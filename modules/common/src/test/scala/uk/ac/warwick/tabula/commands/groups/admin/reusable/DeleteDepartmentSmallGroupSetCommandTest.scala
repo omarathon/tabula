@@ -3,7 +3,8 @@ package uk.ac.warwick.tabula.commands.groups.admin.reusable
 import org.springframework.validation.BindException
 import uk.ac.warwick.tabula._
 import uk.ac.warwick.tabula.commands.{Appliable, Describable, DescriptionImpl, SelfValidating}
-import uk.ac.warwick.tabula.data.model.groups.DepartmentSmallGroupSet
+import uk.ac.warwick.tabula.data.model.Department
+import uk.ac.warwick.tabula.data.model.groups.{DepartmentSmallGroupSet, SmallGroupSet}
 import uk.ac.warwick.tabula.permissions.Permissions
 import uk.ac.warwick.tabula.services.{SmallGroupService, SmallGroupServiceComponent}
 import uk.ac.warwick.tabula.system.permissions.PermissionsChecking
@@ -11,11 +12,11 @@ import uk.ac.warwick.tabula.system.permissions.PermissionsChecking
 class DeleteDepartmentSmallGroupSetCommandTest extends TestBase with Mockito {
 
 	private trait CommandTestSupport extends SmallGroupServiceComponent {
-		val smallGroupService = mock[SmallGroupService]
+		val smallGroupService: SmallGroupService = mock[SmallGroupService]
 	}
 
 	private trait Fixture {
-		val department = Fixtures.department("in", "IT Services")
+		val department: Department = Fixtures.department("in", "IT Services")
 		val set = new DepartmentSmallGroupSet(department)
 		set.id = "existingId"
 		set.name = "Existing set"
@@ -37,11 +38,11 @@ class DeleteDepartmentSmallGroupSetCommandTest extends TestBase with Mockito {
 		val (d, s) = (department, set)
 
 		val command = new DeleteDepartmentSmallGroupSetPermissions with DeleteDepartmentSmallGroupSetCommandState {
-			val department = d
-			val set = s
+			val department: Department = d
+			val set: DepartmentSmallGroupSet = s
 		}
 
-		val checking = mock[PermissionsChecking]
+		val checking: PermissionsChecking = mock[PermissionsChecking]
 		command.permissionsCheck(checking)
 
 		verify(checking, times(1)).PermissionCheck(Permissions.SmallGroups.Delete, set)
@@ -59,7 +60,7 @@ class DeleteDepartmentSmallGroupSetCommandTest extends TestBase with Mockito {
 
 	@Test(expected = classOf[ItemNotFoundException]) def permissionsNoSet {
 		val command = new DeleteDepartmentSmallGroupSetPermissions with DeleteDepartmentSmallGroupSetCommandState {
-			val department = Fixtures.department("in")
+			val department: Department = Fixtures.department("in")
 			val set = null
 		}
 
@@ -69,7 +70,7 @@ class DeleteDepartmentSmallGroupSetCommandTest extends TestBase with Mockito {
 
 	@Test(expected = classOf[ItemNotFoundException]) def permissionsUnlinkedSet {
 		val command = new DeleteDepartmentSmallGroupSetPermissions with DeleteDepartmentSmallGroupSetCommandState {
-			val department = Fixtures.department("in")
+			val department: Department = Fixtures.department("in")
 			department.id = "set id"
 
 			val set = new DepartmentSmallGroupSet(Fixtures.department("other"))
@@ -81,8 +82,8 @@ class DeleteDepartmentSmallGroupSetCommandTest extends TestBase with Mockito {
 
 	private trait ValidationFixture extends Fixture {
 		val command = new DeleteDepartmentSmallGroupSetValidation with DeleteDepartmentSmallGroupSetCommandState {
-			val department = ValidationFixture.this.department
-			val set = ValidationFixture.this.set
+			val department: Department = ValidationFixture.this.department
+			val set: DepartmentSmallGroupSet = ValidationFixture.this.set
 		}
 	}
 
@@ -122,7 +123,7 @@ class DeleteDepartmentSmallGroupSetCommandTest extends TestBase with Mockito {
 	@Test def validateLinkedReleasedToStudents { new ValidationFixture {
 		command.confirm = true
 
-		val linked = Fixtures.smallGroupSet("linked")
+		val linked: SmallGroupSet = Fixtures.smallGroupSet("linked")
 		linked.releasedToStudents = true
 		set.linkedSets.add(linked)
 
@@ -138,8 +139,8 @@ class DeleteDepartmentSmallGroupSetCommandTest extends TestBase with Mockito {
 		val (dept, s) = (department, set)
 		val command = new DeleteDepartmentSmallGroupSetDescription with DeleteDepartmentSmallGroupSetCommandState {
 			override val eventName = "test"
-			val department = dept
-			val set = s
+			val department: Department = dept
+			val set: DepartmentSmallGroupSet = s
 		}
 
 		val d = new DescriptionImpl

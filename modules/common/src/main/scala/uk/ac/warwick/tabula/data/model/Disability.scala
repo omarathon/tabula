@@ -19,19 +19,19 @@ class Disability {
 	var shortName: String = _
 	var sitsDefinition: String = _
 	var tabulaDefinition: String = _
-	var lastUpdatedDate = DateTime.now
+	var lastUpdatedDate: DateTime = DateTime.now
 
 	/**
 	 * Use our override out of preference, where available.
 	 * It's manually maintained in the database.
 	 */
-	def definition = Option(tabulaDefinition).getOrElse(sitsDefinition)
+	def definition: String = Option(tabulaDefinition).getOrElse(sitsDefinition)
 
 	/**
 	 * If tabulaDefinition is null (ie. there's been a new SITS definition added), fail safe to true.
 	 * Otherwise, true only for tabulaDefinitions we have defined as not reportably disabled in the database
 	 */
-	def reportable = Option(tabulaDefinition).forall(_ != Disability.notReportableDefinition)
+	def reportable: Boolean = Option(tabulaDefinition).forall(_ != Disability.notReportableDefinition)
 
-	override def toString = definition
+	override def toString: String = definition
 }

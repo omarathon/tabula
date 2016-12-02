@@ -13,8 +13,8 @@ import org.apache.tiles.TilesException
 
 // An exception handler that delegates to Tabula's exception handler for logging and emailing
 class CustomFreemarkerExceptionHandler extends TemplateExceptionHandler {
-	lazy val handler = Wire[ExceptionHandler]
-	lazy val production = Wire.property("${environment.production}").toBoolean
+	lazy val handler: ExceptionHandler = Wire[ExceptionHandler]
+	lazy val production: Boolean = Wire.property("${environment.production}").toBoolean
 
 	def handleTemplateException(exception: TemplateException, env: Environment, out: Writer) {
 		// Ignore Tiles errors, since they are just multiple errors

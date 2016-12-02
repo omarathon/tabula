@@ -29,7 +29,7 @@ abstract class MarkingWorkflow extends GeneratedId with PermissionsTarget with S
 	type UniversityId = String
 
 	@transient
-	var userLookup = Wire[UserLookupService]("userLookup")
+	var userLookup: UserLookupService = Wire[UserLookupService]("userLookup")
 
 	/** A descriptive name for the users' reference. */
 	@Basic(optional = false)
@@ -42,16 +42,16 @@ abstract class MarkingWorkflow extends GeneratedId with PermissionsTarget with S
 	// Not all marking workflows are suitable for exams
 	def validForExams: Boolean = false
 
-	def permissionsParents = Option(department).toStream
+	def permissionsParents: Stream[Department] = Option(department).toStream
 
-	def courseworkMarkingUrl(assignment: Assignment, marker: User, studentId: String) =
+	def courseworkMarkingUrl(assignment: Assignment, marker: User, studentId: String): UniversityId =
 		Routes.coursework.admin.assignment.markerFeedback.onlineFeedback(assignment, marker)
 
-	def examMarkingUrl(exam: Exam, marker: User, studentId: String) =
+	def examMarkingUrl(exam: Exam, marker: User, studentId: String): UniversityId =
 		Routes.exams.Exams.admin.markerFeedback.onlineFeedback(exam, marker)
 
 	// FIXME this isn't really optional, but testing is a pain unless it's made so
-	@transient var assessmentService = Wire.option[AssessmentService with AssessmentServiceUserGroupHelpers]
+	@transient var assessmentService: Option[AssessmentService with AssessmentServiceUserGroupHelpers] = Wire.option[AssessmentService with AssessmentServiceUserGroupHelpers]
 
 	/** The group of first markers. */
 	@OneToOne(cascade = Array(CascadeType.ALL), fetch = FetchType.LAZY)
@@ -142,7 +142,7 @@ abstract class MarkingWorkflow extends GeneratedId with PermissionsTarget with S
 	}
 
 	// get's this workflows role name for the specified position in the workflow
-	def getRoleNameForPreviousPosition(position: FeedbackPosition) = {
+	def getRoleNameForPreviousPosition(position: FeedbackPosition): Option[String] = {
 		position match {
 			case FirstFeedback => None
 			case SecondFeedback => Some(firstMarkerRoleName)
@@ -160,7 +160,7 @@ abstract class MarkingWorkflow extends GeneratedId with PermissionsTarget with S
 		markerId.map(userLookup.getUserByUserId)
 	}
 
-	override def toString = "MarkingWorkflow(" + id + ")"
+	override def toString: UniversityId = "MarkingWorkflow(" + id + ")"
 
 }
 
@@ -176,7 +176,7 @@ object MarkingWorkflow {
 		studentsGroup.map{ case (markerUserId, _) => markerUserId }
 	}
 
-	implicit val defaultOrdering = Ordering.by { workflow: MarkingWorkflow => workflow.name.toLowerCase }
+	implicit val defaultOrdering: Ordering[MarkingWorkflow] = Ordering.by { workflow: MarkingWorkflow => workflow.name.toLowerCase }
 
 }
 
@@ -252,7 +252,7 @@ trait NoSecondMarker extends NoThirdMarker {
  * Available marking methods and code to persist them
  */
 sealed abstract class MarkingMethod(val name: String, val description: String){
-	override def toString = name
+	override def toString: String = name
 }
 
 object MarkingMethod {
@@ -279,8 +279,8 @@ object MarkingMethod {
 }
 
 class MarkingMethodUserType extends AbstractStringUserType[MarkingMethod]{
-	override def convertToObject(string: String) = MarkingMethod.fromCode(string)
-	override def convertToValue(state: MarkingMethod) = state.name
+	override def convertToObject(string: String): MarkingMethod = MarkingMethod.fromCode(string)
+	override def convertToValue(state: MarkingMethod): String = state.name
 }
 
 class StringToMarkingMethod extends TwoWayConverter[String, MarkingMethod] {

@@ -3,7 +3,7 @@ package uk.ac.warwick.tabula.commands.groups.admin
 import uk.ac.warwick.tabula.commands.{Appliable, Description, Notifies, UserAware}
 import uk.ac.warwick.tabula.data.model.groups.{SmallGroupAllocationMethod, SmallGroupSet, SmallGroupSetSelfSignUpState}
 import uk.ac.warwick.tabula.data.model.notifications.groups.OpenSmallGroupSetsOtherSignUpNotification
-import uk.ac.warwick.tabula.data.model.{Department, UnspecifiedTypeUserGroup, UserGroup}
+import uk.ac.warwick.tabula.data.model.{Department, Notification, UnspecifiedTypeUserGroup, UserGroup}
 import uk.ac.warwick.tabula.permissions.Permissions
 import uk.ac.warwick.tabula.services.{AssessmentMembershipService, UserGroupCacheManager, UserLookupService}
 import uk.ac.warwick.tabula.system.permissions.PermissionsChecking
@@ -12,7 +12,7 @@ import uk.ac.warwick.userlookup.{AnonymousUser, User}
 
 class OpenSmallGroupSetCommandTest extends TestBase with Mockito {
 
-	val operator = mock[User]
+	val operator: User = mock[User]
 
 	@Test
 	def marksSelfSignupGroupAsOpen() {
@@ -78,7 +78,7 @@ class OpenSmallGroupSetCommandTest extends TestBase with Mockito {
 		val set2 = new SmallGroupSet()
 
 		val perms = new OpenSmallGroupSetPermissions with OpenSmallGroupSetState {
-			val department = dept
+			val department: Department = dept
 			val applicableSets = Seq(set1,set2)
 		}
 
@@ -94,7 +94,7 @@ class OpenSmallGroupSetCommandTest extends TestBase with Mockito {
 		val sets = Seq(new SmallGroupSet())
 		val audit = new OpenSmallGroupSetAudit with OpenSmallGroupSetState {
 			val eventName: String = ""
-			val department = dept
+			val department: Department = dept
 			val applicableSets: Seq[SmallGroupSet] = sets
 		}
 		val description = mock[Description]
@@ -116,7 +116,7 @@ class OpenSmallGroupSetCommandTest extends TestBase with Mockito {
 		student3.setUserId("student3")
 		val students = Seq(student1,student2,student3)
 
-		val userLookup = mock[UserLookupService]
+		val userLookup: UserLookupService = mock[UserLookupService]
 
 		def wireUserLookup(userGroup: UnspecifiedTypeUserGroup): Unit = userGroup match {
 			case cm: UserGroupCacheManager => wireUserLookup(cm.underlying)
@@ -138,7 +138,7 @@ class OpenSmallGroupSetCommandTest extends TestBase with Mockito {
 
 	@Test
 	def notifiesEachAffectedUser() { new NotificationFixture {
-		val membershipService = mock[AssessmentMembershipService]
+		val membershipService: AssessmentMembershipService = mock[AssessmentMembershipService]
 
 		val dept = new Department
 
@@ -151,7 +151,7 @@ class OpenSmallGroupSetCommandTest extends TestBase with Mockito {
 		set1.membershipService = membershipService
 		membershipService.determineMembershipUsers(set1.upstreamAssessmentGroups, Some(set1.members)) returns (set1.members.users)
 
-		val s1 = set1.members.users
+		val s1: Seq[User] = set1.members.users
 
 		val set2 = new SmallGroupSet()
 		set2.smallGroupService = None
@@ -162,15 +162,15 @@ class OpenSmallGroupSetCommandTest extends TestBase with Mockito {
 		set2.membershipService = membershipService
 		membershipService.determineMembershipUsers(set2.upstreamAssessmentGroups, Some(set2.members)) returns (set2.members.users)
 
-		val s2 = set2.members.users
+		val s2: Seq[User] = set2.members.users
 
 		val notifier = new OpenSmallGroupSetNotifier with OpenSmallGroupSetState with UserAware {
-			val department = dept
+			val department: Department = dept
 			val applicableSets: Seq[SmallGroupSet] = Seq(set1,set2)
 			val user: User = operator
 		}
 
-		val notifications = notifier.emit(Seq(set1,set2))
+		val notifications: Seq[Notification[SmallGroupSet, Unit]] = notifier.emit(Seq(set1,set2))
 		notifications.foreach {
 			case n: OpenSmallGroupSetsOtherSignUpNotification => n.userLookup = userLookup
 		}
@@ -187,7 +187,7 @@ class OpenSmallGroupSetCommandTest extends TestBase with Mockito {
 		val dept = new Department
 		val set = new SmallGroupSet
 		val oneItem = new OpenSmallGroupSetState {
-			val department = dept
+			val department: Department = dept
 			val applicableSets: Seq[SmallGroupSet] = Seq(set)
 		}
 		oneItem.singleSetToOpen should be(set)
@@ -196,7 +196,7 @@ class OpenSmallGroupSetCommandTest extends TestBase with Mockito {
 		// that you're using a command with multiple sets in a context that only
 		// expects there to be one.
 		val twoItems= new OpenSmallGroupSetState {
-			val department = dept
+			val department: Department = dept
 			val applicableSets: Seq[SmallGroupSet] = Seq(set)
 		}
 		twoItems.singleSetToOpen should be(set)
@@ -206,7 +206,7 @@ class OpenSmallGroupSetCommandTest extends TestBase with Mockito {
 	def CommandStateThrowsExceptionIfAskedForSingleSetFromNone {
 		val dept = new Department
 		val emptyList = new OpenSmallGroupSetState {
-			val department = dept
+			val department: Department = dept
 			val applicableSets: Seq[SmallGroupSet] = Seq()
 		}
 		emptyList.singleSetToOpen

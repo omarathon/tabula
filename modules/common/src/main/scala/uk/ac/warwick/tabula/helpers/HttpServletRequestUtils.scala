@@ -24,7 +24,7 @@ trait HttpServletRequestUtils {
 				case _ => true
 			}
 
-		def isJsonRequest = {
+		def isJsonRequest: Boolean = {
 			// Assume yes for the API
 			if (requestedUri.getPath.startsWith("/api")) true
 			else {
@@ -33,7 +33,7 @@ trait HttpServletRequestUtils {
 			}
 		}
 
-		def isAjaxRequest = {
+		def isAjaxRequest: Boolean = {
 			val hasXHRHeader = request.getHeader(AjaxHeader) match {
 				case "XMLHttpRequest" => true
 				case _ => false
@@ -47,7 +47,7 @@ trait HttpServletRequestUtils {
 			hasXHRHeader || hasAJAXParam
 		}
 
-		def requestedUri = Uri.parse(request.getHeader(XRequestedUriHeader) match {
+		def requestedUri: Uri = Uri.parse(request.getHeader(XRequestedUriHeader) match {
 			case string: String => string
 			case _ => request.getRequestURL.toString
 		})

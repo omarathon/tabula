@@ -1,8 +1,8 @@
 package uk.ac.warwick.tabula.services.timetables
 
-import dispatch.classic.url
+import dispatch.classic.{Handler, Request, url}
 import org.apache.commons.codec.digest.DigestUtils
-import org.joda.time.format.{DateTimeFormat, PeriodFormatterBuilder}
+import org.joda.time.format.{DateTimeFormat, DateTimeFormatter, PeriodFormatter, PeriodFormatterBuilder}
 import org.joda.time.{DateTime, Period}
 import org.springframework.stereotype.Service
 import uk.ac.warwick.spring.Wire
@@ -35,7 +35,7 @@ trait AutowiringExamTimetableConfigurationComponent extends ExamTimetableConfigu
 	val examTimetableConfiguration = new AutowiringExamTimetableConfiguration
 
 	class AutowiringExamTimetableConfiguration extends ExamTimetableConfiguration {
-		lazy val examTimetableUrl = Wire.optionProperty("${examTimetable.url}").getOrElse("https://exams.warwick.ac.uk/timetable/")
+		lazy val examTimetableUrl: String = Wire.optionProperty("${examTimetable.url}").getOrElse("https://exams.warwick.ac.uk/timetable/")
 	}
 
 }
@@ -53,7 +53,7 @@ private class ExamTimetableHttpTimetableFetchingService(examTimetableConfigurati
 		with UserLookupComponent with TermServiceComponent with FeaturesComponent =>
 
 	// a dispatch response handler which reads XML from the response and parses it into a list of TimetableEvents
-	def handler(uniId: String) = { (headers: Map[String,Seq[String]], req: dispatch.classic.Request) =>
+	def handler(uniId: String): (Map[String, Seq[String]], Request) => Handler[Seq[TimetableEvent]] = { (headers: Map[String,Seq[String]], req: dispatch.classic.Request) =>
 		req <> { node =>
 			ExamTimetableHttpTimetableFetchingService.parseXml(node, uniId, termService)
 		}
@@ -68,8 +68,8 @@ private class ExamTimetableHttpTimetableFetchingService(examTimetableConfigurati
 	}
 
 
-	override def getTimetableForStudent(universityId: String) = featureProtected(universityId) { doRequest }
-	override def getTimetableForStaff(universityId: String) = featureProtected(universityId) { doRequest }
+	override def getTimetableForStudent(universityId: String): Future[EventList] = featureProtected(universityId) { doRequest }
+	override def getTimetableForStaff(universityId: String): Future[EventList] = featureProtected(universityId) { doRequest }
 
 	def doRequest(param: String): Future[EventList] = {
 		userLookup.getUserByWarwickUniId(param) match {
@@ -105,7 +105,7 @@ object ExamTimetableHttpTimetableFetchingService extends Logging {
 
 	val cacheName = "ExamTimetableLists"
 
-	def apply(examTimetableConfiguration: ExamTimetableConfiguration) = {
+	def apply(examTimetableConfiguration: ExamTimetableConfiguration): CachedStaffAndStudentTimetableFetchingService = {
 		val service =	new ExamTimetableHttpTimetableFetchingService(examTimetableConfiguration)
 			with AutowiringDispatchHttpClientComponent
 			with AutowiringTrustedApplicationsManagerComponent
@@ -149,9 +149,9 @@ object ExamTimetableHttpTimetableFetchingService extends Logging {
 
 object ExamTimetableFetchingService {
 
-	val examDateTimeFormatter = DateTimeFormat.forPattern("dd MMM HH:mm")
-	val examPeriodFormatter = new PeriodFormatterBuilder().appendHours().appendSuffix("hr ").appendMinutes().appendSuffix("mins").toFormatter
-	val examReadingTimeFormatter = new PeriodFormatterBuilder().appendHours().appendSuffix(":").appendMinutes().appendSuffix(":").appendSeconds().toFormatter
+	val examDateTimeFormatter: DateTimeFormatter = DateTimeFormat.forPattern("dd MMM HH:mm")
+	val examPeriodFormatter: PeriodFormatter = new PeriodFormatterBuilder().appendHours().appendSuffix("hr ").appendMinutes().appendSuffix("mins").toFormatter
+	val examReadingTimeFormatter: PeriodFormatter = new PeriodFormatterBuilder().appendHours().appendSuffix(":").appendMinutes().appendSuffix(":").appendSeconds().toFormatter
 
 	case class ExamTimetableExam(
 		academicYear: AcademicYear,
@@ -274,5 +274,5 @@ trait ExamTimetableFetchingServiceComponent {
 
 
 trait AutowiringExamTimetableFetchingServiceComponent extends ExamTimetableFetchingServiceComponent {
-	var examTimetableFetchingService = Wire[ExamTimetableFetchingService]
+	var examTimetableFetchingService: ExamTimetableFetchingService = Wire[ExamTimetableFetchingService]
 }

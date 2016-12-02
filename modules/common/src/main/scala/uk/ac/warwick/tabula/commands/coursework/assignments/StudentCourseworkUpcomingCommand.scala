@@ -3,6 +3,7 @@ package uk.ac.warwick.tabula.commands.coursework.assignments
 import org.joda.time.DateTime
 import uk.ac.warwick.tabula.commands.coursework.assignments.StudentCourseworkCommand.StudentAssignments
 import uk.ac.warwick.tabula.commands.{Appliable, ComposableCommand, MemberOrUser, ReadOnly, Unaudited}
+import uk.ac.warwick.tabula.data.model.Assignment
 import uk.ac.warwick.tabula.permissions.Permissions
 import uk.ac.warwick.tabula.services.{AssessmentMembershipServiceComponent, AssessmentServiceComponent, AutowiringAssessmentMembershipServiceComponent, AutowiringAssessmentServiceComponent}
 import uk.ac.warwick.tabula.system.permissions.{PermissionsChecking, RequiresPermissionsChecking}
@@ -33,7 +34,7 @@ class StudentCourseworkUpcomingCommandInternal(val memberOrUser: MemberOrUser) e
 	override lazy val overridableAssignmentsWithSubmission = Nil
 
 	// find enrolled assignments that require submission in the next month
-	override lazy val overridableEnrolledAssignments = {
+	override lazy val overridableEnrolledAssignments: Seq[Assignment] = {
 		val user = memberOrUser.asUser
 		val monthFromNow = DateTime.now.plusMonths(1)
 

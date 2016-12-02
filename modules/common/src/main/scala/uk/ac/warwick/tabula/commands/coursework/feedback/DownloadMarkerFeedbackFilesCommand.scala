@@ -13,9 +13,9 @@ import scala.collection.JavaConverters._
 class DownloadMarkerFeedbackFilesCommand (val module: Module, val assignment: Assignment, val markerFeedbackId: String)
 	extends Command[Option[RenderableFile]] with ReadOnly {
 
-		var feedbackService = Wire[FeedbackService]
+		var feedbackService: FeedbackService = Wire[FeedbackService]
 
-		val markerFeedback = feedbackService.getMarkerFeedbackById(markerFeedbackId).get
+		val markerFeedback: MarkerFeedback = feedbackService.getMarkerFeedbackById(markerFeedbackId).get
 
 		notDeleted(assignment)
 		mustBeLinked(assignment, module)
@@ -23,7 +23,7 @@ class DownloadMarkerFeedbackFilesCommand (val module: Module, val assignment: As
 
 		var filename: String = _
 
-		var zipService = Wire.auto[ZipService]
+		var zipService: ZipService = Wire.auto[ZipService]
 
 		private var fileFound: Boolean = _
 
@@ -32,7 +32,7 @@ class DownloadMarkerFeedbackFilesCommand (val module: Module, val assignment: As
 		 * If filename is set, it will return a renderable attachment if found.
 		 * In either case if it's not found, None is returned.
 		 */
-		def applyInternal() = {
+		def applyInternal(): Option[RenderableFile] = {
 			val result: Option[RenderableFile] =
 				filename match {
 					case name: String if name.hasText =>
@@ -48,7 +48,7 @@ class DownloadMarkerFeedbackFilesCommand (val module: Module, val assignment: As
 
 		private def zipped(markerFeedback: MarkerFeedback) = zipService.getSomeMarkerFeedbacksZip(Seq(markerFeedback))
 
-		override def describe(d: Description) = {
+		override def describe(d: Description): Unit = {
 			d.property("filename", filename)
 		}
 

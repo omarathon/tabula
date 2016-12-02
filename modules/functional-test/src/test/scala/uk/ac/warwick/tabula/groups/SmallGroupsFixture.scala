@@ -5,8 +5,8 @@ import uk.ac.warwick.tabula.{BrowserTest, FunctionalTestAcademicYear, LoginDetai
 
 trait SmallGroupsFixture extends BrowserTest with FixturesDriver with FeaturesDriver {
 
-	val academicYear = FunctionalTestAcademicYear.current
-	val academicYearString = academicYear.startYear.toString
+	val academicYear: FunctionalTestAcademicYear = FunctionalTestAcademicYear.current
+	val academicYearString: String = academicYear.startYear.toString
 
   before{
     go to Path("/fixtures/setup")
@@ -27,7 +27,7 @@ trait SmallGroupsFixture extends BrowserTest with FixturesDriver with FeaturesDr
 		)
   }
 
-  def as[T](user: LoginDetails)(fn: =>T) = {
+  def as[T](user: LoginDetails)(fn: =>T): T = {
 		currentUser = user
     signIn as user to Path("/groups/")
     fn

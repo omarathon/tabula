@@ -16,6 +16,7 @@ import uk.ac.warwick.tabula.services.permissions.PermissionsService
 import uk.ac.warwick.tabula.services.{SmallGroupMembershipHelpers, SmallGroupService, UserGroupCacheManager}
 
 import scala.collection.JavaConverters._
+import scala.collection.mutable
 
 object SmallGroup {
 	final val DefaultGroupSize = 15
@@ -26,7 +27,7 @@ object SmallGroup {
 	// For sorting a collection by group name. Either pass to the sort function,
 	// or expose as an implicit val.
 	val NameOrdering = new Ordering[SmallGroup] {
-		def compare(a: SmallGroup, b: SmallGroup) = {
+		def compare(a: SmallGroup, b: SmallGroup): Int = {
 			val nameCompare = StringUtils.AlphaNumericStringOrdering.compare(a.name, b.name)
 			if (nameCompare != 0) nameCompare else a.id compare b.id
 		}
@@ -53,10 +54,10 @@ class SmallGroup
 	type Entity = SmallGroup
 	import uk.ac.warwick.tabula.data.model.groups.SmallGroup._
 
-	@transient var permissionsService = Wire[PermissionsService]
+	@transient var permissionsService: PermissionsService = Wire[PermissionsService]
 
 	// FIXME this isn't really optional, but testing is a pain unless it's made so
-	@transient var smallGroupService = Wire.option[SmallGroupService with SmallGroupMembershipHelpers]
+	@transient var smallGroupService: Option[SmallGroupService with SmallGroupMembershipHelpers] = Wire.option[SmallGroupService with SmallGroupMembershipHelpers]
 
 	def this(_set: SmallGroupSet) {
 		this()
@@ -65,7 +66,7 @@ class SmallGroup
 
 	@Column(name="name")
 	private var _name: String = _
-	def name = Option(linkedDepartmentSmallGroup).map { _.name }.getOrElse(_name)
+	def name: String = Option(linkedDepartmentSmallGroup).map { _.name }.getOrElse(_name)
 	def name_=(name: String) { _name = name }
 
 	@ManyToOne(fetch = FetchType.LAZY)
@@ -77,22 +78,22 @@ class SmallGroup
 	@BatchSize(size=200)
 	private val _events: JList[SmallGroupEvent] = JArrayList()
 
-	def events = _events.asScala.sorted
+	def events: mutable.Buffer[SmallGroupEvent] = _events.asScala.sorted
 	private def events_=(e: Seq[SmallGroupEvent]) {
 		_events.clear()
 		_events.addAll(e.asJava)
 	}
 
-	def addEvent(event: SmallGroupEvent) = _events.add(event)
-	def removeEvent(event: SmallGroupEvent) = _events.remove(event)
+	def addEvent(event: SmallGroupEvent): Boolean = _events.add(event)
+	def removeEvent(event: SmallGroupEvent): Boolean = _events.remove(event)
 
 	// A linked departmental small group; if this is linked, allocations aren't kept here.
 	@ManyToOne(fetch = FetchType.LAZY, optional = true)
 	@JoinColumn(name = "linked_dept_group_id")
 	var linkedDepartmentSmallGroup: DepartmentSmallGroup = _
 
-	def permissionsParents = Option(groupSet).toStream
-	override def humanReadableId = name
+	def permissionsParents: Stream[SmallGroupSet] = Option(groupSet).toStream
+	override def humanReadableId: String = name
 
 	/**
 	 * Direct access to the underlying UserGroup. Most of the time you don't want to us this; unless you're setting
@@ -116,15 +117,15 @@ class SmallGroup
 	def students_=(group: UserGroup) { _studentsGroup = group }
 
 	def maxGroupSize = JInteger(getIntSetting(Settings.MaxGroupSize))
-	def maxGroupSize_=(defaultSize:JInteger) =
+	def maxGroupSize_=(defaultSize:JInteger): Unit =
 		defaultSize match {
 			case null => removeMaxGroupSize()
 			case _ => settings += (Settings.MaxGroupSize -> defaultSize)
 		}
 
-	def removeMaxGroupSize() = settings -= Settings.MaxGroupSize
+	def removeMaxGroupSize(): Unit = settings -= Settings.MaxGroupSize
 
-	def isFull = Option(maxGroupSize).exists(_ <= students.size)
+	def isFull: Boolean = Option(maxGroupSize).exists(_ <= students.size)
 
 	def toStringProps = Seq(
 		"id" -> id,
@@ -132,7 +133,7 @@ class SmallGroup
 		"set" -> groupSet)
 
 
-  def hasEquivalentEventsTo(other:SmallGroup) = {
+  def hasEquivalentEventsTo(other:SmallGroup): Boolean = {
     (this eq other ) ||
     {
       val eventsSC = events
@@ -160,7 +161,7 @@ class SmallGroup
 		ensureSettings
 	}
 
-	def preDelete() = {
+	def preDelete(): Unit = {
 		events.foreach { event =>
 			smallGroupService match {
 				case Some(service) => service.getAllSmallGroupEventOccurrencesForEvent(event).filterNot(
@@ -172,7 +173,7 @@ class SmallGroup
 		}
 	}
 
-	def hasScheduledEvents = events.exists(!_.isUnscheduled)
+	def hasScheduledEvents: Boolean = events.exists(!_.isUnscheduled)
 
-	override def toEntityReference = new SmallGroupEntityReference().put(this)
+	override def toEntityReference: SmallGroupEntityReference = new SmallGroupEntityReference().put(this)
 }

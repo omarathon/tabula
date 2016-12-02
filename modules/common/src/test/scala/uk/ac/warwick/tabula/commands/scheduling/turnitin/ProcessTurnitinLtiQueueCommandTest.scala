@@ -12,21 +12,21 @@ import uk.ac.warwick.userlookup.User
 
 class ProcessTurnitinLtiQueueCommandTest extends TestBase with Mockito {
 
-	val mockTurnitinLtiService = smartMock[TurnitinLtiService]
-	val mockAssessmentService = smartMock[AssessmentService]
-	val mockFileAttachmentService = smartMock[FileAttachmentService]
-	val mockOriginalityReportService = smartMock[OriginalityReportService]
+	val mockTurnitinLtiService: TurnitinLtiService = smartMock[TurnitinLtiService]
+	val mockAssessmentService: AssessmentService = smartMock[AssessmentService]
+	val mockFileAttachmentService: FileAttachmentService = smartMock[FileAttachmentService]
+	val mockOriginalityReportService: OriginalityReportService = smartMock[OriginalityReportService]
 	val mockUserLookup = new MockUserLookup
 
-	val now = DateTime.now
+	val now: DateTime = DateTime.now
 	val department = new Department {
 		code = "its"
-		override lazy val owners = UserGroup.ofUsercodes
+		override lazy val owners: UserGroup = UserGroup.ofUsercodes
 		owners.userLookup = mockUserLookup
 	}
 	val module = new Module {
 		code = "aa100"
-		override lazy val managers = UserGroup.ofUsercodes
+		override lazy val managers: UserGroup = UserGroup.ofUsercodes
 		managers.userLookup = mockUserLookup
 	}
 	module.adminDepartment = department
@@ -41,16 +41,16 @@ class ProcessTurnitinLtiQueueCommandTest extends TestBase with Mockito {
 	mockUserLookup.registerUserObjects(user1, user2, user3)
 
 	trait Fixture {
-		val mockTurnitinLtiQueueService = smartMock[TurnitinLtiQueueService]
+		val mockTurnitinLtiQueueService: TurnitinLtiQueueService = smartMock[TurnitinLtiQueueService]
 		val cmd = new ProcessTurnitinLtiQueueCommandInternal with TurnitinLtiQueueServiceComponent
 			with TurnitinLtiServiceComponent with AssessmentServiceComponent with FileAttachmentServiceComponent
 			with OriginalityReportServiceComponent {
 			override val topLevelUrl: String = ""
-			override val turnitinLtiQueueService = mockTurnitinLtiQueueService
-			override val turnitinLtiService = mockTurnitinLtiService
-			override val assessmentService = mockAssessmentService
-			override val fileAttachmentService = mockFileAttachmentService
-			override val originalityReportService = mockOriginalityReportService
+			override val turnitinLtiQueueService: TurnitinLtiQueueService = mockTurnitinLtiQueueService
+			override val turnitinLtiService: TurnitinLtiService = mockTurnitinLtiService
+			override val assessmentService: AssessmentService = mockAssessmentService
+			override val fileAttachmentService: FileAttachmentService = mockFileAttachmentService
+			override val originalityReportService: OriginalityReportService = mockOriginalityReportService
 		}
 	}
 
@@ -71,7 +71,7 @@ class ProcessTurnitinLtiQueueCommandTest extends TestBase with Mockito {
 	def onlyRunFirst(): Unit = withFakeTime(now){
 		// Assignment to run
 		new Fixture {
-			val assignment = Fixtures.assignment("test")
+			val assignment: Assignment = Fixtures.assignment("test")
 			assignment.module = module
 			assignment.turnitinLtiNotifyUsers = Seq(user1)
 			assignment.userLookup = mockUserLookup
@@ -89,7 +89,7 @@ class ProcessTurnitinLtiQueueCommandTest extends TestBase with Mockito {
 		}
 		// Submission to run
 		new Fixture {
-			val report = deepOriginalityReport()
+			val report: OriginalityReport = deepOriginalityReport()
 			mockTurnitinLtiQueueService.findAssignmentToProcess returns None
 			mockTurnitinLtiQueueService.findReportToProcessForSubmission returns Option(report)
 			mockFileAttachmentService.getValidToken(report.attachment) returns None
@@ -124,7 +124,7 @@ class ProcessTurnitinLtiQueueCommandTest extends TestBase with Mockito {
 		}
 		// Report to get
 		new Fixture {
-			val report = deepOriginalityReport()
+			val report: OriginalityReport = deepOriginalityReport()
 			report.turnitinId = "1234"
 			report.attachment.submissionValue.submission.assignment.turnitinLtiNotifyUsers = Seq(user1)
 			report.attachment.submissionValue.submission.assignment.userLookup = mockUserLookup
@@ -145,7 +145,7 @@ class ProcessTurnitinLtiQueueCommandTest extends TestBase with Mockito {
 	@Test
 	def assignmentWithNotifyUsers(): Unit = {
 		new Fixture {
-			val assignment = Fixtures.assignment("test")
+			val assignment: Assignment = Fixtures.assignment("test")
 			assignment.module = module
 			assignment.turnitinLtiNotifyUsers = Seq(user1)
 			assignment.userLookup = mockUserLookup
@@ -160,7 +160,7 @@ class ProcessTurnitinLtiQueueCommandTest extends TestBase with Mockito {
 	@Test
 	def assignmentWithModuleManager(): Unit = {
 		new Fixture {
-			val assignment = Fixtures.assignment("test")
+			val assignment: Assignment = Fixtures.assignment("test")
 			assignment.module = module
 			assignment.turnitinLtiNotifyUsers = Seq()
 			mockTurnitinLtiQueueService.findAssignmentToProcess returns Option(assignment)
@@ -176,11 +176,11 @@ class ProcessTurnitinLtiQueueCommandTest extends TestBase with Mockito {
 		new Fixture {
 			val moduleWithoutManagers = new Module {
 				code = "aa200"
-				override lazy val managers = UserGroup.ofUsercodes
+				override lazy val managers: UserGroup = UserGroup.ofUsercodes
 				managers.userLookup = mockUserLookup
 			}
 			moduleWithoutManagers.adminDepartment = department
-			val assignment = Fixtures.assignment("test")
+			val assignment: Assignment = Fixtures.assignment("test")
 			assignment.module = moduleWithoutManagers
 			assignment.turnitinLtiNotifyUsers = Seq()
 			mockTurnitinLtiQueueService.findAssignmentToProcess returns Option(assignment)
@@ -194,7 +194,7 @@ class ProcessTurnitinLtiQueueCommandTest extends TestBase with Mockito {
 	@Test
 	def assignmentWithFailure(): Unit = {
 		new Fixture {
-			val assignment = Fixtures.assignment("test")
+			val assignment: Assignment = Fixtures.assignment("test")
 			assignment.module = module
 			assignment.turnitinLtiNotifyUsers = Seq(user1)
 			assignment.userLookup = mockUserLookup
@@ -208,14 +208,14 @@ class ProcessTurnitinLtiQueueCommandTest extends TestBase with Mockito {
 	}
 
 	trait ReportSetupFixture extends Fixture {
-		val report = deepOriginalityReport()
-		val attachment = report.attachment
+		val report: OriginalityReport = deepOriginalityReport()
+		val attachment: FileAttachment = report.attachment
 		attachment.id="1234"
-		val submission = attachment.submissionValue.submission
+		val submission: Submission = attachment.submissionValue.submission
 		submission.id = "2345"
 		submission.userId = "3456"
 		submission.universityId = "4567"
-		val assignment = submission.assignment
+		val assignment: Assignment = submission.assignment
 	}
 
 	@Test
@@ -385,9 +385,9 @@ class ProcessTurnitinLtiQueueCommandTest extends TestBase with Mockito {
 	@Test
 	def finish(): Unit = {
 		new Fixture {
-			val completeAssignment = Fixtures.assignment("test")
+			val completeAssignment: Assignment = Fixtures.assignment("test")
 			completeAssignment.submitToTurnitin = true
-			val failedAssignment = Fixtures.assignment("test")
+			val failedAssignment: Assignment = Fixtures.assignment("test")
 			failedAssignment.submitToTurnitin = true
 			mockTurnitinLtiQueueService.findAssignmentToProcess returns None
 			mockTurnitinLtiQueueService.findReportToProcessForSubmission returns None
@@ -403,24 +403,24 @@ class ProcessTurnitinLtiQueueCommandTest extends TestBase with Mockito {
 	}
 
 	trait NotificationFixture {
-		val mockTurnitinLtiQueueService = smartMock[TurnitinLtiQueueService]
+		val mockTurnitinLtiQueueService: TurnitinLtiQueueService = smartMock[TurnitinLtiQueueService]
 		val cmd = new ProcessTurnitinLtiQueueNotification with TurnitinLtiQueueServiceComponent {
-			override val turnitinLtiQueueService = mockTurnitinLtiQueueService
+			override val turnitinLtiQueueService: TurnitinLtiQueueService = mockTurnitinLtiQueueService
 		}
 	}
 
 	@Test
 	def notifications(): Unit = {
 		new NotificationFixture {
-			val fullyCompletedAssignment = Fixtures.assignment("done")
+			val fullyCompletedAssignment: Assignment = Fixtures.assignment("done")
 			fullyCompletedAssignment.turnitinLtiNotifyUsers = Seq(user1, user2)
 			fullyCompletedAssignment.userLookup = mockUserLookup
 			fullyCompletedAssignment.submissions.add(Fixtures.submission())
-			val partiallyCompletedAssignment = Fixtures.assignment("nearly")
+			val partiallyCompletedAssignment: Assignment = Fixtures.assignment("nearly")
 			partiallyCompletedAssignment.turnitinLtiNotifyUsers = Seq(user1)
 			partiallyCompletedAssignment.userLookup = mockUserLookup
 			partiallyCompletedAssignment.submissions.add(Fixtures.submission())
-			val failedAssignment = Fixtures.assignment("nope")
+			val failedAssignment: Assignment = Fixtures.assignment("nope")
 			failedAssignment.turnitinLtiNotifyUsers = Seq(user1)
 			failedAssignment.userLookup = mockUserLookup
 
@@ -445,13 +445,13 @@ class ProcessTurnitinLtiQueueCommandTest extends TestBase with Mockito {
 				failedReportOnReport
 			)
 
-			val result = cmd.emit(ProcessTurnitinLtiQueueCommandResult(
+			val result: Seq[Notification[OriginalityReport, Assignment]] = cmd.emit(ProcessTurnitinLtiQueueCommandResult(
 				completedAssignments = Seq(fullyCompletedAssignment, partiallyCompletedAssignment),
 				failedAssignments = Seq(failedAssignment)
 			))
 
 			result.size should be (4) // Three assignments, 2 users for 1 assignment
-			val notifications = result.map(_.asInstanceOf[NotificationWithTarget[OriginalityReport, Assignment]])
+			val notifications: Seq[NotificationWithTarget[OriginalityReport, Assignment]] = result.map(_.asInstanceOf[NotificationWithTarget[OriginalityReport, Assignment]])
 			val (successNotifications, errorNotifications) = notifications.partition {
 				case n: TurnitinJobSuccessNotification => true
 				case n: TurnitinJobErrorNotification => false

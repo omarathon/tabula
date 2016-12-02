@@ -37,6 +37,7 @@
 
 				<#if universityId?has_content>
 					<h2><a href="<@routes.profiles.profile_by_id universityId />">My staff profile</a></h2>
+					<h2><a href="<@routes.profiles.profile_by_id universityId />/timetable">My timetable</a></h2>
 				</#if>
 			</#if>
 

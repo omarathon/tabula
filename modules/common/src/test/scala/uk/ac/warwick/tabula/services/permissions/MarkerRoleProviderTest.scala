@@ -1,39 +1,42 @@
 package uk.ac.warwick.tabula.services.permissions
 
+import uk.ac.warwick.tabula.data.model.{Assignment, Department, Module, SeenSecondMarkingLegacyWorkflow}
+import uk.ac.warwick.tabula.helpers.MutablePromise
 import uk.ac.warwick.tabula.services.AssessmentService
-import uk.ac.warwick.tabula.{CurrentUser, Mockito, TestBase, Fixtures}
+import uk.ac.warwick.tabula.{CurrentUser, Fixtures, Mockito, TestBase}
 import uk.ac.warwick.userlookup.User
+
 import scala.collection.JavaConversions._
 import uk.ac.warwick.tabula.roles.Marker
 import uk.ac.warwick.tabula.helpers.Promises._
 
 class MarkerRoleProviderTest extends TestBase with Mockito {
 
-	val mockAssignmentService = smartMock[AssessmentService]
+	val mockAssignmentService: AssessmentService = smartMock[AssessmentService]
 	val provider = new MarkerRoleProvider {
-		override val assignmentService = promise { mockAssignmentService }
+		override val assignmentService: MutablePromise[AssessmentService] = promise { mockAssignmentService }
 	}
 
-	val mw1 = Fixtures.seenSecondMarkingLegacyWorkflow("workflow is marker")
+	val mw1: SeenSecondMarkingLegacyWorkflow = Fixtures.seenSecondMarkingLegacyWorkflow("workflow is marker")
 	mw1.firstMarkers.knownType.addUserId("cuscav")
 
-	val mw2 = Fixtures.seenSecondMarkingLegacyWorkflow("workflow not marker")
+	val mw2: SeenSecondMarkingLegacyWorkflow = Fixtures.seenSecondMarkingLegacyWorkflow("workflow not marker")
 	mw2.firstMarkers.knownType.addUserId("cusebr")
 
-	val assignmentIsMarker1 = Fixtures.assignment("assignment is marker 1")
+	val assignmentIsMarker1: Assignment = Fixtures.assignment("assignment is marker 1")
 	assignmentIsMarker1.markingWorkflow = mw1
 
-	val assignmentIsMarker2 = Fixtures.assignment("assignment is marker 2")
+	val assignmentIsMarker2: Assignment = Fixtures.assignment("assignment is marker 2")
 	assignmentIsMarker2.markingWorkflow = mw1
 
-	val assignmentNotMarker = Fixtures.assignment("not marker")
+	val assignmentNotMarker: Assignment = Fixtures.assignment("not marker")
 	assignmentNotMarker.markingWorkflow = mw2
 
-	val mod1 = Fixtures.module("mod1", "mod 1")
-	val mod2 = Fixtures.module("mod2", "mod 2")
-	val mod3 = Fixtures.module("mod3", "mod 3")
+	val mod1: Module = Fixtures.module("mod1", "mod 1")
+	val mod2: Module = Fixtures.module("mod2", "mod 2")
+	val mod3: Module = Fixtures.module("mod3", "mod 3")
 
-	val dept = Fixtures.department("dept", "department")
+	val dept: Department = Fixtures.department("dept", "department")
 
 	mod1.adminDepartment = dept
 	mod2.adminDepartment = dept

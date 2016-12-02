@@ -6,6 +6,7 @@ import uk.ac.warwick.tabula.data.model.{Department, StudentRelationshipType, Use
 import uk.ac.warwick.tabula.helpers.Tap.tap
 import uk.ac.warwick.tabula.services._
 import uk.ac.warwick.tabula.services.attendancemonitoring.{AttendanceMonitoringService, AttendanceMonitoringServiceComponent}
+import uk.ac.warwick.tabula.web.Mav
 import uk.ac.warwick.tabula.{Mockito, TestBase}
 import uk.ac.warwick.userlookup.User
 
@@ -30,10 +31,10 @@ class AttendanceHomeControllerTest extends TestBase with Mockito{
 			var courseAndRouteService: CourseAndRouteService = _
 			var attendanceMonitoringService: AttendanceMonitoringService = _
 
-			def apply() = info
+			def apply(): HomeInformation = info
 		}
 		val departmentCode = "xx"
-		val relationshipType = smartMock[StudentRelationshipType]
+		val relationshipType: StudentRelationshipType = smartMock[StudentRelationshipType]
 
 		val controller = new AttendanceHomeController
 		controller.userSettingsService = smartMock[UserSettingsService]
@@ -52,7 +53,7 @@ class AttendanceHomeControllerTest extends TestBase with Mockito{
 			relationshipTypesMap = Map()
 		)
 
-		val mav = controller.home(command, null)
+		val mav: Mav = controller.home(command, null)
 		mav.viewName should be("redirect:/attendance/profile")
 
 	}}
@@ -67,7 +68,7 @@ class AttendanceHomeControllerTest extends TestBase with Mockito{
 			relationshipTypesMap = Map()
 		)
 
-		val mav = controller.home(command, null)
+		val mav: Mav = controller.home(command, null)
 		mav.viewName should be(s"redirect:/attendance/view/$departmentCode")
 
 	}}
@@ -82,7 +83,7 @@ class AttendanceHomeControllerTest extends TestBase with Mockito{
 			relationshipTypesMap = Map()
 		)
 
-		val mav = controller.home(command, null)
+		val mav: Mav = controller.home(command, null)
 		mav.viewName should be(s"redirect:/attendance/manage/$departmentCode")
 
 	}}
@@ -97,7 +98,7 @@ class AttendanceHomeControllerTest extends TestBase with Mockito{
 			relationshipTypesMap = Map()
 		)
 
-		val mav = controller.home(command, null)
+		val mav: Mav = controller.home(command, null)
 		mav.viewName should be("attendance/home")
 
 	}}}
@@ -112,7 +113,7 @@ class AttendanceHomeControllerTest extends TestBase with Mockito{
 			relationshipTypesMap = Map()
 		)
 
-		val mav = controller.home(command, null)
+		val mav: Mav = controller.home(command, null)
 		mav.viewName should be("attendance/home")
 
 	}}}
@@ -127,7 +128,7 @@ class AttendanceHomeControllerTest extends TestBase with Mockito{
 			relationshipTypesMap = Map()
 		)
 
-		val mav = controller.home(command, null)
+		val mav: Mav = controller.home(command, null)
 		mav.viewName should be("attendance/home")
 
 	}}}
@@ -142,7 +143,7 @@ class AttendanceHomeControllerTest extends TestBase with Mockito{
 			relationshipTypesMap = Map(relationshipType -> true)
 		)
 
-		val mav = controller.home(command, null)
+		val mav: Mav = controller.home(command, null)
 		mav.viewName should be("attendance/home")
 
 	}}}

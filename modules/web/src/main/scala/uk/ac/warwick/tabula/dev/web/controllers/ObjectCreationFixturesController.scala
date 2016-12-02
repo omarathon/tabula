@@ -22,7 +22,7 @@ class ModuleCreationFixturesController {
 	}
 
 	@RequestMapping(method = Array(POST))
-	def submit(@ModelAttribute("createModuleCommand") cmd: Appliable[Module]) = {
+	def submit(@ModelAttribute("createModuleCommand") cmd: Appliable[Module]): Module = {
 		cmd.apply()
 	}
 }

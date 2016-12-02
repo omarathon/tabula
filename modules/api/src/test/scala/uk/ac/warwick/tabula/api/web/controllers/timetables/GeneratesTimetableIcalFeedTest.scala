@@ -18,8 +18,8 @@ import scala.util.{Success, Try}
 class GeneratesTimetableIcalFeedTest extends TestBase with Mockito {
 
 	val generator = new GeneratesTimetableIcalFeed with TermServiceComponent with EventOccurrenceServiceComponent {
-		val termService = smartMock[TermService]
-		val eventOccurrenceService = mock[EventOccurrenceService]
+		val termService: TermService = smartMock[TermService]
+		val eventOccurrenceService: EventOccurrenceService = mock[EventOccurrenceService]
 	}
 
 	@Test

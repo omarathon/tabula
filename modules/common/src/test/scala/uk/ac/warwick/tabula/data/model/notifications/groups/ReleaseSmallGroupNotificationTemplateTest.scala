@@ -3,8 +3,8 @@ package uk.ac.warwick.tabula.data.model.notifications.groups
 import org.mockito.Matchers._
 import org.mockito.Mockito._
 import uk.ac.warwick.tabula.JavaImports.JHashMap
-import uk.ac.warwick.tabula.web.views.FreemarkerRendering
-import uk.ac.warwick.tabula.{SmallGroupFixture, FreemarkerTestHelpers, TestBase}
+import uk.ac.warwick.tabula.web.views.{FreemarkerRendering, ScalaFreemarkerConfiguration}
+import uk.ac.warwick.tabula.{FreemarkerTestHelpers, SmallGroupFixture, TestBase}
 
 
 class ReleaseSmallGroupNotificationTemplateTest extends TestBase with FreemarkerTestHelpers with FreemarkerRendering{
@@ -15,7 +15,7 @@ class ReleaseSmallGroupNotificationTemplateTest extends TestBase with Freemarker
     val urlModel = new StubFreemarkerDirectiveModel
     val timeBuilder= new StubFreemarkerMethodModel
 
-    implicit val config = newFreemarkerConfiguration(JHashMap(
+    implicit val config: ScalaFreemarkerConfiguration = newFreemarkerConfiguration(JHashMap(
       "url" -> urlModel,
       "weekRangesFormatter" -> weekRangeFormatter,
       "timeBuilder"->timeBuilder))
@@ -24,7 +24,7 @@ class ReleaseSmallGroupNotificationTemplateTest extends TestBase with Freemarker
   @Test
   def includesTheNameOfEachGroup{
     new NotificationFixture {
-      val output =
+      val output: String =
         renderToString(ReleaseSmallGroupSetsNotification.templateLocation,
           Map("user" -> recipient, "groups" -> List(group1, group2), "profileUrl" -> "profileUrl"))
     output should include(group1.name)
@@ -33,7 +33,7 @@ class ReleaseSmallGroupNotificationTemplateTest extends TestBase with Freemarker
 
   @Test
   def includesTheCountOfStudents{new NotificationFixture {
-    val output =
+    val output: String =
       renderToString(ReleaseSmallGroupSetsNotification.templateLocation,
         Map("user" -> recipient, "groups" -> List(group1), "profileUrl" -> "profileUrl"))
       output should include("2 students")
@@ -42,7 +42,7 @@ class ReleaseSmallGroupNotificationTemplateTest extends TestBase with Freemarker
   @Test
   def callsWeekRangeFormatterOncePerEvent() {
     new NotificationFixture {
-      val output =
+      val output: String =
         renderToString(ReleaseSmallGroupSetsNotification.templateLocation,
           Map("user" -> recipient, "groups" -> List(group1, group2), "profileUrl" -> "profileUrl"))
       verify(weekRangeFormatter.mock, times(2)).exec(anyList())
@@ -51,7 +51,7 @@ class ReleaseSmallGroupNotificationTemplateTest extends TestBase with Freemarker
   @Test
   def formatsTimeNicely(){
     new NotificationFixture {
-      val output =
+      val output: String =
         renderToString(ReleaseSmallGroupSetsNotification.templateLocation,
           Map("user" -> recipient, "groups" -> List(group1, group2), "profileUrl" -> "profileUrl"))
      verify(timeBuilder.mock, times(2)).exec(anyList())

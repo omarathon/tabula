@@ -1,16 +1,18 @@
 package uk.ac.warwick.tabula.web.controllers.admin.department
 
-import uk.ac.warwick.tabula.{MockUserLookup, Fixtures, TestBase, Mockito}
+import uk.ac.warwick.tabula.{Fixtures, MockUserLookup, Mockito, TestBase}
 import uk.ac.warwick.tabula.commands.Appliable
 import uk.ac.warwick.tabula.data.model.Department
 import uk.ac.warwick.tabula.data.model.permissions.{DepartmentGrantedRole, GrantedRole}
-import uk.ac.warwick.tabula.commands.permissions.{RevokeRoleCommandState, GrantRoleCommandState}
+import uk.ac.warwick.tabula.commands.permissions.{GrantRoleCommandState, RevokeRoleCommandState}
 import uk.ac.warwick.userlookup.User
+
 import scala.collection.mutable
 import uk.ac.warwick.tabula.roles.DepartmentalAdministratorRoleDefinition
 import org.springframework.validation.BindException
 import uk.ac.warwick.tabula.system.permissions.RequiresPermissionsChecking
 import uk.ac.warwick.tabula.services.permissions.PermissionsServiceComponent
+import uk.ac.warwick.tabula.web.Mav
 
 class DepartmentPermissionControllerTest extends TestBase with Mockito {
 
@@ -19,7 +21,7 @@ class DepartmentPermissionControllerTest extends TestBase with Mockito {
 	val removeController = new DepartmentRemovePermissionController
 
 	trait Fixture {
-		val department = Fixtures.department("in")
+		val department: Department = Fixtures.department("in")
 
 		val userLookup = new MockUserLookup
 		Seq(listController, addController, removeController).foreach { controller => controller.userLookup = userLookup }
@@ -29,8 +31,8 @@ class DepartmentPermissionControllerTest extends TestBase with Mockito {
 
 	@Test def createCommands {
 		Seq(listController, addController, removeController).foreach { controller => new Fixture {
-			val addCommand = controller.addCommandModel(department)
-			val removeCommand = controller.removeCommandModel(department)
+			val addCommand: controller.GrantRoleCommand = controller.addCommandModel(department)
+			val removeCommand: controller.RevokeRoleCommand = controller.removeCommandModel(department)
 
 			addCommand should be (anInstanceOf[Appliable[GrantedRole[Department]]])
 			addCommand should be (anInstanceOf[GrantRoleCommandState[Department]])
@@ -41,7 +43,7 @@ class DepartmentPermissionControllerTest extends TestBase with Mockito {
 	}
 
 	@Test def list { new Fixture {
-		val mav = listController.permissionsForm(department, Array(), null, null)
+		val mav: Mav = listController.permissionsForm(department, Array(), null, null)
 		mav.viewName should be ("admin/department/permissions")
 		mav.toModel("department") should be (department)
 		mav.toModel("users").asInstanceOf[mutable.Map[String, User]] should be ('empty)
@@ -50,7 +52,7 @@ class DepartmentPermissionControllerTest extends TestBase with Mockito {
 	}}
 
 	@Test def listFromRedirect { new Fixture {
-		val mav = listController.permissionsForm(department, Array("cuscav", "cusebr"), DepartmentalAdministratorRoleDefinition, "add")
+		val mav: Mav = listController.permissionsForm(department, Array("cuscav", "cusebr"), DepartmentalAdministratorRoleDefinition, "add")
 		mav.viewName should be ("admin/department/permissions")
 		mav.toModel("department") should be (department)
 		mav.toModel("users") should be (mutable.Map(
@@ -66,16 +68,16 @@ class DepartmentPermissionControllerTest extends TestBase with Mockito {
 
 		val command = new Appliable[GrantedRole[Department]] with GrantRoleCommandState[Department] with PermissionsServiceComponent {
 			val permissionsService = null
-			def scope = department
+			def scope: Department = department
 			def grantedRole = Some(addedRole)
-			def apply = addedRole
+			def apply: DepartmentGrantedRole = addedRole
 		}
 		command.usercodes.add("cuscav")
 		command.usercodes.add("cusebr")
 
 		val errors = new BindException(command, "command")
 
-		val mav = addController.addPermission(command, errors)
+		val mav: Mav = addController.addPermission(command, errors)
 		mav.viewName should be ("admin/department/permissions")
 		mav.toModel("department") should be (department)
 		mav.toModel("users") should be (mutable.Map(
@@ -91,9 +93,9 @@ class DepartmentPermissionControllerTest extends TestBase with Mockito {
 
 		val command = new Appliable[GrantedRole[Department]] with GrantRoleCommandState[Department] with PermissionsServiceComponent {
 			val permissionsService = null
-			def scope = department
+			def scope: Department = department
 			def grantedRole = Some(addedRole)
-			def apply() = {
+			def apply(): Null = {
 				fail("Should not be called")
 				null
 			}
@@ -105,7 +107,7 @@ class DepartmentPermissionControllerTest extends TestBase with Mockito {
 
 		errors.reject("fail")
 
-		val mav = addController.addPermission(command, errors)
+		val mav: Mav = addController.addPermission(command, errors)
 		mav.viewName should be ("admin/department/permissions")
 		mav.toModel("department") should be (department)
 		mav.toModel.contains("users") should be (false)
@@ -118,16 +120,16 @@ class DepartmentPermissionControllerTest extends TestBase with Mockito {
 
 		val command = new Appliable[GrantedRole[Department]] with RevokeRoleCommandState[Department] with PermissionsServiceComponent {
 			val permissionsService = null
-			def scope = department
+			def scope: Department = department
 			def grantedRole = Some(removedRole)
-			def apply = removedRole
+			def apply: DepartmentGrantedRole = removedRole
 		}
 		command.usercodes.add("cuscav")
 		command.usercodes.add("cusebr")
 
 		val errors = new BindException(command, "command")
 
-		val mav = removeController.removePermission(command, errors)
+		val mav: Mav = removeController.removePermission(command, errors)
 		mav.viewName should be ("admin/department/permissions")
 		mav.toModel("department") should be (department)
 		mav.toModel("users") should be (mutable.Map(
@@ -143,9 +145,9 @@ class DepartmentPermissionControllerTest extends TestBase with Mockito {
 
 		val command = new Appliable[GrantedRole[Department]] with RevokeRoleCommandState[Department] with PermissionsServiceComponent {
 			val permissionsService = null
-			def scope = department
+			def scope: Department = department
 			def grantedRole = Some(removedRole)
-			def apply() = {
+			def apply(): Null = {
 				fail("Should not be called")
 				null
 			}
@@ -156,7 +158,7 @@ class DepartmentPermissionControllerTest extends TestBase with Mockito {
 		val errors = new BindException(command, "command")
 		errors.reject("fail")
 
-		val mav = removeController.removePermission(command, errors)
+		val mav: Mav = removeController.removePermission(command, errors)
 		mav.viewName should be ("admin/department/permissions")
 		mav.toModel("department") should be (department)
 		mav.toModel.contains("users") should be (false)

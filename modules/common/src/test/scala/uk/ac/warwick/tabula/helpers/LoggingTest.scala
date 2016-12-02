@@ -1,14 +1,15 @@
 package uk.ac.warwick.tabula.helpers
 
 import org.junit.After
-import uk.ac.warwick.tabula.{TestLoggerFactory, TestBase}
+import uk.ac.warwick.tabula.{TestBase, TestLoggerFactory}
+
 import scala.collection.JavaConverters._
-import ch.qos.logback.classic.Level
+import ch.qos.logback.classic.{Level, Logger}
 
 // scalastyle:off magic.number
 class LoggingTest extends TestBase with Logging {
 
-	val testLogger = TestLoggerFactory.getTestLogger(logger.getName)
+	val testLogger: Logger = TestLoggerFactory.getTestLogger(logger.getName)
 
 	@Test def itWorks {
 		testLogger should be (logger)

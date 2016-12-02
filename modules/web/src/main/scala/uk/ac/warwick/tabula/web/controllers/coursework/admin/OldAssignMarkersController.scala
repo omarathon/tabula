@@ -11,6 +11,7 @@ import uk.ac.warwick.tabula.web.controllers.coursework.OldCourseworkController
 import uk.ac.warwick.tabula.coursework.web.{Routes => CourseworkRoutes}
 import uk.ac.warwick.tabula.data.model._
 import uk.ac.warwick.tabula.services.{AssessmentMembershipService, UserLookupService}
+import uk.ac.warwick.tabula.web.Mav
 import uk.ac.warwick.userlookup.User
 
 object OldAssignMarkersController {
@@ -22,7 +23,7 @@ object OldAssignMarkersController {
 			case true => user.getFullName
 			case false => user.getWarwickId
 		}
-		def sortValue = module.adminDepartment.showStudentName match {
+		def sortValue: (String, String) = module.adminDepartment.showStudentName match {
 			case true => (user.getLastName, user.getFirstName)
 			// returning a pair here removes the need to define a custom Ordering implementation
 			case false => (user.getWarwickId, user.getWarwickId)
@@ -92,7 +93,7 @@ class OldAssignmentAssignMarkersController extends OldCourseworkController {
 		@ModelAttribute("secondMarkers") secondMarkers: Seq[Marker],
 		@PathVariable module: Module,
 		@PathVariable assignment: Assignment
-	) = {
+	): Mav = {
 		val members = assessmentMembershipService.determineMembershipUsers(assignment).map{
 			new AssignmentStudent(_, module)
 		}
@@ -116,7 +117,7 @@ class OldAssignmentAssignMarkersController extends OldCourseworkController {
 		@PathVariable module: Module,
 		@PathVariable(value = "assignment") assignment: Assignment,
 		@ModelAttribute("command") cmd: Appliable[Assignment]
-	) = {
+	): Mav = {
 		cmd.apply()
 		Redirect(CourseworkRoutes.admin.module(module))
 	}
@@ -125,7 +126,7 @@ class OldAssignmentAssignMarkersController extends OldCourseworkController {
 	def doUpload(@PathVariable module: Module,
 							 @PathVariable(value = "assignment") assignment: Assignment,
 							 @ModelAttribute("command") cmd: Appliable[Assignment],
-							 errors: Errors) = {
+							 errors: Errors): Mav = {
 			Mav(s"$urlPrefix/admin/assignments/assignmarkers/upload-preview",
 				"assessment" -> assignment,
 				"isExam" -> false,

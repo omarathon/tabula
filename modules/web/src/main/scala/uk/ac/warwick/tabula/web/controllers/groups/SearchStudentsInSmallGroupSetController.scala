@@ -24,7 +24,7 @@ class SearchStudentsInSmallGroupSetController extends GroupsController {
 	def command(@PathVariable module: Module, @PathVariable("smallGroupSet") set: SmallGroupSet): SearchStudentsInSmallGroupSetCommand =
 		SearchStudentsInSmallGroupSetCommand(module, set)
 
-	@RequestMapping def search(@Valid @ModelAttribute("command") cmd: SearchStudentsInSmallGroupSetCommand, errors: Errors) = {
+	@RequestMapping def search(@Valid @ModelAttribute("command") cmd: SearchStudentsInSmallGroupSetCommand, errors: Errors): JSONView = {
 		if (errors.hasErrors) new JSONErrorView(errors)
 		else {
 			val json: JList[Map[String, String]] = cmd.apply().map { member =>

@@ -33,13 +33,13 @@ case class ActivityStream(
 @Service
 class NotificationService extends Logging with FreemarkerTextRenderer with Daoisms {
 
-	var dao = Wire[NotificationDao]
-	var userLookup = Wire[UserLookupService]
-	var queryService = Wire[NotificationQueryService]
-	var indexService = Wire[NotificationIndexService]
-	var listeners = Wire.all[NotificationListener]
+	var dao: NotificationDao = Wire[NotificationDao]
+	var userLookup: UserLookupService = Wire[UserLookupService]
+	var queryService: NotificationQueryService = Wire[NotificationQueryService]
+	var indexService: NotificationIndexService = Wire[NotificationIndexService]
+	var listeners: Seq[NotificationListener] = Wire.all[NotificationListener]
 
-	def getNotificationById(id: String) = dao.getById(id)
+	def getNotificationById(id: String): Option[Notification[_ >: Null <: ToEntityReference, _]] = dao.getById(id)
 
 	def push(notification: Notification[_,_]){
 		// TODO - In future pushing a notification will add it to a queue, aggregate similar notifications etc.
@@ -110,7 +110,7 @@ class NotificationService extends Logging with FreemarkerTextRenderer with Daois
 		}
 	}
 
-	def save(recipientInfo: RecipientNotificationInfo) = transactional() {
+	def save(recipientInfo: RecipientNotificationInfo): Unit = transactional() {
 		dao.save(recipientInfo)
 	}
 
@@ -118,7 +118,7 @@ class NotificationService extends Logging with FreemarkerTextRenderer with Daois
 		dao.findActionRequiredNotificationsByEntityAndType[A](entity)
 	}
 
-	def processListeners() = transactional() {
+	def processListeners(): Unit = transactional() {
 		dao.unprocessedNotifications.take(NotificationService.ProcessListenersBatchSize).foreach { notification =>
 			try {
 				logger.info("Processing notification listeners - " + notification)
@@ -154,5 +154,5 @@ trait NotificationServiceComponent {
 }
 
 trait AutowiringNotificationServiceComponent extends NotificationServiceComponent {
-	var notificationService = Wire[NotificationService]
+	var notificationService: NotificationService = Wire[NotificationService]
 }

@@ -7,7 +7,7 @@ import uk.ac.warwick.tabula.JavaImports._
 
 class OptionStringUserType extends AbstractBasicUserType[Option[String], String] {
 	def convertToObject(input: String) = Option(input)
-	def convertToValue(obj: Option[String]) = obj.orNull
+	def convertToValue(obj: Option[String]): String = obj.orNull
 	def sqlTypes = Array(Types.VARCHAR)
 	val basicType = StandardBasicTypes.STRING
 	val nullValue = null

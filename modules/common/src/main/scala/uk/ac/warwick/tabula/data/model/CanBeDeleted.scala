@@ -10,7 +10,7 @@ import uk.ac.warwick.tabula.JavaImports._
 trait CanBeDeleted {
 	var deleted: JBoolean = false
 
-	def markDeleted() = {
+	def markDeleted(): Unit = {
 		deleted = true
 	}
 }

@@ -2,7 +2,7 @@ package uk.ac.warwick.tabula.commands.profiles.relationships.meetings
 
 import org.springframework.validation.BindException
 import uk.ac.warwick.tabula._
-import uk.ac.warwick.tabula.data.model.{ExternalStudentRelationship, MeetingRecord, MeetingRecordApproval, StudentRelationshipType}
+import uk.ac.warwick.tabula.data.model._
 import uk.ac.warwick.tabula.data.{MeetingRecordDao, MeetingRecordDaoComponent}
 import uk.ac.warwick.tabula.permissions.Permissions
 import uk.ac.warwick.tabula.services.attendancemonitoring.{AttendanceMonitoringMeetingRecordService, AttendanceMonitoringMeetingRecordServiceComponent}
@@ -12,14 +12,14 @@ class ApproveMeetingRecordCommandTest extends TestBase with Mockito {
 
 	trait CommandTestSupport extends ApproveMeetingRecordState with MeetingRecordDaoComponent with ApproveMeetingRecordValidation
 		with FeaturesComponent with AttendanceMonitoringMeetingRecordServiceComponent with SecurityServiceComponent {
-		val meetingRecordDao = smartMock[MeetingRecordDao]
-		val features = smartMock[Features]
-		val attendanceMonitoringMeetingRecordService = smartMock[AttendanceMonitoringMeetingRecordService]
-		val securityService = smartMock[SecurityService]
+		val meetingRecordDao: MeetingRecordDao = smartMock[MeetingRecordDao]
+		val features: Features = smartMock[Features]
+		val attendanceMonitoringMeetingRecordService: AttendanceMonitoringMeetingRecordService = smartMock[AttendanceMonitoringMeetingRecordService]
+		val securityService: SecurityService = smartMock[SecurityService]
 	}
 
 	trait Fixture {
-		val student = Fixtures.student(universityId = "0123456")
+		val student: StudentMember = Fixtures.student(universityId = "0123456")
 		val studentCurrentUser = new CurrentUser(student.asSsoUser, student.asSsoUser)
 
 		val relationshipType = StudentRelationshipType("tutor", "tutor", "personal tutor", "personal tutee")

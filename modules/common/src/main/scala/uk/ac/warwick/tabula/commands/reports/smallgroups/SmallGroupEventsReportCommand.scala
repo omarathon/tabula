@@ -23,7 +23,7 @@ class SmallGroupEventsReportCommandInternal(val department: Department, val acad
 
 	self: SmallGroupServiceComponent =>
 
-	override def applyInternal() = {
+	override def applyInternal(): Seq[SmallGroupEventReportData] = {
 		smallGroupService.listSmallGroupEventsForReport(department, academicYear)
 	}
 

@@ -26,6 +26,6 @@ class UpstreamModuleListEntry extends GeneratedId {
 		_matchString = "^%s".format(globString.replace(".", "\\.").replace("?", ".").replace("*", ".*"))
 	}
 
-	def pattern = Pattern.compile(_matchString)
+	def pattern: Pattern = Pattern.compile(_matchString)
 
 }

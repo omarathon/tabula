@@ -26,7 +26,7 @@ class ImportSmallGroupSetsFromSpreadsheetController extends GroupsController
 	override val departmentPermission: Permission = ImportSmallGroupSetsFromSpreadsheetCommand.RequiredPermission
 
 	@ModelAttribute("activeDepartment")
-	override def activeDepartment(@PathVariable department: Department) = retrieveActiveDepartment(Option(department))
+	override def activeDepartment(@PathVariable department: Department): Option[Department] = retrieveActiveDepartment(Option(department))
 
 	@ModelAttribute("activeAcademicYear")
 	override def activeAcademicYear(@PathVariable academicYear: AcademicYear): Option[AcademicYear] = retrieveActiveAcademicYear(Option(academicYear))
@@ -52,7 +52,7 @@ class ImportSmallGroupSetsFromSpreadsheetController extends GroupsController
 		errors: Errors,
 		@PathVariable department: Department,
 		@PathVariable academicYear: AcademicYear
-	) = Mav("groups/admin/groups/import-spreadsheet/preview", "errors" -> errors)
+	): Mav = Mav("groups/admin/groups/import-spreadsheet/preview", "errors" -> errors)
 		.crumbs(Breadcrumbs.Department(department, academicYear))
 		.secondCrumbs(academicYearBreadcrumbs(academicYear)(year => Routes.groups.admin.importSpreadsheet(department, year)): _*)
 
@@ -84,7 +84,7 @@ class SmallGroupSetsSpreadsheetTemplateController extends GroupsController {
 		SmallGroupSetsSpreadsheetTemplateCommand(mandatory(department), mandatory(academicYear))
 
 	@RequestMapping
-	def getTemplate(@Valid @ModelAttribute("command") cmd: CommandType) = {
+	def getTemplate(@Valid @ModelAttribute("command") cmd: CommandType): ExcelView = {
 		cmd.apply()
 	}
 

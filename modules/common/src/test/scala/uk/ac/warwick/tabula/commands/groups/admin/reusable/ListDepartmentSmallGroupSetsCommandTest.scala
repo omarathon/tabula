@@ -6,15 +6,16 @@ import uk.ac.warwick.tabula.permissions.Permissions
 import uk.ac.warwick.tabula.services.{SmallGroupService, SmallGroupServiceComponent}
 import uk.ac.warwick.tabula.system.permissions.PermissionsChecking
 import uk.ac.warwick.tabula._
+import uk.ac.warwick.tabula.data.model.Department
 
 class ListDepartmentSmallGroupSetsCommandTest extends TestBase with Mockito {
 
 	private trait CommandTestSupport extends SmallGroupServiceComponent {
-		val smallGroupService = smartMock[SmallGroupService]
+		val smallGroupService: SmallGroupService = smartMock[SmallGroupService]
 	}
 
 	private trait Fixture {
-		val department = Fixtures.department("in", "IT Services")
+		val department: Department = Fixtures.department("in", "IT Services")
 		val academicYear = AcademicYear(2015)
 
 		val set1 = new DepartmentSmallGroupSet(department)
@@ -36,7 +37,7 @@ class ListDepartmentSmallGroupSetsCommandTest extends TestBase with Mockito {
 
 	@Test def permissions() {
 		val command = new ListDepartmentSmallGroupSetsPermissions with ListDepartmentSmallGroupSetsCommandState {
-			override val department = Fixtures.department("in")
+			override val department: Department = Fixtures.department("in")
 			override val academicYear = null
 		}
 

@@ -4,7 +4,7 @@ import org.joda.time.LocalTime
 import org.springframework.validation.BindException
 import uk.ac.warwick.tabula.commands._
 import uk.ac.warwick.tabula.data.model.groups._
-import uk.ac.warwick.tabula.data.model.{MapLocation, NamedLocation}
+import uk.ac.warwick.tabula.data.model.{MapLocation, Module, NamedLocation}
 import uk.ac.warwick.tabula.permissions.Permissions
 import uk.ac.warwick.tabula.services.{SmallGroupService, SmallGroupServiceComponent}
 import uk.ac.warwick.tabula.system.permissions.PermissionsChecking
@@ -13,14 +13,14 @@ import uk.ac.warwick.tabula.{Fixtures, ItemNotFoundException, Mockito, TestBase}
 class EditSmallGroupSetDefaultPropertiesTest extends TestBase with Mockito {
 
 	private trait CommandTestSupport extends SmallGroupServiceComponent {
-		val smallGroupService = mock[SmallGroupService]
+		val smallGroupService: SmallGroupService = mock[SmallGroupService]
 	}
 
 	private trait Fixture {
-		val module = Fixtures.module("in101", "Introduction to Scala")
+		val module: Module = Fixtures.module("in101", "Introduction to Scala")
 		module.id = "moduleId"
 
-		val set = Fixtures.smallGroupSet("IN101 Seminars")
+		val set: SmallGroupSet = Fixtures.smallGroupSet("IN101 Seminars")
 		set.id = "existingId"
 		set.module = module
 	}
@@ -54,14 +54,14 @@ class EditSmallGroupSetDefaultPropertiesTest extends TestBase with Mockito {
 		command.defaultEndTime = new LocalTime(13, 0)
 		command.defaultLocation = "The park"
 
-		val group1 = Fixtures.smallGroup("Group A")
-		val group2 = Fixtures.smallGroup("Group B")
+		val group1: SmallGroup = Fixtures.smallGroup("Group A")
+		val group2: SmallGroup = Fixtures.smallGroup("Group B")
 
-		val event1 = Fixtures.smallGroupEvent("Event 1")
-		val event2 = Fixtures.smallGroupEvent("Event 2")
+		val event1: SmallGroupEvent = Fixtures.smallGroupEvent("Event 1")
+		val event2: SmallGroupEvent = Fixtures.smallGroupEvent("Event 2")
 		event2.location = MapLocation("ITS WW", "12354")
 
-		val event3 = Fixtures.smallGroupEvent("Event 3")
+		val event3: SmallGroupEvent = Fixtures.smallGroupEvent("Event 3")
 		event3.weekRanges = Seq(WeekRange(1, 5))
 
 		set.groups.add(group1)
@@ -105,11 +105,11 @@ class EditSmallGroupSetDefaultPropertiesTest extends TestBase with Mockito {
 	@Test def permissions { new Fixture {
 		val (theModule, theSet) = (module, set)
 		val command = new EditSmallGroupSetDefaultPropertiesPermissions with EditSmallGroupSetDefaultPropertiesCommandState {
-			val module = theModule
-			val set = theSet
+			val module: Module = theModule
+			val set: SmallGroupSet = theSet
 		}
 
-		val checking = mock[PermissionsChecking]
+		val checking: PermissionsChecking = mock[PermissionsChecking]
 		command.permissionsCheck(checking)
 
 		verify(checking, times(1)).PermissionCheck(Permissions.SmallGroups.Update, set)
@@ -127,7 +127,7 @@ class EditSmallGroupSetDefaultPropertiesTest extends TestBase with Mockito {
 
 	@Test(expected = classOf[ItemNotFoundException]) def permissionsNoSet {
 		val command = new EditSmallGroupSetDefaultPropertiesPermissions with EditSmallGroupSetDefaultPropertiesCommandState {
-			val module = Fixtures.module("in101")
+			val module: Module = Fixtures.module("in101")
 			val set = null
 		}
 
@@ -137,7 +137,7 @@ class EditSmallGroupSetDefaultPropertiesTest extends TestBase with Mockito {
 
 	@Test(expected = classOf[ItemNotFoundException]) def permissionsUnlinkedSet {
 		val command = new EditSmallGroupSetDefaultPropertiesPermissions with EditSmallGroupSetDefaultPropertiesCommandState {
-			val module = Fixtures.module("in101")
+			val module: Module = Fixtures.module("in101")
 			module.id = "set id"
 
 			val set = new SmallGroupSet(Fixtures.module("other"))
@@ -149,8 +149,8 @@ class EditSmallGroupSetDefaultPropertiesTest extends TestBase with Mockito {
 
 	private trait ValidationFixture extends Fixture {
 		val command = new EditSmallGroupSetDefaultPropertiesValidation with EditSmallGroupSetDefaultPropertiesCommandState {
-			val module = ValidationFixture.this.module
-			val set = ValidationFixture.this.set
+			val module: Module = ValidationFixture.this.module
+			val set: SmallGroupSet = ValidationFixture.this.set
 		}
 	}
 
@@ -190,8 +190,8 @@ class EditSmallGroupSetDefaultPropertiesTest extends TestBase with Mockito {
 		val (mod, s) = (module, set)
 		val command = new EditSmallGroupSetDefaultPropertiesDescription with EditSmallGroupSetDefaultPropertiesCommandState {
 			override val eventName = "test"
-			val module = mod
-			val set = s
+			val module: Module = mod
+			val set: SmallGroupSet = s
 		}
 
 		val d = new DescriptionImpl

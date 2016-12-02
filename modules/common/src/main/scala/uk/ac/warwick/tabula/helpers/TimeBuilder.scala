@@ -25,7 +25,7 @@ object TimeBuilder {
 	/* everything is specified, including whether minutes should be included */
 	def format(time: ReadablePartial,
 			twentyFourHour: Boolean,
-			includeSeconds: Boolean) = {
+			includeSeconds: Boolean): String = {
 		val pattern = new StringBuilder
 
 		if (twentyFourHour) pattern.append("HH:mm")
@@ -45,7 +45,7 @@ class TimeBuilder extends TemplateMethodModelEx {
 	import TimeBuilder.format
 
 	/** For Freemarker */
-	override def exec(list: JList[_]) = {
+	override def exec(list: JList[_]): String = {
 		val args = list.asScala.toSeq.map { model => DeepUnwrap.unwrap(model.asInstanceOf[TemplateModel]) }
 
 		val time = args.head match {

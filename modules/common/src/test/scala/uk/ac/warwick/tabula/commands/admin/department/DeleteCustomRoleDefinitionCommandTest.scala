@@ -1,22 +1,23 @@
 package uk.ac.warwick.tabula.commands.admin.department
 
-import uk.ac.warwick.tabula.{ItemNotFoundException, Fixtures, TestBase, Mockito}
+import uk.ac.warwick.tabula.{Fixtures, ItemNotFoundException, Mockito, TestBase}
 import uk.ac.warwick.tabula.services.permissions.{PermissionsService, PermissionsServiceComponent}
-import uk.ac.warwick.tabula.roles.{ModuleManagerRoleDefinition, DepartmentalAdministratorRoleDefinition}
+import uk.ac.warwick.tabula.roles.{DepartmentalAdministratorRoleDefinition, ModuleManagerRoleDefinition}
 import uk.ac.warwick.tabula.system.permissions.PermissionsChecking
 import uk.ac.warwick.tabula.permissions.Permissions
 import org.springframework.validation.BindException
 import uk.ac.warwick.tabula.commands.DescriptionImpl
-import uk.ac.warwick.tabula.data.model.permissions.{DepartmentGrantedRole, CustomRoleDefinition}
+import uk.ac.warwick.tabula.data.model.Department
+import uk.ac.warwick.tabula.data.model.permissions.{CustomRoleDefinition, DepartmentGrantedRole}
 
 class DeleteCustomRoleDefinitionCommandTest extends TestBase with Mockito {
 
 	private trait CommandTestSupport extends DeleteCustomRoleDefinitionCommandState with PermissionsServiceComponent {
-		val permissionsService = mock[PermissionsService]
+		val permissionsService: PermissionsService = mock[PermissionsService]
 	}
 
 	private trait Fixture {
-		val department = Fixtures.department("in")
+		val department: Department = Fixtures.department("in")
 
 		val customRole = new CustomRoleDefinition
 		customRole.id = "custom"
@@ -43,11 +44,11 @@ class DeleteCustomRoleDefinitionCommandTest extends TestBase with Mockito {
 
 	@Test def permissions { new Fixture {
 		val command = new DeleteCustomRoleDefinitionCommandPermissions with DeleteCustomRoleDefinitionCommandState {
-			override val department = Fixtures.department("in")
-			override val customRoleDefinition = customRole
+			override val department: Department = Fixtures.department("in")
+			override val customRoleDefinition: CustomRoleDefinition = customRole
 		}
 
-		val checking = mock[PermissionsChecking]
+		val checking: PermissionsChecking = mock[PermissionsChecking]
 		command.permissionsCheck(checking)
 
 		verify(checking, times(1)).PermissionCheck(Permissions.RolesAndPermissions.Delete, customRole)
@@ -56,21 +57,21 @@ class DeleteCustomRoleDefinitionCommandTest extends TestBase with Mockito {
 	@Test(expected = classOf[ItemNotFoundException]) def noDepartment { new Fixture {
 		val command = new DeleteCustomRoleDefinitionCommandPermissions with DeleteCustomRoleDefinitionCommandState {
 			override val department = null
-			override val customRoleDefinition = customRole
+			override val customRoleDefinition: CustomRoleDefinition = customRole
 		}
 
 		customRole.department = department
 
-		val checking = mock[PermissionsChecking]
+		val checking: PermissionsChecking = mock[PermissionsChecking]
 		command.permissionsCheck(checking)
 	}}
 
 	private trait ValidationFixture extends Fixture {
-		val d = department
+		val d: Department = department
 
 		val command = new DeleteCustomRoleDefinitionCommandValidation with CommandTestSupport {
-			val department = d
-			val customRoleDefinition = customRole
+			val department: Department = d
+			val customRoleDefinition: CustomRoleDefinition = customRole
 		}
 	}
 
@@ -111,7 +112,7 @@ class DeleteCustomRoleDefinitionCommandTest extends TestBase with Mockito {
 	@Test def description {
 		val command = new DeleteCustomRoleDefinitionCommandDescription with DeleteCustomRoleDefinitionCommandState {
 			override val eventName: String = "test"
-			val department = Fixtures.department("in")
+			val department: Department = Fixtures.department("in")
 			val customRoleDefinition = new CustomRoleDefinition
 			customRoleDefinition.id = "custom-role"
 			customRoleDefinition.department = department

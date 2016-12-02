@@ -39,7 +39,7 @@ class RecordMonitoringPointCommandInternal(val department: Department, val acade
 
 	self: RecordMonitoringPointCommandState with AttendanceMonitoringServiceComponent =>
 
-	override def applyInternal() = {
+	override def applyInternal(): (Seq[AttendanceMonitoringCheckpoint], Seq[AttendanceMonitoringCheckpointTotal]) = {
 		checkpointMap.asScala.map { case(student, pointMap) =>
 			attendanceMonitoringService.setAttendance(student, pointMap.asScala.toMap, user)
 		}.toSeq.foldLeft(
@@ -55,7 +55,7 @@ trait SetFilterPointsResultOnRecordMonitoringPointCommand {
 
 	self: RecordMonitoringPointCommandState =>
 
-	def setFilteredPoints(result: FilterMonitoringPointsCommandResult) = {
+	def setFilteredPoints(result: FilterMonitoringPointsCommandResult): Unit = {
 		filteredPoints = result.pointMap
 		studentDatas = result.studentDatas
 	}
@@ -65,7 +65,7 @@ trait PopulateRecordMonitoringPointCommand extends PopulateOnForm {
 
 	self: RecordMonitoringPointCommandState =>
 
-	override def populate() = {
+	override def populate(): Unit = {
 		val studentPointStateTuples: Seq[(StudentMember, AttendanceMonitoringPoint, AttendanceState)] =
 			studentMap.flatMap { case (point, students) =>
 				students.map(student => (student, point, {
@@ -137,7 +137,7 @@ trait RecordMonitoringPointCommandState {
 	var filteredPoints: Map[String, Seq[GroupedPoint]] = _
 	var studentDatas: Seq[AttendanceMonitoringStudentData] = _
 
-	lazy val pointsToRecord = filteredPoints.values.flatten
+	lazy val pointsToRecord: Seq[AttendanceMonitoringPoint] = filteredPoints.values.flatten
 		.find(p => p.templatePoint.id == templatePoint.id)
 		.getOrElse(throw new IllegalArgumentException)
 		.points

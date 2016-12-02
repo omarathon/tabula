@@ -20,10 +20,10 @@ class ListExtensionsForAssignmentCommand(val module: Module, val assignment: Ass
 
 	if (assignment.openEnded) throw new ItemNotFoundException
 
-	var assignmentMembershipService = Wire.auto[AssessmentMembershipService]
-	var userLookup = Wire.auto[UserLookupService]
+	var assignmentMembershipService: AssessmentMembershipService = Wire.auto[AssessmentMembershipService]
+	var userLookup: UserLookupService = Wire.auto[UserLookupService]
 
-	def applyInternal() = {
+	def applyInternal(): Seq[ExtensionGraph] = {
 		val assignmentUsers = assignmentMembershipService.determineMembershipUsers(assignment)
 
 		val assignmentMembership = Map() ++ (

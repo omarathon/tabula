@@ -13,24 +13,24 @@ class ObjectStorageMigrationCommandTest extends TestBase with Mockito {
 
 	@Test def noLegacyStore(): Unit = {
 		val command = new ObjectStorageMigrationCommandInternal with SHAFileHasherComponent with ObjectStorageServiceComponent with FileDaoComponent {
-			val objectStorageService = smartMock[ObjectStorageService]
-			val fileDao = smartMock[FileDao]
+			val objectStorageService: ObjectStorageService = smartMock[ObjectStorageService]
+			val fileDao: FileDao = smartMock[FileDao]
 		}
 
 		command.applyInternal() should be ('empty)
 	}
 
 	private trait CommandTestSupport extends FileHasherComponent with ObjectStorageServiceComponent with FileDaoComponent {
-		val defaultStoreService = smartMock[ObjectStorageService]
-		val legacyStoreService = smartMock[ObjectStorageService]
+		val defaultStoreService: ObjectStorageService = smartMock[ObjectStorageService]
+		val legacyStoreService: ObjectStorageService = smartMock[ObjectStorageService]
 
 		val objectStorageService = new LegacyAwareObjectStorageService(
 			defaultService = defaultStoreService,
 			legacyService = legacyStoreService
 		)
 
-		val fileDao = smartMock[FileDao]
-		val fileHasher = smartMock[FileHasher]
+		val fileDao: FileDao = smartMock[FileDao]
+		val fileHasher: FileHasher = smartMock[FileHasher]
 	}
 
 	@Test def transfer(): Unit = {

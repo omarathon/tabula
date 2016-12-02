@@ -22,7 +22,7 @@ import uk.ac.warwick.tabula.data.model.forms.SavedFormValue
 
 class ZipServiceTest extends TestBase with Mockito {
 
-	var userDatabase = Seq(
+	var userDatabase: Seq[User] = Seq(
 		("0000000","aaslat","aaaaa"),
 		("0000001","baslat","aaaab"),
 		("0000002","caslat","aaaac"),

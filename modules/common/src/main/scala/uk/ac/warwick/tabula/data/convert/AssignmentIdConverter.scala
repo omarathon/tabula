@@ -9,7 +9,7 @@ class AssignmentIdConverter extends TwoWayConverter[String, Assignment] {
 
 	@Autowired var service: AssessmentService = _
 
-	override def convertRight(id: String) = (Option(id) flatMap { service.getAssignmentById }).orNull
-	override def convertLeft(assignment: Assignment) = (Option(assignment) map {_.id}).orNull
+	override def convertRight(id: String): Assignment = (Option(id) flatMap { service.getAssignmentById }).orNull
+	override def convertLeft(assignment: Assignment): String = (Option(assignment) map {_.id}).orNull
 
 }

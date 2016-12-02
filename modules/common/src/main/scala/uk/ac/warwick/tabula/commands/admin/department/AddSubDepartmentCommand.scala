@@ -30,7 +30,7 @@ object AddSubDepartmentCommand {
 class AddSubDepartmentCommandInternal(val parent: Department) extends CommandInternal[Department] with AddSubDepartmentCommandState {
 	self: ModuleAndDepartmentServiceComponent =>
 
-	def applyInternal() = transactional() {
+	def applyInternal(): Department = transactional() {
 		val d = new Department
 		d.code = code
 		d.fullName = name

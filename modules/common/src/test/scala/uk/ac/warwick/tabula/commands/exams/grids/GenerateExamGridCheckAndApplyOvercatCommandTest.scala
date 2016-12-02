@@ -2,35 +2,35 @@ package uk.ac.warwick.tabula.commands.exams.grids
 
 import uk.ac.warwick.tabula._
 import uk.ac.warwick.tabula.commands.Appliable
-import uk.ac.warwick.tabula.data.model.DegreeType
+import uk.ac.warwick.tabula.data.model._
 import uk.ac.warwick.tabula.data.{StudentCourseYearDetailsDao, StudentCourseYearDetailsDaoComponent}
 import uk.ac.warwick.tabula.services._
 
 class GenerateExamGridCheckAndApplyOvercatCommandTest extends TestBase with Mockito {
 
-	val thisDepartment = Fixtures.department("its")
+	val thisDepartment: Department = Fixtures.department("its")
 	val thisAcademicYear = AcademicYear(2014)
-	val thisRoute = Fixtures.route("a100")
+	val thisRoute: Route = Fixtures.route("a100")
 	thisRoute.degreeType = DegreeType.Undergraduate
 	val thisYearOfStudy = 3
-	val module1 = Fixtures.module("its01")
-	val module2 = Fixtures.module("its02")
-	val mads = smartMock[ModuleAndDepartmentService]
+	val module1: Module = Fixtures.module("its01")
+	val module2: Module = Fixtures.module("its02")
+	val mads: ModuleAndDepartmentService = smartMock[ModuleAndDepartmentService]
 	mads.getModuleByCode(module1.code) returns Some(module1)
 	mads.getModuleByCode(module2.code) returns Some(module2)
-	val scd = Fixtures.student("1234").mostSignificantCourse
-	val scyd = scd.latestStudentCourseYearDetails
+	val scd: StudentCourseDetails = Fixtures.student("1234").mostSignificantCourse
+	val scyd: StudentCourseYearDetails = scd.latestStudentCourseYearDetails
 	scyd.moduleAndDepartmentService = mads
-	val mr1 = Fixtures.moduleRegistration(scd, module1, null, null)
-	val mr2 = Fixtures.moduleRegistration(scd, module2, null, null)
+	val mr1: ModuleRegistration = Fixtures.moduleRegistration(scd, module1, null, null)
+	val mr2: ModuleRegistration = Fixtures.moduleRegistration(scd, module2, null, null)
 
 	trait StateFixture {
 		val state = new GenerateExamGridCheckAndApplyOvercatCommandState with UpstreamRouteRuleServiceComponent
 			with ModuleRegistrationServiceComponent {
-			override val department = thisDepartment
-			override val academicYear = thisAcademicYear
-			override val upstreamRouteRuleService = smartMock[UpstreamRouteRuleService]
-			override val moduleRegistrationService = smartMock[ModuleRegistrationService]
+			override val department: Department = thisDepartment
+			override val academicYear: AcademicYear = thisAcademicYear
+			override val upstreamRouteRuleService: UpstreamRouteRuleService = smartMock[UpstreamRouteRuleService]
+			override val moduleRegistrationService: ModuleRegistrationService = smartMock[ModuleRegistrationService]
 		}
 		// Just use the default normal load
 		state.upstreamRouteRuleService.findNormalLoad(thisRoute, thisAcademicYear, thisYearOfStudy) returns None
@@ -166,9 +166,9 @@ class GenerateExamGridCheckAndApplyOvercatCommandTest extends TestBase with Mock
 		val cmd = new GenerateExamGridCheckAndApplyOvercatCommandInternal(null, thisAcademicYear, NoCurrentUser())
 			with ModuleRegistrationServiceComponent with UpstreamRouteRuleServiceComponent
 			with GenerateExamGridCheckAndApplyOvercatCommandState	with StudentCourseYearDetailsDaoComponent {
-			override val moduleRegistrationService = smartMock[ModuleRegistrationService]
-			override val studentCourseYearDetailsDao = smartMock[StudentCourseYearDetailsDao]
-			override val upstreamRouteRuleService = smartMock[UpstreamRouteRuleService]
+			override val moduleRegistrationService: ModuleRegistrationService = smartMock[ModuleRegistrationService]
+			override val studentCourseYearDetailsDao: StudentCourseYearDetailsDao = smartMock[StudentCourseYearDetailsDao]
+			override val upstreamRouteRuleService: UpstreamRouteRuleService = smartMock[UpstreamRouteRuleService]
 		}
 		// Just use the default normal load
 		cmd.upstreamRouteRuleService.findNormalLoad(thisRoute, thisAcademicYear, thisYearOfStudy) returns None

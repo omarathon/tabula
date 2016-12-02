@@ -131,7 +131,7 @@ trait AttendancePointCommandState {
 		point
 	}
 
-	def moduleHasSmallGroups(module: Module) = smallGroupService.hasSmallGroups(module, academicYear)
-	def moduleHasAssignments(module: Module) = moduleAndDepartmentService.hasAssignments(module)
+	def moduleHasSmallGroups(module: Module): Boolean = smallGroupService.hasSmallGroups(module, academicYear)
+	def moduleHasAssignments(module: Module): Boolean = moduleAndDepartmentService.hasAssignments(module)
 
 }

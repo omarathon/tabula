@@ -16,7 +16,7 @@ object PlagiarismInvestigation {
 	// lame manual collection. Keep in sync with the case objects above
 	val members = Seq(NotInvestigated, SuspectPlagiarised, InvestigationCompleted)
 
-	def fromDatabase(dbValue: String) ={
+	def fromDatabase(dbValue: String): PlagiarismInvestigation ={
 		if (dbValue == null) null
 		else members.find{_.dbValue == dbValue} match {
 			case Some(caseObject) => caseObject
@@ -24,7 +24,7 @@ object PlagiarismInvestigation {
 		}
 	}
 
-	def apply(value:String) = fromDatabase(value)
+	def apply(value:String): PlagiarismInvestigation = fromDatabase(value)
 }
 
 
@@ -36,6 +36,6 @@ class PlagiarismInvestigationUserType extends AbstractBasicUserType[PlagiarismIn
 	val nullValue = null
 	val nullObject = null
 
-	override def convertToObject(string: String) = PlagiarismInvestigation.fromDatabase(string)
-	override def convertToValue(method: PlagiarismInvestigation) = method.dbValue
+	override def convertToObject(string: String): PlagiarismInvestigation = PlagiarismInvestigation.fromDatabase(string)
+	override def convertToValue(method: PlagiarismInvestigation): String = method.dbValue
 }

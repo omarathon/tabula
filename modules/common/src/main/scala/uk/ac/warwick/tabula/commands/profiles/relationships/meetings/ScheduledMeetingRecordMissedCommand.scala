@@ -25,7 +25,7 @@ class ScheduledMeetingRecordMissedCommand (val meetingRecord: ScheduledMeetingRe
 
 	self: MeetingRecordServiceComponent =>
 
-	def applyInternal() = {
+	def applyInternal(): ScheduledMeetingRecord = {
 		meetingRecord.missed = true
 		meetingRecord.missedReason = missedReason
 		meetingRecordService.saveOrUpdate(meetingRecord)
@@ -67,7 +67,7 @@ trait ScheduledMeetingRecordMissedDescription extends Describable[ScheduledMeeti
 trait ScheduledMeetingRecordMissedNotification extends Notifies[ScheduledMeetingRecord, ScheduledMeetingRecord] {
 	self: ScheduledMeetingRecordMissedState =>
 
-	def emit(meeting: ScheduledMeetingRecord) = {
+	def emit(meeting: ScheduledMeetingRecord): Seq[ScheduledMeetingRecordMissedInviteeNotification] = {
 		val user = meeting.creator.asSsoUser
 		Seq(Notification.init(new ScheduledMeetingRecordMissedInviteeNotification(), user, meeting, meeting.relationship))
 	}

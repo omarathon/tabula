@@ -7,7 +7,7 @@ import uk.ac.warwick.tabula._
 import uk.ac.warwick.tabula.commands.DescriptionImpl
 import uk.ac.warwick.tabula.commands.groups.admin.ImportSmallGroupSetsFromExternalSystemCommand.TimetabledSmallGroupEvent
 import uk.ac.warwick.tabula.data.model.groups._
-import uk.ac.warwick.tabula.data.model.{Location, Module, NamedLocation}
+import uk.ac.warwick.tabula.data.model.{Department, Location, Module, NamedLocation}
 import uk.ac.warwick.tabula.permissions.Permissions
 import uk.ac.warwick.tabula.services._
 import uk.ac.warwick.tabula.services.timetables.TimetableFetchingService.EventList
@@ -35,13 +35,13 @@ class ImportSmallGroupSetsFromExternalSystemCommandTest extends TestBase with Mo
 		with SecurityServiceComponent {
 		self: ImportSmallGroupSetsFromExternalSystemCommandState =>
 
-		val timetableFetchingService = mock[ModuleTimetableFetchingService]
-		val smallGroupService = mock[SmallGroupService]
+		val timetableFetchingService: ModuleTimetableFetchingService = mock[ModuleTimetableFetchingService]
+		val smallGroupService: SmallGroupService = mock[SmallGroupService]
 		val userLookup = new MockUserLookup
-		val moduleAndDepartmentService = mock[ModuleAndDepartmentService]
-		val securityService = mock[SecurityService]
+		val moduleAndDepartmentService: ModuleAndDepartmentService = mock[ModuleAndDepartmentService]
+		val securityService: SecurityService = mock[SecurityService]
 
-		def createSet(module: Module, format: SmallGroupFormat, name: String) = {
+		def createSet(module: Module, format: SmallGroupFormat, name: String): SmallGroupSet = {
 			val set = new SmallGroupSet(module)
 			set.format = format
 			set.name = name
@@ -50,7 +50,7 @@ class ImportSmallGroupSetsFromExternalSystemCommandTest extends TestBase with Mo
 			set
 		}
 
-		def createEvent(module: Module, set: SmallGroupSet, group: SmallGroup, weeks: Seq[WeekRange], day: DayOfWeek, startTime: LocalTime, endTime: LocalTime, location: Option[Location], title: String, tutorUsercodes: Seq[String]) = {
+		def createEvent(module: Module, set: SmallGroupSet, group: SmallGroup, weeks: Seq[WeekRange], day: DayOfWeek, startTime: LocalTime, endTime: LocalTime, location: Option[Location], title: String, tutorUsercodes: Seq[String]): SmallGroupEvent = {
 			val event = new SmallGroupEvent(group)
 			event.title = title
 			event.weekRanges = weeks
@@ -66,10 +66,10 @@ class ImportSmallGroupSetsFromExternalSystemCommandTest extends TestBase with Mo
 	}
 
 	private trait Fixture {
-		val department = Fixtures.department("in")
+		val department: Department = Fixtures.department("in")
 
-		val module1 = Fixtures.module("in101")
-		val module2 = Fixtures.module("in102")
+		val module1: Module = Fixtures.module("in101")
+		val module2: Module = Fixtures.module("in102")
 
 		department.modules.add(module1)
 		department.modules.add(module2)
@@ -210,24 +210,24 @@ class ImportSmallGroupSetsFromExternalSystemCommandTest extends TestBase with Mo
 	}}
 
 	@Test def apply() {	new CommandFixture with FixtureWithSingleSeminarForYear {
-		val sets = command.applyInternal()
+		val sets: Seq[SmallGroupSet] = command.applyInternal()
 
 		verify(command.smallGroupService, times(1)).saveOrUpdate(any[SmallGroupSet])
 		verify(command.smallGroupService, times(2)).saveOrUpdate(any[SmallGroup])
 
 		sets.size should be (1)
 
-		val set = sets.head
+		val set: SmallGroupSet = sets.head
 		set.format should be (SmallGroupFormat.Seminar)
 		set.name should be ("IN101 Seminars")
 		set.groups.size should be (2)
 
-		val group1 = set.groups.get(1) // Order intentionally reversed; the events are re-ordered because Thursday is before Friday
+		val group1: SmallGroup = set.groups.get(1) // Order intentionally reversed; the events are re-ordered because Thursday is before Friday
 		group1.name = "Group 1"
 		group1.students.knownType.includedUserIds should be (Seq("0000001", "0000002", "0000003"))
 		group1.events.size should be (1)
 
-		val group1event = group1.events.head
+		val group1event: SmallGroupEvent = group1.events.head
 		group1event.weekRanges should be (Seq(WeekRange(6, 10)))
 		group1event.day should be (DayOfWeek.Friday)
 		group1event.startTime should be (new LocalTime(12, 0))
@@ -235,11 +235,11 @@ class ImportSmallGroupSetsFromExternalSystemCommandTest extends TestBase with Mo
 		group1event.location should be (NamedLocation("CS1.04"))
 		group1event.tutors.knownType.includedUserIds should be (Seq("abcdef"))
 
-		val group2 = set.groups.get(0) // Order intentionally reversed; the events are re-ordered because Thursday is before Friday
+		val group2: SmallGroup = set.groups.get(0) // Order intentionally reversed; the events are re-ordered because Thursday is before Friday
 		group2.name = "Group 2"
 		group2.students.knownType.includedUserIds should be (Seq("0000004", "0000005", "0000006"))
 
-		val group2event = group2.events.head
+		val group2event: SmallGroupEvent = group2.events.head
 		group2event.weekRanges should be (Seq(WeekRange(6, 10)))
 		group2event.day should be (DayOfWeek.Thursday)
 		group2event.startTime should be (new LocalTime(12, 0))
@@ -252,14 +252,14 @@ class ImportSmallGroupSetsFromExternalSystemCommandTest extends TestBase with Mo
 		with SecurityServiceComponent with ModuleAndDepartmentServiceComponent {
 		self: ImportSmallGroupSetsFromExternalSystemCommandState with RequiresPermissionsChecking =>
 
-		val securityService = mock[SecurityService]
-		val moduleAndDepartmentService = mock[ModuleAndDepartmentService]
+		val securityService: SecurityService = mock[SecurityService]
+		val moduleAndDepartmentService: ModuleAndDepartmentService = mock[ModuleAndDepartmentService]
 	}
 
 	private trait PermissionsFixture extends Fixture {
 		val command = new ImportSmallGroupSetsFromExternalSystemPermissions with ImportSmallGroupSetsFromExternalSystemCommandState with PermissionsTestSupport {
-			val department = PermissionsFixture.this.department
-			val user = PermissionsFixture.this.currentUser
+			val department: Department = PermissionsFixture.this.department
+			val user: CurrentUser = PermissionsFixture.this.currentUser
 		}
 	}
 
@@ -284,21 +284,21 @@ class ImportSmallGroupSetsFromExternalSystemCommandTest extends TestBase with Mo
 	}
 
 	@Test def deptAdminPermissions() { new PermissionsFixture with DepartmentalAdministratorPermissions {
-		val checking = mock[PermissionsChecking]
+		val checking: PermissionsChecking = mock[PermissionsChecking]
 		command.permissionsCheck(checking)
 
 		verify(checking, times(1)).PermissionCheck(Permissions.SmallGroups.ImportFromExternalSystem, department)
 	}}
 
 	@Test def noPermissions() { new PermissionsFixture with DepartmentalAdministratorPermissions {
-		val checking = mock[PermissionsChecking]
+		val checking: PermissionsChecking = mock[PermissionsChecking]
 		command.permissionsCheck(checking)
 
 		verify(checking, times(1)).PermissionCheck(Permissions.SmallGroups.ImportFromExternalSystem, department)
 	}}
 
 	@Test def moduleManagerPermissions() { new PermissionsFixture with ModuleManagerPermissions {
-		val checking = mock[PermissionsChecking]
+		val checking: PermissionsChecking = mock[PermissionsChecking]
 		command.permissionsCheck(checking)
 
 		verify(checking, times(1)).PermissionCheckAll(Permissions.SmallGroups.ImportFromExternalSystem, Seq(module1, module2))
@@ -307,8 +307,8 @@ class ImportSmallGroupSetsFromExternalSystemCommandTest extends TestBase with Mo
 	@Test def description() {
 		val command = new ImportSmallGroupSetsFromExternalSystemDescription with ImportSmallGroupSetsFromExternalSystemCommandState {
 			override val eventName: String = "test"
-			val department = Fixtures.department("in")
-			val user = mock[CurrentUser]
+			val department: Department = Fixtures.department("in")
+			val user: CurrentUser = mock[CurrentUser]
 		}
 
 		val d = new DescriptionImpl

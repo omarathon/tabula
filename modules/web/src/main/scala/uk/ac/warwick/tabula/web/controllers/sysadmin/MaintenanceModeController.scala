@@ -13,6 +13,7 @@ import uk.ac.warwick.tabula.permissions._
 import uk.ac.warwick.tabula.services._
 import uk.ac.warwick.tabula.system.permissions.{PermissionsChecking, PermissionsCheckingMethods, RequiresPermissionsChecking}
 import uk.ac.warwick.tabula.validators.WithinYears
+import uk.ac.warwick.tabula.web.Mav
 
 object MaintenanceModeCommand {
 	type Command = Appliable[MaintenanceModeMessage] with SelfValidating with PopulateOnForm
@@ -97,11 +98,11 @@ class MaintenanceModeController extends BaseSysadminController {
 	@ModelAttribute("maintenanceModeCommand") def cmd: MaintenanceModeCommand.Command = MaintenanceModeCommand()
 
 	@RequestMapping(method = Array(GET, HEAD))
-	def showForm(@ModelAttribute("maintenanceModeCommand") form: MaintenanceModeCommand.Command, errors: Errors) =
+	def showForm(@ModelAttribute("maintenanceModeCommand") form: MaintenanceModeCommand.Command, errors: Errors): Mav =
 		Mav("sysadmin/maintenance").noLayoutIf(ajax)
 
 	@RequestMapping(method = Array(POST))
-	def submit(@Valid @ModelAttribute("maintenanceModeCommand") form: MaintenanceModeCommand.Command, errors: Errors) = {
+	def submit(@Valid @ModelAttribute("maintenanceModeCommand") form: MaintenanceModeCommand.Command, errors: Errors): Mav = {
 		if (errors.hasErrors)
 			showForm(form, errors)
 		else {

@@ -41,7 +41,7 @@ object AuditLogQueryCommand {
 class AuditLogQueryCommandInternal extends CommandInternal[AuditLogQueryResults] with AuditLogQueryCommandState with TaskBenchmarking {
 	self: AuditEventServiceComponent with AuditEventQueryServiceComponent =>
 
-	def applyInternal() = {
+	def applyInternal(): AuditLogQueryResults = {
 		val start = (page * pageSize) + 1
 		val max = pageSize
 		val end = start + max - 1
@@ -64,7 +64,7 @@ class AuditLogQueryCommandInternal extends CommandInternal[AuditLogQueryResults]
 		)
 	}
 
-	def toRichAuditItem(item: AuditEvent) = item.copy(parsedData = auditEventService.parseData(item.data))
+	def toRichAuditItem(item: AuditEvent): AuditEvent = item.copy(parsedData = auditEventService.parseData(item.data))
 }
 
 trait AuditLogQueryCommandPermissions extends RequiresPermissionsChecking {

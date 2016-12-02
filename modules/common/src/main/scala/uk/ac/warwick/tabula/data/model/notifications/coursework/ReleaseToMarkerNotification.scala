@@ -43,9 +43,9 @@ class ReleaseToMarkerNotification
 	@transient val whichMarker = IntSetting("marker", 1)
 
 	def verb = "released"
-	def assignment = target.entity
+	def assignment: Assignment = target.entity
 
-	def title = "%s: Submissions for \"%s\" have been released for marking".format(assignment.module.code.toUpperCase, assignment.name)
+	def title: String = "%s: Submissions for \"%s\" have been released for marking".format(assignment.module.code.toUpperCase, assignment.name)
 
 	def content = FreemarkerModel(ReleaseToMarkerNotification.templateLocation,
 		Map(

@@ -15,7 +15,7 @@ trait RelationshipDaoComponent {
 }
 
 trait AutowiringRelationshipDaoComponent extends RelationshipDaoComponent {
-	val relationshipDao = Wire[RelationshipDao]
+	val relationshipDao: RelationshipDao = Wire[RelationshipDao]
 }
 
 trait RelationshipDao {
@@ -70,19 +70,19 @@ class RelationshipDaoImpl extends RelationshipDao with Daoisms with Logging {
 			.addOrder(Order.asc("id"))
 			.seq
 
-	def getStudentRelationshipTypeById(id: String) = getById[StudentRelationshipType](id)
+	def getStudentRelationshipTypeById(id: String): Option[StudentRelationshipType] = getById[StudentRelationshipType](id)
 
-	def getStudentRelationshipTypeByUrlPart(urlPart: String) =
+	def getStudentRelationshipTypeByUrlPart(urlPart: String): Option[StudentRelationshipType] =
 		session.newCriteria[StudentRelationshipType]
 			.add(is("urlPart", urlPart))
 			.uniqueResult
 
-	def saveOrUpdate(relationshipType: StudentRelationshipType) = session.saveOrUpdate(relationshipType)
-	def delete(relationshipType: StudentRelationshipType) = session.delete(relationshipType)
+	def saveOrUpdate(relationshipType: StudentRelationshipType): Unit = session.saveOrUpdate(relationshipType)
+	def delete(relationshipType: StudentRelationshipType): Unit = session.delete(relationshipType)
 
-	def getStudentRelationshipById(id: String) = getById[StudentRelationship](id)
+	def getStudentRelationshipById(id: String): Option[StudentRelationship] = getById[StudentRelationship](id)
 
-	def saveOrUpdate(rel: StudentRelationship) = session.saveOrUpdate(rel)
+	def saveOrUpdate(rel: StudentRelationship): Unit = session.saveOrUpdate(rel)
 
 	def getAllCurrentRelationships(student: StudentMember): Seq[StudentRelationship] = {
 		session.newCriteria[StudentRelationship]

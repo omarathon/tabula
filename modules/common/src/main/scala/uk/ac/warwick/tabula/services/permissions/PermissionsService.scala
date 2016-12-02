@@ -85,7 +85,7 @@ trait PermissionsServiceComponent {
 }
 
 trait AutowiringPermissionsServiceComponent extends PermissionsServiceComponent {
-	var permissionsService = Wire[PermissionsService]
+	var permissionsService: PermissionsService = Wire[PermissionsService]
 }
 
 trait CacheStrategyComponent {
@@ -93,7 +93,7 @@ trait CacheStrategyComponent {
 }
 
 trait AutowiringCacheStrategyComponent extends CacheStrategyComponent {
-	var cacheStrategy = CacheStrategy.valueOf(Wire.property("${tabula.cacheStrategy:InMemoryOnly}"))
+	var cacheStrategy: CacheStrategy = CacheStrategy.valueOf(Wire.property("${tabula.cacheStrategy:InMemoryOnly}"))
 }
 
 abstract class AbstractPermissionsService extends PermissionsService {
@@ -105,8 +105,8 @@ abstract class AbstractPermissionsService extends PermissionsService {
 		with InitializingBean
 		with Logging =>
 
-	var groupService = Wire[GroupService]
-	var queue = Wire.named[Queue]("settingsSyncTopic")
+	var groupService: GroupService = Wire[GroupService]
+	var queue: Queue = Wire.named[Queue]("settingsSyncTopic")
 
 
 	override def isListeningToQueue = true
@@ -164,18 +164,18 @@ abstract class AbstractPermissionsService extends PermissionsService {
 		}
 	}
 
-	def saveOrUpdate(roleDefinition: CustomRoleDefinition) = permissionsDao.saveOrUpdate(roleDefinition)
-	def saveOrUpdate(permission: GrantedPermission[_]) = permissionsDao.saveOrUpdate(permission)
-	def saveOrUpdate(role: GrantedRole[_]) = permissionsDao.saveOrUpdate(role)
+	def saveOrUpdate(roleDefinition: CustomRoleDefinition): Unit = permissionsDao.saveOrUpdate(roleDefinition)
+	def saveOrUpdate(permission: GrantedPermission[_]): Unit = permissionsDao.saveOrUpdate(permission)
+	def saveOrUpdate(role: GrantedRole[_]): Unit = permissionsDao.saveOrUpdate(role)
 
-	def delete(roleDefinition: CustomRoleDefinition) = {
+	def delete(roleDefinition: CustomRoleDefinition): Unit = {
 		roleDefinition.department.customRoleDefinitions.remove(roleDefinition)
 		permissionsDao.delete(roleDefinition)
 	}
 
-	def getCustomRoleDefinitionById(id: String) = permissionsDao.getCustomRoleDefinitionById(id)
+	def getCustomRoleDefinitionById(id: String): Option[CustomRoleDefinition] = permissionsDao.getCustomRoleDefinitionById(id)
 
-	def getOrCreateGrantedRole[A <: PermissionsTarget : ClassTag](target: A, defn: RoleDefinition) =
+	def getOrCreateGrantedRole[A <: PermissionsTarget : ClassTag](target: A, defn: RoleDefinition): GrantedRole[A] =
 		getGrantedRole(target, defn) match {
 			case Some(role) => role
 			case _ => GrantedRole(target, defn)
@@ -298,20 +298,20 @@ abstract class AbstractPermissionsService extends PermissionsService {
 
 class GrantedPermissionsByIdCache(dao: PermissionsDao) extends RequestLevelCaching[String, Option[GrantedPermission[_]]] {
 
-	def getGrantedPermissionsByIds[A <: PermissionsTarget : ClassTag](ids: Seq[String]) =
+	def getGrantedPermissionsByIds[A <: PermissionsTarget : ClassTag](ids: Seq[String]): Seq[GrantedPermission[A]] =
 		ids flatMap { id => getGrantedPermissionsById[A](id) }
 
-	def getGrantedPermissionsById[A <: PermissionsTarget : ClassTag](id: String) =
+	def getGrantedPermissionsById[A <: PermissionsTarget : ClassTag](id: String): Option[GrantedPermission[A]] =
 		cachedBy(id) { dao.getGrantedPermission[A](id) }.asInstanceOf[Option[GrantedPermission[A]]]
 
 }
 
 class GrantedRoleByIdCache(dao: PermissionsDao) extends RequestLevelCaching[String, Option[GrantedRole[_]]] {
 
-	def getGrantedRolesByIds[A <: PermissionsTarget : ClassTag](ids: Seq[String]) =
+	def getGrantedRolesByIds[A <: PermissionsTarget : ClassTag](ids: Seq[String]): Seq[GrantedRole[A]] =
 		ids flatMap { id => getGrantedRoleById[A](id) }
 
-	def getGrantedRoleById[A <: PermissionsTarget : ClassTag](id: String) =
+	def getGrantedRoleById[A <: PermissionsTarget : ClassTag](id: String): Option[GrantedRole[A]] =
 		cachedBy(id) { dao.getGrantedRole[A](id) }.asInstanceOf[Option[GrantedRole[A]]]
 
 }
@@ -323,15 +323,15 @@ class GrantedRoleByIdCache(dao: PermissionsDao) extends RequestLevelCaching[Stri
 
 trait GrantedRolesForUserCache { self: PermissionsDaoComponent with CacheStrategyComponent with UserLookupComponent =>
 	final val GrantedRolesForUserCacheName = "GrantedRolesForUser"
-	final val GrantedRolesForUserCacheMaxAgeSecs = 60 * 60 // 1 hour
+	final val GrantedRolesForUserCacheMaxAgeSecs: Int = 60 * 60 // 1 hour
 
-	final lazy val GrantedRolesForUserCache = {
+	final lazy val GrantedRolesForUserCache: Cache[(String, ClassTag[_ <: PermissionsTarget]), _root_.uk.ac.warwick.tabula.JavaImports.JArrayList[String]] = {
 		val cache = Caches.newCache(GrantedRolesForUserCacheName, new GrantedRolesForUserCacheFactory, GrantedRolesForUserCacheMaxAgeSecs, cacheStrategy)
 		cache
 	}
 
 	class GrantedRolesForUserCacheFactory extends CacheEntryFactory[(String, ClassTag[_ <: PermissionsTarget]), JArrayList[String]] {
-		def create(cacheKey: (String, ClassTag[_ <: PermissionsTarget])) = cacheKey match {
+		def create(cacheKey: (String, ClassTag[_ <: PermissionsTarget])): JArrayList[String] = cacheKey match {
 			case (userId, tag) => JArrayList(permissionsDao.getGrantedRolesForUser(userLookup.getUserByUserId(userId))(tag).map { role => role.id }.asJava)
 		}
 		def shouldBeCached(ids: JArrayList[String]) = true
@@ -345,15 +345,15 @@ trait GrantedRolesForUserCache { self: PermissionsDaoComponent with CacheStrateg
 
 trait GrantedRolesForGroupCache { self: PermissionsDaoComponent with CacheStrategyComponent =>
 	final val GrantedRolesForGroupCacheName = "GrantedRolesForGroup"
-	final val GrantedRolesForGroupCacheMaxAgeSecs = 60 * 60 // 1 hour
+	final val GrantedRolesForGroupCacheMaxAgeSecs: Int = 60 * 60 // 1 hour
 
-	final lazy val GrantedRolesForGroupCache = {
+	final lazy val GrantedRolesForGroupCache: Cache[(Seq[String], ClassTag[_ <: PermissionsTarget]), _root_.uk.ac.warwick.tabula.JavaImports.JArrayList[String]] = {
 		val cache = Caches.newCache(GrantedRolesForGroupCacheName, new GrantedRolesForGroupCacheFactory, GrantedRolesForGroupCacheMaxAgeSecs, cacheStrategy)
 		cache
 	}
 
 	class GrantedRolesForGroupCacheFactory extends SingularCacheEntryFactory[(Seq[String], ClassTag[_ <: PermissionsTarget]), JArrayList[String]] {
-		def create(cacheKey: (Seq[String], ClassTag[_ <: PermissionsTarget])) = cacheKey match {
+		def create(cacheKey: (Seq[String], ClassTag[_ <: PermissionsTarget])): JArrayList[String] = cacheKey match {
 			case (groupNames, tag) => JArrayList(permissionsDao.getGrantedRolesForWebgroups(groupNames)(tag).map { role => role.id }.asJava)
 		}
 		def shouldBeCached(ids: JArrayList[String]) = true
@@ -362,9 +362,9 @@ trait GrantedRolesForGroupCache { self: PermissionsDaoComponent with CacheStrate
 
 trait GrantedPermissionsForUserCache { self: PermissionsDaoComponent with CacheStrategyComponent with UserLookupComponent =>
 	final val GrantedPermissionsForUserCacheName = "GrantedPermissionsForUser"
-	final val GrantedPermissionsForUserCacheMaxAgeSecs = 60 * 60 // 1 hour
+	final val GrantedPermissionsForUserCacheMaxAgeSecs: Int = 60 * 60 // 1 hour
 
-	final lazy val GrantedPermissionsForUserCache = {
+	final lazy val GrantedPermissionsForUserCache: Cache[(String, ClassTag[_ <: PermissionsTarget]), _root_.uk.ac.warwick.tabula.JavaImports.JArrayList[String]] = {
 		val cache = Caches.newCache(
 			GrantedPermissionsForUserCacheName,
 			new GrantedPermissionsForUserCacheFactory,
@@ -374,7 +374,7 @@ trait GrantedPermissionsForUserCache { self: PermissionsDaoComponent with CacheS
 	}
 
 	class GrantedPermissionsForUserCacheFactory extends SingularCacheEntryFactory[(String, ClassTag[_ <: PermissionsTarget]), JArrayList[String]] {
-		def create(cacheKey: (String, ClassTag[_ <: PermissionsTarget])) = cacheKey match {
+		def create(cacheKey: (String, ClassTag[_ <: PermissionsTarget])): JArrayList[String] = cacheKey match {
 			case (userId, tag) => JArrayList(permissionsDao.getGrantedPermissionsForUser(userLookup.getUserByUserId(userId))(tag).map { role => role.id }.asJava)
 		}
 		def shouldBeCached(ids: JArrayList[String]) = true
@@ -383,9 +383,9 @@ trait GrantedPermissionsForUserCache { self: PermissionsDaoComponent with CacheS
 
 trait GrantedPermissionsForGroupCache { self: PermissionsDaoComponent with CacheStrategyComponent =>
 	final val GrantedPermissionsForGroupCacheName = "GrantedPermissionsForGroup"
-	final val GrantedPermissionsForGroupCacheMaxAgeSecs = 60 * 60 // 1 hour
+	final val GrantedPermissionsForGroupCacheMaxAgeSecs: Int = 60 * 60 // 1 hour
 
-	final lazy val GrantedPermissionsForGroupCache = {
+	final lazy val GrantedPermissionsForGroupCache: Cache[(Seq[String], ClassTag[_ <: PermissionsTarget]), _root_.uk.ac.warwick.tabula.JavaImports.JArrayList[String]] = {
 		val cache = Caches.newCache(
 			GrantedPermissionsForGroupCacheName,
 			new GrantedPermissionsForGroupCacheFactory,
@@ -396,7 +396,7 @@ trait GrantedPermissionsForGroupCache { self: PermissionsDaoComponent with Cache
 	}
 
 	class GrantedPermissionsForGroupCacheFactory extends SingularCacheEntryFactory[(Seq[String], ClassTag[_ <: PermissionsTarget]), JArrayList[String]] {
-		def create(cacheKey: (Seq[String], ClassTag[_ <: PermissionsTarget])) = cacheKey match {
+		def create(cacheKey: (Seq[String], ClassTag[_ <: PermissionsTarget])): JArrayList[String] = cacheKey match {
 			case (groupNames, tag) => JArrayList(permissionsDao.getGrantedPermissionsForWebgroups(groupNames)(tag).map { role => role.id }.asJava)
 		}
 		def shouldBeCached(ids: JArrayList[String]) = true

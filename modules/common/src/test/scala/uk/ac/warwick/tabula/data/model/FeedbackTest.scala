@@ -9,7 +9,7 @@ import uk.ac.warwick.tabula.data.model.forms.SavedFormValue
 
 object FeedbackTest {
 	/** Zero-pad integer to a 7 digit string */
-	def idFormat(i:Int) = "%07d" format i
+	def idFormat(i:Int): String = "%07d" format i
 }
 
 class FeedbackTest extends TestBase {

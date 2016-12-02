@@ -3,16 +3,17 @@ package uk.ac.warwick.tabula.data.model.notifications.profiles
 import org.joda.time.DateTime
 import uk.ac.warwick.tabula.commands.profiles.relationships.meetings._
 import uk.ac.warwick.tabula.data.model._
+import uk.ac.warwick.tabula.data.model.notifications.profiles.meetingrecord.{AddsIcalAttachmentToScheduledMeetingNotification, ScheduledMeetingRecordNotification}
 import uk.ac.warwick.tabula.{CurrentUser, Fixtures, Mockito, TestBase}
 
 trait ScheduledMeetingRecordNotificationFixture {
-	val admin = Fixtures.staff("1170836", "cuslaj")
+	val admin: StaffMember = Fixtures.staff("1170836", "cuslaj")
 	admin.firstName = "Some"
 	admin.lastName = "Admin"
-	val staff = Fixtures.staff("9517535", "mctutor")
+	val staff: StaffMember = Fixtures.staff("9517535", "mctutor")
 	staff.firstName = "Mc"
 	staff.lastName = "Tutor"
-	val student = Fixtures.student("1234567", "youth")
+	val student: StudentMember = Fixtures.student("1234567", "youth")
 	student.firstName = "A"
 	student.lastName = "Youth"
 	val relationshipType = StudentRelationshipType("tutor", "tutor", "tutor", "tutee")
@@ -33,21 +34,21 @@ class CreateScheduledMeetingRecordNotificationTest extends TestBase with Mockito
 
 	@Test
 	def testStudent() { new ScheduledMeetingRecordNotificationFixture {
-		val notifications = notifier.emit(scheduledMeeting(student))
+		val notifications: Seq[ScheduledMeetingRecordNotification with SingleRecipientNotification with AddsIcalAttachmentToScheduledMeetingNotification] = notifier.emit(scheduledMeeting(student))
 		notifications.length should be {1}
 		notifications.head.recipients.head should be {staff.asSsoUser}
 	}}
 
 	@Test
 	def testAgent() { new ScheduledMeetingRecordNotificationFixture {
-		val notifications = notifier.emit(scheduledMeeting(staff))
+		val notifications: Seq[ScheduledMeetingRecordNotification with SingleRecipientNotification with AddsIcalAttachmentToScheduledMeetingNotification] = notifier.emit(scheduledMeeting(staff))
 		notifications.length should be {1}
 		notifications.head.recipients.head should be {student.asSsoUser}
 	}}
 
 	@Test
 	def testAdmin() { new ScheduledMeetingRecordNotificationFixture {
-		val notifications = notifier.emit(scheduledMeeting(admin))
+		val notifications: Seq[ScheduledMeetingRecordNotification with SingleRecipientNotification with AddsIcalAttachmentToScheduledMeetingNotification] = notifier.emit(scheduledMeeting(admin))
 		notifications.length should be {2}
 		notifications(0).recipients.head should be { student.asSsoUser }
 		notifications(0).title should be (s"Tutor meeting with ${staff.fullName.get} created by ${admin.fullName.get}")
@@ -205,7 +206,7 @@ class DeleteScheduledMeetingRecordNotificationTest extends TestBase with Mockito
 			override def meetingRecord: AbstractMeetingRecord = null
 			override def user: CurrentUser = new CurrentUser(student.asSsoUser, student.asSsoUser)
 		}
-		val notifications = notifier.emit(scheduledMeeting(student))
+		val notifications: Seq[ScheduledMeetingRecordNotification with SingleRecipientNotification with AddsIcalAttachmentToScheduledMeetingNotification] = notifier.emit(scheduledMeeting(student))
 		notifications.length should be {1}
 		notifications.head.recipients.head should be {staff.asSsoUser}
 	}}
@@ -216,7 +217,7 @@ class DeleteScheduledMeetingRecordNotificationTest extends TestBase with Mockito
 			override def meetingRecord: AbstractMeetingRecord = null
 			override def user: CurrentUser = new CurrentUser(student.asSsoUser, student.asSsoUser)
 		}
-		val notifications = notifier.emit(scheduledMeeting(staff))
+		val notifications: Seq[ScheduledMeetingRecordNotification with SingleRecipientNotification with AddsIcalAttachmentToScheduledMeetingNotification] = notifier.emit(scheduledMeeting(staff))
 		notifications.length should be {1}
 		notifications.head.recipients.head should be {staff.asSsoUser}
 	}}
@@ -227,7 +228,7 @@ class DeleteScheduledMeetingRecordNotificationTest extends TestBase with Mockito
 			override def meetingRecord: AbstractMeetingRecord = null
 			override def user: CurrentUser = new CurrentUser(student.asSsoUser, student.asSsoUser)
 		}
-		val notifications = notifier.emit(scheduledMeeting(admin))
+		val notifications: Seq[ScheduledMeetingRecordNotification with SingleRecipientNotification with AddsIcalAttachmentToScheduledMeetingNotification] = notifier.emit(scheduledMeeting(admin))
 		notifications.length should be {1}
 		notifications.head.recipients.head should be {staff.asSsoUser}
 	}}
@@ -238,7 +239,7 @@ class DeleteScheduledMeetingRecordNotificationTest extends TestBase with Mockito
 			override def meetingRecord: AbstractMeetingRecord = null
 			override def user: CurrentUser = new CurrentUser(staff.asSsoUser, staff.asSsoUser)
 		}
-		val notifications = notifier.emit(scheduledMeeting(student))
+		val notifications: Seq[ScheduledMeetingRecordNotification with SingleRecipientNotification with AddsIcalAttachmentToScheduledMeetingNotification] = notifier.emit(scheduledMeeting(student))
 		notifications.length should be {1}
 		notifications.head.recipients.head should be {student.asSsoUser}
 	}}
@@ -249,7 +250,7 @@ class DeleteScheduledMeetingRecordNotificationTest extends TestBase with Mockito
 			override def meetingRecord: AbstractMeetingRecord = null
 			override def user: CurrentUser = new CurrentUser(staff.asSsoUser, staff.asSsoUser)
 		}
-		val notifications = notifier.emit(scheduledMeeting(staff))
+		val notifications: Seq[ScheduledMeetingRecordNotification with SingleRecipientNotification with AddsIcalAttachmentToScheduledMeetingNotification] = notifier.emit(scheduledMeeting(staff))
 		notifications.length should be {1}
 		notifications.head.recipients.head should be {student.asSsoUser}
 	}}
@@ -260,7 +261,7 @@ class DeleteScheduledMeetingRecordNotificationTest extends TestBase with Mockito
 			override def meetingRecord: AbstractMeetingRecord = null
 			override def user: CurrentUser = new CurrentUser(staff.asSsoUser, staff.asSsoUser)
 		}
-		val notifications = notifier.emit(scheduledMeeting(admin))
+		val notifications: Seq[ScheduledMeetingRecordNotification with SingleRecipientNotification with AddsIcalAttachmentToScheduledMeetingNotification] = notifier.emit(scheduledMeeting(admin))
 		notifications.length should be {1}
 		notifications.head.recipients.head should be {student.asSsoUser}
 	}}
@@ -271,7 +272,7 @@ class DeleteScheduledMeetingRecordNotificationTest extends TestBase with Mockito
 			override def meetingRecord: AbstractMeetingRecord = null
 			override def user: CurrentUser = new CurrentUser(admin.asSsoUser, admin.asSsoUser)
 		}
-		val notifications = notifier.emit(scheduledMeeting(student))
+		val notifications: Seq[ScheduledMeetingRecordNotification with SingleRecipientNotification with AddsIcalAttachmentToScheduledMeetingNotification] = notifier.emit(scheduledMeeting(student))
 		notifications.length should be {2}
 		notifications(0).recipients.head should be { student.asSsoUser }
 		notifications(0).title should be (s"Tutor meeting with ${staff.fullName.get} deleted by ${admin.fullName.get}")
@@ -285,7 +286,7 @@ class DeleteScheduledMeetingRecordNotificationTest extends TestBase with Mockito
 			override def meetingRecord: AbstractMeetingRecord = null
 			override def user: CurrentUser = new CurrentUser(admin.asSsoUser, admin.asSsoUser)
 		}
-		val notifications = notifier.emit(scheduledMeeting(staff))
+		val notifications: Seq[ScheduledMeetingRecordNotification with SingleRecipientNotification with AddsIcalAttachmentToScheduledMeetingNotification] = notifier.emit(scheduledMeeting(staff))
 		notifications.length should be {2}
 		notifications(0).recipients.head should be { student.asSsoUser }
 		notifications(0).title should be (s"Tutor meeting with ${staff.fullName.get} deleted by ${admin.fullName.get}")
@@ -299,7 +300,7 @@ class DeleteScheduledMeetingRecordNotificationTest extends TestBase with Mockito
 			override def meetingRecord: AbstractMeetingRecord = null
 			override def user: CurrentUser = new CurrentUser(admin.asSsoUser, admin.asSsoUser)
 		}
-		val notifications = notifier.emit(scheduledMeeting(admin))
+		val notifications: Seq[ScheduledMeetingRecordNotification with SingleRecipientNotification with AddsIcalAttachmentToScheduledMeetingNotification] = notifier.emit(scheduledMeeting(admin))
 		notifications.length should be {2}
 		notifications(0).recipients.head should be { student.asSsoUser }
 		notifications(0).title should be (s"Tutor meeting with ${staff.fullName.get} deleted by ${admin.fullName.get}")
@@ -316,7 +317,7 @@ class RestoreScheduledMeetingRecordNotificationTest extends TestBase with Mockit
 			override def meetingRecord: AbstractMeetingRecord = null
 			override def user: CurrentUser = new CurrentUser(student.asSsoUser, student.asSsoUser)
 		}
-		val notifications = notifier.emit(scheduledMeeting(student))
+		val notifications: Seq[ScheduledMeetingRecordNotification with SingleRecipientNotification with AddsIcalAttachmentToScheduledMeetingNotification] = notifier.emit(scheduledMeeting(student))
 		notifications.length should be {1}
 		notifications.head.recipients.head should be {staff.asSsoUser}
 	}}
@@ -327,7 +328,7 @@ class RestoreScheduledMeetingRecordNotificationTest extends TestBase with Mockit
 			override def meetingRecord: AbstractMeetingRecord = null
 			override def user: CurrentUser = new CurrentUser(student.asSsoUser, student.asSsoUser)
 		}
-		val notifications = notifier.emit(scheduledMeeting(staff))
+		val notifications: Seq[ScheduledMeetingRecordNotification with SingleRecipientNotification with AddsIcalAttachmentToScheduledMeetingNotification] = notifier.emit(scheduledMeeting(staff))
 		notifications.length should be {1}
 		notifications.head.recipients.head should be {staff.asSsoUser}
 	}}
@@ -338,7 +339,7 @@ class RestoreScheduledMeetingRecordNotificationTest extends TestBase with Mockit
 			override def meetingRecord: AbstractMeetingRecord = null
 			override def user: CurrentUser = new CurrentUser(student.asSsoUser, student.asSsoUser)
 		}
-		val notifications = notifier.emit(scheduledMeeting(admin))
+		val notifications: Seq[ScheduledMeetingRecordNotification with SingleRecipientNotification with AddsIcalAttachmentToScheduledMeetingNotification] = notifier.emit(scheduledMeeting(admin))
 		notifications.length should be {1}
 		notifications.head.recipients.head should be {staff.asSsoUser}
 	}}
@@ -349,7 +350,7 @@ class RestoreScheduledMeetingRecordNotificationTest extends TestBase with Mockit
 			override def meetingRecord: AbstractMeetingRecord = null
 			override def user: CurrentUser = new CurrentUser(staff.asSsoUser, staff.asSsoUser)
 		}
-		val notifications = notifier.emit(scheduledMeeting(student))
+		val notifications: Seq[ScheduledMeetingRecordNotification with SingleRecipientNotification with AddsIcalAttachmentToScheduledMeetingNotification] = notifier.emit(scheduledMeeting(student))
 		notifications.length should be {1}
 		notifications.head.recipients.head should be {student.asSsoUser}
 	}}
@@ -360,7 +361,7 @@ class RestoreScheduledMeetingRecordNotificationTest extends TestBase with Mockit
 			override def meetingRecord: AbstractMeetingRecord = null
 			override def user: CurrentUser = new CurrentUser(staff.asSsoUser, staff.asSsoUser)
 		}
-		val notifications = notifier.emit(scheduledMeeting(staff))
+		val notifications: Seq[ScheduledMeetingRecordNotification with SingleRecipientNotification with AddsIcalAttachmentToScheduledMeetingNotification] = notifier.emit(scheduledMeeting(staff))
 		notifications.length should be {1}
 		notifications.head.recipients.head should be {student.asSsoUser}
 	}}
@@ -371,7 +372,7 @@ class RestoreScheduledMeetingRecordNotificationTest extends TestBase with Mockit
 			override def meetingRecord: AbstractMeetingRecord = null
 			override def user: CurrentUser = new CurrentUser(staff.asSsoUser, staff.asSsoUser)
 		}
-		val notifications = notifier.emit(scheduledMeeting(admin))
+		val notifications: Seq[ScheduledMeetingRecordNotification with SingleRecipientNotification with AddsIcalAttachmentToScheduledMeetingNotification] = notifier.emit(scheduledMeeting(admin))
 		notifications.length should be {1}
 		notifications.head.recipients.head should be {student.asSsoUser}
 	}}
@@ -382,7 +383,7 @@ class RestoreScheduledMeetingRecordNotificationTest extends TestBase with Mockit
 			override def meetingRecord: AbstractMeetingRecord = null
 			override def user: CurrentUser = new CurrentUser(admin.asSsoUser, admin.asSsoUser)
 		}
-		val notifications = notifier.emit(scheduledMeeting(student))
+		val notifications: Seq[ScheduledMeetingRecordNotification with SingleRecipientNotification with AddsIcalAttachmentToScheduledMeetingNotification] = notifier.emit(scheduledMeeting(student))
 		notifications.length should be {2}
 		notifications(0).recipients.head should be { student.asSsoUser }
 		notifications(0).title should be (s"Tutor meeting with ${staff.fullName.get} rescheduled by ${admin.fullName.get}")
@@ -396,7 +397,7 @@ class RestoreScheduledMeetingRecordNotificationTest extends TestBase with Mockit
 			override def meetingRecord: AbstractMeetingRecord = null
 			override def user: CurrentUser = new CurrentUser(admin.asSsoUser, admin.asSsoUser)
 		}
-		val notifications = notifier.emit(scheduledMeeting(staff))
+		val notifications: Seq[ScheduledMeetingRecordNotification with SingleRecipientNotification with AddsIcalAttachmentToScheduledMeetingNotification] = notifier.emit(scheduledMeeting(staff))
 		notifications.length should be {2}
 		notifications(0).recipients.head should be { student.asSsoUser }
 		notifications(0).title should be (s"Tutor meeting with ${staff.fullName.get} rescheduled by ${admin.fullName.get}")
@@ -410,7 +411,7 @@ class RestoreScheduledMeetingRecordNotificationTest extends TestBase with Mockit
 			override def meetingRecord: AbstractMeetingRecord = null
 			override def user: CurrentUser = new CurrentUser(admin.asSsoUser, admin.asSsoUser)
 		}
-		val notifications = notifier.emit(scheduledMeeting(admin))
+		val notifications: Seq[ScheduledMeetingRecordNotification with SingleRecipientNotification with AddsIcalAttachmentToScheduledMeetingNotification] = notifier.emit(scheduledMeeting(admin))
 		notifications.length should be {2}
 		notifications(0).recipients.head should be { student.asSsoUser }
 		notifications(0).title should be (s"Tutor meeting with ${staff.fullName.get} rescheduled by ${admin.fullName.get}")

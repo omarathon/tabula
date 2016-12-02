@@ -26,13 +26,13 @@ object UserNavigationGeneratorImpl extends UserNavigationGenerator with Autowire
 
 	final val NavigationTemplate = "/WEB-INF/freemarker/navigation.ftl"
 	final val CacheName = "UserNavigation"
-	final val CacheExpiryTime = 60 * 60 * 6 // 6 hours in seconds
+	final val CacheExpiryTime: Int = 60 * 60 * 6 // 6 hours in seconds
 
-	var moduleService = Wire[ModuleAndDepartmentService]
-	var routeService = Wire[CourseAndRouteService]
-	var permissionsService = Wire[PermissionsService]
-	var userLookup = Wire[UserLookupInterface]
-	var features = Wire[Features]
+	var moduleService: ModuleAndDepartmentService = Wire[ModuleAndDepartmentService]
+	var routeService: CourseAndRouteService = Wire[CourseAndRouteService]
+	var permissionsService: PermissionsService = Wire[PermissionsService]
+	var userLookup: UserLookupInterface = Wire[UserLookupInterface]
+	var features: Features = Wire[Features]
 
 	private def render(user: CurrentUser): UserNavigation = {
 		val homeDepartment = moduleService.getDepartmentByCode(user.apparentUser.getDepartmentCode)
@@ -89,7 +89,7 @@ object UserNavigationGeneratorImpl extends UserNavigationGenerator with Autowire
 	private lazy val navigationCache =
 		Caches.newCache(CacheName, cacheEntryFactory, CacheExpiryTime, cacheStrategy)
 
-	def apply(user: User, forceUpdate: Boolean = false) = {
+	def apply(user: User, forceUpdate: Boolean = false): UserNavigation = {
 		if (forceUpdate) {
 			navigationCache.remove(user.getUserId)
 			navigationCache.get(user.getUserId)

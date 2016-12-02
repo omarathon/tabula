@@ -39,7 +39,7 @@
 	<ul id="home-list">
 		<#if user.staff>
 			<li><h2><a href="<@url page="/" context="/profiles" />">Profiles</a></h2>
-				<span class="hint">View staff and student information and edit personal tutors</span>
+				<span class="hint">View staff and student information, your personal timetable, and your department's timetable</span>
 			</li>
 		<#elseif user.student>
 			<li><h2><a href="<@url page="/" context="/profiles" />">My Student Profile</a></h2>

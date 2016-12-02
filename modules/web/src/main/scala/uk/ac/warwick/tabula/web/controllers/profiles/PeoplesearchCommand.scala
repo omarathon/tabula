@@ -78,7 +78,7 @@ class PeoplesearchCommandInternal(val member: Member, val user: CurrentUser) ext
 
 	self: PeopleSearchData =>
 
-	override def applyInternal() = {
+	override def applyInternal(): Map[String, String] = {
 		val data = getDataFromPeoplesearch(user.userId, member.id)
 		data.transform { (key, value) =>
 			if (key.equals("extensionNumberWithExternal")) PhoneNumberFormatter.format(value) else value

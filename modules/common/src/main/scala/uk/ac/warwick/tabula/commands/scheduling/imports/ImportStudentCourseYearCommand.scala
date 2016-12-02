@@ -17,12 +17,12 @@ class ImportStudentCourseYearCommand(row: SitsStudentRow, studentCourseDetails: 
 	extends Command[StudentCourseYearDetails] with Logging with Daoisms
 	with Unaudited with PropertyCopying {
 
-	var modeOfAttendanceImporter = Wire[ModeOfAttendanceImporter]
-	var profileService = Wire[ProfileService]
-	var studentCourseYearDetailsDao = Wire[StudentCourseYearDetailsDao]
-	var courseAndRouteService = Wire[CourseAndRouteService]
+	var modeOfAttendanceImporter: ModeOfAttendanceImporter = Wire[ModeOfAttendanceImporter]
+	var profileService: ProfileService = Wire[ProfileService]
+	var studentCourseYearDetailsDao: StudentCourseYearDetailsDao = Wire[StudentCourseYearDetailsDao]
+	var courseAndRouteService: CourseAndRouteService = Wire[CourseAndRouteService]
 
-	val sceSequenceNumber = row.sceSequenceNumber
+	val sceSequenceNumber: _root_.uk.ac.warwick.tabula.JavaImports.JInteger = row.sceSequenceNumber
 
 	override def applyInternal(): StudentCourseYearDetails = {
 		val studentCourseYearDetailsExisting = studentCourseYearDetailsDao.getBySceKeyStaleOrFresh(
@@ -99,7 +99,7 @@ class ImportStudentCourseYearCommand(row: SitsStudentRow, studentCourseDetails: 
 		}
 	}
 
-	def copyModuleRegistrationStatus(code: String, destinationBean: BeanWrapper) = {
+	def copyModuleRegistrationStatus(code: String, destinationBean: BeanWrapper): Boolean = {
 		val property = "moduleRegistrationStatus"
 		val oldValue = destinationBean.getPropertyValue(property)
 		val newValue = ModuleRegistrationStatus.fromCode(code)
@@ -151,5 +151,5 @@ class ImportStudentCourseYearCommand(row: SitsStudentRow, studentCourseDetails: 
 		}
 	}
 
-	override def describe(d: Description) = d.property("scjCode" -> studentCourseDetails.scjCode).property("sceSequenceNumber" -> sceSequenceNumber)
+	override def describe(d: Description): Unit = d.property("scjCode" -> studentCourseDetails.scjCode).property("sceSequenceNumber" -> sceSequenceNumber)
 }

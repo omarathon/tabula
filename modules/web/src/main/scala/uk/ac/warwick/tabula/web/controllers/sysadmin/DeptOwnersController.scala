@@ -23,7 +23,7 @@ class SysadminDeptDetailsController extends BaseSysadminController {
 		Mav("sysadmin/departments/list", "departments" -> moduleService.allDepartments.sortBy{ _.name })
 
 	@RequestMapping(Array("/{dept}/"))
-	def department(@PathVariable dept: Department) = {
+	def department(@PathVariable dept: Department): Mav = {
 		mandatory(dept)
 		Mav("sysadmin/departments/single","department" -> dept).crumbs(SysadminBreadcrumbs.Departments.Home)
 	}

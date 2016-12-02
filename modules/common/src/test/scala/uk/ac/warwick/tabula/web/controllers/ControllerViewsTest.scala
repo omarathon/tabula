@@ -10,7 +10,7 @@ class ControllerViewsTest extends TestBase {
 
 	@Test def redirect {
 		val views = new ControllerViews {
-			def requestInfo = {
+			def requestInfo: Some[RequestInfo] = {
 				val u = new User("cuscav")
 				u.setIsLoggedIn(true)
 				u.setFoundUser(true)
@@ -34,7 +34,7 @@ class ControllerViewsTest extends TestBase {
 
 	@Test def redirectWithReturnTo {
 		val views = new ControllerViews {
-			def requestInfo = {
+			def requestInfo: Some[RequestInfo] = {
 				val u = new User("cuscav")
 				u.setIsLoggedIn(true)
 				u.setFoundUser(true)
@@ -50,7 +50,7 @@ class ControllerViewsTest extends TestBase {
 
 	@Test def redirectToSignin = withSSOConfig() {
 		val views = new ControllerViews {
-			def requestInfo = {
+			def requestInfo: Some[RequestInfo] = {
 				val u = new User("cuscav")
 				u.setIsLoggedIn(true)
 				u.setFoundUser(true)

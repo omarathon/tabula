@@ -11,7 +11,7 @@ import uk.ac.warwick.tabula.commands.TaskBenchmarking
 @Component
 class DatabaseBackedRoleProvider extends ScopelessRoleProvider with TaskBenchmarking {
 
-	var service = Wire[PermissionsService]
+	var service: PermissionsService = Wire[PermissionsService]
 
 	def getRolesFor(user: CurrentUser): Stream[Role] = benchmarkTask("Get roles for DatabaseBackedRoleProvider") {
 		service.getGrantedRolesFor[PermissionsTarget](user).map { _.build() }

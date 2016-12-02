@@ -11,11 +11,11 @@ class AdminGetSingleFeedbackCommand(module: Module, assignment: Assignment, feed
 	mustBeLinked(assignment, module)
 	PermissionCheck(Permissions.AssignmentFeedback.Read, feedback)
 
-	var zipService = Wire.auto[ZipService]
+	var zipService: ZipService = Wire.auto[ZipService]
 
-	override def applyInternal() = zipService.getFeedbackZip(feedback)
+	override def applyInternal(): RenderableFile = zipService.getFeedbackZip(feedback)
 
-	override def describe(d: Description) = d.feedback(feedback).properties(
+	override def describe(d: Description): Unit = d.feedback(feedback).properties(
 		"studentId" -> feedback.universityId,
 		"attachmentCount" -> feedback.attachments.size)
 }
@@ -28,13 +28,13 @@ class AdminGetSingleFeedbackFileCommand(module: Module, assignment: Assignment, 
 
 	private var fileFound: Boolean = _
 
-	def applyInternal() = {
+	def applyInternal(): Option[RenderableAttachment] = {
 		val attachment = Option(new RenderableAttachment(feedback.attachments.get(0)))
 		fileFound = attachment.isDefined
 		attachment
 	}
 
-	override def describe(d: Description) = {
+	override def describe(d: Description): Unit = {
 		d.assignment(assignment)
 		d.property("filename", filename)
 	}
@@ -52,11 +52,11 @@ class AdminGetSingleMarkerFeedbackCommand(module: Module, assignment: Assignment
 	mustBeLinked(assignment, module)
 	PermissionCheck(Permissions.AssignmentMarkerFeedback.Manage, assignment)
 
-	var zipService = Wire.auto[ZipService]
+	var zipService: ZipService = Wire.auto[ZipService]
 
-	override def applyInternal() = zipService.getSomeMarkerFeedbacksZip(Seq(markerFeedback))
+	override def applyInternal(): RenderableFile = zipService.getSomeMarkerFeedbacksZip(Seq(markerFeedback))
 
-	override def describe(d: Description) = d.feedback(markerFeedback.feedback).properties(
+	override def describe(d: Description): Unit = d.feedback(markerFeedback.feedback).properties(
 		"studentId" -> markerFeedback.feedback.universityId,
 		"attachmentCount" -> markerFeedback.attachments.size)
 }

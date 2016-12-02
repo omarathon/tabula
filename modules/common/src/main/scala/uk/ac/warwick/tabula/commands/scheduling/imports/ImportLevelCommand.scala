@@ -3,6 +3,7 @@ package uk.ac.warwick.tabula.commands.scheduling.imports
 import org.joda.time.DateTime
 import org.springframework.beans.BeanWrapperImpl
 import uk.ac.warwick.spring.Wire
+import uk.ac.warwick.tabula.commands.scheduling.imports.ImportAcademicInformationCommand.ImportResult
 import uk.ac.warwick.tabula.commands.{Command, Description, Unaudited}
 import uk.ac.warwick.tabula.data.{Daoisms, LevelDao}
 import uk.ac.warwick.tabula.data.Transactions.transactional
@@ -18,13 +19,13 @@ class ImportLevelCommand(info: LevelInfo)
 
 	PermissionCheck(Permissions.ImportSystemData)
 
-	var levelDao = Wire.auto[LevelDao]
+	var levelDao: LevelDao = Wire.auto[LevelDao]
 
-	var code = info.code
-	var shortName = info.shortName
-	var name = info.fullName
+	var code: String = info.code
+	var shortName: String = info.shortName
+	var name: String = info.fullName
 
-	override def applyInternal() = transactional() {
+	override def applyInternal(): (Level, ImportResult) = transactional() {
 		val levelExisting = levelDao.getByCode(code)
 
 		logger.debug("Importing level " + code + " into " + levelExisting)
@@ -60,6 +61,6 @@ class ImportLevelCommand(info: LevelInfo)
 		"code", "shortName", "name"
 	)
 
-	override def describe(d: Description) = d.property("shortName" -> shortName)
+	override def describe(d: Description): Unit = d.property("shortName" -> shortName)
 
 }

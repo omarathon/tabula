@@ -19,11 +19,11 @@ object SmallGroupEvent {
 	// Companion object is one of the places searched for an implicit Ordering, so
 	// this will be the default when ordering a list of small group events.
 	implicit val defaultOrdering = new Ordering[SmallGroupEvent] {
-		final val FirstInstanceOrdering = Ordering.by { event: SmallGroupEvent =>
+		final val FirstInstanceOrdering: Ordering[SmallGroupEvent] = Ordering.by { event: SmallGroupEvent =>
 			(Option(event.weekRanges).filter(_.nonEmpty).map { _.minBy { _.minWeek }.minWeek }, Option(event.day).map { _.jodaDayOfWeek }, Option(event.startTime).map { _.getMillisOfDay }, Option(event.endTime).map { _.getMillisOfDay })
 		}
 
-		def compare(a: SmallGroupEvent, b: SmallGroupEvent) = {
+		def compare(a: SmallGroupEvent, b: SmallGroupEvent): Int = {
 			val firstInstanceCompare = FirstInstanceOrdering.compare(a, b)
 			if (firstInstanceCompare != 0) firstInstanceCompare
 			else {
@@ -40,10 +40,10 @@ object SmallGroupEvent {
 class SmallGroupEvent extends GeneratedId with ToString with PermissionsTarget with Serializable {
 	import uk.ac.warwick.tabula.data.model.groups.SmallGroupEvent._
 
-	@transient var permissionsService = Wire[PermissionsService]
+	@transient var permissionsService: PermissionsService = Wire[PermissionsService]
 
 	// FIXME this isn't really optional, but testing is a pain unless it's made so
-	@transient var smallGroupService = Wire.option[SmallGroupService with SmallGroupMembershipHelpers]
+	@transient var smallGroupService: Option[SmallGroupService with SmallGroupMembershipHelpers] = Wire.option[SmallGroupService with SmallGroupMembershipHelpers]
 
 	def this(_group: SmallGroup) {
 		this()
@@ -73,8 +73,8 @@ class SmallGroupEvent extends GeneratedId with ToString with PermissionsTarget w
 	var relatedUrl: String = _
 	var relatedUrlTitle: String = _
 
-	def isUnscheduled = day == null || (startTime == null && endTime == null)
-	def isSingleEvent = weekRanges.size == 1 && weekRanges.head.isSingleWeek
+	def isUnscheduled: Boolean = day == null || (startTime == null && endTime == null)
+	def isSingleEvent: Boolean = weekRanges.size == 1 && weekRanges.head.isSingleWeek
 
 	@OneToOne(cascade = Array(ALL), fetch = FetchType.LAZY)
 	@JoinColumn(name = "tutorsgroup_id")
@@ -88,7 +88,7 @@ class SmallGroupEvent extends GeneratedId with ToString with PermissionsTarget w
 	}
 	def tutors_=(group: UserGroup) { _tutors = group }
 
-	def permissionsParents = Option(group).toStream
+	def permissionsParents: Stream[SmallGroup] = Option(group).toStream
 
 	def toStringProps = Seq(
 		"id" -> id,

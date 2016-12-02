@@ -192,5 +192,5 @@ trait TurnitinLtiQueueServiceComponent {
 }
 
 trait AutowiringTurnitinLtiQueueServiceComponent extends TurnitinLtiQueueServiceComponent {
-	var turnitinLtiQueueService = Wire[TurnitinLtiQueueService]
+	var turnitinLtiQueueService: TurnitinLtiQueueService = Wire[TurnitinLtiQueueService]
 }

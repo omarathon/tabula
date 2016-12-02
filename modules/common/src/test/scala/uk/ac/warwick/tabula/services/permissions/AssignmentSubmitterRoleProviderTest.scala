@@ -14,7 +14,7 @@ import uk.ac.warwick.tabula.services.AssessmentMembershipService
 class AssignmentSubmitterRoleProviderTest extends TestBase with Mockito {
 
 	val provider = new AssignmentSubmitterRoleProvider
-	val assignmentMembershipService = mock[AssessmentMembershipService]
+	val assignmentMembershipService: AssessmentMembershipService = mock[AssessmentMembershipService]
 
 	@Test def unrestrictedAssignment = withUser("cuscav") {
 		val assignment = Fixtures.assignment("my assignment")

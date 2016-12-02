@@ -7,10 +7,10 @@ package uk.ac.warwick.tabula.commands
 class NullCommand extends Command[Unit] {
 
 	private var fn = () => {}
-	def applyInternal() = {
+	def applyInternal(): Unit = {
 		fn()
 	}
-	def will(f: () => Unit) = {
+	def will(f: () => Unit): NullCommand = {
 		fn = f
 		this
 	}
@@ -19,7 +19,7 @@ class NullCommand extends Command[Unit] {
 	def describe(d: Description) {
 		dfn(d)
 	}
-	def describedAs(f: (Description) => Unit) = {
+	def describedAs(f: (Description) => Unit): NullCommand = {
 		dfn = f
 		this
 	}

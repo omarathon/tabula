@@ -16,7 +16,7 @@ object CourseworkBreadcrumbs {
 	 * Special case breadcrumb for the department admin page.
 	 */
 	case class Department(val department: model.Department) extends Abstract {
-		val title = department.name
+		val title: String = department.name
 		val url = Some(Routes.admin.department(department))
 	}
 
@@ -25,9 +25,9 @@ object CourseworkBreadcrumbs {
 	 * Text is the module code, showing the name as a tooltip on hover.
 	 */
 	case class Module(val module: model.Module) extends Abstract {
-		val title = module.code.toUpperCase
+		val title: String = module.code.toUpperCase
 		val url = Some(Routes.admin.module(module))
-		override val tooltip = module.name
+		override val tooltip: String = module.name
 	}
 
 	/**

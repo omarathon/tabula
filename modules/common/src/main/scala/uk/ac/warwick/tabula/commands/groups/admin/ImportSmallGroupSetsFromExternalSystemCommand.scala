@@ -50,7 +50,7 @@ object ImportSmallGroupSetsFromExternalSystemCommand {
 			with SystemClockComponent
 			with ScientiaHttpTimetableFetchingServiceComponent
 
-	def generateSmallGroupSetNameAndFormat(module: Module, eventType: TimetableEventType) = {
+	def generateSmallGroupSetNameAndFormat(module: Module, eventType: TimetableEventType): (String, SmallGroupFormat with Product with Serializable) = {
 		val format = eventType match {
 			case TimetableEventType.Seminar => SmallGroupFormat.Seminar
 			case _ => SmallGroupFormat.Workshop
@@ -71,8 +71,8 @@ trait ImportSmallGroupSetsFromExternalSystemCommandState extends CurrentSITSAcad
 trait ImportSmallGroupSetsFromExternalSystemPermissionsRestrictedState {
 	self: ImportSmallGroupSetsFromExternalSystemCommandState with ModuleAndDepartmentServiceComponent with SecurityServiceComponent =>
 
-	lazy val canManageDepartment = securityService.can(user, RequiredPermission, department)
-	lazy val modulesWithPermission = moduleAndDepartmentService.modulesWithPermission(user, RequiredPermission, department)
+	lazy val canManageDepartment: Boolean = securityService.can(user, RequiredPermission, department)
+	lazy val modulesWithPermission: Set[Module] = moduleAndDepartmentService.modulesWithPermission(user, RequiredPermission, department)
 
 	lazy val modules: Iterable[Module] =
 		if (canManageDepartment) department.modules.asScala
@@ -82,7 +82,7 @@ trait ImportSmallGroupSetsFromExternalSystemPermissionsRestrictedState {
 trait LookupEventsFromModuleTimetables {
 	self: ModuleTimetableFetchingServiceComponent with ImportSmallGroupSetsFromExternalSystemCommandState with ImportSmallGroupSetsFromExternalSystemPermissionsRestrictedState =>
 
-	lazy val timetabledEvents =
+	lazy val timetabledEvents: Seq[TimetabledSmallGroupEvent] =
 		modules.toSeq.par.flatMap { module => // Do it in parallel like a boss
 			Try {
 				Await.result(timetableFetchingService.getTimetableForModule(module.code.toUpperCase),ImportSmallGroupEventsFromExternalSystemCommand.Timeout)
@@ -102,7 +102,7 @@ trait LookupEventsFromModuleTimetables {
 trait SetDefaultSelectedValue extends PopulateOnForm {
 	self: ImportSmallGroupSetsFromExternalSystemCommandState with LookupEventsFromModuleTimetables =>
 
-	def populate() = {
+	def populate(): Unit = {
 		timetabledEvents.zipWithIndex.foreach { case (TimetabledSmallGroupEvent(module, eventType, _), i) =>
 			val (name, _) = generateSmallGroupSetNameAndFormat(module, eventType)
 
@@ -127,7 +127,7 @@ class ImportSmallGroupSetsFromExternalSystemCommandInternal(val department: Depa
 		with SmallGroupEventGenerator
 		with UserLookupComponent =>
 
-	def applyInternal() = transactional() {
+	def applyInternal(): Seq[SmallGroupSet] = transactional() {
 		// For each combination of module & event type, create a small group set with a group for each event
 		timetabledEvents.zipWithIndex
 			.filter { case (_, i) => selected.get(i) }
@@ -163,7 +163,7 @@ trait SmallGroupSetGenerator {
 trait CommandSmallGroupSetGenerator extends SmallGroupSetGenerator {
 	self: ImportSmallGroupSetsFromExternalSystemCommandState =>
 
-	def createSet(module: Module, format: SmallGroupFormat, name: String) = {
+	def createSet(module: Module, format: SmallGroupFormat, name: String): SmallGroupSet = {
 		val command = ModifySmallGroupSetCommand.create(module)
 		command.format = format
 		command.name = name
@@ -178,7 +178,7 @@ trait SmallGroupEventGenerator {
 }
 
 trait CommandSmallGroupEventGenerator extends SmallGroupEventGenerator {
-	def createEvent(module: Module, set: SmallGroupSet, group: SmallGroup, weeks: Seq[WeekRange], day: DayOfWeek, startTime: LocalTime, endTime: LocalTime, location: Option[Location], title: String, tutorUsercodes: Seq[String]) = {
+	def createEvent(module: Module, set: SmallGroupSet, group: SmallGroup, weeks: Seq[WeekRange], day: DayOfWeek, startTime: LocalTime, endTime: LocalTime, location: Option[Location], title: String, tutorUsercodes: Seq[String]): SmallGroupEvent = {
 		val command = ModifySmallGroupEventCommand.create(module, set, group)
 		command.weekRanges = weeks
 		command.day = day
@@ -230,6 +230,6 @@ trait ImportSmallGroupSetsFromExternalSystemValidation extends SelfValidating {
 trait ImportSmallGroupSetsFromExternalSystemDescription extends Describable[Seq[SmallGroupSet]] {
 	self: ImportSmallGroupSetsFromExternalSystemCommandState =>
 
-	override def describe(d: Description) =
+	override def describe(d: Description): Unit =
 		d.department(department)
 }

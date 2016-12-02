@@ -3,6 +3,7 @@ package uk.ac.warwick.tabula.data.model.notifications.profiles.meetingrecord
 import javax.persistence.{DiscriminatorValue, Entity}
 
 import uk.ac.warwick.tabula.data.model.{FreemarkerModel, SingleRecipientNotification}
+import uk.ac.warwick.userlookup.User
 
 @Entity
 @DiscriminatorValue(value="ScheduledMeetingRecordInvitee")
@@ -16,7 +17,7 @@ class ScheduledMeetingRecordInviteeNotification extends ScheduledMeetingRecordNo
 
 	def FreemarkerTemplate = "/WEB-INF/freemarker/notifications/meetingrecord/scheduled_meeting_record_invitee_notification.ftl"
 
-	def title = {
+	def title: String = {
 		val name =
 			if (actor.getWarwickId == meeting.relationship.studentId) meeting.relationship.studentMember.flatMap { _.fullName }.getOrElse("student")
 			else meeting.relationship.agentName
@@ -24,7 +25,7 @@ class ScheduledMeetingRecordInviteeNotification extends ScheduledMeetingRecordNo
 		s"${agentRole.capitalize} meeting with $name $verb by ${agent.getFullName}"
 	}
 
-	def actor = if (meeting.universityIdInRelationship(agent.getWarwickId)) {
+	def actor: User = if (meeting.universityIdInRelationship(agent.getWarwickId)) {
 		agent
 	} else {
 		// meeting was scheduled by someone else on the relationship agents behalf so actor is them
@@ -39,7 +40,7 @@ class ScheduledMeetingRecordInviteeNotification extends ScheduledMeetingRecordNo
 		"meetingRecord" -> meeting
 	))
 
-	def recipient = {
+	def recipient: User = {
 		if (actor.getWarwickId == meeting.relationship.studentId) {
 			meeting.relationship.agentMember.getOrElse(throw new IllegalStateException(agentNotFoundMessage)).asSsoUser
 		} else {

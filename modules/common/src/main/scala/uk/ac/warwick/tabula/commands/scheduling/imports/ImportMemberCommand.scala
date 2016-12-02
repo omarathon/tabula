@@ -28,8 +28,8 @@ with MemberProperties with Unaudited with PropertyCopying {
 
 	PermissionCheck(Permissions.ImportSystemData)
 
-	var memberDao = Wire[MemberDao]
-	var userLookup = Wire[UserLookupService]
+	var memberDao: MemberDao = Wire[MemberDao]
+	var userLookup: UserLookupService = Wire[UserLookupService]
 
 	// A couple of intermediate properties that will be transformed later
 	var homeDepartmentCode: String = _
@@ -105,7 +105,7 @@ with MemberProperties with Unaudited with PropertyCopying {
 	}
 
 	// We intentionally use a single pipe rather than a double pipe here - we want all statements to be evaluated
-	protected def copyMemberProperties(commandBean: BeanWrapper, memberBean: BeanWrapper) =
+	protected def copyMemberProperties(commandBean: BeanWrapper, memberBean: BeanWrapper): Boolean =
 		copyBasicProperties(basicMemberProperties, commandBean, memberBean) |
 		copyObjectProperty("homeDepartment", homeDepartmentCode, memberBean, toDepartment(homeDepartmentCode)) |
 		setTimetableHashIfMissing(memberBean)
@@ -117,7 +117,7 @@ object ImportMemberHelpers {
 	implicit def opt[A](value: A): Option[A] = Option(value)
 
 	/** Return the first Option that has a value, else None. */
-	def oneOf[A](options: Option[A]*) = options.flatten.headOption
+	def oneOf[A](options: Option[A]*): Option[A] = options.flatten.headOption
 
 	def optString(columnName: String)(implicit rs: Option[ResultSet]): Option[String] =
 		rs.flatMap { rs =>
@@ -136,14 +136,14 @@ object ImportMemberHelpers {
 		if (resultSet.wasNull()) None else Some(intValue)
 	}
 
-	def hasColumn(rs: ResultSet, columnName: String) = {
+	def hasColumn(rs: ResultSet, columnName: String): Boolean = {
 		val metadata = rs.getMetaData
 		val cols = for (col <- 1 to metadata.getColumnCount)
 			yield columnName.toLowerCase == metadata.getColumnName(col).toLowerCase
 		cols.exists(b => b)
 	}
 
-	def toLocalDate(date: Date) = {
+	def toLocalDate(date: Date): LocalDate = {
 		if (date == null) {
 			null
 		} else {
@@ -151,7 +151,7 @@ object ImportMemberHelpers {
 		}
 	}
 
-	def toAcademicYear(code: String) = {
+	def toAcademicYear(code: String): AcademicYear = {
 		if (code == null || code == "") {
 			null
 		} else {
@@ -159,7 +159,7 @@ object ImportMemberHelpers {
 		}
 	}
 
-	def getInUseFlag(flag: Option[String], member: MembershipMember) =
+	def getInUseFlag(flag: Option[String], member: MembershipMember): String =
 		flag.getOrElse {
 			val (startDate, endDate) = (member.startDate, member.endDate)
 			if (startDate != null && startDate.toDateTimeAtStartOfDay.isAfter(DateTime.now))

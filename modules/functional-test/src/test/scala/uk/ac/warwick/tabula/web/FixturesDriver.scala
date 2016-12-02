@@ -9,7 +9,7 @@ import scala.util.parsing.json.JSON
 
 trait FixturesDriver extends SimpleHttpFetching {
 
-	def updateExtensionSettings(departmentCode: String, allow: Boolean = true, managerUserId: String = "") = {
+	def updateExtensionSettings(departmentCode: String, allow: Boolean = true, managerUserId: String = ""): Unit = {
 		val uri = FunctionalTestProperties.SiteRoot + "/fixtures/update/extensionSettings"
 		val req = url(uri).POST << Map("departmentCode" -> departmentCode, "allow" -> allow.toString, "userId" -> managerUserId)
 		http.when(_==200)(req >| )

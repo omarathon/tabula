@@ -37,7 +37,7 @@ class PdfGeneratorTest extends TestBase{
 		pdf should include("%PDF-1.4")
 	}
 
-	val minimalXhtml =
+	val minimalXhtml: String =
 		"""<?xml version="1.0" encoding="UTF-8"?>
 			<!DOCTYPE html
 			PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"

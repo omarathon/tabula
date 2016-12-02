@@ -14,13 +14,13 @@ import scala.reflect._
 class GrantPermissionsCommandTest extends TestBase with Mockito {
 
 	trait CommandTestSupport[A <: PermissionsTarget] extends GrantPermissionsCommandState[A] with PermissionsServiceComponent with SecurityServiceComponent with UserLookupComponent {
-		val permissionsService = mock[PermissionsService]
-		val securityService = mock[SecurityService]
+		val permissionsService: PermissionsService = mock[PermissionsService]
+		val securityService: SecurityService = mock[SecurityService]
 		val userLookup = new MockUserLookup()
 	}
 
 	trait Fixture {
-		val department = Fixtures.department("in", "IT Services")
+		val department: Department = Fixtures.department("in", "IT Services")
 
 		val command = new GrantPermissionsCommandInternal(department) with CommandTestSupport[Department] with GrantPermissionsCommandValidation
 	}
@@ -35,7 +35,7 @@ class GrantPermissionsCommandTest extends TestBase with Mockito {
 
 		command.permissionsService.getGrantedPermission(department, Permissions.Department.ManageExtensionSettings, true) returns (None)
 
-		val grantedPerm = command.applyInternal()
+		val grantedPerm: GrantedPermission[Department] = command.applyInternal()
 		grantedPerm.permission should be (Permissions.Department.ManageExtensionSettings)
 		grantedPerm.users.size should be (2)
 		grantedPerm.users.knownType.includesUserId("cuscav") should be (true)
@@ -62,7 +62,7 @@ class GrantPermissionsCommandTest extends TestBase with Mockito {
 
 		command.permissionsService.getGrantedPermission(department, Permissions.Department.ManageExtensionSettings, true) returns (Some(existing))
 
-		val grantedPerm = command.applyInternal()
+		val grantedPerm: GrantedPermission[Department] = command.applyInternal()
 		(grantedPerm.eq(existing)) should be (true)
 
 		grantedPerm.permission should be (Permissions.Department.ManageExtensionSettings)
@@ -173,7 +173,7 @@ class GrantPermissionsCommandTest extends TestBase with Mockito {
 		val command = new GrantPermissionsCommandDescription[Department] with CommandTestSupport[Department] {
 			val eventName: String = "test"
 
-			val scope = department
+			val scope: Department = department
 			val grantedPermission = None
 		}
 

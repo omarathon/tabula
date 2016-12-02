@@ -86,18 +86,18 @@ class AddFeedbackCommand(module: Module, assignment: Assignment, marker: User, c
 		item.isModified =  (attachmentNames -- item.ignoredFileNames).nonEmpty
 	}
 
-	def describe(d: Description) = d
+	def describe(d: Description): Unit = d
 		.assignment(assignment)
 		.studentIds(items.map { _.uniNumber })
 
-	override def describeResult(d: Description, feedbacks: Seq[Feedback]) = {
+	override def describeResult(d: Description, feedbacks: Seq[Feedback]): Unit = {
 		d.assignment(assignment)
 		 .studentIds(items.map { _.uniNumber })
 		 .fileAttachments(feedbacks.flatMap { _.attachments })
 		 .properties("feedback" -> feedbacks.map { _.id })
 	}
 
-	def emit(updatedFeedback: Seq[Feedback]) = {
+	def emit(updatedFeedback: Seq[Feedback]): Seq[FeedbackChangeNotification] = {
 		updatedFeedback.filter(_.released).flatMap { feedback => HibernateHelpers.initialiseAndUnproxy(feedback) match {
 			case assignmentFeedback: AssignmentFeedback =>
 				Option(Notification.init(new FeedbackChangeNotification, marker, assignmentFeedback, assignment))

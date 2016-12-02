@@ -40,7 +40,7 @@ abstract class GrantedPermission[A <: PermissionsTarget] extends GeneratedId wit
 		ensureUsers
 	}
 
-	def ensureUsers = {
+	def ensureUsers: UnspecifiedTypeUserGroup = {
 		if (users == null) _users = UserGroup.ofUsercodes
 		users
 	}
@@ -66,7 +66,7 @@ object GrantedPermission {
 			case _ => throw new IllegalArgumentException("Cannot define new permissions for " + scope)
 		}).asInstanceOf[GrantedPermission[A]]
 
-	def canDefineFor[A <: PermissionsTarget](scope: A) = scope match {
+	def canDefineFor[A <: PermissionsTarget](scope: A): OverrideType = scope match {
 		case _: Department => true
 		case _: Module => true
 		case _: Route => true
@@ -92,8 +92,8 @@ object GrantedPermission {
 
   private def isSubtype[A,B](self: ClassTag[A], other: ClassTag[B]) = other.runtimeClass.isAssignableFrom(self.runtimeClass)
 
-	def className[A <: PermissionsTarget : ClassTag] = classObject[A].getSimpleName
-	def discriminator[A <: PermissionsTarget : ClassTag] =
+	def className[A <: PermissionsTarget : ClassTag]: String = classObject[A].getSimpleName
+	def discriminator[A <: PermissionsTarget : ClassTag]: Option[String] =
 		Option(classObject[A].getAnnotation(classOf[DiscriminatorValue])) map { _.value }
 }
 

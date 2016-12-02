@@ -31,9 +31,9 @@ class StampMissingRowsCommandInternal extends CommandInternal[Unit] with SitsAca
 	self: MemberDaoComponent with StudentCourseYearDetailsDaoComponent
 		with StudentCourseDetailsDaoComponent with FeaturesComponent =>
 
-	var profileImporter = Wire[ProfileImporter]
+	var profileImporter: ProfileImporter = Wire[ProfileImporter]
 
-	override def applyInternal() = {
+	override def applyInternal(): Unit = {
 		val sitsCurrentAcademicYear = getCurrentSitsAcademicYearString
 		val allUniversityIDs = transactional() { memberDao.getFreshUniversityIds() }
 

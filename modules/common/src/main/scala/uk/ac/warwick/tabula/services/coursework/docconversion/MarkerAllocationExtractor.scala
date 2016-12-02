@@ -28,16 +28,16 @@ object MarkerAllocationExtractor {
 	)
 
 	case class Markers(firstMarkers: Seq[User], secondMarkers: Seq[User]) {
-		def allMarkers = firstMarkers ++ secondMarkers
+		def allMarkers: Seq[User] = firstMarkers ++ secondMarkers
 	}
 }
 
 @Service
 class MarkerAllocationExtractor() {
 
-	@transient var userLookup = Wire[UserLookupService]
+	@transient var userLookup: UserLookupService = Wire[UserLookupService]
 
-	def extractMarkersFromSpreadsheet(file: InputStream, workflow: MarkingWorkflow) = {
+	def extractMarkersFromSpreadsheet(file: InputStream, workflow: MarkingWorkflow): Map[MarkerPosition, Seq[ParsedRow]] = {
 
 		val firstMarkers = workflow.firstMarkers.users
 		val secondMarkers = workflow.secondMarkers.users

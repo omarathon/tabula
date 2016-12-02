@@ -13,7 +13,7 @@ import uk.ac.warwick.tabula._
 import uk.ac.warwick.tabula.commands.CurrentSITSAcademicYear
 import uk.ac.warwick.tabula.data.model.forms.Extension
 import uk.ac.warwick.tabula.data.model.forms.ExtensionState.Unreviewed
-import uk.ac.warwick.tabula.data.model.{UpstreamAssessmentGroup, Notification, UnspecifiedTypeUserGroup, UserGroup}
+import uk.ac.warwick.tabula.data.model._
 import uk.ac.warwick.tabula.events.EventListener
 import uk.ac.warwick.tabula.services._
 import uk.ac.warwick.tabula.services.permissions.PermissionsService
@@ -28,7 +28,7 @@ class ModifyAssignmentCommandTest extends TestBase with Mockito with FunctionalC
 
 	import ModifyAssignmentCommandTest.MinimalCommandContext
 
-	var userDatabase = Seq(
+	var userDatabase: Seq[User] = Seq(
 		("0000000", "aaslat", "aaaaa"),
 		("0000001", "baslat", "aaaab")
 	) map { case(warwickId, userId, code) =>
@@ -64,14 +64,14 @@ class ModifyAssignmentCommandTest extends TestBase with Mockito with FunctionalC
 	trait Fixture extends CurrentSITSAcademicYear {
 		val user = new User("cusxad")
 		val currentUser = new CurrentUser(user, user)
-		val module = Fixtures.module(code="ls101")
-		val assignment = Fixtures.assignment("test")
+		val module: Module = Fixtures.module(code="ls101")
+		val assignment: Assignment = Fixtures.assignment("test")
 		assignment.academicYear = academicYear
 		assignment.closeDate = DateTime.now.plusDays(30)
 		assignment.members = UserGroup.ofUsercodes
 		val extension1 = new Extension
 		val extension2 = new Extension
-		val sometime = new DateTime().minusWeeks(1)
+		val sometime: DateTime = new DateTime().minusWeeks(1)
 
 		extension1.universityId = "1234567"
 		extension1.userId = "custard"
@@ -95,15 +95,15 @@ class ModifyAssignmentCommandTest extends TestBase with Mockito with FunctionalC
 
 		module.assignments.add(assignment)
 
-		val mockAssignmentService = smartMock[AssessmentService]
+		val mockAssignmentService: AssessmentService = smartMock[AssessmentService]
 		assignment.assignmentService = mockAssignmentService
 		mockAssignmentService.getAssignmentByNameYearModule(assignment.name, assignment.academicYear, assignment.module) returns Seq(assignment)
 
-		val mockAssignmentMembershipService = smartMock[AssessmentMembershipService]
+		val mockAssignmentMembershipService: AssessmentMembershipService = smartMock[AssessmentMembershipService]
 		assignment.assessmentMembershipService = mockAssignmentMembershipService
 		mockAssignmentMembershipService.determineMembershipUsers(any[Seq[UpstreamAssessmentGroup]], any[Option[UnspecifiedTypeUserGroup]]) returns Seq()
 
-		val mockExtensionService = smartMock[ExtensionService]
+		val mockExtensionService: ExtensionService = smartMock[ExtensionService]
 		assignment.extensionService = mockExtensionService
 		mockExtensionService.countUnapprovedExtensions(assignment) returns 1
 		mockExtensionService.getUnapprovedExtensions(assignment) returns Seq(extension1)
@@ -256,8 +256,8 @@ class ModifyAssignmentCommandTest extends TestBase with Mockito with FunctionalC
 
 		cmd.allowExtensions = false
 		cmd.notificationService = new MockNotificationService()
-		val ns = cmd.notificationService.asInstanceOf[MockNotificationService]
-		val ass = cmd.apply()
+		val ns: MockNotificationService = cmd.notificationService.asInstanceOf[MockNotificationService]
+		val ass: Assignment = cmd.apply()
 		if (extension1.state != Unreviewed) mockExtensionService.countUnapprovedExtensions(assignment) returns 0
 		ass.countUnapprovedExtensions should be (0)
 		ns.notifications.size should be (2)

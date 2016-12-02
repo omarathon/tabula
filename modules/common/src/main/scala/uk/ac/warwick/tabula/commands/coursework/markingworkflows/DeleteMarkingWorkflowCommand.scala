@@ -21,7 +21,7 @@ object DeleteMarkingWorkflowCommand {
 
 class DeleteMarkingWorkflowCommandInternal(val department: Department, val markingWorkflow: MarkingWorkflow) extends CommandInternal[Unit] {
 
-	override protected def applyInternal() = {
+	override protected def applyInternal(): Unit = {
 		transactional() {{
 				department.removeMarkingWorkflow(markingWorkflow)
 		}}
@@ -36,7 +36,7 @@ trait DeleteMarkingWorkflowCommandState {
 trait DeleteMarkingWorkflowCommandValidation extends SelfValidating {
 	self: DeleteMarkingWorkflowCommandState with MarkingWorkflowDaoComponent =>
 
-	override def validate(errors: Errors) = {
+	override def validate(errors: Errors): Unit = {
 		// can't delete a markingWorkflow that's being referenced by assignments.
 		if (!markingWorkflowDao.getAssignmentsUsingMarkingWorkflow(markingWorkflow).isEmpty) {
 			errors.reject("markingWorkflow.assignments.inuse")

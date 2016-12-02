@@ -25,7 +25,7 @@ class ViewMeetingsForPointCommand(val student: StudentMember, val point: Attenda
 
 	self: RelationshipServiceComponent with MeetingRecordDaoComponent =>
 
-	override def applyInternal() = {
+	override def applyInternal(): Seq[(MeetingRecord, mutable.Buffer[String])] = {
 		// Get all the enabled relationship types for a department
 		val allRelationshipTypes = relationshipService.allStudentRelationshipTypes
 

@@ -27,7 +27,7 @@ import scala.util.{Failure, Success, Try}
 import uk.ac.warwick.tabula.JavaImports._
 
 object UrkundService {
-	final val responseTimeout = 60 * 1000
+	final val responseTimeout: Int = 60 * 1000
 	final val reportTimeoutInMinutes = 30
 	final val serverErrorTimeoutInMinutes = 15
 	final val baseUrl: String = "https://secure.urkund.com/api"
@@ -36,12 +36,12 @@ object UrkundService {
 
 	private def getBytesUtf8 = org.apache.commons.codec.binary.StringUtils.getBytesUtf8 _
 	private def encodeBase64String = org.apache.commons.codec.binary.Base64.encodeBase64String _
-	def urkundSafeFilename(attachment: FileAttachment) = encodeBase64String(getBytesUtf8(StringUtils.safeSubstring(attachment.name, 0, 256)))
+	def urkundSafeFilename(attachment: FileAttachment): String = encodeBase64String(getBytesUtf8(StringUtils.safeSubstring(attachment.name, 0, 256)))
 
 	def submitterAddress(submission: Submission) =
 		s"${submission.universityId}.tabula@submitters.urkund.com"
 
-	def receiverAddress(report: OriginalityReport, prefix: String) =
+	def receiverAddress(report: OriginalityReport, prefix: String): String =
 		"%s.%s.tabula.%s@analysis.urkund.com".format(
 			report.attachment.submissionValue.submission.assignment.id.replace("-", ""),
 			report.attachment.submissionValue.submission.assignment.module.code,
@@ -49,7 +49,7 @@ object UrkundService {
 		)
 
 	// TODO this should really be a real e-mail address, but this will do for the time being
-	def receiverEmailAddress(report: OriginalityReport) =
+	def receiverEmailAddress(report: OriginalityReport): String =
 		"%s.%s.tabula@warwick.ac.uk".format(
 			report.attachment.submissionValue.submission.assignment.id.replace("-", ""),
 			report.attachment.submissionValue.submission.assignment.module.code
@@ -89,7 +89,7 @@ object UrkundService {
 
 	val validExtensions = Seq("doc", "docx", "sxw", "ppt", "pptx", "pdf", "txt", "rtf", "html", "htm", "wps", "odt")
 	val maxFileSizeInMegabytes = 20
-	val maxFileSize = maxFileSizeInMegabytes * 1024 * 1024  // 20M
+	val maxFileSize: Int = maxFileSizeInMegabytes * 1024 * 1024  // 20M
 
 	def validFileType(file: FileAttachment): Boolean =
 		validExtensions.contains(getExtension(file.name).toLowerCase)
@@ -129,7 +129,7 @@ abstract class AbstractUrkundService extends UrkundService
 
 	self: UrkundDaoComponent =>
 
-	var objectMapper = Wire[ObjectMapper]
+	var objectMapper: ObjectMapper = Wire[ObjectMapper]
 
 	@Value("${Urkund.username}") var username: String = _
 	@Value("${Urkund.password}") var password: String = _

@@ -64,6 +64,14 @@
 
 		<div class="col-md-3">
 			<div class="checkbox">
+				<label><input type="checkbox" name="predefinedColumnIdentifiers" value="route"
+					<#if gridOptionsCommand.predefinedColumnIdentifiers?seq_contains("route")>checked</#if>
+				/> Route</label>
+			</div>
+		</div>
+
+		<div class="col-md-3">
+			<div class="checkbox">
 				<label><input type="checkbox" name="predefinedColumnIdentifiers" value="startyear"
 					<#if gridOptionsCommand.predefinedColumnIdentifiers?seq_contains("startyear")>checked</#if>
 				/> Start Year</label>

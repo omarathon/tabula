@@ -4,14 +4,15 @@ import org.springframework.validation.BindException
 import uk.ac.warwick.tabula.data.model.attendance.{AttendanceMonitoringPoint, AttendanceMonitoringScheme}
 import uk.ac.warwick.tabula.services.{ProfileService, ProfileServiceComponent, ScheduledNotificationService}
 import uk.ac.warwick.tabula.services.attendancemonitoring.{AttendanceMonitoringService, AttendanceMonitoringServiceComponent}
-import uk.ac.warwick.tabula.{AcademicYear, Fixtures, Mockito, TestBase}
+import uk.ac.warwick.tabula._
+import uk.ac.warwick.tabula.data.model.{Department, StudentMember}
 
 class DeleteSchemeCommandTest extends TestBase with Mockito {
 
 	trait Fixture {
-		val thisDepartment = Fixtures.department("its")
+		val thisDepartment: Department = Fixtures.department("its")
 		val thisAcademicYear = AcademicYear(2014)
-		val student = Fixtures.student("1234")
+		val student: StudentMember = Fixtures.student("1234")
 		val thisScheme = new AttendanceMonitoringScheme
 		thisScheme.department = thisDepartment
 		thisScheme.academicYear = thisAcademicYear
@@ -19,19 +20,19 @@ class DeleteSchemeCommandTest extends TestBase with Mockito {
 		val point = new AttendanceMonitoringPoint
 		thisScheme.points.add(point)
 
-		val thisAttendanceMonitoringService = smartMock[AttendanceMonitoringService]
+		val thisAttendanceMonitoringService: AttendanceMonitoringService = smartMock[AttendanceMonitoringService]
 
 		val validator = new DeleteSchemeValidation with AttendanceMonitoringServiceComponent with DeleteSchemeCommandState {
-			val scheme = thisScheme
-			val user = currentUser
-			val attendanceMonitoringService = thisAttendanceMonitoringService
+			val scheme: AttendanceMonitoringScheme = thisScheme
+			val user: CurrentUser = currentUser
+			val attendanceMonitoringService: AttendanceMonitoringService = thisAttendanceMonitoringService
 		}
 		var errors = new BindException(validator, "command")
 
 		val cmd = new DeleteSchemeCommandInternal(thisScheme) with DeleteSchemeCommandState
 			with AttendanceMonitoringServiceComponent with ProfileServiceComponent {
-			override val attendanceMonitoringService = smartMock[AttendanceMonitoringService]
-			override val profileService = smartMock[ProfileService]
+			override val attendanceMonitoringService: AttendanceMonitoringService = smartMock[AttendanceMonitoringService]
+			override val profileService: ProfileService = smartMock[ProfileService]
 			thisScheduledNotificationService = smartMock[ScheduledNotificationService]
 		}
 	}

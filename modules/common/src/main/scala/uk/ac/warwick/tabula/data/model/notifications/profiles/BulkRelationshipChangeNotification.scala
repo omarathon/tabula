@@ -6,26 +6,27 @@ import uk.ac.warwick.spring.Wire
 import uk.ac.warwick.tabula.data.model._
 import uk.ac.warwick.tabula.profiles.web.Routes
 import uk.ac.warwick.tabula.services.{ProfileService, RelationshipService}
+import uk.ac.warwick.userlookup.User
 
 import scala.annotation.meta.getter
 
 abstract class BulkRelationshipChangeNotification extends Notification[StudentRelationship, Unit] {
 	@(transient @getter) val templateLocation: String
 
-	def relationshipType = entities.head.relationshipType
+	def relationshipType: StudentRelationshipType = entities.head.relationshipType
 
-	var relationshipService = Wire[RelationshipService]
-	var profileService = Wire[ProfileService]
+	var relationshipService: RelationshipService = Wire[RelationshipService]
+	var profileService: ProfileService = Wire[ProfileService]
 
 	def verb: String = "change"
 
 	@transient val oldAgentIds = StringSeqSetting("oldAgents", Nil)
 
-	def oldAgents = oldAgentIds.value.flatMap {
+	def oldAgents: Seq[Member] = oldAgentIds.value.flatMap {
 		id => profileService.getMemberByUniversityId(id)
 	}
 
-	def content = {
+	def content: FreemarkerModel = {
 		FreemarkerModel(templateLocation, Map(
 			"relationshipType" -> relationshipType,
 			"path" -> url
@@ -49,9 +50,9 @@ class BulkStudentRelationshipNotification() extends BulkRelationshipChangeNotifi
 
 	def title: String = s"${relationshipType.agentRole.capitalize} allocation change"
 
-	def newAgents = entities.filter(_.isCurrent).flatMap(_.agentMember)
+	def newAgents: Seq[Member] = entities.filter(_.isCurrent).flatMap(_.agentMember)
 
-	def student = entities.head.studentCourseDetails.student
+	def student: StudentMember = entities.head.studentCourseDetails.student
 	def recipients = Seq(student.asSsoUser)
 
 	def url: String = Routes.Profile.seminars(student)
@@ -75,11 +76,11 @@ class BulkStudentRelationshipNotification() extends BulkRelationshipChangeNotifi
 class BulkNewAgentRelationshipNotification extends BulkRelationshipChangeNotification {
 	@transient val templateLocation = BulkRelationshipChangeNotification.NewAgentTemplate
 
-	def newAgent = entities.headOption.flatMap { _.agentMember}
+	def newAgent: Option[Member] = entities.headOption.flatMap { _.agentMember}
 
 	def title: String = s"Allocation of new ${relationshipType.studentRole}s"
 
-	def recipients = newAgent.map { _.asSsoUser }.toSeq
+	def recipients: Seq[User] = newAgent.map { _.asSsoUser }.toSeq
 
 	def url: String = Routes.students(relationshipType)
 
@@ -106,7 +107,7 @@ class BulkOldAgentRelationshipNotification extends BulkRelationshipChangeNotific
 	def title: String = s"Change to ${relationshipType.studentRole}s"
 
 	// this should be a sequence of 1 since one notification is created for each old agent
-	def recipients = oldAgents.map { _.asSsoUser }.toSeq
+	def recipients: Seq[User] = oldAgents.map { _.asSsoUser }.toSeq
 
 	def url: String = Routes.students(relationshipType)
 

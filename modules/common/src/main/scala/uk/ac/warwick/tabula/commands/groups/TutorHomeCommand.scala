@@ -22,7 +22,7 @@ class TutorHomeCommandInternal(tutor: CurrentUser, academicYear: AcademicYear)
 
 	self: SmallGroupServiceComponent =>
 
-	override def applyInternal() = {
+	override def applyInternal(): Map[Module, Map[SmallGroupSet, Seq[SmallGroup]]] = {
 		smallGroupService.findReleasedSmallGroupsByTutor(tutor)
 			.groupBy { group => group.groupSet }
 			.filterKeys(_.academicYear == academicYear)

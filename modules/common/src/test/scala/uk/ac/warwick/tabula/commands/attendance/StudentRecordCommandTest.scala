@@ -3,10 +3,12 @@ package uk.ac.warwick.tabula.commands.attendance
 import org.joda.time.DateTime
 import org.joda.time.base.BaseDateTime
 import org.springframework.core.convert.support.GenericConversionService
+import org.springframework.validation.BindingResult
 import org.springframework.web.bind.WebDataBinder
 import uk.ac.warwick.tabula.JavaImports._
 import uk.ac.warwick.tabula.data.convert.AttendanceMonitoringPointIdConverter
-import uk.ac.warwick.tabula.data.model.attendance.{AttendanceMonitoringNote, AttendanceMonitoringScheme, AttendanceState}
+import uk.ac.warwick.tabula.data.model.StudentMember
+import uk.ac.warwick.tabula.data.model.attendance.{AttendanceMonitoringNote, AttendanceMonitoringPoint, AttendanceMonitoringScheme, AttendanceState}
 import uk.ac.warwick.tabula.services.attendancemonitoring.{AttendanceMonitoringService, AttendanceMonitoringServiceComponent}
 import uk.ac.warwick.tabula.services.{TermService, TermServiceComponent}
 import uk.ac.warwick.tabula.{AcademicYear, Fixtures, Mockito, TestBase}
@@ -17,27 +19,27 @@ class StudentRecordCommandTest extends TestBase with Mockito {
 
 	trait Fixture {
 		val thisAcademicYear = AcademicYear(2014)
-		val thisStudent = Fixtures.student("1234")
+		val thisStudent: StudentMember = Fixtures.student("1234")
 
 		val validator = new StudentRecordValidation with TermServiceComponent
 			with AttendanceMonitoringServiceComponent with StudentRecordCommandState
 			with StudentRecordCommandRequest {
 
-			val termService = smartMock[TermService]
-			val attendanceMonitoringService = smartMock[AttendanceMonitoringService]
-			val academicYear = thisAcademicYear
-			val student = thisStudent
+			val termService: TermService = smartMock[TermService]
+			val attendanceMonitoringService: AttendanceMonitoringService = smartMock[AttendanceMonitoringService]
+			val academicYear: AcademicYear = thisAcademicYear
+			val student: StudentMember = thisStudent
 			val user = null
 		}
 
 		val scheme = new AttendanceMonitoringScheme
-		val point1 = Fixtures.attendanceMonitoringPoint(scheme, "name1", 1, 1)
+		val point1: AttendanceMonitoringPoint = Fixtures.attendanceMonitoringPoint(scheme, "name1", 1, 1)
 		point1.id = "1"
 		validator.attendanceMonitoringService.getPointById(point1.id) returns Option(point1)
-		val point2 = Fixtures.attendanceMonitoringPoint(scheme, "name2", 2, 2)
+		val point2: AttendanceMonitoringPoint = Fixtures.attendanceMonitoringPoint(scheme, "name2", 2, 2)
 		point2.id = "2"
 		validator.attendanceMonitoringService.getPointById(point2.id) returns Option(point2)
-		val notInSchemePoint = Fixtures.attendanceMonitoringPoint(null, "notInScheme", 1, 1)
+		val notInSchemePoint: AttendanceMonitoringPoint = Fixtures.attendanceMonitoringPoint(null, "notInScheme", 1, 1)
 		notInSchemePoint.id = "3"
 		validator.attendanceMonitoringService.getPointById(notInSchemePoint.id) returns Option(notInSchemePoint)
 
@@ -52,7 +54,7 @@ class StudentRecordCommandTest extends TestBase with Mockito {
 
 		var binder = new WebDataBinder(validator, "command")
 		binder.setConversionService(conversionService)
-		val errors = binder.getBindingResult
+		val errors: BindingResult = binder.getBindingResult
 
 	}
 

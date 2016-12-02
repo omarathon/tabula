@@ -10,7 +10,7 @@ trait MemberNoteDaoComponent {
 }
 
 trait AutowiringMemberNoteDaoComponent extends MemberNoteDaoComponent {
-	val memberNoteDao = Wire[MemberNoteDao]
+	val memberNoteDao: MemberNoteDao = Wire[MemberNoteDao]
 }
 
 trait MemberNoteDao {
@@ -38,9 +38,9 @@ class MemberNoteDaoImpl extends MemberNoteDao with Daoisms {
 			criteria.addOrder(desc("lastUpdatedDate")).seq
 	}
 
-	def saveOrUpdate(memberNote: MemberNote) = session.saveOrUpdate(memberNote)
+	def saveOrUpdate(memberNote: MemberNote): Unit = session.saveOrUpdate(memberNote)
 
-	def delete(memberNote: MemberNote) = session.delete(memberNote)
+	def delete(memberNote: MemberNote): Unit = session.delete(memberNote)
 
 	def getExtenuatingCircumstancesById(id: String): Option[ExtenuatingCircumstances] = getById[ExtenuatingCircumstances](id)
 
@@ -52,8 +52,8 @@ class MemberNoteDaoImpl extends MemberNoteDao with Daoisms {
 		criteria.addOrder(desc("lastUpdatedDate")).seq
 	}
 
-	def saveOrUpdate(circumstances: ExtenuatingCircumstances) = session.saveOrUpdate(circumstances)
+	def saveOrUpdate(circumstances: ExtenuatingCircumstances): Unit = session.saveOrUpdate(circumstances)
 
-	def delete(circumstances: ExtenuatingCircumstances) = session.delete(circumstances)
+	def delete(circumstances: ExtenuatingCircumstances): Unit = session.delete(circumstances)
 
 }

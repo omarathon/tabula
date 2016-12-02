@@ -15,7 +15,7 @@ case class StudentsInformation (
 )
 
 object ListSmallGroupSetStudentsCommand {
-	def apply(smallGroupSet: SmallGroupSet, user: CurrentUser) = {
+	def apply(smallGroupSet: SmallGroupSet, user: CurrentUser): ListSmallGroupSetStudentsCommandInternal with ComposableCommand[StudentsInformation] with AutowiringProfileServiceComponent with ListSmallGroupSetStudentsCommandPermissions with Unaudited with ReadOnly = {
 		new ListSmallGroupSetStudentsCommandInternal(smallGroupSet, user)
 			with ComposableCommand[StudentsInformation]
 			with AutowiringProfileServiceComponent
@@ -28,7 +28,7 @@ class ListSmallGroupSetStudentsCommandInternal(val smallGroupSet: SmallGroupSet,
 	extends CommandInternal[StudentsInformation] with ListSmallGroupSetStudentsCommandState  {
 	self:ProfileServiceComponent =>
 
-		override def applyInternal() = {
+		override def applyInternal(): StudentsInformation = {
 				val students = smallGroupSet.allStudents
 				val userIsMember = students.exists(_.getWarwickId == user.universityId)
 				val showTutors = smallGroupSet.studentsCanSeeTutorName

@@ -10,7 +10,7 @@ trait FileAttachmentServiceComponent {
 }
 
 trait AutowiringFileAttachmentServiceComponent extends FileAttachmentServiceComponent {
-	var fileAttachmentService = Wire[FileAttachmentService]
+	var fileAttachmentService: FileAttachmentService = Wire[FileAttachmentService]
 }
 
 trait FileAttachmentService {
@@ -25,7 +25,7 @@ abstract class AbstractFileAttachmentService extends FileAttachmentService {
 
 	self: FileDaoComponent =>
 
-	def deleteAttachments(files: Seq[FileAttachment]) = fileDao.deleteAttachments(files)
+	def deleteAttachments(files: Seq[FileAttachment]): Unit = fileDao.deleteAttachments(files)
 	def saveOrUpdate(token: FileAttachmentToken): Unit = fileDao.saveOrUpdate(token)
 	def savePermanant(file: FileAttachment): Unit = fileDao.savePermanent(file)
 	def getValidToken(attachment: FileAttachment): Option[FileAttachmentToken] = fileDao.getValidToken(attachment)

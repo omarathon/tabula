@@ -1,9 +1,11 @@
 package uk.ac.warwick.tabula.api.web.helpers
 
 import java.io.StringWriter
+import java.util.concurrent.ConcurrentHashMap
 
 import freemarker.template.Template
 import uk.ac.warwick.tabula.JavaImports._
+import uk.ac.warwick.tabula.ScalaConcurrentMapHelpers
 import uk.ac.warwick.tabula.api.web.helpers.MemberToJsonConverter._
 import uk.ac.warwick.tabula.data.model._
 import uk.ac.warwick.tabula.helpers.StringUtils._
@@ -132,5 +134,5 @@ trait MemberToJsonConverter {
 }
 
 object MemberToJsonConverter {
-	val templateCache = JConcurrentMap[String, Template]()
+	val templateCache: ConcurrentHashMap[String, Template] with ScalaConcurrentMapHelpers[String, Template] = JConcurrentMap[String, Template]()
 }

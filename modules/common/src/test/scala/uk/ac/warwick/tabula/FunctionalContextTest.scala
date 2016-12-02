@@ -50,7 +50,7 @@ object FunctionalContextTest {
 
 	class WiredBean {
 		val mystring: String = Wire[String]("mystring")
-		val thisYear = Wire[AcademicYear]
+		val thisYear: AcademicYear = Wire[AcademicYear]
 	}
 
 	trait StringService {

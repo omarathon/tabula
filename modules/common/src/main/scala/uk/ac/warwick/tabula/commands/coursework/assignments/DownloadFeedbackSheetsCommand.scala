@@ -21,9 +21,9 @@ class DownloadFeedbackSheetsCommand(val module: Module, val assignment: Assignme
 
 	var members: Seq[User] = _
 
-	var zipService = Wire.auto[ZipService]
-	var assignmentService = Wire.auto[AssessmentService]
-	var assignmentMembershipService = Wire.auto[AssessmentMembershipService]
+	var zipService: ZipService = Wire.auto[ZipService]
+	var assignmentService: AssessmentService = Wire.auto[AssessmentService]
+	var assignmentMembershipService: AssessmentMembershipService = Wire.auto[AssessmentMembershipService]
 
 	override def applyInternal(): RenderableFile = {
 		if (assignment.feedbackTemplate == null) logger.error("No feedback sheet for assignment - " + assignment.id)
@@ -33,7 +33,7 @@ class DownloadFeedbackSheetsCommand(val module: Module, val assignment: Assignme
 		zipService.getMemberFeedbackTemplates(members, assignment)
 	}
 
-	override def describe(d: Description) = {
+	override def describe(d: Description): Unit = {
 		val members = assignmentMembershipService.determineMembershipUsers(assignment)
 		d.assignment(assignment)
 		d.studentIds(members.map(_.getWarwickId))

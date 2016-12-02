@@ -19,6 +19,7 @@ import uk.ac.warwick.tabula.sandbox.SandboxData
 import uk.ac.warwick.userlookup.User
 
 import scala.collection.JavaConversions._
+import scala.collection.immutable.Iterable
 
 /**
  * Import accredited prior learning data from SITS.
@@ -34,7 +35,7 @@ trait AccreditedPriorLearningImporter {
 class AccreditedPriorLearningImporterImpl extends AccreditedPriorLearningImporter with TaskBenchmarking {
 	import AccreditedPriorLearningImporter._
 
-	var sits = Wire[DataSource]("sitsDataSource")
+	var sits: DataSource = Wire[DataSource]("sitsDataSource")
 
 	lazy val accreditedPriorLearningQuery = new AccreditedPriorLearningQuery(sits)
 
@@ -52,7 +53,7 @@ class AccreditedPriorLearningImporterImpl extends AccreditedPriorLearningImporte
 
 @Profile(Array("sandbox")) @Service
 class SandboxAccreditedPriorLearningImporter extends AccreditedPriorLearningImporter {
-	var memberDao = Wire.auto[MemberDaoImpl]
+	var memberDao: MemberDaoImpl = Wire.auto[MemberDaoImpl]
 
 	def getAccreditedPriorLearning(membersAndCategories: Seq[MembershipInformation], users: Map[String, User]): Seq[ImportAccreditedPriorLearningCommand] =
 		membersAndCategories flatMap { mac =>
@@ -65,7 +66,7 @@ class SandboxAccreditedPriorLearningImporter extends AccreditedPriorLearningImpo
 			}
 		}
 
-	def studentAccreditedPriorLearningDetails(universityId: String, ssoUser: User) = {
+	def studentAccreditedPriorLearningDetails(universityId: String, ssoUser: User): Iterable[ImportAccreditedPriorLearningCommand] = {
 		for {
 			(code, d) <- SandboxData.Departments
 			route <- d.routes.values.toSeq
@@ -142,7 +143,7 @@ object AccreditedPriorLearningImporter {
 		extends MappingSqlQuery[AccreditedPriorLearningRow](ds, AccreditedPriorLearning) {
 		declareParameter(new SqlParameter("universityId", Types.VARCHAR))
 		compile()
-		override def mapRow(resultSet: ResultSet, rowNumber: Int) = mapResultSet(resultSet)
+		override def mapRow(resultSet: ResultSet, rowNumber: Int): AccreditedPriorLearningRow = mapResultSet(resultSet)
 	}
 }
 

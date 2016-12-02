@@ -24,7 +24,7 @@ class OldFeedbackReportController extends OldCourseworkController {
 
 	validatesSelf[FeedbackReportCommand]
 
-	var jobService = Wire.auto[JobService]
+	var jobService: JobService = Wire.auto[JobService]
 
 	@ModelAttribute def command(@PathVariable(value = "dept") dept: Department, user: CurrentUser) =
 		new FeedbackReportCommand(dept, user)
@@ -40,7 +40,7 @@ class OldFeedbackReportController extends OldCourseworkController {
 	}
 
 	@RequestMapping(method = Array(POST), params = Array("!jobId"))
-	def generateReport(@Valid cmd: FeedbackReportCommand, errors: Errors) = {
+	def generateReport(@Valid cmd: FeedbackReportCommand, errors: Errors): Mav = {
 		if(errors.hasErrors) {
 			Mav(new JSONErrorView(errors))
 		} else {
@@ -51,7 +51,7 @@ class OldFeedbackReportController extends OldCourseworkController {
 	}
 
 	@RequestMapping(params = Array("jobId"))
-	def checkProgress(@RequestParam jobId: String) = {
+	def checkProgress(@RequestParam jobId: String): Mav = {
 		val job = jobService.getInstance(jobId)
 		Mav(s"$urlPrefix/admin/assignments/feedbackreport/progress", "job" -> job).noLayoutIf(ajax)
 	}

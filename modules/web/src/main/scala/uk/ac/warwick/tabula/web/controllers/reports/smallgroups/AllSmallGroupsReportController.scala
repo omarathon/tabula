@@ -18,7 +18,7 @@ class AllSmallGroupsReportController extends AbstractSmallGroupsReportController
 
 	val pageRenderPath = "allsmallgroups"
 	val filePrefix = "all-small-group-attendance"
-	def urlGeneratorFactory(department: Department) = year => Routes.SmallGroups.all(department, year)
+	def urlGeneratorFactory(department: Department): (AcademicYear) => String = year => Routes.SmallGroups.all(department, year)
 
 }
 
@@ -32,7 +32,7 @@ class UnrecordedSmallGroupsReportController extends AbstractSmallGroupsReportCon
 
 	val pageRenderPath = "unrecorded"
 	val filePrefix = "unrecorded-small-group-attendance"
-	def urlGeneratorFactory(department: Department) = year => Routes.SmallGroups.unrecorded(department, year)
+	def urlGeneratorFactory(department: Department): (AcademicYear) => String = year => Routes.SmallGroups.unrecorded(department, year)
 
 }
 
@@ -46,6 +46,6 @@ class MissedSmallGroupsReportController extends AbstractSmallGroupsReportControl
 
 	val pageRenderPath = "missed"
 	val filePrefix = "missed-small-group-attendance"
-	def urlGeneratorFactory(department: Department) = year => Routes.SmallGroups.missed(department, year)
+	def urlGeneratorFactory(department: Department): (AcademicYear) => String = year => Routes.SmallGroups.missed(department, year)
 
 }

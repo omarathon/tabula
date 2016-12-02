@@ -20,9 +20,9 @@ trait FeedbackDao {
 abstract class AbstractFeedbackDao extends FeedbackDao with Daoisms {
 	self: ExtendedSessionComponent =>
 
-	override def getAssignmentFeedback(id: String) = getById[AssignmentFeedback](id)
-	override def getExamFeedback(id: String) = getById[ExamFeedback](id)
-	override def getMarkerFeedback(id: String) = getById[MarkerFeedback](id)
+	override def getAssignmentFeedback(id: String): Option[AssignmentFeedback] = getById[AssignmentFeedback](id)
+	override def getExamFeedback(id: String): Option[ExamFeedback] = getById[ExamFeedback](id)
+	override def getMarkerFeedback(id: String): Option[MarkerFeedback] = getById[MarkerFeedback](id)
 
 	override def getRejectedMarkerFeedbackByFeedback(feedback: Feedback): Seq[MarkerFeedback] =
 		session.newCriteria[MarkerFeedback]
@@ -36,11 +36,11 @@ abstract class AbstractFeedbackDao extends FeedbackDao with Daoisms {
 			.add(is("assignment", assignment))
 			.uniqueResult
 
-	override def save(feedback: Feedback) = {
+	override def save(feedback: Feedback): Unit = {
 		session.saveOrUpdate(feedback)
 	}
 
-	override def delete(feedback: Feedback) = {
+	override def delete(feedback: Feedback): Unit = {
 		// We need to delete any markerfeedback first
 		Option(feedback.firstMarkerFeedback) foreach { _.markDeleted() }
 		Option(feedback.secondMarkerFeedback) foreach { _.markDeleted() }
@@ -51,11 +51,11 @@ abstract class AbstractFeedbackDao extends FeedbackDao with Daoisms {
 		session.delete(feedback)
 	}
 
-	override def save(feedback: MarkerFeedback) = {
+	override def save(feedback: MarkerFeedback): Unit = {
 		session.saveOrUpdate(feedback)
 	}
 
-	override def delete(feedback: MarkerFeedback) = {
+	override def delete(feedback: MarkerFeedback): Unit = {
 		session.delete(feedback)
 	}
 

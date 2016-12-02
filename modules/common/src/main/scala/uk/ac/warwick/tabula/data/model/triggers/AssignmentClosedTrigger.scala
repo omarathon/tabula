@@ -9,7 +9,7 @@ import uk.ac.warwick.tabula.data.model.{Assignment, ToEntityReference}
 import scala.collection.JavaConverters._
 
 object AssignmentClosedTrigger {
-	def apply(thisScheduledDate: DateTime, thisTargetEntity: ToEntityReference) = {
+	def apply(thisScheduledDate: DateTime, thisTargetEntity: ToEntityReference): AssignmentClosedTrigger = {
 		val result = new AssignmentClosedTrigger
 		result.scheduledDate = thisScheduledDate
 		result.updateTarget(thisTargetEntity)
@@ -22,9 +22,9 @@ object AssignmentClosedTrigger {
 @DiscriminatorValue(value="AssignmentClosed")
 class AssignmentClosedTrigger	extends Trigger[Assignment, Unit] with HandlesAssignmentTrigger {
 
-	override def assignment = target.entity
+	override def assignment: Assignment = target.entity
 
-	override def apply() = transactional() {
+	override def apply(): Unit = transactional() {
 		if (assignment.isClosed) {
 			handleAssignment(assignment.submissions.asScala.map(_.universityId))
 		}

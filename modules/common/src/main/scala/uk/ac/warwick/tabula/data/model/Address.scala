@@ -8,16 +8,16 @@ import org.hibernate.`type`.StandardBasicTypes
 import java.sql.Types
 
 sealed abstract class AddressType(val dbValue: String) extends Convertible[String] {
-	def value = dbValue
+	def value: String = dbValue
 }
 
 object AddressType {
 	case object Home extends AddressType("H")
 	case object TermTime extends AddressType("C")
 
-	implicit def factory = fromCode _
+	implicit def factory: (String) => AddressType = fromCode _
 
-	def fromCode(code: String) = code match {
+	def fromCode(code: String): AddressType = code match {
 	  	case Home.dbValue => Home
 	  	case TermTime.dbValue => TermTime
 	  	case null => null
@@ -37,7 +37,7 @@ class Address extends GeneratedId with ToString {
 
 	@transient var addressType: AddressType = null
 
-	def isEmpty = {
+	def isEmpty: Boolean = {
 		!(StringUtils.hasText(line1) || StringUtils.hasText(line2) || StringUtils.hasText(line3) ||
 		StringUtils.hasText(line4) || StringUtils.hasText(line5) || StringUtils.hasText(postcode) ||
 		StringUtils.hasText(telephone))

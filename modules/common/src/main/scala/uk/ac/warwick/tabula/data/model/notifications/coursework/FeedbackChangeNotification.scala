@@ -16,10 +16,10 @@ class FeedbackChangeNotification extends NotificationWithTarget[AssignmentFeedba
 	with AutowiringUserLookupComponent
 	with AllCompletedActionRequiredNotification {
 
-	def feedback = item.entity
-	def assignment = target.entity
-	def module = assignment.module
-	def moduleCode = module.code.toUpperCase
+	def feedback: AssignmentFeedback = item.entity
+	def assignment: Assignment = target.entity
+	def module: Module = assignment.module
+	def moduleCode: String = module.code.toUpperCase
 
 	priority = Warning
 
@@ -29,14 +29,14 @@ class FeedbackChangeNotification extends NotificationWithTarget[AssignmentFeedba
 
 	def verb = "modify"
 
-	def title = "%s: Your assignment feedback for \"%s\" has been updated".format(moduleCode, assignment.name)
+	def title: String = "%s: Your assignment feedback for \"%s\" has been updated".format(moduleCode, assignment.name)
 
 	def content = FreemarkerModel("/WEB-INF/freemarker/emails/feedbackchanged.ftl", Map(
 		"assignment" -> assignment,
 		"module" -> module
 	))
 
-	def url = Routes.assignment.receipt(assignment)
+	def url: String = Routes.assignment.receipt(assignment)
 	def urlTitle = "view your new feedback"
 
 }

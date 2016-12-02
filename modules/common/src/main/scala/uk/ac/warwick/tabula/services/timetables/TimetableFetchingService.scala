@@ -31,8 +31,8 @@ object TimetableFetchingService {
 	object EventList {
 		val empty = EventList(Nil, None)
 
-		def fresh(events: Seq[TimetableEvent]) = forDate(events, Some(DateTime.now))
-		def forDate(events: Seq[TimetableEvent], lastUpdated: Option[DateTime]) = events match {
+		def fresh(events: Seq[TimetableEvent]): EventList = forDate(events, Some(DateTime.now))
+		def forDate(events: Seq[TimetableEvent], lastUpdated: Option[DateTime]): EventList = events match {
 			// can't use "case v: EventList" because the type inference engine in 2.10 can't cope.
 			case v: Seq[TimetableEvent] with java.io.Serializable => EventList(v, lastUpdated)
 			case _ => throw new RuntimeException("Unserializable collection returned from TimetableFetchingService")
@@ -55,7 +55,7 @@ object TimetableFetchingService {
 		def filterNot(p: EventOccurrence => Boolean): EventOccurrenceList =
 			copy(events = events.filterNot(p))
 
-		def ++(other: EventOccurrenceList) = copy(
+		def ++(other: EventOccurrenceList): EventOccurrenceList = copy(
 			events = events ++ other.events,
 			lastUpdated = Seq(lastUpdated, other.lastUpdated).flatten.sortBy(_.getMillis).headOption
 		)
@@ -64,7 +64,7 @@ object TimetableFetchingService {
 	object EventOccurrenceList {
 		val empty = EventOccurrenceList(Nil, None)
 
-		def fresh(events: Seq[EventOccurrence]) = apply(events, Some(DateTime.now))
+		def fresh(events: Seq[EventOccurrence]): EventOccurrenceList = apply(events, Some(DateTime.now))
 
 		def combine(eventLists: Seq[EventOccurrenceList]): EventOccurrenceList =
 			EventOccurrenceList(
@@ -180,7 +180,7 @@ class CombinedTimetableFetchingService(services: PartialTimetableFetchingService
 			.values.toSeq)
 	}
 
-	def getTimetableForStudent(universityId: String) =
+	def getTimetableForStudent(universityId: String): Future[EventList] =
 		Futures.combine(
 			services
 				.collect { case service: StudentTimetableFetchingService => service }
@@ -191,7 +191,7 @@ class CombinedTimetableFetchingService(services: PartialTimetableFetchingService
 			EventList.combine
 		).map(mergeDuplicates)
 
-	def getTimetableForModule(moduleCode: String) =
+	def getTimetableForModule(moduleCode: String): Future[EventList] =
 		Futures.combine(
 			services
 				.collect { case service: ModuleTimetableFetchingService => service }
@@ -202,7 +202,7 @@ class CombinedTimetableFetchingService(services: PartialTimetableFetchingService
 			EventList.combine
 		).map(mergeDuplicates)
 
-	def getTimetableForCourse(courseCode: String) =
+	def getTimetableForCourse(courseCode: String): Future[EventList] =
 		Futures.combine(
 			services
 				.collect { case service: CourseTimetableFetchingService => service }
@@ -213,7 +213,7 @@ class CombinedTimetableFetchingService(services: PartialTimetableFetchingService
 			EventList.combine
 		).map(mergeDuplicates)
 
-	def getTimetableForStaff(universityId: String) =
+	def getTimetableForStaff(universityId: String): Future[EventList] =
 		Futures.combine(
 			services
 				.collect { case service: StaffTimetableFetchingService => service }
@@ -224,7 +224,7 @@ class CombinedTimetableFetchingService(services: PartialTimetableFetchingService
 			EventList.combine
 		).map(mergeDuplicates)
 
-	def getTimetableForRoom(roomName: String) =
+	def getTimetableForRoom(roomName: String): Future[EventList] =
 		Futures.combine(
 			services
 				.collect { case service: RoomTimetableFetchingService => service }

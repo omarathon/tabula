@@ -35,9 +35,9 @@ class RevokePermissionsCommandInternal[A <: PermissionsTarget : ClassTag](val sc
 
 	self: PermissionsServiceComponent with UserLookupComponent =>
 
-	lazy val grantedPermission = permissionsService.getGrantedPermission(scope, permission, overrideType)
+	lazy val grantedPermission: Option[GrantedPermission[A]] = permissionsService.getGrantedPermission(scope, permission, overrideType)
 
-	def applyInternal() = transactional() {
+	def applyInternal(): GrantedPermission[A] = transactional() {
 		grantedPermission.foreach { permission =>
 			usercodes.asScala.foreach(permission.users.knownType.removeUserId)
 
@@ -102,7 +102,7 @@ trait RevokePermissionsCommandPermissions extends RequiresPermissionsChecking wi
 trait RevokePermissionsCommandDescription[A <: PermissionsTarget] extends Describable[GrantedPermission[A]] {
 	self: RevokePermissionsCommandState[A] =>
 
-	def describe(d: Description) = d.properties(
+	def describe(d: Description): Unit = d.properties(
 		"scope" -> (scope.getClass.getSimpleName + "[" + scope.id + "]"),
 		"usercodes" -> usercodes.asScala.mkString(","),
 		"permission" -> permission.getName,

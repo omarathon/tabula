@@ -13,6 +13,7 @@ import uk.ac.warwick.tabula.coursework.web.Routes
 import uk.ac.warwick.tabula.web.controllers.coursework.OldCourseworkController
 import uk.ac.warwick.tabula.data.Transactions._
 import uk.ac.warwick.tabula.data.model.{Assignment, Feedback, Module}
+import uk.ac.warwick.tabula.web.Mav
 
 @Profile(Array("cm1Enabled")) @Controller
 @RequestMapping(value=Array("/${cm1.prefix}/admin/module/{module}/assignments/{assignment}/submissionsandfeedback/release-submissions"))
@@ -28,7 +29,7 @@ class OldReleaseForMarkingController extends OldCourseworkController {
 
 	validatesSelf[SelfValidating]
 
-	def confirmView(assignment: Assignment) = Mav(s"$urlPrefix/admin/assignments/submissionsandfeedback/release-submission",
+	def confirmView(assignment: Assignment): Mav = Mav(s"$urlPrefix/admin/assignments/submissionsandfeedback/release-submission",
 		"assignment" -> assignment)
 		.crumbs(Breadcrumbs.Department(assignment.module.adminDepartment), Breadcrumbs.Module(assignment.module))
 
@@ -39,12 +40,12 @@ class OldReleaseForMarkingController extends OldCourseworkController {
 	def get(@PathVariable assignment: Assignment) = RedirectBack(assignment)
 
 	@RequestMapping(method = Array(POST), params = Array("!confirmScreen"))
-	def showForm(@ModelAttribute("releaseForMarkingCommand") cmd: ReleaseForMarkingCommand, errors: Errors) = {
+	def showForm(@ModelAttribute("releaseForMarkingCommand") cmd: ReleaseForMarkingCommand, errors: Errors): Mav = {
 		confirmView(cmd.assignment)
 	}
 
 	@RequestMapping(method = Array(POST), params = Array("confirmScreen"))
-	def submit(@Valid @ModelAttribute("releaseForMarkingCommand") cmd: ReleaseForMarkingCommand, errors: Errors) = {
+	def submit(@Valid @ModelAttribute("releaseForMarkingCommand") cmd: ReleaseForMarkingCommand, errors: Errors): Mav = {
 		transactional() {
 			if (errors.hasErrors)
 				showForm(cmd, errors)

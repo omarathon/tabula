@@ -13,7 +13,7 @@ trait LenientUserLookup extends Mockito {
 		userLookup.delegate = lenientUserLookup
 	}
 
-	def lenientUserLookup = {
+	def lenientUserLookup: UserLookupService = {
 		val backend = mock[UserLookupService]
 
 		backend.getUserByWarwickUniId(any[String]) answers { id =>

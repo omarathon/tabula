@@ -1,9 +1,10 @@
 package uk.ac.warwick.tabula.data.model.notifications.coursework
 
-import uk.ac.warwick.tabula.data.model.{FirstMarkerOnlyWorkflow, FirstMarkersMap, Notification}
+import uk.ac.warwick.tabula.data.model._
 import uk.ac.warwick.tabula.services.UserLookupService
 import uk.ac.warwick.tabula.web.Routes
 import uk.ac.warwick.tabula.{Fixtures, Mockito, TestBase}
+import uk.ac.warwick.userlookup.User
 
 import scala.collection.JavaConverters._
 
@@ -12,21 +13,21 @@ class FeedbackAdjustmentNotificationTest extends TestBase with Mockito {
 	val cm1Prefix = "coursework"
 	Routes.coursework._cm1Prefix = Some(cm1Prefix)
 
-	val admin = Fixtures.user("1170836")
-	val marker = Fixtures.user("1234567", "1234567")
-	val student = Fixtures.user("7654321")
+	val admin: User = Fixtures.user("1170836")
+	val marker: User = Fixtures.user("1234567", "1234567")
+	val student: User = Fixtures.user("7654321")
 
-	val mockLookup = mock[UserLookupService]
+	val mockLookup: UserLookupService = mock[UserLookupService]
 	mockLookup.getUserByUserId(student.getUserId) returns student
 	mockLookup.getUserByUserId(marker.getUserId) returns marker
 	mockLookup.getUserByWarwickUniId(student.getWarwickId) returns student
 	mockLookup.getUserByWarwickUniId(marker.getWarwickId) returns marker
 
-	val module = Fixtures.module("hnz101")
-	val assignment = Fixtures.assignment("hernz")
+	val module: Module = Fixtures.module("hnz101")
+	val assignment: Assignment = Fixtures.assignment("hernz")
 	assignment.id = "heronzzzz"
 	assignment.module = module
-	val feedback = Fixtures.assignmentFeedback(student.getWarwickId)
+	val feedback: AssignmentFeedback = Fixtures.assignmentFeedback(student.getWarwickId)
 	feedback.assignment = assignment
 	val workflow = new FirstMarkerOnlyWorkflow()
 	workflow.userLookup = mockLookup
@@ -34,7 +35,7 @@ class FeedbackAdjustmentNotificationTest extends TestBase with Mockito {
 	assignment.firstMarkers = Seq(FirstMarkersMap(assignment, "1234567", Fixtures.userGroup(student))).asJava
 
 
-	def createNotification = {
+	def createNotification: FeedbackAdjustmentNotification = {
 		val n = Notification.init(new FeedbackAdjustmentNotification, marker, feedback, assignment)
 		n.userLookup = mockLookup
 		n

@@ -9,7 +9,7 @@ import uk.ac.warwick.tabula.Mockito
 class ExtensionIdConverterTest extends TestBase with Mockito {
 
 	val converter = new ExtensionIdConverter
-	val service = mock[ExtensionService]
+	val service: ExtensionService = mock[ExtensionService]
 	converter.service = service
 
 	@Test def validInput {

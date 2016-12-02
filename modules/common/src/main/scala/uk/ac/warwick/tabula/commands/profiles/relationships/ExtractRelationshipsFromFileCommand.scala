@@ -54,7 +54,7 @@ class ExtractRelationshipsFromFileCommandInternal(val department: Department, va
 
 	self: ExtractRelationshipsFromFileCommandRequest with RelationshipServiceComponent with ProfileServiceComponent =>
 
-	override def applyInternal() = {
+	override def applyInternal(): Seq[ExtractRelationshipsFromFileCommandRow] = {
 		val dbUnallocated = relationshipService.getStudentAssociationDataWithoutRelationship(department, relationshipType)
 		val dbAllocated = relationshipService.getStudentAssociationEntityData(department, relationshipType, Seq())
 		val allStudents = dbUnallocated ++ dbAllocated.flatMap(_.students).distinct
@@ -94,7 +94,7 @@ trait ExtractRelationshipsFromFileCommandBindListener extends BindListener {
 
 	self: ExtractRelationshipsFromFileCommandRequest =>
 
-	override def onBind(result: BindingResult) = {
+	override def onBind(result: BindingResult): Unit = {
 		val fileNames = file.fileNames map (_.toLowerCase)
 		val invalidFiles = fileNames.filter(s => !ExtractRelationshipsFromFileCommand.AcceptedFileExtensions.exists(s.endsWith))
 

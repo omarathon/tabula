@@ -11,7 +11,7 @@ class ObserverTest extends TestBase {
 	import Reactor._
 
 	class Service {
-		var changedState = EventSource[Boolean]
+		var changedState: EventSource[Boolean] = EventSource[Boolean]
 		def updateState(state:Boolean) {
 			changedState.emit(state)
 		}

@@ -20,7 +20,7 @@ object AttendanceBreadcrumbs {
 		 * Special case breadcrumb for the department view page.
 		 */
 		case class ViewDepartment(department: model.Department) extends Abstract {
-			val title = department.name
+			val title: String = department.name
 			val url = Some(Routes.old.department.view(department))
 		}
 
@@ -44,7 +44,7 @@ object AttendanceBreadcrumbs {
 		 * Special case breadcrumb for the department view agents page.
 		 */
 		case class ViewDepartmentAgents(department: model.Department, relationshipType: StudentRelationshipType) extends Abstract {
-			val title = relationshipType.agentRole.capitalize + "s"
+			val title: String = relationshipType.agentRole.capitalize + "s"
 			val url = Some(Routes.old.department.viewAgents(department, relationshipType))
 		}
 
@@ -60,7 +60,7 @@ object AttendanceBreadcrumbs {
 		 * Special case breadcrumb for agent relationship page.
 		 */
 		case class Agent(relationshipType: model.StudentRelationshipType) extends Abstract {
-			val title = relationshipType.studentRole.capitalize + "s"
+			val title: String = relationshipType.studentRole.capitalize + "s"
 			val url = Some(Routes.old.agent.view(relationshipType))
 		}
 
@@ -68,7 +68,7 @@ object AttendanceBreadcrumbs {
 		 * Special case breadcrumb for agent student profile page.
 		 */
 		case class AgentStudent(student: model.StudentMember, relationshipType: model.StudentRelationshipType) extends Abstract {
-			val title = student.fullName.getOrElse("")
+			val title: String = student.fullName.getOrElse("")
 			val url = Some(Routes.old.agent.student(student, relationshipType))
 		}
 
@@ -82,12 +82,12 @@ object AttendanceBreadcrumbs {
 		}
 
 		case class Department(department: model.Department) extends Abstract {
-			val title = department.name
+			val title: String = department.name
 			val url = Some(Routes.Manage.department(department))
 		}
 
 		case class DepartmentForYear(department: model.Department, academicYear: AcademicYear) extends Abstract {
-			val title = academicYear.startYear.toString
+			val title: String = academicYear.startYear.toString
 			val url = Some(Routes.Manage.departmentForYear(department, academicYear))
 		}
 
@@ -106,12 +106,12 @@ object AttendanceBreadcrumbs {
 		}
 
 		case class Department(department: model.Department) extends Abstract {
-			val title = department.name
+			val title: String = department.name
 			val url = Some(Routes.View.department(department))
 		}
 
 		case class DepartmentForYear(department: model.Department, academicYear: AcademicYear) extends Abstract {
-			val title = academicYear.startYear.toString
+			val title: String = academicYear.startYear.toString
 			val url = Some(Routes.View.departmentForYear(department, academicYear))
 		}
 
@@ -121,7 +121,7 @@ object AttendanceBreadcrumbs {
 		}
 
 		case class Student(department: model.Department, academicYear: AcademicYear, student: StudentMember) extends Abstract {
-			val title = student.fullName.getOrElse("")
+			val title: String = student.fullName.getOrElse("")
 			val url = Some(Routes.View.student(department, academicYear, student))
 		}
 
@@ -131,7 +131,7 @@ object AttendanceBreadcrumbs {
 		}
 
 		case class Agents(department: model.Department, academicYear: AcademicYear, relationshipType: StudentRelationshipType) extends Abstract {
-			val title = relationshipType.agentRole.capitalize + "s"
+			val title: String = relationshipType.agentRole.capitalize + "s"
 			val url = Some(Routes.View.agents(department, academicYear, relationshipType))
 		}
 
@@ -140,15 +140,15 @@ object AttendanceBreadcrumbs {
 	object Agent {
 
 		case class Relationship(relationshipType: StudentRelationshipType) extends Abstract {
-			val title = relationshipType.studentRole.capitalize + "s"
+			val title: String = relationshipType.studentRole.capitalize + "s"
 			val url = Some(Routes.Agent.relationship(relationshipType))
 		}
 		case class RelationshipForYear(relationshipType: StudentRelationshipType, academicYear: AcademicYear) extends Abstract {
-			val title = academicYear.startYear.toString
+			val title: String = academicYear.startYear.toString
 			val url = Some(Routes.Agent.relationshipForYear(relationshipType, academicYear))
 		}
 		case class Student(relationshipType: StudentRelationshipType, academicYear: AcademicYear, student: StudentMember) extends Abstract {
-			val title = student.fullName.getOrElse("")
+			val title: String = student.fullName.getOrElse("")
 			val url = Some(Routes.Agent.student(relationshipType, academicYear, student))
 		}
 
@@ -156,14 +156,14 @@ object AttendanceBreadcrumbs {
 
 	object Profile {
 		case class Years(student: StudentMember, isStudent: Boolean) extends Abstract {
-			val title = isStudent match {
+			val title: String = isStudent match {
 				case true => "My Monitoring Points"
 				case false => student.fullName.getOrElse("")
 			}
 			val url = Some(Routes.Profile.years(student))
 		}
 		case class ProfileForYear(student: StudentMember, academicYear: AcademicYear) extends Abstract {
-			val title = academicYear.startYear.toString
+			val title: String = academicYear.startYear.toString
 			val url = Some(Routes.Profile.profileForYear(student, academicYear))
 		}
 	}

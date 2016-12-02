@@ -39,7 +39,7 @@ abstract class SmallGroupSetsSpreadsheetTemplateCommandInternal(val department: 
 	}
 
 	// Publicly visible for testing
-	def generateWorkbook() = {
+	def generateWorkbook(): XSSFWorkbook = {
 		val workbook = new XSSFWorkbook()
 		workbook.setMissingCellPolicy(Row.CREATE_NULL_AS_BLANK)
 

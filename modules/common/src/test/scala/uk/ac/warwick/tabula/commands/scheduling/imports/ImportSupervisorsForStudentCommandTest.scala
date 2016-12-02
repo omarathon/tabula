@@ -32,10 +32,10 @@ class ImportSupervisorsForStudentCommandTest extends AppContextTestBase with Moc
 
 		session.saveOrUpdate(supervisee)
 
-		val supervisor = newSupervisor("0070790", "cusdx")
+		val supervisor: StaffMember = newSupervisor("0070790", "cusdx")
 
 		// create and persist supervisor
-		def newSupervisor(uniId: String, userId: String) = {
+		def newSupervisor(uniId: String, userId: String): StaffMember = {
 			val supervisorMember = new StaffMember(uniId)
 			supervisorMember.userId = userId
 			session.saveOrUpdate(supervisorMember)
@@ -79,7 +79,7 @@ class ImportSupervisorsForStudentCommandTest extends AppContextTestBase with Moc
 			val course2 = new CourseFixture("1111111/2", "1111111/2")
 			session.save(course2.studentCourseDetails)
 
-			val supervisor2 = newSupervisor("1273455","cusmbg")
+			val supervisor2: StaffMember = newSupervisor("1273455","cusmbg")
 		}
 
 	}
@@ -89,7 +89,7 @@ class ImportSupervisorsForStudentCommandTest extends AppContextTestBase with Moc
 		new Environment {
 			// set up importer to return supervisor
 			val codes = Seq((supervisor.universityId, new JBigDecimal("100")))
-			val importer = smartMock[SupervisorImporter]
+			val importer: SupervisorImporter = smartMock[SupervisorImporter]
 			importer.getSupervisorUniversityIds(scjCode, relationshipType) returns codes
 
 			// test command
@@ -99,9 +99,9 @@ class ImportSupervisorsForStudentCommandTest extends AppContextTestBase with Moc
 			command.applyInternal()
 
 			// check results
-			val supRels = supervisee.freshStudentCourseDetails.head.relationships(relationshipType)
+			val supRels: Seq[StudentRelationship] = supervisee.freshStudentCourseDetails.head.relationships(relationshipType)
 			supRels.size should be (1)
-			val rel = supRels.head
+			val rel: StudentRelationship = supRels.head
 
 			rel.agent should be (supervisor.universityId)
 			rel.studentMember should be (Some(supervisee))
@@ -114,7 +114,7 @@ class ImportSupervisorsForStudentCommandTest extends AppContextTestBase with Moc
 	@Test def testCaptureInvalidSupervisor() {
 		new Environment {
 			// set up importer to return supervisor
-			val importer = smartMock[SupervisorImporter]
+			val importer: SupervisorImporter = smartMock[SupervisorImporter]
 
 			importer.getSupervisorUniversityIds(scjCode, relationshipType) returns Seq()
 
@@ -125,7 +125,7 @@ class ImportSupervisorsForStudentCommandTest extends AppContextTestBase with Moc
 			command.applyInternal()
 
 			// check results
-			val supRels = supervisee.freshStudentCourseDetails.head.relationships(relationshipType)
+			val supRels: Seq[StudentRelationship] = supervisee.freshStudentCourseDetails.head.relationships(relationshipType)
 			supRels.size should be (0)
 		}
 	}
@@ -145,7 +145,7 @@ class ImportSupervisorsForStudentCommandTest extends AppContextTestBase with Moc
 
 			// set up importer to return supervisor
 			val codes = Seq((supervisor.universityId, null))
-			val importer = smartMock[SupervisorImporter]
+			val importer: SupervisorImporter = smartMock[SupervisorImporter]
 			importer.getSupervisorUniversityIds(scjCode, relationshipType) returns codes
 
 
@@ -156,9 +156,9 @@ class ImportSupervisorsForStudentCommandTest extends AppContextTestBase with Moc
 			command.applyInternal()
 
 			// check results
-			val supRels = supervisee.freshStudentCourseDetails.head.relationships(relationshipType)
+			val supRels: Seq[StudentRelationship] = supervisee.freshStudentCourseDetails.head.relationships(relationshipType)
 			supRels.size should be (1)
-			val rel = supRels.head
+			val rel: StudentRelationship = supRels.head
 
 			rel.agent should be (supervisor.universityId)
 			rel.studentMember should be (Some(supervisee))

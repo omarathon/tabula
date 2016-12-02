@@ -10,20 +10,22 @@ import org.springframework.jdbc.`object`.MappingSqlQuery
 import org.springframework.jdbc.core.SqlParameter
 import org.springframework.stereotype.Service
 import uk.ac.warwick.spring.Wire
+import uk.ac.warwick.tabula.commands.{Command, Unaudited}
 import uk.ac.warwick.tabula.commands.scheduling.imports._
 import uk.ac.warwick.tabula.data.Daoisms
 import uk.ac.warwick.tabula.data.model.MemberUserType._
-import uk.ac.warwick.tabula.data.model.{DegreeType, Department, Gender, MemberUserType}
+import uk.ac.warwick.tabula.data.model._
 import uk.ac.warwick.tabula.helpers.Logging
 import uk.ac.warwick.tabula.helpers.StringUtils._
 import uk.ac.warwick.tabula.helpers.scheduling.{ImportCommandFactory, SitsStudentRow}
 import uk.ac.warwick.tabula.sandbox.{MapResultSet, SandboxData}
-import uk.ac.warwick.tabula.services.ProfileService
+import uk.ac.warwick.tabula.services.{AutowiringProfileServiceComponent, ProfileService}
 import uk.ac.warwick.tabula.{AcademicYear, Features}
 import uk.ac.warwick.userlookup.User
 
 import scala.collection.JavaConversions._
 import scala.collection.JavaConverters._
+import scala.collection.immutable.IndexedSeq
 import scala.util.Try
 
 case class MembershipInformation(member: MembershipMember)
@@ -31,7 +33,7 @@ case class MembershipInformation(member: MembershipMember)
 trait ProfileImporter {
 	import ProfileImporter._
 
-	var features = Wire[Features]
+	var features: Features = Wire[Features]
 
 	def getMemberDetails(memberInfo: Seq[MembershipInformation], users: Map[UniversityId, User], importCommandFactory: ImportCommandFactory)
 		: Seq[ImportMemberCommand]
@@ -45,16 +47,16 @@ trait ProfileImporter {
 class ProfileImporterImpl extends ProfileImporter with Logging with SitsAcademicYearAware {
 	import ProfileImporter._
 
-	var sits = Wire[DataSource]("sitsDataSource")
+	var sits: DataSource = Wire[DataSource]("sitsDataSource")
 
-	var fim = Wire[DataSource]("fimDataSource")
+	var fim: DataSource = Wire[DataSource]("fimDataSource")
 
 	lazy val membershipByDepartmentQuery = new MembershipByDepartmentQuery(fim)
 	lazy val membershipByUniversityIdQuery = new MembershipByUniversityIdQuery(fim)
 
 	lazy val applicantQuery = new ApplicantQuery(sits)
 
-	def studentInformationQuery = {
+	def studentInformationQuery: StudentInformationQuery = {
 
 		val sceYearClause =
 			if (features.includePastYears) ""
@@ -63,7 +65,7 @@ class ProfileImporterImpl extends ProfileImporter with Logging with SitsAcademic
 		new StudentInformationQuery(sits, sceYearClause)
 	}
 
-	def multipleStudentInformationQuery = {
+	def multipleStudentInformationQuery: MultipleStudentInformationQuery = {
 
 		val sceYearClause =
 			if (features.includePastYears) ""
@@ -144,7 +146,7 @@ class ProfileImporterImpl extends ProfileImporter with Logging with SitsAcademic
 
 @Profile(Array("sandbox")) @Service
 class SandboxProfileImporter extends ProfileImporter {
-	var profileService = Wire[ProfileService]
+	var profileService: ProfileService = Wire[ProfileService]
 
 	def getMemberDetails(memberInfo: Seq[MembershipInformation], users: Map[String, User], importCommandFactory: ImportCommandFactory): Seq[ImportMemberCommand] =
 		memberInfo map { info => info.member.userType match {
@@ -152,7 +154,7 @@ class SandboxProfileImporter extends ProfileImporter {
 			case _ => staffMemberDetails(info)
 		}}
 
-	def studentMemberDetails(importCommandFactory: ImportCommandFactory)(mac: MembershipInformation) = {
+	def studentMemberDetails(importCommandFactory: ImportCommandFactory)(mac: MembershipInformation): ImportStudentRowCommandInternal with Command[Member] with AutowiringProfileServiceComponent with AutowiringTier4RequirementImporterComponent with AutowiringModeOfAttendanceImporterComponent with Unaudited = {
 		val member = mac.member
 		val ssoUser = new User(member.usercode)
 		ssoUser.setFoundUser(true)
@@ -224,7 +226,7 @@ class SandboxProfileImporter extends ProfileImporter {
 		)
 	}
 
-	def staffMemberDetails(mac: MembershipInformation) = {
+	def staffMemberDetails(mac: MembershipInformation): ImportStaffMemberCommand = {
 		val member = mac.member
 		val ssoUser = new User(member.usercode)
 		ssoUser.setFoundUser(true)
@@ -246,7 +248,7 @@ class SandboxProfileImporter extends ProfileImporter {
 		).getOrElse(Seq())
 	}
 
-	def staffForDepartment(department: SandboxData.Department) =
+	def staffForDepartment(department: SandboxData.Department): IndexedSeq[MembershipInformation] =
 		(department.staffStartId to department.staffEndId).map { uniId =>
 			val gender = if (uniId % 2 == 0) Gender.Male else Gender.Female
 			val name = SandboxData.randomName(uniId, gender)
@@ -277,7 +279,7 @@ class SandboxProfileImporter extends ProfileImporter {
 			)
 		}
 
-	def studentsForDepartment(department: SandboxData.Department) =
+	def studentsForDepartment(department: SandboxData.Department): Seq[MembershipInformation] =
 		department.routes.values.flatMap { route =>
 			(route.studentsStartId to route.studentsEndId).map { uniId =>
 				val gender = if (uniId % 2 == 0) Gender.Male else Gender.Female
@@ -352,14 +354,14 @@ class SandboxProfileImporter extends ProfileImporter {
 }
 
 object ProfileImporter extends Logging {
-	var features = Wire[Features]
+	var features: Features = Wire[Features]
 
 	type UniversityId = String
 
 	val applicantDepartmentCode: String = "sl"
 	val sitsSchema: String = Wire.property("${schema.sits}")
 
-	val sceYearClause =
+	val sceYearClause: UniversityId =
 		if (features.includePastYears) {
 			""
 		}
@@ -465,12 +467,12 @@ object ProfileImporter extends Logging {
 				on spr.prs_code = prs.prs_code
 		 """
 
-	def GetSingleStudentInformation(sceYearClause: String) = GetStudentInformation(sceYearClause) + f"""
+	def GetSingleStudentInformation(sceYearClause: String): UniversityId = GetStudentInformation(sceYearClause) + f"""
 			where stu.stu_code = :universityId
 			order by stu.stu_code
 		"""
 
-	def GetMultipleStudentsInformation(sceYearClause: String) = GetStudentInformation(sceYearClause) + f"""
+	def GetMultipleStudentsInformation(sceYearClause: String): UniversityId = GetStudentInformation(sceYearClause) + f"""
 			where stu.stu_code in (:universityIds)
 			order by stu.stu_code
 		"""
@@ -478,7 +480,7 @@ object ProfileImporter extends Logging {
 	class StudentInformationQuery(ds: DataSource, sceYearClause: String)
 		extends MappingSqlQuery[SitsStudentRow](ds, GetSingleStudentInformation(sceYearClause)) {
 
-		var features = Wire.auto[Features]
+		var features: Features = Wire.auto[Features]
 
 		declareParameter(new SqlParameter("universityId", Types.VARCHAR))
 
@@ -493,7 +495,7 @@ object ProfileImporter extends Logging {
 	class MultipleStudentInformationQuery(ds: DataSource, sceYearClause: String)
 		extends MappingSqlQuery[SitsStudentRow](ds, GetMultipleStudentsInformation(sceYearClause)) {
 
-		var features = Wire.auto[Features]
+		var features: Features = Wire.auto[Features]
 
 		declareParameter(new SqlParameter("universityIds", Types.VARCHAR))
 
@@ -533,10 +535,10 @@ object ProfileImporter extends Logging {
 	class ApplicantQuery(ds: DataSource) extends MappingSqlQuery[MembershipMember](ds, GetApplicantInformation) {
 
 		val SqlDatePattern = "yyyy/MM/dd"
-		val SqlDateTimeFormat = DateTimeFormat.forPattern(SqlDatePattern)
+		val SqlDateTimeFormat: DateTimeFormatter = DateTimeFormat.forPattern(SqlDatePattern)
 
 		compile()
-		override def mapRow(rs: ResultSet, rowNumber: Int) = membershipToMember(rs, guessUsercode = false, SqlDateTimeFormat)
+		override def mapRow(rs: ResultSet, rowNumber: Int): MembershipMember = membershipToMember(rs, guessUsercode = false, SqlDateTimeFormat)
 	}
 
 	val GetMembershipByUniversityIdInformation = """
@@ -546,7 +548,7 @@ object ProfileImporter extends Logging {
 	class MembershipByUniversityIdQuery(ds: DataSource) extends MappingSqlQuery[MembershipMember](ds, GetMembershipByUniversityIdInformation) {
 		declareParameter(new SqlParameter("universityIds", Types.VARCHAR))
 		compile()
-		override def mapRow(rs: ResultSet, rowNumber: Int) = membershipToMember(rs)
+		override def mapRow(rs: ResultSet, rowNumber: Int): MembershipMember = membershipToMember(rs)
 	}
 
 	val GetMembershipByDepartmentInformation = """
@@ -556,7 +558,7 @@ object ProfileImporter extends Logging {
 	class MembershipByDepartmentQuery(ds: DataSource) extends MappingSqlQuery[MembershipMember](ds, GetMembershipByDepartmentInformation) {
 		declareParameter(new SqlParameter("departmentCode", Types.VARCHAR))
 		compile()
-		override def mapRow(rs: ResultSet, rowNumber: Int) = membershipToMember(rs)
+		override def mapRow(rs: ResultSet, rowNumber: Int): MembershipMember = membershipToMember(rs)
 	}
 
 	private def membershipToMember(rs: ResultSet, guessUsercode: Boolean = true, dateTimeFormater: DateTimeFormatter = ISODateTimeFormat.dateHourMinuteSecondMillis()) =

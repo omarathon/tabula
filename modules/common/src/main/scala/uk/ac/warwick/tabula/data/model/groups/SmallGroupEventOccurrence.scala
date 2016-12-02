@@ -19,7 +19,7 @@ class SmallGroupEventOccurrence extends GeneratedId with PermissionsTarget with 
 
 	override type Entity = SmallGroupEventOccurrence
 
-	@transient var termService = Wire[TermService]
+	@transient var termService: TermService = Wire[TermService]
 
 	@ManyToOne(fetch = FetchType.LAZY)
 	@JoinColumn(name="event_id", updatable = false)
@@ -50,7 +50,7 @@ class SmallGroupEventOccurrence extends GeneratedId with PermissionsTarget with 
 	def dateTime: Option[DateTime] = date.map(_.toDateTime(event.startTime))
 	def dateTime(weeksForYear: Map[Integer, Interval]): Option[DateTime] = date(weeksForYear).map(_.toDateTime(event.startTime))
 
-	override def toEntityReference = new SmallGroupEventOcurrenceEntityReference().put(this)
+	override def toEntityReference: SmallGroupEventOcurrenceEntityReference = new SmallGroupEventOcurrenceEntityReference().put(this)
 }
 
 object SmallGroupEventOccurrence {

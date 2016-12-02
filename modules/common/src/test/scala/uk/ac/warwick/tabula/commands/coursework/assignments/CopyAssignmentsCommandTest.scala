@@ -1,30 +1,31 @@
 package uk.ac.warwick.tabula.commands.coursework.assignments
 
-import uk.ac.warwick.tabula.data.model.forms.{WordCountField, MarkerSelectField}
+import uk.ac.warwick.tabula.data.model.forms.{MarkerSelectField, WordCountField}
 
 import scala.collection.JavaConversions._
 import uk.ac.warwick.tabula._
 import uk.ac.warwick.tabula.services._
-import uk.ac.warwick.tabula.data.model.{StudentsChooseMarkerWorkflow, UpstreamAssessmentGroup, AssessmentGroup, Assignment}
+import uk.ac.warwick.tabula.data.model._
 import org.joda.time.DateTime
+
 import collection.JavaConverters._
 
 class CopyAssignmentsCommandTest extends TestBase with Mockito {
 
 	trait CommandTestSupport extends AssessmentServiceComponent with AssessmentMembershipServiceComponent {
-		val assessmentService = smartMock[AssessmentService]
-		val assessmentMembershipService = smartMock[AssessmentMembershipService]
+		val assessmentService: AssessmentService = smartMock[AssessmentService]
+		val assessmentMembershipService: AssessmentMembershipService = smartMock[AssessmentMembershipService]
 		def apply(): Seq[Assignment] = Seq()
 	}
 
 	trait Fixture {
-		val department = Fixtures.department("bs")
-		val module = Fixtures.module("bs101")
+		val department: Department = Fixtures.department("bs")
+		val module: Module = Fixtures.module("bs101")
 		module.adminDepartment = department
 
 		val fakeDate = new DateTime(2013, 8, 23, 0, 0)
 
-		val assignment = Fixtures.assignment("Test")
+		val assignment: Assignment = Fixtures.assignment("Test")
 		assignment.addDefaultFields()
 		assignment.academicYear = AcademicYear.parse("12/13")
 		assignment.module = module
@@ -50,7 +51,7 @@ class CopyAssignmentsCommandTest extends TestBase with Mockito {
 			val command = new CopyAssignmentsCommand(department, Seq(module)) with CommandTestSupport
 			command.assignments = Seq(assignment)
 			command.archive = true
-			val newAssignment = command.applyInternal().get(0)
+			val newAssignment: Assignment = command.applyInternal().get(0)
 
 			verify(command.assessmentService, times(1)).save(assignment)
 			verify(command.assessmentService, times(1)).save(newAssignment)
@@ -93,7 +94,7 @@ class CopyAssignmentsCommandTest extends TestBase with Mockito {
 			command.assignments = Seq(assignment)
 			command.academicYear = AcademicYear.parse("13/14")
 
-			val ag1 = {
+			val ag1: AssessmentGroup = {
 				val group = new AssessmentGroup
 				group.assignment = assignment
 				group.occurrence = "A"
@@ -102,7 +103,7 @@ class CopyAssignmentsCommandTest extends TestBase with Mockito {
 				group
 			}
 
-			val ag2 = {
+			val ag2: AssessmentGroup = {
 				val group = new AssessmentGroup
 				group.assignment = assignment
 				group.occurrence = "B"
@@ -114,7 +115,7 @@ class CopyAssignmentsCommandTest extends TestBase with Mockito {
 			assignment.assessmentGroups.add(ag1)
 			assignment.assessmentGroups.add(ag2)
 
-			val template1 = {
+			val template1: UpstreamAssessmentGroup = {
 				val template = new UpstreamAssessmentGroup
 				template.academicYear = AcademicYear.parse("13/14")
 				template.assessmentGroup = ag1.assessmentComponent.assessmentGroup
@@ -122,7 +123,7 @@ class CopyAssignmentsCommandTest extends TestBase with Mockito {
 				template.occurrence = ag1.occurrence
 				template
 			}
-			val template2 = {
+			val template2: UpstreamAssessmentGroup = {
 				val template = new UpstreamAssessmentGroup
 				template.academicYear = AcademicYear.parse("13/14")
 				template.assessmentGroup = ag2.assessmentComponent.assessmentGroup
@@ -139,10 +140,10 @@ class CopyAssignmentsCommandTest extends TestBase with Mockito {
 					None
 			}
 
-			val newAssignment = command.applyInternal().get(0)
+			val newAssignment: Assignment = command.applyInternal().get(0)
 			newAssignment.assessmentGroups.size should be (1)
 
-			val link = newAssignment.assessmentGroups.get(0)
+			val link: AssessmentGroup = newAssignment.assessmentGroups.get(0)
 			link.assessmentComponent should be (ag1.assessmentComponent)
 			link.assignment should be (newAssignment)
 			link.occurrence should be (ag1.occurrence)
@@ -154,7 +155,7 @@ class CopyAssignmentsCommandTest extends TestBase with Mockito {
 		new Fixture with FindAssignmentFields {
 			val command = new CopyAssignmentsCommand(department, Seq(module)) with CommandTestSupport
 			command.assignments = Seq(assignment)
-			val newAssignment = command.applyInternal().get(0)
+			val newAssignment: Assignment = command.applyInternal().get(0)
 
 			findCommentField(newAssignment).get.value should be ("")
 			findFileField(newAssignment).get.attachmentLimit should be (1)
@@ -175,14 +176,14 @@ class CopyAssignmentsCommandTest extends TestBase with Mockito {
 			wordCountField.min = 4500
 			wordCountField.conventions = heronRant
 			assignment.addField(wordCountField)
-			val extremeHeronRant = heronRant.replace("Hate them", "Spit at them!")
+			val extremeHeronRant: String = heronRant.replace("Hate them", "Spit at them!")
 			findCommentField(assignment).get.value = extremeHeronRant
 			findFileField(assignment).get.attachmentLimit = 9999
 			findFileField(assignment).get.attachmentTypes = Seq(".hateherons")
 			findFileField(assignment).get.individualFileSizeLimit = 100
 			val command = new CopyAssignmentsCommand(department, Seq(module)) with CommandTestSupport
 			command.assignments = Seq(assignment)
-			val newAssignment = command.applyInternal().get(0)
+			val newAssignment: Assignment = command.applyInternal().get(0)
 
 			findCommentField(newAssignment).get.value should be (extremeHeronRant)
 			findFileField(newAssignment).get.attachmentLimit should be (9999)
@@ -204,7 +205,7 @@ class CopyAssignmentsCommandTest extends TestBase with Mockito {
 			val command = new CopyAssignmentsCommand(department, Seq(module)) with CommandTestSupport
 			command.assignments = Seq(assignment)
 
-			val newAssignment = command.applyInternal().get(0)
+			val newAssignment: Assignment = command.applyInternal().get(0)
 			newAssignment.fields.asScala.exists{
 				case f: MarkerSelectField => true
 					case _ => false

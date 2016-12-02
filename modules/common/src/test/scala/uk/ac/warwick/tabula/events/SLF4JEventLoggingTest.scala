@@ -1,15 +1,15 @@
 package uk.ac.warwick.tabula.events
 
+import ch.qos.logback.classic.Logger
 import org.junit.After
 import uk.ac.warwick.tabula.commands.DescriptionImpl
 import uk.ac.warwick.tabula.commands.NullCommand
-import uk.ac.warwick.tabula.{TestLoggerFactory, TestBase}
-
+import uk.ac.warwick.tabula.{TestBase, TestLoggerFactory}
 import org.joda.time.DateTime
 
 class SLF4JEventLoggingTest extends TestBase {
 
-	val testLogger = TestLoggerFactory.getTestLogger("uk.ac.warwick.tabula.AUDIT")
+	val testLogger: Logger = TestLoggerFactory.getTestLogger("uk.ac.warwick.tabula.AUDIT")
 	val listener = new SLF4JEventListener
 
 	@Test def writesLogs {

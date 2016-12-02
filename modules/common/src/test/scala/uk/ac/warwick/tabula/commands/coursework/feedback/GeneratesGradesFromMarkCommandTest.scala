@@ -11,26 +11,26 @@ class GeneratesGradesFromMarkCommandTest extends TestBase with Mockito {
 	trait CommandTestSupport extends GenerateGradesFromMarkCommandRequest with AssessmentMembershipServiceComponent
 
 	trait Fixture {
-		val module = Fixtures.module("its01")
-		val assignment = Fixtures.assignment("Test")
+		val module: Module = Fixtures.module("its01")
+		val assignment: Assignment = Fixtures.assignment("Test")
 		assignment.academicYear = AcademicYear(2014)
-		val mockAssignmentMembershipService = smartMock[AssessmentMembershipService]
+		val mockAssignmentMembershipService: AssessmentMembershipService = smartMock[AssessmentMembershipService]
 		val studentUser = new User("student")
 		studentUser.setWarwickId("studentUniId")
 		val assessmentGroup = new AssessmentGroup
 		assessmentGroup.membershipService = mockAssignmentMembershipService
 		assessmentGroup.occurrence = "A"
 		assignment.assessmentGroups = JList(assessmentGroup)
-		val upstreamAssessmentComponent = Fixtures.upstreamAssignment(module, 0)
+		val upstreamAssessmentComponent: AssessmentComponent = Fixtures.upstreamAssignment(module, 0)
 		assessmentGroup.assessmentComponent = upstreamAssessmentComponent
-		val upstreamAssesmentGroup = Fixtures.assessmentGroup(AcademicYear(2014), "A", module.code, null)
+		val upstreamAssesmentGroup: UpstreamAssessmentGroup = Fixtures.assessmentGroup(AcademicYear(2014), "A", module.code, null)
 		assessmentGroup.membershipService.getUpstreamAssessmentGroup(any[UpstreamAssessmentGroup]) returns Option(upstreamAssesmentGroup)
 		upstreamAssesmentGroup.members = JArrayList(new UpstreamAssessmentGroupMember(upstreamAssesmentGroup, studentUser.getWarwickId))
 
 		mockAssignmentMembershipService.determineMembershipUsers(assignment) returns Seq(studentUser)
 
 		val command = new GenerateGradesFromMarkCommandInternal(module, assignment) with CommandTestSupport {
-			val assessmentMembershipService = mockAssignmentMembershipService
+			val assessmentMembershipService: AssessmentMembershipService = mockAssignmentMembershipService
 		}
 	}
 
@@ -39,7 +39,7 @@ class GeneratesGradesFromMarkCommandTest extends TestBase with Mockito {
 		command.studentMarks = JHashMap(studentUser.getWarwickId -> "100")
 		val gb = GradeBoundary(null, "A", 0, 100, null)
 		mockAssignmentMembershipService.gradesForMark(upstreamAssessmentComponent, 100) returns Seq(gb)
-		val result = command.applyInternal()
+		val result: Map[String, Seq[GradeBoundary]] = command.applyInternal()
 		result should be (Map(studentUser.getWarwickId -> Seq(gb)))
 		verify(mockAssignmentMembershipService, times(1)).gradesForMark(upstreamAssessmentComponent, 100)
 	}
@@ -47,21 +47,21 @@ class GeneratesGradesFromMarkCommandTest extends TestBase with Mockito {
 	@Test
 	def studentNotMember(): Unit = new Fixture {
 		command.studentMarks = JHashMap("noSuchUser" -> "100")
-		val result = command.applyInternal()
+		val result: Map[String, Seq[GradeBoundary]] = command.applyInternal()
 		result should be (Map("noSuchUser" -> Seq()))
 	}
 
 	@Test
 	def nullMark(): Unit = new Fixture {
 		command.studentMarks = JHashMap("noSuchUser" -> null)
-		val result = command.applyInternal()
+		val result: Map[String, Seq[GradeBoundary]] = command.applyInternal()
 		result should be (Map("noSuchUser" -> Seq()))
 	}
 
 	@Test
 	def notIntMark(): Unit = new Fixture {
 		command.studentMarks = JHashMap("noSuchUser" -> "fifty")
-		val result = command.applyInternal()
+		val result: Map[String, Seq[GradeBoundary]] = command.applyInternal()
 		result should be (Map("noSuchUser" -> Seq()))
 	}
 
@@ -70,7 +70,7 @@ class GeneratesGradesFromMarkCommandTest extends TestBase with Mockito {
 		val otherStudentUser = new User("student1")
 		mockAssignmentMembershipService.determineMembershipUsers(assignment) returns Seq(otherStudentUser)
 		command.studentMarks = JHashMap(otherStudentUser.getUserId -> "100")
-		val result = command.applyInternal()
+		val result: Map[String, Seq[GradeBoundary]] = command.applyInternal()
 		result should be (Map(otherStudentUser.getUserId -> Seq()))
 	}
 
@@ -78,7 +78,7 @@ class GeneratesGradesFromMarkCommandTest extends TestBase with Mockito {
 	def noMarksFromService(): Unit = new Fixture {
 		command.studentMarks = JHashMap(studentUser.getWarwickId -> "100")
 		mockAssignmentMembershipService.gradesForMark(upstreamAssessmentComponent, 100) returns Seq()
-		val result = command.applyInternal()
+		val result: Map[String, Seq[GradeBoundary]] = command.applyInternal()
 		result should be (Map(studentUser.getWarwickId -> Seq()))
 		verify(mockAssignmentMembershipService, times(1)).gradesForMark(upstreamAssessmentComponent, 100)
 	}

@@ -3,11 +3,11 @@ package uk.ac.warwick.tabula.commands.attendance.view
 import org.joda.time.DateTime
 import org.springframework.validation.Errors
 import uk.ac.warwick.tabula.commands._
-import uk.ac.warwick.tabula.data.model.attendance.AttendanceState
+import uk.ac.warwick.tabula.data.model.attendance.{AttendanceMonitoringPoint, AttendanceState}
 import uk.ac.warwick.tabula.data.model.{Department, StudentMember}
 import uk.ac.warwick.tabula.permissions.Permissions
 import uk.ac.warwick.tabula.services._
-import uk.ac.warwick.tabula.services.attendancemonitoring.{AutowiringAttendanceMonitoringServiceComponent, AttendanceMonitoringServiceComponent}
+import uk.ac.warwick.tabula.services.attendancemonitoring.{AttendanceMonitoringServiceComponent, AutowiringAttendanceMonitoringServiceComponent}
 import uk.ac.warwick.tabula.system.permissions.{PermissionsChecking, PermissionsCheckingMethods, RequiresPermissionsChecking}
 import uk.ac.warwick.tabula.{AcademicYear, ItemNotFoundException}
 
@@ -32,7 +32,7 @@ class ReportStudentsChoosePeriodCommandInternal(val department: Department, val 
 
 	self: TermServiceComponent with ReportStudentsChoosePeriodCommandState with AttendanceMonitoringServiceComponent =>
 
-	override def applyInternal() = {
+	override def applyInternal(): Seq[StudentReportCount] = {
 		studentMissedReportCounts
 	}
 
@@ -65,18 +65,18 @@ trait ReportStudentsChoosePeriodCommandState extends FilterStudentsAttendanceCom
 	self: TermServiceComponent with AttendanceMonitoringServiceComponent =>
 
 	// Only students whose enrolment department is this department
-	lazy val allStudents = benchmarkTask("profileService.findAllStudentsByRestrictions") {
+	lazy val allStudents: Seq[StudentMember] = benchmarkTask("profileService.findAllStudentsByRestrictions") {
 		profileService.findAllStudentsByRestrictions(
 			department = department,
 			restrictions = buildRestrictions(academicYear)
 		).sortBy(s => (s.lastName, s.firstName))
 	}
 
-	lazy val studentPointMap = benchmarkTask("studentPointMap") {
+	lazy val studentPointMap: Map[StudentMember, Seq[AttendanceMonitoringPoint]] = benchmarkTask("studentPointMap") {
 		allStudents.map(s => s -> attendanceMonitoringService.listStudentsPoints(s, Option(department), academicYear)).toMap
 	}
 
-	lazy val termPoints = benchmarkTask("termPoints") {
+	lazy val termPoints: Map[String, Seq[AttendanceMonitoringPoint]] = benchmarkTask("termPoints") {
 		studentPointMap.values.flatten.toSeq.groupBy{ point =>
 			termService.getTermFromDateIncludingVacations(point.startDate.toDateTimeAtStartOfDay).getTermTypeAsString
 		}.mapValues(_.distinct)
@@ -100,7 +100,7 @@ trait ReportStudentsChoosePeriodCommandState extends FilterStudentsAttendanceCom
 		termsToShow.map(term => term -> nonReportedTerms.contains(term))
 	}
 
-	lazy val studentReportCounts = {
+	lazy val studentReportCounts: Seq[StudentReportCount] = {
 		val relevantPoints = termPoints(period).intersect(studentPointMap.values.flatten.toSeq)
 		val checkpoints = attendanceMonitoringService.getCheckpoints(relevantPoints, allStudents)
 
@@ -118,7 +118,7 @@ trait ReportStudentsChoosePeriodCommandState extends FilterStudentsAttendanceCom
 		}}
 	}
 
-	lazy val studentMissedReportCounts = studentReportCounts.filter(_.missed > 0)
+	lazy val studentMissedReportCounts: Seq[StudentReportCount] = studentReportCounts.filter(_.missed > 0)
 
 	// Bind variables
 

@@ -21,7 +21,7 @@ import uk.ac.warwick.tabula.services.jobs.AutowiringJobServiceComponent
 import uk.ac.warwick.tabula.services.scheduling.jobs._
 import uk.ac.warwick.tabula.services.{ModuleAndDepartmentService, ProfileService}
 import uk.ac.warwick.tabula.validators.WithinYears
-import uk.ac.warwick.tabula.web.Routes
+import uk.ac.warwick.tabula.web.{Mav, Routes}
 import uk.ac.warwick.tabula.web.views.JSONView
 import uk.ac.warwick.util.web.Uri
 
@@ -31,17 +31,17 @@ import scala.concurrent.duration.Duration
 class ReindexAuditEventsCommand extends Command[ElasticsearchIndexingResult] with ReadOnly {
 	PermissionCheck(Permissions.ImportSystemData)
 
-	var indexer = Wire[AuditEventIndexService]
+	var indexer: AuditEventIndexService = Wire[AuditEventIndexService]
 
 	@WithinYears(maxPast = 20) @DateTimeFormat(pattern = DateFormats.DateTimePicker)
 	var from: DateTime = _
 
-	def applyInternal() = {
+	def applyInternal(): ElasticsearchIndexingResult = {
 		Await.result(indexer.indexFrom(from), Duration.Inf)
 	}
 
-	override def describe(d: Description) = d.property("from" -> from)
-	override def describeResult(d: Description, result: ElasticsearchIndexingResult) =
+	override def describe(d: Description): Unit = d.property("from" -> from)
+	override def describeResult(d: Description, result: ElasticsearchIndexingResult): Unit =
 		d.properties(
 			"successful" -> result.successful,
 			"failed" -> result.failed,
@@ -53,17 +53,17 @@ class ReindexAuditEventsCommand extends Command[ElasticsearchIndexingResult] wit
 class ReindexNotificationsCommand extends Command[ElasticsearchIndexingResult] with ReadOnly {
 	PermissionCheck(Permissions.ImportSystemData)
 
-	var indexer = Wire[NotificationIndexService]
+	var indexer: NotificationIndexService = Wire[NotificationIndexService]
 
 	@WithinYears(maxPast = 20) @DateTimeFormat(pattern = DateFormats.DateTimePicker)
 	var from: DateTime = _
 
-	def applyInternal() = {
+	def applyInternal(): ElasticsearchIndexingResult = {
 		Await.result(indexer.indexFrom(from), Duration.Inf)
 	}
 
-	def describe(d: Description) = d.property("from" -> from)
-	override def describeResult(d: Description, result: ElasticsearchIndexingResult) =
+	def describe(d: Description): Unit = d.property("from" -> from)
+	override def describeResult(d: Description, result: ElasticsearchIndexingResult): Unit =
 		d.properties(
 			"successful" -> result.successful,
 			"failed" -> result.failed,
@@ -75,14 +75,14 @@ class ReindexNotificationsCommand extends Command[ElasticsearchIndexingResult] w
 class ReindexProfilesCommand extends Command[ElasticsearchIndexingResult] with ReadOnly {
 	PermissionCheck(Permissions.ImportSystemData)
 
-	var indexer = Wire[ProfileIndexService]
-	var mdService = Wire[ModuleAndDepartmentService]
+	var indexer: ProfileIndexService = Wire[ProfileIndexService]
+	var mdService: ModuleAndDepartmentService = Wire[ModuleAndDepartmentService]
 
 	@WithinYears(maxPast = 20) @DateTimeFormat(pattern = DateFormats.DateTimePicker)
 	var from: DateTime = _
 	var deptCode: String = _
 
-	def applyInternal() = {
+	def applyInternal(): ElasticsearchIndexingResult = {
 		Await.result(
 			mdService.getDepartmentByCode(deptCode) match {
 				case None => indexer.indexFrom(from)
@@ -92,8 +92,8 @@ class ReindexProfilesCommand extends Command[ElasticsearchIndexingResult] with R
 		)
 	}
 
-	def describe(d: Description) = d.property("from" -> from).property("deptCode" -> deptCode)
-	override def describeResult(d: Description, result: ElasticsearchIndexingResult) =
+	def describe(d: Description): Unit = d.property("from" -> from).property("deptCode" -> deptCode)
+	override def describeResult(d: Description, result: ElasticsearchIndexingResult): Unit =
 		d.properties(
 			"successful" -> result.successful,
 			"failed" -> result.failed,
@@ -108,7 +108,7 @@ class SysadminNotificationsAuditController extends BaseSysadminController {
 	@ModelAttribute("reindexForm") def reindexForm = new ReindexNotificationsCommand
 
 	@RequestMapping(method = Array(POST))
-	def reindex(form: ReindexNotificationsCommand) = {
+	def reindex(form: ReindexNotificationsCommand): Mav = {
 		form.apply()
 		redirectToHome
 	}
@@ -120,7 +120,7 @@ class SysadminIndexAuditController extends BaseSysadminController {
 	@ModelAttribute("reindexForm") def reindexForm = new ReindexAuditEventsCommand
 
 	@RequestMapping(method = Array(POST))
-	def reindex(form: ReindexAuditEventsCommand) = {
+	def reindex(form: ReindexAuditEventsCommand): Mav = {
 		form.apply()
 		redirectToHome
 	}
@@ -132,7 +132,7 @@ class SysadminIndexProfilesController extends BaseSysadminController {
 	@ModelAttribute("reindexForm") def reindexForm = new ReindexProfilesCommand
 
 	@RequestMapping(method = Array(POST))
-	def reindex(form: ReindexProfilesCommand) = {
+	def reindex(form: ReindexProfilesCommand): Mav = {
 		form.apply()
 		redirectToHome
 	}
@@ -142,10 +142,10 @@ class SysadminIndexProfilesController extends BaseSysadminController {
 @RequestMapping(Array("/sysadmin/import"))
 class SchedulingSysadminController extends BaseSysadminController {
 
-	var scheduler = Wire[Scheduler]
+	var scheduler: Scheduler = Wire[Scheduler]
 
 	@RequestMapping(method = Array(POST))
-	def importModules = {
+	def importModules: Mav = {
 		Redirect(Routes.sysadmin.jobs.quartzStatus(scheduler.scheduleNow[ImportAcademicDataJob]()))
 	}
 
@@ -155,10 +155,10 @@ class SchedulingSysadminController extends BaseSysadminController {
 @RequestMapping(Array("/sysadmin/import-department"))
 class ImportDeptModulesController extends BaseSysadminController {
 
-	var scheduler = Wire[Scheduler]
+	var scheduler: Scheduler = Wire[Scheduler]
 
 	@RequestMapping(method = Array(POST))
-	def importModules(@RequestParam deptCode: String) = {
+	def importModules(@RequestParam deptCode: String): Mav = {
 		Redirect(Routes.sysadmin.jobs.quartzStatus(scheduler.scheduleNow[ImportAcademicDataJob]("departmentCodes" -> deptCode)))
 	}
 }
@@ -167,10 +167,10 @@ class ImportDeptModulesController extends BaseSysadminController {
 @RequestMapping(Array("/sysadmin/import-sits"))
 class ImportSitsAssignmentsController extends BaseSysadminController {
 
-	var scheduler = Wire[Scheduler]
+	var scheduler: Scheduler = Wire[Scheduler]
 
 	@RequestMapping(method = Array(POST))
-	def reindex() = {
+	def reindex(): Mav = {
 		Redirect(Routes.sysadmin.jobs.quartzStatus(scheduler.scheduleNow[ImportAssignmentsJob]()))
 	}
 }
@@ -179,10 +179,10 @@ class ImportSitsAssignmentsController extends BaseSysadminController {
 @RequestMapping(Array("/sysadmin/import-sits-all-years"))
 class ImportSitsAssignmentsAllYearsController extends BaseSysadminController with AutowiringJobServiceComponent {
 
-	var scheduler = Wire[Scheduler]
+	var scheduler: Scheduler = Wire[Scheduler]
 
 	@RequestMapping(method = Array(POST))
-	def importAllYears() = {
+	def importAllYears(): Mav = {
 		Redirect(Routes.sysadmin.jobs.quartzStatus(scheduler.scheduleNow[ImportAssignmentsAllYearsJob]()))
 	}
 
@@ -192,10 +192,10 @@ class ImportSitsAssignmentsAllYearsController extends BaseSysadminController wit
 @RequestMapping(Array("/sysadmin/import-module-lists"))
 class ImportSitsModuleListsController extends BaseSysadminController {
 
-	var scheduler = Wire[Scheduler]
+	var scheduler: Scheduler = Wire[Scheduler]
 
 	@RequestMapping(method = Array(POST))
-	def reindex() = {
+	def reindex(): Mav = {
 		Redirect(Routes.sysadmin.jobs.quartzStatus(scheduler.scheduleNow[ImportModuleListsJob]()))
 	}
 }
@@ -204,16 +204,16 @@ class ImportSitsModuleListsController extends BaseSysadminController {
 @RequestMapping(Array("/sysadmin/import-profiles"))
 class ImportProfilesController extends BaseSysadminController with AutowiringJobServiceComponent {
 
-	var scheduler = Wire[Scheduler]
+	var scheduler: Scheduler = Wire[Scheduler]
 
 	@RequestMapping(method = Array(POST), params = Array("members"))
-	def importSpecificProfiles(@RequestParam members: String) = {
+	def importSpecificProfiles(@RequestParam members: String): Mav = {
 		val jobInstance = jobService.add(None, ImportMembersJob(members.split("(\\s|[^A-Za-z\\d\\-_\\.])+").map(_.trim).filterNot(_.isEmpty)))
 		Redirect(Routes.sysadmin.jobs.status(jobInstance))
 	}
 
 	@RequestMapping(method = Array(POST))
-	def importProfiles(@RequestParam deptCode: String) = {
+	def importProfiles(@RequestParam deptCode: String): Mav = {
 		if (deptCode.maybeText.isEmpty) {
 			Redirect(Routes.sysadmin.jobs.quartzStatus(scheduler.scheduleNow[ImportProfilesJob]()))
 		} else {
@@ -227,12 +227,12 @@ class ImportProfilesController extends BaseSysadminController with AutowiringJob
 @RequestMapping(Array("/sysadmin/import-profiles/{universityId}"))
 class ImportSingleProfileController extends BaseSysadminController {
 
-	var profileService = Wire[ProfileService]
+	var profileService: ProfileService = Wire[ProfileService]
 
 	@RequestMapping def form = "sysadmin/reindexprofile"
 
 	@RequestMapping(method = Array(POST))
-	def importProfile(@PathVariable universityId: String) = {
+	def importProfile(@PathVariable universityId: String): Mav = {
 		val command = new ImportProfilesCommand
 
 		val member = profileService.getMemberByUniversityIdStaleOrFresh(universityId) match {
@@ -251,10 +251,10 @@ class ImportSingleProfileController extends BaseSysadminController {
 @RequestMapping(Array("/sysadmin/complete-scheduled-notification"))
 class CompleteScheduledNotificationsController extends BaseSysadminController {
 
-	var scheduler = Wire[Scheduler]
+	var scheduler: Scheduler = Wire[Scheduler]
 
 	@RequestMapping
-	def complete() = {
+	def complete(): Mav = {
 		Redirect(Routes.sysadmin.jobs.quartzStatus(scheduler.scheduleNow[ProcessScheduledNotificationsJob]()))
 	}
 }
@@ -266,7 +266,7 @@ class QuartzJobStatusController extends BaseSysadminController {
 	@Value("${toplevel.url}") var toplevelUrl: String = _
 
 	@RequestMapping
-	def status(@RequestParam key: String) = {
+	def status(@RequestParam key: String): Mav = {
 		if (ajax) {
 			val clusterName = Uri.parse(Wire.property("${toplevel.url}")).getAuthority
 			val jdbcTemplate = new JdbcTemplate(dataSource)

@@ -2,12 +2,12 @@ package uk.ac.warwick.tabula.system
 
 import scala.collection.JavaConversions._
 import scala.collection.immutable.Stream
-
 import java.lang.annotation.Annotation
-
 import javax.servlet.ServletRequest
 
 import org.springframework.stereotype
+
+import scala.util.matching.Regex
 
 /**
  * Data binder mixin that disallows binding to certain classes, such as ones that
@@ -16,7 +16,7 @@ import org.springframework.stereotype
  */
 trait AllowedFieldsBinding extends CustomDataBinder {
 
-	val parentPathPattern = """(.+)\.(.+?)""".r // match (top.part.of.path).(child)
+	val parentPathPattern: Regex = """(.+)\.(.+?)""".r // match (top.part.of.path).(child)
 
 	// We do not bind to a class if it has one of these annotations.
 	val disallowedAnnotations: Set[Class[_ <: Annotation]] = Set(
@@ -27,15 +27,15 @@ trait AllowedFieldsBinding extends CustomDataBinder {
 		)
 
 	// Annotation you can add to an individual property to disable binding to it
-	val noBindAnnotation = classOf[NoBind]
+	val noBindAnnotation: Class[NoBind] = classOf[NoBind]
 
-	override def isAllowed(field: String) = {
+	override def isAllowed(field: String): Boolean = {
 		super.isAllowed(field) &&
 			! containedWithinDisallowedAnnotation(field) &&
 			! hasNoBindAnnotation(field)
 	}
 
-	def hasNoBindAnnotation(field: String) = {
+	def hasNoBindAnnotation(field: String): Boolean = {
 		val descriptor = propertyAccessor.getPropertyTypeDescriptor(field)
 		descriptor != null && descriptor.getAnnotation(noBindAnnotation) != null
 	}
@@ -48,7 +48,7 @@ trait AllowedFieldsBinding extends CustomDataBinder {
 	 * to manually go up through its parentage, looking for disallowed classes.
 	 * Probably not worth caching the results since they are short-lived.
 	 */
-	def containedWithinDisallowedAnnotation(field: String) = {
+	def containedWithinDisallowedAnnotation(field: String): Boolean = {
 		ancestors(field).flatMap(toPropertyType).exists(usesDisallowedAnnotation)
 	}
 
@@ -58,7 +58,7 @@ trait AllowedFieldsBinding extends CustomDataBinder {
 		case _ => Stream(field)
 	}
 
-	def usesDisallowedAnnotation(c: Class[_]) = {
+	def usesDisallowedAnnotation(c: Class[_]): Boolean = {
 		disallowedAnnotations.exists { annotation => c.getAnnotation(annotation) != null }
 	}
 

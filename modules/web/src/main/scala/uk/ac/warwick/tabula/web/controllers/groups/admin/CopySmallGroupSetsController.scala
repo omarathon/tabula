@@ -15,7 +15,7 @@ import uk.ac.warwick.tabula.permissions.Permission
 import uk.ac.warwick.tabula.services.{AutowiringMaintenanceModeServiceComponent, AutowiringModuleAndDepartmentServiceComponent, AutowiringUserSettingsServiceComponent}
 import uk.ac.warwick.tabula.web.controllers.DepartmentScopedController
 import uk.ac.warwick.tabula.web.controllers.groups.{GroupsController, GroupsDepartmentsAndModulesWithPermission}
-import uk.ac.warwick.tabula.web.{BreadCrumb, Routes}
+import uk.ac.warwick.tabula.web.{BreadCrumb, Mav, Routes}
 
 import scala.collection.JavaConverters._
 
@@ -30,19 +30,19 @@ abstract class CopySmallGroupSetsController extends GroupsController
 	def crumbsList(command: CopySmallGroupSetsCommand): Seq[BreadCrumb]
 
 	@ModelAttribute("academicYearChoices")
-	def academicYearChoices = AcademicYear.guessSITSAcademicYearByDate(DateTime.now).yearsSurrounding(3, 1)
+	def academicYearChoices: Seq[AcademicYear] = AcademicYear.guessSITSAcademicYearByDate(DateTime.now).yearsSurrounding(3, 1)
 
 	private def formView(command: CopySmallGroupSetsCommand) =
 		Mav("groups/admin/groups/copy").crumbsList(crumbsList(command))
 
 	@RequestMapping
-	def refresh(@ModelAttribute("copySmallGroupSetsCommand") command: CopySmallGroupSetsCommand) = {
+	def refresh(@ModelAttribute("copySmallGroupSetsCommand") command: CopySmallGroupSetsCommand): Mav = {
 		command.populate()
 		formView(command)
 	}
 
 	@RequestMapping(method = Array(POST), params = Array("action!=refresh"))
-	def submit(@Valid @ModelAttribute("copySmallGroupSetsCommand") command: CopySmallGroupSetsCommand, errors: Errors) = {
+	def submit(@Valid @ModelAttribute("copySmallGroupSetsCommand") command: CopySmallGroupSetsCommand, errors: Errors): Mav = {
 		if (errors.hasErrors) formView(command)
 		else {
 			command.apply()
@@ -74,7 +74,7 @@ class CopyDepartmentSmallGroupSetsController extends CopySmallGroupSetsControlle
 	override val departmentPermission: Permission = CopySmallGroupSetsCommand.RequiredPermission
 
 	@ModelAttribute("activeDepartment")
-	override def activeDepartment(@PathVariable department: Department) = retrieveActiveDepartment(Option(department))
+	override def activeDepartment(@PathVariable department: Department): Option[Department] = retrieveActiveDepartment(Option(department))
 
 	@ModelAttribute("copySmallGroupSetsCommand")
 	def command(@PathVariable department: Department): CopySmallGroupSetsCommand = {

@@ -23,7 +23,7 @@ abstract class AbstractStringUserType[A >: Null <: AnyRef : ClassTag] extends Ab
  */
 class ConvertibleStringUserType[A >: Null <: Convertible[String]](implicit factory: String => A, classTag: ClassTag[A])
 	extends AbstractStringUserType[A] {
-	override def convertToValue(obj: A) = obj.value
-	override def convertToObject(value: String) = factory(value)
+	override def convertToValue(obj: A): String = obj.value
+	override def convertToObject(value: String): A = factory(value)
 }
 

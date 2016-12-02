@@ -1,9 +1,10 @@
 package uk.ac.warwick.tabula.commands.attendance.manage
 
-import uk.ac.warwick.tabula.{Fixtures, MockUserLookup, Mockito, TestBase}
-import uk.ac.warwick.tabula.services.{SecurityService, SecurityServiceComponent, UserLookupComponent, ProfileServiceComponent, ProfileService}
+import uk.ac.warwick.tabula._
+import uk.ac.warwick.tabula.services._
 import uk.ac.warwick.tabula.commands.MemberOrUser
 import uk.ac.warwick.tabula.permissions.Permissions
+
 import scala.collection.JavaConverters._
 
 class EditSchemeMembershipCommandTest extends TestBase with Mockito {
@@ -13,12 +14,12 @@ class EditSchemeMembershipCommandTest extends TestBase with Mockito {
 		val command = new AddsUsersToEditSchemeMembershipCommand with ProfileServiceComponent with UserLookupComponent
 			with SecurityServiceComponent with EditSchemeMembershipCommandState {
 
-			val profileService = smartMock[ProfileService]
+			val profileService: ProfileService = smartMock[ProfileService]
 			val userLookup = new MockUserLookup
-			val securityService = smartMock[SecurityService]
+			val securityService: SecurityService = smartMock[SecurityService]
 
 			val scheme = null
-			val user = currentUser
+			val user: CurrentUser = currentUser
 		}
 
 		val validStudent = Fixtures.student("1111111","abcd")

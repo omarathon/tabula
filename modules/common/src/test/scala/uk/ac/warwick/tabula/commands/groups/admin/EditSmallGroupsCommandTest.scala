@@ -2,6 +2,7 @@ package uk.ac.warwick.tabula.commands.groups.admin
 
 import org.springframework.validation.{BindException, BindingResult}
 import uk.ac.warwick.tabula.commands._
+import uk.ac.warwick.tabula.data.model.Module
 import uk.ac.warwick.tabula.data.model.attendance.AttendanceState
 import uk.ac.warwick.tabula.data.model.groups._
 import uk.ac.warwick.tabula.helpers.Tap._
@@ -13,27 +14,28 @@ import uk.ac.warwick.tabula.{Fixtures, ItemNotFoundException, Mockito, TestBase}
 import uk.ac.warwick.userlookup.User
 
 import scala.collection.JavaConverters._
+import scala.collection.mutable
 
 class EditSmallGroupsCommandTest extends TestBase with Mockito {
 
 	private trait CommandTestSupport extends SmallGroupServiceComponent {
-		val smallGroupService = mock[SmallGroupService]
+		val smallGroupService: SmallGroupService = mock[SmallGroupService]
 	}
 
 	private trait Fixture {
-		val module = Fixtures.module("in101", "Introduction to Scala")
+		val module: Module = Fixtures.module("in101", "Introduction to Scala")
 		module.id = "moduleId"
 
-		val set = Fixtures.smallGroupSet("IN101 Seminars")
+		val set: SmallGroupSet = Fixtures.smallGroupSet("IN101 Seminars")
 		set.id = "existingId"
 		set.module = module
 	}
 
 	private trait ExistingGroupsFixture extends Fixture {
-		val groupA = Fixtures.smallGroup("Group A").tap { _.id = "groupAid" }
-		val groupB = Fixtures.smallGroup("Group B").tap { _.id = "groupBid" }
-		val groupC = Fixtures.smallGroup("Group C").tap { _.id = "groupCid" }
-		val groupD = Fixtures.smallGroup("Group D").tap { _.id = "groupDid" }
+		val groupA: SmallGroup = Fixtures.smallGroup("Group A").tap { _.id = "groupAid" }
+		val groupB: SmallGroup = Fixtures.smallGroup("Group B").tap { _.id = "groupBid" }
+		val groupC: SmallGroup = Fixtures.smallGroup("Group C").tap { _.id = "groupCid" }
+		val groupD: SmallGroup = Fixtures.smallGroup("Group D").tap { _.id = "groupDid" }
 
 		set.groups.add(groupA)
 		set.groups.add(groupB)
@@ -67,7 +69,7 @@ class EditSmallGroupsCommandTest extends TestBase with Mockito {
 		command.newGroups.get(1).name = "Group B"
 		command.newGroups.get(1).maxGroupSize = 15
 
-		val groups = command.applyInternal()
+		val groups: mutable.Buffer[SmallGroup] = command.applyInternal()
 		set.groups.asScala should be (groups)
 
 		groups(0).name should be ("Group A")
@@ -86,7 +88,7 @@ class EditSmallGroupsCommandTest extends TestBase with Mockito {
 		command.newGroups.get(1).name = "Group B"
 		command.newGroups.get(1).maxGroupSize = null
 
-		val groups = command.applyInternal()
+		val groups: mutable.Buffer[SmallGroup] = command.applyInternal()
 		set.groups.asScala should be (groups)
 
 		groups(0).name should be ("Group A")
@@ -105,7 +107,7 @@ class EditSmallGroupsCommandTest extends TestBase with Mockito {
 
 		command.onBind(mock[BindingResult])
 
-		val groups = command.applyInternal()
+		val groups: mutable.Buffer[SmallGroup] = command.applyInternal()
 		groups should be (Seq(groupA, groupB, groupC))
 
 		groupA.name should be ("Group A")
@@ -120,11 +122,11 @@ class EditSmallGroupsCommandTest extends TestBase with Mockito {
 	@Test def permissions { new Fixture {
 		val (theModule, theSet) = (module, set)
 		val command = new EditSmallGroupsPermissions with EditSmallGroupsCommandState {
-			val module = theModule
-			val set = theSet
+			val module: Module = theModule
+			val set: SmallGroupSet = theSet
 		}
 
-		val checking = mock[PermissionsChecking]
+		val checking: PermissionsChecking = mock[PermissionsChecking]
 		command.permissionsCheck(checking)
 
 		verify(checking, times(1)).PermissionCheck(Permissions.SmallGroups.Update, set)
@@ -142,7 +144,7 @@ class EditSmallGroupsCommandTest extends TestBase with Mockito {
 
 	@Test(expected = classOf[ItemNotFoundException]) def permissionsNoSet {
 		val command = new EditSmallGroupsPermissions with EditSmallGroupsCommandState {
-			val module = Fixtures.module("in101")
+			val module: Module = Fixtures.module("in101")
 			val set = null
 		}
 
@@ -152,7 +154,7 @@ class EditSmallGroupsCommandTest extends TestBase with Mockito {
 
 	@Test(expected = classOf[ItemNotFoundException]) def permissionsUnlinkedSet {
 		val command = new EditSmallGroupsPermissions with EditSmallGroupsCommandState {
-			val module = Fixtures.module("in101")
+			val module: Module = Fixtures.module("in101")
 			module.id = "set id"
 
 			val set = new SmallGroupSet(Fixtures.module("other"))
@@ -164,8 +166,8 @@ class EditSmallGroupsCommandTest extends TestBase with Mockito {
 
 	private trait ValidationFixture extends ExistingGroupsFixture {
 		val command = new EditSmallGroupsValidation with EditSmallGroupsCommandState with PopulateEditSmallGroupsCommand with CommandTestSupport {
-			val module = ValidationFixture.this.module
-			val set = ValidationFixture.this.set
+			val module: Module = ValidationFixture.this.module
+			val set: SmallGroupSet = ValidationFixture.this.set
 		}
 		command.populate()
 	}
@@ -245,7 +247,7 @@ class EditSmallGroupsCommandTest extends TestBase with Mockito {
 	}}
 
 	@Test def validateCantRemoveWhenAttendanceRecorded { new ValidationFixture {
-		val event = Fixtures.smallGroupEvent("An Event")
+		val event: SmallGroupEvent = Fixtures.smallGroupEvent("An Event")
 		groupD.addEvent(event)
 
 		command.existingGroups.get(groupD.id).delete = true
@@ -271,7 +273,7 @@ class EditSmallGroupsCommandTest extends TestBase with Mockito {
 	}}
 
 	@Test def validateCanRemoveWhenAttendaneNotRecorded { new ValidationFixture {
-		val event = Fixtures.smallGroupEvent("An Event")
+		val event: SmallGroupEvent = Fixtures.smallGroupEvent("An Event")
 		groupD.addEvent(event)
 
 		command.existingGroups.get(groupD.id).delete = true
@@ -297,8 +299,8 @@ class EditSmallGroupsCommandTest extends TestBase with Mockito {
 		val (mod, s) = (module, set)
 		val command = new EditSmallGroupsDescription with EditSmallGroupsCommandState {
 			override val eventName = "test"
-			val module = mod
-			val set = s
+			val module: Module = mod
+			val set: SmallGroupSet = s
 		}
 
 		val d = new DescriptionImpl

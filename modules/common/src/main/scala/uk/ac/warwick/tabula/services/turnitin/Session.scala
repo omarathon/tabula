@@ -36,7 +36,7 @@ class Session(turnitin: Turnitin, val sessionId: String) extends TurnitinMethods
 
 	private val http = turnitin.http
 	private def diagnostic = turnitin.diagnostic
-	def apiEndpoint = turnitin.apiEndpoint
+	def apiEndpoint: String = turnitin.apiEndpoint
 
 	/**
 	 * All API requests call the same URL and require the same MD5
@@ -78,7 +78,7 @@ class Session(turnitin: Turnitin, val sessionId: String) extends TurnitinMethods
 
 	def getRequest(
 		functionId: String, // API function ID (defined in TurnitinMethods object)
-		params: (String, String)*) = {
+		params: (String, String)*): Request = {
 
 		val fullParameters = calculateParameters(functionId, params:_*)
 		val req = turnitin.endpoint.POST << fullParameters
@@ -86,7 +86,7 @@ class Session(turnitin: Turnitin, val sessionId: String) extends TurnitinMethods
 		req
 	}
 
-	def calculateParameters(functionId: String, params: (String, String)*) = {
+	def calculateParameters(functionId: String, params: (String, String)*): Map[String, String] = {
 		val parameters = (Map("fid" -> functionId) ++ commonParameters ++ params).filterNot(nullValue)
 		parameters + md5hexparam(parameters)
 	}
@@ -120,7 +120,7 @@ class Session(turnitin: Turnitin, val sessionId: String) extends TurnitinMethods
 	/**
 	 * Parameters that we need in every request.
 	 */
-	def commonParameters = Map(
+	def commonParameters: Map[String, String] = Map(
 		"diagnostic" -> (if (diagnostic) "1" else "0"),
 		"gmtime" -> gmtTimestamp,
 		"encrypt" -> "0",
@@ -150,13 +150,13 @@ class Session(turnitin: Turnitin, val sessionId: String) extends TurnitinMethods
 	}
 
 	/** The md5 signature to add to the request parameter map. */
-	def md5hexparam(map: Map[String, String]) = "md5" -> md5hex(map)
+	def md5hexparam(map: Map[String, String]): (String, String) = "md5" -> md5hex(map)
 
 	/**
 	 * Sort parameters by key, concatenate all the values with
 	 * the shared key and MD5hex that.
 	 */
-	def md5hex(params: Map[String, String]) = {
+	def md5hex(params: Map[String, String]): String = {
 		val filteredParams = params.filterKeys(!excludeFromMd5.contains(_)).toSeq
 		val sortedParams = filteredParams.sortBy(toKey) // sort by key (left part of Pair)
 		val sortedValues = sortedParams.map(toValue).mkString // map to value (right part of Pair)

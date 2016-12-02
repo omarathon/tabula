@@ -57,7 +57,7 @@ class SubmissionsForMarkerTest extends TestBase {
 	}
 
 
-	def submissionValue(name: String, value: String) = {
+	def submissionValue(name: String, value: String): SavedFormValue = {
 		val sv = new SavedFormValue()
 		sv.name = name
 		sv.value = value
@@ -88,7 +88,7 @@ class SubmissionsForMarkerTest extends TestBase {
 		ms
 	}
 
-	def newSubmission(a: Assignment, values: Set[SavedFormValue]) = {
+	def newSubmission(a: Assignment, values: Set[SavedFormValue]): Submission = {
 		val s = new Submission
 		s.assignment = a
 		s.values.addAll(values.asJava)

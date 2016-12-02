@@ -24,7 +24,7 @@ class ExportYearMarksToSitsCommandInternal extends CommandInternal[Seq[StudentCo
 
 	self: StudentCourseYearDetailsDaoComponent with ExportYearMarksToSitsServiceComponent =>
 
-	override def applyInternal() = {
+	override def applyInternal(): Seq[StudentCourseYearDetails] = {
 		val scydsToExport = transactional(readOnly = true) {
 			studentCourseYearDetailsDao.listForYearMarkExport
 		}

@@ -7,6 +7,7 @@ import uk.ac.warwick.tabula.data.model.Assignment
 import uk.ac.warwick.tabula.helpers.StringUtils._
 import uk.ac.warwick.tabula.services.{AssessmentServiceComponent, AutowiringAssessmentServiceComponent}
 import uk.ac.warwick.tabula.system.permissions.Public
+import uk.ac.warwick.tabula.web.Mav
 import uk.ac.warwick.tabula.web.controllers.BaseController
 import uk.ac.warwick.tabula.web.views.JSONView
 
@@ -18,7 +19,7 @@ class AssignmentSearchPickerController extends BaseController {
 	def command = AssignmentSearchPickerCommand()
 
 	@RequestMapping
-	def query(@ModelAttribute("command")cmd: Appliable[Seq[Assignment]]) = {
+	def query(@ModelAttribute("command")cmd: Appliable[Seq[Assignment]]): Mav = {
 		val assignments = cmd.apply()
 		Mav(
 			new JSONView(
@@ -40,7 +41,7 @@ class AssignmentSearchPickerCommand extends CommandInternal[Seq[Assignment]] {
 
 	var query: String = _
 
-	def applyInternal() = {
+	def applyInternal(): Seq[Assignment] = {
 		if (query.isEmptyOrWhitespace) {
 			Seq()
 		} else {

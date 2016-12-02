@@ -57,10 +57,10 @@ trait ViewRelatedStudentsCommandState extends FiltersRelationships {
 	var sprStatuses: JList[SitsStatus] = JArrayList()
 	var modules: JList[Module] = JArrayList()
 
-	lazy val allCourses =
+	lazy val allCourses: Seq[StudentCourseDetails] =
 		profileService.getSCDsByAgentRelationshipAndRestrictions(relationshipType, currentMember, Nil)
-	lazy val allDepartments = allCourses.flatMap(c => Option(c.department)).distinct
-	lazy val allRoutes = allCourses.flatMap(c => Option(c.currentRoute)).distinct
+	lazy val allDepartments: Seq[Department] = allCourses.flatMap(c => Option(c.department)).distinct
+	lazy val allRoutes: Seq[Route] = allCourses.flatMap(c => Option(c.currentRoute)).distinct
 }
 
 abstract class ViewRelatedStudentsCommandInternal(val currentMember: Member, val relationshipType: StudentRelationshipType)

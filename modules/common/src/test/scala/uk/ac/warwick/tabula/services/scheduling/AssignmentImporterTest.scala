@@ -2,7 +2,7 @@ package uk.ac.warwick.tabula.services.scheduling
 
 import org.junit.After
 import org.springframework.jdbc.core.namedparam.{MapSqlParameterSource, NamedParameterUtils}
-import org.springframework.jdbc.datasource.embedded.EmbeddedDatabaseBuilder
+import org.springframework.jdbc.datasource.embedded.{EmbeddedDatabase, EmbeddedDatabaseBuilder}
 import uk.ac.warwick.tabula.JavaImports._
 import uk.ac.warwick.tabula.data.model.{AssessmentComponent, UpstreamAssessmentGroup, UpstreamModuleRegistration}
 import uk.ac.warwick.tabula.{AcademicYear, Mockito, TestBase}
@@ -12,7 +12,7 @@ import scala.collection.mutable.ArrayBuffer
 import scala.reflect._
 
 trait EmbeddedSits {
-	val sits = new EmbeddedDatabaseBuilder().addScript("sits.sql").build()
+	val sits: EmbeddedDatabase = new EmbeddedDatabaseBuilder().addScript("sits.sql").build()
 
 	@After def afterTheFeast() {
 		sits.shutdown()

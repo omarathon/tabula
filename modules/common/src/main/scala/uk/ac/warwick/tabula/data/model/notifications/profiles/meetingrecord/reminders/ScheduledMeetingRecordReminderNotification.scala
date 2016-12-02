@@ -7,6 +7,7 @@ import uk.ac.warwick.tabula.data.model.NotificationPriority.Warning
 import uk.ac.warwick.tabula.data.model.notifications.profiles.meetingrecord.ScheduledMeetingRecordNotification
 import uk.ac.warwick.tabula.data.model.{FreemarkerModel, SingleRecipientNotification}
 import uk.ac.warwick.tabula.helpers.ConfigurableIntervalFormatter
+import uk.ac.warwick.userlookup.User
 
 abstract class ScheduledMeetingRecordReminderNotification extends ScheduledMeetingRecordNotification with SingleRecipientNotification {
 
@@ -15,14 +16,14 @@ abstract class ScheduledMeetingRecordReminderNotification extends ScheduledMeeti
 
 	def FreemarkerTemplate = "/WEB-INF/freemarker/notifications/meetingrecord/scheduled_meeting_record_reminder_notification.ftl"
 
-	def referenceDate = meeting.meetingDate
-	def isToday = {
+	def referenceDate: DateTime = meeting.meetingDate
+	def isToday: Boolean = {
 		val today = DateTime.now.withTimeAtStartOfDay()
 		val meetingDate = meeting.meetingDate.withTimeAtStartOfDay()
 		today == meetingDate
 	}
 
-	def title = {
+	def title: String = {
 		val name =
 			if (isAgent) meeting.relationship.studentMember.flatMap { _.fullName }.getOrElse("student")
 			else meeting.relationship.agentName
@@ -55,7 +56,7 @@ class ScheduledMeetingRecordReminderStudentNotification extends ScheduledMeeting
 
 	override def isAgent = false
 
-	override def recipient = meeting.relationship.studentMember.getOrElse(throw new IllegalStateException(studentNotFoundMessage)).asSsoUser
+	override def recipient: User = meeting.relationship.studentMember.getOrElse(throw new IllegalStateException(studentNotFoundMessage)).asSsoUser
 
 }
 
@@ -65,6 +66,6 @@ class ScheduledMeetingRecordReminderAgentNotification extends ScheduledMeetingRe
 
 	override def isAgent = true
 
-	override def recipient = meeting.relationship.agentMember.getOrElse(throw new IllegalStateException(agentNotFoundMessage)).asSsoUser
+	override def recipient: User = meeting.relationship.agentMember.getOrElse(throw new IllegalStateException(agentNotFoundMessage)).asSsoUser
 
 }

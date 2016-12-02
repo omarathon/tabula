@@ -21,15 +21,15 @@ object ViewProfileSubsetCommand {
 abstract class ViewProfileSubsetCommandInternal(val universityId: String, profileService: ProfileService,	userLookup: UserLookupService)
 	extends CommandInternal[ProfileSubset] with ViewProfileSubsetCommandState {
 
-	val studentMember = profileService.getMemberByUniversityId(universityId).collect{ case sm:StudentMember => sm }
+	val studentMember: Option[StudentMember] = profileService.getMemberByUniversityId(universityId).collect{ case sm:StudentMember => sm }
 
 	// only try to get the user via lookup if no student member is found
-	val user = studentMember match {
+	val user: Option[User] = studentMember match {
 		case Some(_) => None
 		case None => Option(userLookup.getUserByWarwickUniId(universityId))
 	}
 
-	def applyInternal() = {
+	def applyInternal(): ProfileSubset = {
 		if (studentMember.isDefined || user.isDefined)
 			ProfileSubset(studentMember.isDefined, user, studentMember, studentMember.flatMap(_.mostSignificantCourseDetails))
 		else

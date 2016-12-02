@@ -38,7 +38,7 @@ class AttendanceProfileCommandInternal(val student: StudentMember, val academicY
 
 	self: AttendanceMonitoringServiceComponent with TermServiceComponent =>
 
-	override def applyInternal() = {
+	override def applyInternal(): AttendanceProfileCommandResult = {
 		val points = benchmarkTask("listStudentsPoints") {
 			attendanceMonitoringService.listStudentsPoints(student, None, academicYear)
 		}

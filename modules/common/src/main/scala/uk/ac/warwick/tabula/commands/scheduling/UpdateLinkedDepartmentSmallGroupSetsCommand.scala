@@ -32,7 +32,7 @@ class UpdateLinkedDepartmentSmallGroupSetsCommandInternal(
 
 	self: FeaturesComponent with SmallGroupServiceComponent =>
 
-	override def applyInternal() = {
+	override def applyInternal(): Seq[DepartmentSmallGroupSet] = {
 		val setsToUpdate = transactional(readOnly = true) { smallGroupService.listDepartmentSetsForMembershipUpdate }
 
 		logger.info(s"${setsToUpdate.size} sets need membership updating")
@@ -47,10 +47,13 @@ class UpdateLinkedDepartmentSmallGroupSetsCommandInternal(
 			transactional() {
 				val updateCommand = updateCommandFactory.apply(set.department, set)
 				updateCommand.linkToSits = true
-				updateCommand.staticStudentIds = staticStudentIds
 				updateCommand.filterQueryString = set.memberQuery
-				updateCommand.includedStudentIds = set.members.knownType.includedUserIds.asJava
-				updateCommand.excludedStudentIds = set.members.knownType.excludedUserIds.asJava
+				updateCommand.staticStudentIds.clear()
+				updateCommand.staticStudentIds.addAll(staticStudentIds)
+				updateCommand.includedStudentIds.clear()
+				updateCommand.includedStudentIds.addAll(set.members.knownType.includedUserIds.asJava)
+				updateCommand.excludedStudentIds.clear()
+				updateCommand.excludedStudentIds.addAll(set.members.knownType.excludedUserIds.asJava)
 				updateCommand.apply()
 			}
 		}

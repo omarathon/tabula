@@ -1,7 +1,9 @@
 package uk.ac.warwick.tabula.services.elasticsearch
 
 import com.sksamuel.elastic4s.ElasticDsl._
+import com.sksamuel.elastic4s.{RichGetResponse, RichSearchResponse}
 import org.elasticsearch.search.sort.SortOrder
+import org.hibernate.Session
 import org.joda.time.DateTime
 import org.junit.After
 import org.scalatest.time.{Millis, Seconds, Span}
@@ -13,6 +15,8 @@ import uk.ac.warwick.tabula.{Fixtures, Mockito, PersistenceTestBase, TestElastic
 import uk.ac.warwick.util.core.StopWatch
 
 import scala.collection.JavaConverters._
+import scala.collection.immutable.IndexedSeq
+import scala.concurrent.Future
 
 class ProfileIndexServiceTest extends PersistenceTestBase with Mockito with TestElasticsearchClient {
 
@@ -20,11 +24,11 @@ class ProfileIndexServiceTest extends PersistenceTestBase with Mockito with Test
 		PatienceConfig(timeout = Span(2, Seconds), interval = Span(50, Millis))
 
 	val indexName = "profile"
-	val indexType = new ProfileIndexType {}.indexType
+	val indexType: String = new ProfileIndexType {}.indexType
 
 	private trait Fixture {
 		val dao: MemberDaoImpl = new MemberDaoImpl with SessionComponent {
-			val session = sessionFactory.getCurrentSession
+			val session: Session = sessionFactory.getCurrentSession
 		}
 
 		val indexer = new ProfileIndexService
@@ -59,7 +63,7 @@ class ProfileIndexServiceTest extends PersistenceTestBase with Mockito with Test
 		blockUntilCount(1, indexName, indexType)
 
 		// University ID is the ID field so it isn't in the doc source
-		val doc = client.execute { get id m.universityId from indexName / indexType }.futureValue
+		val doc: RichGetResponse = client.execute { get id m.universityId from indexName / indexType }.futureValue
 
 		doc.source.asScala.toMap should be (Map(
 			"userId" -> "cuscav",
@@ -81,7 +85,7 @@ class ProfileIndexServiceTest extends PersistenceTestBase with Mockito with Test
 		val stopwatch = new StopWatch
 		stopwatch.start("creating items")
 
-		val items = for (i <- 1 to 100)
+		val items: IndexedSeq[StudentMember] = for (i <- 1 to 100)
 			yield {
 				val m = new StudentMember
 				m.universityId = i.toString
@@ -110,12 +114,12 @@ class ProfileIndexServiceTest extends PersistenceTestBase with Mockito with Test
 
 		stopwatch.stop()
 
-		def listRecent(max: Int) =
+		def listRecent(max: Int): Future[RichSearchResponse] =
 			client.execute { search in indexName / indexType sort ( field sort "lastUpdatedDate" order SortOrder.DESC ) limit max }
 
 		listRecent(100).futureValue.hits.length should be (100)
 
-		val moreItems = {
+		val moreItems: Seq[StudentMember] = {
 			val m = new StudentMember
 			m.universityId = "x9000"
 			m.userId = "x9000"

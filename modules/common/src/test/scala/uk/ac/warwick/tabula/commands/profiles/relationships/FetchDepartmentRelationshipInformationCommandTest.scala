@@ -1,7 +1,7 @@
 package uk.ac.warwick.tabula.commands.profiles.relationships
 
 import uk.ac.warwick.tabula.JavaImports.JArrayList
-import uk.ac.warwick.tabula.commands.{StudentAssociationData, StudentAssociationEntityData}
+import uk.ac.warwick.tabula.commands.{StudentAssociationData, StudentAssociationEntityData, StudentAssociationResult}
 import uk.ac.warwick.tabula.services.{ProfileService, ProfileServiceComponent, RelationshipService, RelationshipServiceComponent}
 import uk.ac.warwick.tabula.{Fixtures, Mockito, TestBase}
 
@@ -37,10 +37,10 @@ class FetchDepartmentRelationshipInformationCommandTest extends TestBase with Mo
 			with FetchDepartmentRelationshipInformationCommandRequest with FetchDepartmentRelationshipInformationCommandState
 			with RelationshipServiceComponent with ProfileServiceComponent {
 
-			val relationshipService = smartMock[RelationshipService]
+			val relationshipService: RelationshipService = smartMock[RelationshipService]
 			relationshipService.getStudentAssociationDataWithoutRelationship(null, null, Seq()) returns mockDbUnallocated
 			relationshipService.getStudentAssociationEntityData(null, null, Seq()) returns mockDbAllocated
-			val profileService = smartMock[ProfileService]
+			val profileService: ProfileService = smartMock[ProfileService]
 			profileService.getAllMembersWithUserId("cusfal") returns Seq(Fixtures.staff("0770884", "cusfal"))
 			relationshipService.getStudentAssociationEntityData(null, null, Seq("0770884")) returns Seq(
 				StudentAssociationEntityData("1", null, null, null, null, Seq()),
@@ -56,20 +56,20 @@ class FetchDepartmentRelationshipInformationCommandTest extends TestBase with Mo
 	def query(): Unit = {
 		new Fixture {
 			command.query = "JO"
-			val result = command.applyInternal()
+			val result: StudentAssociationResult = command.applyInternal()
 			result.unallocated.size should be (2)
 			result.unallocated.contains(student8) should be {true}
 			result.unallocated.contains(student9) should be {true}
 		}
 		new Fixture {
 			command.query = "pa sm"
-			val result = command.applyInternal()
+			val result: StudentAssociationResult = command.applyInternal()
 			result.unallocated.size should be (1)
 			result.unallocated.contains(student9) should be {true}
 		}
 		new Fixture {
 			command.query = "Sam Jones"
-			val result = command.applyInternal()
+			val result: StudentAssociationResult = command.applyInternal()
 			result.unallocated.size should be (1)
 			result.unallocated.contains(student9) should be {true}
 		}
@@ -80,11 +80,11 @@ class FetchDepartmentRelationshipInformationCommandTest extends TestBase with Mo
 		new Fixture {
 			command.entities.addAll(Seq("1", "2", "3").asJava)
 			command.action = FetchDepartmentRelationshipInformationCommand.Actions.DistributeAll
-			val result = command.applyInternal()
+			val result: StudentAssociationResult = command.applyInternal()
 			result.unallocated.size should be (0)
 			result.allocated.size should be (4)
 			result.allocated.flatMap(_.students).distinct.size should be (11)
-			val sizes = result.allocated.map(_.students.size)
+			val sizes: Seq[Int] = result.allocated.map(_.students.size)
 			sizes.count(_ == 3) should be (3)
 			sizes.count(_ == 2) should be (1)
 			mockDbUnallocated.map(_.universityId).foreach(id => {
@@ -95,11 +95,11 @@ class FetchDepartmentRelationshipInformationCommandTest extends TestBase with Mo
 		new Fixture {
 			command.entities.addAll(Seq("1", "2", "3", "4").asJava)
 			command.action = FetchDepartmentRelationshipInformationCommand.Actions.DistributeAll
-			val result = command.applyInternal()
+			val result: StudentAssociationResult = command.applyInternal()
 			result.unallocated.size should be (0)
 			result.allocated.size should be (4)
 			result.allocated.flatMap(_.students).distinct.size should be (11)
-			val sizes = result.allocated.map(_.students.size)
+			val sizes: Seq[Int] = result.allocated.map(_.students.size)
 			sizes.count(_ == 3) should be (3)
 			sizes.count(_ == 2) should be (1)
 			mockDbUnallocated.map(_.universityId).foreach(id => {
@@ -110,7 +110,7 @@ class FetchDepartmentRelationshipInformationCommandTest extends TestBase with Mo
 		new Fixture {
 			command.entities.addAll(Seq("3", "4").asJava)
 			command.action = FetchDepartmentRelationshipInformationCommand.Actions.DistributeAll
-			val result = command.applyInternal()
+			val result: StudentAssociationResult = command.applyInternal()
 			result.unallocated.size should be (0)
 			result.allocated.size should be (4)
 			result.allocated.flatMap(_.students).distinct.size should be (11)
@@ -131,11 +131,11 @@ class FetchDepartmentRelationshipInformationCommandTest extends TestBase with Mo
 			command.allocate.addAll(allocated.asJava)
 			command.entities.addAll(Seq("1", "2", "3").asJava)
 			command.action = FetchDepartmentRelationshipInformationCommand.Actions.DistributeSelected
-			val result = command.applyInternal()
+			val result: StudentAssociationResult = command.applyInternal()
 			result.unallocated.size should be (0)
 			result.allocated.size should be (4)
 			result.allocated.flatMap(_.students).distinct.size should be (11)
-			val sizes = result.allocated.map(_.students.size)
+			val sizes: Seq[Int] = result.allocated.map(_.students.size)
 			sizes.count(_ == 3) should be (3)
 			sizes.count(_ == 2) should be (1)
 			allocated.foreach(id => {
@@ -148,11 +148,11 @@ class FetchDepartmentRelationshipInformationCommandTest extends TestBase with Mo
 			command.allocate.addAll(allocated.asJava)
 			command.entities.addAll(Seq("1", "2", "3", "4").asJava)
 			command.action = FetchDepartmentRelationshipInformationCommand.Actions.DistributeSelected
-			val result = command.applyInternal()
+			val result: StudentAssociationResult = command.applyInternal()
 			result.unallocated.size should be (1)
 			result.allocated.size should be (4)
 			result.allocated.flatMap(_.students).distinct.size should be (10)
-			val sizes = result.allocated.map(_.students.size)
+			val sizes: Seq[Int] = result.allocated.map(_.students.size)
 			sizes.count(_ == 3) should be (2)
 			sizes.count(_ == 2) should be (2)
 			allocated.foreach(id => {
@@ -165,7 +165,7 @@ class FetchDepartmentRelationshipInformationCommandTest extends TestBase with Mo
 			command.allocate.addAll(allocated.asJava)
 			command.entities.addAll(Seq("3", "4").asJava)
 			command.action = FetchDepartmentRelationshipInformationCommand.Actions.DistributeSelected
-			val result = command.applyInternal()
+			val result: StudentAssociationResult = command.applyInternal()
 			result.unallocated.size should be (1)
 			result.allocated.size should be (4)
 			result.allocated.flatMap(_.students).distinct.size should be (10)
@@ -185,7 +185,7 @@ class FetchDepartmentRelationshipInformationCommandTest extends TestBase with Mo
 			command.studentToRemove = "1"
 			command.entityToRemoveFrom = "2"
 			command.action = FetchDepartmentRelationshipInformationCommand.Actions.RemoveSingle
-			val result = command.applyInternal()
+			val result: StudentAssociationResult = command.applyInternal()
 			result.unallocated.size should be (5)
 			result.allocated.size should be (4)
 			result.allocated.flatMap(_.students).distinct.size should be (6)
@@ -199,7 +199,7 @@ class FetchDepartmentRelationshipInformationCommandTest extends TestBase with Mo
 		new Fixture {
 			command.entities.addAll(Seq("3", "4").asJava)
 			command.action = FetchDepartmentRelationshipInformationCommand.Actions.RemoveFromAll
-			val result = command.applyInternal()
+			val result: StudentAssociationResult = command.applyInternal()
 			result.unallocated.size should be (9)
 			result.allocated.size should be (4)
 			result.allocated.flatMap(_.students).distinct.size should be (2)
@@ -220,7 +220,7 @@ class FetchDepartmentRelationshipInformationCommandTest extends TestBase with Mo
 			command.studentToRemove = "1"
 			command.entityToRemoveFrom = "2"
 			command.action = FetchDepartmentRelationshipInformationCommand.Actions.RemoveSingle
-			val result = command.applyInternal()
+			val result: StudentAssociationResult = command.applyInternal()
 			result.unallocated.size should be (5)
 			result.allocated.size should be (4)
 			result.allocated.flatMap(_.students).distinct.size should be (6)
@@ -230,7 +230,7 @@ class FetchDepartmentRelationshipInformationCommandTest extends TestBase with Mo
 			command.allocate = Seq("1").asJava
 			command.entities = Seq("2").asJava
 			command.action = FetchDepartmentRelationshipInformationCommand.Actions.DistributeSelected
-			val result2 = command.applyInternal()
+			val result2: StudentAssociationResult = command.applyInternal()
 			result2.unallocated.size should be (4)
 			result2.allocated.size should be (4)
 			result2.allocated.flatMap(_.students).distinct.size should be (7)
@@ -247,7 +247,7 @@ class FetchDepartmentRelationshipInformationCommandTest extends TestBase with Mo
 			command.allocate = JArrayList("8")
 			command.entities = JArrayList("2")
 			command.action = FetchDepartmentRelationshipInformationCommand.Actions.DistributeSelected
-			val result = command.applyInternal()
+			val result: StudentAssociationResult = command.applyInternal()
 			result.unallocated.size should be (3)
 			result.allocated.size should be (4)
 			result.allocated.flatMap(_.students).distinct.size should be (8)
@@ -257,7 +257,7 @@ class FetchDepartmentRelationshipInformationCommandTest extends TestBase with Mo
 			command.studentToRemove = "8"
 			command.entityToRemoveFrom = "2"
 			command.action = FetchDepartmentRelationshipInformationCommand.Actions.RemoveSingle
-			val result2 = command.applyInternal()
+			val result2: StudentAssociationResult = command.applyInternal()
 			result2.unallocated.size should be (4)
 			result2.allocated.size should be (4)
 			result2.allocated.flatMap(_.students).distinct.size should be (7)
@@ -272,7 +272,7 @@ class FetchDepartmentRelationshipInformationCommandTest extends TestBase with Mo
 		new Fixture {
 			command.additionalEntityUserIds = JArrayList("cusfal")
 			command.action = FetchDepartmentRelationshipInformationCommand.Actions.AddAdditionalEntities
-			val result = command.applyInternal()
+			val result: StudentAssociationResult = command.applyInternal()
 			result.unallocated.size should be (4)
 			result.allocated.size should be (5)
 		}

@@ -15,10 +15,10 @@ class ExamReleasedForMarkingNotification extends Notification[Exam, Unit]
 	with AutowiringUserLookupComponent {
 
 	@transient
-	final lazy val exam = item.entity
+	final lazy val exam: Exam = item.entity
 
 	@transient
-	final lazy val moduleCode = exam.module.code.toUpperCase
+	final lazy val moduleCode: String = exam.module.code.toUpperCase
 
 	def verb = "released"
 
@@ -28,7 +28,7 @@ class ExamReleasedForMarkingNotification extends Notification[Exam, Unit]
 		"exam" -> exam
 	))
 
-	def url = web.Routes.Exams.admin.markerFeedback(exam, recipient)
+	def url: String = web.Routes.Exams.admin.markerFeedback(exam, recipient)
 	def urlTitle = "enter marks"
 
 }

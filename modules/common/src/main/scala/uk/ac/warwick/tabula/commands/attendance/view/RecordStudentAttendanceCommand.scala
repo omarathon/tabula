@@ -24,7 +24,7 @@ class RecordStudentAttendanceCommandInternal(val department: Department, val aca
 
 	self: StudentRecordCommandRequest with AttendanceMonitoringServiceComponent =>
 
-	override def applyInternal() = {
+	override def applyInternal(): (Seq[AttendanceMonitoringCheckpoint], Seq[AttendanceMonitoringCheckpointTotal]) = {
 		attendanceMonitoringService.setAttendance(student, checkpointMap.asScala.toMap, user)
 	}
 

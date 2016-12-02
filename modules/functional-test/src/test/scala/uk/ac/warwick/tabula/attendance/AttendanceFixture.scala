@@ -11,7 +11,7 @@ class AttendanceFixture extends BrowserTest with FeaturesDriver with FixturesDri
 	val TEST_UNDERGRAD_COURSE_CODE="Ux123"
 	val TEST_POSTGRAD_COURSE_CODE="Px123"
 
-	val thisAcademicYearString = FunctionalTestAcademicYear.current.startYear.toString
+	val thisAcademicYearString: String = FunctionalTestAcademicYear.current.startYear.toString
 
 	before {
 		go to Path("/fixtures/setup")

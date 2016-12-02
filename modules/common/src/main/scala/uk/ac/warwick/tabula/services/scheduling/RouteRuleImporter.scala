@@ -18,6 +18,7 @@ import uk.ac.warwick.tabula.services.{AutowiringCourseAndRouteServiceComponent, 
 import uk.ac.warwick.tabula.data.Transactions._
 
 import scala.collection.JavaConverters._
+import scala.util.matching.Regex
 
 
 trait RouteRuleImporter {
@@ -31,7 +32,7 @@ trait RouteRuleImporter {
 class RouteRuleImporterImpl extends RouteRuleImporter with InitializingBean
 	with TaskBenchmarking with AutowiringCourseAndRouteServiceComponent with AutowiringUpstreamModuleListServiceComponent {
 
-	var sits = Wire[DataSource]("sitsDataSource")
+	var sits: DataSource = Wire[DataSource]("sitsDataSource")
 
 	var routeRuleQuery: UpstreamRouteRuleQuery = _
 
@@ -82,9 +83,9 @@ object RouteRuleImporter {
 
 	var sitsSchema: String = Wire.property("${schema.sits}")
 
-	val academicYearPattern = ".*(\\d\\d/\\d\\d).*".r
+	val academicYearPattern: Regex = ".*(\\d\\d/\\d\\d).*".r
 
-	def GetRouteRules = """
+	def GetRouteRules: String = """
 		select
 			pmr.pwy_code as route_code,
 			pmr.lev_code as year_of_study,
@@ -111,7 +112,7 @@ object RouteRuleImporter {
 
 	class UpstreamRouteRuleQuery(ds: DataSource) extends MappingSqlQuery[UpstreamRouteRuleRow](ds, GetRouteRules) {
 		this.compile()
-		override def mapRow(rs: ResultSet, rowNumber: Int) = {
+		override def mapRow(rs: ResultSet, rowNumber: Int): UpstreamRouteRuleRow = {
 			val academicYear = rs.getString("description").maybeText.flatMap {
 				case academicYearPattern(academicYearString) => Option(academicYearString)
 				case _ => None

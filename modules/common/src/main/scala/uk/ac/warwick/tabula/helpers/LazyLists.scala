@@ -16,7 +16,7 @@ import uk.ac.warwick.util.collections.LazyList
 object LazyLists {
 
 	class FuncFactory[A](fn: () => A) extends LazyList.Factory[A] {
-		override def create = fn()
+		override def create: A = fn()
 	}
 
 	/**

@@ -14,8 +14,8 @@ class ViewModuleRegistrationsCommandTest extends TestBase with Mockito {
 	@Test
 	def requiresModuleRegistrationCoreReadPermissions() {
 		val perms = new ViewModuleRegistrationsCommandPermissions with ViewModuleRegistrationsCommandState {
-			val studentCourseDetails = scd
-			val academicYear = year
+			val studentCourseDetails: StudentCourseDetails = scd
+			val academicYear: AcademicYear = year
 		}
 
 		val checking = mock[PermissionsChecking]

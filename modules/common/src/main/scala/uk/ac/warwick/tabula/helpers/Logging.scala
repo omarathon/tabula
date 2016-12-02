@@ -4,9 +4,9 @@ import Stopwatches._
 import scala.reflect.ClassTag
 
 trait Logging {
-	@transient val loggerName = this.getClass.getName
-	@transient lazy val logger = LoggerFactory.getLogger(loggerName)
-	@transient lazy val debugEnabled = logger.isDebugEnabled
+	@transient val loggerName: String = this.getClass.getName
+	@transient lazy val logger: Logger = LoggerFactory.getLogger(loggerName)
+	@transient lazy val debugEnabled: Boolean = logger.isDebugEnabled
 
 	@transient val Error = Logging.Level.Error
 	@transient val Warn = Logging.Level.Warn
@@ -18,7 +18,7 @@ trait Logging {
 	 * format placeholders in the message. Checks debugEnabled for you,
 	 * so no need to do that.
 	 */
-	def debug(message: String, arguments: Any*) =
+	def debug(message: String, arguments: Any*): Unit =
 		if (debugEnabled) logger.debug(message format (arguments: _*))
 
 	/**
@@ -26,7 +26,7 @@ trait Logging {
 	 * Returns the collection so you can wrap it with this without having
 	 * to break out into a variable.
 	 */
-	def logSize[A](seq: Seq[A], level: Logging.Level = Info)(implicit tag: ClassTag[A]) = {
+	def logSize[A](seq: Seq[A], level: Logging.Level = Info)(implicit tag: ClassTag[A]): Seq[A] = {
 		log(logger, level, "Collection of " + tag.runtimeClass.getSimpleName + "s: " + seq.size)
 		seq
 	}

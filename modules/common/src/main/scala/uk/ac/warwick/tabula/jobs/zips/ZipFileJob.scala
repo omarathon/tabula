@@ -12,7 +12,7 @@ abstract class ZipFileJob extends Job {
 	def zipFileName: String
 	def itemDescription: String
 
-	def updateZipProgress(item: Int, total: Int)(implicit job: JobInstance) = {
+	def updateZipProgress(item: Int, total: Int)(implicit job: JobInstance): Unit = {
 		updateStatus(s"Adding file $item of $total")
 		updateProgress((item.toFloat / total.toFloat * 100).toInt)
 	}

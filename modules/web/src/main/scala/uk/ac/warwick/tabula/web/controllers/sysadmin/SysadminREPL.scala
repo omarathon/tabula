@@ -6,6 +6,7 @@ import org.springframework.stereotype.Controller
 import org.springframework.web.bind.annotation.RequestParam
 import java.io.PrintWriter
 import java.io.StringWriter
+
 import org.springframework.beans.factory.BeanFactoryAware
 import org.springframework.beans.factory.BeanFactory
 import org.springframework.beans.factory.annotation.Autowired
@@ -15,6 +16,8 @@ import uk.ac.warwick.tabula.JavaImports._
 import uk.ac.warwick.tabula.data.model._
 import uk.ac.warwick.tabula.services._
 import org.hibernate.Session
+import uk.ac.warwick.tabula.web.Mav
+
 import scala.beans.BeanProperty
 
 @Controller
@@ -28,7 +31,7 @@ class SysadminREPL extends BaseSysadminController with BeanFactoryAware {
 	val spel: SpelExpressionParser = new SpelExpressionParser
 
 	@annotation.RequestMapping
-	def evaluate(@RequestParam(value = "query", defaultValue = "") query: String) = {
+	def evaluate(@RequestParam(value = "query", defaultValue = "") query: String): Mav = {
 		val response = if (query.hasText) {
 			val context = new StandardEvaluationContext(RootObject(session))
 			val expression = spel.parseExpression(query)
@@ -62,7 +65,7 @@ class SysadminREPL extends BaseSysadminController with BeanFactoryAware {
  */
 abstract class MapAccessor[A] extends JMap[String, A] {
 	def fetch(key: String): A
-	override def get(key: Any) = fetch(key.asInstanceOf[String])
+	override def get(key: Any): A = fetch(key.asInstanceOf[String])
 	override def put(key: String, value: A) = throw strop
 	override def keySet = throw strop
 	override def entrySet = throw strop
@@ -84,24 +87,24 @@ object MapAccessor {
 	 * the string to an object.
 	 */
 	def apply[A](fn: String => A) = new MapAccessor[A] {
-		override def fetch(id: String) = fn(id)
+		override def fetch(id: String): A = fn(id)
 	}
 }
 
 case class Return(value: Any, exception: Exception = null) {
-	lazy val stringValue = value.toString
-	lazy val isNone = value match {
+	lazy val stringValue: String = value.toString
+	lazy val isNone: Boolean = value match {
 		case None => true
 		case _ => false
 	}
-	lazy val stackTrace = {
+	lazy val stackTrace: String = {
 		val stringer = new StringWriter
 		val writer = new PrintWriter(stringer)
 		exception.printStackTrace(writer)
 		writer.close()
 		stringer.toString
 	}
-	lazy val valueType = {
+	lazy val valueType: String = {
 		value match {
 			case Some(any: Any) => any.getClass.getSimpleName
 			case any: Any => any.getClass.getSimpleName

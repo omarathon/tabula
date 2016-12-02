@@ -26,8 +26,8 @@ class DisplaySettingsCommandTest extends TestBase with Mockito {
 		testDepartment.autoGroupDeregistration = true
 
 		val commandInternal = new DisplaySettingsCommandInternal(testDepartment) with ModuleAndDepartmentServiceComponent with RelationshipServiceComponent {
-			var moduleAndDepartmentService = mock[ModuleAndDepartmentService]
-			var relationshipService = mock[RelationshipService]
+			var moduleAndDepartmentService: ModuleAndDepartmentService = mock[ModuleAndDepartmentService]
+			var relationshipService: RelationshipService = mock[RelationshipService]
 		}
 
 	}
@@ -106,7 +106,7 @@ class DisplaySettingsCommandTest extends TestBase with Mockito {
 				val department: Department = testDepartment
 			}
 
-			val description = mock[Description]
+			val description: Description = mock[Description]
 			describable.describe(description)
 			verify(description, times(1)).department(testDepartment)
 		}
@@ -118,7 +118,7 @@ class DisplaySettingsCommandTest extends TestBase with Mockito {
 			val perms = new DisplaySettingsCommandPermissions() with DisplaySettingsCommandState{
 				val department: Department = testDepartment
 			}
-			val checking = mock[PermissionsChecking]
+			val checking: PermissionsChecking = mock[PermissionsChecking]
 			perms.permissionsCheck(checking)
 			verify(checking, times(1)).PermissionCheck(Permissions.Department.ManageDisplaySettings, testDepartment)
 		}

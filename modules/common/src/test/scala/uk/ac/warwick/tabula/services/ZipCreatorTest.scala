@@ -4,14 +4,14 @@ import java.io.ByteArrayInputStream
 
 import uk.ac.warwick.tabula.TestBase
 import uk.ac.warwick.tabula.data.SHAFileHasherComponent
-import uk.ac.warwick.tabula.services.objectstore.ObjectStorageServiceComponent
+import uk.ac.warwick.tabula.services.objectstore.{ObjectStorageService, ObjectStorageServiceComponent}
 
 class ZipCreatorTest extends TestBase {
 
-	val transientObjectStore = createTransientObjectStore()
+	val transientObjectStore: ObjectStorageService = createTransientObjectStore()
 
 	val creator = new ZipCreator() with SHAFileHasherComponent with ObjectStorageServiceComponent {
-		override val objectStorageService = transientObjectStore
+		override val objectStorageService: ObjectStorageService = transientObjectStore
 	}
 
 	@Test def itWorks {

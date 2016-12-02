@@ -8,16 +8,13 @@ import uk.ac.warwick.spring.Wire
 import uk.ac.warwick.tabula.commands.Command
 import uk.ac.warwick.tabula.commands.Description
 import uk.ac.warwick.tabula.commands.SelfValidating
-import uk.ac.warwick.tabula.data.model.Assignment
+import uk.ac.warwick.tabula.data.model._
 import uk.ac.warwick.tabula.services.UserLookupService
 import uk.ac.warwick.tabula.services.ZipService
 import uk.ac.warwick.userlookup.User
-import uk.ac.warwick.tabula.data.model.Module
 import uk.ac.warwick.tabula.permissions._
 import uk.ac.warwick.tabula.services.FeedbackService
 import uk.ac.warwick.tabula.services.SubmissionService
-import uk.ac.warwick.tabula.data.model.Feedback
-import uk.ac.warwick.tabula.data.model.Submission
 
 /**
  * Takes a list of student university IDs and deletes either all their submissions, or all their feedback, or both,
@@ -30,11 +27,11 @@ class DeleteSubmissionsAndFeedbackCommand(val module: Module, val assignment: As
 	PermissionCheck(Permissions.AssignmentFeedback.Manage, assignment)
 	PermissionCheck(Permissions.Submission.Delete, assignment)
 
-	var submissionService = Wire.auto[SubmissionService]
-	var feedbackService = Wire.auto[FeedbackService]
+	var submissionService: SubmissionService = Wire.auto[SubmissionService]
+	var feedbackService: FeedbackService = Wire.auto[FeedbackService]
 
-	var zipService = Wire.auto[ZipService]
-	var userLookup = Wire.auto[UserLookupService]
+	var zipService: ZipService = Wire.auto[ZipService]
+	var userLookup: UserLookupService = Wire.auto[UserLookupService]
 
     var students: JList[String] = JArrayList()
     var submissionOrFeedback: String = ""
@@ -44,10 +41,10 @@ class DeleteSubmissionsAndFeedbackCommand(val module: Module, val assignment: As
 	val FeedbackOnly = "feedbackOnly"
 	val SubmissionAndFeedback = "submissionAndFeedback"
 
-	def shouldDeleteSubmissions = submissionOrFeedback == SubmissionAndFeedback || submissionOrFeedback == SubmissionOnly
-	def shouldDeleteFeedback = submissionOrFeedback == SubmissionAndFeedback || submissionOrFeedback == FeedbackOnly
+	def shouldDeleteSubmissions: Boolean = submissionOrFeedback == SubmissionAndFeedback || submissionOrFeedback == SubmissionOnly
+	def shouldDeleteFeedback: Boolean = submissionOrFeedback == SubmissionAndFeedback || submissionOrFeedback == FeedbackOnly
 
-	def applyInternal() = {
+	def applyInternal(): (Seq[Submission], Seq[AssignmentFeedback]) = {
 		val submissions = if (shouldDeleteSubmissions) {
 			val submissions = for (uniId <- students; submission <- submissionService.getSubmissionByUniId(assignment, uniId)) yield {
 				HibernateHelpers.initialiseAndUnproxy(submission.allAttachments)
@@ -94,11 +91,11 @@ class DeleteSubmissionsAndFeedbackCommand(val module: Module, val assignment: As
 	def getStudentsAsUsers(): JList[User] =
 		userLookup.getUsersByWarwickUniIds(students).values.toSeq
 
-	override def describe(d: Description) = d
+	override def describe(d: Description): Unit = d
 		.assignment(assignment)
 		.property("students" -> students)
 
-	override def describeResult(d: Description, result: (Seq[Submission], Seq[Feedback])) = {
+	override def describeResult(d: Description, result: (Seq[Submission], Seq[Feedback])): Unit = {
 		val (submissions, feedbacks) = result
 		val attachments = submissions.flatMap { _.allAttachments } ++ feedbacks.flatMap { _.attachments }
 

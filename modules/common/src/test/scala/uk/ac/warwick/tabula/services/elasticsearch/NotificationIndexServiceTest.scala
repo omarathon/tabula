@@ -1,6 +1,7 @@
 package uk.ac.warwick.tabula.services.elasticsearch
 
 import com.sksamuel.elastic4s.ElasticDsl._
+import com.sksamuel.elastic4s.RichGetResponse
 import org.elasticsearch.search.sort.SortOrder
 import org.joda.time.DateTime
 import org.junit.After
@@ -10,9 +11,10 @@ import uk.ac.warwick.tabula.data.NotificationDao
 import uk.ac.warwick.tabula.data.model._
 import uk.ac.warwick.tabula.helpers.DateTimeOrdering._
 import uk.ac.warwick.tabula.helpers.Futures._
-import uk.ac.warwick.userlookup.AnonymousUser
+import uk.ac.warwick.userlookup.{AnonymousUser, User}
 
 import scala.collection.JavaConverters._
+import scala.collection.immutable.IndexedSeq
 
 class NotificationIndexServiceTest extends ElasticsearchTestBase with Mockito {
 
@@ -20,10 +22,10 @@ class NotificationIndexServiceTest extends ElasticsearchTestBase with Mockito {
 		PatienceConfig(timeout = Span(2, Seconds), interval = Span(50, Millis))
 
 	val indexName = "notification"
-	val indexType = new NotificationIndexType {}.indexType
+	val indexType: String = new NotificationIndexType {}.indexType
 
 	private trait Fixture {
-		val dao = smartMock[NotificationDao]
+		val dao: NotificationDao = smartMock[NotificationDao]
 
 		// default behaviour, we add individual expectations later
 		dao.getById(any[String]) returns None
@@ -40,16 +42,16 @@ class NotificationIndexServiceTest extends ElasticsearchTestBase with Mockito {
 	}
 
 	private trait DataFixture extends Fixture {
-		val agent = Fixtures.user(userId="abc")
-		val recipient = Fixtures.user(userId="xyz")
-		val otherRecipient = Fixtures.user(userId="xyo")
-		val victim = Fixtures.user("heronVictim")
+		val agent: User = Fixtures.user(userId="abc")
+		val recipient: User = Fixtures.user(userId="xyz")
+		val otherRecipient: User = Fixtures.user(userId="xyo")
+		val victim: User = Fixtures.user("heronVictim")
 		val heron = new Heron(victim)
 
-		val now = DateTime.now
+		val now: DateTime = DateTime.now
 
 		// Selection of notifications intended for a couple of different recipients
-		lazy val items = for (i <- 1 to 100) yield {
+		lazy val items: IndexedSeq[IndexedNotification] = for (i <- 1 to 100) yield {
 			val notification =
 				if (i % 2 == 0) {
 					new HeronWarningNotification
@@ -77,7 +79,7 @@ class NotificationIndexServiceTest extends ElasticsearchTestBase with Mockito {
 		}
 
 		// The IDs of notifications we expect our recipient to get.
-		lazy val recipientNotifications = items.filter { _.recipient == recipient }
+		lazy val recipientNotifications: IndexedSeq[IndexedNotification] = items.filter { _.recipient == recipient }
 	}
 
 	@After def tearDown(): Unit = {
@@ -90,7 +92,7 @@ class NotificationIndexServiceTest extends ElasticsearchTestBase with Mockito {
 		notification.created = DateTime.now()
 		notification.priority = NotificationPriority.Info
 
-		val recipient = Fixtures.user(userId = "xyz")
+		val recipient: User = Fixtures.user(userId = "xyz")
 
 		val item = IndexedNotification(notification, recipient)
 
@@ -98,7 +100,7 @@ class NotificationIndexServiceTest extends ElasticsearchTestBase with Mockito {
 		blockUntilExactCount(1, indexName, indexType)
 
 		// University ID is the ID field so it isn't in the doc source
-		val doc = client.execute { get id item.id from indexName / indexType }.futureValue
+		val doc: RichGetResponse = client.execute { get id item.id from indexName / indexType }.futureValue
 
 		doc.source.asScala.toMap should be (Map(
 			"notification" -> "defeat",
@@ -114,7 +116,7 @@ class NotificationIndexServiceTest extends ElasticsearchTestBase with Mockito {
 		indexer.indexItems(items)
 		blockUntilExactCount(100, indexName, indexType)
 
-		val dates = client.execute {
+		val dates: Seq[DateTime] = client.execute {
 			search in indexName / indexType query termQuery("recipient", "xyz") sort(field sort "created" order SortOrder.DESC ) limit 100
 		}.map { _.hits.map { hit => DateFormats.IsoDateTime.parseDateTime(hit.sourceAsMap("created").toString) }.toSeq }
 		  .futureValue
@@ -125,7 +127,7 @@ class NotificationIndexServiceTest extends ElasticsearchTestBase with Mockito {
 
 	@Test def missingRecipient(): Unit = new DataFixture {
 		val anonUser = new AnonymousUser()
-		val notification = Notification.init(new HeronWarningNotification, agent, heron)
+		val notification: HeronWarningNotification = Notification.init(new HeronWarningNotification, agent, heron)
 		indexer.indexItems(Seq(IndexedNotification(notification, anonUser))).await
 		// No exception, good times.
 	}

@@ -21,8 +21,8 @@ class BlobStoreObjectStorageServiceTest extends TestBase with Mockito {
 	private trait ListKeysFixture {
     val containerName = "tabula"
 
-		val blobStoreContext = mock[BlobStoreContext]
-		val blobStore = mock[BlobStore]
+		val blobStoreContext: BlobStoreContext = mock[BlobStoreContext]
+		val blobStore: BlobStore = mock[BlobStore]
 
 		when(blobStoreContext.getBlobStore) thenReturn blobStore
 
@@ -66,7 +66,7 @@ class BlobStoreObjectStorageServiceTest extends TestBase with Mockito {
 
 	private trait TransientBlobStoreFixture {
 		val containerName = "tabula"
-		val blobStoreContext = ContextBuilder.newBuilder("transient").buildView(classOf[BlobStoreContext])
+		val blobStoreContext: BlobStoreContext = ContextBuilder.newBuilder("transient").buildView(classOf[BlobStoreContext])
 
 		val service = new BlobStoreObjectStorageService(blobStoreContext, "tabula")
 		service.afterPropertiesSet()
@@ -79,10 +79,10 @@ class BlobStoreObjectStorageServiceTest extends TestBase with Mockito {
 	@Test def pushAndFetch(): Unit = new TransientBlobStoreFixture {
 		val key = "my-lovely-file"
 
-		val md = MessageDigest.getInstance("MD5")
+		val md: MessageDigest = MessageDigest.getInstance("MD5")
 		val dis = new DigestInputStream(byteSource.openStream(), md)
 		IOUtils.toByteArray(dis) // pass over the bytes for the DigestInputStream
-		val originalMd5 = md.digest()
+		val originalMd5: Array[Byte] = md.digest()
 
 		service.push(key, byteSource, ObjectStorageService.Metadata(
 			contentLength = 14949,
@@ -90,10 +90,10 @@ class BlobStoreObjectStorageServiceTest extends TestBase with Mockito {
 			fileHash = None
 		))
 
-		val fetchedFile = service.fetch(key)
+		val fetchedFile: Option[InputStream] = service.fetch(key)
 		fetchedFile should be ('defined)
 
-		val fetchedMd5 = MessageDigest.getInstance("MD5").digest(IOUtils.toByteArray(fetchedFile.get))
+		val fetchedMd5: Array[Byte] = MessageDigest.getInstance("MD5").digest(IOUtils.toByteArray(fetchedFile.get))
 		originalMd5 should be (fetchedMd5)
 	}
 

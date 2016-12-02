@@ -6,6 +6,7 @@ import uk.ac.warwick.tabula.data.model.groups.SmallGroupSet
 import uk.ac.warwick.tabula.commands.groups.admin.{ReleaseGroupSetCommandImpl, ReleaseSmallGroupSetCommand}
 import uk.ac.warwick.tabula.groups.web.views.GroupsViewModel
 import uk.ac.warwick.tabula.groups.web.views.GroupsViewModel.{ViewGroup, ViewModule, ViewSet}
+import uk.ac.warwick.tabula.web.Mav
 import uk.ac.warwick.tabula.web.controllers.groups.GroupsController
 
 import scala.collection.JavaConverters._
@@ -19,12 +20,12 @@ class ReleaseSmallGroupSetController extends GroupsController {
 	}
 
 	@RequestMapping
-	def form(@ModelAttribute("releaseGroupSetCommand") cmd: ReleaseSmallGroupSetCommand) =
+	def form(@ModelAttribute("releaseGroupSetCommand") cmd: ReleaseSmallGroupSetCommand): Mav =
 		Mav("groups/admin/groups/release").noLayoutIf(ajax)
 
 
 	@RequestMapping(method = Array(POST))
-	def submit(@ModelAttribute("releaseGroupSetCommand") cmd: ReleaseSmallGroupSetCommand) = {
+	def submit(@ModelAttribute("releaseGroupSetCommand") cmd: ReleaseSmallGroupSetCommand): Mav = {
 		val updatedSet = cmd.apply() match {
 			case releasedSet :: Nil => releasedSet.set
 			case _ => throw new IllegalStateException("Received multiple updated sets from a single update operation!")

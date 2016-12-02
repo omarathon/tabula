@@ -29,7 +29,7 @@ trait ValidatesCommand {
 	private def _validatesWith[A : ClassTag](fn: ValidatorMethod[A]) {
 		if (validator != null) throw new IllegalStateException("Already set validator once")
 		validator = new ClassValidator[A] {
-			override def valid(target: A, errors: Errors) = fn(target, errors)
+			override def valid(target: A, errors: Errors): Unit = fn(target, errors)
 		}
 	}
 

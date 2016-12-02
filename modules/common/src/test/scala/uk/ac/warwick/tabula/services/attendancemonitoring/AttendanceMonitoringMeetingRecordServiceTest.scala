@@ -15,10 +15,10 @@ class AttendanceMonitoringMeetingRecordServiceTest extends TestBase with Mockito
 	trait ServiceTestSupport extends MeetingRecordDaoComponent with AttendanceMonitoringServiceComponent
 		with RelationshipServiceComponent with TermServiceComponent {
 
-		val meetingRecordDao = smartMock[MeetingRecordDao]
-		var relationshipService = smartMock[RelationshipService]
-		val termService = smartMock[TermService]
-		val attendanceMonitoringService = smartMock[AttendanceMonitoringService]
+		val meetingRecordDao: MeetingRecordDao = smartMock[MeetingRecordDao]
+		var relationshipService: RelationshipService = smartMock[RelationshipService]
+		val termService: TermService = smartMock[TermService]
+		val attendanceMonitoringService: AttendanceMonitoringService = smartMock[AttendanceMonitoringService]
 	}
 
 	trait Fixture {
@@ -28,10 +28,10 @@ class AttendanceMonitoringMeetingRecordServiceTest extends TestBase with Mockito
 		val autumnTerm = new TermImpl(null, dateTime(2013, 1, 7), null, TermType.autumn)
 		service.termService.getTermFromDateIncludingVacations(any[DateTime]) returns autumnTerm
 
-		val student = Fixtures.student("1234")
+		val student: StudentMember = Fixtures.student("1234")
 
 		val agent = "agent"
-		val agentMember = Fixtures.staff(agent, agent)
+		val agentMember: StaffMember = Fixtures.staff(agent, agent)
 
 		val tutorRelationshipType = StudentRelationshipType("personalTutor", "tutor", "personal tutor", "personal tutee")
 		val supervisorRelationshipType = StudentRelationshipType("supervisor", "supervisor", "supervisor", "supervisee")

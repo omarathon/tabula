@@ -16,7 +16,7 @@ class RouteCreationFixtureCommand extends CommandInternal[Route] {
 	var routeName: String = _
   var degreeType:String = "UG"
 
-	protected def applyInternal() = {
+	protected def applyInternal(): Route = {
 		transactional() {
 			val existing = routeDao.getByCode(routeCode)
 			for(route <- existing){
@@ -42,7 +42,7 @@ class RouteCreationFixtureCommand extends CommandInternal[Route] {
 }
 
 object RouteCreationFixtureCommand{
-	def apply()={
+	def apply(): RouteCreationFixtureCommand with ComposableCommand[Route] with AutowiringModuleAndDepartmentServiceComponent with Daoisms with AutowiringTransactionalComponent with Unaudited with PubliclyVisiblePermissions ={
 		new RouteCreationFixtureCommand
 		with ComposableCommand[Route]
 		with AutowiringModuleAndDepartmentServiceComponent

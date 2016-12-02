@@ -154,6 +154,6 @@ trait MarkerAddMarksCommandState extends AddMarksCommandState {
 	def marker: User
 	def submitter: CurrentUser
 	def assignment: Assignment
-	override def assessment = assignment
+	override def assessment: Assignment = assignment
 	def firstMarker: Boolean
 }

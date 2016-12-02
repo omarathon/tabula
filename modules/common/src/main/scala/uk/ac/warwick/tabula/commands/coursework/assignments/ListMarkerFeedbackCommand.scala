@@ -14,8 +14,8 @@ case class MarkerFeedbackItem (
 	feedbacks: Seq[MarkerFeedback],
 	nextMarker: Option[User]
 ) {
-	def currentFeedback = feedbacks.lastOption
-	def previousFeedback = feedbacks.reverse.tail.headOption
+	def currentFeedback: Option[MarkerFeedback] = feedbacks.lastOption
+	def previousFeedback: Option[MarkerFeedback] = feedbacks.reverse.tail.headOption
 }
 
 case class MarkerFeedbackStage (
@@ -41,7 +41,7 @@ class ListMarkerFeedbackCommand(val assignment: Assignment, val module: Module, 
 
 	self: UserLookupComponent =>
 
-	def applyInternal() = {
+	def applyInternal(): Seq[MarkerFeedbackStage] = {
 		val students = assignment.markingWorkflow.getMarkersStudents(assignment, marker).distinct
 		val workflow = assignment.markingWorkflow
 
@@ -96,5 +96,5 @@ trait CanProxy {
 	val marker: User
 	val submitter: CurrentUser
 
-	def isProxying = marker != submitter.apparentUser
+	def isProxying: Boolean = marker != submitter.apparentUser
 }

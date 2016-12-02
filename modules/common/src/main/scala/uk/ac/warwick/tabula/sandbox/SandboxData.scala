@@ -1,12 +1,12 @@
 package uk.ac.warwick.tabula.sandbox
 
 import uk.ac.warwick.tabula.data.model._
-import uk.co.halfninja.randomnames.NameGenerators
+import uk.co.halfninja.randomnames.{CompositeNameGenerator, Name, NameGenerators}
 import uk.co.halfninja.randomnames.Gender._
 
 // scalastyle:off magic.number
 object SandboxData {
-	final val NameGenerator = NameGenerators.standardGenerator()
+	final val NameGenerator: CompositeNameGenerator = NameGenerators.standardGenerator()
 	type NameGender = uk.co.halfninja.randomnames.Gender
 
 	final val Departments = Map(
@@ -129,7 +129,7 @@ object SandboxData {
 		GradeBoundary("TABULA-PG", "E", 0, 39, "N")
 	)
 
-	def randomName(id: Long, gender: Gender) = {
+	def randomName(id: Long, gender: Gender): Name = {
 		val nameGender = gender match {
 			case Gender.Male => male
 			case Gender.Female => female
@@ -139,7 +139,7 @@ object SandboxData {
 		NameGenerator.generate(nameGender, id)
 	}
 
-	def route(id: Long) =
+	def route(id: Long): Route =
 		Departments
 			.flatMap { case (code, d) => d.routes }
 			.find { case (code, r) => r.studentsStartId <= id && r.studentsEndId >= id }

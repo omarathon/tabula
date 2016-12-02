@@ -13,6 +13,6 @@ trait MarkdownRendererImpl extends MarkdownRenderer {
 	// PegDownProcessor not threadsafe, so we get a new one each time.
 	def markdown = new PegDownProcessor(markdownOptions, markdownMaxParseTimeMs)
 
-	override def renderMarkdown(source: String) =
+	override def renderMarkdown(source: String): String =
 		markdown.markdownToHtml(source)
 }

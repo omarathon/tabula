@@ -3,19 +3,19 @@ package uk.ac.warwick.tabula.data
 
 import org.joda.time.LocalTime
 import org.junit.Before
-import uk.ac.warwick.tabula.data.model.UserGroup
+import uk.ac.warwick.tabula.data.model.{Module, UserGroup}
 import uk.ac.warwick.tabula.{AcademicYear, Fixtures, MockUserLookup, PersistenceTestBase}
-import uk.ac.warwick.tabula.data.model.groups.{DayOfWeek, SmallGroupEvent, SmallGroupFormat, WeekRange}
+import uk.ac.warwick.tabula.data.model.groups._
 import uk.ac.warwick.userlookup.User
 
 class SmallGroupDaoTest extends PersistenceTestBase {
 
 	val smallGroupDao = new SmallGroupDaoImpl
 	val moduleDao = new ModuleDaoImpl
-	val module = Fixtures.module("kt123","Kinesthetic Teaching")
-	val moduleWithNoGroups = Fixtures.module("ab123", "No Groups Here")
-	val smallGroupSet = Fixtures.smallGroupSet("Test Small Group Set")
-	val smallGroup = Fixtures.smallGroup("Test Small Group")
+	val module: Module = Fixtures.module("kt123","Kinesthetic Teaching")
+	val moduleWithNoGroups: Module = Fixtures.module("ab123", "No Groups Here")
+	val smallGroupSet: SmallGroupSet = Fixtures.smallGroupSet("Test Small Group Set")
+	val smallGroup: SmallGroup = Fixtures.smallGroup("Test Small Group")
 	val mockUserLookup = new MockUserLookup
 	mockUserLookup.registerUserObjects(new User("cusfal"), new User("cuscao"))
 

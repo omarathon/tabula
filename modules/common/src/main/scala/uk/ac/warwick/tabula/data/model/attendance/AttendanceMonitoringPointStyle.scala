@@ -8,7 +8,7 @@ object AttendanceMonitoringPointStyle {
 	case object Week extends AttendanceMonitoringPointStyle("week", "Term Week")
 	case object Date extends AttendanceMonitoringPointStyle("date", "Calendar Date")
 
-	def fromCode(code: String) = code match {
+	def fromCode(code: String): AttendanceMonitoringPointStyle = code match {
 		case Week.dbValue => Week
 		case Date.dbValue => Date
 		case null => null
@@ -20,8 +20,8 @@ object AttendanceMonitoringPointStyle {
 
 class AttendanceMonitoringPointStyleUserType extends AbstractStringUserType[AttendanceMonitoringPointStyle] {
 
-	override def convertToObject(string: String) = AttendanceMonitoringPointStyle.fromCode(string)
+	override def convertToObject(string: String): AttendanceMonitoringPointStyle = AttendanceMonitoringPointStyle.fromCode(string)
 
-	override def convertToValue(state: AttendanceMonitoringPointStyle) = state.dbValue
+	override def convertToValue(state: AttendanceMonitoringPointStyle): String = state.dbValue
 
 }

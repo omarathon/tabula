@@ -24,7 +24,7 @@ class CreateNewAttendancePointsFromCopySearchCommandInternal(val department: Dep
 
 	self: AttendanceMonitoringServiceComponent =>
 
-	override def applyInternal() = {
+	override def applyInternal(): Seq[AttendanceMonitoringScheme] = {
 		attendanceMonitoringService.listSchemes(department, academicYear).sortBy(_.displayName)
 	}
 

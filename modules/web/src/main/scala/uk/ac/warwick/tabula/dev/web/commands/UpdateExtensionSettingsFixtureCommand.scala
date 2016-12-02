@@ -13,7 +13,7 @@ class UpdateExtensionSettingsFixtureCommand extends CommandInternal[Department] 
 	var allow: Boolean = _
 	var userId: String = _
 
-	protected def applyInternal() = {
+	protected def applyInternal(): Department = {
 		transactional() {
 			val dept = moduleAndDepartmentService.getDepartmentByCode(departmentCode).get
 			if (allow) {
@@ -34,7 +34,7 @@ class UpdateExtensionSettingsFixtureCommand extends CommandInternal[Department] 
 }
 
 object UpdateExtensionSettingsFixtureCommand {
-	def apply() = {
+	def apply(): UpdateExtensionSettingsFixtureCommand with ComposableCommand[Department] with AutowiringModuleAndDepartmentServiceComponent with AutowiringTransactionalComponent with PubliclyVisiblePermissions with Unaudited = {
 		new UpdateExtensionSettingsFixtureCommand
 			with ComposableCommand[Department]
 			with AutowiringModuleAndDepartmentServiceComponent

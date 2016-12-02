@@ -25,7 +25,7 @@ class CreateAttendanceTemplatePointCommandInternal(val template: AttendanceMonit
 
 	self: CreateAttendanceTemplatePointCommandState with AttendanceMonitoringServiceComponent =>
 
-	override def applyInternal() = {
+	override def applyInternal(): AttendanceMonitoringTemplatePoint = {
 		val point = new AttendanceMonitoringTemplatePoint
 		point.name = name
 		point.scheme = template

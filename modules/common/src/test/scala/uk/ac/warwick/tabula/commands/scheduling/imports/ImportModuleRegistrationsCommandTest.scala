@@ -13,13 +13,13 @@ import uk.ac.warwick.tabula.{AcademicYear, Fixtures, Mockito, PersistenceTestBas
 class ImportModuleRegistrationsCommandTest extends PersistenceTestBase with Mockito with Logging {
 
 	trait Environment {
-		val stu = Fixtures.student(universityId = "0000001", userId="student")
+		val stu: StudentMember = Fixtures.student(universityId = "0000001", userId="student")
 		session.saveOrUpdate(stu)
 
-		val scd = stu.mostSignificantCourseDetails.get
+		val scd: StudentCourseDetails = stu.mostSignificantCourseDetails.get
 		session.saveOrUpdate(scd)
 
-		val mod = Fixtures.module("ax101", "Pointless Deliberations")
+		val mod: Module = Fixtures.module("ax101", "Pointless Deliberations")
 		session.saveOrUpdate(mod)
 		session.flush()
 
@@ -31,7 +31,7 @@ class ImportModuleRegistrationsCommandTest extends PersistenceTestBase with Mock
 		val year = new AcademicYear(2013)
 		val occurrence = "O"
 
-		val madService = smartMock[ModuleAndDepartmentService]
+		val madService: ModuleAndDepartmentService = smartMock[ModuleAndDepartmentService]
 		madService.getModuleBySitsCode("AX101-30") returns Some(mod)
 
 		val modRegRow1 = new ModuleRegistrationRow(scd.scjCode, "AX101-30", cats, "A", "C", occurrence, "13/14",
@@ -39,10 +39,10 @@ class ImportModuleRegistrationsCommandTest extends PersistenceTestBase with Mock
 		val modRegRow2 = new ModuleRegistrationRow(scd.scjCode, "AX101-30", cats, "A", "O", occurrence, "13/14",
 			Some(new JBigDecimal("50.0")), "C", Some(new JBigDecimal("50.0")), "C")
 
-		val scdDao = smartMock[StudentCourseDetailsDao]
+		val scdDao: StudentCourseDetailsDao = smartMock[StudentCourseDetailsDao]
 		scdDao.getByScjCode("0000001/1") returns Some(scd)
 
-		val mrDao = smartMock[ModuleRegistrationDao]
+		val mrDao: ModuleRegistrationDao = smartMock[ModuleRegistrationDao]
 		mrDao.getByNotionalKey(scd, mod, cats, year, occurrence) returns Some(mr)
 	}
 
@@ -55,7 +55,7 @@ class ImportModuleRegistrationsCommandTest extends PersistenceTestBase with Mock
 			command.moduleAndDepartmentService = madService
 			command.moduleRegistrationDao = mrDao
 
-			val newModRegs = command.applyInternal()
+			val newModRegs: Seq[ModuleRegistration] = command.applyInternal()
 
 			// check results
 			newModRegs.size should be (1)
@@ -69,7 +69,7 @@ class ImportModuleRegistrationsCommandTest extends PersistenceTestBase with Mock
 			newModRegs.head.lastUpdatedDate.getDayOfMonth should be (LocalDate.now.getDayOfMonth)
 
 			// now reset the last updated date to 10 days ago:
-			val tenDaysAgo = DateTime.now.minusDays(10)
+			val tenDaysAgo: DateTime = DateTime.now.minusDays(10)
 			newModRegs.head.lastUpdatedDate = tenDaysAgo
 			newModRegs.head.lastUpdatedDate.getDayOfMonth should be (tenDaysAgo.getDayOfMonth)
 			session.flush()
@@ -80,7 +80,7 @@ class ImportModuleRegistrationsCommandTest extends PersistenceTestBase with Mock
 			command2.moduleRegistrationDao = mrDao
 
 
-			val newModRegs2 = command2.applyInternal()
+			val newModRegs2: Seq[ModuleRegistration] = command2.applyInternal()
 			newModRegs2.head.lastUpdatedDate.getDayOfMonth should be (tenDaysAgo.getDayOfMonth)
 
 			// try just changing the selection status:
@@ -88,7 +88,7 @@ class ImportModuleRegistrationsCommandTest extends PersistenceTestBase with Mock
 			command3.moduleAndDepartmentService = madService
 			command3.moduleRegistrationDao = mrDao
 
-			val newModRegs3 = command3.applyInternal()
+			val newModRegs3: Seq[ModuleRegistration] = command3.applyInternal()
 			newModRegs3.head.selectionStatus.description should be ("Option")
 		}
 	}

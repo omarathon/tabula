@@ -9,7 +9,7 @@ trait GeneratesStudentRelationshipWorkbook {
 	private val agentLookupSheetName = "AgentLookup"
 	private val sheetPassword = "roygbiv"
 
-	def generateWorkbook(allAgents: Seq[Member], allAllocations: Seq[(Member, Seq[Member])], department: Department, relationshipType: StudentRelationshipType) = {
+	def generateWorkbook(allAgents: Seq[Member], allAllocations: Seq[(Member, Seq[Member])], department: Department, relationshipType: StudentRelationshipType): XSSFWorkbook = {
 		val workbook = new XSSFWorkbook()
 		val sheet: XSSFSheet = generateAllocationSheet(workbook, department, relationshipType)
 		generateAgentLookupSheet(workbook, allAgents)
@@ -118,7 +118,7 @@ trait GeneratesStudentRelationshipWorkbook {
 		sheet
 	}
 
-	def allocateSheetName(department: Department, relationshipType: StudentRelationshipType) =
+	def allocateSheetName(department: Department, relationshipType: StudentRelationshipType): String =
 		trimmedSheetName(relationshipType.agentRole.capitalize + "s for " + department.name)
 
 	// Excel sheet names must be 31 chars or less so

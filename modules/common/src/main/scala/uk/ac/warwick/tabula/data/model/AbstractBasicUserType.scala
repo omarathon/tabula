@@ -1,13 +1,14 @@
 package uk.ac.warwick.tabula.data.model
 
-import scala.reflect._
+import java.io.Serializable
 
+import scala.reflect._
 import org.hibernate.usertype.UserType
 import org.hibernate.`type`.AbstractSingleColumnStandardBasicType
-
 import java.sql.PreparedStatement
 import java.sql.ResultSet
-import java.{ io => jio }
+import java.{io => jio}
+
 import org.hibernate.engine.spi.SessionImplementor
 
 /** Trait for a class that can be converted to a value for storing,
@@ -36,7 +37,7 @@ abstract class AbstractBasicUserType[A <: Object : ClassTag, B : ClassTag] exten
 	def convertToValue(obj: A): B
 
 
-	final override def nullSafeGet(resultSet: ResultSet, names: Array[String], impl: SessionImplementor, owner: Object) = {
+	final override def nullSafeGet(resultSet: ResultSet, names: Array[String], impl: SessionImplementor, owner: Object): A = {
 		basicType.nullSafeGet(resultSet, names(0), impl) match {
 			case s: Any if s == nullValue => nullObject
 			case b: B => convertToObject(b)
@@ -53,13 +54,13 @@ abstract class AbstractBasicUserType[A <: Object : ClassTag, B : ClassTag] exten
 		case null => nullValue
 	}
 
-	override def returnedClass = classTag[A].runtimeClass
+	override def returnedClass: Class[_] = classTag[A].runtimeClass
 
 	override def isMutable = false
-	override def equals(x: Object, y: Object) = x == y
-	override def hashCode(x: Object) = Option(x).getOrElse("").hashCode
-	override def deepCopy(x: Object) = x
-	override def replace(original: Object, target: Object, owner: Object) = original
-	override def disassemble(value: Object) = value.asInstanceOf[jio.Serializable]
-	override def assemble(cached: jio.Serializable, owner: Object) = cached.asInstanceOf[AnyRef]
+	override def equals(x: Object, y: Object): Boolean = x == y
+	override def hashCode(x: Object): Int = Option(x).getOrElse("").hashCode
+	override def deepCopy(x: Object): Object = x
+	override def replace(original: Object, target: Object, owner: Object): Object = original
+	override def disassemble(value: Object): Serializable = value.asInstanceOf[jio.Serializable]
+	override def assemble(cached: jio.Serializable, owner: Object): AnyRef = cached.asInstanceOf[AnyRef]
 }

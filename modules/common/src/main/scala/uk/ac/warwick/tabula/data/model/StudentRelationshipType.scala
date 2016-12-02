@@ -131,24 +131,24 @@ class StudentRelationshipType extends PermissionsTarget with PermissionsSelector
 	/**
 	 * If the source is anything other than local, then this relationship type is read-only
 	 */
-	def readOnly(department: Department) =
+	def readOnly(department: Department): Boolean =
 		department.getStudentRelationshipSource(this) != StudentRelationshipSource.Local
 
 
 
 	@transient
-	var relationshipService = Wire[RelationshipService]
+	var relationshipService: RelationshipService = Wire[RelationshipService]
 
-	def empty = relationshipService.countStudentsByRelationship(this) == 0
+	def empty: Boolean = relationshipService.countStudentsByRelationship(this) == 0
 
-	def permissionsParents = Stream.empty
+	def permissionsParents: Stream[Nothing] = Stream.empty
 
-	override def toString = "StudentRelationshipType(%s)".format(id)
+	override def toString: String = "StudentRelationshipType(%s)".format(id)
 
 }
 
 object StudentRelationshipType {
-	def apply(id: String, urlPart: String, agentRole: String, studentRole: String) = {
+	def apply(id: String, urlPart: String, agentRole: String, studentRole: String): StudentRelationshipType = {
 		val relType = new StudentRelationshipType
 		relType.id = id
 		relType.urlPart = urlPart
@@ -164,7 +164,7 @@ object StudentRelationshipSource {
 	case object Local extends StudentRelationshipSource("local")
 	case object SITS extends StudentRelationshipSource("sits")
 
-	def fromCode(code: String) = code match {
+	def fromCode(code: String): StudentRelationshipSource = code match {
 	  	case Local.dbValue => Local
 	  	case SITS.dbValue => SITS
 	  	case null => null
@@ -180,8 +180,8 @@ class StudentRelationshipSourceUserType extends AbstractBasicUserType[StudentRel
 	val nullValue = null
 	val nullObject = null
 
-	override def convertToObject(string: String) = StudentRelationshipSource.fromCode(string)
+	override def convertToObject(string: String): StudentRelationshipSource = StudentRelationshipSource.fromCode(string)
 
-	override def convertToValue(relType: StudentRelationshipSource) = relType.dbValue
+	override def convertToValue(relType: StudentRelationshipSource): String = relType.dbValue
 
 }

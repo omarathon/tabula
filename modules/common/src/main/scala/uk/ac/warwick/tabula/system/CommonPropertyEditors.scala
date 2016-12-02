@@ -11,7 +11,7 @@ class CommonPropertyEditors extends PropertyEditorRegistrar {
 
 	// define a neater `register` method for P.E.R.
 	implicit class CleverRegistry(registry: PropertyEditorRegistry) {
-		def register[A](editor: PropertyEditor)(implicit tag: ClassTag[A]) =
+		def register[A](editor: PropertyEditor)(implicit tag: ClassTag[A]): Unit =
 			registry.registerCustomEditor(tag.runtimeClass, editor)
 	}
 

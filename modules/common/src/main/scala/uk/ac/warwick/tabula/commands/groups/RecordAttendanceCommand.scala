@@ -19,6 +19,7 @@ import uk.ac.warwick.tabula.services.attendancemonitoring.{AttendanceMonitoringE
 import uk.ac.warwick.tabula.system.permissions.{PermissionsChecking, PermissionsCheckingMethods, RequiresPermissionsChecking}
 
 import scala.collection.JavaConverters._
+import scala.collection.mutable
 
 object RecordAttendanceCommand {
 	type UniversityId = String
@@ -50,7 +51,7 @@ trait AddAdditionalStudent {
 	var replacedWeek: JInteger = _
 	var replacedEvent: SmallGroupEvent = _
 
-	lazy val manuallyAddedUniversityIds = occurrence.attendance.asScala.filter { _.addedManually }.map { _.universityId }
+	lazy val manuallyAddedUniversityIds: mutable.Set[String] = occurrence.attendance.asScala.filter { _.addedManually }.map { _.universityId }
 
 	var linkedAttendance: SmallGroupEventAttendance = _
 
@@ -123,7 +124,7 @@ abstract class RecordAttendanceCommand(val event: SmallGroupEvent, val week: Int
 
 	if (!event.group.groupSet.collectAttendance) throw new ItemNotFoundException
 
-	lazy val occurrence = transactional() {
+	lazy val occurrence: SmallGroupEventOccurrence = transactional() {
 		smallGroupService.getOrCreateSmallGroupEventOccurrence(event, week).getOrElse(
 			throw new ItemNotFoundException
 		)
@@ -157,7 +158,7 @@ abstract class RecordAttendanceCommand(val event: SmallGroupEvent, val week: Int
 		members.map { m => (m, all.find { a => a.universityId == m.universityId })}.toMap
 	}
 
-	def attendanceMetadata(uniId: UniversityId) = {
+	def attendanceMetadata(uniId: UniversityId): Option[String] = {
 		occurrence.attendance.asScala
 			.find { _.universityId == uniId }
 			.map(attendance => {
@@ -179,7 +180,7 @@ abstract class RecordAttendanceCommand(val event: SmallGroupEvent, val week: Int
 		}.toMap.asJava
 	}
 
-	def applyInternal() = {
+	def applyInternal(): (SmallGroupEventOccurrence, Seq[SmallGroupEventAttendance]) = {
 		val attendances = studentsState.asScala.flatMap { case (studentId, state) =>
 			if (state == null) {
 				smallGroupService.deleteAttendance(studentId, event, week)
@@ -255,7 +256,7 @@ trait SmallGroupEventInFutureCheck {
 	// TAB-3791
 	private val StartTimeOffset = 15
 
-	lazy val isFutureEvent = {
+	lazy val isFutureEvent: Boolean = {
 		// Get the actual end date of the event in this week
 		weekToDateConverter.toLocalDatetime(week, event.day, event.startTime, event.group.groupSet.academicYear).exists(eventDateTime =>
 			eventDateTime.minusMinutes(StartTimeOffset).isAfter(LocalDateTime.now())

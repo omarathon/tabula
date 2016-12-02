@@ -7,6 +7,7 @@ import uk.ac.warwick.tabula.commands.attendance.view.{FilterMonitoringPointsComm
 import uk.ac.warwick.tabula.web.controllers.attendance.{AttendanceController, HasMonthNames}
 import uk.ac.warwick.tabula.commands.Appliable
 import uk.ac.warwick.tabula.data.model.Department
+import uk.ac.warwick.tabula.web.Mav
 
 @Controller
 @RequestMapping(Array("/attendance/view/{department}/{academicYear}/points"))
@@ -21,7 +22,7 @@ class ViewMonitoringPointsController extends AttendanceController with HasMonthN
 		@ModelAttribute("filterCommand") filterCommand: Appliable[FilterMonitoringPointsCommandResult],
 		@PathVariable department: Department,
 		@PathVariable academicYear: AcademicYear
-	) = {
+	): Mav = {
 		val filterResult = filterCommand.apply().pointMap
 		if (ajax) {
 			Mav("attendance/view/_points_results",

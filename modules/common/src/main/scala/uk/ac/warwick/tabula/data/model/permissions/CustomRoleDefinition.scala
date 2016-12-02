@@ -23,9 +23,9 @@ class CustomRoleDefinition extends RoleDefinition with HibernateVersioned with G
 	var name: String = _
 
 	// Role uses getName. Could change it to name.
-	def getName = name
+	def getName: String = name
 
-	def description = "%s (derived from %s)" format (name, Option(baseRoleDefinition).map { _.description } getOrElse("another role"))
+	def description: String = "%s (derived from %s)" format (name, Option(baseRoleDefinition).map { _.description } getOrElse("another role"))
 
 	def isAssignable = true
 
@@ -39,7 +39,7 @@ class CustomRoleDefinition extends RoleDefinition with HibernateVersioned with G
 	var builtInBaseRoleDefinition: BuiltInRoleDefinition = _
 
 	def baseRoleDefinition: RoleDefinition = Option(customBaseRoleDefinition) getOrElse builtInBaseRoleDefinition
-	def baseRoleDefinition_=(definition: RoleDefinition) = definition match {
+	def baseRoleDefinition_=(definition: RoleDefinition): Unit = definition match {
 		case customDefinition: CustomRoleDefinition => {
 			customBaseRoleDefinition = customDefinition
 			builtInBaseRoleDefinition = null
@@ -65,7 +65,7 @@ class CustomRoleDefinition extends RoleDefinition with HibernateVersioned with G
 	@Column(name = "REPLACES_PARENT")
 	var replacesBaseDefinition: JBoolean = false
 
-	def permissionsParents =
+	def permissionsParents: Stream[Department] =
 		Option(department).toStream
 
 	/**
@@ -74,7 +74,7 @@ class CustomRoleDefinition extends RoleDefinition with HibernateVersioned with G
 	 * we can do the removal accurately - otherwise we won't be able to
 	 * remove permissions added in sub-roles.
 	 */
-	def permissions(scope: Option[PermissionsTarget]) = {
+	def permissions(scope: Option[PermissionsTarget]): Map[Permission, Option[PermissionsTarget]] = {
 		val basePermissions = baseRoleDefinition.allPermissions(scope)
 
 		val (additionOverrides, removalOverrides) = overrides.partition(_.overrideType)
@@ -92,7 +92,7 @@ class CustomRoleDefinition extends RoleDefinition with HibernateVersioned with G
 	def allPermissions(scope: Option[PermissionsTarget]): Map[Permission, Option[PermissionsTarget]] =
 		permissions(scope)
 
-	def mayGrant(target: Permission) = {
+	def mayGrant(target: Permission): Boolean = {
 		val baseGrants = baseRoleDefinition.mayGrant(target)
 		val explicitDeny = (overrides.exists { o => o.overrideType == RoleOverride.Deny && o.permission == target})
 		val explicitGrant = (overrides.exists { o => o.overrideType == RoleOverride.Allow && o.permission == target})

@@ -29,7 +29,7 @@ class EditCustomRoleDefinitionCommandInternal(val department: Department, val cu
 	name = customRoleDefinition.name
 	baseDefinition = customRoleDefinition.baseRoleDefinition
 
-	override def applyInternal() = transactional() {
+	override def applyInternal(): CustomRoleDefinition = transactional() {
 		customRoleDefinition.name = name
 		customRoleDefinition.baseRoleDefinition = baseDefinition
 
@@ -62,6 +62,6 @@ trait EditCustomRoleDefinitionCommandValidation extends AddCustomRoleDefinitionC
 trait EditCustomRoleDefinitionCommandDescription extends Describable[CustomRoleDefinition] {
 	self: EditCustomRoleDefinitionCommandState =>
 	// describe the thing that's happening.
-	override def describe(d: Description) =
+	override def describe(d: Description): Unit =
 		d.customRoleDefinition(customRoleDefinition)
 }

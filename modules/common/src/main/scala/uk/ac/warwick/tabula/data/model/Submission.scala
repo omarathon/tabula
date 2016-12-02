@@ -14,6 +14,7 @@ import uk.ac.warwick.tabula.permissions._
 import uk.ac.warwick.userlookup.User
 
 import scala.collection.JavaConversions._
+import scala.collection.mutable
 
 object Submission {
 	val UseDisabilityFieldName = "use-disability"
@@ -29,18 +30,18 @@ class Submission extends GeneratedId with PermissionsTarget with ToEntityReferen
 		this.universityId = universityId
 	}
 
-	def isLate = submittedDate != null && assignment.isLate(this)
-	def isAuthorisedLate = submittedDate != null && assignment.isAuthorisedLate(this)
-	def workingDaysLate = assignment.workingDaysLate(this)
-	def deadline = assignment.submissionDeadline(this)
+	def isLate: Boolean = submittedDate != null && assignment.isLate(this)
+	def isAuthorisedLate: Boolean = submittedDate != null && assignment.isAuthorisedLate(this)
+	def workingDaysLate: Int = assignment.workingDaysLate(this)
+	def deadline: DateTime = assignment.submissionDeadline(this)
 
-	def feedbackDeadline = assignment.feedbackDeadlineForSubmission(this)
+	def feedbackDeadline: Option[LocalDate] = assignment.feedbackDeadlineForSubmission(this)
 
 	@ManyToOne(optional = false, cascade = Array(PERSIST, MERGE), fetch = LAZY)
 	@JoinColumn(name = "assignment_id")
 	var assignment: Assignment = _
 
-	def permissionsParents = Option(assignment).toStream
+	def permissionsParents: Stream[Assignment] = Option(assignment).toStream
 
 	var submitted: Boolean = false
 
@@ -53,8 +54,8 @@ class Submission extends GeneratedId with PermissionsTarget with ToEntityReferen
 	@Type(`type` = "uk.ac.warwick.tabula.data.model.PlagiarismInvestigationUserType")
 	var plagiarismInvestigation: PlagiarismInvestigation = PlagiarismInvestigation.Default
 
-	def suspectPlagiarised = plagiarismInvestigation == SuspectPlagiarised
-	def investigationCompleted = plagiarismInvestigation == InvestigationCompleted
+	def suspectPlagiarised: Boolean = plagiarismInvestigation == SuspectPlagiarised
+	def investigationCompleted: Boolean = plagiarismInvestigation == InvestigationCompleted
 
 	/**
 	 * It isn't essential to record University ID as their user ID
@@ -75,34 +76,34 @@ class Submission extends GeneratedId with PermissionsTarget with ToEntityReferen
 		values.find( _.name == field.name )
 	}
 
-	def isForUser(user: User) = universityId == user.getWarwickId || userId == user.getUserId
+	def isForUser(user: User): Boolean = universityId == user.getWarwickId || userId == user.getUserId
 
 	def firstMarker:Option[User] = assignment.getStudentsFirstMarker(universityId)
 
 	def secondMarker:Option[User] = assignment.getStudentsSecondMarker(universityId)
 
-	def valuesByFieldName = (values map { v => (v.name, v.value) }).toMap
+	def valuesByFieldName: Map[String, String] = (values map { v => (v.name, v.value) }).toMap
 
-	def valuesWithAttachments = values.filter(_.hasAttachments)
+	def valuesWithAttachments: mutable.Set[SavedFormValue] = values.filter(_.hasAttachments)
 
-	def allAttachments = valuesWithAttachments.toSeq flatMap { _.attachments }
+	def allAttachments: Seq[FileAttachment] = valuesWithAttachments.toSeq flatMap { _.attachments }
 
 	def hasOriginalityReport: JBoolean = allAttachments.exists( _.originalityReportReceived )
 
 	def isNoteworthy: Boolean = suspectPlagiarised || isAuthorisedLate || isLate
 
 	/** Filename as we would expect to find this attachment in a downloaded zip of submissions. */
-	def zipFileName(attachment: FileAttachment) = {
+	def zipFileName(attachment: FileAttachment): String = {
 		assignment.module.code + " - " + universityId + " - " + attachment.name
 	}
 
-	def zipFilename(attachment: FileAttachment, name: String) = {
+	def zipFilename(attachment: FileAttachment, name: String): String = {
 		assignment.module.code + " - " + name + " - " + attachment.name
 	}
 
 	def useDisability: Boolean = values.find(_.name == Submission.UseDisabilityFieldName).exists(_.value.toBoolean)
 
-	def toEntityReference = new SubmissionEntityReference().put(this)
+	def toEntityReference: SubmissionEntityReference = new SubmissionEntityReference().put(this)
 }
 
 trait FeedbackReportGenerator {

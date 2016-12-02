@@ -18,16 +18,16 @@ trait MarkingNotificationFixture extends Mockito {
 	val testmodule = new Module("heron101", department)
 	val testAssignment = new Assignment{ id = "1"; name = "Test assignment"; module = testmodule }
 
-	val marker1 = Fixtures.user("marker1", "marker1")
-	val marker2 = Fixtures.user("marker2", "marker2")
+	val marker1: User = Fixtures.user("marker1", "marker1")
+	val marker2: User = Fixtures.user("marker2", "marker2")
 	marker2.setFullName("Snorkeldink Wafflesmack")
-	val marker3 = Fixtures.user("marker3", "marker3")
-	val student1 = Fixtures.user("student1", "student1")
-	val student2 = Fixtures.user("student2", "student2")
-	val student3 = Fixtures.user("student3", "student3")
-	val student4 = Fixtures.user("student4", "student4")
+	val marker3: User = Fixtures.user("marker3", "marker3")
+	val student1: User = Fixtures.user("student1", "student1")
+	val student2: User = Fixtures.user("student2", "student2")
+	val student3: User = Fixtures.user("student3", "student3")
+	val student4: User = Fixtures.user("student4", "student4")
 
-	val mockUserLookup = mock[UserLookupService]
+	val mockUserLookup: UserLookupService = mock[UserLookupService]
 	when(mockUserLookup.getUserByUserId("marker1")) thenReturn marker1
 	when(mockUserLookup.getUserByUserId("marker2")) thenReturn marker2
 	when(mockUserLookup.getUserByUserId("marker3")) thenReturn marker3
@@ -37,13 +37,13 @@ trait MarkingNotificationFixture extends Mockito {
 	when(mockUserLookup.getUserByWarwickUniId("student4")) thenReturn student4
 
 
-	def userGroup(usercodes: String *) = {
+	def userGroup(usercodes: String *): UserGroup = {
 		val userGroup = UserGroup.ofUsercodes
 		userGroup.includedUserIds = usercodes
 		userGroup
 	}
 
-	def makeMarkerFeedback(student: User)(linkFunction: (Feedback, MarkerFeedback) => Unit) = {
+	def makeMarkerFeedback(student: User)(linkFunction: (Feedback, MarkerFeedback) => Unit): (AssignmentFeedback, MarkerFeedback) = {
 		val feedback = new AssignmentFeedback
 		feedback.universityId = student.getWarwickId
 		val mf = new MarkerFeedback()

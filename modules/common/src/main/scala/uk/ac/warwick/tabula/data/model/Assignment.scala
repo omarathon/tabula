@@ -21,6 +21,7 @@ import uk.ac.warwick.util.workingdays.WorkingDaysHelperImpl
 import scala.beans.BeanProperty
 import scala.collection.JavaConversions._
 import scala.collection.JavaConverters._
+import scala.collection.mutable
 import scala.reflect._
 
 
@@ -77,19 +78,19 @@ class Assignment
 	type Entity = Assignment
 
 	@transient
-	var assignmentService = Wire[AssessmentService]("assignmentService")
+	var assignmentService: AssessmentService = Wire[AssessmentService]("assignmentService")
 
 	@transient
-	var submissionService = Wire[SubmissionService]("submissionService")
+	var submissionService: SubmissionService = Wire[SubmissionService]("submissionService")
 
 	@transient
-	var feedbackService = Wire[FeedbackService]("feedbackService")
+	var feedbackService: FeedbackService = Wire[FeedbackService]("feedbackService")
 
 	@transient
-	var extensionService = Wire[ExtensionService]("extensionService")
+	var extensionService: ExtensionService = Wire[ExtensionService]("extensionService")
 
 	@transient
-	var userLookup = Wire[UserLookupService]("userLookup")
+	var userLookup: UserLookupService = Wire[UserLookupService]("userLookup")
 
 	def this(_module: Module) {
 		this()
@@ -122,7 +123,7 @@ class Assignment
 
 	var openDate: DateTime = _
 	var closeDate: DateTime = _
-	var createdDate = DateTime.now()
+	var createdDate: DateTime = DateTime.now()
 
 	// left unset as defaults are set by BooleanAssignmentProperties
 	var openEnded: JBoolean = _
@@ -146,7 +147,7 @@ class Assignment
 	@JoinColumn(name = "module_id")
 	override var module: Module = _
 
-	override def permissionsParents = Option(module).toStream
+	override def permissionsParents: Stream[Module] = Option(module).toStream
 
 	@OneToMany(mappedBy = "assignment", fetch = FetchType.LAZY, cascade = Array(CascadeType.ALL), orphanRemoval = true)
 	@BatchSize(size = 200)
@@ -164,15 +165,15 @@ class Assignment
 	@OneToMany(mappedBy = "assignment", fetch = LAZY, cascade = Array(ALL))
 	@BatchSize(size = 200)
 	var feedbacks: JList[AssignmentFeedback] = JArrayList()
-	override def allFeedback = feedbacks.asScala
+	override def allFeedback: mutable.Buffer[AssignmentFeedback] = feedbacks.asScala
 
 	@ManyToOne(fetch = FetchType.LAZY)
 	@JoinColumn(name = "feedback_template_id")
 	@BatchSize(size = 200)
 	var feedbackTemplate: FeedbackTemplate = _
 
-	def includeInFeedbackReportWithoutSubmissions = getBooleanSetting(Settings.IncludeInFeedbackReportWithoutSubmissions, default = false)
-	def includeInFeedbackReportWithoutSubmissions_= (include: Boolean) = settings += (Settings.IncludeInFeedbackReportWithoutSubmissions -> include)
+	def includeInFeedbackReportWithoutSubmissions: Boolean = getBooleanSetting(Settings.IncludeInFeedbackReportWithoutSubmissions, default = false)
+	def includeInFeedbackReportWithoutSubmissions_= (include: Boolean): Unit = settings += (Settings.IncludeInFeedbackReportWithoutSubmissions -> include)
 
 	def hasFeedbackTemplate: Boolean = feedbackTemplate != null
 
@@ -201,7 +202,7 @@ class Assignment
 			.forall(user => extensions.exists(e => e.approved && e.isForUser(user.getWarwickId, user.getUserId)))
 
 
-	def feedbackDeadlineForSubmission(submission: Submission) = feedbackDeadline.flatMap { wholeAssignmentDeadline =>
+	def feedbackDeadlineForSubmission(submission: Submission): Option[LocalDate] = feedbackDeadline.flatMap { wholeAssignmentDeadline =>
 		// If we have an extension, use the extension's expiry date
 		val extension = extensions.asScala.find { e => e.isForUser(submission.universityId, submission.userId) && e.approved }
 
@@ -270,7 +271,7 @@ class Assignment
 		ensureSettings
 	}
 
-	def ensureMembersGroup = {
+	def ensureMembersGroup: UserGroup = {
 		if (_members == null) _members = UserGroup.ofUsercodes
 		_members
 	}
@@ -333,10 +334,10 @@ class Assignment
 	/**
 	 * Returns whether we're between the opening and closing dates
 	 */
-	def isBetweenDates(now: DateTime = new DateTime) =
+	def isBetweenDates(now: DateTime = new DateTime): Boolean =
 		isOpened(now) && !isClosed(now)
 
-	def isOpened(now: DateTime) = now.isAfter(openDate)
+	def isOpened(now: DateTime): Boolean = now.isAfter(openDate)
 
 	def isOpened: Boolean = isOpened(new DateTime)
 
@@ -344,7 +345,7 @@ class Assignment
 	 * Whether it's after the close date. Depending on the assignment
 	 * we might still be allowing submissions, though.
 	 */
-	def isClosed(now: DateTime) = !openEnded && now.isAfter(closeDate)
+	def isClosed(now: DateTime): Boolean = !openEnded && now.isAfter(closeDate)
 
 	def isClosed: Boolean = isClosed(new DateTime)
 
@@ -353,7 +354,7 @@ class Assignment
 	 */
 	def isWithinExtension(user: User, time: DateTime): Boolean = isWithinExtension(user.getWarwickId, user.getUserId, time)
 
-	def isWithinExtension(universityId: String, usercode: String, time: DateTime) =
+	def isWithinExtension(universityId: String, usercode: String, time: DateTime): Boolean =
 		extensions.exists(e => e.isForUser(universityId, usercode) && e.approved && e.expiryDate.exists(_.isAfter(time)))
 
 	/**
@@ -366,7 +367,7 @@ class Assignment
 	/**
 	 * retrospectively checks if a submission was late. called by submission.isLate to check against extensions
 	 */
-	def isLate(submission: Submission) =
+	def isLate(submission: Submission): Boolean =
 		!openEnded && closeDate.isBefore(submission.submittedDate) && !isWithinExtension(submission.universityId, submission.userId, submission.submittedDate)
 
 	def lateSubmissionCount: Int =
@@ -382,14 +383,14 @@ class Assignment
 	/**
 	 * Deadline taking into account any approved extension
 	 */
-	def submissionDeadline(submission: Submission) =
+	def submissionDeadline(submission: Submission): DateTime =
 		if (openEnded) null
 		else extensions
 			.find(e => e.isForUser(submission.universityId, submission.userId) && e.approved)
 			.flatMap(_.expiryDate)
 			.getOrElse(closeDate)
 
-	def workingDaysLate(submission: Submission) =
+	def workingDaysLate(submission: Submission): Int =
 		if (isLate(submission)) {
 			val deadline = submissionDeadline(submission)
 
@@ -422,39 +423,39 @@ class Assignment
 	 * retrospectively checks if a submission was an 'authorised late'
 	 * called by submission.isAuthorisedLate to check against extensions
 	 */
-	def isAuthorisedLate(submission: Submission) =
+	def isAuthorisedLate(submission: Submission): Boolean =
 		!openEnded && closeDate.isBefore(submission.submittedDate) && isWithinExtension(submission.universityId, submission.userId, submission.submittedDate)
 
 	// returns extension for a specified student
-	def findExtension(uniId: String) = extensions.find(_.universityId == uniId)
+	def findExtension(uniId: String): Option[Extension] = extensions.find(_.universityId == uniId)
 
 	/**
 	 * Whether the assignment is not archived or deleted.
 	 */
-	def isAlive = !deleted && !_archived
+	def isAlive: Boolean = !deleted && !_archived
 
 	/**
 		* Whether this assignment should be visible to students
 		*/
-	def isVisibleToStudents = isAlive && !_hiddenFromStudents
+	def isVisibleToStudents: Boolean = isAlive && !_hiddenFromStudents
 
 	/**
 		* Whether this assignment should be visible to students historically (this allows archived assignments)
 		*/
-	def isVisibleToStudentsHistoric = !deleted && !_hiddenFromStudents
+	def isVisibleToStudentsHistoric: Boolean = !deleted && !_hiddenFromStudents
 
 	/**
 	 * Calculates whether we could submit to this assignment.
 	 */
-	def submittable(user: User) = isAlive && collectSubmissions && isOpened && (allowLateSubmissions || !isClosed || isWithinExtension(user))
+	def submittable(user: User): Boolean = isAlive && collectSubmissions && isOpened && (allowLateSubmissions || !isClosed || isWithinExtension(user))
 
 	/**
 	 * Calculates whether we could re-submit to this assignment (assuming that the current
 	 * student has already submitted).
 	 */
-	def resubmittable(user: User) = submittable(user) && allowResubmission && (!isClosed || isWithinExtension(user))
+	def resubmittable(user: User): Boolean = submittable(user) && allowResubmission && (!isClosed || isWithinExtension(user))
 
-	def mostRecentFeedbackUpload = feedbacks.maxBy {
+	def mostRecentFeedbackUpload: DateTime = feedbacks.maxBy {
 		_.updatedDate
 	}.updatedDate
 
@@ -506,9 +507,9 @@ class Assignment
 
 
 
-	def countFullFeedback = fullFeedback.size
+	def countFullFeedback: Int = fullFeedback.size
 
-	def hasFullFeedback = countFullFeedback > 0
+	def hasFullFeedback: Boolean = countFullFeedback > 0
 
 	/**
 	 * Returns a filtered copy of the feedbacks that haven't yet been published.
@@ -516,32 +517,32 @@ class Assignment
 	 * assumes all feedback has already been published.
 	 */
 	// scalastyle:off
-	def unreleasedFeedback = fullFeedback.filterNot(_.released == true) // ==true because can be null
+	def unreleasedFeedback: Seq[Feedback] = fullFeedback.filterNot(_.released == true) // ==true because can be null
 
 	// safer to use in overview pages like the department homepage as does not require the feedback list to be inflated
-	def countReleasedFeedback = feedbackService.countPublishedFeedback(this)
+	def countReleasedFeedback: Int = feedbackService.countPublishedFeedback(this)
 
-	def countUnreleasedFeedback = countFullFeedback - countReleasedFeedback
+	def countUnreleasedFeedback: Int = countFullFeedback - countReleasedFeedback
 
-	def hasReleasedFeedback = countReleasedFeedback > 0
+	def hasReleasedFeedback: Boolean = countReleasedFeedback > 0
 
-	def hasUnreleasedFeedback = countReleasedFeedback < countFullFeedback
+	def hasUnreleasedFeedback: Boolean = countReleasedFeedback < countFullFeedback
 
-	def countExtensions = extensionService.countExtensions(this)
+	def countExtensions: Int = extensionService.countExtensions(this)
 
-	def hasExtensions = extensionService.hasExtensions(this)
+	def hasExtensions: Boolean = extensionService.hasExtensions(this)
 
-	def countUnapprovedExtensions = extensionService.countUnapprovedExtensions(this)
+	def countUnapprovedExtensions: Int = extensionService.countUnapprovedExtensions(this)
 
-	def hasUnapprovedExtensions = extensionService.hasUnapprovedExtensions(this)
+	def hasUnapprovedExtensions: Boolean = extensionService.hasUnapprovedExtensions(this)
 
-	def getUnapprovedExtensions = extensionService.getUnapprovedExtensions(this)
+	def getUnapprovedExtensions: Seq[Extension] = extensionService.getUnapprovedExtensions(this)
 
-	def extensionCountByStatus = {
+	def extensionCountByStatus: Map[ExtensionState, Int] = {
 		extensions.groupBy(_._state).map { case (state, extensionList) => (state, extensionList.size ) }
 	}
 
-	def addFields(fieldz: AssignmentFormField*) = for (field <- fieldz) addField(field)
+	def addFields(fieldz: AssignmentFormField*): Unit = for (field <- fieldz) addField(field)
 
 	def addFeedback(feedback: AssignmentFeedback) {
 		feedbacks.add(feedback)
@@ -554,7 +555,7 @@ class Assignment
 	}
 
 	// returns the submission for a specified student
-	def findSubmission(uniId: String) = submissions.find(_.universityId == uniId)
+	def findSubmission(uniId: String): Option[Submission] = submissions.find(_.universityId == uniId)
 
 	// Help views decide whether to show a publish button.
 	def canPublishFeedback: Boolean =
@@ -716,7 +717,7 @@ class Assignment
 		"closeDate" -> closeDate,
 		"module" -> module)
 
-	def getUniIdsWithSubmissionOrFeedback = {
+	def getUniIdsWithSubmissionOrFeedback: Set[String] = {
 			val submissionIds = submissions.asScala.map { _.universityId }.toSet
 			val feedbackIds = fullFeedback.map { _.universityId }.toSet
 
@@ -725,9 +726,9 @@ class Assignment
 
 	// later we may do more complex checks to see if this particular markingWorkflow requires that feedback is released manually
 	// for now all markingWorkflow will require you to release feedback so if one exists for this assignment - provide it
-	def mustReleaseForMarking = hasWorkflow
+	def mustReleaseForMarking: Boolean = hasWorkflow
 
-	def needsFeedbackPublishing = {
+	def needsFeedbackPublishing: Boolean = {
 		if (openEnded || dissertation || !collectSubmissions || _archived) {
 			false
 		} else {
@@ -735,7 +736,7 @@ class Assignment
 		}
 	}
 
-	def needsFeedbackPublishingIgnoreExtensions = {
+	def needsFeedbackPublishingIgnoreExtensions: Boolean = {
 		if (openEnded || dissertation || !collectSubmissions || _archived) {
 			false
 		} else {
@@ -743,7 +744,7 @@ class Assignment
 		}
 	}
 
-	def needsFeedbackPublishingFor(universityId: String) = {
+	def needsFeedbackPublishingFor(universityId: String): Boolean = {
 		if (openEnded || dissertation || !collectSubmissions || _archived) {
 			false
 		} else {
@@ -751,19 +752,19 @@ class Assignment
 		}
 	}
 
-	def automaticallyReleaseToMarkers = getBooleanSetting(Settings.AutomaticallyReleaseToMarkers, default = false)
-	def automaticallyReleaseToMarkers_= (include: Boolean) = settings += (Settings.AutomaticallyReleaseToMarkers -> include)
-	def automaticallySubmitToTurnitin = getBooleanSetting(Settings.AutomaticallySubmitToTurnitin, default = false)
-	def automaticallySubmitToTurnitin_= (include: Boolean) = settings += (Settings.AutomaticallySubmitToTurnitin -> include)
+	def automaticallyReleaseToMarkers: Boolean = getBooleanSetting(Settings.AutomaticallyReleaseToMarkers, default = false)
+	def automaticallyReleaseToMarkers_= (include: Boolean): Unit = settings += (Settings.AutomaticallyReleaseToMarkers -> include)
+	def automaticallySubmitToTurnitin: Boolean = getBooleanSetting(Settings.AutomaticallySubmitToTurnitin, default = false)
+	def automaticallySubmitToTurnitin_= (include: Boolean): Unit = settings += (Settings.AutomaticallySubmitToTurnitin -> include)
 
-	def extensionAttachmentMandatory = getBooleanSetting(Settings.ExtensionAttachmentMandatory, default = false)
-	def extensionAttachmentMandatory_= (mandatory: Boolean) = settings += (Settings.ExtensionAttachmentMandatory -> mandatory)
+	def extensionAttachmentMandatory: Boolean = getBooleanSetting(Settings.ExtensionAttachmentMandatory, default = false)
+	def extensionAttachmentMandatory_= (mandatory: Boolean): Unit = settings += (Settings.ExtensionAttachmentMandatory -> mandatory)
 
-	def allowExtensionsAfterCloseDate = getBooleanSetting(Settings.AllowExtensionsAfterCloseDate, default = false)
-	def allowExtensionsAfterCloseDate_= (allow: Boolean) = settings += (Settings.AllowExtensionsAfterCloseDate -> allow)
+	def allowExtensionsAfterCloseDate: Boolean = getBooleanSetting(Settings.AllowExtensionsAfterCloseDate, default = false)
+	def allowExtensionsAfterCloseDate_= (allow: Boolean): Unit = settings += (Settings.AllowExtensionsAfterCloseDate -> allow)
 
 	def turnitinLtiNotifyUsers: Seq[User] = UserSeqSetting(Settings.TurnitinLtiNotifyUsers, Seq(), userLookup).value
-	def turnitinLtiNotifyUsers_= (users: Seq[User]) = {
+	def turnitinLtiNotifyUsers_= (users: Seq[User]): Unit = {
 		UserSeqSetting(Settings.TurnitinLtiNotifyUsers, Seq(), userLookup).value = users
 	}
 
@@ -785,7 +786,7 @@ class Assignment
 		)
 	}
 
-	def toEntityReference = new AssignmentEntityReference().put(this)
+	def toEntityReference: AssignmentEntityReference = new AssignmentEntityReference().put(this)
 }
 
 case class SubmissionsReport(assignment: Assignment) {
@@ -798,16 +799,16 @@ case class SubmissionsReport(assignment: Assignment) {
 	private val submissionUniIds = submissions.map(toUniId).toSet
 
 	// Subtract the sets from each other to obtain discrepancies
-	val feedbackOnly = feedbackUniIds &~ submissionUniIds
-	val submissionOnly = submissionUniIds &~ feedbackUniIds
+	val feedbackOnly: Set[String] = feedbackUniIds &~ submissionUniIds
+	val submissionOnly: Set[String] = submissionUniIds &~ feedbackUniIds
 
 	/**
 	 * We want to show a warning if some feedback items are missing either marks or attachments
 	 * If however, all feedback items have only marks or attachments then we don't send a warning.
 	 */
-	val withoutAttachments = feedbacks.filter(f => !f.hasAttachments && !f.comments.exists(_.hasText)).map(toUniId).toSet
-	val withoutMarks = feedbacks.filter(!_.hasMarkOrGrade).map(toUniId).toSet
-	val plagiarised = submissions.filter(_.suspectPlagiarised).map(toUniId).toSet
+	val withoutAttachments: Set[String] = feedbacks.filter(f => !f.hasAttachments && !f.comments.exists(_.hasText)).map(toUniId).toSet
+	val withoutMarks: Set[String] = feedbacks.filter(!_.hasMarkOrGrade).map(toUniId).toSet
+	val plagiarised: Set[String] = submissions.filter(_.suspectPlagiarised).map(toUniId).toSet
 
 	def hasProblems: Boolean = {
 		val shouldBeEmpty = Set(feedbackOnly, submissionOnly, plagiarised)
@@ -874,7 +875,7 @@ trait BooleanAssignmentProperties {
 }
 
 object BooleanAssignmentProperties extends BooleanAssignmentProperties {
-	def apply(assignment: Assignment) = copyBooleansTo(assignment)
+	def apply(assignment: Assignment): Unit = copyBooleansTo(assignment)
 }
 
 case class EnhancedAssignment(

@@ -3,7 +3,7 @@ package uk.ac.warwick.tabula.roles
 import uk.ac.warwick.tabula.permissions.Permissions._
 import uk.ac.warwick.tabula.data._
 import uk.ac.warwick.tabula.data.model.StudentRelationshipType
-import uk.ac.warwick.tabula.permissions.PermissionsSelector
+import uk.ac.warwick.tabula.permissions.{Permission, PermissionsSelector}
 import uk.ac.warwick.tabula.JavaImports
 
 object StudentRelationshipAgent {
@@ -54,11 +54,11 @@ case class StudentRelationshipAgent(student: model.Member, relationshipType: Stu
 case class StudentRelationshipAgentRoleDefinition(relationshipType: PermissionsSelector[StudentRelationshipType])
 	extends SelectorBuiltInRoleDefinition(relationshipType) {
 
-	override def description =
+	override def description: String =
 		if (relationshipType.isWildcard) "Relationship agent (any relationship)"
 		else relationshipType.description
 
-	val readOnlyPermissions = StudentRelationshipAgent.profileReadOnlyPermissions(relationshipType)
+	val readOnlyPermissions: Seq[Permission with Product with Serializable] = StudentRelationshipAgent.profileReadOnlyPermissions(relationshipType)
 	val permissionsForCurrentRelationships = Seq (
 		Profiles.Read.NextOfKin,
 		Profiles.Read.HomeAndTermTimeAddresses,
@@ -98,7 +98,7 @@ case class HistoricStudentRelationshipAgent(student: model.Member, relationshipT
 case class HistoricStudentRelationshipAgentRoleDefinition(relationshipType: PermissionsSelector[StudentRelationshipType])
 	extends SelectorBuiltInRoleDefinition(relationshipType) {
 
-	override def description =
+	override def description: String =
 		if (relationshipType.isWildcard) "Previous relationship agent (any relationship)"
 		else s"Previous ${relationshipType.description}"
 

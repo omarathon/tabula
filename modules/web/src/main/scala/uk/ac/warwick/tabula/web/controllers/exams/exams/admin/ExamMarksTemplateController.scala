@@ -17,7 +17,7 @@ import uk.ac.warwick.userlookup.User
 @RequestMapping(value = Array("/exams/exams/admin/module/{module}/{academicYear}/exams/{exam}/marks-template"))
 class ExamMarksTemplateController extends ExamsController {
 
-	var examMembershipService = Wire[AssessmentMembershipService]
+	var examMembershipService: AssessmentMembershipService = Wire[AssessmentMembershipService]
 
 	@ModelAttribute("command")
 	def command(@PathVariable module: Module, @PathVariable exam: Exam) =
@@ -28,7 +28,7 @@ class ExamMarksTemplateController extends ExamsController {
 		)
 
 	@RequestMapping(method = Array(HEAD, GET))
-	def generateMarksTemplate(@ModelAttribute("command") cmd: Appliable[XSSFWorkbook], @PathVariable exam: Exam) = {
+	def generateMarksTemplate(@ModelAttribute("command") cmd: Appliable[XSSFWorkbook], @PathVariable exam: Exam): ExcelView = {
 		new ExcelView(safeAssessmentName(exam) + " marks.xlsx", cmd.apply())
 	}
 }
@@ -37,7 +37,7 @@ class ExamMarksTemplateController extends ExamsController {
 @RequestMapping(value = Array("/exams/exams/admin/module/{module}/{academicYear}/exams/{exam}/marker/{marker}/marks-template"))
 class ExamMarkerMarksTemplateController extends ExamsController {
 
-	var examMembershipService = Wire[AssessmentMembershipService]
+	var examMembershipService: AssessmentMembershipService = Wire[AssessmentMembershipService]
 
 	@ModelAttribute("command")
 	def command(@PathVariable module: Module, @PathVariable exam: Exam, @PathVariable marker: User) =
@@ -48,7 +48,7 @@ class ExamMarkerMarksTemplateController extends ExamsController {
 		)
 
 	@RequestMapping(method = Array(HEAD, GET))
-	def generateMarksTemplate(@ModelAttribute("command") cmd: Appliable[XSSFWorkbook], @PathVariable exam: Exam) = {
+	def generateMarksTemplate(@ModelAttribute("command") cmd: Appliable[XSSFWorkbook], @PathVariable exam: Exam): ExcelView = {
 		new ExcelView(safeAssessmentName(exam) + " marks.xlsx", cmd.apply())
 	}
 }

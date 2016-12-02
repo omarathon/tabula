@@ -12,6 +12,7 @@ import uk.ac.warwick.tabula.commands.coursework.feedback._
 import uk.ac.warwick.tabula.web.controllers.coursework.OldCourseworkController
 import uk.ac.warwick.tabula.data.model._
 import uk.ac.warwick.tabula.services.AutowiringProfileServiceComponent
+import uk.ac.warwick.tabula.web.Mav
 import uk.ac.warwick.userlookup.User
 
 @Profile(Array("cm1Enabled")) @Controller
@@ -28,7 +29,7 @@ class OldFeedbackAdjustmentsListController extends OldCourseworkController {
 	def list(
 		@PathVariable assignment: Assignment,
 		@ModelAttribute("listCommand") listCommand: FeedbackAdjustmentListCommand
-	) = {
+	): Mav = {
 		val (studentInfo, noFeedbackStudentInfo) = listCommand.apply().partition { _.feedback.isDefined }
 
 		Mav(s"$urlPrefix/admin/assignments/feedback/adjustments_list",
@@ -45,7 +46,7 @@ class OldFeedbackAdjustmentsListController extends OldCourseworkController {
 
 object OldFeedbackAdjustmentsController {
 	// TAB-3312 Source: http://www2.warwick.ac.uk/services/aro/dar/quality/categories/examinations/faqs/penalties
-	final val LatePenaltyPerDay = Map(
+	final val LatePenaltyPerDay: Map[CourseType, Int] = Map(
 		CourseType.UG -> 5,
 		CourseType.PGR -> 3,
 		CourseType.PGT -> 3
@@ -67,7 +68,7 @@ class OldFeedbackAdjustmentsController extends OldCourseworkController with Auto
 		@ModelAttribute("command") command: Appliable[Feedback] with FeedbackAdjustmentCommandState,
 		@PathVariable assignment: Assignment,
 		@PathVariable student: User
-	) = {
+	): Mav = {
 		val submission = assignment.findSubmission(student.getWarwickId)
 		val daysLate = submission.map { _.workingDaysLate }
 
@@ -105,7 +106,7 @@ class OldFeedbackAdjustmentsController extends OldCourseworkController with Auto
 		errors: Errors,
 		@PathVariable assignment: Assignment,
 		@PathVariable student: User
-	) = {
+	): Mav = {
 		if (errors.hasErrors) {
 			showForm(command, assignment, student)
 		} else {

@@ -1,12 +1,13 @@
 package uk.ac.warwick.tabula.data
 
-import uk.ac.warwick.tabula.{PersistenceTestBase, Fixtures}
+import org.hibernate.Session
+import uk.ac.warwick.tabula.{Fixtures, PersistenceTestBase}
 import uk.ac.warwick.tabula.JavaImports.JBoolean
 
 class FeedbackDaoTest extends PersistenceTestBase {
 
 	val dao = new AbstractFeedbackDao with ExtendedSessionComponent {
-		override def session = FeedbackDaoTest.this.session
+		override def session: Session = FeedbackDaoTest.this.session
 	}
 
 	@Test def crud() = transactional { tx =>

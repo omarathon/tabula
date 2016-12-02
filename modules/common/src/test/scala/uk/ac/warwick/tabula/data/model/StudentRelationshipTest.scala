@@ -8,7 +8,7 @@ import uk.ac.warwick.tabula.Fixtures
 
 class StudentRelationshipTest extends TestBase with Mockito {
 
-	val profileService = mock[ProfileService]
+	val profileService: ProfileService = mock[ProfileService]
 
 	@Test def agentMember {
 		val relType = StudentRelationshipType("tutor", "tutor", "personal tutor", "personal tutee")

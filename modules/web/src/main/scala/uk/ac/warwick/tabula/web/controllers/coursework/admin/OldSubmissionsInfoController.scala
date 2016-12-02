@@ -23,6 +23,9 @@ import org.springframework.web.bind.annotation.ModelAttribute
 import uk.ac.warwick.tabula.data.model.Module
 import uk.ac.warwick.tabula.data.model.forms.SavedFormValue
 
+import scala.collection.AbstractSeq
+import scala.xml.{Elem, Node}
+
 /**
  * Download submissions metadata.
  */
@@ -32,8 +35,8 @@ class OldSubmissionsInfoController extends OldCourseworkController {
 	val isoFormatter = DateFormats.IsoDateTime
 	val csvFormatter = DateFormats.CSVDateTime
 
-	def isoFormat(i: ReadableInstant) = isoFormatter print i
-	def csvFormat(i: ReadableInstant) = csvFormatter print i
+	def isoFormat(i: ReadableInstant): String = isoFormatter print i
+	def csvFormat(i: ReadableInstant): String = csvFormatter print i
 
 	var checkIndex = true
 
@@ -41,7 +44,7 @@ class OldSubmissionsInfoController extends OldCourseworkController {
 		ListSubmissionsCommand(module, assignment)
 
 	@RequestMapping(value=Array("/${cm1.prefix}/admin/module/{module}/assignments/{assignment}/submissions.xml"), method = Array(GET, HEAD))
-	def xml(@ModelAttribute("command") command: ListSubmissionsCommand.CommandType, @PathVariable assignment: Assignment) = {
+	def xml(@ModelAttribute("command") command: ListSubmissionsCommand.CommandType, @PathVariable assignment: Assignment): Elem = {
 		command.checkIndex = checkIndex
 
 		val items = command.apply().sortBy { _.submission.submittedDate }.reverse
@@ -52,10 +55,10 @@ class OldSubmissionsInfoController extends OldCourseworkController {
 		</submissions>
 	}
 
-	def assignmentElement(assignment: Assignment) =
+	def assignmentElement(assignment: Assignment): Elem =
 		<assignment id={ assignment.id } open-date={ isoFormat(assignment.openDate) } close-date={ isoFormat(assignment.closeDate) }/>
 
-	def submissionElement(item: SubmissionListItem) =
+	def submissionElement(item: SubmissionListItem): Elem =
 		<submission
 				id={ item.submission.id }
 				submission-time={ isoFormat(item.submission.submittedDate) }
@@ -64,7 +67,7 @@ class OldSubmissionsInfoController extends OldCourseworkController {
 			{ item.submission.values map fieldElement(item) }
 		</submission>
 
-	def fieldElement(item: SubmissionListItem)(value: SavedFormValue) =
+	def fieldElement(item: SubmissionListItem)(value: SavedFormValue): AbstractSeq[Node] with Seq[Node] =
 		if (value.hasAttachments)
 			<field name={ value.name }>
 				{
@@ -80,7 +83,7 @@ class OldSubmissionsInfoController extends OldCourseworkController {
 
 
 	@RequestMapping(value=Array("/${cm1.prefix}/admin/module/{module}/assignments/{assignment}/submissions.csv"), method = Array(GET, HEAD))
-	def csv(@ModelAttribute("command") command: ListSubmissionsCommand.CommandType) = {
+	def csv(@ModelAttribute("command") command: ListSubmissionsCommand.CommandType): CSVView = {
 		command.checkIndex = checkIndex
 
 		val items = command.apply().sortBy { _.submission.submittedDate }.reverse
@@ -97,7 +100,7 @@ class OldSubmissionsInfoController extends OldCourseworkController {
 	}
 
 	class SubmissionsCSVBuilder(items:Seq[SubmissionListItem]) extends CSVLineWriter[SubmissionListItem] {
-		val headers = {
+		val headers: Seq[String] = {
 			var extraFields = Set[String]()
 
 			// have to iterate all items to ensure complete field coverage. bleh :(
@@ -107,9 +110,9 @@ class OldSubmissionsInfoController extends OldCourseworkController {
 			coreFields ++ extraFields.toList.sorted
 		}
 
-		def getNoOfColumns(item:SubmissionListItem) = headers.size
+		def getNoOfColumns(item:SubmissionListItem): Int = headers.size
 
-		def getColumn(item:SubmissionListItem, i:Int) = {
+		def getColumn(item:SubmissionListItem, i:Int): String = {
 			itemData(item).getOrElse(headers.get(i), "")
 		}
 	}

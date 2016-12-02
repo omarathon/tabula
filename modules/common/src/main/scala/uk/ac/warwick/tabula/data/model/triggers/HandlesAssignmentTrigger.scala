@@ -7,16 +7,20 @@ import uk.ac.warwick.tabula.commands.coursework.assignments.ReleaseForMarkingCom
 import uk.ac.warwick.tabula.commands.coursework.turnitin.SubmitToTurnitinCommand
 import uk.ac.warwick.tabula.data.model.Assignment
 import uk.ac.warwick.tabula.helpers.Logging
+import uk.ac.warwick.tabula.services.AssessmentService
 import uk.ac.warwick.tabula.services.jobs.JobService
 import uk.ac.warwick.userlookup.AnonymousUser
 
 trait HandlesAssignmentTrigger extends Logging {
 
 	@transient
-	var jobService = Wire[JobService]
+	var jobService: JobService = Wire[JobService]
 
 	@transient
-	var features = Wire[Features]
+	var features: Features = Wire[Features]
+
+	@transient
+	var assessmentService: AssessmentService = Wire[AssessmentService]
 
 	def assignment: Assignment
 
@@ -30,7 +34,9 @@ trait HandlesAssignmentTrigger extends Logging {
 		}
 
 		if (assignment.automaticallySubmitToTurnitin && features.turnitinSubmissions) {
-			SubmitToTurnitinCommand(assignment.module, assignment).apply()
+			// TAB-4718
+			val freshAssignment = assessmentService.getAssignmentById(assignment.id).get
+			SubmitToTurnitinCommand(assignment.module, freshAssignment).apply()
 		}
 	}
 

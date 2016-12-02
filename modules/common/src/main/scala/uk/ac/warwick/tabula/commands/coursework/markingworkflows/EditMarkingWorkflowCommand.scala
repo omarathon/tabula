@@ -30,7 +30,7 @@ class EditMarkingWorkflowCommandInternal(department: Department, val markingWork
 	// fill in the properties on construction
 	copyFrom(markingWorkflow)
 
-	def applyInternal() = {
+	def applyInternal(): MarkingWorkflow = {
 		transactional() {
 			this.copyTo(markingWorkflow)
 			markingWorkflowService.save(markingWorkflow)
@@ -44,8 +44,8 @@ trait EditMarkingWorkflowCommandState extends MarkingWorkflowCommandState {
 	// methods for putting missing markers back into the model
 	def addFirstMarkers(markers: Seq[String])
 	def addSecondMarkers(markers: Seq[String])
-	def newFirstMarkers = firstMarkers.asScala.toSet
-	def newSecondMarkers = secondMarkers.asScala.toSet
+	def newFirstMarkers: Set[String] = firstMarkers.asScala.toSet
+	def newSecondMarkers: Set[String] = secondMarkers.asScala.toSet
 }
 
 trait EditMarkingWorkflowCommandValidation extends MarkingWorkflowCommandValidation with MarkerRemovalAware {
@@ -87,11 +87,11 @@ trait MarkerRemovalAware {
 	def newFirstMarkers: Set[String]
 	def newSecondMarkers: Set[String]
 
-	val existingFirstMarkers = markingWorkflow.firstMarkers.knownType.includedUserIds.toSet
-	val existingSecondMarkers = markingWorkflow.secondMarkers.knownType.includedUserIds.toSet
+	val existingFirstMarkers: Set[String] = markingWorkflow.firstMarkers.knownType.includedUserIds.toSet
+	val existingSecondMarkers: Set[String] = markingWorkflow.secondMarkers.knownType.includedUserIds.toSet
 
-	lazy val removedFirstMarkers = existingFirstMarkers -- newFirstMarkers
-	lazy val removedSecondMarkers = existingSecondMarkers -- newSecondMarkers
+	lazy val removedFirstMarkers: Set[String] = existingFirstMarkers -- newFirstMarkers
+	lazy val removedSecondMarkers: Set[String] = existingSecondMarkers -- newSecondMarkers
 }
 
 trait EditMarkingWorkflowCommandPermissions extends RequiresPermissionsChecking with PermissionsCheckingMethods {

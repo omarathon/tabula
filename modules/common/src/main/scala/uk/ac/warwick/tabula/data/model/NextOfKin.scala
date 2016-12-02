@@ -27,7 +27,7 @@ class NextOfKin extends GeneratedId with ToString {
 	var eveningPhone: String = _
 	var email: String = _
 
-	def fullName = firstName + " " + lastName
+	def fullName: String = firstName + " " + lastName
 
 	def toStringProps = Seq(
 		"member" -> member,

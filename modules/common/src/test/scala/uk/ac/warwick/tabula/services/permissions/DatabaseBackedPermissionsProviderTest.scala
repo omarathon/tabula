@@ -3,6 +3,7 @@ package uk.ac.warwick.tabula.services.permissions
 import uk.ac.warwick.tabula.TestBase
 import uk.ac.warwick.tabula.Mockito
 import uk.ac.warwick.tabula.Fixtures
+import uk.ac.warwick.tabula.data.model.Department
 import uk.ac.warwick.tabula.data.model.permissions.GrantedRole
 import uk.ac.warwick.tabula.data.model.permissions.DepartmentGrantedRole
 import uk.ac.warwick.tabula.roles.DepartmentalAdministratorRoleDefinition
@@ -19,10 +20,10 @@ class DatabaseBackedPermissionsProviderTest extends TestBase with Mockito {
 
 	val provider = new DatabaseBackedPermissionsProvider
 
-	val service = mock[PermissionsService]
+	val service: PermissionsService = mock[PermissionsService]
 	provider.service = service
 
-	val dept = Fixtures.department("in")
+	val dept: Department = Fixtures.department("in")
 
 	@Test def getPermissions = withUser("cuscav") {
 		val gp1 = new DepartmentGrantedPermission(dept, Permissions.Department.ManageDisplaySettings, GrantedPermission.Allow)

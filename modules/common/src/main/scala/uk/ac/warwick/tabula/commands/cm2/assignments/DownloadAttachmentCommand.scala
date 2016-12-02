@@ -24,7 +24,7 @@ class DownloadAttachmentCommand(
 	private var fileFound: Boolean = _
 	var callback: (RenderableFile) => Unit = _
 
-	def applyInternal() = {
+	def applyInternal(): Option[RenderableAttachment] = {
 		val attachment = submission.allAttachments find (_.name == filename) map (a => new RenderableAttachment(a))
 
 		fileFound = attachment.isDefined
@@ -34,7 +34,7 @@ class DownloadAttachmentCommand(
 		attachment
 	}
 
-	override def describe(d: Description) = {
+	override def describe(d: Description): Unit = {
 		d.assignment(assignment)
 		d.property("filename", filename)
 	}

@@ -6,13 +6,13 @@ import net.fortuna.ical4j.model.property._
 import org.joda.time.LocalDate
 import org.springframework.stereotype.Controller
 import org.springframework.web.bind.annotation._
-import uk.ac.warwick.tabula.{DateFormats, AcademicYear}
+import uk.ac.warwick.tabula.{AcademicYear, DateFormats}
 import uk.ac.warwick.tabula.api.web.controllers.ApiController
 import uk.ac.warwick.tabula.data.model.groups.WeekRange
-import uk.ac.warwick.tabula.services.{TermService, AutowiringTermServiceComponent, TermServiceComponent}
+import uk.ac.warwick.tabula.services.{AutowiringTermServiceComponent, TermService, TermServiceComponent}
 import uk.ac.warwick.tabula.web.views.{IcalView, JSONView}
-
 import TermDatesController._
+import uk.ac.warwick.tabula.web.Mav
 import uk.ac.warwick.util.termdates.Term
 
 object TermDatesController {
@@ -58,7 +58,7 @@ trait GetTermDatesApi {
 	}
 
 	@RequestMapping(method = Array(GET), produces = Array("application/json"))
-	def jsonTermDates(@ModelAttribute("terms") terms: Seq[NamedTerm]) = {
+	def jsonTermDates(@ModelAttribute("terms") terms: Seq[NamedTerm]): Mav = {
 		Mav(new JSONView(Map(
 			"success" -> true,
 			"status" -> "ok",
@@ -75,7 +75,7 @@ trait GetTermDatesApi {
 	}
 
 	@RequestMapping(method = Array(GET), produces = Array("text/calendar"))
-	def icalTermDates(@ModelAttribute("terms") terms: Seq[NamedTerm], @ModelAttribute("academicYear") academicYear: AcademicYear) = {
+	def icalTermDates(@ModelAttribute("terms") terms: Seq[NamedTerm], @ModelAttribute("academicYear") academicYear: AcademicYear): Mav = {
 		val cal: Calendar = new Calendar
 		cal.getProperties.add(Version.VERSION_2_0)
 		cal.getProperties.add(new ProdId("-//Tabula//University of Warwick IT Services//EN"))

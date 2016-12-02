@@ -5,6 +5,7 @@ import org.springframework.validation.BindException
 import uk.ac.warwick.tabula.data.model.{Assignment, GradeBoundary, Module}
 import uk.ac.warwick.tabula.events.EventHandling
 import uk.ac.warwick.tabula.services._
+import uk.ac.warwick.tabula.services.coursework.docconversion.MarkItem
 import uk.ac.warwick.tabula.{CurrentUser, Mockito, RequestInfo, TestBase}
 
 import scala.collection.JavaConversions._
@@ -12,7 +13,7 @@ import scala.collection.JavaConversions._
 // scalastyle:off magic.number
 class AddMarksCommandTest extends TestBase with Mockito {
 
-	val thisAssignment = newDeepAssignment()
+	val thisAssignment: Assignment = newDeepAssignment()
 
 	/**
 	 * Check that validation marks an empty mark as an invalid row
@@ -151,8 +152,8 @@ class AddMarksCommandTest extends TestBase with Mockito {
 	@Transactional @Test
 	def gradeValidation() {
 		trait Fixture {
-			val currentUser = RequestInfo.fromThread.get.user
-			val newAssignment = newDeepAssignment()
+			val currentUser: CurrentUser = RequestInfo.fromThread.get.user
+			val newAssignment: Assignment = newDeepAssignment()
 			val validator = new PostExtractValidation with AdminAddMarksCommandState with ValidatesMarkItem with UserLookupComponent with AdminAddMarksCommandValidation {
 				val module: Module = newAssignment.module
 				val assessment: Assignment = newAssignment
@@ -170,7 +171,7 @@ class AddMarksCommandTest extends TestBase with Mockito {
 		withUser("cusebr") { new Fixture {
 			val errors = new BindException(validator, "command")
 
-			val marks1 = validator.marks.get(0)
+			val marks1: MarkItem = validator.marks.get(0)
 			marks1.universityId = "0672088"
 			marks1.actualMark = "100"
 			marks1.actualGrade = "F"
@@ -183,7 +184,7 @@ class AddMarksCommandTest extends TestBase with Mockito {
 		withUser("cusebr") { new Fixture {
 			val errors = new BindException(validator, "command")
 
-			val marks1 = validator.marks.get(0)
+			val marks1: MarkItem = validator.marks.get(0)
 			marks1.universityId = "0672088"
 			marks1.actualMark = "100"
 			marks1.actualGrade = "A"

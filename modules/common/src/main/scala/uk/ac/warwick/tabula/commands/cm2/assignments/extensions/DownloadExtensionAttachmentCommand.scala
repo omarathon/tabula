@@ -16,7 +16,7 @@ object DownloadExtensionAttachmentCommand {
 class DownloadExtensionAttachmentCommandInternal(val extension: Extension, val filename: String)
 	extends CommandInternal[Option[RenderableAttachment]] with DownloadExtensionAttachmentState  {
 
-	def applyInternal() = {
+	def applyInternal(): Option[RenderableAttachment] = {
 		val allAttachments = extension.nonEmptyAttachments
 		allAttachments find (_.name == filename) map (a => new RenderableAttachment(a))
 	}

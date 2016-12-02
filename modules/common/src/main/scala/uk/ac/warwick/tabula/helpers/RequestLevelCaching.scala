@@ -1,9 +1,10 @@
 package uk.ac.warwick.tabula.helpers
 
-import org.slf4j.{LoggerFactory, Logger}
+import org.slf4j.{Logger, LoggerFactory}
 
 import scala.collection.mutable
 import uk.ac.warwick.tabula.EarlyRequestInfo
+import uk.ac.warwick.tabula.helpers.RequestLevelCache.Cache
 
 trait RequestLevelCaching[A, B] {
 
@@ -12,9 +13,9 @@ trait RequestLevelCaching[A, B] {
 
 	// Uses EarlyRequestInfo which is available before the full RequestInfo, since we need some caching
 	// for permissions lookups to create the CurrentUser.
-	def cache = EarlyRequestInfo.fromThread map { _.requestLevelCache.getCacheByName[A, B](getClass.getName) }
+	def cache: Option[Cache[A, B]] = EarlyRequestInfo.fromThread map { _.requestLevelCache.getCacheByName[A, B](getClass.getName) }
 
-	def cachedBy(key: A)(default: => B) = cache match {
+	def cachedBy(key: A)(default: => B): B = cache match {
 		case Some(cache) => cache.getOrElseUpdate(key, default)
 		case _ => {
 			// Include error to get stack trace

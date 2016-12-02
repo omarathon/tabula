@@ -40,7 +40,7 @@ class CourseworkHomepageCommandInternal(user: CurrentUser) extends CommandIntern
 		AssessmentServiceComponent with
 		SecurityServiceComponent =>
 
-	def applyInternal() = {
+	def applyInternal(): Option[CourseworkHomepageInformation] = {
 		if (user.loggedIn) {
 			val ownedDepartments = benchmarkTask("Get owned departments") {
 				moduleAndDepartmentService.departmentsWithPermission(user, Permissions.Module.ManageAssignments)
@@ -81,7 +81,7 @@ class CourseworkHomepageCommandInternal(user: CurrentUser) extends CommandIntern
 		}
 	}
 
-	def webgroupsToMap(groups: Seq[Group]) = groups
+	def webgroupsToMap(groups: Seq[Group]): Seq[(String, Group)] = groups
 		.map { (g: Group) => (Module.nameFromWebgroupName(g.getName), g) }
 		.sortBy { _._1 }
 
@@ -98,7 +98,7 @@ object CourseworkHomepageActivityPageletCommand {
 class CourseworkHomepageActivityPageletCommandInternal(user: CurrentUser, lastUpdatedDate: DateTime) extends CommandInternal[Option[PagedActivities]] {
 	self: ActivityServiceComponent =>
 
-	def applyInternal() =
+	def applyInternal(): Option[PagedActivities] =
 		if (user.loggedIn) Some(Await.result(activityService.getNoteworthySubmissions(user, lastUpdatedDate), 10.seconds))
 		else None
 }

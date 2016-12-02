@@ -5,6 +5,7 @@ import uk.ac.warwick.tabula.{CurrentUser, ItemNotFoundException}
 import uk.ac.warwick.tabula.commands.{Description, SelfValidating}
 import uk.ac.warwick.tabula.data.model.{Member, Notification, StudentCourseDetails, StudentRelationship, StudentRelationshipType}
 import uk.ac.warwick.tabula.data.model.notifications.profiles.{StudentRelationshipChangeToNewAgentNotification, StudentRelationshipChangeToOldAgentNotification, StudentRelationshipChangeToStudentNotification}
+import uk.ac.warwick.tabula.helpers.MutablePromise
 import uk.ac.warwick.tabula.helpers.Promises._
 import uk.ac.warwick.tabula.permissions.Permissions
 
@@ -36,7 +37,7 @@ class EditStudentRelationshipCommand(
 		throw new ItemNotFoundException()
 	}
 
-	val newAgent = promise { agent }
+	val newAgent: MutablePromise[Member] = promise { agent }
 
 	def validate(errors: Errors) {
 		if(agent == null){
@@ -93,7 +94,7 @@ class EditStudentRelationshipCommand(
 		}
 	}
 
-	override def describe(d: Description) = {
+	override def describe(d: Description): Unit = {
 		val oldAgentsHere: Seq[Member] = oldAgents
 		val oldAgentString =
 			if (oldAgentsHere == null || oldAgentsHere.isEmpty ) ""
@@ -108,7 +109,7 @@ class EditStudentRelationshipCommand(
 		)
 	}
 
-	def emit(modifiedRelationships: Seq[StudentRelationship]) = {
+	def emit(modifiedRelationships: Seq[StudentRelationship]): Seq[Notification[StudentRelationship, Unit]] = {
 		val notifications = modifiedRelationships.flatMap(relationship => {
 
 			val studentNotification: Option[Notification[StudentRelationship, Unit]] = if (notifyStudent) {

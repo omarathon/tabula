@@ -2,7 +2,7 @@ package uk.ac.warwick.tabula.commands.scheduling.imports
 
 import org.springframework.validation.Errors
 import uk.ac.warwick.tabula.commands._
-import uk.ac.warwick.tabula.data.model.{StudentMember, StudentRelationship}
+import uk.ac.warwick.tabula.data.model.{StudentMember, StudentRelationship, StudentRelationshipType}
 import uk.ac.warwick.tabula.permissions.Permissions
 import uk.ac.warwick.tabula.services.{AutowiringRelationshipServiceComponent, RelationshipServiceComponent}
 import uk.ac.warwick.tabula.system.permissions.{PermissionsChecking, PermissionsCheckingMethods, RequiresPermissionsChecking}
@@ -23,7 +23,7 @@ class ExpireRelationshipsOnOldCoursesCommandInternal(val student: StudentMember)
 
 	self: ExpireRelationshipsOnOldCoursesCommandState with RelationshipServiceComponent =>
 
-	override def applyInternal() = {
+	override def applyInternal(): Unit = {
 		studentRelationships.groupBy(_.relationshipType).foreach { case(relType, relationships) =>
 			if (hasOnlyVeryOldRelationships(relationships) || hasCurrentRelationship(relationships)) {
 				val relationshipsToEnd = relationships.filter(rel => rel.isCurrent && rel.studentCourseDetails.isEnded)
@@ -72,12 +72,12 @@ trait ExpireRelationshipsOnOldCoursesCommandState {
 
 	def student: StudentMember
 
-	lazy val relationshipTypes = relationshipService.allStudentRelationshipTypes
-	lazy val studentRelationships = relationshipTypes.flatMap(relationshipService.getRelationships(_, student))
+	lazy val relationshipTypes: Seq[StudentRelationshipType] = relationshipService.allStudentRelationshipTypes
+	lazy val studentRelationships: Seq[StudentRelationship] = relationshipTypes.flatMap(relationshipService.getRelationships(_, student))
 
-	def hasOnlyVeryOldRelationships(relationships: Seq[StudentRelationship]) =
+	def hasOnlyVeryOldRelationships(relationships: Seq[StudentRelationship]): Boolean =
 		relationships.forall(rel => rel.studentCourseDetails.isEnded && !rel.studentCourseDetails.hasEndedRecently)
 
-	def hasCurrentRelationship(relationships: Seq[StudentRelationship]) =
+	def hasCurrentRelationship(relationships: Seq[StudentRelationship]): Boolean =
 		relationships.exists(rel => rel.isCurrent && !rel.studentCourseDetails.isEnded)
 }

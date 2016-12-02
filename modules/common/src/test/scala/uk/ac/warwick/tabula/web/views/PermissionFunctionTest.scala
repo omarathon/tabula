@@ -11,7 +11,7 @@ class PermissionFunctionTest extends TestBase with Mockito {
 
 	val fn = new PermissionFunction
 
-	val securityService = mock[SecurityService]
+	val securityService: SecurityService = mock[SecurityService]
 	fn.securityService = securityService
 
 	@Test def can = withUser("cuscav") {

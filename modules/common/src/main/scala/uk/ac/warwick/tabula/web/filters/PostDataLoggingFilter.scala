@@ -9,12 +9,10 @@ import uk.ac.warwick.sso.client.SSOClientFilter
 import uk.ac.warwick.util.concurrency.TaskExecutionService
 
 import scala.collection.JavaConverters._
+import javax.servlet.{Filter, FilterChain, ReadListener, ServletInputStream}
+import javax.servlet.http.{HttpServletRequest, HttpServletRequestWrapper, HttpServletResponse}
 
-import javax.servlet.{ReadListener, ServletInputStream, Filter, FilterChain}
-import javax.servlet.http.{HttpServletRequestWrapper, HttpServletRequest, HttpServletResponse}
-
-import org.slf4j.LoggerFactory
-
+import org.slf4j.{Logger, LoggerFactory}
 import uk.ac.warwick.util.web.filter.AbstractHttpFilter
 import uk.ac.warwick.tabula.helpers.{Logging, Runnable}
 import uk.ac.warwick.tabula.helpers.StringUtils._
@@ -31,9 +29,9 @@ class PostDataLoggingFilter extends AbstractHttpFilter with Filter with Logging 
 
 	import PostDataLoggingFilter._
 
-	@transient lazy val postLogger = LoggerFactory.getLogger("POST_LOGGER")
+	@transient lazy val postLogger: Logger = LoggerFactory.getLogger("POST_LOGGER")
 
-	var multipartResolver = Wire[MultipartResolver]
+	var multipartResolver: MultipartResolver = Wire[MultipartResolver]
 
 	val executionService = new TaskExecutionService
 
@@ -111,7 +109,7 @@ class PostDataLoggingFilter extends AbstractHttpFilter with Filter with Logging 
 
 object PostDataLoggingFilter {
 
-	val MaxRequestBodySizeToLog = 2 * 1024 * 1024 // 2mb
+	val MaxRequestBodySizeToLog: Int = 2 * 1024 * 1024 // 2mb
 
 	/**
 	 * This HttpServletRequestWrapper exposes an InputStream called `secondaryStream`,
@@ -128,7 +126,7 @@ object PostDataLoggingFilter {
 		// A request wrapper for the above stream to
 		val secondaryStreamRequestWrapper = new SecondaryStreamRequestWrapper(this)
 
-		override def getInputStream = {
+		override def getInputStream: FilterServletInputStream = {
 			// Passes through reads as usual, but also writes any data
 			// through PipedOutputStream to the PipedInputStream.
 			new FilterServletInputStream(super.getInputStream) {

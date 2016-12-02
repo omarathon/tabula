@@ -15,8 +15,8 @@ class UpdateAssignmentCommand extends CommandInternal[Seq[Assignment]] {
 
 	type AssignmentUpdate = Assignment => Unit
 
-	val assignmentSrv = Wire[AssessmentService]
-	val departmentDao = Wire[DepartmentDao]
+	val assignmentSrv: AssessmentService = Wire[AssessmentService]
+	val departmentDao: DepartmentDao = Wire[DepartmentDao]
 
 	var assignmentName: String = _
 	var deptCode: String = _
@@ -27,7 +27,7 @@ class UpdateAssignmentCommand extends CommandInternal[Seq[Assignment]] {
 	@WithinYears(maxPast = 3, maxFuture = 3)
 	var closeDate: DateTime = _
 
-	protected def applyInternal() = {
+	protected def applyInternal(): Seq[Assignment] = {
 		val updateOpenDate = Option(openDate).map(date => (a: Assignment) => a.openDate = date)
 		val updateCloseDate = Option(closeDate).map(date => (a: Assignment) => a.closeDate = date)
 		// add more optional update actions here
@@ -50,7 +50,7 @@ class UpdateAssignmentCommand extends CommandInternal[Seq[Assignment]] {
 }
 
 object UpdateAssignmentCommand {
-	def apply() ={
+	def apply(): UpdateAssignmentCommand with ComposableCommand[Seq[Assignment]] with AutowiringTransactionalComponent with PubliclyVisiblePermissions with Unaudited ={
 		new UpdateAssignmentCommand
 			with ComposableCommand[Seq[Assignment]]
 			with AutowiringTransactionalComponent

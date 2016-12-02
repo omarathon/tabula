@@ -7,6 +7,7 @@ import uk.ac.warwick.tabula.AcademicYear
 import uk.ac.warwick.tabula.data.model.Module
 import uk.ac.warwick.tabula.groups.web.Routes
 import uk.ac.warwick.tabula.services.{AutowiringMaintenanceModeServiceComponent, AutowiringUserSettingsServiceComponent}
+import uk.ac.warwick.tabula.web.Mav
 import uk.ac.warwick.tabula.web.controllers.AcademicYearScopedController
 import uk.ac.warwick.tabula.web.controllers.groups.GroupsController
 
@@ -19,7 +20,7 @@ class GroupsAdminModuleHomeController extends GroupsController
 	override def activeAcademicYear: Option[AcademicYear] = retrieveActiveAcademicYear(None)
 
 	@RequestMapping
-	def adminModule(@PathVariable module: Module, @ModelAttribute("activeAcademicYear") academicYear: Option[AcademicYear]) = {
+	def adminModule(@PathVariable module: Module, @ModelAttribute("activeAcademicYear") academicYear: Option[AcademicYear]): Mav = {
 		Redirect(Routes.admin.module(module, academicYear.getOrElse(AcademicYear.guessSITSAcademicYearByDate(DateTime.now))))
 	}
 }

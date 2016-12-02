@@ -1,13 +1,13 @@
 package uk.ac.warwick.tabula.commands.groups.admin
 
-import java.io.FileInputStream
+import java.io.{File, FileInputStream}
 
 import org.springframework.validation.{BindException, BindingResult}
 import uk.ac.warwick.tabula.JavaImports._
 import uk.ac.warwick.tabula._
 import uk.ac.warwick.tabula.commands._
 import uk.ac.warwick.tabula.data.model.groups.{SmallGroup, SmallGroupSet}
-import uk.ac.warwick.tabula.data.model.{FileAttachment, SitsStatus, UnspecifiedTypeUserGroup, UserGroup}
+import uk.ac.warwick.tabula.data.model._
 import uk.ac.warwick.tabula.permissions.Permissions
 import uk.ac.warwick.tabula.services._
 import uk.ac.warwick.tabula.services.groups.docconversion.{AllocateStudentItem, GroupsExtractor, GroupsExtractorComponent}
@@ -20,11 +20,11 @@ import scala.collection.JavaConverters._
 
 class AllocateStudentsToGroupsCommandTest extends TestBase with Mockito {
 
-	val profileService = smartMock[ProfileService]
+	val profileService: ProfileService = smartMock[ProfileService]
 
 	private trait CommandTestSupport extends SmallGroupServiceComponent with ProfileServiceComponent with AllocateStudentsToGroupsSorting {
-		val smallGroupService = smartMock[SmallGroupService]
-		val profileService = AllocateStudentsToGroupsCommandTest.this.profileService
+		val smallGroupService: SmallGroupService = smartMock[SmallGroupService]
+		val profileService: ProfileService = AllocateStudentsToGroupsCommandTest.this.profileService
 	}
 
 	private trait Fixture {
@@ -35,10 +35,10 @@ class AllocateStudentsToGroupsCommandTest extends TestBase with Mockito {
 			case ug: UserGroup => ug.userLookup = userLookup
 		}
 
-		val module = Fixtures.module("in101", "Introduction to Scala")
+		val module: Module = Fixtures.module("in101", "Introduction to Scala")
 		module.id = "moduleId"
 
-		val set = Fixtures.smallGroupSet("My small groups")
+		val set: SmallGroupSet = Fixtures.smallGroupSet("My small groups")
 		set.id = "existingId"
 		set.module = module
 		wireUserLookup(set.members)
@@ -81,10 +81,10 @@ class AllocateStudentsToGroupsCommandTest extends TestBase with Mockito {
 			user5.getUserId -> user5
 		)
 
-		val group1 = Fixtures.smallGroup("Group 1")
+		val group1: SmallGroup = Fixtures.smallGroup("Group 1")
 		group1.id = "group1Id"
 
-		val group2 = Fixtures.smallGroup("Group 2")
+		val group2: SmallGroup = Fixtures.smallGroup("Group 2")
 		group2.id = "group2Id"
 
 		set.groups.add(group1)
@@ -103,26 +103,26 @@ class AllocateStudentsToGroupsCommandTest extends TestBase with Mockito {
 		set.membershipService = smartMock[AssessmentMembershipService]
 		set.membershipService.determineMembershipUsers(Seq(), Some(set.members)) returns set.members.users
 
-		val department = Fixtures.department("CE")
-		val sitsStatus = Fixtures.sitsStatus() // defaults to fully enrolled
+		val department: Department = Fixtures.department("CE")
+		val sitsStatus: SitsStatus = Fixtures.sitsStatus() // defaults to fully enrolled
 
-		val student1 = Fixtures.student("0672089", "cuscav", department, department, sitsStatus)
+		val student1: StudentMember = Fixtures.student("0672089", "cuscav", department, department, sitsStatus)
 		student1.firstName = "Mathew"
 		student1.lastName = "Mannion"
 
-		val student2 = Fixtures.student("0672088", "cusebr", department, department, sitsStatus)
+		val student2: StudentMember = Fixtures.student("0672088", "cusebr", department, department, sitsStatus)
 		student2.firstName = "Nick"
 		student2.lastName = "Howes"
 
-		val student3 = Fixtures.student("9293883", "cusfal", department, department, sitsStatus)
+		val student3: StudentMember = Fixtures.student("9293883", "cusfal", department, department, sitsStatus)
 		student3.firstName = "Matthew"
 		student3.lastName = "Jones"
 
-		val student4 = Fixtures.student("0200202", "curef", department, department, sitsStatus)
+		val student4: StudentMember = Fixtures.student("0200202", "curef", department, department, sitsStatus)
 		student4.firstName = "John"
 		student4.lastName = "Dale"
 
-		val student5 = Fixtures.student("8888888", "cusmab", department, department, sitsStatus)
+		val student5: StudentMember = Fixtures.student("8888888", "cusmab", department, department, sitsStatus)
 		student5.firstName = "Steven"
 		student5.lastName = "Carpenter"
 
@@ -167,7 +167,7 @@ class AllocateStudentsToGroupsCommandTest extends TestBase with Mockito {
 	}}
 
 	@Test def removePermanentlyWithdrawn() { new CommandFixture {
-		val usersWithoutPermWithdrawn = command.removePermanentlyWithdrawn(Seq(user1, user2, user3, user4, user5))
+		val usersWithoutPermWithdrawn: Seq[User] = command.removePermanentlyWithdrawn(Seq(user1, user2, user3, user4, user5))
 		student1.freshStudentCourseDetails.size should be (1)
 
 		command.removePermanentlyWithdrawn(Seq(user1, user2, user3, user4, user5)).size should be (5)
@@ -202,7 +202,7 @@ class AllocateStudentsToGroupsCommandTest extends TestBase with Mockito {
 		command.populate()
 		command.sort()
 
-		val group3 = Fixtures.smallGroup("Group 3")
+		val group3: SmallGroup = Fixtures.smallGroup("Group 3")
 		group3.id = "group3Id"
 		group3.groupSet = Fixtures.smallGroupSet("Another set")
 
@@ -223,8 +223,8 @@ class AllocateStudentsToGroupsCommandTest extends TestBase with Mockito {
 			with PopulateAllocateStudentsToGroupsCommand
 			with GroupsExtractorComponent with UserLookupComponent {
 
-			val groupsExtractor = smartMock[GroupsExtractor]
-			val userLookup = FileUploadSupportFixture.this.userLookup
+			val groupsExtractor: GroupsExtractor = smartMock[GroupsExtractor]
+			val userLookup: MockUserLookup = FileUploadSupportFixture.this.userLookup
 		}
 
 		command.smallGroupService.getSmallGroupById(group1.id) returns Some(group1)
@@ -239,7 +239,7 @@ class AllocateStudentsToGroupsCommandTest extends TestBase with Mockito {
 		attachment.id = "123"
 		attachment.name = "file.xlsx"
 
-		val backingFile = createTemporaryFile()
+		val backingFile: File = createTemporaryFile()
 		attachment.objectStorageService = smartMock[ObjectStorageService]
 		attachment.objectStorageService.keyExists(attachment.id) returns true
 		attachment.objectStorageService.metadata(attachment.id) returns Some(ObjectStorageService.Metadata(backingFile.length(), "application/octet-stream", None))
@@ -268,7 +268,7 @@ class AllocateStudentsToGroupsCommandTest extends TestBase with Mockito {
 		attachment.id = "456"
 		attachment.name = "file.xlsx" // We only accept xlsx
 
-		val backingFile = createTemporaryFile()
+		val backingFile: File = createTemporaryFile()
 		attachment.objectStorageService = smartMock[ObjectStorageService]
 		attachment.objectStorageService.keyExists(attachment.id) returns true
 		attachment.objectStorageService.metadata(attachment.id) returns Some(ObjectStorageService.Metadata(backingFile.length(), "application/octet-stream", None))
@@ -289,7 +289,7 @@ class AllocateStudentsToGroupsCommandTest extends TestBase with Mockito {
 		attachment.id = "789"
 		attachment.name = "file.xls" // We only accept xlsx
 
-		val backingFile = createTemporaryFile()
+		val backingFile: File = createTemporaryFile()
 		attachment.objectStorageService = smartMock[ObjectStorageService]
 		attachment.objectStorageService.keyExists(attachment.id) returns true
 		attachment.objectStorageService.metadata(attachment.id) returns Some(ObjectStorageService.Metadata(backingFile.length(), "application/octet-stream", None))
@@ -311,12 +311,12 @@ class AllocateStudentsToGroupsCommandTest extends TestBase with Mockito {
 	@Test def permissions() { new Fixture {
 		val (theModule, theSet) = (module, set)
 		val command = new AllocateStudentsToGroupsPermissions with AllocateStudentsToGroupsCommandState {
-			val module = theModule
-			val set = theSet
+			val module: Module = theModule
+			val set: SmallGroupSet = theSet
 			val viewer = new CurrentUser(user1, user1)
 		}
 
-		val checking = mock[PermissionsChecking]
+		val checking: PermissionsChecking = mock[PermissionsChecking]
 		command.permissionsCheck(checking)
 
 		verify(checking, times(1)).PermissionCheck(Permissions.SmallGroups.Allocate, set)
@@ -335,7 +335,7 @@ class AllocateStudentsToGroupsCommandTest extends TestBase with Mockito {
 
 	@Test(expected = classOf[ItemNotFoundException]) def permissionsNoSet() {
 		val command = new AllocateStudentsToGroupsPermissions with AllocateStudentsToGroupsCommandState {
-			val module = Fixtures.module("in101")
+			val module: Module = Fixtures.module("in101")
 			val set = null
 			val viewer = null
 		}
@@ -346,7 +346,7 @@ class AllocateStudentsToGroupsCommandTest extends TestBase with Mockito {
 
 	@Test(expected = classOf[ItemNotFoundException]) def permissionsUnlinkedSet() {
 		val command = new AllocateStudentsToGroupsPermissions with AllocateStudentsToGroupsCommandState {
-			val module = Fixtures.module("in101")
+			val module: Module = Fixtures.module("in101")
 			module.id = "set id"
 
 			val set = new SmallGroupSet(Fixtures.module("other"))
@@ -361,8 +361,8 @@ class AllocateStudentsToGroupsCommandTest extends TestBase with Mockito {
 		val (mod, s) = (module, set)
 		val command = new AllocateStudentsToGroupsDescription with AllocateStudentsToGroupsCommandState {
 			override val eventName = "test"
-			val module = mod
-			val set = s
+			val module: Module = mod
+			val set: SmallGroupSet = s
 			val viewer = null
 		}
 

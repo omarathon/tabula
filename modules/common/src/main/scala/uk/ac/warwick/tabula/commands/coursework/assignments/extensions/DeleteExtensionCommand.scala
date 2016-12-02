@@ -30,7 +30,7 @@ class DeleteExtensionCommandInternal(mod: Module, ass: Assignment, uniId: String
 
 	extension = assignment.findExtension(universityId).getOrElse({ throw new IllegalStateException("Cannot delete a missing extension") })
 
-	def applyInternal() = transactional() {
+	def applyInternal(): Extension = transactional() {
 		extension._state = ExtensionState.Revoked
 		assignment.extensions.remove(extension)
 		extension.attachments.asScala.foreach(delete(_))
@@ -42,7 +42,7 @@ class DeleteExtensionCommandInternal(mod: Module, ass: Assignment, uniId: String
 trait DeleteExtensionCommandNotification extends Notifies[Extension, Option[Extension]] {
 	self: ModifyExtensionCommandState =>
 
-	def emit(extension: Extension) = {
+	def emit(extension: Extension): Seq[ExtensionRevokedNotification] = {
 		val notification = Notification.init(new ExtensionRevokedNotification, submitter.apparentUser, Seq(extension.assignment))
 		notification.recipientUniversityId = extension.universityId
 		Seq(notification)

@@ -21,7 +21,7 @@ import scala.concurrent.duration._
 import scala.util.Try
 
 object ViewModuleEventsCommand {
-	val Timeout = 15.seconds
+	val Timeout: FiniteDuration = 15.seconds
 
 	private[timetables] type ReturnType = Try[EventOccurrenceList]
 	type CommandType = Appliable[ReturnType]
@@ -49,7 +49,7 @@ object ViewModuleEventsCommand {
 			with ModuleTimetableFetchingServiceComponent
 			with AutowiringTermServiceComponent
 			with AutowiringTermBasedEventOccurrenceServiceComponent {
-			val timetableFetchingService = service
+			val timetableFetchingService: ModuleTimetableFetchingService = service
 		}
 }
 

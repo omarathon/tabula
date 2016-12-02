@@ -2,7 +2,7 @@ package uk.ac.warwick.tabula.commands.coursework.feedback
 
 import uk.ac.warwick.tabula.commands._
 import uk.ac.warwick.tabula.system.permissions.{PermissionsChecking, PermissionsCheckingMethods, RequiresPermissionsChecking}
-import uk.ac.warwick.tabula.data.model.{Assignment, Feedback}
+import uk.ac.warwick.tabula.data.model.{Assignment, AssignmentFeedback, Feedback}
 import uk.ac.warwick.userlookup.User
 import uk.ac.warwick.tabula.services.{AutowiringFeedbackServiceComponent, FeedbackServiceComponent}
 import uk.ac.warwick.tabula.permissions.Permissions
@@ -22,7 +22,7 @@ class FeedbackSummaryCommandInternal(val assignment: Assignment, val student: Us
 
 	this : FeedbackServiceComponent =>
 
-	def applyInternal() = Option(student.getWarwickId).flatMap(feedbackService.getAssignmentFeedbackByUniId(assignment, _))
+	def applyInternal(): Option[AssignmentFeedback] = Option(student.getWarwickId).flatMap(feedbackService.getAssignmentFeedbackByUniId(assignment, _))
 }
 
 trait FeedbackSummaryCommandState {

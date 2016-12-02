@@ -26,7 +26,7 @@ object PhoneNumberFormatter {
 	  *
 	  *     +33 1234 576 8941
 	  */
-	def format(unformatted: String) = {
+	def format(unformatted: String): String = {
 		try {
 			val number = util.parseAndKeepRawInput(unformatted, homeRegion)
 
@@ -49,7 +49,7 @@ class PhoneNumberFormatter extends TemplateMethodModelEx {
 	import PhoneNumberFormatter.format
 
 	/** Single argument method */
-	override def exec(list: JList[_]) = {
+	override def exec(list: JList[_]): String = {
 		val args = list.toSeq.map { model => DeepUnwrap.unwrap(model.asInstanceOf[TemplateModel]) }
 		args match {
 			case Seq(unformatted: String) => format(unformatted)

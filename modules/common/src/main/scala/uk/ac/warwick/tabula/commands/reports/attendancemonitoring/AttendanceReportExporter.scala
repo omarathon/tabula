@@ -7,9 +7,12 @@ import uk.ac.warwick.tabula.DateFormats
 import uk.ac.warwick.tabula.JavaImports._
 import uk.ac.warwick.tabula.data.AttendanceMonitoringStudentData
 import uk.ac.warwick.tabula.data.model.Department
+import uk.ac.warwick.tabula.data.model.attendance.AttendanceState
 import uk.ac.warwick.tabula.data.model.attendance.AttendanceState.{MissedUnauthorised, NotRecorded}
 import uk.ac.warwick.tabula.helpers.IntervalFormatter
 import uk.ac.warwick.util.csv.CSVLineWriter
+
+import scala.xml.Elem
 
 class AttendanceReportExporter(val processorResult: AttendanceReportProcessorResult, val department: Department)
 	extends CSVLineWriter[AttendanceMonitoringStudentData] {
@@ -18,19 +21,19 @@ class AttendanceReportExporter(val processorResult: AttendanceReportProcessorRes
 	val wrapper = new DefaultObjectWrapper(Configuration.VERSION_2_3_0)
 	val isoFormatter = DateFormats.IsoDateTime
 
-	val result = processorResult.attendance
-	val students = processorResult.students
-	val points = processorResult.points
+	val result: Map[AttendanceMonitoringStudentData, Map[PointData, AttendanceState]] = processorResult.attendance
+	val students: Seq[AttendanceMonitoringStudentData] = processorResult.students
+	val points: Seq[PointData] = processorResult.points
 
-	val headers = Seq("First name","Last name","University ID", "Route", "Year of study", "SPR code") ++
+	val headers: Seq[String] = Seq("First name","Last name","University ID", "Route", "Year of study", "SPR code") ++
 		points.map(p => s"${p.name} (${intervalFormatter.exec(JList(
 			wrapper.wrap(p.startDate.toDate),
 			wrapper.wrap(p.endDate.toDate)
 		)).asInstanceOf[String].replaceAll("<sup>","").replaceAll("</sup>","")})") ++
 		Seq("Unrecorded","Missed (unauthorised)")
 
-	val unrecordedIndex = headers.size - 2
-	val missedIndex = headers.size - 1
+	val unrecordedIndex: Int = headers.size - 2
+	val missedIndex: Int = headers.size - 1
 
 	override def getNoOfColumns(o: AttendanceMonitoringStudentData): Int = headers.size
 
@@ -66,7 +69,7 @@ class AttendanceReportExporter(val processorResult: AttendanceReportProcessorRes
 		}
 	}
 
-	def toXLSX = {
+	def toXLSX: XSSFWorkbook = {
 		val workbook = new XSSFWorkbook()
 		val sheet = generateNewSheet(workbook)
 
@@ -108,7 +111,7 @@ class AttendanceReportExporter(val processorResult: AttendanceReportProcessorRes
 		}
 	}
 
-	def toXML = {
+	def toXML: Elem = {
 		<result>
 			<attendance>
 				{ result.map{case(studentData, pointMap) =>

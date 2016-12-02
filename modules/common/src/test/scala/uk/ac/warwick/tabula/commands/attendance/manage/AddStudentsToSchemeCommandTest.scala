@@ -1,30 +1,31 @@
 package uk.ac.warwick.tabula.commands.attendance.manage
 
 import uk.ac.warwick.tabula.services.attendancemonitoring.{AttendanceMonitoringService, AttendanceMonitoringServiceComponent}
-import uk.ac.warwick.tabula.{AcademicYear, Fixtures, Mockito, TestBase}
+import uk.ac.warwick.tabula._
 import uk.ac.warwick.tabula.data.model.attendance.AttendanceMonitoringScheme
 import uk.ac.warwick.tabula.services._
 import uk.ac.warwick.tabula.permissions.Permissions
 import org.springframework.validation.BindException
+import uk.ac.warwick.tabula.data.model.{Department, StudentMember}
 
 class AddStudentsToSchemeCommandTest extends TestBase with Mockito {
 
 	trait Fixture {
-		val thisDepartment = Fixtures.department("its")
+		val thisDepartment: Department = Fixtures.department("its")
 		val thisAcademicYear = AcademicYear(2014)
 		val thisScheme = new AttendanceMonitoringScheme
 		thisScheme.department = thisDepartment
 		thisScheme.academicYear = thisAcademicYear
-		val staticStudent = Fixtures.student("1234")
-		val includeStudent = Fixtures.student("2345")
-		val excludeStudent = Fixtures.student("3456")
-		val updatedStaticStudent = Fixtures.student("1234")
-		val updatedIncludeStudent = Fixtures.student("9999")
-		val updatedExcludeStudent = Fixtures.student("8888")
+		val staticStudent: StudentMember = Fixtures.student("1234")
+		val includeStudent: StudentMember = Fixtures.student("2345")
+		val excludeStudent: StudentMember = Fixtures.student("3456")
+		val updatedStaticStudent: StudentMember = Fixtures.student("1234")
+		val updatedIncludeStudent: StudentMember = Fixtures.student("9999")
+		val updatedExcludeStudent: StudentMember = Fixtures.student("8888")
 		val allStudents = Seq(staticStudent, includeStudent, excludeStudent, updatedStaticStudent, updatedIncludeStudent, updatedExcludeStudent)
-		val thisProfileService = smartMock[ProfileService]
-		val thisSecurityService = smartMock[SecurityService]
-		val thisAttendanceMonitoringService = smartMock[AttendanceMonitoringService]
+		val thisProfileService: ProfileService = smartMock[ProfileService]
+		val thisSecurityService: SecurityService = smartMock[SecurityService]
+		val thisAttendanceMonitoringService: AttendanceMonitoringService = smartMock[AttendanceMonitoringService]
 		thisProfileService.getAllMembersWithUniversityIds(any[Seq[String]]) answers { arg => arg match {
 			case universityIds: Seq[String] @unchecked => universityIds.flatMap(u => allStudents.find(_.universityId == u))
 			case _ => Seq()
@@ -36,11 +37,11 @@ class AddStudentsToSchemeCommandTest extends TestBase with Mockito {
 		val validator = new AddStudentsToSchemeValidation with AddStudentsToSchemeCommandState
 			with AttendanceMonitoringServiceComponent with ProfileServiceComponent with SecurityServiceComponent {
 
-			val scheme = thisScheme
-			val user = currentUser
-			val profileService = thisProfileService
-			val securityService = thisSecurityService
-			val attendanceMonitoringService = thisAttendanceMonitoringService
+			val scheme: AttendanceMonitoringScheme = thisScheme
+			val user: CurrentUser = currentUser
+			val profileService: ProfileService = thisProfileService
+			val securityService: SecurityService = thisSecurityService
+			val attendanceMonitoringService: AttendanceMonitoringService = thisAttendanceMonitoringService
 		}
 
 		validator.staticStudentIds.add(staticStudent.universityId)
@@ -65,11 +66,11 @@ class AddStudentsToSchemeCommandTest extends TestBase with Mockito {
 		val validator = new AddStudentsToSchemeValidation with AddStudentsToSchemeCommandState
 			with AttendanceMonitoringServiceComponent with ProfileServiceComponent with SecurityServiceComponent {
 
-			val scheme = thisScheme
-			val user = currentUser
-			val profileService = thisProfileService
-			val securityService = thisSecurityService
-			val attendanceMonitoringService = thisAttendanceMonitoringService
+			val scheme: AttendanceMonitoringScheme = thisScheme
+			val user: CurrentUser = currentUser
+			val profileService: ProfileService = thisProfileService
+			val securityService: SecurityService = thisSecurityService
+			val attendanceMonitoringService: AttendanceMonitoringService = thisAttendanceMonitoringService
 		}
 
 		validator.staticStudentIds.add(staticStudent.universityId)
@@ -92,8 +93,8 @@ class AddStudentsToSchemeCommandTest extends TestBase with Mockito {
 			with AttendanceMonitoringServiceComponent
 			with ProfileServiceComponent {
 
-			val attendanceMonitoringService = thisAttendanceMonitoringService
-			val profileService = thisProfileService
+			val attendanceMonitoringService: AttendanceMonitoringService = thisAttendanceMonitoringService
+			val profileService: ProfileService = thisProfileService
 		}
 
 		thisScheme.members.staticUserIds = Seq(staticStudent.universityId)

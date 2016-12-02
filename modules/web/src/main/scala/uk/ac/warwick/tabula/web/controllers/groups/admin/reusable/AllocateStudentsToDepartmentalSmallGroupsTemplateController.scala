@@ -22,7 +22,7 @@ class AllocateStudentsToDepartmentalSmallGroupsTemplateController extends BaseCo
 		AllocateStudentsToDepartmentalSmallGroupsTemplateCommand(department, set)
 
 	@RequestMapping
-	def getTemplate(@Valid @ModelAttribute("command") cmd: AllocateStudentsToDepartmentalSmallGroupsTemplateCommand) = {
+	def getTemplate(@Valid @ModelAttribute("command") cmd: AllocateStudentsToDepartmentalSmallGroupsTemplateCommand): ExcelView = {
 		cmd.apply()
 	}
 

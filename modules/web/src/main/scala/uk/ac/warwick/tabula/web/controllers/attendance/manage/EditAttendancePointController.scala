@@ -2,14 +2,18 @@ package uk.ac.warwick.tabula.web.controllers.attendance.manage
 
 import org.springframework.stereotype.Controller
 import org.springframework.web.bind.annotation.{ModelAttribute, PathVariable, RequestMapping}
-import uk.ac.warwick.tabula.data.model.{MeetingFormat, Department}
+import uk.ac.warwick.tabula.data.model.{Department, MeetingFormat}
 import uk.ac.warwick.tabula.web.controllers.attendance.AttendanceController
 import uk.ac.warwick.tabula.data.model.attendance.AttendanceMonitoringPoint
-import uk.ac.warwick.tabula.commands.{PopulateOnForm, Appliable, SelfValidating}
+import uk.ac.warwick.tabula.commands.{Appliable, ComposableCommand, PopulateOnForm, SelfValidating}
 import uk.ac.warwick.tabula.AcademicYear
 import org.springframework.validation.Errors
-import uk.ac.warwick.tabula.commands.attendance.manage.{SetsFindPointsResultOnCommandState, EditAttendancePointCommand, FindPointsCommand, FindPointsResult}
+import uk.ac.warwick.tabula.commands.attendance.manage._
 import uk.ac.warwick.tabula.attendance.web.Routes
+import uk.ac.warwick.tabula.services.{AutowiringModuleAndDepartmentServiceComponent, AutowiringProfileServiceComponent, AutowiringSmallGroupServiceComponent, AutowiringTermServiceComponent}
+import uk.ac.warwick.tabula.services.attendancemonitoring.AutowiringAttendanceMonitoringServiceComponent
+import uk.ac.warwick.tabula.web.Mav
+
 import collection.JavaConverters._
 
 @Controller
@@ -25,7 +29,7 @@ class EditAttendancePointController extends AttendanceController {
 		@PathVariable department: Department,
 		@PathVariable academicYear: AcademicYear,
 		@PathVariable templatePoint: AttendanceMonitoringPoint
-	) = {
+	): EditAttendancePointCommandInternal with ComposableCommand[Seq[AttendanceMonitoringPoint]] with PopulatesEditAttendancePointCommand with AutowiringAttendanceMonitoringServiceComponent with AutowiringTermServiceComponent with AutowiringSmallGroupServiceComponent with AutowiringModuleAndDepartmentServiceComponent with AutowiringProfileServiceComponent with EditAttendancePointValidation with EditAttendancePointDescription with EditAttendancePointPermissions with EditAttendancePointCommandState with SetsFindPointsResultOnCommandState = {
 		EditAttendancePointCommand(department, academicYear, templatePoint)
 	}
 
@@ -47,7 +51,7 @@ class EditAttendancePointController extends AttendanceController {
 		@ModelAttribute("findCommand") findCommand: Appliable[FindPointsResult],
 		@PathVariable department: Department,
 		@PathVariable academicYear: AcademicYear
-	) = {
+	): Mav = {
 		val findCommandResult = findCommand.apply()
 		cmd.setFindPointsResult(findCommandResult)
 		cmd.populate()
@@ -62,7 +66,7 @@ class EditAttendancePointController extends AttendanceController {
 		@ModelAttribute("findCommand") findCommand: Appliable[FindPointsResult],
 		@PathVariable department: Department,
 		@PathVariable academicYear: AcademicYear
-	) = {
+	): Mav = {
 		val findCommandResult = findCommand.apply()
 		cmd.setFindPointsResult(findCommandResult)
 		cmd.validate(errors)
@@ -81,7 +85,7 @@ class EditAttendancePointController extends AttendanceController {
 		@ModelAttribute("findCommand") findCommand: Appliable[FindPointsResult],
 		@PathVariable department: Department,
 		@PathVariable academicYear: AcademicYear
-	) = {
+	): Mav = {
 		val findCommandResult = findCommand.apply()
 		cmd.setFindPointsResult(findCommandResult)
 		cmd.validate(errors)

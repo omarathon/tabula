@@ -45,7 +45,7 @@ class FeedbackServiceImpl extends FeedbackService with Daoisms with Logging {
 		userLookup.getUsersByWarwickUniIds(unplagiarisedUnreleasedIds).toSeq
 	}
 
-	def getStudentFeedback(assessment: Assessment, uniId: String) = {
+	def getStudentFeedback(assessment: Assessment, uniId: String): Option[Feedback] = {
 		assessment.findFullFeedback(uniId)
 	}
 
@@ -56,7 +56,7 @@ class FeedbackServiceImpl extends FeedbackService with Daoisms with Logging {
 			.asInstanceOf[Number].intValue
 	}
 
-	def getAssignmentFeedbackByUniId(assignment: Assignment, uniId: String) = transactional(readOnly = true) {
+	def getAssignmentFeedbackByUniId(assignment: Assignment, uniId: String): Option[AssignmentFeedback] = transactional(readOnly = true) {
 		dao.getAssignmentFeedbackByUniId(assignment, uniId)
 	}
 
@@ -72,7 +72,7 @@ class FeedbackServiceImpl extends FeedbackService with Daoisms with Logging {
 		dao.getRejectedMarkerFeedbackByFeedback(feedback)
 	}
 
-	def delete(feedback: Feedback) = transactional() {
+	def delete(feedback: Feedback): Unit = transactional() {
 		dao.delete(feedback)
 	}
 
@@ -84,11 +84,11 @@ class FeedbackServiceImpl extends FeedbackService with Daoisms with Logging {
 		session.saveOrUpdate(mark)
 	}
 
-	def save(feedback: MarkerFeedback) = transactional() {
+	def save(feedback: MarkerFeedback): Unit = transactional() {
 		dao.save(feedback)
 	}
 
-	def delete(markerFeedback: MarkerFeedback) = transactional() {
+	def delete(markerFeedback: MarkerFeedback): Unit = transactional() {
 
 		// remove link to parent
 		val parentFeedback = markerFeedback.feedback
@@ -110,5 +110,5 @@ trait FeedbackServiceComponent {
 }
 
 trait AutowiringFeedbackServiceComponent extends FeedbackServiceComponent {
-	var feedbackService = Wire[FeedbackService]
+	var feedbackService: FeedbackService = Wire[FeedbackService]
 }

@@ -17,16 +17,16 @@ class FeedbackPublishedNotification
 	with AutowiringUserLookupComponent
 	with AllCompletedActionRequiredNotification {
 
-	def feedback = item.entity
-	def assignment = feedback.assignment
-	def module = assignment.module
-	def moduleCode = module.code.toUpperCase
+	def feedback: AssignmentFeedback = item.entity
+	def assignment: Assignment = feedback.assignment
+	def module: Module = assignment.module
+	def moduleCode: String = module.code.toUpperCase
 
 	priority = Warning
 
 	def verb = "publish"
 
-	def title = "%s: Your assignment feedback for \"%s\" is now available".format(moduleCode, assignment.name)
+	def title: String = "%s: Your assignment feedback for \"%s\" is now available".format(moduleCode, assignment.name)
 
 	def content = FreemarkerModel("/WEB-INF/freemarker/emails/feedbackready.ftl", Map(
 		"assignmentName" -> assignment.name,
@@ -35,7 +35,7 @@ class FeedbackPublishedNotification
 		"path" -> url
 	))
 
-	def url = Routes.assignment.receipt(assignment)
+	def url: String = Routes.assignment.receipt(assignment)
 	def urlTitle = "view your feedback"
 
 }

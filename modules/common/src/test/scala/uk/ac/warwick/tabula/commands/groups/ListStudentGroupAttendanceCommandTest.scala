@@ -5,7 +5,7 @@ import uk.ac.warwick.tabula.JavaImports._
 import uk.ac.warwick.tabula.commands.groups.SmallGroupAttendanceState._
 import uk.ac.warwick.tabula.data.model.attendance.AttendanceState
 import uk.ac.warwick.tabula.data.model.groups._
-import uk.ac.warwick.tabula.data.model.{MemberUserType, UnspecifiedTypeUserGroup, UserGroup}
+import uk.ac.warwick.tabula.data.model.{Member, MemberUserType, UnspecifiedTypeUserGroup, UserGroup}
 import uk.ac.warwick.tabula.services._
 import uk.ac.warwick.tabula.{AcademicYear, Fixtures, MockUserLookup, Mockito, TestBase}
 import uk.ac.warwick.userlookup.User
@@ -16,9 +16,9 @@ class ListStudentGroupAttendanceCommandTest extends TestBase with Mockito {
 	val baseLocalDateTime = new DateTime(2014, DateTimeConstants.OCTOBER, 19, 9, 18, 33, 0)
 
 	trait CommandTestSupport extends SmallGroupServiceComponent with TermServiceComponent with WeekToDateConverterComponent {
-		val smallGroupService = smartMock[SmallGroupService]
-		val termService = smartMock[TermService]
-		val weekToDateConverter = smartMock[WeekToDateConverter]
+		val smallGroupService: SmallGroupService = smartMock[SmallGroupService]
+		val termService: TermService = smartMock[TermService]
+		val weekToDateConverter: WeekToDateConverter = smartMock[WeekToDateConverter]
 	}
 
 	trait Fixture {
@@ -29,8 +29,8 @@ class ListStudentGroupAttendanceCommandTest extends TestBase with Mockito {
 			case ug: UserGroup => ug.userLookup = userLookup
 		}
 
-		val now = DateTime.now
-		val academicYear = AcademicYear.guessSITSAcademicYearByDate(now)
+		val now: DateTime = DateTime.now
+		val academicYear: AcademicYear = AcademicYear.guessSITSAcademicYearByDate(now)
 
 		val set = new SmallGroupSet
 		set.academicYear = academicYear
@@ -58,11 +58,11 @@ class ListStudentGroupAttendanceCommandTest extends TestBase with Mockito {
 
 		userLookup.registerUsers("user1", "user2", "user3", "user4", "user5")
 
-		val user1 = userLookup.getUserByUserId("user1")
-		val user2 = userLookup.getUserByUserId("user2")
-		val user3 = userLookup.getUserByUserId("user3")
-		val user4 = userLookup.getUserByUserId("user4")
-		val user5 = userLookup.getUserByUserId("user5")
+		val user1: User = userLookup.getUserByUserId("user1")
+		val user2: User = userLookup.getUserByUserId("user2")
+		val user3: User = userLookup.getUserByUserId("user3")
+		val user4: User = userLookup.getUserByUserId("user4")
+		val user5: User = userLookup.getUserByUserId("user5")
 
 		group.students.add(user1)
 		group.students.add(user2)
@@ -115,7 +115,7 @@ class ListStudentGroupAttendanceCommandTest extends TestBase with Mockito {
 
 	@Test
 	def commandApplyNoData() = withFakeTime(baseLocalDateTime) { new Fixture() {
-		val member = Fixtures.member(MemberUserType.Student, user1.getWarwickId, user1.getUserId)
+		val member: Member = Fixtures.member(MemberUserType.Student, user1.getWarwickId, user1.getUserId)
 
 		val command = new ListStudentGroupAttendanceCommandInternal(member, academicYear) with CommandTestSupport
 		command.smallGroupService.findSmallGroupsByStudent(user1) returns Seq()
@@ -125,7 +125,7 @@ class ListStudentGroupAttendanceCommandTest extends TestBase with Mockito {
 			Seq()
 		) returns Seq()
 
-		val info = command.applyInternal()
+		val info: StudentGroupAttendance = command.applyInternal()
 		info.attendance should be ('empty)
 		info.missedCount should be (0)
 		info.missedCountByTerm should be ('empty)

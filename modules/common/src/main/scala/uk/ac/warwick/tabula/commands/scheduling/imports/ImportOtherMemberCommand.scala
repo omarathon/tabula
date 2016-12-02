@@ -44,7 +44,7 @@ class ImportOtherMemberCommand(member: MembershipInformation, ssoUser: User)
 		member
 	}
 
-	override def describe(d: Description) = d.property("universityId" -> universityId).property("category" -> this.userType)
+	override def describe(d: Description): Unit = d.property("universityId" -> universityId).property("category" -> this.userType)
 
 	def phoneNumberPermissions = Nil
 

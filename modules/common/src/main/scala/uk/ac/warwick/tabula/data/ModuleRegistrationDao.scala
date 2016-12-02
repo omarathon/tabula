@@ -11,7 +11,7 @@ trait ModuleRegistrationDaoComponent {
 }
 
 trait AutowiringModuleRegistrationDaoComponent extends ModuleRegistrationDaoComponent {
-	val moduleRegistrationDao = Wire[ModuleRegistrationDao]
+	val moduleRegistrationDao: ModuleRegistrationDao = Wire[ModuleRegistrationDao]
 }
 
 trait ModuleRegistrationDao {
@@ -32,11 +32,11 @@ trait ModuleRegistrationDao {
 @Repository
 class ModuleRegistrationDaoImpl extends ModuleRegistrationDao with Daoisms {
 
-	def saveOrUpdate(moduleRegistration: ModuleRegistration) = session.saveOrUpdate(moduleRegistration)
+	def saveOrUpdate(moduleRegistration: ModuleRegistration): Unit = session.saveOrUpdate(moduleRegistration)
 
-	def saveOrUpdate(coreRequiredModule: CoreRequiredModule) = session.saveOrUpdate(coreRequiredModule)
+	def saveOrUpdate(coreRequiredModule: CoreRequiredModule): Unit = session.saveOrUpdate(coreRequiredModule)
 
-	def delete(coreRequiredModule: CoreRequiredModule) = session.delete(coreRequiredModule)
+	def delete(coreRequiredModule: CoreRequiredModule): Unit = session.delete(coreRequiredModule)
 
 	def getByNotionalKey(
 		studentCourseDetails: StudentCourseDetails,
@@ -44,7 +44,7 @@ class ModuleRegistrationDaoImpl extends ModuleRegistrationDao with Daoisms {
 		cats: JBigDecimal,
 		academicYear: AcademicYear,
 		occurrence: String
-	) =
+	): Option[ModuleRegistration] =
 		session.newCriteria[ModuleRegistration]
 				.add(is("studentCourseDetails", studentCourseDetails))
 				.add(is("module", module))

@@ -3,9 +3,9 @@ package uk.ac.warwick.tabula.commands.attendance.note
 import uk.ac.warwick.tabula._
 import uk.ac.warwick.tabula.services._
 import org.springframework.validation.BindException
-import uk.ac.warwick.tabula.data.model.AbsenceType
+import uk.ac.warwick.tabula.data.model.{AbsenceType, StudentMember}
 import uk.ac.warwick.tabula.data.model.attendance._
-import uk.ac.warwick.tabula.services.attendancemonitoring.{AttendanceMonitoringServiceComponent, AttendanceMonitoringService}
+import uk.ac.warwick.tabula.services.attendancemonitoring.{AttendanceMonitoringService, AttendanceMonitoringServiceComponent}
 import uk.ac.warwick.userlookup.User
 
 class EditAttendanceNoteCommandTest extends TestBase with Mockito {
@@ -20,7 +20,7 @@ class EditAttendanceNoteCommandTest extends TestBase with Mockito {
 			with FileAttachmentServiceComponent
 			with UserLookupComponent
 			with AttendanceNoteCommandState {
-			val attendanceMonitoringService = smartMock[AttendanceMonitoringService]
+			val attendanceMonitoringService: AttendanceMonitoringService = smartMock[AttendanceMonitoringService]
 			val fileAttachmentService = null
 			val userLookup = null
 			attendanceNote = new AttendanceMonitoringNote
@@ -35,7 +35,7 @@ class EditAttendanceNoteCommandTest extends TestBase with Mockito {
 		val errors = new BindException(command, "command")
 
 		val validator = new AttendanceNoteValidation with AttendanceNoteCommandState {
-			val student = Fixtures.student("0000001", "student1")
+			val student: StudentMember = Fixtures.student("0000001", "student1")
 			val point = null
 		}
 	}
@@ -59,7 +59,7 @@ class EditAttendanceNoteCommandTest extends TestBase with Mockito {
 
 	@Test
 	def testApply() { new Fixture {
-		val attendanceNote = command.applyInternal()
+		val attendanceNote: AttendanceMonitoringNote = command.applyInternal()
 		attendanceNote.note should be (theNote)
 		attendanceNote.absenceType should be(anAbsenceType)
 		verify(command.attendanceMonitoringService, times(1)).saveOrUpdate(attendanceNote)

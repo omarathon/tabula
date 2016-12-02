@@ -22,10 +22,10 @@ class NotificationDaoTest extends PersistenceTestBase with Mockito {
 
 	val notificationDao = new NotificationDaoImpl
 
-	val agentMember = Fixtures.member(userType=MemberUserType.Staff)
-	val agent = agentMember.asSsoUser
+	val agentMember: Member = Fixtures.member(userType=MemberUserType.Staff)
+	val agent: User = agentMember.asSsoUser
 
-	val victim = Fixtures.user("heronVictim", "heronVictim")
+	val victim: User = Fixtures.user("heronVictim", "heronVictim")
 	val heron = new Heron(victim)
 
 	@Before
@@ -43,7 +43,7 @@ class NotificationDaoTest extends PersistenceTestBase with Mockito {
 		DateTimeUtils.setCurrentMillisSystem()
 	}
 
-	def newHeronNotification(agent: User, heron: Heron) = {
+	def newHeronNotification(agent: User, heron: Heron): HeronWarningNotification = {
 		Notification.init(new HeronWarningNotification, agent, heron)
 	}
 

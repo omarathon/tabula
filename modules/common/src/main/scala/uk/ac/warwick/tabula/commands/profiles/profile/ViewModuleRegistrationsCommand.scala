@@ -17,7 +17,7 @@ object ViewModuleRegistrationsCommand {
 class ViewModuleRegistrationsCommandInternal(val studentCourseDetails: StudentCourseDetails, val academicYear: AcademicYear)
 	extends CommandInternal[Seq[ModuleRegistration]] with ViewModuleRegistrationsCommandState {
 
-	def applyInternal() = {
+	def applyInternal(): Seq[ModuleRegistration] = {
 		studentCourseYearDetails = studentCourseDetails.freshStudentCourseYearDetails.filter(_.academicYear == academicYear).seq.head
 		studentCourseYearDetails.moduleRegistrations
 	}

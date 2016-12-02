@@ -16,27 +16,27 @@ class EditDepartmentCommandTest extends TestBase  with FunctionalContextTesting 
 	import EditDepartmentCommandTest.MinimalCommandContext
 
 	trait CommandTestSupport extends EditDepartmentCommandState with ModuleAndDepartmentServiceComponent {
-		val moduleAndDepartmentService = mock[ModuleAndDepartmentService]
+		val moduleAndDepartmentService: ModuleAndDepartmentService = mock[ModuleAndDepartmentService]
 
 		moduleAndDepartmentService.getDepartmentByCode("in-pg") returns Some(Fixtures.department("in-pg", "IT Services Postgraduate"))
 		moduleAndDepartmentService.getDepartmentByCode(isNotEq("in-pg")) returns None
 	}
 
 	trait Fixture {
-		val parent = Fixtures.department("in", "Information Technology Services")
+		val parent: Department = Fixtures.department("in", "Information Technology Services")
 		parent.shortName = "IT Services"
 		parent.id = "in"
 		parent.allowExtensionRequests = true
 		parent.autoGroupDeregistration = false
 
-		val ug = UserGroup.ofUsercodes
+		val ug: UserGroup = UserGroup.ofUsercodes
 		ug.addUserId("cuslaj")
 
-		val permissionsService = mock[PermissionsService]
+		val permissionsService: PermissionsService = mock[PermissionsService]
 		permissionsService.ensureUserGroupFor(parent, ExtensionManagerRoleDefinition) returns ug
 		parent.permissionsService = permissionsService
 
-		val department = Fixtures.department("in-ug", "IT Services Undergraduate")
+		val department: Department = Fixtures.department("in-ug", "IT Services Undergraduate")
 		department.id = "in-ug"
 		department.allowExtensionRequests = false
 		department.autoGroupDeregistration = true
@@ -58,7 +58,7 @@ class EditDepartmentCommandTest extends TestBase  with FunctionalContextTesting 
 		command.shortName = "ITS UG"
 		command.filterRule = Department.InYearFilterRule(1)
 
-		val dept = command.applyInternal()
+		val dept: Department = command.applyInternal()
 		dept.code should be ("in-ugs")
 		dept.name should be ("ITS UG")
 		dept.fullName should be ("IT Services Undergraduates")

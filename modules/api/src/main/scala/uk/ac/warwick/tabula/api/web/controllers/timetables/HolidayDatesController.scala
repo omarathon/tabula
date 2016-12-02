@@ -9,6 +9,7 @@ import org.springframework.web.bind.annotation.{ModelAttribute, RequestMapping}
 import uk.ac.warwick.tabula.DateFormats
 import uk.ac.warwick.tabula.api.web.controllers.ApiController
 import uk.ac.warwick.tabula.helpers.DateTimeOrdering._
+import uk.ac.warwick.tabula.web.Mav
 import uk.ac.warwick.tabula.web.views.{IcalView, JSONView}
 import uk.ac.warwick.util.workingdays.WorkingDaysHelperImpl
 
@@ -26,13 +27,13 @@ class HolidayDatesController extends ApiController
 trait GetHolidayDatesApi {
 	self: ApiController =>
 
-	lazy val holidayDates = new WorkingDaysHelperImpl().getHolidayDates.asScala.toSeq.sorted
+	lazy val holidayDates: Seq[LocalDate] = new WorkingDaysHelperImpl().getHolidayDates.asScala.toSeq.sorted
 
 	@ModelAttribute("holidayDates")
-	def holidayDatesModelAttribute = holidayDates
+	def holidayDatesModelAttribute: Seq[LocalDate] = holidayDates
 
 	@RequestMapping(method = Array(GET), produces = Array("application/json"))
-	def jsonTermDates(@ModelAttribute("holidayDates") dates: Seq[LocalDate]) = {
+	def jsonTermDates(@ModelAttribute("holidayDates") dates: Seq[LocalDate]): Mav = {
 		Mav(new JSONView(Map(
 			"success" -> true,
 			"status" -> "ok",
@@ -41,7 +42,7 @@ trait GetHolidayDatesApi {
 	}
 
 	@RequestMapping(method = Array(GET), produces = Array("text/calendar"))
-	def icalTermDates(@ModelAttribute("holidayDates") dates: Seq[LocalDate]) = {
+	def icalTermDates(@ModelAttribute("holidayDates") dates: Seq[LocalDate]): Mav = {
 		val cal: Calendar = new Calendar
 		cal.getProperties.add(Version.VERSION_2_0)
 		cal.getProperties.add(new ProdId("-//Tabula//University of Warwick IT Services//EN"))

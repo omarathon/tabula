@@ -31,7 +31,7 @@ class OldTransientStudentRelationshipTemplateCommandInternal(val department: Dep
 
 	self: OldTransientStudentRelationshipTemplateCommandState with ProfileServiceComponent =>
 
-	override def applyInternal() = {
+	override def applyInternal(): ExcelView = {
 		// Transform into a list of (Member, Seq[Member]) pairs
 		val existingAllocations =
 			mapping.asScala.toSeq.flatMap{case(agent, students) => students.asScala.map((agent, _))}

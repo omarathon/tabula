@@ -19,9 +19,9 @@ class PermissionsHelperCommandTest extends TestBase with Mockito {
 		def canDelegateThisRolesPermissions: JavaImports.JBoolean = false
 	}
 
-	val securityService = mock[SecurityService]
-	val roleService = mock[RoleService]
-	val conversionService = mock[ConversionService]
+	val securityService: SecurityService = mock[SecurityService]
+	val roleService: RoleService = mock[RoleService]
+	val conversionService: ConversionService = mock[ConversionService]
 
 	private def newCommand() = {
 		val cmd = new PermissionsHelperCommand

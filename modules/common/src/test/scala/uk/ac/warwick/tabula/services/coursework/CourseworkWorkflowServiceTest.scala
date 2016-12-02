@@ -4,7 +4,7 @@ import uk.ac.warwick.tabula._
 import uk.ac.warwick.tabula.commands.coursework.assignments.ListSubmissionsCommand._
 import uk.ac.warwick.tabula.commands.coursework.assignments.SubmissionAndFeedbackCommand._
 import uk.ac.warwick.tabula.commands.coursework.feedback.ListFeedbackCommand._
-import uk.ac.warwick.tabula.data.model.{Feedback, FileAttachment, Submission}
+import uk.ac.warwick.tabula.data.model._
 import uk.ac.warwick.tabula.data.model.forms.Extension
 import uk.ac.warwick.userlookup.User
 
@@ -13,9 +13,9 @@ import scala.collection.immutable.ListMap
 // scalastyle:off magic.number
 class CourseworkWorkflowServiceTest extends TestBase {
 
-	val department = Fixtures.department("in", "IT Services")
-	val module = Fixtures.module("in101", "Introduction to Web Development")
-	val assignment = Fixtures.assignment("Programming Test")
+	val department: Department = Fixtures.department("in", "IT Services")
+	val module: Module = Fixtures.module("in101", "Introduction to Web Development")
+	val assignment: Assignment = Fixtures.assignment("Programming Test")
 	assignment.module = module
 	module.adminDepartment = department
 

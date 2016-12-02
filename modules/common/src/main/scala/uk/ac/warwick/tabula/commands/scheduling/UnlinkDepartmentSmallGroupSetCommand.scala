@@ -27,7 +27,7 @@ class UnlinkDepartmentSmallGroupSetCommandInternal extends CommandInternal[Map[D
 
 	self: TermServiceComponent with SmallGroupServiceComponent =>
 
-	override def applyInternal() = {
+	override def applyInternal(): Map[Department, Seq[DepartmentSmallGroupSet]] = {
 		val academicYear = AcademicYear.findAcademicYearContainingDate(DateTime.now)
 		val setMap = transactional() {
 			smallGroupService.findDepartmentSmallGroupSetsLinkedToSITSByDepartment(academicYear)
@@ -65,7 +65,7 @@ trait UnlinkDepartmentSmallGroupSetDescription extends Describable[Map[Departmen
 
 trait UnlinkDepartmentSmallGroupSetNotifications extends Notifies[Map[Department, Seq[DepartmentSmallGroupSet]], Map[Department, Seq[DepartmentSmallGroupSet]]] {
 
-	def emit(result: Map[Department, Seq[DepartmentSmallGroupSet]]) = {
+	def emit(result: Map[Department, Seq[DepartmentSmallGroupSet]]): Seq[UnlinkedDepartmentSmallGroupSetNotification] = {
 		result.map { case (department, sets) =>
 			Notification.init(new UnlinkedDepartmentSmallGroupSetNotification, null, sets, department)
 		}.toSeq

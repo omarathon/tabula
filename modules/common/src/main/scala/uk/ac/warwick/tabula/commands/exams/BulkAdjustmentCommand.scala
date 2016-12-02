@@ -17,6 +17,7 @@ import uk.ac.warwick.tabula.system.BindListener
 import uk.ac.warwick.tabula.system.permissions.{PermissionsChecking, PermissionsCheckingMethods, RequiresPermissionsChecking}
 
 import scala.collection.JavaConverters._
+import scala.collection.mutable
 
 object BulkAdjustmentCommand {
 	val StudentIdHeader = "Student ID"
@@ -42,7 +43,7 @@ class BulkAdjustmentCommandInternal(val assessment: Assessment, val gradeGenerat
 
 	self: BulkAdjustmentCommandState with FeedbackServiceComponent with BulkAdjustmentValidation =>
 
-	override def applyInternal() = {
+	override def applyInternal(): mutable.Buffer[Mark] = {
 		val errors = new BindException(this, "command")
 		validate(errors)
 
@@ -217,7 +218,7 @@ trait BulkAdjustmentCommandState {
 	def spreadsheetHelper: SpreadsheetHelpers
 	def user: CurrentUser
 
-	lazy val feedbackMap = assessment.allFeedback.groupBy(_.universityId).mapValues(_.head)
+	lazy val feedbackMap: Map[String, Feedback] = assessment.allFeedback.groupBy(_.universityId).mapValues(_.head)
 
 	// Bind variables
 	var file: UploadedFile = new UploadedFile
@@ -236,7 +237,7 @@ trait BulkAdjustmentCommandState {
 
 	var confirmStep = false
 
-	lazy val requiresDefaultReason = !students.asScala.forall(universityId => reasons.asScala.getOrElse(universityId, null).hasText)
-	lazy val requiresDefaultComments = !students.asScala.forall(universityId => comments.asScala.getOrElse(universityId, null).hasText)
+	lazy val requiresDefaultReason: Boolean = !students.asScala.forall(universityId => reasons.asScala.getOrElse(universityId, null).hasText)
+	lazy val requiresDefaultComments: Boolean = !students.asScala.forall(universityId => comments.asScala.getOrElse(universityId, null).hasText)
 
 }

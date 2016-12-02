@@ -10,8 +10,8 @@ import uk.ac.warwick.tabula.helpers.Logging
 
 trait NotificationHandling extends Logging {
 
-	var notificationService = Wire[NotificationService]
-	var scheduledNotificationService = Wire[ScheduledNotificationService]
+	var notificationService: NotificationService = Wire[NotificationService]
+	var scheduledNotificationService: ScheduledNotificationService = Wire[ScheduledNotificationService]
 
 	def notify[A, B, C](cmd: Command[A])(f: => A): A = {
 		val result = f
@@ -73,7 +73,7 @@ trait NotificationHandling extends Logging {
 
 trait JobNotificationHandling {
 
-	var notificationService = Wire.auto[NotificationService]
+	var notificationService: NotificationService = Wire.auto[NotificationService]
 
 	def notify[A](instance: JobInstance, job: Job) {
 		job match {

@@ -18,7 +18,7 @@ class ExamFixtures extends BrowserTest with FeaturesDriver with GivenWhenThen {
 		enableFeature("examGrids")
 	}
 
-	def as[T](user: LoginDetails)(fn: => T) = {
+	def as[T](user: LoginDetails)(fn: => T): T = {
 		currentUser = user
 		signIn as user to Path("/exams/exams")
 

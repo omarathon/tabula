@@ -9,7 +9,7 @@ class ExamIdConverter extends TwoWayConverter[String, Exam] {
 
 	@Autowired var service: AssessmentService = _
 
-	override def convertRight(id: String) = (Option(id) flatMap { service.getExamById }).orNull
-	override def convertLeft(exam: Exam) = (Option(exam) map {_.id}).orNull
+	override def convertRight(id: String): Exam = (Option(id) flatMap { service.getExamById }).orNull
+	override def convertLeft(exam: Exam): String = (Option(exam) map {_.id}).orNull
 
 }

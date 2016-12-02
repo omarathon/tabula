@@ -5,13 +5,13 @@ import org.hibernate.`type`.StandardBasicTypes
 import java.sql.Types
 
 sealed abstract class SmallGroupFormat(val code: String, val description: String) {
-	def plural = description + "s"
+	def plural: String = description + "s"
 
 	// For Spring, the silly bum
-	def getCode = code
-	def getDescription = description
+	def getCode: String = code
+	def getDescription: String = description
 
-	override def toString = description
+	override def toString: String = description
 }
 
 object SmallGroupFormat {
@@ -28,14 +28,14 @@ object SmallGroupFormat {
 	// lame manual collection. Keep in sync with the case objects above
 	val members = Seq(Seminar, Lab, Tutorial, Project, Example, Workshop, Lecture, Exam, Meeting)
 
-	def fromCode(code: String) =
+	def fromCode(code: String): SmallGroupFormat =
 		if (code == null) null
 		else members.find{_.code == code} match {
 			case Some(caseObject) => caseObject
 			case None => throw new IllegalArgumentException()
 		}
 
-	def fromDescription(description: String) =
+	def fromDescription(description: String): SmallGroupFormat =
 		if (description == null) null
 		else members.find{_.description == description} match {
 			case Some(caseObject) => caseObject
@@ -51,6 +51,6 @@ class SmallGroupFormatUserType extends AbstractBasicUserType[SmallGroupFormat, S
 	val nullValue = null
 	val nullObject = null
 
-	override def convertToObject(string: String) = SmallGroupFormat.fromCode(string)
-	override def convertToValue(format: SmallGroupFormat) = format.code
+	override def convertToObject(string: String): SmallGroupFormat = SmallGroupFormat.fromCode(string)
+	override def convertToValue(format: SmallGroupFormat): String = format.code
 }

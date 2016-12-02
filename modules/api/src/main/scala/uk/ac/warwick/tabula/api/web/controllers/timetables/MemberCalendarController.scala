@@ -20,6 +20,7 @@ import uk.ac.warwick.tabula.services._
 import uk.ac.warwick.tabula.services.timetables.{AutowiringTermBasedEventOccurrenceServiceComponent, EventOccurrenceServiceComponent}
 import uk.ac.warwick.tabula.system.permissions.PermissionsCheckingMethods
 import uk.ac.warwick.tabula.timetables.EventOccurrence
+import uk.ac.warwick.tabula.web.Mav
 import uk.ac.warwick.tabula.web.views.{FullCalendarEvent, IcalView, JSONErrorView, JSONView}
 
 import scala.util.{Failure, Success}
@@ -95,7 +96,7 @@ trait GetMemberCalendarJsonApi {
 		with UserLookupComponent =>
 
 	@RequestMapping(method = Array(GET), produces = Array("application/json"))
-	def showMemberTimetable(@Valid @ModelAttribute("getTimetableCommand") command: TimetableCommand, errors: Errors) = {
+	def showMemberTimetable(@Valid @ModelAttribute("getTimetableCommand") command: TimetableCommand, errors: Errors): Mav = {
 		if (errors.hasErrors) {
 			Mav(new JSONErrorView(errors))
 		} else command.apply() match {
@@ -118,7 +119,7 @@ trait GetMemberCalendarIcalApi {
 		with TermServiceComponent =>
 
 	@RequestMapping(method = Array(GET), produces = Array("text/calendar"))
-	def icalMemberTimetable(@Valid @ModelAttribute("getTimetableCommand") command: TimetableCommand) = {
+	def icalMemberTimetable(@Valid @ModelAttribute("getTimetableCommand") command: TimetableCommand): Mav = {
 		val member = command.member
 
 		val year = AcademicYear.guessSITSAcademicYearByDate(DateTime.now)

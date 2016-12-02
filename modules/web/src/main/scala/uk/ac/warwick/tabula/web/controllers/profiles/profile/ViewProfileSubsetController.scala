@@ -6,20 +6,21 @@ import uk.ac.warwick.spring.Wire
 import uk.ac.warwick.tabula.commands.Appliable
 import uk.ac.warwick.tabula.commands.profiles.profile.{ProfileSubset, ViewProfileSubsetCommand}
 import uk.ac.warwick.tabula.services.UserLookupService
+import uk.ac.warwick.tabula.web.Mav
 import uk.ac.warwick.tabula.web.controllers.profiles.ProfilesController
 
 @Controller
 @RequestMapping(Array("/profiles/view/subset/{student}"))
 class ViewProfileSubsetController extends ProfilesController {
 
-	var userLookup = Wire[UserLookupService]
+	var userLookup: UserLookupService = Wire[UserLookupService]
 
 	@ModelAttribute("command")
 	def getViewProfileSubsetCommand(@PathVariable student: String) =
 		ViewProfileSubsetCommand(student, profileService, userLookup)
 
 	@RequestMapping
-	def viewProfile(@ModelAttribute("command") command: Appliable[ProfileSubset]) = {
+	def viewProfile(@ModelAttribute("command") command: Appliable[ProfileSubset]): Mav = {
 
 		val profileSubset = command.apply()
 

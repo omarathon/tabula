@@ -38,7 +38,7 @@ object ViewModuleTimetableCommand {
 			with ViewModuleTimetableValidation
 			with Unaudited with ReadOnly
 			with ModuleTimetableFetchingServiceComponent {
-			val timetableFetchingService = service
+			val timetableFetchingService: ModuleTimetableFetchingService = service
 		}
 }
 

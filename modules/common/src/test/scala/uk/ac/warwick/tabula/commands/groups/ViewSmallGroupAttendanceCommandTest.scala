@@ -2,7 +2,9 @@ package uk.ac.warwick.tabula.commands.groups
 
 import org.joda.time.{DateTime, DateTimeConstants, LocalDateTime, LocalTime}
 import uk.ac.warwick.tabula.commands.groups.SmallGroupAttendanceState._
+import uk.ac.warwick.tabula.commands.groups.ViewSmallGroupAttendanceCommand.SmallGroupAttendanceInformation
 import uk.ac.warwick.tabula.data.model.attendance.AttendanceState
+import uk.ac.warwick.tabula.data.model.groups.SmallGroupEventOccurrence.WeekNumber
 import uk.ac.warwick.tabula.data.model.groups.{DayOfWeek, SmallGroup, SmallGroupEvent, SmallGroupEventAttendance, SmallGroupEventOccurrence, SmallGroupSet, WeekRange}
 import uk.ac.warwick.tabula.data.model.{UnspecifiedTypeUserGroup, UserGroup}
 import uk.ac.warwick.tabula.services._
@@ -22,9 +24,9 @@ class ViewSmallGroupAttendanceCommandTest extends TestBase with Mockito {
 		}
 
 		trait CommandTestSupport extends SmallGroupServiceComponent with UserLookupComponent with WeekToDateConverterComponent {
-			val smallGroupService = mock[SmallGroupService]
-			val weekToDateConverter = smartMock[WeekToDateConverter]
-			val userLookup = mockUserLookup
+			val smallGroupService: SmallGroupService = mock[SmallGroupService]
+			val weekToDateConverter: WeekToDateConverter = smartMock[WeekToDateConverter]
+			val userLookup: MockUserLookup = mockUserLookup
 		}
 	}
 
@@ -59,7 +61,7 @@ class ViewSmallGroupAttendanceCommandTest extends TestBase with Mockito {
 		command.smallGroupService.findAttendanceByGroup(group) returns Seq()
 		command.smallGroupService.findAttendanceNotes(Seq(), Seq()) returns Seq()
 
-		val info = command.applyInternal()
+		val info: SmallGroupAttendanceInformation = command.applyInternal()
 
 		info.instances should be (Seq(
 			(event2, 1),
@@ -76,11 +78,11 @@ class ViewSmallGroupAttendanceCommandTest extends TestBase with Mockito {
 	def commandApply() = withFakeTime(baseLocalDateTime) { new Fixture() {
 		mockUserLookup.registerUsers("user1", "user2", "user3", "user4", "user5")
 
-		val user1 = mockUserLookup.getUserByUserId("user1")
-		val user2 = mockUserLookup.getUserByUserId("user2")
-		val user3 = mockUserLookup.getUserByUserId("user3")
-		val user4 = mockUserLookup.getUserByUserId("user4")
-		val user5 = mockUserLookup.getUserByUserId("user5")
+		val user1: User = mockUserLookup.getUserByUserId("user1")
+		val user2: User = mockUserLookup.getUserByUserId("user2")
+		val user3: User = mockUserLookup.getUserByUserId("user3")
+		val user4: User = mockUserLookup.getUserByUserId("user4")
+		val user5: User = mockUserLookup.getUserByUserId("user5")
 
 		group.students.add(user1)
 		group.students.add(user2)
@@ -134,7 +136,7 @@ class ViewSmallGroupAttendanceCommandTest extends TestBase with Mockito {
 		command.weekToDateConverter.toLocalDatetime(4, DayOfWeek.Monday, new LocalTime(12, 0), set.academicYear) returns Some(new LocalDateTime(2014, DateTimeConstants.OCTOBER, 20, 12, 0))
 		command.weekToDateConverter.toLocalDatetime(7, DayOfWeek.Monday, new LocalTime(16, 0), set.academicYear) returns Some(new LocalDateTime(2014, DateTimeConstants.OCTOBER, 29, 16, 0))
 
-		val info = command.applyInternal()
+		val info: SmallGroupAttendanceInformation = command.applyInternal()
 
 		info.instances should be (Seq(
 			(event2, 1),
@@ -146,7 +148,7 @@ class ViewSmallGroupAttendanceCommandTest extends TestBase with Mockito {
 		))
 
 		// Map all the SortedMaps to Seqs to preserve the order they've been set as
-		val userAttendanceSeqs = info.attendance.toSeq.map { case (user, attendance) =>
+		val userAttendanceSeqs: Seq[(User, Seq[((SmallGroupEvent, WeekNumber), SmallGroupAttendanceState)])] = info.attendance.toSeq.map { case (user, attendance) =>
 			user -> attendance.toSeq
 		}
 
@@ -220,9 +222,9 @@ class ViewSmallGroupAttendanceCommandTest extends TestBase with Mockito {
 
 		mockUserLookup.registerUsers("user1", "user2", "user3")
 
-		val user1 = mockUserLookup.getUserByUserId("user1")
-		val user2 = mockUserLookup.getUserByUserId("user2")
-		val user3 = mockUserLookup.getUserByUserId("user3")
+		val user1: User = mockUserLookup.getUserByUserId("user1")
+		val user2: User = mockUserLookup.getUserByUserId("user2")
+		val user3: User = mockUserLookup.getUserByUserId("user3")
 
 		// Give user2 and user3 the same name
 		user2.setFirstName("Billy")
@@ -251,7 +253,7 @@ class ViewSmallGroupAttendanceCommandTest extends TestBase with Mockito {
 		command.weekToDateConverter.toLocalDatetime(3, DayOfWeek.Monday, new LocalTime(12, 0), set.academicYear) returns Some(new LocalDateTime(2014, DateTimeConstants.OCTOBER, 13, 12, 0))
 		command.weekToDateConverter.toLocalDatetime(4, DayOfWeek.Monday, new LocalTime(12, 0), set.academicYear) returns Some(new LocalDateTime(2014, DateTimeConstants.OCTOBER, 20, 12, 0))
 
-		val info = command.applyInternal()
+		val info: SmallGroupAttendanceInformation = command.applyInternal()
 		info.attendance.keySet.size should be (3) // If it's 2, we're bad
 	}}
 

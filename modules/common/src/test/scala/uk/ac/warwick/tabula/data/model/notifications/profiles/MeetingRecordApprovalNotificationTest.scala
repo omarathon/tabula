@@ -6,17 +6,17 @@ import uk.ac.warwick.tabula.data.model.notifications.profiles.meetingrecord.NewM
 import uk.ac.warwick.tabula.data.model.{MeetingRecord, StudentRelationship, StudentRelationshipType}
 import uk.ac.warwick.tabula.permissions.{Permission, PermissionsTarget, ScopelessPermission}
 import uk.ac.warwick.tabula.services.{ProfileService, SecurityService}
-import uk.ac.warwick.tabula.web.views.{FreemarkerRendering, ScalaBeansWrapper, UrlMethodModel}
+import uk.ac.warwick.tabula.web.views.{FreemarkerRendering, ScalaBeansWrapper, ScalaFreemarkerConfiguration, UrlMethodModel}
 
 class MeetingRecordApprovalNotificationTest extends TestBase with Mockito with FreemarkerRendering {
 
-	val securityService = mock[SecurityService]
+	val securityService: SecurityService = mock[SecurityService]
 	securityService.can(any[CurrentUser], any[ScopelessPermission]) returns true
 	securityService.can(any[CurrentUser], any[Permission], any[PermissionsTarget]) returns true
 
-	val profileService = mock[ProfileService]
+	val profileService: ProfileService = mock[ProfileService]
 
-	val freeMarkerConfig = newFreemarkerConfiguration
+	val freeMarkerConfig: ScalaFreemarkerConfiguration = newFreemarkerConfiguration
 	freeMarkerConfig.getObjectWrapper.asInstanceOf[ScalaBeansWrapper].securityService = securityService
 
 	val urlMethodModel = new UrlMethodModel

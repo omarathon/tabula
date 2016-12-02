@@ -21,7 +21,7 @@ trait AttendanceMonitoringServiceComponent {
 }
 
 trait AutowiringAttendanceMonitoringServiceComponent extends AttendanceMonitoringServiceComponent {
-	val attendanceMonitoringService = Wire[AttendanceMonitoringService]
+	val attendanceMonitoringService: AttendanceMonitoringService = Wire[AttendanceMonitoringService]
 }
 
 trait AttendanceMonitoringService {
@@ -104,7 +104,7 @@ abstract class AbstractAttendanceMonitoringService extends AttendanceMonitoringS
 
 	self: AttendanceMonitoringDaoComponent with TermServiceComponent with AttendanceMonitoringMembershipHelpers with UserLookupComponent =>
 
-	var queue = Wire.named[Queue]("settingsSyncTopic")
+	var queue: Queue = Wire.named[Queue]("settingsSyncTopic")
 
 	def getSchemeById(id: String): Option[AttendanceMonitoringScheme] =
 		attendanceMonitoringDao.getSchemeById(id)
@@ -147,16 +147,16 @@ abstract class AbstractAttendanceMonitoringService extends AttendanceMonitoringS
 		attendanceMonitoringDao.saveOrUpdate(total)
 	}
 
-	def deleteScheme(scheme: AttendanceMonitoringScheme) =
+	def deleteScheme(scheme: AttendanceMonitoringScheme): Unit =
 		attendanceMonitoringDao.delete(scheme)
 
-	def deletePoint(point: AttendanceMonitoringPoint) =
+	def deletePoint(point: AttendanceMonitoringPoint): Unit =
 		attendanceMonitoringDao.delete(point)
 
-	def deleteTemplate(template: AttendanceMonitoringTemplate) =
+	def deleteTemplate(template: AttendanceMonitoringTemplate): Unit =
 		attendanceMonitoringDao.delete(template)
 
-	def deleteTemplatePoint(point: AttendanceMonitoringTemplatePoint) =
+	def deleteTemplatePoint(point: AttendanceMonitoringTemplatePoint): Unit =
 		attendanceMonitoringDao.delete(point)
 
 	def getTemplateSchemeById(id: String): Option[AttendanceMonitoringTemplate] =

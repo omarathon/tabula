@@ -31,7 +31,7 @@ class OpenAndCloseDepartmentsCommandInternal extends CommandInternal[DegreeType]
 
 	self: OpenAndCloseDepartmentsCommandState with ModuleAndDepartmentServiceComponent =>
 
-	def applyInternal() = {
+	def applyInternal(): DegreeType = {
 		if (updatePostgrads){
 			updateDepartments(pgMappings, DegreeType.Postgraduate)
 			DegreeType.Postgraduate
@@ -67,7 +67,7 @@ trait OpenAndCloseDepartmentsCommandDescription extends Describable[DegreeType] 
 
 	self: OpenAndCloseDepartmentsCommandState =>
 
-	def describe(d: Description) = d.properties(
+	def describe(d: Description): Unit = d.properties(
 		"degreeType" -> {
 			if (updatePostgrads) DegreeType.Postgraduate
 			else DegreeType.Undergraduate
@@ -78,8 +78,8 @@ trait OpenAndCloseDepartmentsCommandDescription extends Describable[DegreeType] 
 trait OpenAndCloseDepartmentsCommandState {
 	self: TermServiceComponent with ModuleAndDepartmentServiceComponent =>
 
-	lazy val currentAcademicYear = AcademicYear.findAcademicYearContainingDate(DateTime.now)
-	lazy val previousAcademicYear = currentAcademicYear.previous
+	lazy val currentAcademicYear: AcademicYear = AcademicYear.findAcademicYearContainingDate(DateTime.now)
+	lazy val previousAcademicYear: AcademicYear = currentAcademicYear.previous
 
 	lazy val departments: Seq[Department] = moduleAndDepartmentService.allRootDepartments
 	var ugMappings: JMap[String, String] = JHashMap()
@@ -92,7 +92,7 @@ trait PopulateOpenAndCloseDepartmentsCommand extends PopulateOnForm {
 
 	self: OpenAndCloseDepartmentsCommandState =>
 
-	override def populate() = {
+	override def populate(): Unit = {
 
 		ugMappings = departments.map {d =>
 			d.code -> getState(d, DegreeType.Undergraduate).value

@@ -6,6 +6,7 @@ import uk.ac.warwick.tabula.CurrentUser
 import uk.ac.warwick.tabula.commands.Appliable
 import uk.ac.warwick.tabula.commands.home.DismissNotificationCommand
 import uk.ac.warwick.tabula.data.model.{Activity, Notification, ToEntityReference}
+import uk.ac.warwick.tabula.web.Mav
 import uk.ac.warwick.tabula.web.controllers.BaseController
 import uk.ac.warwick.tabula.web.views.MarkdownRendererImpl
 
@@ -22,13 +23,13 @@ class DismissNotificationController extends BaseController with ActivityJsonMav 
 
 
 	@RequestMapping(value=Array("/activity/dismiss/{notification}"))
-	def dismiss(@ModelAttribute("dismissCommand") command: Appliable[Seq[Activity[_]]]) = {
+	def dismiss(@ModelAttribute("dismissCommand") command: Appliable[Seq[Activity[_]]]): Mav = {
 		val activities = command.apply()
 		toMav(activities)
 	}
 
 	@RequestMapping(value=Array("/activity/restore/{notification}"))
-	def restore(@ModelAttribute("restoreCommand") command: Appliable[Seq[Activity[_]]]) = {
+	def restore(@ModelAttribute("restoreCommand") command: Appliable[Seq[Activity[_]]]): Mav = {
 		val activities = command.apply()
 		toMav(activities)
 	}

@@ -36,7 +36,7 @@ trait CombinedStaffTimetableEventSourceComponent extends StaffTimetableEventSour
 }
 
 trait AutowiringStaffTimetableEventSourceComponent extends StaffTimetableEventSourceComponent {
-	val staffTimetableEventSource = (new CombinedStaffTimetableEventSourceComponent
+	val staffTimetableEventSource: StaffTimetableEventSource = (new CombinedStaffTimetableEventSourceComponent
 		with SmallGroupEventTimetableEventSourceComponentImpl
 		with CombinedHttpTimetableFetchingServiceComponent
 		with AutowiringSmallGroupServiceComponent

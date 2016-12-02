@@ -1,5 +1,6 @@
 package uk.ac.warwick.tabula.notifications
 
+import com.fasterxml.jackson.databind.ObjectMapper
 import dispatch.classic.url
 import org.springframework.stereotype.Component
 import uk.ac.warwick.spring.Wire
@@ -19,7 +20,7 @@ import scala.util.parsing.json.JSON
 trait StartWarwickNotificationListener extends NotificationListener {
 	self: StartWarwickPropertiesComponent with TextRendererComponent with FeaturesComponent with DispatchHttpClientComponent =>
 
-	@transient var json = JsonObjectMapperFactory.instance
+	@transient var json: ObjectMapper = JsonObjectMapperFactory.instance
 
 	private def toStartActivity(notification: Notification[_ >: Null <: ToEntityReference, _]): Option[Map[String, Any]] = {
 		val recipients = notification.recipientNotificationInfos.asScala
@@ -120,8 +121,8 @@ trait StartWarwickPropertiesComponent {
 }
 
 trait AutowiringStartWarwickPropertiesComponent extends StartWarwickPropertiesComponent {
-	var startApiHostname = Wire.property("${start.hostname}")
-	var startApiProviderId = Wire.property("${start.provider_id}")
-	var startApiUsername = Wire.property("${start.username}")
-	var startApiPassword = Wire.property("${start.password}")
+	var startApiHostname: String = Wire.property("${start.hostname}")
+	var startApiProviderId: String = Wire.property("${start.provider_id}")
+	var startApiUsername: String = Wire.property("${start.username}")
+	var startApiPassword: String = Wire.property("${start.password}")
 }

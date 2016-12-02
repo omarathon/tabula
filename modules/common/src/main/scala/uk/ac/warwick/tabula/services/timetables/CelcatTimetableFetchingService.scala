@@ -25,7 +25,7 @@ import uk.ac.warwick.tabula.services.timetables.TimetableFetchingService.EventLi
 import uk.ac.warwick.tabula.timetables.{TimetableEvent, TimetableEventType}
 import uk.ac.warwick.tabula.{AcademicYear, AutowiringFeaturesComponent, DateFormats}
 import uk.ac.warwick.userlookup.UserLookupException
-import uk.ac.warwick.util.cache.{CacheEntryUpdateException, Caches, SingularCacheEntryFactory}
+import uk.ac.warwick.util.cache.{Cache, CacheEntryUpdateException, Caches, SingularCacheEntryFactory}
 
 import scala.collection.JavaConverters._
 import scala.concurrent.Future
@@ -57,7 +57,7 @@ case class CelcatDepartmentConfiguration(
 	enabledFn: () => Boolean = { () => true },
 	credentials: Credentials
 ) {
-	def enabled = enabledFn()
+	def enabled: Boolean = enabledFn()
 }
 
 trait AutowiringCelcatConfigurationComponent extends CelcatConfigurationComponent {
@@ -217,11 +217,11 @@ object CelcatHttpTimetableFetchingService {
 	}
 
 	// Doesn't support all-day events
-	def toDateTime(property: DateProperty) =
+	def toDateTime(property: DateProperty): DateTime =
 		if (property == null) null
 		else new DateTime(property.getDate, getTimeZone(property)).withZoneRetainFields(DateTimeZone.forID("Europe/London"))
 
-	def getTimeZone(property: DateProperty) =
+	def getTimeZone(property: DateProperty): DateTimeZone =
 		if (property.getParameter(Parameter.VALUE) != null && (property.getParameter(Parameter.VALUE) == Value.DATE)) DateTimeZone.UTC
 		else if (property.getTimeZone != null) DateTimeZone.forTimeZone(property.getTimeZone)
 		else DateTimeZone.forID("Europe/London")
@@ -236,10 +236,10 @@ class CelcatHttpTimetableFetchingService(celcatConfiguration: CelcatConfiguratio
 		with ModuleAndDepartmentServiceComponent
 		with DispatchHttpClientComponent =>
 
-	lazy val configs = celcatConfiguration.departmentConfiguration
+	lazy val configs: Map[String, CelcatDepartmentConfiguration] = celcatConfiguration.departmentConfiguration
 
 	// a dispatch response handler which reads iCal/JSON from the response and parses it into a list of TimetableEvents
-	def handler(config: CelcatDepartmentConfiguration) = { (headers: Map[String,Seq[String]], req: dispatch.classic.Request) =>
+	def handler(config: CelcatDepartmentConfiguration): (Map[String, Seq[String]], Request) => Handler[EventList] = { (headers: Map[String,Seq[String]], req: dispatch.classic.Request) =>
 		if (config.parseWBSJson) {
 			req >- { (rawJSON) =>
 				combineIdenticalEvents(parseJSON(rawJSON))
@@ -300,7 +300,7 @@ class CelcatHttpTimetableFetchingService(celcatConfiguration: CelcatConfiguratio
 
 	type BSVCacheEntry = Seq[(UniversityId, CelcatStaffInfo)] with java.io.Serializable
 	val bsvCacheEntryFactory = new SingularCacheEntryFactory[String, BSVCacheEntry] {
-		def create(baseUri: String) = {
+		def create(baseUri: String): BSVCacheEntry = {
 			val config = configs.filter { case (_, deptConfig) => deptConfig.baseUri == baseUri }
 				.map { case (_, deptConfig) => deptConfig }
 				.headOption.getOrElse(throw new IllegalArgumentException(s"No such config with baseUri $baseUri"))
@@ -334,10 +334,10 @@ class CelcatHttpTimetableFetchingService(celcatConfiguration: CelcatConfiguratio
 		def shouldBeCached(response: BSVCacheEntry) = true
 	}
 
-	lazy val bsvCache =
+	lazy val bsvCache: Cache[String, BSVCacheEntry] =
 		Caches.newCache("CelcatBSVCache", bsvCacheEntryFactory, 60 * 60 * 24, cacheStrategy)
 
-	def lookupCelcatIDFromBSV(universityId: UniversityId, config: CelcatDepartmentConfiguration) =
+	def lookupCelcatIDFromBSV(universityId: UniversityId, config: CelcatDepartmentConfiguration): Option[String] =
 		staffInfo(config).get(universityId).map { _.celcatId }
 
 	def staffInfo(config: CelcatDepartmentConfiguration): Map[UniversityId, CelcatStaffInfo] =
@@ -412,7 +412,7 @@ class CelcatHttpTimetableFetchingService(celcatConfiguration: CelcatConfiguratio
 		}}.toList
 	}
 
-	def parseJSON(incomingJson: String) = {
+	def parseJSON(incomingJson: String): EventList = {
 		JSON.parseFull(incomingJson) match {
 			case Some(jsonData: List[Map[String, Any]]@unchecked) =>
 				EventList.fresh(jsonData.flatMap { event =>

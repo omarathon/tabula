@@ -8,12 +8,12 @@ import uk.ac.warwick.tabula.data.model.AbstractBasicUserType
 import uk.ac.warwick.tabula.JavaImports._
 
 @SerialVersionUID(-8143257003489402756l) sealed abstract class DayOfWeek(val jodaDayOfWeek: Int) extends Serializable {
-	def name = toString
-	def shortName = name.substring(0, 3)
+	def name: String = toString
+	def shortName: String = name.substring(0, 3)
 
 	// For Spring, the silly bum
-	def getName = name
-	def getAsInt = jodaDayOfWeek
+	def getName: String = name
+	def getAsInt: Int = jodaDayOfWeek
 }
 
 object DayOfWeek {
@@ -42,6 +42,6 @@ class DayOfWeekUserType extends AbstractBasicUserType[DayOfWeek, JInteger] {
 	val nullObject = null
 
 	override def convertToObject(int: JInteger) = DayOfWeek(int)
-	override def convertToValue(day: DayOfWeek) = day.jodaDayOfWeek
+	override def convertToValue(day: DayOfWeek): JInteger = day.jodaDayOfWeek
 
 }

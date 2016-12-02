@@ -12,7 +12,7 @@ trait RouteDaoComponent {
 }
 
 trait AutowiringRouteDaoComponent extends RouteDaoComponent {
-	val routeDao = Wire[RouteDao]
+	val routeDao: RouteDao = Wire[RouteDao]
 }
 
 trait RouteDao {
@@ -38,21 +38,21 @@ class RouteDaoImpl extends RouteDao with Daoisms {
 			.seq
 			.distinct
 
-	def saveOrUpdate(route: Route) = session.saveOrUpdate(route)
+	def saveOrUpdate(route: Route): Unit = session.saveOrUpdate(route)
 
-	def getByCode(code: String) =
+	def getByCode(code: String): Option[Route] =
 		session.newQuery[Route]("from Route r where code = :code").setString("code", code).uniqueResult
 
 	def getAllByCodes(codes: Seq[String]): Seq[Route] = {
 		safeInSeq(() => { session.newCriteria[Route] }, "code", codes)
 	}
 
-	def getById(id: String) = getById[Route](id)
+	def getById(id: String): Option[Route] = getById[Route](id)
 
-	def findByDepartment(department:Department) =
+	def findByDepartment(department:Department): Seq[Route] =
 		session.newQuery[Route]("from Route r where adminDepartment = :dept").setEntity("dept",department).seq
 
-	def stampMissingRows(dept: Department, seenCodes: Seq[String]) = {
+	def stampMissingRows(dept: Department, seenCodes: Seq[String]): Int = {
 		val hql = """
 				update Route r
 				set
@@ -81,10 +81,10 @@ class RouteDaoImpl extends RouteDao with Daoisms {
 			.setMaxResults(20).seq.sorted(Route.DegreeTypeOrdering)
 	}
 
-	def saveOrUpdate(teachingInfo: RouteTeachingInformation) = session.saveOrUpdate(teachingInfo)
-	def delete(teachingInfo: RouteTeachingInformation) = session.delete(teachingInfo)
+	def saveOrUpdate(teachingInfo: RouteTeachingInformation): Unit = session.saveOrUpdate(teachingInfo)
+	def delete(teachingInfo: RouteTeachingInformation): Unit = session.delete(teachingInfo)
 
-	def getTeachingInformationByRouteCodeAndDepartmentCode(routeCode: String, departmentCode: String) =
+	def getTeachingInformationByRouteCodeAndDepartmentCode(routeCode: String, departmentCode: String): Option[RouteTeachingInformation] =
 		session.newCriteria[RouteTeachingInformation]
 			.createAlias("route", "route")
 			.createAlias("department", "department")

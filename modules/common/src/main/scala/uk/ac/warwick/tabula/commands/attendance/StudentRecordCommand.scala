@@ -44,7 +44,7 @@ class StudentRecordCommandInternal(val academicYear: AcademicYear, val student: 
 
 	self: StudentRecordCommandRequest with StudentRecordCommandState with AttendanceMonitoringServiceComponent =>
 
-	override def applyInternal() = {
+	override def applyInternal(): (Seq[AttendanceMonitoringCheckpoint], Seq[AttendanceMonitoringCheckpointTotal]) = {
 		attendanceMonitoringService.setAttendance(student, checkpointMap.asScala.toMap, user)
 	}
 
@@ -54,7 +54,7 @@ trait PopulatesStudentRecordCommand extends PopulateOnForm {
 
 	self: StudentRecordCommandRequest with StudentRecordCommandState with AttendanceMonitoringServiceComponent =>
 
-	override def populate() = {
+	override def populate(): Unit = {
 		studentPointCheckpointMap(student).foreach { case (point, checkpoint) => checkpointMap.put(point, Option(checkpoint).map(_.state).orNull) }
 	}
 }
@@ -64,7 +64,7 @@ trait StudentRecordValidation extends SelfValidating with FiltersCheckpointMapCh
 	self: StudentRecordCommandRequest with StudentRecordCommandState
 		with AttendanceMonitoringServiceComponent with TermServiceComponent =>
 
-	override def validate(errors: Errors) = {
+	override def validate(errors: Errors): Unit = {
 		val nonReportedTerms = attendanceMonitoringService.findNonReportedTerms(Seq(student), academicYear)
 
 		filterCheckpointMapForChanges(
@@ -129,7 +129,7 @@ trait StudentRecordCommandState {
 
 	def departmentOption: Option[Department] = None
 
-	lazy val points = attendanceMonitoringService.listStudentsPoints(student, departmentOption, academicYear)
+	lazy val points: Seq[AttendanceMonitoringPoint] = attendanceMonitoringService.listStudentsPoints(student, departmentOption, academicYear)
 
 	lazy val studentPointCheckpointMap: Map[StudentMember, Map[AttendanceMonitoringPoint, AttendanceMonitoringCheckpoint]] = {
 		val checkpoints = attendanceMonitoringService.getCheckpoints(points, student)

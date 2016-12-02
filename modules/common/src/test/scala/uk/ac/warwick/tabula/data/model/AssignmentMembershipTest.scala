@@ -14,7 +14,7 @@ import uk.ac.warwick.tabula.JavaImports.{JHashMap,JList}
 
 class AssignmentMembershipTest extends TestBase with Mockito {
 
-	var userDatabase = Seq(
+	var userDatabase: Seq[User] = Seq(
 		("0000000","aaaaa"),
 		("0000001","aaaab"),
 		("0000002","aaaac"),
@@ -32,7 +32,7 @@ class AssignmentMembershipTest extends TestBase with Mockito {
 
   var assignmentMembershipService: AssessmentMembershipService = _
 	var userLookup: UserLookupService = _
-	val nobody = UserGroup.ofUsercodes
+	val nobody: UserGroup = UserGroup.ofUsercodes
 
 	@Before def before() {
 		userLookup = mock[UserLookupService]
@@ -146,7 +146,7 @@ class AssignmentMembershipTest extends TestBase with Mockito {
 	}
 
 
-	def newAssessmentGroup(uniIds:Seq[String]) = {
+	def newAssessmentGroup(uniIds:Seq[String]): UpstreamAssessmentGroup = {
 		val upstream = new UpstreamAssessmentGroup
 		upstream.members.addAll(uniIds.map(uniId => new UpstreamAssessmentGroupMember(upstream, uniId)).asJava)
 		upstream

@@ -12,6 +12,7 @@ import uk.ac.warwick.tabula.services.{AutowiringProfileServiceComponent, Autowir
 import uk.ac.warwick.tabula.system.permissions.{PermissionsChecking, PermissionsCheckingMethods, RequiresPermissionsChecking}
 
 import scala.collection.JavaConverters._
+import scala.collection.mutable
 
 object SearchStudentsInSmallGroupSetCommand {
 	def apply(module: Module, set: SmallGroupSet) =
@@ -39,7 +40,7 @@ trait SearchStudentsInSmallGroupSetCommandState {
 	var excludeEvent: SmallGroupEvent = _
 	var excludeWeek: JInteger = _
 
-	def validQuery =
+	def validQuery: Boolean =
 		(query.trim().length >= MinimumQueryLength) &&
 		query.split( """\s+""").exists(_.length >= MinimumTermLength)
 }
@@ -56,7 +57,7 @@ class SearchStudentsInSmallGroupSetCommandInternal(val module: Module, val set: 
 			}
 		}
 
-	def allUniversityIdsInSet = {
+	def allUniversityIdsInSet: mutable.Buffer[String] = {
 		// Include the university IDs of any users in any SmallGroupSet within this module for the relevant academic year
 		module.groupSets.asScala.filter(_.academicYear == set.academicYear).flatMap { set =>
 			set.members.knownType.members ++ set.groups.asScala.flatMap { group =>
@@ -66,7 +67,7 @@ class SearchStudentsInSmallGroupSetCommandInternal(val module: Module, val set: 
 		}.distinct
 	}
 
-	def members = {
+	def members: Seq[Member] = {
 		val allUniversityIds = allUniversityIdsInSet
 		val excludedUniversityIds = excludedEventOccurrence.map { occurrence =>
 			occurrence.event.group.students.users.map { _.getWarwickId } ++ occurrence.attendance.asScala.toSeq.map { _.universityId }
@@ -75,7 +76,7 @@ class SearchStudentsInSmallGroupSetCommandInternal(val module: Module, val set: 
 		profileService.getAllMembersWithUniversityIds(allUniversityIds diff excludedUniversityIds)
 	}
 
-	override def applyInternal() = {
+	override def applyInternal(): Seq[Member] = {
 		if (validQuery) {
 			val terms = query.split("""\s+""").map { _.trim().toLowerCase }
 			members.filter { member =>

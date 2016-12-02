@@ -11,7 +11,7 @@ import uk.ac.warwick.tabula.web.Mav
 import uk.ac.warwick.tabula.commands.coursework.assignments.{StudentCourseworkFullScreenCommand, StudentCourseworkGadgetCommand}
 
 abstract class OldStudentCourseworkController extends OldCourseworkController {
-	def getMav(member: Member, info: StudentAssignments) =
+	def getMav(member: Member, info: StudentAssignments): Mav =
 		Mav(s"$urlPrefix/home/_student",
 			"student" -> member,
 			"enrolledAssignments" -> info.enrolledAssignments,

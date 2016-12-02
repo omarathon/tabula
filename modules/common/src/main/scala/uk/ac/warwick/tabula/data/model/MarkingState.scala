@@ -11,7 +11,7 @@ sealed abstract class MarkingState(val name: String) {
 		state == this || transitionStates.contains(state)
 	}
 
-	override def toString = name
+	override def toString: String = name
 }
 
 object MarkingState {
@@ -44,6 +44,6 @@ class MarkingStateUserType extends AbstractBasicUserType[MarkingState, String]{
 	val nullValue = null
 	val nullObject = null
 
-	override def convertToObject(string: String) = MarkingState.fromCode(string)
-	override def convertToValue(state: MarkingState) = state.name
+	override def convertToObject(string: String): MarkingState = MarkingState.fromCode(string)
+	override def convertToValue(state: MarkingState): String = state.name
 }

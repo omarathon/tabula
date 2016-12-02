@@ -1,5 +1,6 @@
 package uk.ac.warwick.tabula.services.elasticsearch
 
+import com.sksamuel.elastic4s.ElasticClient
 import org.scalatest.time.{Millis, Seconds, Span}
 import uk.ac.warwick.tabula.ElasticsearchTestBase
 
@@ -9,7 +10,7 @@ class ElasticsearchIndexInitialisationTest extends ElasticsearchTestBase {
 		PatienceConfig(timeout = Span(2, Seconds), interval = Span(50, Millis))
 
 	private trait ElasticsearchIndexSupport extends ElasticsearchClientComponent {
-		override val client = ElasticsearchIndexInitialisationTest.this.client
+		override val client: ElasticClient = ElasticsearchIndexInitialisationTest.this.client
 	}
 
 	private trait Fixture {
@@ -17,8 +18,8 @@ class ElasticsearchIndexInitialisationTest extends ElasticsearchTestBase {
 		val indexType = "wibble"
 
 		val service = new ElasticsearchIndexInitialisation with ElasticsearchIndexName with ElasticsearchIndexType with ElasticsearchIndexSupport with AuditEventElasticsearchConfig {
-			override val indexName = Fixture.this.indexName
-			override val indexType = Fixture.this.indexType
+			override val indexName: String = Fixture.this.indexName
+			override val indexType: String = Fixture.this.indexType
 		}
 	}
 

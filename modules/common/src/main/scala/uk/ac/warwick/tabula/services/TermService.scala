@@ -1,14 +1,17 @@
 package uk.ac.warwick.tabula.services
 
 import org.springframework.stereotype.Service
-import uk.ac.warwick.util.termdates.{TermNotFoundException, Term, TermFactoryImpl}
+import uk.ac.warwick.util.termdates.{Term, TermFactoryImpl, TermNotFoundException}
 import org.joda.time.base.BaseDateTime
 import uk.ac.warwick.spring.Wire
 import uk.ac.warwick.util.termdates.Term.TermType
+
 import scala.collection.JavaConverters._
-import org.joda.time.{LocalDate, DateTimeConstants, Interval, DateTime}
+import org.joda.time.{DateTime, DateTimeConstants, Interval, LocalDate}
 import uk.ac.warwick.tabula.AcademicYear
 import uk.ac.warwick.tabula.data.model.groups.DayOfWeek
+
+import scala.collection.mutable
 
 trait TermService {
 	def getTermFromDate(date: BaseDateTime): Term
@@ -45,15 +48,15 @@ object TermService {
 class TermServiceImpl extends TermService {
 	val termFactory = new TermFactoryImpl
 
-	def getTermFromDate(date: BaseDateTime) = termFactory.getTermFromDate(date)
+	def getTermFromDate(date: BaseDateTime): Term = termFactory.getTermFromDate(date)
 
-	def getPreviousTerm(term: Term) = termFactory.getPreviousTerm(term)
+	def getPreviousTerm(term: Term): Term = termFactory.getPreviousTerm(term)
 
-	def getNextTerm(term: Term) = termFactory.getNextTerm(term)
+	def getNextTerm(term: Term): Term = termFactory.getNextTerm(term)
 
-	def getAcademicWeek(date: BaseDateTime, weekNumber: Int) = termFactory.getAcademicWeek(date, weekNumber)
+	def getAcademicWeek(date: BaseDateTime, weekNumber: Int): Interval = termFactory.getAcademicWeek(date, weekNumber)
 
-	def getAcademicWeeksForYear(date: BaseDateTime) = termFactory.getAcademicWeeksForYear(date).asScala map { pair => pair.getLeft -> pair.getRight }
+	def getAcademicWeeksForYear(date: BaseDateTime): mutable.Buffer[(Integer, Interval)] = termFactory.getAcademicWeeksForYear(date).asScala map { pair => pair.getLeft -> pair.getRight }
 
 	/**
 	 * Return all the academic weeks for the specifed range, as a tuple of year, weeknumber, date interval
@@ -82,7 +85,7 @@ class TermServiceImpl extends TermService {
 		  .filterNot(_._2 == 53) // don't include week 53, it's just a confusing alias for week 1
 	}
 
-	def getTermFromDateIncludingVacations(date: BaseDateTime) = {
+	def getTermFromDateIncludingVacations(date: BaseDateTime): Term = {
 		val term = termFactory.getTermFromDate(date)
 		if (date.isBefore(term.getStartDate)) Vacation(termFactory.getPreviousTerm(term), term)
 		else term
@@ -134,11 +137,11 @@ class TermServiceImpl extends TermService {
 	*/
 case class Vacation(before: Term, after: Term) extends Term {
 	// Starts the day after the previous term and ends the day before the new term
-	def getStartDate = before.getEndDate.plusDays(1)
-	def getEndDate = after.getStartDate.minusDays(1)
+	def getStartDate: DateTime = before.getEndDate.plusDays(1)
+	def getEndDate: DateTime = after.getStartDate.minusDays(1)
 
 	def getTermType = null
-	def getTermTypeAsString = before.getTermType match {
+	def getTermTypeAsString: String = before.getTermType match {
 		case Term.TermType.autumn => "Christmas vacation"
 		case Term.TermType.spring => "Easter vacation"
 		case Term.TermType.summer => "Summer vacation"
@@ -146,7 +149,7 @@ case class Vacation(before: Term, after: Term) extends Term {
 
 	def getWeekNumber(date: BaseDateTime) = throw new IllegalStateException("Can't get week numbers from a vacation")
 	def getCumulativeWeekNumber(date: BaseDateTime) = throw new IllegalStateException("Can't get week numbers from a vacation")
-	def getAcademicWeekNumber(date: BaseDateTime) = after.getAcademicWeekNumber(date)
+	def getAcademicWeekNumber(date: BaseDateTime): Int = after.getAcademicWeekNumber(date)
 }
 
 trait TermServiceComponent {

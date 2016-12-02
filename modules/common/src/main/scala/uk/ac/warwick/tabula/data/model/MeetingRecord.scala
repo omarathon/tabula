@@ -14,6 +14,7 @@ import uk.ac.warwick.tabula.services.SecurityService
 import uk.ac.warwick.tabula.timetables.{EventOccurrence, TimetableEvent}
 
 import scala.collection.JavaConverters._
+import scala.collection.mutable
 
 object MeetingRecord {
 	val DefaultMeetingTimeOfDay = 12 // Should be used for legacy meetings (where isRealTime is false)
@@ -33,7 +34,7 @@ class MeetingRecord extends AbstractMeetingRecord {
 	}
 
 	@transient
-	var securityService = Wire[SecurityService]
+	var securityService: SecurityService = Wire[SecurityService]
 
 	@Column(name="real_time")
 	var isRealTime: Boolean = true
@@ -56,13 +57,13 @@ class MeetingRecord extends AbstractMeetingRecord {
 	def pendingActionBy(user: CurrentUser): Boolean = pendingApprovalBy(user) || pendingRevisionBy(user)
 
 	// if there are no approvals with a state of approved return true - otherwise, all approvals need to be true
-	def isApproved = !approvals.asScala.exists(approval => !(approval.state == Approved))
+	def isApproved: Boolean = !approvals.asScala.exists(approval => !(approval.state == Approved))
 
 	// for attendance purposes the meeting is approved if it was created by the agent, or is otherwise approved
-	def isAttendanceApproved = (creator != null && relationship != null && creator.universityId == relationship.agent) || isApproved
+	def isAttendanceApproved: Boolean = (creator != null && relationship != null && creator.universityId == relationship.agent) || isApproved
 
-	def isPendingApproval = approvals.asScala.exists(approval => approval.state == Pending)
-	def pendingApprovals = approvals.asScala.filter(_.state == Pending)
+	def isPendingApproval: Boolean = approvals.asScala.exists(approval => approval.state == Pending)
+	def pendingApprovals: mutable.Buffer[MeetingRecordApproval] = approvals.asScala.filter(_.state == Pending)
 	def pendingApprovalBy(user: CurrentUser): Boolean =
 		approvals.asScala.exists(approval =>
 			approval.state == Pending &&
@@ -73,11 +74,11 @@ class MeetingRecord extends AbstractMeetingRecord {
 
 	def pendingApprovers:List[Member] = pendingApprovals.map(_.approver).toList
 
-	def isRejected =  approvals.asScala.exists(approval => approval.state == Rejected)
-	def rejectedApprovals = approvals.asScala.filter(_.state == Rejected)
+	def isRejected: Boolean =  approvals.asScala.exists(approval => approval.state == Rejected)
+	def rejectedApprovals: mutable.Buffer[MeetingRecordApproval] = approvals.asScala.filter(_.state == Rejected)
 	def rejectedBy(member: Member): Boolean = rejectedApprovals.exists(_.approver == member)
 	// people who have had a draft version rejected
-	def pendingRevisionBy(user: CurrentUser) = isRejected && user.universityId == creator.universityId
+	def pendingRevisionBy(user: CurrentUser): Boolean = isRejected && user.universityId == creator.universityId
 
 	import uk.ac.warwick.tabula.helpers.DateTimeOrdering._
 	def approvedDate: Option[DateTime] = approvals.asScala.filter(_.state == Approved).map(_.lastUpdatedDate).sorted.headOption

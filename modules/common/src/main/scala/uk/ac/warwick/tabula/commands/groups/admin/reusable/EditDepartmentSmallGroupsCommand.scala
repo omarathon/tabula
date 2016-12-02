@@ -15,6 +15,8 @@ import uk.ac.warwick.tabula.system.permissions.{PermissionsChecking, Permissions
 import scala.collection.JavaConverters._
 import uk.ac.warwick.tabula.helpers.StringUtils._
 
+import scala.collection.mutable
+
 object EditDepartmentSmallGroupsCommand {
 	def apply(department: Department, set: DepartmentSmallGroupSet) =
 		new EditDepartmentSmallGroupsCommandInternal(department, set)
@@ -38,7 +40,7 @@ trait EditDepartmentSmallGroupsCommandState {
 class EditDepartmentSmallGroupsCommandInternal(val department: Department, val set: DepartmentSmallGroupSet) extends CommandInternal[Seq[DepartmentSmallGroup]] with EditDepartmentSmallGroupsCommandState {
 	self: SmallGroupServiceComponent =>
 
-	override def applyInternal() = {
+	override def applyInternal(): mutable.Buffer[DepartmentSmallGroup] = {
 		// Edit existing groups and add new groups
 		groupNames.asScala.zipWithIndex.foreach { case (groupName, groupNameIndex) =>
 			groupIds.asScala.zipWithIndex.find { case (_, groupIdIndex) => groupIdIndex == groupNameIndex} match {

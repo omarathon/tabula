@@ -1,14 +1,15 @@
 package uk.ac.warwick.tabula.web.controllers.attendance.manage
 
 import org.springframework.stereotype.Controller
-import org.springframework.web.bind.annotation.{RequestParam, ModelAttribute, PathVariable, RequestMapping}
+import org.springframework.web.bind.annotation.{ModelAttribute, PathVariable, RequestMapping, RequestParam}
 import uk.ac.warwick.tabula.data.model.Department
 import uk.ac.warwick.tabula.web.controllers.attendance.AttendanceController
 import uk.ac.warwick.tabula.commands.Appliable
 import uk.ac.warwick.tabula.data.model.attendance.AttendanceMonitoringScheme
-import uk.ac.warwick.tabula.commands.attendance.manage.{AddPointsToSchemesCommandResult, AddPointsToSchemesCommand}
+import uk.ac.warwick.tabula.commands.attendance.manage.{AddPointsToSchemesCommand, AddPointsToSchemesCommandResult}
 import uk.ac.warwick.tabula.AcademicYear
 import uk.ac.warwick.tabula.JavaImports._
+import uk.ac.warwick.tabula.web.Mav
 
 @Controller
 @RequestMapping(Array("/attendance/manage/{department}/{academicYear}/addpoints"))
@@ -24,7 +25,7 @@ class AddPointsToSchemesController extends AttendanceController {
 		@PathVariable department: Department,
 		@PathVariable academicYear: AcademicYear,
 		@RequestParam(required = false) points: JInteger
-	) = {
+	): Mav = {
 		val result = cmd.apply()
 		Mav("attendance/manage/addpoints",
 			"schemeMaps" -> result,

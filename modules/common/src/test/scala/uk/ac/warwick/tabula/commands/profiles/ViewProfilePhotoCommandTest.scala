@@ -20,7 +20,7 @@ class ViewProfilePhotoCommandTest extends TestBase with Mockito {
 		member.universityId = "1170836"
 		val command = new ViewProfilePhotoCommand(member) with MemberPhotoUrlGeneratorComponent {
 			val photoUrlGenerator = new PhotosWarwickMemberPhotoUrlGenerator with PhotosWarwickConfigComponent {
-				def photosWarwickConfiguration = testConfig
+				def photosWarwickConfiguration: PhotosWarwickConfig = testConfig
 			}
 		}
 		val mav = command.applyInternal()

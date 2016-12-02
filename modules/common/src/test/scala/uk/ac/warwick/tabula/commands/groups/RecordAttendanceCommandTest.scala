@@ -15,19 +15,19 @@ import scala.collection.JavaConverters._
 
 class RecordAttendanceCommandTest extends TestBase with Mockito {
 
-	val smallGroupEventOccurrence = mock[SmallGroupEventOccurrence]
-	val mockCurrentUser = mock[CurrentUser]
+	val smallGroupEventOccurrence: SmallGroupEventOccurrence = mock[SmallGroupEventOccurrence]
+	val mockCurrentUser: CurrentUser = mock[CurrentUser]
 
 	// Implements the dependencies declared by the command
 	trait CommandTestSupport extends SmallGroupServiceComponent with UserLookupComponent
 	with ProfileServiceComponent with WeekToDateConverterComponent
 	with FeaturesComponent with AttendanceMonitoringEventAttendanceServiceComponent {
-		val smallGroupService = smartMock[SmallGroupService]
-		val userLookup = smartMock[UserLookupService]
-		val profileService = smartMock[ProfileService]
-		val weekToDateConverter = smartMock[WeekToDateConverter]
-		val attendanceMonitoringEventAttendanceService = smartMock[AttendanceMonitoringEventAttendanceService]
-		val features = emptyFeatures
+		val smallGroupService: SmallGroupService = smartMock[SmallGroupService]
+		val userLookup: UserLookupService = smartMock[UserLookupService]
+		val profileService: ProfileService = smartMock[ProfileService]
+		val weekToDateConverter: WeekToDateConverter = smartMock[WeekToDateConverter]
+		val attendanceMonitoringEventAttendanceService: AttendanceMonitoringEventAttendanceService = smartMock[AttendanceMonitoringEventAttendanceService]
+		val features: FeaturesImpl = emptyFeatures
 
 		def apply(): SmallGroupEventOccurrence = {
 			smallGroupEventOccurrence
@@ -75,7 +75,7 @@ class RecordAttendanceCommandTest extends TestBase with Mockito {
 		val event = new SmallGroupEvent()
 		val group = new SmallGroup()
 		event.group = group
-		val students = UserGroup.ofUsercodes
+		val students: UserGroup = UserGroup.ofUsercodes
 		group.students = students
 
 		val set = new SmallGroupSet()

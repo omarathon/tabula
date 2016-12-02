@@ -65,7 +65,7 @@ class ViewPlagiarismReportCommandInternal(val module: Module, val assignment: As
 		viewer = user.apparentUser
 	}
 
-	override def applyInternal() = {
+	override def applyInternal(): Either[Uri, TurnitinReportError with Product with Serializable] = {
 
 		if (attachment.originalityReport.turnitinId.hasText) {
 			//LTI

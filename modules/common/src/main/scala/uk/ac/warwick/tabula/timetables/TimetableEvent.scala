@@ -45,19 +45,19 @@ object TimetableEvent {
 	case class Module(override val shortName: Option[String], override val fullName: Option[String]) extends Parent
 	case class Relationship(override val shortName: Option[String], override val fullName: Option[String]) extends Parent
 	object Parent {
-		def apply() = {
+		def apply(): Empty = {
 			Empty(None, None)
 		}
-		def apply(module: Option[model.Module]) = {
+		def apply(module: Option[model.Module]): Module = {
 			Module(module.map(_.code.toUpperCase), module.map(_.name))
 		}
-		def apply(relationship: StudentRelationshipType) = {
+		def apply(relationship: StudentRelationshipType): Relationship = {
 			Relationship(Option(relationship.description), Option(relationship.description))
 		}
 	}
 
-	def apply(sge: SmallGroupEvent) = eventForSmallGroupEventInWeeks(sge, sge.weekRanges)
-	def apply(sgo: SmallGroupEventOccurrence) = eventForSmallGroupEventInWeeks(sgo.event, Seq(WeekRange(sgo.week)))
+	def apply(sge: SmallGroupEvent): TimetableEvent = eventForSmallGroupEventInWeeks(sge, sge.weekRanges)
+	def apply(sgo: SmallGroupEventOccurrence): TimetableEvent = eventForSmallGroupEventInWeeks(sgo.event, Seq(WeekRange(sgo.week)))
 
 	private def eventForSmallGroupEventInWeeks(sge: SmallGroupEvent, weekRanges: Seq[WeekRange]): TimetableEvent =
 		TimetableEvent(
@@ -93,7 +93,7 @@ object TimetableEvent {
 
 	// Companion object is one of the places searched for an implicit Ordering, so
 	// this will be the default when ordering a list of timetable events.
-	implicit val defaultOrdering = Ordering.by { event: TimetableEvent => (Option(event.weekRanges).filter(_.nonEmpty).map { _.minBy { _.minWeek }.minWeek }, Option(event.day).map { _.jodaDayOfWeek }, Option(event.startTime).map { _.getMillisOfDay }, Option(event.endTime).map { _.getMillisOfDay }, event.name, event.title, event.uid) }
+	implicit val defaultOrdering: Ordering[TimetableEvent] = Ordering.by { event: TimetableEvent => (Option(event.weekRanges).filter(_.nonEmpty).map { _.minBy { _.minWeek }.minWeek }, Option(event.day).map { _.jodaDayOfWeek }, Option(event.startTime).map { _.getMillisOfDay }, Option(event.endTime).map { _.getMillisOfDay }, event.name, event.title, event.uid) }
 
 }
 

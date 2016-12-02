@@ -8,6 +8,7 @@ import uk.ac.warwick.tabula.data.model.Department
 import uk.ac.warwick.tabula.permissions.{Permission, Permissions}
 import uk.ac.warwick.tabula.reports.web.Routes
 import uk.ac.warwick.tabula.services.{AutowiringMaintenanceModeServiceComponent, AutowiringModuleAndDepartmentServiceComponent, AutowiringUserSettingsServiceComponent}
+import uk.ac.warwick.tabula.web.Mav
 import uk.ac.warwick.tabula.web.controllers.{AcademicYearScopedController, DepartmentScopedController}
 
 /**
@@ -32,7 +33,7 @@ class ReportsHomeController extends ReportsController with CurrentSITSAcademicYe
 	def home(
 		@ModelAttribute("activeDepartment") activeDepartment: Option[Department],
 		@ModelAttribute("activeAcademicYear") activeAcademicYear: Option[AcademicYear]
-	) = {
+	): Mav = {
 		if (activeDepartment.isDefined && activeAcademicYear.isDefined) {
 			Redirect(Routes.departmentAcademicYear(activeDepartment.get, activeAcademicYear.get))
 		} else if (activeDepartment.isDefined) {

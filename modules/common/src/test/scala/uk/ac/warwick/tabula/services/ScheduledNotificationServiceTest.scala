@@ -16,13 +16,13 @@ import org.hibernate.`type`.Type
 class ScheduledNotificationServiceTest extends TestBase with Mockito {
 
 	val service = new ScheduledNotificationServiceImpl
-	val dao =  mock[ScheduledNotificationDao]
-	val notificationService = mock[NotificationService]
+	val dao: ScheduledNotificationDao =  mock[ScheduledNotificationDao]
+	val notificationService: NotificationService = mock[NotificationService]
 	service.dao = dao
 	service.notificationService = notificationService
 
-	val sessionFactory = mock[SessionFactory]
-	val session = mock[Session]
+	val sessionFactory: SessionFactory = mock[SessionFactory]
+	val session: Session = mock[Session]
 
 	sessionFactory.getCurrentSession() returns (session)
 	sessionFactory.openSession() returns (session)

@@ -16,7 +16,7 @@ object AdminHomeExports {
 
 		// Pimp XML elements to allow a map mutator for attributes
 		implicit class PimpedElement(elem: Elem) {
-			def %(attrs:Map[String,Any]) = {
+			def %(attrs:Map[String,Any]): Elem = {
 				val seq = for( (n,v) <- attrs ) yield new UnprefixedAttribute(n, toXMLString(Some(v)), Null)
 				(elem /: seq) ( _ % _ )
 			}
@@ -32,7 +32,7 @@ object AdminHomeExports {
 			case None => ""
 		}
 
-		def toXML = {
+		def toXML: Elem = {
 			val assignments = info.modules.flatMap { _.assignments.asScala }.filter { _.isAlive }
 
 			<assignments>
@@ -40,7 +40,7 @@ object AdminHomeExports {
 			</assignments>
 		}
 
-		def assignmentElement(assignment: Assignment) = {
+		def assignmentElement(assignment: Assignment): Elem = {
 			<assignment>
 
 			</assignment> % assignmentData(assignment)
@@ -53,7 +53,7 @@ object AdminHomeExports {
 		def topLevelUrl: String
 
 		val isoFormatter = DateFormats.IsoDateTime
-		def isoFormat(i: ReadableInstant) = isoFormatter print i
+		def isoFormat(i: ReadableInstant): String = isoFormatter print i
 
 		protected def assignmentData(assignment: Assignment): Map[String, Any] = Map(
 			"module-code" -> assignment.module.code,

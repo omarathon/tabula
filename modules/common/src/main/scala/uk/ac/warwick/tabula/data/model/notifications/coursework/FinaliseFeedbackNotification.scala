@@ -3,6 +3,7 @@ package uk.ac.warwick.tabula.data.model.notifications.coursework
 import javax.persistence.{DiscriminatorValue, Entity}
 
 import uk.ac.warwick.spring.Wire
+import uk.ac.warwick.tabula.data.model.HasSettings.BooleanSetting
 import uk.ac.warwick.tabula.data.model._
 import uk.ac.warwick.tabula.services.{ModuleAndDepartmentService, UserLookupService}
 import uk.ac.warwick.tabula.web.Routes
@@ -19,11 +20,11 @@ class FinaliseFeedbackNotification
 		with ConfigurableNotification
 		with AllCompletedActionRequiredNotification {
 
-	def assignment = target.entity
+	def assignment: Assignment = target.entity
 
 	override def verb = "finalise"
 
-	override def title = {
+	override def title: String = {
 		val moduleCode = assignment.module.code.toUpperCase
 		val numberOfItems = entities.size
 		val submissionPlural = if (entities.size != 1) "submissions" else "submission"
@@ -39,11 +40,11 @@ class FinaliseFeedbackNotification
 			"finalisedFeedbacks" -> entities
 		))
 
-	override def url = Routes.coursework.admin.assignment.submissionsandfeedback(assignment)
+	override def url: String = Routes.coursework.admin.assignment.submissionsandfeedback(assignment)
 	override def urlTitle = s"publish ${if (entities.length > 1) "these items of" else "this item of"} feedback"
 
 	@transient
-	final lazy val configuringDepartment = assignment.module.adminDepartment
+	final lazy val configuringDepartment: Department = assignment.module.adminDepartment
 
 	override def allRecipients: Seq[User] = {
 		val finalisedFeedbacks = entities
@@ -84,7 +85,7 @@ class FinaliseFeedbackNotification
 class FinaliseFeedbackNotificationSettings(departmentSettings: NotificationSettings) {
 	@transient private val userLookup = Wire[UserLookupService]
 	// Configuration settings specific to this type of notification
-	def enabled = departmentSettings.enabled
+	def enabled: BooleanSetting = departmentSettings.enabled
 	def notifyModuleManagers = departmentSettings.BooleanSetting("notifyModuleManagers", default = false)
 	def notifyDepartmentAdministrators = departmentSettings.BooleanSetting("notifyDepartmentAdministrators", default = false)
 	def notifyNamedUsers = departmentSettings.BooleanSetting("notifyNamedUsers", default = false)

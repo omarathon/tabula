@@ -1,7 +1,7 @@
 package uk.ac.warwick.tabula.commands.groups
 
 import uk.ac.warwick.tabula.data.model.groups.{SmallGroup, SmallGroupSet}
-import uk.ac.warwick.tabula.data.model.{UnspecifiedTypeUserGroup, UserGroup}
+import uk.ac.warwick.tabula.data.model.{Department, StudentMember, UnspecifiedTypeUserGroup, UserGroup}
 import uk.ac.warwick.tabula.services.{AssessmentMembershipService, ProfileService, ProfileServiceComponent, UserGroupCacheManager}
 import uk.ac.warwick.tabula.{CurrentUser, Fixtures, MockUserLookup, Mockito, TestBase}
 import uk.ac.warwick.userlookup.User
@@ -9,10 +9,10 @@ import uk.ac.warwick.userlookup.User
 class ListSmallGroupSetUnallocatedStudentsCommandTest extends TestBase with Mockito {
 
 	trait CommandTestSupport extends ProfileServiceComponent {
-		var profileService = mock[ProfileService]
+		var profileService: ProfileService = mock[ProfileService]
 	}
 
-	def createUser(userId: String, firstName: String, lastName:String, warwickId:String) = {
+	def createUser(userId: String, firstName: String, lastName:String, warwickId:String): User = {
 		val user = new User(userId)
 		user.setFoundUser(true)
 		user.setFirstName(firstName)
@@ -22,10 +22,10 @@ class ListSmallGroupSetUnallocatedStudentsCommandTest extends TestBase with Mock
 	}
 
 	trait Fixture {
-		val department = Fixtures.department("in", "IT Services")
+		val department: Department = Fixtures.department("in", "IT Services")
 		val userLookup = new MockUserLookup
-		val membershipService = mock[AssessmentMembershipService]
-		val profileService = mock[ProfileService]
+		val membershipService: AssessmentMembershipService = mock[AssessmentMembershipService]
+		val profileService: ProfileService = mock[ProfileService]
 		val set = new SmallGroupSet
 
 		def wireUserLookup(userGroup: UnspecifiedTypeUserGroup): Unit = userGroup match {
@@ -33,14 +33,14 @@ class ListSmallGroupSetUnallocatedStudentsCommandTest extends TestBase with Mock
 			case ug: UserGroup => ug.userLookup = userLookup
 		}
 
-		val user1 = createUser("cuscav", "Mathew", "Mannion", "0672089")
-		val user2 = createUser("cusebr", "Nick", "Howes", "0672088")
-		val user3 = createUser("cusfal", "Matthew", "Jones", "9293883")
-		val user4 = createUser("curef", "John", "Dale", "0200202")
-		var user5 = createUser("cusmab", "Steven", "Carpenter", "8888888")
-		val user6 = createUser("caaaaa", "Terence", "Trent D'arby", "6666666")
-		val user7 = createUser("cutrue", "Fabrice", "Morvan", "7777777")
-		val user8 = createUser("cugirl", "Robert", "Pilatus", "1111111")
+		val user1: User = createUser("cuscav", "Mathew", "Mannion", "0672089")
+		val user2: User = createUser("cusebr", "Nick", "Howes", "0672088")
+		val user3: User = createUser("cusfal", "Matthew", "Jones", "9293883")
+		val user4: User = createUser("curef", "John", "Dale", "0200202")
+		var user5: User = createUser("cusmab", "Steven", "Carpenter", "8888888")
+		val user6: User = createUser("caaaaa", "Terence", "Trent D'arby", "6666666")
+		val user7: User = createUser("cutrue", "Fabrice", "Morvan", "7777777")
+		val user8: User = createUser("cugirl", "Robert", "Pilatus", "1111111")
 
 		userLookup.users += (
 			user1.getUserId -> user1,
@@ -67,14 +67,14 @@ class ListSmallGroupSetUnallocatedStudentsCommandTest extends TestBase with Mock
 				wireUserLookup(group.students)
 		}
 
-		val student1 = Fixtures.student(user1.getWarwickId, user1.getUserId, department)
-		val student2 = Fixtures.student(user2.getWarwickId, user2.getUserId, department)
-		val student3 = Fixtures.student(user3.getWarwickId, user3.getUserId, department)
-		val student4 = Fixtures.student(user4.getWarwickId, user4.getUserId, department)
-		val student5 = Fixtures.student(user5.getWarwickId, user5.getUserId, department)
-		val student6 = Fixtures.student(user6.getWarwickId, user6.getUserId, department)
-		val student7 = Fixtures.student(user7.getWarwickId, user7.getUserId, department)
-		val student8 = Fixtures.student(user8.getWarwickId, user8.getUserId, department)
+		val student1: StudentMember = Fixtures.student(user1.getWarwickId, user1.getUserId, department)
+		val student2: StudentMember = Fixtures.student(user2.getWarwickId, user2.getUserId, department)
+		val student3: StudentMember = Fixtures.student(user3.getWarwickId, user3.getUserId, department)
+		val student4: StudentMember = Fixtures.student(user4.getWarwickId, user4.getUserId, department)
+		val student5: StudentMember = Fixtures.student(user5.getWarwickId, user5.getUserId, department)
+		val student6: StudentMember = Fixtures.student(user6.getWarwickId, user6.getUserId, department)
+		val student7: StudentMember = Fixtures.student(user7.getWarwickId, user7.getUserId, department)
+		val student8: StudentMember = Fixtures.student(user8.getWarwickId, user8.getUserId, department)
 
 		val allUsers = Seq(user1, user2, user3, user4, user5, user6, user7, user8)
 		allUsers.foreach(set.members.add(_))
@@ -102,7 +102,7 @@ class ListSmallGroupSetUnallocatedStudentsCommandTest extends TestBase with Mock
 	def emptyGroups() = withUser("snow") { new Fixture() {
 		var command = new ListSmallGroupSetUnallocatedStudentsCommandInternal(set, currentUser) with CommandTestSupport
 		command.profileService = profileService
-		val info = command.applyInternal()
+		val info: UnallocatedStudentsInformation = command.applyInternal()
 
 		info.smallGroupSet should be (set)
 		info.membersNotInGroups.length should be (8)
@@ -116,7 +116,7 @@ class ListSmallGroupSetUnallocatedStudentsCommandTest extends TestBase with Mock
 
 		var command = new ListSmallGroupSetUnallocatedStudentsCommandInternal(set, currentUser) with CommandTestSupport
 		command.profileService = profileService
-		val info = command.applyInternal()
+		val info: UnallocatedStudentsInformation = command.applyInternal()
 
 		info.smallGroupSet should be (set)
 		info.membersNotInGroups.length should be (7)
@@ -130,7 +130,7 @@ class ListSmallGroupSetUnallocatedStudentsCommandTest extends TestBase with Mock
 		var command = new ListSmallGroupSetUnallocatedStudentsCommandInternal(set, fakeCurrentUser) with CommandTestSupport
 		command.profileService = profileService
 
-		val info = command.applyInternal()
+		val info: UnallocatedStudentsInformation = command.applyInternal()
 		info.userIsMember should be (true)
 	}
 	}
@@ -149,7 +149,7 @@ class ListSmallGroupSetUnallocatedStudentsCommandTest extends TestBase with Mock
 
 		var command = new ListSmallGroupSetUnallocatedStudentsCommandInternal(set, currentUser) with CommandTestSupport
 		command.profileService = profileService
-		val info = command.applyInternal()
+		val info: UnallocatedStudentsInformation = command.applyInternal()
 
 		info.membersNotInGroups.length should be (1)
 		info.membersNotInGroups.exists(_.universityId == user8.getWarwickId) should be (true)
@@ -171,7 +171,7 @@ class ListSmallGroupSetUnallocatedStudentsCommandTest extends TestBase with Mock
 
 		var command = new ListSmallGroupSetUnallocatedStudentsCommandInternal(set, currentUser) with CommandTestSupport
 		command.profileService = profileService
-		val info = command.applyInternal()
+		val info: UnallocatedStudentsInformation = command.applyInternal()
 
 		info.membersNotInGroups.length should be (2)
 		info.membersNotInGroups.exists(_.universityId == user8.getWarwickId) should be (true)

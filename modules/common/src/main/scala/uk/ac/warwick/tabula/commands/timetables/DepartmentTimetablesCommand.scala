@@ -93,7 +93,7 @@ class DepartmentTimetablesCommandInternal(
 		with ModuleAndDepartmentServiceComponent
 		with DepartmentTimetablesCommandState =>
 
-	override def applyInternal() = {
+	override def applyInternal(): (EventOccurrenceList, Seq[String]) = {
 		val errors: mutable.Buffer[String] = mutable.Buffer()
 
 		val routesModules = moduleAndDepartmentService.findModulesByRoutes(routes.asScala, academicYear)
@@ -208,8 +208,8 @@ trait DepartmentTimetablesCommandRequest extends PermissionsCheckingMethods {
 
 	var from: JLong = LocalDate.now.minusMonths(1).toDateTimeAtStartOfDay.getMillis
 	var to: JLong = LocalDate.now.plusMonths(1).toDateTimeAtStartOfDay.getMillis
-	def start = new DateTime(from * 1000).toLocalDate
-	def end = new DateTime(to * 1000).toLocalDate
+	def start: LocalDate = new DateTime(from * 1000).toLocalDate
+	def end: LocalDate = new DateTime(to * 1000).toLocalDate
 
 	private def modulesForDepartmentAndSubDepartments(department: Department): Seq[Module] =
 		(department.modules.asScala ++ department.children.asScala.flatMap { modulesForDepartmentAndSubDepartments }).sorted
@@ -234,7 +234,7 @@ trait DepartmentTimetablesCommandRequest extends PermissionsCheckingMethods {
 		user.profile.collect { case m: StaffMember => m }.toSeq
 	).distinct.sortBy { m => (m.lastName, m.firstName) }
 
-	lazy val personalTutorRelationshipType = relationshipService.getStudentRelationshipTypeByUrlPart("tutor").getOrElse(
+	lazy val personalTutorRelationshipType: StudentRelationshipType = relationshipService.getStudentRelationshipTypeByUrlPart("tutor").getOrElse(
 		throw new ItemNotFoundException("Could not find personal tutor relationship type")
 	)
 

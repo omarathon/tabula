@@ -31,9 +31,9 @@ sealed trait MemberOrUser{
 	def asUser: User
 	def asMember: Option[Member]
 
-	override def hashCode = universityId.hashCode
+	override def hashCode: Int = universityId.hashCode
 
-	override def equals(other: Any) = other match {
+	override def equals(other: Any): Boolean = other match {
 		case other: MemberOrUser => other.universityId == universityId
 		case _ => false
 	}
@@ -42,25 +42,25 @@ sealed trait MemberOrUser{
 private case class WrappedUser(user: User) extends MemberOrUser {
 	def isMember = false
 	def fullName = Some(user.getFullName)
-	def firstName = user.getFirstName
-	def lastName = user.getLastName
-	def universityId = user.getWarwickId
-	def usercode = user.getUserId
-	def shortDepartment = user.getShortDepartment
-	def email = user.getEmail
-	def asUser = user
+	def firstName: String = user.getFirstName
+	def lastName: String = user.getLastName
+	def universityId: String = user.getWarwickId
+	def usercode: String = user.getUserId
+	def shortDepartment: String = user.getShortDepartment
+	def email: String = user.getEmail
+	def asUser: User = user
 	def asMember = None
 }
 
 private case class WrappedMember(member: Member) extends MemberOrUser {
 	def isMember = true
-	def fullName = member.fullName
-	def firstName = member.firstName
-	def lastName = member.lastName
-	def universityId = member.universityId
-	def usercode = member.userId
-	def shortDepartment = member.homeDepartment.name
-	def email = member.email
-	def asUser = member.asSsoUser
+	def fullName: Option[String] = member.fullName
+	def firstName: String = member.firstName
+	def lastName: String = member.lastName
+	def universityId: String = member.universityId
+	def usercode: String = member.userId
+	def shortDepartment: String = member.homeDepartment.name
+	def email: String = member.email
+	def asUser: User = member.asSsoUser
 	def asMember = Some(member)
 }

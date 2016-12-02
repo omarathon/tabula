@@ -5,20 +5,22 @@ import javax.mail.Message.RecipientType
 import javax.mail.Session
 import javax.mail.internet.{MimeMessage, MimeMultipart}
 
+import freemarker.template.Template
 import org.springframework.validation.BindException
 import uk.ac.warwick.tabula.data.model.{Department, UserGroup}
 import uk.ac.warwick.tabula.services.{ModuleAndDepartmentService, ModuleAndDepartmentServiceComponent}
+import uk.ac.warwick.tabula.web.views.ScalaFreemarkerConfiguration
 import uk.ac.warwick.tabula.{MockUserLookup, Mockito, TestBase}
 import uk.ac.warwick.userlookup.User
 import uk.ac.warwick.util.mail.WarwickMailSender
 
 class AppCommentsCommandTest extends TestBase with Mockito {
 
-	val mockMailSender = smartMock[WarwickMailSender]
-	val mockModuleAndDepartmentService = smartMock[ModuleAndDepartmentService]
+	val mockMailSender: WarwickMailSender = smartMock[WarwickMailSender]
+	val mockModuleAndDepartmentService: ModuleAndDepartmentService = smartMock[ModuleAndDepartmentService]
 	val mockUserLookup = new MockUserLookup()
 
-	val session = Session.getDefaultInstance(new Properties)
+	val session: Session = Session.getDefaultInstance(new Properties)
 	val mimeMessage = new MimeMessage(session)
 	mockMailSender.createMimeMessage() returns mimeMessage
 
@@ -29,7 +31,7 @@ class AppCommentsCommandTest extends TestBase with Mockito {
 	mockUserLookup.registerUserObjects(owner)
 	val dept = new Department {
 		code = "its"
-		override lazy val owners = UserGroup.ofUsercodes
+		override lazy val owners: UserGroup = UserGroup.ofUsercodes
 		owners.userLookup = mockUserLookup
 	}
 	dept.owners.add(owner)
@@ -40,12 +42,12 @@ class AppCommentsCommandTest extends TestBase with Mockito {
 		val cmd = new AppCommentCommandInternal(currentUser) with AppCommentCommandRequest
 			with AppCommentCommandState with ModuleAndDepartmentServiceComponent {
 
-			override val mailSender = mockMailSender
-			override val freemarker = newFreemarkerConfiguration()
-			override val moduleAndDepartmentService = mockModuleAndDepartmentService
-			override val adminMailAddress = adminEmail
-			override val deptAdminTemplate = freemarker.getTemplate("/WEB-INF/freemarker/emails/appfeedback-deptadmin.ftl")
-			override val webTeamTemplate = freemarker.getTemplate("/WEB-INF/freemarker/emails/appfeedback.ftl")
+			override val mailSender: WarwickMailSender = mockMailSender
+			override val freemarker: ScalaFreemarkerConfiguration = newFreemarkerConfiguration()
+			override val moduleAndDepartmentService: ModuleAndDepartmentService = mockModuleAndDepartmentService
+			override val adminMailAddress: String = adminEmail
+			override val deptAdminTemplate: Template = freemarker.getTemplate("/WEB-INF/freemarker/emails/appfeedback-deptadmin.ftl")
+			override val webTeamTemplate: Template = freemarker.getTemplate("/WEB-INF/freemarker/emails/appfeedback.ftl")
 		}
 
 		val validator = new AppCommentValidation with AppCommentCommandRequest
@@ -127,7 +129,7 @@ class AppCommentsCommandTest extends TestBase with Mockito {
 			mimeMessage.getSubject should be ("Tabula feedback")
 
 			// Check properties have been set
-			val text = mimeMessage.getContent match {
+			val text: String = mimeMessage.getContent match {
 				case string: String => string
 				case multipart: MimeMultipart => multipart.getBodyPart(0).getContent.toString
 			}
@@ -153,7 +155,7 @@ class AppCommentsCommandTest extends TestBase with Mockito {
 		mimeMessage.getSubject should be ("Tabula feedback")
 
 		// Check properties have been set
-		val text = mimeMessage.getContent match {
+		val text: String = mimeMessage.getContent match {
 			case string: String => string
 			case multipart: MimeMultipart => multipart.getBodyPart(0).getContent.toString
 		}
@@ -185,7 +187,7 @@ class AppCommentsCommandTest extends TestBase with Mockito {
 			mimeMessage.getSubject should be ("Tabula feedback")
 
 			// Check properties have been set
-			val text = mimeMessage.getContent match {
+			val text: String = mimeMessage.getContent match {
 				case string: String => string
 				case multipart: MimeMultipart => multipart.getBodyPart(0).getContent.toString
 			}

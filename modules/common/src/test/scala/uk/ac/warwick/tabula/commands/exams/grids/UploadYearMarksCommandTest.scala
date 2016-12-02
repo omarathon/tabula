@@ -1,11 +1,12 @@
 package uk.ac.warwick.tabula.commands.exams.grids
 
-import java.io.{FileInputStream, InputStream}
+import java.io.{File, FileInputStream, InputStream}
 
 import org.springframework.validation.BindException
 import uk.ac.warwick.tabula.JavaImports.JArrayList
 import uk.ac.warwick.tabula.commands.UploadedFile
-import uk.ac.warwick.tabula.data.model.{Department, FileAttachment}
+import uk.ac.warwick.tabula.commands.exams.grids.UploadYearMarksCommand.ProcessedYearMark
+import uk.ac.warwick.tabula.data.model.{Department, FileAttachment, StudentMember}
 import uk.ac.warwick.tabula.data.{StudentCourseYearDetailsDao, StudentCourseYearDetailsDaoComponent}
 import uk.ac.warwick.tabula.services.MaintenanceModeService
 import uk.ac.warwick.tabula.services.coursework.docconversion.{YearMarkItem, YearMarksExtractor, YearMarksExtractorComponent}
@@ -14,21 +15,21 @@ import uk.ac.warwick.tabula.{AcademicYear, Fixtures, Mockito, TestBase}
 
 class UploadYearMarksCommandTest extends TestBase with Mockito {
 
-	val maintenanceMode = smartMock[MaintenanceModeService]
+	val maintenanceMode: MaintenanceModeService = smartMock[MaintenanceModeService]
 	maintenanceMode.enabled returns false
-	val objectStorageService = smartMock[ObjectStorageService]
+	val objectStorageService: ObjectStorageService = smartMock[ObjectStorageService]
 
 	trait BindFixture {
-		val thisDepartment = Fixtures.department("this")
-		val otherDepartment = Fixtures.department("other")
-		val validStudent = Fixtures.student("1234")
+		val thisDepartment: Department = Fixtures.department("this")
+		val otherDepartment: Department = Fixtures.department("other")
+		val validStudent: StudentMember = Fixtures.student("1234")
 		validStudent.mostSignificantCourse.latestStudentCourseYearDetails.enrolmentDepartment = thisDepartment
-		val invalidStudent = Fixtures.student("3456")
+		val invalidStudent: StudentMember = Fixtures.student("3456")
 		invalidStudent.mostSignificantCourse.latestStudentCourseYearDetails.enrolmentDepartment = otherDepartment
 
 		val command = new UploadYearMarksCommandBindListener with UploadYearMarksCommandRequest
 			with UploadYearMarksCommandState with YearMarksExtractorComponent	with StudentCourseYearDetailsDaoComponent {
-			val studentCourseYearDetailsDao = smartMock[StudentCourseYearDetailsDao]
+			val studentCourseYearDetailsDao: StudentCourseYearDetailsDao = smartMock[StudentCourseYearDetailsDao]
 			val department: Department = thisDepartment
 			val academicYear: AcademicYear = AcademicYear(2015)
 			val yearMarksExtractor: YearMarksExtractor = smartMock[YearMarksExtractor]
@@ -59,7 +60,7 @@ class UploadYearMarksCommandTest extends TestBase with Mockito {
 			attachment.name = "file.xlsx"
 			attachment.objectStorageService = objectStorageService
 			attachment.objectStorageService.keyExists(attachment.id) returns {true}
-			val backingFile = createTemporaryFile()
+			val backingFile: File = createTemporaryFile()
 			attachment.objectStorageService.fetch(attachment.id) answers { _ => Some(new FileInputStream(backingFile)) }
 			file.attached.add(attachment)
 			command.file = file
@@ -112,10 +113,10 @@ class UploadYearMarksCommandTest extends TestBase with Mockito {
 			command.onBind(errors)
 			command.processedYearMarks.size should be (8)
 			command.processedYearMarks.count(_.errors.nonEmpty) should be (6)
-			val validWithMissingAcademicYear = command.processedYearMarks.find(i => i.scjCode == validStudent.mostSignificantCourse.scjCode && i.academicYear == command.academicYear)
+			val validWithMissingAcademicYear: Option[ProcessedYearMark] = command.processedYearMarks.find(i => i.scjCode == validStudent.mostSignificantCourse.scjCode && i.academicYear == command.academicYear)
 			validWithMissingAcademicYear.isDefined should be {true}
 			validWithMissingAcademicYear.get.errors.isEmpty should be {true}
-			val valid = command.processedYearMarks.find(i => i.scjCode == validStudent.mostSignificantCourse.scjCode && i.academicYear == AcademicYear(2013))
+			val valid: Option[ProcessedYearMark] = command.processedYearMarks.find(i => i.scjCode == validStudent.mostSignificantCourse.scjCode && i.academicYear == AcademicYear(2013))
 			valid.isDefined should be {true}
 			valid.get.errors.isEmpty should be {true}
 			valid.get.mark.doubleValue should be (60.7) // Check rounding

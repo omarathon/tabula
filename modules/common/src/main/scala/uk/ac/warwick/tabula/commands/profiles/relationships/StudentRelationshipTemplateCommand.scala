@@ -34,7 +34,7 @@ class StudentRelationshipTemplateCommandInternal(val department: Department, val
 
 	self: RelationshipServiceComponent with StudentRelationshipTemplateCommandRequest =>
 
-	override def applyInternal() = {
+	override def applyInternal(): ExcelView = {
 		val dbUnallocated = relationshipService.getStudentAssociationDataWithoutRelationship(department, relationshipType)
 		val dbAllocated = relationshipService.getStudentAssociationEntityData(department, relationshipType, additionalEntities.asScala)
 
@@ -192,7 +192,7 @@ class StudentRelationshipTemplateCommandInternal(val department: Department, val
 		sheet
 	}
 
-	def allocateSheetName = trimmedSheetName(relationshipType.agentRole.capitalize + "s for " + department.name)
+	def allocateSheetName: String = trimmedSheetName(relationshipType.agentRole.capitalize + "s for " + department.name)
 
 	// Excel sheet names must be 31 chars or less so
 	private def trimmedSheetName(rawSheetName: String) = {

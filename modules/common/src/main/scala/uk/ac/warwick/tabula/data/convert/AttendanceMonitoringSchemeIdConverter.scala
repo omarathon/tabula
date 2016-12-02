@@ -9,7 +9,7 @@ class AttendanceMonitoringSchemeIdConverter extends TwoWayConverter[String, Atte
 
 	@Autowired var service: AttendanceMonitoringService = _
 
-	override def convertRight(id: String) = (Option(id) flatMap { service.getSchemeById }).orNull
-	override def convertLeft(scheme: AttendanceMonitoringScheme) = (Option(scheme) map {_.id}).orNull
+	override def convertRight(id: String): AttendanceMonitoringScheme = (Option(id) flatMap { service.getSchemeById }).orNull
+	override def convertLeft(scheme: AttendanceMonitoringScheme): String = (Option(scheme) map {_.id}).orNull
 
 }

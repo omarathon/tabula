@@ -41,7 +41,7 @@ object SchedulingConfiguration {
 	}
 
 	case class SimpleUnscheduledJob[J <: AutowiredJobBean : ClassTag](jobName: Option[String] = None) extends UnscheduledJob[J] {
-		lazy val name = jobName.getOrElse(classTag[J].runtimeClass.getSimpleName)
+		lazy val name: String = jobName.getOrElse(classTag[J].runtimeClass.getSimpleName)
 	}
 
 	abstract class ScheduledJob[J <: AutowiredJobBean : ClassTag, T <: Trigger] extends UnscheduledJob[J] {
@@ -53,7 +53,7 @@ object SchedulingConfiguration {
 		jobName: Option[String] = None,
 		misfireInstruction: Int = SimpleTrigger.MISFIRE_INSTRUCTION_RESCHEDULE_NEXT_WITH_EXISTING_COUNT
 	) extends ScheduledJob[J, SimpleTrigger] {
-		lazy val name = jobName.getOrElse(classTag[J].runtimeClass.getSimpleName)
+		lazy val name: String = jobName.getOrElse(classTag[J].runtimeClass.getSimpleName)
 
 		lazy val trigger: SimpleTrigger = {
 			val trigger = new PersistableSimpleTriggerFactoryBean
@@ -76,7 +76,7 @@ object SchedulingConfiguration {
 		jobName: Option[String] = None,
 		misfireInstruction: Int = CronTrigger.MISFIRE_INSTRUCTION_DO_NOTHING
 	) extends ScheduledJob[J, CronTrigger] {
-		lazy val name = jobName.getOrElse(classTag[J].runtimeClass.getSimpleName)
+		lazy val name: String = jobName.getOrElse(classTag[J].runtimeClass.getSimpleName)
 
 		lazy val trigger: CronTrigger = {
 			val trigger = new PersistableCronTriggerFactoryBean
@@ -236,7 +236,7 @@ class SchedulingMaintenanceModeObserver extends InitializingBean {
 
 trait AutowiredJobBean extends QuartzJobBean {
 
-	protected var features = Wire[Features]
-	protected var exceptionResolver = Wire[ExceptionResolver]
+	protected var features: Features = Wire[Features]
+	protected var exceptionResolver: ExceptionResolver = Wire[ExceptionResolver]
 
 }

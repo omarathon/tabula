@@ -60,7 +60,7 @@ abstract class SubmitToTurnitinCommandInternal(val module: Module, val assignmen
 		submitter = user.apparentUser
 	}
 
-	override def applyInternal() = {
+	override def applyInternal(): Assignment = {
 		if (!assignment.submitToTurnitin) {
 			// Not already started the submission process
 			assignment.lastSubmittedToTurnitin = new DateTime(0)
@@ -94,7 +94,7 @@ trait SubmitToTurnitinPermissions extends RequiresPermissionsChecking with Permi
 trait SubmitToTurnitinDescription extends Describable[Assignment] {
 	self: SubmitToTurnitinState =>
 
-	override def describe(d: Description) = d.assignment(assignment)
+	override def describe(d: Description): Unit = d.assignment(assignment)
 }
 
 trait SubmitToTurnitinValidation extends SelfValidating {

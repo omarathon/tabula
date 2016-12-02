@@ -6,8 +6,9 @@ import uk.ac.warwick.tabula.commands.coursework.assignments.{FirstMarkerReleaseN
 import uk.ac.warwick.tabula.data.model._
 import uk.ac.warwick.tabula.data.model.notifications.coursework.ReleaseToMarkerNotification
 import uk.ac.warwick.tabula.helpers.Logging
-import uk.ac.warwick.tabula.services.UserLookupComponent
+import uk.ac.warwick.tabula.services.{UserLookupComponent, UserLookupService}
 import uk.ac.warwick.tabula.{Mockito, TestBase}
+import uk.ac.warwick.userlookup.User
 
 import scala.collection.JavaConversions._
 
@@ -23,8 +24,8 @@ class ReleaseForMarkingNotifiesTest extends TestBase with Mockito {
 			secondMarkers = userGroup("marker3")
 		}
 
-		val m1UserGroup = userGroup("student1", "student2")
-		val m2UserGroup = userGroup("student3", "student4")
+		val m1UserGroup: UserGroup = userGroup("student1", "student2")
+		val m2UserGroup: UserGroup = userGroup("student3", "student4")
 
 		testAssignment.firstMarkers = Seq(
 			FirstMarkersMap(testAssignment, "marker1", m1UserGroup),
@@ -38,14 +39,14 @@ class ReleaseForMarkingNotifiesTest extends TestBase with Mockito {
 
 		val notifier = new FirstMarkerReleaseNotifier with ReleaseForMarkingState with ReleasedState with UserAware
 			with UserLookupComponent with Logging {
-			val user = marker1
-			val assignment = testAssignment
+			val user: User = marker1
+			val assignment: Assignment = testAssignment
 			val module = new Module
 			newReleasedFeedback = List(mf1, mf2, mf3, mf4)
-			var userLookup = mockUserLookup
+			var userLookup: UserLookupService = mockUserLookup
 		}
 
-		val notifications  = notifier.emit(List())
+		val notifications: Seq[Notification[MarkerFeedback, Assignment]] = notifier.emit(List())
 
 		notifications.foreach {
 			case n: ReleaseToMarkerNotification => n.userLookup = mockUserLookup

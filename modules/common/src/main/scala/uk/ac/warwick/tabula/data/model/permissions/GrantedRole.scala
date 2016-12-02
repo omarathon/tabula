@@ -3,15 +3,16 @@ package uk.ac.warwick.tabula.data.model.permissions
 import org.hibernate.annotations.Type
 import javax.persistence._
 import javax.persistence.CascadeType._
+
 import uk.ac.warwick.tabula.data.PostLoadBehaviour
 import uk.ac.warwick.tabula.data.model._
 import uk.ac.warwick.tabula.permissions.PermissionsTarget
-import uk.ac.warwick.tabula.roles.BuiltInRoleDefinition
-import uk.ac.warwick.tabula.roles.RoleBuilder
-import uk.ac.warwick.tabula.roles.RoleDefinition
+import uk.ac.warwick.tabula.roles.{BuiltInRoleDefinition, Role, RoleBuilder, RoleDefinition}
+
 import scala.reflect._
 import uk.ac.warwick.tabula.permissions.Permission
-import uk.ac.warwick.tabula.data.model.groups.{SmallGroupSet, SmallGroup, SmallGroupEvent}
+import uk.ac.warwick.tabula.data.model.groups.{SmallGroup, SmallGroupEvent, SmallGroupSet}
+import uk.ac.warwick.tabula.roles.RoleBuilder.GeneratedRole
 
 @Entity
 @Access(AccessType.FIELD)
@@ -34,8 +35,8 @@ abstract class GrantedRole[A <: PermissionsTarget] extends GeneratedId with Hibe
 	@Type(`type` = "uk.ac.warwick.tabula.data.model.permissions.BuiltInRoleDefinitionUserType")
 	var builtInRoleDefinition: BuiltInRoleDefinition = _
 
-	def roleDefinition = Option(customRoleDefinition) getOrElse builtInRoleDefinition
-	def roleDefinition_= (definition: RoleDefinition) = definition match {
+	def roleDefinition: RoleDefinition = Option(customRoleDefinition) getOrElse builtInRoleDefinition
+	def roleDefinition_= (definition: RoleDefinition): Unit = definition match {
 		case customDefinition: CustomRoleDefinition =>
 			customRoleDefinition = customDefinition
 			builtInRoleDefinition = null
@@ -60,8 +61,8 @@ abstract class GrantedRole[A <: PermissionsTarget] extends GeneratedId with Hibe
 	/**
 	 * Build a Role from this definition
 	 */
-	def build() = RoleBuilder.build(replaceableRoleDefinition, Option(scope), replaceableRoleDefinition.getName)
-	def mayGrant(target: Permission) = Option(replaceableRoleDefinition).fold(false) { _.mayGrant(target) }
+	def build(): GeneratedRole = RoleBuilder.build(replaceableRoleDefinition, Option(scope), replaceableRoleDefinition.getName)
+	def mayGrant(target: Permission): Boolean = Option(replaceableRoleDefinition).fold(false) { _.mayGrant(target) }
 
 	/**
 	 * Provides a route to Department from the scope, so that we can look for custom definitions.
@@ -71,14 +72,14 @@ abstract class GrantedRole[A <: PermissionsTarget] extends GeneratedId with Hibe
 	 */
 	def scopeDepartment: Option[Department]
 
-	def replaceableRoleDefinition = scopeDepartment.flatMap { _.replacedRoleDefinitionFor(roleDefinition) }.getOrElse(roleDefinition)
+	def replaceableRoleDefinition: RoleDefinition = scopeDepartment.flatMap { _.replacedRoleDefinitionFor(roleDefinition) }.getOrElse(roleDefinition)
 
 	// If hibernate sets users to null, make a new empty usergroup
 	override def postLoad() {
 		ensureUsers
 	}
 
-	def ensureUsers = {
+	def ensureUsers: UnspecifiedTypeUserGroup = {
 		if (users == null) _users = UserGroup.ofUsercodes
 		users
 	}
@@ -100,7 +101,7 @@ object GrantedRole {
 			case _ => throw new IllegalArgumentException("Cannot define new roles for " + scope)
 		}).asInstanceOf[GrantedRole[A]]
 
-	def canDefineFor[A <: PermissionsTarget](scope: A) = scope match {
+	def canDefineFor[A <: PermissionsTarget](scope: A): Boolean = scope match {
 		case _: Department => true
 		case _: Module => true
 		case _: Route => true
@@ -126,8 +127,8 @@ object GrantedRole {
 
   private def isSubtype[A,B](self: ClassTag[A], other: ClassTag[B]) = other.runtimeClass.isAssignableFrom(self.runtimeClass)
 
-  def className[A <: PermissionsTarget : ClassTag] = classObject[A].getSimpleName
-	def discriminator[A <: PermissionsTarget : ClassTag] =
+  def className[A <: PermissionsTarget : ClassTag]: String = classObject[A].getSimpleName
+	def discriminator[A <: PermissionsTarget : ClassTag]: Option[String] =
 		Option(classObject[A].getAnnotation(classOf[DiscriminatorValue])) map { _.value }
 }
 
@@ -142,26 +143,26 @@ object GrantedRole {
 
 	def scopeDepartment = None
 
-	override def build() = RoleBuilder.build(GlobalRoleDefinition(replaceableRoleDefinition), None, replaceableRoleDefinition.getName)
+	override def build(): GeneratedRole = RoleBuilder.build(GlobalRoleDefinition(replaceableRoleDefinition), None, replaceableRoleDefinition.getName)
 }
 
 /**
  * Wrap a normal RoleDefinition to allow us to make permissions that aren't allowed to be global, global.
  */
 case class GlobalRoleDefinition(delegate: RoleDefinition) extends RoleDefinition {
-	def permissions(scope: Option[PermissionsTarget]) =
+	def permissions(scope: Option[PermissionsTarget]): Map[Permission, Option[PermissionsTarget]] =
 		delegate.permissions(Some(null)).map {
 			case (perm, Some(null)) => (perm, None)
 			case (perm, s) => (perm, s)
 		}
 
-	def subRoles(scope: Option[PermissionsTarget]) = delegate.subRoles(scope)
-	def mayGrant(permission: Permission) = delegate.mayGrant(permission)
-	def allPermissions(scope: Option[PermissionsTarget]) = delegate.allPermissions(scope)
-	def canDelegateThisRolesPermissions = delegate.canDelegateThisRolesPermissions
-	def getName = delegate.getName
-	def description = delegate.description
-	def isAssignable = delegate.isAssignable
+	def subRoles(scope: Option[PermissionsTarget]): Set[Role] = delegate.subRoles(scope)
+	def mayGrant(permission: Permission): Boolean = delegate.mayGrant(permission)
+	def allPermissions(scope: Option[PermissionsTarget]): Map[Permission, Option[PermissionsTarget]] = delegate.allPermissions(scope)
+	def canDelegateThisRolesPermissions: _root_.uk.ac.warwick.tabula.JavaImports.JBoolean = delegate.canDelegateThisRolesPermissions
+	def getName: String = delegate.getName
+	def description: String = delegate.description
+	def isAssignable: Boolean = delegate.isAssignable
 }
 
 @Entity @DiscriminatorValue("Department") class DepartmentGrantedRole extends GrantedRole[Department] {
@@ -218,7 +219,7 @@ case class GlobalRoleDefinition(delegate: RoleDefinition) extends RoleDefinition
 	@ForeignKey(name="none")
 	var scope: Member = _
 
-	def scopeDepartment = scope match {
+	def scopeDepartment: Option[Department] = scope match {
 		case student: StudentMember =>
 			student.mostSignificantCourseDetails.flatMap {
 				_.latestStudentCourseYearDetails.enrolmentDepartment.subDepartmentsContaining(student).lastOption

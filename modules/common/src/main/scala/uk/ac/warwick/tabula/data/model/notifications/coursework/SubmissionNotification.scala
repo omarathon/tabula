@@ -1,6 +1,6 @@
 package uk.ac.warwick.tabula.data.model.notifications.coursework
 
-import uk.ac.warwick.tabula.data.model.{Assignment, FreemarkerModel, NotificationWithTarget, SingleItemNotification, Submission}
+import uk.ac.warwick.tabula.data.model._
 import uk.ac.warwick.tabula.services.AutowiringUserLookupComponent
 
 
@@ -9,10 +9,10 @@ abstract class SubmissionNotification
 	with SingleItemNotification[Submission]
 	with AutowiringUserLookupComponent {
 
-	def submission = item.entity
-	def assignment = target.entity
-	def module = assignment.module
-	def moduleCode = module.code.toUpperCase
+	def submission: Submission = item.entity
+	def assignment: Assignment = target.entity
+	def module: Module = assignment.module
+	def moduleCode: String = module.code.toUpperCase
 
 	def verb = "submit"
 	def templateLocation : String

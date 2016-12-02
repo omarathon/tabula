@@ -22,8 +22,8 @@ class ViewStudentRelationshipsCommand(val department: Department, val relationsh
 
 	PermissionCheck(Permissions.Profiles.StudentRelationship.Read(mandatory(relationshipType)), department)
 
-	var relationshipService = Wire.auto[RelationshipService]
-	var profileService = Wire.auto[ProfileService]
+	var relationshipService: RelationshipService = Wire.auto[RelationshipService]
+	var profileService: ProfileService = Wire.auto[ProfileService]
 
 
 	override def applyInternal(): RelationshipGraph = transactional(readOnly = true) {
@@ -54,8 +54,8 @@ class MissingStudentRelationshipCommand(val department: Department, val relation
 
 	PermissionCheck(Permissions.Profiles.StudentRelationship.Read(mandatory(relationshipType)), department)
 
-	var profileService = Wire.auto[ProfileService]
-	var relationshipService = Wire.auto[RelationshipService]
+	var profileService: ProfileService = Wire.auto[ProfileService]
+	var relationshipService: RelationshipService = Wire.auto[RelationshipService]
 
 	override def applyInternal(): (Int, Seq[Member]) = transactional(readOnly = true) {
 		val studentCount = profileService.countStudentsByDepartment(department)

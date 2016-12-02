@@ -14,7 +14,7 @@ class PermissionTagTest extends TestBase with Mockito {
 
 	val tag = new PermissionTag
 
-	val securityService = mock[SecurityService]
+	val securityService: SecurityService = mock[SecurityService]
 	tag.securityService = securityService
 
 	@Test def can = withUser("cuscav") {

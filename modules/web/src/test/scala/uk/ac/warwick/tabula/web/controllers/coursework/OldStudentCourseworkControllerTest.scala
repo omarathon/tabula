@@ -1,32 +1,32 @@
 package uk.ac.warwick.tabula.web.controllers.coursework
 
-import uk.ac.warwick.tabula.{Features, FeaturesComponent, Fixtures, TestBase, Mockito}
+import uk.ac.warwick.tabula._
 import org.joda.time.DateTime
 import uk.ac.warwick.tabula.commands.MemberOrUser
-import uk.ac.warwick.tabula.services.{AssessmentMembershipService, AssessmentService, AssessmentMembershipServiceComponent, AssessmentServiceComponent}
+import uk.ac.warwick.tabula.services.{AssessmentMembershipService, AssessmentMembershipServiceComponent, AssessmentService, AssessmentServiceComponent}
 import uk.ac.warwick.userlookup.User
-import uk.ac.warwick.tabula.data.model.{StudentCourseYearDetails, Assignment}
-import uk.ac.warwick.tabula.commands.coursework.assignments.{StudentCourseworkCommandHelper, StudentCourseworkGadgetCommandInternal, StudentCourseworkFullScreenCommandInternal}
+import uk.ac.warwick.tabula.data.model.{Assignment, StudentCourseYearDetails, StudentMember, Submission}
+import uk.ac.warwick.tabula.commands.coursework.assignments.{StudentCourseworkCommandHelper, StudentCourseworkFullScreenCommandInternal, StudentCourseworkGadgetCommandInternal}
 
 class OldStudentCourseworkControllerTest extends TestBase with Mockito {
 
-	val student = Fixtures.student()
-	val scyd = student.defaultYearDetails.get
+	val student: StudentMember = Fixtures.student()
+	val scyd: StudentCourseYearDetails = student.defaultYearDetails.get
 
 	private trait Fixture {
-		val assignment = newDeepAssignment("LA101")
+		val assignment: Assignment = newDeepAssignment("LA101")
 		assignment.closeDate = new DateTime()
 
-		val submission = Fixtures.submission("0000001")
+		val submission: Submission = Fixtures.submission("0000001")
 		submission.submittedDate = new DateTime()
 	}
 
 	trait CommandTestSupport extends AssessmentServiceComponent
 			with AssessmentMembershipServiceComponent
 			with FeaturesComponent {
-		override val assessmentService = smartMock[AssessmentService]
-		override val assessmentMembershipService = smartMock[AssessmentMembershipService]
-		override val features = {
+		override val assessmentService: AssessmentService = smartMock[AssessmentService]
+		override val assessmentMembershipService: AssessmentMembershipService = smartMock[AssessmentMembershipService]
+		override val features: FeaturesImpl = {
 			val f = Features.empty
 			f.assignmentMembership = true
 			f
@@ -51,12 +51,12 @@ class OldStudentCourseworkControllerTest extends TestBase with Mockito {
 			val lateFormativeAssignmentsInfo = Seq(assignmentInfo)
 
 			val gadgetCommand = new StudentCourseworkGadgetCommandInternal(scyd) with CommandTestSupport with StudentCourseworkCommandHelper
-			val historicalAssignmentsInfo1 = gadgetCommand.getHistoricAssignmentsInfo(Nil, assignmentsWithSubmissionInfo, lateFormativeAssignmentsInfo)
+			val historicalAssignmentsInfo1: Seq[this.gadgetCommand.AssignmentInfo] = gadgetCommand.getHistoricAssignmentsInfo(Nil, assignmentsWithSubmissionInfo, lateFormativeAssignmentsInfo)
 			historicalAssignmentsInfo1.size should be(1)
 
 			val memberOrUser = MemberOrUser(Fixtures.user())
 			val fullScreenCommand = new StudentCourseworkFullScreenCommandInternal(memberOrUser) with CommandTestSupport with StudentCourseworkCommandHelper
-			val historicalAssignmentsInfo2 = gadgetCommand.getHistoricAssignmentsInfo(Nil, assignmentsWithSubmissionInfo, lateFormativeAssignmentsInfo)
+			val historicalAssignmentsInfo2: Seq[this.gadgetCommand.AssignmentInfo] = gadgetCommand.getHistoricAssignmentsInfo(Nil, assignmentsWithSubmissionInfo, lateFormativeAssignmentsInfo)
 			historicalAssignmentsInfo2.size should be(1)
 		}
 	}

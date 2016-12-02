@@ -56,7 +56,7 @@ class CourseworkDisplaySettingsTest extends BrowserTest with CourseworkFixtures 
 
 		}}
 
-	def openDisplaySettings() = {
+	def openDisplaySettings(): Unit = {
 		eventually {
 			find(cssSelector(".dept-settings a.dropdown-toggle")) should be('defined)
 		}

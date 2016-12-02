@@ -25,11 +25,11 @@ class CourseAndRouteServiceTest extends PersistenceTestBase with Mockito {
 			val rolesByIdCache = new GrantedRoleByIdCache(permissionsDao)
 			val permissionsByIdCache = new GrantedPermissionsByIdCache(permissionsDao)
 			val cacheStrategy = CacheStrategy.InMemoryOnly
-			val userLookup = userLookupService
+			val userLookup: MockUserLookup = userLookupService
 		}
 
-		val securityService = mock[SecurityService]
-		val moduleAndDepartmentService = mock[ModuleAndDepartmentService]
+		val securityService: SecurityService = mock[SecurityService]
+		val moduleAndDepartmentService: ModuleAndDepartmentService = mock[ModuleAndDepartmentService]
 	}
 
 	@Before def wire {

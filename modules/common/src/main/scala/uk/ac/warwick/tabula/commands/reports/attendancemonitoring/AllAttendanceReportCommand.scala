@@ -37,7 +37,7 @@ class AllAttendanceReportCommandInternal(
 
 	self: ProfileServiceComponent with AttendanceMonitoringServiceComponent with ReportCommandRequest =>
 
-	override def applyInternal() = {
+	override def applyInternal(): AllAttendanceReportCommandResult = {
 		val allStudentData = benchmarkTask("allStudentData") {
 			profileService.findAllStudentDataByRestrictionsInAffiliatedDepartments(department, Seq(), academicYear)
 		}

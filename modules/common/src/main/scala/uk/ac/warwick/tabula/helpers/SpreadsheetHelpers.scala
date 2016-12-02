@@ -1,13 +1,14 @@
 package uk.ac.warwick.tabula.helpers
 
 import org.apache.poi.xssf.usermodel._
-import org.apache.poi.ss.usermodel.{Font, Cell}
+import org.apache.poi.ss.usermodel.{Cell, Font}
 import uk.ac.warwick.tabula.DateFormats
 import org.apache.poi.ss.util.WorkbookUtil
 import uk.ac.warwick.tabula.data.model.Department
 import org.joda.time.DateTime
 import org.joda.time.LocalDate
 import java.io.InputStream
+
 import org.apache.poi.openxml4j.opc.OPCPackage
 import org.apache.poi.xssf.eventusermodel.XSSFReader
 import org.apache.poi.xssf.eventusermodel.ReadOnlySharedStringsTable
@@ -16,8 +17,11 @@ import org.apache.poi.xssf.model.StylesTable
 import org.xml.sax.helpers.XMLReaderFactory
 import org.apache.poi.xssf.eventusermodel.XSSFSheetXMLHandler.SheetContentsHandler
 import org.apache.poi.hssf.util.CellReference
+
 import scala.collection.JavaConverters._
-import org.xml.sax.InputSource
+import org.xml.sax.{InputSource, XMLReader}
+
+import scala.collection.mutable
 
 trait SpreadsheetHelpers {
 	def parseXSSFExcelFile(file: InputStream, simpleHeaders: Boolean = true): Seq[Map[String, String]]
@@ -25,10 +29,10 @@ trait SpreadsheetHelpers {
 
 object SpreadsheetHelpers extends SpreadsheetHelpers {
 
-	val MaxDepartmentNameLength = 31 - 11
+	val MaxDepartmentNameLength: Int = 31 - 11
 
 	// trim the department name down to 20 characters. Excel sheet names must be 31 chars or less so
-	def trimmedDeptName(department: Department) = {
+	def trimmedDeptName(department: Department): String = {
 		if (department.name.length > MaxDepartmentNameLength)
 			department.name.substring(0, MaxDepartmentNameLength)
 		else
@@ -36,7 +40,7 @@ object SpreadsheetHelpers extends SpreadsheetHelpers {
 	}
 
 	// replace unsafe characters with spaces
-	def safeDeptName(department: Department)  = WorkbookUtil.createSafeSheetName(trimmedDeptName(department))
+	def safeDeptName(department: Department): String = WorkbookUtil.createSafeSheetName(trimmedDeptName(department))
 
 
 	def dateCellStyle(workbook: XSSFWorkbook) : XSSFCellStyle = {
@@ -61,7 +65,7 @@ object SpreadsheetHelpers extends SpreadsheetHelpers {
 
 	def getNextCellNum(row: XSSFRow):Short = if(row.getLastCellNum == -1) 0 else row.getLastCellNum
 
-	def addCell(row: XSSFRow, cellType: Int) = {
+	def addCell(row: XSSFRow, cellType: Int): XSSFCell = {
 		val cell = row.createCell(getNextCellNum(row))
 		cell.setCellType(cellType)
 		cell
@@ -141,42 +145,42 @@ class XslxParser(val styles: StylesTable, val sst: ReadOnlySharedStringsTable, v
 	extends SheetContentsHandler with Logging {
 
 	var isParsingHeader = true // flag to parse the first row for column headers
-	var columnMap = scala.collection.mutable.Map[Short, String]()
+	var columnMap: mutable.Map[Short, String] = scala.collection.mutable.Map[Short, String]()
 	val xssfHandler = new XSSFSheetXMLHandler(styles, sst, this, false)
 
 	var rows: scala.collection.mutable.MutableList[Map[String, String]] = scala.collection.mutable.MutableList()
-	var currentRow = scala.collection.mutable.Map[String, String]()
+	var currentRow: mutable.Map[String, String] = scala.collection.mutable.Map[String, String]()
 
-	def fetchSheetParser = {
+	def fetchSheetParser: XMLReader = {
 		val parser = XMLReaderFactory.createXMLReader("org.apache.xerces.parsers.SAXParser")
 		parser.setContentHandler(xssfHandler)
 		parser
 	}
 
 	// implement SheetContentsHandler
-	override def headerFooter(text: String, isHeader: Boolean, tagName: String) = {
+	override def headerFooter(text: String, isHeader: Boolean, tagName: String): Unit = {
 		// don't care about handling this, but required for interface
 	}
 
-	override def startRow(row: Int) = {
+	override def startRow(row: Int): Unit = {
 		logger.debug("startRow: " + row.toString)
 		isParsingHeader = row == 0
 		currentRow = scala.collection.mutable.Map[String, String]()
 	}
 
-	def formatHeader(rawValue: String) = {
+	def formatHeader(rawValue: String): String = {
 		if (simpleHeaders) rawValue.trim().toLowerCase.replaceAll("[^\\x00-\\x7F]", "")
 		else rawValue
 	}
 
-	override def cell(cellReference: String, formattedValue: String, comment: XSSFComment) = {
+	override def cell(cellReference: String, formattedValue: String, comment: XSSFComment): Unit = {
 		val col = new CellReference(cellReference).getCol
 
 		if (isParsingHeader) columnMap(col) = formatHeader(formattedValue)
 		else if (columnMap.contains(col)) currentRow(columnMap(col)) = formattedValue
 	}
 
-	override def endRow(row: Int) = {
+	override def endRow(row: Int): Unit = {
 		if (!isParsingHeader && currentRow.nonEmpty)
 			rows += currentRow.toMap
 	}

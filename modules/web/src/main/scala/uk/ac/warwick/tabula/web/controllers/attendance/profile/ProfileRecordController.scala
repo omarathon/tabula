@@ -15,6 +15,7 @@ import uk.ac.warwick.tabula.data.model.StudentMember
 import uk.ac.warwick.tabula.data.model.attendance.{AttendanceMonitoringCheckpoint, AttendanceMonitoringNote, AttendanceMonitoringPoint}
 import uk.ac.warwick.tabula.services.AutowiringTermServiceComponent
 import uk.ac.warwick.tabula.services.attendancemonitoring.AttendanceMonitoringService
+import uk.ac.warwick.tabula.web.Mav
 
 @Controller
 @RequestMapping(Array("/attendance/profile/{student}/{academicYear}/record"))
@@ -28,7 +29,7 @@ class ProfileRecordController extends AttendanceController
 	var points: Seq[AttendanceMonitoringPoint] = _
 
 	@InitBinder // do on each request
-	def populatePoints(@PathVariable academicYear: AcademicYear, @PathVariable student: StudentMember) = {
+	def populatePoints(@PathVariable academicYear: AcademicYear, @PathVariable student: StudentMember): Unit = {
 			points = attendanceMonitoringService.listStudentsPoints(mandatory(student), None, mandatory(academicYear))
 	}
 
@@ -68,7 +69,7 @@ class ProfileRecordController extends AttendanceController
 		@ModelAttribute("command") cmd: Appliable[Seq[AttendanceMonitoringCheckpoint]] with PopulateOnForm,
 		@PathVariable academicYear: AcademicYear,
 		@PathVariable student: StudentMember
-	) = {
+	): Mav = {
 		cmd.populate()
 		render(academicYear, student)
 	}
@@ -89,7 +90,7 @@ class ProfileRecordController extends AttendanceController
 		errors: Errors,
 		@PathVariable academicYear: AcademicYear,
 		@PathVariable student: StudentMember
-	) = {
+	): Mav = {
 		if (errors.hasErrors) {
 			render(academicYear, student)
 		} else {

@@ -14,9 +14,9 @@ class ReleaseForMarkingTest extends TestBase with Mockito {
 
 	trait TestSupport extends AssessmentServiceComponent with StateServiceComponent with FeedbackServiceComponent {
 
-		val assessmentService = smartMock[AssessmentService]
-		val stateService = smartMock[StateService]
-		val feedbackService = smartMock[FeedbackService]
+		val assessmentService: AssessmentService = smartMock[AssessmentService]
+		val stateService: StateService = smartMock[StateService]
+		val feedbackService: FeedbackService = smartMock[FeedbackService]
 		def apply(): List[Feedback] = List()
 	}
 

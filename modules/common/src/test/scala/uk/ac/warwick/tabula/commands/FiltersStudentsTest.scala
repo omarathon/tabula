@@ -9,34 +9,34 @@ import uk.ac.warwick.tabula.JavaImports.JArrayList
 class FiltersStudentsTest extends TestBase with Mockito {
 
 	trait Fixture {
-		val thisProfileService = mock[ProfileService]
+		val thisProfileService: ProfileService = mock[ProfileService]
 
-		val dept = Fixtures.department("arc", "School of Architecture")
-		val subDept = Fixtures.department("arc-ug", "Architecture Undergraduates")
+		val dept: Department = Fixtures.department("arc", "School of Architecture")
+		val subDept: Department = Fixtures.department("arc-ug", "Architecture Undergraduates")
 		subDept.parent = dept
 		dept.children.add(subDept)
 
-		val mod1 = Fixtures.module("ac101", "Introduction to Architecture")
-		val mod2 = Fixtures.module("ac102", "Architecture Basics")
-		val mod3 = Fixtures.module("ac901", "Postgraduate Thesis")
+		val mod1: Module = Fixtures.module("ac101", "Introduction to Architecture")
+		val mod2: Module = Fixtures.module("ac102", "Architecture Basics")
+		val mod3: Module = Fixtures.module("ac901", "Postgraduate Thesis")
 
 		dept.modules.add(mod3)
 		subDept.modules.add(mod2)
 		subDept.modules.add(mod1)
 
-		val route1 = Fixtures.route("a501", "Architecture BA")
-		val route2 = Fixtures.route("a502", "Architecture BA with Intercalated year")
-		val route3 = Fixtures.route("a9p1", "Architecture MA")
+		val route1: Route = Fixtures.route("a501", "Architecture BA")
+		val route2: Route = Fixtures.route("a502", "Architecture BA with Intercalated year")
+		val route3: Route = Fixtures.route("a9p1", "Architecture MA")
 
 		dept.routes.add(route3)
 		subDept.routes.add(route2)
 		subDept.routes.add(route1)
 
-		val sprF = Fixtures.sitsStatus("F", "Fully Enrolled", "Fully Enrolled for this Session")
-		val sprP = Fixtures.sitsStatus("P", "Permanently Withdrawn", "Permanently Withdrawn")
+		val sprF: SitsStatus = Fixtures.sitsStatus("F", "Fully Enrolled", "Fully Enrolled for this Session")
+		val sprP: SitsStatus = Fixtures.sitsStatus("P", "Permanently Withdrawn", "Permanently Withdrawn")
 
-		val moaFT = Fixtures.modeOfAttendance("F", "FT", "Full time")
-		val moaPT = Fixtures.modeOfAttendance("P", "PT", "Part time")
+		val moaFT: ModeOfAttendance = Fixtures.modeOfAttendance("F", "FT", "Full time")
+		val moaPT: ModeOfAttendance = Fixtures.modeOfAttendance("P", "PT", "Part time")
 	}
 
 	@Test
@@ -83,7 +83,7 @@ class FiltersStudentsTest extends TestBase with Mockito {
 			val routes: JavaImports.JList[Route] = JArrayList(route1, route2)
 		}
 
-		val serialized = filter.serializeFilter
+		val serialized: String = filter.serializeFilter
 		serialized.contains("courseTypes=" + CourseType.UG.value) should be (true)
 		serialized.contains("courseTypes=" + CourseType.PGT.value) should be (false)
 		serialized.contains("modesOfAttendance=" + moaFT.code) should be (true)
@@ -117,7 +117,7 @@ class FiltersStudentsTest extends TestBase with Mockito {
 			val routes: JavaImports.JList[Route] = JArrayList()
 		}
 
-		val serialized = filter.serializeFilter
+		val serialized: String = filter.serializeFilter
 		serialized should not be null
 		serialized should be ("")
 	}}

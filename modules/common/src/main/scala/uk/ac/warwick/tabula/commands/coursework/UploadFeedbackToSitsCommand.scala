@@ -27,9 +27,9 @@ class UploadFeedbackToSitsCommandInternal(val module: Module, val assessment: As
 
 	self: FeedbackServiceComponent with FeedbackForSitsServiceComponent with UploadFeedbackToSitsCommandState =>
 
-	lazy val gradeValidation = feedbackForSitsService.validateAndPopulateFeedback(feedbacks, gradeGenerator)
+	lazy val gradeValidation: ValidateAndPopulateFeedbackResult = feedbackForSitsService.validateAndPopulateFeedback(feedbacks, gradeGenerator)
 
-	override def applyInternal() = {
+	override def applyInternal(): Seq[Feedback] = {
 		feedbacks.flatMap(f => feedbackForSitsService.queueFeedback(f, currentUser, gradeGenerator)).map(_.feedback)
 	}
 
@@ -67,7 +67,7 @@ trait UploadFeedbackToSitsCommandState {
 
 	def module: Module
 	def assessment: Assessment
-	lazy val feedbacks = assessment.fullFeedback.filter(f => students.isEmpty || students.asScala.contains(f.universityId))
+	lazy val feedbacks: Seq[Feedback] = assessment.fullFeedback.filter(f => students.isEmpty || students.asScala.contains(f.universityId))
 }
 
 trait UploadFeedbackToSitsCommandRequest {

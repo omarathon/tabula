@@ -7,7 +7,7 @@ import uk.ac.warwick.tabula.{Mockito, TestBase}
 class LegacyFilesystemObjectStorageServiceTest extends TestBase with Mockito {
 
 	private trait Fixture {
-		val attachmentDir = createTemporaryDirectory()
+		val attachmentDir: File = createTemporaryDirectory()
 
 		val service = new LegacyFilesystemObjectStorageService(attachmentDir)
 	}

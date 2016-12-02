@@ -54,7 +54,7 @@ class ReturnToMarkerNotification
 	@transient val comment = StringSetting("comment", "")
 
 	def verb = "returned"
-	def assignment = target.entity
+	def assignment: Assignment = target.entity
 
 	def title = s"${assignment.module.code.toUpperCase}: Submissions for ${assignment.name} have been returned to you"
 

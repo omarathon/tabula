@@ -22,7 +22,7 @@ abstract class ModifyExtensionCommand(val mod: Module, val ass: Assignment, uniI
 	submitter = sub
 	action = act
 
-	def copyTo(extension: Extension) = {
+	def copyTo(extension: Extension): Unit = {
 		extension.userId = userLookup.getUserByWarwickUniId(universityId).getUserId
 		extension.assignment = assignment
 		extension.expiryDate = expiryDate
@@ -37,7 +37,7 @@ abstract class ModifyExtensionCommand(val mod: Module, val ass: Assignment, uniI
 		}
 	}
 
-	def copyFrom(extension: Extension) = {
+	def copyFrom(extension: Extension): Unit = {
 		expiryDate = extension.expiryDate.orNull
 		state = extension.state
 		reviewerComments = extension.reviewerComments
@@ -104,12 +104,12 @@ trait ModifyExtensionCommandDescription extends Describable[Extension] {
  * This could be a separate service, but it's so noddy it's not (yet) worth it
  */
 trait HibernateExtensionPersistenceComponent extends ExtensionPersistenceComponent with Daoisms {
-	def delete(attachment: FileAttachment) = {
+	def delete(attachment: FileAttachment): Unit = {
 		attachment.extension.removeAttachment(attachment)
 		session.delete(attachment)
 	}
-	def delete(extension: Extension) = session.delete(extension)
-	def save(extension: Extension) = session.saveOrUpdate(extension)
+	def delete(extension: Extension): Unit = session.delete(extension)
+	def save(extension: Extension): Unit = session.saveOrUpdate(extension)
 }
 
 trait ExtensionPersistenceComponent {

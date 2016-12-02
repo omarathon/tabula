@@ -9,13 +9,13 @@ class MeetingRecordIdConverter extends TwoWayConverter[String, MeetingRecord] {
 
 	@Autowired var dao: MeetingRecordDao = _
 
-	override def convertRight(id: String) = (Option(id) flatMap {
+	override def convertRight(id: String): MeetingRecord = (Option(id) flatMap {
 		meetingId => dao.get(meetingId).map {
 			case (meeting: MeetingRecord) => meeting
 			case _ => null
 		}
 	}).orNull
 
-	override def convertLeft(meetingRecord: MeetingRecord) = (Option(meetingRecord) map {_.id}).orNull
+	override def convertLeft(meetingRecord: MeetingRecord): String = (Option(meetingRecord) map {_.id}).orNull
 
 }

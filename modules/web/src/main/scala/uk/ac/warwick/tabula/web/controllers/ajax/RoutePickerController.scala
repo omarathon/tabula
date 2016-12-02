@@ -6,6 +6,7 @@ import uk.ac.warwick.tabula.commands.{Appliable, Command, CommandInternal, ReadO
 import uk.ac.warwick.tabula.data.model.Route
 import uk.ac.warwick.tabula.services._
 import uk.ac.warwick.tabula.system.permissions.Public
+import uk.ac.warwick.tabula.web.Mav
 import uk.ac.warwick.tabula.web.controllers.BaseController
 import uk.ac.warwick.tabula.web.views.JSONView
 
@@ -17,7 +18,7 @@ class RoutePickerController extends BaseController {
 	def command = RoutePickerCommand()
 
 	@RequestMapping
-	def query(@ModelAttribute("command")cmd: Appliable[Seq[Route]]) = {
+	def query(@ModelAttribute("command")cmd: Appliable[Seq[Route]]): Mav = {
 		val routes = cmd.apply()
 		Mav(
 			new JSONView(
@@ -39,7 +40,7 @@ class RoutePickerCommand extends CommandInternal[Seq[Route]] {
 
 	var query: String = _
 
-	def applyInternal() = {
+	def applyInternal(): Seq[Route] = {
 		if (query.isEmpty) {
 			Seq()
 		} else {

@@ -11,9 +11,9 @@ import org.apache.commons.lang3.builder.ToStringBuilder
 import org.apache.commons.lang3.builder.ToStringStyle
 
 class ScalaRestriction(val underlying: Criterion) extends Aliasable {
-	def apply[A](c: ScalaCriteria[A]) = c.add(this)
+	def apply[A](c: ScalaCriteria[A]): ScalaCriteria[A] = c.add(this)
 
-	override final def equals(other: Any) = other match {
+	override final def equals(other: Any): Boolean = other match {
 		case that: ScalaRestriction =>
 			new EqualsBuilder()
 				.append(underlying, that.underlying)
@@ -22,13 +22,13 @@ class ScalaRestriction(val underlying: Criterion) extends Aliasable {
 		case _ => false
 	}
 
-	override final def hashCode =
+	override final def hashCode: Int =
 		new HashCodeBuilder()
 			.append(underlying)
 			.append(aliases)
 			.build()
 
-	override final def toString =
+	override final def toString: String =
 		new ToStringBuilder(this, ToStringStyle.SHORT_PREFIX_STYLE)
 			.append("underlying", underlying)
 			.append("aliases", aliases)
@@ -80,7 +80,7 @@ object ScalaRestriction {
 			Some(addAliases(new ScalaRestriction(criterion), aliases: _*))
 		}
 
-	def atLeastOneIsTrue(property1: String, property2: String, ticked: Boolean, aliases: (String, AliasAndJoinType)*) =
+	def atLeastOneIsTrue(property1: String, property2: String, ticked: Boolean, aliases: (String, AliasAndJoinType)*): Option[ScalaRestriction] =
 		if (!ticked) None
 		else {
 			val criterion = disjunction()
@@ -108,7 +108,7 @@ object ScalaRestriction {
 trait Aliasable {
 	final val aliases: mutable.Map[String, AliasAndJoinType] = mutable.Map()
 
-	def alias(property: String, aliasAndJoinType: AliasAndJoinType) = {
+	def alias(property: String, aliasAndJoinType: AliasAndJoinType): Aliasable = {
 		aliases.put(property, aliasAndJoinType) match {
 			case Some(other) if other.alias != aliasAndJoinType.alias =>
 				// non-duplicate

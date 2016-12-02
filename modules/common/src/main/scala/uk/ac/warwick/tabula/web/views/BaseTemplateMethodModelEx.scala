@@ -15,7 +15,7 @@ abstract class BaseTemplateMethodModelEx extends TemplateMethodModelEx {
 
 	override def exec(args: JList[_]): Object = execMethod(unwrapArgs(args))
 
-	protected def unwrapArgs(list: JList[_]) =
+	protected def unwrapArgs(list: JList[_]): Seq[AnyRef] =
 		list.asScala.toSeq.map { model =>
 			DeepUnwrap.unwrap(model.asInstanceOf[TemplateModel])
 		}

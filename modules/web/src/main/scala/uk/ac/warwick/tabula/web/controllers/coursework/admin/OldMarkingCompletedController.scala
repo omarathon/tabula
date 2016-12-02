@@ -13,6 +13,7 @@ import uk.ac.warwick.tabula.coursework.web.Routes
 import uk.ac.warwick.tabula.web.controllers.coursework.OldCourseworkController
 import uk.ac.warwick.tabula.data.Transactions._
 import uk.ac.warwick.tabula.data.model._
+import uk.ac.warwick.tabula.web.Mav
 import uk.ac.warwick.userlookup.User
 
 import collection.JavaConverters._
@@ -34,7 +35,7 @@ class OldMarkingCompletedController extends OldCourseworkController {
 	): MarkingCompletedCommand = MarkingCompletedCommand(mandatory(module), mandatory(assignment), marker, submitter)
 
 
-	def RedirectBack(assignment: Assignment, command: MarkingCompletedCommand) = {
+	def RedirectBack(assignment: Assignment, command: MarkingCompletedCommand): Mav = {
 		if (command.onlineMarking) {
 			Redirect(Routes.admin.assignment.markerFeedback.onlineFeedback(assignment, command.user))
 		} else {
@@ -53,7 +54,7 @@ class OldMarkingCompletedController extends OldCourseworkController {
 		@PathVariable marker: User,
 		@ModelAttribute("markingCompletedCommand") form: MarkingCompletedCommand,
 		errors: Errors
-	) = {
+	): Mav = {
 		val isUserALaterMarker = form.markerFeedback.asScala.exists { markerFeedback =>
 			val isSecondMarkerForStudent = assignment.getStudentsSecondMarker(markerFeedback.feedback.universityId).exists(_.getUserId == user.apparentId)
 			val isThirdMarkerForStudent = assignment.getStudentsThirdMarker(markerFeedback.feedback.universityId).exists(_.getUserId == user.apparentId)
@@ -88,7 +89,7 @@ class OldMarkingCompletedController extends OldCourseworkController {
 		@PathVariable marker: User,
 		@Valid @ModelAttribute("markingCompletedCommand") form: MarkingCompletedCommand,
 		errors: Errors
-	) = {
+	): Mav = {
 			if (errors.hasErrors)
 				showForm(module,assignment, marker, form, errors)
 			else {
@@ -107,7 +108,7 @@ class OldMarkingCompletedController extends OldCourseworkController {
 class OldMarkingCompletedControllerCurrentUser extends OldCourseworkController {
 
 	@RequestMapping
-	def redirect(@PathVariable assignment: Assignment, currentUser: CurrentUser) = {
+	def redirect(@PathVariable assignment: Assignment, currentUser: CurrentUser): Mav = {
 		Redirect(Routes.admin.assignment.markerFeedback.complete(assignment, currentUser.apparentUser))
 	}
 

@@ -51,7 +51,7 @@ class RateFeedbackCommand(val module: Module, val assignment: Assignment, val fe
 
 	val maximumStars = 5
 
-	def applyInternal() = transactional() {
+	def applyInternal(): Unit = transactional() {
 		feedback.ratingHelpful = wasHelpful.toBoolean
 		feedback.ratingPrompt = wasPrompt.toBoolean
 	}
@@ -70,9 +70,9 @@ class RateFeedbackCommand(val module: Module, val assignment: Assignment, val fe
 		}
 	}
 
-	def enabled = features.collectRatings && feedback.collectRatings
+	def enabled: Boolean = features.collectRatings && feedback.collectRatings
 
-	def describe(d: Description) = d.feedback(feedback).properties( //			"rating" -> effectiveRating,
+	def describe(d: Description): Unit = d.feedback(feedback).properties( //			"rating" -> effectiveRating,
 	//			"previousRating" -> feedback.rating.orNull
 	)
 }

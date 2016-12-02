@@ -72,7 +72,7 @@ class SubmissionPersistenceTest extends PersistenceTestBase {
     	}
     }
 
-    def newReport = {
+    def newReport: OriginalityReport = {
     	val r = new OriginalityReport
         r.overlap = Some(1)
         r

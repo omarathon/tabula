@@ -6,6 +6,7 @@ import uk.ac.warwick.tabula.web.controllers.attendance.HasMonthNames
 import uk.ac.warwick.tabula.JavaImports
 import uk.ac.warwick.tabula.commands.attendance.manage.FindPointsResult
 import uk.ac.warwick.tabula.data.model.attendance.{AttendanceMonitoringPointStyle, AttendanceMonitoringPointType, AttendanceMonitoringScheme}
+import uk.ac.warwick.tabula.web.Mav
 
 @Controller
 @RequestMapping(Array("/attendance/manage/{department}/{academicYear}/new/{scheme}/points"))
@@ -17,7 +18,7 @@ class AddPointsToNewSchemeController extends AbstractManageSchemePointsControlle
 		points:
 		JavaImports.JInteger,
 		actionCompleted: String
-	) = {
+	): Mav = {
 		Mav("attendance/manage/addpointsoncreate",
 			"findResult" -> findCommandResult,
 			"allTypes" -> AttendanceMonitoringPointType.values,

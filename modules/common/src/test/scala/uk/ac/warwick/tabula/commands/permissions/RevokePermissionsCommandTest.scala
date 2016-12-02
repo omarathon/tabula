@@ -14,13 +14,13 @@ import scala.reflect._
 class RevokePermissionsCommandTest extends TestBase with Mockito {
 
 	trait CommandTestSupport[A <: PermissionsTarget] extends RevokePermissionsCommandState[A] with PermissionsServiceComponent with SecurityServiceComponent with UserLookupComponent {
-		val permissionsService = mock[PermissionsService]
-		val securityService = mock[SecurityService]
+		val permissionsService: PermissionsService = mock[PermissionsService]
+		val securityService: SecurityService = mock[SecurityService]
 		val userLookup = new MockUserLookup()
 	}
 
 	trait Fixture {
-		val department = Fixtures.department("in", "IT Services")
+		val department: Department = Fixtures.department("in", "IT Services")
 
 		val command = new RevokePermissionsCommandInternal(department) with CommandTestSupport[Department] with RevokePermissionsCommandValidation
 	}
@@ -54,7 +54,7 @@ class RevokePermissionsCommandTest extends TestBase with Mockito {
 
 		command.permissionsService.getGrantedPermission(department, Permissions.Department.ManageExtensionSettings, true) returns (Some(existing))
 
-		val grantedPerm = command.applyInternal()
+		val grantedPerm: GrantedPermission[Department] = command.applyInternal()
 		(grantedPerm.eq(existing)) should be (true)
 
 		grantedPerm.permission should be (Permissions.Department.ManageExtensionSettings)
@@ -182,7 +182,7 @@ class RevokePermissionsCommandTest extends TestBase with Mockito {
 		val command = new RevokePermissionsCommandDescription[Department] with CommandTestSupport[Department] {
 			val eventName: String = "test"
 
-			val scope = department
+			val scope: Department = department
 			val grantedPermission = None
 		}
 

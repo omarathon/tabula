@@ -36,12 +36,12 @@ class ModifyExtensionCommandInternal(val extension: Extension, val submitter: Cu
 	reviewerComments = extension.reviewerComments
 	state = extension.state
 
-	def copyTo(extension: Extension) = {
+	def copyTo(extension: Extension): Unit = {
 		extension.expiryDate = expiryDate
 		extension.updateState(state, reviewerComments)
 	}
 
-	def applyInternal() = transactional() {
+	def applyInternal(): Extension = transactional() {
 		copyTo(extension)
 		save(extension)
 		extension
@@ -97,7 +97,7 @@ trait ModifyExtensionDescription extends Describable[Extension] {
 trait ModifyExtensionNotification extends Notifies[Extension, Option[Extension]] {
 	self: ModifyExtensionState =>
 
-	def emit(extension: Extension) = {
+	def emit(extension: Extension): Seq[ExtensionNotification] = {
 		val admin = submitter.apparentUser
 
 		if (extension.isManual) {
@@ -123,7 +123,7 @@ trait ModifyExtensionScheduledNotification extends SchedulesNotifications[Extens
 
 	override def transformResult(extension: Extension) = Seq(extension)
 
-	override def scheduledNotifications(extension: Extension) = {
+	override def scheduledNotifications(extension: Extension): Seq[ScheduledNotification[Extension]] = {
 		val notifications = for (
 			extension <- Seq(extension) if extension.isManual || extension.approved;
 			expiryDate <- extension.expiryDate

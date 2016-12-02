@@ -9,7 +9,7 @@ trait MarkingWorkflowDaoComponent {
 }
 
 trait AutowiringMarkingWorkflowDaoComponent extends MarkingWorkflowDaoComponent {
-	var markingWorkflowDao = Wire[MarkingWorkflowDao]
+	var markingWorkflowDao: MarkingWorkflowDao = Wire[MarkingWorkflowDao]
 }
 
 trait MarkingWorkflowDao {
@@ -26,7 +26,7 @@ trait MarkingWorkflowDao {
 @Repository
 class MarkingWorkflowDaoImpl extends MarkingWorkflowDao with Daoisms {
 
-	def save(markingWorkflow: MarkingWorkflow) = session.saveOrUpdate(markingWorkflow)
+	def save(markingWorkflow: MarkingWorkflow): Unit = session.saveOrUpdate(markingWorkflow)
 
 	def getAssignmentsUsingMarkingWorkflow(markingWorkflow: MarkingWorkflow): Seq[Assignment] =
 		session.newCriteria[Assignment]

@@ -35,8 +35,8 @@ class DownloadMarkerSubmissionTest extends TestBase with MarkingWorkflowWorld wi
   }
 
 	trait CommandTestSupport extends ZipServiceComponent with AssessmentServiceComponent with StateServiceComponent {
-		val assessmentService = smartMock[AssessmentService]
-		val stateService = smartMock[StateService]
+		val assessmentService: AssessmentService = smartMock[AssessmentService]
+		val stateService: StateService = smartMock[StateService]
 		val zipService = new ZipService
 		zipService.userLookup = mockUserLookup
 		zipService.features = Features.empty

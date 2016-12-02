@@ -25,7 +25,7 @@ class ViewSchemesCommandInternal(val department: Department, val academicYear: A
 
 	self: AttendanceMonitoringServiceComponent =>
 
-	override def applyInternal() = {
+	override def applyInternal(): Seq[AttendanceMonitoringScheme] = {
 		attendanceMonitoringService.listSchemes(department, academicYear)
 	}
 

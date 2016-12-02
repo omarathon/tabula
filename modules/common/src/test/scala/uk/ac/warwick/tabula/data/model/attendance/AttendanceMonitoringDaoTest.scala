@@ -5,25 +5,25 @@ import org.junit.Before
 import uk.ac.warwick.tabula._
 import uk.ac.warwick.tabula.commands.MemberOrUser
 import uk.ac.warwick.tabula.data.AutowiringAttendanceMonitoringDao
-import uk.ac.warwick.tabula.data.model.UserGroup
+import uk.ac.warwick.tabula.data.model.{Department, Route, StudentMember, UserGroup}
 
 class AttendanceMonitoringDaoTest extends PersistenceTestBase with Mockito {
 
 	val academicYear = AcademicYear(2014)
-	val department = Fixtures.department("its")
-	val route = Fixtures.route("it100")
+	val department: Department = Fixtures.department("its")
+	val route: Route = Fixtures.route("it100")
 
-	val student1 = Fixtures.student("1234","1234")
+	val student1: StudentMember = Fixtures.student("1234","1234")
 	student1.mostSignificantCourse.beginDate = DateTime.now.minusYears(2).toLocalDate
 	student1.mostSignificantCourse.currentRoute = route
 	student1.mostSignificantCourse.latestStudentCourseYearDetails.academicYear = academicYear
 
-	val student2 = Fixtures.student("2345","2345")
+	val student2: StudentMember = Fixtures.student("2345","2345")
 	student2.mostSignificantCourse.beginDate = DateTime.now.minusYears(2).toLocalDate
 	student2.mostSignificantCourse.currentRoute = route
 	student2.mostSignificantCourse.latestStudentCourseYearDetails.academicYear = academicYear
 
-	val student3 = Fixtures.student("2346","2346")
+	val student3: StudentMember = Fixtures.student("2346","2346")
 	student3.mostSignificantCourse.beginDate = DateTime.now.minusYears(2).toLocalDate
 	student3.mostSignificantCourse.currentRoute = route
 	student3.mostSignificantCourse.latestStudentCourseYearDetails.academicYear = academicYear
@@ -49,28 +49,28 @@ class AttendanceMonitoringDaoTest extends PersistenceTestBase with Mockito {
 	scheme1.createdDate = DateTime.now
 	scheme1.updatedDate = DateTime.now
 
-	val point1 = Fixtures.attendanceMonitoringPoint(scheme1, name = "point1")
+	val point1: AttendanceMonitoringPoint = Fixtures.attendanceMonitoringPoint(scheme1, name = "point1")
 	point1.startDate = new LocalDate(2014, 10, 1)
 	point1.endDate = new LocalDate(2014, 10, 1)
 	point1.pointType = AttendanceMonitoringPointType.Standard
 	point1.createdDate = DateTime.now
 	point1.updatedDate = DateTime.now
 
-	val point2 = Fixtures.attendanceMonitoringPoint(scheme1, name = "point2")
+	val point2: AttendanceMonitoringPoint = Fixtures.attendanceMonitoringPoint(scheme1, name = "point2")
 	point2.startDate = new LocalDate(2014, 10, 1)
 	point2.endDate = new LocalDate(2014, 10, 4)
 	point2.pointType = AttendanceMonitoringPointType.Standard
 	point2.createdDate = DateTime.now
 	point2.updatedDate = DateTime.now
 
-	val point3 = Fixtures.attendanceMonitoringPoint(scheme1, name = "point3")
+	val point3: AttendanceMonitoringPoint = Fixtures.attendanceMonitoringPoint(scheme1, name = "point3")
 	point3.startDate = new LocalDate(2014, 10, 4)
 	point3.endDate = new LocalDate(2014, 10, 4)
 	point3.pointType = AttendanceMonitoringPointType.Standard
 	point3.createdDate = DateTime.now
 	point3.updatedDate = DateTime.now
 
-	val point4 = Fixtures.attendanceMonitoringPoint(scheme1, name = "point4")
+	val point4: AttendanceMonitoringPoint = Fixtures.attendanceMonitoringPoint(scheme1, name = "point4")
 	point4.startDate = new LocalDate(2014, 10, 5)
 	point4.endDate = new LocalDate(2014, 10, 5)
 	point4.pointType = AttendanceMonitoringPointType.Standard

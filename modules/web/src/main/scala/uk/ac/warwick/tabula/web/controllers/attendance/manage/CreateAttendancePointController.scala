@@ -1,16 +1,19 @@
 package uk.ac.warwick.tabula.web.controllers.attendance.manage
 
 import org.springframework.stereotype.Controller
-import org.springframework.web.bind.annotation.{RequestParam, ModelAttribute, PathVariable, RequestMapping}
-import uk.ac.warwick.tabula.data.model.{MeetingFormat, Department}
+import org.springframework.web.bind.annotation.{ModelAttribute, PathVariable, RequestMapping, RequestParam}
+import uk.ac.warwick.tabula.data.model.{Department, MeetingFormat}
 import uk.ac.warwick.tabula.web.controllers.attendance.AttendanceController
 import uk.ac.warwick.tabula.AcademicYear
-import uk.ac.warwick.tabula.data.model.attendance.{AttendanceMonitoringScheme, AttendanceMonitoringPoint}
-import uk.ac.warwick.tabula.commands.{SelfValidating, Appliable}
+import uk.ac.warwick.tabula.data.model.attendance.{AttendanceMonitoringPoint, AttendanceMonitoringScheme}
+import uk.ac.warwick.tabula.commands.{Appliable, SelfValidating}
 import uk.ac.warwick.tabula.commands.attendance.manage.CreateAttendancePointCommand
 import javax.validation.Valid
+
 import org.springframework.validation.Errors
 import uk.ac.warwick.tabula.JavaImports._
+import uk.ac.warwick.tabula.web.Mav
+
 import collection.JavaConverters._
 
 @Controller
@@ -32,7 +35,7 @@ class CreateAttendancePointController extends AttendanceController {
 		@ModelAttribute("command") cmd: Appliable[Seq[AttendanceMonitoringPoint]],
 		@PathVariable department: Department,
 		@PathVariable academicYear: AcademicYear
-	) = {
+	): Mav = {
 		Mav("attendance/manage/newpoint",
 			"allMeetingFormats" -> MeetingFormat.members,
 			"returnTo" -> getReturnTo("")
@@ -49,7 +52,7 @@ class CreateAttendancePointController extends AttendanceController {
 		errors: Errors,
 		@PathVariable department: Department,
 		@PathVariable academicYear: AcademicYear
-	) = {
+	): Mav = {
 		if (errors.hasErrors) {
 			form(cmd, department, academicYear)
 		} else {
@@ -63,7 +66,7 @@ class CreateAttendancePointController extends AttendanceController {
 		errors: Errors,
 		@PathVariable department: Department,
 		@PathVariable academicYear: AcademicYear
-	) = {
+	): Mav = {
 		if (errors.hasErrors && errors.getErrorCount != 1 && errors.getAllErrors.get(0).getCode != "attendanceMonitoringPoint.overlaps") {
 			form(cmd, department, academicYear)
 		} else {
@@ -81,7 +84,7 @@ class CreateAttendancePointController extends AttendanceController {
 	}
 
 	@RequestMapping(method = Array(POST), params = Array("cancel"))
-	def cancel(@RequestParam schemes: JList[AttendanceMonitoringScheme]) = {
+	def cancel(@RequestParam schemes: JList[AttendanceMonitoringScheme]): Mav = {
 		Redirect(
 			getReturnTo(""),
 			"schemes" -> schemes.asScala.map(_.id).mkString(",")

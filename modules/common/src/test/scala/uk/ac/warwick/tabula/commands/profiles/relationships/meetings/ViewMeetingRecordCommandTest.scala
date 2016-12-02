@@ -17,9 +17,9 @@ class ViewMeetingRecordCommandTest extends TestBase with Mockito {
 			val meeting = new MeetingRecord
 			val command = new ViewMeetingRecordCommandInternal(studentCourseDetails, Some(requestor), relationshipType)
 				with RelationshipServiceComponent with ProfileServiceComponent with MeetingRecordServiceComponent {
-				val profileService = mock[ProfileService]
-				var relationshipService = mock[RelationshipService]
-				val meetingRecordService = mock[MeetingRecordService]
+				val profileService: ProfileService = mock[ProfileService]
+				var relationshipService: RelationshipService = mock[RelationshipService]
+				val meetingRecordService: MeetingRecordService = mock[MeetingRecordService]
 			}
 
 			// these are the calls we expect the applyInternal method to make

@@ -89,8 +89,8 @@ abstract class AbstractImportStatusHealthcheck extends ServiceHealthcheckProvide
 class AcademicDataImportStatusHealthcheck extends AbstractImportStatusHealthcheck {
 
 	// Warn if no successful import for 2 days, critical if no import for 3 days
-	override val WarningThreshold = 2.days
-	override val ErrorThreshold = 3.days
+	override val WarningThreshold: FiniteDuration = 2.days
+	override val ErrorThreshold: FiniteDuration = 3.days
 	override val HealthcheckName = "import-academic"
 
 	override protected def auditEvents: Seq[AuditEvent] = {
@@ -105,11 +105,11 @@ class AcademicDataImportStatusHealthcheck extends AbstractImportStatusHealthchec
 class ProfileImportStatusHealthcheck extends AbstractImportStatusHealthcheck {
 
 	// Warn if no successful import for 3 days, critical for 4 days
-	override val WarningThreshold = 3.days
-	override val ErrorThreshold = 4.days
+	override val WarningThreshold: FiniteDuration = 3.days
+	override val ErrorThreshold: FiniteDuration = 4.days
 	override val HealthcheckName = "import-profiles"
 
-	lazy val moduleAndDepartmentService = Wire[ModuleAndDepartmentService]
+	lazy val moduleAndDepartmentService: ModuleAndDepartmentService = Wire[ModuleAndDepartmentService]
 
 	override protected def auditEvents: Seq[AuditEvent] = {
 		val queryService = Wire[AuditEventQueryService]
@@ -169,8 +169,8 @@ class ProfileImportStatusHealthcheck extends AbstractImportStatusHealthcheck {
 class AssignmentImportStatusHealthcheck extends AbstractImportStatusHealthcheck {
 
 	// Warn if no successful import for 3 days, critical for 4 days
-	override val WarningThreshold = 3.days
-	override val ErrorThreshold = 4.days
+	override val WarningThreshold: FiniteDuration = 3.days
+	override val ErrorThreshold: FiniteDuration = 4.days
 	override val HealthcheckName = "import-assignments"
 
 	override protected def auditEvents: Seq[AuditEvent] = {
@@ -185,8 +185,8 @@ class AssignmentImportStatusHealthcheck extends AbstractImportStatusHealthcheck 
 class ModuleListImportStatusHealthcheck extends AbstractImportStatusHealthcheck {
 
 	// Warn if no successful import for 3 days, critical for 4 days
-	override val WarningThreshold = 3.days
-	override val ErrorThreshold = 4.days
+	override val WarningThreshold: FiniteDuration = 3.days
+	override val ErrorThreshold: FiniteDuration = 4.days
 	override val HealthcheckName = "import-module-lists"
 
 	override protected def auditEvents: Seq[AuditEvent] = {
@@ -201,8 +201,8 @@ class ModuleListImportStatusHealthcheck extends AbstractImportStatusHealthcheck 
 class RouteRuleImportStatusHealthcheck extends AbstractImportStatusHealthcheck {
 
 	// Warn if no successful import for 3 days, critical for 4 days
-	override val WarningThreshold = 3.days
-	override val ErrorThreshold = 4.days
+	override val WarningThreshold: FiniteDuration = 3.days
+	override val ErrorThreshold: FiniteDuration = 4.days
 	override val HealthcheckName = "import-route-rules"
 
 	override protected def auditEvents: Seq[AuditEvent] = {

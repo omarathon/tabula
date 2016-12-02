@@ -7,11 +7,11 @@ import uk.ac.warwick.tabula.data.model._
 
 class BulkRelationshipChangeNotificationTest extends TestBase with Mockito {
 
-	val agent = Fixtures.staff("1234567")
+	val agent: StaffMember = Fixtures.staff("1234567")
 	agent.firstName = "Tutor"
 	agent.lastName = "Name"
 
-	val student = Fixtures.student("7654321")
+	val student: StudentMember = Fixtures.student("7654321")
 	student.firstName = "Student"
 	student.lastName = "Name"
 
@@ -34,20 +34,20 @@ class BulkRelationshipChangeNotificationTest extends TestBase with Mockito {
 		notification.title should be ("Allocation of new personal tutees")
 	}
 
-	val profiles = smartMock[ProfileService]
-	val service = smartMock[RelationshipService]
+	val profiles: ProfileService = smartMock[ProfileService]
+	val service: RelationshipService = smartMock[RelationshipService]
 
 	val Tutor = StudentRelationshipType("1", "tutor", "tutor", "tutee")
 
-	val agent0 = Fixtures.member(userType=MemberUserType.Staff, universityId="0")
-	val agent1 = Fixtures.member(userType=MemberUserType.Staff, universityId="1")
-	val agent2 = Fixtures.member(userType=MemberUserType.Staff, universityId="2")
-	val agent3 = Fixtures.member(userType=MemberUserType.Staff, universityId="3")
+	val agent0: Member = Fixtures.member(userType=MemberUserType.Staff, universityId="0")
+	val agent1: Member = Fixtures.member(userType=MemberUserType.Staff, universityId="1")
+	val agent2: Member = Fixtures.member(userType=MemberUserType.Staff, universityId="2")
+	val agent3: Member = Fixtures.member(userType=MemberUserType.Staff, universityId="3")
 
-	val rel0 = relationship(agent0, new DateTime(2013,1,20, 12,0))
-	val rel1 = relationship(agent1, new DateTime(2013,1,10, 12,0))
-	val rel2 = relationship(agent2, new DateTime(2013,1,1, 12,0))
-	val rel3 = relationship(agent3, new DateTime(2013,1,1, 12,0))
+	val rel0: MemberStudentRelationship = relationship(agent0, new DateTime(2013,1,20, 12,0))
+	val rel1: MemberStudentRelationship = relationship(agent1, new DateTime(2013,1,10, 12,0))
+	val rel2: MemberStudentRelationship = relationship(agent2, new DateTime(2013,1,1, 12,0))
+	val rel3: MemberStudentRelationship = relationship(agent3, new DateTime(2013,1,1, 12,0))
 
 	val rels = Seq(rel0, rel1, rel2)
 

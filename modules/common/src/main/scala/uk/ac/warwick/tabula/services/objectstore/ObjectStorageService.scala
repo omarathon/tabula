@@ -126,5 +126,5 @@ trait ObjectStorageServiceComponent {
 }
 
 trait AutowiringObjectStorageServiceComponent extends ObjectStorageServiceComponent {
-	var objectStorageService = Wire[ObjectStorageService]
+	var objectStorageService: ObjectStorageService = Wire[ObjectStorageService]
 }

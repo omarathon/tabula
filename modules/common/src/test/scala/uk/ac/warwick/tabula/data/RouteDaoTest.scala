@@ -1,13 +1,14 @@
 package uk.ac.warwick.tabula.data
 
 import org.junit.Before
+import uk.ac.warwick.tabula.data.model.Route
 import uk.ac.warwick.tabula.{Fixtures, PersistenceTestBase}
 
 class RouteDaoTest extends PersistenceTestBase {
 
 	val dao = new RouteDaoImpl
 
-	val route = Fixtures.route("g553")
+	val route: Route = Fixtures.route("g553")
 
 	@Before
 	def setup() {

@@ -134,7 +134,7 @@ trait MarkingCompletedState {
 
 	var onlineMarking: Boolean = false
 	var confirm: Boolean = false
-	val marker = user
+	val marker: User = user
 	val submitter: CurrentUser
 }
 

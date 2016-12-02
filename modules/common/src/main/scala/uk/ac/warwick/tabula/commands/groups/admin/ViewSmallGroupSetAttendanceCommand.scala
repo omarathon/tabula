@@ -33,7 +33,7 @@ class ViewSmallGroupSetAttendanceCommand(val set: SmallGroupSet)
 
 	if (!set.collectAttendance) throw new ItemNotFoundException
 
-	override def applyInternal() = {
+	override def applyInternal(): SortedMap[SmallGroup, SmallGroupAttendanceInformation] = {
 		SortedMap(set.groups.asScala.map { group =>
 			(group -> ViewSmallGroupAttendanceCommand(group).apply())
 		}.toSeq:_*)

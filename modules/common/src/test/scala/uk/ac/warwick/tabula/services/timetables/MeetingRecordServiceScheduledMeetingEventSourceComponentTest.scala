@@ -11,7 +11,7 @@ class MeetingRecordServiceScheduledMeetingEventSourceComponentTest extends TestB
 	val student = new StudentMember
 	student.universityId = "university ID"
 
-	val user = mock[CurrentUser]
+	val user: CurrentUser = mock[CurrentUser]
 	user.profile returns Some(student)
 
 	val occurrence = EventOccurrence("", "", "", "", TimetableEventType.Meeting, LocalDateTime.now, LocalDateTime.now, None, TimetableEvent.Parent(), None, Nil, None)
@@ -29,9 +29,9 @@ class MeetingRecordServiceScheduledMeetingEventSourceComponentTest extends TestB
 		with MeetingRecordServiceComponent
 		with SecurityServiceComponent {
 
-		val relationshipService = mock[RelationshipService]
-		val meetingRecordService = mock[MeetingRecordService]
-		val securityService = mock[SecurityService]
+		val relationshipService: RelationshipService = mock[RelationshipService]
+		val meetingRecordService: MeetingRecordService = mock[MeetingRecordService]
+		val securityService: SecurityService = mock[SecurityService]
 
 	}
 

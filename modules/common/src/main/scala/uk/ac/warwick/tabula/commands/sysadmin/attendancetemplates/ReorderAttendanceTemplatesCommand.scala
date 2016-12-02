@@ -23,7 +23,7 @@ class ReorderAttendanceTemplatesCommandInternal extends CommandInternal[Seq[Atte
 
 	self: AttendanceMonitoringServiceComponent with ReorderAttendanceTemplatesCommandState =>
 
-	override def applyInternal() = {
+	override def applyInternal(): Seq[AttendanceMonitoringTemplate] = {
 		templates.asScala.zipWithIndex.map{case (template, index) =>
 			template.position = index
 			attendanceMonitoringService.saveOrUpdate(template)

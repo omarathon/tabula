@@ -8,11 +8,11 @@ import uk.ac.warwick.tabula.JavaImports._
 import uk.ac.warwick.spring.Wire
 
 class JSONView(var json: Any) extends View {
-	var objectMapper = Wire[ObjectMapper]
+	var objectMapper: ObjectMapper = Wire[ObjectMapper]
 
 	override def getContentType() = "application/json"
 
-	override def render(model: JMap[String, _], request: HttpServletRequest, response: HttpServletResponse) = {
+	override def render(model: JMap[String, _], request: HttpServletRequest, response: HttpServletResponse): Unit = {
 		response.setContentType(getContentType)
 		val out = response.getWriter
 		objectMapper.writeValue(out, json)

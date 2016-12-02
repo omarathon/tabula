@@ -7,7 +7,7 @@ import uk.ac.warwick.tabula.commands.Appliable
 import uk.ac.warwick.tabula.commands.cm2.assignments.{AssignmentFeedbackAuditCommand, AssignmentFeedbackAuditResults}
 import uk.ac.warwick.tabula.data.model.{Assignment, MarkingMethod}
 import uk.ac.warwick.tabula.cm2.web.Routes
-import uk.ac.warwick.tabula.web.Breadcrumbs
+import uk.ac.warwick.tabula.web.{Breadcrumbs, Mav}
 import uk.ac.warwick.tabula.web.controllers.cm2.CourseworkController
 
 
@@ -23,7 +23,7 @@ class AssignmentFeedbackAuditController extends CourseworkController {
 	@RequestMapping(method=Array(GET))
 	def list(@PathVariable assignment: Assignment,
 		@ModelAttribute("auditCommand") auditCommand: Appliable[AssignmentFeedbackAuditResults]
-	) = {
+	): Mav = {
 		val auditData = auditCommand.apply()
 		Mav("cm2/admin/assignments/submissions_audit", "command" -> auditCommand,
 			"auditData" -> auditData,

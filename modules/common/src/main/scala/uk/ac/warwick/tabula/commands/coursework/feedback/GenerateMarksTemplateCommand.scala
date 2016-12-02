@@ -32,14 +32,14 @@ object GenerateMarksTemplateCommand {
 object MarksTemplateCommand {
 
 	// util to replace unsafe characters with spaces
-	def safeAssessmentName(assessment: Assessment) = WorkbookUtil.createSafeSheetName(trimmedAssessmentName(assessment))
+	def safeAssessmentName(assessment: Assessment): String = WorkbookUtil.createSafeSheetName(trimmedAssessmentName(assessment))
 
 	val MaxSpreadsheetNameLength = 31
-	val MaxAssignmentNameLength = MaxSpreadsheetNameLength - "Marks for ".length
+	val MaxAssignmentNameLength: Int = MaxSpreadsheetNameLength - "Marks for ".length
 
 	// trim the assignment name down to 21 characters. Excel sheet names must be 31 chars or less so
 	// "Marks for " = 10 chars + assignment name (max 21) = 31
-	def trimmedAssessmentName(assessment: Assessment) = {
+	def trimmedAssessmentName(assessment: Assessment): String = {
 		if (assessment.name.length > MaxAssignmentNameLength)
 			assessment.name.substring(0, MaxAssignmentNameLength)
 		else
@@ -52,7 +52,7 @@ class GenerateMarksTemplateCommandInternal(val module: Module, val assignment: A
 
 	self: FeedbackServiceComponent =>
 
-	override def applyInternal() = {
+	override def applyInternal(): XSSFWorkbook = {
 
 		val workbook = new XSSFWorkbook()
 		val sheet = generateNewMarkSheet(assignment, workbook)

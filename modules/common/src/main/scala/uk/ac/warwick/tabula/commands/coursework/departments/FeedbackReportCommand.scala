@@ -23,11 +23,11 @@ class FeedbackReportCommand (val department:Department, val user: CurrentUser) e
 	@WithinYears(maxFuture = 3, maxPast = 3) @DateTimeFormat(pattern = DateFormats.DateTimePicker)
 	var endDate:DateTime = _
 
-	var jobService = Wire.auto[JobService]
+	var jobService: JobService = Wire.auto[JobService]
 
-	def applyInternal() = jobService.add(Option(user), FeedbackReportJob(department, startDate, endDate))
+	def applyInternal(): JobInstance = jobService.add(Option(user), FeedbackReportJob(department, startDate, endDate))
 
-	override def describe(d: Description) = d.department(department)
+	override def describe(d: Description): Unit = d.department(department)
 
 	override def validate(errors: Errors) {
 		ValidationUtils.rejectIfEmptyOrWhitespace(errors, "startDate", "feedback.report.emptyDate")

@@ -10,6 +10,7 @@ import uk.ac.warwick.tabula.data.model.groups.{SmallGroupAllocationMethod, Small
 import uk.ac.warwick.tabula.groups.web.Routes
 import uk.ac.warwick.tabula.permissions.Permission
 import uk.ac.warwick.tabula.services.{AutowiringMaintenanceModeServiceComponent, AutowiringModuleAndDepartmentServiceComponent, AutowiringTermServiceComponent, AutowiringUserSettingsServiceComponent}
+import uk.ac.warwick.tabula.web.Mav
 import uk.ac.warwick.tabula.web.controllers.groups.{GroupsController, GroupsDepartmentsAndModulesWithPermission}
 import uk.ac.warwick.tabula.web.controllers.{AcademicYearScopedController, DepartmentScopedController}
 import uk.ac.warwick.tabula.{AcademicYear, CurrentUser}
@@ -23,11 +24,11 @@ abstract class AbstractGroupsAdminDepartmentHomeController extends GroupsControl
 	override val departmentPermission: Permission = AdminSmallGroupsHomeCommand.RequiredPermission
 
 	@ModelAttribute("activeDepartment")
-	override def activeDepartment(@PathVariable department: Department) = retrieveActiveDepartment(Option(department))
+	override def activeDepartment(@PathVariable department: Department): Option[Department] = retrieveActiveDepartment(Option(department))
 
 	hideDeletedItems
 
-	@ModelAttribute("allocated") def allocatedSet(@RequestParam(value="allocated", required=false) set: SmallGroupSet) = set
+	@ModelAttribute("allocated") def allocatedSet(@RequestParam(value="allocated", required=false) set: SmallGroupSet): SmallGroupSet = set
 
 	private def process(cmd: AdminSmallGroupsHomeCommand, department: Department, view: String) = {
 		val info = cmd.apply()
@@ -65,11 +66,11 @@ abstract class AbstractGroupsAdminDepartmentHomeController extends GroupsControl
 	}
 
 	@RequestMapping(params=Array("!ajax"), headers=Array("!X-Requested-With"))
-	def adminDepartment(@ModelAttribute("adminCommand") cmd: AdminSmallGroupsHomeCommand, @PathVariable department: Department, user: CurrentUser) =
+	def adminDepartment(@ModelAttribute("adminCommand") cmd: AdminSmallGroupsHomeCommand, @PathVariable department: Department, user: CurrentUser): Mav =
 		process(cmd, department, "groups/admin/department")
 
 	@RequestMapping
-	def loadSets(@ModelAttribute("adminCommand") cmd: AdminSmallGroupsHomeCommand, @PathVariable department: Department, user: CurrentUser) =
+	def loadSets(@ModelAttribute("adminCommand") cmd: AdminSmallGroupsHomeCommand, @PathVariable department: Department, user: CurrentUser): Mav =
 		process(cmd, department, "groups/admin/department-noLayout").noLayout()
 }
 

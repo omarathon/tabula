@@ -5,6 +5,7 @@ import org.springframework.validation.BindException
 import uk.ac.warwick.tabula.services.{AssessmentService, AssessmentServiceComponent}
 import uk.ac.warwick.tabula.services.turnitinlti.{TurnitinLtiQueueService, TurnitinLtiQueueServiceComponent, TurnitinLtiService}
 import uk.ac.warwick.tabula.api.commands.coursework.turnitinlti.{TurnitinLtiSubmitAssignmentResponseCommandInternal, TurnitinLtiSubmitAssignmentResponseCommandState, TurnitinLtiSubmitAssignmentResponseRequestState, TurnitinLtiSubmitAssignmentResponseValidation}
+import uk.ac.warwick.tabula.data.model.Assignment
 
 class TurnitinLtiSubmitAssignmentResponseTest extends TestBase with Mockito {
 
@@ -13,13 +14,13 @@ class TurnitinLtiSubmitAssignmentResponseTest extends TestBase with Mockito {
 		with TurnitinLtiSubmitAssignmentResponseCommandState
 		with TurnitinLtiQueueServiceComponent
 		with AssessmentServiceComponent {
-			val assessmentService = smartMock[AssessmentService]
-			val turnitinLtiQueueService = smartMock[TurnitinLtiQueueService]
+			val assessmentService: AssessmentService = smartMock[AssessmentService]
+			val turnitinLtiQueueService: TurnitinLtiQueueService = smartMock[TurnitinLtiQueueService]
 		}
 
 	trait Fixture {
-		val assignment = Fixtures.assignment("an assignment")
-		val anotherAssignment = Fixtures.assignment("another assignment")
+		val assignment: Assignment = Fixtures.assignment("an assignment")
+		val anotherAssignment: Assignment = Fixtures.assignment("another assignment")
 
 		val command = new TurnitinLtiSubmitAssignmentResponseCommandInternal(assignment) with CommandTestSupport
 		command.assessmentService.getAssignmentById("1234") returns Some(assignment)

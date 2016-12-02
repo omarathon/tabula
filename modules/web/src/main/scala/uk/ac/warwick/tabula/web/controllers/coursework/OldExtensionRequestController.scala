@@ -22,7 +22,7 @@ import uk.ac.warwick.spring.Wire
 @RequestMapping(value=Array("/${cm1.prefix}/module/{module}/{assignment}/extension"))
 class OldExtensionRequestController extends OldCourseworkController{
 
-	var profileService = Wire.auto[ProfileService]
+	var profileService: ProfileService = Wire.auto[ProfileService]
 
 	@ModelAttribute("command")
 	def cmd(
@@ -37,8 +37,8 @@ class OldExtensionRequestController extends OldCourseworkController{
 	validatesSelf[SelfValidating]
 
 	// Add the common breadcrumbs to the model.
-	def crumbed(mav:Mav, module:Module)
-		= mav.crumbs(Breadcrumbs.Department(module.adminDepartment), Breadcrumbs.Module(module))
+	def crumbed(mav:Mav, module:Module): Mav
+	= mav.crumbs(Breadcrumbs.Department(module.adminDepartment), Breadcrumbs.Module(module))
 
 	@RequestMapping(method=Array(HEAD,GET))
 	def showForm(@ModelAttribute("command") cmd: Appliable[Extension] with RequestExtensionCommandState): Mav = {

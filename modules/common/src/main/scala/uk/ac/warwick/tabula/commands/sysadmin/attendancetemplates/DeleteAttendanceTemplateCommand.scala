@@ -21,7 +21,7 @@ class DeleteAttendanceTemplateCommandInternal(val template: AttendanceMonitoring
 
 	self: AttendanceMonitoringServiceComponent =>
 
-	override def applyInternal() = {
+	override def applyInternal(): Unit = {
 		attendanceMonitoringService.deleteTemplate(template)
 	}
 

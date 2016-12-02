@@ -10,6 +10,7 @@ import uk.ac.warwick.tabula.data.model._
 import uk.ac.warwick.tabula.commands.{UpstreamGroup, UpstreamGroupPropertyEditor}
 import uk.ac.warwick.tabula.helpers.Logging
 import uk.ac.warwick.tabula.AcademicYear
+import uk.ac.warwick.tabula.web.Mav
 
 
 /**
@@ -21,14 +22,14 @@ class OldAssignmentEnrolmentController extends OldCourseworkController with Logg
 
 	validatesSelf[EditAssignmentEnrolmentCommand]
 
-	@ModelAttribute def formObject(@PathVariable module: Module, @PathVariable academicYear: AcademicYear) = {
+	@ModelAttribute def formObject(@PathVariable module: Module, @PathVariable academicYear: AcademicYear): EditAssignmentEnrolmentCommand = {
 		val cmd = new EditAssignmentEnrolmentCommand(mandatory(module), academicYear)
 		cmd.upstreamGroups.clear()
 		cmd
 	}
 
 	@RequestMapping
-	def showForm(form: EditAssignmentEnrolmentCommand, openDetails: Boolean = false) = {
+	def showForm(form: EditAssignmentEnrolmentCommand, openDetails: Boolean = false): Mav = {
 		form.afterBind()
 
 		logger.info(s"Assignment Enrolment includeCount: ${form.membershipInfo.includeCount}")

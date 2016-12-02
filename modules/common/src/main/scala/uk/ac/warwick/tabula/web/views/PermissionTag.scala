@@ -24,7 +24,7 @@ class PermissionTag extends TemplateDirectiveModel with Logging {
 	override def execute(env: Environment,
 		_params: JMap[_, _],
 		loopVars: Array[TemplateModel],
-		body: TemplateDirectiveBody) = {
+		body: TemplateDirectiveBody): Unit = {
 		val params = _params.asInstanceOf[JMap[String, TemplateModel]]
 
 		val request = RequestInfo.fromThread.get

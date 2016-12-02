@@ -5,8 +5,9 @@ import uk.ac.warwick.tabula.commands.Appliable
 import uk.ac.warwick.tabula.data.model.Department
 import uk.ac.warwick.tabula.data.model.groups.{SmallGroupAllocationMethod, SmallGroupSet, SmallGroupSetSelfSignUpState}
 import uk.ac.warwick.tabula.commands.groups.admin.OpenSmallGroupSet
+import uk.ac.warwick.tabula.web.Mav
 import uk.ac.warwick.tabula.web.controllers.groups.admin.OpenSmallGroupSetsController
-import uk.ac.warwick.tabula.{SmallGroupFixture, CurrentUser, Mockito, TestBase}
+import uk.ac.warwick.tabula.{CurrentUser, Mockito, SmallGroupFixture, TestBase}
 import uk.ac.warwick.userlookup.User
 
 import scala.collection.JavaConverters._
@@ -31,7 +32,7 @@ class CloseSmallGroupSetsControllerTest extends TestBase with Mockito {
 
 			val controller = new OpenSmallGroupSetsController()
 			controller.smallGroupService = mockSmallGroupService
-			val mav = controller.form(controller.newViewModelOpen(department, SmallGroupSetSelfSignUpState.Closed), department, academicYear)
+			val mav: Mav = controller.form(controller.newViewModelOpen(department, SmallGroupSetSelfSignUpState.Closed), department, academicYear)
 
 			mav.map("groupSets") should be(Seq(groupSet1))
 		}
@@ -44,7 +45,7 @@ class CloseSmallGroupSetsControllerTest extends TestBase with Mockito {
 			controller.smallGroupService = mockSmallGroupService
 			department.code = "XYZ"
 
-			val mav = controller.form(controller.newViewModelOpen(department, SmallGroupSetSelfSignUpState.Closed), department, academicYear)
+			val mav: Mav = controller.form(controller.newViewModelOpen(department, SmallGroupSetSelfSignUpState.Closed), department, academicYear)
 
 			mav.map("department") should be(department)
 

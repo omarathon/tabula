@@ -1,6 +1,7 @@
 package uk.ac.warwick.tabula.commands.profiles.relationships
 
 import uk.ac.warwick.tabula.JavaImports.{JArrayList, JHashMap}
+import uk.ac.warwick.tabula.commands.profiles.relationships.AllocateStudentsToRelationshipCommand.Result
 import uk.ac.warwick.tabula.commands.profiles.relationships.ExtractRelationshipsFromFileCommand.AllocationTypes
 import uk.ac.warwick.tabula.data.model.ExternalStudentRelationship
 import uk.ac.warwick.tabula.services.{RelationshipService, RelationshipServiceComponent}
@@ -13,7 +14,7 @@ class AllocateStudentsToRelationshipCommandTest extends TestBase with Mockito {
 			with AllocateStudentsToRelationshipCommandRequest with AllocateStudentsToRelationshipCommandState
 			with RelationshipServiceComponent {
 
-			val relationshipService = smartMock[RelationshipService]
+			val relationshipService: RelationshipService = smartMock[RelationshipService]
 			relationshipService.getStudentAssociationDataWithoutRelationship(null, null, Seq()) returns mockDbUnallocated
 			relationshipService.getStudentAssociationEntityData(null, null, Seq()) returns mockDbAllocated
 		}
@@ -104,7 +105,7 @@ class AllocateStudentsToRelationshipCommandTest extends TestBase with Mockito {
 				"2" -> JArrayList("1"), // Regular removal
 				"3" -> JArrayList("2") // Student 2 isn't assigned to agent 3, so should be ignored
 			)
-			val result = command.applyInternal()
+			val result: Result = command.applyInternal()
 			result.addedRelationships.size should be (1)
 			result.addedRelationships.head.agent should be ("1")
 			result.addedRelationships.head.studentMember.get.universityId should be ("1")
@@ -125,7 +126,7 @@ class AllocateStudentsToRelationshipCommandTest extends TestBase with Mockito {
 			command.removals = JHashMap(
 				"2" -> JArrayList("2") // Should be ignored
 			)
-			val result = command.applyInternal()
+			val result: Result = command.applyInternal()
 			result.addedRelationships.size should be (1)
 			result.addedRelationships.head.agent should be ("3")
 			result.addedRelationships.head.studentMember.get.universityId should be ("1")

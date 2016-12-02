@@ -5,8 +5,9 @@ import org.springframework.web.bind.annotation.{ModelAttribute, PathVariable, Re
 import uk.ac.warwick.tabula.AcademicYear
 import uk.ac.warwick.tabula.commands.Appliable
 import uk.ac.warwick.tabula.data.model.Department
-import uk.ac.warwick.tabula.commands.reports.smallgroups.{AllSmallGroupsReportCommandResult, AllSmallGroupsReportCommand, SmallGroupsReportFilters}
+import uk.ac.warwick.tabula.commands.reports.smallgroups.{AllSmallGroupsReportCommand, AllSmallGroupsReportCommandResult, SmallGroupsReportFilters}
 import uk.ac.warwick.tabula.reports.web.Routes
+import uk.ac.warwick.tabula.web.Mav
 import uk.ac.warwick.tabula.web.controllers.reports.ReportsBreadcrumbs
 
 @Controller
@@ -24,7 +25,7 @@ class MissedSmallGroupsByModuleReportController extends AbstractSmallGroupsByMod
 		@ModelAttribute("filteredAttendanceCommand") cmd: Appliable[AllSmallGroupsReportCommandResult],
 		@PathVariable("department") department: Department,
 		@PathVariable("academicYear") academicYear: AcademicYear
-	) = {
+	): Mav = {
 		Mav("reports/smallgroups/missedByModule")
 			.crumbs(
 				ReportsBreadcrumbs.SmallGroups.Home(department, academicYear),

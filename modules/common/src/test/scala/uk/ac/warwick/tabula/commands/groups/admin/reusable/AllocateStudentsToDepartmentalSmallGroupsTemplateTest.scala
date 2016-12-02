@@ -1,10 +1,10 @@
 package uk.ac.warwick.tabula.commands.groups.admin.reusable
 
-import org.apache.poi.xssf.usermodel.XSSFSheet
+import org.apache.poi.xssf.usermodel.{XSSFRow, XSSFSheet, XSSFWorkbook}
 import uk.ac.warwick.tabula._
 import uk.ac.warwick.tabula.commands.{Appliable, ReadOnly, Unaudited}
-import uk.ac.warwick.tabula.data.model.groups.DepartmentSmallGroupSet
-import uk.ac.warwick.tabula.data.model.{UnspecifiedTypeUserGroup, UserGroup}
+import uk.ac.warwick.tabula.data.model.groups.{DepartmentSmallGroup, DepartmentSmallGroupSet}
+import uk.ac.warwick.tabula.data.model.{Department, UnspecifiedTypeUserGroup, UserGroup}
 import uk.ac.warwick.tabula.permissions.Permissions
 import uk.ac.warwick.tabula.services.{ProfileService, ProfileServiceComponent, UserGroupCacheManager}
 import uk.ac.warwick.tabula.system.permissions.PermissionsChecking
@@ -21,8 +21,8 @@ class AllocateStudentsToDepartmentalSmallGroupsTemplateTest extends TestBase wit
 			case ug: UserGroup => ug.userLookup = userLookup
 		}
 
-		val department = Fixtures.department("in", "IT Services")
-		val set = Fixtures.departmentSmallGroupSet("My small groups")
+		val department: Department = Fixtures.department("in", "IT Services")
+		val set: DepartmentSmallGroupSet = Fixtures.departmentSmallGroupSet("My small groups")
 
 		val user1 = new User("cuscav")
 		user1.setFoundUser(true)
@@ -62,10 +62,10 @@ class AllocateStudentsToDepartmentalSmallGroupsTemplateTest extends TestBase wit
 			user5.getUserId -> user5
 			)
 
-		val group1 = Fixtures.departmentSmallGroup("Group 1")
-		val group2 = Fixtures.departmentSmallGroup("Group 2")
-		val group3 = Fixtures.departmentSmallGroup("Group 3")
-		val group4 = Fixtures.departmentSmallGroup("Group 4")
+		val group1: DepartmentSmallGroup = Fixtures.departmentSmallGroup("Group 1")
+		val group2: DepartmentSmallGroup = Fixtures.departmentSmallGroup("Group 2")
+		val group3: DepartmentSmallGroup = Fixtures.departmentSmallGroup("Group 3")
+		val group4: DepartmentSmallGroup = Fixtures.departmentSmallGroup("Group 4")
 
 		group1.name = "Group 1"
 		group1.id = "abcdefgh1"
@@ -101,7 +101,7 @@ class AllocateStudentsToDepartmentalSmallGroupsTemplateTest extends TestBase wit
 
 	private trait CommandFixture extends Fixture {
 		val command = new AllocateStudentsToDepartmentalSmallGroupsTemplateCommandInternal(department, set) with ProfileServiceComponent {
-			val profileService = smartMock[ProfileService]
+			val profileService: ProfileService = smartMock[ProfileService]
 		}
 	}
 
@@ -114,11 +114,11 @@ class AllocateStudentsToDepartmentalSmallGroupsTemplateTest extends TestBase wit
 			}
 		}
 
-		val workbook = command.generateWorkbook()
+		val workbook: XSSFWorkbook = command.generateWorkbook()
 
-		val allocateSheet = workbook.getSheet(command.allocateSheetName)
+		val allocateSheet: XSSFSheet = workbook.getSheet(command.allocateSheetName)
 
-		val headerRow = allocateSheet.getRow(0)
+		val headerRow: XSSFRow = allocateSheet.getRow(0)
 		headerRow.getCell(0).toString should be ("student_id")
 		headerRow.getCell(1).toString should be ("Student name")
 		headerRow.getCell(2).toString should be ("Group name")
@@ -132,11 +132,11 @@ class AllocateStudentsToDepartmentalSmallGroupsTemplateTest extends TestBase wit
 	}}
 
 	@Test def groupLookupSheet { new CommandFixture {
-		val workbook = command.generateWorkbook()
+		val workbook: XSSFWorkbook = command.generateWorkbook()
 
-		val groupLookupSheet = workbook.getSheet(command.groupLookupSheetName)
+		val groupLookupSheet: XSSFSheet = workbook.getSheet(command.groupLookupSheetName)
 
-		var groupRow = groupLookupSheet.getRow(1)
+		var groupRow: XSSFRow = groupLookupSheet.getRow(1)
 		groupRow.getCell(0).toString should be ("Group 1")
 		groupRow.getCell(1).toString should be ("abcdefgh1")
 
@@ -154,7 +154,7 @@ class AllocateStudentsToDepartmentalSmallGroupsTemplateTest extends TestBase wit
 	}}
 
 	@Test def checkExcelView { new CommandFixture {
-		val excelDownload = command.applyInternal()
+		val excelDownload: ExcelView = command.applyInternal()
 
 		excelDownload.getContentType() should be ("application/vnd.openxmlformats-officedocument.spreadsheetml.sheet")
 	}}
@@ -162,11 +162,11 @@ class AllocateStudentsToDepartmentalSmallGroupsTemplateTest extends TestBase wit
 	@Test def permissions { new Fixture {
 		val (theDepartment, theSet) = (department, set)
 		val command = new AllocateStudentsToDepartmentalSmallGroupsTemplatePermissions with AllocateStudentsToDepartmentalSmallGroupsTemplateCommandState {
-			val department = theDepartment
-			val set = theSet
+			val department: Department = theDepartment
+			val set: DepartmentSmallGroupSet = theSet
 		}
 
-		val checking = mock[PermissionsChecking]
+		val checking: PermissionsChecking = mock[PermissionsChecking]
 		command.permissionsCheck(checking)
 
 		verify(checking, times(1)).PermissionCheck(Permissions.SmallGroups.Allocate, set)
@@ -184,7 +184,7 @@ class AllocateStudentsToDepartmentalSmallGroupsTemplateTest extends TestBase wit
 
 	@Test(expected = classOf[ItemNotFoundException]) def permissionsNoSet {
 		val command = new AllocateStudentsToDepartmentalSmallGroupsTemplatePermissions with AllocateStudentsToDepartmentalSmallGroupsTemplateCommandState {
-			val department = Fixtures.department("in")
+			val department: Department = Fixtures.department("in")
 			val set = null
 		}
 
@@ -194,7 +194,7 @@ class AllocateStudentsToDepartmentalSmallGroupsTemplateTest extends TestBase wit
 
 	@Test(expected = classOf[ItemNotFoundException]) def permissionsUnlinkedSet {
 		val command = new AllocateStudentsToDepartmentalSmallGroupsTemplatePermissions with AllocateStudentsToDepartmentalSmallGroupsTemplateCommandState {
-			val department = Fixtures.department("in")
+			val department: Department = Fixtures.department("in")
 			department.id = "set id"
 
 			val set = new DepartmentSmallGroupSet(Fixtures.department("other"))

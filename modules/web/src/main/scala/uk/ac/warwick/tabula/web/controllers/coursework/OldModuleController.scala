@@ -10,6 +10,7 @@ import org.springframework.stereotype._
 import collection.JavaConversions._
 import uk.ac.warwick.tabula.commands.ViewViewableCommand
 import uk.ac.warwick.tabula.permissions._
+import uk.ac.warwick.tabula.web.Mav
 
 class ViewModuleCommand(module: Module) extends ViewViewableCommand(Permissions.Module.ManageAssignments, module)
 
@@ -22,7 +23,7 @@ class OldModuleController extends OldCourseworkController {
 	@ModelAttribute def command(@PathVariable module: Module) = new ViewModuleCommand(module)
 
 	@RequestMapping
-	def viewModule(@ModelAttribute cmd: ViewModuleCommand) = {
+	def viewModule(@ModelAttribute cmd: ViewModuleCommand): Mav = {
 		val module = cmd.apply()
 
 		Mav(s"$urlPrefix/submit/module",

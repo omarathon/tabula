@@ -37,7 +37,7 @@ class AttendanceMonitoringSchemeFixtureCommand extends CommandInternal[Attendanc
 	var pointCount: Int = _
 	var warwickId: String = _
 
-	def applyInternal() = transactional() {
+	def applyInternal(): AttendanceMonitoringScheme = transactional() {
 
 		val amDao = Wire[AttendanceMonitoringDao]
 

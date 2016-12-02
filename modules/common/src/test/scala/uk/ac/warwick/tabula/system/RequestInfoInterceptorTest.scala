@@ -12,8 +12,8 @@ class RequestInfoInterceptorTest extends TestBase with Mockito {
 
 	val interceptor = new RequestInfoInterceptor
 
-	val maintenanceModeService = mock[MaintenanceModeService]
-	val emergencyMessageService = mock[EmergencyMessageService]
+	val maintenanceModeService: MaintenanceModeService = mock[MaintenanceModeService]
+	val emergencyMessageService: EmergencyMessageService = mock[EmergencyMessageService]
 	interceptor.maintenance = maintenanceModeService
 	interceptor.emergencyMessage = emergencyMessageService
 

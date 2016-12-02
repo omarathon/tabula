@@ -4,6 +4,7 @@ import org.springframework.stereotype.Controller
 import org.springframework.web.bind.annotation.{PathVariable, RequestMapping}
 import uk.ac.warwick.tabula.data.model.{ScheduledMeetingRecord, StudentCourseDetails, StudentRelationshipType}
 import uk.ac.warwick.tabula.profiles.web.Routes
+import uk.ac.warwick.tabula.web.Mav
 import uk.ac.warwick.tabula.web.controllers.profiles.ProfilesController
 
 
@@ -16,7 +17,7 @@ class ChooseScheduledMeetingRecordActionController extends ProfilesController {
 		@PathVariable relationshipType: StudentRelationshipType,
 		@PathVariable studentCourseDetails: StudentCourseDetails,
 		@PathVariable meetingRecord: ScheduledMeetingRecord
-	) = {
+	): Mav = {
 		Redirect(Routes.scheduledMeeting.confirm(meetingRecord, studentCourseDetails, relationshipType))
 	}
 
@@ -25,7 +26,7 @@ class ChooseScheduledMeetingRecordActionController extends ProfilesController {
 		@PathVariable relationshipType: StudentRelationshipType,
 		@PathVariable studentCourseDetails: StudentCourseDetails,
 		@PathVariable meetingRecord: ScheduledMeetingRecord
-	) = {
+	): Mav = {
 		Redirect(Routes.scheduledMeeting.reschedule(meetingRecord, studentCourseDetails, relationshipType))
 	}
 
@@ -34,14 +35,14 @@ class ChooseScheduledMeetingRecordActionController extends ProfilesController {
 		@PathVariable relationshipType: StudentRelationshipType,
 		@PathVariable studentCourseDetails: StudentCourseDetails,
 		@PathVariable meetingRecord: ScheduledMeetingRecord
-	) = {
+	): Mav = {
 		Redirect(Routes.scheduledMeeting.missed(meetingRecord, studentCourseDetails, relationshipType))
 	}
 
 	@RequestMapping
 	def none(
 		@PathVariable meetingRecord: ScheduledMeetingRecord
-	) = {
+	): Mav = {
 		Redirect(
 			Routes.Profile.relationshipType(
 				meetingRecord.relationship.studentMember.getOrElse(throw new IllegalArgumentException),

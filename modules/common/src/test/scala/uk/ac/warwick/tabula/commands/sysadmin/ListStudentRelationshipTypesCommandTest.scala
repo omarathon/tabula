@@ -11,7 +11,7 @@ class ListStudentRelationshipTypesCommandTest extends TestBase with Mockito {
 
 	private trait Fixture {
 		val commandInternal = new ListStudentRelationshipTypesCommandInternal with RelationshipServiceComponent {
-			var relationshipService = mock[RelationshipService]
+			var relationshipService: RelationshipService = mock[RelationshipService]
 		}
 	}
 
@@ -44,7 +44,7 @@ class ListStudentRelationshipTypesCommandTest extends TestBase with Mockito {
 	def permissionsRequireGlobalStudentRelationshipTypeRead {
 		new Fixture {
 			val perms = new ListStudentRelationshipTypesCommandPermissions() {}
-			val checking = mock[PermissionsChecking]
+			val checking: PermissionsChecking = mock[PermissionsChecking]
 			perms.permissionsCheck(checking)
 			verify(checking, times(1)).PermissionCheck(Permissions.StudentRelationshipType.Read)
 		}

@@ -24,7 +24,7 @@ class EditAttendanceTemplateCommandInternal(val template: AttendanceMonitoringTe
 
 	self: EditAttendanceTemplateCommandState with AttendanceMonitoringServiceComponent =>
 
-	override def applyInternal() = {
+	override def applyInternal(): AttendanceMonitoringTemplate = {
 		template.templateName = name
 		template.pointStyle = pointStyle
 		template.updatedDate = DateTime.now
@@ -38,7 +38,7 @@ trait PopulatesEditAttendanceTemplateCommand extends PopulateOnForm {
 
 	self: EditAttendanceTemplateCommandState =>
 
-	override def populate() = {
+	override def populate(): Unit = {
 		name = template.templateName
 		pointStyle = template.pointStyle
 	}

@@ -16,15 +16,15 @@ class ImportStudentCourseCommand(rows: Seq[SitsStudentRow], stuMem: StudentMembe
 	extends Command[StudentCourseDetails] with Logging with Daoisms
 	with Unaudited with PropertyCopying {
 
-	var memberDao = Wire[MemberDao]
-	var relationshipService = Wire[RelationshipService]
-	var studentCourseDetailsDao = Wire[StudentCourseDetailsDao]
-	var courseAndRouteService = Wire[CourseAndRouteService]
-	var awardService = Wire[AwardService]
-	var courseImporter = Wire[CourseImporter]
-	var awardImporter = Wire[AwardImporter]
+	var memberDao: MemberDao = Wire[MemberDao]
+	var relationshipService: RelationshipService = Wire[RelationshipService]
+	var studentCourseDetailsDao: StudentCourseDetailsDao = Wire[StudentCourseDetailsDao]
+	var courseAndRouteService: CourseAndRouteService = Wire[CourseAndRouteService]
+	var awardService: AwardService = Wire[AwardService]
+	var courseImporter: CourseImporter = Wire[CourseImporter]
+	var awardImporter: AwardImporter = Wire[AwardImporter]
 	
-	val courseRow = rows.head
+	val courseRow: SitsStudentRow = rows.head
 
 	override def applyInternal(): StudentCourseDetails = {
 
@@ -124,7 +124,7 @@ class ImportStudentCourseCommand(rows: Seq[SitsStudentRow], stuMem: StudentMembe
 		copyAcademicYear("sprStartAcademicYear", courseRow.sprStartAcademicYearString, studentCourseDetailsBean)
 	}
 
-	def captureTutor(studentCourseDetails: StudentCourseDetails) = {
+	def captureTutor(studentCourseDetails: StudentCourseDetails): Unit = {
 		val dept = studentCourseDetails.department
 		if (dept == null)
 			logger.warn("Trying to capture tutor for " + courseRow.sprCode + " but department is null.")
@@ -172,5 +172,5 @@ class ImportStudentCourseCommand(rows: Seq[SitsStudentRow], stuMem: StudentMembe
 		}
 	}
 
-	override def describe(d: Description) = d.property("scjCode" -> courseRow.scjCode)
+	override def describe(d: Description): Unit = d.property("scjCode" -> courseRow.scjCode)
 }

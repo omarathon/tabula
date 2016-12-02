@@ -3,6 +3,7 @@ package uk.ac.warwick.tabula.data.model
 import org.hibernate.annotations._
 import org.joda.time.LocalDate
 import javax.persistence._
+
 import uk.ac.warwick.tabula.JavaImports._
 import uk.ac.warwick.tabula.ToString
 import uk.ac.warwick.tabula.permissions.PermissionsTarget
@@ -13,8 +14,11 @@ import uk.ac.warwick.spring.Wire
 import uk.ac.warwick.tabula.AcademicYear
 import javax.persistence.Entity
 import javax.persistence.CascadeType
+
 import scala.collection.JavaConverters._
 import uk.ac.warwick.tabula.data.convert.ConvertibleConverter
+
+import scala.collection.mutable
 
 object StudentCourseDetails {
 	final val FreshCourseDetailsOnlyFilter = "freshStudentCourseDetailsOnly"
@@ -36,7 +40,7 @@ class StudentCourseDetails
 	with Ordered[StudentCourseDetails] {
 
 	@transient
-	var relationshipService = Wire.auto[RelationshipService]
+	var relationshipService: RelationshipService = Wire.auto[RelationshipService]
 
 	def this(student: StudentMember, scjCode: String) {
 		this()
@@ -45,8 +49,8 @@ class StudentCourseDetails
 	}
 
 	@Id var scjCode: String = _
-	def id = scjCode
-	def urlSafeId = scjCode.replace("/", "_")
+	def id: String = scjCode
+	def urlSafeId: String = scjCode.replace("/", "_")
 
 	@ManyToOne(fetch = FetchType.LAZY)
 	@JoinColumn(name="universityId", referencedColumnName="universityId")
@@ -58,8 +62,8 @@ class StudentCourseDetails
 	@BatchSize(size=200)
 	private val studentCourseYearDetails: JSet[StudentCourseYearDetails] = JHashSet()
 
-	def freshStudentCourseYearDetails = studentCourseYearDetails.asScala.filter(scyd => scyd.isFresh).toSeq.sorted
-	def freshOrStaleStudentCourseYearDetails = studentCourseYearDetails.asScala
+	def freshStudentCourseYearDetails: Seq[StudentCourseYearDetails] = studentCourseYearDetails.asScala.filter(scyd => scyd.isFresh).toSeq.sorted
+	def freshOrStaleStudentCourseYearDetails: mutable.Set[StudentCourseYearDetails] = studentCourseYearDetails.asScala
 
 	def freshOrStaleStudentCourseYearDetailsForYear(academicYear: AcademicYear): Option[StudentCourseYearDetails] =  {
 		studentCourseYearDetails.asScala.filter(_.academicYear == academicYear).lastOption
@@ -69,10 +73,10 @@ class StudentCourseDetails
 	@BatchSize(size=200)
 	private val _moduleRegistrations: JSet[ModuleRegistration] = JHashSet()
 
-	def moduleRegistrations = _moduleRegistrations.asScala.toSeq.sortBy { reg => reg.module.code }
-	def addModuleRegistration(moduleRegistration: ModuleRegistration) = _moduleRegistrations.add(moduleRegistration)
-	def removeModuleRegistration(moduleRegistration: ModuleRegistration) = _moduleRegistrations.remove(moduleRegistration)
-	def clearModuleRegistrations() = _moduleRegistrations.clear()
+	def moduleRegistrations: Seq[ModuleRegistration] = _moduleRegistrations.asScala.toSeq.sortBy { reg => reg.module.code }
+	def addModuleRegistration(moduleRegistration: ModuleRegistration): Boolean = _moduleRegistrations.add(moduleRegistration)
+	def removeModuleRegistration(moduleRegistration: ModuleRegistration): Boolean = _moduleRegistrations.remove(moduleRegistration)
+	def clearModuleRegistrations(): Unit = _moduleRegistrations.clear()
 
 	def registeredModulesByYear(year: Option[AcademicYear]): Seq[Module] = moduleRegistrationsByYear(year).map(_.module)
 
@@ -86,7 +90,7 @@ class StudentCourseDetails
 	@BatchSize(size=200)
 	private val _accreditedPriorLearning: JSet[AccreditedPriorLearning] = JHashSet()
 
-	def accreditedPriorLearning = _accreditedPriorLearning.asScala.toSeq
+	def accreditedPriorLearning: Seq[AccreditedPriorLearning] = _accreditedPriorLearning.asScala.toSeq
 
 	def accreditedPriorLearningByYear(year: Option[AcademicYear]): Seq[AccreditedPriorLearning] =
 		accreditedPriorLearning.collect {
@@ -98,7 +102,7 @@ class StudentCourseDetails
 		"scjCode" -> scjCode,
 		"sprCode" -> sprCode)
 
-	def permissionsParents = {
+	def permissionsParents: Stream[StringId with Serializable with PermissionsTarget] = {
 		val latestYearDetails = Option(latestStudentCourseYearDetails)
 		val enrolmentDepartment = latestYearDetails.flatMap { scyd => Option(scyd.enrolmentDepartment) }
 
@@ -119,7 +123,7 @@ class StudentCourseDetails
 	// The reason this method isn't on SitsStatus is that P* can have a meaning other than
 	// permanently withdrawn in the context of applicants, but not in the context of
 	// the student's route status (sprStatus)
-	def permanentlyWithdrawn = {
+	def permanentlyWithdrawn: Boolean = {
 		statusOnRoute != null && statusOnRoute.code.startsWith("P")
 	}
 
@@ -148,16 +152,16 @@ class StudentCourseDetails
 
 	// We can't restrict this because it's not a getter. Restrict in
 	// view code if necessary (or implement for all methods in  ScalaBeansWrapper)
-	def relationships(relationshipType: StudentRelationshipType) =
+	def relationships(relationshipType: StudentRelationshipType): Seq[StudentRelationship] =
 		relationshipService.findCurrentRelationships(relationshipType, this)
 
-	def hasRelationship(relationshipType: StudentRelationshipType) = relationships(relationshipType).nonEmpty
+	def hasRelationship(relationshipType: StudentRelationshipType): Boolean = relationships(relationshipType).nonEmpty
 
 	def compare(that:StudentCourseDetails): Int = {
 		this.scjCode.compare(that.scjCode)
 	}
 
-	def equals(that:StudentCourseDetails) = this.scjCode == that.scjCode
+	def equals(that:StudentCourseDetails): Boolean = this.scjCode == that.scjCode
 
 	def attachStudentCourseYearDetails(yearDetailsToAdd: StudentCourseYearDetails) {
 		studentCourseYearDetails.remove(yearDetailsToAdd)
@@ -166,18 +170,18 @@ class StudentCourseDetails
 		latestStudentCourseYearDetails = freshStudentCourseYearDetails.max
 	}
 
-	def isFresh = missingFromImportSince == null
+	def isFresh: Boolean = missingFromImportSince == null
 
 	// use these methods ONLY for tests, as they don't automagically update latestStudentCourseYearDetails
-	def addStudentCourseYearDetails(scyd: StudentCourseYearDetails) = studentCourseYearDetails.add(scyd)
-	def removeStudentCourseYearDetails(scyd: StudentCourseYearDetails) = studentCourseYearDetails.remove(scyd)
+	def addStudentCourseYearDetails(scyd: StudentCourseYearDetails): Boolean = studentCourseYearDetails.add(scyd)
+	def removeStudentCourseYearDetails(scyd: StudentCourseYearDetails): Boolean = studentCourseYearDetails.remove(scyd)
 
-	def beginYear = beginDate match {
+	def beginYear: JInteger = beginDate match {
 		case begin: LocalDate => new Integer(beginDate.year().getAsText)
 		case null => new Integer(0)
 	}
 
-	def endYear = endDate match {
+	def endYear: JInteger = endDate match {
 		case null =>
 			expectedEndDate match {
 				case expectedEnd: LocalDate => new Integer(expectedEndDate.year().getAsText)
@@ -199,12 +203,12 @@ class StudentCourseDetails
 		}
 	}
 
-	def hasAccreditedPriorLearning = accreditedPriorLearning.nonEmpty
+	def hasAccreditedPriorLearning: Boolean = accreditedPriorLearning.nonEmpty
 
-	def isEnded = endDate != null && endDate.isBefore(DateTime.now.toLocalDate)
+	def isEnded: Boolean = endDate != null && endDate.isBefore(DateTime.now.toLocalDate)
 
 	// we won't automatically expire a relationship if it ended recently
-	def hasEndedRecently = endDate != null &&
+	def hasEndedRecently: Boolean = endDate != null &&
 		endDate.toDateTimeAtStartOfDay.plusMonths(StudentCourseDetails.GracePeriodInMonths).isAfterNow
 
 }
@@ -241,7 +245,7 @@ trait BasicStudentCourseProperties {
 }
 
 trait StudentCourseProperties extends BasicStudentCourseProperties {
-	var lastUpdatedDate = DateTime.now
+	var lastUpdatedDate: DateTime = DateTime.now
 	var missingFromImportSince: DateTime = _
 
 	@ManyToOne(fetch = FetchType.LAZY)
@@ -283,11 +287,11 @@ trait StudentCourseProperties extends BasicStudentCourseProperties {
 }
 
 sealed abstract class CourseType(val code: String, val level: String, val description: String, val courseCodeChar: Char) extends Convertible[String] with Product with Serializable {
-	def value = code
+	def value: String = code
 }
 
 object CourseType {
-	implicit val factory = { code: String => CourseType(code) }
+	implicit val factory: (String) => CourseType = { code: String => CourseType(code) }
 
 	case object PGR extends CourseType("PG(R)", "Postgraduate", "Postgraduate (Research)", 'R')
 	case object PGT extends CourseType("PG(T)", "Postgraduate", "Postgraduate (Taught)", 'T')

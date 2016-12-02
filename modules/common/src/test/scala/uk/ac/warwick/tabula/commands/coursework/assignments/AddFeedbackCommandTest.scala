@@ -8,7 +8,7 @@ import uk.ac.warwick.tabula.commands.UploadedFile
 import uk.ac.warwick.tabula.MockUserLookup
 import uk.ac.warwick.tabula.services.objectstore.ObjectStorageService
 import uk.ac.warwick.userlookup.User
-import uk.ac.warwick.tabula.data.model.FileAttachment
+import uk.ac.warwick.tabula.data.model.{Assignment, FileAttachment, Module}
 import org.springframework.mock.web.MockMultipartFile
 import uk.ac.warwick.tabula.data.FileDao
 import org.springframework.beans.factory.annotation.Autowired
@@ -18,14 +18,14 @@ import uk.ac.warwick.tabula.Mockito
 // scalastyle:off magic.number
 class AddFeedbackCommandTest extends TestBase with Mockito {
 
-	var objectStorageService = smartMock[ObjectStorageService]
+	var objectStorageService: ObjectStorageService = smartMock[ObjectStorageService]
 
 	// Start from the basis that the store is empty
 	objectStorageService.fetch(any[String]) returns None
 	objectStorageService.metadata(any[String]) returns None
 
-	val module = Fixtures.module("cs118")
-	val assignment = Fixtures.assignment("my assignment")
+	val module: Module = Fixtures.module("cs118")
+	val assignment: Assignment = Fixtures.assignment("my assignment")
 	assignment.module = module
 
 	val userLookup = new MockUserLookup

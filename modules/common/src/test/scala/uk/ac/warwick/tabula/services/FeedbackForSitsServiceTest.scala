@@ -1,6 +1,6 @@
 package uk.ac.warwick.tabula.services
 
-import uk.ac.warwick.tabula.{Fixtures, Mockito, TestBase}
+import uk.ac.warwick.tabula.{CurrentUser, Fixtures, Mockito, TestBase}
 import uk.ac.warwick.tabula.data.{FeedbackForSitsDao, FeedbackForSitsDaoComponent}
 import uk.ac.warwick.tabula.data.model._
 import uk.ac.warwick.userlookup.User
@@ -9,26 +9,26 @@ import org.joda.time.DateTime
 class FeedbackForSitsServiceTest extends TestBase with Mockito {
 
 	trait ServiceTestSupport extends FeedbackForSitsDaoComponent {
-		val feedbackForSitsDao = smartMock[FeedbackForSitsDao]
+		val feedbackForSitsDao: FeedbackForSitsDao = smartMock[FeedbackForSitsDao]
 	}
 
 	trait Fixture {
 		val service = new AbstractFeedbackForSitsService with ServiceTestSupport
-		val feedback = Fixtures.assignmentFeedback("someFeedback")
+		val feedback: AssignmentFeedback = Fixtures.assignmentFeedback("someFeedback")
 		feedback.assignment = new Assignment
 		feedback.assignment.module = new Module
 		feedback.assignment.module.adminDepartment = new Department
 		feedback.assignment.module.adminDepartment.assignmentGradeValidation = true
 		feedback.actualMark = Some(100)
-		val submitter = currentUser
-		val gradeGenerator = smartMock[GeneratesGradesFromMarks]
+		val submitter: CurrentUser = currentUser
+		val gradeGenerator: GeneratesGradesFromMarks = smartMock[GeneratesGradesFromMarks]
 		gradeGenerator.applyForMarks(Map(feedback.universityId -> feedback.actualMark.get)) returns Map(feedback.universityId -> Seq(GradeBoundary(null, "A", 0, 100, "N")))
 	}
 
 	@Test
 	def queueNewFeedbackForSits() = withUser("abcde")	{ new Fixture {
 		service.getByFeedback(feedback) returns None
-		val feedbackForSits = service.queueFeedback(feedback, submitter, gradeGenerator).get
+		val feedbackForSits: FeedbackForSits = service.queueFeedback(feedback, submitter, gradeGenerator).get
 
 		feedbackForSits.feedback should be(feedback)
 		feedbackForSits.initialiser should be(currentUser.apparentUser)
@@ -41,7 +41,7 @@ class FeedbackForSitsServiceTest extends TestBase with Mockito {
 		val existingFeedbackForSits = new FeedbackForSits
 		val grade = "B"
 		val mark = 72
-		val firstCreatedDate = new DateTime().minusWeeks(2)
+		val firstCreatedDate: DateTime = new DateTime().minusWeeks(2)
 		existingFeedbackForSits.actualGradeLastUploaded = grade
 		existingFeedbackForSits.actualMarkLastUploaded = mark
 		existingFeedbackForSits.initialiser = new User("cuscao")
@@ -49,7 +49,7 @@ class FeedbackForSitsServiceTest extends TestBase with Mockito {
 		existingFeedbackForSits.lastInitialisedOn = firstCreatedDate
 		service.getByFeedback(feedback) returns Some(existingFeedbackForSits)
 
-		val feedbackForSits = service.queueFeedback(feedback, submitter, gradeGenerator).get
+		val feedbackForSits: FeedbackForSits = service.queueFeedback(feedback, submitter, gradeGenerator).get
 
 		feedbackForSits.feedback should be(feedback)
 		feedbackForSits.initialiser should be(currentUser.apparentUser)

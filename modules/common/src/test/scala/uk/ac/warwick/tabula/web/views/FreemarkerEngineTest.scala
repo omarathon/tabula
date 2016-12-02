@@ -18,7 +18,7 @@ class FreemarkerEngineTest extends TestBase {
 		Routes.coursework._cm1Prefix = Some("coursework")
 	}
 
-	def render(template:String, map:Map[String,Any]) = {
+	def render(template:String, map:Map[String,Any]): String = {
 		val writer = new StringWriter
 		configuration.getTemplate(template).process(map, writer)
 		writer.toString

@@ -16,7 +16,7 @@ class AddSubDepartmentCommandTest extends TestBase  with FunctionalContextTestin
 	import AddSubDepartmentCommandTest.MinimalCommandContext
 
 	trait CommandTestSupport extends AddSubDepartmentCommandState with ModuleAndDepartmentServiceComponent {
-		val moduleAndDepartmentService = mock[ModuleAndDepartmentService]
+		val moduleAndDepartmentService: ModuleAndDepartmentService = mock[ModuleAndDepartmentService]
 
 		moduleAndDepartmentService.getDepartmentByCode("in-pg") returns Some(Fixtures.department("in-pg", "IT Services Postgraduate"))
 		moduleAndDepartmentService.getDepartmentByCode(isNotEq("in-pg")) returns None
@@ -24,15 +24,15 @@ class AddSubDepartmentCommandTest extends TestBase  with FunctionalContextTestin
 
 	trait Fixture {
 
-		val parent = Fixtures.department("in", "IT Services")
+		val parent: Department = Fixtures.department("in", "IT Services")
 		parent.id = "in-test"
 		parent.allowExtensionRequests = true
 		parent.autoGroupDeregistration = false
 
-		val ug = UserGroup.ofUsercodes
+		val ug: UserGroup = UserGroup.ofUsercodes
 		ug.addUserId("cuslaj")
 
-		val permissionsService = mock[PermissionsService]
+		val permissionsService: PermissionsService = mock[PermissionsService]
 		permissionsService.ensureUserGroupFor(parent, ExtensionManagerRoleDefinition) returns ug
 		parent.permissionsService = permissionsService
 
@@ -51,7 +51,7 @@ class AddSubDepartmentCommandTest extends TestBase  with FunctionalContextTestin
 		command.name = "IT Services Undergraduate"
 		command.filterRule = Department.UndergraduateFilterRule
 
-		val dept = command.applyInternal()
+		val dept: Department = command.applyInternal()
 		dept.code should be ("in-ug")
 		dept.name should be ("IT Services Undergraduate")
 		dept.filterRule should be (Department.UndergraduateFilterRule)

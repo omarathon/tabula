@@ -25,7 +25,7 @@ trait SupervisorImporter {
 class SupervisorImporterImpl extends SupervisorImporter {
 	import SupervisorImporter._
 
-	var sits = Wire[DataSource]("sitsDataSource")
+	var sits: DataSource = Wire[DataSource]("sitsDataSource")
 
 	lazy val supervisorMappingQuery = new SupervisorMappingQuery(sits)
 
@@ -57,7 +57,7 @@ object SupervisorImporter {
 		this.declareParameter(new SqlParameter("scj_code", Types.VARCHAR))
 		this.declareParameter(new SqlParameter("sits_examiner_type", Types.VARCHAR))
 		this.compile()
-		override def mapRow(rs: ResultSet, rowNumber: Int, params: Array[java.lang.Object], context: JMap[_, _]) = {
+		override def mapRow(rs: ResultSet, rowNumber: Int, params: Array[java.lang.Object], context: JMap[_, _]): (String, JBigDecimal) = {
 			(rs.getString("prs_udf1"), rs.getBigDecimal("rdx_perc"))
 		}
 	}

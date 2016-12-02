@@ -27,8 +27,8 @@ trait ImportModuleListsCommand extends CommandInternal[Unit]
 		p.PermissionCheck(Permissions.ImportSystemData)
 	}
 
-	var moduleListImporter = Wire[ModuleListImporter]
-	var upstreamModuleListService = Wire[UpstreamModuleListService]
+	var moduleListImporter: ModuleListImporter = Wire[ModuleListImporter]
+	var upstreamModuleListService: UpstreamModuleListService = Wire[UpstreamModuleListService]
 
 	val ImportGroupSize = 100
 

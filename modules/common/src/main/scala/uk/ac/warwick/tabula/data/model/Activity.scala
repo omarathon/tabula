@@ -29,15 +29,15 @@ class Activity[A](
 ) {
 
 	// Expose entity type for Freemarker
-	def getEntityType = entity.getClass.getSimpleName
+	def getEntityType: String = entity.getClass.getSimpleName
 }
 
 /** Companion object offers apply method to construct new Activities,
  *  drawing its data from other types.
  */
 object Activity {
-	var userLookup = Wire[UserLookupService]
-	var submissionService = Wire[SubmissionService]
+	var userLookup: UserLookupService = Wire[UserLookupService]
+	var submissionService: SubmissionService = Wire[SubmissionService]
 
 	// given an AuditEvent...
 	def apply(event: AuditEvent): Option[Activity[Any]] = {

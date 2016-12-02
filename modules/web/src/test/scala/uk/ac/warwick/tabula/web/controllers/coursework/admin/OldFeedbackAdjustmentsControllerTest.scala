@@ -3,10 +3,11 @@ package uk.ac.warwick.tabula.web.controllers.coursework.admin
 import org.joda.time.{DateTime, DateTimeConstants}
 import uk.ac.warwick.tabula.commands.Appliable
 import uk.ac.warwick.tabula.commands.coursework.feedback.FeedbackAdjustmentCommandState
-import uk.ac.warwick.tabula.data.model.{Assignment, Feedback}
+import uk.ac.warwick.tabula.data.model._
 import uk.ac.warwick.tabula.helpers.Tap._
 import uk.ac.warwick.tabula.services.{GeneratesGradesFromMarks, ProfileService}
 import uk.ac.warwick.tabula._
+import uk.ac.warwick.tabula.web.Mav
 import uk.ac.warwick.userlookup.User
 
 class OldFeedbackAdjustmentsControllerTest extends TestBase with Mockito {
@@ -18,12 +19,12 @@ class OldFeedbackAdjustmentsControllerTest extends TestBase with Mockito {
 	}
 
 	private trait CommandFixture {
-		val assignment = Fixtures.assignment("5,000 word essay")
+		val assignment: Assignment = Fixtures.assignment("5,000 word essay")
 		assignment.module = Fixtures.module("cs118")
 		assignment.module.adminDepartment = Fixtures.department("cs")
 
-		val submission = Fixtures.submission("1234567").tap { _.assignment = assignment }
-		val feedback = Fixtures.assignmentFeedback("1234567").tap { f =>
+		val submission: Submission = Fixtures.submission("1234567").tap { _.assignment = assignment }
+		val feedback: AssignmentFeedback = Fixtures.assignmentFeedback("1234567").tap { f =>
 			f.assignment = assignment
 			f.actualMark = Some(50)
 		}
@@ -44,21 +45,21 @@ class OldFeedbackAdjustmentsControllerTest extends TestBase with Mockito {
 	}
 
 	private trait UGStudentFixture extends ControllerFixture with CommandFixture {
-		val ugStudent = Fixtures.student("1234567")
+		val ugStudent: StudentMember = Fixtures.student("1234567")
 		ugStudent.mostSignificantCourse.course = Fixtures.course("U100-ABCD")
 
 		controller.profileService.getMemberByUniversityId("1234567") returns Some(ugStudent)
 	}
 
 	private trait PGStudentFixture extends ControllerFixture with CommandFixture {
-		val pgStudent = Fixtures.student("1234567")
+		val pgStudent: StudentMember = Fixtures.student("1234567")
 		pgStudent.mostSignificantCourse.course = Fixtures.course("TESA-H64A")
 
 		controller.profileService.getMemberByUniversityId("1234567") returns Some(pgStudent)
 	}
 
 	private trait FoundationStudentFixture extends ControllerFixture with CommandFixture {
-		val foundationStudent = Fixtures.student("1234567")
+		val foundationStudent: StudentMember = Fixtures.student("1234567")
 		foundationStudent.mostSignificantCourse.course = Fixtures.course("FFFF-FFFF")
 
 		controller.profileService.getMemberByUniversityId("1234567") returns Some(foundationStudent)
@@ -72,7 +73,7 @@ class OldFeedbackAdjustmentsControllerTest extends TestBase with Mockito {
 		assignment.closeDate = new DateTime(2014, DateTimeConstants.SEPTEMBER, 16, 9, 0, 0, 0)
 		submission.submittedDate = new DateTime(2014, DateTimeConstants.SEPTEMBER, 17, 15, 0, 0, 0)
 
-		val mav = controller.showForm(command, assignment, thisStudent)
+		val mav: Mav = controller.showForm(command, assignment, thisStudent)
 		mav.viewName should be ("coursework/admin/assignments/feedback/adjustments")
 		mav.toModel("daysLate") should be (Some(2))
 		mav.toModel("marksSubtracted") should be (Some(10))
@@ -84,7 +85,7 @@ class OldFeedbackAdjustmentsControllerTest extends TestBase with Mockito {
 		assignment.closeDate = new DateTime(2014, DateTimeConstants.SEPTEMBER, 16, 9, 0, 0, 0)
 		submission.submittedDate = new DateTime(2014, DateTimeConstants.SEPTEMBER, 17, 15, 0, 0, 0)
 
-		val mav = controller.showForm(command, assignment, thisStudent)
+		val mav: Mav = controller.showForm(command, assignment, thisStudent)
 		mav.viewName should be ("coursework/admin/assignments/feedback/adjustments")
 		mav.toModel("daysLate") should be (Some(2))
 		mav.toModel("marksSubtracted") should be (Some(6))
@@ -96,7 +97,7 @@ class OldFeedbackAdjustmentsControllerTest extends TestBase with Mockito {
 		submission.submittedDate = new DateTime(2014, DateTimeConstants.SEPTEMBER, 17, 15, 0, 0, 0)
 		assignment.openEnded = true
 
-		val mav = controller.showForm(command, assignment, thisStudent)
+		val mav: Mav = controller.showForm(command, assignment, thisStudent)
 		mav.viewName should be ("coursework/admin/assignments/feedback/adjustments")
 		mav.toModel("daysLate") should be (Some(0))
 		mav.toModel("marksSubtracted") should be (Some(0))
@@ -108,7 +109,7 @@ class OldFeedbackAdjustmentsControllerTest extends TestBase with Mockito {
 		assignment.closeDate = new DateTime(2014, DateTimeConstants.SEPTEMBER, 16, 9, 0, 0, 0)
 		submission.submittedDate = new DateTime(2014, DateTimeConstants.SEPTEMBER, 17, 15, 0, 0, 0)
 
-		val mav = controller.showForm(command, assignment, thisStudent)
+		val mav: Mav = controller.showForm(command, assignment, thisStudent)
 		mav.viewName should be ("coursework/admin/assignments/feedback/adjustments")
 		mav.toModel("daysLate") should be (Some(2))
 		mav.toModel("marksSubtracted") should be (Some(10))
@@ -120,7 +121,7 @@ class OldFeedbackAdjustmentsControllerTest extends TestBase with Mockito {
 		assignment.closeDate = new DateTime(2014, DateTimeConstants.SEPTEMBER, 16, 9, 0, 0, 0)
 		submission.submittedDate = new DateTime(2014, DateTimeConstants.SEPTEMBER, 17, 15, 0, 0, 0)
 
-		val mav = controller.showForm(command, assignment, thisStudent)
+		val mav: Mav = controller.showForm(command, assignment, thisStudent)
 		mav.viewName should be ("coursework/admin/assignments/feedback/adjustments")
 		mav.toModel("daysLate") should be (Some(2))
 		mav.toModel("marksSubtracted") should be (Some(10))

@@ -12,7 +12,7 @@ class AddStudentRelationshipTypeCommandTest extends TestBase with Mockito {
 
 	private trait Fixture {
 		val commandInternal = new AddStudentRelationshipTypeCommandInternal with RelationshipServiceComponent {
-			var relationshipService = mock[RelationshipService]
+			var relationshipService: RelationshipService = mock[RelationshipService]
 		}
 	}
 
@@ -40,7 +40,7 @@ class AddStudentRelationshipTypeCommandTest extends TestBase with Mockito {
 			commandInternal.expectedPGR = true
 			commandInternal.sortOrder = 1234
 
-			val newType = commandInternal.applyInternal()
+			val newType: StudentRelationshipType = commandInternal.applyInternal()
 
 			newType.id should be ("theId")
 			newType.urlPart should be ("theUrlPart")
@@ -59,7 +59,7 @@ class AddStudentRelationshipTypeCommandTest extends TestBase with Mockito {
 	@Test
 	def commandApplyInvokesSaveOnRelationshipService() {
 		new Fixture {
-			val newType = commandInternal.applyInternal()
+			val newType: StudentRelationshipType = commandInternal.applyInternal()
 			verify(commandInternal.relationshipService, times(1)).saveOrUpdate(newType)
 		}
 	}
@@ -75,7 +75,7 @@ class AddStudentRelationshipTypeCommandTest extends TestBase with Mockito {
 			describable.urlPart = "theUrlPart"
 			describable.description = "role description"
 
-			val description = mock[Description]
+			val description: Description = mock[Description]
 			describable.describe(description)
 			verify(description, times(1)).properties(
 				"id" -> "theId",
@@ -89,7 +89,7 @@ class AddStudentRelationshipTypeCommandTest extends TestBase with Mockito {
 	def permissionsRequireGlobalStudentRelationshipTypeCreate {
 		new Fixture {
 			val perms = new AddStudentRelationshipTypeCommandPermissions() {}
-			val checking = mock[PermissionsChecking]
+			val checking: PermissionsChecking = mock[PermissionsChecking]
 			perms.permissionsCheck(checking)
 			verify(checking, times(1)).PermissionCheck(Permissions.StudentRelationshipType.Manage)
 		}

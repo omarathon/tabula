@@ -6,33 +6,33 @@ import org.springframework.validation.BindException
 import uk.ac.warwick.tabula.commands.UploadedFile
 import uk.ac.warwick.tabula.commands.exams.{BulkAdjustmentCommand, BulkAdjustmentCommandBindListener, BulkAdjustmentCommandState, BulkAdjustmentValidation}
 import uk.ac.warwick.tabula.data.FileDao
-import uk.ac.warwick.tabula.data.model.{Assessment, Assignment, FileAttachment, GradeBoundary}
+import uk.ac.warwick.tabula.data.model._
 import uk.ac.warwick.tabula.helpers.SpreadsheetHelpers
 import uk.ac.warwick.tabula.services.objectstore.ObjectStorageService
-import uk.ac.warwick.tabula.services.{MaintenanceModeService, GeneratesGradesFromMarks}
-import uk.ac.warwick.tabula.{Fixtures, CurrentUser, Mockito, TestBase}
+import uk.ac.warwick.tabula.services.{GeneratesGradesFromMarks, MaintenanceModeService}
+import uk.ac.warwick.tabula.{CurrentUser, Fixtures, Mockito, TestBase}
 import uk.ac.warwick.tabula.services.{GeneratesGradesFromMarks, MaintenanceModeService}
 import uk.ac.warwick.tabula.{CurrentUser, Fixtures, Mockito, TestBase}
 
 class BulkAdjustmentCommandTest extends TestBase with Mockito {
 
 	trait BindFixture {
-		val mockFileDao = smartMock[FileDao]
-		val objectStorageService = smartMock[ObjectStorageService]
+		val mockFileDao: FileDao = smartMock[FileDao]
+		val objectStorageService: ObjectStorageService = smartMock[ObjectStorageService]
 
 		// Start from the basis that the store is empty
 		objectStorageService.fetch(any[String]) returns None
 		objectStorageService.metadata(any[String]) returns None
 
-		val mockSpreadsheetHelper = smartMock[SpreadsheetHelpers]
+		val mockSpreadsheetHelper: SpreadsheetHelpers = smartMock[SpreadsheetHelpers]
 		val thisAssessment = new Assignment
-		val feedback = Fixtures.assignmentFeedback("1234")
+		val feedback: AssignmentFeedback = Fixtures.assignmentFeedback("1234")
 		thisAssessment.feedbacks.add(feedback)
 		val bindListener = new BulkAdjustmentCommandBindListener with BulkAdjustmentCommandState {
 			override def assessment: Assessment = thisAssessment
 			override def user: CurrentUser = null
 			override def gradeGenerator: GeneratesGradesFromMarks = null
-			override def spreadsheetHelper = mockSpreadsheetHelper
+			override def spreadsheetHelper: SpreadsheetHelpers = mockSpreadsheetHelper
 		}
 		val file = new UploadedFile
 		file.maintenanceMode = smartMock[MaintenanceModeService]
@@ -92,7 +92,7 @@ class BulkAdjustmentCommandTest extends TestBase with Mockito {
 
 	@Test
 	def bindValidationExtractDataValidStudent() { new BindFixture {
-		val studentId = thisAssessment.allFeedback.head.universityId
+		val studentId: String = thisAssessment.allFeedback.head.universityId
 		mockSpreadsheetHelper.parseXSSFExcelFile(any[InputStream], any[Boolean]) returns Seq(
 			Map(
 				BulkAdjustmentCommand.StudentIdHeader.toLowerCase -> studentId,
@@ -114,14 +114,14 @@ class BulkAdjustmentCommandTest extends TestBase with Mockito {
 	}}
 
 	trait ValidateFixture {
-		val dept = Fixtures.department("its")
-		val module = Fixtures.module("it101")
+		val dept: Department = Fixtures.department("its")
+		val module: Module = Fixtures.module("it101")
 		val thisAssessment = new Assignment
 		thisAssessment.module = module
 		module.adminDepartment = dept
-		val feedback = Fixtures.assignmentFeedback("1234")
+		val feedback: AssignmentFeedback = Fixtures.assignmentFeedback("1234")
 		thisAssessment.feedbacks.add(feedback)
-		val mockGradeGenerator = smartMock[GeneratesGradesFromMarks]
+		val mockGradeGenerator: GeneratesGradesFromMarks = smartMock[GeneratesGradesFromMarks]
 		mockGradeGenerator.applyForMarks(Map("1234" -> 100)) returns Map("1234" -> Seq(GradeBoundary(null, "A", 0, 0, null)))
 		val validator = new BulkAdjustmentValidation with BulkAdjustmentCommandState {
 			override def assessment: Assessment = thisAssessment

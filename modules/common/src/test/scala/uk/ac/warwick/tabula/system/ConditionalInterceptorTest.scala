@@ -8,7 +8,7 @@ import org.springframework.web.context.request.ServletWebRequest
 
 class ConditionalInterceptorTest extends TestBase with Mockito {
 
-	val delegate = mock[WebRequestInterceptor]
+	val delegate: WebRequestInterceptor = mock[WebRequestInterceptor]
 	val interceptor = new ConditionalInterceptor(delegate)
 	interceptor.excludePath = "/sysadmin/*"
 	interceptor.afterPropertiesSet()

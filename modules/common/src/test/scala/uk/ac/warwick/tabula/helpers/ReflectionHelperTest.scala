@@ -32,7 +32,7 @@ class ReflectionHelperTest extends TestBase with ReflectionsSetup {
 }
 
 class CatchAllUrlStreamHandlerFactory extends URLStreamHandlerFactory {
-	override def createURLStreamHandler(protocol: String) =
+	override def createURLStreamHandler(protocol: String): CatchAllUrlHandler =
 		if ("vfszip".equals(protocol) || "zip".equals(protocol)) new CatchAllUrlHandler
 		else null
 }

@@ -26,8 +26,8 @@ object Transactions extends TransactionAspectSupport {
 	// unused as we skip the method that calls it, but it checks that an attribute source is set.
 	setTransactionAttributeSource(new MatchAlwaysTransactionAttributeSource)
 
-	var transactionManager = Wire.auto[PlatformTransactionManager]
-	override def getTransactionManager() = transactionManager
+	var transactionManager: PlatformTransactionManager = Wire.auto[PlatformTransactionManager]
+	override def getTransactionManager(): PlatformTransactionManager = transactionManager
 
 	var enabled = true
 
@@ -35,7 +35,7 @@ object Transactions extends TransactionAspectSupport {
 	  * Should be for testing only.
 	  * TODO better way of disabling transactions inside tests?
 	  */
-	def disable(during: =>Unit) = {
+	def disable(during: =>Unit): Unit = {
 		try {
 			enabled = false
 			during
@@ -68,14 +68,14 @@ object Transactions extends TransactionAspectSupport {
 	def useTransaction[A](
 			readOnly: Boolean = false,
 			propagation: Propagation = Propagation.REQUIRED
-		)(f: TransactionStatus => A) = {
+		)(f: TransactionStatus => A): Any = {
 
 		if (enabled) {
 			val template = new TransactionTemplate(getTransactionManager())
 			template.setReadOnly(readOnly)
 			template.setPropagationBehavior(propagation.value())
 			template.execute(new TransactionCallback[A] {
-				override def doInTransaction(status: TransactionStatus) = f(status)
+				override def doInTransaction(status: TransactionStatus): A = f(status)
 			})
 		} else {
 			f

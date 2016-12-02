@@ -1,16 +1,16 @@
 package uk.ac.warwick.tabula.commands.profiles.membernotes
 
 import org.springframework.validation.BindException
-import uk.ac.warwick.tabula.data.model.MemberNote
+import uk.ac.warwick.tabula.data.model.{AbstractMemberNote, MemberNote, StudentMember}
 import uk.ac.warwick.tabula.services.{MemberNoteServiceComponent, _}
 import uk.ac.warwick.tabula.{Fixtures, Mockito, TestBase}
 
 class EditMemberNoteCommandTest extends TestBase with Mockito {
 
-	val member = Fixtures.student("12345")
-	val mockProfileService = smartMock[ProfileService]
-	val mockMemberNoteService = smartMock[MemberNoteService]
-	val mockFileAttachmentService = smartMock[FileAttachmentService]
+	val member: StudentMember = Fixtures.student("12345")
+	val mockProfileService: ProfileService = smartMock[ProfileService]
+	val mockMemberNoteService: MemberNoteService = smartMock[MemberNoteService]
+	val mockFileAttachmentService: FileAttachmentService = smartMock[FileAttachmentService]
 
 	trait ApplyFixture {
 		val cmd = new EditMemberNoteCommandInternal(Fixtures.memberNoteWithId("some notes", member, "123"))
@@ -26,7 +26,7 @@ class EditMemberNoteCommandTest extends TestBase with Mockito {
 	def testApply(): Unit = withUser("cuscao", "09876") { new ApplyFixture {
 		cmd.note = "the note"
 
-		val memberNote = cmd.applyInternal()
+		val memberNote: AbstractMemberNote = cmd.applyInternal()
 		memberNote.member should be (member)
 		memberNote.note should be (cmd.note)
 	}}

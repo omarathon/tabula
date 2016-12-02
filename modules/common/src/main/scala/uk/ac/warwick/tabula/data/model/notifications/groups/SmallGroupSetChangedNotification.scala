@@ -18,7 +18,7 @@ abstract class SmallGroupSetChangedNotification(recipientRole: UserRoleOnGroup)
 
 	def verb = "Modify"
 
-	def title = "%s: Your %s allocation has changed".format(target.entity.module.code.toUpperCase, target.entity.format.description.toLowerCase)
+	def title: String = "%s: Your %s allocation has changed".format(target.entity.module.code.toUpperCase, target.entity.format.description.toLowerCase)
 
 	@transient val oldSmallGroupSizes = StringMapSetting("oldSmallGroupSizes", Map())
 

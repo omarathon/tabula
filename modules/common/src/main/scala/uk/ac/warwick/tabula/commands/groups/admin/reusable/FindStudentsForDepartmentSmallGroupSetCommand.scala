@@ -55,7 +55,7 @@ class FindStudentsForDepartmentSmallGroupSetCommandInternal(val department: Depa
 
 	self: FiltersStudents with ProfileServiceComponent with UserLookupComponent =>
 
-	override def applyInternal() = {
+	override def applyInternal(): FindStudentsForDepartmentSmallGroupSetCommandResult = {
 		if (!doFind && (serializeFilter.isEmpty || findStudents.isEmpty)) {
 			FindStudentsForDepartmentSmallGroupSetCommandResult(staticStudentIds, Seq())
 		} else {
@@ -100,7 +100,7 @@ trait PopulateFindStudentsForDepartmentSmallGroupSetCommand extends PopulateOnFo
 
 	self: FindStudentsForDepartmentSmallGroupSetCommandState with FiltersStudents with DeserializesFilter =>
 
-	override def populate() = {
+	override def populate(): Unit = {
 		staticStudentIds = set.members.knownType.staticUserIds.asJava
 		includedStudentIds = set.members.knownType.includedUserIds.asJava
 		excludedStudentIds = set.members.knownType.excludedUserIds.asJava
@@ -125,7 +125,7 @@ trait UpdatesFindStudentsForDepartmentSmallGroupSetCommand {
 
 	self: FindStudentsForDepartmentSmallGroupSetCommandState with FiltersStudents with DeserializesFilter =>
 
-	def update(editSchemeMembershipCommandResult: EditDepartmentSmallGroupSetMembershipCommandResult) = {
+	def update(editSchemeMembershipCommandResult: EditDepartmentSmallGroupSetMembershipCommandResult): Any = {
 		includedStudentIds = editSchemeMembershipCommandResult.includedStudentIds
 		excludedStudentIds = editSchemeMembershipCommandResult.excludedStudentIds
 		// Default to current students
@@ -165,7 +165,7 @@ trait FindStudentsForDepartmentSmallGroupSetCommandState {
 	val defaultOrder = Seq(asc("lastName"), asc("firstName")) // Don't allow this to be changed atm
 	var sortOrder: JList[Order] = JArrayList()
 	var page = 1
-	def totalResults = staticStudentIds.size
+	def totalResults: Int = staticStudentIds.size
 	val studentsPerPage = FiltersStudents.DefaultStudentsPerPage
 
 	// Filter binds

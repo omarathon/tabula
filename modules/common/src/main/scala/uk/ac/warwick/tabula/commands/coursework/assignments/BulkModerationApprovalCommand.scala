@@ -33,7 +33,7 @@ class BulkModerationApprovalCommandInternal(val assignment: Assignment, val mark
 
 	self: StateServiceComponent with FeedbackServiceComponent with FinaliseFeedbackComponent =>
 
-	val user = marker
+	val user: User = marker
 
 	override def onBind(result: BindingResult) {
 		// filter out any feedbacks where the current user is not the marker
@@ -95,7 +95,7 @@ trait BulkModerationApprovalState extends OnlineFeedbackState {
 	import uk.ac.warwick.tabula.JavaImports._
 
 	val assignment: Assignment
-	val module = assignment.module
+	val module: Module = assignment.module
 	val marker: User
 	val submitter: CurrentUser
 	val gradeGenerator: GeneratesGradesFromMarks

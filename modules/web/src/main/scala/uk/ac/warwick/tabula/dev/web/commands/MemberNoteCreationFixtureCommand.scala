@@ -13,7 +13,7 @@ class MemberNoteCreationFixtureCommandInternal extends CommandInternal[MemberNot
 	var title = ""
 	var creatorId: String = _
 
-	def applyInternal() = transactional() {
+	def applyInternal(): MemberNote = transactional() {
 		val member = memberDao.getByUniversityId(memberId).getOrElse(
 			throw new IllegalArgumentException(s"Member with university ID $memberId not found")
 		)
@@ -29,7 +29,7 @@ class MemberNoteCreationFixtureCommandInternal extends CommandInternal[MemberNot
 }
 
 object MemberNoteCreationFixtureCommand {
-	def apply()={
+	def apply(): MemberNoteCreationFixtureCommandInternal with ComposableCommand[MemberNote] with AutowiringMemberDaoComponent with AutowiringMemberNoteDaoComponent with AutowiringTransactionalComponent with Unaudited with PubliclyVisiblePermissions ={
 		new MemberNoteCreationFixtureCommandInternal
 			with ComposableCommand[MemberNote]
 			with AutowiringMemberDaoComponent

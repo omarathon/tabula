@@ -1,21 +1,23 @@
 package uk.ac.warwick.tabula.commands.admin.department
 
-import uk.ac.warwick.tabula.{ItemNotFoundException, Fixtures, TestBase, Mockito}
+import uk.ac.warwick.tabula.{Fixtures, ItemNotFoundException, Mockito, TestBase}
 import uk.ac.warwick.tabula.services.permissions.{PermissionsService, PermissionsServiceComponent}
 import uk.ac.warwick.tabula.roles.DepartmentalAdministratorRoleDefinition
 import uk.ac.warwick.tabula.system.permissions.PermissionsChecking
 import uk.ac.warwick.tabula.permissions.Permissions
 import org.springframework.validation.BindException
 import uk.ac.warwick.tabula.commands.DescriptionImpl
+import uk.ac.warwick.tabula.data.model.Department
+import uk.ac.warwick.tabula.data.model.permissions.CustomRoleDefinition
 
 class AddCustomRoleDefinitionCommandTest extends TestBase with Mockito {
 
 	private trait CommandTestSupport extends AddCustomRoleDefinitionCommandState with PermissionsServiceComponent {
-		val permissionsService = mock[PermissionsService]
+		val permissionsService: PermissionsService = mock[PermissionsService]
 	}
 
 	private trait Fixture {
-		val department = Fixtures.department("in")
+		val department: Department = Fixtures.department("in")
 	}
 
 	private trait CommandFixture extends Fixture {
@@ -26,7 +28,7 @@ class AddCustomRoleDefinitionCommandTest extends TestBase with Mockito {
 		command.name = "Custom role"
 		command.baseDefinition = DepartmentalAdministratorRoleDefinition
 
-		val created = command.applyInternal()
+		val created: CustomRoleDefinition = command.applyInternal()
 		created.name should be ("Custom role")
 		created.baseRoleDefinition should be (DepartmentalAdministratorRoleDefinition)
 		created.isAssignable should be (true)
@@ -38,7 +40,7 @@ class AddCustomRoleDefinitionCommandTest extends TestBase with Mockito {
 
 	@Test def permissions {
 		val command = new AddCustomRoleDefinitionCommandPermissions with AddCustomRoleDefinitionCommandState {
-			override val department = Fixtures.department("in")
+			override val department: Department = Fixtures.department("in")
 		}
 
 		val checking = mock[PermissionsChecking]
@@ -58,7 +60,7 @@ class AddCustomRoleDefinitionCommandTest extends TestBase with Mockito {
 
 	private trait ValidationFixture {
 		val command = new AddCustomRoleDefinitionCommandValidation with CommandTestSupport {
-			val department = Fixtures.department("in")
+			val department: Department = Fixtures.department("in")
 		}
 	}
 
@@ -113,7 +115,7 @@ class AddCustomRoleDefinitionCommandTest extends TestBase with Mockito {
 	@Test def description {
 		val command = new AddCustomRoleDefinitionCommandDescription with AddCustomRoleDefinitionCommandState {
 			override val eventName: String = "test"
-			val department = Fixtures.department("in")
+			val department: Department = Fixtures.department("in")
 		}
 
 		val d = new DescriptionImpl

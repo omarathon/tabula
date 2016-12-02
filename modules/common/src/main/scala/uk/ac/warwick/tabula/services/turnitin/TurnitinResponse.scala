@@ -1,5 +1,7 @@
 package uk.ac.warwick.tabula.services.turnitin
 
+import scala.collection.immutable.Seq
+import scala.util.matching.Regex
 import scala.xml.Elem
 
 /**
@@ -10,14 +12,14 @@ case class TurnitinResponse(
 	val diagnostic: Option[String] = None,
 	val redirectUrl: Option[String] = None,
 	val xml: Option[Elem] = None) {
-	def success = code <= 100
-	def error = !success
+	def success: Boolean = code <= 100
+	def error: Boolean = !success
 
-	lazy val assignmentId = xml map { elem => (elem \\ "assignmentid").text } filterNot emptyString
-	lazy val classId = xml map { elem => (elem \\ "classid").text } filterNot emptyString
-	lazy val userId = xml map { elem => (elem \\ "userid").text } filterNot emptyString
-	lazy val objectId = xml map { elem => (elem \\ "objectID").text } filterNot emptyString
-	lazy val sessionId = xml map { elem => (elem \\ "sessionid").text } filterNot emptyString
+	lazy val assignmentId: Option[String] = xml map { elem => (elem \\ "assignmentid").text } filterNot emptyString
+	lazy val classId: Option[String] = xml map { elem => (elem \\ "classid").text } filterNot emptyString
+	lazy val userId: Option[String] = xml map { elem => (elem \\ "userid").text } filterNot emptyString
+	lazy val objectId: Option[String] = xml map { elem => (elem \\ "objectID").text } filterNot emptyString
+	lazy val sessionId: Option[String] = xml map { elem => (elem \\ "sessionid").text } filterNot emptyString
 
 	/**
 	 * Convert an <object> list into a list of TurnitinSubmissionInfo items.
@@ -25,7 +27,7 @@ case class TurnitinResponse(
 	 * It is assumed that the student's Uni ID was used as the first name, so
 	 * it is used as the firstname element.
 	 */
-	lazy val submissionsList = {
+	lazy val submissionsList: Seq[TurnitinSubmissionInfo] = {
 		xml map {
 			_ \\ "object" map { obj =>
 				TurnitinSubmissionInfo(
@@ -41,7 +43,7 @@ case class TurnitinResponse(
 		} getOrElse Nil
 	}
 
-	def message = TurnitinResponse.responseCodes.getOrElse(code, unknownMessage)
+	def message: String = TurnitinResponse.responseCodes.getOrElse(code, unknownMessage)
 	private def unknownMessage = if (success) "Unknown code" else "Unknown error"
 	private def emptyString(s: String) = s.trim.isEmpty
 	private def parseInt(text: String) = if (text.isEmpty) None else Some(text.toInt)
@@ -49,13 +51,13 @@ case class TurnitinResponse(
 
 object TurnitinResponse {
 
-	val StatusRegex = "(?s).+rcode&gt;(\\d+)&lt;.+".r
+	val StatusRegex: Regex = "(?s).+rcode&gt;(\\d+)&lt;.+".r
 
 	/**
 	 * Response in diagnostic mode is all HTML but we can
 	 * regex out the status code at least.
 	 */
-	def fromDiagnostic(string: String) = {
+	def fromDiagnostic(string: String): TurnitinResponse = {
 		val code = string match {
 			case StatusRegex(status) => status.toInt
 			case _ => 1
@@ -63,11 +65,11 @@ object TurnitinResponse {
 		new TurnitinResponse(code, diagnostic = Some(string))
 	}
 
-	def redirect(location: String) = {
+	def redirect(location: String): TurnitinResponse = {
 		new TurnitinResponse(0, redirectUrl = Some(location))
 	}
 
-	def fromXml(xml: Elem) = {
+	def fromXml(xml: Elem): TurnitinResponse = {
 		new TurnitinResponse((xml \\ "rcode").text.toInt, xml = Some(xml))
 	}
 

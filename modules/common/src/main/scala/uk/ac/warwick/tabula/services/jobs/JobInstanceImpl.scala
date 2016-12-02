@@ -14,7 +14,7 @@ import uk.ac.warwick.tabula.system.CurrentUserInterceptor
 import uk.ac.warwick.userlookup.{AnonymousUser, UserLookupInterface}
 
 object JobInstanceImpl {
-	def fromPrototype(prototype: JobPrototype) = {
+	def fromPrototype(prototype: JobPrototype): JobInstanceImpl = {
 		val instance = new JobInstanceImpl
 		instance.jobType = prototype.identifier
 		instance.json = prototype.map
@@ -31,9 +31,9 @@ object JobInstanceImpl {
 @Entity(name = "Job")
 class JobInstanceImpl() extends JobInstance with GeneratedId with PostLoadBehaviour with Logging with ToString {
 
-	@transient var jsonMapper = Wire.auto[ObjectMapper]
-	@transient var userLookup = Wire.auto[UserLookupInterface]
-	@transient var currentUserFinder = Wire.auto[CurrentUserInterceptor]
+	@transient var jsonMapper: ObjectMapper = Wire.auto[ObjectMapper]
+	@transient var userLookup: UserLookupInterface = Wire.auto[UserLookupInterface]
+	@transient var currentUserFinder: CurrentUserInterceptor = Wire.auto[CurrentUserInterceptor]
 
 	/** Human-readable status of the job */
 	override var status: String = _
@@ -47,7 +47,7 @@ class JobInstanceImpl() extends JobInstance with GeneratedId with PostLoadBehavi
 	var realUser: String = _
 	var apparentUser: String = _
 
-	override def userId = apparentUser
+	override def userId: String = apparentUser
 
 	@transient var user: CurrentUser = _
 
@@ -56,8 +56,8 @@ class JobInstanceImpl() extends JobInstance with GeneratedId with PostLoadBehavi
 	override var updatedDate: DateTime = new DateTime
 
 	@Column(name = "progress") var _progress: Int = 0
-	override def progress = _progress
-	override def progress_=(p: Int) = {
+	override def progress: Int = _progress
+	override def progress_=(p: Int): Unit = {
 		_progress = p
 	}
 
@@ -68,7 +68,7 @@ class JobInstanceImpl() extends JobInstance with GeneratedId with PostLoadBehavi
 	var data: String = "{}"
 
 	@transient private var _json: JsonMap = Map()
-	override def json = _json
+	override def json: JsonMap = _json
 	def json_=(map: JsonMap) {
 		_json = map
 		if (jsonMapper != null) {
@@ -78,7 +78,7 @@ class JobInstanceImpl() extends JobInstance with GeneratedId with PostLoadBehavi
 		}
 	}
 
-	override def propsMap = json
+	override def propsMap: JsonMap = json
 	override def propsMap_=(map: JsonMap) { json = map }
 
 	override def postLoad {

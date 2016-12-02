@@ -8,6 +8,7 @@ import org.springframework.web.bind.annotation.{ModelAttribute, PathVariable, Re
 import uk.ac.warwick.tabula.commands.profiles.relationships.meetings.ScheduledMeetingRecordMissedCommand
 import uk.ac.warwick.tabula.commands.{Appliable, SelfValidating}
 import uk.ac.warwick.tabula.data.model.ScheduledMeetingRecord
+import uk.ac.warwick.tabula.web.Mav
 import uk.ac.warwick.tabula.web.controllers.profiles.ProfilesController
 import uk.ac.warwick.tabula.web.views.{JSONErrorView, JSONView}
 
@@ -27,7 +28,7 @@ class ScheduledMeetingRecordMissedController extends ProfilesController {
 		@Valid @ModelAttribute("command") command: Appliable[ScheduledMeetingRecord],
 		errors: Errors,
 		@PathVariable meetingRecord: ScheduledMeetingRecord
-	) = {
+	): Mav = {
 
 		if (!errors.hasErrors) {
 			command.apply()

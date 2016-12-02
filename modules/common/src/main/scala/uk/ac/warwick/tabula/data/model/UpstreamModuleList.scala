@@ -24,7 +24,7 @@ class UpstreamModuleList {
 
 	@Id
 	var code: String = _
-	def id = code
+	def id: String = code
 
 	@Basic
 	@Type(`type` = "uk.ac.warwick.tabula.data.model.AcademicYearUserType")

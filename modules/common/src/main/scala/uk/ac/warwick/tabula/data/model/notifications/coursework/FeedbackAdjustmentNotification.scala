@@ -5,8 +5,8 @@ import javax.persistence.{DiscriminatorValue, Entity}
 import uk.ac.warwick.tabula.coursework.web.Routes
 import uk.ac.warwick.tabula.data.model.NotificationPriority.Info
 import uk.ac.warwick.tabula.data.model._
-
 import uk.ac.warwick.tabula.services.AutowiringUserLookupComponent
+import uk.ac.warwick.userlookup.User
 
 object FeedbackAdjustmentNotification {
 	val templateLocation = "/WEB-INF/freemarker/emails/feedback_adjustment_notification.ftl"
@@ -20,10 +20,10 @@ class FeedbackAdjustmentNotification
 	with AutowiringUserLookupComponent {
 
 	def verb = "adjusted"
-	def assignment = target.entity
+	def assignment: Assignment = target.entity
 	def feedback: Feedback = item.entity
 
-	def recipients = {
+	def recipients: Seq[User] = {
 		if (assignment.hasWorkflow) {
 			val userId = assignment.markingWorkflow.getStudentsPrimaryMarker(assignment, feedback.universityId).getOrElse({
 				throw new IllegalStateException(s"No primary marker found for ${feedback.universityId}")

@@ -9,6 +9,7 @@ import uk.ac.warwick.tabula.data.model.NotificationPriority._
 import uk.ac.warwick.tabula.data.model.forms.Extension
 import uk.ac.warwick.tabula.data.model._
 import uk.ac.warwick.tabula.services.{AssessmentMembershipService, AutowiringUserLookupComponent}
+import uk.ac.warwick.userlookup.User
 
 import scala.collection.JavaConverters._
 
@@ -17,12 +18,12 @@ trait SubmissionReminder extends RecipientCompletedActionRequiredNotification {
 
 	def deadline: DateTime
 	def assignment: Assignment
-	def module = assignment.module
-	def moduleCode = module.code.toUpperCase
+	def module: Module = assignment.module
+	def moduleCode: String = module.code.toUpperCase
 
-	def referenceDate = created
+	def referenceDate: DateTime = created
 
-	def daysLeft = {
+	def daysLeft: Int = {
 		val now = referenceDate.withTimeAtStartOfDay()
 		val closeDate = deadline.withTimeAtStartOfDay()
 		Days.daysBetween(now, closeDate).getDays
@@ -38,13 +39,13 @@ trait SubmissionReminder extends RecipientCompletedActionRequiredNotification {
 		}
 	}
 
-	def url = Routes.assignment(assignment)
+	def url: String = Routes.assignment(assignment)
 
 	def urlTitle = "upload your submission"
 
 	def title = s"$moduleCode: Your submission for '${assignment.name}' $timeStatement"
 
-	def timeStatement = if (daysLeft > 1){
+	def timeStatement: String = if (daysLeft > 1){
 		s"is due in $daysLeft days"
 	} else if (daysLeft == 1) {
 		"is due tomorrow"
@@ -56,8 +57,8 @@ trait SubmissionReminder extends RecipientCompletedActionRequiredNotification {
 		s"is ${0 - daysLeft} days late"
 	}
 
-	def be = if (daysLeft >= 0) "is" else "was"
-	def deadlineDate = be + " " + dateTimeFormatter.print(deadline)
+	def be: String = if (daysLeft >= 0) "is" else "was"
+	def deadlineDate: String = be + " " + dateTimeFormatter.print(deadline)
 
 	def content = FreemarkerModel("/WEB-INF/freemarker/emails/submission_reminder.ftl", Map(
 		"assignment" -> assignment,
@@ -78,12 +79,12 @@ trait SubmissionReminder extends RecipientCompletedActionRequiredNotification {
 class SubmissionDueGeneralNotification extends Notification[Assignment, Unit] with SingleItemNotification[Assignment]
 	with SubmissionReminder {
 
-	@transient var membershipService = Wire[AssessmentMembershipService]
+	@transient var membershipService: AssessmentMembershipService = Wire[AssessmentMembershipService]
 
-	def deadline = assignment.closeDate
-	def assignment = item.entity
+	def deadline: DateTime = assignment.closeDate
+	def assignment: Assignment = item.entity
 
-	def recipients = {
+	def recipients: Seq[User] = {
 		if (!shouldSend)
 			Nil
 		else {
@@ -103,15 +104,15 @@ class SubmissionDueGeneralNotification extends Notification[Assignment, Unit] wi
 class SubmissionDueWithExtensionNotification extends Notification[Extension, Unit] with SingleItemNotification[Extension]
 	with SubmissionReminder with AutowiringUserLookupComponent {
 
-	def extension = item.entity
+	def extension: Extension = item.entity
 
-	def deadline = extension.expiryDate.getOrElse(
+	def deadline: DateTime = extension.expiryDate.getOrElse(
 		throw new IllegalArgumentException("Can't send an SubmissionDueWithExtensionNotification without a deadline")
 	)
 
-	def assignment = extension.assignment
+	def assignment: Assignment = extension.assignment
 
-	def recipients = {
+	def recipients: Seq[User] = {
 		val hasSubmitted = assignment.submissions.asScala.exists(_.universityId == extension.universityId)
 
 		// Don't send if the user has submitted or if there's no expiry date on the extension (i.e. it's been rejected)

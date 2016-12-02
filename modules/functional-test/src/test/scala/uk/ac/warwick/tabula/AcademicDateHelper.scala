@@ -30,7 +30,7 @@ class AcademicDateHelper(val delegate: TermFactory) extends AnyVal {
 		findAutumnTermForTerm(termContainingIntervalStart)
 	}
 
-	def getTermFromDateIncludingVacations(date: BaseDateTime) = {
+	def getTermFromDateIncludingVacations(date: BaseDateTime): Term = {
 		val term = delegate.getTermFromDate(date)
 		if (date.isBefore(term.getStartDate)) FunctionalTestVacation(delegate.getPreviousTerm(term), term)
 		else term
@@ -39,13 +39,13 @@ class AcademicDateHelper(val delegate: TermFactory) extends AnyVal {
 
 case class FunctionalTestVacation(before: Term, after: Term) extends Term {
 	// Starts the day after the previous term and ends the day before the new term
-	def getStartDate = before.getEndDate.plusDays(1)
+	def getStartDate: DateTime = before.getEndDate.plusDays(1)
 
-	def getEndDate = after.getStartDate.minusDays(1)
+	def getEndDate: DateTime = after.getStartDate.minusDays(1)
 
 	def getTermType = null
 
-	def getTermTypeAsString = before.getTermType match {
+	def getTermTypeAsString: String = before.getTermType match {
 		case Term.TermType.autumn => "Christmas vacation"
 		case Term.TermType.spring => "Easter vacation"
 		case Term.TermType.summer => "Summer vacation"
@@ -55,11 +55,11 @@ case class FunctionalTestVacation(before: Term, after: Term) extends Term {
 
 	def getCumulativeWeekNumber(date: BaseDateTime) = throw new IllegalStateException("Can't get week numbers from a vacation")
 
-	def getAcademicWeekNumber(date: BaseDateTime) = after.getAcademicWeekNumber(date)
+	def getAcademicWeekNumber(date: BaseDateTime): Int = after.getAcademicWeekNumber(date)
 }
 
 case class FunctionalTestAcademicYear(startYear: Int) extends Ordered[FunctionalTestAcademicYear] {
-	val endYear = startYear + 1
+	val endYear: Int = startYear + 1
 	def compare(that:FunctionalTestAcademicYear): Int = {
 		this.startYear - that.startYear
 	}
@@ -69,8 +69,8 @@ case class FunctionalTestAcademicYear(startYear: Int) extends Ordered[Functional
 
 object FunctionalTestAcademicYear{
 	private lazy val termFactory = new TermFactoryImpl
-	def current = new AcademicDateHelper(termFactory).getAcademicYearContainingDate(DateTime.now)
-	def currentSITS =
+	def current: FunctionalTestAcademicYear = new AcademicDateHelper(termFactory).getAcademicYearContainingDate(DateTime.now)
+	def currentSITS: FunctionalTestAcademicYear =
 		if (DateTime.now.getMonthOfYear >= DateTimeConstants.AUGUST) {
 			FunctionalTestAcademicYear(DateTime.now.getYear)
 		} else {

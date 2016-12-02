@@ -1,6 +1,9 @@
 package uk.ac.warwick.tabula.commands.coursework
 
 import org.joda.time.DateTime
+import uk.ac.warwick.tabula.commands.coursework.StudentSubmissionAndFeedbackCommand.StudentSubmissionInformation
+import uk.ac.warwick.tabula.data.model.forms.Extension
+import uk.ac.warwick.tabula.data.model._
 import uk.ac.warwick.tabula.permissions.{CheckablePermission, Permissions}
 import uk.ac.warwick.tabula.services._
 import uk.ac.warwick.tabula.system.permissions.PermissionsChecking
@@ -11,14 +14,14 @@ class StudentSubmissionAndFeedbackCommandTest extends TestBase with Mockito {
 
 	private trait CommandTestSupport extends StudentSubmissionAndFeedbackCommandState
 		with SubmissionServiceComponent with FeedbackServiceComponent with ProfileServiceComponent {
-		val submissionService = smartMock[SubmissionService]
-		val feedbackService = smartMock[FeedbackService]
-		val profileService = smartMock[ProfileService]
+		val submissionService: SubmissionService = smartMock[SubmissionService]
+		val feedbackService: FeedbackService = smartMock[FeedbackService]
+		val profileService: ProfileService = smartMock[ProfileService]
 	}
 
 	private trait Fixture {
-		val module = Fixtures.module("in101")
-		val assignment = Fixtures.assignment("Writing test")
+		val module: Module = Fixtures.module("in101")
+		val assignment: Assignment = Fixtures.assignment("Writing test")
 		assignment.allowResubmission = false
 		assignment.openEnded = true
 		assignment.openDate = DateTime.now.minusDays(1)
@@ -27,25 +30,25 @@ class StudentSubmissionAndFeedbackCommandTest extends TestBase with Mockito {
 		val user = new User("cuscav")
 		user.setWarwickId("0672089")
 
-		val student = Fixtures.student(user.getWarwickId, user.getUserId)
+		val student: StudentMember = Fixtures.student(user.getWarwickId, user.getUserId)
 		student.disability = Fixtures.disability("Test")
 	}
 
 	private trait CommandFixture extends Fixture {
 		val command = new StudentSubmissionAndFeedbackCommandInternal(module, assignment) with CommandTestSupport {
-			val studentUser = user
-			val viewer = user
+			val studentUser: User = user
+			val viewer: User = user
 		}
 	}
 
 	@Test def apply() { new CommandFixture {
-		val submission = Fixtures.submission()
+		val submission: Submission = Fixtures.submission()
 		submission.submitted = true
 
-		val feedback = Fixtures.assignmentFeedback()
+		val feedback: AssignmentFeedback = Fixtures.assignmentFeedback()
 		feedback.released = true
 
-		val extension = Fixtures.extension("0672089", "cuscav")
+		val extension: Extension = Fixtures.extension("0672089", "cuscav")
 		extension.approve()
 		extension.expiryDate = DateTime.now.plusDays(5)
 
@@ -55,7 +58,7 @@ class StudentSubmissionAndFeedbackCommandTest extends TestBase with Mockito {
 		command.feedbackService.getAssignmentFeedbackByUniId(assignment, "0672089") returns Some(feedback)
 		command.profileService.getMemberByUser(user, disableFilter = false, eagerLoad = false) returns None
 
-		val info = command.applyInternal()
+		val info: StudentSubmissionInformation = command.applyInternal()
 		info.submission should be (Some(submission))
 		info.feedback should be (Some(feedback))
 		info.extension should be (Some(extension))
@@ -67,13 +70,13 @@ class StudentSubmissionAndFeedbackCommandTest extends TestBase with Mockito {
 	}}
 
 	@Test def applyWithDisability() { new CommandFixture {
-		val submission = Fixtures.submission()
+		val submission: Submission = Fixtures.submission()
 		submission.submitted = true
 
-		val feedback = Fixtures.assignmentFeedback()
+		val feedback: AssignmentFeedback = Fixtures.assignmentFeedback()
 		feedback.released = true
 
-		val extension = Fixtures.extension("0672089", "cuscav")
+		val extension: Extension = Fixtures.extension("0672089", "cuscav")
 		extension.approve()
 		extension.expiryDate = DateTime.now.plusDays(5)
 
@@ -83,7 +86,7 @@ class StudentSubmissionAndFeedbackCommandTest extends TestBase with Mockito {
 		command.feedbackService.getAssignmentFeedbackByUniId(assignment, "0672089") returns Some(feedback)
 		command.profileService.getMemberByUser(user, disableFilter = false, eagerLoad = false) returns Option(student)
 
-		val info = command.applyInternal()
+		val info: StudentSubmissionInformation = command.applyInternal()
 		info.submission should be (Some(submission))
 		info.feedback should be (Some(feedback))
 		info.extension should be (Some(extension))
@@ -97,11 +100,11 @@ class StudentSubmissionAndFeedbackCommandTest extends TestBase with Mockito {
 	@Test def currentUserPermissions() { withUser("cuscav", "0672089") {
 		val u = currentUser
 		val command = new CurrentUserSubmissionAndFeedbackCommandPermissions with CurrentUserSubmissionAndFeedbackCommandState with CommandTestSupport {
-			val module = Fixtures.module("in101")
-			val assignment = Fixtures.assignment("Writing")
+			val module: Module = Fixtures.module("in101")
+			val assignment: Assignment = Fixtures.assignment("Writing")
 			assignment.module = module
 
-			val currentUser = u
+			val currentUser: CurrentUser = u
 		}
 
 		command.submissionService.getSubmissionByUniId(command.assignment, "0672089") returns None
@@ -116,12 +119,12 @@ class StudentSubmissionAndFeedbackCommandTest extends TestBase with Mockito {
 	@Test def memberPermissions() {
 		val m = Fixtures.student("0672089", "cuscav")
 		val command = new StudentMemberSubmissionAndFeedbackCommandPermissions with StudentMemberSubmissionAndFeedbackCommandState with CommandTestSupport {
-			val module = Fixtures.module("in101")
-			val assignment = Fixtures.assignment("Writing")
+			val module: Module = Fixtures.module("in101")
+			val assignment: Assignment = Fixtures.assignment("Writing")
 			assignment.module = module
 
-			val studentMember = m
-			val currentUser = smartMock[CurrentUser]
+			val studentMember: StudentMember = m
+			val currentUser: CurrentUser = smartMock[CurrentUser]
 		}
 
 		val checking = mock[PermissionsChecking]

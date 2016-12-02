@@ -10,7 +10,7 @@ class NotificationIdConverter extends TwoWayConverter[String, Notification[_  >:
 
 	@Autowired var service: NotificationService = _
 
-	override def convertRight(id: String) = (Option(id) flatMap { service.getNotificationById(_) }).orNull
-	override def convertLeft(notification: Notification[_  >: Null <: ToEntityReference ,_]) = (Option(notification) map {_.id}).orNull
+	override def convertRight(id: String): Notification[_ >: Null <: ToEntityReference, _] = (Option(id) flatMap { service.getNotificationById(_) }).orNull
+	override def convertLeft(notification: Notification[_  >: Null <: ToEntityReference ,_]): String = (Option(notification) map {_.id}).orNull
 
 }

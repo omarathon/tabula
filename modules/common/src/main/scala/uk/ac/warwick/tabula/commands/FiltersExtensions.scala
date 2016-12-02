@@ -61,7 +61,7 @@ trait FiltersExtensions extends {
 	def sortOrder: JList[Order]
 	var otherCriteria: JList[String] = JArrayList()
 
-	def serializeFilter = {
+	def serializeFilter: String = {
 		val result = new UriBuilder()
 		departments.asScala.foreach(p => result.addQueryParameter("departments", p.code))
 		modules.asScala.foreach(p => result.addQueryParameter("modules", p.code))
@@ -72,7 +72,7 @@ trait FiltersExtensions extends {
 		Option(result.getQuery).getOrElse("")
 	}
 
-	def receivedRestriction = if (times.isEmpty) {
+	def receivedRestriction: Option[ScalaRestriction] = if (times.isEmpty) {
 			None
 	} else {
 		val criterion = disjunction()
@@ -186,7 +186,7 @@ object TimeFilter {
 	object ThisTerm { val Label = "This term" }
 	case object ThisYear extends TimeFilter("This year", DateTime.now.withDayOfYear(1))
 
-	def fromCode(code: String)(implicit termService: TermService) = code match {
+	def fromCode(code: String)(implicit termService: TermService): TimeFilter = code match {
 		case ThisWeek.code => ThisWeek
 		case ThisMonth.code => ThisMonth
 		case ThisTerm.Label => ThisTerm(termService)
@@ -200,6 +200,6 @@ object TimeFilter {
 class TimeFilterConverter extends TwoWayConverter[String, TimeFilter] {
 	@Autowired implicit var termService: TermService = _
 
-	override def convertRight(code: String) = TimeFilter.fromCode(code)
-	override def convertLeft(time: TimeFilter) = (Option(time) map { _.code }).orNull
+	override def convertRight(code: String): TimeFilter = TimeFilter.fromCode(code)
+	override def convertLeft(time: TimeFilter): String = (Option(time) map { _.code }).orNull
 }

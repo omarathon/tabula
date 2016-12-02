@@ -7,6 +7,7 @@ import uk.ac.warwick.tabula.coursework.web.Routes
 import uk.ac.warwick.tabula.data.HibernateHelpers
 import uk.ac.warwick.tabula.data.model._
 import uk.ac.warwick.tabula.services.AutowiringUserLookupComponent
+import uk.ac.warwick.userlookup.User
 
 /**
  * Sent when a moderator rejects the markers feedback
@@ -23,18 +24,18 @@ class ModeratorRejectedNotification extends Notification[MarkerFeedback, Unit]
 	with AutowiringUserLookupComponent
 	with AllCompletedActionRequiredNotification {
 
-	def markerFeedback = item.entity
-	def parentFeedback = markerFeedback.feedback
-	def rejectedFeedback = parentFeedback.firstMarkerFeedback
+	def markerFeedback: MarkerFeedback = item.entity
+	def parentFeedback: Feedback = markerFeedback.feedback
+	def rejectedFeedback: MarkerFeedback = parentFeedback.firstMarkerFeedback
 
-	def assignment = HibernateHelpers.initialiseAndUnproxy(parentFeedback) match {
+	def assignment: Assignment = HibernateHelpers.initialiseAndUnproxy(parentFeedback) match {
 		case assignmentFeedback: AssignmentFeedback => assignmentFeedback.assignment
 		case _ => throw new IllegalArgumentException("Exam feedback used in Assignment notification")
 	}
 
 	def verb = "Released"
 
-	def title = "%s: Feedback for %s for \"%s\" has been rejected by the moderator".format(assignment.module.code.toUpperCase, parentFeedback.universityId, assignment.name)
+	def title: String = "%s: Feedback for %s for \"%s\" has been rejected by the moderator".format(assignment.module.code.toUpperCase, parentFeedback.universityId, assignment.name)
 
 	def content = FreemarkerModel(ModeratorRejectedNotification.templateLocation,
 		Map(
@@ -50,5 +51,5 @@ class ModeratorRejectedNotification extends Notification[MarkerFeedback, Unit]
 	def urlTitle = "update the feedback and submit it for moderation again"
 
 	// the recepient is the first marker
-	def recipients = rejectedFeedback.getMarkerUser.toSeq
+	def recipients: Seq[User] = rejectedFeedback.getMarkerUser.toSeq
 }

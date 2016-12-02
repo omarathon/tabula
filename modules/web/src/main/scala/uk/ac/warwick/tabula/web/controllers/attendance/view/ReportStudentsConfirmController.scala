@@ -13,6 +13,7 @@ import uk.ac.warwick.tabula.web.controllers.attendance.AttendanceController
 import uk.ac.warwick.tabula.commands.{Appliable, SelfValidating}
 import uk.ac.warwick.tabula.data.model.Department
 import uk.ac.warwick.tabula.data.model.attendance.MonitoringPointReport
+import uk.ac.warwick.tabula.web.Mav
 
 @Controller
 @RequestMapping(Array("/attendance/view/{department}/{academicYear}/report/confirm"))
@@ -29,7 +30,7 @@ class ReportStudentsConfirmController extends AttendanceController {
 		@ModelAttribute("command") cmd: Appliable[Seq[MonitoringPointReport]],
 		@PathVariable department: Department,
 		@PathVariable academicYear: AcademicYear
-	) = {
+	): Mav = {
 		Mav("attendance/view/reportconfirm").crumbs(
 			Breadcrumbs.View.Home,
 			Breadcrumbs.View.Department(department),
@@ -46,7 +47,7 @@ class ReportStudentsConfirmController extends AttendanceController {
 		@PathVariable academicYear: AcademicYear,
 		@RequestParam period: String,
 		@RequestParam(value = "filterString", required = false) filterString: String
-	) = {
+	): Mav = {
 		if(errors.hasErrors) {
 			form(cmd, department, academicYear)
 		} else {

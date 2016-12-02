@@ -1,14 +1,14 @@
 package uk.ac.warwick.tabula.profiles.profile
 
 import org.joda.time.DateTime
-import org.joda.time.format.DateTimeFormat
+import org.joda.time.format.{DateTimeFormat, DateTimeFormatter}
 import org.scalatest.GivenWhenThen
 import uk.ac.warwick.tabula.BrowserTest
 import uk.ac.warwick.tabula.web.FeaturesDriver
 
 class PersonalTutorTest extends BrowserTest with GivenWhenThen with FeaturesDriver with StudentProfileFixture {
 
-	val formatter = DateTimeFormat.forPattern("dd-MMM-yyyy HH:mm:ss")
+	val formatter: DateTimeFormatter = DateTimeFormat.forPattern("dd-MMM-yyyy HH:mm:ss")
 
 	"An admin" should "be able to view personal tutor details" in {
 

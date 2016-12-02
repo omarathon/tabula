@@ -1,6 +1,6 @@
 package uk.ac.warwick.tabula.commands.cm2.assignments
 
-import org.joda.time.format.DateTimeFormat
+import org.joda.time.format.{DateTimeFormat, DateTimeFormatter}
 import uk.ac.warwick.tabula.CurrentUser
 import uk.ac.warwick.tabula.commands.{Command, Description, Notifies, ReadOnly}
 import uk.ac.warwick.tabula.data.model.notifications.coursework.SubmissionReceiptNotification
@@ -19,9 +19,9 @@ class SendSubmissionReceiptCommand(val assignment: Assignment, val submission: S
 
 	PermissionCheck(Permissions.Submission.SendReceipt, mandatory(submission))
 
-	val dateFormatter = DateTimeFormat.forPattern("d MMMM yyyy 'at' HH:mm:ss")
+	val dateFormatter: DateTimeFormatter = DateTimeFormat.forPattern("d MMMM yyyy 'at' HH:mm:ss")
 
-	def applyInternal() = {
+	def applyInternal(): Boolean = {
 		if (user.email.hasText) {
 			true
 		} else {
@@ -33,7 +33,7 @@ class SendSubmissionReceiptCommand(val assignment: Assignment, val submission: S
 		d.assignment(assignment)
 	}
 
-	def emit(sendNotification: Boolean) = {
+	def emit(sendNotification: Boolean): Seq[SubmissionReceiptNotification] = {
 		if (sendNotification) {
 			Seq(Notification.init(new SubmissionReceiptNotification, user.apparentUser, Seq(submission), assignment))
 		} else {

@@ -22,7 +22,7 @@ class HeronWarningNotification extends Notification[Heron, Unit]
 	def content = FreemarkerModel(templateLocation, Map("group" -> item, "rant" -> heronRant))
 	def url: String = "/beware/herons"
 	def urlTitle = "see how evil herons really are"
-	def recipient = item.entity.victim
+	def recipient: User = item.entity.victim
 
 }
 
@@ -39,7 +39,7 @@ with SingleItemNotification[Heron] with SingleRecipientNotification {
 	def content = FreemarkerModel(templateLocation, Map("group" -> item, "rant" -> heronRant))
 	def url: String = "/beware/herons"
 	def urlTitle = "wallow in glory"
-	def recipient = item.entity.victim
+	def recipient: User = item.entity.victim
 
 }
 
@@ -52,7 +52,7 @@ class Heron extends GeneratedId with ToEntityReference {
 	}
 
 	type Entity = Heron
-	def toEntityReference = new HeronEntityReference().put(this)
+	def toEntityReference: HeronEntityReference = new HeronEntityReference().put(this)
 
 	@Type(`type`="uk.ac.warwick.tabula.data.model.SSOUserType")
 	var victim: User = null

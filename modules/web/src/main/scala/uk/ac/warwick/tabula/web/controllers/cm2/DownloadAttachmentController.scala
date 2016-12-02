@@ -15,7 +15,7 @@ import uk.ac.warwick.tabula.{CurrentUser, ItemNotFoundException}
 @RequestMapping(value=Array("/${cm2.prefix}/submission/{assignment}"))
 class DownloadAttachmentController extends CourseworkController {
 
-	var submissionService = Wire.auto[SubmissionService]
+	var submissionService: SubmissionService = Wire.auto[SubmissionService]
 
 	@ModelAttribute def command(@PathVariable assignment: Assignment, user: CurrentUser): Appliable[Option[RenderableFile]]
 		= new DownloadAttachmentCommand(assignment, mandatory(submissionService.getSubmissionByUniId(assignment, user.universityId)), optionalCurrentMember)
@@ -31,7 +31,7 @@ class DownloadAttachmentController extends CourseworkController {
 @RequestMapping(value=Array("/${cm2.prefix}/submission/{assignment}/{studentMember}"))
 class DownloadAttachmentForStudentController extends CourseworkController {
 
-	var submissionService = Wire[SubmissionService]
+	var submissionService: SubmissionService = Wire[SubmissionService]
 
 	@ModelAttribute def command(@PathVariable assignment: Assignment, @PathVariable studentMember: Member): Appliable[Option[RenderableFile]]
 		= new DownloadAttachmentCommand(assignment, mandatory(submissionService.getSubmissionByUniId(assignment, studentMember.universityId)), Some(studentMember))

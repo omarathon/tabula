@@ -25,7 +25,7 @@ class ExportAttendanceToSitsCommand extends CommandInternal[Seq[MonitoringPointR
 
 	self: AttendanceMonitoringServiceComponent with ExportAttendanceToSitsServiceComponent with FeaturesComponent =>
 
-	override def applyInternal() = transactional() {
+	override def applyInternal(): Seq[MonitoringPointReport] = transactional() {
 
 		// check reporting to sits feature is on -- with Features...
 		if (features.attendanceMonitoringReport) {

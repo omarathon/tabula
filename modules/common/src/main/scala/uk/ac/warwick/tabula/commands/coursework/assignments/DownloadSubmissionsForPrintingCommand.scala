@@ -61,7 +61,7 @@ class DownloadSubmissionsForPrintingCommandInternal(val module: Module, val assi
 	self: DownloadSubmissionsForPrintingCommandRequest with FreemarkerXHTMLPDFGeneratorComponent
 		with FileDaoComponent with CombinesPdfs =>
 
-	override def applyInternal() = {
+	override def applyInternal(): RenderableAttachment = {
 		if (submissions.isEmpty) throw new ItemNotFoundException
 
 		val parts: Seq[FileAttachment] = submissions.flatMap(submission => {

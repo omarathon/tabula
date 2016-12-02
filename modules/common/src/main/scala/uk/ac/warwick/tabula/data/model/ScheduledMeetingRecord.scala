@@ -23,10 +23,10 @@ class ScheduledMeetingRecord extends AbstractMeetingRecord {
 	@Column(name="missed_reason")
 	var missedReason: String = _
 
-	def isPendingAction = meetingDate.isBeforeNow && !missed
+	def isPendingAction: Boolean = meetingDate.isBeforeNow && !missed
 
 	@transient
-	var securityService = Wire[SecurityService]
+	var securityService: SecurityService = Wire[SecurityService]
 
 	def pendingActionBy(user: CurrentUser): Boolean =
 		isPendingAction &&
@@ -35,7 +35,7 @@ class ScheduledMeetingRecord extends AbstractMeetingRecord {
 
 	def toEventOccurrence(context: TimetableEvent.Context): Option[EventOccurrence] = asEventOccurrence(context)
 
-	def universityIdInRelationship(universityId: String) = {
+	def universityIdInRelationship(universityId: String): Boolean = {
 		def isStudent = universityId == relationship.studentId
 		def isAgent = relationship.agentMember.exists(_.universityId == universityId)
 		isStudent || isAgent

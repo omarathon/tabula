@@ -42,7 +42,7 @@ class AdminDepartmentHomeCommand(val department: Department, val user: CurrentUs
 			modulesWithPermission.toList.sorted
 		}
 
-	def applyInternal() = modules.filter(moduleFilter).sortBy { (module) => (module.groupSets.isEmpty, module.code) }
+	def applyInternal(): Seq[Module] = modules.filter(moduleFilter).sortBy { (module) => (module.groupSets.isEmpty, module.code) }
 
 }
 
@@ -69,7 +69,7 @@ trait AdminDepartmentHomeState {
 	def department: Department
 	def user: CurrentUser
 
-	lazy val modulesWithPermission = moduleAndDepartmentService.modulesWithPermission(user, requiredPermission, department)
+	lazy val modulesWithPermission: Set[Module] = moduleAndDepartmentService.modulesWithPermission(user, requiredPermission, department)
 }
 
 trait AdminDepartmentHomePermissionDefinition {

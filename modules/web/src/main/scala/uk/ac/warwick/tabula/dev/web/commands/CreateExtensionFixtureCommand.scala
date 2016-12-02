@@ -17,7 +17,7 @@ class CreateExtensionFixtureCommand extends CommandInternal[Extension] {
 	var assignmentId: String = _
 	var approved: Boolean = _
 
-	protected def applyInternal() = {
+	protected def applyInternal(): Extension = {
 		transactional() {
 			val now = new DateTime()
 			val user = userLookup.getUserByUserId(userId)
@@ -43,7 +43,7 @@ class CreateExtensionFixtureCommand extends CommandInternal[Extension] {
 }
 
 object CreateExtensionFixtureCommand {
-	def apply() = {
+	def apply(): CreateExtensionFixtureCommand with ComposableCommand[Extension] with AutowiringTransactionalComponent with AutowiringUserLookupComponent with PubliclyVisiblePermissions with Unaudited = {
 		new CreateExtensionFixtureCommand
 			with ComposableCommand[Extension]
 			with AutowiringTransactionalComponent

@@ -17,12 +17,12 @@ abstract class ProfilesController extends BaseController with ProfileBreadcrumbs
 	 * non-student entities.
 	 */
 	private var _studentProfilesOnly = false
-	def studentProfilesOnly = { _studentProfilesOnly = true }
-	def notStudentProfilesOnly = { _studentProfilesOnly = false }
+	def studentProfilesOnly: Unit = { _studentProfilesOnly = true }
+	def notStudentProfilesOnly: Unit = { _studentProfilesOnly = false }
 
 	private var _activeProfilesOnly = false
-	def activeProfilesOnly = { _activeProfilesOnly = true }
-	def notActiveProfilesOnly = { _activeProfilesOnly = false }
+	def activeProfilesOnly: Unit = { _activeProfilesOnly = true }
+	def notActiveProfilesOnly: Unit = { _activeProfilesOnly = false }
 
 	final override def onPreRequest {
 		// if studentsOnly has been called, activate the studentsOnly filter
@@ -35,8 +35,8 @@ abstract class ProfilesController extends BaseController with ProfileBreadcrumbs
 		}
 	}
 
-	final def optionalCurrentMember = user.profile
-	final def currentMember = optionalCurrentMember getOrElse new RuntimeMember(user)
+	final def optionalCurrentMember: Option[Member] = user.profile
+	final def currentMember: Member = optionalCurrentMember getOrElse new RuntimeMember(user)
 
 }
 

@@ -36,7 +36,7 @@ class EditExamCommandInternal(override val exam: Exam)
 	self: AssessmentServiceComponent with UserLookupComponent  with HasAcademicYear with SpecifiesGroupType
 		with AssessmentMembershipServiceComponent =>
 
-	override def applyInternal() = {
+	override def applyInternal(): Exam = {
 
 		this.copyTo(exam)
 

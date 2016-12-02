@@ -32,11 +32,11 @@ import uk.ac.warwick.tabula.RequestInfo
  * multipart/form-data encoding type on your form.
  */
 class UploadedFile extends BindListener {
-	var fileDao = Wire[FileDao]
-	var maintenanceMode = Wire[MaintenanceModeService]
+	var fileDao: FileDao = Wire[FileDao]
+	var maintenanceMode: MaintenanceModeService = Wire[MaintenanceModeService]
 
-	@NoBind var disallowedFilenames = commaSeparated(Wire[String]("${uploads.disallowedFilenames}"))
-	@NoBind var disallowedPrefixes = commaSeparated(Wire[String]("${uploads.disallowedPrefixes}"))
+	@NoBind var disallowedFilenames: List[String] = commaSeparated(Wire[String]("${uploads.disallowedFilenames}"))
+	@NoBind var disallowedPrefixes: List[String] = commaSeparated(Wire[String]("${uploads.disallowedPrefixes}"))
 
 	// files bound from an upload request, prior to being persisted by `onBind`.
 	var upload: JList[MultipartFile] = JArrayList()
@@ -46,10 +46,10 @@ class UploadedFile extends BindListener {
 
 	def uploadedFileNames: Seq[String] = upload.asScala.map(_.getOriginalFilename).filterNot(_ == "")
 	def attachedFileNames: Seq[String] = attached.asScala.map(_.getName)
-	def fileNames = uploadedFileNames ++ attachedFileNames
+	def fileNames: Seq[String] = uploadedFileNames ++ attachedFileNames
 
-	def isMissing = !isExists
-	def isExists = hasUploads || hasAttachments
+	def isMissing: Boolean = !isExists
+	def isExists: Boolean = hasUploads || hasAttachments
 
 	def size: Int =
 		if (hasAttachments) attached.size
@@ -59,8 +59,8 @@ class UploadedFile extends BindListener {
 	def attachedOrEmpty: JList[FileAttachment] = Option(attached).getOrElse(JArrayList())
 	def uploadOrEmpty: JList[MultipartFile] = permittedUploads
 
-	def hasAttachments = attached != null && !attached.isEmpty
-	def hasUploads = !permittedUploads.isEmpty
+	def hasAttachments: Boolean = attached != null && !attached.isEmpty
+	def hasUploads: Boolean = !permittedUploads.isEmpty
 
 	/** Uploads excluding those that are empty or have bad names. */
 	def permittedUploads: JList[MultipartFile] = {
@@ -71,7 +71,7 @@ class UploadedFile extends BindListener {
 		}.asJava
 	}
 
-	def isUploaded = hasUploads
+	def isUploaded: Boolean = hasUploads
 
 	def individualFileSizes: Seq[(String, Long)] =
 		upload.asScala.map(u => (u.getOriginalFilename, u.getSize)) ++

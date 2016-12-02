@@ -14,7 +14,7 @@ class FirstMarkerOnlyWorkflow extends MarkingWorkflow with NoSecondMarker with A
 		this.department = dept
 	}
 
-	@transient var submissionService = Wire[SubmissionService]
+	@transient var submissionService: SubmissionService = Wire[SubmissionService]
 
 	def markingMethod = FirstMarkerOnly
 

@@ -9,5 +9,5 @@ import freemarker.template.TemplateScalarModel
  * current year each time it's evaluated.
  */
 class TheYear extends TemplateScalarModel {
-	def getAsString = new DateTime().getYear.toString
+	def getAsString: String = new DateTime().getYear.toString
 }

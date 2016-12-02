@@ -25,8 +25,8 @@ class DownloadFeedbackCommand(val module: Module, val assignment: Assignment, va
 		case _ => PermissionCheck(Permissions.AssignmentFeedback.Read, feedback)
 	}
 
-	var zip = Wire.auto[ZipService]
-	var feedbackDao = Wire.auto[FeedbackDao]
+	var zip: ZipService = Wire.auto[ZipService]
+	var feedbackDao: FeedbackDao = Wire.auto[FeedbackDao]
 
 	var filename: String = _
 	var students: JList[String] = JArrayList()
@@ -36,7 +36,7 @@ class DownloadFeedbackCommand(val module: Module, val assignment: Assignment, va
 	 * If filename is set, it will return a renderable attachment if found.
 	 * In either case if it's not found, None is returned.
 	 */
-	def applyInternal() = {
+	def applyInternal(): Option[RenderableFile] = {
 		filename match {
 			case filename: String if filename.hasText =>
 				feedback.attachments.find(_.name == filename).map(new RenderableAttachment(_))
@@ -49,7 +49,7 @@ class DownloadFeedbackCommand(val module: Module, val assignment: Assignment, va
 		case _ => zip.getFeedbackZip(feedback)
 	}
 
-	override def describe(d: Description) = {
+	override def describe(d: Description): Unit = {
 		d.assignment(assignment)
 		d.property("filename", filename)
 	}

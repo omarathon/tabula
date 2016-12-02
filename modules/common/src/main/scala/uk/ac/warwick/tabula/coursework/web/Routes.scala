@@ -17,35 +17,35 @@ object Routes {
 	import RoutesUtils._
 
 	// FIXME this isn't really an optional property, but testing is a pain unless it's made so
-	var _cm1Prefix = Wire.optionProperty("${cm1.prefix}")
-	def cm1Prefix = _cm1Prefix.orNull
+	var _cm1Prefix: Option[String] = Wire.optionProperty("${cm1.prefix}")
+	def cm1Prefix: String = _cm1Prefix.orNull
 
 	private lazy val context = s"/$cm1Prefix"
-	def home = context + "/"
+	def home: String = context + "/"
 
-	def zipFileJob(jobInstance: JobInstance) = "/zips/%s" format encoded(jobInstance.id)
+	def zipFileJob(jobInstance: JobInstance): String = "/zips/%s" format encoded(jobInstance.id)
 
 	object assignment {
-		def apply(assignment: Assignment) = context + "/module/%s/%s/" format (encoded(assignment.module.code), encoded(assignment.id))
-		def receipt(assignment: Assignment) = apply(assignment)
-		def feedback(assignment: Assignment) = apply(assignment) + "all/feedback.zip"
-		def feedbackPdf(assignment: Assignment, feedback: AssignmentFeedback) = apply(assignment) + "%s/feedback.pdf" format encoded(feedback.universityId)
+		def apply(assignment: Assignment): String = context + "/module/%s/%s/" format (encoded(assignment.module.code), encoded(assignment.id))
+		def receipt(assignment: Assignment): String = apply(assignment)
+		def feedback(assignment: Assignment): String = apply(assignment) + "all/feedback.zip"
+		def feedbackPdf(assignment: Assignment, feedback: AssignmentFeedback): String = apply(assignment) + "%s/feedback.pdf" format encoded(feedback.universityId)
 	}
 
 	object admin {
-		def department(department: Department) = context + "/admin/department/%s/" format encoded(department.code)
-		def feedbackTemplates (department: Department) = context + "/admin/department/%s/settings/feedback-templates/" format encoded(department.code)
-		def extensionSettings (department: Department) = context + "/admin/department/%s/settings/extensions" format encoded(department.code)
-		def feedbackReports (department: Department) = context + "/admin/department/%s/reports/feedback/" format encoded(department.code)
+		def department(department: Department): String = context + "/admin/department/%s/" format encoded(department.code)
+		def feedbackTemplates (department: Department): String = context + "/admin/department/%s/settings/feedback-templates/" format encoded(department.code)
+		def extensionSettings (department: Department): String = context + "/admin/department/%s/settings/extensions" format encoded(department.code)
+		def feedbackReports (department: Department): String = context + "/admin/department/%s/reports/feedback/" format encoded(department.code)
 
 		object markingWorkflow {
-			def list(department: Department) = admin.department(department) + "markingworkflows"
-			def add(department: Department) = list(department) + "/add"
-			def edit(scheme: MarkingWorkflow) = list(scheme.department) + "/edit/" + scheme.id
+			def list(department: Department): String = admin.department(department) + "markingworkflows"
+			def add(department: Department): String = list(department) + "/add"
+			def edit(scheme: MarkingWorkflow): String = list(scheme.department) + "/edit/" + scheme.id
 		}
 
 		object module {
-			def apply(module: Module) = department(module.adminDepartment) + "#module-" + encoded(module.code)
+			def apply(module: Module): String = department(module.adminDepartment) + "#module-" + encoded(module.code)
 		}
 
 		object assignment {
@@ -53,95 +53,95 @@ object Routes {
 			private def markerroot(assignment: Assignment, marker: User) = assignmentroot(assignment) + s"/marker/${marker.getWarwickId}"
 
 			object assignMarkers {
-				def apply(assignment: Assignment) = assignmentroot(assignment) + "/assign-markers"
+				def apply(assignment: Assignment): String = assignmentroot(assignment) + "/assign-markers"
 			}
 
 			object markerFeedback {
-				def apply(assignment: Assignment, marker: User) = markerroot(assignment, marker) + "/list"
+				def apply(assignment: Assignment, marker: User): String = markerroot(assignment, marker) + "/list"
 				object complete {
-					def apply(assignment: Assignment, marker: User) = markerroot(assignment, marker) + "/marking-completed"
+					def apply(assignment: Assignment, marker: User): String = markerroot(assignment, marker) + "/marking-completed"
 				}
 				object uncomplete {
-					def apply(assignment: Assignment, marker: User) = markerroot(assignment, marker) + "/marking-uncompleted"
-					def apply(assignment: Assignment, marker: User, previousRole: String) = markerroot(assignment, marker) + "/marking-uncompleted?previousStageRole="+previousRole
+					def apply(assignment: Assignment, marker: User): String = markerroot(assignment, marker) + "/marking-uncompleted"
+					def apply(assignment: Assignment, marker: User, previousRole: String): String = markerroot(assignment, marker) + "/marking-uncompleted?previousStageRole="+previousRole
 				}
 				object bulkApprove {
-					def apply(assignment: Assignment, marker: User) = markerroot(assignment, marker) + "/moderation/bulk-approve"
+					def apply(assignment: Assignment, marker: User): String = markerroot(assignment, marker) + "/moderation/bulk-approve"
 				}
 				object marksTemplate {
-					def apply(assignment: Assignment, marker: User) = markerroot(assignment, marker) + "/marks-template"
+					def apply(assignment: Assignment, marker: User): String = markerroot(assignment, marker) + "/marks-template"
 				}
 				object onlineFeedback {
-					def apply(assignment: Assignment, marker: User) = markerroot(assignment, marker) + "/feedback/online"
+					def apply(assignment: Assignment, marker: User): String = markerroot(assignment, marker) + "/feedback/online"
 
 					object student {
-						def apply(assignment: Assignment, marker: User, student: User) =
+						def apply(assignment: Assignment, marker: User, student: User): String =
 							markerroot(assignment, marker) + s"/feedback/online/${student.getWarwickId}/"
 					}
 					object moderation {
-						def apply(assignment: Assignment, marker: User, student: User) =
+						def apply(assignment: Assignment, marker: User, student: User): String =
 							markerroot(assignment, marker) + s"/feedback/online/moderation/${student.getWarwickId}/"
 					}
 				}
 				object marks {
-					def apply(assignment: Assignment, marker: User) = markerroot(assignment, marker) + "/marks"
+					def apply(assignment: Assignment, marker: User): String = markerroot(assignment, marker) + "/marks"
 				}
 				object feedback {
-					def apply(assignment: Assignment, marker: User) = markerroot(assignment, marker) + "/feedback"
+					def apply(assignment: Assignment, marker: User): String = markerroot(assignment, marker) + "/feedback"
 				}
 				object submissions {
-					def apply(assignment: Assignment, marker: User) = markerroot(assignment, marker) + "/submissions.zip"
+					def apply(assignment: Assignment, marker: User): String = markerroot(assignment, marker) + "/submissions.zip"
 				}
 				object downloadFeedback {
 					object marker {
-						def apply(assignment: Assignment, marker: User, feedbackId: String, filename: String) =
+						def apply(assignment: Assignment, marker: User, feedbackId: String, filename: String): String =
 							markerroot(assignment, marker) + s"/feedback/download/$feedbackId/$filename"
 					}
 
 					object all {
-						def apply(assignment: Assignment, marker: User, markerFeedback: String) = markerroot(assignment, marker) + s"/feedback/download/$markerFeedback/attachments/"
+						def apply(assignment: Assignment, marker: User, markerFeedback: String): String = markerroot(assignment, marker) + s"/feedback/download/$markerFeedback/attachments/"
 					}
 
 					object one {
-						def apply(assignment: Assignment, marker: User, markerFeedback: String, filename: String) = markerroot(assignment, marker) + s"/feedback/download/$markerFeedback/attachment/$filename"
+						def apply(assignment: Assignment, marker: User, markerFeedback: String, filename: String): String = markerroot(assignment, marker) + s"/feedback/download/$markerFeedback/attachment/$filename"
 					}
 				}
 				object returnsubmissions {
-					def apply(assignment: Assignment) = assignmentroot(assignment) + "/submissionsandfeedback/return-submissions"
+					def apply(assignment: Assignment): String = assignmentroot(assignment) + "/submissionsandfeedback/return-submissions"
 				}
 			}
 
 			object feedbackAdjustment {
-				def apply(assignment: Assignment, student: User) = assignmentroot(assignment) + "/feedback/adjustments"
+				def apply(assignment: Assignment, student: User): String = assignmentroot(assignment) + "/feedback/adjustments"
 			}
 
 			object onlineFeedback {
-				def apply(assignment: Assignment) = assignmentroot(assignment) + "/feedback/online"
+				def apply(assignment: Assignment): String = assignmentroot(assignment) + "/feedback/online"
 			}
 
 			object onlineModeration {
-				def apply(assignment: Assignment, marker: User) = assignmentroot(assignment) + s"/marker/${marker.getWarwickId}/feedback/online/moderation"
+				def apply(assignment: Assignment, marker: User): String = assignmentroot(assignment) + s"/marker/${marker.getWarwickId}/feedback/online/moderation"
 			}
 
-			def create(module: Module) = context + "/admin/module/%s/assignments/new" format encoded(module.code)
+			def create(module: Module): String = context + "/admin/module/%s/assignments/new" format encoded(module.code)
 
 			private def assignmentroot(assignment: Assignment) = context + "/admin/module/%s/assignments/%s" format (encoded(assignment.module.code), encoded(assignment.id))
 
-			def edit(assignment: Assignment) = assignmentroot(assignment) + "/edit"
+			def edit(assignment: Assignment): String = assignmentroot(assignment) + "/edit"
 
-			def delete(assignment: Assignment) = assignmentroot(assignment) + "/delete"
+			def delete(assignment: Assignment): String = assignmentroot(assignment) + "/delete"
 
-			def submissionsZip(assignment: Assignment) = assignmentroot(assignment) + "/submissions.zip"
+			def submissionsZip(assignment: Assignment): String = assignmentroot(assignment) + "/submissions.zip"
 
 			object submissionsandfeedback {
-				def apply(assignment: Assignment) = assignmentroot(assignment) + "/list"
-				def summary(assignment: Assignment) = assignmentroot(assignment) + "/summary"
-				def table(assignment: Assignment) = assignmentroot(assignment) + "/table"
+				def apply(assignment: Assignment): String = assignmentroot(assignment) + "/list"
+				def summary(assignment: Assignment): String = assignmentroot(assignment) + "/summary"
+				def table(assignment: Assignment): String = assignmentroot(assignment) + "/table"
 			}
 
 			object turnitin {
-				def status(assignment: Assignment) = assignmentroot(assignment) + "/turnitin/status"
-				def report(submission: Submission, report: OriginalityReport) =
+				def status(assignment: Assignment): String = assignmentroot(assignment) + "/turnitin/status"
+				def report(submission: Submission, report: OriginalityReport): String =
 					if (report.turnitinId.hasText)
 						assignmentroot(submission.assignment) + "/turnitin/lti-report/%s".format (encoded(report.attachment.id))
 					else
@@ -154,13 +154,13 @@ object Routes {
 			}
 
 			object extension {
-				def expandrow (assignment: Assignment, universityId: String) = assignmentroot(assignment) + "/extensions?universityId=" + universityId
+				def expandrow (assignment: Assignment, universityId: String): String = assignmentroot(assignment) + "/extensions?universityId=" + universityId
 
 				// def detail doesn't use assignmentroot since assignmentroot includes the assignment ID in the middle, but
 				// it needs to be on the end for managing extension requests across department so that
 				// it can be passed as a unique contentId when toggling rows (jquery-expandingTable.js)
-				def detail (assignment: Assignment) = context + "/admin/module/%s/assignments/extensions/detail" format encoded(assignment.module.code)
-				def revoke (assignment: Assignment, universityId: String) = assignmentroot(assignment) + "/extensions/revoke/" + universityId
+				def detail (assignment: Assignment): String = context + "/admin/module/%s/assignments/extensions/detail" format encoded(assignment.module.code)
+				def revoke (assignment: Assignment, universityId: String): String = assignmentroot(assignment) + "/extensions/revoke/" + universityId
 			}
 		}
 	}

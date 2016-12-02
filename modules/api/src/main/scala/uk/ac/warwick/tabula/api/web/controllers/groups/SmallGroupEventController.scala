@@ -15,7 +15,7 @@ import uk.ac.warwick.tabula.commands.Appliable
 import uk.ac.warwick.tabula.commands.groups.admin._
 import uk.ac.warwick.tabula.data.model._
 import uk.ac.warwick.tabula.data.model.groups._
-import uk.ac.warwick.tabula.web.Routes
+import uk.ac.warwick.tabula.web.{Mav, Routes}
 import uk.ac.warwick.tabula.web.views.{JSONErrorView, JSONView}
 
 import scala.beans.BeanProperty
@@ -39,7 +39,7 @@ trait CreateSmallGroupEventApi {
 
 
 	@RequestMapping(method = Array(POST), consumes = Array(MediaType.APPLICATION_JSON_VALUE), produces = Array("application/json"))
-	def createEvent(@RequestBody request: SmallGroupEventRequest, @ModelAttribute("createCommand") command: ModifySmallGroupEventCommand, errors: Errors, @PathVariable smallGroupSet: SmallGroupSet)(implicit response: HttpServletResponse) = {
+	def createEvent(@RequestBody request: SmallGroupEventRequest, @ModelAttribute("createCommand") command: ModifySmallGroupEventCommand, errors: Errors, @PathVariable smallGroupSet: SmallGroupSet)(implicit response: HttpServletResponse): Mav = {
 		request.copyTo(command, errors)
 		globalValidator.validate(command, errors)
 		command.validate(errors)
@@ -69,7 +69,7 @@ trait EditSmallGroupEventApi {
 
 
 	@RequestMapping(method = Array(PUT), consumes = Array(MediaType.APPLICATION_JSON_VALUE), produces = Array("application/json"))
-	def editEvent(@RequestBody request: SmallGroupEventRequest, @ModelAttribute("editCommand") command: ModifySmallGroupEventCommand, errors: Errors, @PathVariable smallGroupSet: SmallGroupSet, @PathVariable smallGroupEvent: SmallGroupEvent) = {
+	def editEvent(@RequestBody request: SmallGroupEventRequest, @ModelAttribute("editCommand") command: ModifySmallGroupEventCommand, errors: Errors, @PathVariable smallGroupSet: SmallGroupSet, @PathVariable smallGroupEvent: SmallGroupEvent): Mav = {
 		request.copyTo(command, errors)
 		globalValidator.validate(command, errors)
 		command.validate(errors)
@@ -96,7 +96,7 @@ trait DeleteSmallGroupEventApi {
 
 
 	@RequestMapping(method = Array(DELETE), consumes = Array(MediaType.APPLICATION_JSON_VALUE), produces = Array("application/json"))
-	def deleteEvent(@Valid @ModelAttribute("deleteCommand") command: DeleteSmallGroupEventCommand, errors: Errors) = {
+	def deleteEvent(@Valid @ModelAttribute("deleteCommand") command: DeleteSmallGroupEventCommand, errors: Errors): Mav = {
 		if (errors.hasErrors) {
 			Mav(new JSONErrorView(errors))
 		} else {

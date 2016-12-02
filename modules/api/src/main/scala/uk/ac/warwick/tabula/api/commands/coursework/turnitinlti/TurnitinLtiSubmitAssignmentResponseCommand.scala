@@ -23,7 +23,7 @@ with TurnitinLtiSubmitAssignmentResponseCommandState with Logging {
 
 	self: AssessmentServiceComponent with TurnitinLtiQueueServiceComponent =>
 
-	override protected def applyInternal() = {
+	override protected def applyInternal(): Unit = {
 		assignment.turnitinId = assignmentid
 		turnitinLtiQueueService.createEmptyOriginalityReports(assignment)
 		assessmentService.save(assignment)
@@ -44,7 +44,7 @@ trait TurnitinLtiSubmitAssignmentResponseValidation extends SelfValidating {
 
 	self: TurnitinLtiSubmitAssignmentResponseCommandState with AssessmentServiceComponent =>
 
-	override def validate(errors: Errors) = {
+	override def validate(errors: Errors): Unit = {
 		if (assignment != assessmentService.getAssignmentById(resource_link_id.substring(TurnitinLtiService.AssignmentPrefix.length)).get) {
 			errors.rejectValue("assignment", "turnitin.assignment.invalid")
 		}

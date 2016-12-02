@@ -173,17 +173,17 @@ trait SharedAssignmentProperties extends BooleanAssignmentProperties with FindAs
 
 trait FindAssignmentFields {
 
-	protected def findFileField(assignment: Assignment) =
+	protected def findFileField(assignment: Assignment): Option[FileField] =
 		assignment.findFieldOfType[FileField](Assignment.defaultUploadName)
 
-	protected def findMarkerSelectField(assignment: Assignment) =
+	protected def findMarkerSelectField(assignment: Assignment): Option[MarkerSelectField] =
 		assignment.findFieldOfType[MarkerSelectField](Assignment.defaultMarkerSelectorName)
 
 	/**Find the standard free-text field if it exists */
-	protected def findCommentField(assignment: Assignment) =
+	protected def findCommentField(assignment: Assignment): Option[CommentField] =
 		assignment.findFieldOfType[CommentField](Assignment.defaultCommentFieldName)
 
-	protected def findWordCountField(assignment: Assignment) = {
+	protected def findWordCountField(assignment: Assignment): Option[WordCountField] = {
 		assignment.findFieldOfType[WordCountField](Assignment.defaultWordCountName)
 	}
 }

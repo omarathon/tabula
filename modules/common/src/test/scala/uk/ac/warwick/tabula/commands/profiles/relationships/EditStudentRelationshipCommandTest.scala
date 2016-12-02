@@ -2,7 +2,7 @@ package uk.ac.warwick.tabula.commands.profiles.relationships
 
 import uk.ac.warwick.tabula.commands.DescriptionImpl
 import uk.ac.warwick.tabula.data.model.notifications.profiles.{StudentRelationshipChangeToOldAgentNotification, StudentRelationshipChangeToStudentNotification}
-import uk.ac.warwick.tabula.data.model.{MemberStudentRelationship, StaffMember}
+import uk.ac.warwick.tabula.data.model.{MemberStudentRelationship, Notification, StaffMember, StudentRelationship}
 import uk.ac.warwick.tabula.profiles.TutorFixture
 import uk.ac.warwick.tabula.{Mockito, NoCurrentUser, TestBase}
 
@@ -29,7 +29,7 @@ class EditStudentRelationshipCommandTest extends TestBase with Mockito {
 		command.agent = newTutor
 		command.notifyStudent = true
 
-		val notifications = command.emit(Seq(relationship))
+		val notifications: Seq[Notification[StudentRelationship, Unit]] = command.emit(Seq(relationship))
 		notifications.size should be(1)
 		notifications.exists(n=>n.recipients.exists(u=>u.getWarwickId == "student")) should be (true)
 	}}
@@ -40,7 +40,7 @@ class EditStudentRelationshipCommandTest extends TestBase with Mockito {
 		command.agent = newTutor
 		command.notifyOldAgents = true
 
-		val notifications = command.emit(Seq(relationship))
+		val notifications: Seq[Notification[StudentRelationship, Unit]] = command.emit(Seq(relationship))
 		notifications.size should be(1)
 	}}
 
@@ -50,7 +50,7 @@ class EditStudentRelationshipCommandTest extends TestBase with Mockito {
 		command.agent = newTutor
 		command.notifyNewAgent = true
 
-		val notifications = command.emit(Seq(relationship))
+		val notifications: Seq[Notification[StudentRelationship, Unit]] = command.emit(Seq(relationship))
 		notifications.size should be(1)
 	}}
 
@@ -62,7 +62,7 @@ class EditStudentRelationshipCommandTest extends TestBase with Mockito {
 		command.notifyOldAgents = true
 		command.notifyStudent = true
 
-		val notifications = command.emit(Seq(relationship))
+		val notifications: Seq[Notification[StudentRelationship, Unit]] = command.emit(Seq(relationship))
 		notifications.size should be(2)
 	}}
 
@@ -73,7 +73,7 @@ class EditStudentRelationshipCommandTest extends TestBase with Mockito {
 		command.notifyOldAgents = true
 		command.notifyStudent = true
 
-		val notifications = command.emit(Seq(relationship))
+		val notifications: Seq[Notification[StudentRelationship, Unit]] = command.emit(Seq(relationship))
 		notifications.size should be(2)
 		notifications.exists(_.isInstanceOf[StudentRelationshipChangeToOldAgentNotification]) should be (true)
 		notifications.exists(_.isInstanceOf[StudentRelationshipChangeToStudentNotification]) should be (true)
@@ -89,7 +89,7 @@ class EditStudentRelationshipCommandTest extends TestBase with Mockito {
 
 		command.relationshipService = relationshipService
 
-		val rels = command.applyInternal
+		val rels: Seq[StudentRelationship] = command.applyInternal
 		rels.size should be(1)
 		rels.head.agent should be(newTutor.universityId)
 		rels.head.studentMember should be(Some(studentCourseDetails.student))
@@ -104,7 +104,7 @@ class EditStudentRelationshipCommandTest extends TestBase with Mockito {
 
 		command.relationshipService = relationshipService
 
-		val rels = command.applyInternal
+		val rels: Seq[StudentRelationship] = command.applyInternal
 		rels.size should be(1)
 		rels.head.agent should be(newTutor.universityId)
 		rels.head.studentMember should be(Some(studentCourseDetails.student))
@@ -118,7 +118,7 @@ class EditStudentRelationshipCommandTest extends TestBase with Mockito {
 		command.agent = oldTutor
 		command.relationshipService = relationshipService
 
-		val rels = command.applyInternal
+		val rels: Seq[StudentRelationship] = command.applyInternal
 		rels.size should be(0)
 	}}
 
@@ -141,7 +141,7 @@ class EditStudentRelationshipCommandTest extends TestBase with Mockito {
 		command.relationshipService = relationshipService
 		command.agent = newTutor
 
-		val rels3 = command.applyInternal
+		val rels3: Seq[StudentRelationship] = command.applyInternal
 
 		// so we should have replaced oldTutor with newTutor and oldTutor2 should remain untouched
 		rels3.size should be(1)
@@ -162,7 +162,7 @@ class EditStudentRelationshipCommandTest extends TestBase with Mockito {
 		command.relationshipService = relationshipService
 		command.agent = newTutor
 
-		val rels4 = command.applyInternal
+		val rels4: Seq[StudentRelationship] = command.applyInternal
 
 		// so we should have replaced oldTutor and oldTutor2 with newTutor
 		rels4.size should be (1)

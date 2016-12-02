@@ -29,7 +29,7 @@ class ImpliedDefinitionsFactory extends UnresolvingLocaleDefinitionsFactory with
    * Return a definition if found in XML. Otherwise if it doesn't start with /,
    * generate our own definition based on the base layout
    */
-	override def getDefinition(name: String, ctx: Request) = {
+	override def getDefinition(name: String, ctx: Request): Definition = {
 		if (debugEnabled) logger.debug("Rendering " + name)
 		val name2 = name // TODO figure out why using name directly ends up null
 		super.getDefinition(name, ctx) match {
@@ -42,13 +42,13 @@ class ImpliedDefinitionsFactory extends UnresolvingLocaleDefinitionsFactory with
 		}
 	}
 
-	def layoutDefinition(ctx: Request) = {
+	def layoutDefinition(ctx: Request): Definition = {
 		val layout = layoutTemplate(ctx)
 		if (debugEnabled) logger.debug("Using layout template " + layout)
 		super.getDefinition(layout, ctx)
 	}
 
-	def layoutTemplate(ctx: Request) =
+	def layoutTemplate(ctx: Request): String =
 		if (ctx.getAvailableScopes.asScala.contains(Request.REQUEST_SCOPE))
 			ctx.getContext(Request.REQUEST_SCOPE).get(LayoutAttribute) match {
 				case name: String => name.trim

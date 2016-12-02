@@ -1,7 +1,7 @@
 package uk.ac.warwick.tabula.commands.admin.modules
 
-import uk.ac.warwick.tabula.{Mockito, Fixtures, TestBase}
-import uk.ac.warwick.tabula.data.model.Module
+import uk.ac.warwick.tabula.{Fixtures, Mockito, TestBase}
+import uk.ac.warwick.tabula.data.model.{Department, Module}
 import uk.ac.warwick.tabula.services.{ModuleAndDepartmentService, ModuleAndDepartmentServiceComponent}
 import org.springframework.validation.BindException
 import uk.ac.warwick.tabula.commands._
@@ -11,11 +11,11 @@ import uk.ac.warwick.tabula.permissions.Permissions
 class AddModuleCommandTest extends TestBase with Mockito {
 
 	trait CommandTestSupport extends AddModuleCommandState with ModuleAndDepartmentServiceComponent {
-		val moduleAndDepartmentService = mock[ModuleAndDepartmentService]
+		val moduleAndDepartmentService: ModuleAndDepartmentService = mock[ModuleAndDepartmentService]
 	}
 
 	trait Fixture {
-		val department = Fixtures.department("in", "IT Services")
+		val department: Department = Fixtures.department("in", "IT Services")
 
 		val command = new AddModuleCommandInternal(department) with CommandTestSupport
 	}
@@ -28,7 +28,7 @@ class AddModuleCommandTest extends TestBase with Mockito {
 		command.code = " CS205  "
 		command.name = "Introduction to module creation"
 
-		val module = command.applyInternal()
+		val module: Module = command.applyInternal()
 		module.code should be ("cs205") // sanitised
 		module.name should be ("Introduction to module creation")
 
@@ -37,7 +37,7 @@ class AddModuleCommandTest extends TestBase with Mockito {
 
 	trait ValidationFixture {
 		val command = new AddModuleCommandValidation with CommandTestSupport {
-			val department = Fixtures.department("in", "IT Services")
+			val department: Department = Fixtures.department("in", "IT Services")
 		}
 	}
 
@@ -124,7 +124,7 @@ class AddModuleCommandTest extends TestBase with Mockito {
 		val dept = Fixtures.department("in")
 
 		val command = new AddModuleCommandPermissions with CommandTestSupport {
-			val department = dept
+			val department: Department = dept
 		}
 
 		val checking = mock[PermissionsChecking]
@@ -138,7 +138,7 @@ class AddModuleCommandTest extends TestBase with Mockito {
 
 		val command = new AddModuleCommandDescription with CommandTestSupport {
 			val eventName: String = "test"
-			val department = dept
+			val department: Department = dept
 		}
 
 		command.code = "cs205"

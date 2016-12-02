@@ -18,7 +18,7 @@ trait JobServiceComponent {
 }
 
 trait AutowiringJobServiceComponent extends JobServiceComponent {
-	var jobService = Wire[JobService]
+	var jobService: JobService = Wire[JobService]
 }
 
 @Service
@@ -28,7 +28,7 @@ class JobService extends HasJobDao with Logging with JobNotificationHandling {
 	// How many jobs to load and run each time
 	val RunBatchSize = 10
 
-	lazy val schedulerInstance = {
+	lazy val schedulerInstance: String = {
 		try {
 			InetAddress.getLocalHost.getHostName
 		}
@@ -57,7 +57,7 @@ class JobService extends HasJobDao with Logging with JobNotificationHandling {
 		}
 	}
 
-	def getInstance(id: String) = jobDao.getById(id)
+	def getInstance(id: String): Option[JobInstance] = jobDao.getById(id)
 
 	def processInstance(instance: JobInstance) {
 		findJob(instance.jobType) match {
@@ -89,12 +89,12 @@ class JobService extends HasJobDao with Logging with JobNotificationHandling {
 		}
 	}
 
-	def unfinishedInstances = jobDao.unfinishedInstances
-	def listRecent(start: Int, count: Int) = jobDao.listRecent(start, count)
+	def unfinishedInstances: Seq[JobInstance] = jobDao.unfinishedInstances
+	def listRecent(start: Int, count: Int): Seq[JobInstance] = jobDao.listRecent(start, count)
 
-	def update(instance: JobInstance) = jobDao.update(instance)
+	def update(instance: JobInstance): Unit = jobDao.update(instance)
 
-	def findJob(identifier: String) =
+	def findJob(identifier: String): Option[Job] =
 		jobs.find(identifier == _.identifier)
 
 	def add(user: Option[CurrentUser], prototype: JobPrototype): JobInstance = {

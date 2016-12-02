@@ -49,7 +49,7 @@ abstract class ProcessTurnitinLtiQueueCommandInternal extends CommandInternal[Pr
 
 	def topLevelUrl: String
 
-	override def applyInternal() = {
+	override def applyInternal(): ProcessTurnitinLtiQueueCommandResult = {
 		lazy val processedAssignment: Option[Assignment] =
 			turnitinLtiQueueService.findAssignmentToProcess.map(processAssignment)
 		lazy val processedReportForSubmission: Option[OriginalityReport] =

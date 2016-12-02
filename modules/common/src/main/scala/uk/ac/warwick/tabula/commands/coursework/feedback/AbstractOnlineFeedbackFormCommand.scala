@@ -15,7 +15,7 @@ import scala.util.Try
 abstract class AbstractOnlineFeedbackFormCommand(val module: Module, val assignment: Assignment, val student: User, val marker: User, val gradeGenerator: GeneratesGradesFromMarks)
 	extends OnlineFeedbackState with OnlineFeedbackStudentState with SubmissionState with BindListener with SelfValidating with ProfileServiceComponent {
 
-	def submission = assignment.findSubmission(student.getWarwickId)
+	def submission: Option[Submission] = assignment.findSubmission(student.getWarwickId)
 
 	override def onBind(result:BindingResult) {
 		if (fields != null) {
@@ -74,7 +74,7 @@ trait SubmissionState {
 	def submission: Option[Submission]
 	def student: User
 
-	def submissionState = {
+	def submissionState: String = {
 		submission match {
 			case Some(s) if s.isAuthorisedLate => "workflow.Submission.authorisedLate"
 			case Some(s) if s.isLate => "workflow.Submission.late"

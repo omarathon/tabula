@@ -14,9 +14,9 @@ class ImportSupervisorsForStudentCommand(var studentCourseDetails: StudentCourse
 	extends Command[Unit] with Unaudited with Logging {
 	PermissionCheck(Permissions.ImportSystemData)
 
-	var supervisorImporter = Wire.auto[SupervisorImporter]
-	var profileService = Wire.auto[ProfileService]
-	var relationshipService = Wire.auto[RelationshipService]
+	var supervisorImporter: SupervisorImporter = Wire.auto[SupervisorImporter]
+	var profileService: ProfileService = Wire.auto[ProfileService]
+	var relationshipService: RelationshipService = Wire.auto[RelationshipService]
 
 	def applyInternal() {
 		if (studentCourseDetails.currentRoute != null && studentCourseDetails.currentRoute.degreeType == Postgraduate) {
@@ -26,7 +26,7 @@ class ImportSupervisorsForStudentCommand(var studentCourseDetails: StudentCourse
 		}
 	}
 
-	override def describe(d: Description) = d.property("sprCode" -> studentCourseDetails.sprCode)
+	override def describe(d: Description): Unit = d.property("sprCode" -> studentCourseDetails.sprCode)
 
 	def importSupervisors() {
 		relationshipService

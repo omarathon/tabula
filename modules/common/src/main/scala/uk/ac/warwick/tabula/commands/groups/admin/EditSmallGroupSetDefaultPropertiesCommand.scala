@@ -17,7 +17,7 @@ import scala.collection.JavaConverters._
 
 object EditSmallGroupSetDefaultPropertiesCommand {
 	val DefaultStartTime = new LocalTime(12, 0)
-	val DefaultEndTime = DefaultStartTime.plusHours(1)
+	val DefaultEndTime: LocalTime = DefaultStartTime.plusHours(1)
 
 	def apply(module: Module, set: SmallGroupSet) =
 		new EditSmallGroupSetDefaultPropertiesCommandInternal(module, set)
@@ -41,7 +41,7 @@ trait EditSmallGroupSetDefaultPropertiesCommandState {
 	var defaultLocationId: String = _
 	var resetExistingEvents: Boolean = false
 
-	def defaultWeekRanges = Option(defaultWeeks) map { weeks => WeekRange.combine(weeks.asScala.toSeq.map { _.intValue }) } getOrElse Seq()
+	def defaultWeekRanges: Seq[WeekRange] = Option(defaultWeeks) map { weeks => WeekRange.combine(weeks.asScala.toSeq.map { _.intValue }) } getOrElse Seq()
 	def defaultWeekRanges_=(ranges: Seq[WeekRange]) {
 		defaultWeeks =
 			JHashSet(ranges
@@ -56,7 +56,7 @@ class EditSmallGroupSetDefaultPropertiesCommandInternal(val module: Module, val 
 
 	copyFrom(set)
 
-	override def applyInternal() = {
+	override def applyInternal(): SmallGroupSet = {
 		copyTo(set)
 
 		if (resetExistingEvents) {

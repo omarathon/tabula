@@ -4,6 +4,8 @@ import org.joda.time.LocalDateTime
 import uk.ac.warwick.tabula.ItemNotFoundException
 import uk.ac.warwick.tabula.commands.{CommandInternal, ComposableCommand, MemberOrUser, ReadOnly, TaskBenchmarking, Unaudited}
 import uk.ac.warwick.tabula.data.model.attendance.AttendanceState
+import uk.ac.warwick.tabula.data.model.groups.SmallGroupEventOccurrence.WeekNumber
+import uk.ac.warwick.tabula.data.model.groups.WeekRange.Week
 import uk.ac.warwick.tabula.data.model.groups.{SmallGroup, SmallGroupEvent, SmallGroupEventAttendanceNote, SmallGroupEventOccurrence}
 import uk.ac.warwick.tabula.permissions.Permissions
 import uk.ac.warwick.tabula.services._
@@ -12,9 +14,10 @@ import uk.ac.warwick.userlookup.User
 
 import scala.collection.JavaConverters._
 import scala.collection.immutable.SortedMap
+import scala.collection.mutable
 
 sealed abstract class SmallGroupAttendanceState {
-	def getName = toString
+	def getName: String = toString
 }
 
 object SmallGroupAttendanceState {
@@ -25,7 +28,7 @@ object SmallGroupAttendanceState {
 	case object Late extends SmallGroupAttendanceState
 	case object NotExpected extends SmallGroupAttendanceState // The user is no longer in the group so is not expected to attend
 
-	def from(state: Option[AttendanceState]) = state match {
+	def from(state: Option[AttendanceState]): SmallGroupAttendanceState = state match {
 		case Some(AttendanceState.Attended) => Attended
 		case Some(AttendanceState.MissedAuthorised) => MissedAuthorised
 		case Some(AttendanceState.MissedUnauthorised) => MissedUnauthorised
@@ -57,9 +60,9 @@ object ViewSmallGroupAttendanceCommand {
 	}
 
 	// Sort users by last name, first name
-	implicit val defaultOrderingForUser = Ordering.by { user: User => (user.getLastName, user.getFirstName, user.getUserId) }
+	implicit val defaultOrderingForUser: Ordering[User] = Ordering.by { user: User => (user.getLastName, user.getFirstName, user.getUserId) }
 
-	implicit val defaultOrderingForEventInstance = Ordering.by { instance: EventInstance => instance match {
+	implicit val defaultOrderingForEventInstance: Ordering[(SmallGroupEvent, WeekNumber)] = Ordering.by { instance: EventInstance => instance match {
 		case (event, week) =>
 			val weekValue = week * 7 * 24
 			val dayValue = (event.day.getAsInt - 1) * 24
@@ -68,7 +71,7 @@ object ViewSmallGroupAttendanceCommand {
 			(weekValue + dayValue + hourValue, week, event.id)
 	}}
 
-	def allEventInstances(group: SmallGroup, occurrences: Seq[SmallGroupEventOccurrence]) =
+	def allEventInstances(group: SmallGroup, occurrences: Seq[SmallGroupEventOccurrence]): mutable.Buffer[((SmallGroupEvent, Week), Option[SmallGroupEventOccurrence])] =
 		group.events.filter { !_.isUnscheduled }.flatMap { event =>
 			val allWeeks = event.weekRanges.flatMap { _.toWeeks }
 			allWeeks.map { week =>
@@ -80,7 +83,10 @@ object ViewSmallGroupAttendanceCommand {
 			}
 		}
 
-	def attendanceForStudent(allEventInstances: Seq[(EventInstance, Option[SmallGroupEventOccurrence])], isLate: EventInstance => Boolean)(user: User) = {
+	def attendanceForStudent(
+		allEventInstances: Seq[(EventInstance, Option[SmallGroupEventOccurrence])],
+		isLate: EventInstance => Boolean
+	)(user: User): SortedMap[(SmallGroupEvent, WeekNumber), SmallGroupAttendanceState] = {
 		val userAttendance = allEventInstances.map { case ((event, week), occurrence) =>
 			val instance = (event, week)
 			val attendance =
@@ -103,7 +109,7 @@ object ViewSmallGroupAttendanceCommand {
 			instance -> state
 		}
 
-		SortedMap(userAttendance.toSeq:_*)
+		SortedMap(userAttendance:_*)
 	}
 }
 
@@ -115,7 +121,7 @@ class ViewSmallGroupAttendanceCommand(val group: SmallGroup)
 
 	if (!group.groupSet.collectAttendance) throw new ItemNotFoundException()
 
-	override def applyInternal() = {
+	override def applyInternal(): SmallGroupAttendanceInformation = {
 		val occurrences = benchmarkTask("Get all small group event occurrences for the group") { smallGroupService.findAttendanceByGroup(group) }
 
 		// Build a list of all the events and week information, with an optional register

@@ -19,7 +19,7 @@ abstract class AbstractUpstreamModuleListService extends UpstreamModuleListServi
 
 	self: UpstreamModuleListDaoComponent =>
 
-	def save(list: UpstreamModuleList) =
+	def save(list: UpstreamModuleList): Unit =
 		upstreamModuleListDao.save(list)
 
 	def saveOrUpdate(list: UpstreamModuleList): Unit =
@@ -46,5 +46,5 @@ trait UpstreamModuleListServiceComponent {
 }
 
 trait AutowiringUpstreamModuleListServiceComponent extends UpstreamModuleListServiceComponent {
-	var upstreamModuleListService = Wire[UpstreamModuleListService]
+	var upstreamModuleListService: UpstreamModuleListService = Wire[UpstreamModuleListService]
 }

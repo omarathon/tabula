@@ -34,7 +34,7 @@ abstract class AllocateStudentsToDepartmentalSmallGroupsController extends Group
 		@ModelAttribute("command") cmd: AllocateStudentsToDepartmentalSmallGroupsCommand,
 		@PathVariable department: Department,
 		@PathVariable academicYear: AcademicYear
-	) = {
+	): Mav = {
 		cmd.populate()
 		cmd.sort()
 		form(cmd, department, academicYear)
@@ -42,7 +42,7 @@ abstract class AllocateStudentsToDepartmentalSmallGroupsController extends Group
 
 	protected val renderPath: String
 
-	protected def form(cmd: AllocateStudentsToDepartmentalSmallGroupsCommand, department: Department, academicYear: AcademicYear) =
+	protected def form(cmd: AllocateStudentsToDepartmentalSmallGroupsCommand, department: Department, academicYear: AcademicYear): Mav =
 		Mav(renderPath).crumbs(Breadcrumbs.Department(department, academicYear), Breadcrumbs.Reusable(department, academicYear))
 
 	@RequestMapping(method=Array(POST))

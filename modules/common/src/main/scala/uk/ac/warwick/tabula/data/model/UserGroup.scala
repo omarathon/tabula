@@ -41,12 +41,12 @@ class UserGroup private(val universityIds: Boolean)
 	/* For Hibernate xx */
 	def this() { this(false) }
 
-	@transient var userLookup = Wire[UserLookupService]
+	@transient var userLookup: UserLookupService = Wire[UserLookupService]
 	private def groupService = userLookup.getGroupService
 
 	var baseWebgroup: String = _
 
-	def baseWebgroupSize = groupService.getGroupInfo(baseWebgroup).getSize
+	def baseWebgroupSize: Int = groupService.getGroupInfo(baseWebgroup).getSize
 
 	@ElementCollection @Column(name = "usercode")
 	@JoinTable(name = "UserGroupInclude", joinColumns = Array(
@@ -81,7 +81,7 @@ class UserGroup private(val universityIds: Boolean)
 		excludeUsers.addAll(userIds.asJava)
 	}
 
-	def add(user:User) = {
+	def add(user:User): Unit = {
 		addUserId(getIdFromUser(user))
 	}
 	def addUserId(user: String) {
@@ -89,9 +89,9 @@ class UserGroup private(val universityIds: Boolean)
 			includeUsers.add(user)
 		}
 	}
-	def removeUserId(user: String) = includeUsers.remove(user)
+	def removeUserId(user: String): Unit = includeUsers.remove(user)
 
-	def remove(user:User) = {
+	def remove(user:User): Unit = {
 		removeUserId(getIdFromUser(user))
 	}
 
@@ -100,11 +100,11 @@ class UserGroup private(val universityIds: Boolean)
 			excludeUsers.add(user)
 		}
 	}
-	def exclude(user:User)={
+	def exclude(user:User): Unit ={
 		excludeUserId(getIdFromUser(user))
 	}
-	def unexcludeUserId(user: String) = excludeUsers.remove(user)
-  def unexclude(user:User)={
+	def unexcludeUserId(user: String): Unit = excludeUsers.remove(user)
+  def unexclude(user:User): Unit ={
 		unexcludeUserId(getIdFromUser(user))
 	}
 
@@ -112,20 +112,20 @@ class UserGroup private(val universityIds: Boolean)
 	 * Could implement as `members.contains(user)`
 	 * but this is more efficient
 	 */
-	def includesUserId(user: String) =
+	def includesUserId(user: String): Boolean =
 		!(excludeUsers contains user) &&
 			(
 				includeUsers.contains(user) ||
 				staticIncludeUsers.contains(user) ||
 				(baseWebgroup != null && groupService.isUserInGroup(user, baseWebgroup)))
 
-	def excludesUserId(user: String) = excludeUsers contains user
+	def excludesUserId(user: String): Boolean = excludeUsers contains user
 
-	def includesUser(user:User) = includesUserId(getIdFromUser(user))
-	def excludesUser(user:User) = excludesUserId(getIdFromUser(user))
+	def includesUser(user:User): Boolean = includesUserId(getIdFromUser(user))
+	def excludesUser(user:User): Boolean = excludesUserId(getIdFromUser(user))
 
-	def isEmpty = members.isEmpty
-	def size = members.size
+	def isEmpty: Boolean = members.isEmpty
+	def size: Int = members.size
 
 	def members: Seq[String] = allIncludedIds diff allExcludedIds
 
@@ -178,7 +178,7 @@ class UserGroup private(val universityIds: Boolean)
 		}
 	}
 
-	def knownType = this
+	def knownType: UserGroup = this
 }
 
 object UserGroup {

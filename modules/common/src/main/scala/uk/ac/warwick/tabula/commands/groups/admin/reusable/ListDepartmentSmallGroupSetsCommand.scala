@@ -23,7 +23,7 @@ case class DepartmentSmallGroupSetMembershipItem(
 	universityId: String,
 	userId: String
 ) {
-	def itemTypeString = itemType.value
+	def itemTypeString: String = itemType.value
 }
 
 object ListDepartmentSmallGroupSetsCommand {
@@ -39,7 +39,7 @@ class ListDepartmentSmallGroupSetsCommandInternal(val department: Department, va
 	extends CommandInternal[Seq[DepartmentSmallGroupSet]] with ListDepartmentSmallGroupSetsCommandState {
 	self: SmallGroupServiceComponent =>
 
-	def applyInternal() = smallGroupService.getDepartmentSmallGroupSets(department, academicYear)
+	def applyInternal(): Seq[DepartmentSmallGroupSet] = smallGroupService.getDepartmentSmallGroupSets(department, academicYear)
 }
 
 trait ListDepartmentSmallGroupSetsCommandState {

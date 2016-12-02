@@ -12,6 +12,7 @@ import uk.ac.warwick.tabula.web.controllers.attendance.{AttendanceController, Ha
 import uk.ac.warwick.tabula.commands.{Appliable, PopulateOnForm, SelfValidating}
 import uk.ac.warwick.tabula.data.model.StudentRelationshipType
 import uk.ac.warwick.tabula.data.model.attendance.{AttendanceMonitoringCheckpoint, AttendanceMonitoringPoint}
+import uk.ac.warwick.tabula.web.Mav
 
 @Controller
 @RequestMapping(Array("/attendance/agent/{relationshipType}/{academicYear}/point/{templatePoint}"))
@@ -32,7 +33,7 @@ class AgentPointRecordController extends AttendanceController with HasMonthNames
 		@ModelAttribute("command") cmd: Appliable[Seq[AttendanceMonitoringCheckpoint]] with PopulateOnForm,
 		@PathVariable relationshipType: StudentRelationshipType,
 		@PathVariable academicYear: AcademicYear
-	) = {
+	): Mav = {
 		cmd.populate()
 		render(relationshipType, academicYear)
 	}
@@ -53,7 +54,7 @@ class AgentPointRecordController extends AttendanceController with HasMonthNames
 		errors: Errors,
 		@PathVariable relationshipType: StudentRelationshipType,
 		@PathVariable academicYear: AcademicYear
-	) = {
+	): Mav = {
 		if (errors.hasErrors) {
 			render(relationshipType, academicYear)
 		} else {

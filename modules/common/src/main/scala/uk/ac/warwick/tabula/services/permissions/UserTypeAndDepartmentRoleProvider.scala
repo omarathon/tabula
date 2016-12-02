@@ -13,12 +13,13 @@ import uk.ac.warwick.tabula.helpers.Promises._
 import uk.ac.warwick.tabula.roles.UniversityMemberRole
 import uk.ac.warwick.tabula.roles.StaffRole
 import uk.ac.warwick.tabula.commands.TaskBenchmarking
+import uk.ac.warwick.tabula.helpers.MutablePromise
 
 @Component
 class UserTypeAndDepartmentRoleProvider extends ScopelessRoleProvider with TaskBenchmarking {
 
-	var profileService = Wire.auto[ProfileService]
-	val departmentService = promise { Wire[ModuleAndDepartmentService] }
+	var profileService: ProfileService = Wire.auto[ProfileService]
+	val departmentService: MutablePromise[ModuleAndDepartmentService] = promise { Wire[ModuleAndDepartmentService] }
 
 	private def getRolesForMembers(members: Seq[Member]): Stream[Role] = members.toStream.flatMap { member =>
 		if (member.inUseFlag == "Active" || member.inUseFlag.startsWith("Inactive - Starts ")) {

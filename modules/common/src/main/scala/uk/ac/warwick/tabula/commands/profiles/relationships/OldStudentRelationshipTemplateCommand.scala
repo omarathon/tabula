@@ -12,10 +12,10 @@ class OldStudentRelationshipTemplateCommand(val department: Department, val rela
 
 	PermissionCheck(Permissions.Profiles.StudentRelationship.Read(mandatory(relationshipType)), department)
 
-	var service = Wire[RelationshipService]
-	var profileService = Wire[ProfileService]
+	var service: RelationshipService = Wire[RelationshipService]
+	var profileService: ProfileService = Wire[ProfileService]
 
-	def applyInternal() = {
+	def applyInternal(): ExcelView = {
 
 		val existingRelationships = service.listStudentRelationshipsByDepartment(relationshipType, department)
 		val unallocated = service.listStudentsWithoutRelationship(relationshipType, department)

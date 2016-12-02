@@ -23,11 +23,11 @@ class ModeOfAttendance {
 	var shortName: String = _
 	var fullName: String = _
 
-	var lastUpdatedDate = DateTime.now
+	var lastUpdatedDate: DateTime = DateTime.now
 
-	override def toString = fullName.toLowerCase()
+	override def toString: String = fullName.toLowerCase()
 
-	def fullNameAliased = {
+	def fullNameAliased: String = {
 		if (code.equals("F"))
 			"Full-time"
 		else fullName

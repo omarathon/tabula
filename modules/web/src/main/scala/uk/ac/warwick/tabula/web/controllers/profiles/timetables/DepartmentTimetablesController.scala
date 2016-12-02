@@ -8,6 +8,7 @@ import uk.ac.warwick.tabula.data.model.Department
 import uk.ac.warwick.tabula.helpers.SystemClockComponent
 import uk.ac.warwick.tabula.services._
 import uk.ac.warwick.tabula.services.timetables._
+import uk.ac.warwick.tabula.web.Mav
 import uk.ac.warwick.tabula.web.controllers.profiles.ProfilesController
 import uk.ac.warwick.tabula.web.views.{FullCalendarEvent, JSONView}
 
@@ -19,7 +20,7 @@ class DepartmentTimetablesController extends ProfilesController
 	with AutowiringUserLookupComponent with CurrentSITSAcademicYear {
 
 	@ModelAttribute("activeDepartment")
-	def activeDepartment(@PathVariable department: Department) = department
+	def activeDepartment(@PathVariable department: Department): Department = department
 
 	@ModelAttribute("command")
 	def command(@PathVariable department: Department): DepartmentTimetablesCommand.CommandType = {
@@ -34,7 +35,7 @@ class DepartmentTimetablesController extends ProfilesController
 	}
 
 	@RequestMapping(method = Array(GET))
-	def form(@ModelAttribute("command") cmd: DepartmentTimetablesCommand.CommandType, @PathVariable department: Department) = {
+	def form(@ModelAttribute("command") cmd: DepartmentTimetablesCommand.CommandType, @PathVariable department: Department): Mav = {
 		Mav("profiles/timetables/department",
 			"canFilterStudents" -> securityService.can(user, DepartmentTimetablesCommand.FilterStudentPermission, mandatory(department)),
 			"canFilterStaff" -> securityService.can(user, DepartmentTimetablesCommand.FilterStaffPermission, mandatory(department)),
@@ -47,7 +48,7 @@ class DepartmentTimetablesController extends ProfilesController
 	def post(
 		@ModelAttribute("command") cmd: DepartmentTimetablesCommand.CommandType,
 		@PathVariable department: Department
-	) = {
+	): Mav = {
 		val result = cmd.apply()
 		val calendarEvents = FullCalendarEvent.colourEvents(result._1.events.map(FullCalendarEvent(_, userLookup)))
 		Mav(new JSONView(Map("events" -> calendarEvents, "lastUpdated" -> result._1.lastUpdated, "errors" -> result._2)))

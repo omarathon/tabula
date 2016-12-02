@@ -38,7 +38,7 @@ class FilterMonitoringPointsCommandInternal(val department: Department, val acad
 
 	self: ProfileServiceComponent with FilterMonitoringPointsCommandState with AttendanceMonitoringServiceComponent with TermServiceComponent =>
 
-	override def applyInternal() = {
+	override def applyInternal(): FilterMonitoringPointsCommandResult = {
 		if (serializeFilter.isEmpty) {
 			filterTooVague = true
 			FilterMonitoringPointsCommandResult(Seq(), Map())
@@ -73,7 +73,7 @@ trait OnBindFilterMonitoringPointsCommand extends BindListener {
 
 	self: FilterMonitoringPointsCommandState =>
 
-	override def onBind(result: BindingResult) = {
+	override def onBind(result: BindingResult): Unit = {
 		if (!hasBeenFiltered) {
 			allSprStatuses.filter { status => !status.code.startsWith("P") && !status.code.startsWith("T") }.foreach { sprStatuses.add }
 		}

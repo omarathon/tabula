@@ -7,6 +7,7 @@ import uk.ac.warwick.tabula.commands.Appliable
 import uk.ac.warwick.tabula.commands.reports.profiles.ProfileExportCommand
 import uk.ac.warwick.tabula.data.AttendanceMonitoringStudentData
 import uk.ac.warwick.tabula.data.model.Department
+import uk.ac.warwick.tabula.web.Mav
 import uk.ac.warwick.tabula.web.controllers.reports.{ReportsBreadcrumbs, ReportsController}
 
 @Controller
@@ -22,7 +23,7 @@ class ProfileExportController extends ReportsController {
 		@ModelAttribute("command") cmd: Appliable[Seq[AttendanceMonitoringStudentData]],
 		@PathVariable department: Department,
 		@PathVariable academicYear: AcademicYear
-	) = {
+	): Mav = {
 		val results = cmd.apply()
 		if (ajax) {
 			Mav("reports/profiles/_filter", "results" -> results).noLayout()

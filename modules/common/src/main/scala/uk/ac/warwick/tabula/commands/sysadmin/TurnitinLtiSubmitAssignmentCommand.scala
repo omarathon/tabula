@@ -26,7 +26,7 @@ class TurnitinLtiSubmitAssignmentCommandInternal(val user: CurrentUser) extends 
 
 	self: TurnitinLtiSubmitAssignmentCommandState with TurnitinLtiServiceComponent =>
 
-	override def applyInternal() = transactional() {
+	override def applyInternal(): TurnitinLtiResponse = transactional() {
 		turnitinLtiService.submitAssignment(assignment, user)
 	}
 

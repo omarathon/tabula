@@ -5,7 +5,7 @@ import java.io.FileInputStream
 import org.springframework.validation.BindException
 import uk.ac.warwick.tabula._
 import uk.ac.warwick.tabula.data.FileDao
-import uk.ac.warwick.tabula.data.model.{Assignment, FileAttachment}
+import uk.ac.warwick.tabula.data.model._
 import uk.ac.warwick.tabula.pdf.PdfGeneratorWithFileStorage
 import uk.ac.warwick.tabula.services.objectstore.ObjectStorageService
 import uk.ac.warwick.tabula.services.{UserLookupService, ZipService}
@@ -14,7 +14,7 @@ import uk.ac.warwick.userlookup.{AnonymousUser, User}
 class DownloadFeedbackCommandTest extends TestBase with Mockito {
 
 	trait Fixture {
-		val mockObjectStorageService = smartMock[ObjectStorageService]
+		val mockObjectStorageService: ObjectStorageService = smartMock[ObjectStorageService]
 
 		var userDatabase = Seq(new User())
 		var userLookup: UserLookupService = smartMock[UserLookupService]
@@ -25,10 +25,10 @@ class DownloadFeedbackCommandTest extends TestBase with Mockito {
 			userDatabase find {_.getWarwickId == id} getOrElse new AnonymousUser()
 		}
 
-		val department = Fixtures.department(code="ls", name="Life Sciences")
-		val module = Fixtures.module(code="ls101")
+		val department: Department = Fixtures.department(code="ls", name="Life Sciences")
+		val module: Module = Fixtures.module(code="ls101")
 		val assignment = new Assignment
-		val feedback = Fixtures.assignmentFeedback("0123456")
+		val feedback: AssignmentFeedback = Fixtures.assignmentFeedback("0123456")
 		feedback.id = "123"
 
 		department.postLoad // force legacy settings
@@ -44,7 +44,7 @@ class DownloadFeedbackCommandTest extends TestBase with Mockito {
 		attachment.name = "0123456-feedback.doc"
 		feedback.attachments.add(attachment)
 
-		val mockPdfGenerator = smartMock[PdfGeneratorWithFileStorage]
+		val mockPdfGenerator: PdfGeneratorWithFileStorage = smartMock[PdfGeneratorWithFileStorage]
 		mockPdfGenerator.renderTemplateAndStore(any[String], any[String], any[Any]) answers (_ => {
 			val attachment = new FileAttachment
 			attachment.id = "234"
@@ -61,8 +61,8 @@ class DownloadFeedbackCommandTest extends TestBase with Mockito {
 
 		val command = new DownloadFeedbackCommand(feedback.assignment.module, feedback.assignment, feedback, Some(Fixtures.student("123")))
 		command.zip = new ZipService {
-			override val pdfGenerator = mockPdfGenerator
-			override val fileDao = smartMock[FileDao]
+			override val pdfGenerator: PdfGeneratorWithFileStorage = mockPdfGenerator
+			override val fileDao: FileDao = smartMock[FileDao]
 		}
 		command.zip.userLookup = userLookup
 		command.zip.features = Features.empty

@@ -38,9 +38,9 @@ object GrantRoleCommand {
 class GrantRoleCommandInternal[A <: PermissionsTarget : ClassTag](val scope: A) extends CommandInternal[GrantedRole[A]] with GrantRoleCommandState[A] {
 	self: PermissionsServiceComponent with UserLookupComponent =>
 
-	lazy val grantedRole = permissionsService.getGrantedRole(scope, roleDefinition)
+	lazy val grantedRole: Option[GrantedRole[A]] = permissionsService.getGrantedRole(scope, roleDefinition)
 
-	def applyInternal() = transactional() {
+	def applyInternal(): GrantedRole[A] = transactional() {
 		val role = grantedRole.getOrElse(GrantedRole(scope, roleDefinition))
 
 		usercodes.asScala.foreach(role.users.knownType.addUserId)
@@ -65,7 +65,7 @@ trait GrantRoleCommandValidation extends SelfValidating {
 			errors.rejectValue("usercodes", "NotEmpty")
 		} else {
 			val usercodeValidator = new UsercodeListValidator(usercodes, "usercodes") {
-				override def alreadyHasCode = usercodes.asScala.exists { u => grantedRole.exists(_.users.knownType.includesUserId(u)) }
+				override def alreadyHasCode: Boolean = usercodes.asScala.exists { u => grantedRole.exists(_.users.knownType.includesUserId(u)) }
 			}
 			usercodeValidator.userLookup = userLookup
 
@@ -109,7 +109,7 @@ trait GrantRoleCommandPermissions extends RequiresPermissionsChecking with Permi
 trait GrantRoleCommandDescription[A <: PermissionsTarget] extends Describable[GrantedRole[A]] {
 	self: GrantRoleCommandState[A] =>
 
-	def describe(d: Description) = d.properties(
+	def describe(d: Description): Unit = d.properties(
 		"scope" -> (scope.getClass.getSimpleName + "[" + scope.id + "]"),
 		"usercodes" -> usercodes.asScala.mkString(","),
 		"roleDefinition" -> roleDefinition.getName)

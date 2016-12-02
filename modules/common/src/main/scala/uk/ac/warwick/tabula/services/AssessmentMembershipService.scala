@@ -111,10 +111,10 @@ class AssessmentMembershipServiceImpl
 		(autoEnrolled ++ manuallyEnrolled).filter { _.isVisibleToStudents }.distinct
 	}
 
-	def emptyMembers(groupsToEmpty:Seq[String]) =
+	def emptyMembers(groupsToEmpty:Seq[String]): Int =
 		dao.emptyMembers(groupsToEmpty:Seq[String])
 
-	def replaceMembers(template: UpstreamAssessmentGroup, registrations: Seq[UpstreamModuleRegistration]) = {
+	def replaceMembers(template: UpstreamAssessmentGroup, registrations: Seq[UpstreamModuleRegistration]): UpstreamAssessmentGroup = {
 		if (debugEnabled) debugReplace(template, registrations.map(_.universityId))
 
 		getUpstreamAssessmentGroup(template).map { group =>
@@ -137,37 +137,37 @@ class AssessmentMembershipServiceImpl
 	def find(assignment: AssessmentComponent): Option[AssessmentComponent] = dao.find(assignment)
 	def find(group: UpstreamAssessmentGroup): Option[UpstreamAssessmentGroup] = dao.find(group)
 	def find(group: AssessmentGroup): Option[AssessmentGroup] = dao.find(group)
-	def save(group:AssessmentGroup) = dao.save(group)
+	def save(group:AssessmentGroup): Unit = dao.save(group)
 	def save(assignment: AssessmentComponent): AssessmentComponent = dao.save(assignment)
-	def save(group: UpstreamAssessmentGroup) = dao.save(group)
-	def save(member: UpstreamAssessmentGroupMember) = dao.save(member)
+	def save(group: UpstreamAssessmentGroup): Unit = dao.save(group)
+	def save(member: UpstreamAssessmentGroupMember): Unit = dao.save(member)
 
-	def getAssessmentGroup(id:String) = dao.getAssessmentGroup(id)
+	def getAssessmentGroup(id:String): Option[AssessmentGroup] = dao.getAssessmentGroup(id)
 	def getAssessmentGroup(template: AssessmentGroup): Option[AssessmentGroup] = find(template)
 	def getUpstreamAssessmentGroup(template: UpstreamAssessmentGroup): Option[UpstreamAssessmentGroup] = find(template)
-	def getUpstreamAssessmentGroup(id:String) = dao.getUpstreamAssessmentGroup(id)
+	def getUpstreamAssessmentGroup(id:String): Option[UpstreamAssessmentGroup] = dao.getUpstreamAssessmentGroup(id)
 
 	def delete(group: AssessmentGroup) { dao.delete(group) }
 
-	def getAssessmentComponent(id: String) = dao.getAssessmentComponent(id)
+	def getAssessmentComponent(id: String): Option[AssessmentComponent] = dao.getAssessmentComponent(id)
 
-	def getAssessmentComponent(group: UpstreamAssessmentGroup) = dao.getAssessmentComponent(group)
+	def getAssessmentComponent(group: UpstreamAssessmentGroup): Option[AssessmentComponent] = dao.getAssessmentComponent(group)
 
 	/**
 	 * Gets assessment components for this module.
 	 */
-	def getAssessmentComponents(module: Module) = dao.getAssessmentComponents(module)
+	def getAssessmentComponents(module: Module): Seq[AssessmentComponent] = dao.getAssessmentComponents(module)
 
 	/**
 	 * Gets assessment components by SITS module code
 	 */
-	def getAssessmentComponents(moduleCode: String, inUseOnly: Boolean = true) =
+	def getAssessmentComponents(moduleCode: String, inUseOnly: Boolean = true): Seq[AssessmentComponent] =
 		dao.getAssessmentComponents(moduleCode, inUseOnly)
 
 	/**
 	 * Gets assessment components for this department.
 	 */
-	def getAssessmentComponents(department: Department, includeSubDepartments: Boolean) = dao.getAssessmentComponents(department, includeSubDepartments)
+	def getAssessmentComponents(department: Department, includeSubDepartments: Boolean): Seq[AssessmentComponent] = dao.getAssessmentComponents(department, includeSubDepartments)
 
 	def countPublishedFeedback(assignment: Assignment): Int = dao.countPublishedFeedback(assignment)
 
@@ -204,12 +204,12 @@ class AssessmentMembershipServiceImpl
 }
 
 class AssessmentMembershipInfo(val items: Seq[MembershipItem]) {
-	val	sitsCount = items.count(_.itemType == SitsType)
-	val	totalCount = items.filterNot(_.itemType == ExcludeType).size
-	val includeCount = items.count(_.itemType == IncludeType)
-	val excludeCount = items.count(_.itemType == ExcludeType)
-	val usedIncludeCount = items.count(i => i.itemType == IncludeType && !i.extraneous)
-	val usedExcludeCount = items.count(i => i.itemType == ExcludeType && !i.extraneous)
+	val	sitsCount: Int = items.count(_.itemType == SitsType)
+	val	totalCount: Int = items.filterNot(_.itemType == ExcludeType).size
+	val includeCount: Int = items.count(_.itemType == IncludeType)
+	val excludeCount: Int = items.count(_.itemType == ExcludeType)
+	val usedIncludeCount: Int = items.count(i => i.itemType == IncludeType && !i.extraneous)
+	val usedExcludeCount: Int = items.count(i => i.itemType == ExcludeType && !i.extraneous)
 }
 
 trait AssessmentMembershipMethods extends Logging {
@@ -282,7 +282,7 @@ trait AssessmentMembershipMethods extends Logging {
 		(sitsUsers ++ includes).distinct diff excludes.distinct
 	}
 
-	def countMembershipWithUniversityIdGroup(upstream: Seq[UpstreamAssessmentGroup], others: Option[UnspecifiedTypeUserGroup]) = {
+	def countMembershipWithUniversityIdGroup(upstream: Seq[UpstreamAssessmentGroup], others: Option[UnspecifiedTypeUserGroup]): Int = {
 		others match {
 			case Some(group) if !group.universityIds =>
 				logger.warn("Attempted to use countMembershipWithUniversityIdGroup() with a usercode-type UserGroup. Falling back to determineMembership()")
@@ -375,7 +375,7 @@ case class MembershipItem(
 	*/
 	extraneous: Boolean) {
 
-	def itemTypeString = itemType.value
+	def itemTypeString: String = itemType.value
 }
 
 trait AssessmentMembershipServiceComponent {
@@ -383,7 +383,7 @@ trait AssessmentMembershipServiceComponent {
 }
 
 trait AutowiringAssessmentMembershipServiceComponent extends AssessmentMembershipServiceComponent {
-	var assessmentMembershipService = Wire[AssessmentMembershipService]
+	var assessmentMembershipService: AssessmentMembershipService = Wire[AssessmentMembershipService]
 }
 
 trait GeneratesGradesFromMarks {

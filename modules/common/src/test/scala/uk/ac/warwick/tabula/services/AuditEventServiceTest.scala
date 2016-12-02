@@ -1,10 +1,11 @@
 package uk.ac.warwick.tabula.services
 
+import org.hibernate.Session
 import org.hibernate.dialect.HSQLDialect
 import org.joda.time.DateTime
 import org.springframework.transaction.annotation.Transactional
 import uk.ac.warwick.tabula.data.model.AuditEvent
-import uk.ac.warwick.tabula.services.elasticsearch.{ElasticsearchIndexingResult, AuditEventIndexService}
+import uk.ac.warwick.tabula.services.elasticsearch.{AuditEventIndexService, ElasticsearchIndexingResult}
 import uk.ac.warwick.tabula.{Mockito, PersistenceTestBase}
 import uk.ac.warwick.tabula.data.SessionComponent
 import uk.ac.warwick.tabula.events.Event
@@ -15,7 +16,7 @@ import scala.concurrent.Future
 class AuditEventServiceTest extends PersistenceTestBase with Mockito {
 
 	val service = new AuditEventServiceImpl with SessionComponent {
-		def session = sessionFactory.getCurrentSession
+		def session: Session = sessionFactory.getCurrentSession
 	}
 	service.dialect = new HSQLDialect
 	service.auditEventIndexService = smartMock[AuditEventIndexService]

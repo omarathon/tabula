@@ -1,16 +1,18 @@
 package uk.ac.warwick.tabula.web.controllers.attendance.manage
 
 import org.springframework.stereotype.Controller
-import org.springframework.web.bind.annotation.{PathVariable, ModelAttribute, RequestMapping}
+import org.springframework.web.bind.annotation.{ModelAttribute, PathVariable, RequestMapping}
 import uk.ac.warwick.tabula.data.model.attendance.AttendanceMonitoringScheme
 import uk.ac.warwick.tabula.commands.attendance.manage.EditSchemeCommand
 import uk.ac.warwick.tabula.web.controllers.attendance.AttendanceController
-import uk.ac.warwick.tabula.commands.{SelfValidating, PopulateOnForm, Appliable}
+import uk.ac.warwick.tabula.commands.{Appliable, PopulateOnForm, SelfValidating}
 import javax.validation.Valid
+
 import org.springframework.validation.Errors
 import uk.ac.warwick.tabula.attendance.web.Routes
 import uk.ac.warwick.tabula.data.model.Department
 import uk.ac.warwick.tabula.AcademicYear
+import uk.ac.warwick.tabula.web.Mav
 
 @Controller
 @RequestMapping(Array("/attendance/manage/{department}/{academicYear}/{scheme}/edit"))
@@ -36,7 +38,7 @@ class EditSchemeController extends AttendanceController {
 	def form(
 		@PathVariable scheme: AttendanceMonitoringScheme,
 		@ModelAttribute("command") cmd: Appliable[AttendanceMonitoringScheme] with PopulateOnForm
-	) = {
+	): Mav = {
 		cmd.populate()
 		render(scheme)
 	}
@@ -46,7 +48,7 @@ class EditSchemeController extends AttendanceController {
 		@Valid @ModelAttribute("command") cmd: Appliable[AttendanceMonitoringScheme],
 		errors: Errors,
 		@PathVariable scheme: AttendanceMonitoringScheme
-	) = {
+	): Mav = {
 		if (errors.hasErrors) {
 			render(scheme)
 		} else {
@@ -60,7 +62,7 @@ class EditSchemeController extends AttendanceController {
 		@Valid @ModelAttribute("command") cmd: Appliable[AttendanceMonitoringScheme],
 		errors: Errors,
 		@PathVariable scheme: AttendanceMonitoringScheme
-	) = {
+	): Mav = {
 		if (errors.hasErrors) {
 			render(scheme)
 		} else {
@@ -74,7 +76,7 @@ class EditSchemeController extends AttendanceController {
 		@Valid @ModelAttribute("command") cmd: Appliable[AttendanceMonitoringScheme],
 		errors: Errors,
 		@PathVariable scheme: AttendanceMonitoringScheme
-	) = {
+	): Mav = {
 		if (errors.hasErrors) {
 			render(scheme)
 		} else {

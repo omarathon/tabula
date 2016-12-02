@@ -36,7 +36,7 @@ class CreateMeetingRecordCommandInternal(val creator: Member, var relationship: 
 		with FeaturesComponent with AttendanceMonitoringMeetingRecordServiceComponent
 		with FileAttachmentServiceComponent =>
 
-	override def applyInternal() = {
+	override def applyInternal(): MeetingRecord = {
 		val meeting = new MeetingRecord(creator, relationship)
 		applyCommon(meeting)
 	}

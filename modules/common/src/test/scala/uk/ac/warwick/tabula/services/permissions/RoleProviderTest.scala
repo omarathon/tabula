@@ -16,7 +16,7 @@ class RoleProviderTest extends TestBase with Mockito {
 		val service = new RoleProvider {
 			override def getRolesFor(user: CurrentUser, scope: PermissionsTarget): Stream[Role] = Stream()
 			override def rolesProvided: Set[Class[_ <: Role]] = Set()
-			def testCustomRolesFor[A <: PermissionsTarget](department: Department, definition: RoleDefinition, scope: A) =
+			def testCustomRolesFor[A <: PermissionsTarget](department: Department, definition: RoleDefinition, scope: A): Option[Role] =
 				customRoleFor(department)(definition, scope)
 		}
 

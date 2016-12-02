@@ -18,7 +18,7 @@ class FileServerTest extends TestBase with Mockito {
 
 	val content = "file content"
 
-	val tmpFile = File.createTempFile("fileservertest", ".txt")
+	val tmpFile: File = File.createTempFile("fileservertest", ".txt")
 	FileCopyUtils.copy(content.getBytes("UTF-8"), tmpFile)
 
 	@Test def streamEmptyAttachment {

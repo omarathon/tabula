@@ -10,6 +10,7 @@ import uk.ac.warwick.tabula.commands.groups.admin.reusable.{ListDepartmentSmallG
 import uk.ac.warwick.tabula.groups.web.Routes
 import uk.ac.warwick.tabula.permissions.{Permission, Permissions}
 import uk.ac.warwick.tabula.services.{AutowiringMaintenanceModeServiceComponent, AutowiringModuleAndDepartmentServiceComponent, AutowiringUserSettingsServiceComponent}
+import uk.ac.warwick.tabula.web.Mav
 import uk.ac.warwick.tabula.web.controllers.{AcademicYearScopedController, DepartmentScopedController}
 import uk.ac.warwick.tabula.web.controllers.groups.GroupsController
 
@@ -27,7 +28,7 @@ class ListDepartmentSmallGroupSetsController extends GroupsController
 	override val departmentPermission: Permission = Permissions.SmallGroups.Create
 
 	@ModelAttribute("activeDepartment")
-	override def activeDepartment(@PathVariable department: Department) = retrieveActiveDepartment(Option(department))
+	override def activeDepartment(@PathVariable department: Department): Option[Department] = retrieveActiveDepartment(Option(department))
 
 	@ModelAttribute("activeAcademicYear")
 	override def activeAcademicYear(@PathVariable academicYear: AcademicYear): Option[AcademicYear] = retrieveActiveAcademicYear(Option(academicYear))
@@ -37,7 +38,7 @@ class ListDepartmentSmallGroupSetsController extends GroupsController
 		ListDepartmentSmallGroupSetsCommand(department, academicYear)
 
 	@RequestMapping
-	def list(@ModelAttribute("command") command: ListDepartmentSmallGroupSetsCommand, @PathVariable department: Department) = {
+	def list(@ModelAttribute("command") command: ListDepartmentSmallGroupSetsCommand, @PathVariable department: Department): Mav = {
 		Mav("groups/admin/groups/reusable/list",
 			"sets" -> command.apply()
 		).crumbs(Breadcrumbs.Department(command.department, command.academicYear))

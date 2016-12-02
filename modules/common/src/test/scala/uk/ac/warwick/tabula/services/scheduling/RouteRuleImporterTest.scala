@@ -1,15 +1,16 @@
 package uk.ac.warwick.tabula.services.scheduling
 
 import org.junit.After
-import org.springframework.jdbc.datasource.embedded.EmbeddedDatabaseBuilder
-import uk.ac.warwick.tabula.data.model.UpstreamModuleList
-import uk.ac.warwick.tabula.services.{UpstreamModuleListService, CourseAndRouteService}
+import org.springframework.jdbc.datasource.embedded.{EmbeddedDatabase, EmbeddedDatabaseBuilder}
+import uk.ac.warwick.tabula.data.model.{Route, UpstreamModuleList}
+import uk.ac.warwick.tabula.services.{CourseAndRouteService, UpstreamModuleListService}
 import uk.ac.warwick.tabula.{AcademicYear, Fixtures, Mockito, TestBase}
+
 import collection.JavaConverters._
 
 class RouteRuleImporterTest extends TestBase with Mockito {
 	
-	val sits = new EmbeddedDatabaseBuilder().addScript("sits-module-lists.sql").build()
+	val sits: EmbeddedDatabase = new EmbeddedDatabaseBuilder().addScript("sits-module-lists.sql").build()
 
 	@After def afterTheFeast() {
 		sits.shutdown()
@@ -22,10 +23,10 @@ class RouteRuleImporterTest extends TestBase with Mockito {
 
 	val academicYear = AcademicYear(2014)
 
-	val route1 = Fixtures.route("a100")
-	val route2 = Fixtures.route("b100")
-	val route3 = Fixtures.route("c100")
-	val route4 = Fixtures.route("d100")
+	val route1: Route = Fixtures.route("a100")
+	val route2: Route = Fixtures.route("b100")
+	val route3: Route = Fixtures.route("c100")
+	val route4: Route = Fixtures.route("d100")
 	val allRoutes = Seq(route1, route2, route3, route4)
 
 	val moduleList = new UpstreamModuleList("A100-1-14-CAA", academicYear, route1, 1)

@@ -12,7 +12,7 @@ class IcalView(var ical: Calendar) extends View {
 
 	override def getContentType = "text/calendar"
 
-	override def render(model: JMap[String, _], request: HttpServletRequest, response: HttpServletResponse) = {
+	override def render(model: JMap[String, _], request: HttpServletRequest, response: HttpServletResponse): Unit = {
 		/*
 		 * There's no consistent standard for encoding in the optional
 		 * "filename" attribute of Content-Disposition, so you should stick

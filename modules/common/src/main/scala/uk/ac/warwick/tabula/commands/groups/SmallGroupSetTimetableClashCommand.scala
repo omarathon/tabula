@@ -9,7 +9,7 @@ import uk.ac.warwick.userlookup.User
 
 
 object SmallGroupSetTimetableClashCommand {
-	def apply(smallGroupSet: SmallGroupSet) = {
+	def apply(smallGroupSet: SmallGroupSet): SmallGroupSetTimetableClashCommandInternal with ComposableCommand[Seq[(SmallGroup, Seq[User])]] with SmallGroupSetTimetableClashCommandPermissions with AutowiringSmallGroupServiceComponent with Unaudited with ReadOnly = {
 		new SmallGroupSetTimetableClashCommandInternal(smallGroupSet)
 			with ComposableCommand[Seq[(SmallGroup, Seq[User])]]
 			with SmallGroupSetTimetableClashCommandPermissions
@@ -22,7 +22,7 @@ class SmallGroupSetTimetableClashCommandInternal(val smallGroupSet: SmallGroupSe
 	extends CommandInternal[Seq[(SmallGroup, Seq[User])]] with SmallGroupSetTimetableClashCommandState {
 	self: SmallGroupServiceComponent =>
 
-	override def applyInternal() = {
+	override def applyInternal(): Seq[(SmallGroup, Seq[User])] = {
 		smallGroupService.findPossibleTimetableClashesForGroupSet(smallGroupSet)
 	}
 

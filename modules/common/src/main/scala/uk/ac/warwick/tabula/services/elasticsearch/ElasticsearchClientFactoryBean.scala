@@ -60,5 +60,5 @@ trait ElasticsearchClientComponent {
 }
 
 trait AutowiringElasticsearchClientComponent extends ElasticsearchClientComponent {
-	var client = Wire[ElasticClient]
+	var client: ElasticClient = Wire[ElasticClient]
 }

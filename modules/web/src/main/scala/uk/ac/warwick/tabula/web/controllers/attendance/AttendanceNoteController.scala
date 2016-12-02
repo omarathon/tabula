@@ -15,6 +15,7 @@ import uk.ac.warwick.tabula.helpers.DateBuilder
 import uk.ac.warwick.tabula.services.UserLookupService
 import uk.ac.warwick.tabula.services.attendancemonitoring.AttendanceMonitoringService
 import uk.ac.warwick.tabula.services.fileserver.RenderableFile
+import uk.ac.warwick.tabula.web.Mav
 import uk.ac.warwick.tabula.{AcademicYear, ItemNotFoundException}
 
 @Controller
@@ -29,7 +30,7 @@ class AttendanceNoteController extends AttendanceController {
 		@PathVariable student: StudentMember,
 		@PathVariable point: AttendanceMonitoringPoint,
 		@PathVariable academicYear: AcademicYear
-	) = {
+	): Mav = {
 		val attendanceNote = monitoringPointService.getAttendanceNote(student, point).getOrElse(throw new ItemNotFoundException())
 
 		val mav = Mav("attendance/note/view_note",
@@ -84,7 +85,7 @@ class EditAttendanceNoteController extends AttendanceController {
 		@ModelAttribute("command") cmd: Appliable[AttendanceMonitoringNote] with PopulateOnForm,
 		@PathVariable student: StudentMember,
 		@PathVariable academicYear: AcademicYear
-	) = {
+	): Mav = {
 		cmd.populate()
 		form(cmd, student, academicYear, isIframe = true)
 	}
@@ -94,7 +95,7 @@ class EditAttendanceNoteController extends AttendanceController {
 		@ModelAttribute("command") cmd: Appliable[AttendanceMonitoringNote] with PopulateOnForm,
 		@PathVariable student: StudentMember,
 		@PathVariable academicYear: AcademicYear
-	) = {
+	): Mav = {
 		cmd.populate()
 		form(cmd, student, academicYear)
 	}
@@ -125,7 +126,7 @@ class EditAttendanceNoteController extends AttendanceController {
 		errors: Errors,
 		@PathVariable student: StudentMember,
 		@PathVariable academicYear: AcademicYear
-	) = {
+	): Mav = {
 		if (errors.hasErrors) {
 			form(cmd, student, academicYear, isIframe = true)
 		} else {
@@ -140,7 +141,7 @@ class EditAttendanceNoteController extends AttendanceController {
 		errors: Errors,
 		@PathVariable student: StudentMember,
 		@PathVariable academicYear: AcademicYear
-	) = {
+	): Mav = {
 		if (errors.hasErrors) {
 			form(cmd, student, academicYear)
 		} else {
@@ -186,7 +187,7 @@ class BulkEditAttendanceNoteController extends AttendanceController {
 		@PathVariable academicYear: AcademicYear,
 		@PathVariable point: AttendanceMonitoringPoint,
 		@RequestParam(value="isAuto", required=false) isAuto: Boolean
-	) = {
+	): Mav = {
 		cmd.populate()
 		form(cmd, academicYear, isAuto)
 	}
@@ -197,7 +198,7 @@ class BulkEditAttendanceNoteController extends AttendanceController {
 		errors: Errors,
 		@PathVariable academicYear: AcademicYear,
 		@PathVariable point: AttendanceMonitoringPoint
-	) = {
+	): Mav = {
 		if (errors.hasErrors) {
 			form(cmd, academicYear)
 		} else {

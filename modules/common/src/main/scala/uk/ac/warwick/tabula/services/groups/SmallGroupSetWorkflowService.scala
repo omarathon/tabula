@@ -17,7 +17,7 @@ class SmallGroupSetWorkflowService {
 
 	final val MaxPower = 100
 
-	def getStagesFor(set: SmallGroupSet) = {
+	def getStagesFor(set: SmallGroupSet): Seq[SmallGroupSetWorkflowStage] = {
 		var stages = Seq[SmallGroupSetWorkflowStage]()
 
 		stages = stages ++ Seq(AddGroups, AddStudents, AddEvents)
@@ -36,7 +36,7 @@ class SmallGroupSetWorkflowService {
 		stages
 	}
 
-	def progress(set: SmallGroupSet) = {
+	def progress(set: SmallGroupSet): WorkflowProgress = {
 		val allStages = getStagesFor(set)
 		val progresses = allStages.map { _.progress(set) }
 
@@ -70,7 +70,7 @@ object SmallGroupSetWorkflowStages extends TaskBenchmarking with RequestLevelCac
 
 	case object AddGroups extends SmallGroupSetWorkflowStage {
 		def actionCode = "workflow.smallGroupSet.AddGroups.action"
-		def progress(set: SmallGroupSet) =
+		def progress(set: SmallGroupSet): StageProgress =
 			// Linked upstream, no groups
 			if (set.linkedDepartmentSmallGroupSet != null && set.groups.isEmpty)
 				StageProgress(AddGroups, started = true, messageCode = "workflow.smallGroupSet.AddGroups.linkedEmpty", health = Warning)
@@ -82,7 +82,7 @@ object SmallGroupSetWorkflowStages extends TaskBenchmarking with RequestLevelCac
 
 	case object AddStudents extends SmallGroupSetWorkflowStage {
 		def actionCode = "workflow.smallGroupSet.AddStudents.action"
-		def progress(set: SmallGroupSet) =
+		def progress(set: SmallGroupSet): StageProgress =
 			// Linked upstream
 			if (set.linked && set.linkedDepartmentSmallGroupSet != null) {
 				// Linked upstream (to SITS), no students
@@ -114,7 +114,7 @@ object SmallGroupSetWorkflowStages extends TaskBenchmarking with RequestLevelCac
 
 	case object AddEvents extends SmallGroupSetWorkflowStage {
 		def actionCode = "workflow.smallGroupSet.AddEvents.action"
-		def progress(set: SmallGroupSet) =
+		def progress(set: SmallGroupSet): StageProgress =
 			if (set.groups.asScala.forall { _.events.isEmpty })
 				StageProgress(AddEvents, started = false, messageCode = "workflow.smallGroupSet.AddEvents.empty", health = Danger)
 			else
@@ -125,7 +125,7 @@ object SmallGroupSetWorkflowStages extends TaskBenchmarking with RequestLevelCac
 
 	case object AllocateStudents extends SmallGroupSetWorkflowStage {
 		def actionCode = "workflow.smallGroupSet.AllocateStudents.action"
-		def progress(set: SmallGroupSet) = {
+		def progress(set: SmallGroupSet): StageProgress = {
 			val setUnallocatedStudentsCount = cachedBy(s"${set.id}-unallocatedStudentsCount") { set.unallocatedStudentsCount }
 			val setAllStudentsCount = cachedBy(s"${set.id}-allStudentsCount") { set.allStudentsCount }
 			if (setUnallocatedStudentsCount == setAllStudentsCount)
@@ -141,7 +141,7 @@ object SmallGroupSetWorkflowStages extends TaskBenchmarking with RequestLevelCac
 
 	case object OpenSignUp extends SmallGroupSetWorkflowStage {
 		def actionCode = "workflow.smallGroupSet.OpenSignUp.action"
-		def progress(set: SmallGroupSet) =
+		def progress(set: SmallGroupSet): StageProgress =
 			if (set.openForSignups)
 				StageProgress(OpenSignUp, started = true, messageCode = "workflow.smallGroupSet.OpenSignUp.open", health = Warning, completed = true)
 			else {
@@ -158,7 +158,7 @@ object SmallGroupSetWorkflowStages extends TaskBenchmarking with RequestLevelCac
 
 	case object CloseSignUp extends SmallGroupSetWorkflowStage {
 		def actionCode = "workflow.smallGroupSet.CloseSignUp.action"
-		def progress(set: SmallGroupSet) = {
+		def progress(set: SmallGroupSet): StageProgress = {
 			val setUnallocatedStudentsCount = cachedBy(s"${set.id}-unallocatedStudentsCount") { set.unallocatedStudentsCount }
 			val setAllStudentsCount = cachedBy(s"${set.id}-allStudentsCount") { set.allStudentsCount }
 			if (!set.openForSignups && setUnallocatedStudentsCount < setAllStudentsCount)
@@ -174,7 +174,7 @@ object SmallGroupSetWorkflowStages extends TaskBenchmarking with RequestLevelCac
 
 	case object SendNotifications extends SmallGroupSetWorkflowStage {
 		def actionCode = "workflow.smallGroupSet.SendNotifications.action"
-		def progress(set: SmallGroupSet) =
+		def progress(set: SmallGroupSet): StageProgress =
 			if (set.fullyReleased)
 				StageProgress(SendNotifications, started = true, messageCode = "workflow.smallGroupSet.SendNotifications.fullyReleased", health = Good, completed = true)
 			else if (set.releasedToStudents)
@@ -189,7 +189,7 @@ object SmallGroupSetWorkflowStages extends TaskBenchmarking with RequestLevelCac
 
 	case object AllocateAfterNotifications extends SmallGroupSetWorkflowStage {
 		def actionCode = "workflow.smallGroupSet.AllocateStudents.action"
-		def progress(set: SmallGroupSet) = {
+		def progress(set: SmallGroupSet): StageProgress = {
 			val setUnallocatedStudentsCount = cachedBy(s"${set.id}-unallocatedStudentsCount") { set.unallocatedStudentsCount }
 			if (setUnallocatedStudentsCount == 0)
 				StageProgress(AllocateAfterNotifications, started = true, messageCode = "workflow.smallGroupSet.SendNotifications.fullyReleased", health = Good, completed = true)
@@ -206,5 +206,5 @@ trait SmallGroupSetWorkflowServiceComponent {
 }
 
 trait AutowiringSmallGroupSetWorkflowServiceComponent extends SmallGroupSetWorkflowServiceComponent {
-	var smallGroupSetWorkflowService = Wire[SmallGroupSetWorkflowService]
+	var smallGroupSetWorkflowService: SmallGroupSetWorkflowService = Wire[SmallGroupSetWorkflowService]
 }

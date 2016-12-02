@@ -21,15 +21,15 @@ class ScheduledNotificationServiceImpl extends ScheduledNotificationService with
 
 	val RunBatchSize = 10
 
-	var dao = Wire.auto[ScheduledNotificationDao]
-	var notificationService = Wire.auto[NotificationService]
+	var dao: ScheduledNotificationDao = Wire.auto[ScheduledNotificationDao]
+	var notificationService: NotificationService = Wire.auto[NotificationService]
 
 	// a map of DiscriminatorValue -> Notification
-	lazy val notificationMap = ReflectionHelper.allNotifications
+	lazy val notificationMap: Map[String, Class[_ <: Notification[ToEntityReference, Unit]]] = ReflectionHelper.allNotifications
 
-	override def push(sn: ScheduledNotification[_]) = dao.save(sn)
+	override def push(sn: ScheduledNotification[_]): Unit = dao.save(sn)
 
-	override def removeInvalidNotifications(target: Any) = {
+	override def removeInvalidNotifications(target: Any): Unit = {
 		val existingNotifications = dao.getScheduledNotifications(target)
 		existingNotifications.foreach(dao.delete)
 	}
@@ -54,7 +54,7 @@ class ScheduledNotificationServiceImpl extends ScheduledNotificationService with
 	/**
 	 * This is called peridoically to convert uncompleted ScheduledNotifications into real instances of notification.
 	 */
-	override def processNotifications() = {
+	override def processNotifications(): Unit = {
 		val ids = transactional(readOnly = true) { dao.notificationsToComplete.take(RunBatchSize).map[String] { _.id }.toList }
 
 		// FIXME we are doing this manually (TAB-2221) because Hibernate keeps failing to do this properly. Importantly, we're not

@@ -46,7 +46,7 @@ class PublishFeedbackCommandInternal(val module: Module, val assignment: Assignm
 
 	import PublishFeedbackCommand._
 
-	def applyInternal() = {
+	def applyInternal(): PublishFeedbackResults = {
 
 		val allResults = feedbackToRelease.map {case(studentId, user, feedback) =>
 			feedback.released = true
@@ -92,7 +92,7 @@ class PublishFeedbackCommandInternal(val module: Module, val assignment: Assignm
 }
 
 trait PublishFeedbackNotification extends Notifies[PublishFeedbackCommand.PublishFeedbackResults, Feedback] {
-	override def emit(results: PublishFeedbackResults) = results.notifications
+	override def emit(results: PublishFeedbackResults): Seq[Notification[AssignmentFeedback, Assignment]] = results.notifications
 }
 
 trait PublishFeedbackNotificationCompletion extends CompletesNotifications[PublishFeedbackCommand.PublishFeedbackResults] {
@@ -127,7 +127,7 @@ trait PublishFeedbackCommandState {
 	var confirm: Boolean = false
 	var sendToSits: Boolean = false
 
-	lazy val feedbackToRelease = for {
+	lazy val feedbackToRelease: Seq[(String, User, Feedback)] = for {
 		(studentId, user) <- feedbackService.getUsersForFeedback(assignment)
 		feedback <- assignment.fullFeedback.find(_.universityId == studentId)
 	} yield (studentId, user, feedback)
@@ -149,7 +149,7 @@ trait PublishFeedbackCommandState {
 
 trait QueuesFeedbackForSits extends FeedbackForSitsServiceComponent {
 
-	def queueFeedback(feedback: Feedback, submitter: CurrentUser, gradeGenerator: GeneratesGradesFromMarks) =
+	def queueFeedback(feedback: Feedback, submitter: CurrentUser, gradeGenerator: GeneratesGradesFromMarks): Option[FeedbackForSits] =
 		feedbackForSitsService.queueFeedback(feedback, submitter, gradeGenerator)
 }
 

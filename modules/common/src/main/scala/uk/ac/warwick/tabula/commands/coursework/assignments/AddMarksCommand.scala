@@ -24,7 +24,7 @@ trait ValidatesMarkItem {
 
 	def checkMarker(mark: MarkItem, errors: Errors, hasErrors: Boolean): Boolean = hasErrors
 
-	def validateMarkItem(mark: MarkItem, errors: Errors, newPerson: Boolean) = {
+	def validateMarkItem(mark: MarkItem, errors: Errors, newPerson: Boolean): Boolean = {
 
 		var hasErrors = false
 		// validate id

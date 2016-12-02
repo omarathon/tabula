@@ -1,15 +1,15 @@
 package uk.ac.warwick.tabula.data.model.notifications.profiles.meetingrecord
 
 import uk.ac.warwick.tabula.{Fixtures, TestBase}
-import uk.ac.warwick.tabula.data.model.{ScheduledMeetingRecord, StudentRelationship, StudentRelationshipType, Notification}
+import uk.ac.warwick.tabula.data.model._
 
 class ScheduledMeetingRecordBehalfNotificationTest extends TestBase {
 
-	val agent = Fixtures.staff("1234567")
+	val agent: StaffMember = Fixtures.staff("1234567")
 	agent.firstName = "Tutor"
 	agent.lastName = "Name"
 
-	val student = Fixtures.student("7654321")
+	val student: StudentMember = Fixtures.student("7654321")
 	student.firstName = "Student"
 	student.lastName = "Name"
 
@@ -17,7 +17,7 @@ class ScheduledMeetingRecordBehalfNotificationTest extends TestBase {
 
 	val relationship: StudentRelationship = StudentRelationship(agent, relationshipType, student)
 
-	val thirdParty = Fixtures.staff()
+	val thirdParty: StaffMember = Fixtures.staff()
 	thirdParty.firstName = "Third"
 	thirdParty.lastName = "Party"
 

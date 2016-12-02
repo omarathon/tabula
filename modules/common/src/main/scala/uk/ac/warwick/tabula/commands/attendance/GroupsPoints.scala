@@ -11,7 +11,7 @@ case class GroupedPoint(
 	templatePoint: AttendanceMonitoringPoint,
 	schemes: Seq[AttendanceMonitoringScheme],
 	points: Seq[AttendanceMonitoringPoint]){
-		var attendanceMonitoringService = Wire[AttendanceMonitoringService]
+		var attendanceMonitoringService: AttendanceMonitoringService = Wire[AttendanceMonitoringService]
 		def hasRecordedCheckpoints: Boolean = attendanceMonitoringService.hasRecordedCheckpoints(points)
 }
 

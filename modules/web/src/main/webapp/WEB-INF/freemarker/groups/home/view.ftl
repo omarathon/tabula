@@ -25,8 +25,8 @@
 		</p>
 	</#if>
 <#else>
-	<#include "_student.ftl" />
 	<#include "_admin.ftl" />
+	<#include "_student.ftl" />
 
 	<#if todaysModules.moduleItems?has_content>
 		<h2>Today's events</h2>

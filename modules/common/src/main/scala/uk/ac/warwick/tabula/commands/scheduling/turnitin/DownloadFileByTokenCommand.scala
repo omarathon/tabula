@@ -28,7 +28,7 @@ class DownloadFileByTokenCommandInternal (
 
 	self: DownloadFileByTokenCommandState with OriginalityReportServiceComponent =>
 
-	override def applyInternal() = {
+	override def applyInternal(): RenderableAttachment = {
 		val attachment = new RenderableAttachment(fileAttachment)
 		token.dateUsed = new DateTime()
 		if (fileAttachment.originalityReport != null) {
@@ -67,7 +67,7 @@ trait DownloadFileByTokenDescription extends Describable[RenderableFile] {
 
 	self: DownloadFileByTokenCommandState =>
 
-	override def describe(d: Description) = {
+	override def describe(d: Description): Unit = {
 		d.submission(submission)
 		d.fileAttachments(Seq(fileAttachment))
 	}

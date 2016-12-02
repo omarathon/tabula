@@ -33,7 +33,7 @@ class ViewExamCommandInternal(val module: Module, val academicYear: AcademicYear
 
 	self: FeedbackServiceComponent with AssessmentMembershipServiceComponent with FeedbackForSitsServiceComponent =>
 
-	override def applyInternal() = {
+	override def applyInternal(): ViewExamCommandResult = {
 		val studentSeats = assessmentMembershipService.determineMembershipUsersWithOrder(exam)
 		val studentUsers = studentSeats.map(_._1)
 		val feedbackMap = feedbackService.getExamFeedbackMap(exam, studentUsers).mapValues(Option(_)).withDefaultValue(None)

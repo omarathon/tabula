@@ -1,11 +1,11 @@
 package uk.ac.warwick.tabula.commands.profiles.relationships.meetings
 
-import org.joda.time.DateTimeConstants
+import org.joda.time.{DateTime, DateTimeConstants}
 import org.springframework.validation.BindException
 import org.springframework.web.multipart.MultipartFile
 import uk.ac.warwick.tabula._
 import uk.ac.warwick.tabula.commands.UploadedFile
-import uk.ac.warwick.tabula.data.{FileDaoComponent, FileDao}
+import uk.ac.warwick.tabula.data.{FileDao, FileDaoComponent}
 import uk.ac.warwick.tabula.data.model.MeetingFormat._
 import uk.ac.warwick.tabula.data.model.{ExternalStudentRelationship, _}
 import uk.ac.warwick.tabula.services.attendancemonitoring.{AttendanceMonitoringMeetingRecordService, AttendanceMonitoringMeetingRecordServiceComponent}
@@ -16,10 +16,10 @@ import scala.collection.JavaConverters._
 // scalastyle:off magic.number
 class CreateMeetingRecordCommandTest extends TestBase with Mockito {
 
-	val aprilFool = dateTime(2013, DateTimeConstants.APRIL)
-	val marchHare = dateTime(2013, DateTimeConstants.MARCH)
-	val thisCreator = Fixtures.staff("9876543")
-	val student = Fixtures.student(universityId="1170836", userId="studentmember")
+	val aprilFool: DateTime = dateTime(2013, DateTimeConstants.APRIL)
+	val marchHare: DateTime = dateTime(2013, DateTimeConstants.MARCH)
+	val thisCreator: StaffMember = Fixtures.staff("9876543")
+	val student: StudentMember = Fixtures.student(universityId="1170836", userId="studentmember")
 	val thisRelationship = ExternalStudentRelationship(
 		"Professor A Tutor",
 		StudentRelationshipType("tutor", "tutor", "personal tutor", "personal tutee"),

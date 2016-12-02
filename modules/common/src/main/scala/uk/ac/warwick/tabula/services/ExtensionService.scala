@@ -13,7 +13,7 @@ trait ExtensionServiceComponent {
 }
 
 trait AutowiringExtensionServiceComponent extends ExtensionServiceComponent {
-	var extensionService = Wire[ExtensionService]
+	var extensionService: ExtensionService = Wire[ExtensionService]
 }
 
 object ExtensionService {
@@ -35,7 +35,7 @@ trait ExtensionService {
 abstract class AbstractExtensionService extends ExtensionService {
 	self: ExtensionDaoComponent =>
 
-	def getExtensionById(id: String) = transactional(readOnly = true) { extensionDao.getExtensionById(id) }
+	def getExtensionById(id: String): Option[Extension] = transactional(readOnly = true) { extensionDao.getExtensionById(id) }
 	def countExtensions(assignment: Assignment): Int = transactional(readOnly = true) { extensionDao.countExtensions(assignment) }
 	def countUnapprovedExtensions(assignment: Assignment): Int = transactional(readOnly = true) { extensionDao.countUnapprovedExtensions(assignment) }
 	def getUnapprovedExtensions(assignment: Assignment): Seq[Extension] = transactional(readOnly = true) { extensionDao.getUnapprovedExtensions(assignment) }

@@ -13,10 +13,10 @@ class EmailNotificationService extends Logging with Daoisms {
 
 	val RunBatchSize = 100
 
-	var dao = Wire[NotificationDao]
+	var dao: NotificationDao = Wire[NotificationDao]
 	var listener: RecipientNotificationListener = Wire[EmailNotificationListener]
 
-	def processNotifications() = transactional() {
+	def processNotifications(): Unit = transactional() {
 		unemailedRecipients.take(RunBatchSize).foreach { recipient =>
 			try {
 				logger.info("Emailing recipient - " + recipient)
@@ -31,7 +31,7 @@ class EmailNotificationService extends Logging with Daoisms {
 		}
 	}
 
-	def recentRecipients(start: Int, count: Int) = dao.recentRecipients(start, count)
+	def recentRecipients(start: Int, count: Int): Seq[RecipientNotificationInfo] = dao.recentRecipients(start, count)
 	def unemailedRecipientCount: Number = dao.unemailedRecipientCount
 	def unemailedRecipients: Scrollable[RecipientNotificationInfo] = dao.unemailedRecipients
 

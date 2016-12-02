@@ -49,11 +49,11 @@ trait ListFeedbackRequest extends ListFeedbackState {
 trait UserConversion {
 	self: UserLookupComponent =>
 
-	protected def userIdToUser(tuple: (String, DateTime)) = tuple match {
+	protected def userIdToUser(tuple: (String, DateTime)): (User, DateTime) = tuple match {
 		case (id, date) => (userLookup.getUserByUserId(id), date)
 	}
 
-	protected def warwickIdToUser(tuple: (String, DateTime)) = tuple match {
+	protected def warwickIdToUser(tuple: (String, DateTime)): (User, DateTime) = tuple match {
 		case (id, date) => (userLookup.getUserByWarwickUniId(id), date)
 	}
 }

@@ -17,7 +17,7 @@ import uk.ac.warwick.tabula.CurrentUser
  */
 class CurrentUserMethodArgumentResolver extends HandlerMethodArgumentResolver {
 
-	def supportsParameter(param: MethodParameter) = classOf[CurrentUser] isAssignableFrom param.getParameterType
+	def supportsParameter(param: MethodParameter): Boolean = classOf[CurrentUser] isAssignableFrom param.getParameterType
 
 	def resolveArgument(
 		param: MethodParameter,

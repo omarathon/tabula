@@ -7,7 +7,7 @@ import uk.ac.warwick.userlookup.User
 
 class ExtensionRequestRespondedNotificationTest extends TestBase with Mockito with ExtensionNotificationTesting {
 
-	def createNotification(extension: Extension, student: User, actor: User) = {
+	def createNotification(extension: Extension, student: User, actor: User): ExtensionRequestRespondedNotification = {
 		val baseNotification = if (extension.approved) {
 			new ExtensionRequestRespondedApproveNotification
 		} else {
@@ -21,33 +21,33 @@ class ExtensionRequestRespondedNotificationTest extends TestBase with Mockito wi
 
 	@Test
 	def urlIsProfilePage():Unit = new ExtensionFixture {
-		val n = createNotification(extension, student, admin)
+		val n: ExtensionRequestRespondedNotification = createNotification(extension, student, admin)
 		n.url should be(s"/$cm1Prefix/admin/module/xxx/assignments/123/extensions?universityId=student")
 	}
 
 	@Test
 	def titleShouldContainMessage():Unit = new ExtensionFixture {
 		extension.reject()
-		val n = createNotification(extension, student, admin)
+		val n: ExtensionRequestRespondedNotification = createNotification(extension, student, admin)
 		n.title.contains("XXX: Extension request by [Unknown user] for \"Essay\" was rejected") should be {true}
 	}
 
 	@Test
 	def recipientsContainsOtherAdmins():Unit = new ExtensionFixture{
-		val n = createNotification(extension, student, admin)
+		val n: ExtensionRequestRespondedNotification = createNotification(extension, student, admin)
 		n.recipients should be (Seq(admin2, admin3))
 	}
 
 	@Test
 	def shouldCallTextRendererWithCorrectTemplate():Unit = new ExtensionFixture {
-		val n = createNotification(extension, student, admin)
+		val n: ExtensionRequestRespondedNotification = createNotification(extension, student, admin)
 		n.content.template should be ("/WEB-INF/freemarker/emails/responded_extension_request.ftl")
 	}
 
 	@Test
 	def shouldCallTextRendererWithCorrectModel():Unit = new ExtensionFixture {
 		extension.reject()
-		val n = createNotification(extension, student, admin)
+		val n: ExtensionRequestRespondedNotification = createNotification(extension, student, admin)
 		n.content.model.get("studentName").get should be("[Unknown user]")
 		n.content.model.get("agentName").get should be("[Unknown user]")
 		n.content.model.get("assignment").get should be(assignment)
@@ -62,7 +62,7 @@ class ExtensionRequestRespondedNotificationTest extends TestBase with Mockito wi
 		student.setFullName("John Studentson")
 		extension.approve()
 
-		val n = createNotification(extension, student, admin)
+		val n: ExtensionRequestRespondedNotification = createNotification(extension, student, admin)
 		n.title should be ("CS118: Extension request by John Studentson for \"5,000 word essay\" was approved")
 	}}
 
@@ -73,7 +73,7 @@ class ExtensionRequestRespondedNotificationTest extends TestBase with Mockito wi
 		student.setFullName("John Studentson")
 		extension.reject()
 
-		val n = createNotification(extension, student, admin)
+		val n: ExtensionRequestRespondedNotification = createNotification(extension, student, admin)
 		n.title should be ("CS118: Extension request by John Studentson for \"5,000 word essay\" was rejected")
 	}}
  }

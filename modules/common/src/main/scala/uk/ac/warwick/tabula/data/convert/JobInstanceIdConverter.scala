@@ -10,7 +10,7 @@ class JobInstanceIdConverter extends TwoWayConverter[String, JobInstance] {
 
 	@Autowired var service: JobService = _
 
-	override def convertRight(id: String) = Option(id).flatMap(service.getInstance).orNull
-	override def convertLeft(job: JobInstance) = Option(job).map { _.id }.orNull
+	override def convertRight(id: String): JobInstance = Option(id).flatMap(service.getInstance).orNull
+	override def convertLeft(job: JobInstance): String = Option(job).map { _.id }.orNull
 
 }

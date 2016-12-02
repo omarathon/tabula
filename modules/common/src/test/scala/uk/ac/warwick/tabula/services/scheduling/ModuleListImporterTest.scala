@@ -1,14 +1,14 @@
 package uk.ac.warwick.tabula.services.scheduling
 
 import org.junit.After
-import org.springframework.jdbc.datasource.embedded.EmbeddedDatabaseBuilder
-import uk.ac.warwick.tabula.data.model.UpstreamModuleList
+import org.springframework.jdbc.datasource.embedded.{EmbeddedDatabase, EmbeddedDatabaseBuilder}
+import uk.ac.warwick.tabula.data.model.{Route, UpstreamModuleList}
 import uk.ac.warwick.tabula.services.CourseAndRouteService
 import uk.ac.warwick.tabula.{AcademicYear, Fixtures, Mockito, TestBase}
 
 class ModuleListImporterTest extends TestBase with Mockito {
 	
-	val sits = new EmbeddedDatabaseBuilder().addScript("sits-module-lists.sql").build()
+	val sits: EmbeddedDatabase = new EmbeddedDatabaseBuilder().addScript("sits-module-lists.sql").build()
 
 	@After def afterTheFeast() {
 		sits.shutdown()
@@ -20,7 +20,7 @@ class ModuleListImporterTest extends TestBase with Mockito {
 	ModuleListImporter.dialectRegexpLike = "regexp_matches"
 	moduleListImporter.afterPropertiesSet()
 
-	val route = Fixtures.route("a100")
+	val route: Route = Fixtures.route("a100")
 
 	@Test
 	def moduleLists(): Unit = {

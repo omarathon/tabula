@@ -24,10 +24,10 @@ import uk.ac.warwick.tabula.JavaImports._
 import scala.collection.JavaConverters._
 
 abstract class OldExtensionController extends OldCourseworkController {
-	var json = Wire[ObjectMapper]
-	var userLookup = Wire[UserLookupService]
-	var relationshipService = Wire[RelationshipService]
-	var profileService = Wire[ProfileService]
+	var json: ObjectMapper = Wire[ObjectMapper]
+	var userLookup: UserLookupService = Wire[UserLookupService]
+	var relationshipService: RelationshipService = Wire[RelationshipService]
+	var profileService: ProfileService = Wire[ProfileService]
 
 	class ExtensionMap(extension: Extension) {
 		def asMap: Map[String, String] = {
@@ -57,7 +57,7 @@ abstract class OldExtensionController extends OldCourseworkController {
 class OldListExtensionsForAssignmentController extends OldExtensionController {
 
 	// Add the common breadcrumbs to the model
-	def crumbed(mav: Mav, module: Module)
+	def crumbed(mav: Mav, module: Module): Mav
 	= mav.crumbs(Breadcrumbs.Department(module.adminDepartment), Breadcrumbs.Module(module))
 
 	@ModelAttribute
@@ -88,7 +88,7 @@ class OldListExtensionsForAssignmentController extends OldExtensionController {
 class OldListAllExtensionsController extends OldExtensionController {
 
 	// Add the common breadcrumbs to the model
-	def crumbed(mav: Mav, department: Department)
+	def crumbed(mav: Mav, department: Department): Mav
 	= mav.crumbs(Breadcrumbs.Department(department))
 
 	@ModelAttribute("command")

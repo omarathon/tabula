@@ -35,7 +35,7 @@ trait SmallGroupFixture extends Mockito {
 	val tutor3 = new User
 	tutor3.setUserId("tutor3")
 
-  val userLookup = smartMock[UserLookupService]
+  val userLookup: UserLookupService = smartMock[UserLookupService]
   when(userLookup.getUserByWarwickUniId(student1.getWarwickId)).thenReturn(student1)
   when(userLookup.getUserByWarwickUniId(student2.getWarwickId)).thenReturn(student2)
 	when(userLookup.getUserByUserId(student1.getUserId)).thenReturn(student1)
@@ -59,7 +59,7 @@ trait SmallGroupFixture extends Mockito {
 	recipient.setUserId("recipient")
 	when(userLookup.getUserByUserId(recipient.getUserId)).thenReturn(recipient)
 
-  val department = Fixtures.department("in")
+  val department: Department = Fixtures.department("in")
 	val academicYear = AcademicYear(2015)
 
   val (group1,groupSet1) = createGroupSet("A Groupset 1","small group 1",SmallGroupFormat.Lab, "la101")
@@ -68,7 +68,7 @@ trait SmallGroupFixture extends Mockito {
   val (group4,groupSet4) = createGroupSet("A Groupset 4","small group 4",SmallGroupFormat.Tutorial, "la104")
   val (group5,groupSet5) = createGroupSet("A Groupset 5","small group 5",SmallGroupFormat.Lab, "la105")
 
-	val mockSmallGroupService = smartMock[SmallGroupService]
+	val mockSmallGroupService: SmallGroupService = smartMock[SmallGroupService]
 	mockSmallGroupService.getSmallGroupSets(department, academicYear) returns Seq(groupSet1, groupSet2, groupSet3, groupSet4, groupSet5)
 
 
@@ -108,7 +108,7 @@ trait SmallGroupFixture extends Mockito {
     (gs.groups.asScala.head, gs)
   }
 
-  def createUserGroup(userIds:Seq[String], identifierIsUniNumber:Boolean = true) = {
+  def createUserGroup(userIds:Seq[String], identifierIsUniNumber:Boolean = true): UserGroup = {
     val ug = if (identifierIsUniNumber) UserGroup.ofUniversityIds else UserGroup.ofUsercodes
     ug.userLookup = userLookup
     ug.includedUserIds = userIds
@@ -119,7 +119,7 @@ trait SmallGroupFixture extends Mockito {
 class SmallGroupSetBuilder(){
   val template = new SmallGroupSet
 
-  def build = {
+  def build: SmallGroupSet = {
     val set = template.duplicateTo(transient = false)
     if (template.module != null){
       template.module.groupSets.add(set)
@@ -156,7 +156,7 @@ class SmallGroupSetBuilder(){
     template.module = mod
     this
   }
-	def withAllocationMethod(method:SmallGroupAllocationMethod) = {
+	def withAllocationMethod(method:SmallGroupAllocationMethod): SmallGroupSetBuilder = {
 		template.allocationMethod = method
 		this
 	}
@@ -182,7 +182,7 @@ class SmallGroupBuilder(val template:SmallGroup = new SmallGroup){
     template.students = members
     this
   }
-	def withUserLookup(userLookup:UserLookupService)={
+	def withUserLookup(userLookup:UserLookupService): SmallGroupBuilder ={
 		def wireUserLookup(userGroup: UnspecifiedTypeUserGroup): Unit = userGroup match {
 			case cm: UserGroupCacheManager => wireUserLookup(cm.underlying)
 			case ug: UserGroup => ug.userLookup = userLookup
@@ -191,7 +191,7 @@ class SmallGroupBuilder(val template:SmallGroup = new SmallGroup){
 		wireUserLookup(template.students)
 		this
 	}
-  def withGroupName(s: String) = {
+  def withGroupName(s: String): SmallGroupBuilder = {
     template.name = s
     this
   }
@@ -202,7 +202,7 @@ class SmallGroupEventBuilder(){
 
   val template = new SmallGroupEvent
 
-  def build = template.duplicateTo(template.group, transient = false)
+  def build: SmallGroupEvent = template.duplicateTo(template.group, transient = false)
 
   def withTutors(members:UserGroup):SmallGroupEventBuilder = {
     template.tutors = members
@@ -219,7 +219,7 @@ class SmallGroupEventBuilder(){
     this
   }
 
-  def withLocation(s: String)  = {
+  def withLocation(s: String): SmallGroupEventBuilder = {
     template.location = NamedLocation(s)
     this
   }

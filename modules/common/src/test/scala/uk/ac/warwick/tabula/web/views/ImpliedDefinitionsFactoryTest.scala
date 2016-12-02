@@ -13,8 +13,8 @@ class ImpliedDefinitionsFactoryTest extends TestBase with Mockito {
 
 	val factory = new ImpliedDefinitionsFactory
 
-	val defDao = mock[DefinitionDAO[Locale]]
-	val localeResolver = mock[LocaleResolver]
+	val defDao: DefinitionDAO[Locale] = mock[DefinitionDAO[Locale]]
+	val localeResolver: LocaleResolver = mock[LocaleResolver]
 
 	factory.setDefinitionDAO(defDao)
 	factory.setLocaleResolver(localeResolver)

@@ -44,7 +44,7 @@ abstract class BrowserTest
 	/** Generates a full URL to browse to,
 	  * e.g. Path("/coursework") -> "https://tabula-test.warwick.ac.uk/coursework"
 	  */
-	def Path(path: String) = P.SiteRoot + path
+	def Path(path: String): String = P.SiteRoot + path
 
 	implicit lazy val webDriver: WebDriver = P.Browser match {
 		case "htmlunit" => //new HtmlUnitDriver(true) // JS enabled
@@ -60,7 +60,7 @@ abstract class BrowserTest
 	// Can be overridden by a test if necessary.
 	val htmlUnitBrowserVersion = BrowserVersion.FIREFOX_38
 
-	def ifHtmlUnitDriver(operation:HtmlUnitDriver=>Unit) = {
+	def ifHtmlUnitDriver(operation:HtmlUnitDriver=>Unit): Unit = {
 		webDriver match {
 			case h:HtmlUnitDriver=>operation(h)
 			case _=> // do nothing
@@ -74,7 +74,7 @@ abstract class BrowserTest
 	}
 
 	// Sometimes you need to wait for a page to load after clicking on a link
-	def verifyPageLoaded(fun: => Unit) = eventuallyAjax(fun)
+	def verifyPageLoaded(fun: => Unit): Unit = eventuallyAjax(fun)
 
 	// Don't set textField.value for a datetimepicker, as IT WILL HURT YOU
 	class DateTimePickerField(val underlying: org.openqa.selenium.WebElement, selector: String) {
@@ -85,9 +85,9 @@ abstract class BrowserTest
 				0
 			)
 
-		def value = underlying.getAttribute("value")
+		def value: String = underlying.getAttribute("value")
 
-		def value_=(newValue: DateTime) = {
+		def value_=(newValue: DateTime): AnyRef = {
 			val nearestHourAsString = newValue.toString("dd-MMM-yyyy HH:00:00")
 			do {
 				underlying.clear()
@@ -97,7 +97,7 @@ abstract class BrowserTest
 			executeScript(script)
 		}
 
-		def clear() = underlying.clear()
+		def clear(): Unit = underlying.clear()
 	}
 
 	def dateTimePicker(queryString: String): DateTimePickerField = {
@@ -143,31 +143,31 @@ object FunctionalTestProperties {
 	userLookup.setSsosUrl("https://websignon.warwick.ac.uk")
 	userLookup.setGroupServiceLocation("https://websignon.warwick.ac.uk")
 
-	val SiteRoot = prop("toplevel.url")
-	val Browser = prop("browser")
+	val SiteRoot: String = prop("toplevel.url")
+	val Browser: String = prop("browser")
 
 	/* Test user accounts who can sign in during tests. Populated from properties.
 	 * The tests currently REQUIRE that the user's first name is
 	 * equal to the usercode, since we look for "Signed in as X" to
 	 * determine whether we're signed in. Open to a better solution.
 	 */
-	lazy val Admin1 = userDetails("admin1", "Departmental admin")
-	lazy val Admin2 = userDetails("admin2", "Departmental admin")
-	lazy val Admin3 = userDetails("admin3", "Departmental admin")
-	lazy val Admin4 = userDetails("admin4", "Departmental admin")
-	lazy val ExtensionManager1 = userDetails("extman1", "Extension manager")
-	lazy val ExtensionManager2 = userDetails("extman2", "Extension manager")
-	lazy val Marker1 = userDetails("marker1", "Marker")
-	lazy val Marker2 = userDetails("marker2", "Marker")
-	lazy val Marker3 = userDetails("marker3", "Marker")
-	lazy val ModuleManager1 = userDetails("modman1", "Module Manager")
-	lazy val ModuleManager2 = userDetails("modman2", "Module Manager")
-	lazy val Student1 = userDetails("student1", "Student")
-	lazy val Student2 = userDetails("student2", "Student")
-	lazy val Student3 = userDetails("student3", "Student")
-	lazy val Student4 = userDetails("student4", "Student")
-	lazy val Student5 = userDetails("student5", "Student")
-  lazy val Sysadmin = userDetails("sysadmin", "System Administrator")
+	lazy val Admin1: LoginDetails = userDetails("admin1", "Departmental admin")
+	lazy val Admin2: LoginDetails = userDetails("admin2", "Departmental admin")
+	lazy val Admin3: LoginDetails = userDetails("admin3", "Departmental admin")
+	lazy val Admin4: LoginDetails = userDetails("admin4", "Departmental admin")
+	lazy val ExtensionManager1: LoginDetails = userDetails("extman1", "Extension manager")
+	lazy val ExtensionManager2: LoginDetails = userDetails("extman2", "Extension manager")
+	lazy val Marker1: LoginDetails = userDetails("marker1", "Marker")
+	lazy val Marker2: LoginDetails = userDetails("marker2", "Marker")
+	lazy val Marker3: LoginDetails = userDetails("marker3", "Marker")
+	lazy val ModuleManager1: LoginDetails = userDetails("modman1", "Module Manager")
+	lazy val ModuleManager2: LoginDetails = userDetails("modman2", "Module Manager")
+	lazy val Student1: LoginDetails = userDetails("student1", "Student")
+	lazy val Student2: LoginDetails = userDetails("student2", "Student")
+	lazy val Student3: LoginDetails = userDetails("student3", "Student")
+	lazy val Student4: LoginDetails = userDetails("student4", "Student")
+	lazy val Student5: LoginDetails = userDetails("student5", "Student")
+  lazy val Sysadmin: LoginDetails = userDetails("sysadmin", "System Administrator")
 	/**
 	 * Get a property by name, or null if not found anywhere. Checks in this order
 	 * - System properties

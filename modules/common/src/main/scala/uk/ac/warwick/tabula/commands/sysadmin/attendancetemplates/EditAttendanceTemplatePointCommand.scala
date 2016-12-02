@@ -3,7 +3,7 @@ package uk.ac.warwick.tabula.commands.sysadmin.attendancetemplates
 import org.joda.time.DateTime
 import org.springframework.validation.Errors
 import uk.ac.warwick.tabula.commands._
-import uk.ac.warwick.tabula.data.model.attendance.{AttendanceMonitoringPointStyle, AttendanceMonitoringTemplatePoint}
+import uk.ac.warwick.tabula.data.model.attendance.{AttendanceMonitoringPointStyle, AttendanceMonitoringTemplate, AttendanceMonitoringTemplatePoint}
 import uk.ac.warwick.tabula.helpers.StringUtils._
 import uk.ac.warwick.tabula.services.attendancemonitoring.{AttendanceMonitoringServiceComponent, AutowiringAttendanceMonitoringServiceComponent}
 
@@ -26,7 +26,7 @@ class EditAttendanceTemplatePointCommandInternal(val point: AttendanceMonitoring
 
 	self: EditAttendanceTemplatePointCommandState with AttendanceMonitoringServiceComponent =>
 
-	override def applyInternal() = {
+	override def applyInternal(): AttendanceMonitoringTemplatePoint = {
 		point.name = name
 		point.updatedDate = DateTime.now
 		if (point.scheme.pointStyle == AttendanceMonitoringPointStyle.Week) {
@@ -46,7 +46,7 @@ trait PopulatesEditAttendanceTemplatePointCommand extends PopulateOnForm {
 
 	self: EditAttendanceTemplatePointCommandState =>
 
-	override def populate() = {
+	override def populate(): Unit = {
 		name = point.name
 		if (point.scheme.pointStyle == AttendanceMonitoringPointStyle.Week) {
 			startWeek = point.startWeek
@@ -100,5 +100,5 @@ trait EditAttendanceTemplatePointDescription extends Describable[AttendanceMonit
 
 trait EditAttendanceTemplatePointCommandState extends CreateAttendanceTemplatePointCommandState {
 	def point: AttendanceMonitoringTemplatePoint
-	lazy val template = point.scheme
+	lazy val template: AttendanceMonitoringTemplate = point.scheme
 }

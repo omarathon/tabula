@@ -39,7 +39,7 @@ class AllocateStudentsToDepartmentalSmallGroupsCommandInternal(val department: D
 
 	self: GroupsObjects[User, DepartmentSmallGroup] with SmallGroupServiceComponent =>
 
-	override def applyInternal() = transactional() {
+	override def applyInternal(): DepartmentSmallGroupSet = transactional() {
 		for ((group, users) <- mapping.asScala) {
 			val userGroup = UserGroup.ofUniversityIds
 			users.asScala.foreach { user => userGroup.addUserId(user.getWarwickId) }
@@ -52,7 +52,7 @@ class AllocateStudentsToDepartmentalSmallGroupsCommandInternal(val department: D
 
 trait AllocateStudentsToDepartmentalSmallGroupsSorting extends GroupsObjects[User, DepartmentSmallGroup] {
 	// Sort users by last name, first name
-	implicit val defaultOrderingForUser = Ordering.by { user: User => (user.getLastName, user.getFirstName, user.getUserId) }
+	implicit val defaultOrderingForUser: Ordering[User] = Ordering.by { user: User => (user.getLastName, user.getFirstName, user.getUserId) }
 
 	// Sort all the lists of users by surname, firstname.
 	override def sort() {
@@ -81,7 +81,7 @@ trait AllocateStudentsToDepartmentalSmallGroupsFileUploadSupport extends GroupsO
 		}
 	}
 
-	override def extractDataFromFile(file: FileAttachment, result: BindingResult) = {
+	override def extractDataFromFile(file: FileAttachment, result: BindingResult): Map[DepartmentSmallGroup, JList[User]] = {
 		val allocations = groupsExtractor.readXSSFExcelFile(file.dataStream)
 
 		// work out users to add to set (all users mentioned in spreadsheet - users currently in set)

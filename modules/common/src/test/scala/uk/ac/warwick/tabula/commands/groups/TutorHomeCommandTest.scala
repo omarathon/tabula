@@ -22,7 +22,7 @@ class TutorHomeCommandTest extends TestBase with Mockito {
 			for (group <- groups) group.groupSet = set
 
 			val command = new TutorHomeCommandInternal(currentUser, academicYear) with SmallGroupServiceComponent {
-				override val smallGroupService = smartMock[SmallGroupService]
+				override val smallGroupService: SmallGroupService = smartMock[SmallGroupService]
 			}
 
 			command.smallGroupService.findReleasedSmallGroupsByTutor(currentUser) returns groups

@@ -9,7 +9,8 @@ import uk.ac.warwick.userlookup.webgroups.GroupNotFoundException
 import uk.ac.warwick.tabula.JavaImports._
 import org.apache.commons.codec.digest.DigestUtils
 import org.apache.commons.codec.binary.Base64
-import uk.ac.warwick.tabula.UserFlavour.{Applicant, Anonymous, Unverified, Vanilla}
+import uk.ac.warwick.tabula.UserFlavour.{Anonymous, Applicant, Unverified, Vanilla}
+import uk.ac.warwick.tabula.services.UserLookupService.UniversityId
 import uk.ac.warwick.tabula.services.permissions.CacheStrategyComponent
 import uk.ac.warwick.util.cache.Caches.CacheStrategy
 
@@ -36,7 +37,7 @@ class MockUserLookup(var defaultFoundUser: Boolean)
 		filterUserResult.add(user)
 	}
 
-	override def getUserByUserId(theUserId: String) = {
+	override def getUserByUserId(theUserId: String): User = {
 		users.getOrElse(theUserId, {
 			if (defaultFoundUser) {
 				val user = new User()
@@ -49,7 +50,7 @@ class MockUserLookup(var defaultFoundUser: Boolean)
 		})
 	}
 
-	override def getUserByWarwickUniId(warwickId: String) =
+	override def getUserByWarwickUniId(warwickId: String): User =
 		users.values.find(_.getWarwickId == warwickId).getOrElse {
 			if (defaultFoundUser) {
 				val user = new User()
@@ -61,16 +62,16 @@ class MockUserLookup(var defaultFoundUser: Boolean)
 			}
 		}
 
-	override def getUserByWarwickUniIdUncached(warwickId: String, skipMemberLookup: Boolean) = getUserByWarwickUniId(warwickId)
+	override def getUserByWarwickUniIdUncached(warwickId: String, skipMemberLookup: Boolean): User = getUserByWarwickUniId(warwickId)
 
-	override def getUserByWarwickUniId(warwickId: String, includeDisabledLogins: Boolean) = getUserByWarwickUniId(warwickId)
+	override def getUserByWarwickUniId(warwickId: String, includeDisabledLogins: Boolean): User = getUserByWarwickUniId(warwickId)
 
-	override def getUsersByWarwickUniIds(warwickIds: Seq[String]) = warwickIds.map { id => id -> getUserByWarwickUniId(id) }.toMap
+	override def getUsersByWarwickUniIds(warwickIds: Seq[String]): Map[UniversityId, User] = warwickIds.map { id => id -> getUserByWarwickUniId(id) }.toMap
 
 	override def getUsersByWarwickUniIdsUncached(warwickIds: Seq[String], skipMemberLookup: Boolean): Map[String, User] =
 		getUsersByWarwickUniIds(warwickIds)
 
-	override def findUsersWithFilter(filterValues: JMap[String, String]) = {
+	override def findUsersWithFilter(filterValues: JMap[String, String]): JList[User] = {
 		if (filterValues.size() == 1 && filterValues.containsKey("warwickuniid")) {
 			JArrayList(getUserByWarwickUniId(filterValues.get("warwickuniid")))
 		} else if (findUsersEnabled) {
@@ -82,7 +83,7 @@ class MockUserLookup(var defaultFoundUser: Boolean)
 		}
 	}
 
-	override def findUsersWithFilter(filterValues: JMap[String, String], returnDisabledUsers: Boolean) = findUsersWithFilter(filterValues)
+	override def findUsersWithFilter(filterValues: JMap[String, String], returnDisabledUsers: Boolean): JList[User] = findUsersWithFilter(filterValues)
 
 	override def getUsersByUserIds(userIds: JList[String]): JMap[String, User] = {
 		val map: Map[String, User] = userIds.asScala.map { id => id -> getUserByUserId(id)}.toMap
@@ -94,7 +95,7 @@ class MockUserLookup(var defaultFoundUser: Boolean)
 	 * Method to quickly add some mock users who exist and definitely
 	 * have genuine, real names.
 	 */
-	def registerUsers(userIds: String*) = {
+	def registerUsers(userIds: String*): Seq[User] = {
 		userIds.map { id =>
 			val user = mockUser(id)
 			users += (id -> user)
@@ -137,11 +138,11 @@ class MockCachingLookupService(var flavour: UserFlavour = Vanilla)
 		}
 	}
 
-	override def getUserByWarwickUniId(id: String) = getUserByWarwickUniId(id, ignored = true)
+	override def getUserByWarwickUniId(id: String): User = getUserByWarwickUniId(id, ignored = true)
 
-	override def getUserByWarwickUniId(id: String, ignored: Boolean) = UserByWarwickIdCache.get(id)
+	override def getUserByWarwickUniId(id: String, ignored: Boolean): User = UserByWarwickIdCache.get(id)
 
-	override def getUsersByWarwickUniIds(warwickIds: Seq[String]) = UserByWarwickIdCache.get(warwickIds.asJava).asScala.toMap
+	override def getUsersByWarwickUniIds(warwickIds: Seq[String]): Map[UniversityId, User] = UserByWarwickIdCache.get(warwickIds.asJava).asScala.toMap
 
 	override def getUsersByWarwickUniIdsUncached(warwickIds: Seq[String], skipMemberLookup: Boolean): Map[String, User] =
 		warwickIds.map { id => id -> getUserByWarwickUniIdUncached(id, skipMemberLookup) }.toMap
@@ -197,7 +198,7 @@ class MockGroupService extends GroupService {
 	var usersInGroup: Map[(String, String), Boolean] = Map() withDefaultValue false
 	var groupNamesForUserMap: Map[String, Seq[String]] = Map()
 
-	override def getGroupByName(groupName: String) = groupMap.get(groupName).getOrElse {
+	override def getGroupByName(groupName: String): Group = groupMap.get(groupName).getOrElse {
 		throw new GroupNotFoundException(groupName)
 	}
 
@@ -207,7 +208,7 @@ class MockGroupService extends GroupService {
 
 	override def getGroupsForUser(user: String) = ???
 
-	override def getGroupsNamesForUser(user: String) =
+	override def getGroupsNamesForUser(user: String): JList[String] =
 		groupNamesForUserMap.get(user) match {
 			case Some(groups) => groups.asJava
 			case _ => JArrayList[String]()
@@ -215,7 +216,7 @@ class MockGroupService extends GroupService {
 
 	override def getRelatedGroups(groupName: String) = ???
 
-	override def getUserCodesInGroup(groupName: String) = {
+	override def getUserCodesInGroup(groupName: String): _root_.uk.ac.warwick.tabula.JavaImports.JList[String] = {
 		try {
 			getGroupByName(groupName).getUserCodes
 		} catch {
@@ -223,7 +224,7 @@ class MockGroupService extends GroupService {
 		}
 	}
 
-	override def isUserInGroup(user: String, group: String) = usersInGroup((user, group))
+	override def isUserInGroup(user: String, group: String): Boolean = usersInGroup((user, group))
 
 	override def setTimeoutConfig(config: WebServiceTimeoutConfig) {}
 

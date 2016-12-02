@@ -16,15 +16,15 @@ import uk.ac.warwick.tabula.web.Cookies._
 import uk.ac.warwick.userlookup.{User, UserLookupInterface}
 
 class CurrentUserInterceptor extends HandlerInterceptorAdapter {
-	var roleService = Wire[RoleService]
-	var userLookup = Wire[UserLookupInterface]
-	var profileService = Wire[ProfileService]
-	var departmentService = Wire[ModuleAndDepartmentService]
+	var roleService: RoleService = Wire[RoleService]
+	var userLookup: UserLookupInterface = Wire[UserLookupInterface]
+	var profileService: ProfileService = Wire[ProfileService]
+	var departmentService: ModuleAndDepartmentService = Wire[ModuleAndDepartmentService]
 	var userNavigationGenerator: UserNavigationGenerator = UserNavigationGeneratorImpl
 
 	type MasqueradeUserCheck = (User, Boolean) => User
 
-	def resolveCurrentUser(user: User, masqueradeUser: MasqueradeUserCheck, godModeEnabled: => Boolean) = transactional(readOnly = true) {
+	def resolveCurrentUser(user: User, masqueradeUser: MasqueradeUserCheck, godModeEnabled: => Boolean): CurrentUser = transactional(readOnly = true) {
 		val sysadmin = roleService.hasRole(new CurrentUser(user, user), Sysadmin())
 		val god = sysadmin && godModeEnabled
 		val masquerader =
@@ -45,7 +45,7 @@ class CurrentUserInterceptor extends HandlerInterceptorAdapter {
 		)
 	}
 
-	override def preHandle(request: HttpServletRequest, response: HttpServletResponse, obj: Any) = {
+	override def preHandle(request: HttpServletRequest, response: HttpServletResponse, obj: Any): Boolean = {
 		val currentUser: CurrentUser = request.getAttribute(SSOClientFilter.USER_KEY) match {
 			case FoundUser(user) => resolveCurrentUser(user, apparentUser(request), godCookieExists(request))
 			case _ => NoCurrentUser()

@@ -23,7 +23,7 @@ object AddModuleCommand {
 class AddModuleCommandInternal(val department: Department) extends CommandInternal[Module] with AddModuleCommandState {
 	self: ModuleAndDepartmentServiceComponent =>
 
-	def applyInternal() = transactional() {
+	def applyInternal(): Module = transactional() {
 		val module = new Module()
 		module.adminDepartment = department
 		module.name = name
@@ -66,7 +66,7 @@ trait AddModuleCommandState {
 	var code: String = _
 	var name: String = _
 
-	def sanitisedCode = Option(code).map(_.toLowerCase.trim).orNull
+	def sanitisedCode: String = Option(code).map(_.toLowerCase.trim).orNull
 }
 
 trait AddModuleCommandPermissions extends RequiresPermissionsChecking with PermissionsCheckingMethods {
@@ -80,7 +80,7 @@ trait AddModuleCommandPermissions extends RequiresPermissionsChecking with Permi
 trait AddModuleCommandDescription extends Describable[Module] {
 	self: AddModuleCommandState =>
 
-	def describe(d: Description) =
+	def describe(d: Description): Unit =
 		d.department(department)
 		 .properties(
 				"moduleCode" -> sanitisedCode,

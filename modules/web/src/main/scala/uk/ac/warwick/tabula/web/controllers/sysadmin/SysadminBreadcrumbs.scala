@@ -18,7 +18,7 @@ object SysadminBreadcrumbs {
 		}
 
 		case class Department(department: model.Department) extends BreadCrumb {
-			val title = department.name
+			val title: String = department.name
 			val url = Some(Routes.sysadmin.Departments.department(department))
 		}
 	}

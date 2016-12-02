@@ -31,7 +31,7 @@ trait AddCustomRoleOverrideCommandState {
 class AddCustomRoleOverrideCommandInternal(val department: Department, val customRoleDefinition: CustomRoleDefinition) extends CommandInternal[RoleOverride] with AddCustomRoleOverrideCommandState {
 	self: PermissionsServiceComponent =>
 
-	override def applyInternal() = transactional() {
+	override def applyInternal(): RoleOverride = transactional() {
 		val o = new RoleOverride
 		o.customRoleDefinition = customRoleDefinition
 		o.permission = permission
@@ -86,7 +86,7 @@ trait AddCustomRoleOverrideCommandValidation extends SelfValidating {
 trait AddCustomRoleOverrideCommandDescription extends Describable[RoleOverride] {
 	self: AddCustomRoleOverrideCommandState =>
 	// describe the thing that's happening.
-	override def describe(d: Description) =
+	override def describe(d: Description): Unit =
 		d.customRoleDefinition(customRoleDefinition)
 }
 

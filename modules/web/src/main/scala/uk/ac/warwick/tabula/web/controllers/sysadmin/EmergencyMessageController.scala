@@ -9,6 +9,7 @@ import uk.ac.warwick.tabula.commands._
 import uk.ac.warwick.tabula.permissions.Permissions
 import uk.ac.warwick.tabula.services._
 import uk.ac.warwick.tabula.system.permissions.{PermissionsChecking, PermissionsCheckingMethods, RequiresPermissionsChecking}
+import uk.ac.warwick.tabula.web.Mav
 
 object EmergencyMessageCommand {
 	type Command = Appliable[EmergencyMessage] with SelfValidating with PopulateOnForm
@@ -83,11 +84,11 @@ class EmergencyMessageController extends BaseSysadminController {
 	@ModelAttribute("command") def cmd: EmergencyMessageCommand.Command = EmergencyMessageCommand()
 
 	@RequestMapping(method = Array(GET, HEAD))
-	def showForm(@ModelAttribute("command") form: EmergencyMessageCommand.Command, errors: Errors) =
+	def showForm(@ModelAttribute("command") form: EmergencyMessageCommand.Command, errors: Errors): Mav =
 		Mav("sysadmin/emergency-message").noLayoutIf(ajax)
 
 	@RequestMapping(method = Array(POST))
-	def submit(@Valid @ModelAttribute("command") form: EmergencyMessageCommand.Command, errors: Errors) = {
+	def submit(@Valid @ModelAttribute("command") form: EmergencyMessageCommand.Command, errors: Errors): Mav = {
 		if (errors.hasErrors)
 			showForm(form, errors)
 		else {

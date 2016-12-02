@@ -22,8 +22,8 @@ class Course {
 	var name: String = _
 	var title: String = _
 
-	var lastUpdatedDate = DateTime.now
+	var lastUpdatedDate: DateTime = DateTime.now
 
-	override def toString = name
+	override def toString: String = name
 
 }

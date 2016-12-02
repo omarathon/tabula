@@ -33,7 +33,7 @@ class ModuleRegistration() extends GeneratedId	with PermissionsTarget with Order
 		this.occurrence = occurrence
 	}
 
-	@transient var membershipService = Wire[AssessmentMembershipService]
+	@transient var membershipService: AssessmentMembershipService = Wire[AssessmentMembershipService]
 
 	@ManyToOne(fetch = FetchType.LAZY)
 	@JoinColumn(name="moduleCode", referencedColumnName="code")
@@ -78,16 +78,16 @@ class ModuleRegistration() extends GeneratedId	with PermissionsTarget with Order
 	var selectionStatus: ModuleSelectionStatus = _ // core, option or optional core
 
 	@Restricted(Array("Profiles.Read.ModuleRegistration.Core"))
-	var lastUpdatedDate = DateTime.now
+	var lastUpdatedDate: DateTime = DateTime.now
 
 	def upstreamAssessmentGroups: Seq[UpstreamAssessmentGroup] = membershipService.getUpstreamAssessmentGroups(this)
 
 	def upstreamAssessmentGroupMembers: Seq[UpstreamAssessmentGroupMember] =
 		upstreamAssessmentGroups.flatMap(_.members.asScala).filter(_.universityId == studentCourseDetails.student.universityId)
 
-	override def toString = studentCourseDetails.scjCode + "-" + module.code + "-" + cats + "-" + AcademicYear.toString
+	override def toString: String = studentCourseDetails.scjCode + "-" + module.code + "-" + cats + "-" + AcademicYear.toString
 
-	def permissionsParents = Option(studentCourseDetails).toStream
+	def permissionsParents: Stream[StudentCourseDetails] = Option(studentCourseDetails).toStream
 
 	override def compare(that: ModuleRegistration): Int =
 		new CompareToBuilder()
@@ -119,10 +119,10 @@ case class UpstreamModuleRegistration(
 	agreedGrade: String
 ) {
 
-	def universityId = SprCode.getUniversityId(sprCode)
+	def universityId: String = SprCode.getUniversityId(sprCode)
 
 	// Assessment group membership doesn't vary by sequence
-	def differentGroup(other: UpstreamModuleRegistration) =
+	def differentGroup(other: UpstreamModuleRegistration): Boolean =
 		year != other.year ||
 			occurrence != other.occurrence ||
 			moduleCode != other.moduleCode ||
@@ -131,7 +131,7 @@ case class UpstreamModuleRegistration(
 	/**
 	 * Returns UpstreamAssessmentGroups matching the group attributes.
 	 */
-	def toUpstreamAssessmentGroups(sequences: Seq[String]) = {
+	def toUpstreamAssessmentGroups(sequences: Seq[String]): Seq[UpstreamAssessmentGroup] = {
 		sequences.map(sequence => {
 			val g = new UpstreamAssessmentGroup
 			g.academicYear = AcademicYear.parse(year)
@@ -152,7 +152,7 @@ case class UpstreamModuleRegistration(
 	/**
 	 * Returns an UpstreamAssessmentGroup matching the group attributes, including sequence.
 	 */
-	def toExactUpstreamAssessmentGroup = {
+	def toExactUpstreamAssessmentGroup: UpstreamAssessmentGroup = {
 		val g = new UpstreamAssessmentGroup
 		g.academicYear = AcademicYear.parse(year)
 		g.moduleCode = moduleCode

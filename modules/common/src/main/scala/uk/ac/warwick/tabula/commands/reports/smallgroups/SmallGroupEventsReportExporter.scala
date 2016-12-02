@@ -5,6 +5,8 @@ import uk.ac.warwick.tabula.data.SmallGroupEventReportData
 import uk.ac.warwick.tabula.data.model.Department
 import uk.ac.warwick.util.csv.CSVLineWriter
 
+import scala.xml.Elem
+
 class SmallGroupEventsReportExporter(val processorResult: Seq[SmallGroupEventReportData], val department: Department)
 	extends CSVLineWriter[SmallGroupEventReportData] {
 
@@ -48,7 +50,7 @@ class SmallGroupEventsReportExporter(val processorResult: Seq[SmallGroupEventRep
 		}
 	}
 
-	def toXLSX = {
+	def toXLSX: XSSFWorkbook = {
 		val workbook = new XSSFWorkbook()
 		val sheet = generateNewSheet(workbook)
 
@@ -77,7 +79,7 @@ class SmallGroupEventsReportExporter(val processorResult: Seq[SmallGroupEventRep
 		}
 	}
 
-	def toXML = {
+	def toXML: Elem = {
 		<events>
 				{ processorResult.map(data =>
 					<event

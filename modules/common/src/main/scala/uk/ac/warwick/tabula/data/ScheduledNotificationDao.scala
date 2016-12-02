@@ -22,13 +22,13 @@ trait ScheduledNotificationDao {
 @Repository
 class ScheduledNotificationDaoImpl extends ScheduledNotificationDao with Daoisms {
 
-	override def save(scheduledNotification: ScheduledNotification[_]) = {
+	override def save(scheduledNotification: ScheduledNotification[_]): Unit = {
 		session.saveOrUpdate(scheduledNotification)
 	}
 
-	override def getById(id: String) = getById[ScheduledNotification[_ >: Null <: ToEntityReference]](id)
+	override def getById(id: String): Option[ScheduledNotification[_ >: Null <: ToEntityReference]] = getById[ScheduledNotification[_ >: Null <: ToEntityReference]](id)
 
-	override def getScheduledNotifications(entity: Any) = {
+	override def getScheduledNotifications(entity: Any): Seq[ScheduledNotification[_ >: Null <: ToEntityReference]] = {
 		val targetEntity = entity match {
 			case ref: ToEntityReference => ref.toEntityReference.entity
 			case _ => entity
@@ -41,7 +41,7 @@ class ScheduledNotificationDaoImpl extends ScheduledNotificationDao with Daoisms
 			.seq
 	}
 
-	override def delete(scheduledNotification: ScheduledNotification[_]) = session.delete(scheduledNotification)
+	override def delete(scheduledNotification: ScheduledNotification[_]): Unit = session.delete(scheduledNotification)
 
 	override def notificationsToComplete: Scrollable[ScheduledNotification[_  >: Null <: ToEntityReference]] = {
 		val scrollable =

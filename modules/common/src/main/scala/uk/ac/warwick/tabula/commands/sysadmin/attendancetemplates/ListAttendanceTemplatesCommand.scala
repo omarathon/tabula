@@ -18,7 +18,7 @@ class ListAttendanceTemplatesCommandInternal extends CommandInternal[Seq[Attenda
 
 	self: AttendanceMonitoringServiceComponent =>
 
-	override def applyInternal() = {
+	override def applyInternal(): Seq[AttendanceMonitoringTemplate] = {
 		attendanceMonitoringService.listAllTemplateSchemes
 	}
 

@@ -1,10 +1,10 @@
 package uk.ac.warwick.tabula.commands.profiles.relationships.meetings
 
-import org.joda.time.DateTimeConstants
+import org.joda.time.{DateTime, DateTimeConstants}
 import org.springframework.validation.BindException
 import uk.ac.warwick.tabula._
 import uk.ac.warwick.tabula.data.model.MeetingApprovalState._
-import uk.ac.warwick.tabula.data.model.{ExternalStudentRelationship, MeetingRecord, MeetingRecordApproval, StudentRelationshipType}
+import uk.ac.warwick.tabula.data.model._
 import uk.ac.warwick.tabula.data.{MeetingRecordDao, MeetingRecordDaoComponent}
 import uk.ac.warwick.tabula.permissions.Permissions
 import uk.ac.warwick.tabula.services.attendancemonitoring.{AttendanceMonitoringMeetingRecordService, AttendanceMonitoringMeetingRecordServiceComponent}
@@ -14,10 +14,10 @@ import uk.ac.warwick.tabula.{CurrentUser, Features, FeaturesComponent}
 
 class EditMeetingRecordCommandTest extends TestBase with Mockito {
 
-	val aprilFool = dateTime(2013, DateTimeConstants.APRIL)
-	val marchHare = dateTime(2013, DateTimeConstants.MARCH)
-	val thisCreator = Fixtures.staff("9876543")
-	val student = Fixtures.student(universityId="1170836", userId="studentmember")
+	val aprilFool: DateTime = dateTime(2013, DateTimeConstants.APRIL)
+	val marchHare: DateTime = dateTime(2013, DateTimeConstants.MARCH)
+	val thisCreator: StaffMember = Fixtures.staff("9876543")
+	val student: StudentMember = Fixtures.student(universityId="1170836", userId="studentmember")
 	val thisRelationship = ExternalStudentRelationship(
 		"Professor A Tutor",
 		StudentRelationshipType("tutor", "tutor", "personal tutor", "personal tutee"),
@@ -73,10 +73,10 @@ class EditMeetingRecordCommandTest extends TestBase with Mockito {
 
 		var approvalCmd = new ApproveMeetingRecordCommand(meeting, studentCurrentUser) with ApproveMeetingRecordState with MeetingRecordDaoComponent
 			with ApproveMeetingRecordValidation with FeaturesComponent with AttendanceMonitoringMeetingRecordServiceComponent with SecurityServiceComponent {
-				val meetingRecordDao = smartMock[MeetingRecordDao]
-				val features = smartMock[Features]
-				val attendanceMonitoringMeetingRecordService = smartMock[AttendanceMonitoringMeetingRecordService]
-				val securityService = smartMock[SecurityService]
+				val meetingRecordDao: MeetingRecordDao = smartMock[MeetingRecordDao]
+				val features: Features = smartMock[Features]
+				val attendanceMonitoringMeetingRecordService: AttendanceMonitoringMeetingRecordService = smartMock[AttendanceMonitoringMeetingRecordService]
+				val securityService: SecurityService = smartMock[SecurityService]
 			}
 
 		approvalCmd.approved = false
@@ -122,10 +122,10 @@ class EditMeetingRecordCommandTest extends TestBase with Mockito {
 			with ApproveMeetingRecordState with MeetingRecordDaoComponent with SecurityServiceComponent
 			with ApproveMeetingRecordValidation	with FeaturesComponent
 			with AttendanceMonitoringMeetingRecordServiceComponent {
-				val meetingRecordDao = smartMock[MeetingRecordDao]
-				val features = smartMock[Features]
-				val attendanceMonitoringMeetingRecordService = smartMock[AttendanceMonitoringMeetingRecordService]
-				val securityService = smartMock[SecurityService]
+				val meetingRecordDao: MeetingRecordDao = smartMock[MeetingRecordDao]
+				val features: Features = smartMock[Features]
+				val attendanceMonitoringMeetingRecordService: AttendanceMonitoringMeetingRecordService = smartMock[AttendanceMonitoringMeetingRecordService]
+				val securityService: SecurityService = smartMock[SecurityService]
 			}
 		approvalCmd.approved = true
 		approvalCmd.rejectionComments = null

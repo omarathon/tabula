@@ -4,6 +4,7 @@ import javax.persistence.Lob
 
 import org.hibernate.annotations.Type
 import uk.ac.warwick.tabula.ToString
+import uk.ac.warwick.tabula.data.model.HasSettings._
 import uk.ac.warwick.tabula.helpers.StringUtils._
 import uk.ac.warwick.tabula.services.UserLookupService
 import uk.ac.warwick.userlookup.User
@@ -21,27 +22,27 @@ object HasSettings {
 
 	/** Wrapper for get/put operations on a given string setting. */
 	case class StringSetting(allSettings: HasSettings)(val key: String, val default: String) extends Setting[String] {
-		def value = allSettings.getStringSetting(key, default)
+		def value: String = allSettings.getStringSetting(key, default)
 	}
 
 	case class IntSetting(allSettings: HasSettings)(val key: String, val default: Int) extends Setting[Int] {
-		def value = allSettings.getIntSetting(key, default)
+		def value: Int = allSettings.getIntSetting(key, default)
 	}
 
 	case class BooleanSetting(allSettings: HasSettings)(val key: String, val default: Boolean) extends Setting[Boolean] {
-		def value = allSettings.getBooleanSetting(key, default)
+		def value: Boolean = allSettings.getBooleanSetting(key, default)
 	}
 
 	case class StringMapSetting(allSettings: HasSettings)(val key: String, val default: Map[String, String]) extends Setting[Map[String, String]] {
-		def value = allSettings.getStringMapSetting(key, default)
+		def value: Map[String, String] = allSettings.getStringMapSetting(key, default)
 	}
 
 	case class StringSeqSetting(allSettings: HasSettings)(val key: String, val default: Seq[String]) extends Setting[Seq[String]] {
-		def value = allSettings.getStringSeqSetting(key, default)
+		def value: Seq[String] = allSettings.getStringSeqSetting(key, default)
 	}
 
 	case class UserSeqSetting(allSettings: HasSettings)(val key: String, val default: Seq[User], userLookup: UserLookupService) extends Setting[Seq[User]] {
-		def value = allSettings.getStringSeqSetting(key).map(_.map(userLookup.getUserByUserId).filter(_.isFoundUser)).getOrElse(default)
+		def value: Seq[User] = allSettings.getStringSeqSetting(key).map(_.map(userLookup.getUserByUserId).filter(_.isFoundUser)).getOrElse(default)
 		override def value_=(v: Seq[User]) { allSettings.settings += key -> v.map { _.getUserId }.filter { _.hasText }.toList }
 	}
 }
@@ -52,30 +53,30 @@ trait HasSettings {
 	@Type(`type` = "uk.ac.warwick.tabula.data.model.JsonMapUserType")
 	protected var settings: Map[String, Any] = Map()
 
-	def settingsIterator = settings.iterator
+	def settingsIterator: Iterator[(String, Any)] = settings.iterator
 
-	protected def getSetting(key: String) = Option(settings).flatMap { _.get(key) }
+	protected def getSetting(key: String): Option[Any] = Option(settings).flatMap { _.get(key) }
 
-	protected def getStringSetting(key: String) = getSetting(key) match {
+	protected def getStringSetting(key: String): Option[String] = getSetting(key) match {
 		case Some(value: String) => Some(value)
 		case _ => None
 	}
-	protected def getIntSetting(key: String) = getSetting(key) match {
+	protected def getIntSetting(key: String): Option[Int] = getSetting(key) match {
 		case Some(value: Int) => Some(value)
 		case _ => None
 	}
-	protected def getBooleanSetting(key: String) = getSetting(key) match {
+	protected def getBooleanSetting(key: String): Option[Boolean] = getSetting(key) match {
 		case Some(value: Boolean) => Some(value)
 		case _ => None
 	}
-	protected def getStringSeqSetting(key: String) = getSetting(key) match {
+	protected def getStringSeqSetting(key: String): Option[Seq[String]] = getSetting(key) match {
 		case Some(value: Seq[_]) => Some(value.asInstanceOf[Seq[String]])
 		case _ => None
 	}
 	protected def getStringMapSetting(key: String): Option[Map[String, String]] = {
 		parseMapFromAny(getSetting(key)).map(_.mapValues(_.asInstanceOf[String]))
 	}
-	protected def getUserSeqSetting(key: String) = getSetting(key) match {
+	protected def getUserSeqSetting(key: String): Option[Seq[String]] = getSetting(key) match {
 		case Some(value: Seq[_]) => Some(value.asInstanceOf[Seq[String]])
 		case _ => None
 	}
@@ -86,12 +87,12 @@ trait HasSettings {
 		case _ => None
 	}
 
-	def StringSetting = HasSettings.StringSetting(this)(_, _)
-	def StringMapSetting = HasSettings.StringMapSetting(this)(_, _)
-	def StringSeqSetting = HasSettings.StringSeqSetting(this)(_, _)
-	def IntSetting = HasSettings.IntSetting(this)(_, _)
-	def BooleanSetting = HasSettings.BooleanSetting(this)(_, _)
-	def UserSeqSetting = HasSettings.UserSeqSetting(this)(_, _, _)
+	def StringSetting: (String, String) => StringSetting = HasSettings.StringSetting(this)(_, _)
+	def StringMapSetting: (String, Map[String, String]) => StringMapSetting = HasSettings.StringMapSetting(this)(_, _)
+	def StringSeqSetting: (String, Seq[String]) => StringSeqSetting = HasSettings.StringSeqSetting(this)(_, _)
+	def IntSetting: (String, Int) => IntSetting = HasSettings.IntSetting(this)(_, _)
+	def BooleanSetting: (String, Boolean) => BooleanSetting = HasSettings.BooleanSetting(this)(_, _)
+	def UserSeqSetting: (String, Seq[User], UserLookupService) => UserSeqSetting = HasSettings.UserSeqSetting(this)(_, _, _)
 
 	protected def getStringSetting(key: String, default: => String): String = getStringSetting(key).getOrElse(default)
 	protected def getIntSetting(key: String, default: => Int): Int = getIntSetting(key).getOrElse(default)
@@ -99,7 +100,7 @@ trait HasSettings {
 	protected def getStringSeqSetting(key: String, default: => Seq[String]): Seq[String] = getStringSeqSetting(key).getOrElse(default)
 	protected def getStringMapSetting(key: String, default: => Map[String, String]): Map[String, String] = getStringMapSetting(key).getOrElse(default)
 
-	protected def settingsSeq = Option(settings).map { _.toSeq }.getOrElse(Nil)
+	protected def settingsSeq: Seq[(String, Any)] = Option(settings).map { _.toSeq }.getOrElse(Nil)
 
 	protected def ensureSettings {
 		if (settings == null) settings = Map()
@@ -110,14 +111,14 @@ trait HasSettings {
 }
 
 class NestedSettings(parent: HasSettings, path: String) extends ToString {
-	def StringSetting(key: String, default: String) = HasSettings.StringSetting(parent)(s"$path.$key", default)
-	def StringMapSetting(key: String, default: Map[String, String]) = HasSettings.StringMapSetting(parent)(s"$path.$key", default)
-	def StringSeqSetting(key: String, default: Seq[String]) = HasSettings.StringSeqSetting(parent)(s"$path.$key", default)
-	def IntSetting(key: String, default: Int) = HasSettings.IntSetting(parent)(s"$path.$key", default)
-	def BooleanSetting(key: String, default: Boolean) = HasSettings.BooleanSetting(parent)(s"$path.$key", default)
-	def UserSeqSetting(key: String, default: Seq[User], userLookup: UserLookupService) = HasSettings.UserSeqSetting(parent)(s"$path.$key", default, userLookup)
+	def StringSetting(key: String, default: String): StringSetting = HasSettings.StringSetting(parent)(s"$path.$key", default)
+	def StringMapSetting(key: String, default: Map[String, String]): StringMapSetting = HasSettings.StringMapSetting(parent)(s"$path.$key", default)
+	def StringSeqSetting(key: String, default: Seq[String]): StringSeqSetting = HasSettings.StringSeqSetting(parent)(s"$path.$key", default)
+	def IntSetting(key: String, default: Int): IntSetting = HasSettings.IntSetting(parent)(s"$path.$key", default)
+	def BooleanSetting(key: String, default: Boolean): BooleanSetting = HasSettings.BooleanSetting(parent)(s"$path.$key", default)
+	def UserSeqSetting(key: String, default: Seq[User], userLookup: UserLookupService): UserSeqSetting = HasSettings.UserSeqSetting(parent)(s"$path.$key", default, userLookup)
 
-	def toStringProps = parent.settingsIterator.toSeq.filter { case (key, _) => key.startsWith(path + ".") }.map { case (key, v) => key.substring(path.length + 1) -> v }.toList
+	def toStringProps: List[(String, Any)] = parent.settingsIterator.toSeq.filter { case (key, _) => key.startsWith(path + ".") }.map { case (key, v) => key.substring(path.length + 1) -> v }.toList
 }
 
 /**

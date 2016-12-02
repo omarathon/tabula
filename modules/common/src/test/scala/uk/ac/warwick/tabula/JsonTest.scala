@@ -11,9 +11,9 @@ import scala.beans.BeanProperty
 
 class JsonTest extends TestBase {
 
-	val m = new JsonObjectMapperFactory().createInstance()
+	val m: ObjectMapper = new JsonObjectMapperFactory().createInstance()
 
-	val now = new DateTime().withZone(DateTimeZone.UTC).withDate(2013,7,29).withTime(12,0,0,0)
+	val now: DateTime = new DateTime().withZone(DateTimeZone.UTC).withDate(2013,7,29).withTime(12,0,0,0)
 
 	// Test DefaultScalaModule from https://github.com/FasterXML/jackson-module-scala
 	// which teaches Jackson about Scala collections.
@@ -43,8 +43,8 @@ class JsonTest extends TestBase {
 	}
 
 	class DateHolder(time: DateTime) {
-		@BeanProperty var beanPropDate = time
-		var regularDate = time
+		@BeanProperty var beanPropDate: DateTime = time
+		var regularDate: DateTime = time
 	}
 
 	@Test def datesBecomeTimestamps() {

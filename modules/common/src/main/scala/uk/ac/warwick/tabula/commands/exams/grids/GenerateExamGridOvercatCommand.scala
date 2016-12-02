@@ -53,7 +53,7 @@ class GenerateExamGridOvercatCommandInternal(
 
 	self: GenerateExamGridOvercatCommandRequest with StudentCourseYearDetailsDaoComponent =>
 
-	override def applyInternal() = {
+	override def applyInternal(): Seq[Module] = {
 		val modules = chosenModuleSubset.get._2.map(_.module)
 		scyd.overcattingModules = modules
 		scyd.overcattingChosenBy = user.apparentUser
@@ -126,7 +126,7 @@ trait GenerateExamGridOvercatCommandState {
 	def routeRules: Seq[UpstreamRouteRule]
 	def user: CurrentUser
 
-	lazy val overcattedModuleSubsets = moduleRegistrationService.overcattedModuleSubsets(
+	lazy val overcattedModuleSubsets: Seq[(BigDecimal, Seq[ModuleRegistration])] = moduleRegistrationService.overcattedModuleSubsets(
 		scyd.toExamGridEntityYear,
 		overwrittenMarks,
 		normalLoad,

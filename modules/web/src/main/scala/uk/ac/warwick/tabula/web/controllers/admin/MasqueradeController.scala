@@ -17,14 +17,16 @@ import uk.ac.warwick.tabula.services.{CourseAndRouteService, ModuleAndDepartment
 import uk.ac.warwick.tabula.web.Cookies._
 import uk.ac.warwick.tabula.web.{Cookie, Mav, Routes}
 
+import scala.collection.immutable.Iterable
+
 @Controller
 @RequestMapping(Array("/admin/masquerade"))
 class MasqueradeController extends AdminController {
 
-	var sandbox = Wire.property("${spring.profiles.active}") == "sandbox"
-	var departmentService = Wire[ModuleAndDepartmentService]
-	var profileService = Wire[ProfileService]
-	var routeService = Wire[CourseAndRouteService]
+	var sandbox: Boolean = Wire.property("${spring.profiles.active}") == "sandbox"
+	var departmentService: ModuleAndDepartmentService = Wire[ModuleAndDepartmentService]
+	var profileService: ProfileService = Wire[ProfileService]
+	var routeService: CourseAndRouteService = Wire[CourseAndRouteService]
 
 	validatesSelf[SelfValidating]
 
@@ -44,7 +46,7 @@ class MasqueradeController extends AdminController {
 		}
 	}
 
-	@ModelAttribute("masqueradeDepartments") def masqueradeDepartments =
+	@ModelAttribute("masqueradeDepartments") def masqueradeDepartments: Iterable[MasqueradeDepartment] with (Int with MasqueradeDepartment) => Boolean =
 		if (!sandbox) Nil
 		else {
 			val realUser = new CurrentUser(user.realUser, user.realUser)
@@ -66,7 +68,7 @@ class MasqueradeController extends AdminController {
 			}
 		}
 
-	@ModelAttribute("returnTo") def returnTo = getReturnTo("/")
+	@ModelAttribute("returnTo") def returnTo: String = getReturnTo("/")
 
 }
 

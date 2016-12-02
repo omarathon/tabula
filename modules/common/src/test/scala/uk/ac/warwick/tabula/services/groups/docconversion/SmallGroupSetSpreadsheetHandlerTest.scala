@@ -1,36 +1,39 @@
 package uk.ac.warwick.tabula.services.groups.docconversion
 
+import java.io.InputStream
+
 import org.joda.time.LocalTime
 import org.springframework.validation.BindException
 import uk.ac.warwick.tabula.services._
 import uk.ac.warwick.tabula.services.timetables.{LocationFetchingService, LocationFetchingServiceComponent}
 import uk.ac.warwick.tabula._
 import uk.ac.warwick.tabula.data.model.groups._
-import uk.ac.warwick.tabula.data.model.{Location, NamedLocation}
+import uk.ac.warwick.tabula.data.model.{Department, Location, Module, NamedLocation}
+import uk.ac.warwick.userlookup.User
 
 class SmallGroupSetSpreadsheetHandlerTest extends TestBase with Mockito {
 
 	private trait Fixture {
-		val moduleAndDepartmentService = smartMock[ModuleAndDepartmentService]
-		val smallGroupService = smartMock[SmallGroupService]
+		val moduleAndDepartmentService: ModuleAndDepartmentService = smartMock[ModuleAndDepartmentService]
+		val smallGroupService: SmallGroupService = smartMock[SmallGroupService]
 		val userLookup = new MockUserLookup
 
 		val handler = new SmallGroupSetSpreadsheetHandlerImpl with ModuleAndDepartmentServiceComponent with SmallGroupServiceComponent with UserLookupComponent with LocationFetchingServiceComponent {
-			val moduleAndDepartmentService = Fixture.this.moduleAndDepartmentService
-			val smallGroupService = Fixture.this.smallGroupService
-			val userLookup = Fixture.this.userLookup
+			val moduleAndDepartmentService: ModuleAndDepartmentService = Fixture.this.moduleAndDepartmentService
+			val smallGroupService: SmallGroupService = Fixture.this.smallGroupService
+			val userLookup: MockUserLookup = Fixture.this.userLookup
 			val locationFetchingService = new LocationFetchingService {
 				def locationFor(name: String): Location = NamedLocation(name)
 			}
 		}
 
-		val department = Fixtures.department("in", "IT Services")
+		val department: Department = Fixtures.department("in", "IT Services")
 		val academicYear = AcademicYear(2015)
 
-		val ch134 = Fixtures.module("ch134", "Introduction to Chemistry Stuff")
+		val ch134: Module = Fixtures.module("ch134", "Introduction to Chemistry Stuff")
 		moduleAndDepartmentService.getModuleByCode("CH134") returns Some(ch134)
 
-		val linkedUgY1 = Fixtures.departmentSmallGroupSet("UG Y1")
+		val linkedUgY1: DepartmentSmallGroupSet = Fixtures.departmentSmallGroupSet("UG Y1")
 		linkedUgY1.groups.add(Fixtures.departmentSmallGroup("Alpha"))
 		linkedUgY1.groups.add(Fixtures.departmentSmallGroup("Beta"))
 		linkedUgY1.groups.add(Fixtures.departmentSmallGroup("Gamma"))
@@ -40,23 +43,23 @@ class SmallGroupSetSpreadsheetHandlerTest extends TestBase with Mockito {
 		smallGroupService.getDepartmentSmallGroupSets(department, academicYear) returns Seq(linkedUgY1)
 
 		userLookup.registerUsers("u0000001", "u0000002", "cuscav", "curef", "u1234567", "u2382344", "u1823774", "u2372372", "u1915121", "u1784383")
-		val u0000001 = userLookup.getUserByUserId("u0000001")
-		val u0000002 = userLookup.getUserByUserId("u0000002")
-		val cuscav = userLookup.getUserByUserId("cuscav")
-		val curef = userLookup.getUserByUserId("curef")
-		val u1234567 = userLookup.getUserByUserId("u1234567")
-		val u2382344 = userLookup.getUserByUserId("u2382344")
-		val u1823774 = userLookup.getUserByUserId("u1823774")
-		val u2372372 = userLookup.getUserByUserId("u2372372")
-		val u1915121 = userLookup.getUserByUserId("u1915121")
-		val u1784383 = userLookup.getUserByUserId("u1784383")
+		val u0000001: User = userLookup.getUserByUserId("u0000001")
+		val u0000002: User = userLookup.getUserByUserId("u0000002")
+		val cuscav: User = userLookup.getUserByUserId("cuscav")
+		val curef: User = userLookup.getUserByUserId("curef")
+		val u1234567: User = userLookup.getUserByUserId("u1234567")
+		val u2382344: User = userLookup.getUserByUserId("u2382344")
+		val u1823774: User = userLookup.getUserByUserId("u1823774")
+		val u2372372: User = userLookup.getUserByUserId("u2372372")
+		val u1915121: User = userLookup.getUserByUserId("u1915121")
+		val u1784383: User = userLookup.getUserByUserId("u1784383")
 	}
 
 	@Test def itWorks(): Unit = new Fixture {
-		val is = resourceAsStream("/sgt-import.xlsx")
+		val is: InputStream = resourceAsStream("/sgt-import.xlsx")
 		val bindingResult = new BindException(new Object, "command")
 
-		val results = handler.readXSSFExcelFile(department, academicYear, is, bindingResult)
+		val results: Seq[ExtractedSmallGroupSet] = handler.readXSSFExcelFile(department, academicYear, is, bindingResult)
 		results should be (Seq(
 			ExtractedSmallGroupSet(
 				module = ch134,

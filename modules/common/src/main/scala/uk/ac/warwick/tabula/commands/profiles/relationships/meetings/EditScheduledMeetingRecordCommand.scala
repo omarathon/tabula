@@ -5,7 +5,7 @@ import org.springframework.validation.{BindingResult, Errors}
 import uk.ac.warwick.tabula.JavaImports._
 import uk.ac.warwick.tabula.commands._
 import uk.ac.warwick.tabula.data.model._
-import uk.ac.warwick.tabula.data.model.notifications.profiles.meetingrecord.{ScheduledMeetingRecordBehalfNotification, ScheduledMeetingRecordInviteeNotification}
+import uk.ac.warwick.tabula.data.model.notifications.profiles.meetingrecord.{AddsIcalAttachmentToScheduledMeetingNotification, ScheduledMeetingRecordBehalfNotification, ScheduledMeetingRecordInviteeNotification, ScheduledMeetingRecordNotification}
 import uk.ac.warwick.tabula.permissions.Permissions
 import uk.ac.warwick.tabula.services.{AutowiringFileAttachmentServiceComponent, AutowiringMeetingRecordServiceComponent, FileAttachmentServiceComponent, MeetingRecordServiceComponent}
 import uk.ac.warwick.tabula.system.BindListener
@@ -35,7 +35,7 @@ class EditScheduledMeetingRecordCommand (val editor: Member, val meetingRecord: 
 
 	self: MeetingRecordServiceComponent with FileAttachmentServiceComponent =>
 
-	def applyInternal() = {
+	def applyInternal(): ScheduledMeetingRecordResult = {
 
 		def persistAttachments(meeting: ScheduledMeetingRecord) {
 			// delete attachments that have been removed
@@ -108,7 +108,7 @@ trait EditScheduledMeetingRecordState {
 	var file: UploadedFile = new UploadedFile
 	var attachedFiles:JList[FileAttachment] = _
 
-	var attachmentTypes = Seq[String]()
+	var attachmentTypes: Seq[String] = Seq[String]()
 
 	lazy val relationship: StudentRelationship = meetingRecord.relationship
 }
@@ -139,7 +139,7 @@ trait EditScheduledMeetingRecordDescription extends Describable[ScheduledMeeting
 trait EditScheduledMeetingRecordNotification extends Notifies[ScheduledMeetingRecordResult, ScheduledMeetingRecord] {
 	self: EditScheduledMeetingRecordState =>
 
-	def emit(result: ScheduledMeetingRecordResult) = {
+	def emit(result: ScheduledMeetingRecordResult): Seq[ScheduledMeetingRecordNotification with SingleRecipientNotification with AddsIcalAttachmentToScheduledMeetingNotification] = {
 		val meeting = result.meetingRecord
 		val user = editor.asSsoUser
 		val verb =
@@ -160,7 +160,7 @@ trait EditScheduledMeetingRecordNotifications extends SchedulesNotifications[Sch
 
 	override def transformResult(result: ScheduledMeetingRecordResult) = Seq(result.meetingRecord)
 
-	override def scheduledNotifications(meetingRecord: ScheduledMeetingRecord) = {
+	override def scheduledNotifications(meetingRecord: ScheduledMeetingRecord): Seq[ScheduledNotification[ScheduledMeetingRecord]] = {
 		Seq(
 			new ScheduledNotification[ScheduledMeetingRecord]("ScheduledMeetingRecordReminderStudent", meetingRecord, meetingRecord.meetingDate.withTimeAtStartOfDay),
 			new ScheduledNotification[ScheduledMeetingRecord]("ScheduledMeetingRecordReminderAgent", meetingRecord, meetingRecord.meetingDate.withTimeAtStartOfDay),

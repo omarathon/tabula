@@ -12,8 +12,8 @@ import scala.collection.JavaConverters._
 
 class SmallGroupSetTest extends TestBase with Mockito {
 
-	val sessionFactory = smartMock[SessionFactory]
-	val session = smartMock[Session]
+	val sessionFactory: SessionFactory = smartMock[SessionFactory]
+	val session: Session = smartMock[Session]
 	sessionFactory.getCurrentSession returns session
 	sessionFactory.openSession() returns session
 
@@ -24,7 +24,7 @@ class SmallGroupSetTest extends TestBase with Mockito {
 
     val cloneGroup = new SmallGroup
     val group:SmallGroup  = new SmallGroup(){
-      override def duplicateTo(groupSet:SmallGroupSet, transient: Boolean, copyEvents: Boolean = true, copyMembership: Boolean = true) = cloneGroup
+      override def duplicateTo(groupSet:SmallGroupSet, transient: Boolean, copyEvents: Boolean = true, copyMembership: Boolean = true): SmallGroup = cloneGroup
     }
     source.id = "testId"
     source.academicYear = AcademicYear(2001)

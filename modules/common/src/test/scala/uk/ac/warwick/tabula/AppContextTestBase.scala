@@ -53,7 +53,7 @@ trait TransactionalTesting {
 	@Autowired var dataSource:DataSource =_
 	@Autowired var transactionManager:PlatformTransactionManager =_
 
-	def session = sessionFactory.getCurrentSession
+	def session: Session = sessionFactory.getCurrentSession
 
 	Transactions.enabled = true
 
@@ -61,7 +61,7 @@ trait TransactionalTesting {
 		val template = new TransactionTemplate(transactionManager)
 
 		template.execute(new TransactionCallback[A] {
-			override def doInTransaction(status:TransactionStatus) = {
+			override def doInTransaction(status:TransactionStatus): A = {
 				status.setRollbackOnly()
 				f(status)
 			}

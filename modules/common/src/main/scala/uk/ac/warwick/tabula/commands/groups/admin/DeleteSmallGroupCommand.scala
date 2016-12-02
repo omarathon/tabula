@@ -34,7 +34,7 @@ class DeleteSmallGroupCommandInternal(val set: SmallGroupSet, val group: SmallGr
 	self: SmallGroupServiceComponent =>
 
 
-	override def applyInternal() = transactional() {
+	override def applyInternal(): SmallGroup = transactional() {
 		group.preDelete()
 
 		set.groups.remove(group)

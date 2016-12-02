@@ -48,7 +48,7 @@ trait TurnitinMethods { self: Session =>
 	// Create a session in turnitin and return a session ID.
 	// This is only called by Turnitin service, and once you have a Session
 	// you are already logged in and can just use the other methods.
-	def login() = {
+	def login(): Response = {
 		if (sessionId != null) {
 			throw new UnsupportedOperationException("This should only be called by Turnitin service on an anonymous Session without an ID")
 		}

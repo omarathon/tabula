@@ -49,7 +49,7 @@ class HibernateLifecycle extends InitializingBean with PostLoadEventListener wit
 		}
 	}
 
-	override def onPreInsert(event: PreInsertEvent) = {
+	override def onPreInsert(event: PreInsertEvent): Boolean = {
 		event.getEntity match {
 			case listener: PreSaveBehaviour => listener.preSave(true)
 			case _ =>
@@ -57,7 +57,7 @@ class HibernateLifecycle extends InitializingBean with PostLoadEventListener wit
 		false
 	}
 
-	override def onPreUpdate(event: PreUpdateEvent) = {
+	override def onPreUpdate(event: PreUpdateEvent): Boolean = {
 		event.getEntity match {
 			case listener: PreSaveBehaviour => listener.preSave(false)
 			case _ =>

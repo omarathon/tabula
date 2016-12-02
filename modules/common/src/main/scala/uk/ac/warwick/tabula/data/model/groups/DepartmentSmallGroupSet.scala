@@ -3,23 +3,28 @@ package uk.ac.warwick.tabula.data.model.groups
 import javax.persistence._
 import javax.persistence.CascadeType._
 import javax.validation.constraints.NotNull
-import org.hibernate.annotations.{Type, Filter, FilterDef, BatchSize}
+
+import org.hibernate.annotations.{BatchSize, Filter, FilterDef, Type}
 import org.joda.time.DateTime
 import uk.ac.warwick.spring.Wire
 import uk.ac.warwick.tabula.JavaImports._
-import uk.ac.warwick.tabula.services.{SmallGroupMembershipHelpers, SmallGroupService, AssessmentMembershipService, UserGroupCacheManager}
+import uk.ac.warwick.tabula.data.PostLoadBehaviour
+import uk.ac.warwick.tabula.services.{AssessmentMembershipService, SmallGroupMembershipHelpers, SmallGroupService, UserGroupCacheManager}
 import uk.ac.warwick.tabula.{AcademicYear, ToString}
 import uk.ac.warwick.tabula.data.model._
+import uk.ac.warwick.tabula.helpers.Logging
 import uk.ac.warwick.tabula.permissions.PermissionsTarget
 import uk.ac.warwick.userlookup.User
+
 import scala.collection.JavaConverters._
+import scala.collection.mutable
 
 object DepartmentSmallGroupSet {
 	final val NotDeletedFilter = "notDeleted"
 
 	// For sorting a collection by set name. Either pass to the sort function,
 	// or expose as an implicit val.
-	val NameOrdering = Ordering.by { set: DepartmentSmallGroupSet => (set.name, set.id) }
+	val NameOrdering: Ordering[DepartmentSmallGroupSet] = Ordering.by { set: DepartmentSmallGroupSet => (set.name, set.id) }
 
 	// Companion object is one of the places searched for an implicit Ordering, so
 	// this will be the default when ordering a list of small group sets.
@@ -46,7 +51,7 @@ class DepartmentSmallGroupSet
 	import DepartmentSmallGroupSet._
 
 	// FIXME this isn't really optional, but testing is a pain unless it's made so
-	@transient var smallGroupService = Wire.option[SmallGroupService with SmallGroupMembershipHelpers]
+	@transient var smallGroupService: Option[SmallGroupService with SmallGroupMembershipHelpers] = Wire.option[SmallGroupService with SmallGroupMembershipHelpers]
 
 	def this(_department: Department) {
 		this()
@@ -93,37 +98,37 @@ class DepartmentSmallGroupSet
 	@Column(name = "member_query")
 	var memberQuery: String = _
 
-	def isStudentMember(user: User) = members.includesUser(user)
+	def isStudentMember(user: User): Boolean = members.includesUser(user)
 
-	def allStudents = members.users
-	def allStudentIds = if (members.universityIds) members.knownType.members else allStudents.map { _.getWarwickId }
-	def allStudentsCount = members.size
+	def allStudents: Seq[User] = members.users
+	def allStudentIds: Seq[String] = if (members.universityIds) members.knownType.members else allStudents.map { _.getWarwickId }
+	def allStudentsCount: Int = members.size
 
-	def unallocatedStudents = {
+	def unallocatedStudents: Seq[User] = {
 		val allocatedStudents = groups.asScala.flatMap { _.students.users }
 
 		allStudents diff allocatedStudents
 	}
 
-	def unallocatedStudentsCount = {
+	def unallocatedStudentsCount: Int = {
 		// TAB-2296 we can't rely just on counts here
 		unallocatedStudents.size
 	}
 
-	def studentsNotInMembership = {
+	def studentsNotInMembership: mutable.Buffer[User] = {
 		val allocatedStudents = groups.asScala.flatMap { _.students.users }
 
 		allocatedStudents diff allStudents
 	}
 
-	def studentsNotInMembershipCount = {
+	def studentsNotInMembershipCount: Int = {
 		// TAB-2296 we can't rely just on counts here
 		studentsNotInMembership.size
 	}
 
-	def hasAllocated = groups.asScala.exists { !_.students.isEmpty }
+	def hasAllocated: Boolean = groups.asScala.exists { !_.students.isEmpty }
 
-	def permissionsParents = Option(department).toStream ++ linkedSets.asScala.toStream
+	def permissionsParents: Stream[GeneratedId with PermissionsTarget with HasSettings with Serializable with PostLoadBehaviour with ToEntityReference with Logging] = Option(department).toStream ++ linkedSets.asScala.toStream
 
 	def toStringProps = Seq(
 		"id" -> id,
@@ -143,6 +148,6 @@ class DepartmentSmallGroupSet
 		newSet
 	}
 
-	override def toEntityReference = new DepartmentSmallGroupSetEntityReference().put(this)
+	override def toEntityReference: DepartmentSmallGroupSetEntityReference = new DepartmentSmallGroupSetEntityReference().put(this)
 
 }

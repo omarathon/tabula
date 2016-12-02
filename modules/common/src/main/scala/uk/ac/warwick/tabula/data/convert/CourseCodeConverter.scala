@@ -9,12 +9,12 @@ class CourseCodeConverter extends TwoWayConverter[String, Course] {
 
 	@Autowired var service: CourseAndRouteService = _
 
-	override def convertRight(code: String) =
+	override def convertRight(code: String): Course =
 		service.getCourseByCode(sanitise(code)).orNull
 
-	override def convertLeft(course: Course) = (Option(course) map { _.code }).orNull
+	override def convertLeft(course: Course): String = (Option(course) map { _.code }).orNull
 
-	def sanitise(code: String) = {
+	def sanitise(code: String): String = {
 		if (code == null) throw new IllegalArgumentException
 		else code
 	}

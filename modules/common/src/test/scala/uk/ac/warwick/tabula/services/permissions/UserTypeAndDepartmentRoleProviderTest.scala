@@ -3,23 +3,23 @@ package uk.ac.warwick.tabula.services.permissions
 import uk.ac.warwick.tabula.Fixtures
 import uk.ac.warwick.tabula.Mockito
 import uk.ac.warwick.tabula.TestBase
-import uk.ac.warwick.tabula.services.{StaffAssistantsHelpers, ModuleAndDepartmentService, ProfileService}
-import uk.ac.warwick.tabula.data.model.MemberUserType
+import uk.ac.warwick.tabula.services.{ModuleAndDepartmentService, ProfileService, StaffAssistantsHelpers}
+import uk.ac.warwick.tabula.data.model.{Department, MemberUserType}
 import uk.ac.warwick.tabula.roles._
 
 class UserTypeAndDepartmentRoleProviderTest extends TestBase with Mockito {
 
 	val provider = new UserTypeAndDepartmentRoleProvider
 
-	val profileService = mock[ProfileService with StaffAssistantsHelpers]
-	val departmentService = mock[ModuleAndDepartmentService]
+	val profileService: ProfileService with StaffAssistantsHelpers = mock[ProfileService with StaffAssistantsHelpers]
+	val departmentService: ModuleAndDepartmentService = mock[ModuleAndDepartmentService]
 
 	provider.profileService = profileService
 	provider.departmentService.set(departmentService)
 
-	val dept1 = Fixtures.department("cs")
-	val dept2 = Fixtures.department("en")
-	val dept3 = Fixtures.department("wm")
+	val dept1: Department = Fixtures.department("cs")
+	val dept2: Department = Fixtures.department("en")
+	val dept3: Department = Fixtures.department("wm")
 
 	@Test def student = withUser("cuscav") {
 		val member = Fixtures.student(universityId="0123456", department=dept1, courseDepartment=dept3)

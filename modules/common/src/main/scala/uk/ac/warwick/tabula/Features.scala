@@ -18,7 +18,7 @@ trait FeaturesComponent {
 }
 
 trait AutowiringFeaturesComponent extends FeaturesComponent {
-	var features = Wire[Features]
+	var features: Features = Wire[Features]
 }
 
 /**
@@ -42,112 +42,112 @@ abstract class Features {
 
 	// FIXME currently requires default to be set twice: in annotation for Spring, and in FeaturesMessage non-Spring tests
 
-	@Value("${features.academicYear.2012:true}") var academicYear2012 = defaults.academicYear2012
-	@Value("${features.academicYear.2013:true}") var academicYear2013 = defaults.academicYear2013
-	@Value("${features.academicYear.2014:true}") var academicYear2014 = defaults.academicYear2014
-	@Value("${features.academicYear.2015:true}") var academicYear2015 = defaults.academicYear2015
-	@Value("${features.academicYear.2016:true}") var academicYear2016 = defaults.academicYear2016
-	@Value("${features.academicYear.2017:false}") var academicYear2017 = defaults.academicYear2017
-	@Value("${features.academicYear.2018:false}") var academicYear2018 = defaults.academicYear2018
+	@Value("${features.academicYear.2012:true}") var academicYear2012: Boolean = defaults.academicYear2012
+	@Value("${features.academicYear.2013:true}") var academicYear2013: Boolean = defaults.academicYear2013
+	@Value("${features.academicYear.2014:true}") var academicYear2014: Boolean = defaults.academicYear2014
+	@Value("${features.academicYear.2015:true}") var academicYear2015: Boolean = defaults.academicYear2015
+	@Value("${features.academicYear.2016:true}") var academicYear2016: Boolean = defaults.academicYear2016
+	@Value("${features.academicYear.2017:false}") var academicYear2017: Boolean = defaults.academicYear2017
+	@Value("${features.academicYear.2018:false}") var academicYear2018: Boolean = defaults.academicYear2018
 
-	@Value("${features.emailStudents:false}") var emailStudents = defaults.emailStudents
-	@Value("${features.collectRatings:true}") var collectRatings = defaults.collectRatings
-	@Value("${features.submissions:true}") var submissions = defaults.submissions
-	@Value("${features.privacyStatement:true}") var privacyStatement = defaults.privacyStatement
-	@Value("${features.collectMarks:true}") var collectMarks = defaults.collectMarks
-	@Value("${features.turnitin:true}") var turnitin = defaults.turnitin
-	@Value("${features.turnitinSubmissions:true}") var turnitinSubmissions = defaults.turnitinSubmissions
-	@Value("${features.assignmentMembership:true}") var assignmentMembership = defaults.assignmentMembership
-	@Value("${features.extensions:true}") var extensions = defaults.extensions
-	@Value("${features.feedbackTemplates:true}") var feedbackTemplates = defaults.feedbackTemplates
-	@Value("${features.markingWorkflows:true}") var markingWorkflows = defaults.markingWorkflows
-	@Value("${features.markerFeedback:true}") var markerFeedback = defaults.markerFeedback
-	@Value("${features.profiles:true}") var profiles = defaults.profiles
-	@Value("${features.assignmentProgressTable:true}") var assignmentProgressTable = defaults.assignmentProgressTable
-	@Value("${features.assignmentProgressTableByDefault:true}") var assignmentProgressTableByDefault = defaults.assignmentProgressTableByDefault
-	@Value("${features.summativeFilter:true}") var summativeFilter = defaults.summativeFilter
-	@Value("${features.dissertationFilter:true}") var dissertationFilter = defaults.dissertationFilter
-	@Value("${features.meetingRecordApproval:true}") var meetingRecordApproval = defaults.meetingRecordApproval
-	@Value("${features.smallGroupTeaching:true}") var smallGroupTeaching = defaults.smallGroupTeaching
-	@Value("${features.smallGroupTeaching.studentSignUp:true}") var smallGroupTeachingStudentSignUp = defaults.smallGroupTeachingStudentSignUp
-	@Value("${features.smallGroupTeaching.randomAllocation:false}") var smallGroupTeachingRandomAllocation = defaults.smallGroupTeachingRandomAllocation
-	@Value("${features.smallGroupTeaching.selfGroupSwitching:true}") var smallGroupTeachingSelfGroupSwitching = defaults.smallGroupTeachingSelfGroupSwitching
-	@Value("${features.smallGroupTeaching.tutorView:true}") var smallGroupTeachingTutorView = defaults.smallGroupTeachingTutorView
+	@Value("${features.emailStudents:false}") var emailStudents: Boolean = defaults.emailStudents
+	@Value("${features.collectRatings:true}") var collectRatings: Boolean = defaults.collectRatings
+	@Value("${features.submissions:true}") var submissions: Boolean = defaults.submissions
+	@Value("${features.privacyStatement:true}") var privacyStatement: Boolean = defaults.privacyStatement
+	@Value("${features.collectMarks:true}") var collectMarks: Boolean = defaults.collectMarks
+	@Value("${features.turnitin:true}") var turnitin: Boolean = defaults.turnitin
+	@Value("${features.turnitinSubmissions:true}") var turnitinSubmissions: Boolean = defaults.turnitinSubmissions
+	@Value("${features.assignmentMembership:true}") var assignmentMembership: Boolean = defaults.assignmentMembership
+	@Value("${features.extensions:true}") var extensions: Boolean = defaults.extensions
+	@Value("${features.feedbackTemplates:true}") var feedbackTemplates: Boolean = defaults.feedbackTemplates
+	@Value("${features.markingWorkflows:true}") var markingWorkflows: Boolean = defaults.markingWorkflows
+	@Value("${features.markerFeedback:true}") var markerFeedback: Boolean = defaults.markerFeedback
+	@Value("${features.profiles:true}") var profiles: Boolean = defaults.profiles
+	@Value("${features.assignmentProgressTable:true}") var assignmentProgressTable: Boolean = defaults.assignmentProgressTable
+	@Value("${features.assignmentProgressTableByDefault:true}") var assignmentProgressTableByDefault: Boolean = defaults.assignmentProgressTableByDefault
+	@Value("${features.summativeFilter:true}") var summativeFilter: Boolean = defaults.summativeFilter
+	@Value("${features.dissertationFilter:true}") var dissertationFilter: Boolean = defaults.dissertationFilter
+	@Value("${features.meetingRecordApproval:true}") var meetingRecordApproval: Boolean = defaults.meetingRecordApproval
+	@Value("${features.smallGroupTeaching:true}") var smallGroupTeaching: Boolean = defaults.smallGroupTeaching
+	@Value("${features.smallGroupTeaching.studentSignUp:true}") var smallGroupTeachingStudentSignUp: Boolean = defaults.smallGroupTeachingStudentSignUp
+	@Value("${features.smallGroupTeaching.randomAllocation:false}") var smallGroupTeachingRandomAllocation: Boolean = defaults.smallGroupTeachingRandomAllocation
+	@Value("${features.smallGroupTeaching.selfGroupSwitching:true}") var smallGroupTeachingSelfGroupSwitching: Boolean = defaults.smallGroupTeachingSelfGroupSwitching
+	@Value("${features.smallGroupTeaching.tutorView:true}") var smallGroupTeachingTutorView: Boolean = defaults.smallGroupTeachingTutorView
 
-	@Value("${features.smallGroupAllocationFiltering:true}") var smallGroupAllocationFiltering = defaults.smallGroupAllocationFiltering
-	@Value("${features.personalTutorAssignment:true}") var personalTutorAssignment = defaults.personalTutorAssignment
-	@Value("${features.personalTutorAssignmentFiltering:true}") var personalTutorAssignmentFiltering = defaults.personalTutorAssignmentFiltering
-	@Value("${features.arbitraryRelationships:true}") var arbitraryRelationships = defaults.arbitraryRelationships
-	@Value("${features.personalTimetables:true}") var personalTimetables = defaults.personalTimetables
-	@Value("${features.personalTimetables.exams:false}") var personalExamTimetables = defaults.personalTimetables
-	@Value("${features.profiles.memberNotes:true}") var profilesMemberNotes = defaults.profilesMemberNotes
-	@Value("${features.profiles.circumstances:false}") var profilesCircumstances = defaults.profilesCircumstances
-	@Value("${features.smallGroupTeaching.recordAttendance:true}") var smallGroupTeachingRecordAttendance = defaults.smallGroupTeachingRecordAttendance
+	@Value("${features.smallGroupAllocationFiltering:true}") var smallGroupAllocationFiltering: Boolean = defaults.smallGroupAllocationFiltering
+	@Value("${features.personalTutorAssignment:true}") var personalTutorAssignment: Boolean = defaults.personalTutorAssignment
+	@Value("${features.personalTutorAssignmentFiltering:true}") var personalTutorAssignmentFiltering: Boolean = defaults.personalTutorAssignmentFiltering
+	@Value("${features.arbitraryRelationships:true}") var arbitraryRelationships: Boolean = defaults.arbitraryRelationships
+	@Value("${features.personalTimetables:true}") var personalTimetables: Boolean = defaults.personalTimetables
+	@Value("${features.personalTimetables.exams:false}") var personalExamTimetables: Boolean = defaults.personalTimetables
+	@Value("${features.profiles.memberNotes:true}") var profilesMemberNotes: Boolean = defaults.profilesMemberNotes
+	@Value("${features.profiles.circumstances:false}") var profilesCircumstances: Boolean = defaults.profilesCircumstances
+	@Value("${features.smallGroupTeaching.recordAttendance:true}") var smallGroupTeachingRecordAttendance: Boolean = defaults.smallGroupTeachingRecordAttendance
 
-	@Value("${features.smallGroupTeaching.lectures:true}") var smallGroupTeachingLectures = defaults.smallGroupTeachingLectures
-	@Value("${features.profiles.coursework:true}") var courseworkInStudentProfile = defaults.courseworkInStudentProfile
-	@Value("${features.profiles.visa:true}") var visaInStudentProfile = defaults.visaInStudentProfile
+	@Value("${features.smallGroupTeaching.lectures:true}") var smallGroupTeachingLectures: Boolean = defaults.smallGroupTeachingLectures
+	@Value("${features.profiles.coursework:true}") var courseworkInStudentProfile: Boolean = defaults.courseworkInStudentProfile
+	@Value("${features.profiles.visa:true}") var visaInStudentProfile: Boolean = defaults.visaInStudentProfile
 
-	@Value("${features.profiles.scheduledMeetings:true}") var scheduledMeetings = defaults.scheduledMeetings
-	@Value("${features.disability.rendering.profiles:true}") var disabilityRenderingInProfiles = defaults.disabilityRenderingInProfiles
-	@Value("${features.disability.rendering.extensions:true}") var disabilityRenderingInExtensions = defaults.disabilityRenderingInExtensions
-	@Value("${features.disability.rendering.submissions:true}") var disabilityOnSubmission = defaults.disabilityOnSubmission
-	@Value("${features.includePastYears:true}") var includePastYears = defaults.includePastYears
-	@Value("${features.newSeenSecondMarkingWorkflows:true}") var newSeenSecondMarkingWorkflows = defaults.newSeenSecondMarkingWorkflows
-	@Value("${features.activityStreams:true}") var activityStreams = defaults.activityStreams
-	@Value("${features.profiles.showModuleResults:true}") var showModuleResults = defaults.showModuleResults
-	@Value("${features.profiles.showAccreditedPriorLearning:true}") var showAccreditedPriorLearning = defaults.showAccreditedPriorLearning
-	@Value("${features.attendanceMonitoring:true}") var attendanceMonitoring = defaults.attendanceMonitoring
-	@Value("${features.attendanceMonitoring.meetingPointType:true}") var attendanceMonitoringMeetingPointType = defaults.attendanceMonitoringMeetingPointType
-	@Value("${features.attendanceMonitoring.report:true}") var attendanceMonitoringReport = defaults.attendanceMonitoringReport
-	@Value("${features.attendanceMonitoring.note:true}") var attendanceMonitoringNote = defaults.attendanceMonitoringNote
+	@Value("${features.profiles.scheduledMeetings:true}") var scheduledMeetings: Boolean = defaults.scheduledMeetings
+	@Value("${features.disability.rendering.profiles:true}") var disabilityRenderingInProfiles: Boolean = defaults.disabilityRenderingInProfiles
+	@Value("${features.disability.rendering.extensions:true}") var disabilityRenderingInExtensions: Boolean = defaults.disabilityRenderingInExtensions
+	@Value("${features.disability.rendering.submissions:true}") var disabilityOnSubmission: Boolean = defaults.disabilityOnSubmission
+	@Value("${features.includePastYears:true}") var includePastYears: Boolean = defaults.includePastYears
+	@Value("${features.newSeenSecondMarkingWorkflows:true}") var newSeenSecondMarkingWorkflows: Boolean = defaults.newSeenSecondMarkingWorkflows
+	@Value("${features.activityStreams:true}") var activityStreams: Boolean = defaults.activityStreams
+	@Value("${features.profiles.showModuleResults:true}") var showModuleResults: Boolean = defaults.showModuleResults
+	@Value("${features.profiles.showAccreditedPriorLearning:true}") var showAccreditedPriorLearning: Boolean = defaults.showAccreditedPriorLearning
+	@Value("${features.attendanceMonitoring:true}") var attendanceMonitoring: Boolean = defaults.attendanceMonitoring
+	@Value("${features.attendanceMonitoring.meetingPointType:true}") var attendanceMonitoringMeetingPointType: Boolean = defaults.attendanceMonitoringMeetingPointType
+	@Value("${features.attendanceMonitoring.report:true}") var attendanceMonitoringReport: Boolean = defaults.attendanceMonitoringReport
+	@Value("${features.attendanceMonitoring.note:true}") var attendanceMonitoringNote: Boolean = defaults.attendanceMonitoringNote
 	@Value("${features.attendanceMonitoring.smallGroupPointType:true}")
-	var attendanceMonitoringSmallGroupPointType = defaults.attendanceMonitoringSmallGroupPointType
+	var attendanceMonitoringSmallGroupPointType: Boolean = defaults.attendanceMonitoringSmallGroupPointType
 	@Value("${features.attendanceMonitoring.assignmentSubmissionPointType:true}")
-	var attendanceMonitoringAssignmentSubmissionPointType = defaults.attendanceMonitoringAssignmentSubmissionPointType
-	@Value("${features.smallGroupTeaching.crossModuleSmallGroups:true}") var smallGroupCrossModules = defaults.smallGroupCrossModules
-	@Value("${features.masqueradersCanWrite:false}") var masqueradersCanWrite = defaults.masqueradersCanWrite
-	@Value("${features.masqueradeElevatedPermissions:false}") var masqueradeElevatedPermissions = defaults.masqueradeElevatedPermissions
-	@Value("${features.profiles.autoGroupDeregistration:false}") var autoGroupDeregistration = defaults.autoGroupDeregistration
-	@Value("${features.reports:true}") var reports = defaults.reports
-	@Value("${features.queueFeedbackForSits:true}") var queueFeedbackForSits = defaults.queueFeedbackForSits
-	@Value("${features.searchOnApiComponent:true}") var searchOnApiComponent = defaults.searchOnApiComponent
-	@Value("${features.celcatTimetablesChemistry:true}") var celcatTimetablesChemistry = defaults.celcatTimetablesChemistry
-	@Value("${features.celcatTimetablesWBS:false}") var celcatTimetablesWBS = defaults.celcatTimetablesWBS
-	@Value("${features.smallGroupTeaching.autoMarkMissedMonitoringPoints:true}") var autoMarkMissedMonitoringPoints = defaults.autoMarkMissedMonitoringPoints
-	@Value("${features.notificationListeners.start:false}") var startNotificationListener = defaults.startNotificationListener
-	@Value("${features.urkund.submissions:true}") var urkundSubmissions = defaults.urkundSubmissions
+	var attendanceMonitoringAssignmentSubmissionPointType: Boolean = defaults.attendanceMonitoringAssignmentSubmissionPointType
+	@Value("${features.smallGroupTeaching.crossModuleSmallGroups:true}") var smallGroupCrossModules: Boolean = defaults.smallGroupCrossModules
+	@Value("${features.masqueradersCanWrite:false}") var masqueradersCanWrite: Boolean = defaults.masqueradersCanWrite
+	@Value("${features.masqueradeElevatedPermissions:false}") var masqueradeElevatedPermissions: Boolean = defaults.masqueradeElevatedPermissions
+	@Value("${features.profiles.autoGroupDeregistration:false}") var autoGroupDeregistration: Boolean = defaults.autoGroupDeregistration
+	@Value("${features.reports:true}") var reports: Boolean = defaults.reports
+	@Value("${features.queueFeedbackForSits:true}") var queueFeedbackForSits: Boolean = defaults.queueFeedbackForSits
+	@Value("${features.searchOnApiComponent:true}") var searchOnApiComponent: Boolean = defaults.searchOnApiComponent
+	@Value("${features.celcatTimetablesChemistry:true}") var celcatTimetablesChemistry: Boolean = defaults.celcatTimetablesChemistry
+	@Value("${features.celcatTimetablesWBS:false}") var celcatTimetablesWBS: Boolean = defaults.celcatTimetablesWBS
+	@Value("${features.smallGroupTeaching.autoMarkMissedMonitoringPoints:true}") var autoMarkMissedMonitoringPoints: Boolean = defaults.autoMarkMissedMonitoringPoints
+	@Value("${features.notificationListeners.start:false}") var startNotificationListener: Boolean = defaults.startNotificationListener
+	@Value("${features.urkund.submissions:true}") var urkundSubmissions: Boolean = defaults.urkundSubmissions
 
-	@Value("${features.scheduling.academicInformationImport:true}") var schedulingAcademicInformationImport = defaults.schedulingAcademicInformationImport
-	@Value("${features.scheduling.profilesImport:true}") var schedulingProfilesImport = defaults.schedulingProfilesImport
-	@Value("${features.scheduling.assignmentsImport:true}") var schedulingAssignmentsImport = defaults.schedulingAssignmentsImport
-	@Value("${features.scheduling.cleanupTemporaryFiles:true}") var schedulingCleanupTemporaryFiles = defaults.schedulingCleanupTemporaryFiles
-	@Value("${features.scheduling.auditIndex:true}") var schedulingAuditIndex = defaults.schedulingAuditIndex
-	@Value("${features.scheduling.profilesIndex:true}") var schedulingProfilesIndex = defaults.schedulingProfilesIndex
-	@Value("${features.scheduling.notificationsIndex:true}") var schedulingNotificationsIndex = defaults.schedulingNotificationsIndex
-	@Value("${features.scheduling.processScheduledNotifications:true}") var schedulingProcessScheduledNotifications = defaults.schedulingProcessScheduledNotifications
-	@Value("${features.scheduling.notificationEmails:true}") var schedulingNotificationEmails = defaults.schedulingNotificationEmails
-	@Value("${features.scheduling.jobService:true}") var schedulingJobService = defaults.schedulingJobService
-	@Value("${features.scheduling.fileSync:true}") var schedulingFileSync = defaults.schedulingFileSync
-	@Value("${features.scheduling.cleanupUnreferencedFiles:true}") var schedulingCleanupUnreferencedFiles = defaults.schedulingCleanupUnreferencedFiles
-	@Value("${features.scheduling.sanityCheckFilesystem:true}") var schedulingSanityCheckFilesystem = defaults.schedulingSanityCheckFilesystem
-	@Value("${features.scheduling.exportAttendanceToSits:true}") var schedulingExportAttendanceToSits = defaults.schedulingExportAttendanceToSits
-	@Value("${features.scheduling.attendance.updateSchemes:true}") var schedulingAttendanceUpdateSchemes = defaults.schedulingAttendanceUpdateSchemes
-	@Value("${features.scheduling.attendance.updateTotals:true}") var schedulingAttendanceUpdateTotals = defaults.schedulingAttendanceUpdateTotals
-	@Value("${features.scheduling.exportFeedbackToSits:true}") var schedulingExportFeedbackToSits = defaults.schedulingExportFeedbackToSits
-	@Value("${features.scheduling.triggers:true}") var schedulingTriggers = defaults.schedulingTriggers
-	@Value("${features.scheduling.objectStorageMigration:false}") var schedulingObjectStorageMigration = defaults.schedulingObjectStorageMigration
-	@Value("${features.scheduling.moduleListsImport:true}") var schedulingModuleListsImport = defaults.schedulingModuleListsImport
-	@Value("${features.scheduling.processNotificationListeners:true}") var schedulingProcessNotificationListeners = defaults.schedulingProcessNotificationListeners
-	@Value("${features.scheduling.monitoringPointMigration:false}") var schedulingMonitoringPointMigration = defaults.schedulingMonitoringPointMigration
-	@Value("${features.scheduling.groups.updateDepartmentSets:true}") var schedulingGroupsUpdateDepartmentSets = defaults.schedulingGroupsUpdateDepartmentSets
+	@Value("${features.scheduling.academicInformationImport:true}") var schedulingAcademicInformationImport: Boolean = defaults.schedulingAcademicInformationImport
+	@Value("${features.scheduling.profilesImport:true}") var schedulingProfilesImport: Boolean = defaults.schedulingProfilesImport
+	@Value("${features.scheduling.assignmentsImport:true}") var schedulingAssignmentsImport: Boolean = defaults.schedulingAssignmentsImport
+	@Value("${features.scheduling.cleanupTemporaryFiles:true}") var schedulingCleanupTemporaryFiles: Boolean = defaults.schedulingCleanupTemporaryFiles
+	@Value("${features.scheduling.auditIndex:true}") var schedulingAuditIndex: Boolean = defaults.schedulingAuditIndex
+	@Value("${features.scheduling.profilesIndex:true}") var schedulingProfilesIndex: Boolean = defaults.schedulingProfilesIndex
+	@Value("${features.scheduling.notificationsIndex:true}") var schedulingNotificationsIndex: Boolean = defaults.schedulingNotificationsIndex
+	@Value("${features.scheduling.processScheduledNotifications:true}") var schedulingProcessScheduledNotifications: Boolean = defaults.schedulingProcessScheduledNotifications
+	@Value("${features.scheduling.notificationEmails:true}") var schedulingNotificationEmails: Boolean = defaults.schedulingNotificationEmails
+	@Value("${features.scheduling.jobService:true}") var schedulingJobService: Boolean = defaults.schedulingJobService
+	@Value("${features.scheduling.fileSync:true}") var schedulingFileSync: Boolean = defaults.schedulingFileSync
+	@Value("${features.scheduling.cleanupUnreferencedFiles:true}") var schedulingCleanupUnreferencedFiles: Boolean = defaults.schedulingCleanupUnreferencedFiles
+	@Value("${features.scheduling.sanityCheckFilesystem:true}") var schedulingSanityCheckFilesystem: Boolean = defaults.schedulingSanityCheckFilesystem
+	@Value("${features.scheduling.exportAttendanceToSits:true}") var schedulingExportAttendanceToSits: Boolean = defaults.schedulingExportAttendanceToSits
+	@Value("${features.scheduling.attendance.updateSchemes:true}") var schedulingAttendanceUpdateSchemes: Boolean = defaults.schedulingAttendanceUpdateSchemes
+	@Value("${features.scheduling.attendance.updateTotals:true}") var schedulingAttendanceUpdateTotals: Boolean = defaults.schedulingAttendanceUpdateTotals
+	@Value("${features.scheduling.exportFeedbackToSits:true}") var schedulingExportFeedbackToSits: Boolean = defaults.schedulingExportFeedbackToSits
+	@Value("${features.scheduling.triggers:true}") var schedulingTriggers: Boolean = defaults.schedulingTriggers
+	@Value("${features.scheduling.objectStorageMigration:false}") var schedulingObjectStorageMigration: Boolean = defaults.schedulingObjectStorageMigration
+	@Value("${features.scheduling.moduleListsImport:true}") var schedulingModuleListsImport: Boolean = defaults.schedulingModuleListsImport
+	@Value("${features.scheduling.processNotificationListeners:true}") var schedulingProcessNotificationListeners: Boolean = defaults.schedulingProcessNotificationListeners
+	@Value("${features.scheduling.monitoringPointMigration:false}") var schedulingMonitoringPointMigration: Boolean = defaults.schedulingMonitoringPointMigration
+	@Value("${features.scheduling.groups.updateDepartmentSets:true}") var schedulingGroupsUpdateDepartmentSets: Boolean = defaults.schedulingGroupsUpdateDepartmentSets
 
 
-	@Value("${features.exams:true}") var exams = defaults.exams
-	@Value("${features.exams.grids:true}") var examGrids = defaults.examGrids
+	@Value("${features.exams:true}") var exams: Boolean = defaults.exams
+	@Value("${features.exams.grids:true}") var examGrids: Boolean = defaults.examGrids
 
 	private val bean = new BeanWrapperImpl(this)
-	def update(message: FeaturesMessage) = {
+	def update(message: FeaturesMessage): Features = {
 		val values = new BeanWrapperImpl(message)
 
 		for (pd <- values.getPropertyDescriptors if bean.getPropertyDescriptor(pd.getName).getWriteMethod != null)
@@ -283,9 +283,9 @@ class FeaturesMessage {
 
 class FeatureFlagListener extends QueueListener with InitializingBean with Logging {
 
-	var queue = Wire.named[Queue]("settingsSyncTopic")
-	var features = Wire.auto[Features]
-	var context = Wire.property("${module.context}")
+	var queue: Queue = Wire.named[Queue]("settingsSyncTopic")
+	var features: Features = Wire.auto[Features]
+	var context: String = Wire.property("${module.context}")
 
 	override def isListeningToQueue = true
 	override def onReceive(item: Any) {

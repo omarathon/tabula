@@ -6,7 +6,7 @@ import org.springframework.web.bind.annotation.{ModelAttribute, PathVariable, Re
 import uk.ac.warwick.tabula.JavaImports._
 import uk.ac.warwick.tabula.commands.Appliable
 import uk.ac.warwick.tabula.commands.reports.smallgroups._
-import uk.ac.warwick.tabula.permissions.{Permissions, Permission}
+import uk.ac.warwick.tabula.permissions.{Permission, Permissions}
 import uk.ac.warwick.tabula.services.{AutowiringMaintenanceModeServiceComponent, AutowiringModuleAndDepartmentServiceComponent, AutowiringUserSettingsServiceComponent}
 import uk.ac.warwick.tabula.web.controllers.{AcademicYearScopedController, DepartmentScopedController}
 import uk.ac.warwick.tabula.data.model.Department
@@ -18,6 +18,7 @@ import uk.ac.warwick.tabula.{AcademicYear, JsonHelper}
 import uk.ac.warwick.util.csv.GoodCsvDocument
 
 import scala.collection.JavaConverters._
+import scala.xml.Elem
 
 abstract class AbstractSmallGroupsByModuleReportController extends ReportsController
 	with DepartmentScopedController with AcademicYearScopedController with AutowiringUserSettingsServiceComponent with AutowiringModuleAndDepartmentServiceComponent
@@ -32,7 +33,7 @@ abstract class AbstractSmallGroupsByModuleReportController extends ReportsContro
 	override val departmentPermission: Permission = Permissions.Department.Reports
 
 	@ModelAttribute("activeDepartment")
-	override def activeDepartment(@PathVariable department: Department) = retrieveActiveDepartment(Option(department))
+	override def activeDepartment(@PathVariable department: Department): Option[Department] = retrieveActiveDepartment(Option(department))
 
 	@ModelAttribute("activeAcademicYear")
 	override def activeAcademicYear(@PathVariable academicYear: AcademicYear): Option[AcademicYear] = retrieveActiveAcademicYear(Option(academicYear))
@@ -53,7 +54,7 @@ abstract class AbstractSmallGroupsByModuleReportController extends ReportsContro
 		@ModelAttribute("filteredAttendanceCommand") filteredAttendanceCmd: Appliable[AllSmallGroupsReportCommandResult],
 		@PathVariable department: Department,
 		@PathVariable academicYear: AcademicYear
-	) = {
+	): Mav = {
 		cmd.setFilteredAttendance(filteredAttendanceCmd.apply())
 		val result = cmd.apply()
 		val allStudents: Seq[Map[String, String]] = result.studentDatas.map(studentData =>
@@ -91,7 +92,7 @@ abstract class AbstractSmallGroupsByModuleReportController extends ReportsContro
 		@PathVariable department: Department,
 		@PathVariable academicYear: AcademicYear,
 		@RequestParam data: String
-	) = {
+	): CSVView = {
 		val processorResult = getProcessorResult(processor, data)
 
 		val writer = new StringWriter
@@ -112,7 +113,7 @@ abstract class AbstractSmallGroupsByModuleReportController extends ReportsContro
 		@PathVariable department: Department,
 		@PathVariable academicYear: AcademicYear,
 		@RequestParam data: String
-	) = {
+	): ExcelView = {
 		val processorResult = getProcessorResult(processor, data)
 
 		val workbook = new SmallGroupsByModuleReportExporter(processorResult, department).toXLSX
@@ -126,7 +127,7 @@ abstract class AbstractSmallGroupsByModuleReportController extends ReportsContro
 		@PathVariable department: Department,
 		@PathVariable academicYear: AcademicYear,
 		@RequestParam data: String
-	) = {
+	): Elem = {
 		val processorResult = getProcessorResult(processor, data)
 
 		new SmallGroupsByModuleReportExporter(processorResult, department).toXML

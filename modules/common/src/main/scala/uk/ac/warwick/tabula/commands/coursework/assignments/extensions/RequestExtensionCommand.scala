@@ -1,6 +1,6 @@
 package uk.ac.warwick.tabula.commands.coursework.assignments.extensions
 
-import uk.ac.warwick.tabula.data.model.notifications.coursework.{ExtensionRequestModifiedNotification, ExtensionRequestCreatedNotification}
+import uk.ac.warwick.tabula.data.model.notifications.coursework.{ExtensionRequestCreatedNotification, ExtensionRequestModifiedNotification, ExtensionRequestNotification}
 
 import scala.collection.JavaConversions._
 import uk.ac.warwick.tabula.commands._
@@ -19,10 +19,11 @@ import uk.ac.warwick.tabula.services.{AutowiringRelationshipServiceComponent, Re
 import uk.ac.warwick.tabula.validators.WithinYears
 import uk.ac.warwick.tabula.system.permissions.{PermissionsChecking, PermissionsCheckingMethods, RequiresPermissionsChecking}
 import uk.ac.warwick.tabula.JavaImports._
+
 import scala.collection.mutable
 
 object RequestExtensionCommand {
-	def apply (module: Module, assignment: Assignment, submitter: CurrentUser, action: String) = {
+	def apply (module: Module, assignment: Assignment, submitter: CurrentUser, action: String): RequestExtensionCommandInternal with ComposableCommand[Extension] with AutowiringRelationshipServiceComponent with RequestExtensionCommandDescription with RequestExtensionCommandPermission with RequestExtensionCommandValidation with RequestExtensionCommandNotification with HibernateExtensionPersistenceComponent = {
 		new RequestExtensionCommandInternal(module, assignment, submitter) with
 			ComposableCommand[Extension] with
 			AutowiringRelationshipServiceComponent with
@@ -42,11 +43,11 @@ class RequestExtensionCommandInternal(val module: Module, val assignment:Assignm
 
 	self: RelationshipServiceComponent with ExtensionPersistenceComponent =>
 
-	override def onBind(result:BindingResult) = transactional() {
+	override def onBind(result:BindingResult): Unit = transactional() {
 		file.onBind(result)
 	}
 
-	override def applyInternal() = transactional() {
+	override def applyInternal(): Extension = transactional() {
 		val universityId = submitter.apparentUser.getWarwickId
 		val extension = assignment.findExtension(universityId).getOrElse({
 			val newExtension = new Extension(universityId)
@@ -144,8 +145,8 @@ trait RequestExtensionCommandNotification extends Notifies[Extension, Option[Ext
 	self: RequestExtensionCommandState with RelationshipServiceComponent =>
 
 	val basicInfo = Map("moduleManagers" -> module.managers.users)
-	val studentRelationships = relationshipService.allStudentRelationshipTypes
-	val extraInfo = basicInfo ++ submitter.profile.collect { case student: StudentMember => student }.flatMap { _.mostSignificantCourseDetails.map { scd =>
+	val studentRelationships: Seq[StudentRelationshipType] = relationshipService.allStudentRelationshipTypes
+	val extraInfo: Map[String, Object] = basicInfo ++ submitter.profile.collect { case student: StudentMember => student }.flatMap { _.mostSignificantCourseDetails.map { scd =>
 		val relationships = studentRelationships.map(x => (x.description, relationshipService.findCurrentRelationships(x,scd.student))).toMap
 
 		//Pick only the parts of scd required since passing the whole object fails due to the session not being available to load lazy objects
@@ -157,7 +158,7 @@ trait RequestExtensionCommandNotification extends Notifies[Extension, Option[Ext
 		)
 	}}.getOrElse(Map())
 
-	def emit(extension: Extension) = {
+	def emit(extension: Extension): Seq[ExtensionRequestNotification] = {
 		val agent = submitter.apparentUser
 		val assignment = extension.assignment
 		val baseNotification = if (modified){

@@ -1,8 +1,9 @@
 package uk.ac.warwick.tabula.data
 
-import uk.ac.warwick.tabula.{PersistenceTestBase, Fixtures}
+import uk.ac.warwick.tabula.{Fixtures, PersistenceTestBase}
 import org.junit.Before
 import org.joda.time.DateTime.now
+import uk.ac.warwick.tabula.data.model.Module
 
 class ModuleDaoTest extends PersistenceTestBase {
 
@@ -15,17 +16,17 @@ class ModuleDaoTest extends PersistenceTestBase {
 
 	trait Context {
 		// Already inserted by data.sql
-		val cs108 = dao.getByCode("cs108").get
-		val cs240 = dao.getByCode("cs240").get
-		val cs241 = dao.getByCode("cs241").get
-		val cs242 = dao.getByCode("cs242").get
+		val cs108: Module = dao.getByCode("cs108").get
+		val cs240: Module = dao.getByCode("cs240").get
+		val cs241: Module = dao.getByCode("cs241").get
+		val cs242: Module = dao.getByCode("cs242").get
 	}
 
 	@Test def crud { transactional { tx =>
 		new Context {
 			dao.allModules should be (Seq(cs108, cs240, cs241, cs242))
 
-			val cs333 = Fixtures.module("cs333")
+			val cs333: Module = Fixtures.module("cs333")
 			dao.saveOrUpdate(cs333)
 
 			dao.allModules should be (Seq(cs108, cs240, cs241, cs242, cs333))

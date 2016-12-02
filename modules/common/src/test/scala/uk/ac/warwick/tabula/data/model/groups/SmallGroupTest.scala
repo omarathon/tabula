@@ -10,26 +10,26 @@ import scala.util.Random
 
 class SmallGroupTest extends TestBase with Mockito {
 
-  val event = newEventWithMockedServices
+  val event: SmallGroupEvent = newEventWithMockedServices
 
-  val equivalentEvent = newEventWithMockedServices
+  val equivalentEvent: SmallGroupEvent = newEventWithMockedServices
 
-  val notEquivalentEvent = newEventWithMockedServices
+  val notEquivalentEvent: SmallGroupEvent = newEventWithMockedServices
   notEquivalentEvent.day = DayOfWeek.Monday
 
-	val sessionFactory = smartMock[SessionFactory]
-	val session = smartMock[Session]
+	val sessionFactory: SessionFactory = smartMock[SessionFactory]
+	val session: Session = smartMock[Session]
 	sessionFactory.getCurrentSession returns session
 	sessionFactory.openSession() returns session
 
-	def newSmallGroupWithMockedServices = {
+	def newSmallGroupWithMockedServices: SmallGroup = {
 		val group = new SmallGroup()
 		group.permissionsService = mock[PermissionsService]
 		group.smallGroupService = None
 		group
 	}
 
-	def newEventWithMockedServices = {
+	def newEventWithMockedServices: SmallGroupEvent = {
 		val event = new SmallGroupEvent()
 		event.smallGroupService = None
 		event.permissionsService = mock[PermissionsService]
@@ -87,7 +87,7 @@ class SmallGroupTest extends TestBase with Mockito {
     // can't use a mockito mock because the final equals method on GeneratedId causes mockito to
     // blow up
     val event:SmallGroupEvent = new SmallGroupEvent{
-      override def duplicateTo(g: SmallGroup, transient: Boolean) = clonedEvent
+      override def duplicateTo(g: SmallGroup, transient: Boolean): SmallGroupEvent = clonedEvent
     }
 
     val sourceSet = new SmallGroupSet

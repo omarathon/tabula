@@ -6,6 +6,8 @@ import uk.ac.warwick.tabula.permissions.Permissions
 import uk.ac.warwick.tabula.services.{AutowiringMeetingRecordServiceComponent, AutowiringRelationshipServiceComponent, MeetingRecordServiceComponent, RelationshipServiceComponent}
 import uk.ac.warwick.tabula.system.permissions.{PermissionsChecking, PermissionsCheckingMethods, RequiresPermissionsChecking}
 
+import scala.collection.immutable.TreeMap
+
 object ViewUnconfirmedMeetingRecordsCommand {
 	def apply(department: Department, relationshipType: StudentRelationshipType) =
 		new ViewUnconfirmedMeetingRecordsCommandInternal(department, relationshipType)
@@ -23,7 +25,7 @@ class ViewUnconfirmedMeetingRecordsCommandInternal(val department: Department, v
 
 	self: RelationshipServiceComponent with MeetingRecordServiceComponent =>
 
-	override def applyInternal() = {
+	override def applyInternal(): TreeMap[String, Int] = {
 		val relationshipsByAgent = relationshipService.listAgentRelationshipsByDepartment(relationshipType, department)
 		val allRelationships = relationshipsByAgent.values.flatten.toSeq
 		val counts = meetingRecordService.unconfirmedScheduledCount(allRelationships)

@@ -3,6 +3,7 @@ package uk.ac.warwick.tabula.data.model.notifications.attendance
 import javax.persistence.{DiscriminatorValue, Entity}
 
 import uk.ac.warwick.spring.Wire
+import uk.ac.warwick.tabula.AcademicYear
 import uk.ac.warwick.tabula.attendance.web.Routes
 import uk.ac.warwick.tabula.data.model._
 import uk.ac.warwick.tabula.data.model.attendance.AttendanceMonitoringCheckpointTotal
@@ -17,16 +18,16 @@ abstract class MissedAttendanceMonitoringCheckpointsNotification
 	def level: Int
 
 	@transient
-	lazy val department = item.entity.department
+	lazy val department: Department = item.entity.department
 	@transient
-	lazy val student = item.entity.student
+	lazy val student: StudentMember = item.entity.student
 	@transient
-	lazy val academicYear = item.entity.academicYear
+	lazy val academicYear: AcademicYear = item.entity.academicYear
 
 	@transient
-	var moduleAndDepartmentService = Wire[ModuleAndDepartmentService]
+	var moduleAndDepartmentService: ModuleAndDepartmentService = Wire[ModuleAndDepartmentService]
 	@transient
-	var relationshipService = Wire[RelationshipService]
+	var relationshipService: RelationshipService = Wire[RelationshipService]
 
 	@transient
 	override def verb: String = "view"
@@ -59,7 +60,7 @@ abstract class MissedAttendanceMonitoringCheckpointsNotification
 class MissedAttendanceMonitoringCheckpointsLowNotification extends MissedAttendanceMonitoringCheckpointsNotification {
 
 	@transient
-	override lazy val level = department.missedMonitoringPointsNotificationLevels.low
+	override lazy val level: Int = department.missedMonitoringPointsNotificationLevels.low
 
 }
 
@@ -68,7 +69,7 @@ class MissedAttendanceMonitoringCheckpointsLowNotification extends MissedAttenda
 class MissedAttendanceMonitoringCheckpointsMediumNotification extends MissedAttendanceMonitoringCheckpointsNotification {
 
 	@transient
-	override lazy val level = department.missedMonitoringPointsNotificationLevels.medium
+	override lazy val level: Int = department.missedMonitoringPointsNotificationLevels.medium
 
 }
 
@@ -77,6 +78,6 @@ class MissedAttendanceMonitoringCheckpointsMediumNotification extends MissedAtte
 class MissedAttendanceMonitoringCheckpointsHighNotification extends MissedAttendanceMonitoringCheckpointsNotification {
 
 	@transient
-	override lazy val level = department.missedMonitoringPointsNotificationLevels.high
+	override lazy val level: Int = department.missedMonitoringPointsNotificationLevels.high
 
 }

@@ -27,7 +27,7 @@ object ConvertScheduledMeetingRecordCommand {
 trait ConvertScheduledMeetingRecordCommandPopulate	extends PopulateOnForm {
 	self: ConvertScheduledMeetingRecordState =>
 
-	override def populate() = {
+	override def populate(): Unit = {
 		title = meetingRecord.title
 		description = meetingRecord.description
 		meetingDateTime = meetingRecord.meetingDate
@@ -42,7 +42,7 @@ class ConvertScheduledMeetingRecordCommand (val creator: Member, val meetingReco
 
 	self: MeetingRecordServiceComponent with FileAttachmentServiceComponent =>
 
-	def applyInternal() = {
+	def applyInternal(): MeetingRecord = {
 		val newMeeting = createCommand.apply()
 		newMeeting.attachments.foreach(_.meetingRecord = newMeeting)
 
@@ -74,7 +74,7 @@ trait ConvertScheduledMeetingRecordState {
 	var file: UploadedFile = new UploadedFile
 	var attachedFiles:JList[FileAttachment] = _
 
-	var attachmentTypes = Seq[String]()
+	var attachmentTypes: Seq[String] = Seq[String]()
 
 	var posted: Boolean = false
 

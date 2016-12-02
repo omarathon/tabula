@@ -79,7 +79,7 @@ class OldOnlineMarkerFeedbackFormController extends OldCourseworkController {
 class OldOnlineMarkerFeedbackFormControllerCurrentUser extends OldCourseworkController {
 
 	@RequestMapping
-	def redirect(@PathVariable assignment: Assignment, @PathVariable student: User, currentUser: CurrentUser) = {
+	def redirect(@PathVariable assignment: Assignment, @PathVariable student: User, currentUser: CurrentUser): Mav = {
 		Redirect(Routes.admin.assignment.markerFeedback.onlineFeedback.student(assignment, currentUser.apparentUser, student))
 	}
 }

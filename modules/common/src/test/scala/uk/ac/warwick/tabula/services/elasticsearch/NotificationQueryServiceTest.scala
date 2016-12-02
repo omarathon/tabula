@@ -8,11 +8,14 @@ import uk.ac.warwick.tabula.data.model.NotificationPriority._
 import uk.ac.warwick.tabula.data.model._
 import uk.ac.warwick.tabula.services.ActivityStreamRequest
 import uk.ac.warwick.tabula.{ElasticsearchTestBase, Fixtures, Mockito}
+import uk.ac.warwick.userlookup.User
+
+import scala.collection.immutable.IndexedSeq
 
 class NotificationQueryServiceTest extends ElasticsearchTestBase with Mockito {
 
 	val indexName = "notifications"
-	val indexType = new NotificationIndexType {}.indexType
+	val indexType: String = new NotificationIndexType {}.indexType
 
 	private trait Fixture {
 		val queryService = new NotificationQueryServiceImpl
@@ -24,14 +27,14 @@ class NotificationQueryServiceTest extends ElasticsearchTestBase with Mockito {
 	}
 
 	private trait IndexedDataFixture extends Fixture {
-		val agent = Fixtures.user(userId="abc")
-		val recipient = Fixtures.user(userId="xyz")
-		val otherRecipient = Fixtures.user(userId="xyo")
+		val agent: User = Fixtures.user(userId="abc")
+		val recipient: User = Fixtures.user(userId="xyz")
+		val otherRecipient: User = Fixtures.user(userId="xyo")
 
-		val now = DateTime.now
+		val now: DateTime = DateTime.now
 
 		// Selection of notifications intended for a couple of different recipients
-		lazy val items = for (i <- 1 to 100) yield {
+		lazy val items: IndexedSeq[IndexedNotification] = for (i <- 1 to 100) yield {
 			val notification =
 				if (i % 2 == 0) {
 					new HeronWarningNotification
@@ -57,7 +60,7 @@ class NotificationQueryServiceTest extends ElasticsearchTestBase with Mockito {
 			IndexedNotification(notification, theRecipient)
 		}
 
-		lazy val dismissedItem = {
+		lazy val dismissedItem: IndexedNotification = {
 			val heron2 = new Heron(recipient)
 			val notification = Notification.init(new HeronWarningNotification, agent, heron2)
 			notification.id = "nid101"
@@ -78,10 +81,10 @@ class NotificationQueryServiceTest extends ElasticsearchTestBase with Mockito {
 		search in indexName / indexType term("notificationType", "HeronDefeat") should haveTotalHits(50)
 
 		// The IDs of notifications we expect our recipient to get.
-		lazy val recipientNotifications = items.filter { _.recipient == recipient }
-		lazy val expectedIds = recipientNotifications.map { _.notification.id }
-		lazy val criticalIds = recipientNotifications.filter { _.notification.priority == Critical }.map { _.notification.id }
-		lazy val warningIds =
+		lazy val recipientNotifications: IndexedSeq[IndexedNotification] = items.filter { _.recipient == recipient }
+		lazy val expectedIds: IndexedSeq[String] = recipientNotifications.map { _.notification.id }
+		lazy val criticalIds: IndexedSeq[String] = recipientNotifications.filter { _.notification.priority == Critical }.map { _.notification.id }
+		lazy val warningIds: IndexedSeq[String] =
 			recipientNotifications.filter {i => i.notification.priority == Warning || i.notification.priority == Critical}
 				.map { _.notification.id }
 	}
@@ -111,12 +114,12 @@ class NotificationQueryServiceTest extends ElasticsearchTestBase with Mockito {
 	@Test
 	def userStream(): Unit = new IndexedDataFixture {
 		val request = ActivityStreamRequest(user = recipient, max = 20, lastUpdatedDate = None)
-		val page1 = queryService.userStream(request)
+		val page1: PagedNotifications = queryService.userStream(request)
 		page1.items.size should be (20)
 
 		page1.items.map { _.id } should be (expectedIds.reverse.slice(0, 20))
 
-		val page2 = queryService.userStream(request.copy(lastUpdatedDate = page1.lastUpdatedDate))
+		val page2: PagedNotifications = queryService.userStream(request.copy(lastUpdatedDate = page1.lastUpdatedDate))
 		page2.items.size should be (20)
 
 		page2.items.map { _.id } should be (expectedIds.reverse.slice(20, 40))
@@ -138,17 +141,17 @@ class NotificationQueryServiceTest extends ElasticsearchTestBase with Mockito {
 	def priorityFilteredUserStream(): Unit = new IndexedDataFixture {
 		// show critical items only - should be 10 items
 		val criticalRequest = ActivityStreamRequest(user = recipient, priority = 0.75, max = 20, lastUpdatedDate = None)
-		val page = queryService.userStream(criticalRequest)
+		val page: PagedNotifications = queryService.userStream(criticalRequest)
 		page.items.size should be (10)
 		page.items.map { _.id } should be (criticalIds.reverse)
 
 		// show >= warning items only - should be 30 items
 		val warningRequest = ActivityStreamRequest(user = recipient, priority = 0.5, max = 20, lastUpdatedDate = None)
-		val page1 = queryService.userStream(warningRequest)
+		val page1: PagedNotifications = queryService.userStream(warningRequest)
 		page1.items.size should be (20)
 		page1.items.map { _.id } should be (warningIds.reverse.slice(0, 20))
 
-		val page2 = queryService.userStream(warningRequest.copy(lastUpdatedDate = page1.lastUpdatedDate))
+		val page2: PagedNotifications = queryService.userStream(warningRequest.copy(lastUpdatedDate = page1.lastUpdatedDate))
 		page2.items.size should be (10)
 		page2.items.map { _.id } should be (warningIds.reverse.slice(20, 30))
 	}

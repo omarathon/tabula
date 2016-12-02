@@ -9,7 +9,7 @@ import uk.ac.warwick.tabula.data.model.{AssignmentFeedback, Feedback}
 class AssignmentFeedbackIdConverterTest extends TestBase with Mockito {
 
 	val converter = new AssignmentFeedbackIdConverter
-	var service = mock[FeedbackDao]
+	var service: FeedbackDao = mock[FeedbackDao]
 	converter.service = service
 
 	@Test def validInput {

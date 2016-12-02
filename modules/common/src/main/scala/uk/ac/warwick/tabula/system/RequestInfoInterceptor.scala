@@ -15,7 +15,7 @@ import uk.ac.warwick.tabula.helpers.StringUtils._
 	*/
 class EarlyRequestInfoInterceptor extends HandlerInterceptorAdapter {
 
-	override def preHandle(request: HttpServletRequest, response: HttpServletResponse, obj: Any) = {
+	override def preHandle(request: HttpServletRequest, response: HttpServletResponse, obj: Any): Boolean = {
 		implicit val req = request
 		EarlyRequestInfo.open(new EarlyRequestInfoImpl())
 		true
@@ -32,7 +32,7 @@ class RequestInfoInterceptor extends HandlerInterceptorAdapter {
 	@Autowired var maintenance: MaintenanceModeService = _
 	@Autowired var emergencyMessage: EmergencyMessageService = _
 
-	override def preHandle(request: HttpServletRequest, response: HttpServletResponse, obj: Any) = {
+	override def preHandle(request: HttpServletRequest, response: HttpServletResponse, obj: Any): Boolean = {
 		implicit val req = request
 		RequestInfo.open(fromAttributeElse(newRequestInfo(request, maintenance.enabled, emergencyMessage)))
 		true
@@ -62,7 +62,7 @@ object RequestInfoInterceptor {
 	val RequestInfoAttribute = "APP_REQUEST_INFO_ATTRIBUTE"
 	val UserAgentHeader = "User-Agent"
 
-	def newRequestInfo(request: HttpServletRequest, isMaintenance: Boolean = false, emergencyMessageService: EmergencyMessageService) = {
+	def newRequestInfo(request: HttpServletRequest, isMaintenance: Boolean = false, emergencyMessageService: EmergencyMessageService): RequestInfo = {
 		// Transfer cache from an EarlyAccessInfo if one exists.
 		val cache = EarlyRequestInfo.fromThread map { _.requestLevelCache } getOrElse { new RequestLevelCache() }
 

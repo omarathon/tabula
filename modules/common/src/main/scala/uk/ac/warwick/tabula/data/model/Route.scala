@@ -32,7 +32,7 @@ class Route extends GeneratedId with Serializable with PermissionsTarget {
 	var adminDepartment: Department = _
 
 	@deprecated("TAB-2589 to be explicit, this should use adminDepartment or teachingDepartments", "84")
-	def department = adminDepartment
+	def department: Department = adminDepartment
 
 	@deprecated("TAB-2589 to be explicit, this should use adminDepartment or teachingDepartments", "84")
 	def department_=(d: Department) { adminDepartment = d }
@@ -52,11 +52,11 @@ class Route extends GeneratedId with Serializable with PermissionsTarget {
 
 	var active: Boolean = _
 
-	override def toString = "Route[" + code + "]"
+	override def toString: String = "Route[" + code + "]"
 
-	def permissionsParents = teachingDepartments.toStream
-	override def humanReadableId = code.toUpperCase + " " + name
-	override def urlSlug = code
+	def permissionsParents: Stream[Department] = teachingDepartments.toStream
+	override def humanReadableId: String = code.toUpperCase + " " + name
+	override def urlSlug: String = code
 
 	var missingFromImportSince: DateTime = _
 

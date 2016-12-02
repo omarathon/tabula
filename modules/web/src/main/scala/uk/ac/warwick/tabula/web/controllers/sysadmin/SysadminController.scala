@@ -13,6 +13,7 @@ import uk.ac.warwick.tabula.commands.sysadmin.GodModeCommand
 import uk.ac.warwick.tabula.services._
 import uk.ac.warwick.tabula.validators.WithinYears
 import uk.ac.warwick.tabula.web.Cookies._
+import uk.ac.warwick.tabula.web.Mav
 import uk.ac.warwick.tabula.web.controllers.BaseController
 import uk.ac.warwick.userlookup.UserLookupInterface
 
@@ -21,8 +22,8 @@ import uk.ac.warwick.userlookup.UserLookupInterface
  */
 
 abstract class BaseSysadminController extends BaseController with SysadminBreadcrumbs {
-	var moduleService = Wire.auto[ModuleAndDepartmentService]
-	var userLookup = Wire.auto[UserLookupInterface]
+	var moduleService: ModuleAndDepartmentService = Wire.auto[ModuleAndDepartmentService]
+	var userLookup: UserLookupInterface = Wire.auto[UserLookupInterface]
 
 	def redirectToHome = Redirect("/sysadmin/")
 }
@@ -43,7 +44,7 @@ class SysadminController extends BaseSysadminController
 	@ModelAttribute("blankForm") def blankForm = new BlankForm
 
 	@RequestMapping
-	def home = Mav("sysadmin/home")
+	def home: Mav = Mav("sysadmin/home")
 		.addObjects(
 			"maintenanceModeEnabled" -> maintenanceModeService.enabled,
 			"emergencyMessageEnabled" -> emergencyMessageService.enabled
@@ -55,7 +56,7 @@ class SysadminController extends BaseSysadminController
 class GodModeController extends BaseSysadminController {
 
 	@RequestMapping
-	def submit(@Valid cmd: GodModeCommand, response: HttpServletResponse) = {
+	def submit(@Valid cmd: GodModeCommand, response: HttpServletResponse): Mav = {
 		for (cookie <- cmd.apply()) response.addCookie(cookie)
 		redirectToHome
 	}

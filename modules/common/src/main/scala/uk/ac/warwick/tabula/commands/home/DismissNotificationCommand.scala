@@ -21,7 +21,7 @@ object DismissNotificationCommand {
 abstract class DismissNotificationCommandInternal(val notifications: Seq[Notification[_,_]], val dismiss: Boolean, val user: User)
 		extends CommandInternal[Seq[Activity[_]]] with DismissNotificationCommandState with NotificationServiceComponent{
 
-	def applyInternal() = {
+	def applyInternal(): Seq[Activity[Any]] = {
 		if (dismiss) {
 			notifications.foreach(_.dismiss(user))
 		} else {

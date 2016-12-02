@@ -36,9 +36,9 @@ object RevokeRoleCommand {
 class RevokeRoleCommandInternal[A <: PermissionsTarget : ClassTag](val scope: A) extends CommandInternal[GrantedRole[A]] with RevokeRoleCommandState[A] {
 	self: PermissionsServiceComponent with UserLookupComponent =>
 
-	lazy val grantedRole = permissionsService.getGrantedRole(scope, roleDefinition)
+	lazy val grantedRole: Option[GrantedRole[A]] = permissionsService.getGrantedRole(scope, roleDefinition)
 
-	def applyInternal() = transactional() {
+	def applyInternal(): GrantedRole[A] = transactional() {
 		grantedRole.foreach { role =>
 			usercodes.asScala.foreach(role.users.knownType.removeUserId)
 
@@ -108,7 +108,7 @@ trait RevokeRoleCommandPermissions extends RequiresPermissionsChecking with Perm
 trait RevokeRoleCommandDescription[A <: PermissionsTarget] extends Describable[GrantedRole[A]] {
 	self: RevokeRoleCommandState[A] =>
 
-	def describe(d: Description) = d.properties(
+	def describe(d: Description): Unit = d.properties(
 		"scope" -> (scope.getClass.getSimpleName + "[" + scope.id + "]"),
 		"usercodes" -> usercodes.asScala.mkString(","),
 		"roleDefinition" -> roleDefinition.getName)

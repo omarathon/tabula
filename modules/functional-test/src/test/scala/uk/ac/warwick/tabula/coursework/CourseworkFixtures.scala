@@ -2,7 +2,7 @@ package uk.ac.warwick.tabula.coursework
 
 import scala.collection.JavaConverters._
 import org.joda.time.DateTime
-import org.openqa.selenium.By
+import org.openqa.selenium.{By, WebElement}
 import uk.ac.warwick.tabula.{BrowserTest, FunctionalTestAcademicYear, LoginDetails}
 import uk.ac.warwick.tabula.web.{FeaturesDriver, FixturesDriver}
 import org.scalatest.exceptions.TestFailedException
@@ -82,7 +82,7 @@ trait CourseworkFixtures extends BrowserTest with FeaturesDriver with FixturesDr
 	}
 
 
-	def as[T](user: LoginDetails)(fn: => T) = {
+	def as[T](user: LoginDetails)(fn: => T): T = {
 		currentUser = user
 		signIn as user to Path("/coursework")
 
@@ -96,7 +96,7 @@ trait CourseworkFixtures extends BrowserTest with FeaturesDriver with FixturesDr
 			settings: Seq[String] => Unit = allFeatures,
 			members: Seq[String] = Seq(P.Student1.usercode, P.Student2.usercode),
 			managers: Seq[String] = Seq(),
-			assistants: Seq[String] = Seq())(callback: String => Unit) = as(P.Admin1) {
+			assistants: Seq[String] = Seq())(callback: String => Unit): Unit = as(P.Admin1) {
 		click on linkText("Go to the Test Services admin page")
 		verifyPageLoaded {
 			// wait for the page to load
@@ -179,7 +179,7 @@ trait CourseworkFixtures extends BrowserTest with FeaturesDriver with FixturesDr
 		callback(assignmentId)
 	}
 
-	def addSingleMarkingWorkflow()(callback: String => Unit) = as(P.Admin1) {
+	def addSingleMarkingWorkflow()(callback: String => Unit): Unit = as(P.Admin1) {
 
 		click on linkText("Go to the Test Services admin page")
 		verifyPageLoaded {
@@ -222,7 +222,7 @@ trait CourseworkFixtures extends BrowserTest with FeaturesDriver with FixturesDr
 	}
 
 
-	def submitAssignment(user: LoginDetails, moduleCode: String, assignmentName: String, assignmentId: String, file: String, mustBeEnrolled: Boolean = true) = as(user) {
+	def submitAssignment(user: LoginDetails, moduleCode: String, assignmentName: String, assignmentId: String, file: String, mustBeEnrolled: Boolean = true): Unit = as(user) {
 		if (mustBeEnrolled) {
 			linkText(assignmentName).findElement should be ('defined)
 
@@ -251,7 +251,7 @@ trait CourseworkFixtures extends BrowserTest with FeaturesDriver with FixturesDr
 	}
 
 
-	def requestExtension(user: LoginDetails, moduleCode: String, assignmentName: String, assignmentId: String, requestedDate: DateTime, mustBeEnrolled: Boolean = true) = as(user) {
+	def requestExtension(user: LoginDetails, moduleCode: String, assignmentName: String, assignmentId: String, requestedDate: DateTime, mustBeEnrolled: Boolean = true): Unit = as(user) {
 		if (mustBeEnrolled) {
 			linkText(assignmentName).findElement should be ('defined)
 
@@ -346,7 +346,7 @@ trait CourseworkFixtures extends BrowserTest with FeaturesDriver with FixturesDr
 
 	}
 
-	def getModuleInfo(moduleCode: String) = {
+	def getModuleInfo(moduleCode: String): WebElement = {
 		val moduleInfoBlocks = findAll(className("module-info"))
 
 		if (moduleInfoBlocks.isEmpty)
@@ -360,7 +360,7 @@ trait CourseworkFixtures extends BrowserTest with FeaturesDriver with FixturesDr
 		matchingModule.next().underlying
 	}
 
-	def getAssignmentInfo(moduleCode: String, assignmentName: String) = {
+	def getAssignmentInfo(moduleCode: String, assignmentName: String): WebElement = {
 		val module = getModuleInfo(moduleCode)
 		if (module.getAttribute("class").indexOf("collapsible") != -1 && module.getAttribute("class").indexOf("expanded") == -1) {
 			click on module.findElement(By.className("section-title"))
@@ -383,7 +383,7 @@ trait CourseworkFixtures extends BrowserTest with FeaturesDriver with FixturesDr
 		matchingAssignment.head
 	}
 
-	def getInputByLabel(label: String) =
+	def getInputByLabel(label: String): Option[WebElement] =
 		findAll(tagName("label")).find(_.underlying.getText.trim == label) map { _.underlying.getAttribute("for") } map { id(_).webElement }
 
 }

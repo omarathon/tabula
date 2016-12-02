@@ -9,7 +9,7 @@ import uk.ac.warwick.tabula.data.model.permissions.GloballyGrantedPermission
 @Component
 class DatabaseBackedPermissionsProvider extends ScopelessPermissionsProvider {
 
-	var service = Wire[PermissionsService]
+	var service: PermissionsService = Wire[PermissionsService]
 
 	def getPermissionsFor(user: CurrentUser): Stream[PermissionDefinition] =
 		service.getGrantedPermissionsFor[PermissionsTarget](user) map {

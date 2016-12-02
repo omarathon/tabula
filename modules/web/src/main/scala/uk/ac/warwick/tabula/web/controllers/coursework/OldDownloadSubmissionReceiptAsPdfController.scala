@@ -29,7 +29,7 @@ class OldDownloadSubmissionReceiptAsPdfController extends OldCourseworkControlle
 	): DownloadSubmissionReceiptAsPdfCommand = DownloadSubmissionReceiptAsPdfCommand(module, assignment, user, currentMember)
 
 	@RequestMapping
-	def viewAsPdf(command: DownloadSubmissionReceiptAsPdfCommand, user: CurrentUser) = {
+	def viewAsPdf(command: DownloadSubmissionReceiptAsPdfCommand, user: CurrentUser): PDFView with FreemarkerXHTMLPDFGeneratorComponent with AutowiredTextRendererComponent with PhotosWarwickMemberPhotoUrlGeneratorComponent = {
 		new PDFView(
 			"submission-receipt.pdf",
 			s"/WEB-INF/freemarker/$urlPrefix/submit/submission-receipt.ftl",
@@ -58,7 +58,7 @@ class OldDownloadSubmissionReceiptForStudentAsPdfController extends OldCoursewor
 	 ): DownloadSubmissionReceiptAsPdfCommand = DownloadSubmissionReceiptAsPdfCommand(module, assignment, user, studentMember)
 
 	@RequestMapping
-	def viewAsPdf(command: DownloadSubmissionReceiptAsPdfCommand, user: CurrentUser) = {
+	def viewAsPdf(command: DownloadSubmissionReceiptAsPdfCommand, user: CurrentUser): PDFView with FreemarkerXHTMLPDFGeneratorComponent with AutowiredTextRendererComponent with PhotosWarwickMemberPhotoUrlGeneratorComponent = {
 		new PDFView(
 			"submission-receipt.pdf",
 			s"/WEB-INF/freemarker/$urlPrefix/submit/submission-receipt.ftl",
@@ -86,7 +86,7 @@ class DownloadSubmissionReceiptAsPdfCommandInternal(val module: Module, val assi
 		with DownloadSubmissionReceiptAsPdfState {
 	self: SubmissionServiceComponent =>
 
-	override def applyInternal() = submissionOption.getOrElse(throw new IllegalStateException)
+	override def applyInternal(): Submission = submissionOption.getOrElse(throw new IllegalStateException)
 }
 
 trait DownloadSubmissionReceiptAsPdfPermissions extends RequiresPermissionsChecking with PermissionsCheckingMethods {
@@ -120,5 +120,5 @@ trait DownloadSubmissionReceiptAsPdfState {
 	def viewer: CurrentUser
 	def student: Member
 
-	lazy val submissionOption = submissionService.getSubmissionByUniId(assignment, student.asSsoUser.getWarwickId).filter(_.submitted)
+	lazy val submissionOption: Option[Submission] = submissionService.getSubmissionByUniId(assignment, student.asSsoUser.getWarwickId).filter(_.submitted)
 }

@@ -9,6 +9,7 @@ import uk.ac.warwick.tabula.data.model.NotificationPriority.{Critical, Info, War
 import uk.ac.warwick.tabula.data.model._
 import uk.ac.warwick.tabula.data.model.forms.Extension
 import uk.ac.warwick.tabula.services.ModuleAndDepartmentService
+import uk.ac.warwick.userlookup.User
 import uk.ac.warwick.util.workingdays.WorkingDaysHelperImpl
 
 trait FeedbackDueNotification extends AllCompletedActionRequiredNotification {
@@ -20,7 +21,7 @@ trait FeedbackDueNotification extends AllCompletedActionRequiredNotification {
 
 	@transient private lazy val workingDaysHelper = new WorkingDaysHelperImpl
 
-	protected def daysLeft =
+	protected def daysLeft: Int =
 		deadline.map { d =>
 			val now = created.toLocalDate
 
@@ -32,7 +33,7 @@ trait FeedbackDueNotification extends AllCompletedActionRequiredNotification {
 			workingDaysHelper.getNumWorkingDays(now, d) + offset
 		}.getOrElse(Integer.MAX_VALUE)
 
-	protected def dueToday = deadline.contains(created.toLocalDate)
+	protected def dueToday: Boolean = deadline.contains(created.toLocalDate)
 
 	override final def onPreSave(newRecord: Boolean) {
 		priority = if (daysLeft == 1) {
@@ -48,7 +49,7 @@ trait FeedbackDueNotification extends AllCompletedActionRequiredNotification {
 
 	override final def urlTitle = "publish this feedback"
 
-	override def url = Routes.admin.assignment.submissionsandfeedback(assignment)
+	override def url: String = Routes.admin.assignment.submissionsandfeedback(assignment)
 
 }
 
@@ -57,11 +58,11 @@ trait FeedbackDueNotification extends AllCompletedActionRequiredNotification {
 class FeedbackDueGeneralNotification
 	extends Notification[Assignment, Unit] with SingleItemNotification[Assignment] with FeedbackDueNotification {
 
-	override final def assignment = item.entity
+	override final def assignment: Assignment = item.entity
 
-	override final def title = "%s: Feedback for \"%s\" is due to be published".format(assignment.module.code.toUpperCase, assignment.name)
+	override final def title: String = "%s: Feedback for \"%s\" is due to be published".format(assignment.module.code.toUpperCase, assignment.name)
 
-	override final def recipients = {
+	override final def recipients: Seq[User] = {
 		if (deadline.nonEmpty && assignment.needsFeedbackPublishingIgnoreExtensions) {
 			val moduleAndDepartmentService = Wire[ModuleAndDepartmentService]
 			moduleAndDepartmentService.getModuleByCode(assignment.module.code)
@@ -72,7 +73,7 @@ class FeedbackDueGeneralNotification
 		}
 	}
 
-	override final def deadline = assignment.feedbackDeadline
+	override final def deadline: Option[LocalDate] = assignment.feedbackDeadline
 
 	override def content: FreemarkerModel = FreemarkerModel("/WEB-INF/freemarker/notifications/feedback_reminder_general.ftl", Map(
 		"assignment" -> assignment,
@@ -88,14 +89,14 @@ class FeedbackDueGeneralNotification
 class FeedbackDueExtensionNotification
 	extends Notification[Extension, Unit] with SingleItemNotification[Extension] with FeedbackDueNotification {
 
-	final def extension = item.entity
+	final def extension: Extension = item.entity
 
-	override final def assignment = extension.assignment
-	def submission = assignment.findSubmission(extension.universityId)
+	override final def assignment: Assignment = extension.assignment
+	def submission: Option[Submission] = assignment.findSubmission(extension.universityId)
 
-	override final def title = "%s: Feedback for %s for \"%s\" is due to be published".format(assignment.module.code.toUpperCase, extension.universityId, assignment.name)
+	override final def title: String = "%s: Feedback for %s for \"%s\" is due to be published".format(assignment.module.code.toUpperCase, extension.universityId, assignment.name)
 
-	override final def recipients = {
+	override final def recipients: Seq[User] = {
 		// only send to recipients if the assignments needs feedback publishing and the student actually submitted
 		if (submission.nonEmpty && deadline.nonEmpty && assignment.needsFeedbackPublishingFor(extension.universityId)) {
 			val moduleAndDepartmentService = Wire[ModuleAndDepartmentService]
@@ -107,7 +108,7 @@ class FeedbackDueExtensionNotification
 		}
 	}
 
-	override final def deadline = extension.feedbackDeadline.map(_.toLocalDate)
+	override final def deadline: Option[LocalDate] = extension.feedbackDeadline.map(_.toLocalDate)
 
 	override def content: FreemarkerModel = FreemarkerModel("/WEB-INF/freemarker/notifications/feedback_reminder_extension.ftl", Map(
 		"extension" -> extension,

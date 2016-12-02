@@ -5,6 +5,7 @@ import uk.ac.warwick.tabula.roles.BuiltInRoleDefinition
 import uk.ac.warwick.tabula.data.model.AbstractBasicUserType
 import uk.ac.warwick.tabula.roles.RoleDefinition
 import java.sql.Types
+
 import uk.ac.warwick.tabula.roles.SelectorBuiltInRoleDefinition
 import uk.ac.warwick.tabula.services.RelationshipService
 import uk.ac.warwick.spring.Wire
@@ -12,10 +13,11 @@ import uk.ac.warwick.tabula.helpers.Promises._
 import uk.ac.warwick.tabula.helpers.StringUtils._
 import uk.ac.warwick.tabula.permissions.PermissionsSelector
 import uk.ac.warwick.tabula.data.model.StudentRelationshipType
+import uk.ac.warwick.tabula.helpers.MutablePromise
 
 class BuiltInRoleDefinitionUserType extends AbstractBasicUserType[BuiltInRoleDefinition, String] {
 
-	val relationshipService = promise { Wire[RelationshipService] }
+	val relationshipService: MutablePromise[RelationshipService] = promise { Wire[RelationshipService] }
 
 	val basicType = StandardBasicTypes.STRING
 	override def sqlTypes = Array(Types.VARCHAR)
@@ -23,7 +25,7 @@ class BuiltInRoleDefinitionUserType extends AbstractBasicUserType[BuiltInRoleDef
 	val nullValue = null
 	val nullObject = null
 
-	override def convertToObject(legacy: String) = {
+	override def convertToObject(legacy: String): BuiltInRoleDefinition = {
 		// Hardcoded legacy code. Ew
 		val string = legacy match {
 			case "PersonalTutorRoleDefinition" => "StudentRelationshipAgentRoleDefinition(tutor)"
@@ -47,7 +49,7 @@ class BuiltInRoleDefinitionUserType extends AbstractBasicUserType[BuiltInRoleDef
 		}
 	}
 
-	override def convertToValue(definition: BuiltInRoleDefinition) = definition match {
+	override def convertToValue(definition: BuiltInRoleDefinition): String = definition match {
 		case defn: SelectorBuiltInRoleDefinition[_] => "%s(%s)".format(defn.getName, defn.selector.id)
 		case _ => definition.getName
 	}

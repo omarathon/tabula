@@ -22,11 +22,11 @@ trait CasUsageImporter {
 class CasUsageImporterImpl extends CasUsageImporter {
 	import CasUsageImporter._
 
-	var sits = Wire[DataSource]("sitsDataSource")
+	var sits: DataSource = Wire[DataSource]("sitsDataSource")
 
 	lazy val casUsedMappingQuery = new CasUsedMappingQuery(sits)
 
-	def isCasUsed(universityId: String) = {
+	def isCasUsed(universityId: String): Boolean = {
 		val earliestEndDate = DateTime.now.minusMonths(4).toDate
 		val rowCount = casUsedMappingQuery.executeByNamedParam(Map("universityId" -> universityId, "earliestEndDate" -> earliestEndDate)).head
 		rowCount.intValue > 0
@@ -57,7 +57,7 @@ object CasUsageImporter {
 		this.declareParameter(new SqlParameter("universityId", Types.VARCHAR))
 		this.declareParameter(new SqlParameter("earliestEndDate", Types.DATE))
 		this.compile()
-		override def mapRow(rs: ResultSet, rowNumber: Int, params: Array[java.lang.Object], context: JMap[_, _]) = rs.getLong("count")
+		override def mapRow(rs: ResultSet, rowNumber: Int, params: Array[java.lang.Object], context: JMap[_, _]): JLong = rs.getLong("count")
 	}
 }
 
@@ -66,5 +66,5 @@ trait CasUsageImporterComponent {
 }
 
 trait AutowiringCasUsageImporterComponent extends CasUsageImporterComponent{
-	var casUsageImporter = Wire[CasUsageImporter]
+	var casUsageImporter: CasUsageImporter = Wire[CasUsageImporter]
 }

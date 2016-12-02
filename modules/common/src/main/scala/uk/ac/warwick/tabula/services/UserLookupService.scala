@@ -1,6 +1,8 @@
 package uk.ac.warwick.tabula.services
 
-import uk.ac.warwick.userlookup.webgroups.{GroupNotFoundException, GroupServiceException, GroupInfo}
+import java.io.Serializable
+
+import uk.ac.warwick.userlookup.webgroups.{GroupInfo, GroupNotFoundException, GroupServiceException}
 
 import scala.collection.JavaConverters._
 import uk.ac.warwick.tabula.JavaImports._
@@ -8,8 +10,10 @@ import uk.ac.warwick.userlookup._
 import uk.ac.warwick.util.cache._
 import uk.ac.warwick.tabula.helpers.StringUtils._
 import javax.annotation.PreDestroy
+
 import uk.ac.warwick.userlookup.User
 import uk.ac.warwick.spring.Wire
+import uk.ac.warwick.sso.client.core.OnCampusService
 import uk.ac.warwick.tabula.data.model.Member
 import uk.ac.warwick.tabula.sandbox.SandboxData
 import uk.ac.warwick.tabula.data.model.MemberUserType
@@ -28,7 +32,7 @@ trait UserLookupComponent {
 }
 
 trait AutowiringUserLookupComponent extends UserLookupComponent {
-	@transient var userLookup = Wire[UserLookupService]
+	@transient var userLookup: UserLookupService = Wire[UserLookupService]
 }
 
 trait UserLookupService extends UserLookupInterface {
@@ -54,21 +58,21 @@ trait UserLookupService extends UserLookupInterface {
 class UserLookupServiceImpl(d: UserLookupInterface) extends UserLookupAdapter(d) with UserLookupService
 	with UserByWarwickIdCache with AutowiringCacheStrategyComponent with Logging {
 
-	var profileService = Wire[ProfileService]
+	var profileService: ProfileService = Wire[ProfileService]
 
 	override def getGroupService: LenientGroupService = new LenientGroupService(super.getGroupService)
 
-	override def getUserByUserId(id: String) = super.getUserByUserId(id) match {
+	override def getUserByUserId(id: String): User = super.getUserByUserId(id) match {
 		case anon: AnonymousUser =>
 			anon.setUserId(id)
 			anon
 		case user => filterApplicantUsers(user)
 	}
 
-	override def getUserByWarwickUniId(id: UniversityId) =
+	override def getUserByWarwickUniId(id: UniversityId): User =
 		getUserByWarwickUniId(id, true)
 
-	override def getUserByWarwickUniId(id: UniversityId, ignored: Boolean) =
+	override def getUserByWarwickUniId(id: UniversityId, ignored: Boolean): User =
 		try {
 			id.maybeText.map(UserByWarwickIdCache.get).getOrElse(new AnonymousUser)
 		} catch {
@@ -77,7 +81,7 @@ class UserLookupServiceImpl(d: UserLookupInterface) extends UserLookupAdapter(d)
 				new AnonymousUser
 		}
 
-	override def getUsersByWarwickUniIds(ids: Seq[UniversityId]) =
+	override def getUsersByWarwickUniIds(ids: Seq[UniversityId]): Map[UniversityId, User] =
 		try {
 			UserByWarwickIdCache.get(ids.filter(_.hasText).asJava).asScala.toMap
 		} catch {
@@ -104,14 +108,14 @@ class UserLookupServiceImpl(d: UserLookupInterface) extends UserLookupAdapter(d)
 			}
 	}
 
-	def getUserByWarwickUniIdUncached(id: UniversityId, skipMemberLookup: Boolean) = {
+	def getUserByWarwickUniIdUncached(id: UniversityId, skipMemberLookup: Boolean): User = {
 		if (skipMemberLookup) getUserByWarwickUniIdFromUserLookup(id)
 		else profileService.getMemberByUniversityIdStaleOrFresh(id)
 			.map { _.asSsoUser }
 			.getOrElse { getUserByWarwickUniIdFromUserLookup(id) }
 	}
 
-	def getUsersByWarwickUniIdsUncached(ids: Seq[UniversityId], skipMemberLookup: Boolean) = {
+	def getUsersByWarwickUniIdsUncached(ids: Seq[UniversityId], skipMemberLookup: Boolean): Map[UniversityId, User] = {
 		val dbUsers =
 			if (skipMemberLookup) Map.empty
 			else profileService.getAllMembersWithUniversityIdsStaleOrFresh(ids).map { m => m.universityId -> m.asSsoUser }.toMap
@@ -137,9 +141,9 @@ class UserLookupServiceImpl(d: UserLookupInterface) extends UserLookupAdapter(d)
 
 trait UserByWarwickIdCache extends CacheEntryFactory[UniversityId, User] { self: UserLookupAdapter with CacheStrategyComponent =>
 	final val UserByWarwickIdCacheName = "UserByWarwickIdCache"
-	final val UserByWarwickIdCacheMaxAgeSecs = 60 * 60 * 24 // 1 day
+	final val UserByWarwickIdCacheMaxAgeSecs: Int = 60 * 60 * 24 // 1 day
 
-	final lazy val UserByWarwickIdCache = {
+	final lazy val UserByWarwickIdCache: Cache[UniversityId, User] = {
 		val cache = Caches.newCache(UserByWarwickIdCacheName, this, UserByWarwickIdCacheMaxAgeSecs, cacheStrategy)
 		cache.setAsynchronousUpdateEnabled(true)
 		cache
@@ -148,7 +152,7 @@ trait UserByWarwickIdCache extends CacheEntryFactory[UniversityId, User] { self:
 	def getUserByWarwickUniIdUncached(id: UniversityId, skipMemberLookup: Boolean): User
 	def getUsersByWarwickUniIdsUncached(ids: Seq[UniversityId], skipMemberLookup: Boolean): Map[UniversityId, User]
 
-	def create(warwickId: UniversityId) = {
+	def create(warwickId: UniversityId): User = {
 		try {
 			getUserByWarwickUniIdUncached(warwickId, false)
 		} catch {
@@ -156,7 +160,7 @@ trait UserByWarwickIdCache extends CacheEntryFactory[UniversityId, User] { self:
 		}
 	}
 
-	def shouldBeCached(user: User) = user.isVerified && user.isFoundUser // TAB-1734 don't cache not found users
+	def shouldBeCached(user: User): Boolean = user.isVerified && user.isFoundUser // TAB-1734 don't cache not found users
 
 	def create(warwickIds: JList[UniversityId]): JMap[UniversityId, User] = {
 		try {
@@ -178,7 +182,7 @@ trait UserByWarwickIdCache extends CacheEntryFactory[UniversityId, User] { self:
 }
 
 class SandboxUserLookup(d: UserLookupInterface) extends UserLookupAdapter(d) {
-	var profileService = Wire[ProfileService]
+	var profileService: ProfileService = Wire[ProfileService]
 
 	private def sandboxUser(member: Member) = {
 		val ssoUser = new User(member.userId)
@@ -200,13 +204,13 @@ class SandboxUserLookup(d: UserLookupInterface) extends UserLookupAdapter(d) {
 		ssoUser
 	}
 
-	override def getUsersInDepartment(d: String) =
+	override def getUsersInDepartment(d: String): JList[User] =
 		SandboxData.Departments.find { case (code, department) => department.name == d } match {
 			case Some((code, department)) => getUsersInDepartmentCode(code)
 			case _ => super.getUsersInDepartment(d)
 		}
 
-	override def getUsersInDepartmentCode(c: String) =
+	override def getUsersInDepartmentCode(c: String): JList[User] =
 		SandboxData.Departments.get(c) match {
 			case Some(department) => {
 				val students = department.routes.values.flatMap { route =>
@@ -224,16 +228,16 @@ class SandboxUserLookup(d: UserLookupInterface) extends UserLookupAdapter(d) {
 			case _ => super.getUsersInDepartmentCode(c)
 		}
 
-	override def getUsersByUserIds(ids: JList[String]) =
+	override def getUsersByUserIds(ids: JList[String]): JMap[String, User] =
 		ids.asScala.map { userId => (userId, getUserByUserId(userId)) }.toMap.asJava
 
-	override def getUserByUserId(id: String) =
+	override def getUserByUserId(id: String): User =
 		profileService.getAllMembersWithUserId(id, true).headOption.map { sandboxUser(_) }.getOrElse { super.getUserByUserId(id) }
 
-	override def getUserByWarwickUniId(id: String) =
+	override def getUserByWarwickUniId(id: String): User =
 		profileService.getMemberByUniversityId(id).map { sandboxUser(_) }.getOrElse { super.getUserByUserId(id) }
 
-	override def getUserByWarwickUniId(id: String, ignored: Boolean) = getUserByWarwickUniId(id)
+	override def getUserByWarwickUniId(id: String, ignored: Boolean): User = getUserByWarwickUniId(id)
 
 }
 
@@ -241,24 +245,24 @@ class SwappableUserLookupService(d: UserLookupService) extends UserLookupService
 
 abstract class UserLookupServiceAdapter(var delegate: UserLookupService) extends UserLookupService {
 
-	override def getUsersInDepartment(d: String) = delegate.getUsersInDepartment(d)
-	override def getUsersInDepartmentCode(c: String) = delegate.getUsersInDepartmentCode(c)
-	override def getUserByToken(t: String) = delegate.getUserByToken(t)
-	override def getUsersByUserIds(ids: JList[String]) = delegate.getUsersByUserIds(ids)
-	override def getUserByWarwickUniId(id: UniversityId) = delegate.getUserByWarwickUniId(id)
-	override def getUserByWarwickUniId(id: UniversityId, ignored: Boolean) = delegate.getUserByWarwickUniId(id, ignored)
-	override def getUserByWarwickUniIdUncached(id: UniversityId, skipMemberLookup: Boolean) = delegate.getUserByWarwickUniIdUncached(id, skipMemberLookup)
-	override def getUsersByWarwickUniIds(ids: Seq[UniversityId]) = delegate.getUsersByWarwickUniIds(ids)
-	override def getUsersByWarwickUniIdsUncached(ids: Seq[UniversityId], skipMemberLookup: Boolean) = delegate.getUsersByWarwickUniIdsUncached(ids, skipMemberLookup)
-	override def findUsersWithFilter(map: JMap[String, String]) = delegate.findUsersWithFilter(map)
-	override def findUsersWithFilter(map: JMap[String, String], includeInactive: Boolean) = delegate.findUsersWithFilter(map, includeInactive)
-	override def getGroupService = delegate.getGroupService
-	override def getOnCampusService = delegate.getOnCampusService
-	override def getUserByUserId(id: String) = delegate.getUserByUserId(id)
-	override def getCaches = delegate.getCaches
-	override def clearCaches() = delegate.clearCaches()
-	override def getUserByIdAndPassNonLoggingIn(u: String, p: String) = delegate.getUserByIdAndPassNonLoggingIn(u, p)
-	override def requestClearWebGroup(webgroup: String) = delegate.requestClearWebGroup(webgroup)
+	override def getUsersInDepartment(d: String): JList[User] = delegate.getUsersInDepartment(d)
+	override def getUsersInDepartmentCode(c: String): JList[User] = delegate.getUsersInDepartmentCode(c)
+	override def getUserByToken(t: String): User = delegate.getUserByToken(t)
+	override def getUsersByUserIds(ids: JList[String]): JMap[UniversityId, User] = delegate.getUsersByUserIds(ids)
+	override def getUserByWarwickUniId(id: UniversityId): User = delegate.getUserByWarwickUniId(id)
+	override def getUserByWarwickUniId(id: UniversityId, ignored: Boolean): User = delegate.getUserByWarwickUniId(id, ignored)
+	override def getUserByWarwickUniIdUncached(id: UniversityId, skipMemberLookup: Boolean): User = delegate.getUserByWarwickUniIdUncached(id, skipMemberLookup)
+	override def getUsersByWarwickUniIds(ids: Seq[UniversityId]): Map[UniversityId, User] = delegate.getUsersByWarwickUniIds(ids)
+	override def getUsersByWarwickUniIdsUncached(ids: Seq[UniversityId], skipMemberLookup: Boolean): Map[UniversityId, User] = delegate.getUsersByWarwickUniIdsUncached(ids, skipMemberLookup)
+	override def findUsersWithFilter(map: JMap[String, String]): JList[User] = delegate.findUsersWithFilter(map)
+	override def findUsersWithFilter(map: JMap[String, String], includeInactive: Boolean): JList[User] = delegate.findUsersWithFilter(map, includeInactive)
+	override def getGroupService: LenientGroupService = delegate.getGroupService
+	override def getOnCampusService: OnCampusService = delegate.getOnCampusService
+	override def getUserByUserId(id: String): User = delegate.getUserByUserId(id)
+	override def getCaches: JMap[UniversityId, JSet[Cache[_ <: Serializable, _ <: Serializable]]] = delegate.getCaches
+	override def clearCaches(): Unit = delegate.clearCaches()
+	override def getUserByIdAndPassNonLoggingIn(u: String, p: String): User = delegate.getUserByIdAndPassNonLoggingIn(u, p)
+	override def requestClearWebGroup(webgroup: String): Unit = delegate.requestClearWebGroup(webgroup)
 
 }
 
@@ -272,7 +276,7 @@ class LenientGroupService(delegate: GroupService) extends GroupService with Logg
 			case Failure(t) => throw t
 		}
 
-	def isUserInGroup(userId: String, group: String) = tryOrElse(delegate.isUserInGroup(userId, group), false)
+	def isUserInGroup(userId: String, group: String): Boolean = tryOrElse(delegate.isUserInGroup(userId, group), false)
 
 	def getGroupInfo(name: String): GroupInfo = tryOrElse(delegate.getGroupInfo(name), throw new GroupNotFoundException(name))
 	def getGroupByName(name: String): Group = tryOrElse(delegate.getGroupByName(name), throw new GroupNotFoundException(name))

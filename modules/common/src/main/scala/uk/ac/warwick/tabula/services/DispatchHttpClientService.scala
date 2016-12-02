@@ -23,7 +23,7 @@ class DispatchHttpClientFactoryBean extends ScalaFactoryBean[Http] {
 		}
 	}
 
-	override def destroyInstance(http: Http) = http.shutdown()
+	override def destroyInstance(http: Http): Unit = http.shutdown()
 
 }
 
@@ -32,5 +32,5 @@ trait DispatchHttpClientComponent {
 }
 
 trait AutowiringDispatchHttpClientComponent extends DispatchHttpClientComponent {
-	var httpClient = Wire[Http]
+	var httpClient: Http = Wire[Http]
 }

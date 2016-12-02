@@ -560,5 +560,5 @@ trait SmallGroupSetSpreadsheetHandlerComponent {
 }
 
 trait AutowiringSmallGroupSetSpreadsheetHandlerComponent extends SmallGroupSetSpreadsheetHandlerComponent {
-	val smallGroupSetSpreadsheetHandler = Wire[SmallGroupSetSpreadsheetHandler]
+	val smallGroupSetSpreadsheetHandler: SmallGroupSetSpreadsheetHandler = Wire[SmallGroupSetSpreadsheetHandler]
 }

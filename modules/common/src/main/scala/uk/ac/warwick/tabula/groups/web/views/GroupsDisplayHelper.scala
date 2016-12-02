@@ -63,6 +63,6 @@ object GroupsDisplayHelper {
 		memberViewModules.filterNot(m => m.setItems.isEmpty).toSeq
 	}
 
-	def getGroupSetsReleasedToStudents(memberGroupSets:Seq[SmallGroupSet]) = memberGroupSets.filter(_.visibleToStudents)
+	def getGroupSetsReleasedToStudents(memberGroupSets:Seq[SmallGroupSet]): Seq[SmallGroupSet] = memberGroupSets.filter(_.visibleToStudents)
 
 }

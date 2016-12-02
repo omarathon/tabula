@@ -36,7 +36,7 @@ trait DepartmentPermissionControllerMethods extends AdminController
 	@ModelAttribute("activeDepartment")
 	override def activeDepartment(@PathVariable department: Department): Option[Department] = retrieveActiveDepartment(Option(department))
 
-	var userLookup = Wire[UserLookupService]
+	var userLookup: UserLookupService = Wire[UserLookupService]
 
 	def form(department: Department): Mav = {
 		Mav("admin/department/permissions",

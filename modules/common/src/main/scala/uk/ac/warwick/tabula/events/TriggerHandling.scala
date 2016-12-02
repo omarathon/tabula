@@ -7,7 +7,7 @@ import uk.ac.warwick.tabula.services.TriggerService
 
 trait TriggerHandling {
 
-	var triggerService = Wire[TriggerService]
+	var triggerService: TriggerService = Wire[TriggerService]
 
 	def handleTriggers[A](cmd: Command[A])(f: => A): A = {
 		val result = f

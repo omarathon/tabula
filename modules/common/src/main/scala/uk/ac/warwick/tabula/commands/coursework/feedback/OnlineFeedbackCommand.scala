@@ -29,9 +29,9 @@ abstract class OnlineFeedbackCommand(val module: Module, val assignment: Assignm
 
 	self: SubmissionServiceComponent with FeedbackServiceComponent with UserLookupComponent with AssessmentMembershipServiceComponent =>
 
-	val marker = submitter.apparentUser
+	val marker: User = submitter.apparentUser
 
-	def applyInternal() = {
+	def applyInternal(): Seq[StudentFeedbackGraph] = {
 		val studentsWithSubmissionOrFeedback =
 			userLookup.getUsersByWarwickUniIds(
 				assignment.getUniIdsWithSubmissionOrFeedback.filter { _.hasText }.toSeq
@@ -79,7 +79,7 @@ abstract class OnlineMarkerFeedbackCommand(
 
 	self: SubmissionServiceComponent with FeedbackServiceComponent with UserLookupComponent =>
 
-	def applyInternal() = {
+	def applyInternal(): Seq[StudentFeedbackGraph] = {
 
 		val students = Option(assignment.markingWorkflow).map(_.getMarkersStudents(assignment, marker)).getOrElse(Nil)
 

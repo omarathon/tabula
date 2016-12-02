@@ -25,7 +25,7 @@ class AddMarkingWorkflowCommandInternal(department: Department) extends ModifyMa
 	self: MarkingWorkflowServiceComponent =>
 
 	// Copy properties to a new MarkingWorkflow, save it transactionally, return it.
-	def applyInternal() = {
+	def applyInternal(): MarkingWorkflow = {
 		transactional() {
 			val markingWorkflow = markingMethod match {
 				case SeenSecondMarkingLegacy => new SeenSecondMarkingLegacyWorkflow(department)

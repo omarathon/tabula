@@ -21,7 +21,7 @@ class OldFeedbackTemplateController extends OldCourseworkController {
 	def crumbed(mav:Mav, dept:Department):Mav = mav.crumbs(Breadcrumbs.Department(dept))
 
 	@RequestMapping(method=Array(GET, HEAD))
-	def list(cmd:BulkFeedbackTemplateCommand, errors:Errors) = {
+	def list(cmd:BulkFeedbackTemplateCommand, errors:Errors): Mav = {
 		val dept = cmd.department
 
 		val model = Mav(s"$urlPrefix/admin/feedbackforms/manage-feedback-templates",
@@ -31,7 +31,7 @@ class OldFeedbackTemplateController extends OldCourseworkController {
 	}
 
 	@RequestMapping(method=Array(POST))
-	def saveBulk(cmd:BulkFeedbackTemplateCommand, errors:Errors) = {
+	def saveBulk(cmd:BulkFeedbackTemplateCommand, errors:Errors): Mav = {
 		if (errors.hasErrors){
 			list(cmd, errors)
 		}
@@ -51,7 +51,7 @@ class OldEditFeedbackTemplateController extends OldCourseworkController {
 		= new EditFeedbackTemplateCommand(dept, template)
 
 	@RequestMapping(method=Array(GET))
-	def edit(cmd:EditFeedbackTemplateCommand, errors:Errors) = {
+	def edit(cmd:EditFeedbackTemplateCommand, errors:Errors): Mav = {
 		val dept = cmd.department
 		val template = cmd.template
 
@@ -67,7 +67,7 @@ class OldEditFeedbackTemplateController extends OldCourseworkController {
 	}
 
 	@RequestMapping(method=Array(POST))
-	def save(cmd:EditFeedbackTemplateCommand, errors:Errors) = {
+	def save(cmd:EditFeedbackTemplateCommand, errors:Errors): Mav = {
 		if (errors.hasErrors){
 			edit(cmd, errors)
 		}
@@ -88,7 +88,7 @@ class OldDeleteFeedbackTemplateController extends OldCourseworkController {
 		= new DeleteFeedbackTemplateCommand(dept, template)
 
 	@RequestMapping(method=Array(GET))
-	def deleteCheck(cmd:DeleteFeedbackTemplateCommand, errors:Errors) = {
+	def deleteCheck(cmd:DeleteFeedbackTemplateCommand, errors:Errors): Mav = {
 		val template = cmd.template
 		val dept = cmd.department
 
@@ -102,7 +102,7 @@ class OldDeleteFeedbackTemplateController extends OldCourseworkController {
 	}
 
 	@RequestMapping(method=Array(POST))
-	def delete(cmd:DeleteFeedbackTemplateCommand, errors:Errors) = {
+	def delete(cmd:DeleteFeedbackTemplateCommand, errors:Errors): Mav = {
 		cmd.apply()
 		val model = Mav("ajax_success").noNavigation()
 		model

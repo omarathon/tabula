@@ -48,7 +48,7 @@ class AgentPointRecordCommandInternal(
 
 	self: AgentPointRecordCommandState with AttendanceMonitoringServiceComponent =>
 
-	override def applyInternal() = {
+	override def applyInternal(): (Seq[AttendanceMonitoringCheckpoint], Seq[AttendanceMonitoringCheckpointTotal]) = {
 		checkpointMap.asScala.map { case(student, pointMap) =>
 			attendanceMonitoringService.setAttendance(student, pointMap.asScala.toMap, user)
 		}.toSeq.foldLeft(
@@ -64,7 +64,7 @@ trait PopulateAgentPointRecordCommand extends PopulateOnForm {
 
 	self: AgentPointRecordCommandState =>
 
-	override def populate() = {
+	override def populate(): Unit = {
 		checkpointMap = studentPointMap.map{case(student, points) =>
 			student -> points.map{ point =>
 				point -> studentPointCheckpointMap.get(student).map { pointMap =>
@@ -133,7 +133,7 @@ trait AgentPointRecordCommandState extends GroupsPoints {
 	def user: CurrentUser
 	def member: Member
 
-	lazy val students = relationshipService.listStudentRelationshipsWithMember(relationshipType, member).flatMap(_.studentMember).distinct
+	lazy val students: Seq[StudentMember] = relationshipService.listStudentRelationshipsWithMember(relationshipType, member).flatMap(_.studentMember).distinct
 
 	lazy val studentPointMap: Map[StudentMember, Seq[AttendanceMonitoringPoint]] = {
 		students.map { student =>

@@ -18,7 +18,7 @@ object DownloadFeedbackAsPdfCommand {
 
 class DownloadFeedbackAsPdfCommandInternal(val module: Module, val assignment: Assignment, val feedback: Feedback, val student: Member)
 	extends CommandInternal[Feedback] with DownloadFeedbackAsPdfState {
-	override def applyInternal() = feedback
+	override def applyInternal(): Feedback = feedback
 }
 
 trait DownloadFeedbackAsPdfPermissions extends RequiresPermissionsChecking with PermissionsCheckingMethods {

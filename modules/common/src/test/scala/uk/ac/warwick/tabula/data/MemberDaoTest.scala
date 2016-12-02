@@ -1,13 +1,11 @@
 package uk.ac.warwick.tabula.data
 
 import scala.collection.JavaConverters.asScalaBufferConverter
-
 import org.joda.time.{DateTime, DateTimeConstants}
 import org.junit.{After, Before}
-
 import uk.ac.warwick.tabula.{Fixtures, Mockito, PersistenceTestBase}
 import uk.ac.warwick.tabula.JavaImports.JList
-import uk.ac.warwick.tabula.data.model.{Member, StudentRelationship, StudentRelationshipType}
+import uk.ac.warwick.tabula.data.model._
 import uk.ac.warwick.tabula.helpers.Logging
 import org.springframework.transaction.annotation.Transactional
 
@@ -19,11 +17,11 @@ class MemberDaoTest extends PersistenceTestBase with Logging with Mockito {
 	val sitsStatusDao = new SitsStatusDaoImpl
 	val modeOfAttendanceDao = new ModeOfAttendanceDaoImpl
 
-	val sprFullyEnrolledStatus = Fixtures.sitsStatus("F", "Fully Enrolled", "Fully Enrolled for this Session")
-	val sprPermanentlyWithdrawnStatus = Fixtures.sitsStatus("P", "Permanently Withdrawn", "Permanently Withdrawn")
+	val sprFullyEnrolledStatus: SitsStatus = Fixtures.sitsStatus("F", "Fully Enrolled", "Fully Enrolled for this Session")
+	val sprPermanentlyWithdrawnStatus: SitsStatus = Fixtures.sitsStatus("P", "Permanently Withdrawn", "Permanently Withdrawn")
 
-	val moaFT = Fixtures.modeOfAttendance("F", "FT", "Full time")
-	val moaPT = Fixtures.modeOfAttendance("P", "PT", "Part time")
+	val moaFT: ModeOfAttendance = Fixtures.modeOfAttendance("F", "FT", "Full time")
+	val moaPT: ModeOfAttendance = Fixtures.modeOfAttendance("P", "PT", "Part time")
 
 	@Before def setup() {
 		memberDao.sessionFactory = sessionFactory

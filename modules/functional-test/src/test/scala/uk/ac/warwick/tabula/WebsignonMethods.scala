@@ -16,7 +16,7 @@ import com.gargoylesoftware.htmlunit
 import com.gargoylesoftware.htmlunit.WebClient
 
 object WebsignonMethods {
-	def parseSignedInDetail(html: String) = {
+	def parseSignedInDetail(html: String): String = {
 		val SignedInAs = new Regex("""(?s).+(Signed in as [\-_\w0-9 ]+).+""")
 		html match {
 			case SignedInAs(line) => line.trim
@@ -91,7 +91,7 @@ trait WebsignonMethods extends Matchers  with Eventually{
 	//
 	// (currently requires that the user's first name is the usercode, to check signed-in-ness)
 	object signIn {
-		def as(details: LoginDetails) = {
+		def as(details: LoginDetails): SigningInPhase = {
 			SigningInPhase(details)
 		}
 

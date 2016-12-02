@@ -15,7 +15,7 @@ trait AwardServiceComponent {
 
 
 trait AutowiringAwardServiceComponent extends AwardServiceComponent {
-	var awardService = Wire[AwardService]
+	var awardService: AwardService = Wire[AwardService]
 }
 
 trait AwardService {

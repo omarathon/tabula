@@ -54,7 +54,7 @@ class AllSmallGroupsReportCommandInternal(
 
 	self: SmallGroupServiceComponent with TermServiceComponent with AttendanceMonitoringServiceComponent with ReportCommandRequest =>
 
-	override def applyInternal() = {
+	override def applyInternal(): AllSmallGroupsReportCommandResult = {
 		val thisWeek = termService.getAcademicWeekForAcademicYear(DateTime.now, academicYear)
 		val thisDay = DateTime.now.getDayOfWeek
 		val weeksForYear = termService.getAcademicWeeksForYear(academicYear.dateInTermOne).toMap

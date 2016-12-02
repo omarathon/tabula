@@ -2,7 +2,7 @@ package uk.ac.warwick.tabula.data.model.notifications.attendance.reminders
 
 import org.joda.time.{DateTime, DateTimeConstants}
 import uk.ac.warwick.tabula.data.AttendanceMonitoringStudentData
-import uk.ac.warwick.tabula.data.model.Notification
+import uk.ac.warwick.tabula.data.model.{Department, Notification}
 import uk.ac.warwick.tabula.data.model.attendance.AttendanceMonitoringScheme
 import uk.ac.warwick.tabula.services.TermServiceImpl
 import uk.ac.warwick.tabula.services.attendancemonitoring.AttendanceMonitoringService
@@ -11,7 +11,7 @@ import uk.ac.warwick.userlookup.AnonymousUser
 
 class AttendanceMonitoringUnrecordedNotificationTest extends TestBase with Mockito {
 
-	val department = Fixtures.department("cs")
+	val department: Department = Fixtures.department("cs")
 
 	@Test def titlePoints() {
 		val notification = Notification.init(new AttendanceMonitoringUnrecordedPointsNotification, new AnonymousUser, department)

@@ -54,11 +54,11 @@ class JobDaoImpl extends JobDao with Daoisms {
 				.find(_.json == example.json) // Do the find in pure Scala because it's a CLOB field and we can't do (Hibernate) queries directly
 	}
 
-	def getById(id: String) = transactional(readOnly = true) {
+	def getById(id: String): Option[JobInstanceImpl] = transactional(readOnly = true) {
 		getById[JobInstanceImpl](id)
 	}
 
-	def saveJob(instance: JobInstance) = transactional() {
+	def saveJob(instance: JobInstance): JobInstanceImpl = transactional() {
 		instance match {
 			case instance: JobInstanceImpl =>
 				session.save(instance)
@@ -67,7 +67,7 @@ class JobDaoImpl extends JobDao with Daoisms {
 		}
 	}
 
-	def update(instance: JobInstance) = transactional() {
+	def update(instance: JobInstance): Unit = transactional() {
 		instance match {
 			case instance: JobInstanceImpl => session.update(instance)
 			case _ => throw new IllegalArgumentException("JobDaoImpl only accepts JobInstanceImpls")

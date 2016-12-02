@@ -50,9 +50,9 @@ abstract class AbstractModuleRegistrationService extends ModuleRegistrationServi
 
 	self: ModuleRegistrationDaoComponent =>
 
-	def saveOrUpdate(moduleRegistration: ModuleRegistration) = moduleRegistrationDao.saveOrUpdate(moduleRegistration)
+	def saveOrUpdate(moduleRegistration: ModuleRegistration): Unit = moduleRegistrationDao.saveOrUpdate(moduleRegistration)
 
-	def saveOrUpdate(coreRequiredModule: CoreRequiredModule) = moduleRegistrationDao.saveOrUpdate(coreRequiredModule)
+	def saveOrUpdate(coreRequiredModule: CoreRequiredModule): Unit = moduleRegistrationDao.saveOrUpdate(coreRequiredModule)
 
 	def delete(coreRequiredModule: CoreRequiredModule): Unit = moduleRegistrationDao.delete(coreRequiredModule)
 
@@ -139,5 +139,5 @@ trait ModuleRegistrationServiceComponent {
 }
 
 trait AutowiringModuleRegistrationServiceComponent extends ModuleRegistrationServiceComponent {
-	var moduleRegistrationService = Wire[ModuleRegistrationService]
+	var moduleRegistrationService: ModuleRegistrationService = Wire[ModuleRegistrationService]
 }

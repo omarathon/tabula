@@ -7,11 +7,12 @@ import org.springframework.validation.Errors
 import org.springframework.web.bind.annotation.{ModelAttribute, PathVariable, RequestMapping}
 import uk.ac.warwick.tabula.commands.{Appliable, SelfValidating}
 import uk.ac.warwick.tabula.commands.coursework.feedback.GenerateGradesFromMarkCommand
-import uk.ac.warwick.tabula.data.model.{Mark, Module, Exam}
-import uk.ac.warwick.tabula.commands.exams.{BulkAdjustmentTemplateCommand, BulkAdjustmentCommand}
+import uk.ac.warwick.tabula.data.model.{Exam, Mark, Module}
+import uk.ac.warwick.tabula.commands.exams.{BulkAdjustmentCommand, BulkAdjustmentTemplateCommand}
 import uk.ac.warwick.tabula.exams.web.Routes
 import uk.ac.warwick.tabula.web.controllers.exams.ExamsController
 import uk.ac.warwick.tabula.helpers.SpreadsheetHelpers
+import uk.ac.warwick.tabula.web.Mav
 import uk.ac.warwick.tabula.web.views.ExcelView
 
 @Controller
@@ -30,7 +31,7 @@ class BulkAdjustmentController extends ExamsController {
 		)
 
 	@RequestMapping(method = Array(GET, HEAD))
-	def form = {
+	def form: Mav = {
 		Mav("exams/exams/admin/adjustments/bulk/form",
 			"StudentIdHeader" -> BulkAdjustmentCommand.StudentIdHeader,
 			"MarkHeader" -> BulkAdjustmentCommand.MarkHeader,
@@ -39,7 +40,7 @@ class BulkAdjustmentController extends ExamsController {
 	}
 
 	@RequestMapping(method = Array(POST))
-	def upload(@Valid @ModelAttribute("command") cmd: Appliable[Seq[Mark]], errors: Errors) = {
+	def upload(@Valid @ModelAttribute("command") cmd: Appliable[Seq[Mark]], errors: Errors): Mav = {
 		if (errors.hasFieldErrors("file"))
 			form
 		else
@@ -50,7 +51,7 @@ class BulkAdjustmentController extends ExamsController {
 	def confirm(
 		@Valid @ModelAttribute("command") cmd: Appliable[Seq[Mark]], errors: Errors,
 		@PathVariable exam: Exam
-	) = {
+	): Mav = {
 		if (errors.hasFieldErrors("defaultReason") || errors.hasFieldErrors("defaultComment")) {
 			upload(cmd, errors)
 		} else {
@@ -70,7 +71,7 @@ class BulkAdjustmentTemplateController extends ExamsController {
 		BulkAdjustmentTemplateCommand(mandatory(exam))
 
 	@RequestMapping(method = Array(GET, HEAD))
-	def home(@ModelAttribute("command") cmd: Appliable[ExcelView]) = {
+	def home(@ModelAttribute("command") cmd: Appliable[ExcelView]): ExcelView = {
 		cmd.apply()
 	}
 

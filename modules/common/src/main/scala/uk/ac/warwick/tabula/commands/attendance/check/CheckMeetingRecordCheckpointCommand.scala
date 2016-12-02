@@ -22,7 +22,7 @@ class CheckMeetingRecordCheckpointCommandInternal(val student: StudentMember, va
 
 	self: AttendanceMonitoringMeetingRecordServiceComponent =>
 
-	override def applyInternal() = {
+	override def applyInternal(): Boolean = {
 		val relationship = new MemberStudentRelationship
 		relationship.relationshipType = relationshipType
 		relationship.studentMember = student

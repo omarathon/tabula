@@ -31,12 +31,12 @@ object Turnitin {
 		*/
 	def assignmentIdFor(assignment: Assignment) = AssignmentId("Assignment-" + assignment.id)
 
-	def classNameFor(assignment: Assignment) = {
+	def classNameFor(assignment: Assignment): ClassName = {
 		val module = assignment.module
 		ClassName(module.code.toUpperCase + " - " + module.name)
 	}
 
-	def assignmentNameFor(assignment: Assignment) = {
+	def assignmentNameFor(assignment: Assignment): AssignmentName = {
 		AssignmentName(assignment.name + " (" + assignment.academicYear.toString + ")")
 	}
 }
@@ -76,7 +76,7 @@ class Turnitin extends Logging with DisposableBean with InitializingBean {
 	val userAgent = "Coursework submission app, University of Warwick, coursework@warwick.ac.uk"
 
 	// URL to call for all requests.
-	lazy val endpoint = url(apiEndpoint) <:< Map("User-Agent" -> userAgent)
+	lazy val endpoint: Request = url(apiEndpoint) <:< Map("User-Agent" -> userAgent)
 
 	// TODO does this really need to be a custom instance?
 	val http: Http = new Http with thread.Safety {

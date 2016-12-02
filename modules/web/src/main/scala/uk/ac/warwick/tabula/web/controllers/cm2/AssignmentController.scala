@@ -16,6 +16,7 @@ import uk.ac.warwick.tabula.commands.{Appliable, SelfValidating}
 import uk.ac.warwick.tabula.data.Transactions._
 import uk.ac.warwick.tabula.data.model.{Assignment, Submission}
 import uk.ac.warwick.tabula.services.attendancemonitoring.AutowiringAttendanceMonitoringCourseworkSubmissionServiceComponent
+import uk.ac.warwick.tabula.web.Mav
 
 /**
 	* This is the main student-facing and non-student-facing controller for handling esubmission and return of feedback.
@@ -47,7 +48,7 @@ class AssignmentController extends CourseworkController
 	def willCheckpointBeCreated(
 		@PathVariable assignment: Assignment,
 		user: CurrentUser
-	) = {
+	): Boolean = {
 		val submission = new Submission(user.universityId)
 		submission.assignment = assignment
 		submission.submittedDate = DateTime.now
@@ -63,7 +64,7 @@ class AssignmentController extends CourseworkController
 		@ModelAttribute("studentSubmissionAndFeedbackCommand") infoCommand: StudentSubmissionAndFeedbackCommand,
 		@ModelAttribute("submitAssignmentCommand") formOrNull: SubmitAssignmentCommand,
 		errors: Errors
-	) = {
+	): Mav = {
 		view(infoCommand, formOrNull, errors).embedded
 	}
 
@@ -72,7 +73,7 @@ class AssignmentController extends CourseworkController
 		@ModelAttribute("studentSubmissionAndFeedbackCommand") infoCommand: StudentSubmissionAndFeedbackCommand,
 		@ModelAttribute("submitAssignmentCommand") formOrNull: SubmitAssignmentCommand,
 		errors: Errors
-	) = {
+	): Mav = {
 		val form = Option(formOrNull)
 		val info = infoCommand.apply()
 
@@ -100,7 +101,7 @@ class AssignmentController extends CourseworkController
 		@ModelAttribute("studentSubmissionAndFeedbackCommand") infoCommand: StudentSubmissionAndFeedbackCommand,
 		@Valid @ModelAttribute("submitAssignmentCommand") form: SubmitAssignmentCommand,
 		errors: Errors
-	) = {
+	): Mav = {
 		// We know form isn't null here because of permissions checks on the info command
 		if (errors.hasErrors) {
 			view(infoCommand, form, errors)

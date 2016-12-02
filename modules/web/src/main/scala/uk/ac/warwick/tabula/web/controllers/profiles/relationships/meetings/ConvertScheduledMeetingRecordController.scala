@@ -5,11 +5,14 @@ import javax.validation.Valid
 import org.springframework.stereotype.Controller
 import org.springframework.validation.Errors
 import org.springframework.web.bind.annotation._
-import uk.ac.warwick.tabula.AcademicYear
-import uk.ac.warwick.tabula.commands.profiles.relationships.meetings._
-import uk.ac.warwick.tabula.commands.{Appliable, PopulateOnForm, SelfValidating}
+import uk.ac.warwick.tabula.{AcademicYear, AutowiringFeaturesComponent}
+import uk.ac.warwick.tabula.commands.profiles.relationships.meetings.{ConvertScheduledMeetingRecordCommand, _}
+import uk.ac.warwick.tabula.commands.{Appliable, ComposableCommand, PopulateOnForm, SelfValidating}
 import uk.ac.warwick.tabula.data.model.{StudentCourseDetails, _}
 import uk.ac.warwick.tabula.profiles.web.Routes
+import uk.ac.warwick.tabula.services.{AutowiringFileAttachmentServiceComponent, AutowiringMeetingRecordServiceComponent}
+import uk.ac.warwick.tabula.services.attendancemonitoring.AutowiringAttendanceMonitoringMeetingRecordServiceComponent
+import uk.ac.warwick.tabula.web.Mav
 import uk.ac.warwick.tabula.web.controllers.profiles.ProfilesController
 
 @Controller
@@ -22,14 +25,14 @@ class ConvertScheduledMeetingRecordController extends ProfilesController {
 	validatesSelf[SelfValidating]
 
 	@ModelAttribute("convertCommand")
-	def getConvertCommand(@PathVariable meetingRecord: ScheduledMeetingRecord) = {
+	def getConvertCommand(@PathVariable meetingRecord: ScheduledMeetingRecord): ConvertScheduledMeetingRecordCommand with ComposableCommand[MeetingRecord] with ConvertScheduledMeetingRecordPermissions with ConvertScheduledMeetingRecordState with ConvertScheduledMeetingRecordDescription with AutowiringMeetingRecordServiceComponent with ConvertScheduledMeetingRecordCommandValidation with AutowiringFileAttachmentServiceComponent with ConvertScheduledMeetingRecordCommandPopulate = {
 		Option(meetingRecord).map(mr => {
 			ConvertScheduledMeetingRecordCommand(currentMember, mr)
 		}).orNull
 	}
 
 	@ModelAttribute("command")
-	def getCreateCommand(@PathVariable meetingRecord: ScheduledMeetingRecord) = {
+	def getCreateCommand(@PathVariable meetingRecord: ScheduledMeetingRecord): CreateMeetingRecordCommandInternal with AutowiringMeetingRecordServiceComponent with AutowiringFeaturesComponent with AutowiringAttendanceMonitoringMeetingRecordServiceComponent with AutowiringFileAttachmentServiceComponent with ComposableCommand[MeetingRecord] with MeetingRecordCommandBindListener with ModifyMeetingRecordValidation with CreateMeetingRecordDescription with ModifyMeetingRecordPermissions with CreateMeetingRecordCommandState with MeetingRecordCommandRequest with CreateMeetingRecordCommandNotifications with PopulateOnForm = {
 		Option(meetingRecord).map(mr => {
 			CreateMeetingRecordCommand(currentMember, mr.relationship)
 		}).orNull
@@ -41,7 +44,7 @@ class ConvertScheduledMeetingRecordController extends ProfilesController {
 		@PathVariable relationshipType: StudentRelationshipType,
 		@PathVariable studentCourseDetails: StudentCourseDetails,
 		@PathVariable academicYear: AcademicYear
-	) = {
+	): Mav = {
 		if (cmd != null) {
 			cmd.populate()
 			form(cmd, relationshipType, studentCourseDetails, academicYear, iframe = true)
@@ -56,7 +59,7 @@ class ConvertScheduledMeetingRecordController extends ProfilesController {
 		@PathVariable relationshipType: StudentRelationshipType,
 		@PathVariable studentCourseDetails: StudentCourseDetails,
 		@PathVariable academicYear: AcademicYear
-	) = {
+	): Mav = {
 		if (cmd != null) {
 			cmd.populate()
 			form(cmd, relationshipType, studentCourseDetails, academicYear)
@@ -97,7 +100,7 @@ class ConvertScheduledMeetingRecordController extends ProfilesController {
 		@PathVariable relationshipType: StudentRelationshipType,
 		@PathVariable studentCourseDetails: StudentCourseDetails,
 		@PathVariable academicYear: AcademicYear
-	) = {
+	): Mav = {
 		if (command != null && convertCommand != null) {
 			if (createErrors.hasErrors || convertErrors.hasErrors) {
 				form(command, relationshipType, studentCourseDetails, academicYear, iframe = true)
@@ -123,7 +126,7 @@ class ConvertScheduledMeetingRecordController extends ProfilesController {
 		@PathVariable relationshipType: StudentRelationshipType,
 		@PathVariable studentCourseDetails: StudentCourseDetails,
 		@PathVariable academicYear: AcademicYear
-	) = {
+	): Mav = {
 		if(command != null && convertCommand != null) {
 			if (createErrors.hasErrors || convertErrors.hasErrors) {
 				form(command, relationshipType, studentCourseDetails, academicYear, iframe = false)

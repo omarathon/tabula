@@ -27,7 +27,7 @@ class AddMarkerFeedbackCommand(module: Module, assignment:Assignment, marker: Us
 	// list to contain feedback files that are  for a student that has already been completed
 	var markedStudents: JList[FeedbackItem] = LazyLists.create()
 
-	val submissions = assignment.getMarkersSubmissions(marker)
+	val submissions: Seq[Submission] = assignment.getMarkersSubmissions(marker)
 
 	def processStudents() {
 		val markedSubmissions = submissions.filter{ submission =>
@@ -114,7 +114,7 @@ class AddMarkerFeedbackCommand(module: Module, assignment:Assignment, marker: Us
 		 .studentIds(items.map { _.uniNumber })
 	}
 
-	override def describeResult(d: Description, feedbacks: List[MarkerFeedback]) = {
+	override def describeResult(d: Description, feedbacks: List[MarkerFeedback]): Unit = {
 		d.assignment(assignment)
 		 .studentIds(items.map { _.uniNumber })
 		 .fileAttachments(feedbacks.flatMap { _.attachments })

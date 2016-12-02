@@ -6,20 +6,19 @@ import com.fasterxml.jackson.annotation.JsonAutoDetect
 import org.springframework.http.{HttpStatus, MediaType}
 import org.springframework.stereotype.Controller
 import org.springframework.validation.Errors
-import org.springframework.web.bind.annotation.{RequestBody, PathVariable, ModelAttribute, RequestMapping}
+import org.springframework.web.bind.annotation.{ModelAttribute, PathVariable, RequestBody, RequestMapping}
 import uk.ac.warwick.tabula.api.commands.JsonApiRequest
 import uk.ac.warwick.tabula.api.web.controllers.ApiController
 import uk.ac.warwick.tabula.api.web.helpers._
 import uk.ac.warwick.tabula.commands.SelfValidating
 import uk.ac.warwick.tabula.commands.coursework.assignments.SubmissionAndFeedbackCommand
-import uk.ac.warwick.tabula.commands.coursework.turnitin.{SubmitToTurnitinRequest, SubmitToTurnitinCommand}
-import uk.ac.warwick.tabula.data.model.{Module, Assignment}
-import uk.ac.warwick.tabula.web.Routes
-import uk.ac.warwick.tabula.web.views.{JSONView, JSONErrorView}
+import uk.ac.warwick.tabula.commands.coursework.turnitin.{SubmitToTurnitinCommand, SubmitToTurnitinRequest}
+import uk.ac.warwick.tabula.data.model.{Assignment, Module}
+import uk.ac.warwick.tabula.web.{Mav, Routes}
+import uk.ac.warwick.tabula.web.views.{JSONErrorView, JSONView}
 import uk.ac.warwick.userlookup.User
 
 import scala.beans.BeanProperty
-
 import AssignmentTurnitinController._
 
 object AssignmentTurnitinController {
@@ -47,7 +46,7 @@ trait CreateAssignmentTurnitinJobApi {
 		SubmitToTurnitinCommand(module, assignment)
 
 	@RequestMapping(method = Array(POST), consumes = Array(MediaType.APPLICATION_JSON_VALUE), produces = Array("application/json"))
-	def create(@RequestBody request: CreateAssignmentTurnitinJobRequest, @ModelAttribute("createCommand") command: SubmitToTurnitinCommand, errors: Errors)(implicit response: HttpServletResponse) = {
+	def create(@RequestBody request: CreateAssignmentTurnitinJobRequest, @ModelAttribute("createCommand") command: SubmitToTurnitinCommand, errors: Errors)(implicit response: HttpServletResponse): Mav = {
 		request.copyTo(command, errors)
 		command.validate(errors)
 

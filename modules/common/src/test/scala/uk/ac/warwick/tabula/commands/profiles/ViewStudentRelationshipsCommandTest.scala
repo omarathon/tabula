@@ -1,7 +1,7 @@
 package uk.ac.warwick.tabula.commands.profiles
 
 import org.joda.time.DateTime
-import uk.ac.warwick.tabula.data.model.{Department, MemberStudentRelationship, StaffMember, StudentRelationshipType}
+import uk.ac.warwick.tabula.data.model._
 import uk.ac.warwick.tabula.helpers.Tap.tap
 import uk.ac.warwick.tabula.services.{ProfileService, RelationshipService, SortableAgentIdentifier}
 import uk.ac.warwick.tabula.{Fixtures, Mockito, TestBase}
@@ -11,28 +11,28 @@ import scala.collection.immutable.TreeMap
 class ViewStudentRelationshipsCommandTest extends TestBase with Mockito {
 
 	private trait Fixture {
-		val profileService = smartMock[ProfileService]
-		val relationshipService =  smartMock[RelationshipService]
+		val profileService: ProfileService = smartMock[ProfileService]
+		val relationshipService: RelationshipService =  smartMock[RelationshipService]
 
-		val departmentOfXXX = new Department().tap(_.code = "xxx")
-		val tutorRelType = new StudentRelationshipType().tap(_.description = "tutor")
+		val departmentOfXXX: Department = new Department().tap(_.code = "xxx")
+		val tutorRelType: StudentRelationshipType = new StudentRelationshipType().tap(_.description = "tutor")
 
 		// give them both the same surname, just to prove that we don't accidentally merge users when sorting
-		val staff1 = new StaffMember(id = "111").tap(_.lastName = "Smith")
-		val staff2 = new StaffMember(id = "222").tap(_.lastName = "Smith")
+		val staff1: StaffMember = new StaffMember(id = "111").tap(_.lastName = "Smith")
+		val staff2: StaffMember = new StaffMember(id = "222").tap(_.lastName = "Smith")
 
-		val student1 = Fixtures.student(universityId = "1")
-		val student2 = Fixtures.student(universityId = "2")
-		val student3 = Fixtures.student(universityId = "3")
+		val student1: StudentMember = Fixtures.student(universityId = "1")
+		val student2: StudentMember = Fixtures.student(universityId = "2")
+		val student3: StudentMember = Fixtures.student(universityId = "3")
 
-		val studentRel1 = new MemberStudentRelationship().tap(r => {
+		val studentRel1: MemberStudentRelationship = new MemberStudentRelationship().tap(r => {
 			r.id = "1"
 			r.agentMember = staff1
 			r.studentMember = student1
 			r.startDate = DateTime.now
 		})
 
-		val studentRel2 = new MemberStudentRelationship().tap(r => {
+		val studentRel2: MemberStudentRelationship = new MemberStudentRelationship().tap(r => {
 			r.id = "2"
 			r.agentMember = staff2
 			r.studentMember = student2
@@ -57,7 +57,7 @@ class ViewStudentRelationshipsCommandTest extends TestBase with Mockito {
 
 
 			//When I invoke the command
-			val relationshipInfo = command.applyInternal()
+			val relationshipInfo: RelationshipGraph = command.applyInternal()
 
 			//Then I should get the results I expect
 			relationshipInfo.studentMap(SortableAgentIdentifier("111",Some("Smith"))) should be(Seq(studentRel1))

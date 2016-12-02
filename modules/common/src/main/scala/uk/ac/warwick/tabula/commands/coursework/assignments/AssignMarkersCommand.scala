@@ -34,10 +34,10 @@ class AssignMarkersCommand(val module: Module, val assessment: Assessment)
 
 	self: AssignMarkersCommandState with AssessmentServiceComponent with UserGroupDaoComponent =>
 
-	var alloctaionExtractor = Wire[MarkerAllocationExtractor]
+	var alloctaionExtractor: MarkerAllocationExtractor = Wire[MarkerAllocationExtractor]
 	var file: UploadedFile = new UploadedFile
 
-	val markingWorflow = Option(assessment.markingWorkflow).getOrElse(throw new ItemNotFoundException())
+	val markingWorflow: MarkingWorkflow = Option(assessment.markingWorkflow).getOrElse(throw new ItemNotFoundException())
 	var firstMarkerMapping : JMap[String, JList[String]] = markingWorflow.firstMarkers.knownType.members.map({ marker =>
 		val list : JList[String] = JArrayList()
 		(marker, list)
@@ -54,7 +54,7 @@ class AssignMarkersCommand(val module: Module, val assessment: Assessment)
 	@transient var sheetErrors : Seq[ParsedRow] = Nil
 	@transient var unallocatedStudents : Seq[User] = Nil
 
-	def applyInternal() = {
+	def applyInternal(): Assessment = {
 
 		if (assessment.firstMarkers != null) {
 			assessment.firstMarkers.clear()
@@ -90,7 +90,7 @@ class AssignMarkersCommand(val module: Module, val assessment: Assessment)
 		assessment
 	}
 
-	def extractDataFromFile(file: FileAttachment, result: BindingResult) = {
+	def extractDataFromFile(file: FileAttachment, result: BindingResult): Unit = {
 		val rowData = alloctaionExtractor.extractMarkersFromSpreadsheet(file.dataStream, workflow)
 
 		def rowsToMarkerMap(rows: Seq[ParsedRow]) = {
@@ -157,5 +157,5 @@ trait AssignMarkersDescription extends Describable[Assessment] {
 trait AssignMarkersCommandState {
 	def module: Module
 	def assessment: Assessment
-	def workflow = assessment.markingWorkflow
+	def workflow: MarkingWorkflow = assessment.markingWorkflow
 }

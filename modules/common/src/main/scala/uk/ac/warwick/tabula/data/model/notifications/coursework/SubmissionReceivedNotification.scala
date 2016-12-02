@@ -13,6 +13,7 @@ import uk.ac.warwick.tabula.services.permissions.PermissionsService
 import uk.ac.warwick.tabula.services.{SecurityService, UserSettingsService}
 import uk.ac.warwick.userlookup.User
 
+import scala.collection.immutable.Seq
 import scala.reflect.ClassTag
 
 @Entity
@@ -27,22 +28,22 @@ class SubmissionReceivedNotification extends SubmissionNotification {
 	}
 
 	@transient
-	var userSettings = Wire[UserSettingsService]
+	var userSettings: UserSettingsService = Wire[UserSettingsService]
 
 	@transient
-	var permissionsService = Wire[PermissionsService]
+	var permissionsService: PermissionsService = Wire[PermissionsService]
 
 	@transient
-	var securityService = Wire[SecurityService]
+	var securityService: SecurityService = Wire[SecurityService]
 
 	def templateLocation = "/WEB-INF/freemarker/emails/submissionnotify.ftl"
-	def submissionTitle =
+	def submissionTitle: String =
 		if (submission == null) "Submission"
 		else if (submission.isAuthorisedLate) "Authorised late submission"
 		else if (submission.isLate) "Late submission"
 		else "Submission"
 
-	def title = "%s: %s received for \"%s\"".format(moduleCode, submissionTitle, assignment.name)
+	def title: String = "%s: %s received for \"%s\"".format(moduleCode, submissionTitle, assignment.name)
 
 	def canEmailUser(user: User): Boolean = {
 		// Alert on noteworthy submissions by default
@@ -55,10 +56,10 @@ class SubmissionReceivedNotification extends SubmissionNotification {
 		}
 	}
 
-	def url = Routes.admin.assignment.submissionsandfeedback(assignment)
+	def url: String = Routes.admin.assignment.submissionsandfeedback(assignment)
 	def urlTitle = "view all submissions for this assignment"
 
-	def recipients = {
+	def recipients: Seq[User] = {
 		// TAB-2333 Get any user that has Submission.Delete over the submission, or any of its permission parents
 		// Look at Assignment, Module and Department (can't grant explicitly over one Submission atm)
 		val requiredPermission = Permissions.Submission.Delete

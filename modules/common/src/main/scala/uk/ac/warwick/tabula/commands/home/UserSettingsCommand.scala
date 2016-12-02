@@ -27,18 +27,18 @@ object UserSettingsCommand {
 class UserSettingsCommand(val user: CurrentUser, val settings: UserSettings) extends CommandInternal[UserSettings] {
 	self: UserSettingsServiceComponent =>
 
-	var alertsSubmission = settings.alertsSubmission
-	var weekNumberingSystem = settings.weekNumberingSystem
-	var bulkEmailSeparator = settings.bulkEmailSeparator
-	var profilesDefaultView = settings.profilesDefaultView
+	var alertsSubmission: String = settings.alertsSubmission
+	var weekNumberingSystem: String = settings.weekNumberingSystem
+	var bulkEmailSeparator: String = settings.bulkEmailSeparator
+	var profilesDefaultView: String = settings.profilesDefaultView
 
 	lazy val smallGroupEventAttendanceReminderSettings = new SmallGroupEventAttendanceReminderNotificationSettings(settings.notificationSettings("SmallGroupEventAttendanceReminder"))
-	var smallGroupEventAttendanceReminderEnabled = smallGroupEventAttendanceReminderSettings.enabled.value
+	var smallGroupEventAttendanceReminderEnabled: Boolean = smallGroupEventAttendanceReminderSettings.enabled.value
 
 	lazy val finaliseFeedbackNotificationSettings = new FinaliseFeedbackNotificationSettings(settings.notificationSettings("FinaliseFeedback"))
-	var finaliseFeedbackNotificationEnabled = finaliseFeedbackNotificationSettings.enabled.value
+	var finaliseFeedbackNotificationEnabled: Boolean = finaliseFeedbackNotificationSettings.enabled.value
 
-	override def applyInternal() = transactional() {
+	override def applyInternal(): UserSettings = transactional() {
 		settings.alertsSubmission = alertsSubmission
 		settings.weekNumberingSystem = if (weekNumberingSystem.hasText) weekNumberingSystem else null
 		settings.bulkEmailSeparator = bulkEmailSeparator
@@ -72,7 +72,7 @@ trait UserSettingsDescription extends Describable[UserSettings] {
 		d.properties("user" -> user.apparentId)
 	}
 
-	override def describeResult(d: Description, result: UserSettings) = {
+	override def describeResult(d: Description, result: UserSettings): Unit = {
 		result.activeDepartment.foreach(d.department)
 		d.properties(
 			"user" -> user.apparentId,

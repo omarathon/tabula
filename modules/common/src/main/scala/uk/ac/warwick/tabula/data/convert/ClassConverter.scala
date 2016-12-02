@@ -12,11 +12,11 @@ import uk.ac.warwick.tabula.helpers.StringUtils._
 
 class ClassConverter extends TwoWayConverter[String, Class[_]] {
 
-	override def convertRight(className: String) =
+	override def convertRight(className: String): Class[_] =
 		if (className.hasText) try { Class.forName(className) } catch { case e: ClassNotFoundException => null }
 		else null
 
-	override def convertLeft(clazz: Class[_]) = Option(clazz) match {
+	override def convertLeft(clazz: Class[_]): String = Option(clazz) match {
 		case Some(clazz) => clazz.getName
 		case None => null
 	}

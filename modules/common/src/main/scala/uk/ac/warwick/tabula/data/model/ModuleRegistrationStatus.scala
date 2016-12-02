@@ -22,7 +22,7 @@ object ModuleRegistrationStatus {
 	case object PostConfirmationQueried extends ModuleRegistrationStatus("PCQ", "Post-confirmation query")
 	case object PostConfirmationAnswered extends ModuleRegistrationStatus("PCA", "Post-confirmation answer")
 
-	def fromCode(code: String) = code match {
+	def fromCode(code: String): ModuleRegistrationStatus = code match {
 	  	case AwaitingRegistration.dbValue => AwaitingRegistration
 	  	case AwaitingConfirmation.dbValue => AwaitingConfirmation
 	  	case Confirmed.dbValue => Confirmed
@@ -49,8 +49,8 @@ class ModuleRegistrationStatusUserType extends AbstractBasicUserType[ModuleRegis
 	val nullValue = null
 	val nullObject = null
 
-	override def convertToObject(string: String) = ModuleRegistrationStatus.fromCode(string)
+	override def convertToObject(string: String): ModuleRegistrationStatus = ModuleRegistrationStatus.fromCode(string)
 
-	override def convertToValue(selectionStatus: ModuleRegistrationStatus) = selectionStatus.dbValue
+	override def convertToValue(selectionStatus: ModuleRegistrationStatus): String = selectionStatus.dbValue
 
 }

@@ -9,9 +9,9 @@ import uk.ac.warwick.tabula.{Mockito, TestBase}
 class ImportModuleListsCommandTest extends TestBase with Mockito {
 
 	trait Fixture {
-		val mockSession = smartMock[Session]
+		val mockSession: Session = smartMock[Session]
 		val command = new ImportModuleListsCommand {
-			override val session = mockSession
+			override val session: Session = mockSession
 		}
 		command.upstreamModuleListService = smartMock[UpstreamModuleListService]
 		command.moduleListImporter = smartMock[ModuleListImporter]

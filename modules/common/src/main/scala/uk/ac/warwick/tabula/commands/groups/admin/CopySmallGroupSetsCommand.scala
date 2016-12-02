@@ -176,7 +176,7 @@ trait CopySmallGroupSetsValidation extends SelfValidating {
 trait CopySmallGroupSetsDescription extends Describable[Seq[SmallGroupSet]] {
 	self: CopySmallGroupSetsCommandState with CopySmallGroupSetsRequestState =>
 
-	override def describe(d: Description) = d
+	override def describe(d: Description): Unit = d
 		.department(department)
 		.properties("modules" -> modules.map(_.id))
 		.properties("smallGroupSets" -> smallGroupSets.asScala.filter(_.copy).map(_.smallGroupSet.id))

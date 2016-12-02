@@ -7,7 +7,7 @@ import org.hibernate.`type`.StandardBasicTypes
 sealed abstract class Location extends Serializable {
 	def name: String
 
-	override def toString = name
+	override def toString: String = name
 }
 
 @SerialVersionUID(372489712389245l) case class NamedLocation(val name: String) extends Location
@@ -20,7 +20,7 @@ object Location {
 			case Array(name) => NamedLocation(name)
 		}
 
-	def toDatabase(location: Location) =
+	def toDatabase(location: Location): String =
 		location match {
 			case NamedLocation(name) => name
 			case MapLocation(name, locationId) => s"${name}|${locationId}"
@@ -35,7 +35,7 @@ class LocationUserType extends AbstractBasicUserType[Location, String] {
 	val nullValue = null
 	val nullObject = null
 
-	override def convertToObject(value: String) = Location.fromDatabase(value)
-	override def convertToValue(location: Location) = Location.toDatabase(location)
+	override def convertToObject(value: String): Location = Location.fromDatabase(value)
+	override def convertToValue(location: Location): String = Location.toDatabase(location)
 
 }

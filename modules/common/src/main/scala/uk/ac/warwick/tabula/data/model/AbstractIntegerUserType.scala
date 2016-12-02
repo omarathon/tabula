@@ -13,7 +13,7 @@ abstract class AbstractIntegerUserType[A <: Object : ClassTag] extends AbstractB
 
 	val basicType = StandardBasicTypes.INTEGER
 
-	override def returnedClass = classOf[JInteger]
+	override def returnedClass: Class[_root_.uk.ac.warwick.tabula.JavaImports.JInteger] = classOf[JInteger]
 	override def sqlTypes = Array(Types.INTEGER)
 
 }
@@ -32,8 +32,8 @@ abstract class AbstractIntegerUserType[A <: Object : ClassTag] extends AbstractB
 class ConvertibleIntegerUserType[A >: Null <: Convertible[JInteger]](implicit factory: JInteger => A, classTag: ClassTag[A])
 	extends AbstractIntegerUserType[A] {
 
-	final override def convertToValue(obj: A) = obj.value
-	final override def convertToObject(value: JInteger) = factory(value)
+	final override def convertToValue(obj: A): _root_.uk.ac.warwick.tabula.JavaImports.JInteger = obj.value
+	final override def convertToObject(value: JInteger): A = factory(value)
 	final val nullValue = null
 	final val nullObject = null
 }

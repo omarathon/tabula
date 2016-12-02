@@ -10,6 +10,7 @@ import uk.ac.warwick.tabula.commands.coursework.assignments.CourseworkHomepageCo
 import uk.ac.warwick.tabula.commands.coursework.assignments.{CourseworkHomepageActivityPageletCommand, CourseworkHomepageCommand}
 import uk.ac.warwick.tabula.services.ActivityService.PagedActivities
 import uk.ac.warwick.tabula.services.AutowiringModuleAndDepartmentServiceComponent
+import uk.ac.warwick.tabula.web.Mav
 
 @Profile(Array("cm1Enabled")) @Controller class OldHomeController extends OldCourseworkController with AutowiringModuleAndDepartmentServiceComponent {
 
@@ -17,7 +18,7 @@ import uk.ac.warwick.tabula.services.AutowiringModuleAndDepartmentServiceCompone
 
 	@ModelAttribute("command") def command(user: CurrentUser) = CourseworkHomepageCommand(user)
 
-	@RequestMapping(Array("/${cm1.prefix}")) def home(@ModelAttribute("command") cmd: Appliable[Option[CourseworkHomepageInformation]], user: CurrentUser) =
+	@RequestMapping(Array("/${cm1.prefix}")) def home(@ModelAttribute("command") cmd: Appliable[Option[CourseworkHomepageInformation]], user: CurrentUser): Mav =
 		cmd.apply() match {
 			case Some(info) =>
 				Mav(s"$urlPrefix/home/view",
@@ -45,7 +46,7 @@ import uk.ac.warwick.tabula.services.AutowiringModuleAndDepartmentServiceCompone
 			CourseworkHomepageActivityPageletCommand(user, new DateTime(lastUpdatedDate))
 
 	@RequestMapping(Array("/${cm1.prefix}/api/activity/pagelet/{lastUpdatedDate}"))
-	def pagelet(@ModelAttribute("command") cmd: Appliable[Option[PagedActivities]]) = {
+	def pagelet(@ModelAttribute("command") cmd: Appliable[Option[PagedActivities]]): Mav = {
 		try {
 			cmd.apply() match {
 				case Some(pagedActivities) =>

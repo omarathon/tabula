@@ -7,19 +7,20 @@ import uk.ac.warwick.spring.Wire
 import uk.ac.warwick.tabula.commands.{CurrentSITSAcademicYear, TaskBenchmarking}
 import uk.ac.warwick.tabula.permissions.Permissions
 import uk.ac.warwick.tabula.services.{AssessmentMembershipService, AssessmentService, FeedbackService, ModuleAndDepartmentService}
+import uk.ac.warwick.tabula.web.Mav
 import uk.ac.warwick.tabula.web.controllers.exams.ExamsController
 
 @Controller
 @RequestMapping(Array("/exams/exams"))
 class ExamsHomeController extends ExamsController with CurrentSITSAcademicYear with TaskBenchmarking {
 
-	@Autowired var moduleAndDepartmentService = Wire[ModuleAndDepartmentService]
-	@Autowired var assessmentService = Wire[AssessmentService]
+	@Autowired var moduleAndDepartmentService: ModuleAndDepartmentService = Wire[ModuleAndDepartmentService]
+	@Autowired var assessmentService: AssessmentService = Wire[AssessmentService]
 	@Autowired var examMembershipService: AssessmentMembershipService = _
 	@Autowired var feedbackService: FeedbackService = _
 
 	@RequestMapping
-	def examsHome(@RequestParam(required = false) marked: Integer) = {
+	def examsHome(@RequestParam(required = false) marked: Integer): Mav = {
 		val ownedDepartments = benchmarkTask("Get owned departments") {
 			moduleAndDepartmentService.departmentsWithPermission(user, Permissions.Module.ManageAssignments)
 		}

@@ -86,7 +86,7 @@ class BaseControllerTest extends TestBase with Mockito {
 	@Test def enableFilters {
 		val mockSession = mock[Session]
 		val controller = new BaseController {
-			override protected def session = mockSession
+			override protected def session: Session = mockSession
 		}
 
 		controller.showDeletedItems

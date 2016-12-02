@@ -17,7 +17,7 @@ object App {
 
   def bean[A](name:String) : A = context.getBean(name).asInstanceOf[A]
 
-  def inSession(f: (Session)=>Unit) = {
+  def inSession(f: (Session)=>Unit): Unit = {
     val session = bean[SessionFactory]("sessionFactory").openSession
     try {
       f(session)

@@ -18,7 +18,7 @@ object ImportStudentRowCommand {
 		ssoUser: User,
 		rows: Seq[SitsStudentRow],
 		importCommandFactory: ImportCommandFactory
-	) = {
+	): ImportStudentRowCommandInternal with Command[Member] with AutowiringProfileServiceComponent with AutowiringTier4RequirementImporterComponent with AutowiringModeOfAttendanceImporterComponent with Unaudited = {
 		new ImportStudentRowCommandInternal(member, ssoUser, rows, importCommandFactory)
 			with Command[Member]
 			with AutowiringProfileServiceComponent
@@ -45,7 +45,7 @@ class ImportStudentRowCommandInternal(
 
 	self: ProfileServiceComponent with Tier4RequirementImporterComponent with ModeOfAttendanceImporterComponent =>
 
-	val studentRow = rows.headOption
+	val studentRow: Option[SitsStudentRow] = rows.headOption
 
 	studentRow.foreach { row =>
 		// these properties are from membership but may be overwritten by the SITS data (working theory)
@@ -122,7 +122,7 @@ class ImportStudentRowCommandInternal(
 	private def copyStudentProperties(commandBean: BeanWrapper, memberBean: BeanWrapper) =
 		copyBasicProperties(basicStudentProperties, commandBean, memberBean)
 
-	override def describe(d: Description) = d.property("universityId" -> universityId).property("category" -> "student")
+	override def describe(d: Description): Unit = d.property("universityId" -> universityId).property("category" -> "student")
 }
 
 trait ImportStudentRowCommandState extends StudentProperties

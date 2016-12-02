@@ -22,7 +22,7 @@ class EditAssignmentCommand(module: Module = null, val assignment: Assignment = 
 	this.copyFrom(assignment)
 
 	// submissions exist then the markingWorkflow cannot be updated
-	def canUpdateMarkingWorkflow = assignment.submissions.size() == 0
+	def canUpdateMarkingWorkflow: Boolean = assignment.submissions.size() == 0
 
 	override def validate(errors: Errors) {
 		super.validate(errors)

@@ -20,7 +20,7 @@ import uk.ac.warwick.tabula.data.model.MarkingState.MarkingCompleted
  * point offering a filter for Unsubmitted students).
  */
 sealed abstract class CourseworkFilter extends CaseObjectEqualityFixes[CourseworkFilter] {
-	def getName = CourseworkFilters.shortName(getClass)
+	def getName: String = CourseworkFilters.shortName(getClass)
 	def getDescription: String
 	def predicate(parameters: Map[String, String])(student: Student): Boolean
 	def applies(assignment: Assignment): Boolean
@@ -64,12 +64,12 @@ object CourseworkFilters {
 		}
 	}
 
-	def shortName(clazz: Class[_ <: CourseworkFilter])
-		= clazz.getName.substring(ObjectClassPrefix.length, clazz.getName.length - 1).replace('$', '.')
+	def shortName(clazz: Class[_ <: CourseworkFilter]): String
+	= clazz.getName.substring(ObjectClassPrefix.length, clazz.getName.length - 1).replace('$', '.')
 
 	case object AllStudents extends ParameterlessCourseworkFilter {
 		def getDescription = "students"
-		def predicate(item: Student) = {
+		def predicate(item: Student): Boolean = {
 			true
 		}
 		def applies(assignment: Assignment) = true
@@ -77,8 +77,8 @@ object CourseworkFilters {
 
 	case object SubmissionNotDownloaded extends ParameterlessCourseworkFilter {
 		def getDescription = "submissions not downloaded by staff"
-		def predicate(item: Student) = item.coursework.enhancedSubmission.exists(!_.downloaded)
-		def applies(assignment: Assignment) = assignment.collectSubmissions
+		def predicate(item: Student): Boolean = item.coursework.enhancedSubmission.exists(!_.downloaded)
+		def applies(assignment: Assignment): Boolean = assignment.collectSubmissions
 	}
 
 	case object SubmittedBetweenDates extends CourseworkFilter {
@@ -90,7 +90,7 @@ object CourseworkFilters {
 			("startDate", "Start date", "datetime"),
 			("endDate", "End date", "datetime")
 		)
-		def predicate(parameters: Map[String, String])(item: Student) = {
+		def predicate(parameters: Map[String, String])(item: Student): Boolean = {
 			val start = converter.convertRight(parameters("startDate"))
 			val end = converter.convertRight(parameters("endDate"))
 
@@ -116,37 +116,37 @@ object CourseworkFilters {
 					errors.rejectValue("%s[endDate]".format(fieldName), "filters.SubmittedBetweenDates.end.beforeStart")
 			}
 		}
-		def applies(assignment: Assignment) = assignment.collectSubmissions
+		def applies(assignment: Assignment): Boolean = assignment.collectSubmissions
 	}
 
 	case object OnTime extends ParameterlessCourseworkFilter {
 		def getDescription = "students who submitted on time"
-		def predicate(item: Student) =
+		def predicate(item: Student): Boolean =
 			item.coursework.enhancedSubmission.exists(item => !item.submission.isLate && !item.submission.isAuthorisedLate)
-		def applies(assignment: Assignment) = assignment.collectSubmissions
+		def applies(assignment: Assignment): Boolean = assignment.collectSubmissions
 	}
 
 	case object Late extends ParameterlessCourseworkFilter {
 		def getDescription = "students who submitted late"
-		def predicate(item: Student) =
+		def predicate(item: Student): Boolean =
 			item.coursework.enhancedSubmission.exists(item => item.submission.isLate && !item.submission.isAuthorisedLate)
-		def applies(assignment: Assignment) = assignment.collectSubmissions
+		def applies(assignment: Assignment): Boolean = assignment.collectSubmissions
 	}
 
 	case object WithExtension extends ParameterlessCourseworkFilter {
 		def getDescription = "students with extensions"
-		def predicate(item: Student) = {
+		def predicate(item: Student): Boolean = {
 			item.coursework.enhancedExtension.isDefined
 		}
-		def applies(assignment: Assignment) = assignment.collectSubmissions && assignment.allowExtensions
+		def applies(assignment: Assignment): Boolean = assignment.collectSubmissions && assignment.allowExtensions
 	}
 
 	case object WithinExtension extends ParameterlessCourseworkFilter {
 		def getDescription = "students who submitted within extension"
-		def predicate(item: Student) = {
+		def predicate(item: Student): Boolean = {
 			item.coursework.enhancedSubmission.exists(_.submission.isAuthorisedLate)
 		}
-		def applies(assignment: Assignment) = assignment.collectSubmissions && assignment.allowExtensions
+		def applies(assignment: Assignment): Boolean = assignment.collectSubmissions && assignment.allowExtensions
 	}
 
 	case object WithWordCount extends CourseworkFilter {
@@ -160,7 +160,7 @@ object CourseworkFilters {
 			("minWords", "Min word count", "number"),
 			("maxWords", "Max word count", "number")
 		)
-		def predicate(parameters: Map[String, String])(item: Student) = {
+		def predicate(parameters: Map[String, String])(item: Student): Boolean = {
 			val min = toInt(parameters("minWords")).get
 			val max = toInt(parameters("maxWords")).get
 
@@ -195,56 +195,56 @@ object CourseworkFilters {
 				}
 			}
 		}
-		def applies(assignment: Assignment) = assignment.collectSubmissions && assignment.wordCountField.isDefined
+		def applies(assignment: Assignment): Boolean = assignment.collectSubmissions && assignment.wordCountField.isDefined
 	}
 
 	case object Submitted extends ParameterlessCourseworkFilter {
 		def getDescription = "students who have submitted an assignment"
-		def predicate(item: Student) = {
+		def predicate(item: Student): Boolean = {
 			item.coursework.enhancedSubmission.isDefined
 		}
-		def applies(assignment: Assignment) = assignment.collectSubmissions
+		def applies(assignment: Assignment): Boolean = assignment.collectSubmissions
 	}
 
 	case object Unsubmitted extends ParameterlessCourseworkFilter {
 		def getDescription = "students who have not submitted an assignment"
-		def predicate(item: Student) = {
+		def predicate(item: Student): Boolean = {
 			item.coursework.enhancedSubmission.isEmpty
 		}
-		def applies(assignment: Assignment) = assignment.collectSubmissions
+		def applies(assignment: Assignment): Boolean = assignment.collectSubmissions
 	}
 
 	case object NotReleasedForMarking extends ParameterlessCourseworkFilter {
 		def getDescription = "submissions that have not been released for marking"
-		def predicate(student: Student) = !student.assignment.isReleasedForMarking(student.user.getWarwickId)
-		def applies(assignment: Assignment) = assignment.collectSubmissions && assignment.markingWorkflow != null
+		def predicate(student: Student): Boolean = !student.assignment.isReleasedForMarking(student.user.getWarwickId)
+		def applies(assignment: Assignment): Boolean = assignment.collectSubmissions && assignment.markingWorkflow != null
 	}
 
 	case object NotMarked extends ParameterlessCourseworkFilter {
 		def getDescription = "submissions not marked"
-		def predicate(student: Student) = {
+		def predicate(student: Student): Boolean = {
 			val releasedForMarking = student.assignment.isReleasedForMarking(student.user.getWarwickId)
 			val hasFirstMarker = student.assignment.getStudentsFirstMarker(student.user.getWarwickId).isDefined
 			releasedForMarking && hasFirstMarker
 		}
 
-		def applies(assignment: Assignment) = assignment.collectSubmissions && assignment.markingWorkflow != null
+		def applies(assignment: Assignment): Boolean = assignment.collectSubmissions && assignment.markingWorkflow != null
 	}
 
 	case object MarkedByFirst extends ParameterlessCourseworkFilter {
 		def getDescription = "submissions marked by first marker"
-		def predicate(item: Student) =
+		def predicate(item: Student): Boolean =
 			item.coursework.enhancedFeedback.exists(_.feedback.getFirstMarkerFeedback.exists(_.state == MarkingCompleted))
-		def applies(assignment: Assignment) = assignment.collectSubmissions && assignment.markingWorkflow != null
+		def applies(assignment: Assignment): Boolean = assignment.collectSubmissions && assignment.markingWorkflow != null
 	}
 
 	case object MarkedBySecond extends ParameterlessCourseworkFilter {
 		def getDescription = "submissions marked by second marker"
-		def predicate(item: Student) =
+		def predicate(item: Student): Boolean =
 			item.coursework.enhancedFeedback.exists(_.feedback.getSecondMarkerFeedback.exists(_.state == MarkingCompleted))
 
 		// Only applies to seen second marking
-		def applies(assignment: Assignment) =
+		def applies(assignment: Assignment): Boolean =
 			assignment.collectSubmissions &&
 			assignment.markingWorkflow != null &&
 			assignment.markingWorkflow.hasSecondMarker
@@ -252,25 +252,25 @@ object CourseworkFilters {
 
 	case object CheckedForPlagiarism extends ParameterlessCourseworkFilter {
 		def getDescription = "submissions checked for plagiarism"
-		def predicate(item: Student) =
+		def predicate(item: Student): Boolean =
 			item.coursework.enhancedSubmission.exists(_.submission.hasOriginalityReport.booleanValue)
-		def applies(assignment: Assignment) =
+		def applies(assignment: Assignment): Boolean =
 			assignment.collectSubmissions && assignment.module.adminDepartment.plagiarismDetectionEnabled
 	}
 
 	case object NotCheckedForPlagiarism extends ParameterlessCourseworkFilter {
 		def getDescription = "submissions not checked for plagiarism"
-		def predicate(item: Student) =
+		def predicate(item: Student): Boolean =
 			item.coursework.enhancedSubmission.exists(!_.submission.hasOriginalityReport.booleanValue)
-		def applies(assignment: Assignment) =
+		def applies(assignment: Assignment): Boolean =
 			assignment.collectSubmissions && assignment.module.adminDepartment.plagiarismDetectionEnabled
 	}
 
 	case object MarkedPlagiarised extends ParameterlessCourseworkFilter {
 		def getDescription = "submissions marked as plagiarised"
-		def predicate(item: Student) =
+		def predicate(item: Student): Boolean =
 			item.coursework.enhancedSubmission.exists(_.submission.suspectPlagiarised.booleanValue)
-		def applies(assignment: Assignment) = assignment.collectSubmissions
+		def applies(assignment: Assignment): Boolean = assignment.collectSubmissions
 	}
 
 	case object WithOverlapPercentage extends CourseworkFilter {
@@ -284,7 +284,7 @@ object CourseworkFilters {
 			("minOverlap", "Min overlap %", "percentage"),
 			("maxOverlap", "Max overlap %", "percentage")
 		)
-		def predicate(parameters: Map[String, String])(item: Student) = {
+		def predicate(parameters: Map[String, String])(item: Student): Boolean = {
 			val min = toInt(parameters("minOverlap")).get
 			val max = toInt(parameters("maxOverlap")).get
 
@@ -320,25 +320,25 @@ object CourseworkFilters {
 				}
 			}
 		}
-		def applies(assignment: Assignment) = assignment.collectSubmissions && assignment.module.adminDepartment.plagiarismDetectionEnabled
+		def applies(assignment: Assignment): Boolean = assignment.collectSubmissions && assignment.module.adminDepartment.plagiarismDetectionEnabled
 	}
 
 	case object NoFeedback extends ParameterlessCourseworkFilter {
 		def getDescription = "students with no feedback"
-		def predicate(item: Student) = item.coursework.enhancedFeedback.forall(_.feedback.isPlaceholder)
+		def predicate(item: Student): Boolean = item.coursework.enhancedFeedback.forall(_.feedback.isPlaceholder)
 		def applies(assignment: Assignment) = true
 	}
 
 	case object FeedbackNotReleased extends ParameterlessCourseworkFilter {
 		def getDescription = "students with unpublished feedback"
-		def predicate(item: Student) =
+		def predicate(item: Student): Boolean =
 			item.coursework.enhancedFeedback.filterNot(_.feedback.isPlaceholder).exists(!_.feedback.released)
 		def applies(assignment: Assignment) = true
 	}
 
 	case object FeedbackNotDownloaded extends ParameterlessCourseworkFilter {
 		def getDescription = "students who haven't downloaded their feedback"
-		def predicate(item: Student) =
+		def predicate(item: Student): Boolean =
 			item.coursework.enhancedFeedback.filterNot(_.feedback.isPlaceholder).exists(!_.downloaded)
 		def applies(assignment: Assignment) = true
 	}

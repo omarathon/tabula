@@ -9,7 +9,7 @@ object MemberUserType {
 	case object Emeritus  extends MemberUserType("A", "Emeritus Academic")
 	case object Applicant extends MemberUserType("P", "Applicant")
 
-	def fromCode(code: String) = code match {
+	def fromCode(code: String): MemberUserType = code match {
 	  	case Student.dbValue => Student
 	  	case Staff.dbValue => Staff
 	  	case Emeritus.dbValue => Emeritus
@@ -38,7 +38,7 @@ object MemberUserType {
 		"Academic staff", "Emeritus Academic"
 	)
 
-	def fromTargetGroup(targetGroup: String) = targetGroup match {
+	def fromTargetGroup(targetGroup: String): MemberUserType = targetGroup match {
 		case group if StudentTargetGroups.contains(group) => Student
 		case group if StaffTargetGroups.contains(group) => Staff
 		case group if AcademicTargetGroups.contains(group) => Emeritus
@@ -50,6 +50,6 @@ object MemberUserType {
 
 // Hmm, badly named.
 class MemberUserTypeUserType extends AbstractStringUserType[MemberUserType] {
-	override def convertToObject(string: String) = MemberUserType.fromCode(string)
-	override def convertToValue(MemberUserType: MemberUserType) = MemberUserType.dbValue
+	override def convertToObject(string: String): MemberUserType = MemberUserType.fromCode(string)
+	override def convertToValue(MemberUserType: MemberUserType): String = MemberUserType.dbValue
 }

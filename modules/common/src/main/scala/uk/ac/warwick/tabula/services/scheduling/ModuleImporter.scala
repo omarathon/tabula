@@ -42,8 +42,8 @@ trait ModuleImporter {
 class ModuleImporterImpl extends ModuleImporter with Logging {
 	import ModuleImporter._
 
-	var sits = Wire[DataSource]("sitsDataSource")
-	var httpClient = Wire[Http]
+	var sits: DataSource = Wire[DataSource]("sitsDataSource")
+	var httpClient: Http = Wire[Http]
 
 	var departmentsApiUrl: String = Wire.property("${departments.api}")
 
@@ -188,7 +188,7 @@ object ModuleImporter {
 	class ModuleInfoMappingQuery(ds: DataSource) extends MappingSqlQueryWithParameters[ModuleInfo](ds, GetModulesSql) {
 		declareParameter(new SqlParameter("department_code", Types.VARCHAR))
 		compile()
-		override def mapRow(rs: ResultSet, rowNumber: Int, params: Array[java.lang.Object], context: JMap[_, _]) = {
+		override def mapRow(rs: ResultSet, rowNumber: Int, params: Array[java.lang.Object], context: JMap[_, _]): ModuleInfo = {
 			val moduleCode = rs.getString("code").toLowerCase.safeTrim
 			val deptCode = params(0).toString.toLowerCase
 			val degreeType: DegreeType = DegreeType.getFromSchemeCode(rs.getString("scheme_code"))
@@ -203,7 +203,7 @@ object ModuleImporter {
 	class ModuleTeachingDepartmentInfoMappingQuery(ds: DataSource) extends MappingSqlQueryWithParameters[ModuleTeachingDepartmentInfo](ds, GetModuleTeachingDepartmentsSql) {
 		declareParameter(new SqlParameter("module_code", Types.VARCHAR))
 		compile()
-		override def mapRow(rs: ResultSet, rowNumber: Int, params: Array[java.lang.Object], context: JMap[_, _]) = {
+		override def mapRow(rs: ResultSet, rowNumber: Int, params: Array[java.lang.Object], context: JMap[_, _]): ModuleTeachingDepartmentInfo = {
 			ModuleTeachingDepartmentInfo(
 				rs.getString("code").toLowerCase.safeTrim,
 				rs.getString("department_code").toLowerCase.safeTrim,
@@ -215,7 +215,7 @@ object ModuleImporter {
 	class RouteInfoMappingQuery(ds: DataSource) extends MappingSqlQuery[RouteInfo](ds, GetRoutesSql) {
 		declareParameter(new SqlParameter("department_code", Types.VARCHAR))
 		compile()
-		override def mapRow(rs: ResultSet, rowNumber: Int) = {
+		override def mapRow(rs: ResultSet, rowNumber: Int): RouteInfo = {
 			val routeCode = rs.getString("code").toLowerCase.safeTrim
 			RouteInfo(
 				rs.getString("name").safeTrim,
@@ -227,7 +227,7 @@ object ModuleImporter {
 	class RouteTeachingDepartmentInfoMappingQuery(ds: DataSource) extends MappingSqlQueryWithParameters[RouteTeachingDepartmentInfo](ds, GetRouteTeachingDepartmentsSql) {
 		declareParameter(new SqlParameter("route_code", Types.VARCHAR))
 		compile()
-		override def mapRow(rs: ResultSet, rowNumber: Int, params: Array[java.lang.Object], context: JMap[_, _]) = {
+		override def mapRow(rs: ResultSet, rowNumber: Int, params: Array[java.lang.Object], context: JMap[_, _]): RouteTeachingDepartmentInfo = {
 			RouteTeachingDepartmentInfo(
 				rs.getString("code").toLowerCase.safeTrim,
 				rs.getString("department_code").toLowerCase.safeTrim,
@@ -243,5 +243,5 @@ trait ModuleImporterComponent {
 }
 
 trait AutowiringModuleImporterComponent extends ModuleImporterComponent {
-	var moduleImporter = Wire[ModuleImporter]
+	var moduleImporter: ModuleImporter = Wire[ModuleImporter]
 }

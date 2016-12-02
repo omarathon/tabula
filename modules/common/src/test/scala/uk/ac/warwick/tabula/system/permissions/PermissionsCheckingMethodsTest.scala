@@ -7,18 +7,18 @@ import uk.ac.warwick.userlookup.User
 import uk.ac.warwick.tabula.services.permissions.RoleService
 import uk.ac.warwick.tabula.system.CustomDataBinder
 import uk.ac.warwick.tabula.services.permissions.PermissionDefinition
-import uk.ac.warwick.tabula.data.model.FileAttachment
+import uk.ac.warwick.tabula.data.model.{Department, FileAttachment, Module}
 import uk.ac.warwick.tabula.data.model.forms.SavedFormValue
 
 class PermissionsCheckingMethodsTest extends TestBase with Mockito with PermissionsChecking {
 
-	val dept = Fixtures.department("in", "IT Services")
+	val dept: Department = Fixtures.department("in", "IT Services")
 	dept.id = "dept"
 
-	val mod1 = Fixtures.module("in101", "IN 1")
+	val mod1: Module = Fixtures.module("in101", "IN 1")
 	mod1.id = "mod1"
 
-	val mod2 = Fixtures.module("in102", "IN 2")
+	val mod2: Module = Fixtures.module("in102", "IN 2")
 	mod2.id = "mod2"
 
 	class Binder(obj:Any, name:String, val securityService:SecurityService)

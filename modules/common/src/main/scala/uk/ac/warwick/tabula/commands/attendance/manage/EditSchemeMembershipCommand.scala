@@ -51,7 +51,7 @@ class EditSchemeMembershipCommandInternal(val scheme: AttendanceMonitoringScheme
 	self: EditSchemeMembershipCommandState with UserLookupComponent with ProfileServiceComponent
 		with AttendanceMonitoringServiceComponent with SecurityServiceComponent =>
 
-	override def applyInternal() = {
+	override def applyInternal(): EditSchemeMembershipCommandResult = {
 		val membershipItems: Seq[SchemeMembershipItem] = {
 			val excludedMemberItems = attendanceMonitoringService.findSchemeMembershipItems(excludedStudentIds.asScala, SchemeMembershipExcludeType, scheme.academicYear)
 			val includedMemberItems = attendanceMonitoringService.findSchemeMembershipItems(includedStudentIds.asScala, SchemeMembershipIncludeType, scheme.academicYear)
@@ -88,7 +88,7 @@ trait PopulateEditSchemeMembershipCommand extends PopulateOnForm {
 
 	self: EditSchemeMembershipCommandState =>
 
-	override def populate() = {
+	override def populate(): Unit = {
 		includedStudentIds = scheme.members.includedUserIds.asJava
 		excludedStudentIds = scheme.members.excludedUserIds.asJava
 	}
@@ -144,7 +144,7 @@ trait RemovesUsersFromEditSchemeMembershipCommand {
 
 	self: EditSchemeMembershipCommandState =>
 
-	def removeUsers() = {
+	def removeUsers(): Unit = {
 		excludedStudentIds = (excludedStudentIds.asScala ++ excludeIds.asScala).distinct.asJava
 	}
 }
@@ -153,16 +153,16 @@ trait ResetsMembershipInEditSchemeMembershipCommand {
 
 	self: EditSchemeMembershipCommandState =>
 
-	def resetMembership() = {
+	def resetMembership(): Unit = {
 		includedStudentIds = (includedStudentIds.asScala diff resetStudentIds.asScala).asJava
 		excludedStudentIds = (excludedStudentIds.asScala diff resetStudentIds.asScala).asJava
 	}
 
-	def resetAllIncluded() = {
+	def resetAllIncluded(): Unit = {
 		 includedStudentIds.clear()
 	}
 
-	def resetAllExcluded() = {
+	def resetAllExcluded(): Unit = {
 		excludedStudentIds.clear()
 	}
 }

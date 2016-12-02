@@ -30,13 +30,13 @@ class ConditionalInterceptor(val delegate: WebRequestInterceptor) extends WebReq
 
 	private def included(request: WebRequest) = !(path(request).startsWith(excludeString))
 
-	override def preHandle(request: WebRequest) =
+	override def preHandle(request: WebRequest): Unit =
 		if (included(request)) delegate.preHandle(request)
 
-	override def postHandle(request: WebRequest, model: ModelMap) =
+	override def postHandle(request: WebRequest, model: ModelMap): Unit =
 		if (included(request)) delegate.postHandle(request, model)
 
-	override def afterCompletion(request: WebRequest, ex: Exception) =
+	override def afterCompletion(request: WebRequest, ex: Exception): Unit =
 		if (included(request)) delegate.afterCompletion(request, ex)
 
 }

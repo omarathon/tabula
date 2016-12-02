@@ -26,7 +26,7 @@ trait MarkingWorkflowWorld extends TestHelpers {
 		new User("cuday") { setWarwickId("7170124"); setFoundUser(true); setVerified(true); }
 	)
 
-	val assignment = newDeepAssignment(moduleCode = "IN101")
+	val assignment: Assignment = newDeepAssignment(moduleCode = "IN101")
 	generateSubmission(assignment, "9876004", "cusxad")
 	generateSubmission(assignment, "0270954", "cuscao")
 	generateSubmission(assignment, "9170726", "curef")
@@ -76,16 +76,16 @@ trait MarkingWorkflowWorld extends TestHelpers {
 		assignment.feedbacks = feedback.asJava
 	}
 
-	def setFirstMarkerFeedbackState(state: MarkingState) =
+	def setFirstMarkerFeedbackState(state: MarkingState): Unit =
 		assignment.feedbacks.asScala.foreach( mf => mf.firstMarkerFeedback.state = state )
 
-	def setSecondMarkerFeedbackState(state: MarkingState) =
+	def setSecondMarkerFeedbackState(state: MarkingState): Unit =
 		assignment.feedbacks.asScala.foreach( mf => mf.secondMarkerFeedback.state = state )
 
-	def setFinalMarkerFeedbackState(state: MarkingState) =
+	def setFinalMarkerFeedbackState(state: MarkingState): Unit =
 		assignment.feedbacks.asScala.foreach( mf => mf.thirdMarkerFeedback.state = state )
 
-	def addMarkerFeedback(feedback: Feedback, position: FeedbackPosition) = {
+	def addMarkerFeedback(feedback: Feedback, position: FeedbackPosition): Unit = {
 		val mf = position match {
 			case ThirdFeedback =>
 				val mf = new MarkerFeedback(feedback)

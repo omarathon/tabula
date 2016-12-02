@@ -27,7 +27,7 @@ object WorkflowStageHealth {
 	// lame manual collection. Keep in sync with the case objects above
 	val members = Set(Good, Warning, Danger)
 
-	def fromCssClass(cssClass: String) =
+	def fromCssClass(cssClass: String): WorkflowStageHealth =
 		if (cssClass == null) null
 		else members.find{_.cssClass == cssClass} match {
 			case Some(caseObject) => caseObject
@@ -45,7 +45,7 @@ object WorkflowStages {
 		preconditionsMet: Boolean=false
 	)
 
-	def toMap(progresses: Seq[StageProgress]) = {
+	def toMap(progresses: Seq[StageProgress]): ListMap[String, StageProgress] = {
 		val builder = ListMap.newBuilder[String, StageProgress]
 
 		def preconditionsMet(p: StageProgress) =

@@ -12,7 +12,7 @@ import scala.collection.immutable.ListMap
 
 class OldSubmissionAndFeedbackExportsTest extends TestBase with Mockito {
 
-	val assignment = newDeepAssignment()
+	val assignment: Assignment = newDeepAssignment()
 	assignment.id = "123"
 	assignment.openDate = dateTime(2012, 4)
 	assignment.closeDate = dateTime(2012, 6)
@@ -40,8 +40,8 @@ class OldSubmissionAndFeedbackExportsTest extends TestBase with Mockito {
 	)
 	plagiarisedFile.submission = submission1
 
-	val student66 = newUser("1234566")
-	val student67 = newUser("1234567")
+	val student66: User = newUser("1234566")
+	val student67: User = newUser("1234567")
 
 	val items = Seq(
 

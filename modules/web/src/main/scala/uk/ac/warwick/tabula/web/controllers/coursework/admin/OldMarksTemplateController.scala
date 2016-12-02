@@ -13,6 +13,7 @@ import uk.ac.warwick.tabula.coursework.web.Routes
 import uk.ac.warwick.tabula.web.controllers.coursework.OldCourseworkController
 import uk.ac.warwick.tabula.data.model.{Assignment, Module}
 import uk.ac.warwick.tabula.services.AssessmentMembershipService
+import uk.ac.warwick.tabula.web.Mav
 import uk.ac.warwick.tabula.web.views.ExcelView
 import uk.ac.warwick.userlookup.User
 
@@ -20,7 +21,7 @@ import uk.ac.warwick.userlookup.User
 @RequestMapping(value=Array("/${cm1.prefix}/admin/module/{module}/assignments/{assignment}/marks-template"))
 class OldAssignmentMarksTemplateController extends OldCourseworkController {
 
-	var assignmentMembershipService = Wire[AssessmentMembershipService]
+	var assignmentMembershipService: AssessmentMembershipService = Wire[AssessmentMembershipService]
 
 	@ModelAttribute("command")
 	def command(@PathVariable module: Module, @PathVariable assignment: Assignment) =
@@ -31,7 +32,7 @@ class OldAssignmentMarksTemplateController extends OldCourseworkController {
 		)
 
 	@RequestMapping(method = Array(HEAD, GET))
-	def generateMarksTemplate(@ModelAttribute("command") cmd: Appliable[XSSFWorkbook], @PathVariable assignment: Assignment) = {
+	def generateMarksTemplate(@ModelAttribute("command") cmd: Appliable[XSSFWorkbook], @PathVariable assignment: Assignment): ExcelView = {
 		new ExcelView(safeAssessmentName(assignment) + " marks.xlsx", cmd.apply())
 	}
 }
@@ -54,7 +55,7 @@ class OldAssignmentMarkerMarksTemplateController extends OldCourseworkController
 		)
 
 	@RequestMapping(method = Array(HEAD, GET))
-	def generateMarksTemplate(@ModelAttribute("command") cmd: Appliable[XSSFWorkbook], @PathVariable assignment: Assignment) = {
+	def generateMarksTemplate(@ModelAttribute("command") cmd: Appliable[XSSFWorkbook], @PathVariable assignment: Assignment): ExcelView = {
 		new ExcelView(safeAssessmentName(assignment) + " marks.xlsx", cmd.apply())
 	}
 }
@@ -64,7 +65,7 @@ class OldAssignmentMarkerMarksTemplateController extends OldCourseworkController
 class OldCurrentAssignmentMarkerMarksTemplateController extends OldCourseworkController {
 
 	@RequestMapping
-	def redirect(@PathVariable assignment: Assignment, currentUser: CurrentUser) = {
+	def redirect(@PathVariable assignment: Assignment, currentUser: CurrentUser): Mav = {
 		Redirect(Routes.admin.assignment.markerFeedback.marksTemplate(assignment, currentUser.apparentUser))
 	}
 }

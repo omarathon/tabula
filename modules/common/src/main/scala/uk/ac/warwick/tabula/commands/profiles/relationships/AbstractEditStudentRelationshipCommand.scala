@@ -8,7 +8,7 @@ import uk.ac.warwick.tabula.services.RelationshipService
 
 abstract class AbstractEditStudentRelationshipCommand extends Command[Seq[StudentRelationship]]  with Notifies[Seq[StudentRelationship], StudentRelationship] {
 
-	var relationshipService = Wire[RelationshipService]
+	var relationshipService: RelationshipService = Wire[RelationshipService]
 
 	var notifyStudent: Boolean = false
 	var notifyOldAgents: Boolean = false

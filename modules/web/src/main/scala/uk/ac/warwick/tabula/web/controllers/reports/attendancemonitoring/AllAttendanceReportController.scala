@@ -17,7 +17,7 @@ class AllAttendanceReportController extends AbstractAttendanceReportController {
 
 	val pageRenderPath = "allattendance"
 	val filePrefix = "all-monitoring-point-attendance"
-	def urlGeneratorFactory(department: Department) = year => Routes.Attendance.all(department, year)
+	def urlGeneratorFactory(department: Department): (AcademicYear) => String = year => Routes.Attendance.all(department, year)
 }
 
 @Controller
@@ -30,7 +30,7 @@ class UnrecordedAttendanceReportController extends AbstractAttendanceReportContr
 
 	val pageRenderPath = "unrecorded"
 	val filePrefix = "unrecorded-monitoring-points"
-	def urlGeneratorFactory(department: Department) = year => Routes.Attendance.unrecorded(department, year)
+	def urlGeneratorFactory(department: Department): (AcademicYear) => String = year => Routes.Attendance.unrecorded(department, year)
 
 }
 
@@ -44,6 +44,6 @@ class MissedAttendanceReportController extends AbstractAttendanceReportControlle
 
 	val pageRenderPath = "missed"
 	val filePrefix = "missed-monitoring-points"
-	def urlGeneratorFactory(department: Department) = year => Routes.Attendance.missed(department, year)
+	def urlGeneratorFactory(department: Department): (AcademicYear) => String = year => Routes.Attendance.missed(department, year)
 
 }

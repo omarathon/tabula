@@ -1,15 +1,16 @@
 package uk.ac.warwick.tabula.commands.coursework.marksmanagement
 
 import uk.ac.warwick.tabula.{AcademicYear, Fixtures, Mockito, TestBase}
-import uk.ac.warwick.tabula.data.model.DegreeType
-import uk.ac.warwick.tabula.commands.{Describable, Appliable}
-import uk.ac.warwick.tabula.services.{TermService, TermServiceComponent, ModuleAndDepartmentService, ModuleAndDepartmentServiceComponent}
+import uk.ac.warwick.tabula.data.model.{DegreeType, Department}
+import uk.ac.warwick.tabula.commands.{Appliable, Describable}
+import uk.ac.warwick.tabula.services.{ModuleAndDepartmentService, ModuleAndDepartmentServiceComponent, TermService, TermServiceComponent}
 import uk.ac.warwick.tabula.system.permissions.PermissionsChecking
 import uk.ac.warwick.tabula.permissions.Permissions
 import uk.ac.warwick.util.termdates.TermImpl
 import uk.ac.warwick.util.termdates.Term.TermType
 import org.joda.time.base.BaseDateTime
 import org.joda.time.DateTime
+
 import collection.JavaConverters._
 
 class OpenAndCloseDepartmentsCommandTest extends TestBase with Mockito {
@@ -18,13 +19,13 @@ class OpenAndCloseDepartmentsCommandTest extends TestBase with Mockito {
 		with ModuleAndDepartmentServiceComponent
 		with TermServiceComponent
 		with PopulateOpenAndCloseDepartmentsCommand {
-			val moduleAndDepartmentService = mock[ModuleAndDepartmentService]
+			val moduleAndDepartmentService: ModuleAndDepartmentService = mock[ModuleAndDepartmentService]
 			moduleAndDepartmentService.allRootDepartments returns Seq()
-			implicit val termService = mock[TermService]
+			implicit val termService: TermService = mock[TermService]
 	}
 
 	trait OpenAndCloseDepartmentsWorld {
-		val department = Fixtures.department("in", "IT Services")
+		val department: Department = Fixtures.department("in", "IT Services")
 	}
 
 	trait Fixture extends OpenAndCloseDepartmentsWorld {
@@ -34,7 +35,7 @@ class OpenAndCloseDepartmentsCommandTest extends TestBase with Mockito {
 		val autumnTerm = new TermImpl(null, now, null, TermType.autumn)
 		command.termService.getTermFromDateIncludingVacations(any[BaseDateTime]) returns autumnTerm
 		command.moduleAndDepartmentService.getDepartmentByCode(department.code) returns Some(department)
-		val currentYear = AcademicYear.findAcademicYearContainingDate(now)(command.termService)
+		val currentYear: AcademicYear = AcademicYear.findAcademicYearContainingDate(now)(command.termService)
 	}
 
 	@Test

@@ -22,7 +22,7 @@ class SmallGroupEventFixtureCommand extends CommandInternal[SmallGroupEvent] wit
 	var location = "Test Place"
 	var title = "Test event"
 
-	protected def applyInternal() =
+	protected def applyInternal(): SmallGroupEvent =
 		transactional() {
 			val set = smallGroupDao.getSmallGroupSetById(setId).get
 			val group = set.groups.asScala(groupNumber - 1)
@@ -43,7 +43,7 @@ class SmallGroupEventFixtureCommand extends CommandInternal[SmallGroupEvent] wit
 }
 
 object SmallGroupEventFixtureCommand {
-	def apply() = {
+	def apply(): SmallGroupEventFixtureCommand with ComposableCommand[SmallGroupEvent] with AutowiringSmallGroupDaoComponent with Unaudited with PubliclyVisiblePermissions = {
 		new SmallGroupEventFixtureCommand
 			with ComposableCommand[SmallGroupEvent]
 			with AutowiringSmallGroupDaoComponent

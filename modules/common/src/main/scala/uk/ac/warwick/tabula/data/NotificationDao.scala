@@ -49,7 +49,7 @@ class NotificationDaoImpl extends NotificationDao with Daoisms {
 			.add(is("emailSent", false))
 			.add(is("dismissed", false))
 
-	def unemailedRecipientCount =
+	def unemailedRecipientCount: Number =
 		unemailedRecipientCriteria.count
 
 	def unemailedRecipients: Scrollable[RecipientNotificationInfo] = {
@@ -95,7 +95,7 @@ class NotificationDaoImpl extends NotificationDao with Daoisms {
 		session.saveOrUpdate(notification)
 	}
 
-	def getById(id: String) = getById[Notification[_ >: Null <: ToEntityReference,_]](id)
+	def getById(id: String): Option[Notification[_ >: Null <: ToEntityReference, _]] = getById[Notification[_ >: Null <: ToEntityReference,_]](id)
 
 	def findActionRequiredNotificationsByEntityAndType[A <: ActionRequiredNotification : ClassTag](entity: ToEntityReference): Seq[ActionRequiredNotification] = {
 		val targetEntity = entity match {
@@ -112,7 +112,7 @@ class NotificationDaoImpl extends NotificationDao with Daoisms {
 		session.newCriteria[Notification[_ >: Null <: ToEntityReference, _]]
 			.add(is("_listenersProcessed", false))
 
-	def unprocessedNotificationCount =
+	def unprocessedNotificationCount: Number =
 		unprocessedNotificationCriteria.count
 
 	def unprocessedNotifications: Scrollable[Notification[_ >: Null <: ToEntityReference, _]] = {
@@ -128,5 +128,5 @@ trait NotificationDaoComponent {
 }
 
 trait AutowiringNotificationDaoComponent extends NotificationDaoComponent {
-	var notificationDao = Wire[NotificationDao]
+	var notificationDao: NotificationDao = Wire[NotificationDao]
 }

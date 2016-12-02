@@ -6,7 +6,7 @@ trait JobTestHelp {
 	def createJobs: Array[Job]
 
 	val dao = new MockJobDao
-	lazy val service = {
+	lazy val service: JobService = {
 		val s = new JobService
 		s.jobDao = dao
 		s.jobs = allJobs

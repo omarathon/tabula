@@ -1,6 +1,6 @@
 package uk.ac.warwick.tabula.commands.profiles.relationships.meetings
 
-import org.joda.time.DateTimeConstants
+import org.joda.time.{DateTime, DateTimeConstants}
 import org.springframework.web.multipart.MultipartFile
 import uk.ac.warwick.tabula._
 import uk.ac.warwick.tabula.commands.UploadedFile
@@ -14,7 +14,7 @@ import uk.ac.warwick.tabula.services.attendancemonitoring.AttendanceMonitoringMe
 
 class DownloadMeetingRecordCommandTest extends TestBase with Mockito {
 
-	val aprilFool = dateTime(2013, DateTimeConstants.APRIL)
+	val aprilFool: DateTime = dateTime(2013, DateTimeConstants.APRIL)
 
 	@Test
 	def validMeeting() = withUser("cusdx") { withFakeTime(aprilFool) {

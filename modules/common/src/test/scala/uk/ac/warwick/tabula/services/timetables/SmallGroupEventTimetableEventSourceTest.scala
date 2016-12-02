@@ -2,7 +2,7 @@ package uk.ac.warwick.tabula.services.timetables
 
 import org.joda.time.LocalTime
 import uk.ac.warwick.tabula.data.model.groups._
-import uk.ac.warwick.tabula.data.model.{Module, NamedLocation}
+import uk.ac.warwick.tabula.data.model.{Module, NamedLocation, StudentMember}
 import uk.ac.warwick.tabula.services._
 import uk.ac.warwick.tabula.timetables.{TimetableEvent, TimetableEventType}
 import uk.ac.warwick.tabula.{Fixtures, Mockito, TestBase}
@@ -10,17 +10,17 @@ import uk.ac.warwick.userlookup.User
 
 class SmallGroupEventTimetableEventSourceTest extends TestBase with Mockito{
 
-	val mockSmallGroupService = mock[SmallGroupService]
-	val mockUserLookup = mock[UserLookupService]
-	val mockSecurityService = mock[SecurityService]
+	val mockSmallGroupService: SmallGroupService = mock[SmallGroupService]
+	val mockUserLookup: UserLookupService = mock[UserLookupService]
+	val mockSecurityService: SecurityService = mock[SecurityService]
 
-	val eventSource = new SmallGroupEventTimetableEventSourceComponentImpl with UserLookupComponent with SmallGroupServiceComponent with SecurityServiceComponent {
-		val smallGroupService = mockSmallGroupService
-		val userLookup = mockUserLookup
-		val securityService = mockSecurityService
+	val eventSource: StudentTimetableEventSource = new SmallGroupEventTimetableEventSourceComponentImpl with UserLookupComponent with SmallGroupServiceComponent with SecurityServiceComponent {
+		val smallGroupService: SmallGroupService = mockSmallGroupService
+		val userLookup: UserLookupService = mockUserLookup
+		val securityService: SecurityService = mockSecurityService
 	}.studentGroupEventSource
 
-	val student = Fixtures.student(universityId="0000001", userId="studentUserId")
+	val student: StudentMember = Fixtures.student(universityId="0000001", userId="studentUserId")
 	val studentUser = new User
 	mockUserLookup.getUserByUserId(any[String]) returns studentUser
 

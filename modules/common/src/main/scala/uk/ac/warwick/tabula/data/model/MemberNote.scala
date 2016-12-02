@@ -20,7 +20,7 @@ import uk.ac.warwick.userlookup.User
 abstract class AbstractMemberNote extends GeneratedId with CanBeDeleted with PermissionsTarget with FormattedHtml {
 
 	@transient
-	var userLookup = Wire.auto[UserLookupService]
+	var userLookup: UserLookupService = Wire.auto[UserLookupService]
 
 	@ManyToOne(fetch = FetchType.LAZY)
 	@JoinColumn(name="memberid")
@@ -53,7 +53,7 @@ abstract class AbstractMemberNote extends GeneratedId with CanBeDeleted with Per
 
 	def permissionsParents = Stream(member)
 
-	override def toString = "MemberNote(" + id + ")"
+	override def toString: String = "MemberNote(" + id + ")"
 
 	def creator: User = userLookup.getUserByWarwickUniId(creatorId)
 

@@ -38,7 +38,7 @@ class ModuleAndDepartmentServiceTest extends PersistenceTestBase with Mockito {
 			val rolesByIdCache:GrantedRoleByIdCache = new GrantedRoleByIdCache(permsDao)
 			val permissionsByIdCache = new GrantedPermissionsByIdCache(permsDao)
 			val cacheStrategy = CacheStrategy.InMemoryOnly
-			val userLookup = userLookupService
+			val userLookup: MockUserLookup = userLookupService
 		}
 		permissionsService.queue = mock[Queue]
 		permissionsService.groupService = userLookupService.getGroupService()

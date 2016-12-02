@@ -9,6 +9,7 @@ import uk.ac.warwick.tabula.data.model.groups.SmallGroupSet
 import uk.ac.warwick.tabula.services.groups.AutowiringSmallGroupSetWorkflowServiceComponent
 import uk.ac.warwick.tabula.groups.web.views.GroupsViewModel.{SetProgress, Tutor, ViewGroup, ViewSetWithProgress}
 import uk.ac.warwick.tabula.permissions.Permissions
+import uk.ac.warwick.tabula.web.Mav
 import uk.ac.warwick.tabula.web.controllers.groups.GroupsController
 
 import scala.collection.JavaConverters._
@@ -19,13 +20,13 @@ class AdminSmallGroupSetController extends GroupsController with AutowiringSmall
 
 	hideDeletedItems
 
-	@ModelAttribute("adminCommand") def command(@PathVariable module: Module, @PathVariable("smallGroupSet") set: SmallGroupSet) = {
+	@ModelAttribute("adminCommand") def command(@PathVariable module: Module, @PathVariable("smallGroupSet") set: SmallGroupSet): ViewViewableCommand[SmallGroupSet] = {
 		mustBeLinked(mandatory(set), mandatory(module))
 		new ViewViewableCommand(Permissions.Module.ManageSmallGroups, set)
 	}
 
 	@RequestMapping
-	def adminSingleSet(@ModelAttribute("adminCommand") cmd: Appliable[SmallGroupSet], user: CurrentUser) = {
+	def adminSingleSet(@ModelAttribute("adminCommand") cmd: Appliable[SmallGroupSet], user: CurrentUser): Mav = {
 		val set = cmd.apply()
 
 		val progress = smallGroupSetWorkflowService.progress(set)

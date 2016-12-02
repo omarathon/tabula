@@ -45,7 +45,7 @@ trait PermissionsTreeBuilder {
 trait PermissionsTreeBuilderImpl extends PermissionsTreeBuilder {
 	self: PermissionsServiceComponent =>
 
-	def buildTree[A <: PermissionsTarget : ClassTag](target: A) = {
+	def buildTree[A <: PermissionsTarget : ClassTag](target: A): PermissionsTree[A] = {
 		val roles =
 			permissionsService.getAllGrantedRolesFor(target)
 				.groupBy(_.roleDefinition)
@@ -85,7 +85,7 @@ trait PermissionsTreeBuilderImpl extends PermissionsTreeBuilder {
 abstract class BuildPermissionsTreeCommandInternal[A <: PermissionsTarget : ClassTag](val target: A) extends CommandInternal[PermissionsTree[A]] with BuildPermissionsTreeCommandState {
 	self: PermissionsTreeBuilder =>
 
-	def applyInternal = buildTree(target)
+	def applyInternal: PermissionsTree[A] = buildTree(target)
 }
 
 trait BuildPermissionsTreeCommandPermissions extends RequiresPermissionsChecking with PermissionsCheckingMethods {

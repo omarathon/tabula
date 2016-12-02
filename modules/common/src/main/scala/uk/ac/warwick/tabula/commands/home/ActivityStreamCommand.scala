@@ -23,7 +23,7 @@ abstract class ActivityStreamCommandInternal(
 	with ActivityStreamCommandState
 	with NotificationServiceComponent {
 
-	def applyInternal() = transactional(readOnly = true) {
+	def applyInternal(): PagedActivities = transactional(readOnly = true) {
 		val results = notificationService.stream(request)
 		PagedActivities(
 			results.items,

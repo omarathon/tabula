@@ -34,26 +34,26 @@ class DisplaySettingsCommandInternal(val department: Department) extends Command
 
 	this: ModuleAndDepartmentServiceComponent with RelationshipServiceComponent =>
 
-	var showStudentName = department.showStudentName
-	var plagiarismDetection = department.plagiarismDetectionEnabled
-	var assignmentGradeValidation = department.assignmentGradeValidation
-	var turnitinExcludeBibliography = department.turnitinExcludeBibliography
-	var turnitinExcludeQuotations = department.turnitinExcludeQuotations
+	var showStudentName: Boolean = department.showStudentName
+	var plagiarismDetection: Boolean = department.plagiarismDetectionEnabled
+	var assignmentGradeValidation: Boolean = department.assignmentGradeValidation
+	var turnitinExcludeBibliography: Boolean = department.turnitinExcludeBibliography
+	var turnitinExcludeQuotations: Boolean = department.turnitinExcludeQuotations
 	var turnitinExcludeSmallMatches: Boolean = _ // not saved as part of the settings - just used in the UI
-	var turnitinSmallMatchWordLimit = department.turnitinSmallMatchWordLimit
-	var turnitinSmallMatchPercentageLimit = department.turnitinSmallMatchPercentageLimit
-	var assignmentInfoView = department.assignmentInfoView
-	var weekNumberingSystem = department.weekNumberingSystem
-	var autoGroupDeregistration = department.autoGroupDeregistration
-	var studentsCanScheduleMeetings = department.studentsCanScheduleMeetings
-	var defaultGroupAllocationMethod = department.defaultGroupAllocationMethod.dbValue
+	var turnitinSmallMatchWordLimit: Int = department.turnitinSmallMatchWordLimit
+	var turnitinSmallMatchPercentageLimit: Int = department.turnitinSmallMatchPercentageLimit
+	var assignmentInfoView: String = department.assignmentInfoView
+	var weekNumberingSystem: String = department.weekNumberingSystem
+	var autoGroupDeregistration: Boolean = department.autoGroupDeregistration
+	var studentsCanScheduleMeetings: Boolean = department.studentsCanScheduleMeetings
+	var defaultGroupAllocationMethod: String = department.defaultGroupAllocationMethod.dbValue
 	var studentRelationshipDisplayed: JMap[String, JBoolean] =
 		JHashMap(department.studentRelationshipDisplayed.map {
 			case (id, bString) => id -> java.lang.Boolean.valueOf(bString)
 		})
 	var studentRelationshipExpected: JMap[StudentRelationshipType, JMap[CourseType, JBoolean]] =
 		LazyMaps.create{_: StudentRelationshipType => JMap[CourseType, JBoolean]() }.asJava
-	var autoMarkMissedMonitoringPoints = department.autoMarkMissedMonitoringPoints
+	var autoMarkMissedMonitoringPoints: Boolean = department.autoMarkMissedMonitoringPoints
 
 	def populate() {
 		relationshipService.allStudentRelationshipTypes.foreach { relationshipType => {
@@ -69,7 +69,7 @@ class DisplaySettingsCommandInternal(val department: Department) extends Command
 		}}
 	}
 
-	override def applyInternal() = transactional() {
+	override def applyInternal(): Department = transactional() {
 		department.showStudentName = showStudentName
 		department.plagiarismDetectionEnabled = plagiarismDetection
 		department.assignmentGradeValidation = assignmentGradeValidation
@@ -125,7 +125,7 @@ trait DisplaySettingsCommandPermissions extends RequiresPermissionsChecking {
 trait DisplaySettingsCommandDescription extends Describable[Department] {
 	this: DisplaySettingsCommandState =>
 	// describe the thing that's happening.
-	override def describe(d: Description) =
+	override def describe(d: Description): Unit =
 		d.department(department)
 }
 

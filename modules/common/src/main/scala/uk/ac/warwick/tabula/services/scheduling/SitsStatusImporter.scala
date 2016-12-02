@@ -16,11 +16,11 @@ import uk.ac.warwick.tabula.helpers.Logging
 import scala.collection.JavaConverters._
 
 trait SitsStatusImporter extends Logging {
-	var sitsStatusDao = Wire.auto[SitsStatusDao]
+	var sitsStatusDao: SitsStatusDao = Wire.auto[SitsStatusDao]
 
 	var sitsStatusMap:Map[String,SitsStatus] = null
 
-	def getSitsStatusForCode(code:String) = {
+	def getSitsStatusForCode(code:String): Option[SitsStatus] = {
 			if (sitsStatusMap == null){
 				sitsStatusMap=slurpSitsStatuses()
 			}
@@ -45,7 +45,7 @@ trait SitsStatusImporter extends Logging {
 class SitsStatusImporterImpl extends SitsStatusImporter {
 	import SitsStatusImporter._
 
-	var sits = Wire[DataSource]("sitsDataSource")
+	var sits: DataSource = Wire[DataSource]("sitsDataSource")
 
 	lazy val sitsStatusesQuery = new SitsStatusesQuery(sits)
 
@@ -89,5 +89,5 @@ trait SitsStatusImporterComponent {
 }
 
 trait AutowiringSitsStatusImporterComponent extends SitsStatusImporterComponent {
-	var sitsStatusImporter = Wire[SitsStatusImporter]
+	var sitsStatusImporter: SitsStatusImporter = Wire[SitsStatusImporter]
 }

@@ -28,7 +28,7 @@ class AddPointsToSchemesCommandInternal(val department: Department, val academic
 
 	self: AttendanceMonitoringServiceComponent =>
 
-	override def applyInternal() = {
+	override def applyInternal(): AddPointsToSchemesCommandResult = {
 		val groupedSchemeMap = attendanceMonitoringService.listSchemes(department, academicYear).map{
 			scheme => scheme -> Option(schemes).getOrElse("").contains(scheme.id)
 		}.groupBy(_._1.pointStyle).withDefaultValue(Seq())

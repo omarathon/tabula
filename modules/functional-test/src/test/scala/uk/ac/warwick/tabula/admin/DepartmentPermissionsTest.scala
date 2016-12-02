@@ -79,7 +79,7 @@ class  DepartmentPermissionsTest extends BrowserTest with AdminFixtures with Giv
 		injected.get.underlying.getAttribute("value").trim should be (permittedUser.usercode)
 	}
 
-	def addAndRemoveWithRoleInElement[T](performingUser: LoginDetails, permittedUser: LoginDetails, parentElement: String, preExistingCount: Int = 0)(fn: => T) =
+	def addAndRemoveWithRoleInElement[T](performingUser: LoginDetails, permittedUser: LoginDetails, parentElement: String, preExistingCount: Int = 0)(fn: => T): T =
 		as(performingUser) {
 			gotoPermissionsScreenAndPickUser(parentElement, permittedUser, preExistingCount)
 
@@ -109,7 +109,7 @@ class  DepartmentPermissionsTest extends BrowserTest with AdminFixtures with Giv
 			fn
 		}
 
-	def permissionDeniedWithRoleInElement[T](performingUser: LoginDetails, parentElement: String, preExistingCount:Int = 0)(fn: => T) =
+	def permissionDeniedWithRoleInElement[T](performingUser: LoginDetails, parentElement: String, preExistingCount:Int = 0)(fn: => T): T =
 		as(performingUser) {
 			gotoPermissionsScreen(parentElement, preExistingCount)
 

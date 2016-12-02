@@ -2,6 +2,7 @@ package uk.ac.warwick.tabula.services.attendancemonitoring
 
 import org.joda.time.{DateTime, DateTimeConstants, Interval}
 import uk.ac.warwick.tabula.JavaImports._
+import uk.ac.warwick.tabula.data.model.{Module, StudentMember}
 import uk.ac.warwick.tabula.data.model.attendance._
 import uk.ac.warwick.tabula.data.model.groups._
 import uk.ac.warwick.tabula.services._
@@ -9,15 +10,15 @@ import uk.ac.warwick.tabula.{AcademicYear, Fixtures, Mockito, TestBase}
 
 class AttendanceMonitoringEventAttendanceServiceMissedPointTest extends TestBase with Mockito {
 
-	val mockModuleAndDepartmentService = smartMock[ModuleAndDepartmentService]
+	val mockModuleAndDepartmentService: ModuleAndDepartmentService = smartMock[ModuleAndDepartmentService]
 
 	trait ServiceTestSupport extends SmallGroupServiceComponent with TermServiceComponent
 		with ProfileServiceComponent with AttendanceMonitoringServiceComponent {
 
-		val attendanceMonitoringService = smartMock[AttendanceMonitoringService]
-		val profileService = smartMock[ProfileService]
-		val smallGroupService = smartMock[SmallGroupService]
-		val termService = smartMock[TermService]
+		val attendanceMonitoringService: AttendanceMonitoringService = smartMock[AttendanceMonitoringService]
+		val profileService: ProfileService = smartMock[ProfileService]
+		val smallGroupService: SmallGroupService = smartMock[SmallGroupService]
+		val termService: TermService = smartMock[TermService]
 	}
 
 	trait Fixture {
@@ -42,11 +43,11 @@ class AttendanceMonitoringEventAttendanceServiceMissedPointTest extends TestBase
 
 		service.termService.getAcademicWeeksForYear(academicYear2013.dateInTermOne) returns termWeeks
 
-		val student = Fixtures.student("1234")
+		val student: StudentMember = Fixtures.student("1234")
 
-		val module1 = Fixtures.module("aa101")
+		val module1: Module = Fixtures.module("aa101")
 		module1.id = "aa101"
-		val module2 = Fixtures.module("aa202")
+		val module2: Module = Fixtures.module("aa202")
 		module2.id = "aa202"
 		mockModuleAndDepartmentService.getModuleById(module1.id) returns Option(module1)
 		mockModuleAndDepartmentService.getModuleById(module2.id) returns Option(module2)

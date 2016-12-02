@@ -9,8 +9,8 @@ import scala.collection.JavaConverters._
 
 class MemberTest extends TestBase with Mockito {
 
-	val profileService = smartMock[ProfileService with StaffAssistantsHelpers]
-	val relationshipService = smartMock[RelationshipService]
+	val profileService: ProfileService with StaffAssistantsHelpers = smartMock[ProfileService with StaffAssistantsHelpers]
+	val relationshipService: RelationshipService = smartMock[RelationshipService]
 
 	@Test def testAffiliatedDepartments() {
 		val member = new StudentMember

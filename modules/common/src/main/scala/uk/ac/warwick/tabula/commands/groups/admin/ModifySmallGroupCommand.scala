@@ -49,7 +49,7 @@ trait EditSmallGroupCommandState extends ModifySmallGroupCommandState {
 class CreateSmallGroupCommandInternal(val module: Module, var set: SmallGroupSet) extends ModifySmallGroupCommandInternal with CreateSmallGroupCommandState {
 	self: SmallGroupServiceComponent =>
 
-	override def applyInternal() = transactional() {
+	override def applyInternal(): SmallGroup = transactional() {
 		val smallGroup = new SmallGroup(set)
 		copyTo(smallGroup)
 		set.groups.add(smallGroup)
@@ -63,7 +63,7 @@ class EditSmallGroupCommandInternal(val module: Module, val set: SmallGroupSet, 
 
 	copyFrom(smallGroup)
 
-	override def applyInternal() = transactional() {
+	override def applyInternal(): SmallGroup = transactional() {
 		copyTo(smallGroup)
 		smallGroupService.saveOrUpdate(smallGroup)
 		smallGroup

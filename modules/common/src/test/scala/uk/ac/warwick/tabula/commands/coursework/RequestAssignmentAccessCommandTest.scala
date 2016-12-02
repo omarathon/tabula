@@ -48,20 +48,20 @@ object RequestAssignmentAccessCommandTest {
 
 trait AssignmentFixture extends Mockito{
 
-	val userLookup = mock[UserLookupService]
+	val userLookup: UserLookupService = mock[UserLookupService]
 
-	val ownersGroup = UserGroup.ofUsercodes
+	val ownersGroup: UserGroup = UserGroup.ofUsercodes
 	ownersGroup.includedUserIds = Seq("admin1", "admin2")
 	ownersGroup.userLookup = userLookup
 
-	val student = newTestUser("student")
-	val admin1 = newTestUser("admin1")
-	val admin2 = newTestUser("admin2")
+	val student: User = newTestUser("student")
+	val admin1: User = newTestUser("admin1")
+	val admin2: User = newTestUser("admin2")
 
 	userLookup.getUsersByUserIds(ownersGroup.includedUserIds.asJava) returns JMap("admin1" -> admin1, "admin2" -> admin2)
 
 	val department = new Department
-	val permissionsService = mock[PermissionsService]
+	val permissionsService: PermissionsService = mock[PermissionsService]
 	permissionsService.ensureUserGroupFor(department, DepartmentalAdministratorRoleDefinition) returns ownersGroup
 
 	department.permissionsService = permissionsService
@@ -74,7 +74,7 @@ trait AssignmentFixture extends Mockito{
 	assignment.module.name = "Really difficult module"
 
 
-	def newTestUser(id: String) = {
+	def newTestUser(id: String): User = {
 		val u = new User(id)
 		u.setFoundUser(true)
 		u.setWarwickId("1000000")

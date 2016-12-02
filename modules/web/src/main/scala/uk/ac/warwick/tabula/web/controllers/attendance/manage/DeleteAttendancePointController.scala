@@ -5,11 +5,14 @@ import org.springframework.web.bind.annotation.{ModelAttribute, PathVariable, Re
 import uk.ac.warwick.tabula.data.model.Department
 import uk.ac.warwick.tabula.web.controllers.attendance.AttendanceController
 import uk.ac.warwick.tabula.data.model.attendance.AttendanceMonitoringPoint
-import uk.ac.warwick.tabula.commands.{Appliable, SelfValidating}
+import uk.ac.warwick.tabula.commands.{Appliable, ComposableCommand, SelfValidating}
 import uk.ac.warwick.tabula.AcademicYear
 import org.springframework.validation.Errors
-import uk.ac.warwick.tabula.commands.attendance.manage.{SetsFindPointsResultOnCommandState, DeleteAttendancePointCommand, FindPointsCommand, FindPointsResult}
+import uk.ac.warwick.tabula.commands.attendance.manage._
 import uk.ac.warwick.tabula.attendance.web.Routes
+import uk.ac.warwick.tabula.services.AutowiringProfileServiceComponent
+import uk.ac.warwick.tabula.services.attendancemonitoring.AutowiringAttendanceMonitoringServiceComponent
+import uk.ac.warwick.tabula.web.Mav
 
 @Controller
 @RequestMapping(Array("/attendance/manage/{department}/{academicYear}/editpoints/{templatePoint}/delete"))
@@ -23,7 +26,7 @@ class DeleteAttendancePointController extends AttendanceController {
 	def command(
 		@PathVariable department: Department,
 		@PathVariable templatePoint: AttendanceMonitoringPoint
-	) = {
+	): DeleteAttendancePointCommandInternal with ComposableCommand[Seq[AttendanceMonitoringPoint]] with AutowiringAttendanceMonitoringServiceComponent with AutowiringProfileServiceComponent with DeleteAttendancePointValidation with DeleteAttendancePointDescription with DeleteAttendancePointPermissions with DeleteAttendancePointCommandState with SetsFindPointsResultOnCommandState = {
 		DeleteAttendancePointCommand(mandatory(department), mandatory(templatePoint))
 	}
 
@@ -44,7 +47,7 @@ class DeleteAttendancePointController extends AttendanceController {
 		@ModelAttribute("findCommand") findCommand: Appliable[FindPointsResult],
 		@PathVariable department: Department,
 		@PathVariable academicYear: AcademicYear
-	) = {
+	): Mav = {
 		val findCommandResult = findCommand.apply()
 		cmd.setFindPointsResult(findCommandResult)
 		render(department, academicYear)
@@ -58,7 +61,7 @@ class DeleteAttendancePointController extends AttendanceController {
 		@ModelAttribute("findCommand") findCommand: Appliable[FindPointsResult],
 		@PathVariable department: Department,
 		@PathVariable academicYear: AcademicYear
-	) = {
+	): Mav = {
 		val findCommandResult = findCommand.apply()
 		cmd.setFindPointsResult(findCommandResult)
 		cmd.validate(errors)

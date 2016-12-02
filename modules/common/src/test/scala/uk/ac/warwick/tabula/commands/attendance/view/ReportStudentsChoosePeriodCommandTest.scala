@@ -3,50 +3,51 @@ package uk.ac.warwick.tabula.commands.attendance.view
 import org.joda.time.{DateTime, LocalDate}
 import org.mockito.Matchers
 import org.springframework.validation.BindException
-import uk.ac.warwick.tabula.data.model.attendance.AttendanceState
+import uk.ac.warwick.tabula.data.model.{Department, StudentMember}
+import uk.ac.warwick.tabula.data.model.attendance.{AttendanceMonitoringCheckpoint, AttendanceMonitoringPoint, AttendanceState}
 import uk.ac.warwick.tabula.data.{ScalaOrder, ScalaRestriction}
 import uk.ac.warwick.tabula.services._
-import uk.ac.warwick.tabula.services.attendancemonitoring.{AttendanceMonitoringServiceComponent, AttendanceMonitoringService}
+import uk.ac.warwick.tabula.services.attendancemonitoring.{AttendanceMonitoringService, AttendanceMonitoringServiceComponent}
 import uk.ac.warwick.tabula.{AcademicYear, Fixtures, Mockito, TestBase}
 import uk.ac.warwick.util.termdates.Term.TermType
 import uk.ac.warwick.util.termdates.TermImpl
 
 class ReportStudentsChoosePeriodCommandTest extends TestBase with Mockito {
 
-	val thisTermService = smartMock[TermService]
+	val thisTermService: TermService = smartMock[TermService]
 
 	trait TestSupport extends TermServiceComponent with AttendanceMonitoringServiceComponent with ProfileServiceComponent {
-		val termService = thisTermService
-		val attendanceMonitoringService = smartMock[AttendanceMonitoringService]
-		val profileService = smartMock[ProfileService]
+		val termService: TermService = thisTermService
+		val attendanceMonitoringService: AttendanceMonitoringService = smartMock[AttendanceMonitoringService]
+		val profileService: ProfileService = smartMock[ProfileService]
 	}
 
 	trait Fixture {
-		val student1 = Fixtures.student("1234", "1234")
+		val student1: StudentMember = Fixtures.student("1234", "1234")
 		student1.lastName = "Smith"
 		student1.firstName = "Fred"
-		val student2 = Fixtures.student("2345", "2345")
+		val student2: StudentMember = Fixtures.student("2345", "2345")
 		student2.lastName = "Smith"
 		student2.firstName = "Bob"
 
-		val point1 = Fixtures.attendanceMonitoringPoint(null)
+		val point1: AttendanceMonitoringPoint = Fixtures.attendanceMonitoringPoint(null)
 		point1.startDate = new LocalDate(2014, 1, 1)
-		val point2 = Fixtures.attendanceMonitoringPoint(null)
+		val point2: AttendanceMonitoringPoint = Fixtures.attendanceMonitoringPoint(null)
 		point2.startDate = new LocalDate(2014, 6, 6)
 
 		val autumnTerm = new TermImpl(null, DateTime.now, null, TermType.autumn)
 		val springTerm = new TermImpl(null, DateTime.now, null, TermType.spring)
 		val christmasVacation = Vacation(autumnTerm, null)
 
-		val fakeNow = new LocalDate(2015, 1, 1).toDateTimeAtStartOfDay
+		val fakeNow: DateTime = new LocalDate(2015, 1, 1).toDateTimeAtStartOfDay
 
 		val state = new ReportStudentsChoosePeriodCommandState with TestSupport {
-			val department = Fixtures.department("its")
+			val department: Department = Fixtures.department("its")
 			val academicYear = AcademicYear(2014)
 		}
 
 		val validator = new ReportStudentsChoosePeriodValidation with ReportStudentsChoosePeriodCommandState with TestSupport {
-			val department = Fixtures.department("its")
+			val department: Department = Fixtures.department("its")
 			val academicYear = AcademicYear(2014)
 		}
 
@@ -68,7 +69,7 @@ class ReportStudentsChoosePeriodCommandTest extends TestBase with Mockito {
 		state.profileService.findAllStudentsByRestrictions(Matchers.eq(state.department), any[Seq[ScalaRestriction]], any[Seq[ScalaOrder]]) returns Seq(student1, student2)
 		state.attendanceMonitoringService.listStudentsPoints(student1, Option(state.department), state.academicYear) returns Seq(point1, point2)
 		state.attendanceMonitoringService.listStudentsPoints(student2, Option(state.department), state.academicYear) returns Seq(point1, point2)
-		val result = state.studentPointMap
+		val result: Map[StudentMember, Seq[AttendanceMonitoringPoint]] = state.studentPointMap
 		result(student1) should be (Seq(point1, point2))
 		result(student2) should be (Seq(point1, point2))
 	}}
@@ -80,7 +81,7 @@ class ReportStudentsChoosePeriodCommandTest extends TestBase with Mockito {
 		state.attendanceMonitoringService.listStudentsPoints(student2, Option(state.department), state.academicYear) returns Seq(point1, point2)
 		state.termService.getTermFromDateIncludingVacations(point1.startDate.toDateTimeAtStartOfDay) returns autumnTerm
 		state.termService.getTermFromDateIncludingVacations(point2.startDate.toDateTimeAtStartOfDay) returns christmasVacation
-		val result = state.termPoints
+		val result: Map[String, Seq[AttendanceMonitoringPoint]] = state.termPoints
 		result(autumnTerm.getTermTypeAsString) should be (Seq(point1))
 		result(christmasVacation.getTermTypeAsString) should be (Seq(point2))
 	}}
@@ -95,13 +96,13 @@ class ReportStudentsChoosePeriodCommandTest extends TestBase with Mockito {
 		state.attendanceMonitoringService.findNonReportedTerms(state.allStudents, state.academicYear) returns Seq(autumnTerm.getTermTypeAsString)
 		state.profileService.findAllStudentsByRestrictions(Matchers.eq(state.department), any[Seq[ScalaRestriction]], any[Seq[ScalaOrder]]) returns Seq()
 
-		val student1point1missed = Fixtures.attendanceMonitoringCheckpoint(point1, student1, AttendanceState.MissedUnauthorised)
-		val student2point1missed = Fixtures.attendanceMonitoringCheckpoint(point2, student2, AttendanceState.MissedUnauthorised)
+		val student1point1missed: AttendanceMonitoringCheckpoint = Fixtures.attendanceMonitoringCheckpoint(point1, student1, AttendanceState.MissedUnauthorised)
+		val student2point1missed: AttendanceMonitoringCheckpoint = Fixtures.attendanceMonitoringCheckpoint(point2, student2, AttendanceState.MissedUnauthorised)
 		state.attendanceMonitoringService.getCheckpoints(Seq(point1), state.allStudents) returns
 			Map(student1 -> Map(point1 -> student1point1missed),
 			    student2 -> Map(point1 -> student2point1missed))
 
-		val result = state.studentReportCounts
+		val result: Seq[StudentReportCount] = state.studentReportCounts
 		result.size should be (2)
 	}}
 
@@ -115,8 +116,8 @@ class ReportStudentsChoosePeriodCommandTest extends TestBase with Mockito {
 		state.attendanceMonitoringService.findNonReportedTerms(state.allStudents, state.academicYear) returns Seq(autumnTerm.getTermTypeAsString)
 		state.profileService.findAllStudentsByRestrictions(Matchers.eq(state.department), any[Seq[ScalaRestriction]], any[Seq[ScalaOrder]]) returns Seq()
 
-		val student1point1missed = Fixtures.attendanceMonitoringCheckpoint(point1, student1, AttendanceState.MissedUnauthorised)
-		val student2point1missed = Fixtures.attendanceMonitoringCheckpoint(point2, student2, AttendanceState.MissedUnauthorised)
+		val student1point1missed: AttendanceMonitoringCheckpoint = Fixtures.attendanceMonitoringCheckpoint(point1, student1, AttendanceState.MissedUnauthorised)
+		val student2point1missed: AttendanceMonitoringCheckpoint = Fixtures.attendanceMonitoringCheckpoint(point2, student2, AttendanceState.MissedUnauthorised)
 		state.attendanceMonitoringService.getCheckpoints(Seq(point1), state.allStudents) returns
 			Map(student1 -> Map(point1 -> student1point1missed),
 				student2 -> Map(point1 -> student2point1missed))
@@ -124,7 +125,7 @@ class ReportStudentsChoosePeriodCommandTest extends TestBase with Mockito {
 		state.attendanceMonitoringService.studentAlreadyReportedThisTerm(student1, point1) returns true
 		state.attendanceMonitoringService.studentAlreadyReportedThisTerm(student2, point1) returns false
 
-		val result = state.studentMissedReportCounts
+		val result: Seq[StudentReportCount] = state.studentMissedReportCounts
 		result.size should be (1)
 		result.head.student should be (student2)
 	}}
@@ -190,11 +191,11 @@ class ReportStudentsChoosePeriodCommandTest extends TestBase with Mockito {
 
 	@Test
 	def apply() { new CommandFixture {
-		val student1point1missed = Fixtures.attendanceMonitoringCheckpoint(point1, student1, AttendanceState.MissedUnauthorised)
-		val student1point2missed = Fixtures.attendanceMonitoringCheckpoint(point2, student1, AttendanceState.MissedUnauthorised)
+		val student1point1missed: AttendanceMonitoringCheckpoint = Fixtures.attendanceMonitoringCheckpoint(point1, student1, AttendanceState.MissedUnauthorised)
+		val student1point2missed: AttendanceMonitoringCheckpoint = Fixtures.attendanceMonitoringCheckpoint(point2, student1, AttendanceState.MissedUnauthorised)
 		command.period = autumnTerm.getTermTypeAsString
 		command.attendanceMonitoringService.getCheckpoints(Seq(point1), command.allStudents) returns Map(student1 -> Map(point1 -> student1point1missed, point2 -> student1point2missed))
-		val result = command.applyInternal()
+		val result: Seq[StudentReportCount] = command.applyInternal()
 		result.size should be (1)
 		result.head.missed should be (1)
 	}}

@@ -27,7 +27,7 @@ class DownloadRegistersAsPdfController extends GroupsController with DepartmentS
 	override val departmentPermission: Permission = AdminSmallGroupsHomeCommand.RequiredPermission
 
 	@ModelAttribute("activeDepartment")
-	override def activeDepartment(@PathVariable department: Department) = retrieveActiveDepartment(Option(department))
+	override def activeDepartment(@PathVariable department: Department): Option[Department] = retrieveActiveDepartment(Option(department))
 
 	@ModelAttribute("activeAcademicYear")
 	override def activeAcademicYear(@PathVariable academicYear: AcademicYear): Option[AcademicYear] = retrieveActiveAcademicYear(Option(academicYear))

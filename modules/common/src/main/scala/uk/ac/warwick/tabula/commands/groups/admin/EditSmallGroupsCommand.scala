@@ -5,15 +5,18 @@ import uk.ac.warwick.tabula.JavaImports._
 import uk.ac.warwick.tabula.commands._
 import uk.ac.warwick.tabula.data.model.Module
 import uk.ac.warwick.tabula.data.model.attendance.AttendanceState
-import uk.ac.warwick.tabula.data.model.groups.{SmallGroupAllocationMethod, SmallGroup, SmallGroupSet}
+import uk.ac.warwick.tabula.data.model.groups.{SmallGroup, SmallGroupAllocationMethod, SmallGroupSet}
 import uk.ac.warwick.tabula.helpers.LazyLists
 import uk.ac.warwick.tabula.permissions.Permissions
 import uk.ac.warwick.tabula.services.{AutowiringSmallGroupServiceComponent, SmallGroupServiceComponent}
 import uk.ac.warwick.tabula.system.BindListener
 import uk.ac.warwick.tabula.system.permissions.{PermissionsChecking, PermissionsCheckingMethods, RequiresPermissionsChecking}
+
 import scala.collection.JavaConverters._
 import uk.ac.warwick.tabula.helpers.StringUtils._
 import EditSmallGroupsCommand._
+
+import scala.collection.mutable
 
 object EditSmallGroupsCommand {
 	def apply(module: Module, set: SmallGroupSet) =
@@ -61,7 +64,7 @@ trait EditSmallGroupsCommandState {
 class EditSmallGroupsCommandInternal(val module: Module, val set: SmallGroupSet) extends CommandInternal[Seq[SmallGroup]] with EditSmallGroupsCommandState {
 	self: SmallGroupServiceComponent =>
 
-	override def applyInternal() = {
+	override def applyInternal(): mutable.Buffer[SmallGroup] = {
 		// Manage existing groups
 		existingGroups.asScala.values.filterNot { _.delete }.foreach { props =>
 			val group = props.group

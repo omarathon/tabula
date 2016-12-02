@@ -10,7 +10,7 @@ import uk.ac.warwick.tabula.web.Mav
 class FixturesController {
 
 	@RequestMapping
-	def apply(cmd: FixturesCommand) = {
+	def apply(cmd: FixturesCommand): Mav = {
 		cmd.apply()
 		Mav("sysadmin/fixture-setup-success")
 	}

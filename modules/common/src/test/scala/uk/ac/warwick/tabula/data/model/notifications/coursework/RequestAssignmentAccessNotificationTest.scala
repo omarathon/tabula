@@ -1,21 +1,21 @@
 package uk.ac.warwick.tabula.data.model.notifications.coursework
 
-import uk.ac.warwick.tabula.data.model.Notification
-import uk.ac.warwick.tabula.web.views.FreemarkerRendering
+import uk.ac.warwick.tabula.data.model.{Assignment, Notification}
+import uk.ac.warwick.tabula.web.views.{FreemarkerRendering, ScalaFreemarkerConfiguration}
 import uk.ac.warwick.tabula.{Fixtures, TestBase}
 import uk.ac.warwick.userlookup.User
 
 class RequestAssignmentAccessNotificationTest extends TestBase with FreemarkerRendering {
 
 	private trait Fixture {
-		val freeMarkerConfig = newFreemarkerConfiguration
+		val freeMarkerConfig: ScalaFreemarkerConfiguration = newFreemarkerConfiguration
 
-		val assignment = Fixtures.assignment("5,000 word essay")
+		val assignment: Assignment = Fixtures.assignment("5,000 word essay")
 		assignment.module = Fixtures.module("cs118", "Programming for Computer Scientists")
 	}
 
 	@Test def title(): Unit = new Fixture {
-		val notification = Notification.init(new RequestAssignmentAccessNotification, new User("cuscav"), assignment)
+		val notification: RequestAssignmentAccessNotification = Notification.init(new RequestAssignmentAccessNotification, new User("cuscav"), assignment)
 		notification.title should be ("CS118: Access requested for \"5,000 word essay\"")
 	}
 
@@ -29,9 +29,9 @@ class RequestAssignmentAccessNotificationTest extends TestBase with FreemarkerRe
 		user.setDepartment("Warwick Business School")
 		user.setEmail("student@wbs.ac.uk")
 
-		val notification = Notification.init(new RequestAssignmentAccessNotification, user, assignment)
+		val notification: RequestAssignmentAccessNotification = Notification.init(new RequestAssignmentAccessNotification, user, assignment)
 
-		val notificationContent = renderToString(freeMarkerConfig.getTemplate(notification.content.template), notification.content.model)
+		val notificationContent: String = renderToString(freeMarkerConfig.getTemplate(notification.content.template), notification.content.model)
 		notificationContent should be (
 			"""Student Full Name (1234567), who is a student in Warwick Business School, has requested access to the assignment "5,000 word essay" for CS118.
 				|
@@ -51,9 +51,9 @@ class RequestAssignmentAccessNotificationTest extends TestBase with FreemarkerRe
 		user.setDepartment("Warwick Business School")
 		user.setEmail("staff@wbs.ac.uk")
 
-		val notification = Notification.init(new RequestAssignmentAccessNotification, user, assignment)
+		val notification: RequestAssignmentAccessNotification = Notification.init(new RequestAssignmentAccessNotification, user, assignment)
 
-		val notificationContent = renderToString(freeMarkerConfig.getTemplate(notification.content.template), notification.content.model)
+		val notificationContent: String = renderToString(freeMarkerConfig.getTemplate(notification.content.template), notification.content.model)
 		notificationContent should be (
 			"""Staff Full Name (1234567), who is a member of staff in Warwick Business School, has requested access to the assignment "5,000 word essay" for CS118.
 				|
@@ -70,9 +70,9 @@ class RequestAssignmentAccessNotificationTest extends TestBase with FreemarkerRe
 		user.setFullName("External Full Name")
 		user.setEmail("external@wbs.ac.uk")
 
-		val notification = Notification.init(new RequestAssignmentAccessNotification, user, assignment)
+		val notification: RequestAssignmentAccessNotification = Notification.init(new RequestAssignmentAccessNotification, user, assignment)
 
-		val notificationContent = renderToString(freeMarkerConfig.getTemplate(notification.content.template), notification.content.model)
+		val notificationContent: String = renderToString(freeMarkerConfig.getTemplate(notification.content.template), notification.content.model)
 		notificationContent should be (
 			"""External Full Name, who is an external user, has requested access to the assignment "5,000 word essay" for CS118.
 				|

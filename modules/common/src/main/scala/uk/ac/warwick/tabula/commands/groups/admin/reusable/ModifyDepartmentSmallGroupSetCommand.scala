@@ -47,7 +47,7 @@ class CreateDepartmentSmallGroupSetCommandInternal(val department: Department, v
 
 	self: SmallGroupServiceComponent =>
 
-	def applyInternal() = transactional() {
+	def applyInternal(): DepartmentSmallGroupSet = transactional() {
 		val set = new DepartmentSmallGroupSet(department)
 		set.academicYear = academicYear
 		copyTo(set)
@@ -70,7 +70,7 @@ class EditDepartmentSmallGroupSetCommandInternal(val department: Department, val
 
 	copyFrom(smallGroupSet)
 
-	def applyInternal() = transactional() {
+	def applyInternal(): DepartmentSmallGroupSet = transactional() {
 		copyTo(smallGroupSet)
 
 		smallGroupService.saveOrUpdate(smallGroupSet)
@@ -117,7 +117,7 @@ trait CreateDepartmentSmallGroupSetDescription extends Describable[DepartmentSma
 		d.department(department).properties("name" -> name)
 	}
 
-	override def describeResult(d: Description, set: DepartmentSmallGroupSet) =
+	override def describeResult(d: Description, set: DepartmentSmallGroupSet): Unit =
 		d.department(set.department).properties("smallGroupSet" -> set.id)
 }
 

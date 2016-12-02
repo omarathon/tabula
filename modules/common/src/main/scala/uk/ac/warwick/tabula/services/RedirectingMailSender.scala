@@ -23,7 +23,7 @@ final class RedirectingMailSender(delegate: WarwickMailSender) extends WarwickMa
 	val nonProductionMessage1 = "This is a copy of a message that isn't being sent to the real recipients ("
 	val nonProductionMessage2 = ") because it is being sent from a non-production server.\n\n-------\n\n"
 
-	override def createMimeMessage() = delegate.createMimeMessage()
+	override def createMimeMessage(): MimeMessage = delegate.createMimeMessage()
 
 	override def send(message: MimeMessage): Future[JBoolean] = {
 		val messageToSend = if (!features.emailStudents) {

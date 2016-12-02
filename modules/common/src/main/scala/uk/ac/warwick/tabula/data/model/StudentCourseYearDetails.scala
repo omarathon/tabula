@@ -43,7 +43,7 @@ class StudentCourseYearDetails extends StudentCourseYearProperties
 	with Ordered[StudentCourseYearDetails] with PostLoadBehaviour {
 
 	@transient
-	var termService = Wire.auto[TermService]
+	var termService: TermService = Wire.auto[TermService]
 
 	def this(studentCourseDetails: StudentCourseDetails, sceSequenceNumber: JInteger, year:AcademicYear) {
 		this()
@@ -58,7 +58,7 @@ class StudentCourseYearDetails extends StudentCourseYearProperties
 
 	def toStringProps = Seq("studentCourseDetails" -> studentCourseDetails, "sceSequenceNumber" -> sceSequenceNumber, "academicYear" -> academicYear)
 
-	def permissionsParents = Stream(Option(studentCourseDetails), Option(enrolmentDepartment)).flatten
+	def permissionsParents: Stream[PermissionsTarget] = Stream(Option(studentCourseDetails), Option(enrolmentDepartment)).flatten
 
 	/**
 	 * This is used to calculate StudentCourseDetails.latestStudentCourseYearDetails
@@ -72,31 +72,31 @@ class StudentCourseYearDetails extends StudentCourseYearProperties
 			this.sceSequenceNumber - that.sceSequenceNumber
 	}
 
-	def equals(that: StudentCourseYearDetails) = {
+	def equals(that: StudentCourseYearDetails): Boolean = {
 		(this.studentCourseDetails.scjCode == that.studentCourseDetails.scjCode) && (this.sceSequenceNumber == that.sceSequenceNumber)
 	}
 
-	def isFresh = missingFromImportSince == null
+	def isFresh: Boolean = missingFromImportSince == null
 
 	// There can be more than one StudentCourseYearDetails per year if there are multiple sequence numbers,
 	// so moduleRegistrations are not attached directly - instead, get them from StudentCourseDetails,
 	// filtering by year:
-	def moduleRegistrations = studentCourseDetails.moduleRegistrations.filter(_.academicYear == this.academicYear)
+	def moduleRegistrations: Seq[ModuleRegistration] = studentCourseDetails.moduleRegistrations.filter(_.academicYear == this.academicYear)
 
 	// similarly for accredited prior learning
-	def accreditedPriorLearning = {
+	def accreditedPriorLearning: Seq[AccreditedPriorLearning] = {
 		studentCourseDetails.accreditedPriorLearning.filter(_.academicYear == this.academicYear)
 	}
 
-	def registeredModules = moduleRegistrations.map(mr => mr.module)
+	def registeredModules: Seq[Module] = moduleRegistrations.map(mr => mr.module)
 
-	def hasModuleRegistrations = moduleRegistrations.nonEmpty
+	def hasModuleRegistrations: Boolean = moduleRegistrations.nonEmpty
 
-	def hasModuleRegistrationWithNonStandardOccurrence = moduleRegistrations.exists(_.occurrence != "A")
+	def hasModuleRegistrationWithNonStandardOccurrence: Boolean = moduleRegistrations.exists(_.occurrence != "A")
 
-	def hasAccreditedPriorLearning = accreditedPriorLearning.nonEmpty
+	def hasAccreditedPriorLearning: Boolean = accreditedPriorLearning.nonEmpty
 
-	def isLatest = this.equals(studentCourseDetails.latestStudentCourseYearDetails)
+	def isLatest: Boolean = this.equals(studentCourseDetails.latestStudentCourseYearDetails)
 
 	def relationships(relationshipType: StudentRelationshipType): Seq[StudentRelationship] = {
 		try {
@@ -135,7 +135,7 @@ class StudentCourseYearDetails extends StudentCourseYearProperties
 		}
 	}
 
-	def isFinalYear = yearOfStudy.toString == studentCourseDetails.courseYearLength
+	def isFinalYear: Boolean = yearOfStudy.toString == studentCourseDetails.courseYearLength
 
 	@Lob
 	@Type(`type` = "uk.ac.warwick.tabula.data.model.JsonMapUserType")
@@ -146,28 +146,28 @@ class StudentCourseYearDetails extends StudentCourseYearProperties
 	}
 
 	@transient
-	var moduleAndDepartmentService = Wire[ModuleAndDepartmentService]
+	var moduleAndDepartmentService: ModuleAndDepartmentService = Wire[ModuleAndDepartmentService]
 
 	def overcattingModules: Option[Seq[Module]] = (Option(overcatting).flatMap(_.get(StudentCourseYearDetails.Overcatting.Modules)) match {
 		case Some(value: Seq[_]) => Some(value.asInstanceOf[Seq[String]])
 		case _ => None
 	}).map(moduleCodes => moduleCodes.flatMap(moduleAndDepartmentService.getModuleByCode))
-	def overcattingModules_= (modules: Seq[Module]) = overcatting += (StudentCourseYearDetails.Overcatting.Modules -> modules.map(_.code))
+	def overcattingModules_= (modules: Seq[Module]): Unit = overcatting += (StudentCourseYearDetails.Overcatting.Modules -> modules.map(_.code))
 
 	@transient
-	var userLookup = Wire[UserLookupService]("userLookup")
+	var userLookup: UserLookupService = Wire[UserLookupService]("userLookup")
 
 	def overcattingChosenBy: Option[User] = (Option(overcatting).flatMap(_.get(StudentCourseYearDetails.Overcatting.ChosenBy)) match {
 		case Some(value: String) => Some(value)
 		case _ => None
 	}).map(userId => userLookup.getUserByUserId(userId))
-	def overcattingChosenBy_= (chosenBy: User) = overcatting += (StudentCourseYearDetails.Overcatting.ChosenBy -> chosenBy.getUserId)
+	def overcattingChosenBy_= (chosenBy: User): Unit = overcatting += (StudentCourseYearDetails.Overcatting.ChosenBy -> chosenBy.getUserId)
 
 	def overcattingChosenDate: Option[DateTime] = Option(overcatting).flatMap(_.get(StudentCourseYearDetails.Overcatting.ChosenDate)) match {
 		case Some(value: DateTime) => Some(value)
 		case _ => None
 	}
-	def overcattingChosenDate_= (chosenDate: DateTime) = overcatting += (StudentCourseYearDetails.Overcatting.ChosenDate -> chosenDate)
+	def overcattingChosenDate_= (chosenDate: DateTime): Unit = overcatting += (StudentCourseYearDetails.Overcatting.ChosenDate -> chosenDate)
 
 	final var agreedMarkUploadedDate: DateTime = _
 
@@ -211,7 +211,7 @@ trait BasicStudentCourseYearProperties {
 }
 
 trait StudentCourseYearProperties extends BasicStudentCourseYearProperties {
-	var lastUpdatedDate = DateTime.now
+	var lastUpdatedDate: DateTime = DateTime.now
 	var missingFromImportSince: DateTime = _
 
 	@Type(`type` = "uk.ac.warwick.tabula.data.model.ModuleRegistrationStatusUserType")
@@ -278,7 +278,7 @@ class StudentCourseYearKey {
 		case _ => false
 	}
 
-	override final def hashCode =
+	override final def hashCode: Int =
 		new HashCodeBuilder()
 				.append(scjCode)
 				.append(sceSequenceNumber)

@@ -56,7 +56,7 @@ class OldBulkModerationApprovalController extends OldCourseworkController {
 class OldBulkModerationApprovalControllerCurrentUser extends OldCourseworkController {
 
 	@RequestMapping
-	def redirect(@PathVariable assignment: Assignment, currentUser: CurrentUser) = {
+	def redirect(@PathVariable assignment: Assignment, currentUser: CurrentUser): Mav = {
 		Redirect(Routes.admin.assignment.markerFeedback.bulkApprove(assignment, currentUser.apparentUser))
 	}
 }

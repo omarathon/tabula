@@ -9,6 +9,7 @@ import uk.ac.warwick.tabula.commands.groups.admin.DownloadRegistersAsPdfHelper
 import uk.ac.warwick.tabula.permissions.PermissionsTarget
 import uk.ac.warwick.tabula.services.ModuleAndDepartmentService
 
+import scala.Seq
 import scala.collection._
 
 @Entity
@@ -16,57 +17,57 @@ class UserSettings extends GeneratedId with SettingsMap with HasNotificationSett
 	import UserSettings._
 
 	@transient
-	var moduleAndDepartmentService = Wire[ModuleAndDepartmentService]
+	var moduleAndDepartmentService: ModuleAndDepartmentService = Wire[ModuleAndDepartmentService]
 
 	@Column(unique = true)
 	var userId: String = _
 
-	def alertsSubmission = getStringSetting(Settings.AlertsSubmission).getOrElse(AlertsNoteworthySubmissions)
-	def alertsSubmission_= (alert: String) = settings += (Settings.AlertsSubmission -> alert)
+	def alertsSubmission: String = getStringSetting(Settings.AlertsSubmission).getOrElse(AlertsNoteworthySubmissions)
+	def alertsSubmission_= (alert: String): Unit = settings += (Settings.AlertsSubmission -> alert)
 
-	def hiddenIntros = getStringSeqSetting(Settings.HiddenIntros).getOrElse(Nil)
-	def hiddenIntros_= (hiddenIntro: Seq[String]) = settings += (Settings.HiddenIntros -> hiddenIntro)
+	def hiddenIntros: Seq[String] = getStringSeqSetting(Settings.HiddenIntros).getOrElse(Nil)
+	def hiddenIntros_= (hiddenIntro: Seq[String]): Unit = settings += (Settings.HiddenIntros -> hiddenIntro)
 
 	// It's okay for this to be null - the null choice is to use the department's setting
-	def weekNumberingSystem = getStringSetting(Settings.WeekNumberingSystem).orNull
-	def weekNumberingSystem_= (wnSystem: String) = settings += (Settings.WeekNumberingSystem -> wnSystem)
+	def weekNumberingSystem: String = getStringSetting(Settings.WeekNumberingSystem).orNull
+	def weekNumberingSystem_= (wnSystem: String): Unit = settings += (Settings.WeekNumberingSystem -> wnSystem)
 
-	def bulkEmailSeparator = getStringSetting(Settings.BulkEmailSeparator).getOrElse(DefaultBulkEmailSeparator)
-	def bulkEmailSeparator_= (separator: String) = settings += (Settings.BulkEmailSeparator -> separator)
+	def bulkEmailSeparator: String = getStringSetting(Settings.BulkEmailSeparator).getOrElse(DefaultBulkEmailSeparator)
+	def bulkEmailSeparator_= (separator: String): Unit = settings += (Settings.BulkEmailSeparator -> separator)
 
-	def profilesDefaultView = getStringSetting(Settings.ProfilesDefaultView).getOrElse(DefaultProfilesDefaultView)
-	def profilesDefaultView_= (view: String) = settings += (Settings.ProfilesDefaultView -> view)
+	def profilesDefaultView: String = getStringSetting(Settings.ProfilesDefaultView).getOrElse(DefaultProfilesDefaultView)
+	def profilesDefaultView_= (view: String): Unit = settings += (Settings.ProfilesDefaultView -> view)
 
 	// Active department should be Optional; if the user has chosen one yet they must pick the initial value
 	def activeDepartment: Option[Department] = getStringSetting(Settings.ActiveDepartment).flatMap(moduleAndDepartmentService.getDepartmentByCode)
-	def activeDepartment_= (department: Department) = settings += (Settings.ActiveDepartment -> department.code)
+	def activeDepartment_= (department: Department): Unit = settings += (Settings.ActiveDepartment -> department.code)
 
 	// Active academic year should be Optional; we handle getting the latest year elsewhere
 	def activeAcademicYear: Option[AcademicYear] = getIntSetting(Settings.ActiveAcademicYear).map(y => AcademicYear(y))
-	def activeAcademicYear_= (academicYear: AcademicYear) = settings += (Settings.ActiveAcademicYear -> academicYear.startYear)
+	def activeAcademicYear_= (academicYear: AcademicYear): Unit = settings += (Settings.ActiveAcademicYear -> academicYear.startYear)
 
 	def registerPdfShowPhotos: Boolean = getStringSetting(Settings.RegisterPdf.ShowPhotos).forall(Settings.fromForceBooleanString)
-	def registerPdfShowPhotos_= (showPhotos: Boolean) = settings += (Settings.RegisterPdf.ShowPhotos -> Settings.forceBooleanString(showPhotos))
+	def registerPdfShowPhotos_= (showPhotos: Boolean): Unit = settings += (Settings.RegisterPdf.ShowPhotos -> Settings.forceBooleanString(showPhotos))
 
-	def registerPdfDisplayName = getStringSetting(Settings.RegisterPdf.DisplayName).getOrElse(DownloadRegistersAsPdfHelper.DisplayName.Name)
-	def registerPdfDisplayName_= (name: String) = settings += (Settings.RegisterPdf.DisplayName -> name)
+	def registerPdfDisplayName: String = getStringSetting(Settings.RegisterPdf.DisplayName).getOrElse(DownloadRegistersAsPdfHelper.DisplayName.Name)
+	def registerPdfDisplayName_= (name: String): Unit = settings += (Settings.RegisterPdf.DisplayName -> name)
 
-	def registerPdfDisplayCheck = getStringSetting(Settings.RegisterPdf.DisplayCheck).getOrElse(DownloadRegistersAsPdfHelper.DisplayCheck.Checkbox)
-	def registerPdfDisplayCheck_= (check: String) = settings += (Settings.RegisterPdf.DisplayCheck -> check)
+	def registerPdfDisplayCheck: String = getStringSetting(Settings.RegisterPdf.DisplayCheck).getOrElse(DownloadRegistersAsPdfHelper.DisplayCheck.Checkbox)
+	def registerPdfDisplayCheck_= (check: String): Unit = settings += (Settings.RegisterPdf.DisplayCheck -> check)
 
-	def registerPdfSortOrder = getStringSetting(Settings.RegisterPdf.SortOrder).getOrElse(DownloadRegistersAsPdfHelper.SortOrder.Module)
-	def registerPdfSortOrder_= (check: String) = settings += (Settings.RegisterPdf.SortOrder -> check)
+	def registerPdfSortOrder: String = getStringSetting(Settings.RegisterPdf.SortOrder).getOrElse(DownloadRegistersAsPdfHelper.SortOrder.Module)
+	def registerPdfSortOrder_= (check: String): Unit = settings += (Settings.RegisterPdf.SortOrder -> check)
 
-	def string(key: String) = getStringSetting(key).orNull
+	def string(key: String): String = getStringSetting(key).orNull
 
 	def this(userId: String) = {
 		this()
 		this.userId = userId
 	}
 
-	override def toString = "UserSettings [" + settings + "]"
+	override def toString: String = "UserSettings [" + settings + "]"
 
-	def permissionsParents = Stream.empty
+	def permissionsParents: Stream[Nothing] = Stream.empty
 }
 
 object UserSettings {
@@ -96,7 +97,7 @@ object UserSettings {
 			var SortOrder = "registerPdfSortOrder"
 		}
 			
-		def hiddenIntroHash(mappedPage: String, setting: String) = {
+		def hiddenIntroHash(mappedPage: String, setting: String): String = {
 			val popover = mappedPage + ":" + setting
 			val shaHash = DigestUtils.shaHex(popover)
 

@@ -46,7 +46,7 @@ trait PermissionsTarget {
 
 object PermissionsTarget {
 	final val Global = new PermissionsTarget {
-		override def permissionsParents = Stream.empty
+		override def permissionsParents: Stream[Nothing] = Stream.empty
 		override def id = null
 		override def humanReadableId = null
 		override def urlCategory = null

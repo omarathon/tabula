@@ -31,7 +31,7 @@ case class SchemeMembershipItem(
 	userId: String,
 	existingSchemes: Seq[AttendanceMonitoringScheme]
 ) {
-	def itemTypeString = itemType.value
+	def itemTypeString: String = itemType.value
 }
 
 /**
@@ -48,7 +48,7 @@ trait AttendanceMonitoringDaoComponent {
 }
 
 trait AutowiringAttendanceMonitoringDaoComponent extends AttendanceMonitoringDaoComponent {
-	val attendanceMonitoringDao = Wire[AttendanceMonitoringDao]
+	val attendanceMonitoringDao: AttendanceMonitoringDao = Wire[AttendanceMonitoringDao]
 }
 
 trait AttendanceMonitoringDao {
@@ -119,7 +119,7 @@ class AutowiringAttendanceMonitoringDao extends AttendanceMonitoringDaoImpl with
 class AttendanceMonitoringDaoImpl extends AttendanceMonitoringDao with AttendanceMonitoringStudentDataFetcher {
 	self: ExtendedSessionComponent =>
 
-	def flush() = session.flush()
+	def flush(): Unit = session.flush()
 
 	def getSchemeById(id: String): Option[AttendanceMonitoringScheme] =
 		getById[AttendanceMonitoringScheme](id)
@@ -148,16 +148,16 @@ class AttendanceMonitoringDaoImpl extends AttendanceMonitoringDao with Attendanc
 	def saveOrUpdate(report: MonitoringPointReport): Unit =
 		session.saveOrUpdate(report)
 
-	def delete(scheme: AttendanceMonitoringScheme) =
+	def delete(scheme: AttendanceMonitoringScheme): Unit =
 		session.delete(scheme)
 
-	def delete(point: AttendanceMonitoringPoint) =
+	def delete(point: AttendanceMonitoringPoint): Unit =
 		session.delete(point)
 
-	def delete(template: AttendanceMonitoringTemplate) =
+	def delete(template: AttendanceMonitoringTemplate): Unit =
 		session.delete(template)
 
-	def delete(templatePoint: AttendanceMonitoringTemplatePoint) =
+	def delete(templatePoint: AttendanceMonitoringTemplatePoint): Unit =
 		session.delete(templatePoint)
 
 	def getTemplateSchemeById(id: String): Option[AttendanceMonitoringTemplate] =
@@ -358,7 +358,7 @@ class AttendanceMonitoringDaoImpl extends AttendanceMonitoringDao with Attendanc
 		}
 	}
 
-	def countCheckpointsForPoint(point: AttendanceMonitoringPoint) =
+	def countCheckpointsForPoint(point: AttendanceMonitoringPoint): Int =
 		session.newCriteria[AttendanceMonitoringCheckpoint]
 			.add(is("point", point))
 			.project[Number](Projections.rowCount())
@@ -553,7 +553,7 @@ trait AttendanceMonitoringStudentDataFetcher extends TaskBenchmarking {
 
 	import org.hibernate.criterion.Projections._
 
-	def getAttendanceMonitoringDataForStudents(universityIds: Seq[String], academicYear: AcademicYear) = {
+	def getAttendanceMonitoringDataForStudents(universityIds: Seq[String], academicYear: AcademicYear): Seq[AttendanceMonitoringStudentData] = {
 		def setupProjection(withEndDate: Boolean = false): ProjectionList = {
 			val projections =
 				Projections.projectionList()

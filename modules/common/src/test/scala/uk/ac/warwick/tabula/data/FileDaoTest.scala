@@ -16,7 +16,7 @@ import uk.ac.warwick.tabula.{Mockito, PersistenceTestBase}
 class FileDaoTest extends PersistenceTestBase with Mockito {
 
 	val dao = new FileDao
-	val objectStorageService = smartMock[ObjectStorageService]
+	val objectStorageService: ObjectStorageService = smartMock[ObjectStorageService]
 
 	@Before def setup() {
 		dao.objectStorageService = objectStorageService

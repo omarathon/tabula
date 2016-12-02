@@ -14,83 +14,83 @@ import uk.ac.warwick.tabula.data.model.attendance.{AttendanceMonitoringPoint, At
 object Routes {
 	import RoutesUtils._
 	private val context = "/attendance"
-	def home = context + "/"
+	def home: String = context + "/"
 
 	object old {
 
 		object department {
-			def view(department: Department) = context + "/%s" format encoded(department.code)
+			def view(department: Department): String = context + "/%s" format encoded(department.code)
 
-			def viewPoints(department: Department) = context + "/view/%s/2013/points" format encoded(department.code)
+			def viewPoints(department: Department): String = context + "/view/%s/2013/points" format encoded(department.code)
 
-			def viewStudents(department: Department) = context + "/view/%s/2013/students" format encoded(department.code)
+			def viewStudents(department: Department): String = context + "/view/%s/2013/students" format encoded(department.code)
 
-			def viewStudent(department: Department, student: StudentMember) =
+			def viewStudent(department: Department, student: StudentMember): String =
 				context + "/view/%s/2013/students/%s" format(encoded(department.code), encoded(student.universityId))
 
-			def viewAgents(department: Department, relationshipType: StudentRelationshipType) =
+			def viewAgents(department: Department, relationshipType: StudentRelationshipType): String =
 				context + "/view/%s/2013/agents/%s" format(encoded(department.code), encoded(relationshipType.urlPart))
 
-			def manage(department: Department) = context + "/manage/%s/2013" format encoded(department.code)
+			def manage(department: Department): String = context + "/manage/%s/2013" format encoded(department.code)
 		}
 
 		object admin {
-			def departmentPermissions(department: Department) = context + "/admin/department/%s/permissions" format encoded(department.code)
+			def departmentPermissions(department: Department): String = context + "/admin/department/%s/permissions" format encoded(department.code)
 		}
 
 		object profile {
-			def apply() = context + "/profile"
+			def apply(): String = context + "/profile"
 
-			def apply(student: StudentMember) =
+			def apply(student: StudentMember): String =
 				context + "/profile/%s/2013" format encoded(student.universityId)
 		}
 
 		object agent {
-			def view(relationshipType: StudentRelationshipType) = context + "/agent/%s/2013" format encoded(relationshipType.urlPart)
+			def view(relationshipType: StudentRelationshipType): String = context + "/agent/%s/2013" format encoded(relationshipType.urlPart)
 
-			def student(student: StudentMember, relationshipType: StudentRelationshipType) =
+			def student(student: StudentMember, relationshipType: StudentRelationshipType): String =
 				context + "/agent/%s/2013/%s" format(encoded(relationshipType.urlPart), encoded(student.universityId))
 		}
 
 	}
 
 	object Manage {
-		def home = context + "/manage"
-		def department(department: Department) = context + "/manage/%s" format encoded(department.code)
-		def departmentForYear(department: Department, academicYear: AcademicYear) =
+		def home: String = context + "/manage"
+		def department(department: Department): String = context + "/manage/%s" format encoded(department.code)
+		def departmentForYear(department: Department, academicYear: AcademicYear): String =
 			context + "/manage/%s/%s" format(encoded(department.code), encoded(academicYear.startYear.toString))
 
-		def addStudentsToScheme(scheme: AttendanceMonitoringScheme) =
+		def addStudentsToScheme(scheme: AttendanceMonitoringScheme): String =
 			context + "/manage/%s/%s/new/%s/students" format(
 				encoded(scheme.department.code), encoded(scheme.academicYear.startYear.toString), encoded(scheme.id)
 			)
 
-		def addPointsToNewScheme(scheme: AttendanceMonitoringScheme) =
+		def addPointsToNewScheme(scheme: AttendanceMonitoringScheme): String =
 			context + "/manage/%s/%s/new/%s/points" format(
 				encoded(scheme.department.code), encoded(scheme.academicYear.startYear.toString), encoded(scheme.id)
 			)
 
-		def editScheme(scheme: AttendanceMonitoringScheme) =
+		def editScheme(scheme: AttendanceMonitoringScheme): String =
 			context + "/manage/%s/%s/%s/edit" format(
 				encoded(scheme.department.code), encoded(scheme.academicYear.startYear.toString), encoded(scheme.id)
 		)
 
-		def editSchemeStudents(scheme: AttendanceMonitoringScheme) =
+		def editSchemeStudents(scheme: AttendanceMonitoringScheme): String =
 			context + "/manage/%s/%s/%s/edit/students" format(
 				encoded(scheme.department.code), encoded(scheme.academicYear.startYear.toString), encoded(scheme.id)
 		)
 
-		def editSchemePoints(scheme: AttendanceMonitoringScheme) =
+		def editSchemePoints(scheme: AttendanceMonitoringScheme): String =
 			context + "/manage/%s/%s/%s/edit/points" format(
 				encoded(scheme.department.code), encoded(scheme.academicYear.startYear.toString), encoded(scheme.id)
 		)
 
-		def editPoints(department: Department, academicYear: AcademicYear) =
+		def editPoints(department: Department, academicYear: AcademicYear): String =
 			context + "/manage/%s/%s/editpoints" format(
 				encoded(department.code), encoded(academicYear.startYear.toString)
 			)
 
-		def addPointsToExistingSchemes(department: Department, academicYear: AcademicYear) =
+		def addPointsToExistingSchemes(department: Department, academicYear: AcademicYear): String =
 			context + "/manage/%s/%s/addpoints" format(
 				encoded(department.code), encoded(academicYear.startYear.toString)
 			)
@@ -98,31 +98,31 @@ object Routes {
 	}
 
 	object Note {
-		def view(academicYear: AcademicYear, student: StudentMember, point: AttendanceMonitoringPoint) =
+		def view(academicYear: AcademicYear, student: StudentMember, point: AttendanceMonitoringPoint): String =
 			context + "/note/%s/%s/%s" format(encoded(academicYear.startYear.toString), encoded(student.universityId), encoded(point.id))
 
 	}
 
 	object View {
-		def home = context + "/view"
-		def department(department: Department) = context + "/view/%s" format encoded(department.code)
-		def departmentForYear(department: Department, academicYear: AcademicYear) =
+		def home: String = context + "/view"
+		def department(department: Department): String = context + "/view/%s" format encoded(department.code)
+		def departmentForYear(department: Department, academicYear: AcademicYear): String =
 			context + "/view/%s/%s" format(encoded(department.code), encoded(academicYear.startYear.toString))
-		def students(department: Department, academicYear: AcademicYear) =
+		def students(department: Department, academicYear: AcademicYear): String =
 			context + "/view/%s/%s/students" format(encoded(department.code), encoded(academicYear.startYear.toString))
-		def studentsUnrecorded(department: Department, academicYear: AcademicYear) =
+		def studentsUnrecorded(department: Department, academicYear: AcademicYear): String =
 			context + "/view/%s/%s/students?hasBeenFiltered=true&otherCriteria=Unrecorded" format(encoded(department.code), encoded(academicYear.startYear.toString))
-		def student(department: Department, academicYear: AcademicYear, student: StudentMember) =
+		def student(department: Department, academicYear: AcademicYear, student: StudentMember): String =
 			context + "/view/%s/%s/students/%s" format(
 				encoded(department.code),
 				encoded(academicYear.startYear.toString),
 				encoded(student.universityId)
 			)
-		def points(department: Department, academicYear: AcademicYear) =
+		def points(department: Department, academicYear: AcademicYear): String =
 			context + "/view/%s/%s/points" format(encoded(department.code), encoded(academicYear.startYear.toString))
-		def pointsUnrecorded(department: Department, academicYear: AcademicYear) =
+		def pointsUnrecorded(department: Department, academicYear: AcademicYear): String =
 			context + "/view/%s/%s/points?hasBeenFiltered=true&otherCriteria=Unrecorded" format(encoded(department.code), encoded(academicYear.startYear.toString))
-		def agents(department: Department, academicYear: AcademicYear, relationshipType: StudentRelationshipType) =
+		def agents(department: Department, academicYear: AcademicYear, relationshipType: StudentRelationshipType): String =
 			context + "/view/%s/%s/agents/%s" format(
 				encoded(department.code),
 				encoded(academicYear.startYear.toString),
@@ -131,18 +131,18 @@ object Routes {
 	}
 
 	object Agent {
-		def home = context + "/agent"
-		def relationship(relationshipType: StudentRelationshipType) = context + "/agent/%s" format encoded(relationshipType.urlPart)
-		def relationshipForYear(relationshipType: StudentRelationshipType, academicYear: AcademicYear) =
+		def home: String = context + "/agent"
+		def relationship(relationshipType: StudentRelationshipType): String = context + "/agent/%s" format encoded(relationshipType.urlPart)
+		def relationshipForYear(relationshipType: StudentRelationshipType, academicYear: AcademicYear): String =
 			context + "/agent/%s/%s" format(encoded(relationshipType.urlPart), encoded(academicYear.startYear.toString))
-		def student(relationshipType: StudentRelationshipType, academicYear: AcademicYear, student: StudentMember) =
+		def student(relationshipType: StudentRelationshipType, academicYear: AcademicYear, student: StudentMember): String =
 			context + "/agent/%s/%s/%s" format(encoded(relationshipType.urlPart), encoded(academicYear.startYear.toString), encoded(student.universityId))
 	}
 
 	object Profile {
-		def home = context + "/profile"
-		def years(student: StudentMember) = context + "/profile/%s" format encoded(student.universityId)
-		def profileForYear(student: StudentMember, academicYear: AcademicYear) =
+		def home: String = context + "/profile"
+		def years(student: StudentMember): String = context + "/profile/%s" format encoded(student.universityId)
+		def profileForYear(student: StudentMember, academicYear: AcademicYear): String =
 			context + "/profile/%s/%s" format(encoded(student.universityId), encoded(academicYear.startYear.toString))
 	}
 }

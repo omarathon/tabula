@@ -18,7 +18,7 @@ trait AttendanceMonitoringPointValidation {
 
 	self: TermServiceComponent with AttendanceMonitoringServiceComponent =>
 
-	def validateSchemePointStyles(errors: Errors, style: AttendanceMonitoringPointStyle, schemes: Seq[AttendanceMonitoringScheme]) = {
+	def validateSchemePointStyles(errors: Errors, style: AttendanceMonitoringPointStyle, schemes: Seq[AttendanceMonitoringScheme]): Unit = {
 		if (schemes.exists(_.pointStyle != style)) {
 			errors.reject("attendanceMonitoringPoint.pointStyle.mixed")
 		}
@@ -150,7 +150,7 @@ trait AttendanceMonitoringPointValidation {
 		studentIds: Seq[String],
 		academicYear: AcademicYear,
 		bindPoint: String = "startDate"
-	) = {
+	): Unit = {
 		val pointTerm = termService.getTermFromDateIncludingVacations(startDate.toDateTimeAtStartOfDay)
 		if (attendanceMonitoringService.findReports(studentIds, academicYear, pointTerm.getTermTypeAsString).size > 0) {
 			if (bindPoint.isEmpty)
@@ -166,7 +166,7 @@ trait AttendanceMonitoringPointValidation {
 		studentIds: Seq[String],
 		academicYear: AcademicYear,
 		bindPoint: String = "startWeek"
-	) = {
+	): Unit = {
 		val weeksForYear = termService.getAcademicWeeksForYear(academicYear.dateInTermOne).toMap
 		val startDate = weeksForYear(startWeek).getStart.withDayOfWeek(DayOfWeek.Monday.jodaDayOfWeek).toLocalDate
 		validateCanPointBeEditedByDate(errors, startDate, studentIds, academicYear, bindPoint)
@@ -179,7 +179,7 @@ trait AttendanceMonitoringPointValidation {
 		endWeek: Int,
 		schemes: Seq[AttendanceMonitoringScheme],
 		global: Boolean = false
-	) = {
+	): Unit = {
 		val allPoints = schemes.map(_.points.asScala).flatten
 		if (allPoints.exists(point => point.name == name && point.startWeek == startWeek && point.endWeek == endWeek)) {
 			if (global) {
@@ -198,7 +198,7 @@ trait AttendanceMonitoringPointValidation {
 		endDate: LocalDate,
 		schemes: Seq[AttendanceMonitoringScheme],
 		global: Boolean = false
-	) = {
+	): Unit = {
 		val allPoints = schemes.map(_.points.asScala).flatten
 		if (allPoints.exists(point => point.name == name && point.startDate == startDate && point.endDate == endDate)) {
 			if (global) {
@@ -251,7 +251,7 @@ trait AttendanceMonitoringPointValidation {
 		meetingRelationships: mutable.Set[StudentRelationshipType],
 		meetingFormats: mutable.Set[MeetingFormat],
 		schemes: Seq[AttendanceMonitoringScheme]
-	) = {
+	): Unit = {
 		val allPoints = schemes.map(_.points.asScala).flatten
 		if (allPoints.exists(point =>
 			point.pointType == AttendanceMonitoringPointType.Meeting &&
@@ -293,7 +293,7 @@ trait AttendanceMonitoringPointValidation {
 		smallGroupEventModules: JSet[Module],
 		isAnySmallGroupEventModules: Boolean,
 		schemes: Seq[AttendanceMonitoringScheme]
-	) = {
+	): Unit = {
 		val allPoints = schemes.map(_.points.asScala).flatten
 		if (allPoints.exists(point =>
 			point.pointType == AttendanceMonitoringPointType.SmallGroup &&
@@ -343,7 +343,7 @@ trait AttendanceMonitoringPointValidation {
 		assignmentSubmissionAssignments: JSet[Assignment],
 		isAssignmentSubmissionDisjunction: Boolean,
 		schemes: Seq[AttendanceMonitoringScheme]
-	) = {
+	): Unit = {
 		val allPoints = schemes.map(_.points.asScala).flatten
 		if (allPoints.exists(point =>
 			point.pointType == AttendanceMonitoringPointType.AssignmentSubmission &&

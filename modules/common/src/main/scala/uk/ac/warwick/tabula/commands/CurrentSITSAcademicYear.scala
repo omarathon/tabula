@@ -7,6 +7,6 @@ trait CurrentSITSAcademicYear extends HasAcademicYear {
 
 	var academicYear: AcademicYear = AcademicYear.guessSITSAcademicYearByDate(new DateTime)
 
-	def getAcademicYearString = Option(academicYear).map(_.toString).getOrElse("")
+	def getAcademicYearString: String = Option(academicYear).map(_.toString).getOrElse("")
 
 }

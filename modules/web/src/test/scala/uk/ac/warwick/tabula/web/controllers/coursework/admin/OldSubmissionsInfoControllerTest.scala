@@ -22,7 +22,7 @@ class OldSubmissionsInfoControllerTest extends TestBase with Mockito {
 	private trait CommandTestSupport extends Appliable[Seq[SubmissionListItem]] with ListSubmissionsRequest with AuditEventQueryServiceComponent {
 		self: CommandInternal[Seq[SubmissionListItem]] =>
 
-		val auditEventQueryService = mock[AuditEventQueryService]
+		val auditEventQueryService: AuditEventQueryService = mock[AuditEventQueryService]
 
 		override def apply(): Seq[SubmissionListItem] = applyInternal()
 	}
@@ -105,7 +105,7 @@ class OldSubmissionsInfoControllerTest extends TestBase with Mockito {
 		}
 	}
 
-	def submission(submittedDate: DateTime, assignment:Assignment, uniId:String, attachmentNames:Seq[String]) = {
+	def submission(submittedDate: DateTime, assignment:Assignment, uniId:String, attachmentNames:Seq[String]): Submission = {
 		val s = new Submission
 		s.assignment = assignment
 		s.universityId = uniId
@@ -118,7 +118,7 @@ class OldSubmissionsInfoControllerTest extends TestBase with Mockito {
 		s
 	}
 
-	def toAttachment(attachmentName:String) = {
+	def toAttachment(attachmentName:String): FileAttachment = {
 		val attachment = new FileAttachment
 		attachment.name = attachmentName
 		attachment

@@ -9,6 +9,7 @@ import uk.ac.warwick.tabula.data.model.Department
 import uk.ac.warwick.tabula.services._
 
 import scala.collection.JavaConverters._
+import scala.collection.mutable
 
 object SmallGroupEventsReportProcessor {
 	def apply(department: Department, academicYear: AcademicYear) =
@@ -28,7 +29,7 @@ class SmallGroupEventsReportProcessorInternal(val department: Department, val ac
 
 	self: SmallGroupEventsReportProcessorState with TermServiceComponent with ProfileServiceComponent =>
 
-	override def applyInternal() = {
+	override def applyInternal(): mutable.Buffer[SmallGroupEventReportData] = {
 		events.asScala.map(properties =>
 			SmallGroupEventReportData(
 				departmentName = properties.get("departmentName"),

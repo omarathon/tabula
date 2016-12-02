@@ -9,7 +9,7 @@ class MarkerFeedbackIdConverter extends TwoWayConverter[String, MarkerFeedback] 
 
 	@Autowired var service: FeedbackDao = _
 
-	override def convertRight(id: String) = service.getMarkerFeedback(id).orNull
-	override def convertLeft(feedback: MarkerFeedback) = (Option(feedback) map {_.id}).orNull
+	override def convertRight(id: String): MarkerFeedback = service.getMarkerFeedback(id).orNull
+	override def convertLeft(feedback: MarkerFeedback): String = (Option(feedback) map {_.id}).orNull
 
 }

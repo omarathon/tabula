@@ -13,24 +13,24 @@ import scala.collection.JavaConversions._
 class AddAssignmentsCommandTest extends TestBase with Mockito {
 
 	trait Fixture {
-		val thisDepartment = Fixtures.department(code="ls", name="Life Sciences")
-		val module1 = Fixtures.module(code="ls101")
-		val module2 = Fixtures.module(code="ls102")
-		val module3 = Fixtures.module(code="ls103")
+		val thisDepartment: Department = Fixtures.department(code="ls", name="Life Sciences")
+		val module1: Module = Fixtures.module(code="ls101")
+		val module2: Module = Fixtures.module(code="ls102")
+		val module3: Module = Fixtures.module(code="ls103")
 
-		val upstream1 = Fixtures.upstreamAssignment(module=module1, number=1)
-		val upstream2 = Fixtures.upstreamAssignment(module=module2, number=2)
-		val upstream3 = Fixtures.upstreamAssignment(module=module3, number=3)
-		val assessmentGroup1 = Fixtures.assessmentGroup(upstream1)
-		val assessmentGroup3 = Fixtures.assessmentGroup(upstream3)
+		val upstream1: AssessmentComponent = Fixtures.upstreamAssignment(module=module1, number=1)
+		val upstream2: AssessmentComponent = Fixtures.upstreamAssignment(module=module2, number=2)
+		val upstream3: AssessmentComponent = Fixtures.upstreamAssignment(module=module3, number=3)
+		val assessmentGroup1: UpstreamAssessmentGroup = Fixtures.assessmentGroup(upstream1)
+		val assessmentGroup3: UpstreamAssessmentGroup = Fixtures.assessmentGroup(upstream3)
 
 		thisDepartment.modules.add(module1)
 		thisDepartment.modules.add(module2)
 		thisDepartment.modules.add(module3)
 
-		val thisModuleAndDepartmentService = smartMock[ModuleAndDepartmentService]
-		val thisAssignmentService = smartMock[AssessmentService]
-		val thisAssignmentMembershipService = smartMock[AssessmentMembershipService]
+		val thisModuleAndDepartmentService: ModuleAndDepartmentService = smartMock[ModuleAndDepartmentService]
+		val thisAssignmentService: AssessmentService = smartMock[AssessmentService]
+		val thisAssignmentMembershipService: AssessmentMembershipService = smartMock[AssessmentMembershipService]
 
 		thisModuleAndDepartmentService.getModuleByCode(module1.code) returns Option(module1)
 		thisModuleAndDepartmentService.getModuleByCode(module2.code) returns Option(module2)
@@ -43,10 +43,10 @@ class AddAssignmentsCommandTest extends TestBase with Mockito {
 		val validator = new AddAssignmentsValidation with AddAssignmentsCommandState
 			with ModuleAndDepartmentServiceComponent with AssessmentServiceComponent {
 
-			val department = thisDepartment
-			val user = currentUser
-			val moduleAndDepartmentService = thisModuleAndDepartmentService
-			val assessmentService = thisAssignmentService
+			val department: Department = thisDepartment
+			val user: CurrentUser = currentUser
+			val moduleAndDepartmentService: ModuleAndDepartmentService = thisModuleAndDepartmentService
+			val assessmentService: AssessmentService = thisAssignmentService
 		}
 
 		validator.academicYear = new AcademicYear(2012)
@@ -67,9 +67,9 @@ class AddAssignmentsCommandTest extends TestBase with Mockito {
 	@Test def applyCommand() { new Fixture { withUser("cuscav") {
 		val cmd = new AddAssignmentsCommandInternal(thisDepartment, currentUser) with AddAssignmentsCommandState
 			with ModuleAndDepartmentServiceComponent with AssessmentServiceComponent with AssessmentMembershipServiceComponent {
-			val moduleAndDepartmentService = thisModuleAndDepartmentService
-			val assessmentService = thisAssignmentService
-			val assessmentMembershipService = thisAssignmentMembershipService
+			val moduleAndDepartmentService: ModuleAndDepartmentService = thisModuleAndDepartmentService
+			val assessmentService: AssessmentService = thisAssignmentService
+			val assessmentMembershipService: AssessmentMembershipService = thisAssignmentMembershipService
 		}
 
 		cmd.academicYear = new AcademicYear(2012)
@@ -104,9 +104,9 @@ class AddAssignmentsCommandTest extends TestBase with Mockito {
 	@Test	def optionsMapBinding() { new Fixture {
 		val cmd = new AddAssignmentsCommandInternal(null, null) with AddAssignmentsCommandState
 			with ModuleAndDepartmentServiceComponent with AssessmentServiceComponent with AssessmentMembershipServiceComponent {
-			val moduleAndDepartmentService = thisModuleAndDepartmentService
-			val assessmentService = thisAssignmentService
-			val assessmentMembershipService = thisAssignmentMembershipService
+			val moduleAndDepartmentService: ModuleAndDepartmentService = thisModuleAndDepartmentService
+			val assessmentService: AssessmentService = thisAssignmentService
+			val assessmentMembershipService: AssessmentMembershipService = thisAssignmentMembershipService
 		}
 		val binder = new CustomDataBinder(cmd, "cmd") with NoAutoGrownNestedPaths
 		val pvs = new MutablePropertyValues()

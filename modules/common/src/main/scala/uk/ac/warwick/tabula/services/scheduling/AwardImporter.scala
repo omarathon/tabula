@@ -17,7 +17,7 @@ import uk.ac.warwick.tabula.helpers.StringUtils._
 import scala.collection.JavaConversions.asScalaBuffer
 
 trait AwardImporter extends Logging {
-	var awardDao = Wire[AwardDao]
+	var awardDao: AwardDao = Wire[AwardDao]
 
 	private var awardMap: Map[String, Award] = _
 
@@ -60,7 +60,7 @@ trait AwardImporter extends Logging {
 class SitsAwardImporter extends AwardImporter {
 	import SitsAwardImporter._
 
-	var sits = Wire[DataSource]("sitsDataSource")
+	var sits: DataSource = Wire[DataSource]("sitsDataSource")
 
 	lazy val awardsQuery = new AwardsQuery(sits)
 
@@ -112,5 +112,5 @@ trait AwardImporterComponent {
 }
 
 trait AutowiringAwardImporterComponent extends AwardImporterComponent {
-	var awardImporter = Wire[AwardImporter]
+	var awardImporter: AwardImporter = Wire[AwardImporter]
 }

@@ -33,7 +33,7 @@ class ViewAgentsCommandInternal(val department: Department, val academicYear: Ac
 
 	self: RelationshipServiceComponent =>
 
-	override def applyInternal() = {
+	override def applyInternal(): Seq[ViewAgentsCommandResult] = {
 		val relationships = relationshipService.listStudentRelationshipsByDepartment(relationshipType, department)
 		relationships.groupBy(_.agent).map{case(agent, agentRelationships) =>
 			val tutees = agentRelationships.flatMap(_.studentMember)

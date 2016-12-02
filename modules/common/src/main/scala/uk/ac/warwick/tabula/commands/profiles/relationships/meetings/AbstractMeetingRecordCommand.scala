@@ -85,7 +85,7 @@ trait MeetingRecordCommandBindListener extends BindListener {
 
 	self: MeetingRecordCommandRequest =>
 
-	override def onBind(result: BindingResult) = transactional() {
+	override def onBind(result: BindingResult): Unit = transactional() {
 		file.onBind(result)
 	}
 }
@@ -124,7 +124,7 @@ trait MeetingRecordValidation extends SelfValidating {
 
 trait MeetingRecordCommandState {
 	def creator: Member
-	val attachmentTypes = Seq[String]()
+	val attachmentTypes: Seq[String] = Seq[String]()
 	var isRealTime: Boolean = true
 }
 

@@ -17,7 +17,7 @@ trait ExportYearMarksToSitsServiceComponent {
 }
 
 trait AutowiringExportYearMarksToSitsServiceComponent extends ExportYearMarksToSitsServiceComponent {
-	var exportYearMarksToSitsService = Wire[ExportYearMarksToSitsService]
+	var exportYearMarksToSitsService: ExportYearMarksToSitsService = Wire[ExportYearMarksToSitsService]
 }
 
 trait ExportYearMarksToSitsService {

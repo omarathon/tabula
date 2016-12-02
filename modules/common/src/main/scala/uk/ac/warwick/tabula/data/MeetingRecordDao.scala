@@ -27,13 +27,13 @@ trait MeetingRecordDao {
 @Repository
 class MeetingRecordDaoImpl extends MeetingRecordDao with Daoisms with TaskBenchmarking {
 
-	def saveOrUpdate(meeting: MeetingRecord) = session.saveOrUpdate(meeting)
+	def saveOrUpdate(meeting: MeetingRecord): Unit = session.saveOrUpdate(meeting)
 
-	def saveOrUpdate(scheduledMeeting: ScheduledMeetingRecord) = session.saveOrUpdate(scheduledMeeting)
+	def saveOrUpdate(scheduledMeeting: ScheduledMeetingRecord): Unit = session.saveOrUpdate(scheduledMeeting)
 
-	def saveOrUpdate(meeting: AbstractMeetingRecord) = session.saveOrUpdate(meeting)
+	def saveOrUpdate(meeting: AbstractMeetingRecord): Unit = session.saveOrUpdate(meeting)
 
-	def saveOrUpdate(approval: MeetingRecordApproval) = session.saveOrUpdate(approval)
+	def saveOrUpdate(approval: MeetingRecordApproval): Unit = session.saveOrUpdate(approval)
 
 	def list(rel: Set[StudentRelationship], currentUser: Option[Member]): Seq[MeetingRecord] = {
 		if (rel.isEmpty)
@@ -97,14 +97,14 @@ class MeetingRecordDaoImpl extends MeetingRecordDao with Daoisms with TaskBenchm
 			.count.intValue()
 	}
 
-	def get(id: String) = getById[AbstractMeetingRecord](id)
+	def get(id: String): Option[AbstractMeetingRecord] = getById[AbstractMeetingRecord](id)
 
 	def purge(meeting: AbstractMeetingRecord): Unit = {
 		session.delete(meeting)
 		session.flush()
 	}
 
-	def migrate(from: StudentRelationship, to: StudentRelationship) = {
+	def migrate(from: StudentRelationship, to: StudentRelationship): Unit = {
 		session.newQuery("""
 			update AbstractMeetingRecord
 			set relationship = :to
@@ -136,5 +136,5 @@ trait MeetingRecordDaoComponent {
 	val meetingRecordDao: MeetingRecordDao
 }
 trait AutowiringMeetingRecordDaoComponent extends MeetingRecordDaoComponent{
-	val meetingRecordDao = Wire.auto[MeetingRecordDao]
+	val meetingRecordDao: MeetingRecordDao = Wire.auto[MeetingRecordDao]
 }

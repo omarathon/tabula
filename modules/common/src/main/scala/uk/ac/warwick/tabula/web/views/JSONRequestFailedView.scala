@@ -12,7 +12,7 @@ import uk.ac.warwick.tabula.JavaImports._
 	*/
 class JSONRequestFailedView(errors: Seq[Map[String, Any]]) extends JSONView(Map()) {
 
-	override def render(model: JMap[String, _], request: HttpServletRequest, response: HttpServletResponse) = {
+	override def render(model: JMap[String, _], request: HttpServletRequest, response: HttpServletResponse): Unit = {
 		response.setContentType(getContentType())
 		response.setStatus(HttpStatus.PAYMENT_REQUIRED.value())
 

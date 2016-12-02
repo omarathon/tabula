@@ -9,11 +9,12 @@ import uk.ac.warwick.tabula.data.model.{Department, StudentMember}
 import uk.ac.warwick.tabula.helpers.LazyLists
 import uk.ac.warwick.tabula.permissions.Permissions
 import uk.ac.warwick.tabula.services._
-import uk.ac.warwick.tabula.services.attendancemonitoring.{AutowiringAttendanceMonitoringServiceComponent, AttendanceMonitoringServiceComponent}
+import uk.ac.warwick.tabula.services.attendancemonitoring.{AttendanceMonitoringServiceComponent, AutowiringAttendanceMonitoringServiceComponent}
 import uk.ac.warwick.tabula.system.permissions.{PermissionsChecking, PermissionsCheckingMethods, RequiresPermissionsChecking}
 import uk.ac.warwick.tabula.{AcademicYear, CurrentUser}
 
 import scala.collection.JavaConverters._
+import scala.collection.mutable
 
 object ReportStudentsConfirmCommand {
 	def apply(department: Department, academicYear: AcademicYear, user: CurrentUser) =
@@ -34,7 +35,7 @@ class ReportStudentsConfirmCommandInternal(val department: Department, val acade
 
 	self: ReportStudentsConfirmCommandState with AttendanceMonitoringServiceComponent =>
 
-	override def applyInternal() = {
+	override def applyInternal(): Seq[MonitoringPointReport] = {
 		studentMissedReportCounts.map{ src => {
 			val scyd = src.student.freshStudentCourseYearDetailsForYear(academicYear).getOrElse(throw new IllegalArgumentException())
 			val report = new MonitoringPointReport
@@ -100,12 +101,12 @@ trait ReportStudentsConfirmCommandState extends ReportStudentsChoosePeriodComman
 
 	def user: CurrentUser
 
-	lazy val currentPeriod = termService.getTermFromDateIncludingVacations(DateTime.now).getTermTypeAsString
-	lazy val currentAcademicYear = AcademicYear.findAcademicYearContainingDate(DateTime.now)
+	lazy val currentPeriod: String = termService.getTermFromDateIncludingVacations(DateTime.now).getTermTypeAsString
+	lazy val currentAcademicYear: AcademicYear = AcademicYear.findAcademicYearContainingDate(DateTime.now)
 
 	// Bind variables
 	var students: JList[StudentMember] = LazyLists.create()
 	var filterString: String = _
 	var confirm: Boolean = false
-	override lazy val allStudents = students.asScala
+	override lazy val allStudents: mutable.Buffer[StudentMember] = students.asScala
 }

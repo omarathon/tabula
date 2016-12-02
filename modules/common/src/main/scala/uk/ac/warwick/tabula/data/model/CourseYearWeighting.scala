@@ -28,7 +28,7 @@ class CourseYearWeighting extends GeneratedId with Ordered[CourseYearWeighting] 
 	@transient
 	private val percentageMultiplier = new JBigDecimal(100)
 
-	def weightingAsPercentage = weighting.multiply(percentageMultiplier).stripTrailingZeros.toPlainString + "%"
+	def weightingAsPercentage: String = weighting.multiply(percentageMultiplier).stripTrailingZeros.toPlainString + "%"
 
 	def compare(that:CourseYearWeighting): Int = {
 		if (this.course.code != that.course.code)

@@ -6,8 +6,8 @@ import uk.ac.warwick.tabula.Fixtures
 class StudentRelationshipPersistenceTest extends PersistenceTestBase {
 
 	trait Fixture {
-		val student = Fixtures.student(universityId = "1000001")
-		val memberAgent = Fixtures.staff(universityId = "4387483")
+		val student: StudentMember = Fixtures.student(universityId = "1000001")
+		val memberAgent: StaffMember = Fixtures.staff(universityId = "4387483")
 		memberAgent.firstName = "Anne"
 		memberAgent.lastName = "Frank"
 
@@ -27,7 +27,7 @@ class StudentRelationshipPersistenceTest extends PersistenceTestBase {
 		session.flush()
 		session.clear()
 
-		val loadedRel = session.get(classOf[StudentRelationship], rel.id).asInstanceOf[StudentRelationship]
+		val loadedRel: StudentRelationship = session.get(classOf[StudentRelationship], rel.id).asInstanceOf[StudentRelationship]
 		loadedRel.isAgentMember should be (true)
 		loadedRel.agent should be ("4387483")
 		loadedRel.agentMember should be (Some(memberAgent))
@@ -44,7 +44,7 @@ class StudentRelationshipPersistenceTest extends PersistenceTestBase {
 		session.flush()
 		session.clear()
 
-		val loadedRel = session.get(classOf[StudentRelationship], rel.id).asInstanceOf[StudentRelationship]
+		val loadedRel: StudentRelationship = session.get(classOf[StudentRelationship], rel.id).asInstanceOf[StudentRelationship]
 		loadedRel.isAgentMember should be (false)
 		loadedRel.agent should be (externalAgent)
 		loadedRel.agentMember should be (None)

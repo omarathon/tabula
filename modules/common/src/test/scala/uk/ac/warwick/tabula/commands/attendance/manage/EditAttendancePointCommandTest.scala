@@ -1,14 +1,15 @@
 package uk.ac.warwick.tabula.commands.attendance.manage
 
 import org.mockito.Matchers
-import uk.ac.warwick.tabula.services.attendancemonitoring.{AttendanceMonitoringServiceComponent, AttendanceMonitoringService}
-import uk.ac.warwick.tabula.{Fixtures, AcademicYear, Mockito, TestBase}
+import uk.ac.warwick.tabula.services.attendancemonitoring.{AttendanceMonitoringService, AttendanceMonitoringServiceComponent}
+import uk.ac.warwick.tabula.{AcademicYear, Fixtures, Mockito, TestBase}
 import uk.ac.warwick.tabula.services._
 import org.springframework.validation.BindException
-import org.joda.time.{LocalDate, DateTimeConstants, Interval, DateTime}
-import uk.ac.warwick.util.termdates.{TermImpl, Term}
+import org.joda.time.{DateTime, DateTimeConstants, Interval, LocalDate}
+import uk.ac.warwick.util.termdates.{Term, TermImpl}
+
 import scala.collection.mutable
-import uk.ac.warwick.tabula.data.model.{ScheduledNotification, StudentRelationshipType, Department}
+import uk.ac.warwick.tabula.data.model.{Department, ScheduledNotification, StudentMember, StudentRelationshipType}
 import uk.ac.warwick.tabula.JavaImports.JHashSet
 import uk.ac.warwick.util.termdates.Term.TermType
 import uk.ac.warwick.tabula.data.model.attendance._
@@ -17,18 +18,18 @@ class EditAttendancePointCommandTest extends TestBase with Mockito {
 
 	trait Fixture {
 
-		val thisTermService = smartMock[TermService]
+		val thisTermService: TermService = smartMock[TermService]
 		val commandState = new EditAttendancePointCommandState with TermServiceComponent with SmallGroupServiceComponent with ModuleAndDepartmentServiceComponent {
 			val templatePoint = null
 			val department = null
 			val academicYear = null
-			val termService = thisTermService
+			val termService: TermService = thisTermService
 			val smallGroupService = null
 			val moduleAndDepartmentService = null
 		}
 		val validator = new AttendanceMonitoringPointValidation with TermServiceComponent with AttendanceMonitoringServiceComponent {
-			val termService = thisTermService
-			val attendanceMonitoringService = smartMock[AttendanceMonitoringService]
+			val termService: TermService = thisTermService
+			val attendanceMonitoringService: AttendanceMonitoringService = smartMock[AttendanceMonitoringService]
 		}
 		val errors = new BindException(commandState, "command")
 	}
@@ -37,15 +38,15 @@ class EditAttendancePointCommandTest extends TestBase with Mockito {
 
 		val academicYear2015 = AcademicYear(2015)
 		val department = new Department
-		val student = Fixtures.student("1234")
+		val student: StudentMember = Fixtures.student("1234")
 
-		val week5StartDate = new LocalDate(academicYear2015.startYear, DateTimeConstants.NOVEMBER, 1).toDateTimeAtStartOfDay
-		val week5EndDate = new LocalDate(academicYear2015.startYear, DateTimeConstants.NOVEMBER, 8).toDateTimeAtStartOfDay
-		val week15StartDate = new LocalDate(academicYear2015.startYear, DateTimeConstants.DECEMBER, 1).toDateTimeAtStartOfDay
-		val week15EndDate = new LocalDate(academicYear2015.startYear, DateTimeConstants.DECEMBER, 8).toDateTimeAtStartOfDay
+		val week5StartDate: DateTime = new LocalDate(academicYear2015.startYear, DateTimeConstants.NOVEMBER, 1).toDateTimeAtStartOfDay
+		val week5EndDate: DateTime = new LocalDate(academicYear2015.startYear, DateTimeConstants.NOVEMBER, 8).toDateTimeAtStartOfDay
+		val week15StartDate: DateTime = new LocalDate(academicYear2015.startYear, DateTimeConstants.DECEMBER, 1).toDateTimeAtStartOfDay
+		val week15EndDate: DateTime = new LocalDate(academicYear2015.startYear, DateTimeConstants.DECEMBER, 8).toDateTimeAtStartOfDay
 
-		val week5pair = (new Integer(5), new Interval(week5StartDate, week5EndDate))
-		val week15pair = (new Integer(15), new Interval(week15StartDate, week15EndDate))
+		val week5pair: (Integer, Interval) = (new Integer(5), new Interval(week5StartDate, week5EndDate))
+		val week15pair: (Integer, Interval) = (new Integer(15), new Interval(week15StartDate, week15EndDate))
 		val weeksForYear = Seq(week5pair, week15pair)
 		thisTermService.getAcademicWeeksForYear(new LocalDate(academicYear2015.startYear, DateTimeConstants.NOVEMBER, 1).toDateTimeAtStartOfDay)	returns weeksForYear
 
@@ -54,16 +55,16 @@ class EditAttendancePointCommandTest extends TestBase with Mockito {
 		scheme.department = department
 		scheme.pointStyle = AttendanceMonitoringPointStyle.Week
 		scheme.members.addUserId(student.universityId)
-		val templatePoint = Fixtures.attendanceMonitoringPoint(scheme, "name1", 0, 1)
+		val templatePoint: AttendanceMonitoringPoint = Fixtures.attendanceMonitoringPoint(scheme, "name1", 0, 1)
 		templatePoint.id = "123"
-		val originalCreatedDate = new DateTime().minusDays(2)
+		val originalCreatedDate: DateTime = new DateTime().minusDays(2)
 		templatePoint.createdDate = originalCreatedDate
 		scheme.points.add(templatePoint)
 		val scheme2 = new AttendanceMonitoringScheme
 		scheme2.department = department
 		scheme2.academicYear = academicYear2015
 		scheme2.pointStyle = AttendanceMonitoringPointStyle.Week
-		val secondPoint = Fixtures.attendanceMonitoringPoint(scheme2, templatePoint.name, templatePoint.startWeek, templatePoint.endWeek)
+		val secondPoint: AttendanceMonitoringPoint = Fixtures.attendanceMonitoringPoint(scheme2, templatePoint.name, templatePoint.startWeek, templatePoint.endWeek)
 		secondPoint.id = "234"
 		secondPoint.createdDate = originalCreatedDate
 		scheme2.points.add(secondPoint)
@@ -71,11 +72,11 @@ class EditAttendancePointCommandTest extends TestBase with Mockito {
 		val command = new EditAttendancePointCommandInternal(null, null, templatePoint) with AttendanceMonitoringServiceComponent
 			with EditAttendancePointCommandState with TermServiceComponent with SmallGroupServiceComponent with ModuleAndDepartmentServiceComponent with ProfileServiceComponent {
 			override def pointsToEdit = Seq(templatePoint, secondPoint)
-			val attendanceMonitoringService = smartMock[AttendanceMonitoringService]
-			val termService = thisTermService
+			val attendanceMonitoringService: AttendanceMonitoringService = smartMock[AttendanceMonitoringService]
+			val termService: TermService = thisTermService
 			val smallGroupService = null
 			val moduleAndDepartmentService = null
-			val profileService = smartMock[ProfileService]
+			val profileService: ProfileService = smartMock[ProfileService]
 			profileService.getAllMembersWithUniversityIds(Seq(student.universityId)) returns Seq(student)
 			startWeek = 5
 			endWeek = 15
@@ -86,7 +87,7 @@ class EditAttendancePointCommandTest extends TestBase with Mockito {
 
 	@Test
 	def testApply(): Unit = withFakeTime(new DateTime(2015, DateTimeConstants.NOVEMBER, 30, 12, 35, 0, 0)) { new CommandFixture {
-		val points = command.applyInternal()
+		val points: Seq[AttendanceMonitoringPoint] = command.applyInternal()
 		points.foreach(_.createdDate should be (originalCreatedDate))
 		points.foreach(_.updatedDate.isAfter(originalCreatedDate) should be {true})
 		points.find(_.id == templatePoint.id).get.scheme should be (scheme)
@@ -130,19 +131,19 @@ class EditAttendancePointCommandTest extends TestBase with Mockito {
 			errors.hasFieldErrors("startDate") should be {true}
 		}
 		new Fixture {
-			val date = new DateTime().withYear(2013).toLocalDate
+			val date: LocalDate = new DateTime().withYear(2013).toLocalDate
 			validator.termService.getAcademicWeekForAcademicYear(date.toDateTimeAtStartOfDay, AcademicYear(2014)) returns Term.WEEK_NUMBER_BEFORE_START
 			validator.validateDate(errors, date, AcademicYear(2014), "startDate")
 			errors.hasFieldErrors("startDate") should be {true}
 		}
 		new Fixture {
-			val date = new DateTime().withYear(2016).toLocalDate
+			val date: LocalDate = new DateTime().withYear(2016).toLocalDate
 			validator.termService.getAcademicWeekForAcademicYear(date.toDateTimeAtStartOfDay, AcademicYear(2014)) returns Term.WEEK_NUMBER_AFTER_END
 			validator.validateDate(errors, date, AcademicYear(2014), "startDate")
 			errors.hasFieldErrors("startDate") should be {true}
 		}
 		new Fixture {
-			val date = new DateTime().withYear(2015).toLocalDate
+			val date: LocalDate = new DateTime().withYear(2015).toLocalDate
 			validator.termService.getAcademicWeekForAcademicYear(date.toDateTimeAtStartOfDay, AcademicYear(2014)) returns 10
 			validator.validateDate(errors, date, AcademicYear(2014), "startDate")
 			errors.hasFieldErrors("startDate") should be {false}

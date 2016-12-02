@@ -58,5 +58,5 @@ trait GroupsExtractorComponent {
 	def groupsExtractor: GroupsExtractor
 }
 trait AutowiringGroupsExtractorComponent extends GroupsExtractorComponent {
-	val groupsExtractor = Wire[GroupsExtractor]
+	val groupsExtractor: GroupsExtractor = Wire[GroupsExtractor]
 }

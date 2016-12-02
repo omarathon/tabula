@@ -18,7 +18,7 @@ import uk.ac.warwick.tabula.services.AssessmentMembershipService
 @Entity
 class AssessmentGroup extends GeneratedId {
 
-	@transient var membershipService = Wire[AssessmentMembershipService]
+	@transient var membershipService: AssessmentMembershipService = Wire[AssessmentMembershipService]
 
 	/*
 	Either assignment, smallGroupSet _or_ exam will be non-null
@@ -61,7 +61,7 @@ class AssessmentGroup extends GeneratedId {
 		}
 	}
 
-	override def toString = {
+	override def toString: String = {
 		if (parent.isDefined && assessmentComponent != null && occurrence != null) {
 
 			val entityInfo =

@@ -1,9 +1,9 @@
 package uk.ac.warwick.tabula.commands.groups.admin
 
-import org.apache.poi.xssf.usermodel.XSSFSheet
+import org.apache.poi.xssf.usermodel.{XSSFRow, XSSFSheet, XSSFWorkbook}
 import uk.ac.warwick.tabula._
 import uk.ac.warwick.tabula.commands.{Appliable, ReadOnly, Unaudited}
-import uk.ac.warwick.tabula.data.model.groups.SmallGroupSet
+import uk.ac.warwick.tabula.data.model.groups.{SmallGroup, SmallGroupSet}
 import uk.ac.warwick.tabula.data.model._
 import uk.ac.warwick.tabula.permissions.Permissions
 import uk.ac.warwick.tabula.services.{AssessmentMembershipService, ProfileService, ProfileServiceComponent, UserGroupCacheManager}
@@ -33,8 +33,8 @@ class AllocateStudentsTemplateCommandTest extends TestBase with Mockito {
 			studentWithUsercode1
 		}
 
-		val module = Fixtures.module("in101", "Introduction to Scala")
-		val set = Fixtures.smallGroupSet("My small groups")
+		val module: Module = Fixtures.module("in101", "Introduction to Scala")
+		val set: SmallGroupSet = Fixtures.smallGroupSet("My small groups")
 
 		val user1 = new User("cuscav")
 		user1.setFoundUser(true)
@@ -42,7 +42,7 @@ class AllocateStudentsTemplateCommandTest extends TestBase with Mockito {
 		user1.setLastName("Mannion")
 		user1.setWarwickId("0672089")
 
-		val studentWithUsercode1 = studentMemberWithCourse("0672089","cuscav", "Mathew", "Mannion")
+		val studentWithUsercode1: StudentMember = studentMemberWithCourse("0672089","cuscav", "Mathew", "Mannion")
 
 
 		val user2 = new User("cusebr")
@@ -50,7 +50,7 @@ class AllocateStudentsTemplateCommandTest extends TestBase with Mockito {
 		user2.setFirstName("Nick")
 		user2.setLastName("Howes")
 		user2.setWarwickId("0672088")
-		val studentWithUsercode2 = studentMemberWithCourse("0672088","cusebr", "Nick", "Howes")
+		val studentWithUsercode2: StudentMember = studentMemberWithCourse("0672088","cusebr", "Nick", "Howes")
 
 
 		val user3 = new User("cusfal")
@@ -58,21 +58,21 @@ class AllocateStudentsTemplateCommandTest extends TestBase with Mockito {
 		user3.setFirstName("Matthew")
 		user3.setLastName("Jones")
 		user3.setWarwickId("9293883")
-		val studentWithUsercode3 = studentMemberWithCourse("9293883","cusfal", "Matthew", "Jones")
+		val studentWithUsercode3: StudentMember = studentMemberWithCourse("9293883","cusfal", "Matthew", "Jones")
 
 		val user4 = new User("curef")
 		user4.setFoundUser(true)
 		user4.setFirstName("John")
 		user4.setLastName("Dale")
 		user4.setWarwickId("0200202")
-		val studentWithUsercode4 = studentMemberWithCourse("0200202","curef", "John", "Dale")
+		val studentWithUsercode4: StudentMember = studentMemberWithCourse("0200202","curef", "John", "Dale")
 
 		val user5 = new User("cusmab")
 		user5.setFoundUser(true)
 		user5.setFirstName("Steven")
 		user5.setLastName("Carpenter")
 		user5.setWarwickId("8888888")
-		val studentWithUsercode5 = studentMemberWithCourse("8888888","cusmab", "Steven", "Carpenter")
+		val studentWithUsercode5: StudentMember = studentMemberWithCourse("8888888","cusmab", "Steven", "Carpenter")
 
 		userLookup.users += (
 			user1.getUserId -> user1,
@@ -82,10 +82,10 @@ class AllocateStudentsTemplateCommandTest extends TestBase with Mockito {
 			user5.getUserId -> user5
 		)
 
-		val group1 = Fixtures.smallGroup("Group 1")
-		val group2 = Fixtures.smallGroup("Group 2")
-		val group3 = Fixtures.smallGroup("Group 3")
-		val group4 = Fixtures.smallGroup("Group 4")
+		val group1: SmallGroup = Fixtures.smallGroup("Group 1")
+		val group2: SmallGroup = Fixtures.smallGroup("Group 2")
+		val group3: SmallGroup = Fixtures.smallGroup("Group 3")
+		val group4: SmallGroup = Fixtures.smallGroup("Group 4")
 
 		group1.name = "Group 1"
 		group1.id = "abcdefgh1"
@@ -124,7 +124,7 @@ class AllocateStudentsTemplateCommandTest extends TestBase with Mockito {
 
 	private trait CommandFixture extends Fixture {
 		val command = new AllocateStudentsToGroupsTemplateCommandInternal(module, set) with ProfileServiceComponent {
-			val profileService = smartMock[ProfileService]
+			val profileService: ProfileService = smartMock[ProfileService]
 
 		}
 		command.profileService.getMemberByUser(user1) returns (Some(studentWithUsercode1))
@@ -143,11 +143,11 @@ class AllocateStudentsTemplateCommandTest extends TestBase with Mockito {
 			}
 		}
 
-		val workbook = command.generateWorkbook()
+		val workbook: XSSFWorkbook = command.generateWorkbook()
 
-		val allocateSheet = workbook.getSheet(command.allocateSheetName)
+		val allocateSheet: XSSFSheet = workbook.getSheet(command.allocateSheetName)
 
-		val headerRow = allocateSheet.getRow(0)
+		val headerRow: XSSFRow = allocateSheet.getRow(0)
 		headerRow.getCell(0).toString should be ("student_id")
 		headerRow.getCell(1).toString should be ("Student name")
 		headerRow.getCell(2).toString should be ("Group name")
@@ -161,11 +161,11 @@ class AllocateStudentsTemplateCommandTest extends TestBase with Mockito {
 	}}
 
 	@Test def groupLookupSheet { new CommandFixture {
-		val workbook = command.generateWorkbook()
+		val workbook: XSSFWorkbook = command.generateWorkbook()
 
-		val groupLookupSheet = workbook.getSheet(command.groupLookupSheetName)
+		val groupLookupSheet: XSSFSheet = workbook.getSheet(command.groupLookupSheetName)
 
-		var groupRow = groupLookupSheet.getRow(1)
+		var groupRow: XSSFRow = groupLookupSheet.getRow(1)
 		groupRow.getCell(0).toString should be ("Group 1")
 		groupRow.getCell(1).toString should be ("abcdefgh1")
 
@@ -183,7 +183,7 @@ class AllocateStudentsTemplateCommandTest extends TestBase with Mockito {
 	}}
 
 	@Test def checkExcelView { new CommandFixture {
-		val excelDownload = command.applyInternal()
+		val excelDownload: ExcelView = command.applyInternal()
 
 		excelDownload.getContentType() should be ("application/vnd.openxmlformats-officedocument.spreadsheetml.sheet")
 	}}
@@ -191,11 +191,11 @@ class AllocateStudentsTemplateCommandTest extends TestBase with Mockito {
 	@Test def permissions { new Fixture {
 		val (theModule, theSet) = (module, set)
 		val command = new AllocateStudentsToGroupsTemplatePermissions with AllocateStudentsToGroupsTemplateCommandState {
-			val module = theModule
-			val set = theSet
+			val module: Module = theModule
+			val set: SmallGroupSet = theSet
 		}
 
-		val checking = mock[PermissionsChecking]
+		val checking: PermissionsChecking = mock[PermissionsChecking]
 		command.permissionsCheck(checking)
 
 		verify(checking, times(1)).PermissionCheck(Permissions.SmallGroups.Allocate, set)
@@ -213,7 +213,7 @@ class AllocateStudentsTemplateCommandTest extends TestBase with Mockito {
 
 	@Test(expected = classOf[ItemNotFoundException]) def permissionsNoSet {
 		val command = new AllocateStudentsToGroupsTemplatePermissions with AllocateStudentsToGroupsTemplateCommandState {
-			val module = Fixtures.module("in101")
+			val module: Module = Fixtures.module("in101")
 			val set = null
 		}
 
@@ -223,7 +223,7 @@ class AllocateStudentsTemplateCommandTest extends TestBase with Mockito {
 
 	@Test(expected = classOf[ItemNotFoundException]) def permissionsUnlinkedSet {
 		val command = new AllocateStudentsToGroupsTemplatePermissions with AllocateStudentsToGroupsTemplateCommandState {
-			val module = Fixtures.module("in101")
+			val module: Module = Fixtures.module("in101")
 			module.id = "set id"
 
 			val set = new SmallGroupSet(Fixtures.module("other"))

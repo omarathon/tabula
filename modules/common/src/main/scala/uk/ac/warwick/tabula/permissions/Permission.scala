@@ -7,7 +7,7 @@ import uk.ac.warwick.tabula.data.model.StudentRelationshipType
 import scala.reflect.ClassTag
 
 sealed abstract class Permission(val description: String) extends CaseObjectEqualityFixes[Permission] {
-	val getName = Permissions.shortName(getClass.asInstanceOf[Class[_ <: Permission]])
+	val getName: String = Permissions.shortName(getClass.asInstanceOf[Class[_ <: Permission]])
 
 	val isScoped = true
 }
@@ -17,13 +17,13 @@ sealed abstract class ScopelessPermission(description: String) extends Permissio
 sealed abstract class SelectorPermission[A <: PermissionsSelector[A]](val selector: PermissionsSelector[A], description: String)
 	extends Permission(description) {
 
-	override val getName = SelectorPermission.shortName(getClass.asInstanceOf[Class[_ <: SelectorPermission[A]]])
-	def <= [B <: PermissionsSelector[B]](other: SelectorPermission[B]) = other match {
+	override val getName: String = SelectorPermission.shortName(getClass.asInstanceOf[Class[_ <: SelectorPermission[A]]])
+	def <= [B <: PermissionsSelector[B]](other: SelectorPermission[B]): Boolean = other match {
 		case that: SelectorPermission[A] => selector <= that.selector.asInstanceOf[PermissionsSelector[A]]
 		case _ => false
 	}
 
-	override def equals(other: Any) = other match {
+	override def equals(other: Any): Boolean = other match {
 		case that: SelectorPermission[A] =>
 			new EqualsBuilder()
 			.append(getName, that.getName)
@@ -32,20 +32,20 @@ sealed abstract class SelectorPermission[A <: PermissionsSelector[A]](val select
 		case _ => false
 	}
 
-	override def hashCode() =
+	override def hashCode(): Int =
 		new HashCodeBuilder()
 		.append(getName)
 		.append(selector)
 		.build()
 
-	override def toString = "%s(%s)".format(super.toString(), selector)
+	override def toString: String = "%s(%s)".format(super.toString(), selector)
 }
 
 trait PermissionsSelector[A <: PermissionsSelector[A]] {
 	def id: String
 	def description:String
 	def isWildcard = false
-	def <=(that: PermissionsSelector[A]) = that match {
+	def <=(that: PermissionsSelector[A]): Boolean = that match {
 		case any if any.isWildcard => true
 		case any => this == any
 	}
@@ -59,16 +59,16 @@ object PermissionsSelector {
 		def description = "*"
 		override def isWildcard = true
 
-		override def <=(that: PermissionsSelector[A]) = {
+		override def <=(that: PermissionsSelector[A]): Boolean = {
 			// Any is only <= other wildcards
 			that.isWildcard
 		}
 
 		override def toString = "*"
 
-		override def hashCode = id.hashCode
+		override def hashCode: Int = id.hashCode
 
-		override def equals(other: Any) = other match {
+		override def equals(other: Any): Boolean = other match {
 			case that: PermissionsSelector[A @unchecked] =>
 				new EqualsBuilder()
 					.append(id, that.id)
@@ -99,8 +99,8 @@ object SelectorPermission {
 		}
 	}
 
-	def shortName(clazz: Class[_ <: SelectorPermission[_]])
-		= clazz.getName.substring(ObjectClassPrefix.length, clazz.getName.length).replace('$', '.')
+	def shortName(clazz: Class[_ <: SelectorPermission[_]]): String
+	= clazz.getName.substring(ObjectClassPrefix.length, clazz.getName.length).replace('$', '.')
 }
 
 /* To avoid nasty namespace/scope clashes, stick all of this in a Permission object */
@@ -126,8 +126,8 @@ object Permissions {
 		}
 	}
 
-	def shortName(clazz: Class[_ <: Permission])
-		= clazz.getName.substring(ObjectClassPrefix.length, clazz.getName.length - 1).replace('$', '.')
+	def shortName(clazz: Class[_ <: Permission]): String
+	= clazz.getName.substring(ObjectClassPrefix.length, clazz.getName.length - 1).replace('$', '.')
 
 	/* ScopelessPermissions are Permissions that can be resolved without having to worry about scope */
 	case object UserPicker extends ScopelessPermission("Use the user picker")

@@ -46,7 +46,7 @@ class AddExamCommandInternal(val module: Module, val academicYear: AcademicYear)
 		}
 	}
 
-	override def applyInternal() = {
+	override def applyInternal(): Exam = {
 		val exam = new Exam
 
 		this.copyTo(exam)
@@ -84,7 +84,7 @@ trait ExamState extends UpdatesStudentMembership {
 	var markingWorkflow: MarkingWorkflow = _
 
 	// TAB-3597
-	lazy val allMarkingWorkflows = (exam match {
+	lazy val allMarkingWorkflows: Seq[MarkingWorkflow] = (exam match {
 		case existing: Exam if Option(existing.markingWorkflow).exists(_.department != module.adminDepartment) =>
 			module.adminDepartment.markingWorkflows ++ Seq(existing.markingWorkflow)
 		case _ =>

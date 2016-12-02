@@ -37,7 +37,7 @@ class AdminDepartmentHomeCommandInternal(val department: Department, val user: C
 			routesWithPermission.toList
 		}
 
-	def applyInternal() = (modules.sorted, routes.sorted)
+	def applyInternal(): (Seq[Module], Seq[Route]) = (modules.sorted, routes.sorted)
 }
 
 trait AdminDepartmentHomeCommandState {
@@ -46,8 +46,8 @@ trait AdminDepartmentHomeCommandState {
 	def department: Department
 	def user: CurrentUser
 
-	lazy val modulesWithPermission = moduleAndDepartmentService.modulesWithPermission(user, Permissions.Module.Administer, department)
-	lazy val routesWithPermission = courseAndRouteService.routesWithPermission(user, Permissions.Route.Administer, department)
+	lazy val modulesWithPermission: Set[Module] = moduleAndDepartmentService.modulesWithPermission(user, Permissions.Module.Administer, department)
+	lazy val routesWithPermission: Set[Route] = courseAndRouteService.routesWithPermission(user, Permissions.Route.Administer, department)
 }
 
 trait AdminDepartmentHomeCommandPermissions extends RequiresPermissionsChecking with PermissionsCheckingMethods {

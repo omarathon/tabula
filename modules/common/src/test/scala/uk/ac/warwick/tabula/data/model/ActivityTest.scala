@@ -10,7 +10,7 @@ import uk.ac.warwick.tabula.Fixtures
 
 class ActivityTest extends TestBase with Mockito {
 
-	val submissionService = mock[SubmissionService]
+	val submissionService: SubmissionService = mock[SubmissionService]
 	val userLookup = new MockUserLookup
 	userLookup.registerUsers("cuscav")
 

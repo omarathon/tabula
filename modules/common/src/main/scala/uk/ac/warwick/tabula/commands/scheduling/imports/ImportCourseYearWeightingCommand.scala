@@ -2,6 +2,7 @@ package uk.ac.warwick.tabula.commands.scheduling.imports
 
 import uk.ac.warwick.spring.Wire
 import uk.ac.warwick.tabula.AcademicYear
+import uk.ac.warwick.tabula.commands.scheduling.imports.ImportAcademicInformationCommand.ImportResult
 import uk.ac.warwick.tabula.commands.{Command, Description, Unaudited}
 import uk.ac.warwick.tabula.data.Transactions.transactional
 import uk.ac.warwick.tabula.data.model.CourseYearWeighting
@@ -16,9 +17,9 @@ class ImportCourseYearWeightingCommand(courseCode: String, academicYear: Academi
 
 	PermissionCheck(Permissions.ImportSystemData)
 
-	var courseDao = Wire.auto[CourseDao]
+	var courseDao: CourseDao = Wire.auto[CourseDao]
 
-	override def applyInternal() = transactional() {
+	override def applyInternal(): (CourseYearWeighting, ImportResult) = transactional() {
 		val existingWeighting = courseDao.getCourseYearWeighting(courseCode, academicYear, yearOfStudy)
 		val course = courseDao.getByCode(courseCode)
 
@@ -63,7 +64,7 @@ class ImportCourseYearWeightingCommand(courseCode: String, academicYear: Academi
 		}
 	}
 
-	override def describe(d: Description) = d.properties(
+	override def describe(d: Description): Unit = d.properties(
 		"courseCode" -> courseCode,
 		"academicYear" -> academicYear.toString,
 		"yearOfStudy" -> yearOfStudy.toString,

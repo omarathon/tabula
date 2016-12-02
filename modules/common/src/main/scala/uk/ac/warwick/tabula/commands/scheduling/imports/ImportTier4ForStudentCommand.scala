@@ -23,7 +23,7 @@ class ImportTier4ForStudentCommandInternal(student: StudentMember, yearOnwards: 
 
 	self: CasUsageImporterComponent with Tier4VisaImporterComponent with StudentCourseYearDetailsDaoComponent =>
 
-	def applyInternal() = {
+	def applyInternal(): Unit = {
 		val newCasUsed = casUsageImporter.isCasUsed(student.universityId)
 		val newTier4Visa = tier4VisaImporter.hasTier4Visa(student.universityId)
 

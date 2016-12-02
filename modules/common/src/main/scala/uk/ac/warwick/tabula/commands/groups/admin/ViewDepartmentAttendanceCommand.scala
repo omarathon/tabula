@@ -47,7 +47,7 @@ trait ViewDepartmentAttendancePermission extends RequiresPermissionsChecking wit
 
 	self: ViewDepartmentAttendanceCommandState =>
 
-	override def permissionsCheck(p:PermissionsChecking) = {
+	override def permissionsCheck(p:PermissionsChecking): Unit = {
 		p.PermissionCheckAny(department.modules.asScala.map(
 			CheckablePermission(ViewDepartmentAttendanceCommand.RequiredPermission, _)
 		))

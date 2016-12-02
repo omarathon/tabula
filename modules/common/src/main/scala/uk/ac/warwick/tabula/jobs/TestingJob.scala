@@ -7,7 +7,7 @@ import uk.ac.warwick.tabula.services.jobs._
 object TestingJob {
 	val id = "testing"
 	val DefaultDelay = 500
-	val defaultTime = DateTime.now.toString
+	val defaultTime: String = DateTime.now.toString
 
 	def apply(name: String, createdDate: String = defaultTime, sleepTime: Int = 0) = JobPrototype(id, Map(
 		"name" -> name,
@@ -17,7 +17,7 @@ object TestingJob {
 
 @Component
 class TestingJob extends Job {
-	val identifier = TestingJob.id
+	val identifier: String = TestingJob.id
 
 	def run(implicit job: JobInstance) {
 		val name = job.getString("name")

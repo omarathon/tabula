@@ -12,7 +12,7 @@ object UniversityId {
 	val universityIdPattern = new Regex("^[0-9]{%d}$".format(ExpectedLength))
 
 	/** Returns whether this string matches universityIdPattern. */
-	def isValid(id: String) = id match {
+	def isValid(id: String): Boolean = id match {
 		case universityIdPattern() => true
 		case _ => false
 	}

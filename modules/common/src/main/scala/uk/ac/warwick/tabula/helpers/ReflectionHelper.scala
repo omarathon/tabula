@@ -32,9 +32,9 @@ object ReflectionHelper extends Logging {
 		}.toMap
 	}
 
-	lazy val allPermissionTargets = subtypesOf[PermissionsTarget].sortBy(_.getSimpleName)
+	lazy val allPermissionTargets: Seq[Class[PermissionsTarget]] = subtypesOf[PermissionsTarget].sortBy(_.getSimpleName)
 
-	lazy val allPermissions = {
+	lazy val allPermissions: Seq[Permission] = {
 		def sortFn(clazz1: Class[_ <: Permission], clazz2: Class[_ <: Permission]) = {
 			// Remove prefix and strip trailing $, then change $ to .
 			val shortName1 = Permissions.shortName(clazz1)
@@ -64,7 +64,7 @@ object ReflectionHelper extends Logging {
 			}
 	}
 
-	lazy val allBuiltInRoleDefinitions = {
+	lazy val allBuiltInRoleDefinitions: Seq[BuiltInRoleDefinition] = {
 		val selectorDefinitions = subtypesOf[SelectorBuiltInRoleDefinition[_]]
 
 		subtypesOf[BuiltInRoleDefinition]
@@ -80,7 +80,7 @@ object ReflectionHelper extends Logging {
 			}
 	}
 
-	lazy val allSelectorBuiltInRoleDefinitionNames = {
+	lazy val allSelectorBuiltInRoleDefinitionNames: Seq[String] = {
 		subtypesOf[SelectorBuiltInRoleDefinition[_]]
 			.filterNot { clz => Modifier.isAbstract(clz.getModifiers) }
 			.sortBy(_.getSimpleName)
@@ -90,7 +90,7 @@ object ReflectionHelper extends Logging {
 			}
 	}
 
-	lazy val groupedPermissions = {
+	lazy val groupedPermissions: Map[String, Seq[(String, String)]] = {
 		def groupFn(p: Permission) = {
 			val simpleName = Permissions.shortName(p.getClass)
 

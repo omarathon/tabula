@@ -20,7 +20,7 @@ class OldRequestAssignmentAccessController extends OldCourseworkController {
 	hideDeletedItems
 
 	// clumsy way to prevent a user spamming admins with emails.
-	var requestedAccess = mutable.Queue[(String, String)]()
+	var requestedAccess: mutable.Queue[(String, String)] = mutable.Queue[(String, String)]()
 
 	@ModelAttribute def cmd(@PathVariable module: Module, @PathVariable assignment: Assignment, user: CurrentUser) =
 		new RequestAssignmentAccessCommand(module, assignment, user)

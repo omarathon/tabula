@@ -3,19 +3,21 @@ package uk.ac.warwick.tabula.data.model.groups
 import java.sql.Types
 
 import org.hibernate.`type`.StandardBasicTypes
-import org.joda.time.{LocalDate, DateTimeConstants}
+import org.joda.time.{DateTimeConstants, LocalDate}
 import uk.ac.warwick.tabula.AcademicYear
 import uk.ac.warwick.tabula.data.model.AbstractBasicUserType
 import uk.ac.warwick.tabula.services.TermService
 import uk.ac.warwick.util.termdates.Term
 
+import scala.collection.mutable
+
 case class WeekRange(minWeek: WeekRange.Week, maxWeek: WeekRange.Week) {
 	if (maxWeek < minWeek) throw new IllegalArgumentException("maxWeek must be >= minWeek")
 
-	def isSingleWeek = maxWeek == minWeek
+	def isSingleWeek: Boolean = maxWeek == minWeek
 	def toWeeks: Seq[WeekRange.Week] = minWeek to maxWeek
 
-	override def toString =
+	override def toString: String =
 		if (!isSingleWeek) "%d-%d" format (minWeek, maxWeek)
 		else minWeek.toString
 }
@@ -24,7 +26,7 @@ object WeekRange {
 	type Week = Int
 
 	def apply(singleWeek: Week): WeekRange = WeekRange(singleWeek, singleWeek)
-	def fromString(rep: String) = rep.split('-') match {
+	def fromString(rep: String): WeekRange = rep.split('-') match {
 		case Array(singleWeek) => WeekRange(singleWeek.trim.toInt)
 		case Array(min, max) => WeekRange(min.trim.toInt, max.trim.toInt)
 		case _ => throw new IllegalArgumentException("Couldn't convert string representation %s to WeekRange" format rep)
@@ -59,7 +61,7 @@ object WeekRange {
 		Seq(autumnTerm, springTerm, summerTerm).map(toWeekRange)
 	}
 
-	implicit val defaultOrdering = Ordering.by[WeekRange, Week] ( _.minWeek )
+	implicit val defaultOrdering: Ordering[WeekRange] = Ordering.by[WeekRange, Week] ( _.minWeek )
 
 	object NumberingSystem {
 		val Term = "term" // 1-10, 1-10, 1-10
@@ -80,7 +82,7 @@ class WeekRangeListUserType extends AbstractBasicUserType[Seq[WeekRange], String
 	val nullValue = null
 	val nullObject = Nil
 
-	override def convertToObject(string: String) = string.split(separator) map { rep => WeekRange.fromString(rep) }
-	override def convertToValue(list: Seq[WeekRange]) = if (list.isEmpty) null else list.map { _.toString }.mkString(separator)
+	override def convertToObject(string: String): mutable.ArraySeq[WeekRange] = string.split(separator) map { rep => WeekRange.fromString(rep) }
+	override def convertToValue(list: Seq[WeekRange]): String = if (list.isEmpty) null else list.map { _.toString }.mkString(separator)
 
 }

@@ -32,11 +32,11 @@ object FeedbackReportJob {
 @Component
 class FeedbackReportJob extends Job with Logging with FreemarkerRendering {
 
-	val identifier = FeedbackReportJob.identifier
+	val identifier: String = FeedbackReportJob.identifier
 
 	implicit var freemarker: Configuration = Wire.auto[Configuration]
 	var departmentService: ModuleAndDepartmentService = Wire.auto[ModuleAndDepartmentService]
-	var assignmentService = Wire.auto[AssessmentService]
+	var assignmentService: AssessmentService = Wire.auto[AssessmentService]
 
 	@Resource(name = "mailSender") var mailer: WarwickMailSender = _
 
@@ -55,14 +55,14 @@ class FeedbackReportJob extends Job with Logging with FreemarkerRendering {
 
 	var sendEmails = true
 
-	def run(implicit job: JobInstance) = {
+	def run(implicit job: JobInstance): Unit = {
 		transactional() {
 			new Runner(job).run()
 		}
 	}
 
 
-	def renderJobDoneEmailText(user: CurrentUser, department: Department, startDate: DateTime, endDate: DateTime) = {
+	def renderJobDoneEmailText(user: CurrentUser, department: Department, startDate: DateTime, endDate: DateTime): String = {
 		renderToString("/WEB-INF/freemarker/emails/feedback_report_done.ftl", Map(
 			"department" -> department,
 			"startDate" -> DateFormats.CSVDate.print(startDate),
@@ -76,7 +76,7 @@ class FeedbackReportJob extends Job with Logging with FreemarkerRendering {
 	class Runner(job: JobInstance) {
 		implicit private val _job: JobInstance = job
 
-		val department = {
+		val department: Department = {
 			val id = job.getString("department")
 			departmentService.getDepartmentById(id) getOrElse {
 				updateStatus("%s is not a valid department ID" format (id))
@@ -84,7 +84,7 @@ class FeedbackReportJob extends Job with Logging with FreemarkerRendering {
 			}
 		}
 
-		val startDate = {
+		val startDate: DateTime = {
 			val stringDate = job.getString("startDate")
 			try {
 				DateFormats.CSVDate.parseDateTime(stringDate)
@@ -97,7 +97,7 @@ class FeedbackReportJob extends Job with Logging with FreemarkerRendering {
 		}
 
 
-		val endDate = {
+		val endDate: DateTime = {
 			val stringDate = job.getString("endDate")
 			try {
 				DateFormats.CSVDate.parseDateTime(stringDate)

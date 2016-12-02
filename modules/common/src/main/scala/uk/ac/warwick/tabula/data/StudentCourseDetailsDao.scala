@@ -12,7 +12,7 @@ trait StudentCourseDetailsDaoComponent {
 }
 
 trait AutowiringStudentCourseDetailsDaoComponent extends StudentCourseDetailsDaoComponent {
-	val studentCourseDetailsDao = Wire[StudentCourseDetailsDao]
+	val studentCourseDetailsDao: StudentCourseDetailsDao = Wire[StudentCourseDetailsDao]
 }
 
 trait StudentCourseDetailsDao {
@@ -31,29 +31,29 @@ trait StudentCourseDetailsDao {
 @Repository
 class StudentCourseDetailsDaoImpl extends StudentCourseDetailsDao with Daoisms {
 
-	def saveOrUpdate(studentCourseDetails: StudentCourseDetails) = {
+	def saveOrUpdate(studentCourseDetails: StudentCourseDetails): Unit = {
 		session.saveOrUpdate(studentCourseDetails)
 		session.flush()
 	}
 
-	def delete(studentCourseDetails: StudentCourseDetails) =  {
+	def delete(studentCourseDetails: StudentCourseDetails): Unit =  {
 		session.delete(studentCourseDetails)
 		session.flush()
 	}
 
-	def getByScjCode(scjCode: String) =
+	def getByScjCode(scjCode: String): Option[StudentCourseDetails] =
 		session.newCriteria[StudentCourseDetails]
 				.add(is("scjCode", scjCode.trim))
 				.add(isNull("missingFromImportSince"))
 				.uniqueResult
 
-	def getByScjCodeStaleOrFresh(scjCode: String) = {
+	def getByScjCodeStaleOrFresh(scjCode: String): Option[StudentCourseDetails] = {
 		sessionWithoutFreshFilters.newCriteria[StudentCourseDetails]
 				.add(is("scjCode", scjCode.trim))
 				.uniqueResult
 	}
 
-	def getBySprCode(sprCode: String) =
+	def getBySprCode(sprCode: String): Seq[StudentCourseDetails] =
 		session.newCriteria[StudentCourseDetails]
 				.add(is("sprCode", sprCode.trim))
 				.add(isNull("missingFromImportSince"))
@@ -66,7 +66,7 @@ class StudentCourseDetailsDaoImpl extends StudentCourseDetailsDao with Daoisms {
 			.seq
 	}
 
-	def getStudentBySprCode(sprCode: String) = {
+	def getStudentBySprCode(sprCode: String): Option[StudentMember] = {
 		val scdList: Seq[StudentCourseDetails] = session.newCriteria[StudentCourseDetails]
 				.add(is("sprCode", sprCode.trim))
 				.add(isNull("missingFromImportSince"))
@@ -76,20 +76,20 @@ class StudentCourseDetailsDaoImpl extends StudentCourseDetailsDao with Daoisms {
 		else None
 	}
 
-	def getByRoute(route: Route) = {
+	def getByRoute(route: Route): Seq[StudentCourseDetails] = {
 		session.newCriteria[StudentCourseDetails]
 			.add(is("currentRoute.code", route.code))
 			.add(isNull("missingFromImportSince"))
 			.seq
 	}
 
-	def getFreshScjCodes =
+	def getFreshScjCodes: Seq[String] =
 		session.newCriteria[StudentCourseDetails]
 			.add(isNull("missingFromImportSince"))
 			.project[String](Projections.property("scjCode"))
 			.seq
 
-	def stampMissingFromImport(newStaleScjCodes: Seq[String], importStart: DateTime) = {
+	def stampMissingFromImport(newStaleScjCodes: Seq[String], importStart: DateTime): Unit = {
 		newStaleScjCodes.grouped(Daoisms.MaxInClauseCount).foreach { newStaleCodes =>
 			var sqlString = """
 				update

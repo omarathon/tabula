@@ -4,25 +4,28 @@ import org.apache.poi.hssf.usermodel.HSSFDataFormat
 import org.apache.poi.xssf.usermodel.{XSSFSheet, XSSFWorkbook}
 import uk.ac.warwick.tabula.data.AttendanceMonitoringStudentData
 import uk.ac.warwick.tabula.data.model.Department
+import uk.ac.warwick.tabula.data.model.attendance.AttendanceState
 import uk.ac.warwick.tabula.data.model.attendance.AttendanceState._
 import uk.ac.warwick.util.csv.CSVLineWriter
+
+import scala.xml.Elem
 
 class SmallGroupsReportExporter(val processorResult: SmallGroupsReportProcessorResult, val department: Department)
 	extends CSVLineWriter[AttendanceMonitoringStudentData] {
 
-	val attendance = processorResult.attendance
-	val students = processorResult.students
-	val events = processorResult.events
+	val attendance: Map[AttendanceMonitoringStudentData, Map[EventData, AttendanceState]] = processorResult.attendance
+	val students: Seq[AttendanceMonitoringStudentData] = processorResult.students
+	val events: Seq[EventData] = processorResult.events
 
-	val headers = Seq("First name","Last name","University ID", "Route", "Year of study", "SPR code") ++
+	val headers: Seq[String] = Seq("First name","Last name","University ID", "Route", "Year of study", "SPR code") ++
 		events.map(e => s"${e.moduleCode} ${e.setName} ${e.format} ${e.groupName} ${e.dayString} Week ${e.week}") ++
 		Seq("Not recorded", "Not recorded - Late", "Missed (unauthorised)", "Missed (authorised)", "Attended")
 
-	val unrecordedIndex = headers.size - 5
-	val unrecordedLateIndex = headers.size - 4
-	val missedIndex = headers.size - 3
-	val authorisedIndex = headers.size - 2
-	val attendedIndex = headers.size - 1
+	val unrecordedIndex: Int = headers.size - 5
+	val unrecordedLateIndex: Int = headers.size - 4
+	val missedIndex: Int = headers.size - 3
+	val authorisedIndex: Int = headers.size - 2
+	val attendedIndex: Int = headers.size - 1
 
 	override def getNoOfColumns(o: AttendanceMonitoringStudentData): Int = headers.size
 
@@ -74,7 +77,7 @@ class SmallGroupsReportExporter(val processorResult: SmallGroupsReportProcessorR
 		}
 	}
 
-	def toXLSX = {
+	def toXLSX: XSSFWorkbook = {
 		val workbook = new XSSFWorkbook()
 		val sheet = generateNewSheet(workbook)
 
@@ -116,7 +119,7 @@ class SmallGroupsReportExporter(val processorResult: SmallGroupsReportProcessorR
 		}
 	}
 
-	def toXML = {
+	def toXML: Elem = {
 		<result>
 			<attendance>
 				{ attendance.map{case(studentData, eventMap) =>

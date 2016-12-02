@@ -851,7 +851,7 @@
 <#macro instanceFormat instance academicYear department><#compress>
 	<#local event = instance._1() />
 	<#local week = instance._2() />
-	${event.day.shortName} <@fmt.time event.startTime />, <@fmt.singleWeekFormat week academicYear department />
+	<#if event.title?has_content>${event.title} </#if>${event.day.shortName} <@fmt.time event.startTime />, <@fmt.singleWeekFormat week academicYear department />
 </#compress></#macro>
 
 <#macro studentAttendanceRow student attendance notes instances group>

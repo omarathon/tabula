@@ -22,7 +22,7 @@ object PlagiarismInvestigationCommand {
 			with PlagiarismInvestigationCommandNotification
 			with UserAware
 			with AutowiringSubmissionServiceComponent {
-			val user = _user
+			val user: User = _user
 		}
 }
 
@@ -31,7 +31,7 @@ class PlagiarismInvestigationCommandInternal(val assignment: Assignment)
 
 	self: SubmissionServiceComponent =>
 
-	def applyInternal() = {
+	def applyInternal(): Unit = {
 		submissions = students.asScala.flatMap(submissionService.getSubmissionByUniId(assignment, _))
 		submissions.foreach { submission =>
 			submission.plagiarismInvestigation =
@@ -87,7 +87,7 @@ trait PlagiarismInvestigationCommandDescription extends Describable[Unit] {
 trait PlagiarismInvestigationCommandNotification extends Notifies[Unit, Unit] {
 	self: PlagiarismInvestigationCommandState with UserAware =>
 
-	def emit(result: Unit) = if(markPlagiarised) {
+	def emit(result: Unit): Seq[MarkedPlagiarisedNotification] = if(markPlagiarised) {
 		submissions.map(s=> Notification.init(new MarkedPlagiarisedNotification, user, s, s.assignment))
 	} else {
 		Seq()

@@ -1,6 +1,7 @@
 package uk.ac.warwick.tabula.commands.attendance.manage
 
 import org.springframework.validation.BindException
+import uk.ac.warwick.tabula.data.model.{Department, StudentMember}
 import uk.ac.warwick.tabula.data.model.attendance.{AttendanceMonitoringPoint, AttendanceMonitoringScheme}
 import uk.ac.warwick.tabula.services.{ProfileService, ProfileServiceComponent, ScheduledNotificationService}
 import uk.ac.warwick.tabula.services.attendancemonitoring.{AttendanceMonitoringService, AttendanceMonitoringServiceComponent}
@@ -9,9 +10,9 @@ import uk.ac.warwick.tabula.{AcademicYear, Fixtures, Mockito, TestBase}
 class DeleteAttendancePointCommandTest extends TestBase with Mockito {
 
 	trait Fixture {
-		val thisDepartment = Fixtures.department("its")
+		val thisDepartment: Department = Fixtures.department("its")
 		val thisAcademicYear = AcademicYear(2014)
-		val student = Fixtures.student("1234")
+		val student: StudentMember = Fixtures.student("1234")
 		val scheme = new AttendanceMonitoringScheme
 		scheme.department = thisDepartment
 		scheme.academicYear = thisAcademicYear
@@ -22,7 +23,7 @@ class DeleteAttendancePointCommandTest extends TestBase with Mockito {
 		scheme.points.add(point)
 
 		val validator = new DeleteAttendancePointValidation with AttendanceMonitoringServiceComponent with DeleteAttendancePointCommandState {
-			val attendanceMonitoringService = smartMock[AttendanceMonitoringService]
+			val attendanceMonitoringService: AttendanceMonitoringService = smartMock[AttendanceMonitoringService]
 			def department = null
 			def templatePoint = null
 			override def pointsToDelete = Seq(point)
@@ -32,8 +33,8 @@ class DeleteAttendancePointCommandTest extends TestBase with Mockito {
 		val cmd = new DeleteAttendancePointCommandInternal(thisDepartment, null) with DeleteAttendancePointCommandState
 			with AttendanceMonitoringServiceComponent with ProfileServiceComponent {
 			override val pointsToDelete = Seq(point)
-			override val attendanceMonitoringService = smartMock[AttendanceMonitoringService]
-			override val profileService = smartMock[ProfileService]
+			override val attendanceMonitoringService: AttendanceMonitoringService = smartMock[AttendanceMonitoringService]
+			override val profileService: ProfileService = smartMock[ProfileService]
 			thisScheduledNotificationService = smartMock[ScheduledNotificationService]
 		}
 	}

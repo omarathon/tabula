@@ -14,6 +14,7 @@ import uk.ac.warwick.tabula.helpers.Promises._
 import uk.ac.warwick.spring.Wire
 import uk.ac.warwick.tabula.services.ModuleAndDepartmentService
 import uk.ac.warwick.tabula.commands.TaskBenchmarking
+import uk.ac.warwick.tabula.helpers.MutablePromise
 
 /**
  * A special multi-purpose role provider that provides users access to their own data, generally this isn't an explicit permission.
@@ -21,7 +22,7 @@ import uk.ac.warwick.tabula.commands.TaskBenchmarking
 @Component
 class OwnDataRoleProvider extends RoleProvider with TaskBenchmarking {
 
-	val departmentService = promise { Wire[ModuleAndDepartmentService] }
+	val departmentService: MutablePromise[ModuleAndDepartmentService] = promise { Wire[ModuleAndDepartmentService] }
 
 	def getRolesFor(user: CurrentUser, scope: PermissionsTarget): Stream[Role] = benchmarkTask("Get roles for OwnDataRoleProvider"){
 		lazy val department =

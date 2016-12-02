@@ -54,7 +54,7 @@ object TurnitinLtiService {
 	 */
 	val validExtensions = Seq("doc", "docx", "odt", "wpd", "ps", "eps", "htm", "html", "hwp", "rtf", "txt", "pdf", "pptx", "ppt", "ppsx", "pps", "xls", "xlsx")
 	val maxFileSizeInMegabytes = 20
-	val maxFileSize = maxFileSizeInMegabytes * 1024 * 1024  // 20M
+	val maxFileSize: Int = maxFileSizeInMegabytes * 1024 * 1024  // 20M
 
 	def validFileType(file: FileAttachment): Boolean =
 		validExtensions contains getExtension(file.name).toLowerCase
@@ -72,12 +72,12 @@ object TurnitinLtiService {
 
 	def assignmentIdFor(assignment: Assignment) = AssignmentId(s"$AssignmentPrefix${assignment.id}")
 
-	def classNameFor(assignment: Assignment) = {
+	def classNameFor(assignment: Assignment): ClassName = {
 		val module = assignment.module
 		ClassName(StringUtils.safeSubstring(s"${module.code.toUpperCase} - ${module.name}", 0, turnitinClassTitleMaxCharacters))
 	}
 
-	def assignmentNameFor(assignment: Assignment) = {
+	def assignmentNameFor(assignment: Assignment): AssignmentName = {
 		AssignmentName(s"${assignment.id} (${assignment.academicYear.toString}) ${assignment.name}")
 	}
 }
@@ -237,7 +237,7 @@ class TurnitinLtiService extends Logging with DisposableBean with InitializingBe
 		customParams: String,
 		tool_consumer_info_version: String,
 		assignment: Assignment,
-		user: CurrentUser ) = {
+		user: CurrentUser ): Map[String, String] = {
 
 		val signedParams = getSignedParams(
 			Map(
@@ -386,7 +386,7 @@ trait TurnitinLtiServiceComponent {
 }
 
 trait AutowiringTurnitinLtiServiceComponent extends TurnitinLtiServiceComponent {
-	var turnitinLtiService = Wire[TurnitinLtiService]
+	var turnitinLtiService: TurnitinLtiService = Wire[TurnitinLtiService]
 }
 
 case class ClassName(value: String)
@@ -420,7 +420,7 @@ object TurnitinLtiOAuthSupport {
 		encodeBase64String(mac.doFinal(getBytesUtf8(baseString)))
 	}
 
-	def getSignatureBaseString(requestUrl: String, httpMethod: String, baseParameters: Map[String, String]) = {
+	def getSignatureBaseString(requestUrl: String, httpMethod: String, baseParameters: Map[String, String]): String = {
 		val message = new OAuthMessage(httpMethod, requestUrl, JMap(baseParameters.toSeq: _*).entrySet())
 
 		OAuthSignatureMethod.getBaseString(message)

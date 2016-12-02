@@ -16,9 +16,9 @@ trait TimetablingFixture extends BrowserTest with TimetableDriver  with Features
 
 	var testGroupSetId:String=_
 
-	val academicYear = FunctionalTestAcademicYear.current
+	val academicYear: FunctionalTestAcademicYear = FunctionalTestAcademicYear.current
 
-	val examTimetablesWasEnabled = isFeatureEnabled("personalExamTimetables")
+	val examTimetablesWasEnabled: Boolean = isFeatureEnabled("personalExamTimetables")
 
 	before {
 		Given("The test department exists")

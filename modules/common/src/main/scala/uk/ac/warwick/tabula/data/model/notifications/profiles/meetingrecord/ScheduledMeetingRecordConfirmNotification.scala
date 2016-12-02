@@ -26,7 +26,7 @@ class ScheduledMeetingRecordConfirmNotification
 
 	def FreemarkerTemplate = "/WEB-INF/freemarker/notifications/meetingrecord/scheduled_meeting_record_confirm_notification.ftl"
 
-	def title = {
+	def title: String = {
 		val name =
 			if (meeting.creator.universityId == meeting.relationship.studentId) meeting.relationship.agentName
 			else meeting.relationship.studentMember.flatMap { _.fullName }.getOrElse("student")
@@ -36,7 +36,7 @@ class ScheduledMeetingRecordConfirmNotification
 
 	override def urlTitle = "confirm whether this meeting took place"
 
-	def isAgent = meeting.creator == meeting.relationship.agentMember.getOrElse(throw new IllegalStateException(agentNotFoundMessage))
+	def isAgent: Boolean = meeting.creator == meeting.relationship.agentMember.getOrElse(throw new IllegalStateException(agentNotFoundMessage))
 
 	def content = FreemarkerModel(FreemarkerTemplate, Map(
 		"isAgent" -> isAgent,

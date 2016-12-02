@@ -49,8 +49,8 @@ object AssignmentFeedbackAdjustmentCommand {
 			with AutowiringProfileServiceComponent
 			with QueuesFeedbackForSits
 			with SubmissionState {
-				override val submission = thisAssignment.findSubmission(student.getWarwickId)
-				override val assignment = thisAssignment
+				override val submission: Option[Submission] = thisAssignment.findSubmission(student.getWarwickId)
+				override val assignment: Assignment = thisAssignment
 			}
 }
 
@@ -59,12 +59,12 @@ class FeedbackAdjustmentCommandInternal(val assessment: Assessment, val student:
 
 	self: FeedbackServiceComponent with ZipServiceComponent with QueuesFeedbackForSits =>
 
-	val feedback = assessment.findFeedback(student.getWarwickId)
+	val feedback: Feedback = assessment.findFeedback(student.getWarwickId)
 		.getOrElse(throw new ItemNotFoundException("Can't adjust for non-existent feedback"))
 
-	lazy val canBeUploadedToSits = assessment.assessmentGroups.asScala.map(_.toUpstreamAssessmentGroup(assessment.academicYear)).exists(_.exists(_.membersIncludes(student)))
+	lazy val canBeUploadedToSits: Boolean = assessment.assessmentGroups.asScala.map(_.toUpstreamAssessmentGroup(assessment.academicYear)).exists(_.exists(_.membersIncludes(student)))
 
-	def applyInternal() = {
+	def applyInternal(): Feedback = {
 		val newMark = copyTo(feedback)
 
 		assessment match {
@@ -177,7 +177,7 @@ trait FeedbackAdjustmentCommandDescription extends Describable[Feedback] {
 trait FeedbackAdjustmentNotifier extends Notifies[Feedback, Feedback] {
 	self: FeedbackAdjustmentCommandState =>
 
-	def emit(feedback: Feedback) = {
+	def emit(feedback: Feedback): Seq[NotificationWithTarget[AssignmentFeedback, Assignment] with SingleItemNotification[AssignmentFeedback] with AutowiringUserLookupComponent] = {
 		HibernateHelpers.initialiseAndUnproxy(feedback) match {
 			case assignmentFeedback: AssignmentFeedback =>
 				val studentsNotifications = if (assignmentFeedback.released) {

@@ -31,7 +31,7 @@ class ExamsAddMarksController extends ExamsController {
 		AdminAddMarksCommand(mandatory(module), mandatory(exam), user, GenerateGradesFromMarkCommand(mandatory(module), mandatory(exam)))
 
 	// Add the common breadcrumbs to the model.
-	def crumbed(mav: Mav, module: Module, academicYear: AcademicYear) = mav.crumbs(
+	def crumbed(mav: Mav, module: Module, academicYear: AcademicYear): Mav = mav.crumbs(
 		Breadcrumbs.Exams.Home,
 		Breadcrumbs.Exams.Department(module.adminDepartment, academicYear),
 		Breadcrumbs.Exams.Module(module, academicYear)
@@ -43,7 +43,7 @@ class ExamsAddMarksController extends ExamsController {
 		@PathVariable exam: Exam,
 		@PathVariable academicYear: AcademicYear,
 		@ModelAttribute("adminAddMarksCommand") cmd: AdminAddMarksCommand, errors: Errors
-	) = {
+	): Mav = {
 		val members = examMembershipService.determineMembershipUsersWithOrder(exam)
 
 		val marksToDisplay = members.map { memberPair =>
@@ -92,7 +92,7 @@ class ExamsAddMarksController extends ExamsController {
 		@PathVariable exam: Exam,
 		@PathVariable academicYear: AcademicYear,
 		@ModelAttribute("adminAddMarksCommand") cmd: AdminAddMarksCommand, errors: Errors
-	) = {
+	): Mav = {
 		if (errors.hasErrors) viewMarkUploadForm(module, exam, academicYear, cmd, errors)
 		else {
 			bindAndValidate(module, cmd, errors)
@@ -106,7 +106,7 @@ class ExamsAddMarksController extends ExamsController {
 		@PathVariable exam: Exam,
 		@PathVariable academicYear: AcademicYear,
 		@ModelAttribute("adminAddMarksCommand") cmd: AdminAddMarksCommand, errors: Errors
-	) = {
+	): Mav = {
 		bindAndValidate(module, cmd, errors)
 		cmd.apply()
 		Redirect(Routes.Exams.admin.module(module, academicYear))

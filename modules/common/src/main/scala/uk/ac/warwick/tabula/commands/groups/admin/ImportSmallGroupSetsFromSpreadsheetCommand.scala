@@ -269,6 +269,6 @@ trait ImportSmallGroupSetsFromSpreadsheetPermissions extends RequiresPermissions
 trait ImportSmallGroupSetsFromSpreadsheetDescription extends Describable[Seq[SmallGroupSet]] {
 	self: ImportSmallGroupSetsFromSpreadsheetState =>
 
-	override def describe(d: Description) =
+	override def describe(d: Description): Unit =
 		d.department(department)
 }

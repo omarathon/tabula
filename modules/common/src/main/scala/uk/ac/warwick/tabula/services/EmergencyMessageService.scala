@@ -7,6 +7,7 @@ import org.springframework.beans.factory.annotation.Value
 import org.springframework.stereotype.Service
 import uk.ac.warwick.spring.Wire
 import uk.ac.warwick.tabula.Reactor
+import uk.ac.warwick.tabula.Reactor.EventSource
 import uk.ac.warwick.tabula.commands.Describable
 import uk.ac.warwick.tabula.events.{Event, EventDescription}
 import uk.ac.warwick.tabula.helpers.Logging
@@ -47,7 +48,7 @@ trait EmergencyMessageService extends EmergencyMessageStatus {
 
 	var message: Option[String]
 
-	def update(message: EmergencyMessage) = {
+	def update(message: EmergencyMessage): EmergencyMessageService = {
 		this.message = Option(message.message)
 		if (message.enabled) this.enable
 		else this.disable
@@ -63,9 +64,9 @@ class EmergencyMessageServiceImpl extends EmergencyMessageService with Logging {
 	var message: Option[String] = None
 
 	// for other classes to listen to changes to emergency messahe.
-	val changingState = Reactor.EventSource[Boolean]
+	val changingState: EventSource[Boolean] = Reactor.EventSource[Boolean]
 
-	def exception(callee: Describable[_]) = {
+	def exception(callee: Describable[_]): EmergencyMessageServiceEnabledException = {
 		val m = EventDescription.generateMessage(Event.fromDescribable(callee))
 		logger.info("[Emergency Message Reject] " + m)
 
@@ -94,7 +95,7 @@ trait EmergencyMessageServiceComponent {
 }
 
 trait AutowiringEmergencyMessageServiceComponent extends EmergencyMessageServiceComponent {
-	val emergencyMessageService = Wire[EmergencyMessageService]
+	val emergencyMessageService: EmergencyMessageService = Wire[EmergencyMessageService]
 }
 
 /**
@@ -109,7 +110,7 @@ class EmergencyMessageServiceEnabledException(val message: Option[String])
 	extends RuntimeException
 	with HandledException {
 
-	def getMessageOrEmpty = message.getOrElse("")
+	def getMessageOrEmpty: String = message.getOrElse("")
 
 }
 
@@ -137,7 +138,7 @@ class EmergencyMessage {
 
 class EmergencyMessageListener extends QueueListener with InitializingBean with Logging with AutowiringEmergencyMessageServiceComponent {
 
-	var queue = Wire.named[Queue]("settingsSyncTopic")
+	var queue: Queue = Wire.named[Queue]("settingsSyncTopic")
 
 	override def isListeningToQueue = true
 	override def onReceive(item: Any) {
@@ -147,7 +148,7 @@ class EmergencyMessageListener extends QueueListener with InitializingBean with 
 		}
 	}
 
-	override def afterPropertiesSet = {
+	override def afterPropertiesSet: Unit = {
 		queue.addListener(classOf[EmergencyMessage].getAnnotation(classOf[ItemType]).value, this)
 	}
 

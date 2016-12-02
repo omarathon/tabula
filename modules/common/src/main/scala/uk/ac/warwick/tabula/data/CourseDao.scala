@@ -9,7 +9,7 @@ trait CourseDaoComponent {
 }
 
 trait AutowiringCourseDaoComponent extends CourseDaoComponent {
-	val courseDao = Wire[CourseDao]
+	val courseDao: CourseDao = Wire[CourseDao]
 }
 
 trait CourseDao {
@@ -26,11 +26,11 @@ trait CourseDao {
 @Repository
 class CourseDaoImpl extends CourseDao with Daoisms {
 
-	def saveOrUpdate(course: Course) = session.saveOrUpdate(course)
+	def saveOrUpdate(course: Course): Unit = session.saveOrUpdate(course)
 
-	def saveOrUpdate(courseYearWeighting: CourseYearWeighting) = session.saveOrUpdate(courseYearWeighting)
+	def saveOrUpdate(courseYearWeighting: CourseYearWeighting): Unit = session.saveOrUpdate(courseYearWeighting)
 
-	def getByCode(code: String) =
+	def getByCode(code: String): Option[Course] =
 		session.newQuery[Course]("from Course course where code = :code").setString("code", code).uniqueResult
 
 	def getAllCourseCodes: Seq[String] =

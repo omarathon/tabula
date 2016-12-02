@@ -24,13 +24,13 @@ import scala.collection.JavaConversions._
 
 @Controller
 class FlexiPickerController extends BaseController {
-	var json = Wire[ObjectMapper]
+	var json: ObjectMapper = Wire[ObjectMapper]
 
 	@ModelAttribute("command")
 	def createCommand() = FlexiPickerCommand()
 
 	@RequestMapping(value = Array("/ajax/flexipicker/query.json"))
-	def queryJson(@ModelAttribute("command") form: Appliable[FlexiPickerResult] with FlexiPickerState, out: Writer) = {
+	def queryJson(@ModelAttribute("command") form: Appliable[FlexiPickerResult] with FlexiPickerState, out: Writer): Unit = {
 		var results: FlexiPickerResult = null
 
 		if (form.hasQuery && form.query.trim.length > 2) {
@@ -62,7 +62,7 @@ object FlexiPickerController {
 	class FlexiPickerCommand extends CommandInternal[FlexiPickerResult] with FlexiPickerState with Logging {
 		self: UserLookupComponent with ProfileServiceComponent =>
 
-		def applyInternal() = {
+		def applyInternal(): List[Map[String, String]] = {
 			var results = List[Map[String, String]]()
 
 			if(includeEmail)  results ++= parseEmail       // add results of email search to our list

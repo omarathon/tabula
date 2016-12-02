@@ -13,13 +13,13 @@ trait MeetingRecordNotificationTrait {
 
 	def meeting: MeetingRecord
 
-	def academicYear = AcademicYear.findAcademicYearContainingDate(meeting.meetingDate)
+	def academicYear: AcademicYear = AcademicYear.findAcademicYearContainingDate(meeting.meetingDate)
 
-	def url = Routes.Profile.relationshipType(
+	def url: String = Routes.Profile.relationshipType(
 		meeting.relationship.studentCourseDetails,
 		academicYear,
 		meeting.relationship.relationshipType
 	)
 
-	def agentRole = meeting.relationship.relationshipType.agentRole
+	def agentRole: String = meeting.relationship.relationshipType.agentRole
 }

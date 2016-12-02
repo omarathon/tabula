@@ -1,10 +1,10 @@
 package uk.ac.warwick.tabula.web.controllers.admin.routes
 
-import uk.ac.warwick.tabula.web.Routes
+import uk.ac.warwick.tabula.web.{Mav, Routes}
 import uk.ac.warwick.tabula.web.controllers.admin.AdminBreadcrumbs
-import uk.ac.warwick.tabula.{Fixtures, ItemNotFoundException, TestBase, Mockito}
+import uk.ac.warwick.tabula.{Fixtures, ItemNotFoundException, Mockito, TestBase}
 import uk.ac.warwick.tabula.commands.admin.routes.SortRoutesCommandState
-import uk.ac.warwick.tabula.data.model.{Route, Department}
+import uk.ac.warwick.tabula.data.model.{Department, Route}
 import uk.ac.warwick.tabula.commands.{Appliable, GroupsObjects}
 import org.springframework.validation.BindException
 
@@ -35,15 +35,15 @@ class SortRoutesControllerTest extends TestBase with Mockito {
 	}
 
 	trait Fixture {
-		val department = Fixtures.department("in")
-		val subDepartment = Fixtures.department("in-ug")
+		val department: Department = Fixtures.department("in")
+		val subDepartment: Department = Fixtures.department("in-ug")
 		department.children.add(subDepartment)
 		subDepartment.parent = department
 	}
 
 	@Test def formOnParent() { new Fixture {
 		val command = new CountingCommand(department)
-		val mav = controller.showForm(command)
+		val mav: Mav = controller.showForm(command)
 		mav.viewName should be ("admin/routes/arrange/form")
 		mav.toModel should be (Map("breadcrumbs" -> Seq(AdminBreadcrumbs.Department(department))))
 
@@ -54,7 +54,7 @@ class SortRoutesControllerTest extends TestBase with Mockito {
 
 	@Test def formOnChild() { new Fixture {
 		val command = new CountingCommand(subDepartment)
-		val mav = controller.showForm(command)
+		val mav: Mav = controller.showForm(command)
 		mav.viewName should be (s"redirect:${Routes.admin.department.sortRoutes(department)}")
 		mav.toModel should be ('empty)
 
@@ -65,7 +65,7 @@ class SortRoutesControllerTest extends TestBase with Mockito {
 
 	@Test def formOnLoneDepartment() { new Fixture {
 		val command = new CountingCommand(Fixtures.department("xx"))
-		val mav = controller.showForm(command)
+		val mav: Mav = controller.showForm(command)
 		mav.viewName should be ("admin/routes/arrange/form")
 		mav.toModel should be (Map("breadcrumbs" -> Seq(AdminBreadcrumbs.Department(command.department))))
 
@@ -78,7 +78,7 @@ class SortRoutesControllerTest extends TestBase with Mockito {
 		val command = new CountingCommand(department)
 		val errors = new BindException(command, "command")
 
-		val mav = controller.submit(command, errors)
+		val mav: Mav = controller.submit(command, errors)
 		mav.viewName should be ("admin/routes/arrange/form")
 		mav.toModel("saved").toString should be ("true")
 
@@ -92,7 +92,7 @@ class SortRoutesControllerTest extends TestBase with Mockito {
 		val errors = new BindException(command, "command")
 		errors.reject("fail")
 
-		val mav = controller.submit(command, errors)
+		val mav: Mav = controller.submit(command, errors)
 		mav.viewName should be ("admin/routes/arrange/form")
 		mav.toModel should be (Map("breadcrumbs" -> Seq(AdminBreadcrumbs.Department(department))))
 

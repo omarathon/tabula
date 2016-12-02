@@ -14,7 +14,7 @@ class CourseCreationFixtureCommand extends CommandInternal[Course] {
 	var courseCode: String = _
 	var courseName: String = _
 
-	protected def applyInternal() =
+	protected def applyInternal(): Course =
 		transactional() {
 			val c = courseDao.getByCode(courseCode).getOrElse(new Course)
 			c.code = courseCode
@@ -28,7 +28,7 @@ class CourseCreationFixtureCommand extends CommandInternal[Course] {
 }
 
 object CourseCreationFixtureCommand{
-	def apply()={
+	def apply(): CourseCreationFixtureCommand with ComposableCommand[Course] with AutowiringModuleAndDepartmentServiceComponent with Daoisms with AutowiringTransactionalComponent with Unaudited with PubliclyVisiblePermissions ={
 		new CourseCreationFixtureCommand
 			with ComposableCommand[Course]
 			with AutowiringModuleAndDepartmentServiceComponent

@@ -39,7 +39,7 @@ trait SmallGroupEventTimetableEventSourceComponentImpl extends SmallGroupEventTi
 
 	trait SmallGroupEventTimetableEventSource {
 
-		protected def eventsFor(user: User, currentUser: CurrentUser) = {
+		protected def eventsFor(user: User, currentUser: CurrentUser): EventList = {
 			/* Include SGT teaching responsibilities for students (mainly PGR) and students for staff (e.g. Chemistry) */
 			val allEvents = studentEvents(user, currentUser) ++ tutorEvents(user, currentUser)
 			val autoTimetableEvents = allEvents map smallGroupEventToTimetableEvent

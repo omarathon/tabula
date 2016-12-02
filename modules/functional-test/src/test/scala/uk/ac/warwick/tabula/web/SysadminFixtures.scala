@@ -10,13 +10,13 @@ trait SysadminFixtures extends BrowserTest {
 		pageSource should include("Fixture setup successful")
 	}
 
-	def as[T](user: LoginDetails)(fn: => T) = {
+	def as[T](user: LoginDetails)(fn: => T): T = {
 		currentUser = user
 		signIn as user to Path("/sysadmin")
 		fn
 	}
 
-	def withGodModeEnabled[T](fn: =>T)={
+	def withGodModeEnabled[T](fn: =>T): T ={
 		go to Path("/sysadmin")
 		find("enable-godmode-button").foreach(e=>{
 			click on e

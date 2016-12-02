@@ -10,9 +10,9 @@ class CleanupTemporaryFilesCommand extends Command[Unit] {
 
 	PermissionCheck(Permissions.ReplicaSyncing)
 
-	var dao = Wire.auto[FileDao]
+	var dao: FileDao = Wire.auto[FileDao]
 
-	override def applyInternal() = transactional() {
+	override def applyInternal(): Unit = transactional() {
 		dao.deleteOldTemporaryFiles
 	}
 

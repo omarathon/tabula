@@ -14,6 +14,7 @@ import uk.ac.warwick.tabula.coursework.web.Routes
 import uk.ac.warwick.tabula.web.controllers.coursework.OldCourseworkController
 import uk.ac.warwick.tabula.data.model._
 import uk.ac.warwick.tabula.services.turnitinlti.TurnitinLtiService
+import uk.ac.warwick.tabula.web.Mav
 
 @Profile(Array("cm1Enabled")) @Controller
 @RequestMapping(value=Array("/${cm1.prefix}/admin/module/{module}/assignments/{assignment}/edit"))
@@ -21,12 +22,12 @@ class OldEditAssignmentController extends OldCourseworkController {
 
 	validatesSelf[EditAssignmentCommand]
 
-	@ModelAttribute def formObject(@PathVariable module: Module, @PathVariable assignment: Assignment, user: CurrentUser) = {
+	@ModelAttribute def formObject(@PathVariable module: Module, @PathVariable assignment: Assignment, user: CurrentUser): EditAssignmentCommand = {
 		new EditAssignmentCommand(module, mandatory(assignment), user)
 	}
 
 	@RequestMapping
-	def showForm(form: EditAssignmentCommand, openDetails: Boolean = false) = {
+	def showForm(form: EditAssignmentCommand, openDetails: Boolean = false): Mav = {
 		form.afterBind()
 
 		val (module, assignment) = (form.module, form.assignment)
@@ -49,7 +50,7 @@ class OldEditAssignmentController extends OldCourseworkController {
 	}
 
 	@RequestMapping(method = Array(RequestMethod.POST), params = Array("action=submit"))
-	def submit(@Valid form: EditAssignmentCommand, errors: Errors) = {
+	def submit(@Valid form: EditAssignmentCommand, errors: Errors): Mav = {
 		form.afterBind()
 		if (errors.hasErrors) {
 			showForm(form)
@@ -61,7 +62,7 @@ class OldEditAssignmentController extends OldCourseworkController {
 	}
 
 	@RequestMapping(method = Array(RequestMethod.POST), params = Array("action=update"))
-	def update(@Valid form: EditAssignmentCommand, errors: Errors) = {
+	def update(@Valid form: EditAssignmentCommand, errors: Errors): Mav = {
 		form.afterBind()
 		if (!errors.hasErrors) {
 			form.apply()

@@ -57,17 +57,17 @@ trait ProfileQuerySanitisation {
 	private val Title = """^(?:Mr|Ms|Mrs|Miss|Dr|Sir|Doctor|Prof(?:essor)?)(\.?|\b)\s*""".r
 	private val FullStops = """\.(\S)""".r
 
-	def stripTitles(query: String) =
+	def stripTitles(query: String): String =
 		FullStops.replaceAllIn(
 			Title.replaceAllIn(query, ""),
 			". $1")
 
-	def sanitiseQuery(query: String) = {
+	def sanitiseQuery(query: String): String = {
 		val deslashed = query.replace("/", "\\/") // TAB-1331
 		stripTitles(deslashed)
 	}
 
-	def autoWildcard(query: String) =
+	def autoWildcard(query: String): String =
 		query.split("\\s+").map { str =>
 			if (str.endsWith("*")) str
 			else s"$str*"
@@ -148,5 +148,5 @@ trait ProfileQueryServiceComponent {
 }
 
 trait AutowiringProfileQueryServiceComponent extends ProfileQueryServiceComponent {
-	var profileQueryService = Wire[ProfileQueryService]
+	var profileQueryService: ProfileQueryService = Wire[ProfileQueryService]
 }

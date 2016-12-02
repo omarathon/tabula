@@ -20,8 +20,8 @@ class EmailNotificationListener extends RecipientNotificationListener with Unico
 
 	var topLevelUrl: String = Wire.property("${toplevel.url}")
 
-	var mailSender = Wire[WarwickMailSender]("studentMailSender")
-	var service = Wire[NotificationService]
+	var mailSender: WarwickMailSender = Wire[WarwickMailSender]("studentMailSender")
+	var service: NotificationService = Wire[NotificationService]
 
 	// email constants
 	var replyAddress: String = Wire.property("${mail.noreply.to}")
@@ -30,14 +30,14 @@ class EmailNotificationListener extends RecipientNotificationListener with Unico
 	val mailFooter = "\n\nThank you,\nTabula"
 	val replyWarning = "\n\nThis email was sent from an automated system and replies to it will not reach a real person."
 
-	def link(n: Notification[_,_]) = if (n.isInstanceOf[ActionRequiredNotification]) {
+	def link(n: Notification[_,_]): String = if (n.isInstanceOf[ActionRequiredNotification]) {
 		s"\n\nYou need to ${n.urlTitle}. Please visit $topLevelUrl${n.url}"
 	} else {
 		s"\n\nTo ${n.urlTitle}, please visit $topLevelUrl${n.url}"
 	}
 
 	// add an isEmail property for the model for emails
-	def render(model: FreemarkerModel) = {
+	def render(model: FreemarkerModel): String = {
 		textRenderer.renderTemplate(model.template, model.model + ("isEmail" -> true))
 	}
 
@@ -83,7 +83,7 @@ class EmailNotificationListener extends RecipientNotificationListener with Unico
 		}
 	}
 
-	def listen(recipientInfo: RecipientNotificationInfo) = {
+	def listen(recipientInfo: RecipientNotificationInfo): Unit = {
 		if (!recipientInfo.emailSent) {
 			def cancelSendingEmail() {
 				// TODO This is incorrect, really - we're not sending the email, we're cancelling the sending of the email

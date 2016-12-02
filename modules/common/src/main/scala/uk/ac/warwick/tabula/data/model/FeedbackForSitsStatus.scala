@@ -4,10 +4,10 @@ import java.sql.Types
 
 sealed abstract class FeedbackForSitsStatus(val code: String, val description: String) {
 	// for Spring
-	def getCode = code
-	def getDescription = description
+	def getCode: String = code
+	def getDescription: String = description
 
-	override def toString = description
+	override def toString: String = description
 }
 
 object FeedbackForSitsStatus {
@@ -18,14 +18,14 @@ object FeedbackForSitsStatus {
 	// manual collection - keep in sync with the case objects above
 	val members = Seq(UploadNotAttempted, Successful, Failed)
 
-	def fromCode(code: String) =
+	def fromCode(code: String): FeedbackForSitsStatus =
 		if (code == null) null
 		else members.find{_.code == code} match {
 			case Some(caseObject) => caseObject
 			case None => throw new IllegalArgumentException()
 		}
 
-	def fromDescription(description: String) =
+	def fromDescription(description: String): FeedbackForSitsStatus =
 		if (description == null) null
 		else members.find{_.description == description} match {
 			case Some(caseObject) => caseObject
@@ -36,6 +36,6 @@ object FeedbackForSitsStatus {
 class FeedbackForSitsStatusUserType extends AbstractStringUserType[FeedbackForSitsStatus] {
 
 	override def sqlTypes = Array(Types.VARCHAR)
-	override def convertToObject(string: String) = FeedbackForSitsStatus.fromCode(string)
-	override def convertToValue(format: FeedbackForSitsStatus) = format.code
+	override def convertToObject(string: String): FeedbackForSitsStatus = FeedbackForSitsStatus.fromCode(string)
+	override def convertToValue(format: FeedbackForSitsStatus): String = format.code
 }

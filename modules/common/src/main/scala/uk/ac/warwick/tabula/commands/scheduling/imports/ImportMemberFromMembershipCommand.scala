@@ -56,5 +56,5 @@ abstract class ImportMemberFromMembershipCommand
 		this.homeDepartmentCode = (oneOf(member.departmentCode, optString("home_department_code"), ssoUser.getDepartmentCode).orNull)
 		this.dateOfBirth = (oneOf(member.dateOfBirth, optLocalDate("date_of_birth")).orNull)
 	}
-	override def describe(d: Description) = d.property("universityId" -> universityId)
+	override def describe(d: Description): Unit = d.property("universityId" -> universityId)
 }

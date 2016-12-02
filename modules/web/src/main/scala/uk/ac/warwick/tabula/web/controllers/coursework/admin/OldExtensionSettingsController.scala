@@ -29,13 +29,13 @@ class OldExtensionSettingsController extends OldCourseworkController {
 	def crumbed(mav:Mav, dept:Department):Mav = mav.crumbs(Breadcrumbs.Department(dept))
 
 	@RequestMapping(method=Array(RequestMethod.GET, RequestMethod.HEAD))
-	def viewSettings(@PathVariable dept: Department, user: CurrentUser, cmd:ExtensionSettingsCommand, errors:Errors) =
+	def viewSettings(@PathVariable dept: Department, user: CurrentUser, cmd:ExtensionSettingsCommand, errors:Errors): Mav =
 		crumbed(Mav(s"$urlPrefix/admin/extension-settings",
 			"department" -> dept
 		), dept)
 
 	@RequestMapping(method=Array(RequestMethod.POST))
-	def saveSettings(@Valid cmd:ExtensionSettingsCommand, errors:Errors) = {
+	def saveSettings(@Valid cmd:ExtensionSettingsCommand, errors:Errors): Mav = {
 		if (errors.hasErrors){
 			viewSettings(cmd.department, user, cmd, errors)
 		} else {

@@ -13,10 +13,10 @@ class ActivityServiceTest extends TestBase with Mockito {
 
 	val service = new ActivityService
 
-	val moduleService = mock[ModuleAndDepartmentService]
-	val submissionService = mock[SubmissionService]
-	val assignmentService = mock[AssessmentService]
-	val auditQueryService = mock[AuditEventNoteworthySubmissionsService]
+	val moduleService: ModuleAndDepartmentService = mock[ModuleAndDepartmentService]
+	val submissionService: SubmissionService = mock[SubmissionService]
+	val assignmentService: AssessmentService = mock[AssessmentService]
+	val auditQueryService: AuditEventNoteworthySubmissionsService = mock[AuditEventNoteworthySubmissionsService]
 	val userLookup = new MockUserLookup
 	userLookup.registerUsers("cuscav")
 

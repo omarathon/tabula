@@ -6,7 +6,7 @@ import uk.ac.warwick.tabula.AcademicYear
 import uk.ac.warwick.tabula.data.model.Department
 import uk.ac.warwick.tabula.permissions.{Permission, Permissions}
 import uk.ac.warwick.tabula.services.{AutowiringMaintenanceModeServiceComponent, AutowiringModuleAndDepartmentServiceComponent, AutowiringUserSettingsServiceComponent}
-import uk.ac.warwick.tabula.web.Routes
+import uk.ac.warwick.tabula.web.{Mav, Routes}
 import uk.ac.warwick.tabula.web.controllers.{AcademicYearScopedController, DepartmentScopedController}
 
 @Controller
@@ -24,7 +24,7 @@ class DepartmentAndYearController extends ReportsController
 	override def activeAcademicYear(@PathVariable academicYear: AcademicYear): Option[AcademicYear] = retrieveActiveAcademicYear(Option(academicYear))
 
 	@RequestMapping
-	def home(@PathVariable department: Department, @PathVariable academicYear: AcademicYear) = {
+	def home(@PathVariable department: Department, @PathVariable academicYear: AcademicYear): Mav = {
 		Mav("reports/departmentAndYear")
 			.secondCrumbs(academicYearBreadcrumbs(academicYear)(year => Routes.reports.departmentAcademicYear(department, year)): _*)
 	}

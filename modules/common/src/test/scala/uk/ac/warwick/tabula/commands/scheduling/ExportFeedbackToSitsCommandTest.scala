@@ -4,7 +4,7 @@ import org.joda.time.DateTime
 import uk.ac.warwick.tabula._
 import uk.ac.warwick.tabula.commands.ComposableCommand
 import uk.ac.warwick.tabula.data.model.FeedbackForSitsStatus.Successful
-import uk.ac.warwick.tabula.data.model.{DegreeType, FeedbackForSits, MarkType}
+import uk.ac.warwick.tabula.data.model._
 import uk.ac.warwick.tabula.data.{FeedbackForSitsDao, FeedbackForSitsDaoComponent}
 import uk.ac.warwick.tabula.services.FeedbackService
 import uk.ac.warwick.tabula.services.scheduling.{ExportFeedbackToSitsService, ExportFeedbackToSitsServiceComponent}
@@ -20,11 +20,11 @@ with ExportFeedbackToSitsServiceComponent with Mockito {
 class ExportFeedbackToSitsCommandTest extends TestBase  with ComponentMixins with Mockito {
 
 	trait Environment {
-		val module = Fixtures.module("HY903", "Further Explorations")
+		val module: Module = Fixtures.module("HY903", "Further Explorations")
 		module.degreeType = DegreeType.Undergraduate
 
 		// test department
-		val department = Fixtures.department("XX", "Xander Department")
+		val department: Department = Fixtures.department("XX", "Xander Department")
 		department.id = "1"
 		department.code = "XX"
 		department.setUploadMarksToSitsForYear(new AcademicYear(2014), DegreeType.Undergraduate, canUpload = true)
@@ -37,12 +37,12 @@ class ExportFeedbackToSitsCommandTest extends TestBase  with ComponentMixins wit
 			with ExportFeedbackToSitsCommandDescription
 			with ComponentMixins
 
-		val assignment = Fixtures.assignment("test assignment")
+		val assignment: Assignment = Fixtures.assignment("test assignment")
 		assignment.module = module
 		assignment.academicYear = new AcademicYear(2014)
 
 		// set up feedback
-		val feedback = Fixtures.assignmentFeedback("0070790")
+		val feedback: AssignmentFeedback = Fixtures.assignmentFeedback("0070790")
 		feedback.assignment = assignment
 		feedback.actualGrade = Some("B")
 		feedback.actualMark = Some(73)
@@ -61,7 +61,7 @@ class ExportFeedbackToSitsCommandTest extends TestBase  with ComponentMixins wit
 
 			cmd.feedbackForSitsDao = feedbackForSitsDao
 
-			val feedbackForSits = Fixtures.feedbackForSits(feedback, currentUser.apparentUser)
+			val feedbackForSits: FeedbackForSits = Fixtures.feedbackForSits(feedback, currentUser.apparentUser)
 
 			exportFeedbackToSitsService.exportToSits(feedbackForSits) returns 1
 			cmd.exportFeedbackToSitsService = exportFeedbackToSitsService
@@ -70,7 +70,7 @@ class ExportFeedbackToSitsCommandTest extends TestBase  with ComponentMixins wit
 			cmd.uploadFeedbackToSits(feedbackForSits)
 
 			// check that the feedbackForSits record has been updated to reflect the fact that data has been written to SITS
-			val dateOfUpload = feedbackForSits.dateOfUpload
+			val dateOfUpload: DateTime = feedbackForSits.dateOfUpload
 			dateOfUpload should not be null
 			dateOfUpload.isAfter(DateTime.now) should be{false}
 			dateOfUpload.plusMinutes(1).isAfter(DateTime.now) should be{true}
@@ -84,7 +84,7 @@ class ExportFeedbackToSitsCommandTest extends TestBase  with ComponentMixins wit
 		new Environment {
 			cmd.feedbackForSitsDao = feedbackForSitsDao
 
-			val feedbackForSits = Fixtures.feedbackForSits(feedback, currentUser.apparentUser)
+			val feedbackForSits: FeedbackForSits = Fixtures.feedbackForSits(feedback, currentUser.apparentUser)
 
 			exportFeedbackToSitsService.exportToSits(feedbackForSits) returns 1
 			cmd.exportFeedbackToSitsService = exportFeedbackToSitsService
@@ -93,7 +93,7 @@ class ExportFeedbackToSitsCommandTest extends TestBase  with ComponentMixins wit
 			cmd.uploadFeedbackToSits(feedbackForSits)
 
 			// check that the feedbackForSits record has been updated to reflect the fact that data has been written to SITS
-			val dateOfUpload = feedbackForSits.dateOfUpload
+			val dateOfUpload: DateTime = feedbackForSits.dateOfUpload
 			dateOfUpload should not be null
 			dateOfUpload.isAfter(DateTime.now) should be{false}
 			dateOfUpload.plusMinutes(1).isAfter(DateTime.now) should be{true}
@@ -105,11 +105,11 @@ class ExportFeedbackToSitsCommandTest extends TestBase  with ComponentMixins wit
 
 	@Test def testApply() = withUser("0070790", "cusdx") {
 		new EnvironmentMarkAndGradeAdjusted {
-			val user = currentUser.apparentUser
-			val feedbackService = smartMock[FeedbackService]
+			val user: User = currentUser.apparentUser
+			val feedbackService: FeedbackService = smartMock[FeedbackService]
 			feedbackService.getUsersForFeedback(assignment) returns Seq[(String, User)]((user.getWarwickId, user))
 
-			val feedbackForSits = Fixtures.feedbackForSits(feedback, currentUser.apparentUser)
+			val feedbackForSits: FeedbackForSits = Fixtures.feedbackForSits(feedback, currentUser.apparentUser)
 			feedbackForSitsDao.feedbackToLoad returns Seq(feedbackForSits)
 			cmd.feedbackForSitsDao = feedbackForSitsDao
 
@@ -119,7 +119,7 @@ class ExportFeedbackToSitsCommandTest extends TestBase  with ComponentMixins wit
 			cmd.exportFeedbackToSitsService = exportFeedbackToSitsService
 
 			// call apply to queue the feedback
-			val uploadedFeedbacks = cmd.applyInternal()
+			val uploadedFeedbacks: Seq[FeedbackForSits] = cmd.applyInternal()
 
 			// check to see if the return is as expected
 			uploadedFeedbacks.size should be(1)

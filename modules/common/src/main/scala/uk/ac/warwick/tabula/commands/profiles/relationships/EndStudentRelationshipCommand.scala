@@ -5,7 +5,7 @@ import uk.ac.warwick.spring.Wire
 import uk.ac.warwick.tabula.{CurrentUser, ItemNotFoundException}
 import uk.ac.warwick.tabula.commands.Description
 import uk.ac.warwick.tabula.data.MemberDao
-import uk.ac.warwick.tabula.data.model.{Notification, StudentRelationship}
+import uk.ac.warwick.tabula.data.model._
 import uk.ac.warwick.tabula.data.model.notifications.profiles.{StudentRelationshipChangeToOldAgentNotification, StudentRelationshipChangeToStudentNotification}
 import uk.ac.warwick.tabula.permissions.Permissions
 
@@ -17,12 +17,12 @@ class EndStudentRelationshipCommand(
 	val currentUser: CurrentUser
 ) extends AbstractEditStudentRelationshipCommand {
 
-	var memberDao = Wire[MemberDao]
+	var memberDao: MemberDao = Wire[MemberDao]
 
-	override def oldAgents = relationship.agentMember.toSeq
+	override def oldAgents: Seq[Member] = relationship.agentMember.toSeq
 
-	val relationshipType = relationship.relationshipType
-	val studentCourseDetails = relationship.studentCourseDetails
+	val relationshipType: StudentRelationshipType = relationship.relationshipType
+	val studentCourseDetails: StudentCourseDetails = relationship.studentCourseDetails
 
 	PermissionCheck(Permissions.Profiles.StudentRelationship.Manage(mandatory(relationshipType)), mandatory(studentCourseDetails))
 
@@ -32,13 +32,13 @@ class EndStudentRelationshipCommand(
 		throw new ItemNotFoundException()
 	}
 
-	def applyInternal() = {
+	def applyInternal(): Seq[StudentRelationship] = {
 		relationship.endDate = DateTime.now
 		relationshipService.saveOrUpdate(relationship)
 		Seq(relationship)
 	}
 
-	override def describe(d: Description) =
+	override def describe(d: Description): Unit =
 		d.studentIds(Seq(studentCourseDetails.student.universityId)).properties(
 			"sprCode" -> studentCourseDetails.sprCode,
 			"oldAgents" -> oldAgents.flatMap(_.universityId).mkString(" ")

@@ -27,9 +27,9 @@ class AssignMarkersTemplateCommandInternal(val assessment: Assessment) extends C
 	with AutowiringAssessmentMembershipServiceComponent
 	with AutowiringUserLookupComponent {
 
-	val students = assessmentMembershipService.determineMembershipUsers(assessment)
+	val students: Seq[User] = assessmentMembershipService.determineMembershipUsers(assessment)
 
-	def applyInternal() = {
+	def applyInternal(): ExcelView = {
 		val workbook = generateWorkbook
 		new ExcelView("Allocation for " + assessment.name + ".xlsx", workbook)
 	}

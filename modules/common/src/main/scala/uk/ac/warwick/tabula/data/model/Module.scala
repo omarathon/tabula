@@ -15,6 +15,7 @@ import uk.ac.warwick.tabula.roles.{ModuleAssistantRoleDefinition, ModuleManagerR
 import uk.ac.warwick.tabula.services.permissions.PermissionsService
 
 import scala.collection.JavaConverters._
+import scala.collection.mutable
 import scala.util.matching.Regex
 
 @Entity
@@ -39,18 +40,18 @@ class Module extends GeneratedId with PermissionsTarget with Serializable {
 	// They can also publish feedback.
 	// Module assistants can't publish feedback
 	@transient
-	var permissionsService = Wire.auto[PermissionsService]
+	var permissionsService: PermissionsService = Wire.auto[PermissionsService]
 	@transient
-	lazy val managers = permissionsService.ensureUserGroupFor(this, ModuleManagerRoleDefinition)
+	lazy val managers: UnspecifiedTypeUserGroup = permissionsService.ensureUserGroupFor(this, ModuleManagerRoleDefinition)
 	@transient
-	lazy val assistants = permissionsService.ensureUserGroupFor(this, ModuleAssistantRoleDefinition)
+	lazy val assistants: UnspecifiedTypeUserGroup = permissionsService.ensureUserGroupFor(this, ModuleAssistantRoleDefinition)
 
 	@ManyToOne(fetch = FetchType.LAZY)
 	@JoinColumn(name = "department_id")
 	var adminDepartment: Department = _
 
 	@deprecated("TAB-2589 to be explicit, this should use adminDepartment or teachingDepartments", "84")
-	def department = adminDepartment
+	def department: Department = adminDepartment
 
 	@deprecated("TAB-2589 to be explicit, this should use adminDepartment or teachingDepartments", "84")
 	def department_=(d: Department) { adminDepartment = d }
@@ -59,11 +60,11 @@ class Module extends GeneratedId with PermissionsTarget with Serializable {
 	@BatchSize(size=200)
 	var teachingInfo: JSet[ModuleTeachingInformation] = JHashSet()
 
-	def teachingDepartments = teachingInfo.asScala.map { _.department } + adminDepartment
+	def teachingDepartments: mutable.Set[Department] = teachingInfo.asScala.map { _.department } + adminDepartment
 
-	def permissionsParents = Option(adminDepartment).toStream
-	override def humanReadableId = code.toUpperCase + " " + name
-	override def urlSlug = code
+	def permissionsParents: Stream[Department] = Option(adminDepartment).toStream
+	override def humanReadableId: String = code.toUpperCase + " " + name
+	override def urlSlug: String = code
 
 	@OneToMany(mappedBy = "module", fetch = FetchType.LAZY, cascade = Array(CascadeType.ALL))
 	@BatchSize(size=100)
@@ -74,7 +75,7 @@ class Module extends GeneratedId with PermissionsTarget with Serializable {
 	@BatchSize(size=100)
 	var exams: JList[Exam] = JArrayList()
 
-	def hasLiveAssignments = Option(assignments) match {
+	def hasLiveAssignments: Boolean = Option(assignments) match {
 		case Some(a) => a.asScala.exists(_.isAlive)
 		case None => false
 	}
@@ -92,7 +93,7 @@ class Module extends GeneratedId with PermissionsTarget with Serializable {
 
 	var missingFromImportSince: DateTime = _
 
-	override def toString = "Module[" + code + "]"
+	override def toString: String = "Module[" + code + "]"
 
 
   // true if at least one of this module's SmallGroupSets has not been released to //both students and staff.
@@ -136,8 +137,8 @@ object Module extends Logging {
 
 	// For sorting a collection by module code. Either pass to the sort function,
 	// or expose as an implicit val.
-	val CodeOrdering = Ordering.by[Module, String] ( _.code )
-	val NameOrdering = Ordering.by { module: Module => (module.name, module.code) }
+	val CodeOrdering: Ordering[Module] = Ordering.by[Module, String] ( _.code )
+	val NameOrdering: Ordering[Module] = Ordering.by { module: Module => (module.name, module.code) }
 
 	// Companion object is one of the places searched for an implicit Ordering, so
 	// this will be the default when ordering a list of modules.

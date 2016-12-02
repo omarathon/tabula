@@ -8,6 +8,7 @@ import uk.ac.warwick.tabula.services.attendancemonitoring.{AttendanceMonitoringS
 import uk.ac.warwick.tabula.services.{SecurityService, SecurityServiceComponent}
 import uk.ac.warwick.tabula.system.permissions.PermissionsChecking
 import uk.ac.warwick.tabula._
+import uk.ac.warwick.tabula.data.model.{Department, StudentMember}
 import uk.ac.warwick.userlookup.User
 
 import scala.collection.immutable.ListMap
@@ -16,12 +17,12 @@ class CreateMonitoringPointReportCommandTest extends TestBase with Mockito {
 
 	private trait CommandTestSupport extends CreateMonitoringPointReportCommandState
 		with AttendanceMonitoringServiceComponent with SecurityServiceComponent {
-		val attendanceMonitoringService = smartMock[AttendanceMonitoringService]
-		val securityService = smartMock[SecurityService]
+		val attendanceMonitoringService: AttendanceMonitoringService = smartMock[AttendanceMonitoringService]
+		val securityService: SecurityService = smartMock[SecurityService]
 	}
 
 	private trait Fixture {
-		val department = Fixtures.department("in")
+		val department: Department = Fixtures.department("in")
 
 		val user = new User("cuscav")
 		user.setDepartmentCode("in")
@@ -38,12 +39,12 @@ class CreateMonitoringPointReportCommandTest extends TestBase with Mockito {
 		command.academicYear = new AcademicYear(2013)
 		command.period = "Autumn"
 
-		val student1 = Fixtures.student("1234567")
+		val student1: StudentMember = Fixtures.student("1234567")
 		student1.freshStudentCourseDetails.head.scjCode = "1234567/1"
 		student1.freshStudentCourseDetails.head.addStudentCourseYearDetails(
 			Fixtures.studentCourseYearDetails(academicYear = command.academicYear, studentCourseDetails = student1.freshStudentCourseDetails.head)
 		)
-		val student2 = Fixtures.student("9283845")
+		val student2: StudentMember = Fixtures.student("9283845")
 		student2.freshStudentCourseDetails.head.scjCode = "9283845/1"
 		student2.freshStudentCourseDetails.head.addStudentCourseYearDetails(
 			Fixtures.studentCourseYearDetails(academicYear = command.academicYear, studentCourseDetails = student2.freshStudentCourseDetails.head)
@@ -54,7 +55,7 @@ class CreateMonitoringPointReportCommandTest extends TestBase with Mockito {
 			student2 -> 2
 		)
 
-		val reports = command.applyInternal()
+		val reports: Seq[MonitoringPointReport] = command.applyInternal()
 		reports.size should be (2)
 
 		reports.head.academicYear should be (command.academicYear)
@@ -74,8 +75,8 @@ class CreateMonitoringPointReportCommandTest extends TestBase with Mockito {
 
 	@Test def permissions() {
 		val command = new CreateMonitoringPointReportCommandPermissions with CreateMonitoringPointReportCommandState {
-			val department = Fixtures.department("in")
-			val currentUser = mock[CurrentUser]
+			val department: Department = Fixtures.department("in")
+			val currentUser: CurrentUser = mock[CurrentUser]
 		}
 
 		val checking = mock[PermissionsChecking]
@@ -87,7 +88,7 @@ class CreateMonitoringPointReportCommandTest extends TestBase with Mockito {
 	@Test(expected = classOf[ItemNotFoundException]) def noDepartment() {
 		val command = new CreateMonitoringPointReportCommandPermissions with CreateMonitoringPointReportCommandState {
 			val department = null
-			val currentUser = mock[CurrentUser]
+			val currentUser: CurrentUser = mock[CurrentUser]
 		}
 
 		val checking = mock[PermissionsChecking]
@@ -95,12 +96,12 @@ class CreateMonitoringPointReportCommandTest extends TestBase with Mockito {
 	}
 
 	private trait ValidationFixture extends Fixture {
-		val d = department
-		val u = currentUser
+		val d: Department = department
+		val u: CurrentUser = currentUser
 
 		val command = new CreateMonitoringPointReportCommandValidation with CommandTestSupport {
-			val department = d
-			val currentUser = u
+			val department: Department = d
+			val currentUser: CurrentUser = u
 		}
 	}
 
@@ -108,12 +109,12 @@ class CreateMonitoringPointReportCommandTest extends TestBase with Mockito {
 		command.academicYear = new AcademicYear(2013)
 		command.period = "Autumn"
 
-		val student1 = Fixtures.student("1234567")
+		val student1: StudentMember = Fixtures.student("1234567")
 		student1.freshStudentCourseDetails.head.scjCode = "1234567/1"
 		student1.freshStudentCourseDetails.head.addStudentCourseYearDetails(
 			Fixtures.studentCourseYearDetails(academicYear = command.academicYear, studentCourseDetails = student1.freshStudentCourseDetails.head)
 		)
-		val student2 = Fixtures.student("9283845")
+		val student2: StudentMember = Fixtures.student("9283845")
 		student2.freshStudentCourseDetails.head.scjCode = "9283845/1"
 		student2.freshStudentCourseDetails.head.addStudentCourseYearDetails(
 			Fixtures.studentCourseYearDetails(academicYear = command.academicYear, studentCourseDetails = student2.freshStudentCourseDetails.head)
@@ -154,8 +155,8 @@ class CreateMonitoringPointReportCommandTest extends TestBase with Mockito {
 		command.academicYear = new AcademicYear(2013)
 		command.period = "Winter"
 
-		val student1 = Fixtures.student("1234567")
-		val student2 = Fixtures.student("9283845")
+		val student1: StudentMember = Fixtures.student("1234567")
+		val student2: StudentMember = Fixtures.student("9283845")
 
 		command.missedPoints = ListMap(
 			student1 -> 3,
@@ -174,8 +175,8 @@ class CreateMonitoringPointReportCommandTest extends TestBase with Mockito {
 	@Test def validateNoAcademicYear() { new ValidationFixture {
 		command.period = "Autumn"
 
-		val student1 = Fixtures.student("1234567")
-		val student2 = Fixtures.student("9283845")
+		val student1: StudentMember = Fixtures.student("1234567")
+		val student2: StudentMember = Fixtures.student("9283845")
 
 		command.missedPoints = ListMap(
 			student1 -> 3,
@@ -195,12 +196,12 @@ class CreateMonitoringPointReportCommandTest extends TestBase with Mockito {
 		command.academicYear = new AcademicYear(2013)
 		command.period = "Autumn"
 
-		val student1 = Fixtures.student("1234567")
+		val student1: StudentMember = Fixtures.student("1234567")
 		student1.freshStudentCourseDetails.head.scjCode = "1234567/1"
 		student1.freshStudentCourseDetails.head.addStudentCourseYearDetails(
 			Fixtures.studentCourseYearDetails(academicYear = command.academicYear, studentCourseDetails = student1.freshStudentCourseDetails.head)
 		)
-		val student2 = Fixtures.student("9283845")
+		val student2: StudentMember = Fixtures.student("9283845")
 		student2.freshStudentCourseDetails.head.scjCode = "9283845/1"
 		student2.freshStudentCourseDetails.head.addStudentCourseYearDetails(
 			Fixtures.studentCourseYearDetails(academicYear = command.academicYear, studentCourseDetails = student2.freshStudentCourseDetails.head)
@@ -230,12 +231,12 @@ class CreateMonitoringPointReportCommandTest extends TestBase with Mockito {
 		command.academicYear = new AcademicYear(2013)
 		command.period = "Autumn"
 
-		val student1 = Fixtures.student("1234567")
+		val student1: StudentMember = Fixtures.student("1234567")
 		student1.freshStudentCourseDetails.head.scjCode = "1234567/1"
 		student1.freshStudentCourseDetails.head.addStudentCourseYearDetails(
 			Fixtures.studentCourseYearDetails(academicYear = command.academicYear, studentCourseDetails = student1.freshStudentCourseDetails.head)
 		)
-		val student2 = Fixtures.student("9283845")
+		val student2: StudentMember = Fixtures.student("9283845")
 		student2.freshStudentCourseDetails.head.scjCode = "9283845/1"
 		student2.freshStudentCourseDetails.head.addStudentCourseYearDetails(
 			Fixtures.studentCourseYearDetails(academicYear = command.academicYear, studentCourseDetails = student2.freshStudentCourseDetails.head)
@@ -265,12 +266,12 @@ class CreateMonitoringPointReportCommandTest extends TestBase with Mockito {
 		command.academicYear = new AcademicYear(2013)
 		command.period = "Autumn"
 
-		val student1 = Fixtures.student("1234567")
+		val student1: StudentMember = Fixtures.student("1234567")
 		student1.freshStudentCourseDetails.head.scjCode = "1234567/1"
 		student1.freshStudentCourseDetails.head.addStudentCourseYearDetails(
 			Fixtures.studentCourseYearDetails(academicYear = command.academicYear, studentCourseDetails = student1.freshStudentCourseDetails.head)
 		)
-		val student2 = Fixtures.student("9283845")
+		val student2: StudentMember = Fixtures.student("9283845")
 		student2.freshStudentCourseDetails.head.scjCode = "9283845/1"
 		student2.freshStudentCourseDetails.head.addStudentCourseYearDetails(
 			Fixtures.studentCourseYearDetails(academicYear = command.academicYear, studentCourseDetails = student2.freshStudentCourseDetails.head)
@@ -299,9 +300,9 @@ class CreateMonitoringPointReportCommandTest extends TestBase with Mockito {
 		command.academicYear = new AcademicYear(2013)
 		command.period = "Autumn"
 
-		val student1 = Fixtures.student("1234567")
+		val student1: StudentMember = Fixtures.student("1234567")
 		student1.mostSignificantCourse = null
-		val student2 = Fixtures.student("9283845")
+		val student2: StudentMember = Fixtures.student("9283845")
 		student2.freshStudentCourseDetails.head.scjCode = "9283845/1"
 		student2.freshStudentCourseDetails.head.addStudentCourseYearDetails(
 			Fixtures.studentCourseYearDetails(academicYear = command.academicYear, studentCourseDetails = student2.freshStudentCourseDetails.head)
@@ -330,9 +331,9 @@ class CreateMonitoringPointReportCommandTest extends TestBase with Mockito {
 		command.academicYear = new AcademicYear(2013)
 		command.period = "Autumn"
 
-		val student1 = Fixtures.student("1234567")
+		val student1: StudentMember = Fixtures.student("1234567")
 		student1.freshStudentCourseDetails.head.scjCode = "1234567/1"
-		val student2 = Fixtures.student("9283845")
+		val student2: StudentMember = Fixtures.student("9283845")
 		student2.freshStudentCourseDetails.head.scjCode = "9283845/1"
 		student2.freshStudentCourseDetails.head.addStudentCourseYearDetails(
 			Fixtures.studentCourseYearDetails(academicYear = command.academicYear, studentCourseDetails = student2.freshStudentCourseDetails.head)
@@ -360,8 +361,8 @@ class CreateMonitoringPointReportCommandTest extends TestBase with Mockito {
 	@Test def description() {
 		val command = new CreateMonitoringPointReportCommandDescription with CreateMonitoringPointReportCommandState {
 			override lazy val eventName: String = "test"
-			val department = Fixtures.department("in")
-			val currentUser = mock[CurrentUser]
+			val department: Department = Fixtures.department("in")
+			val currentUser: CurrentUser = mock[CurrentUser]
 		}
 
 		command.academicYear = new AcademicYear(2013)

@@ -1,5 +1,7 @@
 package uk.ac.warwick.tabula.services.elasticsearch
 
+import java.io.Closeable
+
 import com.sksamuel.elastic4s.ElasticDsl._
 import com.sksamuel.elastic4s.analyzers._
 import com.sksamuel.elastic4s.mappings.TypedFieldDefinition
@@ -7,10 +9,11 @@ import org.joda.time.DateTime
 import org.springframework.beans.factory.annotation.{Autowired, Value}
 import org.springframework.stereotype.Service
 import uk.ac.warwick.tabula.DateFormats
-import uk.ac.warwick.tabula.data.{MemberDao, MemberDaoComponent, AutowiringMemberDaoComponent}
+import uk.ac.warwick.tabula.data.{AutowiringMemberDaoComponent, MemberDao, MemberDaoComponent}
 import uk.ac.warwick.tabula.data.model.{Department, Member, StudentMember}
 
 import scala.collection.mutable
+import scala.concurrent.Future
 
 object ProfileIndexService {
 	implicit object MemberIndexable extends ElasticsearchIndexable[Member] {
@@ -225,14 +228,14 @@ class ProfileIndexService
 
 	override val UpdatedDateField: String = "lastUpdatedDate"
 
-	def indexByDateAndDepartment(startDate: DateTime, dept: Department) = {
+	def indexByDateAndDepartment(startDate: DateTime, dept: Department): Future[ElasticsearchIndexingResult] = {
 		val deptMembers = memberDao.listUpdatedSince(startDate, dept).all
 		if (debugEnabled) logger.debug("Indexing " + deptMembers.size + " members with home department " + dept.code)
 		indexItems(deptMembers)
 	}
 
 	// Note batch size is ignored - we use a Scrollable and it will go through all newer items
-	override protected def listNewerThan(startDate: DateTime, batchSize: Int) =
+	override protected def listNewerThan(startDate: DateTime, batchSize: Int): Iterator[Member] with Closeable =
 		memberDao.listUpdatedSince(startDate).all
 }
 

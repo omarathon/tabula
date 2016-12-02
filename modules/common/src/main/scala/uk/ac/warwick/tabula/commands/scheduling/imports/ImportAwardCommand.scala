@@ -18,11 +18,11 @@ class ImportAwardCommand(info: AwardInfo)
 
 	PermissionCheck(Permissions.ImportSystemData)
 
-	var awardDao = Wire.auto[AwardDao]
+	var awardDao: AwardDao = Wire.auto[AwardDao]
 
-	var code = info.code
-	var shortName = info.shortName
-	var name = info.fullName
+	var code: String = info.code
+	var shortName: String = info.shortName
+	var name: String = info.fullName
 
 	override def applyInternal(): (Award, ImportAcademicInformationCommand.ImportResult) = transactional() {
 		val awardExisting = awardDao.getByCode(code)
@@ -57,6 +57,6 @@ class ImportAwardCommand(info: AwardInfo)
 		"code", "shortName", "name"
 	)
 
-	override def describe(d: Description) = d.property("shortName" -> shortName)
+	override def describe(d: Description): Unit = d.property("shortName" -> shortName)
 
 }

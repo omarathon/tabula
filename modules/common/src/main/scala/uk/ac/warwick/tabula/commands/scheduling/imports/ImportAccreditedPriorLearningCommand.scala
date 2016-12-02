@@ -21,16 +21,16 @@ class ImportAccreditedPriorLearningCommand(accreditedPriorLearningRow: Accredite
 
 	PermissionCheck(Permissions.ImportSystemData)
 
-	var accreditedPriorLearningDao = Wire[AccreditedPriorLearningDao]
-	var studentCourseDetailsDao = Wire[StudentCourseDetailsDao]
+	var accreditedPriorLearningDao: AccreditedPriorLearningDao = Wire[AccreditedPriorLearningDao]
+	var studentCourseDetailsDao: StudentCourseDetailsDao = Wire[StudentCourseDetailsDao]
 
-	val scjCode = accreditedPriorLearningRow.scjCode
-	val awardCode = accreditedPriorLearningRow.awardCode
-	val sequenceNumber = accreditedPriorLearningRow.sequenceNumber
-	val academicYear = AcademicYear.parse(accreditedPriorLearningRow.academicYear)
+	val scjCode: String = accreditedPriorLearningRow.scjCode
+	val awardCode: String = accreditedPriorLearningRow.awardCode
+	val sequenceNumber: Int = accreditedPriorLearningRow.sequenceNumber
+	val academicYear: AcademicYear = AcademicYear.parse(accreditedPriorLearningRow.academicYear)
 	val cats: JBigDecimal = accreditedPriorLearningRow.cats
-	val levelCode = accreditedPriorLearningRow.levelCode
-	val reason = accreditedPriorLearningRow.reason
+	val levelCode: String = accreditedPriorLearningRow.levelCode
+	val reason: String = accreditedPriorLearningRow.reason
 
 	override def applyInternal(): Option[AccreditedPriorLearning] = transactional() ({
 		logger.debug("Importing accredited prior learning for student " + scjCode + ", award " + awardCode)
@@ -81,7 +81,7 @@ class ImportAccreditedPriorLearningCommand(accreditedPriorLearningRow: Accredite
 		Some(accreditedPriorLearning)
 	}
 
-	def copyLevel(destinationBean: BeanWrapper, levelCode: String) = {
+	def copyLevel(destinationBean: BeanWrapper, levelCode: String): Boolean = {
 		val property = "level"
 		val oldValue = destinationBean.getPropertyValue(property)
 
@@ -106,6 +106,6 @@ class ImportAccreditedPriorLearningCommand(accreditedPriorLearningRow: Accredite
 		"academicYear", "cats", "reason"
 	)
 
-	override def describe(d: Description) = d.properties("scjCode" -> scjCode)
+	override def describe(d: Description): Unit = d.properties("scjCode" -> scjCode)
 
 }

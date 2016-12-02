@@ -1,7 +1,6 @@
 package uk.ac.warwick.tabula
 
-import org.joda.time.format.ISODateTimeFormat
-import org.joda.time.format.DateTimeFormat
+import org.joda.time.format.{DateTimeFormat, DateTimeFormatter, ISODateTimeFormat}
 
 /**
  * Date format strings and formatter objects that can be used
@@ -14,7 +13,7 @@ object DateFormats {
 	final val DatePicker = "dd-MMM-yyyy"
 	final val TimePicker = "HH:mm:ss"
 	final val NotificationDateOnlyPattern = "d MMMM yyyy"
-	final val NotificationDateTimePattern = NotificationDateOnlyPattern + " 'at' HH:mm:ss"
+	final val NotificationDateTimePattern: String = NotificationDateOnlyPattern + " 'at' HH:mm:ss"
 	final val CSVDatePattern = "dd/MM/yyyy"       // we need the pattern for SpreadsheetHelpers
 	final val CSVDateTimePattern = "dd/MM/yyyy HH:mm"
 
@@ -23,18 +22,18 @@ object DateFormats {
 	 * We don't really need seconds either but there's no simple method to
 	 * make a formatter with no seconds but still having a timezone.
 	 */
-	final val IsoDateTime = ISODateTimeFormat.dateTimeNoMillis
-	final val IsoDate = ISODateTimeFormat.date
+	final val IsoDateTime: DateTimeFormatter = ISODateTimeFormat.dateTimeNoMillis
+	final val IsoDate: DateTimeFormatter = ISODateTimeFormat.date
 
 	/** Date-time format used in Formsbuilder-style CSV export */
-	final val CSVDateTime = DateTimeFormat.forPattern(CSVDateTimePattern)
+	final val CSVDateTime: DateTimeFormatter = DateTimeFormat.forPattern(CSVDateTimePattern)
 
 	/** Date format used in spreadsheets */
-	final val CSVDate = DateTimeFormat.forPattern(CSVDatePattern)
+	final val CSVDate: DateTimeFormatter = DateTimeFormat.forPattern(CSVDatePattern)
 
 	/** Date format used in emails */
-	final val NotificationDateOnly = DateTimeFormat.forPattern(NotificationDateOnlyPattern)
-	final val NotificationDateTime = DateTimeFormat.forPattern(NotificationDateTimePattern)
+	final val NotificationDateOnly: DateTimeFormatter = DateTimeFormat.forPattern(NotificationDateOnlyPattern)
+	final val NotificationDateTime: DateTimeFormatter = DateTimeFormat.forPattern(NotificationDateTimePattern)
 
 }
 

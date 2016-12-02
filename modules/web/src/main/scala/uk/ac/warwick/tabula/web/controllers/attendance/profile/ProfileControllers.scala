@@ -11,6 +11,7 @@ import uk.ac.warwick.tabula.commands.attendance.profile.{AttendanceProfileComman
 import uk.ac.warwick.tabula.data.model.StudentMember
 import uk.ac.warwick.tabula.data.model.attendance.AttendanceState
 import uk.ac.warwick.tabula.services.AutowiringTermServiceComponent
+import uk.ac.warwick.tabula.web.Mav
 import uk.ac.warwick.tabula.web.controllers.attendance.{AttendanceController, HasMonthNames}
 
 @Controller
@@ -18,7 +19,7 @@ import uk.ac.warwick.tabula.web.controllers.attendance.{AttendanceController, Ha
 class ProfileHomeController extends AttendanceController with AutowiringTermServiceComponent {
 
 	@RequestMapping
-	def render() = user.profile match {
+	def render(): Mav = user.profile match {
 		case Some(student: StudentMember) =>
 			Redirect(Routes.Profile.profileForYear(student, AcademicYear.findAcademicYearContainingDate(DateTime.now)))
 		case _ if user.isStaff =>
@@ -33,7 +34,7 @@ class ProfileHomeController extends AttendanceController with AutowiringTermServ
 class ProfileChooseYearController extends AttendanceController {
 
 	@RequestMapping
-	def render(@PathVariable student: StudentMember) =
+	def render(@PathVariable student: StudentMember): Mav =
 		Mav("attendance/profile/years",
 			"years" ->
 				student.freshOrStaleStudentCourseDetails
@@ -56,7 +57,7 @@ class ProfileController extends AttendanceController with HasMonthNames {
 		@PathVariable student: StudentMember,
 		@PathVariable academicYear: AcademicYear,
 		@RequestParam(value="expand", required=false) expand: JBoolean
-	) = {
+	): Mav = {
 		val commandResult = cmd.apply()
 		val groupedPointMap = commandResult.attendanceMonitoringPointWithCheckPoint
 

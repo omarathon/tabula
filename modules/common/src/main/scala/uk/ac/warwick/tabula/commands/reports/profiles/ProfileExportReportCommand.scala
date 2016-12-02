@@ -31,7 +31,7 @@ class ProfileExportReportCommandInternal(val department: Department, val academi
 
 	self: JobServiceComponent with ProfileExportReportCommandState =>
 
-	override def applyInternal() = {
+	override def applyInternal(): JobInstance = {
 		jobService.add(Option(user), ProfileExportJob(students.asScala, academicYear))
 	}
 

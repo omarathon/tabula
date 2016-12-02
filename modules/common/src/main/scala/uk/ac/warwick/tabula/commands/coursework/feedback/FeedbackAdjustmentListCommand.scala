@@ -29,7 +29,7 @@ class FeedbackAdjustmentListCommandInternal(val assessment: Assessment)
 
 	self: UserLookupComponent with AssessmentMembershipServiceComponent =>
 
-	def applyInternal() = {
+	def applyInternal(): Seq[StudentInfo] = {
 		if (assessment.collectMarks) {
 			val allFeedback = assessment.fullFeedback
 			val allStudents =

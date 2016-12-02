@@ -8,8 +8,10 @@ import uk.ac.warwick.tabula.data.Transactions._
 import uk.ac.warwick.tabula.data.model.Department
 import uk.ac.warwick.tabula.data.model.Module
 import uk.ac.warwick.tabula.permissions.Permissions
-import uk.ac.warwick.tabula.services.{ModuleAndDepartmentServiceComponent, AutowiringModuleAndDepartmentServiceComponent}
+import uk.ac.warwick.tabula.services.{AutowiringModuleAndDepartmentServiceComponent, ModuleAndDepartmentServiceComponent}
 import uk.ac.warwick.tabula.system.permissions.{PermissionsChecking, PermissionsCheckingMethods, RequiresPermissionsChecking}
+
+import scala.collection.mutable
 
 object SortModulesCommand {
 	def apply(department: Department) =
@@ -26,7 +28,7 @@ object SortModulesCommand {
 class SortModulesCommandInternal(val department: Department) extends CommandInternal[Unit] with SortModulesCommandState with SortModulesCommandGrouping {
 	self: ModuleAndDepartmentServiceComponent =>
 
-	def applyInternal() = transactional() {
+	def applyInternal(): Unit = transactional() {
 		for ((dept, modules) <- mapping.asScala) {
 			dept.modules.clear()
 			dept.modules.addAll(modules)
@@ -80,13 +82,13 @@ trait SortModulesCommandValidation extends SelfValidating {
 
 trait SortModulesCommandState extends GroupsObjects[Module, Department] {
 	def department: Department
-	def departments = (department :: department.children.asScala.toList)
+	def departments: List[Department] = (department :: department.children.asScala.toList)
 
-	protected def validModule(module: Module) = module.code != null
+	protected def validModule(module: Module): Boolean = module.code != null
 
 	// Purely for use by Freemarker as it can't access map values unless the key is a simple value.
 	// Do not modify the returned value!
-	def mappingByCode = mapping.asScala.map {
+	def mappingByCode: mutable.Map[String, _root_.uk.ac.warwick.tabula.JavaImports.JList[Module]] = mapping.asScala.map {
 		case (dept, modules) => (dept.code, modules)
 	}
 }
@@ -102,5 +104,5 @@ trait SortModulesCommandPermissions extends RequiresPermissionsChecking with Per
 trait SortModulesCommandDescription extends Describable[Unit] {
 	self: SortModulesCommandState =>
 
-	def describe(d: Description) = d.department(department)
+	def describe(d: Description): Unit = d.department(department)
 }

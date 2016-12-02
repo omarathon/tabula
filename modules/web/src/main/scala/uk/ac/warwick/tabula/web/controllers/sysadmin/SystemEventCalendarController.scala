@@ -14,7 +14,7 @@ import uk.ac.warwick.spring.Wire
 @RequestMapping(Array("/sysadmin/event-calendar"))
 class SystemEventCalendarController extends BaseSysadminController {
 
-	var assignmentService = Wire[AssessmentService]
+	var assignmentService: AssessmentService = Wire[AssessmentService]
 
 	@RequestMapping def view = Mav("sysadmin/event-calendar")
 

@@ -33,10 +33,10 @@ trait JavaImports {
 	type JFloat = java.lang.Float
 
 	def JBoolean(b: Option[Boolean]) = ToJBoolean(b)
-	def JList[A](items: A*) = mutable.Seq(items: _*).asJava
-	def JMap[K, V](elems: (K, V)*) = mutable.Map[K, V](elems: _*).asJava
+	def JList[A](items: A*): JList[A] = mutable.Seq(items: _*).asJava
+	def JMap[K, V](elems: (K, V)*): JMap[K, V] = mutable.Map[K, V](elems: _*).asJava
 	def JConcurrentMap[K, V](elems: (K, V)*) = JConcurrentHashMap(elems: _*)
-	def JSet[A](items: A*) = mutable.Set(items: _*).asJava
+	def JSet[A](items: A*): JSet[A] = mutable.Set(items: _*).asJava
 	def JInteger(i: Option[Int]) = ToJInteger(i)
 	def JLong(l: Option[Long]) = ToJLong(l)
 	def JBigDecimal(bd: Option[BigDecimal]) = ToJBigDecimal(bd)

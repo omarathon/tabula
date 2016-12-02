@@ -2,9 +2,10 @@ package uk.ac.warwick.tabula.web.controllers.attendance.manage
 
 import uk.ac.warwick.tabula.JavaImports
 import uk.ac.warwick.tabula.commands.attendance.manage.FindPointsResult
-import uk.ac.warwick.tabula.data.model.attendance.{AttendanceMonitoringScheme, AttendanceMonitoringPointStyle, AttendanceMonitoringPointType}
+import uk.ac.warwick.tabula.data.model.attendance.{AttendanceMonitoringPointStyle, AttendanceMonitoringPointType, AttendanceMonitoringScheme}
 import org.springframework.stereotype.Controller
 import org.springframework.web.bind.annotation.RequestMapping
+import uk.ac.warwick.tabula.web.Mav
 import uk.ac.warwick.tabula.web.controllers.attendance.HasMonthNames
 
 @Controller
@@ -16,7 +17,7 @@ class EditPointsOnSchemeController extends AbstractManageSchemePointsController 
 		scheme: AttendanceMonitoringScheme,
 		points: JavaImports.JInteger,
 		actionCompleted: String
-	) = {
+	): Mav = {
 		Mav("attendance/manage/editschemepoints",
 			"findResult" -> findCommandResult,
 			"allTypes" -> AttendanceMonitoringPointType.values,

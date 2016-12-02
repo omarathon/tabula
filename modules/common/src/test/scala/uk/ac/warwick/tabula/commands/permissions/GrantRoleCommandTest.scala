@@ -16,8 +16,8 @@ import scala.reflect._
 class GrantRoleCommandTest extends TestBase with Mockito {
 
 	trait CommandTestSupport[A <: PermissionsTarget] extends GrantRoleCommandState[A] with PermissionsServiceComponent with SecurityServiceComponent with UserLookupComponent {
-		val permissionsService = mock[PermissionsService]
-		val securityService = mock[SecurityService]
+		val permissionsService: PermissionsService = mock[PermissionsService]
+		val securityService: SecurityService = mock[SecurityService]
 		val userLookup = new MockUserLookup()
 	}
 
@@ -31,7 +31,7 @@ class GrantRoleCommandTest extends TestBase with Mockito {
 	}
 
 	trait Fixture {
-		val department = Fixtures.department("in", "IT Services")
+		val department: Department = Fixtures.department("in", "IT Services")
 
 		val command = new GrantRoleCommandInternal(department) with CommandTestSupport[Department] with GrantRoleCommandValidation
 	}
@@ -45,7 +45,7 @@ class GrantRoleCommandTest extends TestBase with Mockito {
 
 		command.permissionsService.getGrantedRole(department, DepartmentalAdministratorRoleDefinition) returns None
 
-		val grantedRole = command.applyInternal()
+		val grantedRole: GrantedRole[Department] = command.applyInternal()
 		grantedRole.roleDefinition should be (DepartmentalAdministratorRoleDefinition)
 		grantedRole.users.size should be (2)
 		grantedRole.users.knownType.includesUserId("cuscav") should be (true)
@@ -70,7 +70,7 @@ class GrantRoleCommandTest extends TestBase with Mockito {
 
 		command.permissionsService.getGrantedRole(department, DepartmentalAdministratorRoleDefinition) returns Some(existing)
 
-		val grantedRole = command.applyInternal()
+		val grantedRole: GrantedRole[Department] = command.applyInternal()
 		grantedRole.eq(existing) should be (true)
 
 		grantedRole.roleDefinition should be (DepartmentalAdministratorRoleDefinition)
@@ -178,7 +178,7 @@ class GrantRoleCommandTest extends TestBase with Mockito {
 		val command = new GrantRoleCommandDescription[Department] with CommandTestSupport[Department] {
 			val eventName: String = "test"
 
-			val scope = dept
+			val scope: Department = dept
 			val grantedRole = None
 		}
 

@@ -28,7 +28,7 @@ class UnlinkAttendanceMonitoringSchemeCommandInternal extends CommandInternal[Ma
 
 	self: TermServiceComponent with AttendanceMonitoringServiceComponent =>
 
-	override def applyInternal() = {
+	override def applyInternal(): Map[Department, Seq[AttendanceMonitoringScheme]] = {
 		val academicYear = AcademicYear.findAcademicYearContainingDate(DateTime.now)
 		val schemeMap = transactional() {
 			attendanceMonitoringService.findSchemesLinkedToSITSByDepartment(academicYear)
@@ -66,7 +66,7 @@ trait UnlinkAttendanceMonitoringSchemeDescription extends Describable[Map[Depart
 
 trait UnlinkAttendanceMonitoringSchemeNotifications extends Notifies[Map[Department, Seq[AttendanceMonitoringScheme]], Map[Department, Seq[AttendanceMonitoringScheme]]] {
 
-	def emit(result: Map[Department, Seq[AttendanceMonitoringScheme]]) = {
+	def emit(result: Map[Department, Seq[AttendanceMonitoringScheme]]): Seq[UnlinkedAttendanceMonitoringSchemeNotification] = {
 		result.map { case (department, schemes) =>
 			Notification.init(new UnlinkedAttendanceMonitoringSchemeNotification, null, schemes, department)
 		}.toSeq

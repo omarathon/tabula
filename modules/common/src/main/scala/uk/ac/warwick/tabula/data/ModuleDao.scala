@@ -33,18 +33,18 @@ class ModuleDaoImpl extends ModuleDao with Daoisms {
 			.seq
 			.distinct
 
-	def saveOrUpdate(module: Module) = session.saveOrUpdate(module)
-	def saveOrUpdate(teachingInfo: ModuleTeachingInformation) = session.saveOrUpdate(teachingInfo)
-	def delete(teachingInfo: ModuleTeachingInformation) = session.delete(teachingInfo)
+	def saveOrUpdate(module: Module): Unit = session.saveOrUpdate(module)
+	def saveOrUpdate(teachingInfo: ModuleTeachingInformation): Unit = session.saveOrUpdate(teachingInfo)
+	def delete(teachingInfo: ModuleTeachingInformation): Unit = session.delete(teachingInfo)
 
-	def getByCode(code: String) =
+	def getByCode(code: String): Option[Module] =
 		session.newQuery[Module]("from Module m where code = :code").setString("code", code).uniqueResult
 
 	def getAllByCodes(codes: Seq[String]): Seq[Module] = {
 		safeInSeq(() => { session.newCriteria[Module] }, "code", codes)
 	}
 
-	def getTeachingInformationByModuleCodeAndDepartmentCode(moduleCode: String, departmentCode: String) =
+	def getTeachingInformationByModuleCodeAndDepartmentCode(moduleCode: String, departmentCode: String): Option[ModuleTeachingInformation] =
 		session.newCriteria[ModuleTeachingInformation]
 			.createAlias("module", "module")
 			.createAlias("department", "department")
@@ -52,9 +52,9 @@ class ModuleDaoImpl extends ModuleDao with Daoisms {
 			.add(is("department.code", departmentCode.toLowerCase))
 			.uniqueResult
 
-	def getById(id: String) = getById[Module](id)
+	def getById(id: String): Option[Module] = getById[Module](id)
 
-	def stampMissingFromImport(staleModuleCodes: Seq[String]) = {
+	def stampMissingFromImport(staleModuleCodes: Seq[String]): Unit = {
 		staleModuleCodes.grouped(Daoisms.MaxInClauseCount).foreach { staleCodes =>
 			val sqlString = """
 				update

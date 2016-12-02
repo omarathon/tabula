@@ -4,13 +4,14 @@ import javax.validation.Valid
 
 import org.springframework.stereotype.Controller
 import org.springframework.validation.Errors
-import org.springframework.web.bind.annotation.{PathVariable, ModelAttribute, RequestMapping}
+import org.springframework.web.bind.annotation.{ModelAttribute, PathVariable, RequestMapping}
 import uk.ac.warwick.tabula.api.web.controllers.ApiController
 import uk.ac.warwick.tabula.api.web.helpers.SubmissionToJsonConverter
 import uk.ac.warwick.tabula.commands.Appliable
 import uk.ac.warwick.tabula.commands.coursework.assignments.SubmissionAndFeedbackCommand
 import uk.ac.warwick.tabula.data.model.{Assignment, Module}
-import uk.ac.warwick.tabula.web.views.{JSONView, JSONErrorView}
+import uk.ac.warwick.tabula.web.Mav
+import uk.ac.warwick.tabula.web.views.{JSONErrorView, JSONView}
 
 @Controller
 @RequestMapping(Array("/v1/module/{module}/assignments/{assignment}/submissions"))
@@ -26,7 +27,7 @@ trait ListSubmissionsForAssignmentApi {
 		SubmissionAndFeedbackCommand(module, assignment)
 
 	@RequestMapping(method = Array(GET), produces = Array("application/json"))
-	def list(@Valid @ModelAttribute("listCommand") command: Appliable[SubmissionAndFeedbackCommand.SubmissionAndFeedbackResults], errors: Errors, @PathVariable assignment: Assignment) = {
+	def list(@Valid @ModelAttribute("listCommand") command: Appliable[SubmissionAndFeedbackCommand.SubmissionAndFeedbackResults], errors: Errors, @PathVariable assignment: Assignment): Mav = {
 		if (errors.hasErrors) {
 			Mav(new JSONErrorView(errors))
 		} else {

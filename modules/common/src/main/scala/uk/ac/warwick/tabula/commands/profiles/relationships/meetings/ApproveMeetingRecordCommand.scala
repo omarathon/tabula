@@ -6,8 +6,8 @@ import uk.ac.warwick.tabula.JavaImports._
 import uk.ac.warwick.tabula.commands._
 import uk.ac.warwick.tabula.data.Transactions._
 import uk.ac.warwick.tabula.data.model.MeetingApprovalState._
-import uk.ac.warwick.tabula.data.model.notifications.profiles.meetingrecord.{EditedMeetingRecordApprovalNotification, MeetingRecordApprovedNotification, MeetingRecordRejectedNotification, NewMeetingRecordApprovalNotification}
-import uk.ac.warwick.tabula.data.model.{MeetingRecord, MeetingRecordApproval, Notification}
+import uk.ac.warwick.tabula.data.model.notifications.profiles.meetingrecord._
+import uk.ac.warwick.tabula.data.model.{MeetingRecord, MeetingRecordApproval, Notification, SingleItemNotification}
 import uk.ac.warwick.tabula.data.{AutowiringMeetingRecordDaoComponent, MeetingRecordDaoComponent}
 import uk.ac.warwick.tabula.events.NotificationHandling
 import uk.ac.warwick.tabula.helpers.StringUtils._
@@ -39,7 +39,7 @@ class ApproveMeetingRecordCommand (val meeting: MeetingRecord, val user: Current
 	self: MeetingRecordDaoComponent with FeaturesComponent
 		with AttendanceMonitoringMeetingRecordServiceComponent with SecurityServiceComponent =>
 
-	def applyInternal() = transactional() {
+	def applyInternal(): MeetingRecord = transactional() {
 		if (approved) {
 			approvals.foreach(approval => {
 				approval.state = Approved
@@ -101,7 +101,7 @@ trait ApproveMeetingRecordDescription extends Describable[MeetingRecord] {
 trait ApproveMeetingRecordNotification extends Notifies[MeetingRecord, MeetingRecord] {
 	self: ApproveMeetingRecordState =>
 
-	def emit(meeting: MeetingRecord) = {
+	def emit(meeting: MeetingRecord): Seq[Notification[MeetingRecordApproval, Unit] with MeetingRecordNotificationTrait with SingleItemNotification[MeetingRecordApproval] with AutowiringTermServiceComponent] = {
 		val agent = user.apparentUser
 
 		if (approved)

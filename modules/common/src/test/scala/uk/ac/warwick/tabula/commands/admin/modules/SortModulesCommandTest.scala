@@ -13,13 +13,13 @@ import uk.ac.warwick.tabula.permissions.Permissions
 class SortModulesCommandTest extends TestBase with Mockito {
 
 	trait CommandTestSupport extends SortModulesCommandState with ModuleAndDepartmentServiceComponent {
-		val moduleAndDepartmentService = mock[ModuleAndDepartmentService]
+		val moduleAndDepartmentService: ModuleAndDepartmentService = mock[ModuleAndDepartmentService]
 	}
 
 	trait SortModulesWorld {
-		val department = Fixtures.department("in", "IT Services")
-		val ugDepartment = Fixtures.department("in-ug", "ITS Undergraduates")
-		val pgDepartment = Fixtures.department("in-pg", "ITS Postgraduates")
+		val department: Department = Fixtures.department("in", "IT Services")
+		val ugDepartment: Department = Fixtures.department("in-ug", "ITS Undergraduates")
+		val pgDepartment: Department = Fixtures.department("in-pg", "ITS Postgraduates")
 
 		department.children.add(ugDepartment)
 		department.children.add(pgDepartment)
@@ -27,13 +27,13 @@ class SortModulesCommandTest extends TestBase with Mockito {
 		ugDepartment.parent = department
 		pgDepartment.parent = department
 
-		val mod1 = Fixtures.module("in101")
-		val mod2 = Fixtures.module("in102")
-		val mod3 = Fixtures.module("in103")
-		val mod4 = Fixtures.module("in104")
-		val mod5 = Fixtures.module("in105")
-		val mod6 = Fixtures.module("in106")
-		val mod7 = Fixtures.module("in107")
+		val mod1: Module = Fixtures.module("in101")
+		val mod2: Module = Fixtures.module("in102")
+		val mod3: Module = Fixtures.module("in103")
+		val mod4: Module = Fixtures.module("in104")
+		val mod5: Module = Fixtures.module("in105")
+		val mod6: Module = Fixtures.module("in106")
+		val mod7: Module = Fixtures.module("in107")
 
 		department.modules.add(mod1)
 		department.modules.add(mod2)
@@ -112,9 +112,9 @@ class SortModulesCommandTest extends TestBase with Mockito {
 	}}
 
 	trait ValidationFixture extends SortModulesWorld {
-		val d = department
+		val d: Department = department
 		val command = new SortModulesCommandValidation with CommandTestSupport with SortModulesCommandGrouping {
-			val department = d
+			val department: Department = d
 		}
 
 		command.populate()
@@ -176,7 +176,7 @@ class SortModulesCommandTest extends TestBase with Mockito {
 		val dept = Fixtures.department("in")
 
 		val command = new SortModulesCommandPermissions with CommandTestSupport {
-			val department = dept
+			val department: Department = dept
 			def sort() {}
 			def populate() {}
 		}
@@ -192,7 +192,7 @@ class SortModulesCommandTest extends TestBase with Mockito {
 
 		val command = new SortModulesCommandDescription with CommandTestSupport {
 			val eventName: String = "test"
-			val department = dept
+			val department: Department = dept
 			def sort() {}
 			def populate() {}
 		}

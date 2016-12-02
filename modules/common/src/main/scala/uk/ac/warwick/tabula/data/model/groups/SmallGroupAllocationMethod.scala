@@ -16,7 +16,7 @@ object SmallGroupAllocationMethod {
 	// lame manual collection. Keep in sync with the case objects above
 	val members = Seq(Manual, StudentSignUp, Linked, Random)
 
-	def fromDatabase(dbValue: String) ={
+	def fromDatabase(dbValue: String): SmallGroupAllocationMethod ={
 		if (dbValue == null) null
 		else members.find{_.dbValue == dbValue} match {
 			case Some(caseObject) => caseObject
@@ -24,7 +24,7 @@ object SmallGroupAllocationMethod {
 		}
   }
 
-  def apply(value:String) = fromDatabase(value)
+  def apply(value:String): SmallGroupAllocationMethod = fromDatabase(value)
 }
 
 class SmallGroupAllocationMethodUserType extends AbstractBasicUserType[SmallGroupAllocationMethod, String] {
@@ -35,6 +35,6 @@ class SmallGroupAllocationMethodUserType extends AbstractBasicUserType[SmallGrou
 	val nullValue = null
 	val nullObject = null
 
-	override def convertToObject(string: String) = SmallGroupAllocationMethod.fromDatabase(string)
-	override def convertToValue(method: SmallGroupAllocationMethod) = method.dbValue
+	override def convertToObject(string: String): SmallGroupAllocationMethod = SmallGroupAllocationMethod.fromDatabase(string)
+	override def convertToValue(method: SmallGroupAllocationMethod): String = method.dbValue
 }

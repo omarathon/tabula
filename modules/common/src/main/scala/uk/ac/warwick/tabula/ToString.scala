@@ -8,7 +8,7 @@ package uk.ac.warwick.tabula
  */
 trait ToString {
 	def toStringProps: Seq[(String, Any)]
-	override def toString() = ToString.forObject(this, toStringProps : _*)
+	override def toString(): String = ToString.forObject(this, toStringProps : _*)
 }
 
 /** Alternative to the trait that avoids polluting the class's interface.
@@ -16,10 +16,10 @@ trait ToString {
 	*/
 object ToString {
 
-	def forProps(props: (String, Any)*) =
+	def forProps(props: (String, Any)*): String =
 		props.map { case (k, v) => k + "=" + v }.mkString("[", ",", "]")
 
-	def forObject(self: AnyRef, props: (String, Any)*) =
+	def forObject(self: AnyRef, props: (String, Any)*): String =
 		self.getClass.getSimpleName + forProps(props: _*)
 
 }

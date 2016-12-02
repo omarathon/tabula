@@ -9,23 +9,23 @@ import uk.ac.warwick.util.termdates.Term.TermType
 
 class TermAwareWeekRangeToDateConversionServiceTest extends TestBase with Mockito{
 
-	val localNow = LocalDateTime.now.withDayOfWeek(DateTimeConstants.MONDAY)
-	val dtNow = localNow.toDateTime
+	val localNow: LocalDateTime = LocalDateTime.now.withDayOfWeek(DateTimeConstants.MONDAY)
+	val dtNow: DateTime = localNow.toDateTime
 
-  val localCurrentYear = AcademicYear.guessSITSAcademicYearByDate(localNow.toDateTime)
+  val localCurrentYear: AcademicYear = AcademicYear.guessSITSAcademicYearByDate(localNow.toDateTime)
 
 	val week1:WeekRange.Week = 1
   val week1Interval = new Interval(dtNow.withDayOfWeek(DateTimeConstants.MONDAY).withTimeAtStartOfDay(),
 		                               dtNow.withDayOfWeek(DateTimeConstants.MONDAY).withTimeAtStartOfDay().plusDays(7))
 
-	val currentAcademicYear = AcademicYear.guessSITSAcademicYearByDate(DateTime.now)
-	val autumnTerm = mock[Term]
+	val currentAcademicYear: AcademicYear = AcademicYear.guessSITSAcademicYearByDate(DateTime.now)
+	val autumnTerm: Term = mock[Term]
 	autumnTerm.getTermType returns TermType.autumn
 	autumnTerm.getStartDate returns new LocalDate(currentAcademicYear.startYear, DateTimeConstants.NOVEMBER, 1).toDateTimeAtStartOfDay.toDateTime
 
-	val mockTf = smartMock[TermService]
-	val converter = new TermAwareWeekToDateConverterComponent with TermServiceComponent {
-		var termService = mockTf
+	val mockTf: TermService = smartMock[TermService]
+	val converter: WeekToDateConverter = new TermAwareWeekToDateConverterComponent with TermServiceComponent {
+		var termService: TermService = mockTf
 	}.weekToDateConverter
 
 	mockTf.getAcademicWeeksForYear(localCurrentYear.dateInTermOne) returns Seq(

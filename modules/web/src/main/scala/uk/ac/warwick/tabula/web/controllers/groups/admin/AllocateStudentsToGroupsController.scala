@@ -30,7 +30,7 @@ abstract class AbstractAllocateStudentsToGroupsController extends GroupsControll
 		AllocateStudentsToGroupsCommand(module, smallGroupSet, user)
 
 	@RequestMapping
-	def showForm(@ModelAttribute("command") cmd: AllocateStudentsToGroupsCommand, @PathVariable("smallGroupSet") set: SmallGroupSet) = {
+	def showForm(@ModelAttribute("command") cmd: AllocateStudentsToGroupsCommand, @PathVariable("smallGroupSet") set: SmallGroupSet): Mav = {
 		cmd.populate()
 		cmd.sort()
 		render(set)
@@ -38,11 +38,11 @@ abstract class AbstractAllocateStudentsToGroupsController extends GroupsControll
 
 	protected val renderPath: String
 
-	protected def render(set: SmallGroupSet) = {
+	protected def render(set: SmallGroupSet): Mav = {
 		Mav(renderPath).crumbs(Breadcrumbs.Department(set.module.adminDepartment, set.academicYear), Breadcrumbs.ModuleForYear(set.module, set.academicYear))
 	}
 
-	protected def submit(cmd: AllocateStudentsToGroupsCommand, errors: Errors, set: SmallGroupSet, route: String, objects: (String, _)*) = {
+	protected def submit(cmd: AllocateStudentsToGroupsCommand, errors: Errors, set: SmallGroupSet, route: String, objects: (String, _)*): Mav = {
 		cmd.sort()
 		if (errors.hasErrors) {
 			render(set)

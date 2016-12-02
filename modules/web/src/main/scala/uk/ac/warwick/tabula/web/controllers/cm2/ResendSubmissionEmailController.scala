@@ -15,7 +15,7 @@ import uk.ac.warwick.tabula.web.Mav
 @RequestMapping(value=Array("/${cm2.prefix}/submission/{assignment}/resend-receipt"))
 class ResendSubmissionEmailController extends CourseworkController {
 
-	var submissionService = Wire.auto[SubmissionService]
+	var submissionService: SubmissionService = Wire.auto[SubmissionService]
 
 	hideDeletedItems
 

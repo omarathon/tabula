@@ -15,6 +15,7 @@ import uk.ac.warwick.tabula.groups.web.Routes
 import uk.ac.warwick.tabula.helpers.DateBuilder
 import uk.ac.warwick.tabula.services.fileserver.RenderableFile
 import uk.ac.warwick.tabula.services.{ProfileService, SmallGroupService}
+import uk.ac.warwick.tabula.web.Mav
 
 @Controller
 @RequestMapping(Array("/groups/note/{student}/{occurrence}"))
@@ -27,7 +28,7 @@ class GroupsAttendanceNoteController extends GroupsController {
 	def home(
 		@PathVariable("student") member: Member,
 		@PathVariable occurrence: SmallGroupEventOccurrence
-	) = {
+	): Mav = {
 		val attendanceNote = smallGroupService.getAttendanceNote(member.universityId, occurrence).getOrElse(throw new ItemNotFoundException())
 		val attendance = smallGroupService.getAttendance(member.universityId, occurrence).orNull
 		Mav("groups/attendance/view_note",
@@ -73,7 +74,7 @@ class EditGroupsAttendanceNoteController extends GroupsController {
 	@RequestMapping(method=Array(GET, HEAD), params=Array("isIframe"))
 	def getIframe(
 		@ModelAttribute("command") cmd: Appliable[SmallGroupEventAttendanceNote] with PopulateOnForm
-	) = {
+	): Mav = {
 		cmd.populate()
 		form(cmd, isIframe = true)
 	}
@@ -82,7 +83,7 @@ class EditGroupsAttendanceNoteController extends GroupsController {
 	def get(
 		@ModelAttribute("command") cmd: Appliable[SmallGroupEventAttendanceNote] with PopulateOnForm,
 		@PathVariable("student") member: Member
-	) = {
+	): Mav = {
 		cmd.populate()
 		form(cmd)
 	}
@@ -109,7 +110,7 @@ class EditGroupsAttendanceNoteController extends GroupsController {
 	def submitIframe(
 		@Valid @ModelAttribute("command") cmd: Appliable[SmallGroupEventAttendanceNote] with PopulateOnForm,
 		errors: Errors
-	) = {
+	): Mav = {
 		if (errors.hasErrors) {
 			form(cmd, isIframe = true)
 		} else {
@@ -122,7 +123,7 @@ class EditGroupsAttendanceNoteController extends GroupsController {
 	def submit(
 		@Valid @ModelAttribute("command") cmd: Appliable[SmallGroupEventAttendanceNote] with PopulateOnForm,
 		errors: Errors
-	) = {
+	): Mav = {
 		if (errors.hasErrors) {
 			form(cmd)
 		} else {

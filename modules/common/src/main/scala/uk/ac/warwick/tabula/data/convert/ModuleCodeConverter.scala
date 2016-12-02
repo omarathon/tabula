@@ -9,14 +9,14 @@ class ModuleCodeConverter extends TwoWayConverter[String, Module] {
 
 	@Autowired var service: ModuleAndDepartmentService = _
 
-	override def convertRight(code: String) =
+	override def convertRight(code: String): Module =
 		service.getModuleByCode(sanitise(code)).getOrElse {
 			service.getModuleById(code).orNull
 		}
 
-	override def convertLeft(module: Module) = (Option(module) map { _.code }).orNull
+	override def convertLeft(module: Module): String = (Option(module) map { _.code }).orNull
 
-	def sanitise(code: String) = {
+	def sanitise(code: String): String = {
 		if (code == null) throw new IllegalArgumentException
 		else code.toLowerCase
 	}

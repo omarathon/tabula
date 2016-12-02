@@ -27,7 +27,7 @@ class CreateMonitoringSchemeCommandInternal(val department: Department, val acad
 
 	self: CreateMonitoringSchemeCommandState with AttendanceMonitoringServiceComponent =>
 
-	override def applyInternal() = {
+	override def applyInternal(): AttendanceMonitoringScheme = {
 		val scheme = new AttendanceMonitoringScheme
 		scheme.department = department
 		scheme.academicYear = academicYear
@@ -69,11 +69,11 @@ trait CreateMonitoringSchemeDescription extends Describable[AttendanceMonitoring
 
 	override lazy val eventName = "CreateMonitoringScheme"
 
-	override def describe(d: Description) = {
+	override def describe(d: Description): Unit = {
 		d.department(department)
 	}
 
-	override def describeResult(d: Description, result: AttendanceMonitoringScheme) = {
+	override def describeResult(d: Description, result: AttendanceMonitoringScheme): Unit = {
 		d.attendanceMonitoringScheme(result)
 	}
 }

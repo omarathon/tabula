@@ -34,7 +34,7 @@ class DownloadMarkersFeedbackForPositionCommand(
 
 	self: ZipServiceComponent =>
 
-	override def applyInternal() = {
+	override def applyInternal(): RenderableFile = {
 		val markersSubs = assignment.getMarkersSubmissions(marker)
 		val feedbacks = assignment.feedbacks.filter(f => markersSubs.exists(_.universityId == f.universityId))
 		val releasedMarkerFeedbacks = feedbacks.flatMap(f => position match {
