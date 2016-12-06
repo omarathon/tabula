@@ -4,7 +4,9 @@ import org.springframework.validation.Errors
 import uk.ac.warwick.tabula.AcademicYear
 import uk.ac.warwick.tabula.JavaImports._
 import uk.ac.warwick.tabula.commands._
-import uk.ac.warwick.tabula.data.model.{CoreRequiredModule, Department, Module}
+import uk.ac.warwick.tabula.data.{AutowiringStudentCourseYearDetailsDaoComponent, StudentCourseYearDetailsDaoComponent}
+import uk.ac.warwick.tabula.data.model.{CoreRequiredModule, Department, Module, Route}
+import uk.ac.warwick.tabula.helpers.LazyMaps
 import uk.ac.warwick.tabula.permissions.Permissions
 import uk.ac.warwick.tabula.services._
 import uk.ac.warwick.tabula.system.permissions.{PermissionsChecking, PermissionsCheckingMethods, RequiresPermissionsChecking}
@@ -16,7 +18,8 @@ object GenerateExamGridSetCoreRequiredModulesCommand {
 		new GenerateExamGridSetCoreRequiredModulesCommandInternal(department, academicYear)
 			with AutowiringModuleAndDepartmentServiceComponent
 			with AutowiringModuleRegistrationServiceComponent
-			with ComposableCommand[Seq[CoreRequiredModule]]
+			with AutowiringStudentCourseYearDetailsDaoComponent
+			with ComposableCommand[Map[Route, Seq[CoreRequiredModule]]]
 			with PopulateGenerateExamGridSetCoreRequiredModulesCommand
 			with GenerateExamGridSetCoreRequiredModulesCommandValidation
 			with GenerateExamGridSetCoreRequiredModulesDescription
@@ -27,21 +30,23 @@ object GenerateExamGridSetCoreRequiredModulesCommand {
 }
 
 class GenerateExamGridSetCoreRequiredModulesCommandInternal(val department: Department, val academicYear: AcademicYear)
-	extends CommandInternal[Seq[CoreRequiredModule]] {
+	extends CommandInternal[Map[Route, Seq[CoreRequiredModule]]] {
 
 	self: GenerateExamGridSetCoreRequiredModulesCommandState with GenerateExamGridSetCoreRequiredModulesCommandRequest
 		with GenerateExamGridSelectCourseCommandRequest with ModuleRegistrationServiceComponent =>
 
-	override def applyInternal(): Seq[CoreRequiredModule] = {
-		val newModules = modules.asScala.map(module =>
-			existingCoreRequiredModules.find(_.module == module).getOrElse(
-				new CoreRequiredModule(route, academicYear, yearOfStudy, module)
-			)
-		).toSeq
-		val modulesToRemove = existingCoreRequiredModules.filterNot(newModules.contains)
-		modulesToRemove.foreach(moduleRegistrationService.delete)
-		newModules.foreach(moduleRegistrationService.saveOrUpdate)
-		newModules
+	override def applyInternal(): Map[Route, Seq[CoreRequiredModule]] = {
+		allModules.map { case (route, _) =>
+			val existing = existingCoreRequiredModules.getOrElse(route, Seq())
+			val newModules = modules.asScala.getOrElse(route, JHashSet()).asScala
+				.map(module => existing.find(_.module == module).getOrElse(
+					new CoreRequiredModule(route, academicYear, yearOfStudy, module)
+				))
+			val modulesToRemove = existing.diff(newModules.toSeq)
+			modulesToRemove.foreach(moduleRegistrationService.delete)
+			newModules.foreach(moduleRegistrationService.saveOrUpdate)
+			route -> newModules.toSeq
+		}
 	}
 
 }
@@ -51,7 +56,7 @@ trait PopulateGenerateExamGridSetCoreRequiredModulesCommand extends PopulateOnFo
 	self: GenerateExamGridSetCoreRequiredModulesCommandState with GenerateExamGridSetCoreRequiredModulesCommandRequest =>
 
 	def populate(): Unit = {
-		modules.addAll(existingCoreRequiredModules.map(_.module).asJava)
+		existingCoreRequiredModules.foreach { case (route, crModules) => modules.put(route, JHashSet(crModules.map(_.module).toSet)) }
 	}
 
 }
@@ -61,9 +66,13 @@ trait GenerateExamGridSetCoreRequiredModulesCommandValidation extends SelfValida
 	self: GenerateExamGridSetCoreRequiredModulesCommandState with GenerateExamGridSetCoreRequiredModulesCommandRequest =>
 
 	override def validate(errors: Errors): Unit = {
-		val invalidModules = modules.asScala.filterNot(allModules.contains)
-		if (invalidModules.nonEmpty) {
-			errors.reject("examGrid.coreRequiredModulesInvalid", Array(invalidModules.map(_.code).mkString(", ")), "")
+		allModules.foreach { case (route, routeModules) =>
+			modules.asScala.get(route).foreach { crModules =>
+				val invalidModules = crModules.asScala.filterNot(routeModules.contains)
+				if (invalidModules.nonEmpty) {
+					errors.rejectValue(s"modules[${route.code}]", "examGrid.coreRequiredModulesInvalid", Array(invalidModules.map(_.code).mkString(", ")), "")
+				}
+			}
 		}
 	}
 
@@ -79,7 +88,7 @@ trait GenerateExamGridSetCoreRequiredModulesPermissions extends RequiresPermissi
 
 }
 
-trait GenerateExamGridSetCoreRequiredModulesDescription extends Describable[Seq[CoreRequiredModule]] {
+trait GenerateExamGridSetCoreRequiredModulesDescription extends Describable[Map[Route, Seq[CoreRequiredModule]]] {
 
 	self: GenerateExamGridSetCoreRequiredModulesCommandState with GenerateExamGridSetCoreRequiredModulesCommandRequest
 		with GenerateExamGridSelectCourseCommandRequest =>
@@ -91,27 +100,38 @@ trait GenerateExamGridSetCoreRequiredModulesDescription extends Describable[Seq[
 			.properties(
 				"academicYear" -> academicYear.toString,
 				"course" -> course.code,
-				"route" -> route.code,
 				"yearOfStudy" -> yearOfStudy,
-				"modules" -> modules.asScala.map(_.code)
+				"modules" -> modules.asScala.map { case (route, crModules) => route.code -> crModules.asScala.map(_.code) }
 			)
 	}
 }
 
 trait GenerateExamGridSetCoreRequiredModulesCommandState {
 
-	self: ModuleAndDepartmentServiceComponent with GenerateExamGridSelectCourseCommandRequest with ModuleRegistrationServiceComponent =>
+	self: ModuleAndDepartmentServiceComponent with GenerateExamGridSelectCourseCommandRequest
+		with ModuleRegistrationServiceComponent with StudentCourseYearDetailsDaoComponent =>
 
 	def department: Department
 	def academicYear: AcademicYear
 
-	lazy val allModules: Seq[Module] = moduleAndDepartmentService.findByRouteYearAcademicYear(route, yearOfStudy, academicYear)
-	lazy val existingCoreRequiredModules: Seq[CoreRequiredModule] = moduleRegistrationService.findCoreRequiredModules(route, academicYear, yearOfStudy)
+	private lazy val routesForDisplay: Seq[Route] = routes.asScala match {
+		case _ if routes.isEmpty =>
+			studentCourseYearDetailsDao.findByCourseRoutesYear(academicYear, course, routes.asScala, yearOfStudy, eagerLoad = true, disableFreshFilter = true)
+				.map(scyd => scyd.toExamGridEntityYear.route).distinct
+		case _ =>
+			routes.asScala.distinct
+	}
+	lazy val allModules: Map[Route, Seq[Module]] = routesForDisplay.map(r =>
+		r -> moduleAndDepartmentService.findByRouteYearAcademicYear(r, yearOfStudy, academicYear).sortBy(_.code)
+	).toMap
+	lazy val existingCoreRequiredModules: Map[Route, Seq[CoreRequiredModule]] = routesForDisplay.map(r =>
+		r -> moduleRegistrationService.findCoreRequiredModules(r, academicYear, yearOfStudy)
+	).toMap
 }
 
 trait GenerateExamGridSetCoreRequiredModulesCommandRequest {
 
 	self: GenerateExamGridSetCoreRequiredModulesCommandState with GenerateExamGridSelectCourseCommandRequest =>
 
-	var modules: JSet[Module] = JHashSet()
+	var modules: JMap[Route, JSet[Module]] = LazyMaps.create { _: Route => JHashSet(): JSet[Module] }.asJava
 }

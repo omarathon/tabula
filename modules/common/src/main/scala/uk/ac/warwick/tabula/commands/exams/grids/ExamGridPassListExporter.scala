@@ -5,8 +5,8 @@ import org.joda.time.DateTime
 import org.openxmlformats.schemas.wordprocessingml.x2006.main.STTblWidth
 import uk.ac.warwick.tabula.commands.TaskBenchmarking
 import uk.ac.warwick.tabula.data.model.StudentCourseYearDetails.YearOfStudy
-import uk.ac.warwick.tabula.data.model.{Course, Department, Route, UpstreamRouteRule}
-import uk.ac.warwick.tabula.services.{ProgressionResult, ProgressionService}
+import uk.ac.warwick.tabula.data.model._
+import uk.ac.warwick.tabula.services.{NormalLoadLookup, ProgressionResult, ProgressionService}
 import uk.ac.warwick.tabula.{AcademicYear, DateFormats}
 
 import scala.collection.JavaConverters._
@@ -17,12 +17,11 @@ object ExamGridPassListExporter extends TaskBenchmarking with AddConfidentialWat
 		entities: Seq[ExamGridEntity],
 		department: Department,
 		course: Course,
-		route: Route,
 		yearOfStudy: YearOfStudy,
 		academicYear: AcademicYear,
 		progressionService: ProgressionService,
-		normalLoad: BigDecimal,
-		routeRules: Seq[UpstreamRouteRule],
+		normalLoadLookup: NormalLoadLookup,
+		routeRulesLookup: UpstreamRouteRuleLookup,
 		isConfidential: Boolean
 	): XWPFDocument = {
 
@@ -42,7 +41,7 @@ object ExamGridPassListExporter extends TaskBenchmarking with AddConfidentialWat
 		createAndFormatParagraph(doc).createRun().setText("Pass List")
 		createAndFormatParagraph(doc).createRun().setText("The following candidates will proceed to the %s year of study:".format(yearOfStudyToString(yearOfStudy + 1)))
 		createAndFormatParagraph(doc).createRun().setText(department.name)
-		createAndFormatParagraph(doc).createRun().setText(s"${course.code.toUpperCase} ${course.name}, ${route.code.toUpperCase} ${route.name}")
+		createAndFormatParagraph(doc).createRun().setText(s"${course.code.toUpperCase} ${course.name}")
 
 		createAndFormatParagraph(doc).setBorderBottom(Borders.SINGLE)
 
@@ -50,7 +49,11 @@ object ExamGridPassListExporter extends TaskBenchmarking with AddConfidentialWat
 
 		val passedEntites = {
 			entities.filter(entity =>
-				progressionService.suggestedResult(entity.years(yearOfStudy).studentCourseYearDetails.get, normalLoad, routeRules) match {
+				progressionService.suggestedResult(
+					entity.years(yearOfStudy).studentCourseYearDetails.get,
+					normalLoadLookup(entity.years(yearOfStudy).route),
+					routeRulesLookup(entity.years(yearOfStudy).route)
+				) match {
 					case ProgressionResult.Proceed | ProgressionResult.PossiblyProceed | ProgressionResult.Pass => true
 					case _ => false
 				}

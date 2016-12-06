@@ -9,8 +9,8 @@ import org.springframework.web.servlet.View
 import uk.ac.warwick.spring.Wire
 import uk.ac.warwick.tabula.AcademicYear
 import uk.ac.warwick.tabula.commands.exams.grids.{ExamGridMarksRecordExporter, ExamGridPassListExporter, ExamGridTranscriptExporter, GenerateExamGridExporter}
-import uk.ac.warwick.tabula.data.model.{CoreRequiredModule, Department}
-import uk.ac.warwick.tabula.services.{AutowiringProgressionServiceComponent, AutowiringUpstreamRouteRuleServiceComponent}
+import uk.ac.warwick.tabula.data.model.{CoreRequiredModuleLookup, Department, UpstreamRouteRuleLookup}
+import uk.ac.warwick.tabula.services.{AutowiringProgressionServiceComponent, AutowiringUpstreamRouteRuleServiceComponent, NormalLoadLookup}
 import uk.ac.warwick.tabula.web.controllers.exams.ExamsController
 import uk.ac.warwick.tabula.web.views.{ExcelView, WordView}
 
@@ -31,7 +31,7 @@ trait ExamGridDocumentsController extends ExamsController
 		@Valid @ModelAttribute("gridOptionsCommand") gridOptionsCommand: GridOptionsCommand,
 		gridOptionsCommandErrors: Errors,
 		@ModelAttribute("checkOvercatCommmand") checkOvercatCommmand: CheckOvercatCommand,
-		@ModelAttribute("coreRequiredModules") coreRequiredModules: Seq[CoreRequiredModule],
+		@ModelAttribute("coreRequiredModuleLookup") coreRequiredModuleLookup: CoreRequiredModuleLookup,
 		@PathVariable department: Department,
 		@PathVariable academicYear: AcademicYear
 	): View = {
@@ -39,26 +39,35 @@ trait ExamGridDocumentsController extends ExamsController
 			throw new IllegalArgumentException
 		}
 
-		val GridData(entities, studentInformationColumns, perYearColumns, summaryColumns, weightings, normalLoadOption, _) = benchmarkTask("GridData") { checkAndApplyOvercatAndGetGridData(
+		val GridData(entities, studentInformationColumns, perYearColumns, summaryColumns, weightings, normalLoadLookup, _) = benchmarkTask("GridData") { checkAndApplyOvercatAndGetGridData(
 			selectCourseCommand,
 			gridOptionsCommand,
 			checkOvercatCommmand,
-			coreRequiredModules
+			coreRequiredModuleLookup
 		)}
 
 		val chosenYearColumnValues = benchmarkTask("chosenYearColumnValues") { Seq(studentInformationColumns, summaryColumns).flatten.map(c => c -> c.values).toMap }
 		val perYearColumnValues = benchmarkTask("perYearColumnValues") { perYearColumns.values.flatten.toSeq.map(c => c -> c.values).toMap }
 
 		new ExcelView(
-			s"Exam grid for ${department.name} ${selectCourseCommand.course.code} ${selectCourseCommand.route.code.toUpperCase} ${academicYear.toString.replace("/","-")}.xlsx",
+			"Exam grid for %s %s %s %s.xlsx".format(
+				department.name,
+				selectCourseCommand.course.code,
+				selectCourseCommand.routes.size match {
+					case 0 => "All routes"
+					case 1 => selectCourseCommand.routes.get(0).code.toUpperCase
+					case n => s"$n routes"
+				},
+				academicYear.toString.replace("/","-")
+			),
 			GenerateExamGridExporter(
 				department = department,
 				academicYear = academicYear,
 				course = selectCourseCommand.course,
-				route = selectCourseCommand.route,
+				routes = selectCourseCommand.routes.asScala,
 				yearOfStudy = selectCourseCommand.yearOfStudy,
 				yearWeightings = weightings,
-				normalLoad = normalLoadOption.getOrElse(selectCourseCommand.route.degreeType.normalCATSLoad),
+				normalLoadLookup = normalLoadLookup,
 				entities = entities,
 				leftColumns = studentInformationColumns,
 				perYearColumns = perYearColumns,
@@ -72,32 +81,24 @@ trait ExamGridDocumentsController extends ExamsController
 
 	private def marksRecordRender(selectCourseCommand: SelectCourseCommand, isConfidential: Boolean): View = {
 		val entities = selectCourseCommand.apply()
-		val normalLoadOption = upstreamRouteRuleService.findNormalLoad(
-			selectCourseCommand.route,
-			selectCourseCommand.academicYear,
-			selectCourseCommand.yearOfStudy
-		)
-		val normalLoad = normalLoadOption.getOrElse(selectCourseCommand.route.degreeType.normalCATSLoad)
-		val routeRules = upstreamRouteRuleService.list(
-			selectCourseCommand.route,
-			selectCourseCommand.academicYear,
-			selectCourseCommand.yearOfStudy
-		)
 		new WordView(
 			"%sMarks record for %s %s %s %s.docx".format(
 				if (isConfidential) "Confidential " else "",
 				selectCourseCommand.department.name,
 				selectCourseCommand.course.code,
-				selectCourseCommand.route.code.toUpperCase,
+				selectCourseCommand.routes.size match {
+					case 0 => "All routes"
+					case 1 => selectCourseCommand.routes.get(0).code.toUpperCase
+					case n => s"$n routes"
+				},
 				selectCourseCommand.academicYear.toString.replace("/","-")
 			),
 			ExamGridMarksRecordExporter(
 				entities,
 				selectCourseCommand.course,
-				selectCourseCommand.route,
 				progressionService,
-				normalLoad,
-				routeRules,
+				new NormalLoadLookup(selectCourseCommand.academicYear, selectCourseCommand.yearOfStudy, upstreamRouteRuleService),
+				new UpstreamRouteRuleLookup(selectCourseCommand.academicYear, selectCourseCommand.yearOfStudy, upstreamRouteRuleService),
 				isConfidential = isConfidential
 			)
 		)
@@ -133,35 +134,27 @@ trait ExamGridDocumentsController extends ExamsController
 
 	private def passListRender(selectCourseCommand: SelectCourseCommand, isConfidential: Boolean): View = {
 		val entities = selectCourseCommand.apply()
-		val normalLoadOption = upstreamRouteRuleService.findNormalLoad(
-			selectCourseCommand.route,
-			selectCourseCommand.academicYear,
-			selectCourseCommand.yearOfStudy
-		)
-		val normalLoad = normalLoadOption.getOrElse(selectCourseCommand.route.degreeType.normalCATSLoad)
-		val routeRules = upstreamRouteRuleService.list(
-			selectCourseCommand.route,
-			selectCourseCommand.academicYear,
-			selectCourseCommand.yearOfStudy
-		)
 		new WordView(
 			"%sPass list for %s %s %s %s.docx".format(
 				if (isConfidential) "Confidential " else "",
 				selectCourseCommand.department.name,
 				selectCourseCommand.course.code,
-				selectCourseCommand.route.code.toUpperCase,
+				selectCourseCommand.routes.size match {
+					case 0 => "All routes"
+					case 1 => selectCourseCommand.routes.get(0).code.toUpperCase
+					case n => s"$n routes"
+				},
 				selectCourseCommand.academicYear.toString.replace("/","-")
 			),
 			ExamGridPassListExporter(
 				entities,
 				selectCourseCommand.department,
 				selectCourseCommand.course,
-				selectCourseCommand.route,
 				selectCourseCommand.yearOfStudy,
 				selectCourseCommand.academicYear,
 				progressionService,
-				normalLoad,
-				routeRules,
+				new NormalLoadLookup(selectCourseCommand.academicYear, selectCourseCommand.yearOfStudy, upstreamRouteRuleService),
+				new UpstreamRouteRuleLookup(selectCourseCommand.academicYear, selectCourseCommand.yearOfStudy, upstreamRouteRuleService),
 				isConfidential
 			)
 		)
@@ -202,13 +195,15 @@ trait ExamGridDocumentsController extends ExamsController
 				if (isConfidential) "Confidential " else "",
 				selectCourseCommand.department.name,
 				selectCourseCommand.course.code,
-				selectCourseCommand.route.code.toUpperCase,
+				selectCourseCommand.routes.size match {
+					case 0 => "All routes"
+					case 1 => selectCourseCommand.routes.get(0).code.toUpperCase
+					case n => s"$n routes"
+				},
 				selectCourseCommand.academicYear.toString.replace("/","-")
 			),
 			ExamGridTranscriptExporter(
 				entities,
-				selectCourseCommand.course,
-				selectCourseCommand.route,
 				isConfidential = isConfidential
 			)
 		)

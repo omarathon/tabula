@@ -221,15 +221,15 @@
 		});
 		$modalFooter.on('click', 'button[name=continue]', function(){
 			$('.modal button').prop('disabled', true);
-		}).on('click', 'button[name=export]', function(){
+		}).on('click', 'button[name=${GenerateExamGridMappingParameters.excel}]', function(){
 			$modalFooterButtons.prop('disabled', true);
 			var $form = $('.modal-body form');
 			$form.append($('<input/>').attr({
 				'type': 'hidden',
-				'name': 'export'
+				'name': '${GenerateExamGridMappingParameters.excel}'
 			}));
 			$form.submit();
-			$form.find('input[name=export]').remove();
+			$form.find('input[name=${GenerateExamGridMappingParameters.excel}]').remove();
 			$modalFooterButtons.prop('disabled', false);
 		}).on('click', 'button[name=continue]', function(){
 			$modalFooterButtons.prop('disabled', true);

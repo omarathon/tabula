@@ -4,7 +4,8 @@ import org.springframework.stereotype.Component
 import uk.ac.warwick.tabula.AcademicYear
 import uk.ac.warwick.tabula.commands.exams.grids.{ExamGridEntity, ExamGridEntityYear}
 import uk.ac.warwick.tabula.data.model.StudentCourseYearDetails.YearOfStudy
-import uk.ac.warwick.tabula.data.model.{Module, ModuleRegistration, UpstreamRouteRule}
+import uk.ac.warwick.tabula.data.model._
+import uk.ac.warwick.tabula.services.NormalLoadLookup
 
 object ExamGridColumnOption {
 	type Identifier = String
@@ -52,9 +53,9 @@ object ExamGridColumnOption {
 case class ExamGridColumnState(
 	entities: Seq[ExamGridEntity],
 	overcatSubsets: Map[ExamGridEntityYear, Seq[(BigDecimal, Seq[ModuleRegistration])]],
-	coreRequiredModules: Seq[Module],
-	normalLoad: BigDecimal,
-	routeRules: Seq[UpstreamRouteRule],
+	coreRequiredModuleLookup: CoreRequiredModuleLookup,
+	normalLoadLookup: NormalLoadLookup,
+	routeRulesLookup: UpstreamRouteRuleLookup,
 	academicYear: AcademicYear,
 	yearOfStudy: Int,
 	showFullName: Boolean,
@@ -63,7 +64,7 @@ case class ExamGridColumnState(
 )
 
 case object EmptyExamGridColumnState {
-	def apply() = ExamGridColumnState(Nil,Map.empty,Nil,0,Nil,null,0,showFullName=true,showComponentMarks=false,showModuleNames=true)
+	def apply() = ExamGridColumnState(Nil,Map.empty,null,null,null,null,0,showFullName=true,showComponentMarks=false,showModuleNames=true)
 }
 
 @Component

@@ -3,9 +3,25 @@ package uk.ac.warwick.tabula.services
 import org.springframework.stereotype.Service
 import uk.ac.warwick.spring.Wire
 import uk.ac.warwick.tabula.AcademicYear
-import uk.ac.warwick.tabula.data.model.{UpstreamModuleList, Route, UpstreamRouteRule}
+import uk.ac.warwick.tabula.data.model.StudentCourseYearDetails.YearOfStudy
+import uk.ac.warwick.tabula.data.model.{Route, UpstreamModuleList, UpstreamRouteRule}
 import uk.ac.warwick.tabula.data.{AutowiringUpstreamRouteRuleDaoComponent, UpstreamRouteRuleDaoComponent}
+
 import collection.JavaConverters._
+import scala.collection.mutable
+
+class NormalLoadLookup(academicYear: AcademicYear, yearOfStudy: YearOfStudy, upstreamRouteRuleService: UpstreamRouteRuleService) {
+	private val cache = mutable.Map[Route, Option[BigDecimal]]()
+	def withoutDefault(route: Route): Option[BigDecimal] = cache.get(route) match {
+		case Some(option) =>
+			option
+		case _ =>
+			cache.put(route, upstreamRouteRuleService.findNormalLoad(route, academicYear, yearOfStudy))
+			cache(route)
+	}
+	def apply(route: Route): BigDecimal = withoutDefault(route).getOrElse(route.degreeType.normalCATSLoad)
+	def routes: Seq[Route] = cache.keys.toSeq
+}
 
 trait UpstreamRouteRuleService {
 

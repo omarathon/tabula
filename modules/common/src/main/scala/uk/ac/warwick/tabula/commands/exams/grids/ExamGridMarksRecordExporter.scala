@@ -3,8 +3,8 @@ package uk.ac.warwick.tabula.commands.exams.grids
 import org.apache.poi.xwpf.usermodel.XWPFDocument
 import org.openxmlformats.schemas.wordprocessingml.x2006.main.STTblWidth
 import uk.ac.warwick.tabula.commands.TaskBenchmarking
-import uk.ac.warwick.tabula.data.model.{Course, Route, UpstreamRouteRule}
-import uk.ac.warwick.tabula.services.{FinalYearGrade, ProgressionService}
+import uk.ac.warwick.tabula.data.model.{Course, UpstreamRouteRuleLookup}
+import uk.ac.warwick.tabula.services.{FinalYearGrade, NormalLoadLookup, ProgressionService}
 
 import scala.collection.JavaConverters._
 
@@ -13,10 +13,9 @@ object ExamGridMarksRecordExporter extends TaskBenchmarking with AddConfidential
 	def apply(
 		entities: Seq[ExamGridEntity],
 		course: Course,
-		route: Route,
 		progressionService: ProgressionService,
-		normalLoad: BigDecimal,
-		routeRules: Seq[UpstreamRouteRule],
+		normalLoadLookup: NormalLoadLookup,
+		routeRulesLookup: UpstreamRouteRuleLookup,
 		isConfidential: Boolean
 	): XWPFDocument = {
 
@@ -24,6 +23,7 @@ object ExamGridMarksRecordExporter extends TaskBenchmarking with AddConfidential
 		doc.createParagraph()
 
 		def renderEntity(entity: ExamGridEntity): Unit = benchmarkTask("renderEntity") {
+			val route = entity.years(entity.years.keys.last).route
 			val p1 = doc.getLastParagraph
 			val r1 = p1.createRun()
 			r1.setText(s"Marks record for ${entity.firstName} ${entity.lastName}")
@@ -81,14 +81,14 @@ object ExamGridMarksRecordExporter extends TaskBenchmarking with AddConfidential
 					if (Option(year.studentCourseYearDetails.get.agreedMark).isDefined) {
 						Option(BigDecimal(year.studentCourseYearDetails.get.agreedMark))
 					} else if (entity.years.keys.last == yearOfStudy) {
-						progressionService.getYearMark(year.studentCourseYearDetails.get, normalLoad, routeRules).right.toOption
+						progressionService.getYearMark(year.studentCourseYearDetails.get, normalLoadLookup(year.route), routeRulesLookup(year.route)).right.toOption
 					} else {
 						None
 					}
 				}
 				doc.createParagraph().createRun().setText(s"Mark for the year: ${yearMark.map(_.underlying.toPlainString).getOrElse("X")}")
 
-				progressionService.suggestedFinalYearGrade(year.studentCourseYearDetails.get, normalLoad, routeRules) match {
+				progressionService.suggestedFinalYearGrade(year.studentCourseYearDetails.get, normalLoadLookup(year.route), routeRulesLookup(year.route)) match {
 					case FinalYearGrade.Ignore =>
 					case grade => doc.createParagraph().createRun().setText(s"Classification: ${grade.description}")
 				}

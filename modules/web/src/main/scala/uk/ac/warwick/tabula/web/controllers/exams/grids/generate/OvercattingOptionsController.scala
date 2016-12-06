@@ -13,7 +13,7 @@ import uk.ac.warwick.tabula.data.model._
 import uk.ac.warwick.tabula.exams.grids.columns._
 import uk.ac.warwick.tabula.exams.grids.columns.marking.OvercattedYearMarkColumnOption
 import uk.ac.warwick.tabula.exams.grids.columns.modules.{CoreModulesColumnOption, CoreOptionalModulesColumnOption, CoreRequiredModulesColumnOption, OptionalModulesColumnOption}
-import uk.ac.warwick.tabula.services.{AutowiringModuleRegistrationServiceComponent, AutowiringUpstreamRouteRuleServiceComponent, ModuleRegistrationServiceComponent}
+import uk.ac.warwick.tabula.services.{AutowiringModuleRegistrationServiceComponent, AutowiringUpstreamRouteRuleServiceComponent, ModuleRegistrationServiceComponent, NormalLoadLookup}
 import uk.ac.warwick.tabula.web.Mav
 import uk.ac.warwick.tabula.web.controllers.exams.ExamsController
 import uk.ac.warwick.tabula.web.views.{ExcelView, JSONErrorView, JSONView}
@@ -29,12 +29,6 @@ class OvercattingOptionsController extends ExamsController
 	@ModelAttribute("GenerateExamGridMappingParameters")
 	def params = GenerateExamGridMappingParameters
 
-	private def normalLoad(scyd: StudentCourseYearDetails, academicYear: AcademicYear) = {
-		upstreamRouteRuleService.findNormalLoad(scyd.route, academicYear, scyd.yearOfStudy).getOrElse(
-			scyd.route.degreeType.normalCATSLoad
-		)
-	}
-
 	private def routeRules(scyd: StudentCourseYearDetails, academicYear: AcademicYear): Seq[UpstreamRouteRule] = {
 		upstreamRouteRuleService.list(scyd.route, academicYear, scyd.yearOfStudy)
 	}
@@ -45,14 +39,14 @@ class OvercattingOptionsController extends ExamsController
 			mandatory(department),
 			mandatory(academicYear),
 			mandatory(scyd),
-			normalLoad(scyd, academicYear),
+			new NormalLoadLookup(academicYear, scyd.yearOfStudy, upstreamRouteRuleService),
 			routeRules(scyd, academicYear),
 			user
 		)
 
 	@ModelAttribute("overcatView")
 	def overcatView(@PathVariable department: Department, @PathVariable academicYear: AcademicYear, @PathVariable scyd: StudentCourseYearDetails) =
-		OvercattingOptionsView(department, academicYear, scyd, normalLoad(scyd, academicYear), routeRules(scyd, academicYear))
+		OvercattingOptionsView(department, academicYear, scyd, new NormalLoadLookup(academicYear, scyd.yearOfStudy, upstreamRouteRuleService), routeRules(scyd, academicYear))
 
 	@ModelAttribute("ExamGridColumnValueType")
 	def examGridColumnValueType = ExamGridColumnValueType
@@ -84,10 +78,10 @@ class OvercattingOptionsController extends ExamsController
 				department = overcatView.department,
 				academicYear = overcatView.academicYear,
 				course = scyd.studentCourseDetails.course,
-				route = scyd.route,
+				routes = Seq(scyd.route),
 				yearOfStudy = scyd.yearOfStudy,
 				yearWeightings = Seq(),
-				normalLoad = normalLoad(scyd, overcatView.academicYear),
+				normalLoadLookup = overcatView.normalLoadLookup,
 				entities = overcatView.overcattedEntities,
 				leftColumns = overcatView.optionsColumns,
 				perYearColumns = overcatView.perYearColumns,
@@ -122,8 +116,8 @@ class OvercattingOptionsController extends ExamsController
 }
 
 object OvercattingOptionsView {
-	def apply(department: Department, academicYear: AcademicYear, scyd: StudentCourseYearDetails, normalLoad: BigDecimal, routeRules: Seq[UpstreamRouteRule]) =
-		new OvercattingOptionsView(department, academicYear, scyd, normalLoad, routeRules)
+	def apply(department: Department, academicYear: AcademicYear, scyd: StudentCourseYearDetails, normalLoadLookup: NormalLoadLookup, routeRules: Seq[UpstreamRouteRule]) =
+		new OvercattingOptionsView(department, academicYear, scyd, normalLoadLookup, routeRules)
 		with AutowiringModuleRegistrationServiceComponent
 		with GenerateExamGridOvercatCommandState
 		with GenerateExamGridOvercatCommandRequest
@@ -133,7 +127,7 @@ class OvercattingOptionsView(
 	val department: Department,
 	val academicYear: AcademicYear,
 	val scyd: StudentCourseYearDetails,
-	val normalLoad: BigDecimal,
+	val normalLoadLookup: NormalLoadLookup,
 	val routeRules: Seq[UpstreamRouteRule]
 ) {
 
@@ -141,21 +135,15 @@ class OvercattingOptionsView(
 
 	override val user: CurrentUser = null // Never used
 
-	private lazy val coreRequiredModules = moduleRegistrationService.findCoreRequiredModules(
-		scyd.studentCourseDetails.currentRoute,
-		academicYear,
-		scyd.yearOfStudy
-	).map(_.module)
-
-	private lazy val overcattedMarks: Seq[(BigDecimal, Seq[ModuleRegistration])] =
-		moduleRegistrationService.overcattedModuleSubsets(scyd.toExamGridEntityYear, overwrittenMarks, normalLoad, routeRules)
+	private lazy val coreRequiredModuleLookup = new CoreRequiredModuleLookup(academicYear, scyd.yearOfStudy, moduleRegistrationService)
 
 	private lazy val originalEntity = scyd.studentCourseDetails.student.toExamGridEntity(scyd)
 
-	lazy val overcattedEntities: Seq[ExamGridEntity] = overcattedMarks.map { case (mark, overcattedModules) =>
+	lazy val overcattedEntities: Seq[ExamGridEntity] = overcattedModuleSubsets.map { case (_, overcattedModules) =>
 		originalEntity.copy(years = originalEntity.years.updated(scyd.yearOfStudy, ExamGridEntityYear(
 			moduleRegistrations = overcattedModules,
 			cats = overcattedModules.map(mr => BigDecimal(mr.cats)).sum,
+			route = scyd.toExamGridEntityYear.route,
 			overcattingModules = Some(overcattedModules.map(_.module)),
 			markOverrides = Some(overwrittenMarks),
 			studentCourseYearDetails = None
@@ -165,9 +153,9 @@ class OvercattingOptionsView(
 	private lazy val overcattedEntitiesState = ExamGridColumnState(
 		entities = overcattedEntities,
 		overcatSubsets = Map(), // Not used
-		coreRequiredModules = coreRequiredModules,
-		normalLoad = normalLoad,
-		routeRules = Seq(), // Not used
+		coreRequiredModuleLookup = coreRequiredModuleLookup,
+		normalLoadLookup = normalLoadLookup,
+		routeRulesLookup = null, // Not used
 		academicYear = academicYear,
 		yearOfStudy = scyd.yearOfStudy,
 		showFullName = false,

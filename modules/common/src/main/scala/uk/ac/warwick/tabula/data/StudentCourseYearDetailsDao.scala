@@ -22,10 +22,10 @@ trait StudentCourseYearDetailsDao {
 	def convertKeysToIds(keys: Seq[StudentCourseYearKey]): Seq[String]
 	def stampMissingFromImport(newStaleScydIds: Seq[String], importStart: DateTime)
 
-	def findByCourseRouteYear(
+	def findByCourseRoutesYear(
 		academicYear: AcademicYear,
 		course: Course,
-		route: Route,
+		routes: Seq[Route],
 		yearOfStudy: Int,
 		eagerLoad: Boolean = false,
 		disableFreshFilter: Boolean = false
@@ -115,32 +115,46 @@ class StudentCourseYearDetailsDaoImpl extends StudentCourseYearDetailsDao with D
 		}
 	}
 
-	def findByCourseRouteYear(
+	def findByCourseRoutesYear(
 		academicYear: AcademicYear,
 		course: Course,
-		route: Route,
+		routes: Seq[Route],
 		yearOfStudy: Int,
 		eagerLoad: Boolean = false,
 		disableFreshFilter: Boolean = false
 	): Seq[StudentCourseYearDetails] = {
-		val thisSession = disableFreshFilter match {
-			case true => sessionWithoutFreshFilters
-			case false => session
+		val thisSession = if (disableFreshFilter) {
+			sessionWithoutFreshFilters
+		} else {
+			session
 		}
+
 		val c = thisSession.newCriteria[StudentCourseYearDetails]
 			.createAlias("studentCourseDetails", "scd")
 			.add(is("academicYear", academicYear))
 			.add(is("yearOfStudy", yearOfStudy))
 			.add(is("scd.course", course))
-			.add(is("route", route))
 			.add(is("enrolledOrCompleted", true))
 
 		if (eagerLoad) {
 			c.setFetchMode("studentCourseDetails", FetchMode.JOIN)
 				.setFetchMode("studentCourseDetails.student", FetchMode.JOIN)
+				.setFetchMode("studentCourseDetails.moduleRegistrations", FetchMode.JOIN)
 		}
 
-		c.seq
+		if (routes.isEmpty) {
+			c.seq
+		} else {
+			c.add(disjunction(
+				safeIn("route", routes),
+				conjunction(
+					isNull("route"),
+					safeIn("scd.currentRoute", routes)
+				)
+			))
+
+			c.seq
+		}
 	}
 
 	def findByScjCodeAndAcademicYear(items: Seq[(String, AcademicYear)]): Map[(String, AcademicYear), StudentCourseYearDetails] = {

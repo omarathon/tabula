@@ -11,7 +11,9 @@
 
 	<input type="hidden" name="jobId" value="${jobId}" />
 	<input type="hidden" name="course" value="${selectCourseCommand.course.code}" />
-	<input type="hidden" name="route" value="${selectCourseCommand.route.code}" />
+	<#list selectCourseCommand.routes as route>
+		<input type="hidden" name="routes" value="${route.code}" />
+	</#list>
 	<input type="hidden" name="yearOfStudy" value="${selectCourseCommand.yearOfStudy}" />
 
 	<h2>Set grid options</h2>
@@ -24,8 +26,20 @@
 
 	<p>
 		Select the items to include in your grid for Course: ${selectCourseCommand.course.code?upper_case} ${selectCourseCommand.course.name},
-		Route ${selectCourseCommand.route.code?upper_case} ${selectCourseCommand.route.name},
-		Year of Study: ${selectCourseCommand.yearOfStudy}
+		Year of Study: ${selectCourseCommand.yearOfStudy},
+		<#if !selectCourseCommand.routes?has_content>
+			All routes
+		<#elseif selectCourseCommand.routes?size == 1>
+			Route: ${selectCourseCommand.routes?first.code?upper_case} ${selectCourseCommand.routes?first.name}
+		<#else>
+			Routes:
+			<#assign popover>
+				<ul><#list selectCourseCommand.routes?sort_by('code') as route>
+					<li>${route.code?upper_case} ${route.name}</li>
+				</#list></ul>
+			</#assign>
+			<a class="use-popover" href="#" data-html="true" data-content="${popover}" data-container="body">${selectCourseCommand.routes?size} routes</a>
+		</#if>
 	</p>
 
 	<h3>Student identification</h3>

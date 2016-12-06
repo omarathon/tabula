@@ -11,20 +11,7 @@
 
 <form action="<@routes.exams.generateGrid department academicYear />" class="dirty-check" method="post">
 
-	<input type="hidden" name="jobId" value="${jobId}" />
-	<input type="hidden" name="course" value="${selectCourseCommand.course.code}" />
-	<input type="hidden" name="route" value="${selectCourseCommand.route.code}" />
-	<input type="hidden" name="yearOfStudy" value="${selectCourseCommand.yearOfStudy}" />
-	<#list gridOptionsCommand.predefinedColumnIdentifiers as column>
-		<input type="hidden" name="predefinedColumnIdentifiers" value="${column}" />
-	</#list>
-	<#list gridOptionsCommand.customColumnTitles as column>
-		<input type="hidden" name="customColumnTitles[${column_index}]" value="${column}" />
-	</#list>
-	<input type="hidden" name="nameToShow" value="${gridOptionsCommand.nameToShow}" />
-	<input type="hidden" name="yearsToShow" value="${gridOptionsCommand.yearsToShow}" />
-	<input type="hidden" name="marksToShow" value="${gridOptionsCommand.marksToShow}" />
-	<input type="hidden" name="moduleNameToShow" value="${gridOptionsCommand.moduleNameToShow}" />
+	<#include '_hidden_fields.ftl' />
 
 	<h2>Importing student data</h2>
 

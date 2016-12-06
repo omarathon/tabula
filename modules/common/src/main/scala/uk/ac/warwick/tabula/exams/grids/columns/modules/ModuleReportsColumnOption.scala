@@ -34,8 +34,9 @@ class ModuleReportsColumnOption extends PerYearExamGridColumnOption {
 		}
 
 		private def result(entity: ExamGridEntityYear): ExamGridColumnValue = {
-			val coreRequiredModuleRegistrations = entity.moduleRegistrations.filter(mr => state.coreRequiredModules.contains(mr.module))
-			if (state.coreRequiredModules.nonEmpty) {
+			val coreRequiredModules = state.coreRequiredModuleLookup(entity.route).map(_.module)
+			val coreRequiredModuleRegistrations = entity.moduleRegistrations.filter(mr => coreRequiredModules.contains(mr.module))
+			if (coreRequiredModules.nonEmpty) {
 				if (coreRequiredModuleRegistrations.exists(_.agreedGrade == "F")) {
 					ExamGridColumnValueString("N")
 				} else {
