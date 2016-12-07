@@ -113,7 +113,7 @@ abstract class Features {
 	@Value("${features.queueFeedbackForSits:true}") var queueFeedbackForSits: Boolean = defaults.queueFeedbackForSits
 	@Value("${features.searchOnApiComponent:true}") var searchOnApiComponent: Boolean = defaults.searchOnApiComponent
 	@Value("${features.celcatTimetablesChemistry:true}") var celcatTimetablesChemistry: Boolean = defaults.celcatTimetablesChemistry
-	@Value("${features.celcatTimetablesWBS:false}") var celcatTimetablesWBS: Boolean = defaults.celcatTimetablesWBS
+	@Value("${features.celcatTimetablesWBS:true}") var celcatTimetablesWBS: Boolean = defaults.celcatTimetablesWBS
 	@Value("${features.smallGroupTeaching.autoMarkMissedMonitoringPoints:true}") var autoMarkMissedMonitoringPoints: Boolean = defaults.autoMarkMissedMonitoringPoints
 	@Value("${features.notificationListeners.start:false}") var startNotificationListener: Boolean = defaults.startNotificationListener
 	@Value("${features.urkund.submissions:true}") var urkundSubmissions: Boolean = defaults.urkundSubmissions
@@ -228,7 +228,7 @@ class FeaturesMessage {
 	@BeanProperty var showAccreditedPriorLearning = true
 	@BeanProperty var autoGroupDeregistration = false
 	@BeanProperty var celcatTimetablesChemistry = true
-	@BeanProperty var celcatTimetablesWBS = false
+	@BeanProperty var celcatTimetablesWBS = true
 	@BeanProperty var startNotificationListener = false
 
 	@BeanProperty var smallGroupTeaching = true
