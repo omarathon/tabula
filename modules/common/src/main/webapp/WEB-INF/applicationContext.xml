@@ -31,7 +31,18 @@
 	<context:component-scan base-package="uk.ac.warwick.tabula.notifications" />
 	<context:component-scan base-package="uk.ac.warwick.tabula.exams.grids.columns" />
 
+	<!-- enable component scan for mywarwick service -->
 	<context:component-scan base-package="uk.ac.warwick.util.mywarwick" />
+
+	<!-- properties bean expected by mywarwick service -->
+	<bean id="applicationPropertiesForMyWarwick" class="org.springframework.beans.factory.config.PropertiesFactoryBean">
+		<property name="locations">
+			<list>
+				<value>classpath:/default.properties</value>
+				<value>classpath:/tabula.properties</value>
+			</list>
+		</property>
+	</bean>
 
 	<!-- For sub-modules to implement their own component scanning -->
 	<import resource="spring-component-scan-context.xml" />
