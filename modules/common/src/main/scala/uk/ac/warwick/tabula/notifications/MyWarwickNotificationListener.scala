@@ -2,7 +2,6 @@ package uk.ac.warwick.tabula.notifications
 
 import com.fasterxml.jackson.databind.ObjectMapper
 import dispatch.classic.url
-import org.hibernate.ObjectNotFoundException
 import org.springframework.stereotype.Component
 import uk.ac.warwick.spring.Wire
 import uk.ac.warwick.tabula._
@@ -11,6 +10,8 @@ import uk.ac.warwick.tabula.helpers.Futures._
 import uk.ac.warwick.tabula.permissions.PermissionsTarget
 import uk.ac.warwick.tabula.services.{AutowiringDispatchHttpClientComponent, DispatchHttpClientComponent, NotificationListener}
 import uk.ac.warwick.tabula.web.views.{AutowiredTextRendererComponent, TextRendererComponent}
+import uk.ac.warwick.util.mywarwick.MyWarwickService
+import uk.ac.warwick.util.mywarwick.model.request._
 
 import scala.collection.JavaConverters._
 import scala.concurrent.duration._
@@ -19,12 +20,14 @@ import scala.language.existentials
 import scala.util.parsing.json.JSON
 
 trait StartWarwickNotificationListener extends NotificationListener {
-	self: StartWarwickPropertiesComponent with TextRendererComponent with FeaturesComponent with DispatchHttpClientComponent =>
+	self: StartWarwickPropertiesComponent with TextRendererComponent with FeaturesComponent with DispatchHttpClientComponent with MyWarwickServiceComponent =>
 
 	@transient var json: ObjectMapper = JsonObjectMapperFactory.instance
 
-	private def toStartActivity(notification: Notification[_ >: Null <: ToEntityReference, _]): Option[Map[String, Any]] = try {
-		val recipients = notification.recipientNotificationInfos.asScala
+	var myWarwickService: MyWarwickService
+
+	private def toStartActivity(notification: Notification[_ >: Null <: ToEntityReference, _]): Option[Activity] = {
+		val recipientUsers = notification.recipientNotificationInfos.asScala
 			.filterNot(_.dismissed) // Not if the user has dismissed the notificaiton already
 			.map(_.recipient)
 			.filter(_.isFoundUser) // Only users found in SSO
@@ -49,16 +52,18 @@ trait StartWarwickNotificationListener extends NotificationListener {
 				)
 			}
 
-			Some(Map(
-				"type" -> notification.notificationType,
-				"title" -> notification.title,
-				"text" -> textRenderer.renderTemplate(notification.content.template, notification.content.model),
-				"generated_at" -> DateFormats.IsoDateTime.print(notification.created),
-				"tags" -> tags,
-				"recipients" -> Map(
-					"users" -> recipients
-				)
-			))
+			val activity = new Activity(
+				recipientUsers.toSet.asJava,
+				notification.title,
+				"",
+				textRenderer.renderTemplate(notification.content.template, notification.content.model),
+				notification.notificationType
+			)
+
+			activity.setTags(tags.toSet.asJava)
+
+			Some(activity)
+			// "generated_at" -> DateFormats.IsoDateTime.print(notification.created),
 		}
 	} catch {
 		// referenced entity probably missing, oh well.
@@ -116,6 +121,7 @@ class AutowiringStartWarwickNotificationListener extends StartWarwickNotificatio
 	with AutowiredTextRendererComponent
 	with AutowiringFeaturesComponent
 	with AutowiringDispatchHttpClientComponent
+	with AutowiringMyWarwickServiceComponent
 
 trait StartWarwickPropertiesComponent {
 	def startApiHostname: String
