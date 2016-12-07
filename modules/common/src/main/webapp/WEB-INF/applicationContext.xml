@@ -31,6 +31,8 @@
 	<context:component-scan base-package="uk.ac.warwick.tabula.notifications" />
 	<context:component-scan base-package="uk.ac.warwick.tabula.exams.grids.columns" />
 
+	<context:component-scan base-package="uk.ac.warwick.util.mywarwick" />
+
 	<!-- For sub-modules to implement their own component scanning -->
 	<import resource="spring-component-scan-context.xml" />
 

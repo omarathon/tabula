@@ -223,6 +223,11 @@
 			<artifactId>warwickutils-csv</artifactId>
 			<version>${warwickutils.version}</version>
 		</dependency>
+		<dependency>
+			<groupId>uk.ac.warwick.util</groupId>
+			<artifactId>warwickutils-mywarwick</artifactId>
+			<version>20161202-1402</version>
+		</dependency>
 
 		<dependency>
 			<groupId>uk.ac.warwick.sso</groupId>
