@@ -10,6 +10,8 @@ class SuggestedResultColumnOption extends ChosenYearExamGridColumnOption with Au
 
 	override val identifier: ExamGridColumnOption.Identifier = "suggestedresult"
 
+	override val label: String = "Suggested Actions: Suggested result"
+
 	override val sortOrder: Int = ExamGridColumnOption.SortOrders.SuggestedResult
 
 	case class Column(state: ExamGridColumnState)

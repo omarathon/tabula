@@ -9,6 +9,8 @@ class NameColumnOption extends StudentExamGridColumnOption {
 
 	override val identifier: ExamGridColumnOption.Identifier = "name"
 
+	override val label: String = "Student identification: Name"
+
 	override val sortOrder: Int = ExamGridColumnOption.SortOrders.Name
 
 	override val mandatory = true
@@ -67,6 +69,8 @@ class UniversityIDColumnOption extends StudentExamGridColumnOption {
 
 	override val identifier: ExamGridColumnOption.Identifier = "universityId"
 
+	override val label: String = "Student identification: University ID"
+
 	override val sortOrder: Int = ExamGridColumnOption.SortOrders.UniversityId
 
 	override val mandatory = true
@@ -93,6 +97,8 @@ class UniversityIDColumnOption extends StudentExamGridColumnOption {
 class SPRCodeColumnOption extends StudentExamGridColumnOption {
 
 	override val identifier: ExamGridColumnOption.Identifier = "sprCode"
+
+	override val label: String = "Student identification: SPR code"
 
 	override val sortOrder: Int = ExamGridColumnOption.SortOrders.SPRCode
 
@@ -123,6 +129,8 @@ class RouteColumnOption extends StudentExamGridColumnOption {
 
 	override val identifier: ExamGridColumnOption.Identifier = "route"
 
+	override val label: String = "Student identification: Route"
+
 	override val sortOrder: Int = ExamGridColumnOption.SortOrders.Route
 
 	case class Column(state: ExamGridColumnState) extends ChosenYearExamGridColumn(state) {
@@ -151,6 +159,8 @@ class RouteColumnOption extends StudentExamGridColumnOption {
 class StartYearColumnOption extends StudentExamGridColumnOption {
 
 	override val identifier: ExamGridColumnOption.Identifier = "startyear"
+
+	override val label: String = "Student identification: Start Year"
 
 	override val sortOrder: Int = ExamGridColumnOption.SortOrders.StartYear
 

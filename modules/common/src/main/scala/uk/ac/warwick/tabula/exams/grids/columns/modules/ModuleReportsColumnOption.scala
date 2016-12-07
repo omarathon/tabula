@@ -12,6 +12,8 @@ class ModuleReportsColumnOption extends PerYearExamGridColumnOption {
 
 	override val identifier: ExamGridColumnOption.Identifier = "modulereports"
 
+	override val label: String = "Modules: Module Reports"
+
 	override val sortOrder: Int = ExamGridColumnOption.SortOrders.ModuleReports
 
 	case class PassedCoreRequiredColumn(state: ExamGridColumnState)

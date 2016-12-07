@@ -9,6 +9,8 @@ class CommentsColumnOption extends ChosenYearExamGridColumnOption {
 
 	override val identifier: ExamGridColumnOption.Identifier = "comments"
 
+	override val label: String = "Administration: Comments"
+
 	override val sortOrder: Int = ExamGridColumnOption.SortOrders.Comments
 
 	case class Column(state: ExamGridColumnState) extends ChosenYearExamGridColumn(state) with HasExamGridColumnCategory {

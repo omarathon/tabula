@@ -195,6 +195,8 @@ class ChooseOvercatColumnOption extends ChosenYearExamGridColumnOption {
 
 	override val identifier: ExamGridColumnOption.Identifier = "chooseovercat"
 
+	override val label: String = ""
+
 	override val sortOrder: Int = 0
 
 	case class Column(state: ExamGridColumnState, selectedEntityId: Option[String]) extends ChosenYearExamGridColumn(state) {
@@ -226,6 +228,8 @@ class ChooseOvercatColumnOption extends ChosenYearExamGridColumnOption {
 class FixedValueColumnOption extends ChosenYearExamGridColumnOption {
 
 	override val identifier: ExamGridColumnOption.Identifier = "currentyear"
+
+	override val label: String = ""
 
 	override val sortOrder: Int = ExamGridColumnOption.SortOrders.CurrentYear
 

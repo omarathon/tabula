@@ -9,6 +9,8 @@ class BoardAgreedMarksColumnOption extends ChosenYearExamGridColumnOption {
 
 	override val identifier: ExamGridColumnOption.Identifier = "board"
 
+	override val label: String = "Marking: Board agreed mark"
+
 	override val sortOrder: Int = ExamGridColumnOption.SortOrders.BoardAgreedMark
 
 	case class Column(state: ExamGridColumnState) extends ChosenYearExamGridColumn(state) with HasExamGridColumnCategory {

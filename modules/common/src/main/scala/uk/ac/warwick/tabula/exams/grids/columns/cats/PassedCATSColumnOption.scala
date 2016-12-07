@@ -9,6 +9,8 @@ class PassedCATSColumnOption extends ChosenYearExamGridColumnOption {
 
 	override val identifier: ExamGridColumnOption.Identifier = "passedCats"
 
+	override val label: String = "CATS breakdowns: Passed CATS"
+
 	override val sortOrder: Int = ExamGridColumnOption.SortOrders.PassedCATS
 
 	case class Column(state: ExamGridColumnState, thisYearOfStudy: Int)

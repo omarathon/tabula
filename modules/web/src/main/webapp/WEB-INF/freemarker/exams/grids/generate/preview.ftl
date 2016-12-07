@@ -1,3 +1,4 @@
+<#import 'form_fields.ftl' as form_fields />
 <#escape x as x?html>
 
 <#function route_function dept>
@@ -29,7 +30,8 @@
 
 	<form action="<@routes.exams.generateGrid department academicYear />" class="dirty-check exam-grid-preview" method="post">
 
-		<#include '_hidden_fields.ftl' />
+		<@form_fields.select_course_fields />
+		<@form_fields.grid_options_fields />
 
 		<h2>Preview and download</h2>
 

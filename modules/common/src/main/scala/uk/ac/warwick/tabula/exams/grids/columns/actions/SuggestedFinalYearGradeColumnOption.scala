@@ -10,6 +10,8 @@ class SuggestedFinalYearGradeColumnOption extends ChosenYearExamGridColumnOption
 
 	override val identifier: ExamGridColumnOption.Identifier = "suggestedgrade"
 
+	override val label: String = "Suggested Actions: Suggested final year grade"
+
 	override val sortOrder: Int = ExamGridColumnOption.SortOrders.SuggestedFinalYearGrade
 
 	case class Column(state: ExamGridColumnState)
