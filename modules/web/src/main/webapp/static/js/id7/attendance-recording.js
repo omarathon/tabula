@@ -73,47 +73,40 @@ var checkForCheckpoints = function(){
 	$attendanceForm.find('select').each(function(){
 		attendanceData[$(this).data('universityid')] = $(this).val();
 	});
+	$attendanceForm.find('.checkpoints-message').hide();
 	$.post('/attendance/check/smallgroup', {
 		'occurrence' : $attendanceForm.data('occurrence'),
 		'attendances' : attendanceData
 	}, function(data){
-		$attendanceForm.find('.checkpoints-message .students').popover('destroy').removeClass('tabulaPopover-init');
-		var attendedData = data.attended;
-		var missedData = data.missed;
-
-		if (attendedData.length == 0 && missedData.length == 0) {
-			$attendanceForm.find('.checkpoints-message').hide();
-		} else {
-			var $missedStudents = $('.missed-students'), $attendedStudents = $('.attended-students');
-			$missedStudents.html('');
-			$attendedStudents.html('');
-			$attendanceForm.find('.checkpoints-message').show();
-			if (attendedData.length > 0) {
-				var popoverContent = $('<ul/>');
-				$.each(attendedData, function(i, student){
-					popoverContent.append($('<li/>').html(student.name));
-				});
-
-				$attendedStudents.html(attendedData.length + ' student' + ((attendedData.length > 1) ? 's' : '') + ' as attended' + (missedData.length > 1 ? ', ' : ''))
-					.attr('data-content', popoverContent.wrap('<div></div>').parent().html())
-					.tabulaPopover({
-						trigger: 'click'
-					});
-
+		var states = [], buildState = function(students, state){
+			if (students.length > 0) {
+				states.push($('<span/>').append(
+					$('<a/>').attr({
+						'class':'use-popover',
+						'data-placement':'top',
+						'data-container':'body',
+						'data-html':'true',
+						'data-content':'<ul>' + $.map(students, function(student){ return '<li>' + student.name + '</li>' }).join('') + '</ul>'
+					}).html(students.length + ((students.length === 1)?' student':' students')),
+					' as ' + state
+				));
+				states.push(', ');
 			}
-			if (missedData.length > 0) {
-				var missedPopoverContent =  $('<ul/>');
-				$.each(missedData, function(i, student){
-					missedPopoverContent.append($('<li/>').html(student.name));
-				});
+		};
 
-				$missedStudents.html(missedData.length + ' student' + ((missedData.length > 1) ? 's' : '') + ' as missed')
-					.attr('data-content', missedPopoverContent.wrap('<div></div>').parent().html())
-					.tabulaPopover({
-						trigger: 'click'
-					});
-			}
+		buildState(data.attended, 'attended');
+		buildState(data.missedUnauthorised, 'missed (unauthorised)');
+		buildState(data.missedAuthorised, 'missed (authorised)');
+
+		var $container = $attendanceForm.find('.checkpoints-message .inner').empty();
+		$.each(states.slice(0, states.length - 1), function(i, state){ $container.append(state); });
+		if (states.length > 0) {
+			$container.parent().show();
 		}
+		$('.use-popover').tabulaPopover({
+			trigger: 'click',
+			container: '#container'
+		});
 	});
 };
 
