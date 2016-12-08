@@ -29,19 +29,7 @@
 
 	<form action="<@routes.exams.generateGrid department academicYear />" class="dirty-check exam-grid-preview" method="post">
 
-		<input type="hidden" name="course" value="${selectCourseCommand.course.code}" />
-		<input type="hidden" name="route" value="${selectCourseCommand.route.code}" />
-		<input type="hidden" name="yearOfStudy" value="${selectCourseCommand.yearOfStudy}" />
-		<#list gridOptionsCommand.predefinedColumnIdentifiers as column>
-			<input type="hidden" name="predefinedColumnIdentifiers" value="${column}" />
-		</#list>
-		<#list gridOptionsCommand.customColumnTitles as column>
-			<input type="hidden" name="customColumnTitles[${column_index}]" value="${column}" />
-		</#list>
-		<input type="hidden" name="nameToShow" value="${gridOptionsCommand.nameToShow}" />
-		<input type="hidden" name="yearsToShow" value="${gridOptionsCommand.yearsToShow}" />
-		<input type="hidden" name="marksToShow" value="${gridOptionsCommand.marksToShow}" />
-		<input type="hidden" name="moduleNameToShow" value="${gridOptionsCommand.moduleNameToShow}" />
+		<#include '_hidden_fields.ftl' />
 
 		<h2>Preview and download</h2>
 
@@ -106,8 +94,21 @@
 						<td>${selectCourseCommand.course.code?upper_case} ${selectCourseCommand.course.name}</td>
 					</tr>
 					<tr>
-						<th>Route:</th>
-						<td>${selectCourseCommand.route.code?upper_case} ${selectCourseCommand.route.name}</td>
+						<#if !selectCourseCommand.routes?has_content>
+							<th>Routes:</th>
+							<td>All routes</td>
+						<#elseif selectCourseCommand.routes?size == 1>
+							<th>Route:</th>
+							<td>${selectCourseCommand.routes?first.code?upper_case} ${selectCourseCommand.routes?first.name}</td>
+						<#else>
+							<th>Routes:</th>
+							<#assign popover>
+								<ul><#list selectCourseCommand.routes?sort_by('code') as route>
+									<li>${route.code?upper_case} ${route.name}</li>
+								</#list></ul>
+							</#assign>
+							<td><a class="use-popover" href="#" data-html="true" data-content="${popover}">${selectCourseCommand.routes?size} routes</a></td>
+						</#if>
 					</tr>
 					<tr>
 						<th>Year of study:</th>
@@ -124,10 +125,27 @@
 					<tr>
 						<th>Normal CAT load:</th>
 						<td>
-							<#if normalLoadOption??>
-								${normalLoadOption}
+							<#if normalLoadLookup.routes?size == 1>
+								<#if normalLoadLookup.withoutDefault(normalLoadLookup.routes?first)?has_content>
+									${normalLoadLookup.withoutDefault(normalLoadLookup.routes?first)}
+								<#else>
+									<#assign defaultNormalLoad>${normalLoadLookup.apply(normalLoadLookup.routes?first)}</#assign>
+									${defaultNormalLoad} <@fmt.help_popover id="normal-load" content="Could not find a Pathway Module Rule for the normal load so using the default value of ${defaultNormalLoad}" />
+								</#if>
 							<#else>
-								${defaultNormalLoad} <@fmt.help_popover id="normal-load" content="Could not find a Pathway Module Rule for the normal load so using the default value of ${defaultNormalLoad}" />
+								<#assign popover>
+									<ul><#list normalLoadLookup.routes?sort_by('code') as route>
+										<li>${route.code?upper_case}:
+											<#if normalLoadLookup.withoutDefault(route)?has_content>
+												${normalLoadLookup.withoutDefault(route)}
+											<#else>
+												<#assign defaultNormalLoad>${normalLoadLookup.apply(route)}</#assign>
+												${defaultNormalLoad} <@fmt.help_popover id="normal-load" content="Could not find a Pathway Module Rule for the normal load so using the default value of ${defaultNormalLoad}" />
+											</#if>
+										</li>
+									</#list></ul>
+								</#assign>
+								<a href="#" class="use-popover" data-html="true" data-content="${popover}">${normalLoadLookup.routes?size} routes</a>
 							</#if>
 						</td>
 					</tr>
@@ -345,6 +363,7 @@
 		$('a.confirm', $confirmModal).on('click', function() {
 			$form.submit();
 			$confirmModal.modal('hide');
+			$form.find('input.download-option').remove();
 		});
 		$('.download-options').on('click', 'button', function(e) {
 			e.preventDefault();

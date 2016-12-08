@@ -5,6 +5,10 @@ import javax.persistence.{Entity, FetchType, JoinColumn, ManyToOne}
 import org.hibernate.annotations.Type
 import uk.ac.warwick.tabula.AcademicYear
 import uk.ac.warwick.tabula.JavaImports._
+import uk.ac.warwick.tabula.data.model.StudentCourseYearDetails.YearOfStudy
+import uk.ac.warwick.tabula.services.ModuleRegistrationService
+
+import scala.collection.mutable
 
 @Entity
 class CoreRequiredModule extends GeneratedId {
@@ -22,12 +26,23 @@ class CoreRequiredModule extends GeneratedId {
 	var route: Route = _
 
 	@Type(`type` = "uk.ac.warwick.tabula.data.model.AcademicYearUserType")
-	var academicYear: AcademicYear = null
+	var academicYear: AcademicYear = _
 
 	var yearOfStudy: JInteger = _
 
 	@ManyToOne(fetch = FetchType.LAZY)
 	@JoinColumn(name="moduleCode", referencedColumnName="code")
-	var module: Module = null
+	var module: Module = _
 
+}
+
+class CoreRequiredModuleLookup(academicYear: AcademicYear, yearOfStudy: YearOfStudy, moduleRegistrationService: ModuleRegistrationService) {
+	private val cache = mutable.Map[Route, Seq[CoreRequiredModule]]()
+	def apply(route: Route): Seq[CoreRequiredModule] = cache.get(route) match {
+		case Some(modules) =>
+			modules
+		case _ =>
+			cache.put(route, moduleRegistrationService.findCoreRequiredModules(route, academicYear, yearOfStudy))
+			cache(route)
+	}
 }

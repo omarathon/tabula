@@ -95,14 +95,15 @@ abstract class ModuleExamGridColumnOption extends PerYearExamGridColumnOption {
 
 	def Column(state: ExamGridColumnState, module: Module, cats: JBigDecimal): ModuleExamGridColumn
 
-	def moduleRegistrationFilter(mr: ModuleRegistration, state: ExamGridColumnState): Boolean
+	def moduleRegistrationFilter(mr: ModuleRegistration, coreRequiredModules: Seq[Module]): Boolean
 
 	override final def getColumns(state: ExamGridColumnState): Map[YearOfStudy, Seq[PerYearExamGridColumn]] = {
 		state.entities.flatMap(_.years.keys).distinct.map(academicYear => academicYear -> {
-			state.entities.flatMap(_.years.get(academicYear))
-				.flatMap(_.moduleRegistrations)
-				.filter(moduleRegistrationFilter(_, state))
-				.groupBy(mr => (mr.module, mr.cats))
+			val years = state.entities.flatMap(_.years.get(academicYear))
+			years.flatMap { entityYear =>
+				val coreRequiredModules = state.coreRequiredModuleLookup(entityYear.route).map(_.module)
+				entityYear.moduleRegistrations.filter(moduleRegistrationFilter(_, coreRequiredModules))
+			}.groupBy(mr => (mr.module, mr.cats))
 				.keySet
 				.toSeq.sortBy { case (module, cats) => (module, cats) }
 				.map{ case (module, cats) => Column(state, module, cats)}
@@ -129,8 +130,8 @@ class CoreModulesColumnOption extends ModuleExamGridColumnOption {
 
 	override def Column(state: ExamGridColumnState, module: Module, cats: JBigDecimal): ModuleExamGridColumn = new Column(state, module, cats)
 
-	override def moduleRegistrationFilter(mr: ModuleRegistration, state: ExamGridColumnState): Boolean =
-		mr.selectionStatus == ModuleSelectionStatus.Core && !state.coreRequiredModules.contains(mr.module)
+	override def moduleRegistrationFilter(mr: ModuleRegistration, coreRequiredModules: Seq[Module]): Boolean =
+		mr.selectionStatus == ModuleSelectionStatus.Core && !coreRequiredModules.contains(mr.module)
 
 }
 
@@ -151,8 +152,8 @@ class CoreRequiredModulesColumnOption extends ModuleExamGridColumnOption {
 
 	override def Column(state: ExamGridColumnState, module: Module, cats: JBigDecimal): ModuleExamGridColumn = new Column(state, module, cats)
 
-	override def moduleRegistrationFilter(mr: ModuleRegistration, state: ExamGridColumnState): Boolean =
-		state.coreRequiredModules.contains(mr.module)
+	override def moduleRegistrationFilter(mr: ModuleRegistration, coreRequiredModules: Seq[Module]): Boolean =
+		coreRequiredModules.contains(mr.module)
 
 }
 
@@ -173,8 +174,8 @@ class CoreOptionalModulesColumnOption extends ModuleExamGridColumnOption {
 
 	override def Column(state: ExamGridColumnState, module: Module, cats: JBigDecimal): ModuleExamGridColumn = new Column(state, module, cats)
 
-	override def moduleRegistrationFilter(mr: ModuleRegistration, state: ExamGridColumnState): Boolean =
-		mr.selectionStatus == ModuleSelectionStatus.OptionalCore && !state.coreRequiredModules.contains(mr.module)
+	override def moduleRegistrationFilter(mr: ModuleRegistration, coreRequiredModules: Seq[Module]): Boolean =
+		mr.selectionStatus == ModuleSelectionStatus.OptionalCore && !coreRequiredModules.contains(mr.module)
 
 }
 
@@ -195,7 +196,7 @@ class OptionalModulesColumnOption extends ModuleExamGridColumnOption {
 
 	override def Column(state: ExamGridColumnState, module: Module, cats: JBigDecimal): ModuleExamGridColumn = new Column(state, module, cats)
 
-	override def moduleRegistrationFilter(mr: ModuleRegistration, state: ExamGridColumnState): Boolean =
-		mr.selectionStatus == ModuleSelectionStatus.Option && !state.coreRequiredModules.contains(mr.module)
+	override def moduleRegistrationFilter(mr: ModuleRegistration, coreRequiredModules: Seq[Module]): Boolean =
+		mr.selectionStatus == ModuleSelectionStatus.Option && !coreRequiredModules.contains(mr.module)
 
 }

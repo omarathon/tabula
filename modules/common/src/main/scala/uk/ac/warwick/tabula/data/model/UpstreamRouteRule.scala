@@ -5,7 +5,11 @@ import javax.persistence._
 import org.hibernate.annotations.{BatchSize, Type}
 import uk.ac.warwick.tabula.AcademicYear
 import uk.ac.warwick.tabula.JavaImports._
+import uk.ac.warwick.tabula.data.model.StudentCourseYearDetails.YearOfStudy
+import uk.ac.warwick.tabula.services.UpstreamRouteRuleService
+
 import collection.JavaConverters._
+import scala.collection.mutable
 
 /**
 	* Tabula store for a Pathway Module Rule (CAM_PMR) from SITS.
@@ -47,4 +51,15 @@ class UpstreamRouteRule extends GeneratedId {
 		entries.asScala.forall(_.passes(moduleRegistrations))
 	}
 
+}
+
+class UpstreamRouteRuleLookup(academicYear: AcademicYear, yearOfStudy: YearOfStudy, upstreamRouteRuleService: UpstreamRouteRuleService) {
+	private val cache = mutable.Map[Route, Seq[UpstreamRouteRule]]()
+	def apply(route: Route): Seq[UpstreamRouteRule] = cache.get(route) match {
+		case Some(rules) =>
+			rules
+		case _ =>
+			cache.put(route, upstreamRouteRuleService.list(route, academicYear, yearOfStudy))
+			cache(route)
+	}
 }
