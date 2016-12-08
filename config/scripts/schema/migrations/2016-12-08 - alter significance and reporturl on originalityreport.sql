@@ -1,0 +1,7 @@
+--TAB-4767
+alter table ORIGINALITYREPORT MODIFY (
+  SIGNIFICANCE FLOAT(10)
+);
+alter table ORIGINALITYREPORT MODIFY (
+  reporturl nvarchar2(500)
+);
