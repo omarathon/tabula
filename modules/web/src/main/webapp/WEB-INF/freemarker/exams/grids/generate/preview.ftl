@@ -344,6 +344,7 @@
 		var $form = $('form.exam-grid-preview'), $confirmModal = $('#confirmModal');
 		$('a.confirm', $confirmModal).on('click', function() {
 			$form.submit();
+			$confirmModal.modal('hide');
 		});
 		$('.download-options').on('click', 'button', function(e) {
 			e.preventDefault();

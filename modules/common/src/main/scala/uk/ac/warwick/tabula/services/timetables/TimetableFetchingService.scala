@@ -152,8 +152,10 @@ trait CombinedHttpTimetableFetchingServiceComponent extends CompleteTimetableFet
 class CombinedTimetableFetchingService(services: PartialTimetableFetchingService*) extends CompleteTimetableFetchingService with Logging {
 
 	private def mergeDuplicates(events: EventList): EventList = {
-		// If an event runs on the same day, between the same times, in the same weeks, of the same type, on the same module, it is the same
-		events.map(events => events.groupBy { event => (event.year, event.day, event.startTime, event.endTime, event.weekRanges, event.eventType, event.parent.shortName) }
+		// If an event runs on the same day, between the same times, in the same weeks, of the same type, on the same module,
+		// in the same location, with the same tutors, it is the same
+		events.map(events => events.groupBy { event => (event.year, event.day, event.startTime, event.endTime, event.weekRanges,
+			event.eventType, event.parent.shortName, event.location, event.staff) }
 			.mapValues {
 				case event :: Nil => event
 				case groupedEvents =>

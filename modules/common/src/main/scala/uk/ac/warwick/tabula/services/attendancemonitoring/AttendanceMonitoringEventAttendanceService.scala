@@ -213,7 +213,7 @@ abstract class AbstractAttendanceMonitoringEventAttendanceService extends Attend
 		}
 	}
 
-	//used same logic that we have used in findAttendanceForDates
+	// used same logic that we have used in findAttendanceForDates
 	private def findEventOccurrencesForDates(
 		startDate: LocalDate,
 		endDate: LocalDate,
@@ -225,13 +225,13 @@ abstract class AbstractAttendanceMonitoringEventAttendanceService extends Attend
 		val endWeek = termService.getAcademicWeekForAcademicYear(endDate.toDateTimeAtStartOfDay, academicYear)
 		val weekOccurrences = (modules match {
 			case Nil => smallGroupService.findOccurrencesInWeeks(startWeek, endWeek, academicYear)
-			case someModules => smallGroupService.findOccurrencesInModulesInWeeks(startWeek, endWeek, modules, academicYear)
+			case _ => smallGroupService.findOccurrencesInModulesInWeeks(startWeek, endWeek, modules, academicYear)
 
-		}).filter(_.event.group.students.includesUser(MemberOrUser(student).asUser))
+		}).filter(_.event.group.groupSet.showAttendanceReports).filter(_.event.group.students.includesUser(MemberOrUser(student).asUser))
 
-		//logic similar to findAttendanceForDates
+		// logic similar to findAttendanceForDates
 		// weekAttendances may contain attendance before the startDate and after the endDate, so filter those out
-		// don't need to filter if the startDate is a MOnday and the endDate is a Sunday, as that's the whole week
+		// don't need to filter if the startDate is a Monday and the endDate is a Sunday, as that's the whole week
 		if (startDate.getDayOfWeek == DayOfWeek.Monday.jodaDayOfWeek && endDate.getDayOfWeek == DayOfWeek.Sunday.jodaDayOfWeek) {
 			weekOccurrences
 		} else {

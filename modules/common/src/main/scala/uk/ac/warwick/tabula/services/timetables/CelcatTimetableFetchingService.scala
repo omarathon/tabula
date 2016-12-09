@@ -415,7 +415,10 @@ class CelcatHttpTimetableFetchingService(celcatConfiguration: CelcatConfiguratio
 	def parseJSON(incomingJson: String): EventList = {
 		JSON.parseFull(incomingJson) match {
 			case Some(jsonData: List[Map[String, Any]]@unchecked) =>
-				EventList.fresh(jsonData.flatMap { event =>
+				EventList.fresh(jsonData.filterNot { event =>
+					// TAB-4754 These lectures are already in Syllabus+ so we don't include them again
+					event("contactType") == "L" && event("lectureStreamCount") == 1
+				}.flatMap { event =>
 					val start = DateFormats.IsoDateTime.parseDateTime(event.getOrElse("start", "").toString)
 					val end = DateFormats.IsoDateTime.parseDateTime(event.getOrElse("end", "").toString)
 					val year = AcademicYear.findAcademicYearContainingDate(start)
@@ -459,7 +462,6 @@ class CelcatHttpTimetableFetchingService(celcatConfiguration: CelcatConfiguratio
 						relatedUrl = None
 					))
 				})
-
 			case _ => throw new RuntimeException("Could not parse JSON")
 		}
 	}

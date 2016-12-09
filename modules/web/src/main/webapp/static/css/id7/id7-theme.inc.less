@@ -1,5 +1,5 @@
 .apply-brand(#333333);
-.apply-site-imagery('../../images/id7');
+.apply-site-imagery('../../images/id7','masthead-image.png','border-image-left.png','border-image-right.png');
 .link-colour(#3C5E7F);
 .btn-brand {
 	.button-variant(contrast(#666, @text-color, white, 50%); #666; darken(#666, 5%));
@@ -33,11 +33,11 @@
 
 /** This needs to be sent to the compile server as it won't compile with the Ant plugin **/
 .cog {
-	@cog-width: 9px;
-	@cog-height: 38px;
-	@cog-top: 616px;
+	@cog-width: 25px;
+	@cog-height: 81px;
+	@cog-top: 599px;
 	display: none;
-	background: url(../../images/id7/cog.png) no-repeat;
+	background: url(../../images/id7/cog2.png) no-repeat;
 	width: @cog-width;
 	height: @cog-height;
 	position: fixed;
@@ -45,15 +45,15 @@
 	left: 50%;
 	@media (min-width: @screen-sm-min) {
 		display: block;
-		margin-left: @container-tablet / 2 * -1;
+		margin-left: @container-tablet / 2 * -1 - 1;
 	}
 	@media (min-width: @screen-md-min) {
 		display: block;
-		margin-left: @container-desktop / 2 * -1;
+		margin-left: @container-desktop / 2 * -1 - 1;
 	}
 	@media (min-width: @screen-lg-min) {
 		display: block;
-		margin-left: @container-large-desktop / 2 * -1;
+		margin-left: @container-large-desktop / 2 * -1 - 1;
 	}
 
 	.fix-cog-for-large-screen-border-image-sizes(@step: 160) {
