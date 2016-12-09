@@ -337,7 +337,7 @@
 					degree classifications are 'reserved'.
 				</p>
 				<p>
-					When you download a grid as a spreadsheet, you are responsible for managing the security of the
+					When you download the data provided you are responsible for managing the security of the
 					information within it. You agree to abide by the University's <a target='_blank' href='http://www2.warwick.ac.uk/services/legalservices/dataprotection/'>
 						Data Protection Policy
 					<a> and the mandatory working practices for <a target='_blank' href='http://www2.warwick.ac.uk/services/gov/informationsecurity/working_practices/assets_protection/'>
