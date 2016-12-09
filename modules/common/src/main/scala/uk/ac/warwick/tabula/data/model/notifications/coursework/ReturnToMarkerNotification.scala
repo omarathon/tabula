@@ -58,7 +58,7 @@ class ReturnToMarkerNotification
 
 	def title = s"${assignment.module.code.toUpperCase}: Submissions for ${assignment.name} have been returned to you"
 
-	def content = FreemarkerModel(ReleaseToMarkerNotification.templateLocation,
+	def content = FreemarkerModel(ReturnToMarkerNotification.templateLocation,
 		Map(
 			"assignment" -> assignment,
 			"numReleasedFeedbacks" -> items.size,
