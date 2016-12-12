@@ -24,17 +24,23 @@ class DownloadFileByTokenCommandInternal (
 		val submission: Submission,
 		val fileAttachment: FileAttachment,
 		val token: FileAttachmentToken
-) extends CommandInternal[RenderableFile] {
+) extends CommandInternal[RenderableFile] with Logging {
 
 	self: DownloadFileByTokenCommandState with OriginalityReportServiceComponent =>
 
 	override def applyInternal(): RenderableAttachment = {
 		val attachment = new RenderableAttachment(fileAttachment)
 		token.dateUsed = new DateTime()
-		if (fileAttachment.originalityReport != null) {
-			fileAttachment.originalityReport.fileRequested = DateTime.now
-			originalityReportService.saveOrUpdate(fileAttachment.originalityReport)
-		}
+		val reportOption = Option(fileAttachment.originalityReport).orElse(
+			originalityReportService.getOriginalityReportByFileId(fileAttachment.id)
+		)
+		reportOption.map { report =>
+			report.fileRequested = DateTime.now
+			originalityReportService.saveOrUpdate(report)
+			report
+		}.getOrElse(
+			logger.warn(s"Could not find originality report from file attachment ${fileAttachment.id}. This report will have a null fileRequested date.")
+		)
 		attachment
 	}
 
