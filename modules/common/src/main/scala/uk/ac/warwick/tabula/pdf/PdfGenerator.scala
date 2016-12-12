@@ -21,6 +21,8 @@ import uk.ac.warwick.tabula.data.FileDaoComponent
 import uk.ac.warwick.tabula.data.Transactions._
 import uk.ac.warwick.tabula.data.model.FileAttachment
 
+import scala.util.Try
+
 trait PdfGenerator {
 	def renderTemplate(templateId: String, model: Any, out: OutputStream)
 }
@@ -125,8 +127,8 @@ class ProfileImageReplacedElementFactory(delegate: ReplacedElementFactory) exten
 				.filter { el => "img".equals(el.getNodeName) && el.hasAttribute("data-universityid") }
 				.flatMap { el => profileService.getMemberByUniversityId(el.getAttribute("data-universityid"), disableFilter=true) }
 				.flatMap { m =>
-					val url = new URL(photoUrl(Option(m)))
-					val image = Image.getInstance(url)
+					val url = new URL(photoUrl(Some(m)))
+					val image = Try(Image.getInstance(url)).getOrElse(Image.getInstance(DEFAULT_IMAGE))
 					Option(new ITextFSImage(image))
 				}
 				.map { fsImage =>
