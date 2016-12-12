@@ -9,6 +9,7 @@ trait ServesPhotosFromExternalApplication {
 	val THUMBNAIL_SIZE = "thumbnail"
 	val TINYTHUMBNAIL_SIZE = "tinythumbnail"
 	val ACTUAL_SIZE = "actual"
+	val DEFAULT_IMAGE = "/static/images/no-photo.jpg"
 
 	var size: String = ACTUAL_SIZE
 
@@ -21,9 +22,7 @@ trait ServesPhotosFromExternalApplication {
 				case TINYTHUMBNAIL_SIZE => new UriBuilder(baseUri).addQueryParameter("s", "40").toString
 				case _ => baseUri.toString
 			}
-		}.getOrElse {
-			"/static/images/no-photo.jpg" // TODO no resizing
-		}
+		}.getOrElse(DEFAULT_IMAGE) // TODO no resizing
 	}
 
 }
