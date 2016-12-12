@@ -331,10 +331,8 @@
 			<div class='modal-body'>
 				<p>
 					Exam grids contain restricted information. Under the University's
-					<a target='_blank' href='http://www2.warwick.ac.uk/services/gov/informationsecurity/handling/classifications'>
-						information classification scheme
-					</a>, student names and University IDs are 'protected', exam marks are 'restricted' and provisional
-					degree classifications are 'reserved'.
+					<a target='_blank' href='http://www2.warwick.ac.uk/services/gov/informationsecurity/handling/classifications'>information classification scheme</a>,
+					student names and University IDs are 'protected', exam marks are 'restricted' and provisional degree classifications are 'reserved'.
 				</p>
 				<p>
 					When you download the data provided you are responsible for managing the security of the
