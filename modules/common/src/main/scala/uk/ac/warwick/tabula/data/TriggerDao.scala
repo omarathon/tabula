@@ -18,7 +18,7 @@ trait AutowriringTriggerDaoComponent extends TriggerDaoComponent{
 trait TriggerDao {
 	def triggersToRun(limit: Int): Seq[Trigger[_  >: Null <: ToEntityReference, _]]
 	def save(trigger: Trigger[_  >: Null <: ToEntityReference, _]): Unit
-	def getTriggers(entity: Any): Seq[Trigger[_  >: Null <: ToEntityReference, _]]
+	def getUncompletedTriggers(entity: Any): Seq[Trigger[_  >: Null <: ToEntityReference, _]]
 	def delete(trigger: Trigger[_  >: Null <: ToEntityReference, _]): Unit
 }
 
@@ -38,7 +38,7 @@ class TriggerDaoImpl extends TriggerDao with Daoisms {
 		session.saveOrUpdate(trigger)
 	}
 
-	override def getTriggers(entity: Any): Seq[Trigger[_ >: Null <: ToEntityReference, _]] = {
+	override def getUncompletedTriggers(entity: Any): Seq[Trigger[_ >: Null <: ToEntityReference, _]] = {
 		val targetEntity = entity match {
 			case ref: ToEntityReference => ref.toEntityReference.entity
 			case _ => entity
@@ -46,6 +46,7 @@ class TriggerDaoImpl extends TriggerDao with Daoisms {
 		session.newCriteria[Trigger[_  >: Null <: ToEntityReference, _]]
 			.createAlias("target", "target")
 			.add(Restrictions.eq("target.entity", targetEntity))
+			.add(Restrictions.isNull("completedDate"))
 			.addOrder(Order.asc("scheduledDate"))
 			.seq
 	}
