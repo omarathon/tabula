@@ -49,7 +49,7 @@ trait RelationshipService {
 	def findCurrentRelationships(relationshipType: StudentRelationshipType, student: StudentMember): Seq[StudentRelationship]
 	def getCurrentRelationship(relationshipType: StudentRelationshipType, student: StudentMember, agent: Member): Option[StudentRelationship]
 	def getCurrentRelationships(student: StudentMember, agentId: String): Seq[StudentRelationship]
-
+	def getRelationships(relationshipType: StudentRelationshipType, studentCourseDetails:StudentCourseDetails): Seq[StudentRelationship]
 	def getRelationships(relationshipType: StudentRelationshipType, student: StudentMember): Seq[StudentRelationship]
 	def saveStudentRelationships(
 		relationshipType: StudentRelationshipType,
@@ -130,6 +130,10 @@ abstract class AbstractRelationshipService extends RelationshipService with Logg
 
 	def getAllPastAndPresentRelationships(relationshipType: StudentRelationshipType, scd: StudentCourseDetails): Seq[StudentRelationship] = transactional(readOnly = true) {
 		relationshipDao.getAllPastAndPresentRelationships(relationshipType, scd)
+	}
+
+	def getRelationships(relationshipType: StudentRelationshipType, studentCourseDetails:StudentCourseDetails): Seq[StudentRelationship] = transactional(readOnly = true) {
+		relationshipDao.getRelationshipsByCourseDetails(relationshipType, studentCourseDetails)
 	}
 
 	def getRelationships(relationshipType: StudentRelationshipType, student: StudentMember): Seq[StudentRelationship] = transactional(readOnly = true) {

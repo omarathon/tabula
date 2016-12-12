@@ -35,7 +35,7 @@ class ViewMeetingRecordCommandInternal(
 	this: ProfileServiceComponent with RelationshipServiceComponent with MeetingRecordServiceComponent =>
 
 	def applyInternal(): Seq[AbstractMeetingRecord] = {
-		val rels = relationshipService.getRelationships(relationshipType, studentCourseDetails.student)
+		val rels = relationshipService.getRelationships(relationshipType, studentCourseDetails)
 		meetingRecordService.listAll(rels.toSet, currentMember)
 	}
 }
