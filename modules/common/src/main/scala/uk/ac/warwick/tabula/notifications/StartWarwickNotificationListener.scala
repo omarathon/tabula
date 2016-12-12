@@ -2,6 +2,7 @@ package uk.ac.warwick.tabula.notifications
 
 import com.fasterxml.jackson.databind.ObjectMapper
 import dispatch.classic.url
+import org.hibernate.ObjectNotFoundException
 import org.springframework.stereotype.Component
 import uk.ac.warwick.spring.Wire
 import uk.ac.warwick.tabula._
@@ -22,7 +23,7 @@ trait StartWarwickNotificationListener extends NotificationListener {
 
 	@transient var json: ObjectMapper = JsonObjectMapperFactory.instance
 
-	private def toStartActivity(notification: Notification[_ >: Null <: ToEntityReference, _]): Option[Map[String, Any]] = {
+	private def toStartActivity(notification: Notification[_ >: Null <: ToEntityReference, _]): Option[Map[String, Any]] = try {
 		val recipients = notification.recipientNotificationInfos.asScala
 			.filterNot(_.dismissed) // Not if the user has dismissed the notificaiton already
 			.map(_.recipient)
@@ -59,6 +60,9 @@ trait StartWarwickNotificationListener extends NotificationListener {
 				)
 			))
 		}
+	} catch {
+		// referenced entity probably missing, oh well.
+		case e: ObjectNotFoundException => None
 	}
 
 	private def postActivity(notification: Notification[_ >: Null <: ToEntityReference, _]): Future[Option[String]] = {
