@@ -1,10 +1,11 @@
 package uk.ac.warwick.tabula.data.model.notifications
 
-import javax.persistence.{Id, Column, JoinColumn, ManyToOne, Entity}
-import uk.ac.warwick.tabula.data.model.{GeneratedId, IdEquality, Notification}
+import javax.persistence.{Column, Entity, JoinColumn, ManyToOne}
+
+import uk.ac.warwick.tabula.data.model.{GeneratedId, Notification}
 import org.hibernate.annotations.Type
+import org.joda.time.DateTime
 import uk.ac.warwick.userlookup.User
-import scala.beans.BeanProperty
 
 /**
  * Used to store properties against each recipient notification pair such as if an email has been sent to
@@ -33,5 +34,7 @@ class RecipientNotificationInfo extends GeneratedId {
 
 	@Column(name="email_sent", nullable=false)
 	var emailSent: Boolean = false
+
+	var attemptedAt: DateTime = null
 
 }

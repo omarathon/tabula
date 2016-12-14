@@ -4,10 +4,11 @@ import java.util.concurrent.{ExecutionException, TimeUnit, TimeoutException}
 import javax.mail.internet.MimeMessage
 
 import org.hibernate.ObjectNotFoundException
+import org.joda.time.DateTime
 import org.springframework.stereotype.Component
 import uk.ac.warwick.spring.Wire
 import uk.ac.warwick.tabula.data.model.notifications.RecipientNotificationInfo
-import uk.ac.warwick.tabula.data.model.{ActionRequiredNotification, HasNotificationAttachment, FreemarkerModel, Notification}
+import uk.ac.warwick.tabula.data.model.{ActionRequiredNotification, FreemarkerModel, HasNotificationAttachment, Notification}
 import uk.ac.warwick.tabula.helpers.StringUtils._
 import uk.ac.warwick.tabula.helpers.{Logging, UnicodeEmails}
 import uk.ac.warwick.tabula.services.{NotificationService, RecipientNotificationListener}
@@ -72,10 +73,9 @@ class EmailNotificationListener extends RecipientNotificationListener with Unico
 				body.append(mailFooter)
 				body.append(replyWarning)
 				message.setText(body.toString())
-
-				// TODO I'm sure this can be pattern matched. but I can't get around the type checking
-				if (notification.isInstanceOf[HasNotificationAttachment])
-					notification.asInstanceOf[HasNotificationAttachment].generateAttachments(message)
+				notification match {
+					case n: HasNotificationAttachment => n.generateAttachments(message)
+				}
 			})
 		} catch {
 			// referenced entity probably missing, oh well.
@@ -112,10 +112,8 @@ class EmailNotificationListener extends RecipientNotificationListener with Unico
 						val future = mailSender.send(message)
 						try {
 							val successful = future.get(30, TimeUnit.SECONDS)
-
 							if (successful) {
 								recipientInfo.emailSent = true
-								service.save(recipientInfo)
 							}
 						} catch {
 							case e: TimeoutException =>
@@ -123,6 +121,15 @@ class EmailNotificationListener extends RecipientNotificationListener with Unico
 								future.cancel(true)
 							case e@(_: ExecutionException | _: InterruptedException) =>
 								logger.warn("Could not send email ${message}, will try later", e)
+						} finally {
+							/* TAB-4544 log the time at which we tried to send this notification and save
+									* gives us more info for diagnostics
+									* allows us to see which mails were cancelled (time attempted = null but sent is true)
+									* stops us from trying to send the same notification again and again if sending fails
+									 * (don't send ones that we tried to send in the last 5 mins or so)
+							 */
+							recipientInfo.attemptedAt = DateTime.now
+							service.save(recipientInfo)
 						}
 					case None =>
 						logger.warn(s"Couldn't send email for Notification because object no longer exists: $recipientInfo")

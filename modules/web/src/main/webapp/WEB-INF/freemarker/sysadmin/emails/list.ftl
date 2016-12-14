@@ -16,6 +16,7 @@
 				<th>Created</th>
 				<th>Subject</th>
 				<th>User</th>
+				<th>Attempted to send</th>
 				<th>Status</th>
 			</tr>
 			</thead>
@@ -34,6 +35,13 @@
 							<#if email.recipient.foundUser>
 								${email.recipient.userId}<br>
 								<span class="very-subtle">${email.recipient.email}</span>
+							</#if>
+						</td>
+						<td>
+							<#if email.attemptedAt?? >
+								<@fmt.date date=email.attemptedAt seconds=true />
+							<#else>
+								Never
 							</#if>
 						</td>
 						<td>
