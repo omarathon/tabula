@@ -16,7 +16,7 @@
 				<th>Created</th>
 				<th>Subject</th>
 				<th>User</th>
-				<th>Attempted to send</th>
+				<th>Last attempted to send</th>
 				<th>Status</th>
 			</tr>
 			</thead>
