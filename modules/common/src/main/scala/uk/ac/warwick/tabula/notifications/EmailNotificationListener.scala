@@ -75,6 +75,7 @@ class EmailNotificationListener extends RecipientNotificationListener with Unico
 				message.setText(body.toString())
 				notification match {
 					case n: HasNotificationAttachment => n.generateAttachments(message)
+					case _ => () // do nothing
 				}
 			})
 		} catch {
