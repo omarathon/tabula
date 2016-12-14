@@ -51,7 +51,7 @@ class NotificationDaoImpl extends NotificationDao with Daoisms {
 
 		val notAttemptedRecently = disjunction()
 			.add(isNull("attemptedAt"))
-			.add(lt("attemptedAt", DateTime.now.minusMinutes(RETRY_DELAY_MINUTES)))
+			.add(lt("attemptedAt", DateTime.now.minusMinutes(NotificationDao.RETRY_DELAY_MINUTES)))
 
 		session.newCriteria[RecipientNotificationInfo]
 			.createAlias("notification", "notification")
