@@ -234,7 +234,7 @@
 		$('form.select-course .filters').on('change', function(e) {
 			updateFilter($(e.target));
 		});
-		jQuery('form.select-course .filters .filter-list').find('input:first').trigger('change');
+		$('form.select-course .filters .filter-list').find('input:first').trigger('change');
 
 		// Re-order elements inside the dropdown when opened
 		$('.filter-list').closest('.btn-group').find('.dropdown-toggle').on('click.dropdown.data-api', function(e) {
