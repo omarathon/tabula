@@ -21,6 +21,8 @@ class ViewProfileMarkingController extends AbstractViewProfileController {
 		mandatory(member) match {
 			case student: StudentMember if student.mostSignificantCourseDetails.isDefined =>
 				viewByCourse(student.mostSignificantCourseDetails.get, activeAcademicYear)
+			case student: StudentMember if student.freshOrStaleStudentCourseDetails.nonEmpty =>
+				viewByCourse(student.freshOrStaleStudentCourseDetails.lastOption.get, activeAcademicYear)
 			case _ =>
 				commonView(member).crumbs(breadcrumbsStaff(member, ProfileBreadcrumbs.Profile.MarkingIdentifier): _*)
 		}

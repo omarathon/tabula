@@ -42,18 +42,19 @@ abstract class AbstractViewProfileController extends ProfilesController
 	// Only do this once per request
 	protected def scydToSelect(scd: StudentCourseDetails, activeAcademicYear: Option[AcademicYear]): Option[StudentCourseYearDetails] =
 		cachedBy(s"scydToSelect-${scd.id}") {
-			scd.student.freshStudentCourseDetails.flatMap(_.freshStudentCourseYearDetails) match {
+			val scyds = scd.freshStudentCourseYearDetails match {
 				case Nil =>
-					None
-				case scyds =>
-					val thisAcademicYear = activeAcademicYear.getOrElse(AcademicYear.guessSITSAcademicYearByDate(DateTime.now))
-					Option(scd.freshStudentCourseYearDetails.find(_.academicYear == thisAcademicYear).getOrElse {
-						if (thisAcademicYear > scd.freshStudentCourseYearDetails.last.academicYear)
-							scd.freshStudentCourseYearDetails.last
-						else
-							scd.freshStudentCourseYearDetails.head
-					})
+					scd.freshOrStaleStudentCourseYearDetails
+				case fresh =>
+					fresh
 			}
+			val thisAcademicYear = activeAcademicYear.getOrElse(AcademicYear.guessSITSAcademicYearByDate(DateTime.now))
+			Option(scyds.find(_.academicYear == thisAcademicYear).getOrElse {
+				if (thisAcademicYear > scyds.last.academicYear)
+					scyds.last
+				else
+					scyds.head
+			})
 		} match {
 			case scyd: Option[StudentCourseYearDetails]@unchecked => scyd
 			case _ => throw new UnsupportedOperationException("Not a Option[StudentCourseYearDetails]")
@@ -95,7 +96,12 @@ abstract class AbstractViewProfileController extends ProfilesController
 
 	protected def secondBreadcrumbs(activeAcademicYear: Option[AcademicYear], scd: StudentCourseDetails)(urlGenerator: (StudentCourseYearDetails) => String): Seq[BreadCrumb] = {
 		scydToSelect(scd, activeAcademicYear).map(chooseScyd => {
-			val scyds = scd.student.freshStudentCourseDetails.flatMap(_.freshStudentCourseYearDetails)
+			val scyds = scd.student.freshStudentCourseDetails.flatMap(_.freshStudentCourseYearDetails) match {
+				case Nil =>
+					scd.student.freshOrStaleStudentCourseDetails.flatMap(_.freshOrStaleStudentCourseYearDetails)
+				case fresh =>
+					fresh
+			}
 			scyds.map(scyd =>
 				BaseBreadcumbs.Standard(
 					title = "%s %s".format(scyd.studentCourseDetails.course.code, scyd.academicYear.getLabel),
@@ -106,7 +112,7 @@ abstract class AbstractViewProfileController extends ProfilesController
 					)
 				).setActive(scyd == chooseScyd)
 			)
-		}).getOrElse(Nil)
+		}).getOrElse(Nil).toSeq
 	}
 
 	@ModelAttribute("activeAcademicYear")

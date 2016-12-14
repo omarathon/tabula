@@ -12,7 +12,7 @@ class StudentCourseDetailsConverter extends TwoWayConverter[String, StudentCours
 	// parse
 	override def convertRight(scjCode: String): StudentCourseDetails = {
 		val scjCodeDecoded = scjCode.replace("_","/")
-		service.getByScjCode(scjCodeDecoded).orNull
+		service.getByScjCode(scjCodeDecoded).orElse(service.getByScjCodeStaleOrFresh(scjCodeDecoded)).orNull
 	}
 
 	// print

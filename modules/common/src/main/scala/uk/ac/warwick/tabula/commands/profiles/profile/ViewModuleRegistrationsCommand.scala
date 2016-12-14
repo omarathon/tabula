@@ -1,6 +1,6 @@
 package uk.ac.warwick.tabula.commands.profiles.profile
 
-import uk.ac.warwick.tabula.AcademicYear
+import uk.ac.warwick.tabula.{AcademicYear, ItemNotFoundException}
 import uk.ac.warwick.tabula.commands._
 import uk.ac.warwick.tabula.data.model._
 import uk.ac.warwick.tabula.permissions.Permissions.Profiles
@@ -18,7 +18,9 @@ class ViewModuleRegistrationsCommandInternal(val studentCourseDetails: StudentCo
 	extends CommandInternal[Seq[ModuleRegistration]] with ViewModuleRegistrationsCommandState {
 
 	def applyInternal(): Seq[ModuleRegistration] = {
-		studentCourseYearDetails = studentCourseDetails.freshStudentCourseYearDetails.filter(_.academicYear == academicYear).seq.head
+		studentCourseYearDetails = studentCourseDetails.freshStudentCourseYearDetails.find(_.academicYear == academicYear).orElse(
+			studentCourseDetails.freshOrStaleStudentCourseYearDetails.find(_.academicYear == academicYear)
+		).getOrElse(throw new ItemNotFoundException())
 		studentCourseYearDetails.moduleRegistrations
 	}
 }
