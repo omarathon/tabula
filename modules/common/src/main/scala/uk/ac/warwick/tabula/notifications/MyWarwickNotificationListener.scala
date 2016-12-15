@@ -52,7 +52,7 @@ trait MyWarwickNotificationListener extends NotificationListener {
 			val activity = new Activity(
 				recipients.toSet.asJava,
 				notification.title,
-				"https://%s%s".format(Wire.property("${toplevel.url}"), notification.url),
+				Wire.property("${toplevel.url}") + notification.url,
 				textRenderer.renderTemplate(notification.content.template, notification.content.model),
 				notification.notificationType
 			)
@@ -66,16 +66,12 @@ trait MyWarwickNotificationListener extends NotificationListener {
 		case e: ObjectNotFoundException => None
 	}
 
-	private def postActivity(notification: Notification[_ >: Null <: ToEntityReference, _]): Future[Unit] = {
+	private def postActivity(notification: Notification[_ >: Null <: ToEntityReference, _]): Unit = {
 		val send = notification.notificationType match {
 			case "SubmissionReceipt" => myWarwickService.sendAsActivity(_: Activity)
 			case _ => myWarwickService.sendAsNotification(_: Activity)
 		}
-
-		toMyWarwickActivity(notification) match {
-			case Some(activity) => Future(send(activity)).map(_ -> Unit)
-			case None => Future.successful(())
-		}
+		toMyWarwickActivity(notification).map(send)
 	}
 
 	override def listen(notification: Notification[_ >: Null <: ToEntityReference, _]): Unit = {
