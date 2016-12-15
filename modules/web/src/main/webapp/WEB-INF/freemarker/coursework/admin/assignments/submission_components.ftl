@@ -45,7 +45,7 @@
 		Source count: ${r.sourceCount}<br>
 	</p>
 	<p>
-		<a target="urkund-viewer" href="${r.reportUrl}">View full report</a>
+		<a target="_blank" href="${r.reportUrl}">View full report</a>
 	</p>
 </div>
 <script type="text/javascript">
