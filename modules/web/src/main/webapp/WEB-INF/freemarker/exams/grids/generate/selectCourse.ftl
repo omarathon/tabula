@@ -99,7 +99,14 @@
 		</@filter>
 
 		<#assign placeholder = "All routes" />
-		<#assign currentfilter><@current_filter_value "selectCourseCommand.routes" placeholder; route>${route.code?upper_case}</@current_filter_value></#assign>
+
+		<#assign currentfilter><#compress><@current_filter_value "selectCourseCommand.routes" placeholder; route>
+			<#if route?is_sequence>
+				<#list route as r>${r.code?upper_case}<#if r_has_next>, </#if></#list>
+			<#else>
+				${route.code?upper_case}
+			</#if>
+		</@current_filter_value></#compress></#assign>
 		<@filter "selectCourseCommand.routes" placeholder currentfilter selectCourseCommand.allRoutes; route>
 			<label class="checkbox">
 				<input type="checkbox" name="${status.expression}" value="${route.code}" data-short-value="${route.code?upper_case}"
