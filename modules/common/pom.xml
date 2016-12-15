@@ -226,7 +226,7 @@
 		<dependency>
 			<groupId>uk.ac.warwick.util</groupId>
 			<artifactId>warwickutils-mywarwick</artifactId>
-			<version>20161202-1402</version>
+			<version>${warwickutils.version}</version>
 		</dependency>
 
 		<dependency>

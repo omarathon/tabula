@@ -35,7 +35,7 @@
 		<org.apache.poi.version>3.13</org.apache.poi.version>
 		<org.apache.tiles.version>3.0.5</org.apache.tiles.version>
 		<org.apache.jclouds.version>2.0.0-alpha.1</org.apache.jclouds.version>
-		<warwickutils.version>20161122</warwickutils.version>
+		<warwickutils.version>20161202-1402</warwickutils.version>
 		<surefire.version>2.19.1</surefire.version>
 		<recompileMode><!-- incremental --></recompileMode>
 
