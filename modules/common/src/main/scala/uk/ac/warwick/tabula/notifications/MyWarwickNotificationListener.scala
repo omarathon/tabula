@@ -6,20 +6,17 @@ import org.hibernate.ObjectNotFoundException
 import org.springframework.stereotype.Component
 import uk.ac.warwick.spring.Wire
 import uk.ac.warwick.tabula._
-import uk.ac.warwick.tabula.data.model.{Notification, NotificationWithTarget, ToEntityReference}
+import uk.ac.warwick.tabula.data.model.{FreemarkerModel, Notification, NotificationWithTarget, ToEntityReference}
 import uk.ac.warwick.tabula.helpers.Futures._
 import uk.ac.warwick.tabula.permissions.PermissionsTarget
 import uk.ac.warwick.tabula.services.{AutowiringDispatchHttpClientComponent, DispatchHttpClientComponent, NotificationListener}
 import uk.ac.warwick.tabula.web.views.{AutowiredTextRendererComponent, TextRendererComponent}
 import uk.ac.warwick.util.mywarwick.MyWarwickService
 import uk.ac.warwick.util.mywarwick.model.request.{Activity, Tag}
-import uk.ac.warwick.util.mywarwick.model.response.Response
-
 import scala.collection.JavaConverters._
 import scala.concurrent.duration._
 import scala.concurrent.{Await, Future}
 import scala.language.existentials
-import scala.util.parsing.json.JSON
 
 trait MyWarwickNotificationListener extends NotificationListener {
 	self: AutowiredTextRendererComponent with AutowiringFeaturesComponent with AutowiringMyWarwickServiceComponent =>
@@ -57,7 +54,7 @@ trait MyWarwickNotificationListener extends NotificationListener {
 			val activity = new Activity(
 				recipients.toSet.asJava,
 				notification.title,
-				"",
+				"https://%s%s".format(Wire.property("${toplevel.url}"), notification.url),
 				textRenderer.renderTemplate(notification.content.template, notification.content.model),
 				notification.notificationType
 			)
