@@ -3,7 +3,7 @@ package uk.ac.warwick.tabula.commands.coursework.markingworkflows
 import org.springframework.validation.Errors
 import uk.ac.warwick.tabula.JavaImports._
 import uk.ac.warwick.tabula.commands._
-import uk.ac.warwick.tabula.data.model.{Assignment, Department, MarkerMap, MarkingWorkflow}
+import uk.ac.warwick.tabula.data.model._
 import uk.ac.warwick.tabula.helpers.StringUtils._
 import uk.ac.warwick.tabula.permissions.Permissions
 import uk.ac.warwick.tabula.services._
@@ -36,7 +36,8 @@ class ReplaceMarkerInMarkingWorkflowCommandInternal(val department: Department, 
 	override def applyInternal(): MarkingWorkflow = {
 		val oldUser = userLookup.getUserByUserId(oldMarker)
 		val newUser = userLookup.getUserByUserId(newMarker)
-		def replaceMarker[A <: MarkerMap](markers: JList[A]): Unit = {
+
+		def replaceMarkerMap[A <: MarkerMap](markers: JList[A]): Unit = {
 			val oldMarkerMap = markers.asScala.find(_.marker_id == oldMarker)
 			if (markers.asScala.exists(_.marker_id == newMarker)) {
 				// The new marker is an existing marker, so move the students
@@ -48,11 +49,33 @@ class ReplaceMarkerInMarkingWorkflowCommandInternal(val department: Department, 
 				oldMarkerMap.foreach(_.marker_id = newMarker)
 			}
 		}
-		affectedAssignments.foreach(assignment => {
-			replaceMarker(assignment.firstMarkers)
-			replaceMarker(assignment.secondMarkers)
-			assessmentService.save(assignment)
-		})
+
+		def replaceMarkerStudentsChoose(assignment: Assignment): Unit = {
+			assignment.markerSelectField.foreach { field =>
+				assignment.submissions.asScala
+					.filter(_.getValue(field).exists(_.value == oldUser.getUserId))
+				  .foreach(submission =>
+						submission.getValue(field).foreach(_.value = newUser.getUserId)
+					)
+			}
+		}
+
+		markingWorkflow match {
+			case _: StudentsChooseMarkerWorkflow =>
+				affectedAssignments.foreach { assignment =>
+					replaceMarkerStudentsChoose(assignment)
+					assessmentService.save(assignment)
+				}
+			case _: AssessmentMarkerMap =>
+				affectedAssignments.foreach(assignment => {
+					replaceMarkerMap(assignment.firstMarkers)
+					replaceMarkerMap(assignment.secondMarkers)
+					assessmentService.save(assignment)
+				})
+			case _ =>
+			 throw new IllegalArgumentException("Unknown workflow type")
+		}
+
 		if (markingWorkflow.firstMarkers.includesUser(oldUser)) {
 			markingWorkflow.firstMarkers.remove(oldUser)
 			markingWorkflow.firstMarkers.add(newUser)
@@ -125,13 +148,19 @@ trait ReplaceMarkerInMarkingWorkflowCommandState {
 	def department: Department
 	def markingWorkflow: MarkingWorkflow
 
-	lazy val allMarkers: Seq[User] = (markingWorkflow.firstMarkers.users ++ (markingWorkflow.hasSecondMarker match {
-		case true => markingWorkflow.secondMarkers.users
-		case false => Seq()
-	}) ++ (markingWorkflow.hasThirdMarker match {
-		case true => markingWorkflow.thirdMarkers.users
-		case false => Seq()
-	})).distinct.sortBy(u => (u.getLastName, u.getFirstName))
+	lazy val allMarkers: Seq[User] = (markingWorkflow.firstMarkers.users ++ (
+		if (markingWorkflow.hasSecondMarker) {
+			markingWorkflow.secondMarkers.users
+		} else {
+			Seq()
+		}
+	) ++ (
+		if (markingWorkflow.hasThirdMarker) {
+			markingWorkflow.thirdMarkers.users
+		} else {
+			Seq()
+		}
+	)).distinct.sortBy(u => (u.getLastName, u.getFirstName))
 
 	lazy val affectedAssignments: Seq[Assignment] = markingWorkflowService.getAssignmentsUsingMarkingWorkflow(markingWorkflow)
 }
