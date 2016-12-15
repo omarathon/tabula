@@ -166,6 +166,9 @@
 											<#if attachment.originalityReportReceived>
 												: <@components.originalityReport attachment />
 											</#if>
+											<#if can.do("Submission.ViewUrkundPlagiarismStatus", submission) && attachment.urkundResponseReceived>
+												: <@components.urkundOriginalityReport attachment />
+											</#if>
 										</#list>
 									</#if>
 								</#compress></@stage>
