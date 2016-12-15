@@ -168,6 +168,7 @@ trait ZipCreator extends Logging with TaskBenchmarking {
 	 */
 	private def openZipStream(file: File)(fn: (ZipArchiveOutputStream) => Unit) {
 		var zip: ZipArchiveOutputStream = null
+		var thrownException: Exception = null
 		try {
 			zip = new ZipArchiveOutputStream(file)
 			fn(zip)
@@ -175,9 +176,21 @@ trait ZipCreator extends Logging with TaskBenchmarking {
 			case e: Exception =>
 				logger.error("Exception creating zip file, deleting %s" format file)
 				file.delete
+				thrownException = e
 				throw e
 		} finally {
-			if (zip != null) zip.close()
+			try {
+				if (zip != null) zip.close()
+			} catch {
+				case e: Exception =>
+					if (thrownException != null) {
+						// If we caught an exception above, that one will be more useful than one thrown when closing,
+						// so don't throw this one
+						logger.error(s"Exception thrown while trying to close: ${e.getMessage}")
+					} else {
+						throw e
+					}
+			}
 		}
 	}
 
