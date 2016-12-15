@@ -21,8 +21,6 @@ import scala.language.existentials
 trait MyWarwickNotificationListener extends NotificationListener {
 	self: AutowiredTextRendererComponent with AutowiringFeaturesComponent with AutowiringMyWarwickServiceComponent =>
 
-	@transient var json: ObjectMapper = JsonObjectMapperFactory.instance
-
 	private def toMyWarwickActivity(notification: Notification[_ >: Null <: ToEntityReference, _]): Option[Activity] = try {
 		val recipients = notification.recipientNotificationInfos.asScala
 			.filterNot(_.dismissed) // Not if the user has dismissed the notificaiton already
