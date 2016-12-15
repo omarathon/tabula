@@ -23,6 +23,8 @@ class ViewProfileTimetableController extends AbstractViewProfileController
 		mandatory(member) match {
 			case student: StudentMember if student.mostSignificantCourseDetails.isDefined =>
 				viewByCourse(student.mostSignificantCourseDetails.get, activeAcademicYear)
+			case student: StudentMember if student.freshOrStaleStudentCourseDetails.nonEmpty =>
+				viewByCourse(student.freshOrStaleStudentCourseDetails.lastOption.get, activeAcademicYear)
 			case _ =>
 				Mav("profiles/profile/timetable",
 					"academicYears" -> scientiaConfiguration.academicYears

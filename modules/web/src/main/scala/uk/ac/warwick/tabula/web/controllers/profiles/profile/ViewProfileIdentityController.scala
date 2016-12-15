@@ -23,6 +23,8 @@ class ViewProfileIdentityController extends AbstractViewProfileController
 		mandatory(member) match {
 			case student: StudentMember if student.mostSignificantCourseDetails.isDefined =>
 				viewByCourseAndYear(student.mostSignificantCourseDetails.get, activeAcademicYear)
+			case student: StudentMember if student.freshOrStaleStudentCourseDetails.nonEmpty =>
+				viewByCourseAndYear(student.freshOrStaleStudentCourseDetails.lastOption.get, activeAcademicYear)
 			case _ =>
 				Mav("profiles/profile/identity_staff").crumbs(breadcrumbsStaff(member, ProfileBreadcrumbs.Profile.IdentityIdentifier): _*)
 		}
