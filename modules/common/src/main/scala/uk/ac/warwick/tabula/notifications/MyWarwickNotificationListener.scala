@@ -67,11 +67,12 @@ trait MyWarwickNotificationListener extends NotificationListener {
 	}
 
 	private def postActivity(notification: Notification[_ >: Null <: ToEntityReference, _]): Unit = {
-		val send = notification.notificationType match {
-			case "SubmissionReceipt" => myWarwickService.sendAsActivity(_: Activity)
-			case _ => myWarwickService.sendAsNotification(_: Activity)
+		toMyWarwickActivity(notification).map { a =>
+			notification.notificationType match {
+				case "SubmissionReceipt" => myWarwickService.sendAsActivity(a)
+				case _ => myWarwickService.sendAsNotification(a)
+			}
 		}
-		toMyWarwickActivity(notification).map(send)
 	}
 
 	override def listen(notification: Notification[_ >: Null <: ToEntityReference, _]): Unit = {
