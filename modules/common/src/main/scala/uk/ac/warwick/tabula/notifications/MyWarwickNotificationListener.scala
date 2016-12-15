@@ -82,8 +82,7 @@ trait MyWarwickNotificationListener extends NotificationListener {
 
 	override def listen(notification: Notification[_ >: Null <: ToEntityReference, _]): Unit = {
 		if (features.myWarwickNotificationListener) {
-			val id = postActivity(notification)
-			Await.result(id, 10.seconds)
+			postActivity(notification)
 		}
 	}
 
