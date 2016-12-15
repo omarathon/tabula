@@ -2,6 +2,7 @@ package uk.ac.warwick.tabula.notifications
 
 import com.fasterxml.jackson.databind.ObjectMapper
 import dispatch.classic.url
+import org.hibernate.ObjectNotFoundException
 import org.springframework.stereotype.Component
 import uk.ac.warwick.spring.Wire
 import uk.ac.warwick.tabula._
@@ -11,7 +12,8 @@ import uk.ac.warwick.tabula.permissions.PermissionsTarget
 import uk.ac.warwick.tabula.services.{AutowiringDispatchHttpClientComponent, DispatchHttpClientComponent, NotificationListener}
 import uk.ac.warwick.tabula.web.views.{AutowiredTextRendererComponent, TextRendererComponent}
 import uk.ac.warwick.util.mywarwick.MyWarwickService
-import uk.ac.warwick.util.mywarwick.model.request._
+import uk.ac.warwick.util.mywarwick.model.request.{Activity, Tag}
+import uk.ac.warwick.util.mywarwick.model.response.Response
 
 import scala.collection.JavaConverters._
 import scala.concurrent.duration._
@@ -19,15 +21,13 @@ import scala.concurrent.{Await, Future}
 import scala.language.existentials
 import scala.util.parsing.json.JSON
 
-trait StartWarwickNotificationListener extends NotificationListener {
-	self: StartWarwickPropertiesComponent with TextRendererComponent with FeaturesComponent with DispatchHttpClientComponent with MyWarwickServiceComponent =>
+trait MyWarwickNotificationListener extends NotificationListener {
+	self: AutowiredTextRendererComponent with AutowiringFeaturesComponent with AutowiringMyWarwickServiceComponent =>
 
 	@transient var json: ObjectMapper = JsonObjectMapperFactory.instance
 
-	var myWarwickService: MyWarwickService
-
-	private def toStartActivity(notification: Notification[_ >: Null <: ToEntityReference, _]): Option[Activity] = {
-		val recipientUsers = notification.recipientNotificationInfos.asScala
+	private def toMyWarwickActivity(notification: Notification[_ >: Null <: ToEntityReference, _]): Option[Activity] = try {
+		val recipients = notification.recipientNotificationInfos.asScala
 			.filterNot(_.dismissed) // Not if the user has dismissed the notificaiton already
 			.map(_.recipient)
 			.filter(_.isFoundUser) // Only users found in SSO
@@ -40,20 +40,22 @@ trait StartWarwickNotificationListener extends NotificationListener {
 				case _ => notification.items.asScala
 			}
 
-			val permissionsTargets = allEntities.map { _.entity }.collect { case pt: PermissionsTarget => pt }
+			val permissionsTargets = allEntities.map {
+				_.entity
+			}.collect { case pt: PermissionsTarget => pt }
 
 			def withParents(target: PermissionsTarget): Stream[PermissionsTarget] = target #:: target.permissionsParents.flatMap(withParents)
 
 			val tags = permissionsTargets.flatMap(withParents).distinct.map { target =>
-				Map(
-					"name" -> target.urlCategory,
-					"value" -> target.urlSlug,
-					"displayValue" -> target.humanReadableId
-				)
+				val tag = new Tag()
+				tag.setName(target.urlCategory)
+				tag.setValue(target.urlSlug)
+				tag.setDisplay_value(target.humanReadableId)
+				tag
 			}
 
 			val activity = new Activity(
-				recipientUsers.toSet.asJava,
+				recipients.toSet.asJava,
 				notification.title,
 				"",
 				textRenderer.renderTemplate(notification.content.template, notification.content.model),
@@ -63,52 +65,27 @@ trait StartWarwickNotificationListener extends NotificationListener {
 			activity.setTags(tags.toSet.asJava)
 
 			Some(activity)
-			// "generated_at" -> DateFormats.IsoDateTime.print(notification.created),
 		}
 	} catch {
 		// referenced entity probably missing, oh well.
 		case e: ObjectNotFoundException => None
 	}
 
-	private def postActivity(notification: Notification[_ >: Null <: ToEntityReference, _]): Future[Option[String]] = {
-		val endpoint = notification.notificationType match {
-			case "SubmissionReceipt" => "activities"
-			case _ => "notifications"
+	private def postActivity(notification: Notification[_ >: Null <: ToEntityReference, _]): Future[Unit] = {
+		val send = notification.notificationType match {
+			case "SubmissionReceipt" => myWarwickService.sendAsActivity(_: Activity)
+			case _ => myWarwickService.sendAsNotification(_: Activity)
 		}
 
-		toStartActivity(notification) match {
-			case Some(activity) => Future {
-				val httpRequest = (url(
-					s"https://$startApiHostname/api/streams/$startApiProviderId/$endpoint"
-				) << (json.writeValueAsString(activity), "application/json")).as_!(startApiUsername, startApiPassword)
-
-				def handler = { (headers: Map[String,Seq[String]], req: dispatch.classic.Request) =>
-					req >- { (rawJSON) =>
-						val response = JSON.parseFull(rawJSON) match {
-							case Some(r: Map[String, Any] @unchecked) if r.get("success").contains(true) => r
-							case _ => Map.empty[String, Any]
-						}
-
-						for {
-							data <- response.get("data").collect { case r: Map[String, Any] @unchecked => r }
-							id <- data.get("id").collect { case str: String => str }
-						} yield id
-					}
-				}
-
-				httpClient.when(_ == 201)(httpRequest >:+ handler)
-			}
-
-			case None => Future.successful(None)
+		toMyWarwickActivity(notification) match {
+			case Some(activity) => Future(send(activity)).map(_ -> Unit)
+			case None => Future.successful(())
 		}
-
-
 	}
 
 	override def listen(notification: Notification[_ >: Null <: ToEntityReference, _]): Unit = {
-		if (features.startNotificationListener) {
+		if (features.myWarwickNotificationListener) {
 			val id = postActivity(notification)
-
 			Await.result(id, 10.seconds)
 		}
 	}
@@ -116,23 +93,15 @@ trait StartWarwickNotificationListener extends NotificationListener {
 }
 
 @Component
-class AutowiringStartWarwickNotificationListener extends StartWarwickNotificationListener
-	with AutowiringStartWarwickPropertiesComponent
+class AutowiringMyWarwickNotificationListener extends MyWarwickNotificationListener
 	with AutowiredTextRendererComponent
 	with AutowiringFeaturesComponent
-	with AutowiringDispatchHttpClientComponent
 	with AutowiringMyWarwickServiceComponent
 
-trait StartWarwickPropertiesComponent {
-	def startApiHostname: String
-	def startApiProviderId: String
-	def startApiUsername: String
-	def startApiPassword: String
+trait AutowiringMyWarwickServiceComponent extends MyWarwickServiceComponent {
+	var myWarwickService: MyWarwickService = Wire[MyWarwickService]
 }
 
-trait AutowiringStartWarwickPropertiesComponent extends StartWarwickPropertiesComponent {
-	var startApiHostname: String = Wire.property("${start.hostname}")
-	var startApiProviderId: String = Wire.property("${start.provider_id}")
-	var startApiUsername: String = Wire.property("${start.username}")
-	var startApiPassword: String = Wire.property("${start.password}")
+trait MyWarwickServiceComponent {
+	var myWarwickService: MyWarwickService
 }
