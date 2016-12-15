@@ -9,6 +9,8 @@ class MitigatingCircumstancesColumnOption extends ChosenYearExamGridColumnOption
 
 	override val identifier: ExamGridColumnOption.Identifier = "mitigating"
 
+	override val label: String = "Administration: Mitigating Circumstances"
+
 	override val sortOrder: Int = ExamGridColumnOption.SortOrders.MitigatingCircumstances
 
 	case class Column(state: ExamGridColumnState) extends ChosenYearExamGridColumn(state) with HasExamGridColumnCategory {

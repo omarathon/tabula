@@ -9,6 +9,8 @@ class PotentialMarkingOptionsColumnOption extends StudentExamGridColumnOption {
 
 	override val identifier: ExamGridColumnOption.Identifier = "markingoptions"
 
+	override val label: String = ""
+
 	override val sortOrder: Int = ExamGridColumnOption.SortOrders.PotentialMarkingOptions
 
 	override val mandatory = true

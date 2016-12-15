@@ -10,6 +10,8 @@ class CurrentYearMarkColumnOption extends ChosenYearExamGridColumnOption with Au
 
 	override val identifier: ExamGridColumnOption.Identifier = "currentyear"
 
+	override val label: String = "Marking: Current year mean mark"
+
 	override val sortOrder: Int = ExamGridColumnOption.SortOrders.CurrentYear
 
 	override val mandatory = true

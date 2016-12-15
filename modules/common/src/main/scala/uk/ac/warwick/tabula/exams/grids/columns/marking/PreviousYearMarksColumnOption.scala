@@ -10,6 +10,8 @@ class PreviousYearMarksColumnOption extends ChosenYearExamGridColumnOption with 
 
 	override val identifier: ExamGridColumnOption.Identifier = "previous"
 
+	override val label: String = "Marking: Marks from previous year(s)"
+
 	override val sortOrder: Int = ExamGridColumnOption.SortOrders.PreviousYears
 
 	override val mandatory = true

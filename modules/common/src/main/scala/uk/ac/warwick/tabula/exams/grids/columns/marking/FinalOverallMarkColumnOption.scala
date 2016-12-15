@@ -10,6 +10,8 @@ class FinalOverallMarkColumnOption extends ChosenYearExamGridColumnOption with A
 
 	override val identifier: ExamGridColumnOption.Identifier = "finalOverallMark"
 
+	override val label: String = "Marking: Final overall mark"
+
 	override val sortOrder: Int = ExamGridColumnOption.SortOrders.FinalOverallMark
 
 	case class Column(state: ExamGridColumnState)

@@ -6,6 +6,8 @@ object BlankColumnOption extends ChosenYearExamGridColumnOption {
 
 	override val identifier: ExamGridColumnOption.Identifier = "blank"
 
+	override val label: String = ""
+
 	override val sortOrder: Int = Int.MaxValue
 
 	case class Column(state: ExamGridColumnState, override val title: String)

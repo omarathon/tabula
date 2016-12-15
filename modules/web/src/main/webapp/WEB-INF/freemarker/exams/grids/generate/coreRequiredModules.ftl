@@ -1,6 +1,5 @@
+<#import 'form_fields.ftl' as form_fields />
 <#escape x as x?html>
-
-<#import "/WEB-INF/freemarker/modal_macros.ftl" as modal />
 
 <#function route_function dept>
 	<#local selectCourseCommand><@routes.exams.generateGrid dept academicYear /></#local>
@@ -11,7 +10,8 @@
 
 <form action="<@routes.exams.generateGrid department academicYear />" class="dirty-check" method="post">
 
-	<#include '_hidden_fields.ftl' />
+	<@form_fields.select_course_fields />
+	<@form_fields.grid_options_fields />
 
 	<h2>Set grid options</h2>
 

@@ -116,6 +116,8 @@ class CoreModulesColumnOption extends ModuleExamGridColumnOption {
 
 	override val identifier: ExamGridColumnOption.Identifier = "core"
 
+	override val label: String = "Modules: Core Modules"
+
 	override val sortOrder: Int = ExamGridColumnOption.SortOrders.CoreModules
 
 	override val mandatory = true
@@ -140,6 +142,8 @@ class CoreRequiredModulesColumnOption extends ModuleExamGridColumnOption {
 
 	override val identifier: ExamGridColumnOption.Identifier = "corerequired"
 
+	override val label: String = "Modules: Core Required Modules"
+
 	override val sortOrder: Int = ExamGridColumnOption.SortOrders.CoreRequiredModules
 
 	class Column(state: ExamGridColumnState, module: Module, cats: JBigDecimal) extends ModuleExamGridColumn(state, module, cats) {
@@ -162,6 +166,8 @@ class CoreOptionalModulesColumnOption extends ModuleExamGridColumnOption {
 
 	override val identifier: ExamGridColumnOption.Identifier = "coreoptional"
 
+	override val label: String = "Modules: Core Optional Modules"
+
 	override val sortOrder: Int = ExamGridColumnOption.SortOrders.CoreOptionalModules
 
 	class Column(state: ExamGridColumnState, module: Module, cats: JBigDecimal) extends ModuleExamGridColumn(state, module, cats) {
@@ -183,6 +189,8 @@ class CoreOptionalModulesColumnOption extends ModuleExamGridColumnOption {
 class OptionalModulesColumnOption extends ModuleExamGridColumnOption {
 
 	override val identifier: ExamGridColumnOption.Identifier = "optional"
+
+	override val label: String = "Modules: Optional Modules"
 
 	override val sortOrder: Int = ExamGridColumnOption.SortOrders.OptionalModules
 
