@@ -3,6 +3,7 @@ package uk.ac.warwick.tabula.notifications
 import com.fasterxml.jackson.databind.ObjectMapper
 import dispatch.classic.url
 import org.hibernate.ObjectNotFoundException
+import org.springframework.beans.factory.config.PropertiesFactoryBean
 import org.springframework.stereotype.Component
 import uk.ac.warwick.spring.Wire
 import uk.ac.warwick.tabula._
@@ -13,6 +14,7 @@ import uk.ac.warwick.tabula.services.{AutowiringDispatchHttpClientComponent, Dis
 import uk.ac.warwick.tabula.web.views.{AutowiredTextRendererComponent, TextRendererComponent}
 import uk.ac.warwick.util.mywarwick.MyWarwickService
 import uk.ac.warwick.util.mywarwick.model.request.{Activity, Tag}
+
 import scala.collection.JavaConverters._
 import scala.concurrent.duration._
 import scala.concurrent.{Await, Future}
@@ -52,7 +54,7 @@ trait MyWarwickNotificationListener extends NotificationListener {
 			val activity = new Activity(
 				recipients.toSet.asJava,
 				notification.title,
-				Wire.property("${toplevel.url}") + notification.url,
+				topLevelUrl + notification.url,
 				textRenderer.renderTemplate(notification.content.template, notification.content.model),
 				notification.notificationType
 			)
@@ -91,6 +93,7 @@ class AutowiringMyWarwickNotificationListener extends MyWarwickNotificationListe
 
 trait AutowiringMyWarwickServiceComponent extends MyWarwickServiceComponent {
 	var myWarwickService: MyWarwickService = Wire[MyWarwickService]
+	var topLevelUrl: String = Wire.property("${toplevel.url}")
 }
 
 trait MyWarwickServiceComponent {
