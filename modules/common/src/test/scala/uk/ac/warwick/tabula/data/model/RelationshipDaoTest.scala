@@ -83,6 +83,9 @@ class RelationshipDaoTest extends PersistenceTestBase with Logging with Mockito 
 		relationshipDao.getRelationshipsByTarget(relationshipType, stu3) should be (Seq())
 		relationshipDao.getRelationshipsByTarget(null, stu1) should be (Seq())
 
+		relationshipDao.getRelationshipsByCourseDetails(relationshipType, stu1.mostSignificantCourse) should be (Seq(relBetweenStaff1AndStu1))
+		relationshipDao.getRelationshipsByCourseDetails(relationshipType, stu3.mostSignificantCourse) should be (Seq())
+
 		relationshipDao.getCurrentRelationship(relationshipType, stu1, staff1) should be (Some(relBetweenStaff1AndStu1))
 	}
 

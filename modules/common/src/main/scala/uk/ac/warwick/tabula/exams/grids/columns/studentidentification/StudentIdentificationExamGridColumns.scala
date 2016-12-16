@@ -55,9 +55,10 @@ class NameColumnOption extends StudentExamGridColumnOption {
 
 	}
 
-	override def getColumns(state: ExamGridColumnState): Seq[ChosenYearExamGridColumn] = state.showFullName match {
-		case true => Seq(FullNameColumn(state))
-		case false => Seq(FirstNameColumn(state), LastNameColumn(state))
+	override def getColumns(state: ExamGridColumnState): Seq[ChosenYearExamGridColumn] = if (state.showFullName) {
+		Seq(FullNameColumn(state))
+	} else {
+		Seq(FirstNameColumn(state), LastNameColumn(state))
 	}
 
 }
@@ -135,7 +136,7 @@ class RouteColumnOption extends StudentExamGridColumnOption {
 			state.entities.map(entity => entity ->
 				ExamGridColumnValueString(
 					entity.years.get(state.yearOfStudy).flatMap(_.studentCourseYearDetails).flatMap(
-						scyd => Option(scyd.route.code.toUpperCase)
+						scyd => Option(scyd.route).map(_.code.toUpperCase)
 					).getOrElse("[Unknown]")
 				)
 			).toMap

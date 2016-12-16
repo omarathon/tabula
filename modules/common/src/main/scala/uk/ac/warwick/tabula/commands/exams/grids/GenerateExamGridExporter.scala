@@ -9,6 +9,7 @@ import org.joda.time.DateTime
 import uk.ac.warwick.tabula.AcademicYear
 import uk.ac.warwick.tabula.data.model._
 import uk.ac.warwick.tabula.exams.grids.columns._
+import uk.ac.warwick.tabula.services.NormalLoadLookup
 
 object GenerateExamGridExporter {
 
@@ -27,10 +28,10 @@ object GenerateExamGridExporter {
 		department: Department,
 		academicYear: AcademicYear,
 		course: Course,
-		route: Route,
+		routes: Seq[Route],
 		yearOfStudy: Int,
 		yearWeightings: Seq[CourseYearWeighting],
-		normalLoad: BigDecimal,
+		normalLoadLookup: NormalLoadLookup,
 		entities: Seq[ExamGridEntity],
 		leftColumns: Seq[ChosenYearExamGridColumn],
 		perYearColumns: Map[StudentCourseYearDetails.YearOfStudy, Seq[PerYearExamGridColumn]],
@@ -47,7 +48,7 @@ object GenerateExamGridExporter {
 
 		val sheet = workbook.createSheet(academicYear.toString.replace("/","-"))
 
-		summaryAndKey(sheet, cellStyleMap, department, academicYear, course, route, yearOfStudy, yearWeightings, normalLoad, entities.size, isStudentCount = true)
+		summaryAndKey(sheet, cellStyleMap, department, academicYear, course, routes, yearOfStudy, yearWeightings, normalLoadLookup, entities.size, isStudentCount = true)
 
 		val yearRow = sheet.createRow(sheet.getLastRowNum + 1)
 		val categoryRow = sheet.createRow(sheet.getLastRowNum + 1)
@@ -237,10 +238,10 @@ object GenerateExamGridExporter {
 		department: Department,
 		academicYear: AcademicYear,
 		course: Course,
-		route: Route,
+		routes: Seq[Route],
 		yearOfStudy: Int,
 		yearWeightings: Seq[CourseYearWeighting],
-		normalLoad: BigDecimal,
+		normalLoadLookup: NormalLoadLookup,
 		count: Int,
 		isStudentCount: Boolean
 	): Unit = {
@@ -256,11 +257,16 @@ object GenerateExamGridExporter {
 		keyValueCells("Department:", department.name, 0)
 		keyValueCells("Academic year:", academicYear.toString, 1)
 		keyValueCells("Course:", s"${course.code.toUpperCase} ${course.name}", 2)
-		keyValueCells("Route:", s"${route.code.toUpperCase} ${route.name}", 3)
+		routes.size match {
+			case 0 => keyValueCells("Routes:", "All routes", 3)
+			case 1 => keyValueCells("Route:", s"${routes.head.code.toUpperCase} ${routes.head.name}", 3)
+			case n => keyValueCells("Routes:", s"$n routes", 3)
+		}
 		keyValueCells("Year of study:", yearOfStudy.toString, 4)
 		val yearWeightingRow = keyValueCells("Year weightings:", yearWeightings.map(cyw => s"Year ${cyw.yearOfStudy} = ${cyw.weightingAsPercentage}").mkString("\n"), 5)
 		yearWeightingRow.setHeight((yearWeightingRow.getHeight * (yearWeightings.size - 1)).toShort)
-		keyValueCells("Normal CAT load:", normalLoad.toString, 6)
+		val normalCatLoadRow = keyValueCells("Normal CAT load:", normalLoadLookup.routes.sortBy(_.code).map(r => s"${r.code.toUpperCase}: ${normalLoadLookup(r).underlying.toString}").mkString("\n"), 6)
+		normalCatLoadRow.setHeight((normalCatLoadRow.getHeight * (normalLoadLookup.routes.size - 1)).toShort)
 		if (isStudentCount) {
 			keyValueCells("Student Count:", count.toString, 7)
 		} else {

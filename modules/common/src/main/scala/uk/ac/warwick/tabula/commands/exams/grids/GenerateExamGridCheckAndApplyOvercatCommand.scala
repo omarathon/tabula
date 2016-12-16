@@ -4,8 +4,8 @@ import org.joda.time.DateTime
 import org.springframework.validation.Errors
 import uk.ac.warwick.tabula.commands._
 import uk.ac.warwick.tabula.commands.exams.grids.GenerateExamGridCheckAndApplyOvercatCommand.{Result, SelectCourseCommand}
+import uk.ac.warwick.tabula.data.model.{Department, ModuleRegistration, UpstreamRouteRuleLookup}
 import uk.ac.warwick.tabula.data.{AutowiringStudentCourseYearDetailsDaoComponent, StudentCourseYearDetailsDaoComponent}
-import uk.ac.warwick.tabula.data.model.{Department, ModuleRegistration, UpstreamRouteRule}
 import uk.ac.warwick.tabula.permissions.Permissions
 import uk.ac.warwick.tabula.services._
 import uk.ac.warwick.tabula.system.permissions.{PermissionsChecking, PermissionsCheckingMethods, RequiresPermissionsChecking}
@@ -67,9 +67,7 @@ trait GenerateExamGridCheckAndApplyOvercatValidation extends SelfValidating {
 	self: GenerateExamGridCheckAndApplyOvercatCommandState =>
 
 	override def validate(errors: Errors) {
-		if (routeRules.isEmpty) {
-			errors.reject("", "No route rules found")
-		} else if (filteredEntities.isEmpty){
+		if (filteredEntities.isEmpty){
 			errors.reject("", "No changes to apply")
 		}
 	}
@@ -123,31 +121,27 @@ trait GenerateExamGridCheckAndApplyOvercatCommandState {
 		case "all" => fetchEntities
 		case _ => fetchEntities.map(entity => entity.copy(years = Map(entity.years.keys.max -> entity.years(entity.years.keys.max))))
 	}
-	lazy val normalLoadOption: Option[BigDecimal] = upstreamRouteRuleService.findNormalLoad(
-		selectCourseCommand.route,
-		academicYear,
-		selectCourseCommand.yearOfStudy
-	)
-	lazy val normalLoad: BigDecimal = normalLoadOption.getOrElse(selectCourseCommand.route.degreeType.normalCATSLoad)
-	lazy val routeRules: Seq[UpstreamRouteRule] = upstreamRouteRuleService.list(
-		selectCourseCommand.route,
-		academicYear,
-		selectCourseCommand.yearOfStudy
-	)
+	lazy val normalLoadLookup: NormalLoadLookup = new NormalLoadLookup(academicYear, selectCourseCommand.yearOfStudy, upstreamRouteRuleService)
+	lazy val routeRulesLookup: UpstreamRouteRuleLookup = new UpstreamRouteRuleLookup(academicYear, selectCourseCommand.yearOfStudy, upstreamRouteRuleService)
 
 	lazy val overcatSubsets: Map[ExamGridEntity, Seq[(BigDecimal, Seq[ModuleRegistration])]] =
-		entities.filter(_.years.get(selectCourseCommand.yearOfStudy).isDefined).map(entity => entity ->
+		entities.filter(entity =>
+			// We only want to apply a subset automaticaly if they have a valid year and have some route rules for that year
+			entity.years.get(selectCourseCommand.yearOfStudy).isDefined &&
+				routeRulesLookup(entity.years(selectCourseCommand.yearOfStudy).route).nonEmpty
+		).map(entity => entity ->
 			moduleRegistrationService.overcattedModuleSubsets(
 				entity.years(selectCourseCommand.yearOfStudy),
 				entity.years(selectCourseCommand.yearOfStudy).markOverrides.getOrElse(Map()),
-				normalLoad,
-				routeRules
+				normalLoadLookup(entity.years(selectCourseCommand.yearOfStudy).route),
+				routeRulesLookup(entity.years(selectCourseCommand.yearOfStudy).route)
 			)
 		).toMap
 
 	lazy val filteredEntities: Seq[ExamGridEntity] =
 		entities.filter(entity =>
-			// Filter entities to those that have a entity year for the give academic year
+			// Filter entities to those that have a entity year for the given academic year
+			// and have some route rules applied (both done in overcatSubsets)
 			// and have more than one some overcat subset
 			overcatSubsets.exists { case (overcatEntity, subsets) => overcatEntity == entity && subsets.size > 1 }
 		).filter(entity => entity.years(selectCourseCommand.yearOfStudy).overcattingModules match {

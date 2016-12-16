@@ -4,7 +4,8 @@ import org.joda.time.{DateTime, Duration}
 import uk.ac.warwick.tabula.AcademicYear
 import uk.ac.warwick.tabula.JavaImports._
 import uk.ac.warwick.tabula.commands._
-import uk.ac.warwick.tabula.data.model.{AssessmentGroup, Assignment, Department, Module}
+import uk.ac.warwick.tabula.data.model.triggers.{AssignmentClosedTrigger, Trigger}
+import uk.ac.warwick.tabula.data.model._
 import uk.ac.warwick.tabula.permissions.Permissions
 import uk.ac.warwick.tabula.services._
 import uk.ac.warwick.tabula.system.permissions.PermissionsChecking
@@ -17,6 +18,7 @@ object CopyAssignmentsCommand {
 			with ComposableCommand[Seq[Assignment]]
 			with CopyAssignmentsPermissions
 			with CopyAssignmentsDescription
+			with CopyAssignmentsCommandTriggers
 			with AutowiringAssessmentServiceComponent
 			with AutowiringAssessmentMembershipServiceComponent {
 				override lazy val eventName = "CopyAssignmentsFromPrevious"
@@ -125,4 +127,13 @@ trait CopyAssignmentsDescription extends Describable[Seq[Assignment]] {
 		.properties("modules" -> modules.map(_.id))
 		.properties("assignments" -> assignments.asScala.map(_.id))
 		.properties("isArchiving" -> archive)
+}
+
+trait CopyAssignmentsCommandTriggers extends GeneratesTriggers[Seq[Assignment]] {
+
+	def generateTriggers(assignments: Seq[Assignment]): Seq[Trigger[_ >: Null <: ToEntityReference, _]] = {
+		assignments.filter(assignment => assignment.closeDate != null && assignment.closeDate.isAfterNow).map(assignment =>
+			AssignmentClosedTrigger(assignment.closeDate, assignment)
+		)
+	}
 }

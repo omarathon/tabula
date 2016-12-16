@@ -9,7 +9,7 @@ import uk.ac.warwick.tabula.data.{AutowiringStudentCourseYearDetailsDaoComponent
 import uk.ac.warwick.tabula.helpers.LazyMaps
 import uk.ac.warwick.tabula.helpers.StringUtils._
 import uk.ac.warwick.tabula.permissions.Permissions
-import uk.ac.warwick.tabula.services.{AutowiringModuleRegistrationServiceComponent, ModuleRegistrationServiceComponent}
+import uk.ac.warwick.tabula.services.{AutowiringModuleRegistrationServiceComponent, ModuleRegistrationServiceComponent, NormalLoadLookup}
 import uk.ac.warwick.tabula.system.permissions.{PermissionsChecking, PermissionsCheckingMethods, RequiresPermissionsChecking}
 import uk.ac.warwick.tabula.{AcademicYear, CurrentUser}
 
@@ -26,10 +26,10 @@ object GenerateExamGridOvercatCommand {
 		department: Department,
 		academicYear: AcademicYear,
 		scyd: StudentCourseYearDetails,
-		normalLoad: BigDecimal,
+		normalLoadLookup: NormalLoadLookup,
 		routeRules: Seq[UpstreamRouteRule],
 		user: CurrentUser
-	) = new GenerateExamGridOvercatCommandInternal(department, academicYear, scyd, normalLoad, routeRules, user)
+	) = new GenerateExamGridOvercatCommandInternal(department, academicYear, scyd, normalLoadLookup, routeRules, user)
 			with ComposableCommand[Seq[Module]]
 			with AutowiringStudentCourseYearDetailsDaoComponent
 			with AutowiringModuleRegistrationServiceComponent
@@ -46,7 +46,7 @@ class GenerateExamGridOvercatCommandInternal(
 	val department: Department,
 	val academicYear: AcademicYear,
 	val scyd: StudentCourseYearDetails,
-	val normalLoad: BigDecimal,
+	val normalLoadLookup: NormalLoadLookup,
 	val routeRules: Seq[UpstreamRouteRule],
 	val user: CurrentUser
 )	extends CommandInternal[Seq[Module]] {
@@ -122,14 +122,14 @@ trait GenerateExamGridOvercatCommandState {
 	def department: Department
 	def academicYear: AcademicYear
 	def scyd: StudentCourseYearDetails
-	def normalLoad: BigDecimal
+	def normalLoadLookup: NormalLoadLookup
 	def routeRules: Seq[UpstreamRouteRule]
 	def user: CurrentUser
 
 	lazy val overcattedModuleSubsets: Seq[(BigDecimal, Seq[ModuleRegistration])] = moduleRegistrationService.overcattedModuleSubsets(
 		scyd.toExamGridEntityYear,
 		overwrittenMarks,
-		normalLoad,
+		normalLoadLookup(scyd.toExamGridEntityYear.route),
 		routeRules
 	)
 

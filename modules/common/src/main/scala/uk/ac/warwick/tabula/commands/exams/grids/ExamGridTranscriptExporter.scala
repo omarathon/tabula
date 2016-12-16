@@ -5,7 +5,6 @@ import org.joda.time.DateTime
 import org.openxmlformats.schemas.wordprocessingml.x2006.main.STTblWidth
 import uk.ac.warwick.tabula.DateFormats
 import uk.ac.warwick.tabula.commands.TaskBenchmarking
-import uk.ac.warwick.tabula.data.model.{Course, Route}
 
 import scala.collection.JavaConverters._
 
@@ -13,8 +12,6 @@ object ExamGridTranscriptExporter extends TaskBenchmarking with AddConfidentialW
 
 	def apply(
 		entities: Seq[ExamGridEntity],
-		course: Course,
-		route: Route,
 		isConfidential: Boolean
 	): XWPFDocument = {
 

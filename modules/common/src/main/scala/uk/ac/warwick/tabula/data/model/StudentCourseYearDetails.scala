@@ -3,10 +3,11 @@ package uk.ac.warwick.tabula.data.model
 import javax.persistence._
 
 import org.apache.commons.lang3.builder.{EqualsBuilder, HashCodeBuilder}
-import org.hibernate.annotations.{AccessType => _, Any => _, ForeignKey => _, _}
+import org.hibernate.annotations.{Any => _, _}
 import org.joda.time.{DateTime, Duration}
 import uk.ac.warwick.spring.Wire
 import uk.ac.warwick.tabula.JavaImports._
+import uk.ac.warwick.tabula.commands.TaskBenchmarking
 import uk.ac.warwick.tabula.commands.exams.grids.ExamGridEntityYear
 import uk.ac.warwick.tabula.data.PostLoadBehaviour
 import uk.ac.warwick.tabula.permissions.PermissionsTarget
@@ -174,9 +175,13 @@ class StudentCourseYearDetails extends StudentCourseYearProperties
 	@Type(`type`="uk.ac.warwick.tabula.data.model.SSOUserType")
 	final var agreedMarkUploadedBy: User = _
 
-	def toExamGridEntityYear = ExamGridEntityYear(
+	def toExamGridEntityYear: ExamGridEntityYear = ExamGridEntityYear(
 		moduleRegistrations = moduleRegistrations,
 		cats = moduleRegistrations.map(mr => BigDecimal(mr.cats)).sum,
+		route = route match {
+			case _: Route => route
+			case _ => studentCourseDetails.currentRoute
+		},
 		overcattingModules = overcattingModules,
 		markOverrides = None,
 		studentCourseYearDetails = Some(this)
@@ -269,7 +274,7 @@ class StudentCourseYearKey {
 		this.sceSequenceNumber = sceSequenceNumber
 	}
 
-	override final def equals(other: Any): Boolean = other match {
+	override final def equals(other: scala.Any): Boolean = other match {
 		case that: StudentCourseYearKey =>
 			new EqualsBuilder()
 				.append(scjCode, that.scjCode)

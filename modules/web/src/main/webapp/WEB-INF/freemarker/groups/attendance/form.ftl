@@ -352,9 +352,7 @@
 							<a class="btn btn-default dirty-check-ignore" href="${returnTo}">Cancel</a>
 						</div>
 						<div class="pull-left checkpoints-message alert alert-info" style="display: none;">
-							Saving this attendance will set monitoring points for
-							<a class="attended-students use-popover" data-placement="top" data-container="body" data-content=" " data-html="true"></a>
-							<a class="missed-students use-popover" data-placement="top" data-container="body" data-content=" " data-html="true"></a>
+							Saving this attendance will set monitoring points for <span class="inner"></span>
 						</div>
 					</div>
 

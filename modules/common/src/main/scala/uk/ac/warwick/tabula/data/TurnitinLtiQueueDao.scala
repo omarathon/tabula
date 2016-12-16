@@ -62,7 +62,6 @@ class TurnitinLtiQueueDaoImpl extends TurnitinLtiQueueDao with Daoisms {
 			.createAlias("submission.assignment", "assignment")
 			.add(Restrictions.isNotNull("assignment.turnitinId"))
 			.add(Restrictions.isNotNull("turnitinId"))
-			.add(Restrictions.isNotNull("fileRequested"))
 			.add(is("reportReceived", false))
 			.add(Restrictions.lt("lastReportRequest", DateTime.now.minusSeconds(TurnitinLtiService.ReportRequestWaitInSeconds)))
 			.add(Restrictions.lt("reportRequestRetries", TurnitinLtiService.ReportRequestMaxRetries))

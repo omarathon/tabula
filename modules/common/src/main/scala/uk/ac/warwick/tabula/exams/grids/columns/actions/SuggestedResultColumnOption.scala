@@ -23,8 +23,12 @@ class SuggestedResultColumnOption extends ChosenYearExamGridColumnOption with Au
 
 		override def values: Map[ExamGridEntity, ExamGridColumnValue] = {
 			state.entities.map(entity =>
-				entity -> entity.years.get(state.yearOfStudy).map(entity =>
-					progressionService.suggestedResult(entity.studentCourseYearDetails.get, state.normalLoad, state.routeRules) match {
+				entity -> entity.years.get(state.yearOfStudy).map(entityYear =>
+					progressionService.suggestedResult(
+						entityYear.studentCourseYearDetails.get,
+						state.normalLoadLookup(entityYear.route),
+						state.routeRulesLookup(entityYear.route)
+					) match {
 						case unknown: ProgressionResult.Unknown => ExamGridColumnValueMissing(unknown.details)
 						case result => ExamGridColumnValueString(result.description)
 					}

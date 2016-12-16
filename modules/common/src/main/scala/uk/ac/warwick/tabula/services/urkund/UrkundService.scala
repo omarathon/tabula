@@ -224,7 +224,7 @@ abstract class AbstractUrkundService extends UrkundService
 	override def submit(report: OriginalityReport): Try[UrkundResponse] = {
 		getReceiverAddress(report) match {
 			case Success(_) =>
-				val tempFile = File.createTempFile(report.attachment.name, null)
+				val tempFile = File.createTempFile(report.attachment.id, null)
 				FileCopyUtils.copy(report.attachment.dataStream, new FileOutputStream(tempFile))
 
 				val req = url(documentUrl(report))

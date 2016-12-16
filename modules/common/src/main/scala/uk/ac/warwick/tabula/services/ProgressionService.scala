@@ -2,7 +2,7 @@ package uk.ac.warwick.tabula.services
 
 import org.springframework.stereotype.Service
 import uk.ac.warwick.spring.Wire
-import uk.ac.warwick.tabula.data.model.{CourseYearWeighting, ModuleRegistration, StudentCourseYearDetails, UpstreamRouteRule}
+import uk.ac.warwick.tabula.data.model._
 import uk.ac.warwick.tabula.data.{AutowiringCourseDaoComponent, CourseDaoComponent}
 
 import scala.math.BigDecimal.RoundingMode
@@ -162,7 +162,11 @@ abstract class AbstractProgressionService extends ProgressionService {
 		* Regulation defined at: http://www2.warwick.ac.uk/services/aro/dar/quality/categories/examinations/conventions/fyboe
 		*/
 	private def suggestedResultFirstYear(scyd: StudentCourseYearDetails, normalLoad: BigDecimal, routeRules: Seq[UpstreamRouteRule]): ProgressionResult = {
-		val coreRequiredModules = moduleRegistrationService.findCoreRequiredModules(scyd.studentCourseDetails.currentRoute, scyd.academicYear, scyd.yearOfStudy)
+		val coreRequiredModules = moduleRegistrationService.findCoreRequiredModules(
+			scyd.toExamGridEntityYear.route,
+			scyd.academicYear,
+			scyd.yearOfStudy
+		)
 		val passedModuleRegistrations = scyd.moduleRegistrations.filter(mr => BigDecimal(mr.firstDefinedMark.get) >= ProgressionService.ModulePassMark)
 		val passedCredits = passedModuleRegistrations.map(mr => BigDecimal(mr.cats)).sum > ProgressionService.FirstYearRequiredCredits
 		val passedCoreRequired = coreRequiredModules.forall(cr => passedModuleRegistrations.exists(_.module == cr.module))

@@ -193,11 +193,6 @@ class TurnitinLtiQueueDaoTest extends PersistenceTestBase {
 		session.save(reportNotSubmitted.attachment)
 		session.save(reportNotSubmitted)
 
-		val reportNotRetrieved = validReportForReport(assignment)
-		reportNotRetrieved.fileRequested = null
-		session.save(reportNotRetrieved.attachment)
-		session.save(reportNotRetrieved)
-
 		turnitinLtiQueueDao.findReportToProcessForReport.isEmpty should be {true}
 	}}
 

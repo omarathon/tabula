@@ -11,6 +11,7 @@ import uk.ac.warwick.tabula.system.permissions.{PermissionsChecking, Permissions
 import uk.ac.warwick.tabula.JavaImports._
 
 import scala.collection.immutable.Range.Inclusive
+import scala.collection.JavaConverters._
 
 object GenerateExamGridSelectCourseCommand {
 	def apply(department: Department, academicYear: AcademicYear) =
@@ -26,19 +27,20 @@ object GenerateExamGridSelectCourseCommand {
 }
 
 class GenerateExamGridSelectCourseCommandInternal(val department: Department, val academicYear: AcademicYear) 
-	extends CommandInternal[Seq[ExamGridEntity]] {
+	extends CommandInternal[Seq[ExamGridEntity]] with TaskBenchmarking {
 
 	self: StudentCourseYearDetailsDaoComponent with GenerateExamGridSelectCourseCommandRequest =>
 
 	override def applyInternal(): Seq[ExamGridEntity] = {
-		studentCourseYearDetailsDao.findByCourseRouteYear(
-			academicYear,
-			course,
-			route,
-			yearOfStudy,
-			eagerLoad = true,
-			disableFreshFilter = true
-		).sortBy(_.studentCourseDetails.scjCode).map(scyd => scyd.studentCourseDetails.student.toExamGridEntity(scyd))
+		val scyds = benchmarkTask("findByCourseRoutesYear") {
+			studentCourseYearDetailsDao.findByCourseRoutesYear(academicYear, course, routes.asScala, yearOfStudy, eagerLoad = true, disableFreshFilter = true)
+		}
+		val sorted = benchmarkTask("sorting") {
+			scyds.sortBy(_.studentCourseDetails.scjCode)
+		}
+		benchmarkTask("toExamGridEntities") {
+			sorted.map(scyd => scyd.studentCourseDetails.student.toExamGridEntity(scyd))
+		}
 	}
 
 }
@@ -50,17 +52,12 @@ trait GenerateExamGridSelectCourseValidation extends SelfValidating {
 	override def validate(errors: Errors): Unit = {
 		if (course == null) {
 			errors.reject("examGrid.course.empty")
-		} else if (!courses.contains(course)) {
+		} else if (!allCourses.contains(course)) {
 			errors.reject("examGrid.course.invalid")
-		}
-		if (route == null) {
-			errors.reject("examGrid.route.empty")
-		} else if (!routes.contains(route)) {
-			errors.reject("examGrid.route.invalid")
 		}
 		if (yearOfStudy == null) {
 			errors.reject("examGrid.yearOfStudy.empty")
-		} else if (!yearsOfStudy.contains(yearOfStudy)) {
+		} else if (!allYearsOfStudy.contains(yearOfStudy)) {
 			errors.reject("examGrid.yearOfStudy.invalid", Array(FilterStudentsOrRelationships.MaxYearsOfStudy.toString), "")
 		}
 	}
@@ -77,19 +74,19 @@ trait GenerateExamGridSelectCoursePermissions extends RequiresPermissionsCheckin
 }
 
 trait GenerateExamGridSelectCourseCommandState {
-	
+
 	self: CourseAndRouteServiceComponent =>
-	
+
 	def department: Department
 	def academicYear: AcademicYear
 
-	lazy val courses: List[Course] = department.descendants.flatMap(d => courseAndRouteService.findCoursesInDepartment(d)).sortBy(_.code)
-	lazy val routes: List[Route] = department.descendants.flatMap(d => courseAndRouteService.findRoutesInDepartment(d)).sortBy(_.code)
-	lazy val yearsOfStudy: Inclusive = 1 to FilterStudentsOrRelationships.MaxYearsOfStudy
+	lazy val allCourses: List[Course] = department.descendants.flatMap(d => courseAndRouteService.findCoursesInDepartment(d)).sortBy(_.code)
+	lazy val allRoutes: List[Route] = department.descendants.flatMap(d => courseAndRouteService.findRoutesInDepartment(d)).sortBy(_.code)
+	lazy val allYearsOfStudy: Inclusive = 1 to FilterStudentsOrRelationships.MaxYearsOfStudy
 }
 
 trait GenerateExamGridSelectCourseCommandRequest {
 	var course: Course = _
-	var route: Route = _
+	var routes: JList[Route] = JArrayList()
 	var yearOfStudy: JInteger = _
 }

@@ -13,7 +13,8 @@ import scala.collection.JavaConverters._
 
 case class CheckpointResult(
 	attendedMonitoringPointStudentList: Seq[StudentMember],
-	missedMonitoringPointStudentList: Seq[StudentMember]
+	missedUnauthorisedMonitoringPointStudentList: Seq[StudentMember],
+	missedAuthorisedMonitoringPointStudentList: Seq[StudentMember]
 )
 
 object CheckEventAttendanceCheckpointsCommand {
@@ -42,11 +43,16 @@ class CheckEventAttendanceCheckpointsCommandInternal(val occurrence: SmallGroupE
 		}.toSeq
 		val studentListWithCheckpoints = attendanceMonitoringEventAttendanceService.getCheckpoints(attendanceList).map(a => a.student).distinct
 		if (occurrence.event.group.groupSet.module.adminDepartment.autoMarkMissedMonitoringPoints) {
-			val studentListWithMissedCheckpoints = attendanceMonitoringEventAttendanceService.getMissedCheckpoints(attendanceList)
-				.map { case (a, _) => a.student }.distinct
-			CheckpointResult(studentListWithCheckpoints, studentListWithMissedCheckpoints)
+			val (unauthorisedCheckpoints, authorisedCheckpoints) =
+				attendanceMonitoringEventAttendanceService.getMissedCheckpoints(attendanceList)
+					.partition { case (checkpoint, _) => checkpoint.state == AttendanceState.MissedUnauthorised }
+			CheckpointResult(
+				studentListWithCheckpoints,
+				unauthorisedCheckpoints.map { case (a, _) => a.student }.distinct,
+				authorisedCheckpoints.map { case (a, _) => a.student }.distinct
+			)
 		} else {
-			CheckpointResult(studentListWithCheckpoints, Seq())
+			CheckpointResult(studentListWithCheckpoints, Seq(), Seq())
 		}
 	}
 

@@ -54,7 +54,7 @@ class GenerateExamGridController extends ExamsController
 
 	type SelectCourseCommand = Appliable[Seq[ExamGridEntity]] with GenerateExamGridSelectCourseCommandRequest with GenerateExamGridSelectCourseCommandState
 	type GridOptionsCommand = Appliable[(Set[ExamGridColumnOption.Identifier], Seq[String])] with GenerateExamGridGridOptionsCommandRequest
-	type CoreRequiredModulesCommand = Appliable[Seq[CoreRequiredModule]] with PopulateGenerateExamGridSetCoreRequiredModulesCommand
+	type CoreRequiredModulesCommand = Appliable[Map[Route, Seq[CoreRequiredModule]]] with PopulateGenerateExamGridSetCoreRequiredModulesCommand
 	type CheckOvercatCommand = Appliable[GenerateExamGridCheckAndApplyOvercatCommand.Result] with GenerateExamGridCheckAndApplyOvercatCommandState with SelfValidating
 
 	override val departmentPermission: Permission = Permissions.Department.ExamGrids
@@ -91,16 +91,15 @@ class GenerateExamGridController extends ExamsController
 	@ModelAttribute("GenerateExamGridMappingParameters")
 	def params = GenerateExamGridMappingParameters
 
-	@ModelAttribute("coreRequiredModules")
-	def coreRequiredModules(
+	@ModelAttribute("coreRequiredModuleLookup")
+	def coreRequiredModuleLookup(
 		@PathVariable academicYear: AcademicYear,
-		@RequestParam(value = "route", required = false) route: Route,
 		@RequestParam(value = "yearOfStudy", required = false) yearOfStudy: JInteger
-	): Seq[CoreRequiredModule] = {
-		if (Option(route).nonEmpty && Option(yearOfStudy).nonEmpty) {
-			moduleRegistrationService.findCoreRequiredModules(route, academicYear, yearOfStudy)
+	): CoreRequiredModuleLookup = {
+		if (Option(yearOfStudy).nonEmpty) {
+			new CoreRequiredModuleLookup(academicYear, yearOfStudy, moduleRegistrationService)
 		} else {
-			Seq()
+			null
 		}
 	}
 
@@ -156,7 +155,7 @@ class GenerateExamGridController extends ExamsController
 		errors: Errors,
 		@ModelAttribute("coreRequiredModulesCommand") coreRequiredModulesCommand: CoreRequiredModulesCommand,
 		@ModelAttribute("checkOvercatCommmand") checkOvercatCommmand: CheckOvercatCommand,
-		@ModelAttribute("coreRequiredModules") coreRequiredModules: Seq[CoreRequiredModule],
+		@ModelAttribute("coreRequiredModuleLookup") coreRequiredModuleLookup: CoreRequiredModuleLookup,
 		@RequestParam jobId: String,
 		@PathVariable department: Department,
 		@PathVariable academicYear: AcademicYear
@@ -167,22 +166,14 @@ class GenerateExamGridController extends ExamsController
 			val columnIDs = gridOptionsCommand.apply()
 			if (columnIDs._1.contains(new CoreRequiredModulesColumnOption().identifier) || columnIDs._1.contains(new ModuleReportsColumnOption().identifier)) {
 				coreRequiredModulesCommand.populate()
-				coreRequiredModulesRender(jobId, selectCourseCommand, department, academicYear)
+				coreRequiredModulesRender(jobId, department, academicYear)
 			} else {
-				checkJobProgress(
-					jobId,
-					selectCourseCommand,
-					gridOptionsCommand,
-					checkOvercatCommmand,
-					coreRequiredModules,
-					department,
-					academicYear
-				)
+				checkJobProgress(jobId, selectCourseCommand, gridOptionsCommand, checkOvercatCommmand, coreRequiredModuleLookup, department, academicYear)
 			}
 		}
 	}
 
-	private def coreRequiredModulesRender(jobId: String, selectCourseCommand: SelectCourseCommand, department: Department, academicYear: AcademicYear): Mav = {
+	private def coreRequiredModulesRender(jobId: String, department: Department, academicYear: AcademicYear): Mav = {
 		commonCrumbs(
 			Mav("exams/grids/generate/coreRequiredModules", "jobId" -> jobId),
 			department,
@@ -196,24 +187,17 @@ class GenerateExamGridController extends ExamsController
 		@ModelAttribute("gridOptionsCommand") gridOptionsCommand: GridOptionsCommand,
 		@Valid @ModelAttribute("coreRequiredModulesCommand") coreRequiredModulesCommand: CoreRequiredModulesCommand,
 		errors: Errors,
+		@ModelAttribute("coreRequiredModuleLookup") coreRequiredModuleLookup: CoreRequiredModuleLookup,
 		@ModelAttribute("checkOvercatCommmand") checkOvercatCommmand: CheckOvercatCommand,
 		@RequestParam jobId: String,
 		@PathVariable department: Department,
 		@PathVariable academicYear: AcademicYear
 	): Mav = {
 		if (errors.hasErrors) {
-			coreRequiredModulesRender(jobId, selectCourseCommand, department, academicYear)
+			coreRequiredModulesRender(jobId, department, academicYear)
 		} else {
-			val coreRequiredModules = coreRequiredModulesCommand.apply()
-			checkJobProgress(
-				jobId,
-				selectCourseCommand,
-				gridOptionsCommand,
-				checkOvercatCommmand,
-				coreRequiredModules,
-				department,
-				academicYear
-			)
+			coreRequiredModulesCommand.apply()
+			checkJobProgress(jobId, selectCourseCommand, gridOptionsCommand, checkOvercatCommmand, coreRequiredModuleLookup, department, academicYear)
 		}
 	}
 
@@ -222,10 +206,10 @@ class GenerateExamGridController extends ExamsController
 		selectCourseCommand: SelectCourseCommand,
 		gridOptionsCommand: GridOptionsCommand,
 		checkOvercatCommmand: CheckOvercatCommand,
-		coreRequiredModules: Seq[CoreRequiredModule],
+		coreRequiredModuleLookup: CoreRequiredModuleLookup,
 		department: Department,
 		academicYear: AcademicYear
-	): Mav = {
+	) = {
 		val jobInstance = jobService.getInstance(jobId)
 		if (jobInstance.isDefined && !jobInstance.get.finished) {
 			val studentLastImportDates = selectCourseCommand.apply().map(e =>
@@ -246,9 +230,10 @@ class GenerateExamGridController extends ExamsController
 				selectCourseCommand,
 				gridOptionsCommand,
 				checkOvercatCommmand,
-				coreRequiredModules,
+				coreRequiredModuleLookup,
 				department,
-				academicYear
+				academicYear,
+				jobId
 			)
 		}
 	}
@@ -272,9 +257,10 @@ class GenerateExamGridController extends ExamsController
 		@Valid @ModelAttribute("gridOptionsCommand") gridOptionsCommand: GridOptionsCommand,
 		gridOptionsCommandErrors: Errors,
 		@ModelAttribute("checkOvercatCommmand") checkOvercatCommmand: CheckOvercatCommand,
-		@ModelAttribute("coreRequiredModules") coreRequiredModules: Seq[CoreRequiredModule],
+		@ModelAttribute("coreRequiredModuleLookup") coreRequiredModuleLookup: CoreRequiredModuleLookup,
 		@PathVariable department: Department,
-		@PathVariable academicYear: AcademicYear
+		@PathVariable academicYear: AcademicYear,
+		@RequestParam jobId: String
 	): Mav = {
 		if (selectCourseCommandErrors.hasErrors || gridOptionsCommandErrors.hasErrors) {
 			throw new IllegalArgumentException
@@ -283,9 +269,10 @@ class GenerateExamGridController extends ExamsController
 			selectCourseCommand,
 			gridOptionsCommand,
 			checkOvercatCommmand,
-			coreRequiredModules,
+			coreRequiredModuleLookup,
 			department,
-			academicYear
+			academicYear,
+			jobId
 		)
 	}
 
@@ -293,11 +280,12 @@ class GenerateExamGridController extends ExamsController
 		selectCourseCommand: SelectCourseCommand,
 		gridOptionsCommand: GridOptionsCommand,
 		checkOvercatCommmand: CheckOvercatCommand,
-		coreRequiredModules: Seq[CoreRequiredModule],
+		coreRequiredModules: CoreRequiredModuleLookup,
 		department: Department,
-		academicYear: AcademicYear
+		academicYear: AcademicYear,
+		jobId: String
 	): Mav = {
-		val GridData(entities, studentInformationColumns, perYearColumns, summaryColumns, weightings, normalLoadOption, routeRules) = benchmarkTask("GridData") {
+		val GridData(entities, studentInformationColumns, perYearColumns, summaryColumns, weightings, normalLoadLookup, routeRules) = benchmarkTask("GridData") {
 			checkAndApplyOvercatAndGetGridData(
 				selectCourseCommand,
 				gridOptionsCommand,
@@ -325,9 +313,9 @@ class GenerateExamGridController extends ExamsController
 				"entities" -> entities,
 				"generatedDate" -> DateTime.now,
 				"weightings" -> weightings,
-				"normalLoadOption" -> normalLoadOption,
-				"defaultNormalLoad" -> selectCourseCommand.route.degreeType.normalCATSLoad,
-				"routeRules" -> routeRules
+				"normalLoadLookup" -> normalLoadLookup,
+				"routeRules" -> routeRules,
+				"jobId" -> jobId
 			),
 			department,
 			academicYear
@@ -340,15 +328,15 @@ class GenerateExamGridController extends ExamsController
 		perYearColumns: Map[YearOfStudy, Seq[PerYearExamGridColumn]],
 		summaryColumns: Seq[ChosenYearExamGridColumn],
 		weightings: Seq[CourseYearWeighting],
-		normalLoadOption: Option[BigDecimal],
-		routeRules: Seq[UpstreamRouteRule]
+		normalLoadLookup: NormalLoadLookup,
+		routeRulesLookup: UpstreamRouteRuleLookup
 	)
 
 	protected def checkAndApplyOvercatAndGetGridData(
 		selectCourseCommand: SelectCourseCommand,
 		gridOptionsCommand: GridOptionsCommand,
 		checkOvercatCmd: CheckOvercatCommand,
-		coreRequiredModules: Seq[CoreRequiredModule]
+		coreRequiredModuleLookup: CoreRequiredModuleLookup
 	): GridData = {
 
 		checkOvercatCmd.selectCourseCommand = selectCourseCommand
@@ -364,9 +352,8 @@ class GenerateExamGridController extends ExamsController
 			}
 		}
 
-		val normalLoadOption = checkOvercatCmd.normalLoadOption
-		val normalLoad = checkOvercatCmd.normalLoad
-		val routeRules = checkOvercatCmd.routeRules
+		val normalLoadLookup = checkOvercatCmd.normalLoadLookup
+		val routeRulesLookup = checkOvercatCmd.routeRulesLookup
 
 		val gridOptions = gridOptionsCommand.apply()
 		val predefinedColumnIDs = gridOptions._1
@@ -375,11 +362,11 @@ class GenerateExamGridController extends ExamsController
 		val state = ExamGridColumnState(
 			entities = entities,
 			overcatSubsets = entities.flatMap(_.years.get(selectCourseCommand.yearOfStudy)).map(entityYear => entityYear ->
-				moduleRegistrationService.overcattedModuleSubsets(entityYear, entityYear.markOverrides.getOrElse(Map()), normalLoad, routeRules)
+				moduleRegistrationService.overcattedModuleSubsets(entityYear, entityYear.markOverrides.getOrElse(Map()), normalLoadLookup(entityYear.route), routeRulesLookup(entityYear.route))
 			).toMap,
-			coreRequiredModules = coreRequiredModules.map(_.module),
-			normalLoad = normalLoad,
-			routeRules = routeRules,
+			coreRequiredModuleLookup = coreRequiredModuleLookup,
+			normalLoadLookup = normalLoadLookup,
+			routeRulesLookup = routeRulesLookup,
 			academicYear = selectCourseCommand.academicYear,
 			yearOfStudy = selectCourseCommand.yearOfStudy,
 			showFullName = gridOptionsCommand.showFullName,
@@ -400,7 +387,7 @@ class GenerateExamGridController extends ExamsController
 			courseDao.getCourseYearWeighting(selectCourseCommand.course.code, selectCourseCommand.academicYear, year)
 		).sorted
 
-		GridData(entities, studentInformationColumns, perYearColumns, summaryColumns, weightings, normalLoadOption, routeRules)
+		GridData(entities, studentInformationColumns, perYearColumns, summaryColumns, weightings, normalLoadLookup, routeRulesLookup)
 	}
 
 }

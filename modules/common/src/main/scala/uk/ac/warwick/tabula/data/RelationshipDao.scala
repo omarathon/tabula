@@ -35,6 +35,7 @@ trait RelationshipDao {
 	def getCurrentRelationship(relationshipType: StudentRelationshipType, student: StudentMember, agent: Member): Option[StudentRelationship]
 	def getCurrentRelationships(student: StudentMember, agentId: String): Seq[StudentRelationship]
 	def getRelationshipsByTarget(relationshipType: StudentRelationshipType, student: StudentMember): Seq[StudentRelationship]
+	def getRelationshipsByCourseDetails(relationshipType: StudentRelationshipType, details: StudentCourseDetails): Seq[StudentRelationship]
 	def getRelationshipsByDepartment(relationshipType: StudentRelationshipType, department: Department): Seq[StudentRelationship]
 	def getRelationshipsByStaffDepartment(relationshipType: StudentRelationshipType, department: Department): Seq[StudentRelationship]
 	def getAllRelationshipsByAgent(agentId: String): Seq[MemberStudentRelationship]
@@ -157,6 +158,14 @@ class RelationshipDaoImpl extends RelationshipDao with Daoisms with Logging {
 		session.newCriteria[StudentRelationship]
 			.createAlias("studentCourseDetails", "scd")
 			.add(is("scd.student", student))
+			.add(is("relationshipType", relationshipType))
+			.seq
+	}
+
+	def getRelationshipsByCourseDetails(relationshipType: StudentRelationshipType, details: StudentCourseDetails): Seq[StudentRelationship] = {
+		session.newCriteria[StudentRelationship]
+			.createAlias("studentCourseDetails", "scd")
+			.add(is("scd.scjCode", details.scjCode))
 			.add(is("relationshipType", relationshipType))
 			.seq
 	}

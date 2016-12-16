@@ -83,7 +83,7 @@ trait LookupEventsFromModuleTimetables {
 	self: ModuleTimetableFetchingServiceComponent with ImportSmallGroupSetsFromExternalSystemCommandState with ImportSmallGroupSetsFromExternalSystemPermissionsRestrictedState =>
 
 	lazy val timetabledEvents: Seq[TimetabledSmallGroupEvent] =
-		modules.toSeq.par.flatMap { module => // Do it in parallel like a boss
+		modules.toSeq.flatMap { module =>
 			Try {
 				Await.result(timetableFetchingService.getTimetableForModule(module.code.toUpperCase),ImportSmallGroupEventsFromExternalSystemCommand.Timeout)
 					.events
