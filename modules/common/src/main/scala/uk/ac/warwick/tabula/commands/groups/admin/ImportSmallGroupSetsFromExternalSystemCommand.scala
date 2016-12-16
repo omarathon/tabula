@@ -85,7 +85,7 @@ trait LookupEventsFromModuleTimetables {
 	lazy val timetabledEvents: Seq[TimetabledSmallGroupEvent] =
 		modules.toSeq.flatMap { module =>
 			Try {
-				Await.result(timetableFetchingService.getTimetableForModule(module.code.toUpperCase),ImportSmallGroupEventsFromExternalSystemCommand.Timeout)
+				Await.result(timetableFetchingService.getTimetableAndStudentsForModule(module.code.toUpperCase),ImportSmallGroupEventsFromExternalSystemCommand.Timeout)
 					.events
 					.filter(ImportSmallGroupEventsFromExternalSystemCommand.isValidForYear(academicYear))
 					.groupBy { _.eventType }

@@ -90,6 +90,7 @@ class CachedPartialTimetableFetchingService(
 
 	def getTimetableForStudent(universityId: String): Future[EventList] = toFuture(Try(timetableCache.get(StudentKey(universityId))))
 	def getTimetableForModule(moduleCode: String): Future[EventList] = toFuture(Try(timetableCache.get(ModuleKey(moduleCode))))
+	def getTimetableAndStudentsForModule(moduleCode: String): Future[EventList] = toFuture(Try(timetableCache.get(ModuleWithStudentsKey(moduleCode))))
 	def getTimetableForCourse(courseCode: String): Future[EventList] = toFuture(Try(timetableCache.get(CourseKey(courseCode))))
 	def getTimetableForRoom(roomName: String): Future[EventList] = toFuture(Try(timetableCache.get(RoomKey(roomName))))
 	def getTimetableForStaff(universityId: String): Future[EventList] = toFuture(Try(timetableCache.get(StaffKey(universityId))))
@@ -127,4 +128,5 @@ object TimetableCacheKey {
 	case class CourseKey(id: String) extends TimetableCacheKey
 	case class RoomKey(id: String) extends TimetableCacheKey
 	case class ModuleKey(id: String) extends TimetableCacheKey
+	case class ModuleWithStudentsKey(id: String) extends TimetableCacheKey
 }
