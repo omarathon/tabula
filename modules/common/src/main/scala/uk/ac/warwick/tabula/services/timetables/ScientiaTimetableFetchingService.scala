@@ -57,6 +57,9 @@ trait AutowiringScientiaConfigurationComponent extends ScientiaConfigurationComp
 		lazy val cacheSuffix: String = Wire.optionProperty("${scientia.cacheSuffix}").getOrElse("")
 
 		val cacheExpiryTime: Int = 60 * 60 * 6 // 6 hours in seconds
+
+		override val returnEvents: Boolean = false
+
 	}
 
 }
@@ -75,7 +78,8 @@ trait AutowiringNewScientiaConfigurationComponent extends AutowiringScientiaConf
 
 		override val cacheExpiryTime: Int = 60 * 60 // 1 hour in seconds
 
-		override val returnEvents: Boolean = false
+		override val returnEvents: Boolean = true
+
 	}
 
 }
