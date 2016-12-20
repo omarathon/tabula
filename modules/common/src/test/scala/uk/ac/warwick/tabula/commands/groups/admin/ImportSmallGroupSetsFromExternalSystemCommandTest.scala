@@ -158,7 +158,7 @@ class ImportSmallGroupSetsFromExternalSystemCommandTest extends TestBase with Mo
 			relatedUrl = None
 		)
 
-		command.timetableFetchingService.getTimetableForModule("IN101") returns Future.successful(EventList.fresh(Seq(
+		command.timetableFetchingService.getTimetableForModule("IN101", includeStudents = true) returns Future.successful(EventList.fresh(Seq(
 			tEventModule1Seminar1, tEventModule1Seminar2,
 			TimetableEvent(
 				uid="uuid3",
@@ -179,7 +179,7 @@ class ImportSmallGroupSetsFromExternalSystemCommandTest extends TestBase with Mo
 				relatedUrl = None
 			)
 		)))
-		command.timetableFetchingService.getTimetableForModule("IN102") returns Future.successful(EventList.fresh(Seq(
+		command.timetableFetchingService.getTimetableForModule("IN102", includeStudents = true) returns Future.successful(EventList.fresh(Seq(
 			TimetableEvent(
 				uid="uuid4",
 				name="IN102S",
@@ -205,7 +205,7 @@ class ImportSmallGroupSetsFromExternalSystemCommandTest extends TestBase with Mo
 		command.canManageDepartment should be {true}
 		command.modules should be (Seq(module1, module2))
 		command.timetabledEvents should be (Seq(
-			new TimetabledSmallGroupEvent(module1, TimetableEventType.Seminar, Seq(tEventModule1Seminar2, tEventModule1Seminar1))
+			TimetabledSmallGroupEvent(module1, TimetableEventType.Seminar, Seq(tEventModule1Seminar2, tEventModule1Seminar1))
 		))
 	}}
 

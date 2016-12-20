@@ -149,7 +149,7 @@ class ImportSmallGroupEventsFromExternalSystemCommandTest extends TestBase with 
 			relatedUrl = None
 		)
 
-		timetableFetchingService.getTimetableForModule("IN101") returns Future.successful(EventList.fresh(Seq(
+		timetableFetchingService.getTimetableForModule("IN101", includeStudents = false) returns Future.successful(EventList.fresh(Seq(
 			tEventSeminar1, tEventSeminar2,
 			TimetableEvent(
 				uid="uuid3",
