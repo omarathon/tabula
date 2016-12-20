@@ -53,8 +53,12 @@ class CachedPartialTimetableFetchingService(
 					case _ => throw new UnsupportedOperationException("Delegate does not support fetching room timetables")
 				}
 				case ModuleKey(id)  => delegate match {
-					case delegate: ModuleTimetableFetchingService => delegate.getTimetableForModule(id)
+					case delegate: ModuleTimetableFetchingService => delegate.getTimetableForModule(id, includeStudents = false)
 					case _ => throw new UnsupportedOperationException("Delegate does not support fetching module timetables")
+				}
+				case ModuleWithStudentsKey(id)  => delegate match {
+					case delegate: ModuleTimetableFetchingService => delegate.getTimetableForModule(id, includeStudents = true)
+					case _ => throw new UnsupportedOperationException("Delegate does not support fetching module timetables with students")
 				}
 			}
 
@@ -89,8 +93,10 @@ class CachedPartialTimetableFetchingService(
 	)
 
 	def getTimetableForStudent(universityId: String): Future[EventList] = toFuture(Try(timetableCache.get(StudentKey(universityId))))
-	def getTimetableForModule(moduleCode: String): Future[EventList] = toFuture(Try(timetableCache.get(ModuleKey(moduleCode))))
-	def getTimetableAndStudentsForModule(moduleCode: String): Future[EventList] = toFuture(Try(timetableCache.get(ModuleWithStudentsKey(moduleCode))))
+	def getTimetableForModule(moduleCode: String, includeStudents: Boolean): Future[EventList] = {
+		if (includeStudents) toFuture(Try(timetableCache.get(ModuleWithStudentsKey(moduleCode))))
+		else toFuture(Try(timetableCache.get(ModuleKey(moduleCode))))
+	}
 	def getTimetableForCourse(courseCode: String): Future[EventList] = toFuture(Try(timetableCache.get(CourseKey(courseCode))))
 	def getTimetableForRoom(roomName: String): Future[EventList] = toFuture(Try(timetableCache.get(RoomKey(roomName))))
 	def getTimetableForStaff(universityId: String): Future[EventList] = toFuture(Try(timetableCache.get(StaffKey(universityId))))

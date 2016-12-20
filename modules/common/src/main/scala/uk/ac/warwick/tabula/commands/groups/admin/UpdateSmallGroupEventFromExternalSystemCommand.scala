@@ -52,7 +52,7 @@ trait UpdateSmallGroupEventFromExternalSystemCommandState extends ImportSmallGro
 
 	lazy val timetableEvents: Seq[TimetableEvent] =
 		Try {
-			Await.result(timetableFetchingService.getTimetableForModule(module.code.toUpperCase), ImportSmallGroupEventsFromExternalSystemCommand.Timeout)
+			Await.result(timetableFetchingService.getTimetableForModule(module.code.toUpperCase, includeStudents = false), ImportSmallGroupEventsFromExternalSystemCommand.Timeout)
 				.events
 				.filter(ImportSmallGroupEventsFromExternalSystemCommand.isValidForYear(set.academicYear))
 				.sorted

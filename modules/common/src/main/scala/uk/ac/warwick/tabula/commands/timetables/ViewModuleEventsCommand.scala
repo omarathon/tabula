@@ -67,7 +67,7 @@ abstract class ViewModuleEventsCommandInternal(val module: Module)
 	self: ModuleTimetableFetchingServiceComponent with TermServiceComponent with EventOccurrenceServiceComponent =>
 
 	def applyInternal(): ReturnType = {
-		val timetableEvents = timetableFetchingService.getTimetableForModule(module.code.toUpperCase)
+		val timetableEvents = timetableFetchingService.getTimetableForModule(module.code.toUpperCase, includeStudents = false)
 			.map { events =>
 				if (academicYear != null) {
 					events.filter { event => event.year == academicYear }

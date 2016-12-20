@@ -26,7 +26,7 @@ trait SyllabusPlusEventCountForModule {
 
 	@ModelAttribute("syllabusPlusEventCount")
 	def syllabusPlusEventCount(@PathVariable module: Module, @PathVariable("smallGroupSet") set: SmallGroupSet): Int =
-		Try(Await.result(timetableFetchingService.getTimetableForModule(module.code.toUpperCase), ImportSmallGroupEventsFromExternalSystemCommand.Timeout))
+		Try(Await.result(timetableFetchingService.getTimetableForModule(module.code.toUpperCase, includeStudents = false), ImportSmallGroupEventsFromExternalSystemCommand.Timeout))
 			.recover { case _: TimeoutException | _: TimetableEmptyException => EventList.empty }.get
 			.events.count(ImportSmallGroupEventsFromExternalSystemCommand.isValidForYear(set.academicYear))
 }

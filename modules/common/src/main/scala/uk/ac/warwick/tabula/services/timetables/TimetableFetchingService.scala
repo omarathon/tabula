@@ -81,8 +81,7 @@ trait StudentTimetableFetchingService extends PartialTimetableFetchingService {
 }
 
 trait ModuleTimetableFetchingService extends PartialTimetableFetchingService {
-	def getTimetableForModule(moduleCode: String): Future[EventList]
-	def getTimetableAndStudentsForModule(moduleCode: String): Future[EventList]
+	def getTimetableForModule(moduleCode: String, includeStudents: Boolean): Future[EventList]
 }
 
 trait CourseTimetableFetchingService extends PartialTimetableFetchingService {
@@ -194,29 +193,16 @@ class CombinedTimetableFetchingService(services: PartialTimetableFetchingService
 			EventList.combine
 		).map(mergeDuplicates)
 
-	def getTimetableForModule(moduleCode: String): Future[EventList] =
+	def getTimetableForModule(moduleCode: String, includeStudents: Boolean): Future[EventList] =
 		Futures.combine(
 			services
 				.collect { case service: ModuleTimetableFetchingService => service }
 				.map {
 					// On downstream failures, just return Nil
-					_.getTimetableForModule(moduleCode).recover { case t => logger.warn("Error fetching timetable", t); EventList.empty }
+					_.getTimetableForModule(moduleCode, includeStudents).recover { case t => logger.warn("Error fetching timetable", t); EventList.empty }
 				},
 			EventList.combine
 		).map(mergeDuplicates)
-
-	def getTimetableAndStudentsForModule(moduleCode: String): Future[EventList] =
-		Futures.combine(
-			services
-				.collect { case service: ModuleTimetableFetchingService => service }
-				.map {
-					// On downstream failures, just return Nil
-					_.getTimetableAndStudentsForModule(moduleCode).recover { case t => logger.warn("Error fetching timetable", t); EventList.empty }
-				},
-			EventList.combine
-		).map(mergeDuplicates)
-
-
 
 	def getTimetableForCourse(courseCode: String): Future[EventList] =
 		Futures.combine(

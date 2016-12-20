@@ -96,7 +96,7 @@ trait LookupEventsFromModuleTimetable extends PopulateOnForm {
 
 	eventsToImport.clear()
 	eventsToImport.addAll(Try {
-		Await.result(timetableFetchingService.getTimetableForModule(module.code.toUpperCase), ImportSmallGroupEventsFromExternalSystemCommand.Timeout)
+		Await.result(timetableFetchingService.getTimetableForModule(module.code.toUpperCase, includeStudents = false), ImportSmallGroupEventsFromExternalSystemCommand.Timeout)
 			.events
 			.filter(ImportSmallGroupEventsFromExternalSystemCommand.isValidForYear(set.academicYear))
 			.sorted

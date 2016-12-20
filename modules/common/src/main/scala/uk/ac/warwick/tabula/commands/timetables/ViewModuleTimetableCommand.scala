@@ -56,7 +56,7 @@ abstract class ViewModuleTimetableCommandInternal(val module: Module)
 	self: ModuleTimetableFetchingServiceComponent =>
 
 	def applyInternal(): ReturnType = {
-		Try(Await.result(timetableFetchingService.getTimetableForModule(module.code.toUpperCase), ViewModuleEventsCommand.Timeout))
+		Try(Await.result(timetableFetchingService.getTimetableForModule(module.code.toUpperCase, includeStudents = false), ViewModuleEventsCommand.Timeout))
 			.recover { case _: TimeoutException | _: TimetableEmptyException => EventList.empty }
 			.map { events => events.filter { event => event.year == academicYear }}
 	}
