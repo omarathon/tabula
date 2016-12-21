@@ -34,7 +34,8 @@
 		$body.on('submit', 'form.modify-extension', function(e){
 			e.preventDefault();
 			var $form = $(e.target);
-			var $detailRow = $form.closest('tr.detail-row').find('td');
+			//var $detailRow = $form.closest('tr.detail-row').find('td');
+			var $detailRow = $form.closest('.content-container');
 
 			var formData = $form.serializeArray();
 			var $buttonClicked =  $(document.activeElement);
@@ -44,6 +45,7 @@
 				if (data.success) {
 					window.location.replace(data.redirect);
 				} else {
+					console.log($detailRow.size());
 					$detailRow.html(data);
 					$detailRow.bindFormHelpers();
 				}

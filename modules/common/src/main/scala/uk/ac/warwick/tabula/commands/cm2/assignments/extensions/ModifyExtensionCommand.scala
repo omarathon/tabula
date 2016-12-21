@@ -6,7 +6,7 @@ import org.springframework.validation.Errors
 import uk.ac.warwick.tabula.{CurrentUser, DateFormats}
 import uk.ac.warwick.tabula.commands._
 import uk.ac.warwick.tabula.data.Transactions._
-import uk.ac.warwick.tabula.data.model.{Notification, ScheduledNotification}
+import uk.ac.warwick.tabula.data.model.{Assignment, Module, Notification, ScheduledNotification}
 import uk.ac.warwick.tabula.data.model.forms.{Extension, ExtensionState}
 import uk.ac.warwick.tabula.data.model.notifications.coursework._
 import uk.ac.warwick.tabula.events.NotificationHandling
@@ -46,7 +46,28 @@ class ModifyExtensionCommandInternal(val extension: Extension, val submitter: Cu
 		save(extension)
 		extension
 	}
+}
 
+trait ModifyExtensionCommandState {
+
+	var isNew: Boolean = _
+
+	var universityId: String =_
+	var assignment: Assignment =_
+	var module: Module =_
+	var submitter: CurrentUser =_
+
+	@WithinYears(maxFuture = 3) @DateTimeFormat(pattern = DateFormats.DateTimePicker)
+	var expiryDate: DateTime =_
+	var reviewerComments: String =_
+	var state: ExtensionState = ExtensionState.Unreviewed
+	var action: String =_
+	var extension: Extension =_
+
+	final val ApprovalAction = "Grant"
+	final val RejectionAction = "Reject"
+	final val RevocationAction = "Revoke"
+	final val UpdateApprovalAction = "Update"
 }
 
 trait ModifyExtensionPermissions extends RequiresPermissionsChecking with PermissionsCheckingMethods {

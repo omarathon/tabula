@@ -1,6 +1,8 @@
-package uk.ac.warwick.tabula.commands.coursework.assignments.extensions
+package uk.ac.warwick.tabula.commands.cm2.assignments.extensions
 
 import org.joda.time.DateTime
+import org.springframework.format.annotation.DateTimeFormat
+import org.springframework.validation.Errors
 import uk.ac.warwick.tabula.commands._
 import uk.ac.warwick.tabula.data.model.notifications.coursework._
 import uk.ac.warwick.tabula.events.NotificationHandling
@@ -8,18 +10,18 @@ import uk.ac.warwick.tabula.system.permissions.{PermissionsChecking, RequiresPer
 import uk.ac.warwick.tabula.permissions.Permissions
 import uk.ac.warwick.tabula.data.model.forms.{Extension, ExtensionState}
 import uk.ac.warwick.tabula.data.model.{Assignment, Module, Notification, ScheduledNotification}
-import uk.ac.warwick.tabula.CurrentUser
+import uk.ac.warwick.tabula.{CurrentUser, DateFormats}
 import uk.ac.warwick.tabula.services.{AutowiringUserLookupComponent, UserLookupComponent}
 import uk.ac.warwick.tabula.data.Transactions._
-import uk.ac.warwick.userlookup.User
+import uk.ac.warwick.tabula.validators.WithinYears
 
 object EditExtensionCommand {
 	def apply(module: Module, assignment: Assignment, uniId: String, currentUser: CurrentUser, action: String) =
 		new EditExtensionCommandInternal(module, assignment, uniId, currentUser, action)
 			with ComposableCommand[Extension]
 			with EditExtensionCommandPermissions
-			with ModifyExtensionCommandDescription
-			with ModifyExtensionCommandValidation
+			with EditExtensionCommandDescription
+			with EditExtensionCommandValidation
 			with EditExtensionCommandNotification
 			with EditExtensionCommandScheduledNotification
 			with EditExtensionCommandNotificationCompletion
@@ -27,9 +29,17 @@ object EditExtensionCommand {
 			with HibernateExtensionPersistenceComponent
 }
 
-class EditExtensionCommandInternal(module: Module, assignment: Assignment, uniId: String, currentUser: CurrentUser, action: String)
-		extends ModifyExtensionCommand(module, assignment, uniId, currentUser, action) with ModifyExtensionCommandState  {
+class EditExtensionCommandInternal(val mod: Module, val ass: Assignment, val uniId: String, val currentUser: CurrentUser, val act: String) extends CommandInternal[Extension]
+		with EditExtensionCommandState with EditExtensionCommandValidation with TaskBenchmarking {
+
 	self: ExtensionPersistenceComponent with UserLookupComponent =>
+
+	module = mod
+	universityId = uniId
+	assignment = ass
+	action = act
+	submitter = currentUser
+
 
 	val e: Option[Extension] = assignment.findExtension(universityId)
 	e match {
@@ -47,11 +57,72 @@ class EditExtensionCommandInternal(module: Module, assignment: Assignment, uniId
 		save(extension)
 		extension
 	}
+
+	def copyTo(extension: Extension): Unit = {
+		extension.userId = userLookup.getUserByWarwickUniId(universityId).getUserId
+		extension.assignment = assignment
+		extension.expiryDate = expiryDate
+		extension.rawState_=(state)
+		extension.reviewedOn = DateTime.now
+
+		action match {
+			case ApprovalAction | UpdateApprovalAction => extension.approve(reviewerComments)
+			case RejectionAction => extension.reject(reviewerComments)
+			case RevocationAction => extension.rawState_=(ExtensionState.Revoked)
+			case _ =>
+		}
+	}
+
+	def copyFrom(extension: Extension): Unit = {
+		expiryDate = extension.expiryDate.orNull
+		state = extension.state
+		reviewerComments = extension.reviewerComments
+	}
+
 }
 
+trait EditExtensionCommandState {
+
+	var isNew: Boolean = _
+
+	var universityId: String =_
+	var assignment: Assignment =_
+	var module: Module =_
+	var submitter: CurrentUser =_
+
+	@WithinYears(maxFuture = 3) @DateTimeFormat(pattern = DateFormats.DateTimePicker)
+	var expiryDate: DateTime =_
+	var reviewerComments: String =_
+	var state: ExtensionState = ExtensionState.Unreviewed
+	var action: String =_
+	var extension: Extension =_
+
+	final val ApprovalAction = "Grant"
+	final val RejectionAction = "Reject"
+	final val RevocationAction = "Revoke"
+	final val UpdateApprovalAction = "Update"
+
+}
+
+trait EditExtensionCommandValidation extends SelfValidating {
+	self: EditExtensionCommandState =>
+	def validate(errors: Errors) {
+		if(expiryDate == null) {
+			if (state == ExtensionState.Approved) {
+				errors.rejectValue("expiryDate", "extension.requestedExpiryDate.provideExpiry")
+			}
+		} else if(expiryDate.isBefore(assignment.closeDate)) {
+			errors.rejectValue("expiryDate", "extension.expiryDate.beforeAssignmentExpiry")
+		}
+
+		if(!Option(reviewerComments).exists(_.nonEmpty) && state == ExtensionState.MoreInformationRequired) {
+			errors.rejectValue("reviewerComments", "extension.reviewerComments.provideReasons")
+		}
+	}
+}
 
 trait EditExtensionCommandPermissions extends RequiresPermissionsChecking {
-	self: ModifyExtensionCommandState =>
+	self: EditExtensionCommandState =>
 
 	def permissionsCheck(p: PermissionsChecking) {
 		p.mustBeLinked(assignment, module)
@@ -65,7 +136,7 @@ trait EditExtensionCommandPermissions extends RequiresPermissionsChecking {
 
 
 trait EditExtensionCommandNotification extends Notifies[Extension, Option[Extension]] {
-	self: ModifyExtensionCommandState =>
+	self: EditExtensionCommandState =>
 
 	def emit(extension: Extension): Seq[ExtensionNotification] = {
 		val admin = submitter.apparentUser
@@ -97,7 +168,7 @@ trait EditExtensionCommandNotification extends Notifies[Extension, Option[Extens
 }
 
 trait EditExtensionCommandScheduledNotification extends SchedulesNotifications[Extension, Extension] {
-	self: ModifyExtensionCommandState =>
+	self: EditExtensionCommandState =>
 
 	override def transformResult(extension: Extension) = Seq(extension)
 
@@ -153,7 +224,7 @@ trait EditExtensionCommandScheduledNotification extends SchedulesNotifications[E
 
 trait EditExtensionCommandNotificationCompletion extends CompletesNotifications[Extension] {
 
-	self: NotificationHandling with ModifyExtensionCommandState =>
+	self: NotificationHandling with EditExtensionCommandState =>
 
 	def notificationsToComplete(commandResult: Extension): CompletesNotificationsResult = {
 		if (commandResult.approved || commandResult.rejected)
@@ -165,5 +236,15 @@ trait EditExtensionCommandNotificationCompletion extends CompletesNotifications[
 			)
 		else
 			EmptyCompletesNotificationsResult
+	}
+}
+
+trait EditExtensionCommandDescription extends Describable[Extension] {
+	self: EditExtensionCommandState =>
+
+	def describe(d: Description) {
+		d.assignment(assignment)
+		d.module(assignment.module)
+		d.studentIds(Seq(universityId))
 	}
 }
