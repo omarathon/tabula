@@ -1,13 +1,13 @@
 package uk.ac.warwick.tabula.services.timetables
 
 import uk.ac.warwick.tabula.CurrentUser
+import uk.ac.warwick.tabula.data.model.attendance.AttendanceState
 import uk.ac.warwick.tabula.data.model.{StaffMember, StudentMember}
 import uk.ac.warwick.tabula.permissions.Permissions
 import uk.ac.warwick.tabula.services.timetables.TimetableFetchingService.EventList
-import uk.ac.warwick.tabula.services.{SecurityServiceComponent, UserLookupComponent, SmallGroupServiceComponent}
-import uk.ac.warwick.userlookup.User
-import uk.ac.warwick.tabula.data.model.groups.SmallGroupEvent
+import uk.ac.warwick.tabula.services.{SecurityServiceComponent, SmallGroupServiceComponent, UserLookupComponent}
 import uk.ac.warwick.tabula.timetables.TimetableEvent
+import uk.ac.warwick.userlookup.User
 
 import scala.concurrent.Future
 import scala.util.Try
@@ -42,7 +42,19 @@ trait SmallGroupEventTimetableEventSourceComponentImpl extends SmallGroupEventTi
 		protected def eventsFor(user: User, currentUser: CurrentUser): EventList = {
 			/* Include SGT teaching responsibilities for students (mainly PGR) and students for staff (e.g. Chemistry) */
 			val allEvents = studentEvents(user, currentUser) ++ tutorEvents(user, currentUser)
-			val autoTimetableEvents = allEvents map smallGroupEventToTimetableEvent
+
+			// TAB-4643 - Don't show event if it has been replaced
+			val attendanceMap = smallGroupService.findStudentAttendanceInEvents(user.getWarwickId, allEvents).groupBy(_.occurrence.event)
+
+			val autoTimetableEvents: Seq[TimetableEvent] = allEvents.map { event =>
+				attendanceMap.get(event) match {
+					case Some(attendanceList) =>
+						val weeksToRemove = attendanceList.filter(a => a.state == AttendanceState.MissedAuthorised && a.replacedBy != null).map(_.occurrence.week)
+						TimetableEvent(event, withoutWeeks = weeksToRemove)
+					case None =>
+						TimetableEvent(event)
+				}
+			}
 
 			// TAB-2682 Also include events that the student has been manually added to
 			val manualTimetableEvents = smallGroupService.findManuallyAddedAttendance(user.getWarwickId)
@@ -82,9 +94,6 @@ trait SmallGroupEventTimetableEventSourceComponentImpl extends SmallGroupEventTi
 				)
 		}
 
-		private def smallGroupEventToTimetableEvent(sge: SmallGroupEvent): TimetableEvent = {
-			TimetableEvent(sge)
-		}
 	}
 
 }

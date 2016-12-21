@@ -10,9 +10,9 @@ import uk.ac.warwick.userlookup.User
 
 class SmallGroupEventTimetableEventSourceTest extends TestBase with Mockito{
 
-	val mockSmallGroupService: SmallGroupService = mock[SmallGroupService]
-	val mockUserLookup: UserLookupService = mock[UserLookupService]
-	val mockSecurityService: SecurityService = mock[SecurityService]
+	val mockSmallGroupService: SmallGroupService = smartMock[SmallGroupService]
+	val mockUserLookup: UserLookupService = smartMock[UserLookupService]
+	val mockSecurityService: SecurityService = smartMock[SecurityService]
 
 	val eventSource: StudentTimetableEventSource = new SmallGroupEventTimetableEventSourceComponentImpl with UserLookupComponent with SmallGroupServiceComponent with SecurityServiceComponent {
 		val smallGroupService: SmallGroupService = mockSmallGroupService
@@ -46,6 +46,7 @@ class SmallGroupEventTimetableEventSourceTest extends TestBase with Mockito{
 		mockSmallGroupService.findSmallGroupsByStudent(any[User]) returns Seq(group)
 		mockSmallGroupService.findSmallGroupEventsByTutor(any[User]) returns Nil
 		mockSmallGroupService.findManuallyAddedAttendance(any[String]) returns Nil
+		mockSmallGroupService.findStudentAttendanceInEvents(any[String], any[Seq[SmallGroupEvent]]) returns Nil
 	  val events = eventSource.eventsFor(student, currentUser, TimetableEvent.Context.Student).futureValue.events
 		events.size should be (1)
 
