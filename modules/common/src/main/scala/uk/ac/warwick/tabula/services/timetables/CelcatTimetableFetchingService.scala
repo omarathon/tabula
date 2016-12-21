@@ -1,14 +1,10 @@
 package uk.ac.warwick.tabula.services.timetables
 
-import java.io.InputStream
-
 import dispatch.classic._
-import net.fortuna.ical4j.data.CalendarBuilder
 import net.fortuna.ical4j.model.component.VEvent
 import net.fortuna.ical4j.model.parameter.Value
 import net.fortuna.ical4j.model.property.{Categories, DateProperty, RRule}
-import net.fortuna.ical4j.model.{Component, Parameter, Property}
-import net.fortuna.ical4j.util.CompatibilityHints
+import net.fortuna.ical4j.model.{Parameter, Property}
 import org.apache.commons.codec.digest.DigestUtils
 import org.joda.time.{DateTime, DateTimeZone}
 import uk.ac.warwick.spring.Wire
@@ -24,23 +20,13 @@ import uk.ac.warwick.tabula.services.timetables.CelcatHttpTimetableFetchingServi
 import uk.ac.warwick.tabula.services.timetables.TimetableFetchingService.EventList
 import uk.ac.warwick.tabula.timetables.{TimetableEvent, TimetableEventType}
 import uk.ac.warwick.tabula.{AcademicYear, AutowiringFeaturesComponent, DateFormats}
-import uk.ac.warwick.userlookup.UserLookupException
-import uk.ac.warwick.util.cache.{Cache, CacheEntryUpdateException, Caches, SingularCacheEntryFactory}
 
 import scala.collection.JavaConverters._
 import scala.concurrent.Future
 import scala.util.parsing.json.JSON
-import scala.util.{Failure, Success, Try}
-
-sealed abstract class FilenameGenerationStrategy
-object FilenameGenerationStrategy {
-	case object Default extends FilenameGenerationStrategy
-	case object BSV extends FilenameGenerationStrategy
-	case object WBS extends FilenameGenerationStrategy
-}
 
 trait CelcatConfiguration {
-	val departmentConfiguration: Map[String, CelcatDepartmentConfiguration]
+	val wbsConfiguration: CelcatDepartmentConfiguration
 	val cacheEnabled: Boolean
 }
 
@@ -51,9 +37,6 @@ trait CelcatConfigurationComponent {
 case class CelcatDepartmentConfiguration(
 	baseUri: String,
 	excludedEventTypes: Seq[TimetableEventType] = Nil,
-	staffFilenameLookupStrategy: FilenameGenerationStrategy = FilenameGenerationStrategy.Default,
-	staffListInBSV: Boolean = false,
-	parseWBSJson: Boolean = false,
 	enabledFn: () => Boolean = { () => true },
 	credentials: Credentials
 ) {
@@ -64,23 +47,11 @@ trait AutowiringCelcatConfigurationComponent extends CelcatConfigurationComponen
 	val celcatConfiguration = new AutowiringCelcatConfiguration
 
 	class AutowiringCelcatConfiguration extends CelcatConfiguration with AutowiringFeaturesComponent {
-		val departmentConfiguration =	Map(
-			"ch" -> CelcatDepartmentConfiguration(
-				baseUri = "https://www2.warwick.ac.uk/appdata/chem-timetables",
-				staffFilenameLookupStrategy = FilenameGenerationStrategy.BSV,
-				staffListInBSV = true,
-				parseWBSJson = false,
-				enabledFn = { () => features.celcatTimetablesChemistry },
-				credentials = Credentials(Wire.property("${celcat.fetcher.ch.username}"), Wire.property("${celcat.fetcher.ch.password}"))
-			),
-			"ib" -> CelcatDepartmentConfiguration(
-				baseUri = "https://rimmer.wbs.ac.uk",
-				staffFilenameLookupStrategy = FilenameGenerationStrategy.WBS,
-				staffListInBSV = false,
-				parseWBSJson = true,
-				enabledFn = { () => features.celcatTimetablesWBS },
-				credentials = Credentials(Wire.property("${celcat.fetcher.ib.username}"), Wire.property("${celcat.fetcher.ib.password}"))
-			)
+
+		val wbsConfiguration = CelcatDepartmentConfiguration(
+			baseUri = "https://rimmer.wbs.ac.uk",
+			enabledFn = { () => features.celcatTimetablesWBS },
+			credentials = Credentials(Wire.property("${celcat.fetcher.ib.username}"), Wire.property("${celcat.fetcher.ib.password}"))
 		)
 
 		val cacheEnabled = true
@@ -236,123 +207,26 @@ class CelcatHttpTimetableFetchingService(celcatConfiguration: CelcatConfiguratio
 		with ModuleAndDepartmentServiceComponent
 		with DispatchHttpClientComponent =>
 
-	lazy val configs: Map[String, CelcatDepartmentConfiguration] = celcatConfiguration.departmentConfiguration
+	lazy val wbsConfig: CelcatDepartmentConfiguration = celcatConfiguration.wbsConfiguration
 
-	// a dispatch response handler which reads iCal/JSON from the response and parses it into a list of TimetableEvents
+	// a dispatch response handler which reads JSON from the response and parses it into a list of TimetableEvents
 	def handler(config: CelcatDepartmentConfiguration): (Map[String, Seq[String]], Request) => Handler[EventList] = { (headers: Map[String,Seq[String]], req: dispatch.classic.Request) =>
-		if (config.parseWBSJson) {
-			req >- { (rawJSON) =>
-				combineIdenticalEvents(parseJSON(rawJSON))
-			}
-		}
-		else {
-			req >> { (is, json) => {
-				combineIdenticalEvents(parseICal(is, config))
-			}}
+		req >- { (rawJSON) =>
+			combineIdenticalEvents(parseJSON(rawJSON))
 		}
 	}
 
 	def getTimetableForStudent(universityId: UniversityId): Future[EventList] = {
-		userLookup.getUserByWarwickUniId(universityId) match {
-			case FoundUser(u) if u.getDepartmentCode.hasText =>
-				configs.get(u.getDepartmentCode.toLowerCase).filter(_.enabled).map { config =>
-					val filename = {
-						if (config.parseWBSJson) s"${u.getWarwickId}"
-						else s"${u.getWarwickId}.ics"
-					}
-					doRequest(filename, config)
-				}.getOrElse(Future.successful(EventList.fresh(Nil)))
-
-			case FoundUser(u) =>
-				logger.warn(s"Found user for ${u.getWarwickId}, but not departmentCode. Returning empty Celcat timetable")
-				Future.successful(EventList.fresh(Nil))
-			case _ => Future.failed(new UserLookupException(s"No user found for university ID $universityId"))
-		}
-	}
-
-	def findConfigForStaff(universityId: UniversityId): Option[CelcatDepartmentConfiguration] = {
-		userLookup.getUserByWarwickUniId(universityId) match {
-			// User in a department with a config
-			case FoundUser(u) if u.getDepartmentCode.hasText && configs.contains(u.getDepartmentCode.toLowerCase) =>
-				configs.get(u.getDepartmentCode.toLowerCase).filter(_.enabled)
-
-			// Look for a BSV-style config that contains the user
-			case FoundUser(u) =>
-				configs.values.filter(_.enabled)
-					.filter { _.staffFilenameLookupStrategy == FilenameGenerationStrategy.BSV }
-					.find { lookupCelcatIDFromBSV(u.getWarwickId, _).isDefined }
-
-			case _ => None
-		}
+		if (wbsConfig.enabled) doRequest(universityId, wbsConfig)
+		else Future(EventList(Nil, None))
 	}
 
 	def getTimetableForStaff(universityId: UniversityId): Future[EventList] = {
-		findConfigForStaff(universityId).map { config =>
-			val filename = config.staffFilenameLookupStrategy match {
-				case FilenameGenerationStrategy.Default => s"$universityId.ics"
-				case FilenameGenerationStrategy.WBS => s"$universityId"
-				case FilenameGenerationStrategy.BSV => lookupCelcatIDFromBSV(universityId, config).map { id => s"$id.ics" }.getOrElse(s"$universityId.ics")
-			}
-
-			doRequest(filename, config)
-		}.getOrElse(Future.successful(EventList.fresh(Nil)))
+		if (wbsConfig.enabled) doRequest(universityId, wbsConfig)
+		else Future(EventList(Nil, None))
 	}
-
-	type BSVCacheEntry = Seq[(UniversityId, CelcatStaffInfo)] with java.io.Serializable
-	val bsvCacheEntryFactory = new SingularCacheEntryFactory[String, BSVCacheEntry] {
-		def create(baseUri: String): BSVCacheEntry = {
-			val config = configs.filter { case (_, deptConfig) => deptConfig.baseUri == baseUri }
-				.map { case (_, deptConfig) => deptConfig }
-				.headOption.getOrElse(throw new IllegalArgumentException(s"No such config with baseUri $baseUri"))
-
-			val req =
-				(url(baseUri) / "staff.bsv" <<? Map("forcebasic" -> "true"))
-					.as_!(config.credentials.username, config.credentials.password)
-
-			def bsvHandler = { (headers: Map[String,Seq[String]], req: dispatch.classic.Request) =>
-				req >- { _.split('\n').flatMap { _.split("\\|", 4) match {
-					case Array(celcatId, staffId, initials, name) => Some(staffId -> CelcatStaffInfo(celcatId.trim(), staffId.trim(), initials.trim(), name.trim()))
-					case _ => None
-				}}.toList }
-			}
-
-			def toBSVCacheEntry(seq: Seq[(UniversityId, CelcatStaffInfo)]): BSVCacheEntry = {
-				seq match {
-					// can't use "case v: BSVCacheEntry" because the type inference engine in 2.10 can't cope.
-					case v: Seq[(UniversityId, CelcatStaffInfo)] with java.io.Serializable => v
-					case _ => throw new RuntimeException("Unserializable collection returned from TimetableFetchingService")
-				}
-			}
-
-			// Execute the request
-			logger.info(s"Requesting staff information from $req")
-			Try(httpClient.when(_==200)(req >:+ bsvHandler)) match {
-				case Success(ev) => toBSVCacheEntry(ev)
-				case Failure(ex) => throw new CacheEntryUpdateException(ex)
-			}
-		}
-		def shouldBeCached(response: BSVCacheEntry) = true
-	}
-
-	lazy val bsvCache: Cache[String, BSVCacheEntry] =
-		Caches.newCache("CelcatBSVCache", bsvCacheEntryFactory, 60 * 60 * 24, cacheStrategy)
-
-	def lookupCelcatIDFromBSV(universityId: UniversityId, config: CelcatDepartmentConfiguration): Option[String] =
-		staffInfo(config).get(universityId).map { _.celcatId }
-
-	def staffInfo(config: CelcatDepartmentConfiguration): Map[UniversityId, CelcatStaffInfo] =
-		if (config.staffListInBSV) {
-			try {
-				bsvCache.get(config.baseUri).toMap
-			} catch {
-				case e: CacheEntryUpdateException =>
-					logger.error("Couldn't fetch staff BSV file for " + config.baseUri, e)
-					Map()
-			}
-		} else Map()
 
 	def doRequest(filename: String, config: CelcatDepartmentConfiguration): Future[EventList] = {
-		// Add {universityId}.ics to the URL
 		val req =
 			(url(config.baseUri) / filename <<? Map("forcebasic" -> "true"))
 				.as_!(config.credentials.username, config.credentials.password)
@@ -464,25 +338,6 @@ class CelcatHttpTimetableFetchingService(celcatConfiguration: CelcatConfiguratio
 				})
 			case _ => throw new RuntimeException("Could not parse JSON")
 		}
-	}
-
-	def parseICal(is: InputStream, config: CelcatDepartmentConfiguration)(implicit termService: TermService): EventList = {
-		CompatibilityHints.setHintEnabled(CompatibilityHints.KEY_RELAXED_PARSING, true)
-		CompatibilityHints.setHintEnabled(CompatibilityHints.KEY_RELAXED_VALIDATION, true)
-
-		val builder = new CalendarBuilder
-		val cal = builder.build(is)
-
-		val allStaff = staffInfo(config)
-
-		val vEvents = cal.getComponents(Component.VEVENT).asScala.collect { case event: VEvent => event }
-		val moduleMap = moduleAndDepartmentService.getModulesByCodes(
-			vEvents.flatMap(e => parseModuleCode(e).map(_.toLowerCase)).distinct
-		).groupBy(_.code).mapValues(_.head)
-
-		EventList.fresh(vEvents.flatMap { event =>
-			parseVEvent(event, allStaff, config, locationFetchingService, moduleMap, userLookup)
-		})
 	}
 }
 
