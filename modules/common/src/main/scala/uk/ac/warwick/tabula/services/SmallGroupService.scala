@@ -63,6 +63,7 @@ trait SmallGroupService {
 	def getAttendance(studentId: String, occurrence: SmallGroupEventOccurrence) : Option[SmallGroupEventAttendance]
 	def findSmallGroupsWithAttendanceRecorded(studentId: String): Seq[SmallGroup]
 	def findManuallyAddedAttendance(studentId: String): Seq[SmallGroupEventAttendance]
+	def findStudentAttendanceInEvents(universityId: String, events: Seq[SmallGroupEvent]): Seq[SmallGroupEventAttendance]
 
 	def findAttendanceForStudentInModulesInWeeks(student: StudentMember, startWeek: Int, endWeek: Int, modules: Seq[Module]): Seq[SmallGroupEventAttendance]
 
@@ -269,6 +270,9 @@ abstract class AbstractSmallGroupService extends SmallGroupService {
 
 	def findManuallyAddedAttendance(studentId: String): Seq[SmallGroupEventAttendance] =
 		smallGroupDao.findManuallyAddedAttendance(studentId)
+
+	def findStudentAttendanceInEvents(universityId: String, events: Seq[SmallGroupEvent]): Seq[SmallGroupEventAttendance] =
+		smallGroupDao.findStudentAttendanceInEvents(universityId, events)
 
 	def findAttendanceForStudentInModulesInWeeks(student: StudentMember, startWeek: Int, endWeek: Int, modules: Seq[Module]): Seq[SmallGroupEventAttendance] =
 		smallGroupDao.findAttendanceForStudentInModulesInWeeks(student, startWeek, endWeek, modules)

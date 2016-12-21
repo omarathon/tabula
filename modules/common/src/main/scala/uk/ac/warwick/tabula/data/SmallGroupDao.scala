@@ -78,6 +78,7 @@ trait SmallGroupDao {
 	def findAttendanceForStudentInModulesInWeeks(student: StudentMember, startWeek: Int, endWeek: Int, modules: Seq[Module]): Seq[SmallGroupEventAttendance]
 	def findOccurrencesInModulesInWeeks(startWeek: Int, endWeek: Int, modules: Seq[Module], academicYear: AcademicYear): Seq[SmallGroupEventOccurrence]
 	def findOccurrencesInWeeks(startWeek: Int, endWeek: Int, academicYear: AcademicYear): Seq[SmallGroupEventOccurrence]
+	def findStudentAttendanceInEvents(universityId: String, events: Seq[SmallGroupEvent]): Seq[SmallGroupEventAttendance]
 
 	def hasSmallGroups(module: Module): Boolean
 	def hasSmallGroups(module: Module, academicYear: AcademicYear): Boolean
@@ -261,6 +262,14 @@ class SmallGroupDaoImpl extends SmallGroupDao
 			.add(le("week", endWeek))
 			.add(is("groupSet.academicYear", academicYear))
 		  .seq
+	}
+
+	def findStudentAttendanceInEvents(universityId: String, events: Seq[SmallGroupEvent]): Seq[SmallGroupEventAttendance] = {
+		safeInSeq(() => {
+			session.newCriteria[SmallGroupEventAttendance]
+				.createAlias("occurrence", "occurrence")
+				.add(is("universityId", universityId))
+		}, "occurrence.event", events)
 	}
 
 
