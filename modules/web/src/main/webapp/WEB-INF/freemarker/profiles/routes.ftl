@@ -35,11 +35,11 @@ TODO grab values from the Routes object in code, as that's pretty equivalent and
 <#macro relationship_reallocate department relationshipType agentId><@_u page="/department/${department.code}/${relationshipType.urlPart}/reallocate/${agentId}" /></#macro>
 <#macro relationship_unconfirmed_meetings department relationshipType><@_u page="/department/${department.code}/${relationshipType.urlPart}/unconfirmed" /></#macro>
 
-<#macro relationship_edit relationshipType scjCode currentAgent>
-	<@_u page="/${relationshipType.urlPart}/${scjCode}/edit?currentAgent=${currentAgent.universityId}" />
+<#macro relationship_edit relationshipType scjCode agent>
+	<@_u page="/${relationshipType.urlPart}/${scjCode}/edit/${agent.universityId}" />
 </#macro>
 
-<#macro relationship_edit_no_agent relationshipType scjCode>
+<#macro relationship_add relationshipType scjCode>
 	<@_u page="/${relationshipType.urlPart}/${scjCode}/add" />
 </#macro>
 

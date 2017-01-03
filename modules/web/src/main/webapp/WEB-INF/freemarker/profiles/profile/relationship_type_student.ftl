@@ -42,6 +42,15 @@
 					<strong>University number:</strong> ${relationship.agentMember.universityId}<br />
 					<#if relationship.agentMember.userId??><strong>IT code:</strong> ${relationship.agentMember.userId}<br /></#if>
 					<span class="peoplesearch-info" data-href="<@routes.profiles.peoplesearchData relationship.agentMember />"></span>
+					<#if (canEditRelationship!false)>
+						<a class="btn btn-primary ajax-modal"
+						   href="<@routes.profiles.relationship_edit relationshipType studentCourseDetails.urlSafeId relationship.agentMember />"
+						   data-target="#change-agent"
+						   data-toggle="modal"
+						>
+							Edit ${relationshipType.agentRole}
+						</a>
+					</#if>
 				</p>
 			<#else>
 				<p>
@@ -57,21 +66,13 @@
 	<div class="col-md-12">
 		<p>
 			<#if (canEditRelationship!false)>
-				<#if relationshipsToDisplay?has_content>
-					<a class="btn btn-primary"
-					   data-remote="<@routes.profiles.relationship_edit relationshipType studentCourseDetails.urlSafeId relationshipsToDisplay?first.agentMember />"
-					   data-target="#change-agent"
-					   data-toggle="modal">
-					   Edit ${relationshipType.agentRole}
-					</a>
-				<#else>
-					<a class="btn btn-primary"
-					   data-remote="<@routes.profiles.relationship_edit_no_agent relationshipType studentCourseDetails.urlSafeId />"
-					   data-target="#change-agent"
-					   data-toggle="modal">
-						Add a ${relationshipType.agentRole}
-					</a>
-				</#if>
+				<a class="btn btn-primary ajax-modal"
+					href="<@routes.profiles.relationship_add relationshipType studentCourseDetails.urlSafeId />"
+					data-target="#change-agent"
+					data-toggle="modal"
+				>
+					Add a ${relationshipType.agentRole}
+				</a>
 			</#if>
 			<a class="btn btn-default" data-target="#timeline" data-toggle="modal">View timeline</a>
 		</p>
@@ -138,7 +139,7 @@
 	</@modal.wrapper>
 </div>
 
-<div id="change-agent" class="modal fade"><@modal.wrapper></@modal.wrapper></div>
+<div id="change-agent" class="modal fade"></div>
 
 <h2>Record of meetings</h2>
 
