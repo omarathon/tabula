@@ -292,7 +292,9 @@ abstract class Description {
 	 */
 	def submissions(submissions: Seq[Submission]): Description = property("submissions" -> submissions.map(_.id))
 
-	def fileAttachments(attachments: Seq[FileAttachment]): Description = property("attachments" -> attachments.map(_.id))
+	def fileAttachments(attachments: Seq[FileAttachment]): Description = property("attachments" -> attachments.map(a =>
+		s"${a.id} - ${a.hash}"
+	))
 
 	def assessment(assessment: Assessment): Description = assessment match {
 		case a: Assignment => assignment(a)
