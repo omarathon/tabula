@@ -1,5 +1,6 @@
 package uk.ac.warwick.tabula.commands.profiles
 
+import org.joda.time.DateTime
 import uk.ac.warwick.tabula.commands.profiles.ViewRelatedStudentsCommand.Result
 import uk.ac.warwick.tabula.data.ScalaRestriction
 import uk.ac.warwick.tabula.data.model._
@@ -55,8 +56,8 @@ class ViewRelatedStudentsCommandTest extends TestBase with Mockito {
 		val relationshipType = StudentRelationshipType("tutor", "tutor", "personal tutor", "personal tutee")
 		val restrictions : Seq[ScalaRestriction] = Seq()
 
-		val relationship1 = Seq(StudentRelationship(staffMember, relationshipType, courseDetails1.student))
-		val relationship2 = Seq(StudentRelationship(staffMember, relationshipType, courseDetails2.student))
+		val relationship1 = Seq(StudentRelationship(staffMember, relationshipType, courseDetails1.student, DateTime.now))
+		val relationship2 = Seq(StudentRelationship(staffMember, relationshipType, courseDetails2.student, DateTime.now))
 
 		mockProfileService.getSCDsByAgentRelationshipAndRestrictions(relationshipType, staffMember, restrictions) returns Seq(courseDetails1, courseDetails2)
 
@@ -89,8 +90,8 @@ class ViewRelatedStudentsCommandTest extends TestBase with Mockito {
 		val restrictions : Seq[ScalaRestriction] = Seq()
 		val relationshipType = StudentRelationshipType("supervisor", "supervisor", "supervisor", "supervisee")
 
-		val relationship1 = StudentRelationship(staffMember, relationshipType, courseDetails1.student)
-		val relationship2 = StudentRelationship(staffMember, relationshipType, courseDetails2.student)
+		val relationship1 = StudentRelationship(staffMember, relationshipType, courseDetails1.student, DateTime.now)
+		val relationship2 = StudentRelationship(staffMember, relationshipType, courseDetails2.student, DateTime.now)
 
 		val meetingRecord = new MeetingRecord
 		meetingRecord.relationship = relationship1
@@ -124,8 +125,8 @@ class ViewRelatedStudentsCommandTest extends TestBase with Mockito {
 		val result: Result = command.applyInternal()
 
 		result.entities should be (Seq(courseDetails1, courseDetails2))
-		val studentMeetingRecord: Option[MeetingRecord] = result.lastMeetingWithTotalPendingApprovalsMap.get(courseDetails1.student.universityId).get._1
-		val studentPendingApprovalCount: Int = result.lastMeetingWithTotalPendingApprovalsMap.get(courseDetails1.student.universityId).get._2
+		val studentMeetingRecord: Option[MeetingRecord] = result.lastMeetingWithTotalPendingApprovalsMap(courseDetails1.student.universityId)._1
+		val studentPendingApprovalCount: Int = result.lastMeetingWithTotalPendingApprovalsMap(courseDetails1.student.universityId)._2
 		studentMeetingRecord should be (Some(meetingRecord))
 		studentPendingApprovalCount should be (1)
 	}}

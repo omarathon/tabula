@@ -42,7 +42,7 @@ abstract class ProfilesHomeCommand(val user: CurrentUser, val currentMember: Opt
 
 			// Get all the relationship types that the current member is an agent of
 			val downwardRelationshipTypes = currentMember.map { m =>
-				benchmarkTask("Get all relationship types with member") { relationshipService.listAllStudentRelationshipTypesWithMember(m) }
+				benchmarkTask("Get all relationship types with member") { relationshipService.listCurrentStudentRelationshipTypesWithMember(m) }
 			}.getOrElse(Nil)
 
 			// Get all the enabled relationship types for a department

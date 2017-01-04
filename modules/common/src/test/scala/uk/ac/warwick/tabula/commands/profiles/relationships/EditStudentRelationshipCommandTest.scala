@@ -1,5 +1,6 @@
 package uk.ac.warwick.tabula.commands.profiles.relationships
 
+import org.joda.time.DateTime
 import uk.ac.warwick.tabula.commands.DescriptionImpl
 import uk.ac.warwick.tabula.data.model.notifications.profiles.{StudentRelationshipChangeToOldAgentNotification, StudentRelationshipChangeToStudentNotification}
 import uk.ac.warwick.tabula.data.model._
@@ -140,16 +141,14 @@ class EditStudentRelationshipCommandTest extends TestBase with Mockito {
 	}}
 
 	@Test
-	def testApplyNoExistingRels() { new TutorFixture {
-		private val thisRelationshipService = relationshipService
-
+	def testApplyNoExistingRels() { withFakeTime(DateTime.now) { new TutorFixture {
 		// apply should return all the modified relationships
 
 		// no existing relationships for the SCD - add a new tutor and get back the new relationship:
 		val command = new EditStudentRelationshipCommandInternal(studentCourseDetails, tutorRelationshipType, NoCurrentUser())
 			with RelationshipServiceComponent
 			with EditStudentRelationshipCommandRequest {
-			override def relationshipService: RelationshipService = thisRelationshipService
+			override val relationshipService: RelationshipService = mockRelationshipService
 		}
 
 		command.newAgent = newTutor
@@ -158,36 +157,32 @@ class EditStudentRelationshipCommandTest extends TestBase with Mockito {
 		rels.size should be (1)
 		rels.head.agent should be (newTutor.universityId)
 		rels.head.studentMember should be (Some(studentCourseDetails.student))
-	}}
+	}}}
 
 	@Test
-	def testApplyExistingRel() { new TutorFixture {
-		private val thisRelationshipService = relationshipService
-
+	def testApplyExistingRel() { withFakeTime(DateTime.now) { new TutorFixture {
 		// an existing relationship with a different tutor:
 		val command = new EditStudentRelationshipCommandInternal(studentCourseDetails, tutorRelationshipType, NoCurrentUser())
 			with RelationshipServiceComponent
 			with EditStudentRelationshipCommandRequest {
-			override def relationshipService: RelationshipService = thisRelationshipService
+			override val relationshipService: RelationshipService = mockRelationshipService
 		}
 		command.oldAgent = oldTutor
 		command.newAgent = newTutor
 
 		private val rels = command.applyInternal()
-		rels.size should be (1)
-		rels.head.agent should be (newTutor.universityId)
-		rels.head.studentMember should be (Some(studentCourseDetails.student))
-	}}
+		rels.size should be (2)
+		rels.exists(r => r.agent == newTutor.universityId) should be (true)
+		rels.exists(r => r.studentMember.contains(studentCourseDetails.student)) should be (true)
+	}}}
 
 	@Test
 	def testApplyReplaceWithSelf() { new TutorFixture {
-		private val thisRelationshipService = relationshipService
-
 		// replace an agent with themselves, ie do nothing
 		val command = new EditStudentRelationshipCommandInternal(studentCourseDetails, tutorRelationshipType, NoCurrentUser())
 			with RelationshipServiceComponent
 			with EditStudentRelationshipCommandRequest {
-			override def relationshipService: RelationshipService = thisRelationshipService
+			override val relationshipService: RelationshipService = mockRelationshipService
 		}
 		command.oldAgent = oldTutor
 		command.newAgent = oldTutor
@@ -197,25 +192,23 @@ class EditStudentRelationshipCommandTest extends TestBase with Mockito {
 	}}
 
 	@Test
-	def testApplyMultipleOldTutorsReplaceOne() { new TutorFixture {
-		private val thisRelationshipService = relationshipService
-
+	def testApplyMultipleOldTutorsReplaceOne() { withFakeTime(DateTime.now) { new TutorFixture {
 		// multiple old tutors, just replace one
 		val oldTutor2 = new StaffMember
 		oldTutor2.universityId = "00000022"
 
-		profileService.getMemberByUniversityId("00000022") returns Some(oldTutor2)
+		mockProfileService.getMemberByUniversityId("00000022") returns Some(oldTutor2)
 
 		val relationshipOld2 = new MemberStudentRelationship
 		relationshipOld2.studentMember = student
 		relationshipOld2.agentMember = oldTutor2
 
-		relationshipService.findCurrentRelationships(tutorRelationshipType, studentCourseDetails) returns Seq(relationshipOld, relationshipOld2)
+		mockRelationshipService.findCurrentRelationships(tutorRelationshipType, studentCourseDetails) returns Seq(relationshipOld, relationshipOld2)
 
 		val command = new EditStudentRelationshipCommandInternal(studentCourseDetails, tutorRelationshipType, NoCurrentUser())
 			with RelationshipServiceComponent
 			with EditStudentRelationshipCommandRequest {
-			override def relationshipService: RelationshipService = thisRelationshipService
+			override val relationshipService: RelationshipService = mockRelationshipService
 		}
 		command.oldAgent = oldTutor
 		command.newAgent = newTutor
@@ -223,9 +216,9 @@ class EditStudentRelationshipCommandTest extends TestBase with Mockito {
 		val rels3: Seq[StudentRelationship] = command.applyInternal()
 
 		// so we should have replaced oldTutor with newTutor and oldTutor2 should remain untouched
-		rels3.size should be(1)
-		rels3.head.agent should be(newTutor.universityId)
-		rels3.head.studentMember should be(Some(studentCourseDetails.student))
-	}}
+		rels3.size should be (2)
+		rels3.exists(r => r.agent == newTutor.universityId) should be (true)
+		rels3.exists(r => r.studentMember.contains(studentCourseDetails.student)) should be (true)
+	}}}
 
 }

@@ -28,6 +28,8 @@ TODO grab values from the Routes object in code, as that's pretty equivalent and
 <#macro relationship_students relationshipType><@_u page="/${relationshipType.urlPart}/students" /></#macro>
 <#macro relationship_agents department relationshipType><@_u page="/department/${department.code}/${relationshipType.urlPart}" /></#macro>
 <#macro relationship_missing department relationshipType><@_u page="/department/${department.code}/${relationshipType.urlPart}/missing" /></#macro>
+<#macro relationship_scheduled department relationshipType><@_u page="/department/${department.code}/${relationshipType.urlPart}/scheduled" /></#macro>
+<#macro relationship_scheduled_update department relationshipType><@_u page="/department/${department.code}/${relationshipType.urlPart}/scheduled/update" /></#macro>
 <#macro relationship_allocate department relationshipType><@_u page="/department/${department.code}/${relationshipType.urlPart}/allocate" /></#macro>
 <#macro relationship_template department relationshipType><@_u page="/department/${department.code}/${relationshipType.urlPart}/allocate/template" /></#macro>
 <#macro relationship_allocate_upload department relationshipType><@_u page="/department/${department.code}/${relationshipType.urlPart}/allocate/upload" /></#macro>
@@ -41,6 +43,10 @@ TODO grab values from the Routes object in code, as that's pretty equivalent and
 
 <#macro relationship_add relationshipType scjCode>
 	<@_u page="/${relationshipType.urlPart}/${scjCode}/add" />
+</#macro>
+
+<#macro relationship_scheduled_change_cancel relationship>
+	<@_u page="/${relationship.relationshipType.urlPart}/${relationship.studentCourseDetails.urlSafeId}/cancel/${relationship.id}" />
 </#macro>
 
 <#macro create_meeting_record scd academicYear relationshipType><@_u page="/${relationshipType.urlPart}/meeting/${scd.urlSafeId}/${academicYear.startYear?c}/create" /></#macro>

@@ -2,15 +2,22 @@ package uk.ac.warwick.tabula.web.controllers.profiles.relationships
 
 import javax.validation.Valid
 
+import org.joda.time.DateTime
+import org.joda.time.format.DateTimeFormat
 import org.springframework.stereotype.Controller
 import org.springframework.validation.Errors
 import org.springframework.web.bind.annotation.{ModelAttribute, PathVariable, RequestMapping}
-import uk.ac.warwick.tabula.commands.profiles.relationships.EditStudentRelationshipCommand
+import uk.ac.warwick.tabula.DateFormats
+import uk.ac.warwick.tabula.commands.profiles.relationships.{EditStudentRelationshipCommand, EditStudentRelationshipCommandRequest}
 import uk.ac.warwick.tabula.commands.{Appliable, SelfValidating}
 import uk.ac.warwick.tabula.data.model.{Member, StudentCourseDetails, StudentRelationship, StudentRelationshipType}
 import uk.ac.warwick.tabula.profiles.web.Routes
 import uk.ac.warwick.tabula.web.Mav
 import uk.ac.warwick.tabula.web.controllers.profiles.ProfilesController
+
+object ManageStudentRelationshipController {
+	final val scheduledAgentChange = "scheduledAgentChange"
+}
 
 trait ManageStudentRelationshipController extends ProfilesController {
 
@@ -22,6 +29,21 @@ trait ManageStudentRelationshipController extends ProfilesController {
 
 	def render(agent: Option[Member]): Mav = {
 		Mav("profiles/relationships/edit/view", "existingAgent" -> agent).noLayoutIf(ajax)
+	}
+
+	def redirectResult(
+		relationshipType: StudentRelationshipType,
+		studentCourseDetails: StudentCourseDetails,
+		scheduledDate: DateTime
+	): Mav = {
+		val r = Redirect(Routes.Profile.relationshipType(studentCourseDetails.student, relationshipType))
+		if (scheduledDate.isAfterNow) {
+			r.addObjects(
+				ManageStudentRelationshipController.scheduledAgentChange ->
+					DateTimeFormat.forPattern(DateFormats.DateTimePicker).print(scheduledDate)
+			)
+		}
+		r
 	}
 
 }
@@ -37,7 +59,7 @@ class AddStudentRelationshipController extends ManageStudentRelationshipControll
 
 	@RequestMapping(method = Array(POST))
 	def submit(
-		@Valid @ModelAttribute("command") cmd: Appliable[Seq[StudentRelationship]],
+		@Valid @ModelAttribute("command") cmd: Appliable[Seq[StudentRelationship]] with EditStudentRelationshipCommandRequest,
 		errors: Errors,
 		@PathVariable relationshipType: StudentRelationshipType,
 		@PathVariable studentCourseDetails: StudentCourseDetails
@@ -47,12 +69,7 @@ class AddStudentRelationshipController extends ManageStudentRelationshipControll
 		} else {
 			cmd.apply()
 
-			if (ajax) {
-				form(cmd)
-			} else {
-				Redirect(Routes.Profile.relationshipType(studentCourseDetails.student, relationshipType))
-			}
-
+			redirectResult(relationshipType, studentCourseDetails, cmd.scheduledDateToUse)
 		}
 	}
 
@@ -72,7 +89,7 @@ class EditStudentRelationshipController extends ManageStudentRelationshipControl
 
 	@RequestMapping(method = Array(POST))
 	def submit(
-		@Valid @ModelAttribute("command") cmd: Appliable[Seq[StudentRelationship]],
+		@Valid @ModelAttribute("command") cmd: Appliable[Seq[StudentRelationship]] with EditStudentRelationshipCommandRequest,
 		errors: Errors,
 		@PathVariable relationshipType: StudentRelationshipType,
 		@PathVariable studentCourseDetails: StudentCourseDetails,
@@ -83,12 +100,7 @@ class EditStudentRelationshipController extends ManageStudentRelationshipControl
 		} else {
 			cmd.apply()
 
-			if (ajax) {
-				form(cmd, agent)
-			} else {
-				Redirect(Routes.Profile.relationshipType(studentCourseDetails.student, relationshipType))
-			}
-
+			redirectResult(relationshipType, studentCourseDetails, cmd.scheduledDateToUse)
 		}
 	}
 

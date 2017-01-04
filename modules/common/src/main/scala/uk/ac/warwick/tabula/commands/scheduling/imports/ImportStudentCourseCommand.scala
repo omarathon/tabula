@@ -142,7 +142,7 @@ class ImportStudentCourseCommand(rows: Seq[SitsStudentRow], stuMem: StudentMembe
 						case Some(mem: Member) =>
 							logger.info("Got a personal tutor from SITS! SprCode: " + courseRow.sprCode + ", tutorUniId: " + courseRow.tutorUniId)
 
-							relationshipService.replaceStudentRelationships(relationshipType, studentCourseDetails, Seq(mem))
+							relationshipService.replaceStudentRelationships(relationshipType, studentCourseDetails, mem, DateTime.now)
 						case _ =>
 							logger.warn(
 								"SPR code: "

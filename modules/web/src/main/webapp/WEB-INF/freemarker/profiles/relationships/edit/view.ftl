@@ -21,26 +21,32 @@
 
 			<h5 id="studentName">${relationshipType.studentRole?capitalize}: ${student.fullName}</h5>
 
+			<input type="hidden" name="removeAgent" value="false" />
+
 			<@bs3form.labelled_form_group path="" labelText="${relationshipType.agentRole?cap_first}">
-				<div class="input-group profile-search-results">
-					<#if existingAgent??>
-						<input type="text" name="query" value="${existingAgent.fullName}" id="query" class="form-control" />
-						<input type="hidden" name="newAgent" value="${existingAgent.universityId}" />
-						<input type="hidden" name="oldAgent" value="${existingAgent.universityId}" />
-					<#else>
-						<input type="text" name="query" value="" id="query" class="form-control" />
-						<input type="hidden" name="newAgent" />
+				<div class="row">
+					<div class="col-sm-<#if pageAction != "add">10<#else>12</#if>">
+						<div class="input-group profile-search-results">
+							<#if existingAgent??>
+								<input type="text" name="query" value="${existingAgent.fullName}" id="query" class="form-control" />
+								<input type="hidden" name="newAgent" value="${existingAgent.universityId}" />
+								<input type="hidden" name="oldAgent" value="${existingAgent.universityId}" />
+							<#else>
+								<input type="text" name="query" value="" id="query" class="form-control" />
+								<input type="hidden" name="newAgent" />
+							</#if>
+							<span class="input-group-btn">
+								<button class="inline-search-button btn btn-default" type="button"><i class="fa fa-search"></i></button>
+							</span>
+						</div>
+					</div>
+					<#if pageAction != "add">
+						<div class="col-sm-2">
+							<button id="remove-agent" class="btn btn-danger" type="button">Remove</button>
+						</div>
 					</#if>
-					<span class="input-group-btn">
-						<button class="inline-search-button btn btn-default" type="button"><i class="fa fa-search"></i></button>
-					</span>
 				</div>
 			</@bs3form.labelled_form_group>
-
-			<input type="hidden" name="removeAgent" value="false" />
-			<#if pageAction != "add">
-				<button id="remove-agent" class="btn btn-danger" type="button">Remove</button>
-			</#if>
 
 			<#if pageAction != "add">
 				<div id="removeAgentMessage" style="display: none" class="alert alert-info clearfix">
@@ -52,23 +58,38 @@
 				</div>
 			</#if>
 
-			<div id="notify-agent-change">
+			<div id="extra-options">
 				<#if pageAction != "add">
 					<div id="notify-remove-agent" class="alert alert-info hide"><strong>${existingAgent.fullName}</strong> will no longer be ${student.firstName}'s ${relationshipType.agentRole}.</div>
 				</#if>
-				<p>Notify these people via email of this change</p>
-				<@bs3form.checkbox>
-					<input type="checkbox" name="notifyStudent" class="notifyStudent" checked />
-					${relationshipType.studentRole?cap_first}
-				</@bs3form.checkbox>
-				<@bs3form.checkbox>
-					<input type="checkbox" name="notifyOldAgent" class="notifyOldAgent" <#if pageAction != "add">checked <#else> disabled </#if> />
-					Old ${relationshipType.agentRole}
-				</@bs3form.checkbox>
-				<@bs3form.checkbox>
-					<input type="checkbox" name="notifyNewAgent" class="notifyNewAgent" checked />
-					New ${relationshipType.agentRole}
-				</@bs3form.checkbox>
+
+				<div class="scheduledDate">
+					<@bs3form.labelled_form_group path="" labelText="Make this change">
+						<@bs3form.radio>
+							<@f.radiobutton path="specificScheduledDate" value="false" /> Immediately
+						</@bs3form.radio>
+						<@bs3form.radio>
+							<@f.radiobutton path="specificScheduledDate" value="true" /> On date
+							<span class="additional"><@f.input path="scheduledDate" cssClass="date-time-picker form-control" autocomplete="off" /></span>
+						</@bs3form.radio>
+					</@bs3form.labelled_form_group>
+				</div>
+				
+				<@bs3form.labelled_form_group path="" labelText="Notify these people via email of this change">
+					<p>Notifications will be sent immediately, reagardless of when the change is scheduled.</p>
+					<@bs3form.checkbox>
+						<input type="checkbox" name="notifyStudent" checked />
+						${relationshipType.studentRole?cap_first}
+					</@bs3form.checkbox>
+					<@bs3form.checkbox>
+						<input type="checkbox" name="notifyOldAgent" <#if pageAction != "add">checked <#else> disabled </#if> />
+						Old ${relationshipType.agentRole}
+					</@bs3form.checkbox>
+					<@bs3form.checkbox>
+						<input type="checkbox" name="notifyNewAgent" checked />
+						New ${relationshipType.agentRole}
+					</@bs3form.checkbox>
+				</@bs3form.labelled_form_group>
 			</div>
 
 			<@bs3form.errors path="*" />
@@ -84,6 +105,12 @@
 
 	<script type="text/javascript">
 		jQuery(function($) {
+			$("input:radio[name='specificScheduledDate']").radioControlled({
+				'selector' : '.additional',
+				'parentSelector' : '.scheduledDate'
+			});
+			$('input.date-time-picker').tabulaDateTimePicker();
+
 			var $form = $('#command')
 				, $modal = $('#change-agent')
 				, $modalBody = $modal.find('.modal-body')
@@ -100,7 +127,7 @@
 
 			$('#remove-agent').click(function() {
 				if ($(this).hasClass("disabled")) return;
-				if ($('#notify-agent-change').is(':visible')) $('#notify-agent-change').hide();
+				if ($('#extra-options').is(':visible')) $('#extra-options').hide();
 				$('#removeAgentMessage').show();
 			});
 
@@ -109,7 +136,7 @@
 					.prop("checked", false)
 					.closest("label").addClass("muted");
 				$('#removeAgentMessage').hide();
-				$('#notify-agent-change').show();
+				$('#extra-options').show();
 				$("#save-agent").removeClass("disabled").addClass("btn-primary");
 				$form.find('input[name="query"]').prop('disabled', true);
 				$('#remove-agent').hide();
@@ -171,7 +198,7 @@
 
 				if($form.find('input[name=oldAgent]').val() != member[1]) {
 					$('#remove-agent').addClass("disabled");
-					$('#notify-agent-change').show();
+					$('#extra-options').show();
 				} else {
 					$('#remove-agent').removeClass("disabled");
 				}
@@ -181,7 +208,7 @@
 				return member[0];
 			});
 
-			$('#notify-agent-change').hide();
+			$('#extra-options').hide();
 		});
 	</script>
 

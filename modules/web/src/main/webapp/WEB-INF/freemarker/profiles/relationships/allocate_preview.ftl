@@ -92,10 +92,6 @@
 		</div>
 	</div>
 
-	<script>
-		jQuery('table.sortable').sortableTable();
-	</script>
-
 	<@f.form commandName="command" action="${previewFormAction}" method="POST">
 		<#include "_allocate_notifications_modal.ftl" />
 
@@ -111,12 +107,34 @@
 		</#list>
 		<input type="hidden" name="allocationType" value="${command.allocationType}" />
 
+		<div class="scheduledDate">
+			<@bs3form.labelled_form_group path="" labelText="Make this change">
+				<@bs3form.radio>
+					<@f.radiobutton path="specificScheduledDate" value="false" /> Immediately
+				</@bs3form.radio>
+				<@bs3form.radio>
+					<@f.radiobutton path="specificScheduledDate" value="true" /> On date
+					<span class="additional"><@f.input path="scheduledDate" cssClass="date-time-picker form-control" autocomplete="off" /></span>
+				</@bs3form.radio>
+			</@bs3form.labelled_form_group>
+		</div>
+
 		<div class="submit-buttons">
 			<input type="hidden" name="confirm" value="true">
 			<button type="button" class="btn btn-primary" data-toggle="modal" data-target="#notify-modal">Confirm</button>
 			<a href="/profiles/" class="btn btn-default">Cancel</a>
 		</div>
 	</@f.form>
+
+	<script>
+		jQuery(function($){
+			$('table.sortable').sortableTable();
+			$("input:radio[name='specificScheduledDate']").radioControlled({
+				'selector' : '.additional',
+				'parentSelector' : '.scheduledDate'
+			});
+		});
+	</script>
 
 </#if>
 

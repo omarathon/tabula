@@ -1,5 +1,6 @@
 package uk.ac.warwick.tabula.data.model.notifications.profiles.meetingrecord
 
+import org.joda.time.DateTime
 import uk.ac.warwick.tabula.data.model._
 import uk.ac.warwick.tabula.{Fixtures, TestBase}
 
@@ -15,7 +16,7 @@ class MeetingRecordApprovedNotificationTest extends TestBase {
 
 	val relationshipType = StudentRelationshipType("personalTutor", "tutor", "personal tutor", "personal tutee")
 
-	val relationship: StudentRelationship = StudentRelationship(agent, relationshipType, student)
+	val relationship: StudentRelationship = StudentRelationship(agent, relationshipType, student, DateTime.now)
 
 	@Test def titleStudent() = withUser("cuscav", "0672089") {
 		val meeting = new MeetingRecord(student, relationship)

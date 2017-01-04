@@ -24,7 +24,8 @@ class DownloadMeetingRecordCommandTest extends TestBase with Mockito {
 		val relationship = ExternalStudentRelationship(
 			"Professor A Tutor",
 			StudentRelationshipType("tutor", "tutor", "personal tutor", "personal tutee"),
-			student
+			student,
+			DateTime.now
 		)
 
 		val uploadedFile =  new UploadedFile

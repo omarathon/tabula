@@ -18,7 +18,7 @@ class ScheduledMeetingRecordReminderNotificationTest extends TestBase {
 
 		val relationshipType = StudentRelationshipType("personalTutor", "tutor", "personal tutor", "personal tutee")
 
-		val relationship: StudentRelationship = StudentRelationship(agent, relationshipType, student)
+		val relationship: StudentRelationship = StudentRelationship(agent, relationshipType, student, DateTime.now)
 
 		val thirdParty: StaffMember = Fixtures.staff("1122331", "3rdparty")
 		thirdParty.firstName = "Third"

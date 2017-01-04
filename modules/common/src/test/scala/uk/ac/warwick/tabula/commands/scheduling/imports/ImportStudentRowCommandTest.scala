@@ -484,12 +484,12 @@ class ImportStudentRowCommandTest extends TestBase with Mockito with Logging {
 
 			studentMember.freshStudentCourseDetails.size should not be 0
 
-			verify(relationshipService, times(0)).replaceStudentRelationships(tutorRelationshipType, studentMember.mostSignificantCourseDetails.get, Seq(existingStaffMember))
+			verify(relationshipService, times(0)).replaceStudentRelationships(tutorRelationshipType, studentMember.mostSignificantCourseDetails.get, existingStaffMember, DateTime.now)
 		}
 	}
 
 	@Transactional
-	@Test def testCaptureTutorIfSourceIsSits() {
+	@Test def testCaptureTutorIfSourceIsSits() { withFakeTime(DateTime.now) {
 
 		new Environment {
 			val existing = new StudentMember("0672089")
@@ -516,9 +516,9 @@ class ImportStudentRowCommandTest extends TestBase with Mockito with Logging {
 
 			studentMember.mostSignificantCourseDetails should not be null
 
-			verify(relationshipService, times(1)).replaceStudentRelationships(tutorRelationshipType, studentMember.mostSignificantCourseDetails.get, Seq(existingStaffMember))
+			verify(relationshipService, times(1)).replaceStudentRelationships(tutorRelationshipType, studentMember.mostSignificantCourseDetails.get, existingStaffMember, DateTime.now)
 		}
-	}
+	}}
 
 	@Test def testDisabilityHandling() {
 		new Environment {

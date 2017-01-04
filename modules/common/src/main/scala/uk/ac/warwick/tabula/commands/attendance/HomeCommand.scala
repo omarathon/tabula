@@ -58,7 +58,7 @@ abstract class HomeCommand(val user: CurrentUser) extends CommandInternal[HomeIn
 		// These return Sets so no need to distinct the result
 
 		val allRelationshipTypes = relationshipService.allStudentRelationshipTypes
-		val downwardRelationships = relationshipService.listAllStudentRelationshipsWithMember(currentMember)
+		val downwardRelationships = relationshipService.listCurrentStudentRelationshipsWithMember(currentMember)
 		val relationshipTypesMap = allRelationshipTypes.map { t =>
 			(t, downwardRelationships.exists(_.relationshipType == t))
 		}.toMap

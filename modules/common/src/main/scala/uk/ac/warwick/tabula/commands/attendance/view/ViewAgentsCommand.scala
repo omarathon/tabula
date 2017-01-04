@@ -34,7 +34,7 @@ class ViewAgentsCommandInternal(val department: Department, val academicYear: Ac
 	self: RelationshipServiceComponent =>
 
 	override def applyInternal(): Seq[ViewAgentsCommandResult] = {
-		val relationships = relationshipService.listStudentRelationshipsByDepartment(relationshipType, department)
+		val relationships = relationshipService.listCurrentStudentRelationshipsByDepartment(relationshipType, department)
 		relationships.groupBy(_.agent).map{case(agent, agentRelationships) =>
 			val tutees = agentRelationships.flatMap(_.studentMember)
 			val tuteesDepartmentCounts = tutees.flatMap(_.attendanceCheckpointTotals.asScala).filter(t => t.department == department && t.academicYear == academicYear)

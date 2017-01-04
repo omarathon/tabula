@@ -1,5 +1,6 @@
 package uk.ac.warwick.tabula.commands.profiles.relationships
 
+import org.joda.time.DateTime
 import org.springframework.validation.Errors
 import uk.ac.warwick.tabula.commands._
 import uk.ac.warwick.tabula.data.model._
@@ -40,21 +41,21 @@ class EditStudentRelationshipCommandInternal(
 		}
 
 		if (Option(oldAgent).isEmpty) {
-			val newRelationship = relationshipService.saveStudentRelationships(relationshipType, studentCourseDetails, Seq(newAgent)).head
+			val newRelationship = relationshipService.saveStudentRelationship(relationshipType, studentCourseDetails, Left(newAgent), scheduledDateToUse)
 			Seq(newRelationship)
 		} else if (removeAgent) {
 			// remove the relationship for the specified agent and return the ended relationship
 			val preexistingRelationships = relationshipService.findCurrentRelationships(relationshipType, studentCourseDetails)
 
 			val relationshipsToRemove = preexistingRelationships.filter(_.agentMember.contains(oldAgent))
-			relationshipService.endStudentRelationships(relationshipsToRemove)
+			relationshipService.endStudentRelationships(relationshipsToRemove, scheduledDateToUse)
 			relationshipsToRemove
 		}	else if (oldAgent != newAgent) {
 			// we've been given a new agent -
 			// replace the current agents with the new one and return the new relationship
 			val relationshipsToReplace = relationshipService.findCurrentRelationships(relationshipType, studentCourseDetails).filter(rel => rel.agentMember.contains(oldAgent))
-			relationshipService.endStudentRelationships(relationshipsToReplace)
-			relationshipService.saveStudentRelationships(relationshipType, studentCourseDetails, Seq(newAgent))
+			relationshipService.endStudentRelationships(relationshipsToReplace, scheduledDateToUse)
+			relationshipsToReplace ++ Seq(relationshipService.saveStudentRelationship(relationshipType, studentCourseDetails, Left(newAgent), scheduledDateToUse, relationshipsToReplace))
 		} else {
 			Seq()
 		}
@@ -109,6 +110,13 @@ trait EditStudentRelationshipCommandRequest {
 	var oldAgent: Member = _
 	var newAgent: Member = _
 	var removeAgent: Boolean = false
+	var specificScheduledDate: Boolean = false
+	var scheduledDate: DateTime = DateTime.now
+	lazy val scheduledDateToUse: DateTime = if (specificScheduledDate) {
+		scheduledDate
+	} else {
+		DateTime.now
+	}
 	var notifyStudent: Boolean = false
 	var notifyOldAgent: Boolean = false
 	var notifyNewAgent: Boolean = false
@@ -118,18 +126,20 @@ trait EditStudentRelationshipCommandNotifications extends Notifies[Seq[StudentRe
 
 	self: EditStudentRelationshipCommandState with EditStudentRelationshipCommandRequest =>
 
-	def emit(modifiedRelationships: Seq[StudentRelationship]): Seq[Notification[StudentRelationship, Unit]] = {
-		val notifications = modifiedRelationships.flatMap(relationship => {
+	def emit(relationships: Seq[StudentRelationship]): Seq[Notification[StudentRelationship, Unit]] = {
+		val notifications = relationships.filter(_.replacedBy == null).flatMap(relationship => {
 
 			val studentNotification = if (notifyStudent) {
 				val notification = Notification.init(new StudentRelationshipChangeToStudentNotification, user.apparentUser, Seq(relationship))
 				notification.oldAgentIds.value = Seq(Option(oldAgent).map(_.universityId)).flatten
+				if (scheduledDateToUse.isAfterNow) notification.scheduledDate = scheduledDateToUse
 				Some(notification)
 			} else None
 
 			val oldAgentNotification = if (notifyOldAgent && Option(oldAgent).isDefined) {
 				val notification = Notification.init(new StudentRelationshipChangeToOldAgentNotification, user.apparentUser, Seq(relationship))
 				notification.oldAgentIds.value = Seq(oldAgent.universityId)
+				if (scheduledDateToUse.isAfterNow) notification.scheduledDate = scheduledDateToUse
 				Some(notification)
 			} else None
 
@@ -137,6 +147,7 @@ trait EditStudentRelationshipCommandNotifications extends Notifies[Seq[StudentRe
 				relationship.agentMember.map(agent => {
 					val notification = Notification.init(new StudentRelationshipChangeToNewAgentNotification, user.apparentUser, Seq(relationship))
 					notification.oldAgentIds.value = Seq(agent.universityId)
+					if (scheduledDateToUse.isAfterNow) notification.scheduledDate = scheduledDateToUse
 					notification
 				})
 			} else None

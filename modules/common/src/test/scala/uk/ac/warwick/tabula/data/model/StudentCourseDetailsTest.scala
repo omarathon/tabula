@@ -1,5 +1,6 @@
 package uk.ac.warwick.tabula.data.model
 
+import org.joda.time.DateTime
 import uk.ac.warwick.tabula.Fixtures
 import uk.ac.warwick.tabula.Mockito
 import uk.ac.warwick.tabula.PersistenceTestBase
@@ -29,7 +30,7 @@ class StudentCourseDetailsTest extends PersistenceTestBase with Mockito {
 		relationshipService.findCurrentRelationships(relationshipType, studentCourseDetails) returns Nil
 		student.freshStudentCourseDetails.head.relationships(relationshipType) should be ('empty)
 
-		val rel = StudentRelationship(staff, relationshipType, student)
+		val rel = StudentRelationship(staff, relationshipType, student, DateTime.now)
 
 		relationshipService.findCurrentRelationships(relationshipType, studentCourseDetails) returns Seq(rel)
 		student.freshStudentCourseDetails.head.relationships(relationshipType) flatMap { _.agentMember } should be (Seq(staff))
@@ -60,9 +61,9 @@ class StudentCourseDetailsTest extends PersistenceTestBase with Mockito {
 	}
 
 	@Test def relationships() {
-		val rel1 = StudentRelationship(staff, relationshipType, student)
+		val rel1 = StudentRelationship(staff, relationshipType, student, DateTime.now)
 		rel1.id = "1"
-		val rel2 = StudentRelationship(staff, relationshipType, student)
+		val rel2 = StudentRelationship(staff, relationshipType, student, DateTime.now)
 		rel2.id = "2"
 
 		relationshipService.findCurrentRelationships(relationshipType, studentCourseDetails) returns Seq(rel1)
@@ -72,10 +73,10 @@ class StudentCourseDetailsTest extends PersistenceTestBase with Mockito {
 	}
 
 	@Test def relationshipsOfTypeOrderedByPercentage() {
-		val rel1 = StudentRelationship(staff, relationshipType, student)
+		val rel1 = StudentRelationship(staff, relationshipType, student, DateTime.now)
 		rel1.percentage = new JBigDecimal(40)
-		val rel2 = StudentRelationship(staff, relationshipType, student)
-		val rel3 = StudentRelationship(staff, relationshipType, student)
+		val rel2 = StudentRelationship(staff, relationshipType, student, DateTime.now)
+		val rel3 = StudentRelationship(staff, relationshipType, student, DateTime.now)
 		rel3.percentage = new JBigDecimal(60)
 
 		studentCourseDetails.allRelationships.add(rel1)

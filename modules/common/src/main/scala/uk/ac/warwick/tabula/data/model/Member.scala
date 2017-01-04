@@ -196,7 +196,7 @@ abstract class Member
 	def isStaff: Boolean = userType == MemberUserType.Staff
 	def isStudent: Boolean = userType == MemberUserType.Student
 	def isRelationshipAgent(relationshipType: StudentRelationshipType): Boolean = {
-		relationshipService.listStudentRelationshipsWithMember(relationshipType, this).nonEmpty
+		relationshipService.listCurrentStudentRelationshipsWithMember(relationshipType, this).nonEmpty
 	}
 
 	// Overridden in StudentMember

@@ -62,6 +62,8 @@ object Routes {
 			context + "/department/%s/%s" format (encoded(department.code), encoded(relationshipType.urlPart))
 		def missing(department: Department, relationshipType: StudentRelationshipType): String =
 			context + "/department/%s/%s/missing" format (encoded(department.code), encoded(relationshipType.urlPart))
+		def scheduled(department: Department, relationshipType: StudentRelationshipType): String =
+			context + "/department/%s/%s/scheduled" format (encoded(department.code), encoded(relationshipType.urlPart))
 		def allocate(department: Department, relationshipType: StudentRelationshipType): String =
 			context + "/department/%s/%s/allocate" format (encoded(department.code), encoded(relationshipType.urlPart))
 		def template(department: Department, relationshipType: StudentRelationshipType): String =

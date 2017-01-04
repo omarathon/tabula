@@ -1,5 +1,6 @@
 package uk.ac.warwick.tabula.data.model
 
+import org.joda.time.DateTime
 import uk.ac.warwick.tabula.PersistenceTestBase
 import uk.ac.warwick.tabula.Fixtures
 
@@ -21,8 +22,8 @@ class StudentRelationshipPersistenceTest extends PersistenceTestBase {
 		session.flush()
 	}
 
-	@Test def memberRelationship { transactional { tx => new Fixture {
-		val rel = StudentRelationship(memberAgent, relType, student)
+	@Test def memberRelationship() { transactional { tx => new Fixture {
+		val rel = StudentRelationship(memberAgent, relType, student, DateTime.now)
 		session.save(rel)
 		session.flush()
 		session.clear()
@@ -38,8 +39,8 @@ class StudentRelationshipPersistenceTest extends PersistenceTestBase {
 		loadedRel.agentLastName should be ("Frank")
 	}}}
 
-	@Test def externalRelationship { transactional { tx => new Fixture {
-		val rel = ExternalStudentRelationship(externalAgent, relType, student)
+	@Test def externalRelationship() { transactional { tx => new Fixture {
+		val rel = ExternalStudentRelationship(externalAgent, relType, student, DateTime.now)
 		session.save(rel)
 		session.flush()
 		session.clear()
