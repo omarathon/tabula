@@ -58,3 +58,4 @@ ${*
 CVS
 
 pom.xml.versionsBackup
+.DS_Store

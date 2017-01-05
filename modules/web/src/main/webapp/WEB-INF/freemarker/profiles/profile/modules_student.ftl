@@ -24,7 +24,7 @@
 
 	<#if user.staff>
 		<div class="pull-right">
-			<@routes.profiles.mrm_link studentCourseDetails command.studentCourseYearDetails />
+			<@routes.profiles.mrm_link command.studentCourseYearDetails />
 				View in MRM<img class="targetBlank" alt="" title="Link opens in a new window" src="/static/images/shim.gif"/>
 			</a>
 		</div>

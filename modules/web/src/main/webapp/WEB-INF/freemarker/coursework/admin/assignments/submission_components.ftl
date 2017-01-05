@@ -32,3 +32,30 @@
 		});
 	</script>
 </#macro>
+
+<#macro urkundOriginalityReport attachment>
+	<#local r=attachment.originalityReport />
+	<#local assignment=attachment.submissionValue.submission.assignment />
+
+<span id="tool-tip-${attachment.id}" class="similarity-${r.significance} similarity-tooltip">${r.significance}% significance</span>
+<div id="tip-content-${attachment.id}" class="hide">
+	<p>${attachment.name}</p>
+	<p class="similarity-subcategories-tooltip">
+		Match count: ${r.matchCount}<br>
+		Source count: ${r.sourceCount}<br>
+	</p>
+	<p>
+		<a target="_blank" href="${r.reportUrl}">View full report</a>
+	</p>
+</div>
+<script type="text/javascript">
+	jQuery(function($){
+		$("#tool-tip-${attachment.id}").popover({
+			placement: 'right',
+			html: true,
+			content: function(){return $('#tip-content-${attachment.id}').html();},
+			title: 'Urkund report summary'
+		});
+	});
+</script>
+</#macro>

@@ -113,7 +113,10 @@ private class ScientiaHttpTimetableFetchingService(scientiaConfiguration: Scient
 	lazy val courseUris: Seq[(String, AcademicYear)] = perYearUris.map {
 		case (uri, year) => (uri + "?CourseXML", year)
 	}
-	lazy val moduleUris: Seq[(String, AcademicYear)] = perYearUris.map {
+	lazy val moduleNoStudentsUris: Seq[(String, AcademicYear)] = perYearUris.map {
+		case (uri, year) => (uri + "?ModuleNoStudentsXML", year)
+	}
+	lazy val moduleWithSudentsUris: Seq[(String, AcademicYear)] = perYearUris.map {
 		case (uri, year) => (uri + "?ModuleXML", year)
 	}
 	lazy val roomUris: Seq[(String, AcademicYear)] = perYearUris.map {
@@ -134,7 +137,10 @@ private class ScientiaHttpTimetableFetchingService(scientiaConfiguration: Scient
 		}
 
 	def getTimetableForStudent(universityId: String): Future[EventList] = doRequest(studentUris, universityId, excludeSmallGroupEventsInTabula = true)
-	def getTimetableForModule(moduleCode: String): Future[EventList] = doRequest(moduleUris, moduleCode)
+	def getTimetableForModule(moduleCode: String, includeStudents: Boolean): Future[EventList] = {
+		if (includeStudents) doRequest(moduleWithSudentsUris, moduleCode)
+		else doRequest(moduleNoStudentsUris, moduleCode)
+	}
 	def getTimetableForCourse(courseCode: String): Future[EventList] = doRequest(courseUris, courseCode)
 	def getTimetableForRoom(roomName: String): Future[EventList] = doRequest(roomUris, roomName)
 	def getTimetableForStaff(universityId: String): Future[EventList] = doRequest(

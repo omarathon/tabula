@@ -1,3 +1,4 @@
+<#import 'form_fields.ftl' as form_fields />
 <#escape x as x?html>
 
 <#function route_function dept>
@@ -9,12 +10,7 @@
 
 <form action="<@routes.exams.generateGrid department academicYear />" class="dirty-check grid-options" method="post">
 
-	<input type="hidden" name="jobId" value="${jobId}" />
-	<input type="hidden" name="course" value="${selectCourseCommand.course.code}" />
-	<#list selectCourseCommand.routes as route>
-		<input type="hidden" name="routes" value="${route.code}" />
-	</#list>
-	<input type="hidden" name="yearOfStudy" value="${selectCourseCommand.yearOfStudy}" />
+	<@form_fields.select_course_fields />
 
 	<h2>Set grid options</h2>
 

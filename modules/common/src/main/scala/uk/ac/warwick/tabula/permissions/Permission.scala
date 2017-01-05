@@ -199,6 +199,8 @@ object Permissions {
 		case object SendReceipt extends Permission("Send a receipt for a coursework submission")
 		case object ReleaseForMarking extends Permission("Release a coursework submission for marking")
 
+		case object ViewUrkundPlagiarismStatus extends Permission("View Urkund plagiarism status for a coursework submission")
+
 		case object Create extends Permission("Add a coursework submission")
 		case object Read extends Permission("View a coursework submission")
 		case object Update extends Permission("Edit a coursework submission")

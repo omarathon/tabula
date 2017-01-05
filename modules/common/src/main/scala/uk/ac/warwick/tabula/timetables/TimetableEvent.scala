@@ -56,7 +56,8 @@ object TimetableEvent {
 		}
 	}
 
-	def apply(sge: SmallGroupEvent): TimetableEvent = eventForSmallGroupEventInWeeks(sge, sge.weekRanges)
+	def apply(sge: SmallGroupEvent, withoutWeeks: Seq[SmallGroupEventOccurrence.WeekNumber] = Seq()): TimetableEvent =
+		eventForSmallGroupEventInWeeks(sge, WeekRange.combine(sge.weekRanges.flatMap(_.toWeeks).diff(withoutWeeks)))
 	def apply(sgo: SmallGroupEventOccurrence): TimetableEvent = eventForSmallGroupEventInWeeks(sgo.event, Seq(WeekRange(sgo.week)))
 
 	private def eventForSmallGroupEventInWeeks(sge: SmallGroupEvent, weekRanges: Seq[WeekRange]): TimetableEvent =

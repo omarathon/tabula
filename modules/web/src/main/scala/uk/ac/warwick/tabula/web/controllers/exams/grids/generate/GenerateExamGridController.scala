@@ -9,7 +9,7 @@ import org.springframework.web.bind.annotation.{ModelAttribute, PathVariable, Re
 import uk.ac.warwick.spring.Wire
 import uk.ac.warwick.tabula.JavaImports._
 import uk.ac.warwick.tabula.commands.exams.grids._
-import uk.ac.warwick.tabula.commands.{Appliable, FilterStudentsOrRelationships, SelfValidating, TaskBenchmarking}
+import uk.ac.warwick.tabula.commands._
 import uk.ac.warwick.tabula.data.AutowiringCourseDaoComponent
 import uk.ac.warwick.tabula.data.model.StudentCourseYearDetails.YearOfStudy
 import uk.ac.warwick.tabula.data.model._
@@ -30,6 +30,7 @@ import scala.collection.JavaConverters._
 
 object GenerateExamGridMappingParameters {
 	final val selectCourse = "selectCourse"
+	final val usePreviousSettings = "usePreviousSettings"
 	final val gridOptions = "gridOptions"
 	final val coreRequiredModules = "coreRequiredModules"
 	final val previewAndDownload = "previewAndDownload"
@@ -53,7 +54,7 @@ class GenerateExamGridController extends ExamsController
 	with TaskBenchmarking {
 
 	type SelectCourseCommand = Appliable[Seq[ExamGridEntity]] with GenerateExamGridSelectCourseCommandRequest with GenerateExamGridSelectCourseCommandState
-	type GridOptionsCommand = Appliable[(Set[ExamGridColumnOption.Identifier], Seq[String])] with GenerateExamGridGridOptionsCommandRequest
+	type GridOptionsCommand = Appliable[(Seq[ExamGridColumnOption], Seq[String])] with GenerateExamGridGridOptionsCommandRequest with PopulateOnForm
 	type CoreRequiredModulesCommand = Appliable[Map[Route, Seq[CoreRequiredModule]]] with PopulateGenerateExamGridSetCoreRequiredModulesCommand
 	type CheckOvercatCommand = Appliable[GenerateExamGridCheckAndApplyOvercatCommand.Result] with GenerateExamGridCheckAndApplyOvercatCommandState with SelfValidating
 
@@ -64,8 +65,6 @@ class GenerateExamGridController extends ExamsController
 
 	@ModelAttribute("activeAcademicYear")
 	override def activeAcademicYear(@PathVariable academicYear: AcademicYear): Option[AcademicYear] = retrieveActiveAcademicYear(Option(academicYear))
-
-	private lazy val allExamGridsColumns: Seq[ExamGridColumnOption] = Wire.all[ExamGridColumnOption].sorted
 
 	validatesSelf[SelfValidating]
 
@@ -78,7 +77,7 @@ class GenerateExamGridController extends ExamsController
 		GenerateExamGridSelectCourseCommand(mandatory(department), mandatory(academicYear))
 
 	@ModelAttribute("gridOptionsCommand")
-	def gridOptionsCommand = GenerateExamGridGridOptionsCommand()
+	def gridOptionsCommand(@PathVariable department: Department) = GenerateExamGridGridOptionsCommand(mandatory(department))
 
 	@ModelAttribute("coreRequiredModulesCommand")
 	def coreRequiredModulesCommand(@PathVariable department: Department, @PathVariable academicYear: AcademicYear) =
@@ -109,9 +108,11 @@ class GenerateExamGridController extends ExamsController
 	@RequestMapping(method = Array(GET, POST))
 	def selectCourseRender(
 		@ModelAttribute("selectCourseCommand") selectCourseCommand: SelectCourseCommand,
+		@ModelAttribute("gridOptionsCommand") gridOptionsCommand: GridOptionsCommand,
 		@PathVariable department: Department,
 		@PathVariable academicYear: AcademicYear
 	): Mav = {
+		gridOptionsCommand.populate()
 		commonCrumbs(
 			Mav("exams/grids/generate/selectCourse"),
 			department,
@@ -124,22 +125,72 @@ class GenerateExamGridController extends ExamsController
 		@Valid @ModelAttribute("selectCourseCommand") selectCourseCommand: SelectCourseCommand,
 		errors: Errors,
 		@ModelAttribute("gridOptionsCommand") gridOptionsCommand: GridOptionsCommand,
+		@ModelAttribute("checkOvercatCommmand") checkOvercatCommmand: CheckOvercatCommand,
+		@ModelAttribute("coreRequiredModuleLookup") coreRequiredModuleLookup: CoreRequiredModuleLookup,
 		@PathVariable department: Department,
-		@PathVariable academicYear: AcademicYear
+		@PathVariable academicYear: AcademicYear,
+		@RequestParam allRequestParams: JMap[String, String]
+	): Mav = {
+		selectCourseSubmit(
+			selectCourseCommand,
+			errors,
+			gridOptionsCommand,
+			checkOvercatCommmand,
+			coreRequiredModuleLookup,
+			department,
+			academicYear,
+			usePreviousSettings = false
+		)
+	}
+
+	@RequestMapping(method = Array(POST), params = Array(GenerateExamGridMappingParameters.usePreviousSettings))
+	def selectCourseSubmitWithPreviousSettings(
+		@Valid @ModelAttribute("selectCourseCommand") selectCourseCommand: SelectCourseCommand,
+		errors: Errors,
+		@ModelAttribute("gridOptionsCommand") gridOptionsCommand: GridOptionsCommand,
+		@ModelAttribute("checkOvercatCommmand") checkOvercatCommmand: CheckOvercatCommand,
+		@ModelAttribute("coreRequiredModuleLookup") coreRequiredModuleLookup: CoreRequiredModuleLookup,
+		@PathVariable department: Department,
+		@PathVariable academicYear: AcademicYear,
+		@RequestParam allRequestParams: JMap[String, String]
+	): Mav = {
+		selectCourseSubmit(
+			selectCourseCommand,
+			errors,
+			gridOptionsCommand,
+			checkOvercatCommmand,
+			coreRequiredModuleLookup,
+			department,
+			academicYear,
+			usePreviousSettings = true
+		)
+	}
+
+	private def selectCourseSubmit(
+		selectCourseCommand: SelectCourseCommand,
+		errors: Errors,
+		gridOptionsCommand: GridOptionsCommand,
+		checkOvercatCommmand: CheckOvercatCommand,
+		coreRequiredModuleLookup: CoreRequiredModuleLookup,
+		department: Department,
+		academicYear: AcademicYear,
+		usePreviousSettings: Boolean
 	): Mav = {
 		if (errors.hasErrors) {
-			selectCourseRender(selectCourseCommand, department, academicYear)
+			selectCourseRender(selectCourseCommand, gridOptionsCommand, department, academicYear)
 		} else {
 			val students = selectCourseCommand.apply()
 			if (students.isEmpty) {
 				errors.reject("examGrid.noStudents")
-				selectCourseRender(selectCourseCommand, department, academicYear)
+				selectCourseRender(selectCourseCommand, gridOptionsCommand, department, academicYear)
 			} else {
 				val jobInstance = jobService.add(Some(user), ImportMembersJob(students.map(_.universityId)))
-				if (gridOptionsCommand.predefinedColumnIdentifiers.isEmpty) {
-					gridOptionsCommand.predefinedColumnIdentifiers.addAll(allExamGridsColumns.map(_.identifier).asJava)
+
+				if (usePreviousSettings) {
+					checkJobProgress(jobInstance.id, selectCourseCommand, gridOptionsCommand, checkOvercatCommmand, coreRequiredModuleLookup, department, academicYear)
+				} else {
+					gridOptionsRender(jobInstance.id, selectCourseCommand, department, academicYear)
 				}
-				gridOptionsRender(jobInstance.id, selectCourseCommand, department, academicYear)
 			}
 		}
 	}
@@ -163,8 +214,8 @@ class GenerateExamGridController extends ExamsController
 		if (errors.hasErrors) {
 			gridOptionsRender(jobId, selectCourseCommand, department, academicYear)
 		} else {
-			val columnIDs = gridOptionsCommand.apply()
-			if (columnIDs._1.contains(new CoreRequiredModulesColumnOption().identifier) || columnIDs._1.contains(new ModuleReportsColumnOption().identifier)) {
+			val columnIDs = gridOptionsCommand.apply()._1.map(_.identifier)
+			if (columnIDs.contains(new CoreRequiredModulesColumnOption().identifier) || columnIDs.contains(new ModuleReportsColumnOption().identifier)) {
 				coreRequiredModulesCommand.populate()
 				coreRequiredModulesRender(jobId, department, academicYear)
 			} else {
@@ -355,9 +406,7 @@ class GenerateExamGridController extends ExamsController
 		val normalLoadLookup = checkOvercatCmd.normalLoadLookup
 		val routeRulesLookup = checkOvercatCmd.routeRulesLookup
 
-		val gridOptions = gridOptionsCommand.apply()
-		val predefinedColumnIDs = gridOptions._1
-		val customColumnTitles = gridOptions._2
+		val (predefinedColumnOptions, customColumnTitles) = gridOptionsCommand.apply()
 
 		val state = ExamGridColumnState(
 			entities = entities,
@@ -374,7 +423,6 @@ class GenerateExamGridController extends ExamsController
 			showModuleNames = gridOptionsCommand.showModuleNames
 		)
 
-		val predefinedColumnOptions = allExamGridsColumns.filter(c => c.mandatory || predefinedColumnIDs.contains(c.identifier))
 		val studentInformationColumns = predefinedColumnOptions.collect { case c: StudentExamGridColumnOption => c }.flatMap(_.getColumns(state))
 		val summaryColumns = predefinedColumnOptions.collect { case c: ChosenYearExamGridColumnOption => c }.flatMap(_.getColumns(state)) ++
 			customColumnTitles.flatMap(BlankColumnOption.getColumn)

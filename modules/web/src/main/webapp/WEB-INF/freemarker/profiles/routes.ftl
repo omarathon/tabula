@@ -95,8 +95,8 @@ TODO grab values from the Routes object in code, as that's pretty equivalent and
 <#macro timetable_calendar_download profile><@_u page="/view/${profile.universityId}/timetable/download-calendar"/></#macro>
 <#macro timetable_download profile academicYear><@_u page="/view/${profile.universityId}/timetable/download/${academicYear.startYear?c}"/></#macro>
 
-<#macro mrm_link studentCourseDetails studentCourseYearDetails>
-	<a href="https://mrm.warwick.ac.uk/mrm/student/student.htm?sprCode=${((studentCourseDetails.sprCode)!)?url}&acYear=${((studentCourseYearDetails.academicYear.toString)!)?url}" target="_blank">
+<#macro mrm_link studentCourseYearDetails>
+	<a href="https://mrm.warwick.ac.uk/mrm/student/student.htm?sprCode=${((studentCourseYearDetails.studentCourseDetails.sprCode)!)?url}&acYear=${((studentCourseYearDetails.academicYear.toString)!)?url}" target="_blank">
 </#macro>
 
 <#macro permissions scope><@_u page="/permissions/${scope.urlCategory}/${scope.urlSlug}" context="/admin" /></#macro>

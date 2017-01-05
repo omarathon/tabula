@@ -32,6 +32,8 @@ class ViewProfileRelationshipTypeController extends AbstractViewProfileControlle
 		mandatory(member) match {
 			case student: StudentMember if student.mostSignificantCourseDetails.isDefined =>
 				viewByCourse(student.mostSignificantCourseDetails.get, activeAcademicYear, relationshipType)
+			case student: StudentMember if student.freshOrStaleStudentCourseDetails.nonEmpty =>
+				viewByCourse(student.freshOrStaleStudentCourseDetails.lastOption.get, activeAcademicYear, relationshipType)
 			case _ =>
 				Redirect(Routes.Profile.identity(member))
 		}

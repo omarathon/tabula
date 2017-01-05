@@ -71,6 +71,7 @@ case object EmptyExamGridColumnState {
 sealed trait ExamGridColumnOption {
 
 	val identifier: ExamGridColumnOption.Identifier
+	val label: String
 	val sortOrder: Int
 	val mandatory: Boolean = false
 

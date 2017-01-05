@@ -1,3 +1,4 @@
+<#import 'form_fields.ftl' as form_fields />
 <#escape x as x?html>
 
 <#function route_function dept>
@@ -22,6 +23,8 @@
 </div>
 
 <form action="<@routes.exams.generateGrid department academicYear />" class="form-inline select-course" method="post">
+
+	<@form_fields.grid_options_fields />
 
 	<div class="well well-sm filters">
 		<button type="button" class="clear-all-filters btn btn-link">
@@ -130,7 +133,46 @@
 
 	<@bs3form.errors path="selectCourseCommand" />
 
-	<button class="btn btn-primary" name="${GenerateExamGridMappingParameters.selectCourse}" type="submit" disabled>Next</button>
+	<div class="buttons">
+
+		<button class="btn btn-default" name="${GenerateExamGridMappingParameters.selectCourse}" type="submit" disabled>Configure grid options</button>
+
+		<button class="btn btn-default" name="${GenerateExamGridMappingParameters.usePreviousSettings}" type="submit" disabled>Generate using previous settings</button>
+
+		<#assign popover>
+			<ul>
+				<#list gridOptionsCommand.predefinedColumnDescriptions as column>
+					<li>${column}</li>
+				</#list>
+				<#list gridOptionsCommand.customColumnTitles as column>
+					<li>Additional: ${column}</li>
+				</#list>
+				<#if gridOptionsCommand.nameToShow == 'full'>
+					<li>Official name</li>
+				<#else>
+					<li>First and last name</li>
+				</#if>
+				<#if gridOptionsCommand.yearsToShow == 'current'>
+					<li>Current year</li>
+				<#else>
+					<li>All years</li>
+				</#if>
+				<#if gridOptionsCommand.marksToShow == 'overall'>
+					<li>Only show overall mark</li>
+				<#else>
+					<li>Show component marks</li>
+				</#if>
+				<#if gridOptionsCommand.moduleNameToShow == 'codeOnly'>
+					<li>Show module code only</li>
+				<#else>
+					<li>Show module names</li>
+				</#if>
+			</ul>
+		</#assign>
+
+		<@fmt.help_popover id="gridOptions" title="Previous grid options" content=popover html=true />
+
+	</div>
 </form>
 
 <script>
@@ -190,15 +232,16 @@
 			var yearOfStudy = $('[name=yearOfStudy]:checked');
 
 			if (course.length === 0 || yearOfStudy.length === 0) {
-				$('button.btn-primary').prop('disabled', true);
+				$('.buttons button.btn-default').prop('disabled', true);
 			} else {
-				$('button.btn-primary').prop('disabled', false);
+				$('.buttons button.btn-default').prop('disabled', false);
 			}
 		};
 
 		$('form.select-course .filters').on('change', function(e) {
 			updateFilter($(e.target));
 		});
+		$('form.select-course .filters .filter-list').find('input:first').trigger('change');
 
 		// Re-order elements inside the dropdown when opened
 		$('.filter-list').closest('.btn-group').find('.dropdown-toggle').on('click.dropdown.data-api', function(e) {
