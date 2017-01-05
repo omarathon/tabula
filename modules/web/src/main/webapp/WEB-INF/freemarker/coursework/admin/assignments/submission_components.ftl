@@ -37,8 +37,8 @@
 	<#local r=attachment.originalityReport />
 	<#local assignment=attachment.submissionValue.submission.assignment />
 
-<span id="tool-tip-${attachment.id}" class="similarity-${r.significance} similarity-tooltip">${r.significance}% significance</span>
-<div id="tip-content-${attachment.id}" class="hide">
+<span id="tool-tip-urkund-${attachment.id}" class="similarity-${r.significance} similarity-tooltip">${r.significance}% significance</span>
+<div id="tip-content-urkund-${attachment.id}" class="hide">
 	<p>${attachment.name}</p>
 	<p class="similarity-subcategories-tooltip">
 		Match count: ${r.matchCount}<br>
@@ -50,10 +50,10 @@
 </div>
 <script type="text/javascript">
 	jQuery(function($){
-		$("#tool-tip-${attachment.id}").popover({
+		$("#tool-tip-urkund-${attachment.id}").popover({
 			placement: 'right',
 			html: true,
-			content: function(){return $('#tip-content-${attachment.id}').html();},
+			content: function(){return $('#tip-content-urkund-${attachment.id}').html();},
 			title: 'Urkund report summary'
 		});
 	});
