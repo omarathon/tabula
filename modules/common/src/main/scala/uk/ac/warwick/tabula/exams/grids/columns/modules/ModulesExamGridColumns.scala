@@ -103,8 +103,14 @@ abstract class ModuleExamGridColumnOption extends PerYearExamGridColumnOption {
 	override final def getColumns(state: ExamGridColumnState): Map[YearOfStudy, Seq[PerYearExamGridColumn]] = {
 
 		val allYears = state.entities.flatMap(_.years.values).toList
-		val duplicateModules = allYears
-			.flatMap(_.moduleRegistrations).map(mr => (mr.module, mr.selectionStatus)).distinct
+
+		val allCoreRequiredModules =
+			allYears.map(_.route).flatMap(state.coreRequiredModuleLookup.apply).map(cr => (cr.module, "CoreRequired"))
+
+		val allOtherModules = allYears
+			.flatMap(_.moduleRegistrations).map(mr => (mr.module, mr.selectionStatus.description))
+
+		val duplicateModules = (allCoreRequiredModules ++ allOtherModules).distinct
 			.groupBy{ case (module, selectionStatus) => module }
 			// collect modules with 2 or more different selection statuses
 			.collect{ case (module, first :: second :: rest) => module }
