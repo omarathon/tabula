@@ -178,7 +178,7 @@ class CoreRequiredModulesColumnOption extends ModuleExamGridColumnOption {
 	}
 
 	override def Column(state: ExamGridColumnState, module: Module, isDuplicate: Boolean, cats: JBigDecimal): ModuleExamGridColumn
-	= new Column(state, module, isDuplicate, cats)
+		= new Column(state, module, isDuplicate, cats)
 
 	override def moduleRegistrationFilter(mr: ModuleRegistration, coreRequiredModules: Seq[Module]): Boolean =
 		coreRequiredModules.contains(mr.module)
@@ -204,7 +204,7 @@ class CoreOptionalModulesColumnOption extends ModuleExamGridColumnOption {
 	}
 
 	override def Column(state: ExamGridColumnState, module: Module, isDuplicate: Boolean, cats: JBigDecimal): ModuleExamGridColumn
-	= new Column(state, module, isDuplicate, cats)
+		= new Column(state, module, isDuplicate, cats)
 
 	override def moduleRegistrationFilter(mr: ModuleRegistration, coreRequiredModules: Seq[Module]): Boolean =
 		mr.selectionStatus == ModuleSelectionStatus.OptionalCore && !coreRequiredModules.contains(mr.module)
@@ -230,7 +230,7 @@ class OptionalModulesColumnOption extends ModuleExamGridColumnOption {
 	}
 
 	override def Column(state: ExamGridColumnState, module: Module, isDuplicate: Boolean, cats: JBigDecimal): ModuleExamGridColumn
-	= new Column(state, module, isDuplicate, cats)
+		= new Column(state, module, isDuplicate, cats)
 
 	override def moduleRegistrationFilter(mr: ModuleRegistration, coreRequiredModules: Seq[Module]): Boolean =
 		mr.selectionStatus == ModuleSelectionStatus.Option && !coreRequiredModules.contains(mr.module)
