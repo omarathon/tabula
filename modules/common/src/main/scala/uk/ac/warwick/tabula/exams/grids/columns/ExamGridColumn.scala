@@ -119,5 +119,3 @@ trait HasExamGridColumnSecondaryValue {
 	val secondaryValue: String
 
 }
-
-trait Has
