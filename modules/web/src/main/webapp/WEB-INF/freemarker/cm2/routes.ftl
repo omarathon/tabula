@@ -23,13 +23,6 @@ TODO grab values from the Routes object in code, as that's pretty equivalent and
 <#macro assignment assignment><@_u page="/submission/${assignment.id}"/></#macro>
 <#macro extensionRequest assignment><@_u page="/assignment/${assignment.id}/extension"/></#macro>
 <#macro extensionRequestAttachment assignment attachment><@_u page="/assignment/${assignment.id}/extension/supporting-file/${attachment.name?url}"/></#macro>
-<#macro manage_extensions department academicYear=''>
-	<#if academicYear?has_content>
-		<@_u page="/admin/department/${department.code}/manage/extensions?academicYear=${academicYear.startYear?c}" />
-	<#else>
-		<@_u page="/admin/department/${department.code}/manage/extensions" />
-	</#if>
-</#macro>
 <#macro assignmentreceipt assignment><@_u page="/submission/${assignment.id}/resend-receipt"/></#macro>
 <#macro submissionReceiptPdf submission><@_u page="/submission/${submission.assignment.id}/submission-receipt.pdf"/></#macro>
 <#macro submissionReceiptPdf_in_profile assignment><@_u page="submission/${submission.assignment.id}/${submission.universityId}/submission-receipt.pdf"/></#macro>

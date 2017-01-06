@@ -9,20 +9,17 @@ import org.springframework.stereotype.Controller
 import org.springframework.validation.{BindingResult, Errors}
 import org.springframework.web.bind.annotation.{ModelAttribute, RequestMapping, _}
 import uk.ac.warwick.spring.Wire
-import uk.ac.warwick.tabula.JavaImports._
 import uk.ac.warwick.tabula._
 import uk.ac.warwick.tabula.cm2.web.Routes
-import uk.ac.warwick.tabula.commands.cm2.assignments.extensions.{EditExtensionCommand, ListAllExtensionsCommand, _}
+import uk.ac.warwick.tabula.commands.cm2.assignments.extensions.{EditExtensionCommand, _}
 import uk.ac.warwick.tabula.commands.{Appliable, SelfValidating}
 import uk.ac.warwick.tabula.data.model.forms.{Extension, ExtensionState}
-import uk.ac.warwick.tabula.data.model.{Assignment, Department, StudentMember}
+import uk.ac.warwick.tabula.data.model.{Assignment, StudentMember}
 import uk.ac.warwick.tabula.helpers.DateBuilder
 import uk.ac.warwick.tabula.services.fileserver.{RenderableAttachment, RenderableFile}
 import uk.ac.warwick.tabula.services.{ProfileService, RelationshipService, UserLookupService}
 import uk.ac.warwick.tabula.web.Mav
 import uk.ac.warwick.tabula.web.views.JSONView
-
-import scala.collection.JavaConverters._
 
 trait ExtensionServices {	var json: ObjectMapper = Wire[ObjectMapper]
 	var userLookup: UserLookupService = Wire[UserLookupService]
@@ -280,26 +277,5 @@ class EditExtensionController extends CourseworkController with ExtensionService
 			val extensionJson = JsonHelper.toJson(cmd.apply().asMap)
 			Mav("ajax_success", "data" -> extensionJson).noLayout()
 		}
-	}
-}
-
-@Profile(Array("cm2Enabled")) @Controller
-@RequestMapping(Array("/${cm2.prefix}/admin/department/{department}/manage/extensions"))
-class ListAllExtensionsController extends CourseworkController {
-	@ModelAttribute("command")
-	def listCommand(@PathVariable department:Department, @RequestParam(value="academicYear", required=false) academicYear: AcademicYear) =
-		new ListAllExtensionsCommand(department, Option(academicYear).getOrElse(AcademicYear.guessSITSAcademicYearByDate(new DateTime)))
-	@ModelAttribute("academicYears")
-	def academicYearChoices: JList[AcademicYear] =
-		AcademicYear.guessSITSAcademicYearByDate(DateTime.now).yearsSurrounding(2, 2).asJava
-	@RequestMapping(method=Array(HEAD,GET))
-	def listExtensions(@ModelAttribute("command") cmd: ListAllExtensionsCommand, @RequestParam(value="universityId", required=false) universityId: String): Mav = {
-		val extensionGraphs = cmd.apply()
-		val model = Mav(s"$urlPrefix/admin/extensions/departmentSummary",
-			"extensionToOpen" -> universityId,
-			"extensionGraphs" -> extensionGraphs,
-			"maxDaysToDisplayAsProgressBar" -> Extension.MaxDaysToDisplayAsProgressBar
-		)
-		model
 	}
 }
