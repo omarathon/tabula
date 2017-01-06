@@ -15,6 +15,14 @@
 
 		var $body = $('body');
 
+		$body.on('tabula.expandingTable.contentChanged',function(e){
+			var $this = $(e.target);
+			console.log($this);
+			$this.bindFormHelpers();
+
+		})
+
+
 		// expandable table rows
 		$body.on('show.bs.collapse', '.detail-row', function(e){
 			var $this = $(e.target);
@@ -35,7 +43,7 @@
 			e.preventDefault();
 			var $form = $(e.target);
 			//var $detailRow = $form.closest('tr.detail-row').find('td');
-			var $detailRow = $form.closest('.content-container');
+			var $detailRow = $form.closest('.detailrow-container');
 
 			var formData = $form.serializeArray();
 			var $buttonClicked =  $(document.activeElement);

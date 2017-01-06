@@ -36,15 +36,16 @@ class DisplayExtensionCommandInternal(val universityId: String, val assignment: 
 	def applyInternal(): DisplayExtensionDetail = {
 
 		val extension: Option[Extension] = assignment.findExtension(universityId)
-		val user = userLookup.getUserByUserId(universityId)
+		val user = userLookup.getUserByWarwickUniId(universityId)
+
 		val previousExtensions = extensionService.getPreviousExtensions(user)
+
 		val previousSubmissions = submissionService.getPreviousSubmissions(user)
 
 		DisplayExtensionDetail(extension, user, previousExtensions, previousSubmissions)
 
 		}
 }
-
 
 trait DisplayExtensionPermissions extends RequiresPermissionsChecking with PermissionsCheckingMethods {
 	self: DisplayExtensionState =>

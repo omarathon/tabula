@@ -7,7 +7,7 @@ import org.joda.time.DateTime
 import org.springframework.context.annotation.Profile
 import org.springframework.stereotype.Controller
 import org.springframework.validation.{BindingResult, Errors}
-import org.springframework.web.bind.annotation.{RequestMapping, _}
+import org.springframework.web.bind.annotation.{ModelAttribute, RequestMapping, _}
 import uk.ac.warwick.spring.Wire
 import uk.ac.warwick.tabula.JavaImports._
 import uk.ac.warwick.tabula._
@@ -117,7 +117,6 @@ class ExtensionController extends CourseworkController {
 
 	type ExtensionsDetailCommand = Appliable[ExtensionDetail] with ViewExtensionState
 	type ModifyExtensionCommand = Appliable[Extension] with ModifyExtensionState
-
 
 	validatesSelf[SelfValidating]
 
@@ -254,7 +253,21 @@ class EditExtensionController extends CourseworkController with ExtensionService
 		errors: Errors
 	): Mav = {
 		val detail = detailCommand.apply()
+		val student = profileService.getMemberByUniversityId(updateCommand.universityId).getOrElse(None)
+		val studentContext = student match {
+			case Some(student: StudentMember) =>
+				val relationships = relationshipService.allStudentRelationshipTypes.map { relationshipType =>
+					(relationshipType.description, relationshipService.findCurrentRelationships(relationshipType, student))
+				}.toMap.filter({case (relationshipType,relations) => relations.nonEmpty})
+				Map(
+					"relationships" -> relationships,
+					"course" -> student.mostSignificantCourseDetails
+				)
+			case _ => Map.empty
+		}
 		Mav(s"$urlPrefix/admin/extensions/assignmentdetail",
+			"student" -> student,
+			"studentContext" -> studentContext,
 			"detail" -> detail,
 			"modifyExtensionCommand" -> updateCommand,
 			"states" -> ExtensionState,

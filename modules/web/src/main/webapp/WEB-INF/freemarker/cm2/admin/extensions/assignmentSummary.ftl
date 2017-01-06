@@ -46,6 +46,8 @@
 			${graph.duration} days
 		<#elseif (graph.requestedExtraDuration > 0) >
 			${graph.requestedExtraDuration} days requested
+		<#else>
+			N/A
 		</#if>
 	</td>
 	<td data-datesort="${graph.deadline.millis?c!''}" class="deadline-col <#if graph.hasApprovedExtension>approved<#else>very-subtle</#if>"><#if graph.deadline?has_content><@fmt.date date=graph.deadline /></#if></td>
@@ -119,6 +121,7 @@
 				parsed: false,
 				type: 'numeric'
 			});
+
 
 			$('.expanding-table').expandingTable({
 				contentUrlFunction: function($row) { return $row.data('detailurl'); },
