@@ -30,7 +30,6 @@ TODO grab values from the Routes object in code, as that's pretty equivalent and
 		<@_u page="/admin/department/${department.code}/manage/extensions" />
 	</#if>
 </#macro>
-<#--macro manage_extensions assignment><@_u page="/admin/assignments/${assignment.id}/manage/extensions"/></#macro -->
 <#macro assignmentreceipt assignment><@_u page="/submission/${assignment.id}/resend-receipt"/></#macro>
 <#macro submissionReceiptPdf submission><@_u page="/submission/${submission.assignment.id}/submission-receipt.pdf"/></#macro>
 <#macro submissionReceiptPdf_in_profile assignment><@_u page="submission/${submission.assignment.id}/${submission.universityId}/submission-receipt.pdf"/></#macro>
