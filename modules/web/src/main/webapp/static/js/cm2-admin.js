@@ -42,7 +42,6 @@
 		$body.on('submit', 'form.modify-extension', function(e){
 			e.preventDefault();
 			var $form = $(e.target);
-			//var $detailRow = $form.closest('tr.detail-row').find('td');
 			var $detailRow = $form.closest('.detailrow-container');
 
 			var formData = $form.serializeArray();
@@ -53,7 +52,6 @@
 				if (data.success) {
 					window.location.replace(data.redirect);
 				} else {
-					console.log($detailRow.size());
 					$detailRow.html(data);
 					$detailRow.bindFormHelpers();
 				}

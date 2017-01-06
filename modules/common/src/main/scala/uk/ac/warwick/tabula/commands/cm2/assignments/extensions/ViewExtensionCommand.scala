@@ -39,22 +39,17 @@ class ViewExtensionCommandInternal(val extension: Extension) extends CommandInte
 		val previousSubmissions = user.toSeq.flatMap(submissionService.getPreviousSubmissions)
 		ExtensionDetail(extension, user, previousExtensions, previousSubmissions)
 	}
-
 }
 
 
 trait ViewExtensionPermissions extends RequiresPermissionsChecking with PermissionsCheckingMethods {
-
 	self: ViewExtensionState =>
 
 	def permissionsCheck(p: PermissionsChecking) {
 		p.PermissionCheck(Permissions.Extension.Read, extension)
 	}
-
 }
 
 trait ViewExtensionState {
-
 	val extension: Extension
-
 }
