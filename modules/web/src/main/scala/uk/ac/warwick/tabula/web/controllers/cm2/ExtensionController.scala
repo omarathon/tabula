@@ -24,36 +24,6 @@ import uk.ac.warwick.tabula.web.views.JSONView
 
 import scala.collection.JavaConverters._
 
-/* abstract class AbstractExtensionController extends CourseworkController {
-	var json: ObjectMapper = Wire[ObjectMapper]
-	var userLookup: UserLookupService = Wire[UserLookupService]
-	var relationshipService: RelationshipService = Wire[RelationshipService]
-	var profileService: ProfileService = Wire[ProfileService]
-
-	class ExtensionMap(extension: Extension) {
-		def asMap: Map[String, String] = {
-
-			def convertDateToString(date: Option[DateTime]) = date.map(DateBuilder.format).getOrElse("")
-
-			def convertDateToMillis(date: Option[DateTime]) = date.map(_.getMillis.toString).orNull
-
-			Map(
-				"id" -> extension.universityId,
-				"status" -> extension.state.description,
-				"requestedExpiryDate" -> convertDateToString(extension.requestedExpiryDate),
-				"expiryDate" -> convertDateToString(extension.expiryDate),
-				"expiryDateMillis" -> convertDateToMillis(extension.expiryDate),
-				"extensionDuration" -> extension.duration.toString,
-				"requestedExtraExtensionDuration" -> extension.requestedExtraDuration.toString,
-				"reviewerComments" -> extension.reviewerComments
-			)
-		}
-	}
-	import scala.language.implicitConversions
-	implicit def asMap(e: Extension): ExtensionMap = new ExtensionMap(e)
-}
-*/
-//trait ExtensionServices extends CourseworkController {	var json: ObjectMapper = Wire[ObjectMapper]
 trait ExtensionServices {	var json: ObjectMapper = Wire[ObjectMapper]
 	var userLookup: UserLookupService = Wire[UserLookupService]
 	var relationshipService: RelationshipService = Wire[RelationshipService]
@@ -201,44 +171,10 @@ class ListExtensionsForAssignmentController extends CourseworkController {
 @RequestMapping(Array("/${cm2.prefix}/admin/assignments/{assignment}/extensions/{universityId}"))
 class EditExtensionController extends CourseworkController with ExtensionServices {
 
-//	trait EditExtensionState {
-//
-//		var isNew: Boolean = _
-//
-//		var universityId: String =_
-//		var assignment: Assignment =_
-//		var module: Module =_
-//		var submitter: CurrentUser =_
-//
-//		@WithinYears(maxFuture = 3) @DateTimeFormat(pattern = DateFormats.DateTimePicker)
-//		var expiryDate: DateTime =_
-//		var reviewerComments: String =_
-//		var state: ExtensionState = ExtensionState.Unreviewed
-//		var action: String =_
-//		var extension: Extension =_
-//
-//		final val ApprovalAction = "Grant"
-//		final val RejectionAction = "Reject"
-//		final val RevocationAction = "Revoke"
-//		final val UpdateApprovalAction = "Update"
-//	}
-
 	type ExtensionsDetailCommand = Appliable[DisplayExtensionDetail] with DisplayExtensionState
 	type EditExtensionCommand = Appliable[Extension] with EditExtensionCommandState
 
-//	@ModelAttribute("modifyExtensionCommand")
-//	def editCommand(
-//		@PathVariable module: Module,
-//		@PathVariable assignment: Assignment,
-//		@PathVariable universityId: String,
-//		user: CurrentUser,
-//		@RequestParam(defaultValue = "") action: String
-//	) = EditExtensionCommand(module, assignment, universityId, user, action)
-
 	validatesSelf[SelfValidating]
-
-//	@ModelAttribute("extensionDetailCommand")
-//	def grantCommand(@PathVariable assignment: Assignment, @PathVariable universityId: String) = GrantExtensionCommand(mandatory(universityId),mandatory(assignment))
 
 	@ModelAttribute("extensionDetailCommand")
 	def detailCommand(@PathVariable assignment: Assignment, @PathVariable universityId: String) = DisplayExtensionCommand(mandatory(universityId),mandatory(assignment))
