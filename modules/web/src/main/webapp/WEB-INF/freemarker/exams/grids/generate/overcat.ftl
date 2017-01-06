@@ -81,7 +81,7 @@
 							<td class="spacer">&nbsp;</td>
 							<#list overcatView.perYearColumns?keys?sort?reverse as year>
 								<#list mapGet(overcatView.perYearColumns, year) as column>
-									<th class="rotated <#if column.category?has_content>has-category</#if>" <#if !column.secondaryValue?has_content>rowspan="2"</#if>><div class="rotate">${column.title}</div></th>
+									<th class="rotated <#if column.boldTitle>bold</#if> <#if column.category?has_content>has-category</#if>" <#if !column.secondaryValue?has_content>rowspan="2"</#if>><div class="rotate">${column.title}</div></th>
 								</#list>
 								<td class="spacer">&nbsp;</td>
 							</#list>
@@ -91,7 +91,7 @@
 							<td class="spacer">&nbsp;</td>
 							<#list overcatView.perYearColumns?keys?sort?reverse as year>
 								<#list mapGet(overcatView.perYearColumns, year) as column>
-									<#if column.secondaryValue?has_content><th <#if column.category?has_content>class="has-category"</#if>>${column.secondaryValue}</th></#if>
+									<#if column.secondaryValue?has_content><th class="<#if column.boldTitle>bold</#if> <#if column.category?has_content>has-category</#if>">${column.secondaryValue}</th></#if>
 								</#list>
 								<td class="spacer">&nbsp;</td>
 							</#list>
