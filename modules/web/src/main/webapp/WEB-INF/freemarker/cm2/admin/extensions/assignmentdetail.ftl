@@ -39,7 +39,16 @@
 			0
 		</#if>
 	</div>
-
+	<div>
+		<label>Previous submissions:</label>
+		<#if detail.previousSubmissions?has_content>
+			<a href="" data-toggle="modal" data-target="#prev-submissions-${detail.extension.id}">
+			${detail.previousSubmissions?size}
+			</a>
+		<#else>
+			0
+		</#if>
+	</div>
 
 	<details>
 		<summary>About this student (${universityId})</summary>
@@ -148,6 +157,50 @@
 											<@fmt.date date=e.requestedOn />
 										<#else>
 											<@fmt.date date=e.reviewedOn />
+										</#if>
+									</td>
+								</tr>
+								</#list>
+							</tbody>
+						</table>
+					</div>
+				</div>
+			</div>
+		</div>
+	</#if>
+
+	<#if detail.previousSubmissions?has_content>
+		<div id="prev-submissions-${detail.extension.id}" class="modal fade" role="dialog">
+			<div class="modal-dialog" role="document">
+				<div class="modal-content">
+					<div class="modal-header">
+						<button type="button" class="close" data-dismiss="modal" aria-label="Close">
+							<span aria-hidden="true">&times;</span>
+						</button>
+						<h4 class="modal-title">Previous submissions</h4>
+					</div>
+					<div class="modal-body">
+						<h5>${detail.student.fullName} - ${detail.student.warwickId}</h5>
+						<table class="table table-striped">
+							<thead>
+							<tr>
+								<th>Module</th>
+								<th>Assignment</th>
+								<th>Status</th>
+							</tr>
+							</thead>
+							<tbody>
+								<#list detail.previousSubmissions as submission>
+								<tr>
+									<td>${submission.assignment.module.code}</td>
+									<td>${submission.assignment.name}</td>
+									<td>
+										<#if submission.isAuthorisedLate()>
+											Within extension
+										<#elseif submission.isLate()>
+											Late
+										<#else>
+											On time
 										</#if>
 									</td>
 								</tr>
