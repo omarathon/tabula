@@ -48,28 +48,6 @@ class ModifyExtensionCommandInternal(val extension: Extension, val submitter: Cu
 	}
 }
 
-trait ModifyExtensionCommandState {
-
-	var isNew: Boolean = _
-
-	var universityId: String =_
-	var assignment: Assignment =_
-	var module: Module =_
-	var submitter: CurrentUser =_
-
-	@WithinYears(maxFuture = 3) @DateTimeFormat(pattern = DateFormats.DateTimePicker)
-	var expiryDate: DateTime =_
-	var reviewerComments: String =_
-	var state: ExtensionState = ExtensionState.Unreviewed
-	var action: String =_
-	var extension: Extension =_
-
-	final val ApprovalAction = "Grant"
-	final val RejectionAction = "Reject"
-	final val RevocationAction = "Revoke"
-	final val UpdateApprovalAction = "Update"
-}
-
 trait ModifyExtensionPermissions extends RequiresPermissionsChecking with PermissionsCheckingMethods {
 	self: ModifyExtensionState =>
 

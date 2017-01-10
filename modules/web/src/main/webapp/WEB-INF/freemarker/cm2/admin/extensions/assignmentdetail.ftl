@@ -40,6 +40,7 @@
 		</#if>
 	</div>
 
+
 	<details>
 		<summary>About this student (${universityId})</summary>
 		<dl class="unstyled">
@@ -79,6 +80,7 @@
 
 		</dl>
 	</details><br />
+
 	<#if detail.extension.reason?has_content>
 		<details>
 			<summary>Reason for request</summary>
@@ -158,18 +160,18 @@
 		</div>
 	</#if>
 
-		<#assign feedbackNotice>
-			<#if detail.extension.approved>
-				<#if detail.extension.feedbackDeadline?has_content>
-					<br />Feedback for this student is currently due <@fmt.date date=detail.extension.feedbackDeadline capitalise=false at=true />.
-				<#else>
-					<br />Feedback for this student has no due date.
-				</#if>
+	<#assign feedbackNotice>
+		<#if detail.extension.approved>
+			<#if detail.extension.feedbackDeadline?has_content>
+				<br />Feedback for this student is currently due <@fmt.date date=detail.extension.feedbackDeadline capitalise=false at=true />.
+			<#else>
+				<br />Feedback for this student has no due date.
 			</#if>
-		</#assign>
-	</#if>
+		</#if>
+	</#assign>
+</#if>
 
-	<#escape x as x?html>
+<#escape x as x?html>
 	<div class="content extension-detail">
 		<#assign actionUrl><@routes.cm2.extensiondetail assignment universityId /></#assign>
 		<@f.form method="post" enctype="multipart/form-data" action=actionUrl id="editExtensionCommand" commandName="editExtensionCommand" cssClass="form-horizontal double-submit-protection modify-extension">

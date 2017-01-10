@@ -29,17 +29,10 @@ object EditExtensionCommand {
 			with HibernateExtensionPersistenceComponent
 }
 
-class EditExtensionCommandInternal(val mod: Module, val ass: Assignment, val uniId: String, val currentUser: CurrentUser, val act: String) extends CommandInternal[Extension]
+class EditExtensionCommandInternal(val module: Module, val assignment: Assignment, val universityId: String, val submitter: CurrentUser, val action: String) extends CommandInternal[Extension]
 		with EditExtensionCommandState with EditExtensionCommandValidation with TaskBenchmarking {
 
 	self: ExtensionPersistenceComponent with UserLookupComponent =>
-
-	module = mod
-	universityId = uniId
-	assignment = ass
-	action = act
-	submitter = currentUser
-
 
 	val e: Option[Extension] = assignment.findExtension(universityId)
 	e match {
@@ -85,16 +78,17 @@ trait EditExtensionCommandState {
 
 	var isNew: Boolean = _
 
-	var universityId: String =_
-	var assignment: Assignment =_
-	var module: Module =_
-	var submitter: CurrentUser =_
+	def universityId: String
+	def assignment: Assignment
+	def module: Module
+	def submitter: CurrentUser
+	def action: String
 
 	@WithinYears(maxFuture = 3) @DateTimeFormat(pattern = DateFormats.DateTimePicker)
 	var expiryDate: DateTime =_
 	var reviewerComments: String =_
 	var state: ExtensionState = ExtensionState.Unreviewed
-	var action: String =_
+
 	var extension: Extension =_
 
 	final val ApprovalAction = "Grant"

@@ -17,10 +17,8 @@
 
 		$body.on('tabula.expandingTable.contentChanged',function(e){
 			var $this = $(e.target);
-			console.log($this);
 			$this.bindFormHelpers();
-
-		})
+		});
 
 
 		// expandable table rows
