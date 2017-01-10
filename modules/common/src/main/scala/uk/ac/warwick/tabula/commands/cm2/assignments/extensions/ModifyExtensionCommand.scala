@@ -46,7 +46,6 @@ class ModifyExtensionCommandInternal(val extension: Extension, val submitter: Cu
 		save(extension)
 		extension
 	}
-
 }
 
 trait ModifyExtensionPermissions extends RequiresPermissionsChecking with PermissionsCheckingMethods {

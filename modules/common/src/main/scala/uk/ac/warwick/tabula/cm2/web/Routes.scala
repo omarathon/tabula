@@ -38,6 +38,7 @@ object Routes {
 			object audit {
 				def apply(assignment: Assignment): String = admin() + "/audit/assignment/%s" format (encoded(assignment.id))
 			}
+			def extensions(assignment: Assignment): String = admin() + "/assignments/%s/manage/extensions" format (encoded(assignment.id))
 		}
 	}
 }
