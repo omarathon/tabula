@@ -6,7 +6,7 @@ import org.springframework.validation.Errors
 import uk.ac.warwick.tabula.{CurrentUser, DateFormats}
 import uk.ac.warwick.tabula.commands._
 import uk.ac.warwick.tabula.data.Transactions._
-import uk.ac.warwick.tabula.data.model.{Assignment, Module, Notification, ScheduledNotification}
+import uk.ac.warwick.tabula.data.model.{Notification, ScheduledNotification}
 import uk.ac.warwick.tabula.data.model.forms.{Extension, ExtensionState}
 import uk.ac.warwick.tabula.data.model.notifications.coursework._
 import uk.ac.warwick.tabula.events.NotificationHandling
