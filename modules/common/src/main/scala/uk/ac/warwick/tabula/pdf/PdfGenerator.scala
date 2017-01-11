@@ -78,7 +78,6 @@ trait FreemarkerXHTMLPDFGeneratorWithFileStorageComponent extends FreemarkerXHTM
 
 			// Create file
 			val pdfFileAttachment = new FileAttachment
-			//pdfFileAttachment.name = "feedback.pdf"
 			pdfFileAttachment.name = fileName
 			pdfFileAttachment.uploadedData = ByteSource.wrap(bytes)
 			transactional() { fileDao.saveTemporary(pdfFileAttachment) }
