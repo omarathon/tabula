@@ -1,3 +1,4 @@
+<#import "../cm2_macros.ftl" as cm2_macros />
 <#if detail.extension.requestedOn?has_content>
 	<div>
 		<label>Request received:</label> <@fmt.date date=detail.extension.requestedOn />
@@ -101,94 +102,5 @@
 
 </@f.form>
 
-
-
-<#if detail.previousExtensions?has_content>
-	<div id="prev-extensions-${detail.extension.id}" class="modal fade" role="dialog">
-		<div class="modal-dialog" role="document">
-			<div class="modal-content">
-				<div class="modal-header">
-					<button type="button" class="close" data-dismiss="modal" aria-label="Close">
-						<span aria-hidden="true">&times;</span>
-					</button>
-					<h4 class="modal-title">Previous extension requests</h4>
-				</div>
-				<div class="modal-body">
-					<h5>${detail.student.fullName} - ${detail.student.warwickId}</h5>
-					<div><strong>Accepted requests: </strong> ${detail.numAcceptedExtensions}</div>
-					<div><strong>Denied requests: </strong> ${detail.numRejectedExtensions}</div>
-					<table class="table table-striped">
-						<thead>
-							<tr>
-								<th>Module</th>
-								<th>Assignment</th>
-								<th>Status</th>
-								<th>Made</th>
-							</tr>
-						</thead>
-						<tbody>
-							<#list detail.previousExtensions as e>
-								<tr>
-									<td>${e.assignment.module.code}</td>
-									<td>${e.assignment.name}</td>
-									<td>${e.state.description}</td>
-									<td>
-										<#if e.requestedOn?has_content>
-											<@fmt.date date=e.requestedOn />
-										<#else>
-											<@fmt.date date=e.reviewedOn />
-										</#if>
-									</td>
-								</tr>
-							</#list>
-						</tbody>
-					</table>
-				</div>
-			</div>
-		</div>
-	</div>
-</#if>
-
-<#if detail.previousSubmissions?has_content>
-	<div id="prev-submissions-${detail.extension.id}" class="modal fade" role="dialog">
-		<div class="modal-dialog" role="document">
-			<div class="modal-content">
-				<div class="modal-header">
-					<button type="button" class="close" data-dismiss="modal" aria-label="Close">
-						<span aria-hidden="true">&times;</span>
-					</button>
-					<h4 class="modal-title">Previous submissions</h4>
-				</div>
-				<div class="modal-body">
-					<h5>${detail.student.fullName} - ${detail.student.warwickId}</h5>
-					<table class="table table-striped">
-						<thead>
-						<tr>
-							<th>Module</th>
-							<th>Assignment</th>
-							<th>Status</th>
-						</tr>
-						</thead>
-						<tbody>
-						<#list detail.previousSubmissions as submission>
-							<tr>
-								<td>${submission.assignment.module.code}</td>
-								<td>${submission.assignment.name}</td>
-								<td>
-									<#if submission.isAuthorisedLate()>
-										Within extension
-									<#elseif submission.isLate()>
-										Late
-									<#else>
-										On time
-									</#if>
-								</td>
-							</tr>
-						</#list>
-						</tbody>
-					</table>
-				</div>
-			</div>
-		</div>
-	</div>
-</#if>
+<@cm2_macros.previousExtensions detail.extension.id detail.student.warwickId detail.student.fullName detail.numAcceptedExtensions detail.numRejectedExtensions detail.previousExtensions />
+<@cm2_macros.previousSubmissions detail.extension.id detail.student.warwickId detail.student.fullName detail.previousSubmissions />
