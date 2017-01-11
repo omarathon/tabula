@@ -153,7 +153,7 @@ class ProfileExportSingleCommandInternal(val student: StudentMember, val academi
 		// Render PDF and create file
 		val pdfFileAttachment = pdfGenerator.renderTemplateAndStore(
 			"/WEB-INF/freemarker/reports/profile-export.ftl",
-			s"${student.universityId}-profile.pdf",
+			s"Tabula-${student.universityId}-profile.pdf",
 			Map(
 				"student" -> student,
 				"academicYear" -> academicYear,
