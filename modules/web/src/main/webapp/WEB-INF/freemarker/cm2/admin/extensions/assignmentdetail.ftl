@@ -123,7 +123,8 @@
 		>
 	</@f.form>
 
-	<@cm2_macros.assignmentExtension detail.extension.id detail.student.warwickId detail.student.fullName detail.numAcceptedExtensions detail.numRejectedExtensions detail.previousExtensions detail.previousSubmissions />
+	<@cm2_macros.previousExtensions detail.extension.id detail.student.warwickId detail.student.fullName detail.numAcceptedExtensions detail.numRejectedExtensions detail.previousExtensions />
+	<@cm2_macros.previousSubmissions detail.extension.id detail.student.warwickId detail.student.fullName detail.previousSubmissions />
 
 	<#assign feedbackNotice>
 		<#if detail.extension.approved>
