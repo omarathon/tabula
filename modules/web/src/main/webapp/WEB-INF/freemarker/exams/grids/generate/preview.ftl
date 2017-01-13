@@ -193,11 +193,10 @@
 						<td></td>
 						<td>Blank indicates module not taken by student</td>
 					</tr>
-					<#--TODO - Put this description back once TAB-4669 has been implemented -->
-					<#--<tr>-->
-						<#--<td><strong>AB</strong></td>-->
-						<#--<td>Bold module name indicates a duplicate table entry</td>-->
-					<#--</tr>-->
+					<tr>
+						<td><strong>AB</strong></td>
+						<td>Bold module name indicates a duplicate table entry</td>
+					</tr>
 				</tbody>
 			</table>
 		</div>
@@ -255,12 +254,12 @@
 					<#list perYearColumns?keys?sort as year>
 						<#if gridOptionsCommand.showComponentMarks><td class="spacer">&nbsp;</td></#if>
 						<#list mapGet(perYearColumns, year) as column>
-							<th class="rotated <#if column.category?has_content>has-category</#if>" <#if !column.secondaryValue?has_content>rowspan="2"</#if>><div class="rotate">${column.title}</div></th>
+							<th class="rotated <#if column.boldTitle>bold</#if> <#if column.category?has_content>has-category</#if>" <#if !column.secondaryValue?has_content>rowspan="2"</#if>><div class="rotate">${column.title}</div></th>
 						</#list>
 						<#if !year_has_next><td class="spacer">&nbsp;</td></#if>
 					</#list>
 					<#list summaryColumns as column>
-						<th class="rotated <#if column.category?has_content>has-category</#if>" <#if !column.secondaryValue?has_content>rowspan="2"</#if>><div class="rotate">${column.title}</div></th>
+						<th class="rotated <#if column.boldTitle>bold</#if> <#if column.category?has_content>has-category</#if>" <#if !column.secondaryValue?has_content>rowspan="2"</#if>><div class="rotate">${column.title}</div></th>
 					</#list>
 				</tr>
 				<#-- Secondary value row -->
@@ -269,7 +268,7 @@
 					<#list perYearColumns?keys?sort as year>
 						<#if gridOptionsCommand.showComponentMarks><td class="spacer">&nbsp;</td></#if>
 						<#list mapGet(perYearColumns, year) as column>
-							<#if column.secondaryValue?has_content><th <#if column.category?has_content>class="has-category"</#if>>${column.secondaryValue}</th></#if>
+							<#if column.secondaryValue?has_content><th class="<#if column.boldTitle>bold</#if> <#if column.category?has_content>has-category</#if>">${column.secondaryValue}</th></#if>
 						</#list>
 						<#if !year_has_next><td class="spacer">&nbsp;</td></#if>
 					</#list>

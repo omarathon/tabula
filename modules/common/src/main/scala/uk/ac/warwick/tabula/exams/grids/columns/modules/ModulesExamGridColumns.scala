@@ -7,7 +7,7 @@ import uk.ac.warwick.tabula.data.model.StudentCourseYearDetails.YearOfStudy
 import uk.ac.warwick.tabula.data.model.{Module, ModuleRegistration, ModuleSelectionStatus, UpstreamAssessmentGroupMember}
 import uk.ac.warwick.tabula.exams.grids.columns._
 
-abstract class ModuleExamGridColumn(state: ExamGridColumnState, val module: Module, cats: JBigDecimal)
+abstract class ModuleExamGridColumn(state: ExamGridColumnState, val module: Module, isDuplicate: Boolean, cats: JBigDecimal)
 	extends PerYearExamGridColumn(state) with HasExamGridColumnCategory with HasExamGridColumnSecondaryValue {
 
 	def moduleSelectionStatus: Option[ModuleSelectionStatus]
@@ -15,6 +15,8 @@ abstract class ModuleExamGridColumn(state: ExamGridColumnState, val module: Modu
 	override val title: String =
 		if (state.showModuleNames) s"${module.code.toUpperCase} ${module.name}"
 		else s"${module.code.toUpperCase}"
+
+	override val boldTitle = isDuplicate
 
 	override val excelColumnWidth: Int = ExamGridColumnOption.ExcelColumnSizes.WholeMark
 
@@ -93,20 +95,38 @@ abstract class ModuleExamGridColumn(state: ExamGridColumnState, val module: Modu
 
 abstract class ModuleExamGridColumnOption extends PerYearExamGridColumnOption {
 
-	def Column(state: ExamGridColumnState, module: Module, cats: JBigDecimal): ModuleExamGridColumn
+	// isDuplicate is true if this module appears more than once in the grid (as a core and optional module for example)
+	def Column(state: ExamGridColumnState, module: Module, isDuplicate: Boolean, cats: JBigDecimal): ModuleExamGridColumn
 
 	def moduleRegistrationFilter(mr: ModuleRegistration, coreRequiredModules: Seq[Module]): Boolean
 
 	override final def getColumns(state: ExamGridColumnState): Map[YearOfStudy, Seq[PerYearExamGridColumn]] = {
+
+		val allYears = state.entities.flatMap(_.years.values).toList
+
+		val allCoreRequiredModules =
+			allYears.map(_.route).flatMap(state.coreRequiredModuleLookup.apply).map(cr => (cr.module, "CoreRequired"))
+
+		val allOtherModules = allYears
+			.flatMap(_.moduleRegistrations).map(mr => (mr.module, mr.selectionStatus.description))
+
+		val duplicateModules = (allCoreRequiredModules ++ allOtherModules).distinct
+			.groupBy{ case (module, selectionStatus) => module }
+			// collect modules with 2 or more different selection statuses
+			.collect{ case (module, first :: second :: rest) => module }
+			.toSeq
+
 		state.entities.flatMap(_.years.keys).distinct.map(academicYear => academicYear -> {
 			val years = state.entities.flatMap(_.years.get(academicYear))
-			years.flatMap { entityYear =>
+			val moduleAndCats: Set[(Module, JBigDecimal)] = years.flatMap { entityYear =>
 				val coreRequiredModules = state.coreRequiredModuleLookup(entityYear.route).map(_.module)
 				entityYear.moduleRegistrations.filter(moduleRegistrationFilter(_, coreRequiredModules))
-			}.groupBy(mr => (mr.module, mr.cats))
-				.keySet
-				.toSeq.sortBy { case (module, cats) => (module, cats) }
-				.map{ case (module, cats) => Column(state, module, cats)}
+			}.groupBy(mr => (mr.module, mr.cats)).keySet
+
+			moduleAndCats
+				.toSeq
+				.sortBy { case (module, cats) => (module, cats) }
+				.map{ case (module, cats) => Column(state, module, duplicateModules.contains(module), cats)}
 		}).toMap
 	}
 }
@@ -122,7 +142,8 @@ class CoreModulesColumnOption extends ModuleExamGridColumnOption {
 
 	override val mandatory = true
 
-	class Column(state: ExamGridColumnState, module: Module, cats: JBigDecimal) extends ModuleExamGridColumn(state, module, cats) {
+	class Column(state: ExamGridColumnState, module: Module, isDuplicate: Boolean, cats: JBigDecimal)
+		extends ModuleExamGridColumn(state, module, isDuplicate, cats) {
 
 		override val category: String = "Core Modules"
 
@@ -130,7 +151,8 @@ class CoreModulesColumnOption extends ModuleExamGridColumnOption {
 
 	}
 
-	override def Column(state: ExamGridColumnState, module: Module, cats: JBigDecimal): ModuleExamGridColumn = new Column(state, module, cats)
+	override def Column(state: ExamGridColumnState, module: Module, isDuplicate: Boolean, cats: JBigDecimal): ModuleExamGridColumn
+		= new Column(state, module, isDuplicate, cats)
 
 	override def moduleRegistrationFilter(mr: ModuleRegistration, coreRequiredModules: Seq[Module]): Boolean =
 		mr.selectionStatus == ModuleSelectionStatus.Core && !coreRequiredModules.contains(mr.module)
@@ -146,7 +168,8 @@ class CoreRequiredModulesColumnOption extends ModuleExamGridColumnOption {
 
 	override val sortOrder: Int = ExamGridColumnOption.SortOrders.CoreRequiredModules
 
-	class Column(state: ExamGridColumnState, module: Module, cats: JBigDecimal) extends ModuleExamGridColumn(state, module, cats) {
+	class Column(state: ExamGridColumnState, module: Module, isDuplicate: Boolean, cats: JBigDecimal)
+		extends ModuleExamGridColumn(state, module, isDuplicate, cats) {
 
 		override val category: String = "Core Required Modules"
 
@@ -154,7 +177,8 @@ class CoreRequiredModulesColumnOption extends ModuleExamGridColumnOption {
 
 	}
 
-	override def Column(state: ExamGridColumnState, module: Module, cats: JBigDecimal): ModuleExamGridColumn = new Column(state, module, cats)
+	override def Column(state: ExamGridColumnState, module: Module, isDuplicate: Boolean, cats: JBigDecimal): ModuleExamGridColumn
+		= new Column(state, module, isDuplicate, cats)
 
 	override def moduleRegistrationFilter(mr: ModuleRegistration, coreRequiredModules: Seq[Module]): Boolean =
 		coreRequiredModules.contains(mr.module)
@@ -170,7 +194,8 @@ class CoreOptionalModulesColumnOption extends ModuleExamGridColumnOption {
 
 	override val sortOrder: Int = ExamGridColumnOption.SortOrders.CoreOptionalModules
 
-	class Column(state: ExamGridColumnState, module: Module, cats: JBigDecimal) extends ModuleExamGridColumn(state, module, cats) {
+	class Column(state: ExamGridColumnState, module: Module, isDuplicate: Boolean, cats: JBigDecimal)
+		extends ModuleExamGridColumn(state, module, isDuplicate, cats) {
 
 		override val category: String = "Core Optional Modules"
 
@@ -178,7 +203,8 @@ class CoreOptionalModulesColumnOption extends ModuleExamGridColumnOption {
 
 	}
 
-	override def Column(state: ExamGridColumnState, module: Module, cats: JBigDecimal): ModuleExamGridColumn = new Column(state, module, cats)
+	override def Column(state: ExamGridColumnState, module: Module, isDuplicate: Boolean, cats: JBigDecimal): ModuleExamGridColumn
+		= new Column(state, module, isDuplicate, cats)
 
 	override def moduleRegistrationFilter(mr: ModuleRegistration, coreRequiredModules: Seq[Module]): Boolean =
 		mr.selectionStatus == ModuleSelectionStatus.OptionalCore && !coreRequiredModules.contains(mr.module)
@@ -194,7 +220,8 @@ class OptionalModulesColumnOption extends ModuleExamGridColumnOption {
 
 	override val sortOrder: Int = ExamGridColumnOption.SortOrders.OptionalModules
 
-	class Column(state: ExamGridColumnState, module: Module, cats: JBigDecimal) extends ModuleExamGridColumn(state, module, cats) {
+	class Column(state: ExamGridColumnState, module: Module, isDuplicate: Boolean, cats: JBigDecimal)
+		extends ModuleExamGridColumn(state, module, isDuplicate, cats) {
 
 		override val category: String = "Optional Modules"
 
@@ -202,7 +229,8 @@ class OptionalModulesColumnOption extends ModuleExamGridColumnOption {
 
 	}
 
-	override def Column(state: ExamGridColumnState, module: Module, cats: JBigDecimal): ModuleExamGridColumn = new Column(state, module, cats)
+	override def Column(state: ExamGridColumnState, module: Module, isDuplicate: Boolean, cats: JBigDecimal): ModuleExamGridColumn
+		= new Column(state, module, isDuplicate, cats)
 
 	override def moduleRegistrationFilter(mr: ModuleRegistration, coreRequiredModules: Seq[Module]): Boolean =
 		mr.selectionStatus == ModuleSelectionStatus.Option && !coreRequiredModules.contains(mr.module)

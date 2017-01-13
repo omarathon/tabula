@@ -37,7 +37,7 @@
 			</tr>
 			<#assign detailUrl><@routes.cm2.extensionDetail graph.extension /></#assign>
 			<tr id="extension${graph.extension.id}" data-detailurl="${detailUrl}" class="collapse detail-row">
-				<td colspan="7">
+				<td colspan="7" class="detailrow-container">
 					<i class="fa fa-spinner fa-spin"></i> Loading
 				</td>
 			</tr>

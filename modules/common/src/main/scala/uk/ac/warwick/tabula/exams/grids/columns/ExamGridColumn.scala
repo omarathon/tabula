@@ -91,6 +91,7 @@ trait ChosenYearExamGridColumnOption extends ExamGridColumnOption {
 
 sealed abstract class ExamGridColumn(state: ExamGridColumnState) {
 	val title: String
+	val boldTitle: Boolean = false
 	val excelColumnWidth: Int
 }
 

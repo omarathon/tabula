@@ -23,6 +23,7 @@ object GenerateExamGridExporter {
 	case object ActualMark extends Style
 	case object FailAndActualMark extends Style
 	case object OvercatAndActualMark extends Style
+	case object BoldText extends Style
 
 	def apply(
 		department: Department,
@@ -141,7 +142,12 @@ object GenerateExamGridExporter {
 				headerCell.setCellValue(perYearColumn.title)
 				sheet.autoSizeColumn(currentColumnIndex)
 				headerRowMaxCellWidth = Math.max(headerRowMaxCellWidth, sheet.getColumnWidth(currentColumnIndex))
-				headerCell.setCellStyle(cellStyleMap(Rotated))
+
+				if(perYearColumn.boldTitle)
+					headerCell.setCellStyle(cellStyleMap(HeaderRotated))
+				else
+					headerCell.setCellStyle(cellStyleMap(Rotated))
+
 				if (!perYearColumn.isInstanceOf[HasExamGridColumnCategory]) {
 					// rowspan = 2
 					sheet.addMergedRegion(new CellRangeAddress(headerCell.getRowIndex, headerCell.getRowIndex + 1, headerCell.getColumnIndex, headerCell.getColumnIndex))
@@ -199,7 +205,12 @@ object GenerateExamGridExporter {
 			// Header row
 			val headerCell = headerRow.createCell(currentColumnIndex)
 			headerCell.setCellValue(rightColumn.title)
-			headerCell.setCellStyle(cellStyleMap(Rotated))
+
+			if(rightColumn.boldTitle)
+				headerCell.setCellStyle(cellStyleMap(HeaderRotated))
+			else
+				headerCell.setCellStyle(cellStyleMap(Rotated))
+
 			if (!rightColumn.isInstanceOf[HasExamGridColumnSecondaryValue]) {
 				// rowspan = 2
 				sheet.addMergedRegion(new CellRangeAddress(headerCell.getRowIndex, headerCell.getRowIndex + 1, headerCell.getColumnIndex, headerCell.getColumnIndex))
@@ -312,6 +323,14 @@ object GenerateExamGridExporter {
 			val valueCell = row.createCell(1)
 			valueCell.setCellValue("Blank indicates module not taken by student")
 		}
+		{
+			val row = sheet.createRow(14)
+			val keyCell = row.createCell(0)
+			keyCell.setCellValue("AB")
+			keyCell.setCellStyle(cellStyleMap(BoldText))
+			val valueCell = row.createCell(1)
+			valueCell.setCellValue("Bold module name indicates a duplicate table entry")
+		}
 
 		sheet.autoSizeColumn(0)
 		sheet.autoSizeColumn(1)
@@ -407,6 +426,16 @@ object GenerateExamGridExporter {
 			cs
 		}
 
+		val boldText = {
+			val cs = workbook.createCellStyle()
+			val boldFont = workbook.createFont()
+			boldFont.setFontHeight(10)
+			boldFont.setBold(true)
+			cs.setFont(boldFont)
+			cs
+		}
+
+
 		Map(
 			Header -> headerStyle,
 			HeaderRotated -> headerRotatedStyle,
@@ -416,7 +445,8 @@ object GenerateExamGridExporter {
 			Overridden -> overriddenStyle,
 			ActualMark -> actualMarkStyle,
 			FailAndActualMark -> failAndActualMarkStyle,
-			OvercatAndActualMark -> overcatAndActualMarkStyle
+			OvercatAndActualMark -> overcatAndActualMarkStyle,
+			BoldText -> boldText
 		)
 	}
 

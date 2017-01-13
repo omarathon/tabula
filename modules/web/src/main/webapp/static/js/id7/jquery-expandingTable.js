@@ -131,7 +131,7 @@ jQuery.fn.expandingTable = function(options) {
 			}
 
 			$content.css({
-				width: ($row.closest('table').width() - 21) + 'px'
+				width: ($row.closest('table').width()) + 'px'
 			});
 
 			// Change the icon to open
