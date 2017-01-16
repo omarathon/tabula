@@ -5,7 +5,7 @@
 
 <@modal.wrapper cssClass="modal-lg">
 	<@modal.header>
-		<h3 class="modal-title">Students with timetable conflicts</h3>
+		<h3 class="modal-title">Students with small group event conflicts</h3>
 	</@modal.header>
 	<@modal.body>
 		<#if students?has_content>
