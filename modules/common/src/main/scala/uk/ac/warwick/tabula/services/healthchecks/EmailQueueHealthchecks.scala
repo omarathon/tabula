@@ -50,13 +50,10 @@ class EmailOldestUnsentItemHealthcheck extends ServiceHealthcheckProvider {
 	def run(): Unit = transactional(readOnly = true) {
 		// How old (in minutes) is the oldest item in the queue?
 		val oldestUnsentEmail =
-			Wire[EmailNotificationService].unemailedRecipients
-				.take(1)
+			Wire[EmailNotificationService].oldestUnemailedRecipient
 				.map { recipient: RecipientNotificationInfo =>
 					Minutes.minutesBetween(recipient.notification.created, DateTime.now).getMinutes
 				}
-				.toList
-				.headOption
 				.getOrElse(0)
 
 		val status =
