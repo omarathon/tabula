@@ -39,7 +39,7 @@ object TurnitinLtiQueueService {
 trait TurnitinLtiQueueService {
 	def findAssignmentToProcess: Option[Assignment]
 	def findReportToProcessForSubmission: Option[OriginalityReport]
-	def findReportToProcessForReport: Option[OriginalityReport]
+	def findReportToProcessForReport(longAwaitedOnly: Boolean): Option[OriginalityReport]
 	def listCompletedAssignments: Seq[Assignment]
 	def listFailedAssignments: Seq[Assignment]
 	def listOriginalityReports(assignment: Assignment): Seq[OriginalityReport]
@@ -61,8 +61,8 @@ abstract class AbstractTurnitinLtiQueueService extends TurnitinLtiQueueService w
 		turnitinLtiQueueDao.findReportToProcessForSubmission
 	}
 
-	def findReportToProcessForReport: Option[OriginalityReport] = {
-		turnitinLtiQueueDao.findReportToProcessForReport
+	def findReportToProcessForReport(longAwaitedOnly: Boolean): Option[OriginalityReport] = {
+		turnitinLtiQueueDao.findReportToProcessForReport(longAwaitedOnly)
 	}
 
 	def listCompletedAssignments: Seq[Assignment] = {

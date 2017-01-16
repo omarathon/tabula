@@ -81,9 +81,27 @@ class ProcessTurnitinLtiQueueCommandTest extends TestBase with Mockito {
 			mockTurnitinLtiQueueService.listFailedAssignments returns Seq()
 			cmd.applyInternal()
 			verify(mockTurnitinLtiQueueService, times(0)).findReportToProcessForSubmission
-			verify(mockTurnitinLtiQueueService, times(0)).findReportToProcessForReport
+			verify(mockTurnitinLtiQueueService, times(0)).findReportToProcessForReport(false)
 			assignment.lastSubmittedToTurnitin should be (now)
 			verify(mockAssessmentService, times(1)).save(assignment)
+			verify(mockTurnitinLtiQueueService, times(1)).listCompletedAssignments
+			verify(mockTurnitinLtiQueueService, times(1)).listFailedAssignments
+		}
+		// Long awaited report to get
+		new Fixture {
+			val report: OriginalityReport = deepOriginalityReport()
+			report.turnitinId = "1234"
+			report.attachment.submissionValue.submission.assignment.turnitinLtiNotifyUsers = Seq(user1)
+			report.attachment.submissionValue.submission.assignment.userLookup = mockUserLookup
+			mockTurnitinLtiQueueService.findAssignmentToProcess returns None
+			mockTurnitinLtiQueueService.findReportToProcessForReport(true) returns Option(report)
+			mockTurnitinLtiService.getSubmissionDetails(report.turnitinId, new CurrentUser(user1, user1)) returns new TurnitinLtiResponse(success = true, json = Option(""))
+			mockTurnitinLtiQueueService.listCompletedAssignments returns Seq()
+			mockTurnitinLtiQueueService.listFailedAssignments returns Seq()
+			cmd.applyInternal()
+			report.lastReportRequest should be (now)
+			verify(mockTurnitinLtiQueueService, times(0)).findReportToProcessForSubmission
+			verify(mockOriginalityReportService, times(1)).saveOrUpdate(report)
 			verify(mockTurnitinLtiQueueService, times(1)).listCompletedAssignments
 			verify(mockTurnitinLtiQueueService, times(1)).listFailedAssignments
 		}
@@ -91,6 +109,7 @@ class ProcessTurnitinLtiQueueCommandTest extends TestBase with Mockito {
 		new Fixture {
 			val report: OriginalityReport = deepOriginalityReport()
 			mockTurnitinLtiQueueService.findAssignmentToProcess returns None
+			mockTurnitinLtiQueueService.findReportToProcessForReport(true) returns None
 			mockTurnitinLtiQueueService.findReportToProcessForSubmission returns Option(report)
 			mockFileAttachmentService.getValidToken(report.attachment) returns None
 			mockTurnitinLtiService.submitPaper(
@@ -115,7 +134,7 @@ class ProcessTurnitinLtiQueueCommandTest extends TestBase with Mockito {
 			mockTurnitinLtiQueueService.listCompletedAssignments returns Seq()
 			mockTurnitinLtiQueueService.listFailedAssignments returns Seq()
 			cmd.applyInternal()
-			verify(mockTurnitinLtiQueueService, times(0)).findReportToProcessForReport
+			verify(mockTurnitinLtiQueueService, times(0)).findReportToProcessForReport(false)
 			report.lastSubmittedToTurnitin should be (now)
 			report.turnitinId should be ("1234")
 			verify(mockOriginalityReportService, times(1)).saveOrUpdate(report)
@@ -129,8 +148,9 @@ class ProcessTurnitinLtiQueueCommandTest extends TestBase with Mockito {
 			report.attachment.submissionValue.submission.assignment.turnitinLtiNotifyUsers = Seq(user1)
 			report.attachment.submissionValue.submission.assignment.userLookup = mockUserLookup
 			mockTurnitinLtiQueueService.findAssignmentToProcess returns None
+			mockTurnitinLtiQueueService.findReportToProcessForReport(true) returns None
 			mockTurnitinLtiQueueService.findReportToProcessForSubmission returns None
-			mockTurnitinLtiQueueService.findReportToProcessForReport returns Option(report)
+			mockTurnitinLtiQueueService.findReportToProcessForReport(false) returns Option(report)
 			mockTurnitinLtiService.getSubmissionDetails(report.turnitinId, new CurrentUser(user1, user1)) returns new TurnitinLtiResponse(success = true, json = Option(""))
 			mockTurnitinLtiQueueService.listCompletedAssignments returns Seq()
 			mockTurnitinLtiQueueService.listFailedAssignments returns Seq()
@@ -222,6 +242,7 @@ class ProcessTurnitinLtiQueueCommandTest extends TestBase with Mockito {
 	def reportForSubmissionFailure(): Unit = withFakeTime(now) {
 		new ReportSetupFixture {
 			mockTurnitinLtiQueueService.findAssignmentToProcess returns None
+			mockTurnitinLtiQueueService.findReportToProcessForReport(true) returns None
 			mockTurnitinLtiQueueService.findReportToProcessForSubmission returns Option(report)
 			mockFileAttachmentService.getValidToken(report.attachment) returns None
 			mockTurnitinLtiService.submitPaper(
@@ -250,6 +271,7 @@ class ProcessTurnitinLtiQueueCommandTest extends TestBase with Mockito {
 	def reportForSubmissionSuccessNoToken(): Unit = withFakeTime(now) {
 		new ReportSetupFixture {
 			mockTurnitinLtiQueueService.findAssignmentToProcess returns None
+			mockTurnitinLtiQueueService.findReportToProcessForReport(true) returns None
 			mockTurnitinLtiQueueService.findReportToProcessForSubmission returns Option(report)
 			mockFileAttachmentService.getValidToken(report.attachment) returns None
 			mockTurnitinLtiService.submitPaper(
@@ -285,6 +307,7 @@ class ProcessTurnitinLtiQueueCommandTest extends TestBase with Mockito {
 	def reportForSubmissionSuccessExisitngToken(): Unit = withFakeTime(now) {
 		new ReportSetupFixture {
 			mockTurnitinLtiQueueService.findAssignmentToProcess returns None
+			mockTurnitinLtiQueueService.findReportToProcessForReport(true) returns None
 			mockTurnitinLtiQueueService.findReportToProcessForSubmission returns Option(report)
 			val token = new FileAttachmentToken
 			token.id = "1234"
@@ -325,8 +348,7 @@ class ProcessTurnitinLtiQueueCommandTest extends TestBase with Mockito {
 			assignment.turnitinLtiNotifyUsers = Seq(user1)
 			assignment.userLookup = mockUserLookup
 			mockTurnitinLtiQueueService.findAssignmentToProcess returns None
-			mockTurnitinLtiQueueService.findReportToProcessForSubmission returns None
-			mockTurnitinLtiQueueService.findReportToProcessForReport returns Option(report)
+			mockTurnitinLtiQueueService.findReportToProcessForReport(true) returns Option(report)
 			mockTurnitinLtiService.getSubmissionDetails(report.turnitinId, new CurrentUser(user1, user1)) returns new TurnitinLtiResponse(
 				success = false,
 				statusMessage = Option("How bout no!")
@@ -348,8 +370,7 @@ class ProcessTurnitinLtiQueueCommandTest extends TestBase with Mockito {
 			assignment.turnitinLtiNotifyUsers = Seq(user1)
 			assignment.userLookup = mockUserLookup
 			mockTurnitinLtiQueueService.findAssignmentToProcess returns None
-			mockTurnitinLtiQueueService.findReportToProcessForSubmission returns None
-			mockTurnitinLtiQueueService.findReportToProcessForReport returns Option(report)
+			mockTurnitinLtiQueueService.findReportToProcessForReport(true) returns Option(report)
 			mockTurnitinLtiService.getSubmissionDetails(report.turnitinId, new CurrentUser(user1, user1)) returns new TurnitinLtiResponse(
 				success = true,
 				json = Option(
@@ -390,8 +411,9 @@ class ProcessTurnitinLtiQueueCommandTest extends TestBase with Mockito {
 			val failedAssignment: Assignment = Fixtures.assignment("test")
 			failedAssignment.submitToTurnitin = true
 			mockTurnitinLtiQueueService.findAssignmentToProcess returns None
+			mockTurnitinLtiQueueService.findReportToProcessForReport(true) returns None
 			mockTurnitinLtiQueueService.findReportToProcessForSubmission returns None
-			mockTurnitinLtiQueueService.findReportToProcessForReport returns None
+			mockTurnitinLtiQueueService.findReportToProcessForReport(false) returns None
 			mockTurnitinLtiQueueService.listCompletedAssignments returns Seq(completeAssignment)
 			mockTurnitinLtiQueueService.listFailedAssignments returns Seq(failedAssignment)
 			cmd.applyInternal()

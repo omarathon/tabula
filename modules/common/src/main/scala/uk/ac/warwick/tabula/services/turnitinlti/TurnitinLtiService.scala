@@ -45,6 +45,7 @@ object TurnitinLtiService {
 	val SubmitAttachmentMaxRetries = 20
 	val ReportRequestWaitInSeconds = 20
 	val ReportRequestMaxRetries = 50
+	val LongAwaitedReportWaitInSeconds = 60 * 60
 
 	/**
 	 * Quoted supported types are...

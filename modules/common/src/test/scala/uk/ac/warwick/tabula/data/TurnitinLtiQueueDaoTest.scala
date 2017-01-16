@@ -163,7 +163,7 @@ class TurnitinLtiQueueDaoTest extends PersistenceTestBase {
 		reportToProcessLater.lastReportRequest = DateTime.now.minusMinutes(10)
 		session.save(reportToProcessLater)
 
-		turnitinLtiQueueDao.findReportToProcessForReport.get should be (reportToProcess)
+		turnitinLtiQueueDao.findReportToProcessForReport(false).get should be (reportToProcess)
 	}}
 
 	@Test
@@ -193,7 +193,7 @@ class TurnitinLtiQueueDaoTest extends PersistenceTestBase {
 		session.save(reportNotSubmitted.attachment)
 		session.save(reportNotSubmitted)
 
-		turnitinLtiQueueDao.findReportToProcessForReport.isEmpty should be {true}
+		turnitinLtiQueueDao.findReportToProcessForReport(false).isEmpty should be {true}
 	}}
 
 	@Test
