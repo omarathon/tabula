@@ -36,7 +36,7 @@ class AttendanceMonitoringMeetingRecordServiceTest extends TestBase with Mockito
 		val tutorRelationshipType = StudentRelationshipType("personalTutor", "tutor", "personal tutor", "personal tutee")
 		val supervisorRelationshipType = StudentRelationshipType("supervisor", "supervisor", "supervisor", "supervisee")
 
-		val meetingRelationship = ExternalStudentRelationship(agent, tutorRelationshipType, student)
+		val meetingRelationship = ExternalStudentRelationship(agent, tutorRelationshipType, student, DateTime.now)
 
 		service.relationshipService
 			.getStudentRelationshipTypeById(tutorRelationshipType.id) returns Option(tutorRelationshipType)

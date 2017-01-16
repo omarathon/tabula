@@ -2,11 +2,15 @@ package uk.ac.warwick.tabula.data.model.notifications.profiles
 
 import javax.persistence.{DiscriminatorValue, Entity}
 
+import org.joda.time.DateTime
 import uk.ac.warwick.spring.Wire
 import uk.ac.warwick.tabula.data.model.{FreemarkerModel, _}
+import uk.ac.warwick.tabula.helpers.StringUtils._
 import uk.ac.warwick.tabula.profiles.web.Routes
 import uk.ac.warwick.tabula.services.ProfileService
 import uk.ac.warwick.userlookup.User
+
+import scala.util.Try
 
 abstract class StudentRelationshipChangeNotification
 	extends Notification[StudentRelationship, Unit] with SingleItemNotification[StudentRelationship] {
@@ -30,14 +34,19 @@ abstract class StudentRelationshipChangeNotification
 
 	def oldAgents: Seq[Member] = oldAgentIds.value.flatMap { id => profileService.getMemberByUniversityId(id)}
 
+	@transient private val scheduledDateString = StringSetting("scheduledDate", "")
+
+	def scheduledDate: Option[DateTime] = scheduledDateString.value.maybeText.flatMap(s => Try(new DateTime(s.toLong)).toOption)
+	def scheduledDate_=(date: DateTime): Unit = scheduledDateString.value = date.getMillis.toString
+
 	def content =
 		FreemarkerModel(templateLocation, Map(
 			"student" -> relationship.studentMember,
 			"newAgents" -> newAgent.toSeq,
 			"relationshipType" -> relationship.relationshipType,
 			"path" -> url,
-			"oldAgents" -> oldAgents
-
+			"oldAgents" -> oldAgents,
+			"scheduledDate" -> scheduledDate
 		))
 
 	def url: String = Routes.Profile.relationshipType(relationship.studentMember.get, relationshipType)
@@ -85,7 +94,7 @@ class StudentRelationshipChangeToNewAgentNotification extends StudentRelationshi
 }
 
 object StudentRelationshipChangeNotification {
-	val NewAgentTemplate = "/WEB-INF/freemarker/notifications/new_agent_notification.ftl"
-	val OldAgentTemplate = "/WEB-INF/freemarker/notifications/old_agent_notification.ftl"
-	val StudentTemplate = "/WEB-INF/freemarker/notifications/student_change_relationship_notification.ftl"
+	val NewAgentTemplate = "/WEB-INF/freemarker/notifications/profiles/new_agent_notification.ftl"
+	val OldAgentTemplate = "/WEB-INF/freemarker/notifications/profiles/old_agent_notification.ftl"
+	val StudentTemplate = "/WEB-INF/freemarker/notifications/profiles/student_change_relationship_notification.ftl"
 }

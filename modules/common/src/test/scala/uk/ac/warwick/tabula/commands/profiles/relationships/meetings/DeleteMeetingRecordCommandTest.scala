@@ -12,7 +12,7 @@ class DeleteMeetingRecordCommandTest extends TestBase with Mockito {
 	val student: StudentMember = Fixtures.student()
 	var creator: StaffMember = Fixtures.staff("9876543", "staffmember")
 	val relationshipType = StudentRelationshipType("tutor", "tutor", "personal tutor", "personal tutee")
-	var relationship: StudentRelationship = ExternalStudentRelationship("Professor A Tutor", relationshipType, student)
+	var relationship: StudentRelationship = ExternalStudentRelationship("Professor A Tutor", relationshipType, student, DateTime.now)
 
 	val user: CurrentUser = smartMock[CurrentUser]
 	user.universityId returns "9876543"

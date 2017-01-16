@@ -1,9 +1,11 @@
 package uk.ac.warwick.tabula.profiles
 
+import org.joda.time.DateTime
+import org.mockito.Matchers
 import uk.ac.warwick.userlookup.User
 import uk.ac.warwick.tabula.data.model._
 import uk.ac.warwick.tabula.Mockito
-import uk.ac.warwick.tabula.services.{RelationshipService, ProfileService}
+import uk.ac.warwick.tabula.services.{ProfileService, RelationshipService}
 
 trait TutorFixture extends Mockito {
 
@@ -34,11 +36,11 @@ trait TutorFixture extends Mockito {
 	val oldTutor = new StaffMember
 	oldTutor.universityId = "0000002"
 
-	val profileService: ProfileService = smartMock[ProfileService]
-	profileService.getStudentBySprCode("student") returns Some(student)
-	profileService.getMemberByUniversityId("0000001") returns Some(newTutor)
-	profileService.getMemberByUniversityId("0000002") returns Some(oldTutor)
-	profileService.getMemberByUniversityId("0000002", false, false) returns Some(oldTutor)
+	val mockProfileService: ProfileService = smartMock[ProfileService]
+	mockProfileService.getStudentBySprCode("student") returns Some(student)
+	mockProfileService.getMemberByUniversityId("0000001") returns Some(newTutor)
+	mockProfileService.getMemberByUniversityId("0000002") returns Some(oldTutor)
+	mockProfileService.getMemberByUniversityId("0000002", false, false) returns Some(oldTutor)
 
 	val relationship = new MemberStudentRelationship
 	relationship.studentMember = student
@@ -50,8 +52,14 @@ trait TutorFixture extends Mockito {
 	relationshipOld.agentMember = oldTutor
 	relationshipOld.relationshipType = tutorRelationshipType
 
-	val relationshipService: RelationshipService = smartMock[RelationshipService]
-	relationshipService.saveStudentRelationships(tutorRelationshipType, studentCourseDetails, List(newTutor)) returns Seq(StudentRelationship(newTutor, tutorRelationshipType, studentCourseDetails))
-	relationshipService.findCurrentRelationships(tutorRelationshipType, studentCourseDetails) returns Seq(relationshipOld)
+	val mockRelationshipService: RelationshipService = smartMock[RelationshipService]
+	mockRelationshipService.saveStudentRelationship(
+		Matchers.eq(tutorRelationshipType),
+		Matchers.eq(studentCourseDetails),
+		Matchers.eq(Left(newTutor)),
+		Matchers.eq(DateTime.now),
+		any[Seq[StudentRelationship]]
+	) returns StudentRelationship(newTutor, tutorRelationshipType, studentCourseDetails, DateTime.now)
+	mockRelationshipService.findCurrentRelationships(tutorRelationshipType, studentCourseDetails) returns Seq(relationshipOld)
 
 }

@@ -6,13 +6,13 @@ import uk.ac.warwick.tabula.{Fixtures, Mockito, TestBase}
 
 class ScheduledMeetingRecordMissedInviteeNotificationTest extends TestBase with Mockito {
 
-	@Test def recipient = withUser("cuscav", "0672089") {
+	@Test def recipient() = withUser("cuscav", "0672089") {
 		val agent = Fixtures.staff(currentUser.universityId, currentUser.userId)
 		val student = Fixtures.student()
 
 		val relationshipType = StudentRelationshipType("tutor", "tutor", "tutor", "tutee")
 
-		val relationship = StudentRelationship(agent, relationshipType, student)
+		val relationship = StudentRelationship(agent, relationshipType, student, DateTime.now)
 
 		// Scheduled by the agent
 		val scheduledMeeting = new ScheduledMeetingRecord(agent, relationship)
@@ -40,7 +40,7 @@ class ScheduledMeetingRecordMissedInviteeNotificationTest extends TestBase with 
 
 		val relationshipType = StudentRelationshipType("personalTutor", "tutor", "personal tutor", "personal tutee")
 
-		val relationship: StudentRelationship = StudentRelationship(agent, relationshipType, student)
+		val relationship: StudentRelationship = StudentRelationship(agent, relationshipType, student, DateTime.now)
 
 		val thirdParty: StaffMember = Fixtures.staff("1122331", "3rdparty")
 		thirdParty.firstName = "Third"

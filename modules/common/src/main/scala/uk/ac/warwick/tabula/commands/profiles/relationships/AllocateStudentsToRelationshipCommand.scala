@@ -1,12 +1,12 @@
 package uk.ac.warwick.tabula.commands.profiles.relationships
 
+import org.joda.time.DateTime
 import org.springframework.validation.Errors
 import uk.ac.warwick.tabula.JavaImports._
 import uk.ac.warwick.tabula.commands._
 import uk.ac.warwick.tabula.commands.profiles.relationships.AllocateStudentsToRelationshipCommand.Result
 import uk.ac.warwick.tabula.commands.profiles.relationships.ExtractRelationshipsFromFileCommand.AllocationTypes
 import uk.ac.warwick.tabula.data.model._
-import uk.ac.warwick.tabula.data.model.notifications.profiles.{BulkNewAgentRelationshipNotification, BulkOldAgentRelationshipNotification, BulkStudentRelationshipNotification}
 import uk.ac.warwick.tabula.helpers.LazyMaps
 import uk.ac.warwick.tabula.helpers.StringUtils._
 import uk.ac.warwick.tabula.permissions.Permissions
@@ -28,7 +28,7 @@ object AllocateStudentsToRelationshipCommand {
 			with AllocateStudentsToRelationshipValidation
 			with AllocateStudentsToRelationshipDescription
 			with AllocateStudentsToRelationshipPermissions
-			with AllocateStudentsToRelationshipCommandState
+			with ManageStudentRelationshipsState
 			with AllocateStudentsToRelationshipCommandRequest
 			with AllocateStudentsToRelationshipNotifications
 }
@@ -37,16 +37,22 @@ object AllocateStudentsToRelationshipCommand {
 class AllocateStudentsToRelationshipCommandInternal(val department: Department, val relationshipType: StudentRelationshipType, val user: CurrentUser)
 	extends CommandInternal[AllocateStudentsToRelationshipCommand.Result] {
 
-	self: AllocateStudentsToRelationshipCommandRequest with AllocateStudentsToRelationshipCommandState with RelationshipServiceComponent =>
+	self: AllocateStudentsToRelationshipCommandRequest with ManageStudentRelationshipsState
+		with RelationshipServiceComponent with ProfileServiceComponent =>
 
 	override def applyInternal(): Result = {
-		val relationshipsToExpire: Seq[StudentRelationship] = (allocationType match {
+		val relationshipsToExpire = (allocationType match {
 			case AllocationTypes.Replace =>
-				relationshipsNotInAdditions.groupBy(_._2).mapValues(_.map(_._1)).flatMap { case(entity, studentsToRemove) =>
-					relationshipService.listCurrentRelationshipsWithAgent(relationshipType, entity.entityId)
-						.filter(_.studentMember.exists(s => studentsToRemove.map(_.universityId).contains(s.universityId)))
-				}.toSeq
+				// Any student mentioned in additions that isn't re-added needs to be removed
+				relationshipsNotInAdditions
+					.groupBy { case (_, entity) => entity }
+					.mapValues(_.map { case (student, _) => student })
+					.flatMap { case (entity, studentsToRemove) =>
+						relationshipService.listCurrentRelationshipsWithAgent(relationshipType, entity.entityId)
+							.filter(_.studentMember.exists(s => studentsToRemove.map(_.universityId).contains(s.universityId)))
+					}.toSeq
 			case AllocationTypes.Add =>
+				// No replacements; remove the removes
 				removals.asScala.flatMap { case(entityId, removeIDs) =>
 					relationshipService.listCurrentRelationshipsWithAgent(relationshipType, entityId)
 						.filter(_.studentMember.exists(s => removeIDs.contains(s.universityId)))
@@ -55,14 +61,29 @@ class AllocateStudentsToRelationshipCommandInternal(val department: Department, 
 				Seq()
 		}).filter (_.studentCourseDetails.mostSignificant)
 
-		relationshipService.endStudentRelationships(relationshipsToExpire)
+		relationshipService.endStudentRelationships(relationshipsToExpire, scheduledDateToUse)
 
 		/**TODO- If a student is on 2 courses (mainly course transfer cases)-> when we create a new relationship for most significant course Ist time
 			* If there is another course that is not most significant one, set end date for that particular relationship type with the same agent (if it is blank)
 			* Also would need to move comments etc from old relationship to this new one. Probably part of JIRA TAB-4555 **/
-		val newRelationships: Seq[StudentRelationship] = additions.asScala.flatMap{case(entityId, addIDs) =>
+		val newRelationships: Seq[StudentRelationship] = additions.asScala.flatMap { case (entityId, addIDs) =>
 			val alreadyExist = dbAllocated.find(_.entityId == entityId).map(e => e.students.map(_.universityId)).getOrElse(Seq())
-			relationshipService.applyStudentRelationships(relationshipType, entityId, addIDs.asScala.toSeq.filterNot(alreadyExist.contains))
+			val students = profileService.getAllMembersWithUniversityIdsStaleOrFresh(addIDs.asScala.filterNot(alreadyExist.contains)).collect { case s: StudentMember => s }
+			students.map { student =>
+				val replacements = allocationType match {
+					case AllocationTypes.Replace =>
+						relationshipsToExpire.filter(_.studentMember.contains(student))
+					case _ =>
+						Seq()
+				}
+				relationshipService.saveStudentRelationship(
+					relationshipType,
+					student.mostSignificantCourse,
+					profileService.getMemberByUniversityIdStaleOrFresh(entityId).map(Left(_)).getOrElse(Right(entityId)),
+					scheduledDateToUse,
+					replacements
+				)
+			}
 		}.toSeq
 
 		AllocateStudentsToRelationshipCommand.Result(relationshipsToExpire, newRelationships)
@@ -72,7 +93,7 @@ class AllocateStudentsToRelationshipCommandInternal(val department: Department, 
 
 trait AllocateStudentsToRelationshipValidation extends SelfValidating {
 
-	self: AllocateStudentsToRelationshipCommandState with AllocateStudentsToRelationshipCommandRequest =>
+	self: ManageStudentRelationshipsState with AllocateStudentsToRelationshipCommandRequest =>
 
 	override def validate(errors: Errors) {
 		// Should never happen in practice, but protects against direct POSTs
@@ -92,7 +113,7 @@ trait AllocateStudentsToRelationshipValidation extends SelfValidating {
 
 trait AllocateStudentsToRelationshipPermissions extends RequiresPermissionsChecking with PermissionsCheckingMethods {
 
-	self: AllocateStudentsToRelationshipCommandState =>
+	self: ManageStudentRelationshipsState =>
 
 	override def permissionsCheck(p: PermissionsChecking) {
 		// throw this request out if this relationship can't be edited in Tabula for this department
@@ -107,7 +128,7 @@ trait AllocateStudentsToRelationshipPermissions extends RequiresPermissionsCheck
 
 trait AllocateStudentsToRelationshipDescription extends Describable[AllocateStudentsToRelationshipCommand.Result] {
 
-	self: AllocateStudentsToRelationshipCommandState with AllocateStudentsToRelationshipCommandRequest =>
+	self: ManageStudentRelationshipsState with AllocateStudentsToRelationshipCommandRequest =>
 
 	override lazy val eventName = "AllocateStudentsToRelationship"
 
@@ -123,15 +144,9 @@ trait AllocateStudentsToRelationshipDescription extends Describable[AllocateStud
 	}
 }
 
-trait AllocateStudentsToRelationshipCommandState {
-	def department: Department
-	def relationshipType: StudentRelationshipType
-	def user: CurrentUser
-}
+trait AllocateStudentsToRelationshipCommandRequest extends ManageStudentRelationshipsRequest {
 
-trait AllocateStudentsToRelationshipCommandRequest {
-
-	self: AllocateStudentsToRelationshipCommandState with RelationshipServiceComponent =>
+	self: ManageStudentRelationshipsState with RelationshipServiceComponent =>
 
 	var additionalEntities: JList[String] = JArrayList()
 
@@ -140,7 +155,7 @@ trait AllocateStudentsToRelationshipCommandRequest {
 	lazy val allStudents: Seq[StudentAssociationData] = dbUnallocated ++ dbAllocated.flatMap(_.students).distinct
 
 	var additions: JMap[String, JList[String]] =
-		LazyMaps.create{entityId: String => JArrayList(): JList[String] }.asJava
+		LazyMaps.create{ _: String => JArrayList(): JList[String] }.asJava
 
 	lazy val renderAdditions: Map[StudentAssociationData, Seq[String]] = additions.asScala.toSeq.flatMap{case(entityId, addIDs) =>
 		dbAllocated.find(_.entityId == entityId).map { entity =>
@@ -151,13 +166,13 @@ trait AllocateStudentsToRelationshipCommandRequest {
 	}.groupBy(_._1).mapValues(pairs => pairs.map(_._2))
 
 	var removals: JMap[String, JList[String]] =
-		LazyMaps.create{entityId: String => JArrayList(): JList[String] }.asJava
+		LazyMaps.create{ _: String => JArrayList(): JList[String] }.asJava
 
 	lazy val relationshipsNotInAdditions: Seq[(StudentAssociationData, StudentAssociationEntityData)] = {
 		val allStudentAdditionIds = additions.asScala.flatMap(_._2.asScala).toSeq.distinct
 		def inAdditions(entityId: String, studentId: String) = additions.asScala.get(entityId).exists(_.asScala.contains(studentId))
 
-		dbAllocated.flatMap{entity =>
+		dbAllocated.flatMap { entity =>
 			entity.students.flatMap(student =>
 				if (inAdditions(entity.entityId, student.universityId)) // Don't remove and add the same relationship
 					None
@@ -183,63 +198,22 @@ trait AllocateStudentsToRelationshipCommandRequest {
 
 	var allocationType: String = ""
 
-	var notifyStudent: Boolean = false
-	var notifyOldAgents: Boolean = false
-	var notifyNewAgent: Boolean = false
+	var specificScheduledDate: Boolean = false
+	var scheduledDate: DateTime = DateTime.now
+	lazy val scheduledDateToUse: DateTime = if (specificScheduledDate) {
+		scheduledDate
+	} else {
+		DateTime.now
+	}
 
 }
 
-trait AllocateStudentsToRelationshipNotifications extends Notifies[AllocateStudentsToRelationshipCommand.Result, Seq[StudentRelationship]] {
+trait AllocateStudentsToRelationshipNotifications extends BulkRelationshipChangeNotifier[AllocateStudentsToRelationshipCommand.Result, Seq[StudentRelationship]] {
 
-	self: ProfileServiceComponent with AllocateStudentsToRelationshipCommandState with AllocateStudentsToRelationshipCommandRequest =>
+	self: ManageStudentRelationshipsState with ManageStudentRelationshipsRequest =>
 
 	def emit(commandResult: AllocateStudentsToRelationshipCommand.Result): Seq[Notification[StudentRelationship, Unit]] = {
-
-		val studentNotifications = {
-			if (notifyStudent) {
-				val removalsByStudent = commandResult.expiredRelationships.groupBy(_.studentMember)
-				val additionsByStudent = commandResult.addedRelationships.groupBy(_.studentMember)
-				val allStudents: Set[StudentMember] = (removalsByStudent.keySet ++ additionsByStudent.keySet).flatten
-				allStudents.map { student =>
-					val notification = Notification.init(
-						new BulkStudentRelationshipNotification,
-						user.apparentUser,
-						additionsByStudent.getOrElse(Some(student), Seq()) ++ removalsByStudent.getOrElse(Some(student), Seq())
-					)
-					notification.profileService = profileService // the auto-wired version is no good for testing
-					notification.oldAgentIds.value = removalsByStudent.getOrElse(Some(student), Seq()).map(_.agent)
-					notification
-				}
-			} else {
-				Nil
-			}
-		}.toSeq
-
-		val newAgentNotifications = if (notifyNewAgent) {
-			commandResult.addedRelationships.groupBy(_.agent).flatMap { case (agentId, relationships) =>
-				relationships.head.agentMember.map { agent =>
-					val notification = Notification.init(new BulkNewAgentRelationshipNotification, user.apparentUser, relationships)
-					notification.profileService = profileService // the auto-wired version is no good for testing
-					notification
-				}
-			}
-		} else {
-			Nil
-		}.toSeq
-
-		val oldAgentNotifications = if (notifyOldAgents) {
-			commandResult.expiredRelationships.groupBy(_.agent).flatMap { case (agentId, relationships) =>
-				relationships.head.agentMember.map { agent =>
-					val notification = Notification.init(new BulkOldAgentRelationshipNotification, user.apparentUser, relationships)
-					notification.profileService = profileService // the auto-wired version is no good for testing
-					notification
-				}
-			}
-		} else {
-			Nil
-		}.toSeq
-
-		studentNotifications.toSeq ++ oldAgentNotifications ++ newAgentNotifications
+		sharedEmit(commandResult.expiredRelationships, commandResult.addedRelationships)
 	}
 
 }

@@ -17,7 +17,7 @@ trait ScheduledMeetingRecordNotificationFixture {
 	student.firstName = "A"
 	student.lastName = "Youth"
 	val relationshipType = StudentRelationshipType("tutor", "tutor", "tutor", "tutee")
-	val relationship = StudentRelationship(staff, relationshipType, student)
+	val relationship = StudentRelationship(staff, relationshipType, student, DateTime.now)
 
 	def scheduledMeeting(creator: Member): ScheduledMeetingRecord = {
 		val scheduledMeeting = new ScheduledMeetingRecord(creator, relationship)

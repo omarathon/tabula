@@ -1,10 +1,12 @@
 <#import "*/modal_macros.ftl" as modal />
 <#escape x as x?html>
 
-	<#if agentToDisplay??>
-		<#assign pageAction="edit" >
+<@modal.wrapper>
+
+	<#if existingAgent??>
+		<#assign pageAction = "edit">
 	<#else>
-		<#assign pageAction="add" >
+		<#assign pageAction = "add">
 	</#if>
 
 	<@modal.header>
@@ -12,38 +14,43 @@
 	</@modal.header>
 
 
-	<#assign student = studentCourseDetails.student/>
+	<#assign student = studentCourseDetails.student />
 
 	<@modal.body>
-		<@f.form method="post" commandName="editStudentRelationshipCommand" action="" cssClass="dirty-check-ignore">
+		<@f.form method="post" commandName="command" action="" cssClass="dirty-check-ignore">
 
 			<h5 id="studentName">${relationshipType.studentRole?capitalize}: ${student.fullName}</h5>
-			<input id="student" name="student" type="hidden" value="${student.universityId}" />
+
+			<input type="hidden" name="removeAgent" value="false" />
 
 			<@bs3form.labelled_form_group path="" labelText="${relationshipType.agentRole?cap_first}">
-				<div class="input-group profile-search-results">
-					<#if agentToDisplay??>
-						<input type="text" name="query" value="${agentToDisplay.fullName}" id="query" class="form-control" />
-						<input type="hidden" name="agent" value="${agentToDisplay.universityId}" />
-						<input type="hidden" name="currentAgent" value="${agentToDisplay.universityId}" />
-					<#else>
-						<input type="text" name="query" value="" id="query" class="form-control" />
-						<input type="hidden" name="agent" />
+				<div class="row">
+					<div class="col-sm-<#if pageAction != "add">10<#else>12</#if>">
+						<div class="input-group profile-search-results">
+							<#if existingAgent??>
+								<input type="text" name="query" value="${existingAgent.fullName}" id="query" class="form-control" />
+								<input type="hidden" name="newAgent" value="${existingAgent.universityId}" />
+								<input type="hidden" name="oldAgent" value="${existingAgent.universityId}" />
+							<#else>
+								<input type="text" name="query" value="" id="query" class="form-control" />
+								<input type="hidden" name="newAgent" />
+							</#if>
+							<span class="input-group-btn">
+								<button class="inline-search-button btn btn-default" type="button"><i class="fa fa-search"></i></button>
+							</span>
+						</div>
+					</div>
+					<#if pageAction != "add">
+						<div class="col-sm-2">
+							<button id="remove-agent" class="btn btn-danger" type="button">Remove</button>
+						</div>
 					</#if>
-					<span class="input-group-btn">
-						<button class="inline-search-button btn btn-default" type="button"><i class="fa fa-search"></i></button>
-					</span>
 				</div>
 			</@bs3form.labelled_form_group>
 
-			<input type="hidden" name="remove" value="false" />
-			<#if pageAction!="add">
-				<button id="remove-agent" class="btn btn-danger" type="button">Remove</button>
-			</#if>
-
-			<#if pageAction!="add">
+			<#if pageAction != "add">
 				<div id="removeAgentMessage" style="display: none" class="alert alert-info clearfix">
-					<p>Are you sure you want to remove <strong>${agentToDisplay.fullName}</strong> as ${student.firstName}'s ${relationshipType.agentRole}?</p>
+					<p>Are you sure you want to remove <strong>${existingAgent.fullName}</strong> as ${student.firstName}'s ${relationshipType.agentRole}?</p>
 					<div class="pull-right">
 						<button id="confirm-remove-agent" class="btn btn-primary" type="button">Confirm</button>
 						<button id="cancel-remove-agent" class="btn" data-dismiss="modal" type="button">Cancel</button>
@@ -51,24 +58,41 @@
 				</div>
 			</#if>
 
-			<div id="notify-agent-change">
-				<#if pageAction!="add">
-					<div id="notify-remove-agent" class="alert alert-info hide"><strong>${agentToDisplay.fullName}</strong> will no longer be ${student.firstName}'s ${relationshipType.agentRole}.</div>
+			<div id="extra-options">
+				<#if pageAction != "add">
+					<div id="notify-remove-agent" class="alert alert-info hide"><strong>${existingAgent.fullName}</strong> will no longer be ${student.firstName}'s ${relationshipType.agentRole}.</div>
 				</#if>
-				<p>Notify these people via email of this change</p>
-				<@bs3form.checkbox>
-					<input type="checkbox" name="notifyStudent" class="notifyStudent" checked />
-					${relationshipType.studentRole?cap_first}
-				</@bs3form.checkbox>
-				<@bs3form.checkbox>
-					<input type="checkbox" name="notifyOldAgents" class="notifyOldAgents" <#if pageAction!="add">checked <#else> disabled </#if> />
-					Old ${relationshipType.agentRole}
-				</@bs3form.checkbox>
-				<@bs3form.checkbox>
-					<input type="checkbox" name="notifyNewAgent" class="notifyNewAgent" checked />
-					New ${relationshipType.agentRole}
-				</@bs3form.checkbox>
+
+				<div class="scheduledDate">
+					<@bs3form.labelled_form_group path="" labelText="Make this change">
+						<@bs3form.radio>
+							<@f.radiobutton path="specificScheduledDate" value="false" /> Immediately
+						</@bs3form.radio>
+						<@bs3form.radio>
+							<@f.radiobutton path="specificScheduledDate" value="true" /> On date
+							<span class="additional"><@f.input path="scheduledDate" cssClass="date-time-picker form-control" autocomplete="off" /></span>
+						</@bs3form.radio>
+					</@bs3form.labelled_form_group>
+				</div>
+				
+				<@bs3form.labelled_form_group path="" labelText="Notify these people via email of this change">
+					<p>Notifications will be sent immediately, reagardless of when the change is scheduled.</p>
+					<@bs3form.checkbox>
+						<input type="checkbox" name="notifyStudent" checked />
+						${relationshipType.studentRole?cap_first}
+					</@bs3form.checkbox>
+					<@bs3form.checkbox>
+						<input type="checkbox" name="notifyOldAgent" <#if pageAction != "add">checked <#else> disabled </#if> />
+						Old ${relationshipType.agentRole}
+					</@bs3form.checkbox>
+					<@bs3form.checkbox>
+						<input type="checkbox" name="notifyNewAgent" checked />
+						New ${relationshipType.agentRole}
+					</@bs3form.checkbox>
+				</@bs3form.labelled_form_group>
 			</div>
+
+			<@bs3form.errors path="*" />
 		</@f.form>
 	</@modal.body>
 
@@ -81,41 +105,29 @@
 
 	<script type="text/javascript">
 		jQuery(function($) {
-			var $form = $('#editStudentRelationshipCommand')
+			$("input:radio[name='specificScheduledDate']").radioControlled({
+				'selector' : '.additional',
+				'parentSelector' : '.scheduledDate'
+			});
+			$('input.date-time-picker').tabulaDateTimePicker();
+
+			var $form = $('#command')
 				, $modal = $('#change-agent')
 				, $modalBody = $modal.find('.modal-body')
 				, $saveButton = $('#save-agent');
 
-			function submitForm() {
-				$.post($form.prop('action'), $form.serialize(), function() {
-					$modal.modal('hide');
-					var agentId = $form.find('input[name=agent]').val()
-						, remove = $form.find('input[name=remove]').val()
-						, action = 'changed';
-
-					if(agentId == undefined || !agentId) {
-						action = "error";
-					} else if(remove == "true") {
-						action = "removed";
-					}
-
-					var currentUrl = [location.protocol, '//', location.host, location.pathname].join('');    // url without query string
-					window.location = currentUrl + '?action=agent' + action + '&agentId=' + agentId + '&relationshipType=${relationshipType.id}';
-				});
-			}
-
-			$modalBody.on('submit', 'form', function(e){
+			$modalBody.on('submit', 'input', function(e){
 				e.preventDefault();
 			});
 
 			$saveButton.click(function() {
 				if ($(this).hasClass("disabled")) return;
-				submitForm();
+				$form.submit();
 			});
 
 			$('#remove-agent').click(function() {
 				if ($(this).hasClass("disabled")) return;
-				if ($('#notify-agent-change').is(':visible')) $('#notify-agent-change').hide();
+				if ($('#extra-options').is(':visible')) $('#extra-options').hide();
 				$('#removeAgentMessage').show();
 			});
 
@@ -124,13 +136,13 @@
 					.prop("checked", false)
 					.closest("label").addClass("muted");
 				$('#removeAgentMessage').hide();
-				$('#notify-agent-change').show();
+				$('#extra-options').show();
 				$("#save-agent").removeClass("disabled").addClass("btn-primary");
 				$form.find('input[name="query"]').prop('disabled', true);
-				$('#remove-agent').addClass('disabled');
+				$('#remove-agent').hide();
 				$('.inline-search-button').addClass('disabled');
-				$('#notify-remove-agent').show();
-				$form.find("input[name='remove']").val('true');
+				$('#notify-remove-agent').removeClass('hide');
+				$form.find("input[name='removeAgent']").val('true');
 			});
 
 			var profileSearch = function(searchContainer, target, highlighterFunction, updaterFunction) {
@@ -184,20 +196,22 @@
 			}, function(memberString) {
 				var member = memberString.split("|");
 
-				if($form.find('input[name=currentAgent]').val() != member[1]) {
+				if($form.find('input[name=oldAgent]').val() != member[1]) {
 					$('#remove-agent').addClass("disabled");
-					$('#notify-agent-change').show();
+					$('#extra-options').show();
 				} else {
 					$('#remove-agent').removeClass("disabled");
 				}
 
-				$form.find('input[name=agent]').val(member[1]);
+				$form.find('input[name=newAgent]').val(member[1]);
 				$saveButton.removeClass("disabled").addClass("btn-primary");
 				return member[0];
 			});
 
-			$('#notify-agent-change').hide();
+			$('#extra-options').hide();
 		});
 	</script>
+
+</@modal.wrapper>
 
 </#escape>

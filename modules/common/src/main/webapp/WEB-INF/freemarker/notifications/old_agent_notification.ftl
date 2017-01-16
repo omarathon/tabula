@@ -1,1 +1,0 @@
-You are no longer assigned as ${relationshipType.agentRole} to ${student.officialName}.  <#if newAgent??>The new ${relationshipType.agentRole} for ${student.officialName} is now ${newAgent.officialName}.</#if>

@@ -27,18 +27,15 @@ class RelationshipFixtureCommand extends CommandInternal[MemberStudentRelationsh
 				case x: StudentMember => x
 				case _ => throw new RuntimeException(s"$studentUniId could not be resolved to a student member")
 			}
-			val existing = relationshipDao.getRelationshipsByAgent(relType, agent).find (_.studentId == studentUniId)
+			val existing = relationshipDao.getCurrentRelationshipsByAgent(relType, agent).find (_.studentId == studentUniId)
 
 			val modifications = existing match {
-				case Some(existingRel) =>{
+				case Some(existingRel) =>
 					existingRel.endDate = null // make sure it hasn't expired
 					existingRel
-				}
-				case None =>{
-					val relationship = StudentRelationship(memberDao.getByUniversityId(agent).get, relType, student)
-					relationship.startDate = DateTime.now()
+				case None =>
+					val relationship = StudentRelationship(memberDao.getByUniversityId(agent).get, relType, student, DateTime.now)
 					relationship
-				}
 			}
 			session.saveOrUpdate(modifications)
 			modifications

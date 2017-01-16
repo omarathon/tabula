@@ -1,9 +1,9 @@
-package uk.ac.warwick.tabula.commands.profiles
+package uk.ac.warwick.tabula.commands.profiles.relationships
 
 import org.joda.time.DateTime
 import uk.ac.warwick.tabula.data.model._
 import uk.ac.warwick.tabula.helpers.Tap.tap
-import uk.ac.warwick.tabula.services.{ProfileService, RelationshipService, SortableAgentIdentifier}
+import uk.ac.warwick.tabula.services.{RelationshipService, RelationshipServiceComponent, SortableAgentIdentifier}
 import uk.ac.warwick.tabula.{Fixtures, Mockito, TestBase}
 
 import scala.collection.immutable.TreeMap
@@ -11,8 +11,7 @@ import scala.collection.immutable.TreeMap
 class ViewStudentRelationshipsCommandTest extends TestBase with Mockito {
 
 	private trait Fixture {
-		val profileService: ProfileService = smartMock[ProfileService]
-		val relationshipService: RelationshipService =  smartMock[RelationshipService]
+		val mockRelationshipService: RelationshipService =  smartMock[RelationshipService]
 
 		val departmentOfXXX: Department = new Department().tap(_.code = "xxx")
 		val tutorRelType: StudentRelationshipType = new StudentRelationshipType().tap(_.description = "tutor")
@@ -43,21 +42,20 @@ class ViewStudentRelationshipsCommandTest extends TestBase with Mockito {
 	@Test //thisTestHasARidculouslyLongNameButICantThinkOfASensibleWayToShortenItWhichProbablyMeansTheCommandNeedsRefactoring...
 	def applyCombinesStudentsInDepartmentWithStudentsWhoHaveTutorsInDepartment() {
 		new Fixture {
-			relationshipService.listAgentRelationshipsByDepartment(tutorRelType, departmentOfXXX) returns TreeMap(
+			mockRelationshipService.listAgentRelationshipsByDepartment(tutorRelType, departmentOfXXX) returns TreeMap(
 				SortableAgentIdentifier(studentRel1) -> Seq(studentRel1),
 				SortableAgentIdentifier(studentRel2) -> Seq(studentRel2)
 			)(SortableAgentIdentifier.KeyOrdering)
 
-			relationshipService.listStudentsWithoutRelationship(tutorRelType, departmentOfXXX) returns Seq(student3)
+			mockRelationshipService.listStudentsWithoutCurrentRelationship(tutorRelType, departmentOfXXX) returns Seq(student3)
+			mockRelationshipService.listScheduledRelationshipChanges(tutorRelType, departmentOfXXX) returns Seq()
 
-			val command = new ViewStudentRelationshipsCommand(departmentOfXXX, tutorRelType)
-
-			command.profileService = profileService
-			command.relationshipService = relationshipService
-
+			private val command = new ViewStudentRelationshipsCommandInternal(departmentOfXXX, tutorRelType) with RelationshipServiceComponent {
+				override def relationshipService: RelationshipService = mockRelationshipService
+			}
 
 			//When I invoke the command
-			val relationshipInfo: RelationshipGraph = command.applyInternal()
+			private val relationshipInfo = command.applyInternal()
 
 			//Then I should get the results I expect
 			relationshipInfo.studentMap(SortableAgentIdentifier("111",Some("Smith"))) should be(Seq(studentRel1))

@@ -1,12 +1,13 @@
 package uk.ac.warwick.tabula.data
 
-import scala.collection.JavaConverters.asScalaBufferConverter
 import org.joda.time.{DateTime, DateTimeConstants}
 import org.junit.{After, Before}
-import uk.ac.warwick.tabula.{Fixtures, Mockito, PersistenceTestBase}
 import uk.ac.warwick.tabula.JavaImports.JList
 import uk.ac.warwick.tabula.data.model._
 import uk.ac.warwick.tabula.helpers.Logging
+import uk.ac.warwick.tabula.{Fixtures, Mockito, PersistenceTestBase}
+
+import scala.collection.JavaConverters.asScalaBufferConverter
 
 // scalastyle:off magic.number
 class RelationshipDaoTest extends PersistenceTestBase with Logging with Mockito {
@@ -28,14 +29,14 @@ class RelationshipDaoTest extends PersistenceTestBase with Logging with Mockito 
 		}
 	}
 
-	@After def tidyUp: Unit = transactional { tx =>
+	@After def tidyUp(): Unit = transactional { tx =>
 		session.disableFilter(Member.ActiveOnlyFilter)
 
-		session.createCriteria(classOf[Member]).list().asInstanceOf[JList[Member]].asScala map { session.delete(_) }
+		session.createCriteria(classOf[Member]).list().asInstanceOf[JList[Member]].asScala foreach { session.delete(_) }
 	}
 
 	@Test
-	def studentRelationshipsCurrentAndByTarget = transactional { tx =>
+	def studentRelationshipsCurrentAndByTarget() = transactional { tx =>
 		val dept1 = Fixtures.department("sp", "Spanish")
 		val dept2 = Fixtures.department("en", "English")
 
@@ -67,8 +68,8 @@ class RelationshipDaoTest extends PersistenceTestBase with Logging with Mockito 
 		val relationshipType = StudentRelationshipType("tutor", "tutor", "personal tutor", "personal tutee")
 		relationshipDao.saveOrUpdate(relationshipType)
 
-		val relBetweenStaff1AndStu1 = StudentRelationship(staff1, relationshipType, stu1)
-		val relBetweenStaff1AndStu2 = StudentRelationship(staff1, relationshipType, stu2)
+		val relBetweenStaff1AndStu1 = StudentRelationship(staff1, relationshipType, stu1, DateTime.now)
+		val relBetweenStaff1AndStu2 = StudentRelationship(staff1, relationshipType, stu2, DateTime.now)
 
 		relationshipDao.saveOrUpdate(relBetweenStaff1AndStu1)
 		relationshipDao.saveOrUpdate(relBetweenStaff1AndStu2)
@@ -90,7 +91,7 @@ class RelationshipDaoTest extends PersistenceTestBase with Logging with Mockito 
 	}
 
 	@Test
-	def studentRelationshipsByDepartmentAndAgent = transactional { tx =>
+	def studentRelationshipsByDepartmentAndAgent() = transactional { tx =>
 		sitsStatusDao.saveOrUpdate(sprFullyEnrolledStatus)
 
 		val dept1 = Fixtures.department("hm", "History of Music")
@@ -119,28 +120,28 @@ class RelationshipDaoTest extends PersistenceTestBase with Logging with Mockito 
 		val relationshipType = StudentRelationshipType("tutor", "tutor", "personal tutor", "personal tutee")
 		relationshipDao.saveOrUpdate(relationshipType)
 
-		val relBetweenStaff1AndStu1 = StudentRelationship(staff1, relationshipType, stu1)
-		val relBetweenStaff1AndStu2 = StudentRelationship(staff1, relationshipType, stu2)
+		val relBetweenStaff1AndStu1 = StudentRelationship(staff1, relationshipType, stu1, DateTime.now)
+		val relBetweenStaff1AndStu2 = StudentRelationship(staff1, relationshipType, stu2, DateTime.now)
 
 		relationshipDao.saveOrUpdate(relBetweenStaff1AndStu1)
 		relationshipDao.saveOrUpdate(relBetweenStaff1AndStu2)
 
-		val ret = relationshipDao.getRelationshipsByDepartment(relationshipType, dept1)
-		ret(0).studentMember.get.universityId should be ("1000001")
-		ret(0).studentMember.get.mostSignificantCourseDetails.get.department.code should be ("hm")
+		val ret = relationshipDao.getCurrentRelationshipsByDepartment(relationshipType, dept1)
+		ret.head.studentMember.get.universityId should be ("1000001")
+		ret.head.studentMember.get.mostSignificantCourseDetails.get.department.code should be ("hm")
 
-		relationshipDao.getRelationshipsByDepartment(relationshipType, dept1) should be (Seq(relBetweenStaff1AndStu1))
-		relationshipDao.getRelationshipsByDepartment(relationshipType, dept2) should be (Seq(relBetweenStaff1AndStu2))
+		relationshipDao.getCurrentRelationshipsByDepartment(relationshipType, dept1) should be (Seq(relBetweenStaff1AndStu1))
+		relationshipDao.getCurrentRelationshipsByDepartment(relationshipType, dept2) should be (Seq(relBetweenStaff1AndStu2))
 
-		relationshipDao.getRelationshipsByAgent(relationshipType, "1000003").toSet should be (Seq(relBetweenStaff1AndStu1, relBetweenStaff1AndStu2).toSet)
-		relationshipDao.getRelationshipsByAgent(relationshipType, "1000004") should be (Seq())
+		relationshipDao.getCurrentRelationshipsByAgent(relationshipType, "1000003").toSet should be (Seq(relBetweenStaff1AndStu1, relBetweenStaff1AndStu2).toSet)
+		relationshipDao.getCurrentRelationshipsByAgent(relationshipType, "1000004") should be (Seq())
 
-		relationshipDao.getAllRelationshipsByAgent("1000003").toSet should be (Seq(relBetweenStaff1AndStu1, relBetweenStaff1AndStu2).toSet)
-		relationshipDao.getAllRelationshipTypesByAgent("1000003") should be (Seq(relationshipType))
+		relationshipDao.getCurrentRelationshipsForAgent("1000003").toSet should be (Seq(relBetweenStaff1AndStu1, relBetweenStaff1AndStu2).toSet)
+		relationshipDao.getCurrentRelationshipTypesByAgent("1000003") should be (Seq(relationshipType))
 	}
 
 	@Test
-	def studentsWithoutRelationships = transactional { tx =>
+	def studentsWithoutRelationships() = transactional { tx =>
 		val dept1 = Fixtures.department("af", "Art of Foraging")
 		val dept2 = Fixtures.department("tm", "Traditional Music")
 
@@ -165,8 +166,8 @@ class RelationshipDaoTest extends PersistenceTestBase with Logging with Mockito 
 		memberDao.saveOrUpdate(stu2)
 		memberDao.saveOrUpdate(staff1)
 
-		val relBetweenStaff1AndStu1 = StudentRelationship(staff1, relationshipType, stu1)
-		val relBetweenStaff1AndStu2 = StudentRelationship(staff1, relationshipType, stu2)
+		val relBetweenStaff1AndStu1 = StudentRelationship(staff1, relationshipType, stu1, DateTime.now)
+		val relBetweenStaff1AndStu2 = StudentRelationship(staff1, relationshipType, stu2, DateTime.now)
 
 		relationshipDao.saveOrUpdate(relBetweenStaff1AndStu1)
 		relationshipDao.saveOrUpdate(relBetweenStaff1AndStu2)
@@ -177,12 +178,12 @@ class RelationshipDaoTest extends PersistenceTestBase with Logging with Mockito 
 		memberDao.saveOrUpdate(m5)
 		memberDao.saveOrUpdate(m6)
 
-		relationshipDao.getStudentsWithoutRelationshipByDepartment(relationshipType, dept1) should be (Seq(m5))
-		relationshipDao.getStudentsWithoutRelationshipByDepartment(relationshipType, dept2) should be (Seq(m6))
-		relationshipDao.getStudentsWithoutRelationshipByDepartment(null, dept1) should be (Seq())
+		relationshipDao.getStudentsWithoutCurrentRelationshipByDepartment(relationshipType, dept1) should be (Seq(m5))
+		relationshipDao.getStudentsWithoutCurrentRelationshipByDepartment(relationshipType, dept2) should be (Seq(m6))
+		relationshipDao.getStudentsWithoutCurrentRelationshipByDepartment(null, dept1) should be (Seq())
 	}
 
-	@Test def studentRelationshipsByStaffDepartments = transactional{tx=>
+	@Test def studentRelationshipsByStaffDepartments() = transactional{tx=>
 		sitsStatusDao.saveOrUpdate(sprFullyEnrolledStatus)
 
 		val dept1 = Fixtures.department("hm", "History of Music")
@@ -203,20 +204,20 @@ class RelationshipDaoTest extends PersistenceTestBase with Logging with Mockito 
 		val relationshipType = StudentRelationshipType("tutor", "tutor", "personal tutor", "personal tutee")
 		relationshipDao.saveOrUpdate(relationshipType)
 
-		val relBetweenStaff1AndStu2 = StudentRelationship(staff2, relationshipType, stu1)
+		val relBetweenStaff1AndStu2 = StudentRelationship(staff2, relationshipType, stu1, DateTime.now)
 
 		relationshipDao.saveOrUpdate(relBetweenStaff1AndStu2)
 
-		val ret = relationshipDao.getRelationshipsByDepartment(relationshipType, dept1)
-		ret(0).studentMember.get.universityId should be ("1000001")
-		ret(0).studentMember.get.mostSignificantCourseDetails.get.department.code should be ("hm")
+		val ret = relationshipDao.getCurrentRelationshipsByDepartment(relationshipType, dept1)
+		ret.head.studentMember.get.universityId should be ("1000001")
+		ret.head.studentMember.get.mostSignificantCourseDetails.get.department.code should be ("hm")
 
 		// staff department
-		relationshipDao.getRelationshipsByStaffDepartment(relationshipType, dept2) should be (Seq(relBetweenStaff1AndStu2))
+		relationshipDao.getCurrentRelationshipsByStaffDepartment(relationshipType, dept2) should be (Seq(relBetweenStaff1AndStu2))
 
 	}
 
-	@Test def studentsByAgentRelationship = transactional { tx =>
+	@Test def studentsByAgentRelationship() = transactional { tx =>
 		val dept1 = Fixtures.department("ml", "Modern Languages")
 		val dept2 = Fixtures.department("fr", "French")
 		val dept3 = Fixtures.department("es", "Spanish")
@@ -253,10 +254,10 @@ class RelationshipDaoTest extends PersistenceTestBase with Logging with Mockito 
 		val relationshipType = StudentRelationshipType("tutor", "tutor", "personal tutor", "personal tutee")
 		relationshipDao.saveOrUpdate(relationshipType)
 
-		val relBetweenStaff1AndStu1 = StudentRelationship(staff1, relationshipType, stu1)
-		val relBetweenStaff1AndStu2 = StudentRelationship(staff1, relationshipType, stu2)
+		val relBetweenStaff1AndStu1 = StudentRelationship(staff1, relationshipType, stu1, DateTime.now)
+		val relBetweenStaff1AndStu2 = StudentRelationship(staff1, relationshipType, stu2, DateTime.now)
 
-		val relBetweenStaff2AndStu1 = StudentRelationship(staff2, relationshipType, stu1)
+		val relBetweenStaff2AndStu1 = StudentRelationship(staff2, relationshipType, stu1, DateTime.now)
 
 		relationshipDao.saveOrUpdate(relBetweenStaff1AndStu1)
 		relationshipDao.saveOrUpdate(relBetweenStaff1AndStu2)
@@ -270,7 +271,7 @@ class RelationshipDaoTest extends PersistenceTestBase with Logging with Mockito 
 		memberDao.getSCDsByAgentRelationshipAndRestrictions(relationshipType, staff2.universityId, Seq()).size should be (1)
 	}
 
-	@Test def studentsByAgentRelationshipMultiScds = transactional { tx =>
+	@Test def studentsByAgentRelationshipMultiScds() = transactional { tx =>
 
 		val dept = Fixtures.department("ml", "Modern Languages")
 		session.save(dept)
@@ -304,8 +305,8 @@ class RelationshipDaoTest extends PersistenceTestBase with Logging with Mockito 
 		val relationshipType = StudentRelationshipType("tutor", "tutor", "personal tutor", "personal tutee")
 		relationshipDao.saveOrUpdate(relationshipType)
 
-		val relBetweenStaff1AndMultiSCDStudent = StudentRelationship(staff, relationshipType, studentWithMultipleScdsSameSpr)
-		val relBetweenStaff1AndOtherStudent = StudentRelationship(staff, relationshipType, anotherStudent)
+		val relBetweenStaff1AndMultiSCDStudent = StudentRelationship(staff, relationshipType, studentWithMultipleScdsSameSpr, DateTime.now)
+		val relBetweenStaff1AndOtherStudent = StudentRelationship(staff, relationshipType, anotherStudent, DateTime.now)
 
 		relationshipDao.saveOrUpdate(relBetweenStaff1AndMultiSCDStudent)
 		relationshipDao.saveOrUpdate(relBetweenStaff1AndOtherStudent)

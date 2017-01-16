@@ -21,7 +21,8 @@ class EditMeetingRecordCommandTest extends TestBase with Mockito {
 	val thisRelationship = ExternalStudentRelationship(
 		"Professor A Tutor",
 		StudentRelationshipType("tutor", "tutor", "personal tutor", "personal tutee"),
-		student
+		student,
+		DateTime.now
 	)
 
 	@Test

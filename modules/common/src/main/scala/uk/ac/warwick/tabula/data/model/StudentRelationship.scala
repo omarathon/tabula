@@ -2,6 +2,7 @@ package uk.ac.warwick.tabula.data.model
 
 import javax.persistence._
 
+import org.hibernate.annotations.BatchSize
 import org.joda.time.DateTime
 import uk.ac.warwick.spring.Wire
 import uk.ac.warwick.tabula.JavaImports._
@@ -47,7 +48,7 @@ abstract class StudentRelationship extends GeneratedId with Serializable with To
 	@Column(name = "terminated")
 	var explicitlyTerminated: Boolean = _
 
-	var percentage: JBigDecimal = null
+	var percentage: JBigDecimal = _
 
 	// assume that all-numeric value is a member (not proven though)
 	def isAgentMember: Boolean
@@ -70,7 +71,15 @@ abstract class StudentRelationship extends GeneratedId with Serializable with To
 
 	def toEntityReference: StudentRelationshipEntityReference = new StudentRelationshipEntityReference().put(this)
 
-	def isCurrent: Boolean = endDate == null || endDate.isAfterNow
+	def isCurrent: Boolean = (startDate == null || startDate.isBeforeNow) && (endDate == null || endDate.isAfterNow)
+
+	@OneToMany(fetch = FetchType.LAZY, mappedBy = "replacedBy")
+	@BatchSize(size = 5)
+	var replacesRelationships: JSet[StudentRelationship] = JHashSet()
+
+	@ManyToOne(fetch = FetchType.LAZY)
+	@JoinColumn(name = "replacedBy")
+	var replacedBy: StudentRelationship = _
 
 }
 
@@ -110,42 +119,42 @@ class ExternalStudentRelationship extends StudentRelationship {
 
 object StudentRelationship {
 
-	def apply(agent: Member, relType: StudentRelationshipType, student: StudentMember): MemberStudentRelationship = {
+	def apply(agent: Member, relType: StudentRelationshipType, student: StudentMember, startDate: DateTime): MemberStudentRelationship = {
 		val rel = new MemberStudentRelationship
 		rel.agentMember = agent
 		rel.relationshipType = relType
 		rel.studentMember = student
-		rel.startDate = DateTime.now
+		rel.startDate = startDate
 		rel
 	}
 
-	def apply(agent: Member, relType: StudentRelationshipType, studentCourseDetails: StudentCourseDetails): MemberStudentRelationship = {
+	def apply(agent: Member, relType: StudentRelationshipType, studentCourseDetails: StudentCourseDetails, startDate: DateTime): MemberStudentRelationship = {
 		val rel = new MemberStudentRelationship
 		rel.agentMember = agent
 		rel.relationshipType = relType
 		rel.studentCourseDetails = studentCourseDetails
-		rel.startDate = DateTime.now
+		rel.startDate = startDate
 		rel
 	}
 
 }
 
 object ExternalStudentRelationship {
-	def apply(agent: String, relType: StudentRelationshipType, student: StudentMember): ExternalStudentRelationship = {
+	def apply(agent: String, relType: StudentRelationshipType, student: StudentMember, startDate: DateTime): ExternalStudentRelationship = {
 		val rel = new ExternalStudentRelationship
 		rel.agent = agent
 		rel.relationshipType = relType
 		rel.studentMember = student
-		rel.startDate = DateTime.now
+		rel.startDate = startDate
 		rel
 	}
 
-	def apply(agent: String, relType: StudentRelationshipType, studentCourseDetails: StudentCourseDetails): ExternalStudentRelationship = {
+	def apply(agent: String, relType: StudentRelationshipType, studentCourseDetails: StudentCourseDetails, startDate: DateTime): ExternalStudentRelationship = {
 		val rel = new ExternalStudentRelationship
 		rel.agent = agent
 		rel.relationshipType = relType
 		rel.studentCourseDetails = studentCourseDetails
-		rel.startDate = DateTime.now
+		rel.startDate = startDate
 		rel
 	}
 }
