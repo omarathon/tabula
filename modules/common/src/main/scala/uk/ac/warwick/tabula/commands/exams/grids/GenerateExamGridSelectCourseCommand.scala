@@ -33,7 +33,7 @@ class GenerateExamGridSelectCourseCommandInternal(val department: Department, va
 
 	override def applyInternal(): Seq[ExamGridEntity] = {
 		val scyds = benchmarkTask("findByCourseRoutesYear") {
-			studentCourseYearDetailsDao.findByCourseRoutesYear(academicYear, course, routes.asScala, yearOfStudy, eagerLoad = true, disableFreshFilter = true)
+			studentCourseYearDetailsDao.findByCourseRoutesYear(academicYear, course, routes.asScala, yearOfStudy, includeTempWithdrawn, eagerLoad = true, disableFreshFilter = true)
 		}
 		val sorted = benchmarkTask("sorting") {
 			scyds.sortBy(_.studentCourseDetails.scjCode)
@@ -89,4 +89,5 @@ trait GenerateExamGridSelectCourseCommandRequest {
 	var course: Course = _
 	var routes: JList[Route] = JArrayList()
 	var yearOfStudy: JInteger = _
+	var includeTempWithdrawn: Boolean = false
 }
