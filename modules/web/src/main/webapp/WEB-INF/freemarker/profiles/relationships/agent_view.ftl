@@ -42,7 +42,12 @@
 
 					<div id="${studentKey}" class="striped-section-contents">
 						<div class="item-info">
-							<form action="<@routes.profiles.relationship_reallocate department relationshipType agentId />" method="post">
+							<div class="clearfix">
+								<div class="pull-right">
+									<@fmt.bulk_email_student_relationships relationships=students subject="${relationshipType.agentRole?cap_first}" />
+								</div>
+							</div>
+							<form class="" action="<@routes.profiles.relationship_reallocate department relationshipType agentId />" method="post">
 								<table class="related_students table table-striped table-condensed">
 									<thead>
 										<tr>
@@ -86,7 +91,6 @@
 
 								<p>
 									<#if canReallocateStudents><button type="submit" class="btn btn-primary reallocate">Reallocate students</button></#if>
-									<@fmt.bulk_email_student_relationships relationships=students subject="${relationshipType.agentRole?cap_first}" />
 								</p>
 							</form>
 						</div>
