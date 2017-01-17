@@ -73,10 +73,10 @@ class RecordAttendanceController extends GroupsController with AutowiringSmallGr
 			attendance: Option[SmallGroupEventAttendance]
 		)
 
-		// Find any groups that the student SHOULD be attending in the same module
+		// Find any groups that the student SHOULD be attending in the same module and academic year
 		val possibleReplacements: Seq[EventOccurrenceAndState] =
 			smallGroupService.findSmallGroupsByStudent(student.asSsoUser)
-				.filter { _.groupSet.module == event.group.groupSet.module }
+				.filter { group => group.groupSet.module == event.group.groupSet.module && group.groupSet.academicYear == event.group.groupSet.academicYear }
 				.filterNot { _ == event.group } // No self references!
 				.flatMap { group =>
 					val occurrences = smallGroupService.findAttendanceByGroup(group)
