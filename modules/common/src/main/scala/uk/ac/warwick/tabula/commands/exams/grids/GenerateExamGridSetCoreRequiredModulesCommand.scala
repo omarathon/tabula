@@ -116,7 +116,7 @@ trait GenerateExamGridSetCoreRequiredModulesCommandState {
 
 	private lazy val routesForDisplay: Seq[Route] = routes.asScala match {
 		case _ if routes.isEmpty =>
-			studentCourseYearDetailsDao.findByCourseRoutesYear(academicYear, course, routes.asScala, yearOfStudy, eagerLoad = true, disableFreshFilter = true)
+			studentCourseYearDetailsDao.findByCourseRoutesYear(academicYear, course, routes.asScala, yearOfStudy, includeTempWithdrawn, eagerLoad = true, disableFreshFilter = true)
 				.map(scyd => scyd.toExamGridEntityYear.route).distinct
 		case _ =>
 			routes.asScala.distinct

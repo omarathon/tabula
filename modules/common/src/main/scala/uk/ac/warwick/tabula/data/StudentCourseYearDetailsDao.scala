@@ -27,6 +27,7 @@ trait StudentCourseYearDetailsDao {
 		course: Course,
 		routes: Seq[Route],
 		yearOfStudy: Int,
+		includeTempWithdrawn: Boolean,
 		eagerLoad: Boolean = false,
 		disableFreshFilter: Boolean = false
 	): Seq[StudentCourseYearDetails]
@@ -120,6 +121,7 @@ class StudentCourseYearDetailsDaoImpl extends StudentCourseYearDetailsDao with D
 		course: Course,
 		routes: Seq[Route],
 		yearOfStudy: Int,
+		includeTempWithdrawn: Boolean,
 		eagerLoad: Boolean = false,
 		disableFreshFilter: Boolean = false
 	): Seq[StudentCourseYearDetails] = {
@@ -135,6 +137,10 @@ class StudentCourseYearDetailsDaoImpl extends StudentCourseYearDetailsDao with D
 			.add(is("yearOfStudy", yearOfStudy))
 			.add(is("scd.course", course))
 			.add(is("enrolledOrCompleted", true))
+
+		if (!includeTempWithdrawn) {
+			c.add(not(like("scd.statusOnRoute.code", "T%")))
+		}
 
 		if (eagerLoad) {
 			c.setFetchMode("studentCourseDetails", FetchMode.JOIN)
