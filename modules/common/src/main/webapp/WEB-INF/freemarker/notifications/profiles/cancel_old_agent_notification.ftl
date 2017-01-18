@@ -1,4 +1,4 @@
-<#assign formattedDate><@fmt.date scheduledDate /></#assign>
+<#assign formattedDate><@fmt.date date=scheduledDate stripHtml=true /></#assign>
 <#assign formattedDate = formattedDate?replace('&#8194;',' ') />
 The scheduled change to your ${relationshipType.studentRole}s at ${formattedDate} has been cancelled.
 
