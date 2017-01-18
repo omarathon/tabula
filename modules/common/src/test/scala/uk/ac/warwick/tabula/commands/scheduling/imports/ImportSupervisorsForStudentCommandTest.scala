@@ -139,7 +139,7 @@ class ImportSupervisorsForStudentCommandTest extends AppContextTestBase with Moc
 			session.saveOrUpdate(existingSupervisorMember)
 
 			// create and persist existing relationship
-			val existingRelationship = StudentRelationship(existingSupervisorMember, relationshipType, supervisee)
+			val existingRelationship = StudentRelationship(existingSupervisorMember, relationshipType, supervisee, DateTime.now)
 			existingRelationship.startDate = new DateTime
 			session.saveOrUpdate(existingRelationship)
 

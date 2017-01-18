@@ -1,7 +1,7 @@
 package uk.ac.warwick.tabula.web.controllers.groups
 
 import org.springframework.stereotype.Controller
-import org.springframework.web.bind.annotation.{RequestParam, ModelAttribute, PathVariable, RequestMapping}
+import org.springframework.web.bind.annotation.{ModelAttribute, PathVariable, RequestMapping}
 import uk.ac.warwick.tabula.commands.Appliable
 import uk.ac.warwick.tabula.commands.groups.{ListSmallGroupSetTimetableClashStudentsCommand, SmallGroupSetTimetableClashCommand}
 import uk.ac.warwick.tabula.data.model.Member

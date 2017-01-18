@@ -160,8 +160,8 @@ class MemberDaoTest extends PersistenceTestBase with Logging with Mockito {
 		val relationshipType = StudentRelationshipType("tutor", "tutor", "personal tutor", "personal tutee")
 		relationshipDao.saveOrUpdate(relationshipType)
 
-		val relBetweenStaff1AndStu1 = StudentRelationship(staff1, relationshipType, stu1)
-		val relBetweenStaff1AndStu2 = StudentRelationship(staff1, relationshipType, stu2)
+		val relBetweenStaff1AndStu1 = StudentRelationship(staff1, relationshipType, stu1, DateTime.now)
+		val relBetweenStaff1AndStu2 = StudentRelationship(staff1, relationshipType, stu2, DateTime.now)
 
 		relationshipDao.saveOrUpdate(relBetweenStaff1AndStu1)
 		relationshipDao.saveOrUpdate(relBetweenStaff1AndStu2)

@@ -17,6 +17,7 @@ import javax.validation.Valid
 import org.springframework.validation.Errors
 import uk.ac.warwick.tabula.services.attendancemonitoring.AttendanceMonitoringService
 import uk.ac.warwick.tabula.web.Mav
+import uk.ac.warwick.util.termdates.Term
 
 @Controller
 @RequestMapping(Array("/attendance/view/{department}/{academicYear}/students/{student}/record"))
@@ -55,11 +56,16 @@ class RecordStudentAttendanceController extends AttendanceController
 	}
 
 	@ModelAttribute("reportedPointMap")
-	def reportedPointMap(@PathVariable academicYear: AcademicYear, @PathVariable student: StudentMember): Map[AttendanceMonitoringPoint, Boolean] = {
+	def reportedPointMap(@PathVariable academicYear: AcademicYear, @PathVariable student: StudentMember): Map[AttendanceMonitoringPoint, Option[Term]] = {
 		val nonReportedTerms = attendanceMonitoringService.findNonReportedTerms(Seq(mandatory(student)), mandatory(academicYear))
-		points.map{ point => point ->
-			!nonReportedTerms.contains(termService.getTermFromDateIncludingVacations(point.startDate.toDateTimeAtStartOfDay).getTermTypeAsString)
-		}.toMap
+		points.map{ point => point -> {
+			val term = termService.getTermFromDateIncludingVacations(point.startDate.toDateTimeAtStartOfDay)
+			if (nonReportedTerms.contains(term.getTermTypeAsString)) {
+				None
+			} else {
+				Option(term)
+			}
+		}}.toMap
 	}
 
 	@RequestMapping(method = Array(GET))

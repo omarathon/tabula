@@ -2,10 +2,17 @@
 @import "../../bower_components/warwick-id7/less/variables.less";
 @import "../css3.less";
 
+@media (max-width: @screen-xs-max) {
+	.id7-utility-masthead {
+		background: #1f9990 none;
+	}
+}
+
 #sysadmin-link {
 	position: fixed;
 	right: 0;
 	top: 30%;
+	z-index: 100;
 	.dropdown-menu {
 		margin-right: 2em;
 		li { display: block; }

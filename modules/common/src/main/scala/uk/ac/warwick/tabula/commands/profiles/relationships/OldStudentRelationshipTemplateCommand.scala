@@ -17,8 +17,8 @@ class OldStudentRelationshipTemplateCommand(val department: Department, val rela
 
 	def applyInternal(): ExcelView = {
 
-		val existingRelationships = service.listStudentRelationshipsByDepartment(relationshipType, department)
-		val unallocated = service.listStudentsWithoutRelationship(relationshipType, department)
+		val existingRelationships = service.listCurrentStudentRelationshipsByDepartment(relationshipType, department)
+		val unallocated = service.listStudentsWithoutCurrentRelationship(relationshipType, department)
 
 		val allAgents =
 			existingRelationships

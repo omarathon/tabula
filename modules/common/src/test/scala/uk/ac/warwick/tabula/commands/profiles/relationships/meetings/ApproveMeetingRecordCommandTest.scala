@@ -1,5 +1,6 @@
 package uk.ac.warwick.tabula.commands.profiles.relationships.meetings
 
+import org.joda.time.DateTime
 import org.springframework.validation.BindException
 import uk.ac.warwick.tabula._
 import uk.ac.warwick.tabula.data.model._
@@ -19,11 +20,11 @@ class ApproveMeetingRecordCommandTest extends TestBase with Mockito {
 	}
 
 	trait Fixture {
-		val student: StudentMember = Fixtures.student(universityId = "0123456")
+		val student: StudentMember = Fixtures.student()
 		val studentCurrentUser = new CurrentUser(student.asSsoUser, student.asSsoUser)
 
 		val relationshipType = StudentRelationshipType("tutor", "tutor", "personal tutor", "personal tutee")
-		val relationship = ExternalStudentRelationship("Professor A Tutor", relationshipType, student)
+		val relationship = ExternalStudentRelationship("Professor A Tutor", relationshipType, student, DateTime.now)
 		val meetingRecord = new MeetingRecord
 		meetingRecord.relationship = relationship
 		val proposedApproval = new MeetingRecordApproval
@@ -61,12 +62,12 @@ class ApproveMeetingRecordCommandTest extends TestBase with Mockito {
 
 	@Test
 	def validApproval() {
-		val student = Fixtures.student(universityId = "0123456")
+		val student = Fixtures.student()
 
 		val meetingRecord = new MeetingRecord
 
 		val relationshipType = StudentRelationshipType("tutor", "tutor", "personal tutor", "personal tutee")
-		val relationship = ExternalStudentRelationship("Professor A Tutor", relationshipType, student)
+		val relationship = ExternalStudentRelationship("Professor A Tutor", relationshipType, student, DateTime.now)
 		meetingRecord.relationship = relationship
 		val proposedApproval = new MeetingRecordApproval
 		proposedApproval.meetingRecord = meetingRecord
@@ -86,12 +87,12 @@ class ApproveMeetingRecordCommandTest extends TestBase with Mockito {
 
 	@Test
 	def deletedMeetingRecord() {
-		val student = Fixtures.student(universityId = "0123456")
+		val student = Fixtures.student()
 
 		val meetingRecord = new MeetingRecord
 
 		val relationshipType = StudentRelationshipType("tutor", "tutor", "personal tutor", "personal tutee")
-		val relationship = ExternalStudentRelationship("Professor A Tutor", relationshipType, student)
+		val relationship = ExternalStudentRelationship("Professor A Tutor", relationshipType, student, DateTime.now)
 		meetingRecord.relationship = relationship
 		val proposedApproval = new MeetingRecordApproval
 		proposedApproval.meetingRecord = meetingRecord

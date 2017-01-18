@@ -70,7 +70,7 @@ trait FreemarkerXHTMLPDFGeneratorWithFileStorageComponent extends FreemarkerXHTM
 	override def pdfGenerator: PdfGeneratorWithFileStorage = new PdfGeneratorWithFileStorageImpl()
 
 	class PdfGeneratorWithFileStorageImpl extends PdfGeneratorImpl with PdfGeneratorWithFileStorage {
-		override def renderTemplateAndStore(templateId: String, fileName: String, model: Any): FileAttachment = {
+		override def renderTemplateAndStore(templateId: String, fileName: String = "feedback.pdf", model: Any): FileAttachment = {
 			val tempOutputStream = new ByteArrayOutputStream()
 			renderTemplate(templateId, model, tempOutputStream)
 
@@ -78,7 +78,7 @@ trait FreemarkerXHTMLPDFGeneratorWithFileStorageComponent extends FreemarkerXHTM
 
 			// Create file
 			val pdfFileAttachment = new FileAttachment
-			pdfFileAttachment.name = "feedback.pdf"
+			pdfFileAttachment.name = fileName
 			pdfFileAttachment.uploadedData = ByteSource.wrap(bytes)
 			transactional() { fileDao.saveTemporary(pdfFileAttachment) }
 			pdfFileAttachment

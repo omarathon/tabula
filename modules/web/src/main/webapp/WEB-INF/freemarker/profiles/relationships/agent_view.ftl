@@ -42,7 +42,12 @@
 
 					<div id="${studentKey}" class="striped-section-contents">
 						<div class="item-info">
-							<form action="<@routes.profiles.relationship_reallocate department relationshipType agentId />" method="post">
+							<div class="clearfix">
+								<div class="pull-right">
+									<@fmt.bulk_email_student_relationships relationships=students subject="${relationshipType.agentRole?cap_first}" />
+								</div>
+							</div>
+							<form class="" action="<@routes.profiles.relationship_reallocate department relationshipType agentId />" method="post">
 								<table class="related_students table table-striped table-condensed">
 									<thead>
 										<tr>
@@ -86,7 +91,6 @@
 
 								<p>
 									<#if canReallocateStudents><button type="submit" class="btn btn-primary reallocate">Reallocate students</button></#if>
-									<@fmt.bulk_email_student_relationships relationships=students subject="${relationshipType.agentRole?cap_first}" />
 								</p>
 							</form>
 						</div>
@@ -102,6 +106,12 @@
 		<h4 class="subtle">All students in ${department.name} have ${relationshipType.agentRole}s recorded</h4>
 	<#else>
 		<h4><a href="<@routes.profiles.relationship_missing department relationshipType />">View <@fmt.p missingCount "student" /> with no ${relationshipType.agentRole}</a></h4>
+	</#if>
+
+	<#if scheduledCount == 0>
+		<h4 class="subtle">No scheduled ${relationshipType.agentRole} changes</h4>
+	<#else>
+		<h4><a href="<@routes.profiles.relationship_scheduled department relationshipType />">View ${scheduledCount} scheduled ${relationshipType.agentRole} <@fmt.p number=scheduledCount singular="change" shownumber=false/></a></h4>
 	</#if>
 <#else>
 	<p class="alert alert-info">No students are currently visible for ${department.name} in Tabula.</p>

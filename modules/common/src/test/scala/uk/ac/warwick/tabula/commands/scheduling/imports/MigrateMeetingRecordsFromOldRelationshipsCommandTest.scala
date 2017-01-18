@@ -34,8 +34,8 @@ class MigrateMeetingRecordsFromOldRelationshipsCommandTest extends TestBase with
 		val currentCourse: StudentCourseDetails = Fixtures.studentCourseDetails(thisStudent, endedCourse.department)
 		currentCourse.sprCode = "spr"
 		thisStudent.attachStudentCourseDetails(currentCourse)
-		val relationshipOnCurrentCourse = StudentRelationship(agent, tutorRelationshipType, currentCourse)
-		val relationshipOnEndedCourse = StudentRelationship(agent, tutorRelationshipType, endedCourse)
+		val relationshipOnCurrentCourse = StudentRelationship(agent, tutorRelationshipType, currentCourse, DateTime.now.minusDays(7))
+		val relationshipOnEndedCourse = StudentRelationship(agent, tutorRelationshipType, endedCourse, DateTime.now.minusDays(7))
 		relationshipOnEndedCourse.endDate = DateTime.now.minusDays(1)
 		testObject.relationshipService.getRelationships(tutorRelationshipType, thisStudent) returns Seq(relationshipOnCurrentCourse, relationshipOnEndedCourse)
 		val relationshipOnEndedCourseMeeting = new MeetingRecord
@@ -50,32 +50,32 @@ class MigrateMeetingRecordsFromOldRelationshipsCommandTest extends TestBase with
 	}
 
 	@Test
-	def validateNoMeetingRecords(): Unit = new ValidationFixture with StudentWithOneCurrentOneEndedCourse {
+	def validateNoMeetingRecords(): Unit = withFakeTime(DateTime.now) { new ValidationFixture with StudentWithOneCurrentOneEndedCourse {
 		testObject.meetingRecordService.listAll(relationshipOnEndedCourse) returns Seq()
 		validator.validate(errors)
 		errors.hasErrors should be {true}
-	}
+	}}
 
 	@Test
-	def validateNoCorrespondingNotSpr(): Unit = new ValidationFixture with StudentWithOneCurrentOneEndedCourse {
+	def validateNoCorrespondingNotSpr(): Unit = withFakeTime(DateTime.now) { new ValidationFixture with StudentWithOneCurrentOneEndedCourse {
 		endedCourse.sprCode = "somethingElse"
 		validator.validate(errors)
 		errors.hasErrors should be {true}
-	}
+	}}
 
 	@Test
-	def validateNoCorrespondingNotDepartment(): Unit = new ValidationFixture with StudentWithOneCurrentOneEndedCourse {
+	def validateNoCorrespondingNotDepartment(): Unit = withFakeTime(DateTime.now) { new ValidationFixture with StudentWithOneCurrentOneEndedCourse {
 		currentCourse.latestStudentCourseYearDetails.enrolmentDepartment = Fixtures.department("its")
 		validator.validate(errors)
 		errors.hasErrors should be {true}
-	}
+	}}
 
 	@Test
-	def validate(): Unit = new ValidationFixture with StudentWithOneCurrentOneEndedCourse {
+	def validate(): Unit = withFakeTime(DateTime.now) { new ValidationFixture with StudentWithOneCurrentOneEndedCourse {
 		validator.validate(errors)
 		errors.hasErrors should be {false}
 		testObject.migrations should be (Map(relationshipOnEndedCourse -> relationshipOnCurrentCourse))
-	}
+	}}
 
 	trait ApplyFixture extends Fixture {
 		val command = new MigrateMeetingRecordsFromOldRelationshipsCommandInternal(thisStudent) with TestSupport
@@ -83,9 +83,9 @@ class MigrateMeetingRecordsFromOldRelationshipsCommandTest extends TestBase with
 	}
 
 	@Test
-	def apply(): Unit = new ApplyFixture with StudentWithOneCurrentOneEndedCourse {
+	def apply(): Unit = withFakeTime(DateTime.now) { new ApplyFixture with StudentWithOneCurrentOneEndedCourse {
 		command.applyInternal()
 		verify(command.meetingRecordService, times(1)).migrate(relationshipOnEndedCourse, relationshipOnCurrentCourse)
-	}
+	}}
 
 }

@@ -204,17 +204,17 @@
 										</#list>
 										<div class="well clearfix">
 											<div class="loading">
-												</p><i class="fa fa-spinner fa-spin"></i><em> Checking possibility of any timetable conflicts for all students&hellip;</em>
+												<i class="fa fa-spinner fa-spin"></i><em> Checking possibility of any small group event conflicts for all students&hellip;</em>
 											</div>
 											<div class="clash-info hide">
-												<div class="clash-singular-info"><span class="clash-count"></span> student has timetable conflict with this allocation.
-													<a href= "#" data-href="<@routes.groups.timetableclashstudentslist command.set />" class="ajax-modal timetable-clash-link" data-target="#timetable-clash-modal">See student</a>
+												<div class="clash-singular-info"><span class="clash-count"></span> student has small group event conflicts with this allocation.
+													<a href="#" data-href="<@routes.groups.timetableclashstudentslist command.set />" class="ajax-modal timetable-clash-link" data-target="#timetable-clash-modal">See student</a>
 												</div>
-												<div class="clash-plural-info"><span class="clash-count"></span> students have timetable conflicts with this allocation.
-													<a href=#" data-href="<@routes.groups.timetableclashstudentslist command.set />" class="ajax-modal timetable-clash-link" data-target="#timetable-clash-modal">See students</a>
+												<div class="clash-plural-info"><span class="clash-count"></span> students have small group event conflicts with this allocation.
+													<a href="#" data-href="<@routes.groups.timetableclashstudentslist command.set />" class="ajax-modal timetable-clash-link" data-target="#timetable-clash-modal">See students</a>
 												</div>
 											</div>
-											<div class="no-clash-info hide">No students have timetable conflicts with the current allocation.</div>
+											<div class="no-clash-info hide">No students have small group event conflicts with the current allocation.</div>
 											<div class="student-clash-info hide">
 												<span class="possibleclash-group-info"></span>
 												<span class="actualclash-userIds"></span>
@@ -228,7 +228,7 @@
 
 						<div class="fix-footer">
 							<input type="submit" class="btn btn-primary" value="Save">
-							<a class="btn btn-default" href="<@routes.groups.depthome module=smallGroupSet.module academicYear=smallGroupSet.academicYear/>" class="btn btn-default dirty-check-ignore">Cancel</a>
+							<a class="btn btn-default dirty-check-ignore" href="<@routes.groups.depthome module=smallGroupSet.module academicYear=smallGroupSet.academicYear/>">Cancel</a>
 						</div>
 					</@f.form>
 				</div>

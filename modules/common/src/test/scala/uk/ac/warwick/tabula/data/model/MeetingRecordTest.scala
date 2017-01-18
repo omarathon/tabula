@@ -10,7 +10,7 @@ class MeetingRecordTest extends PersistenceTestBase {
 
 	val aprilFool: DateTime = dateTime(2013, DateTimeConstants.APRIL)
 
-	@Test def deleteFileAttachmentOnDelete = transactional {ts=>
+	@Test def deleteFileAttachmentOnDelete() = transactional {ts=>
 		val orphanAttachment = flushing(session) {
 			val attachment = new FileAttachment
 			session.save(attachment)
@@ -38,9 +38,9 @@ class MeetingRecordTest extends PersistenceTestBase {
 		}
 
 		// Ensure everything's been persisted
-		orphanAttachment.id should not be (null)
-		meetingRecord.id should not be (null)
-		meetingRecordkAttachment.id should not be (null)
+		orphanAttachment.id should not be null
+		meetingRecord.id should not be null
+		meetingRecordkAttachment.id should not be null
 
 		// Can fetch everything from db
 		flushing(session) {
@@ -61,7 +61,7 @@ class MeetingRecordTest extends PersistenceTestBase {
 
 
 
-	@Test def defaultConstructor = withFakeTime(aprilFool) {
+	@Test def defaultConstructor() = withFakeTime(aprilFool) {
 		val meeting = new MeetingRecord
 
 		meeting.creationDate should be (aprilFool)
@@ -74,13 +74,13 @@ class MeetingRecordTest extends PersistenceTestBase {
 		meeting should be ('approved)
 	}
 
-	@Test def everydayConstructor = withFakeTime(aprilFool) {
+	@Test def everydayConstructor() = withFakeTime(aprilFool) {
 		val relationshipType = StudentRelationshipType("tutor", "tutor", "personal tutor", "personal tutee")
 
 		val student = Fixtures.student(universityId = "1000001", userId="student")
 
 		val creator = new StaffMember
-		val relationship = ExternalStudentRelationship("Professor A Tutor", relationshipType, student)
+		val relationship = ExternalStudentRelationship("Professor A Tutor", relationshipType, student, DateTime.now)
 
 		val meeting = new MeetingRecord(creator, relationship)
 

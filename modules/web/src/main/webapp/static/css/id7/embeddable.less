@@ -120,6 +120,11 @@ h1.modal-title {
 		line-height: 24px;
 	}
 }
+@media (max-width: @screen-xs-max) {
+	.navbar.navbar-secondary.sibling-breadcrumbs .nav-breadcrumb.active::before {
+		border: 0;
+	}
+}
 
 .subtle { color: @subtle-text-color; }
 .subtler { color: @very-subtle-text-color; }

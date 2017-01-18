@@ -29,8 +29,8 @@ class ExpireRelationshipsOnOldCoursesCommandTest extends TestBase with Mockito {
 		endedCourse.endDate = DateTime.now.minusDays(1).toLocalDate
 		val currentCourse: StudentCourseDetails = Fixtures.studentCourseDetails(thisStudent, null)
 		thisStudent.attachStudentCourseDetails(currentCourse)
-		val relationshipOnCurrentCourse = StudentRelationship(agent, tutorRelationshipType, currentCourse)
-		val relationshipOnEndedCourse = StudentRelationship(agent, tutorRelationshipType, endedCourse)
+		val relationshipOnCurrentCourse = StudentRelationship(agent, tutorRelationshipType, currentCourse, DateTime.now.minusDays(7))
+		val relationshipOnEndedCourse = StudentRelationship(agent, tutorRelationshipType, endedCourse, DateTime.now.minusDays(7))
 		testObject.relationshipService.getRelationships(tutorRelationshipType, thisStudent) returns Seq(relationshipOnCurrentCourse, relationshipOnEndedCourse)
 	}
 
@@ -40,8 +40,8 @@ class ExpireRelationshipsOnOldCoursesCommandTest extends TestBase with Mockito {
 		val currentCourse: StudentCourseDetails = Fixtures.studentCourseDetails(thisStudent, null)
 		currentCourse.endDate = DateTime.now.minusMonths(1).toLocalDate
 		thisStudent.attachStudentCourseDetails(currentCourse)
-		val relationshipOnCurrentCourse = StudentRelationship(agent, tutorRelationshipType, currentCourse)
-		val relationshipOnEndedCourse = StudentRelationship(agent, tutorRelationshipType, endedCourse)
+		val relationshipOnCurrentCourse = StudentRelationship(agent, tutorRelationshipType, currentCourse, DateTime.now.minusMonths(1))
+		val relationshipOnEndedCourse = StudentRelationship(agent, tutorRelationshipType, endedCourse, DateTime.now.minusMonths(12))
 		testObject.relationshipService.getRelationships(tutorRelationshipType, thisStudent) returns Seq(relationshipOnCurrentCourse, relationshipOnEndedCourse)
 	}
 
@@ -99,16 +99,16 @@ class ExpireRelationshipsOnOldCoursesCommandTest extends TestBase with Mockito {
 	}
 
 	@Test
-	def apply(): Unit = new ApplyFixture with StudentWithOneCurrentOneEndedCourse {
+	def apply(): Unit = withFakeTime(DateTime.now) { new ApplyFixture with StudentWithOneCurrentOneEndedCourse {
 		command.applyInternal()
-		verify(command.relationshipService, times(1)).endStudentRelationships(Seq(relationshipOnEndedCourse))
-	}
+		verify(command.relationshipService, times(1)).endStudentRelationships(Seq(relationshipOnEndedCourse), DateTime.now)
+	}}
 
 	@Test
-	def applyAlreadyExpired(): Unit = new ApplyFixture with StudentWithOneCurrentOneEndedCourse {
+	def applyAlreadyExpired(): Unit = withFakeTime(DateTime.now) { new ApplyFixture with StudentWithOneCurrentOneEndedCourse {
 		relationshipOnEndedCourse.endDate = DateTime.now.minusDays(1)
 		command.applyInternal()
-		verify(command.relationshipService, times(1)).endStudentRelationships(Seq())
-	}
+		verify(command.relationshipService, times(1)).endStudentRelationships(Seq(), DateTime.now)
+	}}
 
 }

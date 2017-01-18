@@ -14,7 +14,7 @@ class ScheduledMeetingRecordInviteeNotificationTest extends TestBase with Mockit
 		val staff = Fixtures.staff("9517535", "mctutor")
 		val student = Fixtures.student()
 		val relationshipType = StudentRelationshipType("tutor", "tutor", "tutor", "tutee")
-		val relationship = StudentRelationship(staff, relationshipType, student)
+		val relationship = StudentRelationship(staff, relationshipType, student, DateTime.now)
 
 		// Scheduled by the agent
 		val scheduledMeeting = new ScheduledMeetingRecord(agent, relationship)
@@ -52,7 +52,7 @@ class ScheduledMeetingRecordInviteeNotificationTest extends TestBase with Mockit
 
 		val relationshipType = StudentRelationshipType("personalTutor", "tutor", "personal tutor", "personal tutee")
 
-		val relationship: StudentRelationship = StudentRelationship(agent, relationshipType, student)
+		val relationship: StudentRelationship = StudentRelationship(agent, relationshipType, student, DateTime.now)
 
 		val thirdParty: StaffMember = Fixtures.staff("1122331", "3rdparty")
 		thirdParty.firstName = "Third"

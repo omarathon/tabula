@@ -9,13 +9,13 @@
 	<p>The meeting was successfully scheduled.</p>
 
 <#else>
-
+	<#assign chooseRelationship = (allRelationships?? && allRelationships?size > 1) />
 	<@modal.wrapper enabled=(isModal!false)>
 
 		<#assign heading>
 			<h2 <#if isModal!false>class="modal-title"</#if>>Record a meeting</h2>
 			<h6 <#if isModal!false>class="modal-title"</#if>>
-				<span class="very-subtle">between ${agent_role}</span> ${command.relationship.agentName!""}
+				<span class="very-subtle">between ${agent_role}</span><#if !chooseRelationship> ${command.relationship.agentName!""}</#if>
 				<span class="very-subtle">and ${member_role}</span> ${student.fullName}
 			</h6>
 		</#assign>
@@ -48,7 +48,7 @@
 					<@f.input type="text" path="title" cssClass="form-control" maxlength="255" placeholder="Subject of meeting" />
 				</@bs3form.labelled_form_group>
 
-				<#if allRelationships?? && allRelationships?size gt 1>
+				<#if chooseRelationship>
 					<#assign isCreatorAgent = command.creator.id == command.relationship.agent />
 					<@bs3form.labelled_form_group path="relationship" labelText=agent_role?cap_first>
 						<@f.select path="relationship" cssClass="form-control">

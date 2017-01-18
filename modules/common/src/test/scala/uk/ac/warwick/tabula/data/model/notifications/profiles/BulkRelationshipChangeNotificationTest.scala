@@ -17,7 +17,7 @@ class BulkRelationshipChangeNotificationTest extends TestBase with Mockito {
 
 	val relationshipType = StudentRelationshipType("personalTutor", "tutor", "personal tutor", "personal tutee")
 
-	val relationship: StudentRelationship = StudentRelationship(agent, relationshipType, student)
+	val relationship: StudentRelationship = StudentRelationship(agent, relationshipType, student, DateTime.now)
 
 	@Test def titleStudent() = withUser("0672089", "cuscav") {
 		val notification = Notification.init(new BulkStudentRelationshipNotification, currentUser.apparentUser, relationship)
@@ -63,21 +63,6 @@ class BulkRelationshipChangeNotificationTest extends TestBase with Mockito {
 		profiles.getMemberByUniversityId("1") returns Some(agent1)
 		profiles.getMemberByUniversityId("2") returns Some(agent2)
 		profiles.getMemberByUniversityId("3") returns Some(agent3)
-	}
-
-	@Test
-	def studentNotificationRelEnded() {
-		new Environment {
-			val notification = new BulkStudentRelationshipNotification
-			notification.relationshipService = service
-			notification.profileService = profiles
-			notification.addItems(Seq(rel1))
-
-			notification.oldAgentIds.value = Seq(agent2.universityId)
-			notification.oldAgents should be (Seq(agent2))
-
-			notification.newAgents.isEmpty should be {true} // rel1 is ended, so there should be no new agent
-		}
 	}
 
 	@Test

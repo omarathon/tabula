@@ -74,7 +74,7 @@ class AgentPointRecordCommandTest extends TestBase with Mockito {
 	trait StateFixture extends Fixture {
 		val state = new AgentPointRecordCommandState with StateTestSupport
 		state.relationshipType = thisRelationshipType
-		state.relationshipService.listStudentRelationshipsWithMember(state.relationshipType, state.member) returns Seq(student1rel, student2rel)
+		state.relationshipService.listCurrentStudentRelationshipsWithMember(state.relationshipType, state.member) returns Seq(student1rel, student2rel)
 		state.attendanceMonitoringService.listStudentsPoints(student1, None, state.academicYear) returns Seq(scheme1point1, scheme1point2, scheme2point1, scheme2point2)
 		state.attendanceMonitoringService.listStudentsPoints(student2, None, state.academicYear) returns Seq(scheme2point1, scheme2point2)
 	}
@@ -105,7 +105,7 @@ class AgentPointRecordCommandTest extends TestBase with Mockito {
 	trait PopulateFixture extends Fixture {
 		val populate = new PopulateAgentPointRecordCommand with PopulateTestSupport
 		populate.relationshipType = thisRelationshipType
-		populate.relationshipService.listStudentRelationshipsWithMember(populate.relationshipType, populate.member) returns Seq(student1rel, student2rel)
+		populate.relationshipService.listCurrentStudentRelationshipsWithMember(populate.relationshipType, populate.member) returns Seq(student1rel, student2rel)
 		populate.attendanceMonitoringService.listStudentsPoints(student1, None, populate.academicYear) returns Seq(scheme1point1, scheme1point2, scheme2point1, scheme2point2)
 		populate.attendanceMonitoringService.listStudentsPoints(student2, None, populate.academicYear) returns Seq(scheme2point1, scheme2point2)
 		populate.attendanceMonitoringService.getCheckpoints(any[Seq[AttendanceMonitoringPoint]], any[Seq[StudentMember]]) returns Map(
@@ -132,7 +132,7 @@ class AgentPointRecordCommandTest extends TestBase with Mockito {
 		val validator = new AgentPointRecordValidation with AgentPointRecordCommandState with PopulateTestSupport
 
 		validator.relationshipType = thisRelationshipType
-		validator.relationshipService.listStudentRelationshipsWithMember(validator.relationshipType, validator.member) returns Seq(student1rel, student2rel)
+		validator.relationshipService.listCurrentStudentRelationshipsWithMember(validator.relationshipType, validator.member) returns Seq(student1rel, student2rel)
 		validator.attendanceMonitoringService.listStudentsPoints(student1, None, validator.academicYear) returns Seq(scheme1point1, scheme1point2, scheme2point1, scheme2point2)
 		validator.attendanceMonitoringService.listStudentsPoints(student2, None, validator.academicYear) returns Seq(scheme2point1, scheme2point2)
 		validator.attendanceMonitoringService.getCheckpoints(any[Seq[AttendanceMonitoringPoint]], any[Seq[StudentMember]]) returns Map(

@@ -99,7 +99,7 @@ trait AgentPointRecordPermissions extends RequiresPermissionsChecking with Permi
 		p.PermissionCheck(Permissions.Profiles.StudentRelationship.Read(mandatory(relationshipType)), member)
 		p.PermissionCheckAll(
 			Permissions.MonitoringPoints.Record,
-			relationshipService.listStudentRelationshipsWithMember(relationshipType, member).flatMap(_.studentMember).distinct
+			relationshipService.listCurrentStudentRelationshipsWithMember(relationshipType, member).flatMap(_.studentMember).distinct
 		)
 	}
 
@@ -133,7 +133,7 @@ trait AgentPointRecordCommandState extends GroupsPoints {
 	def user: CurrentUser
 	def member: Member
 
-	lazy val students: Seq[StudentMember] = relationshipService.listStudentRelationshipsWithMember(relationshipType, member).flatMap(_.studentMember).distinct
+	lazy val students: Seq[StudentMember] = relationshipService.listCurrentStudentRelationshipsWithMember(relationshipType, member).flatMap(_.studentMember).distinct
 
 	lazy val studentPointMap: Map[StudentMember, Seq[AttendanceMonitoringPoint]] = {
 		students.map { student =>

@@ -145,7 +145,7 @@ class NotificationDaoTest extends PersistenceTestBase with Mockito {
 		val meeting = new ScheduledMeetingRecord
 		meeting.creator = staff
 
-		val relationship = StudentRelationship(staff, relType, student)
+		val relationship = StudentRelationship(staff, relType, student, DateTime.now)
 		meeting.relationship = relationship
 
 		session.save(staff)

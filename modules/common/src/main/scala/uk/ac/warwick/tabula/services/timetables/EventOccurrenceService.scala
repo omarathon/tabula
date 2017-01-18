@@ -111,7 +111,7 @@ abstract class TermBasedEventOccurrenceService extends EventOccurrenceService {
 		event.getProperties.add(Transp.OPAQUE)
 
 		eventOccurrence.staff.headOption match {
-			case Some(user) =>
+			case Some(user) if user.isFoundUser =>
 				val organiser: Organizer = new Organizer(s"MAILTO:${user.getEmail}")
 				organiser.getParameters.add(new Cn(user.getFullName))
 				event.getProperties.add(organiser)
