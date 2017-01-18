@@ -1,9 +1,9 @@
 <#if scheduledDate?has_content>
-	<#assign formattedDate><@fmt.date scheduledDate /></#assign>
+	<#assign formattedDate><@fmt.date date=scheduledDate stripHtml=true /></#assign>
 	<#assign formattedDate = formattedDate?replace('&#8194;',' ') />
 </#if>
 <#if previouslyScheduledDate?has_content>
-	<#assign formattedPreviousDate><@fmt.date previouslyScheduledDate /></#assign>
+	<#assign formattedPreviousDate><@fmt.date date=previouslyScheduledDate stripHtml=true /></#assign>
 	<#assign formattedPreviousDate = formattedPreviousDate?replace('&#8194;',' ') />
 </#if>
 <@compress single_line=true>
