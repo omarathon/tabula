@@ -49,7 +49,7 @@ trait SmallGroupEventTimetableEventSourceComponentImpl extends SmallGroupEventTi
 			val autoTimetableEvents: Seq[TimetableEvent] = allEvents.map { event =>
 				attendanceMap.get(event) match {
 					case Some(attendanceList) =>
-						val weeksToRemove = attendanceList.filter(a => a.state == AttendanceState.MissedAuthorised && a.replacedBy != null).map(_.occurrence.week)
+						val weeksToRemove = attendanceList.filter(a => a.state == AttendanceState.MissedAuthorised && !a.replacedBy.isEmpty).map(_.occurrence.week)
 						TimetableEvent(event, withoutWeeks = weeksToRemove)
 					case None =>
 						TimetableEvent(event)
