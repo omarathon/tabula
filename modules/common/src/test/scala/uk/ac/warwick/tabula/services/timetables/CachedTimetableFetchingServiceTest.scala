@@ -3,10 +3,10 @@ package uk.ac.warwick.tabula.services.timetables
 import net.spy.memcached.transcoders.SerializingTranscoder
 import org.joda.time.{DateTime, LocalTime}
 import org.junit.Before
-import uk.ac.warwick.tabula.data.model.{Module, NamedLocation}
 import uk.ac.warwick.tabula.data.model.groups.{DayOfWeek, WeekRange}
+import uk.ac.warwick.tabula.data.model.{Module, NamedLocation}
 import uk.ac.warwick.tabula.services.timetables.TimetableFetchingService.EventList
-import uk.ac.warwick.tabula.timetables.{RelatedUrl, TimetableEvent, TimetableEventType}
+import uk.ac.warwick.tabula.timetables.{TimetableEvent, TimetableEventType}
 import uk.ac.warwick.tabula.{AcademicYear, Fixtures, Mockito, TestBase}
 import uk.ac.warwick.userlookup.User
 import uk.ac.warwick.util.cache.HashMapCacheStore
@@ -18,7 +18,7 @@ class CachedTimetableFetchingServiceTest  extends TestBase with Mockito{
 	private trait Fixture {
 		val module: Module = Fixtures.module("cs118")
 		val studentId = "studentId"
-		val studentEvents = Seq(new TimetableEvent("test", "test", "test", "test", TimetableEventType.Lecture, Nil, DayOfWeek.Monday, new LocalTime, new LocalTime, None, TimetableEvent.Parent(None), None, Nil, Nil, AcademicYear(2013), None))
+		val studentEvents = Seq(new TimetableEvent("test", "test", "test", "test", TimetableEventType.Lecture, Nil, DayOfWeek.Monday, new LocalTime, new LocalTime, None, TimetableEvent.Parent(None), None, Nil, Nil, AcademicYear(2013), None, Map()))
 		val delegate: CompleteTimetableFetchingService = mock[CompleteTimetableFetchingService]
 
 		delegate.getTimetableForStudent(studentId) returns Future.successful(EventList.fresh(studentEvents))
@@ -48,7 +48,7 @@ class CachedTimetableFetchingServiceTest  extends TestBase with Mockito{
 		// deliberately use the student ID to look up some staff events. The cache key should be the ID + the type of
 		// request (staff, student, room, etc) so we should get different results back for student and staff
 
-		val staffEvents = Seq(new TimetableEvent("test2", "test2", "test2", "test2", TimetableEventType.Lecture, Nil, DayOfWeek.Monday, new LocalTime, new LocalTime, None, TimetableEvent.Parent(None), None, Nil, Nil, AcademicYear(2013), None))
+		val staffEvents = Seq(new TimetableEvent("test2", "test2", "test2", "test2", TimetableEventType.Lecture, Nil, DayOfWeek.Monday, new LocalTime, new LocalTime, None, TimetableEvent.Parent(None), None, Nil, Nil, AcademicYear(2013), None, Map()))
 		delegate.getTimetableForStaff(studentId) returns Future.successful(EventList.fresh(staffEvents))
 
 		cache.getTimetableForStudent(studentId).futureValue.events should be (studentEvents)
@@ -102,7 +102,8 @@ class CachedTimetableFetchingServiceTest  extends TestBase with Mockito{
 				Seq(tutor1, tutor2),
 				Seq(student),
 				AcademicYear.guessSITSAcademicYearByDate(DateTime.now),
-				relatedUrl = None
+				relatedUrl = None,
+				attendance = Map()
 			),
 			TimetableEvent(
 				"event 2 uid",
@@ -120,7 +121,8 @@ class CachedTimetableFetchingServiceTest  extends TestBase with Mockito{
 				Nil,
 				Nil,
 				AcademicYear.guessSITSAcademicYearByDate(DateTime.now),
-				relatedUrl = None
+				relatedUrl = None,
+				attendance = Map()
 			)
 		)
 
