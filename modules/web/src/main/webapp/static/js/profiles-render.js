@@ -125,7 +125,7 @@
 					break;
 				case 'not-recorded':
 					attendanceCell1 = '<i class="fa fa-minus"/> Not recorded';
-					attendanceCell2 = '<span class="very-subtle">Attendance has not yet been recorded fot this event.</span>';
+					attendanceCell2 = '<span class="very-subtle">Attendance has not yet been recorded for this event.</span>';
 					break;
 			}
 
