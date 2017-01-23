@@ -9,8 +9,8 @@ import org.springframework.stereotype.Controller
 import org.springframework.web.bind.annotation.{ModelAttribute, PathVariable, RequestMapping, RequestParam}
 import uk.ac.warwick.spring.Wire
 import uk.ac.warwick.tabula.DateFormats
-import uk.ac.warwick.tabula.commands.scheduling.imports.ImportProfilesCommand
-import uk.ac.warwick.tabula.commands.{Command, Description, ReadOnly}
+import uk.ac.warwick.tabula.commands.scheduling.imports.{ImportProfilesCommand, RecheckMissingRowsCommand}
+import uk.ac.warwick.tabula.commands.{Appliable, Command, Description, ReadOnly}
 import uk.ac.warwick.tabula.data.model.{StaffMember, StudentMember}
 import uk.ac.warwick.tabula.helpers.SchedulingHelpers._
 import uk.ac.warwick.tabula.jobs.scheduling.ImportMembersJob
@@ -244,6 +244,18 @@ class ImportSingleProfileController extends BaseSysadminController {
 
 		// Redirect cross-context
 		Redirect(Routes.profiles.Profile.identity(member.get))
+	}
+}
+
+@Controller
+@RequestMapping(Array("/sysadmin/recheck-missing"))
+class RecheckMissingController extends BaseSysadminController {
+	@ModelAttribute("recheckForm") def recheckForm = RecheckMissingRowsCommand()
+
+	@RequestMapping(method = Array(POST))
+	def recheck(@ModelAttribute("recheckForm")form: Appliable[Unit]): Mav = {
+		form.apply()
+		redirectToHome
 	}
 }
 

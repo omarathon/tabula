@@ -85,6 +85,15 @@
 			</@f.form>
 		</p>
 
+		<p>
+			<@f.form method="post" action="${url('/sysadmin/recheck-missing')}" commandName="blankForm">
+				Recheck missing stamps from
+				<div class="input-group">
+					<@f.input id="check-from" path="from" cssClass="date-time-picker form-control" placeholder="Click to pick a date" /><span class="input-group-btn"><input class="btn btn-danger" type="submit" value="Re-check" onclick="return confirm('Really? Could take a while.')" /></span>
+				</div>
+			</@f.form>
+		</p>
+
 		<h2>Indexing</h2>
 
 		<#macro reindex_form name text>

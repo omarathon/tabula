@@ -1,16 +1,15 @@
 package uk.ac.warwick.tabula.commands.scheduling.imports
 
 import org.joda.time.DateTime
-import uk.ac.warwick.spring.Wire
 import uk.ac.warwick.tabula.commands._
 import uk.ac.warwick.tabula.data._
 import uk.ac.warwick.tabula.data.model.StudentCourseYearKey
 import uk.ac.warwick.tabula.helpers.Logging
 import uk.ac.warwick.tabula.permissions.Permissions
-import uk.ac.warwick.tabula.services.scheduling.{ProfileImporter, SitsAcademicYearAware}
+import uk.ac.warwick.tabula.services.scheduling.{AutowiringProfileImporterComponent, ProfileImporterComponent}
 import uk.ac.warwick.tabula.system.permissions.{PermissionsChecking, PermissionsCheckingMethods, RequiresPermissionsChecking}
-import uk.ac.warwick.tabula.{AutowiringFeaturesComponent, FeaturesComponent}
 import Transactions._
+
 import scala.collection.JavaConverters._
 
 object StampMissingRowsCommand {
@@ -19,70 +18,49 @@ object StampMissingRowsCommand {
 			with AutowiringMemberDaoComponent
 			with AutowiringStudentCourseYearDetailsDaoComponent
 			with AutowiringStudentCourseDetailsDaoComponent
-			with AutowiringFeaturesComponent
+			with AutowiringProfileImporterComponent
 			with ComposableCommandWithoutTransaction[Unit]
 			with StampMissingRowsDescription
-			with StampMissingRowsPermissions
+			with MissingRowsPermissions
 }
 
 
-class StampMissingRowsCommandInternal extends CommandInternal[Unit] with SitsAcademicYearAware with Logging with Daoisms {
+class StampMissingRowsCommandInternal extends CommandInternal[Unit] with Logging with Daoisms with ChecksStudentsInSits {
 
-	self: MemberDaoComponent with StudentCourseYearDetailsDaoComponent
-		with StudentCourseDetailsDaoComponent with FeaturesComponent =>
+	self: MemberDaoComponent with StudentCourseYearDetailsDaoComponent with StudentCourseDetailsDaoComponent
+		with ProfileImporterComponent =>
 
-	var profileImporter: ProfileImporter = Wire[ProfileImporter]
 
 	override def applyInternal(): Unit = {
-		val sitsCurrentAcademicYear = getCurrentSitsAcademicYearString
-		val allUniversityIDs = transactional() { memberDao.getFreshUniversityIds() }
 
-		logger.info(s"${allUniversityIDs.size} students to fetch from SITS for $sitsCurrentAcademicYear")
+		val allUniversityIDs = transactional() { memberDao.getFreshUniversityIds.toSet }
+		logger.info(s"${allUniversityIDs.size} students to fetch from SITS")
 
-		val parsedSitsRows = allUniversityIDs.grouped(Daoisms.MaxInClauseCount).zipWithIndex.map { case (universityIds, groupCount) =>
-			val sitsRows = profileImporter.multipleStudentInformationQuery.executeByNamedParam(
-				if (features.includePastYears)
-					Map("universityIds" -> universityIds.asJava).asJava
-				else
-					Map("year" -> sitsCurrentAcademicYear, "universityIds" -> universityIds).asJava
-			).asScala
+		val studentsFound = checkSitsForStudents(allUniversityIDs)
 
-			logger.info(s"${(groupCount + 1) * Daoisms.MaxInClauseCount} students requested from SITS; ${sitsRows.size} rows found")
-
-			(
-				sitsRows.map(_.universityId.getOrElse("")).distinct,
-				sitsRows.map(_.scjCode).distinct,
-				sitsRows.map(row => new StudentCourseYearKey(row.scjCode, row.sceSequenceNumber)).distinct
-				)
-		}.toSeq
-
-		val universityIdsSeen = parsedSitsRows.flatMap(_._1).distinct
-		val scjCodesSeen = parsedSitsRows.flatMap(_._2).distinct
-		val studentCourseYearKeysSeen = parsedSitsRows.flatMap(_._3)
-
-		if (universityIdsSeen.isEmpty) {
+		if (studentsFound.universityIdsSeen.isEmpty) {
 			throw new UnsupportedOperationException("Could not find any students, so not marking all as missing")
 		}
 
-		if (scjCodesSeen.isEmpty) {
+		if (studentsFound.scjCodesSeen.isEmpty) {
 			throw new UnsupportedOperationException("Could not find any SCJ codes, so not marking all as missing")
 		}
 
-		if (studentCourseYearKeysSeen.isEmpty) {
+		if (studentsFound.studentCourseYearKeysSeen.isEmpty) {
 			throw new UnsupportedOperationException("Could not find any year enrolments, so not marking all as missing")
 		}
 
 		val newStaleUniversityIds: Seq[String] = {
-			(allUniversityIDs.toSet -- universityIdsSeen).toSeq
+			(allUniversityIDs -- studentsFound.universityIdsSeen).toSeq
 		}
 
 		val newStaleScjCodes: Seq[String] = {
 			val allFreshScjCodes = transactional() { studentCourseDetailsDao.getFreshScjCodes.toSet }
-			(allFreshScjCodes -- scjCodesSeen).toSeq
+			(allFreshScjCodes -- studentsFound.scjCodesSeen).toSeq
 		}
 
 		val newStaleScydIds: Seq[String] = {
-			val scydIdsSeen = transactional() { studentCourseYearDetailsDao.convertKeysToIds(studentCourseYearKeysSeen) }
+			val scydIdsSeen = transactional() { studentCourseYearDetailsDao.convertKeysToIds(studentsFound.studentCourseYearKeysSeen.toSeq) }
 			val allFreshIds = transactional() { studentCourseYearDetailsDao.getFreshIds.toSet }
 			transactional() { (allFreshIds -- scydIdsSeen).toSeq }
 		}
@@ -99,7 +77,7 @@ class StampMissingRowsCommandInternal extends CommandInternal[Unit] with SitsAca
 		transactional() { session.flush() }
 		transactional() { session.clear() }
 
-		val newFreshUniIds = transactional() { memberDao.getFreshUniversityIds().toSet }
+		val newFreshUniIds = transactional() { memberDao.getFreshUniversityIds.toSet }
 		val uniIDsStillNotMarked = newStaleUniversityIds.toSet.intersect(newFreshUniIds)
 		if (uniIDsStillNotMarked.nonEmpty) {
 			logger.error(s"There are still stale IDs that weren't marked as missing (${uniIDsStillNotMarked.size} total); here are a few: ${uniIDsStillNotMarked.take(5).mkString(", ")}")
@@ -110,19 +88,48 @@ class StampMissingRowsCommandInternal extends CommandInternal[Unit] with SitsAca
 
 }
 
-trait StampMissingRowsPermissions extends RequiresPermissionsChecking with PermissionsCheckingMethods {
-
+trait MissingRowsPermissions extends RequiresPermissionsChecking with PermissionsCheckingMethods {
 	override def permissionsCheck(p: PermissionsChecking) {
 		p.PermissionCheck(Permissions.ImportSystemData)
 	}
-
 }
 
 trait StampMissingRowsDescription extends Describable[Unit] {
-
 	override lazy val eventName = "StampMissingRows"
-
 	override def describe(d: Description) {
-
 	}
+}
+
+trait ChecksStudentsInSits {
+
+	self: ProfileImporterComponent with Logging =>
+
+	case class StudentsFound(
+		universityIdsSeen: Set[String],
+		scjCodesSeen: Set[String],
+		studentCourseYearKeysSeen: Set[StudentCourseYearKey]
+	)
+
+	def checkSitsForStudents(universityIds: Set[String]): StudentsFound = {
+		val parsedSitsRows = universityIds.grouped(Daoisms.MaxInClauseCount).zipWithIndex.map { case (ids, groupCount) =>
+			val sitsRows = profileImporter.multipleStudentInformationQuery.executeByNamedParam(
+				Map("universityIds" -> universityIds.toSeq.asJava).asJava
+			).asScala
+
+			logger.info(s"${(groupCount + 1) * Daoisms.MaxInClauseCount} students requested from SITS; ${sitsRows.size} rows found")
+			(
+				sitsRows.map(_.universityId.getOrElse("")).distinct,
+				sitsRows.map(_.scjCode).distinct,
+				sitsRows.map(row => new StudentCourseYearKey(row.scjCode, row.sceSequenceNumber)).distinct
+				)
+		}.toSeq
+
+
+		val universityIdsSeen = parsedSitsRows.flatMap(_._1)
+		val scjCodesSeen = parsedSitsRows.flatMap(_._2)
+		val studentCourseYearKeysSeen = parsedSitsRows.flatMap(_._3)
+
+		StudentsFound(universityIdsSeen.toSet, scjCodesSeen.toSet, studentCourseYearKeysSeen.toSet)
+	}
+
 }
