@@ -32,7 +32,7 @@ abstract class TermBasedEventOccurrenceService extends EventOccurrenceService {
 	self: WeekToDateConverterComponent with TermServiceComponent with ProfileServiceComponent =>
 
 	def fromTimetableEvent(event: TimetableEvent, dateRange: Interval): Seq[EventOccurrence] = {
-		def buildEventOccurrence(start: LocalDateTime, end: LocalDateTime, uid: String): EventOccurrence = {
+		def buildEventOccurrence(week: WeekRange.Week, start: LocalDateTime, end: LocalDateTime, uid: String): EventOccurrence = {
 			EventOccurrence(
 				uid,
 				event.name,
@@ -45,7 +45,8 @@ abstract class TermBasedEventOccurrenceService extends EventOccurrenceService {
 				event.parent,
 				event.comments,
 				event.staff,
-				event.relatedUrl
+				event.relatedUrl,
+				event.attendance.get(week)
 			)
 		}
 
@@ -67,6 +68,7 @@ abstract class TermBasedEventOccurrenceService extends EventOccurrenceService {
 				.filter(week => weekToDateConverter.intersectsWeek(dateRange, week, event.year))
 				.map { week =>
 					buildEventOccurrence(
+						week,
 						eventDateToLocalDate(week, event.startTime),
 						eventDateToLocalDate(week, event.endTime),
 						s"$week-${event.uid}" // TODO rather than UID swapping here, this should be a recurring event

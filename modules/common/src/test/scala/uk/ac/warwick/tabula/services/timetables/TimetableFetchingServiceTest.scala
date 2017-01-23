@@ -54,7 +54,8 @@ class TimetableFetchingServiceTest extends TestBase with Mockito {
 			staff=Seq(tutor),
 			students=Nil,
 		  year = AcademicYear(2012),
-			relatedUrl = None
+			relatedUrl = None,
+			attendance = Map()
 		))
 		events(1).comments should be (Some("Some comments"))
 		events(1).students should be (Seq(student))

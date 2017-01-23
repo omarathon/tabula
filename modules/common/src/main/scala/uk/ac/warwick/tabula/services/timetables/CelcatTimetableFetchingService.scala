@@ -113,7 +113,7 @@ object CelcatHttpTimetableFetchingService {
 				cats.find { c => TimetableEventType(c).core }.map { c => TimetableEventType(c) }.get
 
 			case _ =>	summary.split(" - ", 2) match {
-				case Array(t, staffInfo) => TimetableEventType(t)
+				case Array(t, _) => TimetableEventType(t)
 				case Array(s) => TimetableEventType(s)
 			}
 		}
@@ -182,7 +182,8 @@ object CelcatHttpTimetableFetchingService {
 				staff = staff,
 				students = Nil,
 				year = year,
-				relatedUrl = None
+				relatedUrl = None,
+				attendance = Map()
 			))
 		}
 	}
@@ -210,7 +211,7 @@ class CelcatHttpTimetableFetchingService(celcatConfiguration: CelcatConfiguratio
 	lazy val wbsConfig: CelcatDepartmentConfiguration = celcatConfiguration.wbsConfiguration
 
 	// a dispatch response handler which reads JSON from the response and parses it into a list of TimetableEvents
-	def handler(config: CelcatDepartmentConfiguration): (Map[String, Seq[String]], Request) => Handler[EventList] = { (headers: Map[String,Seq[String]], req: dispatch.classic.Request) =>
+	def handler(config: CelcatDepartmentConfiguration): (Map[String, Seq[String]], Request) => Handler[EventList] = { (_: Map[String,Seq[String]], req: dispatch.classic.Request) =>
 		req >- { (rawJSON) =>
 			combineIdenticalEvents(parseJSON(rawJSON))
 		}
@@ -281,7 +282,8 @@ class CelcatHttpTimetableFetchingService(celcatConfiguration: CelcatConfiguratio
 					event.staff,
 					event.students,
 					event.year,
-					event.relatedUrl
+					event.relatedUrl,
+					event.attendance
 				)
 		}}.toList
 	}
@@ -333,7 +335,8 @@ class CelcatHttpTimetableFetchingService(celcatConfiguration: CelcatConfiguratio
 						staff = Nil,
 						students = Nil,
 						year = AcademicYear.guessSITSAcademicYearByDate(start),
-						relatedUrl = None
+						relatedUrl = None,
+						attendance = Map()
 					))
 				})
 			case _ => throw new RuntimeException("Could not parse JSON")

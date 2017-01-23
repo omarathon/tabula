@@ -125,7 +125,7 @@ private class ScientiaHttpTimetableFetchingService(scientiaConfiguration: Scient
 
 	// a dispatch response handler which reads XML from the response and parses it into a list of TimetableEvents
 	// the timetable response doesn't include its year, so we pass that in separately.
-	def handler(year: AcademicYear, excludeSmallGroupEventsInTabula: Boolean = false, uniId: String): (Map[String, Seq[String]], Request) => Handler[Seq[TimetableEvent]] = { (headers: Map[String,Seq[String]], req: dispatch.classic.Request) =>
+	def handler(year: AcademicYear, excludeSmallGroupEventsInTabula: Boolean = false, uniId: String): (Map[String, Seq[String]], Request) => Handler[Seq[TimetableEvent]] = { (_: Map[String,Seq[String]], req: dispatch.classic.Request) =>
 		req <> { node =>
 			parseXml(node, year, uniId, locationFetchingService, moduleAndDepartmentService, userLookup)
 		}
@@ -296,7 +296,8 @@ object ScientiaHttpTimetableFetchingService extends Logging {
 					_.text
 				}).values.collect { case FoundUser(u) => u }.toSeq,
 				year = year,
-				relatedUrl = None
+				relatedUrl = None,
+				attendance = Map()
 			)
 		}
 	}
