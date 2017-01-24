@@ -33,7 +33,7 @@ class RecheckMissingRowsCommandInternal extends CommandInternal[Unit] with Loggi
 		with ProfileImporterComponent with RecheckMissingRowsState =>
 
 	override def applyInternal(): Unit = {
-		val universityIds = memberDao.getMissingSince(from).toSet
+		val universityIds = transactional() { memberDao.getMissingSince(from).toSet }
 		logger.info(s"${universityIds.size} students to fetch from SITS that were marked as missing since ${CSVDate.print(from)}")
 
 		val studentsFound = checkSitsForStudents(universityIds)
