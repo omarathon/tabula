@@ -32,12 +32,12 @@
 
 		<@modal.footer>
 		<form class="double-submit-protection">
-					<span class="submit-buttons">
-						<button class="btn btn-primary spinnable" type="submit" name="submit" data-loading-text="Saving&hellip;">
-							Save
-						</button>
-						<button class="btn" data-dismiss="modal" aria-hidden="true">Cancel</button>
-					</span>
+			<span class="submit-buttons">
+				<button class="btn btn-primary spinnable" type="submit" name="submit" data-loading-text="Saving&hellip;">
+					Save
+				</button>
+				<button class="btn" data-dismiss="modal" aria-hidden="true">Cancel</button>
+			</span>
 		</form>
 		</@modal.footer>
 	<#else>

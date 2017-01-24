@@ -4,7 +4,7 @@
 <#import "*/modal_macros.ftl" as modal />
 
 <#assign titleHeader>
-	<h1>Record attendance</h1>
+	<h1 class="with-settings">Record attendance</h1>
 	<h6><span class="muted">for</span> ${command.templatePoint.name}</h6>
 </#assign>
 <#assign numberOfStudents = command.checkpointMap?keys?size />
@@ -22,6 +22,10 @@
 		<i class="icon-thumbs-down"></i> There are too many students to display at once. Please go back and choose a more restrictive filter.
 	</div>
 <#else>
+
+	<div class="pull-right">
+		<a href="${uploadUrl}" class="btn btn-default upload-attendance">Upload attendance from CSV</a>
+	</div>
 
 	<#noescape>${titleHeader}</#noescape>
 
@@ -120,7 +124,7 @@
 								<#assign students = command.checkpointMap?keys?sort_by("lastName") />
 								<a class="btn use-tooltip attendance-note bulk-attendance-note"
 								   title="Add an attendance note for all students"
-								   href="<@routes.attendance.bulkNoteEdit academicYear.startYear?c command.templatePoint students/>">
+								   href="<@routes.attendance.bulkNoteEdit academicYear.startYear?c command.templatePoint students />">
 									<i class="icon-edit"></i>
 								</a>
 							</#if>
@@ -129,8 +133,6 @@
 					</div>
 				</div>
 			</div>
-
-
 
 			<form id="recordAttendance" action="" method="post" class="dirty-check">
 				<div class="striped-section-contents attendees">
@@ -160,7 +162,7 @@
 									<div class="pull-right">
 										<div class="hidden-desktop visible-print">
 											<@attendance_macros.checkpointLabel
-												department=command.department
+												department=department
 												student=student
 												checkpoint=(mapGet(mapGet(command.studentPointCheckpointMap, student), point))!""
 												note=(mapGet(mapGet(command.attendanceNoteMap, student), point))!""
@@ -169,7 +171,7 @@
 										</div>
 										<#if mapGet(command.hasReportedMap, student)>
 											<@attendance_macros.checkpointLabel
-												department=command.department
+												department=department
 												student=student
 												checkpoint=(mapGet(mapGet(command.studentPointCheckpointMap, student), point))!""
 												note=(mapGet(mapGet(command.attendanceNoteMap, student), point))!""
@@ -179,7 +181,7 @@
 											<@attendance_macros.checkpointSelect
 												id="checkpointMap-${student.universityId}-${point.id}"
 												name="checkpointMap[${student.universityId}][${point.id}]"
-												department=command.department
+												department=department
 												checkpoint=(mapGet(mapGet(command.studentPointCheckpointMap, student), point))!""
 												note=(mapGet(mapGet(command.attendanceNoteMap, student), point))!""
 												student=student
@@ -244,6 +246,7 @@
 	<@modal.body></@modal.body>
 </div>
 <div id="small-groups-modal" class="modal hide fade" style="display:none;"></div>
+<div id="upload-attendance-modal" class="modal hide fade" style="display:none;"></div>
 
 
 </#escape>
