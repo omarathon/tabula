@@ -56,29 +56,13 @@ class ProfileImporterImpl extends ProfileImporter with Logging with SitsAcademic
 
 	lazy val applicantQuery = new ApplicantQuery(sits)
 
-	def studentInformationQuery: StudentInformationQuery = {
+	def studentInformationQuery: StudentInformationQuery = new StudentInformationQuery(sits)
 
-		val sceYearClause =
-			if (features.includePastYears) ""
-			else "and sce.sce_ayrc in (:year)"
-
-		new StudentInformationQuery(sits, sceYearClause)
-	}
-
-	def multipleStudentInformationQuery: MultipleStudentInformationQuery = {
-
-		val sceYearClause =
-			if (features.includePastYears) ""
-			else "and sce.sce_ayrc in (:year)"
-
-		new MultipleStudentInformationQuery(sits, sceYearClause)
-	}
+	def multipleStudentInformationQuery: MultipleStudentInformationQuery = new MultipleStudentInformationQuery(sits)
 
 	def getMemberDetails(memberInfo: Seq[MembershipInformation], users: Map[UniversityId, User], importCommandFactory: ImportCommandFactory)
 		: Seq[ImportMemberCommand] = {
 		// TODO we could probably chunk this into 20 or 30 users at a time for the query, or even split by category and query all at once
-
-		val sitsCurrentAcademicYear = getCurrentSitsAcademicYearString
 
 		memberInfo.groupBy(_.member.userType).flatMap { case (userType, members) =>
 			userType match {
@@ -91,10 +75,7 @@ class ProfileImporterImpl extends ProfileImporter with Logging with SitsAcademic
 						val ssoUser = users(universityId)
 
 						val sitsRows = studentInformationQuery.executeByNamedParam(
-							if (features.includePastYears)
-								Map("universityId" -> universityId)
-							else
-								Map("year" -> sitsCurrentAcademicYear, "universityId" -> universityId)
+							Map("universityId" -> universityId)
 						).toSeq
 						ImportStudentRowCommand(
 							info,
@@ -361,15 +342,7 @@ object ProfileImporter extends Logging {
 	val applicantDepartmentCode: String = "sl"
 	val sitsSchema: String = Wire.property("${schema.sits}")
 
-	val sceYearClause: UniversityId =
-		if (features.includePastYears) {
-			""
-		}
-		else {
-			"and sce.sce_ayrc in (:year)"
-		}
-
-	private def GetStudentInformation(sceYearClause: String) = f"""
+	private def GetStudentInformation = f"""
 			select
 			stu.stu_code as university_id,
 			stu.stu_titl as title,
@@ -432,7 +405,6 @@ object ProfileImporter extends Logging {
 
 			join $sitsSchema.srs_sce sce -- Student Course Enrolment
 				on scj.scj_code = sce.sce_scjc
-				$sceYearClause
 				and sce.sce_seq2 = -- get the last course enrolment record for the course and year
 					(
 						select max(sce2.sce_seq2)
@@ -467,40 +439,34 @@ object ProfileImporter extends Logging {
 				on spr.prs_code = prs.prs_code
 		 """
 
-	def GetSingleStudentInformation(sceYearClause: String): UniversityId = GetStudentInformation(sceYearClause) + f"""
+	def GetSingleStudentInformation: UniversityId = GetStudentInformation + f"""
 			where stu.stu_code = :universityId
 			order by stu.stu_code
 		"""
 
-	def GetMultipleStudentsInformation(sceYearClause: String): UniversityId = GetStudentInformation(sceYearClause) + f"""
+	def GetMultipleStudentsInformation: UniversityId = GetStudentInformation + f"""
 			where stu.stu_code in (:universityIds)
 			order by stu.stu_code
 		"""
 
-	class StudentInformationQuery(ds: DataSource, sceYearClause: String)
-		extends MappingSqlQuery[SitsStudentRow](ds, GetSingleStudentInformation(sceYearClause)) {
+	class StudentInformationQuery(ds: DataSource)
+		extends MappingSqlQuery[SitsStudentRow](ds, GetSingleStudentInformation) {
 
 		var features: Features = Wire.auto[Features]
 
 		declareParameter(new SqlParameter("universityId", Types.VARCHAR))
-
-		if (!features.includePastYears)
-			declareParameter(new SqlParameter("year", Types.VARCHAR))
 
 		compile()
 
 		override def mapRow(rs: ResultSet, rowNumber: Int) = SitsStudentRow(rs)
 	}
 
-	class MultipleStudentInformationQuery(ds: DataSource, sceYearClause: String)
-		extends MappingSqlQuery[SitsStudentRow](ds, GetMultipleStudentsInformation(sceYearClause)) {
+	class MultipleStudentInformationQuery(ds: DataSource)
+		extends MappingSqlQuery[SitsStudentRow](ds, GetMultipleStudentsInformation) {
 
 		var features: Features = Wire.auto[Features]
 
 		declareParameter(new SqlParameter("universityIds", Types.VARCHAR))
-
-		if (!features.includePastYears)
-			declareParameter(new SqlParameter("year", Types.VARCHAR))
 
 		compile()
 
@@ -606,3 +572,12 @@ case class MembershipMember(
 	alternativeEmailAddress: String = null,
 	userType: MemberUserType
 )
+
+
+trait ProfileImporterComponent {
+	def profileImporter: ProfileImporter
+}
+
+trait AutowiringProfileImporterComponent extends ProfileImporterComponent {
+	var profileImporter: ProfileImporter = Wire[ProfileImporter]
+}
