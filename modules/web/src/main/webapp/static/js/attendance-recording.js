@@ -185,6 +185,13 @@ $(function(){
 		});
 	});
 
+	$('a.upload-attendance').on('click', function(e){
+		e.preventDefault();
+		$.get($(this).attr('href'), function(data){
+			$('#upload-attendance-modal').html(data).modal("show");
+		});
+	});
+
     $('.agent-search').find('input').on('keyup', function(){
         var rows = $('table.agents tbody tr'), query = $(this).val().toLowerCase();
         if (query.length === 0) {
