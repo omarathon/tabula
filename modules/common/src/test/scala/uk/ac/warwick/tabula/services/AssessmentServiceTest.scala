@@ -47,11 +47,14 @@ class AssessmentServiceTest extends PersistenceTestBase with Mockito {
 		feedbackService.sessionFactory = sessionFactory
 		val amDao = new AssessmentMembershipDaoImpl
 		amDao.sessionFactory = sessionFactory
+		val profileService = smartMock[ProfileService]
+		profileService.getAllMembersWithUniversityIds(any[Seq[String]]) returns Seq()
 		assignmentMembershipService.dao = amDao
 		assignmentMembershipService.assignmentManualMembershipHelper.sessionFactory = sessionFactory
 		assignmentMembershipService.assignmentManualMembershipHelper.userLookup = userLookup
 		assignmentMembershipService.assignmentManualMembershipHelper.cache.foreach { _.clear() }
 		assignmentMembershipService.userLookup = userLookup
+		assignmentMembershipService.profileService = profileService
 		val extDao = new ExtensionDaoImpl
 		extDao.sessionFactory = sessionFactory
 		extensionService = new AbstractExtensionService with ExtensionDaoComponent {

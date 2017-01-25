@@ -1,16 +1,13 @@
 package uk.ac.warwick.tabula.data.model
 
-import uk.ac.warwick.tabula.{TestBase, Mockito}
-import uk.ac.warwick.tabula.services.UserLookupService
-import uk.ac.warwick.tabula.services.{AssessmentMembershipServiceImpl, AssessmentMembershipService}
+import uk.ac.warwick.tabula.{Mockito, TestBase}
+import uk.ac.warwick.tabula.services._
 import uk.ac.warwick.userlookup.User
 import org.junit.Before
 import uk.ac.warwick.userlookup.AnonymousUser
-import uk.ac.warwick.tabula.services.IncludeType
-import uk.ac.warwick.tabula.services.SitsType
-import uk.ac.warwick.tabula.services.ExcludeType
+
 import scala.collection.JavaConverters._
-import uk.ac.warwick.tabula.JavaImports.{JHashMap,JList}
+import uk.ac.warwick.tabula.JavaImports.{JHashMap, JList}
 
 class AssignmentMembershipTest extends TestBase with Mockito {
 
@@ -35,7 +32,7 @@ class AssignmentMembershipTest extends TestBase with Mockito {
 	val nobody: UserGroup = UserGroup.ofUsercodes
 
 	@Before def before() {
-		userLookup = mock[UserLookupService]
+		userLookup = smartMock[UserLookupService]
 		userLookup.getUserByUserId(any[String]) answers { id =>
 			userDatabase find {_.getUserId == id} getOrElse new AnonymousUser()
 		}
@@ -49,9 +46,12 @@ class AssignmentMembershipTest extends TestBase with Mockito {
 		userLookup.getUsersByWarwickUniIds(any[Seq[String]]) answers { ids =>
 			ids.asInstanceOf[Seq[String]].map(id => (id, userDatabase.find {_.getWarwickId == id}.getOrElse (new AnonymousUser()))).toMap
 		}
+		val profileService = smartMock[ProfileService]
+		profileService.getAllMembersWithUniversityIds(any[Seq[String]]) returns Seq()
     assignmentMembershipService = {
       val s = new AssessmentMembershipServiceImpl
       s.userLookup = userLookup
+			s.profileService = profileService
       s
     }
 	}
