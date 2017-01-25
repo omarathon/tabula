@@ -129,6 +129,12 @@ class ImportProfilesCommand extends CommandWithoutTransaction[Unit] with Logging
 					}
 				}
 
+				benchmarkTask("Handle deceased students") {
+					transactional() {
+						handleDeceasedStudents(importMemberCommands)
+					}
+				}
+
 				transactional() {
 					val members = importMemberCommands.map(_.universityId).distinct.flatMap(u => memberDao.getByUniversityId(u))
 					members.foreach(member => {
@@ -140,6 +146,11 @@ class ImportProfilesCommand extends CommandWithoutTransaction[Unit] with Logging
 				}
 			}
 		}
+	}
+
+	private def toStudentMembers(rowCommands: Seq[ImportMemberCommand]): Seq[StudentMember] = {
+		memberDao.getAllWithUniversityIds(rowCommands.collect { case s: ImportStudentRowCommandInternal=> s }.map(_.universityId))
+			  .collect { case s: StudentMember => s }
 	}
 
 	def updateModuleRegistrationsAndSmallGroups(membershipInfo: Seq[MembershipInformation], users: Map[UniversityId, User]): Seq[ModuleRegistration] = {
@@ -193,13 +204,7 @@ class ImportProfilesCommand extends CommandWithoutTransaction[Unit] with Logging
 	def updateVisa(rowCommands: Seq[ImportMemberCommand]) {
 		logger.info("Updating visa status")
 
-		val members = rowCommands.flatMap {
-			command => memberDao.getByUniversityId(command.universityId)
-		}
-
-		members.collect {
-			case student: StudentMember => ImportTier4ForStudentCommand(student, getCurrentSitsAcademicYear).apply()
-		}
+		toStudentMembers(rowCommands).foreach(student => ImportTier4ForStudentCommand(student, getCurrentSitsAcademicYear).apply())
 
 		session.flush()
 		session.clear()
@@ -208,28 +213,31 @@ class ImportProfilesCommand extends CommandWithoutTransaction[Unit] with Logging
 	def rationaliseRelationships(rowCommands: Seq[ImportMemberCommand]): Unit = {
 		logger.info("Updating relationships")
 
-		val members = rowCommands.map(_.universityId).distinct.flatMap(u => memberDao.getByUniversityId(u))
-
-		members.foreach {
-			case student: StudentMember =>
-				val expireCommand = ExpireRelationshipsOnOldCoursesCommand(student)
-				val expireCommandErrors = new BindException(expireCommand, "expireCommand")
-				expireCommand.validate(expireCommandErrors)
-				if (!expireCommandErrors.hasErrors) {
-					logger.info(s"Expiring old relationships for ${student.universityId}")
-					expireCommand.apply()
-				} else {
-					logger.info(s"Skipping expiry of relationships for ${student.universityId} - ${expireCommandErrors.getMessage}")
-				}
-				val migrateCommand = MigrateMeetingRecordsFromOldRelationshipsCommand(student)
-				val migrateCommandErrors = new BindException(migrateCommand, "migrateCommand")
-				migrateCommand.validate(migrateCommandErrors)
-				if (!migrateCommandErrors.hasErrors) {
-					logger.info(s"Migrating meetings from old relationships for ${student.universityId}")
-					migrateCommand.apply()
-				}
-			case _ =>
+		toStudentMembers(rowCommands).foreach { student =>
+			val expireCommand = ExpireRelationshipsOnOldCoursesCommand(student)
+			val expireCommandErrors = new BindException(expireCommand, "expireCommand")
+			expireCommand.validate(expireCommandErrors)
+			if (!expireCommandErrors.hasErrors) {
+				logger.info(s"Expiring old relationships for ${student.universityId}")
+				expireCommand.apply()
+			} else {
+				logger.info(s"Skipping expiry of relationships for ${student.universityId} - ${expireCommandErrors.getMessage}")
+			}
+			val migrateCommand = MigrateMeetingRecordsFromOldRelationshipsCommand(student)
+			val migrateCommandErrors = new BindException(migrateCommand, "migrateCommand")
+			migrateCommand.validate(migrateCommandErrors)
+			if (!migrateCommandErrors.hasErrors) {
+				logger.info(s"Migrating meetings from old relationships for ${student.universityId}")
+				migrateCommand.apply()
+			}
 		}
+
+		session.flush()
+		session.clear()
+	}
+
+	def handleDeceasedStudents(rowCommands: Seq[ImportMemberCommand]): Unit = {
+		toStudentMembers(rowCommands).filter(_.deceased).foreach { student => HandleDeceasedStudentCommand(student).apply() }
 
 		session.flush()
 		session.clear()
@@ -263,6 +271,8 @@ class ImportProfilesCommand extends CommandWithoutTransaction[Unit] with Logging
 					val newModuleRegistrations = updateModuleRegistrationsAndSmallGroups(List(membInfo), Map(universityId -> user))
 					updateAccreditedPriorLearning(List(membInfo), Map(universityId -> user))
 					rationaliseRelationships(importMemberCommands)
+
+					handleDeceasedStudents(importMemberCommands)
 
 					val freshMembers = members.flatMap { m => profileService.getMemberByUniversityId(m.universityId) }
 

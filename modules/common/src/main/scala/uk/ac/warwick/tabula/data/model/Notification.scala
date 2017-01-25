@@ -12,6 +12,7 @@ import uk.ac.warwick.tabula.DateFormats
 import uk.ac.warwick.tabula.JavaImports._
 import uk.ac.warwick.tabula.data.Transactions._
 import uk.ac.warwick.tabula.data.model.notifications.RecipientNotificationInfo
+import uk.ac.warwick.tabula.helpers.FoundUser
 import uk.ac.warwick.tabula.helpers.StringUtils._
 import uk.ac.warwick.tabula.permissions.PermissionsTarget
 import uk.ac.warwick.tabula.services._
@@ -136,7 +137,7 @@ abstract class Notification[A >: Null <: ToEntityReference, B]
 	var recipientNotificationInfos: JList[RecipientNotificationInfo] = JArrayList()
 
 	// when performing operations on recipientNotificationInfos you should use this to fetch a users info.
-	private def getRecipientNotificationInfo(user: User) = {
+	private def getOrCreateRecipientNotificationInfo(user: User) = {
 		recipientNotificationInfos.asScala.find(_.recipient == user).getOrElse {
 			val newInfo = new RecipientNotificationInfo(this, user)
 			recipientNotificationInfos.add(newInfo)
@@ -145,13 +146,21 @@ abstract class Notification[A >: Null <: ToEntityReference, B]
 	}
 
 	def dismiss(user: User): Unit = {
-		val info = getRecipientNotificationInfo(user)
-		info.dismissed = true
+		user match {
+			case FoundUser(_) =>
+				val info = getOrCreateRecipientNotificationInfo(user)
+				info.dismissed = true
+			case _ =>
+		}
 	}
 
 	def unDismiss(user: User): Unit = {
-		val info = getRecipientNotificationInfo(user)
-		info.dismissed = false
+		user match {
+			case FoundUser(_) =>
+				val info = getOrCreateRecipientNotificationInfo(user)
+				info.dismissed = false
+			case _ =>
+		}
 	}
 
 	def isDismissed(user: User): Boolean = recipientNotificationInfos.asScala.exists(ni => ni.recipient == user && ni.dismissed)
@@ -206,7 +215,7 @@ abstract class Notification[A >: Null <: ToEntityReference, B]
 		onPreSave(newRecord)
 		// Generate recipientNotificationInfos for non-null recipients
 		// (users could be null if inflating user entities that no longer exist in membership)
-		recipients.flatMap(Option(_)).foreach(getRecipientNotificationInfo)
+		recipients.flatMap(Option(_)).foreach(getOrCreateRecipientNotificationInfo)
 	}
 	def onPreSave(newRecord: Boolean) {}
 
