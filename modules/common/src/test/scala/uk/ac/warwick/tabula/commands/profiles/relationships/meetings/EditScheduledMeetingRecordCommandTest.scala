@@ -5,6 +5,7 @@ import org.springframework.validation.BindException
 import uk.ac.warwick.tabula.data.model._
 import uk.ac.warwick.tabula.services.{FileAttachmentService, FileAttachmentServiceComponent, MeetingRecordService, MeetingRecordServiceComponent}
 import uk.ac.warwick.tabula.{Mockito, TestBase}
+import uk.ac.warwick.tabula.DateFormats._
 
 class EditScheduledMeetingRecordCommandTest  extends TestBase with Mockito {
 
@@ -17,6 +18,7 @@ class EditScheduledMeetingRecordCommandTest  extends TestBase with Mockito {
 		var creator: StaffMember = _
 		var scheduledMeetingRecord: ScheduledMeetingRecord = new ScheduledMeetingRecord()
 		scheduledMeetingRecord.meetingDate = new DateTime().minusDays(1)
+		scheduledMeetingRecord.meetingEndDate = new DateTime().minusDays(1).plusHours(1)
 		scheduledMeetingRecord.relationship = relationship
 		val command = new EditScheduledMeetingRecordCommand(creator, scheduledMeetingRecord) with EditScheduledMeetingRecordCommandValidation with EditScheduledMeetingRecordCommandSupport with MeetingRecordServiceComponent {
 			val meetingRecordService: MeetingRecordService = mockMeetingRecordService
@@ -27,12 +29,15 @@ class EditScheduledMeetingRecordCommandTest  extends TestBase with Mockito {
 	def applyNotRescheduled() { new Fixture {
 		val sameDate: DateTime = new DateTime().plusMonths(1)
 		scheduledMeetingRecord.meetingDate = sameDate
+		scheduledMeetingRecord.meetingEndDate = sameDate.plusHours(1)
 
 		scheduledMeetingRecord.lastUpdatedDate.isAfter(scheduledMeetingRecord.creationDate) should be (false)
 
 		val newTitle: String = "new title"
 		command.title = newTitle
-		command.meetingDate = sameDate
+		command.meetingDateStr = sameDate.toString(DatePickerFormatter)
+		command.meetingTimeStr = sameDate.toString(TimePickerFormatter)
+		command.meetingEndTimeStr = sameDate.plusHours(1).toString(TimePickerFormatter)
 
 		Thread.sleep(2) // otherwise sometimes the last updated date is not after created date and that assertion fails
 
@@ -58,7 +63,9 @@ class EditScheduledMeetingRecordCommandTest  extends TestBase with Mockito {
 		command.title = newTitle
 		command.description = newDescription
 		command.format = newFormat
-		command.meetingDate = newMeetingDate
+		command.meetingDateStr = newMeetingDate.toString(DatePickerFormatter)
+		command.meetingTimeStr = newMeetingDate.toString(TimePickerFormatter)
+		command.meetingEndTimeStr = newMeetingDate.plusHours(1).toString(TimePickerFormatter)
 
 		Thread.sleep(2) // otherwise sometimes the last updated date is not after created date and that assertion fails
 
@@ -80,8 +87,10 @@ class EditScheduledMeetingRecordCommandTest  extends TestBase with Mockito {
 		val errors = new BindException(command, "command")
 		command.title = "title"
 		command.format = MeetingFormat.FaceToFace
-		command.meetingDate = new DateTime().plusDays(1)
-		command.validate(errors)
+		command.meetingDateStr = new DateTime().plusDays(1).toString(DatePickerFormatter)
+		command.meetingTimeStr = new DateTime().plusHours(1).toString(TimePickerFormatter)
+		command.meetingEndTimeStr = new DateTime().plusHours(1).toString(TimePickerFormatter)
+
 		errors.hasErrors should be (false)
 	}}
 
@@ -89,7 +98,9 @@ class EditScheduledMeetingRecordCommandTest  extends TestBase with Mockito {
 	def noTitle() { new Fixture {
 		val errors = new BindException(command, "command")
 		command.format = MeetingFormat.FaceToFace
-		command.meetingDate = new DateTime().plusDays(1)
+		command.meetingDateStr = new DateTime().plusDays(1).toString(DatePickerFormatter)
+		command.meetingTimeStr = new DateTime().plusDays(1).plusHours(1).toString(TimePickerFormatter)
+		command.meetingEndTimeStr = new DateTime().plusDays(1).plusHours(1).toString(TimePickerFormatter)
 		command.validate(errors)
 		errors.hasErrors should be (true)
 		errors.getFieldErrorCount should be(1)
@@ -100,7 +111,9 @@ class EditScheduledMeetingRecordCommandTest  extends TestBase with Mockito {
 	def noFormat() { new Fixture {
 		val errors = new BindException(command, "command")
 		command.title = "A Meeting"
-		command.meetingDate = new DateTime().plusHours(1)
+		command.meetingDateStr = new DateTime().plusHours(1).toString(DatePickerFormatter)
+		command.meetingTimeStr = new DateTime().plusHours(1).toString(TimePickerFormatter)
+		command.meetingEndTimeStr = new DateTime().plusHours(2).toString(TimePickerFormatter)
 		command.validate(errors)
 		errors.hasErrors should be (true)
 		errors.getFieldErrorCount should be(1)
@@ -112,11 +125,13 @@ class EditScheduledMeetingRecordCommandTest  extends TestBase with Mockito {
 		val errors = new BindException(command, "command")
 		command.format = MeetingFormat.FaceToFace
 		command.title = "A Title"
-		command.meetingDate = new DateTime().minusDays(1)
+		command.meetingDateStr = new DateTime().minusDays(1).toString(DatePickerFormatter)
+		command.meetingTimeStr = new DateTime().minusDays(1).toString(TimePickerFormatter)
+		command.meetingEndTimeStr = new DateTime().minusDays(1).plusHours(1).toString(TimePickerFormatter)
 		command.validate(errors)
 		errors.hasErrors should be (true)
 		errors.getFieldErrorCount should be(1)
-		errors.getFieldErrors("meetingDate").size should be(1)
+		errors.getFieldErrors("meetingDateStr").size should be(1)
 	}}
 
 	@Test
@@ -126,6 +141,8 @@ class EditScheduledMeetingRecordCommandTest  extends TestBase with Mockito {
 
 		val meetingWithDupeDate: ScheduledMeetingRecord = new ScheduledMeetingRecord
 		meetingWithDupeDate.meetingDate = meetingTime
+		meetingWithDupeDate.meetingEndDate = meetingTime.plusHours(1)
+
 		meetingWithDupeDate.id = "A"
 
 		command.meetingRecord.id = "B"
@@ -135,11 +152,13 @@ class EditScheduledMeetingRecordCommandTest  extends TestBase with Mockito {
 		val errors = new BindException(command, "command")
 		command.format = MeetingFormat.FaceToFace
 		command.title = "A Title"
-		command.meetingDate = meetingTime
+		command.meetingDateStr = meetingTime.toString(DatePickerFormatter)
+		command.meetingTimeStr = meetingTime.toString(TimePickerFormatter)
+		command.meetingEndTimeStr = meetingTime.plusHours(1).toString(TimePickerFormatter)
 		command.validate(errors)
 		errors.hasErrors should be (true)
 		errors.getFieldErrorCount should be(1)
-		errors.getFieldErrors("meetingDate").size should be(1)
+		errors.getFieldErrors("meetingDateStr").size should be(1)
 	}}
 
 	@Test

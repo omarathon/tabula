@@ -33,7 +33,7 @@ class ReindexAuditEventsCommand extends Command[ElasticsearchIndexingResult] wit
 
 	var indexer: AuditEventIndexService = Wire[AuditEventIndexService]
 
-	@WithinYears(maxPast = 20) @DateTimeFormat(pattern = DateFormats.DateTimePicker)
+	@WithinYears(maxPast = 20) @DateTimeFormat(pattern = DateFormats.DateTimePickerPattern)
 	var from: DateTime = _
 
 	def applyInternal(): ElasticsearchIndexingResult = {
@@ -55,7 +55,7 @@ class ReindexNotificationsCommand extends Command[ElasticsearchIndexingResult] w
 
 	var indexer: NotificationIndexService = Wire[NotificationIndexService]
 
-	@WithinYears(maxPast = 20) @DateTimeFormat(pattern = DateFormats.DateTimePicker)
+	@WithinYears(maxPast = 20) @DateTimeFormat(pattern = DateFormats.DateTimePickerPattern)
 	var from: DateTime = _
 
 	def applyInternal(): ElasticsearchIndexingResult = {
@@ -78,7 +78,7 @@ class ReindexProfilesCommand extends Command[ElasticsearchIndexingResult] with R
 	var indexer: ProfileIndexService = Wire[ProfileIndexService]
 	var mdService: ModuleAndDepartmentService = Wire[ModuleAndDepartmentService]
 
-	@WithinYears(maxPast = 20) @DateTimeFormat(pattern = DateFormats.DateTimePicker)
+	@WithinYears(maxPast = 20) @DateTimeFormat(pattern = DateFormats.DateTimePickerPattern)
 	var from: DateTime = _
 	var deptCode: String = _
 

@@ -9,9 +9,9 @@ import org.joda.time.format.{DateTimeFormat, DateTimeFormatter, ISODateTimeForma
  */
 object DateFormats {
 	/** String format as expected by Javascript date time picker */
-	final val DateTimePicker = "dd-MMM-yyyy HH:mm:ss"
-	final val DatePicker = "dd-MMM-yyyy"
-	final val TimePicker = "HH:mm:ss"
+	final val DateTimePickerPattern = "dd-MMM-yyyy HH:mm:ss"
+	final val DatePickerPattern = "dd-MMM-yyyy"
+	final val TimePickerPattern = "HH:mm:ss"
 	final val NotificationDateOnlyPattern = "d MMMM yyyy"
 	final val NotificationDateTimePattern: String = NotificationDateOnlyPattern + " 'at' HH:mm:ss"
 	final val CSVDatePattern = "dd/MM/yyyy"       // we need the pattern for SpreadsheetHelpers
@@ -34,6 +34,11 @@ object DateFormats {
 	/** Date format used in emails */
 	final val NotificationDateOnly: DateTimeFormatter = DateTimeFormat.forPattern(NotificationDateOnlyPattern)
 	final val NotificationDateTime: DateTimeFormatter = DateTimeFormat.forPattern(NotificationDateTimePattern)
+
+
+	final val DateTimePickerFormatter: DateTimeFormatter = DateTimeFormat.forPattern(DateTimePickerPattern)
+	final val DatePickerFormatter: DateTimeFormatter = DateTimeFormat.forPattern(DatePickerPattern)
+	final val TimePickerFormatter: DateTimeFormatter = DateTimeFormat.forPattern(TimePickerPattern)
 
 }
 

@@ -1,6 +1,7 @@
 package uk.ac.warwick.tabula.commands.profiles.relationships.meetings
 
 import org.joda.time.{DateTime, LocalDate}
+import uk.ac.warwick.tabula.DateFormats.{DateTimePickerFormatter, TimePickerFormatter}
 import org.springframework.validation.ValidationUtils._
 import org.springframework.validation.{BindingResult, Errors}
 import uk.ac.warwick.tabula.FeaturesComponent
@@ -12,6 +13,7 @@ import uk.ac.warwick.tabula.data.model._
 import uk.ac.warwick.tabula.services.attendancemonitoring.AttendanceMonitoringMeetingRecordServiceComponent
 import uk.ac.warwick.tabula.services.{FileAttachmentServiceComponent, MeetingRecordServiceComponent}
 import uk.ac.warwick.tabula.system.BindListener
+import uk.ac.warwick.tabula.DateFormats.DatePickerFormatter
 
 import scala.collection.JavaConverters._
 
@@ -25,9 +27,18 @@ abstract class AbstractMeetingRecordCommand {
 		meeting.title = title
 		meeting.description = description
 		meeting.isRealTime match {
-			case true => meeting.meetingDate = meetingDateTime
-			case false => meeting.meetingDate = meetingDate.toDateTimeAtStartOfDay.withHourOfDay(MeetingRecord.DefaultMeetingTimeOfDay)
+
+			case true =>
+				meeting.meetingDate = DateTimePickerFormatter.parseDateTime(meetingDateStr + " " + meetingTimeStr)
+
+			case false =>
+				meeting.meetingDate = meetingDate.toDateTimeAtStartOfDay.withHourOfDay(MeetingRecord.DefaultMeetingTimeOfDay)
+				meeting.meetingEndDate = meetingEndDate.toDateTimeAtStartOfDay.withHourOfDay(MeetingRecord.DefaultMeetingTimeOfDay)
+
 		}
+
+		meeting.meetingLocation = meetingLocation
+
 		meeting.format = format
 		meeting.lastUpdatedDate = DateTime.now
 		persistAttachments(meeting)
@@ -102,22 +113,34 @@ trait MeetingRecordValidation extends SelfValidating {
 
 		rejectIfEmptyOrWhitespace(errors, "format", "NotEmpty")
 
+		rejectIfEmptyOrWhitespace(errors, "meetingTimeStr", "NotEmpty")
+		rejectIfEmptyOrWhitespace(errors, "meetingEndTimeStr", "NotEmpty")
+
 		val dateToCheck: DateTime = isRealTime match {
 			case true => meetingDateTime
 			case false => meetingDate.toDateTimeAtStartOfDay
+			case true => meetingEndDateTime
+			case false => meetingEndDate.toDateTimeAtStartOfDay
+		}
+
+		if(DateTimePickerFormatter.parseDateTime(meetingDateStr + " "+ meetingTimeStr).compareTo(DateTimePickerFormatter.parseDateTime(meetingDateStr + " "+ meetingEndTimeStr)) > -1){
+			errors.rejectValue("meetingTimeStr", "meetingRecord.date.endbeforestart")
 		}
 
 		if (dateToCheck == null) {
-			errors.rejectValue("meetingDate", "meetingRecord.date.missing")
-			errors.rejectValue("meetingDateTime", "meetingRecord.date.missing")
+			errors.rejectValue("meetingDateStr", "meetingRecord.date.missing")
 		} else {
 			if (dateToCheck.isAfter(DateTime.now)) {
-				errors.rejectValue("meetingDate", "meetingRecord.date.future")
-				errors.rejectValue("meetingDateTime", "meetingRecord.date.future")
+				errors.rejectValue("meetingDateStr", "meetingRecord.date.future")
 			} else if (dateToCheck.isBefore(DateTime.now.minusYears(MeetingRecord.MeetingTooOldThresholdYears))) {
-				errors.rejectValue("meetingDate", "meetingRecord.date.prehistoric")
-				errors.rejectValue("meetingDateTime", "meetingRecord.date.prehistoric")
+				errors.rejectValue("meetingDateStr", "meetingRecord.date.prehistoric")
 			}
+		}
+		if(meetingTimeStr.equals("")) {
+			errors.rejectValue("meetingTimeStr", "meetingRecord.starttime.missing")
+		}
+		if(meetingEndTimeStr.equals("")) {
+			errors.rejectValue("meetingEndTimeStr", "meetingRecord.endtime.missing")
 		}
 	}
 }
@@ -131,8 +154,27 @@ trait MeetingRecordCommandState {
 trait MeetingRecordCommandRequest {
 	var title: String = _
 	var description: String = _
-	var meetingDateTime: DateTime = DateTime.now.hourOfDay.roundFloorCopy
+
 	var meetingDate: LocalDate = _
+	var meetingDateStr: String  = _
+	if(meetingDate != null){
+		meetingDateStr = meetingDate.toString(DatePickerFormatter)
+	}
+
+	var meetingTime: DateTime = DateTime.now.hourOfDay.roundFloorCopy
+	var meetingTimeStr: String  = meetingTime.toString(TimePickerFormatter)
+
+	var meetingEndDate: LocalDate = _
+
+	var meetingEndTime: DateTime = DateTime.now.plusHours(1).hourOfDay.roundFloorCopy
+	var meetingEndTimeStr: String  = meetingEndTime.toString(TimePickerFormatter)
+
+	var meetingDateTime: DateTime = DateTime.now.hourOfDay.roundFloorCopy
+	var meetingEndDateTime: DateTime = DateTime.now.plusHours(1).hourOfDay.roundFloorCopy
+
+	var meetingLocation: String = _
+	var meetingLocationId: String = _
+
 	var format: MeetingFormat = _
 	var file: UploadedFile = new UploadedFile
 	var attachedFiles: JList[FileAttachment] = _
