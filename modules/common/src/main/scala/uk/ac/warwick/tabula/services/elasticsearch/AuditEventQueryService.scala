@@ -14,7 +14,7 @@ import uk.ac.warwick.tabula.helpers.DateTimeOrdering._
 import uk.ac.warwick.tabula.helpers.Futures
 import uk.ac.warwick.tabula.helpers.Futures._
 import uk.ac.warwick.tabula.helpers.StringUtils._
-import uk.ac.warwick.tabula.services.UserLookupService.UniversityId
+import uk.ac.warwick.tabula.services.UserLookupService.Usercode
 import uk.ac.warwick.tabula.services.{AuditEventService, AuditEventServiceComponent, UserLookupComponent, UserLookupService}
 import uk.ac.warwick.userlookup.User
 
@@ -79,7 +79,7 @@ trait AuditEventQueryMethods extends AuditEventNoteworthySubmissionsService {
 	/**
 		* A list of audit events for publishing feedback that includes a particular student
 		*/
-	def publishFeedbackForStudent(assignment: Assignment, universityId: UniversityId): Future[Seq[AuditEvent]]
+	def publishFeedbackForStudent(assignment: Assignment, usercode: Usercode): Future[Seq[AuditEvent]]
 }
 
 @Service
@@ -259,7 +259,7 @@ trait AuditEventQueryMethodsImpl extends AuditEventQueryMethods {
 	def latestOnlineFeedbackAdded(assignment: Assignment): Future[Map[User, DateTime]] =
 		parsedEventsOfType("OnlineFeedback", assignmentRangeRestriction(assignment, Option(assignment.createdDate))).map {
 			_.filterNot { _.hadError }
-				.flatMap { event => event.students.map { universityId => userLookup.getUserByWarwickUniId(universityId) -> event.eventDate } }
+				.flatMap { event => event.students.map { usercode => userLookup.getUserByUserId(usercode) -> event.eventDate } }
 		}.map(mapToLatest)
 
 	def latestGenericFeedbackAdded(assignment: Assignment): Future[Option[DateTime]] =
@@ -268,10 +268,10 @@ trait AuditEventQueryMethodsImpl extends AuditEventQueryMethods {
 			case allEvents => Some(allEvents.maxBy { _.eventDate }.eventDate)
 		}
 
-	def publishFeedbackForStudent(assignment: Assignment, universityId: UniversityId): Future[Seq[AuditEvent]] =
+	def publishFeedbackForStudent(assignment: Assignment, usercode: Usercode): Future[Seq[AuditEvent]] =
 		parsedEventsOfType(
 			"PublishFeedback",
-			termQuery("students", universityId),
+			termQuery("students", usercode),
 			afterFeedbackPublishedRestriction(assignment)
 		).map { events =>
 			events.sortBy(_.eventDate).reverse

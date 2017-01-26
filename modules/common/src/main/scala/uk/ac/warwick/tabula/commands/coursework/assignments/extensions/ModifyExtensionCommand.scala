@@ -1,29 +1,31 @@
 package uk.ac.warwick.tabula.commands.coursework.assignments.extensions
 
-import uk.ac.warwick.tabula.commands.{Description, Describable, CommandInternal, SelfValidating}
+import uk.ac.warwick.tabula.commands.{CommandInternal, Describable, Description, SelfValidating}
 import org.springframework.validation.Errors
 import uk.ac.warwick.tabula.services.UserLookupComponent
-import uk.ac.warwick.tabula.data.model.forms.{ExtensionState, Extension}
-import uk.ac.warwick.tabula.{DateFormats, CurrentUser}
-import uk.ac.warwick.tabula.data.model.{FileAttachment, Module, Assignment}
+import uk.ac.warwick.tabula.data.model.forms.{Extension, ExtensionState}
+import uk.ac.warwick.tabula.{CurrentUser, DateFormats}
+import uk.ac.warwick.tabula.data.model.{Assignment, FileAttachment, Module}
 import uk.ac.warwick.tabula.validators.WithinYears
 import org.joda.time.DateTime
 import org.springframework.format.annotation.DateTimeFormat
 import uk.ac.warwick.tabula.data.Daoisms
+import uk.ac.warwick.userlookup.User
 
 
-abstract class ModifyExtensionCommand(val mod: Module, val ass: Assignment, uniId: String, val sub: CurrentUser, val act: String = "")
+abstract class ModifyExtensionCommand(val mod: Module, val ass: Assignment, val stu: User, val sub: CurrentUser, val act: String = "")
 		extends CommandInternal[Extension] with ModifyExtensionCommandState {
 	self: ExtensionPersistenceComponent with UserLookupComponent =>
 
-	universityId = uniId
+	student = stu
 	module = mod
 	assignment = ass
 	submitter = sub
 	action = act
 
 	def copyTo(extension: Extension): Unit = {
-		extension.userId = userLookup.getUserByWarwickUniId(universityId).getUserId
+		extension.usercode = student.getUserId
+		extension._universityId = student.getWarwickId
 		extension.assignment = assignment
 		extension.expiryDate = expiryDate
 		extension.rawState_=(state)
@@ -50,9 +52,8 @@ trait ModifyExtensionCommandValidation extends SelfValidating {
 	self: ModifyExtensionCommandState with UserLookupComponent =>
 	def validate(errors: Errors) {
 
-		val userId = userLookup.getUserByWarwickUniId(universityId).getUserId
-		if(userId == null) {
-			errors.rejectValue("universityId", "extension.universityId.noValidUserId")
+		if(!student.isFoundUser) {
+			errors.rejectValue("student", "extension.universityId.noValidUserId")
 		}
 
 		if(expiryDate == null) {
@@ -70,7 +71,7 @@ trait ModifyExtensionCommandState {
 
 	var isNew: Boolean = _
 
-	var universityId: String =_
+	var student: User =_
 	var assignment: Assignment =_
 	var module: Module =_
 	var submitter: CurrentUser =_
@@ -95,7 +96,8 @@ trait ModifyExtensionCommandDescription extends Describable[Extension] {
 	def describe(d: Description) {
 		d.assignment(assignment)
 		d.module(module)
-		d.studentIds(Seq(universityId))
+		d.studentIds(Option(student.getWarwickId).toSeq)
+		d.studentUsercodes(student.getUserId)
 	}
 }
 

@@ -9,10 +9,7 @@ import uk.ac.warwick.tabula.MockUserLookup
 import uk.ac.warwick.tabula.services.objectstore.ObjectStorageService
 import uk.ac.warwick.userlookup.User
 import uk.ac.warwick.tabula.data.model.{Assignment, FileAttachment, Module}
-import org.springframework.mock.web.MockMultipartFile
 import uk.ac.warwick.tabula.data.FileDao
-import org.springframework.beans.factory.annotation.Autowired
-import uk.ac.warwick.tabula.services.UserLookupService
 import uk.ac.warwick.tabula.Mockito
 
 // scalastyle:off magic.number
@@ -34,11 +31,10 @@ class AddFeedbackCommandTest extends TestBase with Mockito {
 	user.setWarwickId("1010101")
 	userLookup.users += ("student" -> user)
 
-	@Test def duplicateFileNames = withUser("cuscav") {
+	@Test def duplicateFileNames() = withUser("cuscav") {
 		val cmd = new AddFeedbackCommand(module, assignment, currentUser.apparentUser, currentUser)
 		cmd.userLookup = userLookup
 		cmd.fileDao = smartMock[FileDao]
-		cmd.uniNumber = "1010101"
 
 		val file = new UploadedFile
 		val a = new FileAttachment
@@ -53,7 +49,7 @@ class AddFeedbackCommandTest extends TestBase with Mockito {
 		b.objectStorageService = objectStorageService
 		file.attached.add(b)
 
-		val item = new FeedbackItem("1010101")
+		val item = new FeedbackItem("1010101", user)
 		item.file = file
 		cmd.items.add(item)
 

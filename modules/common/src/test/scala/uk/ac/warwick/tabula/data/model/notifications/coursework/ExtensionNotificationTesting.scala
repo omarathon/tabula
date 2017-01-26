@@ -17,6 +17,7 @@ trait ExtensionNotificationTesting { m: Mockito =>
 	def wireUserlookup(n: AutowiringUserLookupComponent, student: User) {
 		n.userLookup = mockUserLookup
 		mockUserLookup.getUserByUserId(student.getUserId) returns student
+		mockUserLookup.getUserByWarwickUniId(any[String]) returns null
 	}
 
 }

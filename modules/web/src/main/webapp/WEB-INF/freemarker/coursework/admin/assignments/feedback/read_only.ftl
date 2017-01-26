@@ -2,7 +2,7 @@
 
 <div class="modal-header">
 	<a class="close" data-dismiss="modal" aria-hidden="true">&times;</a>
-	<h6>Feedback Summary - ${feedback.universityId}</h6>
+	<h6>Feedback Summary - ${feedback.studentIdentifier}</h6>
 </div>
 <div class="modal-body">
 	<div class="form onlineFeedback">

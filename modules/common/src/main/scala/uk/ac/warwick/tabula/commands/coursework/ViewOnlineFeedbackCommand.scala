@@ -29,9 +29,9 @@ trait ViewOnlineFeedbackCommandDescription extends Describable[Feedback] {
 
 	def describe(d: Description): Unit = HibernateHelpers.initialiseAndUnproxy(feedback) match {
 		case assignmentFeedback: AssignmentFeedback =>
-			d.assignment(assignmentFeedback.assignment).properties("student" -> feedback.universityId)
+			d.assignment(assignmentFeedback.assignment).properties("student" -> feedback.studentIdentifier)
 		case examFeedback: ExamFeedback =>
-			d.exam(examFeedback.exam).properties("student" -> feedback.universityId)
+			d.exam(examFeedback.exam).properties("student" -> feedback.studentIdentifier)
 	}
 }
 

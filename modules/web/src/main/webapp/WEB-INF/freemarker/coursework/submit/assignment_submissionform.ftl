@@ -54,12 +54,9 @@
 		</#if>
 		<@f.errors cssClass="error form-errors"></@f.errors>
 
-		<@form.row>
-			<label class="control-label">Your University ID</label>
-			<@form.field>
-				<div class="uneditable-input">${user.apparentUser.warwickId!}</div>
-			</@form.field>
-		</@form.row>
+		<@form.labelled_row "" "Your University ID">
+			<div class="uneditable-input">${user.studentIdentifier}</div>
+		</@form.labelled_row>
 
 		<div class="submission-fields">
 

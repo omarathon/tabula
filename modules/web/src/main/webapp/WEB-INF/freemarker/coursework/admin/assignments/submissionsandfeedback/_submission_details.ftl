@@ -6,8 +6,8 @@
 			${durationFormatter(submission.assignment.closeDate, submission.submittedDate)} after close
 		</#if>
 	<#elseif assignment?has_content && user?has_content>
-		<#local lateness = assignment.workingDaysLateIfSubmittedNow(user.universityId, user.userId) />
-		<@fmt.p lateness "working day" /> overdue, the deadline/extension was ${durationFormatter(assignment.submissionDeadline(user.universityId, user.userId))}
+		<#local lateness = assignment.workingDaysLateIfSubmittedNow(user.userId) />
+		<@fmt.p lateness "working day" /> overdue, the deadline/extension was ${durationFormatter(assignment.submissionDeadline(user.userId))}
 	</#if>
 </#compress></#macro>
 

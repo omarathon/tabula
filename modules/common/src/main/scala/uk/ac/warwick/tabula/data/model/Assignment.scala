@@ -188,7 +188,7 @@ class Assignment
 		*/
 	def feedbackDeadline: Option[LocalDate] = if (openEnded || dissertation) {
 		None
-	} else if (!hasExtensions || !extensions.exists(_.approved) || submissions.exists(s => !extensions.exists(e => e.isForUser(s.universityId, s.userId))) || !doesAllMembersHaveApprovedExtensions) {
+	} else if (!hasExtensions || !extensions.exists(_.approved) || submissions.exists(s => !extensions.exists(e => e.isForUser(s.usercode))) || !doesAllMembersHaveApprovedExtensions) {
 		Option(workingDaysHelper.datePlusWorkingDays(closeDate.toLocalDate, Feedback.PublishDeadlineInWorkingDays))
 	} else if (extensions.exists(_.feedbackDeadline.isDefined)) {
 		Option(extensions.filter(_.approved).flatMap(_.feedbackDeadline).map(_.toLocalDate).min)
@@ -199,12 +199,12 @@ class Assignment
 
 	private def doesAllMembersHaveApprovedExtensions: Boolean =
 		assessmentMembershipService.determineMembershipUsers(upstreamAssessmentGroups, Option(members))
-			.forall(user => extensions.exists(e => e.approved && e.isForUser(user.getWarwickId, user.getUserId)))
+			.forall(user => extensions.exists(e => e.approved && e.isForUser(user)))
 
 
 	def feedbackDeadlineForSubmission(submission: Submission): Option[LocalDate] = feedbackDeadline.flatMap { wholeAssignmentDeadline =>
 		// If we have an extension, use the extension's expiry date
-		val extension = extensions.asScala.find { e => e.isForUser(submission.universityId, submission.userId) && e.approved }
+		val extension = extensions.asScala.find { e => e.isForUser(submission.usercode) && e.approved }
 
 		val baseFeedbackDeadline =
 			extension.flatMap(_.feedbackDeadline).map(_.toLocalDate).getOrElse(wholeAssignmentDeadline)
@@ -237,7 +237,7 @@ class Assignment
 		submissionService.getSubmissionsByAssignment(this)
 			.exists { submission =>
 				submission.feedbackDeadline.nonEmpty &&
-					!feedbackService.getAssignmentFeedbackByUniId(this, submission.universityId).exists(_.released)
+					!feedbackService.getAssignmentFeedbackByUsercode(this, submission.usercode).exists(_.released)
 			}
 
 	// sort order is unpredictable on retrieval from Hibernate; use indexed defs below for access
@@ -352,33 +352,32 @@ class Assignment
 	/**
 	 * True if the specified user has been granted an extension and that extension has not expired on the specified date
 	 */
-	def isWithinExtension(user: User, time: DateTime): Boolean = isWithinExtension(user.getWarwickId, user.getUserId, time)
+	def isWithinExtension(user: User, time: DateTime): Boolean = isWithinExtension(user.getUserId, time)
 
-	def isWithinExtension(universityId: String, usercode: String, time: DateTime): Boolean =
-		extensions.exists(e => e.isForUser(universityId, usercode) && e.approved && e.expiryDate.exists(_.isAfter(time)))
+	def isWithinExtension(usercode: String, time: DateTime): Boolean =
+		extensions.exists(e => e.isForUser(usercode) && e.approved && e.expiryDate.exists(_.isAfter(time)))
 
 	/**
 	 * True if the specified user has been granted an extension and that extension has not expired now
 	 */
 	def isWithinExtension(user: User): Boolean = isWithinExtension(user, new DateTime)
 
-	def isWithinExtension(universityId: String, usercode: String): Boolean = isWithinExtension(universityId, usercode, new DateTime)
+	def isWithinExtension(usercode: String): Boolean = isWithinExtension(usercode, new DateTime)
 
 	/**
 	 * retrospectively checks if a submission was late. called by submission.isLate to check against extensions
 	 */
 	def isLate(submission: Submission): Boolean =
-		!openEnded && closeDate.isBefore(submission.submittedDate) && !isWithinExtension(submission.universityId, submission.userId, submission.submittedDate)
+		!openEnded && closeDate.isBefore(submission.submittedDate) && !isWithinExtension(submission.usercode, submission.submittedDate)
 
-	def lateSubmissionCount: Int =
-		submissions.filter { submission => isLate(submission) }.size
+	def lateSubmissionCount: Int = submissions.count(submission => isLate(submission))
 
-	def submissionDeadline(user: User): DateTime = submissionDeadline(user.getWarwickId, user.getUserId)
+	def submissionDeadline(user: User): DateTime = submissionDeadline(user.getUserId)
 
-	def submissionDeadline(universityId: String, usercode: String): DateTime =
+	def submissionDeadline(usercode: String): DateTime =
 		if (openEnded) null
 		else
-			extensions.find(e => e.isForUser(universityId, usercode) && e.approved).flatMap(_.expiryDate).getOrElse(closeDate)
+			extensions.find(e => e.isForUser(usercode) && e.approved).flatMap(_.expiryDate).getOrElse(closeDate)
 
 	/**
 	 * Deadline taking into account any approved extension
@@ -386,7 +385,7 @@ class Assignment
 	def submissionDeadline(submission: Submission): DateTime =
 		if (openEnded) null
 		else extensions
-			.find(e => e.isForUser(submission.universityId, submission.userId) && e.approved)
+			.find(e => e.isForUser(submission.usercode) && e.approved)
 			.flatMap(_.expiryDate)
 			.getOrElse(closeDate)
 
@@ -405,8 +404,8 @@ class Assignment
 			else daysLate
 		} else 0
 
-	def workingDaysLateIfSubmittedNow(universityId: String, usercode: String): Int = {
-		val deadline = submissionDeadline(universityId, usercode)
+	def workingDaysLateIfSubmittedNow(usercode: String): Int = {
+		val deadline = submissionDeadline(usercode)
 
 		val offset =
 			if (deadline.toLocalTime.isAfter(DateTime.now.toLocalTime)) -1
@@ -424,10 +423,10 @@ class Assignment
 	 * called by submission.isAuthorisedLate to check against extensions
 	 */
 	def isAuthorisedLate(submission: Submission): Boolean =
-		!openEnded && closeDate.isBefore(submission.submittedDate) && isWithinExtension(submission.universityId, submission.userId, submission.submittedDate)
+		!openEnded && closeDate.isBefore(submission.submittedDate) && isWithinExtension(submission.usercode, submission.submittedDate)
 
 	// returns extension for a specified student
-	def findExtension(uniId: String): Option[Extension] = extensions.find(_.universityId == uniId)
+	def findExtension(usercode: String): Option[Extension] = extensions.find(_.usercode == usercode)
 
 	/**
 	 * Whether the assignment is not archived or deleted.
@@ -555,7 +554,7 @@ class Assignment
 	}
 
 	// returns the submission for a specified student
-	def findSubmission(uniId: String): Option[Submission] = submissions.find(_.universityId == uniId)
+	def findSubmission(usercode: String): Option[Submission] = submissions.find(_.usercode == usercode)
 
 	// Help views decide whether to show a publish button.
 	def canPublishFeedback: Boolean =
@@ -566,8 +565,8 @@ class Assignment
 	def canSubmit(user: User): Boolean = { user.isFoundUser && (
 		if (restrictSubmissions) {
 			// users can always submit to assignments if they have a submission or piece of feedback
-			submissions.asScala.exists(_.universityId == user.getWarwickId) ||
-				fullFeedback.exists(_.universityId == user.getWarwickId) ||
+			submissions.asScala.exists(_.usercode == user.getUserId) ||
+				fullFeedback.exists(_.usercode == user.getUserId) ||
 				assessmentMembershipService.isStudentMember(user, upstreamAssessmentGroups, Option(members))
 		} else {
 			true
@@ -578,28 +577,28 @@ class Assignment
 
 	def newExtensionsCanBeRequested: Boolean = extensionsPossible && (!isClosed || allowExtensionsAfterCloseDate)
 
-	def getMarkerFeedback(uniId: String, user: User, feedbackPosition: FeedbackPosition): Option[MarkerFeedback] = {
-		val parentFeedback = feedbacks.find(_.universityId == uniId)
+	def getMarkerFeedback(usercode: String, user: User, feedbackPosition: FeedbackPosition): Option[MarkerFeedback] = {
+		val parentFeedback = feedbacks.find(_.usercode == usercode)
 		parentFeedback.flatMap {
-			f => getMarkerFeedbackForPositionInFeedback(uniId, user, feedbackPosition, f)
+			f => getMarkerFeedbackForPositionInFeedback(user, feedbackPosition, f)
 		}
 	}
 
-	def getMarkerFeedbackForCurrentPosition(uniId: String, user: User): Option[MarkerFeedback] = for {
-		feedback <- feedbacks.find(_.universityId == uniId)
+	def getMarkerFeedbackForCurrentPosition(usercode: String, user: User): Option[MarkerFeedback] = for {
+		feedback <- feedbacks.find(_.usercode == usercode)
 		position <- feedback.getCurrentWorkflowFeedbackPosition
-		markerFeedback <- getMarkerFeedbackForPositionInFeedback(uniId, user, position, feedback)
+		markerFeedback <- getMarkerFeedbackForPositionInFeedback(user, position, feedback)
 	} yield markerFeedback
 
-	def getLatestCompletedMarkerFeedback(uniId: String, user: User): Option[MarkerFeedback] = {
-		val parentFeedback = feedbacks.find(_.universityId == uniId)
+	def getLatestCompletedMarkerFeedback(usercode: String, user: User): Option[MarkerFeedback] = {
+		val parentFeedback = feedbacks.find(_.usercode == usercode)
 		parentFeedback.flatMap {
 			f => getUpToThirdFeedbacks(user, f).find(_.state == MarkingState.MarkingCompleted)
 		}
 	}
 
-	def getAllMarkerFeedbacks(uniId: String, user: User): Seq[MarkerFeedback] = {
-		feedbacks.find(_.universityId == uniId).fold(Seq[MarkerFeedback]())(feedback =>
+	def getAllMarkerFeedbacks(usercode: String, user: User): Seq[MarkerFeedback] = {
+		feedbacks.find(_.usercode == usercode).fold(Seq[MarkerFeedback]())(feedback =>
 			feedback.getCurrentWorkflowFeedbackPosition match {
 				case None => getUpToThirdFeedbacks(user, feedback)
 				case Some(ThirdFeedback) => getUpToThirdFeedbacks(user, feedback)
@@ -609,7 +608,7 @@ class Assignment
 	}
 
 	private def getUpToThirdFeedbacks(user: User, feedback: Feedback): Seq[MarkerFeedback] = {
-		if (this.markingWorkflow.hasThirdMarker && this.markingWorkflow.getStudentsThirdMarker(this, feedback.universityId).contains(user.getUserId)) {
+		if (this.markingWorkflow.hasThirdMarker && this.markingWorkflow.getStudentsThirdMarker(this, feedback.usercode).contains(user.getUserId)) {
 			Seq(feedback.getThirdMarkerFeedback, feedback.getSecondMarkerFeedback, feedback.getFirstMarkerFeedback).flatten
 		} else {
 			getUpToSecondFeedbacks(user, feedback)
@@ -617,7 +616,7 @@ class Assignment
 	}
 
 	private def getUpToSecondFeedbacks(user: User, feedback: Feedback): Seq[MarkerFeedback] = {
-		if (this.markingWorkflow.hasSecondMarker && this.markingWorkflow.getStudentsSecondMarker(this, feedback.universityId).contains(user.getUserId)) {
+		if (this.markingWorkflow.hasSecondMarker && this.markingWorkflow.getStudentsSecondMarker(this, feedback.usercode).contains(user.getUserId)) {
 			Seq(feedback.getSecondMarkerFeedback, feedback.getFirstMarkerFeedback).flatten
 		} else {
 			getUpToFirstFeedbacks(user, feedback)
@@ -625,14 +624,14 @@ class Assignment
 	}
 
 	private def getUpToFirstFeedbacks(user: User, feedback: Feedback): Seq[MarkerFeedback] = {
-		if (this.markingWorkflow.getStudentsFirstMarker(this, feedback.universityId).contains(user.getUserId)) {
+		if (this.markingWorkflow.getStudentsFirstMarker(this, feedback.usercode).contains(user.getUserId)) {
 			Seq(feedback.getFirstMarkerFeedback).flatten
 		} else {
 			Seq()
 		}
 	}
 
-	private def getMarkerFeedbackForPositionInFeedback(uniId: String, user: User, feedbackPosition: FeedbackPosition, feedback: Feedback): Option[MarkerFeedback] = {
+	private def getMarkerFeedbackForPositionInFeedback(user: User, feedbackPosition: FeedbackPosition, feedback: Feedback): Option[MarkerFeedback] = {
 		feedbackPosition match {
 			case FirstFeedback =>
 				if (this.isFirstMarker(user))
@@ -656,27 +655,27 @@ class Assignment
 	 * Optionally returns the first marker for the given student ID
 	 * Returns none if this assignment doesn't have a valid marking workflow attached
 	 */
-	def getStudentsFirstMarker(universityId: String): Option[User] =
+	def getStudentsFirstMarker(usercode: String): Option[User] =
 		Option(markingWorkflow)
-			.flatMap(_.getStudentsFirstMarker(this, universityId))
+			.flatMap(_.getStudentsFirstMarker(this, usercode))
 			.map(id => userLookup.getUserByUserId(id))
 
 	/**
 	 * Optionally returns the second marker for the given student ID
 	 * Returns none if this assignment doesn't have a valid marking workflow attached
 	 */
-	def getStudentsSecondMarker(universityId: String): Option[User] =
+	def getStudentsSecondMarker(usercode: String): Option[User] =
 		Option(markingWorkflow)
-			.flatMap(_.getStudentsSecondMarker(this, universityId))
+			.flatMap(_.getStudentsSecondMarker(this, usercode))
 			.map(id => userLookup.getUserByUserId(id))
 
 	/**
 		* Optionally returns the second marker for the given student ID
 		* Returns none if this assignment doesn't have a valid marking workflow attached
 		*/
-	def getStudentsThirdMarker(universityId: String): Option[User] =
+	def getStudentsThirdMarker(usercode: String): Option[User] =
 		Option(markingWorkflow)
-			.flatMap(_.getStudentsThirdMarker(this, universityId))
+			.flatMap(_.getStudentsThirdMarker(this, usercode))
 			.map(id => userLookup.getUserByUserId(id))
 
 	/**
@@ -717,9 +716,9 @@ class Assignment
 		"closeDate" -> closeDate,
 		"module" -> module)
 
-	def getUniIdsWithSubmissionOrFeedback: Set[String] = {
-			val submissionIds = submissions.asScala.map { _.universityId }.toSet
-			val feedbackIds = fullFeedback.map { _.universityId }.toSet
+	def getUsercodesWithSubmissionOrFeedback: Set[String] = {
+			val submissionIds = submissions.asScala.map { _.usercode }.toSet
+			val feedbackIds = fullFeedback.map { _.usercode }.toSet
 
 			submissionIds ++ feedbackIds
 	}
@@ -732,7 +731,7 @@ class Assignment
 		if (openEnded || dissertation || !collectSubmissions || _archived) {
 			false
 		} else {
-			submissions.asScala.exists(s => !fullFeedback.exists(f => f.universityId == s.universityId && f.checkedReleased))
+			submissions.asScala.exists(s => !fullFeedback.exists(f => f.usercode == s.usercode && f.checkedReleased))
 		}
 	}
 
@@ -740,15 +739,15 @@ class Assignment
 		if (openEnded || dissertation || !collectSubmissions || _archived) {
 			false
 		} else {
-			submissions.asScala.exists(s => !findExtension(s.universityId).exists(_.approved) && !fullFeedback.exists(f => f.universityId == s.universityId && f.checkedReleased))
+			submissions.asScala.exists(s => !findExtension(s.usercode).exists(_.approved) && !fullFeedback.exists(f => f.usercode == s.usercode && f.checkedReleased))
 		}
 	}
 
-	def needsFeedbackPublishingFor(universityId: String): Boolean = {
+	def needsFeedbackPublishingFor(usercode: String): Boolean = {
 		if (openEnded || dissertation || !collectSubmissions || _archived) {
 			false
 		} else {
-			submissions.asScala.find { _.universityId == universityId }.exists(s => !fullFeedback.exists(f => f.universityId == s.universityId && f.checkedReleased))
+			submissions.asScala.find { _.usercode == usercode }.exists(s => !fullFeedback.exists(f => f.usercode == s.usercode && f.checkedReleased))
 		}
 	}
 
@@ -770,7 +769,7 @@ class Assignment
 
 	def enhance(user: User): EnhancedAssignment = {
 		val extension = extensions.asScala.find(e => e.isForUser(user))
-		val submission = submissions.asScala.find(_.universityId == user.getWarwickId)
+		val submission = submissions.asScala.find(_.usercode == user.getUserId)
 		val feedbackDeadline = submission.flatMap(feedbackDeadlineForSubmission)
 		val feedbackDeadlineWorkingDaysAway = feedbackDeadline.map(workingDaysAway)
 		EnhancedAssignment(
@@ -779,7 +778,7 @@ class Assignment
 			submissionDeadline = Option(submissionDeadline(user)),
 			submission = submission,
 			feedbackDeadlineWorkingDaysAway = feedbackDeadlineWorkingDaysAway,
-			feedback = feedbacks.asScala.filter(_.released).find(_.universityId == user.getWarwickId),
+			feedback = feedbacks.asScala.filter(_.released).find(_.usercode == user.getUserId),
 			extension = extension,
 			withinExtension = isWithinExtension(user),
 			extensionRequested = extension.isDefined && !extension.get.isManual
@@ -794,21 +793,22 @@ case class SubmissionsReport(assignment: Assignment) {
 	private def feedbacks = assignment.fullFeedback
 	private def submissions = assignment.submissions
 
-	// Get sets of University IDs
-	private val feedbackUniIds = feedbacks.map(toUniId).toSet
-	private val submissionUniIds = submissions.map(toUniId).toSet
+	private val feedbackUsercodes = feedbacks.map(_.usercode).toSet
+	private val submissionUsercodes = submissions.map(_.usercode).toSet
 
 	// Subtract the sets from each other to obtain discrepancies
-	val feedbackOnly: Set[String] = feedbackUniIds &~ submissionUniIds
-	val submissionOnly: Set[String] = submissionUniIds &~ feedbackUniIds
+	val feedbackOnly: Set[String] = feedbackUsercodes &~ submissionUsercodes
+	val submissionOnly: Set[String] = submissionUsercodes &~ feedbackUsercodes
 
 	/**
 	 * We want to show a warning if some feedback items are missing either marks or attachments
 	 * If however, all feedback items have only marks or attachments then we don't send a warning.
 	 */
-	val withoutAttachments: Set[String] = feedbacks.filter(f => !f.hasAttachments && !f.comments.exists(_.hasText)).map(toUniId).toSet
-	val withoutMarks: Set[String] = feedbacks.filter(!_.hasMarkOrGrade).map(toUniId).toSet
-	val plagiarised: Set[String] = submissions.filter(_.suspectPlagiarised).map(toUniId).toSet
+	val withoutAttachments: Set[String] = feedbacks
+		.filter(f => !f.hasAttachments && !f.comments.exists(_.hasText))
+		.map(_.usercode).toSet
+	val withoutMarks: Set[String] = feedbacks.filter(!_.hasMarkOrGrade).map(_.usercode).toSet
+	val plagiarised: Set[String] = submissions.filter(_.suspectPlagiarised).map(_.usercode).toSet
 
 	def hasProblems: Boolean = {
 		val shouldBeEmpty = Set(feedbackOnly, submissionOnly, plagiarised)
@@ -821,12 +821,6 @@ case class SubmissionsReport(assignment: Assignment) {
 		    problems
 		}
 	}
-
-	// To make map() calls neater
-    private def toUniId(f: Feedback) = f.universityId
-    private def toUniId(s: Submission) = s.universityId
-
-
 }
 
 /**

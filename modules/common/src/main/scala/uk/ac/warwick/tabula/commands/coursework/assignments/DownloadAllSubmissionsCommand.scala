@@ -24,7 +24,8 @@ class DownloadAllSubmissionsCommand(
 
 	override def describe(d: Description): Unit = d
 		.assignment(assignment)
-		.studentIds(assignment.submissions.map(_.universityId))
+		.studentIds(assignment.submissions.flatMap(_.universityId))
+		.studentUsercodes(assignment.submissions.map(_.usercode))
 		.properties(
 			"submissionCount" -> Option(assignment.submissions).map(_.size).getOrElse(0))
 

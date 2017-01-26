@@ -208,6 +208,9 @@ Generates the bulk of the picker HTML, inside a fieldset element
 								<#if item.universityId??>
 									${item.universityId}
 									<@pl.profile_link item.universityId />
+								<#elseif item.userID??>
+									${item.userID}
+									<@pl.profile_link item.userID />
 								<#else>
 									<span class="muted">Unknown</span>
 								</#if>

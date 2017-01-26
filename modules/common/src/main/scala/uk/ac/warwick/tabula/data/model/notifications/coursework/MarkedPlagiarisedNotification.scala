@@ -17,7 +17,7 @@ class MarkedPlagiarisedNotification extends NotificationWithTarget[Submission, A
 	def assignment: Assignment = target.entity
 	def module: Module = assignment.module
 	def moduleCode: String = module.code.toUpperCase
-	def student: User = userLookup.getUserByWarwickUniId(submission.universityId)
+	def student: User = userLookup.getUserByUserId(submission.usercode)
 
 	priority = Warning
 
@@ -32,7 +32,7 @@ class MarkedPlagiarisedNotification extends NotificationWithTarget[Submission, A
 
 	def urlTitle = "view the submissions for this assignment"
 
-	def title: String = "%s: A submission by %s for \"%s\" is suspected of plagiarism".format(moduleCode, submission.universityId, assignment.name)
+	def title: String = "%s: A submission by %s for \"%s\" is suspected of plagiarism".format(moduleCode, submission.studentIdentifier, assignment.name)
 
 	def verb = "Mark plagiarised"
 

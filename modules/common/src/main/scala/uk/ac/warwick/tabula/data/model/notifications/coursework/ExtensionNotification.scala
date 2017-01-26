@@ -12,7 +12,7 @@ abstract class ExtensionNotification extends NotificationWithTarget[Extension, A
 
 	def extension: Extension = item.entity
 	def assignment: Assignment = target.entity
-	def student: User = userLookup.getUserByUserId(extension.userId)
+	def student: User = userLookup.getUserByUserId(extension.usercode)
 
 	def titlePrefix: String = target.entity.module.code.toUpperCase + ": "
 }

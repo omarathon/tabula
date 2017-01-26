@@ -35,7 +35,7 @@
 			</#if>
 			<div class="hidden released-feedback-list">
 				<ul><#list releasedFeedback as markerFeedback>
-					<li>${markerFeedback.feedback.universityId}</li>
+					<li>${markerFeedback.feedback.studentIdentifier}</li>
 				</#list></ul>
 			</div>
 			<script>
@@ -55,7 +55,7 @@
 		<#assign cantDo><#if isUserALaterMarker>change this before these submissions are marked by others<#else>add a mark to these submissions later</#if></#assign>
 		<#assign count><#if (noMarks?size > 1)>	${noMarks?size} submissions do<#else>One submission does</#if></#assign>
 		<#assign noMarksIds>
-			<ul><#list noMarks as markerFeedback><li>${markerFeedback.feedback.universityId}</li></#list></ul>
+			<ul><#list noMarks as markerFeedback><li>${markerFeedback.feedback.studentIdentifier}</li></#list></ul>
 		</#assign>
 		<div class="alert">
 			${count} not have a mark. You will not be able to ${cantDo}.
@@ -77,7 +77,7 @@
 		</#assign>
 		<#assign count><#if (noFeedback?size > 1)>${noFeedback?size} submissions do<#else>One submission does</#if></#assign>
 		<#assign noFilesIds>
-		<ul><#list noFeedback as markerFeedback><li>${markerFeedback.feedback.universityId}</li></#list></ul>
+		<ul><#list noFeedback as markerFeedback><li>${markerFeedback.feedback.studentIdentifier}</li></#list></ul>
 		</#assign>
 		<div class="alert">
 			${count} not have any feedback files attached. ${cantDo}.

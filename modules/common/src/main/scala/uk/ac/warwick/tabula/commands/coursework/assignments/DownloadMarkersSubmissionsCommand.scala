@@ -40,7 +40,7 @@ class DownloadMarkersSubmissionsCommand(val module: Module, val assignment: Assi
 
 		// do not download submissions where the marker has completed marking
 		val filteredSubmissions = submissions.filter{ submission =>
-			val markerFeedback = assignment.getMarkerFeedbackForCurrentPosition(submission.universityId, marker)
+			val markerFeedback = assignment.getMarkerFeedbackForCurrentPosition(submission.usercode, marker)
 			markerFeedback.exists(mf => mf.state != MarkingCompleted)
 		}
 
@@ -60,7 +60,8 @@ trait DownloadMarkersSubmissionsDescription extends Describable[RenderableFile] 
 
 		d.assignment(assignment)
 			.submissions(downloads)
-			.studentIds(downloads.map(_.universityId))
+			.studentIds(downloads.flatMap(_.universityId))
+			.studentUsercodes(downloads.map(_.usercode))
 			.properties("submissionCount" -> downloads.size)
 	}
 

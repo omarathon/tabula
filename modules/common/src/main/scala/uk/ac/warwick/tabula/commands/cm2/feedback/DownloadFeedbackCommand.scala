@@ -8,22 +8,17 @@ import uk.ac.warwick.tabula.helpers.StringUtils.StringToSuperString
 import uk.ac.warwick.tabula.permissions._
 import uk.ac.warwick.tabula.services.ZipService
 import uk.ac.warwick.tabula.services.fileserver._
+import uk.ac.warwick.userlookup.User
 
 import scala.collection.JavaConversions.asScalaBuffer
 
-class DownloadFeedbackCommand(val module: Module, val assignment: Assignment, val feedback: Feedback, val student: Option[Member])
+class DownloadFeedbackCommand(val module: Module, val assignment: Assignment, val feedback: Feedback)
 	extends Command[Option[RenderableFile]] with ReadOnly {
 
 	notDeleted(assignment)
 	mustBeLinked(assignment, module)
 
-	student match {
-		case Some(student: StudentMember) => PermissionCheckAny(
-			Seq(CheckablePermission(Permissions.AssignmentFeedback.Read, feedback),
-				CheckablePermission(Permissions.AssignmentFeedback.Read, student))
-		)
-		case _ => PermissionCheck(Permissions.AssignmentFeedback.Read, feedback)
-	}
+	PermissionCheck(Permissions.AssignmentFeedback.Read, feedback)
 
 	var zip: ZipService = Wire.auto[ZipService]
 	var feedbackDao: FeedbackDao = Wire.auto[FeedbackDao]
@@ -40,13 +35,8 @@ class DownloadFeedbackCommand(val module: Module, val assignment: Assignment, va
 		filename match {
 			case filename: String if filename.hasText =>
 				feedback.attachments.find(_.name == filename).map(new RenderableAttachment(_))
-			case _ => Some(zipped(feedback))
+			case _ => Some(zip.getFeedbackZip(feedback))
 		}
-	}
-
-	private def zipped(feedback: Feedback) = student match {
-		case Some(student: StudentMember) => zip.getFeedbackZipForStudent(feedback)
-		case _ => zip.getFeedbackZip(feedback)
 	}
 
 	override def describe(d: Description): Unit = {

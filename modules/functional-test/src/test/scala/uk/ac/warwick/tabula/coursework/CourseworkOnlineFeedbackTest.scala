@@ -122,7 +122,7 @@ class CourseworkOnlineFeedbackTest extends BrowserTest with CourseworkFixtures w
 				}
 				And("I can download the results as a PDF")
 
-				val pdfDownload = Download(Path(s"/coursework/module/${moduleCode.toLowerCase}/$assignmentId/${P.Student1.warwickId}/feedback.pdf")).as(P.Student1)
+				val pdfDownload = Download(Path(s"/coursework/module/${moduleCode.toLowerCase}/$assignmentId/${P.Student1.usercode}/feedback.pdf")).as(P.Student1)
 				pdfDownload should be ('successful)
 				pdfDownload.contentAsString should include("PDF")
 

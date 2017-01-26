@@ -2,7 +2,11 @@ This message confirms that you made a submission for the assignment '${assignmen
 
 - Submission date: ${submissionDate}
 - Submission ID: ${submission.id}
-- University ID: ${user.warwickId!}
+<#if user.warwickId??>
+- University ID: ${user.warwickId}
+<#else>
+- User ID: ${user.userId}
+</#if>
 <#if submission.allAttachments??>
 
 Uploaded attachments:

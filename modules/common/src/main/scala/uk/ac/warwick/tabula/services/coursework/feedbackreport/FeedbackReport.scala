@@ -151,7 +151,7 @@ class FeedbackReport(department: Department, startDate: DateTime, endDate: DateT
 		for ((moduleCode, assignmentInfoList) <- sortedModules) {
 			val row = sheet.createRow(sheet.getLastRowNum + 1)
 
-			addStringCell(assignmentInfoList(0).moduleName, row)
+			addStringCell(assignmentInfoList.head.moduleName, row)
 			addStringCell(moduleCode.toUpperCase, row)
 			addNumericCell(assignmentInfoList.groupBy(_.assignment.name).size, row)
 
@@ -193,12 +193,12 @@ class FeedbackReport(department: Department, startDate: DateTime, endDate: DateT
 
 		val times: Seq[FeedbackCount] = for {
 			submission <- submissions
-			feedback <- feedbackService.getAssignmentFeedbackByUniId(assignment, submission.universityId)
+			feedback <- feedbackService.getAssignmentFeedbackByUsercode(assignment, submission.usercode)
 			if feedback.released
 			publishEventDate <- Option(feedback.releasedDate).orElse {
 				try {
 					Await.result(
-						auditEventQueryMethods.publishFeedbackForStudent(assignment, feedback.universityId),
+						auditEventQueryMethods.publishFeedbackForStudent(assignment, feedback.usercode),
 						5.seconds
 					).headOption.map { _.eventDate }
 				} catch { case timeout: TimeoutException => None }
@@ -258,7 +258,7 @@ object FeedbackReport {
 	)
 
 	case class SubmissionlessFeedbackReportGenerator(assignment: Assignment, user: User) extends FeedbackReportGenerator {
-		val universityId: String = user.getWarwickId
+		val usercode: String = user.getUserId
 		val feedbackDeadline: Option[LocalDate] = assignment.feedbackDeadline
 	}
 

@@ -22,7 +22,7 @@ object Routes {
 	def home: String = context + "/"
 
 	object assignment {
-		def apply(assignment: Assignment): String = context + "/submission/%s/" format encoded(assignment.id)
+		def apply(assignment: Assignment): String = context + s"/submission/${encoded(assignment.id)}/"
 	}
 
 	object admin {
@@ -36,9 +36,9 @@ object Routes {
 
 		object assignment {
 			object audit {
-				def apply(assignment: Assignment): String = admin() + "/audit/assignment/%s" format (encoded(assignment.id))
+				def apply(assignment: Assignment): String = admin() + s"/audit/assignment/${encoded(assignment.id)}"
 			}
-			def extensions(assignment: Assignment): String = admin() + "/assignments/%s/manage/extensions" format (encoded(assignment.id))
+			def extensions(assignment: Assignment): String = admin() + s"/assignments/${encoded(assignment.id)}/manage/extensions"
 		}
 	}
 }

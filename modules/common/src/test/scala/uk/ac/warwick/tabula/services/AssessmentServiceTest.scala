@@ -176,7 +176,8 @@ class AssessmentServiceTest extends PersistenceTestBase with Mockito {
 		assignment.foreach { assmt =>
 			// create a feedback for the assignment, not yet released
 			val feedback = new AssignmentFeedback
-			feedback.universityId = "0070790"
+			feedback._universityId = "0070790"
+			feedback.usercode = "abcdef"
 			feedback.actualMark = Some(41)
 			feedback.released = false
 			assmt.addFeedback(feedback)
@@ -185,8 +186,8 @@ class AssessmentServiceTest extends PersistenceTestBase with Mockito {
 			// create a submission for the assignment, not plagiarised
 			val submission = new Submission
 
-			submission.universityId = "0070790"
-			submission.userId = "abcdef"
+			submission._universityId = "0070790"
+			submission.usercode = "abcdef"
 			submission.plagiarismInvestigation = PlagiarismInvestigation.SuspectPlagiarised
 			assmt.addSubmission(submission)
 			submissionService.saveSubmission(submission)
@@ -260,21 +261,25 @@ class AssessmentServiceTest extends PersistenceTestBase with Mockito {
 		val ThisUser = 	"1234567"
 		val OtherUser = "1234568"
 
-		val thisStudent = Fixtures.student("1234567")
+		val thisStudent = Fixtures.student("1234567", "1234567")
 
 		val myFeedback = new AssignmentFeedback
-		myFeedback.universityId = ThisUser
+		myFeedback._universityId = ThisUser
+		myFeedback.usercode = ThisUser
 		myFeedback.released = true
 
 		val otherFeedback = new AssignmentFeedback
-		otherFeedback.universityId = OtherUser
+		otherFeedback._universityId = OtherUser
+		otherFeedback.usercode = OtherUser
 		otherFeedback.released = true
 
 		val unreleasedFeedback = new AssignmentFeedback
-		unreleasedFeedback.universityId = ThisUser
+		unreleasedFeedback._universityId = ThisUser
+		unreleasedFeedback.usercode = ThisUser
 
 		val deletedFeedback = new AssignmentFeedback
-		deletedFeedback.universityId = ThisUser
+		deletedFeedback._universityId = ThisUser
+		deletedFeedback.usercode = ThisUser
 		deletedFeedback.released = true
 
 		val assignment1 = new Assignment
@@ -313,19 +318,19 @@ class AssessmentServiceTest extends PersistenceTestBase with Mockito {
 		val ThisUser = 	"1234567"
 		val OtherUser = "1234568"
 
-		val thisStudent = Fixtures.student("1234567")
+		val thisStudent = Fixtures.student("1234567", "1234567")
 
 		val mySubmission = new Submission
-		mySubmission.universityId = ThisUser
-		mySubmission.userId = "not-used"
+		mySubmission._universityId = ThisUser
+		mySubmission.usercode = ThisUser
 
 		val otherSubmission = new Submission
-		otherSubmission.universityId = OtherUser
-		otherSubmission.userId = "not-used"
+		otherSubmission._universityId = OtherUser
+		otherSubmission.usercode = OtherUser
 
 		val deletedSubmission = new Submission
-		deletedSubmission.universityId = ThisUser
-		deletedSubmission.userId = "not-used"
+		deletedSubmission._universityId = ThisUser
+		deletedSubmission.usercode = ThisUser
 
 		val assignment1 = new Assignment
 		val assignment2 = new Assignment
@@ -556,8 +561,8 @@ class AssessmentServiceTest extends PersistenceTestBase with Mockito {
 		assignmentService.save(assignment)
 
 		val submission = new Submission
-		submission.universityId = "0070790"
-		submission.userId = "abcdef"
+		submission._universityId = "0070790"
+		submission.usercode = "abcdef"
 		submission.plagiarismInvestigation = SuspectPlagiarised
 		assignment.addSubmission(submission)
 		submissionService.saveSubmission(submission)
@@ -568,15 +573,15 @@ class AssessmentServiceTest extends PersistenceTestBase with Mockito {
 		submissionService.getSubmission(submission.id) should be ('defined)
 		submissionService.getSubmission(submission.id).eq(Some(submission)) should be (false)
 
-		submissionService.getSubmissionByUniId(assignment, "0070790") should be ('defined)
-		submissionService.getSubmissionByUniId(assignment, "0070790").eq(Some(submission)) should be (false)
+		submissionService.getSubmissionByUsercode(assignment, "abcdef") should be ('defined)
+		submissionService.getSubmissionByUsercode(assignment, "abcdef").eq(Some(submission)) should be (false)
 
-		submissionService.getSubmissionByUniId(assignment, "0070790") foreach { submissionService.delete }
+		submissionService.getSubmissionByUsercode(assignment, "abcdef") foreach { submissionService.delete }
 
 		session.flush()
 		session.clear()
 
-		submissionService.getSubmissionByUniId(assignment, "0070790") should be ('empty)
+		submissionService.getSubmissionByUsercode(assignment, "abcdef") should be ('empty)
 	}
 
 	@Test def extensions() = transactional { tx =>
@@ -588,8 +593,8 @@ class AssessmentServiceTest extends PersistenceTestBase with Mockito {
 		assignmentService.save(assignment)
 
 		val extension = new Extension
-		extension.universityId = "0070790"
-		extension.userId = "abcdef"
+		extension._universityId = "0070790"
+		extension.usercode = "abcdef"
 		extension.assignment = assignment
 		assignment.extensions.add(extension)
 		session.saveOrUpdate(extension)
@@ -885,18 +890,18 @@ class AssessmentServiceTest extends PersistenceTestBase with Mockito {
 		assignmentNoSubmission.closeDate = startDate.plusDays(1)
 
 		val submissionBefore = new Submission
-		submissionBefore.universityId = universityId
-		submissionBefore.userId = universityId
+		submissionBefore._universityId = universityId
+		submissionBefore.usercode = universityId
 		submissionBefore.assignment = assignmentBefore
 		assignmentBefore.submissions.add(submissionBefore)
 		val submissionInside = new Submission
-		submissionInside.universityId = universityId
-		submissionInside.userId = universityId
+		submissionInside._universityId = universityId
+		submissionInside.usercode = universityId
 		submissionInside.assignment = assignmentInside
 		assignmentInside.submissions.add(submissionInside)
 		val submissionAfter = new Submission
-		submissionAfter.universityId = universityId
-		submissionAfter.userId = universityId
+		submissionAfter._universityId = universityId
+		submissionAfter.usercode = universityId
 		submissionAfter.assignment = assignmentAfter
 		assignmentAfter.submissions.add(submissionAfter)
 

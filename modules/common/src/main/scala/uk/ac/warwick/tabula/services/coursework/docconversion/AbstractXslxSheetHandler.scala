@@ -3,7 +3,6 @@ package uk.ac.warwick.tabula.services.coursework.docconversion
 import org.apache.poi.xssf.eventusermodel.XSSFSheetXMLHandler.SheetContentsHandler
 import org.apache.poi.xssf.eventusermodel.{ReadOnlySharedStringsTable, XSSFSheetXMLHandler}
 import org.apache.poi.xssf.model.StylesTable
-import org.apache.poi.xssf.usermodel.XSSFComment
 import org.xml.sax.XMLReader
 import org.xml.sax.helpers.XMLReaderFactory
 import uk.ac.warwick.tabula.JavaImports._

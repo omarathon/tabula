@@ -25,7 +25,7 @@ class OldResendSubmissionEmail extends OldCourseworkController {
 	@ModelAttribute def command(@PathVariable module: Module, @PathVariable assignment: Assignment, user: CurrentUser) =
 		new SendSubmissionReceiptCommand(
 			module, assignment,
-			mandatory(submissionService.getSubmissionByUniId(assignment, user.universityId).filter(_.submitted)),
+			mandatory(submissionService.getSubmissionByUsercode(assignment, user.userId).filter(_.submitted)),
 			user)
 
 	@RequestMapping(method = Array(GET, HEAD))

@@ -115,8 +115,8 @@ abstract class SubmitAssignmentCommandInternal(val module: Module, val assignmen
 		submission.assignment = assignment
 		submission.submitted = true
 		submission.submittedDate = new DateTime
-		submission.userId = user.usercode
-		submission.universityId = user.universityId
+		submission.usercode = user.usercode
+		submission._universityId = user.universityId
 
 		val savedValues = fields.asScala.map {
 			case (_, submissionValue) =>
@@ -204,7 +204,7 @@ trait SubmitAssignmentValidation extends SelfValidating {
 		}
 
 		// HFC-164
-		if (assignment.submissions.asScala.exists(_.universityId == user.universityId)) {
+		if (assignment.submissions.asScala.exists(_.usercode == user.usercode)) {
 			if (assignment.allowResubmission) {
 				if (assignment.allowLateSubmissions && (assignment.isClosed && !hasExtension)) {
 					errors.reject("assignment.resubmit.closed")
@@ -243,7 +243,7 @@ trait SubmitAssignmentDescription extends Describable[Submission] {
 	override def describe(d: Description): Unit =	{
 		d.assignment(assignment)
 
-		assignment.submissions.asScala.find(_.universityId == user.universityId).map { existingSubmission =>
+		assignment.submissions.asScala.find(_.usercode == user.usercode).map { existingSubmission =>
 			d.properties(
 				"existingSubmission" -> existingSubmission.id,
 				"existingAttachments" -> existingSubmission.allAttachments.map { _.id }

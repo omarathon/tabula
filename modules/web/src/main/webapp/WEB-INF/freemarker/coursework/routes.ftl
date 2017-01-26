@@ -48,10 +48,10 @@ TODO grab values from the Routes object in code, as that's pretty equivalent and
 <#macro checkSitsUpload feedback><@_u page="/admin/module/${feedback.assignment.module.code}/assignments/${feedback.assignment.id}/feedback/${feedback.id}/check-sits"/></#macro>
 
 <#macro genericfeedback assignment><@_u page="/admin/module/${assignment.module.code}/assignments/${assignment.id}/feedback/generic"/></#macro>
-<#macro markerFeedbackFiles assignment markerFeedback><@_u page="/admin/module/${assignment.module.code}/assignments/${assignment.id}/marker/feedback/download/${markerFeedback.id}/feedback-${markerFeedback.feedback.universityId}.zip"/></#macro>
+<#macro markerFeedbackFiles assignment markerFeedback><@_u page="/admin/module/${assignment.module.code}/assignments/${assignment.id}/marker/feedback/download/${markerFeedback.id}/feedback-${markerFeedback.feedback.studentIdentifier}.zip"/></#macro>
 <#macro markerFeedbackFilesDownload markerFeedback><@_u page="/admin/module/${markerFeedback.feedback.assignment.module.code}/assignments/${markerFeedback.feedback.assignment.id}/marker/${markerFeedback.markerUser.warwickId}/feedback/download/${markerFeedback.id}/" /></#macro>
 
-<#macro adminFeedbackZip assignment feedback attachmentExtension><@_u page='/admin/module/${assignment.module.code}/assignments/${assignment.id}/feedback/download/${feedback.id}/feedback-${feedback.universityId}.${attachmentExtension}'/></#macro>
+<#macro adminFeedbackZip assignment feedback attachmentExtension><@_u page='/admin/module/${assignment.module.code}/assignments/${assignment.id}/feedback/download/${feedback.id}/feedback-${feedback.studentIdentifier}.${attachmentExtension}'/></#macro>
 
 <#macro markingCompleted assignment marker><@_u page="/admin/module/${assignment.module.code}/assignments/${assignment.id}/marker/${marker.warwickId}/marking-completed" /></#macro>
 <#macro markingCompleted assignment marker nextRoleName><@_u page="/admin/module/${assignment.module.code}/assignments/${assignment.id}/marker/${marker.warwickId}/marking-completed?nextStageRole=${nextRoleName}" /></#macro>
@@ -75,7 +75,7 @@ TODO grab values from the Routes object in code, as that's pretty equivalent and
 <#macro downloadfirstmarkerfeedback assignment marker><@_u page="/admin/module/${assignment.module.code}/assignments/${assignment.id}/marker/${marker.warwickId}/firstmarker/feedback.zip"/></#macro>
 <#macro downloadsecondmarkerfeedback assignment marker><@_u page="/admin/module/${assignment.module.code}/assignments/${assignment.id}/marker/${marker.warwickId}/secondmarker/feedback.zip"/></#macro>
 <#macro uploadmarkerfeedback assignment marker><@_u page="/admin/module/${assignment.module.code}/assignments/${assignment.id}/marker/${marker.warwickId}/feedback"/></#macro>
-<#macro downloadMarkerFeedback assignment feedback marker><@_u page='/admin/module/${assignment.module.code}/assignments/${assignment.id}/marker/${marker.warwickId}/feedback/download/${feedback.id}/feedback-${feedback.feedback.universityId}.zip'/></#macro>
+<#macro downloadMarkerFeedback assignment feedback marker><@_u page='/admin/module/${assignment.module.code}/assignments/${assignment.id}/marker/${marker.warwickId}/feedback/download/${feedback.id}/feedback-${feedback.feedback.studentIdentifier}.zip'/></#macro>
 <#macro markeraddmarks assignment marker><@_u page="/admin/module/${assignment.module.code}/assignments/${assignment.id}/marker/${marker.warwickId}/marks"/></#macro>
 
 <#macro assignmentsubmissionsandfeedback assignment><@_u page="/admin/module/${assignment.module.code}/assignments/${assignment.id}/list"/></#macro>
@@ -107,11 +107,8 @@ TODO grab values from the Routes object in code, as that's pretty equivalent and
 		<@_u page="/admin/department/${department.code}/manage/extensions" />
 	</#if>
 </#macro>
-<#macro extensionreviewrequest assignment uniId><@_u page="/admin/module/${assignment.module.code}/assignments/${assignment.id}/extensions/review-request/${uniId}" /></#macro>
-<#macro extensionadd assignment uniId><@_u page="/admin/module/${assignment.module.code}/assignments/${assignment.id}/extensions/add?universityId=${uniId}" /></#macro>
-<#macro extensionedit assignment uniId><@_u page="/admin/module/${assignment.module.code}/assignments/${assignment.id}/extensions/edit/${uniId}" /></#macro>
-<#macro extensiondelete assignment uniId><@_u page="/admin/module/${assignment.module.code}/assignments/${assignment.id}/extensions/delete/${uniId}" /></#macro>
-<#macro extensiondetail assignment uniId><@_u page="/admin/module/${assignment.module.code}/assignments/${assignment.id}/extensions/detail/${uniId}" /></#macro>
+
+<#macro extensiondetail assignment usercode><@_u page="/admin/module/${assignment.module.code}/assignments/${assignment.id}/extensions/detail/${usercode}" /></#macro>
 
 <#macro feedbacktemplates department><@_u page="/admin/department/${department.code}/settings/feedback-templates" /></#macro>
 <#macro feedbacktemplateedit department feedbacktemplate><@_u page="/admin/department/${department.code}/settings/feedback-templates/edit/${feedbacktemplate.id}" /></#macro>
@@ -145,9 +142,9 @@ TODO grab values from the Routes object in code, as that's pretty equivalent and
 <#macro extensionRequest assignment><@_u page="/module/${assignment.module.code}/${assignment.id}/extension"/></#macro>
 <#macro assignmentreceipt assignment><@_u page="/module/${assignment.module.code}/${assignment.id}/resend-receipt"/></#macro>
 <#macro assignmentrequestaccess assignment><@_u page="/module/${assignment.module.code}/${assignment.id}/request-access"/></#macro>
-<#macro feedbackPdf assignment feedback><@_u page="/module/${assignment.module.code}/${assignment.id}/${feedback.universityId}/feedback.pdf"/></#macro>
+<#macro feedbackPdf assignment feedback><@_u page="/module/${assignment.module.code}/${assignment.id}/${feedback.usercode}/feedback.pdf"/></#macro>
 <#macro submissionReceiptPdf submission><@_u page="/module/${submission.assignment.module.code}/${submission.assignment.id}/submission-receipt.pdf"/></#macro>
-<#macro submissionReceiptPdf_in_profile assignment><@_u page="/module/${submission.assignment.module.code}/${submission.assignment.id}/${submission.universityId}/submission-receipt.pdf"/></#macro>
+<#macro submissionReceiptPdf_in_profile assignment><@_u page="/module/${submission.assignment.module.code}/${submission.assignment.id}/${submission.usercode}/submission-receipt.pdf"/></#macro>
 
 <#macro feedbackZip feedback><@_u page="/module/${feedback.assignment.module.code}/${feedback.assignment.id}/all/feedback.zip" /></#macro>
 <#macro feedbackZip_in_profile feedback><@_u page="/module/${feedback.assignment.module.code}/${feedback.assignment.id}/${feedback.universityId}/all/feedback.zip" /></#macro>

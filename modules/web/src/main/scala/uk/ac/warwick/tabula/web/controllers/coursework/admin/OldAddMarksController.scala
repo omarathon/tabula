@@ -50,12 +50,13 @@ class OldAddMarksController extends OldCourseworkController {
 			throw new PermissionDeniedException(user, Permissions.AssignmentFeedback.Manage, assignment)
 		}
 
-		val members = assignmentMembershipService.determineMembershipUsers(assignment)
+		// All mark uploads are keyed on uniID so ignore others
+		val members = assignmentMembershipService.determineMembershipUsers(assignment).filter(_.getWarwickId != null)
 
 		val marksToDisplay = members.map { member =>
-			val feedback = feedbackService.getStudentFeedback(assignment, member.getWarwickId)
+			val feedback = feedbackService.getStudentFeedback(assignment, member.getUserId)
 			noteMarkItem(member, feedback)
-		}.sortBy(_.universityId)
+		}.sortBy(_.studentIdentifier)
 
 		crumbed(Mav(s"$urlPrefix/admin/assignments/marks/marksform",
 			"marksToDisplay" -> marksToDisplay,
@@ -66,10 +67,9 @@ class OldAddMarksController extends OldCourseworkController {
 
 	private def noteMarkItem(member: User, feedback: Option[Feedback]) = {
 
-		logger.debug("in noteMarkItem (logger.debug)")
-
 		val markItem = new MarkItem()
 		markItem.universityId = member.getWarwickId
+		markItem.user = member
 
 		feedback match {
 			case Some(f) =>

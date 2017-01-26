@@ -25,10 +25,10 @@ class OldAssignmentControllerTest extends TestBase with Mockito {
 
 		val feedbackService: FeedbackService = smartMock[FeedbackService]
 		val feedback = new AssignmentFeedback()
-		feedbackService.getAssignmentFeedbackByUniId(assignment, "0123456") returns Some(feedback) thenThrows new Error("I TOLD YOU ABOUT STAIRS BRO")
+		feedbackService.getAssignmentFeedbackByUsercode(assignment, "cusebr") returns Some(feedback) thenThrows new Error("I TOLD YOU ABOUT STAIRS BRO")
 
 		val submissionService: SubmissionService = smartMock[SubmissionService]
-		submissionService.getSubmissionByUniId(assignment, "0123456") returns None
+		submissionService.getSubmissionByUsercode(assignment, "cusebr") returns None
 
 		val profileService: ProfileService = smartMock[ProfileService]
 

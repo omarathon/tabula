@@ -121,7 +121,7 @@ class Exam
 
 	def requiresMarks: Int = {
 		membershipInfo.items.count(info => {
-			val feedback = allFeedback.find(_.universityId == info.universityId.getOrElse(""))
+			val feedback = allFeedback.find(_.usercode == info.userId.getOrElse(""))
 			feedback.isEmpty || feedback.get.latestMark.isEmpty
 		})
 	}

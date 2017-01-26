@@ -20,6 +20,7 @@ import uk.ac.warwick.tabula.commands.{Appliable, SelfValidating}
 import com.fasterxml.jackson.databind.ObjectMapper
 import org.springframework.context.annotation.Profile
 import uk.ac.warwick.tabula.JavaImports._
+import uk.ac.warwick.userlookup.User
 
 import scala.collection.JavaConverters._
 
@@ -37,7 +38,8 @@ abstract class OldExtensionController extends OldCourseworkController {
 			def convertDateToMillis(date: Option[DateTime]) = date.map(_.getMillis.toString).orNull
 
 			Map(
-				"id" -> extension.universityId,
+				"id" -> extension.universityId.getOrElse(""),
+				"usercode" -> extension.usercode,
 				"status" -> extension.state.description,
 				"requestedExpiryDate" -> convertDateToString(extension.requestedExpiryDate),
 				"expiryDate" -> convertDateToString(extension.expiryDate),
@@ -67,13 +69,13 @@ class OldListExtensionsForAssignmentController extends OldExtensionController {
 		) = new ListExtensionsForAssignmentCommand(module, assignment, user)
 
 	@RequestMapping(method=Array(HEAD,GET))
-	def listExtensions(cmd: ListExtensionsForAssignmentCommand, @RequestParam(value="universityId", required=false) universityId: String): Mav = {
+	def listExtensions(cmd: ListExtensionsForAssignmentCommand, @RequestParam(value="usercode", required=false) usercode: String): Mav = {
 		val extensionGraphs = cmd.apply()
 
 		val model = Mav(s"$urlPrefix/admin/assignments/extensions/summary",
 			"detailUrl" -> Routes.admin.assignment.extension.detail(cmd.assignment),
 			"module" -> cmd.module,
-			"extensionToOpen" -> universityId,
+			"extensionToOpen" -> usercode,
 			"assignment" -> cmd.assignment,
 			"extensionGraphs" -> extensionGraphs,
 			"maxDaysToDisplayAsProgressBar" -> Extension.MaxDaysToDisplayAsProgressBar
@@ -100,11 +102,11 @@ class OldListAllExtensionsController extends OldExtensionController {
 		AcademicYear.guessSITSAcademicYearByDate(DateTime.now).yearsSurrounding(2, 2).asJava
 
 	@RequestMapping(method=Array(HEAD,GET))
-	def listExtensions(@ModelAttribute("command") cmd: ListAllExtensionsCommand, @RequestParam(value="universityId", required=false) universityId: String): Mav = {
+	def listExtensions(@ModelAttribute("command") cmd: ListAllExtensionsCommand, @RequestParam(value="usercode", required=false) usercode: String): Mav = {
 		val extensionGraphs = cmd.apply()
 
 		val model = Mav(s"$urlPrefix/admin/assignments/extensions/departmentSummary",
-			"extensionToOpen" -> universityId,
+			"extensionToOpen" -> usercode,
 			"extensionGraphs" -> extensionGraphs,
 			"maxDaysToDisplayAsProgressBar" -> Extension.MaxDaysToDisplayAsProgressBar
 		)
@@ -118,17 +120,19 @@ class OldListAllExtensionsController extends OldExtensionController {
  * The first mapping is the one that should be used.
  */
 @Profile(Array("cm1Enabled")) @Controller
-@RequestMapping(Array("/${cm1.prefix}/admin/module/{module}/assignments/{assignment}/extensions/detail/{universityId}"))
+@RequestMapping(Array("/${cm1.prefix}/admin/module/{module}/assignments/{assignment}/extensions/detail/{student}"))
 class OldEditExtensionController extends OldExtensionController {
 
 	@ModelAttribute("modifyExtensionCommand")
 	def editCommand(
 		@PathVariable module: Module,
 		@PathVariable assignment: Assignment,
-		@PathVariable universityId: String,
+		@PathVariable student: User,
 		user: CurrentUser,
 		@RequestParam(defaultValue = "") action: String
-	) = EditExtensionCommand(module, assignment, universityId, user, action)
+	) = {
+		EditExtensionCommand(module, assignment, student, user, action)
+	}
 
 	validatesSelf[SelfValidating]
 
@@ -138,17 +142,17 @@ class OldEditExtensionController extends OldExtensionController {
 		@ModelAttribute("modifyExtensionCommand") cmd: Appliable[Extension] with ModifyExtensionCommandState,
 		errors: Errors
 	): Mav = {
-		val student = profileService.getMemberByUniversityId(cmd.extension.universityId)
 
-		val studentContext = student match {
-			case Some(student: StudentMember) =>
+		val studentMember = cmd.extension.universityId.flatMap(uid => profileService.getMemberByUniversityId(uid))
+		val studentContext = studentMember match {
+			case Some(s: StudentMember) =>
 				val relationships = relationshipService.allStudentRelationshipTypes.map { relationshipType =>
-					(relationshipType.description, relationshipService.findCurrentRelationships(relationshipType, student))
-				}.toMap.filter({case (relationshipType,relations) => relations.length != 0})
+					(relationshipType.description, relationshipService.findCurrentRelationships(relationshipType, s))
+				}.toMap.filter({case (relationshipType,relations) => relations.nonEmpty})
 
 				Map(
 					"relationships" -> relationships,
-					"course" -> student.mostSignificantCourseDetails
+					"course" -> s.mostSignificantCourseDetails
 				)
 			case _ => Map.empty
 		}
@@ -157,10 +161,11 @@ class OldEditExtensionController extends OldExtensionController {
 			"command" -> cmd,
 			"module" -> cmd.module,
 			"assignment" -> cmd.assignment,
-			"universityId" -> cmd.universityId,
-			"student" -> student,
+			"usercode" -> cmd.student.getUserId,
+			"studentIdentifier" -> Option(cmd.student.getWarwickId).getOrElse(cmd.student.getUserId),
+			"student" -> studentMember,
 			"studentContext" -> studentContext,
-			"userFullName" -> userLookup.getUserByWarwickUniId(cmd.universityId).getFullName,
+			"userFullName" -> cmd.student.getFullName,
 			"updateAction" -> cmd.UpdateApprovalAction,
 			"approvalAction" -> cmd.ApprovalAction,
 			"rejectionAction" -> cmd.RejectionAction,
@@ -187,16 +192,18 @@ class OldEditExtensionController extends OldExtensionController {
 
 
 @Profile(Array("cm1Enabled")) @Controller
-@RequestMapping(Array("/${cm1.prefix}/admin/module/{module}/assignments/{assignment}/extensions/revoke/{universityId}"))
+@RequestMapping(Array("/${cm1.prefix}/admin/module/{module}/assignments/{assignment}/extensions/revoke/{student}"))
 class OldDeleteExtensionController extends OldExtensionController {
 
 	@ModelAttribute("deleteExtensionCommand")
 	def deleteCommand(
 		@PathVariable module: Module,
 		@PathVariable assignment: Assignment,
-		@PathVariable universityId: String,
+		@PathVariable student: User,
 		user: CurrentUser
-	) = DeleteExtensionCommand(module, assignment, universityId, user)
+	) = {
+		DeleteExtensionCommand(module, assignment, student, user)
+	}
 
 	// delete a manually created extension item - this revokes the extension
 	@RequestMapping(method=Array(POST))

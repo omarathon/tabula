@@ -21,11 +21,13 @@ class OnlineFeedbackCommandTest extends TestBase with Mockito {
 		val module = new Module
 		assignment.module = module
 
-		val submission1 = new Submission("user1")
+		val submission1 = new Submission {
+			usercode = "user1"
+		}
 
 		val feedback1 = new AssignmentFeedback
 		feedback1.assignment = assignment
-		val feedback2: AssignmentFeedback = Fixtures.assignmentFeedback("user2")
+		val feedback2: AssignmentFeedback = Fixtures.assignmentFeedback("user2", "user2")
 		feedback2.released = true
 		feedback2.assignment = assignment
 
@@ -38,12 +40,13 @@ class OnlineFeedbackCommandTest extends TestBase with Mockito {
 
 		command.userLookup.registerUserObjects(user1,user2)
 
-		command.submissionService.getSubmissionByUniId(assignment, "user1") returns Some(submission1)
-		command.submissionService.getSubmissionByUniId(assignment, "user2") returns None
+		command.submissionService.getSubmissionByUsercode(assignment, "user1") returns Some(submission1)
+		command.submissionService.getSubmissionByUsercode(assignment, "user2") returns None
+		command.submissionService.getSubmissionByUsercode(assignment, "user3") returns None
 
-		command.feedbackService.getAssignmentFeedbackByUniId(assignment, "user1") returns Some(feedback1)
-		command.feedbackService.getAssignmentFeedbackByUniId(assignment, "user2") returns Some(feedback2)
-
+		command.feedbackService.getAssignmentFeedbackByUsercode(assignment, "user1") returns Some(feedback1)
+		command.feedbackService.getAssignmentFeedbackByUsercode(assignment, "user2") returns Some(feedback2)
+		command.feedbackService.getAssignmentFeedbackByUsercode(assignment, "user3") returns None
 	}
 
 
@@ -51,13 +54,13 @@ class OnlineFeedbackCommandTest extends TestBase with Mockito {
 	def commandApply() {
 		new Fixture {
 			val feedbackGraphs: Seq[StudentFeedbackGraph] = command.applyInternal()
-			verify(command.feedbackService, times(1)).getAssignmentFeedbackByUniId(assignment, "user1")
-			verify(command.feedbackService, times(1)).getAssignmentFeedbackByUniId(assignment, "user2")
+			verify(command.feedbackService, times(1)).getAssignmentFeedbackByUsercode(assignment, "user1")
+			verify(command.feedbackService, times(1)).getAssignmentFeedbackByUsercode(assignment, "user2")
 
-			verify(command.submissionService, times(1)).getSubmissionByUniId(assignment, "user1")
-			verify(command.submissionService, times(1)).getSubmissionByUniId(assignment, "user2")
+			verify(command.submissionService, times(1)).getSubmissionByUsercode(assignment, "user1")
+			verify(command.submissionService, times(1)).getSubmissionByUsercode(assignment, "user2")
 
-			val graph1: StudentFeedbackGraph = feedbackGraphs(0)
+			val graph1: StudentFeedbackGraph = feedbackGraphs.head
 			graph1.student should be(user1)
 			graph1.hasSubmission should be {true}
 			graph1.hasUncompletedFeedback should be {true}
@@ -71,7 +74,14 @@ class OnlineFeedbackCommandTest extends TestBase with Mockito {
 			graph2.hasPublishedFeedback should be {true}
 			graph2.hasCompletedFeedback should be {false}
 
-			feedbackGraphs.size should be(2)
+			val graph3: StudentFeedbackGraph = feedbackGraphs(2)
+			graph3.student should be(user3)
+			graph3.hasSubmission should be {false}
+			graph3.hasUncompletedFeedback should be {false}
+			graph3.hasPublishedFeedback should be {false}
+			graph3.hasCompletedFeedback should be {false}
+
+			feedbackGraphs.size should be(3)
 		}
 	}
 

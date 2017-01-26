@@ -77,7 +77,7 @@ class EditAssignmentCommand(module: Module = null, val assignment: Assignment = 
 		)
 		if (unapprovedExtensions.nonEmpty) {
 			desc.property(
-				"studentExtensionRequestsAutoRejected" -> unapprovedExtensions.map(_.universityId)
+				"studentExtensionRequestsAutoRejected" -> unapprovedExtensions.map(_.usercode)
 			)
 		}
 	}

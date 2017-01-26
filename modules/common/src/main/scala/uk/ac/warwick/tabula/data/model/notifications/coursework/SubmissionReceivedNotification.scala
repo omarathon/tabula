@@ -80,11 +80,11 @@ class SubmissionReceivedNotification extends SubmissionNotification {
 
 		def withParents(target: PermissionsTarget): Stream[PermissionsTarget] = target #:: target.permissionsParents.flatMap(withParents)
 
-		val adminsWithPermission = withParents(assignment).flatMap(usersWithPermission).toSeq
+		val adminsWithPermission = withParents(assignment).flatMap(usersWithPermission)
 			.filter { user => securityService.can(new CurrentUser(user, user), requiredPermission, submission) }
 
 		// Contact the current marker, if there is one, and the submission has already been released
-		val feedback = assignment.findFeedback(submission.universityId)
+		val feedback = assignment.findFeedback(submission.usercode)
 		val currentMarker = if (assignment.hasWorkflow && feedback.exists(_.isPlaceholder)) {
 			feedback.flatMap { f => f.getCurrentWorkflowFeedback }
 				.flatMap { _.getMarkerUser }

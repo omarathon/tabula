@@ -13,7 +13,7 @@ abstract class ExtensionRequestRespondedNotification(val verbed: String) extends
 
 	def title: String = titlePrefix + "Extension request by %s for \"%s\" was %s".format(student.getFullName, assignment.name, verbed)
 
-	def url: String = Routes.admin.assignment.extension.expandrow(assignment, student.getWarwickId)
+	def url: String = Routes.admin.assignment.extension.expandrow(assignment, student.getUserId)
 	def urlTitle = "review this extension request"
 
 	def content = FreemarkerModel("/WEB-INF/freemarker/emails/responded_extension_request.ftl", Map(

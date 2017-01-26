@@ -36,7 +36,7 @@ class DownloadSubmissionsCommand(val module: Module, val assignment: Assignment,
 		else if (!students.isEmpty && submissions.isEmpty) {
 			submissions = (for (
 				uniId <- students.asScala;
-				submission <- submissionService.getSubmissionByUniId(assignment, uniId)
+				submission <- submissionService.getSubmissionByUsercode(assignment, uniId)
 			) yield submission).asJava
 		}
 
@@ -48,7 +48,7 @@ class DownloadSubmissionsCommand(val module: Module, val assignment: Assignment,
 			val zip = zipService.getSomeSubmissionsZip(submissions.asScala)
 			Left(zip)
 		} else {
-			Right(jobService.add(Option(user), SubmissionZipFileJob(submissions.asScala.map(_.id).toSeq)))
+			Right(jobService.add(Option(user), SubmissionZipFileJob(submissions.asScala.map(_.id))))
 		}
 
 	}
@@ -56,13 +56,14 @@ class DownloadSubmissionsCommand(val module: Module, val assignment: Assignment,
 	override def describe(d: Description) {
 
 		val downloads: Seq[Submission] = {
-			if (students.asScala.nonEmpty) students.asScala.flatMap(submissionService.getSubmissionByUniId(assignment, _))
+			if (students.asScala.nonEmpty) students.asScala.flatMap(submissionService.getSubmissionByUsercode(assignment, _))
 			else submissions.asScala
 		}
 
 		d.assignment(assignment)
 		.submissions(downloads)
-		.studentIds(downloads.map(_.universityId))
+		.studentIds(downloads.flatMap(_.universityId))
+		.studentUsercodes(downloads.map(_.usercode))
 		.properties("submissionCount" -> Option(downloads).map(_.size).getOrElse(0))
 	}
 

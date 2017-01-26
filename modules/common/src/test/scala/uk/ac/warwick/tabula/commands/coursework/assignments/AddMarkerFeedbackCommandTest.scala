@@ -35,8 +35,6 @@ class AddMarkerFeedbackCommandTest extends TestBase with Mockito {
 		val cmd = new AddMarkerFeedbackCommand(module, assignment, currentUser.apparentUser, currentUser)
 		cmd.userLookup = userLookup
 
-		cmd.uniNumber = "1010101"
-
 		val file = new UploadedFile
 		val a = new FileAttachment
 		a.name = "file.txt"
@@ -44,12 +42,12 @@ class AddMarkerFeedbackCommandTest extends TestBase with Mockito {
 		a.uploadedData = ByteSource.wrap("content".getBytes)
 		file.attached.add(a)
 
-		val item = new FeedbackItem("1010101")
+		val item = new FeedbackItem("1010101", user)
 		item.file = file
 		cmd.items.add(item)
 
 		// Add an existing feedback with the same name
-		val feedback = Fixtures.assignmentFeedback("1010101")
+		val feedback = Fixtures.assignmentFeedback("1010101", "student")
 		feedback.addAttachment(a)
 		assignment.feedbacks.add(feedback)
 		feedback.assignment = assignment
@@ -72,8 +70,6 @@ class AddMarkerFeedbackCommandTest extends TestBase with Mockito {
 		val cmd = new AddMarkerFeedbackCommand(module, assignment, currentUser.apparentUser, currentUser)
 		cmd.userLookup = userLookup
 
-		cmd.uniNumber = "1010101"
-
 		val file = new UploadedFile
 		val a = new FileAttachment
 		a.name = "file.txt"
@@ -81,12 +77,12 @@ class AddMarkerFeedbackCommandTest extends TestBase with Mockito {
 		a.uploadedData = ByteSource.wrap("content".getBytes)
 		file.attached.add(a)
 
-		val item = new FeedbackItem("1010101")
+		val item = new FeedbackItem("1010101", user)
 		item.file = file
 		cmd.items.add(item)
 
 		// Add an existing feedback with the same name
-		val feedback = Fixtures.assignmentFeedback("1010101")
+		val feedback = Fixtures.assignmentFeedback("1010101", "student")
 		feedback.firstMarkerFeedback = Fixtures.markerFeedback(feedback)
 		feedback.firstMarkerFeedback.addAttachment(a)
 		assignment.feedbacks.add(feedback)

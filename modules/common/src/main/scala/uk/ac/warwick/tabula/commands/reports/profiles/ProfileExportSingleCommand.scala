@@ -102,11 +102,11 @@ class ProfileExportSingleCommandInternal(val student: StudentMember, val academi
 
 		// Get coursework
 		val assignmentData = benchmarkTask("assignmentData") {
-			assessmentService.getAssignmentsWithSubmission(student.universityId)
+			assessmentService.getAssignmentsWithSubmission(student.userId)
 				.filter(_.academicYear == academicYear)
 				.sortBy(_.closeDate)
 				.flatMap(assignment => {
-					assignment.findSubmission(student.universityId).map(submission => {
+					assignment.findSubmission(student.userId).map(submission => {
 						AssignmentData(
 							assignment.module.code.toUpperCase,
 							assignment.name,

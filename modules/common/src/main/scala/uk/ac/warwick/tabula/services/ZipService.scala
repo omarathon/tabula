@@ -61,7 +61,7 @@ class ZipService extends ZipCreator with AutowiringObjectStorageServiceComponent
 
 	private def getFeedbackZipItems(feedback: Feedback, forStudent: Boolean = true): Seq[ZipItem] = {
 		(Seq(getOnlineFeedbackPdf(feedback, forStudent)) ++ feedback.attachments.asScala).map { (attachment) =>
-			ZipFileItem(feedback.universityId + " - " + attachment.name, attachment.dataStream, attachment.actualDataLength)
+			ZipFileItem(feedback.studentIdentifier + " - " + attachment.name, attachment.dataStream, attachment.actualDataLength)
 		}
 	}
 
@@ -71,14 +71,14 @@ class ZipService extends ZipCreator with AutowiringObjectStorageServiceComponent
 			"feedback.pdf",
 			Map(
 				"feedback" -> feedback,
-				"studentId" -> feedback.universityId
+				"studentId" -> feedback.studentIdentifier
 			)
 		)
 	}
 
 	private def getMarkerFeedbackZipItems(markerFeedback: MarkerFeedback): Seq[ZipItem] =
 		markerFeedback.attachments.asScala.filter { _.hasData }.map { attachment =>
-			ZipFileItem(markerFeedback.feedback.universityId + " - " + attachment.name, attachment.dataStream, attachment.actualDataLength)
+			ZipFileItem(markerFeedback.feedback.studentIdentifier + " - " + attachment.name, attachment.dataStream, attachment.actualDataLength)
 		}
 
 	/**
@@ -87,15 +87,15 @@ class ZipService extends ZipCreator with AutowiringObjectStorageServiceComponent
 	 */
 	def getSubmissionZipItems(submission: Submission): Seq[ZipItem] = benchmarkTask(s"Create zip item for $submission") {
 		val allAttachments = submission.allAttachments
-		val user = userLookup.getUserByUserId(submission.userId)
+		val user = userLookup.getUserByUserId(submission.usercode)
 		val assignment = submission.assignment
 		val code = assignment.module.code
 
 		val submissionZipItems: Seq[ZipItem] = for (attachment <- allAttachments) yield {
 			val userIdentifier = if(!showStudentName(assignment) || (user==null || user.isInstanceOf[AnonymousUser])) {
-				submission.universityId
+				submission.studentIdentifier
 			} else {
-				s"${user.getFullName} - ${submission.universityId}"
+				s"${user.getFullName} - ${submission.studentIdentifier}"
 			}
 
 			ZipFileItem(code + " - " + userIdentifier + " - " + attachment.name, attachment.dataStream, attachment.actualDataLength)

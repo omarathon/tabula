@@ -33,8 +33,8 @@ class DeleteSubmissionsAndFeedbackCommand(val module: Module, val assignment: As
 	var zipService: ZipService = Wire.auto[ZipService]
 	var userLookup: UserLookupService = Wire.auto[UserLookupService]
 
-    var students: JList[String] = JArrayList()
-    var submissionOrFeedback: String = ""
+	var students: JList[String] = JArrayList()
+	var submissionOrFeedback: String = ""
 	var confirm: Boolean = false
 
 	val SubmissionOnly = "submissionOnly"
@@ -46,7 +46,7 @@ class DeleteSubmissionsAndFeedbackCommand(val module: Module, val assignment: As
 
 	def applyInternal(): (Seq[Submission], Seq[AssignmentFeedback]) = {
 		val submissions = if (shouldDeleteSubmissions) {
-			val submissions = for (uniId <- students; submission <- submissionService.getSubmissionByUniId(assignment, uniId)) yield {
+			val submissions = for (usercode <- students; submission <- submissionService.getSubmissionByUsercode(assignment, usercode)) yield {
 				HibernateHelpers.initialiseAndUnproxy(submission.allAttachments)
 				submissionService.delete(mandatory(submission))
 				submission
@@ -56,7 +56,7 @@ class DeleteSubmissionsAndFeedbackCommand(val module: Module, val assignment: As
 		} else Nil
 
 		val feedbacks = if (shouldDeleteFeedback) {
-			val feedbacks = for (uniId <- students; feedback <- feedbackService.getAssignmentFeedbackByUniId(assignment, uniId)) yield {
+			val feedbacks = for (usercode <- students; feedback <- feedbackService.getAssignmentFeedbackByUsercode(assignment, usercode)) yield {
 				HibernateHelpers.initialiseAndUnproxy(feedback.attachments)
 				feedbackService.delete(mandatory(feedback))
 				zipService.invalidateIndividualFeedbackZip(feedback)
@@ -69,11 +69,11 @@ class DeleteSubmissionsAndFeedbackCommand(val module: Module, val assignment: As
 	}
 
 	def prevalidate(errors: Errors) {
-		for (uniId <- students; submission <- submissionService.getSubmissionByUniId(assignment, uniId)) {
+		for (usercode <- students; submission <- submissionService.getSubmissionByUsercode(assignment, usercode)) {
 			if (mandatory(submission).assignment != assignment) errors.reject("submission.bulk.wrongassignment")
 		}
 
-		for (uniId <- students; feedback <- feedbackService.getAssignmentFeedbackByUniId(assignment, uniId)) {
+		for (usercode <- students; feedback <- feedbackService.getAssignmentFeedbackByUsercode(assignment, usercode)) {
 			if (mandatory(feedback).assignment != assignment) errors.reject("feedback.bulk.wrongassignment")
 		}
 
@@ -88,8 +88,7 @@ class DeleteSubmissionsAndFeedbackCommand(val module: Module, val assignment: As
 	}
 
 
-	def getStudentsAsUsers(): JList[User] =
-		userLookup.getUsersByWarwickUniIds(students).values.toSeq
+	def getStudentsAsUsers: JList[User] = userLookup.getUsersByUserIds(students).values.toSeq
 
 	override def describe(d: Description): Unit = d
 		.assignment(assignment)

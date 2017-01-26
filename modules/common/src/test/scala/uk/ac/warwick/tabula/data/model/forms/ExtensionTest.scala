@@ -2,14 +2,14 @@ package uk.ac.warwick.tabula.data.model.forms
 import scala.collection.JavaConversions._
 import org.joda.time.DateTime
 import uk.ac.warwick.tabula.PersistenceTestBase
-import uk.ac.warwick.tabula.data.model.{BooleanAssignmentProperties, Submission, Assignment, FileAttachment}
+import uk.ac.warwick.tabula.data.model.{Submission, Assignment, FileAttachment}
 import uk.ac.warwick.userlookup.User
 
 // scalastyle:off magic.number
 
 class ExtensionTest extends PersistenceTestBase {
 
-  @Test def testExtension {
+  @Test def testExtension() {
 
     val assignment = new Assignment
 		assignment.setDefaultBooleanProperties()
@@ -18,8 +18,8 @@ class ExtensionTest extends PersistenceTestBase {
 
 		withFakeTime(new DateTime(2012, 7, 22, 14, 42)) {
 			val extension = new Extension()
-			extension.universityId = "1170836"
-			extension.userId = "cuslaj"
+			extension._universityId = "1170836"
+			extension.usercode = "cuslaj"
 			extension.expiryDate = new DateTime(2012, 8, 12, 12, 0)
 			extension.reason = "My hands have turned to flippers. Like the ones that dolphins have. It makes writing and typing super hard. Pity me."
 			extension.approve("That sounds awful. Have an extra month. By then you should be able to write as well as any Cetacea.")
@@ -40,7 +40,9 @@ class ExtensionTest extends PersistenceTestBase {
 
     withFakeTime(dateTime(2012, 7)) {
       for (i <- 1 to 10) {
-        val newSubmission = new Submission(universityId = idFormat(i))
+        val newSubmission = new Submission
+				newSubmission.usercode = idFormat(i)
+				newSubmission._universityId = idFormat(i)
         newSubmission.submittedDate = new DateTime
         assignment.submissions add newSubmission
       }
@@ -48,22 +50,25 @@ class ExtensionTest extends PersistenceTestBase {
 
     withFakeTime(dateTime(2012, 8)) {
       for (i <- 11 to 15) {
-        val newSubmission = new Submission(universityId = idFormat(i))
+        val newSubmission = new Submission
+				newSubmission.usercode = idFormat(i)
+				newSubmission._universityId = idFormat(i)
         newSubmission.submittedDate = new DateTime
         assignment.submissions add newSubmission
       }
-      val newSubmission = new Submission(universityId = idFormat(1170836))
-      newSubmission.userId = "cuslaj"
+      val newSubmission = new Submission
+			newSubmission._universityId = "1170836"
+      newSubmission.usercode = "cuslaj"
       newSubmission.submittedDate = new DateTime
       assignment.submissions add newSubmission
     }
 
-    val lateSubmissions = assignment.submissions filter (assignment.isLate(_)) map (_.universityId)
+    val lateSubmissions = assignment.submissions filter assignment.isLate map (_._universityId)
     lateSubmissions should be ((11 to 15) map idFormat)
 
   }
 
-	@Test def deleteFileAttachmentOnDelete = transactional{tx=>
+	@Test def deleteFileAttachmentOnDelete() = transactional{tx=>
 		// TAB-667
 		val orphanAttachment = flushing(session) {
 			val attachment = new FileAttachment
@@ -73,8 +78,9 @@ class ExtensionTest extends PersistenceTestBase {
 		}
 
 		val (extension, extensionAttachment) = flushing(session) {
-			val extension = new Extension(universityId = idFormat(1))
-			extension.userId = "steve"
+			val extension = new Extension
+			extension._universityId = idFormat(1)
+			extension.usercode = "steve"
 
 			val assignment = new Assignment
 			session.save(assignment)
@@ -89,9 +95,9 @@ class ExtensionTest extends PersistenceTestBase {
 		}
 
 		// Ensure everything's been persisted
-		orphanAttachment.id should not be (null)
-		extension.id should not be (null)
-		extensionAttachment.id should not be (null)
+		orphanAttachment.id should not be null
+		extension.id should not be null
+		extensionAttachment.id should not be null
 
 		// Can fetch everything from db
 		flushing(session) {
@@ -113,7 +119,7 @@ class ExtensionTest extends PersistenceTestBase {
   /** Zero-pad integer to a 7 digit string */
   def idFormat(i:Int): String = "%07d" format i
 
-  @Test def flags {
+  @Test def flags() {
 	  val extension = new Extension
 
 	  extension.isManual should be (true)

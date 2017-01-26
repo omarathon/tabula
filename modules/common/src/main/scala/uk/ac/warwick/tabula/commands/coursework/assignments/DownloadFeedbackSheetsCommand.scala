@@ -36,6 +36,7 @@ class DownloadFeedbackSheetsCommand(val module: Module, val assignment: Assignme
 	override def describe(d: Description): Unit = {
 		val members = assignmentMembershipService.determineMembershipUsers(assignment)
 		d.assignment(assignment)
-		d.studentIds(members.map(_.getWarwickId))
+		d.studentIds(members.flatMap(m => Option(m.getWarwickId)))
+		d.studentUsercodes(members.map(_.getUserId))
 	}
 }

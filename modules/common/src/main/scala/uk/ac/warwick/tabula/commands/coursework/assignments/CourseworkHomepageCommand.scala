@@ -54,7 +54,8 @@ class CourseworkHomepageCommandInternal(user: CurrentUser) extends CommandIntern
 			val assignmentsForMarkingInfo = benchmarkTask("Get markers submissions") {
 				for (assignment <- assignmentsForMarking) yield {
 					val submissions = assignment.getMarkersSubmissions(user.apparentUser)
-					val markerFeedbacks = submissions.flatMap( submission => assignment.getAllMarkerFeedbacks(submission.universityId, user.apparentUser))
+					val markerFeedbacks =
+						submissions.flatMap( submission => assignment.getAllMarkerFeedbacks(submission.usercode, user.apparentUser))
 
 					Map(
 						"assignment" -> assignment,

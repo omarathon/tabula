@@ -5,6 +5,7 @@ import org.springframework.context.annotation.Profile
 import org.springframework.stereotype.Controller
 import org.springframework.validation.Errors
 import org.springframework.web.bind.annotation.{ModelAttribute, PathVariable, RequestMapping}
+import uk.ac.warwick.tabula.CurrentUser
 import uk.ac.warwick.tabula.commands.Appliable
 import uk.ac.warwick.tabula.commands.coursework.assignments.AssignMarkersCommand
 import uk.ac.warwick.tabula.web.controllers.coursework.OldCourseworkController
@@ -21,12 +22,12 @@ object OldAssignMarkersController {
 		def userCode: String = user.getUserId
 		def displayValue: String = module.adminDepartment.showStudentName match {
 			case true => user.getFullName
-			case false => user.getWarwickId
+			case false => CurrentUser.studentIdentifier(user)
 		}
 		def sortValue: (String, String) = module.adminDepartment.showStudentName match {
 			case true => (user.getLastName, user.getFirstName)
 			// returning a pair here removes the need to define a custom Ordering implementation
-			case false => (user.getWarwickId, user.getWarwickId)
+			case false => (CurrentUser.studentIdentifier(user), CurrentUser.studentIdentifier(user))
 		}
 	}
 
@@ -98,8 +99,8 @@ class OldAssignmentAssignMarkersController extends OldCourseworkController {
 			new AssignmentStudent(_, module)
 		}
 
-		val firstMarkerUnassignedStudents = members.toList.filterNot(firstMarkers.map(_.students).flatten.contains).sortBy(_.sortValue)
-		val secondMarkerUnassignedStudents = members.toList.filterNot(secondMarkers.map(_.students).flatten.contains).sortBy(_.sortValue)
+		val firstMarkerUnassignedStudents = members.toList.filterNot(firstMarkers.flatMap(_.students).contains).sortBy(_.sortValue)
+		val secondMarkerUnassignedStudents = members.toList.filterNot(secondMarkers.flatMap(_.students).contains).sortBy(_.sortValue)
 
 		Mav(s"$urlPrefix/admin/assignments/assignmarkers/form",
 			"assessment" -> assignment,

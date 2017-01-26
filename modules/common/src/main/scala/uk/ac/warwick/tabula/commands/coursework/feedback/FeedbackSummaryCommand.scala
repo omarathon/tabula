@@ -22,7 +22,8 @@ class FeedbackSummaryCommandInternal(val assignment: Assignment, val student: Us
 
 	this : FeedbackServiceComponent =>
 
-	def applyInternal(): Option[AssignmentFeedback] = Option(student.getWarwickId).flatMap(feedbackService.getAssignmentFeedbackByUniId(assignment, _))
+	def applyInternal(): Option[AssignmentFeedback] =
+		feedbackService.getAssignmentFeedbackByUsercode(assignment, student.getUserId)
 }
 
 trait FeedbackSummaryCommandState {
@@ -42,5 +43,6 @@ trait FeedbackSummaryCommandDescription extends Describable[Option[Feedback]] {
 	def describe(d: Description) {
 		d.assignment(assignment)
 		d.studentIds(Option(student.getWarwickId).toSeq)
+		d.studentUsercodes(student.getUserId)
 	}
 }

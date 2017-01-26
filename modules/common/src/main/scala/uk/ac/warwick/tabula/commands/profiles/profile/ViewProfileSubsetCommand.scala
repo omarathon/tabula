@@ -5,28 +5,30 @@ import uk.ac.warwick.tabula.commands._
 import uk.ac.warwick.tabula.data.model.{StudentCourseDetails, StudentMember}
 import uk.ac.warwick.tabula.permissions.Permissions
 import uk.ac.warwick.tabula.permissions.Permissions.UserPicker
-import uk.ac.warwick.tabula.services.{ProfileService, UserLookupService}
+import uk.ac.warwick.tabula.services.ProfileService
 import uk.ac.warwick.tabula.system.permissions.{PermissionsChecking, PermissionsCheckingMethods, RequiresPermissionsChecking}
 import uk.ac.warwick.userlookup.User
 
 object ViewProfileSubsetCommand {
-	def apply(universityId: String, profileService: ProfileService, userLookup: UserLookupService) =
-		new ViewProfileSubsetCommandInternal(universityId, profileService, userLookup)
+	def apply(student: User, profileService: ProfileService) =
+		new ViewProfileSubsetCommandInternal(student, profileService)
 			with ComposableCommand[ProfileSubset]
 			with ViewProfileSubsetCommandPermissions
 			with Unaudited
 			with ReadOnly
 }
 
-abstract class ViewProfileSubsetCommandInternal(val universityId: String, profileService: ProfileService,	userLookup: UserLookupService)
+abstract class ViewProfileSubsetCommandInternal(student: User, profileService: ProfileService)
 	extends CommandInternal[ProfileSubset] with ViewProfileSubsetCommandState {
 
-	val studentMember: Option[StudentMember] = profileService.getMemberByUniversityId(universityId).collect{ case sm:StudentMember => sm }
+	val studentMember: Option[StudentMember] = Option(student.getWarwickId)
+			.map(uid => profileService.getMemberByUniversityId(uid))
+			.collect{ case Some(sm: StudentMember) => sm }
 
 	// only try to get the user via lookup if no student member is found
 	val user: Option[User] = studentMember match {
 		case Some(_) => None
-		case None => Option(userLookup.getUserByWarwickUniId(universityId))
+		case None => Option(student).filter(_.isFoundUser)
 	}
 
 	def applyInternal(): ProfileSubset = {
@@ -38,7 +40,6 @@ abstract class ViewProfileSubsetCommandInternal(val universityId: String, profil
 }
 
 trait ViewProfileSubsetCommandState {
-	val universityId: String
 	val studentMember: Option[StudentMember]
 	val user: Option[User]
 }

@@ -26,7 +26,7 @@
 			<tbody>
 				<#list command.gradeValidation.invalid?keys as feedback>
 					<tr>
-						<td>${feedback.universityId}</td>
+						<td>${feedback.studentIdentifier}</td>
 						<td>${feedback.latestMark!}</td>
 						<td>${feedback.latestGrade!}</td>
 						<td>${mapGet(command.gradeValidation.invalid, feedback)}</td>
@@ -54,7 +54,7 @@
 			<tbody>
 				<#list command.gradeValidation.zero?keys as feedback>
 					<tr>
-						<td>${feedback.universityId}</td>
+						<td>${feedback.studentIdentifier}</td>
 						<td>${feedback.latestMark!}</td>
 						<td>${feedback.latestGrade!}</td>
 					</tr>
@@ -79,7 +79,7 @@
 			<tbody>
 				<#list command.gradeValidation.populated?keys as feedback>
 					<tr>
-						<td>${feedback.universityId}</td>
+						<td>${feedback.studentIdentifier}</td>
 						<td>${feedback.latestMark!}</td>
 						<td>${mapGet(command.gradeValidation.populated, feedback)}</td>
 					</tr>
@@ -112,7 +112,7 @@
 			<tbody>
 				<#list command.gradeValidation.invalid?keys as feedback>
 					<tr>
-						<td>${feedback.universityId}</td>
+						<td>${feedback.studentIdentifier}</td>
 						<td>${feedback.latestMark!}</td>
 						<td>${feedback.latestGrade!}</td>
 						<td>${mapGet(command.gradeValidation.invalid, feedback)}</td>
@@ -120,7 +120,7 @@
 				</#list>
 				<#list command.gradeValidation.populated?keys as feedback>
 					<tr>
-						<td>${feedback.universityId}</td>
+						<td>${feedback.studentIdentifier}</td>
 						<td>${feedback.latestMark!}</td>
 						<td>${feedback.latestGrade!}</td>
 						<td></td>
@@ -151,7 +151,7 @@
 		<tbody>
 			<#list command.gradeValidation.valid as feedback>
 				<tr>
-					<td>${feedback.universityId}</td>
+					<td>${feedback.studentIdentifier}</td>
 					<td>${feedback.latestMark!}</td>
 					<td>${feedback.latestGrade!}</td>
 				</tr>

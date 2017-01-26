@@ -23,14 +23,14 @@ class OldFeedbackAdjustmentsControllerTest extends TestBase with Mockito {
 		assignment.module = Fixtures.module("cs118")
 		assignment.module.adminDepartment = Fixtures.department("cs")
 
-		val submission: Submission = Fixtures.submission("1234567").tap { _.assignment = assignment }
-		val feedback: AssignmentFeedback = Fixtures.assignmentFeedback("1234567").tap { f =>
+		val submission: Submission = Fixtures.submission("1234567", "1234567").tap { _.assignment = assignment }
+		val feedback: AssignmentFeedback = Fixtures.assignmentFeedback("1234567", "1234567").tap { f =>
 			f.assignment = assignment
 			f.actualMark = Some(50)
 		}
 
 		assignment.submissions.add(submission)
-		val thisStudent = new User()
+		val thisStudent = new User("1234567")
 		thisStudent.setWarwickId("1234567")
 
 		val command = new Appliable[Feedback] with FeedbackAdjustmentCommandState {

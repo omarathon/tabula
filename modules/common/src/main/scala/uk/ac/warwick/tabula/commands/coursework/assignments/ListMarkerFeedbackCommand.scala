@@ -47,10 +47,10 @@ class ListMarkerFeedbackCommand(val assignment: Assignment, val module: Module, 
 
 		val feedbackItems = students.map(student => {
 			// all non transiant marker feedback items
-			val feedbacks = assignment.getAllMarkerFeedbacks(student.getWarwickId, marker).filterNot(_.state == null).reverse
-			val submission = assignment.findSubmission(student.getWarwickId)
+			val feedbacks = assignment.getAllMarkerFeedbacks(student.getUserId, marker).filterNot(_.state == null).reverse
+			val submission = assignment.findSubmission(student.getUserId)
 			val position = feedbacks.lastOption.map(_.getFeedbackPosition)
-			val nextMarker = workflow.getNextMarker(position, assignment, student.getWarwickId)
+			val nextMarker = workflow.getNextMarker(position, assignment, student.getUserId)
 			MarkerFeedbackItem(student, submission, feedbacks, nextMarker)
 		})
 

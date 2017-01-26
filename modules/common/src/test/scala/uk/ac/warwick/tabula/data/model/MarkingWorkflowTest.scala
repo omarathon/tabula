@@ -28,10 +28,10 @@ class MarkingWorkflowTest extends TestBase with Mockito {
 		val sub3: Submission = Fixtures.submission(universityId="0000003", userId="student3")
 		val sub4: Submission = Fixtures.submission(universityId="0000004", userId="student4")
 
-		val f1: AssignmentFeedback = Fixtures.assignmentFeedback(universityId="0000001")
-		val f2: AssignmentFeedback = Fixtures.assignmentFeedback(universityId="0000002")
-		val f3: AssignmentFeedback = Fixtures.assignmentFeedback(universityId="0000003")
-		val f4: AssignmentFeedback = Fixtures.assignmentFeedback(universityId="0000004")
+		val f1: AssignmentFeedback = Fixtures.assignmentFeedback(universityId="0000001", userId="student1")
+		val f2: AssignmentFeedback = Fixtures.assignmentFeedback(universityId="0000002", userId="student2")
+		val f3: AssignmentFeedback = Fixtures.assignmentFeedback(universityId="0000003", userId="student3")
+		val f4: AssignmentFeedback = Fixtures.assignmentFeedback(universityId="0000004", userId="student4")
 
 		assignment.submissions.addAll(Seq(sub1, sub2, sub3, sub4).toList.asJava)
 		assignment.submissions.asScala.toList foreach { _.assignment = assignment }
@@ -53,10 +53,11 @@ class MarkingWorkflowTest extends TestBase with Mockito {
 		val m4: User = Fixtures.user(universityId="0000008", userId="cusfal")
 
 		val userLookup: UserLookupService = mock[UserLookupService]
-		when(userLookup.getUserByWarwickUniId("0000001")).thenReturn(s1)
-		when(userLookup.getUserByWarwickUniId("0000002")).thenReturn(s2)
-		when(userLookup.getUserByWarwickUniId("0000003")).thenReturn(s3)
-		when(userLookup.getUserByWarwickUniId("0000004")).thenReturn(s4)
+		when(userLookup.getUserByUserId("student1")).thenReturn(s1)
+		when(userLookup.getUserByUserId("student2")).thenReturn(s2)
+		when(userLookup.getUserByUserId("student3")).thenReturn(s3)
+		when(userLookup.getUserByUserId("student4")).thenReturn(s4)
+
 		when(userLookup.getUserByUserId("cuscav")).thenReturn(m1)
 		when(userLookup.getUserByUserId("cusebr")).thenReturn(m2)
 		when(userLookup.getUserByUserId("curef")).thenReturn(m3)
@@ -123,10 +124,10 @@ class MarkingWorkflowTest extends TestBase with Mockito {
 		assignment.fields.add(field)
 
 		workflow.submissionService = mock[SubmissionService]
-		when(workflow.submissionService.getSubmissionByUniId(assignment, f1.universityId)).thenReturn(Some(sub1))
-		when(workflow.submissionService.getSubmissionByUniId(assignment, f2.universityId)).thenReturn(Some(sub2))
-		when(workflow.submissionService.getSubmissionByUniId(assignment, f3.universityId)).thenReturn(Some(sub3))
-		when(workflow.submissionService.getSubmissionByUniId(assignment, f4.universityId)).thenReturn(Some(sub4))
+		when(workflow.submissionService.getSubmissionByUsercode(assignment, f1.usercode)).thenReturn(Some(sub1))
+		when(workflow.submissionService.getSubmissionByUsercode(assignment, f2.usercode)).thenReturn(Some(sub2))
+		when(workflow.submissionService.getSubmissionByUsercode(assignment, f3.usercode)).thenReturn(Some(sub3))
+		when(workflow.submissionService.getSubmissionByUsercode(assignment, f4.usercode)).thenReturn(Some(sub4))
 
 		val valueMatches = new SavedFormValue()
 		valueMatches.name = Assignment.defaultMarkerSelectorName
@@ -142,7 +143,7 @@ class MarkingWorkflowTest extends TestBase with Mockito {
 
 		workflow.getSubmissions(assignment, currentUser.apparentUser) should be (Seq(sub4))
 
-		assignment.getStudentsFirstMarker(sub4.universityId) should be (Some(m1))
+		assignment.getStudentsFirstMarker(sub4.usercode) should be (Some(m1))
 	}}
 
 	@Test def seenSecondMarkingLegacy() = withUser("cuscav", "1234567") { new MarkingWorkflowFixture {
@@ -187,7 +188,7 @@ class MarkingWorkflowTest extends TestBase with Mockito {
 		f4.secondMarkerFeedback = Fixtures.markerFeedback(f4)
 
 		workflow.markingMethod should be(ModeratedMarking)
-		workflow.courseworkMarkingUrl(assignment, currentUser.apparentUser, sub4.universityId) should be(s"/$cm1Prefix/admin/module/heron101/assignments/1/marker/1234567/feedback/online/moderation")
+		workflow.courseworkMarkingUrl(assignment, currentUser.apparentUser, sub4.usercode) should be(s"/$cm1Prefix/admin/module/heron101/assignments/1/marker/1234567/feedback/online/moderation")
 
 		workflow.firstMarkerRoleName should be("Marker")
 		workflow.hasSecondMarker should  be {true}
@@ -217,15 +218,15 @@ class MarkingWorkflowTest extends TestBase with Mockito {
 		withUser("cusebr") { workflow.getSubmissions(assignment, currentUser.apparentUser) should be (Seq()) }
 
 		// Check transitivity. Submission1 isn't released but it's still ok to return the marker that it WILL be
-		assignment.getStudentsFirstMarker(sub1.universityId) should be (Some(m1))
-		assignment.getStudentsFirstMarker(sub2.universityId) should be (Some(m1))
-		assignment.getStudentsFirstMarker(sub3.universityId) should be (None)
-		assignment.getStudentsFirstMarker(sub4.universityId) should be (None)
+		assignment.getStudentsFirstMarker(sub1.usercode) should be (Some(m1))
+		assignment.getStudentsFirstMarker(sub2.usercode) should be (Some(m1))
+		assignment.getStudentsFirstMarker(sub3.usercode) should be (None)
+		assignment.getStudentsFirstMarker(sub4.usercode) should be (None)
 
-		assignment.getStudentsSecondMarker(sub1.universityId) should be (None)
-		assignment.getStudentsSecondMarker(sub2.universityId) should be (None)
-		assignment.getStudentsSecondMarker(sub3.universityId) should be (None)
-		assignment.getStudentsSecondMarker(sub4.universityId) should be (Some(m3))
+		assignment.getStudentsSecondMarker(sub1.usercode) should be (None)
+		assignment.getStudentsSecondMarker(sub2.usercode) should be (None)
+		assignment.getStudentsSecondMarker(sub3.usercode) should be (None)
+		assignment.getStudentsSecondMarker(sub4.usercode) should be (Some(m3))
 	}}
 
 	@Test def convertToObject() {

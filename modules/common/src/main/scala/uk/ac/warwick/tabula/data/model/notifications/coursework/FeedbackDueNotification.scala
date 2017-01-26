@@ -92,13 +92,13 @@ class FeedbackDueExtensionNotification
 	final def extension: Extension = item.entity
 
 	override final def assignment: Assignment = extension.assignment
-	def submission: Option[Submission] = assignment.findSubmission(extension.universityId)
+	def submission: Option[Submission] = assignment.findSubmission(extension.usercode)
 
-	override final def title: String = "%s: Feedback for %s for \"%s\" is due to be published".format(assignment.module.code.toUpperCase, extension.universityId, assignment.name)
+	override final def title: String = "%s: Feedback for %s for \"%s\" is due to be published".format(assignment.module.code.toUpperCase, extension.studentIdentifier, assignment.name)
 
 	override final def recipients: Seq[User] = {
 		// only send to recipients if the assignments needs feedback publishing and the student actually submitted
-		if (submission.nonEmpty && deadline.nonEmpty && assignment.needsFeedbackPublishingFor(extension.universityId)) {
+		if (submission.nonEmpty && deadline.nonEmpty && assignment.needsFeedbackPublishingFor(extension.usercode)) {
 			val moduleAndDepartmentService = Wire[ModuleAndDepartmentService]
 			moduleAndDepartmentService.getModuleByCode(assignment.module.code)
 				.getOrElse(throw new IllegalStateException("No such module"))

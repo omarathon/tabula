@@ -61,6 +61,9 @@ class CurrentUser(
 	/** User code of the apparent user. */
 	def userId: String = apparentUser.getUserId
 
+	/** Prefer university ID but provide usercode when not available */
+	def studentIdentifier: String = Option(apparentUser.getWarwickId).getOrElse(apparentUser.getUserId)
+
 	/** Is of type Postgraduate research student (FT )? (includes PT) */
 	def isPGR: Boolean = apparentUser.getExtraProperty("warwickitsclass") == "PG(R)"
 
@@ -99,6 +102,8 @@ object CurrentUser {
 	val keyName = "CurrentUser"
 	val masqueradeCookie = "tabulaMasqueradeAs"
 	val godModeCookie = "tabulaGodMode"
+
+	def studentIdentifier(user:User) = Option(user.getWarwickId).getOrElse(user.getUserId)
 }
 
 object NoCurrentUser {

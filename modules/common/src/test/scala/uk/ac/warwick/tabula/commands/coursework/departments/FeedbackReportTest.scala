@@ -1,7 +1,6 @@
 package uk.ac.warwick.tabula.commands.coursework.departments
 
 import java.util.Date
-import org.joda.time.DateTime
 
 import scala.collection.JavaConverters._
 import org.apache.poi.ss.usermodel.Cell
@@ -9,7 +8,6 @@ import org.apache.poi.xssf.usermodel.XSSFRow
 import org.joda.time.base.AbstractInstant
 import uk.ac.warwick.tabula.TestBase
 import uk.ac.warwick.tabula.services.coursework.feedbackreport.FeedbackReport
-import uk.ac.warwick.userlookup.User
 
 // scalastyle:off
 class FeedbackReportTest extends TestBase with ReportWorld {
@@ -17,7 +15,7 @@ class FeedbackReportTest extends TestBase with ReportWorld {
 
 	@Test
 	def simpleGetFeedbackTest() {
-		val publishes = auditEventQueryMethods.publishFeedbackForStudent(assignmentOne, idFormat(1))
+		val publishes = auditEventQueryMethods.publishFeedbackForStudent(assignmentOne, "u"+idFormat(1))
 		publishes.futureValue.size should be (1)
 	}
 
