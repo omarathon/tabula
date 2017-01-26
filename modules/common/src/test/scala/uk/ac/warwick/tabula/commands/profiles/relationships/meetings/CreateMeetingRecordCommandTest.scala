@@ -3,14 +3,14 @@ package uk.ac.warwick.tabula.commands.profiles.relationships.meetings
 import org.joda.time.{DateTime, DateTimeConstants}
 import org.springframework.validation.BindException
 import org.springframework.web.multipart.MultipartFile
+import uk.ac.warwick.tabula.DateFormats.{DatePickerFormatter, TimePickerFormatter}
 import uk.ac.warwick.tabula._
 import uk.ac.warwick.tabula.commands.UploadedFile
-import uk.ac.warwick.tabula.data.{FileDao, FileDaoComponent}
+import uk.ac.warwick.tabula.data.FileDao
 import uk.ac.warwick.tabula.data.model.MeetingFormat._
 import uk.ac.warwick.tabula.data.model.{ExternalStudentRelationship, _}
 import uk.ac.warwick.tabula.services.attendancemonitoring.{AttendanceMonitoringMeetingRecordService, AttendanceMonitoringMeetingRecordServiceComponent}
 import uk.ac.warwick.tabula.services.{FileAttachmentService, FileAttachmentServiceComponent, MeetingRecordService, MeetingRecordServiceComponent}
-import uk.ac.warwick.tabula.DateFormats.{DateTimePickerFormatter, TimePickerFormatter, DatePickerFormatter}
 
 import scala.collection.JavaConverters._
 
@@ -57,6 +57,8 @@ class CreateMeetingRecordCommandTest extends TestBase with Mockito {
 		validator.title = "A title"
 		validator.format = FaceToFace
 		validator.meetingDateTime = dateTime(2007, DateTimeConstants.MARCH) // > 5 years ago
+		validator.meetingDateStr = validator.meetingDateTime.toString(DatePickerFormatter)
+		validator.meetingTimeStr = validator.meetingDateTime.toString(TimePickerFormatter)
 
 		var errors = new BindException(validator, "command")
 		validator.validate(errors)
@@ -69,6 +71,8 @@ class CreateMeetingRecordCommandTest extends TestBase with Mockito {
 	@Test
 	def invalidEmptyTitle(): Unit = withUser("cuscav") { withFakeTime(aprilFool) { new ValidationFixture {
 		validator.meetingDateTime = marchHare
+		validator.meetingDateStr = validator.meetingDateTime.toString(DatePickerFormatter)
+		validator.meetingTimeStr = validator.meetingDateTime.toString(TimePickerFormatter)
 		validator.format = FaceToFace
 		validator.title = ""
 
@@ -83,6 +87,8 @@ class CreateMeetingRecordCommandTest extends TestBase with Mockito {
 	@Test
 	def invalidEmptyFormat(): Unit = withUser("cuscav") { withFakeTime(aprilFool) { new ValidationFixture {
 		validator.meetingDateTime = marchHare
+		validator.meetingDateStr = validator.meetingDateTime.toString(DatePickerFormatter)
+		validator.meetingTimeStr = validator.meetingDateTime.toString(TimePickerFormatter)
 		validator.title = "A good title"
 		validator.format = null
 
@@ -97,6 +103,8 @@ class CreateMeetingRecordCommandTest extends TestBase with Mockito {
 	@Test
 	def valid(): Unit = withUser("cuscav") { withFakeTime(aprilFool) { new ValidationFixture {
 		validator.meetingDateTime = marchHare
+		validator.meetingDateStr = validator.meetingDateTime.toString(DatePickerFormatter)
+		validator.meetingTimeStr = validator.meetingDateTime.toString(TimePickerFormatter)
 		validator.title = "A good title"
 		validator.format = Email
 
