@@ -113,6 +113,9 @@ trait MeetingRecordValidation extends SelfValidating {
 
 		rejectIfEmptyOrWhitespace(errors, "format", "NotEmpty")
 
+		rejectIfEmptyOrWhitespace(errors, "meetingTimeStr", "NotEmpty")
+		rejectIfEmptyOrWhitespace(errors, "meetingEndTimeStr", "NotEmpty")
+
 		val dateToCheck: DateTime = isRealTime match {
 			case true => meetingDateTime
 			case false => meetingDate.toDateTimeAtStartOfDay
@@ -132,6 +135,12 @@ trait MeetingRecordValidation extends SelfValidating {
 			} else if (dateToCheck.isBefore(DateTime.now.minusYears(MeetingRecord.MeetingTooOldThresholdYears))) {
 				errors.rejectValue("meetingDateStr", "meetingRecord.date.prehistoric")
 			}
+		}
+		if(meetingTimeStr.equals("")) {
+			errors.rejectValue("meetingTimeStr", "meetingRecord.starttime.missing")
+		}
+		if(meetingEndTimeStr.equals("")) {
+			errors.rejectValue("meetingEndTimeStr", "meetingRecord.endtime.missing")
 		}
 	}
 }
