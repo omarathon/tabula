@@ -1,5 +1,7 @@
 package uk.ac.warwick.tabula.commands.profiles.relationships.meetings
 
+import org.joda.time.DateTime
+import uk.ac.warwick.tabula.DateFormats.DateTimePickerFormatter
 import org.springframework.validation.ValidationUtils._
 import org.springframework.validation.Errors
 import uk.ac.warwick.tabula.FeaturesComponent
@@ -27,7 +29,12 @@ trait ModifyMeetingRecordValidation extends MeetingRecordValidation {
 	override def validate(errors: Errors) {
 		super.validate(errors)
 		rejectIfEmptyOrWhitespace(errors, "relationship", "NotEmpty")
+
+		if(DateTimePickerFormatter.parseDateTime(meetingDateStr+" "+meetingTimeStr).compareTo(DateTime.now) > 0){
+			errors.rejectValue("meetingDateStr", "meetingRecord.date.recordedforfuture")
+		}
 	}
+
 
 }
 

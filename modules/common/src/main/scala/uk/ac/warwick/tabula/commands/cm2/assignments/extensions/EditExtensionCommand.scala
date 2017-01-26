@@ -84,7 +84,7 @@ trait EditExtensionCommandState {
 	def submitter: CurrentUser
 	def action: String
 
-	@WithinYears(maxFuture = 3) @DateTimeFormat(pattern = DateFormats.DateTimePicker)
+	@WithinYears(maxFuture = 3) @DateTimeFormat(pattern = DateFormats.DateTimePickerPattern)
 	var expiryDate: DateTime =_
 	var reviewerComments: String =_
 	var state: ExtensionState = ExtensionState.Unreviewed

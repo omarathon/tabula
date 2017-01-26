@@ -62,8 +62,15 @@ abstract class AbstractMeetingRecord extends GeneratedId with PermissionsTarget 
 	var relationship: StudentRelationship = _
 
 	@Column(name="meeting_date")
-	@DateTimeFormat(pattern = DateFormats.DateTimePicker)
+	@DateTimeFormat(pattern = DateFormats.DateTimePickerPattern)
 	var meetingDate: DateTime = _
+
+	@Column(name="meeting_end_date")
+	@DateTimeFormat(pattern = DateFormats.DateTimePickerPattern)
+	var meetingEndDate: DateTime = _
+
+	@Column(name="meeting_location")
+	var meetingLocation: String = _
 
 	@Column(name="meeting_format")
 	@Type(`type` = "uk.ac.warwick.tabula.data.model.MeetingFormatUserType")
@@ -111,7 +118,7 @@ abstract class AbstractMeetingRecord extends GeneratedId with PermissionsTarget 
 			description = description,
 			eventType = TimetableEventType.Meeting,
 			start = meetingDate.toLocalDateTime,
-			end = meetingDate.plusHours(1).toLocalDateTime,
+			end = meetingEndDate.toLocalDateTime,
 			location = if (format == MeetingFormat.FaceToFace) None else Option(format).map { _.description }.map(NamedLocation),
 			parent = TimetableEvent.Parent(relationship.relationshipType),
 			comments = None,

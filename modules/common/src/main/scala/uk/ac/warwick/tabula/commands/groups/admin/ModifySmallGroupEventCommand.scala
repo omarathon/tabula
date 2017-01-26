@@ -132,7 +132,7 @@ abstract class ModifySmallGroupEventCommandInternal
 	def copyFrom(event: SmallGroupEvent) {
 		title = event.title
 
-		Option(event.location).foreach {
+		  Option(event.location).foreach {
 			case NamedLocation(name) => location = name
 			case MapLocation(name, lid) =>
 				location = name

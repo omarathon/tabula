@@ -1,6 +1,7 @@
 package uk.ac.warwick.tabula.commands.profiles.relationships.meetings
 
 import org.joda.time.DateTime
+import uk.ac.warwick.tabula.DateFormats.{DatePickerFormatter, TimePickerFormatter}
 import uk.ac.warwick.tabula.commands._
 import uk.ac.warwick.tabula.data.model._
 import uk.ac.warwick.tabula.data.model.notifications.profiles.meetingrecord.{EditedMeetingRecordApprovalNotification, MeetingRecordRejectedNotification}
@@ -52,9 +53,20 @@ trait PopulateMeetingRecordCommand extends PopulateOnForm {
 		description = meetingRecord.description
 		isRealTime = meetingRecord.isRealTime
 		meetingRecord.isRealTime match {
-			case true => meetingDateTime = meetingRecord.meetingDate
-			case false => meetingDate = meetingRecord.meetingDate.toLocalDate
+			case true =>
+				meetingDateStr = meetingRecord.meetingDate.toString(DatePickerFormatter)
+				meetingTimeStr = meetingRecord.meetingDate.withHourOfDay(meetingRecord.meetingDate.getHourOfDay).toString(TimePickerFormatter)
+				meetingEndTimeStr = meetingRecord.meetingEndDate.withHourOfDay(meetingRecord.meetingEndDate.getHourOfDay).toString(TimePickerFormatter)
+
+			case false =>
+				meetingDate = meetingRecord.meetingDate.toLocalDate
+				meetingTime = meetingRecord.meetingDate.withHourOfDay(meetingRecord.meetingDate.getHourOfDay)
+				meetingEndTime = meetingRecord.meetingEndDate.withHourOfDay(meetingRecord.meetingEndDate.getHourOfDay)
 		}
+
+		meetingLocation = meetingRecord.meetingLocation
+		meetingLocationId = meetingRecord.meetingLocation
+
 		format = meetingRecord.format
 		attachedFiles = meetingRecord.attachments
 	}

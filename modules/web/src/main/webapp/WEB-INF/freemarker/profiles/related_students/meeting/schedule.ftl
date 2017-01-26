@@ -73,9 +73,11 @@
 					});
 				</script>
 
-				<@bs3form.labelled_form_group path="meetingDate" labelText="Date of meeting">
+			<div class="form-inline">
+
+				<@bs3form.labelled_form_group path="meetingDateStr" labelText="Date of meeting">
 					<div class="input-group">
-						<@f.input type="text" path="meetingDate" cssClass="form-control date-time-minute-picker" placeholder="Pick the date" />
+						<@f.input type="text" path="meetingDateStr" cssClass="form-control date-picker" placeholder="Pick the date" />
 						<span class="input-group-addon"><i class="fa fa-calendar"></i></span>
 					</div>
 					<div class="help-block alert alert-info hidden">
@@ -86,15 +88,15 @@
 				<script>
 					jQuery(function($){
 						var $xhr = null;
-						$('#meetingDate').on('change', function(){
+						$('#meetingDateStr').on('change', function(){
 							if ($xhr) $xhr.abort();
 							var $this = $(this), meetingDateTime = $this.val();
 							if (meetingDateTime.length > 0) {
-								$xhr = jQuery.get('/ajax/academicyearfromdate', { date: meetingDateTime }, function(data){
+								$xhr = jQuery.get('/ajax/academicyearfromdate', { date: meetingDateStr }, function(data){
 									if (data.startYear != '${academicYear.startYear?c}') {
 										$this.closest('.form-group').find('.help-block')
-											.find('span.year').text(data.string).end()
-											.removeClass('hidden');
+												.find('span.year').text(data.string).end()
+												.removeClass('hidden');
 									} else {
 										$this.closest('.form-group').find('.help-block').addClass('hidden');
 									}
@@ -107,11 +109,34 @@
 					});
 				</script>
 
+
+				<@bs3form.labelled_form_group path="meetingTimeStr" labelText="Time of meeting">
+					<div class="input-group">
+						<@f.input type="text" path="meetingTimeStr" cssClass="form-control time-picker" placeholder="Pick the time" />
+						<span class="input-group-addon"><i class="fa fa-calendar"></i></span>
+					</div>
+				</@bs3form.labelled_form_group>
+
+				<@bs3form.labelled_form_group path="meetingEndTimeStr" labelText="End time of meeting">
+					<div class="input-group">
+						<@f.input type="text" path="meetingEndTimeStr" cssClass="form-control time-picker" placeholder="Pick the end time" />
+						<span class="input-group-addon"><i class="fa fa-calendar"></i></span>
+					</div>
+				</@bs3form.labelled_form_group>
+
+			</div>
+			<div style="clear: both;"><!-- --></div>
+
 				<@bs3form.labelled_form_group path="format" labelText="Format">
 					<@f.select path="format" cssClass="form-control">
 						<@f.option disabled=true selected="true" label="Please select one..." />
 						<@f.options items=formats itemLabel="description" itemValue="code" />
 					</@f.select>
+				</@bs3form.labelled_form_group>
+
+				<@bs3form.labelled_form_group path="meetingLocation" labelText="Location">
+					<@f.hidden path="meetingLocationId" />
+					<@f.input path="meetingLocation" cssClass="form-control location-picker" />
 				</@bs3form.labelled_form_group>
 
 				<#-- file upload (TAB-359) -->
