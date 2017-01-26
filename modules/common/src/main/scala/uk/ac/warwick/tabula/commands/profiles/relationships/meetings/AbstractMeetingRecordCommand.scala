@@ -125,15 +125,12 @@ trait MeetingRecordValidation extends SelfValidating {
 		}
 
 		if (dateToCheck == null) {
-			errors.rejectValue("meetingDate", "meetingRecord.date.missing")
-			errors.rejectValue("meetingDateTime", "meetingRecord.date.missing")
+			errors.rejectValue("meetingDateStr", "meetingRecord.date.missing")
 		} else {
 			if (dateToCheck.isAfter(DateTime.now)) {
-				errors.rejectValue("meetingDate", "meetingRecord.date.future")
-				errors.rejectValue("meetingDateTime", "meetingRecord.date.future")
+				errors.rejectValue("meetingDateStr", "meetingRecord.date.future")
 			} else if (dateToCheck.isBefore(DateTime.now.minusYears(MeetingRecord.MeetingTooOldThresholdYears))) {
-				errors.rejectValue("meetingDate", "meetingRecord.date.prehistoric")
-				errors.rejectValue("meetingDateTime", "meetingRecord.date.prehistoric")
+				errors.rejectValue("meetingDateStr", "meetingRecord.date.prehistoric")
 			}
 		}
 	}

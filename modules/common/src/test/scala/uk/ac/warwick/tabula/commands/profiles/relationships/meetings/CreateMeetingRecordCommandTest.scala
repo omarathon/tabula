@@ -45,7 +45,7 @@ class CreateMeetingRecordCommandTest extends TestBase with Mockito {
 		validator.validate(errors)
 		errors.hasErrors should be (true)
 		errors.getErrorCount should be (2)
-		errors.getFieldErrors.asScala.map(_.getField).contains("meetingDateTime") should be (true)
+		errors.getFieldErrors.asScala.map(_.getField).contains("meetingDateStr") should be (true)
 		errors.getFieldError.getCode should be ("meetingRecord.date.future")
 	}}}
 
