@@ -10,6 +10,7 @@ import uk.ac.warwick.tabula.data.model.MeetingFormat._
 import uk.ac.warwick.tabula.data.model.{ExternalStudentRelationship, _}
 import uk.ac.warwick.tabula.services.attendancemonitoring.{AttendanceMonitoringMeetingRecordService, AttendanceMonitoringMeetingRecordServiceComponent}
 import uk.ac.warwick.tabula.services.{FileAttachmentService, FileAttachmentServiceComponent, MeetingRecordService, MeetingRecordServiceComponent}
+import uk.ac.warwick.tabula.DateFormats.{DateTimePickerFormatter, TimePickerFormatter, DatePickerFormatter}
 
 import scala.collection.JavaConverters._
 
@@ -40,7 +41,9 @@ class CreateMeetingRecordCommandTest extends TestBase with Mockito {
 		validator.title = "A title"
 		validator.format = FaceToFace
 		validator.meetingDateTime  = dateTime(3903, DateTimeConstants.MARCH) // it's the future
-		
+		validator.meetingDateStr = validator.meetingDateTime.toString(DatePickerFormatter)
+		validator.meetingTimeStr = validator.meetingDateTime.toString(TimePickerFormatter)
+
 		var errors = new BindException(validator, "command")
 		validator.validate(errors)
 		errors.hasErrors should be (true)

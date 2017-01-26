@@ -35,7 +35,6 @@ trait ModifyMeetingRecordValidation extends MeetingRecordValidation {
 		}
 	}
 
-
 }
 
 trait ModifyMeetingRecordPermissions extends RequiresPermissionsChecking with PermissionsCheckingMethods {
