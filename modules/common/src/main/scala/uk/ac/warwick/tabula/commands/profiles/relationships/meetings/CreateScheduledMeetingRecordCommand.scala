@@ -75,7 +75,7 @@ trait CreateScheduledMeetingRecordCommandValidation extends SelfValidating with 
 			errors.rejectValue("meetingTimeStr", "meetingRecord.date.endbeforestart")
 		}
 		if(DateTimePickerFormatter.parseDateTime(meetingDateStr+" "+meetingTimeStr).compareTo(DateTime.now) <= 0){
-			errors.rejectValue("meetingDateStr", "meetingRecord.date.scheduledforpast")
+			errors.rejectValue("meetingDateStr", "meetingRecord.date.past")
 		}
 	}
 }

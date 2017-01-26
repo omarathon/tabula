@@ -31,7 +31,7 @@ trait ModifyMeetingRecordValidation extends MeetingRecordValidation {
 		rejectIfEmptyOrWhitespace(errors, "relationship", "NotEmpty")
 
 		if(DateTimePickerFormatter.parseDateTime(meetingDateStr+" "+meetingTimeStr).compareTo(DateTime.now) > 0){
-			errors.rejectValue("meetingDateStr", "meetingRecord.date.recordedforfuture")
+			errors.rejectValue("meetingDateStr", "meetingRecord.date.future")
 		}
 	}
 
