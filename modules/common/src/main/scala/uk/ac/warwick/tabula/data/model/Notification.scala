@@ -116,15 +116,15 @@ abstract class Notification[A >: Null <: ToEntityReference, B]
 
 	@Column(nullable=false)
 	@Type(`type`="uk.ac.warwick.tabula.data.model.SSOUserType")
-	final var agent: User = null // the actor in open social activity speak
+	final var agent: User = _ // the actor in open social activity speak
 
 	@OneToMany(mappedBy="notification", fetch=FetchType.LAZY, targetEntity=classOf[EntityReference[_]], cascade=Array(CascadeType.ALL))
 	@BatchSize(size = 1)
 	var items: JList[EntityReference[A]] = JArrayList()
 
-	def entities: Seq[A] = items.asScala.map { _.entity }.toSeq
+	def entities: Seq[A] = items.asScala.map { _.entity }
 
-	var created: DateTime = null
+	var created: DateTime = _
 
 	// the default priority is info. More important notifications should manually set this value to something higher.
 	@Type(`type` = "uk.ac.warwick.tabula.data.model.NotificationPriorityUserType")
@@ -205,7 +205,7 @@ abstract class Notification[A >: Null <: ToEntityReference, B]
 	} catch {
 		// Can happen if reference to an entity has since been deleted, e.g.
 		// a submission is resubmitted and the old submission is removed.
-		case onf: ObjectNotFoundException => None
+		case _: ObjectNotFoundException => None
 	}
 
 	// This used to implement the trait that the Hibernate listener listens to.
@@ -233,7 +233,7 @@ abstract class NotificationWithTarget[A >: Null <: ToEntityReference, B >: Null 
 	@Access(value=AccessType.PROPERTY)
 	@OneToOne(cascade = Array(CascadeType.ALL), targetEntity = classOf[EntityReference[B]], fetch = FetchType.LAZY)
 	@BeanProperty
-	var target: EntityReference[B] = null
+	var target: EntityReference[B] = _
 }
 
 object FreemarkerModel {
@@ -250,7 +250,7 @@ trait SingleItemNotification[A >: Null <: ToEntityReference] {
 		try {
 			items.get(0)
 		} catch {
-			case e: IndexOutOfBoundsException => throw new ObjectNotFoundException("", "")
+			case _: IndexOutOfBoundsException => throw new ObjectNotFoundException("", "")
 		}
 }
 
@@ -259,7 +259,7 @@ trait UserIdRecipientNotification extends SingleRecipientNotification with Notif
 
 	this : UserLookupComponent =>
 
-	var recipientUserId: String = null
+	var recipientUserId: String = _
 	def recipient: User = userLookup.getUserByUserId(recipientUserId)
 
 	override def onPreSave(newRecord: Boolean) {
@@ -275,7 +275,7 @@ trait NotificationPreSaveBehaviour {
 trait UniversityIdRecipientNotification extends SingleRecipientNotification with NotificationPreSaveBehaviour {
 	this : UserLookupComponent =>
 
-	var recipientUniversityId: String = null
+	var recipientUniversityId: String = _
 	def recipient: User = userLookup.getUserByWarwickUniId(recipientUniversityId)
 
 	override def onPreSave(newRecord: Boolean) {
@@ -367,5 +367,11 @@ trait RecipientCompletedActionRequiredNotification extends ActionRequiredNotific
 
 	override final def actionCompleted(user: User): Unit = transactional() {
 		dismiss(user)
+	}
+
+	final def actionCompletedByOther(user: User): Unit = transactional() {
+		completed = true
+		completedBy = user.getUserId
+		completedOn = DateTime.now
 	}
 }
