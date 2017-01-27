@@ -52,18 +52,19 @@ trait PopulateMeetingRecordCommand extends PopulateOnForm {
 		title = meetingRecord.title
 		description = meetingRecord.description
 		isRealTime = meetingRecord.isRealTime
-		meetingRecord.isRealTime match {
-			case true =>
-				meetingDateStr = meetingRecord.meetingDate.toString(DatePickerFormatter)
-				meetingTimeStr = meetingRecord.meetingDate.withHourOfDay(meetingRecord.meetingDate.getHourOfDay).toString(TimePickerFormatter)
-				meetingEndTimeStr = meetingRecord.meetingEndDate.withHourOfDay(meetingRecord.meetingEndDate.getHourOfDay).toString(TimePickerFormatter)
+		if((meetingDateStr != null)&&(!meetingDateStr.equals(""))&&(meetingTimeStr != null)&&(!meetingTimeStr.equals(""))&&(meetingEndTimeStr != null)&&(!meetingEndTimeStr.equals(""))) {
+			meetingRecord.isRealTime match {
+				case true =>
+					meetingDateStr = meetingRecord.meetingDate.toString(DatePickerFormatter)
+					meetingTimeStr = meetingRecord.meetingDate.withHourOfDay(meetingRecord.meetingDate.getHourOfDay).toString(TimePickerFormatter)
+					meetingEndTimeStr = meetingRecord.meetingEndDate.withHourOfDay(meetingRecord.meetingEndDate.getHourOfDay).toString(TimePickerFormatter)
 
-			case false =>
-				meetingDate = meetingRecord.meetingDate.toLocalDate
-				meetingTime = meetingRecord.meetingDate.withHourOfDay(meetingRecord.meetingDate.getHourOfDay)
-				meetingEndTime = meetingRecord.meetingEndDate.withHourOfDay(meetingRecord.meetingEndDate.getHourOfDay)
+				case false =>
+					meetingDate = meetingRecord.meetingDate.toLocalDate
+					meetingTime = meetingRecord.meetingDate.withHourOfDay(meetingRecord.meetingDate.getHourOfDay)
+					meetingEndTime = meetingRecord.meetingEndDate.withHourOfDay(meetingRecord.meetingEndDate.getHourOfDay)
+			}
 		}
-
 		meetingLocation = meetingRecord.meetingLocation
 		meetingLocationId = meetingRecord.meetingLocation
 

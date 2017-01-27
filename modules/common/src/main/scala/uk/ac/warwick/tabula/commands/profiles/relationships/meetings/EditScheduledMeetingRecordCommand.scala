@@ -60,9 +60,10 @@ class EditScheduledMeetingRecordCommand (val editor: Member, val meetingRecord: 
 		meetingRecord.description = description
 		val isRescheduled = meetingRecord.meetingDate != DateTimePickerFormatter.parseDateTime(meetingDateStr+" "+meetingTimeStr).withHourOfDay(DateTimePickerFormatter.parseDateTime(meetingDateStr+" "+meetingTimeStr).getHourOfDay)
 
-		meetingRecord.meetingDate = DateTimePickerFormatter.parseDateTime(meetingDateStr+" "+meetingTimeStr).withHourOfDay(DateTimePickerFormatter.parseDateTime(meetingDateStr+" "+meetingTimeStr).getHourOfDay)
-		meetingRecord.meetingEndDate = DateTimePickerFormatter.parseDateTime(meetingDateStr+" "+meetingEndTimeStr).withHourOfDay(DateTimePickerFormatter.parseDateTime(meetingDateStr+" "+meetingEndTimeStr).getHourOfDay)
-
+		if((meetingDateStr != null)&&(!meetingDateStr.equals(""))&&(meetingTimeStr != null)&&(!meetingTimeStr.equals(""))&&(meetingEndTimeStr != null)&&(!meetingEndTimeStr.equals(""))) {
+			meetingRecord.meetingDate = DateTimePickerFormatter.parseDateTime(meetingDateStr + " " + meetingTimeStr).withHourOfDay(DateTimePickerFormatter.parseDateTime(meetingDateStr + " " + meetingTimeStr).getHourOfDay)
+			meetingRecord.meetingEndDate = DateTimePickerFormatter.parseDateTime(meetingDateStr + " " + meetingEndTimeStr).withHourOfDay(DateTimePickerFormatter.parseDateTime(meetingDateStr + " " + meetingEndTimeStr).getHourOfDay)
+		}
 		meetingRecord.lastUpdatedDate = DateTime.now
 		meetingRecord.format = format
 
@@ -87,9 +88,11 @@ trait PopulateScheduledMeetingRecordCommand extends PopulateOnForm {
 		title = meetingRecord.title
 		description = meetingRecord.description
 
-		meetingDateStr = meetingRecord.meetingDate.toString(DatePickerFormatter)
-		meetingTimeStr = meetingRecord.meetingDate.withHourOfDay(meetingRecord.meetingDate.getHourOfDay).toString(TimePickerFormatter)
-		meetingEndTimeStr = meetingRecord.meetingEndDate.withHourOfDay(meetingRecord.meetingEndDate.getHourOfDay).toString(TimePickerFormatter)
+		if((meetingDateStr != null)&&(!meetingDateStr.equals(""))&&(meetingTimeStr != null)&&(!meetingTimeStr.equals(""))&&(meetingEndTimeStr != null)&&(!meetingEndTimeStr.equals(""))) {
+			meetingDateStr = meetingRecord.meetingDate.toString(DatePickerFormatter)
+			meetingTimeStr = meetingRecord.meetingDate.withHourOfDay(meetingRecord.meetingDate.getHourOfDay).toString(TimePickerFormatter)
+			meetingEndTimeStr = meetingRecord.meetingEndDate.withHourOfDay(meetingRecord.meetingEndDate.getHourOfDay).toString(TimePickerFormatter)
+		}
 
 		meetingLocation = meetingRecord.meetingLocation
 
@@ -106,7 +109,7 @@ trait EditScheduledMeetingRecordCommandValidation extends SelfValidating with Sc
 
 		sharedValidation(errors, title, meetingDateStr, meetingTimeStr, meetingEndTimeStr)
 		meetingRecordService.listScheduled(Set(meetingRecord.relationship), Some(editor)).foreach(
-			m => if (m.meetingDate == DateTimePickerFormatter.parseDateTime(meetingDateStr+" "+meetingTimeStr) && m.id != meetingRecord.id) errors.rejectValue("meetingDate", "meetingRecord.date.duplicate")
+			m => if((meetingDateStr != null)&&(!meetingDateStr.equals(""))&&(meetingTimeStr != null)&&(!meetingTimeStr.equals(""))&&(meetingEndTimeStr != null)&&(!meetingEndTimeStr.equals(""))){ if (m.meetingDate == DateTimePickerFormatter.parseDateTime(meetingDateStr+" "+meetingTimeStr) && m.id != meetingRecord.id) errors.rejectValue("meetingDate", "meetingRecord.date.duplicate")}
 		)
 	}
 }

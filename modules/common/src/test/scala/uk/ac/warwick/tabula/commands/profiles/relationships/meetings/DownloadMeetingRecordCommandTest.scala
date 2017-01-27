@@ -2,6 +2,7 @@ package uk.ac.warwick.tabula.commands.profiles.relationships.meetings
 
 import org.joda.time.{DateTime, DateTimeConstants}
 import org.springframework.web.multipart.MultipartFile
+import uk.ac.warwick.tabula.DateFormats._
 import uk.ac.warwick.tabula._
 import uk.ac.warwick.tabula.commands.UploadedFile
 import uk.ac.warwick.tabula.data.FileDao
@@ -51,7 +52,9 @@ class DownloadMeetingRecordCommandTest extends TestBase with Mockito {
 
 		createMeetingRecordCommand.title = "Title"
 		createMeetingRecordCommand.format = FaceToFace
-		createMeetingRecordCommand.meetingDateTime  = dateTime(3903, DateTimeConstants.MARCH) // it's the future
+		createMeetingRecordCommand.meetingDateStr  = dateTime(3903, DateTimeConstants.MARCH).toString(DatePickerFormatter) // it's the future
+		createMeetingRecordCommand.meetingTimeStr  = dateTime(3903, DateTimeConstants.MARCH).toString(TimePickerFormatter)
+		createMeetingRecordCommand.meetingEndTimeStr  = dateTime(3903, DateTimeConstants.MARCH).plusHours(1).toString(TimePickerFormatter)
 		createMeetingRecordCommand.description = "Lovely words"
 		createMeetingRecordCommand.file = uploadedFile
 
