@@ -86,9 +86,9 @@ class CreateScheduledMeetingRecordCommandTest extends TestBase with Mockito {
 		val errors = new BindException(command, "command")
 		command.format = MeetingFormat.FaceToFace
 		command.title = "A Title"
-		command.meetingDateStr = new DateTime().plusDays(1).toString(DatePickerFormatter)
-		command.meetingTimeStr = new DateTime().plusDays(1).toString(TimePickerFormatter)
-		command.meetingEndTimeStr = new DateTime().plusDays(1).plusHours(1).toString(TimePickerFormatter)
+		command.meetingDateStr = new DateTime().plusWeeks(1).toString(DatePickerFormatter)
+		command.meetingTimeStr = new DateTime().plusWeeks(1).toString(TimePickerFormatter)
+		command.meetingEndTimeStr = new DateTime().plusWeeks(1).plusHours(1).toString(TimePickerFormatter)
 		command.validate(errors)
 		errors.hasErrors should be {true}
 		errors.getFieldErrorCount should be(1)

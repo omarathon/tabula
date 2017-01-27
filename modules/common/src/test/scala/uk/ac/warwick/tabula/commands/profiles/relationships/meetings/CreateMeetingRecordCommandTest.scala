@@ -72,9 +72,12 @@ class CreateMeetingRecordCommandTest extends TestBase with Mockito {
 	def invalidTimes(): Unit = withUser("cuscav") { withFakeTime(aprilFool) { new ValidationFixture {
 		validator.title = "A title"
 		validator.format = FaceToFace
-		validator.meetingDateTime = new DateTime().minusDays(2)
+
+		validator.meetingDateTime = new DateTime().minusDays(1)
 		validator.meetingDateStr = validator.meetingDateTime.toString(DatePickerFormatter)
 		validator.meetingTimeStr = validator.meetingDateTime.toString(TimePickerFormatter)
+
+		validator.meetingEndDateTime = new DateTime().minusDays(1).minusHours(1)
 		validator.meetingEndTimeStr = validator.meetingDateTime.minusHours(1).toString(TimePickerFormatter) //end is before the start
 
 		var errors = new BindException(validator, "command")

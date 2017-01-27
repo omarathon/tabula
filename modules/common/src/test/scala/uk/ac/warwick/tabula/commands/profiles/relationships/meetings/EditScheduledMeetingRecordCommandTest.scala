@@ -64,7 +64,7 @@ class EditScheduledMeetingRecordCommandTest  extends TestBase with Mockito {
 		command.description = newDescription
 		command.format = newFormat
 		command.meetingDateStr = newMeetingDate.toString(DatePickerFormatter)
-		command.meetingTimeStr = newMeetingDate.plusHours(1).toString(TimePickerFormatter)
+		command.meetingTimeStr = newMeetingDate.toString(TimePickerFormatter)
 		command.meetingEndTimeStr = newMeetingDate.plusHours(1).toString(TimePickerFormatter)
 
 		Thread.sleep(2) // otherwise sometimes the last updated date is not after created date and that assertion fails
@@ -131,7 +131,7 @@ class EditScheduledMeetingRecordCommandTest  extends TestBase with Mockito {
 		command.validate(errors)
 		errors.hasErrors should be (true)
 		errors.getFieldErrorCount should be(1)
-		errors.getFieldErrors("meetingDate").size should be(1)
+		errors.getFieldErrors("meetingDateStr").size should be(1)
 	}}
 
 	@Test
@@ -141,6 +141,8 @@ class EditScheduledMeetingRecordCommandTest  extends TestBase with Mockito {
 
 		val meetingWithDupeDate: ScheduledMeetingRecord = new ScheduledMeetingRecord
 		meetingWithDupeDate.meetingDate = meetingTime
+		meetingWithDupeDate.meetingEndDate = meetingTime.plusHours(1)
+
 		meetingWithDupeDate.id = "A"
 
 		command.meetingRecord.id = "B"
@@ -156,7 +158,7 @@ class EditScheduledMeetingRecordCommandTest  extends TestBase with Mockito {
 		command.validate(errors)
 		errors.hasErrors should be (true)
 		errors.getFieldErrorCount should be(1)
-		errors.getFieldErrors("meetingDate").size should be(1)
+		errors.getFieldErrors("meetingDateStr").size should be(1)
 	}}
 
 	@Test
