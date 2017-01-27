@@ -10,7 +10,7 @@ import uk.ac.warwick.tabula.data.model.MeetingFormat._
 import uk.ac.warwick.tabula.data.model.{ExternalStudentRelationship, _}
 import uk.ac.warwick.tabula.services.attendancemonitoring.{AttendanceMonitoringMeetingRecordService, AttendanceMonitoringMeetingRecordServiceComponent}
 import uk.ac.warwick.tabula.services.{FileAttachmentService, FileAttachmentServiceComponent, MeetingRecordService, MeetingRecordServiceComponent}
-import uk.ac.warwick.tabula.DateFormats.{DateTimePickerFormatter, TimePickerFormatter, DatePickerFormatter}
+import uk.ac.warwick.tabula.DateFormats.{TimePickerFormatter, DatePickerFormatter}
 
 import scala.collection.JavaConverters._
 
@@ -90,7 +90,24 @@ class CreateMeetingRecordCommandTest extends TestBase with Mockito {
 		validator.meetingDateTime = marchHare
 		validator.meetingDateStr = validator.meetingDateTime.toString(DatePickerFormatter)
 		validator.meetingTimeStr = ""
-		validator.meetingEndTimeStr = validator.meetingDateTime.toString(TimePickerFormatter)
+		validator.meetingEndTimeStr = "10:00:00"
+		validator.title = "A good title"
+		validator.format = FaceToFace
+
+		var errors = new BindException(validator, "command")
+		validator.validate(errors)
+		errors.hasErrors should be (true)
+		errors.getErrorCount should be (1)
+		errors.getFieldError.getField should be ("meetingTimeStr")
+		errors.getFieldError.getCode should be ("NotEmpty")
+	}}}
+
+	@Test
+	def invalidEmptyEndTime(): Unit = withUser("cuscav") { withFakeTime(aprilFool) { new ValidationFixture {
+		validator.meetingDateTime = marchHare
+		validator.meetingDateStr = validator.meetingDateTime.toString(DatePickerFormatter)
+		validator.meetingTimeStr =  "09:00:00"
+		validator.meetingEndTimeStr = ""
 		validator.title = "A good title"
 		validator.format = FaceToFace
 
@@ -119,22 +136,6 @@ class CreateMeetingRecordCommandTest extends TestBase with Mockito {
 		errors.getFieldError.getCode should be ("NotEmpty")
 	}}}
 
-	@Test
-	def invalidEmptyEndTime(): Unit = withUser("cuscav") { withFakeTime(aprilFool) { new ValidationFixture {
-		validator.meetingDateTime = marchHare
-		validator.meetingDateStr = validator.meetingDateTime.toString(DatePickerFormatter)
-		validator.meetingTimeStr = validator.meetingDateTime.toString(TimePickerFormatter)
-		validator.meetingEndTimeStr = ""
-		validator.title = "A good title"
-		validator.format = FaceToFace
-
-		var errors = new BindException(validator, "command")
-		validator.validate(errors)
-		errors.hasErrors should be (true)
-		errors.getErrorCount should be (1)
-		errors.getFieldError.getField should be ("meetingEndTimeStr")
-		errors.getFieldError.getCode should be ("NotEmpty")
-	}}}
 
 	@Test
 	def invalidEmptyFormat(): Unit = withUser("cuscav") { withFakeTime(aprilFool) { new ValidationFixture {

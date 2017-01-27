@@ -156,7 +156,6 @@ trait MeetingRecordCommandRequest {
 	var description: String = _
 
 	var meetingDate: LocalDate = _
-
 	var meetingDateStr: String  = _
 	if(meetingDate != null){
 		meetingDateStr = meetingDate.toString(DatePickerFormatter)
@@ -167,11 +166,11 @@ trait MeetingRecordCommandRequest {
 
 	var meetingEndDate: LocalDate = _
 
-	var meetingEndTime: DateTime = DateTime.now.hourOfDay.roundFloorCopy
+	var meetingEndTime: DateTime = DateTime.now.plusHours(1).hourOfDay.roundFloorCopy
 	var meetingEndTimeStr: String  = meetingEndTime.toString(TimePickerFormatter)
 
 	var meetingDateTime: DateTime = DateTime.now.hourOfDay.roundFloorCopy
-	var meetingEndDateTime: DateTime = DateTime.now.hourOfDay.roundFloorCopy
+	var meetingEndDateTime: DateTime = DateTime.now.plusHours(1).hourOfDay.roundFloorCopy
 
 	var meetingLocation: String = _
 	var meetingLocationId: String = _
