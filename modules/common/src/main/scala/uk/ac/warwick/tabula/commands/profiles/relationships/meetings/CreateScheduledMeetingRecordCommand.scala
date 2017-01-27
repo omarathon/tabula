@@ -40,8 +40,11 @@ class CreateScheduledMeetingRecordCommand (val creator: Member, val relationship
 		scheduledMeeting.title = title
 		scheduledMeeting.description = description
 
-		scheduledMeeting.meetingDate = DateTimePickerFormatter.parseDateTime(meetingDateStr+" "+meetingTimeStr).withHourOfDay(DateTimePickerFormatter.parseDateTime(meetingDateStr+" "+meetingTimeStr).getHourOfDay)
-		scheduledMeeting.meetingEndDate = DateTimePickerFormatter.parseDateTime(meetingDateStr+" "+meetingEndTimeStr).withHourOfDay(DateTimePickerFormatter.parseDateTime(meetingDateStr+" "+meetingEndTimeStr).getHourOfDay)
+		if((meetingDateStr != null)&&(!meetingDateStr.equals(""))&&(meetingTimeStr != null)&&(!meetingTimeStr.equals(""))&&(meetingEndTimeStr != null)&&(!meetingEndTimeStr.equals(""))){
+			scheduledMeeting.meetingDate = DateTimePickerFormatter.parseDateTime(meetingDateStr+" "+meetingTimeStr).withHourOfDay(DateTimePickerFormatter.parseDateTime(meetingDateStr+" "+meetingTimeStr).getHourOfDay)
+			scheduledMeeting.meetingEndDate = DateTimePickerFormatter.parseDateTime(meetingDateStr+" "+meetingEndTimeStr).withHourOfDay(DateTimePickerFormatter.parseDateTime(meetingDateStr+" "+meetingEndTimeStr).getHourOfDay)
+		}
+
 		scheduledMeeting.meetingLocation = meetingLocation
 
 		scheduledMeeting.lastUpdatedDate = DateTime.now
@@ -69,13 +72,15 @@ trait CreateScheduledMeetingRecordCommandValidation extends SelfValidating with 
 	override def validate(errors: Errors) {
 
 		meetingRecordService.listScheduled(Set(relationship), Some(creator)).foreach(
-		 m => if (m.meetingDate == DateTimePickerFormatter.parseDateTime(meetingDateStr+" "+meetingTimeStr)) errors.rejectValue("meetingDate", "meetingRecord.date.duplicate")
+			m => if((meetingDateStr != null)&&(!meetingDateStr.equals(""))&&(meetingTimeStr != null)&&(!meetingTimeStr.equals(""))&&(meetingEndTimeStr != null)&&(!meetingEndTimeStr.equals(""))){ if (m.meetingDate == DateTimePickerFormatter.parseDateTime(meetingDateStr+" "+meetingTimeStr)) errors.rejectValue("meetingDate", "meetingRecord.date.duplicate")}
 		)
-		if(DateTimePickerFormatter.parseDateTime(meetingDateStr+" "+meetingTimeStr).compareTo(DateTimePickerFormatter.parseDateTime(meetingDateStr+" "+meetingEndTimeStr)) > -1){
-			errors.rejectValue("meetingTimeStr", "meetingRecord.date.endbeforestart")
-		}
-		if(DateTimePickerFormatter.parseDateTime(meetingDateStr+" "+meetingTimeStr).compareTo(DateTime.now) <= 0){
-			errors.rejectValue("meetingDateStr", "meetingRecord.date.past")
+		if((meetingDateStr != null)&&(!meetingDateStr.equals(""))&&(meetingTimeStr != null)&&(!meetingTimeStr.equals(""))&&(meetingEndTimeStr != null)&&(!meetingEndTimeStr.equals(""))){
+			if(DateTimePickerFormatter.parseDateTime(meetingDateStr+" "+meetingTimeStr).compareTo(DateTimePickerFormatter.parseDateTime(meetingDateStr+" "+meetingEndTimeStr)) > -1){
+				errors.rejectValue("meetingTimeStr", "meetingRecord.date.endbeforestart")
+			}
+			if(DateTimePickerFormatter.parseDateTime(meetingDateStr+" "+meetingTimeStr).compareTo(DateTime.now) <= 0){
+				errors.rejectValue("meetingDateStr", "meetingRecord.date.past")
+			}
 		}
 	}
 }
