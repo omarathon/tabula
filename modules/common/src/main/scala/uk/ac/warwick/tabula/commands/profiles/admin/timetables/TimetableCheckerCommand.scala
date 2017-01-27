@@ -33,7 +33,6 @@ class TimetableCheckerCommandInternal() extends CommandInternal[Unit] with Timet
 
 		def handler = { (headers: Map[String, Seq[String]], req: dispatch.classic.Request) =>
 			req >- { (jsonString) =>
-
 				val jsonObject = if (jsonMapper != null) jsonMapper.readValue(jsonString, classOf[List[Map[String, Any]]])
 				jsonMapper.writerWithDefaultPrettyPrinter().writeValueAsString(jsonObject)
 			}
