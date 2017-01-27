@@ -92,7 +92,6 @@ abstract class Features {
 	@Value("${features.disability.rendering.profiles:true}") var disabilityRenderingInProfiles: Boolean = defaults.disabilityRenderingInProfiles
 	@Value("${features.disability.rendering.extensions:true}") var disabilityRenderingInExtensions: Boolean = defaults.disabilityRenderingInExtensions
 	@Value("${features.disability.rendering.submissions:true}") var disabilityOnSubmission: Boolean = defaults.disabilityOnSubmission
-	@Value("${features.includePastYears:true}") var includePastYears: Boolean = defaults.includePastYears
 	@Value("${features.newSeenSecondMarkingWorkflows:true}") var newSeenSecondMarkingWorkflows: Boolean = defaults.newSeenSecondMarkingWorkflows
 	@Value("${features.activityStreams:true}") var activityStreams: Boolean = defaults.activityStreams
 	@Value("${features.profiles.showModuleResults:true}") var showModuleResults: Boolean = defaults.showModuleResults
@@ -223,7 +222,6 @@ class FeaturesMessage {
 	@BeanProperty var visaInStudentProfile = true
 	@BeanProperty var scheduledMeetings = true
 	@BeanProperty var disabilityRenderingInProfiles = true
-	@BeanProperty var includePastYears = true
 	@BeanProperty var showModuleResults = true
 	@BeanProperty var showAccreditedPriorLearning = true
 	@BeanProperty var autoGroupDeregistration = false

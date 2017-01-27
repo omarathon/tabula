@@ -107,6 +107,31 @@
 				"<a href=" + event.relatedUrl.urlString + ">" + relatedUrlTitle + "</a></td></tr>";
 		}
 
+		if (event.attendance) {
+			var attendanceCell1 = '', attendanceCell2 = '';
+
+			switch (event.attendance) {
+				case 'attended':
+					attendanceCell1 = '<i class="fa fa-check attended"/> Attended';
+					attendanceCell2 = '<span class="very-subtle">Attendance at this event has been recorded.</span>';
+					break;
+				case 'authorised':
+					attendanceCell1 = '<i class="fa fa-times-circle-o authorised"/> Missed (authorised)';
+					attendanceCell2 = '<span class="very-subtle">Absence from this event has been authorised.</span>';
+					break;
+				case 'unauthorised':
+					attendanceCell1 = '<i class="fa fa-times unauthorised"/> Missed (unauthorised)';
+					attendanceCell2 = '<span class="very-subtle">Marked absent from this event.</span>';
+					break;
+				case 'not-recorded':
+					attendanceCell1 = '<i class="fa fa-minus"/> Not recorded';
+					attendanceCell2 = '<span class="very-subtle">Attendance has not yet been recorded for this event.</span>';
+					break;
+			}
+
+			content = content + '<tr><th>Attendance</th><td>' + attendanceCell1 + '</td></tr><tr><th></th><td>' + attendanceCell2 + '</td></tr>';
+		}
+
 		content = content + "</table>";
 		$(element).tabulaPopover({html:true, container:"body", title:event.shorterTitle, content:content});
 	}

@@ -126,7 +126,8 @@ abstract class AbstractMeetingRecord extends GeneratedId with PermissionsTarget 
 					relationship.relationshipType
 				),
 				title = Some("Meeting records")
-			))
+			)),
+			attendance = None
 		))
 	}
 

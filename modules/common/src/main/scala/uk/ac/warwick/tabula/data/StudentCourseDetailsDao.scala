@@ -25,7 +25,10 @@ trait StudentCourseDetailsDao {
 	def getByRoute(route: Route) : Seq[StudentCourseDetails]
 	def findByDepartment(department:Department):Seq[StudentCourseDetails]
 	def getFreshScjCodes: Seq[String]
+	def getFreshAndStaleScjCodes: Seq[String]
+	def getStaleScjCodesSince(from: DateTime): Seq[String]
 	def stampMissingFromImport(newStaleScjCodes: Seq[String], importStart: DateTime)
+	def unstampPresentInImport(notStaleScjCodes: Seq[String])
 }
 
 @Repository
@@ -89,21 +92,40 @@ class StudentCourseDetailsDaoImpl extends StudentCourseDetailsDao with Daoisms {
 			.project[String](Projections.property("scjCode"))
 			.seq
 
+	def getStaleScjCodesSince(from: DateTime): Seq[String] =
+		session.newCriteria[StudentCourseDetails]
+			.add(ge("missingFromImportSince", from))
+			.project[String](Projections.property("scjCode"))
+			.seq
+
+	def getFreshAndStaleScjCodes: Seq[String] =
+		session.newCriteria[StudentCourseDetails]
+			.project[String](Projections.property("scjCode"))
+			.seq
+
 	def stampMissingFromImport(newStaleScjCodes: Seq[String], importStart: DateTime): Unit = {
 		newStaleScjCodes.grouped(Daoisms.MaxInClauseCount).foreach { newStaleCodes =>
-			var sqlString = """
-				update
-					StudentCourseDetails
-				set
-					missingFromImportSince = :importStart
-				where
-					scjCode in (:newStaleScjCodes)
-				"""
+			val sqlString =
+				"""update StudentCourseDetails set missingFromImportSince = :importStart
+					|where scjCode in (:newStaleScjCodes)""".stripMargin
 
 				session.newQuery(sqlString)
 					.setParameter("importStart", importStart)
 					.setParameterList("newStaleScjCodes", newStaleCodes)
 					.executeUpdate()
 			}
+	}
+
+	def unstampPresentInImport(notStaleScjCodes: Seq[String]): Unit = {
+		notStaleScjCodes.grouped(Daoisms.MaxInClauseCount).foreach { codes =>
+			val hqlString =
+				"""update StudentCourseDetails set missingFromImportSince = null
+					|where scjCode in (:notStaleCodes)""".stripMargin
+
+			sessionWithoutFreshFilters.newQuery(hqlString)
+				.setParameterList("notStaleCodes", codes)
+				.executeUpdate()
+
+		}
 	}
 }

@@ -53,8 +53,11 @@ trait MemberDao {
 	def getAllModesOfAttendance(department: Department): Seq[ModeOfAttendance]
 	def getAllSprStatuses(department: Department): Seq[SitsStatus]
 
-	def getFreshUniversityIds(): Seq[String]
+	def getFreshUniversityIds: Seq[String]
+	def getMissingSince(from: DateTime): Seq[String]
+
 	def stampMissingFromImport(newStaleUniversityIds: Seq[String], importStart: DateTime)
+	def unstampPresentInImport(notStaleUniversityIds: Seq[String]): Unit
 	def getDisability(code: String): Option[Disability]
 
 	def getMemberByTimetableHash(timetableHash: String): Option[Member]
@@ -132,8 +135,14 @@ class MemberDaoImpl extends MemberDao with Logging with AttendanceMonitoringStud
 		member
 	}
 
-	def getFreshUniversityIds(): Seq[String] =
+	def getFreshUniversityIds: Seq[String] =
 			session.newCriteria[StudentMember]
+			.project[String](Projections.property("universityId"))
+			.seq
+
+	def getMissingSince(from: DateTime): Seq[String] =
+		sessionWithoutFreshFilters.newCriteria[StudentMember]
+			.add(ge("missingFromImportSince", from))
 			.project[String](Projections.property("universityId"))
 			.seq
 
@@ -298,7 +307,7 @@ class MemberDaoImpl extends MemberDao with Logging with AttendanceMonitoringStud
 		val idCriteria = session.newCriteria[StudentMember]
 		restrictions.foreach { _.apply(idCriteria) }
 
-		if (orders.size > 0) {
+		if (orders.nonEmpty) {
 			orders.foreach { idCriteria.addOrder }
 			idCriteria.project[String](property("universityId")).seq.distinct
 		} else {
@@ -406,6 +415,15 @@ class MemberDaoImpl extends MemberDao with Logging with AttendanceMonitoringStud
 					.setParameterList("newStaleUniversityIds", staleIds)
 					.executeUpdate()
 			}
+	}
+
+	def unstampPresentInImport(notStaleUniversityIds: Seq[String]): Unit = {
+		notStaleUniversityIds.grouped(Daoisms.MaxInClauseCount).foreach { notStaleIds =>
+			val hqlString = "update Member set missingFromImportSince = null where universityId in (:notStaleIds)"
+			sessionWithoutFreshFilters.newQuery(hqlString)
+				.setParameterList("notStaleIds", notStaleIds)
+				.executeUpdate()
+		}
 	}
 
 	def getDisability(code: String): Option[Disability] = {

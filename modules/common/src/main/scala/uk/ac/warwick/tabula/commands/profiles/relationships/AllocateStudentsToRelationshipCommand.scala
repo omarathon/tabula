@@ -196,6 +196,9 @@ trait AllocateStudentsToRelationshipCommandRequest extends ManageStudentRelation
 		case _ => Map()
 	}
 
+	lazy val emptyAdditionalEntities: Seq[StudentAssociationEntityData] = dbAllocated.filter(entity =>
+		entity.students.isEmpty && (!additions.keySet.contains(entity.entityId) || additions.get(entity.entityId).isEmpty))
+
 	var allocationType: String = ""
 
 	var specificScheduledDate: Boolean = false

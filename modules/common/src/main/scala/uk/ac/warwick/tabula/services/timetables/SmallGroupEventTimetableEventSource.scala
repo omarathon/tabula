@@ -2,6 +2,7 @@ package uk.ac.warwick.tabula.services.timetables
 
 import uk.ac.warwick.tabula.CurrentUser
 import uk.ac.warwick.tabula.data.model.attendance.AttendanceState
+import uk.ac.warwick.tabula.data.model.groups.WeekRange
 import uk.ac.warwick.tabula.data.model.{StaffMember, StudentMember}
 import uk.ac.warwick.tabula.permissions.Permissions
 import uk.ac.warwick.tabula.services.timetables.TimetableFetchingService.EventList
@@ -49,10 +50,11 @@ trait SmallGroupEventTimetableEventSourceComponentImpl extends SmallGroupEventTi
 			val autoTimetableEvents: Seq[TimetableEvent] = allEvents.map { event =>
 				attendanceMap.get(event) match {
 					case Some(attendanceList) =>
+						val attendanceForEvent = attendanceList.groupBy(_.occurrence.week).mapValues(_.head.state)
 						val weeksToRemove = attendanceList.filter(a => a.state == AttendanceState.MissedAuthorised && !a.replacedBy.isEmpty).map(_.occurrence.week)
-						TimetableEvent(event, withoutWeeks = weeksToRemove)
+						TimetableEvent(event, attendanceForEvent, withoutWeeks = weeksToRemove)
 					case None =>
-						TimetableEvent(event)
+						TimetableEvent(event, Map[WeekRange.Week, AttendanceState]())
 				}
 			}
 
@@ -63,7 +65,7 @@ trait SmallGroupEventTimetableEventSourceComponentImpl extends SmallGroupEventTi
 
 					!groupSet.deleted && groupSet.visibleToStudents
 				}
-				.map { a => TimetableEvent(a.occurrence) }
+				.map { a => TimetableEvent(a.occurrence, Option(a.state).getOrElse(AttendanceState.NotRecorded)) }
 
 			EventList.fresh(autoTimetableEvents ++ manualTimetableEvents)
 		}

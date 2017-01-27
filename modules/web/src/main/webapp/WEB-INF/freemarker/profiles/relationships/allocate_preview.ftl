@@ -92,6 +92,21 @@
 		</div>
 	</div>
 
+	<#if command.emptyAdditionalEntities?has_content>
+		<div class="alert alert-info">
+			<#if command.emptyAdditionalEntities?size == 1>
+				${command.emptyAdditionalEntities?first.displayName} has no ${relationshipType.studentRole}s, so will be removed from the list of ${relationshipType.agentRole}s.
+			<#else>
+				<p>${command.emptyAdditionalEntities?size} ${relationshipType.agentRole}s have no ${relationshipType.studentRole}s, so will be removed from the list of ${relationshipType.agentRole}s:</p>
+				<ul>
+					<#list command.emptyAdditionalEntities as entity>
+						<li>${entity.displayName}</li>
+					</#list>
+				</ul>
+			</#if>
+		</div>
+	</#if>
+
 	<@f.form commandName="command" action="${previewFormAction}" method="POST">
 		<#include "_allocate_notifications_modal.ftl" />
 
