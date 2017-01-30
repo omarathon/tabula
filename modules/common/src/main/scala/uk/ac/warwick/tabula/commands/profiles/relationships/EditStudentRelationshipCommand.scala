@@ -144,9 +144,9 @@ trait EditStudentRelationshipCommandNotifications extends Notifies[Seq[StudentRe
 			} else None
 
 			val newAgentNotification = if (notifyNewAgent) {
-				relationship.agentMember.map(agent => {
+				relationship.agentMember.map(_ => {
 					val notification = Notification.init(new StudentRelationshipChangeToNewAgentNotification, user.apparentUser, Seq(relationship))
-					notification.oldAgentIds.value = Seq(agent.universityId)
+					Option(oldAgent).foreach(agent => notification.oldAgentIds.value = Seq(agent.universityId))
 					if (scheduledDateToUse.isAfterNow) notification.scheduledDate = scheduledDateToUse
 					notification
 				})

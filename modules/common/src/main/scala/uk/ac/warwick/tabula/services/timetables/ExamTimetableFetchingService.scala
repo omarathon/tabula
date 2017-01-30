@@ -53,7 +53,7 @@ private class ExamTimetableHttpTimetableFetchingService(examTimetableConfigurati
 		with UserLookupComponent with TermServiceComponent with FeaturesComponent =>
 
 	// a dispatch response handler which reads XML from the response and parses it into a list of TimetableEvents
-	def handler(uniId: String): (Map[String, Seq[String]], Request) => Handler[Seq[TimetableEvent]] = { (headers: Map[String,Seq[String]], req: dispatch.classic.Request) =>
+	def handler(uniId: String): (Map[String, Seq[String]], Request) => Handler[Seq[TimetableEvent]] = { (_: Map[String,Seq[String]], req: dispatch.classic.Request) =>
 		req <> { node =>
 			ExamTimetableHttpTimetableFetchingService.parseXml(node, uniId, termService)
 		}
@@ -141,7 +141,8 @@ object ExamTimetableHttpTimetableFetchingService extends Logging {
 				staff = Nil,
 				students = Nil,
 				year = timetableExam.academicYear,
-				relatedUrl = None
+				relatedUrl = None,
+				attendance = Map()
 			)
 		})
 	}
@@ -243,7 +244,7 @@ abstract class AbstractExamTimetableFetchingService extends ExamTimetableFetchin
 		logger.info(s"Requesting exam timetable data from ${req.to_uri.toString}")
 
 		// a dispatch response handler which reads XML from the response and parses it into an ExamTimetable
-		def handler = { (headers: Map[String,Seq[String]], req: dispatch.classic.Request) =>
+		def handler = { (_: Map[String,Seq[String]], req: dispatch.classic.Request) =>
 			req <> { node =>
 				ExamTimetableFetchingService.examTimetableFromXml(node, termService)
 			}

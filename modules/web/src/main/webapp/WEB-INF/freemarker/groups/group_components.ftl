@@ -1411,15 +1411,26 @@
 				<#list allTerms as namedTerm>
 					<#local is_vacation = !(namedTerm.term.termType?has_content) />
 				<tr<#if is_vacation> class="vacation"</#if>>
-					<th>${namedTerm.name}<#if !is_vacation> term</#if></th>
+					<th>
+						<div class="checkbox">
+							<label>
+								<input type="checkbox" class="collection-check-all" />
+								${namedTerm.name}<#if !is_vacation> term</#if>
+							</label>
+						</div>
+					</th>
 					<#list namedTerm.weekRange.minWeek..namedTerm.weekRange.maxWeek as weekNumber>
-						<td
-								class="use-tooltip"
-								title="<@fmt.singleWeekFormat weekNumber smallGroupSet.academicYear smallGroupSet.module.adminDepartment />"
-								data-html="true"
-								data-container="body">
-							<@f.checkbox path=path value="${weekNumber}" />
-							<span class="week-number"><@fmt.singleWeekFormat weekNumber smallGroupSet.academicYear smallGroupSet.module.adminDepartment true /></span>
+						<td class="use-tooltip"
+							title="<@fmt.singleWeekFormat weekNumber smallGroupSet.academicYear smallGroupSet.module.adminDepartment />"
+							data-html="true"
+							data-container="body"
+						>
+							<div class="checkbox">
+								<label>
+								<@f.checkbox path=path value="${weekNumber}" cssClass="collection-checkbox" />
+								${weekNumber}
+							</label>
+							</div>
 						</td>
 					</#list>
 				</tr>

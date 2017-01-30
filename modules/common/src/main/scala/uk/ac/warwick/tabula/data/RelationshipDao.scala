@@ -302,6 +302,8 @@ class RelationshipDaoImpl extends RelationshipDao with Daoisms with Logging {
 			and
 				scd.statusOnRoute.code not like 'P%'
 			and
+	 			sm.deceased = false
+		 	and
 				scd not in (
 					select
 						sr.studentCourseDetails

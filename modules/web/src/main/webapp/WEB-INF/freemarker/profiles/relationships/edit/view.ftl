@@ -76,7 +76,7 @@
 				</div>
 				
 				<@bs3form.labelled_form_group path="" labelText="Notify these people via email of this change">
-					<p>Notifications will be sent immediately, reagardless of when the change is scheduled.</p>
+					<p>Notifications will be sent immediately, regardless of when the change is scheduled.</p>
 					<@bs3form.checkbox>
 						<input type="checkbox" name="notifyStudent" checked />
 						${relationshipType.studentRole?cap_first}
@@ -132,7 +132,7 @@
 			});
 
 			$('#confirm-remove-agent').click(function() {
-				$('.notifyNewAgent').attr("disabled", "disabled")
+				$('[name=notifyNewAgent]').attr("disabled", "disabled")
 					.prop("checked", false)
 					.closest("label").addClass("muted");
 				$('#removeAgentMessage').hide();

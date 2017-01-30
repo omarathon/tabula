@@ -122,6 +122,8 @@ object Routes {
 			context + "/view/%s/%s/points" format(encoded(department.code), encoded(academicYear.startYear.toString))
 		def pointsUnrecorded(department: Department, academicYear: AcademicYear): String =
 			context + "/view/%s/%s/points?hasBeenFiltered=true&otherCriteria=Unrecorded" format(encoded(department.code), encoded(academicYear.startYear.toString))
+		def pointRecordUpload(department: Department, academicYear: AcademicYear, templatePoint: AttendanceMonitoringPoint, args: String = ""): String =
+			context + "/view/%s/%s/points/%s/record/upload%s" format(encoded(department.code), encoded(academicYear.startYear.toString), encoded(templatePoint.id), if (args.length > 0) "?" + args else "")
 		def agents(department: Department, academicYear: AcademicYear, relationshipType: StudentRelationshipType): String =
 			context + "/view/%s/%s/agents/%s" format(
 				encoded(department.code),
@@ -137,6 +139,8 @@ object Routes {
 			context + "/agent/%s/%s" format(encoded(relationshipType.urlPart), encoded(academicYear.startYear.toString))
 		def student(relationshipType: StudentRelationshipType, academicYear: AcademicYear, student: StudentMember): String =
 			context + "/agent/%s/%s/%s" format(encoded(relationshipType.urlPart), encoded(academicYear.startYear.toString), encoded(student.universityId))
+		def pointRecordUpload(relationshipType: StudentRelationshipType, academicYear: AcademicYear, templatePoint: AttendanceMonitoringPoint): String =
+			context + "/agent/%s/%s/point/%s/upload" format(encoded(relationshipType.urlPart), encoded(academicYear.startYear.toString), encoded(templatePoint.id))
 	}
 
 	object Profile {

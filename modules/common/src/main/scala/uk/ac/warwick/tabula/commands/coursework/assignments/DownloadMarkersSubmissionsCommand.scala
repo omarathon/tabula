@@ -40,8 +40,7 @@ class DownloadMarkersSubmissionsCommand(val module: Module, val assignment: Assi
 
 		// do not download submissions where the marker has completed marking
 		val filteredSubmissions = submissions.filter{ submission =>
-			val markerFeedback = assignment.getMarkerFeedbackForCurrentPosition(submission.universityId, marker)
-			markerFeedback.exists(mf => mf.state != MarkingCompleted)
+			assignment.getAllMarkerFeedbacks(submission.universityId, marker).lastOption.exists(mf => mf.state != MarkingCompleted)
 		}
 
 		zipService.getSomeSubmissionsZip(filteredSubmissions)

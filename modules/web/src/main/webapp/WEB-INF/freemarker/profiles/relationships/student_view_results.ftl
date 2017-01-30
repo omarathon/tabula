@@ -3,12 +3,16 @@
 
 <#escape x as x?html>
 	<#if studentCourseDetails?has_content>
+		<div class="clearfix">
+			<p class="pull-right">
+				<@fmt.bulk_email_students students=students />
+			</p>
+		</div>
 		<@student_macros.tableWithMeetingsColumn items=studentCourseDetails meetingsMap=meetingsMap showSelectStudents=true/>
 		<div id="meeting-modal" class="modal fade"></div>
 		<div class="submit-buttons fix-footer">
 			<section class="meetings">
 				<a data-href="<@routes.profiles.create_bulk_meeting_record relationshipType />" class="btn btn-default new-meeting-record disabled">Record meeting for selected students</a>
-				<@fmt.bulk_email_students students=students />
 			</section>
 		</div>
 

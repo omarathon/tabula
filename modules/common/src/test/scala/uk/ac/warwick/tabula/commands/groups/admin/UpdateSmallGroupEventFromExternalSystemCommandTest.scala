@@ -119,7 +119,8 @@ class UpdateSmallGroupEventFromExternalSystemCommandTest extends TestBase with M
 			staff=Seq(tutor),
 			students=Seq(student1, student2, student3),
 			year = AcademicYear(2012),
-			relatedUrl = None
+			relatedUrl = None,
+			attendance = Map()
 		)
 		val tEventSeminar2 = TimetableEvent(
 			uid="uuid2",
@@ -137,7 +138,8 @@ class UpdateSmallGroupEventFromExternalSystemCommandTest extends TestBase with M
 			staff=Seq(tutor),
 			students=Seq(student4, student5, student6),
 			year = AcademicYear(2012),
-			relatedUrl = None
+			relatedUrl = None,
+			attendance = Map()
 		)
 
 		timetableFetchingService.getTimetableForModule("IN101", includeStudents = false) returns Future.successful(EventList.fresh(Seq(
@@ -158,7 +160,8 @@ class UpdateSmallGroupEventFromExternalSystemCommandTest extends TestBase with M
 				staff=Seq(tutor),
 				students=Nil,
 				year = AcademicYear(2012),
-				relatedUrl = None
+				relatedUrl = None,
+				attendance = Map()
 			)
 		)))
 	}

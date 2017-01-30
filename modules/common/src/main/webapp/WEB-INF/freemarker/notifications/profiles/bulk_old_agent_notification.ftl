@@ -1,9 +1,9 @@
 <#if scheduledDate?has_content>
-	<#assign formattedDate><@fmt.date scheduledDate /></#assign>
+	<#assign formattedDate><@fmt.date date=scheduledDate stripHtml=true /></#assign>
 	<#assign formattedDate =  formattedDate?replace('&#8194;',' ') />
 </#if>
 <#if previouslyScheduledDate?has_content>
-	<#assign formattedPreviousDate><@fmt.date previouslyScheduledDate /></#assign>
+	<#assign formattedPreviousDate><@fmt.date date=previouslyScheduledDate stripHtml=true /></#assign>
 	<#assign formattedPreviousDate = formattedPreviousDate?replace('&#8194;',' ') />
 </#if>
 <#if scheduledDate?has_content>As of ${formattedDate} you will be<#else>You are</#if> no longer assigned as ${relationshipType.agentRole} to the following students:
