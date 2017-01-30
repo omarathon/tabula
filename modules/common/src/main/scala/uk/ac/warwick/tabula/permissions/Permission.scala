@@ -276,7 +276,7 @@ object Permissions {
 			case object SmallGroups extends Permission("View a member's small groups")
 			case object Coursework extends Permission("View a member's coursework")
 			case object Timetable extends Permission("View a member's personal timetable")
-			case object TimetablePrivateFeed extends Permission("View a member's private able feedtime")
+			case object TimetablePrivateFeed extends Permission("View a member's private timetable feed")
 			case object Tier4VisaRequirement extends Permission("View a member's tier 4 visa requirement")
 			case object CasUsed extends Permission("View whether a CAS has been used by a student to obtain a visa")
 			case object Disability extends Permission("View a student member's reported disability")
@@ -318,7 +318,6 @@ object Permissions {
 				extends SelectorPermission(relationshipType, "Manage scheduled meeting records")
 			case object Confirm extends Permission("Confirm whether a scheduled meeting record took place")
 		}
-
 	}
 
 	object SmallGroups {
@@ -379,5 +378,6 @@ object Permissions {
 
 	object Timetabling {
 		case object ViewDraft extends Permission("View draft releases of the timetable")
+		case object Checker extends ScopelessPermission("View timetable feeds for students")
 	}
 }
