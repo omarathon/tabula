@@ -27,7 +27,7 @@ class AddAssignmentDetailsController extends CourseworkController {
 
 	@ModelAttribute("command")
 	def createAssignmentDetailsCommand(@PathVariable module: Module) =
-		CreateAssignmentDetailsCommand(module)
+		CreateAssignmentDetailsCommand(mandatory(module))
 
 	@RequestMapping
 	def form(@ModelAttribute("command") form: CreateAssignmentDetailsCommand): Mav = {
