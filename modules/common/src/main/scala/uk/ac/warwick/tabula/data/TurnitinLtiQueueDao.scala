@@ -18,7 +18,7 @@ trait AutowriringTurnitinLtiQueueDaoComponent extends TurnitinLtiQueueDaoCompone
 trait TurnitinLtiQueueDao {
 	def findAssignmentToProcess: Option[Assignment]
 	def findReportToProcessForSubmission: Option[OriginalityReport]
-	def findReportToProcessForReport: Option[OriginalityReport]
+	def findReportToProcessForReport(longAwaitedOnly: Boolean): Option[OriginalityReport]
 	def listCompletedAssignments: Seq[Assignment]
 	def listFailedAssignments: Seq[Assignment]
 	def listOriginalityReports(assignment: Assignment): Seq[OriginalityReport]
@@ -54,8 +54,8 @@ class TurnitinLtiQueueDaoImpl extends TurnitinLtiQueueDao with Daoisms {
 			.uniqueResult
 	}
 
-	def findReportToProcessForReport: Option[OriginalityReport] = {
-		session.newCriteria[OriginalityReport]
+	def findReportToProcessForReport(longAwaitedOnly: Boolean): Option[OriginalityReport] = {
+		val c = session.newCriteria[OriginalityReport]
 			.createAlias("attachment", "attachment")
 			.createAlias("attachment.submissionValue", "submissionValue")
 			.createAlias("submissionValue.submission", "submission")
@@ -67,7 +67,12 @@ class TurnitinLtiQueueDaoImpl extends TurnitinLtiQueueDao with Daoisms {
 			.add(Restrictions.lt("reportRequestRetries", TurnitinLtiService.ReportRequestMaxRetries))
 			.addOrder(Order.asc("lastReportRequest"))
 			.setMaxResults(1)
-			.uniqueResult
+
+		if (longAwaitedOnly) {
+			c.add(Restrictions.lt("lastSubmittedToTurnitin", DateTime.now.minusSeconds(TurnitinLtiService.LongAwaitedReportWaitInSeconds)))
+		}
+
+		c.uniqueResult
 	}
 
 	def listCompletedAssignments: Seq[Assignment] = {

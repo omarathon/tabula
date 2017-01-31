@@ -1,22 +1,23 @@
 package uk.ac.warwick.tabula.web.controllers.attendance.view
 
-import uk.ac.warwick.tabula.web.controllers.attendance.{AttendanceController, HasMonthNames}
-import org.springframework.web.bind.annotation.{InitBinder, ModelAttribute, PathVariable, RequestMapping}
-import uk.ac.warwick.tabula.data.model.{Department, StudentMember}
-import uk.ac.warwick.tabula.AcademicYear
-import uk.ac.warwick.tabula.commands.{Appliable, PopulateOnForm, SelfValidating}
-import uk.ac.warwick.tabula.data.model.attendance.{AttendanceMonitoringCheckpoint, AttendanceMonitoringCheckpointTotal, AttendanceMonitoringNote, AttendanceMonitoringPoint}
-import uk.ac.warwick.tabula.commands.attendance.view.RecordStudentAttendanceCommand
-import org.springframework.beans.factory.annotation.Autowired
-import uk.ac.warwick.tabula.services.AutowiringTermServiceComponent
-import uk.ac.warwick.tabula.commands.attendance.GroupsPoints
-import uk.ac.warwick.tabula.attendance.web.Routes
-import org.springframework.stereotype.Controller
 import javax.validation.Valid
 
+import org.springframework.beans.factory.annotation.Autowired
+import org.springframework.stereotype.Controller
 import org.springframework.validation.Errors
+import org.springframework.web.bind.annotation.{InitBinder, ModelAttribute, PathVariable, RequestMapping}
+import uk.ac.warwick.tabula.AcademicYear
+import uk.ac.warwick.tabula.attendance.web.Routes
+import uk.ac.warwick.tabula.commands.attendance.GroupsPoints
+import uk.ac.warwick.tabula.commands.attendance.view.RecordStudentAttendanceCommand
+import uk.ac.warwick.tabula.commands.{Appliable, PopulateOnForm, SelfValidating}
+import uk.ac.warwick.tabula.data.model.attendance.{AttendanceMonitoringCheckpoint, AttendanceMonitoringCheckpointTotal, AttendanceMonitoringNote, AttendanceMonitoringPoint}
+import uk.ac.warwick.tabula.data.model.{Department, StudentMember}
+import uk.ac.warwick.tabula.services.AutowiringTermServiceComponent
 import uk.ac.warwick.tabula.services.attendancemonitoring.AttendanceMonitoringService
 import uk.ac.warwick.tabula.web.Mav
+import uk.ac.warwick.tabula.web.controllers.attendance.{AttendanceController, HasMonthNames}
+import uk.ac.warwick.util.termdates.Term
 
 @Controller
 @RequestMapping(Array("/attendance/view/{department}/{academicYear}/students/{student}/record"))
@@ -55,11 +56,16 @@ class RecordStudentAttendanceController extends AttendanceController
 	}
 
 	@ModelAttribute("reportedPointMap")
-	def reportedPointMap(@PathVariable academicYear: AcademicYear, @PathVariable student: StudentMember): Map[AttendanceMonitoringPoint, Boolean] = {
+	def reportedPointMap(@PathVariable academicYear: AcademicYear, @PathVariable student: StudentMember): Map[AttendanceMonitoringPoint, Option[Term]] = {
 		val nonReportedTerms = attendanceMonitoringService.findNonReportedTerms(Seq(mandatory(student)), mandatory(academicYear))
-		points.map{ point => point ->
-			!nonReportedTerms.contains(termService.getTermFromDateIncludingVacations(point.startDate.toDateTimeAtStartOfDay).getTermTypeAsString)
-		}.toMap
+		points.map{ point => point -> {
+			val term = termService.getTermFromDateIncludingVacations(point.startDate.toDateTimeAtStartOfDay)
+			if (nonReportedTerms.contains(term.getTermTypeAsString)) {
+				None
+			} else {
+				Option(term)
+			}
+		}}.toMap
 	}
 
 	@RequestMapping(method = Array(GET))

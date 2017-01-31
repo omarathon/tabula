@@ -1,5 +1,6 @@
 package uk.ac.warwick.tabula.commands.scheduling.imports
 
+import org.joda.time.DateTime
 import org.springframework.validation.Errors
 import uk.ac.warwick.tabula.commands._
 import uk.ac.warwick.tabula.data.model.{StudentMember, StudentRelationship, StudentRelationshipType}
@@ -27,7 +28,7 @@ class ExpireRelationshipsOnOldCoursesCommandInternal(val student: StudentMember)
 		studentRelationships.groupBy(_.relationshipType).foreach { case(relType, relationships) =>
 			if (hasOnlyVeryOldRelationships(relationships) || hasCurrentRelationship(relationships)) {
 				val relationshipsToEnd = relationships.filter(rel => rel.isCurrent && rel.studentCourseDetails.isEnded)
-				relationshipService.endStudentRelationships(relationshipsToEnd)
+				relationshipService.endStudentRelationships(relationshipsToEnd, DateTime.now)
 			}
 		}
 	}

@@ -1,9 +1,9 @@
 package uk.ac.warwick.tabula.services.timetables
 
-import org.joda.time.LocalDateTime
+import org.joda.time.{DateTime, LocalDateTime}
 import uk.ac.warwick.tabula.data.model.{AbstractMeetingRecord, StudentMember, StudentRelationship, StudentRelationshipType}
 import uk.ac.warwick.tabula.permissions.Permissions
-import uk.ac.warwick.tabula.services.{MeetingRecordService, MeetingRecordServiceComponent, RelationshipService, RelationshipServiceComponent, SecurityService, SecurityServiceComponent}
+import uk.ac.warwick.tabula.services._
 import uk.ac.warwick.tabula.timetables.{EventOccurrence, TimetableEvent, TimetableEventType}
 import uk.ac.warwick.tabula.{CurrentUser, Fixtures, Mockito, TestBase}
 
@@ -14,10 +14,10 @@ class MeetingRecordServiceScheduledMeetingEventSourceComponentTest extends TestB
 	val user: CurrentUser = mock[CurrentUser]
 	user.profile returns Some(student)
 
-	val occurrence = EventOccurrence("", "", "", "", TimetableEventType.Meeting, LocalDateTime.now, LocalDateTime.now, None, TimetableEvent.Parent(), None, Nil, None)
+	val occurrence = EventOccurrence("", "", "", "", TimetableEventType.Meeting, LocalDateTime.now, LocalDateTime.now, None, TimetableEvent.Parent(), None, Nil, None, None)
 
 	val relationshipType = StudentRelationshipType("t", "t", "t", "t")
-	val relationships = Seq(StudentRelationship(Fixtures.staff(), relationshipType, student))
+	val relationships = Seq(StudentRelationship(Fixtures.staff(), relationshipType, student, DateTime.now))
 	val meetings = Seq(new AbstractMeetingRecord {
 		relationship = relationships.head
 
@@ -36,7 +36,7 @@ class MeetingRecordServiceScheduledMeetingEventSourceComponentTest extends TestB
 	}
 
 	source.relationshipService.getAllPastAndPresentRelationships(student) returns relationships
-	source.relationshipService.listAllStudentRelationshipsWithMember(student) returns Nil
+	source.relationshipService.listCurrentStudentRelationshipsWithMember(student) returns Nil
 	source.securityService.can(user, Permissions.Profiles.MeetingRecord.Read(relationshipType), student) returns true
 	source.meetingRecordService.listAll(relationships.toSet, Some(student)) returns meetings
 

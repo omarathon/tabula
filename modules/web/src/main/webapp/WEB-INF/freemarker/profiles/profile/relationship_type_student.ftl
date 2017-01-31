@@ -1,6 +1,16 @@
 <#import "*/modal_macros.ftl" as modal />
 <#escape x as x?html>
 
+<#if scheduledAgentChange?has_content>
+	<div class="alert alert-info">
+		Change of ${relationshipType.agentRole} scheduled for <@fmt.date scheduledAgentChange />
+	</div>
+<#elseif scheduledAgentChangeCancel!false>
+	<div class="alert alert-info">
+		Scheduled change of ${relationshipType.agentRole} cancelled
+	</div>
+</#if>
+
 <#if !isSelf>
 	<details class="indent">
 		<summary>${member.officialName}</summary>
@@ -42,6 +52,15 @@
 					<strong>University number:</strong> ${relationship.agentMember.universityId}<br />
 					<#if relationship.agentMember.userId??><strong>IT code:</strong> ${relationship.agentMember.userId}<br /></#if>
 					<span class="peoplesearch-info" data-href="<@routes.profiles.peoplesearchData relationship.agentMember />"></span>
+					<#if (canEditRelationship!false)>
+						<a class="btn btn-primary ajax-modal"
+						   href="<@routes.profiles.relationship_edit relationshipType studentCourseDetails.urlSafeId relationship.agentMember />"
+						   data-target="#change-agent"
+						   data-toggle="modal"
+						>
+							Edit ${relationshipType.agentRole}
+						</a>
+					</#if>
 				</p>
 			<#else>
 				<p>
@@ -57,21 +76,13 @@
 	<div class="col-md-12">
 		<p>
 			<#if (canEditRelationship!false)>
-				<#if relationshipsToDisplay?has_content>
-					<a class="btn btn-primary"
-					   data-remote="<@routes.profiles.relationship_edit relationshipType studentCourseDetails.urlSafeId relationshipsToDisplay?first.agentMember />"
-					   data-target="#change-agent"
-					   data-toggle="modal">
-					   Edit ${relationshipType.agentRole}
-					</a>
-				<#else>
-					<a class="btn btn-primary"
-					   data-remote="<@routes.profiles.relationship_edit_no_agent relationshipType studentCourseDetails.urlSafeId />"
-					   data-target="#change-agent"
-					   data-toggle="modal">
-						Add a ${relationshipType.agentRole}
-					</a>
-				</#if>
+				<a class="btn btn-primary ajax-modal"
+					href="<@routes.profiles.relationship_add relationshipType studentCourseDetails.urlSafeId />"
+					data-target="#change-agent"
+					data-toggle="modal"
+				>
+					Add a ${relationshipType.agentRole}
+				</a>
 			</#if>
 			<a class="btn btn-default" data-target="#timeline" data-toggle="modal">View timeline</a>
 		</p>
@@ -84,10 +95,10 @@
 			<h3 class="modal-title">Changes to ${relationshipType.agentRole}</h3>
 		</@modal.header>
 		<@modal.body>
-			<#if !allRelationships?has_content>
-				<em>No ${relationshipType.agentRole} details found for this course</em>
+			<#if !pastAndPresentRelationships?has_content>
+				<em>No past or present ${relationshipType.agentRole} details found for this course</em>
 			<#else>
-				<table class="table table-hover table-condensed sb-no-wrapper-table-popout">
+				<table class="table table-hover table-condensed table-striped sb-no-wrapper-table-popout">
 					<thead>
 					<tr>
 						<th></th>
@@ -97,48 +108,148 @@
 					</thead>
 					<tbody>
 						<#macro timeline_row relationship>
-						<tr>
-							<td>
-								<@fmt.relation_photo member relationship "tinythumbnail" />
-								${relationship.agentMember.fullName!relationship.relationshipType.agentRole?cap_first}
-								<#if relationship.percentage?has_content>
-									<span class="percentage muted">(${relationship.percentage}%)</span>
-								</#if>
-							</td>
-							<td>
-								<#if relationship.startDate??>
-									<@fmt.date date=relationship.startDate includeTime=false />
-								<#else>
-									<em>Unknown</em>
-								</#if>
-							</td>
-							<td>
-								<#if relationship.endDate??>
-									<@fmt.date date=relationship.endDate includeTime=false />
-								<#else>
-									<em>None</em>
-								</#if>
-							</td>
-						</tr>
+							<tr>
+								<td>
+									<@fmt.relation_photo member relationship "tinythumbnail" />
+									${relationship.agentName}
+									<#if relationship.percentage?has_content>
+										<span class="percentage muted">(${relationship.percentage}%)</span>
+									</#if>
+								</td>
+								<td>
+									<#if relationship.startDate??>
+										<span class="use-tooltip" data-container="body" title="<@fmt.date date=relationship.startDate includeTime=true relative=false stripHtml=true />">
+											<@fmt.date date=relationship.startDate includeTime=false />
+										</span>
+									<#else>
+										<em>Unknown</em>
+									</#if>
+								</td>
+								<td>
+									<#if relationship.endDate??>
+										<span class="use-tooltip" data-container="body" title="<@fmt.date date=relationship.endDate includeTime=true relative=false stripHtml=true />">
+											<@fmt.date date=relationship.endDate includeTime=false />
+										</span>
+									<#else>
+										-
+									</#if>
+								</td>
+							</tr>
 						</#macro>
-						<#list allRelationships as rel>
+						<#list pastAndPresentRelationships as rel>
 							<#if rel.current>
 								<@timeline_row rel />
 							</#if>
 						</#list>
-						<#list allRelationships as rel>
-						<#if !rel.current>
-							<@timeline_row rel />
-						</#if>
-					</#list>
+						<#list pastAndPresentRelationships as rel>
+							<#if !rel.current>
+								<@timeline_row rel />
+							</#if>
+						</#list>
 					</tbody>
 				</table>
+			</#if>
+
+			<#if scheduledRelationshipChanges?has_content>
+				<h4>Scheduled changes</h4>
+				<table class="table table-hover table-condensed table-striped sb-no-wrapper-table-popout">
+					<thead>
+					<tr>
+						<th>Change</th>
+						<th>Date</th>
+						<#if (canEditRelationship!false)>
+							<th></th>
+						</#if>
+					</tr>
+					</thead>
+					<tbody>
+						<#list scheduledRelationshipChanges as relationship>
+							<#assign action = '' />
+							<#if (relationship.replacesRelationships?has_content)>
+								<#assign action = 'replace' />
+							<#elseif (relationship.startDate?? && relationship.startDate.afterNow)>
+								<#assign action = 'add' />
+							<#elseif (relationship.endDate?? && relationship.endDate.afterNow)>
+								<#assign action = 'remove' />
+							</#if>
+							<tr>
+								<td>
+									<#if action == 'replace'>
+										Replace <#list relationship.replacesRelationships as replaced>${replaced.agentName}<#if replaced_has_next>, </#if></#list> with ${relationship.agentName}
+									<#elseif action == 'add'>
+										Add ${relationship.agentName}
+									<#elseif action == 'remove'>
+										Remove ${relationship.agentName}
+									</#if>
+								</td>
+								<td>
+									<#if (relationship.startDate?? && relationship.startDate.afterNow)>
+										<span class="use-tooltip" data-container="body" title="<@fmt.date date=relationship.startDate includeTime=true relative=false stripHtml=true />">
+											<@fmt.date date=relationship.startDate includeTime=false relative=false shortMonth=true />
+										</span>
+									<#elseif (relationship.endDate?? && relationship.endDate.afterNow)>
+										<span class="use-tooltip" data-container="body" title="<@fmt.date date=relationship.endDate includeTime=true relative=false stripHtml=true />">
+											<@fmt.date date=relationship.endDate includeTime=false relative=false shortMonth=true />
+										</span>
+									</#if>
+								</td>
+								<#if (canEditRelationship!false)>
+									<td>
+										<form action="<@routes.profiles.relationship_scheduled_change_cancel relationship />" method="post">
+											<input type="hidden" name="notifyStudent" value="false" />
+											<input type="hidden" name="notifyOldAgent" value="false" />
+											<input type="hidden" name="notifyNewAgent" value="false" />
+											<#assign popover>
+												<@bs3form.labelled_form_group path="" labelText="Notify these people via email of this cancellation">
+													<@bs3form.checkbox>
+														<input type="checkbox" name="notifyStudent" checked />
+														${relationshipType.studentRole?cap_first}
+													</@bs3form.checkbox>
+													<@bs3form.checkbox>
+														<input type="checkbox" name="notifyOldAgent" <#if action != 'add'>checked<#else>disabled</#if> />
+														${relationshipType.agentRole?cap_first}s no longer removed
+													</@bs3form.checkbox>
+													<@bs3form.checkbox>
+														<input type="checkbox" name="notifyNewAgent" <#if action != 'remove'>checked<#else>disabled</#if> />
+														${relationshipType.agentRole?cap_first}s no longer assigned
+													</@bs3form.checkbox>
+												</@bs3form.labelled_form_group>
+												<button type="button" class="btn btn-danger cancel-scheduled-change">Cancel scheduled change</button>
+											</#assign>
+											<button
+												type="button"
+												class="btn btn-default btn-sm use-popover"
+												data-html="true"
+												data-title="Cancel scheduled change"
+												data-content="${popover}"
+												data-placement="left"
+											>
+												Cancel
+											</button>
+										</form>
+									</td>
+								</#if>
+							</tr>
+						</#list>
+					</tbody>
+				</table>
+				<script>
+					jQuery(function($){
+						$('body').on('click', '.cancel-scheduled-change', function(){
+							var $this = $(this), $form = $this.closest('.popover').data('creator').closest('form');
+							$this.closest('div').find('input:checked').each(function(){
+								$form.find('input[name=' + $(this).prop('name') + ']').val('true');
+							});
+							$form.submit();
+						});
+					});
+				</script>
 			</#if>
 		</@modal.body>
 	</@modal.wrapper>
 </div>
 
-<div id="change-agent" class="modal fade"><@modal.wrapper></@modal.wrapper></div>
+<div id="change-agent" class="modal fade"></div>
 
 <h2>Record of meetings</h2>
 

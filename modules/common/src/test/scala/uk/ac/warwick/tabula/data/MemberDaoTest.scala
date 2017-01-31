@@ -1,13 +1,14 @@
 package uk.ac.warwick.tabula.data
 
-import scala.collection.JavaConverters.asScalaBufferConverter
 import org.joda.time.{DateTime, DateTimeConstants}
 import org.junit.{After, Before}
-import uk.ac.warwick.tabula.{Fixtures, Mockito, PersistenceTestBase}
+import org.springframework.transaction.annotation.Transactional
 import uk.ac.warwick.tabula.JavaImports.JList
 import uk.ac.warwick.tabula.data.model._
 import uk.ac.warwick.tabula.helpers.Logging
-import org.springframework.transaction.annotation.Transactional
+import uk.ac.warwick.tabula.{Fixtures, Mockito, PersistenceTestBase}
+
+import scala.collection.JavaConverters.asScalaBufferConverter
 
 // scalastyle:off magic.number
 class MemberDaoTest extends PersistenceTestBase with Logging with Mockito {
@@ -34,14 +35,14 @@ class MemberDaoTest extends PersistenceTestBase with Logging with Mockito {
 		}
 	}
 
-	@After def tidyUp: Unit = transactional { tx =>
+	@After def tidyUp(): Unit = transactional { tx =>
 		session.disableFilter(Member.ActiveOnlyFilter)
 
-		session.createCriteria(classOf[Member]).list().asInstanceOf[JList[Member]].asScala map { session.delete(_) }
+		session.createCriteria(classOf[Member]).list().asInstanceOf[JList[Member]].asScala foreach { session.delete }
 	}
 
 	@Test
-	def crud = {
+	def crud() = {
 		transactional { tx =>
 
 			sitsStatusDao.saveOrUpdate(sprFullyEnrolledStatus)
@@ -68,22 +69,22 @@ class MemberDaoTest extends PersistenceTestBase with Logging with Mockito {
 			memberDao.getByUniversityId("0000003") should be (None)
 			memberDao.getByUniversityId("0000004") should be (None)
 
-			memberDao.getAllByUserId("student", false) should be (Seq(m1, m2))
-			memberDao.getAllByUserId("student", true) should be (Seq(m1, m2))
-			memberDao.getAllByUserId("staff1", false) should be (Seq())
-			memberDao.getAllByUserId("staff1", true) should be (Seq(m3))
-			memberDao.getAllByUserId("unknown", false) should be (Seq())
-			memberDao.getAllByUserId("unknown", true) should be (Seq())
+			memberDao.getAllByUserId("student", disableFilter = false) should be (Seq(m1, m2))
+			memberDao.getAllByUserId("student", disableFilter = true) should be (Seq(m1, m2))
+			memberDao.getAllByUserId("staff1", disableFilter = false) should be (Seq())
+			memberDao.getAllByUserId("staff1", disableFilter = true) should be (Seq(m3))
+			memberDao.getAllByUserId("unknown", disableFilter = false) should be (Seq())
+			memberDao.getAllByUserId("unknown", disableFilter = true) should be (Seq())
 
 			session.disableFilter(Member.StudentsOnlyFilter)
 
-			memberDao.getAllByUserId("staff1", false) should be (Seq(m3))
+			memberDao.getAllByUserId("staff1", disableFilter = false) should be (Seq(m3))
 	}
 }
 
 	@Transactional
 	@Test
-	def getStudentByTimetableHash = {
+	def testGetStudentByTimetableHash() = {
 		val student = Fixtures.student()
 		val timetableHash = "abc"
 		student.timetableHash = timetableHash
@@ -93,7 +94,7 @@ class MemberDaoTest extends PersistenceTestBase with Logging with Mockito {
 	}
 
 	@Test
-  def listUpdatedSince = transactional { tx =>
+  def listUpdatedSince() = transactional { tx =>
 		val dept1 = Fixtures.department("hi", "History")
 		val dept2 = Fixtures.department("fr", "French")
 
@@ -131,7 +132,7 @@ class MemberDaoTest extends PersistenceTestBase with Logging with Mockito {
 		memberDao.listUpdatedSince(new DateTime(2013, DateTimeConstants.JANUARY, 31, 0, 0, 0, 0), dept2, 5) should be (Seq(m4))
 	}
 
-	@Test def studentsCounting = transactional { tx =>
+	@Test def studentsCounting() = transactional { tx =>
 		val dept1 = Fixtures.department("ms", "Motorsport")
 		val dept2 = Fixtures.department("vr", "Vehicle Repair")
 
@@ -160,8 +161,8 @@ class MemberDaoTest extends PersistenceTestBase with Logging with Mockito {
 		val relationshipType = StudentRelationshipType("tutor", "tutor", "personal tutor", "personal tutee")
 		relationshipDao.saveOrUpdate(relationshipType)
 
-		val relBetweenStaff1AndStu1 = StudentRelationship(staff1, relationshipType, stu1)
-		val relBetweenStaff1AndStu2 = StudentRelationship(staff1, relationshipType, stu2)
+		val relBetweenStaff1AndStu1 = StudentRelationship(staff1, relationshipType, stu1, DateTime.now)
+		val relBetweenStaff1AndStu2 = StudentRelationship(staff1, relationshipType, stu2, DateTime.now)
 
 		relationshipDao.saveOrUpdate(relBetweenStaff1AndStu1)
 		relationshipDao.saveOrUpdate(relBetweenStaff1AndStu2)
@@ -171,7 +172,7 @@ class MemberDaoTest extends PersistenceTestBase with Logging with Mockito {
 	}
 
 	@Test
-	def getAllSprStatuses = transactional { tx =>
+	def testGetAllSprStatuses() = transactional { tx =>
 		sitsStatusDao.saveOrUpdate(sprFullyEnrolledStatus)
 		sitsStatusDao.saveOrUpdate(sprPermanentlyWithdrawnStatus)
 
@@ -196,7 +197,7 @@ class MemberDaoTest extends PersistenceTestBase with Logging with Mockito {
 	}
 
 	@Test
-	def getAllModesOfAttendance = transactional { tx =>
+	def testGetAllModesOfAttendance() = transactional { tx =>
 		modeOfAttendanceDao.saveOrUpdate(moaFT)
 		modeOfAttendanceDao.saveOrUpdate(moaPT)
 
@@ -254,7 +255,7 @@ class MemberDaoTest extends PersistenceTestBase with Logging with Mockito {
 	}
 
 	@Test
-	def testGetFreshAndStaleUniversityIds = transactional { tx =>
+	def testGetFreshAndStaleUniversityIds() = transactional { tx =>
 		val dept1 = Fixtures.department("hm", "History of Music")
 		val dept2 = Fixtures.department("ar", "Architecture")
 
@@ -276,17 +277,17 @@ class MemberDaoTest extends PersistenceTestBase with Logging with Mockito {
 
 		stu3.missingFromImportSince = DateTime.now
 		memberDao.saveOrUpdate(stu3)
-		session.flush
+		session.flush()
 
 		memberDao.getFreshUniversityIds.size should be (3)
 		memberDao.getAllWithUniversityIdsStaleOrFresh(Seq("1000001", "1000002", "1000003", "1000004")).size should be (4)
 
-		memberDao.getByUniversityId("1000003") should be (None);
+		memberDao.getByUniversityId("1000003") should be (None)
 		memberDao.getByUniversityIdStaleOrFresh("1000003").get.universityId should be ("1000003")
 	}
 
 	@Test
-	def testStampMissingFromImport = transactional { tx =>
+	def testStampMissingFromImport() = transactional { tx =>
 		val dept1 = Fixtures.department("hm", "History of Music")
 		val dept2 = Fixtures.department("ar", "Architecture")
 
@@ -320,6 +321,44 @@ class MemberDaoTest extends PersistenceTestBase with Logging with Mockito {
 		memberDao.getByUniversityId("1000004").get.missingFromImportSince should be (null)
 
 		memberDao.getByUniversityId("1000002") should be (None)
+
+	}
+
+	@Test
+	def testUnstampPresentInImport() = transactional { tx =>
+		val dept1 = Fixtures.department("hm", "History of Music")
+		val dept2 = Fixtures.department("ar", "Architecture")
+
+		session.saveOrUpdate(dept1)
+		session.saveOrUpdate(dept2)
+
+		val stu1 = Fixtures.student(universityId = "1000001", userId="student", department=dept1, courseDepartment=dept1)
+		val stu2 = Fixtures.student(universityId = "1000002", userId="student", department=dept2, courseDepartment=dept2)
+		val stu3 = Fixtures.student(universityId = "1000003", userId="student", department=dept2, courseDepartment=dept2)
+		val stu4 = Fixtures.student(universityId = "1000004", userId="student", department=dept2, courseDepartment=dept2)
+
+		stu2.missingFromImportSince = DateTime.now()
+		stu3.missingFromImportSince = DateTime.now()
+		stu4.missingFromImportSince = DateTime.now()
+
+		memberDao.saveOrUpdate(stu1)
+		memberDao.saveOrUpdate(stu2)
+		memberDao.saveOrUpdate(stu3)
+		memberDao.saveOrUpdate(stu4)
+
+		memberDao.getByUniversityId("1000001").get.missingFromImportSince should be (null)
+		memberDao.getByUniversityId("1000002") should be (None)
+		memberDao.getByUniversityId("1000003") should be (None)
+		memberDao.getByUniversityId("1000004") should be (None)
+
+		memberDao.unstampPresentInImport(Seq("1000002"))
+		session.flush()
+		session.clear()
+
+		memberDao.getByUniversityId("1000001").get.missingFromImportSince should be (null)
+		memberDao.getByUniversityId("1000002").get.missingFromImportSince should be (null)
+		memberDao.getByUniversityId("1000003") should be (None)
+		memberDao.getByUniversityId("1000004") should be (None)
 
 	}
 

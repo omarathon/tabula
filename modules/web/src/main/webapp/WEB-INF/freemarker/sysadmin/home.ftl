@@ -21,6 +21,7 @@
 		<p><a class="btn btn-default" href="<@url page="/sysadmin/complete-scheduled-notification" />">Complete scheduled notifications</a></p>
 		<p><a class="btn btn-default" href="<@url page="/sysadmin/event-calendar" />">Upcoming event calendar</a></p>
 		<p><a class="btn btn-default" href="<@url page="/sysadmin/metrics" />">Metrics</a></p>
+		<p><a class="btn btn-default" href="<@url page="/profiles/admin/timetablechecker" />">Timetable feed checker</a></p>
 	</div>
 
 	<div class="col-md-4">
@@ -82,6 +83,15 @@
 			<@f.form method="post" action="${url('/sysadmin/import-profiles')}" commandName="blankForm">
 				<textarea id="import-profiles-specific" name="members" class="form-control" placeholder="University IDs (one per line)" rows="2"></textarea>
 				<input class="btn btn-danger" type="submit" value="Specific profile(s)">
+			</@f.form>
+		</p>
+
+		<p>
+			<@f.form method="post" action="${url('/sysadmin/recheck-missing')}" commandName="blankForm">
+				Recheck missing stamps from
+				<div class="input-group">
+					<@f.input id="check-from" path="from" cssClass="date-time-picker form-control" placeholder="Click to pick a date" /><span class="input-group-btn"><input class="btn btn-danger" type="submit" value="Re-check" onclick="return confirm('Really? Could take a while.')" /></span>
+				</div>
 			</@f.form>
 		</p>
 

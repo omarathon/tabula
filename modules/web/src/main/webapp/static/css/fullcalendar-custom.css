@@ -37,3 +37,6 @@ but it should look more like h4
 	margin-top: 10px;
 	font-size: 0.9em;
 }
+.fc-event.tabulaPopover-init {
+	cursor: pointer;
+}

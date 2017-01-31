@@ -5,13 +5,14 @@ import org.hibernate.sql.JoinType
 import org.joda.time.DateTime
 import org.springframework.stereotype.Service
 import uk.ac.warwick.spring.Wire
+import uk.ac.warwick.tabula.JavaImports._
 import uk.ac.warwick.tabula.commands.{FiltersStudents, StudentAssociationData, StudentAssociationEntityData, TaskBenchmarking}
-import uk.ac.warwick.tabula.data._
 import uk.ac.warwick.tabula.data.Transactions._
+import uk.ac.warwick.tabula.data._
 import uk.ac.warwick.tabula.data.model._
 import uk.ac.warwick.tabula.helpers.Logging
-import uk.ac.warwick.tabula.JavaImports._
 
+import scala.collection.JavaConverters._
 import scala.collection.immutable.TreeMap
 
 trait RelationshipServiceComponent {
@@ -46,45 +47,48 @@ trait RelationshipService {
 
 	def saveOrUpdate(relationship: StudentRelationship)
 	def findCurrentRelationships(relationshipType: StudentRelationshipType, scd: StudentCourseDetails): Seq[StudentRelationship]
+	def findFutureRelationships(relationshipType: StudentRelationshipType, scd: StudentCourseDetails): Seq[StudentRelationship]
 	def findCurrentRelationships(relationshipType: StudentRelationshipType, student: StudentMember): Seq[StudentRelationship]
 	def getCurrentRelationship(relationshipType: StudentRelationshipType, student: StudentMember, agent: Member): Option[StudentRelationship]
 	def getCurrentRelationships(student: StudentMember, agentId: String): Seq[StudentRelationship]
 	def getRelationships(relationshipType: StudentRelationshipType, studentCourseDetails:StudentCourseDetails): Seq[StudentRelationship]
 	def getRelationships(relationshipType: StudentRelationshipType, student: StudentMember): Seq[StudentRelationship]
-	def saveStudentRelationships(
+	def saveStudentRelationship(
 		relationshipType: StudentRelationshipType,
 		studentCourseDetails: StudentCourseDetails,
-		agents: Seq[Member]
-	): Seq[StudentRelationship]
+		agent: Either[Member, String],
+		startDate: DateTime,
+		replaces: Seq[StudentRelationship] = Seq()
+	): StudentRelationship
 	def replaceStudentRelationships(
 		relationshipType: StudentRelationshipType,
 		studentCourseDetails: StudentCourseDetails,
-		agents: Seq[Member]
-	): Seq[StudentRelationship]
+		agent: Member,
+		scheduledDate: DateTime
+	): StudentRelationship
 	def replaceStudentRelationshipsWithPercentages(
 		relationshipType: StudentRelationshipType,
 		studentCourseDetails: StudentCourseDetails,
 		agentsWithPercentages: Seq[(Member, JBigDecimal)]
 	): Seq[StudentRelationship]
-	def listStudentRelationshipsByDepartment(relationshipType: StudentRelationshipType, department: Department): Seq[StudentRelationship]
-	def listStudentRelationshipsByStaffDepartment(relationshipType: StudentRelationshipType, department: Department): Seq[StudentRelationship]
-	def listAllStudentRelationshipsWithMember(agent: Member): Seq[StudentRelationship]
-	def listAllStudentRelationshipTypesWithStudentMember(student: StudentMember): Seq[StudentRelationshipType]
-	def listAllStudentRelationshipTypesWithMember(agent: Member): Seq[StudentRelationshipType]
-	def listStudentRelationshipsWithMember(relationshipType: StudentRelationshipType, agent: Member): Seq[StudentRelationship]
-	def listStudentRelationshipsWithMemberInDepartment(relationshipType: StudentRelationshipType, agent: Member, department: Department): Seq[StudentRelationship]
+	def listCurrentStudentRelationshipsByDepartment(relationshipType: StudentRelationshipType, department: Department): Seq[StudentRelationship]
+	def listCurrentStudentRelationshipsByStaffDepartment(relationshipType: StudentRelationshipType, department: Department): Seq[StudentRelationship]
+	def listCurrentStudentRelationshipsWithMember(agent: Member): Seq[StudentRelationship]
+	def listCurrentStudentRelationshipTypesWithMember(agent: Member): Seq[StudentRelationshipType]
+	def listCurrentStudentRelationshipsWithMember(relationshipType: StudentRelationshipType, agent: Member): Seq[StudentRelationship]
+	def listCurrentStudentRelationshipsWithMemberInDepartment(relationshipType: StudentRelationshipType, agent: Member, department: Department): Seq[StudentRelationship]
 	def listAllStudentRelationshipsWithUniversityId(agentId: String): Seq[StudentRelationship]
-	def listStudentRelationshipsWithUniversityId(relationshipType: StudentRelationshipType, agentId: String): Seq[StudentRelationship]
-	def listStudentsWithoutRelationship(relationshipType: StudentRelationshipType, department: Department): Seq[Member]
+	def listStudentsWithoutCurrentRelationship(relationshipType: StudentRelationshipType, department: Department): Seq[Member]
+	def listScheduledRelationshipChanges(relationshipType: StudentRelationshipType, department: Department): Seq[StudentRelationship]
 	def countStudentsByRelationship(relationshipType: StudentRelationshipType): Int
 	def getAllCurrentRelationships(student: StudentMember): Seq[StudentRelationship]
 	def getAllPastAndPresentRelationships(student: StudentMember): Seq[StudentRelationship]
 	def getAllPastAndPresentRelationships(relationshipType: StudentRelationshipType, scd: StudentCourseDetails): Seq[StudentRelationship]
-	def endStudentRelationships(relationships: Seq[StudentRelationship])
+	def endStudentRelationships(relationships: Seq[StudentRelationship], endDate: DateTime)
+	def removeFutureStudentRelationships(relationships: Seq[StudentRelationship])
 	def getStudentAssociationDataWithoutRelationship(department: Department, relationshipType: StudentRelationshipType, restrictions: Seq[ScalaRestriction] = Seq()): Seq[StudentAssociationData]
 	def getStudentAssociationEntityData(department: Department, relationshipType: StudentRelationshipType, additionalEntityIds: Seq[String]): Seq[StudentAssociationEntityData]
 	def listCurrentRelationshipsWithAgent(relationshipType: StudentRelationshipType, agentId: String): Seq[StudentRelationship]
-	def applyStudentRelationships(relationshipType: StudentRelationshipType, agentId: String, studentIDs: Seq[String]): Seq[StudentRelationship]
 	def coursesForStudentCourseDetails(scds: Seq[StudentCourseDetails]): Map[StudentCourseDetails, Course]
 	def latestYearsOfStudyForStudentCourseDetails(scds: Seq[StudentCourseDetails]): Map[StudentCourseDetails, Int]
 	def listAgentRelationshipsByDepartment(relationshipType: StudentRelationshipType, department: Department): TreeMap[SortableAgentIdentifier, Seq[StudentRelationship]]
@@ -92,7 +96,7 @@ trait RelationshipService {
 
 abstract class AbstractRelationshipService extends RelationshipService with Logging with TaskBenchmarking {
 
-	self: RelationshipDaoComponent with ProfileServiceComponent =>
+	self: RelationshipDaoComponent =>
 
 	def saveOrUpdate(relationship: StudentRelationship): Unit = relationshipDao.saveOrUpdate(relationship)
 
@@ -106,6 +110,10 @@ abstract class AbstractRelationshipService extends RelationshipService with Logg
 
 	def findCurrentRelationships(relationshipType: StudentRelationshipType, scd: StudentCourseDetails): Seq[StudentRelationship] = transactional(){
 		relationshipDao.getCurrentRelationships(relationshipType, scd)
+	}
+
+	def findFutureRelationships(relationshipType: StudentRelationshipType, scd: StudentCourseDetails): Seq[StudentRelationship] = transactional(){
+		relationshipDao.getFutureRelationships(relationshipType, scd)
 	}
 
 	def findCurrentRelationships(relationshipType: StudentRelationshipType, student: StudentMember): Seq[StudentRelationship] = transactional() {
@@ -140,22 +148,53 @@ abstract class AbstractRelationshipService extends RelationshipService with Logg
 		relationshipDao.getRelationshipsByTarget(relationshipType, student)
 	}
 
-	def saveStudentRelationships(
+	def saveStudentRelationship(
 		relationshipType: StudentRelationshipType,
 		studentCourseDetails: StudentCourseDetails,
-		agents: Seq[Member]
-	): Seq[StudentRelationship] = transactional() {
+		agent: Either[Member, String],
+		startDate: DateTime,
+		replaces: Seq[StudentRelationship] = Seq()
+	): StudentRelationship = transactional() {
+		/** For each SCD-Agent pair:
+			* if there is current relationship that ends after the specified startDate, do nothing (return that relationship)
+			* else if there is a future relationship, update the startDate of the existing future relationship
+			* else create a new relationship with the specified startDate
+			*/
 		val currentRelationships = findCurrentRelationships(relationshipType, studentCourseDetails)
-		val existingRelationships = currentRelationships.filter { rel => rel.agentMember.exists { agents.contains(_) } }
-		val agentsToCreate = agents.filterNot { agent => currentRelationships.exists(_.agentMember.contains(agent)) }
+		val futureRelationships = findFutureRelationships(relationshipType, studentCourseDetails)
 
-		agentsToCreate.map { agent =>
-			// create the new one
-			val newRelationship = StudentRelationship(agent, relationshipType, studentCourseDetails)
-			newRelationship.startDate = new DateTime
-			relationshipDao.saveOrUpdate(newRelationship)
-			newRelationship
-		} ++ existingRelationships
+		val agentId = agent.fold(a => a.universityId, a => a)
+
+		val relationship = {
+			val existingCurrentRelationship = currentRelationships.find(_.agent.contains(agentId))
+			val existingFutureRelationship = futureRelationships.find(_.agent.contains(agentId))
+			if (existingCurrentRelationship.isDefined && (existingCurrentRelationship.get.endDate == null || existingCurrentRelationship.get.endDate.isAfter(startDate))) {
+				// Return the existing relationship
+				existingCurrentRelationship.get.replacesRelationships.addAll(replaces.asJava)
+				replaces.foreach(_.replacedBy = existingCurrentRelationship.get)
+				existingCurrentRelationship.get
+			} else if (existingFutureRelationship.isDefined) {
+				// Update the scheduled date
+				existingFutureRelationship.get.startDate = startDate
+				existingFutureRelationship.get.replacesRelationships.addAll(replaces.asJava)
+				replaces.foreach(_.replacedBy = existingFutureRelationship.get)
+				existingFutureRelationship.get
+			} else {
+				// Create the new one
+				val newRelationship = agent match {
+					case Left(agentMember) => StudentRelationship(agentMember, relationshipType, studentCourseDetails, startDate)
+					case Right(external) => ExternalStudentRelationship(external, relationshipType, studentCourseDetails, startDate)
+				}
+				newRelationship.replacesRelationships.addAll(replaces.asJava)
+				replaces.foreach(_.replacedBy = newRelationship)
+				newRelationship
+			}
+
+		}
+
+		(Seq(relationship) ++ replaces).foreach(relationshipDao.saveOrUpdate)
+
+		relationship
 	}
 
 	def saveStudentRelationshipsWithPercentages(
@@ -169,9 +208,8 @@ abstract class AbstractRelationshipService extends RelationshipService with Logg
 
 		agentsToCreate.map { case (agent, percentage) =>
 			// create the new one
-			val newRelationship = StudentRelationship(agent, relationshipType, studentCourseDetails)
+			val newRelationship = StudentRelationship(agent, relationshipType, studentCourseDetails, DateTime.now)
 			newRelationship.percentage = percentage
-			newRelationship.startDate = new DateTime
 			relationshipDao.saveOrUpdate(newRelationship)
 			newRelationship
 		} ++ existingRelationships
@@ -181,28 +219,42 @@ abstract class AbstractRelationshipService extends RelationshipService with Logg
 	def replaceStudentRelationships(
 		relationshipType: StudentRelationshipType,
 		studentCourseDetails: StudentCourseDetails,
-		agents: Seq[Member]
-	): Seq[StudentRelationship] = transactional() {
+		agent: Member,
+		scheduledDate: DateTime
+	): StudentRelationship = transactional() {
 		val currentRelationships = findCurrentRelationships(relationshipType, studentCourseDetails)
-		val (existingRelationships, relationshipsToEnd) = currentRelationships.partition { rel => rel.agentMember.exists { agents.contains(_) } }
-
-		val agentsToAdd = agents.filterNot { agent => existingRelationships.exists(_.agentMember.contains(agent)) }
+		val (existingRelationships, relationshipsToEnd) = currentRelationships.partition { rel => rel.agentMember.contains(agent) }
 
 		// Don't need to do anything with existingRelationships, but need to handle the others
 
 		// End all relationships for agents not passed in
-		endStudentRelationships(relationshipsToEnd)
+		endStudentRelationships(relationshipsToEnd, scheduledDate)
 
-		// Save new relationships for agents that don't already exist
-		saveStudentRelationships(relationshipType, studentCourseDetails, agentsToAdd)
+		// Save new relationship if agent that didn't already exist
+		if (existingRelationships.isEmpty) {
+			saveStudentRelationship(relationshipType, studentCourseDetails, Left(agent), scheduledDate)
+		} else {
+			existingRelationships.head
+		}
 	}
 
-	def endStudentRelationships(relationships: Seq[StudentRelationship]) {
+	def endStudentRelationships(relationships: Seq[StudentRelationship], endDate: DateTime) {
 		relationships.foreach {
 			rel => {
-				rel.endDate = DateTime.now
+				rel.endDate = endDate
 				saveOrUpdate(rel)
 			}
+		}
+	}
+
+	def removeFutureStudentRelationships(relationships: Seq[StudentRelationship]): Unit = {
+		relationships.filter(r => r.startDate != null && r.startDate.isAfterNow).foreach { relationship =>
+			relationship.replacesRelationships.asScala.foreach { rel =>
+				rel.replacedBy = null
+				rel.endDate = null
+			}
+			relationship.replacesRelationships.clear()
+			relationshipDao.delete(relationship)
 		}
 	}
 
@@ -250,66 +302,66 @@ abstract class AbstractRelationshipService extends RelationshipService with Logg
 
 	def studentDepartmentMatchesAndExpectedToHaveRelationship(relationshipType: StudentRelationshipType, department: Department)(member: StudentMember): Boolean = {
 		department.filterRule.matches(member, Option(department)) &&
-		member.freshStudentCourseDetails
-		.filter(scd => Option(scd.currentRoute).exists(route => route.adminDepartment == department || route.adminDepartment == department.rootDepartment)) // there needs to be an SCD for the right department ...
-		.filter(!_.permanentlyWithdrawn) // that's not permanently withdrawn ...
-		.exists(relationshipType.isExpected) // and has a course of the type that is expected to have this kind of relationship
+			member.freshStudentCourseDetails
+				.filter(scd => Option(scd.currentRoute).exists(route => route.adminDepartment == department || route.adminDepartment == department.rootDepartment)) // there needs to be an SCD for the right department ...
+				.filter(!_.permanentlyWithdrawn) // that's not permanently withdrawn ...
+				.exists(relationshipType.isExpected) // and has a course of the type that is expected to have this kind of relationship
 	}
 
-	def listStudentRelationshipsByDepartment(relationshipType: StudentRelationshipType, department: Department): Seq[StudentRelationship] = transactional(readOnly = true) {
+	def listCurrentStudentRelationshipsByDepartment(relationshipType: StudentRelationshipType, department: Department): Seq[StudentRelationship] = transactional(readOnly = true) {
 		benchmarkTask("listStudentRelationshipsByDepartment") {
-		relationshipDao.getRelationshipsByDepartment(relationshipType, department.rootDepartment)
+		relationshipDao.getCurrentRelationshipsByDepartment(relationshipType, department.rootDepartment)
 			.filter(relationshipDepartmentFilterMatches(department))
 			.filter(relationshipNotPermanentlyWithdrawn)
 	}}
 
-	def listStudentRelationshipsByStaffDepartment(relationshipType: StudentRelationshipType, department: Department): Seq[StudentRelationship] = transactional(readOnly = true) {
-		relationshipDao.getRelationshipsByStaffDepartment(relationshipType, department.rootDepartment)
+	def listCurrentStudentRelationshipsByStaffDepartment(relationshipType: StudentRelationshipType, department: Department): Seq[StudentRelationship] = transactional(readOnly = true) {
+		relationshipDao.getCurrentRelationshipsByStaffDepartment(relationshipType, department.rootDepartment)
 			.filter(relationshipDepartmentFilterMatches(department))
 			.filter(relationshipNotPermanentlyWithdrawn)
 	}
 
-	def listAllStudentRelationshipsWithMember(agent: Member): Seq[MemberStudentRelationship] = transactional(readOnly = true) {
-		relationshipDao.getAllRelationshipsByAgent(agent.universityId)
+	def listCurrentStudentRelationshipsWithMember(agent: Member): Seq[MemberStudentRelationship] = transactional(readOnly = true) {
+		relationshipDao.getCurrentRelationshipsForAgent(agent.universityId)
 			.filter(relationshipNotPermanentlyWithdrawn)
 	}
 
-	def listAllStudentRelationshipTypesWithStudentMember(student: StudentMember): Seq[StudentRelationshipType] = transactional(readOnly = true) {
-		relationshipDao.getAllRelationshipTypesByStudent(student)
+	def listCurrentStudentRelationshipTypesWithMember(agent: Member): Seq[StudentRelationshipType] = transactional(readOnly = true) {
+		relationshipDao.getCurrentRelationshipTypesByAgent(agent.universityId)
 	}
 
-
-	def listAllStudentRelationshipTypesWithMember(agent: Member): Seq[StudentRelationshipType] = transactional(readOnly = true) {
-		relationshipDao.getAllRelationshipTypesByAgent(agent.universityId)
-	}
-
-	def listStudentRelationshipsWithMember(relationshipType: StudentRelationshipType, agent: Member): Seq[MemberStudentRelationship] = transactional(readOnly = true) {
-		relationshipDao.getRelationshipsByAgent(relationshipType, agent.universityId)
+	def listCurrentStudentRelationshipsWithMember(relationshipType: StudentRelationshipType, agent: Member): Seq[MemberStudentRelationship] = transactional(readOnly = true) {
+		relationshipDao.getCurrentRelationshipsByAgent(relationshipType, agent.universityId)
 			.filter(relationshipNotPermanentlyWithdrawn)
 	}
 
-	def listStudentRelationshipsWithMemberInDepartment(relationshipType: StudentRelationshipType, agent: Member, department: Department): Seq[MemberStudentRelationship] = transactional(readOnly = true) {
-		relationshipDao.getRelationshipsByAgent(relationshipType, agent.universityId)
+	def listCurrentStudentRelationshipsWithMemberInDepartment(relationshipType: StudentRelationshipType, agent: Member, department: Department): Seq[MemberStudentRelationship] = transactional(readOnly = true) {
+		relationshipDao.getCurrentRelationshipsByAgent(relationshipType, agent.universityId)
 			.filter(relationshipNotPermanentlyWithdrawn)
 			.filter(r => r.studentCourseDetails.department == department.rootDepartment)
 	}
 
 	def listAllStudentRelationshipsWithUniversityId(agentId: String): Seq[MemberStudentRelationship] = transactional(readOnly = true) {
-		relationshipDao.getAllRelationshipsByAgent(agentId)
+		relationshipDao.getCurrentRelationshipsForAgent(agentId)
 			.filter(relationshipNotPermanentlyWithdrawn)
 	}
 
-	def listStudentRelationshipsWithUniversityId(relationshipType: StudentRelationshipType, agentId: String): Seq[MemberStudentRelationship] = transactional(readOnly = true) {
-		relationshipDao.getRelationshipsByAgent(relationshipType, agentId)
-			.filter(relationshipNotPermanentlyWithdrawn)
-	}
-
-  def listStudentsWithoutRelationship(relationshipType: StudentRelationshipType, department: Department): Seq[StudentMember] = transactional(readOnly = true) {
-		benchmarkTask("listStudentsWithoutRelationship") {
-			relationshipDao.getStudentsWithoutRelationshipByDepartment(relationshipType, department.rootDepartment)
+  def listStudentsWithoutCurrentRelationship(relationshipType: StudentRelationshipType, department: Department): Seq[StudentMember] = transactional(readOnly = true) {
+		benchmarkTask("listStudentsWithoutCurrentRelationship") {
+			relationshipDao.getStudentsWithoutCurrentRelationshipByDepartment(relationshipType, department.rootDepartment)
 				.filter(studentDepartmentMatchesAndExpectedToHaveRelationship(relationshipType, department))
 		}
   }
+
+	def listScheduledRelationshipChanges(relationshipType: StudentRelationshipType, department: Department): Seq[StudentRelationship] = transactional(readOnly = true) {
+		benchmarkTask("listScheduledRelationshipChanges") {
+			relationshipDao.getScheduledRelationshipChangesByDepartment(relationshipType, department.rootDepartment)
+				.filter(rel =>
+					department.filterRule.matches(rel.studentCourseDetails.student, Option(department)) &&
+						Option(rel.studentCourseDetails.currentRoute).exists(route => route.adminDepartment == department || route.adminDepartment == department.rootDepartment)
+				)
+		}
+	}
 
   def countStudentsByRelationship(relationshipType: StudentRelationshipType): Int = transactional(readOnly = true) {
 		relationshipDao.countStudentsByRelationship(relationshipType).intValue
@@ -374,19 +426,6 @@ abstract class AbstractRelationshipService extends RelationshipService with Logg
 		}
 	}
 
-	def applyStudentRelationships(relationshipType: StudentRelationshipType, agentId: String, studentIDs: Seq[String]): Seq[StudentRelationship] = {
-		val allStudents = profileService.getAllMembersWithUniversityIdsStaleOrFresh(studentIDs).flatMap{
-			case student: StudentMember => Some(student)
-			case _ => None
-		}
-		val relationships = profileService.getMemberByUniversityIdStaleOrFresh(agentId) match {
-			case Some(agentMember: Member) => allStudents.map(s => StudentRelationship.apply(agentMember, relationshipType, s))
-			case None => allStudents.map(s => ExternalStudentRelationship.apply(agentId, relationshipType, s))
-		}
-		relationships.foreach(saveOrUpdate)
-		relationships
-	}
-
 	def coursesForStudentCourseDetails(scds: Seq[StudentCourseDetails]): Map[StudentCourseDetails, Course] = {
 		relationshipDao.coursesForStudentCourseDetails(scds)
 	}
@@ -397,10 +436,10 @@ abstract class AbstractRelationshipService extends RelationshipService with Logg
 
 	def listAgentRelationshipsByDepartment(relationshipType: StudentRelationshipType, department: Department): TreeMap[SortableAgentIdentifier, Seq[StudentRelationship]] = {
 		// all students in department X
-		val unsortedAgentRelationshipsByStudentDept = listStudentRelationshipsByDepartment(relationshipType, department)
+		val unsortedAgentRelationshipsByStudentDept = listCurrentStudentRelationshipsByDepartment(relationshipType, department)
 
 		// all students with a tutor in department X
-		val unsortedAgentRelationshipsByStaffDept = listStudentRelationshipsByStaffDepartment(relationshipType, department)
+		val unsortedAgentRelationshipsByStaffDept = listCurrentStudentRelationshipsByStaffDepartment(relationshipType, department)
 
 		// combine the two and remove the dups
 		val unsortedAgentRelationships = (unsortedAgentRelationshipsByStudentDept ++ unsortedAgentRelationshipsByStaffDept)
@@ -421,4 +460,3 @@ abstract class AbstractRelationshipService extends RelationshipService with Logg
 class RelationshipServiceImpl
 	extends AbstractRelationshipService
 	with AutowiringRelationshipDaoComponent
-	with AutowiringProfileServiceComponent

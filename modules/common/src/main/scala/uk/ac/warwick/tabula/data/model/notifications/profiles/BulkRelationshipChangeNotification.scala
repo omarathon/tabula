@@ -2,13 +2,16 @@ package uk.ac.warwick.tabula.data.model.notifications.profiles
 
 import javax.persistence.{DiscriminatorValue, Entity}
 
+import org.joda.time.DateTime
 import uk.ac.warwick.spring.Wire
 import uk.ac.warwick.tabula.data.model._
+import uk.ac.warwick.tabula.helpers.StringUtils._
 import uk.ac.warwick.tabula.profiles.web.Routes
 import uk.ac.warwick.tabula.services.{ProfileService, RelationshipService}
 import uk.ac.warwick.userlookup.User
 
 import scala.annotation.meta.getter
+import scala.util.Try
 
 abstract class BulkRelationshipChangeNotification extends Notification[StudentRelationship, Unit] {
 	@(transient @getter) val templateLocation: String
@@ -26,10 +29,22 @@ abstract class BulkRelationshipChangeNotification extends Notification[StudentRe
 		id => profileService.getMemberByUniversityId(id)
 	}
 
+	@transient private val scheduledDateString = StringSetting("scheduledDate", "")
+
+	def scheduledDate: Option[DateTime] = scheduledDateString.value.maybeText.flatMap(s => Try(new DateTime(s.toLong)).toOption)
+	def scheduledDate_=(date: DateTime): Unit = scheduledDateString.value = date.getMillis.toString
+
+	@transient private val previouslyScheduledDateString = StringSetting("previouslyScheduledDate", "")
+
+	def previouslyScheduledDate: Option[DateTime] = previouslyScheduledDateString.value.maybeText.flatMap(s => Try(new DateTime(s.toLong)).toOption)
+	def previouslyScheduledDate_=(date: DateTime): Unit = previouslyScheduledDateString.value = date.getMillis.toString
+
 	def content: FreemarkerModel = {
 		FreemarkerModel(templateLocation, Map(
 			"relationshipType" -> relationshipType,
-			"path" -> url
+			"modifiedRelationships" -> entities,
+			"scheduledDate" -> scheduledDate,
+			"previouslyScheduledDate" -> previouslyScheduledDate
 		) ++ extraModel)
 	}
 
@@ -39,9 +54,6 @@ abstract class BulkRelationshipChangeNotification extends Notification[StudentRe
 /**
  * notification for a student letting them know of any change to their tutors following
  * e.g. drag and drop tutor allocation
- *
- * it's a SingleItemNotification because it's just about one relationship, whereas the
- * notifications below for old and new tutors might be about many relationships
  */
 @Entity
 @DiscriminatorValue(value="BulkStudentRelationship")
@@ -50,18 +62,16 @@ class BulkStudentRelationshipNotification() extends BulkRelationshipChangeNotifi
 
 	def title: String = s"${relationshipType.agentRole.capitalize} allocation change"
 
-	def newAgents: Seq[Member] = entities.filter(_.isCurrent).flatMap(_.agentMember)
+	def newAgents: Seq[Member] = entities.flatMap(_.agentMember)
 
 	def student: StudentMember = entities.head.studentCourseDetails.student
 	def recipients = Seq(student.asSsoUser)
 
-	def url: String = Routes.Profile.seminars(student)
+	def url: String = Routes.Profile.relationshipType(student, relationshipType)
 
 	def urlTitle: String = "view this information on your student profile"
 
-	def extraModel = Map(
-		"modifiedRelationships" -> entities,
-		"student" -> student,
+	def extraModel = Map("student" -> student,
 		"oldAgents" -> oldAgents,
 		"newAgents" -> newAgents
 	)
@@ -87,7 +97,6 @@ class BulkNewAgentRelationshipNotification extends BulkRelationshipChangeNotific
 	def urlTitle: String = s"view all of your ${relationshipType.studentRole}s"
 
 	def extraModel = Map(
-		"modifiedRelationships" -> entities,
 		"newAgent" -> newAgent
 	)
 
@@ -107,19 +116,17 @@ class BulkOldAgentRelationshipNotification extends BulkRelationshipChangeNotific
 	def title: String = s"Change to ${relationshipType.studentRole}s"
 
 	// this should be a sequence of 1 since one notification is created for each old agent
-	def recipients: Seq[User] = oldAgents.map { _.asSsoUser }.toSeq
+	def recipients: Seq[User] = oldAgents.map { _.asSsoUser	}
 
 	def url: String = Routes.students(relationshipType)
 
 	def urlTitle: String = s"view your ${relationshipType.studentRole}s"
 
-	def extraModel = Map(
-		"modifiedRelationships" -> entities
-	)
+	def extraModel = Map()
 }
 
 object BulkRelationshipChangeNotification {
-	val NewAgentTemplate = "/WEB-INF/freemarker/notifications/bulk_new_agent_notification.ftl"
-	val OldAgentTemplate = "/WEB-INF/freemarker/notifications/bulk_old_agent_notification.ftl"
-	val StudentTemplate = "/WEB-INF/freemarker/notifications/student_change_relationship_notification.ftl"
+	val NewAgentTemplate = "/WEB-INF/freemarker/notifications/profiles/bulk_new_agent_notification.ftl"
+	val OldAgentTemplate = "/WEB-INF/freemarker/notifications/profiles/bulk_old_agent_notification.ftl"
+	val StudentTemplate = "/WEB-INF/freemarker/notifications/profiles/student_change_relationship_notification.ftl"
 }

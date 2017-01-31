@@ -1,12 +1,13 @@
 package uk.ac.warwick.tabula.commands.attendance
 
-import uk.ac.warwick.tabula.commands._
-import uk.ac.warwick.tabula.services._
-import uk.ac.warwick.tabula.data.model.{RuntimeMember, StudentRelationshipType, StudentMember, Department}
-import uk.ac.warwick.tabula.services.attendancemonitoring.{AutowiringAttendanceMonitoringServiceComponent, AttendanceMonitoringServiceComponent}
-import uk.ac.warwick.tabula.system.permissions.Public
-import uk.ac.warwick.tabula.permissions.Permissions
 import uk.ac.warwick.tabula.CurrentUser
+import uk.ac.warwick.tabula.commands._
+import uk.ac.warwick.tabula.data.model.{Department, RuntimeMember, StudentMember, StudentRelationshipType}
+import uk.ac.warwick.tabula.permissions.Permissions
+import uk.ac.warwick.tabula.services._
+import uk.ac.warwick.tabula.services.attendancemonitoring.{AttendanceMonitoringServiceComponent, AutowiringAttendanceMonitoringServiceComponent}
+import uk.ac.warwick.tabula.system.permissions.Public
+
 import scala.collection.JavaConverters._
 
 case class HomeInformation(
@@ -58,7 +59,7 @@ abstract class HomeCommand(val user: CurrentUser) extends CommandInternal[HomeIn
 		// These return Sets so no need to distinct the result
 
 		val allRelationshipTypes = relationshipService.allStudentRelationshipTypes
-		val downwardRelationships = relationshipService.listAllStudentRelationshipsWithMember(currentMember)
+		val downwardRelationships = relationshipService.listCurrentStudentRelationshipsWithMember(currentMember)
 		val relationshipTypesMap = allRelationshipTypes.map { t =>
 			(t, downwardRelationships.exists(_.relationshipType == t))
 		}.toMap

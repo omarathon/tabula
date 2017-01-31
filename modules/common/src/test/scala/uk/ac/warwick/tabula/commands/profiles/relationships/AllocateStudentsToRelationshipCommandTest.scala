@@ -1,22 +1,26 @@
 package uk.ac.warwick.tabula.commands.profiles.relationships
 
+import org.joda.time.DateTime
 import uk.ac.warwick.tabula.JavaImports.{JArrayList, JHashMap}
 import uk.ac.warwick.tabula.commands.profiles.relationships.AllocateStudentsToRelationshipCommand.Result
 import uk.ac.warwick.tabula.commands.profiles.relationships.ExtractRelationshipsFromFileCommand.AllocationTypes
-import uk.ac.warwick.tabula.data.model.ExternalStudentRelationship
-import uk.ac.warwick.tabula.services.{RelationshipService, RelationshipServiceComponent}
+import uk.ac.warwick.tabula.data.model.{ExternalStudentRelationship, StudentMember, StudentRelationshipType}
+import uk.ac.warwick.tabula.services.{ProfileService, ProfileServiceComponent, RelationshipService, RelationshipServiceComponent}
 import uk.ac.warwick.tabula.{Fixtures, Mockito, TestBase}
 
 class AllocateStudentsToRelationshipCommandTest extends TestBase with Mockito {
 
 	trait Fixture extends StudentAssociationFixture {
+		protected val thisRelationshipType = StudentRelationshipType("tutor","tutor","tutor","tutee")
 		val command = new AllocateStudentsToRelationshipCommandInternal(null, null, null)
-			with AllocateStudentsToRelationshipCommandRequest with AllocateStudentsToRelationshipCommandState
-			with RelationshipServiceComponent {
+			with AllocateStudentsToRelationshipCommandRequest with ManageStudentRelationshipsState
+			with RelationshipServiceComponent with ProfileServiceComponent {
 
 			val relationshipService: RelationshipService = smartMock[RelationshipService]
 			relationshipService.getStudentAssociationDataWithoutRelationship(null, null, Seq()) returns mockDbUnallocated
 			relationshipService.getStudentAssociationEntityData(null, null, Seq()) returns mockDbAllocated
+
+			val profileService: ProfileService = smartMock[ProfileService]
 		}
 	}
 
@@ -81,15 +85,19 @@ class AllocateStudentsToRelationshipCommandTest extends TestBase with Mockito {
 	}
 
 	trait DbFixture extends Fixture {
+		protected val studentMember1: StudentMember = Fixtures.student("1")
+		protected val studentMember2: StudentMember = Fixtures.student("2")
+		protected val studentMember3: StudentMember = Fixtures.student("3")
+		protected val studentMember4: StudentMember = Fixtures.student("4")
 		command.relationshipService.listCurrentRelationshipsWithAgent(null, "1") returns Seq()
-		val agent2Rels = Seq(
-			ExternalStudentRelationship("2", null, Fixtures.student("1")),
-			ExternalStudentRelationship("2", null, Fixtures.student("2"))
+		protected val agent2Rels = Seq(
+			ExternalStudentRelationship("2", null, studentMember1, DateTime.now),
+			ExternalStudentRelationship("2", null, studentMember2, DateTime.now)
 		)
 		command.relationshipService.listCurrentRelationshipsWithAgent(null, "2") returns agent2Rels
-		val agent3Rels = Seq(
-			ExternalStudentRelationship("2", null, Fixtures.student("3")),
-			ExternalStudentRelationship("2", null, Fixtures.student("4"))
+		protected val agent3Rels = Seq(
+			ExternalStudentRelationship("2", null, studentMember3, DateTime.now),
+			ExternalStudentRelationship("2", null, studentMember4, DateTime.now)
 		)
 		command.relationshipService.listCurrentRelationshipsWithAgent(null, "3") returns agent3Rels
 	}
@@ -112,8 +120,8 @@ class AllocateStudentsToRelationshipCommandTest extends TestBase with Mockito {
 			result.expiredRelationships.size should be (1)
 			result.expiredRelationships.head.agent should be ("2")
 			result.expiredRelationships.head.studentMember.get.universityId should be ("1")
-			verify(command.relationshipService, times(1)).endStudentRelationships(Seq(agent2Rels.head))
-			verify(command.relationshipService, times(1)).applyStudentRelationships(null, "1", Seq("1"))
+			verify(command.relationshipService, times(1)).endStudentRelationships(Seq(agent2Rels.head), DateTime.now)
+			verify(command.relationshipService, times(1)).saveStudentRelationship(thisRelationshipType, studentMember1.mostSignificantCourse, Right("1"), DateTime.now)
 		}
 	}
 
@@ -133,8 +141,8 @@ class AllocateStudentsToRelationshipCommandTest extends TestBase with Mockito {
 			result.expiredRelationships.size should be (1)
 			result.expiredRelationships.head.agent should be ("2")
 			result.expiredRelationships.head.studentMember.get.universityId should be ("1")
-			verify(command.relationshipService, times(1)).endStudentRelationships(Seq(agent2Rels.head))
-			verify(command.relationshipService, times(1)).applyStudentRelationships(null, "3", Seq("1"))
+			verify(command.relationshipService, times(1)).endStudentRelationships(Seq(agent2Rels.head), DateTime.now)
+			verify(command.relationshipService, times(1)).saveStudentRelationship(thisRelationshipType, studentMember3.mostSignificantCourse, Right("1"), DateTime.now)
 		}
 	}
 

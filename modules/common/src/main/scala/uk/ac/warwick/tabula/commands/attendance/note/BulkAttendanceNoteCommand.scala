@@ -1,34 +1,21 @@
 package uk.ac.warwick.tabula.commands.attendance.note
 
-import uk.ac.warwick.tabula.commands.CommandInternal
-import uk.ac.warwick.tabula.commands.ComposableCommand
-import uk.ac.warwick.tabula.commands.Describable
-import uk.ac.warwick.tabula.commands.Description
-import uk.ac.warwick.tabula.commands.PopulateOnForm
-import uk.ac.warwick.tabula.commands.SelfValidating
-import uk.ac.warwick.tabula.commands.UploadedFile
-import uk.ac.warwick.tabula.data.model.{AbsenceType, FileAttachment, StudentMember}
-import uk.ac.warwick.tabula.data.model.attendance.{AttendanceMonitoringCheckpoint, AttendanceMonitoringNote, AttendanceMonitoringPoint}
-import uk.ac.warwick.tabula.services.AutowiringFileAttachmentServiceComponent
-import uk.ac.warwick.tabula.services.AutowiringUserLookupComponent
-import uk.ac.warwick.tabula.services.FileAttachmentServiceComponent
-import uk.ac.warwick.tabula.services.UserLookupComponent
-import uk.ac.warwick.tabula.services.attendancemonitoring.{AttendanceMonitoringServiceComponent, AutowiringAttendanceMonitoringServiceComponent}
-import uk.ac.warwick.tabula.system.permissions.{PermissionsChecking, PermissionsCheckingMethods, RequiresPermissionsChecking}
-import uk.ac.warwick.tabula.permissions.Permissions
-import uk.ac.warwick.tabula.CurrentUser
 import org.joda.time.DateTime
 import org.springframework.validation.{BindingResult, Errors}
+import uk.ac.warwick.tabula.CurrentUser
+import uk.ac.warwick.tabula.commands._
+import uk.ac.warwick.tabula.data.model.attendance.{AttendanceMonitoringNote, AttendanceMonitoringPoint}
+import uk.ac.warwick.tabula.data.model.{AbsenceType, FileAttachment, StudentMember}
+import uk.ac.warwick.tabula.permissions.Permissions
+import uk.ac.warwick.tabula.services.attendancemonitoring.{AttendanceMonitoringServiceComponent, AutowiringAttendanceMonitoringServiceComponent}
+import uk.ac.warwick.tabula.services.{AutowiringFileAttachmentServiceComponent, AutowiringUserLookupComponent, FileAttachmentServiceComponent, UserLookupComponent}
 import uk.ac.warwick.tabula.system.BindListener
-import uk.ac.warwick.tabula.JavaImports._
-
-import scala.collection.JavaConverters._
-import scala.collection.mutable
+import uk.ac.warwick.tabula.system.permissions.{PermissionsChecking, PermissionsCheckingMethods, RequiresPermissionsChecking}
 
 
 object BulkAttendanceNoteCommand {
-	def apply(point: AttendanceMonitoringPoint, user: CurrentUser) =
-		new BulkAttendanceNoteCommand(point, user)
+	def apply(point: AttendanceMonitoringPoint, students: Seq[StudentMember], user: CurrentUser) =
+		new BulkAttendanceNoteCommand(point, students, user)
 			with ComposableCommand[Seq[AttendanceMonitoringNote]]
 			with BulkAttendanceNotePermissions
 			with BulkAttendanceNoteDescription
@@ -41,6 +28,7 @@ object BulkAttendanceNoteCommand {
 
 abstract class BulkAttendanceNoteCommand (
 	val point: AttendanceMonitoringPoint,
+	val students: Seq[StudentMember],
 	val user: CurrentUser
 ) extends CommandInternal[Seq[AttendanceMonitoringNote]] with PopulateOnForm with BindListener
 	with BulkAttendanceNoteCommandState {
@@ -48,13 +36,13 @@ abstract class BulkAttendanceNoteCommand (
 	self: AttendanceMonitoringServiceComponent with FileAttachmentServiceComponent with UserLookupComponent =>
 
 	def populate(): Unit = {
-		val firstNote = students.asScala.flatMap(attendanceMonitoringService.getAttendanceNote(_, point)).headOption
+		val firstNote = students.flatMap(attendanceMonitoringService.getAttendanceNote(_, point)).headOption
 		firstNote.foreach(n => {
 			note = n.note
 			attachedFile = n.attachment
 			absenceType = n.absenceType
 		})
-		students.asScala.headOption.foreach(student = _)
+		students.headOption.foreach(student = _)
 		isNew = firstNote.isEmpty
 	}
 
@@ -62,9 +50,9 @@ abstract class BulkAttendanceNoteCommand (
 		file.onBind(result)
 	}
 
-	def applyInternal(): mutable.Buffer[AttendanceMonitoringNote] = {
+	def applyInternal(): Seq[AttendanceMonitoringNote] = {
 
-		val notes = students.asScala.flatMap(student => {
+		val notes = students.flatMap(student => {
 
 			val existingNote = attendanceMonitoringService.getAttendanceNote(student, point)
 
@@ -115,7 +103,7 @@ trait BulkAttendanceNoteDescription extends Describable[Seq[AttendanceMonitoring
 	override lazy val eventName = "UpdateBulkAttendanceNote"
 
 	override def describe(d: Description) {
-		d.studentIds(students.asScala.map(_.universityId))
+		d.studentIds(students.map(_.universityId))
 		d.attendanceMonitoringPoints(Seq(point))
 	}
 
@@ -129,14 +117,14 @@ trait BulkAttendanceNotePermissions extends RequiresPermissionsChecking with Per
 	self: BulkAttendanceNoteCommandState =>
 
 	def permissionsCheck(p: PermissionsChecking) {
-		p.PermissionCheck(Permissions.MonitoringPoints.Record, point.scheme)
+		p.PermissionCheckAll(Permissions.MonitoringPoints.Record, students)
 	}
 }
 
 trait BulkAttendanceNoteCommandState {
 
 	def point: AttendanceMonitoringPoint
-	var students: JList[StudentMember] = new JArrayList()
+	def students: Seq[StudentMember]
 	var student: StudentMember = _ // used for attachment url
 	var overwrite: Boolean = _
 
@@ -147,5 +135,4 @@ trait BulkAttendanceNoteCommandState {
 
 	var isNew: Boolean = false
 
-	var checkpoint: AttendanceMonitoringCheckpoint = _
 }

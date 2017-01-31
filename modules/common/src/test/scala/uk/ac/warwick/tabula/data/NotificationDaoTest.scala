@@ -1,21 +1,21 @@
 package uk.ac.warwick.tabula.data
 
-import org.junit.{After, Before}
-
-import org.springframework.transaction.annotation.Transactional
-import uk.ac.warwick.tabula.data.model.notifications.coursework.SubmissionReceivedNotification
-import uk.ac.warwick.tabula.data.model.notifications.profiles.meetingrecord.{ScheduledMeetingRecordNotification, ScheduledMeetingRecordInviteeNotification}
-import uk.ac.warwick.tabula.{PackageScanner, Mockito, Fixtures, PersistenceTestBase}
-import uk.ac.warwick.tabula.data.model._
-import uk.ac.warwick.tabula.services.{SecurityService, UserLookupService}
-import uk.ac.warwick.userlookup.User
 import javax.persistence.DiscriminatorValue
-import org.joda.time.{DateTimeUtils, DateTime}
+
 import org.hibernate.ObjectNotFoundException
-import uk.ac.warwick.tabula.services.permissions.PermissionsService
-import uk.ac.warwick.tabula.roles.{DepartmentalAdministratorRoleDefinition, ModuleManagerRoleDefinition}
+import org.joda.time.{DateTime, DateTimeUtils}
+import org.junit.{After, Before}
+import org.springframework.transaction.annotation.Transactional
+import uk.ac.warwick.tabula.data.model._
+import uk.ac.warwick.tabula.data.model.notifications.coursework.SubmissionReceivedNotification
+import uk.ac.warwick.tabula.data.model.notifications.profiles.meetingrecord.{ScheduledMeetingRecordInviteeNotification, ScheduledMeetingRecordNotification}
 import uk.ac.warwick.tabula.data.model.permissions.RoleOverride
 import uk.ac.warwick.tabula.permissions.Permissions
+import uk.ac.warwick.tabula.roles.{DepartmentalAdministratorRoleDefinition, ModuleManagerRoleDefinition}
+import uk.ac.warwick.tabula.services.permissions.PermissionsService
+import uk.ac.warwick.tabula.services.{SecurityService, UserLookupService}
+import uk.ac.warwick.tabula.{Fixtures, Mockito, PackageScanner, PersistenceTestBase}
+import uk.ac.warwick.userlookup.User
 
 import scala.collection.JavaConverters._
 
@@ -145,7 +145,7 @@ class NotificationDaoTest extends PersistenceTestBase with Mockito {
 		val meeting = new ScheduledMeetingRecord
 		meeting.creator = staff
 
-		val relationship = StudentRelationship(staff, relType, student)
+		val relationship = StudentRelationship(staff, relType, student, DateTime.now)
 		meeting.relationship = relationship
 
 		session.save(staff)

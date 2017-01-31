@@ -8,7 +8,7 @@ import uk.ac.warwick.tabula.commands.{Command, Description, Unaudited}
 import uk.ac.warwick.tabula.data.model._
 import uk.ac.warwick.tabula.data.{Daoisms, MemberDao, StudentCourseDetailsDao}
 import uk.ac.warwick.tabula.helpers.Logging
-import uk.ac.warwick.tabula.helpers.scheduling.{PropertyCopying, ImportCommandFactory, SitsStudentRow}
+import uk.ac.warwick.tabula.helpers.scheduling.{ImportCommandFactory, PropertyCopying, SitsStudentRow}
 import uk.ac.warwick.tabula.services.scheduling.{AwardImporter, CourseImporter}
 import uk.ac.warwick.tabula.services.{AwardService, CourseAndRouteService, RelationshipService}
 
@@ -142,7 +142,7 @@ class ImportStudentCourseCommand(rows: Seq[SitsStudentRow], stuMem: StudentMembe
 						case Some(mem: Member) =>
 							logger.info("Got a personal tutor from SITS! SprCode: " + courseRow.sprCode + ", tutorUniId: " + courseRow.tutorUniId)
 
-							relationshipService.replaceStudentRelationships(relationshipType, studentCourseDetails, Seq(mem))
+							relationshipService.replaceStudentRelationships(relationshipType, studentCourseDetails, mem, DateTime.now)
 						case _ =>
 							logger.warn(
 								"SPR code: "

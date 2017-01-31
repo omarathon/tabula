@@ -17,16 +17,19 @@ trait StudentCourseYearDetailsDao {
 	def getBySceKey(studentCourseDetails: StudentCourseDetails, seq: Integer): Option[StudentCourseYearDetails]
 	def getBySceKeyStaleOrFresh(studentCourseDetails: StudentCourseDetails, seq: Integer): Option[StudentCourseYearDetails]
 	def getFreshIds: Seq[String]
+	def getIdsStaleSince(from:DateTime): Seq[String]
 	def getFreshKeys: Seq[StudentCourseYearKey]
 	def getIdFromKey(key: StudentCourseYearKey): Option[String]
 	def convertKeysToIds(keys: Seq[StudentCourseYearKey]): Seq[String]
 	def stampMissingFromImport(newStaleScydIds: Seq[String], importStart: DateTime)
+	def unstampPresentInImport(notStaleScjCodes: Seq[String])
 
 	def findByCourseRoutesYear(
 		academicYear: AcademicYear,
 		course: Course,
 		routes: Seq[Route],
 		yearOfStudy: Int,
+		includeTempWithdrawn: Boolean,
 		eagerLoad: Boolean = false,
 		disableFreshFilter: Boolean = false
 	): Seq[StudentCourseYearDetails]
@@ -83,6 +86,13 @@ class StudentCourseYearDetailsDaoImpl extends StudentCourseYearDetailsDao with D
 		.seq
 	}
 
+	def getIdsStaleSince(from:DateTime): Seq[String] = {
+		session.newCriteria[StudentCourseYearDetails]
+			.add(ge("missingFromImportSince", from))
+			.project[String](Projections.property("id"))
+			.seq
+	}
+
 	// TODO - put these two methods in a service
 	def convertKeysToIds(keys: Seq[StudentCourseYearKey]): Seq[String] =
 			keys.flatMap {
@@ -90,7 +100,7 @@ class StudentCourseYearDetailsDaoImpl extends StudentCourseYearDetailsDao with D
 			}
 
 	def getIdFromKey(key: StudentCourseYearKey): Option[String] = {
-		session.newCriteria[StudentCourseYearDetails]
+		sessionWithoutFreshFilters.newCriteria[StudentCourseYearDetails]
 		.add(is("studentCourseDetails.scjCode", key.scjCode))
 		.add(is("sceSequenceNumber", key.sceSequenceNumber))
 		.project[String](Projections.property("id"))
@@ -99,14 +109,9 @@ class StudentCourseYearDetailsDaoImpl extends StudentCourseYearDetailsDao with D
 
 	def stampMissingFromImport(newStaleScydIds: Seq[String], importStart: DateTime): Unit = {
 		newStaleScydIds.grouped(Daoisms.MaxInClauseCount).foreach { newStaleIds =>
-			val sqlString = """
-				update
-					StudentCourseYearDetails
-				set
-					missingFromImportSince = :importStart
-				where
-					id in (:newStaleScydIds)
-				"""
+			val sqlString =
+				""" update StudentCourseYearDetails set missingFromImportSince = :importStart
+					|where id in (:newStaleScydIds) """.stripMargin
 
 				session.newQuery(sqlString)
 					.setParameter("importStart", importStart)
@@ -115,11 +120,24 @@ class StudentCourseYearDetailsDaoImpl extends StudentCourseYearDetailsDao with D
 		}
 	}
 
+	def unstampPresentInImport(notStaleScydIds: Seq[String]): Unit = {
+		notStaleScydIds.grouped(Daoisms.MaxInClauseCount).foreach { ids =>
+			val hqlString =
+				"""update StudentCourseYearDetails set missingFromImportSince = null
+					|where id in (:ids)""".stripMargin
+
+			sessionWithoutFreshFilters.newQuery(hqlString)
+				.setParameterList("ids", ids)
+				.executeUpdate()
+		}
+	}
+
 	def findByCourseRoutesYear(
 		academicYear: AcademicYear,
 		course: Course,
 		routes: Seq[Route],
 		yearOfStudy: Int,
+		includeTempWithdrawn: Boolean,
 		eagerLoad: Boolean = false,
 		disableFreshFilter: Boolean = false
 	): Seq[StudentCourseYearDetails] = {
@@ -135,6 +153,10 @@ class StudentCourseYearDetailsDaoImpl extends StudentCourseYearDetailsDao with D
 			.add(is("yearOfStudy", yearOfStudy))
 			.add(is("scd.course", course))
 			.add(is("enrolledOrCompleted", true))
+
+		if (!includeTempWithdrawn) {
+			c.add(not(like("scd.statusOnRoute.code", "T%")))
+		}
 
 		if (eagerLoad) {
 			c.setFetchMode("studentCourseDetails", FetchMode.JOIN)

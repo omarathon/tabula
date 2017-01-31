@@ -4,8 +4,8 @@ import org.springframework.validation.Errors
 import uk.ac.warwick.tabula.AcademicYear
 import uk.ac.warwick.tabula.JavaImports._
 import uk.ac.warwick.tabula.commands._
-import uk.ac.warwick.tabula.data.{AutowiringStudentCourseYearDetailsDaoComponent, StudentCourseYearDetailsDaoComponent}
 import uk.ac.warwick.tabula.data.model.{CoreRequiredModule, Department, Module, Route}
+import uk.ac.warwick.tabula.data.{AutowiringStudentCourseYearDetailsDaoComponent, StudentCourseYearDetailsDaoComponent}
 import uk.ac.warwick.tabula.helpers.LazyMaps
 import uk.ac.warwick.tabula.permissions.Permissions
 import uk.ac.warwick.tabula.services._
@@ -116,7 +116,7 @@ trait GenerateExamGridSetCoreRequiredModulesCommandState {
 
 	private lazy val routesForDisplay: Seq[Route] = routes.asScala match {
 		case _ if routes.isEmpty =>
-			studentCourseYearDetailsDao.findByCourseRoutesYear(academicYear, course, routes.asScala, yearOfStudy, eagerLoad = true, disableFreshFilter = true)
+			studentCourseYearDetailsDao.findByCourseRoutesYear(academicYear, course, routes.asScala, yearOfStudy, includeTempWithdrawn, eagerLoad = true, disableFreshFilter = true)
 				.map(scyd => scyd.toExamGridEntityYear.route).distinct
 		case _ =>
 			routes.asScala.distinct

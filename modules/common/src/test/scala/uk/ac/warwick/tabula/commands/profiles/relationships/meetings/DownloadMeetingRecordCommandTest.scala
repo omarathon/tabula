@@ -9,8 +9,7 @@ import uk.ac.warwick.tabula.data.FileDao
 import uk.ac.warwick.tabula.data.model.MeetingFormat._
 import uk.ac.warwick.tabula.data.model.{ExternalStudentRelationship, FileAttachment, StudentRelationshipType}
 import uk.ac.warwick.tabula.services._
-import uk.ac.warwick.tabula.services.attendancemonitoring.AttendanceMonitoringMeetingRecordServiceComponent
-import uk.ac.warwick.tabula.services.attendancemonitoring.AttendanceMonitoringMeetingRecordService
+import uk.ac.warwick.tabula.services.attendancemonitoring.{AttendanceMonitoringMeetingRecordService, AttendanceMonitoringMeetingRecordServiceComponent}
 
 
 class DownloadMeetingRecordCommandTest extends TestBase with Mockito {
@@ -25,7 +24,8 @@ class DownloadMeetingRecordCommandTest extends TestBase with Mockito {
 		val relationship = ExternalStudentRelationship(
 			"Professor A Tutor",
 			StudentRelationshipType("tutor", "tutor", "personal tutor", "personal tutee"),
-			student
+			student,
+			DateTime.now
 		)
 
 		val uploadedFile =  new UploadedFile

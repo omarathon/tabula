@@ -5,7 +5,7 @@ import uk.ac.warwick.tabula.commands.{CommandInternal, ComposableCommand, ReadOn
 import uk.ac.warwick.tabula.data.model._
 import uk.ac.warwick.tabula.permissions.Permissions
 import uk.ac.warwick.tabula.services._
-import uk.ac.warwick.tabula.services.attendancemonitoring.{AutowiringAttendanceMonitoringServiceComponent, AttendanceMonitoringServiceComponent}
+import uk.ac.warwick.tabula.services.attendancemonitoring.{AttendanceMonitoringServiceComponent, AutowiringAttendanceMonitoringServiceComponent}
 import uk.ac.warwick.tabula.system.permissions.{PermissionsChecking, PermissionsCheckingMethods, RequiresPermissionsChecking}
 
 object ViewAgentsStudentsCommand {
@@ -26,7 +26,7 @@ class ViewAgentsStudentsCommandInternal(val department: Department, val academic
 		self: RelationshipServiceComponent with AttendanceMonitoringServiceComponent with TermServiceComponent =>
 
 		def applyInternal(): FilteredStudentsAttendanceResult = {
-			val students = relationshipService.listStudentRelationshipsWithMemberInDepartment(relationshipType, agent, department).flatMap(_.studentMember)
+			val students = relationshipService.listCurrentStudentRelationshipsWithMemberInDepartment(relationshipType, agent, department).flatMap(_.studentMember)
 			buildAttendanceResult(students.size, students, Option(department), academicYear)
 		}
 	}

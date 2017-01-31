@@ -131,6 +131,12 @@
 		</@filter>
 	</div>
 
+	<p>
+		<@bs3form.checkbox path="selectCourseCommand.includeTempWithdrawn">
+			<@f.checkbox path="selectCourseCommand.includeTempWithdrawn" /> Show temporarily withdrawn students
+		</@bs3form.checkbox>
+	</p>
+
 	<@bs3form.errors path="selectCourseCommand" />
 
 	<div class="buttons">

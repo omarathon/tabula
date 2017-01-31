@@ -5,12 +5,11 @@ import com.fasterxml.jackson.annotation.JsonAutoDetect
 import org.springframework.beans.BeanWrapperImpl
 import org.springframework.beans.factory.InitializingBean
 import org.springframework.beans.factory.annotation.Value
-
 import uk.ac.warwick.spring.Wire
 import uk.ac.warwick.tabula.helpers.Logging
-import uk.ac.warwick.util.queue.Queue
-import uk.ac.warwick.util.queue.QueueListener
 import uk.ac.warwick.util.queue.conversion.ItemType
+import uk.ac.warwick.util.queue.{Queue, QueueListener}
+
 import scala.beans.BeanProperty
 
 trait FeaturesComponent {
@@ -92,7 +91,6 @@ abstract class Features {
 	@Value("${features.disability.rendering.profiles:true}") var disabilityRenderingInProfiles: Boolean = defaults.disabilityRenderingInProfiles
 	@Value("${features.disability.rendering.extensions:true}") var disabilityRenderingInExtensions: Boolean = defaults.disabilityRenderingInExtensions
 	@Value("${features.disability.rendering.submissions:true}") var disabilityOnSubmission: Boolean = defaults.disabilityOnSubmission
-	@Value("${features.includePastYears:true}") var includePastYears: Boolean = defaults.includePastYears
 	@Value("${features.newSeenSecondMarkingWorkflows:true}") var newSeenSecondMarkingWorkflows: Boolean = defaults.newSeenSecondMarkingWorkflows
 	@Value("${features.activityStreams:true}") var activityStreams: Boolean = defaults.activityStreams
 	@Value("${features.profiles.showModuleResults:true}") var showModuleResults: Boolean = defaults.showModuleResults
@@ -223,7 +221,6 @@ class FeaturesMessage {
 	@BeanProperty var visaInStudentProfile = true
 	@BeanProperty var scheduledMeetings = true
 	@BeanProperty var disabilityRenderingInProfiles = true
-	@BeanProperty var includePastYears = true
 	@BeanProperty var showModuleResults = true
 	@BeanProperty var showAccreditedPriorLearning = true
 	@BeanProperty var autoGroupDeregistration = false

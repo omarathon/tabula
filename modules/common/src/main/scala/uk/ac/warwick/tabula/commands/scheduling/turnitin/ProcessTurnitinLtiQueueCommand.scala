@@ -52,14 +52,18 @@ abstract class ProcessTurnitinLtiQueueCommandInternal extends CommandInternal[Pr
 	override def applyInternal(): ProcessTurnitinLtiQueueCommandResult = {
 		lazy val processedAssignment: Option[Assignment] =
 			turnitinLtiQueueService.findAssignmentToProcess.map(processAssignment)
+		lazy val processedLongAwaitedReportForReport: Option[OriginalityReport] =
+			turnitinLtiQueueService.findReportToProcessForReport(longAwaitedOnly = true).map(processReportForReport)
 		lazy val processedReportForSubmission: Option[OriginalityReport] =
 			turnitinLtiQueueService.findReportToProcessForSubmission.map(processReportForSubmission)
 		lazy val processedReportForReport: Option[OriginalityReport] =
-			turnitinLtiQueueService.findReportToProcessForReport.map(processReportForReport)
+			turnitinLtiQueueService.findReportToProcessForReport(longAwaitedOnly = false).map(processReportForReport)
 
 		processedAssignment.getOrElse(
-			processedReportForSubmission.getOrElse(
-				processedReportForReport
+			processedLongAwaitedReportForReport.getOrElse(
+				processedReportForSubmission.getOrElse(
+					processedReportForReport
+				)
 			)
 		)
 
@@ -99,7 +103,7 @@ abstract class ProcessTurnitinLtiQueueCommandInternal extends CommandInternal[Pr
 		// Check for an existing valid token before creating a new one
 		val token = fileAttachmentService.getValidToken(attachment).getOrElse {
 			// New transaction as Turnitin requests the file while keeping the submitPaper request pending
-			transactional(readOnly = false, propagation = REQUIRES_NEW) {
+			transactional(propagation = REQUIRES_NEW) {
 				val t = attachment.generateToken()
 				fileAttachmentService.saveOrUpdate(t)
 				t

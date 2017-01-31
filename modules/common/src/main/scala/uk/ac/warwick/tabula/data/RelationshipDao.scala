@@ -6,7 +6,7 @@ import org.hibernate.sql.JoinType
 import org.joda.time.DateTime
 import org.springframework.stereotype.Repository
 import uk.ac.warwick.spring.Wire
-import uk.ac.warwick.tabula.commands.{StudentAssociationEntityData, StudentAssociationData}
+import uk.ac.warwick.tabula.commands.{StudentAssociationData, StudentAssociationEntityData}
 import uk.ac.warwick.tabula.data.model.{MemberStudentRelationship, _}
 import uk.ac.warwick.tabula.helpers.Logging
 
@@ -27,22 +27,24 @@ trait RelationshipDao {
 	def getStudentRelationshipById(id: String): Option[StudentRelationship]
 
 	def saveOrUpdate(rel: StudentRelationship)
+	def delete(relationship: StudentRelationship)
 
 	def getAllCurrentRelationships(student: StudentMember): Seq[StudentRelationship]
 	def getAllPastAndPresentRelationships(student: StudentMember): Seq[StudentRelationship]
 	def getCurrentRelationships(relationshipType: StudentRelationshipType, scd: StudentCourseDetails): Seq[StudentRelationship]
+	def getFutureRelationships(relationshipType: StudentRelationshipType, scd: StudentCourseDetails): Seq[StudentRelationship]
 	def getCurrentRelationships(relationshipType: StudentRelationshipType, student: StudentMember): Seq[StudentRelationship]
 	def getCurrentRelationship(relationshipType: StudentRelationshipType, student: StudentMember, agent: Member): Option[StudentRelationship]
 	def getCurrentRelationships(student: StudentMember, agentId: String): Seq[StudentRelationship]
 	def getRelationshipsByTarget(relationshipType: StudentRelationshipType, student: StudentMember): Seq[StudentRelationship]
 	def getRelationshipsByCourseDetails(relationshipType: StudentRelationshipType, details: StudentCourseDetails): Seq[StudentRelationship]
-	def getRelationshipsByDepartment(relationshipType: StudentRelationshipType, department: Department): Seq[StudentRelationship]
-	def getRelationshipsByStaffDepartment(relationshipType: StudentRelationshipType, department: Department): Seq[StudentRelationship]
-	def getAllRelationshipsByAgent(agentId: String): Seq[MemberStudentRelationship]
-	def getAllRelationshipTypesByStudent(student: StudentMember): Seq[StudentRelationshipType]
-	def getAllRelationshipTypesByAgent(agentId: String): Seq[StudentRelationshipType]
-	def getRelationshipsByAgent(relationshipType: StudentRelationshipType, agentId: String): Seq[MemberStudentRelationship]
-	def getStudentsWithoutRelationshipByDepartment(relationshipType: StudentRelationshipType, department: Department): Seq[StudentMember]
+	def getCurrentRelationshipsByDepartment(relationshipType: StudentRelationshipType, department: Department): Seq[StudentRelationship]
+	def getCurrentRelationshipsByStaffDepartment(relationshipType: StudentRelationshipType, department: Department): Seq[StudentRelationship]
+	def getCurrentRelationshipsForAgent(agentId: String): Seq[MemberStudentRelationship]
+	def getCurrentRelationshipTypesByAgent(agentId: String): Seq[StudentRelationshipType]
+	def getCurrentRelationshipsByAgent(relationshipType: StudentRelationshipType, agentId: String): Seq[MemberStudentRelationship]
+	def getStudentsWithoutCurrentRelationshipByDepartment(relationshipType: StudentRelationshipType, department: Department): Seq[StudentMember]
+	def getScheduledRelationshipChangesByDepartment(relationshipType: StudentRelationshipType, department: Department): Seq[StudentRelationship]
 	def getStudentsByRelationshipAndDepartment(relationshipType: StudentRelationshipType, department: Department): Seq[StudentMember]
 	def countStudentsByRelationship(relationshipType: StudentRelationshipType): Number
 	def getAllPastAndPresentRelationships(relationshipType: StudentRelationshipType, scd: StudentCourseDetails): Seq[StudentRelationship]
@@ -84,22 +86,80 @@ class RelationshipDaoImpl extends RelationshipDao with Daoisms with Logging {
 	def getStudentRelationshipById(id: String): Option[StudentRelationship] = getById[StudentRelationship](id)
 
 	def saveOrUpdate(rel: StudentRelationship): Unit = session.saveOrUpdate(rel)
+	def delete(relationship: StudentRelationship): Unit = {
+		if (relationship.startDate == null || relationship.startDate.isBeforeNow) {
+			// As of now there's no good reason to delete a relationship that's started
+			throw new IllegalArgumentException("Cannot delete a relationship once it has started; did you mean to end the relationship instead?")
+		} else {
+			session.delete(relationship)
+		}
+	}
 
-	def getAllCurrentRelationships(student: StudentMember): Seq[StudentRelationship] = {
-		session.newCriteria[StudentRelationship]
+	private def currentRelationsipBaseCriteria(student: StudentMember, agentId: Option[String]) = {
+		val c = session.newCriteria[MemberStudentRelationship]
 			.createAlias("studentCourseDetails", "scd")
 			.add(is("scd.student", student))
-			.add( Restrictions.or(
-			Restrictions.isNull("endDate"),
-			Restrictions.ge("endDate", new DateTime())
-		))
-			.seq
+			.add(Restrictions.or(
+				Restrictions.isNull("endDate"),
+				Restrictions.ge("endDate", DateTime.now)
+			))
+			.add(Restrictions.or(
+				Restrictions.isNull("startDate"),
+				Restrictions.le("startDate", DateTime.now)
+			))
+
+		if (agentId.isDefined) {
+			c.add(is("_agentMember.universityId", agentId.get))
+		}
+
+		c
+	}
+
+	private def currentRelationsipBaseCriteria(scd: StudentCourseDetails, agentId: Option[String]) = {
+		val c = session.newCriteria[MemberStudentRelationship]
+			.add(is("studentCourseDetails", scd))
+			.add(Restrictions.or(
+				Restrictions.isNull("endDate"),
+				Restrictions.ge("endDate", DateTime.now)
+			))
+			.add(Restrictions.or(
+				Restrictions.isNull("startDate"),
+				Restrictions.le("startDate", DateTime.now)
+			))
+
+		if (agentId.isDefined) {
+			c.add(is("_agentMember.universityId", agentId.get))
+		}
+
+		c
+	}
+
+	private def currentRelationsipBaseCriteria(agentId: String) = {
+		val c = session.newCriteria[MemberStudentRelationship]
+			.add(Restrictions.or(
+				Restrictions.isNull("endDate"),
+				Restrictions.ge("endDate", DateTime.now)
+			))
+			.add(Restrictions.or(
+				Restrictions.isNull("startDate"),
+				Restrictions.le("startDate", DateTime.now)
+			))
+			.add(is("_agentMember.universityId", agentId))
+		c
+	}
+
+	def getAllCurrentRelationships(student: StudentMember): Seq[StudentRelationship] = {
+		currentRelationsipBaseCriteria(student, None).seq
 	}
 
 	def getAllPastAndPresentRelationships(student: StudentMember): Seq[StudentRelationship] = {
 		session.newCriteria[StudentRelationship]
 			.createAlias("studentCourseDetails", "scd")
 			.add(is("scd.student", student))
+			.add(Restrictions.or(
+				Restrictions.isNull("startDate"),
+				Restrictions.le("startDate", DateTime.now)
+			))
 			.seq
 	}
 
@@ -107,50 +167,39 @@ class RelationshipDaoImpl extends RelationshipDao with Daoisms with Logging {
 		session.newCriteria[StudentRelationship]
 			.add(is("studentCourseDetails", scd))
 			.add(is("relationshipType", relationshipType))
+			.add(Restrictions.or(
+				Restrictions.isNull("startDate"),
+				Restrictions.le("startDate", DateTime.now)
+			))
 			.seq
 	}
 
 	def getCurrentRelationships(relationshipType: StudentRelationshipType, student: StudentMember): Seq[StudentRelationship] = {
-		session.newCriteria[StudentRelationship]
-			.createAlias("studentCourseDetails", "scd")
-			.add(is("scd.student", student))
+		currentRelationsipBaseCriteria(student, None)
 			.add(is("relationshipType", relationshipType))
-			.add( Restrictions.or(
-			Restrictions.isNull("endDate"),
-			Restrictions.ge("endDate", new DateTime())
-		))
 			.seq
 	}
 
-	private def currentRelationsipBaseCriteria(student: StudentMember, agentId: String) = {
-		session.newCriteria[MemberStudentRelationship]
-			.createAlias("studentCourseDetails", "scd")
-			.add(is("scd.student", student))
-			.add(is("_agentMember.universityId", agentId))
-			.add( Restrictions.or(
-			Restrictions.isNull("endDate"),
-			Restrictions.ge("endDate", new DateTime())
-		))
-	}
-
 	def getCurrentRelationship(relationshipType: StudentRelationshipType, student: StudentMember, agent: Member): Option[StudentRelationship] = {
-		currentRelationsipBaseCriteria(student, agent.universityId)
+		currentRelationsipBaseCriteria(student, Some(agent.universityId))
 			.add(is("relationshipType", relationshipType))
 			.uniqueResult
 	}
 
 	def getCurrentRelationships(student: StudentMember, agentId: String): Seq[StudentRelationship] = {
-		currentRelationsipBaseCriteria(student, agentId).seq
+		currentRelationsipBaseCriteria(student, Some(agentId)).seq
 	}
 
 	def getCurrentRelationships(relationshipType: StudentRelationshipType, scd: StudentCourseDetails): Seq[StudentRelationship] = {
-		session.newCriteria[StudentRelationship]
-			.add(is("studentCourseDetails", scd))
+		currentRelationsipBaseCriteria(scd, None)
 			.add(is("relationshipType", relationshipType))
-			.add( Restrictions.or(
-			Restrictions.isNull("endDate"),
-			Restrictions.ge("endDate", new DateTime())
-		))
+			.seq
+	}
+
+	def getFutureRelationships(relationshipType: StudentRelationshipType, scd: StudentCourseDetails): Seq[StudentRelationship] = {
+		session.newCriteria[MemberStudentRelationship]
+			.add(is("studentCourseDetails", scd))
+			.add(Restrictions.gt("startDate", DateTime.now))
 			.seq
 	}
 
@@ -170,7 +219,7 @@ class RelationshipDaoImpl extends RelationshipDao with Daoisms with Logging {
 			.seq
 	}
 
-	def getRelationshipsByDepartment(relationshipType: StudentRelationshipType, department: Department): Seq[StudentRelationship] = {
+	def getCurrentRelationshipsByDepartment(relationshipType: StudentRelationshipType, department: Department): Seq[StudentRelationship] = {
 		// This eagerly fetches a few associations for the view-students-by-tutor page in Attendance Monitoring
 		// (/attendance/view/[dept]/agents/[reltype]) - TAB-1868
 
@@ -182,6 +231,7 @@ class RelationshipDaoImpl extends RelationshipDao with Daoisms with Logging {
 			.add(is("studentCourseDetails.mostSignificant", true))
 			.add(not(like("studentCourseDetails.statusOnRoute.code", "P%")))
 			.add(or(isNull("endDate"), ge("endDate", DateTime.now)))
+			.add(or(isNull("startDate"), le("startDate", DateTime.now)))
 			.addOrder(asc("_agentMember"))
 			.addOrder(asc("studentCourseDetails"))
 			.setFetchMode("studentCourseDetails.student", FetchMode.JOIN)
@@ -192,7 +242,7 @@ class RelationshipDaoImpl extends RelationshipDao with Daoisms with Logging {
 			.seq
 	}
 
-	def getRelationshipsByStaffDepartment(relationshipType: StudentRelationshipType, department: Department): Seq[StudentRelationship] = {
+	def getCurrentRelationshipsByStaffDepartment(relationshipType: StudentRelationshipType, department: Department): Seq[StudentRelationship] = {
 		session.newQuery[StudentRelationship]("""
 			select
 				distinct sr
@@ -214,6 +264,8 @@ class RelationshipDaoImpl extends RelationshipDao with Daoisms with Logging {
 				scd.mostSignificant = true
 			and
 				(sr.endDate is null or sr.endDate >= SYSDATE)
+			and
+				(sr.startDate is null or sr.startDate <= SYSDATE)
 			order by
 				sr._agentMember, sr.studentCourseDetails
 																					""")
@@ -222,49 +274,20 @@ class RelationshipDaoImpl extends RelationshipDao with Daoisms with Logging {
 			.seq
 	}
 
+	def getCurrentRelationshipsForAgent(agentId: String): Seq[MemberStudentRelationship] =
+		currentRelationsipBaseCriteria(agentId).seq
 
-	def getAllRelationshipsByAgent(agentId: String): Seq[MemberStudentRelationship] =
-		session.newCriteria[MemberStudentRelationship]
-			.add(is("_agentMember.universityId", agentId))
-			.add( Restrictions.or(
-			Restrictions.isNull("endDate"),
-			Restrictions.ge("endDate", new DateTime())
-		))
-			.seq
-
-	def getAllRelationshipTypesByStudent(student: StudentMember): Seq[StudentRelationshipType] =
-		session.newCriteria[StudentRelationship]
-			.createAlias("studentCourseDetails", "scd")
-			.add(is("scd.student", student))
-			.add( Restrictions.or(
-			Restrictions.isNull("endDate"),
-			Restrictions.ge("endDate", new DateTime())
-		))
+	def getCurrentRelationshipTypesByAgent(agentId: String): Seq[StudentRelationshipType] =
+		currentRelationsipBaseCriteria(agentId)
 			.project[StudentRelationshipType](distinct(property("relationshipType")))
 			.seq
 
-
-	def getAllRelationshipTypesByAgent(agentId: String): Seq[StudentRelationshipType] =
-		session.newCriteria[MemberStudentRelationship]
-			.add(is("_agentMember.universityId", agentId))
-			.add( Restrictions.or(
-			Restrictions.isNull("endDate"),
-			Restrictions.ge("endDate", new DateTime())
-		))
-			.project[StudentRelationshipType](distinct(property("relationshipType")))
-			.seq
-
-	def getRelationshipsByAgent(relationshipType: StudentRelationshipType, agentId: String): Seq[MemberStudentRelationship] =
-		session.newCriteria[MemberStudentRelationship]
-			.add(is("_agentMember.universityId", agentId))
+	def getCurrentRelationshipsByAgent(relationshipType: StudentRelationshipType, agentId: String): Seq[MemberStudentRelationship] =
+		currentRelationsipBaseCriteria(agentId)
 			.add(is("relationshipType", relationshipType))
-			.add( Restrictions.or(
-			Restrictions.isNull("endDate"),
-			Restrictions.ge("endDate", new DateTime())
-		))
 			.seq
 
-	def getStudentsWithoutRelationshipByDepartment(relationshipType: StudentRelationshipType, department: Department): Seq[StudentMember] =
+	def getStudentsWithoutCurrentRelationshipByDepartment(relationshipType: StudentRelationshipType, department: Department): Seq[StudentMember] =
 		if (relationshipType == null) Seq()
 		else session.newQuery[StudentMember]("""
 			select
@@ -279,6 +302,8 @@ class RelationshipDaoImpl extends RelationshipDao with Daoisms with Logging {
 			and
 				scd.statusOnRoute.code not like 'P%'
 			and
+	 			sm.deceased = false
+		 	and
 				scd not in (
 					select
 						sr.studentCourseDetails
@@ -288,10 +313,38 @@ class RelationshipDaoImpl extends RelationshipDao with Daoisms with Logging {
 						sr.relationshipType = :relationshipType
 					and
 						(sr.endDate is null or sr.endDate >= SYSDATE)
+					and
+						(sr.startDate is null or sr.startDate <= SYSDATE)
 				)
-																				 """)
+		""")
 			.setEntity("department", department)
 			.setEntity("relationshipType", relationshipType)
+			.seq.distinct
+
+	def getScheduledRelationshipChangesByDepartment(relationshipType: StudentRelationshipType, department: Department): Seq[StudentRelationship] =
+		if (relationshipType == null) Seq()
+		else session.newQuery[StudentRelationship]("""
+			select
+					sr
+				from
+					StudentRelationship sr
+					inner join sr.studentCourseDetails as scd
+				where
+					scd.department = :department
+				and
+					scd.mostSignificant = true
+				and
+					scd.statusOnRoute.code not like 'P%'
+				and
+					sr.relationshipType = :relationshipType
+				and (
+					sr.endDate > :now
+					or sr.startDate > :now
+				)
+		""")
+			.setEntity("department", department)
+			.setEntity("relationshipType", relationshipType)
+			.setParameter("now", DateTime.now)
 			.seq.distinct
 
 	/**
@@ -387,14 +440,16 @@ class RelationshipDaoImpl extends RelationshipDao with Daoisms with Logging {
 				session.newCriteria[MemberStudentRelationship]
 					.createAlias("_agentMember", "member")
 					.createAlias("studentCourseDetails", "course")
-					.add(Restrictions.and(
-						Restrictions.eq("relationshipType", relationshipType),
-						Restrictions.or(
-							Restrictions.isNull("endDate"),
-							Restrictions.gt("endDate", DateTime.now)
-						),
-						Restrictions.eq("course.mostSignificant", true)
+					.add(Restrictions.eq("relationshipType", relationshipType))
+					.add(Restrictions.or(
+						Restrictions.isNull("endDate"),
+						Restrictions.gt("endDate", DateTime.now)
 					))
+					.add(Restrictions.or(
+						Restrictions.isNull("startDate"),
+						Restrictions.lt("startDate", DateTime.now)
+					))
+					.add(Restrictions.eq("course.mostSignificant", true))
 			},
 			Projections.projectionList()
 				.add(property("member.universityId"))
@@ -417,14 +472,16 @@ class RelationshipDaoImpl extends RelationshipDao with Daoisms with Logging {
 			() => {
 				session.newCriteria[ExternalStudentRelationship]
 					.createAlias("studentCourseDetails", "course")
-					.add(Restrictions.and(
-						Restrictions.eq("relationshipType", relationshipType),
-						Restrictions.or(
-							Restrictions.isNull("endDate"),
-							Restrictions.gt("endDate", DateTime.now)
-						),
-						Restrictions.eq("course.mostSignificant", true)
+					.add(Restrictions.eq("relationshipType", relationshipType))
+					.add(Restrictions.or(
+						Restrictions.isNull("endDate"),
+						Restrictions.gt("endDate", DateTime.now)
 					))
+					.add(Restrictions.or(
+						Restrictions.isNull("startDate"),
+						Restrictions.lt("startDate", DateTime.now)
+					))
+					.add(Restrictions.eq("course.mostSignificant", true))
 			},
 			Projections.projectionList()
 				.add(property("_agentName"))
@@ -484,7 +541,12 @@ class RelationshipDaoImpl extends RelationshipDao with Daoisms with Logging {
 			.add(Restrictions.or(
 				Restrictions.isNull("endDate"),
 				Restrictions.ge("endDate", new DateTime())
-			)).seq
+			))
+			.add(Restrictions.or(
+				Restrictions.isNull("startDate"),
+				Restrictions.le("startDate", new DateTime())
+			))
+			.seq
 
 		val externalRelationships = session.newCriteria[ExternalStudentRelationship]
 			.createAlias("studentCourseDetails", "studentCourseDetails")
@@ -495,7 +557,12 @@ class RelationshipDaoImpl extends RelationshipDao with Daoisms with Logging {
 			.add(Restrictions.or(
 				Restrictions.isNull("endDate"),
 				Restrictions.ge("endDate", new DateTime())
-			)).seq
+			))
+			.add(Restrictions.or(
+				Restrictions.isNull("startDate"),
+				Restrictions.le("startDate", new DateTime())
+			))
+			.seq
 
 		memberRelationships ++ externalRelationships
 	}
@@ -512,7 +579,7 @@ class RelationshipDaoImpl extends RelationshipDao with Daoisms with Logging {
 				where studentCourseDetails.course = course
 				and (
 			""" + scjCodes.map{
-				case (ids, index) => "studentCourseDetails.scjCode in (:scjCodes" + index.toString + ") "
+				case (_, index) => "studentCourseDetails.scjCode in (:scjCodes" + index.toString + ") "
 			}.mkString(" or ")	+ ")"
 			val query = session.newQuery[Array[java.lang.Object]](queryString)
 			scjCodes.foreach {
@@ -537,7 +604,7 @@ class RelationshipDaoImpl extends RelationshipDao with Daoisms with Logging {
 				where studentCourseDetails.latestStudentCourseYearDetails = studentCourseYearDetails
 				and (
 				""" + scjCodes.map{
-					case (ids, index) => "studentCourseDetails.scjCode in (:scjCodes" + index.toString + ") "
+					case (_, index) => "studentCourseDetails.scjCode in (:scjCodes" + index.toString + ") "
 				}.mkString(" or ")	+ ")"
 			val query = session.newQuery[Array[java.lang.Object]](queryString)
 			scjCodes.foreach {

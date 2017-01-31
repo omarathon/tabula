@@ -1,16 +1,17 @@
 package uk.ac.warwick.tabula.services
 
-import scala.collection.JavaConverters._
-import org.springframework.transaction.annotation.Transactional
-import org.junit.Before
 import org.joda.time.DateTime
+import org.junit.Before
+import org.springframework.transaction.annotation.Transactional
+import uk.ac.warwick.tabula.JavaImports.{JArrayList, JBigDecimal}
 import uk.ac.warwick.tabula._
+import uk.ac.warwick.tabula.data._
+import uk.ac.warwick.tabula.data.model.PlagiarismInvestigation.SuspectPlagiarised
 import uk.ac.warwick.tabula.data.model._
 import uk.ac.warwick.tabula.data.model.forms.{CommentField, Extension, FormFieldContext, WordCountField}
-import uk.ac.warwick.tabula.data.{AssessmentDaoComponent, AssessmentDaoImpl, AssessmentMembershipDaoImpl, DepartmentDaoImpl, ExtensionDaoComponent, ExtensionDaoImpl}
 import uk.ac.warwick.userlookup.User
-import uk.ac.warwick.tabula.data.model.PlagiarismInvestigation.SuspectPlagiarised
-import uk.ac.warwick.tabula.JavaImports.{JArrayList, JBigDecimal}
+
+import scala.collection.JavaConverters._
 
 // scalastyle:off magic.number
 class AssessmentServiceTest extends PersistenceTestBase with Mockito {
@@ -47,11 +48,14 @@ class AssessmentServiceTest extends PersistenceTestBase with Mockito {
 		feedbackService.sessionFactory = sessionFactory
 		val amDao = new AssessmentMembershipDaoImpl
 		amDao.sessionFactory = sessionFactory
+		val profileService = smartMock[ProfileService]
+		profileService.getAllMembersWithUniversityIds(any[Seq[String]]) returns Seq()
 		assignmentMembershipService.dao = amDao
 		assignmentMembershipService.assignmentManualMembershipHelper.sessionFactory = sessionFactory
 		assignmentMembershipService.assignmentManualMembershipHelper.userLookup = userLookup
 		assignmentMembershipService.assignmentManualMembershipHelper.cache.foreach { _.clear() }
 		assignmentMembershipService.userLookup = userLookup
+		assignmentMembershipService.profileService = profileService
 		val extDao = new ExtensionDaoImpl
 		extDao.sessionFactory = sessionFactory
 		extensionService = new AbstractExtensionService with ExtensionDaoComponent {

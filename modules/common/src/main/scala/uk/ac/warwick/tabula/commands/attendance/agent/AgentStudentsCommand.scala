@@ -1,13 +1,13 @@
 package uk.ac.warwick.tabula.commands.attendance.agent
 
 import uk.ac.warwick.tabula.AcademicYear
-import uk.ac.warwick.tabula.commands.attendance.{GroupsPoints, GroupedPoint}
-import uk.ac.warwick.tabula.commands.attendance.view.{BuildsFilteredStudentsAttendanceResult, FilteredStudentsAttendanceResult}
 import uk.ac.warwick.tabula.commands._
+import uk.ac.warwick.tabula.commands.attendance.view.{BuildsFilteredStudentsAttendanceResult, FilteredStudentsAttendanceResult}
+import uk.ac.warwick.tabula.commands.attendance.{GroupedPoint, GroupsPoints}
 import uk.ac.warwick.tabula.data.model.{Member, StudentRelationshipType}
 import uk.ac.warwick.tabula.permissions.Permissions
-import uk.ac.warwick.tabula.services.attendancemonitoring.{AutowiringAttendanceMonitoringServiceComponent, AttendanceMonitoringServiceComponent}
-import uk.ac.warwick.tabula.services.{AutowiringTermServiceComponent, TermServiceComponent, AutowiringRelationshipServiceComponent, RelationshipServiceComponent}
+import uk.ac.warwick.tabula.services.attendancemonitoring.{AttendanceMonitoringServiceComponent, AutowiringAttendanceMonitoringServiceComponent}
+import uk.ac.warwick.tabula.services.{AutowiringRelationshipServiceComponent, AutowiringTermServiceComponent, RelationshipServiceComponent, TermServiceComponent}
 import uk.ac.warwick.tabula.system.permissions.{PermissionsChecking, PermissionsCheckingMethods, RequiresPermissionsChecking}
 
 case class AgentStudentsCommandResult(
@@ -34,7 +34,7 @@ class AgentStudentsCommandInternal(val relationshipType: StudentRelationshipType
 	self: AttendanceMonitoringServiceComponent with RelationshipServiceComponent with TermServiceComponent =>
 
 	override def applyInternal(): AgentStudentsCommandResult = {
-		val students = relationshipService.listStudentRelationshipsWithMember(relationshipType, currentMember).flatMap(_.studentMember).distinct
+		val students = relationshipService.listCurrentStudentRelationshipsWithMember(relationshipType, currentMember).flatMap(_.studentMember).distinct
 		val pointMap = students.map { student =>
 			student -> attendanceMonitoringService.listStudentsPoints(student, None, academicYear)
 		}.toMap

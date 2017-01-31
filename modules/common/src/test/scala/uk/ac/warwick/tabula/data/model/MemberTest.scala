@@ -1,10 +1,12 @@
 package uk.ac.warwick.tabula.data.model
 
+import org.joda.time.DateTime
 import org.junit.Before
+import uk.ac.warwick.tabula.JavaImports.JBigDecimal
+import uk.ac.warwick.tabula._
 import uk.ac.warwick.tabula.data.{AutowiringMemberDaoImpl, StudentCourseDetailsDaoImpl}
 import uk.ac.warwick.tabula.services.{ProfileService, RelationshipService, StaffAssistantsHelpers}
-import uk.ac.warwick.tabula._
-import uk.ac.warwick.tabula.JavaImports.JBigDecimal
+
 import scala.collection.JavaConverters._
 
 class MemberTest extends TestBase with Mockito {
@@ -205,10 +207,10 @@ class MemberTest extends TestBase with Mockito {
 
 		val relationshipType = StudentRelationshipType("tutor", "tutor", "personal tutor", "personal tutee")
 
-		relationshipService.listStudentRelationshipsWithMember(relationshipType, staff) returns Seq()
+		relationshipService.listCurrentStudentRelationshipsWithMember(relationshipType, staff) returns Seq()
 		staff.isRelationshipAgent(relationshipType) should be {false}
 
-		relationshipService.listStudentRelationshipsWithMember(relationshipType, staff) returns Seq(StudentRelationship(staff, relationshipType, Fixtures.student()))
+		relationshipService.listCurrentStudentRelationshipsWithMember(relationshipType, staff) returns Seq(StudentRelationship(staff, relationshipType, Fixtures.student(), DateTime.now))
 		staff.isRelationshipAgent(relationshipType) should be {true}
 	}
 

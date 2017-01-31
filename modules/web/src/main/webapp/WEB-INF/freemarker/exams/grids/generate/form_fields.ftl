@@ -9,6 +9,7 @@
 		<input type="hidden" name="routes" value="${route.code}" />
 	</#list>
 	<input type="hidden" name="yearOfStudy" value="${selectCourseCommand.yearOfStudy}" />
+	<input type="hidden" name="includeTempWithdrawn" value="${selectCourseCommand.includeTempWithdrawn?string('true','false')}" />
 </#macro>
 
 <#macro grid_options_fields>

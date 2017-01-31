@@ -1,20 +1,9 @@
 package uk.ac.warwick.tabula.system.permissions
 
-import scala.collection.JavaConversions._
-import org.springframework.web.bind.support.WebBindingInitializer
-import org.springframework.web.context.request.NativeWebRequest
-import org.springframework.web.method.support.InvocableHandlerMethod
-import org.springframework.web.servlet.mvc.method.annotation.ExtendedServletRequestDataBinder
-import org.springframework.web.servlet.mvc.method.annotation.ServletRequestDataBinderFactory
-import javax.servlet.ServletRequest
-
-import uk.ac.warwick.spring.Wire
-import uk.ac.warwick.tabula.{CurrentUser, ItemNotFoundException, PermissionDeniedException, RequestInfo}
 import uk.ac.warwick.tabula.helpers.Logging
-import uk.ac.warwick.tabula.permissions._
 import uk.ac.warwick.tabula.services.SecurityService
-import uk.ac.warwick.tabula.system.BindListener
 import uk.ac.warwick.tabula.system.CustomDataBinder
+import uk.ac.warwick.tabula.{CurrentUser, RequestInfo}
 
 /**
  * Trait that is added to the data binder to check permissions on the command.

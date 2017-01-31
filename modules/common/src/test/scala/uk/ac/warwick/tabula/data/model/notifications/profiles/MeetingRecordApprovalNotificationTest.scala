@@ -1,12 +1,12 @@
 package uk.ac.warwick.tabula.data.model.notifications.profiles
 
 import org.joda.time.{DateTime, DateTimeConstants}
-import uk.ac.warwick.tabula.{CurrentUser, Fixtures, Mockito, TestBase}
 import uk.ac.warwick.tabula.data.model.notifications.profiles.meetingrecord.NewMeetingRecordApprovalNotification
 import uk.ac.warwick.tabula.data.model.{MeetingRecord, StudentRelationship, StudentRelationshipType}
 import uk.ac.warwick.tabula.permissions.{Permission, PermissionsTarget, ScopelessPermission}
 import uk.ac.warwick.tabula.services.{ProfileService, SecurityService}
 import uk.ac.warwick.tabula.web.views.{FreemarkerRendering, ScalaBeansWrapper, ScalaFreemarkerConfiguration, UrlMethodModel}
+import uk.ac.warwick.tabula.{CurrentUser, Fixtures, Mockito, TestBase}
 
 class MeetingRecordApprovalNotificationTest extends TestBase with Mockito with FreemarkerRendering {
 
@@ -16,7 +16,7 @@ class MeetingRecordApprovalNotificationTest extends TestBase with Mockito with F
 
 	val profileService: ProfileService = mock[ProfileService]
 
-	val freeMarkerConfig: ScalaFreemarkerConfiguration = newFreemarkerConfiguration
+	val freeMarkerConfig: ScalaFreemarkerConfiguration = newFreemarkerConfiguration()
 	freeMarkerConfig.getObjectWrapper.asInstanceOf[ScalaBeansWrapper].securityService = securityService
 
 	val urlMethodModel = new UrlMethodModel
@@ -25,7 +25,7 @@ class MeetingRecordApprovalNotificationTest extends TestBase with Mockito with F
 
 	freeMarkerConfig.setSharedVariable("url", urlMethodModel)
 
-	@Test def itWorks {
+	@Test def itWorks() {
 		val department = Fixtures.department("es", "Engineering")
 
 		val agent = Fixtures.staff("1234567", "estaff", department)
@@ -46,7 +46,7 @@ class MeetingRecordApprovalNotificationTest extends TestBase with Mockito with F
 			meeting.meetingDate = new DateTime(2013, DateTimeConstants.DECEMBER, 5, 12, 0, 0, 0)
 
 			val relationshipType = StudentRelationshipType("tutor", "tutor", "personal tutor", "personal tutee")
-			meeting.relationship = StudentRelationship(agent, relationshipType, student)
+			meeting.relationship = StudentRelationship(agent, relationshipType, student, DateTime.now)
 
 			val notification = new NewMeetingRecordApprovalNotification
 			notification.agent = agent.asSsoUser

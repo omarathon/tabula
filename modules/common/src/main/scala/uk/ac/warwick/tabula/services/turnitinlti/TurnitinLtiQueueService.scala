@@ -3,12 +3,12 @@ package uk.ac.warwick.tabula.services.turnitinlti
 import org.joda.time.DateTime
 import org.springframework.stereotype.Service
 import uk.ac.warwick.spring.Wire
-import uk.ac.warwick.tabula.{AutowiringFeaturesComponent, FeaturesComponent}
 import uk.ac.warwick.tabula.data.model.{Assignment, OriginalityReport}
 import uk.ac.warwick.tabula.data.{AutowriringTurnitinLtiQueueDaoComponent, TurnitinLtiQueueDaoComponent}
 import uk.ac.warwick.tabula.helpers.Logging
 import uk.ac.warwick.tabula.services.urkund.UrkundService
 import uk.ac.warwick.tabula.services.{AutowiringOriginalityReportServiceComponent, OriginalityReportServiceComponent}
+import uk.ac.warwick.tabula.{AutowiringFeaturesComponent, FeaturesComponent}
 
 import scala.collection.JavaConverters._
 
@@ -39,7 +39,7 @@ object TurnitinLtiQueueService {
 trait TurnitinLtiQueueService {
 	def findAssignmentToProcess: Option[Assignment]
 	def findReportToProcessForSubmission: Option[OriginalityReport]
-	def findReportToProcessForReport: Option[OriginalityReport]
+	def findReportToProcessForReport(longAwaitedOnly: Boolean): Option[OriginalityReport]
 	def listCompletedAssignments: Seq[Assignment]
 	def listFailedAssignments: Seq[Assignment]
 	def listOriginalityReports(assignment: Assignment): Seq[OriginalityReport]
@@ -61,8 +61,8 @@ abstract class AbstractTurnitinLtiQueueService extends TurnitinLtiQueueService w
 		turnitinLtiQueueDao.findReportToProcessForSubmission
 	}
 
-	def findReportToProcessForReport: Option[OriginalityReport] = {
-		turnitinLtiQueueDao.findReportToProcessForReport
+	def findReportToProcessForReport(longAwaitedOnly: Boolean): Option[OriginalityReport] = {
+		turnitinLtiQueueDao.findReportToProcessForReport(longAwaitedOnly)
 	}
 
 	def listCompletedAssignments: Seq[Assignment] = {

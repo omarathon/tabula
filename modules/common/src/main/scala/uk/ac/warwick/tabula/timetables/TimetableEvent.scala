@@ -1,10 +1,11 @@
 package uk.ac.warwick.tabula.timetables
 
-import org.joda.time.{LocalTime, LocalDateTime}
-import uk.ac.warwick.tabula.data.model
-import uk.ac.warwick.tabula.data.model.{StudentRelationshipType, Location}
-import uk.ac.warwick.tabula.data.model.groups._
+import org.joda.time.{LocalDateTime, LocalTime}
 import uk.ac.warwick.tabula.AcademicYear
+import uk.ac.warwick.tabula.data.model
+import uk.ac.warwick.tabula.data.model.attendance.AttendanceState
+import uk.ac.warwick.tabula.data.model.groups._
+import uk.ac.warwick.tabula.data.model.{Location, StudentRelationshipType}
 import uk.ac.warwick.tabula.timetables.TimetableEvent.Parent
 import uk.ac.warwick.userlookup.User
 
@@ -24,7 +25,8 @@ case class TimetableEvent(
 	staff: Seq[User],
 	students: Seq[User],
 	year: AcademicYear,
-	relatedUrl: Option[RelatedUrl]
+	relatedUrl: Option[RelatedUrl],
+	attendance: Map[WeekRange.Week, AttendanceState]
 )
 
 case class RelatedUrl(urlString: String, title: Option[String])
@@ -56,11 +58,11 @@ object TimetableEvent {
 		}
 	}
 
-	def apply(sge: SmallGroupEvent, withoutWeeks: Seq[SmallGroupEventOccurrence.WeekNumber] = Seq()): TimetableEvent =
-		eventForSmallGroupEventInWeeks(sge, WeekRange.combine(sge.weekRanges.flatMap(_.toWeeks).diff(withoutWeeks)))
-	def apply(sgo: SmallGroupEventOccurrence): TimetableEvent = eventForSmallGroupEventInWeeks(sgo.event, Seq(WeekRange(sgo.week)))
+	def apply(sge: SmallGroupEvent, attendance: Map[WeekRange.Week, AttendanceState], withoutWeeks: Seq[SmallGroupEventOccurrence.WeekNumber] = Seq()): TimetableEvent =
+		eventForSmallGroupEventInWeeks(sge, WeekRange.combine(sge.weekRanges.flatMap(_.toWeeks).diff(withoutWeeks)), attendance)
+	def apply(sgo: SmallGroupEventOccurrence, attendance: AttendanceState): TimetableEvent = eventForSmallGroupEventInWeeks(sgo.event, Seq(WeekRange(sgo.week)), Map(sgo.week -> attendance))
 
-	private def eventForSmallGroupEventInWeeks(sge: SmallGroupEvent, weekRanges: Seq[WeekRange]): TimetableEvent =
+	private def eventForSmallGroupEventInWeeks(sge: SmallGroupEvent, weekRanges: Seq[WeekRange], attendance: Map[WeekRange.Week, AttendanceState]): TimetableEvent =
 		TimetableEvent(
 			uid = sge.id,
 			name = s"${sge.group.groupSet.name}: ${sge.group.name}",
@@ -77,7 +79,8 @@ object TimetableEvent {
 			staff = sge.tutors.users,
 			students = sge.group.students.users,
 			year = sge.group.groupSet.academicYear,
-			relatedUrl = Option(RelatedUrl(sge.relatedUrl, Option(sge.relatedUrlTitle)))
+			relatedUrl = Option(RelatedUrl(sge.relatedUrl, Option(sge.relatedUrlTitle))),
+			attendance = attendance
 		)
 
 	private def smallGroupFormatToTimetableEventType(sgf: SmallGroupFormat): TimetableEventType = sgf match {
@@ -141,7 +144,8 @@ case class EventOccurrence(
 	parent: TimetableEvent.Parent,
 	comments: Option[String],
 	staff: Seq[User],
-	relatedUrl: Option[RelatedUrl]
+	relatedUrl: Option[RelatedUrl],
+	attendance: Option[AttendanceState]
 )
 
 object EventOccurrence {
@@ -158,6 +162,7 @@ object EventOccurrence {
 			TimetableEvent.Parent(),
 			None,
 			Nil,
+			None,
 			None
 		)
 	}

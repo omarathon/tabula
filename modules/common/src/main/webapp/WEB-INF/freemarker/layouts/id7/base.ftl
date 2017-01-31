@@ -219,9 +219,11 @@
 					<li><a href="http://warwick.ac.uk/privacy">Privacy</a></li>
 					<li><a href="http://warwick.ac.uk/cookies">Cookies</a></li>
 					<li><a href="http://warwick.ac.uk/accessibility">Accessibility</a></li>
-					<li class="subtle">
-						App last built <@warwick.formatDate value=appBuildDate pattern="d MMMM yyyy HH:mm" />
-					</li>
+					<#if user?? && user.sysadmin>
+						<li class="subtle">
+							App last built <@warwick.formatDate value=appBuildDate pattern="d MMMM yyyy HH:mm" />
+						</li>
+					</#if>
 				</ul>
 			</div>
 		</div>

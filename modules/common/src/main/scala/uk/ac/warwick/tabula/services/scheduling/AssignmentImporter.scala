@@ -16,7 +16,7 @@ import uk.ac.warwick.tabula.JavaImports._
 import uk.ac.warwick.tabula.data.model._
 import uk.ac.warwick.tabula.helpers.StringUtils._
 import uk.ac.warwick.tabula.sandbox.SandboxData
-import uk.ac.warwick.tabula.services.scheduling.AssignmentImporter.{GradeBoundaryQuery, AssessmentComponentQuery, UpstreamAssessmentGroupQuery}
+import uk.ac.warwick.tabula.services.scheduling.AssignmentImporter.{AssessmentComponentQuery, GradeBoundaryQuery, UpstreamAssessmentGroupQuery}
 
 import scala.collection.JavaConverters._
 
@@ -300,7 +300,8 @@ object AssignmentImporter {
 			sas.sas_agrg as agreed_grade
 				from $sitsSchema.srs_scj scj -- Student Course Join  - gives us most significant course
 					join $sitsSchema.ins_spr spr -- Student Programme Route - gives us SPR code
-						on scj.scj_sprc = spr.spr_code and (spr.sts_code is null or spr.sts_code not like 'P%') -- no perm withdrawn students
+						on scj.scj_sprc = spr.spr_code and
+							(spr.sts_code is null or spr.sts_code not like 'P%' or spr.sts_code != 'D') -- no perm withdrawn or deceased students
 
 					join $sitsSchema.cam_sms sms -- Student Module Selection table, storing unconfirmed module registrations
 						on sms.spr_code = scj.scj_sprc
@@ -340,7 +341,7 @@ object AssignmentImporter {
 				from $sitsSchema.srs_scj scj
 					join $sitsSchema.ins_spr spr
 						on scj.scj_sprc = spr.spr_code and
-							(spr.sts_code is null or spr.sts_code not like 'P%') -- no perm withdrawn students
+							(spr.sts_code is null or spr.sts_code not like 'P%' or spr.sts_code != 'D') -- no perm withdrawn or deceased students
 
 					join $sitsSchema.cam_smo smo
 						on smo.spr_code = spr.spr_code and
@@ -380,7 +381,7 @@ object AssignmentImporter {
 				from $sitsSchema.srs_scj scj
 					join $sitsSchema.ins_spr spr
 						on scj.scj_sprc = spr.spr_code and
-							(spr.sts_code is null or spr.sts_code not like 'P%') -- no perm withdrawn students
+							(spr.sts_code is null or spr.sts_code not like 'P%' or spr.sts_code != 'D') -- no perm withdrawn or deceased students
 
 					join $sitsSchema.cam_smo smo
 						on smo.spr_code = spr.spr_code and

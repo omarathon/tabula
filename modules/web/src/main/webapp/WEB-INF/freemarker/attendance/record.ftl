@@ -91,7 +91,8 @@
 					<@attendance_macros.groupedPointsBySection groupedPointMap term; pointCheckpointPair>
 						<#assign point = pointCheckpointPair._1() />
 						<div class="span12">
-							<#if mapGet(reportedPointMap, point)>
+							<#if mapGet(reportedPointMap, point)??>
+								<#assign reportedTerm = mapGet(reportedPointMap, point) />
 								<div class="pull-right">
 									<#if pointCheckpointPair._2()??>
 										<@attendance_macros.checkpointLabel department=department student=student checkpoint=pointCheckpointPair._2() point=point />
@@ -113,7 +114,10 @@
 									department
 								/></a>)
 								<div class="alert alert-info">
-									<i class="icon-ban-circle"></i> This student's attendance for this term has already been uploaded to SITS:eVision.
+									<i class="icon-ban-circle"></i>
+									This student's attendance for ${reportedTerm.termTypeAsString}
+									(<@fmt.date date=reportedTerm.startDate relative=false includeTime=false shortMonth=true /> - <@fmt.date date=reportedTerm.endDate relative=false includeTime=false shortMonth=true />)
+									has already been uploaded to SITS:eVision.
 								</div>
 							<#else>
 								<div class="pull-right">
@@ -144,7 +148,8 @@
 					<@attendance_macros.groupedPointsBySection groupedPointMap month; pointCheckpointPair>
 						<#assign point = pointCheckpointPair._1() />
 						<div class="span12">
-							<#if mapGet(reportedPointMap, point)>
+							<#if mapGet(reportedPointMap, point)??>
+								<#assign reportedTerm = mapGet(reportedPointMap, point) />
 								<div class="pull-right">
 									<#if pointCheckpointPair._2()??>
 											<@attendance_macros.checkpointLabel department=department student=student checkpoint=pointCheckpointPair._2() point=point />
@@ -155,7 +160,10 @@
 								${point.name}
 								(<@fmt.interval point.startDate point.endDate />)
 								<div class="alert alert-info">
-									<i class="icon-ban-circle"></i> This student's attendance for this term has already been uploaded to SITS:eVision.
+									<i class="icon-ban-circle"></i>
+									This student's attendance for ${reportedTerm.termTypeAsString}
+									(<@fmt.date date=reportedTerm.startDate relative=false includeTime=false shortMonth=true /> - <@fmt.date date=reportedTerm.endDate relative=false includeTime=false shortMonth=true />)
+									has already been uploaded to SITS:eVision.
 								</div>
 							<#else>
 								<div class="span12">

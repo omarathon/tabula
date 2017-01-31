@@ -1,11 +1,10 @@
 package uk.ac.warwick.tabula.services.permissions
 
-import uk.ac.warwick.tabula.TestBase
-import uk.ac.warwick.tabula.Mockito
-import uk.ac.warwick.tabula.Fixtures
-import uk.ac.warwick.tabula.roles.StudentRelationshipAgent
+import org.joda.time.DateTime
 import uk.ac.warwick.tabula.data.model.{StaffMember, StudentMember, StudentRelationship, StudentRelationshipType}
+import uk.ac.warwick.tabula.roles.StudentRelationshipAgent
 import uk.ac.warwick.tabula.services.{RelationshipService, RelationshipServiceComponent}
+import uk.ac.warwick.tabula.{Fixtures, Mockito, TestBase}
 
 trait StudentRelationshipRoleTestBase extends TestBase with Mockito {
 	val provider : RoleProvider with RelationshipServiceComponent
@@ -17,8 +16,8 @@ trait StudentRelationshipRoleTestBase extends TestBase with Mockito {
 	val relService: RelationshipService = smartMock[RelationshipService]
 
 	val personalTutor = StudentRelationshipType("1", "tutor", "personal tutor", "personal tutee")
-	val rel = StudentRelationship(staff, personalTutor, student)
-	val oldRel = StudentRelationship(oldStaff, personalTutor, student)
+	val rel = StudentRelationship(staff, personalTutor, student, DateTime.now)
+	val oldRel = StudentRelationship(oldStaff, personalTutor, student, DateTime.now)
 }
 
 

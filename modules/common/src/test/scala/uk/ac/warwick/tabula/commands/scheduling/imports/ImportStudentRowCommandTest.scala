@@ -1,20 +1,20 @@
 package uk.ac.warwick.tabula.commands.scheduling.imports
 
-import java.sql.{Date, ResultSetMetaData, ResultSet}
+import java.sql.{Date, ResultSet, ResultSetMetaData}
 
-import org.joda.time.{DateTimeConstants, LocalDate, DateTime}
+import org.joda.time.{DateTime, DateTimeConstants, LocalDate}
 import org.springframework.beans.BeanWrapperImpl
 import org.springframework.transaction.annotation.Transactional
+import uk.ac.warwick.tabula.JavaImports._
 import uk.ac.warwick.tabula.data.model.Gender.Male
 import uk.ac.warwick.tabula.data.model.MemberUserType.Student
-import uk.ac.warwick.tabula.helpers.Logging
-import uk.ac.warwick.tabula.{TestBase, Mockito}
 import uk.ac.warwick.tabula.data.model._
-import uk.ac.warwick.tabula.data.{ModeOfAttendanceDao, StudentCourseYearDetailsDao, StudentCourseDetailsDao, MemberDao}
-import uk.ac.warwick.tabula.helpers.scheduling.{SitsStudentRow, ImportCommandFactory}
+import uk.ac.warwick.tabula.data.{MemberDao, ModeOfAttendanceDao, StudentCourseDetailsDao, StudentCourseYearDetailsDao}
+import uk.ac.warwick.tabula.helpers.Logging
+import uk.ac.warwick.tabula.helpers.scheduling.{ImportCommandFactory, SitsStudentRow}
 import uk.ac.warwick.tabula.services._
 import uk.ac.warwick.tabula.services.scheduling._
-import uk.ac.warwick.tabula.JavaImports._
+import uk.ac.warwick.tabula.{Mockito, TestBase}
 import uk.ac.warwick.userlookup.AnonymousUser
 
 trait ComponentMixins extends Mockito
@@ -484,12 +484,12 @@ class ImportStudentRowCommandTest extends TestBase with Mockito with Logging {
 
 			studentMember.freshStudentCourseDetails.size should not be 0
 
-			verify(relationshipService, times(0)).replaceStudentRelationships(tutorRelationshipType, studentMember.mostSignificantCourseDetails.get, Seq(existingStaffMember))
+			verify(relationshipService, times(0)).replaceStudentRelationships(tutorRelationshipType, studentMember.mostSignificantCourseDetails.get, existingStaffMember, DateTime.now)
 		}
 	}
 
 	@Transactional
-	@Test def testCaptureTutorIfSourceIsSits() {
+	@Test def testCaptureTutorIfSourceIsSits() { withFakeTime(DateTime.now) {
 
 		new Environment {
 			val existing = new StudentMember("0672089")
@@ -516,9 +516,9 @@ class ImportStudentRowCommandTest extends TestBase with Mockito with Logging {
 
 			studentMember.mostSignificantCourseDetails should not be null
 
-			verify(relationshipService, times(1)).replaceStudentRelationships(tutorRelationshipType, studentMember.mostSignificantCourseDetails.get, Seq(existingStaffMember))
+			verify(relationshipService, times(1)).replaceStudentRelationships(tutorRelationshipType, studentMember.mostSignificantCourseDetails.get, existingStaffMember, DateTime.now)
 		}
-	}
+	}}
 
 	@Test def testDisabilityHandling() {
 		new Environment {

@@ -264,45 +264,41 @@ $(function(){
 				var $input = $search.find('input[type="text"]').first();
 				var $target = $search.find('input[type="hidden"]').first();
 
-				$modalElement
-					.on('shown.bs.modal', function() {
-						var $form = $('form#recordAttendance');
-						var $eventInput = $modalElement.find('input[name="replacedEvent"]');
-						var $weekInput = $modalElement.find('input[name="replacedWeek"]');
-						var $replacementInput = $modalElement.find('select#replacementEventAndWeek');
+				var handleReplacement = function(e){
+					e.preventDefault();
+					e.stopPropagation();
 
-						$replacementInput.on('change', function() {
-							var $opt = $(this).find(':selected');
-							$eventInput.val($opt.data('event'));
-							$weekInput.val($opt.data('week'));
-						});
+					var $form = $('form#recordAttendance')
+						, $eventInput = $modalElement.find('input[name="replacedEvent"]')
+						, $weekInput = $modalElement.find('input[name="replacedWeek"]')
+						, $replacementInput = $modalElement.find('select#replacementEventAndWeek')
+						, $opt = $replacementInput.find(':selected');
 
-						var onSubmit = function(e) {
-							e.preventDefault();
-							e.stopPropagation();
+					$eventInput.val($opt.data('event'));
+					$weekInput.val($opt.data('week'));
 
-							$form.prepend($target.clone()).prepend(
-								$('<input />').attr({
-									'type': 'hidden',
-									'name': 'action',
-									'value': 'refresh'
-								})
-							).prepend($eventInput).prepend($weekInput);
+					$form.prepend($target.clone()).prepend(
+						$('<input />').attr({
+							'type': 'hidden',
+							'name': 'action',
+							'value': 'refresh'
+						})
+					).prepend($eventInput).prepend($weekInput);
 
-							$form.submit();
+					$form.submit();
 
-							return false;
-						};
+					return false;
+				};
 
-						$modalElement.find('form').on('submit', onSubmit);
-						$modalElement.find('[type="submit"]').on('click', onSubmit);
-					})
-					.on('hidden', function() {
-						// There was no modal-body when we first started, so revert back to
-						// this situation to allow the init code to work next time.
-						$modalElement.html("");
-						$modalElement.removeData('modal');
-					});
+				$('body').on('submit', '#addAdditional-modal form', handleReplacement)
+					.on('click', '#addAdditional-modal form [type="submit"]', handleReplacement);
+
+				$modalElement.on('hidden', function() {
+					// There was no modal-body when we first started, so revert back to
+					// this situation to allow the init code to work next time.
+					$modalElement.html("");
+					$modalElement.removeData('modal');
+				});
 
 				$search.on('tabula:selected', function(evt, name, universityId) {
 					$modalElement.html('<div class="modal-dialog"><div class="modal-content"><div class="modal-header"><h3>Loading&hellip;</h3></div></div></div>');
