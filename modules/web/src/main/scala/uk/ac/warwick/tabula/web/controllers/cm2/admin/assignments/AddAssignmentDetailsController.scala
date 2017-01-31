@@ -39,16 +39,16 @@ class AddAssignmentDetailsController extends CourseworkController {
 	def showForm(form: CreateAssignmentDetailsCommand): Mav = {
 		val module = form.module
 
-		Mav(s"$urlPrefix/admin/assignments/newAssignmentsDetails",
+		Mav(s"$urlPrefix/admin/assignments/new_assignment_details",
 			"department" -> module.adminDepartment,
 			"module" -> module,
 			"academicYear" -> form.academicYear
 		).secondCrumbs(Breadcrumbs.Standard("Assignment Management", Some(Routes.admin.assignment.createAssignmentDetails(module)), ""))
 	}
 
-
+ // TODO - add method for save and exit
 	@RequestMapping(method = Array(POST), params = Array(ManageAssignmentMappingParameters.createAndAddFeedback, "action!=refresh", "action!=update"))
-	def save(@Valid @ModelAttribute("command") cmd: CreateAssignmentDetailsCommand, errors: Errors): Mav =
+	def submitAndAddFeedback(@Valid @ModelAttribute("command") cmd: CreateAssignmentDetailsCommand, errors: Errors): Mav =
 		submit(cmd, errors, Routes.admin.assignment.createAddFeedback)
 
 	private def submit(cmd: CreateAssignmentDetailsCommand, errors: Errors, route: Assignment => String) = {

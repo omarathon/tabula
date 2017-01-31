@@ -12,8 +12,6 @@
 	<h4 class="with-related"><span class="muted">for</span> <@fmt.module_name module /></h4>
 </div>
 <div class="fix-area">
-	<#assign commandName="command" />
-	<#assign command=command />
 	<@f.form method="post" action="${url('/cm2/admin/${module.code}/assignments/new')}"  cssClass="dirty-check">
 		<@components.set_wizard true 'details'  />
 		<#if command.prefilled>
@@ -43,7 +41,7 @@
 			<input
 				type="submit"
 				class="btn btn-primary"
-				name="create"
+				name="${ManageAssignmentMappingParameters.createAndAddDetails}"
 				value="Save and exit"
 			/>
 		</div>
