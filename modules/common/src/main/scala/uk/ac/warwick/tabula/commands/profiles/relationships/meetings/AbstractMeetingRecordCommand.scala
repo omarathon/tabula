@@ -10,6 +10,7 @@ import uk.ac.warwick.tabula.commands._
 import uk.ac.warwick.tabula.data.Transactions._
 import uk.ac.warwick.tabula.data.model.MeetingApprovalState.Pending
 import uk.ac.warwick.tabula.data.model._
+import uk.ac.warwick.tabula.helpers.StringUtils._
 import uk.ac.warwick.tabula.services.attendancemonitoring.AttendanceMonitoringMeetingRecordServiceComponent
 import uk.ac.warwick.tabula.services.{FileAttachmentServiceComponent, MeetingRecordServiceComponent}
 import uk.ac.warwick.tabula.system.BindListener
@@ -28,7 +29,7 @@ abstract class AbstractMeetingRecordCommand {
 		meeting.isRealTime match {
 
 			case true =>
-				if((meetingDateStr != null)&&(!meetingDateStr.equals(""))&&(meetingTimeStr != null)&&(!meetingTimeStr.equals(""))){
+				if(meetingDateStr.hasText && meetingTimeStr.hasText){
 					meeting.meetingDate = DateTimePickerFormatter.parseDateTime(meetingDateStr + " " + meetingTimeStr)
 				}
 
@@ -130,10 +131,10 @@ trait MeetingRecordValidation extends SelfValidating {
 			}
 		}
 
-		if(meetingTimeStr.equals("")) {
+		if(meetingTimeStr.isEmptyOrWhitespace) {
 			errors.rejectValue("meetingTimeStr", "meetingRecord.starttime.missing")
 		}
-		if(meetingEndTimeStr.equals("")) {
+		if(meetingEndTimeStr.isEmptyOrWhitespace) {
 			errors.rejectValue("meetingEndTimeStr", "meetingRecord.endtime.missing")
 		}
 
@@ -146,7 +147,7 @@ trait MeetingRecordValidation extends SelfValidating {
 				errors.rejectValue("meetingTimeStr", "meetingRecord.date.endbeforestart")
 			}
 
-			if(startDateTime.compareTo(DateTime.now) > 0){
+			if(startDateTime.isAfterNow){
 				errors.rejectValue("meetingDateStr", "meetingRecord.date.future")
 			}
 		}
