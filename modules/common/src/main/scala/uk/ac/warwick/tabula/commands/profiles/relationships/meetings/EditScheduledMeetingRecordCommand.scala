@@ -2,7 +2,7 @@ package uk.ac.warwick.tabula.commands.profiles.relationships.meetings
 
 import org.joda.time.DateTime
 import org.springframework.validation.{BindingResult, Errors}
-import uk.ac.warwick.tabula.DateFormats.DateTimePickerFormatter
+import uk.ac.warwick.tabula.DateFormats._
 import uk.ac.warwick.tabula.JavaImports._
 import uk.ac.warwick.tabula.commands._
 import uk.ac.warwick.tabula.data.model._
@@ -11,7 +11,6 @@ import uk.ac.warwick.tabula.permissions.Permissions
 import uk.ac.warwick.tabula.services.{AutowiringFileAttachmentServiceComponent, AutowiringMeetingRecordServiceComponent, FileAttachmentServiceComponent, MeetingRecordServiceComponent}
 import uk.ac.warwick.tabula.system.BindListener
 import uk.ac.warwick.tabula.system.permissions.{PermissionsChecking, PermissionsCheckingMethods, RequiresPermissionsChecking}
-import uk.ac.warwick.tabula.DateFormats.{DatePickerFormatter, TimePickerFormatter}
 
 import scala.collection.JavaConverters._
 
@@ -58,7 +57,11 @@ class EditScheduledMeetingRecordCommand (val editor: Member, val meetingRecord: 
 
 		meetingRecord.title = title
 		meetingRecord.description = description
-		val isRescheduled = meetingRecord.meetingDate != DateTimePickerFormatter.parseDateTime(meetingDateStr+" "+meetingTimeStr).withHourOfDay(DateTimePickerFormatter.parseDateTime(meetingDateStr+" "+meetingTimeStr).getHourOfDay)
+
+		val meetingDate = DateTimePickerFormatter.parseDateTime(meetingRecord.meetingDate.toString(DateTimePickerFormatter))
+		val newMeetingDate = DateTimePickerFormatter.parseDateTime(meetingDateStr+" "+meetingTimeStr)
+
+		val isRescheduled = (!meetingDate.equals(newMeetingDate))
 
 		if((meetingDateStr != null)&&(!meetingDateStr.equals(""))&&(meetingTimeStr != null)&&(!meetingTimeStr.equals(""))&&(meetingEndTimeStr != null)&&(!meetingEndTimeStr.equals(""))) {
 			meetingRecord.meetingDate = DateTimePickerFormatter.parseDateTime(meetingDateStr + " " + meetingTimeStr).withHourOfDay(DateTimePickerFormatter.parseDateTime(meetingDateStr + " " + meetingTimeStr).getHourOfDay)
@@ -110,7 +113,9 @@ trait EditScheduledMeetingRecordCommandValidation extends SelfValidating with Sc
 		sharedValidation(errors, title, meetingDateStr, meetingTimeStr, meetingEndTimeStr)
 
 		meetingRecordService.listScheduled(Set(meetingRecord.relationship), Some(editor)).foreach(
-			m => if((meetingDateStr != null)&&(!meetingDateStr.equals(""))&&(meetingTimeStr != null)&&(!meetingTimeStr.equals(""))&&(meetingEndTimeStr != null)&&(!meetingEndTimeStr.equals(""))){ if (m.meetingDate == DateTimePickerFormatter.parseDateTime(meetingDateStr+" "+meetingTimeStr) && m.id != meetingRecord.id) errors.rejectValue("meetingDate", "meetingRecord.date.duplicate")}
+			m => if((meetingDateStr != null)&&(!meetingDateStr.equals(""))&&(meetingTimeStr != null)&&(!meetingTimeStr.equals(""))){
+				if ((m.meetingDate.toString(DateTimePickerFormatter).equals(meetingDateStr+" "+meetingTimeStr)) && (m.id != meetingRecord.id) ) errors.rejectValue("meetingDateStr", "meetingRecord.date.duplicate")
+			}
 		)
 	}
 }

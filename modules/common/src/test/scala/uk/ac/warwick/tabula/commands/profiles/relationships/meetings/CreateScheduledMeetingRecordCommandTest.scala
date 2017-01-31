@@ -50,9 +50,10 @@ class CreateScheduledMeetingRecordCommandTest extends TestBase with Mockito {
 	def noFormat() { new Fixture {
 		val errors = new BindException(command, "command")
 		command.title = "A Meeting"
-		command.meetingDateStr = new DateTime().plusDays(1).toString(DatePickerFormatter)
-		command.meetingTimeStr = new DateTime().plusDays(1).toString(TimePickerFormatter)
-		command.meetingEndTimeStr = new DateTime().plusDays(1).plusHours(1).toString(TimePickerFormatter)
+		val meetingTime : DateTime = new DateTime().plusDays(1)
+		command.meetingDateStr = meetingTime.toString(DatePickerFormatter)
+		command.meetingTimeStr = meetingTime.toString(TimePickerFormatter)
+		command.meetingEndTimeStr = meetingTime.plusHours(1).toString(TimePickerFormatter)
 		command.validate(errors)
 		errors.hasErrors should be {true}
 		errors.getFieldErrorCount should be(1)
@@ -62,15 +63,17 @@ class CreateScheduledMeetingRecordCommandTest extends TestBase with Mockito {
 	@Test
 	def scheduleInPast() { new Fixture {
 		val errors = new BindException(command, "command")
+		val meetingTime: DateTime = new DateTime().minusWeeks(1)
+
 		command.format = MeetingFormat.FaceToFace
 		command.title = "A Title"
-		command.meetingDateStr = new DateTime().plusDays(1).toString(DatePickerFormatter)
-		command.meetingTimeStr = new DateTime().plusDays(1).toString(TimePickerFormatter)
-		command.meetingEndTimeStr = new DateTime().plusDays(1).plusHours(1).toString(TimePickerFormatter)
+		command.meetingDateStr = meetingTime.toString(DatePickerFormatter)
+		command.meetingTimeStr = meetingTime.toString(TimePickerFormatter)
+		command.meetingEndTimeStr = meetingTime.plusHours(1).toString(TimePickerFormatter)
 		command.validate(errors)
 		errors.hasErrors should be {true}
-		errors.getFieldErrorCount should be(1)
-		errors.getFieldErrors("meetingDateStr").size should be(1)
+		errors.getFieldErrorCount should be(2)
+		errors.getFieldErrors("meetingDateStr").size should be(2)
 	}}
 
 	@Test
@@ -86,9 +89,10 @@ class CreateScheduledMeetingRecordCommandTest extends TestBase with Mockito {
 		val errors = new BindException(command, "command")
 		command.format = MeetingFormat.FaceToFace
 		command.title = "A Title"
-		command.meetingDateStr = new DateTime().plusWeeks(1).toString(DatePickerFormatter)
-		command.meetingTimeStr = new DateTime().plusWeeks(1).toString(TimePickerFormatter)
-		command.meetingEndTimeStr = new DateTime().plusWeeks(1).plusHours(1).toString(TimePickerFormatter)
+		command.meetingDateStr = meetingTime.toString(DatePickerFormatter)
+		command.meetingTimeStr = meetingTime.toString(TimePickerFormatter)
+		command.meetingEndTimeStr = meetingTime.plusHours(1).toString(TimePickerFormatter)
+
 		command.validate(errors)
 		errors.hasErrors should be {true}
 		errors.getFieldErrorCount should be(1)

@@ -17,19 +17,24 @@ trait ScheduledMeetingRecordValidation {
 
 		rejectIfEmptyOrWhitespace(errors, "relationship", "NotEmpty")
 		rejectIfEmptyOrWhitespace(errors, "format", "NotEmpty")
+		var meetingDate = new DateTime()
+		if((meetingDateStr != null)&&(!meetingDateStr.equals(""))&&(meetingTimeStr != null)&&(!meetingTimeStr.equals(""))&&(meetingEndTimeStr != null)&&(!meetingEndTimeStr.equals(""))){
+			meetingDate = DateTimePickerFormatter.parseDateTime(meetingDateStr + " "+ meetingTimeStr)
 
-		var meetingDate = DateTimePickerFormatter.parseDateTime(meetingDateStr + " "+ meetingTimeStr)
-		if(meetingDate.compareTo(DateTimePickerFormatter.parseDateTime(meetingDateStr + " "+ meetingEndTimeStr)) > -1){
-			errors.rejectValue("meetingTimeStr", "meetingRecord.date.endbeforestart")
+			if(meetingDate.compareTo(DateTimePickerFormatter.parseDateTime(meetingDateStr + " "+ meetingEndTimeStr)) > -1){
+				errors.rejectValue("meetingTimeStr", "meetingRecord.date.endbeforestart")
+			}
 		}
 		meetingDate match {
 			case date:DateTime =>
-				if (meetingDate.isBefore(DateTime.now.toDateTime))
-					errors.rejectValue("meetingDate", "meetingRecord.date.past")
-				else if (meetingDate.isAfter(DateTime.now.plusYears(MeetingRecord.MeetingTooOldThresholdYears).toDateTime))
-					errors.rejectValue("meetingDate", "meetingRecord.date.futuristic")
-
-			case _ => errors.rejectValue("meetingDate", "meetingRecord.date.missing")
+				if((meetingDateStr != null)&&(!meetingDateStr.equals(""))&&(meetingTimeStr != null)&&(!meetingTimeStr.equals(""))&&(meetingEndTimeStr != null)&&(!meetingEndTimeStr.equals(""))) {
+					if (DateTimePickerFormatter.parseDateTime(meetingDateStr + " " + meetingTimeStr).isBefore(DateTime.now.toDateTime))
+						errors.rejectValue("meetingDateStr", "meetingRecord.date.past")
+					else if (meetingDate.isAfter(DateTime.now.plusYears(MeetingRecord.MeetingTooOldThresholdYears).toDateTime))
+						errors.rejectValue("meetingDateStr", "meetingRecord.date.futuristic")
+				}
+			case _ => errors.rejectValue("meetingDateStr", "meetingRecord.date.missing")
 		}
+
 	}
 }

@@ -47,7 +47,7 @@ class CreateMeetingRecordCommandTest extends TestBase with Mockito {
 		var errors = new BindException(validator, "command")
 		validator.validate(errors)
 		errors.hasErrors should be (true)
-		errors.getErrorCount should be (2)
+		errors.getErrorCount should be (3)
 		errors.getFieldErrors.asScala.map(_.getField).contains("meetingDateStr") should be (true)
 		errors.getFieldError.getCode should be ("meetingRecord.date.future")
 	}}}
@@ -57,14 +57,14 @@ class CreateMeetingRecordCommandTest extends TestBase with Mockito {
 		validator.title = "A title"
 		validator.format = FaceToFace
 		validator.meetingDateTime = dateTime(2007, DateTimeConstants.MARCH) // > 5 years ago
-		validator.meetingDateStr = validator.meetingDateTime.toString(DatePickerFormatter)
-		validator.meetingTimeStr = validator.meetingDateTime.toString(TimePickerFormatter)
+		validator.meetingDateStr = dateTime(2007, DateTimeConstants.MARCH).toString(DatePickerFormatter)
+		validator.meetingTimeStr = dateTime(2007, DateTimeConstants.MARCH).toString(TimePickerFormatter)
 
 		var errors = new BindException(validator, "command")
 		validator.validate(errors)
 		errors.hasErrors should be {true}
 		errors.getErrorCount should be (1)
-		errors.getFieldErrors.asScala.map(_.getField).contains("meetingDateTime") should be (true)
+		errors.getFieldErrors.asScala.map(_.getField).contains("meetingDateStr") should be (true)
 		errors.getFieldError.getCode should be ("meetingRecord.date.prehistoric")
 	}}}
 
@@ -73,12 +73,13 @@ class CreateMeetingRecordCommandTest extends TestBase with Mockito {
 		validator.title = "A title"
 		validator.format = FaceToFace
 
-		validator.meetingDateTime = new DateTime().minusDays(1)
-		validator.meetingDateStr = validator.meetingDateTime.toString(DatePickerFormatter)
-		validator.meetingTimeStr = validator.meetingDateTime.toString(TimePickerFormatter)
+		val yesterday: DateTime = DateTime.now.minusDays(1)
+		validator.meetingDateTime = yesterday
+		validator.meetingDateStr = yesterday.toString(DatePickerFormatter)
+		validator.meetingTimeStr = yesterday.toString(TimePickerFormatter)
 
-		validator.meetingEndDateTime = new DateTime().minusDays(1).minusHours(1)
-		validator.meetingEndTimeStr = validator.meetingDateTime.minusHours(1).toString(TimePickerFormatter) //end is before the start
+		validator.meetingEndDateTime = yesterday.minusHours(1) // end is before the start
+		validator.meetingEndTimeStr = yesterday.minusHours(1).toString(TimePickerFormatter)
 
 		var errors = new BindException(validator, "command")
 		validator.validate(errors)
@@ -102,13 +103,13 @@ class CreateMeetingRecordCommandTest extends TestBase with Mockito {
 		errors.hasErrors should be (true)
 		errors.getErrorCount should be (1)
 		errors.getFieldError.getField should be ("meetingTimeStr")
-		errors.getFieldError.getCode should be ("NotEmpty")
+		errors.getFieldError.getCode should be ("meetingRecord.starttime.missing")
 	}}}
 
 	@Test
 	def invalidEmptyEndTime(): Unit = withUser("cuscav") { withFakeTime(aprilFool) { new ValidationFixture {
 		validator.meetingDateTime = marchHare
-		validator.meetingDateStr = validator.meetingDateTime.toString(DatePickerFormatter)
+		validator.meetingDateStr = marchHare.toString(DatePickerFormatter)
 		validator.meetingTimeStr =  "09:00:00"
 		validator.meetingEndTimeStr = ""
 		validator.title = "A good title"
@@ -119,7 +120,7 @@ class CreateMeetingRecordCommandTest extends TestBase with Mockito {
 		errors.hasErrors should be (true)
 		errors.getErrorCount should be (1)
 		errors.getFieldError.getField should be ("meetingEndTimeStr")
-		errors.getFieldError.getCode should be ("NotEmpty")
+		errors.getFieldError.getCode should be ("meetingRecord.endtime.missing")
 	}}}
 
 	@Test

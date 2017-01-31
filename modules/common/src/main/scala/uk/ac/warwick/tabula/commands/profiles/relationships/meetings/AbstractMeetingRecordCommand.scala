@@ -1,6 +1,6 @@
 package uk.ac.warwick.tabula.commands.profiles.relationships.meetings
 
-import org.joda.time.{DateTime, LocalDate}
+import org.joda.time.{DateTime, DateTimeComparator, LocalDate}
 import uk.ac.warwick.tabula.DateFormats.{DateTimePickerFormatter, TimePickerFormatter}
 import org.springframework.validation.ValidationUtils._
 import org.springframework.validation.{BindingResult, Errors}
@@ -29,7 +29,9 @@ abstract class AbstractMeetingRecordCommand {
 		meeting.isRealTime match {
 
 			case true =>
-				meeting.meetingDate = DateTimePickerFormatter.parseDateTime(meetingDateStr + " " + meetingTimeStr)
+				if((meetingDateStr != null)&&(!meetingDateStr.equals(""))&&(meetingTimeStr != null)&&(!meetingTimeStr.equals(""))){
+					meeting.meetingDate = DateTimePickerFormatter.parseDateTime(meetingDateStr + " " + meetingTimeStr)
+				}
 
 			case false =>
 				meeting.meetingDate = meetingDate.toDateTimeAtStartOfDay.withHourOfDay(MeetingRecord.DefaultMeetingTimeOfDay)
@@ -106,6 +108,7 @@ trait MeetingRecordValidation extends SelfValidating {
 	self: MeetingRecordCommandRequest with MeetingRecordCommandState =>
 
 	override def validate(errors: Errors) {
+
 		rejectIfEmptyOrWhitespace(errors, "title", "NotEmpty")
 		if (title.length > MeetingRecord.MaxTitleLength) {
 			errors.rejectValue("title", "meetingRecord.title.long", new Array(MeetingRecord.MaxTitleLength), "")
@@ -113,18 +116,9 @@ trait MeetingRecordValidation extends SelfValidating {
 
 		rejectIfEmptyOrWhitespace(errors, "format", "NotEmpty")
 
-		rejectIfEmptyOrWhitespace(errors, "meetingTimeStr", "NotEmpty")
-		rejectIfEmptyOrWhitespace(errors, "meetingEndTimeStr", "NotEmpty")
-
 		val dateToCheck: DateTime = isRealTime match {
 			case true => meetingDateTime
 			case false => meetingDate.toDateTimeAtStartOfDay
-			case true => meetingEndDateTime
-			case false => meetingEndDate.toDateTimeAtStartOfDay
-		}
-
-		if(DateTimePickerFormatter.parseDateTime(meetingDateStr + " "+ meetingTimeStr).compareTo(DateTimePickerFormatter.parseDateTime(meetingDateStr + " "+ meetingEndTimeStr)) > -1){
-			errors.rejectValue("meetingTimeStr", "meetingRecord.date.endbeforestart")
 		}
 
 		if (dateToCheck == null) {
@@ -136,11 +130,27 @@ trait MeetingRecordValidation extends SelfValidating {
 				errors.rejectValue("meetingDateStr", "meetingRecord.date.prehistoric")
 			}
 		}
+
 		if(meetingTimeStr.equals("")) {
 			errors.rejectValue("meetingTimeStr", "meetingRecord.starttime.missing")
 		}
 		if(meetingEndTimeStr.equals("")) {
 			errors.rejectValue("meetingEndTimeStr", "meetingRecord.endtime.missing")
+		}
+
+		if((meetingDateStr != null)&&(!meetingDateStr.equals(""))&&(meetingTimeStr != null)&&(!meetingTimeStr.equals(""))&&(meetingEndTimeStr != null)&&(!meetingEndTimeStr.equals(""))) {
+
+			val startDateTime: DateTime = DateTimePickerFormatter.parseDateTime(meetingDateStr + " " + meetingTimeStr)
+			//val endDateTime: DateTime = DateTimePickerFormatter.parseDateTime(meetingDateStr + " " + meetingEndTimeStr)
+			val endDateTime: DateTime = DateTimePickerFormatter.parseDateTime(meetingEndDateTime.toString(DatePickerFormatter) + " " + meetingEndTimeStr)
+
+			if(DateTimeComparator.getInstance().compare(startDateTime, endDateTime) >= 0) {
+				errors.rejectValue("meetingTimeStr", "meetingRecord.date.endbeforestart")
+			}
+
+			if(startDateTime.compareTo(DateTime.now) > 0){
+				errors.rejectValue("meetingDateStr", "meetingRecord.date.future")
+			}
 		}
 	}
 }

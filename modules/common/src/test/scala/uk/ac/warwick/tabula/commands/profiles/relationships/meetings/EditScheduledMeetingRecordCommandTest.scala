@@ -17,8 +17,9 @@ class EditScheduledMeetingRecordCommandTest  extends TestBase with Mockito {
 
 		var creator: StaffMember = _
 		var scheduledMeetingRecord: ScheduledMeetingRecord = new ScheduledMeetingRecord()
-		scheduledMeetingRecord.meetingDate = new DateTime().minusDays(1)
-		scheduledMeetingRecord.meetingEndDate = new DateTime().minusDays(1).plusHours(1)
+		val newMeetingDate = new DateTime().plusMonths(1)
+		scheduledMeetingRecord.meetingDate = newMeetingDate
+		scheduledMeetingRecord.meetingEndDate = newMeetingDate.plusHours(1)
 		scheduledMeetingRecord.relationship = relationship
 		val command = new EditScheduledMeetingRecordCommand(creator, scheduledMeetingRecord) with EditScheduledMeetingRecordCommandValidation with EditScheduledMeetingRecordCommandSupport with MeetingRecordServiceComponent {
 			val meetingRecordService: MeetingRecordService = mockMeetingRecordService
@@ -59,13 +60,14 @@ class EditScheduledMeetingRecordCommandTest  extends TestBase with Mockito {
 		val newTitle: String = "new title"
 		val newDescription: String = "new description"
 		val newFormat = MeetingFormat.VideoConference
-		val newMeetingDate: DateTime = new DateTime().plusMinutes(1)
+
+		val theNewMeetingDate: DateTime = new DateTime().plusMinutes(1)
 		command.title = newTitle
 		command.description = newDescription
 		command.format = newFormat
-		command.meetingDateStr = newMeetingDate.toString(DatePickerFormatter)
-		command.meetingTimeStr = newMeetingDate.toString(TimePickerFormatter)
-		command.meetingEndTimeStr = newMeetingDate.plusHours(1).toString(TimePickerFormatter)
+		command.meetingDateStr = theNewMeetingDate.toString(DatePickerFormatter)
+		command.meetingTimeStr = theNewMeetingDate.toString(TimePickerFormatter)
+		command.meetingEndTimeStr = theNewMeetingDate.plusHours(1).toString(TimePickerFormatter)
 
 		Thread.sleep(2) // otherwise sometimes the last updated date is not after created date and that assertion fails
 
@@ -75,7 +77,7 @@ class EditScheduledMeetingRecordCommandTest  extends TestBase with Mockito {
 		result.meetingRecord.description should be (newDescription)
 		result.meetingRecord.lastUpdatedDate.isAfter(result.meetingRecord.creationDate) should be (true)
 		result.meetingRecord.format should be (newFormat)
-		result.meetingRecord.meetingDate should be (newMeetingDate)
+		result.meetingRecord.meetingDate.toString(DatePickerFormatter) should be (theNewMeetingDate.toString(DatePickerFormatter))
 		result.isRescheduled should be (true)
 
 		verify(mockMeetingRecordService, times(1)).saveOrUpdate(scheduledMeetingRecord)
@@ -87,10 +89,10 @@ class EditScheduledMeetingRecordCommandTest  extends TestBase with Mockito {
 		val errors = new BindException(command, "command")
 		command.title = "title"
 		command.format = MeetingFormat.FaceToFace
-		command.meetingDateStr = new DateTime().plusDays(1).toString(DatePickerFormatter)
-		command.meetingTimeStr = new DateTime().plusHours(1).toString(TimePickerFormatter)
-		command.meetingEndTimeStr = new DateTime().plusHours(1).toString(TimePickerFormatter)
-
+		val theMeeting = new DateTime().plusDays(1)
+		command.meetingDateStr = theMeeting.toString(DatePickerFormatter)
+		command.meetingTimeStr = theMeeting.toString(TimePickerFormatter)
+		command.meetingEndTimeStr = theMeeting.plusHours(1).toString(TimePickerFormatter)
 		errors.hasErrors should be (false)
 	}}
 
@@ -98,9 +100,10 @@ class EditScheduledMeetingRecordCommandTest  extends TestBase with Mockito {
 	def noTitle() { new Fixture {
 		val errors = new BindException(command, "command")
 		command.format = MeetingFormat.FaceToFace
-		command.meetingDateStr = new DateTime().plusDays(1).toString(DatePickerFormatter)
-		command.meetingTimeStr = new DateTime().plusDays(1).plusHours(1).toString(TimePickerFormatter)
-		command.meetingEndTimeStr = new DateTime().plusDays(1).plusHours(1).toString(TimePickerFormatter)
+		val startdate = new DateTime().plusDays(1)
+		command.meetingDateStr = startdate.toString(DatePickerFormatter)
+		command.meetingTimeStr = startdate.toString(TimePickerFormatter)
+		command.meetingEndTimeStr = startdate.plusHours(1).toString(TimePickerFormatter)
 		command.validate(errors)
 		errors.hasErrors should be (true)
 		errors.getFieldErrorCount should be(1)
@@ -137,7 +140,7 @@ class EditScheduledMeetingRecordCommandTest  extends TestBase with Mockito {
 	@Test
 	def scheduleDuplicateDate() { new Fixture {
 
-		val meetingTime: DateTime = new DateTime().plusWeeks(1)
+		val meetingTime: DateTime = new DateTime().plusMonths(1)
 
 		val meetingWithDupeDate: ScheduledMeetingRecord = new ScheduledMeetingRecord
 		meetingWithDupeDate.meetingDate = meetingTime

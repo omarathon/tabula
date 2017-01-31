@@ -27,12 +27,11 @@ trait ModifyMeetingRecordValidation extends MeetingRecordValidation {
 	self: MeetingRecordCommandRequest with ModifyMeetingRecordCommandState =>
 
 	override def validate(errors: Errors) {
+
 		super.validate(errors)
+
 		rejectIfEmptyOrWhitespace(errors, "relationship", "NotEmpty")
 
-		if(DateTimePickerFormatter.parseDateTime(meetingDateStr+" "+meetingTimeStr).compareTo(DateTime.now) > 0){
-			errors.rejectValue("meetingDateStr", "meetingRecord.date.future")
-		}
 	}
 
 }

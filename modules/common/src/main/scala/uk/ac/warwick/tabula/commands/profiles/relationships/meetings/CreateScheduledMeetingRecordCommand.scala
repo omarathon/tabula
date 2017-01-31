@@ -41,8 +41,10 @@ class CreateScheduledMeetingRecordCommand (val creator: Member, val relationship
 		scheduledMeeting.description = description
 
 		if((meetingDateStr != null)&&(!meetingDateStr.equals(""))&&(meetingTimeStr != null)&&(!meetingTimeStr.equals(""))&&(meetingEndTimeStr != null)&&(!meetingEndTimeStr.equals(""))){
-			scheduledMeeting.meetingDate = DateTimePickerFormatter.parseDateTime(meetingDateStr+" "+meetingTimeStr).withHourOfDay(DateTimePickerFormatter.parseDateTime(meetingDateStr+" "+meetingTimeStr).getHourOfDay)
-			scheduledMeeting.meetingEndDate = DateTimePickerFormatter.parseDateTime(meetingDateStr+" "+meetingEndTimeStr).withHourOfDay(DateTimePickerFormatter.parseDateTime(meetingDateStr+" "+meetingEndTimeStr).getHourOfDay)
+
+			scheduledMeeting.meetingDate = DateTimePickerFormatter.parseDateTime(meetingDateStr+" "+meetingTimeStr)
+			scheduledMeeting.meetingEndDate = DateTimePickerFormatter.parseDateTime(meetingDateStr+" "+meetingEndTimeStr)
+
 		}
 
 		scheduledMeeting.meetingLocation = meetingLocation
@@ -74,16 +76,28 @@ trait CreateScheduledMeetingRecordCommandValidation extends SelfValidating with 
 		sharedValidation(errors: Errors, title: String, meetingDateStr: String, meetingTimeStr: String, meetingEndTimeStr: String)
 
 		meetingRecordService.listScheduled(Set(relationship), Some(creator)).foreach(
-			m => if((meetingDateStr != null)&&(!meetingDateStr.equals(""))&&(meetingTimeStr != null)&&(!meetingTimeStr.equals(""))&&(meetingEndTimeStr != null)&&(!meetingEndTimeStr.equals(""))){ if (m.meetingDate == DateTimePickerFormatter.parseDateTime(meetingDateStr+" "+meetingTimeStr)) errors.rejectValue("meetingDate", "meetingRecord.date.duplicate")}
+			m =>
+				if((meetingDateStr != null)&&(!meetingDateStr.equals(""))&&(meetingTimeStr != null)&&(!meetingTimeStr.equals("")))	{
+
+					val dateCheck = meetingDateStr+" "+meetingTimeStr
+					if (m.meetingDate.toString(DateTimePickerFormatter).equals(dateCheck)) errors.rejectValue("meetingDateStr", "meetingRecord.date.duplicate")
+			}
 		)
+
 		if((meetingDateStr != null)&&(!meetingDateStr.equals(""))&&(meetingTimeStr != null)&&(!meetingTimeStr.equals(""))&&(meetingEndTimeStr != null)&&(!meetingEndTimeStr.equals(""))){
-			if(DateTimePickerFormatter.parseDateTime(meetingDateStr+" "+meetingTimeStr).compareTo(DateTimePickerFormatter.parseDateTime(meetingDateStr+" "+meetingEndTimeStr)) > -1){
+
+			val startDate: DateTime = DateTimePickerFormatter.parseDateTime(meetingDateStr+" "+meetingTimeStr)
+			val endDate: DateTime = DateTimePickerFormatter.parseDateTime(meetingDateStr+" "+meetingEndTimeStr)
+
+			if(endDate.isBefore(startDate)){
 				errors.rejectValue("meetingTimeStr", "meetingRecord.date.endbeforestart")
 			}
-			if(DateTimePickerFormatter.parseDateTime(meetingDateStr+" "+meetingTimeStr).compareTo(DateTime.now) <= 0){
+
+			if(startDate.isBefore(DateTime.now)){
 				errors.rejectValue("meetingDateStr", "meetingRecord.date.past")
 			}
 		}
+
 	}
 }
 
