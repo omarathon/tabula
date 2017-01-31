@@ -61,7 +61,7 @@ class EditScheduledMeetingRecordCommand (val editor: Member, val meetingRecord: 
 		val meetingDate = DateTimePickerFormatter.parseDateTime(meetingRecord.meetingDate.toString(DateTimePickerFormatter))
 		val newMeetingDate = DateTimePickerFormatter.parseDateTime(meetingDateStr+" "+meetingTimeStr)
 
-		val isRescheduled = (!meetingDate.equals(newMeetingDate))
+		val isRescheduled = !meetingDate.equals(newMeetingDate)
 
 		if((meetingDateStr != null)&&(!meetingDateStr.equals(""))&&(meetingTimeStr != null)&&(!meetingTimeStr.equals(""))&&(meetingEndTimeStr != null)&&(!meetingEndTimeStr.equals(""))) {
 			meetingRecord.meetingDate = DateTimePickerFormatter.parseDateTime(meetingDateStr + " " + meetingTimeStr).withHourOfDay(DateTimePickerFormatter.parseDateTime(meetingDateStr + " " + meetingTimeStr).getHourOfDay)
@@ -114,7 +114,7 @@ trait EditScheduledMeetingRecordCommandValidation extends SelfValidating with Sc
 
 		meetingRecordService.listScheduled(Set(meetingRecord.relationship), Some(editor)).foreach(
 			m => if((meetingDateStr != null)&&(!meetingDateStr.equals(""))&&(meetingTimeStr != null)&&(!meetingTimeStr.equals(""))){
-				if ((m.meetingDate.toString(DateTimePickerFormatter).equals(meetingDateStr+" "+meetingTimeStr)) && (m.id != meetingRecord.id) ) errors.rejectValue("meetingDateStr", "meetingRecord.date.duplicate")
+				if (m.meetingDate.toString(DateTimePickerFormatter).equals(meetingDateStr+" "+meetingTimeStr) && (m.id != meetingRecord.id) ) errors.rejectValue("meetingDateStr", "meetingRecord.date.duplicate")
 			}
 		)
 	}
