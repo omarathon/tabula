@@ -1,9 +1,9 @@
 package uk.ac.warwick.tabula.commands.profiles.relationships.meetings
 
 import org.joda.time.{DateTime, DateTimeComparator, LocalDate}
-import uk.ac.warwick.tabula.DateFormats.{DateTimePickerFormatter, TimePickerFormatter}
 import org.springframework.validation.ValidationUtils._
 import org.springframework.validation.{BindingResult, Errors}
+import uk.ac.warwick.tabula.DateFormats.{DatePickerFormatter, DateTimePickerFormatter, TimePickerFormatter}
 import uk.ac.warwick.tabula.FeaturesComponent
 import uk.ac.warwick.tabula.JavaImports._
 import uk.ac.warwick.tabula.commands._
@@ -13,7 +13,6 @@ import uk.ac.warwick.tabula.data.model._
 import uk.ac.warwick.tabula.services.attendancemonitoring.AttendanceMonitoringMeetingRecordServiceComponent
 import uk.ac.warwick.tabula.services.{FileAttachmentServiceComponent, MeetingRecordServiceComponent}
 import uk.ac.warwick.tabula.system.BindListener
-import uk.ac.warwick.tabula.DateFormats.DatePickerFormatter
 
 import scala.collection.JavaConverters._
 
@@ -141,7 +140,6 @@ trait MeetingRecordValidation extends SelfValidating {
 		if((meetingDateStr != null)&&(!meetingDateStr.equals(""))&&(meetingTimeStr != null)&&(!meetingTimeStr.equals(""))&&(meetingEndTimeStr != null)&&(!meetingEndTimeStr.equals(""))) {
 
 			val startDateTime: DateTime = DateTimePickerFormatter.parseDateTime(meetingDateStr + " " + meetingTimeStr)
-			//val endDateTime: DateTime = DateTimePickerFormatter.parseDateTime(meetingDateStr + " " + meetingEndTimeStr)
 			val endDateTime: DateTime = DateTimePickerFormatter.parseDateTime(meetingEndDateTime.toString(DatePickerFormatter) + " " + meetingEndTimeStr)
 
 			if(DateTimeComparator.getInstance().compare(startDateTime, endDateTime) >= 0) {
