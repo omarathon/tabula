@@ -41,7 +41,7 @@ class ImportAssignmentsCommandTest extends FlatSpec with Matchers with Mockito {
 			case fn: (UpstreamModuleRegistration=>Unit) @unchecked => registrations.foreach(fn)
 		}}
 
-		membershipService.getAssessmentComponents("HI33M-30") returns Seq(
+		membershipService.getAssessmentComponents("HI33M-30", inUseOnly = false) returns Seq(
 			new AssessmentComponent {
 				assessmentGroup = "A"
 				sequence = "A01"
@@ -51,13 +51,13 @@ class ImportAssignmentsCommandTest extends FlatSpec with Matchers with Mockito {
 				sequence = "A02"
 			}
 		)
-		membershipService.getAssessmentComponents("HI100-30") returns Seq(
+		membershipService.getAssessmentComponents("HI100-30", inUseOnly = false) returns Seq(
 			new AssessmentComponent {
 				assessmentGroup = "A"
 				sequence = "A01"
 			}
 		)
-		membershipService.getAssessmentComponents("HI101-30") returns Seq(
+		membershipService.getAssessmentComponents("HI101-30", inUseOnly = false) returns Seq(
 			new AssessmentComponent {
 				assessmentGroup = "A"
 				sequence = "A01"
