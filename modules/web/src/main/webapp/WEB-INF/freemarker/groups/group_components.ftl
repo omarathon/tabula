@@ -1397,32 +1397,45 @@
 				</tr>
 			</thead>
 			<tbody>
+				<#local maxCells = 0 />
+				<#list allTerms as namedTerm>
+					<#local weeks = namedTerm.weekRange.maxWeek - namedTerm.weekRange.minWeek + 1 />
+					<#if (weeks > maxCells)>
+						<#local maxCells = weeks />
+					</#if>
+				</#list>
 				<#list allTerms as namedTerm>
 					<#local is_vacation = !(namedTerm.term.termType?has_content) />
-				<tr<#if is_vacation> class="vacation"</#if>>
-					<th>
-						<div class="checkbox">
-							<label>
-								<input type="checkbox" class="collection-check-all" />
-								${namedTerm.name}<#if !is_vacation> term</#if>
-							</label>
-						</div>
-					</th>
-					<#list namedTerm.weekRange.minWeek..namedTerm.weekRange.maxWeek as weekNumber>
-						<td class="use-tooltip"
-							title="<@fmt.singleWeekFormat weekNumber smallGroupSet.academicYear smallGroupSet.module.adminDepartment />"
-							data-html="true"
-							data-container="body"
-						>
+					<tr<#if is_vacation> class="vacation"</#if>>
+						<th>
 							<div class="checkbox">
 								<label>
-								<@f.checkbox path=path value="${weekNumber}" cssClass="collection-checkbox" />
-								${weekNumber}
-							</label>
+									<input type="checkbox" class="collection-check-all" />
+									${namedTerm.name}<#if !is_vacation> term</#if>
+								</label>
 							</div>
-						</td>
-					</#list>
-				</tr>
+						</th>
+						<#list namedTerm.weekRange.minWeek..namedTerm.weekRange.maxWeek as weekNumber>
+							<td class="use-tooltip"
+								title="<@fmt.singleWeekFormat weekNumber smallGroupSet.academicYear smallGroupSet.module.adminDepartment />"
+								data-html="true"
+								data-container="body"
+							>
+								<div class="checkbox">
+									<label>
+									<@f.checkbox path=path value="${weekNumber}" cssClass="collection-checkbox" />
+									${weekNumber}
+								</label>
+								</div>
+							</td>
+						</#list>
+						<#local numberOfWeeks = namedTerm.weekRange.maxWeek - namedTerm.weekRange.minWeek + 1 />
+						<#if numberOfWeeks < maxCells>
+							<#list numberOfWeeks..(maxCells - 1) as extraWeeks>
+								<td class="empty"></td>
+							</#list>
+						</#if>
+					</tr>
 				</#list>
 			</tbody>
 		</table>
