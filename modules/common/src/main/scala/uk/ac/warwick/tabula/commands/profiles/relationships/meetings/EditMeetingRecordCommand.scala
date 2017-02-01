@@ -52,24 +52,21 @@ trait PopulateMeetingRecordCommand extends PopulateOnForm {
 		title = meetingRecord.title
 		description = meetingRecord.description
 		isRealTime = meetingRecord.isRealTime
-		if((meetingDateStr != null)&&(!meetingDateStr.equals(""))&&(meetingTimeStr != null)&&(!meetingTimeStr.equals(""))&&(meetingEndTimeStr != null)&&(!meetingEndTimeStr.equals(""))) {
-			meetingRecord.isRealTime match {
-				case true =>
+		meetingRecord.isRealTime match {
+			case true =>
 					meetingDateStr = meetingRecord.meetingDate.toString(DatePickerFormatter)
 					meetingTimeStr = meetingRecord.meetingDate.withHourOfDay(meetingRecord.meetingDate.getHourOfDay).toString(TimePickerFormatter)
 					meetingEndTimeStr = meetingRecord.meetingEndDate.withHourOfDay(meetingRecord.meetingEndDate.getHourOfDay).toString(TimePickerFormatter)
-
-				case false =>
+			case false =>
 					meetingDate = meetingRecord.meetingDate.toLocalDate
 					meetingTime = meetingRecord.meetingDate.withHourOfDay(meetingRecord.meetingDate.getHourOfDay)
-					meetingEndTime = meetingRecord.meetingEndDate.withHourOfDay(meetingRecord.meetingEndDate.getHourOfDay)
-			}
+				meetingEndTime = meetingRecord.meetingEndDate.withHourOfDay(meetingRecord.meetingEndDate.getHourOfDay).plusHours(1)
+
 		}
 		meetingLocation = meetingRecord.meetingLocation
-		meetingLocationId = meetingRecord.meetingLocation
-
 		format = meetingRecord.format
 		attachedFiles = meetingRecord.attachments
+
 	}
 
 }

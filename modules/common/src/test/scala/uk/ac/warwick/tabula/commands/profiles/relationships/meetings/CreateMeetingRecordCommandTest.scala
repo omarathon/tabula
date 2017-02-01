@@ -74,7 +74,7 @@ class CreateMeetingRecordCommandTest extends TestBase with Mockito {
 		validator.title = "A title"
 		validator.format = FaceToFace
 
-		val yesterday: DateTime = DateTime.now.minusDays(1)
+		val yesterday: DateTime = DateTime.now.minusDays(1).plusHours(10)
 		validator.meetingDateTime = yesterday
 		validator.meetingDateStr = yesterday.toString(DatePickerFormatter)
 		validator.meetingTimeStr = yesterday.toString(TimePickerFormatter)

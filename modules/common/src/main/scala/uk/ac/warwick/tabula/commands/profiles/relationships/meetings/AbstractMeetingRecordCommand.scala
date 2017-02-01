@@ -1,6 +1,6 @@
 package uk.ac.warwick.tabula.commands.profiles.relationships.meetings
 
-import org.joda.time.{DateTime, DateTimeComparator, LocalDate}
+import org.joda.time.{DateTime, LocalDate}
 import org.springframework.validation.ValidationUtils._
 import org.springframework.validation.{BindingResult, Errors}
 import uk.ac.warwick.tabula.DateFormats.{DatePickerFormatter, DateTimePickerFormatter, TimePickerFormatter}
@@ -32,10 +32,13 @@ abstract class AbstractMeetingRecordCommand {
 				if(meetingDateStr.hasText && meetingTimeStr.hasText){
 					meeting.meetingDate = DateTimePickerFormatter.parseDateTime(meetingDateStr + " " + meetingTimeStr)
 				}
+				if (meetingDateStr.hasText && meetingEndTimeStr.hasText) {
+					meeting.meetingEndDate = DateTimePickerFormatter.parseDateTime(meetingDateStr + " " + meetingEndTimeStr)
+				}
 
 			case false =>
 				meeting.meetingDate = meetingDate.toDateTimeAtStartOfDay.withHourOfDay(MeetingRecord.DefaultMeetingTimeOfDay)
-				meeting.meetingEndDate = meetingEndDate.toDateTimeAtStartOfDay.withHourOfDay(MeetingRecord.DefaultMeetingTimeOfDay)
+				meeting.meetingEndDate = meetingEndDate.toDateTimeAtStartOfDay.withHourOfDay(MeetingRecord.DefaultMeetingTimeOfDay).plusHours(1)
 
 		}
 
@@ -117,7 +120,7 @@ trait MeetingRecordValidation extends SelfValidating {
 		rejectIfEmptyOrWhitespace(errors, "format", "NotEmpty")
 
 		val dateToCheck: DateTime = isRealTime match {
-			case true => meetingDateTime
+			case true => DateTimePickerFormatter.parseDateTime(meetingDateStr + " " + meetingTimeStr)
 			case false => meetingDate.toDateTimeAtStartOfDay
 		}
 
@@ -138,12 +141,12 @@ trait MeetingRecordValidation extends SelfValidating {
 			errors.rejectValue("meetingEndTimeStr", "meetingRecord.endtime.missing")
 		}
 
-		if((meetingDateStr != null)&&(!meetingDateStr.equals(""))&&(meetingTimeStr != null)&&(!meetingTimeStr.equals(""))&&(meetingEndTimeStr != null)&&(!meetingEndTimeStr.equals(""))) {
+		if ((!meetingDateStr.isEmptyOrWhitespace) && (!meetingTimeStr.isEmptyOrWhitespace) && (!meetingEndTimeStr.isEmptyOrWhitespace)) {
 
 			val startDateTime: DateTime = DateTimePickerFormatter.parseDateTime(meetingDateStr + " " + meetingTimeStr)
-			val endDateTime: DateTime = DateTimePickerFormatter.parseDateTime(meetingEndDateTime.toString(DatePickerFormatter) + " " + meetingEndTimeStr)
+			val endDateTime: DateTime = DateTimePickerFormatter.parseDateTime(meetingDateStr + " " + meetingEndTimeStr)
 
-			if(DateTimeComparator.getInstance().compare(startDateTime, endDateTime) >= 0) {
+			if (endDateTime.isBefore(startDateTime) || startDateTime.isEqual(endDateTime)) {
 				errors.rejectValue("meetingTimeStr", "meetingRecord.date.endbeforestart")
 			}
 
@@ -182,7 +185,6 @@ trait MeetingRecordCommandRequest {
 	var meetingEndDateTime: DateTime = DateTime.now.plusHours(1).hourOfDay.roundFloorCopy
 
 	var meetingLocation: String = _
-	var meetingLocationId: String = _
 
 	var format: MeetingFormat = _
 	var file: UploadedFile = new UploadedFile

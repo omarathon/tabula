@@ -69,6 +69,7 @@ abstract class AbstractMeetingRecord extends GeneratedId with PermissionsTarget 
 	@DateTimeFormat(pattern = DateFormats.DateTimePickerPattern)
 	var meetingEndDate: DateTime = _
 
+
 	@Column(name="meeting_location")
 	var meetingLocation: String = _
 
@@ -119,7 +120,10 @@ abstract class AbstractMeetingRecord extends GeneratedId with PermissionsTarget 
 			eventType = TimetableEventType.Meeting,
 			start = meetingDate.toLocalDateTime,
 			end = meetingEndDate.toLocalDateTime,
-			location = if (format == MeetingFormat.FaceToFace) None else Option(format).map { _.description }.map(NamedLocation),
+			if (format == MeetingFormat.FaceToFace) None
+			else Option(format).map {
+				_.description
+			}.map(NamedLocation),
 			parent = TimetableEvent.Parent(relationship.relationshipType),
 			comments = None,
 			staff = context match {

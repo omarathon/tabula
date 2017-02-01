@@ -7,6 +7,7 @@ import uk.ac.warwick.tabula.JavaImports._
 import uk.ac.warwick.tabula.commands._
 import uk.ac.warwick.tabula.data.model._
 import uk.ac.warwick.tabula.data.model.notifications.profiles.meetingrecord.{AddsIcalAttachmentToScheduledMeetingNotification, ScheduledMeetingRecordBehalfNotification, ScheduledMeetingRecordInviteeNotification, ScheduledMeetingRecordNotification}
+import uk.ac.warwick.tabula.helpers.StringUtils._
 import uk.ac.warwick.tabula.permissions.Permissions
 import uk.ac.warwick.tabula.services.{AutowiringFileAttachmentServiceComponent, AutowiringMeetingRecordServiceComponent, FileAttachmentServiceComponent, MeetingRecordServiceComponent}
 import uk.ac.warwick.tabula.system.BindListener
@@ -63,7 +64,7 @@ class EditScheduledMeetingRecordCommand (val editor: Member, val meetingRecord: 
 
 		val isRescheduled = !meetingDate.equals(newMeetingDate)
 
-		if((meetingDateStr != null)&&(!meetingDateStr.equals(""))&&(meetingTimeStr != null)&&(!meetingTimeStr.equals(""))&&(meetingEndTimeStr != null)&&(!meetingEndTimeStr.equals(""))) {
+		if ((!meetingDateStr.isEmptyOrWhitespace) && (!meetingTimeStr.isEmptyOrWhitespace) && (!meetingEndTimeStr.isEmptyOrWhitespace)) {
 			meetingRecord.meetingDate = DateTimePickerFormatter.parseDateTime(meetingDateStr + " " + meetingTimeStr).withHourOfDay(DateTimePickerFormatter.parseDateTime(meetingDateStr + " " + meetingTimeStr).getHourOfDay)
 			meetingRecord.meetingEndDate = DateTimePickerFormatter.parseDateTime(meetingDateStr + " " + meetingEndTimeStr).withHourOfDay(DateTimePickerFormatter.parseDateTime(meetingDateStr + " " + meetingEndTimeStr).getHourOfDay)
 		}
@@ -91,11 +92,9 @@ trait PopulateScheduledMeetingRecordCommand extends PopulateOnForm {
 		title = meetingRecord.title
 		description = meetingRecord.description
 
-		if((meetingDateStr != null)&&(!meetingDateStr.equals(""))&&(meetingTimeStr != null)&&(!meetingTimeStr.equals(""))&&(meetingEndTimeStr != null)&&(!meetingEndTimeStr.equals(""))) {
-			meetingDateStr = meetingRecord.meetingDate.toString(DatePickerFormatter)
-			meetingTimeStr = meetingRecord.meetingDate.withHourOfDay(meetingRecord.meetingDate.getHourOfDay).toString(TimePickerFormatter)
-			meetingEndTimeStr = meetingRecord.meetingEndDate.withHourOfDay(meetingRecord.meetingEndDate.getHourOfDay).toString(TimePickerFormatter)
-		}
+		meetingDateStr = meetingRecord.meetingDate.toString(DatePickerFormatter)
+		meetingTimeStr = meetingRecord.meetingDate.withHourOfDay(meetingRecord.meetingDate.getHourOfDay).toString(TimePickerFormatter)
+		meetingEndTimeStr = meetingRecord.meetingEndDate.withHourOfDay(meetingRecord.meetingEndDate.getHourOfDay).toString(TimePickerFormatter)
 
 		meetingLocation = meetingRecord.meetingLocation
 
@@ -113,7 +112,7 @@ trait EditScheduledMeetingRecordCommandValidation extends SelfValidating with Sc
 		sharedValidation(errors, title, meetingDateStr, meetingTimeStr, meetingEndTimeStr)
 
 		meetingRecordService.listScheduled(Set(meetingRecord.relationship), Some(editor)).foreach(
-			m => if((meetingDateStr != null)&&(!meetingDateStr.equals(""))&&(meetingTimeStr != null)&&(!meetingTimeStr.equals(""))){
+			m => if ((!meetingDateStr.isEmptyOrWhitespace) && (!meetingTimeStr.isEmptyOrWhitespace) && (!meetingEndTimeStr.isEmptyOrWhitespace)) {
 				if (m.meetingDate.toString(DateTimePickerFormatter).equals(meetingDateStr+" "+meetingTimeStr) && (m.id != meetingRecord.id) ) errors.rejectValue("meetingDateStr", "meetingRecord.date.duplicate")
 			}
 		)
@@ -134,7 +133,6 @@ trait EditScheduledMeetingRecordState {
 	var format: MeetingFormat = _
 
 	var meetingLocation: String  = _
-	var meetingLocationId: String = _
 
 	var file: UploadedFile = new UploadedFile
 	var attachedFiles:JList[FileAttachment] = _
