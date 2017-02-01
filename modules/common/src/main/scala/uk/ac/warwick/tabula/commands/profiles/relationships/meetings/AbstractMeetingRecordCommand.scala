@@ -155,9 +155,6 @@ trait MeetingRecordValidation extends SelfValidating {
 				errors.rejectValue("meetingTimeStr", "meetingRecord.date.endbeforestart")
 			}
 
-			if(startDateTime.isAfterNow){
-				errors.rejectValue("meetingDateStr", "meetingRecord.date.future")
-			}
 		}
 	}
 }
