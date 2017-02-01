@@ -86,7 +86,8 @@ trait PopulateEditExamCommand {
 
 	def populateGroups(exam: Exam) {
 		assessmentGroups = exam.assessmentGroups
-		upstreamGroups.addAll(availableUpstreamGroups.filter { ug =>
+		// TAB-4848 get all the groups that are linked even if they're marked not in use
+		upstreamGroups.addAll(allUpstreamGroups.filter { ug =>
 			assessmentGroups.asScala.exists(ag => ug.assessmentComponent == ag.assessmentComponent && ag.occurrence == ug.occurrence)
 		}.asJavaCollection)
 	}
