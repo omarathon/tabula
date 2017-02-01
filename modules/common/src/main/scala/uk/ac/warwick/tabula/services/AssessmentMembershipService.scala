@@ -34,9 +34,9 @@ trait AssessmentMembershipService {
 	 *  Typically used to provide possible candidates to link to an app assignment,
 	 *  in conjunction with #getUpstreamAssessmentGroups.
 	 */
-	def getAssessmentComponents(module: Module): Seq[AssessmentComponent]
+	def getAssessmentComponents(module: Module, inUseOnly: Boolean = true): Seq[AssessmentComponent]
 	def getAssessmentComponents(department: Department, includeSubDepartments: Boolean): Seq[AssessmentComponent]
-	def getAssessmentComponents(moduleCode: String, inUseOnly: Boolean = true): Seq[AssessmentComponent]
+	def getAssessmentComponents(moduleCode: String, inUseOnly: Boolean): Seq[AssessmentComponent]
 
 	/**
 	 * Get all assessment groups that can serve this assignment this year.
@@ -159,12 +159,12 @@ class AssessmentMembershipServiceImpl
 	/**
 	 * Gets assessment components for this module.
 	 */
-	def getAssessmentComponents(module: Module): Seq[AssessmentComponent] = dao.getAssessmentComponents(module)
+	def getAssessmentComponents(module: Module, inUseOnly: Boolean = true): Seq[AssessmentComponent] = dao.getAssessmentComponents(module, inUseOnly)
 
 	/**
 	 * Gets assessment components by SITS module code
 	 */
-	def getAssessmentComponents(moduleCode: String, inUseOnly: Boolean = true): Seq[AssessmentComponent] =
+	def getAssessmentComponents(moduleCode: String, inUseOnly: Boolean): Seq[AssessmentComponent] =
 		dao.getAssessmentComponents(moduleCode, inUseOnly)
 
 	/**

@@ -2,10 +2,10 @@ package uk.ac.warwick.tabula.data.model
 
 import org.joda.time.DateTime
 import org.junit.Before
-import uk.ac.warwick.tabula.JavaImports.JBigDecimal
-import uk.ac.warwick.tabula._
 import uk.ac.warwick.tabula.data.{AutowiringMemberDaoImpl, StudentCourseDetailsDaoImpl}
 import uk.ac.warwick.tabula.services.{ProfileService, RelationshipService, StaffAssistantsHelpers}
+import uk.ac.warwick.tabula._
+import uk.ac.warwick.tabula.JavaImports.JBigDecimal
 
 import scala.collection.JavaConverters._
 

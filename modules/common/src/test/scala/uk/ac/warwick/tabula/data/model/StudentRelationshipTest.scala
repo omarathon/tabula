@@ -1,8 +1,8 @@
 package uk.ac.warwick.tabula.data.model
 
 import org.joda.time.DateTime
-import uk.ac.warwick.tabula.services.ProfileService
 import uk.ac.warwick.tabula.{Fixtures, Mockito, TestBase}
+import uk.ac.warwick.tabula.services.ProfileService
 
 class StudentRelationshipTest extends TestBase with Mockito {
 

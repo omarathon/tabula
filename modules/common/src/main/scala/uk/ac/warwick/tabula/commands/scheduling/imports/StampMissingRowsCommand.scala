@@ -2,13 +2,13 @@ package uk.ac.warwick.tabula.commands.scheduling.imports
 
 import org.joda.time.DateTime
 import uk.ac.warwick.tabula.commands._
-import uk.ac.warwick.tabula.data.Transactions._
 import uk.ac.warwick.tabula.data._
 import uk.ac.warwick.tabula.data.model.StudentCourseYearKey
 import uk.ac.warwick.tabula.helpers.Logging
 import uk.ac.warwick.tabula.permissions.Permissions
 import uk.ac.warwick.tabula.services.scheduling.{AutowiringProfileImporterComponent, ProfileImporterComponent}
 import uk.ac.warwick.tabula.system.permissions.{PermissionsChecking, PermissionsCheckingMethods, RequiresPermissionsChecking}
+import Transactions._
 
 import scala.collection.JavaConverters._
 

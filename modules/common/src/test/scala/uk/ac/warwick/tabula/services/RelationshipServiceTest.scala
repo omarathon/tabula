@@ -6,8 +6,8 @@ import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.transaction.annotation.Transactional
 import uk.ac.warwick.spring.Wire
 import uk.ac.warwick.tabula.JavaImports.JList
-import uk.ac.warwick.tabula.data.model._
 import uk.ac.warwick.tabula.data.{RelationshipDao, RelationshipDaoComponent, SitsStatusDaoImpl}
+import uk.ac.warwick.tabula.data.model._
 import uk.ac.warwick.tabula.{AppContextTestBase, Fixtures, Mockito, TestBase}
 
 import scala.collection.JavaConverters.asScalaBufferConverter

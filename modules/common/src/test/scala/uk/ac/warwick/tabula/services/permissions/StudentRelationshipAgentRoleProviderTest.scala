@@ -1,10 +1,12 @@
 package uk.ac.warwick.tabula.services.permissions
 
 import org.joda.time.DateTime
-import uk.ac.warwick.tabula.data.model.{StaffMember, StudentMember, StudentRelationship, StudentRelationshipType}
+import uk.ac.warwick.tabula.TestBase
+import uk.ac.warwick.tabula.Mockito
+import uk.ac.warwick.tabula.Fixtures
 import uk.ac.warwick.tabula.roles.StudentRelationshipAgent
+import uk.ac.warwick.tabula.data.model.{StaffMember, StudentMember, StudentRelationship, StudentRelationshipType}
 import uk.ac.warwick.tabula.services.{RelationshipService, RelationshipServiceComponent}
-import uk.ac.warwick.tabula.{Fixtures, Mockito, TestBase}
 
 trait StudentRelationshipRoleTestBase extends TestBase with Mockito {
 	val provider : RoleProvider with RelationshipServiceComponent

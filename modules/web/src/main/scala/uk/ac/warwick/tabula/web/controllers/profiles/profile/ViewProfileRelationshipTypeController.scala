@@ -4,20 +4,19 @@ import org.joda.time.DateTime
 import org.springframework.stereotype.Controller
 import org.springframework.web.bind.annotation.{ModelAttribute, PathVariable, RequestMapping, RequestParam}
 import uk.ac.warwick.tabula.AcademicYear
-import uk.ac.warwick.tabula.JavaImports._
 import uk.ac.warwick.tabula.commands.profiles.relationships.meetings.ViewMeetingRecordCommand
 import uk.ac.warwick.tabula.data.model._
-import uk.ac.warwick.tabula.helpers.DateTimeOrdering._
 import uk.ac.warwick.tabula.permissions.Permissions
 import uk.ac.warwick.tabula.permissions.Permissions.Profiles
 import uk.ac.warwick.tabula.profiles.web.Routes
-import uk.ac.warwick.tabula.services.attendancemonitoring.AutowiringAttendanceMonitoringMeetingRecordServiceComponent
 import uk.ac.warwick.tabula.services.{AutowiringRelationshipServiceComponent, AutowiringTermServiceComponent}
+import uk.ac.warwick.tabula.services.attendancemonitoring.AutowiringAttendanceMonitoringMeetingRecordServiceComponent
 import uk.ac.warwick.tabula.web.Mav
 import uk.ac.warwick.tabula.web.controllers.profiles.ProfileBreadcrumbs
-import uk.ac.warwick.tabula.web.controllers.profiles.relationships.{CancelScheduledStudentRelationshipChangeController => CSSRCC, ManageStudentRelationshipController => MSRC}
 import uk.ac.warwick.util.termdates.{Term, TermNotFoundException}
-
+import uk.ac.warwick.tabula.helpers.DateTimeOrdering._
+import uk.ac.warwick.tabula.web.controllers.profiles.relationships.{CancelScheduledStudentRelationshipChangeController => CSSRCC, ManageStudentRelationshipController => MSRC}
+import uk.ac.warwick.tabula.JavaImports._
 import scala.collection.JavaConverters._
 
 @Controller

@@ -2,10 +2,10 @@ package uk.ac.warwick.tabula.profiles
 
 import org.joda.time.DateTime
 import org.mockito.Matchers
-import uk.ac.warwick.tabula.Mockito
-import uk.ac.warwick.tabula.data.model._
-import uk.ac.warwick.tabula.services.{ProfileService, RelationshipService}
 import uk.ac.warwick.userlookup.User
+import uk.ac.warwick.tabula.data.model._
+import uk.ac.warwick.tabula.Mockito
+import uk.ac.warwick.tabula.services.{ProfileService, RelationshipService}
 
 trait TutorFixture extends Mockito {
 

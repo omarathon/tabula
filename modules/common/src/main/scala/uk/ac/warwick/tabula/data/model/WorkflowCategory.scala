@@ -1,8 +1,7 @@
 package uk.ac.warwick.tabula.data.model
 
-import java.sql.Types
-
 import org.hibernate.`type`.StandardBasicTypes
+import java.sql.Types
 
 sealed abstract class WorkflowCategory(val code: String, val displayName: String) {
 	// For Spring
