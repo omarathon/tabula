@@ -1382,18 +1382,7 @@
 
 <#macro week_selector path allTerms smallGroupSet>
 	<#local label>
-		Running in these weeks
-		<#local helpText>
-			<p>Select the weeks that this small group event will run in by clicking on each week, the week will turn to a tick to indicate that the group is active on that date. Click on the name of the term or vacation to select all weeks in that term or vacation.</p>
-		</#local>
-		<a href="#"
-		   class="use-introductory<#if showIntro("sgt-week-selector", "anywhere")> auto</#if>"
-		   data-title="Selecting weeks for a small group event"
-		   data-trigger="click"
-		   data-placement="bottom"
-		   data-html="true"
-		   data-hash="${introHash("sgt-week-selector", "anywhere")}"
-		   data-content="${helpText}"><i class="fa fa-question-circle fa-fw"></i></a>
+		Runs in these weeks
 	</#local>
 	<@bs3form.labelled_form_group path=path labelText="${label}">
 		<table class="table table-striped week-selector">

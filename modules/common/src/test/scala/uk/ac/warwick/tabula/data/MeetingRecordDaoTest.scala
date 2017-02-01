@@ -2,8 +2,12 @@ package uk.ac.warwick.tabula.data
 
 import org.joda.time.{DateTime, DateTimeConstants}
 import org.junit.Before
-import uk.ac.warwick.tabula.data.model._
 import uk.ac.warwick.tabula.{Fixtures, PersistenceTestBase}
+import uk.ac.warwick.tabula.data.model.MeetingRecord
+import uk.ac.warwick.tabula.data.model.StaffMember
+import uk.ac.warwick.tabula.data.model.StudentRelationship
+import uk.ac.warwick.tabula.data.model.StudentRelationshipType
+import uk.ac.warwick.tabula.data.model.ExternalStudentRelationship
 
 // scalastyle:off magic.number
 class MeetingRecordDaoTest extends PersistenceTestBase {

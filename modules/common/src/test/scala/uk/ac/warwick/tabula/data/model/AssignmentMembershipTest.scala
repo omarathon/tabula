@@ -1,12 +1,13 @@
 package uk.ac.warwick.tabula.data.model
 
-import org.junit.Before
-import uk.ac.warwick.tabula.JavaImports.{JHashMap, JList}
-import uk.ac.warwick.tabula.services._
 import uk.ac.warwick.tabula.{Mockito, TestBase}
-import uk.ac.warwick.userlookup.{AnonymousUser, User}
+import uk.ac.warwick.tabula.services._
+import uk.ac.warwick.userlookup.User
+import org.junit.Before
+import uk.ac.warwick.userlookup.AnonymousUser
 
 import scala.collection.JavaConverters._
+import uk.ac.warwick.tabula.JavaImports.{JHashMap, JList}
 
 class AssignmentMembershipTest extends TestBase with Mockito {
 

@@ -2,6 +2,7 @@ package uk.ac.warwick.tabula.commands.attendance
 
 import java.io.ByteArrayInputStream
 
+import com.google.common.io.ByteSource
 import org.springframework.validation.BindException
 import uk.ac.warwick.tabula.commands.UploadedFile
 import uk.ac.warwick.tabula.data.model.FileAttachment

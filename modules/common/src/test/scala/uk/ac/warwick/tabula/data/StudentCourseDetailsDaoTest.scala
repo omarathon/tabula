@@ -1,13 +1,14 @@
 package uk.ac.warwick.tabula.data
 
-import org.joda.time.{DateTime, DateTimeConstants}
-import org.junit.{After, Before}
+import scala.collection.JavaConverters.asScalaBufferConverter
+import org.joda.time.DateTime
+import org.joda.time.DateTimeConstants
+import org.junit.After
+import org.junit.Before
+import uk.ac.warwick.tabula.{Mockito, PersistenceTestBase, Fixtures}
 import uk.ac.warwick.tabula.JavaImports.JList
 import uk.ac.warwick.tabula.data.model.Member
 import uk.ac.warwick.tabula.helpers.Logging
-import uk.ac.warwick.tabula.{Fixtures, Mockito, PersistenceTestBase}
-
-import scala.collection.JavaConverters.asScalaBufferConverter
 
 class StudentCourseDetailsDaoTest extends PersistenceTestBase with Logging with Mockito {
 

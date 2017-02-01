@@ -1,11 +1,11 @@
 package uk.ac.warwick.tabula.commands.profiles.relationships
 
 import org.joda.time.DateTime
-import uk.ac.warwick.tabula._
 import uk.ac.warwick.tabula.commands.DescriptionImpl
-import uk.ac.warwick.tabula.data.model._
 import uk.ac.warwick.tabula.data.model.notifications.profiles.{StudentRelationshipChangeToOldAgentNotification, StudentRelationshipChangeToStudentNotification}
+import uk.ac.warwick.tabula.data.model._
 import uk.ac.warwick.tabula.profiles.TutorFixture
+import uk.ac.warwick.tabula._
 import uk.ac.warwick.tabula.services.{RelationshipService, RelationshipServiceComponent}
 
 class EditStudentRelationshipCommandTest extends TestBase with Mockito {

@@ -1,11 +1,11 @@
 package uk.ac.warwick.tabula.timetables
 
 import org.joda.time.{LocalDateTime, LocalTime}
-import uk.ac.warwick.tabula.AcademicYear
 import uk.ac.warwick.tabula.data.model
-import uk.ac.warwick.tabula.data.model.attendance.AttendanceState
-import uk.ac.warwick.tabula.data.model.groups._
 import uk.ac.warwick.tabula.data.model.{Location, StudentRelationshipType}
+import uk.ac.warwick.tabula.data.model.groups._
+import uk.ac.warwick.tabula.AcademicYear
+import uk.ac.warwick.tabula.data.model.attendance.AttendanceState
 import uk.ac.warwick.tabula.timetables.TimetableEvent.Parent
 import uk.ac.warwick.userlookup.User
 

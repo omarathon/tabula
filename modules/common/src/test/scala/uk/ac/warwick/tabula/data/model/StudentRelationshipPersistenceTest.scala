@@ -1,7 +1,8 @@
 package uk.ac.warwick.tabula.data.model
 
 import org.joda.time.DateTime
-import uk.ac.warwick.tabula.{Fixtures, PersistenceTestBase}
+import uk.ac.warwick.tabula.PersistenceTestBase
+import uk.ac.warwick.tabula.Fixtures
 
 class StudentRelationshipPersistenceTest extends PersistenceTestBase {
 

@@ -1,8 +1,8 @@
 package uk.ac.warwick.tabula.commands.profiles.relationships
 
 import uk.ac.warwick.tabula.commands.Notifies
-import uk.ac.warwick.tabula.data.model.notifications.profiles.{BulkNewAgentRelationshipNotification, BulkOldAgentRelationshipNotification, BulkRelationshipChangeNotification, BulkStudentRelationshipNotification}
 import uk.ac.warwick.tabula.data.model.{Notification, StudentMember, StudentRelationship}
+import uk.ac.warwick.tabula.data.model.notifications.profiles.{BulkNewAgentRelationshipNotification, BulkOldAgentRelationshipNotification, BulkRelationshipChangeNotification, BulkStudentRelationshipNotification}
 
 trait BulkRelationshipChangeNotifier[A, B] extends Notifies[A, B] {
 

@@ -35,10 +35,7 @@ class HandleDeceasedStudentCommandInternal(student: StudentMember) extends Comma
 
 	override def applyInternal(): Unit = {
 		if (student.deceased) {
-			val extensions = handlePendingExtensions()
-			val abstractMeetingRecords = handleMeetingRecords()
-
-			cleanUpNotifications(extensions ++ abstractMeetingRecords)
+			cleanUpNotifications(handlePendingExtensions() ++ handleRelationships())
 		}
 	}
 
@@ -49,8 +46,19 @@ class HandleDeceasedStudentCommandInternal(student: StudentMember) extends Comma
 		extensions
 	}
 
-	private def handleMeetingRecords(): Seq[AbstractMeetingRecord] = {
-		relationshipService.getAllCurrentRelationships(student).flatMap(rel =>
+	private def handleRelationships(): Seq[ToEntityReference] = {
+		val current = relationshipService.getAllCurrentRelationships(student)
+		val future = relationshipService.getAllFutureRelationships(student)
+		current.filter(_.endDate.isAfterNow).foreach { rel =>
+			rel.endDate = null
+			relationshipService.saveOrUpdate(rel)
+		}
+		relationshipService.removeFutureStudentRelationships(future)
+		current ++ future ++ handleMeetingRecords(current)
+	}
+
+	private def handleMeetingRecords(relationships: Seq[StudentRelationship]): Seq[AbstractMeetingRecord] = {
+		relationships.flatMap(rel =>
 			rel.agentMember.map(MemberOrUser(_).asUser).map(agentUser =>
 				meetingRecordService.listAll(rel).filter(abstractMeeting => HibernateHelpers.initialiseAndUnproxy(abstractMeeting) match {
 					case meeting: MeetingRecord => meeting.pendingActionBy(new CurrentUser(agentUser, agentUser))

@@ -1,9 +1,12 @@
 package uk.ac.warwick.tabula.data.model
 
 import org.joda.time.DateTime
-import uk.ac.warwick.tabula.JavaImports.JBigDecimal
+import uk.ac.warwick.tabula.Fixtures
+import uk.ac.warwick.tabula.Mockito
+import uk.ac.warwick.tabula.PersistenceTestBase
 import uk.ac.warwick.tabula.services.RelationshipService
-import uk.ac.warwick.tabula.{AcademicYear, Fixtures, Mockito, PersistenceTestBase}
+import uk.ac.warwick.tabula.AcademicYear
+import uk.ac.warwick.tabula.JavaImports.JBigDecimal
 
 class StudentCourseDetailsTest extends PersistenceTestBase with Mockito {
 

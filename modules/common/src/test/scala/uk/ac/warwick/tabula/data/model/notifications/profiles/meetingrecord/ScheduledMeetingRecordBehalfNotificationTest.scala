@@ -1,8 +1,8 @@
 package uk.ac.warwick.tabula.data.model.notifications.profiles.meetingrecord
 
 import org.joda.time.DateTime
-import uk.ac.warwick.tabula.data.model._
 import uk.ac.warwick.tabula.{Fixtures, TestBase}
+import uk.ac.warwick.tabula.data.model._
 
 class ScheduledMeetingRecordBehalfNotificationTest extends TestBase {
 

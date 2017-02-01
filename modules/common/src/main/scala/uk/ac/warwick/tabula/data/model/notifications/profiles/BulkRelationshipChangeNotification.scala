@@ -9,7 +9,7 @@ import uk.ac.warwick.tabula.helpers.StringUtils._
 import uk.ac.warwick.tabula.profiles.web.Routes
 import uk.ac.warwick.tabula.services.{ProfileService, RelationshipService}
 import uk.ac.warwick.userlookup.User
-
+import uk.ac.warwick.tabula.helpers.StringUtils._
 import scala.annotation.meta.getter
 import scala.util.Try
 
