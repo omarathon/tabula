@@ -49,7 +49,7 @@ class HandleDeceasedStudentCommandInternal(student: StudentMember) extends Comma
 	private def handleRelationships(): Seq[ToEntityReference] = {
 		val current = relationshipService.getAllCurrentRelationships(student)
 		val future = relationshipService.getAllFutureRelationships(student)
-		current.filter(_.endDate.isAfterNow).foreach { rel =>
+		current.filter(rel => Option(rel.endDate).exists(_.isAfterNow)).foreach { rel =>
 			rel.endDate = null
 			relationshipService.saveOrUpdate(rel)
 		}
