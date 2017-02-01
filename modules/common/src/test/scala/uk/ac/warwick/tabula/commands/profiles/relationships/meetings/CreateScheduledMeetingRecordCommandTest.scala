@@ -2,10 +2,10 @@ package uk.ac.warwick.tabula.commands.profiles.relationships.meetings
 
 import org.joda.time.DateTime
 import org.springframework.validation.BindException
+import uk.ac.warwick.tabula.DateFormats._
 import uk.ac.warwick.tabula.data.model._
 import uk.ac.warwick.tabula.services.{MeetingRecordService, MeetingRecordServiceComponent}
 import uk.ac.warwick.tabula.{Mockito, TestBase}
-import uk.ac.warwick.tabula.DateFormats._
 
 class CreateScheduledMeetingRecordCommandTest extends TestBase with Mockito {
 
@@ -72,8 +72,8 @@ class CreateScheduledMeetingRecordCommandTest extends TestBase with Mockito {
 		command.meetingEndTimeStr = meetingTime.plusHours(1).toString(TimePickerFormatter)
 		command.validate(errors)
 		errors.hasErrors should be {true}
-		errors.getFieldErrorCount should be(2)
-		errors.getFieldErrors("meetingDateStr").size should be(2)
+		errors.getFieldErrorCount should be(1)
+		errors.getFieldErrors("meetingDateStr").size should be(1)
 	}}
 
 	@Test

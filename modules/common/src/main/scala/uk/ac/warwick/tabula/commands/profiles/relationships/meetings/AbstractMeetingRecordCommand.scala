@@ -120,7 +120,12 @@ trait MeetingRecordValidation extends SelfValidating {
 		rejectIfEmptyOrWhitespace(errors, "format", "NotEmpty")
 
 		val dateToCheck: DateTime = isRealTime match {
-			case true => DateTimePickerFormatter.parseDateTime(meetingDateStr + " " + meetingTimeStr)
+			case true =>
+				if ((!meetingDateStr.isEmptyOrWhitespace) && (!meetingTimeStr.isEmptyOrWhitespace)) {
+					DateTimePickerFormatter.parseDateTime(meetingDateStr + " " + meetingTimeStr)
+				} else {
+					new DateTime
+				}
 			case false => meetingDate.toDateTimeAtStartOfDay
 		}
 
