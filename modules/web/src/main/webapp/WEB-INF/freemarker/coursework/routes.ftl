@@ -142,6 +142,7 @@ TODO grab values from the Routes object in code, as that's pretty equivalent and
 
 <#-- non admin -->
 <#macro assignment assignment><@_u page="/module/${assignment.module.code}/${assignment.id}"/></#macro>
+<#macro submission_attempt assignment><@_u page="/module/${assignment.module.code}/${assignment.id}/attempt" /></#macro>
 <#macro extensionRequest assignment><@_u page="/module/${assignment.module.code}/${assignment.id}/extension"/></#macro>
 <#macro assignmentreceipt assignment><@_u page="/module/${assignment.module.code}/${assignment.id}/resend-receipt"/></#macro>
 <#macro assignmentrequestaccess assignment><@_u page="/module/${assignment.module.code}/${assignment.id}/request-access"/></#macro>
