@@ -133,6 +133,7 @@ trait EditScheduledMeetingRecordState {
 	var format: MeetingFormat = _
 
 	var meetingLocation: String  = _
+	var meetingLocationId: String = _
 
 	var file: UploadedFile = new UploadedFile
 	var attachedFiles:JList[FileAttachment] = _

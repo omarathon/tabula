@@ -135,6 +135,7 @@
 				</@bs3form.labelled_form_group>
 
 				<@bs3form.labelled_form_group path="meetingLocation" labelText="Location">
+					<@f.hidden path="meetingLocationId" />
 					<@f.input path="meetingLocation" cssClass="form-control location-picker" />
 				</@bs3form.labelled_form_group>
 

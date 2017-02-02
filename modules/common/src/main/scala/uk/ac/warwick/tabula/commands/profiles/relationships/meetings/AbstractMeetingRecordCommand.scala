@@ -187,6 +187,7 @@ trait MeetingRecordCommandRequest {
 	var meetingEndDateTime: DateTime = DateTime.now.plusHours(1).hourOfDay.roundFloorCopy
 
 	var meetingLocation: String = _
+	var meetingLocationId: String = _
 
 	var format: MeetingFormat = _
 	var file: UploadedFile = new UploadedFile

@@ -64,6 +64,8 @@ trait PopulateMeetingRecordCommand extends PopulateOnForm {
 
 		}
 		meetingLocation = meetingRecord.meetingLocation
+		meetingLocationId = meetingRecord.meetingLocation
+
 		format = meetingRecord.format
 		attachedFiles = meetingRecord.attachments
 
