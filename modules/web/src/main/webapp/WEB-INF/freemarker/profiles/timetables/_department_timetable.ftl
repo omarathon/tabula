@@ -151,6 +151,34 @@
 		>
 		${(eventType.displayName)!}
 	</@filter>
+
+	<#assign placeholder = "Event sources" />
+	<#assign currentfilter><#if command.showTimetableEvents && command.showSmallGroupEvents>Syllabus+, Small Group Teaching<#elseif command.showTimetableEvents>Syllabus+<#elseif command.showSmallGroupEvents>Small Group Teaching<#else>${placeholder}</#if></#assign>
+	<div class="btn-group<#if currentfilter == placeholder> empty-filter</#if>">
+		<a class="btn btn-default btn-xs dropdown-toggle" data-toggle="dropdown">
+			<span class="filter-short-values" data-placeholder="${placeholder}" data-prefix="">${currentfilter}</span>
+			<span class="caret"></span>
+		</a>
+		<div class="dropdown-menu filter-list">
+			<button type="button" class="close" data-dismiss="dropdown" aria-hidden="true" title="Close">×</button>
+			<ul>
+				<li class="check-list-item" data-natural-sort="0">
+					<label class="checkbox">
+						<input type="hidden" name="_showTimetableEvents" value="false" />
+						<input type="checkbox" name="showTimetableEvents" value="true" data-short-value="Syllabus+" ${command.showTimetableEvents?string('checked','')}>
+						Syllabus+
+					</label>
+				</li>
+				<li class="check-list-item" data-natural-sort="1">
+					<label class="checkbox">
+						<input type="hidden" name="_showSmallGroupEvents" value="false" />
+						<input type="checkbox" name="showSmallGroupEvents" value="true" data-short-value="Small Group Teaching" ${command.showSmallGroupEvents?string('checked','')}>
+						Small Group Teaching
+					</label>
+				</li>
+			</ul>
+		</div>
+	</div>
 </div>
 </@f.form>
 
