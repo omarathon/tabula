@@ -71,7 +71,16 @@ class EditScheduledMeetingRecordCommand (val editor: Member, val meetingRecord: 
 		meetingRecord.lastUpdatedDate = DateTime.now
 		meetingRecord.format = format
 
-		meetingRecord.meetingLocation = meetingLocation
+		meetingRecord.meetingLocation =
+			if (meetingLocation.hasText) {
+				if (meetingLocationId.hasText) {
+					MapLocation(meetingLocation, meetingLocationId)
+				} else {
+					NamedLocation(meetingLocation)
+				}
+			} else {
+				null
+			}
 
 		persistAttachments(meetingRecord)
 		meetingRecordService.saveOrUpdate(meetingRecord)
@@ -96,7 +105,12 @@ trait PopulateScheduledMeetingRecordCommand extends PopulateOnForm {
 		meetingTimeStr = meetingRecord.meetingDate.withHourOfDay(meetingRecord.meetingDate.getHourOfDay).toString(TimePickerFormatter)
 		meetingEndTimeStr = meetingRecord.meetingEndDate.withHourOfDay(meetingRecord.meetingEndDate.getHourOfDay).toString(TimePickerFormatter)
 
-		meetingLocation = meetingRecord.meetingLocation
+		Option(meetingRecord.meetingLocation).foreach {
+			case NamedLocation(name) => meetingLocation = name
+			case MapLocation(name, lid) =>
+				meetingLocation = name
+				meetingLocationId = lid
+		}
 
 		format = meetingRecord.format
 		attachedFiles = meetingRecord.attachments
@@ -132,7 +146,7 @@ trait EditScheduledMeetingRecordState {
 
 	var format: MeetingFormat = _
 
-	var meetingLocation: String  = _
+	var meetingLocation: String = _
 	var meetingLocationId: String = _
 
 	var file: UploadedFile = new UploadedFile

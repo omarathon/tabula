@@ -48,7 +48,15 @@ class CreateScheduledMeetingRecordCommand (val creator: Member, val relationship
 
 		}
 
-		scheduledMeeting.meetingLocation = meetingLocation
+		scheduledMeeting.meetingLocation = if (meetingLocation.hasText) {
+			if (meetingLocationId.hasText) {
+				MapLocation(meetingLocation.toString, meetingLocationId)
+			} else {
+				NamedLocation(meetingLocation.toString)
+			}
+		} else {
+			null
+		}
 
 		scheduledMeeting.lastUpdatedDate = DateTime.now
 		scheduledMeeting.creationDate = DateTime.now

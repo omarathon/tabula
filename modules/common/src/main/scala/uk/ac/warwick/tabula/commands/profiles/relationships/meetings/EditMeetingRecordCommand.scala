@@ -3,8 +3,8 @@ package uk.ac.warwick.tabula.commands.profiles.relationships.meetings
 import org.joda.time.DateTime
 import uk.ac.warwick.tabula.DateFormats.{DatePickerFormatter, TimePickerFormatter}
 import uk.ac.warwick.tabula.commands._
-import uk.ac.warwick.tabula.data.model._
 import uk.ac.warwick.tabula.data.model.notifications.profiles.meetingrecord.{EditedMeetingRecordApprovalNotification, MeetingRecordRejectedNotification}
+import uk.ac.warwick.tabula.data.model.{NamedLocation, _}
 import uk.ac.warwick.tabula.events.NotificationHandling
 import uk.ac.warwick.tabula.services._
 import uk.ac.warwick.tabula.services.attendancemonitoring.{AttendanceMonitoringMeetingRecordServiceComponent, AutowiringAttendanceMonitoringMeetingRecordServiceComponent}
@@ -63,8 +63,12 @@ trait PopulateMeetingRecordCommand extends PopulateOnForm {
 				meetingEndTime = meetingRecord.meetingEndDate.withHourOfDay(meetingRecord.meetingEndDate.getHourOfDay).plusHours(1)
 
 		}
-		meetingLocation = meetingRecord.meetingLocation
-		meetingLocationId = meetingRecord.meetingLocation
+		Option(meetingRecord.meetingLocation).foreach {
+			case NamedLocation(name) => meetingLocation = name
+			case MapLocation(name, lid) =>
+				meetingLocation = name
+				meetingLocationId = lid
+		}
 
 		format = meetingRecord.format
 		attachedFiles = meetingRecord.attachments

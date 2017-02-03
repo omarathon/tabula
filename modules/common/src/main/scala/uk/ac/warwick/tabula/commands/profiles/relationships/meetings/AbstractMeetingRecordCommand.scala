@@ -41,8 +41,15 @@ abstract class AbstractMeetingRecordCommand {
 				meeting.meetingEndDate = meetingEndDate.toDateTimeAtStartOfDay.withHourOfDay(MeetingRecord.DefaultMeetingTimeOfDay).plusHours(1)
 
 		}
-
-		meeting.meetingLocation = meetingLocation
+		if (meetingLocation.hasText) {
+			if (meetingLocationId.hasText) {
+				meeting.meetingLocation = MapLocation(meetingLocation, meetingLocationId)
+			} else {
+				meeting.meetingLocation = NamedLocation(meetingLocation)
+			}
+		} else {
+			meeting.meetingLocation = null
+		}
 
 		meeting.format = format
 		meeting.lastUpdatedDate = DateTime.now

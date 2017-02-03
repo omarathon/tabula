@@ -71,7 +71,8 @@ abstract class AbstractMeetingRecord extends GeneratedId with PermissionsTarget 
 
 
 	@Column(name="meeting_location")
-	var meetingLocation: String = _
+	@Type(`type` = "uk.ac.warwick.tabula.data.model.LocationUserType")
+	var meetingLocation: Location = _
 
 	@Column(name="meeting_format")
 	@Type(`type` = "uk.ac.warwick.tabula.data.model.MeetingFormatUserType")
