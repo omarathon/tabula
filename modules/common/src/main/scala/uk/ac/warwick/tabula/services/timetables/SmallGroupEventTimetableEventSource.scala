@@ -104,7 +104,7 @@ trait SmallGroupEventTimetableEventSourceComponentImpl extends SmallGroupEventTi
 
 	class ModuleSmallGroupEventTimetableEventSource extends ModuleTimetableEventSource {
 		override def eventsFor(module: Module, academicYear: AcademicYear, currentUser: CurrentUser, sources: Seq[TimetableEventSource]): Future[EventList] = {
-			Future {
+			Future.successful {
 				if (sources.contains(TimetableEventSource.SmallGroups)) {
 					val sets = smallGroupService.getSmallGroupSets(module, academicYear).filterNot(_.archived)
 					// Try and do as few permission checks as possible

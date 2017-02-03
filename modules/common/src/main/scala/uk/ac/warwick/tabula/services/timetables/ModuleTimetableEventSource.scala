@@ -33,12 +33,12 @@ trait CombinedModuleTimetableEventSourceComponent extends ModuleTimetableEventSo
 			val timetableEvents: Future[EventList] = if (sources.contains(TimetableEventSource.Sciencia)) {
 				timetableFetchingService.getTimetableForModule(module.code, includeStudents = false)
 			} else {
-				Future { EventList.empty }
+				Future.successful { EventList.empty }
 			}
 			val smallGroupEvents: Future[EventList] = if (sources.contains(TimetableEventSource.SmallGroups)) {
 				moduleGroupEventSource.eventsFor(module, academicYear, currentUser, sources)
 			} else {
-				Future { EventList.empty }
+				Future.successful { EventList.empty }
 			}
 
 			Futures.combine(Seq(timetableEvents, smallGroupEvents), EventList.combine)
