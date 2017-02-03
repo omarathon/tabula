@@ -908,7 +908,7 @@ jQuery(function($){
 	/**
 	 * Meeting locationid updater
 	 */
-	jQuery(function($) { // currently breaks the modal form!!
+	jQuery(function($) {
 
 
 		$('input#meetingLocation')
