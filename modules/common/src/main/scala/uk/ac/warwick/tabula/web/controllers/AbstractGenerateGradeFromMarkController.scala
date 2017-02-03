@@ -44,13 +44,20 @@ abstract class AbstractGenerateGradeFromMarkController[A <: Assessment] extends 
 		errors: Errors
 	): Mav = {
 		val result = cmd.apply()
-		val universityId = result.keys.head
-		val default = defaultGrade(universityId, cmd.studentMarks.asScala.toMap, result, cmd.selected.asScala.toMap)
+		if (result.nonEmpty) {
+			val universityId = result.keys.head
+			val default = defaultGrade(universityId, cmd.studentMarks.asScala.toMap, result, cmd.selected.asScala.toMap)
 
-		Mav("_generatedGrades",
-			"grades" -> result.values.toSeq.headOption.getOrElse(Seq()).sorted,
-			"default" -> default
-		).noLayout()
+			Mav("_generatedGrades",
+				"grades" -> result.values.toSeq.headOption.getOrElse(Seq()).sorted,
+				"default" -> default
+			).noLayout()
+		} else {
+			Mav("_generatedGrades",
+				"grades" -> Seq(),
+				"default" -> null
+			).noLayout()
+		}
 	}
 
 	@RequestMapping(value = Array("/multiple"), method= Array(POST))

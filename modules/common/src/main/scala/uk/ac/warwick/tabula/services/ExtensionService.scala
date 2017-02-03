@@ -21,6 +21,7 @@ object ExtensionService {
 }
 
 trait ExtensionService {
+	def saveOrUpdate(extension: Extension): Unit
 	def getExtensionById(id: String): Option[Extension]
 	def countExtensions(assignment: Assignment): Int
 	def hasExtensions(assignment: Assignment): Boolean
@@ -34,6 +35,8 @@ trait ExtensionService {
 
 abstract class AbstractExtensionService extends ExtensionService {
 	self: ExtensionDaoComponent =>
+
+	def saveOrUpdate(extension: Extension): Unit = extensionDao.saveOrUpdate(extension)
 
 	def getExtensionById(id: String): Option[Extension] = transactional(readOnly = true) { extensionDao.getExtensionById(id) }
 	def countExtensions(assignment: Assignment): Int = transactional(readOnly = true) { extensionDao.countExtensions(assignment) }

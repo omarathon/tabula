@@ -85,3 +85,11 @@ class ScheduledNotificationServiceImpl extends ScheduledNotificationService with
 		}
 	}
 }
+
+trait ScheduledNotificationServiceComponent {
+	def scheduledNotificationService: ScheduledNotificationService
+}
+
+trait AutowiringScheduledNotificationServiceComponent extends ScheduledNotificationServiceComponent {
+	var scheduledNotificationService: ScheduledNotificationService = Wire[ScheduledNotificationService]
+}

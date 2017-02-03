@@ -82,6 +82,7 @@ trait RelationshipService {
 	def listScheduledRelationshipChanges(relationshipType: StudentRelationshipType, department: Department): Seq[StudentRelationship]
 	def countStudentsByRelationship(relationshipType: StudentRelationshipType): Int
 	def getAllCurrentRelationships(student: StudentMember): Seq[StudentRelationship]
+	def getAllFutureRelationships(student: StudentMember): Seq[StudentRelationship]
 	def getAllPastAndPresentRelationships(student: StudentMember): Seq[StudentRelationship]
 	def getAllPastAndPresentRelationships(relationshipType: StudentRelationshipType, scd: StudentCourseDetails): Seq[StudentRelationship]
 	def endStudentRelationships(relationships: Seq[StudentRelationship], endDate: DateTime)
@@ -130,6 +131,10 @@ abstract class AbstractRelationshipService extends RelationshipService with Logg
 
 	def getAllCurrentRelationships(student: StudentMember): Seq[StudentRelationship] = transactional(readOnly = true) {
 		relationshipDao.getAllCurrentRelationships(student)
+	}
+
+	def getAllFutureRelationships(student: StudentMember): Seq[StudentRelationship] = transactional(readOnly = true) {
+		relationshipDao.getAllFutureRelationships(student)
 	}
 
 	def getAllPastAndPresentRelationships(student: StudentMember): Seq[StudentRelationship] = transactional(readOnly = true) {

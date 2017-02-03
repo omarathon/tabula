@@ -1382,18 +1382,7 @@
 
 <#macro week_selector path allTerms smallGroupSet>
 	<#local label>
-		Running in these weeks
-		<#local helpText>
-			<p>Select the weeks that this small group event will run in by clicking on each week, the week will turn to a tick to indicate that the group is active on that date. Click on the name of the term or vacation to select all weeks in that term or vacation.</p>
-		</#local>
-		<a href="#"
-		   class="use-introductory<#if showIntro("sgt-week-selector", "anywhere")> auto</#if>"
-		   data-title="Selecting weeks for a small group event"
-		   data-trigger="click"
-		   data-placement="bottom"
-		   data-html="true"
-		   data-hash="${introHash("sgt-week-selector", "anywhere")}"
-		   data-content="${helpText}"><i class="fa fa-question-circle fa-fw"></i></a>
+		Runs in these weeks
 	</#local>
 	<@bs3form.labelled_form_group path=path labelText="${label}">
 		<table class="table table-striped week-selector">
@@ -1411,15 +1400,26 @@
 				<#list allTerms as namedTerm>
 					<#local is_vacation = !(namedTerm.term.termType?has_content) />
 				<tr<#if is_vacation> class="vacation"</#if>>
-					<th>${namedTerm.name}<#if !is_vacation> term</#if></th>
+					<th>
+						<div class="checkbox">
+							<label>
+								<input type="checkbox" class="collection-check-all" />
+								${namedTerm.name}<#if !is_vacation> term</#if>
+							</label>
+						</div>
+					</th>
 					<#list namedTerm.weekRange.minWeek..namedTerm.weekRange.maxWeek as weekNumber>
-						<td
-								class="use-tooltip"
-								title="<@fmt.singleWeekFormat weekNumber smallGroupSet.academicYear smallGroupSet.module.adminDepartment />"
-								data-html="true"
-								data-container="body">
-							<@f.checkbox path=path value="${weekNumber}" />
-							<span class="week-number"><@fmt.singleWeekFormat weekNumber smallGroupSet.academicYear smallGroupSet.module.adminDepartment true /></span>
+						<td class="use-tooltip"
+							title="<@fmt.singleWeekFormat weekNumber smallGroupSet.academicYear smallGroupSet.module.adminDepartment />"
+							data-html="true"
+							data-container="body"
+						>
+							<div class="checkbox">
+								<label>
+								<@f.checkbox path=path value="${weekNumber}" cssClass="collection-checkbox" />
+								${weekNumber}
+							</label>
+							</div>
 						</td>
 					</#list>
 				</tr>

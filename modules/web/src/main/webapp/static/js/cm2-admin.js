@@ -83,6 +83,18 @@
 			e.preventDefault();
 			$(this).tab('show');
 		});
+
+		$('input#openEnded').change(function(){
+			var $this = $(this);
+			if ($this.is(':checked'))  {
+				$('#open-reminder-dt').removeAttr("disabled");
+				$('#close-dt').attr("disabled", "disabled");
+			}  else {
+				$('#close-dt').removeAttr("disabled");
+				$('#open-reminder-dt').attr("disabled","disabled");
+
+			}
+		});
 	});
 
 

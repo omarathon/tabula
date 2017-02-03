@@ -16,7 +16,7 @@ abstract class ModuleExamGridColumn(state: ExamGridColumnState, val module: Modu
 		if (state.showModuleNames) s"${module.code.toUpperCase} ${module.name}"
 		else s"${module.code.toUpperCase}"
 
-	override val boldTitle = isDuplicate
+	override val boldTitle: Boolean = isDuplicate
 
 	override val excelColumnWidth: Int = ExamGridColumnOption.ExcelColumnSizes.WholeMark
 
@@ -108,12 +108,12 @@ abstract class ModuleExamGridColumnOption extends PerYearExamGridColumnOption {
 			allYears.map(_.route).flatMap(state.coreRequiredModuleLookup.apply).map(cr => (cr.module, "CoreRequired"))
 
 		val allOtherModules = allYears
-			.flatMap(_.moduleRegistrations).map(mr => (mr.module, mr.selectionStatus.description))
+			.flatMap(_.moduleRegistrations).map(mr => (mr.module, mr.selectionStatus))
 
 		val duplicateModules = (allCoreRequiredModules ++ allOtherModules).distinct
-			.groupBy{ case (module, selectionStatus) => module }
+			.groupBy { case (module, _) => module }
 			// collect modules with 2 or more different selection statuses
-			.collect{ case (module, first :: second :: rest) => module }
+			.collect { case (module, _ :: _ :: _) => module }
 			.toSeq
 
 		state.entities.flatMap(_.years.keys).distinct.map(academicYear => academicYear -> {

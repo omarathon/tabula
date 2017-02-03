@@ -27,6 +27,8 @@ class AssessmentMembershipServiceTest extends TestBase with Mockito {
 
 		val assignmentMembershipService = new AssessmentMembershipServiceImpl
 		assignmentMembershipService.userLookup = userLookup
+		assignmentMembershipService.profileService = smartMock[ProfileService]
+		assignmentMembershipService.profileService.getAllMembersWithUniversityIds(any[Seq[String]]) returns Seq()
 
 		val uag = new UpstreamAssessmentGroup
 		uag.assessmentGroup = "A"
