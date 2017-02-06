@@ -23,7 +23,7 @@ the comments textarea needs to maintain newlines.
 			<span class ="assignment-picker-input"  data-target="<@routes.cm2.assignemnts_json module/>">
 				<@bs3form.labelled_form_group path="prefillAssignment" labelText="Copy assignment options (optional):">
 					<input id="prefillAssignment" name="prefillAssignment" type="hidden" value=""/>
-					<@f.input path="prefillAssignment" cssClass="form-control"  value="${pHolder!''}"/>
+					<input name = "query" type="text" cssClass="form-control"  value="${pHolder!''}"/>
 				</@bs3form.labelled_form_group>
 			</span>
 		</div>

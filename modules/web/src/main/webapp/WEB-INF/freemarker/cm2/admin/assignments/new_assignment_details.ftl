@@ -19,7 +19,7 @@
 			<div class="alert alert-success">
 				<i class="icon-info-sign fa fa-info-circle"></i>
 				Some fields have been pre-filled from another recently created assignment for convenience.
-				<a href="${url('/cm2/admin/${module.code}/assignments/new')}?prefillFromRecent=false">Don't do this</a>
+				<a href='${actionUrl}?prefillFromRecent=false'>Don't do this</a>
 			</div>
 		</#if>
 		<#if command.prefillAssignment??>

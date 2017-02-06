@@ -97,7 +97,7 @@
 		});
 
 		var $assignmentpicker = $('.assignment-picker-input');
-		var $assignmentQuery = $assignmentpicker.find('input[name=prefillAssignment]').attr('autocomplete', 'off');
+		var $assignmentQuery = $assignmentpicker.find('input[name=query]').attr('autocomplete', 'off');
 		var target = $assignmentpicker.attr('data-target');
 		$assignmentQuery.bootstrap3Typeahead({
 			source: function(query, process) {
