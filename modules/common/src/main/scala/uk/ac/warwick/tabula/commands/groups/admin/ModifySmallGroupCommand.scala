@@ -94,7 +94,7 @@ trait ModifySmallGroupValidation extends SelfValidating {
 		if (maxGroupSize != null && maxGroupSize <= 0) errors.rejectValue("maxGroupSize", "invalid")
 
 		if (hasDuplicateEvents)
-			errors.reject("smallGroupEvent.duplicate", Array[Object](set.module.code.toUpperCase, set.name, name), "")
+			errors.reject("smallGroupEvent.duplicate", Array[Object](module.code.toUpperCase, set.name, name), "")
 	}
 }
 
