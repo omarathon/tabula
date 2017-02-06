@@ -122,7 +122,7 @@ $(function() {
 		$table.find('.show-vacations').each(function() {
 			var $checkbox = $(this);
 
-			if ($table.find('tr.vacation td.checked').length) {
+			if ($table.find('tr.vacation td').find(':checked').length) {
 				$checkbox.prop('checked', true);
 			}
 
