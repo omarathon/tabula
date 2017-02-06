@@ -95,6 +95,50 @@
 
 			}
 		});
+
+		var $assignmentpicker = $('.assignment-picker-input');
+		var $assignmentQuery = $assignmentpicker.find('input[name=query]').attr('autocomplete', 'off');
+		var target = $assignmentpicker.attr('data-target');
+		$assignmentQuery.bootstrap3Typeahead({
+			source: function(query, process) {
+				if (self.currentSearch) {
+					self.currentSearch.abort();
+					self.currentSearch = null;
+				}
+				query = $.trim(query);
+				self.currentSearch = $.ajax({
+					url: $('.assignment-picker-input').attr('data-target'),
+					data: {query: query},
+					success: function(data) {
+						var assignments = [];
+						$.each(data, function(i, assignment) {
+							var item = assignment.name + '|' + assignment.moduleCode + '|' + assignment.id;
+							assignments.push(item);
+						});
+						process(assignments);
+					}
+				})
+			},
+			matcher: function(item) {
+				return true;
+			},
+			sorter: function(items) {
+				return items;
+			}, // use 'as-returned' sort
+			highlighter: function(item) {
+				var assignment = item.split('|');
+				return '<div class="description">' + assignment[0] + '-' + assignment[1] + '</div>';
+			},
+			updater: function(item) {
+				var assignment = item.split('|');
+				var assignmentId = assignment[2];
+				$("#prefillAssignment").val(assignmentId);
+				$assignmentpicker.val(assignmentId);
+				$('#action-submit').val('');
+				$("#command").submit();
+				return assignment[0] + '-' + assignment[1];
+			}
+		});
 	});
 
 
