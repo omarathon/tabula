@@ -4,7 +4,7 @@ import org.hibernate.StaleObjectStateException
 import org.joda.time.DateTime
 import org.springframework.validation.BindException
 import uk.ac.warwick.spring.Wire
-import uk.ac.warwick.tabula.commands.{Command, CommandWithoutTransaction, Description, TaskBenchmarking}
+import uk.ac.warwick.tabula.commands.{CommandWithoutTransaction, Description, TaskBenchmarking}
 import uk.ac.warwick.tabula.data.Transactions._
 import uk.ac.warwick.tabula.data.model._
 import uk.ac.warwick.tabula.data.{Daoisms, MemberDao, StudentCourseDetailsDao, StudentCourseYearDetailsDao}
