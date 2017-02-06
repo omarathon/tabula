@@ -36,7 +36,7 @@ trait GetModuleTimetableApi {
 
 	@ModelAttribute("getTimetableCommand")
 	def command(@PathVariable module: Module): ViewModuleTimetableCommand =
-		ViewModuleTimetableCommand(module)
+		ViewModuleTimetableCommand(module, user)
 
 	@RequestMapping(method = Array(GET), produces = Array("application/json"))
 	def showModuleTimetable(@Valid @ModelAttribute("getTimetableCommand") command: ViewModuleTimetableCommand, errors: Errors): Mav = {

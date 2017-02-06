@@ -107,13 +107,15 @@ class DepartmentTimetablesCommandInternal(
 			(yearsOfStudy.isEmpty || yearOfStudyModules.contains(module))
 		}
 
-		val moduleCommands = queryModules.map(module => module -> moduleTimetableCommandFactory.apply(module))
+		val moduleCommands = queryModules.map(module => module -> moduleTimetableCommandFactory.apply(module, user))
 		val moduleEvents = EventList.combine(moduleCommands.map { case (module, cmd) =>
 			cmd.academicYear = academicYear
+			cmd.showTimetableEvents = showTimetableEvents
+			cmd.showSmallGroupEvents = showSmallGroupEvents
 			cmd.apply() match {
 				case Success(events) =>
 					events
-				case Failure(t) =>
+				case Failure(_) =>
 					errors.append(s"Unable to load timetable for ${module.code.toUpperCase}")
 					EventList.empty
 			}
@@ -155,9 +157,8 @@ class DepartmentTimetablesCommandInternal(
 			if (eventTypes.asScala.isEmpty) occurrences
 			else occurrences.filter { o => eventTypes.contains(o.eventType) }
 
-		// Converter to make localDates sortable
-		import uk.ac.warwick.tabula.helpers.DateTimeOrdering._
-		(filtered.map(_.sortBy(_.start)), errors.toSeq)
+		import uk.ac.warwick.tabula.helpers.DateTimeOrdering.orderedLocalDateTime
+		(filtered.map(_.sortBy(_.start)), errors)
 	}
 
 	private def eventsToOccurrences(events: EventList) = EventOccurrenceList(
@@ -251,4 +252,7 @@ trait DepartmentTimetablesCommandRequest extends PermissionsCheckingMethods {
 		}
 		r.filter(_ != null)
 	}
+
+	var showTimetableEvents: Boolean = true
+	var showSmallGroupEvents: Boolean = true
 }
