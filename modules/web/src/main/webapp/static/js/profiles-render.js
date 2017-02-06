@@ -21,7 +21,6 @@
 			return then.format('ddd Do MMM YYYY LT');
 		}
 	}
-	exports.toTimestamp = toTimestamp;
 
 	function onViewUpdate(view, weeks, $calendar){
 		updateCalendarTitle(view, weeks);
@@ -136,12 +135,86 @@
 		$(element).tabulaPopover({html:true, container:"body", title:event.shorterTitle, content:content});
 	}
 
-	exports.renderCalendarEvents = renderCalendarEvents;
+
+	function handleCalendarError(jqXHR, $container) {
+		try {
+			var data = $.parseJSON(jqXHR.responseText);
+
+			var errors = $.map(data.errors, function (error) { return error.message; });
+
+			$container.find('> .alert-danger').remove();
+			$container.prepend(
+				$('<div />').addClass('alert').addClass('alert-danger').text(errors.join(', '))
+			);
+		} catch (e) {}
+	}
+
+	function getCalendarEvents($container, $loading, url, data, method) {
+		return function (start, end, callback){
+			var complete = false;
+			setTimeout(function() {
+				if (!complete) {
+					$loading.show();
+					$container.fadeTo('fast', 0.3);
+				}
+			}, 300);
+			var startToSend = new Date(start.getTime());
+			startToSend.setDate(startToSend.getDate() - 1);
+			var endToSend = new Date(end.getTime());
+			endToSend.setDate(endToSend.getDate() + 1);
+			$('#from').val(startToSend.getTime()/1000);
+			$('#to').val(endToSend.getTime()/1000);
+			$.ajax({
+				url: url,
+				type: method,
+				// make the from/to params compatible with what FullCalendar sends if you just specify a URL
+				// as an eventSource, rather than a function. i.e. use seconds-since-the-epoch.
+				data: data(start, end),
+				success:function(data){
+					if (data.lastUpdated) {
+						// Update the last updated timestamp
+						$container.find('> .fc-last-updated').remove();
+
+						var now = moment();
+						var time = moment(data.lastUpdated);
+
+						$container.append(
+							$('<div />').addClass('fc-last-updated').addClass('pull-right').html('Last updated: ' + toTimestamp(now, time))
+						);
+					}
+
+					var events = data.events;
+					// TAB-3008 - Change times to Europe/London
+					$.each(events, function(i, event){
+						event.start = moment(moment.unix(event.start).tz('Europe/London').format('YYYY-MM-DDTHH:mm:ss')).unix();
+						event.end = moment(moment.unix(event.end).tz('Europe/London').format('YYYY-MM-DDTHH:mm:ss')).unix();
+					});
+					if ((data.errors||[]).length > 0) {
+						var $errorDiv = $('<div />').addClass('alert').addClass('alert-danger');
+						$container.find('> .alert-danger').remove();
+						$container.prepend($errorDiv);
+						$.each(data.errors, function(i, error) {
+							$errorDiv.append(error).append('<br />');
+						});
+					} else {
+						$container.find('> .alert-danger').remove();
+					}
+					callback(events);
+				},
+				error: function(jqXKR){ handleCalendarError(jqXKR, $container) },
+				complete: function() {
+					complete = true;
+					$container.fadeTo('fast', 1);
+				}
+			});
+		};
+	}
+	exports.getCalendarEvents = getCalendarEvents;
 
 	function createCalendar(container, defaultViewName, weeks, eventsCallback, hasStartDate, year, month, date, defaultDate) {
 		var showWeekends = (defaultViewName == "month"), $container = $(container);
 		var options = {
-			events: eventsCallback($container),
+			events: eventsCallback,
 			defaultView: defaultViewName,
 			allDaySlot: false,
 			slotMinutes: 60,
@@ -201,6 +274,111 @@
 		$container.fullCalendar(options);
 	}
 	exports.createCalendar = createCalendar;
+
+	function createSmallScreenCalender($container, $loading, url, data, method) {
+		function fetchAndRender() {
+			$container.empty();
+			var complete = false;
+			setTimeout(function() {
+				if (!complete) {
+					$loading.show();
+				}
+			}, 300);
+			var startToSend = new Date();
+			startToSend.setMilliseconds(0);
+			startToSend.setDate(startToSend.getDate() - 1);
+			var endToSend = new Date(startToSend.valueOf());
+			endToSend.setDate(endToSend.getDate() + 40);
+			$.ajax({
+				url: url,
+				// make the from/to params compatible with what FullCalendar sends if you just specify a URL
+				// as an eventSource, rather than a function. i.e. use seconds-since-the-epoch.
+				data: data(),
+				type: method,
+				success:function(data){
+					var events = data.events;
+					// TAB-3008 - Change times to Europe/London
+					_.forEach(events, function(event){
+						event.start = moment(moment.unix(event.start).tz('Europe/London').format('YYYY-MM-DDTHH:mm:ss')).unix();
+						event.end = moment(moment.unix(event.end).tz('Europe/London').format('YYYY-MM-DDTHH:mm:ss')).unix();
+					});
+
+					$container.find('> .alert-danger').remove();
+
+					var eventsByDay = {}
+						, todayAtMidnight = moment().hour(0).minute(0).second(0).millisecond(0);
+					_.forEach(events, function(event){
+						var date = moment.unix(event.start).hour(0).minute(0).second(0).millisecond(0);
+						if (date.diff(todayAtMidnight) >= 0) {
+							if (!_.has(eventsByDay, date.valueOf())) {
+								eventsByDay[date.valueOf()] = [event];
+							} else {
+								eventsByDay[date.valueOf()].push(event);
+							}
+						}
+					});
+					var dates = _.keys(eventsByDay).sort();
+
+					if (dates.length === 0) {
+						$container.append($('<em/>').html('No events found in the next 30 days.'));
+					} else {
+						_.each(dates, function(dateValue){
+							var date = moment(dateValue, 'x')
+								, $table = $('<table/>').addClass('table table-condensed').append($('<thead/>')).append('<tbody/>')
+								, $thead = $table.find('thead')
+								, $tbody = $table.find('tbody');
+							$thead.append(
+								$('<tr/>').append(
+									$('<th/>').prop('colspan',3).append(
+										$('<h6/>').html(date.calendar(null, {
+											sameDay: '[Today] D MMMM',
+											nextDay: '[Tomorrow] D MMMM',
+											nextWeek: 'dddd D MMMM',
+											lastDay: 'dddd D MMMM',
+											lastWeek: 'dddd D MMMM',
+											sameElse: 'dddd D MMMM'
+										}))
+									)
+								)
+							);
+							if (date.diff(todayAtMidnight) === 0) {
+								$table.addClass('today');
+							}
+							_.each(_.sortBy(eventsByDay[dateValue],['startDate']), function(event){
+								var title = event.title;
+								if (event.locationId && event.locationId.length > 0) {
+									title = title.replace('(' + event.location + ')','')
+										+ '(<span class="map-location" data-lid="' + event.locationId + '">' + event.location + '</span>)';
+								}
+								$tbody.append(
+									$('<tr/>').append(
+										$('<td/>').addClass('time').html(moment.unix(event.start).format('kk:mm'))
+									).append(
+										$('<td/>').addClass('marker').append(
+											$('<i/>').addClass('fa fa-circle').css('color',event.backgroundColor)
+										)
+									).append(
+										$('<td/>').html(title)
+									)
+								);
+							});
+							$container.append($table);
+						});
+
+						$('.map-location[data-lid]').mapPopups({placement:'bottom'});
+					}
+				},
+				error: function(jqXKR){ handleCalendarError(jqXKR, $container) },
+				complete: function() {
+					complete = true;
+					$loading.hide();
+				}
+			});
+		}
+		fetchAndRender();
+		$(window).on('tabula.smallScreenCalender.refresh', fetchAndRender);
+	}
+	exports.createSmallScreenCalender = createSmallScreenCalender;
 
 	// End Timetable calendar exports
 

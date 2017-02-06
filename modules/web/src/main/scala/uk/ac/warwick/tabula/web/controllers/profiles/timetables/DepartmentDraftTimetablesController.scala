@@ -6,9 +6,10 @@ import uk.ac.warwick.tabula.AcademicYear
 import uk.ac.warwick.tabula.commands.Appliable
 import uk.ac.warwick.tabula.commands.timetables._
 import uk.ac.warwick.tabula.data.model.{Department, StudentMember}
+import uk.ac.warwick.tabula.helpers.SystemClockComponent
 import uk.ac.warwick.tabula.services.timetables.TimetableFetchingService.EventOccurrenceList
-import uk.ac.warwick.tabula.services.timetables.{CachedPartialTimetableFetchingService, ScientiaConfiguration, ScientiaHttpTimetableFetchingService}
-import uk.ac.warwick.tabula.services.{AutowiringTermServiceComponent, AutowiringUserLookupComponent}
+import uk.ac.warwick.tabula.services.timetables._
+import uk.ac.warwick.tabula.services.{AutowiringSecurityServiceComponent, AutowiringSmallGroupServiceComponent, AutowiringTermServiceComponent, AutowiringUserLookupComponent}
 import uk.ac.warwick.tabula.web.Mav
 import uk.ac.warwick.tabula.web.controllers.profiles.ProfilesController
 import uk.ac.warwick.tabula.web.views.{FullCalendarEvent, JSONView}
@@ -34,13 +35,26 @@ class DepartmentDraftTimetablesController extends ProfilesController
 			override val cacheExpiryTime: Int = CachedPartialTimetableFetchingService.defaultCacheExpiryTime
 		}
 
-		val timetableFetchingService = ScientiaHttpTimetableFetchingService(scientiaConfiguration)
+		val draftTimetableFetchingService = ScientiaHttpTimetableFetchingService(scientiaConfiguration)
+
+		val moduleTimetableEventSource: ModuleTimetableEventSource =
+			new CombinedModuleTimetableEventSourceComponent
+			with SmallGroupEventTimetableEventSourceComponentImpl
+			with AutowiringSmallGroupServiceComponent
+			with AutowiringUserLookupComponent
+			with AutowiringCelcatConfigurationComponent
+			with AutowiringExamTimetableConfigurationComponent
+			with AutowiringSecurityServiceComponent
+			with SystemClockComponent
+			with ModuleTimetableFetchingServiceComponent {
+				override val timetableFetchingService: ModuleTimetableFetchingService = draftTimetableFetchingService
+			}.moduleTimetableEventSource
 
 		DepartmentTimetablesCommand.draft(
 			mandatory(department),
 			academicYear,
 			user,
-			new ViewModuleTimetableCommandFactoryImpl(timetableFetchingService),
+			new ViewModuleTimetableCommandFactoryImpl(moduleTimetableEventSource),
 			// Don't support students
 			new ViewStudentPersonalTimetableCommandFactory() {
 				override def apply(student: StudentMember): Appliable[Try[EventOccurrenceList]] with ViewMemberEventsRequest =

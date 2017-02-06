@@ -10,7 +10,7 @@ import uk.ac.warwick.tabula.timetables.TimetableEvent
 
 import scala.concurrent.Future
 
-trait StudentTimetableEventSource extends TimetableEventSource[StudentMember] {
+trait StudentTimetableEventSource extends MemberTimetableEventSource[StudentMember] {
 	override def eventsFor(student: StudentMember, currentUser: CurrentUser, context: TimetableEvent.Context): Future[EventList]
 }
 

@@ -3,6 +3,7 @@ package uk.ac.warwick.tabula.commands.timetables
 import java.util.concurrent.TimeoutException
 
 import org.springframework.validation.Errors
+import uk.ac.warwick.tabula.CurrentUser
 import uk.ac.warwick.tabula.commands._
 import uk.ac.warwick.tabula.commands.timetables.ViewModuleTimetableCommand.{CommandType, ReturnType}
 import uk.ac.warwick.tabula.data.model.Module
@@ -19,8 +20,8 @@ object ViewModuleTimetableCommand {
 	private[timetables] type ReturnType = Try[EventList]
 	type CommandType = Appliable[ReturnType] with ViewModuleTimetableRequest
 
-	def apply(module: Module): CommandType =
-		new ViewModuleTimetableCommandInternal(module)
+	def apply(module: Module, user: CurrentUser): CommandType =
+		new ViewModuleTimetableCommandInternal(module, user)
 			with ComposableCommand[ReturnType]
 			with ViewModuleTimetablePermissions
 			with ViewModuleTimetableValidation
@@ -28,35 +29,35 @@ object ViewModuleTimetableCommand {
 			with AutowiringScientiaConfigurationComponent
 			with AutowiringNewScientiaConfigurationComponent
 			with SystemClockComponent
-			with ScientiaHttpTimetableFetchingServiceComponent // Only include Scientia events for now. If we ever include from other sources, they should be opt-in via params
+			with AutowiringModuleTimetableEventSourceComponent
 
 	// Re-usable service
-	def apply(module: Module, service: ModuleTimetableFetchingService): CommandType =
-		new ViewModuleTimetableCommandInternal(module)
+	def apply(module: Module, user: CurrentUser, source: ModuleTimetableEventSource): CommandType =
+		new ViewModuleTimetableCommandInternal(module, user)
 			with ComposableCommand[ReturnType]
 			with ViewModuleTimetablePermissions
 			with ViewModuleTimetableValidation
 			with Unaudited with ReadOnly
-			with ModuleTimetableFetchingServiceComponent {
-			val timetableFetchingService: ModuleTimetableFetchingService = service
+			with ModuleTimetableEventSourceComponent {
+			val moduleTimetableEventSource: ModuleTimetableEventSource = source
 		}
 }
 
 trait ViewModuleTimetableCommandFactory {
-	def apply(module: Module): CommandType
+	def apply(module: Module, user: CurrentUser): CommandType
 }
-class ViewModuleTimetableCommandFactoryImpl(service: ModuleTimetableFetchingService) extends ViewModuleTimetableCommandFactory {
-	def apply(module: Module) = ViewModuleTimetableCommand(module, service)
+class ViewModuleTimetableCommandFactoryImpl(source: ModuleTimetableEventSource) extends ViewModuleTimetableCommandFactory {
+	def apply(module: Module, user: CurrentUser) = ViewModuleTimetableCommand(module, user, source)
 }
 
-abstract class ViewModuleTimetableCommandInternal(val module: Module)
+abstract class ViewModuleTimetableCommandInternal(val module: Module, user: CurrentUser)
 	extends CommandInternal[ReturnType]
 		with ViewModuleTimetableRequest {
 
-	self: ModuleTimetableFetchingServiceComponent =>
+	self: ModuleTimetableEventSourceComponent =>
 
 	def applyInternal(): ReturnType = {
-		Try(Await.result(timetableFetchingService.getTimetableForModule(module.code.toUpperCase, includeStudents = false), ViewModuleEventsCommand.Timeout))
+		Try(Await.result(moduleTimetableEventSource.eventsFor(module, academicYear, user, sourcesToShow), ViewModuleEventsCommand.Timeout))
 			.recover { case _: TimeoutException | _: TimetableEmptyException => EventList.empty }
 			.map { events => events.filter { event => event.year == academicYear }}
 	}
@@ -69,7 +70,17 @@ trait ViewModuleTimetableState {
 
 // Request parameters
 trait ViewModuleTimetableRequest extends ViewModuleTimetableState
-	with CurrentSITSAcademicYear
+	with CurrentSITSAcademicYear {
+	var showTimetableEvents: Boolean = true
+	var showSmallGroupEvents: Boolean = false
+	def sourcesToShow: Seq[TimetableEventSource] = if (showTimetableEvents == showSmallGroupEvents) {
+		Seq(TimetableEventSource.Sciencia, TimetableEventSource.SmallGroups)
+	} else if (showTimetableEvents) {
+		Seq(TimetableEventSource.Sciencia)
+	} else {
+		Seq(TimetableEventSource.SmallGroups)
+	}
+}
 
 trait ViewModuleTimetablePermissions extends RequiresPermissionsChecking with PermissionsCheckingMethods {
 	self: ViewModuleTimetableState =>
