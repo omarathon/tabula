@@ -16,6 +16,7 @@ import org.springframework.transaction.PlatformTransactionManager
 import uk.ac.warwick.spring.Wire
 import uk.ac.warwick.tabula.Features
 import uk.ac.warwick.tabula.services.MaintenanceModeService
+import uk.ac.warwick.tabula.services.scheduling.SchedulingConfiguration.{ScheduledJob, UnscheduledJob}
 import uk.ac.warwick.tabula.services.scheduling.jobs._
 import uk.ac.warwick.tabula.system.exceptions.ExceptionResolver
 import uk.ac.warwick.util.core.spring.scheduling.{AutowiringSpringBeanJobFactory, PersistableCronTriggerFactoryBean, PersistableSimpleTriggerFactoryBean}
@@ -126,15 +127,17 @@ object SchedulingConfiguration {
 		SimpleTriggerJob[UpdateCheckpointTotalsJob](repeatInterval = 10.seconds),
 
 		SimpleTriggerJob[ProcessTurnitinLtiQueueJob](repeatInterval = 20.seconds),
-		SimpleTriggerJob[ProcessUrkundQueueJob](repeatInterval = 10.seconds),
+		SimpleTriggerJob[ProcessUrkundQueueJob](repeatInterval = 10.seconds)
 
+		// Migration now complete, don't need this any more
+		// SimpleTriggerJob[ObjectStorageMigrationJob](repeatInterval = 1.minute)
+	)
+
+	val scheduledSitsJobs: Seq[ScheduledJob[_, _ <: Trigger]] = Seq(
 		// SITS exports
 		SimpleTriggerJob[ExportAttendanceToSitsJob](repeatInterval = 5.minutes),
 		SimpleTriggerJob[ExportFeedbackToSitsJob](repeatInterval = 5.minutes),
 		SimpleTriggerJob[ExportYearMarksToSitsJob](repeatInterval = 5.minutes)
-
-		// Migration now complete, don't need this any more
-		// SimpleTriggerJob[ObjectStorageMigrationJob](repeatInterval = 1.minute)
 	)
 }
 
@@ -156,14 +159,13 @@ class SchedulingConfiguration {
 
 	@Value("${toplevel.url}") var toplevelUrl: String = _
 
-	@Bean def scheduler(): FactoryBean[Scheduler] = {
+	private def scheduler(scheduledJobs: Seq[ScheduledJob[_, _ <: Trigger]]): FactoryBean[Scheduler] = {
 		// If we're deploying a change that means an existing trigger is no longer referenced, clear the scheduler
 		val triggerNames: Seq[String] =
 			new JdbcTemplate(dataSource).queryAndMap("select trigger_name from qrtz_triggers") {
 				case (rs, _) => rs.getString("trigger_name")
 			}
 
-		val scheduledJobs = SchedulingConfiguration.scheduledJobs
 		val jobs = Seq(scheduledJobs, SchedulingConfiguration.unscheduledJobs).flatten
 		val jobNames = jobs.map { _.name }
 
@@ -206,6 +208,18 @@ class SchedulingConfiguration {
 		factory.setTriggers(scheduledJobs.map { _.trigger }: _*)
 
 		factory
+	}
+
+	@Bean
+	@Profile(Array("dev", "production"))
+	def schedulerWithSitsExports(): FactoryBean[Scheduler] = {
+		scheduler(SchedulingConfiguration.scheduledJobs ++ SchedulingConfiguration.scheduledSitsJobs)
+	}
+
+	@Bean
+	@Profile(Array("sandbox"))
+	def schedulerNoSitsExports(): FactoryBean[Scheduler] = {
+		scheduler(SchedulingConfiguration.scheduledJobs)
 	}
 
 }
