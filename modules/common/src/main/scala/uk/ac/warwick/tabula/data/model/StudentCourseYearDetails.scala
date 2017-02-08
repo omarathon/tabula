@@ -7,7 +7,6 @@ import org.hibernate.annotations.{Any => _, _}
 import org.joda.time.{DateTime, Duration}
 import uk.ac.warwick.spring.Wire
 import uk.ac.warwick.tabula.JavaImports._
-import uk.ac.warwick.tabula.commands.TaskBenchmarking
 import uk.ac.warwick.tabula.commands.exams.grids.ExamGridEntityYear
 import uk.ac.warwick.tabula.data.PostLoadBehaviour
 import uk.ac.warwick.tabula.permissions.PermissionsTarget

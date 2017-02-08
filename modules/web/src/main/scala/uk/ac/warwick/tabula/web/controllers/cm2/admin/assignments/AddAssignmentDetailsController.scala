@@ -45,8 +45,8 @@ class AddAssignmentDetailsController extends CourseworkController {
 		).secondCrumbs(Breadcrumbs.Standard("Assignment Management", Some(Routes.admin.assignment.createAssignmentDetails(module)), ""))
 	}
 
- // TODO - add method for save and exit
-	@RequestMapping(method = Array(POST), params = Array(ManageAssignmentMappingParameters.createAndAddFeedback, "action!=refresh", "action!=update"))
+  // TODO - add method for save and exit
+	@RequestMapping(method = Array(POST), params = Array(ManageAssignmentMappingParameters.createAndAddFeedback, "action!=refresh", "action!=update, action=submit"))
 	def submitAndAddFeedback(@Valid @ModelAttribute("command") cmd: CreateAssignmentDetailsCommand, errors: Errors): Mav =
 		submit(cmd, errors, Routes.admin.assignment.createAddFeedback)
 
