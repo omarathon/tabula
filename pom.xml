@@ -524,7 +524,7 @@
 					<version>${surefire.version}</version>
 					<configuration>
 						<argLine>-Xmx2048m -Xms256m</argLine>
-						<forkCount>0.75C</forkCount>
+						<forkCount>0.5C</forkCount>
 						<!--<runOrder>random</runOrder>-->
 						<systemPropertyVariables>
 							<!-- Referenced in test tabula.properties data directory,
