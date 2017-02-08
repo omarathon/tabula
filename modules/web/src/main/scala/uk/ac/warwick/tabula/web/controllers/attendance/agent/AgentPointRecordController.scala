@@ -40,12 +40,11 @@ class AgentPointRecordController extends AttendanceController with HasMonthNames
 	}
 
 	private def render(relationshipType: StudentRelationshipType, academicYear: AcademicYear, templatePoint: AttendanceMonitoringPoint) = {
-		Mav("attendance/pointrecord",
+		Mav("attendance/pointrecord-id7",
 			"department" -> currentMember.homeDepartment,
 			"uploadUrl" -> Routes.Agent.pointRecordUpload(relationshipType, academicYear, templatePoint),
 			"returnTo" -> getReturnTo(Routes.Agent.relationshipForYear(relationshipType, academicYear))
 		).crumbs(
-			Breadcrumbs.Agent.Relationship(relationshipType),
 			Breadcrumbs.Agent.RelationshipForYear(relationshipType, academicYear)
 		)
 	}

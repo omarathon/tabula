@@ -1,6 +1,6 @@
 <#escape x as x?html>
-	<#import "*/modal_macros.ftl" as modal />
-
+<#import "*/modal_macros.ftl" as modal />
+<@modal.wrapper isModal!false 'modal-lg'>
 	<#if success??>
 		<#assign isAdd = !command.note?has_content && !command.attachment?has_content && !command.absenceType?has_content />
 		<div
@@ -12,9 +12,9 @@
 
 	<#assign heading>
 		<#if command.isNew()>
-		<h2>Create attendance note for <@fmt.p command.students?size "student" /></h2>
+			<h3 class="modal-title">Create attendance note for <@fmt.p command.students?size "student" /></h3>
 		<#else>
-		<h2>Edit attendance note for <@fmt.p command.students?size "student" /></h2>
+			<h3 class="modal-title">Edit attendance note for <@fmt.p command.students?size "student" /></h3>
 		</#if>
 	</#assign>
 
@@ -36,7 +36,7 @@
 				<button class="btn btn-primary spinnable" type="submit" name="submit" data-loading-text="Saving&hellip;">
 					Save
 				</button>
-				<button class="btn" data-dismiss="modal" aria-hidden="true">Cancel</button>
+				<button class="btn btn-default" data-dismiss="modal" aria-hidden="true">Cancel</button>
 			</span>
 		</form>
 		</@modal.footer>
@@ -66,5 +66,5 @@
 	<#if !isModal!false>
 		</div><#-- #container -->
 	</#if>
-
+</@modal.wrapper>
 </#escape>

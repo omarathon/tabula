@@ -313,6 +313,9 @@ summary {
 			margin-top: 6px;
 			margin-bottom: 6px;
 		}
+		&.with-contents {
+			margin-bottom: 6px;
+		}
 
 		i.fa-chevron-right, i.fa-chevron-down, i.fa-refresh {
 			.opacity-one(0.6);
@@ -333,8 +336,10 @@ summary {
 			.section-title {
 				margin-bottom: 11px;
 			}
-			padding-bottom: 0;
 		}
+	}
+	&.expanded {
+		padding-bottom: 0;
 	}
 
 	:not(.striped-section-contents) div.checkbox {
@@ -375,8 +380,18 @@ summary {
 .striped-section.no-title {
 	padding-top: 0;
 
-	.striped-section-contents .item-info:first-child {
+	.striped-section-contents .item-info:first-of-type {
 		border-top: 0;
+	}
+}
+
+.striped-section.spacing-only {
+	background-color: transparent;
+	border-color: transparent;
+
+	.striped-section-contents .item-info {
+		background-color: transparent;
+		border-color: transparent;
 	}
 }
 

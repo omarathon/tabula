@@ -2,133 +2,76 @@
 	<#import "../attendance_variables.ftl" as attendance_variables />
 	<#import "../attendance_macros.ftl" as attendance_macros />
 
-<article class="profile">
-	<section id="personal-details">
-		<@fmt.member_photo student />
-		<header>
-			<h1><@fmt.profile_name student /></h1>
-			<h5><@fmt.profile_description student /></h5>
-		</header>
+<h1>${student.fullName}</h1>
 
-		<div class="data clearfix">
-			<div class="col1">
-				<table class="profile-info">
-					<tbody>
-						<tr>
-							<th>Official name</th>
-							<td>${student.officialName}</td>
-						</tr>
-
-						<tr>
-							<th>Preferred name</th>
-							<td>${student.fullName}</td>
-						</tr>
-
+<section class="identity">
+	<div class="row">
+		<div class="col-md-6">
+			<div class="row">
+				<div class="col-md-5 col-lg-4">
+					<@fmt.member_photo student />
+				</div>
+				<div class="col-md-7 col-lg-8">
+					<strong>Official name:</strong> ${student.officialName}<br/>
+					<strong>Preferred name:</strong> ${student.fullName}<br/>
+					<details class="indent">
+						<summary>
+							<strong>More info</strong>
+						</summary>
 						<#if student.gender??>
-							<tr>
-								<th>Gender</th>
-								<td>${student.gender.description}</td>
-							</tr>
+							<strong>Gender:</strong> ${student.gender.description}<br/>
 						</#if>
-
-						<#if student.nationality??>
-							<tr>
-								<th>Nationality</th>
-								<td><@fmt.nationality student.nationality!('Unknown') /></td>
-							</tr>
-						</#if>
-
 						<#if student.dateOfBirth??>
-							<tr>
-								<th>Date of birth</th>
-								<td><@warwick.formatDate value=student.dateOfBirth.toDateTimeAtStartOfDay() pattern="dd/MM/yyyy" /></td>
-							</tr>
+							<strong>Date of birth:</strong> <@warwick.formatDate value=student.dateOfBirth.toDateTimeAtStartOfDay() pattern="dd/MM/yyyy" /><br/>
 						</#if>
-
-						<#if student.student && student.termtimeAddress??>
-							<tr class="address">
-								<th>Term-time address</th>
-								<td><@student_macros.address student.termtimeAddress /></td>
-							</tr>
+						<#if student.nationality??>
+							<strong>Nationality:</strong> <@fmt.nationality student.nationality!('Unknown') /><br/>
 						</#if>
-
-						<#if student.student && student.nextOfKins?? && student.nextOfKins?size gt 0>
-							<tr>
-								<th>Emergency contacts</th>
-								<td>
-									<#list student.nextOfKins as kin>
-										<div>
-											<#if kin.firstName?? && kin.lastName??>${kin.fullName}</#if>
-											<#if kin.relationship??>(${kin.relationship})</#if>
-										</div>
-									</#list>
-								</td>
-							</tr>
+						<#if features.disabilityRenderingInProfiles && (student.disability.reportable)!false>
+							<strong>Disability:</strong>
+							<a class="use-popover cue-popover" id="popover-disability" data-html="true" data-original-title="Disability"
+							   data-content="<p><#if isSelf>You have<#else>This student has</#if> self-reported the following disability code:</p><div class='well'><h6>${student.disability.code}</h6><small>${(student.disability.sitsDefinition)!}</small></div>"> ${student.disability.definition}</a><br/>
 						</#if>
-					</tbody>
-				</table>
-
-				<br class="clearfix">
-			</div>
-
-			<div class="col2">
-				<table class="profile-info">
-					<tbody>
-						<#if student.email??>
-							<tr>
-								<th>Warwick email</th>
-								<td><i class="icon-envelope-alt"></i> <a href="mailto:${student.email}">${student.email}</a></td>
-							</tr>
+						<#if features.visaInStudentProfile && student.hasTier4Visa?? && student.casUsed??>
+							<strong>Tier 4 requirements:</strong>
+							<#if student.casUsed && student.hasTier4Visa>Yes
+							<#elseif !student.casUsed && !student.hasTier4Visa>No
+							<#else>
+								<#if !student.casUsed && student.hasTier4Visa>
+									<#assign inconsistency = "Tier 4 visa exists but no Confirmation of Acceptance for Studies" />
+								<#else>
+									<#assign inconsistency = "Confirmation of Acceptance for Studies exists but no tier 4 visa" />
+								</#if>
+								Contact the <a href="mailto:immigrationservice@warwick.ac.uk">Immigration Service</a>
+								<a class="use-popover" data-content="Contact the University's Immigration Service to find out whether tier 4
+								requirements apply to this student. (${inconsistency})" data-toggle="popover"><i class="fa fa-question-circle"></i></a>
+							</#if>
+							<br/>
 						</#if>
-
-						<#if student.homeEmail??>
-							<tr>
-								<th>Alternative email</th>
-								<td><i class="icon-envelope-alt"></i> <a href="mailto:${student.homeEmail}">${student.homeEmail}</a></td>
-							</tr>
-						</#if>
-
-						<#if student.phoneNumber??>
-							<tr>
-								<th>Phone number</th>
-								<td>${phoneNumberFormatter(student.phoneNumber)}</td>
-							</tr>
-						</#if>
-
-						<#if student.mobileNumber??>
-							<tr>
-								<th>Mobile phone</th>
-								<td>${phoneNumberFormatter(student.mobileNumber)}</td>
-							</tr>
-						</#if>
-
-						<#if student.universityId??>
-							<tr>
-								<th>University number</th>
-								<td>${student.universityId}</td>
-							</tr>
-						</#if>
-
-						<#if student.userId??>
-							<tr>
-								<th>IT code</th>
-								<td>${student.userId}</td>
-							</tr>
-						</#if>
-
-						<#if student.student && student.homeAddress??>
-							<tr class="address">
-								<th>Home address</th>
-								<td><@student_macros.address student.homeAddress /></td>
-							</tr>
-						</#if>
-					</tbody>
-				</table>
+					</details>
+					<#if student.email??>
+						<strong>Warwick email:</strong> <a href="mailto:${student.email}">${student.email}</a><br/>
+					</#if>
+					<#if student.homeEmail??>
+						<strong>Alternative email:</strong> <a href="mailto:${student.homeEmail}">${student.homeEmail}</a><br/>
+					</#if>
+					<#if student.mobileNumber??>
+						<strong>Mobile phone:</strong> ${phoneNumberFormatter(student.mobileNumber)}<br/>
+					</#if>
+					<#if student.universityId??>
+						<strong>University number: </strong> ${student.universityId}<br/>
+					</#if>
+					<#if student.userId??>
+						<strong>IT code:</strong> ${student.userId}<br/>
+					</#if>
+					<#if student.homeDepartment??>
+						<strong>Home department:</strong> ${student.homeDepartment.name}<br/>
+					</#if>
+				</div>
 			</div>
 		</div>
-
-	</section>
-</article>
+	</div>
+</section>
 
 <#if groupedPointMap?keys?size == 0>
 	<p><em>No monitoring points found for this academic year.</em></p>
@@ -137,9 +80,9 @@
 	<a class="btn btn-primary" href="<@routes.attendance.agentRecord relationshipType academicYear.startYear?c student returnTo />">Record attendance</a>
 	<#list attendance_variables.monitoringPointTermNames as term>
 		<#if groupedPointMap[term]??>
-			<@attendance_macros.groupedPointsBySection groupedPointMap term; groupedPointPair>
+			<@attendance_macros.id7GroupedPointsBySection groupedPointMap term; groupedPointPair>
 				<#assign point = groupedPointPair._1() />
-				<div class="span10">
+				<div class="col-md-10">
 					${point.name}
 					(<a class="use-tooltip" data-html="true" title="
 						<@fmt.wholeWeekDateFormat
@@ -154,33 +97,33 @@
 						department
 					/></a>)
 				</div>
-				<div class="span2">
+				<div class="col-md-2">
 					<#if groupedPointPair._2()??>
 						<@attendance_macros.checkpointLabel department=department checkpoint=groupedPointPair._2() />
 					<#else>
 						<@attendance_macros.checkpointLabel department=department point=groupedPointPair._1() student=student />
 					</#if>
 				</div>
-			</@attendance_macros.groupedPointsBySection>
+			</@attendance_macros.id7GroupedPointsBySection>
 		</#if>
 	</#list>
 
 	<#list monthNames as month>
 		<#if groupedPointMap[month]??>
-			<@attendance_macros.groupedPointsBySection groupedPointMap month; groupedPointPair>
+			<@attendance_macros.id7GroupedPointsBySection groupedPointMap month; groupedPointPair>
 				<#assign point = groupedPointPair._1() />
-				<div class="span10">
+				<div class="col-md-10">
 					${point.name}
 					(<@fmt.interval point.startDate point.endDate />)
 				</div>
-				<div class="span2">
+				<div class="col-md-2">
 					<#if groupedPointPair._2()??>
 						<@attendance_macros.checkpointLabel department=department checkpoint=groupedPointPair._2() />
 					<#else>
 						<@attendance_macros.checkpointLabel department=department point=groupedPointPair._1() student=student />
 					</#if>
 				</div>
-			</@attendance_macros.groupedPointsBySection>
+			</@attendance_macros.id7GroupedPointsBySection>
 		</#if>
 	</#list>
 </#if>

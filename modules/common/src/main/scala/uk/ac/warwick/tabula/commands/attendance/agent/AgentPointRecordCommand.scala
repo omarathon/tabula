@@ -139,7 +139,8 @@ trait AgentPointRecordCommandState extends GroupsPoints {
 		students.map { student =>
 			student -> attendanceMonitoringService.listStudentsPoints(student, None, academicYear)
 		}.toMap.mapValues(points => points.filter(p => {
-			p.name.toLowerCase == templatePoint.name.toLowerCase && {
+			p.name.toLowerCase == templatePoint.name.toLowerCase &&
+				templatePoint.scheme.pointStyle == p.scheme.pointStyle && {
 				templatePoint.scheme.pointStyle match {
 					case AttendanceMonitoringPointStyle.Week =>
 						p.startWeek == templatePoint.startWeek && p.endWeek == templatePoint.endWeek
