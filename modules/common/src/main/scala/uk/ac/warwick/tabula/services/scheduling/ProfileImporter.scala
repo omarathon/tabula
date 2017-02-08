@@ -10,8 +10,8 @@ import org.springframework.jdbc.`object`.MappingSqlQuery
 import org.springframework.jdbc.core.SqlParameter
 import org.springframework.stereotype.Service
 import uk.ac.warwick.spring.Wire
-import uk.ac.warwick.tabula.commands.{Command, Unaudited}
 import uk.ac.warwick.tabula.commands.scheduling.imports._
+import uk.ac.warwick.tabula.commands.{Command, Unaudited}
 import uk.ac.warwick.tabula.data.Daoisms
 import uk.ac.warwick.tabula.data.model.MemberUserType._
 import uk.ac.warwick.tabula.data.model._

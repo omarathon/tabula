@@ -1,12 +1,12 @@
 package uk.ac.warwick.tabula.data.model.notifications.profiles
 
 import org.joda.time.{DateTime, DateTimeConstants}
-import uk.ac.warwick.tabula.{CurrentUser, Fixtures, Mockito, TestBase}
 import uk.ac.warwick.tabula.data.model.notifications.profiles.meetingrecord.NewMeetingRecordApprovalNotification
 import uk.ac.warwick.tabula.data.model.{MeetingRecord, StudentRelationship, StudentRelationshipType}
 import uk.ac.warwick.tabula.permissions.{Permission, PermissionsTarget, ScopelessPermission}
 import uk.ac.warwick.tabula.services.{ProfileService, SecurityService}
 import uk.ac.warwick.tabula.web.views.{FreemarkerRendering, ScalaBeansWrapper, ScalaFreemarkerConfiguration, UrlMethodModel}
+import uk.ac.warwick.tabula.{CurrentUser, Fixtures, Mockito, TestBase}
 
 class MeetingRecordApprovalNotificationTest extends TestBase with Mockito with FreemarkerRendering {
 

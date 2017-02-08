@@ -40,7 +40,7 @@ trait ManageStudentRelationshipController extends ProfilesController {
 		if (scheduledDate.isAfterNow) {
 			r.addObjects(
 				ManageStudentRelationshipController.scheduledAgentChange ->
-					DateTimeFormat.forPattern(DateFormats.DateTimePicker).print(scheduledDate)
+					DateTimeFormat.forPattern(DateFormats.DateTimePickerPattern).print(scheduledDate)
 			)
 		}
 		r

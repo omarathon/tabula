@@ -30,7 +30,7 @@ abstract class BaseSysadminController extends BaseController with SysadminBreadc
 
 /* Just a pojo to bind to for blank form; actually used in scheduling */
 class BlankForm {
-	@WithinYears(maxPast = 20) @DateTimeFormat(pattern = DateFormats.DateTimePicker)
+	@WithinYears(maxPast = 20) @DateTimeFormat(pattern = DateFormats.DateTimePickerPattern)
 	var from: DateTime = _
 	var deptCode: String = _
 }
