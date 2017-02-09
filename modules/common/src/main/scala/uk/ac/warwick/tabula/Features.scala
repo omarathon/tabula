@@ -5,12 +5,11 @@ import com.fasterxml.jackson.annotation.JsonAutoDetect
 import org.springframework.beans.BeanWrapperImpl
 import org.springframework.beans.factory.InitializingBean
 import org.springframework.beans.factory.annotation.Value
-
 import uk.ac.warwick.spring.Wire
 import uk.ac.warwick.tabula.helpers.Logging
-import uk.ac.warwick.util.queue.Queue
-import uk.ac.warwick.util.queue.QueueListener
 import uk.ac.warwick.util.queue.conversion.ItemType
+import uk.ac.warwick.util.queue.{Queue, QueueListener}
+
 import scala.beans.BeanProperty
 
 trait FeaturesComponent {

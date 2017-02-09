@@ -3,12 +3,12 @@ package uk.ac.warwick.tabula.services.turnitinlti
 import org.joda.time.DateTime
 import org.springframework.stereotype.Service
 import uk.ac.warwick.spring.Wire
-import uk.ac.warwick.tabula.{AutowiringFeaturesComponent, FeaturesComponent}
 import uk.ac.warwick.tabula.data.model.{Assignment, OriginalityReport}
 import uk.ac.warwick.tabula.data.{AutowriringTurnitinLtiQueueDaoComponent, TurnitinLtiQueueDaoComponent}
 import uk.ac.warwick.tabula.helpers.Logging
 import uk.ac.warwick.tabula.services.urkund.UrkundService
 import uk.ac.warwick.tabula.services.{AutowiringOriginalityReportServiceComponent, OriginalityReportServiceComponent}
+import uk.ac.warwick.tabula.{AutowiringFeaturesComponent, FeaturesComponent}
 
 import scala.collection.JavaConverters._
 

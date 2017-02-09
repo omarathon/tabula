@@ -3,12 +3,12 @@ package uk.ac.warwick.tabula.commands.scheduling.imports
 import org.joda.time.DateTime
 import org.springframework.format.annotation.DateTimeFormat
 import uk.ac.warwick.tabula.DateFormats
+import uk.ac.warwick.tabula.DateFormats._
 import uk.ac.warwick.tabula.commands.{CommandInternal, ComposableCommandWithoutTransaction, Describable, Description}
+import uk.ac.warwick.tabula.data.Transactions._
 import uk.ac.warwick.tabula.data.{StudentCourseDetailsDaoComponent, StudentCourseYearDetailsDaoComponent, _}
 import uk.ac.warwick.tabula.helpers.Logging
 import uk.ac.warwick.tabula.services.scheduling.{AutowiringProfileImporterComponent, ProfileImporterComponent}
-import uk.ac.warwick.tabula.DateFormats._
-import uk.ac.warwick.tabula.data.Transactions._
 import uk.ac.warwick.tabula.validators.WithinYears
 
 
@@ -65,7 +65,7 @@ class RecheckMissingRowsCommandInternal extends CommandInternal[Unit] with Loggi
 }
 
 trait RecheckMissingRowsState {
-	@WithinYears(maxPast = 20) @DateTimeFormat(pattern = DateFormats.DateTimePicker)
+	@WithinYears(maxPast = 20) @DateTimeFormat(pattern = DateFormats.DateTimePickerPattern)
 	var from: DateTime = _
 }
 

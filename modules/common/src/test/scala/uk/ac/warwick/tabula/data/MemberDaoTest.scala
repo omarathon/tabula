@@ -1,13 +1,14 @@
 package uk.ac.warwick.tabula.data
 
-import scala.collection.JavaConverters.asScalaBufferConverter
 import org.joda.time.{DateTime, DateTimeConstants}
 import org.junit.{After, Before}
-import uk.ac.warwick.tabula.{Fixtures, Mockito, PersistenceTestBase}
+import org.springframework.transaction.annotation.Transactional
 import uk.ac.warwick.tabula.JavaImports.JList
 import uk.ac.warwick.tabula.data.model._
 import uk.ac.warwick.tabula.helpers.Logging
-import org.springframework.transaction.annotation.Transactional
+import uk.ac.warwick.tabula.{Fixtures, Mockito, PersistenceTestBase}
+
+import scala.collection.JavaConverters.asScalaBufferConverter
 
 // scalastyle:off magic.number
 class MemberDaoTest extends PersistenceTestBase with Logging with Mockito {

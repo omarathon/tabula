@@ -8,7 +8,7 @@ import uk.ac.warwick.tabula.commands.{Command, Description, Unaudited}
 import uk.ac.warwick.tabula.data.model._
 import uk.ac.warwick.tabula.data.{Daoisms, MemberDao, StudentCourseDetailsDao}
 import uk.ac.warwick.tabula.helpers.Logging
-import uk.ac.warwick.tabula.helpers.scheduling.{PropertyCopying, ImportCommandFactory, SitsStudentRow}
+import uk.ac.warwick.tabula.helpers.scheduling.{ImportCommandFactory, PropertyCopying, SitsStudentRow}
 import uk.ac.warwick.tabula.services.scheduling.{AwardImporter, CourseImporter}
 import uk.ac.warwick.tabula.services.{AwardService, CourseAndRouteService, RelationshipService}
 

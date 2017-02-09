@@ -35,7 +35,7 @@ trait MaintenanceModeCommandRequest {
 
 	var enable: Boolean = _
 
-	@WithinYears(maxFuture = 1, maxPast = 1) @DateTimeFormat(pattern = DateFormats.DateTimePicker)
+	@WithinYears(maxFuture = 1, maxPast = 1) @DateTimeFormat(pattern = DateFormats.DateTimePickerPattern)
 	var until: DateTime = _
 
 	var message: String = _

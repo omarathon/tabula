@@ -1,9 +1,9 @@
 package uk.ac.warwick.tabula.attendance.web
 
-import uk.ac.warwick.tabula.data.model.{StudentRelationshipType, StudentMember, Department}
-import uk.ac.warwick.tabula.web.RoutesUtils
 import uk.ac.warwick.tabula.AcademicYear
 import uk.ac.warwick.tabula.data.model.attendance.{AttendanceMonitoringPoint, AttendanceMonitoringScheme}
+import uk.ac.warwick.tabula.data.model.{Department, StudentMember, StudentRelationshipType}
+import uk.ac.warwick.tabula.web.RoutesUtils
 
 /**
  * Generates URLs to various locations, to reduce the number of places where URLs

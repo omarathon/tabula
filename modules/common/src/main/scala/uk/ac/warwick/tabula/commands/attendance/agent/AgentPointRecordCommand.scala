@@ -2,9 +2,9 @@ package uk.ac.warwick.tabula.commands.attendance.agent
 
 import org.springframework.validation.Errors
 import uk.ac.warwick.tabula.JavaImports._
+import uk.ac.warwick.tabula.commands._
 import uk.ac.warwick.tabula.commands.attendance.GroupsPoints
 import uk.ac.warwick.tabula.commands.attendance.view.{GroupedPointRecordValidation, MissedAttendanceMonitoringCheckpointsNotifications}
-import uk.ac.warwick.tabula.commands._
 import uk.ac.warwick.tabula.data.model.attendance._
 import uk.ac.warwick.tabula.data.model.{Member, StudentMember, StudentRelationshipType}
 import uk.ac.warwick.tabula.helpers.LazyMaps

@@ -1,11 +1,11 @@
 package uk.ac.warwick.tabula.services
 
 import org.springframework.stereotype.Service
+import uk.ac.warwick.spring.Wire
+import uk.ac.warwick.tabula.data.Transactions._
 import uk.ac.warwick.tabula.data._
 import uk.ac.warwick.tabula.data.model._
 import uk.ac.warwick.tabula.data.model.forms._
-import uk.ac.warwick.spring.Wire
-import uk.ac.warwick.tabula.data.Transactions._
 import uk.ac.warwick.userlookup.User
 
 trait ExtensionServiceComponent {
