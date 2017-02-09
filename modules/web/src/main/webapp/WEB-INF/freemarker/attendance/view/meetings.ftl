@@ -1,6 +1,6 @@
 <#escape x as x?html>
 	<#if !command.point.pointType?? || command.point.pointType.dbValue != "meeting">
-		<div class="alert alert-error">
+		<div class="alert alert-danger">
 			Specified monitoring point is not a Meeting point
 		</div>
 	<#else>
@@ -17,7 +17,7 @@
 			</#if>
 			with the student's
 			<#list command.point.meetingRelationships as relationship>
-			${relationship.description}<#if relationship_has_next> or </#if>
+				${relationship.description}<#if relationship_has_next> or </#if>
 			</#list>
 
 			<#if command.point.scheme.pointStyle.dbValue == "week">
@@ -45,7 +45,7 @@
 			<p><em>There were no meetings found.</em></p>
 		<#else>
 
-			<table class="table table-bordered table-condensed table-hover">
+			<table class="table table-condensed table-hover">
 				<thead>
 					<tr>
 						<th>Meeting</th>
@@ -65,7 +65,7 @@
 							</td>
 							<td>
 								<#if reasons?size == 0>
-									<i class="icon-fixed-width icon-ok"></i>
+									<i class="fa fa-fw fa-check"></i>
 								<#else>
 									<#assign popoverContent>
 										<#list reasons as reason>
@@ -91,7 +91,7 @@
 										</#list>
 									</#assign>
 									<a class="use-popover" id="popover-meeting-status-${meetingStatus_index}" data-placement="left" data-html="true" data-content="${popoverContent}">
-										<i class="icon-fixed-width icon-remove"></i>
+										<i class="fa fa-fw fa-times"></i>
 									</a>
 								</#if>
 							</td>

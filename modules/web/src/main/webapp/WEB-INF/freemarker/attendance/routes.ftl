@@ -20,10 +20,10 @@
 
 <#macro agentHome><@_u page="/agent"/></#macro>
 <#macro agentHomeYears relationshipType><@_u page="/agent/${relationshipType.urlPart}"/></#macro>
-<#macro agentHomeForYear relationshipType academicYearString><@_u page="/agent/${relationshipType.urlPart}/${academicYearString}"/></#macro>
-<#macro agentStudent relationshipType academicYearString student><@_u page="/agent/${relationshipType.urlPart}/${academicYearString}/${student.universityId}"/></#macro>
-<#macro agentRecord relationshipType academicYearString student returnTo><@_u page="/agent/${relationshipType.urlPart}/${academicYearString}/${student.universityId}/record?returnTo=${returnTo}"/></#macro>
-<#macro agentRecordPoints relationshipType academicYearString point returnTo><@_u page="/agent/${relationshipType.urlPart}/${academicYearString}/point/${point.id}?returnTo=${returnTo}"/></#macro>
+<#macro agentHomeForYear relationshipType academicYear><@_u page="/agent/${relationshipType.urlPart}/${academicYear.startYear?c}"/></#macro>
+<#macro agentStudent relationshipType academicYear student><@_u page="/agent/${relationshipType.urlPart}/${academicYear.startYear?c}/${student.universityId}"/></#macro>
+<#macro agentRecord relationshipType academicYear student returnTo><@_u page="/agent/${relationshipType.urlPart}/${academicYear.startYear?c}/${student.universityId}/record?returnTo=${returnTo}"/></#macro>
+<#macro agentRecordPoints relationshipType academicYear point returnTo><@_u page="/agent/${relationshipType.urlPart}/${academicYear.startYear?c}/point/${point.id}?returnTo=${returnTo}"/></#macro>
 
 <#macro manageHome><@_u page="/manage"/></#macro>
 <#macro manageHomeYears department><@_u page="/manage/${department.code}"/></#macro>
@@ -67,11 +67,9 @@
 
 <#macro profile profile><@_u page="/view/${profile.universityId}" context="/profiles"/></#macro>
 <#macro profileHome><@_u page="/profile"/></#macro>
-<#macro profileYears student><@_u page="/profile/${student.universityId}"/></#macro>
-<#macro profileForYear student academicYearString><@_u page="/profile/${student.universityId}/${academicYearString}"/></#macro>
-<#macro profileRecord student academicYearString returnTo="">
+<#macro profileRecord student academicYear returnTo="">
 	<#local returnTo><#if returnTo?has_content>?returnTo=${returnTo}</#if></#local>
-	<@_u page="/profile/${student.universityId}/${academicYearString}/record${returnTo}"/>
+	<@_u page="/profile/${student.universityId}/${academicYear.startYear?c}/record${returnTo}"/>
 </#macro>
 <#macro profileMeetings student academicYearString point><@_u page="/profile/${student.universityId}/${academicYearString}/${point.id}/meetings"/></#macro>
 <#macro profileGroups student academicYearString point><@_u page="/profile/${student.universityId}/${academicYearString}/${point.id}/groups"/></#macro>

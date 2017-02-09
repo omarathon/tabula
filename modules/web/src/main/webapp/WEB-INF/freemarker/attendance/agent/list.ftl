@@ -12,7 +12,7 @@
 <#if studentAttendance.totalResults == 0>
 	<p><em>No ${relationshipType.studentRole}s were found.</em></p>
 <#else>
-	<#assign returnTo><@routes.attendance.agentHomeForYear relationshipType academicYear.startYear?c /></#assign>
+	<#assign returnTo><@routes.attendance.agentHomeForYear relationshipType academicYear /></#assign>
 
 	<@attendance_macros.id7ScrollablePointsTable
 		command=command
@@ -23,21 +23,21 @@
 		doCommandSorting=false
 	; result>
 		<td class="unrecorded">
-			<a href="<@routes.attendance.agentStudent relationshipType academicYear.startYear?c result.student />" title="<@attendance_macros.checkpointTotalTitle result.checkpointTotal />" class="use-tooltip">
+			<a href="<@routes.attendance.agentStudent relationshipType academicYear result.student />" title="<@attendance_macros.checkpointTotalTitle result.checkpointTotal />" class="use-tooltip">
 				<span class="<#if (result.checkpointTotal.unrecorded > 2)>badge progress-bar-danger<#elseif (result.checkpointTotal.unrecorded > 0)>badge progress-bar-warning</#if>">
 					${result.checkpointTotal.unrecorded}
 				</span>
 			</a>
 		</td>
 		<td class="missed">
-			<a href="<@routes.attendance.agentStudent relationshipType academicYear.startYear?c result.student />" title="<@attendance_macros.checkpointTotalTitle result.checkpointTotal />" class="use-tooltip">
+			<a href="<@routes.attendance.agentStudent relationshipType academicYear result.student />" title="<@attendance_macros.checkpointTotalTitle result.checkpointTotal />" class="use-tooltip">
 				<span class="<#if (result.checkpointTotal.unauthorised > 2)>badge progress-bar-danger<#elseif (result.checkpointTotal.unauthorised > 0)>badge progress-bar-warning</#if>">
 					${result.checkpointTotal.unauthorised}
 				</span>
 			</a>
 		</td>
 		<td class="record">
-			<#assign record_url><@routes.attendance.agentRecord relationshipType academicYear.startYear?c result.student returnTo/></#assign>
+			<#assign record_url><@routes.attendance.agentRecord relationshipType academicYear result.student returnTo/></#assign>
 				<@fmt.permission_button
 				permission='MonitoringPoints.Record'
 				scope=result.student
@@ -57,7 +57,7 @@
 				<@attendance_macros.id7GroupedPointsBySection groupedPoints term; groupedPoint>
 					<div class="col-md-12">
 						<div class="pull-right">
-							<#assign record_url><@routes.attendance.agentRecordPoints relationshipType academicYear.startYear?c groupedPoint.templatePoint returnTo/></#assign>
+							<#assign record_url><@routes.attendance.agentRecordPoints relationshipType academicYear groupedPoint.templatePoint returnTo/></#assign>
 							<a href="${record_url}" class="btn btn-primary btn-sm <#if !canRecordAny>disabled</#if>">Record</a>
 						</div>
 						${groupedPoint.templatePoint.name}
@@ -93,7 +93,7 @@
 				<@attendance_macros.id7GroupedPointsBySection groupedPoints month; groupedPoint>
 					<div class="col-md-12">
 						<div class="pull-right">
-							<#assign record_url><@routes.attendance.agentRecordPoints relationshipType academicYear.startYear?c groupedPoint.templatePoint returnTo/></#assign>
+							<#assign record_url><@routes.attendance.agentRecordPoints relationshipType academicYear groupedPoint.templatePoint returnTo/></#assign>
 							<a href="${record_url}" class="btn btn-primary btn-sm <#if !canRecordAny>disabled</#if>">Record</a>
 						</div>
 						${groupedPoint.templatePoint.name}

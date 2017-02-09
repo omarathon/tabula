@@ -22,8 +22,6 @@
 		<@modal.header>
 			<#noescape>${heading}</#noescape>
 		</@modal.header>
-	<#else>
-		<div id="container">
 	</#if>
 
 	<#if isModal!false>
@@ -41,30 +39,23 @@
 		</form>
 		</@modal.footer>
 	<#else>
-		<div id="container">
-			<#if isAuto!false>
-				<div class="alert alert-warning">
-					Points marked as Missed (authorised) must have an attendance note explaining why the absence was authorised.
-				</div>
-			</#if>
+		<#if isAuto!false>
+			<div class="alert alert-info">
+				Points marked as Missed (authorised) must have an attendance note explaining why the absence was authorised.
+			</div>
+		</#if>
 
-			<@f.form id="bulk-attendance-note-form" method="post" enctype="multipart/form-data" action="" commandName="command" class="form-horizontal double-submit-protection">
-				<#include "_shared_fields.ftl" />
+		<@f.form id="bulk-attendance-note-form" method="post" enctype="multipart/form-data" action="" commandName="command" class="double-submit-protection">
+			<#include "_shared_fields.ftl" />
 
-				<@form.labelled_row "overwrite" "">
-					<label class="checkbox">
-						<@f.checkbox path="overwrite" />
-						Overwrite existing attendance notes
-					</label>
-				</@form.labelled_row>
+			<@bs3form.checkbox>
+				<@f.checkbox path="overwrite" />
+				Overwrite existing attendance notes
+			</@bs3form.checkbox>
 
-				<input type="hidden" name="isSave" value="true" />
+			<input type="hidden" name="isSave" value="true" />
 		</@f.form>
-		</div>
 	</#if>
 
-	<#if !isModal!false>
-		</div><#-- #container -->
-	</#if>
 </@modal.wrapper>
 </#escape>

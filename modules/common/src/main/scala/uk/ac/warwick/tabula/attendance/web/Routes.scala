@@ -144,8 +144,9 @@ object Routes {
 
 	object Profile {
 		def home: String = context + "/profile"
-		def years(student: StudentMember): String = context + "/profile/%s" format encoded(student.universityId)
 		def profileForYear(student: StudentMember, academicYear: AcademicYear): String =
 			context + "/profile/%s/%s" format(encoded(student.universityId), encoded(academicYear.startYear.toString))
+		def record(student: StudentMember, academicYear: AcademicYear): String =
+			context + "/profile/%s/%s/record" format(encoded(student.universityId), encoded(academicYear.startYear.toString))
 	}
 }

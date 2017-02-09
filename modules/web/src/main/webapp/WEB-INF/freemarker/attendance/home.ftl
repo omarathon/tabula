@@ -44,7 +44,7 @@
 	<ul>
 		<#list relationshipTypesMap?keys as relationshipType>
 			<#if relationshipTypesMapById[relationshipType.id]>
-				<li><h3><a id="relationship-${relationshipType.urlPart}-${academicYear.startYear?c}" href="<@routes.attendance.agentHomeForYear relationshipType academicYear.startYear?c />">${relationshipType.studentRole?cap_first}s ${academicYear.label}</a></h3></li>
+				<li><h3><a id="relationship-${relationshipType.urlPart}-${academicYear.startYear?c}" href="<@routes.attendance.agentHomeForYear relationshipType academicYear />">${relationshipType.studentRole?cap_first}s ${academicYear.label}</a></h3></li>
 			</#if>
 		</#list>
 	</ul>

@@ -16,7 +16,7 @@
 			<#if checkpoint??>
 				${checkpoint.state.description}:
 			<#else>
-				Not recorded:
+				Unrecorded:
 			</#if>
 			${attendanceNote.point.name}
 			<#if point.scheme.pointStyle.dbValue == "week">
