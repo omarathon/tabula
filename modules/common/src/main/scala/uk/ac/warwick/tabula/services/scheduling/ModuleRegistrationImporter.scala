@@ -24,6 +24,7 @@ import uk.ac.warwick.userlookup.User
 
 import scala.collection.JavaConverters._
 import scala.collection.immutable.{HashMap, Iterable}
+import scala.util.Try
 
 /**
  * Import module registration data from SITS.
@@ -104,23 +105,30 @@ class SandboxModuleRegistrationImporter extends AbstractModuleRegistrationImport
 
 	def studentModuleRegistrationDetails(universityId: String, ssoUser: User): Iterable[ImportModuleRegistrationsCommand] = {
 		val rows = (for {
-			(code, d) <- SandboxData.Departments
+			(_, d) <- SandboxData.Departments
 			route <- d.routes.values.toSeq
 			if (route.studentsStartId to route.studentsEndId).contains(universityId.toInt)
 			moduleCode <- route.moduleCodes
 		} yield {
+			val mark = (universityId ++ universityId ++ moduleCode.substring(3)).toCharArray.map(char =>
+				Try(char.toString.toInt).toOption.getOrElse(0) * universityId.toCharArray.apply(0).toString.toInt
+			).sum % 100
+			val grade = SandboxData.GradeBoundaries.find(gb => gb.marksCode == "TABULA-UG" && gb.minimumMark <= mark && gb.maximumMark >= mark).map(_.grade).getOrElse("F")
 			new ModuleRegistrationRow(
 				scjCode = "%s/1".format(universityId),
 				sitsModuleCode = "%s-15".format(moduleCode.toUpperCase),
 				cats = new JBigDecimal(15),
 				assessmentGroup = "A",
-				selectionStatusCode = "C",
+				selectionStatusCode = (universityId.toInt + Try(moduleCode.substring(3).toInt).getOrElse(0)) % 2 match {
+					case 0 => "C"
+					case _ => "O"
+				},
 				occurrence = "A",
 				academicYear = AcademicYear.guessSITSAcademicYearByDate(DateTime.now).toString,
-				actualMark = Some(new JBigDecimal("90.0")),
-				actualGrade = "A",
-				agreedMark = Some(new JBigDecimal("90.0")),
-				agreedGrade = "A"
+				actualMark = Some(new JBigDecimal(mark)),
+				actualGrade = grade,
+				agreedMark = Some(new JBigDecimal(mark)),
+				agreedGrade = grade
 			)
 		}).toSeq
 

@@ -20,9 +20,12 @@ the comments textarea needs to maintain newlines.
 	</#if>
 	<div class="row">
 		<div class="col-md-5">
-			<@bs3form.labelled_form_group path="prefillAssignment" labelText="Copy assignment options (optional):">
-				<@f.input path="prefillAssignment" cssClass="form-control assignment-picker-input"  placeholder="${pHolder!''}"/>
-			</@bs3form.labelled_form_group>
+			<span class ="assignment-picker-input"  data-target="<@routes.cm2.assignemnts_json module/>">
+				<@bs3form.labelled_form_group path="prefillAssignment" labelText="Copy assignment options (optional):">
+					<input id="prefillAssignment" name="prefillAssignment" type="hidden" value=""/>
+					<input name="query" type="text" class="form-control"  value="${pHolder!''}"/>
+				</@bs3form.labelled_form_group>
+			</span>
 		</div>
 	</div>
 	<div>To find an assignment to pre-populate from, just start typing its name.</div>
@@ -101,5 +104,4 @@ the comments textarea needs to maintain newlines.
 <div>Marking workflows define how and by whom the assignment will be marked. You can use an existing workflow, no
 	workflow or create a single use workflow.
 </div>
-
 </#escape>

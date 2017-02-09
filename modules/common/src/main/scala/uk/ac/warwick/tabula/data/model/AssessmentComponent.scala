@@ -91,6 +91,7 @@ class AssessmentComponent extends GeneratedId with PreSaveBehaviour with Seriali
 	def needsUpdatingFrom(other: AssessmentComponent): Boolean =
 		this.name != other.name ||
 		this.module != other.module ||
+		this.assessmentGroup != other.assessmentGroup ||
 		this.inUse != other.inUse ||
 		this.marksCode != other.marksCode
 

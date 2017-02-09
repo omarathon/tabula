@@ -69,7 +69,7 @@ trait UpdatesStudentMembership {
 	// parse massAddUsers into a collection of individual tokens
 	def massAddUsersEntries: Seq[String] =
 		if (massAddUsers == null) Nil
-		else massAddUsers split ("(\\s|[^A-Za-z\\d\\-_\\.])+") map (_.trim) filterNot (_.isEmpty)
+		else massAddUsers.split("(\\s|[^A-Za-z\\d\\-_\\.])+").map(_.trim).filterNot(_.isEmpty)
 
 	def afterBind() {
 		updateMembership()
@@ -154,6 +154,16 @@ trait UpdatesStudentMembership {
 	lazy val availableUpstreamGroups: Seq[UpstreamGroup] = {
 		for {
 			ua <- assessmentMembershipService.getAssessmentComponents(module)
+			uag <- assessmentMembershipService.getUpstreamAssessmentGroups(ua, academicYear)
+		} yield new UpstreamGroup(ua, uag)
+	}
+
+	/**
+		* All upstream groups whether in use or not
+		*/
+	lazy val allUpstreamGroups: Seq[UpstreamGroup] = {
+		for {
+			ua <- assessmentMembershipService.getAssessmentComponents(module, inUseOnly = false)
 			uag <- assessmentMembershipService.getUpstreamAssessmentGroups(ua, academicYear)
 		} yield new UpstreamGroup(ua, uag)
 	}

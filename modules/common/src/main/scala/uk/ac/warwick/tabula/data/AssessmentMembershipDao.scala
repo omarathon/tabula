@@ -47,9 +47,9 @@ trait AssessmentMembershipDao {
 	 *  Typically used to provide possible candidates to link to an app assignment,
 	 *  in conjunction with #getUpstreamAssessmentGroups.
 	 */
-	def getAssessmentComponents(module: Module): Seq[AssessmentComponent]
+	def getAssessmentComponents(module: Module, inUseOnly: Boolean): Seq[AssessmentComponent]
 	def getAssessmentComponents(department: Department, includeSubDepartments: Boolean): Seq[AssessmentComponent]
-	def getAssessmentComponents(moduleCode: String, inUseOnly: Boolean = true): Seq[AssessmentComponent]
+	def getAssessmentComponents(moduleCode: String, inUseOnly: Boolean): Seq[AssessmentComponent]
 
 	/**
 	 * Get all assessment groups that can serve this assignment this year.
@@ -185,12 +185,16 @@ class AssessmentMembershipDaoImpl extends AssessmentMembershipDao with Daoisms w
 	}
 
 	/** Just gets components of type Assignment for this module, not all components. */
-	def getAssessmentComponents(module: Module): Seq[AssessmentComponent] = {
-		session.newCriteria[AssessmentComponent]
+	def getAssessmentComponents(module: Module, inUseOnly: Boolean): Seq[AssessmentComponent] = {
+		val c = session.newCriteria[AssessmentComponent]
 			.add(Restrictions.like("moduleCode", module.code.toUpperCase + "-%"))
-			.add(is("inUse", true))
 			.addOrder(Order.asc("sequence"))
-			.seq
+
+		if (inUseOnly) {
+			c.add(is("inUse", true))
+		}
+
+		c.seq
 	}
 
 	/** Just gets components of type Assignment for modules in this department, not all components. */
@@ -218,7 +222,7 @@ class AssessmentMembershipDaoImpl extends AssessmentMembershipDao with Daoisms w
 		}
 	}
 
-	def getAssessmentComponents(moduleCode: String, inUseOnly: Boolean = true): Seq[AssessmentComponent] = {
+	def getAssessmentComponents(moduleCode: String, inUseOnly: Boolean): Seq[AssessmentComponent] = {
 		val c = session.newCriteria[AssessmentComponent]
 			.add(is("moduleCode", moduleCode))
 			.addOrder(Order.asc("sequence"))

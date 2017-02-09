@@ -94,7 +94,8 @@ trait ModifiesSmallGroupSetMembership extends UpdatesStudentMembership with Spec
 	lazy val existingMembers: Option[UnspecifiedTypeUserGroup] = Option(set).map { _.members }
 
 	def copyGroupsFrom(smallGroupSet: SmallGroupSet) {
-		upstreamGroups.addAll(availableUpstreamGroups.filter { ug =>
+		// TAB-4848 get all the groups that are linked even if they're marked not in use
+		upstreamGroups.addAll(allUpstreamGroups.filter { ug =>
 			assessmentGroups.asScala.exists( ag => ug.assessmentComponent == ag.assessmentComponent && ag.occurrence == ug.occurrence )
 		}.asJavaCollection)
 	}
