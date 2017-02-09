@@ -139,12 +139,8 @@ object AttendanceBreadcrumbs {
 
 	object Agent {
 
-		case class Relationship(relationshipType: StudentRelationshipType) extends Abstract {
-			val title: String = relationshipType.studentRole.capitalize + "s"
-			val url = Some(Routes.Agent.relationship(relationshipType))
-		}
 		case class RelationshipForYear(relationshipType: StudentRelationshipType, academicYear: AcademicYear) extends Abstract {
-			val title: String = academicYear.startYear.toString
+			val title: String = relationshipType.studentRole.capitalize + "s"
 			val url = Some(Routes.Agent.relationshipForYear(relationshipType, academicYear))
 		}
 		case class Student(relationshipType: StudentRelationshipType, academicYear: AcademicYear, student: StudentMember) extends Abstract {

@@ -3,27 +3,7 @@
 <#import "../attendance_macros.ftl" as attendance_macros />
 <#import "../attendance_variables.ftl" as attendance_variables />
 
-<div class="btn-toolbar dept-toolbar">
-	<div class="btn-group dept-settings">
-		<a class="btn btn-medium dropdown-toggle" data-toggle="dropdown" href="#">
-			<i class="icon-calendar"></i>
-			${academicYear.label}
-			<span class="caret"></span>
-		</a>
-		<ul class="dropdown-menu pull-right">
-			<li><a href="<@routes.attendance.agentHomeForYear relationshipType '2013' />"><#if academicYear.startYear == 2013><strong>13/14</strong><#else>13/14</#if></a></li>
-			<#if features.academicYear2014>
-				<li><a href="<@routes.attendance.agentHomeForYear relationshipType '2014' />"><#if academicYear.startYear == 2014><strong>14/15</strong><#else>14/15</#if></a></li>
-			</#if>
-			<#if features.academicYear2015>
-				<li><a href="<@routes.attendance.agentHomeForYear relationshipType '2015' />"><#if academicYear.startYear == 2015><strong>15/16</strong><#else>15/16</#if></a></li>
-			</#if>
-			<#if features.academicYear2016>
-				<li><a href="<@routes.attendance.agentHomeForYear relationshipType '2016' />"><#if academicYear.startYear == 2016><strong>16/17</strong><#else>16/17</#if></a></li>
-			</#if>
-		</ul>
-	</div>
-
+<div class="pull-right">
 	<@fmt.bulk_email_students students=studentAttendance.students />
 </div>
 
@@ -34,7 +14,7 @@
 <#else>
 	<#assign returnTo><@routes.attendance.agentHomeForYear relationshipType academicYear.startYear?c /></#assign>
 
-	<@attendance_macros.scrollablePointsTable
+	<@attendance_macros.id7ScrollablePointsTable
 		command=command
 		filterResult=studentAttendance
 		visiblePeriods=visiblePeriods
@@ -44,14 +24,14 @@
 	; result>
 		<td class="unrecorded">
 			<a href="<@routes.attendance.agentStudent relationshipType academicYear.startYear?c result.student />" title="<@attendance_macros.checkpointTotalTitle result.checkpointTotal />" class="use-tooltip">
-				<span class="badge badge-<#if (result.checkpointTotal.unrecorded > 2)>important<#elseif (result.checkpointTotal.unrecorded > 0)>warning<#else>success</#if>">
+				<span class="<#if (result.checkpointTotal.unrecorded > 2)>badge progress-bar-danger<#elseif (result.checkpointTotal.unrecorded > 0)>badge progress-bar-warning</#if>">
 					${result.checkpointTotal.unrecorded}
 				</span>
 			</a>
 		</td>
 		<td class="missed">
 			<a href="<@routes.attendance.agentStudent relationshipType academicYear.startYear?c result.student />" title="<@attendance_macros.checkpointTotalTitle result.checkpointTotal />" class="use-tooltip">
-				<span class="badge badge-<#if (result.checkpointTotal.unauthorised > 2)>important<#elseif (result.checkpointTotal.unauthorised > 0)>warning<#else>success</#if>">
+				<span class="<#if (result.checkpointTotal.unauthorised > 2)>badge progress-bar-danger<#elseif (result.checkpointTotal.unauthorised > 0)>badge progress-bar-warning</#if>">
 					${result.checkpointTotal.unauthorised}
 				</span>
 			</a>
@@ -62,23 +42,23 @@
 				permission='MonitoringPoints.Record'
 				scope=result.student
 				action_descr='record monitoring points'
-				classes='btn btn-primary btn-mini'
+				classes='btn btn-primary btn-xs'
 				href=record_url
 				tooltip='Record'
 			>
-				<i class="icon-pencil icon-fixed-width late"></i>
+				Record
 			</@fmt.permission_button>
 		</td>
-	</@attendance_macros.scrollablePointsTable>
+	</@attendance_macros.id7ScrollablePointsTable>
 
 	<div class="monitoring-points">
 		<#list attendance_variables.monitoringPointTermNames as term>
 			<#if groupedPoints[term]??>
-				<@attendance_macros.groupedPointsBySection groupedPoints term; groupedPoint>
-					<div class="span12">
+				<@attendance_macros.id7GroupedPointsBySection groupedPoints term; groupedPoint>
+					<div class="col-md-12">
 						<div class="pull-right">
 							<#assign record_url><@routes.attendance.agentRecordPoints relationshipType academicYear.startYear?c groupedPoint.templatePoint returnTo/></#assign>
-							<a href="${record_url}" class="btn btn-primary <#if !canRecordAny>disabled</#if>">Record</a>
+							<a href="${record_url}" class="btn btn-primary btn-sm <#if !canRecordAny>disabled</#if>">Record</a>
 						</div>
 						${groupedPoint.templatePoint.name}
 						(<a class="use-tooltip" data-html="true" title="
@@ -104,17 +84,17 @@
 							<@fmt.p groupedPoint.schemes?size "scheme" />
 						</a>
 					</div>
-				</@attendance_macros.groupedPointsBySection>
+				</@attendance_macros.id7GroupedPointsBySection>
 			</#if>
 		</#list>
 
 		<#list monthNames as month>
 			<#if groupedPoints[month]??>
-				<@attendance_macros.groupedPointsBySection groupedPoints month; groupedPoint>
-					<div class="span12">
+				<@attendance_macros.id7GroupedPointsBySection groupedPoints month; groupedPoint>
+					<div class="col-md-12">
 						<div class="pull-right">
 							<#assign record_url><@routes.attendance.agentRecordPoints relationshipType academicYear.startYear?c groupedPoint.templatePoint returnTo/></#assign>
-							<a href="${record_url}" class="btn btn-primary <#if !canRecordAny>disabled</#if>">Record</a>
+							<a href="${record_url}" class="btn btn-primary btn-sm <#if !canRecordAny>disabled</#if>">Record</a>
 						</div>
 						${groupedPoint.templatePoint.name}
 						(<@fmt.interval groupedPoint.templatePoint.startDate groupedPoint.templatePoint.endDate />)
@@ -129,38 +109,27 @@
 							<@fmt.p groupedPoint.schemes?size "scheme" />
 						</a>
 					</div>
-				</@attendance_macros.groupedPointsBySection>
+				</@attendance_macros.id7GroupedPointsBySection>
 			</#if>
 		</#list>
 
 	</div>
 
+	<div id="profile-modal" class="modal fade profile-subset"></div>
+
 	<script>
 		jQuery(window).on('load', function(){
-			Attendance.scrollablePointsTableSetup();
+			GlobalScripts.scrollableTableSetup();
 		});
 		jQuery(function($){
-			Attendance.tableSortMatching([
-				$('.scrollable-points-table .students'),
-				$('.scrollable-points-table .attendance'),
-				$('.scrollable-points-table .counts')
+			var $leftTable = $('.scrollable-points-table .left table');
+			GlobalScripts.tableSortMatching([
+				$leftTable,
+				$('.scrollable-points-table .right table')
 			]);
-			$(".scrollable-points-table .students").tablesorter({
+			$leftTable.tablesorter({
 				sortList: [[2,0], [1,0]],
-				headers: {0:{sorter:false}}
-			});
-			$(".scrollable-points-table .attendance").tablesorter({
-				headers: {
-					0:{sorter:false},
-					1:{sorter:false},
-					2:{sorter:false},
-					3:{sorter:false},
-					4:{sorter:false},
-					5:{sorter:false}
-				}
-			});
-			$(".scrollable-points-table .counts").tablesorter({
-				headers: {2:{sorter:false}},
+				headers: {0:{sorter:false},6:{sorter:false}},
 				textExtraction: function(node) {
 					var $el = $(node);
 					if ($el.data('sortby')) {

@@ -112,7 +112,7 @@ var checkForCheckpoints = function(){
 
 exports.bindButtonGroupHandler = function(enableCheckForCheckpoints) {
 
-	$('#recordAttendance').on('click', 'tbody div.btn-group button', function(e){
+	$('#recordAttendance').on('click', 'tbody div.btn-group button, .striped-section-contents div.btn-group button', function(e){
 		var $this = $(this);
 		updateAttendanceState(e, $this);
 		$this.trigger('checkform.areYouSure');
@@ -157,7 +157,7 @@ $(function(){
         .end().each(function(){
 		$(this).find('.btn-group button').each(function(i){
 			$(this).on('click', function(e){
-				$('.attendees tbody tr').each(function(){
+				$('.attendees tbody tr, .attendees .item-info').each(function(){
 					$(this).find('button').eq(i).each(function() {
 						$(this).closest('[data-toggle="radio-buttons"]').find('button.active').removeClass('active');
 						$(this).addClass('active');
@@ -170,7 +170,7 @@ $(function(){
 				if (i === 2) {
 					var $bulkNote = $('.bulk-attendance-note');
 					if ($bulkNote.length) {
-						$bulkNote.attr('href', setArgOnUrl($bulkNote.attr('href'), 'isAuto', 'true'));
+						$bulkNote.attr('href', GlobalScripts.setArgOnUrl($bulkNote.attr('href'), 'isAuto', 'true'));
 						$bulkNote.click();
 					}
 				}
@@ -200,6 +200,13 @@ $(function(){
 				trigger: 'click',
 				container: 'body'
 			});
+		});
+	});
+
+	$('a.upload-attendance').on('click', function(e){
+		e.preventDefault();
+		$.get($(this).attr('href'), function(data){
+			$('#upload-attendance-modal').html(data).modal("show");
 		});
 	});
 
