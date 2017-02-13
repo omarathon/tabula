@@ -276,24 +276,32 @@
 	exports.createCalendar = createCalendar;
 
 	function createSmallScreenCalender($container, $loading, url, data, method) {
+		var startToSend = new Date();
+		startToSend.setHours(0,0,0,0);
+
+		function checkScrollAndRefresh() {
+			if ($(window).scrollTop() + $(window).height() > $(document).height() - 400) {
+				startToSend.setDate(startToSend.getDate() + 7);
+				fetchAndRender();
+			} else {
+				setTimeout(checkScrollAndRefresh, 500);
+			}
+		}
+
 		function fetchAndRender() {
-			$container.empty();
 			var complete = false;
 			setTimeout(function() {
 				if (!complete) {
 					$loading.show();
 				}
 			}, 300);
-			var startToSend = new Date();
-			startToSend.setMilliseconds(0);
-			startToSend.setDate(startToSend.getDate() - 1);
 			var endToSend = new Date(startToSend.valueOf());
-			endToSend.setDate(endToSend.getDate() + 40);
+			endToSend.setDate(endToSend.getDate() + 7);
 			$.ajax({
 				url: url,
 				// make the from/to params compatible with what FullCalendar sends if you just specify a URL
 				// as an eventSource, rather than a function. i.e. use seconds-since-the-epoch.
-				data: data(),
+				data: data(startToSend, endToSend),
 				type: method,
 				success:function(data){
 					var events = data.events;
@@ -319,17 +327,15 @@
 					});
 					var dates = _.keys(eventsByDay).sort();
 
-					if (dates.length === 0) {
-						$container.append($('<em/>').html('No events found in the next 30 days.'));
-					} else {
-						_.each(dates, function(dateValue){
+					if (dates.length > 0) {
+						_.each(dates, function(dateValue) {
 							var date = moment(dateValue, 'x')
 								, $table = $('<table/>').addClass('table table-condensed').append($('<thead/>')).append('<tbody/>')
 								, $thead = $table.find('thead')
 								, $tbody = $table.find('tbody');
 							$thead.append(
 								$('<tr/>').append(
-									$('<th/>').prop('colspan',3).append(
+									$('<th/>').prop('colspan', 3).append(
 										$('<h6/>').html(date.calendar(null, {
 											sameDay: '[Today] D MMMM',
 											nextDay: '[Tomorrow] D MMMM',
@@ -344,10 +350,10 @@
 							if (date.diff(todayAtMidnight) === 0) {
 								$table.addClass('today');
 							}
-							_.each(_.sortBy(eventsByDay[dateValue],['startDate']), function(event){
+							_.each(_.sortBy(eventsByDay[dateValue], ['startDate']), function(event) {
 								var title = event.title;
 								if (event.locationId && event.locationId.length > 0) {
-									title = title.replace('(' + event.location + ')','')
+									title = title.replace('(' + event.location + ')', '')
 										+ '(<span class="map-location" data-lid="' + event.locationId + '">' + event.location + '</span>)';
 								}
 								$tbody.append(
@@ -355,7 +361,7 @@
 										$('<td/>').addClass('time').html(moment.unix(event.start).format('kk:mm'))
 									).append(
 										$('<td/>').addClass('marker').append(
-											$('<i/>').addClass('fa fa-circle').css('color',event.backgroundColor)
+											$('<i/>').addClass('fa fa-circle').css('color', event.backgroundColor)
 										)
 									).append(
 										$('<td/>').html(title)
@@ -365,18 +371,42 @@
 							$container.append($table);
 						});
 
-						$('.map-location[data-lid]').mapPopups({placement:'bottom'});
+						$('.map-location[data-lid]').mapPopups({
+							placement: 'bottom',
+							expandClickTarget: true
+						});
+
+						$loading.hide();
+						complete = true;
 					}
 				},
-				error: function(jqXKR){ handleCalendarError(jqXKR, $container) },
-				complete: function() {
-					complete = true;
+				error: function(jqXKR){
+					handleCalendarError(jqXKR, $container);
 					$loading.hide();
+					complete = true;
+				},
+				complete: function() {
+					if (startToSend.valueOf() - new Date().valueOf() > (1000*60*60*24*365)) {
+						if ($('.calendar-smallscreen table').length === 0) {
+							$loading.html("No events found in the next 12 months").show();
+						} else {
+							$loading.hide();
+							complete = true;
+						}
+					} else {
+						setTimeout(checkScrollAndRefresh, 500);
+					}
 				}
 			});
 		}
 		fetchAndRender();
-		$(window).on('tabula.smallScreenCalender.refresh', fetchAndRender);
+
+		$(window).on('tabula.smallScreenCalender.refresh', function(){
+			var startToSend = new Date();
+			startToSend.setHours(0,0,0,0);
+			$container.empty();
+			fetchAndRender();
+		});
 	}
 	exports.createSmallScreenCalender = createSmallScreenCalender;
 

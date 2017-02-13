@@ -190,10 +190,10 @@
 </div>
 
 <div class="calendar-smallscreen-outer visible-xs-block">
+	<div class="calendar-smallscreen"></div>
 	<div class="calendar-smallscreen-loading">
 		<i class="fa fa-spinner fa-spin"></i><em> Loading&hellip;</em>
 	</div>
-	<div class="calendar-smallscreen"></div>
 </div>
 
 <style type="text/css">
@@ -270,14 +270,9 @@
 				$('.calendar-smallscreen'),
 				$('.calendar-smallscreen-loading'),
 				'${submitUrl}',
-				function() {
-					var startToSend = new Date();
-					startToSend.setMilliseconds(0);
-					startToSend.setDate(startToSend.getDate() - 1);
-					var endToSend = new Date(startToSend.valueOf());
-					endToSend.setDate(endToSend.getDate() + 40);
-					$('#from').val(startToSend.getTime()/1000);
-					$('#to').val(endToSend.getTime()/1000);
+				function(startDate, endDate) {
+					$('#from').val(startDate.getTime()/1000);
+					$('#to').val(endDate.getTime()/1000);
 					return $form.serialize();
 				},
 				'POST'
