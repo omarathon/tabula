@@ -110,9 +110,10 @@ var checkForCheckpoints = function(){
 	});
 };
 
-exports.bindButtonGroupHandler = function(enableCheckForCheckpoints) {
+exports.bindButtonGroupHandler = function() {
 
-	$('#recordAttendance').on('click', 'tbody div.btn-group button, .striped-section-contents div.btn-group button', function(e){
+	var $recordForm = $('.recordCheckpointForm'), enableCheckForCheckpoints = $recordForm.data('check-checkpoints');
+	$recordForm.on('click', 'tbody div.btn-group button, .striped-section-contents div.btn-group button', function(e){
 		var $this = $(this);
 		updateAttendanceState(e, $this);
 		$this.trigger('checkform.areYouSure');
@@ -138,7 +139,7 @@ exports.bindButtonGroupHandler = function(enableCheckForCheckpoints) {
 $(function(){
 	// SCRIPTS FOR RECORDING MONITORING POINTS
 
-	var $recordForm = $('.recordCheckpointForm');
+	var $recordForm = $('.recordCheckpointForm'), enableCheckForCheckpoints = $recordForm.data('check-checkpoints');
 	$recordForm.on('click.saveButtonPrompt', 'div.btn-group button', function() {
 		$recordForm.off('click.saveButtonPrompt').find('.submit-buttons .btn-primary')
 			.data({
@@ -164,7 +165,9 @@ $(function(){
 						updateAttendanceState(e, $(this));
 					})
 				});
-				checkForCheckpoints();
+				if (enableCheckForCheckpoints) {
+					checkForCheckpoints();
+				}
 				$recordForm.find('form').trigger('checkform.areYouSure');
 				// if the bulk authorised was clicked then open the bulk attendance note popup
 				if (i === 2) {
@@ -215,16 +218,16 @@ $(function(){
         if (query.length === 0) {
             rows.show();
             rows.find('p.student-list').hide();
-            $('.agent-search span.muted').hide();
+            $('.agent-search span.very-subtle').hide();
         } else if (query.length < 3) {
-            $('.agent-search span.muted').show();
+            $('.agent-search span.very-subtle').show();
         } else {
-            $('.agent-search span.muted').hide();
+            $('.agent-search span.very-subtle').hide();
             rows.each(function(){
                 var $row = $(this)
                     , $agentCell = $row.find('td.agent')
-                    , $agentName = $agentCell.find('h6')
-                    , $students = $agentCell.find('p.student-list')
+                    , $agentName = $agentCell.find('strong')
+                    , $students = $agentCell.find('div.student-list')
                     , showRow = false;
                 if ($agentName.text().toLowerCase().indexOf(query) >= 0) {
                     showRow = true;

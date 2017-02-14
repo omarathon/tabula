@@ -76,12 +76,12 @@
 
 <#macro viewHome><@_u page="/view"/></#macro>
 <#macro viewHomeYears department><@_u page="/view/${department.code}"/></#macro>
-<#macro viewHomeForYear department academicYearString><@_u page="/view/${department.code}/${academicYearString}"/></#macro>
+<#macro viewHomeForYear department academicYear><@_u page="/view/${department.code}/${academicYear.startYear?c}"/></#macro>
 
-<#macro viewReport department academicYearString queryString><@_u page="/view/${department.code}/${academicYearString}/report?${queryString}"/></#macro>
-<#macro viewReportConfirm department academicYearString><@_u page="/view/${department.code}/${academicYearString}/report/confirm"/></#macro>
+<#macro viewReport department academicYear queryString><@_u page="/view/${department.code}/${academicYear.startYear?c}/report?${queryString}"/></#macro>
+<#macro viewReportConfirm department academicYear><@_u page="/view/${department.code}/${academicYear.startYear?c}/report/confirm"/></#macro>
 
-<#macro viewStudents department academicYearString queryString="" page="" sortOrder="">
+<#macro viewStudents department academicYear queryString="" page="" sortOrder="">
 	<#local args = [] />
 	<#if queryString?has_content>
 		<#local args = args + [queryString] />
@@ -93,20 +93,20 @@
 		<#local args = args + ["sortOrder=" + sortOrder ] />
 	</#if>
 	<#local query><#if args?has_content>?</#if><#list args as arg>${arg}<#if arg_has_next>&</#if></#list></#local>
-	<@_u page="/view/${department.code}/${academicYearString}/students${query}"/>
+	<@_u page="/view/${department.code}/${academicYear.startYear?c}/students${query}"/>
 </#macro>
-<#macro viewSingleStudent department academicYearString student><@_u page="/view/${department.code}/${academicYearString}/students/${student.universityId}" /></#macro>
-<#macro viewRecordStudent department academicYearString student returnTo="">
+<#macro viewSingleStudent department academicYear student><@_u page="/view/${department.code}/${academicYear.startYear?c}/students/${student.universityId}" /></#macro>
+<#macro viewRecordStudent department academicYear student returnTo="">
 	<#local returnTo><#if returnTo?has_content>?returnTo=${returnTo}</#if></#local>
-	<@_u page="/view/${department.code}/${academicYearString}/students/${student.universityId}/record${returnTo}"/>
+	<@_u page="/view/${department.code}/${academicYear.startYear?c}/students/${student.universityId}/record${returnTo}"/>
 </#macro>
 
-<#macro viewPoints department academicYearString filterQuery="">
+<#macro viewPoints department academicYear filterQuery="">
 	<#local filterQuery><#if filterQuery?has_content>?${filterQuery}&hasBeenFiltered=true</#if></#local>
-	<@_u page="/view/${department.code}/${academicYearString}/points${filterQuery}"/>
+	<@_u page="/view/${department.code}/${academicYear.startYear?c}/points${filterQuery}"/>
 </#macro>
-<#macro viewRecordPoints department academicYearString point queryString returnTo><@_u page="/view/${department.code}/${academicYearString}/points/${point.id}/record?returnTo=${returnTo?url}&hasBeenFiltered=true&${queryString}"/></#macro>
+<#macro viewRecordPoints department academicYear point queryString returnTo><@_u page="/view/${department.code}/${academicYear.startYear?c}/points/${point.id}/record?returnTo=${returnTo?url}&hasBeenFiltered=true&${queryString}"/></#macro>
 
-<#macro viewAgentsHome department academicYearString><@_u page="/view/${department.code}/${academicYearString}/agents"/></#macro>
-<#macro viewAgents department academicYearString relationshipType><@_u page="/view/${department.code}/${academicYearString}/agents/${relationshipType.urlPart}"/></#macro>
-<#macro viewAgent department academicYearString relationshipType agent><@_u page="/view/${department.code}/${academicYearString}/agents/${relationshipType.urlPart}/${agent.universityId}"/></#macro>
+<#macro viewAgentsHome department academicYear><@_u page="/view/${department.code}/${academicYear.startYear?c}/agents"/></#macro>
+<#macro viewAgents department academicYear relationshipType><@_u page="/view/${department.code}/${academicYear.startYear?c}/agents/${relationshipType.urlPart}"/></#macro>
+<#macro viewAgent department academicYear relationshipType agent><@_u page="/view/${department.code}/${academicYear.startYear?c}/agents/${relationshipType.urlPart}/${agent.universityId}"/></#macro>

@@ -44,7 +44,6 @@
 				action_descr='record monitoring points'
 				classes='btn btn-primary btn-xs'
 				href=record_url
-				tooltip='Record'
 			>
 				Record
 			</@fmt.permission_button>
