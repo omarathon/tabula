@@ -65,10 +65,10 @@ abstract class AbstractFeedbackDao extends FeedbackDao with Daoisms {
 				session.newCriteria[ExamFeedback]
 					.add(is("exam", exam))
 			},
-			"universityId",
-			users.map(_.getWarwickId)
-		).groupBy(_.studentIdentifier).map{case(universityId, feedbacks) =>
-			users.find(_.getWarwickId == universityId).get -> feedbacks.head
+			"usercode",
+			users.map(_.getUserId)
+		).groupBy(_.usercode).map{case(usercode, feedbacks) =>
+			users.find(_.getUserId == usercode).get -> feedbacks.head
 		}
 	}
 
