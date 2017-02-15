@@ -49,7 +49,7 @@ class AttendanceViewHomeController extends AbstractAttendanceViewHomeController 
 }
 
 @Controller
-@RequestMapping(value = Array("/attendance/view/{academicYear:\\d\\d\\d\\d}"))
+@RequestMapping(value = Array("/attendance/view/{academicYear:\\d{4}}"))
 class AttendanceViewHomeForYearController extends AbstractAttendanceViewHomeController {
 
 	@ModelAttribute("activeAcademicYear")
