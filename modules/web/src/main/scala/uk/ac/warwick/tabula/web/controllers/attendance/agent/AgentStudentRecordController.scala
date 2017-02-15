@@ -82,7 +82,7 @@ class AgentStudentRecordController extends AttendanceController
 	}
 
 	private def render(relationshipType: StudentRelationshipType, academicYear: AcademicYear, student: StudentMember) = {
-		Mav("attendance/record-id7",
+		Mav("attendance/record",
 			"department" -> currentMember.homeDepartment,
 			"returnTo" -> getReturnTo(Routes.Agent.student(relationshipType, academicYear, student))
 		).crumbs(

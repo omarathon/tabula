@@ -33,9 +33,9 @@
 				<li>unauthorised</li>
 				<li>not-recorded</li>
 			</ul>
-			<@form.labelled_row "" "File">
+			<@bs3form.labelled_form_group "" "File">
 				<input type="file" name="file.upload" />
-			</@form.labelled_row>
+			</@bs3form.labelled_form_group>
 		</@modal.body>
 
 		<@modal.footer enabled=ajax>

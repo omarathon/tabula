@@ -1,34 +1,31 @@
 package uk.ac.warwick.tabula.web.controllers.admin.permissions
 
-import org.joda.time.DateTime
-import org.springframework.web.bind.annotation.{ModelAttribute, PathVariable, RequestMapping, RequestParam}
-import org.springframework.stereotype.Controller
-import uk.ac.warwick.tabula.permissions.{Permission, Permissions, PermissionsSelector, PermissionsTarget, SelectorPermission}
-import uk.ac.warwick.tabula.commands.{Appliable, SelfValidating}
-import uk.ac.warwick.tabula.data.model.permissions.{GrantedPermission, GrantedRole}
-import uk.ac.warwick.tabula.commands.permissions._
-import uk.ac.warwick.tabula.data.model.{Assignment, Department, Member, Module, Route, StudentRelationshipType}
-import uk.ac.warwick.tabula.web.Mav
-import uk.ac.warwick.tabula.web.controllers.admin.AdminController
-import uk.ac.warwick.tabula.roles.{RoleBuilder, RoleDefinition, SelectorBuiltInRoleDefinition}
-import uk.ac.warwick.spring.Wire
-import uk.ac.warwick.tabula.services.UserLookupService
-
-import scala.collection.JavaConverters._
 import javax.validation.Valid
 
+import org.joda.time.DateTime
+import org.springframework.stereotype.Controller
 import org.springframework.validation.Errors
-
-import scala.reflect.ClassTag
-import uk.ac.warwick.tabula.services.permissions.PermissionsService
-import uk.ac.warwick.tabula.data.model.groups.{SmallGroup, SmallGroupEvent, SmallGroupSet}
-import uk.ac.warwick.tabula.{AcademicYear, CurrentUser}
-import uk.ac.warwick.tabula.helpers.ReflectionHelper
+import org.springframework.web.bind.annotation.{ModelAttribute, PathVariable, RequestMapping, RequestParam}
+import uk.ac.warwick.spring.Wire
+import uk.ac.warwick.tabula.commands.permissions._
+import uk.ac.warwick.tabula.commands.{Appliable, SelfValidating}
 import uk.ac.warwick.tabula.data.Transactions._
+import uk.ac.warwick.tabula.data.model.groups.{SmallGroup, SmallGroupEvent, SmallGroupSet}
+import uk.ac.warwick.tabula.data.model.permissions.{GrantedPermission, GrantedRole}
+import uk.ac.warwick.tabula.data.model._
+import uk.ac.warwick.tabula.helpers.ReflectionHelper
+import uk.ac.warwick.tabula.permissions._
 import uk.ac.warwick.tabula.roles.RoleBuilder.GeneratedRole
+import uk.ac.warwick.tabula.roles.{RoleBuilder, RoleDefinition, SelectorBuiltInRoleDefinition}
+import uk.ac.warwick.tabula.services.UserLookupService
+import uk.ac.warwick.tabula.services.permissions.PermissionsService
+import uk.ac.warwick.tabula.web.{Mav, Routes}
+import uk.ac.warwick.tabula.web.controllers.admin.AdminController
+import uk.ac.warwick.tabula.{AcademicYear, CurrentUser}
 
+import scala.collection.JavaConverters._
 import scala.collection.immutable.SortedMap
-import uk.ac.warwick.tabula.web.Routes
+import scala.reflect.ClassTag
 
 abstract class PermissionsControllerMethods[A <: PermissionsTarget : ClassTag] extends AdminController {
 
@@ -107,7 +104,7 @@ abstract class PermissionsControllerMethods[A <: PermissionsTarget : ClassTag] e
 		if (errors.hasErrors) {
 			form(target)
 		} else {
-			val grantedPermission = Some(command.apply())
+			command.apply()
 			val userCodes = command.usercodes.asScala
 			form(target, userCodes, None, "add")
 		}
@@ -120,7 +117,7 @@ abstract class PermissionsControllerMethods[A <: PermissionsTarget : ClassTag] e
 		if (errors.hasErrors) {
 			form(target)
 		} else {
-			val grantedPermission = Some(command.apply())
+			command.apply()
 			val userCodes = command.usercodes.asScala
 			form(target, userCodes, None, "remove")
 		}
@@ -170,14 +167,13 @@ abstract class PermissionsControllerMethods[A <: PermissionsTarget : ClassTag] e
 
 		val allDefinitions = (builtInRoleDefinitions ++ selectorBuiltInRoleDefinitions ++ customRoleDefinitions).filter { roleDefinition =>
 			roleDefinition.isAssignable &&
-			roleDefinition.allPermissions(Some(target)).keys.filterNot(securityService.canDelegate(user,_,target)).isEmpty
+			roleDefinition.allPermissions(Some(target)).keys.forall(securityService.canDelegate(user, _, target))
 		}
 
 		SortedMap(
 			allDefinitions
 				.filterNot { defn => existingRoleDefinitions(target).contains(defn) }
-				.map { defn => defn -> RoleBuilder.build(defn, Some(target), defn.getName) }
-				.toSeq:_*
+				.map { defn => defn -> RoleBuilder.build(defn, Some(target), defn.getName) }:_*
 		)
 	}
 
@@ -243,7 +239,7 @@ class DepartmentPermissionsController extends PermissionsControllerMethods[Depar
 	@ModelAttribute("adminLinks") def adminLinks(@PathVariable("target") department: Department) = Seq(
 		AdminLink("Coursework Management", Routes.coursework.admin.department(department)),
 		AdminLink("Small Group Teaching", Routes.groups.admin(department, AcademicYear.guessSITSAcademicYearByDate(DateTime.now))),
-		AdminLink("Monitoring Points - View and record", Routes.attendance.View.department(department)),
+		AdminLink("Monitoring Points - View and record", Routes.attendance.View.departmentForYear(department, AcademicYear.guessSITSAcademicYearByDate(DateTime.now))),
 		AdminLink("Monitoring Points - Create and edit", Routes.attendance.Manage.department(department)),
 		AdminLink("Administration & Permissions", Routes.admin.department(department))
 	)

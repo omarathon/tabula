@@ -32,8 +32,7 @@ class ReportStudentsConfirmController extends AttendanceController {
 		@PathVariable academicYear: AcademicYear
 	): Mav = {
 		Mav("attendance/view/reportconfirm").crumbs(
-			Breadcrumbs.View.Home,
-			Breadcrumbs.View.Department(department),
+			Breadcrumbs.View.HomeForYear(academicYear),
 			Breadcrumbs.View.DepartmentForYear(department, academicYear),
 			Breadcrumbs.View.Students(department, academicYear)
 		)

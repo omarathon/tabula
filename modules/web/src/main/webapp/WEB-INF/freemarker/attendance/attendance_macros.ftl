@@ -157,10 +157,10 @@
 	<#return "" />
 </#function>
 
-<#macro pagination currentPage totalResults resultsPerPage extra_classes="">
+<#macro pagination currentPage totalResults resultsPerPage>
 	<#local totalPages = (totalResults / resultsPerPage)?ceiling />
-	<div class="pagination pagination-right ${extra_classes}">
-		<ul>
+	<nav>
+		<ul class="pagination pagination-sm">
 			<#if currentPage lte 1>
 				<li class="disabled"><span>&laquo;</span></li>
 			<#else>
@@ -181,7 +181,7 @@
 				<li><a href="?page=${currentPage + 1}" data-page="${currentPage + 1}">&raquo;</a></li>
 			</#if>
 		</ul>
-	</div>
+	</nav>
 </#macro>
 
 <#macro manageStudentTable

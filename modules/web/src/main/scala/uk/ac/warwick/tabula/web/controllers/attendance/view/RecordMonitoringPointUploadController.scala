@@ -42,8 +42,7 @@ class RecordMonitoringPointUploadController extends AttendanceController {
 			"uploadUrl" -> Routes.View.pointRecordUpload(department, academicYear, templatePoint, filterCommand.serializeFilter),
 			"ajax" -> ajax
 		).crumbs(
-			Breadcrumbs.View.Home,
-			Breadcrumbs.View.Department(department),
+			Breadcrumbs.View.HomeForYear(academicYear),
 			Breadcrumbs.View.DepartmentForYear(department, academicYear),
 			Breadcrumbs.View.Points(department, academicYear)
 		).noLayoutIf(ajax)
