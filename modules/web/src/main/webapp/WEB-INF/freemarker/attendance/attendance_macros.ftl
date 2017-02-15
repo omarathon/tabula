@@ -350,9 +350,11 @@
 	</#if>
 </#function>
 
-<#macro checkpointDescription department checkpoint="" point="" student="" note="" urlProfile=false>
+<#macro checkpointDescription department checkpoint="" point="" student="" note="" urlProfile=false withParagraph=true>
 	<#local formatResult = formatResult(department, checkpoint, point, student, note, urlProfile) />
-	<#if formatResult.metadata?has_content><p>${formatResult.metadata}</p></#if>
+	<#if formatResult.metadata?has_content>
+		<#if withParagraph><p>${formatResult.metadata}</p><#else>${formatResult.metadata}</#if>
+	</#if>
 </#macro>
 
 <#macro checkpointLabel department checkpoint="" point="" student="" note="" urlProfile=false>

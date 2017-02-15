@@ -9,7 +9,7 @@
 	<@modal.body isModal>
 
 		<#if !point.pointType?? || point.pointType.dbValue != "smallGroup">
-			<div class="alert alert-error">
+			<div class="alert alert-danger">
 				Specified monitoring point is not a Teaching event point
 			</div>
 		<#else>
@@ -43,7 +43,7 @@
 					<span class="legend">Course: ${result.course.name}</span>
 				</summary>
 
-				<table class="table table-condensed">
+				<table class="table table-condensed table-striped">
 					<tbody>
 						<tr>
 							<th>Route:</th>
@@ -81,7 +81,7 @@
 				<#if result.modules?size == 0>
 					<em>No module registrations found.</em>
 				<#else>
-					<table class="table table-condensed">
+					<table class="table table-condensed table striped">
 						<thead>
 							<tr>
 								<td></td>
@@ -97,7 +97,7 @@
 								<tr>
 									<td>
 										<#if !module.hasGroups>
-											<i class="icon-fixed-width icon-exclamation-sign" title="This module has no small groups set up in Tabula"></i>
+											<i class="fa fa-fw fa-exclamation-circle" title="This module has no small groups set up in Tabula"></i>
 										</#if>
 									</td>
 									<td>${module.code}</td>
@@ -128,7 +128,7 @@
 				<#macro groupsInATerm term>
 					<h4>${term.name}</h4>
 
-					<table class="table table-striped table-bordered table-condensed">
+					<table class="table table-striped table-condensed">
 						<thead>
 							<tr>
 								<th class="sortable nowrap"></th>
@@ -151,7 +151,7 @@
 										<td <#if !weekPair._2()>class="irrelevant"</#if>>
 											<#list mapGet(group.attendance, weekPair._1()) as attendance>
 												<#if !attendance.instance??>
-													<i class="use-popover icon-fixed-width irrelevant" data-content="${attendance.reason}"></i>
+													<i class="use-popover fa fa-fw irrelevant" data-content="${attendance.reason}"></i>
 												<#else>
 													<#local titles = [] />
 
@@ -162,19 +162,19 @@
 
 													<#local title><@instanceFormat attendance.instance academicYear currentMember.homeDepartment /></#local>
 													<#if attendance.state.name == 'Attended'>
-														<#local class = "icon-ok attended" />
+														<#local class = "fa fa-check attended" />
 														<#local title = "${student.fullName} attended: " + title />
 													<#elseif attendance.state.name == 'MissedAuthorised'>
-														<#local class = "icon-remove-circle authorised" />
+														<#local class = "fa fa-times-circle-o authorised" />
 														<#local title = "${student.fullName} did not attend (authorised absence): " + title />
 													<#elseif attendance.state.name == 'MissedUnauthorised'>
-														<#local class = "icon-remove unauthorised" />
+														<#local class = "fa fa-times unauthorised" />
 														<#local title = "${student.fullName} did not attend (unauthorised): " + title />
 													<#elseif attendance.state.name == 'Late'>
-														<#local class = "icon-warning-sign late" />
+														<#local class = "fa fa-exclamation-triangle late" />
 														<#local title = "No data: " + title />
 													<#else>
-														<#local class = "icon-minus" />
+														<#local class = "fa fa-minus" />
 													</#if>
 
 													<#local titles = titles + [title] />
@@ -202,7 +202,7 @@
 														</#list>
 													</#local>
 
-													<i class="use-popover icon-fixed-width ${class} <#if !attendance.relevant>irrelevant</#if>" data-content="<#noescape>${renderedTitle}</#noescape>" data-html="true"></i>
+													<i class="use-popover fa fa-fw ${class} <#if !attendance.relevant>irrelevant</#if>" data-content="<#noescape>${renderedTitle}</#noescape>" data-html="true"></i>
 												</#if>
 											</#list>
 										</td>

@@ -151,15 +151,8 @@ object AttendanceBreadcrumbs {
 	}
 
 	object Profile {
-		case class Years(student: StudentMember, isStudent: Boolean) extends Abstract {
-			val title: String = isStudent match {
-				case true => "My Monitoring Points"
-				case false => student.fullName.getOrElse("")
-			}
-			val url = Some(Routes.Profile.years(student))
-		}
 		case class ProfileForYear(student: StudentMember, academicYear: AcademicYear) extends Abstract {
-			val title: String = academicYear.startYear.toString
+			val title: String = student.fullName.getOrElse("")
 			val url = Some(Routes.Profile.profileForYear(student, academicYear))
 		}
 	}

@@ -219,20 +219,6 @@ preposition: Text to relate the title to the department name in the second line,
 	--></#noescape><#--
 --></#macro>
 
-<#macro monitoringPointFormat point stripHtml=false><#--
-	--><#noescape><#--
-		--><#local result = wholeWeekFormatter(point.validFromWeek, point.requiredFromWeek, point.pointSet.academicYear, point.pointSet.route.adminDepartment, false) /><#--
-		--><#if stripHtml>${result?replace('<sup>','')?replace('</sup>','')}<#else>${result}</#if><#--
-	--></#noescape><#--
---></#macro>
-
-<#macro monitoringPointDateFormat point stripHtml=false><#--
-	--><#noescape><#--
-		--><#local result = wholeWeekFormatter(point.validFromWeek, point.requiredFromWeek, point.pointSet.academicYear, false) /><#--
-		--><#if stripHtml>${result?replace('<sup>','')?replace('</sup>','')}<#else>${result}</#if><#--
-	--></#noescape><#--
---></#macro>
-
 <#macro weekRangeSelect event><#--
 	--><#assign weeks=weekRangeSelectFormatter(event) /><#--
 	--><#if weeks?has_content><#--

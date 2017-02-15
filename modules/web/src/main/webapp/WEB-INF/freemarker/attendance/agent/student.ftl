@@ -76,8 +76,8 @@
 <#if groupedPointMap?keys?size == 0>
 	<p><em>No monitoring points found for this academic year.</em></p>
 <#else>
-	<#assign returnTo><@routes.attendance.agentStudent relationshipType academicYear.startYear?c student /></#assign>
-	<a class="btn btn-primary" href="<@routes.attendance.agentRecord relationshipType academicYear.startYear?c student returnTo />">Record attendance</a>
+	<#assign returnTo><@routes.attendance.agentStudent relationshipType academicYear student /></#assign>
+	<a class="btn btn-primary" href="<@routes.attendance.agentRecord relationshipType academicYear student returnTo />">Record attendance</a>
 	<#list attendance_variables.monitoringPointTermNames as term>
 		<#if groupedPointMap[term]??>
 			<@attendance_macros.id7GroupedPointsBySection groupedPointMap term; groupedPointPair>

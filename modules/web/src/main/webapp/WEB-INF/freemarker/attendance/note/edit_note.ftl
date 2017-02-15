@@ -24,9 +24,7 @@
 			<@modal.header>
 				<#noescape>${heading}</#noescape>
 			</@modal.header>
-		<#elseif isIframe>
-			<div id="container">
-		<#else>
+		<#elseif !isIframe>
 			<#noescape>${heading}</#noescape>
 		</#if>
 
@@ -45,7 +43,7 @@
 			</@modal.footer>
 		<#else>
 			<#if command.isNew() && command.customState?? && command.customState.description == "Missed (authorised)">
-				<div class="alert alert-warning">
+				<div class="alert alert-info">
 					Points marked as Missed (authorised) must have an attendance note explaining why the absence was authorised.
 				</div>
 			</#if>
@@ -81,7 +79,7 @@
 				<@attendance_macros.checkpointDescription department=checkpoint.point.scheme.department checkpoint=checkpoint point=point student=attendanceNote.student/>
 			</#if>
 
-			<@f.form id="attendance-note-form" method="post" enctype="multipart/form-data" action="" commandName="command" class="form-horizontal double-submit-protection">
+			<@f.form id="attendance-note-form" method="post" enctype="multipart/form-data" action="" commandName="command" class="double-submit-protection">
 
 				<#include "_shared_fields.ftl" />
 
@@ -98,10 +96,6 @@
 
 			</@f.form>
 
-		</#if>
-
-		<#if isIframe>
-			</div> <#--container -->
 		</#if>
 
 	</@modal.wrapper>
