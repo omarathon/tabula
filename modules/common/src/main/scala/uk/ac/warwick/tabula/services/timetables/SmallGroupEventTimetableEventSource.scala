@@ -108,15 +108,17 @@ trait SmallGroupEventTimetableEventSourceComponentImpl extends SmallGroupEventTi
 				if (sources.contains(TimetableEventSource.SmallGroups)) {
 					val sets = smallGroupService.getSmallGroupSets(module, academicYear).filterNot(_.archived)
 					// Try and do as few permission checks as possible
-					val filteredEvents: Seq[SmallGroupEvent] = if (securityService.can(currentUser, Permissions.SmallGroups.Read, module)) {
-						sets.flatMap(_.groups.asScala.flatMap(_.events))
-					} else {
-						sets.flatMap(_.groups.asScala).flatMap(group => if (securityService.can(currentUser, Permissions.SmallGroups.Read, group)) {
-							group.events
+					val filteredEvents: Seq[SmallGroupEvent] = {
+						if (securityService.can(currentUser, Permissions.SmallGroups.Read, module)) {
+							sets.flatMap(_.groups.asScala.flatMap(_.events))
 						} else {
-							group.events.filter(event => securityService.can(currentUser, Permissions.SmallGroups.Read, event))
-						})
-					}
+							sets.flatMap(_.groups.asScala).flatMap(group => if (securityService.can(currentUser, Permissions.SmallGroups.Read, group)) {
+								group.events
+							} else {
+								group.events.filter(event => securityService.can(currentUser, Permissions.SmallGroups.Read, event))
+							})
+						}
+					}.filterNot(_.isUnscheduled)
 					EventList.fresh(filteredEvents.map(event => TimetableEvent(event, Map[WeekRange.Week, AttendanceState]())))
 				} else {
 					EventList.empty
