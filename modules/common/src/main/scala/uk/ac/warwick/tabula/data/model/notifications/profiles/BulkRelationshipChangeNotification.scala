@@ -5,6 +5,7 @@ import javax.persistence.{DiscriminatorValue, Entity}
 import org.joda.time.DateTime
 import uk.ac.warwick.spring.Wire
 import uk.ac.warwick.tabula.data.model._
+import uk.ac.warwick.tabula.helpers.StringUtils._
 import uk.ac.warwick.tabula.profiles.web.Routes
 import uk.ac.warwick.tabula.services.{ProfileService, RelationshipService}
 import uk.ac.warwick.userlookup.User

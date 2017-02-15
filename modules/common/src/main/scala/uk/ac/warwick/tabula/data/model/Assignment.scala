@@ -123,6 +123,7 @@ class Assignment
 
 	var openDate: DateTime = _
 	var closeDate: DateTime = _
+	var openEndedReminderDate: DateTime = _
 	var createdDate: DateTime = DateTime.now()
 
 	// left unset as defaults are set by BooleanAssignmentProperties
@@ -279,6 +280,18 @@ class Assignment
 	@ManyToOne(fetch = LAZY)
 	@JoinColumn(name = "markscheme_id")
 	var markingWorkflow: MarkingWorkflow = _
+
+
+	@Column(name="workflow_category")
+	@Type(`type` = "uk.ac.warwick.tabula.data.model.WorkflowCategoryUserType")
+	private var _workflowCategory: WorkflowCategory = _
+
+	def workflowCategory: Option[WorkflowCategory] = Option(_workflowCategory)
+
+	def workflowCategory_= (workflowCategoryOption: Option[WorkflowCategory]): Unit = {
+		_workflowCategory = workflowCategoryOption.orNull
+	}
+
 
 	@OneToMany(mappedBy = "assignment", fetch = LAZY, cascade = Array(ALL), orphanRemoval = true)
 	@BatchSize(size = 200)

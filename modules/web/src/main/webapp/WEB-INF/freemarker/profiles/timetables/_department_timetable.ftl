@@ -151,16 +151,49 @@
 		>
 		${(eventType.displayName)!}
 	</@filter>
+
+	<#assign placeholder = "Event sources" />
+	<#assign currentfilter><#if command.showTimetableEvents && command.showSmallGroupEvents>Syllabus+, Small Group Teaching<#elseif command.showTimetableEvents>Syllabus+<#elseif command.showSmallGroupEvents>Small Group Teaching<#else>${placeholder}</#if></#assign>
+	<div class="btn-group<#if currentfilter == placeholder> empty-filter</#if>">
+		<a class="btn btn-default btn-xs dropdown-toggle" data-toggle="dropdown">
+			<span class="filter-short-values" data-placeholder="${placeholder}" data-prefix="">${currentfilter}</span>
+			<span class="caret"></span>
+		</a>
+		<div class="dropdown-menu filter-list">
+			<button type="button" class="close" data-dismiss="dropdown" aria-hidden="true" title="Close">×</button>
+			<ul>
+				<li class="check-list-item" data-natural-sort="0">
+					<label class="checkbox">
+						<input type="hidden" name="_showTimetableEvents" value="false" />
+						<input type="checkbox" name="showTimetableEvents" value="true" data-short-value="Syllabus+" ${command.showTimetableEvents?string('checked','')}>
+						Syllabus+
+					</label>
+				</li>
+				<li class="check-list-item" data-natural-sort="1">
+					<label class="checkbox">
+						<input type="hidden" name="_showSmallGroupEvents" value="false" />
+						<input type="checkbox" name="showSmallGroupEvents" value="true" data-short-value="Small Group Teaching" ${command.showSmallGroupEvents?string('checked','')}>
+						Small Group Teaching
+					</label>
+				</li>
+			</ul>
+		</div>
+	</div>
 </div>
 </@f.form>
-
-<div class="alert alert-danger" style="display: none;"></div>
 
 <div class="calendar-outer">
 	<div class="calendar-loading hidden-print">
 		<i class="fa fa-spinner fa-spin"></i><em> Loading&hellip;</em>
 	</div>
-	<div class="calendar" data-viewname="month"></div>
+	<div class="calendar hidden-xs" data-viewname="month"></div>
+</div>
+
+<div class="calendar-smallscreen-outer visible-xs-block">
+	<div class="calendar-smallscreen"></div>
+	<div class="calendar-smallscreen-loading">
+		<i class="fa fa-spinner fa-spin"></i><em> Loading&hellip;</em>
+	</div>
 </div>
 
 <style type="text/css">
@@ -203,78 +236,48 @@
 
 		var $form = $('#command');
 
-		function getEvents($container){
-			return function (start, end, callback){
-				var complete = false;
-				setTimeout(function() {
-					if (!complete) {
-						$('.calendar-loading').show();
-						$container.fadeTo('fast', 0.3);
-					}
-				}, 300);
-				var startToSend = new Date(start.getTime());
-				startToSend.setDate(startToSend.getDate() - 1);
-				var endToSend = new Date(end.getTime());
-				endToSend.setDate(endToSend.getDate() + 1);
-				$('#from').val(startToSend.getTime()/1000);
-				$('#to').val(endToSend.getTime()/1000);
-				$.ajax({
-					url:'${submitUrl}',
-					type: 'POST',
-					// make the from/to params compatible with what FullCalendar sends if you just specify a URL
-					// as an eventSource, rather than a function. i.e. use seconds-since-the-epoch.
-					data: $form.serialize(),
-					success:function(data){
-						if (data.lastUpdated) {
-							// Update the last updated timestamp
-							$container.find('> .fc-last-updated').remove();
-
-							var now = moment();
-							var time = moment(data.lastUpdated);
-
-							$container.append(
-									$('<div />').addClass('fc-last-updated').addClass('pull-right').html('Last updated: ' + Profiles.toTimestamp(now, time))
-							);
-						}
-
-						var events = data.events, errorDiv = $('div.alert-danger');
-						// TAB-3008 - Change times to Europe/London
-						$.each(events, function(i, event){
-							event.start = moment(moment.unix(event.start).tz('Europe/London').format('YYYY-MM-DDTHH:mm:ss')).unix();
-							event.end = moment(moment.unix(event.end).tz('Europe/London').format('YYYY-MM-DDTHH:mm:ss')).unix();
-						});
-						if (data.errors.length > 0) {
-							errorDiv.empty().show();
-							$.each(data.errors, function(i, error) {
-								errorDiv.append(error).append('<br />');
-							});
-						} else {
-							errorDiv.hide();
-						}
-						callback(events);
+		var $calendar = $('.calendar');
+		if ($calendar.is(':visible')) {
+			Profiles.createCalendar(
+				$calendar,
+				$calendar.data('viewname'),
+				weeks,
+				Profiles.getCalendarEvents(
+					$calendar,
+					$('.calendar-loading'),
+					'${submitUrl}',
+					function (start, end) {
+						var startToSend = new Date(start.getTime());
+						startToSend.setDate(startToSend.getDate() - 1);
+						var endToSend = new Date(end.getTime());
+						endToSend.setDate(endToSend.getDate() + 1);
+						$('#from').val(startToSend.getTime()/1000);
+						$('#to').val(endToSend.getTime()/1000);
+						return $form.serialize();
 					},
-					complete: function() {
-						complete = true;
-						$container.fadeTo('fast', 1);
-					}
-				});
-			};
+					'POST'
+				)<#if startDate??>,
+					true,
+					${startDate.getYear()?c},
+					${(startDate.getMonthOfYear() - 1)?c},
+					${startDate.getDayOfMonth()?c},
+					'${startDate.toString("YYYY-MM-dd")}' // This is here for FullCalendar 2 support or if it's ever backported to 1.6.x
+				</#if>
+			);
+			$calendar.find('table').attr('role', 'presentation');
+		} else {
+			Profiles.createSmallScreenCalender(
+				$('.calendar-smallscreen'),
+				$('.calendar-smallscreen-loading'),
+				'${submitUrl}',
+				function(startDate, endDate) {
+					$('#from').val(startDate.getTime()/1000);
+					$('#to').val(endDate.getTime()/1000);
+					return $form.serialize();
+				},
+				'POST'
+			)
 		}
-
-		var $calendar = $(".calendar");
-		Profiles.createCalendar(
-			$calendar,
-			$calendar.data('viewname'),
-			weeks,
-			getEvents<#if startDate??>,
-				true,
-				${startDate.getYear()?c},
-				${(startDate.getMonthOfYear() - 1)?c},
-				${startDate.getDayOfMonth()?c},
-				'${startDate.toString("YYYY-MM-dd")}' // This is here for FullCalendar 2 support or if it's ever backported to 1.6.x
-			</#if>
-		);
-		$calendar.find('table').attr('role','presentation');
 
 		var prependClearLink = function($list) {
 			if (!$list.find('input:checked').length) {
@@ -332,7 +335,11 @@
 			if (typeof history.pushState !== 'undefined')
 				history.pushState(null, null, $form.attr('action') + '?' + $form.serialize());
 
-			$calendar.fullCalendar('refetchEvents');
+			if ($calendar.is(':visible')) {
+				$calendar.fullCalendar('refetchEvents');
+			} else {
+				$(window).trigger('tabula.smallScreenCalender.refresh');
+			}
 		};
 		window.doRequest = doRequest;
 

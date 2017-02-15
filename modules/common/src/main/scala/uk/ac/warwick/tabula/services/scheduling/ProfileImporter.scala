@@ -10,8 +10,8 @@ import org.springframework.jdbc.`object`.MappingSqlQuery
 import org.springframework.jdbc.core.SqlParameter
 import org.springframework.stereotype.Service
 import uk.ac.warwick.spring.Wire
-import uk.ac.warwick.tabula.commands.{Command, Unaudited}
 import uk.ac.warwick.tabula.commands.scheduling.imports._
+import uk.ac.warwick.tabula.commands.{Command, Unaudited}
 import uk.ac.warwick.tabula.data.Daoisms
 import uk.ac.warwick.tabula.data.model.MemberUserType._
 import uk.ac.warwick.tabula.data.model._
@@ -27,6 +27,7 @@ import scala.collection.JavaConversions._
 import scala.collection.JavaConverters._
 import scala.collection.immutable.IndexedSeq
 import scala.util.Try
+import uk.ac.warwick.tabula.JavaImports._
 
 case class MembershipInformation(member: MembershipMember)
 
@@ -189,13 +190,15 @@ class SandboxProfileImporter extends ProfileImporter {
 				"year_of_study" -> thisYearOfStudy,
 				"mode_of_attendance_code" -> (if (member.universityId.toLong % 5 == 0) "P" else "F"),
 				"sce_academic_year" -> (AcademicYear.guessSITSAcademicYearByDate(DateTime.now) - (yearOfStudy - thisYearOfStudy)).toString,
-				"sce_sequence_number" -> 1,
+				"sce_sequence_number" -> thisYearOfStudy,
 				"sce_route_code" -> route.code.toUpperCase,
 				"enrolment_department_code" -> member.departmentCode.toUpperCase,
 				"mod_reg_status" -> "CON",
 				"disability" -> "A",
 				"mst_type" -> "L",
-				"sce_agreed_mark" -> null
+				"sce_agreed_mark" -> new JBigDecimal((member.universityId ++ member.universityId).toCharArray.map(char =>
+					char.toString.toInt * member.universityId.toCharArray.apply(0).toString.toInt * thisYearOfStudy
+				).sum % 100)
 			)))
 		})
 

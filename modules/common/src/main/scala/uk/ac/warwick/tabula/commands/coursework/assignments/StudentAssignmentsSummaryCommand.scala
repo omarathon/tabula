@@ -13,6 +13,7 @@ import uk.ac.warwick.tabula.helpers.DateTimeOrdering._
 object StudentAssignmentsSummaryCommand {
 
 	case class Result(
+		upcoming: Seq[EnhancedAssignment],
 		todo: Seq[EnhancedAssignment],
 		doing: Seq[EnhancedAssignment],
 		done: Seq[EnhancedAssignment]
@@ -69,7 +70,16 @@ class StudentAssignmentsSummaryCommandInternal(val student: MemberOrUser, val ac
 			.map(_.enhance(studentUser))
 			.sortBy(_.submissionDeadline.getOrElse(new DateTime().plusYears(500))) // Sort open-ended assignments to the bottom
 
-		StudentAssignmentsSummaryCommand.Result(todo, doing, done)
+		val upcoming = enrolledAssignments
+			.filterNot(done.map(_.assignment).contains)
+			.filterNot(doing.map(_.assignment).contains)
+			.filterNot(todo.map(_.assignment).contains)
+			.filter(a => academicYearOption.isEmpty || academicYearOption.contains(a.academicYear))
+			.filter(a => a.isVisibleToStudents && a.collectSubmissions)
+			.map(_.enhance(studentUser))
+			.sortBy(_.submissionDeadline.getOrElse(new DateTime().plusYears(500))) // Sort open-ended assignments to the bottom
+
+		StudentAssignmentsSummaryCommand.Result(upcoming, todo, doing, done)
 	}
 
 }

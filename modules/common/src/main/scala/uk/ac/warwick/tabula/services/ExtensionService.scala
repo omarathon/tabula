@@ -1,11 +1,11 @@
 package uk.ac.warwick.tabula.services
 
 import org.springframework.stereotype.Service
+import uk.ac.warwick.spring.Wire
+import uk.ac.warwick.tabula.data.Transactions._
 import uk.ac.warwick.tabula.data._
 import uk.ac.warwick.tabula.data.model._
 import uk.ac.warwick.tabula.data.model.forms._
-import uk.ac.warwick.spring.Wire
-import uk.ac.warwick.tabula.data.Transactions._
 import uk.ac.warwick.userlookup.User
 
 trait ExtensionServiceComponent {
@@ -21,6 +21,7 @@ object ExtensionService {
 }
 
 trait ExtensionService {
+	def saveOrUpdate(extension: Extension): Unit
 	def getExtensionById(id: String): Option[Extension]
 	def countExtensions(assignment: Assignment): Int
 	def hasExtensions(assignment: Assignment): Boolean
@@ -34,6 +35,8 @@ trait ExtensionService {
 
 abstract class AbstractExtensionService extends ExtensionService {
 	self: ExtensionDaoComponent =>
+
+	def saveOrUpdate(extension: Extension): Unit = extensionDao.saveOrUpdate(extension)
 
 	def getExtensionById(id: String): Option[Extension] = transactional(readOnly = true) { extensionDao.getExtensionById(id) }
 	def countExtensions(assignment: Assignment): Int = transactional(readOnly = true) { extensionDao.countExtensions(assignment) }

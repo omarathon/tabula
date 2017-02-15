@@ -22,6 +22,7 @@
 				</#if>
 			</td>
 		</#list>
+		<#if !mapGet(perYearColumns, year)?has_content><td class="spacer">&nbsp;</td></#if>
 		<#if !year_has_next><td class="spacer">&nbsp;</td></#if>
 	</#list>
 </#macro>
@@ -231,6 +232,7 @@
 								<td>&nbsp;</td>
 							</#if>
 						</#list>
+						<#if !mapGet(perYearColumns, year)?has_content><td class="spacer">&nbsp;</td></#if>
 						<#if !year_has_next><td class="spacer">&nbsp;</td></#if>
 					</#list>
 					<#assign currentCategory = '' />
@@ -256,6 +258,7 @@
 						<#list mapGet(perYearColumns, year) as column>
 							<th class="rotated <#if column.boldTitle>bold</#if> <#if column.category?has_content>has-category</#if>" <#if !column.secondaryValue?has_content>rowspan="2"</#if>><div class="rotate">${column.title}</div></th>
 						</#list>
+						<#if !mapGet(perYearColumns, year)?has_content><td class="spacer">&nbsp;</td></#if>
 						<#if !year_has_next><td class="spacer">&nbsp;</td></#if>
 					</#list>
 					<#list summaryColumns as column>

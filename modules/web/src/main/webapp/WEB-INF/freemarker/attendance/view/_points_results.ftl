@@ -7,16 +7,16 @@
 <#if validationError?has_content>
 	<#noescape>${validationError}</#noescape>
 <#elseif !filterCommand.hasBeenFiltered>
-	<p class="alert alert-info"><i class="icon-lightbulb"></i> Find points for students using the filter options above.</p>
+	<p class="alert alert-info">Find points for students using the filter options above.</p>
 <#elseif filterCommand.filterTooVague>
-	<p class="alert"><i class="icon-warning-sign"></i> The filter you have chosen includes too many students.</p>
+	<p class="alert alert-info">The filter you have chosen includes too many students.</p>
 <#elseif filterResult?size == 0>
-	<p class="alert"><i class="icon-warning-sign"></i> No students with points exist for the selected options.</p>
+	<p class="alert alert-info">No students with points exist for the selected options.</p>
 <#else>
 
-	<#assign returnTo><@routes.attendance.viewPoints filterCommand.department filterCommand.academicYear.startYear?c filterQuery/></#assign>
+	<#assign returnTo><@routes.attendance.viewPoints filterCommand.department filterCommand.academicYear filterQuery/></#assign>
 	<#function permission_button_function groupedPoint>
-		<#local record_url><@routes.attendance.viewRecordPoints filterCommand.department filterCommand.academicYear.startYear?c groupedPoint filterQuery returnTo/></#local>
+		<#local record_url><@routes.attendance.viewRecordPoints filterCommand.department filterCommand.academicYear groupedPoint filterQuery returnTo/></#local>
 		<#local result>
 			<@fmt.permission_button
 				permission='MonitoringPoints.Record'
@@ -24,7 +24,6 @@
 				action_descr='record monitoring points'
 				classes='btn btn-primary'
 				href=record_url
-				tooltip='Record'
 			>
 				Record
 			</@fmt.permission_button>
@@ -36,8 +35,8 @@
 	<div class="monitoring-points">
 		<#list attendance_variables.monitoringPointTermNames as term>
 			<#if filterResult[term]??>
-				<@attendance_macros.groupedPointsBySection filterResult term; groupedPoint>
-					<div class="span12">
+				<@attendance_macros.id7GroupedPointsBySection filterResult term; groupedPoint>
+					<div class="col-md-12">
 						<div class="pull-right">
 							<#noescape>
 								${permission_button_function(groupedPoint.templatePoint)}
@@ -67,14 +66,14 @@
 							<@fmt.p groupedPoint.schemes?size "scheme" />
 						</a>
 					</div>
-				</@attendance_macros.groupedPointsBySection>
+				</@attendance_macros.id7GroupedPointsBySection>
 			</#if>
 		</#list>
 
 		<#list monthNames as month>
 			<#if filterResult[month]??>
 				<@attendance_macros.groupedPointsBySection filterResult month; groupedPoint>
-					<div class="span12">
+					<div class="col-md-12">
 						<div class="pull-right">
 							<#noescape>
 								${permission_button_function(groupedPoint.templatePoint)}
@@ -104,7 +103,7 @@
 	// Enable any freshly loaded popovers
 	jQuery('.use-popover').tabulaPopover({
 		trigger: 'click',
-		container: '#container'
+		container: 'body'
 	});
 </script>
 

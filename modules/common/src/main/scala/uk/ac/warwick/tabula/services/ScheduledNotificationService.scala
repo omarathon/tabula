@@ -1,13 +1,13 @@
 package uk.ac.warwick.tabula.services
 
+import org.hibernate.ObjectNotFoundException
 import org.springframework.stereotype.Service
-import uk.ac.warwick.tabula.data.model.{CanBeDeleted, ToEntityReference, Notification, ScheduledNotification}
 import uk.ac.warwick.spring.Wire
+import uk.ac.warwick.tabula.data.Transactions._
+import uk.ac.warwick.tabula.data.model.{CanBeDeleted, Notification, ScheduledNotification, ToEntityReference}
 import uk.ac.warwick.tabula.data.{Daoisms, ScheduledNotificationDao}
 import uk.ac.warwick.tabula.helpers.{Logging, ReflectionHelper}
 import uk.ac.warwick.userlookup.AnonymousUser
-import uk.ac.warwick.tabula.data.Transactions._
-import org.hibernate.ObjectNotFoundException
 
 trait ScheduledNotificationService {
 	def removeInvalidNotifications(target: Any)
@@ -84,4 +84,12 @@ class ScheduledNotificationServiceImpl extends ScheduledNotificationService with
 			}
 		}
 	}
+}
+
+trait ScheduledNotificationServiceComponent {
+	def scheduledNotificationService: ScheduledNotificationService
+}
+
+trait AutowiringScheduledNotificationServiceComponent extends ScheduledNotificationServiceComponent {
+	var scheduledNotificationService: ScheduledNotificationService = Wire[ScheduledNotificationService]
 }

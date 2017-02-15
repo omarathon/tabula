@@ -6,10 +6,11 @@ import uk.ac.warwick.spring.Wire
 import uk.ac.warwick.tabula.AcademicYear
 import uk.ac.warwick.tabula.data.AssessmentMembershipDao
 import uk.ac.warwick.tabula.data.model._
+import uk.ac.warwick.tabula.helpers.StringUtils._
 import uk.ac.warwick.tabula.helpers.{FoundUser, Logging}
 import uk.ac.warwick.userlookup.{AnonymousUser, User}
+
 import scala.collection.JavaConverters._
-import uk.ac.warwick.tabula.helpers.StringUtils._
 
 trait AssessmentMembershipService {
 	def assignmentManualMembershipHelper: UserGroupMembershipHelperMethods[Assignment]
@@ -33,9 +34,9 @@ trait AssessmentMembershipService {
 	 *  Typically used to provide possible candidates to link to an app assignment,
 	 *  in conjunction with #getUpstreamAssessmentGroups.
 	 */
-	def getAssessmentComponents(module: Module): Seq[AssessmentComponent]
+	def getAssessmentComponents(module: Module, inUseOnly: Boolean = true): Seq[AssessmentComponent]
 	def getAssessmentComponents(department: Department, includeSubDepartments: Boolean): Seq[AssessmentComponent]
-	def getAssessmentComponents(moduleCode: String, inUseOnly: Boolean = true): Seq[AssessmentComponent]
+	def getAssessmentComponents(moduleCode: String, inUseOnly: Boolean): Seq[AssessmentComponent]
 
 	/**
 	 * Get all assessment groups that can serve this assignment this year.
@@ -83,10 +84,12 @@ class AssessmentMembershipServiceImpl
 	extends AssessmentMembershipService
 	with AssessmentMembershipMethods
 	with UserLookupComponent
+	with ProfileServiceComponent
 	with Logging {
 
 	@Autowired var userLookup: UserLookupService = _
 	@Autowired var dao: AssessmentMembershipDao = _
+	@Autowired var profileService: ProfileService = _
 
 	val assignmentManualMembershipHelper = new UserGroupMembershipHelper[Assignment]("_members")
 	val examManualMembershipHelper = new UserGroupMembershipHelper[Exam]("_members")
@@ -156,12 +159,12 @@ class AssessmentMembershipServiceImpl
 	/**
 	 * Gets assessment components for this module.
 	 */
-	def getAssessmentComponents(module: Module): Seq[AssessmentComponent] = dao.getAssessmentComponents(module)
+	def getAssessmentComponents(module: Module, inUseOnly: Boolean = true): Seq[AssessmentComponent] = dao.getAssessmentComponents(module, inUseOnly)
 
 	/**
 	 * Gets assessment components by SITS module code
 	 */
-	def getAssessmentComponents(moduleCode: String, inUseOnly: Boolean = true): Seq[AssessmentComponent] =
+	def getAssessmentComponents(moduleCode: String, inUseOnly: Boolean): Seq[AssessmentComponent] =
 		dao.getAssessmentComponents(moduleCode, inUseOnly)
 
 	/**
@@ -214,7 +217,17 @@ class AssessmentMembershipInfo(val items: Seq[MembershipItem]) {
 
 trait AssessmentMembershipMethods extends Logging {
 
-	self: AssessmentMembershipService with UserLookupComponent =>
+	self: AssessmentMembershipService with UserLookupComponent with ProfileServiceComponent =>
+
+	private def deceasedItemsFilter(items: Seq[MembershipItem]) = {
+		val profiles = profileService.getAllMembersWithUniversityIds(items.flatMap(_.universityId))
+		items.filter(item => item.universityId.isEmpty || !profiles.find(_.universityId == item.universityId.get).exists(_.deceased))
+	}
+
+	private def deceasedUniIdsFilter(universityIds: Seq[String]) = {
+		val profiles = profileService.getAllMembersWithUniversityIds(universityIds)
+		universityIds.filter(universityId => !profiles.find(_.universityId == universityId).exists(_.deceased))
+	}
 
 	def determineMembership(upstream: Seq[UpstreamAssessmentGroup], others: Option[UnspecifiedTypeUserGroup]): AssessmentMembershipInfo = {
 		val sitsUsers =
@@ -232,7 +245,7 @@ trait AssessmentMembershipMethods extends Logging {
 		val sorted = (includeItems ++ excludeItems ++ sitsItems)
 			.sortBy(membershipItem => (membershipItem.user.getLastName, membershipItem.user.getFirstName))
 
-		new AssessmentMembershipInfo(sorted)
+		new AssessmentMembershipInfo(deceasedItemsFilter(sorted))
 	}
 
 	def determineMembership(assessment: Assessment) : AssessmentMembershipInfo = assessment match {
@@ -279,7 +292,7 @@ trait AssessmentMembershipMethods extends Logging {
 		val includes = others.map(_.knownType.members).getOrElse(Nil)
 		val excludes = others.map(_.knownType.excludedUserIds).getOrElse(Nil)
 
-		(sitsUsers ++ includes).distinct diff excludes.distinct
+		deceasedUniIdsFilter((sitsUsers ++ includes).distinct.diff(excludes.distinct))
 	}
 
 	def countMembershipWithUniversityIdGroup(upstream: Seq[UpstreamAssessmentGroup], others: Option[UnspecifiedTypeUserGroup]): Int = {
@@ -293,7 +306,7 @@ trait AssessmentMembershipMethods extends Logging {
 				val includes = others map { _.knownType.allIncludedIds } getOrElse Nil
 				val excludes = others map { _.knownType.allExcludedIds } getOrElse Nil
 
-				((sitsUsers ++ includes).distinct diff excludes).size
+				deceasedUniIdsFilter((sitsUsers ++ includes).distinct.diff(excludes)).size
 		}
 	}
 
@@ -347,7 +360,7 @@ trait AssessmentMembershipMethods extends Logging {
 	private def userId(user: User, fallback: Option[String]) = option(user) map { _.getUserId } orElse fallback
 
 	private def option(user: User): Option[User] = user match {
-		case FoundUser(u) => Some(user)
+		case FoundUser(_) => Some(user)
 		case _ => None
 	}
 

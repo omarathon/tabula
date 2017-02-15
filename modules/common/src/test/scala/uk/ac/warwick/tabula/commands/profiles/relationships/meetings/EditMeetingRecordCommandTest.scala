@@ -2,15 +2,13 @@ package uk.ac.warwick.tabula.commands.profiles.relationships.meetings
 
 import org.joda.time.{DateTime, DateTimeConstants}
 import org.springframework.validation.BindException
-import uk.ac.warwick.tabula._
 import uk.ac.warwick.tabula.data.model.MeetingApprovalState._
 import uk.ac.warwick.tabula.data.model._
 import uk.ac.warwick.tabula.data.{MeetingRecordDao, MeetingRecordDaoComponent}
 import uk.ac.warwick.tabula.permissions.Permissions
 import uk.ac.warwick.tabula.services.attendancemonitoring.{AttendanceMonitoringMeetingRecordService, AttendanceMonitoringMeetingRecordServiceComponent}
-import uk.ac.warwick.tabula.services.{FileAttachmentService, FileAttachmentServiceComponent, MeetingRecordService, _}
-import uk.ac.warwick.tabula.services.{SecurityService, SecurityServiceComponent}
-import uk.ac.warwick.tabula.{CurrentUser, Features, FeaturesComponent}
+import uk.ac.warwick.tabula.services.{FileAttachmentService, FileAttachmentServiceComponent, MeetingRecordService, SecurityService, SecurityServiceComponent, _}
+import uk.ac.warwick.tabula.{CurrentUser, Features, FeaturesComponent, _}
 
 class EditMeetingRecordCommandTest extends TestBase with Mockito {
 

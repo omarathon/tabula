@@ -22,7 +22,7 @@
 </#if>
 
 <div class="pull-right">
-	<a class="btn btn-default" href="http://warwick.ac.uk/tabula/manual/profiles/timetables" target="_blank">Timetable help</a>
+	<a class="btn btn-default hidden-xs" href="http://warwick.ac.uk/tabula/manual/profiles/timetables" target="_blank">Timetable help</a>
 	<a class="btn btn-primary" href="<@routes.profiles.department_timetables member.homeDepartment />">Show all timetables</a>
 </div>
 <h1 class="with-settings">Timetable</h1>
@@ -31,11 +31,18 @@
 	<div class="calendar-loading hidden-print">
 		<i class="fa fa-spinner fa-spin"></i><em> Loading&hellip;</em>
 	</div>
-	<div class="calendar" data-viewname="month" data-downloadbutton=".calendar-download"></div>
+	<div class="calendar hidden-xs" data-viewname="month" data-downloadbutton=".calendar-download"></div>
+</div>
+
+<div class="calendar-smallscreen-outer visible-xs-block">
+	<div class="calendar-smallscreen"></div>
+	<div class="calendar-smallscreen-loading">
+		<i class="fa fa-spinner fa-spin"></i><em> Loading&hellip;</em>
+	</div>
 </div>
 
 <p>
-	<a class="btn btn-default calendar-download" href="<@routes.profiles.timetable_calendar_download member />">Download calendar as PDF</a>
+	<a class="btn btn-default calendar-download hidden-xs" href="<@routes.profiles.timetable_calendar_download member />">Download calendar as PDF</a>
 	<#if academicYear??>
 		<a class="btn btn-default timetable-download" href="<@routes.profiles.timetable_download member academicYear />">Download timetable as PDF (${academicYear.toString})</a>
 	<#elseif academicYears?has_content>
@@ -122,85 +129,52 @@
 
 		var weeks = ${weekRangesDumper()};
 
-		function getEvents($container){
-			return function (start, end, callback){
-				var complete = false;
-				setTimeout(function() {
-					if (!complete) {
-						$('.calendar-loading').show();
-						$container.fadeTo('fast', 0.3);
-					}
-				}, 300);
-				var startToSend = new Date(start.getTime());
-				startToSend.setDate(startToSend.getDate() - 1);
-				var endToSend = new Date(end.getTime());
-				endToSend.setDate(endToSend.getDate() + 1);
-				$.ajax({
-					url:'/api/v1/member/${member.universityId}/timetable/calendar',
-					// make the from/to params compatible with what FullCalendar sends if you just specify a URL
-					// as an eventSource, rather than a function. i.e. use seconds-since-the-epoch.
-					data: {
-						'from':startToSend.getTime()/1000,
-						'to':endToSend.getTime()/1000,
+		var $calendar = $('.calendar');
+		if ($calendar.is(':visible')) {
+			Profiles.createCalendar(
+				$calendar,
+				$calendar.data('viewname'),
+				weeks,
+				Profiles.getCalendarEvents(
+					$calendar,
+					$('.calendar-loading'),
+					'/api/v1/member/${member.universityId}/timetable/calendar',
+					function (start, end) {
+						var startToSend = new Date(start.getTime());
+						startToSend.setDate(startToSend.getDate() - 1);
+						var endToSend = new Date(end.getTime());
+						endToSend.setDate(endToSend.getDate() + 1);
+						return {
+							'from':startToSend.getTime()/1000,
+							'to':endToSend.getTime()/1000,
+							'cb':new Date().valueOf() // Break the IE cache
+						};
+					},
+					'GET'
+				)<#if startDate??>,
+					true,
+					${startDate.getYear()?c},
+					${(startDate.getMonthOfYear() - 1)?c},
+					${startDate.getDayOfMonth()?c},
+					'${startDate.toString("YYYY-MM-dd")}' // This is here for FullCalendar 2 support or if it's ever backported to 1.6.x
+				</#if>
+			);
+			$calendar.find('table').attr('role', 'presentation');
+		} else {
+			Profiles.createSmallScreenCalender(
+				$('.calendar-smallscreen'),
+				$('.calendar-smallscreen-loading'),
+				'/api/v1/member/${member.universityId}/timetable/calendar',
+				function(startDate, endDate) {
+					return {
+						'from':startDate.getTime()/1000,
+						'to':endDate.getTime()/1000,
 						'cb':new Date().valueOf() // Break the IE cache
-					},
-					success:function(data){
-						if (data.lastUpdated) {
-							// Update the last updated timestamp
-							$container.find('> .fc-last-updated').remove();
-
-							var now = moment();
-							var time = moment(data.lastUpdated);
-
-							$container.append(
-								$('<div />').addClass('fc-last-updated').addClass('pull-right').html('Last updated: ' + Profiles.toTimestamp(now, time))
-							);
-						}
-
-						var events = data.events;
-						// TAB-3008 - Change times to Europe/London
-						$.each(events, function(i, event){
-							event.start = moment(moment.unix(event.start).tz('Europe/London').format('YYYY-MM-DDTHH:mm:ss')).unix();
-							event.end = moment(moment.unix(event.end).tz('Europe/London').format('YYYY-MM-DDTHH:mm:ss')).unix();
-						});
-
-						$container.find('> .alert-danger').remove();
-						callback(events);
-					},
-					error: function (jqXHR) {
-						try {
-							var data = $.parseJSON(jqXHR.responseText);
-
-							var errors = $.map(data.errors, function (error) { return error.message; });
-
-							$container.find('> .alert-danger').remove();
-							$container.prepend(
-								$('<div />').addClass('alert').addClass('alert-danger').text(errors.join(', '))
-							);
-						} catch (e) {}
-					},
-					complete: function() {
-						complete = true;
-						$container.fadeTo('fast', 1);
-					}
-				});
-			};
+					};
+				},
+				'GET'
+			)
 		}
-
-		var $calendar = $(".calendar");
-		Profiles.createCalendar(
-			$calendar,
-			$calendar.data('viewname'),
-			weeks,
-			getEvents<#if startDate??>,
-				true,
-				${startDate.getYear()?c},
-				${(startDate.getMonthOfYear() - 1)?c},
-				${startDate.getDayOfMonth()?c},
-				'${startDate.toString("YYYY-MM-dd")}' // This is here for FullCalendar 2 support or if it's ever backported to 1.6.x
-			</#if>
-		);
-		$calendar.find('table').attr('role','presentation');
 	});
 </script>
 

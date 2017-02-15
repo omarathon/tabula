@@ -26,11 +26,13 @@ class FakeSyllabusPlusController extends Logging {
 	val userLookup:UserLookupService = Wire[UserLookupService]
 	val studentTimetables: mutable.Map[StudentYearKey, String] = mutable.Map.empty
 	val moduleTimetables: mutable.Map[ModuleYearKey, String] = mutable.Map.empty
+	val moduleNoStudentsTimetables: mutable.Map[ModuleNoStudentsYearKey, String] = mutable.Map.empty
 	val staffTimetables: mutable.Map[StaffYearKey, String] = mutable.Map.empty
 	val baseUri: String = Wire.optionProperty("${scientia.stubfallback.url}")
 		.getOrElse("https://timetablingmanagement.warwick.ac.uk/xml")
 	def studentUri(year:String): String = baseUri + year + "/?StudentXML"
 	def moduleUri(year:String): String = baseUri + year + "/?ModuleXML"
+	def moduleNoStudentsUri(year:String): String = baseUri + year + "/?ModuleNoStudentsXML"
 	def staffUri(year:String): String = baseUri + year + "/?StaffXML"
 
 
@@ -97,6 +99,30 @@ class FakeSyllabusPlusController extends Logging {
 		moduleTimetables.put(ModuleYearKey(moduleCode, year), content)
 	}
 
+	@RequestMapping(value = Array("/stubTimetable/{year}"), params = Array("ModuleNoStudentsXML"))
+	def getModuleNoStudents(@RequestParam("p0") moduleCode: String, @PathVariable year:String): Elem = {
+		val xml = moduleNoStudentsTimetables.getOrElseUpdate(ModuleNoStudentsYearKey(moduleCode, year) , {
+			val req = url(moduleNoStudentsUri(year)) <<? Map("p0" -> moduleCode)
+			import scala.language.postfixOps
+			val xml = Try(http.when(_==200)(req as_str)) match {
+				case Success(s)=>s
+				// If we get an error back, just return then XML for an empty list immediately,
+				// otherwise the XML handler in ScientiaHttpTimetableFetchingService
+				// will wait for the request keep-alive to time out (60s) before finally giving up.
+				// n.b. if we made this controller return a non-200 status code then we probably wouldn't have
+				// to do this.
+				case _	=>"<?xml version=\"1.0\" encoding=\"utf-8\"?><Data><Activities></Activities></Data>"
+			}
+			xml
+		})
+		XML.loadString(xml)
+	}
+
+	@RequestMapping(method = Array(RequestMethod.POST), value = Array("/stubTimetable/moduleNoStudents"))
+	def saveModuleNoStudents(@RequestParam moduleCode: String, @RequestParam year:String, @RequestParam content: String) {
+		moduleNoStudentsTimetables.put(ModuleNoStudentsYearKey(moduleCode, year), content)
+	}
+
 	@RequestMapping(value = Array("/stubTimetable/{year}"), params = Array("StaffXML"))
 	def getStaff(@RequestParam("p0") staffId: String, @PathVariable year:String): Elem = {
 		val xml = staffTimetables.getOrElseUpdate(StaffYearKey(staffId, year) , {
@@ -132,4 +158,5 @@ class FakeSyllabusPlusController extends Logging {
 }
 case class StudentYearKey(studentId:String, year:String)
 case class ModuleYearKey(moduleCode:String, year:String)
+case class ModuleNoStudentsYearKey(moduleCode:String, year:String)
 case class StaffYearKey(staffId:String, year:String)

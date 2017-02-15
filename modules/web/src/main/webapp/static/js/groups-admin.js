@@ -103,51 +103,18 @@ $(function() {
 		var $table = $(this);
 
 		var updateCell = function($cell, value) {
-			var $icon = $cell.find('i'), groupRunningText = 'Group running on ';
+			var groupRunningText = 'Group running on ';
 			if (value) {
-				$icon.addClass('fa fa-check');
-				$cell.addClass('checked')
-					.attr('data-original-title', groupRunningText + $cell.attr('data-original-title'));
+				$cell.attr('data-original-title', groupRunningText + $cell.attr('data-original-title'));
 			} else {
-				$icon.removeClass('fa fa-check');
-				$cell.removeClass('checked')
-					.attr('data-original-title', $cell.attr('data-original-title').replace(groupRunningText, ''));
+				$cell.attr('data-original-title', $cell.attr('data-original-title').replace(groupRunningText, ''));
 			}
 		};
 
-		$table.find('tbody input[type="checkbox"]').each(function() {
-			var $checkbox = $(this);
-			var $cell = $checkbox.closest('td');
-
-			$checkbox.hide();
-
-			var $icon = $('<i />').addClass('fa fa-fw');
-			$checkbox.after($icon);
-
-			updateCell($cell, $checkbox.is(':checked'));
-
-			$cell.on('click', function() {
-				$checkbox.prop('checked', !$checkbox.prop('checked'));
-				updateCell($cell, $checkbox.is(':checked'));
-			});
-		});
-		$table.find('tbody tr th').each(function() {
-			var $header = $(this);
-			var $cells = $header.closest('tr').find('td');
-			$header.on('click', function() {
-				var allChecked = $cells.find('input[type="checkbox"]:not(:checked)').length == 0;
-				if (allChecked) {
-					$cells.each(function() {
-						var $cell = $(this);
-						$cell.find('input[type="checkbox"]').prop('checked', false);
-						updateCell($cell, false);
-					});
-				} else {
-					$cells.each(function() {
-						var $cell = $(this);
-						$cell.find('input[type="checkbox"]').prop('checked', true);
-						updateCell($cell, true);
-					});
+		$table.find('tbody tr').each(function(){
+			$(this).bigList({
+				'onChange' : function(){
+					updateCell($(this).closest('td'), $(this).is(':checked'));
 				}
 			});
 		});
@@ -155,7 +122,7 @@ $(function() {
 		$table.find('.show-vacations').each(function() {
 			var $checkbox = $(this);
 
-			if ($table.find('tr.vacation td.checked').length) {
+			if ($table.find('tr.vacation td').find(':checked').length) {
 				$checkbox.prop('checked', true);
 			}
 

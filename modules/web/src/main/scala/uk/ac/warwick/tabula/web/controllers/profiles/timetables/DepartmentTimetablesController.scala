@@ -5,8 +5,7 @@ import org.springframework.web.bind.annotation.{ModelAttribute, PathVariable, Re
 import uk.ac.warwick.tabula.commands.CurrentSITSAcademicYear
 import uk.ac.warwick.tabula.commands.timetables.{DepartmentTimetablesCommand, ViewModuleTimetableCommandFactoryImpl, ViewStaffPersonalTimetableCommandFactoryImpl, ViewStudentPersonalTimetableCommandFactoryImpl}
 import uk.ac.warwick.tabula.data.model.Department
-import uk.ac.warwick.tabula.helpers.SystemClockComponent
-import uk.ac.warwick.tabula.services._
+import uk.ac.warwick.tabula.services.AutowiringUserLookupComponent
 import uk.ac.warwick.tabula.services.timetables._
 import uk.ac.warwick.tabula.web.Mav
 import uk.ac.warwick.tabula.web.controllers.profiles.ProfilesController
@@ -15,9 +14,8 @@ import uk.ac.warwick.tabula.web.views.{FullCalendarEvent, JSONView}
 @Controller
 @RequestMapping(Array("/profiles/department/{department}/timetables"))
 class DepartmentTimetablesController extends ProfilesController
-	with AutowiringScientiaConfigurationComponent with AutowiringNewScientiaConfigurationComponent
-	with ScientiaHttpTimetableFetchingServiceComponent with SystemClockComponent
-	with AutowiringUserLookupComponent with CurrentSITSAcademicYear {
+	with CurrentSITSAcademicYear with AutowiringModuleTimetableEventSourceComponent
+	with AutowiringUserLookupComponent {
 
 	@ModelAttribute("activeDepartment")
 	def activeDepartment(@PathVariable department: Department): Department = department
@@ -28,7 +26,7 @@ class DepartmentTimetablesController extends ProfilesController
 			mandatory(department),
 			academicYear,
 			user,
-			new ViewModuleTimetableCommandFactoryImpl(timetableFetchingService),
+			new ViewModuleTimetableCommandFactoryImpl(moduleTimetableEventSource),
 			new ViewStudentPersonalTimetableCommandFactoryImpl(user),
 			new ViewStaffPersonalTimetableCommandFactoryImpl(user)
 		)

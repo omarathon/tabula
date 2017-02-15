@@ -13,6 +13,7 @@ import uk.ac.warwick.tabula.JavaImports._
 import uk.ac.warwick.tabula.data.Transactions._
 import uk.ac.warwick.tabula.data.convert.FetchByUniIdOrUsercode
 import uk.ac.warwick.tabula.data.model.notifications.RecipientNotificationInfo
+import uk.ac.warwick.tabula.helpers.FoundUser
 import uk.ac.warwick.tabula.helpers.StringUtils._
 import uk.ac.warwick.tabula.permissions.PermissionsTarget
 import uk.ac.warwick.tabula.services._
@@ -116,7 +117,7 @@ abstract class Notification[A >: Null <: ToEntityReference, B]
 
 	@Column(nullable=false)
 	@Type(`type`="uk.ac.warwick.tabula.data.model.SSOUserType")
-	final var agent: User = null // the actor in open social activity speak
+	final var agent: User = _ // the actor in open social activity speak
 
 	@OneToMany(mappedBy="notification", fetch=FetchType.LAZY, targetEntity=classOf[EntityReference[_]], cascade=Array(CascadeType.ALL))
 	@BatchSize(size = 1)
@@ -124,7 +125,7 @@ abstract class Notification[A >: Null <: ToEntityReference, B]
 
 	def entities: Seq[A] = items.asScala.map(_.entity)
 
-	var created: DateTime = null
+	var created: DateTime = _
 
 	// the default priority is info. More important notifications should manually set this value to something higher.
 	@Type(`type` = "uk.ac.warwick.tabula.data.model.NotificationPriorityUserType")
@@ -137,7 +138,7 @@ abstract class Notification[A >: Null <: ToEntityReference, B]
 	var recipientNotificationInfos: JList[RecipientNotificationInfo] = JArrayList()
 
 	// when performing operations on recipientNotificationInfos you should use this to fetch a users info.
-	private def getRecipientNotificationInfo(user: User) = {
+	private def getOrCreateRecipientNotificationInfo(user: User) = {
 		recipientNotificationInfos.asScala.find(_.recipient == user).getOrElse {
 			val newInfo = new RecipientNotificationInfo(this, user)
 			recipientNotificationInfos.add(newInfo)
@@ -146,13 +147,21 @@ abstract class Notification[A >: Null <: ToEntityReference, B]
 	}
 
 	def dismiss(user: User): Unit = {
-		val info = getRecipientNotificationInfo(user)
-		info.dismissed = true
+		user match {
+			case FoundUser(_) =>
+				val info = getOrCreateRecipientNotificationInfo(user)
+				info.dismissed = true
+			case _ =>
+		}
 	}
 
 	def unDismiss(user: User): Unit = {
-		val info = getRecipientNotificationInfo(user)
-		info.dismissed = false
+		user match {
+			case FoundUser(_) =>
+				val info = getOrCreateRecipientNotificationInfo(user)
+				info.dismissed = false
+			case _ =>
+		}
 	}
 
 	def isDismissed(user: User): Boolean = recipientNotificationInfos.asScala.exists(ni => ni.recipient == user && ni.dismissed)
@@ -197,7 +206,7 @@ abstract class Notification[A >: Null <: ToEntityReference, B]
 	} catch {
 		// Can happen if reference to an entity has since been deleted, e.g.
 		// a submission is resubmitted and the old submission is removed.
-		case onf: ObjectNotFoundException => None
+		case _: ObjectNotFoundException => None
 	}
 
 	// This used to implement the trait that the Hibernate listener listens to.
@@ -207,7 +216,7 @@ abstract class Notification[A >: Null <: ToEntityReference, B]
 		onPreSave(newRecord)
 		// Generate recipientNotificationInfos for non-null recipients
 		// (users could be null if inflating user entities that no longer exist in membership)
-		recipients.flatMap(Option(_)).foreach(getRecipientNotificationInfo)
+		recipients.flatMap(Option(_)).foreach(getOrCreateRecipientNotificationInfo)
 	}
 	def onPreSave(newRecord: Boolean) {}
 
@@ -225,7 +234,7 @@ abstract class NotificationWithTarget[A >: Null <: ToEntityReference, B >: Null 
 	@Access(value=AccessType.PROPERTY)
 	@OneToOne(cascade = Array(CascadeType.ALL), targetEntity = classOf[EntityReference[B]], fetch = FetchType.LAZY)
 	@BeanProperty
-	var target: EntityReference[B] = null
+	var target: EntityReference[B] = _
 }
 
 object FreemarkerModel {
@@ -242,7 +251,7 @@ trait SingleItemNotification[A >: Null <: ToEntityReference] {
 		try {
 			items.get(0)
 		} catch {
-			case e: IndexOutOfBoundsException => throw new ObjectNotFoundException("", "")
+			case _: IndexOutOfBoundsException => throw new ObjectNotFoundException("", "")
 		}
 }
 
@@ -251,7 +260,7 @@ trait UserIdRecipientNotification extends SingleRecipientNotification with Notif
 
 	this : UserLookupComponent =>
 
-	var recipientUserId: String = null
+	var recipientUserId: String = _
 	def recipient: User = userLookup.getUserByUserId(recipientUserId)
 
 	override def onPreSave(newRecord: Boolean) {
@@ -267,7 +276,7 @@ trait NotificationPreSaveBehaviour {
 trait UniversityIdRecipientNotification extends SingleRecipientNotification with NotificationPreSaveBehaviour {
 	this : UserLookupComponent =>
 
-	var recipientUniversityId: String = null
+	var recipientUniversityId: String = _
 	def recipient: User = userLookup.getUserByWarwickUniId(recipientUniversityId)
 
 	override def onPreSave(newRecord: Boolean) {
@@ -380,5 +389,11 @@ trait RecipientCompletedActionRequiredNotification extends ActionRequiredNotific
 
 	override final def actionCompleted(user: User): Unit = transactional() {
 		dismiss(user)
+	}
+
+	final def actionCompletedByOther(user: User): Unit = transactional() {
+		completed = true
+		completedBy = user.getUserId
+		completedOn = DateTime.now
 	}
 }

@@ -121,7 +121,7 @@ object GenerateExamGridExporter {
 			val yearCell = yearRow.createCell(currentColumnIndex)
 			yearCell.setCellValue(s"Year $year")
 			yearCell.setCellStyle(cellStyleMap(Header))
-			sheet.addMergedRegion(new CellRangeAddress(yearCell.getRowIndex, yearCell.getRowIndex, yearCell.getColumnIndex, yearCell.getColumnIndex + perYearColumns(year).size - 1))
+			sheet.addMergedRegion(new CellRangeAddress(yearCell.getRowIndex, yearCell.getRowIndex, yearCell.getColumnIndex, yearCell.getColumnIndex + Math.max(perYearColumns(year).size - 1, 0)))
 
 			var currentCategory = ""
 			perYearColumns(year).foreach(perYearColumn => {
@@ -179,6 +179,10 @@ object GenerateExamGridExporter {
 				sheet.setColumnWidth(currentColumnIndex, perYearColumn.excelColumnWidth)
 				currentColumnIndex = currentColumnIndex + 1
 			})
+
+			if (perYearColumns(year).isEmpty) {
+				currentColumnIndex = currentColumnIndex + 1
+			}
 
 			if (!showComponentMarks || perYearColumns.keys.toSeq.sorted(yearOrder).last == year) {
 				// Add a spacer after each year

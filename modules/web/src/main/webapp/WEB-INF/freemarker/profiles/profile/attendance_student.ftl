@@ -2,7 +2,6 @@
 
 <#import "../../attendance/attendance_variables.ftl" as attendance_variables />
 <#import "../../attendance/attendance_macros.ftl" as attendance_macros />
-<#import "../../attendance/attendance_note_macros.ftl" as attendance_note_macros />
 
 <#escape x as x?html>
 
@@ -27,7 +26,7 @@
 <h1>Attendance</h1>
 
 <#if hasMonitoringPointAttendancePermission>
-	<#assign groupedPointMap=monitoringPointAttendanceCommandResult.attendanceMonitoringPointWithCheckPoint />
+	<#assign groupedPointMap=monitoringPointAttendanceCommandResult.groupedPointMap />
 	<#if groupedPointMap?keys?size == 0>
 		<div class="seminar-attendance-profile striped-section collapsible">
 			<h3 class="section-title">Monitoring points</h3>
@@ -37,7 +36,7 @@
 		<div class="monitoring-points-profile striped-section collapsible expanded">
 			<#if can.do("MonitoringPoints.Record", student)>
 				<#assign returnTo><@routes.profiles.profile_attendance studentCourseDetails academicYear /></#assign>
-				<a class="pull-right btn btn-primary btn-sm" href="<@routes.attendance.profileRecord student academicYear.startYear?c returnTo />">Record attendance</a>
+				<a class="pull-right btn btn-primary btn-sm" href="<@routes.attendance.profileRecord student academicYear returnTo />">Record attendance</a>
 			</#if>
 			<h3 class="section-title">
 				Monitoring points
@@ -138,39 +137,96 @@
 				</#list>
 			</div>
 		</div>
-		<#assign allNotes = monitoringPointAttendanceCommandResult.allNotesWithSomeCheckPoints />
-		<div class="monitoring-points-profile striped-section collapsible">
+		<#assign notes = monitoringPointAttendanceCommandResult.notes />
+		<#assign noteCheckpoints = monitoringPointAttendanceCommandResult.noteCheckpoints />
+		<div class="monitoring-points-profile attendance-notes striped-section collapsible">
 			<h3 class="section-title">Attendance notes</h3>
 			<div class="attendance-note-info">
 				<#if isSelf>
-					You have ${allNotes?size} attendance notes.
+					You have <@fmt.p notes?size "attendance note" />
 				<#else>
-				${student.firstName} has ${allNotes?size} attendance notes.
+					${student.firstName} has <@fmt.p notes?size "attendance note" />
 				</#if>
 			</div>
 			<div class="striped-section-contents">
-				<div class="row-fluid">
-					<#if (allNotes?size > 0)>
-						<h4>Filter Options</h4>
-						<form>
-							<div class= "form-group checkbox-inline  checkpointState-checkbox checkpointState-all">
-								<label><input type="checkbox" name="all" value="all"   checked />All</label>
+				<#if notes?has_content>
+					<div class="row item-info">
+						<div class="col-md-12 form-inline">
+							<div class="form-group">
+								<label>Filter options</label>
+								<label class="checkbox-inline"><input type="checkbox" class="collection-check-all" checked />All</label>
+								<#list allCheckpointStates as state>
+									<label class="checkbox-inline"><input type="checkbox" class="collection-checkbox" name="checkpointState" value="${state.dbValue}" checked />${state.description}</label>
+								</#list>
 							</div>
-							<#list allCheckpointStates as state>
-								<div class= "form-group checkbox-inline checkpointState-checkbox checkpointState-${state.dbValue}"  >
-									<label><input  type="checkbox" name="${state.dbValue}" value="${state.description}"  align="left" checked />${state.description}</label>
-								</div>
-							</#list>
-						</form>
-						<@attendance_note_macros.allNotes notes=allNotes  />
-						<#list monitoringPointAttendanceCommandResult.checkPointNotes?keys as state>
-							<@attendance_note_macros.checkpointNotes  checkpointNoteList=monitoringPointAttendanceCommandResult.checkPointNotes[state] type=state />
-						</#list>
-						<@attendance_note_macros.unrecordedNotes monitoringPointNoteList=monitoringPointAttendanceCommandResult.notesWithoutCheckPoints  />
-					</#if>
-				</div>
+						</div>
+					</div>
+					<#list notes as note>
+						<#if mapGet(noteCheckpoints, note)??>
+							<#assign checkpoint = mapGet(noteCheckpoints, note) />
+						<#else>
+							<#assign checkpoint = '' />
+						</#if>
+						<div class="row item-info checkpoint-state-<#if checkpoint?has_content>${checkpoint.state.dbValue}<#else>not-recorded</#if>">
+							<div class="col-md-12">
+								<p>
+									<#if checkpoint?has_content>
+										<strong>${checkpoint.state.description}</strong>:
+									<#else>
+										<strong>Unrecorded</strong>:
+									</#if>
+									${note.point.name}
+									<#if point.scheme.pointStyle.dbValue == "week">
+										(<@fmt.wholeWeekDateFormat point.startWeek point.endWeek point.scheme.academicYear />)
+									<#else>
+										(<@fmt.interval point.startDate point.endDate />)
+									</#if>.
+									<#if checkpoint?has_content>
+										<@attendance_macros.checkpointDescription department=checkpoint.point.scheme.department checkpoint=checkpoint point=point student=note.student withParagraph=false />
+									</#if>
+								</p>
+
+								<p>Absence type: ${note.absenceType.description}</p>
+
+								<#if note.note?has_content>
+									<blockquote><#noescape>${note.escapedNote}</#noescape></blockquote>
+								</#if>
+
+								<#if note.attachment?has_content>
+									<p>
+										<@fmt.download_link
+											filePath="/attendance/note/${academicYear.startYear?c}/${note.student.universityId}/${note.point.id}/attachment/${note.attachment.name}"
+											mimeType=note.attachment.mimeType
+											title="Download file ${note.attachment.name}"
+											text="Download ${note.attachment.name}"
+										/>
+									</p>
+								</#if>
+
+								<p class="hint">
+									Attendance note updated
+									<#if note.updatedBy?? && note.updatedBy?has_content>
+										by
+										<@userlookup id=note.updatedBy>
+											<#if returned_user.foundUser>
+												${returned_user.fullName}
+											<#else>
+												${note.updatedBy}
+											</#if>
+										</@userlookup>
+										,
+									</#if>
+									<@fmt.date note.updatedDate />
+								</p>
+							</div>
+						</div>
+					</#list>
+				<#else>
+					<div class="row item-info"><div class="col-md-12"><em>There are no notes.</em></div></div>
+				</#if>
 			</div>
 		</div>
+
 	</#if>
 <#else>
 	<div class="alert alert-info">
@@ -186,61 +242,21 @@
 	</div>
 </#if>
 
-	<script>
-		jQuery(function($) {
-			$('.checkpointState-checkbox input').on('change', function() {
-				var checkboxInput = $(this);
-				//if event is for change of all checkbox
-				//if all is checked, show all notes and hide individual categories
-				if (checkboxInput.prop('name') == 'all' && checkboxInput.prop('checked')){
-					$('.allNotes').show();
-					//mark all others as checked when you select all
-					var filterCheckboxes = $('.checkpointState-checkbox input')
-					$.each(filterCheckboxes, function(element) {
-						$(this).prop('checked','checked')
-					});
-					hideNoteStates()
-
-				} else if (checkboxInput.prop('name') == 'all'){
-					//if all deselected,  hide all notes and show/hide individual categories based on checkboxes
-					$('.allNotes').hide();
-					// check all checkboxes and show/hide based on that
-					var filterCheckboxes = $('.checkpointState-checkbox input')
-					$.each(filterCheckboxes, function(element) {
-						var elmnt = $(this);
-						var elmntClass = ".note-state." +  elmnt.prop('name');
-						if( elmnt.prop('checked')) {
-							$(elmntClass).show();
-						} else {
-							$(elmntClass).hide();
-						}
-
-					});
-
-				} else {
-					//if event is for change of other checkboxes (other than all)
-					var checkboxInputClass = "." + checkboxInput.prop('name');
-					var container = $(checkboxInputClass);
-					var allCheckboxInput = $('.checkpointState-checkbox.checkpointState-all input');
-					// case for other checkboxes
-					if (checkboxInput.prop('checked') && !allCheckboxInput.prop('checked')){
-						container.show();
+<script>
+	jQuery(function($) {
+		$('.attendance-notes').bigList({
+			onChange: function(){
+				$('[name=checkpointState]').each(function(){
+					var $this = $(this), state = $this.val();
+					if ($this.is(':checked')) {
+						$('.attendance-notes .checkpoint-state-' + state).show();
 					} else {
-						container.hide();
+						$('.attendance-notes .checkpoint-state-' + state).hide();
 					}
-				}
 
-			});
-
-			function hideNoteStates() {
-				var elements = $('.note-state');
-				$.each(elements, function(element) {
-					$(this).hide();
 				});
-			};
-			// hide all individual category notes at start
-			hideNoteStates();
-
+			}
 		});
-	</script>
+	});
+</script>
 </#escape>

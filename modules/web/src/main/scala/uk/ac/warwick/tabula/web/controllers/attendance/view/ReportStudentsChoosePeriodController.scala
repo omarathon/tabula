@@ -29,8 +29,7 @@ class ReportStudentsChoosePeriodController extends AttendanceController {
 		@PathVariable academicYear: AcademicYear
 	): Mav = {
 		Mav("attendance/view/reportperiod").crumbs(
-			Breadcrumbs.View.Home,
-			Breadcrumbs.View.Department(department),
+			Breadcrumbs.View.HomeForYear(academicYear),
 			Breadcrumbs.View.DepartmentForYear(department, academicYear),
 			Breadcrumbs.View.Students(department, academicYear)
 		)
@@ -51,8 +50,7 @@ class ReportStudentsChoosePeriodController extends AttendanceController {
 				"studentMissedReportCounts" -> studentMissedReportCounts,
 				"unrecordedStudentsCount" -> studentMissedReportCounts.count(_.unrecorded > 0)
 			).crumbs(
-				Breadcrumbs.View.Home,
-				Breadcrumbs.View.Department(department),
+				Breadcrumbs.View.HomeForYear(academicYear),
 				Breadcrumbs.View.DepartmentForYear(department, academicYear),
 				Breadcrumbs.View.Students(department, academicYear)
 			)

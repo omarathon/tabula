@@ -187,7 +187,7 @@ trait RequestExtensionCommandState {
 
 	var reason: String =_
 
-	@DateTimeFormat(pattern = DateFormats.DateTimePicker)
+	@DateTimeFormat(pattern = DateFormats.DateTimePickerPattern)
 	@WithinYears(maxFuture = 3)
 	var requestedExpiryDate: DateTime =_
 

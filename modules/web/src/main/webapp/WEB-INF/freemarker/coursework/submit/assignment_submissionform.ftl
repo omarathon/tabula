@@ -164,6 +164,14 @@
 		</div>
 	</@f.form>
 
+	<script>
+		jQuery(function($){
+			$('form#submitAssignmentCommand').on('submit', function(){
+				$.post('<@routes.coursework.submission_attempt assignment />')
+			});
+		});
+	</script>
+
 <#elseif !submission??>
 
 	<#if !assignment.alive>

@@ -76,7 +76,7 @@ trait ModifyExtensionCommandState {
 	var module: Module =_
 	var submitter: CurrentUser =_
 
-	@WithinYears(maxFuture = 3) @DateTimeFormat(pattern = DateFormats.DateTimePicker)
+	@WithinYears(maxFuture = 3) @DateTimeFormat(pattern = DateFormats.DateTimePickerPattern)
 	var expiryDate: DateTime =_
 	var reviewerComments: String =_
 	var state: ExtensionState = ExtensionState.Unreviewed

@@ -151,7 +151,7 @@ $(function(){
 			$(this).on('click', function(){
 				$('.attendees .item-info').each(function(){
 					$(this).find('button').eq(i).trigger('click', ['bulkAction']);
-				})
+				});
 				// if the bulk authorised was clicked then open the bulk attendance note popup
 				if (i === 2) {
 					var $bulkNote = $('.bulk-attendance-note');
@@ -182,6 +182,13 @@ $(function(){
 				trigger: 'click',
 				container: '#container'
 			});
+		});
+	});
+
+	$('a.upload-attendance').on('click', function(e){
+		e.preventDefault();
+		$.get($(this).attr('href'), function(data){
+			$('#upload-attendance-modal').html(data).modal("show");
 		});
 	});
 

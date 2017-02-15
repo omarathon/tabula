@@ -130,6 +130,37 @@ section.identity, section.member-notes, section.circumstances {
 		}
 	}
 }
+.datetimepicker .datetimepicker-hours th.switch,
+.datetimepicker .datetimepicker-minutes th.switch {
+		color: transparent;
+}
+
+.tabula-page .calendar-smallscreen {
+	table.table {
+		&.today {
+			thead h6 {
+				color: @brand-primary;
+			}
+		}
+		thead tr th {
+			border-bottom-width: 1px;
+			border-top: 1px solid @table-border-color;
+			background-color: @table-bg-hover;
+			h6 {
+				margin: 0;
+			}
+		}
+		tbody tr td {
+			border: 0;
+			&.time, &.marker {
+				width: 1px;
+			}
+			&.time {
+				color: @very-subtle-text-color;
+			}
+		}
+	}
+}
 
 @import "allocate-associations.less";
 @import "profile-attendance.less";
