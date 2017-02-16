@@ -113,7 +113,9 @@
 			}).next('.add-on').css({'cursor': 'pointer'}).on('click', function() {$(this).prev("input").focus();});
 		}
 
-		//$(this).on('changeDate', function(){ offsetEndDate($(this)); });
+		$(this).on('changeDate', function() {
+			offsetEndDate($(this));
+		});
 	};
 
 	jQuery.fn.tabulaTimePicker = function() {
@@ -144,7 +146,9 @@
 			}
 		}).next('.add-on').css({'cursor': 'pointer'}).on('click', function() { $(this).prev("input").focus(); });
 
-		//$(this).on('changeDate', function(){ offsetEndDateTime($(this)); });
+		$(this).on('changeDate', function() {
+			offsetEndDateTime($(this));
+		});
 
 
 	};
@@ -193,7 +197,7 @@
 	}
 
 	function offsetEndDate($element) {
-		/*if($element.hasClass('startDateTime')) {
+		if ($element.hasClass('startDateTime')) {
 			var endDate = $element.data('datetimepicker').getDate().getTime() + parseInt($element.next('.endoffset').data('end-offset'));
 			var $endDateInput =  $element.closest('.dateTimePair').find('.endDateTime');
 			var endDatePicker = $endDateInput.data('datetimepicker');
@@ -214,7 +218,7 @@
 			} else {
 				$element.closest('.form-group').removeClass('has-error');
 			}
-		 }*/
+		}
 	}
 
 	/* apply to a checkbox or radio button. When the target is selected a div containing further related form elements
