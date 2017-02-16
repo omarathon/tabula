@@ -90,8 +90,9 @@
 								var $xhr = null;
 								$('#meetingDateStr').on('change', function(){
 									if ($xhr) $xhr.abort();
-									var $this = $(this), meetingDateTime = $this.val();
-									if (meetingDateTime.length > 0) {
+									var $this = $(this), meetingDateStr = $this.val();
+									if (meetingDateStr.length > 0) {
+
 										$xhr = jQuery.get('/ajax/academicyearfromdate', { date: meetingDateStr }, function(data){
 											if (data.startYear != '${academicYear.startYear?c}') {
 												$this.closest('.form-group').find('.help-block')
