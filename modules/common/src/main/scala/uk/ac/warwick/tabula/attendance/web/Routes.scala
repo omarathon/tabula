@@ -2,7 +2,7 @@ package uk.ac.warwick.tabula.attendance.web
 
 import uk.ac.warwick.tabula.AcademicYear
 import uk.ac.warwick.tabula.data.model.attendance.{AttendanceMonitoringPoint, AttendanceMonitoringScheme}
-import uk.ac.warwick.tabula.data.model.{Department, StudentMember, StudentRelationshipType}
+import uk.ac.warwick.tabula.data.model.{Department, Member, StudentMember, StudentRelationshipType}
 import uk.ac.warwick.tabula.web.RoutesUtils
 
 /**
