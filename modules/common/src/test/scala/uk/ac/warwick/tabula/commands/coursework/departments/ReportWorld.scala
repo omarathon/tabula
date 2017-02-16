@@ -75,7 +75,7 @@ trait ReportWorld extends TestBase with Mockito {
 
 	var auditEventQueryMethods: AuditEventQueryMethods = mock[AuditEventQueryMethods]
 
-	auditEventQueryMethods.publishFeedbackForStudent(any[Assignment], any[String]) answers {argsObj => {
+	auditEventQueryMethods.publishFeedbackForStudent(any[Assignment], any[String], any[Option[String]]) answers {argsObj => {
 		val args = argsObj.asInstanceOf[Array[_]]
 		val assignment = args(0).asInstanceOf[Assignment]
 		val warwickId = args(1).asInstanceOf[String]

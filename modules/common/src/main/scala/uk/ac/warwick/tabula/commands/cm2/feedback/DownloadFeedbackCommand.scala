@@ -8,7 +8,6 @@ import uk.ac.warwick.tabula.helpers.StringUtils.StringToSuperString
 import uk.ac.warwick.tabula.permissions._
 import uk.ac.warwick.tabula.services.ZipService
 import uk.ac.warwick.tabula.services.fileserver._
-import uk.ac.warwick.userlookup.User
 
 import scala.collection.JavaConversions.asScalaBuffer
 

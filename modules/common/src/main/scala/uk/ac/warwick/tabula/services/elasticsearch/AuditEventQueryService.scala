@@ -1,7 +1,7 @@
 package uk.ac.warwick.tabula.services.elasticsearch
 
 import com.sksamuel.elastic4s.ElasticDsl._
-import com.sksamuel.elastic4s.{QueryDefinition, RichSearchHit, RichSearchResponse}
+import com.sksamuel.elastic4s.{BoolQueryDefinition, QueryDefinition, RichSearchHit, RichSearchResponse}
 import org.elasticsearch.index.query.QueryStringQueryBuilder.Operator
 import org.elasticsearch.search.sort.SortOrder
 import org.joda.time.DateTime
@@ -14,7 +14,7 @@ import uk.ac.warwick.tabula.helpers.DateTimeOrdering._
 import uk.ac.warwick.tabula.helpers.Futures
 import uk.ac.warwick.tabula.helpers.Futures._
 import uk.ac.warwick.tabula.helpers.StringUtils._
-import uk.ac.warwick.tabula.services.UserLookupService.Usercode
+import uk.ac.warwick.tabula.services.UserLookupService.{UniversityId, Usercode}
 import uk.ac.warwick.tabula.services.{AuditEventService, AuditEventServiceComponent, UserLookupComponent, UserLookupService}
 import uk.ac.warwick.userlookup.User
 
@@ -79,7 +79,7 @@ trait AuditEventQueryMethods extends AuditEventNoteworthySubmissionsService {
 	/**
 		* A list of audit events for publishing feedback that includes a particular student
 		*/
-	def publishFeedbackForStudent(assignment: Assignment, usercode: Usercode): Future[Seq[AuditEvent]]
+	def publishFeedbackForStudent(assignment: Assignment, usercode: Usercode, uniId: Option[UniversityId]): Future[Seq[AuditEvent]]
 }
 
 @Service
@@ -258,8 +258,13 @@ trait AuditEventQueryMethodsImpl extends AuditEventQueryMethods {
 
 	def latestOnlineFeedbackAdded(assignment: Assignment): Future[Map[User, DateTime]] =
 		parsedEventsOfType("OnlineFeedback", assignmentRangeRestriction(assignment, Option(assignment.createdDate))).map {
-			_.filterNot { _.hadError }
-				.flatMap { event => event.students.map { usercode => userLookup.getUserByUserId(usercode) -> event.eventDate } }
+			_.filterNot(_.hadError)
+			.flatMap { event =>
+				val usersById = event.students.map(userLookup.getUserByUserId)
+				val usersByUsercode = event.studentUsercodes.map(userLookup.getUserByWarwickUniId)
+				val allUsers = (usersById ++ usersByUsercode).toSet
+				allUsers.map { u => u -> event.eventDate }.toSeq
+			}
 		}.map(mapToLatest)
 
 	def latestGenericFeedbackAdded(assignment: Assignment): Future[Option[DateTime]] =
@@ -268,14 +273,22 @@ trait AuditEventQueryMethodsImpl extends AuditEventQueryMethods {
 			case allEvents => Some(allEvents.maxBy { _.eventDate }.eventDate)
 		}
 
-	def publishFeedbackForStudent(assignment: Assignment, usercode: Usercode): Future[Seq[AuditEvent]] =
+	def publishFeedbackForStudent(assignment: Assignment, usercode: Usercode, uniId: Option[UniversityId]): Future[Seq[AuditEvent]] = {
+
+		val optionalUniIdQuery = uniId.map(uid => termQuery("students",uid))
+		val usercodeQuery = termQuery("studentUsercodes", usercode)
+		val queries =  optionalUniIdQuery.toSeq :+ usercodeQuery
+
 		parsedEventsOfType(
 			"PublishFeedback",
-			termQuery("students", usercode),
+			bool {
+				should ( queries )
+			},
 			afterFeedbackPublishedRestriction(assignment)
 		).map { events =>
 			events.sortBy(_.eventDate).reverse
 		}
+	}
 
 	private def submissionEventsForModules(modules: Seq[Module], lastUpdatedDate: Option[DateTime], max: Int, restrictions: QueryDefinition*): Future[PagedAuditEvents] = {
 		val eventTypeQuery = termQuery("eventType", "SubmitAssignment")

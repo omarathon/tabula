@@ -22,7 +22,6 @@ object DisplayExtensionCommand {
 	def apply(student: User, assignment: Assignment) = new DisplayExtensionCommandInternal(student, assignment)
 			with ComposableCommand[DisplayExtensionDetail]
 			with DisplayExtensionPermissions
-			with AutowiringUserLookupComponent
 			with AutowiringExtensionServiceComponent
 			with AutowiringSubmissionServiceComponent
 			with ReadOnly with Unaudited
@@ -31,7 +30,7 @@ object DisplayExtensionCommand {
 class DisplayExtensionCommandInternal(val student: User, val assignment: Assignment) extends CommandInternal[DisplayExtensionDetail]
 	with DisplayExtensionState with TaskBenchmarking {
 
-	this: UserLookupComponent with ExtensionServiceComponent with SubmissionServiceComponent  =>
+	this:  ExtensionServiceComponent with SubmissionServiceComponent  =>
 
 	def applyInternal(): DisplayExtensionDetail = {
 

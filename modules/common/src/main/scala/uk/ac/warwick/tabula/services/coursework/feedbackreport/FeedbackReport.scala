@@ -198,7 +198,7 @@ class FeedbackReport(department: Department, startDate: DateTime, endDate: DateT
 			publishEventDate <- Option(feedback.releasedDate).orElse {
 				try {
 					Await.result(
-						auditEventQueryMethods.publishFeedbackForStudent(assignment, feedback.usercode),
+						auditEventQueryMethods.publishFeedbackForStudent(assignment, feedback.usercode, feedback.universityId),
 						5.seconds
 					).headOption.map { _.eventDate }
 				} catch { case timeout: TimeoutException => None }

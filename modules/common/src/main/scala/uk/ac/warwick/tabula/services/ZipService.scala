@@ -51,21 +51,18 @@ class ZipService extends ZipCreator with AutowiringObjectStorageServiceComponent
 
 
 	def getFeedbackZip(feedback: Feedback): RenderableFile =
-		getZip(resolvePath(feedback), getFeedbackZipItems(feedback, forStudent = false))
-
-	def getFeedbackZipForStudent(feedback: Feedback): RenderableFile =
-		getZip(resolvePathForStudent(feedback), getFeedbackZipItems(feedback, forStudent = true))
+		getZip(resolvePath(feedback), getFeedbackZipItems(feedback))
 
 	def getSubmissionZip(submission: Submission): RenderableFile =
 		getZip(resolvePath(submission), getSubmissionZipItems(submission))
 
-	private def getFeedbackZipItems(feedback: Feedback, forStudent: Boolean = true): Seq[ZipItem] = {
-		(Seq(getOnlineFeedbackPdf(feedback, forStudent)) ++ feedback.attachments.asScala).map { (attachment) =>
+	private def getFeedbackZipItems(feedback: Feedback): Seq[ZipItem] = {
+		(Seq(getOnlineFeedbackPdf(feedback)) ++ feedback.attachments.asScala).map { (attachment) =>
 			ZipFileItem(feedback.studentIdentifier + " - " + attachment.name, attachment.dataStream, attachment.actualDataLength)
 		}
 	}
 
-	private def getOnlineFeedbackPdf(feedback: Feedback, forStudent: Boolean = true): FileAttachment = {
+	private def getOnlineFeedbackPdf(feedback: Feedback): FileAttachment = {
 		pdfGenerator.renderTemplateAndStore(
 			DownloadFeedbackAsPdfCommand.feedbackDownloadTemple,
 			"feedback.pdf",
@@ -121,7 +118,7 @@ class ZipService extends ZipCreator with AutowiringObjectStorageServiceComponent
 		* Get a zip containing these feedbacks.
 	*/
 	def getSomeFeedbacksZip(feedbacks: Seq[Feedback], progressCallback: (Int, Int) => Unit = {(_,_) => }): RenderableFile =
-		createUnnamedZip(feedbacks.flatMap(f => getFeedbackZipItems(f, forStudent = false)), progressCallback)
+		createUnnamedZip(feedbacks.flatMap(getFeedbackZipItems), progressCallback)
 
 	/**
 	 * Get a zip containing these marker feedbacks.

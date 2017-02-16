@@ -23,10 +23,9 @@ object AuditEventIndexService {
 		"assignment",
 		"module",
 		"department",
-		"studentId",
-		"studentUsercodes",
 		"submissionIsNoteworthy",
 		"students",
+		"studentUsercodes",
 		"attachments"
 	)
 

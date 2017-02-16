@@ -15,7 +15,7 @@ class FeedbackReportTest extends TestBase with ReportWorld {
 
 	@Test
 	def simpleGetFeedbackTest() {
-		val publishes = auditEventQueryMethods.publishFeedbackForStudent(assignmentOne, "u"+idFormat(1))
+		val publishes = auditEventQueryMethods.publishFeedbackForStudent(assignmentOne, "u"+idFormat(1), None)
 		publishes.futureValue.size should be (1)
 	}
 

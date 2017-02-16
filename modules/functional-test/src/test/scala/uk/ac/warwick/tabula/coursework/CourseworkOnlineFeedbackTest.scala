@@ -68,10 +68,10 @@ class CourseworkOnlineFeedbackTest extends BrowserTest with CourseworkFixtures w
 					toggleLink.underlying.click()
 					eventuallyAjax(getInputByLabel("Feedback") should be ('defined))
 
-					textArea(cssSelector(s"#content-${P.Student1.warwickId} textarea")).value = "That was RUBBISH"
-					textField(cssSelector(s"#content-${P.Student1.warwickId} input#mark")).value="12"
-					textField(cssSelector(s"#content-${P.Student1.warwickId} input#grade")).value="F"
-					find(cssSelector(s"#content-${P.Student1.warwickId} input.btn-primary")).get.underlying.click()
+					textArea(cssSelector(s"#content-${P.Student1.usercode} textarea")).value = "That was RUBBISH"
+					textField(cssSelector(s"#content-${P.Student1.usercode} input#mark")).value="12"
+					textField(cssSelector(s"#content-${P.Student1.usercode} input#grade")).value="F"
+					find(cssSelector(s"#content-${P.Student1.usercode} input.btn-primary")).get.underlying.click()
 
 					And("I go to the marking page")
 					go to Path("/coursework/admin/module/" + moduleCode.toLowerCase + "/assignments/" + assignmentId + "/feedback/online")
@@ -81,10 +81,10 @@ class CourseworkOnlineFeedbackTest extends BrowserTest with CourseworkFixtures w
 					toggleLink2.underlying.click()
 					eventuallyAjax(getInputByLabel("Feedback") should be ('defined))
 
-					textArea(cssSelector(s"#content-${P.Student2.warwickId} textarea")).value = "That was Awesome"
-					textField(cssSelector(s"#content-${P.Student2.warwickId} input#mark")).value="98"
-					textField(cssSelector(s"#content-${P.Student2.warwickId} input#grade")).value="A"
-					find(cssSelector(s"#content-${P.Student2.warwickId} input.btn-primary")).get.underlying.click()
+					textArea(cssSelector(s"#content-${P.Student2.usercode} textarea")).value = "That was Awesome"
+					textField(cssSelector(s"#content-${P.Student2.usercode} input#mark")).value="98"
+					textField(cssSelector(s"#content-${P.Student2.usercode} input#grade")).value="A"
+					find(cssSelector(s"#content-${P.Student2.usercode} input.btn-primary")).get.underlying.click()
 				}
 			  as(P.Admin1) {
 
