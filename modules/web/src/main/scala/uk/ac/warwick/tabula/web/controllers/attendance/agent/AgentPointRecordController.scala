@@ -45,7 +45,6 @@ class AgentPointRecordController extends AttendanceController with HasMonthNames
 			"uploadUrl" -> Routes.Agent.pointRecordUpload(relationshipType, academicYear, templatePoint),
 			"returnTo" -> getReturnTo(Routes.Agent.relationshipForYear(relationshipType, academicYear))
 		).crumbs(
-			Breadcrumbs.Agent.Relationship(relationshipType),
 			Breadcrumbs.Agent.RelationshipForYear(relationshipType, academicYear)
 		)
 	}

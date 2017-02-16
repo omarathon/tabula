@@ -2,9 +2,10 @@
 <#import "*/modal_macros.ftl" as modal />
 <#import "../attendance_macros.ftl" as attendance_macros />
 
+<@modal.wrapper isModal>
 	<#if isModal>
 		<@modal.header>
-			<h2>Attendance note for ${attendanceNote.student.fullName}</h2>
+			<h3 class="modal-title">Attendance note for ${attendanceNote.student.fullName}</h3>
 		</@modal.header>
 	<#else>
 		<h2>Attendance note for ${attendanceNote.student.fullName}</h2>
@@ -15,7 +16,7 @@
 			<#if checkpoint??>
 				${checkpoint.state.description}:
 			<#else>
-				Not recorded:
+				Unrecorded:
 			</#if>
 			${attendanceNote.point.name}
 			<#if point.scheme.pointStyle.dbValue == "week">
@@ -69,7 +70,7 @@
 						Edit
 					</a>
 				</#if>
-				<button class="btn" data-dismiss="modal" aria-hidden="true">Close</button>
+				<button class="btn btn-default" data-dismiss="modal" aria-hidden="true">Close</button>
 			</span>
 		</@modal.footer>
 
@@ -83,4 +84,5 @@
 
 	</#if>
 
+</@modal.wrapper>
 </#escape>

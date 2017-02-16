@@ -86,7 +86,6 @@ class AgentStudentRecordController extends AttendanceController
 			"department" -> currentMember.homeDepartment,
 			"returnTo" -> getReturnTo(Routes.Agent.student(relationshipType, academicYear, student))
 		).crumbs(
-			Breadcrumbs.Agent.Relationship(relationshipType),
 			Breadcrumbs.Agent.RelationshipForYear(relationshipType, academicYear),
 			Breadcrumbs.Agent.Student(relationshipType, academicYear, student)
 		)

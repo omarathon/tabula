@@ -2,7 +2,7 @@
 
 <h1>Upload missed monitoring points</h1>
 
-<@f.form commandName="command" action="" method="POST" cssClass="form-horizontal">
+<@f.form commandName="command" action="" method="POST">
 
 	<input type="hidden" name="period" value="${command.period}" />
 	<input type="hidden" name="filterString" value="${command.filterString}" />
@@ -11,7 +11,7 @@
 	</#list>
 
 	<#if command.currentPeriod == command.period && command.currentAcademicYear.toString == command.academicYear.toString>
-		<div class="alert alert-warn">
+		<div class="alert alert-info">
 			<p>You have chosen to upload points for the current monitoring period, which has not yet finished.</p>
 		</div>
 	</#if>
@@ -33,9 +33,9 @@
 		<p>Are you sure you wish to upload these missed points?</p>
 
 		<p>
-			<@form.label checkbox=true>
+			<@bs3form.checkbox>
 				<@f.checkbox path="confirm" /> I confirm that I want to upload these missed points.
-			</@form.label>
+			</@bs3form.checkbox>
 			<@form.errors path="confirm"/>
 		</p>
 
@@ -46,7 +46,7 @@
 			<button class="btn btn-primary spinnable spinner-auto" type="submit" name="submit-confirm" data-loading-text="Loading&hellip;">
 				Upload
 			</button>
-			<a class="btn" href="<@routes.attendance.viewStudents department academicYear.startYear?c command.filterString />">Cancel</a>
+			<a class="btn btn-default" href="<@routes.attendance.viewStudents department academicYear command.filterString />">Cancel</a>
 		</div>
 	</div>
 

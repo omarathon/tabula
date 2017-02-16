@@ -1,41 +1,40 @@
-<@form.labelled_row "absenceType" "Absence type">
-	<@f.select path="absenceType">
+<@bs3form.labelled_form_group path="absenceType" labelText="Absence type">
+	<@f.select path="absenceType" cssClass="form-control">
 	<option value="" style="display: none;">Please select one&hellip;</option>
 		<#list allAbsenceTypes as type>
 			<@f.option value="${type.dbValue}" label="${type.description}" />
 		</#list>
 	</@f.select>
-</@form.labelled_row>
+</@bs3form.labelled_form_group>
 
-<@form.labelled_row "note" "Note">
-	<@f.textarea path="note" cssClass="input-block-level" rows="5" cssStyle="height: 150px;" />
-</@form.labelled_row>
+<@bs3form.labelled_form_group path="note" labelText="Note">
+	<@f.textarea path="note" cssClass="form-control" rows="5" cssStyle="height: 150px;" />
+</@bs3form.labelled_form_group>
 
 <#if command.attachedFile?has_content>
-	<@form.labelled_row "attachedFile" "Attached file">
-	<i class="icon-file-alt"></i>
+	<@bs3form.labelled_form_group path="attachedFile" labelText="Attached file">
 		<@fmt.download_link
-		filePath="/attendance/note/2013/${command.student.universityId}/${command.point.id}/attachment/${command.attachedFile.name}"
-		mimeType=command.attachedFile.mimeType
-		title="Download file ${command.attachedFile.name}"
-		text="Download ${command.attachedFile.name}"
+			filePath="/attendance/note/${academicYear.startYear?c}/${command.student.universityId}/${command.point.id}/attachment/${command.attachedFile.name}"
+			mimeType=command.attachedFile.mimeType
+			title="Download file ${command.attachedFile.name}"
+			text="Download ${command.attachedFile.name}"
 		/>
-	&nbsp;
+		&nbsp;
 		<@f.hidden path="attachedFile" value="${command.attachedFile.id}" />
-	<i class="icon-remove-sign remove-attachment"></i>
+		<i class="fa fa-times-circle remove-attachment"></i>
 
-	<small class="subtle help-block">
-		This is the file attached to this attendance note.
-		Click the remove link to delete it.
-	</small>
+		<small class="very-subtle help-block">
+			This is the file attached to this attendance note.
+			Click the remove link next to a document to delete it.
+		</small>
 
-	</@form.labelled_row>
+	</@bs3form.labelled_form_group>
 
 <script>
 	jQuery(function($){
-		$(".remove-attachment").on("click", function(e){
+		$(".remove-attachment").on("click", function(){
 			$(this).closest('form').find('.attendance-file').show();
-			$(this).closest(".control-group").remove()
+			$(this).closest(".form-group").remove();
 			return false;
 		});
 	});
@@ -43,5 +42,5 @@
 </#if>
 
 <div class="attendance-file" <#if command.attachedFile?has_content>style="display:none;"</#if>>
-<@form.filewidget basename="file" types=[] multiple=false />
+	<@bs3form.filewidget basename="file" types=[] multiple=false />
 </div>

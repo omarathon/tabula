@@ -35,10 +35,10 @@
 </div>
 
 <div class="calendar-smallscreen-outer visible-xs-block">
+	<div class="calendar-smallscreen"></div>
 	<div class="calendar-smallscreen-loading">
 		<i class="fa fa-spinner fa-spin"></i><em> Loading&hellip;</em>
 	</div>
-	<div class="calendar-smallscreen"></div>
 </div>
 
 <p>
@@ -165,15 +165,10 @@
 				$('.calendar-smallscreen'),
 				$('.calendar-smallscreen-loading'),
 				'/api/v1/member/${member.universityId}/timetable/calendar',
-				function() {
-					var startToSend = new Date();
-					startToSend.setMilliseconds(0);
-					startToSend.setDate(startToSend.getDate() - 1);
-					var endToSend = new Date(startToSend.valueOf());
-					endToSend.setDate(endToSend.getDate() + 40);
+				function(startDate, endDate) {
 					return {
-						'from':startToSend.getTime()/1000,
-						'to':endToSend.getTime()/1000,
+						'from':startDate.getTime()/1000,
+						'to':endDate.getTime()/1000,
 						'cb':new Date().valueOf() // Break the IE cache
 					};
 				},
