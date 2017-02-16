@@ -6,7 +6,7 @@ import org.hibernate.annotations.{BatchSize, Type}
 import uk.ac.warwick.tabula.AcademicYear
 import uk.ac.warwick.tabula.JavaImports._
 import uk.ac.warwick.tabula.data.model.StudentCourseYearDetails.YearOfStudy
-import uk.ac.warwick.tabula.services.UpstreamRouteRuleService
+import uk.ac.warwick.tabula.services.exams.grids.UpstreamRouteRuleService
 
 import collection.JavaConverters._
 import scala.collection.mutable

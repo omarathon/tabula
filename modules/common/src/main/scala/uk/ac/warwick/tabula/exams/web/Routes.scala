@@ -77,6 +77,9 @@ object Routes {
 		def generate(department: Department, academicYear: AcademicYear): String =
 			context + "/%s/%s/generate" format(encoded(department.code), encoded(academicYear.startYear.toString))
 
+		def normalLoad(department: Department, academicYear: AcademicYear): String =
+			context + "/%s/%s/normalload" format(encoded(department.code), encoded(academicYear.startYear.toString))
+
 	}
 
 }

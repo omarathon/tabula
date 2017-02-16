@@ -14,8 +14,9 @@ import uk.ac.warwick.tabula.commands.scheduling.imports.ImportMemberHelpers
 import uk.ac.warwick.tabula.data.model.{UpstreamRouteRule, UpstreamRouteRuleEntry}
 import uk.ac.warwick.tabula.helpers.StringUtils._
 import uk.ac.warwick.tabula.services.scheduling.RouteRuleImporter.{UpstreamRouteRuleQuery, UpstreamRouteRuleRow}
-import uk.ac.warwick.tabula.services.{AutowiringCourseAndRouteServiceComponent, AutowiringUpstreamModuleListServiceComponent}
+import uk.ac.warwick.tabula.services.AutowiringCourseAndRouteServiceComponent
 import uk.ac.warwick.tabula.data.Transactions._
+import uk.ac.warwick.tabula.services.exams.grids.AutowiringUpstreamModuleListServiceComponent
 
 import scala.collection.JavaConverters._
 import scala.util.matching.Regex

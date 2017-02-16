@@ -4,13 +4,10 @@ import java.io.InputStream
 
 import org.springframework.validation.BindException
 import uk.ac.warwick.tabula.commands.UploadedFile
-import uk.ac.warwick.tabula.commands.exams.{BulkAdjustmentCommand, BulkAdjustmentCommandBindListener, BulkAdjustmentCommandState, BulkAdjustmentValidation}
 import uk.ac.warwick.tabula.data.FileDao
 import uk.ac.warwick.tabula.data.model._
 import uk.ac.warwick.tabula.helpers.SpreadsheetHelpers
 import uk.ac.warwick.tabula.services.objectstore.ObjectStorageService
-import uk.ac.warwick.tabula.services.{GeneratesGradesFromMarks, MaintenanceModeService}
-import uk.ac.warwick.tabula.{CurrentUser, Fixtures, Mockito, TestBase}
 import uk.ac.warwick.tabula.services.{GeneratesGradesFromMarks, MaintenanceModeService}
 import uk.ac.warwick.tabula.{CurrentUser, Fixtures, Mockito, TestBase}
 

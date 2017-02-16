@@ -13,7 +13,8 @@ import uk.ac.warwick.tabula.data.model._
 import uk.ac.warwick.tabula.exams.grids.columns._
 import uk.ac.warwick.tabula.exams.grids.columns.marking.OvercattedYearMarkColumnOption
 import uk.ac.warwick.tabula.exams.grids.columns.modules.{CoreModulesColumnOption, CoreOptionalModulesColumnOption, CoreRequiredModulesColumnOption, OptionalModulesColumnOption}
-import uk.ac.warwick.tabula.services.{AutowiringModuleRegistrationServiceComponent, AutowiringUpstreamRouteRuleServiceComponent, ModuleRegistrationServiceComponent, NormalLoadLookup}
+import uk.ac.warwick.tabula.services.exams.grids.{AutowiringNormalCATSLoadServiceComponent, AutowiringUpstreamRouteRuleServiceComponent, NormalLoadLookup}
+import uk.ac.warwick.tabula.services.{AutowiringModuleRegistrationServiceComponent, ModuleRegistrationServiceComponent}
 import uk.ac.warwick.tabula.web.Mav
 import uk.ac.warwick.tabula.web.controllers.exams.ExamsController
 import uk.ac.warwick.tabula.web.views.{ExcelView, JSONErrorView, JSONView}
@@ -22,7 +23,8 @@ import uk.ac.warwick.tabula.{AcademicYear, CurrentUser}
 @Controller
 @RequestMapping(Array("/exams/grids/{department}/{academicYear}/generate/overcatting/{scyd}"))
 class OvercattingOptionsController extends ExamsController
-	with AutowiringModuleRegistrationServiceComponent with AutowiringUpstreamRouteRuleServiceComponent {
+	with AutowiringModuleRegistrationServiceComponent with AutowiringUpstreamRouteRuleServiceComponent
+	with AutowiringNormalCATSLoadServiceComponent {
 
 	validatesSelf[SelfValidating]
 
@@ -39,14 +41,14 @@ class OvercattingOptionsController extends ExamsController
 			mandatory(department),
 			mandatory(academicYear),
 			mandatory(scyd),
-			new NormalLoadLookup(academicYear, scyd.yearOfStudy, upstreamRouteRuleService),
+			new NormalLoadLookup(academicYear, scyd.yearOfStudy, normalCATSLoadService),
 			routeRules(scyd, academicYear),
 			user
 		)
 
 	@ModelAttribute("overcatView")
 	def overcatView(@PathVariable department: Department, @PathVariable academicYear: AcademicYear, @PathVariable scyd: StudentCourseYearDetails) =
-		OvercattingOptionsView(department, academicYear, scyd, new NormalLoadLookup(academicYear, scyd.yearOfStudy, upstreamRouteRuleService), routeRules(scyd, academicYear))
+		OvercattingOptionsView(department, academicYear, scyd, new NormalLoadLookup(academicYear, scyd.yearOfStudy, normalCATSLoadService), routeRules(scyd, academicYear))
 
 	@ModelAttribute("ExamGridColumnValueType")
 	def examGridColumnValueType = ExamGridColumnValueType

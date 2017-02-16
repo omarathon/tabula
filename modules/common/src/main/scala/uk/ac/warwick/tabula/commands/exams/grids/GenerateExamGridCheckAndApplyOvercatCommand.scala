@@ -8,6 +8,7 @@ import uk.ac.warwick.tabula.data.model.{Department, ModuleRegistration, Upstream
 import uk.ac.warwick.tabula.data.{AutowiringStudentCourseYearDetailsDaoComponent, StudentCourseYearDetailsDaoComponent}
 import uk.ac.warwick.tabula.permissions.Permissions
 import uk.ac.warwick.tabula.services._
+import uk.ac.warwick.tabula.services.exams.grids._
 import uk.ac.warwick.tabula.system.permissions.{PermissionsChecking, PermissionsCheckingMethods, RequiresPermissionsChecking}
 import uk.ac.warwick.tabula.{AcademicYear, CurrentUser}
 
@@ -26,6 +27,7 @@ object GenerateExamGridCheckAndApplyOvercatCommand {
 			with AutowiringUpstreamRouteRuleServiceComponent
 			with AutowiringModuleRegistrationServiceComponent
 			with AutowiringStudentCourseYearDetailsDaoComponent
+			with AutowiringNormalCATSLoadServiceComponent
 			with GenerateExamGridCheckAndApplyOvercatValidation
 			with GenerateExamGridCheckAndApplyOvercatDescription
 			with GenerateExamGridCheckAndApplyOvercatPermissions
@@ -108,7 +110,8 @@ trait GenerateExamGridCheckAndApplyOvercatDescription extends Describable[Genera
 
 trait GenerateExamGridCheckAndApplyOvercatCommandState {
 
-	self: UpstreamRouteRuleServiceComponent with ModuleRegistrationServiceComponent =>
+	self: UpstreamRouteRuleServiceComponent with ModuleRegistrationServiceComponent
+		with NormalCATSLoadServiceComponent =>
 
 	def department: Department
 	def academicYear: AcademicYear
@@ -121,7 +124,7 @@ trait GenerateExamGridCheckAndApplyOvercatCommandState {
 		case "all" => fetchEntities
 		case _ => fetchEntities.map(entity => entity.copy(years = Map(entity.years.keys.max -> entity.years(entity.years.keys.max))))
 	}
-	lazy val normalLoadLookup: NormalLoadLookup = new NormalLoadLookup(academicYear, selectCourseCommand.yearOfStudy, upstreamRouteRuleService)
+	lazy val normalLoadLookup: NormalLoadLookup = new NormalLoadLookup(academicYear, selectCourseCommand.yearOfStudy, normalCATSLoadService)
 	lazy val routeRulesLookup: UpstreamRouteRuleLookup = new UpstreamRouteRuleLookup(academicYear, selectCourseCommand.yearOfStudy, upstreamRouteRuleService)
 
 	lazy val overcatSubsets: Map[ExamGridEntity, Seq[(BigDecimal, Seq[ModuleRegistration])]] =

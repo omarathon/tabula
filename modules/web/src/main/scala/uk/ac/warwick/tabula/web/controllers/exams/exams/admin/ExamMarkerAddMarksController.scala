@@ -8,6 +8,7 @@ import uk.ac.warwick.tabula.{AcademicYear, CurrentUser}
 import uk.ac.warwick.tabula.commands.Appliable
 import uk.ac.warwick.tabula.commands.coursework.assignments.PostExtractValidation
 import uk.ac.warwick.tabula.commands.coursework.feedback.GenerateGradesFromMarkCommand
+import uk.ac.warwick.tabula.commands.exams.exams.ExamMarkerAddMarksCommand
 import uk.ac.warwick.tabula.services.coursework.docconversion.MarkItem
 import uk.ac.warwick.tabula.exams.web.Routes
 import uk.ac.warwick.tabula.data.model.{Exam, Feedback, Module}
@@ -15,7 +16,6 @@ import uk.ac.warwick.tabula.web.controllers.exams.ExamsController
 import uk.ac.warwick.tabula.services.{AssessmentMembershipService, FeedbackService}
 import uk.ac.warwick.tabula.web.Mav
 import uk.ac.warwick.userlookup.User
-import uk.ac.warwick.tabula.commands.exams.ExamMarkerAddMarksCommand
 
 @Controller
 @RequestMapping(value = Array("/exams/exams/admin/module/{module}/{academicYear}/exams/{exam}/marker/{marker}/marks"))

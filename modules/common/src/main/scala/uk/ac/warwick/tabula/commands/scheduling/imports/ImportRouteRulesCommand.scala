@@ -7,6 +7,7 @@ import uk.ac.warwick.tabula.data.{Daoisms, SessionComponent}
 import uk.ac.warwick.tabula.helpers.Logging
 import uk.ac.warwick.tabula.permissions._
 import uk.ac.warwick.tabula.services._
+import uk.ac.warwick.tabula.services.exams.grids.UpstreamRouteRuleService
 import uk.ac.warwick.tabula.services.scheduling.RouteRuleImporter
 import uk.ac.warwick.tabula.system.permissions.{PermissionsChecking, RequiresPermissionsChecking}
 

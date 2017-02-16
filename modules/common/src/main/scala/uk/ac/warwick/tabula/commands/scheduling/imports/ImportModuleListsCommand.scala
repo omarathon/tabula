@@ -11,6 +11,7 @@ import uk.ac.warwick.tabula.services._
 import uk.ac.warwick.tabula.services.scheduling.ModuleListImporter
 import uk.ac.warwick.tabula.system.permissions.{PermissionsChecking, RequiresPermissionsChecking}
 import uk.ac.warwick.tabula.JavaImports._
+import uk.ac.warwick.tabula.services.exams.grids.UpstreamModuleListService
 
 object ImportModuleListsCommand {
 	def apply() = new ComposableCommandWithoutTransaction[Unit]

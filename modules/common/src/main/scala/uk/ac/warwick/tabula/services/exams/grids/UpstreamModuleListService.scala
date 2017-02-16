@@ -1,4 +1,4 @@
-package uk.ac.warwick.tabula.services
+package uk.ac.warwick.tabula.services.exams.grids
 
 import org.springframework.stereotype.Service
 import uk.ac.warwick.spring.Wire

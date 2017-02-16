@@ -9,7 +9,8 @@ import uk.ac.warwick.tabula.data.{AutowiringStudentCourseYearDetailsDaoComponent
 import uk.ac.warwick.tabula.helpers.LazyMaps
 import uk.ac.warwick.tabula.helpers.StringUtils._
 import uk.ac.warwick.tabula.permissions.Permissions
-import uk.ac.warwick.tabula.services.{AutowiringModuleRegistrationServiceComponent, ModuleRegistrationServiceComponent, NormalLoadLookup}
+import uk.ac.warwick.tabula.services.exams.grids.NormalLoadLookup
+import uk.ac.warwick.tabula.services.{AutowiringModuleRegistrationServiceComponent, ModuleRegistrationServiceComponent}
 import uk.ac.warwick.tabula.system.permissions.{PermissionsChecking, PermissionsCheckingMethods, RequiresPermissionsChecking}
 import uk.ac.warwick.tabula.{AcademicYear, CurrentUser}
 
