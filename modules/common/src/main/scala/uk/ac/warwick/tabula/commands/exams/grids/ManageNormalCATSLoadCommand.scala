@@ -44,20 +44,22 @@ class ManageNormalCATSLoadCommandInternal(val department: Department, val academ
 		val loads = normalLoads.asScala.toSeq.map { case (route, yearMap) =>
 			val (toRemove, toUpdate) = yearMap.asScala.partition { case (_, load) => Option(load).isEmpty }
 
-			val removed = toRemove.flatMap { case (year, _) =>
-				originalNormalLoads.get(route).flatMap(_.get(year)).map { load =>
-					normalCATSLoadService.delete(load)
-					load
-				}
-			}
+			val removed = for {
+				(year, _) <- toRemove
+				loadsForRoute <- originalNormalLoads.get(route)
+				normalLoad <- loadsForRoute.get(year)
+			} yield normalLoad
+			removed.foreach(normalCATSLoadService.delete)
 
-			val updated = toUpdate.map { case (year, normalLoad) =>
-				val load = originalNormalLoads.get(route).flatMap(_.get(year)).getOrElse(
-					new NormalCATSLoad(academicYear, route, year, BigDecimal(normalLoad))
-				)
-				normalCATSLoadService.saveOrUpdate(load)
+			val updated = for {
+				(year, normalLoad) <- toUpdate
+				loadsForRoute <- originalNormalLoads.get(route)
+			} yield {
+				val load = loadsForRoute.getOrElse(year, new NormalCATSLoad(academicYear, route, year, BigDecimal(normalLoad)))
+				load.normalLoad = BigDecimal(normalLoad)
 				load
 			}
+			updated.foreach(normalCATSLoadService.saveOrUpdate)
 
 			(removed, updated)
 		}
