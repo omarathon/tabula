@@ -90,9 +90,10 @@
 								var $xhr = null;
 								$('#meetingDateStr').on('change', function(){
 									if ($xhr) $xhr.abort();
-									var $this = $(this), meetingDateTime = $this.val();
-									if (meetingDateTime.length > 0) {
-										$xhr = jQuery.get('/ajax/academicyearfromdate', { date: meetingDateStr }, function(data){
+									var $this = $(this), meetingDateStr = $this.val() + ' ' + $('#meetingTimeStr').val();
+									if (meetingDateStr.length > 0) {
+
+										$xhr = jQuery.get('/ajax/academicyearfromdate', {date: meetingDateStr}, function(data) {
 											if (data.startYear != '${academicYear.startYear?c}') {
 												$this.closest('.form-group').find('.help-block')
 													.find('span.year').text(data.string).end()
@@ -150,7 +151,7 @@
 									'student' : '${studentCourseDetails.student.universityId}',
 									'relationshipType' : '${relationshipType.urlPart}',
 									'meetingFormat' : $('#format').val(),
-									'meetingDate' : $('#meetingDateStr').val()
+									'meetingDate': $('#meetingDateStr').val() + ' ' + $('#meetingTimeStr').val()
 								}, function(data){
 									if(data.willCheckpointBeCreated) {
 										$('#willCheckpointBeCreatedMessage').show();
