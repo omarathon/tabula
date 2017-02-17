@@ -1,20 +1,20 @@
 <#escape x as x?html>
 <#import "../attendance_macros.ftl" as attendance_macros />
 
-<#macro deptheaderroutemacro dept>
-	<@routes.attendance.viewPoints dept academicYear.startYear?c />
-</#macro>
-<#assign deptheaderroute = deptheaderroutemacro in routes/>
-<@fmt.deptheader "View monitoring points" "for" filterCommand.department routes "deptheaderroute" />
+<#function route_function dept>
+	<#local result><@routes.attendance.viewPoints dept academicYear /></#local>
+	<#return result />
+</#function>
+<@fmt.id7_deptheader title="View monitoring points" route_function=route_function preposition="for" />
 
 <#if updatedMonitoringPoint??>
-<div class="alert alert-success">
+<div class="alert alert-info">
 	<button type="button" class="close" data-dismiss="alert">&times;</button>
 	Attendance recorded for '${updatedMonitoringPoint.name}'
 </div>
 </#if>
 
-<#assign submitUrl><@routes.attendance.viewPoints filterCommand.department filterCommand.academicYear.startYear?c /></#assign>
+<#assign submitUrl><@routes.attendance.viewPoints filterCommand.department filterCommand.academicYear /></#assign>
 
 <#assign filterCommand = filterCommand />
 <#assign filterCommandName = "filterCommand" />

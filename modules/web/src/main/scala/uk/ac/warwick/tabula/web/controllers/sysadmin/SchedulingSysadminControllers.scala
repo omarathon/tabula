@@ -21,8 +21,8 @@ import uk.ac.warwick.tabula.services.jobs.AutowiringJobServiceComponent
 import uk.ac.warwick.tabula.services.scheduling.jobs._
 import uk.ac.warwick.tabula.services.{ModuleAndDepartmentService, ProfileService}
 import uk.ac.warwick.tabula.validators.WithinYears
-import uk.ac.warwick.tabula.web.{Mav, Routes}
 import uk.ac.warwick.tabula.web.views.JSONView
+import uk.ac.warwick.tabula.web.{Mav, Routes}
 import uk.ac.warwick.util.web.Uri
 
 import scala.concurrent.Await
@@ -33,7 +33,7 @@ class ReindexAuditEventsCommand extends Command[ElasticsearchIndexingResult] wit
 
 	var indexer: AuditEventIndexService = Wire[AuditEventIndexService]
 
-	@WithinYears(maxPast = 20) @DateTimeFormat(pattern = DateFormats.DateTimePicker)
+	@WithinYears(maxPast = 20) @DateTimeFormat(pattern = DateFormats.DateTimePickerPattern)
 	var from: DateTime = _
 
 	def applyInternal(): ElasticsearchIndexingResult = {
@@ -55,7 +55,7 @@ class ReindexNotificationsCommand extends Command[ElasticsearchIndexingResult] w
 
 	var indexer: NotificationIndexService = Wire[NotificationIndexService]
 
-	@WithinYears(maxPast = 20) @DateTimeFormat(pattern = DateFormats.DateTimePicker)
+	@WithinYears(maxPast = 20) @DateTimeFormat(pattern = DateFormats.DateTimePickerPattern)
 	var from: DateTime = _
 
 	def applyInternal(): ElasticsearchIndexingResult = {
@@ -78,7 +78,7 @@ class ReindexProfilesCommand extends Command[ElasticsearchIndexingResult] with R
 	var indexer: ProfileIndexService = Wire[ProfileIndexService]
 	var mdService: ModuleAndDepartmentService = Wire[ModuleAndDepartmentService]
 
-	@WithinYears(maxPast = 20) @DateTimeFormat(pattern = DateFormats.DateTimePicker)
+	@WithinYears(maxPast = 20) @DateTimeFormat(pattern = DateFormats.DateTimePickerPattern)
 	var from: DateTime = _
 	var deptCode: String = _
 

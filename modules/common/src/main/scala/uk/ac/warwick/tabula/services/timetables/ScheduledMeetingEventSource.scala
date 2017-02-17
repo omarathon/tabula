@@ -1,6 +1,5 @@
 package uk.ac.warwick.tabula.services.timetables
 
-import org.joda.time.DateTime
 import uk.ac.warwick.tabula.CurrentUser
 import uk.ac.warwick.tabula.data.model.{AbstractMeetingRecord, Member, StudentMember}
 import uk.ac.warwick.tabula.permissions.Permissions

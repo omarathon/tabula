@@ -15,7 +15,7 @@
 
 <div id="addAdditional-modal" class="modal fade"></div>
 
-<div class="recordCheckpointForm">
+<div class="recordCheckpointForm" data-check-checkpoints="true">
 	<div style="display:none;" class="forCloning">
 		<div class="btn-group" data-toggle="radio-buttons">
 			<button type="button" class="btn btn-default" data-state="">
@@ -233,7 +233,7 @@
 		<div class="attendees">
 			<form id="recordAttendance" action="" method="post" data-occurrence="${command.occurrence.id}" class="dirty-check">
 				<script type="text/javascript">
-					AttendanceRecording.bindButtonGroupHandler(true);
+					AttendanceRecording.bindButtonGroupHandler();
 				</script>
 
 				<table class="table table-striped table-condensed">

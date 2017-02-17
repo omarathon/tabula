@@ -17,11 +17,13 @@
 <#else>
 <div class="recordCheckpointForm">
 
-	<@attendance_macros.attendanceButtons />
+	<@attendance_macros.id7AttendanceButtons />
 
 	<div class="fix-area">
-		<h1>Record attendance</h1>
-		<h6><span class="muted">for</span> ${student.fullName}, ${department.name}</h6>
+		<div class="deptheader">
+			<h1>Record attendance</h1>
+			<h5 class="with-related"><span class="muted">for</span> ${student.fullName}, ${department.name}</h5>
+		</div>
 
 		<form id="recordAttendance" action="" method="post" class="dirty-check">
 			<input type="hidden" name="returnTo" value="${returnTo}"/>
@@ -52,25 +54,25 @@
 				<#if mapGet(attendanceNotes, point)??>
 					<#assign note = mapGet(attendanceNotes, point) />
 					<#if note.hasContent>
-						<a id="attendanceNote-${student.universityId}-${point.id}" class="btn use-tooltip attendance-note edit" title="Edit attendance note" href="<@routes.attendance.noteEdit academicYear.startYear?c student point />?dt=${.now?string('iso')}">
-							<i class="icon-edit attendance-note-icon"></i>
+						<a id="attendanceNote-${student.universityId}-${point.id}" class="btn btn-default use-tooltip attendance-note edit" title="Edit attendance note" href="<@routes.attendance.noteEdit academicYear.startYear?c student point />?dt=${.now?string('iso')}">
+							<i class="fa fa-pencil-square-o attendance-note-icon"></i>
 						</a>
 					<#else>
-						<a id="attendanceNote-${student.universityId}-${point.id}" class="btn use-tooltip attendance-note" title="Add attendance note" href="<@routes.attendance.noteEdit academicYear.startYear?c student point />">
-							<i class="icon-edit attendance-note-icon"></i>
+						<a id="attendanceNote-${student.universityId}-${point.id}" class="btn btn-default use-tooltip attendance-note" title="Add attendance note" href="<@routes.attendance.noteEdit academicYear.startYear?c student point />">
+							<i class="fa fa-pencil-square-o attendance-note-icon"></i>
 						</a>
 					</#if>
 				<#else>
-					<a id="attendanceNote-${student.universityId}-${point.id}" class="btn use-tooltip attendance-note" title="Add attendance note" href="<@routes.attendance.noteEdit academicYear.startYear?c student point />">
-						<i class="icon-edit attendance-note-icon"></i>
+					<a id="attendanceNote-${student.universityId}-${point.id}" class="btn btn-default  use-tooltip attendance-note" title="Add attendance note" href="<@routes.attendance.noteEdit academicYear.startYear?c student point />">
+						<i class="fa fa-pencil-square-o attendance-note-icon"></i>
 					</a>
 				</#if>
 				<#if point.pointType.dbValue == "meeting">
-					<a class="meetings" title="Meetings with this student" href="<@routes.attendance.profileMeetings student academicYear.startYear?c point />"><i class="icon-info-sign icon-fixed-width"></i></a>
+					<a class="meetings" title="Meetings with this student" href="<@routes.attendance.profileMeetings student academicYear.startYear?c point />"><i class="fa fa-fw fa-info-circle"></i></a>
 				<#elseif point.pointType.dbValue == "smallGroup">
-					<a class="small-groups" title="Small group teaching events for this student" href="<@routes.attendance.profileGroups student academicYear.startYear?c point />"><i class="icon-info-sign icon-fixed-width"></i></a>
+					<a class="small-groups" title="Small group teaching events for this student" href="<@routes.attendance.profileGroups student academicYear.startYear?c point />"><i class="fa fa-fw fa-info-circle"></i></a>
 				<#else>
-					<i class="icon-fixed-width"></i>
+					<i class="fa fa-fw"></i>
 				</#if>
 			</#macro>
 
@@ -88,9 +90,9 @@
 
 			<#list attendance_variables.monitoringPointTermNames as term>
 				<#if groupedPointMap[term]??>
-					<@attendance_macros.groupedPointsBySection groupedPointMap term; pointCheckpointPair>
+					<@attendance_macros.id7GroupedPointsBySection groupedPointMap term; pointCheckpointPair>
 						<#assign point = pointCheckpointPair._1() />
-						<div class="span12">
+						<div class="col-md-12">
 							<#if mapGet(reportedPointMap, point)??>
 								<#assign reportedTerm = mapGet(reportedPointMap, point) />
 								<div class="pull-right">
@@ -114,7 +116,6 @@
 									department
 								/></a>)
 								<div class="alert alert-info">
-									<i class="icon-ban-circle"></i>
 									This student's attendance for ${reportedTerm.termTypeAsString}
 									(<@fmt.date date=reportedTerm.startDate relative=false includeTime=false shortMonth=true /> - <@fmt.date date=reportedTerm.endDate relative=false includeTime=false shortMonth=true />)
 									has already been uploaded to SITS:eVision.
@@ -139,15 +140,15 @@
 								<@errorsAndScript pointCheckpointPair />
 							</#if>
 						</div>
-					</@attendance_macros.groupedPointsBySection>
+					</@attendance_macros.id7GroupedPointsBySection>
 				</#if>
 			</#list>
 
 			<#list monthNames as month>
 				<#if groupedPointMap[month]??>
-					<@attendance_macros.groupedPointsBySection groupedPointMap month; pointCheckpointPair>
+					<@attendance_macros.id7GroupedPointsBySection groupedPointMap month; pointCheckpointPair>
 						<#assign point = pointCheckpointPair._1() />
-						<div class="span12">
+						<div class="col-md-12">
 							<#if mapGet(reportedPointMap, point)??>
 								<#assign reportedTerm = mapGet(reportedPointMap, point) />
 								<div class="pull-right">
@@ -160,13 +161,12 @@
 								${point.name}
 								(<@fmt.interval point.startDate point.endDate />)
 								<div class="alert alert-info">
-									<i class="icon-ban-circle"></i>
 									This student's attendance for ${reportedTerm.termTypeAsString}
 									(<@fmt.date date=reportedTerm.startDate relative=false includeTime=false shortMonth=true /> - <@fmt.date date=reportedTerm.endDate relative=false includeTime=false shortMonth=true />)
 									has already been uploaded to SITS:eVision.
 								</div>
 							<#else>
-								<div class="span12">
+								<div class="col-md-12">
 									<div class="pull-right">
 										<@controls pointCheckpointPair/>
 									</div>
@@ -176,14 +176,14 @@
 								</div>
 							</#if>
 						</div>
-					</@attendance_macros.groupedPointsBySection>
+					</@attendance_macros.id7GroupedPointsBySection>
 				</#if>
 			</#list>
 
 			<div class="submit-buttons fix-footer save-row">
 				<div class="pull-right">
 					<input type="submit" value="Save" class="btn btn-primary" data-loading-text="Saving&hellip;" autocomplete="off">
-					<a class="btn dirty-check-ignore" href="${returnTo}">Cancel</a>
+					<a class="btn btn-default dirty-check-ignore" href="${returnTo}">Cancel</a>
 				</div>
 			</div>
 		</form>
@@ -191,12 +191,14 @@
 </div>
 </#if>
 
-<div id="meetings-modal" class="modal hide fade" style="display:none;">
-	<@modal.header>
-		<h3>Meetings</h3>
-	</@modal.header>
-	<@modal.body></@modal.body>
+<div id="meetings-modal" class="modal fade" style="display:none;">
+	<@modal.wrapper>
+		<@modal.header>
+			<h3 class="modal-title">Meetings</h3>
+		</@modal.header>
+		<@modal.body></@modal.body>
+	</@modal.wrapper>
 </div>
-<div id="small-groups-modal" class="modal hide fade" style="display:none;"></div>
+<div id="small-groups-modal" class="modal fade" style="display:none;"></div>
 
 </#escape>

@@ -2,6 +2,7 @@ package uk.ac.warwick.tabula.commands.profiles.relationships.meetings
 
 import org.joda.time.DateTime
 import org.springframework.validation.BindException
+import uk.ac.warwick.tabula.DateFormats._
 import uk.ac.warwick.tabula.data.model._
 import uk.ac.warwick.tabula.services.{MeetingRecordService, MeetingRecordServiceComponent}
 import uk.ac.warwick.tabula.{Mockito, TestBase}
@@ -25,7 +26,9 @@ class CreateScheduledMeetingRecordCommandTest extends TestBase with Mockito {
 		val errors = new BindException(command, "command")
 		command.title = "title"
 		command.format = MeetingFormat.FaceToFace
-		command.meetingDate = new DateTime().plusDays(1)
+		command.meetingDateStr = new DateTime().plusDays(1).toString(DatePickerFormatter)
+		command.meetingTimeStr = new DateTime().plusDays(1).toString(TimePickerFormatter)
+		command.meetingEndTimeStr = new DateTime().plusDays(1).plusHours(1).toString(TimePickerFormatter)
 		command.validate(errors)
 		errors.hasErrors should be {false}
 	}}
@@ -34,7 +37,9 @@ class CreateScheduledMeetingRecordCommandTest extends TestBase with Mockito {
 	def noTitle() { new Fixture {
 		val errors = new BindException(command, "command")
 		command.format = MeetingFormat.FaceToFace
-		command.meetingDate = new DateTime().plusDays(1)
+		command.meetingDateStr = new DateTime().plusDays(1).toString(DatePickerFormatter)
+		command.meetingTimeStr = new DateTime().plusDays(1).toString(TimePickerFormatter)
+		command.meetingEndTimeStr = new DateTime().plusDays(1).plusHours(1).toString(TimePickerFormatter)
 		command.validate(errors)
 		errors.hasErrors should be {true}
 		errors.getFieldErrorCount should be(1)
@@ -45,7 +50,10 @@ class CreateScheduledMeetingRecordCommandTest extends TestBase with Mockito {
 	def noFormat() { new Fixture {
 		val errors = new BindException(command, "command")
 		command.title = "A Meeting"
-		command.meetingDate = new DateTime().plusHours(1)
+		val meetingTime : DateTime = new DateTime().plusDays(1)
+		command.meetingDateStr = meetingTime.toString(DatePickerFormatter)
+		command.meetingTimeStr = meetingTime.toString(TimePickerFormatter)
+		command.meetingEndTimeStr = meetingTime.plusHours(1).toString(TimePickerFormatter)
 		command.validate(errors)
 		errors.hasErrors should be {true}
 		errors.getFieldErrorCount should be(1)
@@ -55,13 +63,17 @@ class CreateScheduledMeetingRecordCommandTest extends TestBase with Mockito {
 	@Test
 	def scheduleInPast() { new Fixture {
 		val errors = new BindException(command, "command")
+		val meetingTime: DateTime = new DateTime().minusWeeks(1)
+
 		command.format = MeetingFormat.FaceToFace
 		command.title = "A Title"
-		command.meetingDate = new DateTime().minusDays(1)
+		command.meetingDateStr = meetingTime.toString(DatePickerFormatter)
+		command.meetingTimeStr = meetingTime.toString(TimePickerFormatter)
+		command.meetingEndTimeStr = meetingTime.plusHours(1).toString(TimePickerFormatter)
 		command.validate(errors)
 		errors.hasErrors should be {true}
 		errors.getFieldErrorCount should be(1)
-		errors.getFieldErrors("meetingDate").size should be(1)
+		errors.getFieldErrors("meetingDateStr").size should be(1)
 	}}
 
 	@Test
@@ -77,11 +89,14 @@ class CreateScheduledMeetingRecordCommandTest extends TestBase with Mockito {
 		val errors = new BindException(command, "command")
 		command.format = MeetingFormat.FaceToFace
 		command.title = "A Title"
-		command.meetingDate = meetingTime
+		command.meetingDateStr = meetingTime.toString(DatePickerFormatter)
+		command.meetingTimeStr = meetingTime.toString(TimePickerFormatter)
+		command.meetingEndTimeStr = meetingTime.plusHours(1).toString(TimePickerFormatter)
+
 		command.validate(errors)
 		errors.hasErrors should be {true}
 		errors.getFieldErrorCount should be(1)
-		errors.getFieldErrors("meetingDate").size should be(1)
+		errors.getFieldErrors("meetingDateStr").size should be(1)
 	}}
 
 	@Test

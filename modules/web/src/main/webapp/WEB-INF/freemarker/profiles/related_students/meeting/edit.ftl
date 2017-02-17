@@ -73,49 +73,60 @@
 						});
 					});
 				</script>
-
-				<#if command.realTime>
-					<@bs3form.labelled_form_group path="meetingDateTime" labelText="Date of meeting">
+				<div class="form-inline">
+					<@bs3form.labelled_form_group path="meetingDateStr" labelText="Date of meeting">
 						<div class="input-group">
-							<@f.input type="text" path="meetingDateTime" cssClass="form-control date-time-minute-picker" placeholder="Pick the date" />
+							<@f.input type="text" path="meetingDateStr" cssClass="form-control date-picker" placeholder="Pick the date" />
 							<span class="input-group-addon"><i class="fa fa-calendar"></i></span>
 						</div>
 						<div class="help-block alert alert-info hidden">
 							This meeting takes place in the <span class="year"></span> academic year.
 							You will be able to find this meeting under the <span class="year"></span> tab.
 						</div>
-					</@bs3form.labelled_form_group>
-					<script>
-						jQuery(function($){
-							var $xhr = null;
-							$('#meetingDateTime').on('change', function(){
-								if ($xhr) $xhr.abort();
-								var $this = $(this), meetingDateTime = $this.val();
-								if (meetingDateTime.length > 0) {
-									$xhr = jQuery.get('/ajax/academicyearfromdate', { date: meetingDateTime }, function(data){
-										if (data.startYear != '${academicYear.startYear?c}') {
-											$this.closest('.form-group').find('.help-block')
-												.find('span.year').text(data.string).end()
-												.removeClass('hidden');
-										} else {
-											$this.closest('.form-group').find('.help-block').addClass('hidden');
-										}
-									});
-								} else {
-									$this.closest('.form-group').find('.help-block').addClass('hidden');
-								}
+						</@bs3form.labelled_form_group>
+					<#if command.realTime>
+						<script>
+							jQuery(function($){
+								var $xhr = null;
+								$('#meetingDateStr').on('change', function(){
+									if ($xhr) $xhr.abort();
+									var $this = $(this), meetingDateStr = $this.val() + ' ' + $('#meetingTimeStr').val();
+									if (meetingDateStr.length > 0) {
 
+										$xhr = jQuery.get('/ajax/academicyearfromdate', {date: meetingDateStr}, function(data) {
+											if (data.startYear != '${academicYear.startYear?c}') {
+												$this.closest('.form-group').find('.help-block')
+													.find('span.year').text(data.string).end()
+													.removeClass('hidden');
+											} else {
+												$this.closest('.form-group').find('.help-block').addClass('hidden');
+											}
+										});
+									} else {
+										$this.closest('.form-group').find('.help-block').addClass('hidden');
+									}
+
+								});
 							});
-						});
-					</script>
-				<#else>
-					<@bs3form.labelled_form_group path="meetingDate" labelText="Date of meeting">
+						</script>
+					</#if>
+
+					<@bs3form.labelled_form_group path="meetingTimeStr" labelText="Time of meeting">
 						<div class="input-group">
-							<@f.input type="text" path="meetingDate" cssClass="form-control date-picker" placeholder="Pick the date" />
+							<@f.input type="text" path="meetingTimeStr" cssClass="form-control time-picker" placeholder="Pick the time" />
 							<span class="input-group-addon"><i class="fa fa-calendar"></i></span>
 						</div>
 					</@bs3form.labelled_form_group>
-				</#if>
+
+					<@bs3form.labelled_form_group path="meetingEndTimeStr" labelText="End time of meeting">
+						<div class="input-group">
+							<@f.input type="text" path="meetingEndTimeStr" cssClass="form-control time-picker" placeholder="Pick the end time" />
+							<span class="input-group-addon"><i class="fa fa-calendar"></i></span>
+						</div>
+					</@bs3form.labelled_form_group>
+
+				</div>
+				<div style="clear: both;"><!-- --></div>
 
 				<@bs3form.labelled_form_group path="format" labelText="Format">
 					<@f.select path="format" cssClass="form-control">
@@ -124,18 +135,23 @@
 					</@f.select>
 				</@bs3form.labelled_form_group>
 
+				<@bs3form.labelled_form_group path="meetingLocation" labelText="Location">
+					<@f.hidden path="meetingLocationId" />
+					<@f.input path="meetingLocation" cssClass="form-control" />
+				</@bs3form.labelled_form_group>
+
 				<#if !isStudent>
 					<div id="willCheckpointBeCreatedMessage" class="alert alert-info" style="display: none;">
 						Submitting this record will mark a monitoring point as attended
 					</div>
 					<script>
 						jQuery(function($){
-							$('#meetingDateTime, #format').on('change', function(){
+							$('#meetingDateStr, #format').on('change', function(){
 								$.get('<@routes.profiles.meeting_will_create_checkpoint />', {
 									'student' : '${studentCourseDetails.student.universityId}',
 									'relationshipType' : '${relationshipType.urlPart}',
 									'meetingFormat' : $('#format').val(),
-									'meetingDate' : $('#meetingDateTime').val()
+									'meetingDate': $('#meetingDateStr').val() + ' ' + $('#meetingTimeStr').val()
 								}, function(data){
 									if(data.willCheckpointBeCreated) {
 										$('#willCheckpointBeCreatedMessage').show();

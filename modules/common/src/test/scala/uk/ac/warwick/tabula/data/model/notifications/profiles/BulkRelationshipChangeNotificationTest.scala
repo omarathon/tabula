@@ -1,9 +1,9 @@
 package uk.ac.warwick.tabula.data.model.notifications.profiles
 
 import org.joda.time.DateTime
-import uk.ac.warwick.tabula.services.{RelationshipService, ProfileService}
-import uk.ac.warwick.tabula.{Mockito, Fixtures, TestBase}
 import uk.ac.warwick.tabula.data.model._
+import uk.ac.warwick.tabula.services.{ProfileService, RelationshipService}
+import uk.ac.warwick.tabula.{Fixtures, Mockito, TestBase}
 
 class BulkRelationshipChangeNotificationTest extends TestBase with Mockito {
 

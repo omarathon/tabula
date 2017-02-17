@@ -151,7 +151,7 @@ $(function(){
 			$(this).on('click', function(){
 				$('.attendees .item-info').each(function(){
 					$(this).find('button').eq(i).trigger('click', ['bulkAction']);
-				})
+				});
 				// if the bulk authorised was clicked then open the bulk attendance note popup
 				if (i === 2) {
 					var $bulkNote = $('.bulk-attendance-note');

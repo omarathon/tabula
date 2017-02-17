@@ -2,10 +2,12 @@ package uk.ac.warwick.tabula.commands.profiles.relationships.meetings
 
 import org.joda.time.DateTime
 import org.springframework.validation.{BindingResult, Errors}
+import uk.ac.warwick.tabula.DateFormats.DateTimePickerFormatter
 import uk.ac.warwick.tabula.JavaImports._
 import uk.ac.warwick.tabula.commands._
 import uk.ac.warwick.tabula.data.model._
 import uk.ac.warwick.tabula.data.model.notifications.profiles.meetingrecord.{AddsIcalAttachmentToScheduledMeetingNotification, ScheduledMeetingRecordBehalfNotification, ScheduledMeetingRecordInviteeNotification, ScheduledMeetingRecordNotification}
+import uk.ac.warwick.tabula.helpers.StringUtils._
 import uk.ac.warwick.tabula.permissions.Permissions
 import uk.ac.warwick.tabula.services.{AutowiringMeetingRecordServiceComponent, MeetingRecordServiceComponent}
 import uk.ac.warwick.tabula.system.BindListener
@@ -38,7 +40,24 @@ class CreateScheduledMeetingRecordCommand (val creator: Member, val relationship
 		val scheduledMeeting = new ScheduledMeetingRecord(creator, relationship)
 		scheduledMeeting.title = title
 		scheduledMeeting.description = description
-		scheduledMeeting.meetingDate = meetingDate.toDateTime
+
+		if ((!meetingDateStr.isEmptyOrWhitespace) && (!meetingTimeStr.isEmptyOrWhitespace) && (!meetingEndTimeStr.isEmptyOrWhitespace)) {
+
+			scheduledMeeting.meetingDate = DateTimePickerFormatter.parseDateTime(meetingDateStr+" "+meetingTimeStr)
+			scheduledMeeting.meetingEndDate = DateTimePickerFormatter.parseDateTime(meetingDateStr+" "+meetingEndTimeStr)
+
+		}
+
+		scheduledMeeting.meetingLocation = if (meetingLocation.hasText) {
+			if (meetingLocationId.hasText) {
+				MapLocation(meetingLocation.toString, meetingLocationId)
+			} else {
+				NamedLocation(meetingLocation.toString)
+			}
+		} else {
+			null
+		}
+
 		scheduledMeeting.lastUpdatedDate = DateTime.now
 		scheduledMeeting.creationDate = DateTime.now
 		scheduledMeeting.format = format
@@ -58,14 +77,22 @@ class CreateScheduledMeetingRecordCommand (val creator: Member, val relationship
 
 }
 
-trait CreateScheduledMeetingRecordCommandValidation extends SelfValidating with ScheduledMeetingRecordValidation {
+trait CreateScheduledMeetingRecordCommandValidation extends SelfValidating with ScheduledMeetingRecordValidation  {
 	self: CreateScheduledMeetingRecordState with MeetingRecordServiceComponent =>
 
 	override def validate(errors: Errors) {
-		sharedValidation(errors, title, meetingDate)
+
+		sharedValidation(errors: Errors, title: String, meetingDateStr: String, meetingTimeStr: String, meetingEndTimeStr: String)
+
 		meetingRecordService.listScheduled(Set(relationship), Some(creator)).foreach(
-		 m => if (m.meetingDate == meetingDate) errors.rejectValue("meetingDate", "meetingRecord.date.duplicate")
+			m =>
+				if ((!meetingDateStr.isEmptyOrWhitespace) && (!meetingTimeStr.isEmptyOrWhitespace) && (!meetingEndTimeStr.isEmptyOrWhitespace)) {
+
+					val dateCheck = meetingDateStr+" "+meetingTimeStr
+					if (m.meetingDate.toString(DateTimePickerFormatter).equals(dateCheck)) errors.rejectValue("meetingDateStr", "meetingRecord.date.duplicate")
+			}
 		)
+
 	}
 }
 
@@ -76,8 +103,15 @@ trait CreateScheduledMeetingRecordState {
 
 	var title: String = _
 	var description: String = _
-	var meetingDate: DateTime = _
+
+	var meetingDateStr: String = _
+	var meetingTimeStr: String = _
+	var meetingEndTimeStr: String = _
+
 	var format: MeetingFormat = _
+
+	var meetingLocation: String  = _
+	var meetingLocationId: String = _
 
 	var file: UploadedFile = new UploadedFile
 	var attachedFiles:JList[FileAttachment] = _

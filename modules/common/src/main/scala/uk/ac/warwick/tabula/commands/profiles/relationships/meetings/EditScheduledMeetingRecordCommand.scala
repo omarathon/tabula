@@ -2,10 +2,12 @@ package uk.ac.warwick.tabula.commands.profiles.relationships.meetings
 
 import org.joda.time.DateTime
 import org.springframework.validation.{BindingResult, Errors}
+import uk.ac.warwick.tabula.DateFormats._
 import uk.ac.warwick.tabula.JavaImports._
 import uk.ac.warwick.tabula.commands._
 import uk.ac.warwick.tabula.data.model._
 import uk.ac.warwick.tabula.data.model.notifications.profiles.meetingrecord.{AddsIcalAttachmentToScheduledMeetingNotification, ScheduledMeetingRecordBehalfNotification, ScheduledMeetingRecordInviteeNotification, ScheduledMeetingRecordNotification}
+import uk.ac.warwick.tabula.helpers.StringUtils._
 import uk.ac.warwick.tabula.permissions.Permissions
 import uk.ac.warwick.tabula.services.{AutowiringFileAttachmentServiceComponent, AutowiringMeetingRecordServiceComponent, FileAttachmentServiceComponent, MeetingRecordServiceComponent}
 import uk.ac.warwick.tabula.system.BindListener
@@ -56,10 +58,29 @@ class EditScheduledMeetingRecordCommand (val editor: Member, val meetingRecord: 
 
 		meetingRecord.title = title
 		meetingRecord.description = description
-		val isRescheduled = meetingRecord.meetingDate != meetingDate
-		meetingRecord.meetingDate = meetingDate
+
+		val meetingDate = DateTimePickerFormatter.parseDateTime(meetingRecord.meetingDate.toString(DateTimePickerFormatter))
+		val newMeetingDate = DateTimePickerFormatter.parseDateTime(meetingDateStr+" "+meetingTimeStr)
+
+		val isRescheduled = !meetingDate.equals(newMeetingDate)
+
+		if ((!meetingDateStr.isEmptyOrWhitespace) && (!meetingTimeStr.isEmptyOrWhitespace) && (!meetingEndTimeStr.isEmptyOrWhitespace)) {
+			meetingRecord.meetingDate = DateTimePickerFormatter.parseDateTime(meetingDateStr + " " + meetingTimeStr).withHourOfDay(DateTimePickerFormatter.parseDateTime(meetingDateStr + " " + meetingTimeStr).getHourOfDay)
+			meetingRecord.meetingEndDate = DateTimePickerFormatter.parseDateTime(meetingDateStr + " " + meetingEndTimeStr).withHourOfDay(DateTimePickerFormatter.parseDateTime(meetingDateStr + " " + meetingEndTimeStr).getHourOfDay)
+		}
 		meetingRecord.lastUpdatedDate = DateTime.now
 		meetingRecord.format = format
+
+		meetingRecord.meetingLocation =
+			if (meetingLocation.hasText) {
+				if (meetingLocationId.hasText) {
+					MapLocation(meetingLocation, meetingLocationId)
+				} else {
+					NamedLocation(meetingLocation)
+				}
+			} else {
+				null
+			}
 
 		persistAttachments(meetingRecord)
 		meetingRecordService.saveOrUpdate(meetingRecord)
@@ -79,7 +100,18 @@ trait PopulateScheduledMeetingRecordCommand extends PopulateOnForm {
 	override def populate(): Unit = {
 		title = meetingRecord.title
 		description = meetingRecord.description
-		meetingDate = meetingRecord.meetingDate
+
+		meetingDateStr = meetingRecord.meetingDate.toString(DatePickerFormatter)
+		meetingTimeStr = meetingRecord.meetingDate.withHourOfDay(meetingRecord.meetingDate.getHourOfDay).toString(TimePickerFormatter)
+		meetingEndTimeStr = meetingRecord.meetingEndDate.withHourOfDay(meetingRecord.meetingEndDate.getHourOfDay).toString(TimePickerFormatter)
+
+		Option(meetingRecord.meetingLocation).foreach {
+			case NamedLocation(name) => meetingLocation = name
+			case MapLocation(name, lid) =>
+				meetingLocation = name
+				meetingLocationId = lid
+		}
+
 		format = meetingRecord.format
 		attachedFiles = meetingRecord.attachments
 	}
@@ -88,10 +120,15 @@ trait PopulateScheduledMeetingRecordCommand extends PopulateOnForm {
 
 trait EditScheduledMeetingRecordCommandValidation extends SelfValidating with ScheduledMeetingRecordValidation {
 	self: EditScheduledMeetingRecordState with MeetingRecordServiceComponent =>
+
 	override def validate(errors: Errors) {
-		sharedValidation(errors, title, meetingDate)
+
+		sharedValidation(errors, title, meetingDateStr, meetingTimeStr, meetingEndTimeStr)
+
 		meetingRecordService.listScheduled(Set(meetingRecord.relationship), Some(editor)).foreach(
-			m => if (m.meetingDate == meetingDate && m.id != meetingRecord.id) errors.rejectValue("meetingDate", "meetingRecord.date.duplicate")
+			m => if ((!meetingDateStr.isEmptyOrWhitespace) && (!meetingTimeStr.isEmptyOrWhitespace) && (!meetingEndTimeStr.isEmptyOrWhitespace)) {
+				if (m.meetingDate.toString(DateTimePickerFormatter).equals(meetingDateStr+" "+meetingTimeStr) && (m.id != meetingRecord.id) ) errors.rejectValue("meetingDateStr", "meetingRecord.date.duplicate")
+			}
 		)
 	}
 }
@@ -102,8 +139,15 @@ trait EditScheduledMeetingRecordState {
 
 	var title: String = _
 	var description: String = _
-	var meetingDate: DateTime = _
+
+	var meetingDateStr: String = _
+	var meetingTimeStr: String = _
+	var meetingEndTimeStr: String = _
+
 	var format: MeetingFormat = _
+
+	var meetingLocation: String = _
+	var meetingLocationId: String = _
 
 	var file: UploadedFile = new UploadedFile
 	var attachedFiles:JList[FileAttachment] = _

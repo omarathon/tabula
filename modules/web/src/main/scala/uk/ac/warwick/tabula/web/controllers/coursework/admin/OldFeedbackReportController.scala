@@ -31,7 +31,7 @@ class OldFeedbackReportController extends OldCourseworkController {
 
 	@RequestMapping(method=Array(HEAD, GET), params = Array("!jobId"))
 	def requestReport(cmd:FeedbackReportCommand, errors:Errors):Mav = {
-		val formatter = DateTimeFormat.forPattern(DateFormats.DateTimePicker)
+		val formatter = DateTimeFormat.forPattern(DateFormats.DateTimePickerPattern)
 		Mav(s"$urlPrefix/admin/assignments/feedbackreport/report_range",
 			"department" -> cmd.department,
 			"startDate" ->  formatter.print(new DateTime().minusMonths(3)),

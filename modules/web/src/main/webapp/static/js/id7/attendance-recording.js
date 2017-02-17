@@ -110,9 +110,10 @@ var checkForCheckpoints = function(){
 	});
 };
 
-exports.bindButtonGroupHandler = function(enableCheckForCheckpoints) {
+exports.bindButtonGroupHandler = function() {
 
-	$('#recordAttendance').on('click', 'tbody div.btn-group button', function(e){
+	var $recordForm = $('.recordCheckpointForm'), enableCheckForCheckpoints = $recordForm.data('check-checkpoints');
+	$recordForm.on('click', 'tbody div.btn-group button, .striped-section-contents div.btn-group button', function(e){
 		var $this = $(this);
 		updateAttendanceState(e, $this);
 		$this.trigger('checkform.areYouSure');
@@ -138,7 +139,7 @@ exports.bindButtonGroupHandler = function(enableCheckForCheckpoints) {
 $(function(){
 	// SCRIPTS FOR RECORDING MONITORING POINTS
 
-	var $recordForm = $('.recordCheckpointForm');
+	var $recordForm = $('.recordCheckpointForm'), enableCheckForCheckpoints = $recordForm.data('check-checkpoints');
 	$recordForm.on('click.saveButtonPrompt', 'div.btn-group button', function() {
 		$recordForm.off('click.saveButtonPrompt').find('.submit-buttons .btn-primary')
 			.data({
@@ -157,20 +158,22 @@ $(function(){
         .end().each(function(){
 		$(this).find('.btn-group button').each(function(i){
 			$(this).on('click', function(e){
-				$('.attendees tbody tr').each(function(){
+				$('.attendees tbody tr, .attendees .item-info').each(function(){
 					$(this).find('button').eq(i).each(function() {
 						$(this).closest('[data-toggle="radio-buttons"]').find('button.active').removeClass('active');
 						$(this).addClass('active');
 						updateAttendanceState(e, $(this));
 					})
 				});
-				checkForCheckpoints();
+				if (enableCheckForCheckpoints) {
+					checkForCheckpoints();
+				}
 				$recordForm.find('form').trigger('checkform.areYouSure');
 				// if the bulk authorised was clicked then open the bulk attendance note popup
 				if (i === 2) {
 					var $bulkNote = $('.bulk-attendance-note');
 					if ($bulkNote.length) {
-						$bulkNote.attr('href', setArgOnUrl($bulkNote.attr('href'), 'isAuto', 'true'));
+						$bulkNote.attr('href', GlobalScripts.setArgOnUrl($bulkNote.attr('href'), 'isAuto', 'true'));
 						$bulkNote.click();
 					}
 				}
@@ -203,21 +206,28 @@ $(function(){
 		});
 	});
 
+	$('a.upload-attendance').on('click', function(e){
+		e.preventDefault();
+		$.get($(this).attr('href'), function(data){
+			$('#upload-attendance-modal').html(data).modal("show");
+		});
+	});
+
     $('.agent-search').find('input').on('keyup', function(){
         var rows = $('table.agents tbody tr'), query = $(this).val().toLowerCase();
         if (query.length === 0) {
             rows.show();
             rows.find('p.student-list').hide();
-            $('.agent-search span.muted').hide();
+            $('.agent-search span.very-subtle').hide();
         } else if (query.length < 3) {
-            $('.agent-search span.muted').show();
+            $('.agent-search span.very-subtle').show();
         } else {
-            $('.agent-search span.muted').hide();
+            $('.agent-search span.very-subtle').hide();
             rows.each(function(){
                 var $row = $(this)
                     , $agentCell = $row.find('td.agent')
-                    , $agentName = $agentCell.find('h6')
-                    , $students = $agentCell.find('p.student-list')
+                    , $agentName = $agentCell.find('strong')
+                    , $students = $agentCell.find('div.student-list')
                     , showRow = false;
                 if ($agentName.text().toLowerCase().indexOf(query) >= 0) {
                     showRow = true;

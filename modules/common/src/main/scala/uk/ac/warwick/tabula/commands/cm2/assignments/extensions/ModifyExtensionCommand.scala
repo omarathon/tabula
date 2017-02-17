@@ -60,7 +60,7 @@ trait ModifyExtensionState {
 	val extension: Extension
 	val submitter: CurrentUser
 
-	@WithinYears(maxFuture = 3) @DateTimeFormat(pattern = DateFormats.DateTimePicker)
+	@WithinYears(maxFuture = 3) @DateTimeFormat(pattern = DateFormats.DateTimePickerPattern)
 	var expiryDate: DateTime = _
 	var reviewerComments: String = _
 	var state: ExtensionState = _

@@ -16,7 +16,7 @@ import uk.ac.warwick.tabula.JavaImports._
 import uk.ac.warwick.tabula.data.model._
 import uk.ac.warwick.tabula.helpers.StringUtils._
 import uk.ac.warwick.tabula.sandbox.SandboxData
-import uk.ac.warwick.tabula.services.scheduling.AssignmentImporter.{GradeBoundaryQuery, AssessmentComponentQuery, UpstreamAssessmentGroupQuery}
+import uk.ac.warwick.tabula.services.scheduling.AssignmentImporter.{AssessmentComponentQuery, GradeBoundaryQuery, UpstreamAssessmentGroupQuery}
 
 import scala.collection.JavaConverters._
 

@@ -17,10 +17,10 @@ class FeedbackReportCommand (val department:Department, val user: CurrentUser) e
 
 	PermissionCheck(Permissions.Department.DownloadFeedbackReport, department)
 
-	@WithinYears(maxFuture = 3, maxPast = 3) @DateTimeFormat(pattern = DateFormats.DateTimePicker)
+	@WithinYears(maxFuture = 3, maxPast = 3) @DateTimeFormat(pattern = DateFormats.DateTimePickerPattern)
 	var startDate:DateTime = _
 
-	@WithinYears(maxFuture = 3, maxPast = 3) @DateTimeFormat(pattern = DateFormats.DateTimePicker)
+	@WithinYears(maxFuture = 3, maxPast = 3) @DateTimeFormat(pattern = DateFormats.DateTimePickerPattern)
 	var endDate:DateTime = _
 
 	var jobService: JobService = Wire.auto[JobService]

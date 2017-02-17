@@ -1,12 +1,13 @@
 package uk.ac.warwick.tabula.commands.profiles
 
-import uk.ac.warwick.tabula.commands.{Command, CommandInternal, ReadOnly, TaskBenchmarking, Unaudited}
+import uk.ac.warwick.tabula.commands._
 import uk.ac.warwick.tabula.data.model.groups.SmallGroup
 import uk.ac.warwick.tabula.data.model.{Department, Member, StudentRelationshipType}
 import uk.ac.warwick.tabula.permissions.Permissions
 import uk.ac.warwick.tabula.services._
 import uk.ac.warwick.tabula.system.permissions.Public
 import uk.ac.warwick.tabula.{CurrentUser, FeaturesComponent}
+
 import scala.collection.JavaConverters._
 
 case class ProfilesHomeInformation(
