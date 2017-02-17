@@ -41,7 +41,12 @@ class ImportCourseCommand(info: CourseInfo)
 		val commandBean = new BeanWrapperImpl(this)
 		val courseBean = new BeanWrapperImpl(course)
 
-		val hasChanged = copyBasicProperties(properties, commandBean, courseBean)
+		val hasChanged = copyBasicProperties(properties, commandBean, courseBean) |
+			(if (course.department.isEmpty) {
+				copyObjectProperty("department", info.departmentCode, courseBean, toDepartment(info.departmentCode))
+			} else {
+				false
+			})
 
 		if (isTransient || hasChanged) {
 			logger.debug("Saving changes for " + course)

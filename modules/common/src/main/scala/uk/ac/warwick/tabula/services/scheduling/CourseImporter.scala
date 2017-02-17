@@ -90,7 +90,7 @@ object SitsCourseImporter {
 	val sitsSchema: String = Wire.property("${schema.sits}")
 
 	def GetCourse = f"""
-		select crs_code, crs_snam, crs_name, crs_titl from $sitsSchema.srs_crs
+		select crs_code, crs_snam, crs_name, crs_titl, crs_dptc from $sitsSchema.srs_crs
 		"""
 
 	def GetCourseYearWeighting = f"""
@@ -105,7 +105,8 @@ object SitsCourseImporter {
 					code=resultSet.getString("crs_code"),
 					shortName=resultSet.getString("crs_snam"),
 					fullName=resultSet.getString("crs_name"),
-					title=resultSet.getString("crs_titl")
+					title=resultSet.getString("crs_titl"),
+					departmentCode=resultSet.getString("crs_dptc")
 				)
 			)
 	}
@@ -123,7 +124,7 @@ object SitsCourseImporter {
 
 }
 
-case class CourseInfo(code: String, shortName: String, fullName: String, title: String)
+case class CourseInfo(code: String, shortName: String, fullName: String, title: String, departmentCode: String)
 
 @Profile(Array("sandbox")) @Service
 class SandboxCourseImporter extends CourseImporter {
@@ -137,7 +138,8 @@ class SandboxCourseImporter extends CourseImporter {
 							code="%c%s-%s".format(route.courseType.courseCodeChar, departmentCode.toUpperCase, routeCode.toUpperCase),
 							shortName=StringUtils.safeSubstring(route.name, 0, 20).toUpperCase,
 							fullName=route.name,
-							title="%s %s".format(route.degreeType.description, route.name)
+							title="%s %s".format(route.degreeType.description, route.name),
+							departmentCode=departmentCode.toUpperCase
 						)
 					)
 				}
