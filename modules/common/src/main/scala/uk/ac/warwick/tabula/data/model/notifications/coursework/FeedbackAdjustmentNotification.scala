@@ -25,8 +25,9 @@ class FeedbackAdjustmentNotification
 
 	def recipients: Seq[User] = {
 		if (assignment.hasWorkflow) {
-			val userId = assignment.markingWorkflow.getStudentsPrimaryMarker(assignment, feedback.universityId).getOrElse({
-				throw new IllegalStateException(s"No primary marker found for ${feedback.universityId}")
+
+			val userId = assignment.markingWorkflow.getStudentsPrimaryMarker(assignment, feedback.usercode).getOrElse({
+				throw new IllegalStateException(s"No primary marker found for ${feedback.usercode}")
 			})
 			Seq(userLookup.getUserByUserId(userId))
 		} else {
@@ -35,7 +36,7 @@ class FeedbackAdjustmentNotification
 
 	}
 
-	def title = s"${assignment.module.code.toUpperCase} - for ${assignment.name} : Adjustments have been made to feedback for ${feedback.universityId}"
+	def title = s"${assignment.module.code.toUpperCase} - for ${assignment.name} : Adjustments have been made to feedback for ${feedback.studentIdentifier}"
 
 	def content = FreemarkerModel(FeedbackAdjustmentNotification.templateLocation,
 		Map(

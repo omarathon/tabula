@@ -6,13 +6,13 @@ import org.springframework.core.convert.support.GenericConversionService
 import org.springframework.validation.BindingResult
 import org.springframework.web.bind.WebDataBinder
 import uk.ac.warwick.tabula.JavaImports.JHashMap
+import uk.ac.warwick.tabula._
 import uk.ac.warwick.tabula.data.convert.AttendanceMonitoringPointIdConverter
-import uk.ac.warwick.tabula.data.model.attendance.{AttendanceMonitoringPoint, AttendanceMonitoringPointStyle, AttendanceMonitoringScheme, AttendanceState}
 import uk.ac.warwick.tabula.data.model._
+import uk.ac.warwick.tabula.data.model.attendance.{AttendanceMonitoringPoint, AttendanceMonitoringPointStyle, AttendanceMonitoringScheme, AttendanceState}
 import uk.ac.warwick.tabula.permissions.Permissions
 import uk.ac.warwick.tabula.services._
 import uk.ac.warwick.tabula.services.attendancemonitoring.{AttendanceMonitoringService, AttendanceMonitoringServiceComponent}
-import uk.ac.warwick.tabula._
 import uk.ac.warwick.userlookup.User
 import uk.ac.warwick.util.termdates.Term.TermType
 import uk.ac.warwick.util.termdates.TermImpl

@@ -8,6 +8,7 @@ import uk.ac.warwick.tabula.{AcademicYear, CurrentUser}
 import uk.ac.warwick.tabula.commands.Appliable
 import uk.ac.warwick.tabula.commands.coursework.assignments.PostExtractValidation
 import uk.ac.warwick.tabula.commands.coursework.feedback.GenerateGradesFromMarkCommand
+import uk.ac.warwick.tabula.commands.exams.exams.ExamMarkerAddMarksCommand
 import uk.ac.warwick.tabula.services.coursework.docconversion.MarkItem
 import uk.ac.warwick.tabula.exams.web.Routes
 import uk.ac.warwick.tabula.data.model.{Exam, Feedback, Module}
@@ -15,7 +16,6 @@ import uk.ac.warwick.tabula.web.controllers.exams.ExamsController
 import uk.ac.warwick.tabula.services.{AssessmentMembershipService, FeedbackService}
 import uk.ac.warwick.tabula.web.Mav
 import uk.ac.warwick.userlookup.User
-import uk.ac.warwick.tabula.commands.exams.ExamMarkerAddMarksCommand
 
 @Controller
 @RequestMapping(value = Array("/exams/exams/admin/module/{module}/{academicYear}/exams/{exam}/marker/{marker}/marks"))
@@ -52,15 +52,14 @@ class ExamMarkerAddMarksController extends ExamsController {
 	): Mav = {
 		val members = examMembershipService.determineMembershipUsersWithOrderForMarker(exam, marker)
 
-		val marksToDisplay = members.map { memberPair =>
-			val member = memberPair._1
-			val feedback = feedbackService.getStudentFeedback(exam, member.getWarwickId)
-			noteMarkItem(member, feedback)
+		val marksToDisplay = members.map { case (user, _) =>
+			val feedback = feedbackService.getStudentFeedback(exam, user.getUserId)
+			noteMarkItem(user, feedback)
 		}
 
 		crumbed(Mav("exams/exams/admin/marks/marksform",
 			"marksToDisplay" -> marksToDisplay,
-			"seatNumberMap" -> members.map(m => m._1.getWarwickId -> m._2).toMap,
+			"seatNumberMap" -> members.map{ case (user, seatNumber) => user.getUserId -> seatNumber }.toMap,
 			"isGradeValidation" -> module.adminDepartment.assignmentGradeValidation
 		), module, academicYear)
 
@@ -72,6 +71,7 @@ class ExamMarkerAddMarksController extends ExamsController {
 
 		val markItem = new MarkItem()
 		markItem.universityId = member.getWarwickId
+		markItem.user = member
 
 		feedback match {
 			case Some(f) =>

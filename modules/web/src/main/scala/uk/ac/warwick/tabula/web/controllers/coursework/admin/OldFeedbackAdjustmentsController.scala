@@ -69,14 +69,15 @@ class OldFeedbackAdjustmentsController extends OldCourseworkController with Auto
 		@PathVariable assignment: Assignment,
 		@PathVariable student: User
 	): Mav = {
-		val submission = assignment.findSubmission(student.getWarwickId)
+		val submission = assignment.findSubmission(student.getUserId)
 		val daysLate = submission.map { _.workingDaysLate }
 
 		val courseType = submission.flatMap { submission =>
-			profileService.getMemberByUniversityId(submission.universityId)
-				.collect { case stu: StudentMember => stu }
-				.flatMap { _.mostSignificantCourseDetails }
-				.flatMap { _.courseType }
+				submission.universityId
+					.flatMap(uid => profileService.getMemberByUniversityId(uid))
+					.collect { case stu: StudentMember => stu }
+					.flatMap { _.mostSignificantCourseDetails }
+					.flatMap { _.courseType }
 		}
 
 		// Treat any unknowns as an undergraduate

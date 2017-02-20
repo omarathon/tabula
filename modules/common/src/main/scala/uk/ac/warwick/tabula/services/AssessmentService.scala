@@ -32,15 +32,15 @@ trait AssessmentService {
 	def getAssignmentByNameYearModule(name: String, year: AcademicYear, module: Module): Seq[Assignment]
 	def getExamByNameYearModule(name: String, year: AcademicYear, module: Module): Seq[Exam]
 
-	def getAssignmentsWithFeedback(universityId: String): Seq[Assignment]
+	def getAssignmentsWithFeedback(usercode: String): Seq[Assignment]
 	def getAssignmentsWithFeedback(studentCourseYearDetails: StudentCourseYearDetails): Seq[Assignment]
-	def getAssignmentsWithFeedback(universityId: String, academicYearOption: Option[AcademicYear]): Seq[Assignment]
+	def getAssignmentsWithFeedback(usercode: String, academicYearOption: Option[AcademicYear]): Seq[Assignment]
 
-	def getAssignmentsWithSubmission(universityId: String): Seq[Assignment]
+	def getAssignmentsWithSubmission(usercode: String): Seq[Assignment]
 	def getAssignmentsWithSubmission(studentCourseYearDetails: StudentCourseYearDetails): Seq[Assignment]
-	def getAssignmentsWithSubmission(universityId: String, academicYearOption: Option[AcademicYear]): Seq[Assignment]
+	def getAssignmentsWithSubmission(usercode: String, academicYearOption: Option[AcademicYear]): Seq[Assignment]
 
-	def getSubmissionsForAssignmentsBetweenDates(universityId: String, startInclusive: DateTime, endExclusive: DateTime): Seq[Submission]
+	def getSubmissionsForAssignmentsBetweenDates(usercode: String, startInclusive: DateTime, endExclusive: DateTime): Seq[Submission]
 
 	def getAssignmentWhereMarker(user: User): Seq[Assignment]
 	def getAssignmentsByDepartmentAndMarker(department: Department, user: CurrentUser): Seq[Assignment]
@@ -82,28 +82,28 @@ abstract class AbstractAssessmentService extends AssessmentService {
 	def getExamByNameYearModule(name: String, year: AcademicYear, module: Module): Seq[Exam] =
 		assessmentDao.getExamByNameYearModule(name, year, module)
 
-	def getAssignmentsWithFeedback(universityId: String): Seq[Assignment] = assessmentDao.getAssignmentsWithFeedback(universityId).filter { _.isVisibleToStudentsHistoric }
+	def getAssignmentsWithFeedback(usercode: String): Seq[Assignment] = assessmentDao.getAssignmentsWithFeedback(usercode).filter { _.isVisibleToStudentsHistoric }
 
 	def getAssignmentsWithFeedback(studentCourseYearDetails: StudentCourseYearDetails): Seq[Assignment] = {
-		val allAssignments = getAssignmentsWithFeedback(studentCourseYearDetails.studentCourseDetails.student.universityId)
+		val allAssignments = getAssignmentsWithFeedback(studentCourseYearDetails.studentCourseDetails.student.userId)
 		filterAssignmentsByCourseAndYear(allAssignments, studentCourseYearDetails)
 	}
 
-	def getAssignmentsWithFeedback(universityId: String, academicYearOption: Option[AcademicYear]): Seq[Assignment] =
-		assessmentDao.getAssignmentsWithFeedback(universityId, academicYearOption)
+	def getAssignmentsWithFeedback(usercode: String, academicYearOption: Option[AcademicYear]): Seq[Assignment] =
+		assessmentDao.getAssignmentsWithFeedback(usercode, academicYearOption)
 
-	def getAssignmentsWithSubmission(universityId: String): Seq[Assignment] = assessmentDao.getAssignmentsWithSubmission(universityId).filter { _.isVisibleToStudentsHistoric }
+	def getAssignmentsWithSubmission(usercode: String): Seq[Assignment] = assessmentDao.getAssignmentsWithSubmission(usercode).filter { _.isVisibleToStudentsHistoric }
 
 	def getAssignmentsWithSubmission(studentCourseYearDetails: StudentCourseYearDetails): Seq[Assignment] = {
-		val allAssignments = getAssignmentsWithSubmission(studentCourseYearDetails.studentCourseDetails.student.universityId)
+		val allAssignments = getAssignmentsWithSubmission(studentCourseYearDetails.studentCourseDetails.student.userId)
 		filterAssignmentsByCourseAndYear(allAssignments, studentCourseYearDetails)
 	}
 
-	def getAssignmentsWithSubmission(universityId: String, academicYearOption: Option[AcademicYear]): Seq[Assignment] =
-		assessmentDao.getAssignmentsWithSubmission(universityId, academicYearOption)
+	def getAssignmentsWithSubmission(usercode: String, academicYearOption: Option[AcademicYear]): Seq[Assignment] =
+		assessmentDao.getAssignmentsWithSubmission(usercode, academicYearOption)
 
-	def getSubmissionsForAssignmentsBetweenDates(universityId: String, startInclusive: DateTime, endExclusive: DateTime): Seq[Submission] =
-		assessmentDao.getSubmissionsForAssignmentsBetweenDates(universityId, startInclusive, endExclusive)
+	def getSubmissionsForAssignmentsBetweenDates(usercode: String, startInclusive: DateTime, endExclusive: DateTime): Seq[Submission] =
+		assessmentDao.getSubmissionsForAssignmentsBetweenDates(usercode, startInclusive, endExclusive)
 
 	def getAssignmentWhereMarker(user: User): Seq[Assignment] = {
 		(firstMarkerHelper.findBy(user) ++ secondMarkerHelper.findBy(user))

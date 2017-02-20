@@ -107,7 +107,7 @@ class ExportFeedbackToSitsCommandTest extends TestBase  with ComponentMixins wit
 		new EnvironmentMarkAndGradeAdjusted {
 			val user: User = currentUser.apparentUser
 			val feedbackService: FeedbackService = smartMock[FeedbackService]
-			feedbackService.getUsersForFeedback(assignment) returns Seq[(String, User)]((user.getWarwickId, user))
+			feedbackService.getUsersForFeedback(assignment) returns Seq[(String, User)]((user.getUserId, user))
 
 			val feedbackForSits: FeedbackForSits = Fixtures.feedbackForSits(feedback, currentUser.apparentUser)
 			feedbackForSitsDao.feedbackToLoad returns Seq(feedbackForSits)

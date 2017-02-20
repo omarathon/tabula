@@ -31,7 +31,7 @@ class MockUserLookup(var defaultFoundUser: Boolean)
 
 	val groupService: MockGroupService = new MockGroupService
 
-	override def getGroupService() = new LenientGroupService(groupService)
+	override def getGroupService = new LenientGroupService(groupService)
 
 	def addFindUsersWithFilterResult(user: User) {
 		filterUserResult.add(user)
@@ -128,12 +128,14 @@ class MockCachingLookupService(var flavour: UserFlavour = Vanilla)
 			case Applicant =>
 				val user = new AnonymousUser()
 				user.setWarwickId(warwickId)
+				user.setUserId(warwickId)
 				user
 			case Vanilla =>
 				// hash WarwickId to a consistent 6 char 'usercode'. Tiny, but finite risk of collision/short usercodes.
 				val userId = Base64.encodeBase64String(DigestUtils.sha256(warwickId.getBytes)).filter(_.isLower).take(6)
 				val user = mockUser(userId)
 				user.setWarwickId(warwickId)
+				user.setUserId(warwickId)
 				user
 		}
 	}
@@ -198,9 +200,7 @@ class MockGroupService extends GroupService {
 	var usersInGroup: Map[(String, String), Boolean] = Map() withDefaultValue false
 	var groupNamesForUserMap: Map[String, Seq[String]] = Map()
 
-	override def getGroupByName(groupName: String): Group = groupMap.get(groupName).getOrElse {
-		throw new GroupNotFoundException(groupName)
-	}
+	override def getGroupByName(groupName: String): Group = groupMap.getOrElse(groupName, throw new GroupNotFoundException(groupName))
 
 	override def getGroupsForDeptCode(deptCode: String) = ???
 

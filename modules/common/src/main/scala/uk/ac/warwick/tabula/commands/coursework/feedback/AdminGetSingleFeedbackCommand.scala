@@ -16,7 +16,7 @@ class AdminGetSingleFeedbackCommand(module: Module, assignment: Assignment, feed
 	override def applyInternal(): RenderableFile = zipService.getFeedbackZip(feedback)
 
 	override def describe(d: Description): Unit = d.feedback(feedback).properties(
-		"studentId" -> feedback.universityId,
+		"studentId" -> feedback.studentIdentifier,
 		"attachmentCount" -> feedback.attachments.size)
 }
 
@@ -57,6 +57,6 @@ class AdminGetSingleMarkerFeedbackCommand(module: Module, assignment: Assignment
 	override def applyInternal(): RenderableFile = zipService.getSomeMarkerFeedbacksZip(Seq(markerFeedback))
 
 	override def describe(d: Description): Unit = d.feedback(markerFeedback.feedback).properties(
-		"studentId" -> markerFeedback.feedback.universityId,
+		"studentId" -> markerFeedback.feedback.studentIdentifier,
 		"attachmentCount" -> markerFeedback.attachments.size)
 }

@@ -34,23 +34,28 @@ abstract class ReleaseForMarkingCommand(val module: Module, val assignment: Assi
 	extends CommandInternal[List[Feedback]] with Appliable[List[Feedback]] with ReleaseForMarkingState with ReleasedState with BindListener
 	with SelfValidating with UserAware {
 
-	self: AssessmentServiceComponent with StateServiceComponent with FeedbackServiceComponent =>
+	self: AssessmentServiceComponent with StateServiceComponent with FeedbackServiceComponent with UserLookupComponent =>
 
 	// we must go via the marking workflow directly to determine if the student has a marker - not all workflows use the markerMap on assignment
 	def studentsWithKnownMarkers: Seq[String] = students.asScala.filter(assignment.markingWorkflow.studentHasMarker(assignment, _))
 	def unreleasableSubmissions: Seq[String] = (studentsWithoutKnownMarkers ++ studentsAlreadyReleased).distinct
 
 	def studentsWithoutKnownMarkers:Seq[String] = students.asScala -- studentsWithKnownMarkers
-	def studentsAlreadyReleased: mutable.Buffer[String] = invalidFeedback.asScala.map(f => f.universityId)
+	def studentsAlreadyReleased: mutable.Buffer[String] = invalidFeedback.asScala.map(f => f.usercode)
 
 	override def applyInternal(): List[AssignmentFeedback] = {
+
+		val studentUsers = userLookup.getUsersByUserIds(students.asScala)
+
 		// get the parent feedback or create one if none exist
-		val feedbacks = studentsWithKnownMarkers.toBuffer.map { uniId: String =>
-			val parentFeedback = assignment.feedbacks.asScala.find(_.universityId == uniId).getOrElse({
+		val feedbacks = studentsWithKnownMarkers.toBuffer.map { usercode: String =>
+			val student = studentUsers(usercode)
+			val parentFeedback = assignment.feedbacks.asScala.find(_.usercode == usercode).getOrElse({
 				val newFeedback = new AssignmentFeedback
 				newFeedback.assignment = assignment
 				newFeedback.uploaderId = user.getUserId
-				newFeedback.universityId = uniId
+				newFeedback.usercode = student.getUserId
+				newFeedback._universityId = student.getWarwickId
 				newFeedback.released = false
 				newFeedback.createdDate = DateTime.now
 				feedbackService.saveOrUpdate(newFeedback)
@@ -76,8 +81,8 @@ abstract class ReleaseForMarkingCommand(val module: Module, val assignment: Assi
 
 	override def onBind(result: BindingResult) {
 		invalidFeedback.addAll((for {
-			universityId <- students.asScala
-			parentFeedback <- assignment.feedbacks.asScala.find(_.universityId == universityId)
+			usercode <- students.asScala
+			parentFeedback <- assignment.feedbacks.asScala.find(_.usercode == usercode)
 			if parentFeedback.firstMarkerFeedback != null
 		} yield parentFeedback).asJava)
 	}

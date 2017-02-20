@@ -8,7 +8,8 @@ import uk.ac.warwick.tabula.web.FeaturesDriver
 
 class PersonalTutorTest extends BrowserTest with GivenWhenThen with FeaturesDriver with StudentProfileFixture {
 
-	val formatter: DateTimeFormatter = DateTimeFormat.forPattern("dd-MMM-yyyy HH:mm:ss")
+	val dateFormatter: DateTimeFormatter = DateTimeFormat.forPattern("dd-MMM-yyyy")
+	val timeFormatter: DateTimeFormatter = DateTimeFormat.forPattern("HH:mm:ss")
 
 	"An admin" should "be able to view personal tutor details" in {
 
@@ -28,7 +29,7 @@ class PersonalTutorTest extends BrowserTest with GivenWhenThen with FeaturesDriv
 
 		Given("Student1 has a personal tutor")
 		createStaffMember(P.Marker1.usercode, deptCode = TEST_DEPARTMENT_CODE)
-		createStudentRelationship(P.Student1, P.Marker1, "tutor")
+		createStudentRelationship(P.Student1, P.Marker1)
 
 		When("Admin1 views the personal tutors of Student1")
 		go to Path(s"/profiles/view/${P.Student1.warwickId}/tutor")
@@ -43,7 +44,7 @@ class PersonalTutorTest extends BrowserTest with GivenWhenThen with FeaturesDriv
 
 		Given("Marker1 is a personal tutor of the student")
 		createStaffMember(P.Marker1.usercode, deptCode = TEST_DEPARTMENT_CODE)
-		createStudentRelationship(P.Student1, P.Marker1, "tutor")
+		createStudentRelationship(P.Student1, P.Marker1)
 
 		When("Marker1 views the profile of Student1")
 		signIn as P.Marker1 to Path(s"/profiles/view/${P.Student1.warwickId}")
@@ -64,7 +65,10 @@ class PersonalTutorTest extends BrowserTest with GivenWhenThen with FeaturesDriv
 
 		ifHtmlUnitDriver(h=>h.setJavascriptEnabled(true))
 		textField("title").value = "Created meeting"
-		textField("meetingDateTime").value = formatter.print(DateTime.now.minusDays(1).withHourOfDay(11))
+		val datetime = DateTime.now.minusDays(1).withHourOfDay(11)
+		textField("meetingDateStr").value = dateFormatter.print(datetime)
+		textField("meetingTimeStr").value = timeFormatter.print(datetime)
+		textField("meetingEndTimeStr").value = timeFormatter.print(datetime.plusHours(1))
 		singleSel("format").value = "f2f"
 		cssSelector("button.btn-primary[type=submit]").findElement.get.underlying.click()
 

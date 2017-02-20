@@ -5,27 +5,27 @@
 <#import "/WEB-INF/freemarker/_profile_link.ftl" as pl />
 <div id="profile-modal" class="modal fade profile-subset"></div>
 
-<#function markingId user>
+<#function markingId user><#compress>
 	<#if !user.warwickId?has_content || user.getExtraProperty("urn:websignon:usersource")! == 'WarwickExtUsers'>
 		<#return user.userId />
 	<#else>
 		<#return user.warwickId />
 	</#if>
-</#function>
+</#compress></#function>
 
 <#macro row graph>
 	<#assign u = graph.student />
 <tr class="item-container" data-contentid="${markingId(u)}" data-markingurl="${onlineMarkingUrls[u.userId]}">
 	<#if showMarkingCompleted>
 		<td class="check-col">
-			<input type="checkbox" class="collection-checkbox" name="students" value="${markingId(u)}">
+			<input type="checkbox" class="collection-checkbox" name="students" value="${u.userId}">
 		</td>
 	</#if>
 	<#if department.showStudentName>
 		<td class="student-col toggle-cell"><h6 class="toggle-icon">${u.firstName}</h6></td>
-		<td class="student-col toggle-cell"><h6>${u.lastName}&nbsp;<@pl.profile_link u.warwickId! /></h6></td>
+		<td class="student-col toggle-cell"><h6>${u.lastName}&nbsp;<#if u.warwickId??><@pl.profile_link u.warwickId /><#else><@pl.profile_link u.userId /></#if></h6></td>
 	<#else>
-		<td class="student-col toggle-cell"><h6 class="toggle-icon">${u.warwickId!}</h6></td>
+		<td class="student-col toggle-cell"><h6 class="toggle-icon"><#if u.warwickId??>${u.warwickId}<#else>${u.userId}</#if></h6></td>
 	</#if>
 	<td class="status-col toggle-cell content-cell">
 		<dl style="margin: 0; border-bottom: 0;">

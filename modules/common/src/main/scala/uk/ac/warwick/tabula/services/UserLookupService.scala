@@ -25,6 +25,7 @@ import scala.util.{Failure, Success, Try}
 
 object UserLookupService {
 	type UniversityId = String
+	type Usercode = String
 }
 
 trait UserLookupComponent {
@@ -53,6 +54,8 @@ trait UserLookupService extends UserLookupInterface {
 	 */
 	def getUsersByWarwickUniIds(ids: Seq[UniversityId]): Map[UniversityId, User]
 	def getUsersByWarwickUniIdsUncached(ids: Seq[UniversityId], skipMemberLookup: Boolean): Map[UniversityId, User]
+
+	def getUsersByUserIds(ids: Seq[String]): Map[String, User] = getUsersByUserIds(ids.asJava).asScala.toMap
 }
 
 class UserLookupServiceImpl(d: UserLookupInterface) extends UserLookupAdapter(d) with UserLookupService
@@ -70,7 +73,7 @@ class UserLookupServiceImpl(d: UserLookupInterface) extends UserLookupAdapter(d)
 	}
 
 	override def getUserByWarwickUniId(id: UniversityId): User =
-		getUserByWarwickUniId(id, true)
+		getUserByWarwickUniId(id, ignored=true)
 
 	override def getUserByWarwickUniId(id: UniversityId, ignored: Boolean): User =
 		try {

@@ -55,8 +55,10 @@ trait StudentSubmissionAndFeedbackCommandState {
 	def studentUser: User
 	def viewer: User
 
-	lazy val feedback: Option[AssignmentFeedback] = feedbackService.getAssignmentFeedbackByUniId(assignment, studentUser.getWarwickId).filter(_.released)
-	lazy val submission: Option[Submission] = submissionService.getSubmissionByUniId(assignment, studentUser.getWarwickId).filter { _.submitted }
+	lazy val feedback: Option[AssignmentFeedback] =
+		feedbackService.getAssignmentFeedbackByUsercode(assignment, studentUser.getUserId).filter(_.released)
+	lazy val submission: Option[Submission] =
+		submissionService.getSubmissionByUsercode(assignment, studentUser.getUserId).filter(_.submitted)
 }
 
 trait StudentMemberSubmissionAndFeedbackCommandState extends StudentSubmissionAndFeedbackCommandState {
@@ -96,7 +98,7 @@ abstract class StudentSubmissionAndFeedbackCommandInternal(val module: Module, v
 		val extension = assignment.extensions.asScala.find(_.isForUser(studentUser))
 
 		// Log a ViewOnlineFeedback event if the student itself is viewing
-		feedback.filter { _.universityId == viewer.getWarwickId }.foreach { feedback =>
+		feedback.filter { _.usercode == viewer.getUserId }.foreach { feedback =>
 			ViewOnlineFeedbackCommand(feedback).apply()
 		}
 

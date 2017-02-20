@@ -39,10 +39,10 @@ trait Assessment extends GeneratedId with CanBeDeleted with PermissionsTarget {
 	def fullFeedback: Seq[Feedback] = allFeedback.filterNot(_.isPlaceholder)
 
 	// returns feedback for a specified student
-	def findFeedback(uniId: String): Option[Feedback] = allFeedback.find(_.universityId == uniId)
+	def findFeedback(usercode: String): Option[Feedback] = allFeedback.find(_.usercode == usercode)
 
 	// returns feedback for a specified student
-	def findFullFeedback(uniId: String): Option[Feedback] = fullFeedback.find(_.universityId == uniId)
+	def findFullFeedback(usercode: String): Option[Feedback] = fullFeedback.find(_.usercode == usercode)
 
 	// converts the assessmentGroups to upstream assessment groups
 	def upstreamAssessmentGroups: Seq[UpstreamAssessmentGroup] =
@@ -78,20 +78,20 @@ trait Assessment extends GeneratedId with CanBeDeleted with PermissionsTarget {
 	}
 
 
-	def isReleasedForMarking(universityId: String): Boolean =
-		allFeedback.find(_.universityId == universityId) match {
+	def isReleasedForMarking(usercode: String): Boolean =
+		allFeedback.find(_.usercode == usercode) match {
 			case Some(f) => f.firstMarkerFeedback != null
 			case _ => false
 		}
 
-	def isReleasedToSecondMarker(universityId: String): Boolean =
-		allFeedback.find(_.universityId == universityId) match {
+	def isReleasedToSecondMarker(usercode: String): Boolean =
+		allFeedback.find(_.usercode == usercode) match {
 			case Some(f) => f.secondMarkerFeedback != null
 			case _ => false
 		}
 
-	def isReleasedToThirdMarker(universityId: String): Boolean =
-		allFeedback.find(_.universityId == universityId) match {
+	def isReleasedToThirdMarker(usercode: String): Boolean =
+		allFeedback.find(_.usercode == usercode) match {
 			case Some(f) => f.thirdMarkerFeedback != null
 			case _ => false
 		}

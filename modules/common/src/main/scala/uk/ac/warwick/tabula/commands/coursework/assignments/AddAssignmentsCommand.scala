@@ -311,11 +311,11 @@ trait AddAssignmentsCommandState {
 	val DEFAULT_WEEKS_LENGTH = 4
 
 	// just for prepopulating the date form fields.
-	@WithinYears(maxPast = 3, maxFuture = 3) @DateTimeFormat(pattern = DateFormats.DateTimePicker)
+	@WithinYears(maxPast = 3, maxFuture = 3) @DateTimeFormat(pattern = DateFormats.DateTimePickerPattern)
 	@BeanProperty
 	val defaultOpenDate: DateTime = new DateTime().withTime(DEFAULT_OPEN_HOUR, 0, 0, 0)
 
-	@WithinYears(maxFuture = 3) @DateTimeFormat(pattern = DateFormats.DateTimePicker)
+	@WithinYears(maxFuture = 3) @DateTimeFormat(pattern = DateFormats.DateTimePickerPattern)
 	@BeanProperty
 	val defaultCloseDate: DateTime = defaultOpenDate.plusWeeks(DEFAULT_WEEKS_LENGTH)
 

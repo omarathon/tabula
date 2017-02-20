@@ -42,7 +42,7 @@ class ParameterGetter(feedbackForSits: FeedbackForSits) {
 		case pairs if pairs.isEmpty => None
 		case _ => Option(JHashMap(
 			// for the where clause
-			("studentId", feedbackForSits.feedback.universityId),
+			("studentId", feedbackForSits.feedback.studentIdentifier),
 			("academicYear", feedbackForSits.feedback.academicYear.toString),
 			("moduleCodeMatcher", feedbackForSits.feedback.module.code.toUpperCase + "%"),
 			("now", DateTime.now.toDate),
@@ -59,7 +59,7 @@ class ParameterGetter(feedbackForSits: FeedbackForSits) {
 		case pairs if pairs.isEmpty => None
 		case _ => Option(JHashMap(
 			// for the where clause
-			("studentId", feedbackForSits.feedback.universityId),
+			("studentId", feedbackForSits.feedback.studentIdentifier),
 			("academicYear", feedbackForSits.feedback.academicYear.toString),
 			("moduleCodeMatcher", feedbackForSits.feedback.module.code.toUpperCase + "%"),
 			("now", DateTime.now.toDate),

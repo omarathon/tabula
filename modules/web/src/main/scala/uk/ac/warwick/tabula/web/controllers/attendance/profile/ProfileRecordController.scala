@@ -13,15 +13,17 @@ import uk.ac.warwick.tabula.web.controllers.attendance.{AttendanceController, Ha
 import uk.ac.warwick.tabula.commands.{Appliable, PopulateOnForm, SelfValidating}
 import uk.ac.warwick.tabula.data.model.StudentMember
 import uk.ac.warwick.tabula.data.model.attendance.{AttendanceMonitoringCheckpoint, AttendanceMonitoringNote, AttendanceMonitoringPoint}
-import uk.ac.warwick.tabula.services.AutowiringTermServiceComponent
+import uk.ac.warwick.tabula.services.{AutowiringMaintenanceModeServiceComponent, AutowiringTermServiceComponent, AutowiringUserSettingsServiceComponent}
 import uk.ac.warwick.tabula.services.attendancemonitoring.AttendanceMonitoringService
 import uk.ac.warwick.tabula.web.Mav
+import uk.ac.warwick.tabula.web.controllers.AcademicYearScopedController
 import uk.ac.warwick.util.termdates.Term
 
 @Controller
 @RequestMapping(Array("/attendance/profile/{student}/{academicYear}/record"))
 class ProfileRecordController extends AttendanceController
-	with HasMonthNames with GroupsPoints with AutowiringTermServiceComponent {
+	with HasMonthNames with GroupsPoints with AutowiringTermServiceComponent
+	with AcademicYearScopedController with AutowiringUserSettingsServiceComponent with AutowiringMaintenanceModeServiceComponent {
 
 	@Autowired var attendanceMonitoringService: AttendanceMonitoringService = _
 
@@ -85,9 +87,8 @@ class ProfileRecordController extends AttendanceController
 			"department" -> student.homeDepartment,
 			"returnTo" -> getReturnTo(Routes.Profile.profileForYear(mandatory(student), mandatory(academicYear)))
 		).crumbs(
-			Breadcrumbs.Profile.Years(mandatory(student), user.apparentId == student.userId),
 			Breadcrumbs.Profile.ProfileForYear(mandatory(student), mandatory(academicYear))
-		)
+		).secondCrumbs(academicYearBreadcrumbs(academicYear)(year => Routes.Profile.record(student, year)):_*)
 	}
 
 	@RequestMapping(method = Array(POST))

@@ -66,7 +66,8 @@ class SubmissionsForMarkerTest extends TestBase {
 
 	def releaseAllSubmissions(assignment: Assignment){
 		assignment.submissions.asScala.foreach{ s =>
-			val newFeedback = Fixtures.assignmentFeedback(s.universityId)
+			val newFeedback = Fixtures.assignmentFeedback(s._universityId)
+			newFeedback.usercode = s.usercode
 			newFeedback.assignment = assignment
 			newFeedback.uploaderId = "test"
 			newFeedback.released = false

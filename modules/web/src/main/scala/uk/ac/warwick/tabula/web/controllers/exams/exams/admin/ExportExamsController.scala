@@ -5,8 +5,8 @@ import java.io.StringWriter
 import org.springframework.stereotype.Controller
 import org.springframework.web.bind.annotation.{PathVariable, RequestMapping}
 import uk.ac.warwick.tabula.AcademicYear
+import uk.ac.warwick.tabula.commands.exams.exams.ViewExamCommand
 import uk.ac.warwick.tabula.data.model.{Exam, Module}
-import uk.ac.warwick.tabula.commands.exams.ViewExamCommand
 import uk.ac.warwick.tabula.web.controllers.exams.ExamsController
 import uk.ac.warwick.tabula.web.views.{CSVView, ExcelView}
 import uk.ac.warwick.util.csv.GoodCsvDocument

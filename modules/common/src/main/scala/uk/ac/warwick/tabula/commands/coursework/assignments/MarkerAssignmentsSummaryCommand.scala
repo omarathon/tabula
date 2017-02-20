@@ -43,7 +43,7 @@ class MarkerAssignmentsSummaryCommandInternal(marker: Member) extends CommandInt
 
 		val parsedAssignments: Seq[MarkerAssignmentsSummaryCommand.Result] = benchmarkTask("parsedAssignments") { allAssignments.map { assignment =>
 			val markerStudents = assignment.markingWorkflow.getMarkersStudents(assignment, markerUser)
-			val markerFeedbacks = markerStudents.flatMap(student => assignment.getAllMarkerFeedbacks(student.getWarwickId, markerUser))
+			val markerFeedbacks = markerStudents.flatMap(student => assignment.getAllMarkerFeedbacks(student.getUserId, markerUser))
 
 			if (markerFeedbacks.map(_.feedback).forall(_.released)) {
 				MarkerAssignmentsSummaryCommand.Result(

@@ -62,7 +62,8 @@ class OldSubmissionsInfoController extends OldCourseworkController {
 		<submission
 				id={ item.submission.id }
 				submission-time={ isoFormat(item.submission.submittedDate) }
-				university-id={ item.submission.universityId }
+				university-id={ item.submission.universityId.orNull }
+				usercode={ item.submission.usercode }
 				downloaded={ item.downloaded.toString }>
 			{ item.submission.values map fieldElement(item) }
 		</submission>
@@ -125,7 +126,7 @@ class OldSubmissionsInfoController extends OldCourseworkController {
 	private def coreData(item: SubmissionListItem) = Map(
 		"submission-id" -> item.submission.id,
 		"submission-time" -> csvFormat(item.submission.submittedDate),
-		"university-id" -> item.submission.universityId,
+		"university-id" -> item.submission.universityId.orNull,
 		"assignment-id" -> item.submission.assignment.id,
 		"downloaded" -> item.downloaded.toString.toLowerCase
 	)

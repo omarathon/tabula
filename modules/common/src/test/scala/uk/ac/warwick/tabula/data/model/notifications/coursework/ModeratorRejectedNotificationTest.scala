@@ -9,7 +9,7 @@ class ModeratorRejectedNotificationTest extends TestBase {
 		val assignment = Fixtures.assignment("5,000 word essay")
 		assignment.module = Fixtures.module("cs118", "Programming for Computer Scientists")
 
-		val feedback = Fixtures.assignmentFeedback("1412345")
+		val feedback = Fixtures.assignmentFeedback("1412345", "1412345")
 		feedback.assignment = assignment
 
 		val markerFeedback = Fixtures.markerFeedback(feedback)

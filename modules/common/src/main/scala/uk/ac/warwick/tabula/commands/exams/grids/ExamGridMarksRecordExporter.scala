@@ -4,7 +4,8 @@ import org.apache.poi.xwpf.usermodel.XWPFDocument
 import org.openxmlformats.schemas.wordprocessingml.x2006.main.STTblWidth
 import uk.ac.warwick.tabula.commands.TaskBenchmarking
 import uk.ac.warwick.tabula.data.model.{Course, UpstreamRouteRuleLookup}
-import uk.ac.warwick.tabula.services.{FinalYearGrade, NormalLoadLookup, ProgressionService}
+import uk.ac.warwick.tabula.services.exams.grids.NormalLoadLookup
+import uk.ac.warwick.tabula.services.{FinalYearGrade, ProgressionService}
 
 import scala.collection.JavaConverters._
 

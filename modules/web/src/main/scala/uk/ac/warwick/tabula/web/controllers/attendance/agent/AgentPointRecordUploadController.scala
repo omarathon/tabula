@@ -44,7 +44,6 @@ class AgentPointRecordUploadController extends AttendanceController with HasMont
 			"uploadUrl" -> Routes.Agent.pointRecordUpload(relationshipType, academicYear, templatePoint),
 			"ajax" -> ajax
 		).crumbs(
-			Breadcrumbs.Agent.Relationship(relationshipType),
 			Breadcrumbs.Agent.RelationshipForYear(relationshipType, academicYear)
 		).noLayoutIf(ajax)
 	}

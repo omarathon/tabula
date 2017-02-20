@@ -7,7 +7,7 @@ import uk.ac.warwick.userlookup.User
 trait FeedbackDao {
 	def getAssignmentFeedback(id: String): Option[AssignmentFeedback]
 	def getExamFeedback(id: String): Option[ExamFeedback]
-	def getAssignmentFeedbackByUniId(assignment: Assignment, uniId: String): Option[AssignmentFeedback]
+	def getAssignmentFeedbackByUsercode(assignment: Assignment, usercode: String): Option[AssignmentFeedback]
 	def getMarkerFeedback(id: String): Option[MarkerFeedback]
 	def getRejectedMarkerFeedbackByFeedback(feedback: Feedback): Seq[MarkerFeedback]
 	def save(feedback: Feedback)
@@ -30,9 +30,9 @@ abstract class AbstractFeedbackDao extends FeedbackDao with Daoisms {
 			.add(is("feedback", feedback))
 			.seq
 
-	override def getAssignmentFeedbackByUniId(assignment: Assignment, uniId: String): Option[AssignmentFeedback] =
+	override def getAssignmentFeedbackByUsercode(assignment: Assignment, usercode: String): Option[AssignmentFeedback] =
 		session.newCriteria[AssignmentFeedback]
-			.add(is("universityId", uniId))
+			.add(is("usercode", usercode))
 			.add(is("assignment", assignment))
 			.uniqueResult
 
@@ -65,10 +65,10 @@ abstract class AbstractFeedbackDao extends FeedbackDao with Daoisms {
 				session.newCriteria[ExamFeedback]
 					.add(is("exam", exam))
 			},
-			"universityId",
-			users.map(_.getWarwickId)
-		).groupBy(_.universityId).map{case(universityId, feedbacks) =>
-			users.find(_.getWarwickId == universityId).get -> feedbacks.head
+			"usercode",
+			users.map(_.getUserId)
+		).groupBy(_.usercode).map{case(usercode, feedbacks) =>
+			users.find(_.getUserId == usercode).get -> feedbacks.head
 		}
 	}
 

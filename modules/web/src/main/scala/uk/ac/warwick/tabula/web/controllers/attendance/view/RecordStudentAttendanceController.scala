@@ -83,8 +83,7 @@ class RecordStudentAttendanceController extends AttendanceController
 		Mav("attendance/record",
 			"returnTo" -> getReturnTo(Routes.View.student(department, academicYear, student))
 		).crumbs(
-			Breadcrumbs.View.Home,
-			Breadcrumbs.View.Department(department),
+			Breadcrumbs.View.HomeForYear(academicYear),
 			Breadcrumbs.View.DepartmentForYear(department, academicYear),
 			Breadcrumbs.View.Students(department, academicYear),
 			Breadcrumbs.View.Student(department, academicYear, student)

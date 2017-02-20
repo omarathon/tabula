@@ -29,13 +29,13 @@ class StudentCourseworkFullScreenCommandInternal(val memberOrUser: MemberOrUser)
 		  FeaturesComponent with
 			StudentCourseworkCommandHelper =>
 
-	override lazy val overridableAssignmentsWithFeedback: Seq[Assignment] = assessmentService.getAssignmentsWithFeedback(memberOrUser.universityId)
+	override lazy val overridableAssignmentsWithFeedback: Seq[Assignment] = assessmentService.getAssignmentsWithFeedback(memberOrUser.usercode)
 
 	override lazy val overridableEnrolledAssignments: Seq[Assignment] = assessmentMembershipService.getEnrolledAssignments(memberOrUser.asUser)
 
-	override lazy val overridableAssignmentsWithSubmission: Seq[Assignment] = assessmentService.getAssignmentsWithSubmission(memberOrUser.universityId)
+	override lazy val overridableAssignmentsWithSubmission: Seq[Assignment] = assessmentService.getAssignmentsWithSubmission(memberOrUser.usercode)
 
-	override val universityId: String = memberOrUser.universityId
+	override val usercode: String = memberOrUser.usercode
 
 	override val user: User = memberOrUser.asUser
 

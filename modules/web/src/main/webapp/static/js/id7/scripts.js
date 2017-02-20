@@ -610,17 +610,17 @@
 		}
 
 		$el.filter(':not(.collapsible-init)').each(function() {
-			var $section = $(this).addClass('collapsible-init'), 
+			var $section = $(this).addClass('collapsible-init'),
 				checkboxToggle = $section.hasClass('checkbox-toggle'),
 				$icon = $('<i />'),
 				open = function() {
 					return $section.hasClass('expanded');
 				};
-			
+
 			if (!checkboxToggle) {
 				if (open()) $icon.addClass('fa fa-fw fa-chevron-down');
 				else $icon.addClass('fa fa-fw fa-chevron-right');
-	
+
 				var $title = $section.find('.section-title');
 				if ($title.find('.icon-container').length) {
 					$title.find('.icon-container').first().prepend(' ').prepend($icon);
@@ -636,7 +636,8 @@
 				// Populate function
 				populateContent = function(onComplete) {
 					if ($section.data('loaded')) onComplete();
-					else if ($section.data('loading')) return; // prevent multiple invocation
+					else if ($section.data('loading')) {
+					} // prevent multiple invocation
 					else {
 						$section.data('loading', true);
 						$icon.removeClass().addClass('fa fa-fw fa-refresh fa-spin');

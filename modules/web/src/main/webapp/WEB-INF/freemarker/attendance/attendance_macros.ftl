@@ -48,6 +48,53 @@
 	</div>
 </#macro>
 
+<#macro id7AttendanceButtons>
+	<div style="display:none;" class="forCloning">
+		<div class="btn-group" data-toggle="radio-buttons">
+			<button
+					type="button"
+					class="btn btn-default use-tooltip"
+					data-state=""
+					title="Set to 'Not recorded'"
+					data-html="true"
+					data-container="body"
+					>
+				<i class="fa fa-fw fa-minus"></i>
+			</button>
+			<button
+					type="button"
+					class="btn btn-default btn-unauthorised use-tooltip"
+					data-state="unauthorised"
+					title="Set to 'Missed (unauthorised)'"
+					data-html="true"
+					data-container="body"
+					>
+				<i class="fa fa-fw fa-times"></i>
+			</button>
+			<button
+					type="button"
+					class="btn btn-default btn-authorised use-tooltip"
+					data-state="authorised"
+					title="Set to 'Missed (authorised)'"
+					data-html="true"
+					data-container="body"
+					>
+				<i class="fa fa-fw fa-times-circle-o"></i>
+			</button>
+			<button
+					type="button"
+					class="btn btn-default btn-attended use-tooltip"
+					data-state="attended"
+					title="Set to 'Attended'"
+					data-html="true"
+					data-container="body"
+					>
+				<i class="fa fa-fw fa-check"></i>
+			</button>
+		</div>
+	</div>
+</#macro>
+
 <#macro groupedPointsInATerm pointsMap term department permission_button_function>
 	<div class="striped-section">
 		<h2 class="section-title">${term}</h2>
@@ -110,10 +157,10 @@
 	<#return "" />
 </#function>
 
-<#macro pagination currentPage totalResults resultsPerPage extra_classes="">
+<#macro pagination currentPage totalResults resultsPerPage>
 	<#local totalPages = (totalResults / resultsPerPage)?ceiling />
-	<div class="pagination pagination-right ${extra_classes}">
-		<ul>
+	<nav>
+		<ul class="pagination pagination-sm">
 			<#if currentPage lte 1>
 				<li class="disabled"><span>&laquo;</span></li>
 			<#else>
@@ -134,7 +181,7 @@
 				<li><a href="?page=${currentPage + 1}" data-page="${currentPage + 1}">&raquo;</a></li>
 			</#if>
 		</ul>
-	</div>
+	</nav>
 </#macro>
 
 <#macro manageStudentTable
@@ -261,6 +308,19 @@
 </div>
 </#macro>
 
+<#macro id7GroupedPointsBySection pointsMap sectionName>
+<div class="striped-section expanded">
+	<h2 class="section-title with-contents">${sectionName}</h2>
+	<div class="striped-section-contents">
+		<#list pointsMap[sectionName] as groupedPoint>
+			<div class="item-info row point">
+				<#nested groupedPoint />
+			</div>
+		</#list>
+	</div>
+</div>
+</#macro>
+
 <#macro groupedPointSchemePopover groupedPoint>
 	<#local popoverContent>
 		<ul>
@@ -290,9 +350,11 @@
 	</#if>
 </#function>
 
-<#macro checkpointDescription department checkpoint="" point="" student="" note="" urlProfile=false>
+<#macro checkpointDescription department checkpoint="" point="" student="" note="" urlProfile=false withParagraph=true>
 	<#local formatResult = formatResult(department, checkpoint, point, student, note, urlProfile) />
-	<#if formatResult.metadata?has_content><p>${formatResult.metadata}</p></#if>
+	<#if formatResult.metadata?has_content>
+		<#if withParagraph><p>${formatResult.metadata}</p><#else>${formatResult.metadata}</#if>
+	</#if>
 </#macro>
 
 <#macro checkpointLabel department checkpoint="" point="" student="" note="" urlProfile=false>
@@ -305,7 +367,7 @@
 		<#if formatResult.noteUrl?has_content><p><a class='attendance-note-modal' href='${formatResult.noteUrl}?dt=${.now?string('iso')}'>View attendance note</a></p></#if>
 	</#local>
 	<span class="use-popover label ${formatResult.labelClass}" data-content="${popoverContent}" data-html="true" data-placement="left">${formatResult.labelText}</span>
-	<span class="hidden-desktop visible-print">
+	<span class="hidden-desktop visible-print visible-print-inline">
 		<#if formatResult.metadata?has_content>${formatResult.metadata}<br /></#if>
 		<#if formatResult.noteType?has_content>${formatResult.noteType}<br /></#if>
 		<#if formatResult.noteText?has_content>${formatResult.noteText}</#if>
@@ -349,9 +411,9 @@
 		<#if formatResult.noteText?has_content><p>${formatResult.noteText}</p></#if>
 		<#if formatResult.noteUrl?has_content><p><a class='attendance-note-modal' href='${formatResult.noteUrl}?dt=${.now?string('iso')}'>View attendance note</a></p></#if>
 	</#local>
-	<span class="icon-stack icon-stack-original-size icon-stack-right icon-fixed-width use-popover" data-content="${popoverContent}" data-html="true">
-		<i class="icon-fixed-width icon-stack-base ${formatResult.iconClass} <#if nonActivePoint>non-active</#if>" ></i>
-		<#if formatResult.noteUrl?has_content><i class="icon-fixed-width icon-stack-small icon-envelope-alt icon-filled-white"></i></#if>
+	<span class="icon-stack icon-stack-original-size icon-stack-right icon-fixed-width fa fa-fw fa-stack fa-stack-original-size fa-stack-right use-popover" data-content="${popoverContent}" data-html="true">
+		<i class="icon-fixed-width icon-stack-base fa fa-fw fa-stack2x ${formatResult.iconClass} <#if nonActivePoint>non-active</#if>" ></i>
+		<#if formatResult.noteUrl?has_content><i class="icon-fixed-width icon-stack-small icon-envelope-alt icon-filled-white fa fa-fw fa-stack-1x fa-envelope-o fa-filled-white"></i></#if>
 	</span>
 </#macro>
 
@@ -396,11 +458,11 @@
 						<#if pointCheckpointPair??>
 							<@checkpointIconForPointCheckpointPair department result.student pointCheckpointPair result.attendanceNotes />
 						<#else>
-							<i class="icon-fixed-width"></i>
+							<i class="fa fa-fw fa-stack fa-stack-right fa-stack-original-size icon-fixed-width"></i>
 						</#if>
 					</#list>
 				<#else>
-					<i class="icon-fixed-width"></i>
+					<i class="fa fa-fw icon-fixed-width"></i>
 				</#if>
 			</td>
 		</#if>
@@ -522,6 +584,92 @@
 			</div>
 		</div>
 	</div>
+</#macro>
+
+<#macro id7ScrollablePointsTable command department filterResult visiblePeriods monthNames doCommandSorting=true>
+<div class="scrollable-points-table">
+	<div class="scrollable-table">
+		<div class="scrollable-table-row">
+			<div class="left">
+				<table class="students table table-striped table-condensed">
+					<thead>
+						<tr>
+							<th class="profile_link-col no-sort"></th>
+							<th class="student-col <#if doCommandSorting>${sortClass("firstName", command)}</#if> sortable" data-field="firstName">First name</th>
+							<th class="student-col <#if doCommandSorting>${sortClass("lastName", command)}</#if> sortable" data-field="lastName">Last name</th>
+							<th class="id-col <#if doCommandSorting>${sortClass("universityId", command)}</#if> sortable" data-field="universityId">ID</th>
+							<th class="unrecorded-col <#if doCommandSorting>${sortClass("attendanceCheckpointTotals.unrecorded", command)}</#if> sortable" data-field="attendanceCheckpointTotals.unrecorded">
+								<i title="Unrecorded" class="fa fa-fw fa-exclamation-triangle late"></i>
+							</th>
+							<th class="missed-col <#if doCommandSorting>${sortClass("attendanceCheckpointTotals.unauthorised", command)}</#if> sortable" data-field="attendanceCheckpointTotals.unauthorised">
+								<i title="Missed monitoring points" class="fa fa-fw fa-times unauthorised"></i>
+							</th>
+							<th class="record-col no-sort"></th>
+						</tr>
+					</thead>
+
+					<tbody>
+						<#list filterResult.results as result>
+							<tr class="student">
+								<td class="profile_link"><@pl.profile_link result.student.universityId /></td>
+								<td class="fname" title="${result.student.firstName}">${result.student.firstName}</td>
+								<td class="lname" title="${result.student.lastName}">${result.student.lastName}</td>
+								<td class="id"><a class="profile-link" href="<@routes.attendance.profile result.student />">${result.student.universityId}</a></td>
+								<#if result.groupedPointCheckpointPairs?keys?size == 0>
+									<td class="unrecorded">
+										0
+									</td>
+									<td class="missed">
+										0
+									</td>
+									<td>&nbsp;</td>
+								<#else>
+									<#nested result />
+								</#if>
+							</tr>
+						</#list>
+					</tbody>
+				</table>
+			</div>
+
+			<div class="right">
+				<table class="attendance table tablesorter table-striped table-condensed sb-no-wrapper-table-popout">
+					<thead>
+					<tr>
+						<#list attendance_variables.monitoringPointTermNames as term>
+							<#if visiblePeriods?seq_contains(term)>
+								<th class="${term}-col">${term}</th>
+							</#if>
+						</#list>
+						<#list monthNames as month>
+							<#if visiblePeriods?seq_contains(month)>
+								<#assign monthMatch = month?matches("([a-zA-Z]{3})[a-zA-Z]*\\s(.*)")[0] />
+								<#assign shortMonth>${monthMatch?groups[1]} ${monthMatch?groups[2]}</#assign>
+								<th class="${shortMonth}-col">${shortMonth}</th>
+							</#if>
+						</#list>
+						<#if visiblePeriods?size == 0>
+							<th>&nbsp;</th>
+						</#if>
+					</tr>
+					</thead>
+
+					<tbody>
+						<#list filterResult.results as result>
+						<tr class="student">
+							<#if visiblePeriods?size == 0 || !result.groupedPointCheckpointPairs?has_content>
+								<td colspan="${visiblePeriods?size}"><span class="very-subtle"><em>No monitoring points found</em></span></td>
+							<#else>
+								<@listCheckpointIcons department visiblePeriods monthNames result />
+							</#if>
+						</tr>
+						</#list>
+					</tbody>
+				</table>
+			</div>
+		</div>
+	</div>
+</div>
 </#macro>
 
 <#macro checkpointTotalTitle checkpointTotal>

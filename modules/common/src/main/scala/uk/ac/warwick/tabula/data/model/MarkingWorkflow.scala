@@ -102,21 +102,21 @@ abstract class MarkingWorkflow extends GeneratedId with PermissionsTarget with S
 	def thirdMarkerRoleName: Option[String]
 	def thirdMarkerVerb: Option[String]
 
-	def studentHasMarker(assessment:Assessment, universityId: String): Boolean =
-		getStudentsFirstMarker(assessment, universityId).isDefined ||
-		getStudentsSecondMarker(assessment, universityId).isDefined ||
-		getStudentsThirdMarker(assessment, universityId).isDefined
+	def studentHasMarker(assessment:Assessment, usercode: Usercode): Boolean =
+		getStudentsFirstMarker(assessment, usercode).isDefined ||
+		getStudentsSecondMarker(assessment, usercode).isDefined ||
+		getStudentsThirdMarker(assessment, usercode).isDefined
 
-	def getStudentsFirstMarker(assessment:Assessment, universityId: UniversityId): Option[Usercode]
+	def getStudentsFirstMarker(assessment:Assessment, usercode: Usercode): Option[Usercode]
 
-	def getStudentsSecondMarker(assessment:Assessment, universityId: UniversityId): Option[Usercode]
+	def getStudentsSecondMarker(assessment:Assessment, usercode: Usercode): Option[Usercode]
 
-	def getStudentsThirdMarker(assessment:Assessment, universityId: UniversityId): Option[Usercode]
+	def getStudentsThirdMarker(assessment:Assessment, usercode: Usercode): Option[Usercode]
 
 	// Get's the marker that is primarally responsible for the specified students feedback. This user is notified of
 	// adjustments. The default is the first marker but this can be overriden when that isn't the case
-	def getStudentsPrimaryMarker(assessment:Assessment, universityId: UniversityId): Option[Usercode] =
-		getStudentsFirstMarker(assessment, universityId)
+	def getStudentsPrimaryMarker(assessment:Assessment, usercode: Usercode): Option[Usercode] =
+		getStudentsFirstMarker(assessment, usercode)
 
 	// get's the submissions for the given marker this must be an assignment as exams have no submission
 	def getSubmissions(assignment: Assignment, user: User): Seq[Submission]
@@ -151,10 +151,10 @@ abstract class MarkingWorkflow extends GeneratedId with PermissionsTarget with S
 	}
 
 	// get's the next marker in the workflow if one exists
-	def getNextMarker(position: Option[FeedbackPosition], assessment:Assessment, universityId: UniversityId): Option[User] = {
+	def getNextMarker(position: Option[FeedbackPosition], assessment:Assessment, usercode: Usercode): Option[User] = {
 		val markerId = position match {
-			case Some(FirstFeedback) => getStudentsSecondMarker(assessment, universityId)
-			case Some(SecondFeedback) => getStudentsThirdMarker(assessment, universityId)
+			case Some(FirstFeedback) => getStudentsSecondMarker(assessment, usercode)
+			case Some(SecondFeedback) => getStudentsThirdMarker(assessment, usercode)
 			case _ => None
 		}
 		markerId.map(userLookup.getUserByUserId)
@@ -170,8 +170,8 @@ object MarkingWorkflow {
 
 	val adminRole = "Administrator"
 
-	def getMarkerFromAssessmentMap(userLookup: UserLookupService, universityId: String, markerMap: Map[String, UserGroup]): Option[String] = {
-		val student = userLookup.getUserByWarwickUniId(universityId)
+	def getMarkerFromAssessmentMap(userLookup: UserLookupService, usercode: String, markerMap: Map[String, UserGroup]): Option[String] = {
+		val student = userLookup.getUserByUserId(usercode)
 		val studentsGroup = markerMap.find{case(markerUserId, group) => group.includesUser(student)}
 		studentsGroup.map{ case (markerUserId, _) => markerUserId }
 	}
@@ -184,11 +184,11 @@ trait AssessmentMarkerMap {
 
 	this : MarkingWorkflow =>
 
-	def getStudentsFirstMarker(assessment: Assessment, universityId: UniversityId): Option[String] =
-		MarkingWorkflow.getMarkerFromAssessmentMap(userLookup, universityId, assessment.firstMarkerMap)
+	def getStudentsFirstMarker(assessment: Assessment, usercode: Usercode): Option[Usercode] =
+		MarkingWorkflow.getMarkerFromAssessmentMap(userLookup, usercode, assessment.firstMarkerMap)
 
-	def getStudentsSecondMarker(assessment: Assessment, universityId: UniversityId): Option[String] =
-		MarkingWorkflow.getMarkerFromAssessmentMap(userLookup, universityId, assessment.secondMarkerMap)
+	def getStudentsSecondMarker(assessment: Assessment, usercode: Usercode): Option[Usercode] =
+		MarkingWorkflow.getMarkerFromAssessmentMap(userLookup, usercode, assessment.secondMarkerMap)
 
 	// for assignemnts only. cannot get submissions for exams as they don't exist
 	def getSubmissions(assignment: Assignment, marker: User): Seq[Submission] = {
@@ -198,25 +198,27 @@ trait AssessmentMarkerMap {
 				assignment.firstMarkerMap.get(marker.getUserId).map{_.knownType.allIncludedIds}.getOrElse(Seq()) ++
 					assignment.secondMarkerMap.get(marker.getUserId).map{_.knownType.allIncludedIds}.getOrElse(Seq())
 
-			assignment.submissions.filter(s => studentIds.contains(s.userId))
+			assignment.submissions.filter(s => studentIds.contains(s.usercode))
 		}
 
 		val allSubmissionsForMarker = getSubmissionsFromMap(assignment, marker)
 
-		allSubmissionsForMarker.filter(submission =>
+		allSubmissionsForMarker.filter(submission => {
+
+			val id = submission.usercode
 			(
 				assignment.markingWorkflow.hasThirdMarker &&
-					assignment.isReleasedToThirdMarker(submission.universityId) &&
-					getStudentsThirdMarker(assignment, submission.universityId).contains(marker.getUserId)
-			) || (
+					assignment.isReleasedToThirdMarker(id) &&
+					getStudentsThirdMarker(assignment, id).contains(marker.getUserId)
+				) || (
 				assignment.markingWorkflow.hasSecondMarker &&
-					assignment.isReleasedToSecondMarker(submission.universityId) &&
-					getStudentsSecondMarker(assignment, submission.universityId).contains(marker.getUserId)
-			) || (
-				assignment.isReleasedForMarking(submission.universityId) &&
-					getStudentsFirstMarker(assignment, submission.universityId).contains(marker.getUserId)
-			)
-		)
+					assignment.isReleasedToSecondMarker(id) &&
+					getStudentsSecondMarker(assignment, id).contains(marker.getUserId)
+				) || (
+				assignment.isReleasedForMarking(id) &&
+					getStudentsFirstMarker(assignment, id).contains(marker.getUserId)
+				)
+		})
 	}
 
 	def getMarkersStudents(assessment: Assessment, marker: User): Seq[User] = {

@@ -12,6 +12,7 @@ import uk.ac.warwick.tabula.data.model.notifications.coursework.FeedbackChangeNo
 import uk.ac.warwick.tabula.permissions.Permissions
 import uk.ac.warwick.tabula.services._
 import uk.ac.warwick.tabula.system.permissions.{PermissionsChecking, PermissionsCheckingMethods, RequiresPermissionsChecking}
+import uk.ac.warwick.userlookup.User
 
 import scala.collection.JavaConversions._
 
@@ -40,8 +41,9 @@ class AdminAddMarksCommandInternal(val module: Module, val assessment: Assessmen
 	self: AdminAddMarksCommandState with FeedbackServiceComponent =>
 
 	override def applyInternal(): List[Feedback] = transactional() {
-		def saveFeedback(universityId: String, actualMark: String, actualGrade: String, isModified: Boolean) = {
-			val feedback = assessment.findFeedback(universityId).getOrElse({
+		def saveFeedback(user: User, actualMark: String, actualGrade: String, isModified: Boolean) = {
+
+			val feedback = assessment.findFeedback(user.getUserId).getOrElse({
 				val newFeedback = assessment match {
 					case assignment: Assignment =>
 						val f = new AssignmentFeedback
@@ -53,7 +55,8 @@ class AdminAddMarksCommandInternal(val module: Module, val assessment: Assessmen
 						f
 				}
 				newFeedback.uploaderId = submitter.apparentId
-				newFeedback.universityId = universityId
+				newFeedback.usercode = user.getUserId
+				newFeedback._universityId = user.getWarwickId
 				newFeedback.released = false
 				newFeedback.createdDate = DateTime.now
 				newFeedback
@@ -77,9 +80,9 @@ class AdminAddMarksCommandInternal(val module: Module, val assessment: Assessmen
 			feedback
 		}
 
-		// persist valid marks
-		val markList = marks filter (_.isValid) map {
-			(mark) => saveFeedback(mark.universityId, mark.actualMark, mark.actualGrade, mark.isModified)
+
+		val markList = marks.filter(_.isValid).map{ mark =>
+			saveFeedback(mark.user, mark.actualMark, mark.actualGrade, mark.isModified)
 		}
 
 		markList.toList
@@ -93,8 +96,10 @@ trait AdminAddMarksCommandValidation extends ValidatesMarkItem {
 
 	override def checkMarkUpdated(mark: MarkItem) {
 		// Warn if marks for this student are already uploaded
-		assessment.allFeedback.find { (feedback) => feedback.universityId == mark.universityId && (feedback.hasMark || feedback.hasGrade) } match {
-			case Some(feedback) =>
+		assessment
+			.allFeedback
+			.find(feedback => feedback.usercode == mark.user.getUserId && (feedback.hasMark || feedback.hasGrade))
+			.foreach(feedback => {
 				val markChanged = feedback.actualMark match {
 					case Some(m) if m.toString != mark.actualMark => true
 					case _ => false
@@ -114,8 +119,7 @@ trait AdminAddMarksCommandValidation extends ValidatesMarkItem {
 					mark.isPublished = feedback.released
 					mark.hasAdjustment = feedback.hasPrivateOrNonPrivateAdjustments
 				}
-			case None =>
-		}
+			})
 	}
 }
 

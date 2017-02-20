@@ -9,10 +9,9 @@ import org.springframework.web.bind.annotation._
 import uk.ac.warwick.tabula.cm2.web.Routes
 import uk.ac.warwick.tabula.commands.cm2.assignments.{AssignmentDetailsCommandState, CreateAssignmentDetailsCommand, CreateAssignmentDetailsCommandInternal}
 import uk.ac.warwick.tabula.commands.{Appliable, SelfValidating}
-import uk.ac.warwick.tabula.web.Breadcrumbs
 import uk.ac.warwick.tabula.data.model._
-import uk.ac.warwick.tabula.web.Mav
 import uk.ac.warwick.tabula.web.controllers.cm2.CourseworkController
+import uk.ac.warwick.tabula.web.{Breadcrumbs, Mav}
 
 @Profile(Array("cm2Enabled"))
 @Controller
@@ -46,8 +45,8 @@ class AddAssignmentDetailsController extends CourseworkController {
 		).secondCrumbs(Breadcrumbs.Standard("Assignment Management", Some(Routes.admin.assignment.createAssignmentDetails(module)), ""))
 	}
 
- // TODO - add method for save and exit
-	@RequestMapping(method = Array(POST), params = Array(ManageAssignmentMappingParameters.createAndAddFeedback, "action!=refresh", "action!=update"))
+  // TODO - add method for save and exit
+	@RequestMapping(method = Array(POST), params = Array(ManageAssignmentMappingParameters.createAndAddFeedback, "action!=refresh", "action!=update, action=submit"))
 	def submitAndAddFeedback(@Valid @ModelAttribute("command") cmd: CreateAssignmentDetailsCommand, errors: Errors): Mav =
 		submit(cmd, errors, Routes.admin.assignment.createAddFeedback)
 

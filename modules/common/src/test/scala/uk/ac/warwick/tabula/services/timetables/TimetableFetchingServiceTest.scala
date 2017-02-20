@@ -3,8 +3,8 @@ package uk.ac.warwick.tabula.services.timetables
 import org.joda.time.LocalTime
 import org.mockito.Matchers
 import uk.ac.warwick.tabula._
-import uk.ac.warwick.tabula.data.model.{Module, NamedLocation}
 import uk.ac.warwick.tabula.data.model.groups.{DayOfWeek, WeekRange}
+import uk.ac.warwick.tabula.data.model.{Module, NamedLocation}
 import uk.ac.warwick.tabula.services.ModuleAndDepartmentService
 import uk.ac.warwick.tabula.timetables.{TimetableEvent, TimetableEventType}
 import uk.ac.warwick.userlookup.User

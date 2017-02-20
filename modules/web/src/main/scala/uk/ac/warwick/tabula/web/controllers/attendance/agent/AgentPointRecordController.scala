@@ -6,13 +6,13 @@ import org.springframework.stereotype.Controller
 import org.springframework.validation.Errors
 import org.springframework.web.bind.annotation.{ModelAttribute, PathVariable, RequestMapping}
 import uk.ac.warwick.tabula.AcademicYear
-import uk.ac.warwick.tabula.commands.attendance.agent.AgentPointRecordCommand
 import uk.ac.warwick.tabula.attendance.web.Routes
-import uk.ac.warwick.tabula.web.controllers.attendance.{AttendanceController, HasMonthNames}
+import uk.ac.warwick.tabula.commands.attendance.agent.AgentPointRecordCommand
 import uk.ac.warwick.tabula.commands.{Appliable, PopulateOnForm, SelfValidating}
 import uk.ac.warwick.tabula.data.model.StudentRelationshipType
 import uk.ac.warwick.tabula.data.model.attendance.{AttendanceMonitoringCheckpoint, AttendanceMonitoringPoint}
 import uk.ac.warwick.tabula.web.Mav
+import uk.ac.warwick.tabula.web.controllers.attendance.{AttendanceController, HasMonthNames}
 
 @Controller
 @RequestMapping(Array("/attendance/agent/{relationshipType}/{academicYear}/point/{templatePoint}"))
@@ -45,7 +45,6 @@ class AgentPointRecordController extends AttendanceController with HasMonthNames
 			"uploadUrl" -> Routes.Agent.pointRecordUpload(relationshipType, academicYear, templatePoint),
 			"returnTo" -> getReturnTo(Routes.Agent.relationshipForYear(relationshipType, academicYear))
 		).crumbs(
-			Breadcrumbs.Agent.Relationship(relationshipType),
 			Breadcrumbs.Agent.RelationshipForYear(relationshipType, academicYear)
 		)
 	}

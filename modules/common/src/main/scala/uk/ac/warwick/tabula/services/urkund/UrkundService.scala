@@ -39,7 +39,7 @@ object UrkundService {
 	def urkundSafeFilename(attachment: FileAttachment): String = encodeBase64String(getBytesUtf8(StringUtils.safeSubstring(attachment.name, 0, 256)))
 
 	def submitterAddress(submission: Submission) =
-		s"${submission.universityId}.tabula@submitters.urkund.com"
+		s"${submission.studentIdentifier}.tabula@submitters.urkund.com"
 
 	def receiverAddress(report: OriginalityReport, prefix: String): String =
 		"%s.%s.tabula.%s@analysis.urkund.com".format(

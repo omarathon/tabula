@@ -178,7 +178,9 @@ trait ImportSmallGroupSetsFromSpreadsheetBinding extends BindListener {
 
 							val (groupCommand, groupCommandType) = existingGroup match {
 								case Some(group) => (ModifySmallGroupCommand.edit(group.groupSet.module, group.groupSet, group), "Edit")
-								case _ => (ModifySmallGroupCommand.create(extracted.module, new SmallGroupSet), "Create")
+								case _ => (ModifySmallGroupCommand.create(extracted.module, new SmallGroupSet {
+									name = extracted.name // Could be needed if validation fails
+								}), "Create")
 							}
 
 							groupCommand.name = extractedGroup.name

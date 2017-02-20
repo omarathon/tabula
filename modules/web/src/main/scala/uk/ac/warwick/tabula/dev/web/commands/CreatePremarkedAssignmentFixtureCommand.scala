@@ -76,8 +76,8 @@ class CreatePremarkedAssignmentFixtureCommand extends CommandInternal[Assignment
 			val submissions = CreatePremarkedAssignmentFixtureCommand.students.map(student => {
 				val s = new Submission
 				s.assignment = assignment
-				s.userId = student.userId
-				s.universityId = student.universityId
+				s.usercode = student.userId
+				s._universityId = student.universityId
 				s.submittedDate = DateTime.now.minusDays(30)
 				s
 			})
@@ -86,7 +86,8 @@ class CreatePremarkedAssignmentFixtureCommand extends CommandInternal[Assignment
 
 			val feedbacks = CreatePremarkedAssignmentFixtureCommand.students.map(student => {
 				val f = new AssignmentFeedback
-				f.universityId = student.universityId
+				f._universityId = student.universityId
+				f.usercode = student.userId
 				f.assignment = assignment
 				f.uploaderId = "tabula-functest-admin1"
 				val mf = new MarkerFeedback(f)

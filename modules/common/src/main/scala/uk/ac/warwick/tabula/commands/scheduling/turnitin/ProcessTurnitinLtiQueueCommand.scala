@@ -115,10 +115,10 @@ abstract class ProcessTurnitinLtiQueueCommandInternal extends CommandInternal[Pr
 		val response = turnitinLtiService.submitPaper(
 			assignment = assignment,
 			paperUrl = attachmentUrl,
-			userId = submission.userId,
-			userEmail = s"${submission.userId}@TurnitinLti.warwick.ac.uk",
+			userId = submission.usercode,
+			userEmail = s"${submission.usercode}@TurnitinLti.warwick.ac.uk",
 			attachment = attachment,
-			userFirstName = submission.universityId,
+			userFirstName = submission.studentIdentifier,
 			userLastName = "Student"
 		)
 

@@ -2,8 +2,8 @@
 
 <h1>Upload missed monitoring points to SITS:eVision</h1>
 
-<#assign confirmPath><@routes.attendance.viewReportConfirm department academicYear.startYear?c /></#assign>
-<@f.form commandName="command" action="${confirmPath}" method="POST" cssClass="form-horizontal">
+<#assign confirmPath><@routes.attendance.viewReportConfirm department academicYear /></#assign>
+<@f.form commandName="command" action="${confirmPath}" method="POST">
 
 	<input type="hidden" name="period" value="${command.period}" />
 	<input type="hidden" name="filterString" value="${command.serializeFilter}" />
@@ -18,7 +18,7 @@
 		</div>
 	<#else>
 		<#if (unrecordedStudentsCount > 0)>
-			<div class="alert alert-warn">
+			<div class="alert alert-info">
 				There <@fmt.p number=unrecordedStudentsCount singular="is" plural="are" shownumber=false />
 				<@fmt.p number=unrecordedStudentsCount singular="student" shownumber=true />
 				with unrecorded points during this period.
@@ -48,7 +48,7 @@
 						<td>${student.universityId}</td>
 						<td>${missed}<#if (unrecorded > 0)>
 							<i
-								class="icon-warning-sign icon-fixed-width"
+								class="fa fa-fw fa-exclamation-triangle"
 								title="There <@fmt.p number=unrecorded singular="is" plural="are" shownumber=false /> ${unrecorded} unrecorded <@fmt.p number=unrecorded singular="checkpoint" shownumber=false /> for this student"
 							></i>
 							</#if>
@@ -63,7 +63,7 @@
 				<button class="btn btn-primary spinnable spinner-auto" type="submit" name="submit" data-loading-text="Loading&hellip;">
 					Upload
 				</button>
-				<a class="btn" href="<@routes.attendance.viewStudents department academicYear.startYear?c command.serializeFilter />">Cancel</a>
+				<a class="btn btn-default" href="<@routes.attendance.viewStudents department academicYear command.serializeFilter />">Cancel</a>
 			</div>
 		</div>
 	</#if>

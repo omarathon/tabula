@@ -21,7 +21,7 @@
 <a id="submittop"></a>
 
 <#if feedback??>
-	<h2>Feedback for ${feedback.universityId}</h2>
+	<h2>Feedback for ${feedback.studentIdentifier}</h2>
 	<#include "_assignment_feedbackdownload.ftl" />
 	<#if features.submissions>
 		<#if submission??>
@@ -47,7 +47,7 @@
 			</#if>
 		</#if>
 	<#elseif isSelf>
-		<h2>${user.fullName} (${user.universityId})</h2>
+		<h2>${user.fullName} (${user.studentIdentifier})</h2>
 		<p>
 			If you've submitted your assignment, you should be able to access your
 			feedback here once it's ready.

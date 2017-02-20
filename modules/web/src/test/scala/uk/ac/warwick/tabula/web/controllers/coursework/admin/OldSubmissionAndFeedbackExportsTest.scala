@@ -32,7 +32,7 @@ class OldSubmissionAndFeedbackExportsTest extends TestBase with Mockito {
 
 	val submission1 = new Submission()
 	submission1.assignment = assignment
-	submission1.universityId = "HAVILAND"
+	submission1._universityId = "HAVILAND"
 	submission1.id = "10001"
 	submission1.submittedDate = dateTime(2012, 3)
 	submission1.values = JSet(

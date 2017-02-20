@@ -41,7 +41,7 @@ object RequestInfo {
 
 	def use[A](info: RequestInfo)(fn: => A): A =
 		try { open(info); fn }
-		finally close
+		finally close()
 
 	def close() {
 		fromThread foreach { _.requestLevelCache.shutdown() }

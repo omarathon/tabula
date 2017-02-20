@@ -22,6 +22,37 @@
 
 <#if hasPermission>
 
+	<div class="striped-section collapsible upcoming">
+		<h3 class="section-title">Upcoming assignments</h3>
+		<div class="striped-section-contents">
+			<#if result.upcoming?has_content>
+				<#list result.upcoming as enhancedAssignment>
+					<div class="row item-info">
+						<div class="col-md-<#if enhancedAssignment.submissionDeadline?has_content>5<#else>10</#if>">
+							<h4><@fmt.module_name enhancedAssignment.assignment.module /></h4>
+							<h4>${enhancedAssignment.assignment.name!}</h4>
+						</div>
+						<div class="col-md-5">
+							<#if enhancedAssignment.assignment.openDate?has_content>
+								Opens <@fmt.date date=enhancedAssignment.assignment.openDate relative=false />
+							</#if>
+							<#if enhancedAssignment.submissionDeadline?has_content>
+								<br />
+								Deadline <@fmt.date date=enhancedAssignment.submissionDeadline relative=false />
+							</#if>
+						</div>
+					</div>
+				</#list>
+			<#else>
+				<div class="row item-info">
+					<div class="col-md-12">
+						There are no upcoming assignments in Tabula.
+					</div>
+				</div>
+			</#if>
+		</div>
+	</div>
+
 	<div class="striped-section collapsible expanded todo">
 		<h3 class="section-title">To do</h3>
 		<div class="striped-section-contents">

@@ -18,7 +18,7 @@ class OldDownloadFeedbackInProfileController extends OldCourseworkController {
 	var feedbackDao: FeedbackDao = Wire.auto[FeedbackDao]
 
 	@ModelAttribute def command(@PathVariable module: Module, @PathVariable assignment: Assignment, @PathVariable student: Member)
-		= new DownloadFeedbackCommand(module, assignment, mandatory(feedbackDao.getAssignmentFeedbackByUniId(assignment, student.universityId).filter(_.released)), Some(student))
+		= new DownloadFeedbackCommand(module, assignment, mandatory(feedbackDao.getAssignmentFeedbackByUsercode(assignment, student.userId).filter(_.released)), Some(student))
 
 	@RequestMapping(value = Array("/all/feedback.zip"))
 	def getAll(command: DownloadFeedbackCommand, @PathVariable student: Member): RenderableFile = {

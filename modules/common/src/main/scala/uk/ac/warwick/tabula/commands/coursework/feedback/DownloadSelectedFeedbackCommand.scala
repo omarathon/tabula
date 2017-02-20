@@ -38,8 +38,8 @@ class DownloadSelectedFeedbackCommand(val module: Module, val assignment: Assign
 		if (students.isEmpty) throw new ItemNotFoundException
 
 		feedbacks = (for (
-			uniId <- students.asScala;
-			feedback <- feedbackDao.getAssignmentFeedbackByUniId(assignment, uniId) // assignmentService.getSubmissionByUniId(assignment, uniId)
+			usercode <- students.asScala;
+			feedback <- feedbackDao.getAssignmentFeedbackByUsercode(assignment, usercode)
 		) yield feedback).asJava
 
 
@@ -51,17 +51,18 @@ class DownloadSelectedFeedbackCommand(val module: Module, val assignment: Assign
 			val zip = zipService.getSomeFeedbacksZip(feedbacks.asScala)
 			Left(zip)
 		} else {
-			Right(jobService.add(Option(user), FeedbackZipFileJob(feedbacks.asScala.map(_.id).toSeq)))
+			Right(jobService.add(Option(user), FeedbackZipFileJob(feedbacks.asScala.map(_.id))))
 		}
 	}
 
 	override def describe(d: Description): Unit = d
 		.assignment(assignment)
-		.studentIds(students.asScala)
+		.studentUsercodes(students.asScala)
 
 	override def describeResult(d: Description): Unit = d
 		.assignment(assignment)
-		.studentIds(students.asScala)
+		.studentIds(feedbacks.asScala.flatMap(_.universityId))
+		.studentUsercodes(students.asScala) // is usercodes
 		.properties(
 			"feedbackCount" -> Option(feedbacks).map(_.size).getOrElse(0))
 }

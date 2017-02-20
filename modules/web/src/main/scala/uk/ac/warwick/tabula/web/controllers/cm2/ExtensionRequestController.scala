@@ -12,7 +12,7 @@ import uk.ac.warwick.tabula.commands.{Appliable, SelfValidating}
 import uk.ac.warwick.tabula.commands.cm2.assignments.extensions.{RequestExtensionCommand, RequestExtensionCommandState}
 import uk.ac.warwick.tabula.web.Routes
 import uk.ac.warwick.tabula.data.model.Assignment
-import uk.ac.warwick.tabula.data.model.forms.{Extension, ExtensionState}
+import uk.ac.warwick.tabula.data.model.forms.Extension
 import uk.ac.warwick.tabula.permissions.Permissions
 import uk.ac.warwick.tabula.services.ProfileService
 import uk.ac.warwick.tabula.web.Mav
@@ -44,7 +44,7 @@ class ExtensionRequestController extends CourseworkController {
 			logger.info("Rejecting access to extension request screen as department does not allow extension requests")
 			throw new PermissionDeniedException(user, Permissions.Extension.MakeRequest, assignment)
 		} else {
-			val existingRequest = assignment.findExtension(user.universityId)
+			val existingRequest = assignment.findExtension(user.userId)
 			existingRequest.foreach(cmd.presetValues)
 			val profile = profileService.getMemberByUser(user.apparentUser)
 			// is this an edit of an existing request

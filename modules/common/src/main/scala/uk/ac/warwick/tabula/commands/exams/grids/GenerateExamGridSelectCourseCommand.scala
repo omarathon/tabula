@@ -2,16 +2,16 @@ package uk.ac.warwick.tabula.commands.exams.grids
 
 import org.springframework.validation.Errors
 import uk.ac.warwick.tabula.AcademicYear
+import uk.ac.warwick.tabula.JavaImports._
 import uk.ac.warwick.tabula.commands._
-import uk.ac.warwick.tabula.data.{AutowiringStudentCourseYearDetailsDaoComponent, StudentCourseYearDetailsDaoComponent}
 import uk.ac.warwick.tabula.data.model._
+import uk.ac.warwick.tabula.data.{AutowiringStudentCourseYearDetailsDaoComponent, StudentCourseYearDetailsDaoComponent}
 import uk.ac.warwick.tabula.permissions.Permissions
 import uk.ac.warwick.tabula.services.{AutowiringCourseAndRouteServiceComponent, CourseAndRouteServiceComponent}
 import uk.ac.warwick.tabula.system.permissions.{PermissionsChecking, PermissionsCheckingMethods, RequiresPermissionsChecking}
-import uk.ac.warwick.tabula.JavaImports._
 
-import scala.collection.immutable.Range.Inclusive
 import scala.collection.JavaConverters._
+import scala.collection.immutable.Range.Inclusive
 
 object GenerateExamGridSelectCourseCommand {
 	def apply(department: Department, academicYear: AcademicYear) =

@@ -1,9 +1,9 @@
 package uk.ac.warwick.tabula.data.model
 
-import uk.ac.warwick.tabula.{Fixtures, PersistenceTestBase}
 import org.joda.time.{DateTime, DateTimeConstants}
+import uk.ac.warwick.tabula.{Fixtures, PersistenceTestBase}
 
-import collection.JavaConversions._
+import scala.collection.JavaConversions._
 
 // scalastyle:off magic.number
 class MeetingRecordTest extends PersistenceTestBase {

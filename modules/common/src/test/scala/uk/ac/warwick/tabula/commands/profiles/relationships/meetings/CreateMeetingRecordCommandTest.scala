@@ -3,9 +3,10 @@ package uk.ac.warwick.tabula.commands.profiles.relationships.meetings
 import org.joda.time.{DateTime, DateTimeConstants}
 import org.springframework.validation.BindException
 import org.springframework.web.multipart.MultipartFile
+import uk.ac.warwick.tabula.DateFormats.{DatePickerFormatter, TimePickerFormatter}
 import uk.ac.warwick.tabula._
 import uk.ac.warwick.tabula.commands.UploadedFile
-import uk.ac.warwick.tabula.data.{FileDao, FileDaoComponent}
+import uk.ac.warwick.tabula.data.FileDao
 import uk.ac.warwick.tabula.data.model.MeetingFormat._
 import uk.ac.warwick.tabula.data.model.{ExternalStudentRelationship, _}
 import uk.ac.warwick.tabula.services.attendancemonitoring.{AttendanceMonitoringMeetingRecordService, AttendanceMonitoringMeetingRecordServiceComponent}
@@ -41,12 +42,14 @@ class CreateMeetingRecordCommandTest extends TestBase with Mockito {
 		validator.title = "A title"
 		validator.format = FaceToFace
 		validator.meetingDateTime  = dateTime(3903, DateTimeConstants.MARCH) // it's the future
-		
+		validator.meetingDateStr = validator.meetingDateTime.toString(DatePickerFormatter)
+		validator.meetingTimeStr = validator.meetingDateTime.toString(TimePickerFormatter)
+
 		var errors = new BindException(validator, "command")
 		validator.validate(errors)
 		errors.hasErrors should be (true)
-		errors.getErrorCount should be (2)
-		errors.getFieldErrors.asScala.map(_.getField).contains("meetingDateTime") should be (true)
+		errors.getErrorCount should be(1)
+		errors.getFieldErrors.asScala.map(_.getField).contains("meetingDateStr") should be (true)
 		errors.getFieldError.getCode should be ("meetingRecord.date.future")
 	}}}
 
@@ -55,18 +58,78 @@ class CreateMeetingRecordCommandTest extends TestBase with Mockito {
 		validator.title = "A title"
 		validator.format = FaceToFace
 		validator.meetingDateTime = dateTime(2007, DateTimeConstants.MARCH) // > 5 years ago
+		validator.meetingDateStr = dateTime(2007, DateTimeConstants.MARCH).toString(DatePickerFormatter)
+		validator.meetingTimeStr = dateTime(2007, DateTimeConstants.MARCH).toString(TimePickerFormatter)
 
 		var errors = new BindException(validator, "command")
 		validator.validate(errors)
 		errors.hasErrors should be {true}
-		errors.getErrorCount should be (2)
-		errors.getFieldErrors.asScala.map(_.getField).contains("meetingDateTime") should be (true)
+		errors.getErrorCount should be (1)
+		errors.getFieldErrors.asScala.map(_.getField).contains("meetingDateStr") should be (true)
 		errors.getFieldError.getCode should be ("meetingRecord.date.prehistoric")
+	}}}
+
+	@Test
+	def invalidTimes(): Unit = withUser("cuscav") { withFakeTime(aprilFool) { new ValidationFixture {
+		validator.title = "A title"
+		validator.format = FaceToFace
+
+		val yesterday: DateTime = DateTime.now.minusDays(1).plusHours(10)
+		validator.meetingDateTime = yesterday
+		validator.meetingDateStr = yesterday.toString(DatePickerFormatter)
+		validator.meetingTimeStr = yesterday.toString(TimePickerFormatter)
+
+		validator.meetingEndDateTime = yesterday.minusHours(1) // end is before the start
+		validator.meetingEndTimeStr = yesterday.minusHours(1).toString(TimePickerFormatter)
+
+		var errors = new BindException(validator, "command")
+		validator.validate(errors)
+		errors.hasErrors should be {true}
+		errors.getErrorCount should be (1)
+		errors.getFieldErrors.asScala.map(_.getField).contains("meetingTimeStr") should be (true)
+		errors.getFieldError.getCode should be ("meetingRecord.date.endbeforestart")
+	}}}
+
+	@Test
+	def invalidEmptyStartTime(): Unit = withUser("cuscav") { withFakeTime(aprilFool) { new ValidationFixture {
+		validator.meetingDateTime = marchHare
+		validator.meetingDateStr = validator.meetingDateTime.toString(DatePickerFormatter)
+		validator.meetingTimeStr = ""
+		validator.meetingEndTimeStr = "10:00:00"
+		validator.title = "A good title"
+		validator.format = FaceToFace
+
+		var errors = new BindException(validator, "command")
+		validator.validate(errors)
+		errors.hasErrors should be (true)
+		errors.getErrorCount should be (1)
+		errors.getFieldError.getField should be ("meetingTimeStr")
+		errors.getFieldError.getCode should be ("meetingRecord.starttime.missing")
+	}}}
+
+	@Test
+	def invalidEmptyEndTime(): Unit = withUser("cuscav") { withFakeTime(aprilFool) { new ValidationFixture {
+		validator.meetingDateTime = marchHare
+		validator.meetingDateStr = marchHare.toString(DatePickerFormatter)
+		validator.meetingTimeStr =  "09:00:00"
+		validator.meetingEndTimeStr = ""
+		validator.title = "A good title"
+		validator.format = FaceToFace
+
+		var errors = new BindException(validator, "command")
+		validator.validate(errors)
+		errors.hasErrors should be (true)
+		errors.getErrorCount should be (1)
+		errors.getFieldError.getField should be ("meetingEndTimeStr")
+		errors.getFieldError.getCode should be ("meetingRecord.endtime.missing")
 	}}}
 
 	@Test
 	def invalidEmptyTitle(): Unit = withUser("cuscav") { withFakeTime(aprilFool) { new ValidationFixture {
 		validator.meetingDateTime = marchHare
+		validator.meetingDateStr = validator.meetingDateTime.toString(DatePickerFormatter)
+		validator.meetingTimeStr = validator.meetingDateTime.toString(TimePickerFormatter)
+		validator.meetingEndTimeStr = validator.meetingDateTime.plusHours(1).toString(TimePickerFormatter)
 		validator.format = FaceToFace
 		validator.title = ""
 
@@ -78,9 +141,13 @@ class CreateMeetingRecordCommandTest extends TestBase with Mockito {
 		errors.getFieldError.getCode should be ("NotEmpty")
 	}}}
 
+
 	@Test
 	def invalidEmptyFormat(): Unit = withUser("cuscav") { withFakeTime(aprilFool) { new ValidationFixture {
 		validator.meetingDateTime = marchHare
+		validator.meetingDateStr = validator.meetingDateTime.toString(DatePickerFormatter)
+		validator.meetingTimeStr = validator.meetingDateTime.toString(TimePickerFormatter)
+		validator.meetingEndTimeStr = validator.meetingDateTime.plusHours(1).toString(TimePickerFormatter)
 		validator.title = "A good title"
 		validator.format = null
 
@@ -95,6 +162,9 @@ class CreateMeetingRecordCommandTest extends TestBase with Mockito {
 	@Test
 	def valid(): Unit = withUser("cuscav") { withFakeTime(aprilFool) { new ValidationFixture {
 		validator.meetingDateTime = marchHare
+		validator.meetingDateStr = validator.meetingDateTime.toString(DatePickerFormatter)
+		validator.meetingTimeStr = validator.meetingDateTime.toString(TimePickerFormatter)
+		validator.meetingEndTimeStr = validator.meetingDateTime.plusHours(1).toString(TimePickerFormatter)
 		validator.title = "A good title"
 		validator.format = Email
 
@@ -121,6 +191,10 @@ class CreateMeetingRecordCommandTest extends TestBase with Mockito {
 		cmd.title = "A good title"
 		cmd.format = Email
 		cmd.meetingDateTime = marchHare
+		cmd.meetingDateStr = cmd.meetingDateTime.toString(DatePickerFormatter)
+		cmd.meetingTimeStr = cmd.meetingDateTime.toString(TimePickerFormatter)
+		cmd.meetingEndTimeStr = cmd.meetingDateTime.plusHours(1).toString(TimePickerFormatter)
+
 		cmd.description = "Lovely words"
 
 		// try adding a file

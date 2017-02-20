@@ -32,20 +32,23 @@ abstract class OnlineFeedbackCommand(val module: Module, val assignment: Assignm
 	val marker: User = submitter.apparentUser
 
 	def applyInternal(): Seq[StudentFeedbackGraph] = {
-		val studentsWithSubmissionOrFeedback =
-			userLookup.getUsersByWarwickUniIds(
-				assignment.getUniIdsWithSubmissionOrFeedback.filter { _.hasText }.toSeq
-			).values.filter { _.isFoundUser }.toSeq.sortBy { _.getWarwickId }
 
-	  val studentsWithSubmissionOrFeedbackUniversityIds = studentsWithSubmissionOrFeedback.map(_.getWarwickId)
+		val usercodes = assignment.getUsercodesWithSubmissionOrFeedback.filter(_.hasText).toSeq
+		val studentsWithSubmissionOrFeedback = userLookup.getUsersByUserIds(usercodes)
+			.values
+			.filter(_.isFoundUser)
+			.toSeq
+			.sortBy(u => s"${u.getWarwickId}${u.getUserId}")
+
+	  val studentsWithSubmissionOrFeedbackUsercodes = studentsWithSubmissionOrFeedback.map(_.getUserId)
 
 		val unsubmittedStudents = assessmentMembershipService.determineMembershipUsers(assignment)
-				.filterNot { x => studentsWithSubmissionOrFeedbackUniversityIds.contains(x.getWarwickId) }
+				.filterNot { u => studentsWithSubmissionOrFeedbackUsercodes.contains(u.getUserId) }
 
 		val students = studentsWithSubmissionOrFeedback ++ unsubmittedStudents
 		students.map { student =>
-			val hasSubmission = submissionService.getSubmissionByUniId(assignment, student.getWarwickId).isDefined
-			val feedback = feedbackService.getAssignmentFeedbackByUniId(assignment, student.getWarwickId)
+			val hasSubmission = submissionService.getSubmissionByUsercode(assignment, student.getUserId).isDefined
+			val feedback = feedbackService.getAssignmentFeedbackByUsercode(assignment, student.getUserId)
 			val (hasFeedback, hasPublishedFeedback) = feedback match {
 				case Some(f) => (true, f.released.booleanValue)
 				case _ => (false, false)
@@ -83,12 +86,12 @@ abstract class OnlineMarkerFeedbackCommand(
 
 		val students = Option(assignment.markingWorkflow).map(_.getMarkersStudents(assignment, marker)).getOrElse(Nil)
 
-		students.filter(s => assignment.isReleasedForMarking(s.getWarwickId)).map { student =>
+		students.filter(s => assignment.isReleasedForMarking(s.getUserId)).map { student =>
 
-			val hasSubmission = assignment.submissions.asScala.exists(_.universityId == student.getWarwickId)
-			val feedback = feedbackService.getAssignmentFeedbackByUniId(assignment, student.getWarwickId)
+			val hasSubmission = assignment.submissions.asScala.exists(_.usercode == student.getUserId)
+			val feedback = feedbackService.getAssignmentFeedbackByUsercode(assignment, student.getUserId)
 			// get all the feedbacks for this user and pick the most recent
-			val markerFeedback = assignment.getAllMarkerFeedbacks(student.getWarwickId, marker).headOption
+			val markerFeedback = assignment.getAllMarkerFeedbacks(student.getUserId, marker).headOption
 
 			val hasUncompletedFeedback = markerFeedback.exists(_.hasContent)
 			// the current feedback for the marker is completed or if the parent feedback isn't a placeholder then marking is completed

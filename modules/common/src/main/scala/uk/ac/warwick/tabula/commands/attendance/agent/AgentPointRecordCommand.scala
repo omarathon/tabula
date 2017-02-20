@@ -2,9 +2,9 @@ package uk.ac.warwick.tabula.commands.attendance.agent
 
 import org.springframework.validation.Errors
 import uk.ac.warwick.tabula.JavaImports._
+import uk.ac.warwick.tabula.commands._
 import uk.ac.warwick.tabula.commands.attendance.GroupsPoints
 import uk.ac.warwick.tabula.commands.attendance.view.{GroupedPointRecordValidation, MissedAttendanceMonitoringCheckpointsNotifications}
-import uk.ac.warwick.tabula.commands._
 import uk.ac.warwick.tabula.data.model.attendance._
 import uk.ac.warwick.tabula.data.model.{Member, StudentMember, StudentRelationshipType}
 import uk.ac.warwick.tabula.helpers.LazyMaps
@@ -139,7 +139,8 @@ trait AgentPointRecordCommandState extends GroupsPoints {
 		students.map { student =>
 			student -> attendanceMonitoringService.listStudentsPoints(student, None, academicYear)
 		}.toMap.mapValues(points => points.filter(p => {
-			p.name.toLowerCase == templatePoint.name.toLowerCase && {
+			p.name.toLowerCase == templatePoint.name.toLowerCase &&
+				templatePoint.scheme.pointStyle == p.scheme.pointStyle && {
 				templatePoint.scheme.pointStyle match {
 					case AttendanceMonitoringPointStyle.Week =>
 						p.startWeek == templatePoint.startWeek && p.endWeek == templatePoint.endWeek

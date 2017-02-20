@@ -5,7 +5,6 @@ import uk.ac.warwick.userlookup.User
 import uk.ac.warwick.tabula.data.model.forms.Extension
 
 case class ExtensionGraph(
-	universityId: String,
 	user: User,
 	deadline: DateTime,
 	isAwaitingReview: Boolean,
@@ -17,7 +16,6 @@ case class ExtensionGraph(
 
 object ExtensionGraph {
 	def apply(extension: Extension, user: User) = new ExtensionGraph(
-		extension.universityId,
 		user,
 		extension.assignment.submissionDeadline(user),
 		extension.awaitingReview,

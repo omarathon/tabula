@@ -40,20 +40,22 @@ abstract class OnlineMarkerFeedbackFormCommand(
 	gradeGenerator: GeneratesGradesFromMarks
 )	extends AbstractOnlineFeedbackFormCommand(module, assignment, student, marker, gradeGenerator)
 	with CommandInternal[MarkerFeedback] with Appliable[MarkerFeedback] {
+
 	self: FeedbackServiceComponent with ZipServiceComponent with MarkerFeedbackStateCopy =>
 
-	def markerFeedback: Option[MarkerFeedback] = assignment.getMarkerFeedbackForCurrentPosition(student.getWarwickId, marker)
-	def allMarkerFeedbacks: Seq[MarkerFeedback] = assignment.getAllMarkerFeedbacks(student.getWarwickId, marker)
+	def markerFeedback: Option[MarkerFeedback] = assignment.getMarkerFeedbackForCurrentPosition(student.getUserId, marker)
+	def allMarkerFeedbacks: Seq[MarkerFeedback] = assignment.getAllMarkerFeedbacks(student.getUserId, marker)
 
 	if (markerFeedback.isDefined) copyState(markerFeedback)
 
 	def applyInternal(): MarkerFeedback = {
 		// find the parent feedback or make a new one
-		val parentFeedback = assignment.feedbacks.asScala.find(_.universityId == student.getWarwickId).getOrElse({
+		val parentFeedback = assignment.feedbacks.asScala.find(_.usercode == student.getUserId).getOrElse({
 			val newFeedback = new AssignmentFeedback
 			newFeedback.assignment = assignment
 			newFeedback.uploaderId = marker.getUserId
-			newFeedback.universityId = student.getWarwickId
+			newFeedback.usercode = student.getUserId
+			newFeedback._universityId = student.getWarwickId
 			newFeedback.released = false
 			newFeedback.createdDate = DateTime.now
 			newFeedback

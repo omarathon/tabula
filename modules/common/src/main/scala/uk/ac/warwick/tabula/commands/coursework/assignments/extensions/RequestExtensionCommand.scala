@@ -48,10 +48,11 @@ class RequestExtensionCommandInternal(val module: Module, val assignment:Assignm
 	}
 
 	override def applyInternal(): Extension = transactional() {
-		val universityId = submitter.apparentUser.getWarwickId
-		val extension = assignment.findExtension(universityId).getOrElse({
-			val newExtension = new Extension(universityId)
-			newExtension.userId = submitter.apparentUser.getUserId
+
+		val extension = assignment.findExtension(submitter.apparentUser.getUserId).getOrElse({
+			val newExtension = new Extension
+			newExtension._universityId = submitter.apparentUser.getWarwickId
+			newExtension.usercode = submitter.apparentUser.getUserId
 			newExtension
 		})
 		extension.assignment = assignment
@@ -186,7 +187,7 @@ trait RequestExtensionCommandState {
 
 	var reason: String =_
 
-	@DateTimeFormat(pattern = DateFormats.DateTimePicker)
+	@DateTimeFormat(pattern = DateFormats.DateTimePickerPattern)
 	@WithinYears(maxFuture = 3)
 	var requestedExpiryDate: DateTime =_
 

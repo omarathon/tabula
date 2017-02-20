@@ -2,26 +2,30 @@ package uk.ac.warwick.tabula.web.controllers.attendance.profile
 
 import org.joda.time.DateTime
 import org.springframework.stereotype.Controller
-import org.springframework.web.bind.annotation.{ModelAttribute, PathVariable, RequestMapping, RequestParam}
+import org.springframework.web.bind.annotation.{ModelAttribute, PathVariable, RequestMapping}
 import uk.ac.warwick.tabula.AcademicYear
-import uk.ac.warwick.tabula.JavaImports._
 import uk.ac.warwick.tabula.attendance.web.Routes
 import uk.ac.warwick.tabula.commands.Appliable
 import uk.ac.warwick.tabula.commands.attendance.profile.{AttendanceProfileCommand, AttendanceProfileCommandResult}
 import uk.ac.warwick.tabula.data.model.StudentMember
 import uk.ac.warwick.tabula.data.model.attendance.AttendanceState
-import uk.ac.warwick.tabula.services.AutowiringTermServiceComponent
+import uk.ac.warwick.tabula.services.{AutowiringMaintenanceModeServiceComponent, AutowiringUserSettingsServiceComponent}
 import uk.ac.warwick.tabula.web.Mav
+import uk.ac.warwick.tabula.web.controllers.AcademicYearScopedController
 import uk.ac.warwick.tabula.web.controllers.attendance.{AttendanceController, HasMonthNames}
 
 @Controller
 @RequestMapping(value = Array("/attendance/profile"))
-class ProfileHomeController extends AttendanceController with AutowiringTermServiceComponent {
+class ProfileHomeController extends AttendanceController
+	with AcademicYearScopedController with AutowiringUserSettingsServiceComponent with AutowiringMaintenanceModeServiceComponent {
+
+	@ModelAttribute("activeAcademicYear")
+	override def activeAcademicYear: Option[AcademicYear] = retrieveActiveAcademicYear(None)
 
 	@RequestMapping
-	def render(): Mav = user.profile match {
+	def render(@ModelAttribute("activeAcademicYear") activeAcademicYear: Option[AcademicYear]): Mav = user.profile match {
 		case Some(student: StudentMember) =>
-			Redirect(Routes.Profile.profileForYear(student, AcademicYear.findAcademicYearContainingDate(DateTime.now)))
+			Redirect(Routes.Profile.profileForYear(student, activeAcademicYear.getOrElse(AcademicYear.guessSITSAcademicYearByDate(DateTime.now))))
 		case _ if user.isStaff =>
 			Mav("attendance/profile/staff").noLayoutIf(ajax)
 		case _ =>
@@ -31,21 +35,28 @@ class ProfileHomeController extends AttendanceController with AutowiringTermServ
 
 @Controller
 @RequestMapping(value = Array("/attendance/profile/{student}"))
-class ProfileChooseYearController extends AttendanceController {
+class ProfileYearRedirectController extends AttendanceController
+	with AcademicYearScopedController with AutowiringUserSettingsServiceComponent with AutowiringMaintenanceModeServiceComponent {
+
+	@ModelAttribute("activeAcademicYear")
+	override def activeAcademicYear: Option[AcademicYear] = retrieveActiveAcademicYear(None)
 
 	@RequestMapping
-	def render(@PathVariable student: StudentMember): Mav =
-		Mav("attendance/profile/years",
-			"years" ->
-				student.freshOrStaleStudentCourseDetails
-					.flatMap(_.freshOrStaleStudentCourseYearDetails)
-					.map(_.academicYear.startYear)
-		).noLayoutIf(ajax)
+	def redirect(
+		@ModelAttribute("activeAcademicYear") activeAcademicYear: Option[AcademicYear],
+		@PathVariable student: StudentMember
+	): Mav = {
+		Redirect(Routes.Profile.profileForYear(student, activeAcademicYear.getOrElse(AcademicYear.guessSITSAcademicYearByDate(DateTime.now))))
+	}
 }
 
 @Controller
 @RequestMapping(Array("/attendance/profile/{student}/{academicYear}"))
-class ProfileController extends AttendanceController with HasMonthNames {
+class ProfileController extends AttendanceController with HasMonthNames
+	with AcademicYearScopedController with AutowiringUserSettingsServiceComponent with AutowiringMaintenanceModeServiceComponent {
+
+	@ModelAttribute("activeAcademicYear")
+	override def activeAcademicYear(@PathVariable academicYear: AcademicYear): Option[AcademicYear] = retrieveActiveAcademicYear(Option(academicYear))
 
 	@ModelAttribute("command")
 	def command(@PathVariable student: StudentMember, @PathVariable academicYear: AcademicYear) =
@@ -55,37 +66,20 @@ class ProfileController extends AttendanceController with HasMonthNames {
 	def home(
 		@ModelAttribute("command") cmd: Appliable[AttendanceProfileCommandResult],
 		@PathVariable student: StudentMember,
-		@PathVariable academicYear: AcademicYear,
-		@RequestParam(value="expand", required=false) expand: JBoolean
+		@PathVariable academicYear: AcademicYear
 	): Mav = {
 		val commandResult = cmd.apply()
-		val groupedPointMap = commandResult.attendanceMonitoringPointWithCheckPoint
 
-
-		val allNotes = commandResult.allNotesWithSomeCheckPoints
-		val checkPointNotesMap = commandResult.checkPointNotes
-		val unrecordedNotes = commandResult.notesWithoutCheckPoints
-		val missedPointCountByTerm = groupedPointMap.map{ case(period, pointCheckpointPairs) =>
-			period -> pointCheckpointPairs.count{ case(point, checkpoint) => checkpoint != null && checkpoint.state == AttendanceState.MissedUnauthorised}
-		}
-		val modelMap = Map(
-			"groupedPointMap" -> groupedPointMap,
-			"missedPointCountByTerm" -> missedPointCountByTerm,
-			"hasAnyMissed" -> missedPointCountByTerm.exists(_._2 > 0),
+		Mav("attendance/profile/profile",
+			"groupedPointMap" -> commandResult.groupedPointMap,
+			"missedPointCountByTerm" -> commandResult.missedPointCountByTerm,
+			"hasAnyMissed" -> commandResult.hasAnyMissedPoints,
 			"department" -> currentMember.homeDepartment,
-			"is_the_student" -> (user.apparentId == student.userId),
-			"expand" -> expand,
-			"allNotes" -> allNotes,
-			"checkPointNotesMap" -> checkPointNotesMap,
-			"unrecordedNotes" -> unrecordedNotes,
+			"isSelf" -> (user.apparentId == student.userId),
+			"notes" -> commandResult.notes,
+			"noteCheckpoints" -> commandResult.noteCheckpoints,
 			"allCheckpointStates" -> AttendanceState.values.sortBy(state => state.description) ,
 			"returnTo" -> getReturnTo(Routes.Profile.profileForYear(mandatory(student), mandatory(academicYear)))
-		)
-		if (ajax)
-			Mav("attendance/profile/_profile", modelMap).noLayout()
-		else
-			Mav("attendance/profile/profile", modelMap).crumbs(
-				Breadcrumbs.Profile.Years(mandatory(student), user.apparentId == student.userId)
-			)
+		).secondCrumbs(academicYearBreadcrumbs(academicYear)(year => Routes.Profile.profileForYear(student, year)):_*)
 	}
 }

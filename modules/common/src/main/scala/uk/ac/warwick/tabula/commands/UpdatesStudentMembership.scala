@@ -69,7 +69,10 @@ trait UpdatesStudentMembership {
 	// parse massAddUsers into a collection of individual tokens
 	def massAddUsersEntries: Seq[String] =
 		if (massAddUsers == null) Nil
-		else massAddUsers.split("(\\s|[^A-Za-z\\d\\-_\\.])+").map(_.trim).filterNot(_.isEmpty)
+		else massAddUsers
+			.split("(\\s|[^A-Za-z\\d\\-_\\.])+")
+			.map(_.trim)
+			.filterNot(_.isEmpty)
 
 	def afterBind() {
 		updateMembership()
@@ -78,7 +81,7 @@ trait UpdatesStudentMembership {
 
 	private def bufferUserFromUserId(userId: String, buffer: ListBuffer[User]) {
 		val user = userLookup.getUserByUserId(userId)
-		if (user.isFoundUser && null != user.getWarwickId) {
+		if (user.isFoundUser) {
 			buffer += user
 		}
 	}

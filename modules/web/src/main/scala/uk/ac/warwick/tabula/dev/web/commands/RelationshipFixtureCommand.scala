@@ -1,14 +1,12 @@
 package uk.ac.warwick.tabula.dev.web.commands
 
-import uk.ac.warwick.tabula.data._
-import uk.ac.warwick.tabula.data.model.{StudentMember, StudentRelationship}
-import uk.ac.warwick.spring.Wire
 import org.joda.time.DateTime
-import uk.ac.warwick.tabula.commands.{CommandInternal, Unaudited, ComposableCommand}
-import uk.ac.warwick.tabula.services.AutowiringModuleAndDepartmentServiceComponent
+import uk.ac.warwick.spring.Wire
+import uk.ac.warwick.tabula.commands.{CommandInternal, ComposableCommand, Unaudited}
+import uk.ac.warwick.tabula.data._
+import uk.ac.warwick.tabula.data.model.{MemberStudentRelationship, StudentMember, StudentRelationship}
+import uk.ac.warwick.tabula.services.{AutowiringModuleAndDepartmentServiceComponent, RelationshipService}
 import uk.ac.warwick.tabula.system.permissions.PubliclyVisiblePermissions
-import uk.ac.warwick.tabula.services.RelationshipService
-import uk.ac.warwick.tabula.data.model.MemberStudentRelationship
 
 class RelationshipFixtureCommand extends CommandInternal[MemberStudentRelationship] {
 	this: TransactionalComponent with SessionComponent=>

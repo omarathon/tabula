@@ -80,7 +80,7 @@ class MarkingCompletedTest extends TestBase with MarkingWorkflowWorld with Mocki
 	def firstMarkerFinished() {
 		withUser("cuslaj") { new CommandFixture {
 			val students = List("9876004", "0270954", "9170726")
-			command.markerFeedback = assignment.feedbacks.filter(f => students.contains(f.universityId)).map(_.firstMarkerFeedback)
+			command.markerFeedback = assignment.feedbacks.filter(f => students.contains(f._universityId)).map(_.firstMarkerFeedback)
 
 			command.onBind(null)
 
@@ -104,7 +104,7 @@ class MarkingCompletedTest extends TestBase with MarkingWorkflowWorld with Mocki
 		withUser("cuday") { new CommandFixture {
 			val students = List("0672088", "0672089")
 			assignment.feedbacks.foreach(addMarkerFeedback(_, SecondFeedback))
-			val feedbacks: mutable.Buffer[AssignmentFeedback] = assignment.feedbacks.filter(f => students.contains(f.universityId))
+			val feedbacks: mutable.Buffer[AssignmentFeedback] = assignment.feedbacks.filter(f => students.contains(f._universityId))
 			command.markerFeedback = feedbacks.map(_.secondMarkerFeedback)
 			setFirstMarkerFeedbackState(MarkingState.MarkingCompleted)
 			command.onBind(null)
@@ -139,7 +139,7 @@ class MarkingCompletedTest extends TestBase with MarkingWorkflowWorld with Mocki
 				setSecondMarkerFeedbackState(MarkingState.MarkingCompleted)
 
 				val students = List("9876004", "0270954", "9170726")
-				command.markerFeedback = assignment.feedbacks.filter(f => students.contains(f.universityId)).map(_.thirdMarkerFeedback)
+				command.markerFeedback = assignment.feedbacks.filter(f => students.contains(f._universityId)).map(_.thirdMarkerFeedback)
 
 				command.onBind(null)
 

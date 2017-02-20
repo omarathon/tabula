@@ -68,7 +68,8 @@ trait MarkingWorkflowWorld extends TestHelpers {
 			val newFeedback = new AssignmentFeedback
 			newFeedback.assignment = assignment
 			newFeedback.uploaderId = "cuslaj"
-			newFeedback.universityId = s.universityId
+			newFeedback._universityId = s._universityId
+			newFeedback.usercode = s.usercode
 			newFeedback.released = false
 			addMarkerFeedback(newFeedback,FirstFeedback)
 			newFeedback
@@ -108,8 +109,8 @@ trait MarkingWorkflowWorld extends TestHelpers {
 	def generateSubmission(assignment:Assignment, uniId: String, userCode: String) {
 		val submission = new Submission()
 		submission.assignment = assignment
-		submission.universityId = uniId
-		submission.userId = userCode
+		submission._universityId = uniId
+		submission.usercode = userCode
 		assignment.submissions.add(submission)
 	}
 

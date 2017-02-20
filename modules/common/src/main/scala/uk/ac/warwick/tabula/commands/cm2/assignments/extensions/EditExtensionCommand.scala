@@ -14,10 +14,11 @@ import uk.ac.warwick.tabula.{CurrentUser, DateFormats}
 import uk.ac.warwick.tabula.services.{AutowiringUserLookupComponent, UserLookupComponent}
 import uk.ac.warwick.tabula.data.Transactions._
 import uk.ac.warwick.tabula.validators.WithinYears
+import uk.ac.warwick.userlookup.User
 
 object EditExtensionCommand {
-	def apply(module: Module, assignment: Assignment, uniId: String, currentUser: CurrentUser, action: String) =
-		new EditExtensionCommandInternal(module, assignment, uniId, currentUser, action)
+	def apply(module: Module, assignment: Assignment, student: User, currentUser: CurrentUser, action: String) =
+		new EditExtensionCommandInternal(module, assignment, student, currentUser, action)
 			with ComposableCommand[Extension]
 			with EditExtensionCommandPermissions
 			with EditExtensionCommandDescription
@@ -29,19 +30,21 @@ object EditExtensionCommand {
 			with HibernateExtensionPersistenceComponent
 }
 
-class EditExtensionCommandInternal(val module: Module, val assignment: Assignment, val universityId: String, val submitter: CurrentUser, val action: String) extends CommandInternal[Extension]
+class EditExtensionCommandInternal(val module: Module, val assignment: Assignment, val student: User, val submitter: CurrentUser, val action: String) extends CommandInternal[Extension]
 		with EditExtensionCommandState with EditExtensionCommandValidation with TaskBenchmarking {
 
 	self: ExtensionPersistenceComponent with UserLookupComponent =>
 
-	val e: Option[Extension] = assignment.findExtension(universityId)
+	val e: Option[Extension] = assignment.findExtension(student.getUserId)
 	e match {
 		case Some(ext) =>
 			copyFrom(ext)
 			extension = ext
 			isNew = false
 		case None =>
-			extension = new Extension(universityId)
+			extension = new Extension
+			extension.usercode = student.getUserId
+			extension._universityId = student.getUserId
 			isNew = true
 	}
 
@@ -52,7 +55,7 @@ class EditExtensionCommandInternal(val module: Module, val assignment: Assignmen
 	}
 
 	def copyTo(extension: Extension): Unit = {
-		extension.userId = userLookup.getUserByWarwickUniId(universityId).getUserId
+		extension._universityId = student.getUserId
 		extension.assignment = assignment
 		extension.expiryDate = expiryDate
 		extension.rawState_=(state)
@@ -78,13 +81,13 @@ trait EditExtensionCommandState {
 
 	var isNew: Boolean = _
 
-	def universityId: String
+	def student: User
 	def assignment: Assignment
 	def module: Module
 	def submitter: CurrentUser
 	def action: String
 
-	@WithinYears(maxFuture = 3) @DateTimeFormat(pattern = DateFormats.DateTimePicker)
+	@WithinYears(maxFuture = 3) @DateTimeFormat(pattern = DateFormats.DateTimePickerPattern)
 	var expiryDate: DateTime =_
 	var reviewerComments: String =_
 	var state: ExtensionState = ExtensionState.Unreviewed
@@ -239,6 +242,7 @@ trait EditExtensionCommandDescription extends Describable[Extension] {
 	def describe(d: Description) {
 		d.assignment(assignment)
 		d.module(assignment.module)
-		d.studentIds(Seq(universityId))
+		d.studentIds(Option(student.getWarwickId).toSeq)
+		d.studentUsercodes(student.getUserId)
 	}
 }

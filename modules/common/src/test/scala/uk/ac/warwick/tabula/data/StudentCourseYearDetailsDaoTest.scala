@@ -2,8 +2,8 @@ package uk.ac.warwick.tabula.data
 
 import org.joda.time.DateTime
 import org.junit.Before
-import uk.ac.warwick.tabula.{AcademicYear, Fixtures, PersistenceTestBase}
 import uk.ac.warwick.tabula.data.model.{StudentCourseDetails, StudentCourseYearDetails, StudentCourseYearKey, StudentMember}
+import uk.ac.warwick.tabula.{AcademicYear, Fixtures, PersistenceTestBase}
 
 class StudentCourseYearDetailsDaoTest extends PersistenceTestBase {
 

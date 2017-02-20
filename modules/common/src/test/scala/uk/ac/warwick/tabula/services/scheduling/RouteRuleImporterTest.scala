@@ -3,7 +3,8 @@ package uk.ac.warwick.tabula.services.scheduling
 import org.junit.After
 import org.springframework.jdbc.datasource.embedded.{EmbeddedDatabase, EmbeddedDatabaseBuilder}
 import uk.ac.warwick.tabula.data.model.{Route, UpstreamModuleList}
-import uk.ac.warwick.tabula.services.{CourseAndRouteService, UpstreamModuleListService}
+import uk.ac.warwick.tabula.services.CourseAndRouteService
+import uk.ac.warwick.tabula.services.exams.grids.UpstreamModuleListService
 import uk.ac.warwick.tabula.{AcademicYear, Fixtures, Mockito, TestBase}
 
 import collection.JavaConverters._

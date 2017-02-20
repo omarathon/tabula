@@ -60,7 +60,7 @@ trait ModifyExtensionState {
 	val extension: Extension
 	val submitter: CurrentUser
 
-	@WithinYears(maxFuture = 3) @DateTimeFormat(pattern = DateFormats.DateTimePicker)
+	@WithinYears(maxFuture = 3) @DateTimeFormat(pattern = DateFormats.DateTimePickerPattern)
 	var expiryDate: DateTime = _
 	var reviewerComments: String = _
 	var state: ExtensionState = _
@@ -89,7 +89,8 @@ trait ModifyExtensionDescription extends Describable[Extension] {
 	def describe(d: Description) {
 		d.assignment(extension.assignment)
 		d.module(extension.assignment.module)
-		d.studentIds(Seq(extension.universityId))
+		d.studentIds(extension.universityId.toSeq)
+		d.studentUsercodes(extension.usercode)
 	}
 }
 

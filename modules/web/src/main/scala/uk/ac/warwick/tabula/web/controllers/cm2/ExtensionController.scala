@@ -20,8 +20,10 @@ import uk.ac.warwick.tabula.services.fileserver.{RenderableAttachment, Renderabl
 import uk.ac.warwick.tabula.services.{ProfileService, RelationshipService, UserLookupService}
 import uk.ac.warwick.tabula.web.Mav
 import uk.ac.warwick.tabula.web.views.JSONView
+import uk.ac.warwick.userlookup.User
 
-trait ExtensionServices {	var json: ObjectMapper = Wire[ObjectMapper]
+trait ExtensionServices {
+	var json: ObjectMapper = Wire[ObjectMapper]
 	var userLookup: UserLookupService = Wire[UserLookupService]
 	var relationshipService: RelationshipService = Wire[RelationshipService]
 	var profileService: ProfileService = Wire[ProfileService]
@@ -34,7 +36,8 @@ trait ExtensionServices {	var json: ObjectMapper = Wire[ObjectMapper]
 			def convertDateToMillis(date: Option[DateTime]) = date.map(_.getMillis.toString).orNull
 
 			Map(
-				"id" -> extension.universityId,
+				"id" -> extension.universityId.getOrElse(""),
+				"usercode" -> extension.usercode,
 				"status" -> extension.state.description,
 				"requestedExpiryDate" -> convertDateToString(extension.requestedExpiryDate),
 				"expiryDate" -> convertDateToString(extension.expiryDate),
@@ -100,7 +103,7 @@ class ExtensionController extends CourseworkController {
 		errors: Errors
 	): Mav = {
 		val detail = detailCommand.apply()
-		Mav(s"$urlPrefix/admin/extensions/detail",
+		Mav("cm2/admin/extensions/detail",
 			"detail" -> detail,
 			"modifyExtensionCommand" -> updateCommand,
 			"states" -> ExtensionState
@@ -165,7 +168,7 @@ class ListExtensionsForAssignmentController extends CourseworkController {
 	}
 }
 @Profile(Array("cm2Enabled")) @Controller
-@RequestMapping(Array("/${cm2.prefix}/admin/assignments/{assignment}/extensions/{universityId}"))
+@RequestMapping(Array("/${cm2.prefix}/admin/assignments/{assignment}/extensions/{student}"))
 class EditExtensionController extends CourseworkController with ExtensionServices {
 
 	type ExtensionsDetailCommand = Appliable[DisplayExtensionDetail] with DisplayExtensionState
@@ -174,32 +177,36 @@ class EditExtensionController extends CourseworkController with ExtensionService
 	validatesSelf[SelfValidating]
 
 	@ModelAttribute("extensionDetailCommand")
-	def detailCommand(@PathVariable assignment: Assignment, @PathVariable universityId: String) = DisplayExtensionCommand(mandatory(universityId),mandatory(assignment))
+	def detailCommand(@PathVariable assignment: Assignment, @PathVariable student: User) =
+		DisplayExtensionCommand(mandatory(student),mandatory(assignment))
 
 	@ModelAttribute("editExtensionCommand")
-	def editCommand(@PathVariable assignment: Assignment, @PathVariable universityId: String, @RequestParam(defaultValue = "") action: String) = EditExtensionCommand(assignment.module, assignment, universityId, user, action)
+	def editCommand(@PathVariable assignment: Assignment, @PathVariable student: User, @RequestParam(defaultValue = "") action: String) =
+		EditExtensionCommand(assignment.module, assignment, student, user, action)
 
 	@RequestMapping(method=Array(GET), path=Array("detail"))
 	def detail(
+		@PathVariable student: User,
 		@ModelAttribute("extensionDetailCommand") detailCommand: ExtensionsDetailCommand,
 		@ModelAttribute("editExtensionCommand") updateCommand: EditExtensionCommand,
 		errors: Errors
 	): Mav = {
 		val detail = detailCommand.apply()
-		val student = profileService.getMemberByUniversityId(updateCommand.universityId).getOrElse(None)
-		val studentContext = student match {
-			case Some(student: StudentMember) =>
+		val studentMember = profileService.getMemberByUser(student)
+		val studentContext = studentMember match {
+			case Some(s: StudentMember) =>
 				val relationships = relationshipService.allStudentRelationshipTypes.map { relationshipType =>
-					(relationshipType.description, relationshipService.findCurrentRelationships(relationshipType, student))
+					(relationshipType.description, relationshipService.findCurrentRelationships(relationshipType, s))
 				}.toMap.filter({case (relationshipType,relations) => relations.nonEmpty})
 				Map(
 					"relationships" -> relationships,
-					"course" -> student.mostSignificantCourseDetails
+					"course" -> s.mostSignificantCourseDetails
 				)
 			case _ => Map.empty
 		}
 		Mav(s"$urlPrefix/admin/extensions/assignmentdetail",
-			"student" -> student,
+			"usercode" -> student.getUserId,
+			"student" -> studentMember,
 			"studentContext" -> studentContext,
 			"detail" -> detail,
 			"modifyExtensionCommand" -> updateCommand,
@@ -214,13 +221,14 @@ class EditExtensionController extends CourseworkController with ExtensionService
 	@RequestMapping(method=Array(POST), path=Array("detail"))
 	def update(
 		@PathVariable assignment: Assignment,
+		@PathVariable user: User,
 		@ModelAttribute("extensionDetailCommand") detailCommand: ExtensionsDetailCommand,
 		@Valid @ModelAttribute("editExtensionCommand") updateCommand: EditExtensionCommand,
 		result: BindingResult,
 		errors: Errors
 	): Mav = {
 		if (errors.hasErrors) {
-			detail(detailCommand, updateCommand, errors)
+			detail(user, detailCommand, updateCommand, errors)
 		} else {
 			updateCommand.apply()
 			Mav(new JSONView(Map(
@@ -233,10 +241,10 @@ class EditExtensionController extends CourseworkController with ExtensionService
 	// view an extension (or request)
 	@RequestMapping(method=Array(GET))
 	def editExtension(
-		@ModelAttribute("editExtensionCommand") cmd: EditExtensionCommand, // with ModifyExtensionState,
+		@ModelAttribute("editExtensionCommand") cmd: EditExtensionCommand,
 		errors: Errors
 	): Mav = {
-		val student = profileService.getMemberByUniversityId(cmd.extension.universityId)
+		val student = cmd.extension.universityId.flatMap(uid => profileService.getMemberByUniversityId(uid))
 		val studentContext = student match {
 			case Some(student: StudentMember) =>
 				val relationships = relationshipService.allStudentRelationshipTypes.map { relationshipType =>
@@ -255,7 +263,7 @@ class EditExtensionController extends CourseworkController with ExtensionService
 			"assignment" -> cmd.extension.assignment,
 			"student" -> student,
 			"studentContext" -> studentContext,
-			"userFullName" -> userLookup.getUserByWarwickUniId(cmd.extension.universityId).getFullName,
+			"userFullName" -> userLookup.getUserByUserId(cmd.extension.usercode).getFullName,
 			"updateAction" -> cmd.UpdateApprovalAction,
 			"approvalAction" -> cmd.ApprovalAction,
 			"rejectionAction" -> cmd.RejectionAction,
@@ -264,6 +272,7 @@ class EditExtensionController extends CourseworkController with ExtensionService
 
 		model
 	}
+
 	@RequestMapping(method=Array(POST))
 	@ResponseBody
 	def persistExtension(

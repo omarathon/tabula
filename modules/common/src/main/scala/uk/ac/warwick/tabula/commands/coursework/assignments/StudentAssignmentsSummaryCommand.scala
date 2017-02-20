@@ -13,6 +13,7 @@ import uk.ac.warwick.tabula.helpers.DateTimeOrdering._
 object StudentAssignmentsSummaryCommand {
 
 	case class Result(
+		upcoming: Seq[EnhancedAssignment],
 		todo: Seq[EnhancedAssignment],
 		doing: Seq[EnhancedAssignment],
 		done: Seq[EnhancedAssignment]
@@ -40,7 +41,7 @@ class StudentAssignmentsSummaryCommandInternal(val student: MemberOrUser, val ac
 		val enrolledAssignments = assessmentMembershipService.getEnrolledAssignments(studentUser)
 
 		val done = benchmarkTask("getAssignmentsWithFeedback") {
-			assessmentService.getAssignmentsWithFeedback(student.universityId, academicYearOption).map(_.enhance(studentUser)).sortBy(enhancedAssignment =>
+			assessmentService.getAssignmentsWithFeedback(student.usercode, academicYearOption).map(_.enhance(studentUser)).sortBy(enhancedAssignment =>
 				if (enhancedAssignment.submission.nonEmpty) {
 					enhancedAssignment.submission.get.submittedDate
 				} else {
@@ -49,7 +50,7 @@ class StudentAssignmentsSummaryCommandInternal(val student: MemberOrUser, val ac
 			)
 		}
 		val doing = benchmarkTask("getAssignmentsWithSubmission") {
-			assessmentService.getAssignmentsWithSubmission(student.universityId, academicYearOption)
+			assessmentService.getAssignmentsWithSubmission(student.usercode, academicYearOption)
 				.filterNot(done.map(_.assignment).contains)
 				.map(_.enhance(studentUser))
 				.sortBy(enhancedAssignment =>
@@ -69,7 +70,16 @@ class StudentAssignmentsSummaryCommandInternal(val student: MemberOrUser, val ac
 			.map(_.enhance(studentUser))
 			.sortBy(_.submissionDeadline.getOrElse(new DateTime().plusYears(500))) // Sort open-ended assignments to the bottom
 
-		StudentAssignmentsSummaryCommand.Result(todo, doing, done)
+		val upcoming = enrolledAssignments
+			.filterNot(done.map(_.assignment).contains)
+			.filterNot(doing.map(_.assignment).contains)
+			.filterNot(todo.map(_.assignment).contains)
+			.filter(a => academicYearOption.isEmpty || academicYearOption.contains(a.academicYear))
+			.filter(a => a.isVisibleToStudents && a.collectSubmissions)
+			.map(_.enhance(studentUser))
+			.sortBy(_.submissionDeadline.getOrElse(new DateTime().plusYears(500))) // Sort open-ended assignments to the bottom
+
+		StudentAssignmentsSummaryCommand.Result(upcoming, todo, doing, done)
 	}
 
 }

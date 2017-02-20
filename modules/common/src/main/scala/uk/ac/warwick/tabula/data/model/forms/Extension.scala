@@ -27,11 +27,6 @@ class Extension extends GeneratedId with PermissionsTarget with ToEntityReferenc
 
 	type Entity = Extension
 
-	def this(universityId:String=null) {
-		this()
-		this.universityId = universityId
-	}
-
 	@ManyToOne(optional=false, cascade=Array(PERSIST,MERGE), fetch=FetchType.LAZY)
 	@JoinColumn(name="assignment_id")
 	var assignment:Assignment = _
@@ -39,17 +34,22 @@ class Extension extends GeneratedId with PermissionsTarget with ToEntityReferenc
 	def permissionsParents: Stream[Assignment] = Option(assignment).toStream
 
 	@NotNull
-	var userId: String = _
+	@Column(name = "userId")
+	var usercode: String = _
 
-	@NotNull
-	var universityId: String = _
+	@Column(name = "universityId")
+	var _universityId: String = _
 
-	def isForUser(user: User): Boolean = isForUser(user.getWarwickId, user.getUserId)
-	def isForUser(theUniversityId: String, theUsercode: String): Boolean = universityId == theUniversityId || userId == theUsercode
+	def universityId = Option(_universityId)
+
+	def studentIdentifier = universityId.getOrElse(usercode)
+
+	def isForUser(user: User): Boolean = isForUser(user.getUserId)
+	def isForUser(theUsercode: String): Boolean = usercode == theUsercode
 
 	// TODO should there be a single def that returns the expiry date for approved/manual extensions, and requested expiry date otherwise?
 	@Type(`type` = "org.jadira.usertype.dateandtime.joda.PersistentDateTime")
-	@DateTimeFormat(pattern = DateFormats.DateTimePicker)
+	@DateTimeFormat(pattern = DateFormats.DateTimePickerPattern)
 	@Column(name = "requestedExpiryDate")
 	private var _requestedExpiryDate: DateTime = _
 	def requestedExpiryDate: Option[DateTime] = Option(_requestedExpiryDate)
@@ -147,7 +147,7 @@ class Extension extends GeneratedId with PermissionsTarget with ToEntityReferenc
 
 	// calculate deadline only if not late (return None for late returns)
 	def feedbackDeadline: Option[DateTime] = assignment
-		.findSubmission(universityId)
+		.findSubmission(usercode)
 		.flatMap(s => expiryDate.map(_.isAfter(s.submittedDate)))
 		.collect {
 			case(true) => feedbackDueDate

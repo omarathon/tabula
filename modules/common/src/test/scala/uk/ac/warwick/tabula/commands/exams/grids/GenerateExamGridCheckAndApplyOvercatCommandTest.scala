@@ -5,6 +5,7 @@ import uk.ac.warwick.tabula.commands.Appliable
 import uk.ac.warwick.tabula.data.model._
 import uk.ac.warwick.tabula.data.{StudentCourseYearDetailsDao, StudentCourseYearDetailsDaoComponent}
 import uk.ac.warwick.tabula.services._
+import uk.ac.warwick.tabula.services.exams.grids.{NormalCATSLoadService, NormalCATSLoadServiceComponent, UpstreamRouteRuleService, UpstreamRouteRuleServiceComponent}
 
 class GenerateExamGridCheckAndApplyOvercatCommandTest extends TestBase with Mockito {
 
@@ -26,14 +27,15 @@ class GenerateExamGridCheckAndApplyOvercatCommandTest extends TestBase with Mock
 
 	trait StateFixture {
 		val state = new GenerateExamGridCheckAndApplyOvercatCommandState with UpstreamRouteRuleServiceComponent
-			with ModuleRegistrationServiceComponent {
+			with ModuleRegistrationServiceComponent with NormalCATSLoadServiceComponent {
 			override val department: Department = thisDepartment
 			override val academicYear: AcademicYear = thisAcademicYear
 			override val upstreamRouteRuleService: UpstreamRouteRuleService = smartMock[UpstreamRouteRuleService]
 			override val moduleRegistrationService: ModuleRegistrationService = smartMock[ModuleRegistrationService]
+			override val normalCATSLoadService: NormalCATSLoadService = smartMock[NormalCATSLoadService]
 		}
 		// Just use the default normal load
-		state.upstreamRouteRuleService.findNormalLoad(thisRoute, thisAcademicYear, thisYearOfStudy) returns None
+		state.normalCATSLoadService.find(thisRoute, thisAcademicYear, thisYearOfStudy) returns None
 		// Have to have at least 1 route rule as otherwise it won't apply the change
 		val routeRule = new UpstreamRouteRule(None, null, null)
 		state.upstreamRouteRuleService.list(thisRoute, thisAcademicYear, thisYearOfStudy) returns Seq(routeRule)
@@ -160,13 +162,15 @@ class GenerateExamGridCheckAndApplyOvercatCommandTest extends TestBase with Mock
 
 		val cmd = new GenerateExamGridCheckAndApplyOvercatCommandInternal(null, thisAcademicYear, NoCurrentUser())
 			with ModuleRegistrationServiceComponent with UpstreamRouteRuleServiceComponent
-			with GenerateExamGridCheckAndApplyOvercatCommandState	with StudentCourseYearDetailsDaoComponent {
+			with GenerateExamGridCheckAndApplyOvercatCommandState	with StudentCourseYearDetailsDaoComponent
+			with NormalCATSLoadServiceComponent {
 			override val moduleRegistrationService: ModuleRegistrationService = smartMock[ModuleRegistrationService]
 			override val studentCourseYearDetailsDao: StudentCourseYearDetailsDao = smartMock[StudentCourseYearDetailsDao]
 			override val upstreamRouteRuleService: UpstreamRouteRuleService = smartMock[UpstreamRouteRuleService]
+			override val normalCATSLoadService: NormalCATSLoadService = smartMock[NormalCATSLoadService]
 		}
 		// Just use the default normal load
-		cmd.upstreamRouteRuleService.findNormalLoad(thisRoute, thisAcademicYear, thisYearOfStudy) returns None
+		cmd.normalCATSLoadService.find(thisRoute, thisAcademicYear, thisYearOfStudy) returns None
 		// Have to have at least 1 route rule as otherwise it won't apply the change
 		val routeRule = new UpstreamRouteRule(None, null, null)
 		cmd.upstreamRouteRuleService.list(thisRoute, thisAcademicYear, thisYearOfStudy) returns Seq(routeRule)

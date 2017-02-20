@@ -24,7 +24,7 @@
 <a id="submittop"></a>
 
 <#if feedback??>
-	<h2>Feedback for ${feedback.universityId}</h2>
+	<h2>Feedback for ${feedback.studentIdentifier}</h2>
 	<#include "_assignment_feedbackdownload.ftl" />
 	<#if features.submissions>
 		<#if submission??>

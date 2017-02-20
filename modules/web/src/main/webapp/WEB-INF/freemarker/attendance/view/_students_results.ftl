@@ -12,15 +12,15 @@
 	<#if (filterCommand.sortOrder?size > 0)>
 		<#assign sortOrderString><#if filterCommand.sortOrder?first.ascending>asc<#else>desc</#if>(${filterCommand.sortOrder?first.propertyName})</#assign>
 	</#if>
-	<#assign sendToSitsUrl><@routes.attendance.viewReport department academicYear.startYear?c filterQuery /></#assign>
+	<#assign sendToSitsUrl><@routes.attendance.viewReport department academicYear filterQuery /></#assign>
 	<div class="studentResults" data-sits-url="${sendToSitsUrl}">
-		<#assign returnTo><@routes.attendance.viewStudents department academicYear.startYear?c filterQuery filterCommand.page sortOrderString /></#assign>
+		<#assign returnTo><@routes.attendance.viewStudents department academicYear filterQuery filterCommand.page sortOrderString /></#assign>
 		<#assign returnTo = returnTo?url />
 		<#if (filterResult.totalResults > 0)>
 			<div class="clearfix fix-header pad-when-fixed">
 				<#if (filterResult.totalResults > filterCommand.studentsPerPage)>
 					<div class="pull-right">
-						<@attendance_macros.pagination filterCommand.page filterResult.totalResults filterCommand.studentsPerPage "pagination-small" />
+						<@attendance_macros.pagination filterCommand.page filterResult.totalResults filterCommand.studentsPerPage />
 					</div>
 				</#if>
 
@@ -29,7 +29,7 @@
 				<p class="not-relative">Results ${startIndex + 1} - ${endIndex} of ${filterResult.totalResults}</p>
 			</div>
 
-			<@attendance_macros.scrollablePointsTable
+			<@attendance_macros.id7ScrollablePointsTable
 				command=filterCommand
 				filterResult=filterResult
 				visiblePeriods=visiblePeriods
@@ -37,33 +37,32 @@
 				department=department
 			; result>
 				<td class="unrecorded">
-					<a href="<@routes.attendance.viewSingleStudent department academicYear.startYear?c result.student />" title="<@attendance_macros.checkpointTotalTitle result.checkpointTotal />" class="use-tooltip">
-						<span class="badge badge-<#if (result.checkpointTotal.unrecorded > 2)>important<#elseif (result.checkpointTotal.unrecorded > 0)>warning<#else>success</#if>">
+					<a href="<@routes.attendance.viewSingleStudent department academicYear result.student />" title="<@attendance_macros.checkpointTotalTitle result.checkpointTotal />" class="use-tooltip">
+						<span class="<#if (result.checkpointTotal.unrecorded > 2)>badge progress-bar-danger<#elseif (result.checkpointTotal.unrecorded > 0)>badge progress-bar-warning</#if>">
 							${result.checkpointTotal.unrecorded}
 						</span>
 					</a>
 				</td>
 				<td class="missed">
-					<a href="<@routes.attendance.viewSingleStudent department academicYear.startYear?c result.student />" title="<@attendance_macros.checkpointTotalTitle result.checkpointTotal />" class="use-tooltip">
-						<span class="badge badge-<#if (result.checkpointTotal.unauthorised > 2)>important<#elseif (result.checkpointTotal.unauthorised > 0)>warning<#else>success</#if>">
+					<a href="<@routes.attendance.viewSingleStudent department academicYear result.student />" title="<@attendance_macros.checkpointTotalTitle result.checkpointTotal />" class="use-tooltip">
+						<span class="<#if (result.checkpointTotal.unauthorised > 2)>badge progress-bar-danger<#elseif (result.checkpointTotal.unauthorised > 0)>badge progress-bar-warning</#if>">
 							${result.checkpointTotal.unauthorised}
 						</span>
 					</a>
 				</td>
 				<td class="record">
-					<#assign record_url><@routes.attendance.viewRecordStudent department academicYear.startYear?c result.student returnTo /></#assign>
+					<#assign record_url><@routes.attendance.viewRecordStudent department academicYear result.student returnTo /></#assign>
 					<@fmt.permission_button
 						permission='MonitoringPoints.Record'
 						scope=result.student
 						action_descr='record monitoring points'
-						classes='btn btn-primary btn-mini'
+						classes='btn btn-primary btn-xs'
 						href=record_url
-						tooltip='Record'
 					>
-						<i class="icon-pencil icon-fixed-width late"></i>
+						Record
 					</@fmt.permission_button>
 				</td>
-			</@attendance_macros.scrollablePointsTable>
+			</@attendance_macros.id7ScrollablePointsTable>
 
 			<#if !student_table_script_included??>
 				<script type="text/javascript">
@@ -73,15 +72,15 @@
 									.find('th.sortable').addClass('header')
 									.on('click', function(e) {
 										var $th = $(this)
-												, sortDescending = function(){
-													$('#sortOrder').val('desc(' + $th.data('field') + ')');
-													$th.closest('thead').find('th').removeClass('headerSortUp').removeClass('headerSortDown');
-													$th.addClass('headerSortUp');
-												}, sortAscending = function(){
-													$('#sortOrder').val('asc(' + $th.data('field') + ')');
-													$th.closest('thead').find('th').removeClass('headerSortUp').removeClass('headerSortDown');
-													$th.addClass('headerSortDown');
-												};
+											, sortDescending = function(){
+												$('#sortOrder').val('desc(' + $th.data('field') + ')');
+												$th.closest('thead').find('th').removeClass('headerSortUp').removeClass('headerSortDown');
+												$th.addClass('headerSortUp');
+											}, sortAscending = function(){
+												$('#sortOrder').val('asc(' + $th.data('field') + ')');
+												$th.closest('thead').find('th').removeClass('headerSortUp').removeClass('headerSortDown');
+												$th.addClass('headerSortDown');
+											};
 
 										if ($th.hasClass('headerSortUp')) {
 											sortAscending();
@@ -104,7 +103,7 @@
 									});
 						});
 						$(window).on('load', function(){
-							Attendance.scrollablePointsTableSetup();
+							GlobalScripts.scrollableTableSetup();
 						});
 					})(jQuery);
 				</script>
@@ -117,7 +116,7 @@
 						<@fmt.bulk_email_students students=filterResult.students />
 					</div>
 				<#else>
-					<@attendance_macros.pagination filterCommand.page filterResult.totalResults filterCommand.studentsPerPage "pagination-small" />
+					<@attendance_macros.pagination filterCommand.page filterResult.totalResults filterCommand.studentsPerPage />
 				</#if>
 			</div>
 
@@ -146,7 +145,7 @@
 	// Enable any freshly loaded popovers
 	jQuery('.use-popover').tabulaPopover({
 		trigger: 'click',
-		container: '#container'
+		container: 'body'
 	});
 
 	jQuery('a.ajax-modal').ajaxModalLink();

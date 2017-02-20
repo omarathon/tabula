@@ -1,20 +1,20 @@
 package uk.ac.warwick.tabula.commands.scheduling.imports
 
-import java.sql.{Date, ResultSetMetaData, ResultSet}
+import java.sql.{Date, ResultSet, ResultSetMetaData}
 
-import org.joda.time.{DateTimeConstants, LocalDate, DateTime}
+import org.joda.time.{DateTime, DateTimeConstants, LocalDate}
 import org.springframework.beans.BeanWrapperImpl
 import org.springframework.transaction.annotation.Transactional
+import uk.ac.warwick.tabula.JavaImports._
 import uk.ac.warwick.tabula.data.model.Gender.Male
 import uk.ac.warwick.tabula.data.model.MemberUserType.Student
-import uk.ac.warwick.tabula.helpers.Logging
-import uk.ac.warwick.tabula.{TestBase, Mockito}
 import uk.ac.warwick.tabula.data.model._
-import uk.ac.warwick.tabula.data.{ModeOfAttendanceDao, StudentCourseYearDetailsDao, StudentCourseDetailsDao, MemberDao}
-import uk.ac.warwick.tabula.helpers.scheduling.{SitsStudentRow, ImportCommandFactory}
+import uk.ac.warwick.tabula.data.{MemberDao, ModeOfAttendanceDao, StudentCourseDetailsDao, StudentCourseYearDetailsDao}
+import uk.ac.warwick.tabula.helpers.Logging
+import uk.ac.warwick.tabula.helpers.scheduling.{ImportCommandFactory, SitsStudentRow}
 import uk.ac.warwick.tabula.services._
 import uk.ac.warwick.tabula.services.scheduling._
-import uk.ac.warwick.tabula.JavaImports._
+import uk.ac.warwick.tabula.{Mockito, TestBase}
 import uk.ac.warwick.userlookup.AnonymousUser
 
 trait ComponentMixins extends Mockito

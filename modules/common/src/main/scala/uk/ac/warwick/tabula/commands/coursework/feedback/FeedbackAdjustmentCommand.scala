@@ -49,7 +49,7 @@ object AssignmentFeedbackAdjustmentCommand {
 			with AutowiringProfileServiceComponent
 			with QueuesFeedbackForSits
 			with SubmissionState {
-				override val submission: Option[Submission] = thisAssignment.findSubmission(student.getWarwickId)
+				override val submission: Option[Submission] = thisAssignment.findSubmission(student.getUserId)
 				override val assignment: Assignment = thisAssignment
 			}
 }
@@ -59,7 +59,7 @@ class FeedbackAdjustmentCommandInternal(val assessment: Assessment, val student:
 
 	self: FeedbackServiceComponent with ZipServiceComponent with QueuesFeedbackForSits =>
 
-	val feedback: Feedback = assessment.findFeedback(student.getWarwickId)
+	val feedback: Feedback = assessment.findFeedback(student.getUserId)
 		.getOrElse(throw new ItemNotFoundException("Can't adjust for non-existent feedback"))
 
 	lazy val canBeUploadedToSits: Boolean = assessment.assessmentGroups.asScala.map(_.toUpstreamAssessmentGroup(assessment.academicYear)).exists(_.exists(_.membersIncludes(student)))
@@ -168,7 +168,8 @@ trait FeedbackAdjustmentCommandDescription extends Describable[Feedback] {
 	self: FeedbackAdjustmentCommandState =>
 	def describe(d: Description) {
 		d.assessment(assessment)
-		d.studentIds(Seq(student.getUserId))
+		d.studentIds(Option(student.getWarwickId).toSeq)
+		d.studentUsercodes(student.getUserId)
 		d.property("adjustmentReason", reason)
 		d.property("adjustmentComments", comments)
 	}

@@ -22,6 +22,6 @@ abstract class SubmissionNotification
 		"submissionDate" -> dateTimeFormatter.print(submission.submittedDate),
 		"assignment" -> assignment,
 		"module" -> module,
-		"user" -> userLookup.getUserByWarwickUniId(submission.universityId))
+		"user" -> userLookup.getUserByUserId(submission.usercode))
 	)
 }

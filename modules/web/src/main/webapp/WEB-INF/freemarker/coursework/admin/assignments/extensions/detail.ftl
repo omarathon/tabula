@@ -14,9 +14,9 @@
 
 <#escape x as x?html>
 	<div class="content extension-detail">
-		<#assign actionUrl><@routes.coursework.extensiondetail assignment universityId /></#assign>
+		<#assign actionUrl><@routes.coursework.extensiondetail assignment usercode /></#assign>
 		<@f.form method="post" enctype="multipart/form-data" action=actionUrl commandName="modifyExtensionCommand" cssClass="form-horizontal double-submit-protection">
-			<@f.input type="hidden" path="universityId" value="${universityId}" />
+
 			<input type="hidden" name="closeDate" class="startDateTime" value="${assignment.closeDate}" />
 
 			<#if extension.awaitingReview>
@@ -69,7 +69,7 @@
 					<ul>
 						<#list extension.attachments as attachment>
 							<li>
-								<a href="<@routes.coursework.extensionreviewattachment assignment=assignment userid=universityId filename=attachment.name />">
+								<a href="<@routes.coursework.extensionreviewattachment assignment=assignment userid=usercode filename=attachment.name />">
 								${attachment.name}
 								</a>
 							</li>
@@ -79,7 +79,7 @@
 			</#if>
 
 			<details>
-				<summary>About this student (${universityId})</summary>
+				<summary>About this student (${studentIdentifier})</summary>
 				<dl class="unstyled">
 					<#if (studentContext.course)?has_content>
 						<#assign c = studentContext.course />

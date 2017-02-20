@@ -6,8 +6,9 @@ import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.stereotype.Controller
 import org.springframework.validation.Errors
 import org.springframework.web.bind.annotation.{ModelAttribute, PathVariable, RequestMapping, RequestParam}
-import uk.ac.warwick.tabula.commands.attendance.note.{AttendanceNoteAttachmentCommand, BulkAttendanceNoteCommand, EditAttendanceNoteCommand}
+import uk.ac.warwick.tabula.JavaImports._
 import uk.ac.warwick.tabula.attendance.web.Routes
+import uk.ac.warwick.tabula.commands.attendance.note.{AttendanceNoteAttachmentCommand, BulkAttendanceNoteCommand, EditAttendanceNoteCommand}
 import uk.ac.warwick.tabula.commands.{Appliable, PopulateOnForm, SelfValidating}
 import uk.ac.warwick.tabula.data.model.attendance.{AttendanceMonitoringNote, AttendanceMonitoringPoint}
 import uk.ac.warwick.tabula.data.model.{AbsenceType, StudentMember}
@@ -18,6 +19,8 @@ import uk.ac.warwick.tabula.services.fileserver.RenderableFile
 import uk.ac.warwick.tabula.web.Mav
 import uk.ac.warwick.tabula.{AcademicYear, ItemNotFoundException}
 import uk.ac.warwick.tabula.JavaImports._
+import scala.collection.JavaConverters._
+
 import scala.collection.JavaConverters._
 
 @Controller

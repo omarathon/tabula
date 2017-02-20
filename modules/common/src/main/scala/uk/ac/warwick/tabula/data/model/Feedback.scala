@@ -87,11 +87,6 @@ trait AssessmentFeedback {
 @DiscriminatorColumn(name = "discriminator", discriminatorType = DiscriminatorType.STRING)
 abstract class Feedback extends GeneratedId with FeedbackAttachments with PermissionsTarget with FormattedHtml with AssessmentFeedback with ToEntityReference {
 
-	def this(universityId: String) {
-		this()
-		this.universityId = universityId
-	}
-
 	var uploaderId: String = _
 
 	@Column(name = "uploaded_date")
@@ -101,7 +96,16 @@ abstract class Feedback extends GeneratedId with FeedbackAttachments with Permis
 	@NotNull
 	var updatedDate: DateTime = new DateTime
 
-	var universityId: String = _
+	@Column(name = "universityId")
+	var _universityId: String = _
+
+	def universityId = Option(_universityId)
+
+	def studentIdentifier = universityId.getOrElse(usercode)
+
+	// TODO - ADD Not null constraint after bulk populating usercode @NotNull
+	@Column(name = "userId")
+	var usercode: String = _
 
 	var released: JBoolean = false
 

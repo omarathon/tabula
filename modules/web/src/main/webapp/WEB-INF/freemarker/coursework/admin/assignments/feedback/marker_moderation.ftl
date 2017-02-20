@@ -17,7 +17,7 @@
 		<#include "_moderation_summary.ftl">
 	<#else>
 		<#assign submit_url>
-			<@routes.coursework.markerModerationform assignment=assignment studentid=command.student.warwickId! marker=marker />
+			<@routes.coursework.markerModerationform assignment=assignment studentid=command.student.userId marker=marker />
 		</#assign>
 		<@f.form cssClass="form-horizontal double-submit-protection" method="post" enctype="multipart/form-data"
 			commandName="command" action="${submit_url}">
@@ -59,7 +59,7 @@
 					<@form.row>
 						<#if isGradeValidation>
 							<#assign generateUrl><@routes.coursework.generateGradesForMarks command.assignment /></#assign>
-							<@courses_macros.autoGradeOnline "grade" "Suggested Grade" "mark" command.student.warwickId!"" generateUrl />
+							<@courses_macros.autoGradeOnline "grade" "Suggested Grade" "mark" command.student.userId"" generateUrl />
 						<#else>
 							<@form.label path="grade">Suggested Grade</@form.label>
 							<@form.field>
