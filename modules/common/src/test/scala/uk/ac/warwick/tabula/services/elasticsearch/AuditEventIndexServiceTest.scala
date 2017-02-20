@@ -80,7 +80,7 @@ class AuditEventIndexServiceTest extends PersistenceTestBase with Mockito with T
 		val stopwatch = new StopWatch
 
 		val jsonData = Map(
-			"students" -> Array("0123456", "0199999")
+			"students" -> Array("jeb", "joe")
 		)
 		val jsonDataString: String = json.writeValueAsString(jsonData)
 
@@ -129,7 +129,7 @@ class AuditEventIndexServiceTest extends PersistenceTestBase with Mockito with T
 			client.execute { search in indexName / indexType sort ( field sort "eventDate" order SortOrder.DESC ) limit max }
 
 		def resultsForStudent(user: User): Future[RichSearchResponse] =
-			client.execute { search in indexName / indexType query termQuery("students", user.getWarwickId) }
+			client.execute { search in indexName / indexType query termQuery("students", user.getUserId) }
 
 		listRecent(1000).futureValue.hits.length should be (1000)
 

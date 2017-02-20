@@ -48,11 +48,11 @@ class PublishFeedbackCommandInternal(val module: Module, val assignment: Assignm
 
 	def applyInternal(): PublishFeedbackResults = {
 
-		val allResults = feedbackToRelease.map {case(studentId, user, feedback) =>
+		val allResults = feedbackToRelease.map { case(usercode, user, feedback) =>
 			feedback.released = true
 			feedback.releasedDate = new DateTime
 			if (sendToSits)	queueFeedback(feedback, submitter, gradeGenerator)
-			generateNotification(studentId, user, feedback)
+			generateNotification(usercode, user, feedback)
 		}
 
 		allResults.foldLeft(PublishFeedbackResults()) { (acc, result) =>
@@ -64,14 +64,14 @@ class PublishFeedbackCommandInternal(val module: Module, val assignment: Assignm
 			}
 	}
 
-	private def generateNotification(id: String, user: User, feedback: Feedback) = {
+	private def generateNotification(usercode: String, user: User, feedback: Feedback) = {
 		feedback match {
 			case assignmentFeedback: AssignmentFeedback =>
 				if (user.isFoundUser) {
 					val email = user.getEmail
 					if (email.hasText) {
 						val n = Notification.init(new FeedbackPublishedNotification, submitter.apparentUser, Seq(assignmentFeedback), assignmentFeedback.assignment)
-						n.recipientUniversityId = user.getWarwickId
+						n.recipientUniversityId = user.getUserId
 						PublishFeedbackResults(
 							notifications = Seq(n)
 						)
@@ -82,7 +82,7 @@ class PublishFeedbackCommandInternal(val module: Module, val assignment: Assignm
 					}
 				} else {
 					PublishFeedbackResults(
-						missingUsers = Seq(PublishFeedbackCommand.MissingUser(id))
+						missingUsers = Seq(PublishFeedbackCommand.MissingUser(usercode))
 					)
 				}
 			case _ => PublishFeedbackResults()
@@ -128,9 +128,9 @@ trait PublishFeedbackCommandState {
 	var sendToSits: Boolean = false
 
 	lazy val feedbackToRelease: Seq[(String, User, Feedback)] = for {
-		(studentId, user) <- feedbackService.getUsersForFeedback(assignment)
-		feedback <- assignment.fullFeedback.find(_.universityId == studentId)
-	} yield (studentId, user, feedback)
+		(usercode, user) <- feedbackService.getUsersForFeedback(assignment)
+		feedback <- assignment.fullFeedback.find(_.usercode == usercode)
+	} yield (usercode, user, feedback)
 
 
 	// validation done even when showing initial form.
@@ -180,7 +180,9 @@ trait PublishFeedbackDescription extends Describable[PublishFeedbackCommand.Publ
 	self: PublishFeedbackCommandState with FeedbackServiceComponent =>
 
 	override def describe(d: Description) {
+		val students = feedbackToRelease map { case(_, user, _) => user }
 		d.assignment(assignment)
-		.studentIds(feedbackService.getUsersForFeedback(assignment) map { case(userId, user) => user.getWarwickId })
+		 .studentIds(students.flatMap(m => Option(m.getWarwickId)))
+		 .studentUsercodes(students.map(_.getUserId))
 	}
 }

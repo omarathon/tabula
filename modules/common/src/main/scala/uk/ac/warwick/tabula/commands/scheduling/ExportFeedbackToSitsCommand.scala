@@ -66,7 +66,7 @@ class ExportFeedbackToSitsCommand extends CommandInternal[Seq[FeedbackForSits]] 
 	def uploadFeedbackToSits(feedbackToLoad: FeedbackForSits): FeedbackForSits = {
 		val feedback = feedbackToLoad.feedback
 		val feedbackId = feedback.id
-		val studentId = feedback.universityId
+		val studentId = feedback.studentIdentifier
 
 		//  update - expecting to update one row
 		val expectedRowCount = exportFeedbackToSitsService.exportToSits(feedbackToLoad)

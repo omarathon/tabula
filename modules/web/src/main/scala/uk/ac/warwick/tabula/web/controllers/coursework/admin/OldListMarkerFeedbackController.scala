@@ -51,7 +51,7 @@ class OldListMarkerFeedbackController extends OldCourseworkController {
 				"secondMarkerRoleName" -> assignment.markingWorkflow.secondMarkerRoleName,
 				"thirdMarkerRoleName" -> assignment.markingWorkflow.thirdMarkerRoleName,
 				"onlineMarkingUrls" -> feedbackItems.map{ items =>
-					items.student.getUserId -> assignment.markingWorkflow.courseworkMarkingUrl(assignment, marker, items.student.getWarwickId)
+					items.student.getUserId -> assignment.markingWorkflow.courseworkMarkingUrl(assignment, marker, items.student.getUserId)
 				}.toMap,
 				"marker" -> marker,
 				"unsubmittedStudents" -> unsubmittedStudents,

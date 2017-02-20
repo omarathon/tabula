@@ -73,15 +73,15 @@ class ModifyAssignmentCommandTest extends TestBase with Mockito with FunctionalC
 		val extension2 = new Extension
 		val sometime: DateTime = new DateTime().minusWeeks(1)
 
-		extension1.universityId = "1234567"
-		extension1.userId = "custard"
+		extension1._universityId = "1234567"
+		extension1.usercode = "custard"
 		extension1.requestedOn = sometime
 		extension1.requestedExpiryDate = sometime.plusWeeks(8)
 		extension1.reason = "Truculence."
 		extension1.assignment = assignment
 
-		extension2.universityId = "7654321"
-		extension2.userId = "swotty"
+		extension2._universityId = "7654321"
+		extension2.usercode = "swotty"
 		extension2.requestedOn = sometime
 		extension2.requestedExpiryDate = sometime.plusWeeks(8)
 		extension2.assignment = assignment

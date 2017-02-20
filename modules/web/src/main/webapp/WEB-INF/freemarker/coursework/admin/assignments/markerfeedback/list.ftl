@@ -35,12 +35,14 @@
 
 				<#if assignment.module.adminDepartment.showStudentName>
 					<td class="student-col toggle-cell"><h6 class="toggle-icon">${item.student.firstName}</h6></td>
-					<td class="student-col toggle-cell"><h6>${item.student.lastName} <@pl.profile_link item.student.warwickId! /></h6></td>
+					<td class="student-col toggle-cell"><h6>${item.student.lastName} <#if item.student.warwickId??><@pl.profile_link item.student.warwickId /><#else><@pl.profile_link item.student.userId /></#if></h6></td>
 					<#assign toggleIcon = "" />
 				<#else>
 					<#assign toggleIcon = "toggle-icon" />
 				</#if>
-				<td class="student-col toggle-cell"><h6 class="${toggleIcon}">${item.student.warwickId!}</h6></td>
+				<td class="student-col toggle-cell"><h6 class="${toggleIcon}">
+					<#if item.student.warwickId??>${item.student.warwickId}<#else>${item.student.userId}</#if>
+				</h6></td>
 
 				<#if isModeration && item.previousFeedback??>
 					<#local previousFeedback = item.previousFeedback />
@@ -100,12 +102,12 @@
 				<td class="check-col"></td>
 				<#if assignment.module.adminDepartment.showStudentName>
 					<td class="student-col"><h6 class="toggle-icon">${u.firstName}</h6></td>
-					<td class="student-col"><h6>${u.lastName} <@pl.profile_link u.warwickId! /></h6></td>
+					<td class="student-col"><h6>${u.lastName} <#if u.warwickId??><@pl.profile_link u.warwickId /><#else><@pl.profile_link u.userId /></#if></h6></td>
 					<#assign toggleIcon = "" />
 				<#else>
 					<#assign toggleIcon = "toggle-icon" />
 				</#if>
-				<td class="student-col"><h6 class="${toggleIcon}">${u.warwickId!}</h6></td>
+				<td class="student-col"><h6 class="${toggleIcon}"><#if u.warwickId??>${u.warwickId}<#else>${u.userId}</#if></h6></td>
 				<#if isModeration>
 					<td></td>
 					<td></td>

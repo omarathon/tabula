@@ -53,9 +53,9 @@ class ReleaseForMarkingNotifiesTest extends TestBase with Mockito {
 		}
 
 		notifications.size should be(2)
-		notifications(0).recipients should contain(marker2)
-		notifications(0).entities should contain(mf3)
-		notifications(0).entities should contain(mf4)
+		notifications.head.recipients should contain(marker2)
+		notifications.head.entities should contain(mf3)
+		notifications.head.entities should contain(mf4)
 		notifications(1).recipients should contain(marker1)
 		notifications(1).entities should contain(mf1)
 		notifications(1).entities should contain(mf2)

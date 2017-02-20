@@ -143,40 +143,42 @@
 							</tr>
 							<#if marksToDisplay??>
 								<#list marksToDisplay as markItem>
-									<tr class="mark-row">
-										<#if seatNumberMap?has_content>
-											<#if mapGet(seatNumberMap, markItem.universityId)??>
-												<td>${mapGet(seatNumberMap, markItem.universityId)}</td>
-											<#else>
-												<td></td>
+									<#if markItem.universityId??>
+										<tr class="mark-row">
+											<#if seatNumberMap?has_content>
+												<#if mapGet(seatNumberMap, markItem.usercode)??>
+													<td>${mapGet(seatNumberMap, markItem.usercode)}</td>
+												<#else>
+													<td></td>
+												</#if>
 											</#if>
-										</#if>
-										<td>
-											<div class="input-prepend input-append">
-												<span class="add-on"><i class="icon-user"></i></span>
-												<input class="universityId span2" value="${markItem.universityId}" name="marks[${markItem_index}].universityId" type="text" readonly="readonly" />
-											</div>
-										</td>
-										<#if studentMarkerMap?has_content>
-											<#if mapGet(studentMarkerMap, markItem.universityId)??>
-												<td>${mapGet(studentMarkerMap, markItem.universityId)}</td>
-											<#else>
-												<td></td>
+											<td>
+												<div class="input-prepend input-append">
+													<span class="add-on"><i class="icon-user"></i></span>
+													<input class="universityId span2" value="${markItem.universityId}" name="marks[${markItem_index}].universityId" type="text" readonly="readonly" />
+												</div>
+											</td>
+											<#if studentMarkerMap?has_content>
+												<#if mapGet(studentMarkerMap, markItem.usercode)??>
+													<td>${mapGet(studentMarkerMap, markItem.usercode)}</td>
+												<#else>
+													<td></td>
+												</#if>
 											</#if>
-										</#if>
-										<td>
-											<div class="input-append">
-												<input name="marks[${markItem_index}].actualMark" class="mark" value="<#if markItem.actualMark??>${markItem.actualMark}</#if>" type="text" />
-												<span class="add-on">%</span>
-											</div>
-										</td>
-										<td>
-											<input name="marks[${markItem_index}].actualGrade" class="grade input-small" value="<#if markItem.actualGrade??>${markItem.actualGrade}</#if>" type="text" />
-											<#if isGradeValidation>
-												<select name="marks[${markItem_index}].actualGrade" class="input-small" disabled style="display:none;"></select>
-											</#if>
-										</td>
-									</tr>
+											<td>
+												<div class="input-append">
+													<input name="marks[${markItem_index}].actualMark" class="mark" value="<#if markItem.actualMark??>${markItem.actualMark}</#if>" type="text" />
+													<span class="add-on">%</span>
+												</div>
+											</td>
+											<td>
+												<input name="marks[${markItem_index}].actualGrade" class="grade input-small" value="<#if markItem.actualGrade??>${markItem.actualGrade}</#if>" type="text" />
+												<#if isGradeValidation>
+													<select name="marks[${markItem_index}].actualGrade" class="input-small" disabled style="display:none;"></select>
+												</#if>
+											</td>
+										</tr>
+									</#if>
 								</#list>
 							</#if>
 						</table>
@@ -337,7 +339,7 @@
 						<tbody>
 							<#list gradeValidation.invalid?keys as feedback>
 								<tr>
-									<td>${feedback.universityId}</td>
+									<td>${feedback.studentIdentifier}</td>
 									<td>${(feedback.latestMark)!}</td>
 									<td>${(feedback.latestGrade)!}</td>
 									<td>${mapGet(gradeValidation.invalid, feedback)}</td>
@@ -357,7 +359,7 @@
 						<tbody>
 							<#list gradeValidation.zero?keys as feedback>
 							<tr>
-								<td>${feedback.universityId}</td>
+								<td>${feedback.studentIdentifier}</td>
 								<td>${(feedback.latestMark)!}</td>
 								<td>${(feedback.latestGrade)!}</td>
 							</tr>
@@ -376,7 +378,7 @@
 						<tbody>
 							<#list gradeValidation.populated?keys as feedback>
 							<tr>
-								<td>${feedback.universityId}</td>
+								<td>${feedback.studentIdentifier}</td>
 								<td>${(feedback.latestMark)!}</td>
 								<td>${mapGet(gradeValidation.populated, feedback)}</td>
 							</tr>
@@ -405,7 +407,7 @@
 						<tbody>
 							<#list gradeValidation.populated?keys as feedback>
 								<tr>
-									<td>${feedback.universityId}</td>
+									<td>${feedback.studentIdentifier}</td>
 									<td>${(feedback.latestMark)!}</td>
 									<td></td>
 									<td></td>
@@ -413,7 +415,7 @@
 							</#list>
 							<#list gradeValidation.invalid?keys as feedback>
 								<tr>
-									<td>${feedback.universityId}</td>
+									<td>${feedback.studentIdentifier}</td>
 									<td>${(feedback.latestMark)!}</td>
 									<td>${(feedback.latestGrade)!}</td>
 									<td>${mapGet(gradeValidation.invalid, feedback)}</td>

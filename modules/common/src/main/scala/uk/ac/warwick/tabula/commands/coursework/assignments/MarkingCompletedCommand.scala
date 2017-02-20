@@ -109,7 +109,7 @@ trait MarkingCompletedDescription extends Describable[Unit] {
 
 	override def describe(d: Description){
 		d.assignment(assignment)
-			.property("students" -> markerFeedback.asScala.map(_.feedback.universityId))
+			.property("students" -> markerFeedback.asScala.map(_.feedback.usercode))
 	}
 
 	override def describeResult(d: Description){

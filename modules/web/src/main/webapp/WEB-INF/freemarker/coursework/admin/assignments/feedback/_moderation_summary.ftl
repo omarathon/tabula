@@ -47,7 +47,7 @@
 				<h5>Attachments</h5>
 				<div>
 					<#assign downloadMFUrl><@routes.coursework.markerFeedbackFilesDownload moderationFeedback/></#assign>
-					<@fmt.download_attachments feedback.attachments downloadMFUrl "" "feedback-${feedback.feedback.universityId}" />
+					<@fmt.download_attachments feedback.attachments downloadMFUrl "" "feedback-${feedback.feedback.studentIdentifier}" />
 				</div>
 			</div>
 		</#if>

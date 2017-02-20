@@ -11,6 +11,7 @@ import uk.ac.warwick.spring.Wire
 import uk.ac.warwick.tabula.DateFormats
 import uk.ac.warwick.tabula.JavaImports._
 import uk.ac.warwick.tabula.data.Transactions._
+import uk.ac.warwick.tabula.data.convert.FetchByUniIdOrUsercode
 import uk.ac.warwick.tabula.data.model.notifications.RecipientNotificationInfo
 import uk.ac.warwick.tabula.helpers.FoundUser
 import uk.ac.warwick.tabula.helpers.StringUtils._
@@ -122,7 +123,7 @@ abstract class Notification[A >: Null <: ToEntityReference, B]
 	@BatchSize(size = 1)
 	var items: JList[EntityReference[A]] = JArrayList()
 
-	def entities: Seq[A] = items.asScala.map { _.entity }
+	def entities: Seq[A] = items.asScala.map(_.entity)
 
 	var created: DateTime = _
 
@@ -280,6 +281,27 @@ trait UniversityIdRecipientNotification extends SingleRecipientNotification with
 
 	override def onPreSave(newRecord: Boolean) {
 		Assert.notNull(recipientUniversityId, "recipientUniversityId must be set")
+	}
+}
+
+/**
+	* NOPE!!! - Not to be used for new notifications
+	*
+	* If you need to support external users you must use UserIdRecipientNotification
+	*
+	* This is only here so we don't have to migrate a bunch of existing notification data as part of TAB-4838
+	* The horrible thing about this is that 'recipientUniversityId' may will usercodes for these Notifications after this is merged
+	*/
+trait UniversityIdOrUserIdRecipientNotification extends SingleRecipientNotification with NotificationPreSaveBehaviour
+	with FetchByUniIdOrUsercode {
+
+	this : UserLookupComponent =>
+
+	var recipientUniversityId: String = null
+	def recipient: User = fetchUser(recipientUniversityId)
+
+	override def onPreSave(newRecord: Boolean) {
+		Assert.notNull(recipientUniversityId, "recipientIdentifier must be set")
 	}
 }
 

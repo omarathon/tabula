@@ -52,15 +52,14 @@ class ExamMarkerAddMarksController extends ExamsController {
 	): Mav = {
 		val members = examMembershipService.determineMembershipUsersWithOrderForMarker(exam, marker)
 
-		val marksToDisplay = members.map { memberPair =>
-			val member = memberPair._1
-			val feedback = feedbackService.getStudentFeedback(exam, member.getWarwickId)
-			noteMarkItem(member, feedback)
+		val marksToDisplay = members.map { case (user, _) =>
+			val feedback = feedbackService.getStudentFeedback(exam, user.getUserId)
+			noteMarkItem(user, feedback)
 		}
 
 		crumbed(Mav("exams/exams/admin/marks/marksform",
 			"marksToDisplay" -> marksToDisplay,
-			"seatNumberMap" -> members.map(m => m._1.getWarwickId -> m._2).toMap,
+			"seatNumberMap" -> members.map{ case (user, seatNumber) => user.getUserId -> seatNumber }.toMap,
 			"isGradeValidation" -> module.adminDepartment.assignmentGradeValidation
 		), module, academicYear)
 
@@ -72,6 +71,7 @@ class ExamMarkerAddMarksController extends ExamsController {
 
 		val markItem = new MarkItem()
 		markItem.universityId = member.getWarwickId
+		markItem.user = member
 
 		feedback match {
 			case Some(f) =>

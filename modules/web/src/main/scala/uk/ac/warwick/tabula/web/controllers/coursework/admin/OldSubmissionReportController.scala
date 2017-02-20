@@ -40,11 +40,11 @@ class OldSubmissionReportController extends OldCourseworkController {
 	def get(command: SubmissionReportCommand): Mav = {
 		val report = command.apply()
 
-		val submissionOnly = usersByWarwickIds(report.submissionOnly.toList)
-		val feedbackOnly = usersByWarwickIds(report.feedbackOnly.toList)
-		val hasNoAttachments = usersByWarwickIds(report.withoutAttachments.toList)
-		val hasNoMarks = usersByWarwickIds(report.withoutMarks.toList)
-		val plagiarised = usersByWarwickIds(report.plagiarised.toList)
+		val submissionOnly = usersByUsercodes(report.submissionOnly.toList)
+		val feedbackOnly = usersByUsercodes(report.feedbackOnly.toList)
+		val hasNoAttachments = usersByUsercodes(report.withoutAttachments.toList)
+		val hasNoMarks = usersByUsercodes(report.withoutMarks.toList)
+		val plagiarised = usersByUsercodes(report.plagiarised.toList)
 
 		Mav(s"$urlPrefix/admin/assignments/submissionsreport",
 			"assignment" -> command.assignment,
@@ -56,7 +56,8 @@ class OldSubmissionReportController extends OldCourseworkController {
 			"report" -> report).noLayoutIf(ajax)
 	}
 
-	def usersByWarwickIds(ids: Seq[String]): Seq[User] = userLookup.getUsersByWarwickUniIds(ids).values.toSeq.sortBy { _.getWarwickId }
+	def usersByUsercodes(usercodes: Seq[String]): Seq[User] =
+		userLookup.getUsersByUserIds(usercodes).values.toSeq.sortBy { u => s"${u.getWarwickId}${u.getUserId}"}
 
 	def surname(user: User): String = user.getLastName
 

@@ -1,6 +1,5 @@
 package uk.ac.warwick.tabula.services.coursework.docconversion
 
-import java.lang.Override
 import org.apache.poi.hssf.eventusermodel.FormatTrackingHSSFListener
 import org.apache.poi.hssf.eventusermodel.HSSFListener
 import org.apache.poi.hssf.record.CellRecord
@@ -21,15 +20,9 @@ class XslSheetHandler extends HSSFListener with Logging {
 	@Override
 	def processRecord(record: Record): Unit = {
 		record match {
-			case record: SSTRecord => {
-				sstrec = record
-			}
-			case record: RowRecord => {
-				markItems.add(new MarkItem)
-			}
-			case record: CellRecord => {
-				processCell(record, sstrec)
-			}
+			case record: SSTRecord => sstrec = record
+			case record: RowRecord => markItems.add(new MarkItem)
+			case record: CellRecord => processCell(record, sstrec)
 			case _ =>
 		}
 	}
@@ -38,7 +31,7 @@ class XslSheetHandler extends HSSFListener with Logging {
 		val rowNumber = record.getRow
 		val currentMarkItem = markItems.get(rowNumber)
 		val cellValue = record match {
-			case record: LabelSSTRecord => currentSST.getString(record.getSSTIndex()).toString()
+			case record: LabelSSTRecord => currentSST.getString(record.getSSTIndex).toString
 			case record: NumberRecord => record.getValue.toInt.toString
 		}
 

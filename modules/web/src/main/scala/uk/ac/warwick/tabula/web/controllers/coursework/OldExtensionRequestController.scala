@@ -49,7 +49,7 @@ class OldExtensionRequestController extends OldCourseworkController{
 			throw new PermissionDeniedException(user, Permissions.Extension.MakeRequest, assignment)
 		} else {
 			if (user.loggedIn){
-				val existingRequest = assignment.findExtension(user.universityId)
+				val existingRequest = assignment.findExtension(user.userId)
 				existingRequest.foreach(cmd.presetValues)
 				val profile = profileService.getMemberByUser(user.apparentUser)
 				// is this an edit of an existing request

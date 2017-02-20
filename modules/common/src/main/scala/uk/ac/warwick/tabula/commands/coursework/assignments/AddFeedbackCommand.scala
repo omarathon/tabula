@@ -20,12 +20,13 @@ class AddFeedbackCommand(module: Module, assignment: Assignment, marker: User, c
 
 	override def applyInternal(): Seq[Feedback] = transactional() {
 
-		def saveFeedback(uniNumber: String, file: UploadedFile):Option[Feedback] = {
-			val feedback = assignment.findFeedback(uniNumber).getOrElse({
+		def saveFeedback(student: User, file: UploadedFile):Option[Feedback] = {
+			val feedback = assignment.findFeedback(student.getUserId).getOrElse({
 				val newFeedback = new AssignmentFeedback
 				newFeedback.assignment = assignment
 				newFeedback.uploaderId = marker.getUserId
-				newFeedback.universityId = uniNumber
+				newFeedback._universityId = student.getWarwickId
+				newFeedback.usercode = student.getUserId
 				newFeedback.released = false
 				newFeedback.createdDate = DateTime.now
 				newFeedback.updatedDate = DateTime.now
@@ -42,26 +43,16 @@ class AddFeedbackCommand(module: Module, assignment: Assignment, marker: User, c
 			}
 		}
 
-		// TODO should really do this in a more general place, like a save listener for Feedback objects
-		val updatedFeedback = if (items != null && !items.isEmpty) {
-			val feedbacks = items.map { (item) =>
-				val feedback = saveFeedback(item.uniNumber, item.file)
-				feedback.foreach(zipService.invalidateIndividualFeedbackZip)
-				feedback
-			}.toList.flatten
-			feedbacks
-		} else {
-			val feedback = saveFeedback(uniNumber, file)
-			// delete feedback zip for this assignment, since it'll now be different.
-			feedback.toList
-		}
-
-		updatedFeedback
+		(for(item <- items; student <- item.student) yield {
+			val feedback = saveFeedback(student, item.file)
+			feedback.foreach(zipService.invalidateIndividualFeedbackZip)
+			feedback
+		}).toList.flatten
 	}
 
 	override def validateExisting(item: FeedbackItem, errors: Errors) {
 		// warn if feedback for this student is already uploaded
-		assignment.feedbacks.find { feedback => feedback.universityId == item.uniNumber && feedback.hasAttachments } match {
+		assignment.feedbacks.find { feedback => feedback._universityId == item.uniNumber && feedback.hasAttachments } match {
 			case Some(feedback) =>
 				// set warning flag for existing feedback and check if any existing files will be overwritten
 				item.submissionExists = true
@@ -88,11 +79,13 @@ class AddFeedbackCommand(module: Module, assignment: Assignment, marker: User, c
 
 	def describe(d: Description): Unit = d
 		.assignment(assignment)
-		.studentIds(items.map { _.uniNumber })
+		.studentIds(items.map(_.uniNumber))
+		.studentUsercodes(items.flatMap(_.student.map(_.getUserId)))
 
 	override def describeResult(d: Description, feedbacks: Seq[Feedback]): Unit = {
 		d.assignment(assignment)
-		 .studentIds(items.map { _.uniNumber })
+		 .studentIds(items.map(_.uniNumber))
+		 .studentUsercodes(items.flatMap(_.student.map(_.getUserId)))
 		 .fileAttachments(feedbacks.flatMap { _.attachments })
 		 .properties("feedback" -> feedbacks.map { _.id })
 	}

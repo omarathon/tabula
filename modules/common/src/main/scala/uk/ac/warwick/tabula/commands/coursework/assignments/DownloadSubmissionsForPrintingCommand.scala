@@ -84,7 +84,7 @@ class DownloadSubmissionsForPrintingCommandInternal(val module: Module, val assi
 			output
 		)
 		val pdf = new FileAttachment
-		pdf.name = s"submission-receipt-${submission.universityId}.pdf"
+		pdf.name = s"submission-receipt-${submission.studentIdentifier}.pdf"
 		pdf.uploadedData = ByteSource.wrap(output.toByteArray)
 		fileDao.saveTemporary(pdf)
 		Some(pdf)
@@ -103,7 +103,7 @@ class DownloadSubmissionsForPrintingCommandInternal(val module: Module, val assi
 					output
 				)
 				val pdf = new FileAttachment
-				pdf.name = s"non-pdf-attachments-${submission.universityId}.pdf"
+				pdf.name = s"non-pdf-attachments-${submission.studentIdentifier}.pdf"
 				pdf.uploadedData = ByteSource.wrap(output.toByteArray)
 				fileDao.saveTemporary(pdf)
 				Some(pdf)
@@ -164,7 +164,7 @@ trait DownloadAdminSubmissionsForPrintingCommandRequest extends DownloadSubmissi
 	self: DownloadSubmissionsForPrintingCommandState =>
 
 	override def submissions: Seq[Submission] = students.asScala.flatMap(s =>
-		assignment.submissions.asScala.find(_.universityId == s)
+		assignment.submissions.asScala.find(_.usercode == s)
 	)
 }
 
@@ -174,7 +174,7 @@ trait DownloadMarkerSubmissionsForPrintingCommandRequest extends DownloadSubmiss
 
 	override def submissions: Seq[Submission] = {
 		assignment.getMarkersSubmissions(marker).filter{ submission =>
-			val markerFeedback = assignment.getMarkerFeedbackForCurrentPosition(submission.universityId, marker)
+			val markerFeedback = assignment.getMarkerFeedbackForCurrentPosition(submission.usercode, marker)
 			markerFeedback.exists(mf => mf.state != MarkingCompleted)
 		}
 	}

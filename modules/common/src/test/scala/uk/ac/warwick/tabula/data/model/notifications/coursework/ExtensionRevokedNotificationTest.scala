@@ -9,6 +9,7 @@ class ExtensionRevokedNotificationTest extends TestBase with Mockito with Extens
 
 	def createNotification(assignment: Assignment, student: User, actor: User): ExtensionRevokedNotification = {
 		val n = Notification.init(new ExtensionRevokedNotification, actor, Seq(assignment))
+		n.recipientUniversityId = student.getUserId
 		wireUserlookup(n, student)
 		n
 	}

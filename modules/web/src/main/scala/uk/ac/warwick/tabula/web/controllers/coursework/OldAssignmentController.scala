@@ -47,10 +47,11 @@ class OldAssignmentController extends OldCourseworkController
 		@PathVariable assignment: Assignment,
 		user: CurrentUser
 	): Boolean = {
-		val submission = new Submission(user.universityId)
+		val submission = new Submission
 		submission.assignment = assignment
 		submission.submittedDate = DateTime.now
-		submission.userId = user.userId
+		submission._universityId = user.universityId
+		submission.usercode = user.userId
 		attendanceMonitoringCourseworkSubmissionService.getCheckpoints(submission).nonEmpty
 	}
 

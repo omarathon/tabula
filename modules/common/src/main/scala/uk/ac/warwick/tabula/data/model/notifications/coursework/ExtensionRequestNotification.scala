@@ -19,17 +19,17 @@ abstract class ExtensionRequestNotification
 
 	def template: String
 
-	def url: String = Routes.admin.assignment.extension.expandrow(assignment, student.getWarwickId)
+	def url: String = Routes.admin.assignment.extension.expandrow(assignment, student.getUserId)
 	def urlTitle = "review this extension request"
 
-	def studentMember: Option[Member] = profileService.getMemberByUniversityId(student.getWarwickId)
+	def studentMember: Option[Member] = Option(student.getWarwickId).flatMap(uid => profileService.getMemberByUniversityId(uid))
 	def studentRelationships: Seq[StudentRelationshipType] = relationshipService.allStudentRelationshipTypes
 
 	def profileInfo: Map[String, Object] = studentMember.collect { case student: StudentMember => student }.flatMap(_.mostSignificantCourseDetails).map(scd => {
 		val relationships = studentRelationships.map(x => (
 			x.description,
 			relationshipService.findCurrentRelationships(x, scd)
-		)).filter{ case (relationshipType,relations) => relations.length != 0 }.toMap
+		)).filter{ case (relationshipType,relations) => relations.nonEmpty }.toMap
 
 		Map(
 			"relationships" -> relationships,

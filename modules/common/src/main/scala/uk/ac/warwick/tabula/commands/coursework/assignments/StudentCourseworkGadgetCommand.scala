@@ -49,7 +49,7 @@ class StudentCourseworkGadgetCommandInternal(val studentCourseYearDetails: Stude
 	override lazy val overridableAssignmentsWithSubmission: Seq[Assignment] = assessmentService.getAssignmentsWithSubmission(studentCourseYearDetails)
 
 	override val user: User = student.asSsoUser
-	override val universityId: String = student.universityId
+	override val usercode: String = student.userId
 
 }
 

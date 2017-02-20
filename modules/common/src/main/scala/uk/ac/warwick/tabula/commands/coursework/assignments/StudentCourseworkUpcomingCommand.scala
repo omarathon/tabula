@@ -44,7 +44,7 @@ class StudentCourseworkUpcomingCommandInternal(val memberOrUser: MemberOrUser) e
 			.sortBy(_.submissionDeadline(user))(Ordering.fromLessThan(_ isBefore _))
 	}
 
-	override val universityId: String = memberOrUser.universityId
+	override val usercode: String = memberOrUser.usercode
 	override val user: User = memberOrUser.asUser
 
 	override def applyInternal() = StudentAssignments(

@@ -20,8 +20,9 @@ class SubmissionTest extends PersistenceTestBase {
 		}
 
 		val (submission, submissionAttachment) = flushing(session) {
-			val submission = new Submission(universityId = "0000001")
-			submission.userId = "steve"
+			val submission = new Submission
+			submission._universityId = "0000001"
+			submission.usercode = "steve"
 
 			val assignment = new Assignment
 			session.save(assignment)

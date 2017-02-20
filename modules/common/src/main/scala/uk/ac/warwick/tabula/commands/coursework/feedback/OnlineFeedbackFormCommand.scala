@@ -42,7 +42,7 @@ abstract class OnlineFeedbackFormCommand(
 
 	self: FeedbackServiceComponent with SavedFormValueDaoComponent with FileAttachmentServiceComponent with ZipServiceComponent =>
 
-	def feedback: Option[Feedback] = assignment.findFeedback(student.getWarwickId)
+	def feedback: Option[Feedback] = assignment.findFeedback(student.getUserId)
 
 	feedback match {
 		case Some(f) => copyFrom(f)
@@ -55,11 +55,12 @@ abstract class OnlineFeedbackFormCommand(
 
 	def applyInternal(): Feedback = {
 
-		val feedback = assignment.findFeedback(student.getWarwickId).getOrElse({
+		val feedback = assignment.findFeedback(student.getUserId).getOrElse({
 			val newFeedback = new AssignmentFeedback
 			newFeedback.assignment = assignment
 			newFeedback.uploaderId = marker.getUserId
-			newFeedback.universityId = student.getWarwickId
+			newFeedback.usercode = student.getUserId
+			newFeedback._universityId = student.getWarwickId
 			newFeedback.released = false
 			newFeedback.createdDate = DateTime.now
 			newFeedback
@@ -234,7 +235,8 @@ trait OnlineFeedbackFormDescription[A] extends Describable[A] {
 	this: OnlineFeedbackState with OnlineFeedbackStudentState =>
 
 	def describe(d: Description) {
-		d.studentIds(Seq(student.getWarwickId))
+		d.studentIds(Option(student.getWarwickId).toSeq)
+		d.studentUsercodes(student.getUserId)
 		d.assignment(assignment)
 	}
 }

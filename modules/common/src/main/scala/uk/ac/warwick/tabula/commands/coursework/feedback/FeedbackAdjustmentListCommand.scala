@@ -34,10 +34,10 @@ class FeedbackAdjustmentListCommandInternal(val assessment: Assessment)
 			val allFeedback = assessment.fullFeedback
 			val allStudents =
 				if (students.isEmpty) assessmentMembershipService.determineMembershipUsers(assessment)
-				else students.asScala.map(userLookup.getUserByWarwickUniId)
+				else students.asScala.map(userLookup.getUserByUserId)
 
 			val (hasFeedback, noFeedback) = allStudents.map { student =>
-				StudentInfo(student, allFeedback.find { _.universityId == student.getWarwickId })
+				StudentInfo(student, allFeedback.find { _.usercode == student.getUserId })
 			}.partition { _.feedback.isDefined }
 
 			hasFeedback ++ noFeedback

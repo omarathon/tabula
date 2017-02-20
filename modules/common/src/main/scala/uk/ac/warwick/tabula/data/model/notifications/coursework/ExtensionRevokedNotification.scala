@@ -4,7 +4,7 @@ import javax.persistence.{DiscriminatorValue, Entity}
 
 import uk.ac.warwick.tabula.coursework.web.Routes
 import uk.ac.warwick.tabula.data.model.NotificationPriority.Warning
-import uk.ac.warwick.tabula.data.model.{Assignment, FreemarkerModel, Notification, SingleItemNotification, SingleRecipientNotification, UniversityIdRecipientNotification}
+import uk.ac.warwick.tabula.data.model._
 import uk.ac.warwick.tabula.services.AutowiringUserLookupComponent
 
 object ExtensionRevokedNotification {
@@ -16,7 +16,7 @@ object ExtensionRevokedNotification {
 class ExtensionRevokedNotification extends Notification[Assignment, Unit]
 	with SingleItemNotification[Assignment]
 	with SingleRecipientNotification
-	with UniversityIdRecipientNotification
+	with UniversityIdOrUserIdRecipientNotification
 	with AutowiringUserLookupComponent {
 
 	priority = Warning

@@ -3,7 +3,6 @@ package uk.ac.warwick.tabula.commands.coursework.assignments
 import org.springframework.transaction.annotation.Transactional
 import org.springframework.validation.BindException
 import uk.ac.warwick.tabula.data.model.{Assignment, GradeBoundary, Module}
-import uk.ac.warwick.tabula.events.EventHandling
 import uk.ac.warwick.tabula.services._
 import uk.ac.warwick.tabula.services.coursework.docconversion.MarkItem
 import uk.ac.warwick.tabula.{CurrentUser, Mockito, RequestInfo, TestBase}

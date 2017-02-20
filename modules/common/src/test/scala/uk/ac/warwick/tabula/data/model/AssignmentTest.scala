@@ -88,7 +88,10 @@ class AssignmentTest extends TestBase with Mockito {
 		}
 
 		for (i <- 8 to 20) // 0000008 .. 0000020
-			assignment.submissions add new Submission(universityId = idFormat(i))
+			assignment.submissions add new Submission {
+				usercode = idFormat(i)
+				_universityId = idFormat(i)
+			}
 
 		// only 0000008 .. 0000010 are common to both lists
 		val report = assignment.submissionsReport
@@ -203,7 +206,7 @@ class AssignmentTest extends TestBase with Mockito {
 		assignment.openEnded = false
 
 		val submission = new Submission
-		submission.userId = "cuscav"
+		submission.usercode = "cuscav"
 
 		submission.submittedDate = new DateTime(2013, DateTimeConstants.JANUARY, 10, 0, 0, 0, 0)
 
@@ -221,7 +224,7 @@ class AssignmentTest extends TestBase with Mockito {
 		assignment.isAuthorisedLate(submission) should be {false}
 
 		val extension = new Extension
-		extension.userId = "cuscav"
+		extension.usercode = "cuscav"
 		extension.approve()
 		extension.expiryDate = new DateTime(2013, DateTimeConstants.JANUARY, 31, 12, 0, 0, 0)
 
@@ -259,7 +262,7 @@ class AssignmentTest extends TestBase with Mockito {
 		assignment.openEnded = false
 
 		val submission = new Submission
-		submission.userId = "cuscav"
+		submission.usercode = "cuscav"
 
 		submission.submittedDate = new DateTime(2013, DateTimeConstants.JANUARY, 10, 0, 0, 0, 0)
 		assignment.workingDaysLate(submission) should be (0)
@@ -290,7 +293,7 @@ class AssignmentTest extends TestBase with Mockito {
 
 		// Extended until 12pm Friday
 		val extension = new Extension
-		extension.userId = "cuscav"
+		extension.usercode = "cuscav"
 		extension.approve()
 		extension.expiryDate = new DateTime(2013, DateTimeConstants.FEBRUARY, 1, 12, 0, 0, 0)
 
@@ -324,7 +327,7 @@ class AssignmentTest extends TestBase with Mockito {
 		assignment.workingDaysLate(submission) should be (2)
 	}
 
-	@Test def hasOutstandingFeedback(): Unit = {
+	@Test def testHasOutstandingFeedback(): Unit = {
 		val assignment = new Assignment
 		assignment.dissertation = false
 		assignment.openDate = new DateTime(2015, DateTimeConstants.APRIL, 1, 12, 0, 0, 0)
@@ -336,18 +339,18 @@ class AssignmentTest extends TestBase with Mockito {
 
 		assignment.extensionService.hasExtensions(assignment) returns false
 
-		assignment.submissionService.getSubmissionsByAssignment(assignment) returns (Nil)
+		assignment.submissionService.getSubmissionsByAssignment(assignment) returns Nil
 
 		assignment.hasOutstandingFeedback should be (false)
 
 		reset(assignment.submissionService)
 
 		val submission1 = new Submission
-		submission1.universityId = "0000001"
+		submission1.usercode = "0000001"
 		submission1.assignment = assignment
 
 		val submission2 = new Submission
-		submission2.universityId = "0000002"
+		submission2.usercode = "0000002"
 		submission2.assignment = assignment
 
 		assignment.submissionService.getSubmissionsByAssignment(assignment) returns Seq(submission1, submission2)
@@ -357,8 +360,8 @@ class AssignmentTest extends TestBase with Mockito {
 
 		assignment.openEnded = false
 
-		assignment.feedbackService.getAssignmentFeedbackByUniId(assignment, "0000001") returns None
-		assignment.feedbackService.getAssignmentFeedbackByUniId(assignment, "0000002") returns None
+		assignment.feedbackService.getAssignmentFeedbackByUsercode(assignment, "0000001") returns None
+		assignment.feedbackService.getAssignmentFeedbackByUsercode(assignment, "0000002") returns None
 
 		assignment.hasOutstandingFeedback should be (true)
 
@@ -371,8 +374,8 @@ class AssignmentTest extends TestBase with Mockito {
 		val feedback2 = new AssignmentFeedback
 		feedback2.released = false
 
-		assignment.feedbackService.getAssignmentFeedbackByUniId(assignment, "0000001") returns Some(feedback1)
-		assignment.feedbackService.getAssignmentFeedbackByUniId(assignment, "0000002") returns Some(feedback2)
+		assignment.feedbackService.getAssignmentFeedbackByUsercode(assignment, "0000001") returns Some(feedback1)
+		assignment.feedbackService.getAssignmentFeedbackByUsercode(assignment, "0000002") returns Some(feedback2)
 
 		assignment.hasOutstandingFeedback should be (true)
 

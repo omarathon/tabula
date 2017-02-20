@@ -6,7 +6,7 @@ import uk.ac.warwick.tabula.data.model._
 import uk.ac.warwick.util.csv.CSVLineWriter
 
 import scala.collection.JavaConverters._
-import uk.ac.warwick.tabula.DateFormats
+import uk.ac.warwick.tabula.{CurrentUser, DateFormats}
 import org.joda.time.ReadableInstant
 import uk.ac.warwick.tabula.helpers.StringUtils._
 
@@ -274,7 +274,7 @@ trait SubmissionAndFeedbackExport {
 	)
 
 	protected def identityData(item: Student): Map[String, Any] = Map(
-		"university-id" -> item.user.getWarwickId
+		"university-id" -> CurrentUser.studentIdentifier(item.user)
 	) ++ (if (module.adminDepartment.showStudentName) Map("name" -> item.user.getFullName) else Map())
 
 	protected def submissionData(student: Student): Map[String, Any] = student.coursework.enhancedSubmission match {
@@ -293,7 +293,7 @@ trait SubmissionAndFeedbackExport {
 		case Some(item) => Map(
 			"late" -> item.submission.isLate,
 			"within-extension" -> item.submission.isAuthorisedLate,
-			"markable" -> assignment.isReleasedForMarking(item.submission.universityId)
+			"markable" -> assignment.isReleasedForMarking(item.submission.usercode)
 		)
 		case _ => student.coursework.enhancedExtension match {
 			case Some(item) =>
@@ -311,8 +311,8 @@ trait SubmissionAndFeedbackExport {
 	}
 
 	protected def markerData(student: Student): Map[String, Any] = Map(
-		"first-marker" -> assignment.getStudentsFirstMarker(student.user.getWarwickId).map(_.getFullName).getOrElse(""),
-		"second-marker" -> assignment.getStudentsSecondMarker(student.user.getWarwickId).map(_.getFullName).getOrElse("")
+		"first-marker" -> assignment.getStudentsFirstMarker(student.user.getUserId).map(_.getFullName).getOrElse(""),
+		"second-marker" -> assignment.getStudentsSecondMarker(student.user.getUserId).map(_.getFullName).getOrElse("")
 	)
 
 	protected def extraFieldData(student: Student): Map[String, String] = {

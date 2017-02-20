@@ -12,7 +12,7 @@ import scala.collection.JavaConverters._
 
 trait SubmissionService {
 	def saveSubmission(submission: Submission)
-	def getSubmissionByUniId(assignment: Assignment, uniId: String): Option[Submission]
+	def getSubmissionByUsercode(assignment: Assignment, usercode: String): Option[Submission]
 	def getSubmissionsByAssignment(assignment: Assignment): Seq[Submission]
 	def getSubmission(id: String): Option[Submission]
 	def getPreviousSubmissions(user: User): Seq[Submission]
@@ -36,10 +36,10 @@ abstract class AbstractSubmissionService extends SubmissionService with Daoisms 
 		session.flush()
 	}
 
-	def getSubmissionByUniId(assignment: Assignment, uniId: String): Option[Submission] = {
+	def getSubmissionByUsercode(assignment: Assignment, usercode: String): Option[Submission] = {
 		session.newCriteria[Submission]
 			.add(is("assignment", assignment))
-			.add(is("universityId", uniId))
+			.add(is("usercode", usercode))
 			.uniqueResult
 	}
 

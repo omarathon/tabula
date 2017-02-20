@@ -2,7 +2,6 @@ package uk.ac.warwick.tabula.data
 
 import org.hibernate.Session
 import uk.ac.warwick.tabula.{Fixtures, PersistenceTestBase}
-import uk.ac.warwick.tabula.JavaImports.JBoolean
 
 class FeedbackDaoTest extends PersistenceTestBase {
 
@@ -70,16 +69,16 @@ class FeedbackDaoTest extends PersistenceTestBase {
 		dao.getMarkerFeedback(mf3.id) map { _.feedback } should be (Some(f3))
 		dao.getMarkerFeedback("blah") should be (None)
 
-		dao.getAssignmentFeedbackByUniId(ass1, "0205225") should be (Some(f1))
-		dao.getAssignmentFeedbackByUniId(ass2, "0205225") should be (Some(f2))
-		dao.getAssignmentFeedbackByUniId(ass1, "0205226") should be (Some(f3))
-		dao.getAssignmentFeedbackByUniId(ass2, "0205226") should be (None)
+		dao.getAssignmentFeedbackByUsercode(ass1, "0205225") should be (Some(f1))
+		dao.getAssignmentFeedbackByUsercode(ass2, "0205225") should be (Some(f2))
+		dao.getAssignmentFeedbackByUsercode(ass1, "0205226") should be (Some(f3))
+		dao.getAssignmentFeedbackByUsercode(ass2, "0205226") should be (None)
 		session.flush()
 
 		dao.delete(dao.getAssignmentFeedback(f1.id).get)
 		session.flush()
 
-		dao.getAssignmentFeedbackByUniId(ass1, "0205225") should be (None)
+		dao.getAssignmentFeedbackByUsercode(ass1, "0205225") should be (None)
 		dao.getAssignmentFeedback(f1.id) should be (None)
 		dao.getMarkerFeedback(mf1.id) should be (None)
 	}

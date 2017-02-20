@@ -5,11 +5,11 @@ import uk.ac.warwick.tabula.{Fixtures, TestBase}
 
 class MarkedPlagiarisedNotificationTest extends TestBase {
 
-	@Test def title() = withUser("cuscav", "0672089") {
+	@Test def title() = withUser("cuscav", "cuscav") {
 		val assignment = Fixtures.assignment("5,000 word essay")
 		assignment.module = Fixtures.module("cs118", "Programming for Computer Scientists")
 
-		val submission = Fixtures.submission("1412345")
+		val submission = Fixtures.submission("1412345", "1412345")
 		submission.assignment = assignment
 
 		val notification = Notification.init(new MarkedPlagiarisedNotification, currentUser.apparentUser, submission, assignment)

@@ -13,6 +13,7 @@ trait ExtensionFixture extends Mockito{
 
 	val studentMember = new StudentMember
 	studentMember.universityId = "student"
+	studentMember.userId = "student"
 	val student: User = studentMember.asSsoUser
 
 	val adminMember = new StaffMember
@@ -54,7 +55,9 @@ trait ExtensionFixture extends Mockito{
 	assignment.closeDate = new DateTime(2013, 8, 1, 12, 0)
 	assignment.module = module
 
-	val extension = new Extension(student.getWarwickId)
+	val extension = new Extension
+	extension._universityId = student.getWarwickId
+	extension.usercode = student.getUserId
 	extension.expiryDate = new DateTime(2013, 8, 23, 12, 0)
 	extension.requestedExpiryDate = new DateTime(2013, 8, 23, 12, 0)
 	extension.reason = "My hands have turned to flippers. Like the ones that dolphins have. It makes writing and typing super hard. Pity me."

@@ -13,9 +13,9 @@ class FeedbackAdjustmentNotificationTest extends TestBase with Mockito {
 	val cm1Prefix = "coursework"
 	Routes.coursework._cm1Prefix = Some(cm1Prefix)
 
-	val admin: User = Fixtures.user("1170836")
+	val admin: User = Fixtures.user("1170836", "1170836")
 	val marker: User = Fixtures.user("1234567", "1234567")
-	val student: User = Fixtures.user("7654321")
+	val student: User = Fixtures.user("7654321", "7654321")
 
 	val mockLookup: UserLookupService = mock[UserLookupService]
 	mockLookup.getUserByUserId(student.getUserId) returns student

@@ -25,11 +25,6 @@ class Submission extends GeneratedId with PermissionsTarget with ToEntityReferen
 
 	type Entity = Submission
 
-	def this(universityId: String = null) {
-		this()
-		this.universityId = universityId
-	}
-
 	def isLate: Boolean = submittedDate != null && assignment.isLate(this)
 	def isAuthorisedLate: Boolean = submittedDate != null && assignment.isAuthorisedLate(this)
 	def workingDaysLate: Int = assignment.workingDaysLate(this)
@@ -49,7 +44,8 @@ class Submission extends GeneratedId with PermissionsTarget with ToEntityReferen
 	var submittedDate: DateTime = _
 
 	@NotNull
-	var userId: String = _
+	@Column(name = "userId")
+	var usercode: String = _
 
 	@Type(`type` = "uk.ac.warwick.tabula.data.model.PlagiarismInvestigationUserType")
 	var plagiarismInvestigation: PlagiarismInvestigation = PlagiarismInvestigation.Default
@@ -65,8 +61,13 @@ class Submission extends GeneratedId with PermissionsTarget with ToEntityReferen
 	 * records for a while, the ITS account can be expunged so we'd lose
 	 * it entirely.
 	 */
-	@NotNull
-	var universityId: String = _
+	@Column(name = "universityId")
+	var _universityId: String = _
+
+	def universityId = Option(_universityId)
+
+	def studentIdentifier = universityId.getOrElse(usercode)
+
 
 	@OneToMany(mappedBy = "submission", cascade = Array(ALL))
 	@BatchSize(size=200)
@@ -76,11 +77,11 @@ class Submission extends GeneratedId with PermissionsTarget with ToEntityReferen
 		values.find( _.name == field.name )
 	}
 
-	def isForUser(user: User): Boolean = universityId == user.getWarwickId || userId == user.getUserId
+	def isForUser(user: User): Boolean = usercode == user.getUserId
 
-	def firstMarker:Option[User] = assignment.getStudentsFirstMarker(universityId)
+	def firstMarker:Option[User] = assignment.getStudentsFirstMarker(usercode)
 
-	def secondMarker:Option[User] = assignment.getStudentsSecondMarker(universityId)
+	def secondMarker:Option[User] = assignment.getStudentsSecondMarker(usercode)
 
 	def valuesByFieldName: Map[String, String] = (values map { v => (v.name, v.value) }).toMap
 
@@ -94,7 +95,7 @@ class Submission extends GeneratedId with PermissionsTarget with ToEntityReferen
 
 	/** Filename as we would expect to find this attachment in a downloaded zip of submissions. */
 	def zipFileName(attachment: FileAttachment): String = {
-		assignment.module.code + " - " + universityId + " - " + attachment.name
+		assignment.module.code + " - " + studentIdentifier + " - " + attachment.name
 	}
 
 	def zipFilename(attachment: FileAttachment, name: String): String = {
@@ -107,6 +108,6 @@ class Submission extends GeneratedId with PermissionsTarget with ToEntityReferen
 }
 
 trait FeedbackReportGenerator {
-	def universityId: String
+	def usercode: String
 	def feedbackDeadline: Option[LocalDate]
 }

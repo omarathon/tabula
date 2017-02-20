@@ -108,7 +108,7 @@ class OldDownloadSingleSubmissionFileController extends OldCourseworkController 
 			@PathVariable module: Module,
 			@PathVariable assignment: Assignment,
 			@PathVariable submission: Submission ): DownloadAttachmentCommand = {
-		val student = profileService.getMemberByUser(userLookup.getUserByUserId(mandatory(submission).userId))
+		val student = profileService.getMemberByUser(userLookup.getUserByUserId(mandatory(submission).usercode))
 		new DownloadAttachmentCommand(module, assignment, mandatory(submission), student)
 	}
 
@@ -140,7 +140,7 @@ class OldDownloadFeedbackSheetsController extends OldCourseworkController {
 
 		val submissions = assignment.getMarkersSubmissions(user.apparentUser)
 
-		val users = submissions.map(s => userLookup.getUserByUserId(s.userId))
+		val users = submissions.map(s => userLookup.getUserByUserId(s.usercode))
 		command.members = users
 		command.apply()
 	}

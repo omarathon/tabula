@@ -151,8 +151,10 @@ jQuery.fn.expandingTable = function(options) {
 					hideContent($content, $row, $icon);
 				} else {
 					if(options.contentUrlFunction && !$content.data("loaded")) {
-						var contentId = ""
-						if(!preventContentIdInUrl) { contentId = '/' + ($row.attr("data-contentid")).replace("_","/"); }
+						var contentId = "";
+						// data attributes can't contain / so we use __ instead and replace them here
+						// __ is just as arbitrary as _ but is less likely to actually be used in the content ID
+						if(!preventContentIdInUrl) { contentId = '/' + ($row.attr("data-contentid")).replace("__","/"); }
 						var dataUrl = options.contentUrlFunction($row) + contentId;
 
 						$icon.removeClass('fa-chevron-right').addClass('fa-spinner fa-spin');

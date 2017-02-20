@@ -78,6 +78,7 @@
 
 						<tr class="${errorClass}">
 							<@f.hidden path="universityId" />
+							<@f.hidden path="user" />
 							<@f.hidden path="actualMark" />
 							<@f.hidden path="actualGrade" />
 							<@f.hidden path="valid" />

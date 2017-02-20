@@ -8,8 +8,7 @@ import uk.ac.warwick.tabula.data.model.{Assignment, Module}
 import uk.ac.warwick.tabula.helpers.coursework.ExtensionGraph
 import uk.ac.warwick.tabula.permissions._
 import uk.ac.warwick.tabula.services.{AssessmentMembershipService, UserLookupService}
-
-import scala.collection.JavaConversions._
+import scala.collection.JavaConverters._
 
 class ListExtensionsForAssignmentCommand(val module: Module, val assignment: Assignment, val user: CurrentUser)
 	extends Command[Seq[ExtensionGraph]] with ReadOnly with Unaudited {
@@ -25,21 +24,17 @@ class ListExtensionsForAssignmentCommand(val module: Module, val assignment: Ass
 	def applyInternal(): Seq[ExtensionGraph] = {
 		val assignmentUsers = assignmentMembershipService.determineMembershipUsers(assignment)
 
-		val assignmentMembership = Map() ++ (
-			for(assignmentUser <- assignmentUsers)
-				yield assignmentUser.getWarwickId -> assignmentUser
-		)
+		val assignmentMembership = assignmentUsers.map(u => u.getUserId -> u).toMap
 
 		// all the users that aren't members of this assignment, but have submitted work to it
-		val extensionsFromNonMembers = assignment.extensions.filterNot(x => assignmentMembership.contains(x.universityId))
-		val nonMembers = userLookup.getUsersByWarwickUniIds(extensionsFromNonMembers.map { _.universityId })
+		val extensionsFromNonMembers = assignment.extensions.asScala.filterNot(x => assignmentMembership.contains(x.usercode))
+		val nonMembers = userLookup.getUsersByUserIds(extensionsFromNonMembers.map(_.usercode))
 
 		// build lookup of names from non members of the assignment that have submitted work plus members
 		val students = nonMembers ++ assignmentMembership
 
-		(for ((universityId, user) <- students) yield {
-			// deconstruct the map, bleh
-			val extension = assignment.extensions.find(_.universityId == universityId)
+		(for ((usercode, user) <- students) yield {
+			val extension = assignment.extensions.asScala.find(_.usercode == usercode)
 			val isAwaitingReview = extension exists (_.awaitingReview)
 			val hasApprovedExtension = extension exists (_.approved)
 			val hasRejectedExtension = extension exists (_.rejected)
@@ -51,7 +46,16 @@ class ListExtensionsForAssignmentCommand(val module: Module, val assignment: Ass
 				Days.daysBetween(e.expiryDate.getOrElse(assignment.closeDate), requestedExpiryDate).getDays
 			}).getOrElse(0)
 
-			new ExtensionGraph(universityId, user, assignment.submissionDeadline(user), isAwaitingReview, hasApprovedExtension, hasRejectedExtension, duration, requestedExtraDuration, extension)
+			new ExtensionGraph(
+				user,
+				assignment.submissionDeadline(user),
+				isAwaitingReview,
+				hasApprovedExtension,
+				hasRejectedExtension,
+				duration,
+				requestedExtraDuration,
+				extension
+			)
 		}).toSeq
 	}
 }

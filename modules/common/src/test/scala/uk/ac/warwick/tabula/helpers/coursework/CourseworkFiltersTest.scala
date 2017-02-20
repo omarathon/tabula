@@ -509,15 +509,15 @@ class CourseworkFiltersTest extends TestBase with Mockito {
 		val submission = Fixtures.submission("0672089", "cuscav")
 		submission.assignment = assignment
 
-		assignment.isReleasedForMarking(submission.universityId) should be {false}
+		assignment.isReleasedForMarking(submission.usercode) should be {false}
 
 		filter.predicate(student(user=s, submission=Option(submission), assignment=assignment)) should be {true}
 
 		// Release for marking, no longer fits
-		val feedback = Fixtures.assignmentFeedback("0672089")
+		val feedback = Fixtures.assignmentFeedback("0672089", "cuscav")
 		assignment.feedbacks.add(feedback)
 		feedback.firstMarkerFeedback = Fixtures.markerFeedback(feedback)
-		assignment.isReleasedForMarking(submission.universityId) should be {true}
+		assignment.isReleasedForMarking(submission.usercode) should be {true}
 
 		filter.predicate(student(user=s, submission=Option(submission), assignment=assignment)) should be {false}
 	}
@@ -550,17 +550,17 @@ class CourseworkFiltersTest extends TestBase with Mockito {
 		val s = Fixtures.user("0672089", "cuscav")
 		val submission = Fixtures.submission("0672089", "cuscav")
 		submission.assignment = assignment
-		when(workflow.submissionService.getSubmissionByUniId(assignment, "0672089")) thenReturn Option(submission)
+		when(workflow.submissionService.getSubmissionByUsercode(assignment, "cuscav")) thenReturn Option(submission)
 
-		assignment.isReleasedForMarking(submission.universityId) should be {false}
+		assignment.isReleasedForMarking(submission.usercode) should be {false}
 
 		filter.predicate(student(user=s, submission=Option(submission), assignment=assignment)) should be {false}
 
 		// Release for marking and make sure it has a first marker
-		val feedback = Fixtures.assignmentFeedback("0672089")
+		val feedback = Fixtures.assignmentFeedback("0672089", "cuscav")
 		assignment.feedbacks.add(feedback)
 		feedback.firstMarkerFeedback = Fixtures.markerFeedback(feedback)
-		assignment.isReleasedForMarking(submission.universityId) should be {true}
+		assignment.isReleasedForMarking(submission.usercode) should be {true}
 
 		val f = new MarkerSelectField
 		f.name = Assignment.defaultMarkerSelectorName
@@ -600,10 +600,10 @@ class CourseworkFiltersTest extends TestBase with Mockito {
 		val submission = Fixtures.submission("0672089", "cuscav")
 		submission.assignment = assignment
 
-		val feedback = Fixtures.assignmentFeedback("0672089")
+		val feedback = Fixtures.assignmentFeedback("0672089", "cuscav")
 		assignment.feedbacks.add(feedback)
 		feedback.firstMarkerFeedback = Fixtures.markerFeedback(feedback)
-		assignment.isReleasedToSecondMarker(submission.universityId) should be {false}
+		assignment.isReleasedToSecondMarker(submission.usercode) should be {false}
 
 		filter.predicate(student(feedback=Option(feedback))) should be {false}
 
@@ -611,7 +611,7 @@ class CourseworkFiltersTest extends TestBase with Mockito {
 		filter.predicate(student(feedback=Option(feedback))) should be {true}
 
 		feedback.secondMarkerFeedback = Fixtures.markerFeedback(feedback)
-		assignment.isReleasedToSecondMarker(submission.universityId) should be {true}
+		assignment.isReleasedToSecondMarker(submission.usercode) should be {true}
 
 		filter.predicate(student(feedback=Option(feedback))) should be {true}
 	}
@@ -642,7 +642,7 @@ class CourseworkFiltersTest extends TestBase with Mockito {
 		val submission = Fixtures.submission("0672089", "cuscav")
 		submission.assignment = assignment
 
-		val feedback = Fixtures.assignmentFeedback("0672089")
+		val feedback = Fixtures.assignmentFeedback("0672089", "cuscav")
 		assignment.feedbacks.add(feedback)
 		feedback.firstMarkerFeedback = Fixtures.markerFeedback(feedback)
 		feedback.secondMarkerFeedback = Fixtures.markerFeedback(feedback)
@@ -901,7 +901,7 @@ class CourseworkFiltersTest extends TestBase with Mockito {
 		// Valid where there's feedback, but it hasn't been released
 		filter.predicate(student(feedback=None)) should be {false}
 
-		val feedback = Fixtures.assignmentFeedback("0672089")
+		val feedback = Fixtures.assignmentFeedback("0672089", "cuscav")
 		feedback.actualMark = Option(41)
 		feedback.released = false
 		feedback.assignment = assignment

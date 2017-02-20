@@ -10,8 +10,8 @@ import uk.ac.warwick.userlookup.{AnonymousUser, User}
 class SubmissionDueNotificationTest extends TestBase with Mockito {
 
 	val users = Seq(
-		Fixtures.user(universityId="0123456", userId="cusaaa"),
-		Fixtures.user(universityId="0133454", userId="cusaab")
+		Fixtures.user(universityId="0123456", userId="0123456"),
+		Fixtures.user(universityId="0133454", userId="0133454")
 	)
 
 	val assignment = new Assignment
@@ -33,14 +33,16 @@ class SubmissionDueNotificationTest extends TestBase with Mockito {
 		// Don't notify them if they've submitted
 		withClue("Shouldn't notify user who has submitted") {
 			val submission = new Submission
-			submission.universityId = "0133454"
+			submission._universityId = "0133454"
+			submission.usercode = "0133454"
 			assignment.addSubmission(submission)
 			notification.recipients should be(Seq(users.head))
 		}
 
 		withClue("Shouldn't notify user with extension") { // A different class handles individual extensions
 			val extension = new Extension
-			extension.universityId = "0123456"
+			extension._universityId = "0123456"
+			extension.usercode = "0123456"
 			extension.approve()
 			assignment.extensions.add(extension)
 			notification.recipients should be(Seq())
@@ -50,13 +52,14 @@ class SubmissionDueNotificationTest extends TestBase with Mockito {
 	@Test
 	def extensionRecipients() {
 		val anExtension = new Extension
-		anExtension.universityId = "0133454"
+		anExtension._universityId = "0133454"
+		anExtension.usercode = "u0133454"
 
 		val notification = new SubmissionDueWithExtensionNotification {
 			override def extension: Extension = anExtension
 		}
 		notification.userLookup = mock[UserLookupService]
-		notification.userLookup.getUserByWarwickUniId("0133454") returns users(1)
+		notification.userLookup.getUserByUserId("u0133454") returns users(1)
 		anExtension.assignment = assignment
 
 		withClue("Shouldn't send if the extension hasn't been approved") {
@@ -72,7 +75,8 @@ class SubmissionDueNotificationTest extends TestBase with Mockito {
 
 		withClue("Shouldn't be sent if extension user has submitted") {
 			val submission = new Submission
-			submission.universityId = "0133454"
+			submission._universityId = "0133454"
+			submission.usercode = "u0133454"
 			assignment.addSubmission(submission)
 			notification.recipients should be(Seq())
 		}

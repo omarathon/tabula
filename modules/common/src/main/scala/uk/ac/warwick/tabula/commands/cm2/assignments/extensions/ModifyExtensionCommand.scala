@@ -89,7 +89,8 @@ trait ModifyExtensionDescription extends Describable[Extension] {
 	def describe(d: Description) {
 		d.assignment(extension.assignment)
 		d.module(extension.assignment.module)
-		d.studentIds(Seq(extension.universityId))
+		d.studentIds(extension.universityId.toSeq)
+		d.studentUsercodes(extension.usercode)
 	}
 }
 
