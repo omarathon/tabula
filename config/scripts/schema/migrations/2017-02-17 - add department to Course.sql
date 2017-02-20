@@ -1,0 +1,5 @@
+-- TAB-4893
+
+ALTER TABLE COURSE ADD (
+  department_id NVARCHAR2(255)
+);
