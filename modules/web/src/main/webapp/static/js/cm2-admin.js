@@ -97,5 +97,10 @@
 		});
 	});
 
+	var $assessmentComponentTable = $(".assessment-component table");
+	$assessmentComponentTable.tablesorter({
+		headers: {0:{sorter:false}}
+	});
+
 
 })(jQuery);
