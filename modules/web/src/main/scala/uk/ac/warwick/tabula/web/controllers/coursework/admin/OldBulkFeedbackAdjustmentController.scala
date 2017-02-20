@@ -1,19 +1,19 @@
 package uk.ac.warwick.tabula.web.controllers.coursework.admin
 
-import org.springframework.stereotype.Controller
-import org.springframework.web.bind.annotation.{ModelAttribute, PathVariable, RequestMapping}
-import uk.ac.warwick.tabula.web.controllers.coursework.OldCourseworkController
-import uk.ac.warwick.tabula.commands.{Appliable, SelfValidating}
-import uk.ac.warwick.tabula.data.model.{Assignment, Mark, Module}
-import uk.ac.warwick.tabula.commands.exams.{BulkAdjustmentCommand, BulkAdjustmentTemplateCommand}
-import uk.ac.warwick.tabula.commands.coursework.feedback.GenerateGradesFromMarkCommand
-import uk.ac.warwick.tabula.helpers.SpreadsheetHelpers
 import javax.validation.Valid
 
 import org.springframework.context.annotation.Profile
+import org.springframework.stereotype.Controller
 import org.springframework.validation.Errors
+import org.springframework.web.bind.annotation.{ModelAttribute, PathVariable, RequestMapping}
+import uk.ac.warwick.tabula.commands.coursework.feedback.GenerateGradesFromMarkCommand
+import uk.ac.warwick.tabula.commands.exams.exams.{BulkAdjustmentCommand, BulkAdjustmentTemplateCommand}
+import uk.ac.warwick.tabula.commands.{Appliable, SelfValidating}
 import uk.ac.warwick.tabula.coursework.web.Routes
+import uk.ac.warwick.tabula.data.model.{Assignment, Mark, Module}
+import uk.ac.warwick.tabula.helpers.SpreadsheetHelpers
 import uk.ac.warwick.tabula.web.Mav
+import uk.ac.warwick.tabula.web.controllers.coursework.OldCourseworkController
 import uk.ac.warwick.tabula.web.views.ExcelView
 
 @Profile(Array("cm1Enabled")) @Controller

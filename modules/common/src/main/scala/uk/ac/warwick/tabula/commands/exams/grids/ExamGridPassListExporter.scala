@@ -6,7 +6,8 @@ import org.openxmlformats.schemas.wordprocessingml.x2006.main.STTblWidth
 import uk.ac.warwick.tabula.commands.TaskBenchmarking
 import uk.ac.warwick.tabula.data.model.StudentCourseYearDetails.YearOfStudy
 import uk.ac.warwick.tabula.data.model._
-import uk.ac.warwick.tabula.services.{NormalLoadLookup, ProgressionResult, ProgressionService}
+import uk.ac.warwick.tabula.services.exams.grids.NormalLoadLookup
+import uk.ac.warwick.tabula.services.{ProgressionResult, ProgressionService}
 import uk.ac.warwick.tabula.{AcademicYear, DateFormats}
 
 import scala.collection.JavaConverters._

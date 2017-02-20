@@ -1,4 +1,4 @@
-package uk.ac.warwick.tabula.commands.exams
+package uk.ac.warwick.tabula.commands.exams.exams
 
 import uk.ac.warwick.tabula.CurrentUser
 import uk.ac.warwick.tabula.commands._

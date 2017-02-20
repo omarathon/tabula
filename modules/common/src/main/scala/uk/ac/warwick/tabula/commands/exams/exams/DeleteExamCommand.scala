@@ -1,5 +1,4 @@
-package uk.ac.warwick.tabula.commands.exams
-
+package uk.ac.warwick.tabula.commands.exams.exams
 
 import org.springframework.validation.Errors
 import uk.ac.warwick.tabula.commands._

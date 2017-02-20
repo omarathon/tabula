@@ -7,8 +7,8 @@ import org.apache.poi.xssf.usermodel.{XSSFSheet, XSSFWorkbook}
 import org.joda.time.DateTime
 import org.joda.time.format.DateTimeFormat
 import uk.ac.warwick.tabula.AcademicYear
+import uk.ac.warwick.tabula.commands.exams.exams.ViewExamCommandResult
 import uk.ac.warwick.tabula.data.model._
-import uk.ac.warwick.tabula.commands.exams.ViewExamCommandResult
 import uk.ac.warwick.userlookup.User
 import uk.ac.warwick.util.csv.CSVLineWriter
 

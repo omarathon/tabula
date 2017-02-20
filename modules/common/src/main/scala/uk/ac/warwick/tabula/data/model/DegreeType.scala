@@ -24,6 +24,8 @@ object DegreeType {
 		case _ => null
 	}
 
+	val members = Seq(Undergraduate, Postgraduate, PGCE, InService)
+
 	val SortOrdering: Ordering[DegreeType] = Ordering.by[DegreeType, Int] ( _.sortOrder )
 
 	// Companion object is one of the places searched for an implicit Ordering, so

@@ -2,7 +2,7 @@ package uk.ac.warwick.tabula.commands.scheduling.imports
 
 import org.hibernate.Session
 import org.mockito.Matchers
-import uk.ac.warwick.tabula.services.UpstreamModuleListService
+import uk.ac.warwick.tabula.services.exams.grids.UpstreamModuleListService
 import uk.ac.warwick.tabula.services.scheduling.ModuleListImporter
 import uk.ac.warwick.tabula.{Mockito, TestBase}
 

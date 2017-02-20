@@ -5,7 +5,7 @@ import uk.ac.warwick.tabula.AcademicYear
 import uk.ac.warwick.tabula.commands.exams.grids.{ExamGridEntity, ExamGridEntityYear}
 import uk.ac.warwick.tabula.data.model.StudentCourseYearDetails.YearOfStudy
 import uk.ac.warwick.tabula.data.model._
-import uk.ac.warwick.tabula.services.NormalLoadLookup
+import uk.ac.warwick.tabula.services.exams.grids.NormalLoadLookup
 
 object ExamGridColumnOption {
 	type Identifier = String
