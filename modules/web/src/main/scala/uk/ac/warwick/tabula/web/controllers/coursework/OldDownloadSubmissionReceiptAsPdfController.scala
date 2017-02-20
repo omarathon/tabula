@@ -120,5 +120,5 @@ trait DownloadSubmissionReceiptAsPdfState {
 	def viewer: CurrentUser
 	def student: Member
 
-	lazy val submissionOption: Option[Submission] = submissionService.getSubmissionByUniId(assignment, student.asSsoUser.getWarwickId).filter(_.submitted)
+	lazy val submissionOption: Option[Submission] = submissionService.getSubmissionByUsercode(assignment, student.asSsoUser.getUserId).filter(_.submitted)
 }

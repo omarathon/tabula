@@ -71,17 +71,17 @@ class AssignmentFeedbackAuditCommandInternal(val assignment: Assignment) extends
 			assignment.extensionCountByStatus
 		}
 
-		val uniIdsWithSubmissionOrFeedback = benchmarkTask("Get uni IDs with submissions or feedback") {
-			assignment.getUniIdsWithSubmissionOrFeedback.toSeq.sorted
+		val usercodesWithSubmissionOrFeedback = benchmarkTask("Get uni IDs with submissions or feedback") {
+			assignment.getUsercodesWithSubmissionOrFeedback.toSeq.sorted
 		}
 		val moduleMembers = benchmarkTask("Get module membership") {
 			assessmentMembershipService.determineMembershipUsers(assignment)
 		}
-		val unsubmittedMembers = moduleMembers.filterNot(m => uniIdsWithSubmissionOrFeedback.contains(m.getWarwickId))
+		val unsubmittedMembers = moduleMembers.filterNot(m => usercodesWithSubmissionOrFeedback.contains(m.getUserId))
 
-		def enhancedFeedbackForUniId(uniId: String) = {
-			val usersFeedback = assignment.feedbacks.asScala.filter(feedback => feedback.universityId == uniId)
-			if (usersFeedback.size > 1) throw new IllegalStateException("More than one Feedback for " + uniId)
+		def enhancedFeedbackForUsercode(usercode: String) = {
+			val usersFeedback = assignment.feedbacks.asScala.filter(feedback => feedback.usercode == usercode)
+			if (usersFeedback.size > 1) throw new IllegalStateException("More than one Feedback for " + usercode)
 			// we only need feedback for audit. Utilising existing workflow structure to extract FeedbackListItem as that might be needed at other places.
 			usersFeedback.headOption.map { feedback => FeedbackListItem(feedback, downloaded = false, onlineViewed = false, feedbackForSits = null) }
 		}
@@ -99,7 +99,7 @@ class AssignmentFeedbackAuditCommandInternal(val assignment: Assignment) extends
 
 		val unsubmitted: Seq[WorkFlowStudent] = benchmarkTask("Get unsubmitted users") {
 			for (user <- unsubmittedMembers) yield {
-				val usersExtension = assignment.extensions.asScala.filter(_.universityId == user.getWarwickId)
+				val usersExtension = assignment.extensions.asScala.filter(_.usercode == user.getUserId)
 				if (usersExtension.size > 1) throw new IllegalStateException("More than one Extension for " + user.getWarwickId)
 
 				val enhancedExtensionForUniId = usersExtension.headOption.map { extension =>
@@ -112,7 +112,7 @@ class AssignmentFeedbackAuditCommandInternal(val assignment: Assignment) extends
 				val coursework = WorkflowItems(
 					user,
 					enhancedSubmission = None,
-					enhancedFeedbackForUniId(user.getWarwickId),
+					enhancedFeedbackForUsercode(user.getUserId),
 					enhancedExtensionForUniId
 				)
 
@@ -130,24 +130,24 @@ class AssignmentFeedbackAuditCommandInternal(val assignment: Assignment) extends
 		}
 
 		val submitted: Seq[WorkFlowStudent] = benchmarkTask("Get submitted users") {
-			for (uniId <- uniIdsWithSubmissionOrFeedback) yield {
-				val usersSubmissions = submissions.asScala.filter(_.universityId == uniId)
-				val usersExtension = assignment.extensions.asScala.filter(extension => extension.universityId == uniId)
+			for (usercode <- usercodesWithSubmissionOrFeedback) yield {
+				val usersSubmissions = submissions.asScala.filter(_.usercode == usercode)
+				val usersExtension = assignment.extensions.asScala.filter(_.usercode == usercode)
 
-				val userFilter = moduleMembers.filter(member => member.getWarwickId == uniId)
+				val userFilter = moduleMembers.filter(member => member.getUserId == usercode)
 				val user = if (userFilter.isEmpty) {
-					userLookup.getUserByWarwickUniId(uniId)
+					userLookup.getUserByUserId(usercode)
 				} else {
 					userFilter.head
 				}
 
-				if (usersSubmissions.size > 1) throw new IllegalStateException("More than one Submission for " + uniId)
-				if (usersExtension.size > 1) throw new IllegalStateException("More than one Extension for " + uniId)
+				if (usersSubmissions.size > 1) throw new IllegalStateException(s"More than one Submission for $usercode")
+				if (usersExtension.size > 1) throw new IllegalStateException(s"More than one Extension for $usercode")
 
 				// we only need submission but utilising existing workflow structure to extract SubmissionListItem as that might be needed at other places
-				val enhancedSubmissionForUniId = usersSubmissions.headOption.map { submission => SubmissionListItem(submission, false) }
+				val enhancedSubmissionForUsercode = usersSubmissions.headOption.map (submission => SubmissionListItem(submission, downloaded=false))
 
-				val enhancedExtensionForUniId = usersExtension.headOption map { extension =>
+				val enhancedExtensionForUniUsercode = usersExtension.headOption map { extension =>
 					new ExtensionListItem(
 						extension,
 						assignment.isWithinExtension(user)
@@ -156,9 +156,9 @@ class AssignmentFeedbackAuditCommandInternal(val assignment: Assignment) extends
 
 				val coursework = WorkflowItems(
 					user,
-					enhancedSubmissionForUniId,
-					enhancedFeedbackForUniId(uniId),
-					enhancedExtensionForUniId
+					enhancedSubmissionForUsercode,
+					enhancedFeedbackForUsercode(usercode),
+					enhancedExtensionForUniUsercode
 				)
 
 				val progress = cm2WorkflowService.progress(assignment)(coursework)
@@ -182,7 +182,7 @@ class AssignmentFeedbackAuditCommandInternal(val assignment: Assignment) extends
 		val markerInfo = MarkerInfo(assignment.firstMarkersWithStudentAllocationCountMap, assignment.secondMarkersWithStudentAllocationCountMap)
 
 		AssignmentFeedbackAuditResults(
-			(unsubmitted ++ submitted),
+			unsubmitted ++ submitted,
 			totalFilesCheckedForPlagiarism,
 			extensionInfo,
 			markerInfo

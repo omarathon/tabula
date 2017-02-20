@@ -38,10 +38,9 @@ class MarkerAddMarksCommandInternal(val module: Module, val assignment: Assignme
 
 	override def applyInternal(): List[MarkerFeedback] = transactional() {
 
-		def saveFeedback(universityId: String, actualMark: String, actualGrade: String) = {
-
+		def saveFeedback(user: User, actualMark: String, actualGrade: String) = {
 			// For markers a parent feedback should _always_ exist (created when released for marking)
-			val parentFeedback = assignment.feedbacks.asScala.find(_.universityId == universityId).get
+			val parentFeedback = assignment.feedbacks.asScala.find(_.usercode == user.getUserId).get
 
 			// get marker feedback if it already exists - if not create one
 			val markerFeedback:MarkerFeedback = firstMarker match {
@@ -76,7 +75,7 @@ class MarkerAddMarksCommandInternal(val module: Module, val assignment: Assignme
 		}
 
 		// persist valid marks
-		val markList = marks.asScala.filter(_.isValid).map { (mark) => saveFeedback(mark.universityId, mark.actualMark, mark.actualGrade) }
+		val markList = marks.asScala.filter(_.isValid).map { (mark) => saveFeedback(mark.user, mark.actualMark, mark.actualGrade) }
 		markList.toList
 	}
 
@@ -88,7 +87,7 @@ trait MarkerAddMarksCommandValidation extends ValidatesMarkItem {
 
 	override def checkMarkUpdated(mark: MarkItem) {
 		// Warn if marks for this student are already uploaded
-		assessment.feedbacks.asScala.find(feedback => feedback.universityId == mark.universityId) match {
+		assessment.feedbacks.asScala.find(feedback => feedback.usercode == mark.user.getUserId) match {
 			case Some(feedback) =>
 				if (assessment.isFirstMarker(marker)
 					&& feedback.firstMarkerFeedback != null
@@ -106,11 +105,11 @@ trait MarkerAddMarksCommandValidation extends ValidatesMarkItem {
 
 	override def checkMarker(mark: MarkItem, errors: Errors, alreadyHasErrors: Boolean): Boolean = {
 		var hasErrors = alreadyHasErrors
-		assessment.feedbacks.asScala.find(feedback => feedback.universityId == mark.universityId) match {
+		assessment.feedbacks.asScala.find(feedback => feedback.usercode == mark.user.getUserId) match {
 			case Some(feedback) =>
 				val assignedMarker = firstMarker match {
-					case true => assignment.getStudentsFirstMarker(feedback.universityId)
-					case false => assignment.getStudentsSecondMarker(feedback.universityId)
+					case true => assignment.getStudentsFirstMarker(feedback.usercode)
+					case false => assignment.getStudentsSecondMarker(feedback.usercode)
 				}
 
 				if (!assignedMarker.contains(marker)) {

@@ -44,7 +44,7 @@
 			<h5>Attachments</h5>
 			<div>
 				<#assign downloadMFUrl><@routes.coursework.markerFeedbackFilesDownload secondMarkerFeedback/></#assign>
-				<@fmt.download_attachments feedback.attachments downloadMFUrl "for ${feedback.feedbackPosition.description?uncap_first}" "feedback-${feedback.feedback.universityId}" />
+				<@fmt.download_attachments feedback.attachments downloadMFUrl "for ${feedback.feedbackPosition.description?uncap_first}" "feedback-${feedback.feedback.studentIdentifier}" />
 				<#list feedback.attachments as attachment>
 					<input value="${attachment.id}" name="${attachment.name}" type="hidden"/>
 				</#list>

@@ -23,22 +23,22 @@ class StudentsChooseMarkerWorkflow extends MarkingWorkflow with NoSecondMarker {
 
 	override def studentsChooseMarker = true
 
-	def getStudentsFirstMarker(assessment: Assessment, universityId: String): Option[String] = assessment match {
+	def getStudentsFirstMarker(assessment: Assessment, usercode: String): Option[String] = assessment match {
 		case exam:Exam => None
 		case assignment:Assignment => assignment.markerSelectField.flatMap { field =>
-			val submission = submissionService.getSubmissionByUniId(assignment, universityId)
+			val submission = submissionService.getSubmissionByUsercode(assignment, usercode)
 			submission.flatMap(_.getValue(field).map(_.value))
 		}
 	}
 
 	def getMarkersStudents(assessment: Assessment, user: User): Seq[User] = assessment match {
-		case assignment: Assignment => getSubmissions(assignment, user).map(s => userLookupService.getUserByWarwickUniId(s.universityId))
+		case assignment: Assignment => getSubmissions(assignment, user).map(s => userLookupService.getUserByUserId(s.usercode))
 		case _ => Nil
 	}
 
 
 	def getSubmissions(assignment: Assignment, user: User): Seq[Submission] = assignment.markerSelectField.map { markerField =>
-			val releasedSubmission = assignment.submissions.asScala.filter(s => assignment.isReleasedForMarking(s.universityId))
+			val releasedSubmission = assignment.submissions.asScala.filter(s => assignment.isReleasedForMarking(s.usercode))
 			releasedSubmission.filter(submission => {
 				submission.getValue(markerField) match {
 					case Some(subValue) => user.getUserId == subValue.value

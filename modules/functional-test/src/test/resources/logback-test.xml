@@ -14,6 +14,7 @@
 		</encoder>
 	</appender>
 	<logger name="com.gargoylesoftware.htmlunit.javascript.host.html.HTMLElement" level="ERROR"/>
+	<logger name="com.gargoylesoftware.htmlunit.javascript.host.css.CSSStyleSheet" level="ERROR"/>
 	<logger name="org.springframework.jdbc.core" level="DEBUG"/>
 	<logger name="com.gargoylesoftware.htmlunit.IncorrectnessListenerImpl" level="OFF"/>
 	<logger name="com.gargoylesoftware.htmlunit.javascript.host.ActiveXObject" level="OFF"/>

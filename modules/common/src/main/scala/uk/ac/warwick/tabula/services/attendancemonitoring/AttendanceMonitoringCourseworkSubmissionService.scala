@@ -25,7 +25,9 @@ abstract class AbstractAttendanceMonitoringCourseworkSubmissionService extends A
 	self: ProfileServiceComponent with AttendanceMonitoringServiceComponent with AssessmentServiceComponent =>
 
 	def getCheckpoints(submission: Submission): Seq[AttendanceMonitoringCheckpoint] = {
-		profileService.getMemberByUniversityId(submission.universityId).flatMap{
+
+		val member = submission.universityId.flatMap(uid => profileService.getMemberByUniversityId(uid))
+		member.flatMap{
 			case studentMember: StudentMember =>
 					val relevantPoints = getRelevantPoints(
 						attendanceMonitoringService.listStudentsPoints(studentMember, None, submission.assignment.academicYear),
@@ -38,12 +40,12 @@ abstract class AbstractAttendanceMonitoringCourseworkSubmissionService extends A
 						checkpoint.point = point
 						checkpoint.attendanceMonitoringService = attendanceMonitoringService
 						checkpoint.student = studentMember
-						checkpoint.updatedBy = submission.userId
+						checkpoint.updatedBy = submission.usercode
 						checkpoint.updatedDate = DateTime.now
 						checkpoint.state = AttendanceState.Attended
 						checkpoint
 					})
-					Option(checkpoints)
+					Some(checkpoints)
 			case _ => None
 		}.getOrElse(Seq())
 	}
@@ -88,7 +90,7 @@ abstract class AbstractAttendanceMonitoringCourseworkSubmissionService extends A
 				true
 			} else {
 				val submissions = assessmentService.getSubmissionsForAssignmentsBetweenDates(
-					studentMember.universityId,
+					studentMember.userId,
 					point.startDate.toDateTimeAtStartOfDay,
 					point.endDate.plusDays(1).toDateTimeAtStartOfDay
 				).filterNot(_.isLate).filterNot(s => s.assignment == submission.assignment) ++ Seq(submission)
@@ -98,7 +100,7 @@ abstract class AbstractAttendanceMonitoringCourseworkSubmissionService extends A
 		} else {
 			def allSubmissions = {
 				assessmentService.getSubmissionsForAssignmentsBetweenDates(
-					studentMember.universityId,
+					studentMember.userId,
 					point.startDate.toDateTimeAtStartOfDay,
 					point.endDate.plusDays(1).toDateTimeAtStartOfDay
 				).filterNot(_.isLate).filterNot(

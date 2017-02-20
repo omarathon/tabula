@@ -34,7 +34,7 @@ class AddAssignmentCommandContextTest extends AppContextTestBase {
 			modules.saveOrUpdate(module)
 			session.flush() // get out of my car, get into my database
 
-			module.id should not be (null)
+			module.id should not be null
 
 			val command = new AddAssignmentCommand(module)
 
@@ -47,11 +47,11 @@ class AddAssignmentCommandContextTest extends AppContextTestBase {
 
 			val assignment = session.get(classOf[Assignment], assignmentNew.id).asInstanceOf[Assignment]
 
-			assignment.fields.size should be >= (2)
+			assignment.fields.size should be >= 2
 			assignment.submissionFields.size should be (2)
-			assignment.submissionFields.apply(0) should have('class(classOf[CommentField]))
-			assignment.submissionFields.apply(0).template should be ("comment")
-			assignment.submissionFields.apply(0).propertiesMap("value") should be("Text at the top")
+			assignment.submissionFields.head should have('class(classOf[CommentField]))
+			assignment.submissionFields.head.template should be ("comment")
+			assignment.submissionFields.head.propertiesMap("value") should be("Text at the top")
 			assignment.submissionFields.apply(1) should have('class(classOf[FileField]))
 			assignment.submissionFields.apply(1).assignment should be(assignment)
 			assignment.submissionFields.apply(1).position should be(1)
@@ -59,7 +59,7 @@ class AddAssignmentCommandContextTest extends AppContextTestBase {
 		}
 	}
 
-  @Test def massAddUsers {
+  @Test def massAddUsers() {
     val form = new AddAssignmentCommand()
     form.massAddUsers =
       """ cusebr

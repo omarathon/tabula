@@ -56,8 +56,8 @@ class OldMarkingCompletedController extends OldCourseworkController {
 		errors: Errors
 	): Mav = {
 		val isUserALaterMarker = form.markerFeedback.asScala.exists { markerFeedback =>
-			val isSecondMarkerForStudent = assignment.getStudentsSecondMarker(markerFeedback.feedback.universityId).exists(_.getUserId == user.apparentId)
-			val isThirdMarkerForStudent = assignment.getStudentsThirdMarker(markerFeedback.feedback.universityId).exists(_.getUserId == user.apparentId)
+			val isSecondMarkerForStudent = assignment.getStudentsSecondMarker(markerFeedback.feedback.usercode).exists(_.getUserId == user.apparentId)
+			val isThirdMarkerForStudent = assignment.getStudentsThirdMarker(markerFeedback.feedback.usercode).exists(_.getUserId == user.apparentId)
 			markerFeedback.getFeedbackPosition match {
 				case FirstFeedback => isSecondMarkerForStudent || isThirdMarkerForStudent
 				case SecondFeedback => isThirdMarkerForStudent

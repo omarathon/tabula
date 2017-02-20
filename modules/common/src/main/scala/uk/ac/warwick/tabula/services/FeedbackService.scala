@@ -13,10 +13,10 @@ import uk.ac.warwick.userlookup.User
 import uk.ac.warwick.spring.Wire
 
 trait FeedbackService {
-	def getStudentFeedback(assessment: Assessment, warwickId: String): Option[Feedback]
+	def getStudentFeedback(assessment: Assessment, usercode: String): Option[Feedback]
 	def countPublishedFeedback(assignment: Assignment): Int
 	def getUsersForFeedback(assignment: Assignment): Seq[(String, User)]
-	def getAssignmentFeedbackByUniId(assignment: Assignment, uniId: String): Option[AssignmentFeedback]
+	def getAssignmentFeedbackByUsercode(assignment: Assignment, usercode: String): Option[AssignmentFeedback]
 	def getAssignmentFeedbackById(feedbackId: String): Option[AssignmentFeedback]
 	def getMarkerFeedbackById(markerFeedbackId: String): Option[MarkerFeedback]
 	def getRejectedMarkerFeedbackByFeedback(feedback: Feedback): Seq[MarkerFeedback]
@@ -39,14 +39,14 @@ class FeedbackServiceImpl extends FeedbackService with Daoisms with Logging {
 	 * of being plagiarised */
 	def getUsersForFeedback(assignment: Assignment): Seq[(String, User)] = {
 		val plagiarisedSubmissions = assignment.submissions.filter { submission => submission.suspectPlagiarised }
-		val plagiarisedIds = plagiarisedSubmissions.map { _.universityId }
-		val unreleasedIds = assignment.unreleasedFeedback.map { _.universityId }
-		val unplagiarisedUnreleasedIds = unreleasedIds.filter { uniId => !plagiarisedIds.contains(uniId) }
-		userLookup.getUsersByWarwickUniIds(unplagiarisedUnreleasedIds).toSeq
+		val plagiarisedIds = plagiarisedSubmissions.map { _.usercode }
+		val unreleasedIds = assignment.unreleasedFeedback.map { _.usercode }
+		val unplagiarisedUnreleasedIds = unreleasedIds.filter { usercode => !plagiarisedIds.contains(usercode) }
+		userLookup.getUsersByUserIds(unplagiarisedUnreleasedIds).toSeq
 	}
 
-	def getStudentFeedback(assessment: Assessment, uniId: String): Option[Feedback] = {
-		assessment.findFullFeedback(uniId)
+	def getStudentFeedback(assessment: Assessment, usercode: String): Option[Feedback] = {
+		assessment.findFullFeedback(usercode)
 	}
 
 	def countPublishedFeedback(assignment: Assignment): Int = {
@@ -56,8 +56,8 @@ class FeedbackServiceImpl extends FeedbackService with Daoisms with Logging {
 			.asInstanceOf[Number].intValue
 	}
 
-	def getAssignmentFeedbackByUniId(assignment: Assignment, uniId: String): Option[AssignmentFeedback] = transactional(readOnly = true) {
-		dao.getAssignmentFeedbackByUniId(assignment, uniId)
+	def getAssignmentFeedbackByUsercode(assignment: Assignment, usercode: String): Option[AssignmentFeedback] = transactional(readOnly = true) {
+		dao.getAssignmentFeedbackByUsercode(assignment, usercode)
 	}
 
 	def getAssignmentFeedbackById(feedbackId: String): Option[AssignmentFeedback] = {

@@ -4,7 +4,6 @@ import scala.collection.JavaConversions._
 import org.joda.time.DateTime
 import uk.ac.warwick.tabula.data.model.forms.{Extension, ExtensionState}
 import uk.ac.warwick.tabula.data.model.{Assignment, FileAttachment}
-import uk.ac.warwick.tabula.events.EventHandling
 import uk.ac.warwick.tabula.services.{UserLookupComponent, UserLookupService}
 import uk.ac.warwick.tabula.{CurrentUser, Mockito, RequestInfo, TestBase}
 import uk.ac.warwick.userlookup.User
@@ -12,20 +11,26 @@ import uk.ac.warwick.userlookup.User
 // scalastyle:off magic.number
 class EditExtensionCommandTest extends TestBase {
 
+	def createUser(userId: String, warwickId:String): User = {
+		val user = new User(userId)
+		user.setFoundUser(true)
+		user.setWarwickId(warwickId)
+		user
+	}
+	
 	@Test
 	def addExtension() {
 		withUser("cuslat", "1171795") {
 			withFakeTime(dateTime(2014, 2, 11)) {
 
 				val assignment = createAssignment()
-				val targetUniversityId = "1234567"
-				val extension = createExtension(assignment, targetUniversityId)
+				val student = createUser("1234567", "u1234567")
+				val extension = createExtension(assignment, student)
 
 				extension.approved should be (false)
 				extension.rejected should be (false)
 				extension.state should be (ExtensionState.Unreviewed)
 				extension.reviewerComments should be (null)
-				extension.universityId should be (targetUniversityId)
 			}
 		}
 	}
@@ -37,18 +42,17 @@ class EditExtensionCommandTest extends TestBase {
 
 				val currentUser = RequestInfo.fromThread.get.user
 				val assignment = createAssignment()
-				val targetUniversityId = "1234567"
-				val extension = createExtension(assignment, targetUniversityId)
+				val student = createUser("1234567", "u1234567")
+				val extension = createExtension(assignment, student)
 
 				extension.approved should be (false)
 				extension.rejected should be (false)
 				extension.state should be (ExtensionState.Unreviewed)
 				extension.reviewerComments should be (null)
-				extension.universityId should be (targetUniversityId)
 
 				val reviewerComments = "I've always thought that Tabula should have a photo sharing component"
 
-				val editCommand = new EditExtensionCommandInternal(assignment.module, assignment, targetUniversityId, currentUser, "Grant") with EditExtensionCommandTestSupport
+				val editCommand = new EditExtensionCommandInternal(assignment.module, assignment, student, currentUser, "Grant") with EditExtensionCommandTestSupport
 				editCommand.reviewerComments = reviewerComments
 				val result = editCommand.apply()
 
@@ -57,7 +61,7 @@ class EditExtensionCommandTest extends TestBase {
 				result.state should be (ExtensionState.Approved)
 				result.reviewedOn should be (DateTime.now)
 				result.reviewerComments should be (reviewerComments)
-				result.universityId should be (targetUniversityId)
+				result._universityId should be (student.getWarwickId)
 			}
 		}
 	}
@@ -69,18 +73,17 @@ class EditExtensionCommandTest extends TestBase {
 
 				val currentUser = RequestInfo.fromThread.get.user
 				val assignment = createAssignment()
-				val targetUniversityId = "1234567"
-				val extension = createExtension(assignment, targetUniversityId)
+				val student = createUser("1234567", "u1234567")
+				val extension = createExtension(assignment, student)
 
 				extension.approved should be (false)
 				extension.rejected should be (false)
 				extension.state should be (ExtensionState.Unreviewed)
 				extension.reviewerComments should be (null)
-				extension.universityId should be (targetUniversityId)
 
 				val reviewerComments = "something something messaging service something something $17 billion cheers thanks"
 
-				val editCommand = new EditExtensionCommandInternal(assignment.module, assignment, targetUniversityId, currentUser, "Reject") with EditExtensionCommandTestSupport
+				val editCommand = new EditExtensionCommandInternal(assignment.module, assignment, student, currentUser, "Reject") with EditExtensionCommandTestSupport
 				editCommand.reviewerComments = reviewerComments
 				val result = editCommand.apply()
 
@@ -89,7 +92,7 @@ class EditExtensionCommandTest extends TestBase {
 				result.state should be (ExtensionState.Rejected)
 				result.reviewedOn should be (DateTime.now)
 				result.reviewerComments should be (reviewerComments)
-				result.universityId should be (targetUniversityId)
+				result.usercode should be (student.getUserId)
 			}
 		}
 	}
@@ -102,18 +105,17 @@ class EditExtensionCommandTest extends TestBase {
 
 				val currentUser = RequestInfo.fromThread.get.user
 				val assignment = createAssignment()
-				val targetUniversityId = "1234567"
-				val extension = createExtension(assignment, targetUniversityId)
+				val student = createUser("1234567", "u1234567")
+				val extension = createExtension(assignment, student)
 
 				extension.approved should be (false)
 				extension.rejected should be (false)
 				extension.state should be (ExtensionState.Unreviewed)
-				extension.universityId should be (targetUniversityId)
 
 				assignment.extensions.add(extension)
 
 				assignment.extensions.size should be (2)
-				val deleteCommand = new DeleteExtensionCommandInternal(assignment.module, assignment, targetUniversityId, currentUser) with DeleteExtensionCommandTestSupport
+				val deleteCommand = new DeleteExtensionCommandInternal(assignment.module, assignment, student, currentUser) with DeleteExtensionCommandTestSupport
 				val result = deleteCommand.apply()
 				assignment.extensions.size should be (1)
 
@@ -134,8 +136,8 @@ class EditExtensionCommandTest extends TestBase {
 				submitter = currentUser
 				assignment = createAssignment()
 				assignment.extensions.add(extension)
-				val targetUniversityId = "1234567"
-				extension = createExtension(assignment, targetUniversityId)
+				student = createUser("1234567", "u1234567")
+				extension = createExtension(assignment, student)
 			}
 
 			val emitted = deleteCommand.emit(deleteCommand.extension)
@@ -148,12 +150,17 @@ class EditExtensionCommandTest extends TestBase {
 	def createAssignment(): Assignment = {
 		val assignment = newDeepAssignment()
 		assignment.closeDate = DateTime.now.plusMonths(1)
-		assignment.extensions += new Extension(currentUser.universityId)
+		assignment.extensions += new Extension {
+			_universityId = currentUser.universityId
+			usercode = currentUser.userId
+		}
 		assignment
 	}
 
-	def createExtension(assignment: Assignment, targetUniversityId: String, reviewerComments: String = "") : Extension = {
-		val extension = new Extension(targetUniversityId)
+	def createExtension(assignment: Assignment, student: User, reviewerComments: String = "") : Extension = {
+		val extension = new Extension
+		extension.usercode = student.getUserId
+		extension._universityId = student.getWarwickId
 		extension.assignment = assignment
 		extension.expiryDate = DateTime.now.plusMonths(2)
 		if(reviewerComments.isEmpty)
@@ -175,7 +182,7 @@ with Mockito {
 	var deleted = false
 	testuser.setWarwickId("1171975")
 
-	userLookup.getUserByWarwickUniId(any[String]) answers { id => testuser	}
+	userLookup.getUserByWarwickUniId(any[String]) answers { id => testuser }
 
 	def delete(attachment: FileAttachment) {}
 	def delete(extension: Extension) { }

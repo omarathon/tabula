@@ -13,7 +13,7 @@ class FeedbackPublishedNotification
 	extends NotificationWithTarget[AssignmentFeedback, Assignment]
 	with SingleRecipientNotification
 	with SingleItemNotification[AssignmentFeedback]
-	with UniversityIdRecipientNotification
+	with UniversityIdOrUserIdRecipientNotification
 	with AutowiringUserLookupComponent
 	with AllCompletedActionRequiredNotification {
 

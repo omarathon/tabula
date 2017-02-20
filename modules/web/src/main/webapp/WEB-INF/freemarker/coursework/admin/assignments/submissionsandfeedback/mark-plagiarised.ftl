@@ -30,8 +30,8 @@
 			${verb?cap_first}ing <strong><@fmt.p students?size "student" /></strong> as suspected of being plagiarised.
 			${message}
 		</p>
-		<#list students as uniId>
-			<input type="hidden" name="students" value="${uniId}" />
+		<#list students as usercode>
+			<input type="hidden" name="students" value="${usercode}" />
 		</#list>
 	</@spring.bind>
 

@@ -35,7 +35,7 @@ class MarkerFeedback extends GeneratedId with FeedbackAttachments with ToEntityR
 		// Very fuck you, Hibernate
 		HibernateHelpers.initialiseAndUnproxy(feedback) match {
 			case assignmentFeedback: AssignmentFeedback =>
-				val student = feedback.universityId
+				val student = feedback.usercode
 				val assignment = assignmentFeedback.assignment
 				Option(assignment.markingWorkflow).flatMap { workflow =>
 					getFeedbackPosition match {

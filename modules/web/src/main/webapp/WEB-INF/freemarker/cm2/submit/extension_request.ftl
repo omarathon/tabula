@@ -86,7 +86,7 @@
 		>
 
 			<@bs3form.labelled_form_group "" "Your University ID">
-				<div class="uneditable-input">${user.apparentUser.warwickId!}</div>
+				<div class="uneditable-input">${user.studentIdentifier}</div>
 			</@bs3form.labelled_form_group>
 
 			<@bs3form.labelled_form_group "reason" "Reasons for applying for an extension">

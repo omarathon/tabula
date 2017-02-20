@@ -89,7 +89,7 @@ class FilterExtensionsCommandInternal(val user: CurrentUser) extends CommandInte
 			extensionsPerPage * (page-1)
 		)}
 
-		val graphs = extensions.map(e => ExtensionGraph(e, userLookup.getUserByUserId(e.userId)))
+		val graphs = extensions.map(e => ExtensionGraph(e, userLookup.getUserByUserId(e.usercode)))
 		FilterExtensionResults(graphs, totalResults)
 	}
 }

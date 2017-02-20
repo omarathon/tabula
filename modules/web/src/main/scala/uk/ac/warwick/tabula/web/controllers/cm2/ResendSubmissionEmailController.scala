@@ -22,7 +22,7 @@ class ResendSubmissionEmailController extends CourseworkController {
 	@ModelAttribute def command(@PathVariable assignment: Assignment, user: CurrentUser) =
 		new SendSubmissionReceiptCommand(
 			assignment,
-			mandatory(submissionService.getSubmissionByUniId(assignment, user.universityId).filter(_.submitted)),
+			mandatory(submissionService.getSubmissionByUsercode(assignment, user.userId).filter(_.submitted)),
 			user)
 
 	@RequestMapping(method = Array(GET, HEAD))

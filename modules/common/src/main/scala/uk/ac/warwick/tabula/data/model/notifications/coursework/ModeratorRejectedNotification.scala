@@ -2,7 +2,6 @@ package uk.ac.warwick.tabula.data.model.notifications.coursework
 
 import javax.persistence.{DiscriminatorValue, Entity}
 
-import uk.ac.warwick.tabula.ItemNotFoundException
 import uk.ac.warwick.tabula.coursework.web.Routes
 import uk.ac.warwick.tabula.data.HibernateHelpers
 import uk.ac.warwick.tabula.data.model._
@@ -35,12 +34,13 @@ class ModeratorRejectedNotification extends Notification[MarkerFeedback, Unit]
 
 	def verb = "Released"
 
-	def title: String = "%s: Feedback for %s for \"%s\" has been rejected by the moderator".format(assignment.module.code.toUpperCase, parentFeedback.universityId, assignment.name)
+	def title: String = "%s: Feedback for %s for \"%s\" has been rejected by the moderator"
+		.format(assignment.module.code.toUpperCase, parentFeedback.studentIdentifier, assignment.name)
 
 	def content = FreemarkerModel(ModeratorRejectedNotification.templateLocation,
 		Map(
 			"moderatorName" -> agent.getFullName,
-			"studentId" -> parentFeedback.universityId,
+			"studentId" -> parentFeedback.studentIdentifier,
 			"assignment" -> assignment,
 			"rejectionComments" -> markerFeedback.rejectionComments,
 			"adjustedMark" -> markerFeedback.mark,

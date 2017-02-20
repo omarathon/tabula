@@ -31,13 +31,13 @@ class OwnDataRoleProvider extends RoleProvider with TaskBenchmarking {
 		scope match {
 			// You can view your own submission
 			case submission: Submission =>
-				if (submission.universityId == user.universityId)
+				if (submission.usercode == user.userId)
 					Stream(customRoleFor(department)(SubmitterRoleDefinition, submission).getOrElse(Submitter(submission)))
 				else Stream.empty
 
 			// You can view feedback to your work, but only if it's released
 			case feedback: Feedback =>
-				if (feedback.universityId == user.universityId && feedback.released)
+				if (feedback.usercode == user.userId && feedback.released)
 					Stream(customRoleFor(department)(FeedbackRecipientRoleDefinition, feedback).getOrElse(FeedbackRecipient(feedback)))
 				else Stream.empty
 

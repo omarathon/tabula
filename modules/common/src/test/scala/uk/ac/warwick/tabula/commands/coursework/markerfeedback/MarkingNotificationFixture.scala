@@ -1,6 +1,5 @@
 package uk.ac.warwick.tabula.commands.coursework.markerfeedback
 
-import collection.JavaConversions._
 import uk.ac.warwick.tabula.{Mockito, Fixtures}
 import uk.ac.warwick.tabula.services.UserLookupService
 import org.mockito.Mockito._
@@ -31,10 +30,10 @@ trait MarkingNotificationFixture extends Mockito {
 	when(mockUserLookup.getUserByUserId("marker1")) thenReturn marker1
 	when(mockUserLookup.getUserByUserId("marker2")) thenReturn marker2
 	when(mockUserLookup.getUserByUserId("marker3")) thenReturn marker3
-	when(mockUserLookup.getUserByWarwickUniId("student1")) thenReturn student1
-	when(mockUserLookup.getUserByWarwickUniId("student2")) thenReturn student2
-	when(mockUserLookup.getUserByWarwickUniId("student3")) thenReturn student3
-	when(mockUserLookup.getUserByWarwickUniId("student4")) thenReturn student4
+	when(mockUserLookup.getUserByUserId("student1")) thenReturn student1
+	when(mockUserLookup.getUserByUserId("student2")) thenReturn student2
+	when(mockUserLookup.getUserByUserId("student3")) thenReturn student3
+	when(mockUserLookup.getUserByUserId("student4")) thenReturn student4
 
 
 	def userGroup(usercodes: String *): UserGroup = {
@@ -45,7 +44,8 @@ trait MarkingNotificationFixture extends Mockito {
 
 	def makeMarkerFeedback(student: User)(linkFunction: (Feedback, MarkerFeedback) => Unit): (AssignmentFeedback, MarkerFeedback) = {
 		val feedback = new AssignmentFeedback
-		feedback.universityId = student.getWarwickId
+		feedback.usercode = student.getUserId
+		feedback._universityId = student.getWarwickId
 		val mf = new MarkerFeedback()
 		mf.userLookup = mockUserLookup
 		mf.feedback = feedback

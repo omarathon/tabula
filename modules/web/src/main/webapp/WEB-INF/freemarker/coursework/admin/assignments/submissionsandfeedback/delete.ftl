@@ -16,8 +16,8 @@
 <p>Deleting submissions and feedback for <strong><@fmt.p students?size "student" /></strong>:</p>
 <ul>
 <#list students as student>
-<li>${student.fullName} (${student.warwickId!})</li>
-<input type="hidden" name="students" value="${student.warwickId!}" />
+<li>${student.fullName} (<#if student.warwickId??>${student.warwickId}<#else>${student.userId}</#if>)</li>
+<input type="hidden" name="students" value="${student.userId!}" />
 </#list>
 </ul>
 <p>

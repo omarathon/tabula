@@ -9,13 +9,13 @@
 <#macro row graph>
 	<#assign state = (graph.extension.state.description)!"None" />
 	<tr class="itemContainer"
-		data-contentid ="${assignment.id}_${graph.universityId}"
-		data-detailurl ="<@routes.coursework.extensiondetail assignment graph.universityId />"
+		data-contentid ="${assignment.id}_${graph.user.userId}"
+		data-detailurl ="<@routes.coursework.extensiondetail assignment graph.user.userId />"
 	>
 
 		<#-- TAB-2063 - The extension manager will need to know who is doing the asking, so we should always show names -->
 		<td class="student-col toggle-cell"><h6 class="toggle-icon">${graph.user.firstName}</h6></td>
-		<td class="student-col toggle-cell"><h6>${graph.user.lastName}&nbsp;<@pl.profile_link graph.universityId /></h6></td>
+		<td class="student-col toggle-cell"><h6>${graph.user.lastName}&nbsp;<#if graph.user.warwickId??><@pl.profile_link graph.user.warwickId /><#else><@pl.profile_link graph.user.userId /></#if></h6></td>
 
 		<td class="status-col toggle-cell content-cell">
 			<dl style="margin: 0; border-bottom: 0;">
@@ -35,8 +35,8 @@
 						<span class="label no-extension">No extension</span>
 					</#if>
 				</dt>
-				<dd style="display: none;" class="table-content-container" data-contentid="${assignment.id}_${graph.universityId}">
-					<div id="content-${assignment.id}_${graph.universityId}" class="content-container" data-contentid="${assignment.id}_${graph.universityId}">
+				<dd style="display: none;" class="table-content-container" data-contentid="${assignment.id}__${graph.user.userId}">
+					<div id="content-${assignment.id}_${graph.user.userId}" class="content-container" data-contentid="${assignment.id}__${graph.user.userId}">
 						<p>No extension data is currently available.</p>
 					</div>
 				</dd>

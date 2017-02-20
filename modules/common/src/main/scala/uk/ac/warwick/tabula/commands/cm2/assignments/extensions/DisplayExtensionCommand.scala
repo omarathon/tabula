@@ -19,30 +19,28 @@ case class DisplayExtensionDetail(
 }
 
 object DisplayExtensionCommand {
-	def apply(universityId: String, assignment: Assignment) = new DisplayExtensionCommandInternal(universityId, assignment)
+	def apply(student: User, assignment: Assignment) = new DisplayExtensionCommandInternal(student, assignment)
 			with ComposableCommand[DisplayExtensionDetail]
 			with DisplayExtensionPermissions
-			with AutowiringUserLookupComponent
 			with AutowiringExtensionServiceComponent
 			with AutowiringSubmissionServiceComponent
 			with ReadOnly with Unaudited
 }
 
-class DisplayExtensionCommandInternal(val universityId: String, val assignment: Assignment) extends CommandInternal[DisplayExtensionDetail]
+class DisplayExtensionCommandInternal(val student: User, val assignment: Assignment) extends CommandInternal[DisplayExtensionDetail]
 	with DisplayExtensionState with TaskBenchmarking {
 
-	this: UserLookupComponent with ExtensionServiceComponent with SubmissionServiceComponent  =>
+	this:  ExtensionServiceComponent with SubmissionServiceComponent  =>
 
 	def applyInternal(): DisplayExtensionDetail = {
 
-		val extension: Option[Extension] = assignment.findExtension(universityId)
-		val user = userLookup.getUserByWarwickUniId(universityId)
+		val extension: Option[Extension] = assignment.findExtension(student.getUserId)
 
-		val previousExtensions = extensionService.getPreviousExtensions(user)
+		val previousExtensions = extensionService.getPreviousExtensions(student)
 
-		val previousSubmissions = submissionService.getPreviousSubmissions(user)
+		val previousSubmissions = submissionService.getPreviousSubmissions(student)
 
-		DisplayExtensionDetail(extension, user, previousExtensions, previousSubmissions)
+		DisplayExtensionDetail(extension, student, previousExtensions, previousSubmissions)
 
 		}
 }

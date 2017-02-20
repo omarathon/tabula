@@ -28,10 +28,10 @@ class FeedbackAuditCommandInternal(val assignment: Assignment, val student: User
 
 	self : SubmissionServiceComponent with FeedbackServiceComponent =>
 
-	lazy val submission: Option[Submission] = submissionService.getSubmissionByUniId(assignment, student.getWarwickId)
+	lazy val submission: Option[Submission] = submissionService.getSubmissionByUsercode(assignment, student.getUserId)
 
 	def applyInternal(): FeedbackAuditData = {
-		val feedback = feedbackService.getAssignmentFeedbackByUniId(assignment, student.getWarwickId)
+		val feedback = feedbackService.getAssignmentFeedbackByUsercode(assignment, student.getUserId)
 		FeedbackAuditData(submission, feedback)
 	}
 }
@@ -52,7 +52,8 @@ trait FeedbackAuditCommandPermissions extends RequiresPermissionsChecking with P
 trait FeedbackAuditCommandDescription extends Describable[FeedbackAuditData] {
 	self: FeedbackAuditCommandState =>
 	def describe(d: Description) {
-		d.studentIds(Seq(student.getWarwickId))
+		d.studentIds(Option(student.getWarwickId).toSeq)
+		d.studentUsercodes(student.getUserId)
 		d.assignment(assignment)
 	}
 }

@@ -324,7 +324,7 @@
 						<tbody>
 							<#list gradeValidation.invalid?keys as feedback>
 							<tr>
-								<td>${feedback.universityId}</td>
+								<td>${feedback.studentIdentifier}</td>
 								<td>${(feedback.latestMark)!}</td>
 								<td>${(feedback.latestGrade)!}</td>
 								<td>${mapGet(gradeValidation.invalid, feedback)}</td>
@@ -344,7 +344,7 @@
 						<tbody>
 							<#list gradeValidation.zero?keys as feedback>
 							<tr>
-								<td>${feedback.universityId}</td>
+								<td>${feedback.studentIdentifier}</td>
 								<td>${(feedback.latestMark)!}</td>
 								<td>${(feedback.latestGrade)!}</td>
 							</tr>
@@ -363,7 +363,7 @@
 						<tbody>
 							<#list gradeValidation.populated?keys as feedback>
 								<tr>
-									<td>${feedback.universityId}</td>
+									<td>${feedback.studentIdentifier}</td>
 									<td>${(feedback.latestMark)!}</td>
 									<td>${mapGet(gradeValidation.populated, feedback)}</td>
 								</tr>
@@ -392,7 +392,7 @@
 						<tbody>
 							<#list gradeValidation.populated?keys as feedback>
 								<tr>
-									<td>${feedback.universityId}</td>
+									<td>${feedback.studentIdentifier}</td>
 									<td>${(feedback.latestMark)!}</td>
 									<td></td>
 									<td></td>
@@ -400,7 +400,7 @@
 							</#list>
 							<#list gradeValidation.invalid?keys as feedback>
 								<tr>
-									<td>${feedback.universityId}</td>
+									<td>${feedback.studentIdentifier}</td>
 									<td>${(feedback.latestMark)!}</td>
 									<td>${(feedback.latestGrade)!}</td>
 									<td>${mapGet(gradeValidation.invalid, feedback)}</td>

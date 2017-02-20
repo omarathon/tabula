@@ -22,8 +22,8 @@ class CreateExtensionFixtureCommand extends CommandInternal[Extension] {
 			val now = new DateTime()
 			val user = userLookup.getUserByUserId(userId)
 			val e = new Extension()
-			e.universityId = user.getWarwickId
-			e.userId = user.getUserId
+			e._universityId = user.getWarwickId
+			e.usercode = user.getUserId
 			e.requestedOn = now
 			e.requestedExpiryDate = now.plusMonths(3)
 			e.reason = "For use in fixture."

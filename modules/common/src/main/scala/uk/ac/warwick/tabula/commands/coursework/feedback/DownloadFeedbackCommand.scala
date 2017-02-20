@@ -45,7 +45,7 @@ class DownloadFeedbackCommand(val module: Module, val assignment: Assignment, va
 	}
 
 	private def zipped(feedback: Feedback) = student match {
-		case Some(student: StudentMember) => zip.getFeedbackZipForStudent(feedback)
+		case Some(student: StudentMember) => zip.getFeedbackZip(feedback)
 		case _ => zip.getFeedbackZip(feedback)
 	}
 

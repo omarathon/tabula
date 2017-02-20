@@ -29,7 +29,7 @@ object Routes {
 		def apply(assignment: Assignment): String = context + "/module/%s/%s/" format (encoded(assignment.module.code), encoded(assignment.id))
 		def receipt(assignment: Assignment): String = apply(assignment)
 		def feedback(assignment: Assignment): String = apply(assignment) + "all/feedback.zip"
-		def feedbackPdf(assignment: Assignment, feedback: AssignmentFeedback): String = apply(assignment) + "%s/feedback.pdf" format encoded(feedback.universityId)
+		def feedbackPdf(assignment: Assignment, feedback: AssignmentFeedback): String = apply(assignment) + "%s/feedback.pdf" format encoded(feedback.usercode)
 	}
 
 	object admin {
@@ -76,11 +76,11 @@ object Routes {
 
 					object student {
 						def apply(assignment: Assignment, marker: User, student: User): String =
-							markerroot(assignment, marker) + s"/feedback/online/${student.getWarwickId}/"
+							markerroot(assignment, marker) + s"/feedback/online/${student.getUserId}/"
 					}
 					object moderation {
 						def apply(assignment: Assignment, marker: User, student: User): String =
-							markerroot(assignment, marker) + s"/feedback/online/moderation/${student.getWarwickId}/"
+							markerroot(assignment, marker) + s"/feedback/online/moderation/${student.getUserId}/"
 					}
 				}
 				object marks {
@@ -154,13 +154,13 @@ object Routes {
 			}
 
 			object extension {
-				def expandrow (assignment: Assignment, universityId: String): String = assignmentroot(assignment) + "/extensions?universityId=" + universityId
+				def expandrow (assignment: Assignment, usercode: String): String = assignmentroot(assignment) + "/extensions?usercode=" + usercode
 
 				// def detail doesn't use assignmentroot since assignmentroot includes the assignment ID in the middle, but
 				// it needs to be on the end for managing extension requests across department so that
 				// it can be passed as a unique contentId when toggling rows (jquery-expandingTable.js)
 				def detail (assignment: Assignment): String = context + "/admin/module/%s/assignments/extensions/detail" format encoded(assignment.module.code)
-				def revoke (assignment: Assignment, universityId: String): String = assignmentroot(assignment) + "/extensions/revoke/" + universityId
+				def revoke (assignment: Assignment, usercode: String): String = assignmentroot(assignment) + "/extensions/revoke/" + usercode
 			}
 		}
 	}

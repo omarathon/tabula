@@ -37,7 +37,7 @@ class OnlineModerationCommandTest extends TestBase with Mockito {
 			with FinaliseFeedbackTestImpl
 
 		val testFeedback = new AssignmentFeedback
-		testFeedback.universityId = "user1"
+		testFeedback.usercode = "user1"
 		assignment.feedbacks.add(testFeedback)
 		val firstMarkerFeedback = new MarkerFeedback {
 			mark = Some(69)
@@ -48,7 +48,7 @@ class OnlineModerationCommandTest extends TestBase with Mockito {
 		testFeedback.firstMarkerFeedback = firstMarkerFeedback
 		testFeedback.secondMarkerFeedback = secondMarkerFeedback
 
-		when (command.feedbackService.getAssignmentFeedbackByUniId(assignment, "user1")) thenReturn Some(testFeedback)
+		when (command.feedbackService.getAssignmentFeedbackByUsercode(assignment, "user1")) thenReturn Some(testFeedback)
 	}
 
 

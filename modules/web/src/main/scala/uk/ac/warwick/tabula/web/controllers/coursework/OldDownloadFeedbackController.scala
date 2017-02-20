@@ -17,7 +17,7 @@ class OldDownloadFeedbackController extends OldCourseworkController {
 	var feedbackService: FeedbackService = Wire[FeedbackService]
 
 	@ModelAttribute def command(@PathVariable module: Module, @PathVariable assignment: Assignment, user: CurrentUser)
-		= new DownloadFeedbackCommand(module, assignment, mandatory(feedbackService.getAssignmentFeedbackByUniId(assignment, user.universityId).filter(_.released)), optionalCurrentMember)
+		= new DownloadFeedbackCommand(module, assignment, mandatory(feedbackService.getAssignmentFeedbackByUsercode(assignment, user.userId).filter(_.released)), optionalCurrentMember)
 
 	@RequestMapping(value = Array("/all/feedback.zip"))
 	def getAll(command: DownloadFeedbackCommand, user: CurrentUser): RenderableFile = {

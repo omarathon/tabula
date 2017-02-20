@@ -33,7 +33,7 @@ class DownloadAttachmentCommand(
 
 		fileFound = attachment.isDefined
 		if (callback != null) {
-			attachment.map { callback(_) }
+			attachment.foreach { callback }
 		}
 		attachment
 	}

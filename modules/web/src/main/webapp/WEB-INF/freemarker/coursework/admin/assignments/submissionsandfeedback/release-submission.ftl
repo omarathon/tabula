@@ -48,8 +48,8 @@
 			<p>
 				Releasing <strong><@fmt.p (students?size - releaseForMarkingCommand.unreleasableSubmissions?size ) "student" /></strong> submissions to markers.
 			</p>
-			<#list students as uniId>
-				<input type="hidden" name="students" value="${uniId}" />
+			<#list students as usercode>
+				<input type="hidden" name="students" value="${usercode}" />
 			</#list>
 		</@spring.bind>
 

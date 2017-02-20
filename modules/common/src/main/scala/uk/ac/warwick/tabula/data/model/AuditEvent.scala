@@ -62,6 +62,7 @@ case class AuditEvent(
 	def submissionIds: Seq[String] = stringListProperty("submissions")
 	def feedbackIds: Seq[String] = stringListProperty("feedbacks")
 	def students: Seq[String] = stringListProperty("students")
+	def studentUsercodes: Seq[String] = stringListProperty("studentUsercodes")
 	def attachments: Seq[String] = stringListProperty("attachments")
 
 	/** Was there an "error" stage, indicating an exception was thrown? */
