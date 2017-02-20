@@ -10,7 +10,8 @@ import uk.ac.warwick.spring.Wire
 import uk.ac.warwick.tabula.AcademicYear
 import uk.ac.warwick.tabula.commands.exams.grids.{ExamGridMarksRecordExporter, ExamGridPassListExporter, ExamGridTranscriptExporter, GenerateExamGridExporter}
 import uk.ac.warwick.tabula.data.model.{CoreRequiredModuleLookup, Department, UpstreamRouteRuleLookup}
-import uk.ac.warwick.tabula.services.{AutowiringProgressionServiceComponent, AutowiringUpstreamRouteRuleServiceComponent, NormalLoadLookup}
+import uk.ac.warwick.tabula.services.AutowiringProgressionServiceComponent
+import uk.ac.warwick.tabula.services.exams.grids.{AutowiringNormalCATSLoadServiceComponent, AutowiringUpstreamRouteRuleServiceComponent, NormalLoadLookup}
 import uk.ac.warwick.tabula.web.controllers.exams.ExamsController
 import uk.ac.warwick.tabula.web.views.{ExcelView, WordView}
 
@@ -18,7 +19,8 @@ import scala.collection.JavaConverters._
 
 trait ExamGridDocumentsController extends ExamsController
 	with AutowiringUpstreamRouteRuleServiceComponent
-	with AutowiringProgressionServiceComponent {
+	with AutowiringProgressionServiceComponent
+	with AutowiringNormalCATSLoadServiceComponent {
 
 	self: GenerateExamGridController =>
 
@@ -97,7 +99,7 @@ trait ExamGridDocumentsController extends ExamsController
 				entities,
 				selectCourseCommand.course,
 				progressionService,
-				new NormalLoadLookup(selectCourseCommand.academicYear, selectCourseCommand.yearOfStudy, upstreamRouteRuleService),
+				new NormalLoadLookup(selectCourseCommand.academicYear, selectCourseCommand.yearOfStudy, normalCATSLoadService),
 				new UpstreamRouteRuleLookup(selectCourseCommand.academicYear, selectCourseCommand.yearOfStudy, upstreamRouteRuleService),
 				isConfidential = isConfidential
 			)
@@ -153,7 +155,7 @@ trait ExamGridDocumentsController extends ExamsController
 				selectCourseCommand.yearOfStudy,
 				selectCourseCommand.academicYear,
 				progressionService,
-				new NormalLoadLookup(selectCourseCommand.academicYear, selectCourseCommand.yearOfStudy, upstreamRouteRuleService),
+				new NormalLoadLookup(selectCourseCommand.academicYear, selectCourseCommand.yearOfStudy, normalCATSLoadService),
 				new UpstreamRouteRuleLookup(selectCourseCommand.academicYear, selectCourseCommand.yearOfStudy, upstreamRouteRuleService),
 				isConfidential
 			)

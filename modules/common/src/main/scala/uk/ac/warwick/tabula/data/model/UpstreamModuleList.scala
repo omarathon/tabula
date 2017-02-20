@@ -43,7 +43,3 @@ class UpstreamModuleList {
 	def matches(moduleCode: String): Boolean = entries.asScala.exists(_.pattern.matcher(moduleCode).matches())
 
 }
-
-object UpstreamModuleList {
-	final val AllModulesListCode = "ALLMODULES"
-}

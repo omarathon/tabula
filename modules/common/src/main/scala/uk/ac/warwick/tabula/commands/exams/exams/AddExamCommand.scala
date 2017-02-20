@@ -1,13 +1,13 @@
-package uk.ac.warwick.tabula.commands.exams
+package uk.ac.warwick.tabula.commands.exams.exams
 
 import org.springframework.validation.Errors
-import uk.ac.warwick.tabula.{UniversityId, AcademicYear}
 import uk.ac.warwick.tabula.commands._
 import uk.ac.warwick.tabula.data.model._
 import uk.ac.warwick.tabula.helpers.StringUtils._
 import uk.ac.warwick.tabula.permissions.Permissions
 import uk.ac.warwick.tabula.services._
 import uk.ac.warwick.tabula.system.permissions.{PermissionsChecking, PermissionsCheckingMethods, RequiresPermissionsChecking}
+import uk.ac.warwick.tabula.{AcademicYear, UniversityId}
 
 import scala.collection.JavaConverters._
 

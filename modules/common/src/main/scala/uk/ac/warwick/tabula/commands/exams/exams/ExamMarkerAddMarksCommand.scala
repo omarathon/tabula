@@ -1,14 +1,14 @@
-package uk.ac.warwick.tabula.commands.exams
+package uk.ac.warwick.tabula.commands.exams.exams
 
 import uk.ac.warwick.tabula.CurrentUser
 import uk.ac.warwick.tabula.commands._
 import uk.ac.warwick.tabula.commands.coursework.assignments._
-import uk.ac.warwick.tabula.services.coursework.docconversion.AutowiringMarksExtractorComponent
 import uk.ac.warwick.tabula.data.HibernateHelpers
 import uk.ac.warwick.tabula.data.model._
 import uk.ac.warwick.tabula.data.model.notifications.exams.ExamMarkedNotification
 import uk.ac.warwick.tabula.permissions.Permissions
 import uk.ac.warwick.tabula.services._
+import uk.ac.warwick.tabula.services.coursework.docconversion.AutowiringMarksExtractorComponent
 import uk.ac.warwick.tabula.system.permissions.{PermissionsChecking, PermissionsCheckingMethods, RequiresPermissionsChecking}
 
 object ExamMarkerAddMarksCommand {

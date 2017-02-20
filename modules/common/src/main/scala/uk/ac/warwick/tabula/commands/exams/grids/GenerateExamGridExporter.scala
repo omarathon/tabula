@@ -9,7 +9,7 @@ import org.joda.time.DateTime
 import uk.ac.warwick.tabula.AcademicYear
 import uk.ac.warwick.tabula.data.model._
 import uk.ac.warwick.tabula.exams.grids.columns._
-import uk.ac.warwick.tabula.services.NormalLoadLookup
+import uk.ac.warwick.tabula.services.exams.grids.NormalLoadLookup
 
 object GenerateExamGridExporter {
 

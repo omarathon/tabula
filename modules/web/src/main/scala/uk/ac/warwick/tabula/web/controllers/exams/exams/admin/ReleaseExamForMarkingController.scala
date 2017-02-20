@@ -3,10 +3,10 @@ package uk.ac.warwick.tabula.web.controllers.exams.exams.admin
 import org.springframework.stereotype.Controller
 import org.springframework.web.bind.annotation.{ModelAttribute, PathVariable, RequestMapping}
 import uk.ac.warwick.tabula.commands.Appliable
+import uk.ac.warwick.tabula.commands.exams.exams.ReleaseExamForMarkingCommand
 import uk.ac.warwick.tabula.data.model.{Exam, Feedback, Module}
 import uk.ac.warwick.tabula.exams.web.Routes
 import uk.ac.warwick.tabula.web.controllers.exams.ExamsController
-import uk.ac.warwick.tabula.commands.exams.ReleaseExamForMarkingCommand
 import uk.ac.warwick.tabula.web.Mav
 
 @Controller
