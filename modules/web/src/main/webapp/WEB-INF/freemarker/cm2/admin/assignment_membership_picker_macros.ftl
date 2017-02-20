@@ -149,22 +149,23 @@
 		</#if>
 	</fieldset>
 
-		<script type="text/javascript">
+	<script type="text/javascript">
 		jQuery(function($) {
 			var $enrolment = $('.assignmentEnrolment');
 
 			var initEnrolment = function() {
-				<#-- sortable tables -->
+			<#-- sortable tables -->
 				$enrolment.find('.table-sortable').sortableTable();
 				$enrolment.tabulaPrepareSpinners();
 				$enrolment.find('.use-popover').popover({
 					trigger: 'click',
 					container: '.assignment-student-details',
 					template: '<div class="popover"><div class="arrow"></div><div class="popover-inner"><button type="button" class="close" aria-hidden="true">&#215;</button><h3 class="popover-title"></h3><div class="popover-content"><p></p></div></div></div>'
-				}).click(function(){
-					return false; });
+				}).click(function() {
+					return false;
+				});
 
-
+			};
 				// ensure that the close handler for any popovers still work
 				$('.assignment-student-details').on('click', '.close', function() { $enrolment.find('.use-popover').popover('hide') });
 				$enrolment.on('click', '.table-checkable th .check-all', function(e) {
@@ -173,7 +174,7 @@
 					updateCheckboxes($table);
 					enableActions($table);
 				});
-			};
+			//};
 		<#-- manage check-all state -->
 			var updateCheckboxes = function($table) {
 				var checked = $table.find('td input:checked').length;
@@ -184,7 +185,6 @@
 		<#-- enable/disable action buttons -->
 			var enableActions = function($table) {
 				var context = $table.prop('id');
-
 				if (context == 'sits-table') {
 					$('.sits-picker-action').toggleClass('disabled', $table.find('input:checked').length==0);
 				} else if (context == 'enrolment-table') {
@@ -211,8 +211,6 @@
 				updateCheckboxes($table);
 				enableActions($table);
 			});
-
-
 
 			<#-- sits-picker click handler -->
 			$enrolment.on('click', '.sits-picker .btn', function(e) {
@@ -316,7 +314,7 @@
 				});
 			});
 		});
-		</script>
+	</script>
 </#macro>
 
 </#escape>

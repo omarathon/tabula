@@ -45,7 +45,7 @@ class EditAssignmentStudentsController extends CourseworkController {
 
 	def showForm(form: ModifyAssignmentStudentsCommand): Mav = {
 		val module = form.module
-		Mav(s"$urlPrefix/admin/assignments/new_assignment_student_details",
+		Mav(s"$urlPrefix/admin/assignments/assignment_student_details",
 			"department" -> module.adminDepartment,
 			"module" -> module,
 			"linkedUpstreamAssessmentGroups" -> form.linkedUpstreamAssessmentGroups,

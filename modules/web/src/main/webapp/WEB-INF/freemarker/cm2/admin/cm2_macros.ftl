@@ -124,7 +124,7 @@
 								${isLinked?string(" checked","")}
 							</td>
 							<td><label for="chk-${available.id}">${available.name}<span class="label label-primary linked <#if !isLinked>hidden</#if>">Linked</span></label></td>
-							<td class = "sortable">${available.group.members?size}</td>
+							<td class="sortable">${available.group.members?size}</td>
 							<td>${available.group.assessmentGroup}</td>
 							<td>${available.cats!'-'}</td>
 							<td>${available.occurrence}</td>

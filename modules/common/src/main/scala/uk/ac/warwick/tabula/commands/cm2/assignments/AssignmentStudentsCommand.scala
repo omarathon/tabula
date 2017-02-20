@@ -24,7 +24,6 @@ object ModifyAssignmentStudentsCommand {
 			with AutowiringAssessmentServiceComponent
 			with AutowiringAssessmentMembershipServiceComponent
 			with CurrentSITSAcademicYear
-			with AssignmentsDetailsTriggers
 			with ModifiesAssignmentMembership
 			with SharedAssignmentProperties {
 

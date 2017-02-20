@@ -29,9 +29,6 @@ the comments textarea needs to maintain newlines.
 				<details id="students-details">
 					<summary id="students-summary" class="collapsible large-chevron">
 						<span class="legend" id="student-summary-legend">Students <small>Select which students should be in this assignment</small> </span>
-						<div class="alert alert-success" style="display: none;" data-display="fragment">
-							The membership list for this assignment has been updated
-						</div>
 						<@membership_picker.header command />
 					</summary>
 					<#assign enrolment_url><@routes.cm2.enrolment command.assignment /></#assign>

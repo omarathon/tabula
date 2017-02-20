@@ -16,7 +16,6 @@
 	<@f.form method="post" action=actionUrl>
 		<@components.set_wizard true 'students'  />
 		<@f.errors cssClass="error form-errors" />
-		<#assign newRecord=true />
 	<div>
 		<#include "_student_fields.ftl" />
 	</div>
