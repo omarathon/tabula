@@ -1,8 +1,8 @@
+(function ($) { "use strict";
+
 /**
  * Scripts used only by the exams admin section.
  */
-(function ($) { "use strict";
-
 var examsExports = {};
 
 examsExports.zebraStripeExams = function($module) {
@@ -44,104 +44,166 @@ window.Exams = jQuery.extend(window.Exams, examsExports);
 /**
 * Scripts used only by the exam grids section.
 */
+
 var examGridsExports = {};
 
-examGridsExports.manageNormalLoads = function(){
-	jQuery(function($){
-		$('.fix-area').fixHeaderFooter();
-		$('input[name=showAdditionalYears]').on('change', function(){
-			var $this = $(this);
-			if ($this.is(':checked')) {
-				$('.normal-load-editor')
-					.find('.row > .col-md-5').removeClass('col-md-5').addClass('col-md-2').end()
-					.find('.row > .col-md-offset-5').removeClass('col-md-offset-5').addClass('col-md-offset-2').end()
-					.find('.row > .col-md-7').removeClass('col-md-7').addClass('col-md-10')
+function additionalYearsOfStudyToggle($editor) {
+	$('input[name=showAdditionalYears]').on('change', function(){
+		var $this = $(this);
+		if ($this.is(':checked')) {
+			$editor
+				.find('.row > .col-md-5').removeClass('col-md-5').addClass('col-md-2').end()
+				.find('.row > .col-md-offset-5').removeClass('col-md-offset-5').addClass('col-md-offset-2').end()
+				.find('.row > .col-md-6').removeClass('col-md-6').addClass('col-md-9')
 					.find('.col-md-2').removeClass('col-md-2').addClass('col-md-1').end()
 					.each(function(){
 						$(this).find('.col-md-1').show();
 					});
-			} else {
-				$('.normal-load-editor')
-					.find('.row > .col-md-2').removeClass('col-md-2').addClass('col-md-5').end()
-					.find('.row > .col-md-offset-2').removeClass('col-md-offset-2').addClass('col-md-offset-5').end()
-					.find('.row > .col-md-10').removeClass('col-md-10').addClass('col-md-7')
+		} else {
+			$editor
+				.find('.row > .col-md-2').removeClass('col-md-2').addClass('col-md-5').end()
+				.find('.row > .col-md-offset-2').removeClass('col-md-offset-2').addClass('col-md-offset-5').end()
+				.find('.row > .col-md-9').removeClass('col-md-9').addClass('col-md-6')
 					.find('.col-md-1').removeClass('col-md-1').addClass('col-md-2').end()
 					.each(function(){
 						$(this).find('.col-md-2').filter(function(i){ return i > 5; }).hide();
 					});
 
-			}
-		}).trigger('change');
+		}
+	}).trigger('change');
+}
 
-		var $modal = $('#copy-loads-modal')
-			, $loading = $modal.find('loading')
-			, $content = $modal.find('.content')
-			, $academicYearSelect = $('select[name=academicYear]')
-			, $copyButton = $modal.find('.modal-footer .btn-primary').on('click', function(){
-				var data = $(this).data('otherAcademicYear');
-				if (data) {
-					var routeCodes = _.keysIn(data), yearsOfStudy = _.keysIn(data[routeCodes[0]]);
-					_.each(routeCodes, function(routeCode){ _.each(yearsOfStudy, function(year){
-						$('input[name="normalLoads[' + routeCode + '][' + year + ']"]').val(data[routeCode][year]);
-					})});
-					$content.empty();
-					$academicYearSelect.val('');
-					$modal.modal('hide');
-				}
-			})
-			, complete = false;
-
-		$modal.on('click', 'select', function(){
-			var academicYear = $academicYearSelect.find(':selected').val();
-			if (academicYear.length > 0) {
+function otherAcademicYearModalHandler($modal, inputName, collectionName) {
+	var $loading = $modal.find('.loading')
+		, $content = $modal.find('.content')
+		, $academicYearSelect = $('select[name=academicYear]')
+		, $copyButton = $modal.find('.modal-footer .btn-primary').on('click', function(){
+			var data = $(this).data('otherAcademicYear');
+			if (data) {
+				var codes = _.keysIn(data), yearsOfStudy = _.keysIn(data[codes[0]]);
+				_.each(codes, function(code){ _.each(yearsOfStudy, function(year){
+					$('input[name="' + inputName + '[' + code + '][' + year + ']"]').val(data[code][year]);
+				})});
 				$content.empty();
-				$copyButton.prop('disabled', true);
-				setTimeout(function() {
-					if (!complete) {
-						$loading.show();
-					}
-				}, 300);
-				$.get($academicYearSelect.data('href') + academicYear, function(data){
-					var routeCodes = _.keysIn(data).sort();
-					if (routeCodes.length === 0) {
-						$content.append("Could not find any routes owned by this department");
-					} else {
-						var yearsOfStudy = _.sortBy(_.keysIn(data[routeCodes[0]]), function(year){ return parseInt(year); });
-						var $table = $('<table/>').addClass('table table-striped table-condensed').append(
-							$('<thead/>').append(
-								$('<tr/>').append(
-									$('<th/>')
-								).append(
-									$('<th/>').attr('colspan', yearsOfStudy.length).html('Year of study')
-								)
+				$academicYearSelect.val('');
+				$modal.modal('hide');
+			}
+		})
+		, complete = false;
+
+	$modal.on('click', 'select', function(){
+		complete = false;
+		var academicYear = $academicYearSelect.find(':selected').val();
+		if (academicYear.length > 0) {
+			$content.empty();
+			$copyButton.prop('disabled', true);
+			setTimeout(function() {
+				if (!complete) {
+					$loading.show();
+				}
+			}, 300);
+			$.get($academicYearSelect.data('href') + academicYear, function(data){
+				var codes = _.keysIn(data).sort();
+				if (codes.length === 0) {
+					$content.append('Could not find any ' + collectionName + ' owned by this department');
+				} else {
+					var yearsOfStudy = _.sortBy(_.keysIn(data[codes[0]]), function(year){ return parseInt(year); });
+					var $table = $('<table/>').addClass('table table-striped table-condensed').append(
+						$('<thead/>').append(
+							$('<tr/>').append(
+								$('<th/>')
 							).append(
-								$('<tr/>').append(
-									$('<th/>').html('Routes')
-								)
+								$('<th/>').attr('colspan', yearsOfStudy.length).html('Year of study')
 							)
 						).append(
-							$('<tbody/>')
-						);
-						var $yearOfStudyRow = $table.find('thead tr:nth-of-type(2)'), $tbody = $table.find('tbody');
+							$('<tr/>').append(
+								$('<th/>').html(_.capitalize(collectionName))
+							)
+						)
+					).append(
+						$('<tbody/>')
+					);
+					var $yearOfStudyRow = $table.find('thead tr:nth-of-type(2)'), $tbody = $table.find('tbody');
+					_.each(yearsOfStudy, function(year){
+						$yearOfStudyRow.append($('<th/>').html(year));
+					});
+					_.each(codes, function(code){
+						var $row = $('<tr/>').append($('<th/>').html(code.toUpperCase()));
 						_.each(yearsOfStudy, function(year){
-							$yearOfStudyRow.append($('<th/>').html(year));
+							$row.append($('<td/>').html(data[code][year]));
 						});
-						_.each(routeCodes, function(routeCode){
-							var $row = $('<tr/>').append($('<th/>').html(routeCode.toUpperCase()));
-							_.each(yearsOfStudy, function(year){
-								$row.append($('<td/>').html(data[routeCode][year]));
-							});
-							$tbody.append($row);
-						});
-						$content.append($table).wideTables();
-						$copyButton.data('otherAcademicYear', data).prop('disabled', false);
-					}
+						$tbody.append($row);
+					});
+					$content.append($table).wideTables();
+					$copyButton.data('otherAcademicYear', data).prop('disabled', false);
+				}
 
-					$loading.hide();
-					complete = true;
-				});
-			}
+				$loading.hide();
+				complete = true;
+			});
+		}
+	});
+}
+
+function stripeElements($elements) {
+	$elements.each(function(i){
+		if (i % 2 === 0) {
+			$(this).removeClass('even odd').addClass('even');
+		} else {
+			$(this).removeClass('even odd').addClass('odd');
+		}
+	});
+}
+function editorFilterAndBulkEdit($editor, inputName) {
+	var $rows = $editor.find('.row').not('.header .row')
+		, $applyButton = $editor.find('button[name=bulkapply]')
+		, $allValues = $editor.find('input[name^=' + inputName + ']');
+	$editor.on('keyup', 'input[name=filter]', function(){
+		var filterVal = $(this).val().toLowerCase();
+		if (filterVal.length === 0) {
+			stripeElements($rows.show());
+		} else {
+			var terms = filterVal.split(' ');
+			stripeElements($rows.hide().filter(function(){
+				var text = $(this).find('label').text().toLowerCase();
+				return _.every(terms, function(val) { return text.indexOf(val) >= 0 });
+			}).show());
+		}
+		$(window).trigger('resize.ScrollToFixed');
+	}).on('keyup', 'input[name=bulk]', function(){
+		if ($editor.find('input[name=bulk]').filter(function(){ return $(this).val().length > 0 }).length > 0) {
+			$applyButton.prop('disabled', false);
+		} else {
+			$applyButton.prop('disabled', true);
+		}
+	});
+	$applyButton.on('click', function(){
+		$editor.find('input[name=bulk]').filter(function(){ return $(this).val().length > 0 }).each(function(){
+			var $this = $(this), year = $this.data('year');
+			$allValues.filter(':visible').filter('[name*="[' + year + ']"]').val($this.val());
 		});
+	});
+}
+
+examGridsExports.manageNormalLoads = function(){
+	jQuery(function($){
+		$('.fix-area').fixHeaderFooter();
+		var $editor = $('.normal-load-editor');
+		stripeElements($editor.find('.row').not('.header .row'));
+		editorFilterAndBulkEdit($editor, 'normalLoads');
+		additionalYearsOfStudyToggle($editor);
+		otherAcademicYearModalHandler($('#copy-loads-modal'), 'normalLoads', 'routes');		
+	});
+};
+
+examGridsExports.manageWeightings = function(){
+	jQuery(function($){
+		$('.fix-area').fixHeaderFooter();
+		var $editor = $('.course-weightings-editor');
+		stripeElements($editor.find('.row').not('.header .row'));
+		editorFilterAndBulkEdit($editor, 'yearWeightings');
+		additionalYearsOfStudyToggle($editor);
+		otherAcademicYearModalHandler($('#copy-weightings-modal'), 'yearWeightings', 'courses');
 	});
 };
 

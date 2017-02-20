@@ -3,7 +3,6 @@ package uk.ac.warwick.tabula.services
 import org.springframework.stereotype.Service
 import uk.ac.warwick.spring.Wire
 import uk.ac.warwick.tabula.data.model._
-import uk.ac.warwick.tabula.data.{AutowiringCourseDaoComponent, CourseDaoComponent}
 
 import scala.math.BigDecimal.RoundingMode
 
@@ -112,7 +111,7 @@ trait ProgressionService {
 
 abstract class AbstractProgressionService extends ProgressionService {
 
-	self: ModuleRegistrationServiceComponent with CourseDaoComponent =>
+	self: ModuleRegistrationServiceComponent with CourseAndRouteServiceComponent =>
 
 	def getYearMark(scyd: StudentCourseYearDetails, normalLoad: BigDecimal, routeRules: Seq[UpstreamRouteRule]): Either[String, BigDecimal] = {
 		val possibleWeightedMeanMark = moduleRegistrationService.weightedMeanYearMark(scyd.moduleRegistrations, Map())
@@ -227,14 +226,14 @@ abstract class AbstractProgressionService extends ProgressionService {
 			})
 			lazy val markPerYear: Seq[(Int, Either[String, BigDecimal])] = getMarkPerYear(scyd, scydPerYear, finalYearOfStudy, normalLoad, routeRules)
 			lazy val yearWeightings: Seq[(Int, Option[CourseYearWeighting])] = markPerYear.map { case (year, _) =>
-				(year, courseDao.getCourseYearWeighting(scyd.studentCourseDetails.course.code, scyd.academicYear, year))
+				(year, courseAndRouteService.getCourseYearWeighting(scyd.studentCourseDetails.course.code, scyd.studentCourseDetails.sprStartAcademicYear, year))
 			}
 			if (markPerYear.exists { case (_, possibleMark) => possibleMark.isLeft }) {
 				FinalYearGrade.Unknown(markPerYear.flatMap { case (_, possibleMark) => possibleMark.left.toOption }.mkString(", "))
 			} else if (yearWeightings.exists { case (_, possibleYearWeighting) => possibleYearWeighting.isEmpty } ) {
 				FinalYearGrade.Unknown("Could not find year weightings for: %s".format(
 					yearWeightings.filter { case (_, possibleWeighting) => possibleWeighting.isEmpty }.map { case (year, _) =>
-						s"${scyd.studentCourseDetails.course.code.toUpperCase} ${scyd.academicYear.toString} Year $year"
+						s"${scyd.studentCourseDetails.course.code.toUpperCase} ${scyd.studentCourseDetails.sprStartAcademicYear.toString} Year $year"
 					}.mkString(", ")
 				))
 			} else {
@@ -311,7 +310,7 @@ abstract class AbstractProgressionService extends ProgressionService {
 class ProgressionServiceImpl
 	extends AbstractProgressionService
 	with AutowiringModuleRegistrationServiceComponent
-	with AutowiringCourseDaoComponent
+	with AutowiringCourseAndRouteServiceComponent
 
 trait ProgressionServiceComponent {
 	def progressionService: ProgressionService

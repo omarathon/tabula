@@ -6,11 +6,9 @@ import org.joda.time.DateTime
 import org.springframework.stereotype.Controller
 import org.springframework.validation.{BindException, Errors}
 import org.springframework.web.bind.annotation.{ModelAttribute, PathVariable, RequestMapping, RequestParam}
-import uk.ac.warwick.spring.Wire
 import uk.ac.warwick.tabula.JavaImports._
-import uk.ac.warwick.tabula.commands.exams.grids._
 import uk.ac.warwick.tabula.commands._
-import uk.ac.warwick.tabula.data.AutowiringCourseDaoComponent
+import uk.ac.warwick.tabula.commands.exams.grids._
 import uk.ac.warwick.tabula.data.model.StudentCourseYearDetails.YearOfStudy
 import uk.ac.warwick.tabula.data.model._
 import uk.ac.warwick.tabula.exams.grids.columns._
@@ -26,8 +24,6 @@ import uk.ac.warwick.tabula.web.controllers.{AcademicYearScopedController, Depar
 import uk.ac.warwick.tabula.web.views.JSONView
 import uk.ac.warwick.tabula.web.{Mav, Routes}
 import uk.ac.warwick.tabula.{AcademicYear, ItemNotFoundException}
-
-import scala.collection.JavaConverters._
 
 object GenerateExamGridMappingParameters {
 	final val selectCourse = "selectCourse"
@@ -50,7 +46,7 @@ class GenerateExamGridController extends ExamsController
 	with DepartmentScopedController with AcademicYearScopedController
 	with AutowiringUserSettingsServiceComponent with AutowiringModuleAndDepartmentServiceComponent
 	with AutowiringMaintenanceModeServiceComponent with AutowiringJobServiceComponent
-	with AutowiringCourseDaoComponent with AutowiringModuleRegistrationServiceComponent
+	with AutowiringCourseAndRouteServiceComponent with AutowiringModuleRegistrationServiceComponent
 	with ExamGridDocumentsController
 	with TaskBenchmarking {
 
@@ -433,7 +429,7 @@ class GenerateExamGridController extends ExamsController
 			.mapValues(_.flatMap { case (_, columns) => columns })
 
 		val weightings = (1 to FilterStudentsOrRelationships.MaxYearsOfStudy).flatMap(year =>
-			courseDao.getCourseYearWeighting(selectCourseCommand.course.code, selectCourseCommand.academicYear, year)
+			courseAndRouteService.getCourseYearWeighting(selectCourseCommand.course.code, selectCourseCommand.academicYear, year)
 		).sorted
 
 		GridData(entities, studentInformationColumns, perYearColumns, summaryColumns, weightings, normalLoadLookup, routeRulesLookup)
