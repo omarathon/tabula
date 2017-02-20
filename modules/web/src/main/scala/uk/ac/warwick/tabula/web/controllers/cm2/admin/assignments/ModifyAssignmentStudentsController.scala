@@ -11,16 +11,15 @@ import uk.ac.warwick.tabula.cm2.web.Routes
 import uk.ac.warwick.tabula.commands._
 import uk.ac.warwick.tabula.commands.cm2.assignments.{ModifyAssignmentStudentsCommand, _}
 import uk.ac.warwick.tabula.data.model._
-import uk.ac.warwick.tabula.web.controllers.cm2.CourseworkController
-import uk.ac.warwick.tabula.web.{Breadcrumbs, Mav}
+import uk.ac.warwick.tabula.web.Mav
 
 @Profile(Array("cm2Enabled"))
 @Controller
 @RequestMapping(value = Array("/${cm2.prefix}/admin/assignments/new/{assignment}/students"))
-class EditAssignmentStudentsController extends CourseworkController {
+class ModifyAssignmentStudentsController extends AbstractAssignmentController {
 
-	type ModifyAssignmentStudentsCommand = ModifyAssignmentStudentsCommandInternal with Appliable[Assignment] with AssignmentStudentsCommandState with ModifiesAssignmentMembership
-		with PopulateAssignmentStudentCommand
+	type ModifyAssignmentStudentsCommand =  Appliable[Assignment] with AssignmentStudentsCommandState with ModifiesAssignmentMembership
+		with PopulateOnForm
 
 	validatesSelf[SelfValidating]
 
@@ -38,7 +37,7 @@ class EditAssignmentStudentsController extends CourseworkController {
 		@PathVariable("assignment") assignment: Assignment,
 		@ModelAttribute("command") cmd: ModifyAssignmentStudentsCommand): Mav = {
 		cmd.afterBind()
-		cmd.populateGroups(assignment)
+		cmd.populate()
 		showForm(cmd)
 	}
 
@@ -52,7 +51,7 @@ class EditAssignmentStudentsController extends CourseworkController {
 			"availableUpstreamGroups" -> form.availableUpstreamGroups,
 			"assessmentGroups" -> form.assessmentGroups,
 			"academicYear" -> form.assignment.academicYear
-		).secondCrumbs(Breadcrumbs.Standard("Assignment Management", Some(Routes.admin.assignment.createAddStudents(form.assignment)), ""))
+		).crumbs(breadcrumbsStaff(form.assignment, AssignmentBreadcrumbs.Assignment.AssignmentManagementIdentifier): _*)
 	}
 
 	// TODO - add method for save and exit

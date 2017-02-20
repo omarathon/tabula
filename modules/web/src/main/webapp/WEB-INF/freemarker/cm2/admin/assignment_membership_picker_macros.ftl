@@ -49,7 +49,7 @@
 		<#local membershipInfo = command.membershipInfo />
 		<#local hasMembers=(membershipInfo.totalCount gt 0 || membershipInfo.includeCount gt 0 || membershipInfo.excludeCount gt 0) />
 
-		<div class = "remove-restore assignmentEnrolmentInfo">
+		<div class="remove-restore assignmentEnrolmentInfo">
 			<#if hasMembers>
 				<span class="use-tooltip"  <#if availableUpstreamGroups??>title="This will only remove enrolment for this assignment in Tabula. If SITS data appears to be wrong then it's best to have it fixed there."</#if>>
 					<a class="btn btn-primary disabled remove-users member-action">Remove</a>
@@ -159,15 +159,16 @@
 				$enrolment.tabulaPrepareSpinners();
 				$enrolment.find('.use-popover').popover({
 					trigger: 'click',
-					container: '.assignment-student-details',
-					template: '<div class="popover"><div class="arrow"></div><div class="popover-inner"><button type="button" class="close" aria-hidden="true">&#215;</button><h3 class="popover-title"></h3><div class="popover-content"><p></p></div></div></div>'
+					container: 'body'
 				}).click(function() {
+					//this part is required otherwise both popup and student list open at the same time
 					return false;
 				});
 
 			};
 				// ensure that the close handler for any popovers still work
 				$('.assignment-student-details').on('click', '.close', function() { $enrolment.find('.use-popover').popover('hide') });
+				//TODO - This needs to be replaced with bigLisrt. Leaving it as it is for time being as it is breaking some other things
 				$enrolment.on('click', '.table-checkable th .check-all', function(e) {
 					var $table = $(this).closest('table');
 					$table.find('td input:checkbox').prop('checked', this.checked);

@@ -99,7 +99,7 @@
 
 		<#if command.availableUpstreamGroups?has_content>
 			<div class="assessment-component assignment-modal">
-				<table id="sits-table" class="table table-bordered table-striped table-condensed table-hover table-sortable table-checkable sticky-table-headers">
+				<table id="sits-table" class="table table-striped table-condensed table-hover table-sortable table-checkable sticky-table-headers">
 					<thead>
 					<tr>
 						<th class="for-check-all"><input  type="checkbox" class="check-all use-tooltip" title="Select all/none" /> </th>
@@ -121,7 +121,7 @@
 										type="checkbox"
 										id="chk-${available.id}"
 										value="${available.id}"
-								${isLinked?string(" checked","")}
+								${isLinked?string(" checked","")} />
 							</td>
 							<td><label for="chk-${available.id}">${available.name}<span class="label label-primary linked <#if !isLinked>hidden</#if>">Linked</span></label></td>
 							<td class="sortable">${available.group.members?size}</td>

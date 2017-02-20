@@ -137,8 +137,8 @@ class Assignment
 	var summative: JBoolean = _
 	var dissertation: JBoolean = _
 	var allowExtensions: JBoolean = _
-	@Column(name="student_info_annonymous")
-	var studentInfoAnnonymous: JBoolean = _
+	@Column(name="anonymous_marking")
+	var anonymousMarking: JBoolean = _
 
 	var genericFeedback: String = ""
 	@Column(name="turnitin_id")

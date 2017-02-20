@@ -33,7 +33,6 @@ class AssignmentEnrolmentController extends CourseworkController {
 	@RequestMapping
 	def showForm(@ModelAttribute("command") form: EditAssignmentMembershipCommand, @PathVariable assignment: Assignment): Mav = {
 		form.afterBind()
-		logger.info(s"Assignment Enrolment includeCount: ${form.membershipInfo.includeCount}")
 		Mav(s"$urlPrefix/admin/assignments/enrolment",
 			"department" -> form.module.adminDepartment,
 			"module" -> form.module,

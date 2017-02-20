@@ -57,19 +57,17 @@ trait AssignmentStudentsCommandState extends EditAssignmentMembershipCommandStat
 	val updateStudentMembershipGroupIsUniversityIds: Boolean = false
 
 	// bind variables
-	var studentInfoAnnonymous: JBoolean = _
+	var anonymousMarking: JBoolean = _
 
 
 	def copyTo(assignment: Assignment) {
-		assignment.studentInfoAnnonymous = studentInfoAnnonymous
+		assignment.anonymousMarking = anonymousMarking
 		assignment.assessmentGroups.clear()
 		assignment.assessmentGroups.addAll(assessmentGroups)
 
 		for (group <- assignment.assessmentGroups.asScala if group.assignment == null) {
 			group.assignment = assignment
 		}
-
-		if (assignment.members == null) assignment.members = UserGroup.ofUsercodes
 		assignment.members.copyFrom(members)
 	}
 
@@ -116,18 +114,20 @@ trait AssignmentStudentsValidation extends SelfValidating {
 }
 
 
-trait PopulateAssignmentStudentCommand {
+trait PopulateAssignmentStudentCommand extends PopulateOnForm {
 
 	self: AssignmentStudentsCommandState with UpdatesStudentMembership with BooleanAssignmentProperties =>
-	assessmentGroups = assignment.assessmentGroups
+
+	// This does just set manual users only and works as expected.
 	massAddUsers = assignment.members.users.map(_.getWarwickId).mkString("\n")
 
-	studentInfoAnnonymous = assignment.studentInfoAnnonymous
+	anonymousMarking = assignment.anonymousMarking
 
-	def populateGroups(assignment: Assignment) {
+	override def populate(): Unit = {
 		assessmentGroups = assignment.assessmentGroups
 		upstreamGroups.addAll(allUpstreamGroups.filter { ug =>
 			assessmentGroups.asScala.exists(ag => ug.assessmentComponent == ag.assessmentComponent && ag.occurrence == ug.occurrence)
 		}.asJavaCollection)
 	}
+
 }

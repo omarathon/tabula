@@ -36,13 +36,13 @@ the comments textarea needs to maintain newlines.
 				</details>
 			</@form.row>
 		</div>
-		<@bs3form.labelled_form_group path="studentInfoAnnonymous" labelText="Set annonymity">
+		<@bs3form.labelled_form_group path="anonymousMarking" labelText="Set annonymity">
 			<div class="help-block">If set to 'on', markers won't be able to set student ID or name.</div>
 			<@bs3form.radio>
-				<@f.radiobutton path="studentInfoAnnonymous" value="true" /> On
+				<@f.radiobutton path="anonymousMarking" value="true" /> On
 			</@bs3form.radio>
 			<@bs3form.radio>
-				<@f.radiobutton path="studentInfoAnnonymous" value="false" /> Off
+				<@f.radiobutton path="anonymousMarking" value="false" /> Off
 			</@bs3form.radio>
 		</@bs3form.labelled_form_group>
 	</div>

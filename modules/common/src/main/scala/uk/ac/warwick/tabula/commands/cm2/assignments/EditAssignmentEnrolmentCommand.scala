@@ -69,7 +69,7 @@ trait ModifiesAssignmentMembership extends UpdatesStudentMembership with Specifi
 			template.assessmentComponent = ug.assessmentComponent
 			template.occurrence = ug.occurrence
 			template.assignment = assignment
-			assessmentMembershipService.getAssessmentGroup(template) orElse Some(template)
+			assessmentMembershipService.getAssessmentGroup(template).orElse(Some(template))
 		}).distinct.asJava
 	}
 }

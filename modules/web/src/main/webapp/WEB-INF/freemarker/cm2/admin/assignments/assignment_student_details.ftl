@@ -2,12 +2,8 @@
 <#assign f=JspTaglibs["/WEB-INF/tld/spring-form.tld"]>
 <#escape x as x?html>
 <#import "*/assignment_components.ftl" as components />
-	<#--
-	HFC-166 Don't use #compress on this file because
-	the comments textarea needs to maintain newlines.
-	-->
 
-<div class="assignment-header">
+<div>
 	<h1>Create assignment</h1>
 	<h4 class="with-related"><span class="muted">for</span> <@fmt.module_name module /></h4>
 </div>
