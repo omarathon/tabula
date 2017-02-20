@@ -51,6 +51,7 @@ trait SmallGroupService {
 	def getSmallGroupSets(department: Department, year: AcademicYear): Seq[SmallGroupSet]
 	def getSmallGroupSets(module: Module, year: AcademicYear): Seq[SmallGroupSet]
 	def getAllSmallGroupSets(department: Department): Seq[SmallGroupSet]
+	def getAllSmallGroupSets(year: AcademicYear): Seq[SmallGroupSet]
 
 	def findSmallGroupsByStudent(student: User): Seq[SmallGroup]
 	def findSmallGroupSetsByMember(user: User): Seq[SmallGroupSet]
@@ -137,6 +138,7 @@ abstract class AbstractSmallGroupService extends SmallGroupService {
 	def getSmallGroupSets(department: Department, year: AcademicYear): Seq[SmallGroupSet] = smallGroupDao.findSetsByDepartmentAndYear(department, year)
 	def getSmallGroupSets(module: Module, year: AcademicYear): Seq[SmallGroupSet] = smallGroupDao.findSetsByModuleAndYear(module, year)
 	def getAllSmallGroupSets(department: Department): Seq[SmallGroupSet] = smallGroupDao.findAllSetsByDepartment(department)
+	def getAllSmallGroupSets(year: AcademicYear): Seq[SmallGroupSet] = smallGroupDao.findAllSetsByYear(year)
 
 	def findSmallGroupEventsByTutor(user: User): Seq[SmallGroupEvent] = eventTutorsHelper.findBy(user)
 	def findSmallGroupsByTutor(user: User): Seq[SmallGroup] = findSmallGroupEventsByTutor(user)

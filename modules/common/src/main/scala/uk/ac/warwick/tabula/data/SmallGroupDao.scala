@@ -62,6 +62,7 @@ trait SmallGroupDao {
 	def findSetsByDepartmentAndYear(department: Department, year: AcademicYear): Seq[SmallGroupSet]
 	def findSetsByModuleAndYear(module: Module, year: AcademicYear): Seq[SmallGroupSet]
 	def findAllSetsByDepartment(department: Department): Seq[SmallGroupSet]
+	def findAllSetsByYear(year: AcademicYear): Seq[SmallGroupSet]
 	def findByModuleAndYear(module: Module, year: AcademicYear): Seq[SmallGroup]
 
 	def getSmallGroupEventOccurrence(event: SmallGroupEvent, week: Int): Option[SmallGroupEventOccurrence]
@@ -147,6 +148,18 @@ class SmallGroupDaoImpl extends SmallGroupDao
 		session.newCriteria[SmallGroupSet]
 			.createAlias("module", "module")
 			.add(is("module.adminDepartment", department))
+			.seq
+
+	def findAllSetsByYear(year: AcademicYear): Seq[SmallGroupSet] =
+		session.newCriteria[SmallGroupSet]
+			.createAlias("module", "module")
+			.createAlias("module.adminDepartment", "department")
+			.createAlias("groups", "group")
+			.addOrder(asc("department.code"))
+			.addOrder(asc("module.code"))
+			.addOrder(asc("name"))
+			.setFetchMode("groups", FetchMode.JOIN)
+			.setFetchMode("group.events", FetchMode.JOIN)
 			.seq
 
 	def findByModuleAndYear(module: Module, year: AcademicYear): Seq[SmallGroup] =
