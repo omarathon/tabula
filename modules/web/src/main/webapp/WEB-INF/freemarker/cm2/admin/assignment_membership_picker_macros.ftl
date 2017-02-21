@@ -65,7 +65,7 @@
 				<table id="enrolment-table" class="table table-bordered table-striped table-condensed table-hover table-sortable table-checkable sticky-table-headers">
 					<thead>
 						<tr>
-							<th class="for-check-all"><input  type="checkbox" class="check-all use-tooltip" title="Select all/none" /></th>
+							<th class="for-check-all"><input  type="checkbox" class="collection-check-all use-tooltip" title="Select all/none" /></th>
 							<th class="sortable">Source</th>
 							<th class="sortable">First name</th>
 							<th class="sortable">Last name</th>
@@ -84,9 +84,9 @@
 
 									<#-- TAB-1240: use the right key -->
 									<#if command.members.universityIds && item.universityId?has_content>
-											<@bs3form.selector_check_row "modifyEnrolment" item.universityId />
+										<@bs3form.selector_check_row "modifyEnrolment" item.universityId />
 									<#elseif item.userId?has_content>
-											<@bs3form.selector_check_row "modifyEnrolment" item.userId />
+										<@bs3form.selector_check_row "modifyEnrolment" item.userId />
 									<#else>
 										<i class="icon-ban-circle fa fa-ban use-tooltip" title="We are missing this person's usercode, without which we cannot modify their enrolment."></i>
 									</#if>
@@ -166,24 +166,17 @@
 				});
 
 			};
-				// ensure that the close handler for any popovers still work
-				$('.assignment-student-details').on('click', '.close', function() { $enrolment.find('.use-popover').popover('hide') });
-				//TODO - This needs to be replaced with bigLisrt. Leaving it as it is for time being as it is breaking some other things
-				$enrolment.on('click', '.table-checkable th .check-all', function(e) {
+			// ensure that the close handler for any popovers still work
+			$('.assignment-student-details').on('click', '.close', function() { $enrolment.find('.use-popover').popover('hide') });
+			//TODO - This needs to be replaced with bigLisrt. Leaving it as it is for time being as it is breaking some other things
+			$enrolment.find('.table-checkable').bigList({
+				onChange: function(){
 					var $table = $(this).closest('table');
-					$table.find('td input:checkbox').prop('checked', this.checked);
-					updateCheckboxes($table);
 					enableActions($table);
-				});
-			//};
-		<#-- manage check-all state -->
-			var updateCheckboxes = function($table) {
-				var checked = $table.find('td input:checked').length;
-				if (checked == $table.find('td input').length) $table.find('.check-all').prop('checked', true);
-				if (checked == 0) $table.find('.check-all').prop('checked', false);
-			};
+				}
+			});
 
-		<#-- enable/disable action buttons -->
+			<#-- enable/disable action buttons -->
 			var enableActions = function($table) {
 				var context = $table.prop('id');
 				if (context == 'sits-table') {
@@ -194,7 +187,7 @@
 				}
 			};
 
-		<#-- initialise the scripting for enrolment management -->
+			<#-- initialise the scripting for enrolment management -->
 			initEnrolment();
 			enableActions($('#sits-table'));
 
@@ -207,10 +200,6 @@
 						$chk.prop('checked', !$chk.prop('checked'));
 					}
 				}
-
-				var $table = $(this).closest('table');
-				updateCheckboxes($table);
-				enableActions($table);
 			});
 
 			<#-- sits-picker click handler -->

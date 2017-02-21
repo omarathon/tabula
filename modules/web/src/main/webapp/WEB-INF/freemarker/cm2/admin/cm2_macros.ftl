@@ -102,7 +102,7 @@
 				<table id="sits-table" class="table table-striped table-condensed table-hover table-sortable table-checkable sticky-table-headers">
 					<thead>
 					<tr>
-						<th class="for-check-all"><input  type="checkbox" class="check-all use-tooltip" title="Select all/none" /> </th>
+						<th class="for-check-all"><input  type="checkbox" class="collection-check-all use-tooltip" title="Select all/none" /> </th>
 						<th class="sortable">Name</th>
 						<th class="sortable">Members</th>
 						<th class="sortable">Assessment group</th>
@@ -118,10 +118,12 @@
 						<tr>
 							<td>
 								<input
-										type="checkbox"
-										id="chk-${available.id}"
-										value="${available.id}"
-								${isLinked?string(" checked","")} />
+									type="checkbox"
+									id="chk-${available.id}"
+									value="${available.id}"
+									${isLinked?string(" checked","")}
+									class="collection-checkbox"
+								/>
 							</td>
 							<td><label for="chk-${available.id}">${available.name}<span class="label label-primary linked <#if !isLinked>hidden</#if>">Linked</span></label></td>
 							<td class="sortable">${available.group.members?size}</td>
