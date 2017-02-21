@@ -27,7 +27,6 @@ object ViewModuleTimetableCommand {
 			with ViewModuleTimetableValidation
 			with ViewModuleTimetableDescription with ReadOnly
 			with AutowiringScientiaConfigurationComponent
-			with AutowiringNewScientiaConfigurationComponent
 			with SystemClockComponent
 			with AutowiringModuleTimetableEventSourceComponent
 

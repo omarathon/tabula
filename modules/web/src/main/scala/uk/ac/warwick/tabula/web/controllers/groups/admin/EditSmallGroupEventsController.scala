@@ -32,7 +32,7 @@ trait SyllabusPlusEventCountForModule {
 }
 
 abstract class AbstractEditSmallGroupEventsController extends GroupsController
-	with AutowiringScientiaConfigurationComponent with AutowiringNewScientiaConfigurationComponent
+	with AutowiringScientiaConfigurationComponent
 	with ScientiaHttpTimetableFetchingServiceComponent with SystemClockComponent
 	with SyllabusPlusEventCountForModule {
 
