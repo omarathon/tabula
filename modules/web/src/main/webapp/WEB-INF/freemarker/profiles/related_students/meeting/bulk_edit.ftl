@@ -40,21 +40,19 @@
 						<@f.input type="text" path="title" cssClass="form-control" maxlength="255" placeholder="Subject of meeting" />
 					</@bs3form.labelled_form_group>
 
-					<#if command.realTime>
-						<@bs3form.labelled_form_group path="meetingDateTime" labelText="Date of meeting">
-							<div class="input-group">
-								<@f.input type="text" path="meetingDateTime" cssClass="form-control date-time-minute-picker" placeholder="Pick the date" />
-								<span class="input-group-addon"><i class="fa fa-calendar"></i></span>
-							</div>
-						</@bs3form.labelled_form_group>
-					<#else>
-						<@bs3form.labelled_form_group path="meetingDate" labelText="Date of meeting">
-							<div class="input-group">
-								<@f.input type="text" path="meetingDate" cssClass="form-control date-picker" placeholder="Pick the date" />
-								<span class="input-group-addon"><i class="fa fa-calendar"></i></span>
-							</div>
-						</@bs3form.labelled_form_group>
-					</#if>
+					<@bs3form.labelled_form_group path="meetingDateStr" labelText="Date of meeting">
+						<div class="input-group">
+							<@f.input type="text" path="meetingDateStr" cssClass="form-control date-picker" placeholder="Pick the date" />
+							<span class="input-group-addon"><i class="fa fa-calendar"></i></span>
+						</div>
+					</@bs3form.labelled_form_group>
+
+					<@bs3form.labelled_form_group path="meetingTimeStr" labelText="Time of meeting">
+						<div class="input-group">
+							<@f.input type="text" path="meetingTimeStr" cssClass="form-control time-picker" placeholder="Pick the time" />
+							<span class="input-group-addon"><i class="fa fa-calendar"></i></span>
+						</div>
+					</@bs3form.labelled_form_group>
 
 					<@bs3form.labelled_form_group path="format" labelText="Format">
 						<@f.select path="format" cssClass="form-control">
