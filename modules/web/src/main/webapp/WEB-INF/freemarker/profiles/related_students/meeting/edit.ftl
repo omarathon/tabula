@@ -83,7 +83,7 @@
 							This meeting takes place in the <span class="year"></span> academic year.
 							You will be able to find this meeting under the <span class="year"></span> tab.
 						</div>
-						</@bs3form.labelled_form_group>
+					</@bs3form.labelled_form_group>
 					<#if command.realTime>
 						<script>
 							jQuery(function($){
