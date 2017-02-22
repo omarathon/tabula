@@ -51,11 +51,8 @@ class ManageNormalCATSLoadCommandInternal(val department: Department, val academ
 			} yield normalLoad
 			removed.foreach(normalCATSLoadService.delete)
 
-			val updated = for {
-				(year, normalLoad) <- toUpdate
-				loadsForRoute <- originalNormalLoads.get(route)
-			} yield {
-				val load = loadsForRoute.getOrElse(year, new NormalCATSLoad(academicYear, route, year, BigDecimal(normalLoad)))
+			val updated = toUpdate.map { case (year, normalLoad) =>
+				val load = originalNormalLoads.getOrElse(route, Map()).getOrElse(year, new NormalCATSLoad(academicYear, route, year, BigDecimal(normalLoad)))
 				load.normalLoad = BigDecimal(normalLoad)
 				load
 			}
@@ -93,12 +90,12 @@ trait ManageNormalCATSLoadValidation extends SelfValidating {
 	override def validate(errors: Errors) {
 		normalLoads.asScala.foreach { case (route, yearOfStudyMap) =>
 			if (!allRoutes.contains(route)) {
-				errors.reject("normalCATSLoad.route.invalid", Array(route.code.toUpperCase), "")
+				errors.reject("examGrids.normalCATSLoad.route.invalid", Array(route.code.toUpperCase), "")
 			}
 			yearOfStudyMap.asScala.foreach { case (yearOfStudy, jNormalLoad) =>
 				Option(jNormalLoad).foreach(normalLoad =>
 					if (BigDecimal(normalLoad) <= 0) {
-						errors.rejectValue("normalLoads", "normalCATSLoad.normalLoad.invalid", Array(route.code.toUpperCase, yearOfStudy.toString), "")
+						errors.rejectValue("normalLoads", "examGrids.normalCATSLoad.normalLoad.invalid", Array(route.code.toUpperCase, yearOfStudy.toString), "")
 					}
 				)
 			}

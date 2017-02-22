@@ -2,12 +2,12 @@
 <#import "*/modal_macros.ftl" as modal />
 
 <div class="pull-right">
-	<button class="btn btn-default" data-toggle="modal" data-target="#copy-loads-modal">
+	<button class="btn btn-default" data-toggle="modal" data-target="#copy-weightings-modal">
 		Copy from other academic year
 	</button>
 </div>
 
-<div id="copy-loads-modal" class="modal fade">
+<div id="copy-weightings-modal" class="modal fade">
 	<@modal.wrapper cssClass="modal-lg">
 		<@modal.header>
 			<h3 class="modal-title">Copy from other academic year</h3>
@@ -18,7 +18,7 @@
 				but you can review and update the copy before it is saved.
 			</div>
 			<@bs3form.labelled_form_group path="" labelText="Academic year">
-				<select class="form-control" name="academicYear" data-href="<@routes.exams.manageNormalLoads department academicYear />/fetch/">
+				<select class="form-control" name="academicYear" data-href="<@routes.exams.manageWeightings department academicYear />/fetch/">
 					<option value="" disabled selected></option>
 					<#list availableAcademicYears as academicYear>
 						<option value="${academicYear.startYear?c}">${academicYear.toString}</option>
@@ -40,32 +40,23 @@
 </div>
 
 <#function route_function dept>
-	<#local result><@routes.exams.manageNormalLoads dept academicYear /></#local>
+	<#local result><@routes.exams.manageWeightings dept academicYear /></#local>
 	<#return result />
 </#function>
 
-<@fmt.id7_deptheader title="Manage normal CATS loads for ${academicYear.toString}" route_function=route_function preposition="in" />
+<@fmt.id7_deptheader title="Manage course year weightings for ${academicYear.toString}" route_function=route_function preposition="in" />
 
 <p>
-	The "Normal CATS load" is the expected number of CATS take by each student on a given route
-	on a particular year of study in an academic year. Any student who is registered for modules
-	whose CATS total more than this are considered to have overcatted.
+	In order to generate a final degree mark when creating an exam grid the weighting for each year needs to be specified.
+	The weighting chosen corresponds to the student's SPR start year, for each year of study on their course.
 </p>
-
 <p>
-	For each route and year of study you can specify the normal CAT load for ${academicYear.toString}.
-	If the normal CATS load is not specified the following defaults will be used, based on the value of INS_PWY.PWY_PWTC in SITS:
+	Weightings should be entered as a percentage, totalling 100 for the degree.
 </p>
 
-<ul>
-	<#list allDegreeTypes as degreeType>
-		<li>${degreeType.description} (${degreeType.dbValue}): ${degreeType.normalCATSLoad}</li>
-	</#list>
-</ul>
+<#assign formUrl><@routes.exams.manageWeightings department academicYear /></#assign>
 
-<#assign formUrl><@routes.exams.manageNormalLoads department academicYear /></#assign>
-
-<div class="fix-area normal-load-editor">
+<div class="fix-area course-weightings-editor">
 
 	<@f.form method="post" action="${formUrl}" commandName="command" cssClass="dirty-check">
 
@@ -93,7 +84,7 @@
 			</div>
 			<div class="row last">
 				<div class="col-md-2">
-					<label>Route</label>
+					<label>Course</label>
 				</div>
 				<div class="col-md-9">
 					<#list allYearsOfStudy as year>
@@ -102,7 +93,7 @@
 				</div>
 
 				<div class="col-md-2">
-					<input type="text" class="form-control" name="filter" placeholder="Filter routes" />
+					<input type="text" class="form-control" name="filter" placeholder="Filter courses" />
 				</div>
 				<div class="col-md-9">
 					<#list allYearsOfStudy as year>
@@ -113,30 +104,29 @@
 				</div>
 				<div class="col-md-1">
 					<button type="button" name="bulkapply" class="btn btn-default btn-sm" disabled>Apply</button>
-					<@fmt.help_popover id="bulkapply" content="Enter a CATS load and click Apply to change all filtered routes" />
+					<@fmt.help_popover id="bulkapply" content="Enter a weighting and click Apply to change all filtered courses" />
 				</div>
 			</div>
 		</div>
 
-		<#list command.allRoutes as route>
+		<#list command.allCourses as course>
 			<div class="row">
 				<div class="col-md-2">
-					<label title="${route.code?upper_case} ${route.name}" class="use-tooltip">${route.code?upper_case} ${route.name}</label>
+					<label title="${course.code?upper_case} ${course.name}" class="use-tooltip">${course.code?upper_case} ${course.name}</label>
 				</div>
 				<div class="col-md-9">
 					<#list allYearsOfStudy as year>
 						<#assign value = "" />
-						<#if mapGet(command.normalLoads, route)?? && mapGet(mapGet(command.normalLoads, route), year)?? >
-							<#assign value = mapGet(mapGet(command.normalLoads, route), year) />
+						<#if mapGet(command.yearWeightings, course)?? && mapGet(mapGet(command.yearWeightings, course), year)?? >
+							<#assign value = mapGet(mapGet(command.yearWeightings, course), year) />
 						</#if>
 						<div class="col-md-1">
-							<input title="${route.code?upper_case} ${route.name} Year ${year}"
+							<input title="${course.code?upper_case} ${course.name} Year ${year}"
 								data-container="body"
 								type="text"
 								class="use-tooltip form-control"
-								name="normalLoads[${route.code}][${year}]"
+								name="yearWeightings[${course.code}][${year}]"
 								value="${value}"
-								placeholder="${route.degreeType.normalCATSLoad}"
 							/>
 						</div>
 					</#list>
@@ -153,7 +143,7 @@
 </div>
 
 <script>
-	window.ExamGrids.manageNormalLoads();
+	window.ExamGrids.manageWeightings();
 </script>
 
 </#escape>

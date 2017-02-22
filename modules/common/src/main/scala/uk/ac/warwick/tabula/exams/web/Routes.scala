@@ -80,6 +80,9 @@ object Routes {
 		def normalLoad(department: Department, academicYear: AcademicYear): String =
 			context + "/%s/%s/normalload" format(encoded(department.code), encoded(academicYear.startYear.toString))
 
+		def weightings(department: Department, academicYear: AcademicYear): String =
+			context + "/%s/%s/weightings" format(encoded(department.code), encoded(academicYear.startYear.toString))
+
 	}
 
 }
