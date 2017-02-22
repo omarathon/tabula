@@ -26,33 +26,46 @@
 			</#if>
 			<#if isModal!false>
 				<div class="modal-body"></div>
-					<@modal.footer>
-						<form class="double-submit-protection">
-							<button class="btn btn-primary spinnable spinner-auto" type="submit" name="submit">
-								Submit for approval
-							</button>
-							<button class="btn btn-default" data-dismiss="modal" aria-hidden="true">Cancel</button>
-						</form>
-					</@modal.footer>
+				<@modal.footer>
+					<form class="double-submit-protection">
+						<button class="btn btn-primary spinnable spinner-auto" type="submit" name="submit">
+							Submit for approval
+						</button>
+						<button class="btn btn-default" data-dismiss="modal" aria-hidden="true">Cancel</button>
+					</form>
+				</@modal.footer>
 			<#else>
 				<@f.form id="meeting-record-form" method="post" enctype="multipart/form-data" commandName="command" class="double-submit-protection">
 					<@bs3form.labelled_form_group path="title" labelText="Title">
 						<@f.input type="text" path="title" cssClass="form-control" maxlength="255" placeholder="Subject of meeting" />
 					</@bs3form.labelled_form_group>
 
-					<@bs3form.labelled_form_group path="meetingDateStr" labelText="Date of meeting">
-						<div class="input-group">
-							<@f.input type="text" path="meetingDateStr" cssClass="form-control date-picker" placeholder="Pick the date" />
-							<span class="input-group-addon"><i class="fa fa-calendar"></i></span>
+					<div class="row">
+						<div class="col-xs-4">
+							<@bs3form.labelled_form_group path="meetingDateStr" labelText="Date of meeting">
+								<div class="input-group">
+									<@f.input type="text" path="meetingDateStr" cssClass="form-control date-picker" placeholder="Pick the date" />
+									<span class="input-group-addon"><i class="fa fa-calendar"></i></span>
+								</div>
+							</@bs3form.labelled_form_group>
 						</div>
-					</@bs3form.labelled_form_group>
-
-					<@bs3form.labelled_form_group path="meetingTimeStr" labelText="Time of meeting">
-						<div class="input-group">
-							<@f.input type="text" path="meetingTimeStr" cssClass="form-control time-picker" placeholder="Pick the time" />
-							<span class="input-group-addon"><i class="fa fa-calendar"></i></span>
+						<div class="col-xs-4">
+							<@bs3form.labelled_form_group path="meetingTimeStr" labelText="Time of meeting">
+								<div class="input-group">
+									<@f.input type="text" path="meetingTimeStr" cssClass="form-control time-picker" placeholder="Pick the time" />
+									<span class="input-group-addon"><i class="fa fa-clock-o"></i></span>
+								</div>
+							</@bs3form.labelled_form_group>
 						</div>
-					</@bs3form.labelled_form_group>
+						<div class="col-xs-4">
+							<@bs3form.labelled_form_group path="meetingEndTimeStr" labelText="End time of meeting">
+								<div class="input-group">
+									<@f.input type="text" path="meetingEndTimeStr" cssClass="form-control time-picker" placeholder="Pick the end time" />
+									<span class="input-group-addon"><i class="fa fa-clock-o"></i></span>
+								</div>
+							</@bs3form.labelled_form_group>
+						</div>
+					</div>
 
 					<@bs3form.labelled_form_group path="format" labelText="Format">
 						<@f.select path="format" cssClass="form-control">
