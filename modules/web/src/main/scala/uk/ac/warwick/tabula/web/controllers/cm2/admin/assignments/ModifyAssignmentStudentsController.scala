@@ -18,7 +18,7 @@ import uk.ac.warwick.tabula.web.Mav
 @RequestMapping(value = Array("/${cm2.prefix}/admin/assignments/new/{assignment}/students"))
 class ModifyAssignmentStudentsController extends AbstractAssignmentController {
 
-	type ModifyAssignmentStudentsCommand = Appliable[Assignment] with AssignmentStudentsCommandState with ModifiesAssignmentMembership with PopulateOnForm
+	type ModifyAssignmentStudentsCommand = Appliable[Assignment] with ModifyAssignmentStudentsCommandState with ModifiesAssignmentMembership with PopulateOnForm
 
 	validatesSelf[SelfValidating]
 

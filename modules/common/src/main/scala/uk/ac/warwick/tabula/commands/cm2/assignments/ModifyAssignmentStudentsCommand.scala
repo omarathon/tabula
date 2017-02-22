@@ -18,9 +18,8 @@ object ModifyAssignmentStudentsCommand {
 			with AutowiringUserLookupComponent
 			with ModifyAssignmentStudentsPermissions
 			with ModifyAssignmentStudentsDescription
-			with AssignmentStudentsCommandState
-			with PopulateAssignmentStudentCommand
-			with AssignmentStudentsValidation
+			with ModifyAssignmentStudentsCommandState
+			with ModifyAssignmentStudentsValidation
 			with AutowiringAssessmentServiceComponent
 			with AutowiringAssessmentMembershipServiceComponent
 			with CurrentSITSAcademicYear
@@ -33,10 +32,10 @@ object ModifyAssignmentStudentsCommand {
 }
 
 class ModifyAssignmentStudentsCommandInternal(override val assignment: Assignment)
-	extends CommandInternal[Assignment] {
+	extends CommandInternal[Assignment] with PopulateOnForm {
 
 	self: AssessmentServiceComponent with UserLookupComponent
-		with AssessmentMembershipServiceComponent with AssignmentStudentsCommandState
+		with AssessmentMembershipServiceComponent with ModifyAssignmentStudentsCommandState
 		with SharedAssignmentProperties with ModifiesAssignmentMembership =>
 
 
@@ -46,10 +45,18 @@ class ModifyAssignmentStudentsCommandInternal(override val assignment: Assignmen
 		assignment
 	}
 
+	override def populate(): Unit = {
+		anonymousMarking = assignment.anonymousMarking
+		assessmentGroups = assignment.assessmentGroups
+		upstreamGroups.addAll(allUpstreamGroups.filter { ug =>
+			assessmentGroups.asScala.exists(ag => ug.assessmentComponent == ag.assessmentComponent && ag.occurrence == ug.occurrence)
+		}.asJavaCollection)
+	}
+
 }
 
 
-trait AssignmentStudentsCommandState extends EditAssignmentMembershipCommandState with UpdatesStudentMembership {
+trait ModifyAssignmentStudentsCommandState extends EditAssignmentMembershipCommandState with UpdatesStudentMembership {
 
 	self: AssessmentServiceComponent with UserLookupComponent with SpecifiesGroupType with SharedAssignmentProperties
 		with AssessmentMembershipServiceComponent =>
@@ -72,7 +79,7 @@ trait AssignmentStudentsCommandState extends EditAssignmentMembershipCommandStat
 
 
 trait ModifyAssignmentStudentsPermissions extends RequiresPermissionsChecking with PermissionsCheckingMethods {
-	self: AssignmentStudentsCommandState =>
+	self: ModifyAssignmentStudentsCommandState =>
 
 	override def permissionsCheck(p: PermissionsChecking): Unit = {
 		p.PermissionCheck(Permissions.Assignment.Update, assignment.module)
@@ -81,16 +88,16 @@ trait ModifyAssignmentStudentsPermissions extends RequiresPermissionsChecking wi
 
 
 trait ModifyAssignmentStudentsDescription extends Describable[Assignment] {
-	self: AssignmentStudentsCommandState =>
+	self: ModifyAssignmentStudentsCommandState =>
 
 	override def describe(d: Description) {
 		d.assignment(assignment)
 	}
 }
 
-trait AssignmentStudentsValidation extends SelfValidating {
+trait ModifyAssignmentStudentsValidation extends SelfValidating {
 
-	self: AssignmentStudentsCommandState with AssessmentServiceComponent with UserLookupComponent with ModifiesAssignmentMembership =>
+	self: ModifyAssignmentStudentsCommandState with AssessmentServiceComponent with UserLookupComponent with ModifiesAssignmentMembership =>
 
 	override def validate(errors: Errors) {
 
@@ -110,17 +117,3 @@ trait AssignmentStudentsValidation extends SelfValidating {
 	}
 }
 
-
-trait PopulateAssignmentStudentCommand extends PopulateOnForm {
-
-	self: AssignmentStudentsCommandState with UpdatesStudentMembership with BooleanAssignmentProperties =>
-
-	override def populate(): Unit = {
-		anonymousMarking = assignment.anonymousMarking
-		assessmentGroups = assignment.assessmentGroups
-		upstreamGroups.addAll(allUpstreamGroups.filter { ug =>
-			assessmentGroups.asScala.exists(ag => ug.assessmentComponent == ag.assessmentComponent && ag.occurrence == ug.occurrence)
-		}.asJavaCollection)
-	}
-
-}
