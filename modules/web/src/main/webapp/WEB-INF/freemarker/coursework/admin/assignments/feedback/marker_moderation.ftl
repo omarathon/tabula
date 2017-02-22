@@ -59,7 +59,7 @@
 					<@form.row>
 						<#if isGradeValidation>
 							<#assign generateUrl><@routes.coursework.generateGradesForMarks command.assignment /></#assign>
-							<@courses_macros.autoGradeOnline "grade" "Suggested Grade" "mark" command.student.userId"" generateUrl />
+							<@courses_macros.autoGradeOnline "grade" "Suggested Grade" "mark" command.student.userId!"" generateUrl />
 						<#else>
 							<@form.label path="grade">Suggested Grade</@form.label>
 							<@form.field>
