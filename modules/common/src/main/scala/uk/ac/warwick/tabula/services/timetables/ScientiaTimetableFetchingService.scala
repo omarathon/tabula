@@ -56,40 +56,17 @@ trait AutowiringScientiaConfigurationComponent extends ScientiaConfigurationComp
 
 		lazy val cacheSuffix: String = Wire.optionProperty("${scientia.cacheSuffix}").getOrElse("")
 
-		val cacheExpiryTime: Int = 60 * 60 * 6 // 6 hours in seconds
-
-		override val returnEvents: Boolean = false
-
-	}
-
-}
-
-trait NewScientiaConfigurationComponent {
-	val newScientiaConfiguration: ScientiaConfiguration
-}
-
-trait AutowiringNewScientiaConfigurationComponent extends AutowiringScientiaConfigurationComponent with NewScientiaConfigurationComponent {
-	val newScientiaConfiguration = new AutowiringNewScientiaConfiguration
-
-	class AutowiringNewScientiaConfiguration extends AutowiringScientiaConfiguration {
-		override lazy val scientiaBaseUrl: String = Wire.optionProperty("${scientia.base.url.new}").getOrElse("https://test-timetablingmanagement.warwick.ac.uk/xml")
-
-		override lazy val cacheSuffix = "New"
-
 		override val cacheExpiryTime: Int = 60 * 60 // 1 hour in seconds
-
-		override val returnEvents: Boolean = true
 
 	}
 
 }
 
 trait ScientiaHttpTimetableFetchingServiceComponent extends CompleteTimetableFetchingServiceComponent {
-	self: ScientiaConfigurationComponent with NewScientiaConfigurationComponent =>
+	self: ScientiaConfigurationComponent =>
 
 	lazy val timetableFetchingService = new CombinedTimetableFetchingService(
-		ScientiaHttpTimetableFetchingService(scientiaConfiguration),
-		ScientiaHttpTimetableFetchingService(newScientiaConfiguration)
+		ScientiaHttpTimetableFetchingService(scientiaConfiguration)
 	)
 }
 
