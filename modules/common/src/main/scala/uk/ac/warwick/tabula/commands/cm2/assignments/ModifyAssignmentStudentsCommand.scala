@@ -16,8 +16,8 @@ object ModifyAssignmentStudentsCommand {
 		new ModifyAssignmentStudentsCommandInternal(assignment)
 			with ComposableCommand[Assignment]
 			with AutowiringUserLookupComponent
-			with CreateAssignmentStudentsPermissions
-			with CreateAssignmentStudentsDescription
+			with ModifyAssignmentStudentsPermissions
+			with ModifyAssignmentStudentsDescription
 			with AssignmentStudentsCommandState
 			with PopulateAssignmentStudentCommand
 			with AssignmentStudentsValidation
@@ -56,9 +56,6 @@ trait AssignmentStudentsCommandState extends EditAssignmentMembershipCommandStat
 
 	val updateStudentMembershipGroupIsUniversityIds: Boolean = false
 
-	// bind variables
-	var anonymousMarking: JBoolean = _
-
 
 	def copyTo(assignment: Assignment) {
 		assignment.anonymousMarking = anonymousMarking
@@ -74,16 +71,16 @@ trait AssignmentStudentsCommandState extends EditAssignmentMembershipCommandStat
 }
 
 
-trait CreateAssignmentStudentsPermissions extends RequiresPermissionsChecking with PermissionsCheckingMethods {
+trait ModifyAssignmentStudentsPermissions extends RequiresPermissionsChecking with PermissionsCheckingMethods {
 	self: AssignmentStudentsCommandState =>
 
 	override def permissionsCheck(p: PermissionsChecking): Unit = {
-		p.PermissionCheck(Permissions.Assignment.Create, assignment.module)
+		p.PermissionCheck(Permissions.Assignment.Update, assignment.module)
 	}
 }
 
 
-trait CreateAssignmentStudentsDescription extends Describable[Assignment] {
+trait ModifyAssignmentStudentsDescription extends Describable[Assignment] {
 	self: AssignmentStudentsCommandState =>
 
 	override def describe(d: Description) {
@@ -118,12 +115,8 @@ trait PopulateAssignmentStudentCommand extends PopulateOnForm {
 
 	self: AssignmentStudentsCommandState with UpdatesStudentMembership with BooleanAssignmentProperties =>
 
-	// This does just set manual users only and works as expected.
-	massAddUsers = assignment.members.users.map(_.getWarwickId).mkString("\n")
-
-	anonymousMarking = assignment.anonymousMarking
-
 	override def populate(): Unit = {
+		anonymousMarking = assignment.anonymousMarking
 		assessmentGroups = assignment.assessmentGroups
 		upstreamGroups.addAll(allUpstreamGroups.filter { ug =>
 			assessmentGroups.asScala.exists(ag => ug.assessmentComponent == ag.assessmentComponent && ag.occurrence == ug.occurrence)

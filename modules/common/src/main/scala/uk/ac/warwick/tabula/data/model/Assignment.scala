@@ -861,6 +861,7 @@ trait BooleanAssignmentProperties {
 	@BeanProperty var automaticallyReleaseToMarkers: JBoolean = false
 	@BeanProperty var automaticallySubmitToTurnitin: JBoolean = false
 	@BeanProperty var hiddenFromStudents: JBoolean = false
+	@BeanProperty var anonymousMarking: JBoolean = false
 
 
 
@@ -880,6 +881,7 @@ trait BooleanAssignmentProperties {
 		assignment.includeInFeedbackReportWithoutSubmissions = includeInFeedbackReportWithoutSubmissions
 		assignment.automaticallyReleaseToMarkers = automaticallyReleaseToMarkers
 		assignment.automaticallySubmitToTurnitin = automaticallySubmitToTurnitin
+		assignment.anonymousMarking = anonymousMarking
 
 
 		// You can only hide an assignment, no un-hiding.
