@@ -184,7 +184,7 @@ class TurnitinLtiService extends Logging with DisposableBean with InitializingBe
 							response
 						}
 					}
-			}doRequestForLtiTesting
+			}
 
 	}
 
