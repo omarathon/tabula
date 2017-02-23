@@ -54,6 +54,7 @@
 		<constructor-arg index="0">
 			<list>
 				<bean class="uk.ac.warwick.tabula.events.SLF4JEventListener" />
+				<bean class="uk.ac.warwick.tabula.events.AuditLoggingEventListener" />
 				<bean class="uk.ac.warwick.tabula.events.DatabaseEventListener" />
 			</list>
 		</constructor-arg>
