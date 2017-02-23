@@ -189,6 +189,16 @@ examGridsExports.manageNormalLoads = function(){
 	jQuery(function($){
 		$('.fix-area').fixHeaderFooter();
 		var $editor = $('.normal-load-editor');
+		// Stop 'Enter' from submitting the form
+		$editor.find('form')
+			.off('keyup.inputSubmitProtection keypress.inputSubmitProtection')
+			.on('keyup.inputSubmitProtection keypress.inputSubmitProtection', function(e){
+				var code = e.keyCode || e.which;
+				if (code  == 13) {
+					e.preventDefault();
+					return false;
+				}
+			});
 		stripeElements($editor.find('.row').not('.header .row'));
 		editorFilterAndBulkEdit($editor, 'normalLoads');
 		additionalYearsOfStudyToggle($editor);
@@ -200,6 +210,16 @@ examGridsExports.manageWeightings = function(){
 	jQuery(function($){
 		$('.fix-area').fixHeaderFooter();
 		var $editor = $('.course-weightings-editor');
+		// Stop 'Enter' from submitting the form
+		$editor.find('form')
+			.off('keyup.inputSubmitProtection keypress.inputSubmitProtection')
+			.on('keyup.inputSubmitProtection keypress.inputSubmitProtection', function(e){
+				var code = e.keyCode || e.which;
+				if (code  == 13) {
+					e.preventDefault();
+					return false;
+				}
+			});
 		stripeElements($editor.find('.row').not('.header .row'));
 		editorFilterAndBulkEdit($editor, 'yearWeightings');
 		additionalYearsOfStudyToggle($editor);
