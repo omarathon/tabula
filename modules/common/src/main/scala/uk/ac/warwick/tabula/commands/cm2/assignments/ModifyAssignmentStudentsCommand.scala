@@ -46,7 +46,7 @@ class ModifyAssignmentStudentsCommandInternal(override val assignment: Assignmen
 	}
 
 	override def populate(): Unit = {
-		anonymousMarking = assignment.anonymousMarking
+		copySharedFrom(assignment)
 		assessmentGroups = assignment.assessmentGroups
 		upstreamGroups.addAll(allUpstreamGroups.filter { ug =>
 			assessmentGroups.asScala.exists(ag => ug.assessmentComponent == ag.assessmentComponent && ag.occurrence == ug.occurrence)
