@@ -137,6 +137,9 @@ class Assignment
 	var summative: JBoolean = _
 	var dissertation: JBoolean = _
 	var allowExtensions: JBoolean = _
+	@Column(name="anonymous_marking")
+	var anonymousMarking: JBoolean = _
+
 	var genericFeedback: String = ""
 	@Column(name="turnitin_id")
 	var turnitinId: String = ""
@@ -858,6 +861,9 @@ trait BooleanAssignmentProperties {
 	@BeanProperty var automaticallyReleaseToMarkers: JBoolean = false
 	@BeanProperty var automaticallySubmitToTurnitin: JBoolean = false
 	@BeanProperty var hiddenFromStudents: JBoolean = false
+	@BeanProperty var anonymousMarking: JBoolean = false
+
+
 
 	def copyBooleansTo(assignment: Assignment) {
 		assignment.openEnded = openEnded
@@ -875,6 +881,8 @@ trait BooleanAssignmentProperties {
 		assignment.includeInFeedbackReportWithoutSubmissions = includeInFeedbackReportWithoutSubmissions
 		assignment.automaticallyReleaseToMarkers = automaticallyReleaseToMarkers
 		assignment.automaticallySubmitToTurnitin = automaticallySubmitToTurnitin
+		assignment.anonymousMarking = anonymousMarking
+
 
 		// You can only hide an assignment, no un-hiding.
 		if (hiddenFromStudents) assignment.hideFromStudents()

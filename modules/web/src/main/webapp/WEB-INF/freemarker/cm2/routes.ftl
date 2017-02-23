@@ -32,3 +32,5 @@ TODO grab values from the Routes object in code, as that's pretty equivalent and
 <#macro feedbackAttachment feedback attachment><@_u page="/submission/${feedback.assignment.id}/get/${attachment.name?url}"/></#macro>
 <#macro assignemnts_json module><@_u page="/admin/${module.code}/assignments" /></#macro>
 <#macro assignemnts_details_new module><@_u page="/admin/${module.code}/assignments/new" /></#macro>
+<#macro assignemnts_students_new assignment><@_u page="/admin/assignments/new/${assignment.id}/students" /></#macro>
+<#macro enrolment assignment><@_u page="/admin/assignments/${assignment.id}/enrolment"/></#macro>
