@@ -1,7 +1,6 @@
 package uk.ac.warwick.tabula.services
 
 import org.junit.Before
-import org.mockito.Mockito._
 import org.springframework.beans.factory.InitializingBean
 import uk.ac.warwick.tabula._
 import uk.ac.warwick.tabula.data._
@@ -11,13 +10,11 @@ import uk.ac.warwick.tabula.services.permissions._
 import uk.ac.warwick.util.cache.Caches.CacheStrategy
 import uk.ac.warwick.util.queue.{Queue, QueueListener}
 
-import scala.collection.JavaConverters._
-
 class CourseAndRouteServiceTest extends PersistenceTestBase with Mockito {
 
 	val userLookupService = new MockUserLookup
 
-	val service: CourseAndRouteService = new CourseAndRouteService with RouteDaoComponent with CourseDaoComponent with SecurityServiceComponent with PermissionsServiceComponent with ModuleAndDepartmentServiceComponent {
+	val service: CourseAndRouteService = new AbstractCourseAndRouteService with RouteDaoComponent with CourseDaoComponent with SecurityServiceComponent with PermissionsServiceComponent with ModuleAndDepartmentServiceComponent {
 		val routeDao = new RouteDaoImpl
 		val courseDao = new CourseDaoImpl
 		val permissionsService = new AbstractPermissionsService with PermissionsDaoComponent with PermissionsServiceCaches with GrantedRolesForUserCache with GrantedRolesForGroupCache with GrantedPermissionsForUserCache with GrantedPermissionsForGroupCache with CacheStrategyComponent with QueueListener with InitializingBean with Logging with UserLookupComponent {
@@ -32,7 +29,7 @@ class CourseAndRouteServiceTest extends PersistenceTestBase with Mockito {
 		val moduleAndDepartmentService: ModuleAndDepartmentService = mock[ModuleAndDepartmentService]
 	}
 
-	@Before def wire {
+	@Before def wire() {
 		service.routeDao.asInstanceOf[RouteDaoImpl].sessionFactory = sessionFactory
 		service.courseDao.asInstanceOf[CourseDaoImpl].sessionFactory = sessionFactory
 		service.permissionsService.asInstanceOf[PermissionsDaoComponent].permissionsDao.asInstanceOf[PermissionsDaoImpl].sessionFactory = sessionFactory
@@ -43,7 +40,7 @@ class CourseAndRouteServiceTest extends PersistenceTestBase with Mockito {
 		service.securityService.can(isA[CurrentUser],isA[Permission],isA[PermissionsTarget] ) returns true
 	}
 
-	@Test def crud = transactional { tx =>
+	@Test def crud() = transactional { tx =>
 		// uses data created in data.sql
 		val g500 = service.getRouteByCode("g500").get
 		val g503 = service.getRouteByCode("g503").get

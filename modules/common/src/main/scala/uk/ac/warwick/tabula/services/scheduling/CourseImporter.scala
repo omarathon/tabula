@@ -9,7 +9,7 @@ import org.springframework.jdbc.`object`.MappingSqlQuery
 import org.springframework.stereotype.Service
 import uk.ac.warwick.spring.Wire
 import uk.ac.warwick.tabula.AcademicYear
-import uk.ac.warwick.tabula.commands.scheduling.imports.{ImportAcademicInformationCommand, ImportCourseCommand, ImportCourseYearWeightingCommand}
+import uk.ac.warwick.tabula.commands.scheduling.imports.{ImportAcademicInformationCommand, ImportCourseCommand}
 import uk.ac.warwick.tabula.data.CourseDao
 import uk.ac.warwick.tabula.data.Transactions._
 import uk.ac.warwick.tabula.data.model.Course
@@ -57,13 +57,7 @@ trait CourseImporter extends Logging {
 		ImportAcademicInformationCommand.combineResults(results)
 	}
 
-	def importCourseYearWeightings(): ImportAcademicInformationCommand.ImportResult = {
-		val results = buildImportWeightingsCommands().map { _.apply()._2 }
-		ImportAcademicInformationCommand.combineResults(results)
-	}
-
 	def buildImportCommands(): Seq[ImportCourseCommand]
-	def buildImportWeightingsCommands(): Seq[ImportCourseYearWeightingCommand]
 }
 
 @Profile(Array("dev", "test", "production"))
@@ -75,14 +69,8 @@ class SitsCourseImporter extends CourseImporter {
 
 	lazy val coursesQuery = new CoursesQuery(sits)
 
-	lazy val courseYearWeightingsQuery = new CourseYearWeightingsQuery(sits)
-
 	override def buildImportCommands(): Seq[ImportCourseCommand] = {
 		coursesQuery.execute.toSeq
-	}
-
-	override def buildImportWeightingsCommands(): Seq[ImportCourseYearWeightingCommand] = {
-		courseYearWeightingsQuery.execute.toSeq
 	}
 }
 
@@ -90,12 +78,8 @@ object SitsCourseImporter {
 	val sitsSchema: String = Wire.property("${schema.sits}")
 
 	def GetCourse = f"""
-		select crs_code, crs_snam, crs_name, crs_titl from $sitsSchema.srs_crs
+		select crs_code, crs_snam, crs_name, crs_titl, crs_dptc from $sitsSchema.srs_crs
 		"""
-
-	def GetCourseYearWeighting = f"""
-		select cbo_ayrc, cbo_crsc, cbo_blok, cbo_spif from $sitsSchema.srs_cbo where cbo_spif is not null
-	"""
 
 	class CoursesQuery(ds: DataSource) extends MappingSqlQuery[ImportCourseCommand](ds, GetCourse) {
 		compile()
@@ -105,25 +89,15 @@ object SitsCourseImporter {
 					code=resultSet.getString("crs_code"),
 					shortName=resultSet.getString("crs_snam"),
 					fullName=resultSet.getString("crs_name"),
-					title=resultSet.getString("crs_titl")
+					title=resultSet.getString("crs_titl"),
+					departmentCode=resultSet.getString("crs_dptc")
 				)
-			)
-	}
-
-	class CourseYearWeightingsQuery(ds: DataSource) extends MappingSqlQuery[ImportCourseYearWeightingCommand](ds, GetCourseYearWeighting) {
-		compile()
-		override def mapRow(resultSet: ResultSet, rowNumber: Int) =
-			new ImportCourseYearWeightingCommand(
-				resultSet.getString("cbo_crsc"),
-				AcademicYear.parse(resultSet.getString("cbo_ayrc")),
-				resultSet.getInt("cbo_blok"),
-				resultSet.getBigDecimal("cbo_spif")
 			)
 	}
 
 }
 
-case class CourseInfo(code: String, shortName: String, fullName: String, title: String)
+case class CourseInfo(code: String, shortName: String, fullName: String, title: String, departmentCode: String)
 
 @Profile(Array("sandbox")) @Service
 class SandboxCourseImporter extends CourseImporter {
@@ -137,28 +111,13 @@ class SandboxCourseImporter extends CourseImporter {
 							code="%c%s-%s".format(route.courseType.courseCodeChar, departmentCode.toUpperCase, routeCode.toUpperCase),
 							shortName=StringUtils.safeSubstring(route.name, 0, 20).toUpperCase,
 							fullName=route.name,
-							title="%s %s".format(route.degreeType.description, route.name)
+							title="%s %s".format(route.degreeType.description, route.name),
+							departmentCode=departmentCode.toUpperCase
 						)
 					)
 				}
 			}
 			.toSeq
-
-	override def buildImportWeightingsCommands(): Seq[ImportCourseYearWeightingCommand] = {
-		val courseCodes = SandboxData.Departments.flatMap { case (departmentCode, department) =>
-			department.routes.map { case (routeCode, route) =>
-				"%c%s-%s".format(route.courseType.courseCodeChar, departmentCode.toUpperCase, routeCode.toUpperCase)
-			}
-		}
-		courseCodes.flatMap(courseCode => (1 to 3).map(yearOfStudy =>
-			new ImportCourseYearWeightingCommand(
-				courseCode,
-				AcademicYear.guessSITSAcademicYearByDate(DateTime.now),
-				yearOfStudy,
-				BigDecimal(1.toDouble / 3.toDouble)
-			)
-		)).toSeq
-	}
 
 }
 

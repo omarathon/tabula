@@ -34,12 +34,12 @@ class JobDaoTest extends AppContextTestBase with HasJobDao {
 		jobDao.findOutstandingInstances(5).length should be (5)
 		jobDao.findOutstandingInstances(3).length should be (3)
 		/* TAB-4302 - return oldest jobs first */
-		jobDao.findOutstandingInstances(3).contains(oldestInst) should be {true}
-		jobDao.findOutstandingInstances(3).contains(newestInst) should be {false}
+		withClue("jobDao.findOutstandingInstances(3).contains(oldestInst)") { jobDao.findOutstandingInstances(3).contains(oldestInst) should be {true} }
+		withClue("jobDao.findOutstandingInstances(3).contains(newestInst)") { jobDao.findOutstandingInstances(3).contains(newestInst) should be {false} }
 
 		val inst = jobDao.getById(inst1.id).get
 
-		jobDao.findOutstandingInstances(5).contains(inst) should be {true}
+		withClue("jobDao.findOutstandingInstances(5).contains(inst)") { jobDao.findOutstandingInstances(5).contains(inst) should be {true} }
 
 		inst.started = true
 		jobDao.update(inst)
@@ -47,20 +47,20 @@ class JobDaoTest extends AppContextTestBase with HasJobDao {
 		jobDao.findOutstandingInstance(inst1) should be (None)
 
 		jobDao.findOutstandingInstances(5).length should be (4)
-		jobDao.findOutstandingInstances(5).contains(inst) should be {false}
+		withClue("jobDao.findOutstandingInstances(5).contains(inst)") { jobDao.findOutstandingInstances(5).contains(inst) should be {false} }
 
 		jobDao.unfinishedInstances.length should be (5)
-		jobDao.unfinishedInstances.contains(inst) should be {true}
+		withClue("jobDao.unfinishedInstances.contains(inst)") { jobDao.unfinishedInstances.contains(inst) should be {true} }
 		jobDao.listRecent(0, 5).length should be (0)
-		jobDao.listRecent(0, 5).contains(inst) should be {false}
+		withClue("jobDao.listRecent(0, 5).contains(inst)") { jobDao.listRecent(0, 5).contains(inst) should be {false} }
 
 		inst.finished = true
 		jobDao.update(inst)
 
 		jobDao.unfinishedInstances.length should be (4)
-		jobDao.unfinishedInstances.contains(inst) should be {false}
+		withClue("jobDao.unfinishedInstances.contains(inst)") { jobDao.unfinishedInstances.contains(inst) should be {false} }
 		jobDao.listRecent(0, 5).length should be (1)
-		jobDao.listRecent(0, 5).contains(inst) should be {true}
+		withClue("jobDao.listRecent(0, 5).contains(inst)") { jobDao.listRecent(0, 5).contains(inst) should be {true} }
 	}
 
 }
