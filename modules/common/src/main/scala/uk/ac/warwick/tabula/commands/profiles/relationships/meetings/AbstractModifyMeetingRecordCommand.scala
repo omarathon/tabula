@@ -1,11 +1,11 @@
 package uk.ac.warwick.tabula.commands.profiles.relationships.meetings
 
-import org.joda.time.DateTime
-import uk.ac.warwick.tabula.DateFormats.DateTimePickerFormatter
-import org.springframework.validation.ValidationUtils._
 import org.springframework.validation.Errors
+import org.springframework.validation.ValidationUtils._
+import uk.ac.warwick.tabula.DateFormats.{DatePickerFormatter, TimePickerFormatter}
 import uk.ac.warwick.tabula.FeaturesComponent
 import uk.ac.warwick.tabula.commands._
+import uk.ac.warwick.tabula.data.HibernateHelpers
 import uk.ac.warwick.tabula.data.model._
 import uk.ac.warwick.tabula.permissions.Permissions
 import uk.ac.warwick.tabula.services.attendancemonitoring.AttendanceMonitoringMeetingRecordServiceComponent
@@ -20,7 +20,45 @@ abstract class AbstractModifyMeetingRecordCommand extends AbstractMeetingRecordC
 		with FileAttachmentServiceComponent =>
 }
 
+trait PopulateMeetingRecordCommand extends PopulateOnForm {
 
+	self: MeetingRecordCommandRequest with EditMeetingRecordCommandState =>
+
+	override def populate(): Unit = {
+		title = meetingRecord.title
+		description = meetingRecord.description
+		HibernateHelpers.initialiseAndUnproxy(meetingRecord) match {
+			case meeting: MeetingRecord =>
+				isRealTime = meeting.isRealTime
+				if (meeting.isRealTime) {
+					meetingDateStr = meetingRecord.meetingDate.toString(DatePickerFormatter)
+					meetingTimeStr = meetingRecord.meetingDate.withHourOfDay(meetingRecord.meetingDate.getHourOfDay).toString(TimePickerFormatter)
+					meetingEndTimeStr = meetingRecord.meetingEndDate.withHourOfDay(meetingRecord.meetingEndDate.getHourOfDay).toString(TimePickerFormatter)
+				} else {
+					meetingDate = meetingRecord.meetingDate.toLocalDate
+					meetingTime = meetingRecord.meetingDate.withHourOfDay(meetingRecord.meetingDate.getHourOfDay)
+					meetingEndTime = meetingRecord.meetingEndDate.withHourOfDay(meetingRecord.meetingEndDate.getHourOfDay).plusHours(1)
+				}
+			case _: ScheduledMeetingRecord =>
+				meetingDateStr = meetingRecord.meetingDate.toString(DatePickerFormatter)
+				meetingTimeStr = meetingRecord.meetingDate.withHourOfDay(meetingRecord.meetingDate.getHourOfDay).toString(TimePickerFormatter)
+				meetingEndTimeStr = meetingRecord.meetingEndDate.withHourOfDay(meetingRecord.meetingEndDate.getHourOfDay).toString(TimePickerFormatter)
+		}
+
+
+		Option(meetingRecord.meetingLocation).foreach {
+			case NamedLocation(name) => meetingLocation = name
+			case MapLocation(name, lid) =>
+				meetingLocation = name
+				meetingLocationId = lid
+		}
+
+		format = meetingRecord.format
+		attachedFiles = meetingRecord.attachments
+
+	}
+
+}
 
 trait ModifyMeetingRecordValidation extends MeetingRecordValidation {
 
