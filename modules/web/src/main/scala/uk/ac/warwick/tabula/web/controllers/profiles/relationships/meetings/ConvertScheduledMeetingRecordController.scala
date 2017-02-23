@@ -25,7 +25,7 @@ class ConvertScheduledMeetingRecordController extends ProfilesController {
 	validatesSelf[SelfValidating]
 
 	@ModelAttribute("convertCommand")
-	def getConvertCommand(@PathVariable meetingRecord: ScheduledMeetingRecord): ConvertScheduledMeetingRecordCommand with ComposableCommand[MeetingRecord] with ConvertScheduledMeetingRecordPermissions with ConvertScheduledMeetingRecordState with ConvertScheduledMeetingRecordDescription with AutowiringMeetingRecordServiceComponent with ConvertScheduledMeetingRecordCommandValidation with AutowiringFileAttachmentServiceComponent with ConvertScheduledMeetingRecordCommandPopulate = {
+	def getConvertCommand(@PathVariable meetingRecord: ScheduledMeetingRecord): ConvertScheduledMeetingRecordCommand = {
 		Option(meetingRecord).map(mr => {
 			ConvertScheduledMeetingRecordCommand(currentMember, mr)
 		}).orNull
@@ -129,7 +129,7 @@ class ConvertScheduledMeetingRecordController extends ProfilesController {
 	): Mav = {
 		if(command != null && convertCommand != null) {
 			if (createErrors.hasErrors || convertErrors.hasErrors) {
-				form(command, relationshipType, studentCourseDetails, academicYear, iframe = false)
+				form(command, relationshipType, studentCourseDetails, academicYear)
 			} else {
 				convertCommand.createCommand = command
 				convertCommand.apply()
