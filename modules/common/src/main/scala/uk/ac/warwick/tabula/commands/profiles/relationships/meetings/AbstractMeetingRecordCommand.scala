@@ -26,20 +26,16 @@ abstract class AbstractMeetingRecordCommand {
 	protected def applyCommon(meeting: MeetingRecord): MeetingRecord = {
 		meeting.title = title
 		meeting.description = description
-		meeting.isRealTime match {
-
-			case true =>
-				if(meetingDateStr.hasText && meetingTimeStr.hasText){
-					meeting.meetingDate = DateTimePickerFormatter.parseDateTime(meetingDateStr + " " + meetingTimeStr)
-				}
-				if (meetingDateStr.hasText && meetingEndTimeStr.hasText) {
-					meeting.meetingEndDate = DateTimePickerFormatter.parseDateTime(meetingDateStr + " " + meetingEndTimeStr)
-				}
-
-			case false =>
-				meeting.meetingDate = meetingDate.toDateTimeAtStartOfDay.withHourOfDay(MeetingRecord.DefaultMeetingTimeOfDay)
-				meeting.meetingEndDate = meetingEndDate.toDateTimeAtStartOfDay.withHourOfDay(MeetingRecord.DefaultMeetingTimeOfDay).plusHours(1)
-
+		if (meeting.isRealTime) {
+			if (meetingDateStr.hasText && meetingTimeStr.hasText) {
+				meeting.meetingDate = DateTimePickerFormatter.parseDateTime(meetingDateStr + " " + meetingTimeStr)
+			}
+			if (meetingDateStr.hasText && meetingEndTimeStr.hasText) {
+				meeting.meetingEndDate = DateTimePickerFormatter.parseDateTime(meetingDateStr + " " + meetingEndTimeStr)
+			}
+		} else {
+			meeting.meetingDate = meetingDate.toDateTimeAtStartOfDay.withHourOfDay(MeetingRecord.DefaultMeetingTimeOfDay)
+			meeting.meetingEndDate = meetingEndDate.toDateTimeAtStartOfDay.withHourOfDay(MeetingRecord.DefaultMeetingTimeOfDay).plusHours(1)
 		}
 		if (meetingLocation.hasText) {
 			if (meetingLocationId.hasText) {
@@ -126,14 +122,14 @@ trait MeetingRecordValidation extends SelfValidating {
 
 		rejectIfEmptyOrWhitespace(errors, "format", "NotEmpty")
 
-		val dateToCheck: DateTime = isRealTime match {
-			case true =>
-				if ((!meetingDateStr.isEmptyOrWhitespace) && (!meetingTimeStr.isEmptyOrWhitespace)) {
-					DateTimePickerFormatter.parseDateTime(meetingDateStr + " " + meetingTimeStr)
-				} else {
-					new DateTime
-				}
-			case false => meetingDate.toDateTimeAtStartOfDay
+		val dateToCheck: DateTime = if (isRealTime) {
+			if ((!meetingDateStr.isEmptyOrWhitespace) && (!meetingTimeStr.isEmptyOrWhitespace)) {
+				DateTimePickerFormatter.parseDateTime(meetingDateStr + " " + meetingTimeStr)
+			} else {
+				new DateTime
+			}
+		} else {
+			meetingDate.toDateTimeAtStartOfDay
 		}
 
 		if (dateToCheck == null) {
@@ -146,10 +142,10 @@ trait MeetingRecordValidation extends SelfValidating {
 			}
 		}
 
-		if(meetingTimeStr.isEmptyOrWhitespace) {
+		if (meetingTimeStr.isEmptyOrWhitespace) {
 			errors.rejectValue("meetingTimeStr", "meetingRecord.starttime.missing")
 		}
-		if(meetingEndTimeStr.isEmptyOrWhitespace) {
+		if (meetingEndTimeStr.isEmptyOrWhitespace) {
 			errors.rejectValue("meetingEndTimeStr", "meetingRecord.endtime.missing")
 		}
 
