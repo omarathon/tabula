@@ -18,7 +18,7 @@ import uk.ac.warwick.tabula.web.controllers.coursework.OldCourseworkController
 import uk.ac.warwick.tabula.data.model._
 import uk.ac.warwick.tabula.helpers.coursework.{CourseworkFilter, CourseworkFilters}
 import uk.ac.warwick.tabula.web.Mav
-import uk.ac.warwick.tabula.web.views.{CSVView, ExcelView}
+import uk.ac.warwick.tabula.web.views.{CSVView, ExcelView, XmlView}
 import uk.ac.warwick.util.csv.GoodCsvDocument
 import uk.ac.warwick.util.web.bind.AbstractPropertyEditor
 
@@ -114,12 +114,12 @@ class OldSubmissionAndFeedbackController extends OldCourseworkController {
 	}
 
 	@RequestMapping(Array("/export.xml"))
-	def xml(@Valid @ModelAttribute("submissionAndFeedbackCommand") command: SubmissionAndFeedbackCommand.CommandType, @PathVariable module: Module, @PathVariable assignment: Assignment): Elem = {
+	def xml(@Valid @ModelAttribute("submissionAndFeedbackCommand") command: SubmissionAndFeedbackCommand.CommandType, @PathVariable module: Module, @PathVariable assignment: Assignment): XmlView = {
 		val results = command.apply()
 
 		val items = results.students
 
-		new XMLBuilder(items, assignment, module).toXML
+		new XmlView(new XMLBuilder(items, assignment, module).toXML, Some(module.code + "-" + assignment.id + ".xml"))
 	}
 
 	@RequestMapping(Array("/export.xlsx"))
