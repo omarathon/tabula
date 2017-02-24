@@ -9,11 +9,19 @@ import uk.ac.warwick.tabula.data.model.attendance.AttendanceMonitoringScheme
 import uk.ac.warwick.tabula.commands.attendance.manage.{AddPointsToSchemesCommand, AddPointsToSchemesCommandResult}
 import uk.ac.warwick.tabula.AcademicYear
 import uk.ac.warwick.tabula.JavaImports._
+import uk.ac.warwick.tabula.attendance.web.Routes
+import uk.ac.warwick.tabula.services.{AutowiringMaintenanceModeServiceComponent, AutowiringUserSettingsServiceComponent}
 import uk.ac.warwick.tabula.web.Mav
+import uk.ac.warwick.tabula.web.controllers.AcademicYearScopedController
 
 @Controller
 @RequestMapping(Array("/attendance/manage/{department}/{academicYear}/addpoints"))
-class AddPointsToSchemesController extends AttendanceController {
+class AddPointsToSchemesController extends AttendanceController
+	with AcademicYearScopedController with AutowiringUserSettingsServiceComponent
+	with AutowiringMaintenanceModeServiceComponent {
+
+	@ModelAttribute("activeAcademicYear")
+	override def activeAcademicYear(@PathVariable academicYear: AcademicYear): Option[AcademicYear] = retrieveActiveAcademicYear(Option(academicYear))
 
 	@ModelAttribute("command")
 	def command(@PathVariable department: Department, @PathVariable academicYear: AcademicYear) =
@@ -34,10 +42,9 @@ class AddPointsToSchemesController extends AttendanceController {
 				.map(s => s"findSchemes=${s.id}").mkString("&"),
 			"newPoints" -> Option(points).getOrElse(0)
 		).crumbs(
-			Breadcrumbs.Manage.Home,
-			Breadcrumbs.Manage.Department(department),
+			Breadcrumbs.Manage.HomeForYear(academicYear),
 			Breadcrumbs.Manage.DepartmentForYear(department, academicYear)
-		)
+		).secondCrumbs(academicYearBreadcrumbs(academicYear)(year => Routes.Manage.addPointsToExistingSchemes(department, year)): _*)
 	}
 
 }

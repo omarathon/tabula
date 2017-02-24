@@ -16,18 +16,13 @@ object AttendanceBreadcrumbs {
 
 	object Manage {
 
-		case object Home extends Abstract {
+		case class HomeForYear(academicYear: AcademicYear) extends Abstract {
 			val title = "Manage"
-			val url = Some(Routes.Manage.home)
-		}
-
-		case class Department(department: model.Department) extends Abstract {
-			val title: String = department.name
-			val url = Some(Routes.Manage.department(department))
+			val url = Some(Routes.Manage.homeForYear(academicYear))
 		}
 
 		case class DepartmentForYear(department: model.Department, academicYear: AcademicYear) extends Abstract {
-			val title: String = academicYear.startYear.toString
+			val title: String = department.name
 			val url = Some(Routes.Manage.departmentForYear(department, academicYear))
 		}
 

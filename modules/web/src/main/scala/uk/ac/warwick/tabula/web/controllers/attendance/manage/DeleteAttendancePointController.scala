@@ -34,8 +34,7 @@ class DeleteAttendancePointController extends AttendanceController {
 		Mav("attendance/manage/deletepoint",
 			"returnTo" -> getReturnTo("")
 		).crumbs(
-			Breadcrumbs.Manage.Home,
-			Breadcrumbs.Manage.Department(department),
+			Breadcrumbs.Manage.HomeForYear(academicYear),
 			Breadcrumbs.Manage.DepartmentForYear(department, academicYear),
 			Breadcrumbs.Manage.EditPoints(department, academicYear)
 		)

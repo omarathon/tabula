@@ -17,7 +17,7 @@
 <#else>
 <div class="recordCheckpointForm">
 
-	<@attendance_macros.id7AttendanceButtons />
+	<@attendance_macros.attendanceButtons />
 
 	<div class="fix-area">
 		<div class="deptheader">
@@ -54,23 +54,23 @@
 				<#if mapGet(attendanceNotes, point)??>
 					<#assign note = mapGet(attendanceNotes, point) />
 					<#if note.hasContent>
-						<a id="attendanceNote-${student.universityId}-${point.id}" class="btn btn-default use-tooltip attendance-note edit" title="Edit attendance note" href="<@routes.attendance.noteEdit academicYear.startYear?c student point />?dt=${.now?string('iso')}">
+						<a id="attendanceNote-${student.universityId}-${point.id}" class="btn btn-default use-tooltip attendance-note edit" title="Edit attendance note" href="<@routes.attendance.noteEdit academicYear student point />?dt=${.now?string('iso')}">
 							<i class="fa fa-pencil-square-o attendance-note-icon"></i>
 						</a>
 					<#else>
-						<a id="attendanceNote-${student.universityId}-${point.id}" class="btn btn-default use-tooltip attendance-note" title="Add attendance note" href="<@routes.attendance.noteEdit academicYear.startYear?c student point />">
+						<a id="attendanceNote-${student.universityId}-${point.id}" class="btn btn-default use-tooltip attendance-note" title="Add attendance note" href="<@routes.attendance.noteEdit academicYear student point />">
 							<i class="fa fa-pencil-square-o attendance-note-icon"></i>
 						</a>
 					</#if>
 				<#else>
-					<a id="attendanceNote-${student.universityId}-${point.id}" class="btn btn-default  use-tooltip attendance-note" title="Add attendance note" href="<@routes.attendance.noteEdit academicYear.startYear?c student point />">
+					<a id="attendanceNote-${student.universityId}-${point.id}" class="btn btn-default  use-tooltip attendance-note" title="Add attendance note" href="<@routes.attendance.noteEdit academicYear student point />">
 						<i class="fa fa-pencil-square-o attendance-note-icon"></i>
 					</a>
 				</#if>
 				<#if point.pointType.dbValue == "meeting">
-					<a class="meetings" title="Meetings with this student" href="<@routes.attendance.profileMeetings student academicYear.startYear?c point />"><i class="fa fa-fw fa-info-circle"></i></a>
+					<a class="meetings" title="Meetings with this student" href="<@routes.attendance.profileMeetings student academicYear point />"><i class="fa fa-fw fa-info-circle"></i></a>
 				<#elseif point.pointType.dbValue == "smallGroup">
-					<a class="small-groups" title="Small group teaching events for this student" href="<@routes.attendance.profileGroups student academicYear.startYear?c point />"><i class="fa fa-fw fa-info-circle"></i></a>
+					<a class="small-groups" title="Small group teaching events for this student" href="<@routes.attendance.profileGroups student academicYear point />"><i class="fa fa-fw fa-info-circle"></i></a>
 				<#else>
 					<i class="fa fa-fw"></i>
 				</#if>
@@ -90,7 +90,7 @@
 
 			<#list attendance_variables.monitoringPointTermNames as term>
 				<#if groupedPointMap[term]??>
-					<@attendance_macros.id7GroupedPointsBySection groupedPointMap term; pointCheckpointPair>
+					<@attendance_macros.groupedPointsBySection groupedPointMap term; pointCheckpointPair>
 						<#assign point = pointCheckpointPair._1() />
 						<div class="col-md-12">
 							<#if mapGet(reportedPointMap, point)??>
@@ -140,13 +140,13 @@
 								<@errorsAndScript pointCheckpointPair />
 							</#if>
 						</div>
-					</@attendance_macros.id7GroupedPointsBySection>
+					</@attendance_macros.groupedPointsBySection>
 				</#if>
 			</#list>
 
 			<#list monthNames as month>
 				<#if groupedPointMap[month]??>
-					<@attendance_macros.id7GroupedPointsBySection groupedPointMap month; pointCheckpointPair>
+					<@attendance_macros.groupedPointsBySection groupedPointMap month; pointCheckpointPair>
 						<#assign point = pointCheckpointPair._1() />
 						<div class="col-md-12">
 							<#if mapGet(reportedPointMap, point)??>
@@ -176,7 +176,7 @@
 								</div>
 							</#if>
 						</div>
-					</@attendance_macros.id7GroupedPointsBySection>
+					</@attendance_macros.groupedPointsBySection>
 				</#if>
 			</#list>
 

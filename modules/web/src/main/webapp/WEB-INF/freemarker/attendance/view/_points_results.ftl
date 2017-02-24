@@ -35,7 +35,7 @@
 	<div class="monitoring-points">
 		<#list attendance_variables.monitoringPointTermNames as term>
 			<#if filterResult[term]??>
-				<@attendance_macros.id7GroupedPointsBySection filterResult term; groupedPoint>
+				<@attendance_macros.groupedPointsBySection filterResult term; groupedPoint>
 					<div class="col-md-12">
 						<div class="pull-right">
 							<#noescape>
@@ -66,7 +66,7 @@
 							<@fmt.p groupedPoint.schemes?size "scheme" />
 						</a>
 					</div>
-				</@attendance_macros.id7GroupedPointsBySection>
+				</@attendance_macros.groupedPointsBySection>
 			</#if>
 		</#list>
 

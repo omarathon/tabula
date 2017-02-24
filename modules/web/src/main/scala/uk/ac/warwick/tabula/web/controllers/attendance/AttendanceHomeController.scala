@@ -39,7 +39,7 @@ abstract class AbstractAttendanceHomeController extends AttendanceController
 		} else if (!info.hasProfile && info.managePermissions.isEmpty && info.viewPermissions.size == 1 && !hasAnyRelationships) {
 			Redirect(Routes.View.departmentForYear(info.viewPermissions.head, academicYear))
 		} else if (!info.hasProfile && info.managePermissions.size == 1 && info.viewPermissions.isEmpty && !hasAnyRelationships) {
-			Redirect(Routes.Manage.department(info.managePermissions.head))
+			Redirect(Routes.Manage.departmentForYear(info.managePermissions.head, academicYear))
 		} else {
 			Mav("attendance/home",
 				"academicYear" -> academicYear,

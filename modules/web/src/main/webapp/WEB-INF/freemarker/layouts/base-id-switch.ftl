@@ -5,9 +5,7 @@
 
 <#assign requestPath = (info.requestedUri.path!"") />
 
-<#if (requestPath?starts_with('/attendance/manage'))>
-	<#assign brand_name = "id6" />
-<#elseif requestPath == '/coursework' || requestPath?starts_with('/coursework/')>
+<#if requestPath == '/coursework' || requestPath?starts_with('/coursework/')>
 	<#assign brand_name = "id6" />
 </#if>
 

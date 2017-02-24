@@ -12,7 +12,7 @@
 	<#assign returnTo = returnTo?url />
 	<#if (result.totalResults > 0)>
 
-		<@attendance_macros.id7ScrollablePointsTable
+		<@attendance_macros.scrollablePointsTable
 			command=command
 			filterResult=result
 			visiblePeriods=visiblePeriods
@@ -46,7 +46,7 @@
 					Record
 				</@fmt.permission_button>
 			</td>
-		</@attendance_macros.id7ScrollablePointsTable>
+		</@attendance_macros.scrollablePointsTable>
 
 		<div class="clearfix">
 			<div class="pull-left">

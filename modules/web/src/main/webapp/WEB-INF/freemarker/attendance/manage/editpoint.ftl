@@ -25,7 +25,7 @@
 	<#return result />
 </#function>
 
-<@f.form action="" method="POST" commandName="command" class="form-horizontal">
+<@f.form action="" method="POST" commandName="command">
 
 	<#assign hasOverlap = false />
 
@@ -37,7 +37,7 @@
 		<button class="btn btn-primary spinnable spinner-auto" type="submit" name="<#if hasOverlap>submitConfirm<#else>submit</#if>" data-loading-text="Saving&hellip;">
 			Save
 		</button>
-		<a href="${returnTo}" class="btn">Cancel</a>
+		<a href="${returnTo}" class="btn btn-default">Cancel</a>
 	</div>
 </@f.form>
 

@@ -15,7 +15,7 @@
 
 <h1>Create scheme: ${scheme.displayName}</h1>
 
-<form method="POST">
+<form class="add-student-to-scheme" method="POST">
 	<input type="hidden" name="filterQueryString" value="${findCommand.serializeFilter}" />
 	<@listStudentIdInputs />
 
@@ -30,60 +30,39 @@
 		<#include "_selectstudents.ftl" />
 
 		<div class="fix-footer submit-buttons">
-			<p style="padding-left: 20px;">
-				<label>
-					<#if SITSInFlux>
-						<input type="checkbox" name="_linkToSits" value="on" disabled />
-						Link to SITS
-						<#assign popoverContent><#noescape>
-							You can no longer link to SITS for the current academic year,
-							as changes for the forthcoming academic year are being made that will make the students on this scheme inaccurate.
-						</#noescape></#assign>
-						<a class="use-popover"
-						   id="popover-linkToSits"
-						   data-content="${popoverContent}"
-						   data-html="true"
-						>
-							<i class="icon-question-sign"></i>
-						</a>
-					<#else>
-						<@f.checkbox path="findCommand.linkToSits" />
-						Link to SITS
-						<#assign popoverContent><#noescape>
-							If ticked, this filter will be automatically update this group of students from SITS.
-							<br />
-							If not, these students will be imported into a static list which will <strong>not</strong> be updated from SITS.
-						</#noescape></#assign>
-						<a class="use-popover"
-						   id="popover-linkToSits"
-						   data-content="${popoverContent}"
-						   data-html="true"
-						>
-							<i class="icon-question-sign"></i>
-						</a>
-					</#if>
-				</label>
-			</p>
+			<@bs3form.checkbox path="findCommand.linkToSits">
+				<#if SITSInFlux>
+					<input type="checkbox" name="_linkToSits" value="on" disabled />
+					Link to SITS
+					<@fmt.help_popover id="linkToSits" content="You can no longer link to SITS for the current academic year, as changes for the forthcoming academic year are being made that will make the students on this scheme inaccurate." html=true/>
+				<#else>
+					<@f.checkbox path="findCommand.linkToSits" />
+					Link to SITS
+					<@fmt.help_popover id="linkToSits" content="If ticked, this filter will be automatically update this group of students from SITS.<br />	If not, these students will be imported into a static list which will <strong>not</strong> be updated from SITS." html=true/>
+				</#if>
+			</@bs3form.checkbox>
 
-			<input
-				type="submit"
-				class="btn btn-success use-tooltip spinnable spinner-auto"
-				name="${ManageSchemeMappingParameters.createAndAddPoints}"
-				value="Save and add points"
-				title="Select which monitoring points this scheme should use"
-				data-container="body"
-				data-loading-text="Saving&hellip;"
-			/>
-			<input
-				type="submit"
-				class="btn btn-primary use-tooltip spinnable spinner-auto"
-				name="persist"
-				value="Save and exit"
-				title="Save your blank scheme and add points to it later"
-				data-container="body"
-				data-loading-text="Saving&hellip;"
-			/>
-			<a class="btn" href="<@routes.attendance.manageHomeForYear scheme.department scheme.academicYear.startYear?c />">Cancel</a>
+			<@bs3form.form_group>
+				<input
+					type="submit"
+					class="btn btn-primary use-tooltip spinnable spinner-auto"
+					name="${ManageSchemeMappingParameters.createAndAddPoints}"
+					value="Save and add points"
+					title="Select which monitoring points this scheme should use"
+					data-container="body"
+					data-loading-text="Saving&hellip;"
+				/>
+				<input
+					type="submit"
+					class="btn btn-primary use-tooltip spinnable spinner-auto"
+					name="persist"
+					value="Save and exit"
+					title="Save your blank scheme and add points to it later"
+					data-container="body"
+					data-loading-text="Saving&hellip;"
+				/>
+				<a class="btn btn-default" href="<@routes.attendance.manageHomeForYear scheme.department scheme.academicYear />">Cancel</a>
+			</@bs3form.form_group>
 		</div>
 
 	</div>

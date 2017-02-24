@@ -240,7 +240,7 @@ class DepartmentPermissionsController extends PermissionsControllerMethods[Depar
 		AdminLink("Coursework Management", Routes.coursework.admin.department(department)),
 		AdminLink("Small Group Teaching", Routes.groups.admin(department, AcademicYear.guessSITSAcademicYearByDate(DateTime.now))),
 		AdminLink("Monitoring Points - View and record", Routes.attendance.View.departmentForYear(department, AcademicYear.guessSITSAcademicYearByDate(DateTime.now))),
-		AdminLink("Monitoring Points - Create and edit", Routes.attendance.Manage.department(department)),
+		AdminLink("Monitoring Points - Create and edit", Routes.attendance.Manage.departmentForYear(department, AcademicYear.guessSITSAcademicYearByDate(DateTime.now))),
 		AdminLink("Administration & Permissions", Routes.admin.department(department))
 	)
 }
