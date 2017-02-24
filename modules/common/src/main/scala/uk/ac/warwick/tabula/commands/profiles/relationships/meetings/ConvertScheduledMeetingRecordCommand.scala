@@ -1,8 +1,6 @@
 package uk.ac.warwick.tabula.commands.profiles.relationships.meetings
 
-import org.joda.time.DateTime
 import org.springframework.validation.Errors
-import uk.ac.warwick.tabula.JavaImports._
 import uk.ac.warwick.tabula.commands._
 import uk.ac.warwick.tabula.data.model._
 import uk.ac.warwick.tabula.permissions.Permissions
@@ -17,27 +15,15 @@ object ConvertScheduledMeetingRecordCommand {
 			with ComposableCommand[MeetingRecord]
 			with ConvertScheduledMeetingRecordPermissions
 			with ConvertScheduledMeetingRecordState
+			with MeetingRecordCommandRequest
 			with ConvertScheduledMeetingRecordDescription
 			with AutowiringMeetingRecordServiceComponent
 			with ConvertScheduledMeetingRecordCommandValidation
 			with AutowiringFileAttachmentServiceComponent
-			with ConvertScheduledMeetingRecordCommandPopulate
+			with PopulateMeetingRecordCommand
 }
 
-trait ConvertScheduledMeetingRecordCommandPopulate	extends PopulateOnForm {
-	self: ConvertScheduledMeetingRecordState =>
-
-	override def populate(): Unit = {
-		title = meetingRecord.title
-		description = meetingRecord.description
-		meetingDateTime = meetingRecord.meetingDate
-		isRealTime = true
-		format = meetingRecord.format
-		attachedFiles = meetingRecord.attachments
-	}
-}
-
-class ConvertScheduledMeetingRecordCommand (val creator: Member, val meetingRecord: ScheduledMeetingRecord)
+class ConvertScheduledMeetingRecordCommand (override val creator: Member, val meetingRecord: ScheduledMeetingRecord)
 	extends CommandInternal[MeetingRecord] with ConvertScheduledMeetingRecordState {
 
 	self: MeetingRecordServiceComponent with FileAttachmentServiceComponent =>
@@ -59,27 +45,6 @@ trait ConvertScheduledMeetingRecordCommandValidation extends SelfValidating {
 		if (meetingRecord.missed)
 			errors.reject("meetingRecord.confirm.missed")
 	}
-}
-
-trait ConvertScheduledMeetingRecordState {
-	def creator: Member
-	def meetingRecord: ScheduledMeetingRecord
-
-	var title: String = _
-	var description: String = _
-	var meetingDateTime: DateTime = _
-	var isRealTime: Boolean = _
-	var format: MeetingFormat = _
-
-	var file: UploadedFile = new UploadedFile
-	var attachedFiles:JList[FileAttachment] = _
-
-	var attachmentTypes: Seq[String] = Seq[String]()
-
-	var posted: Boolean = false
-
-	lazy val relationship: StudentRelationship = meetingRecord.relationship
-	var createCommand: Appliable[MeetingRecord] = _
 }
 
 trait ConvertScheduledMeetingRecordPermissions extends RequiresPermissionsChecking with PermissionsCheckingMethods {
@@ -109,4 +74,11 @@ trait ConvertScheduledMeetingRecordDescription extends Describable[MeetingRecord
 	override def describeResult(d: Description, result: MeetingRecord) {
 		d.meeting(result)
 	}
+}
+
+trait ConvertScheduledMeetingRecordState extends EditMeetingRecordCommandState {
+	def creator: Member
+	def meetingRecord: ScheduledMeetingRecord
+	override lazy val relationship: StudentRelationship = meetingRecord.relationship
+	var createCommand: Appliable[MeetingRecord] = _
 }

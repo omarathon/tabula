@@ -44,39 +44,6 @@ class EditMeetingRecordCommandInternal(val meetingRecord: MeetingRecord)
 
 }
 
-trait PopulateMeetingRecordCommand extends PopulateOnForm {
-
-	self: MeetingRecordCommandRequest with EditMeetingRecordCommandState =>
-
-	override def populate(): Unit = {
-		title = meetingRecord.title
-		description = meetingRecord.description
-		isRealTime = meetingRecord.isRealTime
-		meetingRecord.isRealTime match {
-			case true =>
-					meetingDateStr = meetingRecord.meetingDate.toString(DatePickerFormatter)
-					meetingTimeStr = meetingRecord.meetingDate.withHourOfDay(meetingRecord.meetingDate.getHourOfDay).toString(TimePickerFormatter)
-					meetingEndTimeStr = meetingRecord.meetingEndDate.withHourOfDay(meetingRecord.meetingEndDate.getHourOfDay).toString(TimePickerFormatter)
-			case false =>
-					meetingDate = meetingRecord.meetingDate.toLocalDate
-					meetingTime = meetingRecord.meetingDate.withHourOfDay(meetingRecord.meetingDate.getHourOfDay)
-				meetingEndTime = meetingRecord.meetingEndDate.withHourOfDay(meetingRecord.meetingEndDate.getHourOfDay).plusHours(1)
-
-		}
-		Option(meetingRecord.meetingLocation).foreach {
-			case NamedLocation(name) => meetingLocation = name
-			case MapLocation(name, lid) =>
-				meetingLocation = name
-				meetingLocationId = lid
-		}
-
-		format = meetingRecord.format
-		attachedFiles = meetingRecord.attachments
-
-	}
-
-}
-
 trait EditMeetingRecordDescription extends ModifyMeetingRecordDescription {
 
 	self: ModifyMeetingRecordCommandState =>
@@ -86,7 +53,7 @@ trait EditMeetingRecordDescription extends ModifyMeetingRecordDescription {
 }
 
 trait EditMeetingRecordCommandState extends ModifyMeetingRecordCommandState {
-	def meetingRecord: MeetingRecord
+	def meetingRecord: AbstractMeetingRecord
 	override def creator: Member = meetingRecord.creator
 	override def relationship: StudentRelationship = meetingRecord.relationship
 }
