@@ -35,6 +35,7 @@ object AddAssignmentsCommand {
 			with AddAssignmentsPermissions
 			with AddAssignmentsCommandState
 			with AddAssignmentsCommandTriggers
+			with AddAssignmentsCommandNotifications
 }
 
 /**
@@ -330,4 +331,12 @@ trait AddAssignmentsCommandTriggers extends GeneratesTriggers[Seq[Assignment]] {
 			AssignmentClosedTrigger(assignment.closeDate, assignment)
 		)
 	}
+}
+
+trait AddAssignmentsCommandNotifications extends SchedulesNotifications[Seq[Assignment], Assignment] with SharedAssignmentCommandNotifications {
+
+	override def transformResult(assignments: Seq[Assignment]): Seq[Assignment] = assignments
+
+	override def scheduledNotifications(assignment: Assignment): Seq[ScheduledNotification[Assignment]] = generateScheduledNotifications(assignment)
+
 }

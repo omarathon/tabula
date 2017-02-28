@@ -24,7 +24,7 @@ abstract class ModifyAssignmentCommand(val module: Module,val updateStudentMembe
 		with SelfValidating
 		with SpecifiesGroupType
 		with CurrentSITSAcademicYear
-		with SchedulesNotifications[Assignment, Assignment]
+		with ModifyAssignmentCommandNotifications
 		with AutowiringUserLookupComponent
 		with AutowiringAssessmentMembershipServiceComponent
 		with UpdatesStudentMembership
@@ -170,9 +170,19 @@ abstract class ModifyAssignmentCommand(val module: Module,val updateStudentMembe
 		}).distinct.asJava
 	}
 
-	override def transformResult(assignment: Assignment) = Seq(assignment)
+	override def generateTriggers(commandResult: Assignment): Seq[Trigger[_ >: Null <: ToEntityReference, _]] = {
+		if (commandResult.closeDate != null && commandResult.closeDate.isAfterNow) {
+			Seq(AssignmentClosedTrigger(commandResult.closeDate, commandResult))
+		} else {
+			Seq()
+		}
+	}
 
-	override def scheduledNotifications(assignment: Assignment): Seq[ScheduledNotification[Assignment]] = {
+}
+
+trait SharedAssignmentCommandNotifications {
+
+	def generateScheduledNotifications(assignment: Assignment): Seq[ScheduledNotification[Assignment]] = {
 		// if the assignment doesn't collect submissions or is open ended then don't schedule any notifications about deadlines
 		if (!assignment.collectSubmissions || assignment.openEnded) {
 			Seq()
@@ -222,12 +232,12 @@ abstract class ModifyAssignmentCommand(val module: Module,val updateStudentMembe
 		}
 	}
 
-	override def generateTriggers(commandResult: Assignment): Seq[Trigger[_ >: Null <: ToEntityReference, _]] = {
-		if (commandResult.closeDate != null && commandResult.closeDate.isAfterNow) {
-			Seq(AssignmentClosedTrigger(commandResult.closeDate, commandResult))
-		} else {
-			Seq()
-		}
-	}
+}
+
+trait ModifyAssignmentCommandNotifications extends SchedulesNotifications[Assignment, Assignment] with SharedAssignmentCommandNotifications {
+
+	override def transformResult(assignment: Assignment) = Seq(assignment)
+
+	override def scheduledNotifications(assignment: Assignment): Seq[ScheduledNotification[Assignment]] = generateScheduledNotifications(assignment)
 
 }
