@@ -72,7 +72,7 @@
 
 		<#list monthNames as month>
 			<#if filterResult[month]??>
-				<@attendance_macros.groupedPointsBySection filterResult month; groupedPoint>
+				<@attendance_macros.id7GroupedPointsBySection filterResult month; groupedPoint>
 					<div class="col-md-12">
 						<div class="pull-right">
 							<#noescape>
@@ -92,7 +92,7 @@
 							<@fmt.p groupedPoint.schemes?size "scheme" />
 						</a>
 					</div>
-				</@attendance_macros.groupedPointsBySection>
+				</@attendance_macros.id7GroupedPointsBySection>
 			</#if>
 		</#list>
 
