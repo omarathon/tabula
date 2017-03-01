@@ -69,13 +69,21 @@ object TurnitinLtiService {
 	 * ID that we should store classes under. They are per-module so we base it on the module code.
 	 * This ID is stored within TurnitinLti and requests for the same ID should return the same class.
 	 */
-	def classIdFor(assignment: Assignment, prefix: String) = ClassId(s"$prefix-${assignment.module.code}")
+	def classIdFor(assignment: Assignment, prefix: String): ClassId = if (assignment.turnitinLtiClassWithAcademicYear) {
+		ClassId(s"$prefix-${assignment.module.code}-${assignment.academicYear.startYear.toString}")
+	} else {
+		ClassId(s"$prefix-${assignment.module.code}")
+	}
 
 	def assignmentIdFor(assignment: Assignment) = AssignmentId(s"$AssignmentPrefix${assignment.id}")
 
 	def classNameFor(assignment: Assignment): ClassName = {
 		val module = assignment.module
-		ClassName(StringUtils.safeSubstring(s"${module.code.toUpperCase} - ${module.name}", 0, turnitinClassTitleMaxCharacters))
+		if (assignment.turnitinLtiClassWithAcademicYear) {
+			ClassName(StringUtils.safeSubstring(s"${module.code.toUpperCase} (${assignment.academicYear.toString}) - ${module.name}", 0, turnitinClassTitleMaxCharacters))
+		} else {
+			ClassName(StringUtils.safeSubstring(s"${module.code.toUpperCase} - ${module.name}", 0, turnitinClassTitleMaxCharacters))
+		}
 	}
 
 	def assignmentNameFor(assignment: Assignment): AssignmentName = {
