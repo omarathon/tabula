@@ -70,6 +70,9 @@ abstract class SubmitToTurnitinCommandInternal(val module: Module, val assignmen
 		if (assignment.turnitinId != null) {
 			// Assignment won't be re-submitted, so create empty reports now
 			turnitinLtiQueueService.createEmptyOriginalityReports(assignment)
+		} else {
+			// For all new assignments, create academic year-scoped classes
+			assignment.turnitinLtiClassWithAcademicYear = true
 		}
 		// Add the requesting user on to the list
 		if (Option(submitter).nonEmpty) {

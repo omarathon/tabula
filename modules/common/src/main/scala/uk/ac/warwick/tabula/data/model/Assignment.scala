@@ -49,6 +49,7 @@ object Assignment {
 		val ExtensionAttachmentMandatory = "extensionAttachmentMandatory"
 		val AllowExtensionsAfterCloseDate = "allowExtensionsAfterCloseDate"
 		val TurnitinLtiNotifyUsers = "turnitinLtiNotifyUsers"
+		val TurnitinLtiClassWithAcademicYear = "turnitinLtiClassWithAcademicYear"
 	}
 }
 
@@ -782,6 +783,9 @@ class Assignment
 	def turnitinLtiNotifyUsers_= (users: Seq[User]): Unit = {
 		UserSeqSetting(Settings.TurnitinLtiNotifyUsers, Seq(), userLookup).value = users
 	}
+
+	def turnitinLtiClassWithAcademicYear: Boolean = getBooleanSetting(Settings.TurnitinLtiClassWithAcademicYear, default = false)
+	def turnitinLtiClassWithAcademicYear_= (withAcademicYear: Boolean): Unit = settings += (Settings.TurnitinLtiClassWithAcademicYear -> withAcademicYear)
 
 	def enhance(user: User): EnhancedAssignment = {
 		val extension = extensions.asScala.find(e => e.isForUser(user))
