@@ -1,5 +1,3 @@
-<#assign spring=JspTaglibs["/WEB-INF/tld/spring.tld"]>
-<#assign f=JspTaglibs["/WEB-INF/tld/spring-form.tld"]>
 <#escape x as x?html>
 <#import "*/assignment_components.ftl" as components />
 	<#--
@@ -12,9 +10,9 @@
 	<h4 class="with-related"><span class="muted">for</span> <@fmt.module_name module /></h4>
 </div>
 <div class="fix-area">
-	<#assign actionUrl><@routes.cm2.assignemnts_details_new module /></#assign>
+	<#assign actionUrl><@routes.cm2.createassignmentdetails module /></#assign>
 	<@f.form method="post" action=actionUrl>
-		<@components.set_wizard true 'details'  />
+		<@components.assignment_wizard 'details' module />
 		<#if command.prefilled>
 			<div class="alert alert-success">
 				<i class="icon-info-sign fa fa-info-circle"></i>

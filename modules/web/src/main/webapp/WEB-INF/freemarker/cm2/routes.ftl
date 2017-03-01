@@ -31,6 +31,20 @@ TODO grab values from the Routes object in code, as that's pretty equivalent and
 <#macro feedbackPdf assignment feedback><@_u page="/submission/${assignment.id}/${feedback.usercode}/feedback.pdf"/></#macro>
 <#macro feedbackAttachment feedback attachment><@_u page="/submission/${feedback.assignment.id}/get/${attachment.name?url}"/></#macro>
 <#macro assignemnts_json module><@_u page="/admin/${module.code}/assignments" /></#macro>
-<#macro assignemnts_details_new module><@_u page="/admin/${module.code}/assignments/new" /></#macro>
-<#macro assignemnts_students_new assignment><@_u page="/admin/assignments/new/${assignment.id}/students" /></#macro>
 <#macro enrolment assignment><@_u page="/admin/assignments/${assignment.id}/enrolment"/></#macro>
+
+<#macro createassignmentdetails module><@_u page="/admin/${module.code}/assignments/new" /></#macro>
+<#macro createassignmentfeedback assignment><@_u page="/admin/assignments/new/${assignment.id}/feedback" /></#macro>
+<#macro createassignmentstudents assignment><@_u page="/admin/assignments/new/${assignment.id}/students" /></#macro>
+<#macro createassignmentmarkers assignment><@_u page="/admin/assignments/new/${assignment.id}/markers" /></#macro>
+<#macro createassignmentsubmissions assignment><@_u page="/admin/assignments/new/${assignment.id}/submissions" /></#macro>
+<#macro createassignmentoptions assignment><@_u page="/admin/assignments/new/${assignment.id}/options" /></#macro>
+<#macro createassignmentreview assignment><@_u page="/admin/assignments/new/${assignment.id}/review" /></#macro>
+
+<#macro editassignmentdetails assignment><@_u page="/admin/assignments/edit/${assignment.id}" /></#macro>
+<#macro editassignmentfeedback assignment><@_u page="/admin/assignments/edit/${assignment.id}/feedback" /></#macro>
+<#macro editassignmentstudents assignment><@_u page="/admin/assignments/edit/${assignment.id}/students" /></#macro>
+<#macro editassignmentmarkers assignment><@_u page="/admin/assignments/edit/${assignment.id}/markers" /></#macro>
+<#macro editassignmentsubmissions assignment><@_u page="/admin/assignments/edit/${assignment.id}/submissions" /></#macro>
+<#macro editassignmentoptions assignment><@_u page="/admin/assignments/edit/${assignment.id}/options" /></#macro>
+<#macro editassignmentreview assignment><@_u page="/admin/assignments/edit/${assignment.id}/review" /></#macro>

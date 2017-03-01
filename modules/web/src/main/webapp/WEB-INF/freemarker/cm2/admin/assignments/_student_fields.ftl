@@ -1,7 +1,3 @@
-<#--
-HFC-166 Don't use #compress on this file because
-the comments textarea needs to maintain newlines.
--->
 <#escape x as x?html>
 <#-- Field to support redirection post-submit -->
 	<input type="hidden" name="action" value="submit" id="action-submit">
@@ -33,7 +29,7 @@ the comments textarea needs to maintain newlines.
 				<@membership_picker.fieldset command enrolment_url />
 			</details>
 		</div>
-		<@bs3form.labelled_form_group path="anonymousMarking" labelText="Set annonymity">
+		<@bs3form.labelled_form_group path="anonymousMarking" labelText="Set anonymity">
 			<div class="help-block">If set to 'on', markers won't be able to set student ID or name.</div>
 			<@bs3form.radio>
 				<@f.radiobutton path="anonymousMarking" value="true" /> On

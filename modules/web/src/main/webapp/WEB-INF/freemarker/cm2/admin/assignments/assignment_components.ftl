@@ -1,7 +1,8 @@
 <#ftl strip_text=true />
 
 <#macro wizard_link label is_first is_active is_available tooltip="" url="">
-<span class="arrow-right<#if !is_first> arrow-left</#if><#if is_active> active</#if><#if is_available && !is_active> use-tooltip</#if>" <#if is_available && !is_active>title="${tooltip}"</#if>><#compress>
+<span class="arrow-right<#if !is_first> arrow-left</#if><#if is_active> active</#if><#if is_available && !is_active> use-tooltip</#if>"
+	<#if is_available && !is_active>title="${tooltip}"</#if>><#compress>
 	<#if is_available && !is_active>
 		<a href="${url}">${label}</a>
 	<#else>
@@ -10,58 +11,137 @@
 </#compress></span>
 </#macro>
 
-<#macro set_wizard is_new current_step>
+<#macro assignment_wizard current_step module edit_mode=false assignment={}>
 	<p class="progress-arrows">
+		<#if edit_mode>
+			<#local details_url><@routes.cm2.editassignmentdetails assignment /></#local>
 			<@wizard_link
 				label="Assignment details"
 				is_first=true
 				is_active=(current_step == 'details')
 				is_available=true
-				tooltip="Edit properties" />
+				tooltip="Edit details"
+				url=details_url />
 
+			<#local feedback_url><@routes.cm2.editassignmentfeedback assignment /></#local>
 			<@wizard_link
 				label="Feedback"
 				is_first=false
 				is_active=(current_step == 'feedback')
-				is_available=false
-				tooltip="Edit feedback" />
+				is_available=true
+				tooltip="Edit feedback"
+				url=feedback_url />
 
+			<#local students_url><@routes.cm2.editassignmentstudents assignment /></#local>
 			<@wizard_link
 				label="Students"
 				is_first=false
 				is_active=(current_step == 'students')
-				is_available=false
-				tooltip="Edit students" />
+				is_available=true
+				tooltip="Edit students"
+				url=students_url />
 
+			<#local markers_url><@routes.cm2.editassignmentmarkers assignment /></#local>
 			<@wizard_link
 				label="Markers"
 				is_first=false
 				is_active=(current_step == 'markers')
-				is_available=false
-				tooltip="Edit markers" />
+				is_available=true
+				tooltip="Edit markers"
+				url=markers_url />
 
+			<#local submissions_url><@routes.cm2.editassignmentsubmissions assignment /></#local>
 			<@wizard_link
 				label="Submissions"
 				is_first=false
-				is_active=(current_step == 'saubmissions')
-				is_available=false
-				tooltip="Edit submissions" />
+				is_active=(current_step == 'submissions')
+				is_available=true
+				tooltip="Edit submissions"
+				url=submissions_url />
 
+			<#local options_url><@routes.cm2.editassignmentoptions assignment /></#local>
 			<@wizard_link
 				label="Options"
 				is_first=false
 				is_active=(current_step == 'options')
-				is_available=false
-				tooltip="Edit options" />
+				is_available=true
+				tooltip="Edit options"
+				url=options_url />
 
+			<#local review_url><@routes.cm2.editassignmentreview assignment /></#local>
 			<@wizard_link
 				label="Review"
 				is_first=false
 				is_active=(current_step == 'review')
-				is_available=false
-				tooltip="Review" />
+				is_available=true
+				tooltip="Review"
+				url=review_url />
+		<#else>
+			<#assign displayLink=assignment.id?? />
+			<#local details_url><#if displayLink><@routes.cm2.editassignmentdetails assignment /></#if></#local>
+			<@wizard_link
+				label="Assignment details"
+				is_first=true
+				is_active=(current_step == 'details')
+				is_available=displayLink
+				tooltip="Edit details"
+				url=details_url />
 
-		</p>
+			<#local feedback_url><#if displayLink><@routes.cm2.createassignmentfeedback assignment /></#if></#local>
+			<@wizard_link
+				label="Feedback"
+				is_first=false
+				is_active=(current_step == 'feedback')
+				is_available=displayLink
+				tooltip="Edit feedback"
+				url=feedback_url />
+
+			<#local students_url><#if displayLink><@routes.cm2.createassignmentstudents assignment /></#if></#local>
+			<@wizard_link
+				label="Students"
+				is_first=false
+				is_active=(current_step == 'students')
+				is_available=displayLink
+				tooltip="Edit students"
+				url=students_url />
+
+			<#local markers_url><#if assignment.id??><@routes.cm2.createassignmentmarkers assignment /></#if></#local>
+			<@wizard_link
+				label="Markers"
+				is_first=false
+				is_active=(current_step == 'markers')
+				is_available=displayLink
+				tooltip="Edit markers"
+				url=markers_url />
+
+			<#local submissions_url><#if displayLink><@routes.cm2.createassignmentsubmissions assignment /></#if></#local>
+			<@wizard_link
+				label="Submissions"
+				is_first=false
+				is_active=(current_step == 'submissions')
+				is_available=assignment.id??
+				tooltip="Edit submissions"
+				url=submissions_url />
+
+			<#local options_url><#if displayLink><@routes.cm2.createassignmentoptions assignment /></#if></#local>
+				<@wizard_link
+				label="Options"
+				is_first=false
+				is_active=(current_step == 'options')
+				is_available=assignment.id??
+				tooltip="Edit options"
+				url=options_url />
+
+			<#local review_url><#if displayLink><@routes.cm2.createassignmentreview assignment /></#if></#local>
+			<@wizard_link
+				label="Review"
+				is_first=false
+				is_active=(current_step == 'review')
+				is_available=displayLink
+				tooltip="Review"
+				url=review_url />
+		</#if>
+	</p>
 </#macro>
 
 
