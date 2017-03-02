@@ -10,17 +10,23 @@ class JobDaoTest extends AppContextTestBase with HasJobDao {
 
 	@Autowired var service: JobService = _
 
-	@Test def crud() = transactional { t =>
+	@Test def crud() = transactional { _ =>
 
-		val anHourAgo = DateTime.now.minusHours(1).toString
-		val twoHoursAgo = DateTime.now.minusHours(2).toString
-		val lastWeek = DateTime.now.minusWeeks(1).toString
+		val anHourAgo = DateTime.now.minusHours(1)
+		val twoHoursAgo = DateTime.now.minusHours(2)
+		val lastWeek = DateTime.now.minusWeeks(1)
 
-		val inst1 = service.add(None, TestingJob("job1", createdDate = twoHoursAgo))
-		val oldestInst = service.add(None, TestingJob("job2", createdDate = lastWeek))
-		val inst3 = service.add(None, TestingJob("job3", createdDate = twoHoursAgo))
-		val newestInst = service.add(None, TestingJob("job4", createdDate = anHourAgo))
-		val inst5 = service.add(None, TestingJob("job5", createdDate = twoHoursAgo))
+		val inst1 = service.add(None, TestingJob("job1"))
+		inst1.createdDate = twoHoursAgo
+		val oldestInst = service.add(None, TestingJob("job2"))
+		oldestInst.createdDate = lastWeek
+		val inst3 = service.add(None, TestingJob("job3"))
+		inst3.createdDate = twoHoursAgo
+		val newestInst = service.add(None, TestingJob("job4"))
+		newestInst.createdDate = anHourAgo
+		val inst5 = service.add(None, TestingJob("job5"))
+		inst5.createdDate = twoHoursAgo
+		Seq(inst1, oldestInst, inst3, newestInst, inst5).foreach(jobDao.update)
 
 		session.flush()
 		session.clear()
@@ -32,10 +38,11 @@ class JobDaoTest extends AppContextTestBase with HasJobDao {
 		jobDao.findOutstandingInstance(inst5) should be (Some(inst5))
 
 		jobDao.findOutstandingInstances(5).length should be (5)
-		jobDao.findOutstandingInstances(3).length should be (3)
+		val threeOutstanding = jobDao.findOutstandingInstances(3)
+		threeOutstanding.length should be (3)
 		/* TAB-4302 - return oldest jobs first */
-		withClue("jobDao.findOutstandingInstances(3).contains(oldestInst)") { jobDao.findOutstandingInstances(3).contains(oldestInst) should be {true} }
-		withClue("jobDao.findOutstandingInstances(3).contains(newestInst)") { jobDao.findOutstandingInstances(3).contains(newestInst) should be {false} }
+		threeOutstanding.head should be (oldestInst)
+		threeOutstanding.contains(newestInst) should be {false}
 
 		val inst = jobDao.getById(inst1.id).get
 
