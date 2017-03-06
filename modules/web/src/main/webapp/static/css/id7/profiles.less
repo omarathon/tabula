@@ -137,6 +137,7 @@ section.identity, section.member-notes, section.circumstances {
 
 .tabula-page .calendar-smallscreen {
 	table.table {
+		margin-bottom: 11px;
 		&.today {
 			thead h6 {
 				color: @brand-primary;
@@ -152,8 +153,14 @@ section.identity, section.member-notes, section.circumstances {
 		}
 		tbody tr td {
 			border: 0;
+			line-height: 1.3em;
+			padding-bottom: 0;
+			.fa-user {
+				color: #aaa;
+			}
 			&.time, &.marker {
 				width: 1px;
+				white-space: nowrap;
 			}
 			&.time {
 				color: @very-subtle-text-color;
