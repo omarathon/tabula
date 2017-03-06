@@ -108,7 +108,7 @@ class OldSubmissionsInfoControllerTest extends TestBase with Mockito {
 	def submission(submittedDate: DateTime, assignment:Assignment, uniId:String, attachmentNames:Seq[String]): Submission = {
 		val s = new Submission
 		s.assignment = assignment
-		s.universityId = uniId
+		s._universityId = uniId
 		s.submittedDate = submittedDate
 		s.id = "fakesubid"
 		if (attachmentNames.nonEmpty) {

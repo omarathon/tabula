@@ -1,12 +1,11 @@
 package uk.ac.warwick.tabula.commands.coursework.assignments.extensions
 
-import org.joda.time.DateTime
 import uk.ac.warwick.tabula.commands._
 import uk.ac.warwick.tabula.data.model.notifications.coursework._
 import uk.ac.warwick.tabula.events.NotificationHandling
 import uk.ac.warwick.tabula.system.permissions.{PermissionsChecking, RequiresPermissionsChecking}
 import uk.ac.warwick.tabula.permissions.Permissions
-import uk.ac.warwick.tabula.data.model.forms.{Extension, ExtensionState}
+import uk.ac.warwick.tabula.data.model.forms.Extension
 import uk.ac.warwick.tabula.data.model.{Assignment, Module, Notification, ScheduledNotification}
 import uk.ac.warwick.tabula.CurrentUser
 import uk.ac.warwick.tabula.services.{AutowiringUserLookupComponent, UserLookupComponent}
@@ -14,8 +13,8 @@ import uk.ac.warwick.tabula.data.Transactions._
 import uk.ac.warwick.userlookup.User
 
 object EditExtensionCommand {
-	def apply(module: Module, assignment: Assignment, uniId: String, currentUser: CurrentUser, action: String) =
-		new EditExtensionCommandInternal(module, assignment, uniId, currentUser, action)
+	def apply(module: Module, assignment: Assignment, student: User, currentUser: CurrentUser, action: String) =
+		new EditExtensionCommandInternal(module, assignment, student, currentUser, action)
 			with ComposableCommand[Extension]
 			with EditExtensionCommandPermissions
 			with ModifyExtensionCommandDescription
@@ -27,18 +26,20 @@ object EditExtensionCommand {
 			with HibernateExtensionPersistenceComponent
 }
 
-class EditExtensionCommandInternal(module: Module, assignment: Assignment, uniId: String, currentUser: CurrentUser, action: String)
-		extends ModifyExtensionCommand(module, assignment, uniId, currentUser, action) with ModifyExtensionCommandState  {
+class EditExtensionCommandInternal(module: Module, assignment: Assignment, student: User, currentUser: CurrentUser, action: String)
+		extends ModifyExtensionCommand(module, assignment, student, currentUser, action) with ModifyExtensionCommandState  {
 	self: ExtensionPersistenceComponent with UserLookupComponent =>
 
-	val e: Option[Extension] = assignment.findExtension(universityId)
+	val e: Option[Extension] = assignment.findExtension(student.getUserId)
 	e match {
 		case Some(ext) =>
 			copyFrom(ext)
 			extension = ext
 			isNew = false
 		case None =>
-			extension = new Extension(universityId)
+			extension = new Extension
+			extension.usercode = student.getUserId
+			extension._universityId = student.getWarwickId
 			isNew = true
 	}
 

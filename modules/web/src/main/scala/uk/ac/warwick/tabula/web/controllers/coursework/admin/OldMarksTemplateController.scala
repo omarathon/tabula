@@ -51,7 +51,7 @@ class OldAssignmentMarkerMarksTemplateController extends OldCourseworkController
 		GenerateOwnMarksTemplateCommand(
 			mandatory(module),
 			mandatory(assignment),
-			assignment.getMarkersSubmissions(mandatory(marker)).map(_.universityId)
+			assignment.getMarkersSubmissions(mandatory(marker)).flatMap(_.universityId)
 		)
 
 	@RequestMapping(method = Array(HEAD, GET))

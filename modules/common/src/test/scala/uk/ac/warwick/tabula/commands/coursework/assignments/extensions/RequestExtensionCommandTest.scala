@@ -40,8 +40,8 @@ class RequestExtensionCommandTest extends TestBase with Mockito {
 				returnedExtension.approved should be {false}
 				returnedExtension.rejected should be {false}
 				returnedExtension.reviewedOn should be (null)
-				returnedExtension.userId should be (currentUser.userId)
-				returnedExtension.universityId should be (currentUser.universityId)
+				returnedExtension.usercode should be (currentUser.userId)
+				returnedExtension.universityId should be (Some(currentUser.universityId))
 				returnedExtension.assignment should be (assignment)
 				returnedExtension.attachments.isEmpty should be {true}
 
@@ -65,7 +65,10 @@ class RequestExtensionCommandTest extends TestBase with Mockito {
 
 				val currentUser = RequestInfo.fromThread.get.user
 				var assignment = newDeepAssignment()
-				val newExtension = new Extension(currentUser.universityId)
+				val newExtension = new Extension {
+					_universityId = currentUser.universityId
+					usercode = currentUser.userId
+				}
 				newExtension.approve()
 				newExtension.reviewedOn = DateTime.now
 				assignment.extensions.add(newExtension)
@@ -145,7 +148,10 @@ class RequestExtensionCommandTest extends TestBase with Mockito {
 				val currentUser = RequestInfo.fromThread.get.user
 				val assignment = newDeepAssignment()
 
-				val newExtension = new Extension(currentUser.universityId)
+				val newExtension = new Extension {
+					_universityId = currentUser.universityId
+					usercode = currentUser.userId
+				}
 				val attachment = new FileAttachment
 
 				newExtension.addAttachment(attachment)

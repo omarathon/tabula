@@ -13,7 +13,6 @@ import uk.ac.warwick.tabula.commands.{Command, Description, UploadedFile}
 import uk.ac.warwick.tabula.data.Transactions._
 import uk.ac.warwick.tabula.data.model.{Assignment, FileAttachment, Module}
 import uk.ac.warwick.tabula.data.{Daoisms, FileDao}
-import uk.ac.warwick.tabula.helpers.StringUtils._
 import uk.ac.warwick.tabula.helpers._
 import uk.ac.warwick.tabula.services._
 import uk.ac.warwick.tabula.system._
@@ -26,6 +25,7 @@ import scala.util.matching.Regex
 
 class FeedbackItem {
 	var uniNumber: String = _
+	var student: Option[User] = _
 	var file: UploadedFile = new UploadedFile
 
 	var submissionExists = false
@@ -41,9 +41,10 @@ class FeedbackItem {
 		new AttachmentItem(f.name, duplicate, ignore)
 	})
 
-	def this(uniNumber: String) = {
+	def this(uniNumber:String, student: User) = {
 		this()
 		this.uniNumber = uniNumber
+		this.student = Option(student)
 	}
 
 	class AttachmentItem(val name: String, val duplicate: Boolean, val ignore: Boolean)
@@ -65,10 +66,6 @@ class ExtractFeedbackZip(cmd: UploadFeedbackCommand[_]) extends Command[Unit] {
  * Command which adds feedback for an assignment.
  * It either takes a single uniNumber and file, or it takes a
  * zip of files with uni numbers embedded in their path.
- *
- * TODO The controller that does single-file upload isn't exposed in the UI
- * so we could check that this is no longer being accessed by anyone, and then
- * remove all the code in here that handles it, to simplify it a little.
  */
 abstract class UploadFeedbackCommand[A](val module: Module, val assignment: Assignment, val marker: User)
 	extends Command[A] with Daoisms with Logging with BindListener {
@@ -87,10 +84,7 @@ abstract class UploadFeedbackCommand[A](val module: Module, val assignment: Assi
 	var assignmentService: AssessmentService = Wire[AssessmentService]
 	var stateService: StateService = Wire[StateService]
 
-	/* for single upload */
-	var uniNumber: String = _
 	var file: UploadedFile = new UploadedFile
-	/* ----- */
 
 	/* for multiple upload */
 	// use lazy list with factory as spring doesn't know how to dynamically create items
@@ -121,22 +115,15 @@ abstract class UploadFeedbackCommand[A](val module: Module, val assignment: Assi
 
 	def postExtractValidation(errors: Errors) {
 		if (!invalidFiles.isEmpty) errors.rejectValue("invalidFiles", "invalidFiles")
-		if (items != null && !items.isEmpty) {
-			items.asScala.zipWithIndex.foreach { case (item, i) =>
-				errors.pushNestedPath("items[" + i + "]")
-				validateUploadedFile(item, errors)
-				errors.popNestedPath()
-			}
-		} else {
-			val tempItem = new FeedbackItem(uniNumber)
-			tempItem.file = file
-			validateUploadedFile(tempItem, errors)
+		items.asScala.zipWithIndex.foreach { case (item, i) =>
+			errors.pushNestedPath("items[" + i + "]")
+			validateUploadedFile(item, errors)
+			errors.popNestedPath()
 		}
 	}
 
 	private def validateUploadedFile(item: FeedbackItem, errors: Errors) {
 		val file = item.file
-		val uniNumber = item.uniNumber
 
 		if (file.isMissing) errors.rejectValue("file", "file.missing")
 		for((f, i) <- file.attached.asScala.zipWithIndex){
@@ -153,29 +140,29 @@ abstract class UploadFeedbackCommand[A](val module: Module, val assignment: Assi
 			}
 		}
 
-		if (uniNumber.hasText) {
-			if (!UniversityId.isValid(uniNumber)) {
-				errors.rejectValue("uniNumber", "uniNumber.invalid")
-			} else {
-				userLookup.getUserByWarwickUniId(uniNumber) match {
-					case FoundUser(u) =>
-					case NoUser(u) => errors.rejectValue("uniNumber", "uniNumber.userNotFound", Array(uniNumber), "")
-				}
-
-				validateExisting(item, errors)
-			}
+		if (!UniversityId.isValid(item.uniNumber)) {
+			errors.rejectValue("uniNumber", "uniNumber.invalid")
 		} else {
-			errors.rejectValue("uniNumber", "NotEmpty")
+			item.student match {
+				case Some(FoundUser(u)) =>
+				case _ => errors.rejectValue("uniNumber", "uniNumber.userNotFound", Array(item.uniNumber), "")
+			}
+
+			validateExisting(item, errors)
 		}
+
 	}
 
 	def validateExisting(item: FeedbackItem, errors: Errors)
 
 	private def processFiles(bits: Seq[(String, FileAttachment)]) {
 
-		def store(itemMap: collection.mutable.Map[String, FeedbackItem], number: String, name: String, file: FileAttachment) =
-			itemMap.getOrElseUpdate(number, new FeedbackItem(uniNumber = number))
+		def store(itemMap: collection.mutable.Map[String, FeedbackItem], number: String, name: String, file: FileAttachment) = {
+			val student = userLookup.getUserByWarwickUniId(number)
+			itemMap
+				.getOrElseUpdate(number, new FeedbackItem(number, student))
 				.file.attached.add(file)
+		}
 
 		// go through individual files, extracting the uni number and grouping
 		// them into feedback items.
@@ -267,8 +254,11 @@ abstract class UploadFeedbackCommand[A](val module: Module, val assignment: Assi
 			}
 
 			if (items != null) {
-				for (item <- items.asScala if item.file != null) {
-					item.file.onBind(result)
+				for (item <- items.asScala) {
+					if (item.file != null) item.file.onBind(result)
+					if (item.student == null) {
+						item.student = Option(userLookup.getUserByWarwickUniId(item.uniNumber))
+					}
 				}
 			}
 		}

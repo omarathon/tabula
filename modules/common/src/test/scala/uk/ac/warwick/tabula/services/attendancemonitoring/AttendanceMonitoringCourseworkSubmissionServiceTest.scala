@@ -41,8 +41,8 @@ class AttendanceMonitoringCourseworkSubmissionServiceTest extends TestBase with 
 		assignment.module = module1
 
 		val submission = new Submission
-		submission.userId = student.userId
-		submission.universityId = student.universityId
+		submission.usercode = student.userId
+		submission._universityId = student.universityId
 		submission.submittedDate = new DateTime()
 		submission.assignment = assignment
 
@@ -72,7 +72,7 @@ class AttendanceMonitoringCourseworkSubmissionServiceTest extends TestBase with 
 			((Seq(Fixtures.attendanceMonitoringCheckpoint(assignmentPoint, student, AttendanceState.Attended)), Seq[AttendanceMonitoringCheckpointTotal]()))
 
 		mockAssignmentService.getSubmissionsForAssignmentsBetweenDates(
-			student.universityId,
+			student.userId,
 			assignmentPoint.startDate.toDateTimeAtStartOfDay,
 			assignmentPoint.endDate.plusDays(1).toDateTimeAtStartOfDay
 		) returns Seq()

@@ -2,12 +2,16 @@ package uk.ac.warwick.tabula.commands.coursework.assignments
 
 import uk.ac.warwick.tabula.data.model.{Assignment, Feedback, FirstMarkersMap, Module, UserGroup}
 import uk.ac.warwick.tabula.helpers.Tap.tap
-import uk.ac.warwick.tabula.services.{AssessmentService, AssessmentServiceComponent, FeedbackService, FeedbackServiceComponent, StateService, StateServiceComponent}
+import uk.ac.warwick.tabula.services._
 import uk.ac.warwick.tabula.{MockUserLookup, Mockito, TestBase}
 
 import scala.collection.JavaConverters._
 
 class ReleaseForMarkingCommandTest extends TestBase  with Mockito {
+
+	trait MockUserLookupComponent extends UserLookupComponent {
+		override def userLookup = new MockUserLookup
+	}
 
 	val ug1: UserGroup = UserGroup.ofUniversityIds.tap(g=>{
 		g.includedUserIds = Seq("1", "2","4")
@@ -28,7 +32,7 @@ class ReleaseForMarkingCommandTest extends TestBase  with Mockito {
 			}
 
 			val cmd = new ReleaseForMarkingCommand(assignment.module, assignment, currentUser.apparentUser)
-			with ReleaseForMarkingCommandTestSupport {
+			with MockUserLookupComponent with ReleaseForMarkingCommandTestSupport {
 				override def studentsWithKnownMarkers = Seq()
 			}
 
@@ -49,7 +53,7 @@ class ReleaseForMarkingCommandTest extends TestBase  with Mockito {
 			}
 
 			val cmd = new ReleaseForMarkingCommand(assignment.module, assignment, currentUser.apparentUser)
-			with ReleaseForMarkingCommandTestSupport {
+			with MockUserLookupComponent with ReleaseForMarkingCommandTestSupport {
 				override def studentsWithKnownMarkers = Seq("1","2")
 			}
 
@@ -69,7 +73,7 @@ class ReleaseForMarkingCommandTest extends TestBase  with Mockito {
 			}
 
 			val cmd = new ReleaseForMarkingCommand(assignment.module, assignment, currentUser.apparentUser)
-			with ReleaseForMarkingCommandTestSupport {
+			with MockUserLookupComponent with ReleaseForMarkingCommandTestSupport {
 				override def studentsWithKnownMarkers = Seq("1","2", "3")
 			}
 			cmd.students = Seq("1", "2", "3").asJava
@@ -90,7 +94,7 @@ class ReleaseForMarkingCommandTest extends TestBase  with Mockito {
 			}
 
 			val cmd = new ReleaseForMarkingCommand(assignment.module, assignment, currentUser.apparentUser)
-			with ReleaseForMarkingCommandTestSupport {
+			with MockUserLookupComponent with ReleaseForMarkingCommandTestSupport {
 				override def studentsWithKnownMarkers = Seq("1","2")
 			}
 			cmd.students = Seq("1", "2", "3").asJava

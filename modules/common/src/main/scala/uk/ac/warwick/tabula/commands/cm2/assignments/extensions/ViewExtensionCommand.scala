@@ -34,7 +34,7 @@ class ViewExtensionCommandInternal(val extension: Extension) extends CommandInte
 	this: UserLookupComponent with ExtensionServiceComponent with SubmissionServiceComponent  =>
 
 	def applyInternal(): ExtensionDetail = {
-		val user = Option(userLookup.getUserByUserId(extension.userId))
+		val user = Option(userLookup.getUserByUserId(extension.usercode))
 		val previousExtensions = user.toSeq.flatMap(extensionService.getPreviousExtensions)
 		val previousSubmissions = user.toSeq.flatMap(submissionService.getPreviousSubmissions)
 		ExtensionDetail(extension, user, previousExtensions, previousSubmissions)

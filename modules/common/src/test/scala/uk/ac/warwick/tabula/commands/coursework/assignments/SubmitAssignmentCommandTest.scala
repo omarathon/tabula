@@ -1,6 +1,6 @@
 package uk.ac.warwick.tabula.commands.coursework.assignments
 
-import uk.ac.warwick.tabula.services.{AutowiringSubmissionServiceComponent, AutowiringZipServiceComponent, ProfileService}
+import uk.ac.warwick.tabula.services.{AutowiringSubmissionServiceComponent, AutowiringZipServiceComponent}
 
 import scala.collection.JavaConverters._
 import org.joda.time.DateTime
@@ -61,13 +61,14 @@ class SubmitAssignmentCommandTest extends TestBase with Mockito {
 
 		val submission = new Submission()
 		submission.assignment = assignment
-		submission.universityId = "0678022"
+		submission._universityId = "0678022"
+		submission.usercode = "cusebr"
 		assignment.submissions.add(submission)
 
 		// Can't submit twice, silly
 		errors = new BindException(cmd, "command")
 		cmd.validate(errors)
-		errors.hasErrors should be{true}
+		errors.hasErrors should be {true}
 
 		// But guys, guys... what if...
 		assignment.allowResubmission = true

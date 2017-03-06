@@ -86,7 +86,7 @@ trait ValidatesMarkItem {
 
 trait PostExtractValidation {
 
-	self: AddMarksCommandState with ValidatesMarkItem =>
+	self: AddMarksCommandState with ValidatesMarkItem with UserLookupComponent =>
 
 	def postExtractValidation(errors: Errors) {
 		val uniIdsSoFar: mutable.Set[String] = mutable.Set()
@@ -95,6 +95,7 @@ trait PostExtractValidation {
 			for (i <- 0 until marks.size()) {
 				val mark = marks.get(i)
 				val newPerson = if (mark.universityId != null){
+					if(mark.user == null) mark.user = userLookup.getUserByWarwickUniId(mark.universityId)
 					uniIdsSoFar.add(mark.universityId)
 				} else {
 					false
@@ -168,7 +169,7 @@ trait FetchDisabilities {
 		assessment match {
 			case assignment: Assignment =>
 				marks.asScala.map{ markItem => markItem.universityId -> {
-					if (submissionService.getSubmissionByUniId(assignment, markItem.universityId).exists(_.useDisability)) {
+					if (submissionService.getSubmissionByUsercode(assignment, markItem.user.getUserId).exists(_.useDisability)) {
 						profileService.getMemberByUniversityId(markItem.universityId).flatMap {
 							case student: StudentMember => Option(student)
 							case _ => None

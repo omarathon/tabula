@@ -37,7 +37,7 @@ class DownloadMarkerFeedbackFilesCommand (val module: Module, val assignment: As
 				filename match {
 					case name: String if name.hasText =>
 						markerFeedback.attachments.asScala.find(_.name == filename).map(new RenderableAttachment(_){
-							override val filename = s"${markerFeedback.feedback.universityId}-${Option(name).getOrElse(module.code)}"
+							override val filename = s"${markerFeedback.feedback.studentIdentifier}-${Option(name).getOrElse(module.code)}"
 						})
 					case _ => Some(zipped(markerFeedback))
 				}

@@ -19,9 +19,7 @@ import uk.ac.warwick.tabula.services.{AutowiringRelationshipServiceComponent, Re
 import uk.ac.warwick.tabula.validators.WithinYears
 import uk.ac.warwick.tabula.system.permissions.{PermissionsChecking, PermissionsCheckingMethods, RequiresPermissionsChecking}
 import uk.ac.warwick.tabula.JavaImports._
-import uk.ac.warwick.tabula.commands.coursework.assignments.extensions.ModifyExtensionCommandState
-import uk.ac.warwick.tabula.data.model.forms.ExtensionState.MoreInformationReceived
-import uk.ac.warwick.tabula.events.NotificationHandling
+import uk.ac.warwick.tabula.data.model.forms.ExtensionState.{MoreInformationReceived, Unreviewed}
 
 import scala.collection.mutable
 
@@ -52,9 +50,11 @@ class RequestExtensionCommandInternal(val assignment:Assignment, val submitter: 
 
 	override def applyInternal(): Extension = transactional() {
 		val universityId = submitter.apparentUser.getWarwickId
-		val extension = assignment.findExtension(universityId).getOrElse({
-			val newExtension = new Extension(universityId)
-			newExtension.userId = submitter.apparentUser.getUserId
+		val usercode = submitter.apparentUser.getUserId
+		val extension = assignment.findExtension(usercode).getOrElse({
+			val newExtension = new Extension
+			newExtension._universityId = universityId
+			newExtension.usercode = usercode
 			newExtension
 		})
 		extension.assignment = assignment
@@ -75,6 +75,8 @@ class RequestExtensionCommandInternal(val assignment:Assignment, val submitter: 
 
 		if (extension.state == ExtensionState.MoreInformationRequired) {
 			extension._state = MoreInformationReceived
+		} else {
+			extension._state = Unreviewed
 		}
 
 		save(extension)

@@ -32,7 +32,7 @@ class PlagiarismInvestigationCommandInternal(val assignment: Assignment)
 	self: SubmissionServiceComponent =>
 
 	def applyInternal(): Unit = {
-		submissions = students.asScala.flatMap(submissionService.getSubmissionByUniId(assignment, _))
+		submissions = students.asScala.flatMap(submissionService.getSubmissionByUsercode(assignment, _))
 		submissions.foreach { submission =>
 			submission.plagiarismInvestigation =
 				if (markPlagiarised) SuspectPlagiarised

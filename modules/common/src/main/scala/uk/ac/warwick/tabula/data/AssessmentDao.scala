@@ -28,12 +28,12 @@ trait AssessmentDao {
 
 	def deleteFormField(field: FormField): Unit
 
-	def getAssignmentsWithFeedback(universityId: String): Seq[Assignment]
-	def getAssignmentsWithFeedback(universityId: String, academicYearOption: Option[AcademicYear]): Seq[Assignment]
+	def getAssignmentsWithFeedback(usercode: String): Seq[Assignment]
+	def getAssignmentsWithFeedback(usercode: String, academicYearOption: Option[AcademicYear]): Seq[Assignment]
 
-	def getAssignmentsWithSubmission(universityId: String): Seq[Assignment]
-	def getAssignmentsWithSubmission(universityId: String, academicYearOption: Option[AcademicYear]): Seq[Assignment]
-	def getSubmissionsForAssignmentsBetweenDates(universityId: String, startInclusive: DateTime, endExclusive: DateTime): Seq[Submission]
+	def getAssignmentsWithSubmission(usercode: String): Seq[Assignment]
+	def getAssignmentsWithSubmission(usercode: String, academicYearOption: Option[AcademicYear]): Seq[Assignment]
+	def getSubmissionsForAssignmentsBetweenDates(usercode: String, startInclusive: DateTime, endExclusive: DateTime): Seq[Submission]
 
 	def getAssignmentByNameYearModule(name: String, year: AcademicYear, module: Module): Seq[Assignment]
 
@@ -67,18 +67,18 @@ class AssessmentDaoImpl extends AssessmentDao with Daoisms {
 		session.delete(field)
 	}
 
-	def getAssignmentsWithFeedback(universityId: String): Seq[Assignment] =
+	def getAssignmentsWithFeedback(usercode: String): Seq[Assignment] =
 		session.newQuery[Assignment]("""select a from Assignment a
 				join a.feedbacks as f
-				where f.universityId = :universityId
+				where f.usercode = :usercode
 				and f.released=true""")
-			.setString("universityId", universityId)
+			.setString("usercode", usercode)
 			.distinct.seq
 
-	def getAssignmentsWithFeedback(universityId: String, academicYearOption: Option[AcademicYear]): Seq[Assignment] = {
+	def getAssignmentsWithFeedback(usercode: String, academicYearOption: Option[AcademicYear]): Seq[Assignment] = {
 		val c = session.newCriteria[AssignmentFeedback]
 			.createAlias("assignment", "assignment")
-			.add(is("universityId", universityId))
+			.add(is("usercode", usercode))
 			.add(is("released", true))
 		  .add(is("assignment.deleted", false))
 		  .add(is("assignment._hiddenFromStudents", false))
@@ -91,17 +91,17 @@ class AssessmentDaoImpl extends AssessmentDao with Daoisms {
 		}).map(_.assignment)
 	}
 
-	def getAssignmentsWithSubmission(universityId: String): Seq[Assignment] =
+	def getAssignmentsWithSubmission(usercode: String): Seq[Assignment] =
 		session.newQuery[Assignment]("""select a from Assignment a
 				join a.submissions as s
-				where s.universityId = :universityId""")
-			.setString("universityId", universityId)
+				where s.usercode = :usercode""")
+			.setString("usercode", usercode)
 			.distinct.seq
 
-	def getAssignmentsWithSubmission(universityId: String, academicYearOption: Option[AcademicYear]): Seq[Assignment] = {
+	def getAssignmentsWithSubmission(usercode: String, academicYearOption: Option[AcademicYear]): Seq[Assignment] = {
 		val c = session.newCriteria[Submission]
 			.createAlias("assignment", "assignment")
-			.add(is("universityId", universityId))
+			.add(is("usercode", usercode))
 			.add(is("assignment.deleted", false))
 			.add(is("assignment._hiddenFromStudents", false))
 			.setFetchMode("assignment", FetchMode.JOIN)
@@ -113,10 +113,10 @@ class AssessmentDaoImpl extends AssessmentDao with Daoisms {
 		}).map(_.assignment)
 	}
 
-	def getSubmissionsForAssignmentsBetweenDates(universityId: String, startInclusive: DateTime, endExclusive: DateTime): Seq[Submission] =
+	def getSubmissionsForAssignmentsBetweenDates(usercode: String, startInclusive: DateTime, endExclusive: DateTime): Seq[Submission] =
 		session.newCriteria[Submission]
 			.createAlias("assignment", "assignment")
-			.add(is("universityId", universityId))
+			.add(is("usercode", usercode))
 			.add(ge("assignment.closeDate", startInclusive))
 			.add(lt("assignment.closeDate", endExclusive))
 			.seq

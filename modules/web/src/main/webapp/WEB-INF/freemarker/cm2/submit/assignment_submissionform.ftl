@@ -56,7 +56,7 @@
 
 		<@bs3form.labelled_form_group path="" labelText="University ID">
 				<p class="very-subtle">
-					${user.apparentUser.warwickId!}
+					${user.studentIdentifier}
 				</p>
 		</@bs3form.labelled_form_group>
 

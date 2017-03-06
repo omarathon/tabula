@@ -57,7 +57,7 @@ trait UploadFeedbackToSitsDescription extends Describable[Seq[Feedback]] {
 	}
 
 	override def describeResult(d: Description, result: Seq[Feedback]): Unit = {
-		d.property("students" -> result.map(_.universityId))
+		d.property("students" -> result.map(_.usercode))
 	}
 }
 
@@ -67,7 +67,7 @@ trait UploadFeedbackToSitsCommandState {
 
 	def module: Module
 	def assessment: Assessment
-	lazy val feedbacks: Seq[Feedback] = assessment.fullFeedback.filter(f => students.isEmpty || students.asScala.contains(f.universityId))
+	lazy val feedbacks: Seq[Feedback] = assessment.fullFeedback.filter(f => students.isEmpty || students.asScala.contains(f.usercode))
 }
 
 trait UploadFeedbackToSitsCommandRequest {

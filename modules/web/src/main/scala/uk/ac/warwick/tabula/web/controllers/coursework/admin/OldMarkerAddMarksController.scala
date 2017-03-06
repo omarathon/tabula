@@ -50,20 +50,20 @@ class OldMarkerAddMarksController extends OldCourseworkController {
 		@ModelAttribute("markerAddMarksCommand") cmd: MarkerAddMarksCommand, errors: Errors
 	): Mav = {
 		val submissions = assignment.getMarkersSubmissions(marker)
-		val markerFeedbacks = submissions.flatMap(s => assignment.getMarkerFeedbackForCurrentPosition(s.universityId, marker))
-		val filteredFeedbackId = markerFeedbacks.filter(_.state != MarkingCompleted).map(_.feedback.universityId)
-		val filteredSubmissions = submissions.filter(s => filteredFeedbackId.contains(s.universityId))
+		val markerFeedbacks = submissions.flatMap(s => assignment.getMarkerFeedbackForCurrentPosition(s.usercode, marker))
+		val filteredFeedbackId = markerFeedbacks.filter(_.state != MarkingCompleted).map(_.feedback.usercode)
+		val filteredSubmissions = submissions.filter(s => filteredFeedbackId.contains(s.usercode))
 
 		val marksToDisplay:Seq[MarkItem] = filteredSubmissions.map{ submission =>
-			val universityId = submission.universityId
-			val member = userLookup.getUserByWarwickUniId(universityId)
+			val usercode = submission.usercode
+			val member = userLookup.getUserByUserId(usercode)
 
-			val markerFeedback = markerFeedbacks.find(_.feedback.universityId == universityId)
+			val markerFeedback = markerFeedbacks.find(_.feedback.usercode == usercode)
 			markerFeedback match  {
 				case Some(f) if f.state != MarkingCompleted => noteMarkItem(member, Option(f))
 				case None => noteMarkItem(member, None)
 			}
-		}.sortBy(_.universityId)
+		}.sortBy(markItem => s"${markItem.user.getWarwickId}${markItem.user.getUserId}")
 
 		Mav(s"$urlPrefix/admin/assignments/markerfeedback/marksform",
 			"marksToDisplay" -> marksToDisplay,
@@ -78,6 +78,7 @@ class OldMarkerAddMarksController extends OldCourseworkController {
 	private def noteMarkItem(member: User, markerFeedback: Option[MarkerFeedback]) = {
 		val markItem = new MarkItem()
 		markItem.universityId = member.getWarwickId
+		markItem.user = member
 		markerFeedback match {
 			case Some(f) =>
 				markItem.actualMark = f.mark.map { _.toString }.getOrElse("")

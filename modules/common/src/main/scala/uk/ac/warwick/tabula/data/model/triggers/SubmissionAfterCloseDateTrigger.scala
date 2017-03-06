@@ -25,7 +25,7 @@ class SubmissionAfterCloseDateTrigger extends Trigger[Submission, Unit] with Han
 
 	override def apply(): Unit = transactional() {
 		if (assignment.isClosed && (submission.isLate || submission.isAuthorisedLate)) {
-			handleAssignment(Seq(submission.universityId))
+			handleAssignment(Seq(submission.usercode))
 		}
 	}
 }

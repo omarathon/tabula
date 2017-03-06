@@ -61,7 +61,7 @@ class ExtensionDaoImpl extends ExtensionDao with Daoisms {
 
 	def getPreviousExtensions(user: User): Seq[Extension] = {
 		session.newCriteria[Extension]
-			.add(is("userId", user.getUserId))
+			.add(is("usercode", user.getUserId))
 			.seq
 	}
 

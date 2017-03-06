@@ -24,10 +24,10 @@ trait HandlesAssignmentTrigger extends Logging {
 
 	def assignment: Assignment
 
-	def handleAssignment(universityIds: Seq[String]): Unit = {
+	def handleAssignment(usercodes: Seq[String]): Unit = {
 		if (assignment.automaticallyReleaseToMarkers && assignment.hasWorkflow) {
 			val releaseToMarkersCommand = ReleaseForMarkingCommand(assignment.module, assignment, new AnonymousUser)
-			releaseToMarkersCommand.students = JArrayList(universityIds)
+			releaseToMarkersCommand.students = JArrayList(usercodes)
 			releaseToMarkersCommand.confirm = true
 			releaseToMarkersCommand.onBind(null)
 			releaseToMarkersCommand.apply()

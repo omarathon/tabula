@@ -69,38 +69,38 @@
 					(function($) {
 						$(function() {
 							$(".scrollable-points-table .left table, .scrollable-points-table .right table").addClass('tablesorter')
-									.find('th.sortable').addClass('header')
-									.on('click', function(e) {
-										var $th = $(this)
-											, sortDescending = function(){
-												$('#sortOrder').val('desc(' + $th.data('field') + ')');
-												$th.closest('thead').find('th').removeClass('headerSortUp').removeClass('headerSortDown');
-												$th.addClass('headerSortUp');
-											}, sortAscending = function(){
-												$('#sortOrder').val('asc(' + $th.data('field') + ')');
-												$th.closest('thead').find('th').removeClass('headerSortUp').removeClass('headerSortDown');
-												$th.addClass('headerSortDown');
-											};
+								.find('th.sortable').addClass('header')
+								.on('click', function(e) {
+									var $th = $(this)
+										, sortDescending = function(){
+											$('#sortOrder').val('desc(' + $th.data('field') + ')');
+											$th.closest('thead').find('th').removeClass('headerSortUp').removeClass('headerSortDown');
+											$th.addClass('headerSortUp');
+										}, sortAscending = function(){
+											$('#sortOrder').val('asc(' + $th.data('field') + ')');
+											$th.closest('thead').find('th').removeClass('headerSortUp').removeClass('headerSortDown');
+											$th.addClass('headerSortDown');
+										};
 
-										if ($th.hasClass('headerSortUp')) {
-											sortAscending();
-										} else if ($th.hasClass('headerSortDown')) {
+									if ($th.hasClass('headerSortUp')) {
+										sortAscending();
+									} else if ($th.hasClass('headerSortDown')) {
+										sortDescending();
+									} else {
+										// if unrecorded or missed, sort desc on first click
+										if ($th.hasClass('unrecorded-col') || $th.hasClass('missed-col')) {
 											sortDescending();
 										} else {
-											// if unrecorded or missed, sort desc on first click
-											if ($th.hasClass('unrecorded-col') || $th.hasClass('missed-col')) {
-												sortDescending();
-											} else {
-												sortAscending();
-											}
+											sortAscending();
 										}
+									}
 
-										if (typeof(window.doRequest) === 'function') {
-											window.doRequest($('#filterCommand'), true);
-										} else {
-											$('#filterCommand').submit();
-										}
-									});
+									if (typeof(window.doRequest) === 'function') {
+										window.doRequest($('#filterCommand'), true);
+									} else {
+										$('#filterCommand').submit();
+									}
+								});
 						});
 						$(window).on('load', function(){
 							GlobalScripts.scrollableTableSetup();
@@ -149,6 +149,8 @@
 	});
 
 	jQuery('a.ajax-modal').ajaxModalLink();
+
+	jQuery('.studentResults').wideTables();
 </script>
 
 </#escape>

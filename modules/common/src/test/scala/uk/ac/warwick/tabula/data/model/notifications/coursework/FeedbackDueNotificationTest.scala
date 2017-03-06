@@ -109,7 +109,8 @@ class FeedbackDueNotificationTest extends TestBase with Mockito with FreemarkerR
 
 		val extension = Fixtures.extension()
 		extension.assignment = assignment
-		extension.universityId = "1234567"
+		extension._universityId = "1234567"
+		extension.usercode = "1234567"
 		extension.expiryDate = new DateTime(2014, DateTimeConstants.SEPTEMBER, 17, 9, 0, 0, 0)
 
 		val notification = Notification.init(new FeedbackDueExtensionNotification, new AnonymousUser, extension)
@@ -120,12 +121,13 @@ class FeedbackDueNotificationTest extends TestBase with Mockito with FreemarkerR
 		val assignment = Fixtures.assignment("5,000 word essay")
 		assignment.module = Fixtures.module("cs118", "Programming for Computer Scientists")
 		assignment.closeDate = new DateTime(2014, DateTimeConstants.SEPTEMBER, 15, 9, 0, 0, 0)
-		val submission = Fixtures.submission("1234567","cuspxp")
+		val submission = Fixtures.submission("1234567","1234567")
 		submission.submittedDate = new DateTime(2014, DateTimeConstants.SEPTEMBER, 16, 9, 0, 0, 0)
 		assignment.submissions.add(submission)
 		val extension = Fixtures.extension()
 		extension.assignment = assignment
-		extension.universityId = "1234567"
+		extension._universityId = "1234567"
+		extension.usercode = "1234567"
 		extension.expiryDate = new DateTime(2014, DateTimeConstants.SEPTEMBER, 17, 9, 0, 0, 0)
 		extension.approve()
 
@@ -143,13 +145,14 @@ class FeedbackDueNotificationTest extends TestBase with Mockito with FreemarkerR
 		assignment.module = Fixtures.module("cs404", "Agent Based Systems")
 		assignment.closeDate = new DateTime(2015, DateTimeConstants.JANUARY, 20, 12, 0, 0, 0)
 
-		val submission = Fixtures.submission("1234567","cuspxp")
+		val submission = Fixtures.submission("1234567","1234567")
 		submission.submittedDate = new DateTime(2014, DateTimeConstants.SEPTEMBER, 20, 13, 0, 0, 0)
 		assignment.submissions.add(submission)
 
 		val extension = Fixtures.extension()
 		extension.assignment = assignment
-		extension.universityId = "1234567"
+		extension._universityId = "1234567"
+		extension.usercode = "1234567"
 		extension.expiryDate = new DateTime(2015, DateTimeConstants.JANUARY, 20, 17, 0, 0, 0)
 		extension.approve()
 
@@ -166,13 +169,14 @@ class FeedbackDueNotificationTest extends TestBase with Mockito with FreemarkerR
 		assignment.module = Fixtures.module("cs118", "Programming for Computer Scientists")
 		assignment.closeDate = new DateTime(2014, DateTimeConstants.SEPTEMBER, 16, 9, 0, 0, 0)
 
-		val submission = Fixtures.submission("1234567")
+		val submission = Fixtures.submission("1234567", "1234567")
 		submission.submittedDate = new DateTime(2014, DateTimeConstants.SEPTEMBER, 17, 9, 0, 0, 0)
 		assignment.submissions.add(submission)
 
 		val extension = Fixtures.extension()
 		extension.assignment = assignment
-		extension.universityId = "1234567"
+		extension._universityId = "1234567"
+		extension.usercode = "1234567"
 		extension.expiryDate = new DateTime(2014, DateTimeConstants.SEPTEMBER, 18, 9, 0, 0, 0)
 		extension.approve()
 		extension.feedbackDeadline should not be 'empty
@@ -185,7 +189,7 @@ class FeedbackDueNotificationTest extends TestBase with Mockito with FreemarkerR
 		moduleAndDepartmentService.getModuleByCode(assignment.module.code) returns Some(assignment.module)
 		permissionsService.ensureUserGroupFor[Module](assignment.module, ModuleManagerRoleDefinition) returns managers
 
-		assignment.submissions.add(Fixtures.submission("1234567"))
+		assignment.submissions.add(Fixtures.submission("1234567", "1234567"))
 
 		val notification = Notification.init(new FeedbackDueExtensionNotification, new AnonymousUser, extension)
 		notification.deadline should not be 'empty
@@ -199,7 +203,8 @@ class FeedbackDueNotificationTest extends TestBase with Mockito with FreemarkerR
 
 		val extension = Fixtures.extension()
 		extension.assignment = assignment
-		extension.universityId = "1234567"
+		extension._universityId = "1234567"
+		extension.usercode = "1234567"
 		extension.expiryDate = new DateTime(2014, DateTimeConstants.SEPTEMBER, 17, 9, 0, 0, 0)
 
 		val notification = Notification.init(new FeedbackDueExtensionNotification, new AnonymousUser, extension)
@@ -219,8 +224,8 @@ class FeedbackDueNotificationTest extends TestBase with Mockito with FreemarkerR
 		moduleAndDepartmentService.getModuleByCode(assignment.module.code) returns Some(assignment.module)
 		permissionsService.ensureUserGroupFor[Module](assignment.module, ModuleManagerRoleDefinition) returns managers
 
-		assignment.submissions.add(Fixtures.submission("0000001"))
-		assignment.submissions.add(Fixtures.submission("0000002"))
+		assignment.submissions.add(Fixtures.submission("0000001", "0000001"))
+		assignment.submissions.add(Fixtures.submission("0000002", "0000002"))
 
 		assignment.needsFeedbackPublishing should be {true}
 
@@ -228,8 +233,8 @@ class FeedbackDueNotificationTest extends TestBase with Mockito with FreemarkerR
 		notification.recipients should not be 'empty
 
 		// Feedback added
-		assignment.feedbacks.add(Fixtures.assignmentFeedback("0000001").tap { f => f.assignment = assignment; f.actualMark = Some(80) })
-		assignment.feedbacks.add(Fixtures.assignmentFeedback("0000002").tap { f => f.assignment = assignment; f.actualMark = Some(70) })
+		assignment.feedbacks.add(Fixtures.assignmentFeedback("0000001", "0000001").tap { f => f.assignment = assignment; f.actualMark = Some(80) })
+		assignment.feedbacks.add(Fixtures.assignmentFeedback("0000002", "0000002").tap { f => f.assignment = assignment; f.actualMark = Some(70) })
 		notification.recipients should not be 'empty
 
 		// Feedback partially released
@@ -247,8 +252,8 @@ class FeedbackDueNotificationTest extends TestBase with Mockito with FreemarkerR
 		assignment.module = Fixtures.module("cs118", "Programming for Computer Scientists")
 		assignment.closeDate = new DateTime(2014, DateTimeConstants.SEPTEMBER, 14, 9, 0, 0, 0)
 
-		val submission1 = Fixtures.submission("0000001")
-		val submission2 = Fixtures.submission("0000002")
+		val submission1 = Fixtures.submission("0000001", "0000001")
+		val submission2 = Fixtures.submission("0000002", "0000002")
 		submission1.submittedDate = new DateTime(2014, DateTimeConstants.SEPTEMBER, 15, 9, 0, 0, 0)
 		submission2.submittedDate = new DateTime(2014, DateTimeConstants.SEPTEMBER, 15, 9, 0, 0, 0)
 		assignment.submissions.add(submission1)
@@ -264,12 +269,13 @@ class FeedbackDueNotificationTest extends TestBase with Mockito with FreemarkerR
 
 		val extension = Fixtures.extension()
 		extension.assignment = assignment
-		extension.universityId = "1234567"
+		extension._universityId = "1234567"
+		extension.usercode = "1234567"
 		extension.expiryDate = new DateTime(2014, DateTimeConstants.SEPTEMBER, 17, 9, 0, 0, 0)
 		extension.approve()
 		extension.feedbackDeadline should be ('empty)
 
-		val submission3 = Fixtures.submission("1234567")
+		val submission3 = Fixtures.submission("1234567", "1234567")
 		submission3.submittedDate = new DateTime(2014, DateTimeConstants.SEPTEMBER, 15, 9, 0, 0, 0)
 		assignment.submissions.add(submission3)
 
@@ -278,7 +284,7 @@ class FeedbackDueNotificationTest extends TestBase with Mockito with FreemarkerR
 		notification.recipients should not be 'empty
 
 		// Feedback added
-		assignment.feedbacks.add(Fixtures.assignmentFeedback("1234567").tap { f => f.assignment = assignment; f.actualMark = Some(80) })
+		assignment.feedbacks.add(Fixtures.assignmentFeedback("1234567", "1234567").tap { f => f.assignment = assignment; f.actualMark = Some(80) })
 		notification.recipients should not be 'empty
 
 		// Feedback fully released

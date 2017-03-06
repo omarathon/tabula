@@ -233,8 +233,8 @@ class ProcessTurnitinLtiQueueCommandTest extends TestBase with Mockito {
 		attachment.id="1234"
 		val submission: Submission = attachment.submissionValue.submission
 		submission.id = "2345"
-		submission.userId = "3456"
-		submission.universityId = "4567"
+		submission.usercode = "3456"
+		submission._universityId = "4567"
 		val assignment: Assignment = submission.assignment
 	}
 
@@ -248,10 +248,10 @@ class ProcessTurnitinLtiQueueCommandTest extends TestBase with Mockito {
 			mockTurnitinLtiService.submitPaper(
 				assignment,
 				s"/turnitin/submission/${submission.id}/attachment/${attachment.id}?token=null",
-				submission.userId,
-				s"${submission.userId}@TurnitinLti.warwick.ac.uk",
+				submission.usercode,
+				s"${submission.usercode}@TurnitinLti.warwick.ac.uk",
 				attachment,
-				submission.universityId,
+				submission._universityId,
 				"Student"
 			) returns new TurnitinLtiResponse(
 				success = false,
@@ -277,10 +277,10 @@ class ProcessTurnitinLtiQueueCommandTest extends TestBase with Mockito {
 			mockTurnitinLtiService.submitPaper(
 				assignment,
 				s"/turnitin/submission/${submission.id}/attachment/${attachment.id}?token=null",
-				submission.userId,
-				s"${submission.userId}@TurnitinLti.warwick.ac.uk",
+				submission.usercode,
+				s"${submission.usercode}@TurnitinLti.warwick.ac.uk",
 				attachment,
-				submission.universityId,
+				submission._universityId,
 				"Student"
 			) returns new TurnitinLtiResponse(
 				success = true,
@@ -315,10 +315,10 @@ class ProcessTurnitinLtiQueueCommandTest extends TestBase with Mockito {
 			mockTurnitinLtiService.submitPaper(
 				assignment,
 				s"/turnitin/submission/${submission.id}/attachment/${attachment.id}?token=${token.id}",
-				submission.userId,
-				s"${submission.userId}@TurnitinLti.warwick.ac.uk",
+				submission.usercode,
+				s"${submission.usercode}@TurnitinLti.warwick.ac.uk",
 				attachment,
-				submission.universityId,
+				submission._universityId,
 				"Student"
 			) returns new TurnitinLtiResponse(
 				success = true,

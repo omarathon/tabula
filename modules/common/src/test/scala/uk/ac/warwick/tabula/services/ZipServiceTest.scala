@@ -42,14 +42,14 @@ class ZipServiceTest extends TestBase with Mockito {
 
 	var userLookup: UserLookupService = _
 
-	@Before def before {
+	@Before def before() {
 		userLookup = mock[UserLookupService]
 
 		userLookup.getUserByUserId(any[String]) answers { id =>
-			userDatabase find {_.getUserId == id} getOrElse (new AnonymousUser())
+			userDatabase find {_.getUserId == id} getOrElse new AnonymousUser()
 		}
 		userLookup.getUserByWarwickUniId(any[String]) answers { id =>
-			userDatabase find {_.getWarwickId == id} getOrElse (new AnonymousUser())
+			userDatabase find {_.getWarwickId == id} getOrElse new AnonymousUser()
 		}
 	}
 
@@ -65,8 +65,8 @@ class ZipServiceTest extends TestBase with Mockito {
 		val assignment = new Assignment
 		val submission = new Submission
 
-		submission.universityId = "0000007"
-		submission.userId = "haslat"
+		submission._universityId = "0000007"
+		submission.usercode = "haslat"
 		submission.assignment = assignment
 
 		val attachment = new FileAttachment
@@ -91,7 +91,7 @@ class ZipServiceTest extends TestBase with Mockito {
 		service.features = emptyFeatures
 		service.userLookup = userLookup
 
-		var department = new Department
+		val department = new Department
 		department.showStudentName = true
 
 		val module = new Module(code="ph105", adminDepartment=department)
@@ -100,8 +100,8 @@ class ZipServiceTest extends TestBase with Mockito {
 		assignment.module = module
 
 		val submission = new Submission
-		submission.universityId = "0000007"
-		submission.userId = "haslat"
+		submission._universityId = "0000007"
+		submission.usercode = "haslat"
 		submission.assignment = assignment
 
 		val attachment = new FileAttachment
@@ -137,8 +137,8 @@ class ZipServiceTest extends TestBase with Mockito {
 		assignment.module = module
 
 		val submission = new Submission
-		submission.universityId = "0000007"
-		submission.userId = ""
+		submission._universityId = "0000007"
+		submission.usercode = ""
 		submission.assignment = assignment
 
 		val attachment = new FileAttachment

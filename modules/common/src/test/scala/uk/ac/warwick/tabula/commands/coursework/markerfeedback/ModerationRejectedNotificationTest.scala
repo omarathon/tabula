@@ -43,6 +43,7 @@ class ModerationRejectedNotificationTest  extends TestBase with Mockito {
 		mf2.grade = Some("3")
 
 		userLookupService.getUserByWarwickUniId(student1.getWarwickId) returns student1
+		userLookupService.getUserByUserId(student1.getWarwickId) returns student1
 	}
 
 	@Test

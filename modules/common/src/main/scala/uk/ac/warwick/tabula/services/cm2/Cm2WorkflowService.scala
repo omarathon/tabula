@@ -142,7 +142,7 @@ object Cm2WorkflowStages {
 	case object ReleaseForMarking extends Cm2WorkflowStage {
 		def actionCode = "workflow.ReleaseForMarking.action"
 		def progress(assignment: Assignment)(cm2: WorkflowItems): StageProgress = {
-			if (assignment.isReleasedForMarking(cm2.student.getWarwickId)) {
+			if (assignment.isReleasedForMarking(cm2.student.getUserId)) {
 				StageProgress(ReleaseForMarking, started = true, messageCode = "workflow.ReleaseForMarking.released", health = Good, completed = true)
 			} else {
 				StageProgress(ReleaseForMarking, started = false, messageCode = "workflow.ReleaseForMarking.notReleased")
@@ -167,7 +167,7 @@ object Cm2WorkflowStages {
 	case object SecondMarking extends Cm2WorkflowStage {
 		def actionCode = "workflow.SecondMarking.action"
 		def progress(assignment: Assignment)(cm2: WorkflowItems): StageProgress = {
-			val released = assignment.isReleasedToSecondMarker(cm2.student.getWarwickId)
+			val released = assignment.isReleasedToSecondMarker(cm2.student.getUserId)
 			cm2.enhancedFeedback match {
 				case Some(item) if released && item.feedback.getSecondMarkerFeedback.exists(_.state != Rejected) =>
 					if (item.feedback.getSecondMarkerFeedback.exists(_.state == MarkingCompleted))
@@ -223,7 +223,7 @@ object Cm2WorkflowStages {
 	case object FinaliseSeenSecondMarking extends Cm2WorkflowStage {
 		def actionCode = "workflow.FinaliseSeenSecondMarking.action"
 		def progress(assignment: Assignment)(cm2: WorkflowItems): StageProgress = {
-			val released = assignment.isReleasedToThirdMarker(cm2.student.getWarwickId)
+			val released = assignment.isReleasedToThirdMarker(cm2.student.getUserId)
 			cm2.enhancedFeedback match {
 				case Some(item) if released && item.feedback.getThirdMarkerFeedback.exists(_.state != Rejected) =>
 					if (item.feedback.getThirdMarkerFeedback.exists(_.state == MarkingCompleted))

@@ -52,18 +52,19 @@ abstract class OnlineModerationCommand(
 	self: FeedbackServiceComponent with FileAttachmentServiceComponent with ZipServiceComponent with MarkerFeedbackStateCopy
 		with FinaliseFeedbackComponent =>
 
-	def markerFeedback: Option[MarkerFeedback] = assignment.getMarkerFeedback(student.getWarwickId, marker, SecondFeedback)
+	def markerFeedback: Option[MarkerFeedback] = assignment.getMarkerFeedback(student.getUserId, marker, SecondFeedback)
 
 	copyState(markerFeedback, copyModerationFieldsFrom)
 
 	def applyInternal(): MarkerFeedback = {
 
 		// find the parent feedback or make a new one
-		val parentFeedback = assignment.feedbacks.asScala.find(_.universityId == student.getWarwickId).getOrElse({
+		val parentFeedback = assignment.feedbacks.asScala.find(_.usercode == student.getUserId).getOrElse({
 			val newFeedback = new AssignmentFeedback
 			newFeedback.assignment = assignment
-			newFeedback.uploaderId = marker.getWarwickId
-			newFeedback.universityId = student.getWarwickId
+			newFeedback.uploaderId = marker.getUserId
+			newFeedback._universityId = student.getWarwickId
+			newFeedback.usercode = student.getUserId
 			newFeedback.released = false
 			newFeedback.createdDate = DateTime.now
 			newFeedback

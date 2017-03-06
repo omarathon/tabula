@@ -28,7 +28,7 @@ class CheckExamSitsUploadController extends ExamsController with AutowiringProfi
 		errors: Errors,
 		@PathVariable feedback: ExamFeedback
 	): Mav = {
-		val sprCodes = profileService.getMemberByUniversityId(feedback.universityId).flatMap {
+		val sprCodes = feedback.universityId.flatMap(uid => profileService.getMemberByUniversityId(uid)).flatMap {
 			case s: StudentMember => Some(s.freshStudentCourseDetails.map(_.sprCode))
 			case _ => None
 		}.getOrElse(Seq())

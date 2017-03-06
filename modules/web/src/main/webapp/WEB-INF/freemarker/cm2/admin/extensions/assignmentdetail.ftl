@@ -139,9 +139,8 @@
 
 <#escape x as x?html>
 	<div class="content extension-detail">
-		<#assign actionUrl><@routes.cm2.extensiondetail assignment universityId /></#assign>
+		<#assign actionUrl><@routes.cm2.extensiondetail assignment usercode /></#assign>
 		<@f.form method="post" enctype="multipart/form-data" action=actionUrl id="editExtensionCommand" commandName="editExtensionCommand" cssClass="form-horizontal double-submit-protection modify-extension">
-			<@f.input type="hidden" path="universityId" value="${universityId}" />
 			<input type="hidden" name="closeDate" class="startDateTime" value="${assignment.closeDate}" />
 
 			<#if detail.extension?has_content>

@@ -155,12 +155,12 @@
 						<#local lateness><@sd.lateness submission /></#local>
 
 						<tr class="itemContainer<#if !enhancedSubmission??> awaiting-submission</#if>" <#if enhancedSubmission?? && submission.suspectPlagiarised> data-plagiarised="true" </#if> >
-							<td><@form.selector_check_row "students" student.user.warwickId /></td>
+							<td><@form.selector_check_row "students" student.user.userId /></td>
 							<td class="id">
 							<#if module.adminDepartment.showStudentName>
-								${student.user.fullName} <@pl.profile_link student.user.warwickId />
+								${student.user.fullName} <#if student.user.warwickId??><@pl.profile_link student.user.warwickId /><#else><@pl.profile_link student.user.userId /></#if>
 							<#else>
-								${student.user.warwickId!}
+								<#if student.user.warwickId??>${student.user.warwickId}<#else>${student.user.userId}</#if>
 							</#if>
 							</td>
 
@@ -172,7 +172,7 @@
 											<#local filename = "${attachments[0].name}">
 											<#local downloadUrl><@routes.coursework.downloadSubmission submission filename/>?single=true</#local>
 										<#else>
-											<#local filename = "submission-${submission.universityId}.zip">
+											<#local filename = "submission-${submission.studentIdentifier}.zip">
 											<#local downloadUrl><@routes.coursework.downloadSubmission submission filename/></#local>
 										</#if>
 										<a class="long-running" href="${downloadUrl}">
@@ -252,7 +252,7 @@
 									<#else>
 										<#local attachmentExtension = "zip">
 									</#if>
-									<a class="long-running" href="<@url page='/coursework/admin/module/${module.code}/assignments/${assignment.id}/feedback/download/${student.coursework.enhancedFeedback.feedback.id}/feedback-${student.coursework.enhancedFeedback.feedback.universityId}.${attachmentExtension}'/>">
+									<a class="long-running" href="<@url page='/coursework/admin/module/${module.code}/assignments/${assignment.id}/feedback/download/${student.coursework.enhancedFeedback.feedback.id}/feedback-${student.coursework.enhancedFeedback.feedback.studentIdentifier}.${attachmentExtension}'/>">
 										${attachments?size}
 										<#if attachments?size == 1> file
 										<#else> files
@@ -288,7 +288,7 @@
 
 							<td>
 								<#if student.coursework.enhancedFeedback??>
-									<a href="<@routes.coursework.feedbackSummary assignment student.user.warwickId!''/>"
+									<a href="<@routes.coursework.feedbackSummary assignment student.user.userId/>"
 									   class="ajax-modal"
 									   data-target="#feedback-modal">
 										View

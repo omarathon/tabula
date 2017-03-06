@@ -41,7 +41,7 @@ class StudentAssignmentsSummaryCommandInternal(val student: MemberOrUser, val ac
 		val enrolledAssignments = assessmentMembershipService.getEnrolledAssignments(studentUser)
 
 		val done = benchmarkTask("getAssignmentsWithFeedback") {
-			assessmentService.getAssignmentsWithFeedback(student.universityId, academicYearOption).map(_.enhance(studentUser)).sortBy(enhancedAssignment =>
+			assessmentService.getAssignmentsWithFeedback(student.usercode, academicYearOption).map(_.enhance(studentUser)).sortBy(enhancedAssignment =>
 				if (enhancedAssignment.submission.nonEmpty) {
 					enhancedAssignment.submission.get.submittedDate
 				} else {
@@ -50,7 +50,7 @@ class StudentAssignmentsSummaryCommandInternal(val student: MemberOrUser, val ac
 			)
 		}
 		val doing = benchmarkTask("getAssignmentsWithSubmission") {
-			assessmentService.getAssignmentsWithSubmission(student.universityId, academicYearOption)
+			assessmentService.getAssignmentsWithSubmission(student.usercode, academicYearOption)
 				.filterNot(done.map(_.assignment).contains)
 				.map(_.enhance(studentUser))
 				.sortBy(enhancedAssignment =>

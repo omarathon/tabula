@@ -28,20 +28,20 @@
 
 	<#assign formUrl><@routes.coursework.feedbackBulkAdjustment assignment /></#assign>
 	<@f.form method="post" enctype="multipart/form-data" action="${formUrl}" commandName="command" class="form-horizontal">
-		<#list command.students as universityId>
-			<input type="hidden" name="students" value="${universityId}" />
+		<#list command.students as usercode>
+			<input type="hidden" name="students" value="${usercode}" />
 		</#list>
-		<#list command.marks?keys as universityId>
-			<input type="hidden" name="marks[${universityId}]" value="${command.marks[universityId]!""}" />
+		<#list command.marks?keys as usercode>
+			<input type="hidden" name="marks[${usercode}]" value="${command.marks[usercode]!""}" />
 		</#list>
-		<#list command.grades?keys as universityId>
-			<input type="hidden" name="grades[${universityId}]" value="${command.grades[universityId]!""}" />
+		<#list command.grades?keys as usercode>
+			<input type="hidden" name="grades[${usercode}]" value="${command.grades[usercode]!""}" />
 		</#list>
-		<#list command.reasons?keys as universityId>
-			<input type="hidden" name="reasons[${universityId}]" value="${command.reasons[universityId]!""}" />
+		<#list command.reasons?keys as usercode>
+			<input type="hidden" name="reasons[${usercode}]" value="${command.reasons[usercode]!""}" />
 		</#list>
-		<#list command.comments?keys as universityId>
-			<input type="hidden" name="comments[${universityId}]" value="${command.comments[universityId]!""}" />
+		<#list command.comments?keys as usercode>
+			<input type="hidden" name="comments[${usercode}]" value="${command.comments[usercode]!""}" />
 		</#list>
 
 		<@form.labelled_row "privateAdjustment" "Hide from student">

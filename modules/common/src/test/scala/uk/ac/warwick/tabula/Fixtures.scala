@@ -26,29 +26,30 @@ object Fixtures extends Mockito {
 
 	def submission(universityId: String = "0123456", userId: String = "cuspxp"): Submission = {
 		val s = new Submission
-		s.universityId = universityId
-		s.userId = userId
+		s._universityId = universityId
+		s.usercode = userId
 		s
 	}
 
 	def submissionWithId(universityId: String = "0123456", userId: String = "cuspxp", id: String): Submission = {
 		val s = new Submission
-		s.universityId = universityId
-		s.userId = userId
+		s._universityId = universityId
+		s.usercode = userId
 		s.id = id
 		s
 	}
 
-	def assignmentFeedback(universityId: String = "0123456"): AssignmentFeedback = {
+	def assignmentFeedback(universityId: String = "0123456", userId: String = null): AssignmentFeedback = {
 		val f = new AssignmentFeedback
-		f.universityId = universityId
+		f._universityId = universityId
+		f.usercode = if (userId == null) universityId else userId
 		f
 	}
 
 	def extension(universityId: String = "0123456", userId: String = "cuspxp"): Extension = {
 		val e = new Extension
-		e.universityId = universityId
-		e.userId = userId
+		e._universityId = universityId
+		e.usercode = userId
 		e
 	}
 

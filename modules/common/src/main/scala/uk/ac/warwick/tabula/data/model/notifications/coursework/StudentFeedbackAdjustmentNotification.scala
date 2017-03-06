@@ -24,12 +24,7 @@ class StudentFeedbackAdjustmentNotification
 	def assignment: Assignment = target.entity
 	def feedback: Feedback = item.entity
 
-	def recipient: User = {
-		val uniId = Option(feedback.universityId).getOrElse({
-			throw new IllegalStateException(s"No student found for ${feedback.universityId}")
-		})
-		userLookup.getUserByWarwickUniId(uniId)
-	}
+	def recipient: User = userLookup.getUserByUserId(feedback.usercode)
 
 	def whatAdjusted: String = {
 		val mark = feedback.latestMark.map(m => "mark")

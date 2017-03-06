@@ -1,10 +1,9 @@
 package uk.ac.warwick.tabula.commands.coursework.markerfeedback
 
 import org.joda.time.DateTime
-import org.mockito.Mockito._
 import uk.ac.warwick.tabula.commands.coursework.assignments.ReleaseForMarkingCommand
 import uk.ac.warwick.tabula.data.model._
-import uk.ac.warwick.tabula.services.{AssessmentService, AssessmentServiceComponent, FeedbackService, FeedbackServiceComponent, StateService, StateServiceComponent}
+import uk.ac.warwick.tabula.services._
 import uk.ac.warwick.tabula.{MockUserLookup, Mockito, TestBase}
 
 import scala.collection.JavaConversions._
@@ -38,14 +37,18 @@ class ReleaseForMarkingTest extends TestBase with Mockito {
 			generateSubmission(assignment, "1170836")
 			generateSubmission(assignment, "9170726")
 
+			trait MockUserLookupComponent extends UserLookupComponent {
+				override def userLookup = new MockUserLookup
+			}
+
 			// override studentsWithKnownMarkers so we dont have to mock-up a whole workflow
 			val command = new ReleaseForMarkingCommand(assignment.module, assignment, currentUser.apparentUser)
-			with TestSupport {
+			with MockUserLookupComponent with TestSupport {
 				override def studentsWithKnownMarkers = Seq("0678022", "1170836", "9170726")
 			}
 
 
-			command.students = assignment.submissions.map(_.universityId)
+			command.students = assignment.submissions.map(_.usercode)
 			assignment.feedbacks = command.applyInternal()
 
 			verify(command.stateService, times(3)).updateState(any[MarkerFeedback], any[MarkingState])
@@ -60,7 +63,8 @@ class ReleaseForMarkingTest extends TestBase with Mockito {
 	private def generateSubmission(assignment:Assignment, uniId: String) {
 		val submission = new Submission()
 		submission.assignment = assignment
-		submission.universityId = uniId
+		submission._universityId = uniId
+		submission.usercode = uniId
 		assignment.submissions.add(submission)
 	}
 

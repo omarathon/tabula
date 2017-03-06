@@ -12,7 +12,7 @@ import uk.ac.warwick.tabula.services.AutowiringUserLookupComponent
 class FeedbackChangeNotification extends NotificationWithTarget[AssignmentFeedback, Assignment]
 	with SingleItemNotification[AssignmentFeedback]
 	with SingleRecipientNotification
-	with UniversityIdRecipientNotification
+	with UniversityIdOrUserIdRecipientNotification
 	with AutowiringUserLookupComponent
 	with AllCompletedActionRequiredNotification {
 
@@ -24,7 +24,7 @@ class FeedbackChangeNotification extends NotificationWithTarget[AssignmentFeedba
 	priority = Warning
 
 	override def onPreSave(newRecord: Boolean) {
-		recipientUniversityId = feedback.universityId
+		recipientUniversityId = feedback.usercode
 	}
 
 	def verb = "modify"

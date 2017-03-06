@@ -3,6 +3,10 @@
 <#import "*/submission_components.ftl" as components />
 <#escape x as x?html>
 
+<#macro studentIdentifier user><#compress>
+	<#if user.warwickId??>${user.warwickId}<#else>${user.userId!}</#if>
+</#compress></#macro>
+
 <div id="profile-modal" class="modal fade profile-subset"></div>
 <div id="feedback-modal" class="modal fade"></div>
 
@@ -62,14 +66,14 @@
 	<#if students?size gt 0>
 		<tbody>
 			<#macro action actionCode student>
-				<#local studentDetails><span data-profile="${student.user.warwickId!}"><#if department.showStudentName>${student.user.fullName}<#else>${student.user.warwickId!}</#if></span></#local>
+				<#local studentDetails><span data-profile="<@studentIdentifier student.user />"><#if department.showStudentName>${student.user.fullName}<#else><@studentIdentifier student.user /></#if></span></#local>
 				<#local firstMarker="first marker" />
 				<#local secondMarker="second marker" />
-				<#assign fm = assignment.getStudentsFirstMarker(student.user.warwickId)!"" />
+				<#assign fm = assignment.getStudentsFirstMarker(student.user.userId)!"" />
 				<#if fm?has_content>
 					<#local firstMarker><span data-profile="${fm.warwickId!}">${fm.fullName}</span></#local>
 				</#if>
-				<#assign sm = assignment.getStudentsSecondMarker(student.user.warwickId)!"" />
+				<#assign sm = assignment.getStudentsSecondMarker(student.user.userId)!"" />
 				<#if sm?has_content>
 					<#local secondMarker><span data-profile="${sm.warwickId!}">${sm.fullName}</span></#local>
 				</#if>
@@ -180,7 +184,7 @@
 								<h3>Marking</h3>
 
 								<div class="labels">
-									<#if assignment.isReleasedForMarking(student.user.warwickId)>
+									<#if assignment.isReleasedForMarking(student.user.userId)>
 										<span class="label label-success">Markable</span>
 									</#if>
 								</div>
@@ -196,7 +200,7 @@
 
 								<#if student.stages?keys?seq_contains('FirstMarking')>
 
-									<#assign fm = assignment.getStudentsFirstMarker(student.user.warwickId)!"" />
+									<#assign fm = assignment.getStudentsFirstMarker(student.user.userId)!"" />
 									<#if fm?has_content>
 										<#local firstMarker><span data-profile="${fm.warwickId!}">${fm.fullName}</span></#local>
 									</#if>
@@ -213,7 +217,7 @@
 
 								<#if student.stages?keys?seq_contains('SecondMarking')>
 
-									<#assign sm = assignment.getStudentsSecondMarker(student.user.warwickId)!"" />
+									<#assign sm = assignment.getStudentsSecondMarker(student.user.userId)!"" />
 									<#if sm?has_content>
 										<#local secondMarker><span data-profile="${sm.warwickId!}">${sm.fullName}</span></#local>
 									</#if>
@@ -229,7 +233,7 @@
 								</#if>
 
 								<#if student.stages?keys?seq_contains('Moderation')>
-									<#assign sm = assignment.getStudentsSecondMarker(student.user.warwickId)!"" />
+									<#assign sm = assignment.getStudentsSecondMarker(student.user.userId)!"" />
 									<#if sm?has_content>
 										<#local secondMarker><span data-profile="${sm.warwickId!}">${sm.fullName}</span></#local>
 									</#if>
@@ -245,7 +249,7 @@
 								</#if>
 
 								<#if student.stages?keys?seq_contains('FinaliseSeenSecondMarking')>
-									<#assign fm = assignment.getStudentsFirstMarker(student.user.warwickId)!"" />
+									<#assign fm = assignment.getStudentsFirstMarker(student.user.userId)!"" />
 									<#if fm?has_content>
 										<#local firstMarker><span data-profile="${fm.warwickId!}">${fm.fullName}</span></#local>
 									</#if>
@@ -311,7 +315,7 @@
 							<#-- not really a stage but the best place to put a link to the feedback summary -->
 							<div class="stage">
 								<i class="icon-eye-open"></i>
-								<a href="<@routes.coursework.feedbackSummary assignment student.user.warwickId!''/>"
+								<a href="<@routes.coursework.feedbackSummary assignment student.user.userId!''/>"
 								   class="ajax-modal"
 								   data-target="#feedback-modal">
 									View feedback
@@ -320,7 +324,7 @@
 
 							<div class="stage">
 								<i class="icon-eye-open"></i>
-								<a href="<@routes.coursework.feedbackAudit assignment student.user.warwickId!''/>">
+								<a href="<@routes.coursework.feedbackAudit assignment student.user.userId!''/>">
 									View audit
 								</a>
 							</div>
@@ -367,7 +371,7 @@
 											<#else>
 												<#local attachmentExtension = "zip">
 											</#if>
-											<a class="long-running" href="<@url page='/coursework/admin/module/${module.code}/assignments/${assignment.id}/feedback/download/${student.coursework.enhancedFeedback.feedback.id}/feedback-${student.coursework.enhancedFeedback.feedback.universityId}.${attachmentExtension}'/>"><#compress>
+											<a class="long-running" href="<@url page='/coursework/admin/module/${module.code}/assignments/${assignment.id}/feedback/download/${student.coursework.enhancedFeedback.feedback.id}/feedback-${student.coursework.enhancedFeedback.feedback.studentIdentifier}.${attachmentExtension}'/>"><#compress>
 												${attachments?size}
 												<#if attachments?size == 1> file
 												<#else> files
@@ -402,21 +406,22 @@
 				</#macro>
 
 				<#macro row student>
-					<tr data-contentid="${student.user.warwickId!}" class="itemContainer<#if !student.coursework.enhancedSubmission??> awaiting-submission</#if>"<#if student.coursework.enhancedSubmission?? && student.coursework.enhancedSubmission.submission.suspectPlagiarised> data-plagiarised="true"</#if>>
-						<td class="check-col"><input type="checkbox" class="collection-checkbox" name="students" value="${student.user.warwickId!}"></td>
+					<tr data-contentid="<@studentIdentifier student.user />" class="itemContainer<#if !student.coursework.enhancedSubmission??> awaiting-submission</#if>"<#if student.coursework.enhancedSubmission?? && student.coursework.enhancedSubmission.submission.suspectPlagiarised> data-plagiarised="true"</#if>>
+						<td class="check-col"><input type="checkbox" class="collection-checkbox" name="students" value="${student.user.userId!}"></td>
 						<#if department.showStudentName>
 							<td class="student-col toggle-cell">
-								<h6 class="toggle-icon" data-profile="${student.user.warwickId!}">${student.user.firstName}</h6>
+								<h6 class="toggle-icon" data-profile="<@studentIdentifier student.user />">${student.user.firstName}</h6>
 							</td>
 							<td class="student-col toggle-cell">
-								<h6 data-profile="${student.user.warwickId!}">
-									${student.user.lastName}&nbsp;<@pl.profile_link student.user.warwickId! />
+								<h6 data-profile="<@studentIdentifier student.user />">
+									${student.user.lastName}&nbsp;<#if student.user.warwickId??><@pl.profile_link student.user.warwickId /><#else><@pl.profile_link student.user.userId /></#if>
 								</h6>
 							</td>
 						<#else>
+							<#assign studentId><#if student.user.warwickId??>${student.user.warwickId}<#else>${student.user.userId}</#if></#assign>
 							<td class="student-col toggle-cell">
-								<h6 class="toggle-icon" data-profile="${student.user.warwickId!}">
-									${student.user.warwickId!}
+								<h6 class="toggle-icon" data-profile="${studentId}">
+									${studentId}
 								</h6>
 							</td>
 						</#if>
@@ -429,8 +434,8 @@
 
 							<dl class="progress progress-${student.progress.t} use-tooltip" title="${progressTooltip}" style="margin: 0; border-bottom: 0;" data-container="body">
 								<dt class="bar" style="width: ${student.progress.percentage}%;"></dt>
-								<dd style="display: none;" class="table-content-container" data-contentid="${student.user.warwickId!}">
-									<div id="content-${student.user.warwickId!}" class="content-container">
+								<dd style="display: none;" class="table-content-container" data-contentid="<@studentIdentifier student.user />">
+									<div id="content-<@studentIdentifier student.user />" class="content-container">
 										<@workflow student />
 									</div>
 								</dd>

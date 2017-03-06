@@ -15,12 +15,12 @@
 	<tr class="item-container" data-contentid="${markingId(u)}" data-markingurl="<@routes.coursework.feedbackAdjustment assignment />">
 		<td class="student-col toggle-cell"><h6 class="toggle-icon">${u.firstName}</h6></td>
 		<td class="student-col toggle-cell">
-			<h6>${u.lastName}&nbsp;<@pl.profile_link u.warwickId! /></h6>
+			<h6>${u.lastName}&nbsp;<#if u.warwickId??><@pl.profile_link u.warwickId /><#else><@pl.profile_link u.userId /></#if></h6>
 		</td>
 		<td class="toggle-cell content-cell">
 			<dl style="margin: 0; border-bottom: 0;">
 				<dt>
-					${u.warwickId!}
+					<#if u.warwickId??>${u.warwickId}<#else>${u.userId!}</#if>
 				</dt>
 				<dd style="display: none;" class="table-content-container" data-contentid="${markingId(u)}">
 					<div id="content-${markingId(u)}" class="content-container" data-contentid="${markingId(u)}">
@@ -165,10 +165,10 @@
 					<tr>
 						<td class="student-col"><h6>${info.student.firstName}</h6></td>
 						<td class="student-col">
-							<h6>${info.student.lastName}&nbsp;<@pl.profile_link info.student.warwickId! /></h6>
+							<h6>${info.student.lastName}&nbsp;<#if info.student.warwickId??><@pl.profile_link info.student.warwickId /><#else><@pl.profile_link info.student.userId /></#if></h6>
 						</td>
 						<td>
-							${info.student.warwickId!}
+							<#if info.student.warwickId??>${info.student.warwickId}<#else>${info.student.userId!}</#if>
 						</td>
 					</tr>
 				</#list>

@@ -34,7 +34,7 @@ class DownloadMarkerFeedbackTest extends TestBase with MarkingWorkflowWorld with
 
 	@Test
 	def downloadSingle() { withUser("cuslaj"){
-		val markerFeedback = assignment.getMarkerFeedback("9876004", currentUser.apparentUser, FirstFeedback)
+		val markerFeedback = assignment.getMarkerFeedback("cusxad", currentUser.apparentUser, FirstFeedback)
 		val command = new AdminGetSingleMarkerFeedbackCommand(assignment.module, assignment, markerFeedback.get)
 		command.zipService = zipService
 		val renderable = command.applyInternal()
@@ -44,7 +44,7 @@ class DownloadMarkerFeedbackTest extends TestBase with MarkingWorkflowWorld with
 	}}
 
 	@Test
-	def downloadAll() { withUser("cuslat", "1111111"){
+	def downloadAll() { withUser("cuslat", "1171795"){
 		val command = new DownloadMarkersFeedbackForPositionCommand(assignment.module, assignment, currentUser.apparentUser, currentUser, FirstFeedback) with AutowiringZipServiceComponent
 		assignment.markingWorkflow.userLookup = mockUserLookup
 		command.zipService = zipService

@@ -75,7 +75,7 @@ trait ReportWorld extends TestBase with Mockito {
 
 	var auditEventQueryMethods: AuditEventQueryMethods = mock[AuditEventQueryMethods]
 
-	auditEventQueryMethods.publishFeedbackForStudent(any[Assignment], any[String]) answers {argsObj => {
+	auditEventQueryMethods.publishFeedbackForStudent(any[Assignment], any[String], any[Option[String]]) answers {argsObj => {
 		val args = argsObj.asInstanceOf[Array[_]]
 		val assignment = args(0).asInstanceOf[Assignment]
 		val warwickId = args(1).asInstanceOf[String]
@@ -91,14 +91,14 @@ trait ReportWorld extends TestBase with Mockito {
 
 
 	var feedbackService: FeedbackService = mock[FeedbackService]
-	feedbackService.getAssignmentFeedbackByUniId(any[Assignment], any[String]) answers { argsObj => {
+	feedbackService.getAssignmentFeedbackByUsercode(any[Assignment], any[String]) answers { argsObj => {
 		val args = argsObj.asInstanceOf[Array[_]]
 		val assignment = args(0).asInstanceOf[Assignment]
-		val userId = args(1).asInstanceOf[String]
-		assignment.feedbacks.find(_.universityId == userId)
+		val usercode = args(1).asInstanceOf[String]
+		assignment.feedbacks.find(_.usercode == usercode)
 	}}
 
-	def studentData(start:Int, end:Int): List[String] = (start to end).map(idFormat).toList
+	def studentData(start:Int, end:Int): List[String] = (start to end).map(i => s"u${idFormat(i)}").toList
 
 	def createPublishEvent(assignment: Assignment, daysAfter: Int, students: List[String]) {
 		val date = assignment.closeDate.plusDays(daysAfter)
@@ -116,11 +116,14 @@ trait ReportWorld extends TestBase with Mockito {
 
 	def studentsData(students: List[String]): StringBuilder = students.addString(new StringBuilder(), """["""", """","""", """"]""")
 
-	val extension = new Extension(idFormat(3))
+	val extension = new Extension
+
+	val id = idFormat(3)
+	extension._universityId = id
+	extension.usercode = s"u$id"
 	extension.approve()
 	extension.expiryDate = assignmentSix.closeDate.plusDays(2)
 	extension.assignment =  assignmentSix
-	extension.userId = "cuxxxx"
 	assignmentSix.extensions = Seq(extension)
 
 	def addAssignment(id: String, name: String, closeDate: DateTime, numberOfStudents: Int, lateModNumber: Int, module: Module): Assignment = {
@@ -153,7 +156,8 @@ trait ReportWorld extends TestBase with Mockito {
 			val feedback = assignment.submissions.map { s=>
 				val newFeedback = new AssignmentFeedback
 				newFeedback.assignment = assignment
-				newFeedback.universityId = s.universityId
+				newFeedback.usercode = s.usercode
+				newFeedback._universityId = s._universityId
 				newFeedback.released = true
 				newFeedback
 			}
@@ -174,7 +178,9 @@ trait ReportWorld extends TestBase with Mockito {
 		withFakeTime(submissionDate) {
 			val submission = new Submission()
 			submission.assignment = assignment
-			submission.universityId = idFormat(num)
+			val id = idFormat(num)
+			submission._universityId = id
+			submission.usercode = s"u$id"
 			submission.submittedDate = submissionDate
 			assignment.submissions.add(submission)
 

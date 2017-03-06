@@ -26,8 +26,8 @@ trait OldDownloadSubmissionsForPrintingController extends OldCourseworkControlle
 			).map(submission =>
 				Map(
 					"submission" -> submission.id,
-					"universityId" -> submission.universityId,
-					"name" -> (if (module.adminDepartment.showStudentName) userLookup.getUserByUserId(submission.userId).getFullName else ""),
+					"universityId" -> submission.studentIdentifier,
+					"name" -> (if (module.adminDepartment.showStudentName) userLookup.getUserByUserId(submission.usercode).getFullName else ""),
 					"nonPDFFiles" -> submission.allAttachments.filter(
 						!_.name.endsWith(DownloadAdminSubmissionsForPrintingCommand.pdfExtension)
 					).map(_.name)

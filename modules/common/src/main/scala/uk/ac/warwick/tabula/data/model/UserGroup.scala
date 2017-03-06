@@ -138,6 +138,7 @@ class UserGroup private(val universityIds: Boolean)
 		else
 			user.getUserId
 	}
+
 	private def getUsersFromIds(ids: Seq[String]): Seq[User] = ids match {
 		case Nil => Nil
 		case list if universityIds => userLookup.getUsersByWarwickUniIds(list).values.toSeq

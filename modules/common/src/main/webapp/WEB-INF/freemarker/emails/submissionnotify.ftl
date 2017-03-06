@@ -16,7 +16,7 @@ Uploaded attachments:
 <#if isEmail!false>
 You can download all the attachments for this submission here:
 
-<@url context='/coursework' page='/admin/module/${module.code}/assignments/${assignment.id}/submissions/download/${submission.id}/submission-${submission.universityId}.zip'/>
+<@url context='/coursework' page='/admin/module/${module.code}/assignments/${assignment.id}/submissions/download/${submission.id}/submission-${submission.studentIdentifier}.zip'/>
 
 
 To unsubscribe from these messages, go here and select "No alerts".

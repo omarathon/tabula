@@ -48,26 +48,26 @@ class BulkAdjustmentCommandInternal(val assessment: Assessment, val gradeGenerat
 		validate(errors)
 
 		students.asScala
-			.filter(universityId =>
-				!errors.hasFieldErrors(s"marks[$universityId]") &&
-					!errors.hasFieldErrors(s"grades[$universityId]") &&
-					!errors.hasFieldErrors(s"reasons[$universityId]")
+			.filter(usercode =>
+				!errors.hasFieldErrors(s"marks[$usercode]") &&
+				!errors.hasFieldErrors(s"grades[$usercode]") &&
+				!errors.hasFieldErrors(s"reasons[$usercode]")
 			)
-			.map(universityId => {
-				val feedback = feedbackMap(universityId)
+			.map(usercode => {
+				val feedback = feedbackMap(usercode)
 				val mark = feedback.addMark(
 					user.apparentUser.getUserId,
 					privateAdjustment match {
 						case true => PrivateAdjustment
 						case false => Adjustment
 					},
-					marks.asScala(universityId).toInt,
-					grades.asScala.get(universityId),
-					reasons.asScala.get(universityId) match {
+					marks.asScala(usercode).toInt,
+					grades.asScala.get(usercode),
+					reasons.asScala.get(usercode) match {
 						case Some(reason) if reason.hasText => reason
 						case _ => defaultReason
 					},
-					comments.asScala.get(universityId) match {
+					comments.asScala.get(usercode) match {
 						case Some(comment) if comment.hasText => comment
 						case _ => defaultComment
 					}
@@ -101,7 +101,7 @@ trait BulkAdjustmentCommandBindListener extends BindListener {
 		val fileNames = file.fileNames.map(_.toLowerCase)
 		val invalidFiles = fileNames.filter(s => !s.endsWith(".xlsx"))
 
-		if (invalidFiles.size > 0) {
+		if (invalidFiles.nonEmpty) {
 			if (invalidFiles.size == 1) result.rejectValue("file", "file.wrongtype.one", Array(invalidFiles.mkString("")), "")
 			else result.rejectValue("", "file.wrongtype", Array(invalidFiles.mkString(", ")), "")
 		}
@@ -112,7 +112,7 @@ trait BulkAdjustmentCommandBindListener extends BindListener {
 
 		val (rowsToValidate, badRows) = rowData.partition(row => {
 			row.get(BulkAdjustmentCommand.StudentIdHeader.toLowerCase) match {
-				case Some(studentId) if studentId.matches("\\d+") && feedbackMap.get(studentId).isDefined => true
+				case Some(studentId) if feedbackMap.get(studentId).isDefined => true
 				case _ => false
 			}
 		})
@@ -137,29 +137,29 @@ trait BulkAdjustmentValidation extends SelfValidating {
 
 	override def validate(errors: Errors) {
 		val doGradeValidation = assessment.module.adminDepartment.assignmentGradeValidation
-		students.asScala.foreach(universityId => {
-			marks.asScala.get(universityId) match {
+		students.asScala.foreach(id => {
+			marks.asScala.get(id) match {
 				case Some(mark) if mark.hasText =>
 					try {
 						val asInt = mark.toInt
 						if (asInt < 0 || asInt > 100) {
-							errors.rejectValue(s"marks[$universityId]", "actualMark.range")
-						} else if (doGradeValidation && grades.asScala.getOrElse(universityId, null).hasText) {
-							val validGrades = gradeGenerator.applyForMarks(Map(universityId -> asInt))(universityId)
-							if (validGrades.nonEmpty && !validGrades.exists(_.grade == grades.asScala(universityId))) {
-								errors.rejectValue(s"grades[$universityId]", "actualGrade.invalidSITS", Array(validGrades.map(_.grade).mkString(", ")), "")
+							errors.rejectValue(s"marks[$id]", "actualMark.range")
+						} else if (doGradeValidation && grades.asScala.getOrElse(id, null).hasText) {
+							val validGrades = gradeGenerator.applyForMarks(Map(id -> asInt))(id)
+							if (validGrades.nonEmpty && !validGrades.exists(_.grade == grades.asScala(id))) {
+								errors.rejectValue(s"grades[$id]", "actualGrade.invalidSITS", Array(validGrades.map(_.grade).mkString(", ")), "")
 							}
 						}
 					} catch {
 						case _@(_: NumberFormatException | _: IllegalArgumentException) =>
-							errors.rejectValue(s"marks[$universityId]", "actualMark.format")
+							errors.rejectValue(s"marks[$id]", "actualMark.format")
 					}
 				case _ =>
-					errors.rejectValue(s"marks[$universityId]", "actualMark.range")
+					errors.rejectValue(s"marks[$id]", "actualMark.range")
 			}
-			reasons.asScala.get(universityId) match {
+			reasons.asScala.get(id) match {
 				case Some(reason) if reason.hasText && reason.length > AssignmentFeedbackAdjustmentCommand.REASON_SIZE_LIMIT =>
-					errors.rejectValue(s"reasons[$universityId]", "feedback.adjustment.reason.tooBig")
+					errors.rejectValue(s"reasons[$id]", "feedback.adjustment.reason.tooBig")
 				case _ =>
 			}
 		})
@@ -211,23 +211,22 @@ trait BulkAdjustmentDescription extends Describable[Seq[Mark]] {
 }
 
 trait BulkAdjustmentCommandState {
-	type UniversityId = String
 
 	def assessment: Assessment
 	def gradeGenerator: GeneratesGradesFromMarks
 	def spreadsheetHelper: SpreadsheetHelpers
 	def user: CurrentUser
 
-	lazy val feedbackMap: Map[String, Feedback] = assessment.allFeedback.groupBy(_.universityId).mapValues(_.head)
+	lazy val feedbackMap: Map[String, Feedback] = assessment.allFeedback.groupBy(_.studentIdentifier).mapValues(_.head)
 
 	// Bind variables
 	var file: UploadedFile = new UploadedFile
 
-	var students: JList[UniversityId] = JArrayList()
-	var marks: JMap[UniversityId, String] = JHashMap()
-	var grades: JMap[UniversityId, String] = JHashMap()
-	var reasons: JMap[UniversityId, String] = JHashMap()
-	var comments: JMap[UniversityId, String] = JHashMap()
+	var students: JList[String] = JArrayList()
+	var marks: JMap[String, String] = JHashMap()
+	var grades: JMap[String, String] = JHashMap()
+	var reasons: JMap[String, String] = JHashMap()
+	var comments: JMap[String, String] = JHashMap()
 
 	var privateAdjustment = true
 	var defaultReason: String = _
@@ -237,7 +236,7 @@ trait BulkAdjustmentCommandState {
 
 	var confirmStep = false
 
-	lazy val requiresDefaultReason: Boolean = !students.asScala.forall(universityId => reasons.asScala.getOrElse(universityId, null).hasText)
-	lazy val requiresDefaultComments: Boolean = !students.asScala.forall(universityId => comments.asScala.getOrElse(universityId, null).hasText)
+	lazy val requiresDefaultReason: Boolean = !students.asScala.forall(id => reasons.asScala.getOrElse(id, null).hasText)
+	lazy val requiresDefaultComments: Boolean = !students.asScala.forall(id => comments.asScala.getOrElse(id, null).hasText)
 
 }

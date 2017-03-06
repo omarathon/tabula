@@ -3,18 +3,19 @@ package uk.ac.warwick.tabula.commands.coursework.assignments.extensions
 import uk.ac.warwick.tabula.data.model.notifications.coursework.ExtensionRevokedNotification
 
 import scala.collection.JavaConverters._
-import uk.ac.warwick.tabula.commands.{Notifies, Description, ComposableCommand}
+import uk.ac.warwick.tabula.commands.{ComposableCommand, Notifies}
 import uk.ac.warwick.tabula.system.permissions.{PermissionsChecking, PermissionsCheckingMethods, RequiresPermissionsChecking}
 import uk.ac.warwick.tabula.data.model.{Assignment, Module, Notification}
 import uk.ac.warwick.tabula.CurrentUser
-import uk.ac.warwick.tabula.data.model.forms.{ExtensionState, Extension}
+import uk.ac.warwick.tabula.data.model.forms.{Extension, ExtensionState}
 import uk.ac.warwick.tabula.data.Transactions._
 import uk.ac.warwick.tabula.permissions.Permissions
 import uk.ac.warwick.tabula.services.{AutowiringUserLookupComponent, UserLookupComponent}
+import uk.ac.warwick.userlookup.User
 
 object DeleteExtensionCommand {
-	def apply(mod: Module, ass: Assignment, uniId: String, sub: CurrentUser) =
-		new DeleteExtensionCommandInternal(mod, ass, uniId, sub)
+	def apply(mod: Module, ass: Assignment, student: User, sub: CurrentUser) =
+		new DeleteExtensionCommandInternal(mod, ass, student, sub)
 			with ComposableCommand[Extension]
 			with DeleteExtensionCommandPermissions
 			with ModifyExtensionCommandDescription
@@ -23,12 +24,13 @@ object DeleteExtensionCommand {
 			with HibernateExtensionPersistenceComponent
 }
 
-class DeleteExtensionCommandInternal(mod: Module, ass: Assignment, uniId: String, sub: CurrentUser)
-	extends ModifyExtensionCommand(mod, ass, uniId, sub) with ModifyExtensionCommandState {
+class DeleteExtensionCommandInternal(mod: Module, ass: Assignment, student: User, sub: CurrentUser)
+	extends ModifyExtensionCommand(mod, ass, student, sub) with ModifyExtensionCommandState {
 
 	self: ExtensionPersistenceComponent with UserLookupComponent =>
 
-	extension = assignment.findExtension(universityId).getOrElse({ throw new IllegalStateException("Cannot delete a missing extension") })
+	extension = assignment.findExtension(student.getUserId)
+		.getOrElse({ throw new IllegalStateException("Cannot delete a missing extension") })
 
 	def applyInternal(): Extension = transactional() {
 		extension._state = ExtensionState.Revoked
@@ -44,7 +46,7 @@ trait DeleteExtensionCommandNotification extends Notifies[Extension, Option[Exte
 
 	def emit(extension: Extension): Seq[ExtensionRevokedNotification] = {
 		val notification = Notification.init(new ExtensionRevokedNotification, submitter.apparentUser, Seq(extension.assignment))
-		notification.recipientUniversityId = extension.universityId
+		notification.recipientUniversityId = extension.usercode
 		Seq(notification)
 	}
 }

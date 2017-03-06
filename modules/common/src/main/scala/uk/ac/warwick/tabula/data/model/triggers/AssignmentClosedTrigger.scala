@@ -20,13 +20,13 @@ object AssignmentClosedTrigger {
 @Entity
 @Inheritance(strategy = InheritanceType.SINGLE_TABLE)
 @DiscriminatorValue(value="AssignmentClosed")
-class AssignmentClosedTrigger	extends Trigger[Assignment, Unit] with HandlesAssignmentTrigger {
+class AssignmentClosedTrigger extends Trigger[Assignment, Unit] with HandlesAssignmentTrigger {
 
 	override def assignment: Assignment = target.entity
 
 	override def apply(): Unit = transactional() {
 		if (assignment.isClosed) {
-			handleAssignment(assignment.submissions.asScala.map(_.universityId))
+			handleAssignment(assignment.submissions.asScala.map(_.usercode))
 		}
 
 	}

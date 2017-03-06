@@ -6,7 +6,7 @@
 			${durationFormatter(submission.assignment.closeDate, submission.submittedDate)} after close
 		</#if>
 	<#elseif assignment?has_content && user?has_content>
-		<#local lateness = assignment.workingDaysLateIfSubmittedNow(user.universityId, user.userId) />
+		<#local lateness = assignment.workingDaysLateIfSubmittedNow(user.userId) />
 		<@fmt.p lateness "working day" /> overdue, the deadline/extension was ${durationFormatter(assignment.submissionDeadline(user.universityId, user.userId))}
 	</#if>
 </#compress></#macro>
@@ -28,7 +28,7 @@
 				<#local filename = "${attachments[0].name}">
 				<#local downloadUrl><@routes.cm2.downloadSubmission submission filename/>?single=true</#local>
 			<#else>
-				<#local filename = "submission-${submission.universityId}.zip">
+				<#local filename = "submission-${submission.studentIdentifier}.zip">
 				<#local downloadUrl><@routes.cm2.downloadSubmission submission filename/></#local>
 			</#if>
 			<a class="long-running" href="${downloadUrl}"><#compress>

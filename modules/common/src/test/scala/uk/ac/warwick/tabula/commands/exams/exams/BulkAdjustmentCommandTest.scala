@@ -92,7 +92,7 @@ class BulkAdjustmentCommandTest extends TestBase with Mockito {
 
 	@Test
 	def bindValidationExtractDataValidStudent() { new BindFixture {
-		val studentId: String = thisAssessment.allFeedback.head.universityId
+		val studentId: String = thisAssessment.allFeedback.head._universityId
 		mockSpreadsheetHelper.parseXSSFExcelFile(any[InputStream], any[Boolean]) returns Seq(
 			Map(
 				BulkAdjustmentCommand.StudentIdHeader.toLowerCase -> studentId,

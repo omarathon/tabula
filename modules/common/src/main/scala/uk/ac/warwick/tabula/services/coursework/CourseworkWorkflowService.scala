@@ -141,7 +141,7 @@ object CourseworkWorkflowStages {
 	case object ReleaseForMarking extends CourseworkWorkflowStage {
 		def actionCode = "workflow.ReleaseForMarking.action"
 		def progress(assignment: Assignment)(coursework: WorkflowItems): StageProgress = {
-			if (assignment.isReleasedForMarking(coursework.student.getWarwickId)) {
+			if (assignment.isReleasedForMarking(coursework.student.getUserId)) {
 				StageProgress(ReleaseForMarking, started = true, messageCode = "workflow.ReleaseForMarking.released", health = Good, completed = true)
 			} else {
 				StageProgress(ReleaseForMarking, started = false, messageCode = "workflow.ReleaseForMarking.notReleased")
@@ -166,7 +166,7 @@ object CourseworkWorkflowStages {
 	case object SecondMarking extends CourseworkWorkflowStage {
 		def actionCode = "workflow.SecondMarking.action"
 		def progress(assignment: Assignment)(coursework: WorkflowItems): StageProgress = {
-			val released = assignment.isReleasedToSecondMarker(coursework.student.getWarwickId)
+			val released = assignment.isReleasedToSecondMarker(coursework.student.getUserId)
 			coursework.enhancedFeedback match {
 				case Some(item) if released && item.feedback.getSecondMarkerFeedback.exists(_.state != Rejected) =>
 					if (item.feedback.getSecondMarkerFeedback.exists(_.state == MarkingCompleted))
@@ -194,7 +194,7 @@ object CourseworkWorkflowStages {
 	case object Moderation extends CourseworkWorkflowStage {
 		def actionCode = "workflow.ModeratedMarking.action"
 		def progress(assignment: Assignment)(coursework: WorkflowItems): StageProgress = {
-			val released = assignment.isReleasedToSecondMarker(coursework.student.getWarwickId)
+			val released = assignment.isReleasedToSecondMarker(coursework.student.getUserId)
 			coursework.enhancedFeedback match {
 				case Some(item) if released && item.feedback.getSecondMarkerFeedback.exists(_.state != Rejected) =>
 					if (item.feedback.getSecondMarkerFeedback.exists(_.state == MarkingCompleted))
@@ -222,7 +222,7 @@ object CourseworkWorkflowStages {
 	case object FinaliseSeenSecondMarking extends CourseworkWorkflowStage {
 		def actionCode = "workflow.FinaliseSeenSecondMarking.action"
 		def progress(assignment: Assignment)(coursework: WorkflowItems): StageProgress = {
-			val released = assignment.isReleasedToThirdMarker(coursework.student.getWarwickId)
+			val released = assignment.isReleasedToThirdMarker(coursework.student.getUserId)
 			coursework.enhancedFeedback match {
 				case Some(item) if released && item.feedback.getThirdMarkerFeedback.exists(_.state != Rejected) =>
 					if (item.feedback.getThirdMarkerFeedback.exists(_.state == MarkingCompleted))

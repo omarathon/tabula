@@ -54,8 +54,8 @@ class StudentSubmissionAndFeedbackCommandTest extends TestBase with Mockito {
 
 		assignment.extensions.add(extension)
 
-		command.submissionService.getSubmissionByUniId(assignment, "0672089") returns Some(submission)
-		command.feedbackService.getAssignmentFeedbackByUniId(assignment, "0672089") returns Some(feedback)
+		command.submissionService.getSubmissionByUsercode(assignment, "cuscav") returns Some(submission)
+		command.feedbackService.getAssignmentFeedbackByUsercode(assignment, "cuscav") returns Some(feedback)
 		command.profileService.getMemberByUser(user, disableFilter = false, eagerLoad = false) returns None
 
 		val info: StudentSubmissionInformation = command.applyInternal()
@@ -82,8 +82,8 @@ class StudentSubmissionAndFeedbackCommandTest extends TestBase with Mockito {
 
 		assignment.extensions.add(extension)
 
-		command.submissionService.getSubmissionByUniId(assignment, "0672089") returns Some(submission)
-		command.feedbackService.getAssignmentFeedbackByUniId(assignment, "0672089") returns Some(feedback)
+		command.submissionService.getSubmissionByUsercode(assignment, "cuscav") returns Some(submission)
+		command.feedbackService.getAssignmentFeedbackByUsercode(assignment, "cuscav") returns Some(feedback)
 		command.profileService.getMemberByUser(user, disableFilter = false, eagerLoad = false) returns Option(student)
 
 		val info: StudentSubmissionInformation = command.applyInternal()
@@ -107,8 +107,8 @@ class StudentSubmissionAndFeedbackCommandTest extends TestBase with Mockito {
 			val currentUser: CurrentUser = u
 		}
 
-		command.submissionService.getSubmissionByUniId(command.assignment, "0672089") returns None
-		command.feedbackService.getAssignmentFeedbackByUniId(command.assignment, "0672089") returns None
+		command.submissionService.getSubmissionByUsercode(command.assignment, "cuscav") returns None
+		command.feedbackService.getAssignmentFeedbackByUsercode(command.assignment, "cuscav") returns None
 
 		val checking = mock[PermissionsChecking]
 		command.permissionsCheck(checking)

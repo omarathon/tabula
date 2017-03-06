@@ -1,6 +1,10 @@
 <#compress>
 <#escape x as x?html>
 
+<#macro studentIdentifier user><#compress>
+	<#if user.warwickId??>${user.warwickId}<#else>${user.userId!}</#if>
+</#compress></#macro>
+
 <#if !embedded>
 <h1>Submissions/feedback comparison for ${assignment.name}</h1>
 </#if>
@@ -13,7 +17,7 @@
 
 		<ul class="user-list">
 		<#list submissionOnly as u>
-			<li>${u.warwickId!}</li>
+			<li><@studentIdentifier u /></li>
 		</#list>
 		</ul>
 	</div>
@@ -25,7 +29,7 @@
 
 		<ul class="user-list">
 		<#list feedbackOnly as u>
-			<li>${u.warwickId!}</li>
+			<li><@studentIdentifier u /></li>
 		</#list>
 		</ul>
 	</div>
@@ -40,7 +44,7 @@
 			<p><i class="icon-remove"></i> Submissions received from the following students do not have any feedback.</p>
 			<ul class="user-list">
 			<#list hasNoAttachments as u>
-				<li>${u.warwickId!}</li>
+				<li><@studentIdentifier u /></li>
 			</#list>
 			</ul>
 		</div>
@@ -55,7 +59,7 @@
 			<p><i class="icon-remove"></i> Submissions received from the following students do not have any marks assigned.</p>
 			<ul class="user-list">
 			<#list hasNoMarks as u>
-				<li>${u.warwickId!}</li>
+				<li><@studentIdentifier u /></li>
 			</#list>
 			</ul>
 		</div>
@@ -76,7 +80,7 @@
 			</p>
 			<ul class="user-list">
 			<#list plagiarised as u>
-				<li>${u.warwickId!}</li>
+				<li><@studentIdentifier u /></li>
 			</#list>
 			</ul>
 		</div>
