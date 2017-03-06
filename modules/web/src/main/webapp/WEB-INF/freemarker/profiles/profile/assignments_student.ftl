@@ -75,7 +75,7 @@
 										</#if>
 									</#assign>
 									<#assign lateness>
-										<@fmt.p enhancedAssignment.assignment.workingDaysLateIfSubmittedNow(member.universityId, member.userId) "working day" /> overdue,
+										<@fmt.p enhancedAssignment.assignment.workingDaysLateIfSubmittedNow(member.userId) "working day" /> overdue,
 										${durationFormatter(enhancedAssignment.submissionDeadline)} after ${context}
 										(<@fmt.date date=enhancedAssignment.submissionDeadline capitalise=false shortMonth=true stripHtml=true />)
 									</#assign>
