@@ -336,7 +336,7 @@ class TurnitinLtiService extends Logging with DisposableBean with InitializingBe
 				Try(http.when(_==expectedStatusCode.get)(transform(req))) match {
 					case Success(response) => response
 					case Failure(StatusCode(code, contents)) =>
-						logger.warn(s"Not expected http status code")
+						logger.warn(s"Not expected http status code - $code")
 						new TurnitinLtiResponse(false, statusMessage = Some("Unexpected HTTP status code"), responseCode = Some(code))
 					case _ =>
 						new TurnitinLtiResponse(false, statusMessage = Some("Unexpected HTTP status code"))
@@ -366,7 +366,7 @@ class TurnitinLtiService extends Logging with DisposableBean with InitializingBe
 				Try(http.when(_==expectedStatusCode.get)(transform(req))) match {
 					case Success(response) => response
 					case Failure(StatusCode(code, contents)) =>
-						logger.warn(s"Not expected http status code")
+						logger.warn(s"Not expected http status code - $code")
 						new TurnitinLtiResponse(false, statusMessage = Some("Unexpected HTTP status code"), responseCode = Some(code))
 					case _ =>
 						new TurnitinLtiResponse(false, statusMessage = Some("Unexpected HTTP status code"))

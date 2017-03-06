@@ -33,8 +33,8 @@
 					<span class="label no-extension">No extension</span>
 				</#if>
 			</dt>
-			<dd style="display: none;" class="table-content-container" data-contentid="${assignment.id}__${graph.user.userId}">
-				<div id="content-${assignment.id}_${graph.user.userId}" class="content-container" data-contentid="${assignment.id}__${graph.user.userId}">
+			<dd style="display: none;" class="table-content-container" data-contentid="${assignment.id}_${graph.user.userId}">
+				<div id="content-${assignment.id}_${graph.user.userId}" class="content-container" data-contentid="${assignment.id}_${graph.user.userId}">
 					<p>No extension data is currently available.</p>
 				</div>
 			</dd>

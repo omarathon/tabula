@@ -254,8 +254,11 @@ abstract class UploadFeedbackCommand[A](val module: Module, val assignment: Assi
 			}
 
 			if (items != null) {
-				for (item <- items.asScala if item.file != null) {
-					item.file.onBind(result)
+				for (item <- items.asScala) {
+					if (item.file != null) item.file.onBind(result)
+					if (item.student == null) {
+						item.student = Option(userLookup.getUserByWarwickUniId(item.uniNumber))
+					}
 				}
 			}
 		}

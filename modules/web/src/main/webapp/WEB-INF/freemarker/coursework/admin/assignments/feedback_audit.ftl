@@ -7,7 +7,7 @@
 		${assignment.name} (${assignment.module.code?upper_case})
 	</h5>
 
-	<h4>Student - ${student.fullName} (${student.warwickId}) <#if student.warwickId??><@pl.profile_link student.warwickId /><#else><@pl.profile_link student.userId /></#if></h4>
+	<h4>Student - ${student.fullName} (${student.warwickId!student.userId}) <#if student.warwickId??><@pl.profile_link student.warwickId /><#else><@pl.profile_link student.userId /></#if></h4>
 	<#if auditData.submission??>
 		<#assign submission=auditData.submission />
 		<#include "feedback/_submission_summary.ftl">

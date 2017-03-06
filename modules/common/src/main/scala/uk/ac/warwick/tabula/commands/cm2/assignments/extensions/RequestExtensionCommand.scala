@@ -19,7 +19,7 @@ import uk.ac.warwick.tabula.services.{AutowiringRelationshipServiceComponent, Re
 import uk.ac.warwick.tabula.validators.WithinYears
 import uk.ac.warwick.tabula.system.permissions.{PermissionsChecking, PermissionsCheckingMethods, RequiresPermissionsChecking}
 import uk.ac.warwick.tabula.JavaImports._
-import uk.ac.warwick.tabula.data.model.forms.ExtensionState.MoreInformationReceived
+import uk.ac.warwick.tabula.data.model.forms.ExtensionState.{MoreInformationReceived, Unreviewed}
 
 import scala.collection.mutable
 
@@ -75,6 +75,8 @@ class RequestExtensionCommandInternal(val assignment:Assignment, val submitter: 
 
 		if (extension.state == ExtensionState.MoreInformationRequired) {
 			extension._state = MoreInformationReceived
+		} else {
+			extension._state = Unreviewed
 		}
 
 		save(extension)
