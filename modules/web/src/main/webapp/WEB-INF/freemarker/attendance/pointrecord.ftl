@@ -49,7 +49,7 @@
 
 	<div class="recordCheckpointForm">
 
-		<@attendance_macros.id7AttendanceButtons />
+		<@attendance_macros.attendanceButtons />
 
 		<div class="fix-area">
 			<div class="fix-header pad-when-fixed">
@@ -128,7 +128,7 @@
 										<#assign students = command.checkpointMap?keys?sort_by("lastName") />
 										<a class="btn btn-default use-tooltip attendance-note bulk-attendance-note"
 										   title="Add an attendance note for all students"
-										   href="<@routes.attendance.bulkNoteEdit academicYear.startYear?c command.templatePoint students />">
+										   href="<@routes.attendance.bulkNoteEdit academicYear command.templatePoint students />">
 											<i class="fa fa-pencil-square-o"></i>
 										</a>
 									</#if>
@@ -199,24 +199,24 @@
 											<#if mapGet(mapGet(command.attendanceNoteMap, student), point)??>
 												<#assign note = mapGet(mapGet(command.attendanceNoteMap, student), point) />
 												<#if note.hasContent>
-													<a id="attendanceNote-${student.universityId}-${point.id}" class="btn btn-default use-tooltip attendance-note edit" title="Edit attendance note" href="<@routes.attendance.noteEdit academicYear.startYear?c student point />?dt=${.now?string('iso')}">
+													<a id="attendanceNote-${student.universityId}-${point.id}" class="btn btn-default use-tooltip attendance-note edit" title="Edit attendance note" href="<@routes.attendance.noteEdit academicYear student point />?dt=${.now?string('iso')}">
 														<i class="fa fa-pencil-square-o attendance-note-icon"></i>
 													</a>
 												<#else>
-													<a id="attendanceNote-${student.universityId}-${point.id}" class="btn btn-default use-tooltip attendance-note" title="Add attendance note" href="<@routes.attendance.noteEdit academicYear.startYear?c student point />">
+													<a id="attendanceNote-${student.universityId}-${point.id}" class="btn btn-default use-tooltip attendance-note" title="Add attendance note" href="<@routes.attendance.noteEdit academicYear student point />">
 														<i class="fa fa-pencil-square-o attendance-note-icon"></i>
 													</a>
 												</#if>
 											<#else>
-												<a id="attendanceNote-${student.universityId}-${point.id}" class="btn btn-default use-tooltip attendance-note" title="Add attendance note" href="<@routes.attendance.noteEdit academicYear.startYear?c student point />">
+												<a id="attendanceNote-${student.universityId}-${point.id}" class="btn btn-default use-tooltip attendance-note" title="Add attendance note" href="<@routes.attendance.noteEdit academicYear student point />">
 													<i class="fa fa-pencil-square-o attendance-note-icon"></i>
 												</a>
 											</#if>
 
 											<#if point.pointType.dbValue == "meeting">
-												<a class="meetings" title="Meetings with this student" href="<@routes.attendance.profileMeetings student academicYear.startYear?c point />"><i class="icon-info-sign fa fa-fw"></i></a>
+												<a class="meetings" title="Meetings with this student" href="<@routes.attendance.profileMeetings student academicYear point />"><i class="fa fa-fw fa-info-circle"></i></a>
 											<#elseif point.pointType.dbValue == "smallGroup">
-												<a class="small-groups" title="Small group teaching events for this student" href="<@routes.attendance.profileGroups student academicYear.startYear?c point />"><i class="icon-info-sign fa fa-fw"></i></a>
+												<a class="small-groups" title="Small group teaching events for this student" href="<@routes.attendance.profileGroups student academicYear point />"><i class="fa fa-fw fa-info-circle"></i></a>
 											<#else>
 												<i class="fa fa-fw"></i>
 											</#if>

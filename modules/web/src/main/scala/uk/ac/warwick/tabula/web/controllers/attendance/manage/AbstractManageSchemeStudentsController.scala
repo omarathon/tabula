@@ -79,8 +79,7 @@ abstract class AbstractManageSchemeStudentsController extends AttendanceControll
 			"SITSInFlux" -> scheme.academicYear.isSITSInFlux(DateTime.now),
 			"returnTo" -> getReturnTo(Routes.Manage.departmentForYear(scheme.department, scheme.academicYear))
 		).crumbs(
-				Breadcrumbs.Manage.Home,
-				Breadcrumbs.Manage.Department(scheme.department),
+				Breadcrumbs.Manage.HomeForYear(scheme.academicYear),
 				Breadcrumbs.Manage.DepartmentForYear(scheme.department, scheme.academicYear)
 			)
 	}
@@ -126,8 +125,7 @@ abstract class AbstractManageSchemeStudentsController extends AttendanceControll
 			"ManageSchemeMappingParameters" -> ManageSchemeMappingParameters,
 			"returnTo" -> getReturnTo("")
 		).crumbs(
-				Breadcrumbs.Manage.Home,
-				Breadcrumbs.Manage.Department(scheme.department),
+				Breadcrumbs.Manage.HomeForYear(scheme.academicYear),
 				Breadcrumbs.Manage.DepartmentForYear(scheme.department, scheme.academicYear)
 			)
 	}

@@ -14,7 +14,7 @@
 <#else>
 	<#assign returnTo><@routes.attendance.agentHomeForYear relationshipType academicYear /></#assign>
 
-	<@attendance_macros.id7ScrollablePointsTable
+	<@attendance_macros.scrollablePointsTable
 		command=command
 		filterResult=studentAttendance
 		visiblePeriods=visiblePeriods
@@ -48,12 +48,12 @@
 				Record
 			</@fmt.permission_button>
 		</td>
-	</@attendance_macros.id7ScrollablePointsTable>
+	</@attendance_macros.scrollablePointsTable>
 
 	<div class="monitoring-points">
 		<#list attendance_variables.monitoringPointTermNames as term>
 			<#if groupedPoints[term]??>
-				<@attendance_macros.id7GroupedPointsBySection groupedPoints term; groupedPoint>
+				<@attendance_macros.groupedPointsBySection groupedPoints term; groupedPoint>
 					<div class="col-md-12">
 						<div class="pull-right">
 							<#assign record_url><@routes.attendance.agentRecordPoints relationshipType academicYear groupedPoint.templatePoint returnTo/></#assign>
@@ -83,13 +83,13 @@
 							<@fmt.p groupedPoint.schemes?size "scheme" />
 						</a>
 					</div>
-				</@attendance_macros.id7GroupedPointsBySection>
+				</@attendance_macros.groupedPointsBySection>
 			</#if>
 		</#list>
 
 		<#list monthNames as month>
 			<#if groupedPoints[month]??>
-				<@attendance_macros.id7GroupedPointsBySection groupedPoints month; groupedPoint>
+				<@attendance_macros.groupedPointsBySection groupedPoints month; groupedPoint>
 					<div class="col-md-12">
 						<div class="pull-right">
 							<#assign record_url><@routes.attendance.agentRecordPoints relationshipType academicYear groupedPoint.templatePoint returnTo/></#assign>
@@ -108,7 +108,7 @@
 							<@fmt.p groupedPoint.schemes?size "scheme" />
 						</a>
 					</div>
-				</@attendance_macros.id7GroupedPointsBySection>
+				</@attendance_macros.groupedPointsBySection>
 			</#if>
 		</#list>
 

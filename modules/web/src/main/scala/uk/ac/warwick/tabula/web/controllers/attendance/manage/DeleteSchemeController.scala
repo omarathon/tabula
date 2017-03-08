@@ -27,8 +27,7 @@ class DeleteSchemeController extends AttendanceController {
 	def form(@ModelAttribute("command") cmd: DeleteSchemeCommand): Mav = {
 		Mav("attendance/manage/delete")
 			.crumbs(
-				Breadcrumbs.Manage.Home,
-				Breadcrumbs.Manage.Department(cmd.scheme.department),
+				Breadcrumbs.Manage.HomeForYear(cmd.scheme.academicYear),
 				Breadcrumbs.Manage.DepartmentForYear(cmd.scheme.department, cmd.scheme.academicYear)
 			)
 	}

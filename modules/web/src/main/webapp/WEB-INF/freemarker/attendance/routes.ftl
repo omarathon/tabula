@@ -27,9 +27,9 @@
 
 <#macro manageHome><@_u page="/manage"/></#macro>
 <#macro manageHomeYears department><@_u page="/manage/${department.code}"/></#macro>
-<#macro manageHomeForYear department academicYearString><@_u page="/manage/${department.code}/${academicYearString}"/></#macro>
+<#macro manageHomeForYear department academicYear><@_u page="/manage/${department.code}/${academicYear.startYear?c}"/></#macro>
 
-<#macro manageNewScheme department academicYearString><@_u page="/manage/${department.code}/${academicYearString}/new"/></#macro>
+<#macro manageNewScheme department academicYear><@_u page="/manage/${department.code}/${academicYear.startYear?c}/new"/></#macro>
 <#macro manageAddStudents scheme>
 	<@_u page="/manage/${scheme.department.code}/${scheme.academicYear.startYear?c}/new/${scheme.id}/students"/>
 </#macro>
@@ -40,39 +40,39 @@
 	<@_u page="/manage/${scheme.department.code}/${scheme.academicYear.startYear?c}/new/${scheme.id}/points"/>
 </#macro>
 
-<#macro manageEditScheme department academicYearString scheme><@_u page="/manage/${department.code}/${academicYearString}/${scheme.id}/edit"/></#macro>
-<#macro manageEditSchemeStudents department academicYearString scheme><@_u page="/manage/${department.code}/${academicYearString}/${scheme.id}/edit/students"/></#macro>
-<#macro manageEditSchemePoints department academicYearString scheme><@_u page="/manage/${department.code}/${academicYearString}/${scheme.id}/edit/points"/></#macro>
-<#macro manageDeleteScheme department academicYearString scheme><@_u page="/manage/${department.code}/${academicYearString}/${scheme.id}/delete"/></#macro>
+<#macro manageEditScheme department academicYear scheme><@_u page="/manage/${department.code}/${academicYear.startYear?c}/${scheme.id}/edit"/></#macro>
+<#macro manageEditSchemeStudents department academicYear scheme><@_u page="/manage/${department.code}/${academicYear.startYear?c}/${scheme.id}/edit/students"/></#macro>
+<#macro manageEditSchemePoints department academicYear scheme><@_u page="/manage/${department.code}/${academicYear.startYear?c}/${scheme.id}/edit/points"/></#macro>
+<#macro manageDeleteScheme department academicYear scheme><@_u page="/manage/${department.code}/${academicYear.startYear?c}/${scheme.id}/delete"/></#macro>
 
 <#macro manageSelectStudents scheme>
 	<@_u page="/manage/${scheme.department.code}/${scheme.academicYear.startYear?c}/${scheme.id}/students/select"/>
 </#macro>
 
-<#macro manageAddPoints department academicYearString><@_u page="/manage/${department.code}/${academicYearString}/addpoints"/></#macro>
-<#macro manageAddPointsBlank department academicYearString><@_u page="/manage/${department.code}/${academicYearString}/addpoints/new"/></#macro>
-<#macro manageAddPointsCopy department academicYearString><@_u page="/manage/${department.code}/${academicYearString}/addpoints/copy"/></#macro>
-<#macro manageAddPointsTemplate department academicYearString><@_u page="/manage/${department.code}/${academicYearString}/addpoints/template"/></#macro>
+<#macro manageAddPoints department academicYear><@_u page="/manage/${department.code}/${academicYear.startYear?c}/addpoints"/></#macro>
+<#macro manageAddPointsBlank department academicYear><@_u page="/manage/${department.code}/${academicYear.startYear?c}/addpoints/new"/></#macro>
+<#macro manageAddPointsCopy department academicYear><@_u page="/manage/${department.code}/${academicYear.startYear?c}/addpoints/copy"/></#macro>
+<#macro manageAddPointsTemplate department academicYear><@_u page="/manage/${department.code}/${academicYear.startYear?c}/addpoints/template"/></#macro>
 
-<#macro manageEditPoints department academicYearString schemesParam="">
+<#macro manageEditPoints department academicYear schemesParam="">
 	<#if schemesParam?has_content><#local schemesParam = "?" + schemesParam /></#if>
-	<@_u page="/manage/${department.code}/${academicYearString}/editpoints${schemesParam}"/></#macro>
+	<@_u page="/manage/${department.code}/${academicYear.startYear?c}/editpoints${schemesParam}"/></#macro>
 <#macro manageEditPoint point filterQuery returnTo><@_u page="/manage/${point.scheme.department.code}/${point.scheme.academicYear.startYear?c}/editpoints/${point.id}/edit?returnTo=${returnTo}&${filterQuery}"/></#macro>
 <#macro manageDeletePoint point filterQuery returnTo><@_u page="/manage/${point.scheme.department.code}/${point.scheme.academicYear.startYear?c}/editpoints/${point.id}/delete?returnTo=${returnTo}&${filterQuery}"/></#macro>
 
-<#macro noteView academicYearString student point returnTo=""><@_u page="/note/${academicYearString}/${student.universityId}/${point.id}/?returnTo=${returnTo}" /></#macro>
+<#macro noteView academicYear student point returnTo=""><@_u page="/note/${academicYear.startYear?c}/${student.universityId}/${point.id}/?returnTo=${returnTo}" /></#macro>
 <#macro groupsNoteView student occurrence returnTo=""><@_u context="/groups" page="/note/${student.universityId}/${occurrence.id}/?returnTo=${returnTo}" /></#macro>
-<#macro noteEdit academicYearString student point><@_u page="/note/${academicYearString}/${student.universityId}/${point.id}/edit"/></#macro>
-<#macro bulkNoteEdit academicYearString point students><@_u page="/note/${academicYearString}/bulk/${point.id}/edit"/><#list students as student><#if student_index ==0>?<#else>&</#if>students=${student.universityId}</#list></#macro>
+<#macro noteEdit academicYear student point><@_u page="/note/${academicYear.startYear?c}/${student.universityId}/${point.id}/edit"/></#macro>
+<#macro bulkNoteEdit academicYear point students><@_u page="/note/${academicYear.startYear?c}/bulk/${point.id}/edit"/><#list students as student><#if student_index ==0>?<#else>&</#if>students=${student.universityId}</#list></#macro>
 
-<#macro profile profile><@_u page="/view/${profile.universityId}" context="/profiles"/></#macro>
+<#macro profile member><@_u page="/view/${member.universityId}" context="/profiles"/></#macro>
 <#macro profileHome><@_u page="/profile"/></#macro>
 <#macro profileRecord student academicYear returnTo="">
 	<#local returnTo><#if returnTo?has_content>?returnTo=${returnTo}</#if></#local>
 	<@_u page="/profile/${student.universityId}/${academicYear.startYear?c}/record${returnTo}"/>
 </#macro>
-<#macro profileMeetings student academicYearString point><@_u page="/profile/${student.universityId}/${academicYearString}/${point.id}/meetings"/></#macro>
-<#macro profileGroups student academicYearString point><@_u page="/profile/${student.universityId}/${academicYearString}/${point.id}/groups"/></#macro>
+<#macro profileMeetings student academicYear point><@_u page="/profile/${student.universityId}/${academicYear.startYear?c}/${point.id}/meetings"/></#macro>
+<#macro profileGroups student academicYear point><@_u page="/profile/${student.universityId}/${academicYear.startYear?c}/${point.id}/groups"/></#macro>
 
 <#macro viewHome><@_u page="/view"/></#macro>
 <#macro viewHomeYears department><@_u page="/view/${department.code}"/></#macro>

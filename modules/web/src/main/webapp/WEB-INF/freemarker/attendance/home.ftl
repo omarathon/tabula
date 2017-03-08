@@ -42,7 +42,7 @@
 		<ul class="unstyled">
 			<#list managePermissions as department>
 				<li>
-					<h3><a id="manage-department-${department.code}" href="<@routes.attendance.manageHomeForYear department academicYear.startYear?c/>">${department.name}</a></h3>
+					<h3><a id="manage-department-${department.code}" href="<@routes.attendance.manageHomeForYear department academicYear />">${department.name}</a></h3>
 				</li>
 			</#list>
 		</ul>
@@ -61,7 +61,7 @@
 			   data-hash="${introHash("no-route-departments-intro", "anywhere")}"
 			   data-placement="bottom"
 			   data-html="true"
-			   data-content="${introText}"><i class="icon-question-sign"></i></a>
+			   data-content="${introText}"><i class="fa fa-question-circle"></i></a>
 		</#if>
 	</#if>
 <#else>

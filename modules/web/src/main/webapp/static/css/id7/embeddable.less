@@ -367,6 +367,10 @@ summary {
 
 		&:nth-of-type(odd) {
 			background-color: @zebra-pale;
+			.well {
+				background-color: @zebra-dark;
+				border-color: darken(@zebra-dark, 7%);;
+			}
 		}
 	}
 	:nth-of-type(odd) .item-info {

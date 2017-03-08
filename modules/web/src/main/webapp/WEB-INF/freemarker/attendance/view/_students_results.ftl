@@ -29,7 +29,7 @@
 				<p class="not-relative">Results ${startIndex + 1} - ${endIndex} of ${filterResult.totalResults}</p>
 			</div>
 
-			<@attendance_macros.id7ScrollablePointsTable
+			<@attendance_macros.scrollablePointsTable
 				command=filterCommand
 				filterResult=filterResult
 				visiblePeriods=visiblePeriods
@@ -62,7 +62,7 @@
 						Record
 					</@fmt.permission_button>
 				</td>
-			</@attendance_macros.id7ScrollablePointsTable>
+			</@attendance_macros.scrollablePointsTable>
 
 			<#if !student_table_script_included??>
 				<script type="text/javascript">

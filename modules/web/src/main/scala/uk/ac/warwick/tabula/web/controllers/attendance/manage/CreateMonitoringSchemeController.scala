@@ -28,8 +28,7 @@ class CreateMonitoringSchemeController extends AttendanceController {
 	def form(@PathVariable department: Department, @PathVariable academicYear: AcademicYear): Mav = {
 		Mav("attendance/manage/new", "ManageSchemeMappingParameters" -> ManageSchemeMappingParameters)
 			.crumbs(
-				Breadcrumbs.Manage.Home,
-				Breadcrumbs.Manage.Department(department),
+				Breadcrumbs.Manage.HomeForYear(academicYear),
 				Breadcrumbs.Manage.DepartmentForYear(department, academicYear)
 			)
 	}

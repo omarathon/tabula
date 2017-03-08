@@ -221,6 +221,7 @@ class FixturesCommand extends Command[Unit] with Public with Daoisms {
 						join entityreference on target_id = entityreference.id
 						where scheduledtrigger.trigger_type = 'AssignmentClosed'
 						and entityreference.entity_id not in (select id from assignment)
+						and scheduledtrigger.completed_date is null
 					""").list.size() == 0)
 			}
 		}

@@ -1,20 +1,20 @@
 package uk.ac.warwick.tabula.web.controllers.attendance.manage
 
-import org.springframework.stereotype.Controller
-import org.springframework.web.bind.annotation.{ModelAttribute, PathVariable, RequestMapping, RequestParam}
-import uk.ac.warwick.tabula.data.model.{Department, MeetingFormat}
-import uk.ac.warwick.tabula.web.controllers.attendance.AttendanceController
-import uk.ac.warwick.tabula.AcademicYear
-import uk.ac.warwick.tabula.data.model.attendance.{AttendanceMonitoringPoint, AttendanceMonitoringScheme}
-import uk.ac.warwick.tabula.commands.{Appliable, SelfValidating}
-import uk.ac.warwick.tabula.commands.attendance.manage.CreateAttendancePointCommand
 import javax.validation.Valid
 
+import org.springframework.stereotype.Controller
 import org.springframework.validation.Errors
+import org.springframework.web.bind.annotation.{ModelAttribute, PathVariable, RequestMapping, RequestParam}
+import uk.ac.warwick.tabula.AcademicYear
 import uk.ac.warwick.tabula.JavaImports._
+import uk.ac.warwick.tabula.commands.attendance.manage.CreateAttendancePointCommand
+import uk.ac.warwick.tabula.commands.{Appliable, SelfValidating}
+import uk.ac.warwick.tabula.data.model.attendance.{AttendanceMonitoringPoint, AttendanceMonitoringScheme}
+import uk.ac.warwick.tabula.data.model.{Department, MeetingFormat}
 import uk.ac.warwick.tabula.web.Mav
+import uk.ac.warwick.tabula.web.controllers.attendance.AttendanceController
 
-import collection.JavaConverters._
+import scala.collection.JavaConverters._
 
 @Controller
 @RequestMapping(Array("/attendance/manage/{department}/{academicYear}/addpoints/new"))
@@ -28,7 +28,7 @@ class CreateAttendancePointController extends AttendanceController {
 		@PathVariable academicYear: AcademicYear,
 		@RequestParam schemes: JList[AttendanceMonitoringScheme]
 	) =
-		CreateAttendancePointCommand(mandatory(department), mandatory(academicYear), schemes.asScala.toSeq)
+		CreateAttendancePointCommand(mandatory(department), mandatory(academicYear), schemes.asScala)
 
 	@RequestMapping(method = Array(POST))
 	def form(
@@ -40,8 +40,7 @@ class CreateAttendancePointController extends AttendanceController {
 			"allMeetingFormats" -> MeetingFormat.members,
 			"returnTo" -> getReturnTo("")
 		).crumbs(
-			Breadcrumbs.Manage.Home,
-			Breadcrumbs.Manage.Department(department),
+			Breadcrumbs.Manage.HomeForYear(academicYear),
 			Breadcrumbs.Manage.DepartmentForYear(department, academicYear)
 		)
 	}

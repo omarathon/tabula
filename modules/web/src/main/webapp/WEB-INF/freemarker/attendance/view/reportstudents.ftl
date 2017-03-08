@@ -27,7 +27,7 @@
 		</#if>
 		<p>Upload missed points in the ${command.period} monitoring period for the following students:</p>
 
-		<table class="table table-bordered table-striped table-condensed">
+		<table class="table table-striped table-condensed">
 			<thead>
 				<tr>
 					<th>First name</th>

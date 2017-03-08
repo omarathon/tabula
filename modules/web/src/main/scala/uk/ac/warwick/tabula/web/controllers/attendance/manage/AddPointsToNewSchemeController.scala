@@ -27,8 +27,7 @@ class AddPointsToNewSchemeController extends AbstractManageSchemePointsControlle
 			"newPoints" -> Option(points).getOrElse(0),
 			"actionCompleted" -> actionCompleted
 		).crumbs(
-			Breadcrumbs.Manage.Home,
-			Breadcrumbs.Manage.Department(scheme.department),
+			Breadcrumbs.Manage.HomeForYear(scheme.academicYear),
 			Breadcrumbs.Manage.DepartmentForYear(scheme.department, scheme.academicYear)
 		)
 	}
