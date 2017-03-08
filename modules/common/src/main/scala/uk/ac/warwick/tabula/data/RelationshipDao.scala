@@ -398,7 +398,7 @@ class RelationshipDaoImpl extends RelationshipDao with Daoisms with Logging {
 			.add( Restrictions.or(
 			Restrictions.isNull("endDate"),
 			Restrictions.ge("endDate", new DateTime())
-		)).project[Number](rowCount()).uniqueResult.get.intValue() > 0
+		)).count.intValue > 0
 
 	def getStudentAssociationData(restrictions: Iterable[ScalaRestriction]): Seq[StudentAssociationData] = {
 		val criteria = session.newCriteria[StudentMember]

@@ -11,6 +11,14 @@ trait SmallGroupSetToJsonConverter {
 
 		val basicInfo = Map(
 			"id" -> set.id,
+			"module" -> Map(
+				"code" -> set.module.code.toUpperCase,
+				"name" -> set.module.name,
+				"adminDepartment" -> Map(
+					"code" -> set.module.adminDepartment.code.toUpperCase,
+					"name" -> set.module.adminDepartment.name
+				)
+			),
 			"name" -> set.name,
 			"archived" -> set.archived,
 			"format" -> set.format.code,

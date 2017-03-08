@@ -77,8 +77,7 @@ class ModuleDaoImpl extends ModuleDao with Daoisms {
 	def hasAssignments(module: Module): Boolean = {
 		session.newCriteria[Assignment]
 			.add(is("module", module))
-			.project[Number](Projections.rowCount())
-			.uniqueResult.get.intValue() > 0
+			.count.intValue > 0
 	}
 
 	def findModulesNamedLike(query: String): Seq[Module] = {
