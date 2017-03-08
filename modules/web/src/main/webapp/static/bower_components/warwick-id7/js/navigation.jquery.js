@@ -195,7 +195,7 @@
           var wasWrapped = $navbar.hasClass('navbar-wrapped');
 
           var $item = $navbar.find('> .nav > li:last');
-          var isWrapped = $item.position().top > 0;
+          var isWrapped = $item.length && $item.position().top > 0;
 
           if (isWrapped != wasWrapped) {
             $navbar.addClass('important-no-transition');
@@ -334,5 +334,19 @@
 
   $(function () {
     $('.id7-navigation').id7Navigation();
+
+    // jump to a tab if specified
+    var url = document.location.toString();
+    if (url.match('#') && url.split('#')[1].length) {
+      var $tabLink = $('.nav-tabs a[href="#' + url.split('#')[1] + '"]');
+      if ($tabLink) {
+        $tabLink.tab('show')
+      }
+    }
+
+    // Change hash for page-reload
+    $('.nav-tabs a').on('shown.bs.tab', function (e) {
+      window.location.hash = e.target.hash;
+    });
   });
 })(jQuery);

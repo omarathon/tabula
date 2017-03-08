@@ -13,3 +13,4 @@
     return ua.indexOf('Safari/') >= 0 && ua.indexOf('Chrome/') == -1;
   });
 })();
+
