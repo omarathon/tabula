@@ -73,80 +73,36 @@
 						</span>
 					</div>
 
-					<div class="col-md-1">
+					<div class="col-md-2">
 						<#if setItem.isStudentSignUp()>
 							<#if setItem.set.openForSignups>
-								<span class="use-tooltip" title="These groups are open for self sign-up"><i class="fa fa-unlock-alt"></i></span>
+								<span class="use-tooltip" title="These groups are open for self sign-up"><i class="fa fa-unlock-alt"></i> Open for self-signup</span>
 							<#else>
-								<span class="use-tooltip" title="These groups are closed for self sign-up"><i class="fa fa-lock"></i></span>
+								<span class="use-tooltip" title="These groups are closed for self sign-up"><i class="fa fa-lock"></i> Closed for self-signup</span>
 							</#if>
 						<#elseif setItem.isLinked()>
-							<span class="use-tooltip" title="These group allocations may be linked to other modules"><i class="fa fa-link"></i></span>
+							<span class="use-tooltip" title="These group allocations may be linked to other modules">Linked</span>
 						<#else>
-							<span class="use-tooltip" title="These groups are manually allocated"><i class="fa fa-random"></i></span>
+							<span class="use-tooltip" title="These groups are manually allocated">Manually allocated</span>
 						</#if>
 
 						<#if set.archived>
-							<span class="use-tooltip" title="These groups have been archived"><i class="fa fa-folder"></i></span>
+							<span class="use-tooltip" title="These groups have been archived">Archived</span>
 						</#if>
 					</div>
 
-					<#if !set.archived>
-						<div class="col-md-2">
+
+					<div class="col-md-2">
+						<#if !set.archived>
 							<#local progressTooltip><@spring.message code=setItem.progress.messageCode /></#local>
 
 							<dl class="progress use-tooltip" title="${progressTooltip}" style="margin: 0; border-bottom: 0;" data-container="body">
 								<dt class="progress-bar progress-bar-${setItem.progress.t}" style="width: <#if setItem.progress.percentage == 0>10<#else>${setItem.progress.percentage}</#if>%;"></dt>
 							</dl>
-						</div>
+						</#if>
+					</div>
 
-						<div class="col-md-3 next-action">
-							<#if setItem.nextStage??>
-								<#local nextStageUrl="" />
-								<#local nextStageModal="" />
-								<#if setItem.nextStage.actionCode == "workflow.smallGroupSet.AddGroups.action">
-									<#local nextStageUrl><@routes.groups.editsetgroups set /></#local>
-								<#elseif setItem.nextStage.actionCode == "workflow.smallGroupSet.AddStudents.action">
-									<#local nextStageUrl><@routes.groups.editsetstudents set /></#local>
-								<#elseif setItem.nextStage.actionCode == "workflow.smallGroupSet.AddEvents.action">
-									<#local nextStageUrl><@routes.groups.editsetevents set /></#local>
-								<#elseif setItem.nextStage.actionCode == "workflow.smallGroupSet.AllocateStudents.action">
-									<#local nextStageUrl><@routes.groups.editsetallocate set /></#local>
-								<#elseif setItem.nextStage.actionCode == "workflow.smallGroupSet.OpenSignUp.action">
-									<#local nextStageUrl><@routes.groups.openset set /></#local>
-									<#local nextStageModal = "#modal-container" />
-								<#elseif setItem.nextStage.actionCode == "workflow.smallGroupSet.CloseSignUp.action">
-									<#local nextStageUrl><@routes.groups.closeset set /></#local>
-									<#local nextStageModal = "#modal-container" />
-								<#elseif setItem.nextStage.actionCode == "workflow.smallGroupSet.SendNotifications.action">
-									<#local nextStageUrl><@routes.groups.releaseset set /></#local>
-									<#local nextStageModal = "#modal-container" />
-								</#if>
-
-								<#if nextStageUrl?has_content && can.do('SmallGroups.Update', set)>
-									<a href="${nextStageUrl}"<#if nextStageModal?has_content> data-toggle="modal" data-target="${nextStageModal}" data-container="body"</#if>><#compress>
-										<@spring.message code=setItem.nextStage.actionCode />
-									</#compress></a>
-								<#else>
-									<@spring.message code=setItem.nextStage.actionCode />
-								</#if>
-							<#elseif setItem.progress.percentage == 100>
-								Complete
-							</#if>
-
-							<#local notInMembershipCount = set.studentsNotInMembershipCount />
-
-							<#if notInMembershipCount gt 0>
-								<#local tooltip><@fmt.p notInMembershipCount "student has" "students have" /> deregistered</#local>
-
-								<a href="<@routes.groups.deregisteredStudents set />" class="use-tooltip warning" style="display: inline;" title="${tooltip}"><i class="fa fa-exclamation-triangle warning"></i></a>
-							</#if>
-						</div>
-					<#else>
-						<div class="col-md-5"></div>
-					</#if>
-
-					<div class="col-md-2">
+					<div class="col-md-4">
 						<div class="pull-right">
 							<span>
 								<@dropdown_menu "Edit" "btn-xs">
@@ -320,7 +276,51 @@
 								</@dropdown_menu>
 							</span>
 						</div>
+
+						<#if !set.archived>
+							<#if setItem.nextStage??>
+								<#local nextStageUrl="" />
+								<#local nextStageModal="" />
+								<#if setItem.nextStage.actionCode == "workflow.smallGroupSet.AddGroups.action">
+									<#local nextStageUrl><@routes.groups.editsetgroups set /></#local>
+								<#elseif setItem.nextStage.actionCode == "workflow.smallGroupSet.AddStudents.action">
+									<#local nextStageUrl><@routes.groups.editsetstudents set /></#local>
+								<#elseif setItem.nextStage.actionCode == "workflow.smallGroupSet.AddEvents.action">
+									<#local nextStageUrl><@routes.groups.editsetevents set /></#local>
+								<#elseif setItem.nextStage.actionCode == "workflow.smallGroupSet.AllocateStudents.action">
+									<#local nextStageUrl><@routes.groups.editsetallocate set /></#local>
+								<#elseif setItem.nextStage.actionCode == "workflow.smallGroupSet.OpenSignUp.action">
+									<#local nextStageUrl><@routes.groups.openset set /></#local>
+									<#local nextStageModal = "#modal-container" />
+								<#elseif setItem.nextStage.actionCode == "workflow.smallGroupSet.CloseSignUp.action">
+									<#local nextStageUrl><@routes.groups.closeset set /></#local>
+									<#local nextStageModal = "#modal-container" />
+								<#elseif setItem.nextStage.actionCode == "workflow.smallGroupSet.SendNotifications.action">
+									<#local nextStageUrl><@routes.groups.releaseset set /></#local>
+									<#local nextStageModal = "#modal-container" />
+								</#if>
+
+								<#if nextStageUrl?has_content && can.do('SmallGroups.Update', set)>
+									<a href="${nextStageUrl}"<#if nextStageModal?has_content> data-toggle="modal" data-target="${nextStageModal}" data-container="body"</#if>><#compress>
+										<@spring.message code=setItem.nextStage.actionCode />
+									</#compress></a>
+								<#else>
+									<@spring.message code=setItem.nextStage.actionCode />
+								</#if>
+							<#elseif setItem.progress.percentage == 100>
+								Complete
+							</#if>
+
+							<#local notInMembershipCount = set.studentsNotInMembershipCount />
+
+							<#if notInMembershipCount gt 0>
+								<#local tooltip><@fmt.p notInMembershipCount "student has" "students have" /> deregistered</#local>
+
+								<a href="<@routes.groups.deregisteredStudents set />" class="use-tooltip warning" style="display: inline;" title="${tooltip}"><i class="fa fa-exclamation-triangle warning"></i></a>
+							</#if>
+						</#if>
 					</div>
+
 				</div>
 
 				<div class="striped-section-contents">
