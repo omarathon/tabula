@@ -6,7 +6,7 @@
 <#macro alerts commandName scope users="" role="">
 	<#local bindingError><@f.errors path="${commandName}.*" /></#local>
 	<#if bindingError?has_content>
-		<p class="alert alert-error">
+		<p class="alert alert-danger">
 			<button type="button" class="close" data-dismiss="alert">&times;</button>
 			<#noescape>${bindingError}</#noescape>
 		</p>
