@@ -47,8 +47,8 @@ trait GetMemberEventsApi {
 		@RequestParam(required = false) end: LocalDate
 	): Mav = {
 		for (from <- Option(start); to <- Option(end)) {
-			command.from = from
-			command.to = to
+			command.from = from.toDateTimeAtStartOfDay.getMillis
+			command.to = to.toDateTimeAtStartOfDay.getMillis
 		}
 
 		if (errors.hasErrors) {

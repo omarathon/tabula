@@ -1,6 +1,6 @@
 package uk.ac.warwick.tabula.commands.timetables
 
-import org.joda.time.{Interval, LocalDate, LocalDateTime, LocalTime}
+import org.joda.time._
 import uk.ac.warwick.tabula.commands.timetables.ViewMemberEventsCommand.ReturnType
 import uk.ac.warwick.tabula.data.model.StudentMember
 import uk.ac.warwick.tabula.data.model.groups.DayOfWeek
@@ -45,8 +45,8 @@ class ViewMemberEventsCommandTest extends TestBase with Mockito {
 
 		val command = new ViewStudentEventsCommandInternal(testStudent, user) with CommandTestSupport
 
-		command.from =  new LocalDate
-		command.to = command.start.plusDays(2)
+		command.from = DateTime.now.getMillis
+		command.to = DateTime.now.plusDays(2).getMillis
 		command.studentTimetableEventSource.eventsFor(testStudent, user, TimetableEvent.Context.Student) returns Future.successful(EventList.fresh(timetableEvents))
 		command.scheduledMeetingEventSource.occurrencesFor(testStudent, user, TimetableEvent.Context.Student) returns Future.successful(EventOccurrenceList.fresh(meetingOccurrences))
 		command.eventOccurrenceService.fromTimetableEvent(any[TimetableEvent], any[Interval]) returns eventOccurences

@@ -1,22 +1,21 @@
 package uk.ac.warwick.tabula.commands.timetables
 
-import org.joda.time.{DateTime, Interval, LocalDate}
+import org.joda.time.Interval
 import uk.ac.warwick.tabula.JavaImports._
 import uk.ac.warwick.tabula.commands._
+import uk.ac.warwick.tabula.commands.timetables.DepartmentTimetablesCommand._
 import uk.ac.warwick.tabula.data.model._
 import uk.ac.warwick.tabula.permissions.Permissions
 import uk.ac.warwick.tabula.services._
-import uk.ac.warwick.tabula.services.timetables.TimetableFetchingService.{EventOccurrenceList, EventList}
+import uk.ac.warwick.tabula.services.timetables.TimetableFetchingService.{EventList, EventOccurrenceList}
 import uk.ac.warwick.tabula.services.timetables.{AutowiringTermBasedEventOccurrenceServiceComponent, EventOccurrenceServiceComponent}
 import uk.ac.warwick.tabula.system.permissions.{PermissionsChecking, PermissionsCheckingMethods, RequiresPermissionsChecking}
 import uk.ac.warwick.tabula.timetables.TimetableEventType
-import uk.ac.warwick.tabula.{ItemNotFoundException, AcademicYear, CurrentUser}
+import uk.ac.warwick.tabula.{AcademicYear, CurrentUser, ItemNotFoundException}
 
 import scala.collection.JavaConverters._
 import scala.collection.mutable
 import scala.util.{Failure, Success}
-
-import DepartmentTimetablesCommand._
 
 object DepartmentTimetablesCommand {
 	val RequiredPermission = Permissions.Module.ViewTimetable
@@ -127,8 +126,8 @@ class DepartmentTimetablesCommandInternal(
 		val studentCommands = studentMembers.map(student => student -> studentPersonalTimetableCommandFactory.apply(student))
 		val studentEvents = EventOccurrenceList.combine(studentCommands.map { case (student, cmd) =>
 			if (securityService.can(user, FilterStudentPermission, student)) {
-				cmd.from = start
-				cmd.to = end
+				cmd.from = from
+				cmd.to = to
 				cmd.apply().getOrElse(EventOccurrenceList.empty)
 			} else {
 				errors.append(s"You do not have permission to view the timetable of ${student.fullName.getOrElse("")} (${student.universityId})")
@@ -142,8 +141,8 @@ class DepartmentTimetablesCommandInternal(
 		val staffCommands = staffMembers.map(staffMember => staffMember -> staffPersonalTimetableCommandFactory.apply(staffMember))
 		val staffEvents = EventOccurrenceList.combine(staffCommands.map { case (staffMember, cmd) =>
 			if (securityService.can(user, FilterStaffPermission, staffMember)) {
-				cmd.from = start
-				cmd.to = end
+				cmd.from = from
+				cmd.to = to
 				cmd.apply().getOrElse(EventOccurrenceList.empty)
 			} else {
 				errors.append(s"You do not have permission to view the timetable of ${staffMember.fullName.getOrElse("")} (${staffMember.universityId})")
@@ -157,7 +156,7 @@ class DepartmentTimetablesCommandInternal(
 			if (eventTypes.asScala.isEmpty) occurrences
 			else occurrences.filter { o => eventTypes.contains(o.eventType) }
 
-		import uk.ac.warwick.tabula.helpers.DateTimeOrdering.orderedLocalDateTime
+		import uk.ac.warwick.tabula.helpers.DateTimeOrdering._
 		(filtered.map(_.sortBy(_.start)), errors)
 	}
 
@@ -189,7 +188,7 @@ trait DepartmentTimetablesCommandState {
 	def department: Department
 }
 
-trait DepartmentTimetablesCommandRequest extends PermissionsCheckingMethods {
+trait DepartmentTimetablesCommandRequest extends PermissionsCheckingMethods with TimetableEventsRequest {
 	self: DepartmentTimetablesCommandState with ProfileServiceComponent with RelationshipServiceComponent =>
 
 	var modules: JList[Module] = JArrayList()
@@ -206,11 +205,6 @@ trait DepartmentTimetablesCommandRequest extends PermissionsCheckingMethods {
 		case _ => None
 	}
 	var eventTypes: JList[TimetableEventType] = JArrayList()
-
-	var from: JLong = LocalDate.now.minusMonths(1).toDateTimeAtStartOfDay.getMillis
-	var to: JLong = LocalDate.now.plusMonths(1).toDateTimeAtStartOfDay.getMillis
-	def start: LocalDate = new DateTime(from * 1000).toLocalDate
-	def end: LocalDate = new DateTime(to * 1000).toLocalDate
 
 	private def modulesForDepartmentAndSubDepartments(department: Department): Seq[Module] =
 		(department.modules.asScala ++ department.children.asScala.flatMap { modulesForDepartmentAndSubDepartments }).sorted

@@ -145,8 +145,8 @@
 						var endToSend = new Date(end.getTime());
 						endToSend.setDate(endToSend.getDate() + 1);
 						return {
-							'from':startToSend.getTime()/1000,
-							'to':endToSend.getTime()/1000,
+							'from':startToSend.getTime(),
+							'to':endToSend.getTime(),
 							'cb':new Date().valueOf() // Break the IE cache
 						};
 					},
