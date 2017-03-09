@@ -2,14 +2,16 @@ package uk.ac.warwick.tabula.services
 
 import org.springframework.stereotype.Service
 import uk.ac.warwick.spring.Wire
-import uk.ac.warwick.tabula.CurrentUser
+import uk.ac.warwick.tabula.{AcademicYear, CurrentUser}
 import uk.ac.warwick.tabula.data.Transactions._
+import uk.ac.warwick.tabula.data.model.StudentCourseYearDetails.YearOfStudy
 import uk.ac.warwick.tabula.data.{AutowiringCourseDaoComponent, AutowiringRouteDaoComponent, CourseDaoComponent, RouteDaoComponent}
-import uk.ac.warwick.tabula.data.model.{RouteTeachingInformation, Department, Course, Route}
+import uk.ac.warwick.tabula.data.model._
 import uk.ac.warwick.tabula.helpers.StringUtils._
 import uk.ac.warwick.tabula.permissions.Permission
 import uk.ac.warwick.tabula.roles.RouteManagerRoleDefinition
 import uk.ac.warwick.tabula.services.permissions.{AutowiringPermissionsServiceComponent, PermissionsServiceComponent}
+
 import scala.collection.JavaConverters._
 import scala.reflect._
 
@@ -25,6 +27,42 @@ trait AutowiringCourseAndRouteServiceComponent extends CourseAndRouteServiceComp
 }
 
 trait CourseAndRouteService extends RouteDaoComponent with CourseDaoComponent with SecurityServiceComponent with PermissionsServiceComponent with ModuleAndDepartmentServiceComponent {
+
+	def save(route: Route): Unit
+	def saveOrUpdate(course: Course): Unit
+	def saveOrUpdate(teachingInfo: RouteTeachingInformation): Unit
+	def saveOrUpdate(courseYearWeighting: CourseYearWeighting): Unit
+
+	def delete(teachingInfo: RouteTeachingInformation): Unit
+	def delete(courseYearWeighting: CourseYearWeighting): Unit
+
+	def allRoutes: Seq[Route]
+	def getRouteById(id: String): Option[Route]
+	def getRouteByCode(code: String): Option[Route]
+	def getRoutesByCodes(codes: Seq[String]): Seq[Route]
+	def findRoutesInDepartment(department: Department): Seq[Route]
+	def findRoutesNamedLike(query: String): Seq[Route]
+	def stampMissingRoutes(dept: Department, seenCodes: Seq[String]): Int
+	def routesWithPermission(user: CurrentUser, permission: Permission): Set[Route]
+	def routesWithPermission(user: CurrentUser, permission: Permission, dept: Department): Set[Route]
+	def routesInDepartmentsWithPermission(user: CurrentUser, permission: Permission): Set[Route]
+	def routesInDepartmentWithPermission(user: CurrentUser, permission: Permission, dept: Department): Set[Route]
+
+	def getCourseByCode(code: String): Option[Course]
+	def findCoursesInDepartment(department: Department): Seq[Course]
+
+	def getRouteTeachingInformation(routeCode: String, departmentCode: String): Option[RouteTeachingInformation]
+
+	def addRouteManager(route: Route, owner: String): Unit
+	def removeRouteManager(route: Route, owner: String): Unit
+
+	def getCourseYearWeighting(courseCode: String, academicYear: AcademicYear, yearOfStudy: YearOfStudy): Option[CourseYearWeighting]
+	def findAllCourseYearWeightings(courses: Seq[Course], academicYear: AcademicYear): Seq[CourseYearWeighting]
+
+}
+
+abstract class AbstractCourseAndRouteService extends CourseAndRouteService {
+	self: RouteDaoComponent with CourseDaoComponent =>
 
 	def allRoutes: Seq[Route] = transactional(readOnly = true) { routeDao.allRoutes }
 
@@ -42,6 +80,9 @@ trait CourseAndRouteService extends RouteDaoComponent with CourseDaoComponent wi
 	def getCourseByCode(code: String): Option[Course] = code.maybeText.flatMap {
 		ccode => courseDao.getByCode(ccode)
 	}
+
+	def saveOrUpdate(course: Course): Unit =
+		courseDao.saveOrUpdate(course)
 
 	def findCoursesInDepartment(department: Department): Seq[Course] =
 		courseDao.findByDepartment(department)
@@ -95,10 +136,18 @@ trait CourseAndRouteService extends RouteDaoComponent with CourseDaoComponent wi
 		permissionsService.saveOrUpdate(role)
 		permissionsService.clearCachesForUser((owner, classTag[Route]))
 	}
-}
 
-abstract class AbstractCourseAndRouteService extends CourseAndRouteService {
-	self: RouteDaoComponent with CourseDaoComponent =>
+	def getCourseYearWeighting(courseCode: String, academicYear: AcademicYear, yearOfStudy: YearOfStudy): Option[CourseYearWeighting] =
+		courseDao.getCourseYearWeighting(courseCode, academicYear, yearOfStudy)
+
+	def findAllCourseYearWeightings(courses: Seq[Course], academicYear: AcademicYear): Seq[CourseYearWeighting] =
+		courseDao.findAllCourseYearWeightings(courses, academicYear)
+
+	def saveOrUpdate(courseYearWeighting: CourseYearWeighting): Unit =
+		courseDao.saveOrUpdate(courseYearWeighting)
+
+	def delete(courseYearWeighting: CourseYearWeighting): Unit =
+		courseDao.delete(courseYearWeighting)
 
 }
 

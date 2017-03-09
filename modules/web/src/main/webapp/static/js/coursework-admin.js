@@ -862,13 +862,14 @@ $(function(){
 			if ($this.data('href')) {
 				action = $this.data('href')
 			}
-			var postData = $this.closest('div.form-post-container').find('.collection-checkbox:checked').map(function(){
+			var postData = $('div.form-post-container').find('.collection-checkbox:checked').map(function(){
 				var $input = $(this);
 				return $input.prop('name') + '=' + $input.val();
 			}).get().join('&');
 			$.post(action, postData, function(data){
 				if (data.submissionsWithNonPDFs.length === 0) {
-					$modal.find('.btn.btn-primary').trigger('click');
+					// Use native click instead of trigger because there's no click handler for the marker version
+					$modal.find('.btn.btn-primary').get(0).click();
 				} else {
 					$modal.find('.count').html(data.submissionsWithNonPDFs.length);
 					var $submissionsContainer = $modal.find('.submissions').empty();

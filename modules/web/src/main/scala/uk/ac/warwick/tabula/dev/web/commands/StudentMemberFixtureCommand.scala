@@ -8,12 +8,11 @@ import uk.ac.warwick.tabula.data.Transactions.transactional
 import uk.ac.warwick.tabula.data._
 import uk.ac.warwick.tabula.data.model.{Gender, StudentCourseDetails, StudentCourseYearDetails, StudentMember}
 import uk.ac.warwick.tabula.helpers.Logging
-import uk.ac.warwick.tabula.services.{AutowiringUserLookupComponent, UserLookupComponent}
+import uk.ac.warwick.tabula.services.{AutowiringUserLookupComponent, CourseAndRouteService, UserLookupComponent}
 import uk.ac.warwick.tabula.system.permissions.PubliclyVisiblePermissions
 
 class StudentMemberFixtureCommand extends CommandInternal[StudentMember] with Logging {
 	this: UserLookupComponent =>
-
 
 	var userId: String = _
 	var genderCode: String = _
@@ -24,8 +23,7 @@ class StudentMemberFixtureCommand extends CommandInternal[StudentMember] with Lo
 	var academicYear: AcademicYear = _
 
 	var memberDao: MemberDao = Wire[MemberDao]
-	var routeDao: RouteDao = Wire[RouteDao]
-	var courseDao: CourseDao = Wire[CourseDao]
+	var courseAndRouteService: CourseAndRouteService = Wire[CourseAndRouteService]
   var deptDao: DepartmentDao = Wire[DepartmentDao]
 	var statusDao: SitsStatusDao = Wire[SitsStatusDao]
 	var studentCourseDetailsDao: StudentCourseDetailsDao = Wire[StudentCourseDetailsDao]
@@ -35,8 +33,8 @@ class StudentMemberFixtureCommand extends CommandInternal[StudentMember] with Lo
 		assert(userLookupUser != null)
 
 			val existing = memberDao.getByUniversityId(userLookupUser.getWarwickId)
-			val route = if (routeCode != "") routeDao.getByCode(routeCode) else None
-			val course = if (courseCode!= "") courseDao.getByCode(courseCode) else None
+			val route = if (routeCode != "") courseAndRouteService.getRouteByCode(routeCode) else None
+			val course = if (courseCode!= "") courseAndRouteService.getCourseByCode(courseCode) else None
 			val dept = if (deptCode!= "") deptDao.getByCode(deptCode) else None
 			val currentStudentStatus = statusDao.getByCode("C").get
 

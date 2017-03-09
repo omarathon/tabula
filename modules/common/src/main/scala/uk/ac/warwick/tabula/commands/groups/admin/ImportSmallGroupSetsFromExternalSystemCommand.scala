@@ -46,7 +46,6 @@ object ImportSmallGroupSetsFromExternalSystemCommand {
 			with AutowiringSmallGroupServiceComponent
 			with AutowiringUserLookupComponent
 			with AutowiringScientiaConfigurationComponent
-			with AutowiringNewScientiaConfigurationComponent
 			with SystemClockComponent
 			with ScientiaHttpTimetableFetchingServiceComponent
 

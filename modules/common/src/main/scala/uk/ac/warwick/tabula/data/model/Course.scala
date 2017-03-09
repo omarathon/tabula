@@ -1,10 +1,7 @@
 package uk.ac.warwick.tabula.data.model
 
 import org.joda.time.DateTime
-import javax.persistence.Entity
-import javax.persistence.Id
-import javax.persistence.NamedQueries
-import javax.persistence.NamedQuery
+import javax.persistence._
 
 @Entity
 @NamedQueries(Array(
@@ -21,6 +18,15 @@ class Course {
 	var shortName: String = _
 	var name: String = _
 	var title: String = _
+
+	@ManyToOne(fetch = FetchType.LAZY)
+	@JoinColumn(name="department_id")
+	private var _department: Department = _
+	def department_=(department: Department): Unit = {
+		_department = department
+	}
+	def department: Option[Department] = Option(_department)
+	
 
 	var lastUpdatedDate: DateTime = DateTime.now
 

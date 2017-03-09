@@ -49,7 +49,6 @@ object ImportAcademicInformationCommand {
 		routes: ImportResult,
 		routeTeachingDepartments: ImportResult,
 		courses: ImportResult,
-		courseYearWeightings: ImportResult,
 		sitsStatuses: ImportResult,
 		modesOfAttendance: ImportResult,
 		awards: ImportResult,
@@ -142,7 +141,6 @@ class ImportAcademicInformationCommandInternal extends CommandInternal[ImportAca
 		routes = benchmarkTask("Import routes") { transactional() { importRoutes() } },
 		routeTeachingDepartments = benchmarkTask("Import route teaching departments") { transactional() { importRouteTeachingDepartments() } },
 		courses = benchmarkTask("Import courses") { transactional() { importCourses() } },
-		courseYearWeightings = benchmarkTask("Import course year weightings") { transactional() { importCourseYearWeightings() } },
 		sitsStatuses = benchmarkTask("Import SITS status codes") { transactional() { importSitsStatuses() } },
 		modesOfAttendance = benchmarkTask("Import modes of attendance") { transactional() { importModesOfAttendance() } },
 		awards = benchmarkTask("Import awards") { transactional() { importAwards() } },
@@ -404,10 +402,6 @@ trait ImportCourses {
 		courseImporter.importCourses()
 	}
 
-	def importCourseYearWeightings(): ImportResult = {
-		logger.info("Importing course year weightings")
-		courseImporter.importCourseYearWeightings()
-	}
 }
 
 trait ImportSitsStatuses {

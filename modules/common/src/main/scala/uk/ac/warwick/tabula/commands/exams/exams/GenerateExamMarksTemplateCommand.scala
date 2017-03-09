@@ -1,4 +1,4 @@
-package uk.ac.warwick.tabula.commands.exams
+package uk.ac.warwick.tabula.commands.exams.exams
 
 import org.apache.poi.ss.usermodel.{ComparisonOperator, IndexedColors}
 import org.apache.poi.ss.util.CellRangeAddress

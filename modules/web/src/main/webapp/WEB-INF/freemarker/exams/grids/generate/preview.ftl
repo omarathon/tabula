@@ -121,7 +121,7 @@
 						<th>Year weightings:</th>
 						<td>
 							<#list weightings as weighting>
-								Year ${weighting.yearOfStudy} = ${weighting.weightingAsPercentage}<#if weighting_has_next><br /></#if>
+								Year ${weighting.yearOfStudy} = ${weighting.weightingAsPercentage}%<#if weighting_has_next><br /></#if>
 							</#list>
 						</td>
 					</tr>

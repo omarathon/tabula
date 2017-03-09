@@ -9,7 +9,7 @@ import org.joda.time.DateTime
 import uk.ac.warwick.tabula.AcademicYear
 import uk.ac.warwick.tabula.data.model._
 import uk.ac.warwick.tabula.exams.grids.columns._
-import uk.ac.warwick.tabula.services.NormalLoadLookup
+import uk.ac.warwick.tabula.services.exams.grids.NormalLoadLookup
 
 object GenerateExamGridExporter {
 
@@ -278,10 +278,10 @@ object GenerateExamGridExporter {
 			case n => keyValueCells("Routes:", s"$n routes", 3)
 		}
 		keyValueCells("Year of study:", yearOfStudy.toString, 4)
-		val yearWeightingRow = keyValueCells("Year weightings:", yearWeightings.map(cyw => s"Year ${cyw.yearOfStudy} = ${cyw.weightingAsPercentage}").mkString("\n"), 5)
+		val yearWeightingRow = keyValueCells("Year weightings:", yearWeightings.map(cyw => s"Year ${cyw.yearOfStudy} = ${cyw.weightingAsPercentage}%").mkString("\n"), 5)
 		yearWeightingRow.setHeight((yearWeightingRow.getHeight * (yearWeightings.size - 1)).toShort)
-		val normalCatLoadRow = keyValueCells("Normal CAT load:", normalLoadLookup.routes.sortBy(_.code).map(r => s"${r.code.toUpperCase}: ${normalLoadLookup(r).underlying.toString}").mkString("\n"), 6)
-		normalCatLoadRow.setHeight((normalCatLoadRow.getHeight * (normalLoadLookup.routes.size - 1)).toShort)
+		val normalCATSLoadRow = keyValueCells("Normal CATS load:", normalLoadLookup.routes.sortBy(_.code).map(r => s"${r.code.toUpperCase}: ${normalLoadLookup(r).underlying.toString}").mkString("\n"), 6)
+		normalCATSLoadRow.setHeight((normalCATSLoadRow.getHeight * (normalLoadLookup.routes.size - 1)).toShort)
 		if (isStudentCount) {
 			keyValueCells("Student Count:", count.toString, 7)
 		} else {

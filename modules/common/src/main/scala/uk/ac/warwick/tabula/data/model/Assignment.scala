@@ -49,6 +49,7 @@ object Assignment {
 		val ExtensionAttachmentMandatory = "extensionAttachmentMandatory"
 		val AllowExtensionsAfterCloseDate = "allowExtensionsAfterCloseDate"
 		val TurnitinLtiNotifyUsers = "turnitinLtiNotifyUsers"
+		val TurnitinLtiClassWithAcademicYear = "turnitinLtiClassWithAcademicYear"
 	}
 }
 
@@ -137,6 +138,9 @@ class Assignment
 	var summative: JBoolean = _
 	var dissertation: JBoolean = _
 	var allowExtensions: JBoolean = _
+	@Column(name="anonymous_marking")
+	var anonymousMarking: JBoolean = _
+
 	var genericFeedback: String = ""
 	@Column(name="turnitin_id")
 	var turnitinId: String = ""
@@ -780,6 +784,9 @@ class Assignment
 		UserSeqSetting(Settings.TurnitinLtiNotifyUsers, Seq(), userLookup).value = users
 	}
 
+	def turnitinLtiClassWithAcademicYear: Boolean = getBooleanSetting(Settings.TurnitinLtiClassWithAcademicYear, default = false)
+	def turnitinLtiClassWithAcademicYear_= (withAcademicYear: Boolean): Unit = settings += (Settings.TurnitinLtiClassWithAcademicYear -> withAcademicYear)
+
 	def enhance(user: User): EnhancedAssignment = {
 		val extension = extensions.asScala.find(e => e.isForUser(user))
 		val submission = submissions.asScala.find(_.usercode == user.getUserId)
@@ -858,6 +865,9 @@ trait BooleanAssignmentProperties {
 	@BeanProperty var automaticallyReleaseToMarkers: JBoolean = false
 	@BeanProperty var automaticallySubmitToTurnitin: JBoolean = false
 	@BeanProperty var hiddenFromStudents: JBoolean = false
+	@BeanProperty var anonymousMarking: JBoolean = false
+
+
 
 	def copyBooleansTo(assignment: Assignment) {
 		assignment.openEnded = openEnded
@@ -875,6 +885,8 @@ trait BooleanAssignmentProperties {
 		assignment.includeInFeedbackReportWithoutSubmissions = includeInFeedbackReportWithoutSubmissions
 		assignment.automaticallyReleaseToMarkers = automaticallyReleaseToMarkers
 		assignment.automaticallySubmitToTurnitin = automaticallySubmitToTurnitin
+		assignment.anonymousMarking = anonymousMarking
+
 
 		// You can only hide an assignment, no un-hiding.
 		if (hiddenFromStudents) assignment.hideFromStudents()

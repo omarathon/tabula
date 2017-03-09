@@ -33,7 +33,6 @@ object ViewModuleEventsCommand {
 			with ViewModuleEventsValidation
 			with Unaudited with ReadOnly
 			with AutowiringScientiaConfigurationComponent
-			with AutowiringNewScientiaConfigurationComponent
 			with SystemClockComponent
 			with ScientiaHttpTimetableFetchingServiceComponent // Only include Scientia events for now. If we ever include from other sources, they should be opt-in via params
 			with AutowiringTermServiceComponent

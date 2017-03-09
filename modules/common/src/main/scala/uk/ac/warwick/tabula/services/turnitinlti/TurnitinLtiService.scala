@@ -29,8 +29,9 @@ import uk.ac.warwick.tabula.helpers.StringUtils._
 import uk.ac.warwick.tabula.services.AutowiringOriginalityReportServiceComponent
 import uk.ac.warwick.tabula.{CurrentUser, DateFormats}
 import uk.ac.warwick.util.core.StringUtils
-
+import scala.collection.JavaConverters._
 import scala.util.{Failure, Success, Try}
+import uk.ac.warwick.tabula.helpers.DateTimeOrdering._
 
 object TurnitinLtiService {
 
@@ -45,7 +46,7 @@ object TurnitinLtiService {
 	val SubmitAttachmentMaxRetries = 20
 	val ReportRequestWaitInSeconds = 20
 	val ReportRequestMaxRetries = 50
-	val LongAwaitedReportWaitInSeconds = 60 * 60
+	val LongAwaitedReportWaitInSeconds: Int = 60 * 60
 
 	/**
 	 * Quoted supported types are...
@@ -69,17 +70,33 @@ object TurnitinLtiService {
 	 * ID that we should store classes under. They are per-module so we base it on the module code.
 	 * This ID is stored within TurnitinLti and requests for the same ID should return the same class.
 	 */
-	def classIdFor(assignment: Assignment, prefix: String) = ClassId(s"$prefix-${assignment.module.code}")
+	def classIdFor(assignment: Assignment, prefix: String): ClassId = if (assignment.turnitinLtiClassWithAcademicYear) {
+		ClassId(s"$prefix-${assignment.module.code}-${assignment.academicYear.startYear.toString}")
+	} else {
+		ClassId(s"$prefix-${assignment.module.code}")
+	}
 
 	def assignmentIdFor(assignment: Assignment) = AssignmentId(s"$AssignmentPrefix${assignment.id}")
 
 	def classNameFor(assignment: Assignment): ClassName = {
 		val module = assignment.module
-		ClassName(StringUtils.safeSubstring(s"${module.code.toUpperCase} - ${module.name}", 0, turnitinClassTitleMaxCharacters))
+		if (assignment.turnitinLtiClassWithAcademicYear) {
+			ClassName(StringUtils.safeSubstring(s"${module.code.toUpperCase} (${assignment.academicYear.toString}) - ${module.name}", 0, turnitinClassTitleMaxCharacters))
+		} else {
+			ClassName(StringUtils.safeSubstring(s"${module.code.toUpperCase} - ${module.name}", 0, turnitinClassTitleMaxCharacters))
+		}
 	}
 
 	def assignmentNameFor(assignment: Assignment): AssignmentName = {
 		AssignmentName(s"${assignment.id} (${assignment.academicYear.toString}) ${assignment.name}")
+	}
+
+	def assignmentEndDate(assignment: Assignment): DateTime = {
+		Seq(
+			Seq(assignment.closeDate),
+			assignment.extensions.asScala.flatMap(_.expiryDate),
+			Seq(DateTime.now)
+		).flatten.max.plusMonths(1)
 	}
 }
 
@@ -91,9 +108,9 @@ class TurnitinLtiService extends Logging with DisposableBean with InitializingBe
 	with AutowiringOriginalityReportServiceComponent {
 
 	/** Turnitin LTI account id */
-	@Value("${TurnitinLti.aid}") var turnitinAccountId: String = null
+	@Value("${TurnitinLti.aid}") var turnitinAccountId: String = _
 	/** Shared key as set up on the University of Warwick account's LTI settings */
-	@Value("${TurnitinLti.key}") var sharedSecretKey: String = null
+	@Value("${TurnitinLti.key}") var sharedSecretKey: String = _
 
 	@Value("${TurnitinLti.submitassignment.url}") var apiSubmitAssignment: String = _
 	@Value("${TurnitinLti.submitpaper.url}") var apiSubmitPaperEndpoint: String = _
@@ -127,6 +144,9 @@ class TurnitinLtiService extends Logging with DisposableBean with InitializingBe
 	override def afterPropertiesSet() {}
 
 	def submitAssignment(assignment: Assignment, user: CurrentUser): TurnitinLtiResponse = {
+		// 
+		// Don't allow an end date more than 1 year away, regardless of assignment properties
+		val customDueDate = Seq(TurnitinLtiService.assignmentEndDate(assignment), DateTime.now.plusYears(1)).min
 		doRequest(
 			apiSubmitAssignment,
 			Map(
@@ -136,7 +156,8 @@ class TurnitinLtiService extends Logging with DisposableBean with InitializingBe
 				"resource_link_description" -> TurnitinLtiService.assignmentNameFor(assignment).value,
 				"context_id" -> TurnitinLtiService.classIdFor(assignment, classPrefix).value,
 				"context_title" -> TurnitinLtiService.classNameFor(assignment).value,
-				"custom_duedate" -> isoFormatter.print(new DateTime().plusYears(2)), // default is 7 days in the future, so make it far in future
+				"custom_duedate" -> isoFormatter.print(customDueDate),
+				"custom_late_accept_flag" -> "1",
 				"ext_resource_tool_placement_url" -> s"$topLevelUrl${Routes.turnitin.submitAssignmentCallback(assignment)}"
 			) ++ userParams(user.userId, user.email, user.firstName, user.lastName),
 			Some(HttpStatus.SC_OK)

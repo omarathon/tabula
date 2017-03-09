@@ -19,6 +19,7 @@ object CopyAssignmentsCommand {
 			with CopyAssignmentsPermissions
 			with CopyAssignmentsDescription
 			with CopyAssignmentsCommandTriggers
+			with CopyAssignmentsCommandNotifications
 			with AutowiringAssessmentServiceComponent
 			with AutowiringAssessmentMembershipServiceComponent {
 				override lazy val eventName = "CopyAssignmentsFromPrevious"
@@ -78,6 +79,7 @@ abstract class CopyAssignmentsCommand(val department: Department, val modules: S
 		newAssignment.includeInFeedbackReportWithoutSubmissions = assignment.includeInFeedbackReportWithoutSubmissions
 		newAssignment.automaticallyReleaseToMarkers = assignment.automaticallyReleaseToMarkers
 		newAssignment.automaticallySubmitToTurnitin = assignment.automaticallySubmitToTurnitin
+		newAssignment.anonymousMarking = assignment.anonymousMarking
 
 		newAssignment.addDefaultFields()
 
@@ -136,4 +138,12 @@ trait CopyAssignmentsCommandTriggers extends GeneratesTriggers[Seq[Assignment]] 
 			AssignmentClosedTrigger(assignment.closeDate, assignment)
 		)
 	}
+}
+
+trait CopyAssignmentsCommandNotifications extends SchedulesNotifications[Seq[Assignment], Assignment] with SharedAssignmentCommandNotifications {
+
+	override def transformResult(assignments: Seq[Assignment]): Seq[Assignment] = assignments
+
+	override def scheduledNotifications(assignment: Assignment): Seq[ScheduledNotification[Assignment]] = generateScheduledNotifications(assignment)
+
 }

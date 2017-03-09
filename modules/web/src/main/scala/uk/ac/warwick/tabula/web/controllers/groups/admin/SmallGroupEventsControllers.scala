@@ -7,13 +7,13 @@ import org.springframework.stereotype.Controller
 import org.springframework.validation.Errors
 import org.springframework.web.bind.annotation.{ModelAttribute, PathVariable, RequestMapping}
 import uk.ac.warwick.tabula.AcademicYear
+import uk.ac.warwick.tabula.commands.groups.admin.{ModifySmallGroupEventCommand, ModifySmallGroupEventCommandState, UpdateSmallGroupEventFromExternalSystemCommand}
 import uk.ac.warwick.tabula.commands.{Appliable, SelfValidating}
 import uk.ac.warwick.tabula.data.model.Module
 import uk.ac.warwick.tabula.data.model.groups._
-import uk.ac.warwick.tabula.commands.groups.admin.{ModifySmallGroupEventCommand, ModifySmallGroupEventCommandState, UpdateSmallGroupEventFromExternalSystemCommand}
 import uk.ac.warwick.tabula.groups.web.Routes
 import uk.ac.warwick.tabula.helpers.SystemClockComponent
-import uk.ac.warwick.tabula.services.timetables.{AutowiringNewScientiaConfigurationComponent, AutowiringScientiaConfigurationComponent, ScientiaHttpTimetableFetchingServiceComponent}
+import uk.ac.warwick.tabula.services.timetables.{AutowiringScientiaConfigurationComponent, ScientiaHttpTimetableFetchingServiceComponent}
 import uk.ac.warwick.tabula.services.{AutowiringTermServiceComponent, TermService, TermServiceComponent}
 import uk.ac.warwick.tabula.web.Mav
 import uk.ac.warwick.tabula.web.controllers.groups.GroupsController
@@ -102,7 +102,7 @@ class EditSmallGroupSetCreateEventController extends AbstractCreateSmallGroupEve
 }
 
 abstract class AbstractEditSmallGroupEventController extends SmallGroupEventsController with AutowiringTermServiceComponent
-	with AutowiringScientiaConfigurationComponent with AutowiringNewScientiaConfigurationComponent
+	with AutowiringScientiaConfigurationComponent
 	with ScientiaHttpTimetableFetchingServiceComponent with SystemClockComponent
 	with SyllabusPlusEventCountForModule {
 

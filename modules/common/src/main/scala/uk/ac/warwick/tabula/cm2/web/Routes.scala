@@ -35,13 +35,13 @@ object Routes {
 		}
 
 		object assignment {
-			def createAssignmentDetails(module: Module): String = admin() + "/%s/assignments/new" format (encoded(module.id))
-			def createAddFeedback(assignment: Assignment): String = admin()  + "/assignments/new/%s/feedback" format (encoded(assignment.id))
-			def createAddStudents(assignment: Assignment): String = admin()  + "/assignments/new/%s/students" format (encoded(assignment.id))
-			def createAddMarkers(assignment: Assignment): String = admin()  + "/assignments/new/%s/markers" format (encoded(assignment.id))
-			def createAddSubmissions(assignment: Assignment): String = admin()  + "/assignments/new/%s/submissions" format (encoded(assignment.id))
-			def createAddOptions(assignment: Assignment): String = admin()  + "/assignments/new/%s/options" format (encoded(assignment.id))
-			def reviewAssignment(assignment: Assignment): String = admin()  + "/assignments/new/%s/review" format (encoded(assignment.id))
+			def createAssignmentDetails(module: Module): String = admin() + s"/${encoded(module.code)}/assignments/new"
+			def createAddFeedback(assignment: Assignment): String = admin()  + s"/assignments/new/${encoded(assignment.id)}/feedback"
+			def createAddStudents(assignment: Assignment): String = admin()  + s"/assignments/new/${encoded(assignment.id)}/students"
+			def createAddMarkers(assignment: Assignment): String = admin()  + s"/assignments/new/${encoded(assignment.id)}/markers"
+			def createAddSubmissions(assignment: Assignment): String = admin()  + s"/assignments/new/${encoded(assignment.id)}/submissions"
+			def createAddOptions(assignment: Assignment): String = admin()  + s"/assignments/new/${encoded(assignment.id)}/options"
+			def reviewAssignment(assignment: Assignment): String = admin()  + s"/assignments/new/${encoded(assignment.id)}/review"
 
 			object audit {
 				def apply(assignment: Assignment): String = admin() + s"/audit/assignment/${encoded(assignment.id)}"

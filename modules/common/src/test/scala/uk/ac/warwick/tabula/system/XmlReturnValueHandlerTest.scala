@@ -1,12 +1,11 @@
 package uk.ac.warwick.tabula.system
 
-import uk.ac.warwick.tabula.TestBase
 import org.springframework.core.MethodParameter
+import org.springframework.mock.web.{MockHttpServletRequest, MockHttpServletResponse}
 import org.springframework.web.context.request.ServletWebRequest
 import org.springframework.web.method.support.ModelAndViewContainer
-import uk.ac.warwick.tabula.web.Mav
-import org.springframework.mock.web.MockHttpServletRequest
-import org.springframework.mock.web.MockHttpServletResponse
+import uk.ac.warwick.tabula.TestBase
+import uk.ac.warwick.tabula.web.views.XmlView
 
 import scala.xml.Elem
 
@@ -19,33 +18,33 @@ class XmlReturnValueHandlerTest extends TestBase {
 			<scala>is the best</scala>
 		</xml>
 	}
-	def returnsUnit {}
+	def returnsUnit() {}
 	def returnsAny: Any = null
 
 	val xmlMethod  = new MethodParameter(getClass.getMethod("returnsXml"), 1)
 	val unitMethod = new MethodParameter(getClass.getMethod("returnsUnit"), 1)
 	val anyMethod  = new MethodParameter(getClass.getMethod("returnsAny"), 1)
 
-	@Test def supports {
+	@Test def supports() {
 		handler.supportsReturnType(xmlMethod) should be (true)
 		handler.supportsReturnType(unitMethod) should be (false)
 		handler.supportsReturnType(anyMethod) should be (false)
 	}
 
-	@Test def handle {
+	@Test def handle() {
 		val mavContainer = new ModelAndViewContainer
 		val req = new ServletWebRequest(new MockHttpServletRequest)
 		handler.handleReturnValue(returnsXml, xmlMethod, mavContainer, req)
 
 		mavContainer.getViewName should be (null)
-		mavContainer.isRequestHandled() should be (false)
+		mavContainer.isRequestHandled should be (false)
 
 		val hsReq = new MockHttpServletRequest
 		val hsResp = new MockHttpServletResponse
 
-		mavContainer.getView().asInstanceOf[handler.XmlView].render(null, hsReq, hsResp)
+		mavContainer.getView.asInstanceOf[XmlView].render(null, hsReq, hsResp)
 
-		hsResp.getContentAsString().replaceAll("\\s+", "") should be ("""
+		hsResp.getContentAsString.replaceAll("\\s+", "") should be ("""
 				<?xml version="1.0" encoding="UTF-8" ?>
 				<xml>
 				  <scala>is the best</scala>

@@ -13,6 +13,25 @@
 } (jQuery));
 </script>
 
+<#assign studentMembers = [] />
+
+<#if command.additionalStudent??>
+	<#assign already_in = false />
+	<#list command.members as student>
+		<#if student.universityId == command.additionalStudent.universityId>
+			<#assign already_in = true />
+		</#if>
+	</#list>
+
+	<#if !already_in><#assign studentMembers = studentMembers + [command.additionalStudent] /></#if>
+</#if>
+
+<#list command.members as student>
+	<#if !(command.removeAdditionalStudent??) || command.removeAdditionalStudent.universityId != student.universityId>
+		<#assign studentMembers = studentMembers + [student] />
+	</#if>
+</#list>
+
 <div id="addAdditional-modal" class="modal fade"></div>
 
 <div class="recordCheckpointForm" data-check-checkpoints="true">
@@ -96,6 +115,7 @@
 		</div>
 		<div class="pull-right">
 			<button type="button" class="btn btn-default" data-toggle="modal" data-target="#print-modal">Print</button>
+			<@fmt.bulk_email_students studentMembers />
 		</div>
 
 		<h6>
@@ -105,7 +125,7 @@
 			</#if>
 		</h6>
 
-		<#if !command.members?has_content && !command.manuallyAddedUniversityIds?has_content && !command.additionalStudent?has_content>
+		<#if !studentMembers?has_content>
 			<p><em>There are no students allocated to this group.</em></p>
 		</#if>
 
@@ -344,7 +364,7 @@
 					</tbody>
 				</table>
 
-				<#if command.members?has_content || command.manuallyAddedUniversityIds?has_content>
+				<#if studentMembers?has_content>
 
 					<div class="fix-footer submit-buttons">
 						<div class="pull-right">

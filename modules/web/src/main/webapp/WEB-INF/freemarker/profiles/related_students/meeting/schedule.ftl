@@ -73,59 +73,62 @@
 					});
 				</script>
 
-			<div class="form-inline">
+				<div class="row">
+					<div class="col-xs-4">
+						<@bs3form.labelled_form_group path="meetingDateStr" labelText="Date of meeting">
+							<div class="input-group">
+								<@f.input type="text" path="meetingDateStr" cssClass="form-control date-picker" placeholder="Pick the date" />
+								<span class="input-group-addon"><i class="fa fa-calendar"></i></span>
+							</div>
+						</@bs3form.labelled_form_group>
+					</div>
+					<div class="col-xs-4">
+						<@bs3form.labelled_form_group path="meetingTimeStr" labelText="Time of meeting">
+							<div class="input-group">
+								<@f.input type="text" path="meetingTimeStr" cssClass="form-control time-picker" placeholder="Pick the time" />
+								<span class="input-group-addon"><i class="fa fa-clock-o"></i></span>
+							</div>
+						</@bs3form.labelled_form_group>
+					</div>
+					<div class="col-xs-4">
+						<@bs3form.labelled_form_group path="meetingEndTimeStr" labelText="End time of meeting">
+							<div class="input-group">
+								<@f.input type="text" path="meetingEndTimeStr" cssClass="form-control time-picker" placeholder="Pick the end time" />
+								<span class="input-group-addon"><i class="fa fa-clock-o"></i></span>
+							</div>
+						</@bs3form.labelled_form_group>
+					</div>
 
-				<@bs3form.labelled_form_group path="meetingDateStr" labelText="Date of meeting">
-					<div class="input-group">
-						<@f.input type="text" path="meetingDateStr" cssClass="form-control date-picker" placeholder="Pick the date" />
-						<span class="input-group-addon"><i class="fa fa-calendar"></i></span>
+					<div class="col-xs-12">
+						<div class="help-block alert alert-info hidden">
+							This meeting takes place in the <span class="year"></span> academic year.
+							You will be able to find this meeting under the <span class="year"></span> tab.
+						</div>
 					</div>
-					<div class="help-block alert alert-info hidden">
-						This meeting takes place in the <span class="year"></span> academic year.
-						You will be able to find this meeting under the <span class="year"></span> tab.
-					</div>
-				</@bs3form.labelled_form_group>
+				</div>
+
 				<script>
 					jQuery(function($){
 						var $xhr = null;
 						$('#meetingDateStr').on('change', function(){
 							if ($xhr) $xhr.abort();
-							var $this = $(this), meetingDateStr = $this.val() + ' ' + $('#meetingTimeStr').val();
+							var $this = $(this), meetingDateStr = $this.val();
 							if (meetingDateStr.length > 0) {
-								$xhr = jQuery.get('/ajax/academicyearfromdate', { date: meetingDateStr }, function(data){
+								$xhr = jQuery.get('/ajax/academicyearfromdate', {date: meetingDateStr}, function(data) {
 									if (data.startYear != '${academicYear.startYear?c}') {
-										$this.closest('.form-group').find('.help-block')
-												.find('span.year').text(data.string).end()
-												.removeClass('hidden');
+										$this.closest('.row').find('.help-block')
+											.find('span.year').text(data.string).end()
+											.removeClass('hidden');
 									} else {
-										$this.closest('.form-group').find('.help-block').addClass('hidden');
+										$this.closest('.row').find('.help-block').addClass('hidden');
 									}
 								});
 							} else {
-								$this.closest('.form-group').find('.help-block').addClass('hidden');
+								$this.closest('.row').find('.help-block').addClass('hidden');
 							}
-
 						});
 					});
 				</script>
-
-
-				<@bs3form.labelled_form_group path="meetingTimeStr" labelText="Time of meeting">
-					<div class="input-group">
-						<@f.input type="text" path="meetingTimeStr" cssClass="form-control time-picker" placeholder="Pick the time" />
-						<span class="input-group-addon"><i class="fa fa-calendar"></i></span>
-					</div>
-				</@bs3form.labelled_form_group>
-
-				<@bs3form.labelled_form_group path="meetingEndTimeStr" labelText="End time of meeting">
-					<div class="input-group">
-						<@f.input type="text" path="meetingEndTimeStr" cssClass="form-control time-picker" placeholder="Pick the end time" />
-						<span class="input-group-addon"><i class="fa fa-calendar"></i></span>
-					</div>
-				</@bs3form.labelled_form_group>
-
-			</div>
-			<div style="clear: both;"><!-- --></div>
 
 				<@bs3form.labelled_form_group path="format" labelText="Format">
 					<@f.select path="format" cssClass="form-control">

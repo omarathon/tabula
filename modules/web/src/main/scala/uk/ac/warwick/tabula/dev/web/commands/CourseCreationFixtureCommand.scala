@@ -4,25 +4,25 @@ import uk.ac.warwick.spring.Wire
 import uk.ac.warwick.tabula.commands.{CommandInternal, ComposableCommand, Unaudited}
 import uk.ac.warwick.tabula.data._
 import uk.ac.warwick.tabula.data.model.Course
-import uk.ac.warwick.tabula.services.{AutowiringModuleAndDepartmentServiceComponent, ModuleAndDepartmentServiceComponent}
+import uk.ac.warwick.tabula.services.{AutowiringModuleAndDepartmentServiceComponent, CourseAndRouteService, ModuleAndDepartmentServiceComponent}
 import uk.ac.warwick.tabula.system.permissions.PubliclyVisiblePermissions
 
 class CourseCreationFixtureCommand extends CommandInternal[Course] {
 	this: ModuleAndDepartmentServiceComponent with SessionComponent with TransactionalComponent =>
 
-	var courseDao:CourseDao = Wire[CourseDao]
+	var courseAndRouteService: CourseAndRouteService = Wire[CourseAndRouteService]
 	var courseCode: String = _
 	var courseName: String = _
 
 	protected def applyInternal(): Course =
 		transactional() {
-			val c = courseDao.getByCode(courseCode).getOrElse(new Course)
+			val c = courseAndRouteService.getCourseByCode(courseCode).getOrElse(new Course)
 			c.code = courseCode
 			c.name = courseName
 			c.shortName = courseName
 			c.title = courseName
 
-			courseDao.saveOrUpdate(c)
+			courseAndRouteService.saveOrUpdate(c)
 			c
 		}
 }

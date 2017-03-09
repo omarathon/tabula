@@ -55,6 +55,25 @@
 		</rollingPolicy>
 	</appender>
 
+	<appender name="AUDIT_LOGSTASH" class="net.logstash.logback.appender.LogstashTcpSocketAppender">
+		<destination>ibrar.lnx.warwick.ac.uk:10570</destination>
+
+		<encoder class="net.logstash.logback.encoder.LoggingEventCompositeJsonEncoder">
+			<providers>
+				<timestamp />
+				<version />
+
+				<pattern>
+					<pattern>
+						{ "log_source_hostname": "augustus.warwick.ac.uk", "node_app": "tabula", "node_deployment": "dev", "node_tier": "monolithic" }
+					</pattern>
+				</pattern>
+
+				<arguments />
+			</providers>
+		</encoder>
+	</appender>
+
 	<appender name="POSTLOG" class="ch.qos.logback.core.rolling.RollingFileAppender">
 		<file>${catalina.base}/logs/post.log</file>
 		<append>true</append>
@@ -71,20 +90,6 @@
 			<fileNamePattern>${catalina.base}/logs/post.log.%d{yyyy-MM-dd}</fileNamePattern>
 			<maxHistory>${max.retention.days}</maxHistory>
 		</rollingPolicy>
-	</appender>
-
-	<!-- syslog appenders -->
-	<appender name="SPLUNK" class="ch.qos.logback.classic.net.SyslogAppender">
-		<syslogHost>splunk.warwick.ac.uk</syslogHost>
-		<facility>LOCAL1</facility>
-		<encoder>
-			<charset>utf-8</charset>
-			<pattern>%d{yyyy-MM-dd HH:mm:ss,SSSZ} %-5p [%c{1}](%t) %m%n</pattern>
-		</encoder>
-
-		<filter class="ch.qos.logback.classic.filter.ThresholdFilter">
-			<level>INFO</level>
-		</filter>
 	</appender>
 
 	<!-- console -->
@@ -105,9 +110,9 @@
 		<appender-ref ref="POSTLOG"/>
 	</logger>
 
-	<logger name="uk.ac.warwick.tabula.AUDIT">
+	<logger name="uk.ac.warwick.AUDIT" additivity="false">
 		<appender-ref ref="AUDIT" />
-		<appender-ref ref="SPLUNK" />
+		<appender-ref ref="AUDIT_LOGSTASH" />
 	</logger>
 
 	<logger name="uk.ac.warwick.sso" level="WARN" />

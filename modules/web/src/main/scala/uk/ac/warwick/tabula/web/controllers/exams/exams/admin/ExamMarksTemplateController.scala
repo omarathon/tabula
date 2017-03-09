@@ -6,10 +6,10 @@ import org.springframework.web.bind.annotation.{ModelAttribute, PathVariable, Re
 import uk.ac.warwick.spring.Wire
 import uk.ac.warwick.tabula.commands.Appliable
 import uk.ac.warwick.tabula.commands.coursework.feedback.MarksTemplateCommand._
+import uk.ac.warwick.tabula.commands.exams.exams.{GenerateExamMarksTemplateCommand, GenerateOwnExamMarksTemplateCommand}
 import uk.ac.warwick.tabula.data.model.{Exam, Module}
-import uk.ac.warwick.tabula.commands.exams.{GenerateOwnExamMarksTemplateCommand, GenerateExamMarksTemplateCommand}
-import uk.ac.warwick.tabula.web.controllers.exams.ExamsController
 import uk.ac.warwick.tabula.services.AssessmentMembershipService
+import uk.ac.warwick.tabula.web.controllers.exams.ExamsController
 import uk.ac.warwick.tabula.web.views.ExcelView
 import uk.ac.warwick.userlookup.User
 

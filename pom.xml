@@ -34,8 +34,8 @@
 		<net.databinder.dispatch.version>0.8.10</net.databinder.dispatch.version>
 		<org.apache.poi.version>3.13</org.apache.poi.version>
 		<org.apache.tiles.version>3.0.5</org.apache.tiles.version>
-		<org.apache.jclouds.version>2.0.0-alpha.1</org.apache.jclouds.version>
-		<warwickutils.version>20161202-1402</warwickutils.version>
+		<org.apache.jclouds.version>2.0.0</org.apache.jclouds.version>
+		<warwickutils.version>20170217</warwickutils.version>
 		<surefire.version>2.19.1</surefire.version>
 		<recompileMode><!-- incremental --></recompileMode>
 
@@ -390,8 +390,6 @@
 									<entry key="build.time" value="${build.time}" />
 									<entry key="module.name" value="${project.artifactId}" />
 									<entry key="module.context" value="${tabula.module.context}" />
-									<entry key="git.commit" value ="${git.commit.id}"/>
-									<entry key="git.describe" value = "${git.commit.id.describe}"/>
 								</propertyfile>
 							</target>
 						</configuration>
@@ -400,37 +398,6 @@
 						</goals>
 					</execution>
 				</executions>
-			</plugin>
-
-			<plugin>
-				<groupId>pl.project13.maven</groupId>
-				<artifactId>git-commit-id-plugin</artifactId>
-				<version>2.1.11</version>
-				<executions>
-					<execution>
-						<phase>prepare-package</phase>
-						<goals>
-							<goal>revision</goal>
-						</goals>
-					</execution>
-				</executions>
-
-				<configuration>
-					<prefix>git</prefix>
-					<dateFormat>dd.MM.yyyy '@' HH:mm:ss z</dateFormat>
-					<verbose>false</verbose>
-					<dotGitDirectory>${project.basedir}/.git</dotGitDirectory>
-					<generateGitPropertiesFile>false</generateGitPropertiesFile>
-					<generateGitPropertiesFilename>src/main/resources/git.properties</generateGitPropertiesFilename>
-					<failOnNoGitDirectory>true</failOnNoGitDirectory>
-					<gitDescribe>
-						<skip>false</skip>
-						<always>true</always>
-						<abbrev>7</abbrev>
-						<dirty>-devel</dirty>
-						<forceLongFormat>false</forceLongFormat>
-					</gitDescribe>
-				</configuration>
 			</plugin>
 		</plugins>
 
