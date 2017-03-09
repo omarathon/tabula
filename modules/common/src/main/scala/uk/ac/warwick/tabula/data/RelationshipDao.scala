@@ -1,12 +1,12 @@
 package uk.ac.warwick.tabula.data
 
-import org.hibernate.FetchMode
+import org.hibernate.{FetchMode, NonUniqueResultException}
 import org.hibernate.criterion.{Order, Projections, Restrictions}
 import org.hibernate.sql.JoinType
 import org.joda.time.DateTime
 import org.springframework.stereotype.Repository
 import uk.ac.warwick.spring.Wire
-import uk.ac.warwick.tabula.commands.{StudentAssociationEntityData, StudentAssociationData}
+import uk.ac.warwick.tabula.commands.{StudentAssociationData, StudentAssociationEntityData}
 import uk.ac.warwick.tabula.data.model.{MemberStudentRelationship, _}
 import uk.ac.warwick.tabula.helpers.Logging
 
@@ -182,9 +182,15 @@ class RelationshipDaoImpl extends RelationshipDao with Daoisms with Logging {
 	}
 
 	def getCurrentRelationship(relationshipType: StudentRelationshipType, student: StudentMember, agent: Member): Option[StudentRelationship] = {
-		currentRelationsipBaseCriteria(student, Some(agent.universityId))
-			.add(is("relationshipType", relationshipType))
-			.uniqueResult
+		try {
+			currentRelationsipBaseCriteria(student, Some(agent.universityId))
+				.add(is("relationshipType", relationshipType))
+				.uniqueResult
+		} catch {
+			case e: NonUniqueResultException =>
+				logger.error(s"Tried to find single current relationship for ${relationshipType.id}, ${student.universityId}, ${agent.universityId} but found multiple")
+				throw e
+		}
 	}
 
 	def getCurrentRelationships(student: StudentMember, agentId: String): Seq[StudentRelationship] = {
