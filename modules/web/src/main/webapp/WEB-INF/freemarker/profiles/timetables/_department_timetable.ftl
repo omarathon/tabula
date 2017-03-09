@@ -251,8 +251,8 @@
 						startToSend.setDate(startToSend.getDate() - 1);
 						var endToSend = new Date(end.getTime());
 						endToSend.setDate(endToSend.getDate() + 1);
-						$('#from').val(startToSend.getTime()/1000);
-						$('#to').val(endToSend.getTime()/1000);
+						$('#from').val(startToSend.getTime());
+						$('#to').val(endToSend.getTime());
 						return $form.serialize();
 					},
 					'POST'

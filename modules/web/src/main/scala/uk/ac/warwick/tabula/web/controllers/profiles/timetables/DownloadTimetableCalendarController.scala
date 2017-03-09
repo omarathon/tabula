@@ -57,8 +57,8 @@ class DownloadTimetableCalendarController extends ProfilesController
 				)
 		}
 
-		cmd.from = startDate
-		cmd.to = endDate
+		cmd.from = startDate.toDateTimeAtStartOfDay.getMillis
+		cmd.to = endDate.toDateTimeAtStartOfDay.getMillis
 
 		cmd.apply() match {
 			case Success(result) =>

@@ -19,6 +19,13 @@
         <JSCodeStyleSettings>
           <option name="SPACE_BEFORE_FUNCTION_LEFT_PARENTH" value="false" />
         </JSCodeStyleSettings>
+        <ScalaCodeStyleSettings>
+          <option name="alwaysUsedImports">
+            <array>
+              <option value="uk.ac.warwick.tabula.helpers.DateTimeOrdering._" />
+            </array>
+          </option>
+        </ScalaCodeStyleSettings>
         <XML>
           <option name="XML_LEGACY_SETTINGS_IMPORTED" value="true" />
         </XML>
@@ -49,7 +56,7 @@
           </indentOptions>
         </codeStyleSettings>
         <codeStyleSettings language="Scala">
-		  <option name="ALIGN_MULTILINE_PARAMETERS" value="false" />
+          <option name="ALIGN_MULTILINE_PARAMETERS" value="false" />
           <indentOptions>
             <option name="USE_TAB_CHARACTER" value="true" />
           </indentOptions>

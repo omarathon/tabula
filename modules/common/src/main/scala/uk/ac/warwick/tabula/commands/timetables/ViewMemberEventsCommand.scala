@@ -1,6 +1,6 @@
 package uk.ac.warwick.tabula.commands.timetables
 
-import org.joda.time.{DateTime, Interval, LocalDate}
+import org.joda.time.{DateTime, Interval}
 import org.springframework.validation.Errors
 import uk.ac.warwick.tabula.commands._
 import uk.ac.warwick.tabula.commands.timetables.ViewMemberEventsCommand.ReturnType
@@ -165,12 +165,8 @@ trait ViewMemberEventsState {
 }
 
 // Request parameters
-trait ViewMemberEventsRequest extends ViewMemberEventsState {
+trait ViewMemberEventsRequest extends ViewMemberEventsState with TimetableEventsRequest {
 	var academicYear: AcademicYear = _
-	var from: LocalDate = LocalDate.now.minusMonths(12)
-	var to: LocalDate = from.plusMonths(13)
-	def start: LocalDate = from
-	def end: LocalDate = to
 }
 
 trait ViewMemberEventsPermissions extends RequiresPermissionsChecking with PermissionsCheckingMethods {
