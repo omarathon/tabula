@@ -74,6 +74,11 @@
 						</@f.select>
 					</@bs3form.labelled_form_group>
 
+					<@bs3form.labelled_form_group path="meetingLocation" labelText="Location">
+						<@f.hidden path="meetingLocationId" />
+						<@f.input path="meetingLocation" cssClass="form-control" />
+					</@bs3form.labelled_form_group>
+
 					<#assign fileTypes=command.attachmentTypes />
 					<@bs3form.filewidget basename="file" types=fileTypes />
 

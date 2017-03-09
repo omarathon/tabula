@@ -8,6 +8,7 @@ import org.springframework.web.bind.annotation.{ModelAttribute, PathVariable, Re
 import uk.ac.warwick.tabula.commands.profiles.relationships.meetings.ApproveMeetingRecordCommand
 import uk.ac.warwick.tabula.commands.{Appliable, SelfValidating}
 import uk.ac.warwick.tabula.data.model.{MeetingRecord, MeetingRecordApproval}
+import uk.ac.warwick.tabula.profiles.web.Routes
 import uk.ac.warwick.tabula.web.Mav
 import uk.ac.warwick.tabula.web.controllers.profiles.ProfilesController
 import uk.ac.warwick.tabula.web.views.{JSONErrorView, JSONView}
@@ -29,17 +30,17 @@ class ApproveMeetingRecordController  extends ProfilesController {
 		errors: Errors,
 		@PathVariable meetingRecord: MeetingRecord
 	): Mav = {
-
-		val meetingRecordId = meetingRecord.id
-
 		if (!errors.hasErrors) {
 			command.apply()
-			Mav(new JSONView(Map(
-				"status" -> "successful"
-			)))
+			if (ajax) {
+				Mav(new JSONView(Map(
+					"status" -> "successful"
+				)))
+			} else {
+				Redirect(Routes.Profile.relationshipType(meetingRecord.relationship.studentCourseDetails.student, meetingRecord.relationship.relationshipType))
+			}
 		} else {
-			Mav(new JSONErrorView(errors, Map("formId" -> "meeting-%s".format(meetingRecordId))))
+			Mav(new JSONErrorView(errors, Map("formId" -> "meeting-%s".format(meetingRecord.id))))
 		}
-
 	}
 }
