@@ -14,14 +14,14 @@
 	<@f.form method="post" action=actionUrl>
 		<@components.assignment_wizard 'details' module />
 		<#if command.prefilled>
-			<div class="alert alert-success">
+			<div class="alert alert-info">
 				<i class="icon-info-sign fa fa-info-circle"></i>
 				Some fields have been pre-filled from another recently created assignment for convenience.
 				<a href='${actionUrl}?prefillFromRecent=false'>Don't do this</a>
 			</div>
 		</#if>
 		<#if command.prefillAssignment??>
-			<div class="alert alert-success">
+			<div class="alert alert-info">
 				<i class="fa fa-question-circle"></i>
 				Some fields have been pre-filled from assignment ${command.prefillAssignment.name}.
 			</div>

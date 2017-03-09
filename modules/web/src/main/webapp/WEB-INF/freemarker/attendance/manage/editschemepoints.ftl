@@ -17,7 +17,7 @@
 	<#if newPoints == 0>
 		<p><@fmt.p scheme.points?size "point" /> on this scheme</p>
 	<#else>
-		<div class="alert alert-success">
+		<div class="alert alert-info">
 			<strong><@fmt.p newPoints "point" /></strong> ${actionCompleted!"added to this scheme"}
 			<a class="btn btn-default" href="<@routes.attendance.manageEditPoints findCommand.department findCommand.academicYear schemesParam />">Edit points</a>
 		</div>

@@ -154,12 +154,6 @@ $(function() {
 // Re-usable small groups
 $(function() {
 	if ($('.add-student-to-set').length > 0) {
-		$('details').on('open.details close.details', function() {
-			setTimeout(function() {
-				$(window).trigger('resize');
-			}, 10);
-		});
-
 		$('.tablesorter').find('th.sortable').addClass('header').on('click', function() {
 			var $th = $(this)
 				, sortDescending = function() {
@@ -171,7 +165,7 @@ $(function() {
 					$th.closest('thead').find('th').removeClass('headerSortUp').removeClass('headerSortDown');
 					$th.addClass('headerSortDown');
 				}, $form = $th.closest('form')
-				, $details = $th.closest('details');
+				, $section = $th.closest('.striped-section');
 
 			if ($th.hasClass('headerSortUp')) {
 				sortAscending();
@@ -186,10 +180,10 @@ $(function() {
 				}
 			}
 
-			if ($details.data('submitparam').length > 0) {
+			if ($section.data('submitparam').length > 0) {
 				$form.append($('<input/>').attr({
 					'type': 'hidden',
-					'name': $details.data('submitparam'),
+					'name': $section.data('submitparam'),
 					'value': true
 				}));
 			}
@@ -197,7 +191,7 @@ $(function() {
 		});
 
 		$('.pagination').on('click', 'a', function() {
-			var $this = $(this), $form = $this.closest('form'), $details = $this.closest('details');
+			var $this = $(this), $form = $this.closest('form'), $section = $this.closest('.striped-section');
 			if ($this.data('page').toString.length > 0) {
 				$form.find('input[name="page"]').remove().end()
 					.append($('<input/>').attr({
@@ -207,11 +201,11 @@ $(function() {
 					})
 				);
 			}
-			if ($details.data('submitparam').length > 0) {
-				$form.find('input[name="' + $details.data('submitparam') + '"]').remove().end()
+			if ($section.data('submitparam').length > 0) {
+				$form.find('input[name="' + $section.data('submitparam') + '"]').remove().end()
 					.append($('<input/>').attr({
 						'type': 'hidden',
-						'name': $details.data('submitparam'),
+						'name': $section.data('submitparam'),
 						'value': true
 					})
 				);
