@@ -38,7 +38,7 @@ trait SharedAssignmentProperties extends BooleanAssignmentProperties with FindAs
 	@Max(Assignment.MaximumWordCount)
 	var wordCountMax: JInteger = _
 	@Length(max = 600)
-	var wordCountConventions: String = "Exclude any bibliography or appendices."
+	var wordCountConventions: String = "Exclude any bibliography or appendices from your word count."
 
 	// linked feedback template (optional)
 	var feedbackTemplate: FeedbackTemplate = _
@@ -50,6 +50,10 @@ trait SharedAssignmentProperties extends BooleanAssignmentProperties with FindAs
 	@Min(1)
 	@Max(Assignment.MaximumFileAttachments)
 	var fileAttachmentLimit: Int = 1
+
+	@Min(1)
+	@Max(Assignment.MaximumFileAttachments)
+	var minimumFileAttachmentLimit: Int = 1
 
 	val maxFileAttachments: Int = 20
 
@@ -69,7 +73,7 @@ trait SharedAssignmentProperties extends BooleanAssignmentProperties with FindAs
 	var comment: String = _
 
 	def validateShared(errors: Errors) {
-		if(fileAttachmentTypes.mkString("").matches(invalidAttachmentPattern)){
+		if (fileAttachmentTypes.mkString("").matches(invalidAttachmentPattern)) {
 			errors.rejectValue("fileAttachmentTypes", "attachment.invalidChars")
 		}
 
@@ -80,6 +84,8 @@ trait SharedAssignmentProperties extends BooleanAssignmentProperties with FindAs
 			case (None, Some(max)) => wordCountMin = 0
 			case _ => // It's All Good
 		}
+
+		if (fileAttachmentLimit < minimumFileAttachmentLimit) errors.rejectValue("fileAttachmentLimit", "assignment.attachments.outOfRange")
 	}
 
 	def copySharedTo(assignment: Assignment) {
@@ -90,21 +96,25 @@ trait SharedAssignmentProperties extends BooleanAssignmentProperties with FindAs
 			zipService.invalidateSubmissionZip(assignment)
 		assignment.markingWorkflow = markingWorkflow
 		manageMarkerField(assignment)
+		copyOptionsTo(assignment)
+	}
 
+	def copyOptionsTo(assignment: Assignment) {
 		for (field <- findCommentField(assignment)) field.value = comment
 		for (file <- findFileField(assignment)) {
 			file.attachmentLimit = fileAttachmentLimit
+			file.minimumAttachmentLimit = minimumFileAttachmentLimit
 			file.attachmentTypes = fileAttachmentTypes
 			file.individualFileSizeLimit = individualFileSizeLimit
 		}
 
 		if (wordCountMin == null && wordCountMax == null) {
-			findWordCountField(assignment).foreach{ wordCountField =>
+			findWordCountField(assignment).foreach { wordCountField =>
 				wordCountField.max = null
 				wordCountField.min = null
 			}
 		} else {
-			val wordCount = findWordCountField(assignment).getOrElse{
+			val wordCount = findWordCountField(assignment).getOrElse {
 				val newField = new WordCountField()
 				newField.name = Assignment.defaultWordCountName
 				assignment.addField(newField)
@@ -139,6 +149,7 @@ trait SharedAssignmentProperties extends BooleanAssignmentProperties with FindAs
 		for (field <- findCommentField(assignment)) comment = field.value
 		for (file <- findFileField(assignment)) {
 			fileAttachmentLimit = file.attachmentLimit
+			minimumFileAttachmentLimit = file.minimumAttachmentLimit
 			fileAttachmentTypes = file.attachmentTypes
 			individualFileSizeLimit = file.individualFileSizeLimit
 		}
@@ -155,7 +166,7 @@ trait SharedAssignmentProperties extends BooleanAssignmentProperties with FindAs
 	 */
 	def manageMarkerField(assignment:Assignment) {
 		val markerField = findMarkerSelectField(assignment)
-		if (markingWorkflow != null && markingWorkflow.studentsChooseMarker){
+		if (markingWorkflow != null && markingWorkflow.studentsChooseMarker) {
 			// we now need a marker field for this assignment. create one
 			if (markerField.isEmpty) {
 				val markerSelect = new MarkerSelectField()
