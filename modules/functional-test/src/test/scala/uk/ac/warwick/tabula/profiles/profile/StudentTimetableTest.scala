@@ -19,13 +19,6 @@ import scala.xml.Elem
 	*/
 class StudentTimetableTest extends BrowserTest with TimetablingFixture with GivenWhenThen {
 
-	// The default HTMLUnit JS engine throws errors about
-	// "Unexpected call to method or property access" when trying to render the profiles page
-	// The code that updates the calendar title seems to trigger the error, but it doesn't happen
-	// in any real browsers that I've tested with.
-	// Using Firefox JS emulation avoids the problem.
-	override val htmlUnitBrowserVersion = BrowserVersion.FIREFOX_38
-
 	"A student" should "be able to view their timetable" in {
 
 		Given("The timetabling service knows of a single event for student1")

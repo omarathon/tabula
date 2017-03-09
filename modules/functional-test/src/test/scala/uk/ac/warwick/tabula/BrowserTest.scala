@@ -58,7 +58,7 @@ abstract class BrowserTest
 	}
 
 	// Can be overridden by a test if necessary.
-	val htmlUnitBrowserVersion = BrowserVersion.FIREFOX_38
+	val htmlUnitBrowserVersion = BrowserVersion.BEST_SUPPORTED
 
 	def ifHtmlUnitDriver(operation:HtmlUnitDriver=>Unit): Unit = {
 		webDriver match {
