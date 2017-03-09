@@ -116,7 +116,7 @@ class AttendanceMonitoringCheckpointFormatter extends TemplateMethodModelEx {
 				AttendanceMonitoringCheckpointFormatterResult(
 					"Attended",
 					"label-success",
-					"icon-ok fa fa-check attended",
+					"fa fa-check attended",
 					s"Attended: ${point.name} ${pointDuration(point, department)}",
 					describeCheckpoint(checkpoint),
 					noteType,
@@ -127,7 +127,7 @@ class AttendanceMonitoringCheckpointFormatter extends TemplateMethodModelEx {
 				AttendanceMonitoringCheckpointFormatterResult(
 					"Missed (authorised)",
 					"label-info",
-					"icon-remove-circle fa fa-times-circle-o authorised",
+					"fa fa-times-circle-o authorised",
 					s"Missed (authorised): ${point.name} ${pointDuration(point, department)}",
 					describeCheckpoint(checkpoint),
 					noteType,
@@ -139,7 +139,7 @@ class AttendanceMonitoringCheckpointFormatter extends TemplateMethodModelEx {
 				AttendanceMonitoringCheckpointFormatterResult(
 					"Missed (unauthorised)",
 					"label-danger label-important",
-					"icon-remove fa fa-times unauthorised",
+					"fa fa-times unauthorised",
 					s"Missed (unauthorised): ${point.name} ${pointDuration(point, department)}",
 					describeCheckpoint(checkpoint),
 					noteType,
@@ -164,7 +164,7 @@ class AttendanceMonitoringCheckpointFormatter extends TemplateMethodModelEx {
 			AttendanceMonitoringCheckpointFormatterResult(
 				"Unrecorded",
 				"label-warning",
-				"icon-warning-sign fa fa-exclamation-triangle late",
+				"fa fa-exclamation-triangle late",
 				s"${point.name} ${pointDuration(point, department)}",
 				"",
 				noteType,
@@ -175,7 +175,7 @@ class AttendanceMonitoringCheckpointFormatter extends TemplateMethodModelEx {
 			AttendanceMonitoringCheckpointFormatterResult(
 				"",
 				"",
-				"icon-minus fa fa-minus",
+				"fa fa-minus",
 				s"${point.name} ${pointDuration(point, department)}",
 				"",
 				noteType,

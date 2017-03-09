@@ -19,11 +19,11 @@
 
 	<p>Type or paste in a list of usercodes or University numbers here, separated by white space, then click <code>Add</code>.</p>
 
-	<textarea rows="6" class="input-block-level" name="massAddUsers"></textarea>
+	<textarea rows="6" class="form-control" name="massAddUsers"></textarea>
 
 	<input
 		type="submit"
-		class="btn btn-success disabled spinnable spinner-auto add-students"
+		class="btn btn-primary disabled spinnable spinner-auto add-students"
 		name="${ManageSchemeMappingParameters.manuallyAddSubmit}"
 		value="Add"
 	/>

@@ -1,4 +1,4 @@
-The following student has missed ${level} monitoring points in the academic year ${academicYear.toString}:
+The following student has missed at least ${level} monitoring points in the academic year ${academicYear.toString}:
 
 Name: ${student.fullName!'Unknown'}
 University ID: ${student.universityId}

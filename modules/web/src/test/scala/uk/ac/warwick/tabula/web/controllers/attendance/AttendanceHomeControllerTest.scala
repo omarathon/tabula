@@ -84,7 +84,7 @@ class AttendanceHomeControllerTest extends TestBase with Mockito{
 		)
 
 		val mav: Mav = controller.home(command, None)
-		mav.viewName should be(s"redirect:/attendance/manage/$departmentCode")
+		mav.viewName should be(s"redirect:/attendance/manage/$departmentCode/${AcademicYear(2016).startYear.toString}")
 
 	}}
 

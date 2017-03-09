@@ -157,6 +157,7 @@
 					<nomunge>true</nomunge>
 					<disableOptimizations>true</disableOptimizations>
 					<excludes>
+						<exclude>**/static/bower_components/**/*.*</exclude>
 						<exclude>**/static/libs/**/*.*</exclude>
 						<exclude>**/*.css</exclude>
 					</excludes>

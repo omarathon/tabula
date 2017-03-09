@@ -15,7 +15,7 @@
 
 <h1>Edit scheme: ${scheme.displayName}</h1>
 
-<form method="POST">
+<form class="add-student-to-scheme" method="POST">
 	<input type="hidden" name="filterQueryString" value="${findCommand.serializeFilter}" />
 	<@listStudentIdInputs />
 
@@ -30,7 +30,7 @@
 		<#include "_selectstudents.ftl" />
 
 		<div class="fix-footer submit-buttons">
-			<p style="padding-left: 20px;">
+			<p style="padding-left: 20px;" class="checkbox">
 				<label>
 					<#if SITSInFlux>
 						<input type="checkbox" name="_linkToSits" value="on" disabled />
@@ -44,7 +44,7 @@
 						   data-content="${popoverContent}"
 						   data-html="true"
 						>
-							<i class="icon-question-sign"></i>
+							<i class="fa fa-question-circle"></i>
 						</a>
 					<#else>
 						<@f.checkbox path="findCommand.linkToSits" />
@@ -59,32 +59,34 @@
 						   data-content="${popoverContent}"
 						   data-html="true"
 						>
-							<i class="icon-question-sign"></i>
+							<i class="fa fa-question-circle"></i>
 						</a>
 					</#if>
 				</label>
 			</p>
 
-			<input
-				type="submit"
-				class="btn btn-success use-tooltip spinnable spinner-auto"
-				name="${ManageSchemeMappingParameters.createAndAddPoints}"
-				value="Save"
-				title="Select which monitoring points this scheme should use"
-				data-container="body"
-				data-loading-text="Saving&hellip;"
-			/>
-			<input
-				type="submit"
-				class="btn btn-primary use-tooltip spinnable spinner-auto"
-				name="persist"
-				value="Save and exit"
-				title="Save your scheme"
-				data-container="body"
-				data-loading-text="Saving&hellip;"
-			/>
+			<p>
+				<input
+					type="submit"
+					class="btn btn-primary use-tooltip spinnable spinner-auto"
+					name="${ManageSchemeMappingParameters.createAndAddPoints}"
+					value="Save and edit points"
+					title="Select which monitoring points this scheme should use"
+					data-container="body"
+					data-loading-text="Saving&hellip;"
+				/>
+				<input
+					type="submit"
+					class="btn btn-primary use-tooltip spinnable spinner-auto"
+					name="persist"
+					value="Save and exit"
+					title="Save your scheme"
+					data-container="body"
+					data-loading-text="Saving&hellip;"
+				/>
 
-			<a class="btn" href="<@routes.attendance.manageHomeForYear scheme.department scheme.academicYear.startYear?c />">Cancel</a>
+				<a class="btn btn-default" href="<@routes.attendance.manageHomeForYear scheme.department scheme.academicYear />">Cancel</a>
+			</p>
 		</div>
 
 	</div>

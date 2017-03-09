@@ -632,6 +632,10 @@
 			var populateContent = function(onComplete) { onComplete(); };
 			if ($section.data('populate') && $section.data('href')) {
 				$section.data('loaded', false).data('loading', false);
+				var formdata = { ts: new Date().getTime() };
+				if ($section.data('form')) {
+					formdata = $($section.data('form')).serialize();
+				}
 
 				// Populate function
 				populateContent = function(onComplete) {
@@ -644,12 +648,16 @@
 
 						var $target = $section.find($section.data('populate'));
 
-						$target.load(
+						$.post(
 							$section.data('href'),
-							{ ts: new Date().getTime() },
-							function() {
+							formdata,
+							function(html) {
+								$target.html(html);
 								$target.find('a.ajax-modal').ajaxModalLink();
-
+								$target.find('.use-popover').tabulaPopover({
+									trigger: 'click',
+									container: '#container'
+								});
 								onComplete();
 								$section.data('loading', false).data('loaded', true).trigger('loaded.collapsible');
 							}
@@ -703,6 +711,8 @@
 							$section.wideTables();
 						});
 					}
+
+					$(window).trigger('resize');
 				});
 
 				if (!open() && window.location.hash && window.location.hash.substring(1) == $section.data('name')) {

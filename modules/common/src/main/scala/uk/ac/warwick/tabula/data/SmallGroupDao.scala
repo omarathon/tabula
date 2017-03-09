@@ -2,7 +2,8 @@ package uk.ac.warwick.tabula.data
 
 import org.hibernate.FetchMode
 import org.hibernate.criterion.Restrictions._
-import org.hibernate.criterion.{Order, Projections}
+import org.hibernate.criterion.Projections._
+import org.hibernate.criterion.Order._
 import org.hibernate.sql.JoinType
 import org.joda.time.LocalTime
 import org.springframework.stereotype.Repository
@@ -62,6 +63,8 @@ trait SmallGroupDao {
 	def findSetsByDepartmentAndYear(department: Department, year: AcademicYear): Seq[SmallGroupSet]
 	def findSetsByModuleAndYear(module: Module, year: AcademicYear): Seq[SmallGroupSet]
 	def findAllSetsByDepartment(department: Department): Seq[SmallGroupSet]
+	def countAllSetsByYear(year: AcademicYear): Int
+	def findAllSetsByYear(year: AcademicYear, maxResults: Int, startResult: Int): Seq[SmallGroupSet]
 	def findByModuleAndYear(module: Module, year: AcademicYear): Seq[SmallGroup]
 
 	def getSmallGroupEventOccurrence(event: SmallGroupEvent, week: Int): Option[SmallGroupEventOccurrence]
@@ -100,8 +103,6 @@ trait SmallGroupDao {
 @Repository
 class SmallGroupDaoImpl extends SmallGroupDao
 	with Daoisms with TaskBenchmarking with AutowiringUserLookupComponent {
-
-	import Order._
 
 	def getSmallGroupSetById(id: String): Option[SmallGroupSet] = getById[SmallGroupSet](id)
 	def getSmallGroupById(id: String): Option[SmallGroup] = getById[SmallGroup](id)
@@ -148,6 +149,46 @@ class SmallGroupDaoImpl extends SmallGroupDao
 			.createAlias("module", "module")
 			.add(is("module.adminDepartment", department))
 			.seq
+
+	def countAllSetsByYear(year: AcademicYear): Int =
+		session.newCriteria[SmallGroupSet]
+			.add(is("academicYear", year))
+			.count.intValue
+
+	def findAllSetsByYear(year: AcademicYear, maxResults: Int, startResult: Int): Seq[SmallGroupSet] = {
+		val allIds =
+			session.newCriteria[SmallGroupSet]
+				.createAlias("module", "module")
+				.createAlias("module.adminDepartment", "department")
+				.add(is("academicYear", year))
+				.addOrder(asc("department.code"))
+				.addOrder(asc("module.code"))
+				.addOrder(asc("name"))
+				.setMaxResults(maxResults)
+				.setFirstResult(startResult)
+				.project[Array[Any]](
+					projectionList()
+						.add(distinct(id()))
+						.add(property("department.code"))
+						.add(property("module.code"))
+						.add(property("name"))
+				)
+				.seq.map(_(0).asInstanceOf[String])
+
+		safeInSeq(() => {
+			session.newCriteria[SmallGroupSet]
+				.createAlias("module", "module")
+				.createAlias("module.adminDepartment", "department")
+				.addOrder(asc("department.code"))
+				.addOrder(asc("module.code"))
+				.addOrder(asc("name"))
+				.setFetchMode("groups", FetchMode.JOIN)
+				.setFetchMode("groups.events", FetchMode.JOIN)
+				.setFetchMode("module", FetchMode.JOIN)
+				.setFetchMode("department", FetchMode.JOIN)
+			  .distinct
+		}, "id", allIds).sortBy { s => (s.module.adminDepartment.code, s.module.code, s.name) }
+	}
 
 	def findByModuleAndYear(module: Module, year: AcademicYear): Seq[SmallGroup] =
 		session.newCriteria[SmallGroup]
@@ -200,7 +241,7 @@ class SmallGroupDaoImpl extends SmallGroupDao
 			.createAlias("occurrence", "occurrence")
 			.createAlias("occurrence.event", "event")
 			.add(is("universityId", studentId))
-			.project[SmallGroup](Projections.distinct(Projections.groupProperty("event.group")))
+			.project[SmallGroup](distinct(groupProperty("event.group")))
 			.seq
 
 	def findManuallyAddedAttendance(studentId: String): Seq[SmallGroupEventAttendance] =
@@ -277,8 +318,7 @@ class SmallGroupDaoImpl extends SmallGroupDao
 		session.newCriteria[SmallGroupSet]
 			.add(is("module", module))
 			.add(is("deleted", false))
-			.project[Number](Projections.rowCount())
-			.uniqueResult.get.intValue() > 0
+			.count.intValue > 0
 	}
 
 	def hasSmallGroups(module: Module, academicYear: AcademicYear): Boolean = {
@@ -286,8 +326,7 @@ class SmallGroupDaoImpl extends SmallGroupDao
 			.add(is("module", module))
 			.add(is("deleted", false))
 			.add(is("academicYear", academicYear))
-			.project[Number](Projections.rowCount())
-			.uniqueResult.get.intValue() > 0
+			.count.intValue > 0
 	}
 
 	def getDepartmentSmallGroupSets(department: Department, year: AcademicYear): Seq[DepartmentSmallGroupSet] = {
@@ -328,9 +367,9 @@ class SmallGroupDaoImpl extends SmallGroupDao
 				.createAlias("groupSet.module", "module")
 				.add(is("module.adminDepartment", department))
 				.add(is("groupSet.academicYear", academicYear))
-				.project[Array[java.lang.Object]](Projections.projectionList()
-					.add(Projections.property("id"))
-					.add(Projections.property("group.id"))
+				.project[Array[java.lang.Object]](projectionList()
+					.add(property("id"))
+					.add(property("group.id"))
 				).seq
 				.map(array => (array(0).asInstanceOf[String], array(1).asInstanceOf[String]))
 		}
@@ -344,9 +383,9 @@ class SmallGroupDaoImpl extends SmallGroupDao
 						.createAlias("usergroup.includeUsers", "users")
 						.add(isNull("linkedDepartmentSmallGroup"))
 				},
-				Projections.projectionList()
-					.add(Projections.groupProperty("id"))
-					.add(Projections.count("id")),
+				projectionList()
+					.add(groupProperty("id"))
+					.add(count("id")),
 				"id",
 				eventIDs.map(_._2)
 			).seq
@@ -362,9 +401,9 @@ class SmallGroupDaoImpl extends SmallGroupDao
 						.createAlias("linkedGroup._studentsGroup", "usergroup")
 						.createAlias("usergroup.includeUsers", "users")
 				},
-				Projections.projectionList()
-					.add(Projections.groupProperty("id"))
-					.add(Projections.count("id")),
+				projectionList()
+					.add(groupProperty("id"))
+					.add(count("id")),
 				"id",
 				eventIDs.map(_._2)
 			).seq
@@ -379,9 +418,9 @@ class SmallGroupDaoImpl extends SmallGroupDao
 						.createAlias("_tutors", "usergroup")
 						.createAlias("usergroup.includeUsers", "users")
 				},
-				Projections.projectionList()
-					.add(Projections.property("id"))
-					.add(Projections.property("users.elements")),
+				projectionList()
+					.add(property("id"))
+					.add(property("users.elements")),
 				"id",
 				eventIDs.map(_._1)
 			).seq
@@ -400,19 +439,19 @@ class SmallGroupDaoImpl extends SmallGroupDao
 					.add(is("module.adminDepartment", department))
 					.add(is("groupSet.academicYear", academicYear))
 			},
-			Projections.projectionList()
-				.add(Projections.property("id"))
-				.add(Projections.property("group.id"))
-				.add(Projections.property("groupSet.name"))
-				.add(Projections.property("group.uk$ac$warwick$tabula$data$model$groups$SmallGroup$$_name")) // Fuck you Hibernate
-				.add(Projections.property("linkedGroup.name")) // Fuck you Hibernate
-				.add(Projections.property("title"))
-				.add(Projections.property("module.name"))
-				.add(Projections.property("day"))
-				.add(Projections.property("startTime"))
-				.add(Projections.property("endTime"))
-				.add(Projections.property("location"))
-				.add(Projections.property("weekRanges"))
+			projectionList()
+				.add(property("id"))
+				.add(property("group.id"))
+				.add(property("groupSet.name"))
+				.add(property("group.uk$ac$warwick$tabula$data$model$groups$SmallGroup$$_name")) // Fuck you Hibernate
+				.add(property("linkedGroup.name")) // Fuck you Hibernate
+				.add(property("title"))
+				.add(property("module.name"))
+				.add(property("day"))
+				.add(property("startTime"))
+				.add(property("endTime"))
+				.add(property("location"))
+				.add(property("weekRanges"))
 			,
 			"id",
 			eventIDs.map(_._1)
@@ -450,11 +489,11 @@ class SmallGroupDaoImpl extends SmallGroupDao
 					.createAlias("course.studentCourseYearDetails", "studentCourseYearDetails")
 					.add(is("studentCourseYearDetails.academicYear", academicYear))
 			},
-			Projections.projectionList()
-				.add(Projections.property("universityId"))
-				.add(Projections.property("route.code"))
-				.add(Projections.property("route.name"))
-				.add(Projections.property("studentCourseYearDetails.yearOfStudy"))
+			projectionList()
+				.add(property("universityId"))
+				.add(property("route.code"))
+				.add(property("route.name"))
+				.add(property("studentCourseYearDetails.yearOfStudy"))
 			,
 			"universityId",
 			members.map(_.universityId)

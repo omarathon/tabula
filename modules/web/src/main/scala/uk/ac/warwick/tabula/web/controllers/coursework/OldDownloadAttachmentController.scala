@@ -29,7 +29,7 @@ class OldDownloadAttachmentController extends OldCourseworkController {
 }
 
 @Profile(Array("cm1Enabled")) @Controller
-@RequestMapping(value=Array("/${cm1.prefix}/module/{module}/{assignment}/{studentMember}"))
+@RequestMapping(value=Array("/${cm1.prefix}/module/{module}/{assignment}/{student}"))
 class OldDownloadAttachmentForStudentController extends OldCourseworkController {
 
 	var submissionService: SubmissionService = Wire[SubmissionService]

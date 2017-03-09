@@ -36,7 +36,7 @@
 			<@bs3form.checkbox>
 				<@f.checkbox path="confirm" /> I confirm that I want to upload these missed points.
 			</@bs3form.checkbox>
-			<@form.errors path="confirm"/>
+			<@bs3form.errors path="confirm"/>
 		</p>
 
 	</div>

@@ -40,7 +40,11 @@ trait StudentAssignmentInfoToJsonConverter extends CourseworkCommandTypes {
 
 			"module" -> Map(
 				"code" -> assignment.module.code.toUpperCase,
-				"name" -> assignment.module.name
+				"name" -> assignment.module.name,
+				"adminDepartment" -> Map(
+					"code" -> assignment.module.adminDepartment.code.toUpperCase,
+					"name" -> assignment.module.adminDepartment.name
+				)
 			),
 
 			"id" -> assignment.id,

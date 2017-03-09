@@ -79,7 +79,7 @@
 	<a class="btn btn-primary" href="<@routes.attendance.viewRecordStudent department academicYear student />">Record attendance</a>
 	<#list attendance_variables.monitoringPointTermNames as term>
 		<#if groupedPointMap[term]??>
-			<@attendance_macros.id7GroupedPointsBySection groupedPointMap term; groupedPointPair>
+			<@attendance_macros.groupedPointsBySection groupedPointMap term; groupedPointPair>
 				<#assign point = groupedPointPair._1() />
 				<div class="col-md-10">
 					${point.name}
@@ -103,13 +103,13 @@
 						<@attendance_macros.checkpointLabel department=department point=groupedPointPair._1() student=student />
 					</#if>
 				</div>
-			</@attendance_macros.id7GroupedPointsBySection>
+			</@attendance_macros.groupedPointsBySection>
 		</#if>
 	</#list>
 
 	<#list monthNames as month>
 		<#if groupedPointMap[month]??>
-			<@attendance_macros.id7GroupedPointsBySection groupedPointMap month; groupedPointPair>
+			<@attendance_macros.groupedPointsBySection groupedPointMap month; groupedPointPair>
 				<#assign point = groupedPointPair._1() />
 				<div class="col-md-10">
 					${point.name}
@@ -122,7 +122,7 @@
 						<@attendance_macros.checkpointLabel department=department point=groupedPointPair._1() student=student />
 					</#if>
 				</div>
-			</@attendance_macros.id7GroupedPointsBySection>
+			</@attendance_macros.groupedPointsBySection>
 		</#if>
 	</#list>
 </#if>

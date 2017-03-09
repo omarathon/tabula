@@ -1,7 +1,7 @@
 <#assign secondMarkerFeedback = parentFeedback.secondMarkerFeedback />
 <div class="well alert alert-danger">
 	<h3 style="color: inherit;">
-		The moderator requested changes to this feedabck at <@fmt.date secondMarkerFeedback.uploadedDate />
+		The moderator requested changes to this feedback at <@fmt.date secondMarkerFeedback.uploadedDate />
 	</h3>
 </div>
 <div class="well">
@@ -44,8 +44,8 @@
 			<h5>Attachments</h5>
 			<div>
 				<#assign downloadMFUrl><@routes.coursework.markerFeedbackFilesDownload secondMarkerFeedback/></#assign>
-				<@fmt.download_attachments feedback.attachments downloadMFUrl "for ${feedback.feedbackPosition.description?uncap_first}" "feedback-${feedback.feedback.studentIdentifier}" />
-				<#list feedback.attachments as attachment>
+				<@fmt.download_attachments secondMarkerFeedback.attachments downloadMFUrl "for ${secondMarkerFeedback.feedbackPosition.description?uncap_first}" "feedback-${secondMarkerFeedback.feedback.studentIdentifier}" />
+				<#list secondMarkerFeedback.attachments as attachment>
 					<input value="${attachment.id}" name="${attachment.name}" type="hidden"/>
 				</#list>
 			</div>

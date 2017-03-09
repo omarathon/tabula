@@ -193,7 +193,7 @@
 							</td>
 							<td class="submission-status">
 								<#-- Markable - ignore placeholder submissions -->
-								<#if assignment.isReleasedForMarking(student.user.warwickId)>
+								<#if assignment.isReleasedForMarking(student.user.userId)>
 									<span class="label label-success">Markable</span>
 								</#if>
 								<#if submission??>
@@ -219,13 +219,13 @@
 							</#if>
 							<#if assignment.markingWorkflow??>
 								<td>
-									<#if (assignment.getStudentsFirstMarker(student.user.warwickId)!"")?has_content>
-										${assignment.getStudentsFirstMarker(student.user.warwickId).fullName}
+									<#if (assignment.getStudentsFirstMarker(student.user.userId)!"")?has_content>
+										${assignment.getStudentsFirstMarker(student.user.userId).fullName}
 									</#if>
 								</td>
 								<td>
-									<#if (assignment.getStudentsSecondMarker(student.user.warwickId)!"")?has_content>
-										${assignment.getStudentsSecondMarker(student.user.warwickId).fullName}
+									<#if (assignment.getStudentsSecondMarker(student.user.userId)!"")?has_content>
+										${assignment.getStudentsSecondMarker(student.user.userId).fullName}
 									</#if>
 								</td>
 							</#if>

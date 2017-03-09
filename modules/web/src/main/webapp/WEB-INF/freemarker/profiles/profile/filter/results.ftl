@@ -23,7 +23,10 @@
 			<td><a class="profile-link" href="<@routes.profiles.profile student />">${student.universityId}</a></td>
 			<td>${student.groupName}</td>
 			<#if academicYear?has_content>
-				<#assign courseYearDetails=student.freshOrStaleStudentCourseYearDetailsForYear(academicYear) />
+				<#assign courseYearDetails = (student.mostSignificantCourseDetails.freshOrStaleStudentCourseYearDetailsForYear(academicYear))!"" />
+				<#if !courseYearDetails?has_content>
+					<#assign courseYearDetails=student.freshOrStaleStudentCourseYearDetailsForYear(academicYear) />
+				</#if>
 				<td>${(courseYearDetails.yearOfStudy)!""}</td>
 				<td>${(courseYearDetails.route.name)!""}</td>
 			<#else>

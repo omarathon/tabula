@@ -27,59 +27,69 @@
 
 <div class="fix-area">
 
-	<form action="<@routes.attendance.manageAddPointsCopy command.department command.academicYear.startYear?c />" method="post" class="form-inline">
+	<form action="<@routes.attendance.manageAddPointsCopy command.department command.academicYear />" method="post" class="form-inline">
 		<#list command.schemes as scheme>
 			<input type="hidden" name="schemes" value="${scheme.id}" />
 		</#list>
 
 		<input type="hidden" name="returnTo" value="${returnTo}" />
 
-		<p>
-			<label>Copy points from:</label>
-			<label style="margin-left: 16px;">
-				Academic year
-				<select name="searchAcademicYear" class="input-small">
-					<#list allAcademicYears as year>
-						<option
-							value="${year.toString}"
-							<#if searchAcademicYear??>
-								<#if searchAcademicYear.toString == year.toString>
-									selected
-								</#if>
-							<#elseif academicYear.toString == year.toString>
+		<@bs3form.form_group>
+			<label style="margin-right: 12px;">Copy points from:</label>
+			<label>Academic year</label>
+			<select name="searchAcademicYear" class="form-control" style="margin-right: 12px;">
+				<#list allAcademicYears as year>
+					<option	value="${year.toString}"
+						<#if searchAcademicYear??>
+							<#if searchAcademicYear.toString == year.toString>
 								selected
 							</#if>
-						>
-							${year.toString}
-						</option>
-					</#list>
-				</select>
-			</label>
-			<label style="margin-left: 16px;">
-				Department
-				<select name="searchDepartment">
-					<#list allDepartments as department>
-						<option value="${department.code}" <#if searchDepartment?? && searchDepartment.name == department.name>selected</#if>>
-							${department.name}
-						</option>
-					</#list>
-				</select>
-			</label>
+						<#elseif academicYear.toString == year.toString>
+							selected
+						</#if>
+					>
+						${year.toString}
+					</option>
+				</#list>
+			</select>
+		</@bs3form.form_group>
 
-			<input style="margin-left: 16px;" type="submit" class="btn btn-primary" name="search" value="Display"/>
-		</p>
+		<@bs3form.labelled_form_group labelText="Department">
+			<select name="searchDepartment" class="form-control" style="margin-right: 12px;">
+				<#list allDepartments as department>
+					<option value="${department.code}" <#if searchDepartment?? && searchDepartment.name == department.name>selected</#if>>
+					${department.name}
+					</option>
+				</#list>
+			</select>
+		</@bs3form.labelled_form_group>
+
+		<@bs3form.form_group>
+			<input type="submit" class="btn btn-primary" name="search" value="Display"/>
+		</@bs3form.form_group>
+	</form>
+
+	<form action="<@routes.attendance.manageAddPointsCopy command.department command.academicYear />" method="post">
+		<#list command.schemes as scheme>
+			<input type="hidden" name="schemes" value="${scheme.id}" />
+		</#list>
+
+		<input type="hidden" name="returnTo" value="${returnTo}" />
 
 		<#if allSchemes??>
+			<input type="hidden" name="searchDepartment" value="${searchCommand.department.code}" />
+			<input type="hidden" name="searchAcademicYear" value="${searchCommand.academicYear.startYear?c}" />
+
 			<#if allSchemes?size == 0>
 				<div class="alert alert-info">
 					No schemes found
 				</div>
 
-				<button class="btn" type="submit" name="cancel">Cancel</button>
+				<button class="btn btn-default" type="submit" name="cancel">Cancel</button>
 			<#else>
 
 				<#if errors??>
-					<div class="alert alert-error">
+					<div class="alert alert-danger">
 						<#list errors.allErrors as error>
 							<p><@spring.message code=error.code arguments=error.arguments/></p>
 						</#list>
@@ -88,19 +98,19 @@
 
 				<p>Use the filters to choose which points to copy:</p>
 
-				<div class="student-filter points-filter btn-group-group well well-small">
+				<div class="student-filter points-filter btn-group-group well well-sm">
 
 					<button type="button" class="clear-all-filters btn btn-link">
-						<span class="icon-stack">
-							<i class="icon-filter"></i>
-							<i class="icon-ban-circle icon-stack-base"></i>
+						<span class="fa-stack">
+							<i class="fa fa-filter fa-stack-1x"></i>
+							<i class="fa fa-ban fa-stack-2x"></i>
 						</span>
 					</button>
 
 					<#macro filter path placeholder currentFilter allItems validItems=allItems prefix="">
 						<@spring.bind path=path>
 							<div class="btn-group<#if currentFilter == placeholder> empty-filter</#if>">
-								<a class="btn btn-mini dropdown-toggle" data-toggle="dropdown">
+								<a class="btn btn-default btn-xs dropdown-toggle" data-toggle="dropdown">
 									<span class="filter-short-values" data-placeholder="${placeholder}" data-prefix="${prefix}"><#if currentFilter != placeholder>${prefix}</#if>${currentFilter}</span>
 									<span class="caret"></span>
 								</a>
@@ -117,14 +127,14 @@
 														</#if>
 													</#list>
 												</#if>
-												<li class="check-list-item" data-natural-sort="${item_index}">
+												<li class="check-list-item checkbox" data-natural-sort="${item_index}">
 													<label class="checkbox <#if !isValid>disabled</#if>">
 														<#nested item isValid/>
 													</label>
 												</li>
 											</#list>
 										<#else>
-											<li><small class="muted" style="padding-left: 5px;">N/A for this department</small></li>
+											<li><small class="very-subtle" style="padding-left: 5px;">N/A for this department</small></li>
 										</#if>
 									</ul>
 								</div>
@@ -172,7 +182,7 @@
 					</@filter>
 
 					<div class="btn-group empty-filter">
-						<a class="btn btn-mini">
+						<a class="btn btn-default btn-xs">
 							<span class="filter-short-values">
 								<#if findCommand.restrictedStyle.dbValue == "week">
 									Term week points only
@@ -184,8 +194,8 @@
 					</div>
 
 					<div class="btn-group">
-						<button class="btn btn-mini btn-primary search" type="submit" name="search">
-							<i class="icon-search"></i> Filter
+						<button class="btn btn-xs btn-primary search" type="submit" name="search">
+							Filter
 						</button>
 					</div>
 
@@ -199,14 +209,14 @@
 						No points found for the specified filter
 					</div>
 
-					<button class="btn" type="submit" name="cancel">Cancel</button>
+					<button class="btn btn-default" type="submit" name="cancel">Cancel</button>
 				<#else>
 
 					<div class="submit-buttons fix-footer save-row">
 						<button class="btn btn-primary spinnable spinner-auto" type="submit" name="copy" data-loading-text="Copying&hellip;">
 							Copy
 						</button>
-						<button class="btn" type="submit" name="cancel">Cancel</button>
+						<button class="btn btn-default" type="submit" name="cancel">Cancel</button>
 					</div>
 
 				</#if>
@@ -228,20 +238,19 @@
 			} else {
 				if (!$list.find('.clear-this-filter').length) {
 					$list.find('> ul').prepend(
-							$('<li />').addClass('clear-this-filter')
-									.append(
-									$('<button />').attr('type', 'button')
-											.addClass('btn btn-link')
-											.html('<i class="icon-ban-circle"></i> Clear selected items')
-											.on('click', function(e) {
-												$list.find('input:checked').each(function() {
-													var $checkbox = $(this);
-													$checkbox.prop('checked', false);
-													updateFilter($checkbox);
-												});
-											})
-							)
-									.append($('<hr />'))
+						$('<li />').addClass('clear-this-filter').append(
+							$('<button />').attr('type', 'button')
+								.addClass('btn btn-link')
+								.html('Clear selected items')
+								.on('click', function(e) {
+									$list.find('input:checked').each(function() {
+										var $checkbox = $(this);
+										$checkbox.prop('checked', false);
+										updateFilter($checkbox);
+									});
+								})
+						)
+						.append($('<hr />'))
 					);
 				}
 			}

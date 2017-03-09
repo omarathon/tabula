@@ -351,20 +351,30 @@
 								$table.addClass('today');
 							}
 							_.each(_.sortBy(eventsByDay[dateValue], ['startDate']), function(event) {
-								var title = event.title;
+								var location = '';
+								if (event.location.length > 0) {
+									location = '(' + event.location + ')';
+								}
 								if (event.locationId && event.locationId.length > 0) {
-									title = title.replace('(' + event.location + ')', '')
-										+ '(<span class="map-location" data-lid="' + event.locationId + '">' + event.location + '</span>)';
+									location = '(<span class="map-location" data-lid="' + event.locationId + '">' + event.location + '</span>)';
+								}
+								var tutors = '';
+								if (event.tutorNames.length > 0) {
+									tutors = '<i class="fa fa-user"></i> ' + event.tutorNames;
 								}
 								$tbody.append(
 									$('<tr/>').append(
-										$('<td/>').addClass('time').html(moment.unix(event.start).format('kk:mm'))
+										$('<td/>').addClass('time').html(moment.unix(event.start).format('kk:mm') + ' -<br />' + moment.unix(event.end).format('kk:mm'))
 									).append(
 										$('<td/>').addClass('marker').append(
 											$('<i/>').addClass('fa fa-circle').css('color', event.backgroundColor)
 										)
 									).append(
-										$('<td/>').html(title)
+										$('<td/>').html([
+											event.title.replace('(' + event.location + ')', ''),
+											event.name + ' ' + location,
+											tutors
+										].join('<br />'))
 									)
 								);
 							});

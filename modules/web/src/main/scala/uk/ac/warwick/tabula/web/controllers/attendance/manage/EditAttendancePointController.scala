@@ -38,8 +38,7 @@ class EditAttendancePointController extends AttendanceController {
 			"allMeetingFormats" -> MeetingFormat.members,
 			"returnTo" -> getReturnTo("")
 		).crumbs(
-			Breadcrumbs.Manage.Home,
-			Breadcrumbs.Manage.Department(department),
+			Breadcrumbs.Manage.HomeForYear(academicYear),
 			Breadcrumbs.Manage.DepartmentForYear(department, academicYear),
 			Breadcrumbs.Manage.EditPoints(department, academicYear)
 		)

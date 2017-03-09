@@ -361,8 +361,7 @@ class AttendanceMonitoringDaoImpl extends AttendanceMonitoringDao with Attendanc
 	def countCheckpointsForPoint(point: AttendanceMonitoringPoint): Int =
 		session.newCriteria[AttendanceMonitoringCheckpoint]
 			.add(is("point", point))
-			.project[Number](Projections.rowCount())
-			.uniqueResult.get.intValue()
+			.count.intValue
 
 	def getNonActiveCheckpoints(
 		student: StudentMember,

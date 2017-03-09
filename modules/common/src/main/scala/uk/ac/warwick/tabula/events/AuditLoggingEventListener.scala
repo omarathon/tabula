@@ -11,7 +11,7 @@ import scala.collection.JavaConverters._
 	*/
 class AuditLoggingEventListener extends EventListener {
 
-	val logger = AuditLogger.getAuditLogger("tabula")
+	val logger: AuditLogger = AuditLogger.getAuditLogger("tabula")
 
 	override def beforeCommand(event: Event): Unit = {}
 	override def onException(event: Event, exception: Throwable): Unit = {}
@@ -26,7 +26,7 @@ class AuditLoggingEventListener extends EventListener {
 		// TODO We have no way this far down to get things like IP address or User-Agent
 
 		// We need to convert all Scala collections into Java collections
-		def handle(in: Any): AnyRef = in match {
+		def handle(in: Any): AnyRef = (in match {
 			case Some(x: Object) => handle(x)
 			case Some(null) => null
 			case None => null
@@ -38,6 +38,9 @@ class AuditLoggingEventListener extends EventListener {
 			case scol: scala.Iterable[_] => asJavaCollectionConverter(scol.map(handle)).asJavaCollection
 			case other: AnyRef => other
 			case _ => null
+		}) match {
+			case null => "-"
+			case notNull => notNull
 		}
 
 		val data = event.extra.map { case (k, v) => new Field(k) -> handle(v) }
