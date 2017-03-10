@@ -10,15 +10,18 @@ import uk.ac.warwick.tabula.WorkflowStageHealth._
 import uk.ac.warwick.tabula.helpers.cm2.WorkflowItems
 
 //TODO- This might need further refactoring. Currently just copied  from existing coursework
+/**
+	* This isn't code for marking workflows. It drives the progress bar and next action on various coursework pages.
+	*/
 @Service
-class Cm2WorkflowService {
-	import Cm2WorkflowStages._
+class CM2WorkflowProgressService {
+	import CM2WorkflowStages._
 
 	final val MaxPower = 100
 	var features: Features = Wire.auto[Features]
 
-	def getStagesFor(assignment: Assignment): Seq[Cm2WorkflowStage] = {
-		var stages = Seq[Cm2WorkflowStage]()
+	def getStagesFor(assignment: Assignment): Seq[CM2WorkflowStage] = {
+		var stages = Seq[CM2WorkflowStage]()
 		if (assignment.collectSubmissions) {
 			stages = stages ++ Seq(Submission)
 
@@ -78,14 +81,14 @@ class Cm2WorkflowService {
 	}
 }
 
-sealed abstract class Cm2WorkflowStage extends WorkflowStage {
+sealed abstract class CM2WorkflowStage extends WorkflowStage {
 	def progress(assignment: Assignment)(cm2: WorkflowItems): WorkflowStages.StageProgress
 }
 
-object Cm2WorkflowStages {
+object CM2WorkflowStages {
 	import WorkflowStages._
 
-	case object Submission extends Cm2WorkflowStage {
+	case object Submission extends CM2WorkflowStage {
 		def actionCode = "workflow.Submission.action"
 		def progress(assignment: Assignment)(cm2: WorkflowItems): StageProgress = cm2.enhancedSubmission match {
 			// If the student hasn't submitted, but we have uploaded feedback for them, don't record their submission status
@@ -113,7 +116,7 @@ object Cm2WorkflowStages {
 		}
 	}
 
-	case object DownloadSubmission extends Cm2WorkflowStage {
+	case object DownloadSubmission extends CM2WorkflowStage {
 		def actionCode = "workflow.DownloadSubmission.action"
 		def progress(assignment: Assignment)(cm2: WorkflowItems): StageProgress = cm2.enhancedSubmission match {
 			case Some(submission) if submission.downloaded =>
@@ -126,7 +129,7 @@ object Cm2WorkflowStages {
 		override def preconditions = Seq(Seq(Submission))
 	}
 
-	case object CheckForPlagiarism extends Cm2WorkflowStage {
+	case object CheckForPlagiarism extends CM2WorkflowStage {
 		def actionCode = "workflow.CheckForPlagiarism.action"
 		def progress(assignment: Assignment)(cm2: WorkflowItems): StageProgress = cm2.enhancedSubmission match {
 			case Some(item) if item.submission.suspectPlagiarised =>
@@ -139,7 +142,7 @@ object Cm2WorkflowStages {
 		override def preconditions = Seq(Seq(Submission))
 	}
 
-	case object ReleaseForMarking extends Cm2WorkflowStage {
+	case object ReleaseForMarking extends CM2WorkflowStage {
 		def actionCode = "workflow.ReleaseForMarking.action"
 		def progress(assignment: Assignment)(cm2: WorkflowItems): StageProgress = {
 			if (assignment.isReleasedForMarking(cm2.student.getUserId)) {
@@ -151,7 +154,7 @@ object Cm2WorkflowStages {
 		override def preconditions = Seq()
 	}
 
-	case object FirstMarking extends Cm2WorkflowStage {
+	case object FirstMarking extends CM2WorkflowStage {
 		def actionCode = "workflow.FirstMarking.action"
 		def progress(assignment: Assignment)(cm2: WorkflowItems): StageProgress = cm2.enhancedFeedback match {
 			case Some(item) =>
@@ -164,7 +167,7 @@ object Cm2WorkflowStages {
 		override def preconditions = Seq(Seq(ReleaseForMarking))
 	}
 
-	case object SecondMarking extends Cm2WorkflowStage {
+	case object SecondMarking extends CM2WorkflowStage {
 		def actionCode = "workflow.SecondMarking.action"
 		def progress(assignment: Assignment)(cm2: WorkflowItems): StageProgress = {
 			val released = assignment.isReleasedToSecondMarker(cm2.student.getUserId)
@@ -192,7 +195,7 @@ object Cm2WorkflowStages {
 		override def preconditions = Seq(Seq(ReleaseForMarking, FirstMarking))
 	}
 
-	case object Moderation extends Cm2WorkflowStage {
+	case object Moderation extends CM2WorkflowStage {
 		def actionCode = "workflow.ModeratedMarking.action"
 		def progress(assignment: Assignment)(cm2: WorkflowItems): StageProgress = {
 			val released = assignment.isReleasedToSecondMarker(cm2.student.getWarwickId)
@@ -220,7 +223,7 @@ object Cm2WorkflowStages {
 		override def preconditions = Seq(Seq(ReleaseForMarking, FirstMarking))
 	}
 
-	case object FinaliseSeenSecondMarking extends Cm2WorkflowStage {
+	case object FinaliseSeenSecondMarking extends CM2WorkflowStage {
 		def actionCode = "workflow.FinaliseSeenSecondMarking.action"
 		def progress(assignment: Assignment)(cm2: WorkflowItems): StageProgress = {
 			val released = assignment.isReleasedToThirdMarker(cm2.student.getUserId)
@@ -251,7 +254,7 @@ object Cm2WorkflowStages {
 
 
 
-	case object AddMarks extends Cm2WorkflowStage {
+	case object AddMarks extends CM2WorkflowStage {
 		def actionCode = "workflow.AddMarks.action"
 		def progress(assignment: Assignment)(cm2: WorkflowItems): StageProgress =
 			cm2.enhancedFeedback.filterNot(_.feedback.isPlaceholder) match {
@@ -262,7 +265,7 @@ object Cm2WorkflowStages {
 			}
 	}
 
-	case object AddFeedback extends Cm2WorkflowStage {
+	case object AddFeedback extends CM2WorkflowStage {
 		def actionCode = "workflow.AddFeedback.action"
 		def progress(assignment: Assignment)(cm2: WorkflowItems): StageProgress = cm2.enhancedFeedback.filterNot(_.feedback.isPlaceholder) match {
 			case Some(item) if item.feedback.hasAttachments || item.feedback.hasOnlineFeedback =>
@@ -274,7 +277,7 @@ object Cm2WorkflowStages {
 		}
 	}
 
-	case object ReleaseFeedback extends Cm2WorkflowStage {
+	case object ReleaseFeedback extends CM2WorkflowStage {
 		def actionCode = "workflow.ReleaseFeedback.action"
 		def progress(assignment: Assignment)(cm2: WorkflowItems): StageProgress =
 			cm2.enhancedFeedback.filterNot(_.feedback.isPlaceholder) match {
@@ -287,7 +290,7 @@ object Cm2WorkflowStages {
 		override def preconditions = Seq(Seq(AddMarks), Seq(AddFeedback))
 	}
 
-	case object ViewOnlineFeedback extends Cm2WorkflowStage {
+	case object ViewOnlineFeedback extends CM2WorkflowStage {
 		def actionCode = "workflow.ViewOnlineFeedback.action"
 		def progress(assignment: Assignment)(cm2: WorkflowItems): StageProgress =
 			cm2.enhancedFeedback.filterNot(_.feedback.isPlaceholder) match {
@@ -300,7 +303,7 @@ object Cm2WorkflowStages {
 		override def preconditions = Seq(Seq(ReleaseFeedback))
 	}
 
-	case object DownloadFeedback extends Cm2WorkflowStage {
+	case object DownloadFeedback extends CM2WorkflowStage {
 		def actionCode = "workflow.DownloadFeedback.action"
 		def progress(assignment: Assignment)(cm2: WorkflowItems): StageProgress =
 			cm2.enhancedFeedback.filterNot(_.feedback.isPlaceholder) match {
@@ -316,10 +319,10 @@ object Cm2WorkflowStages {
 	}
 }
 
-trait Cm2WorkflowServiceComponent {
-	def cm2WorkflowService: Cm2WorkflowService
+trait CM2WorkflowServiceComponent {
+	def cm2WorkflowService: CM2WorkflowProgressService
 }
 
-trait AutowiringCm2WorkflowServiceComponent extends Cm2WorkflowServiceComponent {
-	var cm2WorkflowService: Cm2WorkflowService = Wire[Cm2WorkflowService]
+trait AutowiringCM2WorkflowServiceComponent extends CM2WorkflowServiceComponent {
+	var cm2WorkflowService: CM2WorkflowProgressService = Wire[CM2WorkflowProgressService]
 }
