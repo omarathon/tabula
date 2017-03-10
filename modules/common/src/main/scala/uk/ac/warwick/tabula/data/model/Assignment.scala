@@ -10,6 +10,7 @@ import uk.ac.warwick.spring.Wire
 import uk.ac.warwick.tabula.JavaImports._
 import uk.ac.warwick.tabula.data.PostLoadBehaviour
 import uk.ac.warwick.tabula.data.model.forms.{WordCountField, _}
+import uk.ac.warwick.tabula.data.model.markingworkflow.CM2MarkingWorkflow
 import uk.ac.warwick.tabula.data.model.permissions.AssignmentGrantedRole
 import uk.ac.warwick.tabula.helpers.DateTimeOrdering._
 import uk.ac.warwick.tabula.helpers.StringUtils._
@@ -285,6 +286,9 @@ class Assignment
 	@JoinColumn(name = "markscheme_id")
 	var markingWorkflow: MarkingWorkflow = _
 
+	@ManyToOne(fetch = LAZY)
+	@JoinColumn(name = "cm2_workflow_id")
+	var cm2MarkingWorkflow: CM2MarkingWorkflow = _
 
 	@Column(name="workflow_category")
 	@Type(`type` = "uk.ac.warwick.tabula.data.model.WorkflowCategoryUserType")

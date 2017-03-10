@@ -23,6 +23,7 @@ import uk.ac.warwick.tabula.helpers.StringUtils._
 @Inheritance(strategy=InheritanceType.SINGLE_TABLE)
 @DiscriminatorColumn(name="MarkingMethod", discriminatorType = DiscriminatorType.STRING, length=255)
 @Access(AccessType.FIELD)
+@Deprecated
 abstract class MarkingWorkflow extends GeneratedId with PermissionsTarget with Serializable {
 
 	type Usercode = String
@@ -44,10 +45,10 @@ abstract class MarkingWorkflow extends GeneratedId with PermissionsTarget with S
 
 	def permissionsParents: Stream[Department] = Option(department).toStream
 
-	def courseworkMarkingUrl(assignment: Assignment, marker: User, studentId: String): UniversityId =
+	def courseworkMarkingUrl(assignment: Assignment, marker: User, studentId: String): String =
 		Routes.coursework.admin.assignment.markerFeedback.onlineFeedback(assignment, marker)
 
-	def examMarkingUrl(exam: Exam, marker: User, studentId: String): UniversityId =
+	def examMarkingUrl(exam: Exam, marker: User, studentId: String): String =
 		Routes.exams.Exams.admin.markerFeedback.onlineFeedback(exam, marker)
 
 	// FIXME this isn't really optional, but testing is a pain unless it's made so

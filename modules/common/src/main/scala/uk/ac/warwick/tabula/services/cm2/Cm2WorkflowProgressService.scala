@@ -10,8 +10,11 @@ import uk.ac.warwick.tabula.WorkflowStageHealth._
 import uk.ac.warwick.tabula.helpers.cm2.WorkflowItems
 
 //TODO- This might need further refactoring. Currently just copied  from existing coursework
+/**
+	* This isn't code for marking workflows. It drives the progress bar and next action on various coursework pages.
+	*/
 @Service
-class Cm2WorkflowService {
+class Cm2WorkflowProgressService {
 	import Cm2WorkflowStages._
 
 	final val MaxPower = 100
@@ -317,9 +320,9 @@ object Cm2WorkflowStages {
 }
 
 trait Cm2WorkflowServiceComponent {
-	def cm2WorkflowService: Cm2WorkflowService
+	def cm2WorkflowService: Cm2WorkflowProgressService
 }
 
 trait AutowiringCm2WorkflowServiceComponent extends Cm2WorkflowServiceComponent {
-	var cm2WorkflowService: Cm2WorkflowService = Wire[Cm2WorkflowService]
+	var cm2WorkflowService: Cm2WorkflowProgressService = Wire[Cm2WorkflowProgressService]
 }

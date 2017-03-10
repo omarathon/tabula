@@ -1,0 +1,126 @@
+package uk.ac.warwick.tabula.data
+
+import scala.collection.JavaConverters._
+import org.junit.Before
+import uk.ac.warwick.tabula.data.model.markingworkflow.MarkingWorkflowStage._
+import uk.ac.warwick.tabula.data.model.markingworkflow.{DoubleBlindWorkflow, SingleMarkerWorkflow}
+import uk.ac.warwick.tabula.{Fixtures, PersistenceTestBase}
+
+class CM2MarkingWorkflowDaoTest extends PersistenceTestBase {
+
+	val dao = new CM2MarkingWorkflowDaoImpl
+
+	val dept = Fixtures.department("in")
+	val marker = Fixtures.user("1170836", "cuslaj")
+	val marker2 = Fixtures.user("1170837", "cuslak")
+
+	@Before
+	def setup() = transactional { tx =>
+		dao.sessionFactory = sessionFactory
+		session.save(dept)
+		session.flush()
+	}
+
+	@Test def saveThenFetch() = transactional { tx =>
+		val singleMarkerWorkflow = SingleMarkerWorkflow("testAssignment", dept, Seq(marker))
+
+		dao.save(singleMarkerWorkflow)
+		session.flush()
+
+		val workflow = dao.get(singleMarkerWorkflow.id).get
+		workflow should be (singleMarkerWorkflow)
+
+		workflow.name should be ("testAssignment")
+		workflow.department should be (dept)
+		workflow.initialStages.size should be (1)
+
+		val stageMarker = workflow.stageMarkers.asScala.head
+		stageMarker.stage should be (SingleMarker)
+		stageMarker.workflow should be (workflow)
+		stageMarker.markers.knownType.members should be (Seq("cuslaj"))
+
+		val stage = workflow.initialStages.head
+		stage.nextStages should be {Seq(SingleMarkingCompleted)}
+	}
+
+	@Test def markerFeedbackForAssignmentAndStage() = transactional { tx =>
+		val w = SingleMarkerWorkflow("test", dept, Seq(marker))
+		val assignment = Fixtures.assignment("test")
+		assignment.cm2MarkingWorkflow = w
+		val feedback = Fixtures.assignmentFeedback("1431777", "u1431777")
+		feedback.assignment = assignment
+		val markerFeedback = Fixtures.markerFeedback(feedback)
+		markerFeedback.markerUsercode = marker.getUserId
+		markerFeedback.stage = SingleMarker
+
+		val assignment2 = Fixtures.assignment("test2")
+		assignment2.cm2MarkingWorkflow = w
+		val feedback2 = Fixtures.assignmentFeedback("1431777", "u1431777")
+		feedback2.assignment = assignment2
+		val markerFeedback2 = Fixtures.markerFeedback(feedback2)
+		markerFeedback2.markerUsercode = marker.getUserId
+		markerFeedback2.stage = SingleMarker
+
+		session.save(assignment)
+		session.save(assignment2)
+		session.save(feedback)
+		session.save(feedback2)
+		session.save(markerFeedback)
+		session.save(markerFeedback2)
+		session.save(w)
+		session.flush()
+
+		dao.markerFeedbackForAssignmentAndStage(assignment, SingleMarker) should be (Seq(markerFeedback))
+		dao.markerFeedbackForAssignmentAndStage(assignment2, SingleMarker) should be (Seq(markerFeedback2))
+	}
+
+	@Test def markerFeedbackForMarker() = transactional { tx =>
+		val w = DoubleBlindWorkflow("test", dept, Seq(marker, marker2), Seq(marker))
+		val assignment = Fixtures.assignment("test")
+		assignment.cm2MarkingWorkflow = w
+
+		val feedback = Fixtures.assignmentFeedback("1431777", "u1431777")
+		feedback.assignment = assignment
+
+		val markerFeedback = Fixtures.markerFeedback(feedback)
+		markerFeedback.markerUsercode = marker.getUserId
+		markerFeedback.stage = DblBlndInitialMarkerA
+
+		val markerFeedback2 = Fixtures.markerFeedback(feedback)
+		markerFeedback2.markerUsercode = marker2.getUserId
+		markerFeedback2.stage = DblBlndInitialMarkerB
+
+		val markerFeedback3 = Fixtures.markerFeedback(feedback)
+		markerFeedback3.markerUsercode = marker.getUserId
+		markerFeedback3.stage = DblBlndFinalMarker
+
+		val feedback2 = Fixtures.assignmentFeedback("1431778", "u1431778")
+		feedback2.assignment = assignment
+
+		val markerFeedback4 = Fixtures.markerFeedback(feedback2)
+		markerFeedback4.markerUsercode = marker.getUserId
+		markerFeedback4.stage = DblBlndInitialMarkerB
+
+		val markerFeedback5 = Fixtures.markerFeedback(feedback2)
+		markerFeedback5.markerUsercode = marker2.getUserId
+		markerFeedback5.stage = DblBlndInitialMarkerA
+
+		session.save(assignment)
+		Seq(feedback, feedback2).foreach(session.save)
+		Seq(markerFeedback, markerFeedback2, markerFeedback3, markerFeedback4, markerFeedback5).foreach(session.save)
+		session.save(w)
+		session.flush()
+
+		val marker1MarkerFeedback = dao.markerFeedbackForMarker(assignment, marker)
+		marker1MarkerFeedback.size should be (3)
+		marker1MarkerFeedback.contains(markerFeedback) should be {true}
+		marker1MarkerFeedback.contains(markerFeedback3) should be {true}
+		marker1MarkerFeedback.contains(markerFeedback4) should be {true}
+
+		val marker2MarkerFeedback = dao.markerFeedbackForMarker(assignment, marker2)
+		marker2MarkerFeedback.size should be (2)
+		marker2MarkerFeedback.contains(markerFeedback2) should be {true}
+		marker2MarkerFeedback.contains(markerFeedback5) should be {true}
+	}
+
+}
