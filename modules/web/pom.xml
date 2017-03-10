@@ -338,6 +338,8 @@
 							<output>${project.build.directory}/${project.build.finalName}/static/js/id7/render.js</output>
 							<inputDir>${basedir}/src/main/webapp/static</inputDir>
 							<includes>
+								<!-- Needed for functional tests -->
+								<include>libs/map-set-for-each/map-set-for-each.js</include>
 								<include>bower_components/warwick-id7/dist/js/id7-bundle.js</include>
 								<include>libs/jquery-ui-interactions/jquery-ui-1.11.4-custom.js</include>
 								<include>libs/jquery.delayedObserver.js</include>
