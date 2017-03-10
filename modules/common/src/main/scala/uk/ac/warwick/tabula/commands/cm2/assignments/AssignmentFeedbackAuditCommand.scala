@@ -5,7 +5,7 @@ import uk.ac.warwick.tabula.data.model.forms.ExtensionState
 import uk.ac.warwick.tabula.data.model.Assignment
 import uk.ac.warwick.tabula.helpers.cm2._
 import uk.ac.warwick.tabula.permissions.Permissions
-import uk.ac.warwick.tabula.services.cm2.{AutowiringCm2WorkflowServiceComponent, Cm2WorkflowServiceComponent}
+import uk.ac.warwick.tabula.services.cm2.{AutowiringCM2WorkflowServiceComponent, CM2WorkflowServiceComponent}
 import uk.ac.warwick.tabula.system.permissions.{PermissionsChecking, PermissionsCheckingMethods, RequiresPermissionsChecking}
 import uk.ac.warwick.tabula.services._
 import uk.ac.warwick.userlookup.User
@@ -22,7 +22,7 @@ object AssignmentFeedbackAuditCommand {
 			with AutowiringUserLookupComponent
 			with AutowiringFeedbackForSitsServiceComponent
 			with AutowiringProfileServiceComponent
-			with AutowiringCm2WorkflowServiceComponent
+			with AutowiringCM2WorkflowServiceComponent
 			with Unaudited with ReadOnly
 }
 
@@ -62,7 +62,7 @@ class AssignmentFeedbackAuditCommandInternal(val assignment: Assignment) extends
 		with UserLookupComponent
 		with FeedbackForSitsServiceComponent
 		with ProfileServiceComponent
-		with Cm2WorkflowServiceComponent =>
+		with CM2WorkflowServiceComponent =>
 
 	override def applyInternal(): AssignmentFeedbackAuditResults = {
 		//most of the logic copied from cm1

@@ -18,7 +18,7 @@ import uk.ac.warwick.tabula.data.model.markingworkflow.MarkingWorkflowStage
 import uk.ac.warwick.tabula.services.UserLookupService
 
 @Entity @Access(AccessType.FIELD)
-class MarkerFeedback extends GeneratedId with FeedbackAttachments with ToEntityReference with CanBeDeleted with Cm1MarkerFeedbackSupport {
+class MarkerFeedback extends GeneratedId with FeedbackAttachments with ToEntityReference with CanBeDeleted with CM1MarkerFeedbackSupport {
 	type Entity = MarkerFeedback
 
 	def this(parent:Feedback){
@@ -109,7 +109,7 @@ class MarkerFeedback extends GeneratedId with FeedbackAttachments with ToEntityR
 	override def toEntityReference: MarkerFeedbackEntityReference = new MarkerFeedbackEntityReference().put(this)
 }
 
-trait Cm1MarkerFeedbackSupport {
+trait CM1MarkerFeedbackSupport {
 	this: MarkerFeedback =>
 
 	@Deprecated

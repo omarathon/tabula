@@ -85,7 +85,7 @@ trait AssessmentFeedback {
 	def assessmentGroups: JList[AssessmentGroup]
 }
 
-trait Cm1WorkflowSupport {
+trait CM1WorkflowSupport {
 
 	this: Feedback =>
 
@@ -169,7 +169,7 @@ trait Cm1WorkflowSupport {
 @Entity @Access(AccessType.FIELD)
 @Inheritance(strategy = InheritanceType.SINGLE_TABLE)
 @DiscriminatorColumn(name = "discriminator", discriminatorType = DiscriminatorType.STRING)
-abstract class Feedback extends GeneratedId with FeedbackAttachments with PermissionsTarget with FormattedHtml with AssessmentFeedback with ToEntityReference with Cm1WorkflowSupport{
+abstract class Feedback extends GeneratedId with FeedbackAttachments with PermissionsTarget with FormattedHtml with AssessmentFeedback with ToEntityReference with CM1WorkflowSupport{
 
 	var uploaderId: String = _
 
