@@ -46,10 +46,10 @@
 	}
 
 	function updateDownloadButton(view, $calendar, data) {
-		if ($calendar.data('downloadbutton')) {
-			var $downloadButton = $($calendar.data('downloadbutton'))
-				, formData = data()
-				, originalHref = $downloadButton.data('href')
+		var formData = data();
+		if ($calendar.data('calendar-download-button')) {
+			var $calendarDownloadButton = $($calendar.data('calendar-download-button'))
+				, originalHref = $calendarDownloadButton.data('href')
 				, args = [
 					'calendarView=' + view.name,
 					'renderDate=' + view.start.getTime()/1000
@@ -58,7 +58,16 @@
 			if (formData.length > 0) {
 				args.push(formData);
 			}
-			$downloadButton.prop('href', originalHref + '?' + args.join('&'));
+			$calendarDownloadButton.prop('href', originalHref + '?' + args.join('&'));
+		}
+		if ($calendar.data('timetable-download-button')) {
+			var $timetableDownloadButtons = $($calendar.data('timetable-download-button'));
+			$timetableDownloadButtons.each(function(){
+				var $this = $(this), originalHref = $this.data('href');
+				if (formData.length > 0) {
+					$this.prop('href', originalHref + '?' + formData);
+				}
+			});
 		}
 	}
 

@@ -22,20 +22,20 @@ class DownloadDepartmentTimetableCalendarController extends ProfilesController
 	with AutowiringModuleTimetableEventSourceComponent {
 
 	@ModelAttribute("timetableCommand")
-	def timetableCommand(@PathVariable department: Department): DepartmentTimetablesCommand.CommandType = {
-		DepartmentTimetablesCommand(
+	def timetableCommand(@PathVariable department: Department): DepartmentEventsCommand.CommandType = {
+		DepartmentEventsCommand(
 			mandatory(department),
 			academicYear,
 			user,
 			new ViewModuleTimetableCommandFactoryImpl(moduleTimetableEventSource),
-			new ViewStudentPersonalTimetableCommandFactoryImpl(user),
-			new ViewStaffPersonalTimetableCommandFactoryImpl(user)
+			new ViewStudentMemberEventsCommandFactoryImpl(user),
+			new ViewStaffMemberEventsCommandFactoryImpl(user)
 		)
 	}
 
 	@RequestMapping
 	def render(
-		@ModelAttribute("timetableCommand") cmd: DepartmentTimetablesCommand.CommandType,
+		@ModelAttribute("timetableCommand") cmd: DepartmentEventsCommand.CommandType,
 		@PathVariable department: Department,
 		@RequestParam(value = "calendarView", required = false) calendarView: String,
 		@RequestParam(value = "renderDate", required = false) renderDate: LocalDate

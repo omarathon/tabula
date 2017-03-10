@@ -25,7 +25,7 @@ class DepartmentDraftTimetablesController extends ProfilesController
 	def activeDepartment(@PathVariable department: Department): Department = department
 
 	@ModelAttribute("command")
-	def command(@PathVariable department: Department, @PathVariable academicYear: AcademicYear, @PathVariable endpoint: String): DepartmentTimetablesCommand.CommandType = {
+	def command(@PathVariable department: Department, @PathVariable academicYear: AcademicYear, @PathVariable endpoint: String): DepartmentEventsCommand.CommandType = {
 		val scientiaConfiguration = new ScientiaConfiguration {
 			override val perYearUris: Seq[(String, AcademicYear)] = Seq(
 				// FIXME hardcoded host
@@ -50,29 +50,29 @@ class DepartmentDraftTimetablesController extends ProfilesController
 				override val timetableFetchingService: ModuleTimetableFetchingService = draftTimetableFetchingService
 			}.moduleTimetableEventSource
 
-		DepartmentTimetablesCommand.draft(
+		DepartmentEventsCommand.draft(
 			mandatory(department),
 			academicYear,
 			user,
 			new ViewModuleTimetableCommandFactoryImpl(moduleTimetableEventSource),
 			// Don't support students
-			new ViewStudentPersonalTimetableCommandFactory() {
+			new ViewStudentMemberEventsCommandFactory() {
 				override def apply(student: StudentMember): Appliable[Try[EventOccurrenceList]] with ViewMemberEventsRequest =
 					new Appliable[Try[EventOccurrenceList]] with ViewMemberEventsRequest {
 						override val member: StudentMember = student
 						override def apply(): Try[EventOccurrenceList] = Failure(new IllegalArgumentException("Filtering students is not supported for draft timetables"))
 					}
 			},
-			new ViewStaffPersonalTimetableCommandFactoryImpl(user)
+			new ViewStaffMemberEventsCommandFactoryImpl(user)
 		)
 	}
 
 	@RequestMapping(method = Array(GET))
-	def form(@ModelAttribute("command") cmd: DepartmentTimetablesCommand.CommandType, @PathVariable department: Department, @PathVariable academicYear: AcademicYear): Mav = {
+	def form(@ModelAttribute("command") cmd: DepartmentEventsCommand.CommandType, @PathVariable department: Department, @PathVariable academicYear: AcademicYear): Mav = {
 		Mav("profiles/timetables/department_draft",
 			"startDate" -> termService.getAcademicWeek(academicYear.dateInTermOne, 1).getStart.toLocalDate,
 			"canFilterStudents" -> false,
-			"canFilterStaff" -> securityService.can(user, DepartmentTimetablesCommand.FilterStaffPermission, mandatory(department)),
+			"canFilterStaff" -> securityService.can(user, DepartmentEventsCommand.FilterStaffPermission, mandatory(department)),
 			"canFilterRoute" -> false,
 			"canFilterYearOfStudy" -> false
 		)
@@ -80,7 +80,7 @@ class DepartmentDraftTimetablesController extends ProfilesController
 
 	@RequestMapping(method = Array(POST))
 	def post(
-		@ModelAttribute("command") cmd: DepartmentTimetablesCommand.CommandType,
+		@ModelAttribute("command") cmd: DepartmentEventsCommand.CommandType,
 		@PathVariable department: Department
 	): Mav = {
 		val result = cmd.apply()
