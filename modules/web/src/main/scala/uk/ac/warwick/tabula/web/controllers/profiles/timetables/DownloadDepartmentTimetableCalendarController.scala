@@ -3,33 +3,40 @@ package uk.ac.warwick.tabula.web.controllers.profiles.timetables
 import org.joda.time.{DateTime, LocalDate}
 import org.springframework.stereotype.Controller
 import org.springframework.web.bind.annotation.{ModelAttribute, PathVariable, RequestMapping, RequestParam}
-import uk.ac.warwick.tabula.commands.timetables.ViewMemberEventsCommand
-import uk.ac.warwick.tabula.commands.timetables.ViewMemberEventsCommand.TimetableCommand
-import uk.ac.warwick.tabula.data.model.Member
+import uk.ac.warwick.tabula.commands.CurrentSITSAcademicYear
+import uk.ac.warwick.tabula.commands.timetables._
+import uk.ac.warwick.tabula.data.model.Department
 import uk.ac.warwick.tabula.helpers.KnowsUserNumberingSystem
+import uk.ac.warwick.tabula.services.timetables.AutowiringModuleTimetableEventSourceComponent
 import uk.ac.warwick.tabula.services.{AutowiringModuleAndDepartmentServiceComponent, AutowiringTermServiceComponent, AutowiringUserLookupComponent, AutowiringUserSettingsServiceComponent}
 import uk.ac.warwick.tabula.web.controllers.profiles.ProfilesController
 import uk.ac.warwick.tabula.web.views.PDFView
-import uk.ac.warwick.tabula.{CurrentUser, RequestFailedException}
-
-import scala.util.{Failure, Success}
 
 @Controller
-@RequestMapping(Array("/profiles/view/{member}/timetable/download-calendar"))
-class DownloadTimetableCalendarController extends ProfilesController
+@RequestMapping(Array("/profiles/department/{department}/timetables/download-calendar"))
+class DownloadDepartmentTimetableCalendarController extends ProfilesController
 	with DownloadsTimetableCalendar
 	with AutowiringUserLookupComponent with AutowiringTermServiceComponent
 	with KnowsUserNumberingSystem with AutowiringUserSettingsServiceComponent
-	with AutowiringModuleAndDepartmentServiceComponent {
+	with AutowiringModuleAndDepartmentServiceComponent with CurrentSITSAcademicYear
+	with AutowiringModuleTimetableEventSourceComponent {
 
 	@ModelAttribute("timetableCommand")
-	def timetableCommand(@PathVariable member: Member, currentUser: CurrentUser) =
-		ViewMemberEventsCommand(mandatory(member), currentUser)
+	def timetableCommand(@PathVariable department: Department): DepartmentTimetablesCommand.CommandType = {
+		DepartmentTimetablesCommand(
+			mandatory(department),
+			academicYear,
+			user,
+			new ViewModuleTimetableCommandFactoryImpl(moduleTimetableEventSource),
+			new ViewStudentPersonalTimetableCommandFactoryImpl(user),
+			new ViewStaffPersonalTimetableCommandFactoryImpl(user)
+		)
+	}
 
 	@RequestMapping
 	def render(
-		@ModelAttribute("timetableCommand") cmd: TimetableCommand,
-		@PathVariable member: Member,
+		@ModelAttribute("timetableCommand") cmd: DepartmentTimetablesCommand.CommandType,
+		@PathVariable department: Department,
 		@RequestParam(value = "calendarView", required = false) calendarView: String,
 		@RequestParam(value = "renderDate", required = false) renderDate: LocalDate
 	): PDFView = {
@@ -55,23 +62,15 @@ class DownloadTimetableCalendarController extends ProfilesController
 				)
 		}
 
-		cmd.from = startDate.toDateTimeAtStartOfDay.getMillis
-		cmd.to = endDate.toDateTimeAtStartOfDay.getMillis
-
-		cmd.apply() match {
-			case Success(result) =>
-				getCalendar(
-					events = result.events,
-					startDate = startDate,
-					endDate = endDate,
-					renderDate = thisRenderDate,
-					calendarView = thisCalendarView,
-					user = user,
-					fileNameSuffix = member.universityId
-				)
-
-			case Failure(t) => throw new RequestFailedException("The timetabling service could not be reached", t)
-		}
+		getCalendar(
+			events = cmd.apply()._1.events,
+			startDate = startDate,
+			endDate = endDate,
+			renderDate = thisRenderDate,
+			calendarView = thisCalendarView,
+			user = user,
+			fileNameSuffix = department.code
+		)
 	}
 
 

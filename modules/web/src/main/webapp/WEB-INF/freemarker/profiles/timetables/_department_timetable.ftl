@@ -186,7 +186,7 @@
 	<div class="calendar-loading hidden-print">
 		<i class="fa fa-spinner fa-spin"></i><em> Loading&hellip;</em>
 	</div>
-	<div class="calendar hidden-xs" data-viewname="month"></div>
+	<div class="calendar hidden-xs" data-viewname="month" data-downloadbutton=".calendar-download"></div>
 </div>
 
 <div class="calendar-smallscreen-outer visible-xs-block">
@@ -195,6 +195,14 @@
 		<i class="fa fa-spinner fa-spin"></i><em> Loading&hellip;</em>
 	</div>
 </div>
+
+<#if calendarDownloadUrl?has_content>
+	<p>
+		<a class="btn btn-default calendar-download hidden-xs" href="${calendarDownloadUrl}" data-href="${calendarDownloadUrl}">
+			Download calendar as PDF
+		</a>
+	</p>
+</#if>
 
 <style type="text/css">
 	@import url("<@url resource="/static/css/fullcalendar.css" />");
@@ -209,6 +217,7 @@
 
 	.calendar-outer {
 		position: relative;
+		margin-bottom: 16px;
 	}
 	.calendar {
 		background: white;
@@ -256,7 +265,10 @@
 						return $form.serialize();
 					},
 					'POST'
-				)<#if startDate??>,
+				),
+				function() {
+					return $form.serialize();
+				}<#if startDate??>,
 					true,
 					${startDate.getYear()?c},
 					${(startDate.getMonthOfYear() - 1)?c},

@@ -7,5 +7,6 @@
 <@fmt.id7_deptheader "Timetables" route_function "for" />
 
 <#assign submitUrl><@routes.profiles.department_timetables department /></#assign>
+<#assign calendarDownloadUrl><@routes.profiles.department_timetables_calendar_download department /></#assign>
 <#include "_department_timetable.ftl" />
 </#escape>
