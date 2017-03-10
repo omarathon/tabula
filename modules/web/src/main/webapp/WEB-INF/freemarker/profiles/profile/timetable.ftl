@@ -42,7 +42,9 @@
 </div>
 
 <p>
-	<a class="btn btn-default calendar-download hidden-xs" href="<@routes.profiles.timetable_calendar_download member />">Download calendar as PDF</a>
+	<a class="btn btn-default calendar-download hidden-xs" href="<@routes.profiles.timetable_calendar_download member />" data-href="<@routes.profiles.timetable_calendar_download member />">
+		Download calendar as PDF
+	</a>
 	<#if academicYear??>
 		<a class="btn btn-default timetable-download" href="<@routes.profiles.timetable_download member academicYear />">Download timetable as PDF (${academicYear.toString})</a>
 	<#elseif academicYears?has_content>

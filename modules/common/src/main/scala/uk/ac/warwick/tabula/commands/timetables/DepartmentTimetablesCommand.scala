@@ -24,7 +24,7 @@ object DepartmentTimetablesCommand {
 	val FilterStaffPermission = ViewMemberEventsCommand.RequiredPermission
 
 	private[timetables] type ReturnType = (EventOccurrenceList, Seq[String])
-	type CommandType = Appliable[ReturnType]
+	type CommandType = Appliable[ReturnType] with DepartmentTimetablesCommandRequest
 
 	def apply(
 		department: Department,

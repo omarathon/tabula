@@ -24,7 +24,6 @@
 
 	function onViewUpdate(view, weeks, $calendar){
 		updateCalendarTitle(view, weeks);
-		updateDownloadButton(view, $calendar);
 		$('.popover').hide();
 		$calendar.find('table').attr('role','presentation');
 	}
@@ -46,25 +45,24 @@
 		}
 	}
 
-	function updateDownloadButton(view, $calendar) {
+	function updateDownloadButton(view, $calendar, data) {
 		if ($calendar.data('downloadbutton')) {
-			var $downloadButton = $($calendar.data('downloadbutton'));
-			$downloadButton.prop(
-				'href',
-				GlobalScripts.setArgOnUrl(
-					GlobalScripts.setArgOnUrl(
-						$downloadButton.prop('href'),
-						'calendarView',
-						view.name
-					),
-					'renderDate',
-					view.start.getTime()/1000
-				)
-			);
+			var $downloadButton = $($calendar.data('downloadbutton'))
+				, formData = data()
+				, originalHref = $downloadButton.data('href')
+				, args = [
+					'calendarView=' + view.name,
+					'renderDate=' + view.start.getTime()/1000
+				]
+				;
+			if (formData.length > 0) {
+				args.push(formData);
+			}
+			$downloadButton.prop('href', originalHref + '?' + args.join('&'));
 		}
 	}
 
-	function renderCalendarEvents(event, element) {
+	function renderCalendarEvent(event, element) {
 		var content = "<table class='event-info'>";
 		if (event.parentType && event.parentFullName && event.parentShortName && event.parentType === "Module") {
 			content = content + "<tr><th>Module</th><td>" + event.parentShortName + " " + event.parentFullName + "</td></tr>";
@@ -211,7 +209,10 @@
 	}
 	exports.getCalendarEvents = getCalendarEvents;
 
-	function createCalendar(container, defaultViewName, weeks, eventsCallback, hasStartDate, year, month, date, defaultDate) {
+	function createCalendar(container, defaultViewName, weeks, eventsCallback, data, hasStartDate, year, month, date, defaultDate) {
+		if (!data) {
+			data = function(){ return ""; }
+		}
 		var showWeekends = (defaultViewName == "month"), $container = $(container);
 		var options = {
 			events: eventsCallback,
@@ -261,8 +262,11 @@
 				// we'll just leave it blank. The day columns still have the date on them.
 				return '';
 			},
-			eventAfterRender: function(event, element, view) {
-				renderCalendarEvents(event, element);
+			eventAfterRender: function(event, element) {
+				renderCalendarEvent(event, element);
+			},
+			eventAfterAllRender: function(view) {
+				updateDownloadButton(view, $container, data);
 			}
 		};
 		if (hasStartDate) {
