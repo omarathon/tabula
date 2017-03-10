@@ -39,13 +39,13 @@ class CM2MarkingWorkflowServiceTest extends TestBase with Mockito {
 	trait MarkerFeedbackFixture extends Mockito {
 		val mf1 = Fixtures.markerFeedback(Fixtures.assignmentFeedback(userId = "student1"))
 		mf1.userLookup = userLookup
-		mf1.markerUsercode = marker1.getUserId
+		mf1.marker = marker1
 		val mf2 = Fixtures.markerFeedback(Fixtures.assignmentFeedback(userId = "student2"))
 		mf2.userLookup = userLookup
-		mf2.markerUsercode = marker1.getUserId
+		mf2.marker = marker1
 		val mf3 = Fixtures.markerFeedback(Fixtures.assignmentFeedback(userId = "student3"))
 		mf3.userLookup = userLookup
-		mf3.markerUsercode = marker2.getUserId
+		mf3.marker = marker2
 
 		val markerFeedback = Seq(mf1, mf2, mf3)
 		mwd.markerFeedbackForAssignmentAndStage(assignment, SingleMarker) returns markerFeedback
@@ -55,7 +55,7 @@ class CM2MarkingWorkflowServiceTest extends TestBase with Mockito {
 	def save() {
 		val workflow = SingleMarkerWorkflow("testAssignment", dept, Seq(marker1))
 		service.save(workflow)
-		verify(mwd, times(1)).save(workflow)
+		verify(mwd, times(1)).saveOrUpdate(workflow)
 	}
 
 	@Test
@@ -133,7 +133,7 @@ class CM2MarkingWorkflowServiceTest extends TestBase with Mockito {
 	def addMarkersForStage(){
 		val workflow = SingleMarkerWorkflow("testAssignment", dept, Nil)
 		service.addMarkersForStage(workflow, SingleMarker, Seq(marker1))
-		verify(mwd, times(1)).save(workflow.stageMarkers.asScala.head)
+		verify(mwd, times(1)).saveOrUpdate(workflow.stageMarkers.asScala.head)
 		workflow.stageMarkers.asScala.head.markers.knownType.members should be (Seq("cuslaj"))
 	}
 
@@ -141,7 +141,7 @@ class CM2MarkingWorkflowServiceTest extends TestBase with Mockito {
 	def removeMarkersForStage(){
 		val workflow = SingleMarkerWorkflow("testAssignment", dept, Seq(marker1, marker2))
 		service.removeMarkersForStage(workflow, SingleMarker, Seq(marker1))
-		verify(mwd, times(1)).save(workflow.stageMarkers.asScala.head)
+		verify(mwd, times(1)).saveOrUpdate(workflow.stageMarkers.asScala.head)
 		workflow.stageMarkers.asScala.head.markers.knownType.members should be (Seq("cuslak"))
 	}
 
@@ -172,11 +172,12 @@ class CM2MarkingWorkflowServiceTest extends TestBase with Mockito {
 		).toMap
 
 		val result = service.allocateMarkersForStage(assignment, SingleMarker, allocations)
-		result.find(_.feedback.usercode == student1.getUserId).get.markerUsercode should be (marker1.getUserId)
+		result.foreach(_.userLookup = userLookup)
+		result.find(_.feedback.usercode == student1.getUserId).get.marker should be (marker1)
 		val feedback = result.find(_.feedback.usercode == student2.getUserId).get
-		feedback.markerUsercode should be (marker1.getUserId)
+		feedback.marker should be (marker1)
 		feedback.mark = Some(41)
-		result.find(_.feedback.usercode == student3.getUserId).get.markerUsercode should be (marker2.getUserId)
+		result.find(_.feedback.usercode == student3.getUserId).get.marker should be (marker2)
 
 		verify(fs, times(3)).saveOrUpdate(any[Feedback])
 		verify(fs, times(3)).save(any[MarkerFeedback])
@@ -192,11 +193,11 @@ class CM2MarkingWorkflowServiceTest extends TestBase with Mockito {
 			marker2 -> Set(student2, student3)
 		).toMap
 		val result2 = service.allocateMarkersForStage(assignment, SingleMarker, allocations2)
-		result2.find(_.feedback.usercode == student1.getUserId).get.markerUsercode should be (marker1.getUserId)
+		result2.find(_.feedback.usercode == student1.getUserId).get.marker should be (marker1)
 		val feedback2 = result2.find(_.feedback.usercode == student2.getUserId).get
-		feedback2.markerUsercode should be (marker2.getUserId)
+		feedback2.marker should be (marker2)
 		feedback2.mark should be (Some(41)) // marker has changed but the feedback is still here
-		result2.find(_.feedback.usercode == student3.getUserId).get.markerUsercode should be (marker2.getUserId)
+		result2.find(_.feedback.usercode == student3.getUserId).get.marker should be (marker2)
 
 		verify(fs, times(3)).saveOrUpdate(any[Feedback])
 		verify(fs, times(6)).save(any[MarkerFeedback])
@@ -210,7 +211,7 @@ class CM2MarkingWorkflowServiceTest extends TestBase with Mockito {
 		).toMap
 		val result3 = service.allocateMarkersForStage(assignment, SingleMarker, allocations3)
 		// student ones marker feedback shouldn't have a marker now
-		result2.find(_.feedback.usercode == student1.getUserId).get.markerUsercode should be (null)
+		result2.find(_.feedback.usercode == student1.getUserId).get.marker should be (null)
 		result3.size should be(2)
 
 		verify(fs, times(3)).saveOrUpdate(any[Feedback])
@@ -227,23 +228,23 @@ class CM2MarkingWorkflowServiceTest extends TestBase with Mockito {
 		val feedback2 = Fixtures.assignmentFeedback("1431778", "u1431778")
 
 		val markerFeedback = Fixtures.markerFeedback(feedback)
-		markerFeedback.markerUsercode = marker1.getUserId
+		markerFeedback.marker = marker1
 		markerFeedback.stage = DblBlndInitialMarkerA
 
 		val markerFeedback2 = Fixtures.markerFeedback(feedback)
-		markerFeedback2.markerUsercode = marker2.getUserId
+		markerFeedback2.marker = marker2
 		markerFeedback2.stage = DblBlndInitialMarkerB
 
 		val markerFeedback3 = Fixtures.markerFeedback(feedback)
-		markerFeedback3.markerUsercode = marker1.getUserId
+		markerFeedback3.marker = marker1
 		markerFeedback3.stage = DblBlndFinalMarker
 
 		val markerFeedback4 = Fixtures.markerFeedback(feedback2)
-		markerFeedback4.markerUsercode = marker1.getUserId
+		markerFeedback4.marker = marker1
 		markerFeedback4.stage = DblBlndInitialMarkerB
 
 		val markerFeedback5 = Fixtures.markerFeedback(feedback2)
-		markerFeedback5.markerUsercode = marker2.getUserId
+		markerFeedback5.marker = marker2
 		markerFeedback5.stage = DblBlndInitialMarkerA
 
 		mwd.markerFeedbackForMarker(assignment, marker1) returns Seq(markerFeedback, markerFeedback3, markerFeedback4)

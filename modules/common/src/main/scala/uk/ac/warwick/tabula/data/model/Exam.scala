@@ -10,7 +10,6 @@ import uk.ac.warwick.tabula.AcademicYear
 import uk.ac.warwick.tabula.JavaImports._
 import uk.ac.warwick.tabula.data.PostLoadBehaviour
 import uk.ac.warwick.tabula.data.model.forms._
-import uk.ac.warwick.tabula.data.model.markingworkflow.CM2MarkingWorkflow
 import uk.ac.warwick.tabula.services.UserGroupCacheManager
 
 import scala.collection.JavaConverters._
@@ -56,10 +55,6 @@ class Exam
 	@ManyToOne(fetch = LAZY)
 	@JoinColumn(name = "workflow_id")
 	var markingWorkflow: MarkingWorkflow = _
-
-	@ManyToOne(fetch = LAZY)
-	@JoinColumn(name = "cm2_workflow_id")
-	var cm2MarkingWorkflow: CM2MarkingWorkflow = _
 
 	@OneToMany(mappedBy = "exam", fetch = LAZY, cascade = Array(ALL), orphanRemoval = true)
 	@BatchSize(size = 200)

@@ -24,7 +24,7 @@ class CM2MarkingWorkflowDaoTest extends PersistenceTestBase {
 	@Test def saveThenFetch() = transactional { tx =>
 		val singleMarkerWorkflow = SingleMarkerWorkflow("testAssignment", dept, Seq(marker))
 
-		dao.save(singleMarkerWorkflow)
+		dao.saveOrUpdate(singleMarkerWorkflow)
 		session.flush()
 
 		val workflow = dao.get(singleMarkerWorkflow.id).get
@@ -50,7 +50,7 @@ class CM2MarkingWorkflowDaoTest extends PersistenceTestBase {
 		val feedback = Fixtures.assignmentFeedback("1431777", "u1431777")
 		feedback.assignment = assignment
 		val markerFeedback = Fixtures.markerFeedback(feedback)
-		markerFeedback.markerUsercode = marker.getUserId
+		markerFeedback.marker = marker
 		markerFeedback.stage = SingleMarker
 
 		val assignment2 = Fixtures.assignment("test2")
@@ -58,7 +58,7 @@ class CM2MarkingWorkflowDaoTest extends PersistenceTestBase {
 		val feedback2 = Fixtures.assignmentFeedback("1431777", "u1431777")
 		feedback2.assignment = assignment2
 		val markerFeedback2 = Fixtures.markerFeedback(feedback2)
-		markerFeedback2.markerUsercode = marker.getUserId
+		markerFeedback2.marker = marker
 		markerFeedback2.stage = SingleMarker
 
 		session.save(assignment)
@@ -83,26 +83,26 @@ class CM2MarkingWorkflowDaoTest extends PersistenceTestBase {
 		feedback.assignment = assignment
 
 		val markerFeedback = Fixtures.markerFeedback(feedback)
-		markerFeedback.markerUsercode = marker.getUserId
+		markerFeedback.marker = marker
 		markerFeedback.stage = DblBlndInitialMarkerA
 
 		val markerFeedback2 = Fixtures.markerFeedback(feedback)
-		markerFeedback2.markerUsercode = marker2.getUserId
+		markerFeedback2.marker = marker2
 		markerFeedback2.stage = DblBlndInitialMarkerB
 
 		val markerFeedback3 = Fixtures.markerFeedback(feedback)
-		markerFeedback3.markerUsercode = marker.getUserId
+		markerFeedback3.marker = marker
 		markerFeedback3.stage = DblBlndFinalMarker
 
 		val feedback2 = Fixtures.assignmentFeedback("1431778", "u1431778")
 		feedback2.assignment = assignment
 
 		val markerFeedback4 = Fixtures.markerFeedback(feedback2)
-		markerFeedback4.markerUsercode = marker.getUserId
+		markerFeedback4.marker = marker
 		markerFeedback4.stage = DblBlndInitialMarkerB
 
 		val markerFeedback5 = Fixtures.markerFeedback(feedback2)
-		markerFeedback5.markerUsercode = marker2.getUserId
+		markerFeedback5.marker = marker2
 		markerFeedback5.stage = DblBlndInitialMarkerA
 
 		session.save(assignment)

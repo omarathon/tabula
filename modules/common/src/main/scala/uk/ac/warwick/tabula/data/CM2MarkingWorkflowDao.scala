@@ -17,8 +17,8 @@ trait AutowiringCM2MarkingWorkflowDaoComponent extends CM2MarkingWorkflowDaoComp
 
 trait CM2MarkingWorkflowDao {
 	def get(id: String): Option[CM2MarkingWorkflow]
-	def save(workflow: CM2MarkingWorkflow): Unit
-	def save(markers: StageMarkers): Unit
+	def saveOrUpdate(workflow: CM2MarkingWorkflow): Unit
+	def saveOrUpdate(markers: StageMarkers): Unit
 	def markerFeedbackForAssignmentAndStage(assignment: Assignment, stage: MarkingWorkflowStage): Seq[MarkerFeedback]
 	def markerFeedbackForFeedback(feedback: AssignmentFeedback): Seq[MarkerFeedback]
 	def markerFeedbackForMarker(assignment: Assignment, marker: User): Seq[MarkerFeedback]
@@ -27,8 +27,8 @@ trait CM2MarkingWorkflowDao {
 @Repository
 class CM2MarkingWorkflowDaoImpl extends CM2MarkingWorkflowDao with Daoisms {
 	override def get(id: String): Option[CM2MarkingWorkflow] = getById[CM2MarkingWorkflow](id)
-	override def save(workflow: CM2MarkingWorkflow): Unit = session.saveOrUpdate(workflow)
-	override def save(markers: StageMarkers): Unit = session.saveOrUpdate(markers)
+	override def saveOrUpdate(workflow: CM2MarkingWorkflow): Unit = session.saveOrUpdate(workflow)
+	override def saveOrUpdate(markers: StageMarkers): Unit = session.saveOrUpdate(markers)
 	override def markerFeedbackForAssignmentAndStage(assignment: Assignment, stage: MarkingWorkflowStage): Seq[MarkerFeedback] = {
 		session.newCriteria[MarkerFeedback]
 			.createAlias("feedback", "f")

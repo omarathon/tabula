@@ -1,7 +1,5 @@
 package uk.ac.warwick.tabula.data.model
 
-import javax.validation.constraints.NotNull
-
 import scala.collection.JavaConversions._
 import org.joda.time.DateTime
 import javax.persistence._
@@ -20,7 +18,7 @@ import uk.ac.warwick.tabula.data.model.markingworkflow.MarkingWorkflowStage
 import uk.ac.warwick.tabula.services.UserLookupService
 
 @Entity @Access(AccessType.FIELD)
-class MarkerFeedback extends GeneratedId with FeedbackAttachments with ToEntityReference with CanBeDeleted {
+class MarkerFeedback extends GeneratedId with FeedbackAttachments with ToEntityReference with CanBeDeleted with Cm1MarkerFeedbackSupport {
 	type Entity = MarkerFeedback
 
 	def this(parent:Feedback){
@@ -31,37 +29,18 @@ class MarkerFeedback extends GeneratedId with FeedbackAttachments with ToEntityR
 	@transient
 	var userLookup: UserLookupService = Wire[UserLookupService]("userLookup")
 
-	@Deprecated
-	def getFeedbackPosition: FeedbackPosition = feedback.getFeedbackPosition(this)
-
-	@Deprecated
-	def getMarkerUsercode: Option[String] = {
-		// Very fuck you, Hibernate
-		HibernateHelpers.initialiseAndUnproxy(feedback) match {
-			case assignmentFeedback: AssignmentFeedback =>
-				val student = feedback.usercode
-				val assignment = assignmentFeedback.assignment
-				Option(assignment.markingWorkflow).flatMap { workflow =>
-					getFeedbackPosition match {
-						case FirstFeedback => workflow.getStudentsFirstMarker(assignment, student)
-						case SecondFeedback => workflow.getStudentsSecondMarker(assignment, student)
-						case ThirdFeedback => workflow.getStudentsFirstMarker(assignment, student)
-						case _ => None
-					}
-				}
-			case _ => None
-		}
-
-	}
-
-	def getMarkerUser: Option[User] = getMarkerUsercode.map(userLookup.getUserByUserId)
-
 	@ManyToOne(optional = false, fetch = FetchType.LAZY)
 	@JoinColumn(name = "feedback_id", nullable = false)
 	var feedback: Feedback = _
 
 	@Column(name = "marker")
-	var markerUsercode: String = _
+	private var markerUsercode: String = _
+
+	def marker_=(marker: User) = markerUsercode = marker match {
+		case m: User if !m.isFoundUser => throw new IllegalStateException(s"Marker is not a valid user.")
+		case m: User =>  m.getUserId
+		case _ => null
+	}
 
 	// returns an Anon user when the markerUsercode is null
 	def marker: User =  {
@@ -128,4 +107,33 @@ class MarkerFeedback extends GeneratedId with FeedbackAttachments with ToEntityR
 	def hasComments: Boolean = customFormValues.exists(_.value != null)
 
 	override def toEntityReference: MarkerFeedbackEntityReference = new MarkerFeedbackEntityReference().put(this)
+}
+
+trait Cm1MarkerFeedbackSupport {
+	this: MarkerFeedback =>
+
+	@Deprecated
+	def getMarkerUser: Option[User] = getMarkerUsercode.map(userLookup.getUserByUserId)
+
+	@Deprecated
+	def getFeedbackPosition: FeedbackPosition = feedback.getFeedbackPosition(this)
+
+	@Deprecated
+	def getMarkerUsercode: Option[String] = {
+		// Very fuck you, Hibernate
+		HibernateHelpers.initialiseAndUnproxy(feedback) match {
+			case assignmentFeedback: AssignmentFeedback =>
+				val student = feedback.usercode
+				val assignment = assignmentFeedback.assignment
+				Option(assignment.markingWorkflow).flatMap { workflow =>
+					getFeedbackPosition match {
+						case FirstFeedback => workflow.getStudentsFirstMarker(assignment, student)
+						case SecondFeedback => workflow.getStudentsSecondMarker(assignment, student)
+						case ThirdFeedback => workflow.getStudentsFirstMarker(assignment, student)
+						case _ => None
+					}
+				}
+			case _ => None
+		}
+	}
 }

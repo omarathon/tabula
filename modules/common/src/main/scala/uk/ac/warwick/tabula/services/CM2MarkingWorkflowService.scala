@@ -49,7 +49,7 @@ trait CM2MarkingWorkflowService extends WorkflowUserGroupHelpers {
 class CM2MarkingWorkflowServiceImpl extends CM2MarkingWorkflowService with AutowiringFeedbackServiceComponent
 	with WorkflowUserGroupHelpersImpl with AutowiringCM2MarkingWorkflowDaoComponent {
 
-	override def save(workflow: CM2MarkingWorkflow): Unit = markingWorkflowDao.save(workflow)
+	override def save(workflow: CM2MarkingWorkflow): Unit = markingWorkflowDao.saveOrUpdate(workflow)
 
 	override def releaseFeedback(feedbacks: Seq[AssignmentFeedback]): Seq[AssignmentFeedback] = feedbacks.map(f => {
 		f.outstandingStages = f.assignment.cm2MarkingWorkflow.initialStages.asJava
@@ -84,7 +84,7 @@ class CM2MarkingWorkflowServiceImpl extends CM2MarkingWorkflowService with Autow
 		)
 		// usergroup handles dupes for us :)
 		markers.foreach(markersForStage.markers.add)
-		markingWorkflowDao.save(markersForStage)
+		markingWorkflowDao.saveOrUpdate(markersForStage)
 	}
 
 	override def removeMarkersForStage(workflow: CM2MarkingWorkflow, stage: MarkingWorkflowStage, markers: Seq[Marker]): Unit = {
@@ -97,7 +97,7 @@ class CM2MarkingWorkflowServiceImpl extends CM2MarkingWorkflowService with Autow
 				throw new IllegalArgumentException(s"Can't remove marker ${marker.getUserId} for this stage as they have marker feedback in progress")
 			markersForStage.markers.remove(marker)
 		})
-		markingWorkflowDao.save(markersForStage)
+		markingWorkflowDao.saveOrUpdate(markersForStage)
 	}
 
 	// for a given assignment and workflow stage specify the markers for each student
@@ -112,7 +112,7 @@ class CM2MarkingWorkflowServiceImpl extends CM2MarkingWorkflowService with Autow
 		existingMarkerFeedback
 			.filter(mf => allocations.getOrElse(mf.marker, Set()).isEmpty)
 			.foreach(mf => {
-				mf.markerUsercode = null
+				mf.marker = null
 				feedbackService.save(mf)
 			})
 
@@ -137,7 +137,7 @@ class CM2MarkingWorkflowServiceImpl extends CM2MarkingWorkflowService with Autow
 			})
 
 			// set the marker (possibly moving the MarkerFeedback to another marker - any existing data remains)
-			markerFeedback.markerUsercode = marker.getUserId
+			markerFeedback.marker = marker
 			feedbackService.save(markerFeedback)
 			markerFeedback
 		}
