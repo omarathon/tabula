@@ -34,6 +34,7 @@ class GenerateExamGridSelectCourseCommandInternal(val department: Department, va
 	override def applyInternal(): Seq[ExamGridEntity] = {
 		val scyds = benchmarkTask("findByCourseRoutesYear") {
 			studentCourseYearDetailsDao.findByCourseRoutesYear(academicYear, course, routes.asScala, yearOfStudy, includeTempWithdrawn, eagerLoad = true, disableFreshFilter = true)
+				.filter(scyd => department.includesMember(scyd.studentCourseDetails.student, Some(department)))
 		}
 		val sorted = benchmarkTask("sorting") {
 			scyds.sortBy(_.studentCourseDetails.scjCode)
@@ -80,7 +81,8 @@ trait GenerateExamGridSelectCourseCommandState {
 	def department: Department
 	def academicYear: AcademicYear
 
-	lazy val allCourses: List[Course] = department.descendants.flatMap(d => courseAndRouteService.findCoursesInDepartment(d)).sortBy(_.code)
+	// Courses are always owned by the root department
+	lazy val allCourses: List[Course] = department.rootDepartment.descendants.flatMap(d => courseAndRouteService.findCoursesInDepartment(d)).sortBy(_.code)
 	lazy val allRoutes: List[Route] = department.descendants.flatMap(d => courseAndRouteService.findRoutesInDepartment(d)).sortBy(_.code)
 	lazy val allYearsOfStudy: Inclusive = 1 to FilterStudentsOrRelationships.MaxYearsOfStudy
 }
