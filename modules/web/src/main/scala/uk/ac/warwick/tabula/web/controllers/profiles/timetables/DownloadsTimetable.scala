@@ -89,8 +89,7 @@ trait DownloadsTimetable extends TaskBenchmarking {
 					} else {
 						cell
 					}
-				}
-				}
+				}}
 			}
 
 			val eventGrid: Map[DayOfWeek, Seq[Map[LocalTime, TimetableEvent]]] = benchmarkTask("eventGrid") {
