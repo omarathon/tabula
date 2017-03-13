@@ -188,12 +188,12 @@ trait ViewMemberEventsValidation extends SelfValidating {
 	}
 }
 
-trait ViewStaffPersonalTimetableCommandFactory {
+trait ViewStaffMemberEventsCommandFactory {
 	def apply(staffMember: StaffMember): Appliable[ReturnType] with ViewMemberEventsRequest
 }
 
-class ViewStaffPersonalTimetableCommandFactoryImpl(currentUser: CurrentUser)
-	extends ViewStaffPersonalTimetableCommandFactory {
+class ViewStaffMemberEventsCommandFactoryImpl(currentUser: CurrentUser)
+	extends ViewStaffMemberEventsCommandFactory {
 
 	def apply(staffMember: StaffMember) =
 		ViewMemberEventsCommand(
@@ -202,12 +202,12 @@ class ViewStaffPersonalTimetableCommandFactoryImpl(currentUser: CurrentUser)
 		)
 }
 
-trait ViewStudentPersonalTimetableCommandFactory {
+trait ViewStudentMemberEventsCommandFactory {
 	def apply(student: StudentMember): Appliable[ReturnType] with ViewMemberEventsRequest
 }
 
-class ViewStudentPersonalTimetableCommandFactoryImpl(currentUser: CurrentUser)
-	extends ViewStudentPersonalTimetableCommandFactory {
+class ViewStudentMemberEventsCommandFactoryImpl(currentUser: CurrentUser)
+	extends ViewStudentMemberEventsCommandFactory {
 
 	def apply(student: StudentMember) =
 		ViewMemberEventsCommand(

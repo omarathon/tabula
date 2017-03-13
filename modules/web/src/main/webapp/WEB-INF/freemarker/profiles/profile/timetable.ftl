@@ -31,7 +31,7 @@
 	<div class="calendar-loading hidden-print">
 		<i class="fa fa-spinner fa-spin"></i><em> Loading&hellip;</em>
 	</div>
-	<div class="calendar hidden-xs" data-viewname="month" data-downloadbutton=".calendar-download"></div>
+	<div class="calendar hidden-xs" data-viewname="month" data-calendar-download-button=".calendar-download" data-timetable-download-button=".timetable-download"></div>
 </div>
 
 <div class="calendar-smallscreen-outer visible-xs-block">
@@ -46,10 +46,14 @@
 		Download calendar as PDF
 	</a>
 	<#if academicYear??>
-		<a class="btn btn-default timetable-download" href="<@routes.profiles.timetable_download member academicYear />">Download timetable as PDF (${academicYear.toString})</a>
+		<a class="btn btn-default timetable-download" href="<@routes.profiles.timetable_download member academicYear />" data-href="<@routes.profiles.timetable_download member academicYear />">
+			Download timetable as PDF (${academicYear.toString})
+		</a>
 	<#elseif academicYears?has_content>
 		<#list academicYears as academicYear>
-			<a class="btn btn-default timetable-download" href="<@routes.profiles.timetable_download member academicYear />">Download timetable as PDF (${academicYear.toString})</a>
+			<a class="btn btn-default timetable-download" href="<@routes.profiles.timetable_download member academicYear />" data-href="<@routes.profiles.timetable_download member academicYear />">
+				Download timetable as PDF (${academicYear.toString})
+			</a>
 		</#list>
 	</#if>
 	<#if member.timetableHash?has_content>

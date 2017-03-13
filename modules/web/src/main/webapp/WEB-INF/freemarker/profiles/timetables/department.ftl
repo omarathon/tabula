@@ -8,5 +8,9 @@
 
 <#assign submitUrl><@routes.profiles.department_timetables department /></#assign>
 <#assign calendarDownloadUrl><@routes.profiles.department_timetables_calendar_download department /></#assign>
+<#function timetableDownloadRoute dept year>
+	<#local result><@routes.profiles.department_timetables_download dept year /></#local>
+	<#return result />
+</#function>
 <#include "_department_timetable.ftl" />
 </#escape>

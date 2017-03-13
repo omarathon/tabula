@@ -18,6 +18,7 @@ import scala.util.Try
 object ViewMemberTimetableCommand extends Logging {
 	private[timetables] type ReturnType = Try[EventList]
 	type TimetableCommand = Appliable[ReturnType] with ViewMemberTimetableRequest with SelfValidating
+	val RequiredPermission = Permissions.Profiles.Read.Timetable
 
 	def apply(member: Member, currentUser: CurrentUser): TimetableCommand = member match {
 		case student: StudentMember =>
@@ -81,7 +82,7 @@ trait ViewMemberTimetablePermissions extends RequiresPermissionsChecking with Pe
 	self: ViewMemberTimetableState =>
 
 	override def permissionsCheck(p: PermissionsChecking) {
-		p.PermissionCheck(Permissions.Profiles.Read.Timetable, mandatory(member))
+		p.PermissionCheck(ViewMemberTimetableCommand.RequiredPermission, mandatory(member))
 	}
 }
 
@@ -93,4 +94,32 @@ trait ViewMemberTimetableValidation extends SelfValidating {
 			errors.rejectValue("academicYear", "NotEmpty")
 		}
 	}
+}
+
+trait ViewStaffMemberTimetableCommandFactory {
+	def apply(staffMember: StaffMember): Appliable[ReturnType] with CurrentSITSAcademicYear
+}
+
+class ViewStaffMemberTimetableCommandFactoryImpl(currentUser: CurrentUser)
+	extends ViewStaffMemberTimetableCommandFactory {
+
+	def apply(staffMember: StaffMember) =
+		ViewMemberTimetableCommand(
+			staffMember,
+			currentUser
+		)
+}
+
+trait ViewStudentMemberTimetableCommandFactory {
+	def apply(student: StudentMember): Appliable[ReturnType] with CurrentSITSAcademicYear
+}
+
+class ViewStudentMemberTimetableCommandFactoryImpl(currentUser: CurrentUser)
+	extends ViewStudentMemberTimetableCommandFactory {
+
+	def apply(student: StudentMember) =
+		ViewMemberTimetableCommand(
+			student,
+			currentUser
+		)
 }

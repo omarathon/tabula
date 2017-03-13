@@ -43,7 +43,7 @@
 	</style>
 </head>
 <body>
-	<h1>Timetable for ${member.fullName!} (${member.universityId}) for ${academicYear.toString}</h1>
+	<h1>Timetable for ${title}</h1>
 
 	<table>
 		<thead>
