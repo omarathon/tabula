@@ -112,6 +112,7 @@ trait SharedAssignmentProperties extends BooleanAssignmentProperties with FindAs
 			findWordCountField(assignment).foreach { wordCountField =>
 				wordCountField.max = null
 				wordCountField.min = null
+				wordCountField.conventions = wordCountConventions
 			}
 		} else {
 			val wordCount = findWordCountField(assignment).getOrElse {
