@@ -20,7 +20,7 @@ class AddMarkerFeedbackCommandTest extends TestBase with Mockito {
 	val module: Module = Fixtures.module("cs118")
 	val assignment: Assignment = Fixtures.assignment("my assignment")
 	assignment.module = module
-	assignment.markingWorkflow = new StudentsChooseMarkerWorkflow
+	assignment.markingWorkflow = new OldStudentsChooseMarkerWorkflow
 
 	val userLookup = new MockUserLookup
 	val user = new User("student")

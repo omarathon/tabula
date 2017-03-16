@@ -183,7 +183,8 @@
 		<bean class="uk.ac.warwick.tabula.data.model.forms.ExtensionStateConverter" />
 		<bean class="uk.ac.warwick.tabula.commands.TimeFilterConverter"/>
 		<bean class="uk.ac.warwick.tabula.data.convert.WorkflowCategoryConverter" />
-
+		<bean class="uk.ac.warwick.tabula.data.convert.CM2MarkingWorkflowIdConverter" />
+		<bean class="uk.ac.warwick.tabula.data.model.markingworkflow.StringToMarkingWorkflowType" />
 	</util:list>
 
 	<bean id="typeConverter"

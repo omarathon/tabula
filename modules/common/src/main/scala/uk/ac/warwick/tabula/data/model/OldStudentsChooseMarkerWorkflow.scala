@@ -9,7 +9,7 @@ import uk.ac.warwick.spring.Wire
 
 @Entity
 @DiscriminatorValue(value="StudentsChooseMarker")
-class StudentsChooseMarkerWorkflow extends MarkingWorkflow with NoSecondMarker {
+class OldStudentsChooseMarkerWorkflow extends MarkingWorkflow with NoSecondMarker {
 
 	def this(dept: Department) = {
 		this()

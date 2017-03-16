@@ -199,7 +199,7 @@ class CopyAssignmentsCommandTest extends TestBase with Mockito {
 	@Test
 	def copyMarkerField() {
 		new Fixture with FindAssignmentFields {
-			val studentChooseWorkflow = new StudentsChooseMarkerWorkflow
+			val studentChooseWorkflow = new OldStudentsChooseMarkerWorkflow
 			assignment.markingWorkflow = studentChooseWorkflow
 			assignment.addField(new MarkerSelectField)
 			val command = new CopyAssignmentsCommand(department, Seq(module)) with CommandTestSupport

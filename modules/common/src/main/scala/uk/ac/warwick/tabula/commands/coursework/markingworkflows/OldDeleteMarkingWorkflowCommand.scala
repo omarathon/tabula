@@ -8,7 +8,7 @@ import uk.ac.warwick.tabula.data.{MarkingWorkflowDaoComponent, AutowiringMarking
 import uk.ac.warwick.tabula.permissions._
 import uk.ac.warwick.tabula.system.permissions.{PermissionsChecking, PermissionsCheckingMethods, RequiresPermissionsChecking}
 
-object DeleteMarkingWorkflowCommand {
+object OldDeleteMarkingWorkflowCommand {
 	def apply(department: Department, markingWorkflow: MarkingWorkflow) = new DeleteMarkingWorkflowCommandInternal(department, markingWorkflow)
 		with ComposableCommand[Unit]
 		with DeleteMarkingWorkflowCommandState

@@ -10,6 +10,7 @@ import uk.ac.warwick.tabula.JavaImports._
 import uk.ac.warwick.tabula.data.convert.ConvertibleConverter
 import uk.ac.warwick.tabula.data.model.Department.Settings.ExamGridOptions
 import uk.ac.warwick.tabula.data.model.groups.{SmallGroupAllocationMethod, WeekRange}
+import uk.ac.warwick.tabula.data.model.markingworkflow.CM2MarkingWorkflow
 import uk.ac.warwick.tabula.data.model.permissions.{CustomRoleDefinition, DepartmentGrantedRole}
 import uk.ac.warwick.tabula.data.{AliasAndJoinType, PostLoadBehaviour, ScalaRestriction}
 import uk.ac.warwick.tabula.exams.grids.columns.ExamGridColumnOption
@@ -85,6 +86,12 @@ class Department extends GeneratedId
 	def markingWorkflows: Seq[MarkingWorkflow] = _markingWorkflows.asScala.toSeq.sorted
 	def addMarkingWorkflow(markingWorkflow: MarkingWorkflow): Boolean = _markingWorkflows.add(markingWorkflow)
 	def removeMarkingWorkflow(markingWorkflow: MarkingWorkflow): Boolean = _markingWorkflows.remove(markingWorkflow)
+
+
+	@OneToMany(mappedBy = "department", fetch = FetchType.LAZY, cascade = Array(CascadeType.ALL), orphanRemoval = true)
+	@BatchSize(size=200)
+	private val _cm2MarkingWorkflows: JSet[CM2MarkingWorkflow] = JHashSet()
+	def cm2MarkingWorkflows: Seq[CM2MarkingWorkflow] = _cm2MarkingWorkflows.asScala.toSeq.sorted
 
 	// TAB-2388 Disable orphanRemoval as Module Managers were unintentionally being removed in certain circumstances
 	@OneToMany(mappedBy="department", fetch = FetchType.LAZY, cascade = Array(CascadeType.ALL), orphanRemoval = false)

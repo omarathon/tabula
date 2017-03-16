@@ -26,7 +26,7 @@ Macros for customised form elements, containers and more complex pickers.
 	</#if>
 </#macro>
 
-<#macro form_group path="" checkbox=false radio=false>
+<#macro form_group path="" checkbox=false radio=false cssClass="">
 	<#local errorClass="" />
 	<#if path?has_content>
 		<@spring.bind path=path>
@@ -35,13 +35,13 @@ Macros for customised form elements, containers and more complex pickers.
 			</#if>
 		</@spring.bind>
 	</#if>
-	<div class="form-group <#if checkbox>checkbox</#if> <#if radio>radio</#if> ${errorClass}">
+	<div class="<#compress>form-group <#if checkbox>checkbox</#if> <#if radio>radio</#if> ${cssClass} ${errorClass}</#compress>">
 		<#nested />
 	</div>
 </#macro>
 
-<#macro labelled_form_group path="" labelText="" help="">
-	<@form_group path=path>
+<#macro labelled_form_group path="" labelText="" help="" cssClass="">
+	<@form_group path=path cssClass=cssClass>
 		<#if labelText?has_content>
 			<@label path=path><#compress><#noescape>${labelText}</#noescape></#compress></@label>
 		</#if>
@@ -200,9 +200,10 @@ Macros for customised form elements, containers and more complex pickers.
 	object: True if binding to User objects, otherwise binds to strings.
 	    This might not actually work - better to register a property editor for the field
 	    if you are binding to and from Users.
+	delete_existing: whether the UI element will allow you to remove existing users that are pre-populated
 
 -->
-<#macro flexipicker path="" list=false object=false name="" htmlId="" cssClass="" placeholder="" includeEmail="false" includeGroups="false" includeUsers="true" membersOnly="false" multiple=false auto_multiple=true>
+<#macro flexipicker path="" list=false object=false name="" htmlId="" cssClass="" placeholder="" includeEmail="false" includeGroups="false" includeUsers="true" membersOnly="false" multiple=false auto_multiple=true delete_existing=true>
 	<#if name="">
 		<@spring.bind path=path>
 		<#-- This handles whether we're binding to a list or not but I think
@@ -217,25 +218,25 @@ Macros for customised form elements, containers and more complex pickers.
 					<#local ids=[status.value] />
 				</#if>
 			</#if>
-			<@render_flexipicker expression=status.expression value=ids cssClass=cssClass htmlId=htmlId placeholder=placeholder includeEmail=includeEmail includeGroups=includeGroups includeUsers=includeUsers membersOnly=membersOnly multiple=multiple auto_multiple=auto_multiple><#nested /></@render_flexipicker>
+			<@render_flexipicker expression=status.expression value=ids cssClass=cssClass htmlId=htmlId placeholder=placeholder includeEmail=includeEmail includeGroups=includeGroups includeUsers=includeUsers membersOnly=membersOnly multiple=multiple auto_multiple=auto_multiple delete_existing=delete_existing><#nested /></@render_flexipicker>
 		</@spring.bind>
 	<#else>
-		<@render_flexipicker expression=name value=[] cssClass=cssClass htmlId=htmlId placeholder=placeholder includeEmail=includeEmail includeGroups=includeGroups includeUsers=includeUsers membersOnly=membersOnly multiple=multiple auto_multiple=auto_multiple><#nested /></@render_flexipicker>
+		<@render_flexipicker expression=name value=[] cssClass=cssClass htmlId=htmlId placeholder=placeholder includeEmail=includeEmail includeGroups=includeGroups includeUsers=includeUsers membersOnly=membersOnly multiple=multiple auto_multiple=auto_multiple delete_existing=delete_existing><#nested /></@render_flexipicker>
 	</#if>
 </#macro>
 
-<#macro render_flexipicker expression cssClass value multiple auto_multiple placeholder includeEmail includeGroups includeUsers membersOnly htmlId="">
+<#macro render_flexipicker expression cssClass value multiple auto_multiple placeholder includeEmail includeGroups includeUsers membersOnly delete_existing htmlId="">
 	<#if multiple><div class="flexi-picker-collection" data-automatic="${auto_multiple?string}"></#if>
 	<#local nested><#nested /></#local>
-<#-- List existing values -->
+	<#-- List existing values -->
 	<#if value?? && value?size gt 0>
 		<#list value as id>
 			<div class="flexi-picker-container <#if nested?has_content>input-group</#if>"><#--
 			--><input type="text" class="flexi-picker form-control ${cssClass}"
 					name="${expression}" id="${htmlId}" placeholder="${placeholder}"
-					data-include-users="${includeUsers}" data-include-email="${includeEmail}" data-include-groups="${includeGroups}"
-					data-members-only="${membersOnly}"
-					data-prefix-groups="webgroup:" value="${id}" data-type="" autocomplete="off"
+					data-include-users="${includeUsers}" data-include-email="${includeEmail}"
+					data-include-groups="${includeGroups}" data-members-only="${membersOnly}"
+					data-prefix-groups="webgroup:" data-can-delete="${delete_existing?c}" value="${id}" data-type="" autocomplete="off"
 				/>
 				<#noescape>${nested}</#noescape>
 			</div>
@@ -247,7 +248,7 @@ Macros for customised form elements, containers and more complex pickers.
 			--><input type="text" class="flexi-picker form-control ${cssClass}"
 				name="${expression}" id="${htmlId}" placeholder="${placeholder}"
 				data-include-users="${includeUsers}" data-include-email="${includeEmail}" data-include-groups="${includeGroups}"
-				data-members-only="${membersOnly}"
+				data-members-only="${membersOnly}" data-can-delete="true"
 				data-prefix-groups="webgroup:" data-type="" autocomplete="off"
 			/>
 			<#noescape>${nested}</#noescape>

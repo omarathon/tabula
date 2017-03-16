@@ -12,8 +12,12 @@ var RichResultField = function (input) {
 	this.$input = $(input);
 	this.$uneditable = this.$input.parent().find('.uneditable-input.rich-result-field');
 	if (this.$uneditable.length === 0) {
-		this.$uneditable = $('<span><span class=val></span>'+
-			'<a href=# class="clear-field" title="Clear">&times;</a></span>');
+		this.canDelete = !!this.$input.data('can-delete');
+		this.html = '<span class=val></span>';
+		if(this.canDelete) {
+			this.html = this.html + '<a href=# class="clear-field" title="Clear">&times;</a>';
+		}
+		this.$uneditable = $('<span>'+this.html+'</span>');
 		this.$uneditable.attr({
 			'class': 'uneditable-input rich-result-field ' + this.$input.attr('class'),
 			'disabled': true

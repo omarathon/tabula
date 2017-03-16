@@ -5,9 +5,10 @@ import org.springframework.stereotype.Service
 
 import scala.collection.JavaConverters._
 import uk.ac.warwick.spring.Wire
+import uk.ac.warwick.tabula.AcademicYear
 import uk.ac.warwick.tabula.data.AutowiringCM2MarkingWorkflowDaoComponent
-import uk.ac.warwick.tabula.data.model.markingworkflow.{CM2MarkingWorkflow, MarkingWorkflowStage, StageMarkers}
-import uk.ac.warwick.tabula.data.model.{Assignment, AssignmentFeedback, MarkerFeedback}
+import uk.ac.warwick.tabula.data.model.markingworkflow._
+import uk.ac.warwick.tabula.data.model.{Assignment, AssignmentFeedback, Department, MarkerFeedback}
 import uk.ac.warwick.userlookup.User
 
 import scala.collection.immutable.{SortedMap, TreeMap}
@@ -19,8 +20,15 @@ trait CM2MarkingWorkflowService extends WorkflowUserGroupHelpers {
 	type Student = User
 
 	def save(workflow: CM2MarkingWorkflow): Unit
+	def delete(workflow: CM2MarkingWorkflow): Unit
 	def releaseFeedback(feedbacks: Seq[AssignmentFeedback]): Seq[AssignmentFeedback]
+
+	// move feedback onto the next stage when the next stage
 	def progressFeedback(markerStage: MarkingWorkflowStage, feedbacks: Seq[AssignmentFeedback]): Seq[AssignmentFeedback]
+
+	// move feedback to a target stage - allows skipping of stages - will fail if target stage isn't a valid future stage
+	def progressFeedback(currentStage: MarkingWorkflowStage, targetStage: MarkingWorkflowStage, feedbacks: Seq[AssignmentFeedback]): Seq[AssignmentFeedback]
+
 	// essentially an undo for progressFeedback if it was done in error - not a normal step in the workflow
 	def returnFeedback(feedbacks: Seq[AssignmentFeedback]): Seq[AssignmentFeedback]
 
@@ -43,6 +51,8 @@ trait CM2MarkingWorkflowService extends WorkflowUserGroupHelpers {
 	def markerFeedbackForFeedback(feedback: AssignmentFeedback): SortedMap[MarkingWorkflowStage, MarkerFeedback]
 
 	def getAllFeedbackForMarker(assignment: Assignment, marker: User): SortedMap[MarkingWorkflowStage, Seq[MarkerFeedback]]
+
+	def getReusableWorkflows(department: Department, academicYear: AcademicYear): Seq[CM2MarkingWorkflow]
 }
 
 @Service
@@ -51,21 +61,39 @@ class CM2MarkingWorkflowServiceImpl extends CM2MarkingWorkflowService with Autow
 
 	override def save(workflow: CM2MarkingWorkflow): Unit = markingWorkflowDao.saveOrUpdate(workflow)
 
+	override def delete(workflow: CM2MarkingWorkflow): Unit = markingWorkflowDao.delete(workflow)
+
 	override def releaseFeedback(feedbacks: Seq[AssignmentFeedback]): Seq[AssignmentFeedback] = feedbacks.map(f => {
 		f.outstandingStages = f.assignment.cm2MarkingWorkflow.initialStages.asJava
 		feedbackService.saveOrUpdate(f)
 		f
 	})
 
-	override def progressFeedback(currentStage: MarkingWorkflowStage, feedbacks: Seq[AssignmentFeedback]): Seq[AssignmentFeedback] = feedbacks.map(f => {
+	override def progressFeedback(currentStage: MarkingWorkflowStage , feedbacks: Seq[AssignmentFeedback]): Seq[AssignmentFeedback] = {
+		// don't progress if nextStages is empty
 		if(currentStage.nextStages.isEmpty)
 			throw new IllegalArgumentException("cannot progress feedback past the final stage")
 
-		val remainingStages = f.outstandingStages.asScala diff Seq(currentStage)
-		f.outstandingStages = if(remainingStages.isEmpty) currentStage.nextStages.asJava else remainingStages.asJava
-		feedbackService.saveOrUpdate(f)
-		f
-	})
+		// don't progress if outstanding stages doesn't contain the one we are trying to complete
+		if (feedbacks.exists(f => !f.outstandingStages.asScala.contains(currentStage)))
+			throw new IllegalArgumentException(s"some of the specified feedback doesn't have outstanding stage - $currentStage")
+
+		feedbacks.map(f => {
+			val remainingStages = f.outstandingStages.asScala diff Seq(currentStage)
+			f.outstandingStages = if(remainingStages.isEmpty) currentStage.nextStages.asJava else remainingStages.asJava
+			feedbackService.saveOrUpdate(f)
+			f
+		})
+	}
+
+	override def progressFeedback(currentStage: MarkingWorkflowStage, targetStage: MarkingWorkflowStage, feedbacks: Seq[AssignmentFeedback]): Seq[AssignmentFeedback] = {
+		// don't progress if outstanding stages doesn't contain the one we are trying to complete
+		if (feedbacks.exists(f => !f.outstandingStages.asScala.contains(currentStage)))
+			throw new IllegalArgumentException(s"some of the specified feedback doesn't have outstanding stage - $currentStage")
+
+		// TODO - walk through next stages until we find target stage or reach the end. if end then throw an exception
+		???
+	}
 
 	override def returnFeedback(feedbacks: Seq[AssignmentFeedback]): Seq[AssignmentFeedback] = feedbacks.map(f => {
 		val previousStages = f.outstandingStages.asScala.head.previousStages
@@ -170,6 +198,10 @@ class CM2MarkingWorkflowServiceImpl extends CM2MarkingWorkflowService with Autow
 		TreeMap(unsortedMap.toSeq:_*)
 	}
 
+	override def getReusableWorkflows(department: Department, academicYear: AcademicYear): Seq[CM2MarkingWorkflow] = {
+		markingWorkflowDao.getReusableWorkflows(department, academicYear)
+	}
+
 }
 
 trait WorkflowUserGroupHelpers {
@@ -184,6 +216,6 @@ trait CM2MarkingWorkflowServiceComponent {
 	def cm2MarkingWorkflowService: CM2MarkingWorkflowService
 }
 
-trait AutoWiringCM2MarkingWorkflowServiceComponent {
+trait AutoWiringCM2MarkingWorkflowServiceComponent extends CM2MarkingWorkflowServiceComponent {
 	def cm2MarkingWorkflowService: CM2MarkingWorkflowService =  Wire.auto[CM2MarkingWorkflowService]
 }
