@@ -173,8 +173,8 @@
 				'/api/v1/member/${member.universityId}/timetable/calendar',
 				function(startDate, endDate) {
 					return {
-						'from':startDate.getTime()/1000,
-						'to':endDate.getTime()/1000,
+						'from':startDate.getTime(),
+						'to':endDate.getTime(),
 						'cb':new Date().valueOf() // Break the IE cache
 					};
 				},
