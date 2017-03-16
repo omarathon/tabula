@@ -14,7 +14,7 @@ class AttendanceManageHomeTest extends AttendanceFixture with GivenWhenThen {
 		go to Path(s"/attendance/manage")
 
 		Then("I click the link to manage xxx for this academic year")
-		click on linkText(s"Test Services ${FunctionalTestAcademicYear.current.toString}")
+		click on linkText(s"Test Services")
 
 		Then("I am redirected to the manage department for year page")
 		eventually(currentUrl should include(s"/attendance/manage/xxx/${FunctionalTestAcademicYear.current.startYear.toString}"))

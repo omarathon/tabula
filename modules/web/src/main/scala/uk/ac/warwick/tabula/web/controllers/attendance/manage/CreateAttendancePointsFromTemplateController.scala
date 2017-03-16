@@ -32,12 +32,9 @@ class CreateAttendancePointsFromTemplateController extends AttendanceController 
 		Mav("attendance/manage/templates",
 			"schemes" -> cmd.schemes,
 			"templates" -> cmd.templateSchemeItems,
-			"department" -> cmd.schemes.get(0).department,
-			"academicYear" -> cmd.academicYear.startYear.toString,
 			"returnTo" -> getReturnTo(Routes.Manage.addPointsToExistingSchemes(department, academicYear))
 		).crumbs(
-			Breadcrumbs.Manage.Home,
-			Breadcrumbs.Manage.Department(department),
+			Breadcrumbs.Manage.HomeForYear(academicYear),
 			Breadcrumbs.Manage.DepartmentForYear(department, academicYear)
 		)
 	}
@@ -54,13 +51,10 @@ class CreateAttendancePointsFromTemplateController extends AttendanceController 
 			Mav("attendance/manage/templates",
 				"schemes" -> cmd.schemes,
 				"templates" -> cmd.templateSchemeItems,
-				"department" -> cmd.schemes.get(0).department,
-				"academicYear" -> cmd.academicYear.startYear.toString,
 				"returnTo" -> getReturnTo(Routes.Manage.addPointsToExistingSchemes(department, academicYear)),
 				"errors" -> errors
 			).crumbs(
-				Breadcrumbs.Manage.Home,
-				Breadcrumbs.Manage.Department(department),
+				Breadcrumbs.Manage.HomeForYear(academicYear),
 				Breadcrumbs.Manage.DepartmentForYear(department, academicYear)
 			)
 		} else {

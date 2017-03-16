@@ -39,6 +39,7 @@ class CreateAssignmentDetailsCommandInternal(val module: Module)
 
 	override def applyInternal(): Assignment = {
 		val assignment = new Assignment(module)
+		assignment.addDefaultFields()
 		copyTo(assignment)
 		assessmentService.save(assignment)
 		assignment

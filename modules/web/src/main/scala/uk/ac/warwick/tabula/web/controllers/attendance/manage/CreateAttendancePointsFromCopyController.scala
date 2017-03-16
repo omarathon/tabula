@@ -65,7 +65,7 @@ class CreateAttendancePointsFromCopyController extends AttendanceController with
 		@PathVariable academicYear: AcademicYear,
 		@RequestParam schemes: JList[AttendanceMonitoringScheme]
 	) =
-		CreateNewAttendancePointsFromCopyCommand(department, academicYear, schemes.asScala.toSeq)
+		CreateNewAttendancePointsFromCopyCommand(department, academicYear, schemes.asScala)
 
 	@RequestMapping(method = Array(POST))
 	def form(
@@ -76,8 +76,7 @@ class CreateAttendancePointsFromCopyController extends AttendanceController with
 		Mav("attendance/manage/copypoints",
 			"returnTo" -> getReturnTo("")
 		).crumbs(
-			Breadcrumbs.Manage.Home,
-			Breadcrumbs.Manage.Department(department),
+			Breadcrumbs.Manage.HomeForYear(academicYear),
 			Breadcrumbs.Manage.DepartmentForYear(department, academicYear)
 		)
 	}
@@ -103,8 +102,7 @@ class CreateAttendancePointsFromCopyController extends AttendanceController with
 			"monthNames" -> monthNames(searchAcademicYear),
 			"returnTo" -> getReturnTo("")
 		).crumbs(
-			Breadcrumbs.Manage.Home,
-			Breadcrumbs.Manage.Department(department),
+			Breadcrumbs.Manage.HomeForYear(academicYear),
 			Breadcrumbs.Manage.DepartmentForYear(department, academicYear)
 		)
 	}
@@ -136,8 +134,7 @@ class CreateAttendancePointsFromCopyController extends AttendanceController with
 				"monthNames" -> monthNames(searchAcademicYear),
 				"returnTo" -> getReturnTo("")
 			).crumbs(
-				Breadcrumbs.Manage.Home,
-				Breadcrumbs.Manage.Department(department),
+				Breadcrumbs.Manage.HomeForYear(academicYear),
 				Breadcrumbs.Manage.DepartmentForYear(department, academicYear)
 			)
 		} else {

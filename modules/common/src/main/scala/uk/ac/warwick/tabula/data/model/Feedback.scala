@@ -1,14 +1,17 @@
 package uk.ac.warwick.tabula.data.model
 
 import javax.persistence.CascadeType._
+import javax.persistence.FetchType._
 import javax.persistence._
 import javax.validation.constraints.NotNull
 
 import org.hibernate.annotations.{BatchSize, Type}
 import org.joda.time.DateTime
-import uk.ac.warwick.tabula.{JavaImports, AcademicYear}
+import uk.ac.warwick.tabula.{AcademicYear, JavaImports}
 import uk.ac.warwick.tabula.JavaImports._
 import uk.ac.warwick.tabula.data.model.forms.{FormattedHtml, SavedFormValue}
+import uk.ac.warwick.tabula.data.model.markingworkflow.MarkingWorkflowStage
+import uk.ac.warwick.tabula.data.model.markingworkflow.MarkingWorkflowStage.FinalStage
 import uk.ac.warwick.tabula.permissions.PermissionsTarget
 
 import scala.collection.JavaConverters._
@@ -82,10 +85,91 @@ trait AssessmentFeedback {
 	def assessmentGroups: JList[AssessmentGroup]
 }
 
+trait CM1WorkflowSupport {
+
+	this: Feedback =>
+
+	@OneToOne(cascade=Array(PERSIST,MERGE,REFRESH,DETACH), fetch = FetchType.LAZY)
+	@JoinColumn(name = "first_marker_feedback")
+	@Deprecated
+	var firstMarkerFeedback: MarkerFeedback = _
+
+	@OneToOne(cascade=Array(PERSIST,MERGE,REFRESH,DETACH), fetch = FetchType.LAZY)
+	@JoinColumn(name = "second_marker_feedback")
+	@Deprecated
+	var secondMarkerFeedback: MarkerFeedback = _
+
+	@OneToOne(cascade=Array(PERSIST,MERGE,REFRESH,DETACH), fetch = FetchType.LAZY)
+	@JoinColumn(name = "third_marker_feedback")
+	@Deprecated
+	var thirdMarkerFeedback: MarkerFeedback = _
+
+	@Deprecated
+	def getFeedbackPosition(markerFeedback: MarkerFeedback) : FeedbackPosition = {
+		if(markerFeedback == firstMarkerFeedback) FirstFeedback
+		else if (markerFeedback == secondMarkerFeedback) SecondFeedback
+		else if (markerFeedback == thirdMarkerFeedback) ThirdFeedback
+		else throw new IllegalArgumentException
+	}
+
+	// Returns None if marking is completed for the current workflow or if no workflow exists - i.e. not in the middle of a workflow
+	@Deprecated
+	def getCurrentWorkflowFeedbackPosition: Option[FeedbackPosition] = {
+
+		def markingCompleted(workflow: MarkingWorkflow) = {
+			(workflow.hasThirdMarker && thirdMarkerFeedback != null && thirdMarkerFeedback.state == MarkingState.MarkingCompleted) ||
+				(!workflow.hasThirdMarker && workflow.hasSecondMarker && secondMarkerFeedback != null && secondMarkerFeedback.state == MarkingState.MarkingCompleted) ||
+				(!workflow.hasThirdMarker && !workflow.hasSecondMarker && firstMarkerFeedback != null && firstMarkerFeedback.state == MarkingState.MarkingCompleted)
+		}
+
+		Option(markingWorkflow)
+			.filterNot(markingCompleted)
+			.map { workflow =>
+				if (workflow.hasThirdMarker && secondMarkerFeedback != null && secondMarkerFeedback.state == MarkingState.MarkingCompleted)
+					ThirdFeedback
+				else if (workflow.hasSecondMarker && secondMarkerFeedback != null && secondMarkerFeedback.state == MarkingState.Rejected)
+					FirstFeedback
+				else if (workflow.hasSecondMarker && firstMarkerFeedback != null && firstMarkerFeedback.state == MarkingState.MarkingCompleted)
+					SecondFeedback
+				else
+					FirstFeedback
+			}
+	}
+
+	@Deprecated
+	def getCurrentWorkflowFeedback: Option[MarkerFeedback] = {
+		getCurrentWorkflowFeedbackPosition match {
+			case Some(FirstFeedback) => getFirstMarkerFeedback
+			case Some(SecondFeedback) => getSecondMarkerFeedback
+			case Some(ThirdFeedback) => getThirdMarkerFeedback
+			case _ => None
+		}
+	}
+
+	@Deprecated
+	def getFirstMarkerFeedback: Option[MarkerFeedback] = Option(firstMarkerFeedback)
+	@Deprecated
+	def getSecondMarkerFeedback: Option[MarkerFeedback] = Option(secondMarkerFeedback)
+	@Deprecated
+	def getThirdMarkerFeedback: Option[MarkerFeedback] = Option(thirdMarkerFeedback)
+
+	// The current workflow position isn't None so this must be a placeholder
+	@Deprecated
+	def isPlaceholder: Boolean = getCurrentWorkflowFeedbackPosition.isDefined || !hasContent
+
+	@Deprecated
+	def getAllMarkerFeedback: Seq[MarkerFeedback] = Seq(firstMarkerFeedback, secondMarkerFeedback, thirdMarkerFeedback)
+
+	@Deprecated
+	def getAllCompletedMarkerFeedback: Seq[MarkerFeedback] = Seq(firstMarkerFeedback, secondMarkerFeedback, thirdMarkerFeedback)
+		.filter(_ != null)
+		.filter(_.state == MarkingState.MarkingCompleted)
+}
+
 @Entity @Access(AccessType.FIELD)
 @Inheritance(strategy = InheritanceType.SINGLE_TABLE)
 @DiscriminatorColumn(name = "discriminator", discriminatorType = DiscriminatorType.STRING)
-abstract class Feedback extends GeneratedId with FeedbackAttachments with PermissionsTarget with FormattedHtml with AssessmentFeedback with ToEntityReference {
+abstract class Feedback extends GeneratedId with FeedbackAttachments with PermissionsTarget with FormattedHtml with AssessmentFeedback with ToEntityReference with CM1WorkflowSupport{
 
 	var uploaderId: String = _
 
@@ -179,56 +263,21 @@ abstract class Feedback extends GeneratedId with FeedbackAttachments with Permis
 	def hasNonPrivateAdjustments: Boolean = latestNonPrivateAdjustment.isDefined
 	def hasPrivateOrNonPrivateAdjustments: Boolean = marks.asScala.nonEmpty
 
-	@OneToOne(cascade=Array(PERSIST,MERGE,REFRESH,DETACH), fetch = FetchType.LAZY)
-	@JoinColumn(name = "first_marker_feedback")
-	var firstMarkerFeedback: MarkerFeedback = _
+	def assessment: Assessment
 
-	@OneToOne(cascade=Array(PERSIST,MERGE,REFRESH,DETACH), fetch = FetchType.LAZY)
-	@JoinColumn(name = "second_marker_feedback")
-	var secondMarkerFeedback: MarkerFeedback = _
+	@OneToMany(mappedBy = "feedback", fetch = LAZY, cascade = Array(ALL), orphanRemoval = true)
+	@BatchSize(size = 200)
+	var markerFeedback: JList[MarkerFeedback] = JArrayList()
 
-	@OneToOne(cascade=Array(PERSIST,MERGE,REFRESH,DETACH), fetch = FetchType.LAZY)
-	@JoinColumn(name = "third_marker_feedback")
-	var thirdMarkerFeedback: MarkerFeedback = _
+	@ElementCollection @Column(name = "stage")
+	@JoinTable(name = "OutstandingStages", joinColumns = Array(
+		new JoinColumn(name = "feedback_id", referencedColumnName = "id")))
+	@Type(`type` = "uk.ac.warwick.tabula.data.model.markingworkflow.MarkingWorkflowStageUserType")
+	var outstandingStages: JList[MarkingWorkflowStage] = JArrayList()
 
-
-	def getFeedbackPosition(markerFeedback: MarkerFeedback) : FeedbackPosition = {
-		if(markerFeedback == firstMarkerFeedback) FirstFeedback
-		else if (markerFeedback == secondMarkerFeedback) SecondFeedback
-		else if (markerFeedback == thirdMarkerFeedback) ThirdFeedback
-		else throw new IllegalArgumentException
-	}
-
-	// Returns None if marking is completed for the current workflow or if no workflow exists - i.e. not in the middle of a workflow
-	def getCurrentWorkflowFeedbackPosition: Option[FeedbackPosition] = {
-
-		def markingCompleted(workflow: MarkingWorkflow) = {
-			(workflow.hasThirdMarker && thirdMarkerFeedback != null && thirdMarkerFeedback.state == MarkingState.MarkingCompleted) ||
-			(!workflow.hasThirdMarker && workflow.hasSecondMarker && secondMarkerFeedback != null && secondMarkerFeedback.state == MarkingState.MarkingCompleted) ||
-			(!workflow.hasThirdMarker && !workflow.hasSecondMarker && firstMarkerFeedback != null && firstMarkerFeedback.state == MarkingState.MarkingCompleted)
-		}
-
-		Option(markingWorkflow)
-			.filterNot(markingCompleted)
-			.map { workflow =>
-				if (workflow.hasThirdMarker && secondMarkerFeedback != null && secondMarkerFeedback.state == MarkingState.MarkingCompleted)
-					ThirdFeedback
-				else if (workflow.hasSecondMarker && secondMarkerFeedback != null && secondMarkerFeedback.state == MarkingState.Rejected)
-					FirstFeedback
-				else if (workflow.hasSecondMarker && firstMarkerFeedback != null && firstMarkerFeedback.state == MarkingState.MarkingCompleted)
-					SecondFeedback
-				else
-					FirstFeedback
-			}
-	}
-
-	def getCurrentWorkflowFeedback: Option[MarkerFeedback] = {
-		getCurrentWorkflowFeedbackPosition match {
-			case Some(FirstFeedback) => getFirstMarkerFeedback
-			case Some(SecondFeedback) => getSecondMarkerFeedback
-			case Some(ThirdFeedback) => getThirdMarkerFeedback
-			case _ => None
-		}
+	def isMarkingCompleted = outstandingStages.asScala.toList match {
+		case (s: FinalStage) :: Nil => true
+		case _ => false
 	}
 
 	@Column(name = "released_date")
@@ -251,16 +300,6 @@ abstract class Feedback extends GeneratedId with FeedbackAttachments with Permis
 
 	def commentsFormattedHtml: String = formattedHtml(comments)
 
-
-	def getFirstMarkerFeedback: Option[MarkerFeedback] = Option(firstMarkerFeedback)
-
-	def getSecondMarkerFeedback: Option[MarkerFeedback] = Option(secondMarkerFeedback)
-
-	def getThirdMarkerFeedback: Option[MarkerFeedback] = Option(thirdMarkerFeedback)
-
-	// The current workflow position isn't None so this must be a placeholder
-	def isPlaceholder: Boolean = getCurrentWorkflowFeedbackPosition.isDefined || !hasContent
-
 	def hasContent: Boolean = hasMarkOrGrade || hasAttachments || hasOnlineFeedback
 
 	def hasMarkOrGrade: Boolean = hasMark || hasGrade
@@ -271,12 +310,6 @@ abstract class Feedback extends GeneratedId with FeedbackAttachments with Permis
 
 	// TODO in some other places we also check that the string value hasText. Be consistent?
 	def hasOnlineFeedback: Boolean = commentsFormValue.isDefined
-
-	def getAllMarkerFeedback: Seq[MarkerFeedback] = Seq(firstMarkerFeedback, secondMarkerFeedback, thirdMarkerFeedback)
-
-	def getAllCompletedMarkerFeedback: Seq[MarkerFeedback] = Seq(firstMarkerFeedback, secondMarkerFeedback, thirdMarkerFeedback)
-		.filter(_ != null)
-		.filter(_.state == MarkingState.MarkingCompleted)
 
 	/**
 	 * Returns the released flag of this feedback,
@@ -308,6 +341,8 @@ class AssignmentFeedback extends Feedback {
 	@ManyToOne(fetch = FetchType.LAZY, cascade=Array(PERSIST, MERGE))
 	var assignment: Assignment = _
 
+	def assessment: Assessment = assignment
+
 	def module: Module = assignment.module
 
 	override def markingWorkflow: MarkingWorkflow = assignment.markingWorkflow
@@ -336,6 +371,8 @@ class ExamFeedback extends Feedback {
 	@ManyToOne(fetch = FetchType.LAZY, cascade=Array(PERSIST, MERGE))
 	var exam: Exam = _
 
+	def assessment: Assessment = exam
+
 	def module: Module = exam.module
 
 	override def markingWorkflow: MarkingWorkflow = null
@@ -360,6 +397,7 @@ object Feedback {
 	val PublishDeadlineInWorkingDays = 20
 }
 
+@Deprecated
 object FeedbackPosition {
 	def getPreviousPosition(position: Option[FeedbackPosition]): Option[FeedbackPosition] = position match {
 		case Some(FirstFeedback) => None
@@ -369,6 +407,7 @@ object FeedbackPosition {
 	}
 }
 
+@Deprecated
 sealed trait FeedbackPosition extends Ordered[FeedbackPosition] {
 	val description: String
 	val position: Int

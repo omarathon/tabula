@@ -5,11 +5,11 @@
 	<#list attendance_variables.monitoringPointTermNames as term>
 		<#if findResult.termGroupedPoints[term]??>
 			<@attendance_macros.groupedPointsBySection findResult.termGroupedPoints term; groupedPoint>
-			<div class="span12">
+			<div class="col-md-12">
 				<div class="pull-right">
 					<a class="btn btn-primary" href="<@routes.attendance.manageEditPoint groupedPoint.templatePoint filterQuery returnTo />">Edit</a>
 					<#assign hasRecordedCheckpoints = groupedPoint.hasRecordedCheckpoints/>
-					<a class="btn btn-danger <#if hasRecordedCheckpoints> disabled use-tooltip</#if>" <#if hasRecordedCheckpoints>title="This point cannot be removed as it has attendance marks against it."</#if> href="<@routes.attendance.manageDeletePoint groupedPoint.templatePoint filterQuery returnTo />"><i class="icon-remove"></i></a>
+					<a class="btn btn-danger <#if hasRecordedCheckpoints> disabled use-tooltip</#if>" <#if hasRecordedCheckpoints>title="This point cannot be removed as it has attendance marks against it."</#if> href="<@routes.attendance.manageDeletePoint groupedPoint.templatePoint filterQuery returnTo />">Delete</a>
 				</div>
 				${groupedPoint.templatePoint.name}
 				(<a class="use-tooltip" data-html="true" title="
@@ -44,11 +44,11 @@
 	<#list monthNames as month>
 		<#if findResult.monthGroupedPoints[month]??>
 			<@attendance_macros.groupedPointsBySection findResult.monthGroupedPoints month; groupedPoint>
-			<div class="span12">
+			<div class="col-md-12">
 				<div class="pull-right">
 					<a class="btn btn-primary" href="<@routes.attendance.manageEditPoint groupedPoint.templatePoint filterQuery returnTo />">Edit</a>
 					<#assign hasRecordedCheckpoints = groupedPoint.hasRecordedCheckpoints/>
-					<a class="btn btn-danger<#if hasRecordedCheckpoints> disabled use-tooltip</#if>" <#if hasRecordedCheckpoints>title="This point cannot be removed as it has attendance marks against it."</#if> href="<@routes.attendance.manageDeletePoint groupedPoint.templatePoint filterQuery returnTo />"><i class="icon-remove"></i></a>
+					<a class="btn btn-danger<#if hasRecordedCheckpoints> disabled use-tooltip</#if>" <#if hasRecordedCheckpoints>title="This point cannot be removed as it has attendance marks against it."</#if> href="<@routes.attendance.manageDeletePoint groupedPoint.templatePoint filterQuery returnTo />">Delete</a>
 				</div>
 				${groupedPoint.templatePoint.name}
 				(<@fmt.interval groupedPoint.templatePoint.startDate groupedPoint.templatePoint.endDate />)

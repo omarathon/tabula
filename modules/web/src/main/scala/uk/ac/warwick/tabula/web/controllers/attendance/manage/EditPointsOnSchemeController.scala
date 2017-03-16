@@ -26,8 +26,7 @@ class EditPointsOnSchemeController extends AbstractManageSchemePointsController 
 			"newPoints" -> Option(points).getOrElse(0),
 			"actionCompleted" -> actionCompleted
 		).crumbs(
-			Breadcrumbs.Manage.Home,
-			Breadcrumbs.Manage.Department(mandatory(scheme).department),
+			Breadcrumbs.Manage.HomeForYear(mandatory(scheme).academicYear),
 			Breadcrumbs.Manage.DepartmentForYear(mandatory(scheme).department, mandatory(scheme).academicYear)
 		)
 	}

@@ -10,9 +10,6 @@ import com.gargoylesoftware.htmlunit.BrowserVersion
  */
 class CourseworkAddAssignmentsTest extends BrowserTest with CourseworkFixtures with GivenWhenThen {
 
-	// Not even the Back button works in the default emulation mode.
-	override val htmlUnitBrowserVersion = BrowserVersion.FIREFOX_38
-
 	/**
 	 * Sorry, code gods, for this quite long test. Yes, it contains too many interdependent steps.
 	 *

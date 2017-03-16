@@ -7,6 +7,8 @@ import uk.ac.warwick.tabula.DateFormats.DateTimePickerFormatter
 import uk.ac.warwick.tabula.data.model.MeetingRecord
 import uk.ac.warwick.tabula.helpers.StringUtils._
 
+import scala.util.Try
+
 trait ScheduledMeetingRecordValidation {
 
 	def sharedValidation(errors: Errors, title: String, meetingDateStr: String, meetingTimeStr: String, meetingEndTimeStr: String) {
@@ -17,23 +19,28 @@ trait ScheduledMeetingRecordValidation {
 
 		rejectIfEmptyOrWhitespace(errors, "relationship", "NotEmpty")
 		rejectIfEmptyOrWhitespace(errors, "format", "NotEmpty")
-		var meetingDate = new DateTime()
-		if ((!meetingDateStr.isEmptyOrWhitespace) && (!meetingTimeStr.isEmptyOrWhitespace) && (!meetingEndTimeStr.isEmptyOrWhitespace)) {
-			meetingDate = DateTimePickerFormatter.parseDateTime(meetingDateStr + " "+ meetingTimeStr)
+		rejectIfEmptyOrWhitespace(errors, "meetingDateStr", "NotEmpty")
+		rejectIfEmptyOrWhitespace(errors, "meetingTimeStr", "NotEmpty")
+		rejectIfEmptyOrWhitespace(errors, "meetingEndTimeStr", "NotEmpty")
 
-			if(meetingDate.compareTo(DateTimePickerFormatter.parseDateTime(meetingDateStr + " "+ meetingEndTimeStr)) > -1){
-				errors.rejectValue("meetingTimeStr", "meetingRecord.date.endbeforestart")
-			}
-		}
-		meetingDate match {
-			case date:DateTime =>
-				if ((!meetingDateStr.isEmptyOrWhitespace) && (!meetingTimeStr.isEmptyOrWhitespace) && (!meetingEndTimeStr.isEmptyOrWhitespace)) {
-					if (DateTimePickerFormatter.parseDateTime(meetingDateStr + " " + meetingTimeStr).isBefore(DateTime.now.toDateTime))
-						errors.rejectValue("meetingDateStr", "meetingRecord.date.past")
-					else if (meetingDate.isAfter(DateTime.now.plusYears(MeetingRecord.MeetingTooOldThresholdYears).toDateTime))
-						errors.rejectValue("meetingDateStr", "meetingRecord.date.futuristic")
+		if (!errors.hasErrors) {
+			val startDate = Try(DateTimePickerFormatter.parseDateTime(meetingDateStr + " " + meetingTimeStr))
+			val endDate = Try(DateTimePickerFormatter.parseDateTime(meetingDateStr + " " + meetingEndTimeStr))
+
+			if (startDate.isFailure) {
+				errors.rejectValue("meetingTimeStr", "meetingRecord.date.missing")
+			} else if (endDate.isFailure) {
+				errors.rejectValue("meetingEndTimeStr", "meetingRecord.date.missing")
+			} else {
+				if (startDate.get.isAfter(endDate.get) || startDate.get.isEqual(endDate.get)) {
+					errors.rejectValue("meetingTimeStr", "meetingRecord.date.endbeforestart")
 				}
-			case _ => errors.rejectValue("meetingDateStr", "meetingRecord.date.missing")
+				if (startDate.get.isBeforeNow) {
+					errors.rejectValue("meetingDateStr", "meetingRecord.date.past")
+				} else if (startDate.get.isAfter(DateTime.now.plusYears(MeetingRecord.MeetingTooOldThresholdYears).toDateTime)) {
+					errors.rejectValue("meetingDateStr", "meetingRecord.date.futuristic")
+				}
+			}
 		}
 
 	}

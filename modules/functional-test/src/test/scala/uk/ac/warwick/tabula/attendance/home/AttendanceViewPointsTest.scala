@@ -20,7 +20,7 @@ class AttendanceViewPointsTest extends AttendanceFixture with GivenWhenThen{
 
 		 When("I filter only Undergraduate")
 		 click on id("filterCommand").webElement.findElement(By.className("filter-short-values"))
-		 cssSelector(".dropdown-menu.filter-list").findElement.get.isDisplayed should be (right = true)
+		 cssSelector(".dropdown-menu.filter-list").findElement.get.isDisplayed should be (true)
 		 click on cssSelector("input[name=courseTypes][value=UG]")
 
 		 Then("The points are displayed")

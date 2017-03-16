@@ -126,22 +126,22 @@ trait GetMemberCalendarIcalApi {
 
 		// Start from either 1 week ago, or the start of the current academic year, whichever is earlier
 		val start = {
-			val startOfYear = termService.getTermFromAcademicWeek(1, year).getStartDate.toLocalDate
-			val oneWeekAgo = DateTime.now.minusWeeks(1).toLocalDate
+			val startOfYear = termService.getTermFromAcademicWeek(1, year).getStartDate
+			val oneWeekAgo = DateTime.now.minusWeeks(1)
 
 			if (startOfYear.isBefore(oneWeekAgo)) startOfYear else oneWeekAgo
 		}
 
 		// End either at the end of the current academic year, or in 15 weeks time, whichever is later
 		val end = {
-			val endOfYear = termService.getTermFromAcademicWeek(1, year + 1).getStartDate.toLocalDate
-			val fifteenWeeksTime = DateTime.now.plusWeeks(15).toLocalDate
+			val endOfYear = termService.getTermFromAcademicWeek(1, year + 1).getStartDate
+			val fifteenWeeksTime = DateTime.now.plusWeeks(15)
 
 			if (endOfYear.isAfter(fifteenWeeksTime)) endOfYear else fifteenWeeksTime
 		}
 
-		command.from = start
-		command.to = end
+		command.from = start.getMillis
+		command.to = end.getMillis
 
 		command.apply() match {
 			case Success(result) =>

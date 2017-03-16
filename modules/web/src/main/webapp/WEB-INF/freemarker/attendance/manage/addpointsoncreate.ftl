@@ -16,7 +16,7 @@
 	<#if newPoints == 0>
 		<p><@fmt.p scheme.points?size "point" /> on this scheme</p>
 	<#else>
-		<div class="alert alert-success">
+		<div class="alert alert-info">
 			<strong><@fmt.p newPoints "point" /></strong> added to this scheme
 		</div>
 
@@ -26,15 +26,15 @@
 	<form method="POST">
 		<input name="schemes" value="${scheme.id}" type="hidden" />
 		<input name="returnTo" value="<@routes.attendance.manageNewSchemeAddPoints scheme />" type="hidden" />
-		<button type="button" class="btn add-blank-point" data-href="<@routes.attendance.manageAddPointsBlank findCommand.department findCommand.academicYear.startYear?c/>">Add a point</button>
-		<button type="button" class="btn copy-points" data-href="<@routes.attendance.manageAddPointsCopy findCommand.department findCommand.academicYear.startYear?c/>">Copy points</button>
-		<button type="button" class="btn use-template" data-href="<@routes.attendance.manageAddPointsTemplate findCommand.department findCommand.academicYear.startYear?c/>">Use template</button>
+		<button type="button" class="btn btn-default add-blank-point" data-href="<@routes.attendance.manageAddPointsBlank findCommand.department findCommand.academicYear/>">Add a point</button>
+		<button type="button" class="btn btn-default copy-points" data-href="<@routes.attendance.manageAddPointsCopy findCommand.department findCommand.academicYear/>">Copy points</button>
+		<button type="button" class="btn btn-default use-template" data-href="<@routes.attendance.manageAddPointsTemplate findCommand.department findCommand.academicYear/>">Use template</button>
 	</form>
 
 	<#include "_findpointsresult.ftl" />
 
 	<div class="fix-footer submit-buttons">
-		<a class="btn" href="<@routes.attendance.manageHomeForYear findCommand.department findCommand.academicYear.startYear?c />">Done</a>
+		<a class="btn btn-default" href="<@routes.attendance.manageHomeForYear findCommand.department findCommand.academicYear />">Done</a>
 	</div>
 
 </div>

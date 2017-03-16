@@ -59,7 +59,8 @@ class AddMarkerFeedbackCommand(module: Module, assignment:Assignment, marker: Us
 			val newFeedback = new AssignmentFeedback
 			newFeedback.assignment = assignment
 			newFeedback.uploaderId = marker.getUserId
-			newFeedback._universityId = marker.getWarwickId
+			newFeedback.usercode = student.getUserId
+			newFeedback._universityId = student.getWarwickId
 			newFeedback.released = false
 			newFeedback.createdDate = DateTime.now
 			newFeedback

@@ -186,7 +186,7 @@
 	<div class="calendar-loading hidden-print">
 		<i class="fa fa-spinner fa-spin"></i><em> Loading&hellip;</em>
 	</div>
-	<div class="calendar hidden-xs" data-viewname="month"></div>
+	<div class="calendar hidden-xs" data-viewname="month" data-calendar-download-button=".calendar-download" data-timetable-download-button=".timetable-download"></div>
 </div>
 
 <div class="calendar-smallscreen-outer visible-xs-block">
@@ -209,6 +209,7 @@
 
 	.calendar-outer {
 		position: relative;
+		margin-bottom: 16px;
 	}
 	.calendar {
 		background: white;
@@ -251,12 +252,15 @@
 						startToSend.setDate(startToSend.getDate() - 1);
 						var endToSend = new Date(end.getTime());
 						endToSend.setDate(endToSend.getDate() + 1);
-						$('#from').val(startToSend.getTime()/1000);
-						$('#to').val(endToSend.getTime()/1000);
+						$('#from').val(startToSend.getTime());
+						$('#to').val(endToSend.getTime());
 						return $form.serialize();
 					},
 					'POST'
-				)<#if startDate??>,
+				),
+				function() {
+					return $form.serialize();
+				}<#if startDate??>,
 					true,
 					${startDate.getYear()?c},
 					${(startDate.getMonthOfYear() - 1)?c},
@@ -271,8 +275,8 @@
 				$('.calendar-smallscreen-loading'),
 				'${submitUrl}',
 				function(startDate, endDate) {
-					$('#from').val(startDate.getTime()/1000);
-					$('#to').val(endDate.getTime()/1000);
+					$('#from').val(startDate.getTime());
+					$('#to').val(endDate.getTime());
 					return $form.serialize();
 				},
 				'POST'

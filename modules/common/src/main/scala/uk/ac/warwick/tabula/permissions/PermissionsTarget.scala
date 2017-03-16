@@ -50,5 +50,6 @@ object PermissionsTarget {
 		override def id = null
 		override def humanReadableId = null
 		override def urlCategory = null
+		override def toString: String = "Global"
 	}
 }

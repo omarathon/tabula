@@ -23,6 +23,8 @@ TODO grab values from the Routes object in code, as that's pretty equivalent and
 
 <#macro filter_students department academicYear=""><#if academicYear?has_content><@_u page="/department/${department.code}/students/${academicYear.startYear?c}" /><#else><@_u page="/department/${department.code}/students" /></#if></#macro>
 <#macro department_timetables department><@_u page="/department/${department.code}/timetables" /></#macro>
+<#macro department_timetables_calendar_download department><@_u page="/department/${department.code}/timetables/download-calendar" /></#macro>
+<#macro department_timetables_download department academicYear><@_u page="/department/${department.code}/timetables/download/${academicYear.startYear?c}" /></#macro>
 <#macro draft_department_timetables department academicYear endpoint><@_u page="/department/${department.code}/timetables/drafts/${academicYear.startYear?c}/${endpoint}" /></#macro>
 
 <#macro relationship_students relationshipType><@_u page="/${relationshipType.urlPart}/students" /></#macro>

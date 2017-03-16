@@ -36,8 +36,7 @@ class ExtensionDaoImpl extends ExtensionDao with Daoisms {
 	def countExtensions(assignment: Assignment): Int = {
 		session.newCriteria[Extension]
 			.add(is("assignment", assignment))
-			.project[Number](rowCount())
-			.uniqueResult.get.intValue()
+			.count.intValue
 	}
 
 	private def unapprovedExtensionsCriteria(assignment: Assignment) = session.newCriteria[Extension]
@@ -51,8 +50,7 @@ class ExtensionDaoImpl extends ExtensionDao with Daoisms {
 
 	def countUnapprovedExtensions(assignment: Assignment): Int = {
 		unapprovedExtensionsCriteria(assignment)
-			.project[Number](rowCount())
-			.uniqueResult.get.intValue()
+			.count.intValue
 	}
 
 	def getUnapprovedExtensions(assignment: Assignment): Seq[Extension] = {

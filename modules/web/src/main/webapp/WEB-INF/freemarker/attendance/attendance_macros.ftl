@@ -3,53 +3,6 @@
 
 <#macro attendanceButtons>
 	<div style="display:none;" class="forCloning">
-		<div class="btn-group" data-toggle="buttons-radio">
-			<button
-					type="button"
-					class="btn use-tooltip"
-					data-state=""
-					title="Set to 'Not recorded'"
-					data-html="true"
-					data-container="body"
-					>
-				<i class="icon-minus icon-fixed-width"></i>
-			</button>
-			<button
-					type="button"
-					class="btn btn-unauthorised use-tooltip"
-					data-state="unauthorised"
-					title="Set to 'Missed (unauthorised)'"
-					data-html="true"
-					data-container="body"
-					>
-				<i class="icon-remove icon-fixed-width"></i>
-			</button>
-			<button
-					type="button"
-					class="btn btn-authorised use-tooltip"
-					data-state="authorised"
-					title="Set to 'Missed (authorised)'"
-					data-html="true"
-					data-container="body"
-					>
-				<i class="icon-remove-circle icon-fixed-width"></i>
-			</button>
-			<button
-					type="button"
-					class="btn btn-attended use-tooltip"
-					data-state="attended"
-					title="Set to 'Attended'"
-					data-html="true"
-					data-container="body"
-					>
-				<i class="icon-ok icon-fixed-width"></i>
-			</button>
-		</div>
-	</div>
-</#macro>
-
-<#macro id7AttendanceButtons>
-	<div style="display:none;" class="forCloning">
 		<div class="btn-group" data-toggle="radio-buttons">
 			<button
 					type="button"
@@ -91,55 +44,6 @@
 					>
 				<i class="fa fa-fw fa-check"></i>
 			</button>
-		</div>
-	</div>
-</#macro>
-
-<#macro groupedPointsInATerm pointsMap term department permission_button_function>
-	<div class="striped-section">
-		<h2 class="section-title">${term}</h2>
-		<div class="striped-section-contents">
-			<#list pointsMap[term] as groupedPoint>
-				<div class="item-info row-fluid point">
-					<div class="span12">
-						<div class="pull-right">
-							${permission_button_function(groupedPoint)}
-						</div>
-					${groupedPoint.name}
-						(<a class="use-tooltip" data-html="true" title="<@fmt.wholeWeekDateFormat groupedPoint.validFromWeek groupedPoint.requiredFromWeek command.academicYear />">
-						<@fmt.monitoringPointWeeksFormat groupedPoint.validFromWeek groupedPoint.requiredFromWeek command.academicYear department />
-					</a>
-						):
-						<#if command.allRoutes?? && groupedPoint.routes?size == command.allRoutes?size>
-							All routes
-						<#else>
-							<#local popoverContent>
-								<ul class="unstyled">
-									<#if command.allRoutes??>
-										<#list command.allRoutes as route>
-											<#local isInPoint = false />
-											<#list groupedPoint.routes as pointRoutePair>
-												<#if pointRoutePair._1().code == route.code>
-													<li>
-														<@fmt.route_name route />
-
-													</li>
-												</#if>
-											</#list>
-										</#list>
-									</#if>
-									<#list groupedPoint.routes as pointRoutePair>
-										<#if !pointRoutePair._2()><li><span title="${pointRoutePair._1().department.name}"><@fmt.route_name pointRoutePair._1() /></span></li></#if>
-									</#list>
-								</ul>
-							</#local>
-							<a class="use-wide-popover" data-content="${popoverContent?html}" data-html="true" data-placement="bottom">
-								<@fmt.p groupedPoint.routes?size "route" />
-							</a>
-						</#if>
-					</div>
-				</div>
-			</#list>
 		</div>
 	</div>
 </#macro>
@@ -197,7 +101,7 @@
 
 	<#if (membershipItems?size > 0)>
 
-		<table class="manage-student-table table table-bordered table-striped table-condensed table-hover table-sortable table-checkable sticky-table-headers tabula-darkRed tablesorter sb-no-wrapper-table-popout">
+		<table class="manage-student-table table table-striped table-condensed table-hover tablesorter sb-no-wrapper-table-popout">
 			<thead>
 			<tr>
 				<th class="profile_link-col"></th>
@@ -208,25 +112,26 @@
 				<th <#if doSorting> class="${sortClass("userId", command)} sortable" data-field="userId"</#if>>User</th>
 				<th>Schemes</th>
 				<#if checkboxName?has_content>
-					<th style="width: 65px; padding-right: 5px;" <#if checkAll>class="for-check-all"</#if>>
+					<th style="width: 65px; padding-right: 5px; white-space: nowrap" <#if checkAll>class="for-check-all"</#if>>
 						<#if showRemoveButton>
-							<input class="btn btn-warning btn-small use-tooltip"
-							  <#if findCommandResult.membershipItems?size == 0>disabled</#if>
-							  type="submit"
-							  name="${ManageSchemeMappingParameters.manuallyExclude}"
-							  value="Remove"
-							  title="Remove selected students from this scheme"
-							  style="margin-left: 0.5em;"
+							<input class="btn btn-danger btn-xs use-tooltip"
+								<#if findCommandResult.membershipItems?size == 0>disabled</#if>
+								type="submit"
+								name="${ManageSchemeMappingParameters.manuallyExclude}"
+								value="Remove"
+								data-container="body"
+								title="Remove selected students from this scheme"
+								style="margin-left: 0.5em;"
 							/>
 						</#if>
 						<#if (showResetButton && (editMembershipCommandResult.includedStudentIds?size > 0 || editMembershipCommandResult.excludedStudentIds?size > 0))>
-							<input class="btn btn-warning btn-small use-tooltip"
-								   type="submit"
-								   style="float: right; padding-left: 5px; padding-right: 5px; margin-left: 5px;"
-								   name="${ManageSchemeMappingParameters.resetMembership}"
-								   value="Reset"
-								   data-container="body"
-								   title="Restore the manually removed and remove the manually added students selected"
+							<input class="btn btn-danger btn-xs use-tooltip"
+								type="submit"
+								style="float: right; padding-left: 5px; padding-right: 5px; margin-left: 5px;"
+								name="${ManageSchemeMappingParameters.resetMembership}"
+								value="Reset"
+								data-container="body"
+								title="Restore the manually removed and remove the manually added students selected"
 							/>
 						</#if>
 					</th>
@@ -239,11 +144,11 @@
 						<td class="profile_link"><@pl.profile_link item.universityId /></td>
 						<td>
 							<#if item.itemTypeString == "static">
-								<span class="use-tooltip" title="Automatically linked from SITS" data-placement="right"><i class="icon-list-alt"></i></span>
+								<span class="use-tooltip" title="Automatically linked from SITS" data-placement="right">SITS</span>
 							<#elseif item.itemTypeString == "exclude">
-								<span class="use-tooltip" title="Removed manually, overriding SITS" data-placement="right"><i class="icon-ban-circle"></i></span>
+								<span class="use-tooltip" title="Removed manually, overriding SITS" data-placement="right">Removed</span>
 							<#else>
-								<span class="use-tooltip" title="Added manually" data-placement="right"><i class="icon-hand-up"></i></span>
+								<span class="use-tooltip" title="Added manually" data-placement="right">Added</span>
 							</#if>
 						</td>
 						<td>${item.firstName}</td>
@@ -262,27 +167,29 @@
 									<ul>
 								</#local>
 
-								<span
-									class="use-tooltip"
-									data-container="body"
-									title="See which schemes apply to this student"
-								>
+								<a href="#">
 									<span
-										class="use-popover"
+										class="use-tooltip"
 										data-container="body"
-										data-html="true"
-										data-content="${popovercontent}"
-										data-placement="top"
+										title="See which schemes apply to this student"
+									>
+										<span
+											class="use-popover"
+											data-container="body"
+											data-html="true"
+											data-content="${popovercontent}"
+											data-placement="top"
 										>
-										<@fmt.p item.existingSchemes?size "scheme" />
+											<@fmt.p item.existingSchemes?size "scheme" />
+										</span>
 									</span>
-								</span>
+								</a>
 							</#if>
 						</td>
 						<#if checkboxName?has_content>
 							<td>
 								<#if !onlyShowCheckboxForStatic || item.itemTypeString == "static">
-									<input type="checkbox" name="${checkboxName}" value="${item.universityId}" />
+									<input type="checkbox" class="collection-checkbox" name="${checkboxName}" value="${item.universityId}" />
 								</#if>
 							</td>
 						</#if>
@@ -296,19 +203,6 @@
 </#macro>
 
 <#macro groupedPointsBySection pointsMap sectionName>
-<div class="striped-section">
-	<h2 class="section-title">${sectionName}</h2>
-	<div class="striped-section-contents">
-		<#list pointsMap[sectionName] as groupedPoint>
-			<div class="item-info row-fluid point">
-				<#nested groupedPoint />
-			</div>
-		</#list>
-	</div>
-</div>
-</#macro>
-
-<#macro id7GroupedPointsBySection pointsMap sectionName>
 <div class="striped-section expanded">
 	<h2 class="section-title with-contents">${sectionName}</h2>
 	<div class="striped-section-contents">
@@ -402,7 +296,7 @@
 			<p>
 				This attendance can no longer be edited, because it was recorded for a monitoring scheme (${checkpoint.point.scheme.displayName})
 				that no longer applies to this student.
-				<a href='http://warwick.ac.uk/tabula/manual/monitoring-points/recording-viewing-points/#nonactivepoints' target='_blank'><i class='icon-question-sign'></i></a>
+				<a href='http://warwick.ac.uk/tabula/manual/monitoring-points/recording-viewing-points/#nonactivepoints' target='_blank'><i class='fa fa-question-circle'></i></a>
 			</p>
 		</#if>
 		<#if formatResult.status?has_content><p>${formatResult.status}</p></#if>
@@ -411,9 +305,9 @@
 		<#if formatResult.noteText?has_content><p>${formatResult.noteText}</p></#if>
 		<#if formatResult.noteUrl?has_content><p><a class='attendance-note-modal' href='${formatResult.noteUrl}?dt=${.now?string('iso')}'>View attendance note</a></p></#if>
 	</#local>
-	<span class="icon-stack icon-stack-original-size icon-stack-right icon-fixed-width fa fa-fw fa-stack fa-stack-original-size fa-stack-right use-popover" data-content="${popoverContent}" data-html="true">
-		<i class="icon-fixed-width icon-stack-base fa fa-fw fa-stack2x ${formatResult.iconClass} <#if nonActivePoint>non-active</#if>" ></i>
-		<#if formatResult.noteUrl?has_content><i class="icon-fixed-width icon-stack-small icon-envelope-alt icon-filled-white fa fa-fw fa-stack-1x fa-envelope-o fa-filled-white"></i></#if>
+	<span class="fa fa-fw fa-stack fa-stack-original-size fa-stack-right use-popover" data-content="${popoverContent}" data-html="true">
+		<i class="fa fa-fw fa-stack2x ${formatResult.iconClass} <#if nonActivePoint>non-active</#if>" ></i>
+		<#if formatResult.noteUrl?has_content><i class="fa fa-fw fa-stack-1x fa-envelope-o fa-filled-white"></i></#if>
 	</span>
 </#macro>
 
@@ -458,11 +352,11 @@
 						<#if pointCheckpointPair??>
 							<@checkpointIconForPointCheckpointPair department result.student pointCheckpointPair result.attendanceNotes />
 						<#else>
-							<i class="fa fa-fw fa-stack fa-stack-right fa-stack-original-size icon-fixed-width"></i>
+							<i class="fa fa-fw fa-stack fa-stack-right fa-stack-original-size"></i>
 						</#if>
 					</#list>
 				<#else>
-					<i class="fa fa-fw icon-fixed-width"></i>
+					<i class="fa fa-fw"></i>
 				</#if>
 			</td>
 		</#if>
@@ -475,11 +369,11 @@
 					<#if pointCheckpointPair??>
 						<@checkpointIconForPointCheckpointPair department result.student pointCheckpointPair result.attendanceNotes />
 					<#else>
-						<i class="icon-fixed-width"></i>
+						<i class="fa fa-fw"></i>
 					</#if>
 				</#list>
 			<#else>
-				<i class="icon-fixed-width"></i>
+				<i class="fa fa-fw"></i>
 			</#if>
 		</td>
 		</#if>
@@ -487,106 +381,6 @@
 </#macro>
 
 <#macro scrollablePointsTable command department filterResult visiblePeriods monthNames doCommandSorting=true>
-	<div class="scrollable-points-table">
-		<div class="row">
-			<div class="left">
-				<table class="students table table-bordered table-striped table-condensed">
-					<thead>
-					<tr>
-						<th class="profile_link-col"></th>
-						<th class="student-col <#if doCommandSorting>${sortClass("firstName", command)}</#if> sortable" data-field="firstName">First name</th>
-						<th class="student-col <#if doCommandSorting>${sortClass("lastName", command)}</#if> sortable" data-field="lastName">Last name</th>
-						<th class="id-col <#if doCommandSorting>${sortClass("universityId", command)}</#if> sortable" data-field="universityId">ID</th>
-					</tr>
-					</thead>
-
-					<tbody>
-						<#list filterResult.results as result>
-						<tr class="student">
-							<td class="profile_link"><@pl.profile_link result.student.universityId /></td>
-							<td class="fname" title="${result.student.firstName}">${result.student.firstName}</td>
-							<td class="lname" title="${result.student.lastName}">${result.student.lastName}</td>
-							<td class="id"><a class="profile-link" href="<@routes.attendance.profile result.student />">${result.student.universityId}</a></td>
-						</tr>
-						</#list>
-					</tbody>
-				</table>
-			</div>
-
-			<div class="middle">
-				<table class="attendance table tablesorter table-bordered table-striped table-condensed sb-no-wrapper-table-popout">
-					<thead>
-					<tr>
-						<#list attendance_variables.monitoringPointTermNames as term>
-							<#if visiblePeriods?seq_contains(term)>
-								<th class="${term}-col">${term}</th>
-							</#if>
-						</#list>
-						<#list monthNames as month>
-							<#if visiblePeriods?seq_contains(month)>
-								<#assign monthMatch = month?matches("([a-zA-Z]{3})[a-zA-Z]*\\s(.*)")[0] />
-								<#assign shortMonth>${monthMatch?groups[1]} ${monthMatch?groups[2]}</#assign>
-								<th class="${shortMonth}-col">${shortMonth}</th>
-							</#if>
-						</#list>
-						<#if visiblePeriods?size == 0>
-							<th>&nbsp;</th>
-						</#if>
-					</tr>
-					</thead>
-
-					<tbody>
-						<#list filterResult.results as result>
-							<tr class="student">
-								<#if visiblePeriods?size == 0 || !result.groupedPointCheckpointPairs?has_content>
-									<td colspan="${visiblePeriods?size}"><span class="muted"><em>No monitoring points found</em></span></td>
-								<#else>
-									<@listCheckpointIcons department visiblePeriods monthNames result />
-								</#if>
-							</tr>
-						</#list>
-					</tbody>
-				</table>
-			</div>
-
-			<div class="right">
-				<table class="counts table table-bordered table-striped table-condensed">
-					<thead>
-					<tr>
-						<th class="unrecorded-col <#if doCommandSorting>${sortClass("attendanceCheckpointTotals.unrecorded", command)}</#if> sortable" data-field="attendanceCheckpointTotals.unrecorded">
-							<i title="Unrecorded" class="icon-warning-sign icon-fixed-width late"></i>
-						</th>
-						<th class="missed-col <#if doCommandSorting>${sortClass("attendanceCheckpointTotals.unauthorised", command)}</#if> sortable" data-field="attendanceCheckpointTotals.unauthorised">
-							<i title="Missed monitoring points" class="icon-remove icon-fixed-width unauthorised"></i>
-						</th>
-						<th class="record-col"></th>
-					</tr>
-					</thead>
-
-					<tbody>
-						<#list filterResult.results as result>
-						<tr class="student">
-							<#if result.groupedPointCheckpointPairs?keys?size == 0>
-								<td class="unrecorded">
-									<span class="badge badge-success">0</span>
-								</td>
-								<td class="missed">
-									<span class="badge badge-success">0</span>
-								</td>
-								<td>&nbsp;</td>
-							<#else>
-								<#nested result />
-							</#if>
-						</tr>
-						</#list>
-					</tbody>
-				</table>
-			</div>
-		</div>
-	</div>
-</#macro>
-
-<#macro id7ScrollablePointsTable command department filterResult visiblePeriods monthNames doCommandSorting=true>
 <div class="scrollable-points-table">
 	<div class="scrollable-table">
 		<div class="scrollable-table-row">

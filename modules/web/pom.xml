@@ -157,6 +157,7 @@
 					<nomunge>true</nomunge>
 					<disableOptimizations>true</disableOptimizations>
 					<excludes>
+						<exclude>**/static/bower_components/**/*.*</exclude>
 						<exclude>**/static/libs/**/*.*</exclude>
 						<exclude>**/*.css</exclude>
 					</excludes>
@@ -337,9 +338,12 @@
 							<output>${project.build.directory}/${project.build.finalName}/static/js/id7/render.js</output>
 							<inputDir>${basedir}/src/main/webapp/static</inputDir>
 							<includes>
+								<!-- Needed for functional tests -->
+								<include>libs/map-set-for-each/map-set-for-each.js</include>
 								<include>bower_components/warwick-id7/dist/js/id7-bundle.js</include>
 								<include>libs/jquery-ui-interactions/jquery-ui-1.11.4-custom.js</include>
 								<include>libs/jquery.delayedObserver.js</include>
+								<include>libs/jquery-caret/jquery.caret-1.5.2.js</include>
 								<include>libs/jquery-fixedheadertable/jquery.fixedheadertable.min.js</include>
 								<include>libs/jquery-tablesorter/jquery.tablesorter.min.js</include>
 								<include>js/moment.js</include>

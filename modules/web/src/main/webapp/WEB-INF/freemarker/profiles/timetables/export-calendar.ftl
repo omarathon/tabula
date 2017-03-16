@@ -94,7 +94,6 @@
 
 	<#macro monthView>
 		<h1>${renderDate.toDate()?string('MMMM yyyy')}</h1>
-
 		<table>
 			<thead>
 			<tr>
@@ -108,7 +107,7 @@
 			</tr>
 			</thead>
 			<tbody>
-				<#list groupedAllDays?keys as week>
+				<#list groupedAllDays?keys?sort as week>
 				<tr>
 					<#local thisWeek = mapGet(groupedAllDays, week) />
 					<#if !mapGet(groupedEvents, week)??>

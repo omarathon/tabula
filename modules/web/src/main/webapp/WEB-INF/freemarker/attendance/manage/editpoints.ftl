@@ -10,7 +10,7 @@
 <#if newPoints == 0>
 	<p>Which points do you want to edit?</p>
 <#else>
-	<div class="alert alert-success">
+	<div class="alert alert-info">
 		<strong><@fmt.p newPoints "point" /></strong> ${actionCompleted!"edited"} on <strong><@fmt.p newPoints "scheme" /></strong>
 	</div>
 </#if>
@@ -19,19 +19,19 @@
 
 	<form action="">
 
-		<div class="fix-header points-filter student-filter btn-group-group well well-small">
+		<div class="fix-header points-filter student-filter btn-group-group well well-sm">
 
 			<button type="button" class="clear-all-filters btn btn-link">
-				<span class="icon-stack">
-					<i class="icon-filter"></i>
-					<i class="icon-ban-circle icon-stack-base"></i>
+				<span class="fa-stack">
+					<i class="fa fa-filter fa-stack-1x"></i>
+					<i class="fa fa-ban fa-stack-2x"></i>
 				</span>
 			</button>
 
 			<#macro filter path placeholder currentFilter allItems validItems=allItems prefix="">
 				<@spring.bind path=path>
 					<div class="btn-group<#if currentFilter == placeholder> empty-filter</#if>">
-						<a class="btn btn-mini dropdown-toggle" data-toggle="dropdown">
+						<a class="btn btn-default btn-xs dropdown-toggle" data-toggle="dropdown">
 							<span class="filter-short-values" data-placeholder="${placeholder}" data-prefix="${prefix}"><#if currentFilter != placeholder>${prefix}</#if>${currentFilter}</span>
 							<span class="caret"></span>
 						</a>
@@ -48,14 +48,14 @@
 												</#if>
 											</#list>
 										</#if>
-										<li class="check-list-item" data-natural-sort="${item_index}">
+										<li class="check-list-item checkbox" data-natural-sort="${item_index}">
 											<label class="checkbox <#if !isValid>disabled</#if>">
 												<#nested item isValid/>
 											</label>
 										</li>
 									</#list>
 								<#else>
-									<li><small class="muted" style="padding-left: 5px;">N/A for this department</small></li>
+									<li><small class="very-subtle" style="padding-left: 5px;">N/A for this department</small></li>
 								</#if>
 							</ul>
 						</div>
@@ -110,8 +110,8 @@
 			</@filter>
 
 			<div class="btn-group">
-				<button class="btn btn-mini btn-primary search" type="submit">
-					<i class="icon-search"></i> Filter
+				<button class="btn btn-xs btn-primary search" type="submit">
+					Filter
 				</button>
 			</div>
 
@@ -135,7 +135,7 @@
 						$('<li />').addClass('clear-this-filter').append(
 							$('<button />').attr('type', 'button')
 								.addClass('btn btn-link')
-								.html('<i class="icon-ban-circle"></i> Clear selected items')
+								.html('<i class="fa fa-ban"></i> Clear selected items')
 								.on('click', function(e) {
 									$list.find('input:checked').each(function() {
 										var $checkbox = $(this);

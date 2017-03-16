@@ -25,40 +25,40 @@ class AttendanceEditStudentsTest extends AttendanceFixture with GivenWhenThen {
 		pageSource should include("0 from SITS")
 
 		When("I add a student manually")
-		click on cssSelector("details.manually-added summary")
+		click on cssSelector(".manually-added .section-title")
 		eventually {
-			findAll(cssSelector("details.manually-added input[name=manuallyAddForm]")).forall { _.isDisplayed } should be {true}
+			findAll(cssSelector(".manually-added input[name=manuallyAddForm]")).forall { _.isDisplayed } should be {true}
 		}
 		click on cssSelector("input[name=manuallyAddForm]")
 		eventually(pageSource should include("Add students manually"))
 		click on cssSelector("textarea[name=massAddUsers]")
 		pressKeys("tabula-functest-student2")
-		click on cssSelector("#main-content form input.btn.btn-success")
+		click on cssSelector("form input.btn.btn-primary")
 
 		Then("I see the manually added student")
 		eventually(
-			findAll(cssSelector("details.manually-added table.manage-student-table tbody tr")).size should be (2)
+			findAll(cssSelector(".manually-added table.manage-student-table tbody tr")).size should be (2)
 		)
 		pageSource should include("2 students on this scheme")
 		pageSource should include("(0 from SITS, plus 2 added manually)")
 
 		When("I choose a route")
-		click on cssSelector("details.find-students summary")
+		click on cssSelector(".find-students .section-title")
 		eventually {
-			findAll(cssSelector("details.find-students div.student-filter")).forall { _.isDisplayed } should be {true}
+			findAll(cssSelector(".find-students div.student-filter")).forall { _.isDisplayed } should be {true}
 		}
-		click on cssSelector("#main-content span[data-placeholder='All routes']")
+		click on cssSelector("span[data-placeholder='All routes']")
 		eventually {
-			findAll(cssSelector("#main-content input[name=routes]")).forall { _.isDisplayed } should be {true}
+			findAll(cssSelector("input[name=routes]")).forall { _.isDisplayed } should be {true}
 		}
-		click on cssSelector("#main-content input[name=routes]")
+		click on cssSelector("input[name=routes]")
 
 		And("I click on Find")
-		click on cssSelector("#main-content button[name=findStudents]")
+		click on cssSelector("button[name=findStudents]")
 
 		Then("I see the students")
 		eventually(
-			findAll(cssSelector("details.find-students table.manage-student-table tbody tr")).size should be (2)
+			findAll(cssSelector(".find-students table.manage-student-table tbody tr")).size should be (2)
 		)
 		pageSource should include("3 students on this scheme")
 		pageSource should include("(1 from SITS, plus 2 added manually)")
@@ -76,7 +76,7 @@ class AttendanceEditStudentsTest extends AttendanceFixture with GivenWhenThen {
 		}
 
 		And("I save the scheme")
-		click on cssSelector("#main-content form input.btn.btn-primary")
+		click on cssSelector("form input.btn.btn-primary[name=persist]")
 
 		Then("I am redirected to the manage home page")
 		eventually(currentUrl should endWith(s"/attendance/manage/xxx/$thisAcademicYearString"))
@@ -92,54 +92,54 @@ class AttendanceEditStudentsTest extends AttendanceFixture with GivenWhenThen {
 		if (!isSitsInFlux) {
 
 			When("I reset both manually added students")
-			click on cssSelector("details.manually-added summary")
+			click on cssSelector(".manually-added .section-title")
 			eventually {
-				findAll(cssSelector("details.manually-added input[name=manuallyAddForm]")).forall { _.isDisplayed } should be {true}
+				findAll(cssSelector(".manually-added input[name=manuallyAddForm]")).forall { _.isDisplayed } should be {true}
 			}
-			cssSelector("details.manually-added input[name=resetStudentIds]").findAllElements.foreach(input => click on input)
+			cssSelector(".manually-added input[name=resetStudentIds]").findAllElements.foreach(input => click on input)
 			click on cssSelector("input[name=resetMembership]")
 
 			Then("Only the SITS students remain")
 			eventually {
-				findAll(cssSelector("details.find-students table.manage-student-table tbody tr")).size should be(2)
-				findAll(cssSelector("details.manually-added table.manage-student-table tbody tr")).size should be(0)
+				findAll(cssSelector(".find-students table.manage-student-table tbody tr")).size should be(2)
+				findAll(cssSelector(".manually-added table.manage-student-table tbody tr")).size should be(0)
 			}
 			pageSource should include("2 students on this scheme")
 
 			When("I exclude the SITS students")
-			click on cssSelector("details.find-students summary")
+			click on cssSelector(".find-students .section-title")
 			eventually {
-				findAll(cssSelector("details.find-students div.student-filter")).forall { _.isDisplayed } should be {true}
+				findAll(cssSelector(".find-students div.student-filter")).forall { _.isDisplayed } should be {true}
 			}
-			cssSelector("details.find-students input[name=excludeIds]").findAllElements.foreach(input => click on input)
+			cssSelector(".find-students input[name=excludeIds]").findAllElements.foreach(input => click on input)
 			click on cssSelector("input[name=manuallyExclude]")
 
 			Then("No students remain")
 			eventually {
-				findAll(cssSelector("details.find-students table.manage-student-table tbody tr")).size should be(2)
-				findAll(cssSelector("details.find-students table.manage-student-table tbody tr.exclude")).size should be(2)
-				findAll(cssSelector("details.manually-added table.manage-student-table tbody tr")).size should be(2)
+				findAll(cssSelector(".find-students table.manage-student-table tbody tr")).size should be(2)
+				findAll(cssSelector(".find-students table.manage-student-table tbody tr.exclude")).size should be(2)
+				findAll(cssSelector(".manually-added table.manage-student-table tbody tr")).size should be(2)
 			}
 
 		} else {
 
 			When("I reset all manually added students")
-			click on cssSelector("details.manually-added summary")
+			click on cssSelector(".manually-added .section-title")
 			eventually {
-				findAll(cssSelector("details.manually-added input[name=manuallyAddForm]")).forall { _.isDisplayed } should be {true}
+				findAll(cssSelector(".manually-added input[name=manuallyAddForm]")).forall { _.isDisplayed } should be {true}
 			}
-			cssSelector("details.manually-added input[name=resetStudentIds]").findAllElements.foreach(input => click on input)
+			cssSelector(".manually-added input[name=resetStudentIds]").findAllElements.foreach(input => click on input)
 			click on cssSelector("input[name=resetMembership]")
 
 			Then("No students remain")
 			eventually {
-				findAll(cssSelector("details.manually-added table.manage-student-table tbody tr")).size should be(0)
+				findAll(cssSelector(".manually-added table.manage-student-table tbody tr")).size should be(0)
 			}
 
 		}
 
 		When("I save the scheme")
-		click on cssSelector("#main-content form input.btn.btn-primary")
+		click on cssSelector("form input.btn.btn-primary[name=persist]")
 
 		Then("I am redirected to the manage home page")
 		eventually(currentUrl should endWith(s"/attendance/manage/xxx/$thisAcademicYearString"))

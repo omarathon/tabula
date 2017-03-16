@@ -12,11 +12,12 @@ import uk.ac.warwick.tabula.commands._
 import uk.ac.warwick.tabula.commands.cm2.assignments.{ModifyAssignmentStudentsCommand, _}
 import uk.ac.warwick.tabula.data.model._
 import uk.ac.warwick.tabula.web.Mav
+import uk.ac.warwick.tabula.web.controllers.cm2.{CourseworkBreadcrumbs, CourseworkController}
 
 @Profile(Array("cm2Enabled"))
 @Controller
 @RequestMapping(value = Array("/${cm2.prefix}/admin/assignments/new/{assignment}/students"))
-class ModifyAssignmentStudentsController extends AbstractAssignmentController {
+class ModifyAssignmentStudentsController extends CourseworkController {
 
 	type ModifyAssignmentStudentsCommand = Appliable[Assignment] with ModifyAssignmentStudentsCommandState with ModifiesAssignmentMembership with PopulateOnForm
 
@@ -50,13 +51,17 @@ class ModifyAssignmentStudentsController extends AbstractAssignmentController {
 			"availableUpstreamGroups" -> form.availableUpstreamGroups,
 			"assessmentGroups" -> form.assessmentGroups,
 			"academicYear" -> form.assignment.academicYear
-		).crumbs(breadcrumbsStaff(form.assignment, AssignmentBreadcrumbs.Assignment.AssignmentManagementIdentifier): _*)
+		).crumbs(CourseworkBreadcrumbs.Assignment.AssignmentManagement())
 	}
 
-	// TODO - add method for save and exit
 	@RequestMapping(method = Array(POST), params = Array(ManageAssignmentMappingParameters.createAndAddMarkers, "action!=refresh", "action!=update"))
 	def submitAndAddFeedback(@Valid @ModelAttribute("command") cmd: ModifyAssignmentStudentsCommand, errors: Errors): Mav =
 	submit(cmd, errors, Routes.admin.assignment.createAddMarkers)
+
+	@RequestMapping(method = Array(POST), params = Array(ManageAssignmentMappingParameters.createAndAddStudents, "action!=refresh", "action!=update"))
+	def saveAndExit(@ModelAttribute("command") cmd: ModifyAssignmentStudentsCommand, errors: Errors): Mav = {
+		submit(cmd, errors, { _ => Routes.home })
+	}
 
 
 	private def submit(cmd: ModifyAssignmentStudentsCommand, errors: Errors, route: Assignment => String) = {

@@ -9,11 +9,12 @@ import uk.ac.warwick.tabula.commands._
 import uk.ac.warwick.tabula.commands.cm2.assignments.{ModifyAssignmentSubmissionsCommand, _}
 import uk.ac.warwick.tabula.data.model._
 import uk.ac.warwick.tabula.web.Mav
+import uk.ac.warwick.tabula.web.controllers.cm2.{CourseworkBreadcrumbs, CourseworkController}
 
 @Profile(Array("cm2Enabled"))
 @Controller
 @RequestMapping(value = Array("/${cm2.prefix}/admin/assignments/new/{assignment}/submissions"))
-class ModifyAssignmentSubmissionsController extends AbstractAssignmentController {
+class ModifyAssignmentSubmissionsController extends CourseworkController {
 
 	type ModifyAssignmentSubmissionsCommand = Appliable[Assignment] with ModifyAssignmentSubmissionsCommandState with PopulateOnForm
 
@@ -40,7 +41,7 @@ class ModifyAssignmentSubmissionsController extends AbstractAssignmentController
 		val module = form.module
 		Mav(s"$urlPrefix/admin/assignments/assignment_submissions_details",
 			"module" -> module
-		).crumbs(breadcrumbsStaff(form.assignment, AssignmentBreadcrumbs.Assignment.AssignmentManagementIdentifier): _*)
+		).crumbs(CourseworkBreadcrumbs.Assignment.AssignmentManagement())
 	}
 
 	@RequestMapping(method = Array(POST), params = Array(ManageAssignmentMappingParameters.createAndAddOptions, "action!=refresh", "action!=update"))

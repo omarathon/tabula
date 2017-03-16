@@ -18,8 +18,7 @@ object Routes {
 	def homeForYear(academicYear: AcademicYear): String = context + "/%s" format encoded(academicYear.startYear.toString)
 
 	object Manage {
-		def home: String = context + "/manage"
-		def department(department: Department): String = context + "/manage/%s" format encoded(department.code)
+		def homeForYear(academicYear: AcademicYear): String = context + "/manage/%s" format encoded(academicYear.startYear.toString)
 		def departmentForYear(department: Department, academicYear: AcademicYear): String =
 			context + "/manage/%s/%s" format(encoded(department.code), encoded(academicYear.startYear.toString))
 

@@ -289,6 +289,9 @@ class FileField extends AssignmentFormField {
 	def attachmentLimit: Int = getProperty[JInteger]("attachmentLimit", 1)
 	def attachmentLimit_=(limit: Int): Unit = setProperty("attachmentLimit", limit)
 
+	def minimumAttachmentLimit: Int = getProperty[JInteger]("minimumAttachmentLimit", 1)
+	def minimumAttachmentLimit_=(limit: Int): Unit = setProperty("minimumAttachmentLimit", limit)
+
 	// List of extensions.
 	def attachmentTypes: Seq[String] = getProperty[Seq[String]]("attachmentTypes", Seq())
 	def attachmentTypes_=(types: Seq[String]): Unit = setProperty("attachmentTypes", types: Seq[String])
@@ -310,6 +313,8 @@ class FileField extends AssignmentFormField {
 				} else if (v.file.size > attachmentLimit) {
 					if (attachmentLimit == 1) errors.rejectValue("file", "file.toomany.one")
 					else errors.rejectValue("file", "file.toomany", Array(attachmentLimit: JInteger), "")
+				} else if (v.file.size < minimumAttachmentLimit) {
+					 errors.rejectValue("file", "file.minimum", Array(minimumAttachmentLimit: JInteger), "")
 				} else if (hasDuplicates(v.file.fileNames)) {
 					errors.rejectValue("file", "file.duplicate")
 				}

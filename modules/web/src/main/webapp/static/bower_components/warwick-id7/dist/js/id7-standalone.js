@@ -106,25 +106,19 @@
 (function ($) {
   'use strict';
 
+  function escapeHtml(unsafe) {
+    return unsafe
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;')
+        .replace(/'/g, '&#039;');
+  }
+
   var Config = {
     Templates: {
-      Popover: _.template([
-        '<div class="account-info">',
-        '<iframe src="<%- iframelink %>" scrolling="no" frameborder="0" allowtransparency="true" seamless></iframe>',
-        '</div>',
-        '<div class="actions">',
-        '<div class="btn-group btn-group-justified">',
-        '<div class="btn-group sign-out">',
-        '<a href="<%- logoutlink %>" class="btn btn-default">Sign out</a>',
-        '</div>',
-        '</div>',
-        '</div>'
-      ].join('')),
-      Action: _.template([
-        '<div class="btn-group">',
-        '<a href="<%- href %>" title="<%= tooltip %>" class="btn btn-default <%= classes %>"><%= title %></a>',
-        '</div>'
-      ].join(''))
+      Popover: function (o) { return '<div class="account-info"><iframe src="' + escapeHtml(o.iframelink) + '" scrolling="no" frameborder="0" allowtransparency="true" seamless sandbox="allow-same-origin allow-scripts allow-top-navigation"></iframe></div><div class="actions"><div class="btn-group btn-group-justified"><div class="btn-group sign-out"><a href="' + escapeHtml(o.logoutlink) + '" class="btn btn-default">Sign out</a></div></div></div>'; },
+      Action: function (o) { return '<div class="btn-group"><a href="' + escapeHtml(o.href) + '" title="' + escapeHtml(o.tooltip) + '" class="btn btn-default ' + escapeHtml(o.classes) + '">' + escapeHtml(o.title) + '</a></div>'; }
     },
     Defaults: {
       container: false,
@@ -165,6 +159,7 @@
           .on('click', function (e) {
             e.preventDefault();
             e.stopPropagation();
+            $trigger.popover('toggle');
             return false;
           })
           .popover({
@@ -174,14 +169,17 @@
             html: true,
             placement: 'bottom',
             title: 'Account information',
-            trigger: 'click'
-          })
-          .html(this.options.name + '<span class="caret"></span>');
+            trigger: 'manual'
+          });
+
+        if (this.options.name) {
+          $trigger.html(this.options.name + '<span class="caret"></span>');
+        }
 
         // Click away to dismiss
         $('html').on('click.popoverDismiss', function (e) {
-          // if clicking anywhere other than the popover itself
-          if ($(e.target).closest('.popover').length === 0 && $(e.target).closest('.use-popover').length === 0) {
+          var $target = $(e.target);
+          if ($target.closest('.popover').length === 0 && $target.closest('.use-popover').length === 0 && $target.closest($trigger).length === 0) {
             $trigger.popover('hide');
           }
         });
@@ -456,7 +454,7 @@
           var wasWrapped = $navbar.hasClass('navbar-wrapped');
 
           var $item = $navbar.find('> .nav > li:last');
-          var isWrapped = $item.position().top > 0;
+          var isWrapped = $item.length && $item.position().top > 0;
 
           if (isWrapped != wasWrapped) {
             $navbar.addClass('important-no-transition');
@@ -595,10 +593,24 @@
 
   $(function () {
     $('.id7-navigation').id7Navigation();
+
+    // jump to a tab if specified
+    var url = document.location.toString();
+    if (url.match('#') && url.split('#')[1].length) {
+      var $tabLink = $('.nav-tabs a[href="#' + url.split('#')[1] + '"]');
+      if ($tabLink) {
+        $tabLink.tab('show')
+      }
+    }
+
+    // Change hash for page-reload
+    $('.nav-tabs a').on('shown.bs.tab', function (e) {
+      window.location.hash = e.target.hash;
+    });
   });
 })(jQuery);
 
-/*global _:false, Modernizr:false */
+/*global Modernizr:false */
 
 (function ($) {
   'use strict';
@@ -654,6 +666,15 @@
   };
 
   $(function () {
+    function escapeHtml(unsafe) {
+      return unsafe
+          .replace(/&/g, '&amp;')
+          .replace(/</g, '&lt;')
+          .replace(/>/g, '&gt;')
+          .replace(/"/g, '&quot;')
+          .replace(/'/g, '&#039;');
+    }
+
     $('input[data-suggest="go"]').each(function (i, el) {
       // ID-156 find the icon next to it
       $(el).next('.fa').on('click', function (e) {
@@ -681,12 +702,7 @@
         minLength: minLength,
         hint: false,
         templates: {
-          suggestion: _.template([
-              '<div>',
-              '<p class="go-path"><%= path %></p>',
-              '<p class="go-description"><% if (typeof description !== "undefined") { print(description); } %></p>',
-              '</div>'
-            ].join(''))
+          suggestion: function (o) { return '<div><p class="go-path">' + escapeHtml(o.path) + '</p><p class="go-description">' + (typeof o.description !== 'undefined' ? escapeHtml(o.description) : '') + '</p></div>'; }
         }
       });
 
@@ -803,11 +819,11 @@
       findWideTables: function findWideTables($container) {
         return $container.find('table').filter(function () {
           var $table = $(this);
-			var originalMaxWidth = $table.css('max-width');
-			$table.css('max-width', 'none');
-			var tooWide = !$table.data('id7.wide-tables.wrapped') && Math.floor($table.width()) > $table.parent().width();
-			$table.css('max-width', originalMaxWidth);
-			return tooWide;
+          var originalMaxWidth = $table.css('max-width');
+          $table.css('max-width', 'none');
+          var tooWide = !$table.data('id7.wide-tables.wrapped') && Math.floor($table.width()) > $table.parent().width();
+          $table.css('max-width', originalMaxWidth);
+          return tooWide;
         });
       },
       wrap: function wrap($table, wrapperClass, containerClass) {
@@ -886,48 +902,6 @@
     } catch (e) {
       return false;
     }
-  });
-})();
-
-/*global Modernizr:false */
-
-(function () {
-  'use strict';
-  // querySelector
-  Modernizr.addTest('style-update', function () {
-    var doc = window.document;
-    if (!('createElement' in doc && 'createTextNode' in doc)) {
-      return false;
-    }
-
-    try {
-      var el = doc.createElement('style');
-      el.setAttribute('type', 'text/css');
-
-      var contents = doc.createTextNode('modernizr { property: slime; }');
-      el.appendChild(contents);
-
-      return true;
-    } catch (e) {
-      return false;
-    }
-  });
-})();
-
-/*global Modernizr:false */
-
-(function () {
-  'use strict';
-  // Should fail in Safari: http://stackoverflow.com/questions/9739955/feature-detecting-support-for-svg-filters.
-  Modernizr.addTest('svgfilters', function () {
-    var result = false;
-
-    try {
-      result = 'SVGFEColorMatrixElement' in window &&
-                SVGFEColorMatrixElement.SVG_FECOLORMATRIX_TYPE_SATURATE == 2;
-    } catch (e) {}
-
-    return result;
   });
 })();
 

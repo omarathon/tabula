@@ -24,7 +24,6 @@
 
 	function onViewUpdate(view, weeks, $calendar){
 		updateCalendarTitle(view, weeks);
-		updateDownloadButton(view, $calendar);
 		$('.popover').hide();
 		$calendar.find('table').attr('role','presentation');
 	}
@@ -46,25 +45,33 @@
 		}
 	}
 
-	function updateDownloadButton(view, $calendar) {
-		if ($calendar.data('downloadbutton')) {
-			var $downloadButton = $($calendar.data('downloadbutton'));
-			$downloadButton.prop(
-				'href',
-				GlobalScripts.setArgOnUrl(
-					GlobalScripts.setArgOnUrl(
-						$downloadButton.prop('href'),
-						'calendarView',
-						view.name
-					),
-					'renderDate',
-					view.start.getTime()/1000
-				)
-			);
+	function updateDownloadButton(view, $calendar, data) {
+		var formData = data();
+		if ($calendar.data('calendar-download-button')) {
+			var $calendarDownloadButton = $($calendar.data('calendar-download-button'))
+				, originalHref = $calendarDownloadButton.data('href')
+				, args = [
+					'calendarView=' + view.name,
+					'renderDate=' + view.start.getTime()/1000
+				]
+				;
+			if (formData.length > 0) {
+				args.push(formData);
+			}
+			$calendarDownloadButton.prop('href', originalHref + '?' + args.join('&'));
+		}
+		if ($calendar.data('timetable-download-button')) {
+			var $timetableDownloadButtons = $($calendar.data('timetable-download-button'));
+			$timetableDownloadButtons.each(function(){
+				var $this = $(this), originalHref = $this.data('href');
+				if (formData.length > 0) {
+					$this.prop('href', originalHref + '?' + formData);
+				}
+			});
 		}
 	}
 
-	function renderCalendarEvents(event, element) {
+	function renderCalendarEvent(event, element) {
 		var content = "<table class='event-info'>";
 		if (event.parentType && event.parentFullName && event.parentShortName && event.parentType === "Module") {
 			content = content + "<tr><th>Module</th><td>" + event.parentShortName + " " + event.parentFullName + "</td></tr>";
@@ -162,8 +169,8 @@
 			startToSend.setDate(startToSend.getDate() - 1);
 			var endToSend = new Date(end.getTime());
 			endToSend.setDate(endToSend.getDate() + 1);
-			$('#from').val(startToSend.getTime()/1000);
-			$('#to').val(endToSend.getTime()/1000);
+			$('#from').val(startToSend.getTime());
+			$('#to').val(endToSend.getTime());
 			$.ajax({
 				url: url,
 				type: method,
@@ -211,7 +218,10 @@
 	}
 	exports.getCalendarEvents = getCalendarEvents;
 
-	function createCalendar(container, defaultViewName, weeks, eventsCallback, hasStartDate, year, month, date, defaultDate) {
+	function createCalendar(container, defaultViewName, weeks, eventsCallback, data, hasStartDate, year, month, date, defaultDate) {
+		if (!data) {
+			data = function(){ return ""; }
+		}
 		var showWeekends = (defaultViewName == "month"), $container = $(container);
 		var options = {
 			events: eventsCallback,
@@ -261,8 +271,11 @@
 				// we'll just leave it blank. The day columns still have the date on them.
 				return '';
 			},
-			eventAfterRender: function(event, element, view) {
-				renderCalendarEvents(event, element);
+			eventAfterRender: function(event, element) {
+				renderCalendarEvent(event, element);
+			},
+			eventAfterAllRender: function(view) {
+				updateDownloadButton(view, $container, data);
 			}
 		};
 		if (hasStartDate) {
