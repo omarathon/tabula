@@ -290,8 +290,8 @@
 				$('.calendar-smallscreen-loading'),
 				'${submitUrl}',
 				function(startDate, endDate) {
-					$('#from').val(startDate.getTime()/1000);
-					$('#to').val(endDate.getTime()/1000);
+					$('#from').val(startDate.getTime());
+					$('#to').val(endDate.getTime());
 					return $form.serialize();
 				},
 				'POST'
