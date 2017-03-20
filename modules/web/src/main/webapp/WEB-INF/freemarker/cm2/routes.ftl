@@ -48,3 +48,5 @@ TODO grab values from the Routes object in code, as that's pretty equivalent and
 <#macro editassignmentsubmissions assignment><@_u page="/admin/assignments/edit/${assignment.id}/submissions" /></#macro>
 <#macro editassignmentoptions assignment><@_u page="/admin/assignments/edit/${assignment.id}/options" /></#macro>
 <#macro editassignmentreview assignment><@_u page="/admin/assignments/edit/${assignment.id}/review" /></#macro>
+
+<#macro feedbacktemplate department><@_u page="/admin/department/${department.code}/settings/feedback-templates" /></#macro>
