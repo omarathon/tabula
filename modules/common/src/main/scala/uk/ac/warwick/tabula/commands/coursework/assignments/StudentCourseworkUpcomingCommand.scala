@@ -40,7 +40,7 @@ class StudentCourseworkUpcomingCommandInternal(val memberOrUser: MemberOrUser) e
 
 		assessmentMembershipService
 			.getEnrolledAssignments(user)
-			.filter(a => a.submittable(user) && a.submissionDeadline(user).isBefore(monthFromNow) && a.submissionDeadline(user).isAfterNow)
+			.filter(a => a.submittable(user) && !a.openEnded && a.submissionDeadline(user).isBefore(monthFromNow) && a.submissionDeadline(user).isAfterNow)
 			.sortBy(_.submissionDeadline(user))(Ordering.fromLessThan(_ isBefore _))
 	}
 
