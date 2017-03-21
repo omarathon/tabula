@@ -74,8 +74,14 @@ abstract class ModifyAssignmentCommand(val module: Module,val updateStudentMembe
 			}
 		}
 
-		if(openDate == null){
+		if(openDate == null) {
 			errors.rejectValue("openDate", "openDate.missing")
+		} else {
+			//disallow assignments with open date >= 1st Aug 2017
+			var validOpenDate: DateTime = DateTime.parse("2017-08-01")
+			if(openDate.isAfter(validOpenDate) || openDate.isEqual(validOpenDate)) {
+				errors.rejectValue("openDate", "openDate.invalid")
+			}
 		}
 
 		if(!openEnded){
