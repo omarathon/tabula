@@ -52,7 +52,7 @@ abstract class AbstractSubmissionService extends SubmissionService with Daoisms 
 
 	def getPreviousSubmissions(user: User): Seq[Submission] = {
 		session.newCriteria[Submission]
-			.add(is("universityId", user.getWarwickId))
+			.add(is("usercode", user.getUserId))
 			.seq
 	}
 
