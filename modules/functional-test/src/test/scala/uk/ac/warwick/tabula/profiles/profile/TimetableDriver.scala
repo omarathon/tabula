@@ -31,8 +31,8 @@ trait TimetableDriver extends FixturesDriver  {
 			// request all the events for the current year
 			val termDates = new AcademicDateHelper(new TermFactoryImpl)
 			val startOfYear = termDates.getFirstTermOfYearContaining(new DateTime).getStartDate
-			val start = startOfYear.getMillis / 1000
-			val end = startOfYear.plusYears(1).getMillis / 1000
+			val start = startOfYear.getMillis
+			val end = startOfYear.plusYears(1).getMillis
 			val req = (url(s"${FunctionalTestProperties.SiteRoot}/api/v1/member/${user.warwickId}/timetable/calendar") <<?
 				Map(
 					"from" -> start.toString,

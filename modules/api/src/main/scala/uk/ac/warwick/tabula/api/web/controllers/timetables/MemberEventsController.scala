@@ -37,7 +37,7 @@ trait GetMemberEventsApi {
 
 	@ModelAttribute("getTimetableCommand")
 	def command(@PathVariable member: Member, currentUser: CurrentUser): ViewMemberEventsCommand =
-		ViewMemberEventsCommand(member, currentUser)
+		ViewMemberEventsCommand(mandatory(member), currentUser)
 
 	@RequestMapping(method = Array(GET), produces = Array("application/json"))
 	def showModuleTimetable(

@@ -29,6 +29,7 @@ object Routes {
 
 	object admin {
 		def apply() = s"$context/admin"
+		def feedbackTemplates(department: Department): String = apply() + s"/department/${encoded(department.code)}/settings/feedback-templates/"
 
 		object extensions {
 			def apply(): String = admin() + "/extensions"

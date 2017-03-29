@@ -10,7 +10,7 @@ TODO grab values from the Routes object in code, as that's pretty equivalent and
 </#macro>
 <#macro home><@_u page="/" /></#macro>
 <#-- to rename - also filter options will need to be added to jump to correct module -->
-<#macro depthome module><@_u page="#module-${module.code}" /></#macro>
+<#macro depthome module><@_u page="/admin/department/${module.adminDepartment.code}/#module-${module.code}" /></#macro>
 <#macro downloadSubmission submission filename><@_u page="/admin/assignments/${submission.assignment.id}/submissions/download/${submission.id}/${filename?url}"/></#macro>
 
 <#macro filterExtensions><@_u page="/admin/extensions"/></#macro>
@@ -40,6 +40,12 @@ TODO grab values from the Routes object in code, as that's pretty equivalent and
 <#macro editassignmentsubmissions assignment><@_u page="/admin/assignments/edit/${assignment.id}/submissions" /></#macro>
 <#macro editassignmentoptions assignment><@_u page="/admin/assignments/edit/${assignment.id}/options" /></#macro>
 <#macro editassignmentreview assignment><@_u page="/admin/assignments/edit/${assignment.id}/review" /></#macro>
+
+<#macro feedbacktemplate department><@_u page="/admin/department/${department.code}/settings/feedback-templates" /></#macro>
+<#macro feedbacktemplates department><@_u page="/admin/department/${department.code}/settings/feedback-templates" /></#macro>
+<#macro editfeedbacktemplate department template><@_u page="/admin/department/${department.code}/settings/feedback-templates/edit/${template.id}" /></#macro>
+<#macro deletefeedbacktemplate department template><@_u page="/admin/department/${department.code}/settings/feedback-templates/delete/${template.id}" /></#macro>
+<#macro feedbacktemplatedownload department feedbacktemplate><@_u page="/admin/department/${department.code}/settings/feedback-templates/download/${feedbacktemplate.id}/${feedbacktemplate.attachment.name}" /></#macro>
 
 <#-- non admin -->
 <#macro assignment assignment><@_u page="/submission/${assignment.id}"/></#macro>

@@ -196,21 +196,6 @@
 	</div>
 </div>
 
-<#if calendarDownloadUrl??>
-	<p>
-		<a class="btn btn-default calendar-download hidden-xs" href="${calendarDownloadUrl}" data-href="${calendarDownloadUrl}">
-			Download calendar as PDF
-		</a>
-		<#if academicYears?has_content>
-			<#list academicYears as academicYear>
-				<a class="btn btn-default timetable-download" href="${timetableDownloadRoute(department, academicYear)}" data-href="${timetableDownloadRoute(department, academicYear)}">
-					Download timetable as PDF (${academicYear.toString})
-				</a>
-			</#list>
-		</#if>
-	</p>
-</#if>
-
 <style type="text/css">
 	@import url("<@url resource="/static/css/fullcalendar.css" />");
 	@import url("<@url resource="/static/css/fullcalendar-custom.css" />");
@@ -290,8 +275,8 @@
 				$('.calendar-smallscreen-loading'),
 				'${submitUrl}',
 				function(startDate, endDate) {
-					$('#from').val(startDate.getTime()/1000);
-					$('#to').val(endDate.getTime()/1000);
+					$('#from').val(startDate.getTime());
+					$('#to').val(endDate.getTime());
 					return $form.serialize();
 				},
 				'POST'
