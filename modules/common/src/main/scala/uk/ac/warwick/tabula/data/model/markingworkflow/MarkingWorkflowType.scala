@@ -27,8 +27,8 @@ object MarkingWorkflowType {
 	case object SingleMarking extends MarkingWorkflowType(
 		name = "Single",
 		description = "First marker only",
-	  allStages =  Seq(SingleMarker),
-	  initialStages = Seq(SingleMarker),
+		allStages =  Seq(SingleMarker),
+		initialStages = Seq(SingleMarker),
 		order = 0
 	)
 
