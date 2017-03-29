@@ -48,7 +48,7 @@ object Routes {
 			def add(department: Department, academicYear: AcademicYear): String =
 				workflows(department, academicYear) + "/add"
 			def addToCurrentYear(department: Department, academicYear: AcademicYear, workflow: CM2MarkingWorkflow): String =
-				workflows(department, academicYear) + "/addtocurrent/%s" format encoded(workflow.id)
+				workflows(department, academicYear) + "/copy/%s" format encoded(workflow.id)
 			def edit(department: Department, academicYear: AcademicYear, workflow: CM2MarkingWorkflow): String =
 				workflows(department, academicYear) + "/edit/%s" format encoded(workflow.id)
 			def delete(department: Department, academicYear: AcademicYear, workflow: CM2MarkingWorkflow): String =
