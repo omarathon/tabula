@@ -12,19 +12,6 @@ import uk.ac.warwick.tabula.data.model.markingworkflow.CM2MarkingWorkflow
 import uk.ac.warwick.tabula.web.{Mav, Routes}
 
 @Profile(Array("cm2Enabled")) @Controller
-@RequestMapping(Array("/${cm2.prefix}/admin/department/{department}/markingworkflows"))
-class ListReusableMarkingWorkflowControllerNoYear extends CM2MarkingWorkflowController {
-	@RequestMapping
-	def redirect(
-		@ModelAttribute("activeAcademicYear") activeAcademicYear: Option[AcademicYear],
-		@PathVariable department: Department
-	): Mav = {
-		val currentAcademicYear = activeAcademicYear.getOrElse(AcademicYear.guessSITSAcademicYearByDate(DateTime.now))
-		Redirect(Routes.cm2.admin.workflows(mandatory(department), currentAcademicYear))
-	}
-}
-
-@Profile(Array("cm2Enabled")) @Controller
 @RequestMapping(Array("/${cm2.prefix}/admin/department/{department}/{academicYear}/markingworkflows"))
 class ListReusableMarkingWorkflowController extends CM2MarkingWorkflowController {
 
