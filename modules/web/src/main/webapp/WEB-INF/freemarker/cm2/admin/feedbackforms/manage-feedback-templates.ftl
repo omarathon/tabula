@@ -1,9 +1,15 @@
 <#import "*/modal_macros.ftl" as modal />
 <#escape x as x?html>
+	<#include "/WEB-INF/freemarker/formatters.ftl" />
 	<div class="deptheader">
 		<h1>Feedback forms</h1>
-		<h2>${department.name}</h2>
 	</div>
+	<#function route_function department>
+		<#local result><@routes.cm2.feedbacktemplates department /></#local>
+		<#return result />
+	</#function>
+
+	<@fmt.id7_deptheader activeDepartment.name route_function />
 	<div class="fix-area">
 		<#assign actionUrl><@routes.cm2.feedbacktemplates department /></#assign>
 		<@f.form enctype="multipart/form-data"
@@ -11,16 +17,7 @@
 				 class="form-horizontal"
 				 action="${actionUrl}"
 				 commandName="bulkFeedbackTemplateCommand">
-			<div class="col-md-12">
-				<@bs3form.form_group "dept">
-					<select name="dept">
-						<#list deptList as dept>
-							<option value="${dept}">${dept}</option>
-						</#list>
-					</select>
 
-				</@bs3form.form_group>
-			</div>
 			<div class="col-md-12">
 				<@bs3form.labelled_form_group "file.upload" "Upload feedback forms">
 					<input type="file" name="file.upload" multiple />
