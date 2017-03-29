@@ -26,8 +26,9 @@ class ListReusableMarkingWorkflowController extends CM2MarkingWorkflowController
 		@ModelAttribute("listReusableWorkflowsCommand") cmd: ListReusableWorkflowsCommand,
 		@PathVariable department: Department,
 		@PathVariable academicYear: AcademicYear,
-		@RequestParam(value="copyErrors", required=false) copyErrors: String,
-		@RequestParam(value="copiedWorkflow", required=false) copiedWorkflow: CM2MarkingWorkflow
+		@RequestParam(value="actionErrors", required=false) actionErrors: String,
+		@RequestParam(value="copiedWorkflow", required=false) copiedWorkflow: CM2MarkingWorkflow,
+		@RequestParam(value="deletedWorkflow", required=false) deletedWorkflow: String
 	): Mav = {
 		// use the SITS rollover date so we can start adding workflows for 'next' year
 		val currentAcademicYear = AcademicYear.guessSITSAcademicYearByDate(DateTime.now)
@@ -39,8 +40,9 @@ class ListReusableMarkingWorkflowController extends CM2MarkingWorkflowController
 				"workflows" -> cmd.apply(),
 				"currentYear" -> currentAcademicYear,
 				"isCurrentYear" -> (currentAcademicYear == academicYear),
-				"copyErrors" -> copyErrors,
-				"copiedWorkflow" -> copiedWorkflow
+				"actionErrors" -> actionErrors,
+				"copiedWorkflow" -> copiedWorkflow,
+				"deletedWorkflow" -> deletedWorkflow
 			)),
 			department,
 			academicYear

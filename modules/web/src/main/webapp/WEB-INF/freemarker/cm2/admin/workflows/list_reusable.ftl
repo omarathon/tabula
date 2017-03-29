@@ -14,10 +14,17 @@
 	</div>
 </#if>
 
-<#if copyErrors??>
-	<div class="alert alert-warning">
+<#if deletedWorkflow??>
+	<div class="alert alert-info">
 		<button type="button" class="close" data-dismiss="alert">&times;</button>
-		${copyErrors}
+		${deletedWorkflow} was deleted.
+	</div>
+</#if>
+
+<#if actionErrors??>
+	<div class="alert alert-danger">
+		<button type="button" class="close" data-dismiss="alert">&times;</button>
+		${actionErrors}
 	</div>
 </#if>
 
