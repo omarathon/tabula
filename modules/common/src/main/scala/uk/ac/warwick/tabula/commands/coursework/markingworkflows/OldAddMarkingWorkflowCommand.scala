@@ -11,7 +11,7 @@ import uk.ac.warwick.tabula.system.permissions.RequiresPermissionsChecking
 import uk.ac.warwick.tabula.services.MarkingWorkflowServiceComponent
 import uk.ac.warwick.tabula.services.AutowiringMarkingWorkflowServiceComponent
 
-object AddMarkingWorkflowCommand {
+object OldAddMarkingWorkflowCommand {
 	def apply(department: Department) =
 		new AddMarkingWorkflowCommandInternal(department)
 			with ComposableCommand[MarkingWorkflow]
@@ -30,7 +30,7 @@ class AddMarkingWorkflowCommandInternal(department: Department) extends ModifyMa
 			val markingWorkflow = markingMethod match {
 				case SeenSecondMarkingLegacy => new SeenSecondMarkingLegacyWorkflow(department)
 				case SeenSecondMarking => new SeenSecondMarkingWorkflow(department)
-				case StudentsChooseMarker => new StudentsChooseMarkerWorkflow(department)
+				case StudentsChooseMarker => new OldStudentsChooseMarkerWorkflow(department)
 				case ModeratedMarking => new ModeratedMarkingWorkflow(department)
 				case FirstMarkerOnly => new FirstMarkerOnlyWorkflow(department)
 				case _ => throw new UnsupportedOperationException(markingMethod + " not specified")

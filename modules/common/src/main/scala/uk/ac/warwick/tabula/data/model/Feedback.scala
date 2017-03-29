@@ -10,8 +10,7 @@ import org.joda.time.DateTime
 import uk.ac.warwick.tabula.{AcademicYear, JavaImports}
 import uk.ac.warwick.tabula.JavaImports._
 import uk.ac.warwick.tabula.data.model.forms.{FormattedHtml, SavedFormValue}
-import uk.ac.warwick.tabula.data.model.markingworkflow.MarkingWorkflowStage
-import uk.ac.warwick.tabula.data.model.markingworkflow.MarkingWorkflowStage.FinalStage
+import uk.ac.warwick.tabula.data.model.markingworkflow.{FinalStage, MarkingWorkflowStage}
 import uk.ac.warwick.tabula.permissions.PermissionsTarget
 
 import scala.collection.JavaConverters._

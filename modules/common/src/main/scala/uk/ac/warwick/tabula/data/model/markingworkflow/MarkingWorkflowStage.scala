@@ -16,6 +16,7 @@ sealed abstract class MarkingWorkflowStage(val name: String, val order: Int) {
 	override def toString: String = name
 }
 
+abstract class FinalStage(n: String) extends MarkingWorkflowStage(name = n, order = Int.MaxValue)
 
 /**
 	* Stages model the steps in any given workflow.
@@ -27,14 +28,30 @@ sealed abstract class MarkingWorkflowStage(val name: String, val order: Int) {
 	*/
 object MarkingWorkflowStage {
 
-	abstract class FinalStage(n: String) extends MarkingWorkflowStage(name = n, order = Int.MaxValue)
-
 	// single marker workflow
 	case object SingleMarker extends MarkingWorkflowStage("SingleMarker", 1) {
 		override def nextStages: Seq[MarkingWorkflowStage] = Seq(SingleMarkingCompleted)
 	}
 	case object SingleMarkingCompleted extends FinalStage("SingleMarkingCompleted") {
 		override def previousStages: Seq[MarkingWorkflowStage] = Seq(SingleMarker)
+	}
+
+	// double marker workflow
+	case object DblFirstMarker extends MarkingWorkflowStage("DblFirstMarker", 1) {
+		override def nextStages: Seq[MarkingWorkflowStage] = Seq(DblSecondMarker)
+	}
+	case object DblSecondMarker extends MarkingWorkflowStage("DblSecondMarker", 2) {
+		override def roleName = "Second marker"
+		override def nextStages: Seq[MarkingWorkflowStage] = Seq(DblFinalMarker)
+		override def previousStages: Seq[MarkingWorkflowStage] = Seq(DblFirstMarker)
+	}
+	case object DblFinalMarker extends MarkingWorkflowStage("DblFinalMarker", 3) {
+		override def verb: String = "finalise"
+		override def nextStages: Seq[MarkingWorkflowStage] = Seq(DblCompleted)
+		override def previousStages: Seq[MarkingWorkflowStage] = Seq(DblSecondMarker)
+	}
+	case object DblCompleted extends FinalStage("DblCompleted") {
+		override def previousStages: Seq[MarkingWorkflowStage] = Seq(DblFinalMarker)
 	}
 
 	// double blind workflow
@@ -54,7 +71,26 @@ object MarkingWorkflowStage {
 		override def previousStages: Seq[MarkingWorkflowStage] = Seq(DblBlndFinalMarker)
 	}
 
-	val values: Set[MarkingWorkflowStage] = Set(SingleMarker, DblBlndInitialMarkerA, DblBlndInitialMarkerB, DblBlndFinalMarker)
+	// moderated workflow
+	case object ModerationMarker extends MarkingWorkflowStage("ModerationMarker", 1) {
+		override def nextStages: Seq[MarkingWorkflowStage] = Seq(ModerationModerator)
+	}
+	case object ModerationModerator extends MarkingWorkflowStage("ModerationModerator", 2) {
+		override def roleName = "Moderator"
+		override def verb: String = "moderate"
+		override def nextStages: Seq[MarkingWorkflowStage] = Seq(ModerationCompleted)
+		override def previousStages: Seq[MarkingWorkflowStage] = Seq(ModerationMarker)
+	}
+	case object ModerationCompleted extends FinalStage("ModerationCompleted") {
+		override def previousStages: Seq[MarkingWorkflowStage] = Seq(ModerationModerator)
+	}
+
+	val values: Set[MarkingWorkflowStage] = Set(
+		SingleMarker, SingleMarkingCompleted,
+		DblFirstMarker, DblSecondMarker, DblFinalMarker, DblCompleted,
+		DblBlndInitialMarkerA, DblBlndInitialMarkerB, DblBlndFinalMarker, DblBlndCompleted,
+		ModerationMarker, ModerationModerator
+	)
 
 	def fromCode(code: String): MarkingWorkflowStage =
 		if (code == null) null

@@ -5,7 +5,7 @@ import uk.ac.warwick.tabula.data.model.{Assignment, Department, Exam, FirstMarke
 import org.springframework.validation.BindException
 import uk.ac.warwick.tabula.data.{MarkingWorkflowDao, MarkingWorkflowDaoComponent}
 
-class DeleteMarkingWorkflowCommandTest extends TestBase with Mockito {
+class OldDeleteMarkingWorkflowCommandTest extends TestBase with Mockito {
 
 	val mockMarkingWorkflowDao: MarkingWorkflowDao = smartMock[MarkingWorkflowDao]
 

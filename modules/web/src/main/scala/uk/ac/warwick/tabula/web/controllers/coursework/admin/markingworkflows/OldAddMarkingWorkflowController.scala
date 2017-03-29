@@ -6,7 +6,7 @@ import org.springframework.context.annotation.Profile
 import org.springframework.stereotype.Controller
 import org.springframework.validation.Errors
 import org.springframework.web.bind.annotation._
-import uk.ac.warwick.tabula.commands.coursework.markingworkflows.AddMarkingWorkflowCommand
+import uk.ac.warwick.tabula.commands.coursework.markingworkflows.OldAddMarkingWorkflowCommand
 import uk.ac.warwick.tabula.data.model._
 import uk.ac.warwick.tabula.web.controllers.coursework.OldCourseworkController
 import uk.ac.warwick.tabula.web.Mav
@@ -23,7 +23,7 @@ class OldAddMarkingWorkflowController extends OldCourseworkController {
 	validatesSelf[SelfValidating]
 
 	@ModelAttribute("command")
-	def cmd(@PathVariable department: Department) = AddMarkingWorkflowCommand(department)
+	def cmd(@PathVariable department: Department) = OldAddMarkingWorkflowCommand(department)
 
 	@RequestMapping(method=Array(GET, HEAD))
 	def form(@ModelAttribute("command") cmd: Appliable[MarkingWorkflow] with MarkingWorkflowCommandState): Mav = {

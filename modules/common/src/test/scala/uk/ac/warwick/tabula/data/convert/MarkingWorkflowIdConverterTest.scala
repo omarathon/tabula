@@ -5,7 +5,7 @@ import org.hibernate.Session
 import uk.ac.warwick.tabula.Mockito
 
 import uk.ac.warwick.tabula.TestBase
-import uk.ac.warwick.tabula.data.model.{StudentsChooseMarkerWorkflow, SeenSecondMarkingLegacyWorkflow, MarkingWorkflow}
+import uk.ac.warwick.tabula.data.model.{OldStudentsChooseMarkerWorkflow, SeenSecondMarkingLegacyWorkflow, MarkingWorkflow}
 
 class MarkingWorkflowIdConverterTest extends TestBase with Mockito {
 
@@ -35,7 +35,7 @@ class MarkingWorkflowIdConverterTest extends TestBase with Mockito {
 	}
 
 	@Test def formatting() {
-		val workflow = new StudentsChooseMarkerWorkflow
+		val workflow = new OldStudentsChooseMarkerWorkflow
 		workflow.id = "steve"
 
 		converter.convertLeft(workflow) should be ("steve")

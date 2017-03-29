@@ -24,7 +24,7 @@ class UsercodeListValidator(usercodes: JList[String], pathName: String, universi
 		} else if (alreadyHasCode) {
 			errors.rejectValue(pathName, "userId.duplicate")
 		} else {
-			val users = userLookup.getUsersByUserIds(trimmedCodes).values()
+			val users = userLookup.getUsersByUserIds(trimmedCodes).values
 			// Uses find() so we'll only show one missing user at any one time. Could change this to
 			// use filter() and combine the result into one error message listing them all.
 			val anonUsers = users.find { !_.isFoundUser }

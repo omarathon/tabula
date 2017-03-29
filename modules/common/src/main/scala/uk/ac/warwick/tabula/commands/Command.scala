@@ -7,6 +7,7 @@ import uk.ac.warwick.tabula.data.Transactions._
 import uk.ac.warwick.tabula.data.model._
 import uk.ac.warwick.tabula.data.model.attendance._
 import uk.ac.warwick.tabula.data.model.groups._
+import uk.ac.warwick.tabula.data.model.markingworkflow.CM2MarkingWorkflow
 import uk.ac.warwick.tabula.data.model.permissions.CustomRoleDefinition
 import uk.ac.warwick.tabula.data.model.triggers.Trigger
 import uk.ac.warwick.tabula.events._
@@ -415,6 +416,10 @@ abstract class Description {
 
 	def markingWorkflow(scheme: MarkingWorkflow): Description = {
 		property("markingWorkflow" -> scheme.id)
+	}
+
+	def markingWorkflow(markingWorkflow: CM2MarkingWorkflow): Description = {
+		property("markingWorkflow" -> markingWorkflow.id)
 	}
 
 	/**

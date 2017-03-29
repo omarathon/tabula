@@ -12,7 +12,7 @@ import uk.ac.warwick.tabula.system.permissions.PermissionsCheckingMethods
 import uk.ac.warwick.tabula.services.AutowiringMarkingWorkflowServiceComponent
 import uk.ac.warwick.tabula.system.permissions.RequiresPermissionsChecking
 
-object EditMarkingWorkflowCommand {
+object OldEditMarkingWorkflowCommand {
 	def apply(department: Department, markingWorkflow: MarkingWorkflow) =
 		new EditMarkingWorkflowCommandInternal(department, markingWorkflow)
 			with ComposableCommand[MarkingWorkflow]

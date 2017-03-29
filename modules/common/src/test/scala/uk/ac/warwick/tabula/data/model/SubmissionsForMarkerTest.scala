@@ -83,7 +83,7 @@ class SubmissionsForMarkerTest extends TestBase {
 		ug.addUserId("cuslaj")
 		ug.addUserId("cusebr")
 
-		val ms = new StudentsChooseMarkerWorkflow
+		val ms = new OldStudentsChooseMarkerWorkflow
 		ms.name = "Test marking workflow"
 		ms.firstMarkers = ug
 		ms

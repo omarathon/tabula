@@ -6,7 +6,7 @@ import org.springframework.context.annotation.Profile
 import org.springframework.stereotype.Controller
 import org.springframework.validation.Errors
 import org.springframework.web.bind.annotation._
-import uk.ac.warwick.tabula.commands.coursework.markingworkflows.{DeleteMarkingWorkflowCommand, DeleteMarkingWorkflowCommandState}
+import uk.ac.warwick.tabula.commands.coursework.markingworkflows.{OldDeleteMarkingWorkflowCommand, DeleteMarkingWorkflowCommandState}
 import uk.ac.warwick.tabula.data.model._
 import uk.ac.warwick.tabula.web.controllers.coursework.OldCourseworkController
 import uk.ac.warwick.tabula.web.Mav
@@ -27,7 +27,7 @@ class OldDeleteMarkingWorkflowController extends OldCourseworkController {
 
 	@ModelAttribute("command")
 	def cmd(@PathVariable department: Department, @PathVariable markingworkflow: MarkingWorkflow): DeleteMarkingWorkflowCommand =
-		DeleteMarkingWorkflowCommand(department, markingworkflow)
+		OldDeleteMarkingWorkflowCommand(department, markingworkflow)
 
 	@RequestMapping(method=Array(GET, HEAD))
 	def form(@ModelAttribute("command") cmd: DeleteMarkingWorkflowCommand): Mav = {

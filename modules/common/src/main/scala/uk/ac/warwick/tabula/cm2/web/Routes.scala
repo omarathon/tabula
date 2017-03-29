@@ -1,8 +1,10 @@
 package uk.ac.warwick.tabula.cm2.web
 
 import uk.ac.warwick.spring.Wire
+import uk.ac.warwick.tabula.AcademicYear
 import uk.ac.warwick.tabula.data.model._
 import uk.ac.warwick.tabula.data.model.forms.Extension
+import uk.ac.warwick.tabula.data.model.markingworkflow.CM2MarkingWorkflow
 import uk.ac.warwick.tabula.web.RoutesUtils
 
 /**
@@ -33,6 +35,24 @@ object Routes {
 			def apply(): String = admin() + "/extensions"
 			def detail(extension: Extension): String = extensions() + s"/${extension.id}/detail/"
 			def modify(extension: Extension): String = extensions() + s"/${extension.id}/update/"
+		}
+
+		object department {
+			def apply(department: Department, academicYear: AcademicYear): String =
+				admin() + "/department/%s/%s" format(encoded(department.code), encoded(academicYear.startYear.toString))
+		}
+
+		object workflows {
+			def apply(dept: Department, academicYear: AcademicYear): String =
+				department(dept, academicYear) + "/markingworkflows"
+			def add(department: Department, academicYear: AcademicYear): String =
+				workflows(department, academicYear) + "/add"
+			def addToCurrentYear(department: Department, academicYear: AcademicYear, workflow: CM2MarkingWorkflow): String =
+				workflows(department, academicYear) + "/addtocurrent/%s" format encoded(workflow.id)
+			def edit(department: Department, academicYear: AcademicYear, workflow: CM2MarkingWorkflow): String =
+				workflows(department, academicYear) + "/edit/%s" format encoded(workflow.id)
+			def delete(department: Department, academicYear: AcademicYear, workflow: CM2MarkingWorkflow): String =
+				workflows(department, academicYear) + "/delete/%s" format encoded(workflow.id)
 		}
 
 		object assignment {

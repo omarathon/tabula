@@ -44,7 +44,7 @@ class FeedbackItem {
 	def this(uniNumber:String, student: User) = {
 		this()
 		this.uniNumber = uniNumber
-		this.student = Option(student)
+		this.student = Option(student).filter(_.isFoundUser)
 	}
 
 	class AttachmentItem(val name: String, val duplicate: Boolean, val ignore: Boolean)
@@ -257,7 +257,7 @@ abstract class UploadFeedbackCommand[A](val module: Module, val assignment: Assi
 				for (item <- items.asScala) {
 					if (item.file != null) item.file.onBind(result)
 					if (item.student == null) {
-						item.student = Option(userLookup.getUserByWarwickUniId(item.uniNumber))
+						item.student = Option(userLookup.getUserByWarwickUniId(item.uniNumber)).filterNot(_.getUserType == "Applicant")
 					}
 				}
 			}

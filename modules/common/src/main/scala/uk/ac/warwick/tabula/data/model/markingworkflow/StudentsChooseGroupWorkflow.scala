@@ -5,13 +5,15 @@ import javax.persistence.{DiscriminatorValue, Entity}
 import uk.ac.warwick.tabula.JavaImports._
 import uk.ac.warwick.tabula.data.model.Department
 import uk.ac.warwick.tabula.data.model.markingworkflow.MarkingWorkflowStage.SingleMarker
-import uk.ac.warwick.tabula.data.model.markingworkflow.MarkingWorkflowType.SingleMarking
+import uk.ac.warwick.tabula.data.model.markingworkflow.MarkingWorkflowType.StudentChoosesGroupMarking
 import uk.ac.warwick.userlookup.User
 
-@Entity @DiscriminatorValue("Single")
-class SingleMarkerWorkflow extends CM2MarkingWorkflow {
-	def workflowType = SingleMarking
+@Entity @DiscriminatorValue("StudentsChoose")
+class StudentsChooseGroupWorkflow extends CM2MarkingWorkflow {
+	def workflowType = StudentChoosesGroupMarking
+	override def studentsChooseMarkers: Boolean = true
 
+	// TODO - just copied from single marker for now. Will need to be able to save group info as well
 	override def replaceMarkers(markers: Seq[Marker]*): Unit = {
 		val firstMarkers = markers.toList match {
 			case fm :: _ => fm
@@ -20,10 +22,9 @@ class SingleMarkerWorkflow extends CM2MarkingWorkflow {
 
 		replaceStageMarkers(SingleMarker, firstMarkers)
 	}
-
 }
 
-object SingleMarkerWorkflow {
+object StudentsChooseGroupWorkflow {
 	def apply(name: String, department: Department, firstMarkers: Seq[User]): SingleMarkerWorkflow = {
 
 		val singleWorkflow = new SingleMarkerWorkflow

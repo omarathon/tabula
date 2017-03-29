@@ -61,7 +61,7 @@ class ReplaceMarkerInMarkingWorkflowCommandInternal(val department: Department, 
 		}
 
 		markingWorkflow match {
-			case _: StudentsChooseMarkerWorkflow =>
+			case _: OldStudentsChooseMarkerWorkflow =>
 				affectedAssignments.foreach { assignment =>
 					replaceMarkerStudentsChoose(assignment)
 					assessmentService.save(assignment)
