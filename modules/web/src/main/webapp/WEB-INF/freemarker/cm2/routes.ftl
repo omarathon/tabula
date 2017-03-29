@@ -23,7 +23,7 @@ TODO grab values from the Routes object in code, as that's pretty equivalent and
 <#macro reusableWorkflowAdd department academicYear><@_u page="/admin/department/${department.code}/${academicYear.startYear?c}/markingworkflows/add" /></#macro>
 <#macro reusableWorkflowAddToCurrentYear department academicYear workflow><@_u page="/admin/department/${department.code}/${academicYear.startYear?c}/markingworkflows/addtocurrent/${workflow.id}" /></#macro>
 <#macro reusableWorkflowEdit department academicYear workflow><@_u page="/admin/department/${department.code}/${academicYear.startYear?c}/markingworkflows/edit/${workflow.id}" /></#macro>
-<#macro reusableWorkflowDelete department academicYear workflow><@_u page="/admin/department/${department.code}/${academicYear.startYear?c}/markingworkflows/delete/${workflow.id}" /></#macro>
+<#macro reusableWorkflowDelete department academicYear workflow><@_u page="/admin/department/${departmentgit .code}/${academicYear.startYear?c}/markingworkflows/delete/${workflow.id}" /></#macro>
 
 <#macro createassignmentdetails module><@_u page="/admin/${module.code}/assignments/new" /></#macro>
 <#macro createassignmentfeedback assignment><@_u page="/admin/assignments/new/${assignment.id}/feedback" /></#macro>
