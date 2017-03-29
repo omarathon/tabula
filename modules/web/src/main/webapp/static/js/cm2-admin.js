@@ -15,13 +15,15 @@
 
 		var $body = $('body');
 
+		// sortable tables
+		$body.find('.table-sortable').sortableTable();
+
+		// expandable table rows
 		$body.on('tabula.expandingTable.contentChanged',function(e){
 			var $this = $(e.target);
 			$this.bindFormHelpers();
 		});
 
-
-		// expandable table rows
 		$body.on('show.bs.collapse', '.detail-row', function(e){
 			var $this = $(e.target);
 			var hasLoaded = $this.data('loaded') || false;
