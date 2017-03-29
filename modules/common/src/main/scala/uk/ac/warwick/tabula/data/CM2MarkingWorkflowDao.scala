@@ -33,7 +33,7 @@ class CM2MarkingWorkflowDaoImpl extends CM2MarkingWorkflowDao with Daoisms {
 	override def getReusableWorkflows(department: Department, academicYear: AcademicYear): Seq[CM2MarkingWorkflow] = {
 
 		session.newQuery[CM2MarkingWorkflow]("""select c from CM2MarkingWorkflow c
-				where :year in elements(c.academicYears)
+				where c.academicYear = :year
 				and c.department = :department
 				and c.isReusable = true""")
 			.setParameter("year", academicYear)

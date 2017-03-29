@@ -2,8 +2,11 @@ package uk.ac.warwick.tabula.data.model.markingworkflow
 
 import javax.persistence.CascadeType._
 import javax.persistence.FetchType._
-import javax.persistence.{Column, DiscriminatorType, JoinTable, OneToMany, _}
+import javax.persistence.{Column, DiscriminatorType, OneToMany, _}
+
 import org.hibernate.annotations.{BatchSize, Type}
+import org.joda.time.DateTime
+
 import scala.collection.immutable.{SortedMap, TreeMap}
 import scala.collection.JavaConverters._
 import uk.ac.warwick.spring.Wire
@@ -62,13 +65,10 @@ abstract class CM2MarkingWorkflow extends GeneratedId with PermissionsTarget wit
 	@Column(name="is_reusable", nullable = false)
 	var isReusable: JBoolean = false
 
-	@ElementCollection @Column(name = "academicYear")
-	@JoinTable(
-		name = "MARKINGWORKFLOWYEARS",
-		joinColumns = Array(new JoinColumn(name = "workflow_id", referencedColumnName = "id"))
-	)
+	@Basic
 	@Type(`type` = "uk.ac.warwick.tabula.data.model.AcademicYearUserType")
-	var academicYears: JSet[AcademicYear] = JHashSet()
+	@Column(nullable = false)
+	var academicYear: AcademicYear = AcademicYear.guessSITSAcademicYearByDate(DateTime.now)
 
 	// should be hardcoded to the MarkingWorkflowType with the same value as the implementations DiscriminatorValue :(
 	def workflowType: MarkingWorkflowType
@@ -79,7 +79,7 @@ abstract class CM2MarkingWorkflow extends GeneratedId with PermissionsTarget wit
 	def permissionsParents: Stream[Department] = Option(department).toStream
 
 	// replace the markers for a specified stage in the workflow
-	protected def replaceStageMarkers(stage:MarkingWorkflowStage, markers:Seq[Marker]) = {
+	protected def replaceStageMarkers(stage:MarkingWorkflowStage, markers:Seq[Marker]): Unit = {
 		stageMarkers.asScala.find(_.stage == stage).foreach(sm => {
 			sm.markers.knownType.includedUserIds = markers.map(_.getUserId)
 		})

@@ -2,20 +2,22 @@ package uk.ac.warwick.tabula.data
 
 import scala.collection.JavaConverters._
 import org.junit.Before
+import uk.ac.warwick.tabula.data.model.Department
 import uk.ac.warwick.tabula.data.model.markingworkflow.MarkingWorkflowStage._
 import uk.ac.warwick.tabula.data.model.markingworkflow.{DoubleBlindWorkflow, SingleMarkerWorkflow}
 import uk.ac.warwick.tabula.{AcademicYear, Fixtures, PersistenceTestBase}
+import uk.ac.warwick.userlookup.User
 
 class CM2MarkingWorkflowDaoTest extends PersistenceTestBase {
 
 	val dao = new CM2MarkingWorkflowDaoImpl
 
-	val dept = Fixtures.department("in")
-	val marker = Fixtures.user("1170836", "cuslaj")
-	val marker2 = Fixtures.user("1170837", "cuslak")
+	val dept: Department = Fixtures.department("in")
+	val marker: User = Fixtures.user("1170836", "cuslaj")
+	val marker2: User = Fixtures.user("1170837", "cuslak")
 
 	@Before
-	def setup() = transactional { tx =>
+	def setup(): Unit = transactional { tx =>
 		dao.sessionFactory = sessionFactory
 		session.save(dept)
 		session.flush()
@@ -23,7 +25,7 @@ class CM2MarkingWorkflowDaoTest extends PersistenceTestBase {
 
 	@Test def saveThenFetch() = transactional { tx =>
 		val singleMarkerWorkflow = SingleMarkerWorkflow("testAssignment", dept, Seq(marker))
-		singleMarkerWorkflow.academicYears = Set(AcademicYear(2016), AcademicYear(2017)).asJava
+		singleMarkerWorkflow.academicYear = AcademicYear(2016)
 
 		dao.saveOrUpdate(singleMarkerWorkflow)
 		session.flush()
@@ -33,7 +35,7 @@ class CM2MarkingWorkflowDaoTest extends PersistenceTestBase {
 
 		workflow.name should be ("testAssignment")
 		workflow.department should be (dept)
-		workflow.academicYears.asScala should be (Set(AcademicYear(2016), AcademicYear(2017)))
+		workflow.academicYear should be (AcademicYear(2016))
 		workflow.initialStages.size should be (1)
 
 		val stageMarker = workflow.stageMarkers.asScala.head
@@ -47,19 +49,19 @@ class CM2MarkingWorkflowDaoTest extends PersistenceTestBase {
 
 	@Test def testGetReusableWorkflows() = transactional { tx =>
 		val singleMarkerWorkflow = SingleMarkerWorkflow("testAssignment", dept, Seq(marker))
-		singleMarkerWorkflow.academicYears = Set(AcademicYear(2015), AcademicYear(2016)).asJava
+		singleMarkerWorkflow.academicYear = AcademicYear(2016)
 		singleMarkerWorkflow.isReusable = true
 		dao.saveOrUpdate(singleMarkerWorkflow)
 
 		val doubleBlindWorkflow = DoubleBlindWorkflow("testAssignment", dept, Seq(marker), Seq(marker))
-		doubleBlindWorkflow.academicYears = Set(AcademicYear(2014), AcademicYear(2015)).asJava
+		doubleBlindWorkflow.academicYear = AcademicYear(2015)
 		doubleBlindWorkflow.isReusable = true
 		dao.saveOrUpdate(doubleBlindWorkflow)
 		session.flush()
 
 		dao.getReusableWorkflows(dept, AcademicYear(2016)).length should be (1)
-		dao.getReusableWorkflows(dept, AcademicYear(2015)).length should be (2)
-		dao.getReusableWorkflows(dept, AcademicYear(2014)).length should be (1)
+		dao.getReusableWorkflows(dept, AcademicYear(2015)).length should be (1)
+		dao.getReusableWorkflows(dept, AcademicYear(2014)).length should be (0)
 	}
 
 	@Test def markerFeedbackForAssignmentAndStage() = transactional { tx =>

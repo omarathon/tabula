@@ -48,7 +48,6 @@ class AddMarkingWorkflowCommandInternal(
 			case DoubleBlindMarking => DoubleBlindWorkflow(name, department, markersAUsers, markersBUsers)
 			case _ => throw new UnsupportedOperationException(workflowType + " not specified")
 		}
-		workflow.academicYears.add(academicYear)
 		workflow.isReusable = isResuable
 		cm2MarkingWorkflowService.save(workflow)
 		workflow
