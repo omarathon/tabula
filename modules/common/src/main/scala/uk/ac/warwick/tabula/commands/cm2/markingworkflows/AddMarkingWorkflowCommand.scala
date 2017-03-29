@@ -60,7 +60,7 @@ trait AddMarkingWorkflowValidation extends ModifyMarkingWorkflowValidation with 
 
 	def validate(errors: Errors) {
 
-		if (department.cm2MarkingWorkflows.exists(_.name == name)) {
+		if (department.cm2MarkingWorkflows.exists(w => w.academicYear == academicYear && w.name == name )) {
 			errors.rejectValue("name", "name.duplicate.markingWorkflow", Array(name), null)
 		}
 

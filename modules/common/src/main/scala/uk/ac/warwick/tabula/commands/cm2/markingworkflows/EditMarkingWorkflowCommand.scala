@@ -56,7 +56,7 @@ trait EditMarkingWorkflowValidation extends ModifyMarkingWorkflowValidation with
 	override def validate(errors: Errors) {
 		genericValidate(errors, workflow.workflowType)
 
-		if (department.cm2MarkingWorkflows.exists(w => w.id != workflow.id && w.name == name)) {
+		if (department.cm2MarkingWorkflows.exists(w => w.id != workflow.id && w.academicYear == academicYear && w.name == name)) {
 			errors.rejectValue("name", "name.duplicate.markingWorkflow", Array(name), null)
 		}
 
