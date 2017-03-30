@@ -1,7 +1,6 @@
 package uk.ac.warwick.tabula.commands.cm2.markingworkflows
 
 import org.springframework.validation.Errors
-import uk.ac.warwick.tabula.AcademicYear
 import uk.ac.warwick.tabula.commands.{Describable, Description, _}
 import uk.ac.warwick.tabula.data.model.Department
 import uk.ac.warwick.tabula.data.model.markingworkflow._

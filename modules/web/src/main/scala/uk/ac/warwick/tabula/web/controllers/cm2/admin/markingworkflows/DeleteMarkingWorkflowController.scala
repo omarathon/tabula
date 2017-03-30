@@ -31,7 +31,7 @@ class DeleteMarkingWorkflowController extends CM2MarkingWorkflowController {
 
 	@ModelAttribute("deleteMarkingWorkflowCommand")
 	def command(@PathVariable department: Department, @PathVariable academicYear: AcademicYear, @PathVariable workflow: CM2MarkingWorkflow) =
-		DeleteMarkingWorkflowCommand(mandatory(department), mandatory(academicYear), mandatory(workflow))
+		DeleteMarkingWorkflowCommand(mandatory(department), mandatory(workflow))
 
 	@RequestMapping
 	def submitForm(
@@ -48,7 +48,6 @@ class DeleteMarkingWorkflowController extends CM2MarkingWorkflowController {
 		} else {
 			"deletedWorkflow" -> cmd.apply()
 		}
-
 		Redirect(Routes.cm2.admin.workflows(department, academicYear), model)
 	}
 
