@@ -14,8 +14,8 @@ object DeleteMarkingWorkflowCommand {
 
 	type Command = Appliable[String] with DeleteMarkingWorkflowState
 
-	def apply(department:Department, academicYear: AcademicYear, markingWorkflow: CM2MarkingWorkflow) =
-		new DeleteMarkingWorkflowCommandInternal(department, academicYear, markingWorkflow)
+	def apply(department:Department, markingWorkflow: CM2MarkingWorkflow) =
+		new DeleteMarkingWorkflowCommandInternal(department, markingWorkflow)
 			with ComposableCommand[String]
 			with DeleteMarkingWorkflowValidation
 			with MarkingWorkflowPermissions
@@ -25,7 +25,7 @@ object DeleteMarkingWorkflowCommand {
 
 }
 
-class DeleteMarkingWorkflowCommandInternal(val department: Department, val academicYear: AcademicYear, val markingWorkflow: CM2MarkingWorkflow)
+class DeleteMarkingWorkflowCommandInternal(val department: Department, val markingWorkflow: CM2MarkingWorkflow)
 	extends CommandInternal[String] {
 
 	self: DeleteMarkingWorkflowState with CM2MarkingWorkflowServiceComponent =>
@@ -56,6 +56,5 @@ trait DeleteMarkingWorkflowDescription extends Describable[String] {
 
 trait DeleteMarkingWorkflowState {
 	def department: Department
-	def academicYear: AcademicYear
 	def markingWorkflow: CM2MarkingWorkflow
 }
