@@ -44,7 +44,7 @@ class RouteRuleImporterImpl extends RouteRuleImporter with InitializingBean
 	override def getRouteRules: Seq[UpstreamRouteRule] = {
 		val rows = benchmarkTask("Fetch route rules") { routeRuleQuery.execute }
 		// Remove rows that have null entires that aren't allowed
-		val nonEmptyRows = rows.asScala.filter(r => r.routeCode.hasText && r.yearOfStudy.nonEmpty && r.moduleListCode.nonEmpty)
+		val nonEmptyRows = rows.asScala.filter(r => r.routeCode.hasText && r.yearOfStudy.nonEmpty && r.moduleListCode != null &&  r.moduleListCode.nonEmpty)
 		// Batch fetch the routes and module lists
 		val routeCodes = nonEmptyRows.map(_.routeCode).distinct
 		val moduleListCodes = nonEmptyRows.map(_.moduleListCode).distinct
