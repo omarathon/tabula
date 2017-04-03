@@ -1,20 +1,18 @@
 package uk.ac.warwick.tabula.commands.admin.department
 
-import uk.ac.warwick.tabula.{Mockito, TestBase}
-import uk.ac.warwick.tabula.data.model.{Assignment, Department}
-import uk.ac.warwick.tabula.commands.{Description, Appliable}
-import uk.ac.warwick.tabula.services.{ModuleAndDepartmentServiceComponent, ModuleAndDepartmentService}
-import uk.ac.warwick.tabula.data.model.groups.SmallGroupAllocationMethod._
-import Assignment.Settings.InfoViewType._
-import uk.ac.warwick.tabula.data.model.groups.WeekRange
-import WeekRange.NumberingSystem._
-import uk.ac.warwick.tabula.system.permissions.PermissionsChecking
-import uk.ac.warwick.tabula.permissions.Permissions
 import org.springframework.validation.BindException
-import uk.ac.warwick.tabula.services.RelationshipServiceComponent
-import uk.ac.warwick.tabula.services.RelationshipService
+import uk.ac.warwick.tabula.commands.{Appliable, Description}
+import uk.ac.warwick.tabula.data.model.Assignment.Settings.InfoViewType._
+import uk.ac.warwick.tabula.data.model.groups.SmallGroupAllocationMethod._
+import uk.ac.warwick.tabula.data.model.groups.WeekRange
+import uk.ac.warwick.tabula.data.model.groups.WeekRange.NumberingSystem._
+import uk.ac.warwick.tabula.data.model.{Assignment, Department}
+import uk.ac.warwick.tabula.permissions.Permissions
+import uk.ac.warwick.tabula.services.{ModuleAndDepartmentService, ModuleAndDepartmentServiceComponent, RelationshipService, RelationshipServiceComponent}
+import uk.ac.warwick.tabula.system.permissions.PermissionsChecking
+import uk.ac.warwick.tabula.{Mockito, TestBase}
 
-class DisplaySettingsCommandTest extends TestBase with Mockito {
+class OldDisplaySettingsCommandTest extends TestBase with Mockito {
 
 	private trait Fixture {
 		val testDepartment = new Department
@@ -25,7 +23,7 @@ class DisplaySettingsCommandTest extends TestBase with Mockito {
 		testDepartment.weekNumberingSystem = Academic
 		testDepartment.autoGroupDeregistration = true
 
-		val commandInternal = new DisplaySettingsCommandInternal(testDepartment) with ModuleAndDepartmentServiceComponent with RelationshipServiceComponent {
+		val commandInternal = new OldDisplaySettingsCommandInternal(testDepartment) with ModuleAndDepartmentServiceComponent with RelationshipServiceComponent {
 			var moduleAndDepartmentService: ModuleAndDepartmentService = mock[ModuleAndDepartmentService]
 			var relationshipService: RelationshipService = mock[RelationshipService]
 		}
@@ -35,11 +33,11 @@ class DisplaySettingsCommandTest extends TestBase with Mockito {
 	@Test
 	def objectApplyCreatesCommand() {
 		new Fixture {
-			val command = DisplaySettingsCommand(testDepartment)
+			val command = OldDisplaySettingsCommand(testDepartment)
 
 			command.isInstanceOf[Appliable[Department]] should be(true)
-			command.isInstanceOf[DisplaySettingsCommandState] should be(true)
-			command.asInstanceOf[DisplaySettingsCommandState].department should be(testDepartment)
+			command.isInstanceOf[OldDisplaySettingsCommandState] should be(true)
+			command.asInstanceOf[OldDisplaySettingsCommandState].department should be(testDepartment)
 		}
 	}
 
@@ -101,7 +99,7 @@ class DisplaySettingsCommandTest extends TestBase with Mockito {
 	@Test
 	def commandDescriptionDescribedDepartment() {
 		new Fixture {
-			val describable = new DisplaySettingsCommandDescription with DisplaySettingsCommandState {
+			val describable = new OldDisplaySettingsCommandDescription with OldDisplaySettingsCommandState {
 				val eventName: String = "test"
 				val department: Department = testDepartment
 			}
@@ -115,7 +113,7 @@ class DisplaySettingsCommandTest extends TestBase with Mockito {
 	@Test
 	def permissionsRequireManageDisplaySettingsOnDepartment {
 		new Fixture {
-			val perms = new DisplaySettingsCommandPermissions() with DisplaySettingsCommandState{
+			val perms = new OldDisplaySettingsCommandPermissions() with OldDisplaySettingsCommandState{
 				val department: Department = testDepartment
 			}
 			val checking: PermissionsChecking = mock[PermissionsChecking]

@@ -94,7 +94,7 @@ class NotificationSettingsCommandTest extends TestBase with Mockito {
 	@Test
 	def commandDescriptionDescribedDepartment() {
 		new Fixture {
-			val describable = new DisplaySettingsCommandDescription with DisplaySettingsCommandState {
+			val describable = new OldDisplaySettingsCommandDescription with OldDisplaySettingsCommandState {
 				val eventName: String = "test"
 				val department: Department = testDepartment
 			}
