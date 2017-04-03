@@ -12,7 +12,7 @@ import uk.ac.warwick.userlookup.User
 
 import scala.collection.JavaConverters._
 
-object ReplaceMarkerInMarkingWorkflowCommand {
+object OldReplaceMarkerInMarkingWorkflowCommand {
 	def apply(department: Department, markingWorkflow: MarkingWorkflow) =
 		new ReplaceMarkerInMarkingWorkflowCommandInternal(department, markingWorkflow)
 			with AutowiringUserLookupComponent

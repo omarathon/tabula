@@ -12,6 +12,9 @@ import uk.ac.warwick.userlookup.User
 
 import scala.collection.Map
 
+// scalastyle:off public.methods.have.type
+// scalastyle:off public.property.type.annotation
+
 class CM2MarkingWorkflowServiceTest extends TestBase with Mockito {
 
 	val fs = smartMock[FeedbackService]
@@ -27,14 +30,11 @@ class CM2MarkingWorkflowServiceTest extends TestBase with Mockito {
 
 	val marker1 = Fixtures.user("1170836", "cuslaj")
 	val marker2 = Fixtures.user("1170837", "cuslak")
-	val student1 = Fixtures.user(userId = "student1")
-	val student2 = Fixtures.user(userId = "student2")
-	val student3 = Fixtures.user(userId = "student3")
+	val student1 = Fixtures.user("student1", "student1")
+	val student2 = Fixtures.user("student2", "student2")
+	val student3 = Fixtures.user("student3", "student3")
 
-	val userLookup = mock[UserLookupService]
-	for (user <- Seq(marker1, marker2, student1, student2, student3)) {
-		userLookup.getUserByUserId(user.getUserId) returns user
-	}
+	val userLookup = Fixtures.userLookupService(marker1, marker2, student1, student2, student3)
 
 	trait MarkerFeedbackFixture extends Mockito {
 		val mf1 = Fixtures.markerFeedback(Fixtures.assignmentFeedback(userId = "student1"))
@@ -211,7 +211,7 @@ class CM2MarkingWorkflowServiceTest extends TestBase with Mockito {
 		).toMap
 		val result3 = service.allocateMarkersForStage(assignment, SingleMarker, allocations3)
 		// student ones marker feedback shouldn't have a marker now
-		result2.find(_.feedback.usercode == student1.getUserId).get.marker should be (null)
+		result2.find(_.feedback.usercode == student1.getUserId).get.marker.isFoundUser should be (false)
 		result3.size should be(2)
 
 		verify(fs, times(3)).saveOrUpdate(any[Feedback])

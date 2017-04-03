@@ -8,7 +8,7 @@ import uk.ac.warwick.userlookup.User
 
 import collection.JavaConverters._
 
-class ReplaceMarkerInMarkingWorkflowCommandTest extends TestBase with Mockito {
+class OldReplaceMarkerInMarkingWorkflowCommandTest extends TestBase with Mockito {
 
 	val mockUserLookup = new MockUserLookup
 	val mockAssessmentService: AssessmentService = smartMock[AssessmentService]

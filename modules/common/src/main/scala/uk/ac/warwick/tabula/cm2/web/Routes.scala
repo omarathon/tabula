@@ -53,6 +53,8 @@ object Routes {
 				workflows(department, academicYear) + "/%s/edit" format encoded(workflow.id)
 			def delete(department: Department, academicYear: AcademicYear, workflow: CM2MarkingWorkflow): String =
 				workflows(department, academicYear) + "/%s/delete" format encoded(workflow.id)
+			def replaceMarker(department: Department, academicYear: AcademicYear, workflow: CM2MarkingWorkflow): String =
+				workflows(department, academicYear) + "/%s/replace" format encoded(workflow.id)
 		}
 
 		object assignment {

@@ -92,6 +92,8 @@ class Department extends GeneratedId
 	@BatchSize(size=200)
 	private val _cm2MarkingWorkflows: JSet[CM2MarkingWorkflow] = JHashSet()
 	def cm2MarkingWorkflows: Seq[CM2MarkingWorkflow] = _cm2MarkingWorkflows.asScala.toSeq.sorted
+	def addCM2MarkingWorkflow(markingWorkflow: CM2MarkingWorkflow): Boolean = _cm2MarkingWorkflows.add(markingWorkflow)
+	def removeCM2MarkingWorkflow(markingWorkflow: CM2MarkingWorkflow): Boolean = _cm2MarkingWorkflows.remove(markingWorkflow)
 
 	// TAB-2388 Disable orphanRemoval as Module Managers were unintentionally being removed in certain circumstances
 	@OneToMany(mappedBy="department", fetch = FetchType.LAZY, cascade = Array(CascadeType.ALL), orphanRemoval = false)

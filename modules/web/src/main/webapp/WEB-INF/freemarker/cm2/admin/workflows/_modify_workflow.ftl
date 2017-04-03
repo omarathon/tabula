@@ -35,7 +35,7 @@
 				</@f.select>
 			</@bs3form.labelled_form_group>
 		<#else>
-			<div class="form-group">
+			<@bs3form.labelled_form_group>
 				<label for="workflowType" class="control-label ">Workflow type</label>
 				<select id="workflowType" name="workflowType" class="form-control" disabled="disabled">
 					<option
@@ -50,7 +50,7 @@
 				<div class="help-block">
 					It is not possible to modify the marking method once a marking workflow has been created.
 				</div>
-			</div>
+			</@bs3form.labelled_form_group>
 		</#if>
 
 		<#assign markerHelp>You can add an individual by name or university ID.<#if !canDeleteMarkers> At least one assignment that uses this workflow has marking in progress so you can't remove markers. You can replace markers instead.</#if></#assign>
@@ -63,6 +63,12 @@
 		<@bs3form.labelled_form_group path="markersB" labelText="Add markers" help="${markerHelp}" cssClass="markersB hide">
 			<@bs3form.flexipicker path="markersB" placeholder="User name" list=true multiple=true auto_multiple=false delete_existing=canDeleteMarkers />
 		</@bs3form.labelled_form_group>
+
+		<#if !isNew>
+			<@bs3form.labelled_form_group>
+				<a href="<@routes.cm2.reusableWorkflowReplaceMarker department academicYear workflow />">Replace marker</a>
+			</@bs3form.labelled_form_group>
+		</#if>
 
 
 		<@bs3form.labelled_form_group>
