@@ -3,14 +3,16 @@ package uk.ac.warwick.tabula
 import java.math
 
 import org.joda.time.DateTime
-import uk.ac.warwick.tabula.JavaImports.JBigDecimal
+import uk.ac.warwick.tabula.JavaImports._
 import uk.ac.warwick.tabula.data.model._
 import uk.ac.warwick.tabula.data.model.attendance._
 import uk.ac.warwick.tabula.data.model.forms.Extension
 import uk.ac.warwick.tabula.data.model.groups._
 import uk.ac.warwick.tabula.permissions.PermissionsTarget
+import uk.ac.warwick.tabula.services.UserLookupService
 import uk.ac.warwick.tabula.services.attendancemonitoring.AttendanceMonitoringService
-import uk.ac.warwick.userlookup.User
+import uk.ac.warwick.userlookup.{AnonymousUser, User}
+import org.junit.Before
 
 import scala.collection.JavaConverters._
 
@@ -56,6 +58,7 @@ object Fixtures extends Mockito {
 	def markerFeedback(parent: Feedback): MarkerFeedback = {
 		val mf = new MarkerFeedback(parent)
 		mf.state = MarkingState.ReleasedForMarking
+		parent.markerFeedback.add(mf)
 		mf
 	}
 
@@ -442,6 +445,26 @@ object Fixtures extends Mockito {
 
 	def withParents(target: PermissionsTarget): Stream[PermissionsTarget] = {
 		  target #:: target.permissionsParents.flatMap(withParents)
+	}
+
+	def userLookupService(users: User*) = {
+		val userLookup = smartMock[UserLookupService]
+		for (user <- users) {
+			userLookup.getUserByUserId(user.getUserId) returns user
+		}
+		userLookup.getUserByUserId(null) returns new AnonymousUser
+
+		userLookup.getUsersByUserIds(any[JList[String]]) answers { ids =>
+			val u = ids.asInstanceOf[JList[String]].asScala.map(id=>(id, users.find(_.getUserId == id).getOrElse(new AnonymousUser())))
+			JHashMap(u:_*)
+		}
+
+		userLookup.getUsersByUserIds(any[Seq[String]]) answers { ids =>
+			val u = ids.asInstanceOf[Seq[String]].map(id=>(id, users.find(_.getUserId == id).getOrElse(new AnonymousUser())))
+			Map(u:_*)
+		}
+
+		userLookup
 	}
 
 }

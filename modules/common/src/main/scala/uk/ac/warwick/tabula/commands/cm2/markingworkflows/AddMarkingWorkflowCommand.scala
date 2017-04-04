@@ -56,7 +56,7 @@ class AddMarkingWorkflowCommandInternal(
 
 trait AddMarkingWorkflowValidation extends ModifyMarkingWorkflowValidation with StringUtils {
 
-	self: AddMarkingWorkflowState =>
+	self: AddMarkingWorkflowState with UserLookupComponent =>
 
 	def validate(errors: Errors) {
 

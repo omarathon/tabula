@@ -7,7 +7,7 @@ import org.springframework.stereotype.Controller
 import org.springframework.validation.Errors
 import org.springframework.web.bind.annotation.{ModelAttribute, PathVariable, RequestMapping}
 import uk.ac.warwick.tabula.commands.{Appliable, SelfValidating}
-import uk.ac.warwick.tabula.commands.coursework.markingworkflows.ReplaceMarkerInMarkingWorkflowCommand
+import uk.ac.warwick.tabula.commands.coursework.markingworkflows.OldReplaceMarkerInMarkingWorkflowCommand
 import uk.ac.warwick.tabula.web.controllers.coursework.OldCourseworkController
 import uk.ac.warwick.tabula.data.model.{Department, MarkingWorkflow}
 import uk.ac.warwick.tabula.coursework.web.{Routes => CourseworkRoutes}
@@ -21,7 +21,7 @@ class OldReplaceMarkerInMarkingWorkflowController extends OldCourseworkControlle
 
 	@ModelAttribute("command")
 	def cmd(@PathVariable department: Department, @PathVariable markingWorkflow: MarkingWorkflow) =
-		ReplaceMarkerInMarkingWorkflowCommand(department, markingWorkflow)
+		OldReplaceMarkerInMarkingWorkflowCommand(department, markingWorkflow)
 
 	@RequestMapping(method=Array(GET, HEAD))
 	def form(@ModelAttribute("command") cmd: Appliable[MarkingWorkflow], @PathVariable department: Department): Mav = {

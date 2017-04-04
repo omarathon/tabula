@@ -34,7 +34,7 @@ class MarkerFeedbackTest extends PersistenceTestBase {
 	}
 
 	@Transactional
-	@Test def deleteFileAttachmentOnDelete {
+	@Test def deleteFileAttachmentOnDelete() {
 		// TAB-667
 		val orphanAttachment = flushing(session) {
 			val attachment = new FileAttachment
@@ -62,10 +62,10 @@ class MarkerFeedbackTest extends PersistenceTestBase {
 		}
 
 		// Ensure everything's been persisted
-		orphanAttachment.id should not be (null)
-		feedback.id should not be (null)
-		markerFeedback.id should not be (null)
-		markerFeedbackAttachment.id should not be (null)
+		orphanAttachment.id should not be null
+		feedback.id should not be null
+		markerFeedback.id should not be null
+		markerFeedbackAttachment.id should not be null
 
 		// Can fetch everything from db
 		session.get(classOf[FileAttachment], orphanAttachment.id) should be (orphanAttachment)
@@ -74,7 +74,10 @@ class MarkerFeedbackTest extends PersistenceTestBase {
 		session.get(classOf[FileAttachment], markerFeedbackAttachment.id) should be (markerFeedbackAttachment)
 
 
-		flushing(session) { session.delete(markerFeedback) }
+		flushing(session) {
+			feedback.markerFeedback.remove(markerFeedback)
+			session.delete(markerFeedback)
+		}
 
 		session.clear()
 

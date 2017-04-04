@@ -136,7 +136,7 @@ class CM2MarkingWorkflowServiceImpl extends CM2MarkingWorkflowService with Autow
 
 		val existingMarkerFeedback = allMarkerFeedbackForStage(assignment, stage)
 
-		// if any students did have a marker now don't remove the marker ID
+		// if any students did have a marker and now don't, remove the marker ID
 		existingMarkerFeedback
 			.filter(mf => allocations.getOrElse(mf.marker, Set()).isEmpty)
 			.foreach(mf => {

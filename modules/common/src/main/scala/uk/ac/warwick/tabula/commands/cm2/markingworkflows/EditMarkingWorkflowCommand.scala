@@ -9,7 +9,7 @@ import uk.ac.warwick.tabula.JavaImports.JArrayList
 import uk.ac.warwick.tabula.commands._
 import uk.ac.warwick.tabula.data.model.markingworkflow._
 import uk.ac.warwick.tabula.helpers.StringUtils
-import uk.ac.warwick.tabula.services.{AutoWiringCM2MarkingWorkflowServiceComponent, AutowiringUserLookupComponent, CM2MarkingWorkflowServiceComponent, UserLookupComponent}
+import uk.ac.warwick.tabula.services.{UserLookupComponent, _}
 import uk.ac.warwick.tabula.validators.UsercodeListValidator
 import uk.ac.warwick.userlookup.User
 
@@ -51,7 +51,7 @@ class EditMarkingWorkflowCommandInternal(
 
 trait EditMarkingWorkflowValidation extends ModifyMarkingWorkflowValidation with StringUtils {
 
-	self: EditMarkingWorkflowState =>
+	self: EditMarkingWorkflowState with UserLookupComponent =>
 
 	override def validate(errors: Errors) {
 		genericValidate(errors, workflow.workflowType)
@@ -95,7 +95,7 @@ trait EditMarkingWorkflowState extends ModifyMarkingWorkflowState {
 
 trait ModifyMarkingWorkflowValidation extends SelfValidating {
 
-	self: ModifyMarkingWorkflowState =>
+	self: ModifyMarkingWorkflowState with UserLookupComponent =>
 
 	def hasDuplicates(usercodes: JList[String]): Boolean =
 		usercodes.asScala.distinct.size != usercodes.asScala.size
@@ -107,6 +107,7 @@ trait ModifyMarkingWorkflowValidation extends SelfValidating {
 		val markerAValidator = new UsercodeListValidator(markersA, "markersA"){
 			override def alreadyHasCode: Boolean = hasDuplicates(markersA)
 		}
+		markerAValidator.userLookup = this.userLookup // makes testing easier
 		markerAValidator.validate(errors)
 
 		// validate only when two groups of marker are used
@@ -114,6 +115,7 @@ trait ModifyMarkingWorkflowValidation extends SelfValidating {
 			val markerBValidator = new UsercodeListValidator(markersB, "markersB"){
 				override def alreadyHasCode: Boolean = hasDuplicates(markersB)
 			}
+			markerBValidator.userLookup = this.userLookup  // makes testing easier
 			markerBValidator.validate(errors)
 		}
 	}
