@@ -11,6 +11,7 @@ TODO grab values from the Routes object in code, as that's pretty equivalent and
 <#macro home><@_u page="/" /></#macro>
 <#-- to rename - also filter options will need to be added to jump to correct module -->
 <#macro depthome module><@_u page="/admin/department/${module.adminDepartment.code}/#module-${module.code}" /></#macro>
+<#macro departmenthome department><@_u page="/admin/department/${department.code}/" /></#macro>
 <#macro downloadSubmission submission filename><@_u page="/admin/assignments/${submission.assignment.id}/submissions/download/${submission.id}/${filename?url}"/></#macro>
 
 <#macro filterExtensions><@_u page="/admin/extensions"/></#macro>
@@ -18,6 +19,7 @@ TODO grab values from the Routes object in code, as that's pretty equivalent and
 <#macro extensiondetail assignment usercode><@_u page="/admin/assignments/${assignment.id}/extensions/${usercode}/detail" /></#macro>
 <#macro extensionUpdate extension><@_u page="/admin/extensions/${extension.id}/update"/></#macro>
 <#macro extensionAttachment extension filename><@_u page="/admin/extensions/${extension.id}/supporting-file/${filename?url}" /></#macro>
+<#macro extensionSettings department><@_u page="/admin/department/${department.code}/settings/extensions" /></#macro>
 
 <#macro reusableWorkflowsHome department academicYear><@_u page="/admin/department/${department.code}/${academicYear.startYear?c}/markingworkflows" /></#macro>
 <#macro reusableWorkflowAdd department academicYear><@_u page="/admin/department/${department.code}/${academicYear.startYear?c}/markingworkflows/add" /></#macro>

@@ -98,6 +98,11 @@
 			}
 		});
 
+		// check that the extension UI elements are present
+		if($('input#allowExtensionRequests').length > 0){
+			$('input#allowExtensionRequests').slideMoreOptions($('#request-extension-fields'), true);
+		}
+
 		var $assignmentpicker = $('.assignment-picker-input');
 		var $assignmentQuery = $assignmentpicker.find('input[name=query]').attr('autocomplete', 'off');
 		var target = $assignmentpicker.attr('data-target');
