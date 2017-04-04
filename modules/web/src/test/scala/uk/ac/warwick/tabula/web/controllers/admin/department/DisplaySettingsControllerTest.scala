@@ -1,29 +1,29 @@
 package uk.ac.warwick.tabula.web.controllers.admin.department
 
-import org.springframework.validation.BindException
-import uk.ac.warwick.tabula.commands.{Appliable, PopulateOnForm}
+import uk.ac.warwick.tabula.web.Routes
+import uk.ac.warwick.tabula.{ItemNotFoundException, Fixtures, Mockito, TestBase}
+import uk.ac.warwick.tabula.commands.{PopulateOnForm, Appliable}
 import uk.ac.warwick.tabula.data.model.Department
 import uk.ac.warwick.tabula.services.RelationshipService
 import uk.ac.warwick.tabula.services.permissions.PermissionsServiceComponent
-import uk.ac.warwick.tabula.web.Routes
-import uk.ac.warwick.tabula.{Fixtures, ItemNotFoundException, Mockito, TestBase}
+import org.springframework.validation.BindException
 
-class OldDisplaySettingsControllerTest extends TestBase with Mockito {
+class DisplaySettingsControllerTest extends TestBase with Mockito {
 
-	val controller = new OldDisplaySettingsController
+	val controller = new DisplaySettingsController
 	controller.relationshipService = mock[RelationshipService]
 
 	@Test def createsCommand {
 		val department = Fixtures.department("in")
 
-		val command = controller.oldDisplaySettingsCommand(department)
+		val command = controller.displaySettingsCommand(department)
 
 		command should be (anInstanceOf[Appliable[Department]])
 		command should be (anInstanceOf[PopulateOnForm])
 	}
 
 	@Test(expected = classOf[ItemNotFoundException]) def requiresDepartment {
-		controller.oldDisplaySettingsCommand(null)
+		controller.displaySettingsCommand(null)
 	}
 
 	@Test def form {
