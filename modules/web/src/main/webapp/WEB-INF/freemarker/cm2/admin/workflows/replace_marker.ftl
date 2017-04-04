@@ -3,16 +3,10 @@
 <#assign formAction><@routes.cm2.reusableWorkflowReplaceMarker department academicYear workflow /></#assign>
 <#assign cancelAction><@routes.cm2.reusableWorkflowEdit department academicYear workflow /></#assign>
 
-<#function route_function dept>
-	<#local selectCourseCommand><@routes.cm2.reusableWorkflowsHome dept academicYear /></#local>
-	<#return selectCourseCommand />
-</#function>
-
 <div class="deptheader">
 	<h1>Replace marker in </h1>
 	<h4 class="with-related">${workflow.name}</h4>
 </div>
-
 
 <@f.form
 	method="POST"
@@ -50,7 +44,7 @@
 			</@bs3form.checkbox>
 		</@bs3form.labelled_form_group>
 
-		<div class="alert alert-warning">
+		<div class="alert alert-info">
 			<p>
 				Any submissions to the assignments listed above that have already been released will not be re-released, so the new marker will not be notified that they need to mark the submissions. You should contact the new marker yourself.
 			</p>
@@ -69,10 +63,4 @@
 
 </@f.form>
 
-<script type="text/javascript">
-	(function ($) { "use strict";
-
-
-	})(jQuery);
-</script>
 </#escape>

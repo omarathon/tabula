@@ -42,7 +42,7 @@ class ReplaceMarkerCommandInternal(val department: Department, val markingWorkfl
 				cm2MarkingWorkflowService.allocateMarkersForStage(assignment, stage, newAllocations)
 			}
 
-			// if there are some finished assignments and we aren't swapping the marker out - leave them in the list
+			// if there are no finished assignments or we are swapping the marker for finished assignments - remove them from the stage
 			if (finishedAssignments.isEmpty || includeCompleted) {
 				cm2MarkingWorkflowService.removeMarkersForStage(markingWorkflow, stage, Seq(oldMarkerUser))
 			}
