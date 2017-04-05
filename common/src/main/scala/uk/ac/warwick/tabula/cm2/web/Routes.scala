@@ -89,6 +89,16 @@ object Routes {
 				def status(assignment: Assignment): String = assignmentroot(assignment) + "/turnitin/status"
 			}
 
+			private def assignmentroot(assignment: Assignment) = admin() + "/assignments/%s" format (encoded(assignment.id))
+
+			def submissionsZip(assignment: Assignment): String = assignmentroot(assignment) + "/submissions.zip"
+
+			object submissionsandfeedback {
+				def apply(assignment: Assignment): String = assignmentroot(assignment) + "/list"
+				def summary(assignment: Assignment): String = assignmentroot(assignment) + "/summary"
+				def table(assignment: Assignment): String = assignmentroot(assignment) + "/table"
+			}
+
 			object audit {
 				def apply(assignment: Assignment): String = admin() + s"/audit/assignment/${encoded(assignment.id)}"
 			}
