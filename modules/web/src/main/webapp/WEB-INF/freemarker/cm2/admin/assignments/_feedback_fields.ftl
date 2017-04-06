@@ -1,5 +1,4 @@
 <#escape x as x?html>
-
 	<#-- Field to support redirection post-submit -->
 	<input type="hidden" name="action" value="submit" id="action-submit">
 
@@ -10,7 +9,7 @@
 				<@f.options items=department.feedbackTemplates itemLabel="name" itemValue="id" />
 			</@f.select>
 		</div>
-		<div class="help-block"><a href="<@routes.cm2.feedbacktemplate department />">Create new feedback template</a></div>
+		<div class="help-block"><a href="<@routes.cm2.feedbacktemplates department />">Create new feedback template</a></div>
 	</@bs3form.labelled_form_group>
 
 	<@bs3form.labelled_form_group path="automaticallyReleaseToMarkers" labelText="Automated submission release:">
