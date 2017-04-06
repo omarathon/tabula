@@ -48,7 +48,7 @@ class SitsAssignmentItem(
 	var upstreamAssignment: AssessmentComponent
 ) {
 
-	//def this() = this(true, null, null)
+	def this() = this(true, null, null)
 
 	var assignmentService: AssessmentService = Wire.auto[AssessmentService]
 
