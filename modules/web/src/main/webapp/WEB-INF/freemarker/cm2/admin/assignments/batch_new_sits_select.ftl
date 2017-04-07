@@ -89,10 +89,10 @@ first page of the form to setup a bunch of assignments from SITS.
 			<@f.hidden path="name" cssClass="name-field" />
 		</#macro>
 
-	<#--
-		Always output these hidden properties for all assignments. We want to show them
-		on step 1 because we might have gone back from step 2.
-	-->
+		<#--
+			Always output these hidden properties for all assignments. We want to show them
+			on step 1 because we might have gone back from step 2.
+		-->
 		<#list command.sitsAssignmentItems as item>
 			<#if step != 'select' && !item.include>
 				<@spring.nestedPath path="sitsAssignmentItems[${item_index}]">
@@ -104,80 +104,77 @@ first page of the form to setup a bunch of assignments from SITS.
 		<div class = 'assessment-component'>
 			<table class="table table-striped table-condensed table-hover table-sortable table-checkable sticky-table-headers" id="batch-add-table">
 				<thead>
-				<tr>
-					<th class="for-check-all"><input  type="checkbox" checked="checked" class="collection-check-all use-tooltip" title="Select all/none"> </th>
-					<th>Module</th>
-					<th><abbr title="Component type" class="use-tooltip">Type</abbr></th>
-					<th><abbr title="Sequence" class="use-tooltip">Seq</abbr></th>
-					<th><abbr title="Occurrence/Cohort" class="use-tooltip">Occ</abbr></th>
-					<th>Component name</th>
-					<#if step="options">
-						<th></th>
-						<th></th>
-					</#if>
-				</tr>
+					<tr>
+						<th class="for-check-all"><input  type="checkbox" checked="checked" class="collection-check-all use-tooltip" title="Select all/none"> </th>
+						<th>Module</th>
+						<th><abbr title="Component type" class="use-tooltip">Type</abbr></th>
+						<th><abbr title="Sequence" class="use-tooltip">Seq</abbr></th>
+						<th><abbr title="Occurrence/Cohort" class="use-tooltip">Occ</abbr></th>
+						<th>Component name</th>
+						<#if step="options">
+							<th></th>
+							<th></th>
+						</#if>
+					</tr>
 				</thead>
 				<tbody>
 					<#list command.sitsAssignmentItems as item>
 						<@spring.nestedPath path="sitsAssignmentItems[${item_index}]">
 							<#if step="select" || item.include>
-							<tr class="itemContainer">
-								<td>
-								<#-- saved options for the assignment stored here -->
-									<@hidden_properties />
-									<#if step="select">
-										<@f.checkbox path="include" cssClass="collection-checkbox" />
-									<#else>
-										<@f.hidden path="include" />
-										<input type="checkbox" checked="checked" class="collection-checkbox" />
-									</#if>
-								</td>
-								<td class="selectable">
-									${item.upstreamAssignment.moduleCode?upper_case}
-								</td>
-								<td class="selectable">
-									${(item.upstreamAssignment.assessmentType.value)!'A'}
-								</td>
-								<td class="selectable">
-									${item.upstreamAssignment.sequence}
-								</td>
-								<td class="selectable">
-									${item.occurrence}
-								</td>
-								<td class="selectable">
-									<span class="editable-name" id="editable-name-${item_index}">${item.name!''}</span>
-								<#-- TODO expose as click-to-edit -->
-								<#-- render all field errors for sitsAssignmentItems[x] -->
-									<@bs3form.errors path="" />
-								</td>
-								<#if step="options">
-									<td class="selectable assignment-editable-fields-cell">
-										<span class="dates-label">
-											<#if form.hasvalue('openDate') && form.hasvalue('closeDate')>
-												${form.getvalue("openDate")}<#if form.hasvalue("openEnded") && form.getvalue("openEnded") == "true"> (open ended)<#else> - ${form.getvalue("closeDate")}</#if>
-											</#if>
-										</span>
-									</td>
+								<tr class="itemContainer">
 									<td>
-										<span class="options-id-label">
-											<#if form.hasvalue('optionsId')>
-												<#assign optionsIdValue=form.getvalue('optionsId') />
-												<span class="label label-${optionsIdValue}">${optionsIdValue}</span>
-											</#if>
-										</span>
+									<#-- saved options for the assignment stored here -->
+										<@hidden_properties />
+										<#if step="select">
+											<@f.checkbox path="include" cssClass="collection-checkbox" />
+										<#else>
+											<@f.hidden path="include" />
+											<input type="checkbox" checked="checked" class="collection-checkbox" />
+										</#if>
 									</td>
-								</#if>
-							</tr>
-
+									<td class="selectable">
+										${item.upstreamAssignment.moduleCode?upper_case}
+									</td>
+									<td class="selectable">
+										${(item.upstreamAssignment.assessmentType.value)!'A'}
+									</td>
+									<td class="selectable">
+										${item.upstreamAssignment.sequence}
+									</td>
+									<td class="selectable">
+										${item.occurrence}
+									</td>
+									<td class="selectable">
+										<span class="editable-name" id="editable-name-${item_index}">${item.name!''}</span>
+									<#-- TODO expose as click-to-edit -->
+									<#-- render all field errors for sitsAssignmentItems[x] -->
+										<@bs3form.errors path="" />
+									</td>
+									<#if step="options">
+										<td class="selectable assignment-editable-fields-cell">
+											<span class="dates-label">
+												<#if form.hasvalue('openDate') && form.hasvalue('closeDate')>
+													${form.getvalue("openDate")}<#if form.hasvalue("openEnded") && form.getvalue("openEnded") == "true"> (open ended)<#else> - ${form.getvalue("closeDate")}</#if>
+												</#if>
+											</span>
+										</td>
+										<td>
+											<span class="options-id-label">
+												<#if form.hasvalue('optionsId')>
+													<#assign optionsIdValue=form.getvalue('optionsId') />
+													<span class="label label-${optionsIdValue}">${optionsIdValue}</span>
+												</#if>
+											</span>
+										</td>
+									</#if>
+								</tr>
 							<#else>
-							<#-- we include the hidden fields of unincluded items below, outside the table -->
+								<#-- we include the hidden fields of unincluded items below, outside the table -->
 							</#if>
 						</@spring.nestedPath>
 					</#list>
 				</tbody>
 			</table>
-
-
 		<#-- Hidden fields for items we unchecked in the first step, just to remember that we unchecked them -->
 			<#list command.sitsAssignmentItems as item>
 				<@spring.nestedPath path="sitsAssignmentItems[${item_index}]">
@@ -188,58 +185,55 @@ first page of the form to setup a bunch of assignments from SITS.
 			</#list>
 		</div>
 	</div>
+	<div class="col-md-2">
+		<#if step='select'>
+			<button class="btn btn-large btn-primary btn-block" data-action="options">Next</button>
+		<#-- This is for if you go Back from step 2, to remember previous options -->
+			<#list command.optionsMap?keys as optionsId>
+				<div class="options-group">
+					<@spring.nestedPath path="optionsMap[${optionsId}]">
+							<#assign ignoreQueueFeedbackForSits = true />
+							<#include "_common_fields_hidden.ftl" />
+						</@spring.nestedPath>
+				</div>
+			</#list>
+		<#elseif step='options'>
+			<div id="options-buttons">
+				<button class="btn btn-large btn-default btn-block use-tooltip" data-container="body" data-action="refresh-select" title="Go back to change your assignment choices, without losing your work so far.">&larr; Back</button>
+				<button id="batch-add-submit-button" class="btn btn-large btn-primary btn-block" data-action="submit">Submit</button>
 
-		<div class="col-md-2">
-			<#if step='select'>
-				<button class="btn btn-large btn-primary btn-block" data-action="options">Next</button>
-			<#-- This is for if you go Back from step 2, to remember previous options -->
+				<div id="selected-count">0 selected</div>
+				<div id="selected-deselect"><a href="#">Clear selection</a></div>
+				<#-- options sets -->
+				<a class="btn btn-default btn-default btn-block" id="set-options-button" data-target="#set-options-modal" href="<@routes.cm2.assignmentSharedOptions department />">
+					Set options&hellip;
+				</a>
+				<a class="btn btn-default btn-default btn-block" id="set-dates-button" data-target="#set-dates-modal">
+					Set dates&hellip;
+				</a>
+
 				<#list command.optionsMap?keys as optionsId>
-					<div class="options-group">
-						<@spring.nestedPath path="optionsMap[${optionsId}]">
-								<#assign ignoreQueueFeedbackForSits = true />
-								<#include "_common_fields_hidden.ftl" />
-							</@spring.nestedPath>
+					<div class="options-button">
+						<button class="btn btn-default btn-block" data-group="${optionsId}">
+							Re-use options
+							<span class="label label-${optionsId}">${optionsId}</span>
+						</button>
+						<div class="options-group">
+							<@spring.nestedPath path="optionsMap[${optionsId}]">
+									<#-- Include all the common fields as hidden fields -->
+									<#assign ignoreQueueFeedbackForSits = true />
+									<#include "_common_fields_hidden.ftl" />
+								</@spring.nestedPath>
+						</div>
 					</div>
 				</#list>
-			<#elseif step='options'>
-				<div id="options-buttons">
-					<button class="btn btn-large btn-default btn-block use-tooltip" data-container="body" data-action="refresh-select" title="Go back to change your assignment choices, without losing your work so far.">&larr; Back</button>
-					<button id="batch-add-submit-button" class="btn btn-large btn-primary btn-block" data-action="submit">Submit</button>
-
-					<div id="selected-count">0 selected</div>
-					<div id="selected-deselect"><a href="#">Clear selection</a></div>
-				<#-- options sets -->
-					<a class="btn btn-default btn-default btn-block" id="set-options-button" data-target="#set-options-modal" href="<@routes.cm2.assignmentSharedOptions department />">
-						Set options&hellip;
-					</a>
-					<a class="btn btn-default btn-default btn-block" id="set-dates-button" data-target="#set-dates-modal">
-						Set dates&hellip;
-					</a>
-
-					<#list command.optionsMap?keys as optionsId>
-						<div class="options-button">
-							<button class="btn btn-default btn-block" data-group="${optionsId}">
-								Re-use options
-								<span class="label label-${optionsId}">${optionsId}</span>
-							</button>
-							<div class="options-group">
-								<@spring.nestedPath path="optionsMap[${optionsId}]">
-										<#-- Include all the common fields as hidden fields -->
-										<#assign ignoreQueueFeedbackForSits = true />
-										<#include "_common_fields_hidden.ftl" />
-									</@spring.nestedPath>
-							</div>
-						</div>
-					</#list>
-
-				</div>
-			</#if>
-		</div>
+			</div>
+		</#if>
+	</div>
 
 	</@f.form>
 
 	<#if step='options'>
-
 	<#-- popup box for 'Set options' button -->
 		<div class="modal fade" id="set-options-modal" tabindex="-1" role="dialog" aria-labelledby="set-options-label" aria-hidden="true">
 			<@modal.wrapper>
@@ -261,10 +255,9 @@ first page of the form to setup a bunch of assignments from SITS.
 			<@modal.wrapper>
 				<@modal.header>
 					<h3 class="modal-title">Set dates</h3>
-
 				</@modal.header>
 				<@modal.body>
-					<@f.form  class="form-horizontal dateTimePair dirty-check-ignore" commandName=commandName>
+					<@f.form  class="dateTimePair dirty-check-ignore" commandName=commandName>
 						<@bs3form.labelled_form_group path="defaultOpenDate" labelText="Open date:">
 							<div class="input-group">
 								<input type="text" id="modal-open-date" name="openDate" class="form-control date-time-minute-picker" value="${status.value}">
@@ -278,7 +271,6 @@ first page of the form to setup a bunch of assignments from SITS.
 									<p>
 										Check this box to mark the assignment as open-ended.
 									</p>
-
 									<ul>
 										<li>Any close date previously entered will have no effect.</li>
 										<li>Allowing extensions and submission after the close date will have no effect.</li>
@@ -304,11 +296,8 @@ first page of the form to setup a bunch of assignments from SITS.
 						<button class="btn btn-default" data-dismiss="modal">Close</button>
 					</div>
 				</@modal.footer>
-
 			</@modal.wrapper>
 		</div>
-
-
 
 		<script type="text/javascript">
 			// Give a heads up if you're about to navigate away from your progress
@@ -321,8 +310,6 @@ first page of the form to setup a bunch of assignments from SITS.
 				jQuery(window).off('beforeunload.backattack');
 			});
 		</script>
-
 	</#if>
-	<script type="text/javascript" src="/static/js/textList.js" />
-
+	<script type="text/javascript" src="/static/js/assignment-batch-select.js" />
 </#escape>

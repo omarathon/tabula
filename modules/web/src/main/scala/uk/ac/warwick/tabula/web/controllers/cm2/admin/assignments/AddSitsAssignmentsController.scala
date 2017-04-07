@@ -36,7 +36,7 @@ import uk.ac.warwick.tabula.web.controllers.{AcademicYearScopedController, Depar
 
 @Profile(Array("cm2Enabled"))
 @Controller
-@RequestMapping(value = Array("/${cm2.prefix}/admin/{department}/setup-sitsassignments"))
+@RequestMapping(value = Array("/${cm2.prefix}/admin/department/{department}/setup-assignments"))
 class AddSitsAssignmentsController extends CourseworkController with DepartmentScopedController
 	with AutowiringModuleAndDepartmentServiceComponent with AutowiringUserSettingsServiceComponent
 	with AutowiringMaintenanceModeServiceComponent with AcademicYearScopedController {
@@ -51,7 +51,7 @@ class AddSitsAssignmentsController extends CourseworkController with DepartmentS
 
 	@ModelAttribute("command")
 	def command(@PathVariable department: Department) =
-		AddSitsAssignmentsCommand(mandatory(department), user)
+		AddSitsAssignmentsCommand(mandatory(department), mandatory(user))
 
 	@ModelAttribute("activeDepartment")
 	override def activeDepartment(@PathVariable department: Department): Option[Department] = retrieveActiveDepartment(Option(department))
