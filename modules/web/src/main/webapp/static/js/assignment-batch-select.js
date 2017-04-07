@@ -4,7 +4,7 @@ jQuery(function($){
 	$('.editable-name').each(function() {
 		var $this = $(this);
 
-		var $target = $('<a class="name-edit-link"><i class="icon-pencil"></i></a>');
+		var $target = $('<a class="name-edit-link"><i class="fa fa-pencil"></i></a>');
 
 		$this.editable({
 			toggle: 'manual',
@@ -89,34 +89,6 @@ jQuery(function($){
 		}
 	});
 
-	// cool selection mechanism...
-	var batchTableMouseDown = false;
-	$('#batch-add-table')
-		.on('mousedown', 'td.selectable', function(){
-			batchTableMouseDown = true;
-			var $row = $(this).closest('tr');
-			$row.toggleClass('selected');
-			var checked = $row.hasClass('selected');
-			$row.find('.collection-checkbox').attr('checked', checked);
-			return false;
-		})
-		.on('mouseenter', 'td.selectable', function(){
-			if (batchTableMouseDown) {
-				var $row = $(this).closest('tr');
-				$row.toggleClass('selected');
-				var checked = $row.hasClass('selected');
-				$row.find('.collection-checkbox').attr('checked', checked);
-			}
-		})
-		.on('mousedown', 'a.name-edit-link', function(e){
-			// prevent td.selected toggling when clicking the edit link.
-			e.stopPropagation();
-		});
-
-	$(document).mouseup(function(){
-		batchTableMouseDown = false;
-		$('#batch-add-table').bigList('changed');
-	});
 
 	// make "Set options" buttons magically stay where they are
 	var $opts = $('#options-buttons');
@@ -166,7 +138,7 @@ jQuery(function($){
 
 					var $group = $('<div>').addClass('options-button');
 					var $hidden = $('<div>').addClass('options-group').data('group', groupName);
-					var $button = $('<button class="btn btn-block"></button>').html('Re-use options ').append($groupNameLabel);
+					var $button = $('<button class="btn btn-default btn-block"></button>').html('Re-use options ').append($groupNameLabel);
 					$button.data('group', groupName);
 					$group.append($button);
 					$group.append($hidden);
@@ -250,6 +222,15 @@ jQuery(function($){
 		$optsModal.find('form').trigger('submit');
 	});
 
-	('.slow-page-warning').hide('fast');
+	$('input#modal-open-ended').change(function(){
+		var $this = $(this);
+		if ($this.is(':checked'))  {
+			$('#modal-close-date').attr("disabled", "disabled");
+		}  else {
+			$('#modal-close-date').removeAttr("disabled");
+		}
+	});
+
+	$('.slow-page-warning').hide('fast');
 
 });

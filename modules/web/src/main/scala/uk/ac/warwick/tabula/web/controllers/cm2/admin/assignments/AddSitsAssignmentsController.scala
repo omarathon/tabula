@@ -59,9 +59,10 @@ class AddSitsAssignmentsController extends CourseworkController with DepartmentS
 
 	val academicYear = activeAcademicYear.getOrElse(AcademicYear.guessSITSAcademicYearByDate(DateTime.now))
 
+	//Command sets it to default -AcademicYear.guessSITSAcademicYearByDate(DateTime.now.plusMonths(3))
 	@ModelAttribute("academicYearChoices")
 	def academicYearChoices: JList[AcademicYear] =
-		academicYear.yearsSurrounding(0, 1).asJava
+		AcademicYear.guessSITSAcademicYearByDate(DateTime.now).yearsSurrounding(0, 1).asJava
 
 	// The initial load of page 1, where we select the items to import.
 	@RequestMapping(method = Array(GET))

@@ -452,6 +452,7 @@
 								<include>cm2-admin.js</include>
 								<include>filters.js</include>
 								<include>fullcalendar.js</include>
+								<include>id7/textList.js</include>
 							</includes>
 						</aggregation>
 						<aggregation>

@@ -16,7 +16,7 @@ first page of the form to setup a bunch of assignments from SITS.
 	<#assign actionUrl><@routes.cm2.create_sitsassignments department /></#assign>
 	<@f.form method="post" id="batch-add-form" action=actionUrl commandName=commandName>
 		<#if step =='select'>
-			<div class="alert alert-danger slow-page-warning">
+			<div class="alert alert-info slow-page-warning">
 				<p>This page may take a few seconds to fully load, please wait &hellip;</p>
 			</div>
 			<h2>Step 1 - choose which assignments to setup</h2>
@@ -39,7 +39,7 @@ first page of the form to setup a bunch of assignments from SITS.
 					and resubmission behaviour.
 				</p>
 				<ul>
-					<li>Click and drag to select/unselect assignments (or use the checkboxes on the left).</li>
+					<li>select/unselect assignments using the checkboxes on the left.</li>
 					<li>Click <strong>Set options</strong> to set e-submission and other options for selected assignments.
 						You can overwrite the options for an assignment so it might be a good idea to set the most common options with
 						all the assignments selected, and then set more specific options for assignments that require it.
@@ -61,7 +61,7 @@ first page of the form to setup a bunch of assignments from SITS.
 				<#else>
 					<@f.hidden path="academicYear"/>
 					<@f.hidden path="includeSubDepartments"/>
-					<span class="uneditable-value">
+					<span class="form-control-static">
 						<@spring.bind path="academicYear">${status.actualValue.label}</@spring.bind>
 					</span>
 				</#if>
@@ -247,7 +247,7 @@ first page of the form to setup a bunch of assignments from SITS.
 				</@modal.header>
 				<@modal.body>
 					<@f.form  class="dateTimePair dirty-check-ignore" commandName=commandName>
-						<@bs3form.labelled_form_group path="defaultOpenDate" labelText="Open date:">
+						<@bs3form.labelled_form_group path="defaultOpenDate" labelText="Open date">
 							<div class="input-group">
 								<input type="text" id="modal-open-date" name="openDate" class="form-control date-time-minute-picker" value="${status.value}">
 								<span class="input-group-addon"><i class="fa fa-calendar"></i></span>
@@ -255,7 +255,7 @@ first page of the form to setup a bunch of assignments from SITS.
 						</@bs3form.labelled_form_group>
 						<@bs3form.labelled_form_group path="defaultOpenEnded" labelText="">
 							<@bs3form.checkbox path="defaultOpenEnded">
-								<@f.checkbox path="defaultOpenEnded" id="defaultOpenEnded" />Open ended
+								<@f.checkbox path="defaultOpenEnded" id="modal-open-ended" />Open ended
 								<#assign popoverText>
 									<p>
 										Check this box to mark the assignment as open-ended.
@@ -271,7 +271,7 @@ first page of the form to setup a bunch of assignments from SITS.
 								<@fmt.help_popover id="defaultOpenEndedInfo" content="${popoverText}" html=true/>
 							</@bs3form.checkbox>
 						</@bs3form.labelled_form_group>
-						<@bs3form.labelled_form_group path="defaultCloseDate" labelText="Close date:">
+						<@bs3form.labelled_form_group path="defaultCloseDate" labelText="Close date">
 							<div class="input-group">
 								<input type="text" id="modal-close-date" name="closeDate" class="form-control date-time-minute-picker" value="${status.value}">
 								<span class="input-group-addon"><i class="fa fa-calendar"></i></span>

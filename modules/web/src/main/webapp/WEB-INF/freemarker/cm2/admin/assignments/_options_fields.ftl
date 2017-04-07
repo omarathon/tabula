@@ -13,27 +13,27 @@
 	<@bs3form.labelled_form_group path="fileAttachmentTypes" labelText="Attachment file types">
 		<@f.errors path="fileAttachmentTypes" cssClass="error" />
 		<@f.input path="fileAttachmentTypes"  type="hidden" />
-	<script type="text/javascript" src="/static/js/id7/textList.js"></script>
-	<script type="text/javascript">
-		jQuery(function($){
-			var textListController = new TextListController('#fileExtensionList', '#fileAttachmentTypes');
-			textListController.transformInput = function(text){
-				var result = text.replace(new RegExp('\\.', 'g') , '');
-				return result.toLowerCase();
-			};
-			textListController.preventDuplicates = true;
-			textListController.init();
-		});
-	</script>
-	<div id="fileExtensionList" class="textBoxListContainer">
-		<ul>
-			<li class="inputContainer"><input class="text form-control" type="text"></li>
-		</ul>
-	</div>
-	<div class="help-block">
-		Enter the file types you would like to allow separated by spaces (e.g. "pdf doc docx"). Only attachments with the extensions
-		specified will be permitted. Leave this field blank to accept attachments with any extension.
-	</div>
+
+		<script type="text/javascript">
+			jQuery(function($){
+				var textListController = new TextListController('#fileExtensionList', '#fileAttachmentTypes');
+				textListController.transformInput = function(text){
+					var result = text.replace(new RegExp('\\.', 'g') , '');
+					return result.toLowerCase();
+				};
+				textListController.preventDuplicates = true;
+				textListController.init();
+			});
+		</script>
+		<div id="fileExtensionList" class="textBoxListContainer">
+			<ul>
+				<li class="inputContainer"><input class="text form-control" type="text"></li>
+			</ul>
+		</div>
+		<div class="help-block">
+			Enter the file types you would like to allow separated by spaces (e.g. "pdf doc docx"). Only attachments with the extensions
+			specified will be permitted. Leave this field blank to accept attachments with any extension.
+		</div>
 	</@bs3form.labelled_form_group>
 	<@bs3form.labelled_form_group path="individualFileSizeLimit" labelText="Maximum file size">
 	<div class="input-group">
