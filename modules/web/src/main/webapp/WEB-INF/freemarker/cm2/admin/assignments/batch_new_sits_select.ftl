@@ -39,7 +39,7 @@ first page of the form to setup a bunch of assignments from SITS.
 					and resubmission behaviour.
 				</p>
 				<ul>
-					<li>select/unselect assignments using the checkboxes on the left.</li>
+					<li>Select/unselect assignments using the checkboxes on the left.</li>
 					<li>Click <strong>Set options</strong> to set e-submission and other options for selected assignments.
 						You can overwrite the options for an assignment so it might be a good idea to set the most common options with
 						all the assignments selected, and then set more specific options for assignments that require it.
