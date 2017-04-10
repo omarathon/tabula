@@ -80,18 +80,6 @@ There is a sample `server.xml` in `config/servers/augustus/conf`
 
 This is just copied from the `conf` directory in the Tomcat 8 install. I couldn't get Tomcat to run without it being copied, which sucks a bit.
 
-│   ├── jackson-annotations-2.6.5.jar
-│   ├── jackson-core-2.6.5.jar
-│   ├── jackson-databind-2.6.5.jar
-│   ├── jtds-1.3.1.jar
-│   ├── logback-access-1.1.7.jar
-│   ├── logback-classic-1.1.7.jar
-│   ├── logback-core-1.1.7.jar
-│   ├── logback.xml
-│   ├── logstash-logback-encoder-4.7.jar
-│   ├── ojdbc7.jar
-│   ├── slf4j-api-1.7.20.jar
-
 ### `lib/jackson-annotations-2.6.5.jar`
 
 You can get this from http://pkg.elab.warwick.ac.uk/net.logstash.logback/dependencies/jackson-annotations-2.6.5.jar
