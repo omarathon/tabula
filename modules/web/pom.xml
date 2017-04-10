@@ -329,6 +329,7 @@
 								<include>libs/popup/popup.css</include>
 								<include>libs/jquery-fixedheadertable/jquery.fixedheadertable.css</include>
 								<include>libs/jquery-ui-interactions/jquery-ui.min.css</include>
+								<include>libs/bootstrap3-editable/css/bootstrap-editable.css</include>
 							</includes>
 						</aggregation>
 
@@ -352,6 +353,7 @@
 								<include>libs/bootstrap-datetimepicker/js/bootstrap-datetimepicker.js</include>
 								<include>libs/bootstrap3-typeahead/bootstrap3-typeahead.js</include>
 								<include>libs/bootstrap3-typeahead/no-conflict.js</include>
+								<include>libs/bootstrap3-editable/js/bootstrap-editable.js</include>
 								<include>libs/spin-js/spin.min.js</include>
 								<include>libs/spin-js/jquery.spin.js</include>
 								<include>js/jquery-copyable.js</include>
@@ -450,6 +452,7 @@
 								<include>cm2-admin.js</include>
 								<include>filters.js</include>
 								<include>fullcalendar.js</include>
+								<include>id7/textList.js</include>
 							</includes>
 						</aggregation>
 						<aggregation>

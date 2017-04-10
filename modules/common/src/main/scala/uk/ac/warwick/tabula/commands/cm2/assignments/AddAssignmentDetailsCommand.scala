@@ -189,13 +189,9 @@ trait CreateAssignmentDetailsDescription extends Describable[Assignment] {
 
 }
 
+trait GeneratesNotificationsForAssignment {
 
-trait AssignmentScheduledNotifications
-	extends SchedulesNotifications[Assignment, Assignment] {
-
-	override def transformResult(assignment: Assignment) = Seq(assignment)
-
-	override def scheduledNotifications(assignment: Assignment): Seq[ScheduledNotification[Assignment]] = {
+	def generateNotifications(assignment: Assignment): Seq[ScheduledNotification[Assignment]] = {
 		// if the assignment doesn't collect submissions or is open ended then don't schedule any notifications about deadlines
 		if (!assignment.collectSubmissions || assignment.openEnded) {
 			Seq()
@@ -244,6 +240,16 @@ trait AssignmentScheduledNotifications
 			submissionNotifications ++ feedbackNotifications
 		}
 	}
+}
+
+trait AssignmentScheduledNotifications
+	extends SchedulesNotifications[Assignment, Assignment] with GeneratesNotificationsForAssignment {
+
+	override def transformResult(assignment: Assignment) = Seq(assignment)
+
+	override def scheduledNotifications(assignment: Assignment): Seq[ScheduledNotification[Assignment]] = {
+		generateNotifications(assignment)
+	}
 
 }
 
@@ -257,10 +263,3 @@ trait AssignmentsDetailsTriggers extends GeneratesTriggers[Assignment] {
 		}
 	}
 }
-
-
-
-
-
-
-
