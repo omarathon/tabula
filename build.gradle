@@ -126,6 +126,12 @@ subprojects {
         testCompile 'org.mockito:mockito-all:1.10.19'
     }
 
+    tasks.withType(ScalaCompile) {
+        configure(scalaCompileOptions.forkOptions) {
+            memoryMaximumSize = '2048m'
+        }
+    }
+
     test {
         ignoreFailures = true // So we can quarantine in Bamboo
         maxHeapSize = '2048m'
