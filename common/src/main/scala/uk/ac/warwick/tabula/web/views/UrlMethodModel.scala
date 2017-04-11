@@ -82,7 +82,7 @@ class UrlMethodModel extends TemplateDirectiveModel with TemplateMethodModelEx {
 	def encode(url: String): String = parser.parse(url).toString
 
 	def addSuffix(path: String): String = {
-		staticHashes.getProperty(path.substring(1)) match {
+		staticHashes.getProperty(path.substring("/static/".length)) match {
 			case hash: String => path + "." + hash
 			case _ => path
 		}

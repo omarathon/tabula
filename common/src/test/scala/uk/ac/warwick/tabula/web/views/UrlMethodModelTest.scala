@@ -72,7 +72,7 @@ class UrlMethodModelTest extends TestBase with Mockito {
 	@Test def tagResource() {
 		// Use a SimpleHash as a workaround to wrapping things manually
 		val hash = new SimpleHash(null.asInstanceOf[ObjectWrapper])
-		hash.put("resource", "/css/main.css")
+		hash.put("resource", "/static/css/main.css")
 
 		model.staticHashes.setProperty("css/main.css", "1234567890")
 
@@ -86,7 +86,7 @@ class UrlMethodModelTest extends TestBase with Mockito {
 
 		model.execute(env, params, null, body)
 
-		writer.getBuffer().toString() should be ("https://courses.warwick.ac.uk/css/main.css.1234567890")
+		writer.getBuffer().toString() should be ("https://courses.warwick.ac.uk/static/css/main.css.1234567890")
 	}
 
 }
