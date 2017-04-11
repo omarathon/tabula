@@ -10,8 +10,9 @@ import uk.ac.warwick.tabula.cm2.web.Routes
 import uk.ac.warwick.tabula.commands.cm2.assignments.{AssignmentDetailsCommandState, CreateAssignmentDetailsCommand, CreateAssignmentDetailsCommandInternal}
 import uk.ac.warwick.tabula.commands.{Appliable, SelfValidating}
 import uk.ac.warwick.tabula.data.model._
+import uk.ac.warwick.tabula.data.model.markingworkflow.MarkingWorkflowType
 import uk.ac.warwick.tabula.web.controllers.cm2.{CourseworkBreadcrumbs, CourseworkController}
-import uk.ac.warwick.tabula.web.{Breadcrumbs, Mav}
+import uk.ac.warwick.tabula.web.Mav
 
 @Profile(Array("cm2Enabled"))
 @Controller
@@ -40,8 +41,12 @@ class AddAssignmentDetailsController extends CourseworkController {
 
 		Mav(s"$urlPrefix/admin/assignments/new_assignment_details",
 			"department" -> module.adminDepartment,
+			"department" -> module.adminDepartment,
 			"module" -> module,
-			"academicYear" -> form.academicYear
+			"academicYear" -> form.academicYear,
+			"reusableWorkflows" -> form.availableWorkflows,
+			"availableWorkflows" -> MarkingWorkflowType.values.sorted,
+			"canDeleteMarkers" -> true
 		).crumbs(CourseworkBreadcrumbs.Assignment.AssignmentManagement())
 	}
 

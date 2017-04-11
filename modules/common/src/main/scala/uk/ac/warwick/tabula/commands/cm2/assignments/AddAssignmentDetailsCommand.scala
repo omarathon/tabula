@@ -4,11 +4,14 @@ import org.hibernate.validator.constraints.{Length, NotEmpty}
 import org.joda.time.DateTime
 import org.springframework.validation.Errors
 import uk.ac.warwick.tabula.commands._
+import uk.ac.warwick.tabula.commands.cm2.markingworkflows.{CreatesMarkingWorkflow, ModifyMarkingWorkflowState, ModifyMarkingWorkflowValidation}
 import uk.ac.warwick.tabula.data.model._
+import uk.ac.warwick.tabula.data.model.markingworkflow.{CM2MarkingWorkflow, MarkingWorkflowType}
 import uk.ac.warwick.tabula.data.model.triggers.{AssignmentClosedTrigger, Trigger}
 import uk.ac.warwick.tabula.permissions.Permissions
 import uk.ac.warwick.tabula.services._
 import uk.ac.warwick.tabula.system.permissions.{PermissionsChecking, PermissionsCheckingMethods, RequiresPermissionsChecking}
+import uk.ac.warwick.tabula.JavaImports.JArrayList
 
 import scala.collection.JavaConverters._
 
@@ -24,27 +27,41 @@ object CreateAssignmentDetailsCommand {
 			with AssignmentScheduledNotifications
 			with AutowiringAssessmentServiceComponent
 			with AssignmentsDetailsTriggers
+			with AutowiringUserLookupComponent
+			with AutoWiringCM2MarkingWorkflowServiceComponent
 }
 
-class CreateAssignmentDetailsCommandInternal(val module: Module)
-	extends CommandInternal[Assignment]
-		with AssignmentDetailsCommandState
-		with SharedAssignmentProperties {
+class CreateAssignmentDetailsCommandInternal(val module: Module) extends CommandInternal[Assignment]
+	with AssignmentDetailsCommandState with SharedAssignmentProperties with CreatesMarkingWorkflow {
 
-	self: AssessmentServiceComponent =>
+	self: AssessmentServiceComponent with UserLookupComponent with CM2MarkingWorkflowServiceComponent =>
 
 	private var _prefilled: Boolean = _
 
 	def prefilled: Boolean = _prefilled
 
+	markersA = JArrayList()
+	markersB = JArrayList()
+
 	override def applyInternal(): Assignment = {
 		val assignment = new Assignment(module)
 		assignment.addDefaultFields()
 		copyTo(assignment)
+		if(workflowCategory == WorkflowCategory.SingleUse){
+			val data = MarkingWorkflowData(
+				department,
+				s"${module.code} ${assignment.name}",
+				markersAUsers,
+				markersBUsers,
+				workflowType
+			)
+			val workflow = createWorkflow(data)
+			workflow.isReusable = false
+			cm2MarkingWorkflowService.save(workflow)
+			assignment.cm2MarkingWorkflow = workflow
+		}
 		assessmentService.save(assignment)
 		assignment
-
-
 	}
 
 	protected def copyFrom(assignment: Assignment) {
@@ -53,6 +70,10 @@ class CreateAssignmentDetailsCommandInternal(val module: Module)
 		feedbackTemplate = assignment.feedbackTemplate
 		openDate = assignment.openDate
 		closeDate = assignment.closeDate
+		workflowCategory = assignment.workflowCategory.getOrElse(WorkflowCategory.NotDecided)
+		if(assignment.workflowCategory.contains(WorkflowCategory.Reusable)){
+			reusableWorkflow = assignment.cm2MarkingWorkflow
+		}
 		copySharedFrom(assignment)
 	}
 
@@ -69,8 +90,11 @@ class CreateAssignmentDetailsCommandInternal(val module: Module)
 			assignment.closeDate = closeDate
 		}
 
-
 		assignment.workflowCategory = Some(workflowCategory)
+		if(workflowCategory == WorkflowCategory.Reusable){
+			assignment.cm2MarkingWorkflow = reusableWorkflow
+		}
+
 		assignment.assessmentGroups.clear()
 		for (group <- assignment.assessmentGroups.asScala if group.assignment == null) {
 			group.assignment = assignment
@@ -102,6 +126,10 @@ class CreateAssignmentDetailsCommandInternal(val module: Module)
 	def copyNonspecificFrom(assignment: Assignment) {
 		openDate = assignment.openDate
 		closeDate = assignment.closeDate
+		workflowCategory = assignment.workflowCategory.getOrElse(WorkflowCategory.NotDecided)
+		if(assignment.workflowCategory.contains(WorkflowCategory.Reusable)){
+			reusableWorkflow = assignment.cm2MarkingWorkflow
+		}
 		copySharedFrom(assignment)
 	}
 
@@ -109,9 +137,9 @@ class CreateAssignmentDetailsCommandInternal(val module: Module)
 }
 
 
-trait AssignmentDetailsCommandState extends CurrentSITSAcademicYear {
+trait AssignmentDetailsCommandState extends CurrentSITSAcademicYear with ModifyMarkingWorkflowState {
 
-	self: AssessmentServiceComponent =>
+	self: AssessmentServiceComponent with UserLookupComponent with CM2MarkingWorkflowServiceComponent =>
 
 	def module: Module
 
@@ -138,18 +166,26 @@ trait AssignmentDetailsCommandState extends CurrentSITSAcademicYear {
 
 	var prefillAssignment: Assignment = _
 
+	var reusableWorkflow: CM2MarkingWorkflow = _
+
+	var workflowType: MarkingWorkflowType = _
+	lazy val department: Department = module.adminDepartment
+	lazy val availableWorkflows: Seq[CM2MarkingWorkflow] =
+		cm2MarkingWorkflowService.getReusableWorkflows(department, academicYear)
 
 }
 
 
-trait AssignmentDetailsValidation extends SelfValidating {
-	self: AssignmentDetailsCommandState with BooleanAssignmentProperties with AssessmentServiceComponent =>
+trait AssignmentDetailsValidation extends ModifyMarkingWorkflowValidation with SelfValidating {
+
+	self: AssignmentDetailsCommandState with ModifyMarkingWorkflowState with BooleanAssignmentProperties
+		with AssessmentServiceComponent with UserLookupComponent =>
 
 
 	override def validate(errors: Errors): Unit = {
 		// TAB-255 Guard to avoid SQL error - if it's null or gigantic it will fail validation in other ways.
 		if (name != null && name.length < 3000) {
-			val duplicates = assessmentService.getAssignmentByNameYearModule(name, academicYear, module).filter { existing => existing.isAlive }
+			val duplicates = assessmentService.getAssignmentByNameYearModule(name, academicYear, module).filter(_.isAlive)
 			for (duplicate <- duplicates.headOption) {
 				errors.rejectValue("name", "name.duplicate.assignment", Array(name), "")
 			}
@@ -165,6 +201,15 @@ trait AssignmentDetailsValidation extends SelfValidating {
 			} else if (openDate != null && openDate.isAfter(closeDate)) {
 				errors.reject("closeDate.early")
 			}
+		}
+
+		if(workflowCategory == WorkflowCategory.Reusable && reusableWorkflow == null){
+			errors.rejectValue("reusableWorkflow", "markingWorkflow.reusableWorkflow.none")
+		} else if (workflowCategory == WorkflowCategory.SingleUse) {
+			if (workflowType == null)
+				errors.rejectValue("workflowType", "markingWorkflow.workflowType.none")
+			else
+				markerValidation(errors, workflowType)
 		}
 	}
 }

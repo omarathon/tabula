@@ -7,45 +7,34 @@ the comments textarea needs to maintain newlines.
 <#-- Field to support redirection post-submit -->
 <input type="hidden" name="action" value="submit" id="action-submit">
 
-<div class="row">
-	<div class="col-md-5">
-		<@bs3form.labelled_form_group path="name" labelText="Assignment Title:">
-			<@f.input path="name" cssClass="form-control" />
-		</@bs3form.labelled_form_group>
-	</div>
-</div>
+<@bs3form.labelled_form_group path="name" labelText="Assignment Title:">
+	<@f.input path="name" cssClass="form-control" />
+</@bs3form.labelled_form_group>
+
 <#if newRecord>
 	<#if command.prefillAssignment??>
 		<#assign pHolder = "${command.prefillAssignment.name} - ${command.prefillAssignment.module.code}">
 	</#if>
-	<div class="row">
-		<div class="col-md-5">
-			<span class ="assignment-picker-input"  data-target="<@routes.cm2.assignemnts_json module/>">
-				<@bs3form.labelled_form_group path="prefillAssignment" labelText="Copy assignment options (optional):">
-					<input id="prefillAssignment" name="prefillAssignment" type="hidden" value=""/>
-					<input name="query" type="text" class="form-control"  value="${pHolder!''}"/>
-				</@bs3form.labelled_form_group>
-			</span>
-		</div>
-	</div>
-	<div>To find an assignment to pre-populate from, just start typing its name.</div>
-	<div>Assignments within your department will be matched. Click on an assignment to choose it.</div>
+
+	<span class ="assignment-picker-input"  data-target="<@routes.cm2.assignemnts_json module/>">
+		<@bs3form.labelled_form_group path="prefillAssignment" labelText="Copy assignment options (optional):" help= "To find an assignment to pre-populate from, just start typing its name. Assignments within your department will be matched. Click on an assignment to choose it.">
+			<input id="prefillAssignment" name="prefillAssignment" type="hidden" value=""/>
+			<input name="query" type="text" class="form-control"  value="${pHolder!''}"/>
+		</@bs3form.labelled_form_group>
+	</span>
 </#if>
 
-<div class="row">
-	<div class="col-md-3">
-		<@bs3form.labelled_form_group path="openDate" labelText="Open date:">
-			<div class="input-group">
-				<@f.input type="text" path="openDate" cssClass="form-control date-time-minute-picker" placeholder="Pick the date" />
-				<span class="input-group-addon"><i class="fa fa-calendar"></i></span>
-			</div>
-		</@bs3form.labelled_form_group>
+
+<@bs3form.labelled_form_group path="openDate" labelText="Open date:">
+	<div class="input-group">
+		<@f.input type="text" path="openDate" cssClass="form-control date-time-minute-picker" placeholder="Pick the date" />
+		<span class="input-group-addon"><i class="fa fa-calendar"></i></span>
 	</div>
-</div>
+</@bs3form.labelled_form_group>
 
 
 <@bs3form.checkbox path="openEnded" >
-	<@f.checkbox path="openEnded" id="openEnded" />    Open ended
+	<@f.checkbox path="openEnded" id="openEnded" /> Open ended
 	<#assign popoverText>
 	<p>
 		Check this box to mark the assignment as open-ended.
@@ -61,47 +50,32 @@ the comments textarea needs to maintain newlines.
 	</#assign>
 	<@fmt.help_popover id="openEndedInfo" content="${popoverText}" html=true/>
 </@bs3form.checkbox>
+
 <#assign openEnd =  command.openEnded?string('true','false') />
 <fieldset id="open-reminder-dt" <#if openEnd == 'false'>disabled</#if>>
-	<div class="row">
-		<div class="col-md-3">
-			<@bs3form.labelled_form_group path="openEndedReminderDate" labelText="Open ended reminder date:" >
-				<div class="input-group disabled">
-					<@f.input type="text" path="openEndedReminderDate" cssClass="disabled form-control date-time-minute-picker" placeholder="Pick the date" />
-					<span class="input-group-addon"><i class="fa fa-calendar"></i></span>
-				</div>
-			</@bs3form.labelled_form_group>
+	<@bs3form.labelled_form_group path="openEndedReminderDate" labelText="Open ended reminder date:" >
+		<div class="input-group disabled">
+			<@f.input type="text" path="openEndedReminderDate" cssClass="disabled form-control date-time-minute-picker" placeholder="Pick the date" />
+			<span class="input-group-addon"><i class="fa fa-calendar"></i></span>
 		</div>
-	</div>
+	</@bs3form.labelled_form_group>
 </fieldset>
 
 <fieldset id="close-dt" <#if openEnd == 'true'>disabled</#if>>
-	<div class="row">
-		<div class="col-md-3">
-			<@bs3form.labelled_form_group path="closeDate" labelText="Closing date:">
-				<div class="input-group">
-					<@f.input type="text" path="closeDate" cssClass="form-control date-time-minute-picker" placeholder="Pick the date" />
-					<span class="input-group-addon"><i class="fa fa-calendar"></i></span>
-				</div>
-			</@bs3form.labelled_form_group>
+	<@bs3form.labelled_form_group path="closeDate" labelText="Closing date:">
+		<div class="input-group">
+			<@f.input type="text" path="closeDate" cssClass="form-control date-time-minute-picker" placeholder="Pick the date" />
+			<span class="input-group-addon"><i class="fa fa-calendar"></i></span>
 		</div>
-	</div>
+	</@bs3form.labelled_form_group>
 </fieldset>
 
-<div class="row">
-	<div class="col-md-3">
-		<@bs3form.labelled_form_group path="workflowCategory" labelText="Workflow:">
-			<div class="input-group">
-				<@f.select path="workflowCategory" id="workflowCategory">
 
-				<@f.options items=command.workflowCategories itemLabel="displayName" itemValue="code" />
-			</@f.select>
-			</div>
-		</@bs3form.labelled_form_group>
-	</div>
-</div>
+<@bs3form.labelled_form_group path="workflowCategory" labelText="Workflow:" help="Marking workflows define how and by whom the assignment will be marked. You can use an existing workflow, no workflow or create a single use workflow.">
+	<@f.select path="workflowCategory" id="workflowCategory" class="form-control">
+		<@f.options items=command.workflowCategories itemLabel="displayName" itemValue="code" />
+	</@f.select>
+</@bs3form.labelled_form_group>
 
-<div>Marking workflows define how and by whom the assignment will be marked. You can use an existing workflow, no
-	workflow or create a single use workflow.
-</div>
+
 </#escape>
