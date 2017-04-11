@@ -2,7 +2,7 @@ package uk.ac.warwick.tabula.coursework
 
 import scala.collection.JavaConverters._
 import org.joda.time.DateTime
-import org.openqa.selenium.{By, WebElement}
+import org.openqa.selenium.{By, Keys, WebElement}
 import uk.ac.warwick.tabula.{BrowserTest, FunctionalTestAcademicYear, LoginDetails}
 import uk.ac.warwick.tabula.web.{FeaturesDriver, FixturesDriver}
 import org.scalatest.exceptions.TestFailedException
@@ -336,10 +336,11 @@ trait CourseworkFixtures extends BrowserTest with FeaturesDriver with FixturesDr
 		// Type the file types in so that the javascript understands
 		find("fileExtensionList").get.underlying.findElement(By.tagName("input")).sendKeys("docx txt pdf")
 
-		textArea("assignmentComment").value =
-			"""Hello my special friends.
-
-			Here is another paragraph"""
+		// FIXME some combination of Selenium 3 and PhantomJS causes newlines in a textarea to submit the form
+//		textArea("assignmentComment").value =
+//			"""Hello my special friends.
+//
+//			Here is another paragraph"""
 
 		textField("wordCountMin").value = "1"
 		textField("wordCountMax").value = "10000"

@@ -238,8 +238,7 @@ trait TestScreenshots extends Logging {
   implicit val webDriver: WebDriver // let the trait know this will be implemented
   val screenshotDirectory: File
 
-  @Rule def screenShotOnFailure = _screenShotOnFailure
-  val _screenShotOnFailure = new TestWatcher() {
+  @Rule val screenShotOnFailure: TestWatcher = new TestWatcher() {
     private var screenshotFilename: String = _
 
     override def starting(description: Description): Unit = {
