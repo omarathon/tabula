@@ -207,7 +207,7 @@ concatScripts('concat-renderjs-id7', 'js/id7/render.js', [
   'js/jquery.form.js',
   'js/id7/jquery-tableform.js',
   'js/select-deselect-checkboxes.js',
-], true);
+], true, ['copy-id7']);
 concatScripts('concat-commonjs-id7', 'js/id7/common.js', [
   'js/id7/scripts.js',
 ], true);
