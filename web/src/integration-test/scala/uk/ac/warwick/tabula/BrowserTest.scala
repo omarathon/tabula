@@ -4,23 +4,32 @@ import org.scalatest._
 import org.scalatest.exceptions.TestFailedException
 import org.scalatest.junit._
 import org.scalatest.selenium.WebBrowser
-import org.junit.runner.RunWith
+import org.junit.runner.{Description, RunWith}
 import org.openqa.selenium.htmlunit.HtmlUnitDriver
-import org.openqa.selenium.WebDriver
-import java.util.Properties
+import org.openqa.selenium.{OutputType, TakesScreenshot, WebDriver}
+import java.util.{Base64, Properties}
+
 import org.openqa.selenium.chrome.ChromeDriver
 import org.openqa.selenium.firefox.FirefoxDriver
 import org.openqa.selenium.ie.InternetExplorerDriver
 import org.openqa.selenium.phantomjs.PhantomJSDriver
-import java.io.File
-import java.io.FileInputStream
+import java.io.{File, FileInputStream, IOException}
+
 import org.scalatest.concurrent.Eventually
 import org.scalatest.time.SpanSugar
 import com.gargoylesoftware.htmlunit.BrowserVersion
+import com.google.common.base.Charsets
+import com.google.common.io.{ByteSource, Files}
 import uk.ac.warwick.userlookup.UserLookup
+
 import scala.util.Try
 import scala.util.Success
 import org.joda.time.DateTime
+import org.junit.Rule
+import org.junit.rules.TestWatcher
+import org.openqa.selenium.remote.ScreenshotException
+import uk.ac.warwick.tabula.helpers.Logging
+import uk.ac.warwick.util.core.ExceptionUtils
 
 /** Abstract base class for Selenium tests.
   *
@@ -36,7 +45,8 @@ abstract class BrowserTest
 	with SpanSugar
 	with WebBrowser
 	with WebsignonMethods
-	with UserKnowledge {
+	with UserKnowledge
+  with TestScreenshots {
 
 	// Shorthand to expose properties to test classes
 	val P = FunctionalTestProperties
@@ -46,15 +56,21 @@ abstract class BrowserTest
 	  */
 	def Path(path: String): String = P.SiteRoot + path
 
+  val screenshotDirectory = new File(P.ScreenshotDirectory)
+
 	implicit lazy val webDriver: WebDriver = P.Browser match {
-		case "htmlunit" => //new HtmlUnitDriver(true) // JS enabled
+		case "htmlunit" =>
 			val driver = new HtmlUnitDriver(htmlUnitBrowserVersion) // JS enabled
 			driver.setJavascriptEnabled(true)
 			driver
 		case "chrome" => new ChromeDriver
 		case "firefox" => new FirefoxDriver
 		case "ie" => new InternetExplorerDriver
-		case "phantomjs" => new PhantomJSDriver
+		case "phantomjs" =>
+      if (System.getProperty("phantomjs.binary.path") == null)
+        System.setProperty("phantomjs.binary.path", P.PhatomJSLocation)
+
+      new PhantomJSDriver
 	}
 
 	// Can be overridden by a test if necessary.
@@ -145,6 +161,8 @@ object FunctionalTestProperties {
 
 	val SiteRoot: String = prop("toplevel.url")
 	val Browser: String = prop("browser")
+  val PhatomJSLocation: String = prop("phantomjs.binary.path")
+  val ScreenshotDirectory: String = prop("screenshot.dir")
 
 	/* Test user accounts who can sign in during tests. Populated from properties.
 	 * The tests currently REQUIRE that the user's first name is
@@ -214,4 +232,42 @@ object FunctionalTestProperties {
 
 trait UserKnowledge {
 	var currentUser: LoginDetails = _
+}
+
+trait TestScreenshots extends Logging {
+  implicit val webDriver: WebDriver // let the trait know this will be implemented
+  val screenshotDirectory: File
+
+  @Rule def screenShotOnFailure = _screenShotOnFailure
+  val _screenShotOnFailure = new TestWatcher() {
+    private var screenshotFilename: String = _
+
+    override def starting(description: Description): Unit = {
+      screenshotFilename = description.getDisplayName + ".png"
+    }
+
+    override def failed(t: Throwable, description: Description): Unit = { // Look for a ScreenshotException in the trace
+      val e = ExceptionUtils.retrieveException(t, classOf[ScreenshotException])
+
+      val screenshot =
+        if (e != null)
+          Some(Base64.getDecoder.decode(e.getBase64EncodedScreenshot.getBytes(Charsets.UTF_8)))
+        else
+          webDriver match {
+            case d: TakesScreenshot => Some(d.getScreenshotAs(OutputType.BYTES))
+            case _ => None
+          }
+
+      screenshot.foreach { screenshot =>
+        val outputFile = new File(screenshotDirectory, screenshotFilename)
+        try {
+          ByteSource.wrap(screenshot).copyTo(Files.asByteSink(outputFile))
+          logger.info("Screenshot written to " + outputFile.getAbsolutePath)
+        } catch {
+          case ex: IOException =>
+            logger.error("Couldn't write screenshot", ex)
+        }
+      }
+    }
+  }
 }
