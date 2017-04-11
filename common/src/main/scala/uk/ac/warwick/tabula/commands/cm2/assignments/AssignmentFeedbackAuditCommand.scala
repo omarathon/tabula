@@ -6,7 +6,7 @@ import uk.ac.warwick.tabula.data.model.forms.ExtensionState
 import uk.ac.warwick.tabula.helpers.cm2._
 import uk.ac.warwick.tabula.permissions.Permissions
 import uk.ac.warwick.tabula.services._
-import uk.ac.warwick.tabula.services.cm2.{AutowiringCM2WorkflowProgressServiceComponent, CM2WorkflowProgressServiceComponent}
+import uk.ac.warwick.tabula.services.cm2.{AutowiringCM2WorkflowServiceProgressComponent, CM2WorkflowServiceProgressComponent}
 import uk.ac.warwick.tabula.system.permissions.{PermissionsChecking, PermissionsCheckingMethods, RequiresPermissionsChecking}
 import uk.ac.warwick.userlookup.User
 
@@ -22,7 +22,7 @@ object AssignmentFeedbackAuditCommand {
 			with AutowiringUserLookupComponent
 			with AutowiringFeedbackForSitsServiceComponent
 			with AutowiringProfileServiceComponent
-			with AutowiringCM2WorkflowProgressServiceComponent
+			with AutowiringCM2WorkflowServiceProgressComponent
 			with Unaudited with ReadOnly
 }
 
@@ -37,7 +37,7 @@ case class ExtensionInfo(
 )
 
 case class AssignmentFeedbackAuditResults(
-	students: Seq[WorkflowStudent],
+	students: Seq[WorkFlowStudent],
 	totalFilesCheckedForPlagiarism: Int,
 	extensionInfo: ExtensionInfo,
 	markerInfo: MarkerInfo
@@ -62,7 +62,7 @@ class AssignmentFeedbackAuditCommandInternal(val assignment: Assignment) extends
 		with UserLookupComponent
 		with FeedbackForSitsServiceComponent
 		with ProfileServiceComponent
-		with CM2WorkflowProgressServiceComponent =>
+		with CM2WorkflowServiceProgressComponent =>
 
 	override def applyInternal(): AssignmentFeedbackAuditResults = {
 		//most of the logic copied from cm1
@@ -97,7 +97,7 @@ class AssignmentFeedbackAuditCommandInternal(val assignment: Assignment) extends
 			}
 		}
 
-		val unsubmitted: Seq[WorkflowStudent] = benchmarkTask("Get unsubmitted users") {
+		val unsubmitted: Seq[WorkFlowStudent] = benchmarkTask("Get unsubmitted users") {
 			for (user <- unsubmittedMembers) yield {
 				val usersExtension = assignment.extensions.asScala.filter(_.usercode == user.getUserId)
 				if (usersExtension.size > 1) throw new IllegalStateException("More than one Extension for " + user.getWarwickId)
@@ -116,8 +116,8 @@ class AssignmentFeedbackAuditCommandInternal(val assignment: Assignment) extends
 					enhancedExtensionForUniId
 				)
 
-				val progress = workflowProgressService.progress(assignment)(coursework)
-				WorkflowStudent(
+				val progress = cm2WorkflowProgressService.progress(assignment)(coursework)
+				WorkFlowStudent(
 					user,
 					Progress(progress.percentage, progress.cssClass, progress.messageCode),
 					progress.nextStage,
@@ -129,7 +129,7 @@ class AssignmentFeedbackAuditCommandInternal(val assignment: Assignment) extends
 			}
 		}
 
-		val submitted: Seq[WorkflowStudent] = benchmarkTask("Get submitted users") {
+		val submitted: Seq[WorkFlowStudent] = benchmarkTask("Get submitted users") {
 			for (usercode <- usercodesWithSubmissionOrFeedback) yield {
 				val usersSubmissions = submissions.asScala.filter(_.usercode == usercode)
 				val usersExtension = assignment.extensions.asScala.filter(_.usercode == usercode)
@@ -161,9 +161,9 @@ class AssignmentFeedbackAuditCommandInternal(val assignment: Assignment) extends
 					enhancedExtensionForUniUsercode
 				)
 
-				val progress = workflowProgressService.progress(assignment)(coursework)
+				val progress = cm2WorkflowProgressService.progress(assignment)(coursework)
 
-				WorkflowStudent(
+				WorkFlowStudent(
 					user,
 					Progress(progress.percentage, progress.cssClass, progress.messageCode),
 					progress.nextStage,
