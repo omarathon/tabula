@@ -1,15 +1,13 @@
 package uk.ac.warwick.tabula.system
 
 import java.util.Properties
-import scala.collection.JavaConversions._
+
 import org.springframework.context.ApplicationContextInitializer
-import org.springframework.core.env.MutablePropertySources
-import org.springframework.core.env.PropertiesPropertySource
-import org.springframework.core.env.PropertySource
+import org.springframework.core.env.{MutablePropertySources, PropertiesPropertySource, PropertySource, PropertySourcesPropertyResolver}
 import org.springframework.core.io.ClassPathResource
 import org.springframework.web.context.ConfigurableWebApplicationContext
-import uk.ac.warwick.tabula.helpers.Logging
 import uk.ac.warwick.spring.Wire
+import uk.ac.warwick.tabula.helpers.Logging
 
 /**
  * We load config.properties in our Spring config, but that is too late for Spring
@@ -20,8 +18,9 @@ import uk.ac.warwick.spring.Wire
  */
 class ContextProfileInitializer extends ApplicationContextInitializer[ConfigurableWebApplicationContext] with Logging {
 
-	var mainConfig = "/tabula.properties"
-	var optionalConfig = "/tabula-instance.properties"
+	val defaultConfig = "/default.properties"
+	val mainConfig = "/tabula.properties"
+	val optionalConfig = "/tabula-instance.properties"
 	val profilesProperty = "spring.profiles.active"
 
 	override def initialize(ctx: ConfigurableWebApplicationContext): Unit = {
@@ -55,10 +54,8 @@ class ContextProfileInitializer extends ApplicationContextInitializer[Configurab
 	 * a profile name if it should be enabled.
 	 */
 	def extraProfile(prop: String, profileName: String, default: Boolean): Option[String] =
-		config.getBoolean(prop, default) match {
-			case true => Some(profileName)
-			case false => None
-		}
+    if (config.getBoolean(prop, default)) Some(profileName)
+    else None
 
 	var testConfig: PropertySource[_] = _
 
@@ -66,6 +63,7 @@ class ContextProfileInitializer extends ApplicationContextInitializer[Configurab
 		val properties = new CompositePropertySource("config")
 		if (testConfig == null) {
 			properties.addRequiredSource(propertySource(mainConfig))
+			properties.addRequiredSource(propertySource(defaultConfig))
 			properties.addOptionalSource(propertySource(optionalConfig))
 		} else {
 			properties.addRequiredSource(Option(testConfig))
@@ -93,22 +91,14 @@ class CompositePropertySource(name: String) extends PropertySource[Unit](name, (
 		mutableSources.addLast(src.getOrElse(throw new IllegalArgumentException("required property source missing")))
 
 	def addOptionalSource(src: Option[PropertySource[_]]): Unit = src match {
-		case Some(source) => mutableSources.addLast(source)
+		case Some(s) => mutableSources.addLast(s)
 		case None =>
 	}
 
-	def getBoolean(prop: String, default: Boolean): Boolean = getString(prop) match {
-		case "true" => true
-		case "false" => false
-		case _ => default
-	}
+  lazy val resolver = new PropertySourcesPropertyResolver(mutableSources)
 
-	def getString(prop: String): Object = getProperty(prop) match {
-		case value: Any => value.toString
-		case _ => null
-	}
+	def getBoolean(prop: String, default: Boolean): Boolean = resolver.getProperty(prop, classOf[Boolean], default)
+	def getString(prop: String): Object = getProperty(prop)
 
-	override def getProperty(prop: String): Object =
-		(mutableSources.find { _.containsProperty(prop) } map { _.getProperty(prop) }).orNull
-
+	override def getProperty(prop: String): String = resolver.getProperty(prop)
 }
