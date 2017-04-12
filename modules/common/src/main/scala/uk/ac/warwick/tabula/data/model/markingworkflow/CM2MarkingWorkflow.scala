@@ -55,9 +55,9 @@ abstract class CM2MarkingWorkflow extends GeneratedId with PermissionsTarget wit
 		stageMarkers.asScala.map(sm => sm.stage -> sm.markers.knownType.users.sortBy(u => (u.getLastName, u.getFirstName))).toMap
 
 	// If two stages have the same roleName only keep the earliest stage.
-	def markersByRole: SortedMap[MarkingWorkflowStage, Seq[Marker]] =  {
-		val unsorted = markers.foldRight(Map.empty[MarkingWorkflowStage, Seq[Marker]]){ case ((s, m), acc) =>
-			if (acc.keys.exists(_.roleName == s.roleName)) acc else acc + (s -> m)
+	def markersByRole: SortedMap[String, Seq[Marker]] =  {
+		val unsorted = markers.foldRight(Map.empty[String, Seq[Marker]]){ case ((s, m), acc) =>
+			if (acc.keys.exists(role => role == s.roleName)) acc else acc + (s.roleName -> m)
 		}
 		TreeMap(unsorted.toSeq:_*)
 	}

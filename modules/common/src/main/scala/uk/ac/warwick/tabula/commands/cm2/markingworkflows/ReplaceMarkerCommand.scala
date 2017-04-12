@@ -22,7 +22,7 @@ object ReplaceMarkerCommand {
 			with ReplaceMarkerDescription
 			with ReplaceMarkerState
 			with ReplaceMarkerValidation
-			with AutoWiringCM2MarkingWorkflowServiceComponent
+			with AutowiringCM2MarkingWorkflowServiceComponent
 			with AutowiringUserLookupComponent
 }
 

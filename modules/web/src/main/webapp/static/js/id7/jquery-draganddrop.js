@@ -470,17 +470,20 @@ Method calls (after initialising):
         }, 10);
     };
 
-    // Rename all form input for this department to represent the ordered list
-    // NOTE only works if exactly 1 input in each li
+    // Rename all form input to represent the ordered list
+    // NOTE only works if there are as many inputs as bindpaths (bindpaths is a comma seperated list)
     var renameFields = function($list) {
-        var bindpath = $list.data('bindpath');
+        var bindpathData = $list.data('bindpath');
+        var bindpath = bindpathData ? bindpathData.split(",") : [];
         var nobind = $list.data('nobind') === true;
         if (bindpath || nobind) {
-            $list.find('li input').each(function(i, field) {
-                var path = "";
-                if (!nobind) path = bindpath + '[' + i + ']';
-                field.name = path;
-            });
+			$list.find('li').each(function(itemIndex, li) {
+				$(li).find('input').each(function(fieldIndex, field) {
+					var path = "";
+					if (!nobind) path = bindpath[fieldIndex] + '[' + itemIndex + ']';
+					field.name = path;
+				});
+			});
         } else {
             throw new Error("No data-bindpath on ul: " + $list);
         }

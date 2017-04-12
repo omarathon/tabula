@@ -18,18 +18,18 @@ import scala.collection.JavaConverters._
 import uk.ac.warwick.tabula.data.{AutowiringUserGroupDaoComponent, UserGroupDaoComponent}
 
 
-object AssignMarkersCommand {
+object OldAssignMarkersCommand {
 	def apply(module: Module, assessment: Assessment) =
-		new AssignMarkersCommand(module, assessment)
+		new OldAssignMarkersCommand(module, assessment)
 		with ComposableCommand[Assessment]
 		with AssignMarkersPermission
-		with AssignMarkersDescription
+		with OldAssignMarkersDescription
 		with AssignMarkersCommandState
 		with AutowiringAssessmentServiceComponent
 		with AutowiringUserGroupDaoComponent
 }
 
-class AssignMarkersCommand(val module: Module, val assessment: Assessment)
+class OldAssignMarkersCommand(val module: Module, val assessment: Assessment)
 	extends CommandInternal[Assessment] with BindListener {
 
 	self: AssignMarkersCommandState with AssessmentServiceComponent with UserGroupDaoComponent =>
@@ -142,7 +142,7 @@ trait AssignMarkersPermission extends RequiresPermissionsChecking with Permissio
 
 }
 
-trait AssignMarkersDescription extends Describable[Assessment] {
+trait OldAssignMarkersDescription extends Describable[Assessment] {
 
 	self: AssignMarkersCommandState =>
 

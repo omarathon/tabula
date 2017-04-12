@@ -50,7 +50,7 @@ class ModifyAssignmentFeedbackController extends CourseworkController {
 	}
 
 
-	@RequestMapping(method = Array(POST), params = Array(ManageAssignmentMappingParameters.createAndAddStudents, "action!=refresh", "action!=update, action=submit"))
+	@RequestMapping(method = Array(POST), params = Array(ManageAssignmentMappingParameters.createAndAddStudents, "action!=refresh", "action!=update"))
 	def submitAndAddStudents(@Valid @ModelAttribute("command") cmd: ModifyAssignmentFeedbackCommand, errors: Errors): Mav =
 		submit(cmd, errors, Routes.admin.assignment.createAddStudents)
 

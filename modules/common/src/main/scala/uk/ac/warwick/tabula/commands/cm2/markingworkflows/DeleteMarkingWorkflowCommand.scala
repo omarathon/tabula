@@ -4,7 +4,7 @@ import org.springframework.validation.Errors
 import uk.ac.warwick.tabula.commands.{Describable, Description, _}
 import uk.ac.warwick.tabula.data.model.Department
 import uk.ac.warwick.tabula.data.model.markingworkflow._
-import uk.ac.warwick.tabula.services.{AutoWiringCM2MarkingWorkflowServiceComponent, CM2MarkingWorkflowServiceComponent}
+import uk.ac.warwick.tabula.services.{AutowiringCM2MarkingWorkflowServiceComponent, CM2MarkingWorkflowServiceComponent}
 
 
 import scala.collection.JavaConverters._
@@ -20,7 +20,7 @@ object DeleteMarkingWorkflowCommand {
 			with MarkingWorkflowPermissions
 			with DeleteMarkingWorkflowDescription
 			with DeleteMarkingWorkflowState
-			with AutoWiringCM2MarkingWorkflowServiceComponent
+			with AutowiringCM2MarkingWorkflowServiceComponent
 
 }
 
