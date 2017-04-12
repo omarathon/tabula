@@ -9,7 +9,6 @@ import uk.ac.warwick.tabula.data.model.MarkingState.MarkingCompleted
 import uk.ac.warwick.tabula.helpers.StringUtils._
 
 // FIXME: implemented as part of CM2 migration but will require further reworking due to CM2 workflow changes
-
 /**
  * Filters a set of "Student" case objects (which are a representation of the current
  * state of a single student's submission workflow on an assignment, containing the
@@ -21,15 +20,15 @@ import uk.ac.warwick.tabula.helpers.StringUtils._
 sealed abstract class Cm2Filter extends CaseObjectEqualityFixes[Cm2Filter] {
 	def getName: String = Cm2Filters.shortName(getClass)
 	def getDescription: String
-	def predicate(parameters: Map[String, String])(student: WorkflowStudent): Boolean
+	def predicate(parameters: Map[String, String])(student: WorkFlowStudent): Boolean
 	def applies(assignment: Assignment): Boolean
 	def validate(parameters: Map[String, String], fieldName: String = "filterParameters")(errors: Errors): Unit
 	def parameters: Seq[(String, String, String)]
 }
 
 abstract class ParameterlessCm2Filter extends Cm2Filter {
-	def predicate(student: WorkflowStudent): Boolean
-	final def predicate(parameters: Map[String, String])(student: WorkflowStudent): Boolean = predicate(student)
+	def predicate(student: WorkFlowStudent): Boolean
+	final def predicate(parameters: Map[String, String])(student: WorkFlowStudent): Boolean = predicate(student)
 	final def validate(parameters: Map[String, String], fieldName: String)(errors: Errors) {}
 	final override def parameters = Seq()
 }
@@ -68,7 +67,7 @@ object Cm2Filters {
 
 	case object AllStudents extends ParameterlessCm2Filter {
 		def getDescription = "students"
-		def predicate(item: WorkflowStudent): Boolean = {
+		def predicate(item: WorkFlowStudent): Boolean = {
 			true
 		}
 		def applies(assignment: Assignment) = true
@@ -76,7 +75,7 @@ object Cm2Filters {
 
 	case object SubmissionNotDownloaded extends ParameterlessCm2Filter {
 		def getDescription = "submissions not downloaded by staff"
-		def predicate(item: WorkflowStudent): Boolean = item.coursework.enhancedSubmission.exists(!_.downloaded)
+		def predicate(item: WorkFlowStudent): Boolean = item.coursework.enhancedSubmission.exists(!_.downloaded)
 		def applies(assignment: Assignment): Boolean = assignment.collectSubmissions
 	}
 
@@ -89,7 +88,7 @@ object Cm2Filters {
 			("startDate", "Start date", "datetime"),
 			("endDate", "End date", "datetime")
 		)
-		def predicate(parameters: Map[String, String])(item: WorkflowStudent): Boolean = {
+		def predicate(parameters: Map[String, String])(item: WorkFlowStudent): Boolean = {
 			val start = converter.convertRight(parameters("startDate"))
 			val end = converter.convertRight(parameters("endDate"))
 
@@ -120,21 +119,21 @@ object Cm2Filters {
 
 	case object OnTime extends ParameterlessCm2Filter {
 		def getDescription = "students who submitted on time"
-		def predicate(item: WorkflowStudent): Boolean =
+		def predicate(item: WorkFlowStudent): Boolean =
 			item.coursework.enhancedSubmission.exists(item => !item.submission.isLate && !item.submission.isAuthorisedLate)
 		def applies(assignment: Assignment): Boolean = assignment.collectSubmissions
 	}
 
 	case object Late extends ParameterlessCm2Filter {
 		def getDescription = "students who submitted late"
-		def predicate(item: WorkflowStudent): Boolean =
+		def predicate(item: WorkFlowStudent): Boolean =
 			item.coursework.enhancedSubmission.exists(item => item.submission.isLate && !item.submission.isAuthorisedLate)
 		def applies(assignment: Assignment): Boolean = assignment.collectSubmissions
 	}
 
 	case object WithExtension extends ParameterlessCm2Filter {
 		def getDescription = "students with extensions"
-		def predicate(item: WorkflowStudent): Boolean = {
+		def predicate(item: WorkFlowStudent): Boolean = {
 			item.coursework.enhancedExtension.isDefined
 		}
 		def applies(assignment: Assignment): Boolean = assignment.collectSubmissions && assignment.allowExtensions
@@ -142,7 +141,7 @@ object Cm2Filters {
 
 	case object WithinExtension extends ParameterlessCm2Filter {
 		def getDescription = "students who submitted within extension"
-		def predicate(item: WorkflowStudent): Boolean = {
+		def predicate(item: WorkFlowStudent): Boolean = {
 			item.coursework.enhancedSubmission.exists(_.submission.isAuthorisedLate)
 		}
 		def applies(assignment: Assignment): Boolean = assignment.collectSubmissions && assignment.allowExtensions
@@ -159,7 +158,7 @@ object Cm2Filters {
 			("minWords", "Min word count", "number"),
 			("maxWords", "Max word count", "number")
 		)
-		def predicate(parameters: Map[String, String])(item: WorkflowStudent): Boolean = {
+		def predicate(parameters: Map[String, String])(item: WorkFlowStudent): Boolean = {
 			val min = toInt(parameters("minWords")).get
 			val max = toInt(parameters("maxWords")).get
 
@@ -199,7 +198,7 @@ object Cm2Filters {
 
 	case object Submitted extends ParameterlessCm2Filter {
 		def getDescription = "students who have submitted an assignment"
-		def predicate(item: WorkflowStudent): Boolean = {
+		def predicate(item: WorkFlowStudent): Boolean = {
 			item.coursework.enhancedSubmission.isDefined
 		}
 		def applies(assignment: Assignment): Boolean = assignment.collectSubmissions
@@ -207,7 +206,7 @@ object Cm2Filters {
 
 	case object Unsubmitted extends ParameterlessCm2Filter {
 		def getDescription = "students who have not submitted an assignment"
-		def predicate(item: WorkflowStudent): Boolean = {
+		def predicate(item: WorkFlowStudent): Boolean = {
 			item.coursework.enhancedSubmission.isEmpty
 		}
 		def applies(assignment: Assignment): Boolean = assignment.collectSubmissions
@@ -215,13 +214,13 @@ object Cm2Filters {
 
 	case object NotReleasedForMarking extends ParameterlessCm2Filter {
 		def getDescription = "submissions that have not been released for marking"
-		def predicate(student: WorkflowStudent): Boolean = !student.assignment.isReleasedForMarking(student.user.getUserId)
+		def predicate(student: WorkFlowStudent): Boolean = !student.assignment.isReleasedForMarking(student.user.getUserId)
 		def applies(assignment: Assignment): Boolean = assignment.collectSubmissions && assignment.markingWorkflow != null
 	}
 
 	case object NotMarked extends ParameterlessCm2Filter {
 		def getDescription = "submissions not marked"
-		def predicate(student: WorkflowStudent): Boolean = {
+		def predicate(student: WorkFlowStudent): Boolean = {
 			val releasedForMarking = student.assignment.isReleasedForMarking(student.user.getUserId)
 			val hasFirstMarker = student.assignment.getStudentsFirstMarker(student.user.getUserId).isDefined
 			releasedForMarking && hasFirstMarker
@@ -232,14 +231,14 @@ object Cm2Filters {
 
 	case object MarkedByFirst extends ParameterlessCm2Filter {
 		def getDescription = "submissions marked by first marker"
-		def predicate(item: WorkflowStudent): Boolean =
+		def predicate(item: WorkFlowStudent): Boolean =
 			item.coursework.enhancedFeedback.exists(_.feedback.getFirstMarkerFeedback.exists(_.state == MarkingCompleted))
 		def applies(assignment: Assignment): Boolean = assignment.collectSubmissions && assignment.markingWorkflow != null
 	}
 
 	case object MarkedBySecond extends ParameterlessCm2Filter {
 		def getDescription = "submissions marked by second marker"
-		def predicate(item: WorkflowStudent): Boolean =
+		def predicate(item: WorkFlowStudent): Boolean =
 			item.coursework.enhancedFeedback.exists(_.feedback.getSecondMarkerFeedback.exists(_.state == MarkingCompleted))
 
 		// Only applies to seen second marking
@@ -251,7 +250,7 @@ object Cm2Filters {
 
 	case object CheckedForPlagiarism extends ParameterlessCm2Filter {
 		def getDescription = "submissions checked for plagiarism"
-		def predicate(item: WorkflowStudent): Boolean =
+		def predicate(item: WorkFlowStudent): Boolean =
 			item.coursework.enhancedSubmission.exists(_.submission.hasOriginalityReport.booleanValue)
 		def applies(assignment: Assignment): Boolean =
 			assignment.collectSubmissions && assignment.module.adminDepartment.plagiarismDetectionEnabled
@@ -259,7 +258,7 @@ object Cm2Filters {
 
 	case object NotCheckedForPlagiarism extends ParameterlessCm2Filter {
 		def getDescription = "submissions not checked for plagiarism"
-		def predicate(item: WorkflowStudent): Boolean =
+		def predicate(item: WorkFlowStudent): Boolean =
 			item.coursework.enhancedSubmission.exists(!_.submission.hasOriginalityReport.booleanValue)
 		def applies(assignment: Assignment): Boolean =
 			assignment.collectSubmissions && assignment.module.adminDepartment.plagiarismDetectionEnabled
@@ -267,7 +266,7 @@ object Cm2Filters {
 
 	case object MarkedPlagiarised extends ParameterlessCm2Filter {
 		def getDescription = "submissions marked as plagiarised"
-		def predicate(item: WorkflowStudent): Boolean =
+		def predicate(item: WorkFlowStudent): Boolean =
 			item.coursework.enhancedSubmission.exists(_.submission.suspectPlagiarised.booleanValue)
 		def applies(assignment: Assignment): Boolean = assignment.collectSubmissions
 	}
@@ -283,7 +282,7 @@ object Cm2Filters {
 			("minOverlap", "Min overlap %", "percentage"),
 			("maxOverlap", "Max overlap %", "percentage")
 		)
-		def predicate(parameters: Map[String, String])(item: WorkflowStudent): Boolean = {
+		def predicate(parameters: Map[String, String])(item: WorkFlowStudent): Boolean = {
 			val min = toInt(parameters("minOverlap")).get
 			val max = toInt(parameters("maxOverlap")).get
 
@@ -324,20 +323,20 @@ object Cm2Filters {
 
 	case object NoFeedback extends ParameterlessCm2Filter {
 		def getDescription = "students with no feedback"
-		def predicate(item: WorkflowStudent): Boolean = item.coursework.enhancedFeedback.forall(_.feedback.isPlaceholder)
+		def predicate(item: WorkFlowStudent): Boolean = item.coursework.enhancedFeedback.forall(_.feedback.isPlaceholder)
 		def applies(assignment: Assignment) = true
 	}
 
 	case object FeedbackNotReleased extends ParameterlessCm2Filter {
 		def getDescription = "students with unpublished feedback"
-		def predicate(item: WorkflowStudent): Boolean =
+		def predicate(item: WorkFlowStudent): Boolean =
 			item.coursework.enhancedFeedback.filterNot(_.feedback.isPlaceholder).exists(!_.feedback.released)
 		def applies(assignment: Assignment) = true
 	}
 
 	case object FeedbackNotDownloaded extends ParameterlessCm2Filter {
 		def getDescription = "students who haven't downloaded their feedback"
-		def predicate(item: WorkflowStudent): Boolean =
+		def predicate(item: WorkFlowStudent): Boolean =
 			item.coursework.enhancedFeedback.filterNot(_.feedback.isPlaceholder).exists(!_.downloaded)
 		def applies(assignment: Assignment) = true
 	}
