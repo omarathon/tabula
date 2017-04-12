@@ -1,35 +1,31 @@
 package uk.ac.warwick.tabula
 
-import org.scalatest._
-import org.scalatest.exceptions.TestFailedException
-import org.scalatest.junit._
-import org.scalatest.selenium.WebBrowser
-import org.junit.runner.{Description, RunWith}
-import org.openqa.selenium.htmlunit.HtmlUnitDriver
-import org.openqa.selenium.{OutputType, TakesScreenshot, WebDriver}
+import java.io.{File, FileInputStream, IOException}
 import java.util.{Base64, Properties}
 
-import org.openqa.selenium.chrome.ChromeDriver
-import org.openqa.selenium.firefox.FirefoxDriver
-import org.openqa.selenium.ie.InternetExplorerDriver
-import org.openqa.selenium.phantomjs.PhantomJSDriver
-import java.io.{File, FileInputStream, IOException}
-
-import org.scalatest.concurrent.Eventually
-import org.scalatest.time.SpanSugar
 import com.gargoylesoftware.htmlunit.BrowserVersion
 import com.google.common.base.Charsets
 import com.google.common.io.{ByteSource, Files}
-import uk.ac.warwick.userlookup.UserLookup
-
-import scala.util.Try
-import scala.util.Success
 import org.joda.time.DateTime
-import org.junit.Rule
-import org.junit.rules.TestWatcher
+import org.junit.runner.RunWith
+import org.openqa.selenium.chrome.ChromeDriver
+import org.openqa.selenium.firefox.FirefoxDriver
+import org.openqa.selenium.htmlunit.HtmlUnitDriver
+import org.openqa.selenium.ie.InternetExplorerDriver
+import org.openqa.selenium.phantomjs.PhantomJSDriver
 import org.openqa.selenium.remote.ScreenshotException
+import org.openqa.selenium.{OutputType, TakesScreenshot, WebDriver}
+import org.scalatest._
+import org.scalatest.concurrent.Eventually
+import org.scalatest.exceptions.TestFailedException
+import org.scalatest.junit._
+import org.scalatest.selenium.WebBrowser
+import org.scalatest.time.SpanSugar
 import uk.ac.warwick.tabula.helpers.Logging
+import uk.ac.warwick.userlookup.UserLookup
 import uk.ac.warwick.util.core.ExceptionUtils
+
+import scala.util.{Success, Try}
 
 /** Abstract base class for Selenium tests.
   *
@@ -58,30 +54,47 @@ abstract class BrowserTest
 
   val screenshotDirectory = new File(P.ScreenshotDirectory)
 
-	implicit lazy val webDriver: WebDriver = P.Browser match {
-		case "htmlunit" =>
-			val driver = new HtmlUnitDriver(htmlUnitBrowserVersion) // JS enabled
-			driver.setJavascriptEnabled(true)
-			driver
-		case "chrome" => new ChromeDriver
-		case "firefox" => new FirefoxDriver
-		case "ie" => new InternetExplorerDriver
-		case "phantomjs" =>
-      if (System.getProperty("phantomjs.binary.path") == null)
-        System.setProperty("phantomjs.binary.path", P.PhatomJSLocation)
+	implicit lazy val webDriver: WebDriver = {
+		val driver = P.Browser match {
+			case "htmlunit" =>
+				val d = new HtmlUnitDriver(htmlUnitBrowserVersion) // JS enabled
+				d.setJavascriptEnabled(true)
+				d
+			case "chrome" => new ChromeDriver
+			case "firefox" => new FirefoxDriver
+			case "ie" => new InternetExplorerDriver
+			case "phantomjs" =>
+				if (System.getProperty("phantomjs.binary.path") == null)
+					System.setProperty("phantomjs.binary.path", P.PhatomJSLocation)
 
-      new PhantomJSDriver
+				new PhantomJSDriver
+		}
+
+		// Set the most common screen resolution for Tabula
+		driver.manage().window().setSize(new org.openqa.selenium.Dimension(1920, 1080))
+		driver
 	}
 
 	// Can be overridden by a test if necessary.
 	val htmlUnitBrowserVersion = BrowserVersion.BEST_SUPPORTED
 
-	def ifHtmlUnitDriver(operation:HtmlUnitDriver=>Unit): Unit = {
+	def ifHtmlUnitDriver(operation:HtmlUnitDriver=>Unit): Unit =
 		webDriver match {
 			case h:HtmlUnitDriver=>operation(h)
 			case _=> // do nothing
 		}
-	}
+
+	def ifNotHtmlUnitDriver(operation: => Unit): Unit =
+		webDriver match {
+			case _: HtmlUnitDriver => // Do nothing
+			case _ => operation
+		}
+
+	def ifPhantomJSDriver(operation: PhantomJSDriver => Unit): Unit =
+		webDriver match {
+			case p: PhantomJSDriver => operation(p)
+			case _ => // do nothing
+		}
 
 	def disableJQueryAnimationsOnHtmlUnit() {
 		ifHtmlUnitDriver { driver =>
@@ -235,38 +248,38 @@ trait UserKnowledge {
 }
 
 trait TestScreenshots extends Logging {
+	self: Suite =>
+
   implicit val webDriver: WebDriver // let the trait know this will be implemented
   val screenshotDirectory: File
 
-  @Rule val screenShotOnFailure: TestWatcher = new TestWatcher() {
-    private var screenshotFilename: String = _
+	override def withFixture(test: NoArgTest): Outcome = {
+		test() match {
+			case failed: Failed =>
+				val e = ExceptionUtils.retrieveException(failed.exception, classOf[ScreenshotException])
 
-    override def starting(description: Description): Unit = {
-      screenshotFilename = description.getDisplayName + ".png"
-    }
+				val screenshot =
+					if (e != null)
+						Some(Base64.getDecoder.decode(e.getBase64EncodedScreenshot.getBytes(Charsets.UTF_8)))
+					else
+						webDriver match {
+							case d: TakesScreenshot => Some(d.getScreenshotAs(OutputType.BYTES))
+							case _ => None
+						}
 
-    override def failed(t: Throwable, description: Description): Unit = { // Look for a ScreenshotException in the trace
-      val e = ExceptionUtils.retrieveException(t, classOf[ScreenshotException])
+				screenshot.foreach { screenshot =>
+					val outputFile = new File(screenshotDirectory, s"${test.name}.png")
+					try {
+						ByteSource.wrap(screenshot).copyTo(Files.asByteSink(outputFile))
+						logger.info("Screenshot written to " + outputFile.getAbsolutePath)
+					} catch {
+						case ex: IOException =>
+							logger.error("Couldn't write screenshot", ex)
+					}
+				}
 
-      val screenshot =
-        if (e != null)
-          Some(Base64.getDecoder.decode(e.getBase64EncodedScreenshot.getBytes(Charsets.UTF_8)))
-        else
-          webDriver match {
-            case d: TakesScreenshot => Some(d.getScreenshotAs(OutputType.BYTES))
-            case _ => None
-          }
-
-      screenshot.foreach { screenshot =>
-        val outputFile = new File(screenshotDirectory, screenshotFilename)
-        try {
-          ByteSource.wrap(screenshot).copyTo(Files.asByteSink(outputFile))
-          logger.info("Screenshot written to " + outputFile.getAbsolutePath)
-        } catch {
-          case ex: IOException =>
-            logger.error("Couldn't write screenshot", ex)
-        }
-      }
-    }
-  }
+				failed
+			case other => other
+		}
+	}
 }

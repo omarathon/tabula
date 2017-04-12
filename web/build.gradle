@@ -73,7 +73,15 @@ rebel {
 
         resource {
             directory = "build/rootContent/WEB-INF"
+            includes = ["build.properties", "static-hashes.properties"]
             target = "/WEB-INF/"
+        }
+
+        resource {}
+
+        resource {
+            directory = "../common/src/main/webapp"
+            target = "/"
         }
     }
 }
