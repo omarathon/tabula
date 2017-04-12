@@ -115,19 +115,18 @@ class TutorAllocationTest extends BrowserTest with FeaturesDriver with FixturesD
 		click on cssSelector("form div.submit-buttons button.btn-primary")
 
 		// Couldn't get the modal to work properly in HtmlUnit, so just submit the form
-		ifHtmlUnitDriver { _ =>
-			id("command").webElement.submit()
-		}
+		ifHtmlUnitDriver(
+			operation = { _ => id("command").webElement.submit() },
+			otherwise = { _ =>
+				Then("I am prompted to choose the notifications")
+				eventually{
+					id("notify-modal").webElement.isDisplayed should be {true}
+				}
 
-		ifNotHtmlUnitDriver {
-			Then("I am prompted to choose the notifications")
-			eventually{
-				id("notify-modal").webElement.isDisplayed should be {true}
+				When("I choose to save the changes")
+				click on cssSelector("form div.modal-footer button.btn-primary")
 			}
-
-			When("I choose to save the changes")
-			click on cssSelector("form div.modal-footer button.btn-primary")
-		}
+		)
 
 		Then("The changes are saved and I am redirected")
 		eventually {

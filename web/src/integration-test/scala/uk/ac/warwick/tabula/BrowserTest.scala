@@ -78,22 +78,16 @@ abstract class BrowserTest
 	// Can be overridden by a test if necessary.
 	val htmlUnitBrowserVersion = BrowserVersion.BEST_SUPPORTED
 
-	def ifHtmlUnitDriver(operation:HtmlUnitDriver=>Unit): Unit =
+	def ifHtmlUnitDriver(operation: HtmlUnitDriver => Unit, otherwise: WebDriver => Unit = _ => {}): Unit =
 		webDriver match {
-			case h:HtmlUnitDriver=>operation(h)
-			case _=> // do nothing
+			case h: HtmlUnitDriver => operation(h)
+			case d => otherwise(d)
 		}
 
-	def ifNotHtmlUnitDriver(operation: => Unit): Unit =
-		webDriver match {
-			case _: HtmlUnitDriver => // Do nothing
-			case _ => operation
-		}
-
-	def ifPhantomJSDriver(operation: PhantomJSDriver => Unit): Unit =
+	def ifPhantomJSDriver(operation: PhantomJSDriver => Unit, otherwise: WebDriver => Unit = _ => {}): Unit =
 		webDriver match {
 			case p: PhantomJSDriver => operation(p)
-			case _ => // do nothing
+			case d => otherwise(d)
 		}
 
 	def disableJQueryAnimationsOnHtmlUnit() {

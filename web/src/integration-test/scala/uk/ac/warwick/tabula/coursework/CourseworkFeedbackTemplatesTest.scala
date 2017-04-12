@@ -26,10 +26,18 @@ class CourseworkFeedbackTemplatesTest extends BrowserTest with CourseworkFixture
 				if (id("feedback-template-list").findElement.isEmpty) 0
 				else id("feedback-template-list").webElement.findElement(By.tagName("tbody")).findElements(By.tagName("tr")).size
 
-			click on ("file.upload")
-			pressKeys(getClass.getResource(file).getFile)
+			ifPhantomJSDriver(
+				operation = { d =>
+          // This hangs forever for some reason in PhantomJS if you use the normal pressKeys method
+					d.executePhantomJS("var page = this; page.uploadFile('input[type=file]', '" + getClass.getResource(file).getFile + "');")
+				},
+				otherwise = { _ =>
+					click on getInputByLabel("Upload feedback forms").get
+					pressKeys(getClass.getResource(file).getFile)
+				}
+			)
 
-			click on (cssSelector(".btn-primary"))
+			click on cssSelector(".btn-primary")
 
 			eventually {
 				// We make sure that we haven't left the page

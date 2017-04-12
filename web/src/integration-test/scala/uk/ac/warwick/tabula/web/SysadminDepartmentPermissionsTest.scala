@@ -74,6 +74,11 @@ class SysadminDepartmentPermissionsTest extends BrowserTest with SysadminFixture
 				normalAdmins()
 				usercodes should contain (permittedUser)
 
+			// PhantomJS doesn't support confirm()
+			ifPhantomJSDriver { _ =>
+				executeScript("window.confirm = function(msg) { return true; };")
+			}
+
 			When("I remove the new entry")
 				val removable = find(cssSelector(s"$parentElement .remove-permissions [name=usercodes][value=$permittedUser]"))
 				removable should not be None
