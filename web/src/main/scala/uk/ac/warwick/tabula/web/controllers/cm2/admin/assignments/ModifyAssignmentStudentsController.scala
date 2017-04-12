@@ -50,7 +50,6 @@ abstract class AbstractAssignmentStudentsController extends AbstractAssignmentCo
 	def upstreamGroupBinder(binder: WebDataBinder) {
 		binder.registerCustomEditor(classOf[UpstreamGroup], new UpstreamGroupPropertyEditor)
 	}
-
 }
 
 @Profile(Array("cm2Enabled"))
@@ -58,20 +57,21 @@ abstract class AbstractAssignmentStudentsController extends AbstractAssignmentCo
 @RequestMapping(value = Array("/${cm2.prefix}/admin/assignments/{assignment}"))
 class ModifyAssignmentStudentsController extends AbstractAssignmentStudentsController {
 
-
 	@ModelAttribute("command") def command(@PathVariable assignment: Assignment): ModifyAssignmentStudentsCommand =
-		ModifyAssignmentStudentsCommand(mandatory(assignment))
+	ModifyAssignmentStudentsCommand(mandatory(assignment))
 
 	@RequestMapping(method = Array(GET), value = Array("/new/students"))
 	def form(
-						@PathVariable("assignment") assignment: Assignment,
-						@ModelAttribute("command") cmd: ModifyAssignmentStudentsCommand): Mav =
+		@PathVariable("assignment") assignment: Assignment,
+		@ModelAttribute("command") cmd: ModifyAssignmentStudentsCommand
+	): Mav =
 		getStudents(cmd, createMode)
 
 	@RequestMapping(method = Array(GET), value = Array("/edit/students"))
 	def formEdit(
-								@PathVariable("assignment") assignment: Assignment,
-								@ModelAttribute("command") cmd: ModifyAssignmentStudentsCommand): Mav =
+		@PathVariable("assignment") assignment: Assignment,
+		@ModelAttribute("command") cmd: ModifyAssignmentStudentsCommand
+	): Mav =
 		getStudents(cmd, editMode)
 
 

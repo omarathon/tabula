@@ -56,18 +56,18 @@ class ModifyAssignmentOptionsController extends AbstractAssignmentOptionsControl
 
 	@RequestMapping(method = Array(GET), value = Array("/new/options"))
 	def form(
-						@PathVariable("assignment") assignment: Assignment,
-						@ModelAttribute("command") cmd: ModifyAssignmentOptionsCommand
-					): Mav = {
+		@PathVariable("assignment") assignment: Assignment,
+		@ModelAttribute("command") cmd: ModifyAssignmentOptionsCommand
+	): Mav = {
 		cmd.populate()
 		showForm(cmd, createMode)
 	}
 
 	@RequestMapping(method = Array(GET), value = Array("/edit/options"))
 	def formEdit(
-								@PathVariable("assignment") assignment: Assignment,
-								@ModelAttribute("command") cmd: ModifyAssignmentOptionsCommand
-							): Mav = {
+		@PathVariable("assignment") assignment: Assignment,
+		@ModelAttribute("command") cmd: ModifyAssignmentOptionsCommand
+	): Mav = {
 		cmd.populate()
 		showForm(cmd, editMode)
 	}

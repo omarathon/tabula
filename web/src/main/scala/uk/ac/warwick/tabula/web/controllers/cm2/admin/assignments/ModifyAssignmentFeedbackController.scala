@@ -50,18 +50,18 @@ class ModifyAssignmentFeedbackController extends AbstractAssignmentFeedbackContr
 
   @RequestMapping(method = Array(GET), value = Array("/new/feedback"))
   def form(
-            @PathVariable("assignment") assignment: Assignment,
-            @ModelAttribute("command") cmd: ModifyAssignmentFeedbackCommand
-          ): Mav = {
+    @PathVariable("assignment") assignment: Assignment,
+    @ModelAttribute("command") cmd: ModifyAssignmentFeedbackCommand
+  ): Mav = {
     cmd.populate()
     showForm(cmd, createMode)
   }
 
   @RequestMapping(method = Array(GET), value = Array("/edit/feedback"))
   def formEdit(
-                @PathVariable("assignment") assignment: Assignment,
-                @ModelAttribute("command") cmd: ModifyAssignmentFeedbackCommand
-              ): Mav = {
+    @PathVariable("assignment") assignment: Assignment,
+    @ModelAttribute("command") cmd: ModifyAssignmentFeedbackCommand
+  ): Mav = {
     cmd.populate()
     showForm(cmd, editMode)
   }

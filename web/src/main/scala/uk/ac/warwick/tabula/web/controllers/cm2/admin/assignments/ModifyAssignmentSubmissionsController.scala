@@ -46,9 +46,9 @@ class ModifyAssignmentSubmissionsController extends AbstractAssignmentSubmission
 
 	@RequestMapping(method = Array(GET), value = Array("/new/submissions"))
 	def form(
-						@PathVariable("assignment") assignment: Assignment,
-						@ModelAttribute("command") cmd: ModifyAssignmentSubmissionsCommand
-					): Mav = {
+		@PathVariable("assignment") assignment: Assignment,
+		@ModelAttribute("command") cmd: ModifyAssignmentSubmissionsCommand
+	): Mav = {
 		cmd.populate()
 		showForm(cmd, createMode)
 	}
@@ -56,9 +56,9 @@ class ModifyAssignmentSubmissionsController extends AbstractAssignmentSubmission
 
 	@RequestMapping(method = Array(GET), value = Array("/edit/submissions"))
 	def formEdit(
-								@PathVariable("assignment") assignment: Assignment,
-								@ModelAttribute("command") cmd: ModifyAssignmentSubmissionsCommand
-							): Mav = {
+		@PathVariable("assignment") assignment: Assignment,
+		@ModelAttribute("command") cmd: ModifyAssignmentSubmissionsCommand
+	): Mav = {
 		cmd.populate()
 		showForm(cmd, editMode)
 	}

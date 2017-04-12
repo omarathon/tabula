@@ -36,8 +36,7 @@ class EditAssignmentDetailsController extends AbstractAssignmentController {
 		val module = cmd.module
 		Mav(s"$urlPrefix/admin/assignments/edit_assignment_details",
 			"department" -> module.adminDepartment,
-			"module" -> module,
-			"academicYear" -> cmd.academicYear
+			"module" -> module
 		).crumbs(CourseworkBreadcrumbs.Assignment.AssignmentManagement())
 	}
 
