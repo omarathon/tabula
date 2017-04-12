@@ -60,12 +60,13 @@ object Routes {
 
 		object assignment {
 			def createAssignmentDetails(module: Module): String = admin() + s"/${encoded(module.code)}/assignments/new"
-			def createAddFeedback(assignment: Assignment): String = admin()  + s"/assignments/new/${encoded(assignment.id)}/feedback"
-			def createAddStudents(assignment: Assignment): String = admin()  + s"/assignments/new/${encoded(assignment.id)}/students"
-			def createAddMarkers(assignment: Assignment): String = admin()  + s"/assignments/new/${encoded(assignment.id)}/markers"
-			def createAddSubmissions(assignment: Assignment): String = admin()  + s"/assignments/new/${encoded(assignment.id)}/submissions"
-			def createAddOptions(assignment: Assignment): String = admin()  + s"/assignments/new/${encoded(assignment.id)}/options"
-			def reviewAssignment(assignment: Assignment): String = admin()  + s"/assignments/new/${encoded(assignment.id)}/review"
+			def editAssignmentDetails(assignment: Assignment): String = admin()  + s"/assignments/${encoded(assignment.id)}/edit"
+			def createOrEditFeedback(assignment: Assignment, createOrEditMode: String): String = admin()  + s"/assignments/${encoded(assignment.id)}/${encoded(createOrEditMode)}/feedback"
+			def createOrEditStudents(assignment: Assignment, createOrEditMode: String): String = admin()  + s"/assignments/${encoded(assignment.id)}/${encoded(createOrEditMode)}/students"
+			def createOrEditMarkers(assignment: Assignment, createOrEditMode: String): String = admin()  + s"/assignments/${encoded(assignment.id)}/${encoded(createOrEditMode)}/markers"
+			def createOrEditSubmissions(assignment: Assignment, createOrEditMode: String): String = admin()  + s"/assignments/${encoded(assignment.id)}/${encoded(createOrEditMode)}/submissions"
+			def createOrEditOptions(assignment: Assignment, createOrEditMode: String): String = admin()  + s"/assignments/${encoded(assignment.id)}/${encoded(createOrEditMode)}/options"
+			def reviewAssignment(assignment: Assignment): String = admin()  + s"/assignments/${encoded(assignment.id)}/review"
 
 			object audit {
 				def apply(assignment: Assignment): String = admin() + s"/audit/assignment/${encoded(assignment.id)}"

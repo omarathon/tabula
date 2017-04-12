@@ -20,16 +20,15 @@ object CreateAssignmentDetailsCommand {
 			with BooleanAssignmentProperties
 			with CreateAssignmentPermissions
 			with CreateAssignmentDetailsDescription
-			with AssignmentDetailsValidation
-			with AssignmentScheduledNotifications
+			with CreateAssignmentDetailsCommandState
+			with CreateAssignmentDetailsValidation
+			with ModifyAssignmentScheduledNotifications
 			with AutowiringAssessmentServiceComponent
-			with AssignmentsDetailsTriggers
+			with ModifyAssignmentsDetailsTriggers
 }
 
 class CreateAssignmentDetailsCommandInternal(val module: Module)
-	extends CommandInternal[Assignment]
-		with AssignmentDetailsCommandState
-		with SharedAssignmentProperties {
+	extends CommandInternal[Assignment]	with CreateAssignmentDetailsCommandState	with SharedAssignmentProperties with AssignmentDetailsCopy {
 
 	self: AssessmentServiceComponent =>
 
@@ -43,40 +42,6 @@ class CreateAssignmentDetailsCommandInternal(val module: Module)
 		copyTo(assignment)
 		assessmentService.save(assignment)
 		assignment
-
-
-	}
-
-	protected def copyFrom(assignment: Assignment) {
-		name = assignment.name
-		academicYear = assignment.academicYear
-		feedbackTemplate = assignment.feedbackTemplate
-		openDate = assignment.openDate
-		closeDate = assignment.closeDate
-		copySharedFrom(assignment)
-	}
-
-
-	protected def copyTo(assignment: Assignment) {
-		assignment.name = name
-		assignment.openDate = openDate
-		assignment.academicYear = academicYear
-		if (openEnded) {
-			assignment.openEndedReminderDate = openEndedReminderDate
-			assignment.closeDate = null
-		} else {
-			assignment.openEndedReminderDate = null
-			assignment.closeDate = closeDate
-		}
-
-
-		assignment.workflowCategory = Some(workflowCategory)
-		assignment.assessmentGroups.clear()
-		for (group <- assignment.assessmentGroups.asScala if group.assignment == null) {
-			group.assignment = assignment
-		}
-
-		copySharedTo(assignment: Assignment)
 	}
 
 
@@ -109,13 +74,30 @@ class CreateAssignmentDetailsCommandInternal(val module: Module)
 }
 
 
-trait AssignmentDetailsCommandState extends CurrentSITSAcademicYear {
+trait AssignmentDetailsCopy extends ModifyAssignmentDetailsCommandState with SharedAssignmentProperties{
+	self: AssessmentServiceComponent =>
+
+	def copyTo(assignment: Assignment) {
+		assignment.name = name
+		assignment.openDate = openDate
+		assignment.academicYear = academicYear
+		if (openEnded) {
+			assignment.openEndedReminderDate = openEndedReminderDate
+			assignment.closeDate = null
+		} else {
+			assignment.openEndedReminderDate = null
+			assignment.closeDate = closeDate
+		}
+
+		assignment.workflowCategory = Some(workflowCategory)
+		copySharedTo(assignment: Assignment)
+	}
+}
+
+trait ModifyAssignmentDetailsCommandState extends CurrentSITSAcademicYear {
 
 	self: AssessmentServiceComponent =>
 
-	def module: Module
-
-	def assignment: Assignment = null
 
 	@Length(max = 200)
 	@NotEmpty(message = "{NotEmpty.assignmentName}")
@@ -133,28 +115,25 @@ trait AssignmentDetailsCommandState extends CurrentSITSAcademicYear {
 		WorkflowCategory.values
 	}
 
+}
+
+trait CreateAssignmentDetailsCommandState extends ModifyAssignmentDetailsCommandState {
+	self: AssessmentServiceComponent =>
+
+	def module: Module
+
 	// can be set to false if that's not what you want.
 	var prefillFromRecent = true
 
 	var prefillAssignment: Assignment = _
 
-
 }
 
+trait ModifyAssignmentDetailsValidation extends SelfValidating {
+	self: ModifyAssignmentDetailsCommandState with BooleanAssignmentProperties with AssessmentServiceComponent =>
 
-trait AssignmentDetailsValidation extends SelfValidating {
-	self: AssignmentDetailsCommandState with BooleanAssignmentProperties with AssessmentServiceComponent =>
-
-
-	override def validate(errors: Errors): Unit = {
-		// TAB-255 Guard to avoid SQL error - if it's null or gigantic it will fail validation in other ways.
-		if (name != null && name.length < 3000) {
-			val duplicates = assessmentService.getAssignmentByNameYearModule(name, academicYear, module).filter { existing => existing.isAlive }
-			for (duplicate <- duplicates.headOption) {
-				errors.rejectValue("name", "name.duplicate.assignment", Array(name), "")
-			}
-		}
-
+	// validation shared between add and edit
+	def genericValidate(errors: Errors): Unit = {
 		if (openDate == null) {
 			errors.rejectValue("openDate", "openDate.missing")
 		}
@@ -169,8 +148,24 @@ trait AssignmentDetailsValidation extends SelfValidating {
 	}
 }
 
+
+trait CreateAssignmentDetailsValidation extends ModifyAssignmentDetailsValidation {
+	self: CreateAssignmentDetailsCommandState with BooleanAssignmentProperties with AssessmentServiceComponent =>
+
+	override def validate(errors: Errors): Unit = {
+		// TAB-255 Guard to avoid SQL error - if it's null or gigantic it will fail validation in other ways.
+		if (name != null && name.length < 3000) {
+			val duplicates = assessmentService.getAssignmentByNameYearModule(name, academicYear, module).filter { existing => existing.isAlive }
+			for (duplicate <- duplicates.headOption) {
+				errors.rejectValue("name", "name.duplicate.assignment", Array(name), "")
+			}
+		}
+		genericValidate(errors)
+	}
+}
+
 trait CreateAssignmentPermissions extends RequiresPermissionsChecking with PermissionsCheckingMethods {
-	self: AssignmentDetailsCommandState =>
+	self: CreateAssignmentDetailsCommandState =>
 
 	override def permissionsCheck(p: PermissionsChecking): Unit = {
 		p.PermissionCheck(Permissions.Assignment.Create, module)
@@ -178,7 +173,7 @@ trait CreateAssignmentPermissions extends RequiresPermissionsChecking with Permi
 }
 
 trait CreateAssignmentDetailsDescription extends Describable[Assignment] {
-	self: AssignmentDetailsCommandState =>
+	self: CreateAssignmentDetailsCommandState =>
 
 	override def describe(d: Description) {
 		d.module(module).properties(
@@ -242,7 +237,7 @@ trait GeneratesNotificationsForAssignment {
 	}
 }
 
-trait AssignmentScheduledNotifications
+trait ModifyAssignmentScheduledNotifications
 	extends SchedulesNotifications[Assignment, Assignment] with GeneratesNotificationsForAssignment {
 
 	override def transformResult(assignment: Assignment) = Seq(assignment)
@@ -253,7 +248,7 @@ trait AssignmentScheduledNotifications
 
 }
 
-trait AssignmentsDetailsTriggers extends GeneratesTriggers[Assignment] {
+trait ModifyAssignmentsDetailsTriggers extends GeneratesTriggers[Assignment] {
 
 	def generateTriggers(commandResult: Assignment): Seq[Trigger[_ >: Null <: ToEntityReference, _]] = {
 		if (commandResult.closeDate != null && commandResult.closeDate.isAfterNow) {
