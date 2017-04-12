@@ -17,7 +17,7 @@ class ContextProfileInitializerTest extends TestBase {
         contain("web") and
         contain("scheduling") and
         contain("cm1Enabled")
-    )
+      )
   }
 
   @Test def prodNoWeb(): Unit = {
