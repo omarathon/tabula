@@ -1,6 +1,5 @@
 package uk.ac.warwick.tabula.commands.cm2.feedback
 
-import org.joda.time.DateTime
 import uk.ac.warwick.tabula.commands._
 import uk.ac.warwick.tabula.commands.cm2.feedback.ListFeedbackCommand._
 import uk.ac.warwick.tabula.data.model.{Assignment, Feedback, FeedbackForSits, Module}
@@ -10,7 +9,6 @@ import uk.ac.warwick.tabula.permissions._
 import uk.ac.warwick.tabula.services._
 import uk.ac.warwick.tabula.services.elasticsearch.{AuditEventQueryServiceComponent, AutowiringAuditEventQueryServiceComponent}
 import uk.ac.warwick.tabula.system.permissions.{PermissionsChecking, PermissionsCheckingMethods, RequiresPermissionsChecking}
-import uk.ac.warwick.userlookup.User
 
 import scala.concurrent.Await
 import scala.concurrent.duration._
@@ -24,6 +22,8 @@ object ListFeedbackCommand {
 		latestOnlineAdded: Map[User, DateTime],
 		latestGenericFeedback: Option[DateTime]
 	)
+
+	case class FeedbackListItem(feedback: Feedback, downloaded: Boolean, onlineViewed: Boolean, feedbackForSits: FeedbackForSits)
 
 	def apply(module: Module, assignment: Assignment) =
 		new ListFeedbackCommandInternal(module, assignment)

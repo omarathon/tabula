@@ -1,6 +1,6 @@
 <#import "_submission_details.ftl" as sd />
 <#import "/WEB-INF/freemarker/_profile_link.ftl" as pl />
-<#import "*/webapp/WEB-INF/freemarker/cm2/admin/assignments/submission_components.ftl" as components />
+<#import "*/../../../../../../../../../../modules/web/src/main/webapp/WEB-INF/freemarker/cm2/admin/assignments/submission_components.ftl" as components />
 <#escape x as x?html>
 <#-- FIXME: implemented as part of CM2 migration but will require further reworking due to CM2 workflow changes -->
 <div id="feedback-modal" class="modal fade"></div>
