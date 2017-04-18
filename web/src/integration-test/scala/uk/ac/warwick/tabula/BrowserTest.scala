@@ -54,6 +54,10 @@ abstract class BrowserTest
 
   val screenshotDirectory = new File(P.ScreenshotDirectory)
 
+	after {
+		webDriver.quit()
+	}
+
 	implicit lazy val webDriver: WebDriver = {
 		val driver = P.Browser match {
 			case "htmlunit" =>
@@ -65,7 +69,7 @@ abstract class BrowserTest
 			case "ie" => new InternetExplorerDriver
 			case "phantomjs" =>
 				if (System.getProperty("phantomjs.binary.path") == null)
-					System.setProperty("phantomjs.binary.path", P.PhatomJSLocation)
+					System.setProperty("phantomjs.binary.path", P.PhantomJSLocation)
 
 				new PhantomJSDriver
 		}
@@ -168,7 +172,7 @@ object FunctionalTestProperties {
 
 	val SiteRoot: String = prop("toplevel.url")
 	val Browser: String = prop("browser")
-  val PhatomJSLocation: String = prop("phantomjs.binary.path")
+  val PhantomJSLocation: String = prop("phantomjs.binary.path")
   val ScreenshotDirectory: String = prop("screenshot.dir")
 
 	/* Test user accounts who can sign in during tests. Populated from properties.
