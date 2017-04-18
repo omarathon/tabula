@@ -31,22 +31,17 @@ TODO grab values from the Routes object in code, as that's pretty equivalent and
 <#macro feedbackreport department><@_u page="/admin/department/${department.code}/reports/feedback" /></#macro>
 
 <#macro createassignmentdetails module><@_u page="/admin/${module.code}/assignments/new" /></#macro>
-<#macro createassignmentfeedback assignment><@_u page="/admin/assignments/new/${assignment.id}/feedback" /></#macro>
-<#macro createassignmentstudents assignment><@_u page="/admin/assignments/new/${assignment.id}/students" /></#macro>
-<#macro createassignmentmarkers assignment><@_u page="/admin/assignments/new/${assignment.id}/markers" /></#macro>
-<#macro createassignmentsubmissions assignment><@_u page="/admin/assignments/new/${assignment.id}/submissions" /></#macro>
-<#macro createassignmentoptions assignment><@_u page="/admin/assignments/new/${assignment.id}/options" /></#macro>
-<#macro createassignmentreview assignment><@_u page="/admin/assignments/new/${assignment.id}/review" /></#macro>
+<#macro assignmentfeedback assignment mode><@_u page="/admin/assignments/${assignment.id}/${mode}/feedback" /></#macro>
+<#macro assignmentstudents assignment mode><@_u page="/admin/assignments/${assignment.id}/${mode}/students" /></#macro>
+<#macro assignmentmarkers assignment mode><@_u page="/admin/assignments/${assignment.id}/${mode}/markers" /></#macro>
+<#macro assignmentsubmissions assignment mode><@_u page="/admin/assignments/${assignment.id}/${mode}/submissions" /></#macro>
+<#macro assignmentoptions assignment mode><@_u page="/admin/assignments/${assignment.id}/${mode}/options" /></#macro>
+<#macro assignmentreview assignment><@_u page="/admin/assignments/${assignment.id}/review" /></#macro>
+
 <#macro create_sitsassignments department><@_u page="/admin/department/${department.code}/setup-assignments" /></#macro>
 <#macro assignmentSharedOptions department><@_u page="/admin/department/${department.code}/shared-options" /></#macro>
 
-<#macro editassignmentdetails assignment><@_u page="/admin/assignments/edit/${assignment.id}" /></#macro>
-<#macro editassignmentfeedback assignment><@_u page="/admin/assignments/edit/${assignment.id}/feedback" /></#macro>
-<#macro editassignmentstudents assignment><@_u page="/admin/assignments/edit/${assignment.id}/students" /></#macro>
-<#macro editassignmentmarkers assignment><@_u page="/admin/assignments/edit/${assignment.id}/markers" /></#macro>
-<#macro editassignmentsubmissions assignment><@_u page="/admin/assignments/edit/${assignment.id}/submissions" /></#macro>
-<#macro editassignmentoptions assignment><@_u page="/admin/assignments/edit/${assignment.id}/options" /></#macro>
-<#macro editassignmentreview assignment><@_u page="/admin/assignments/edit/${assignment.id}/review" /></#macro>
+<#macro editassignmentdetails assignment><@_u page="/admin/assignments/${assignment.id}/edit" /></#macro>
 
 <#macro feedbackSummary assignment studentid><@_u page="/admin/module/${assignment.module.code}/assignments/${assignment.id}/feedback/summary/${studentid}"/></#macro>
 <#macro feedbackAudit assignment studentid><@_u page="/admin/module/${assignment.module.code}/assignments/${assignment.id}/audit/${studentid}"/></#macro>
