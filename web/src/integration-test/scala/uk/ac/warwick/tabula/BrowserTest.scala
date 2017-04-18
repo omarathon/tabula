@@ -42,7 +42,8 @@ abstract class BrowserTest
 	with WebBrowser
 	with WebsignonMethods
 	with UserKnowledge
-  with TestScreenshots {
+	with TestScreenshots
+	with BeforeAndAfterAll {
 
 	// Shorthand to expose properties to test classes
 	val P = FunctionalTestProperties
@@ -54,7 +55,10 @@ abstract class BrowserTest
 
   val screenshotDirectory = new File(P.ScreenshotDirectory)
 
-	after {
+	// Run at the end of this Suite (regular after() doesn't work because ScalaTest
+	// reuses an instance for all tests, unlike JUnit which makes a new instance per test)
+	override def afterAll() = {
+		super.afterAll()
 		webDriver.quit()
 	}
 
