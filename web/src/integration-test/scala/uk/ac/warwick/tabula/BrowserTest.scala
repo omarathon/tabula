@@ -42,7 +42,8 @@ abstract class BrowserTest
 	with WebBrowser
 	with WebsignonMethods
 	with UserKnowledge
-  with TestScreenshots {
+	with TestScreenshots
+	with BeforeAndAfterAll {
 
 	// Shorthand to expose properties to test classes
 	val P = FunctionalTestProperties
@@ -53,6 +54,13 @@ abstract class BrowserTest
 	def Path(path: String): String = P.SiteRoot + path
 
   val screenshotDirectory = new File(P.ScreenshotDirectory)
+
+	// Run at the end of this Suite (regular after() doesn't work because ScalaTest
+	// reuses an instance for all tests, unlike JUnit which makes a new instance per test)
+	override def afterAll() = {
+		super.afterAll()
+		webDriver.quit()
+	}
 
 	implicit lazy val webDriver: WebDriver = {
 		val driver = P.Browser match {
@@ -65,7 +73,7 @@ abstract class BrowserTest
 			case "ie" => new InternetExplorerDriver
 			case "phantomjs" =>
 				if (System.getProperty("phantomjs.binary.path") == null)
-					System.setProperty("phantomjs.binary.path", P.PhatomJSLocation)
+					System.setProperty("phantomjs.binary.path", P.PhantomJSLocation)
 
 				new PhantomJSDriver
 		}
@@ -168,7 +176,7 @@ object FunctionalTestProperties {
 
 	val SiteRoot: String = prop("toplevel.url")
 	val Browser: String = prop("browser")
-  val PhatomJSLocation: String = prop("phantomjs.binary.path")
+  val PhantomJSLocation: String = prop("phantomjs.binary.path")
   val ScreenshotDirectory: String = prop("screenshot.dir")
 
 	/* Test user accounts who can sign in during tests. Populated from properties.
