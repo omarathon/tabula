@@ -420,7 +420,7 @@
 				<entry key="weekRangeSelectFormatter"><bean class="uk.ac.warwick.tabula.helpers.WeekRangeSelectFormatterTag" /></entry>
 				<entry key="mapGet"><bean class="uk.ac.warwick.tabula.helpers.FreemarkerMapHelper" /></entry>
 				<entry key="wholeWeekFormatter"><bean class="uk.ac.warwick.tabula.helpers.WholeWeekFormatterTag" /></entry>
-        <entry key="dateToWeekNumber"><bean class="uk.ac.warwick.tabula.helpers.DateToWeekNumberTag" /></entry>
+				<entry key="dateToWeekNumber"><bean class="uk.ac.warwick.tabula.helpers.DateToWeekNumberTag" /></entry>
 				<entry key="userSetting"><bean class="uk.ac.warwick.tabula.web.views.UserSettingFunction" /></entry>
 				<entry key="attendanceMonitoringCheckpointFormatter"><bean class="uk.ac.warwick.tabula.helpers.AttendanceMonitoringCheckpointFormatter" /></entry>
 				<entry key="phoneNumberFormatter"><bean class="uk.ac.warwick.tabula.helpers.PhoneNumberFormatter" /></entry>
