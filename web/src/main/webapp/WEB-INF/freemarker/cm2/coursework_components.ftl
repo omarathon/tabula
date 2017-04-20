@@ -2,29 +2,29 @@
 
 <#macro student_assignment_list id title assignments expand_by_default=true show_submission_progress=false>
 	<span id="${id}-container">
-    <#local has_assignments = (assignments!?size gt 0) />
+		<#local has_assignments = (assignments!?size gt 0) />
 		<div id="${id}" class="striped-section student-assignment-list<#if has_assignments> collapsible<#if expand_by_default> expanded</#if><#else> empty</#if>" data-name="${id}">
-      <div class="clearfix">
-        <h4 class="section-title">${title}</h4>
+			<div class="clearfix">
+				<h4 class="section-title">${title}</h4>
 
 				<#if has_assignments>
 					<div class="striped-section-contents">
-            <div class="row">
-              <div class="col-md-3">Details</div>
-              <div class="col-md-4 col-lg-5">Progress</div>
-              <div class="col-md-5 col-lg-4">Actions</div>
-            </div>
+						<div class="row">
+							<div class="col-md-3">Details</div>
+							<div class="col-md-4 col-lg-5">Progress</div>
+							<div class="col-md-5 col-lg-4">Actions</div>
+						</div>
 
 						<#list assignments as info>
 							<span id="assignment-container-${info.assignment.id}">
 								<@student_assignment_info info show_submission_progress />
-		          </span>
+							</span>
 						</#list>
 					</div>
 				</#if>
-      </div>
-    </div>
-  </span>
+			</div>
+		</div>
+	</span>
 </#macro>
 
 <#macro progress_bar tooltip percentage class="default">
