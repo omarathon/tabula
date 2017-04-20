@@ -72,6 +72,7 @@ trait AssessmentMembershipDao {
 	 * takes this into account.
 	 */
 	def getSITSEnrolledAssignments(user: User): Seq[Assignment]
+	def getSITSEnrolledAssignments(user: User, academicYear: AcademicYear): Seq[Assignment]
 	def getSITSEnrolledSmallGroupSets(user: User): Seq[SmallGroupSet]
 
 	def save(gb: GradeBoundary): Unit
@@ -94,6 +95,22 @@ class AssessmentMembershipDaoImpl extends AssessmentMembershipDao with Daoisms w
 					uag.occurrence = ag.occurrence and
 					a.deleted = false and a._archived = false and a._hiddenFromStudents = false""")
 			.setString("universityId", user.getWarwickId)
+			.distinct.seq
+
+	def getSITSEnrolledAssignments(user: User, academicYear: AcademicYear): Seq[Assignment] =
+		session.newQuery[Assignment]("""select a
+			from
+				Assignment a
+					join a.assessmentGroups ag
+					join ag.assessmentComponent.upstreamAssessmentGroups uag
+					join uag.members uagms with uagms.universityId = :universityId
+			where
+					uag.academicYear = a.academicYear and
+					uag.occurrence = ag.occurrence and
+     			a.academicYear = :academicYear and
+					a.deleted = false and a._archived = false and a._hiddenFromStudents = false""")
+			.setString("universityId", user.getWarwickId)
+			.setParameter("academicYear", academicYear)
 			.distinct.seq
 
 	def getSITSEnrolledSmallGroupSets(user: User): Seq[SmallGroupSet] =

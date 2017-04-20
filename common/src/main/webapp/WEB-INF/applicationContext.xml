@@ -414,11 +414,13 @@
 				<entry key="timeBuilder"><bean class="uk.ac.warwick.tabula.helpers.TimeBuilder" /></entry>
 				<entry key="intervalFormatter"><bean class="uk.ac.warwick.tabula.helpers.IntervalFormatter" /></entry>
 				<entry key="durationFormatter"><bean class="uk.ac.warwick.tabula.helpers.DurationFormatterTag" /></entry>
+				<entry key="durationPercentage"><bean class="uk.ac.warwick.tabula.helpers.DurationPercentageTag" /></entry>
 				<entry key="weekRangesFormatter"><bean class="uk.ac.warwick.tabula.helpers.WeekRangesFormatterTag" /></entry>
 				<entry key="weekRangesDumper"><bean class="uk.ac.warwick.tabula.helpers.WeekRangesDumperTag" /></entry>
 				<entry key="weekRangeSelectFormatter"><bean class="uk.ac.warwick.tabula.helpers.WeekRangeSelectFormatterTag" /></entry>
 				<entry key="mapGet"><bean class="uk.ac.warwick.tabula.helpers.FreemarkerMapHelper" /></entry>
 				<entry key="wholeWeekFormatter"><bean class="uk.ac.warwick.tabula.helpers.WholeWeekFormatterTag" /></entry>
+        <entry key="dateToWeekNumber"><bean class="uk.ac.warwick.tabula.helpers.DateToWeekNumberTag" /></entry>
 				<entry key="userSetting"><bean class="uk.ac.warwick.tabula.web.views.UserSettingFunction" /></entry>
 				<entry key="attendanceMonitoringCheckpointFormatter"><bean class="uk.ac.warwick.tabula.helpers.AttendanceMonitoringCheckpointFormatter" /></entry>
 				<entry key="phoneNumberFormatter"><bean class="uk.ac.warwick.tabula.helpers.PhoneNumberFormatter" /></entry>
