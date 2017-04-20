@@ -38,7 +38,7 @@ class StudentAssignmentsSummaryCommandInternal(val student: MemberOrUser, val ac
 	override def applyInternal(): Result = {
 		val studentUser = student.asUser
 
-		val enrolledAssignments = assessmentMembershipService.getEnrolledAssignments(studentUser)
+		val enrolledAssignments = assessmentMembershipService.getEnrolledAssignments(studentUser, None)
 
 		val done = benchmarkTask("getAssignmentsWithFeedback") {
 			assessmentService.getAssignmentsWithFeedback(student.usercode, academicYearOption).map(_.enhance(studentUser)).sortBy(enhancedAssignment =>

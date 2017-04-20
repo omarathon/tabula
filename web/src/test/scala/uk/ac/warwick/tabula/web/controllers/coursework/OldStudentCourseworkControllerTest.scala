@@ -35,7 +35,7 @@ class OldStudentCourseworkControllerTest extends TestBase with Mockito {
 		assessmentService.getAssignmentsWithFeedback(any[StudentCourseYearDetails]) returns Seq()
 		assessmentService.filterAssignmentsByCourseAndYear(any[Seq[Assignment]], any[StudentCourseYearDetails]) returns Seq()
 		assessmentService.getAssignmentsWithSubmission(any[StudentCourseYearDetails]) returns Seq()
-		assessmentMembershipService.getEnrolledAssignments(any[User]) returns Seq()
+		assessmentMembershipService.getEnrolledAssignments(any[User], None) returns Seq()
 		assessmentService.getAssignmentsWithFeedback(any[String]) returns Seq()
 		assessmentService.getAssignmentsWithSubmission(any[String]) returns Seq()
 	}

@@ -12,31 +12,31 @@ import uk.ac.warwick.tabula.web.controllers.AcademicYearScopedController
 import uk.ac.warwick.tabula.{AcademicYear, CurrentUser}
 
 abstract class AbstractHomeController
-  extends CourseworkController
-    with AcademicYearScopedController
-    with AutowiringUserSettingsServiceComponent
-    with AutowiringMaintenanceModeServiceComponent {
+	extends CourseworkController
+		with AcademicYearScopedController
+		with AutowiringUserSettingsServiceComponent
+		with AutowiringMaintenanceModeServiceComponent {
 
-  hideDeletedItems
+	hideDeletedItems
 
-  @ModelAttribute("command")
-  def command(@ModelAttribute("activeAcademicYear") activeAcademicYear: Option[AcademicYear], user: CurrentUser): Command = {
-    val academicYear = activeAcademicYear.getOrElse(AcademicYear.guessSITSAcademicYearByDate(DateTime.now))
+	@ModelAttribute("command")
+	def command(@ModelAttribute("activeAcademicYear") activeAcademicYear: Option[AcademicYear], user: CurrentUser): Command = {
+		val academicYear = activeAcademicYear.getOrElse(AcademicYear.guessSITSAcademicYearByDate(DateTime.now))
 
-    CourseworkHomepageCommand(academicYear, user)
-  }
+		CourseworkHomepageCommand(academicYear, user)
+	}
 
-  @RequestMapping
-  def home(@ModelAttribute("command") command: Command, user: CurrentUser) = {
-    val info = command.apply()
+	@RequestMapping
+	def home(@ModelAttribute("command") command: Command, user: CurrentUser) = {
+		val info = command.apply()
 
-    Mav(s"$urlPrefix/home/view",
-      "academicYear" -> command.academicYear,
-      "studentInformation" -> info.studentInformation,
-      "moduleManagerDepartments" -> info.moduleManagerDepartments,
-      "adminDepartments" -> info.adminDepartments
-    ).secondCrumbs(academicYearBreadcrumbs(command.academicYear)(Routes.homeForYear): _*)
-  }
+		Mav(s"$urlPrefix/home/view",
+			"academicYear" -> command.academicYear,
+			"studentInformation" -> info.studentInformation,
+			"moduleManagerDepartments" -> info.moduleManagerDepartments,
+			"adminDepartments" -> info.adminDepartments
+		).secondCrumbs(academicYearBreadcrumbs(command.academicYear)(Routes.homeForYear): _*)
+	}
 
 }
 
@@ -45,9 +45,9 @@ abstract class AbstractHomeController
 @RequestMapping(Array("/${cm2.prefix}"))
 class HomeController extends AbstractHomeController {
 
-  @ModelAttribute("activeAcademicYear")
-  override def activeAcademicYear: Option[AcademicYear] =
-    retrieveActiveAcademicYear(None)
+	@ModelAttribute("activeAcademicYear")
+	override def activeAcademicYear: Option[AcademicYear] =
+		retrieveActiveAcademicYear(None)
 
 }
 
@@ -56,8 +56,8 @@ class HomeController extends AbstractHomeController {
 @RequestMapping(Array("/${cm2.prefix}/{academicYear:\\d{4}}"))
 class HomeForYearController extends AbstractHomeController {
 
-  @ModelAttribute("activeAcademicYear")
-  override def activeAcademicYear(@PathVariable academicYear: AcademicYear): Option[AcademicYear] =
-    retrieveActiveAcademicYear(Option(academicYear))
+	@ModelAttribute("activeAcademicYear")
+	override def activeAcademicYear(@PathVariable academicYear: AcademicYear): Option[AcademicYear] =
+		retrieveActiveAcademicYear(Option(academicYear))
 
 }

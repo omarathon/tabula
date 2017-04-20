@@ -14,13 +14,13 @@ class DurationPercentageTag extends BaseTemplateMethodModelEx {
 }
 
 /**
- * Actually formats Intervals, not Durations.
- */
+	* Actually formats Intervals, not Durations.
+	*/
 object DurationPercentage {
 
 	/**
-	 * Prints the progress between a duration, as a whole integer between 0 and 100
-	 */
+		* Prints the progress between a duration, as a whole integer between 0 and 100
+		*/
 	def format(start: DateTime, now: DateTime, end: DateTime): Int =
 		if ((now isAfter end) || (now isEqual end))
 			100
@@ -30,9 +30,9 @@ object DurationPercentage {
 			100
 		else {
 			val wholeDuration = new Duration(start, end).getMillis
-      val currentDuration = new Duration(start, now).getMillis
+			val currentDuration = new Duration(start, now).getMillis
 
-      ((currentDuration.toDouble * 100.0) / wholeDuration.toFloat).toInt
+			((currentDuration.toDouble * 100.0) / wholeDuration.toFloat).toInt
 		}
 
 }

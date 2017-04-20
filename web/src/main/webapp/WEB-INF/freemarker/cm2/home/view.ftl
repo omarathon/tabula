@@ -7,15 +7,15 @@
 <#assign is_admin = nonempty(moduleManagerDepartments) || nonempty(adminDepartments) />
 
 <#if expect_assignments || !studentInformation.empty>
-  <#include "_student.ftl" />
+	<#include "_student.ftl" />
 </#if>
 
 <#if is_admin>
-  <#include "_admin.ftl" />
+	<#include "_admin.ftl" />
 </#if>
 
 <#if !expect_assignments && studentInformation.empty && !is_marker && !is_admin>
-  <#-- TODO show something if you don't have any permissions at all to avoid blank page c.f. groups -->
+	<#-- TODO show something if you don't have any permissions at all to avoid blank page c.f. groups -->
 </#if>
 
 </#escape>

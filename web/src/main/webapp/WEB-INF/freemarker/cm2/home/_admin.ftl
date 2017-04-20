@@ -1,11 +1,11 @@
 <#import "*/coursework_components.ftl" as components />
 <#escape x as x?html>
 
-<#macro link_to_department department>
-  <a href="<@routes.cm2.departmenthome department academicYear />">
-    ${department.name}
-  </a>
-</#macro>
+  <#macro link_to_department department>
+    <a href="<@routes.cm2.departmenthome department academicYear />">
+      ${department.name}
+    </a>
+  </#macro>
 
 <h1>Administration</h1>
 

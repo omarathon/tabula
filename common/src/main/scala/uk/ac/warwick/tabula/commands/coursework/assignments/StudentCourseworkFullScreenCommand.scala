@@ -31,7 +31,7 @@ class StudentCourseworkFullScreenCommandInternal(val memberOrUser: MemberOrUser)
 
 	override lazy val overridableAssignmentsWithFeedback: Seq[Assignment] = assessmentService.getAssignmentsWithFeedback(memberOrUser.usercode)
 
-	override lazy val overridableEnrolledAssignments: Seq[Assignment] = assessmentMembershipService.getEnrolledAssignments(memberOrUser.asUser)
+	override lazy val overridableEnrolledAssignments: Seq[Assignment] = assessmentMembershipService.getEnrolledAssignments(memberOrUser.asUser, None)
 
 	override lazy val overridableAssignmentsWithSubmission: Seq[Assignment] = assessmentService.getAssignmentsWithSubmission(memberOrUser.usercode)
 

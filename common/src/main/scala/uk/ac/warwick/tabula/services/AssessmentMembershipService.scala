@@ -55,8 +55,7 @@ trait AssessmentMembershipService {
 
 	def getUpstreamAssessmentGroupsNotIn(ids: Seq[String], academicYears: Seq[AcademicYear]): Seq[String]
 
-	def getEnrolledAssignments(user: User): Seq[Assignment]
-	def getEnrolledAssignments(user: User, academicYear: AcademicYear): Seq[Assignment]
+	def getEnrolledAssignments(user: User, academicYear: Option[AcademicYear]): Seq[Assignment]
 
 	/**
 	 * This will throw an exception if the others are usercode groups, use determineMembership instead in that situation
@@ -95,27 +94,7 @@ class AssessmentMembershipServiceImpl
 	val assignmentManualMembershipHelper = new UserGroupMembershipHelper[Assignment]("_members")
 	val examManualMembershipHelper = new UserGroupMembershipHelper[Exam]("_members")
 
-	def getEnrolledAssignments(user: User): Seq[Assignment] = {
-		val autoEnrolled =
-			dao.getSITSEnrolledAssignments(user)
-				.filterNot { _.members.excludesUser(user) }
-
-		// TAB-1749 If we've been passed a non-primary usercode (e.g. WBS logins)
-		// then also get registrations for the primary usercode
-		val manuallyEnrolled = {
-			val ssoUser = if (user.getWarwickId != null) userLookup.getUserByWarwickUniId(user.getWarwickId) else userLookup.getUserByUserId(user.getUserId)
-			ssoUser match {
-				case FoundUser(primaryUser) if primaryUser.getUserId != user.getUserId =>
-					assignmentManualMembershipHelper.findBy(primaryUser) ++ assignmentManualMembershipHelper.findBy(user)
-
-				case _ => assignmentManualMembershipHelper.findBy(user)
-			}
-		}
-
-		(autoEnrolled ++ manuallyEnrolled).filter { _.isVisibleToStudents }.distinct
-	}
-
-	def getEnrolledAssignments(user: User, academicYear: AcademicYear): Seq[Assignment] = {
+	def getEnrolledAssignments(user: User, academicYear: Option[AcademicYear]): Seq[Assignment] = {
 		val autoEnrolled =
 			dao.getSITSEnrolledAssignments(user, academicYear)
 				.filterNot { _.members.excludesUser(user) }
@@ -132,7 +111,8 @@ class AssessmentMembershipServiceImpl
 			}
 		}
 
-		(autoEnrolled ++ manuallyEnrolled.filter(_.academicYear == academicYear)).filter { _.isVisibleToStudents }.distinct
+		(autoEnrolled ++ manuallyEnrolled.filter { a => academicYear.isEmpty || academicYear.contains(a.academicYear) })
+			.filter { _.isVisibleToStudents }.distinct
 	}
 
 	def emptyMembers(groupsToEmpty:Seq[String]): Int =
