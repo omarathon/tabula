@@ -3,12 +3,12 @@
 <#macro student_assignment_list id title assignments expand_by_default=true show_submission_progress=false>
 	<span id="${id}-container">
     <#local has_assignments = (assignments!?size gt 0) />
-  	<div id="${id}" class="striped-section student-assignment-list<#if has_assignments> collapsible<#if expand_by_default> expanded</#if><#else> empty</#if>" data-name="${id}">
+		<div id="${id}" class="striped-section student-assignment-list<#if has_assignments> collapsible<#if expand_by_default> expanded</#if><#else> empty</#if>" data-name="${id}">
       <div class="clearfix">
         <h4 class="section-title">${title}</h4>
 
 				<#if has_assignments>
-          <div class="striped-section-contents">
+					<div class="striped-section-contents">
             <div class="row">
               <div class="col-md-3">Details</div>
               <div class="col-md-4 col-lg-5">Progress</div>
@@ -16,7 +16,7 @@
             </div>
 
 						<#list assignments as info>
-              <span id="assignment-container-${info.assignment.id}">
+							<span id="assignment-container-${info.assignment.id}">
 								<@student_assignment_info info show_submission_progress />
 		          </span>
 						</#list>
@@ -51,25 +51,25 @@
 		<#elseif submission.authorisedLate>
 			<#local state = "success" />
 			<#local tooltip>
-      	Submitted within extension ${durationFormatter(submission.submittedDate)} (<@fmt.date date=submission.submittedDate />)
+				Submitted within extension ${durationFormatter(submission.submittedDate)} (<@fmt.date date=submission.submittedDate />)
 			</#local>
 		<#else>
 			<#local state = "success" />
 			<#local tooltip>
-      	Submitted ${durationFormatter(submission.submittedDate)} (<@fmt.date date=submission.submittedDate />)
+				Submitted ${durationFormatter(submission.submittedDate)} (<@fmt.date date=submission.submittedDate />)
 			</#local>
 		</#if>
 	<#elseif !assignment.opened>
 		<#local percentage = 1 />
 		<#local state = "default" />
 		<#local tooltip>
-    	Opens in ${durationFormatter(assignment.openDate)}
+			Opens in ${durationFormatter(assignment.openDate)}
 		</#local>
 	<#elseif assignment.openEnded>
 		<#local percentage = 100 />
 		<#local state = "info" />
 		<#local tooltip>
-    	Open-ended assignment
+			Open-ended assignment
 		</#local>
 	<#elseif info.submittable>
 		<#local extension = info.extension! />
@@ -87,7 +87,7 @@
 			</#local>
 		<#elseif assignment.closed>
 			<#local submissionStatus>
-      	<strong>Late</strong>
+			<strong>Late</strong>
 			</#local>
 
 			<#local state = "danger" />
@@ -97,14 +97,14 @@
 		<#else>
 			<#local state = "success" />
 			<#local tooltip>
-      	Due in ${time_remaining} (<@fmt.date date=info.studentDeadline />)
+				Due in ${time_remaining} (<@fmt.date date=info.studentDeadline />)
 			</#local>
 		</#if>
 	<#else>
 		<#local percentage = durationPercentage(assignment.openDate, info.studentDeadline) />
 		<#local state = "info" />
 		<#local tooltip>
-    	Assignment close ${durationFormatter(info.studentDeadline)} (<@fmt.date date=info.studentDeadline />)
+			Assignment close ${durationFormatter(info.studentDeadline)} (<@fmt.date date=info.studentDeadline />)
 		</#local>
 	</#if>
 
@@ -278,11 +278,11 @@
 		<#else>
 			${durationFormatter(submission.assignment.closeDate, submission.submittedDate)} after close
 		</#if>
-  	(<@fmt.date date=submission.assignment.submissionDeadline(user.userId) />)
+		(<@fmt.date date=submission.assignment.submissionDeadline(user.userId) />)
 	<#elseif assignment?has_content && user?has_content>
 		<#local lateness = assignment.workingDaysLateIfSubmittedNow(user.userId) />
 		<@fmt.p lateness "working day" /> overdue, the deadline/extension was ${durationFormatter(assignment.submissionDeadline(user.userId))}
-  	(<@fmt.date date=assignment.submissionDeadline(user.userId) />)
+		(<@fmt.date date=assignment.submissionDeadline(user.userId) />)
 	</#if>
 </#macro>
 
