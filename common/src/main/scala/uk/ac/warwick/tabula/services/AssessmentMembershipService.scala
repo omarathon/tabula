@@ -55,7 +55,7 @@ trait AssessmentMembershipService {
 
 	def getUpstreamAssessmentGroupsNotIn(ids: Seq[String], academicYears: Seq[AcademicYear]): Seq[String]
 
-	def getEnrolledAssignments(user: User): Seq[Assignment]
+	def getEnrolledAssignments(user: User, academicYear: Option[AcademicYear]): Seq[Assignment]
 
 	/**
 	 * This will throw an exception if the others are usercode groups, use determineMembership instead in that situation
@@ -94,9 +94,9 @@ class AssessmentMembershipServiceImpl
 	val assignmentManualMembershipHelper = new UserGroupMembershipHelper[Assignment]("_members")
 	val examManualMembershipHelper = new UserGroupMembershipHelper[Exam]("_members")
 
-	def getEnrolledAssignments(user: User): Seq[Assignment] = {
+	def getEnrolledAssignments(user: User, academicYear: Option[AcademicYear]): Seq[Assignment] = {
 		val autoEnrolled =
-			dao.getSITSEnrolledAssignments(user)
+			dao.getSITSEnrolledAssignments(user, academicYear)
 				.filterNot { _.members.excludesUser(user) }
 
 		// TAB-1749 If we've been passed a non-primary usercode (e.g. WBS logins)
@@ -111,7 +111,8 @@ class AssessmentMembershipServiceImpl
 			}
 		}
 
-		(autoEnrolled ++ manuallyEnrolled).filter { _.isVisibleToStudents }.distinct
+		(autoEnrolled ++ manuallyEnrolled.filter { a => academicYear.isEmpty || academicYear.contains(a.academicYear) })
+			.filter { _.isVisibleToStudents }.distinct
 	}
 
 	def emptyMembers(groupsToEmpty:Seq[String]): Int =

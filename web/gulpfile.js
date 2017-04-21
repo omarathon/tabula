@@ -243,6 +243,7 @@ concatScripts('concat-cm2js-id7', 'js/id7/cm2.js', [
   'js/filters.js',
   'js/fullcalendar.js',
   'js/id7/textList.js',
+  'js/activity-streams.js',
 ], true, ['concat-commonjs-id7']);
 concatScripts('concat-attendancejs-id7', 'js/id7/attendance.js', [
   'js/id7/common.js',
@@ -317,7 +318,10 @@ gulp.task('clean', () => {
 
 // Shortcuts for building all asset types at once
 gulp.task('assets', ['all-assets', 'hash-assets']);
-gulp.task('watch-assets', () => {
-  return gulp.watch('src/main/assets/**/*', ['assets']);
+gulp.task('watch-less', () => {
+  return gulp.watch('src/main/assets/**/*.less', ['compile-less']);
 });
-gulp.task('default', ['assets', 'watch-assets']);
+gulp.task('watch-js', () => {
+  return gulp.watch('src/main/assets/**/*.js', ['concat-scripts']);
+});
+gulp.task('default', ['assets', 'watch-less', 'watch-js']);

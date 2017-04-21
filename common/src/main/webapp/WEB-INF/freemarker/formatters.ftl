@@ -243,6 +243,8 @@ preposition: Text to relate the title to the department name in the second line,
 --></#noescape><#--
 --></#macro>
 
+<#macro dateToWeek date>${dateToWeekNumber(date)}</#macro>
+
 <#macro tense date future past><#if date.afterNow>${future}<#else>${past}</#if></#macro>
 
 <#macro usergroup_summary ug>

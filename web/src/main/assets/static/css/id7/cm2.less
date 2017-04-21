@@ -6,7 +6,6 @@ a.profile-link {
 	text-decoration: none;
 }
 
-
 // extension management
 .detail-row {
 	padding: 0;
@@ -116,5 +115,14 @@ table.expanding-row-pairs {
 	.label-R { background-color: @tabulaGrayDark; }
 	.label-S { background-color: @tabulaGray; }
 	// if you've gone past S then you have too many options. Grey for you!
+}
 
+.student-assignment-list {
+	.module-title + h4.name {
+		margin-top: 0;
+	}
+
+	.progress {
+		margin-bottom: 3px; // Difference between progress height (22px) and a standard div with text (25px)
+	}
 }

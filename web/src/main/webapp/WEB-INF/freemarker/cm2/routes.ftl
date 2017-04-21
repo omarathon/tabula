@@ -8,10 +8,24 @@ TODO grab values from the Routes object in code, as that's pretty equivalent and
 <#macro _u page context=component.context?default('/cm2')>
 	<@url context=context page=page />
 </#macro>
-<#macro home><@_u page="/" /></#macro>
+
+<#macro home academicYear="">
+	<#if academicYear?has_content>
+		<@_u page="/${academicYear.startYear}" />
+	<#else>
+		<@_u page="/" />
+	</#if>
+</#macro>
+
 <#-- to rename - also filter options will need to be added to jump to correct module -->
 <#macro depthome module><@_u page="/admin/department/${module.adminDepartment.code}/#module-${module.code}" /></#macro>
-<#macro departmenthome department><@_u page="/admin/department/${department.code}/" /></#macro>
+<#macro departmenthome department academicYear="">
+	<#if academicYear?has_content>
+		<@_u page="/admin/department/${department.code}/${academicYear.startYear}" />
+	<#else>
+		<@_u page="/admin/department/${department.code}" />
+	</#if>
+</#macro>
 <#macro downloadSubmission submission filename><@_u page="/admin/assignments/${submission.assignment.id}/submissions/download/${submission.id}/${filename?url}"/></#macro>
 
 <#macro filterExtensions><@_u page="/admin/extensions"/></#macro>

@@ -56,10 +56,9 @@ trait AcademicYearScopedController {
 	def activeAcademicYear(academicYear: AcademicYear): Option[AcademicYear] = { None }
 	def activeAcademicYear: Option[AcademicYear] = { None }
 
-	def academicYearBreadcrumbs(activeAcademicYear: AcademicYear)(urlGenerator: (AcademicYear) => String): Seq[BreadCrumb] = {
+	def academicYearBreadcrumbs(activeAcademicYear: AcademicYear)(urlGenerator: (AcademicYear) => String): Seq[BreadCrumb] =
 		availableAcademicYears.map(year =>
 			Breadcrumbs.Standard(year.getLabel, Some(urlGenerator(year)), "").setActive(year.startYear == activeAcademicYear.startYear)
 		)
-	}
 
 }
