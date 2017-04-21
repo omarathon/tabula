@@ -769,11 +769,9 @@ var LocationPicker = function (options) {
 				self.currentSearch = null;
 			}
 			self.currentSearch = $.ajax({
-				url: 'https://campus.warwick.ac.uk/Services/api.php?callback=?',
+				url: 'https://campus.warwick.ac.uk/warwick/API/getAC?callback=?',
 				dataType: 'json',
 				data: {
-					config: 'warwick',
-					act: 'ac',
 					mlim: 2,
 					limit: 1000,
 					type: 'lb',
