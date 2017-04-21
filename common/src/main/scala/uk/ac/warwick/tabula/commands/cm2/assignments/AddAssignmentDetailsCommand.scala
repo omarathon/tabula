@@ -90,6 +90,7 @@ trait AssignmentDetailsCopy extends ModifyAssignmentDetailsCommandState with Sha
     }
 
     assignment.workflowCategory = Some(workflowCategory)
+    assignment.cm2Assignment = true
     copySharedTo(assignment: Assignment)
   }
 }

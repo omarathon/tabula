@@ -141,6 +141,7 @@ class Assignment
 	var allowExtensions: JBoolean = _
 	@Column(name="anonymous_marking")
 	var anonymousMarking: JBoolean = _
+	var cm2Assignment: JBoolean = false
 
 	var genericFeedback: String = ""
 	@Column(name="turnitin_id")
@@ -870,6 +871,7 @@ trait BooleanAssignmentProperties {
 	@BeanProperty var automaticallySubmitToTurnitin: JBoolean = false
 	@BeanProperty var hiddenFromStudents: JBoolean = false
 	@BeanProperty var anonymousMarking: JBoolean = false
+	@BeanProperty var cm2Assignment: JBoolean = false
 
 
 
@@ -890,6 +892,7 @@ trait BooleanAssignmentProperties {
 		assignment.automaticallyReleaseToMarkers = automaticallyReleaseToMarkers
 		assignment.automaticallySubmitToTurnitin = automaticallySubmitToTurnitin
 		assignment.anonymousMarking = anonymousMarking
+
 
 
 		// You can only hide an assignment, no un-hiding.
