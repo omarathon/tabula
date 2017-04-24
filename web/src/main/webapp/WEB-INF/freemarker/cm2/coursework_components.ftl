@@ -319,3 +319,77 @@
 		</div>
 	</#if>
 </#macro>
+
+<#macro marker_assignment_list id title assignments expand_by_default=true>
+	<span id="${id}-container">
+		<#local has_assignments = (assignments!?size gt 0) />
+		<div id="${id}" class="striped-section marker-assignment-list<#if has_assignments> collapsible<#if expand_by_default> expanded</#if><#else> empty</#if>" data-name="${id}">
+			<div class="clearfix">
+				<h4 class="section-title">${title}</h4>
+
+				<#if has_assignments>
+					<div class="striped-section-contents">
+						<div class="row">
+							<div class="col-md-3">Details</div>
+							<div class="col-md-3">Status</div>
+							<div class="col-md-4">Progress</div>
+							<div class="col-md-2">Actions</div>
+						</div>
+
+						<#list assignments as info>
+							<span id="marker-assignment-container-${info.assignment.id}">
+								<@marker_assignment_info info />
+							</span>
+						</#list>
+					</div>
+				</#if>
+			</div>
+		</div>
+	</span>
+</#macro>
+
+<#macro marker_assignment_info info>
+	<#local assignment = info.assignment />
+	<div class="item-info row marker-assignment-${assignment.id}">
+		<div class="col-md-3">
+			<div class="module-title"><@fmt.module_name assignment.module /></div>
+			<h4 class="name">
+				<#-- TODO If the user can administer the assignment, link them to the admin page here -->
+				<span class="ass-name">${assignment.name}</span>
+			</h4>
+		</div>
+		<div class="col-md-3">
+			<#if !assignment.openEnded && !assignment.closed>
+				Assignment not closed yet
+			<#elseif info.submissions?size == 0 && info.markerFeedbacks?size == 0>
+				Not released for marking
+			<#else>
+				In progress <#-- TODO -->
+			</#if>
+		</div>
+		<div class="col-md-4">
+			<#if assignment.closed || assignment.openEnded>
+				<#if !assignment.openEnded>
+					<strong>Assignment closed:</strong> <span class="use-tooltip" title="<@fmt.dateToWeek assignment.closeDate />" data-html="true"><@fmt.date date=assignment.closeDate /></span>
+				<#else>
+					Open-ended assignment (no close date)
+				</#if>
+			<#else>
+				<strong>Assignment closes:</strong> <span class="use-tooltip" title="<@fmt.dateToWeek assignment.closeDate />" data-html="true"><@fmt.date date=assignment.closeDate /></span>
+			</#if>
+		</div>
+		<div class="col-md-2">
+			<#if assignment.closed || assignment.openEnded>
+				<#if info.submissions?size gt 0 || info.markerFeedbacks?size gt 0>
+					<a class="btn btn-block btn-primary" href="<@routes.cm2.listmarkersubmissions assignment user.apparentUser />">
+						Mark
+					</a>
+				<#else>
+					<a class="btn btn-block btn-default btn-disabled use-tooltip" title="You'll be able to download submissions for marking when an administrator releases them." disabled>
+						Mark
+					</a>
+				</#if>
+			</#if>
+		</div>
+	</div>
+</#macro>

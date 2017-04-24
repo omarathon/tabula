@@ -4,13 +4,14 @@ import org.joda.time.{DateTime, LocalDate}
 import uk.ac.warwick.tabula.commands._
 import uk.ac.warwick.tabula.commands.cm2.CourseworkHomepageCommand._
 import uk.ac.warwick.tabula.data.model.forms.Extension
-import uk.ac.warwick.tabula.data.model.{Assignment, AssignmentFeedback, Department, Submission}
+import uk.ac.warwick.tabula.data.model._
 import uk.ac.warwick.tabula.helpers.DateTimeOrdering._
 import uk.ac.warwick.tabula.helpers.StringUtils._
 import uk.ac.warwick.tabula.permissions.Permissions
 import uk.ac.warwick.tabula.services._
 import uk.ac.warwick.tabula.system.permissions.PubliclyVisiblePermissions
 import uk.ac.warwick.tabula.{AcademicYear, CurrentUser}
+import uk.ac.warwick.userlookup.User
 
 import scala.collection.JavaConverters._
 
@@ -39,11 +40,36 @@ object CourseworkHomepageCommand {
 		def nonempty: Boolean = !isEmpty
 	}
 
-	case class CourseworkHomepageInformation(
-		studentInformation: CourseworkHomepageStudentInformation,
-		homeDepartment: Option[Department],
+	case class MarkerAssignmentInformation(
+		assignment: Assignment,
+		students: Seq[User],
+		submissions: Seq[Submission],
+		extensions: Seq[Extension],
+		markerFeedbacks: Seq[MarkerFeedback]
+	)
+
+	case class CourseworkHomepageMarkerInformation(
+		unmarkedAssignments: Seq[MarkerAssignmentInformation],
+		inProgressAssignments: Seq[MarkerAssignmentInformation],
+		pastAssignments: Seq[MarkerAssignmentInformation]
+	) {
+		def isEmpty: Boolean = unmarkedAssignments.isEmpty && inProgressAssignments.isEmpty && pastAssignments.isEmpty
+		def nonempty: Boolean = !isEmpty
+	}
+
+	case class CourseworkHomepageAdminInformation(
 		moduleManagerDepartments: Seq[Department],
 		adminDepartments: Seq[Department]
+	) {
+		def isEmpty: Boolean = moduleManagerDepartments.isEmpty && adminDepartments.isEmpty
+		def nonempty: Boolean = !isEmpty
+	}
+
+	case class CourseworkHomepageInformation(
+		homeDepartment: Option[Department],
+		studentInformation: CourseworkHomepageStudentInformation,
+		markerInformation: CourseworkHomepageMarkerInformation,
+		adminInformation: CourseworkHomepageAdminInformation
 	)
 
 	type Result = CourseworkHomepageInformation
@@ -67,7 +93,9 @@ trait CourseworkHomepageCommandState {
 
 class CourseworkHomepageCommandInternal(val academicYear: AcademicYear, val user: CurrentUser) extends CommandInternal[Result]
 	with CourseworkHomepageCommandState
+	with CourseworkHomepageHomeDepartment
 	with CourseworkHomepageStudentAssignments
+	with CourseworkHomepageMarkerAssignments
 	with CourseworkHomepageAdminDepartments
 	with TaskBenchmarking {
 	self: ModuleAndDepartmentServiceComponent
@@ -76,19 +104,32 @@ class CourseworkHomepageCommandInternal(val academicYear: AcademicYear, val user
 
 	override def applyInternal(): Result =
 		CourseworkHomepageInformation(
-			studentInformation,
 			homeDepartment,
-			moduleManagerDepartments,
-			adminDepartments
+			studentInformation,
+			markerInformation,
+			adminInformation
 		)
 
 }
 
-trait CourseworkHomepageAdminDepartments extends TaskBenchmarking {
-	self: CourseworkHomepageCommandState with ModuleAndDepartmentServiceComponent =>
+trait CourseworkHomepageHomeDepartment extends TaskBenchmarking {
+	self: CourseworkHomepageCommandState
+		with ModuleAndDepartmentServiceComponent =>
 
 	lazy val homeDepartment: Option[Department] = benchmarkTask("Get user's home department") {
 		user.departmentCode.maybeText.flatMap(moduleAndDepartmentService.getDepartmentByCode)
+	}
+}
+
+trait CourseworkHomepageAdminDepartments extends TaskBenchmarking {
+	self: CourseworkHomepageCommandState
+		with ModuleAndDepartmentServiceComponent =>
+
+	lazy val adminInformation: CourseworkHomepageAdminInformation = benchmarkTask("Get admin information") {
+		CourseworkHomepageAdminInformation(
+			moduleManagerDepartments,
+			adminDepartments
+		)
 	}
 
 	lazy val moduleManagerDepartments: Seq[Department] = benchmarkTask("Get module manager departments") {
@@ -215,6 +256,70 @@ trait CourseworkHomepageStudentAssignments extends TaskBenchmarking {
 		(assignmentsWithFeedback ++ enrolledAssignments.filter(lateFormative))
 			.map(enhance)
 			.sortWith(hasEarlierEffectiveDate)
+	}
+
+}
+
+trait CourseworkHomepageMarkerAssignments extends TaskBenchmarking {
+	self: CourseworkHomepageCommandState
+		with AssessmentServiceComponent =>
+
+	lazy val markerInformation: CourseworkHomepageMarkerInformation = benchmarkTask("Get marker information") {
+		CourseworkHomepageMarkerInformation(
+			unmarkedAssignments,
+			markingInProgressAssignments,
+			markingPastAssignments
+		)
+	}
+
+	lazy val unmarkedAssignments: Seq[MarkerAssignmentInformation] = benchmarkTask("Get un-marked assignments") {
+		allMarkerAssignments.filter { info =>
+			// Assignments that haven't closed yet
+			val isStillSubmitting = !info.assignment.openEnded && !info.assignment.isClosed
+
+			// Not released for marking yet
+			val notReleasedYet = info.submissions.isEmpty && info.markerFeedbacks.isEmpty
+
+			// TODO Once we've got CM2 workflow in we'll be able to interrogate state
+
+			isStillSubmitting || notReleasedYet
+		}
+	}
+
+	lazy val markingInProgressAssignments: Seq[MarkerAssignmentInformation] = benchmarkTask("Get in-progress assignments") {
+		// TODO once we've got CM2 workflow in, it'll be easier to see which assignments have "completed" marking
+		allMarkerAssignments.diff(unmarkedAssignments)
+	}
+
+	lazy val markingPastAssignments: Seq[MarkerAssignmentInformation] = benchmarkTask("Get past assignments") {
+		allMarkerAssignments.diff(unmarkedAssignments).diff(markingInProgressAssignments)
+	}
+
+	private lazy val allMarkerAssignments: Seq[MarkerAssignmentInformation] = benchmarkTask("Get assignments for marking") {
+		assessmentService.getAssignmentWhereMarker(user.apparentUser, Some(academicYear))
+			.sortBy(a => (a.openEnded, a.closeDate))
+			.map { assignment =>
+				val markingWorkflow = assignment.markingWorkflow
+
+				val students = markingWorkflow.getMarkersStudents(assignment, user.apparentUser)
+				val submissions = assignment.getMarkersSubmissions(user.apparentUser)
+
+				val extensions = assignment.extensions.asScala.filter { extension =>
+					extension.approved && students.exists(extension.isForUser)
+				}
+
+				val markerFeedbacks = submissions.flatMap { submission =>
+					assignment.getAllMarkerFeedbacks(submission.usercode, user.apparentUser)
+				}
+
+				MarkerAssignmentInformation(
+					assignment,
+					students,
+					submissions,
+					extensions,
+					markerFeedbacks
+				)
+			}
 	}
 
 }

@@ -3,18 +3,23 @@
 
 <#-- Do we expect this user to submit assignments, and therefore show them some text even if there aren't any? -->
 <#assign expect_assignments = user.student || user.PGR || user.alumni />
-<#assign is_marker = false /> <#-- TODO -->
-<#assign is_admin = nonempty(moduleManagerDepartments) || nonempty(adminDepartments) />
+<#assign is_student = expect_assignments || !studentInformation.empty />
+<#assign is_marker = !markerInformation.empty />
+<#assign is_admin = !adminInformation.empty />
 
-<#if expect_assignments || !studentInformation.empty>
+<#if is_student>
 	<#include "_student.ftl" />
 </#if>
 
-<#if is_admin>
+<#if is_marker>
+	<#include "_marker.ftl" />
+</#if>
+
+<#if is_admin || is_marker> <#-- Markers get the activity stream -->
 	<#include "_admin.ftl" />
 </#if>
 
-<#if !expect_assignments && studentInformation.empty && !is_marker && !is_admin>
+<#if !is_student && !is_marker && !is_admin>
 	<h1>Coursework Management</h1>
 
 	<p class="lead muted">
