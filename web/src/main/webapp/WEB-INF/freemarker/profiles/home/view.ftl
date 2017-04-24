@@ -135,5 +135,16 @@
 			</div>
 		</#if>
 	</div>
+
+	<#-- Prevent empty page -->
+	<#if !is_staff && !isPGR && !showMyStudents && !nonempty(searchDepartments) && !nonempty(adminDepartments)>
+		<p class="lead muted">
+			This is a service for viewing student profiles and managing student records.
+		</p>
+
+		<p>
+			If you cannot see your student profile, please contact <a id="email-support-link" href="mailto:tabula@warwick.ac.uk">tabula@warwick.ac.uk</a>.
+		</p>
+	</#if>
 </#if>
 </#escape>

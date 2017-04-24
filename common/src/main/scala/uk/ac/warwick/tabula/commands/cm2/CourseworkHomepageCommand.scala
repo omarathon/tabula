@@ -5,11 +5,12 @@ import uk.ac.warwick.tabula.commands._
 import uk.ac.warwick.tabula.commands.cm2.CourseworkHomepageCommand._
 import uk.ac.warwick.tabula.data.model.forms.Extension
 import uk.ac.warwick.tabula.data.model.{Assignment, AssignmentFeedback, Department, Submission}
+import uk.ac.warwick.tabula.helpers.DateTimeOrdering._
+import uk.ac.warwick.tabula.helpers.StringUtils._
 import uk.ac.warwick.tabula.permissions.Permissions
 import uk.ac.warwick.tabula.services._
 import uk.ac.warwick.tabula.system.permissions.PubliclyVisiblePermissions
 import uk.ac.warwick.tabula.{AcademicYear, CurrentUser}
-import uk.ac.warwick.tabula.helpers.DateTimeOrdering._
 
 import scala.collection.JavaConverters._
 
@@ -40,6 +41,7 @@ object CourseworkHomepageCommand {
 
 	case class CourseworkHomepageInformation(
 		studentInformation: CourseworkHomepageStudentInformation,
+		homeDepartment: Option[Department],
 		moduleManagerDepartments: Seq[Department],
 		adminDepartments: Seq[Department]
 	)
@@ -75,6 +77,7 @@ class CourseworkHomepageCommandInternal(val academicYear: AcademicYear, val user
 	override def applyInternal(): Result =
 		CourseworkHomepageInformation(
 			studentInformation,
+			homeDepartment,
 			moduleManagerDepartments,
 			adminDepartments
 		)
@@ -83,6 +86,10 @@ class CourseworkHomepageCommandInternal(val academicYear: AcademicYear, val user
 
 trait CourseworkHomepageAdminDepartments extends TaskBenchmarking {
 	self: CourseworkHomepageCommandState with ModuleAndDepartmentServiceComponent =>
+
+	lazy val homeDepartment: Option[Department] = benchmarkTask("Get user's home department") {
+		user.departmentCode.maybeText.flatMap(moduleAndDepartmentService.getDepartmentByCode)
+	}
 
 	lazy val moduleManagerDepartments: Seq[Department] = benchmarkTask("Get module manager departments") {
 		val ownedModules = benchmarkTask("Get owned modules") {
@@ -129,7 +136,8 @@ trait CourseworkHomepageStudentAssignments extends TaskBenchmarking {
 
 	private def lateFormative(assignment: Assignment) = !assignment.summative && assignment.isClosed
 
-	def enhance(assignment: Assignment) = {
+	// Public for testing
+	def enhance(assignment: Assignment): StudentAssignmentInformation = {
 		val extension = assignment.extensions.asScala.find(e => e.isForUser(user.apparentUser))
 		// isExtended: is within an approved extension
 		val isExtended = assignment.isWithinExtension(user.apparentUser)

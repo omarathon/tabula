@@ -33,6 +33,7 @@ abstract class AbstractHomeController
 		Mav(s"$urlPrefix/home/view",
 			"academicYear" -> command.academicYear,
 			"studentInformation" -> info.studentInformation,
+			"homeDepartment" -> info.homeDepartment,
 			"moduleManagerDepartments" -> info.moduleManagerDepartments,
 			"adminDepartments" -> info.adminDepartments
 		).secondCrumbs(academicYearBreadcrumbs(command.academicYear)(Routes.homeForYear): _*)
