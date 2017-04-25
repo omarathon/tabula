@@ -8,7 +8,7 @@ import uk.ac.warwick.tabula.cm2.web.Routes
 import uk.ac.warwick.tabula.commands.cm2.CourseworkHomepageCommand
 import uk.ac.warwick.tabula.commands.cm2.CourseworkHomepageCommand.Command
 import uk.ac.warwick.tabula.services.{AutowiringMaintenanceModeServiceComponent, AutowiringUserSettingsServiceComponent}
-import uk.ac.warwick.tabula.web.controllers.AcademicYearScopedController
+import uk.ac.warwick.tabula.web.controllers.{AcademicYearScopedController, BaseController}
 import uk.ac.warwick.tabula.{AcademicYear, CurrentUser}
 
 abstract class AbstractHomeController
@@ -60,5 +60,15 @@ class HomeForYearController extends AbstractHomeController {
 	@ModelAttribute("activeAcademicYear")
 	override def activeAcademicYear(@PathVariable academicYear: AcademicYear): Option[AcademicYear] =
 		retrieveActiveAcademicYear(Option(academicYear))
+
+}
+
+@Profile(Array("cm2Enabled"))
+@Controller
+@RequestMapping(Array("/${cm2.prefix}/admin", "/${cm2.prefix}/admin/department"))
+class HomeRewritesController extends BaseController {
+
+	@RequestMapping
+	def rewriteToHome = Redirect(Routes.home)
 
 }
