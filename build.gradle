@@ -23,7 +23,7 @@ ext {
     scalaMajorVersion = "2.11"
     springVersion = "4.2.4.RELEASE"
     hibernateVersion = "4.3.11.Final"
-    jacksonVersion = "2.6.3"
+    jacksonVersion = "2.6.5"
     elasticsearchVersion = "2.1.1"
     dispatchVersion = "0.8.10"
     poiVersion = "3.13"
@@ -116,6 +116,10 @@ subprojects {
         // Not actually provided -  it's a ruse to exclude commons-logging from the WAR.
         // The API at runtime is provided by jcl-over-slf4j.
         providedCompile 'commons-logging:commons-logging:1.2'
+
+        providedCompile "com.fasterxml.jackson.core:jackson-core:${jacksonVersion}"
+        providedCompile "com.fasterxml.jackson.core:jackson-databind:${jacksonVersion}"
+        providedCompile "com.fasterxml.jackson.core:jackson-annotations:${jacksonVersion}"
         /* ******* */
 
         testCompile 'junit:junit:4.12'

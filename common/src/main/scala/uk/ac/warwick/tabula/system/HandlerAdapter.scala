@@ -46,7 +46,7 @@ class HandlerAdapter extends org.springframework.web.servlet.mvc.method.annotati
 		val converter = getMessageConverters.asScala.collectFirst {
 			case c: MappingJackson2HttpMessageConverter => c
 		}.getOrElse {
-			val c = new MappingJackson2HttpMessageConverter()
+			val c = new MappingJackson2HttpMessageConverter
 			getMessageConverters.add(c)
 			c
 		}
