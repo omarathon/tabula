@@ -21,9 +21,7 @@ object CopyAssignmentsCommand {
 			with CopyAssignmentsCommandTriggers
 			with CopyAssignmentsCommandNotifications
 			with AutowiringAssessmentServiceComponent
-			with AutowiringAssessmentMembershipServiceComponent {
-			override lazy val eventName = "CopyAssignmentsFromPrevious"
-		}
+			with AutowiringAssessmentMembershipServiceComponent
 }
 
 abstract class CopyAssignmentsCommand(val department: Department, val modules: Seq[Module]) extends CommandInternal[Seq[Assignment]]
@@ -120,6 +118,9 @@ trait CopyAssignmentsState {
 
 trait CopyAssignmentsDescription extends Describable[Seq[Assignment]] {
 	self: CopyAssignmentsState =>
+
+	override lazy val eventName = "CopyAssignmentsFromPrevious"
+
 	def describe(d: Description): Unit = d
 		.properties("modules" -> modules.map(_.id))
 		.properties("assignments" -> assignments.asScala.map(_.id))

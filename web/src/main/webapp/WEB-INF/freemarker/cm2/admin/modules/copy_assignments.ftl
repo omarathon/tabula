@@ -5,8 +5,7 @@
 	<form action="" method="post" class="copy-assignments">
 		<div class="submit-buttons">
 			<input class="btn btn-primary confirm-btn" type="submit" value="Confirm">
-			<#assign cancelDestination><@routes.cm2.departmenthome department /></#assign>
-			<a class='btn btn-default' href='${cancelDestination}'>Cancel</a>
+			<a class='btn btn-default' href='<@url page=cancel />'>Cancel</a>
 		</div>
 
 		<#assign modules = copyAssignmentsCommand.modules />
@@ -26,7 +25,7 @@
 
 		<div class="submit-buttons">
 			<input class="btn btn-primary confirm-btn" type="submit" value="Confirm">
-			<a class='btn btn-default' href='${cancelDestination}'>Cancel</a>
+			<a class='btn btn-default' href='<@url page=cancel />'>Cancel</a>
 		</div>
 
 	</form>
