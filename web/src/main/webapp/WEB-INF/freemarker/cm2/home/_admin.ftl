@@ -7,7 +7,9 @@
 	</a>
 </#macro>
 
-<h1>Administration</h1>
+<#if is_admin && !is_marker>
+	<h1>Administration</h1>
+</#if>
 
 <div class="row">
 	<div class="col-md-6">
@@ -19,27 +21,29 @@
 		</div>
 	</div>
 
-	<div class="col-md-6">
-		<#if nonempty(moduleManagerDepartments)>
-			<h2>My managed modules</h2>
+	<#if is_admin>
+		<div class="col-md-6">
+			<#if nonempty(adminInformation.moduleManagerDepartments)>
+				<h2>My managed modules</h2>
 
-			<ul>
-				<#list moduleManagerDepartments as department>
-					<li><@link_to_department department /></li>
-				</#list>
-			</ul>
-		</#if>
+				<ul>
+					<#list adminInformation.moduleManagerDepartments as department>
+						<li><@link_to_department department /></li>
+					</#list>
+				</ul>
+			</#if>
 
-		<#if nonempty(adminDepartments)>
-			<h2>My department-wide responsibilities</h2>
+			<#if nonempty(adminInformation.adminDepartments)>
+				<h2>My department-wide responsibilities</h2>
 
-			<ul>
-				<#list adminDepartments as department>
-					<li><@link_to_department department /></li>
-				</#list>
-			</ul>
-		</#if>
-	</div>
+				<ul>
+					<#list adminInformation.adminDepartments as department>
+						<li><@link_to_department department /></li>
+					</#list>
+				</ul>
+			</#if>
+		</div>
+	</#if>
 </div>
 
 </#escape>

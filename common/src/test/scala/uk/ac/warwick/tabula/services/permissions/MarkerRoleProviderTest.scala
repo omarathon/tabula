@@ -53,10 +53,10 @@ class MarkerRoleProviderTest extends TestBase with Mockito {
 
 	val cuscavUser = new CurrentUser(new User("cuscav"), new User("cuscav"))
 
-	mockAssignmentService.getAssignmentsByDepartmentAndMarker(dept, cuscavUser) returns Seq(assignmentIsMarker1, assignmentIsMarker2)
-	mockAssignmentService.getAssignmentsByModuleAndMarker(mod1, cuscavUser) returns Seq(assignmentIsMarker1)
-	mockAssignmentService.getAssignmentsByModuleAndMarker(mod2, cuscavUser) returns Seq(assignmentIsMarker2)
-	mockAssignmentService.getAssignmentsByModuleAndMarker(mod3, cuscavUser) returns Seq()
+	mockAssignmentService.getAssignmentsByDepartmentAndMarker(dept, cuscavUser, None) returns Seq(assignmentIsMarker1, assignmentIsMarker2)
+	mockAssignmentService.getAssignmentsByModuleAndMarker(mod1, cuscavUser, None) returns Seq(assignmentIsMarker1)
+	mockAssignmentService.getAssignmentsByModuleAndMarker(mod2, cuscavUser, None) returns Seq(assignmentIsMarker2)
+	mockAssignmentService.getAssignmentsByModuleAndMarker(mod3, cuscavUser, None) returns Seq()
 
 	@Test def forAssignment() = withCurrentUser(cuscavUser) {
 		provider.getRolesFor(currentUser, assignmentIsMarker1) should be (Seq(Marker(assignmentIsMarker1)))

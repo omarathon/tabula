@@ -48,7 +48,7 @@ class CourseworkHomepageCommandInternal(user: CurrentUser) extends CommandIntern
 			val ownedModules = benchmarkTask("Get owned modules") { moduleAndDepartmentService.modulesWithPermission(user, Permissions.Module.ManageAssignments) }
 
 			val assignmentsForMarking = benchmarkTask("Get assignments for marking") {
-				assessmentService.getAssignmentWhereMarker(user.apparentUser).sortBy(_.closeDate)
+				assessmentService.getAssignmentWhereMarker(user.apparentUser, None).sortBy(_.closeDate)
 			}
 			// add the number of submissions to each assignment for marking
 			val assignmentsForMarkingInfo = benchmarkTask("Get markers submissions") {

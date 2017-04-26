@@ -24,12 +24,12 @@ class MarkerRoleProvider extends RoleProvider with TaskBenchmarking with Request
 		scope match {
 			case department: Department =>
 				getRoles(cachedBy((user, scope.toString)) {
-					assignmentService.get.getAssignmentsByDepartmentAndMarker(department, user)
+					assignmentService.get.getAssignmentsByDepartmentAndMarker(department, user, None)
 				}.toStream)
 
 			case module: Module =>
 				getRoles(cachedBy((user, scope.toString)) {
-					assignmentService.get.getAssignmentsByModuleAndMarker(module, user).toStream
+					assignmentService.get.getAssignmentsByModuleAndMarker(module, user, None).toStream
 				}.toStream)
 
 			case assessment: Assessment if assessment.isMarker(user.apparentUser) =>
