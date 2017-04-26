@@ -1,10 +1,10 @@
 <#escape x as x?html>
+	<#import "*/modal_macros.ftl" as modal />
 	<h1>Create assignments from previous for ${title}</h1>
 
 	<form action="" method="post" class="copy-assignments">
-
 		<div class="submit-buttons">
-			<input class="btn btn-primary" type="submit" value="Confirm">
+			<input class="btn btn-primary confirm-btn" type="submit" value="Confirm">
 			<#assign cancelDestination><@routes.cm2.departmenthome department /></#assign>
 			<a class='btn btn-default' href='${cancelDestination}'>Cancel</a>
 		</div>
@@ -25,9 +25,49 @@
 
 
 		<div class="submit-buttons">
-			<input class="btn btn-primary" type="submit" value="Confirm">
+			<input class="btn btn-primary confirm-btn" type="submit" value="Confirm">
 			<a class='btn btn-default' href='${cancelDestination}'>Cancel</a>
 		</div>
 
 	</form>
+
+
+	<div class="modal fade" id="confirmModal">
+		<@modal.wrapper cssClass="modal-xs">
+			<@modal.body>
+			<p>Are you sure you want to create these assignments?</p>
+			</@modal.body>
+			<@modal.footer>
+				<div>
+					<button type="button" class="btn btn-primary" name="submit">Confirm</button>
+					<button type="button" class="btn btn-default" name="cancel">Cancel</button>
+				</div>
+			</@modal.footer>
+		</@modal.wrapper>
+	</div>
+
+<script>
+	jQuery(function($) {
+		var $form = $('form.copy-assignments');
+		var $confirmModal = $('#confirmModal');
+
+		$('.modal-footer button[name="submit"]').on('click', function(e) {
+			$form.submit();
+			$confirmModal.modal('hide');
+		});
+
+		$('.modal-footer button[name="cancel"]').on('click', function(e) {
+			e.preventDefault();
+			e.stopPropagation();
+			$confirmModal.modal('hide');
+		});
+
+		$('.confirm-btn').on('click', function(e) {
+			e.preventDefault();
+			e.stopPropagation();
+			$confirmModal.modal('show');
+		});
+
+	});
+</script>
 </#escape>

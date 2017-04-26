@@ -16,12 +16,11 @@ import uk.ac.warwick.tabula.commands.cm2.assignments.{CopyAssignmentsCommand, Co
 import uk.ac.warwick.tabula.services.{AutowiringAssessmentMembershipServiceComponent, AutowiringAssessmentServiceComponent}
 import uk.ac.warwick.tabula.web.Mav
 import uk.ac.warwick.tabula.web.controllers.cm2.CourseworkController
-import uk.ac.warwick.tabula.web.controllers.coursework.OldCourseworkController
 
 
 @Profile(Array("cm1Enabled")) @Controller
 @RequestMapping(value=Array("/${cm2.prefix}/admin/module/{module}/copy-assignments"))
-class CopyModuleAssignmentsController extends CourseworkController with UnarchivedAssignmentsMap {
+class CopyModuleAssignmentsController extends CourseworkController with AliveAssignmentsMap {
 
 	@ModelAttribute
 	def copyAssignmentsCommand(@PathVariable module: Module) = CopyAssignmentsCommand(mandatory(module).adminDepartment, Seq(module))
@@ -52,7 +51,7 @@ class CopyModuleAssignmentsController extends CourseworkController with Unarchiv
 
 @Profile(Array("cm1Enabled")) @Controller
 @RequestMapping(value=Array("/${cm2.prefix}/admin/department/{department}/copy-assignments"))
-class CopyDepartmentAssignmentsController extends CourseworkController with UnarchivedAssignmentsMap {
+class CopyDepartmentAssignmentsController extends CourseworkController with AliveAssignmentsMap {
 
 	@ModelAttribute
 	def copyAssignmentsCommand(@PathVariable department: Department): CopyAssignmentsCommand with ComposableCommand[Seq[Assignment]] with CopyAssignmentsPermissions with CopyAssignmentsDescription with AutowiringAssessmentServiceComponent with AutowiringAssessmentMembershipServiceComponent = {
@@ -79,7 +78,7 @@ class CopyDepartmentAssignmentsController extends CourseworkController with Unar
 
 }
 
-trait UnarchivedAssignmentsMap {
+trait AliveAssignmentsMap {
 
 	def moduleAssignmentMap(modules: Seq[Module]): Map[String, Seq[Assignment]] = (
 		for(module <- modules) yield module.code ->  module.assignments.asScala.filter { _.isAlive }

@@ -22,8 +22,8 @@ object CopyAssignmentsCommand {
 			with CopyAssignmentsCommandNotifications
 			with AutowiringAssessmentServiceComponent
 			with AutowiringAssessmentMembershipServiceComponent {
-				override lazy val eventName = "CopyAssignmentsFromPrevious"
-			}
+			override lazy val eventName = "CopyAssignmentsFromPrevious"
+		}
 }
 
 abstract class CopyAssignmentsCommand(val department: Department, val modules: Seq[Module]) extends CommandInternal[Seq[Assignment]]
@@ -34,14 +34,6 @@ abstract class CopyAssignmentsCommand(val department: Department, val modules: S
 	def applyInternal(): Seq[Assignment] = {
 
 		val scalaAssignments = assignments.asScala
-
-		if (archive) {
-			for (assignment <- scalaAssignments) {
-				assignment.archive()
-				assessmentService.save(assignment)
-			}
-		}
-
 		scalaAssignments.map { assignment =>
 			val newAssignment = copy(assignment)
 			assessmentService.save(newAssignment)
@@ -49,7 +41,7 @@ abstract class CopyAssignmentsCommand(val department: Department, val modules: S
 		}
 	}
 
-	def copy(assignment: Assignment) : Assignment = {
+	def copy(assignment: Assignment): Assignment = {
 		val newAssignment = new Assignment()
 		newAssignment.assignmentService = assignment.assignmentService // FIXME Used in testing
 		newAssignment.academicYear = academicYear
@@ -80,36 +72,36 @@ abstract class CopyAssignmentsCommand(val department: Department, val modules: S
 		newAssignment.automaticallyReleaseToMarkers = assignment.automaticallyReleaseToMarkers
 		newAssignment.automaticallySubmitToTurnitin = assignment.automaticallySubmitToTurnitin
 		newAssignment.anonymousMarking = assignment.anonymousMarking
-
+		newAssignment.cm2Assignment = true
+		newAssignment.cm2MarkingWorkflow = assignment.cm2MarkingWorkflow
+		newAssignment.workflowCategory = assignment.workflowCategory
 		newAssignment.addDefaultFields()
 
 		newAssignment.addFields(assignment.fields.asScala.sortBy(_.position).map(field => {
 			newAssignment.findField(field.name).foreach(newAssignment.removeField)
 			field.duplicate(newAssignment)
-		}):_*)
+		}): _*)
 
 		// TAB-1175 Guess SITS links
 		assignment.assessmentGroups.asScala
-			.filter { _.toUpstreamAssessmentGroup(newAssignment.academicYear).isDefined } // Only where defined in the new year
+			.filter {
+				_.toUpstreamAssessmentGroup(newAssignment.academicYear).isDefined
+			} // Only where defined in the new year
 			.foreach { group =>
-				val newGroup = new AssessmentGroup
-				newGroup.assessmentComponent = group.assessmentComponent
-				newGroup.occurrence = group.occurrence
-				newGroup.assignment = newAssignment
-				newAssignment.assessmentGroups.add(newGroup)
-			}
+			val newGroup = new AssessmentGroup
+			newGroup.assessmentComponent = group.assessmentComponent
+			newGroup.occurrence = group.occurrence
+			newGroup.assignment = newAssignment
+			newAssignment.assessmentGroups.add(newGroup)
+		}
 
 		newAssignment
 	}
 }
 
-trait CopyAssignmentsPermissions extends ArchiveAssignmentsPermissionsDel {
+trait CopyAssignmentsPermissions extends RequiresPermissionsChecking with PermissionsCheckingMethods {
 	self: CopyAssignmentsState =>
 	override def permissionsCheck(p: PermissionsChecking) {
-		if (archive) {
-			super.permissionsCheck(p)
-		}
-
 		if (modules.isEmpty) p.PermissionCheck(Permissions.Assignment.Create, mandatory(department))
 		else for (module <- modules) {
 			p.mustBeLinked(p.mandatory(module), mandatory(department))
@@ -118,9 +110,12 @@ trait CopyAssignmentsPermissions extends ArchiveAssignmentsPermissionsDel {
 	}
 }
 
-trait CopyAssignmentsState extends ArchiveAssignmentsStateDel {
+trait CopyAssignmentsState {
+	val department: Department
+	val modules: Seq[Module]
+	var assignments: JList[Assignment] = JArrayList()
+
 	var academicYear: AcademicYear = AcademicYear.guessSITSAcademicYearByDate(new DateTime)
-	var archive: JBoolean = false
 }
 
 trait CopyAssignmentsDescription extends Describable[Seq[Assignment]] {
@@ -128,7 +123,6 @@ trait CopyAssignmentsDescription extends Describable[Seq[Assignment]] {
 	def describe(d: Description): Unit = d
 		.properties("modules" -> modules.map(_.id))
 		.properties("assignments" -> assignments.asScala.map(_.id))
-		.properties("isArchiving" -> archive)
 }
 
 trait CopyAssignmentsCommandTriggers extends GeneratesTriggers[Seq[Assignment]] {
@@ -148,28 +142,9 @@ trait CopyAssignmentsCommandNotifications extends SchedulesNotifications[Seq[Ass
 
 }
 
-
 trait ArchiveAssignmentsStateDel {
 	val department: Department
 	val modules: Seq[Module]
 	var assignments: JList[Assignment] = JArrayList()
 }
 
-trait ArchiveAssignmentsDescriptionDel extends Describable[Seq[Assignment]] {
-	self: ArchiveAssignmentsStateDel =>
-	def describe(d: Description): Unit = d
-		.properties("modules" -> modules.map(_.id))
-		.properties("assignments" -> assignments.asScala.map(_.id))
-}
-
-
-trait ArchiveAssignmentsPermissionsDel extends RequiresPermissionsChecking with PermissionsCheckingMethods {
-	self: ArchiveAssignmentsStateDel =>
-	def permissionsCheck(p: PermissionsChecking) {
-		if (modules.isEmpty) p.PermissionCheck(Permissions.Assignment.Archive, mandatory(department))
-		else for (module <- modules) {
-			p.mustBeLinked(p.mandatory(module), mandatory(department))
-			p.PermissionCheck(Permissions.Assignment.Archive, module)
-		}
-	}
-}
