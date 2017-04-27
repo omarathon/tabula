@@ -23,11 +23,11 @@ class CopyAssignmentsCommandTest extends TestBase with Mockito {
 		val module: Module = Fixtures.module("bs101")
 		module.adminDepartment = department
 
-		val fakeDate = new DateTime(2013, 8, 23, 0, 0)
+		val fakeDate = new DateTime(2016, 8, 23, 0, 0)
 
 		val assignment: Assignment = Fixtures.assignment("Test")
 		assignment.addDefaultFields()
-		assignment.academicYear = AcademicYear.parse("12/13")
+		assignment.academicYear = AcademicYear.parse("15/16")
 		assignment.module = module
 		assignment.openDate = fakeDate
 		assignment.closeDate = fakeDate.plusDays(30)
@@ -43,9 +43,7 @@ class CopyAssignmentsCommandTest extends TestBase with Mockito {
 		assignment.allowExtensionsAfterCloseDate = true
 		assignment.summative = false
 		assignment.assignmentService = smartMock[AssessmentService]
-	//	assignment.anonymousMarking = assignment.anonymousMarking
-	//	assignment.cm2Assignment = true
-		//assignment.cm2MarkingWorkflow = assignment.cm2MarkingWorkflow
+		assignment.anonymousMarking = assignment.anonymousMarking
 		assignment.workflowCategory = Some(WorkflowCategory.NotDecided)
 
 	}
@@ -68,11 +66,11 @@ class CopyAssignmentsCommandTest extends TestBase with Mockito {
 				val command = new CopyAssignmentsCommand(department, Seq(module)) with CommandTestSupport
 				command.assignments = Seq(assignment).asJava
 				val newAssignment = command.applyInternal().head
-				newAssignment.academicYear.toString should be("13/14")
+				newAssignment.academicYear.toString should be("16/17")
 				newAssignment.module should be(module)
 				newAssignment.name should be("Test")
-				newAssignment.openDate should be(new DateTime(2014, 8, 22, 0, 0))
-				newAssignment.closeDate should be(new DateTime(2014, 8, 22, 0, 0).plusDays(30))
+				newAssignment.openDate should be(new DateTime(2017, 8, 22, 0, 0))
+				newAssignment.closeDate should be(new DateTime(2017, 8, 22, 0, 0).plusDays(30))
 				newAssignment.openEnded.booleanValue should be {false}
 				newAssignment.collectMarks.booleanValue should be {true}
 				newAssignment.collectSubmissions.booleanValue should be {true}
