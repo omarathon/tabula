@@ -65,14 +65,20 @@ abstract class CopyAssignmentsCommand(val department: Department, val modules: S
 		newAssignment.summative = assignment.summative
 		newAssignment.dissertation = assignment.dissertation
 		newAssignment.feedbackTemplate = assignment.feedbackTemplate
-		newAssignment.markingWorkflow = assignment.markingWorkflow
 		newAssignment.includeInFeedbackReportWithoutSubmissions = assignment.includeInFeedbackReportWithoutSubmissions
 		newAssignment.automaticallyReleaseToMarkers = assignment.automaticallyReleaseToMarkers
 		newAssignment.automaticallySubmitToTurnitin = assignment.automaticallySubmitToTurnitin
 		newAssignment.anonymousMarking = assignment.anonymousMarking
 		newAssignment.cm2Assignment = true
 		newAssignment.cm2MarkingWorkflow = assignment.cm2MarkingWorkflow
-		newAssignment.workflowCategory = assignment.workflowCategory
+		var workflowCtg = assignment.workflowCategory match {
+			case Some(workflowCategory: WorkflowCategory) =>
+				Some(workflowCategory)
+			case _ =>
+				Some(WorkflowCategory.NotDecided)
+		}
+		newAssignment.workflowCategory = workflowCtg
+
 		newAssignment.addDefaultFields()
 
 		newAssignment.addFields(assignment.fields.asScala.sortBy(_.position).map(field => {
