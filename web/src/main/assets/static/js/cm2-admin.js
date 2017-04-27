@@ -199,4 +199,25 @@
 
 	});
 
+    // code for bulk copy assignments
+    $(function(){
+
+        $('.copy-assignments').bigList({
+
+            setup: function(e){
+                if(!$(".collection-checkbox").is(":checked")){
+                    $('.btn-primary').prop('disabled', 'disabled');
+                }
+            },
+
+            onSomeChecked: function() {
+                $('.btn-primary').removeProp('disabled');
+            },
+
+            onNoneChecked: function() {
+                $('.btn-primary').prop('disabled', 'disabled');
+            }
+        });
+    });
+
 })(jQuery);
