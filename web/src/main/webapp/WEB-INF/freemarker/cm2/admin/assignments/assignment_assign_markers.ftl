@@ -11,11 +11,18 @@
 	<@f.form method="post" action=actionUrl  cssClass="dirty-check">
 		<@components.assignment_wizard 'markers' assignment.module false assignment />
 
-		<@f.errors cssClass="error form-errors" />
-		<#assign newRecord=false />
+		<p class="btn-toolbar">
+			<a class="return-items btn btn-default" href="<@routes.cm2.createassignmentmarkerstemplate assignment/>" >
+				Upload spreadsheet
+			</a>
+			<a class="return-items btn btn-default" href="#" >
+				Import small groups
+			</a>
+		</p>
 
+		<@f.errors cssClass="error form-errors" />
 		<#list state.keys as role>
-			<@allocateStudents role mapGet(stages, role) mapGet(state.markers, role) mapGet(state.unallocatedStudents, role) mapGet(state.allocations, role)  />
+			<@allocateStudents assignment role mapGet(stages, role) mapGet(state.markers, role) mapGet(state.unallocatedStudents, role) mapGet(state.allocations, role)  />
 		</#list>
 		<div class="fix-footer">
 			<input

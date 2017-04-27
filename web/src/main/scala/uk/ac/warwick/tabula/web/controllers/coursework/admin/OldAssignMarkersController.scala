@@ -128,7 +128,7 @@ class OldAssignmentAssignMarkersController extends OldCourseworkController {
 							 @PathVariable(value = "assignment") assignment: Assignment,
 							 @ModelAttribute("command") cmd: Appliable[Assignment],
 							 errors: Errors): Mav = {
-			Mav(s"$urlPrefix/admin/assignments/assignmarkers/upload-preview",
+			Mav(s"$urlPrefix/admin/assignments/assignmarkers/upload-previewupload-preview",
 				"assessment" -> assignment,
 				"isExam" -> false,
 				"assignMarkersURL" -> CourseworkRoutes.admin.assignment.assignMarkers(assignment),

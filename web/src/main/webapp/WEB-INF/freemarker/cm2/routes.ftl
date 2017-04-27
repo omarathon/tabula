@@ -34,6 +34,8 @@ TODO grab values from the Routes object in code, as that's pretty equivalent and
 <#macro createassignmentfeedback assignment><@_u page="/admin/assignments/new/${assignment.id}/feedback" /></#macro>
 <#macro createassignmentstudents assignment><@_u page="/admin/assignments/new/${assignment.id}/students" /></#macro>
 <#macro createassignmentmarkers assignment><@_u page="/admin/assignments/new/${assignment.id}/markers" /></#macro>
+<#macro createassignmentmarkerstemplate assignment><@_u page="/admin/assignments/new/${assignment.id}/markers/template" /></#macro>
+<#macro createassignmentmarkerstemplatedownload assignment><@_u page="/admin/assignments/new/${assignment.id}/markers/template/download" /></#macro>
 <#macro createassignmentsubmissions assignment><@_u page="/admin/assignments/new/${assignment.id}/submissions" /></#macro>
 <#macro createassignmentoptions assignment><@_u page="/admin/assignments/new/${assignment.id}/options" /></#macro>
 <#macro createassignmentreview assignment><@_u page="/admin/assignments/new/${assignment.id}/review" /></#macro>

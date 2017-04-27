@@ -66,7 +66,7 @@ function concatScripts(name, target, srcs, minify, dependencies) {
     return gulp.src(srcs.map(s => `${base}/${s}`), {base: base})
       .pipe(sourcemaps.init())
       .pipe(concat(target))
-      .pipe(minify ? uglify(uglifyOptions) : gutil.noop())
+      //.pipe(minify ? uglify(uglifyOptions) : gutil.noop())
       .pipe(sourcemaps.write({ includeContent: false, sourceRoot: '/static' }))
       .pipe(gulp.dest(base));
   });

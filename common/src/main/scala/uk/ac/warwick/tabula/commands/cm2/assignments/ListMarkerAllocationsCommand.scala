@@ -7,18 +7,61 @@ import ListMarkerAllocationsCommand._
 import uk.ac.warwick.tabula.data.model.Assignment
 import uk.ac.warwick.tabula.permissions.Permissions
 import uk.ac.warwick.tabula.services.CM2MarkingWorkflowService.Allocations
-import uk.ac.warwick.tabula.services._
+import uk.ac.warwick.tabula.services.{AssessmentMembershipServiceComponent, CM2MarkingWorkflowServiceComponent, UserLookupComponent, _}
 
 import scala.collection.immutable.SortedSet
 import scala.collection.mutable
 
 
 case class MarkerAllocations(
+	allStudents: SortedSet[Student],
 	keys: List[String], // ordered keys for all of the other maps - getting freemarker to iterate across maps in order is dumb
 	unallocatedStudents: Map[String, SortedSet[Student]],
 	allocations: Map[String, Map[Marker, SortedSet[Student]]],
 	markers: Map[String, SortedSet[Marker]]
 )
+
+trait FetchMarkerAllocations {
+	self: UserLookupComponent with CM2MarkingWorkflowServiceComponent
+		with AssessmentMembershipServiceComponent =>
+
+	def fetchAllocations(assignment: Assignment): MarkerAllocations = {
+		val workflow = assignment.cm2MarkingWorkflow
+		val stagesByRole = workflow.allStages.groupBy(_.roleName)
+		val allStudents = SortedSet(assessmentMembershipService.determineMembershipUsers(assignment): _*)
+
+		val allocations = mutable.Map[String, Map[Marker, SortedSet[Student]]]()
+		val markers = mutable.Map[String, SortedSet[Marker]]()
+
+		def toSortedSet(allocations: Allocations) = allocations.map{case(marker, students) =>
+			marker -> SortedSet(students.toSeq: _*)
+		}
+
+		for {
+			(role, stages) <- stagesByRole
+			stage <- stages
+		} if(workflow.workflowType.rolesShareAllocations) {
+			// key by role as the allocations are the same
+			allocations += role -> toSortedSet(cm2MarkingWorkflowService.getMarkerAllocations(assignment, stage))
+			markers += role -> SortedSet(workflow.markers(stage): _*)
+		} else {
+			allocations += stage.allocationName -> toSortedSet(cm2MarkingWorkflowService.getMarkerAllocations(assignment, stage))
+			markers += stage.allocationName -> SortedSet(workflow.markers(stage): _*)
+		}
+
+		val unallocatedStudents = allocations.map{ case(key, allocation) =>
+			key ->  (allStudents -- allocation.filterKeys(_.isFoundUser).values.flatten.toSet)
+		}
+
+		MarkerAllocations(
+			allStudents = allStudents,
+			keys = workflow.allocationOrder,
+			unallocatedStudents = Map(unallocatedStudents.toList: _*),
+			allocations = Map(allocations.toList: _*),
+			markers = Map(markers.toList: _*)
+		)
+	}
+}
 
 object ListMarkerAllocationsCommand {
 
@@ -31,55 +74,18 @@ object ListMarkerAllocationsCommand {
 		with ComposableCommand[MarkerAllocations]
 		with ListMarkerAllocationsPermissions
 		with Unaudited
+		with ReadOnly
 		with AutowiringUserLookupComponent
 		with AutowiringCM2MarkingWorkflowServiceComponent
 		with AutowiringAssessmentMembershipServiceComponent
 }
 
 class ListMarkerAllocationsCommandInternal(val assignment: Assignment) extends CommandInternal[MarkerAllocations]
-	with ListMarkerAllocationsState {
+	with ListMarkerAllocationsState with FetchMarkerAllocations {
 
-	// selftype for dependencies go here
 	this: UserLookupComponent with CM2MarkingWorkflowServiceComponent with AssessmentMembershipServiceComponent =>
 
-	def applyInternal(): MarkerAllocations = {
-
-		val workflow = assignment.cm2MarkingWorkflow
-		val stagesByRole = workflow.allStages.groupBy(_.roleName)
-		val allStudents = SortedSet(assessmentMembershipService.determineMembershipUsers(assignment): _*)
-
-		val allocations = mutable.LinkedHashMap[String, Map[Marker, SortedSet[Student]]]()
-		val markers = mutable.LinkedHashMap[String, SortedSet[Marker]]()
-
-		def toSortedSet(allocations: Allocations) = allocations.map{case(marker, students) =>
-			marker -> SortedSet(students.toSeq: _*)
-		}
-
-		for {
-			(role, stages) <- stagesByRole
-			stage <- stages
-		} if(workflow.workflowType.rolesShareAllocations) {
-				// key by role as the allocations are the same
-				allocations += role -> toSortedSet(cm2MarkingWorkflowService.getMarkerAllocations(assignment, stage))
-				markers += role -> SortedSet(workflow.markers(stage): _*)
-		} else {
-			allocations +=  stage.allocationName -> toSortedSet(cm2MarkingWorkflowService.getMarkerAllocations(assignment, stage))
-			markers += stage.allocationName -> SortedSet(workflow.markers(stage): _*)
-		}
-
-
-		val keys: List[String] = if(workflow.workflowType.rolesShareAllocations) {
-			stagesByRole.keys.toList.sortBy(r => stagesByRole(r).map(_.order).min) // sort roles by their earliest stages
-		} else {
-			workflow.allStages.sortBy(_.order).map(_.allocationName).toList
-		}
-
-		val unallocatedStudents = allocations.map{ case(key, allocation) =>
-			key ->  (allStudents -- allocation.filterKeys(_.isFoundUser).values.flatten.toSet)
-		}
-
-		MarkerAllocations(keys, Map(unallocatedStudents.toList: _*), Map(allocations.toList: _*), Map(markers.toList: _*))
-	}
+	def applyInternal(): MarkerAllocations = fetchAllocations(assignment)
 }
 
 trait ListMarkerAllocationsPermissions extends RequiresPermissionsChecking with PermissionsCheckingMethods {

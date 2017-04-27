@@ -4,8 +4,8 @@ import org.springframework.validation.BindingResult
 import uk.ac.warwick.spring.Wire
 import uk.ac.warwick.tabula.ItemNotFoundException
 import uk.ac.warwick.tabula.commands._
-import uk.ac.warwick.tabula.services.coursework.docconversion.MarkerAllocationExtractor
-import uk.ac.warwick.tabula.services.coursework.docconversion.MarkerAllocationExtractor.{NoMarker, SecondMarker, FirstMarker, ParsedRow}
+import uk.ac.warwick.tabula.services.coursework.docconversion.OldMarkerAllocationExtractor
+import uk.ac.warwick.tabula.services.coursework.docconversion.OldMarkerAllocationExtractor.{NoMarker, SecondMarker, FirstMarker, ParsedRow}
 import uk.ac.warwick.tabula.data.Transactions._
 import uk.ac.warwick.tabula.data.model._
 import uk.ac.warwick.tabula.services.{AutowiringAssessmentServiceComponent, AssessmentServiceComponent}
@@ -34,7 +34,7 @@ class OldAssignMarkersCommand(val module: Module, val assessment: Assessment)
 
 	self: AssignMarkersCommandState with AssessmentServiceComponent with UserGroupDaoComponent =>
 
-	var alloctaionExtractor: MarkerAllocationExtractor = Wire[MarkerAllocationExtractor]
+	var alloctaionExtractor: OldMarkerAllocationExtractor = Wire[OldMarkerAllocationExtractor]
 	var file: UploadedFile = new UploadedFile
 
 	val markingWorflow: MarkingWorkflow = Option(assessment.markingWorkflow).getOrElse(throw new ItemNotFoundException())
@@ -109,7 +109,7 @@ class OldAssignMarkersCommand(val module: Module, val assessment: Assessment)
 
 	def validateUploadedFile(result: BindingResult) {
 		val fileNames = file.fileNames map (_.toLowerCase)
-		val invalidFiles = fileNames.filter(s => !MarkerAllocationExtractor.AcceptedFileExtensions.exists(s.endsWith))
+		val invalidFiles = fileNames.filter(s => !OldMarkerAllocationExtractor.AcceptedFileExtensions.exists(s.endsWith))
 
 		if (invalidFiles.size > 0) {
 			if (invalidFiles.size == 1) result.rejectValue("file", "file.wrongtype.one", Array(invalidFiles.mkString("")), "")

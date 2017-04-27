@@ -14,7 +14,7 @@
 	</li>
 </#macro>
 
-<#macro allocateStudents role stages markers unassigned assigned>
+<#macro allocateStudents assignment role stages markers unassigned assigned>
 <h2>Allocate students to ${role}s</h2>
 <p>Drag students onto a ${role} to allocate them. Select multiple students by dragging a box around them. You can also hold the <kbd class="keyboard-control-key">Ctrl</kbd> key and drag to add to a selection.</p>
 <div class="fix-area">
@@ -28,14 +28,11 @@
 		<!-- persist header -->
 		<div class="fix-header pad-when-fixed">
 			<p class="btn-toolbar">
-				<a class="random btn btn-default" data-toggle="randomise" data-disabled-on="empty-list"
-				   href="#" >
-					<i class="icon-random"></i> Randomly allocate
+				<a class="random btn btn-default" data-toggle="randomise" data-disabled-on="empty-list" href="#" >
+					Randomly allocate
 				</a>
-				</a>
-				<a class="return-items btn btn-default" data-toggle="return" data-disabled-on="no-allocation"
-				   href="#" >
-					<i class="icon-arrow-left"></i> Remove all
+				<a class="return-items btn btn-default" data-toggle="return" data-disabled-on="no-allocation" href="#" >
+					Remove all
 				</a>
 			</p>
 			<div class="row">
