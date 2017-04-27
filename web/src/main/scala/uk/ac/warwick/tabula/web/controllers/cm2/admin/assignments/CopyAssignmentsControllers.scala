@@ -3,24 +3,24 @@ package uk.ac.warwick.tabula.web.controllers.cm2.admin.assignments
 import org.joda.time.DateTime
 import org.springframework.context.annotation.Profile
 import org.springframework.stereotype.Controller
-import org.springframework.validation.Errors
 import org.springframework.web.bind.annotation.{ModelAttribute, PathVariable, RequestMapping}
 import uk.ac.warwick.tabula.JavaImports.JList
 import uk.ac.warwick.tabula.cm2.web.Routes
 import uk.ac.warwick.tabula.commands.cm2.assignments.CopyAssignmentsCommand
 import uk.ac.warwick.tabula.data.model.{Assignment, Department, Module}
-import uk.ac.warwick.tabula.services.{AutowiringMaintenanceModeServiceComponent, AutowiringModuleAndDepartmentServiceComponent, AutowiringUserSettingsServiceComponent}
+import uk.ac.warwick.tabula.services.{AutowiringMaintenanceModeServiceComponent, AutowiringUserSettingsServiceComponent}
 import uk.ac.warwick.tabula.web.Mav
 import uk.ac.warwick.tabula.web.controllers.cm2.CourseworkController
 import uk.ac.warwick.tabula.web.controllers.AcademicYearScopedController
-import uk.ac.warwick.tabula.{AcademicYear, CurrentUser}
+import uk.ac.warwick.tabula.AcademicYear
 
 import scala.collection.JavaConverters._
 
 
 abstract class AbstractCopyAssignmentsController extends CourseworkController
-	with AutowiringModuleAndDepartmentServiceComponent with AutowiringUserSettingsServiceComponent
-	with AutowiringMaintenanceModeServiceComponent with AcademicYearScopedController {
+	with AutowiringUserSettingsServiceComponent
+	with AutowiringMaintenanceModeServiceComponent
+	with AcademicYearScopedController {
 
 	val academicYear = activeAcademicYear.getOrElse(AcademicYear.guessSITSAcademicYearByDate(DateTime.now))
 
@@ -51,7 +51,7 @@ class CopyModuleAssignmentsController extends AbstractCopyAssignmentsController 
 	}
 
 	@RequestMapping(method = Array(POST))
-	def submit(cmd: CopyAssignmentsCommand, @PathVariable module: Module, errors: Errors, user: CurrentUser): Mav = {
+	def submit(cmd: CopyAssignmentsCommand, @PathVariable module: Module): Mav = {
 		cmd.apply()
 		Redirect(Routes.admin.module(module, academicYear))
 	}
@@ -83,7 +83,7 @@ class CopyDepartmentAssignmentsController extends AbstractCopyAssignmentsControl
 	}
 
 	@RequestMapping(method = Array(POST))
-	def submit(cmd: CopyAssignmentsCommand, @PathVariable department: Department, errors: Errors, user: CurrentUser): Mav = {
+	def submit(cmd: CopyAssignmentsCommand, @PathVariable department: Department): Mav = {
 		cmd.apply()
 		Redirect(Routes.admin.department(department, academicYear))
 	}

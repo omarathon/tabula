@@ -34,7 +34,7 @@
 	<div class="modal fade" id="confirmModal">
 		<@modal.wrapper cssClass="modal-xs">
 			<@modal.body>
-			<p>Are you sure you want to create these assignments?</p>
+				<p>Are you sure you want to create these assignments?</p>
 			</@modal.body>
 			<@modal.footer>
 				<div>

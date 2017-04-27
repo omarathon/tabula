@@ -25,7 +25,7 @@ object CopyAssignmentsCommand {
 }
 
 abstract class CopyAssignmentsCommand(val department: Department, val modules: Seq[Module]) extends CommandInternal[Seq[Assignment]]
-	with Appliable[Seq[Assignment]] with CopyAssignmentsState with FindAssignmentFields {
+	with Appliable[Seq[Assignment]] with CopyAssignmentsState {
 
 	self: AssessmentServiceComponent with AssessmentMembershipServiceComponent =>
 
@@ -141,11 +141,5 @@ trait CopyAssignmentsCommandNotifications extends SchedulesNotifications[Seq[Ass
 
 	override def scheduledNotifications(assignment: Assignment): Seq[ScheduledNotification[Assignment]] = generateNotifications(assignment)
 
-}
-
-trait ArchiveAssignmentsStateDel {
-	val department: Department
-	val modules: Seq[Module]
-	var assignments: JList[Assignment] = JArrayList()
 }
 
