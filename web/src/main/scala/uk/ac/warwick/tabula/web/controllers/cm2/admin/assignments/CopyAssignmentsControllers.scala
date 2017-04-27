@@ -9,26 +9,25 @@ import uk.ac.warwick.tabula.JavaImports.JList
 import uk.ac.warwick.tabula.cm2.web.Routes
 import uk.ac.warwick.tabula.commands.cm2.assignments.CopyAssignmentsCommand
 import uk.ac.warwick.tabula.data.model.{Assignment, Department, Module}
-import uk.ac.warwick.tabula.permissions.{Permission, Permissions}
 import uk.ac.warwick.tabula.services.{AutowiringMaintenanceModeServiceComponent, AutowiringModuleAndDepartmentServiceComponent, AutowiringUserSettingsServiceComponent}
 import uk.ac.warwick.tabula.web.Mav
 import uk.ac.warwick.tabula.web.controllers.cm2.CourseworkController
-import uk.ac.warwick.tabula.web.controllers.{AcademicYearScopedController, DepartmentScopedController}
+import uk.ac.warwick.tabula.web.controllers.AcademicYearScopedController
 import uk.ac.warwick.tabula.{AcademicYear, CurrentUser}
 
 import scala.collection.JavaConverters._
 
 
-abstract class AbstractCopyAssignmentsController extends CourseworkController with DepartmentScopedController
+abstract class AbstractCopyAssignmentsController extends CourseworkController
 	with AutowiringModuleAndDepartmentServiceComponent with AutowiringUserSettingsServiceComponent
 	with AutowiringMaintenanceModeServiceComponent with AcademicYearScopedController {
 
-	override def departmentPermission: Permission = Permissions.Assignment.Create
-
-	@ModelAttribute("activeDepartment")
-	override def activeDepartment(@PathVariable department: Department): Option[Department] = retrieveActiveDepartment(Option(department))
-
 	val academicYear = activeAcademicYear.getOrElse(AcademicYear.guessSITSAcademicYearByDate(DateTime.now))
+
+	@ModelAttribute("academicYearChoices")
+	def academicYearChoices: JList[AcademicYear] =
+		AcademicYear.guessSITSAcademicYearByDate(DateTime.now).yearsSurrounding(0, 1).asJava
+
 }
 
 
@@ -50,10 +49,6 @@ class CopyModuleAssignmentsController extends AbstractCopyAssignmentsController 
 			"map" -> moduleAssignmentMap(cmd.modules)
 		)
 	}
-
-	@ModelAttribute("academicYearChoices")
-	def academicYearChoices: JList[AcademicYear] =
-		AcademicYear.guessSITSAcademicYearByDate(DateTime.now).yearsSurrounding(0, 1).asJava
 
 	@RequestMapping(method = Array(POST))
 	def submit(cmd: CopyAssignmentsCommand, @PathVariable module: Module, errors: Errors, user: CurrentUser): Mav = {
