@@ -84,5 +84,9 @@ object Routes {
 			}
 			def extensions(assignment: Assignment): String = admin() + s"/assignments/${encoded(assignment.id)}/manage/extensions"
 		}
+
+		object module {
+			def apply(module: Module, academicYear: AcademicYear): String = department(module.adminDepartment, academicYear) + "#module-" + encoded(module.code)
+		}
 	}
 }
