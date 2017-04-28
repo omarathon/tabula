@@ -1,19 +1,19 @@
 <#escape x as x?html>
-<#if undergraduateUpdated?? >
+<#if undergraduateUpdated??>
 	<div class="alert alert-info">
 		<button type="button" class="close" data-dismiss="alert">&times;</button>
 		Undergraduate settings have been saved.
 	</div>
 </#if>
 
-<#if postgraduateUpdated?? >
+<#if postgraduateUpdated??>
 	<div class="alert alert-info">
 		<button type="button" class="close" data-dismiss="alert">&times;</button>
 		Postgraduate settings have been saved.
 	</div>
 </#if>
 
-<h2>Manage Marks Closure-cm2</h2>
+<h2>Manage Marks Closure</h2>
 
 <div class="fix-area">
 	<#assign actionUrl><@routes.cm2.manageMarksClosure /></#assign>
