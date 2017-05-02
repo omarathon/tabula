@@ -6,7 +6,7 @@
 				<#-- one input per stage. if no marker is defined leave the name blank (unallocated students aren't bound) -->
 				<input
 					type="hidden"
-					<#if marker?has_content>name="allocations['${stage.name}']['${marker.userId}'][${index}]"</#if>
+					<#if marker?has_content>name="allocations['${stage}']['${marker.userId}'][${index}]"</#if>
 					value="${student.userId}"
 				>
 			</#list>
@@ -85,7 +85,7 @@
 							</div>
 
 							<#assign bindpath><#compress>
-								<#list stages as stage>allocations['${stage.name}']['${marker.userId}']<#if stage_has_next>,</#if></#list>
+								<#list stages as stage>allocations['${stage}']['${marker.userId}']<#if stage_has_next>,</#if></#list>
 							</#compress></#assign>
 
 							<ul class="drag-list hide" data-bindpath="${bindpath}">

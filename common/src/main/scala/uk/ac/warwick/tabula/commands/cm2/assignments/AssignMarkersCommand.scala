@@ -15,6 +15,7 @@ import uk.ac.warwick.tabula.services.cm2.docconversion.MarkerAllocationExtractor
 import uk.ac.warwick.tabula.services.cm2.docconversion.{AutowiringMarkerAllocationExtractorComponent, MarkerAllocationExtractorComponent}
 import uk.ac.warwick.tabula.system.BindListener
 
+
 import scala.collection.JavaConverters._
 
 object AssignMarkersCommand {

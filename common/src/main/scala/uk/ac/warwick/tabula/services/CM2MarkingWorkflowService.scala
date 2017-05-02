@@ -133,6 +133,9 @@ class CM2MarkingWorkflowServiceImpl extends CM2MarkingWorkflowService with Autow
 	// for a given assignment and workflow stage specify the markers for each student
 	override def allocateMarkersForStage(assignment: Assignment, stage: MarkingWorkflowStage, allocations: Allocations): Seq[MarkerFeedback] = {
 
+
+		val bullshit = allocations.toSeq.map{case (m, s) => s"${m.getUserId} -> ${s.map(_.getUserId).mkString("| ")}"}.mkString("   ")
+
 		val workflow = assignment.cm2MarkingWorkflow
 		if (workflow == null) throw new IllegalArgumentException("Can't assign markers for an assignment with no workflow")
 

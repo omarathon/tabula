@@ -15,14 +15,14 @@
 			<a class="return-items btn btn-default" href="<@routes.cm2.createassignmentmarkerstemplate assignment/>" >
 				Upload spreadsheet
 			</a>
-			<a class="return-items btn btn-default" href="#" >
+			<a class="return-items btn btn-default" href="<@routes.cm2.createassignmentmarkerssmallgroups assignment/>" >
 				Import small groups
 			</a>
 		</p>
 
 		<@f.errors cssClass="error form-errors" />
-		<#list state.keys as role>
-			<@allocateStudents assignment role mapGet(stages, role) mapGet(state.markers, role) mapGet(state.unallocatedStudents, role) mapGet(state.allocations, role)  />
+		<#list state.keys as roleOrStage>
+			<@allocateStudents assignment roleOrStage mapGet(stages, roleOrStage)![roleOrStage] mapGet(state.markers, roleOrStage) mapGet(state.unallocatedStudents, roleOrStage) mapGet(state.allocations, roleOrStage) />
 		</#list>
 		<div class="fix-footer">
 			<input
