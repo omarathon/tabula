@@ -51,6 +51,9 @@
 				<div id="${role}StudentsList" class="students" data-item-selector=".student-list li">
 					<div class="well">
 						<h4>Not allocated to a marker</h4>
+						<#if assignment.anonymousMarking>
+							You have set anonymity to on. Markers cannot see students' names or University IDs.
+						</#if>
 						<div class="student-list drag-target">
 							<ul class="drag-list return-list unstyled" data-nobind="true">
 								<#list unassigned as student>

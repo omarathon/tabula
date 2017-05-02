@@ -32,42 +32,43 @@
 							<#assign stages = mapGet(stageNames, roleOrStage)![roleOrStage]>
 							<div class="role" data-stages="${stages?join(",")}">
 								<h2>${roleOrStage}</h2>
-								<div></div> <#--Prevents the first group header from merging with the role header -->
 								<#list groupAllocations as group>
-									<h5>${group.name}</h5>
-									<div class="row group">
-										<div class="col-md-5">
-											<strong>Students</strong>
-											<ul>
-												<#list group.students as student>
-													<li>
-														${student.fullName}&nbsp;${student.warwickId!userId}
-														<#list stages as stage>
-															<#-- one input per stage -->
-															<input
-																class="marker-input"
-																disabled="disabled"
-																type="hidden"
-																data-stage="${stage}"
-																name=""
-																value="${student.userId}"
-															>
-														</#list>
-													</li>
-												</#list>
-											</ul>
-										</div>
-										<div class="col-md-7">
-											<@bs3form.labelled_form_group path="" labelText="Marker">
-												<@f.select path="" cssClass="form-control marker-select">
-													<#list group.tutors as tutor>
-														<option value="${tutor.userId}">${tutor.fullName}</option>
+									<div class="group well">
+										<h5>${group.name}</h5>
+										<div class="row">
+											<div class="col-md-5">
+												<strong>Students</strong>
+												<ul>
+													<#list group.students as student>
+														<li>
+															${student.fullName}&nbsp;${student.warwickId!userId}
+															<#list stages as stage>
+																<#-- one input per stage -->
+																<input
+																	class="marker-input"
+																	disabled="disabled"
+																	type="hidden"
+																	data-stage="${stage}"
+																	name=""
+																	value="${student.userId}"
+																>
+															</#list>
+														</li>
 													</#list>
-												</@f.select>
-											</@bs3form.labelled_form_group>
+												</ul>
+											</div>
+											<div class="col-md-7">
+												<@bs3form.labelled_form_group path="" labelText="Marker">
+													<@f.select path="" cssClass="form-control marker-select">
+														<#list group.tutors as tutor>
+															<option value="${tutor.userId}">${tutor.fullName}</option>
+														</#list>
+													</@f.select>
+												</@bs3form.labelled_form_group>
+											</div>
 										</div>
 									</div>
-							</#list>
+								</#list>
 							</div>
 						</#list>
 						<div class="fix-footer">
