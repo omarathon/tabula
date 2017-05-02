@@ -13,21 +13,18 @@ import uk.ac.warwick.tabula.commands.cm2.assignments.{AssignMarkersBySpreadsheet
 import uk.ac.warwick.tabula.data.model.Assignment
 import uk.ac.warwick.tabula.services.AssessmentMembershipService
 import uk.ac.warwick.tabula.web.Mav
-import uk.ac.warwick.tabula.web.controllers.cm2.{CourseworkBreadcrumbs, CourseworkController}
+import uk.ac.warwick.tabula.web.controllers.cm2.CourseworkBreadcrumbs
 import uk.ac.warwick.tabula.web.views.ExcelView
 
 @Profile(Array("cm2Enabled"))
 @Controller
-@RequestMapping(value = Array("/${cm2.prefix}/admin/assignments/new/{assignment}/markers/template"))
-class ModifyAssignmentMarkersSpreadsheetController extends CourseworkController {
+@RequestMapping(value = Array("/${cm2.prefix}/admin/assignments/{assignment}"))
+class ModifyAssignmentMarkersSpreadsheetController extends AbstractAssignmentController {
 
 	type AssignMarkersCommand = Appliable[Assignment] with AssignMarkersState
 	type TemplateCommand = Appliable[ExcelView] with AssignMarkersTemplateState
 
 	val assessmentMembershipService: AssessmentMembershipService = Wire.auto[AssessmentMembershipService]
-
-	@ModelAttribute("ManageAssignmentMappingParameters")
-	def params = ManageAssignmentMappingParameters
 
 	@ModelAttribute("assignMarkersBySpreadsheetCommand")
 	def assignMarkersBySpreadsheetCommand(@PathVariable assignment: Assignment) =
@@ -36,31 +33,36 @@ class ModifyAssignmentMarkersSpreadsheetController extends CourseworkController 
 	@ModelAttribute("templateCommand")
 	def templateCommand(@PathVariable assignment: Assignment) = AssignMarkersTemplateCommand(mandatory(assignment))
 
-	@RequestMapping(method = Array(GET, HEAD), value=Array("download"))
+	@RequestMapping(method = Array(GET, HEAD), value=Array("*/markers/template/download"))
 	def downloadTemplate(@ModelAttribute("templateCommand") templateCommand: TemplateCommand): ExcelView = {
 		templateCommand.apply()
 	}
 
-	@RequestMapping(method = Array(GET, HEAD))
-	def showSpreadsheetForm(
-		@PathVariable("assignment") assignment: Assignment,
-		@ModelAttribute("assignMarkersBySpreadsheetCommand") assignMarkersBySpreadsheetCommand: AssignMarkersCommand,
-		errors: Errors
-	): Mav = {
+	private def showSpreadsheetForm(assignment: Assignment, assignMarkersBySpreadsheetCommand: AssignMarkersCommand, errors: Errors, mode: String): Mav = {
 		val module =  mandatory(assignment.module)
 		Mav(s"$urlPrefix/admin/assignments/assignment_markers_spreadsheet",
 			"module" -> module,
 			"department" -> module.adminDepartment,
-			"fileTypes" -> AssignMarkersBySpreadsheetCommand.AcceptedFileExtensions
+			"fileTypes" -> AssignMarkersBySpreadsheetCommand.AcceptedFileExtensions,
+			"mode" -> mode
 		).crumbs(CourseworkBreadcrumbs.Assignment.AssignmentManagement())
 	}
 
-	@RequestMapping(method = Array(POST), params = Array("preview"))
-	def previewSpreadsheet(
+	@RequestMapping(method = Array(GET, HEAD), value=Array("new/markers/template"))
+	def createForm(
 		@PathVariable("assignment") assignment: Assignment,
-		@Valid @ModelAttribute("assignMarkersBySpreadsheetCommand") assignMarkersBySpreadsheetCommand: AssignMarkersCommand,
+		@ModelAttribute("assignMarkersBySpreadsheetCommand") assignMarkersBySpreadsheetCommand: AssignMarkersCommand,
 		errors: Errors
-	): Mav = {
+	): Mav = showSpreadsheetForm(assignment, assignMarkersBySpreadsheetCommand, errors, createMode)
+
+	@RequestMapping(method = Array(GET, HEAD),  value=Array("edit/markers/template"))
+	def editForm(
+		@PathVariable("assignment") assignment: Assignment,
+		@ModelAttribute("assignMarkersBySpreadsheetCommand") assignMarkersBySpreadsheetCommand: AssignMarkersCommand,
+		errors: Errors
+	): Mav = showSpreadsheetForm(assignment, assignMarkersBySpreadsheetCommand, errors, editMode)
+
+	private def previewSpreadsheet(assignment: Assignment, assignMarkersBySpreadsheetCommand: AssignMarkersCommand, errors: Errors, mode: String): Mav = {
 		val module =  mandatory(assignment.module)
 		val workflow = assignment.cm2MarkingWorkflow
 		val allocationPreview = if(workflow.workflowType.rolesShareAllocations){
@@ -81,28 +83,50 @@ class ModifyAssignmentMarkersSpreadsheetController extends CourseworkController 
 			"department" -> module.adminDepartment,
 			"allocationPreview" -> allocationPreview,
 			"allocationOrder" -> workflow.allocationOrder,
-			"unallocatedStudents" -> unallocatedStudents
+			"unallocatedStudents" -> unallocatedStudents,
+			"mode" -> mode
 		).crumbs(CourseworkBreadcrumbs.Assignment.AssignmentManagement())
 	}
 
-	@RequestMapping(method = Array(POST), params = Array(ManageAssignmentMappingParameters.createAndAddMarkers))
-	def spreadsheetAndExit(
+	@RequestMapping(method = Array(POST), value=Array("new/markers/template"), params = Array("preview"))
+	def createPreview(
 		@PathVariable("assignment") assignment: Assignment,
 		@Valid @ModelAttribute("assignMarkersBySpreadsheetCommand") assignMarkersBySpreadsheetCommand: AssignMarkersCommand,
 		errors: Errors
-	): Mav = {
+	): Mav = previewSpreadsheet(assignment, assignMarkersBySpreadsheetCommand, errors, createMode)
+
+	@RequestMapping(method = Array(POST), value=Array("edit/markers/template"), params = Array("preview"))
+	def editPreview(
+		@PathVariable("assignment") assignment: Assignment,
+		@Valid @ModelAttribute("assignMarkersBySpreadsheetCommand") assignMarkersBySpreadsheetCommand: AssignMarkersCommand,
+		errors: Errors
+	): Mav = previewSpreadsheet(assignment, assignMarkersBySpreadsheetCommand, errors, editMode)
+
+	@RequestMapping(method = Array(POST), params = Array(ManageAssignmentMappingParameters.createAndAddMarkers), value = Array("*/markers/template"))
+	def saveAndExit(
+		@PathVariable("assignment") assignment: Assignment,
+		@Valid @ModelAttribute("assignMarkersBySpreadsheetCommand") assignMarkersBySpreadsheetCommand: AssignMarkersCommand
+	): Mav =  {
 		assignMarkersBySpreadsheetCommand.apply()
 		RedirectForce(Routes.home)
 	}
 
-	@RequestMapping(method = Array(POST), params = Array(ManageAssignmentMappingParameters.createAndAddSubmissions))
-	def spreadsheetAndAddSubmissions(
+	@RequestMapping(method = Array(POST), params = Array(ManageAssignmentMappingParameters.createAndAddSubmissions), value = Array("new/markers/template"))
+	def submitAndAddSubmissionsCreate(
 		@PathVariable("assignment") assignment: Assignment,
-		@Valid @ModelAttribute("assignMarkersBySpreadsheetCommand") assignMarkersBySpreadsheetCommand: AssignMarkersCommand,
-		errors: Errors
+		@Valid @ModelAttribute("assignMarkersBySpreadsheetCommand") assignMarkersBySpreadsheetCommand: AssignMarkersCommand
 	): Mav = {
-		assignMarkersBySpreadsheetCommand.apply()
-		RedirectForce(Routes.admin.assignment.createAddSubmissions(assignment))
+		val assignment = assignMarkersBySpreadsheetCommand.apply()
+		RedirectForce(Routes.admin.assignment.createOrEditSubmissions(assignment, createMode))
+	}
+
+	@RequestMapping(method = Array(POST), params = Array(ManageAssignmentMappingParameters.createAndAddSubmissions), value = Array("edit/markers/template"))
+	def submitAndAddSubmissionsEdit(
+		@PathVariable("assignment") assignment: Assignment,
+		@Valid @ModelAttribute("assignMarkersBySpreadsheetCommand") assignMarkersBySpreadsheetCommand: AssignMarkersCommand
+	): Mav = {
+		val assignment = assignMarkersBySpreadsheetCommand.apply()
+		RedirectForce(Routes.admin.assignment.createOrEditSubmissions(assignment, editMode))
 	}
 
 }

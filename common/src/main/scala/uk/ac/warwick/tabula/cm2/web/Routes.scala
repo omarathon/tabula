@@ -22,6 +22,7 @@ object Routes {
 
 	private lazy val context = s"/$cm2Prefix"
 	def home: String = context + "/"
+	def homeForYear(academicYear: AcademicYear): String = context + s"/${encoded(academicYear.startYear.toString)}"
 
 	object assignment {
 		def apply(assignment: Assignment): String = context + s"/submission/${encoded(assignment.id)}/"
@@ -40,7 +41,7 @@ object Routes {
 
 		object department {
 			def apply(department: Department, academicYear: AcademicYear): String =
-				admin() + "/department/%s/%s" format(encoded(department.code), encoded(academicYear.startYear.toString))
+				admin() + s"/department/${encoded(department.code)}/${encoded(academicYear.startYear.toString)}"
 		}
 
 		object workflows {
@@ -60,19 +61,34 @@ object Routes {
 
 		object assignment {
 			def createAssignmentDetails(module: Module): String = admin() + s"/${encoded(module.code)}/assignments/new"
-			def createAddFeedback(assignment: Assignment): String = admin()  + s"/assignments/new/${encoded(assignment.id)}/feedback"
-			def createAddStudents(assignment: Assignment): String = admin()  + s"/assignments/new/${encoded(assignment.id)}/students"
-			def createAddMarkers(assignment: Assignment): String = admin()  + s"/assignments/new/${encoded(assignment.id)}/markers"
-			def createAddMarkersTemplate(assignment: Assignment): String = createAddMarkers(assignment) + "template"
-			def createAddMarkersTemplateDownload(assignment: Assignment): String = createAddMarkers(assignment) + "template/download"
-			def createAddSubmissions(assignment: Assignment): String = admin()  + s"/assignments/new/${encoded(assignment.id)}/submissions"
-			def createAddOptions(assignment: Assignment): String = admin()  + s"/assignments/new/${encoded(assignment.id)}/options"
-			def reviewAssignment(assignment: Assignment): String = admin()  + s"/assignments/new/${encoded(assignment.id)}/review"
+			def editAssignmentDetails(assignment: Assignment): String = admin()  + s"/assignments/${encoded(assignment.id)}/edit"
+			def createOrEditFeedback(assignment: Assignment, createOrEditMode: String): String = admin() + s"/assignments/${encoded(assignment.id)}/${encoded(createOrEditMode)}/feedback"
+			def createOrEditStudents(assignment: Assignment, createOrEditMode: String): String = admin() + s"/assignments/${encoded(assignment.id)}/${encoded(createOrEditMode)}/students"
+			def createOrEditMarkers(assignment: Assignment, createOrEditMode: String): String = admin() + s"/assignments/${encoded(assignment.id)}/${encoded(createOrEditMode)}/markers"
+			def createOrEditMarkersTemplate(assignment: Assignment, createOrEditMode: String): String = createOrEditMarkers(assignment, createOrEditMode) + "template"
+			def createOrEditMarkersTemplateDownload(assignment: Assignment, createOrEditMode: String): String = createOrEditMarkers(assignment, createOrEditMode) + "template/download"
+			def createOrEditSubmissions(assignment: Assignment, createOrEditMode: String): String = admin() + s"/assignments/${encoded(assignment.id)}/${encoded(createOrEditMode)}/submissions"
+			def createOrEditOptions(assignment: Assignment, createOrEditMode: String): String = admin() + s"/assignments/${encoded(assignment.id)}/${encoded(createOrEditMode)}/options"
+			def reviewAssignment(assignment: Assignment): String = admin()  + s"/assignments/${encoded(assignment.id)}/review"
+
+			private def assignmentroot(assignment: Assignment) = admin() + "/assignments/%s" format (encoded(assignment.id))
+
+			def submissionsZip(assignment: Assignment): String = assignmentroot(assignment) + "/submissions.zip"
+
+			object submissionsandfeedback {
+				def apply(assignment: Assignment): String = assignmentroot(assignment) + "/list"
+				def summary(assignment: Assignment): String = assignmentroot(assignment) + "/summary"
+				def table(assignment: Assignment): String = assignmentroot(assignment) + "/table"
+			}
 
 			object audit {
 				def apply(assignment: Assignment): String = admin() + s"/audit/assignment/${encoded(assignment.id)}"
 			}
 			def extensions(assignment: Assignment): String = admin() + s"/assignments/${encoded(assignment.id)}/manage/extensions"
+		}
+
+		object module {
+			def apply(module: Module, academicYear: AcademicYear): String = department(module.adminDepartment, academicYear) + "#module-" + encoded(module.code)
 		}
 	}
 }

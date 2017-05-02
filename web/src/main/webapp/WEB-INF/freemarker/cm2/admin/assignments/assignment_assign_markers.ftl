@@ -7,15 +7,15 @@
 	<h4 class="with-related"><span class="muted">for</span> <@fmt.module_name module /></h4>
 </div>
 <div class="fix-area">
-	<#assign actionUrl><@routes.cm2.createassignmentmarkers assignment /></#assign>
+	<#assign actionUrl><@routes.cm2.assignmentmarkers assignment mode /></#assign>
 	<@f.form method="post" action=actionUrl  cssClass="dirty-check">
 		<@components.assignment_wizard 'markers' assignment.module false assignment />
 
 		<p class="btn-toolbar">
-			<a class="return-items btn btn-default" href="<@routes.cm2.createassignmentmarkerstemplate assignment/>" >
+			<a class="return-items btn btn-default" href="<@routes.cm2.assignmentmarkerstemplate assignment mode />" >
 				Upload spreadsheet
 			</a>
-			<a class="return-items btn btn-default" href="<@routes.cm2.createassignmentmarkerssmallgroups assignment/>" >
+			<a class="return-items btn btn-default" href="<@routes.cm2.assignmentmarkerssmallgroups assignment mode />" >
 				Import small groups
 			</a>
 		</p>

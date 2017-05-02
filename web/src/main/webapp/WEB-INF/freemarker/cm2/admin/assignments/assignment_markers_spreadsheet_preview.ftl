@@ -6,7 +6,7 @@
 	<h4 class="with-related"><span class="muted">for</span> <@fmt.module_name module /></h4>
 </div>
 <div class="fix-area">
-	<#assign actionUrl><@routes.cm2.createassignmentmarkerstemplate assignment /></#assign>
+	<#assign actionUrl><@routes.cm2.assignmentmarkerstemplate assignment mode /></#assign>
 	<@f.form method="post" action=actionUrl enctype="multipart/form-data" cssClass="dirty-check" commandName="assignMarkersBySpreadsheetCommand">
 		<@components.assignment_wizard 'markers' assignment.module false assignment />
 

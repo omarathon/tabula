@@ -8,12 +8,12 @@
 	<div class="fix-area">
 		<@components.assignment_wizard 'markers' assignment.module false assignment />
 		<p class="btn-toolbar">
-			<a class="return-items btn btn-default" href="<@routes.cm2.createassignmentmarkers assignment/>" >
+			<a class="return-items btn btn-default" href="<@routes.cm2.assignmentmarkers assignment mode />" >
 				Return to drag and drop
 			</a>
 		</p>
 		<#if sets?has_content>
-			<#assign actionUrl><@routes.cm2.createassignmentmarkerssmallgroups assignment /></#assign>
+			<#assign actionUrl><@routes.cm2.assignmentmarkerssmallgroups assignment mode /></#assign>
 			<@f.form method="post" action=actionUrl cssClass="dirty-check" commandName="assignMarkersCommand">
 
 				<@bs3form.labelled_form_group path="" labelText="Small group set">

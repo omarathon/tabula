@@ -58,10 +58,8 @@ trait AutowiringWAI2GoConfigurationComponent extends WAI2GoConfigurationComponen
 	val wai2GoConfiguration = new AutowiringWAI2GoConfiguration
 	class AutowiringWAI2GoConfiguration extends WAI2GoConfiguration {
 		val cached = true
-		val baseUri: Uri = Uri.parse("https://campus.warwick.ac.uk/Services/api.php")
+		val baseUri: Uri = Uri.parse("https://campus.warwick.ac.uk/warwick/API/getAC")
 		val defaultProperties = Map(
-			"config" -> "warwick",
-			"act" -> "ac",
 			"mlim" -> "2",
 			"limit" -> "2",
 			"type" -> "lb",

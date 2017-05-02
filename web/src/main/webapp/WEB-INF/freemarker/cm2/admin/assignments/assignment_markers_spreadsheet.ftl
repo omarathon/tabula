@@ -6,17 +6,17 @@
 		<h4 class="with-related"><span class="muted">for</span> <@fmt.module_name module /></h4>
 	</div>
 	<div class="fix-area">
-		<#assign actionUrl><@routes.cm2.createassignmentmarkerstemplate assignment /></#assign>
+		<#assign actionUrl><@routes.cm2.assignmentmarkerstemplate assignment mode /></#assign>
 		<@f.form method="post" action=actionUrl enctype="multipart/form-data" cssClass="dirty-check" commandName="assignMarkersBySpreadsheetCommand">
 			<@components.assignment_wizard 'markers' assignment.module false assignment />
 			<p class="btn-toolbar">
-				<a class="return-items btn btn-default" href="<@routes.cm2.createassignmentmarkers assignment/>" >
+				<a class="return-items btn btn-default" href="<@routes.cm2.assignmentmarkers assignment mode />" >
 					Return to drag and drop
 				</a>
 			</p>
 			<p>You can assign students to markers by uploading a spreadsheet.</p>
 			<ol>
-				<li>Download a <a href="<@routes.cm2.createassignmentmarkerstemplatedownload assignment />">template spreadsheet.</a></li>
+				<li>Download a <a href="<@routes.cm2.assignmentmarkerstemplatedownload assignment mode />">template spreadsheet.</a></li>
 				<li>Allocate students to markers using the dropdown menu in the marker name column or by typing a markers usercode into the agent_id column. The agent_id field will be updated with the usercode for that marker if you use the dropdown. Any students with an empty agent_id field will have their marker removed, if they have one.</li>
 				<li><strong>Save</strong> your updated spreadsheet.</li>
 			</ol>

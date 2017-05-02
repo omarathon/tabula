@@ -42,9 +42,9 @@ trait AssessmentService {
 
 	def getSubmissionsForAssignmentsBetweenDates(usercode: String, startInclusive: DateTime, endExclusive: DateTime): Seq[Submission]
 
-	def getAssignmentWhereMarker(user: User): Seq[Assignment]
-	def getAssignmentsByDepartmentAndMarker(department: Department, user: CurrentUser): Seq[Assignment]
-	def getAssignmentsByModuleAndMarker(module: Module, user: CurrentUser): Seq[Assignment]
+	def getAssignmentWhereMarker(user: User, academicYearOption: Option[AcademicYear]): Seq[Assignment]
+	def getAssignmentsByDepartmentAndMarker(department: Department, user: CurrentUser, academicYearOption: Option[AcademicYear]): Seq[Assignment]
+	def getAssignmentsByModuleAndMarker(module: Module, user: CurrentUser, academicYearOption: Option[AcademicYear]): Seq[Assignment]
 
 	/**
 	 * Find a recent assignment within this module or possible department.
@@ -105,18 +105,18 @@ abstract class AbstractAssessmentService extends AssessmentService {
 	def getSubmissionsForAssignmentsBetweenDates(usercode: String, startInclusive: DateTime, endExclusive: DateTime): Seq[Submission] =
 		assessmentDao.getSubmissionsForAssignmentsBetweenDates(usercode, startInclusive, endExclusive)
 
-	def getAssignmentWhereMarker(user: User): Seq[Assignment] = {
+	def getAssignmentWhereMarker(user: User, academicYearOption: Option[AcademicYear]): Seq[Assignment] = {
 		(firstMarkerHelper.findBy(user) ++ secondMarkerHelper.findBy(user))
 			.distinct
 			.flatMap(markingWorkflowService.getAssignmentsUsingMarkingWorkflow)
-			.filter { _.isAlive }
+			.filter { a => a.isAlive && (academicYearOption.isEmpty || academicYearOption.contains(a.academicYear)) }
 	}
 
-	def getAssignmentsByDepartmentAndMarker(department: Department, user: CurrentUser): Seq[Assignment] =
-		getAssignmentWhereMarker(user.apparentUser).filter { _.module.adminDepartment == department }
+	def getAssignmentsByDepartmentAndMarker(department: Department, user: CurrentUser, academicYearOption: Option[AcademicYear]): Seq[Assignment] =
+		getAssignmentWhereMarker(user.apparentUser, academicYearOption).filter { _.module.adminDepartment == department }
 
-	def getAssignmentsByModuleAndMarker(module: Module, user: CurrentUser): Seq[Assignment] =
-		getAssignmentWhereMarker(user.apparentUser).filter { _.module == module }
+	def getAssignmentsByModuleAndMarker(module: Module, user: CurrentUser, academicYearOption: Option[AcademicYear]): Seq[Assignment] =
+		getAssignmentWhereMarker(user.apparentUser, academicYearOption).filter { _.module == module }
 
 	/**
 	 * Find a recent assignment within this module or possible department.
