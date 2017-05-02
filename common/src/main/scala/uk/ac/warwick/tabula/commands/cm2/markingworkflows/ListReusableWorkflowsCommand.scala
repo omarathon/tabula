@@ -6,7 +6,7 @@ import org.springframework.validation.Errors
 import uk.ac.warwick.tabula.AcademicYear
 import uk.ac.warwick.tabula.data.model.Department
 import uk.ac.warwick.tabula.data.model.markingworkflow.CM2MarkingWorkflow
-import uk.ac.warwick.tabula.services.{AutoWiringCM2MarkingWorkflowServiceComponent, CM2MarkingWorkflowService, CM2MarkingWorkflowServiceComponent}
+import uk.ac.warwick.tabula.services.{AutowiringCM2MarkingWorkflowServiceComponent, CM2MarkingWorkflowService, CM2MarkingWorkflowServiceComponent}
 
 
 object ListReusableWorkflowsCommand {
@@ -15,7 +15,7 @@ object ListReusableWorkflowsCommand {
 			with ComposableCommand[Seq[CM2MarkingWorkflow]]
 			with ListReusableWorkflowsState
 			with MarkingWorkflowDepartmentPermissions
-			with AutoWiringCM2MarkingWorkflowServiceComponent
+			with AutowiringCM2MarkingWorkflowServiceComponent
 			with Unaudited
 }
 

@@ -23,7 +23,7 @@ object EditMarkingWorkflowCommand {
 			with MarkingWorkflowDepartmentPermissions
 			with ModifyMarkingWorkflowDescription
 			with EditMarkingWorkflowState
-			with AutoWiringCM2MarkingWorkflowServiceComponent
+			with AutowiringCM2MarkingWorkflowServiceComponent
 			with AutowiringUserLookupComponent
 }
 

@@ -17,8 +17,6 @@ import org.apache.poi.xssf.model.StylesTable
 import org.xml.sax.helpers.XMLReaderFactory
 import org.apache.poi.xssf.eventusermodel.XSSFSheetXMLHandler.SheetContentsHandler
 import org.apache.poi.hssf.util.CellReference
-
-import scala.collection.JavaConverters._
 import org.xml.sax.{InputSource, XMLReader}
 
 import scala.collection.mutable
@@ -113,7 +111,7 @@ object SpreadsheetHelpers extends SpreadsheetHelpers {
 	}
 
 	def formatWorksheet(sheet: XSSFSheet, cols: Int) {
-		(0 to cols).map(sheet.autoSizeColumn)
+		(0 to cols).foreach(sheet.autoSizeColumn)
 	}
 
 	/**
@@ -123,23 +121,38 @@ object SpreadsheetHelpers extends SpreadsheetHelpers {
 	 * - trim the header and remove all non-ascii characters
 	 */
 	def parseXSSFExcelFile(file: InputStream, simpleHeaders: Boolean = true): Seq[Map[String, String]] = {
+		val sheets = parseXSSFExcelFileWithSheetMetadata(file, simpleHeaders)
+		sheets.flatMap(_.rows)
+	}
+
+	def parseXSSFExcelFileWithSheetMetadata(file: InputStream, simpleHeaders: Boolean = true): Seq[Sheet] = {
 		val pkg = OPCPackage.open(file)
 		val sst = new ReadOnlySharedStringsTable(pkg)
 		val reader = new XSSFReader(pkg)
 		val styles = reader.getStylesTable
 
-		reader.getSheetsData.asScala.toSeq.flatMap { sheet =>
+		val data = reader.getSheetsData.asInstanceOf[XSSFReader.SheetIterator]
+
+		// can't asScala the SheetIterator as is lubs back to a Seq[InputStream] losing the sheet metadata
+		val sheets: mutable.Buffer[Sheet] = mutable.Buffer()
+		while(data.hasNext){
+			val sheet = data.next
+			val sheetName = data.getSheetName
 			val handler = new XslxParser(styles, sst, simpleHeaders)
 			val parser = handler.fetchSheetParser
-
 			val sheetSource = new InputSource(sheet)
 			parser.parse(sheetSource)
 			sheet.close()
-
-			handler.rows.toSeq
+			sheets.append(Sheet(sheetName, handler.rows))
 		}
+		sheets
 	}
 }
+
+case class Sheet(
+	name: String,
+	rows: Seq[Map[String, String]]
+)
 
 class XslxParser(val styles: StylesTable, val sst: ReadOnlySharedStringsTable, val simpleHeaders: Boolean = true)
 	extends SheetContentsHandler with Logging {

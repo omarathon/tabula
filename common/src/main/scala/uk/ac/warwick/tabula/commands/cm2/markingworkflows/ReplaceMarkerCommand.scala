@@ -9,6 +9,7 @@ import uk.ac.warwick.tabula.data.model.markingworkflow._
 import uk.ac.warwick.tabula.helpers.StringUtils._
 import uk.ac.warwick.tabula.services._
 import uk.ac.warwick.userlookup.User
+import uk.ac.warwick.tabula.helpers.UserOrdering._
 
 
 object ReplaceMarkerCommand {
@@ -22,7 +23,7 @@ object ReplaceMarkerCommand {
 			with ReplaceMarkerDescription
 			with ReplaceMarkerState
 			with ReplaceMarkerValidation
-			with AutoWiringCM2MarkingWorkflowServiceComponent
+			with AutowiringCM2MarkingWorkflowServiceComponent
 			with AutowiringUserLookupComponent
 }
 
@@ -100,7 +101,7 @@ trait ReplaceMarkerState {
 	lazy val oldMarkerUser: User = userLookup.getUserByUserId(oldMarker)
 	lazy val newMarkerUser: User = userLookup.getUserByUserId(newMarker)
 
-	lazy val allMarkers: Seq[User] = markingWorkflow.markers.values.flatten.toSeq.distinct.sortBy(u => (u.getLastName, u.getFirstName))
+	lazy val allMarkers: Seq[User] = markingWorkflow.markers.values.flatten.toSeq.distinct.sorted
 
 	lazy val affectedAssignments: Set[Assignment] = markingWorkflow.assignments.asScala.toSet
 

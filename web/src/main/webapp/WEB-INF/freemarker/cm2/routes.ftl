@@ -8,24 +8,10 @@ TODO grab values from the Routes object in code, as that's pretty equivalent and
 <#macro _u page context=component.context?default('/cm2')>
 	<@url context=context page=page />
 </#macro>
-
-<#macro home academicYear="">
-	<#if academicYear?has_content>
-		<@_u page="/${academicYear.startYear}" />
-	<#else>
-		<@_u page="/" />
-	</#if>
-</#macro>
-
+<#macro home><@_u page="/" /></#macro>
 <#-- to rename - also filter options will need to be added to jump to correct module -->
 <#macro depthome module><@_u page="/admin/department/${module.adminDepartment.code}/#module-${module.code}" /></#macro>
-<#macro departmenthome department academicYear="">
-	<#if academicYear?has_content>
-		<@_u page="/admin/department/${department.code}/${academicYear.startYear}" />
-	<#else>
-		<@_u page="/admin/department/${department.code}" />
-	</#if>
-</#macro>
+<#macro departmenthome department><@_u page="/admin/department/${department.code}/" /></#macro>
 <#macro downloadSubmission submission filename><@_u page="/admin/assignments/${submission.assignment.id}/submissions/download/${submission.id}/${filename?url}"/></#macro>
 
 <#macro filterExtensions><@_u page="/admin/extensions"/></#macro>
@@ -47,7 +33,12 @@ TODO grab values from the Routes object in code, as that's pretty equivalent and
 <#macro createassignmentdetails module><@_u page="/admin/${module.code}/assignments/new" /></#macro>
 <#macro assignmentfeedback assignment mode><@_u page="/admin/assignments/${assignment.id}/${mode}/feedback" /></#macro>
 <#macro assignmentstudents assignment mode><@_u page="/admin/assignments/${assignment.id}/${mode}/students" /></#macro>
+
 <#macro assignmentmarkers assignment mode><@_u page="/admin/assignments/${assignment.id}/${mode}/markers" /></#macro>
+<#macro assignmentmarkerssmallgroups assignment mode><@_u page="/admin/assignments/${assignment.id}/${mode}/markers/smallgroups" /></#macro>
+<#macro assignmentmarkerstemplate assignment mode><@_u page="/admin/assignments/${assignment.id}/${mode}/markers/template" /></#macro>
+<#macro assignmentmarkerstemplatedownload assignment mode><@_u page="/admin/assignments/${assignment.id}/${mode}/markers/template/download" /></#macro>
+
 <#macro assignmentsubmissions assignment mode><@_u page="/admin/assignments/${assignment.id}/${mode}/submissions" /></#macro>
 <#macro assignmentoptions assignment mode><@_u page="/admin/assignments/${assignment.id}/${mode}/options" /></#macro>
 <#macro assignmentreview assignment><@_u page="/admin/assignments/${assignment.id}/review" /></#macro>

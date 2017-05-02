@@ -15,6 +15,9 @@
 
 		var $body = $('body');
 
+		// fixed header and footer
+		$body.find('.fix-area').fixHeaderFooter();
+
 		// sortable tables
 		$body.find('.table-sortable').sortableTable();
 

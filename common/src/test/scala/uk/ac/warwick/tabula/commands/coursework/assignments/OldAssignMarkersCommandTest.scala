@@ -8,11 +8,11 @@ import uk.ac.warwick.tabula.services.{AssessmentServiceComponent, AssessmentServ
 import uk.ac.warwick.tabula.data.{UserGroupDao, UserGroupDaoComponent}
 
 // scalastyle:off magic.number
-class AssignMarkersCommandTest extends TestBase with Mockito {
+class OldAssignMarkersCommandTest extends TestBase with Mockito {
 
 	@Test
 	def assignMarkers() { new MarkingWorkflowWorld {
-		val command = new AssignMarkersCommand(assignment.module, assignment) with AssignMarkersCommandState with AssessmentServiceComponent with UserGroupDaoComponent {
+		val command = new OldAssignMarkersCommand(assignment.module, assignment) with AssignMarkersCommandState with AssessmentServiceComponent with UserGroupDaoComponent {
 			val assessmentService: AssessmentService = smartMock[AssessmentService]
 			val userGroupDao: UserGroupDao = smartMock[UserGroupDao]
 		}

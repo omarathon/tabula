@@ -65,6 +65,8 @@ object Routes {
 			def createOrEditFeedback(assignment: Assignment, createOrEditMode: String): String = admin() + s"/assignments/${encoded(assignment.id)}/${encoded(createOrEditMode)}/feedback"
 			def createOrEditStudents(assignment: Assignment, createOrEditMode: String): String = admin() + s"/assignments/${encoded(assignment.id)}/${encoded(createOrEditMode)}/students"
 			def createOrEditMarkers(assignment: Assignment, createOrEditMode: String): String = admin() + s"/assignments/${encoded(assignment.id)}/${encoded(createOrEditMode)}/markers"
+			def createOrEditMarkersTemplate(assignment: Assignment, createOrEditMode: String): String = createOrEditMarkers(assignment, createOrEditMode) + "template"
+			def createOrEditMarkersTemplateDownload(assignment: Assignment, createOrEditMode: String): String = createOrEditMarkers(assignment, createOrEditMode) + "template/download"
 			def createOrEditSubmissions(assignment: Assignment, createOrEditMode: String): String = admin() + s"/assignments/${encoded(assignment.id)}/${encoded(createOrEditMode)}/submissions"
 			def createOrEditOptions(assignment: Assignment, createOrEditMode: String): String = admin() + s"/assignments/${encoded(assignment.id)}/${encoded(createOrEditMode)}/options"
 			def reviewAssignment(assignment: Assignment): String = admin()  + s"/assignments/${encoded(assignment.id)}/review"
