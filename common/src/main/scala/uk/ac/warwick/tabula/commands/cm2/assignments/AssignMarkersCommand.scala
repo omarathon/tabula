@@ -124,7 +124,7 @@ trait AssignMarkersDescription extends Describable[Assignment] {
 	self: AssignMarkersState =>
 
 	private def printAllocation(allocation: Allocations): String = allocation.map{ case(marker, students) =>
-			s"${marker.getUserId} -> ${students.map(_.getUserId).mkString(",")}"
+			s"${marker.getUserId} -> ${students.map(_.getUserId).toSeq.sorted.mkString(",")}"
 	}.mkString("\n")
 
 	def describe(d: Description) {
