@@ -3,7 +3,7 @@ package uk.ac.warwick.tabula.web.controllers.cm2.admin.marksmanagement
 import org.springframework.context.annotation.Profile
 import org.springframework.stereotype.Controller
 import org.springframework.web.bind.annotation.{ModelAttribute, RequestMapping}
-import uk.ac.warwick.tabula.commands.coursework.marksmanagement.OpenAndCloseDepartmentsCommand
+import uk.ac.warwick.tabula.commands.cm2.marksmanagement.MarksOpenAndCloseDepartmentsCommand
 import uk.ac.warwick.tabula.commands.{Appliable, PopulateOnForm}
 import uk.ac.warwick.tabula.data.model.DegreeType
 import uk.ac.warwick.tabula.web.Mav
@@ -17,7 +17,7 @@ class OpenAndCloseDepartmentsController extends CourseworkController {
 	type OpenAndCloseDepartmentsCommand = Appliable[DegreeType] with PopulateOnForm
 
 	@ModelAttribute("command")
-	def command: OpenAndCloseDepartmentsCommand = OpenAndCloseDepartmentsCommand()
+	def command: OpenAndCloseDepartmentsCommand = MarksOpenAndCloseDepartmentsCommand()
 
 	@RequestMapping(method=Array(GET, HEAD))
 	def showForm(@ModelAttribute("command") cmd: OpenAndCloseDepartmentsCommand):Mav = {
