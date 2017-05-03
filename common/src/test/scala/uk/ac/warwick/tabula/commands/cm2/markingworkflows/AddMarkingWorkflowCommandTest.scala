@@ -110,10 +110,10 @@ class AddMarkingWorkflowCommandTest extends TestBase with Mockito with Validator
 		dept.addCM2MarkingWorkflow(wflow)
 
 		validator.workflowName = "name"
-		hasError(validator, "name")
+		hasError(validator, "workflowName")
 
 		wflow.academicYear = AcademicYear(2015)
-		hasNoError(validator, "name")
+		hasNoError(validator, "workflowName")
 	}
 
 	@Test
