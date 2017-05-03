@@ -12,13 +12,13 @@ case class ExtensionListItem (extension: Extension,	within: Boolean)
 case class FeedbackListItem(feedback: Feedback, downloaded: Boolean, onlineViewed: Boolean, feedbackForSits: FeedbackForSits)
 case class Progress (percentage: Int, t: String, messageCode: String)
 // Simple object holder
-case class WorkFlowStudent (
+case class WorkflowStudent (
 	user: User,
 	progress: Progress,
 	nextStage: Option[WorkflowStage],
 	stages: ListMap[String, WorkflowStages.StageProgress],
 	coursework: WorkflowItems,
-	assignment:Assignment,
+	assignment: Assignment,
 	disability: Option[Disability]
 )
 case class WorkflowItems (

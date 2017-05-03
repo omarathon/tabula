@@ -3,8 +3,6 @@ package uk.ac.warwick.tabula.web.controllers.cm2
 import uk.ac.warwick.tabula.cm2.web.Routes
 import uk.ac.warwick.tabula.data.model.Assignment
 import uk.ac.warwick.tabula.web.BreadCrumb
-import uk.ac.warwick.tabula.web.controllers.coursework.CourseworkBreadcrumbs.Abstract
-
 
 trait CourseworkBreadcrumbs {
 	val Breadcrumbs = CourseworkBreadcrumbs

@@ -1,3 +1,6 @@
+<#ftl strip_text=true />
+<#include "*/prelude.ftl" /> <#-- FIXME why is this necessary? -->
+
 <#macro filter name path placeholder currentFilter allItems validItems=allItems prefix="" customPicker="">
 	<@spring.bind path=path>
 	<div id="${name}-filter" class="btn-group filter<#if currentFilter == placeholder> empty</#if>">
@@ -45,6 +48,15 @@
 		</#if>
 	</@spring.bind>
 </#compress></#macro>
+
+<#function contains_by_filter_name collection item>
+	<#list collection as c>
+		<#if c.name == item.name>
+			<#return true />
+		</#if>
+	</#list>
+	<#return false />
+</#function>
 
 <#function contains_by_code collection item>
 	<#list collection as c>

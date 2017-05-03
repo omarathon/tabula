@@ -65,7 +65,7 @@ class HomeForYearController extends AbstractHomeController {
 
 @Profile(Array("cm2Enabled"))
 @Controller
-@RequestMapping(Array("/${cm2.prefix}/admin", "/${cm2.prefix}/admin/department"))
+@RequestMapping(Array("/${cm2.prefix}/admin", "/${cm2.prefix}/admin/department", "/${cm2.prefix}/admin/module"))
 class HomeRewritesController extends BaseController {
 
 	@RequestMapping

@@ -43,6 +43,10 @@ object Routes {
 			def apply(department: Department, academicYear: AcademicYear): String =
 				admin() + s"/department/${encoded(department.code)}/${encoded(academicYear.startYear.toString)}"
 		}
+		object module {
+			def apply(module: Module, academicYear: AcademicYear): String =
+				admin() + s"/module/${encoded(module.code)}/${encoded(academicYear.startYear.toString)}"
+		}
 
 		object workflows {
 			def apply(dept: Department, academicYear: AcademicYear): String =
@@ -82,7 +86,9 @@ object Routes {
 			object audit {
 				def apply(assignment: Assignment): String = admin() + s"/audit/assignment/${encoded(assignment.id)}"
 			}
-			def extensions(assignment: Assignment): String = admin() + s"/assignments/${encoded(assignment.id)}/manage/extensions"
+			def extensions(assignment: Assignment): String = assignmentroot(assignment) + "/manage/extensions"
+
+			def submitToTurnitin(assignment: Assignment): String = assignmentroot(assignment) + "/turnitin"
 		}
 	}
 }

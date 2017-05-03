@@ -185,6 +185,7 @@
 		<bean class="uk.ac.warwick.tabula.data.convert.WorkflowCategoryConverter" />
 		<bean class="uk.ac.warwick.tabula.data.convert.CM2MarkingWorkflowIdConverter" />
 		<bean class="uk.ac.warwick.tabula.data.model.markingworkflow.StringToMarkingWorkflowType" />
+		<bean class="uk.ac.warwick.tabula.data.convert.AssignmentInfoFilterConverter"/>
 	</util:list>
 
 	<bean id="typeConverter"

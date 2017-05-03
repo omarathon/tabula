@@ -457,6 +457,7 @@ var ModulePicker = function (options) {
 				dataType: 'json',
 				data: {
 					query: query,
+					department: options.department,
 					checkGroups: options.checkGroups,
 					checkAssignments: options.checkAssignments
 				},
@@ -551,7 +552,7 @@ $.fn.modulePicker = function (options) {
 			checkGroups: false,
 			checkAssignments: false
 		};
-		$.extend(allOptions, options || {});
+		$.extend(allOptions, $this.data(), options || {});
 		$this.data('module-picker', new ModulePicker(allOptions));
 	});
 	return this;
@@ -562,7 +563,7 @@ $.fn.modulePicker = function (options) {
  * so you can use the picker without writing any code yourself.
  */
 jQuery(function($){
-	$('.module-picker').modulePicker({});
+	$('.module-picker').modulePicker();
 });
 
 

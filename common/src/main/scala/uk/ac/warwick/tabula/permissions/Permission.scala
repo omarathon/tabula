@@ -127,7 +127,7 @@ object Permissions {
 	}
 
 	def shortName(clazz: Class[_ <: Permission]): String
-	= clazz.getName.substring(ObjectClassPrefix.length, clazz.getName.length - 1).replace('$', '.')
+		= clazz.getName.substring(ObjectClassPrefix.length, clazz.getName.length - 1).replace('$', '.')
 
 	/* ScopelessPermissions are Permissions that can be resolved without having to worry about scope */
 	case object UserPicker extends ScopelessPermission("Use the user picker")

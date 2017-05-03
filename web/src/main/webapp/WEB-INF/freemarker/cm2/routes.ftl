@@ -26,6 +26,13 @@ TODO grab values from the Routes object in code, as that's pretty equivalent and
 		<@_u page="/admin/department/${department.code}" />
 	</#if>
 </#macro>
+<#macro modulehome module academicYear="">
+	<#if academicYear?has_content>
+		<@_u page="/admin/module/${module.code}/${academicYear.startYear}" />
+	<#else>
+		<@_u page="/admin/module/${module.code}" />
+	</#if>
+</#macro>
 <#macro downloadSubmission submission filename><@_u page="/admin/assignments/${submission.assignment.id}/submissions/download/${submission.id}/${filename?url}"/></#macro>
 
 <#macro filterExtensions><@_u page="/admin/extensions"/></#macro>
@@ -55,8 +62,12 @@ TODO grab values from the Routes object in code, as that's pretty equivalent and
 <#macro create_sitsassignments department><@_u page="/admin/department/${department.code}/setup-assignments" /></#macro>
 <#macro assignmentSharedOptions department><@_u page="/admin/department/${department.code}/shared-options" /></#macro>
 
+<#macro copy_assignments_previous department><@_u page="/admin/department/${department.code}/copy-assignments" /></#macro>
+<#macro copy_assignments_previous_module module><@_u page="/admin/module/${module.code}/copy-assignments" /></#macro>
+
 <#macro editassignmentdetails assignment><@_u page="/admin/assignments/${assignment.id}/edit" /></#macro>
 
+<#macro assignmentAudit assignment><@_u page="/admin/module/${assignment.module.code}/assignments/${assignment.id}/audit"/></#macro>
 <#macro feedbackSummary assignment studentid><@_u page="/admin/module/${assignment.module.code}/assignments/${assignment.id}/feedback/summary/${studentid}"/></#macro>
 <#macro feedbackAudit assignment studentid><@_u page="/admin/module/${assignment.module.code}/assignments/${assignment.id}/audit/${studentid}"/></#macro>
 <#macro onlinefeedback assignment><@_u page="/admin/module/${assignment.module.code}/assignments/${assignment.id}/feedback/online"/></#macro>
@@ -91,6 +102,8 @@ TODO grab values from the Routes object in code, as that's pretty equivalent and
 <#macro assignmentsubmissionsandfeedback assignment><@_u page="/admin/assignments/${assignment.id}/list"/></#macro>
 <#macro assignmentsubmissionsandfeedbacktable assignment><@_u page="/admin/assignments/${assignment.id}/table"/></#macro>
 <#macro assignmentsubmissionsandfeedbacksummary assignment><@_u page="/admin/assignments/${assignment.id}/summary"/></#macro>
+
+<#macro assignmentextensions assignment><@_u page="/admin/assignments/${assignment.id}/extensions"/></#macro>
 
 <#macro genericfeedback assignment><@_u page="/admin/module/${assignment.module.code}/assignments/${assignment.id}/feedback/generic"/></#macro>
 <#macro uploadToSits assignment><@_u page="/admin/module/${assignment.module.code}/assignments/${assignment.id}/upload-to-sits"/></#macro>
