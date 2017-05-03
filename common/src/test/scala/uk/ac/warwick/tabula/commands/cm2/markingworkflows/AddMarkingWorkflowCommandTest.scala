@@ -27,16 +27,15 @@ class AddMarkingWorkflowCommandTest extends TestBase with Mockito with Validator
 			val userLookup = userlookupService
 			val department = dept
 			val academicYear = AcademicYear(2016)
-			val isResuable = true
 
 			markersA = JArrayList()
 			markersB = JArrayList()
 		}
 
-		val cmd = new AddMarkingWorkflowCommandInternal(dept, AcademicYear(2016), isResuable=true) with AddMarkingWorkflowState with CM2MarkingWorkflowServiceComponent with UserLookupComponent {
+		val cmd = new AddMarkingWorkflowCommandInternal(dept, AcademicYear(2016)) with AddMarkingWorkflowState with CM2MarkingWorkflowServiceComponent with UserLookupComponent {
 			val userLookup = userlookupService
 			val cm2MarkingWorkflowService = workflowService
-			name = "name"
+			workflowName = "name"
 			markersA = JArrayList(marker1.getUserId, marker2.getUserId)
 			markersB = JArrayList(marker3.getUserId)
 		}
@@ -55,11 +54,11 @@ class AddMarkingWorkflowCommandTest extends TestBase with Mockito with Validator
 	def validateEmptyName(): Unit = {
 		new Fixture {
 			validator.workflowType = SingleMarking
-			hasError(validator, "name")
-			validator.name = ""
-			hasError(validator, "name")
-			validator.name = "a name"
-			hasNoError(validator, "name")
+			hasError(validator, "workflowName")
+			validator.workflowName = ""
+			hasError(validator, "workflowName")
+			validator.workflowName = "a name"
+			hasNoError(validator, "workflowName")
 		}
 	}
 
@@ -67,7 +66,7 @@ class AddMarkingWorkflowCommandTest extends TestBase with Mockito with Validator
 	def validateMarkerA(): Unit = {
 		new Fixture {
 			validator.workflowType = SingleMarking
-			validator.name = "a name"
+			validator.workflowName = "a name"
 			hasError(validator, "markersA")
 
 			validator.markersA = JArrayList("notauser")
@@ -85,7 +84,7 @@ class AddMarkingWorkflowCommandTest extends TestBase with Mockito with Validator
 	def validateMarkerB(): Unit = {
 		new Fixture {
 			validator.workflowType = SingleMarking
-			validator.name = "a name"
+			validator.workflowName = "a name"
 			validator.markersA = JArrayList("cuslaj", "cuslak")
 			hasNoError(validator, "markersB")
 
@@ -110,11 +109,11 @@ class AddMarkingWorkflowCommandTest extends TestBase with Mockito with Validator
 		wflow.academicYear = AcademicYear(2016)
 		dept.addCM2MarkingWorkflow(wflow)
 
-		validator.name = "name"
-		hasError(validator, "name")
+		validator.workflowName = "name"
+		hasError(validator, "workflowName")
 
 		wflow.academicYear = AcademicYear(2015)
-		hasNoError(validator, "name")
+		hasNoError(validator, "workflowName")
 	}
 
 	@Test
@@ -122,7 +121,7 @@ class AddMarkingWorkflowCommandTest extends TestBase with Mockito with Validator
 		cmd.workflowType = SingleMarking
 		var wflow = cmd.applyInternal()
 		wflow.workflowType should be (SingleMarking)
-		wflow.name should be (cmd.name)
+		wflow.name should be (cmd.workflowName)
 		wflow.department should be (cmd.department)
 		wflow.academicYear should be (cmd.academicYear)
 		wflow.workflowType should be (SingleMarking)

@@ -35,7 +35,8 @@ class CM2MarkingWorkflowDaoImpl extends CM2MarkingWorkflowDao with Daoisms {
 		session.newQuery[CM2MarkingWorkflow]("""select c from CM2MarkingWorkflow c
 				where c.academicYear = :year
 				and c.department = :department
-				and c.isReusable = true""")
+				and c.isReusable = true
+				order by c.name""")
 			.setParameter("year", academicYear)
 			.setEntity("department", department)
 			.distinct

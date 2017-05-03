@@ -42,15 +42,15 @@ class EditMarkingWorkflowCommandTest extends TestBase with Mockito with Validato
 		dept.addCM2MarkingWorkflow(wflow)
 		dept.addCM2MarkingWorkflow(wflow2)
 
-		validator.name = "workflow2"
-		hasError(validator, "name")
+		validator.workflowName = "workflow2"
+		hasError(validator, "workflowName")
 
-		validator.name = "workflow1"
-		hasNoError(validator, "name")
+		validator.workflowName = "workflow1"
+		hasNoError(validator, "workflowName")
 
-		validator.name = "workflow2"
+		validator.workflowName = "workflow2"
 		wflow2.academicYear = AcademicYear(2015)
-		hasNoError(validator, "name")
+		hasNoError(validator, "workflowName")
 	}
 
 }
