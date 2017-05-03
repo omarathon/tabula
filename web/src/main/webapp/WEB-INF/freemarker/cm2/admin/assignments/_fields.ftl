@@ -78,10 +78,16 @@
 		</#if>
 	</@bs3form.labelled_form_group>
 
-	<@bs3form.labelled_form_group path="workflowCategory" labelText="Marking workflow use" help="A marking workflow defines the marking method and who the markers are. You can reuse an existing workflow, create a single use workflow or choose not to have one.">
+	<@bs3form.labelled_form_group path="workflowCategory" labelText="Marking workflow use">
 		<@f.select path="workflowCategory" id="workflowCategory" class="form-control">
 			<@f.options items=command.workflowCategories itemLabel="displayName" itemValue="code" />
 		</@f.select>
+		<div class="help-block">
+			A marking workflow defines the marking method and who the markers are. You can reuse an existing workflow, create a single use workflow or choose not to have one.
+			<span class="workflow-fields single-use-workflow-fields">
+				Single use workflows are only used once and aren't saved in Tabula. To create a reusable workflow, go to <a href="<@routes.cm2.reusableWorkflowsHome department academicYear />">marking workflows</a>.
+			</span>
+		</div>
 	</@bs3form.labelled_form_group>
 
 </#escape>

@@ -31,15 +31,19 @@
 	</@bs3form.labelled_form_group>
 </#if>
 
-<#assign markerHelp>You can add an individual by name or university ID.<#if !canDeleteMarkers> At least one assignment that uses this workflow has marking in progress so you can't remove markers. You can replace markers instead.</#if></#assign>
+<#assign markerHelp>
+	Add an individual <span class="role">marker</span>'s name or University ID.<#if !canDeleteMarkers> At least one assignment that uses this workflow has marking in progress so you can't remove markers. You can replace markers instead.</#if>
+</#assign>
 
-<@bs3form.labelled_form_group path="markersA" labelText="Add markers" help="${markerHelp}" cssClass="markersA">
+<@bs3form.labelled_form_group path="markersA" labelText="Add markers" cssClass="markersA">
 	<@bs3form.flexipicker path="markersA" placeholder="User name" list=true multiple=true auto_multiple=false delete_existing=canDeleteMarkers />
+	<div class="help-block">${markerHelp}</div>
 </@bs3form.labelled_form_group>
 
 
-<@bs3form.labelled_form_group path="markersB" labelText="Add markers" help="${markerHelp}" cssClass="markersB hide">
+<@bs3form.labelled_form_group path="markersB" labelText="Add markers" cssClass="markersB hide">
 	<@bs3form.flexipicker path="markersB" placeholder="User name" list=true multiple=true auto_multiple=false delete_existing=canDeleteMarkers />
+	<div class="help-block">${markerHelp}</div>
 </@bs3form.labelled_form_group>
 
 <#if !newRecord>
@@ -55,10 +59,15 @@
 			var $workflowOption = $this.find('option:selected');
 			var roleNames = $workflowOption.data('roles') ? $workflowOption.data('roles').split(",") : [];
 			if(roleNames.length !== 0){
-				$('.form-group.markersA label').text(roleNames[0]);
+				var roleA = roleNames[0].toLowerCase();
+				$('.form-group.markersA label').text("Add " + roleA);
+				$('.form-group.markersA .role').text(roleA);
+
 				var useMarkerB = $workflowOption.data("numroles") > 1;
 				if(useMarkerB) {
-					$('.form-group.markersB label').text(roleNames[1]);
+					var roleB = roleNames[1].toLowerCase();
+					$('.form-group.markersB .role').text(roleB);
+					$('.form-group.markersB label').text("Add " + roleB);
 				}
 				$('.markersB').removeClass('hide').toggle(useMarkerB);
 			}
