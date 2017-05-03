@@ -16,17 +16,25 @@ $.fn.enableFilters = function(options) {
 		// bind event handlers
 		$this.on('change', function(e) {
 			var $checkbox = $(e.target);
-			doRequest();
+			doRequest(true);
 			updateFilterText($checkbox);
 			updateRelatedFilters($checkbox);
 		});
 
+		if ($this.data('lazy')) {
+			doRequest(false);
+		}
+
 		$this.find('.module-picker').on('change', function(){
 			var $picker = $(this);
+			var name = $picker.data('name') || 'modules';
+
 			if ($picker.data('modulecode') === undefined || $picker.data('modulecode').length === 0)
 				return;
 
-			updateFilterFromPicker($picker, 'modules', $picker.data('modulecode'), $picker.data('modulecode').toUpperCase());
+			var value = $picker.data('wrap') ? 'Module(' + $picker.data('modulecode') + ')' : $picker.data('modulecode');
+
+			updateFilterFromPicker($picker, name, value, $picker.data('modulecode').toUpperCase());
 
 			$picker.data('modulecode','').val('');
 		});
@@ -38,7 +46,7 @@ $.fn.enableFilters = function(options) {
 				updateFilterText($checkbox);
 				updateRelatedFilters($checkbox);
 			});
-			doRequest();
+			doRequest(true);
 		});
 		toggleClearAll();
 
@@ -75,10 +83,12 @@ $.fn.enableFilters = function(options) {
 			updateRelatedFilters($(checkbox));
 		});
 
-		function doRequest() {
+		function doRequest(eventDriven) {
 			// update the url with the new filter values
-			if (typeof history.pushState !== 'undefined') {
-				history.pushState(null, document.title, $form.attr('action') + '?' + $form.serialize());
+			var serialized = $form.find(':input').filter(function(index, element) { return $(element).val() !== ""; }).serialize();
+			var url = $form.attr('action') + '?' + serialized;
+			if (eventDriven && typeof history.pushState !== 'undefined') {
+				history.pushState(null, document.title, url);
 			}
 
 			// abort any currently running requests
@@ -90,10 +100,22 @@ $.fn.enableFilters = function(options) {
 			// grey out results while loading
 			$results.addClass('loading');
 
-			$form.data('request', $.post($form.attr('action'), $form.serialize(), function(data) {
+			$form.data('request', $.get(url + '&_ts=' + new Date().getTime(), function(data) {
 				$results.html(data);
 				$form.data('request', null);
 				$results.removeClass('loading');
+
+				$('.use-wide-popover').tabulaPopover({
+					trigger: 'click',
+					container: 'body',
+					template: '<div class="popover wide"><div class="arrow"></div><div class="popover-inner"><button type="button" class="close" aria-hidden="true">&#215;</button><h3 class="popover-title"></h3><div class="popover-content"><p></p></div></div></div>'
+				});
+
+				$('.use-tooltip').tooltip();
+				AjaxPopup.wireAjaxPopupLinks($('body'));
+
+				// callback for hooking in local changes to results
+				$(document).trigger("tabula.filterResultsChanged");
 			}));
 			toggleClearAll();
 		}
@@ -154,7 +176,7 @@ $.fn.enableFilters = function(options) {
 											updateFilterText($checkbox);
 											updateRelatedFilters($checkbox);
 										});
-										doRequest();
+										doRequest(true);
 									})
 							)
 							.append($('<hr />'))
@@ -171,7 +193,7 @@ $.fn.enableFilters = function(options) {
 
 			var $ul = $picker.closest('ul');
 
-			var $li = $ul.find('input[value="' + value + '"]').closest('li');
+			var $li = $ul.find('input[value="' + value + '"], input[value="Module(' + value + ')"]').closest('li');
 			var $checkbox;
 			if ($li.length) {
 				$checkbox = $li.find('input').prop('checked', true);
@@ -187,11 +209,11 @@ $.fn.enableFilters = function(options) {
 				}).data('short-value', shortValue);
 
 				$('<li/>').addClass('check-list-item').append(
-					$('<label/>').addClass('checkbox').append($checkbox).append($picker.val())
+					$('<label/>').addClass('checkbox').append($checkbox).append(' ' + $picker.val())
 				).insertBefore($ul.find('li.check-list-item:first'));
 			}
 
-			doRequest();
+			doRequest(true);
 			updateFilterText($checkbox);
 		}
 	});

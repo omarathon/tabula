@@ -3,7 +3,7 @@ package uk.ac.warwick.tabula.web.controllers.ajax
 import org.springframework.stereotype.Controller
 import org.springframework.web.bind.annotation.{ModelAttribute, RequestMapping}
 import uk.ac.warwick.tabula.commands.{Appliable, Command, CommandInternal, ReadOnly, Unaudited}
-import uk.ac.warwick.tabula.data.model.Module
+import uk.ac.warwick.tabula.data.model.{Department, Module}
 import uk.ac.warwick.tabula.helpers.StringUtils._
 import uk.ac.warwick.tabula.services.{AutowiringModuleAndDepartmentServiceComponent, AutowiringSmallGroupServiceComponent, ModuleAndDepartmentServiceComponent, SmallGroupServiceComponent}
 import uk.ac.warwick.tabula.system.permissions.Public
@@ -46,13 +46,14 @@ class ModulePickerCommand extends CommandInternal[Seq[ModulePickerResult]] {
 	var query: String = _
 	var checkAssignments: Boolean = _
 	var checkGroups: Boolean = _
+	var department: Department = _
 
 	def applyInternal(): Seq[ModulePickerResult] = {
 		if (!query.hasText) {
 			Seq()
 		} else {
 			val modules: Seq[Module] = moduleAndDepartmentService.findModulesNamedLike(query)
-			modules.map {
+			modules.filter(m => Option(department).isEmpty || m.adminDepartment == department).map {
 				case (module) =>
 					ModulePickerResult(module,
 						if (checkGroups) smallGroupService.hasSmallGroups(module) else false,
