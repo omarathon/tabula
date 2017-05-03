@@ -78,7 +78,7 @@
 		</#if>
 	</@bs3form.labelled_form_group>
 
-	<@bs3form.labelled_form_group path="workflowCategory" labelText="Workflow" help="Marking workflows define how and by whom the assignment will be marked. You can use an existing workflow, no workflow or create a single use workflow.">
+	<@bs3form.labelled_form_group path="workflowCategory" labelText="Marking workflow use" help="A marking workflow defines the marking method and who the markers are. You can reuse an existing workflow, create a single use workflow or choose not to have one.">
 		<@f.select path="workflowCategory" id="workflowCategory" class="form-control">
 			<@f.options items=command.workflowCategories itemLabel="displayName" itemValue="code" />
 		</@f.select>
