@@ -1,13 +1,13 @@
 package uk.ac.warwick.tabula.web.views
 
-import freemarker.template._
-import freemarker.core.Environment
-import org.springframework.beans.factory.annotation.Value
 import java.util.Properties
 import javax.annotation.Resource
-import java.net.URLEncoder
-import uk.ac.warwick.util.web.EscapingUriParser
+
+import freemarker.core.Environment
+import freemarker.template._
+import org.springframework.beans.factory.annotation.Value
 import uk.ac.warwick.tabula.JavaImports._
+import uk.ac.warwick.util.web.EscapingUriParser
 
 /**
  *

@@ -71,7 +71,7 @@ object Routes {
 			def createOrEditOptions(assignment: Assignment, createOrEditMode: String): String = admin() + s"/assignments/${encoded(assignment.id)}/${encoded(createOrEditMode)}/options"
 			def reviewAssignment(assignment: Assignment): String = admin()  + s"/assignments/${encoded(assignment.id)}/review"
 
-			private def assignmentroot(assignment: Assignment) = admin() + "/assignments/%s" format (encoded(assignment.id))
+			private def assignmentroot(assignment: Assignment) = admin() + s"/assignments/${encoded(assignment.id)}"
 
 			def submissionsZip(assignment: Assignment): String = assignmentroot(assignment) + "/submissions.zip"
 

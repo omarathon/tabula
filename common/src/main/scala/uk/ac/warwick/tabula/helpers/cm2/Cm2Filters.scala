@@ -9,6 +9,7 @@ import uk.ac.warwick.tabula.data.model.MarkingState.MarkingCompleted
 import uk.ac.warwick.tabula.helpers.StringUtils._
 
 // FIXME: implemented as part of CM2 migration but will require further reworking due to CM2 workflow changes
+
 /**
  * Filters a set of "Student" case objects (which are a representation of the current
  * state of a single student's submission workflow on an assignment, containing the
@@ -214,12 +215,14 @@ object Cm2Filters {
 
 	case object NotReleasedForMarking extends ParameterlessCm2Filter {
 		def getDescription = "submissions that have not been released for marking"
+    def predicate(student: WorkflowItems): Boolean = false
 		def predicate(student: WorkFlowStudent): Boolean = !student.assignment.isReleasedForMarking(student.user.getUserId)
 		def applies(assignment: Assignment): Boolean = assignment.collectSubmissions && assignment.markingWorkflow != null
 	}
 
 	case object NotMarked extends ParameterlessCm2Filter {
 		def getDescription = "submissions not marked"
+    def predicate(student: WorkflowItems): Boolean = false
 		def predicate(student: WorkFlowStudent): Boolean = {
 			val releasedForMarking = student.assignment.isReleasedForMarking(student.user.getUserId)
 			val hasFirstMarker = student.assignment.getStudentsFirstMarker(student.user.getUserId).isDefined

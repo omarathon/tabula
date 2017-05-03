@@ -1,11 +1,11 @@
-package uk.ac.warwick.tabula.data.model.notifications.coursework
+package uk.ac.warwick.tabula.data.model.notifications.cm2
 
 import uk.ac.warwick.tabula.data.model.{Assignment, Notification}
 import uk.ac.warwick.tabula.web.views.{FreemarkerRendering, ScalaFreemarkerConfiguration}
 import uk.ac.warwick.tabula.{Fixtures, TestBase}
 import uk.ac.warwick.userlookup.User
 
-class RequestAssignmentAccessNotificationTest extends TestBase with FreemarkerRendering {
+class Cm2RequestAssignmentAccessNotificationTest extends TestBase with FreemarkerRendering {
 
 	private trait Fixture {
 		val freeMarkerConfig: ScalaFreemarkerConfiguration = newFreemarkerConfiguration
@@ -15,7 +15,7 @@ class RequestAssignmentAccessNotificationTest extends TestBase with FreemarkerRe
 	}
 
 	@Test def title(): Unit = new Fixture {
-		val notification: RequestAssignmentAccessNotification = Notification.init(new RequestAssignmentAccessNotification, new User("cuscav"), assignment)
+		val notification: Cm2RequestAssignmentAccessNotification = Notification.init(new Cm2RequestAssignmentAccessNotification, new User("cuscav"), assignment)
 		notification.title should be ("CS118: Access requested for \"5,000 word essay\"")
 	}
 
@@ -29,7 +29,7 @@ class RequestAssignmentAccessNotificationTest extends TestBase with FreemarkerRe
 		user.setDepartment("Warwick Business School")
 		user.setEmail("student@wbs.ac.uk")
 
-		val notification: RequestAssignmentAccessNotification = Notification.init(new RequestAssignmentAccessNotification, user, assignment)
+		val notification: Cm2RequestAssignmentAccessNotification = Notification.init(new Cm2RequestAssignmentAccessNotification, user, assignment)
 
 		val notificationContent: String = renderToString(freeMarkerConfig.getTemplate(notification.content.template), notification.content.model)
 		notificationContent should be (
@@ -51,7 +51,7 @@ class RequestAssignmentAccessNotificationTest extends TestBase with FreemarkerRe
 		user.setDepartment("Warwick Business School")
 		user.setEmail("staff@wbs.ac.uk")
 
-		val notification: RequestAssignmentAccessNotification = Notification.init(new RequestAssignmentAccessNotification, user, assignment)
+		val notification: Cm2RequestAssignmentAccessNotification = Notification.init(new Cm2RequestAssignmentAccessNotification, user, assignment)
 
 		val notificationContent: String = renderToString(freeMarkerConfig.getTemplate(notification.content.template), notification.content.model)
 		notificationContent should be (
@@ -70,7 +70,7 @@ class RequestAssignmentAccessNotificationTest extends TestBase with FreemarkerRe
 		user.setFullName("External Full Name")
 		user.setEmail("external@wbs.ac.uk")
 
-		val notification: RequestAssignmentAccessNotification = Notification.init(new RequestAssignmentAccessNotification, user, assignment)
+		val notification: Cm2RequestAssignmentAccessNotification = Notification.init(new Cm2RequestAssignmentAccessNotification, user, assignment)
 
 		val notificationContent: String = renderToString(freeMarkerConfig.getTemplate(notification.content.template), notification.content.model)
 		notificationContent should be (
