@@ -5,7 +5,7 @@ import org.springframework.validation.ValidationUtils.rejectIfEmptyOrWhitespace
 import uk.ac.warwick.tabula.AcademicYear
 import uk.ac.warwick.tabula.JavaImports.JList
 import uk.ac.warwick.tabula.data.model.Department
-import uk.ac.warwick.tabula.JavaImports.JArrayList
+import uk.ac.warwick.tabula.JavaImports._
 import uk.ac.warwick.tabula.commands._
 import uk.ac.warwick.tabula.data.model.markingworkflow._
 import uk.ac.warwick.tabula.helpers.StringUtils

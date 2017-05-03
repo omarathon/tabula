@@ -11,7 +11,7 @@ import uk.ac.warwick.tabula.data.model.triggers.{AssignmentClosedTrigger, Trigge
 import uk.ac.warwick.tabula.permissions.Permissions
 import uk.ac.warwick.tabula.services._
 import uk.ac.warwick.tabula.system.permissions.{PermissionsChecking, PermissionsCheckingMethods, RequiresPermissionsChecking}
-import uk.ac.warwick.tabula.JavaImports.JArrayList
+import uk.ac.warwick.tabula.JavaImports._
 
 
 
