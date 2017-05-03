@@ -154,7 +154,7 @@ trait AssignmentProgress extends TaskBenchmarking {
 	self: CM2WorkflowProgressServiceComponent =>
 
 	def enhance(assignment: Assignment): EnhancedAssignmentInfo = benchmarkTask(s"Get progress information for ${assignment.name}") {
-		val results = SubmissionAndFeedbackCommand(assignment.module, assignment).apply()
+		val results = SubmissionAndFeedbackCommand(assignment).apply()
 
 		val allStages = workflowProgressService.getStagesFor(assignment)
 
