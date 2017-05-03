@@ -104,9 +104,9 @@ abstract class CM2MarkingWorkflow extends GeneratedId with PermissionsTarget wit
 	def studentsChooseMarkers: Boolean = false
 
 	def canDeleteMarkers: Boolean = {
-		def oneHasSubmissions = assignments.asScala.exists(_.submissions.asScala.nonEmpty)
-		def oneIsReleased = assignments.asScala.exists(_.allFeedback.nonEmpty)
-		!((studentsChooseMarkers && oneHasSubmissions) || oneIsReleased)
+		def hasSubmissions = assignments.asScala.exists(_.submissions.asScala.nonEmpty)
+		def markersAssigned = assignments.asScala.exists(_.markersAssigned)
+		!((studentsChooseMarkers && hasSubmissions) || markersAssigned)
 	}
 }
 

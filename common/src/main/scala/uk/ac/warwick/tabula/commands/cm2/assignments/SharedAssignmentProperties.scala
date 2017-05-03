@@ -45,8 +45,6 @@ trait SharedAssignmentProperties extends BooleanAssignmentProperties with FindAs
 	// if we change a feedback template we may need to invalidate existing zips
 	var zipService: ZipService = Wire.auto[ZipService]
 
-	var markingWorkflow: MarkingWorkflow = _
-
 	@Min(1)
 	@Max(Assignment.MaximumFileAttachments)
 	var fileAttachmentLimit: Int = 1
@@ -94,8 +92,6 @@ trait SharedAssignmentProperties extends BooleanAssignmentProperties with FindAs
 		assignment.feedbackTemplate = feedbackTemplate
 		if (assignment.id != null) // this is an edit
 			zipService.invalidateSubmissionZip(assignment)
-		assignment.markingWorkflow = markingWorkflow
-		manageMarkerField(assignment)
 		copyOptionsTo(assignment)
 	}
 
@@ -141,7 +137,6 @@ trait SharedAssignmentProperties extends BooleanAssignmentProperties with FindAs
 		summative = assignment.summative
 		dissertation = assignment.dissertation
 		feedbackTemplate = assignment.feedbackTemplate
-		markingWorkflow = assignment.markingWorkflow
 		includeInFeedbackReportWithoutSubmissions = assignment.includeInFeedbackReportWithoutSubmissions
 		automaticallyReleaseToMarkers = assignment.automaticallyReleaseToMarkers
 		automaticallySubmitToTurnitin = assignment.automaticallySubmitToTurnitin
@@ -162,25 +157,6 @@ trait SharedAssignmentProperties extends BooleanAssignmentProperties with FindAs
 		}
 	}
 
-	/**
-	 * add/remove marker field as appropriate
-	 */
-	def manageMarkerField(assignment:Assignment) {
-		val markerField = findMarkerSelectField(assignment)
-		if (markingWorkflow != null && markingWorkflow.studentsChooseMarker) {
-			// we now need a marker field for this assignment. create one
-			if (markerField.isEmpty) {
-				val markerSelect = new MarkerSelectField()
-				markerSelect.name = Assignment.defaultMarkerSelectorName
-				assignment.addFields(markerSelect)
-			}
-		} else {
-			// if a marking workflow has been removed or changed we need to remove redundant marker fields
-			if (markerField.isDefined) {
-				assignment.removeField(markerField.get)
-			}
-		}
-	}
 }
 
 
