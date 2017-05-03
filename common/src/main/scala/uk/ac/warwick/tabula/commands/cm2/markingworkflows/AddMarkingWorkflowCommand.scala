@@ -63,6 +63,6 @@ trait AddMarkingWorkflowValidation extends ModifyMarkingWorkflowValidation with 
 
 trait AddMarkingWorkflowState extends ModifyMarkingWorkflowState {
 	this: UserLookupComponent =>
-	def isResuable: Boolean
+	def isResuable: Boolean = true
 	var workflowType: MarkingWorkflowType = _
 }

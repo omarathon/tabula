@@ -27,7 +27,6 @@ class AddMarkingWorkflowCommandTest extends TestBase with Mockito with Validator
 			val userLookup = userlookupService
 			val department = dept
 			val academicYear = AcademicYear(2016)
-			val isResuable = true
 
 			markersA = JArrayList()
 			markersB = JArrayList()

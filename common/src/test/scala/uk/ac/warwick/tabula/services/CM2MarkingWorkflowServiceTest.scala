@@ -71,7 +71,7 @@ class CM2MarkingWorkflowServiceTest extends TestBase with Mockito {
 		)
 		feedback.foreach(f => f.assignment = assignment)
 
-		val releasedFeedback = service.releaseFeedback(feedback)
+		val releasedFeedback = service.releaseForMarking(feedback)
 
 		feedback.foreach(f => verify(fs, times(1)).saveOrUpdate(f))
 

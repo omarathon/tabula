@@ -1,4 +1,4 @@
-<#if isNew>
+<#if newRecord>
 	<@bs3form.labelled_form_group path="workflowType" labelText="Workflow type">
 		<@f.select path="workflowType" class="form-control" >
 			<option value="" disabled selected></option>
@@ -14,8 +14,7 @@
 		</@f.select>
 	</@bs3form.labelled_form_group>
 <#else>
-	<@bs3form.labelled_form_group>
-		<label for="workflowType" class="control-label ">Workflow type</label>
+	<@bs3form.labelled_form_group labelText="Workflow type">
 		<select id="workflowType" name="workflowType" class="form-control" disabled="disabled">
 			<option
 					selected="selected"
@@ -43,7 +42,7 @@
 	<@bs3form.flexipicker path="markersB" placeholder="User name" list=true multiple=true auto_multiple=false delete_existing=canDeleteMarkers />
 </@bs3form.labelled_form_group>
 
-<#if !isNew>
+<#if !newRecord>
 	<@bs3form.labelled_form_group>
 	<a href="<@routes.cm2.reusableWorkflowReplaceMarker department academicYear workflow />">Replace marker</a>
 	</@bs3form.labelled_form_group>
@@ -51,7 +50,6 @@
 
 <script type="text/javascript">
 	(function ($) { "use strict";
-
 		$('select[name=workflowType]').on('change', function() {
 			var $this = $(this);
 			var $workflowOption = $this.find('option:selected');

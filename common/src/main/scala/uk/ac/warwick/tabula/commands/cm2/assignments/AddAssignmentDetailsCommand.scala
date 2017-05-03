@@ -97,7 +97,7 @@ class CreateAssignmentDetailsCommandInternal(val module: Module)
 
 
 trait AssignmentDetailsCopy extends ModifyAssignmentDetailsCommandState with SharedAssignmentProperties {
-  self: AssessmentServiceComponent  with UserLookupComponent with CM2MarkingWorkflowServiceComponent =>
+  self: AssessmentServiceComponent  with UserLookupComponent with CM2MarkingWorkflowServiceComponent with ModifyMarkingWorkflowState =>
 
   def copyTo(assignment: Assignment) {
     assignment.name = name
@@ -120,9 +120,9 @@ trait AssignmentDetailsCopy extends ModifyAssignmentDetailsCommandState with Sha
   }
 }
 
-trait ModifyAssignmentDetailsCommandState extends CurrentSITSAcademicYear with ModifyMarkingWorkflowState {
+trait ModifyAssignmentDetailsCommandState extends CurrentSITSAcademicYear {
 
-  self: AssessmentServiceComponent with UserLookupComponent with CM2MarkingWorkflowServiceComponent =>
+  self: AssessmentServiceComponent with UserLookupComponent with CM2MarkingWorkflowServiceComponent with ModifyMarkingWorkflowState =>
 
   def module: Module
 
@@ -151,7 +151,7 @@ trait ModifyAssignmentDetailsCommandState extends CurrentSITSAcademicYear with M
 
 }
 
-trait CreateAssignmentDetailsCommandState extends ModifyAssignmentDetailsCommandState {
+trait CreateAssignmentDetailsCommandState extends ModifyAssignmentDetailsCommandState with ModifyMarkingWorkflowState {
   self: AssessmentServiceComponent with UserLookupComponent with CM2MarkingWorkflowServiceComponent =>
 
   // can be set to false if that's not what you want.
