@@ -16,7 +16,7 @@ object SmallGroupSetFilters {
 	private val ObjectClassPrefix = SmallGroupSetFilters.getClass.getName
 
 	def shortName(clazz: Class[_ <: SmallGroupSetFilter]): String
-	= clazz.getName.substring(ObjectClassPrefix.length, clazz.getName.length - 1).replace('$', '.')
+		= clazz.getName.substring(ObjectClassPrefix.length, clazz.getName.length - 1).replace('$', '.')
 
 	def of(name: String): SmallGroupSetFilter = {
 		try {

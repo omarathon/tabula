@@ -654,6 +654,7 @@
 							function(html) {
 								$target.html(html);
 								$target.find('a.ajax-modal').ajaxModalLink();
+								$target.find('.use-tooltip').tooltip();
 								$target.find('.use-popover').tabulaPopover({
 									trigger: 'click',
 									container: 'body'
@@ -715,7 +716,7 @@
 					$(window).trigger('resize');
 				});
 
-				if (!open() && window.location.hash && window.location.hash.substring(1) == $section.data('name')) {
+				if (!open() && window.location.hash && window.location.hash.substring(1) === $section.data('name')) {
 					// simulate a click
 					$title.trigger('click');
 				}

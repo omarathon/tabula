@@ -1,5 +1,10 @@
 <#ftl strip_text=true />
 
+<#-- FIXME why is this necessary? -->
+<#if JspTaglibs??>
+	<#assign spring=JspTaglibs["/WEB-INF/tld/spring.tld"]>
+</#if>
+
 <#macro student_assignment_list id title assignments expand_by_default=true show_submission_progress=false>
 	<span id="${id}-container">
 		<#local has_assignments = (assignments!?size gt 0) />
@@ -25,6 +30,13 @@
 			</div>
 		</div>
 	</span>
+
+	<#if !expand_by_default>
+		<#-- If we're not expanding by default, initialise the collapsible immediate - don't wait for DOMReady -->
+		<script type="text/javascript">
+			GlobalScripts.initCollapsible(jQuery('#${id}').filter(':not(.empty)'));
+		</script>
+	</#if>
 </#macro>
 
 <#macro progress_bar tooltip percentage class="default">
@@ -346,6 +358,13 @@
 			</div>
 		</div>
 	</span>
+
+	<#if !expand_by_default>
+		<#-- If we're not expanding by default, initialise the collapsible immediate - don't wait for DOMReady -->
+		<script type="text/javascript">
+			GlobalScripts.initCollapsible(jQuery('#${id}').filter(':not(.empty)'));
+		</script>
+	</#if>
 </#macro>
 
 <#macro marker_assignment_info info>
@@ -393,3 +412,267 @@
 		</div>
 	</div>
 </#macro>
+
+<#macro admin_assignment_list module assignments expand_by_default=true>
+	<#local id>module-${module.code}</#local>
+	<#local title><@fmt.module_name module /></#local>
+
+	<span id="${id}-container">
+		<#local has_assignments = (assignments!?size gt 0) />
+		<div id="${id}" class="striped-section admin-assignment-list<#if has_assignments> collapsible<#if expand_by_default> expanded</#if><#else> empty</#if>" data-name="${id}"
+			<#if has_assignments && !expand_by_default>
+				 data-populate=".striped-section-contents"
+				 data-href="<@routes.cm2.modulehome module />?${info.requestedUri.query!}"
+				 data-name="${id}"
+			</#if>
+		>
+			<div class="clearfix">
+				<div class="btn-group section-manage-button">
+					<a class="btn btn-default btn-sm dropdown-toggle" data-toggle="dropdown">Manage this module <span class="caret"></span></a>
+					<ul class="dropdown-menu pull-right">
+						<li>
+							<#local perms_url><@routes.admin.moduleperms module /></#local>
+							<@fmt.permission_button
+								permission='RolesAndPermissions.Read'
+								scope=module
+								action_descr='manage module permissions'
+								href=perms_url>
+									Module permissions
+							</@fmt.permission_button>
+						</li>
+						<li>
+						<#local create_url><@routes.cm2.createassignmentdetails module /></#local>
+							<@fmt.permission_button
+								permission='Assignment.Create'
+								scope=module
+								action_descr='create a new assignment'
+								href=create_url>
+									Create new assignment
+							</@fmt.permission_button>
+						</li>
+						<li>
+							<#local copy_url><@routes.cm2.copy_assignments_previous_module module /></#local>
+							<@fmt.permission_button
+								permission='Assignment.Create'
+								scope=module
+								action_descr='copy existing assignments'
+								href=copy_url>
+									Create new assignment from previous
+							</@fmt.permission_button>
+						</li>
+					</ul>
+				</div>
+
+				<h4 class="section-title with-button">${title}</h4>
+
+				<#if has_assignments>
+					<div class="striped-section-contents">
+						<#if expand_by_default>
+							<#list assignments as info>
+								<span id="admin-assignment-container-${info.assignment.id}">
+									<@admin_assignment_info info />
+								</span>
+							</#list>
+						</#if>
+					</div>
+				</#if>
+			</div>
+		</div>
+	</span>
+
+	<#if !expand_by_default>
+		<#-- If we're not expanding by default, initialise the collapsible immediate - don't wait for DOMReady -->
+		<script type="text/javascript">
+			GlobalScripts.initCollapsible(jQuery('#${id}').filter(':not(.empty)'));
+		</script>
+	</#if>
+</#macro>
+
+<#macro admin_assignment_info info>
+	<#local assignment = info.assignment />
+	<div class="item-info admin-assignment-${assignment.id}">
+		<div class="clearfix">
+			<div class="pull-right">
+				<div class="btn-group">
+					<a class="btn btn-default btn-xs dropdown-toggle" data-toggle="dropdown">
+						Actions
+						<span class="caret"></span>
+					</a>
+					<ul class="dropdown-menu pull-right">
+						<li>
+							<#local edit_url><@routes.cm2.editassignmentdetails assignment /></#local>
+							<@fmt.permission_button
+								permission='Assignment.Update'
+								scope=assignment
+								action_descr='edit assignment properties'
+								href=edit_url>
+								Edit
+							</@fmt.permission_button>
+						</li>
+
+						<li>
+							<#if assignment.collectSubmissions>
+								<#local sub_caption="Manage assignment's submissions" />
+							<#else>
+								<#local sub_caption="Manage assignment's feedback" />
+							</#if>
+							<#local edit_url><@routes.cm2.assignmentsubmissionsandfeedback assignment /></#local>
+							<@fmt.permission_button
+								permission='AssignmentFeedback.Read'
+								scope=assignment
+								action_descr=sub_caption?lower_case
+								href=edit_url>
+									${sub_caption}
+							</@fmt.permission_button>
+						</li>
+
+						<li>
+							<#if can.do('Extension.Update', assignment)>
+								<#local ext_caption="Manage assignment's extensions" />
+							<#else>
+								<#local ext_caption="View assignment's extensions" />
+							</#if>
+							<#local ext_url><@routes.cm2.assignmentextensions assignment /></#local>
+							<@fmt.permission_button
+								permission='Extension.Read'
+								scope=assignment
+								action_descr=ext_caption?lower_case
+								href=ext_url>
+									${ext_caption}
+							</@fmt.permission_button>
+						</li>
+					</ul>
+				</div>
+			</div>
+			<h5 class="assignment-name">${assignment.name}</h5>
+		</div>
+
+		<div class="row">
+			<div class="col-md-4">
+				<h6 class="sr-only">Assignment information</h6>
+
+				<ul class="list-unstyled">
+					<#if !assignment.opened>
+						<li><strong>Assignment opens:</strong> <span class="use-tooltip" title="<@fmt.dateToWeek assignment.openDate />" data-html="true"><@fmt.date date=assignment.openDate /></span></li>
+					</#if>
+
+					<#if assignment.openEnded>
+						<li><strong>Open-ended</strong></li>
+					<#else>
+						<li><strong>Assignment <#if assignment.closed>closed<#else>due</#if>:</strong> <span class="use-tooltip" title="<@fmt.dateToWeek assignment.closeDate />" data-html="true"><@fmt.date date=assignment.closeDate /></span></li>
+					</#if>
+
+					<li>
+						<strong>Assigned students:</strong>
+						<#if assignment.membershipInfo.totalCount == 0>
+							0
+						<#elseif assignment.membershipInfo.sitsCount gt 0>
+							${assignment.membershipInfo.sitsCount} from SITS<#--
+							--><#if assignment.membershipInfo.usedExcludeCount gt 0> after ${assignment.membershipInfo.usedExcludeCount} removed manually</#if><#--
+							--><#if assignment.membershipInfo.usedIncludeCount gt 0>, ${assignment.membershipInfo.usedIncludeCount} added manually</#if>
+						<#else>
+							${assignment.membershipInfo.usedIncludeCount} added manually
+						</#if>
+					</li>
+
+					<#if (assignment.markingWorkflow.markingMethod)??>
+						<li><strong>Workflow type:</strong> ${assignment.markingWorkflow.markingMethod.description}</li>
+					</#if>
+
+					<#if assignment.feedbackDeadline??>
+						<li><strong>Feedback due:</strong> <span class="use-tooltip" title="<@fmt.dateToWeek assignment.feedbackDeadline />" data-html="true"><@fmt.date date=assignment.feedbackDeadline includeTime=false /></span></li>
+					</#if>
+				</ul>
+
+				<#if assignment.collectSubmissions || assignment.extensionsPossible>
+					<ul class="list-unstyled">
+						<#if assignment.collectSubmissions>
+							<li><strong>Submissions received:</strong> ${assignment.submissions?size}</li>
+							<li><strong>Late submissions:</strong> ${assignment.lateSubmissionCount}</li>
+						</#if>
+
+						<#if assignment.extensionsPossible>
+							<li><strong>Extension requests:</strong> ${assignment.countUnapprovedExtensions}</li>
+						</#if>
+					</ul>
+				</#if>
+
+				<ul class="list-unstyled">
+					<li><a href="<@routes.cm2.assignment assignment />">Link for students</a></li>
+				</ul>
+			</div>
+			<#if info.stages??>
+				<div class="col-md-4">
+					<h6>Progress</h6>
+
+					<ul class="list-unstyled pre-scrollable">
+						<li><strong>Created:</strong> <span class="use-tooltip" title="<@fmt.dateToWeek assignment.createdDate />" data-html="true"><@fmt.date date=assignment.createdDate /></span></li>
+
+						<#if assignment.opened>
+							<li><strong>Opened:</strong> <span class="use-tooltip" title="<@fmt.dateToWeek assignment.openDate />" data-html="true"><@fmt.date date=assignment.openDate /></span></li>
+						</#if>
+
+						<#if !assignment.openEnded && assignment.closed>
+							<li><strong>Closed:</strong> <span class="use-tooltip" title="<@fmt.dateToWeek assignment.closeDate />" data-html="true"><@fmt.date date=assignment.closeDate /></span></li>
+						</#if>
+
+						<#list info.stages as stage>
+							<li>
+								<strong><@workflowMessage stage.stage.actionCode /></strong>:
+								<#if stage.progress?size == 1>
+									<@workflowMessage stage.progress[0].progress.messageCode /> (<@fmt.p stage.progress[0].count "student" />)
+								<#else>
+									<ul>
+										<#list stage.progress as progress>
+											<li><@workflowMessage progress.progress.messageCode /> (<@fmt.p progress.count "student" />)</li>
+										</#list>
+									</ul>
+								</#if>
+							</li>
+						</#list>
+					</ul>
+				</div>
+			</#if>
+			<#if info.nextStages??>
+				<div class="col-md-4">
+					<h6>Next steps</h6>
+
+					<ul class="list-unstyled">
+						<#if info.nextStages?size == 0>
+							<#if !assignment.opened>
+								<#-- Not open yet -->
+								<li>Not open yet</li>
+							<#elseif !assignment.openEnded && !assignment.closed>
+								<#-- Not closed yet -->
+								<li>Not closed yet</li>
+							<#else>
+								<#-- Complete? -->
+								<#if assignment.hasReleasedFeedback>
+									<li><a href="<@routes.cm2.assignmentAudit assignment />">View audit</a></li>
+								<#else>
+									<li>Awaiting feedback</li>
+								</#if>
+							</#if>
+						<#else>
+							<#list info.nextStages as nextStage>
+								<li>
+									<#local nextStageDescription><@workflowMessage nextStage.stage.actionCode /> (<@fmt.p nextStage.count "student" />)</#local>
+									<#if nextStage.url??>
+										<a href="${nextStage.url}">${nextStageDescription}</a>
+									<#else>
+										${nextStageDescription}
+									</#if>
+								</li>
+							</#list>
+						</#if>
+					</ul>
+				</div>
+			</#if>
+		</div>
+	</div>
+</#macro>
+
+<#macro workflowMessage code><#compress>
+	<#local text><@spring.message code=code /></#local>
+	${(text!"")?replace("[STUDENT]", "student")?replace("[FIRST_MARKER]", "first marker")?replace("[SECOND_MARKER]", "second marker")}
+</#compress></#macro>

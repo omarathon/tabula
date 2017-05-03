@@ -19,7 +19,6 @@ class AssignmentFeedbackAuditController extends CourseworkController {
 	def listCommand(@PathVariable assignment: Assignment) =
 		AssignmentFeedbackAuditCommand(mandatory(assignment))
 
-
 	@RequestMapping(method=Array(GET))
 	def list(@PathVariable assignment: Assignment,
 		@ModelAttribute("auditCommand") auditCommand: Appliable[AssignmentFeedbackAuditResults]
@@ -30,7 +29,7 @@ class AssignmentFeedbackAuditController extends CourseworkController {
 			"assignment" -> assignment,
 			"isModerated" -> Option(assignment.markingWorkflow).exists(_.markingMethod == MarkingMethod.ModeratedMarking),
 			"releasedFeedback" -> assignment.countReleasedFeedback)
-			.secondCrumbs(Breadcrumbs.Standard("Audit", Some(Routes.admin.assignment.audit(assignment)), ""))
+			.secondCrumbs(Breadcrumbs.Standard("Audit", Some(Routes.admin.assignment.audit(assignment))))
 	}
 }
 
