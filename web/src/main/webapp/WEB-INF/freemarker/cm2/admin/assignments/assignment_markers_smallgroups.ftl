@@ -60,7 +60,12 @@
 											<div class="col-md-7">
 												<@bs3form.labelled_form_group path="" labelText="Marker">
 													<@f.select path="" cssClass="form-control marker-select">
+														<#-- list tutors from this group first -->
 														<#list group.tutors as tutor>
+															<option value="${tutor.userId}">${tutor.fullName}</option>
+														</#list>
+														<#-- list tutors from other groups last -->
+														<#list group.otherTutors as tutor>
 															<option value="${tutor.userId}">${tutor.fullName}</option>
 														</#list>
 													</@f.select>
