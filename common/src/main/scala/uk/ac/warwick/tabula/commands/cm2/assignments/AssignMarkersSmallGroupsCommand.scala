@@ -12,7 +12,7 @@ import uk.ac.warwick.userlookup.User
 import scala.collection.JavaConverters._
 
 case class SetAllocation(set: SmallGroupSet, allocations: Map[String, Seq[GroupAllocation]])
-case class GroupAllocation(name: String, tutors: Seq[User], students: Seq[User])
+case class GroupAllocation(name: String, tutors: Seq[User], students: Seq[User], otherTutors: Seq[User])
 
 object AssignMarkersSmallGroupsCommand {
 	def apply(assignment: Assignment) = new AssignMarkersSmallGroupsCommandInternal(assignment)
@@ -38,14 +38,20 @@ class AssignMarkersSmallGroupsCommandInternal(val assignment: Assignment) extend
 
 		val setAllocations = sets.map(set => {
 
-			def getGroupAllocations(markers: Seq[User]): Seq[GroupAllocation] = set.groups.asScala.map(group => {
-				val validMarkers = group.events
-					.flatMap(_.tutors.users)
-					.filter(markers.contains)
-					.distinct
-				val students = group.students.users.filter(validStudents.contains)
-				GroupAllocation(group.name, validMarkers, students)
-			})
+			def getGroupAllocations(markers: Seq[User]): Seq[GroupAllocation] = {
+				val validMarkers: Seq[User] = (for {
+					group <- set.groups.asScala
+					event <- group.events
+					user <- event.tutors.users if markers.contains(user)
+				} yield user).distinct
+
+				set.groups.asScala.map(group => {
+					val students = group.students.users.filter(validStudents.contains)
+					val markers = group.events.flatMap(_.tutors.users).filter(validMarkers.contains)
+					val otherMarkers = validMarkers.diff(markers)
+					GroupAllocation(group.name, markers, students, otherMarkers)
+				})
+			}
 
 			val allocations = if(assignment.cm2MarkingWorkflow.workflowType.rolesShareAllocations) {
 				assignment.cm2MarkingWorkflow.markers.map{case (s, m) => s.allocationName -> getGroupAllocations(m)}
