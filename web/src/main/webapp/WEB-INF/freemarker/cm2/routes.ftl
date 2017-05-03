@@ -8,7 +8,14 @@ TODO grab values from the Routes object in code, as that's pretty equivalent and
 <#macro _u page context=component.context?default('/cm2')>
 	<@url context=context page=page />
 </#macro>
-<#macro home><@_u page="/" /></#macro>
+
+<#macro home academicYear="">
+	<#if academicYear?has_content>
+		<@_u page="/${academicYear.startYear}" />
+	<#else>
+		<@_u page="/" />
+	</#if>
+</#macro>
 <#-- to rename - also filter options will need to be added to jump to correct module -->
 <#macro depthome module><@_u page="/admin/department/${module.adminDepartment.code}/#module-${module.code}" /></#macro>
 <#macro departmenthome department academicYear="">
@@ -95,15 +102,6 @@ TODO grab values from the Routes object in code, as that's pretty equivalent and
 <#macro feedbackAttachment feedback attachment><@_u page="/submission/${feedback.assignment.id}/get/${attachment.name?url}"/></#macro>
 <#macro assignemnts_json module><@_u page="/admin/${module.code}/assignments" /></#macro>
 <#macro enrolment assignment><@_u page="/admin/assignments/${assignment.id}/enrolment"/></#macro>
-
-<#macro assignmentsubmissionsandfeedback assignment><@_u page="/admin/assignments/${assignment.id}/list"/></#macro>
-<#macro assignmentsubmissionsandfeedbacktable assignment><@_u page="/admin/assignments/${assignment.id}/table"/></#macro>
-<#macro assignmentsubmissionsandfeedbacksummary assignment><@_u page="/admin/assignments/${assignment.id}/summary"/></#macro>
-
-<#macro genericfeedback assignment><@_u page="/admin/module/${assignment.module.code}/assignments/${assignment.id}/feedback/generic"/></#macro>
-<#macro uploadToSits assignment><@_u page="/admin/module/${assignment.module.code}/assignments/${assignment.id}/upload-to-sits"/></#macro>
-<#macro checkSitsUpload feedback><@_u page="/admin/module/${feedback.assignment.module.code}/assignments/${feedback.assignment.id}/feedback/${feedback.id}/check-sits"/></#macro>
-<#macro manageMarksClosure ><@_u page="/admin/marksmanagement/departments" /></#macro>
 
 <#macro submitToTurnitin assignment><@_u page="/admin/module/${assignment.module.code}/assignments/${assignment.id}/turnitin"/></#macro>
 <#macro turnitinLtiReport assignment attachment><@_u page="/admin/module/${assignment.module.code}/assignments/${assignment.id}/turnitin/lti-report/${attachment.id}"/></#macro>
