@@ -194,7 +194,7 @@
 					<#local feedbackStatus>
 						<strong>Feedback <#if info.feedbackLate>over</#if>due:</strong> <span class="use-tooltip" title="<@fmt.dateToWeek info.feedbackDeadline />" data-html="true"><@fmt.date date=info.feedbackDeadline includeTime=false /></span>
 					</#local>
-				<#else>
+				<#elseif info.studentDeadline??>
 					<#local feedbackStatus>
 						<strong>Assignment due:</strong> <span class="use-tooltip" title="<@fmt.dateToWeek info.studentDeadline />" data-html="true"><@fmt.date date=info.studentDeadline /></span>
 					</#local>
