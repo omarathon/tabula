@@ -14,6 +14,7 @@ import uk.ac.warwick.tabula.system.permissions.{PermissionsChecking, Permissions
 import uk.ac.warwick.tabula.JavaImports.JArrayList
 
 
+
 object CreateAssignmentDetailsCommand {
   def apply(module: Module) =
     new CreateAssignmentDetailsCommandInternal(module)

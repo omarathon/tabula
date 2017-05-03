@@ -1,7 +1,7 @@
 package uk.ac.warwick.tabula.web
 
-import uk.ac.warwick.tabula.BrowserTest
 import org.scalatest.GivenWhenThen
+import uk.ac.warwick.tabula.BrowserTest
 
 class SysadminDepartmentPermissionsTest extends BrowserTest with SysadminFixtures with GivenWhenThen {
 

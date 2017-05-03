@@ -1,13 +1,13 @@
 package uk.ac.warwick.tabula.web.views
 
-import uk.ac.warwick.tabula.{TestBase, Mockito}
-import org.junit.Before
+import java.io.{StringReader, StringWriter}
 import java.util.Properties
-import uk.ac.warwick.tabula.JavaImports._
+
 import freemarker.core.Environment
 import freemarker.template._
-import java.io.StringReader
-import java.io.StringWriter
+import org.junit.Before
+import uk.ac.warwick.tabula.JavaImports._
+import uk.ac.warwick.tabula.{Mockito, TestBase}
 
 class UrlMethodModelTest extends TestBase with Mockito {
 
