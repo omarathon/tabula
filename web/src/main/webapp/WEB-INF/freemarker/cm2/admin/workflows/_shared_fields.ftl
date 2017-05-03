@@ -12,7 +12,34 @@
 				</option>
 			</#list>
 		</@f.select>
+		<div class="help-block">
+			<a href="#" data-toggle="modal" data-target="#workflowTypeHelp">Which type should I use?</a>
+		</div>
 	</@bs3form.labelled_form_group>
+
+<!-- Modal -->
+<div class="modal fade" id="workflowTypeHelp" tabindex="-1" role="dialog" aria-labelledby="workflowTypeHelp">
+	<div class="modal-dialog" role="document">
+		<div class="modal-content">
+			<div class="modal-header">
+				<button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+				<h4 class="modal-title" id="workflowTypeHelpLabel">Marking workflow types</h4>
+			</div>
+			<div class="modal-body">
+				<dl>
+					<dt>Single marking</dt>
+					<dd>One marker is allocated to a submission. They mark the submission and pass it to the administrator.</dd>
+					<dt>Moderated marking</dt>
+					<dd>The first marker marks the submission and passes it to the moderator. The moderator decides the final mark and passes the submission to the administrator.</dd>
+					<dt>Double seen marking</dt>
+					<dd>The first marker marks the assignment. The second marker either agrees with the mark or requests changes. They return the submission to the first marker, who accepts or rejects the second marker's changes, then passes the submission to the administrator.</dd>
+				</dl>
+			</div>
+		</div>
+	</div>
+</div>
+
+
 <#else>
 	<@bs3form.labelled_form_group labelText="Workflow type">
 		<select id="workflowType" name="workflowType" class="form-control" disabled="disabled">
@@ -48,7 +75,7 @@
 
 <#if !newRecord>
 	<@bs3form.labelled_form_group>
-	<a href="<@routes.cm2.reusableWorkflowReplaceMarker department academicYear workflow />">Replace marker</a>
+		<a href="<@routes.cm2.reusableWorkflowReplaceMarker department academicYear workflow />">Replace marker</a>
 	</@bs3form.labelled_form_group>
 </#if>
 
