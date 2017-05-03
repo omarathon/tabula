@@ -6,6 +6,7 @@ import javax.mail.internet.{MimeMessage, MimeMultipart}
 
 import org.springframework.beans.factory.annotation.{Autowired, Value}
 import org.springframework.mail.SimpleMailMessage
+import org.springframework.mail.javamail.MimeMessagePreparator
 import uk.ac.warwick.tabula.Features
 import uk.ac.warwick.tabula.JavaImports._
 import uk.ac.warwick.tabula.helpers.{Logging, UnicodeEmails}
@@ -65,4 +66,9 @@ final class RedirectingMailSender(delegate: WarwickMailSender) extends WarwickMa
 		Option(simpleMessage.getText) foreach {message.setText}
 	})
 
+	override def send(preparator: MimeMessagePreparator): Future[JBoolean] = {
+		val message = createMimeMessage()
+		preparator.prepare(message)
+		send(message)
+	}
 }
