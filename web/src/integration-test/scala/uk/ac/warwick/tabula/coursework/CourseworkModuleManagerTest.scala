@@ -1,8 +1,8 @@
 package uk.ac.warwick.tabula.coursework
 
+import org.openqa.selenium.By
 import org.scalatest.GivenWhenThen
 import uk.ac.warwick.tabula.BrowserTest
-import org.openqa.selenium.By
 
 class CourseworkModuleManagerTest extends BrowserTest with CourseworkFixtures with GivenWhenThen {
 

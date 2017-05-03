@@ -1,7 +1,7 @@
 package uk.ac.warwick.tabula.attendance.home
 
-import org.scalatest.GivenWhenThen
 import org.openqa.selenium.By
+import org.scalatest.GivenWhenThen
 import uk.ac.warwick.tabula.attendance.AttendanceFixture
 
 class AttendanceViewPointsTest extends AttendanceFixture with GivenWhenThen{

@@ -54,11 +54,11 @@
 					<td>${workflow.name}</td>
 					<td>${workflow.workflowType.description}</td>
 					<td>
-						<#list workflow.markersByRole?keys as stage><#compress>
-							<strong>${stage.roleName}: </strong>
-							<#assign markers = mapGet(workflow.markersByRole, stage) />
+						<#list workflow.markersByRole?keys as role><#compress>
+							<strong>${role}: </strong>
+							<#assign markers = mapGet(workflow.markersByRole, role) />
 							<#list markers as marker>
-							${marker.fullName}<#if marker_has_next>, </#if>
+								${marker.fullName}<#if marker_has_next>, </#if>
 							</#list><br />
 						</#compress></#list>
 					</td>

@@ -4,14 +4,14 @@ import java.io.InputStream
 
 import org.springframework.stereotype.Service
 import uk.ac.warwick.spring.Wire
-import uk.ac.warwick.tabula.services.coursework.docconversion.MarkerAllocationExtractor._
+import uk.ac.warwick.tabula.services.coursework.docconversion.OldMarkerAllocationExtractor._
 import uk.ac.warwick.tabula.data.model.MarkingWorkflow
 import uk.ac.warwick.tabula.helpers.{FoundUser, SpreadsheetHelpers}
 import uk.ac.warwick.tabula.helpers.StringUtils._
 import uk.ac.warwick.tabula.services.UserLookupService
 import uk.ac.warwick.userlookup.User
 
-object MarkerAllocationExtractor {
+object OldMarkerAllocationExtractor {
 	case class Error(field: String, rowData: Map[String, String], code: String, codeArgument: Array[Object] = Array())
 	val AcceptedFileExtensions = Seq(".xlsx")
 
@@ -33,7 +33,7 @@ object MarkerAllocationExtractor {
 }
 
 @Service
-class MarkerAllocationExtractor() {
+class OldMarkerAllocationExtractor() {
 
 	@transient var userLookup: UserLookupService = Wire[UserLookupService]
 

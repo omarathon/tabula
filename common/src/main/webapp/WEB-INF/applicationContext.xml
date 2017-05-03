@@ -84,7 +84,7 @@
 				<entry key="uk.ac.warwick.tabula.services.CannotPerformWriteOperationException" value="errors/readOnlyMasquerade" />
 				<entry key="uk.ac.warwick.tabula.services.ZipRequestTooLargeError" value="errors/zipTooBig" />
 				<entry key="uk.ac.warwick.tabula.api.web.filters.APILoginMethodMissingException" value="errors/apiLoginMethodMissing" />
-				<entry key="uk.ac.warwick.tabula.SubmitPermissionDeniedException" value="coursework/submit/assignment_permissionDenied" />
+				<entry key="uk.ac.warwick.tabula.SubmitPermissionDeniedException" value="cm2/submit/assignment_permissionDenied" />
 			</map>
 		</property>
 	</bean>
@@ -185,6 +185,7 @@
 		<bean class="uk.ac.warwick.tabula.data.convert.WorkflowCategoryConverter" />
 		<bean class="uk.ac.warwick.tabula.data.convert.CM2MarkingWorkflowIdConverter" />
 		<bean class="uk.ac.warwick.tabula.data.model.markingworkflow.StringToMarkingWorkflowType" />
+		<bean class="uk.ac.warwick.tabula.data.model.markingworkflow.StringToMarkingWorkflowStage" />
 		<bean class="uk.ac.warwick.tabula.data.convert.AssignmentInfoFilterConverter"/>
 	</util:list>
 

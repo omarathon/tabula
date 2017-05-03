@@ -69,11 +69,13 @@ object Routes {
 			def createOrEditFeedback(assignment: Assignment, createOrEditMode: String): String = admin() + s"/assignments/${encoded(assignment.id)}/${encoded(createOrEditMode)}/feedback"
 			def createOrEditStudents(assignment: Assignment, createOrEditMode: String): String = admin() + s"/assignments/${encoded(assignment.id)}/${encoded(createOrEditMode)}/students"
 			def createOrEditMarkers(assignment: Assignment, createOrEditMode: String): String = admin() + s"/assignments/${encoded(assignment.id)}/${encoded(createOrEditMode)}/markers"
+			def createOrEditMarkersTemplate(assignment: Assignment, createOrEditMode: String): String = createOrEditMarkers(assignment, createOrEditMode) + "template"
+			def createOrEditMarkersTemplateDownload(assignment: Assignment, createOrEditMode: String): String = createOrEditMarkers(assignment, createOrEditMode) + "template/download"
 			def createOrEditSubmissions(assignment: Assignment, createOrEditMode: String): String = admin() + s"/assignments/${encoded(assignment.id)}/${encoded(createOrEditMode)}/submissions"
 			def createOrEditOptions(assignment: Assignment, createOrEditMode: String): String = admin() + s"/assignments/${encoded(assignment.id)}/${encoded(createOrEditMode)}/options"
 			def reviewAssignment(assignment: Assignment): String = admin()  + s"/assignments/${encoded(assignment.id)}/review"
 
-			private def assignmentroot(assignment: Assignment) = admin() + "/assignments/%s" format (encoded(assignment.id))
+			private def assignmentroot(assignment: Assignment) = admin() + s"/assignments/${encoded(assignment.id)}"
 
 			def submissionsZip(assignment: Assignment): String = assignmentroot(assignment) + "/submissions.zip"
 
@@ -89,6 +91,10 @@ object Routes {
 			def extensions(assignment: Assignment): String = assignmentroot(assignment) + "/manage/extensions"
 
 			def submitToTurnitin(assignment: Assignment): String = assignmentroot(assignment) + "/turnitin"
+		}
+
+		object module {
+			def apply(module: Module, academicYear: AcademicYear): String = department(module.adminDepartment, academicYear) + "#module-" + encoded(module.code)
 		}
 	}
 }

@@ -6,8 +6,9 @@ import org.joda.time.DateTime
 import org.springframework.validation.Errors
 import uk.ac.warwick.tabula.JavaImports._
 import uk.ac.warwick.tabula.commands._
-import uk.ac.warwick.tabula.commands.cm2.assignments.ListFeedbackCommand.ListFeedbackResult
-import uk.ac.warwick.tabula.commands.cm2.assignments.SubmissionAndFeedbackCommand.SubmissionAndFeedbackResults
+import uk.ac.warwick.tabula.commands.cm2.assignments.SubmissionAndFeedbackCommand._
+import uk.ac.warwick.tabula.commands.cm2.feedback.ListFeedbackCommand
+import uk.ac.warwick.tabula.commands.cm2.feedback.ListFeedbackCommand._
 import uk.ac.warwick.tabula.data.model._
 import uk.ac.warwick.tabula.helpers.cm2._
 import uk.ac.warwick.tabula.permissions._
@@ -35,7 +36,7 @@ object SubmissionAndFeedbackCommand {
 			with AutowiringCM2WorkflowProgressServiceComponent
 			with Unaudited with ReadOnly
 
-	case class SubmissionAndFeedbackResults(
+	case class SubmissionAndFeedbackResults (
 		students: Seq[WorkflowStudent],
 		whoDownloaded: Seq[(User, DateTime)],
 		stillToDownload: Seq[WorkflowStudent],

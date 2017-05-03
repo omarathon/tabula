@@ -88,6 +88,45 @@ table.expanding-row-pairs {
 
 }
 
+// allocate students to markers
+.tabula-dnd.marker-allocation {
+
+	// Give the student list some affordance for dragging around students
+	.student-list {
+		margin: -16px;
+		padding: 16px;
+	}
+
+	ul.drag-list li {
+		display: block;
+		float: none;
+
+		background: white;
+		margin: 0 0 10px;
+
+		&:hover { background-color: darken(@well-bg, 10%); }
+
+		&.ui-selecting { background: darken(@well-bg, 10%) !important; }
+		&.ui-selected { background: darken(@well-bg, 15%) !important; }
+	}
+
+	.well.drop-hover {
+		background-color: #dddddd;
+	}
+
+	.group-header {
+		> h4, > div { display: inline-block; }
+		> h4 { margin-right: 10px; }
+	}
+
+	.direction-icon {
+		font-size: 8em;
+		text-align: center;
+		color: #d6d6d6;
+	}
+
+}
+
 // setup assignments - hidden options groups
 .options-button .options-group {
 	display: none;

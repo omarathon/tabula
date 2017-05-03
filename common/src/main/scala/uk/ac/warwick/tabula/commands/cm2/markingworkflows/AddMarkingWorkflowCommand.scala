@@ -8,7 +8,7 @@ import uk.ac.warwick.tabula.data.model.markingworkflow.MarkingWorkflowType._
 import uk.ac.warwick.tabula.data.model.markingworkflow._
 import uk.ac.warwick.tabula.helpers.StringUtils
 import uk.ac.warwick.tabula.JavaImports.JArrayList
-import uk.ac.warwick.tabula.services.{AutoWiringCM2MarkingWorkflowServiceComponent, AutowiringUserLookupComponent, CM2MarkingWorkflowServiceComponent, UserLookupComponent}
+import uk.ac.warwick.tabula.services.{AutowiringCM2MarkingWorkflowServiceComponent, AutowiringUserLookupComponent, CM2MarkingWorkflowServiceComponent, UserLookupComponent}
 
 import scala.collection.JavaConverters._
 
@@ -21,7 +21,7 @@ object AddMarkingWorkflowCommand {
 			with MarkingWorkflowDepartmentPermissions
 			with ModifyMarkingWorkflowDescription
 			with AddMarkingWorkflowState
-			with AutoWiringCM2MarkingWorkflowServiceComponent
+			with AutowiringCM2MarkingWorkflowServiceComponent
 			with AutowiringUserLookupComponent
 }
 
@@ -41,7 +41,6 @@ class AddMarkingWorkflowCommandInternal(
 		val markersBUsers = userLookup.getUsersByUserIds(markersB.asScala).values.toSeq
 
 		val workflow = workflowType match {
-			case StudentChoosesGroupMarking => StudentsChooseGroupWorkflow(name, department, markersAUsers)
 			case DoubleMarking => DoubleWorkflow(name, department, markersAUsers, markersBUsers)
 			case ModeratedMarking => ModeratedWorkflow(name, department, markersAUsers, markersBUsers)
 			case SingleMarking => SingleMarkerWorkflow(name, department, markersAUsers)

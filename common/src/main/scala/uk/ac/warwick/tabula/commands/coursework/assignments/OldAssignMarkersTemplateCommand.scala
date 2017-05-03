@@ -13,9 +13,9 @@ import uk.ac.warwick.tabula.web.views.ExcelView
 import uk.ac.warwick.userlookup.User
 
 
-object AssignMarkersTemplateCommand {
+object OldAssignMarkersTemplateCommand {
 	def apply(assessment: Assessment) =
-		new AssignMarkersTemplateCommandInternal(assessment)
+		new OldAssignMarkersTemplateCommandInternal(assessment)
 			with ComposableCommand[ExcelView]
 			with AssignMarkersTemplateCommandState
 			with AssignMarkersTemplateCommandPermissions
@@ -23,7 +23,7 @@ object AssignMarkersTemplateCommand {
 			with Unaudited
 }
 
-class AssignMarkersTemplateCommandInternal(val assessment: Assessment) extends CommandInternal[ExcelView]
+class OldAssignMarkersTemplateCommandInternal(val assessment: Assessment) extends CommandInternal[ExcelView]
 	with AutowiringAssessmentMembershipServiceComponent
 	with AutowiringUserLookupComponent {
 

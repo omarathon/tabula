@@ -1,9 +1,9 @@
-package uk.ac.warwick.tabula.commands.cm2.assignments
+package uk.ac.warwick.tabula.commands.cm2.feedback
 
 import org.joda.time.DateTime
 import uk.ac.warwick.tabula.commands._
-import uk.ac.warwick.tabula.commands.cm2.assignments.ListFeedbackCommand._
-import uk.ac.warwick.tabula.data.model.{Assignment, Module}
+import uk.ac.warwick.tabula.commands.cm2.feedback.ListFeedbackCommand._
+import uk.ac.warwick.tabula.data.model.{Assignment, Feedback, FeedbackForSits, Module}
 import uk.ac.warwick.tabula.helpers.Futures
 import uk.ac.warwick.tabula.helpers.Futures._
 import uk.ac.warwick.tabula.permissions._
@@ -14,6 +14,8 @@ import uk.ac.warwick.userlookup.User
 
 import scala.concurrent.Await
 import scala.concurrent.duration._
+
+// FIXME: implemented as part of CM2 migration but will require further reworking due to CM2 workflow changes
 
 object ListFeedbackCommand {
 	case class ListFeedbackResult(

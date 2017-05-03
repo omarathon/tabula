@@ -6,7 +6,7 @@ import org.springframework.validation.Errors
 import org.springframework.web.bind.annotation.{ModelAttribute, PathVariable, RequestMapping}
 import uk.ac.warwick.tabula.AcademicYear
 import uk.ac.warwick.tabula.commands.Appliable
-import uk.ac.warwick.tabula.commands.coursework.assignments.AssignMarkersCommand
+import uk.ac.warwick.tabula.commands.coursework.assignments.OldAssignMarkersCommand
 import uk.ac.warwick.tabula.data.model.{Exam, Module}
 import uk.ac.warwick.tabula.exams.web.Routes
 import uk.ac.warwick.tabula.services.{AssessmentMembershipService, UserLookupService}
@@ -33,7 +33,7 @@ class ExamAssignMarkersController extends ExamsController {
 
 	@ModelAttribute("command")
 	def getCommand(@PathVariable module: Module, @PathVariable exam: Exam) =
-		AssignMarkersCommand(module, exam)
+		OldAssignMarkersCommand(module, exam)
 
 	@ModelAttribute("firstMarkerRoleName")
 	def firstMarkerRoleName(@PathVariable exam: Exam): String = exam.markingWorkflow.firstMarkerRoleName
