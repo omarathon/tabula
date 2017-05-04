@@ -15,7 +15,7 @@
 	>
 		<@f.errors cssClass="error form-errors" />
 
-		<@bs3form.labelled_form_group path="workflowName" labelText="Name" help="A descriptive name that will be used to refer to this marking workflow elsewhere.">
+		<@bs3form.labelled_form_group path="workflowName" labelText="Name" help="Use a descriptive name as this appears throughout Tabula to refer to this marking workflow.">
 			<@f.input type="text" path="workflowName" cssClass="form-control" maxlength="255" placeholder="" />
 		</@bs3form.labelled_form_group>
 
