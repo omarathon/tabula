@@ -85,6 +85,10 @@ object Routes {
 				def table(assignment: Assignment): String = assignmentroot(assignment) + "/table"
 			}
 
+			object turnitin {
+				def status(assignment: Assignment): String = assignmentroot(assignment) + "/turnitin/status"
+			}
+
 			object audit {
 				def apply(assignment: Assignment): String = admin() + s"/audit/assignment/${encoded(assignment.id)}"
 			}
