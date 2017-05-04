@@ -1,5 +1,4 @@
 <#ftl strip_text=true />
-<#include "*/prelude.ftl" /> <#-- FIXME why is this necessary? -->
 
 <#macro filter name path placeholder currentFilter allItems validItems=allItems prefix="" customPicker="">
 	<@spring.bind path=path>
