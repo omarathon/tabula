@@ -29,10 +29,11 @@
 </#if>
 
 <#if isCurrentYear>
-	<p>You can create marking workflows here and then use them with one or more assignments to define how marking is done for that assignment. Below is the list of the current workflows available to you. To use a previous workflow, click on the appropriate year and click 'add to ${currentYear.toString}'.</p>
+	<p>Marking workflows define the marking method and who the markers are. Create workflows here and use them with one or more assignments.</p>
+	<p>Below is the list of current workflows available. To copy an old workflow, navigate to the relevant academic year and add the workflow to the current year.</p>
 	<@bs3form.labelled_form_group>
 		<a class="btn btn-primary" href="<@routes.cm2.reusableWorkflowAdd department academicYear />">
-			Create a new workflow
+			Create workflow
 		</a>
 	</@bs3form.labelled_form_group>
 </#if>
@@ -69,7 +70,7 @@
 									disabled="disabled"
 									class="btn btn-default use-tooltip"
 									data-toggle=""
-									title="You can't delete this marking workflow as it is in use by <@fmt.p number=workflow.assignments?size singular="assignment" />"
+									title="You can't delete this marking workflow because <@fmt.p number=workflow.assignments?size singular="assignment" /> are using it"
 							<#else>
 									class="btn btn-default"
 									href="<@routes.cm2.reusableWorkflowDelete department academicYear workflow/>"
