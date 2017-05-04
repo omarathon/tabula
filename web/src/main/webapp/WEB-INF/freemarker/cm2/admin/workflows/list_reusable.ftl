@@ -38,7 +38,7 @@
 	</@bs3form.labelled_form_group>
 </#if>
 <#if workflows?has_content>
-	<#if !isCurrentYear><p>Below is the list of the ${academicYear.toString} workflows. To use any of these for the current year, click 'add to ${currentYear.toString}'.</p></#if>
+	<#if !isCurrentYear><p>The following workflows relate to the year selected in the main menu. Use the Add to button to copy a workflow to the current academic year.</p></#if>
 	<table class="table-sortable table table-bordered table-striped">
 		<thead>
 		<tr>
