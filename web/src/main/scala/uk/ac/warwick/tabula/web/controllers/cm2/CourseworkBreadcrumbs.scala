@@ -1,7 +1,9 @@
 package uk.ac.warwick.tabula.web.controllers.cm2
 
+import org.joda.time.DateTime
+import uk.ac.warwick.tabula.AcademicYear
 import uk.ac.warwick.tabula.cm2.web.Routes
-import uk.ac.warwick.tabula.data.model.Assignment
+import uk.ac.warwick.tabula.data.model.{Assignment, Module}
 import uk.ac.warwick.tabula.web.BreadCrumb
 
 trait CourseworkBreadcrumbs {
@@ -25,5 +27,14 @@ object CourseworkBreadcrumbs {
 			val title: String = "Submissions and Feedback Management"
 			val url = Some(Routes.admin.assignment.submissionsandfeedback(assignment))
 		}
+	}
+	object Plagiarism {
+
+		case class PlagiarismInvestigation(val module: Module) extends Abstract {
+			val title: String = "Plagiarism Investigation"
+			val url = Some(Routes.admin.module(module, AcademicYear.guessSITSAcademicYearByDate(DateTime.now)))
+
+		}
+
 	}
 }

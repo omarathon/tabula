@@ -2,14 +2,10 @@ package uk.ac.warwick.tabula.coursework
 
 import org.joda.time.DateTime
 import org.openqa.selenium.{By, WebElement}
-import org.openqa.selenium.{By, Keys, WebElement}
 import uk.ac.warwick.tabula.{BrowserTest, FunctionalTestAcademicYear, LoginDetails}
 import uk.ac.warwick.tabula.web.{FeaturesDriver, FixturesDriver}
 import org.scalatest.exceptions.TestFailedException
 import org.scalatest.GivenWhenThen
-import org.scalatest.exceptions.TestFailedException
-import uk.ac.warwick.tabula.web.{FeaturesDriver, FixturesDriver}
-import uk.ac.warwick.tabula.{BrowserTest, FunctionalTestAcademicYear, LoginDetails}
 
 import scala.collection.JavaConverters._
 import scala.concurrent.ExecutionContext.Implicits.global
