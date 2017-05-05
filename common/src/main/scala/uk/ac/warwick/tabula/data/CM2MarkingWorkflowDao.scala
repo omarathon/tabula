@@ -25,6 +25,9 @@ trait CM2MarkingWorkflowDao {
 	def markerFeedbackForFeedback(feedback: AssignmentFeedback): Seq[MarkerFeedback]
 	def markerFeedbackForMarker(assignment: Assignment, marker: User): Seq[MarkerFeedback]
 	def delete(workflow: CM2MarkingWorkflow): Unit
+
+	/** All assignments using this marking workflow. */
+	def getAssignmentsUsingMarkingWorkflow(workflow: CM2MarkingWorkflow): Seq[Assignment]
 }
 
 @Repository
@@ -69,4 +72,10 @@ class CM2MarkingWorkflowDaoImpl extends CM2MarkingWorkflowDao with Daoisms {
 	override def delete(workflow: CM2MarkingWorkflow): Unit = {
 		session.delete(workflow)
 	}
+
+	def getAssignmentsUsingMarkingWorkflow(workflow: CM2MarkingWorkflow): Seq[Assignment] =
+		session.newCriteria[Assignment]
+			.add(is("cm2MarkingWorkflow", workflow))
+			.add(is("deleted", false))
+			.seq
 }

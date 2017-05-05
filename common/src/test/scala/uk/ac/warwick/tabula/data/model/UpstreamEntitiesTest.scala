@@ -1,6 +1,7 @@
 package uk.ac.warwick.tabula.data.model
 
 import uk.ac.warwick.tabula.JavaImports.JArrayList
+import uk.ac.warwick.tabula.data.model.markingworkflow.StageMarkers
 
 import scala.collection.JavaConversions.seqAsJavaList
 import uk.ac.warwick.tabula.{AcademicYear, PersistenceTestBase}
@@ -17,11 +18,13 @@ class UpstreamEntitiesTest extends PersistenceTestBase {
 			thisAssignmentDao.sessionFactory = sessionFactory
 
 			val assignmentService = new AbstractAssessmentService with AssessmentDaoComponent
-				with AssessmentServiceUserGroupHelpers with MarkingWorkflowServiceComponent {
+				with AssessmentServiceUserGroupHelpers with MarkingWorkflowServiceComponent with CM2MarkingWorkflowServiceComponent {
 				val assessmentDao: AssessmentDaoImpl = thisAssignmentDao
 				val firstMarkerHelper = null
 				val secondMarkerHelper = null
+				val cm2MarkerHelper = null
 				val markingWorkflowService = null
+				val cm2MarkingWorkflowService = null
 			}
 
 			val dao = new AssessmentMembershipDaoImpl

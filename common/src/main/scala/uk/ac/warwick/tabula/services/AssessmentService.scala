@@ -5,6 +5,7 @@ import org.springframework.stereotype.Service
 import uk.ac.warwick.spring.Wire
 import uk.ac.warwick.tabula.data.model._
 import uk.ac.warwick.tabula.data.model.forms._
+import uk.ac.warwick.tabula.data.model.markingworkflow.StageMarkers
 import uk.ac.warwick.tabula.data.{AssessmentDaoComponent, AutowiringAssessmentDaoComponent}
 import uk.ac.warwick.tabula.{AcademicYear, CurrentUser}
 import uk.ac.warwick.userlookup.User
@@ -46,6 +47,8 @@ trait AssessmentService {
 	def getAssignmentsByDepartmentAndMarker(department: Department, user: CurrentUser, academicYearOption: Option[AcademicYear]): Seq[Assignment]
 	def getAssignmentsByModuleAndMarker(module: Module, user: CurrentUser, academicYearOption: Option[AcademicYear]): Seq[Assignment]
 
+	def getCM2AssignmentsWhereMarker(user: User, academicYearOption: Option[AcademicYear]): Seq[Assignment]
+
 	/**
 	 * Find a recent assignment within this module or possible department.
 	 */
@@ -66,7 +69,7 @@ trait AssessmentService {
 }
 
 abstract class AbstractAssessmentService extends AssessmentService {
-	self: AssessmentDaoComponent with AssessmentServiceUserGroupHelpers with MarkingWorkflowServiceComponent =>
+	self: AssessmentDaoComponent with AssessmentServiceUserGroupHelpers with MarkingWorkflowServiceComponent with CM2MarkingWorkflowServiceComponent =>
 
 	def getAssignmentById(id: String): Option[Assignment] = assessmentDao.getAssignmentById(id)
 	def getExamById(id: String): Option[Exam] = assessmentDao.getExamById(id)
@@ -118,6 +121,14 @@ abstract class AbstractAssessmentService extends AssessmentService {
 	def getAssignmentsByModuleAndMarker(module: Module, user: CurrentUser, academicYearOption: Option[AcademicYear]): Seq[Assignment] =
 		getAssignmentWhereMarker(user.apparentUser, academicYearOption).filter { _.module == module }
 
+	def getCM2AssignmentsWhereMarker(user: User, academicYearOption: Option[AcademicYear]): Seq[Assignment] = {
+		cm2MarkerHelper.findBy(user)
+			.map(_.workflow)
+			.distinct
+			.flatMap(cm2MarkingWorkflowService.getAssignmentsUsingMarkingWorkflow)
+			.filter { a => a.isAlive && (academicYearOption.isEmpty || academicYearOption.contains(a.academicYear)) }
+	}
+
 	/**
 	 * Find a recent assignment within this module or possible department.
 	 */
@@ -156,17 +167,22 @@ abstract class AbstractAssessmentService extends AssessmentService {
 trait AssessmentServiceUserGroupHelpers {
 	val firstMarkerHelper: UserGroupMembershipHelper[MarkingWorkflow]
 	val secondMarkerHelper: UserGroupMembershipHelper[MarkingWorkflow]
+
+	val cm2MarkerHelper: UserGroupMembershipHelper[StageMarkers]
 }
 
 trait AssessmentServiceUserGroupHelpersImpl extends AssessmentServiceUserGroupHelpers {
 	val firstMarkerHelper = new UserGroupMembershipHelper[MarkingWorkflow]("_firstMarkers")
 	val secondMarkerHelper = new UserGroupMembershipHelper[MarkingWorkflow]("_secondMarkers")
+
+	val cm2MarkerHelper = new UserGroupMembershipHelper[StageMarkers]("_markers")
 }
 
 @Service(value = "assignmentService")
 class AssessmentServiceImpl
 	extends AbstractAssessmentService
-	with AutowiringAssessmentDaoComponent
-	with AutowiringMarkingWorkflowServiceComponent
-	with AssessmentServiceUserGroupHelpersImpl
+		with AutowiringAssessmentDaoComponent
+		with AutowiringMarkingWorkflowServiceComponent
+		with AutowiringCM2MarkingWorkflowServiceComponent
+		with AssessmentServiceUserGroupHelpersImpl
 

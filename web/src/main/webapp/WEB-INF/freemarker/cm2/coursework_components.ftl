@@ -40,7 +40,7 @@
 </#macro>
 
 <#macro progress_bar tooltip percentage class="default">
-	<div class="progress use-tooltip" title="${tooltip}" data-html="true">
+	<div class="progress use-tooltip" title="${tooltip}" data-html="true" data-container="body">
 		<div class="progress-bar progress-bar-${class}" role="progressbar" aria-valuenow="${percentage?c}" aria-valuemin="0" aria-valuemax="100" style="width: ${percentage?c}%;">
 		</div>
 	</div>
@@ -120,11 +120,42 @@
 		</#local>
 	</#if>
 
-	<@progress_bar tooltip percentage state />
-</#macro>
+	<div class="stage-progress-bar time-progress-bar">
+		<#if assignment.opened>
+			<span class="fa-stack">
+				<i class="fa fa-stack-1x fa-circle fa-inverse"></i>
+				<i class="fa fa-stack-1x fa-check-circle-o text-success use-tooltip" title="Assignment ready" data-container="body"></i>
+			</span>
+		<#else>
+			<span class="fa-stack">
+				<i class="fa fa-stack-1x fa-circle fa-inverse"></i>
+				<i class="fa fa-stack-1x fa-circle-o text-default use-tooltip" title="${tooltip}" data-html="true" data-container="body"></i>
+			</span>
+		</#if>
 
-<#macro feedback_progress info>
+		<div class="bar use-tooltip" title="${tooltip}" data-html="true" data-container="body">
+			<div class="progress-bar progress-bar-${state}" role="progressbar" aria-valuenow="${percentage?c}" aria-valuemin="0" aria-valuemax="100" style="width: ${percentage?c}%;">
+			</div>
+		</div>
 
+		<#if state == 'success' && !info.submission??>
+			<#local state = 'default' />
+		</#if>
+
+		<#local icon = 'fa-circle-o' />
+		<#if state == 'success'>
+			<#local icon = 'fa-check-circle-o' />
+		<#elseif state == 'warning'>
+			<#local icon = 'fa-dot-circle-o' />
+		<#elseif state == 'danger'>
+			<#local icon = 'fa-exclamation-circle' />
+		</#if>
+
+		<span class="fa-stack">
+			<i class="fa fa-stack-1x fa-circle fa-inverse"></i>
+			<i class="fa fa-stack-1x ${icon} text-${state} use-tooltip" title="${tooltip}" data-html="true" data-container="body"></i>
+		</span>
+	</div>
 </#macro>
 
 <#macro student_assignment_info info show_submission_progress=false>
@@ -193,10 +224,14 @@
 				<#if info.submission?? && info.feedbackDeadline??>
 					<#local feedbackStatus>
 						<strong>Feedback <#if info.feedbackLate>over</#if>due:</strong> <span class="use-tooltip" title="<@fmt.dateToWeek info.feedbackDeadline />" data-html="true"><@fmt.date date=info.feedbackDeadline includeTime=false /></span>
+						<#if info.feedbackLate>
+							<br />
+							Please contact your Departmental Administrator with any queries
+						</#if>
 					</#local>
 				<#elseif info.studentDeadline??>
 					<#local feedbackStatus>
-						<strong>Assignment due:</strong> <span class="use-tooltip" title="<@fmt.dateToWeek info.studentDeadline />" data-html="true"><@fmt.date date=info.studentDeadline /></span>
+						<strong>Assignment due:</strong> <span class="use-tooltip" title="<@fmt.dateToWeek info.studentDeadline />" data-html="true"><@fmt.date date=info.studentDeadline /> - ${durationFormatter(info.studentDeadline)}</span>
 					</#local>
 				</#if>
 			</#if>
@@ -367,6 +402,41 @@
 	</#if>
 </#macro>
 
+<#macro stage_progress_bar stages>
+	<div class="stage-progress-bar">
+		<#list stages as stageInfo>
+			<#local stage = stageInfo.stage />
+			<#local state = 'default' />
+			<#local icon = 'fa-circle-o' />
+			<#if stageInfo.completed>
+				<#local state = 'success' />
+				<#local icon = 'fa-check-circle-o' />
+			<#elseif stageInfo.started>
+				<#local state = 'warning' />
+				<#local icon = 'fa-dot-circle-o' />
+			</#if>
+
+			<#if stageInfo.progress?size == 1>
+				<#local title><@workflowMessage stageInfo.progress[0].progress.messageCode /></#local>
+			<#else>
+				<#local title><#compress>
+					<#list stageInfo.progress as progress>
+						<@workflowMessage progress.progress.messageCode /> (<@fmt.p progress.count "student" />)<#if progress_has_next>, </#if>
+					</#list>
+				</#compress></#local>
+			</#if>
+
+			<#if stageInfo_index gt 0>
+				<div class="bar bar-${state} use-tooltip" title="${title}" data-html="true" data-container="body"></div>
+			</#if>
+			<span class="fa-stack">
+				<i class="fa fa-stack-1x fa-circle fa-inverse"></i>
+				<i class="fa fa-stack-1x ${icon} text-${state} use-tooltip" title="${title}" data-html="true" data-container="body"></i>
+			</span>
+		</#list>
+	</div>
+</#macro>
+
 <#macro marker_assignment_info info>
 	<#local assignment = info.assignment />
 	<div class="item-info row marker-assignment-${assignment.id}">
@@ -378,28 +448,57 @@
 			</h4>
 		</div>
 		<div class="col-md-3">
-			<#if !assignment.openEnded && !assignment.closed>
-				Assignment not closed yet
-			<#elseif info.submissions?size == 0 && info.markerFeedbacks?size == 0>
-				Not released for marking
-			<#else>
-				In progress <#-- TODO -->
-			</#if>
+			<ul class="list-unstyled">
+				<#list info.currentStages as stage>
+					<li>
+						<#if stage.progress?size == 1>
+							<@workflowMessage stage.progress[0].progress.messageCode />
+						<#else>
+							<ul>
+								<#list stage.progress as progress>
+									<li><@workflowMessage progress.progress.messageCode /> (<@fmt.p progress.count "student" />)</li>
+								</#list>
+							</ul>
+						</#if>
+					</li>
+				</#list>
+			</ul>
 		</div>
 		<div class="col-md-4">
-			<#if assignment.closed || assignment.openEnded>
-				<#if !assignment.openEnded>
-					<strong>Assignment closed:</strong> <span class="use-tooltip" title="<@fmt.dateToWeek assignment.closeDate />" data-html="true"><@fmt.date date=assignment.closeDate /></span>
-				<#else>
-					Open-ended assignment (no close date)
-				</#if>
-			<#else>
-				<strong>Assignment closes:</strong> <span class="use-tooltip" title="<@fmt.dateToWeek assignment.closeDate />" data-html="true"><@fmt.date date=assignment.closeDate /></span>
+			<@stage_progress_bar info.stages />
+
+			<#if info.feedbackDeadline??>
+				<p>
+					<strong>Student feedback due:</strong>
+					<span class="use-tooltip" title="<@fmt.dateToWeek info.feedbackDeadline />" data-html="true"><@fmt.date date=info.feedbackDeadline includeTime=false /></span>
+				</p>
+			</#if>
+
+			<#if info.extensionCount gt 0 || info.unsubmittedCount gt 0 || info.lateSubmissionsCount gt 0>
+				<div class="row">
+					<#if info.extensionCount gt 0>
+						<div class="col-sm-6">
+							<strong>Extensions:</strong> ${info.extensionCount}
+						</div>
+					</#if>
+
+					<#if info.unsubmittedCount gt 0>
+						<div class="col-sm-6">
+							<strong>Not submitted:</strong> ${info.unsubmittedCount}
+						</div>
+					</#if>
+
+					<#if info.lateSubmissionsCount gt 0>
+						<div class="col-sm-6">
+							<strong>Submitted late:</strong> ${info.lateSubmissionsCount}
+						</div>
+					</#if>
+				</div>
 			</#if>
 		</div>
 		<div class="col-md-2">
 			<#if assignment.closed || assignment.openEnded>
-				<#if info.submissions?size gt 0 || info.markerFeedbacks?size gt 0>
+				<#if info.nextStages?size gt 0>
 					<a class="btn btn-block btn-primary" href="<@routes.cm2.listmarkersubmissions assignment user.apparentUser />">
 						Mark
 					</a>
@@ -605,7 +704,7 @@
 				<div class="col-md-4">
 					<h6>Progress</h6>
 
-					<ul class="list-unstyled pre-scrollable">
+					<ul class="list-unstyled scrollable-list">
 						<li><strong>Created:</strong> <span class="use-tooltip" title="<@fmt.dateToWeek assignment.createdDate />" data-html="true"><@fmt.date date=assignment.createdDate /></span></li>
 
 						<#if assignment.opened>
