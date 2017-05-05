@@ -40,7 +40,7 @@
 </#macro>
 
 <#macro progress_bar tooltip percentage class="default">
-	<div class="progress use-tooltip" title="${tooltip}" data-html="true">
+	<div class="progress use-tooltip" title="${tooltip}" data-html="true" data-container="body">
 		<div class="progress-bar progress-bar-${class}" role="progressbar" aria-valuenow="${percentage?c}" aria-valuemin="0" aria-valuemax="100" style="width: ${percentage?c}%;">
 		</div>
 	</div>
@@ -124,16 +124,16 @@
 		<#if assignment.opened>
 			<span class="fa-stack">
 				<i class="fa fa-stack-1x fa-circle fa-inverse"></i>
-				<i class="fa fa-stack-1x fa-check-circle-o text-success use-tooltip" title="Assignment ready"></i>
+				<i class="fa fa-stack-1x fa-check-circle-o text-success use-tooltip" title="Assignment ready" data-container="body"></i>
 			</span>
 		<#else>
 			<span class="fa-stack">
 				<i class="fa fa-stack-1x fa-circle fa-inverse"></i>
-				<i class="fa fa-stack-1x fa-circle-o text-default use-tooltip" title="${tooltip}" data-html="true"></i>
+				<i class="fa fa-stack-1x fa-circle-o text-default use-tooltip" title="${tooltip}" data-html="true" data-container="body"></i>
 			</span>
 		</#if>
 
-		<div class="bar use-tooltip" title="${tooltip}" data-html="true">
+		<div class="bar use-tooltip" title="${tooltip}" data-html="true" data-container="body">
 			<div class="progress-bar progress-bar-${state}" role="progressbar" aria-valuenow="${percentage?c}" aria-valuemin="0" aria-valuemax="100" style="width: ${percentage?c}%;">
 			</div>
 		</div>
@@ -153,7 +153,7 @@
 
 		<span class="fa-stack">
 			<i class="fa fa-stack-1x fa-circle fa-inverse"></i>
-			<i class="fa fa-stack-1x ${icon} text-${state} use-tooltip" title="${tooltip}" data-html="true"></i>
+			<i class="fa fa-stack-1x ${icon} text-${state} use-tooltip" title="${tooltip}" data-html="true" data-container="body"></i>
 		</span>
 	</div>
 </#macro>
@@ -427,11 +427,11 @@
 			</#if>
 
 			<#if stageInfo_index gt 0>
-				<div class="bar bar-${state} use-tooltip" title="${title}" data-html="true"></div>
+				<div class="bar bar-${state} use-tooltip" title="${title}" data-html="true" data-container="body"></div>
 			</#if>
 			<span class="fa-stack">
 				<i class="fa fa-stack-1x fa-circle fa-inverse"></i>
-				<i class="fa fa-stack-1x ${icon} text-${state} use-tooltip" title="${title}" data-html="true"></i>
+				<i class="fa fa-stack-1x ${icon} text-${state} use-tooltip" title="${title}" data-html="true" data-container="body"></i>
 			</span>
 		</#list>
 	</div>
