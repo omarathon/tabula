@@ -9,6 +9,7 @@ import uk.ac.warwick.tabula.data._
 import uk.ac.warwick.tabula.data.model.PlagiarismInvestigation.SuspectPlagiarised
 import uk.ac.warwick.tabula.data.model._
 import uk.ac.warwick.tabula.data.model.forms.{CommentField, Extension, FormFieldContext, WordCountField}
+import uk.ac.warwick.tabula.data.model.markingworkflow.StageMarkers
 import uk.ac.warwick.userlookup.User
 
 import scala.collection.JavaConverters._
@@ -19,14 +20,18 @@ class AssessmentServiceTest extends PersistenceTestBase with Mockito {
 	val thisAssignmentDao = new AssessmentDaoImpl
 	val thisFirstMarkerHelper: UserGroupMembershipHelper[MarkingWorkflow] = smartMock[UserGroupMembershipHelper[MarkingWorkflow]]
 	val thisSecondMarkerHelper: UserGroupMembershipHelper[MarkingWorkflow] = smartMock[UserGroupMembershipHelper[MarkingWorkflow]]
+	val thisCM2MarkerHelper: UserGroupMembershipHelper[StageMarkers] = smartMock[UserGroupMembershipHelper[StageMarkers]]
 	val thisMarkingWorkflowService: MarkingWorkflowService = smartMock[MarkingWorkflowService]
+	val thisCM2MarkingWorkflowService: CM2MarkingWorkflowService = smartMock[CM2MarkingWorkflowService]
 
 	val assignmentService = new AbstractAssessmentService with AssessmentDaoComponent
-		with AssessmentServiceUserGroupHelpers with MarkingWorkflowServiceComponent {
+		with AssessmentServiceUserGroupHelpers with MarkingWorkflowServiceComponent with CM2MarkingWorkflowServiceComponent {
 		val assessmentDao: AssessmentDaoImpl = thisAssignmentDao
 		val firstMarkerHelper: UserGroupMembershipHelper[MarkingWorkflow] = thisFirstMarkerHelper
 		val secondMarkerHelper: UserGroupMembershipHelper[MarkingWorkflow] = thisSecondMarkerHelper
+		val cm2MarkerHelper: UserGroupMembershipHelper[StageMarkers] = thisCM2MarkerHelper
 		val markingWorkflowService: MarkingWorkflowService = thisMarkingWorkflowService
+		val cm2MarkingWorkflowService: CM2MarkingWorkflowService = thisCM2MarkingWorkflowService
 	}
 	val assignmentMembershipService = new AssessmentMembershipServiceImpl
 	val feedbackService = new FeedbackServiceImpl

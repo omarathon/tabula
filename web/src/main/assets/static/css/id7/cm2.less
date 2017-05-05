@@ -179,6 +179,11 @@ table.expanding-row-pairs {
 	.striped-section.empty {
 		display: block;
 	}
+
+	.scrollable-list {
+		max-height: 340px;
+		overflow-y: auto;
+	}
 }
 
 .filters.admin-assignment-filters {
@@ -203,5 +208,44 @@ table.expanding-row-pairs {
 #workflowTypeHelp {
 	dd {
 		margin-bottom: 16px;
+	}
+}
+
+@progress-bar-default-bg: #999999;
+@stage-progress-bar-vertical-padding: 5px;
+.stage-progress-bar {
+	height: @line-height-computed;
+	line-height: @line-height-computed;
+	margin-bottom: @line-height-computed;
+	display: flex;
+
+	.bar {
+		flex: 1;
+		margin: @stage-progress-bar-vertical-padding -(@line-height-computed / 2);
+
+		&.bar-default {
+			background-color: @progress-bar-default-bg;
+		}
+
+		&.bar-success {
+			background-color: @progress-bar-success-bg;
+		}
+
+		&.bar-warning {
+			background-color: @progress-bar-warning-bg;
+		}
+	}
+
+	> .fa-stack {
+		flex: 0;
+		flex-basis: @line-height-computed;
+		z-index: 1;
+		font-size: @line-height-computed;
+		height: auto;
+		line-height: inherit;
+
+		.text-default {
+			color: @progress-bar-default-bg;
+		}
 	}
 }

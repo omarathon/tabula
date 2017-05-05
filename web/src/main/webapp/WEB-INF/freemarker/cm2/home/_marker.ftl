@@ -3,8 +3,9 @@
 
 <h1>Assignments for marking</h1>
 
-<@components.marker_assignment_list id="marker-todo" title="To do" assignments=markerInformation.unmarkedAssignments />
-<@components.marker_assignment_list id="marker-doing" title="Doing" assignments=markerInformation.inProgressAssignments />
-<@components.marker_assignment_list id="marker-done" title="Done" assignments=markerInformation.pastAssignments />
+<@components.marker_assignment_list id="marker-upcoming" title="Upcoming" assignments=markerInformation.upcomingAssignments />
+<@components.marker_assignment_list id="marker-action" title="Action required" assignments=markerInformation.actionRequiredAssignments />
+<@components.marker_assignment_list id="marker-noaction" title="No action required" assignments=markerInformation.noActionRequiredAssignments />
+<@components.marker_assignment_list id="marker-completed" title="Completed" assignments=markerInformation.completedAssignments />
 
 </#escape>

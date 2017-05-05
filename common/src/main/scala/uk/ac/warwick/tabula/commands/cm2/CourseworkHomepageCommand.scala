@@ -1,16 +1,21 @@
 package uk.ac.warwick.tabula.commands.cm2
 
 import org.joda.time.{DateTime, LocalDate}
+import uk.ac.warwick.tabula.WorkflowStages.StageProgress
 import uk.ac.warwick.tabula.commands._
 import uk.ac.warwick.tabula.commands.cm2.CourseworkHomepageCommand._
-import uk.ac.warwick.tabula.data.model.forms.Extension
+import uk.ac.warwick.tabula.commands.cm2.assignments.SubmissionAndFeedbackCommand
 import uk.ac.warwick.tabula.data.model._
+import uk.ac.warwick.tabula.data.model.forms.Extension
 import uk.ac.warwick.tabula.helpers.DateTimeOrdering._
 import uk.ac.warwick.tabula.helpers.StringUtils._
+import uk.ac.warwick.tabula.helpers.cm2.WorkflowStudent
 import uk.ac.warwick.tabula.permissions.Permissions
 import uk.ac.warwick.tabula.services._
+import uk.ac.warwick.tabula.services.cm2.CM2WorkflowStages.{CM1ReleaseForMarking, CM2ReleaseForMarking}
+import uk.ac.warwick.tabula.services.cm2.{AutowiringCM2WorkflowProgressServiceComponent, CM2WorkflowProgressServiceComponent}
 import uk.ac.warwick.tabula.system.permissions.PubliclyVisiblePermissions
-import uk.ac.warwick.tabula.{AcademicYear, CurrentUser}
+import uk.ac.warwick.tabula.{AcademicYear, CurrentUser, WorkflowStage}
 import uk.ac.warwick.userlookup.User
 
 import scala.collection.JavaConverters._
@@ -40,20 +45,42 @@ object CourseworkHomepageCommand {
 		def nonempty: Boolean = !isEmpty
 	}
 
-	case class MarkerAssignmentInformation(
+	case class MarkingStage(
+		stage: WorkflowStage,
+		progress: Seq[MarkingStageProgress]
+	) {
+		def started: Boolean = progress.exists(_.progress.started)
+		def completed: Boolean = progress.forall(_.progress.completed)
+	}
+
+	case class MarkingStageProgress(
+		progress: StageProgress,
+		count: Int
+	)
+
+	case class MarkingNextStage(
+		stage: WorkflowStage,
+		count: Int
+	)
+
+	case class MarkerAssignmentInfo(
 		assignment: Assignment,
-		students: Seq[User],
-		submissions: Seq[Submission],
-		extensions: Seq[Extension],
-		markerFeedbacks: Seq[MarkerFeedback]
+		feedbackDeadline: Option[LocalDate],
+		extensionCount: Int,
+		unsubmittedCount: Int,
+		lateSubmissionsCount: Int,
+		currentStages: Seq[MarkingStage],
+		stages: Seq[MarkingStage],
+		nextStages: Seq[MarkingNextStage]
 	)
 
 	case class CourseworkHomepageMarkerInformation(
-		unmarkedAssignments: Seq[MarkerAssignmentInformation],
-		inProgressAssignments: Seq[MarkerAssignmentInformation],
-		pastAssignments: Seq[MarkerAssignmentInformation]
+		upcomingAssignments: Seq[MarkerAssignmentInfo],
+		actionRequiredAssignments: Seq[MarkerAssignmentInfo],
+		noActionRequiredAssignments: Seq[MarkerAssignmentInfo],
+		completedAssignments: Seq[MarkerAssignmentInfo]
 	) {
-		def isEmpty: Boolean = unmarkedAssignments.isEmpty && inProgressAssignments.isEmpty && pastAssignments.isEmpty
+		def isEmpty: Boolean = upcomingAssignments.isEmpty && actionRequiredAssignments.isEmpty && noActionRequiredAssignments.isEmpty && completedAssignments.isEmpty
 		def nonempty: Boolean = !isEmpty
 	}
 
@@ -83,6 +110,10 @@ object CourseworkHomepageCommand {
 			with AutowiringModuleAndDepartmentServiceComponent
 			with AutowiringAssessmentServiceComponent
 			with AutowiringAssessmentMembershipServiceComponent
+			with AutowiringCM2MarkingWorkflowServiceComponent
+			with MarkerProgress
+			with CommandWorkflowStudentsForAssignment
+			with AutowiringCM2WorkflowProgressServiceComponent
 			with PubliclyVisiblePermissions with Unaudited with ReadOnly
 }
 
@@ -100,7 +131,9 @@ class CourseworkHomepageCommandInternal(val academicYear: AcademicYear, val user
 	with TaskBenchmarking {
 	self: ModuleAndDepartmentServiceComponent
 		with AssessmentServiceComponent
-		with AssessmentMembershipServiceComponent =>
+		with AssessmentMembershipServiceComponent
+		with MarkerProgress
+		with CM2MarkingWorkflowServiceComponent =>
 
 	override def applyInternal(): Result =
 		CourseworkHomepageInformation(
@@ -262,64 +295,139 @@ trait CourseworkHomepageStudentAssignments extends TaskBenchmarking {
 
 trait CourseworkHomepageMarkerAssignments extends TaskBenchmarking {
 	self: CourseworkHomepageCommandState
-		with AssessmentServiceComponent =>
+		with AssessmentServiceComponent
+		with CM2MarkingWorkflowServiceComponent
+		with MarkerProgress =>
 
 	lazy val markerInformation: CourseworkHomepageMarkerInformation = benchmarkTask("Get marker information") {
 		CourseworkHomepageMarkerInformation(
-			unmarkedAssignments,
-			markingInProgressAssignments,
-			markingPastAssignments
+			upcomingAssignments,
+			actionRequiredAssignments,
+			noActionRequiredAssignments,
+			completedAssignments
 		)
 	}
 
-	lazy val unmarkedAssignments: Seq[MarkerAssignmentInformation] = benchmarkTask("Get un-marked assignments") {
-		allMarkerAssignments.filter { info =>
-			// Assignments that haven't closed yet
-			val isStillSubmitting = !info.assignment.openEnded && !info.assignment.isClosed
-
-			// Not released for marking yet
-			val notReleasedYet = info.submissions.isEmpty && info.markerFeedbacks.isEmpty
-
-			// TODO Once we've got CM2 workflow in we'll be able to interrogate state
-
-			isStillSubmitting || notReleasedYet
+	// Upcoming - assignments involving marker but not yet released
+	private lazy val upcomingAssignments: Seq[MarkerAssignmentInfo] = benchmarkTask("Get upcoming assignments") {
+		allMarkerAssignments.filterNot { info =>
+			info.stages
+				.filter { s => s.stage == CM1ReleaseForMarking || s.stage == CM2ReleaseForMarking }
+				.exists(_.progress.exists(_.progress.completed))
 		}
 	}
 
-	lazy val markingInProgressAssignments: Seq[MarkerAssignmentInformation] = benchmarkTask("Get in-progress assignments") {
-		// TODO once we've got CM2 workflow in, it'll be easier to see which assignments have "completed" marking
-		allMarkerAssignments.diff(unmarkedAssignments)
+	// Action required - assignments which need an action
+	private lazy val actionRequiredAssignments: Seq[MarkerAssignmentInfo] = benchmarkTask("Get action required assignments") {
+		allMarkerAssignments.diff(upcomingAssignments).diff(completedAssignments).filter { info =>
+			info.nextStages.nonEmpty
+		}
 	}
 
-	lazy val markingPastAssignments: Seq[MarkerAssignmentInformation] = benchmarkTask("Get past assignments") {
-		allMarkerAssignments.diff(unmarkedAssignments).diff(markingInProgressAssignments)
+	// No action required - Assignments that are in the workflow but aren't in need of an action at this stage
+	private lazy val noActionRequiredAssignments: Seq[MarkerAssignmentInfo] = benchmarkTask("Get no action required assignments") {
+		allMarkerAssignments.diff(upcomingAssignments).diff(completedAssignments).diff(actionRequiredAssignments)
 	}
 
-	private lazy val allMarkerAssignments: Seq[MarkerAssignmentInformation] = benchmarkTask("Get assignments for marking") {
+	// Completed - Assignments finished
+	private lazy val completedAssignments: Seq[MarkerAssignmentInfo] = benchmarkTask("Get completed assignments") {
+		allMarkerAssignments.filter { info =>
+			info.stages.nonEmpty && info.stages.last.progress.forall(_.progress.completed)
+		}
+	}
+
+	private lazy val allCM1MarkerAssignments: Seq[MarkerAssignmentInfo] = benchmarkTask("Get CM1 assignments for marking") {
 		assessmentService.getAssignmentWhereMarker(user.apparentUser, Some(academicYear))
-			.sortBy(a => (a.openEnded, a.closeDate))
 			.map { assignment =>
 				val markingWorkflow = assignment.markingWorkflow
+				val students = markingWorkflow.getMarkersStudents(assignment, user.apparentUser).toSet
 
-				val students = markingWorkflow.getMarkersStudents(assignment, user.apparentUser)
-				val submissions = assignment.getMarkersSubmissions(user.apparentUser)
-
-				val extensions = assignment.extensions.asScala.filter { extension =>
-					extension.approved && students.exists(extension.isForUser)
-				}
-
-				val markerFeedbacks = submissions.flatMap { submission =>
-					assignment.getAllMarkerFeedbacks(submission.usercode, user.apparentUser)
-				}
-
-				MarkerAssignmentInformation(
-					assignment,
-					students,
-					submissions,
-					extensions,
-					markerFeedbacks
-				)
+				enhance(assignment, students)
 			}
 	}
 
+	private lazy val allCM2MarkerAssignments: Seq[MarkerAssignmentInfo] = benchmarkTask("Get CM2 assignments for marking") {
+		assessmentService.getCM2AssignmentsWhereMarker(user.apparentUser, Some(academicYear))
+			.map { assignment =>
+				val markerFeedbacks = cm2MarkingWorkflowService.getAllFeedbackForMarker(assignment, user.apparentUser).values.flatten
+				val students = markerFeedbacks.map(_.student).toSet
+
+				enhance(assignment, students)
+			}
+	}
+
+	private lazy val allMarkerAssignments: Seq[MarkerAssignmentInfo] = benchmarkTask("Get assignments for marking") {
+		(allCM1MarkerAssignments ++ allCM2MarkerAssignments)
+			.sortBy(info => (info.assignment.openEnded, info.assignment.closeDate))
+	}
+
+}
+
+trait WorkflowStudentsForAssignment {
+	def workflowStudentsFor(assignment: Assignment): Seq[WorkflowStudent]
+}
+
+trait CommandWorkflowStudentsForAssignment extends WorkflowStudentsForAssignment {
+	def workflowStudentsFor(assignment: Assignment): Seq[WorkflowStudent] = SubmissionAndFeedbackCommand(assignment).apply().students
+}
+
+trait MarkerProgress extends TaskBenchmarking {
+	self: WorkflowStudentsForAssignment
+		with CM2WorkflowProgressServiceComponent =>
+
+	protected def enhance(assignment: Assignment, students: Set[User]): MarkerAssignmentInfo = benchmarkTask(s"Get progress information for ${assignment.name}") {
+		val workflowStudents = workflowStudentsFor(assignment).filter(s => students.contains(s.user))
+
+		val allStages = workflowProgressService.getStagesFor(assignment).filter(_.markingRelated)
+
+		val currentStages = allStages.flatMap { stage =>
+			val name = stage.toString
+
+			val progresses = workflowStudents.flatMap(_.stages.get(name)).filter(_.preconditionsMet)
+			if (progresses.nonEmpty) {
+				Seq(MarkingStage(
+					stage,
+					progresses.groupBy(identity).mapValues(_.size).toSeq.map { case (p, c) => MarkingStageProgress(p, c) }
+				))
+			} else {
+				Nil
+			}
+		}
+
+		val stages = allStages.flatMap { stage =>
+			val name = stage.toString
+
+			val progresses = workflowStudents.flatMap(_.stages.get(name))
+			if (progresses.nonEmpty) {
+				Seq(MarkingStage(
+					stage,
+					progresses.groupBy(identity).mapValues(_.size).toSeq.map { case (p, c) => MarkingStageProgress(p, c) }
+				))
+			} else {
+				Nil
+			}
+		}
+
+		val allNextStages =
+			workflowStudents.flatMap(_.nextStage).groupBy(identity).mapValues(_.size)
+
+		val nextStages =
+			allStages.filter(allNextStages.contains).map { stage =>
+				MarkingNextStage(
+					stage,
+					allNextStages(stage)
+				)
+			}
+
+		MarkerAssignmentInfo(
+			assignment,
+			assignment.feedbackDeadline,
+			extensionCount = assignment.extensions.asScala.count { e => students.exists(e.isForUser) },
+			unsubmittedCount = students.count { u => !assignment.submissions.asScala.exists(_.isForUser(u)) },
+			lateSubmissionsCount = assignment.submissions.asScala.count { s => s.isLate && students.exists(s.isForUser) },
+			currentStages,
+			stages,
+			nextStages
+		)
+	}
 }

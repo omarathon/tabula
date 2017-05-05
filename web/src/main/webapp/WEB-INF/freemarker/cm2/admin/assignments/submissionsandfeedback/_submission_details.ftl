@@ -8,7 +8,7 @@
 		</#if>
 	<#elseif assignment?has_content && user?has_content>
 		<#local lateness = assignment.workingDaysLateIfSubmittedNow(user.userId) />
-		<@fmt.p lateness "working day" /> overdue, the deadline/extension was ${durationFormatter(assignment.submissionDeadline(user.universityId, user.userId))}
+		<@fmt.p lateness "working day" /> overdue, the deadline/extension was ${durationFormatter(assignment.submissionDeadline(user.userId))}
 	</#if>
 </#compress></#macro>
 
@@ -27,10 +27,10 @@
 		<#if attachments?size gt 0>
 			<#if attachments?size == 1>
 				<#local filename = "${attachments[0].name}">
-				<#local downloadUrl><@routes.cm2.downloadSubmission submission filename/>?single=true</#local>
+				<#local downloadUrl><@routes.coursework.downloadSubmission submission filename/>?single=true</#local>
 			<#else>
-				<#local filename = "submission-${submission.studentIdentifier}.zip">
-				<#local downloadUrl><@routes.cm2.downloadSubmission submission filename/></#local>
+				<#local filename = "submission-${submission.universityId}.zip">
+				<#local downloadUrl><@routes.coursework.downloadSubmission submission filename/></#local>
 			</#if>
 			<a class="long-running" href="${downloadUrl}"><#compress>
 				${attachments?size}

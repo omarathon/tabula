@@ -202,10 +202,10 @@
 					</@bs3form.labelled_form_group>
 				</@f.form>
 			</div>
+		</div>
 
-			<div class="filter-results admin-assignment-list">
-				<i class="fa fa-spinner fa-spin"></i> Loading&hellip;
-			</div>
+		<div class="filter-results admin-assignment-list">
+			<i class="fa fa-spinner fa-spin"></i> Loading&hellip;
 		</div>
 	</div>
 
