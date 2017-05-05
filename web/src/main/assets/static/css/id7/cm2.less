@@ -219,6 +219,10 @@ table.expanding-row-pairs {
 	margin-bottom: @line-height-computed;
 	display: flex;
 
+	&.time-progress-bar .bar {
+		background-color: @progress-bar-default-bg;
+	}
+
 	.bar {
 		flex: 1;
 		margin: @stage-progress-bar-vertical-padding -(@line-height-computed / 2);

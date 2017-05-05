@@ -120,7 +120,42 @@
 		</#local>
 	</#if>
 
-	<@progress_bar tooltip percentage state />
+	<div class="stage-progress-bar time-progress-bar">
+		<#if assignment.opened>
+			<span class="fa-stack">
+				<i class="fa fa-stack-1x fa-circle fa-inverse"></i>
+				<i class="fa fa-stack-1x fa-check-circle-o text-success use-tooltip" title="Assignment ready"></i>
+			</span>
+		<#else>
+			<span class="fa-stack">
+				<i class="fa fa-stack-1x fa-circle fa-inverse"></i>
+				<i class="fa fa-stack-1x fa-circle-o text-default use-tooltip" title="${tooltip}" data-html="true"></i>
+			</span>
+		</#if>
+
+		<div class="bar use-tooltip" title="${tooltip}" data-html="true">
+			<div class="progress-bar progress-bar-${state}" role="progressbar" aria-valuenow="${percentage?c}" aria-valuemin="0" aria-valuemax="100" style="width: ${percentage?c}%;">
+			</div>
+		</div>
+
+		<#if state == 'success' && !info.submission??>
+			<#local state = 'default' />
+		</#if>
+
+		<#local icon = 'fa-circle-o' />
+		<#if state == 'success'>
+			<#local icon = 'fa-check-circle-o' />
+		<#elseif state == 'warning'>
+			<#local icon = 'fa-dot-circle-o' />
+		<#elseif state == 'danger'>
+			<#local icon = 'fa-exclamation-circle' />
+		</#if>
+
+		<span class="fa-stack">
+			<i class="fa fa-stack-1x fa-circle fa-inverse"></i>
+			<i class="fa fa-stack-1x ${icon} text-${state} use-tooltip" title="${tooltip}" data-html="true"></i>
+		</span>
+	</div>
 </#macro>
 
 <#macro student_assignment_info info show_submission_progress=false>
