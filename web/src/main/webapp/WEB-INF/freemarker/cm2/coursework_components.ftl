@@ -224,10 +224,14 @@
 				<#if info.submission?? && info.feedbackDeadline??>
 					<#local feedbackStatus>
 						<strong>Feedback <#if info.feedbackLate>over</#if>due:</strong> <span class="use-tooltip" title="<@fmt.dateToWeek info.feedbackDeadline />" data-html="true"><@fmt.date date=info.feedbackDeadline includeTime=false /></span>
+						<#if info.feedbackLate>
+							<br />
+							Please contact your Departmental Administrator with any queries
+						</#if>
 					</#local>
 				<#elseif info.studentDeadline??>
 					<#local feedbackStatus>
-						<strong>Assignment due:</strong> <span class="use-tooltip" title="<@fmt.dateToWeek info.studentDeadline />" data-html="true"><@fmt.date date=info.studentDeadline /></span>
+						<strong>Assignment due:</strong> <span class="use-tooltip" title="<@fmt.dateToWeek info.studentDeadline />" data-html="true"><@fmt.date date=info.studentDeadline /> - ${durationFormatter(info.studentDeadline)}</span>
 					</#local>
 				</#if>
 			</#if>
@@ -423,11 +427,11 @@
 			</#if>
 
 			<#if stageInfo_index gt 0>
-				<div class="bar bar-${state}"></div>
+				<div class="bar bar-${state} use-tooltip" title="${title}" data-html="true"></div>
 			</#if>
 			<span class="fa-stack">
 				<i class="fa fa-stack-1x fa-circle fa-inverse"></i>
-				<i class="fa fa-stack-1x ${icon} text-${state} use-tooltip" title="${title}"></i>
+				<i class="fa fa-stack-1x ${icon} text-${state} use-tooltip" title="${title}" data-html="true"></i>
 			</span>
 		</#list>
 	</div>
