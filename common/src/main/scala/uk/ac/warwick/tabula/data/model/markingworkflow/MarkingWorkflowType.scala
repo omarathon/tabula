@@ -60,7 +60,8 @@ object MarkingWorkflowType {
 		rolesShareAllocations = false
 	)
 
-	val values: Seq[MarkingWorkflowType] = Seq(
+	// Don't change this to a val https://warwick.slack.com/archives/C029QTGBN/p1493995125972397
+	def values: Seq[MarkingWorkflowType] = Seq(
 		SingleMarking,
 		DoubleMarking,
 		ModeratedMarking

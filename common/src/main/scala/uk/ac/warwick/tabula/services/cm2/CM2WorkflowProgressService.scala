@@ -60,8 +60,6 @@ class CM2WorkflowProgressService {
 
 		stages ++= Seq(AddFeedback, ReleaseFeedback, ViewOnlineFeedback, DownloadFeedback)
 
-		println(stages.result())
-
 		stages.result()
 	}
 

@@ -25,7 +25,6 @@ import scala.collection.JavaConverters._
 import scala.collection.mutable
 import scala.reflect._
 
-
 object Assignment {
 	// don't use the same name in different contexts, as that will kill find methods
 	val defaultCommentFieldName = "pretext"
@@ -36,6 +35,8 @@ object Assignment {
 	final val NotDeletedFilter = "notDeleted"
 	final val MaximumFileAttachments = 50
 	final val MaximumWordCount = 1000000
+
+	case class MarkerAllocation(role: String, marker: User, students: Set[User])
 
 	object Settings {
 		object InfoViewType {
@@ -772,6 +773,22 @@ class Assignment
 			submissions.asScala.find { _.usercode == usercode }.exists(s => !fullFeedback.exists(f => f.usercode == s.usercode && f.checkedReleased))
 		}
 	}
+
+	def cm2MarkerAllocations: Seq[MarkerAllocation] =
+		Option(cm2MarkingWorkflow)
+			.map { workflow =>
+				workflow.markers.toSeq
+					.sortBy { case (stage, _) => stage.order }
+					.flatMap { case (stage, markers) =>
+						markers.sortBy { u => (u.getLastName, u.getFirstName) }.map { marker =>
+							MarkerAllocation(
+								stage.roleName,
+								marker,
+								allFeedback.flatMap(_.markerFeedback.asScala).filter { mf => mf.stage == stage && mf.marker == marker }.map(_.student).toSet
+							)
+						}
+					}
+			}.getOrElse(Nil)
 
 	def automaticallyReleaseToMarkers: Boolean = getBooleanSetting(Settings.AutomaticallyReleaseToMarkers, default = false)
 	def automaticallyReleaseToMarkers_= (include: Boolean): Unit = settings += (Settings.AutomaticallyReleaseToMarkers -> include)

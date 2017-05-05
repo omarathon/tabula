@@ -37,6 +37,8 @@ class AddAssignmentDetailsController extends AbstractAssignmentController {
 	def showForm(form: CreateAssignmentDetailsCommand): Mav = {
 		val module = form.module
 
+		println(MarkingWorkflowType.values)
+
 		Mav(s"$urlPrefix/admin/assignments/new_assignment_details",
 			"department" -> module.adminDepartment,
 			"module" -> module,
