@@ -1,18 +1,17 @@
 package uk.ac.warwick.tabula.services
 
-import java.io.{File, FileInputStream, InputStream, OutputStream}
-import java.nio.ByteBuffer
+import java.io.{File, FileInputStream}
 import java.util.UUID
 import java.util.zip.Deflater
 
-import com.google.common.io.Files
-import org.apache.commons.compress.archivers.zip.{ZipArchiveEntry, ZipArchiveOutputStream}
+import com.google.common.io.{ByteSource, Files}
 import org.apache.commons.compress.archivers.zip.ZipArchiveOutputStream.UnicodeExtraFieldPolicy
+import org.apache.commons.compress.archivers.zip.{ZipArchiveEntry, ZipArchiveOutputStream}
 import org.springframework.http.HttpStatus
 import uk.ac.warwick.tabula.commands.TaskBenchmarking
 import uk.ac.warwick.tabula.data.FileHasherComponent
-import uk.ac.warwick.tabula.helpers.{Closeables, Logging}
 import uk.ac.warwick.tabula.helpers.StringUtils._
+import uk.ac.warwick.tabula.helpers.{Closeables, Logging}
 import uk.ac.warwick.tabula.services.fileserver.RenderableFile
 import uk.ac.warwick.tabula.services.objectstore.{ObjectStorageService, ObjectStorageServiceComponent}
 import uk.ac.warwick.tabula.system.exceptions.UserError
@@ -27,7 +26,7 @@ sealed trait ZipItem {
 	def name: String
 	def length: Long
 }
-case class ZipFileItem(name: String, input: InputStream, length: Long) extends ZipItem
+case class ZipFileItem(name: String, source: ByteSource, length: Long) extends ZipItem
 case class ZipFolderItem(name: String, startItems: Seq[ZipItem] = Nil) extends ZipItem {
 	var items: ListBuffer[ZipItem] = ListBuffer()
 	items.appendAll(startItems)
@@ -137,10 +136,10 @@ trait ZipCreator extends Logging with TaskBenchmarking {
 	private def writeItems(items: Seq[ZipItem], zip: ZipArchiveOutputStream, progressCallback: (Int, Int) => Unit = {(_,_) => }): Unit = benchmarkTask("Write zip items") {
 		def writeFolder(basePath: String, items: Seq[ZipItem]) {
 			items.zipWithIndex.foreach { case(item, index) => item match {
-				case file: ZipFileItem if Option(file.input).nonEmpty && file.length > 0 =>
+				case file: ZipFileItem if Option(file.source).nonEmpty && file.length > 0 =>
 					benchmarkTask(s"Write ${file.name}") {
 						zip.putArchiveEntry(new ZipArchiveEntry(basePath + trunc(file.name, MaxFileLength)))
-						copy(file.input, zip)
+						file.source.copyTo(zip)
 						zip.closeArchiveEntry()
 						progressCallback(index, items.size)
 					}
@@ -191,23 +190,6 @@ trait ZipCreator extends Logging with TaskBenchmarking {
 						throw e
 					}
 			}
-		}
-	}
-
-	private val BufferSizeInBytes = 4096 // 4kb
-
-	// copies from is to os, but doesn't close os
-	private def copy(is: InputStream, os: OutputStream) {
-		try {
-			// not sure how to create a byte[] directly, this seems reasonable.
-			val buffer = ByteBuffer.allocate(BufferSizeInBytes).array
-			// "continually" creates an endless iterator, "takeWhile" gives it an end
-			val iterator = Iterator.continually { is.read(buffer) }.takeWhile { _ != -1 }
-			for (read <- iterator) {
-				os.write(buffer, 0, read)
-			}
-		} finally {
-			is.close()
 		}
 	}
 

@@ -2,6 +2,7 @@ package uk.ac.warwick.tabula.services
 
 import java.io.ByteArrayInputStream
 
+import com.google.common.io.ByteSource
 import uk.ac.warwick.tabula.TestBase
 import uk.ac.warwick.tabula.data.SHAFileHasherComponent
 import uk.ac.warwick.tabula.services.objectstore.{ObjectStorageService, ObjectStorageServiceComponent}
@@ -16,11 +17,11 @@ class ZipCreatorTest extends TestBase {
 
 	@Test def itWorks {
 		val items = Seq(
-				ZipFileItem("one.txt", new ByteArrayInputStream("one".getBytes("UTF-8")), 3),
-				ZipFileItem("two.txt", new ByteArrayInputStream("two".getBytes("UTF-8")), 3),
+				ZipFileItem("one.txt", ByteSource.wrap("one".getBytes("UTF-8")), 3),
+				ZipFileItem("two.txt", ByteSource.wrap("two".getBytes("UTF-8")), 3),
 				ZipFolderItem("folder", Seq(
-						ZipFileItem("three.txt", new ByteArrayInputStream("three".getBytes("UTF-8")), 5),
-						ZipFileItem("four.txt", new ByteArrayInputStream("four".getBytes("UTF-8")), 4)
+						ZipFileItem("three.txt", ByteSource.wrap("three".getBytes("UTF-8")), 5),
+						ZipFileItem("four.txt", ByteSource.wrap("four".getBytes("UTF-8")), 4)
 				))
 		)
 
