@@ -25,7 +25,7 @@ class FinalOverallMarkColumnOption extends ChosenYearExamGridColumnOption with A
 
 		override def values: Map[ExamGridEntity, ExamGridColumnValue] = {
 			state.entities.map(entity =>
-				entity -> entity.years.get(state.yearOfStudy).map(entityYear =>
+				entity -> entity.validYears.get(state.yearOfStudy).map(entityYear =>
 					progressionService.suggestedFinalYearGrade(
 						entityYear.studentCourseYearDetails.get,
 						state.normalLoadLookup(entityYear.route),

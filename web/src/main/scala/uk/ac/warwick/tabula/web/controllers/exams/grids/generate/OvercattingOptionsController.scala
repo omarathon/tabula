@@ -142,14 +142,14 @@ class OvercattingOptionsView(
 	private lazy val originalEntity = scyd.studentCourseDetails.student.toExamGridEntity(scyd)
 
 	lazy val overcattedEntities: Seq[ExamGridEntity] = overcattedModuleSubsets.map { case (_, overcattedModules) =>
-		originalEntity.copy(years = originalEntity.years.updated(scyd.yearOfStudy, ExamGridEntityYear(
+		originalEntity.copy(years = originalEntity.years.updated(scyd.yearOfStudy, Some(ExamGridEntityYear(
 			moduleRegistrations = overcattedModules,
 			cats = overcattedModules.map(mr => BigDecimal(mr.cats)).sum,
 			route = scyd.toExamGridEntityYear.route,
 			overcattingModules = Some(overcattedModules.map(_.module)),
 			markOverrides = Some(overwrittenMarks),
 			studentCourseYearDetails = None
-		)))
+		))))
 	}
 
 	private lazy val overcattedEntitiesState = ExamGridColumnState(
@@ -209,7 +209,7 @@ class ChooseOvercatColumnOption extends ChosenYearExamGridColumnOption {
 
 		override def values: Map[ExamGridEntity, ExamGridColumnValue] = {
 			state.entities.map(entity => entity -> {
-				val entityId = GenerateExamGridOvercatCommand.overcatIdentifier(entity.years(state.yearOfStudy).moduleRegistrations)
+				val entityId = GenerateExamGridOvercatCommand.overcatIdentifier(entity.validYears(state.yearOfStudy).moduleRegistrations)
 				ExamGridColumnValueStringHtmlOnly(
 					"<input type=\"radio\" name=\"overcatChoice\" value=\"%s\" %s />".format(
 						entityId,

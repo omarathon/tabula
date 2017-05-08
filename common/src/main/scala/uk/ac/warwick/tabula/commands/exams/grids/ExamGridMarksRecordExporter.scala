@@ -24,7 +24,7 @@ object ExamGridMarksRecordExporter extends TaskBenchmarking with AddConfidential
 		doc.createParagraph()
 
 		def renderEntity(entity: ExamGridEntity): Unit = benchmarkTask("renderEntity") {
-			val route = entity.years(entity.years.keys.last).route
+			val route = entity.validYears(entity.validYears.keys.last).route
 			val p1 = doc.getLastParagraph
 			val r1 = p1.createRun()
 			r1.setText(s"Marks record for ${entity.firstName} ${entity.lastName}")
@@ -32,7 +32,7 @@ object ExamGridMarksRecordExporter extends TaskBenchmarking with AddConfidential
 
 			doc.createParagraph()
 
-			entity.years.keys.toSeq.sorted.foreach { yearOfStudy =>
+			entity.validYears.keys.toSeq.sorted.foreach { yearOfStudy =>
 				doc.createParagraph().createRun().setText("%s year examinations".format(yearOfStudy match {
 					case 1 => "First"
 					case 2 => "Second"
@@ -41,7 +41,7 @@ object ExamGridMarksRecordExporter extends TaskBenchmarking with AddConfidential
 					case n => s"${n}th"
 				}))
 
-				val year = entity.years(yearOfStudy)
+				val year = entity.validYears(yearOfStudy)
 				val moduleTable = doc.createTable(year.moduleRegistrations.size + 1, 4)
 				// Set table width
 				val moduleTableWidth = moduleTable.getCTTbl.getTblPr.getTblW

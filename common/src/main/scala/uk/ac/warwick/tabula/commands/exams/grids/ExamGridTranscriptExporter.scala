@@ -30,8 +30,8 @@ object ExamGridTranscriptExporter extends TaskBenchmarking with AddConfidentialW
 
 			doc.createParagraph().createRun().setText("The board has agreed the following marks for you:")
 
-			entity.years.keys.toSeq.sorted.foreach { yearOfStudy =>
-				val year = entity.years(yearOfStudy)
+			entity.validYears.keys.toSeq.sorted.foreach { yearOfStudy =>
+				val year = entity.validYears(yearOfStudy)
 				val moduleTable = doc.createTable(year.moduleRegistrations.size + 2, 3)
 				// Set table width
 				val moduleTableWidth = moduleTable.getCTTbl.getTblPr.getTblW

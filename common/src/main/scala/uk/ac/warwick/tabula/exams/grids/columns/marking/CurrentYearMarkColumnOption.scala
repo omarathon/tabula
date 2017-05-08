@@ -26,7 +26,7 @@ class CurrentYearMarkColumnOption extends ChosenYearExamGridColumnOption with Au
 
 		override def values: Map[ExamGridEntity, ExamGridColumnValue] = {
 			state.entities.map(entity =>
-				entity -> entity.years.get(state.yearOfStudy).map(entity => result(entity) match {
+				entity -> entity.validYears.get(state.yearOfStudy).map(entity => result(entity) match {
 					case Right(mark) => ExamGridColumnValueDecimal(mark)
 					case Left(message) => ExamGridColumnValueMissing(message)
 				}).getOrElse(ExamGridColumnValueMissing(s"Could not find course details for ${entity.universityId} for ${state.academicYear}"))

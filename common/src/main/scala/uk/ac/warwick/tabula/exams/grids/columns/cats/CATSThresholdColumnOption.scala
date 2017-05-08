@@ -19,7 +19,7 @@ abstract class CATSThresholdColumnOption(bound: BigDecimal, isUpperBound: Boolea
 
 		override def values: Map[ExamGridEntity, ExamGridColumnValue] = {
 			state.entities.map(entity =>
-				entity -> entity.years.get(state.yearOfStudy).map(entityYear => result(entityYear))
+				entity -> entity.years.filter { case (_, entityYear) => entityYear.nonEmpty }.get(state.yearOfStudy).map(entityYear => result(entityYear.get))
 					.getOrElse(ExamGridColumnValueMissing(s"Could not find course details for ${entity.universityId} for ${state.academicYear}"))
 			).toMap
 		}

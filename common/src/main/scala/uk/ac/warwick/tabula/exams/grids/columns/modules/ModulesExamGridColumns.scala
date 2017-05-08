@@ -22,7 +22,7 @@ abstract class ModuleExamGridColumn(state: ExamGridColumnState, val module: Modu
 
 	override def values: Map[ExamGridEntity, Map[YearOfStudy, Map[ExamGridColumnValueType, Seq[ExamGridColumnValue]]]] = {
 		state.entities.map(entity =>
-			entity -> entity.years.map { case (academicYear, entityYear) =>
+			entity -> entity.validYears.map { case (academicYear, entityYear) =>
 				academicYear -> result(entityYear)
 			}
 		).toMap
@@ -102,7 +102,7 @@ abstract class ModuleExamGridColumnOption extends PerYearExamGridColumnOption {
 
 	override final def getColumns(state: ExamGridColumnState): Map[YearOfStudy, Seq[PerYearExamGridColumn]] = {
 
-		val allYears = state.entities.flatMap(_.years.values).toList
+		val allYears = state.entities.flatMap(_.validYears.values).toList
 
 		val allCoreRequiredModules =
 			allYears.map(_.route).flatMap(state.coreRequiredModuleLookup.apply).map(cr => (cr.module, "CoreRequired"))
@@ -117,7 +117,7 @@ abstract class ModuleExamGridColumnOption extends PerYearExamGridColumnOption {
 			.toSeq
 
 		state.entities.flatMap(_.years.keys).distinct.map(academicYear => academicYear -> {
-			val years = state.entities.flatMap(_.years.get(academicYear))
+			val years = state.entities.flatMap(_.validYears.get(academicYear))
 			val moduleAndCats: Set[(Module, JBigDecimal)] = years.flatMap { entityYear =>
 				val coreRequiredModules = state.coreRequiredModuleLookup(entityYear.route).map(_.module)
 				entityYear.moduleRegistrations.filter(moduleRegistrationFilter(_, coreRequiredModules))
