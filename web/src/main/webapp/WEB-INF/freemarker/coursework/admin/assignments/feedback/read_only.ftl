@@ -14,7 +14,7 @@
 					<div class="control-group">
 						<label class="control-label">Generic feedback</label>
 						<div class="controls">
-							<p>${assignment.genericFeedback}</p>
+							<p>${assignment.genericFeedbackFormattedHtml}</p>
 						</div>
 					</div>
 				</div>

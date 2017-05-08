@@ -74,7 +74,8 @@ class Assignment
 		with HasSettings
 		with PostLoadBehaviour
 		with Serializable
-		with ToEntityReference {
+		with ToEntityReference
+		with FormattedHtml {
 
 	import uk.ac.warwick.tabula.data.model.Assignment._
 
@@ -145,6 +146,9 @@ class Assignment
 	var cm2Assignment: JBoolean = false
 
 	var genericFeedback: String = ""
+
+	def genericFeedbackFormattedHtml: String = formattedHtml(genericFeedback)
+
 	@Column(name="turnitin_id")
 	var turnitinId: String = ""
 	var submitToTurnitin: JBoolean = false
