@@ -407,7 +407,7 @@ class GenerateExamGridController extends ExamsController
 
 		val state = ExamGridColumnState(
 			entities = entities,
-			overcatSubsets = entities.flatMap(_.years.get(selectCourseCommand.yearOfStudy)).map(entityYear => entityYear ->
+			overcatSubsets = entities.flatMap(_.validYears.get(selectCourseCommand.yearOfStudy)).map(entityYear => entityYear ->
 				moduleRegistrationService.overcattedModuleSubsets(entityYear, entityYear.markOverrides.getOrElse(Map()), normalLoadLookup(entityYear.route), routeRulesLookup(entityYear.route))
 			).toMap,
 			coreRequiredModuleLookup = coreRequiredModuleLookup,

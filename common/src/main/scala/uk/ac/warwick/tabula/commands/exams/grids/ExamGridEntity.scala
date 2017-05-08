@@ -9,8 +9,10 @@ case class ExamGridEntity(
 	lastName: String,
 	universityId: String,
 	lastImportDate: Option[DateTime],
-	years: Map[YearOfStudy, ExamGridEntityYear] // Int = year of study
-)
+	years: Map[YearOfStudy, Option[ExamGridEntityYear]] // Int = year of study
+) {
+	def validYears: Map[YearOfStudy, ExamGridEntityYear] = years.filter { case (_, year) => year.nonEmpty }.mapValues(_.get)
+}
 
 case class ExamGridEntityYear(
 	moduleRegistrations: Seq[ModuleRegistration],

@@ -29,7 +29,7 @@ class ModuleReportsColumnOption extends PerYearExamGridColumnOption {
 
 		override def values: Map[ExamGridEntity, Map[YearOfStudy, Map[ExamGridColumnValueType, Seq[ExamGridColumnValue]]]] = {
 			state.entities.map(entity =>
-				entity -> entity.years.map { case (academicYear, entityYear) =>
+				entity -> entity.validYears.map { case (academicYear, entityYear) =>
 					academicYear -> ExamGridColumnValueType.toMap(result(entityYear))
 				}
 			).toMap
@@ -64,7 +64,7 @@ class ModuleReportsColumnOption extends PerYearExamGridColumnOption {
 
 		override def values: Map[ExamGridEntity, Map[YearOfStudy, Map[ExamGridColumnValueType, Seq[ExamGridColumnValue]]]] = {
 			state.entities.map(entity =>
-				entity -> entity.years.map { case (academicYear, entityYear) =>
+				entity -> entity.validYears.map { case (academicYear, entityYear) =>
 					academicYear -> ExamGridColumnValueType.toMap(result(entityYear))
 				}
 			).toMap

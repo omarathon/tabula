@@ -433,7 +433,7 @@ class StudentMember extends Member with StudentProperties {
 			universityId = universityId,
 			lastImportDate = Option(lastImportDate),
 			years = (1 to baseSCYD.yearOfStudy).map(year =>
-				year -> allSCYDs.reverse.find(_.yearOfStudy == year).get.toExamGridEntityYear
+				year -> allSCYDs.reverse.find(_.yearOfStudy == year).map(_.toExamGridEntityYear)
 			).toMap
 		)
 	}

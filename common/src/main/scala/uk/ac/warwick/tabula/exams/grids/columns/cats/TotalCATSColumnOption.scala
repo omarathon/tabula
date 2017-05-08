@@ -24,7 +24,7 @@ class TotalCATSColumnOption extends ChosenYearExamGridColumnOption {
 
 		override def values: Map[ExamGridEntity, ExamGridColumnValue] = {
 			state.entities.map(entity =>
-				entity -> entity.years.get(state.yearOfStudy).map(entityYear =>
+				entity -> entity.validYears.get(state.yearOfStudy).map(entityYear =>
 					ExamGridColumnValueDecimal(entityYear.moduleRegistrations.map(mr => BigDecimal(mr.cats)).sum.underlying)
 				).getOrElse(
 					ExamGridColumnValueMissing(s"Could not find course details for ${entity.universityId} for ${state.academicYear}")
