@@ -6,7 +6,7 @@
 	</@bs3form.labelled_form_group>
 
 	<@bs3form.labelled_form_group path="tutors" labelText="Tutors">
-		<@form.flexipicker path="tutors" placeholder="User name" list=true multiple=true auto_multiple=false />
+		<@bs3form.flexipicker path="tutors" placeholder="User name" list=true multiple=true auto_multiple=false />
 	</@bs3form.labelled_form_group>
 
 	<@components.week_selector "weeks" allTerms smallGroupSet />

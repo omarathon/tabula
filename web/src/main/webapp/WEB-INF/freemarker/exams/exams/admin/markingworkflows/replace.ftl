@@ -16,7 +16,7 @@
 		</@form.labelled_row>
 
 		<@form.labelled_row "newMarker" "New marker">
-			<@form.flexipicker path="newMarker" />
+			<@bs3form.flexipicker path="newMarker" />
 		</@form.labelled_row>
 
 		<div class="alert alert-warning">
