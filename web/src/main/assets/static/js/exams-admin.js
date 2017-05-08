@@ -172,9 +172,9 @@ function editorFilterAndBulkEdit($editor, inputName) {
 		$(window).trigger('resize.ScrollToFixed');
 	}).on('keyup', 'input[name=bulk]', function(){
 		if ($editor.find('input[name=bulk]').filter(function(){ return $(this).val().length > 0 }).length > 0) {
-			$applyButton.prop('disabled', false);
+			$applyButton.prop('disabled', false).removeClass('btn-default').addClass('btn-primary');
 		} else {
-			$applyButton.prop('disabled', true);
+			$applyButton.prop('disabled', true).addClass('btn-default').removeClass('btn-primary');
 		}
 	});
 	$applyButton.on('click', function(){
