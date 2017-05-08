@@ -5,7 +5,9 @@ import uk.ac.warwick.tabula.AcademicYear
 import uk.ac.warwick.tabula.data.model._
 import uk.ac.warwick.tabula.data.model.forms.Extension
 import uk.ac.warwick.tabula.data.model.markingworkflow.CM2MarkingWorkflow
+import uk.ac.warwick.tabula.services.jobs.JobInstance
 import uk.ac.warwick.tabula.web.RoutesUtils
+import uk.ac.warwick.userlookup.User
 
 /**
  * Generates URLs to various locations, to reduce the number of places where URLs
@@ -19,6 +21,8 @@ object Routes {
 	// FIXME this isn't really an optional property, but testing is a pain unless it's made so
 	var _cm2Prefix: Option[String] = Wire.optionProperty("${cm2.prefix}")
 	def cm2Prefix: String = _cm2Prefix.orNull
+
+	def zipFileJob(jobInstance: JobInstance): String = "/zips/%s" format encoded(jobInstance.id)
 
 	private lazy val context = s"/$cm2Prefix"
 	def home: String = context + "/"
@@ -83,6 +87,63 @@ object Routes {
 				def apply(assignment: Assignment): String = assignmentroot(assignment) + "/list"
 				def summary(assignment: Assignment): String = assignmentroot(assignment) + "/summary"
 				def table(assignment: Assignment): String = assignmentroot(assignment) + "/table"
+			}
+
+			private def markerroot(assignment: Assignment, marker: User) = assignmentroot(assignment) + s"/marker/${marker.getWarwickId}"
+
+			object markerFeedback {
+				def apply(assignment: Assignment, marker: User): String = markerroot(assignment, marker) + "/list"
+				object complete {
+					def apply(assignment: Assignment, marker: User): String = markerroot(assignment, marker) + "/marking-completed"
+				}
+				object uncomplete {
+					def apply(assignment: Assignment, marker: User): String = markerroot(assignment, marker) + "/marking-uncompleted"
+					def apply(assignment: Assignment, marker: User, previousRole: String): String = markerroot(assignment, marker) + "/marking-uncompleted?previousStageRole="+previousRole
+				}
+				object bulkApprove {
+					def apply(assignment: Assignment, marker: User): String = markerroot(assignment, marker) + "/moderation/bulk-approve"
+				}
+				object marksTemplate {
+					def apply(assignment: Assignment, marker: User): String = markerroot(assignment, marker) + "/marks-template"
+				}
+				object onlineFeedback {
+					def apply(assignment: Assignment, marker: User): String = markerroot(assignment, marker) + "/feedback/online"
+
+					object student {
+						def apply(assignment: Assignment, marker: User, student: User): String =
+							markerroot(assignment, marker) + s"/feedback/online/${student.getUserId}/"
+					}
+					object moderation {
+						def apply(assignment: Assignment, marker: User, student: User): String =
+							markerroot(assignment, marker) + s"/feedback/online/moderation/${student.getUserId}/"
+					}
+				}
+				object marks {
+					def apply(assignment: Assignment, marker: User): String = markerroot(assignment, marker) + "/marks"
+				}
+				object feedback {
+					def apply(assignment: Assignment, marker: User): String = markerroot(assignment, marker) + "/feedback"
+				}
+				object submissions {
+					def apply(assignment: Assignment, marker: User): String = markerroot(assignment, marker) + "/submissions.zip"
+				}
+				object downloadFeedback {
+					object marker {
+						def apply(assignment: Assignment, marker: User, feedbackId: String, filename: String): String =
+							markerroot(assignment, marker) + s"/feedback/download/$feedbackId/$filename"
+					}
+
+					object all {
+						def apply(assignment: Assignment, marker: User, markerFeedback: String): String = markerroot(assignment, marker) + s"/feedback/download/$markerFeedback/attachments/"
+					}
+
+					object one {
+						def apply(assignment: Assignment, marker: User, markerFeedback: String, filename: String): String = markerroot(assignment, marker) + s"/feedback/download/$markerFeedback/attachment/$filename"
+					}
+				}
+				object returnsubmissions {
+					def apply(assignment: Assignment): String = assignmentroot(assignment) + "/submissionsandfeedback/return-submissions"
+				}
 			}
 
 			object turnitin {
