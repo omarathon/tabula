@@ -1,7 +1,8 @@
 package uk.ac.warwick.tabula.commands.coursework.assignments
+
 import uk.ac.warwick.tabula.CurrentUser
 import uk.ac.warwick.tabula.commands.{Command, Description, Notifies}
-import uk.ac.warwick.tabula.data.model.notifications.coursework.RequestAssignmentAccessNotification
+import uk.ac.warwick.tabula.data.model.notifications.cm2.RequestAssignmentAccessNotification
 import uk.ac.warwick.tabula.data.model.{Assignment, Module, Notification}
 import uk.ac.warwick.tabula.helpers.StringUtils._
 import uk.ac.warwick.tabula.helpers.UnicodeEmails
