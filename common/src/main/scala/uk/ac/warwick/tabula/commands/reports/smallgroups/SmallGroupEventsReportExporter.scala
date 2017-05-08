@@ -1,6 +1,7 @@
 package uk.ac.warwick.tabula.commands.reports.smallgroups
 
-import org.apache.poi.xssf.usermodel.{XSSFSheet, XSSFWorkbook}
+import org.apache.poi.ss.usermodel.Sheet
+import org.apache.poi.xssf.streaming.SXSSFWorkbook
 import uk.ac.warwick.tabula.data.SmallGroupEventReportData
 import uk.ac.warwick.tabula.data.model.Department
 import uk.ac.warwick.util.csv.CSVLineWriter
@@ -50,8 +51,8 @@ class SmallGroupEventsReportExporter(val processorResult: Seq[SmallGroupEventRep
 		}
 	}
 
-	def toXLSX: XSSFWorkbook = {
-		val workbook = new XSSFWorkbook()
+	def toXLSX: SXSSFWorkbook = {
+		val workbook = new SXSSFWorkbook
 		val sheet = generateNewSheet(workbook)
 
 		processorResult.foreach(addRow(sheet))
@@ -60,8 +61,9 @@ class SmallGroupEventsReportExporter(val processorResult: Seq[SmallGroupEventRep
 		workbook
 	}
 
-	private def generateNewSheet(workbook: XSSFWorkbook) = {
+	private def generateNewSheet(workbook: SXSSFWorkbook) = {
 		val sheet = workbook.createSheet(department.name)
+		sheet.trackAllColumnsForAutoSizing()
 
 		// add header row
 		val headerRow = sheet.createRow(0)
@@ -71,7 +73,7 @@ class SmallGroupEventsReportExporter(val processorResult: Seq[SmallGroupEventRep
 		sheet
 	}
 
-	private def addRow(sheet: XSSFSheet)(data: SmallGroupEventReportData) {
+	private def addRow(sheet: Sheet)(data: SmallGroupEventReportData) {
 		val row = sheet.createRow(sheet.getLastRowNum + 1)
 		headers.zipWithIndex foreach { case (_, index) =>
 			val cell = row.createCell(index)

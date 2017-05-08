@@ -2,8 +2,9 @@ package uk.ac.warwick.tabula.web.controllers.exams.exams.admin
 
 import org.apache.commons.lang3.text.WordUtils
 import org.apache.poi.hssf.usermodel.HSSFDataFormat
+import org.apache.poi.ss.usermodel.Sheet
 import org.apache.poi.ss.util.WorkbookUtil
-import org.apache.poi.xssf.usermodel.{XSSFSheet, XSSFWorkbook}
+import org.apache.poi.xssf.streaming.SXSSFWorkbook
 import org.joda.time.DateTime
 import org.joda.time.format.DateTimeFormat
 import uk.ac.warwick.tabula.AcademicYear
@@ -113,7 +114,7 @@ trait ItemData extends ExamHeaderInformation {
 
 	def studentFeedback(results:ViewExamCommandResult, student:User): ExamFeedback = {
 		if (studentHasFeedback(results, student)) {
-			results.feedbackMap.get(student).get.get
+			results.feedbackMap(student).get
 		} else {
 			new ExamFeedback
 		}
@@ -127,7 +128,7 @@ trait ItemData extends ExamHeaderInformation {
 	def studentSitsFeedback(results:ViewExamCommandResult, student:User) : FeedbackForSits = {
 		val feedback = studentFeedback(results, student)
 		if (studentHasSitsFeedack(results, student)) {
-			results.sitsStatusMap.get(feedback).get.get
+			results.sitsStatusMap(feedback).get
 		} else {
 			new FeedbackForSits
 		}
@@ -177,8 +178,8 @@ class XMLBuilder(val students:Seq[User], val results:ViewExamCommandResult, val 
 class ExcelBuilder(val students: Seq[User], val results:ViewExamCommandResult, val module: Module)
 	extends ExamHeaderInformation with ItemData with FormatsContent {
 
-	def toXLSX: XSSFWorkbook = {
-		val workbook = new XSSFWorkbook()
+	def toXLSX: SXSSFWorkbook = {
+		val workbook = new SXSSFWorkbook
 		val sheet = generateNewSheet(workbook)
 
 		students foreach { addRow(sheet)(_) }
@@ -187,8 +188,9 @@ class ExcelBuilder(val students: Seq[User], val results:ViewExamCommandResult, v
 		workbook
 	}
 
-	def generateNewSheet(workbook: XSSFWorkbook): XSSFSheet = {
+	def generateNewSheet(workbook: SXSSFWorkbook): Sheet = {
 		val sheet = workbook.createSheet(module.code.toUpperCase + " - " + safeExamName)
+		sheet.trackAllColumnsForAutoSizing()
 
 		def formatHeader(header: String) =
 			WordUtils.capitalizeFully(header.replace('-', ' '))
@@ -201,7 +203,7 @@ class ExcelBuilder(val students: Seq[User], val results:ViewExamCommandResult, v
 		sheet
 	}
 
-	def addRow(sheet: XSSFSheet)(student: User) {
+	def addRow(sheet: Sheet)(student: User) {
 		val plainCellStyle = {
 			val cs = sheet.getWorkbook.createCellStyle()
 			cs.setDataFormat(HSSFDataFormat.getBuiltinFormat("@"))
@@ -222,7 +224,7 @@ class ExcelBuilder(val students: Seq[User], val results:ViewExamCommandResult, v
 		}
 	}
 
-	def formatWorksheet(sheet: XSSFSheet): Unit = {
+	def formatWorksheet(sheet: Sheet): Unit = {
 		(0 to headers.size) foreach sheet.autoSizeColumn
 	}
 

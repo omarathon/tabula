@@ -1,6 +1,6 @@
 package uk.ac.warwick.tabula.commands.exams.exams
 
-import org.apache.poi.xssf.usermodel.XSSFWorkbook
+import org.apache.poi.xssf.streaming.SXSSFWorkbook
 import uk.ac.warwick.tabula.commands._
 import uk.ac.warwick.tabula.data.HibernateHelpers
 import uk.ac.warwick.tabula.data.model.{Assessment, Assignment, Exam}
@@ -28,9 +28,10 @@ class BulkAdjustmentTemplateCommandInternal(val assessment: Assessment) extends 
 		new ExcelView("Adjustments for " + assessment.name +  ".xlsx", workbook)
 	}
 
-	private def generateWorkbook: XSSFWorkbook = {
-		val workbook = new XSSFWorkbook()
+	private def generateWorkbook: SXSSFWorkbook = {
+		val workbook = new SXSSFWorkbook
 		val sheet = workbook.createSheet("Marks")
+		sheet.trackAllColumnsForAutoSizing()
 
 		// add header row
 		val header = sheet.createRow(0)

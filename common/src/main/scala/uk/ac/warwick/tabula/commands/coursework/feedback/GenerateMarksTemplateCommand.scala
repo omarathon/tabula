@@ -1,8 +1,8 @@
 package uk.ac.warwick.tabula.commands.coursework.feedback
 
-import org.apache.poi.ss.usermodel.{ComparisonOperator, IndexedColors}
+import org.apache.poi.ss.usermodel.{ComparisonOperator, IndexedColors, Sheet}
 import org.apache.poi.ss.util.{CellRangeAddress, WorkbookUtil}
-import org.apache.poi.xssf.usermodel.{XSSFSheet, XSSFWorkbook}
+import org.apache.poi.xssf.streaming.SXSSFWorkbook
 import uk.ac.warwick.tabula.commands._
 import uk.ac.warwick.tabula.data.model.{Assessment, Assignment, Module}
 import uk.ac.warwick.tabula.permissions.Permissions
@@ -13,7 +13,7 @@ object GenerateOwnMarksTemplateCommand {
 	def apply(module: Module, assignment: Assignment, members: Seq[String]) =
 		new GenerateMarksTemplateCommandInternal(module, assignment, members)
 			with AutowiringFeedbackServiceComponent
-			with ComposableCommand[XSSFWorkbook]
+			with ComposableCommand[SXSSFWorkbook]
 			with GenerateOwnMarksTemplatePermissions
 			with GenerateMarksTemplateCommandState
 			with Unaudited with ReadOnly
@@ -23,7 +23,7 @@ object GenerateMarksTemplateCommand {
 	def apply(module: Module, assignment: Assignment, members: Seq[String]) =
 		new GenerateMarksTemplateCommandInternal(module, assignment, members)
 			with AutowiringFeedbackServiceComponent
-			with ComposableCommand[XSSFWorkbook]
+			with ComposableCommand[SXSSFWorkbook]
 			with GenerateAllMarksTemplatePermissions
 			with GenerateMarksTemplateCommandState
 			with Unaudited with ReadOnly
@@ -48,13 +48,13 @@ object MarksTemplateCommand {
 
 }
 
-class GenerateMarksTemplateCommandInternal(val module: Module, val assignment: Assignment, val members: Seq[String]) extends CommandInternal[XSSFWorkbook] {
+class GenerateMarksTemplateCommandInternal(val module: Module, val assignment: Assignment, val members: Seq[String]) extends CommandInternal[SXSSFWorkbook] {
 
 	self: FeedbackServiceComponent =>
 
-	override def applyInternal(): XSSFWorkbook = {
+	override def applyInternal(): SXSSFWorkbook = {
 
-		val workbook = new XSSFWorkbook()
+		val workbook = new SXSSFWorkbook
 		val sheet = generateNewMarkSheet(assignment, workbook)
 
 		// populate the mark sheet with ids
@@ -69,7 +69,7 @@ class GenerateMarksTemplateCommandInternal(val module: Module, val assignment: A
 		workbook
 	}
 
-	private def generateNewMarkSheet(assignment: Assignment, workbook: XSSFWorkbook) = {
+	private def generateNewMarkSheet(assignment: Assignment, workbook: SXSSFWorkbook) = {
 		val sheet = workbook.createSheet("Marks for " + MarksTemplateCommand.safeAssessmentName(assignment))
 
 		// add header row
@@ -82,7 +82,7 @@ class GenerateMarksTemplateCommandInternal(val module: Module, val assignment: A
 		sheet
 	}
 
-	private def addConditionalFormatting(sheet: XSSFSheet) = {
+	private def addConditionalFormatting(sheet: Sheet) = {
 		val sheetCF = sheet.getSheetConditionalFormatting
 
 		val invalidMarkRule = sheetCF.createConditionalFormattingRule(ComparisonOperator.NOT_BETWEEN, "0", "100")

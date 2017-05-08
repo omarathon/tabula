@@ -1,7 +1,9 @@
 package uk.ac.warwick.tabula.commands.profiles.relationships
 
+import org.apache.poi.ss.usermodel.{Row, Sheet}
 import org.apache.poi.ss.util.{CellRangeAddressList, WorkbookUtil}
-import org.apache.poi.xssf.usermodel._
+import org.apache.poi.xssf.streaming.SXSSFWorkbook
+import org.apache.poi.xssf.usermodel.XSSFDataValidationHelper
 import uk.ac.warwick.tabula.JavaImports._
 import uk.ac.warwick.tabula.commands._
 import uk.ac.warwick.tabula.data.model.{Department, StudentRelationshipType}
@@ -72,8 +74,8 @@ class StudentRelationshipTemplateCommandInternal(val department: Department, val
 	}
 
 	private def generateWorkbook(unallocated: Seq[StudentAssociationData], allocations: Seq[StudentAssociationEntityData]) = {
-		val workbook = new XSSFWorkbook()
-		val sheet: XSSFSheet = generateAllocationSheet(workbook)
+		val workbook = new SXSSFWorkbook
+		val sheet = generateAllocationSheet(workbook)
 		generateAgentLookupSheet(workbook, allocations)
 		generateAgentDropdowns(sheet, allocations)
 
@@ -112,8 +114,8 @@ class StudentRelationshipTemplateCommandInternal(val department: Department, val
 		workbook
 	}
 
-	private def generateAgentLookupSheet(workbook: XSSFWorkbook, allocations: Seq[StudentAssociationEntityData]) = {
-		val agentSheet: XSSFSheet = workbook.createSheet(StudentRelationshipTemplateCommand.agentLookupSheetName)
+	private def generateAgentLookupSheet(workbook: SXSSFWorkbook, allocations: Seq[StudentAssociationEntityData]) = {
+		val agentSheet = workbook.createSheet(StudentRelationshipTemplateCommand.agentLookupSheetName)
 
 		for (agent <- allocations) {
 			val row = agentSheet.createRow(agentSheet.getLastRowNum + 1)
@@ -126,7 +128,7 @@ class StudentRelationshipTemplateCommandInternal(val department: Department, val
 	}
 
 	// attaches the data validation to the sheet
-	private def generateAgentDropdowns(sheet: XSSFSheet, allocations: Seq[StudentAssociationEntityData]) {
+	private def generateAgentDropdowns(sheet: Sheet, allocations: Seq[StudentAssociationEntityData]) {
 		if (allocations.nonEmpty) {
 			val dropdownRange = new CellRangeAddressList(1, allocations.flatMap(_.students).length, 2, 2)
 			val validation = getDataValidation(allocations, sheet, dropdownRange)
@@ -136,18 +138,16 @@ class StudentRelationshipTemplateCommandInternal(val department: Department, val
 	}
 
 	// Excel data validation - will only accept the values fed to this method, also puts a dropdown on each cell
-	private def getDataValidation(allocations: Seq[StudentAssociationEntityData], sheet: XSSFSheet, addressList: CellRangeAddressList) = {
-		val dvHelper = new XSSFDataValidationHelper(sheet)
-		val dvConstraint = dvHelper.createFormulaListConstraint(
-			StudentRelationshipTemplateCommand.agentLookupSheetName + "!$A$2:$A$" + (allocations.length + 1)
-		).asInstanceOf[XSSFDataValidationConstraint]
-		val validation = dvHelper.createValidation(dvConstraint, addressList).asInstanceOf[XSSFDataValidation]
+	private def getDataValidation(allocations: Seq[StudentAssociationEntityData], sheet: Sheet, addressList: CellRangeAddressList) = {
+		val dvHelper = new XSSFDataValidationHelper(null)
+		val dvConstraint = dvHelper.createFormulaListConstraint(StudentRelationshipTemplateCommand.agentLookupSheetName + "!$A$2:$A$" + (allocations.length + 1))
+		val validation = dvHelper.createValidation(dvConstraint, addressList)
 
 		validation.setShowErrorBox(true)
 		validation
 	}
 
-	private def createUnprotectedCell(workbook: XSSFWorkbook, row: XSSFRow, col: Int, value: String = "") = {
+	private def createUnprotectedCell(workbook: SXSSFWorkbook, row: Row, col: Int, value: String = "") = {
 		val lockedCellStyle = workbook.createCellStyle()
 		lockedCellStyle.setLocked(false)
 		val cell = row.createCell(col)
@@ -156,7 +156,7 @@ class StudentRelationshipTemplateCommandInternal(val department: Department, val
 		cell
 	}
 
-	private def formatWorkbook(workbook: XSSFWorkbook) = {
+	private def formatWorkbook(workbook: SXSSFWorkbook) = {
 		val style = workbook.createCellStyle
 		val format = workbook.createDataFormat
 
@@ -176,8 +176,9 @@ class StudentRelationshipTemplateCommandInternal(val department: Department, val
 
 	}
 
-	private def generateAllocationSheet(workbook: XSSFWorkbook): XSSFSheet =  {
+	private def generateAllocationSheet(workbook: SXSSFWorkbook): Sheet =  {
 		val sheet = workbook.createSheet(allocateSheetName)
+		sheet.trackAllColumnsForAutoSizing()
 
 		// add header row
 		val header = sheet.createRow(0)

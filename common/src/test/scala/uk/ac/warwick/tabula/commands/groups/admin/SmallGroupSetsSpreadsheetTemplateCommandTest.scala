@@ -1,6 +1,7 @@
 package uk.ac.warwick.tabula.commands.groups.admin
 
-import org.apache.poi.xssf.usermodel.{XSSFSheet, XSSFWorkbook}
+import org.apache.poi.ss.usermodel.Sheet
+import org.apache.poi.xssf.streaming.SXSSFWorkbook
 import org.joda.time.{DateTime, LocalTime}
 import uk.ac.warwick.tabula.data.model.{Department, MapLocation, Module, NamedLocation}
 import uk.ac.warwick.tabula.data.model.groups._
@@ -25,12 +26,12 @@ class SmallGroupSetsSpreadsheetTemplateCommandTest extends TestBase with Mockito
 	@Test def emptySpreadsheet(): Unit = new CommandFixture {
 		command.smallGroupService.getSmallGroupSets(department, academicYear) returns Nil
 
-		val workbook: XSSFWorkbook = command.generateWorkbook()
+		val workbook: SXSSFWorkbook = command.generateWorkbook()
 		workbook.getSheet("Sets").getLastRowNum should be (0)
 		workbook.getSheet("Groups").getLastRowNum should be (0)
 		workbook.getSheet("Events").getLastRowNum should be (0)
 
-		val lookups: XSSFSheet = workbook.getSheet("Lookups")
+		val lookups: Sheet = workbook.getSheet("Lookups")
 
 		val formats: IndexedSeq[String] = (1 to 9).map { i => lookups.getRow(i).getCell(0).toString }
 		val allocationMethods: IndexedSeq[String] = (1 to 4).map { i => lookups.getRow(i).getCell(1).toString }
@@ -85,15 +86,15 @@ class SmallGroupSetsSpreadsheetTemplateCommandTest extends TestBase with Mockito
 
 		command.smallGroupService.getSmallGroupSets(department, academicYear) returns Seq(set)
 
-		val workbook: XSSFWorkbook = command.generateWorkbook()
+		val workbook: SXSSFWorkbook = command.generateWorkbook()
 
-		val setsSheet: XSSFSheet = workbook.getSheet("Sets")
+		val setsSheet: Sheet = workbook.getSheet("Sets")
 		setsSheet.getLastRowNum should be (1)
 
 		val setRow: IndexedSeq[String] = (0 to 8).map { col => setsSheet.getRow(1).getCell(col).toString }
 		setRow should be (Seq("IN101", "Lab", "IN101 Labs", "Self sign-up", "TRUE", "FALSE", "TRUE", "", "TRUE"))
 
-		val groupsSheet: XSSFSheet = workbook.getSheet("Groups")
+		val groupsSheet: Sheet = workbook.getSheet("Groups")
 		groupsSheet.getLastRowNum should be (2)
 
 		val groupRow1: IndexedSeq[String] = (0 to 3).map { col => groupsSheet.getRow(1).getCell(col).toString }
@@ -102,7 +103,7 @@ class SmallGroupSetsSpreadsheetTemplateCommandTest extends TestBase with Mockito
 		groupRow1 should be (Seq("IN101", "IN101 Labs", "Alpha", ""))
 		groupRow2 should be (Seq("IN101", "IN101 Labs", "Beta", "10.0"))
 
-		val eventsSheet: XSSFSheet = workbook.getSheet("Events")
+		val eventsSheet: Sheet = workbook.getSheet("Events")
 		eventsSheet.getLastRowNum should be (2)
 
 		val eventRow1: IndexedSeq[String] = (0 to 9).map { col =>

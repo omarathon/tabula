@@ -2,8 +2,9 @@ package uk.ac.warwick.tabula.web.controllers.cm2.admin
 
 import org.apache.commons.lang3.text.WordUtils
 import org.apache.poi.hssf.usermodel.HSSFDataFormat
+import org.apache.poi.ss.usermodel.Sheet
 import org.apache.poi.ss.util.WorkbookUtil
-import org.apache.poi.xssf.usermodel.{XSSFSheet, XSSFWorkbook}
+import org.apache.poi.xssf.streaming.SXSSFWorkbook
 import org.joda.time.ReadableInstant
 import uk.ac.warwick.spring.Wire
 import uk.ac.warwick.tabula.cm2.web.Routes
@@ -106,8 +107,8 @@ class ExcelBuilder(val items: Seq[WorkflowItems], val assignment: Assignment, ov
 
 	var topLevelUrl: String = Wire.property("${toplevel.url}")
 
-	def toXLSX: XSSFWorkbook = {
-		val workbook = new XSSFWorkbook()
+	def toXLSX: SXSSFWorkbook = {
+		val workbook = new SXSSFWorkbook
 		val sheet = generateNewSheet(workbook)
 
 		items foreach { addRow(sheet)(_) }
@@ -116,8 +117,9 @@ class ExcelBuilder(val items: Seq[WorkflowItems], val assignment: Assignment, ov
 		workbook
 	}
 
-	def generateNewSheet(workbook: XSSFWorkbook): XSSFSheet = {
+	def generateNewSheet(workbook: SXSSFWorkbook): Sheet = {
 		val sheet = workbook.createSheet(module.code.toUpperCase + " - " + safeAssignmentName)
+		sheet.trackAllColumnsForAutoSizing()
 
 		def formatHeader(header: String) =
 			WordUtils.capitalizeFully(header.replace('-', ' '))
@@ -130,7 +132,7 @@ class ExcelBuilder(val items: Seq[WorkflowItems], val assignment: Assignment, ov
 		sheet
 	}
 
-	def addRow(sheet: XSSFSheet)(item: WorkflowItems) {
+	def addRow(sheet: Sheet)(item: WorkflowItems) {
 		val plainCellStyle = {
 			val cs = sheet.getWorkbook.createCellStyle()
 			cs.setDataFormat(HSSFDataFormat.getBuiltinFormat("@"))
@@ -167,7 +169,7 @@ class ExcelBuilder(val items: Seq[WorkflowItems], val assignment: Assignment, ov
 		}
 	}
 
-	def formatWorksheet(sheet: XSSFSheet): Unit = {
+	def formatWorksheet(sheet: Sheet): Unit = {
 	    (0 to headers.size) foreach sheet.autoSizeColumn
 	}
 

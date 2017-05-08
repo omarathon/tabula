@@ -1,26 +1,24 @@
 package uk.ac.warwick.tabula.web.controllers.coursework.admin
 
-import uk.ac.warwick.tabula.commands.coursework.assignments.SubmissionAndFeedbackCommand._
+import org.apache.commons.lang3.text.WordUtils
+import org.apache.poi.hssf.usermodel.HSSFDataFormat
+import org.apache.poi.ss.usermodel.Sheet
+import org.apache.poi.ss.util.WorkbookUtil
+import org.apache.poi.xssf.streaming.SXSSFWorkbook
+import org.joda.time.ReadableInstant
+import uk.ac.warwick.spring.Wire
 import uk.ac.warwick.tabula.commands.coursework.assignments.ListSubmissionsCommand._
+import uk.ac.warwick.tabula.commands.coursework.assignments.SubmissionAndFeedbackCommand._
+import uk.ac.warwick.tabula.coursework.web.Routes
 import uk.ac.warwick.tabula.data.model._
+import uk.ac.warwick.tabula.data.model.forms.SavedFormValue
+import uk.ac.warwick.tabula.helpers.StringUtils._
+import uk.ac.warwick.tabula.{CurrentUser, DateFormats}
 import uk.ac.warwick.util.csv.CSVLineWriter
 
 import scala.collection.JavaConverters._
-import uk.ac.warwick.tabula.{CurrentUser, DateFormats}
-import org.joda.time.ReadableInstant
-import uk.ac.warwick.tabula.helpers.StringUtils._
-
-import scala.xml._
-import org.apache.poi.xssf.usermodel.XSSFWorkbook
-import org.apache.poi.xssf.usermodel.XSSFSheet
-import org.apache.poi.ss.util.WorkbookUtil
-import org.apache.commons.lang3.text.WordUtils
-import org.apache.poi.hssf.usermodel.HSSFDataFormat
-import uk.ac.warwick.tabula.coursework.web.Routes
-import uk.ac.warwick.spring.Wire
-import uk.ac.warwick.tabula.data.model.forms.SavedFormValue
-
 import scala.collection.mutable
+import scala.xml._
 
 class XMLBuilder(val items: Seq[Student], val assignment: Assignment, val module: Module) extends SubmissionAndFeedbackExport {
 
@@ -110,8 +108,8 @@ class ExcelBuilder(val items: Seq[Student], val assignment: Assignment, val modu
 
 	var topLevelUrl: String = Wire.property("${toplevel.url}")
 
-	def toXLSX: XSSFWorkbook = {
-		val workbook = new XSSFWorkbook()
+	def toXLSX: SXSSFWorkbook = {
+		val workbook = new SXSSFWorkbook
 		val sheet = generateNewSheet(workbook)
 
 		items foreach { addRow(sheet)(_) }
@@ -120,8 +118,9 @@ class ExcelBuilder(val items: Seq[Student], val assignment: Assignment, val modu
 		workbook
 	}
 
-	def generateNewSheet(workbook: XSSFWorkbook): XSSFSheet = {
+	def generateNewSheet(workbook: SXSSFWorkbook): Sheet = {
 		val sheet = workbook.createSheet(module.code.toUpperCase + " - " + safeAssignmentName)
+		sheet.trackAllColumnsForAutoSizing()
 
 		def formatHeader(header: String) =
 			WordUtils.capitalizeFully(header.replace('-', ' '))
@@ -134,7 +133,7 @@ class ExcelBuilder(val items: Seq[Student], val assignment: Assignment, val modu
 		sheet
 	}
 
-	def addRow(sheet: XSSFSheet)(item: Student) {
+	def addRow(sheet: Sheet)(item: Student) {
 		val plainCellStyle = {
 			val cs = sheet.getWorkbook.createCellStyle()
 			cs.setDataFormat(HSSFDataFormat.getBuiltinFormat("@"))
@@ -171,7 +170,7 @@ class ExcelBuilder(val items: Seq[Student], val assignment: Assignment, val modu
 		}
 	}
 
-	def formatWorksheet(sheet: XSSFSheet): Unit = {
+	def formatWorksheet(sheet: Sheet): Unit = {
 	    (0 to headers.size) foreach sheet.autoSizeColumn
 	}
 

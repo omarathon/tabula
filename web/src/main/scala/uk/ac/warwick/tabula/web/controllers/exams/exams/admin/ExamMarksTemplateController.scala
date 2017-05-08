@@ -1,6 +1,6 @@
 package uk.ac.warwick.tabula.web.controllers.exams.exams.admin
 
-import org.apache.poi.xssf.usermodel.XSSFWorkbook
+import org.apache.poi.xssf.streaming.SXSSFWorkbook
 import org.springframework.stereotype.Controller
 import org.springframework.web.bind.annotation.{ModelAttribute, PathVariable, RequestMapping}
 import uk.ac.warwick.spring.Wire
@@ -28,7 +28,7 @@ class ExamMarksTemplateController extends ExamsController {
 		)
 
 	@RequestMapping(method = Array(HEAD, GET))
-	def generateMarksTemplate(@ModelAttribute("command") cmd: Appliable[XSSFWorkbook], @PathVariable exam: Exam): ExcelView = {
+	def generateMarksTemplate(@ModelAttribute("command") cmd: Appliable[SXSSFWorkbook], @PathVariable exam: Exam): ExcelView = {
 		new ExcelView(safeAssessmentName(exam) + " marks.xlsx", cmd.apply())
 	}
 }
@@ -48,7 +48,7 @@ class ExamMarkerMarksTemplateController extends ExamsController {
 		)
 
 	@RequestMapping(method = Array(HEAD, GET))
-	def generateMarksTemplate(@ModelAttribute("command") cmd: Appliable[XSSFWorkbook], @PathVariable exam: Exam): ExcelView = {
+	def generateMarksTemplate(@ModelAttribute("command") cmd: Appliable[SXSSFWorkbook], @PathVariable exam: Exam): ExcelView = {
 		new ExcelView(safeAssessmentName(exam) + " marks.xlsx", cmd.apply())
 	}
 }
