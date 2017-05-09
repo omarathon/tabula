@@ -252,7 +252,7 @@
 					</#if>
 					<#if assignment.collectMarks>
 						<li class="must-have-selected">
-							<#assign onlinefeedback_url><@routes.coursework.feedbackAdjustment assignment /></#assign>
+							<#assign onlinefeedback_url><@routes.cm2.feedbackAdjustment assignment /></#assign>
 							<@fmt.permission_button
 								permission='AssignmentFeedback.Manage'
 								scope=assignment

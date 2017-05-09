@@ -16,7 +16,7 @@ import uk.ac.warwick.tabula.web.controllers.cm2.{CourseworkBreadcrumbs, Coursewo
 import uk.ac.warwick.userlookup.User
 
 @Profile(Array("cm2Enabled")) @Controller
-@RequestMapping(Array("/${cm2.prefix}/admin/module/{module}/assignments/{assignment}/feedback/adjustments"))
+@RequestMapping(Array("/${cm2.prefix}/admin/assignments/{assignment}/feedback/adjustments"))
 class FeedbackAdjustmentsListController extends CourseworkController {
 
 	type FeedbackAdjustmentListCommand = Appliable[Seq[StudentInfo]]
@@ -51,14 +51,14 @@ object FeedbackAdjustmentsController {
 }
 
 @Profile(Array("cm2Enabled")) @Controller
-@RequestMapping(Array("/${cm2.prefix}/admin/module/{module}/assignments/{assignment}/feedback/adjustments/{student}"))
+@RequestMapping(Array("/${cm2.prefix}/admin/assignments/{assignment}/feedback/adjustments/{student}"))
 class FeedbackAdjustmentsController extends CourseworkController with AutowiringProfileServiceComponent {
 
 	validatesSelf[SelfValidating]
 
 	@ModelAttribute("command")
-	def formCommand(@PathVariable module: Module, @PathVariable assignment: Assignment, @PathVariable student: User, submitter: CurrentUser) =
-		Cm2AssignmentFeedbackAdjustmentCommand(mandatory(assignment), student, submitter, GenerateGradesFromMarkCommand(mandatory(module), mandatory(assignment)))
+	def formCommand(@PathVariable assignment: Assignment, @PathVariable student: User, submitter: CurrentUser) =
+		Cm2AssignmentFeedbackAdjustmentCommand(mandatory(assignment), student, submitter, GenerateGradesFromMarkCommand(mandatory(assignment).module, mandatory(assignment)))
 
 	@RequestMapping(method=Array(GET))
 	def showForm(

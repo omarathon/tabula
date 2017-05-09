@@ -12,7 +12,7 @@
 
 <#macro row info>
 	<#assign u = info.student />
-	<tr class="item-container" data-contentid="${markingId(u)}" data-markingurl="<@routes.coursework.feedbackAdjustment assignment />">
+	<tr class="item-container" data-contentid="${markingId(u)}" data-markingurl="<@routes.cm2.feedbackAdjustment assignment />">
 		<td class="student-col toggle-cell"><h6 class="toggle-icon">${u.firstName}</h6></td>
 		<td class="student-col toggle-cell">
 			<h6>${u.lastName}&nbsp;<#if u.warwickId??><@pl.profile_link u.warwickId /><#else><@pl.profile_link u.userId /></#if></h6>
@@ -35,7 +35,7 @@
 <#escape x as x?html>
 	<#if studentInfo?size gt 0>
 		<div class="pull-right">
-			<a href="<@routes.coursework.feedbackBulkAdjustment assignment />" class="btn"><i class="icon-sort"></i> Adjust in bulk</a>
+			<a href="<@routes.cm2.feedbackBulkAdjustment assignment />" class="btn"><i class="icon-sort"></i> Adjust in bulk</a>
 		</div>
 	</#if>
 	<h1>Feedback adjustment</h1>
@@ -176,5 +176,5 @@
 		</table>
 	</#if>
 
-	<p><a class="btn" href="<@routes.coursework.assignmentsubmissionsandfeedback assignment />"><i class="icon-reply"></i> Return to previous page</a></p>
+	<p><a class="btn" href="<@routes.cm2.assignmentsubmissionsandfeedback assignment />"><i class="icon-reply"></i> Return to previous page</a></p>
 </#escape>

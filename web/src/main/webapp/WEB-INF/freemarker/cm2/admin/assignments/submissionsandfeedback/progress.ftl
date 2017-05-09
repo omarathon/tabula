@@ -1,7 +1,7 @@
 <#-- FIXME: implemented as part of CM2 migration but will require further reworking due to CM2 workflow changes -->
 <#import "_submission_details.ftl" as sd />
 <#import "/WEB-INF/freemarker/_profile_link.ftl" as pl />
-<#import "*/../../../../../../../../../../modules/web/src/main/webapp/WEB-INF/freemarker/cm2/admin/assignments/submission_components.ftl" as components />
+<#import "/WEB-INF/freemarker/cm2/admin/assignments/submission_components.ftl" as components />
 <#escape x as x?html>
 
 <#macro studentIdentifier user><#compress>
@@ -110,16 +110,16 @@
 				</#macro>
 
 				<#macro workflow student>
-					<#if student.cm2.enhancedSubmission??>
-						<#local enhancedSubmission=student.cm2.enhancedSubmission>
+					<#if student.enhancedSubmission??>
+						<#local enhancedSubmission=student.enhancedSubmission>
 						<#local submission=enhancedSubmission.submission>
 					</#if>
-					<#if student.cm2.enhancedFeedback??>
-						<#local enhancedFeedback=student.cm2.enhancedFeedback>
+					<#if student.enhancedFeedback??>
+						<#local enhancedFeedback=student.enhancedFeedback>
 						<#local feedback=enhancedFeedback.feedback>
 					</#if>
-					<#if student.cm2.enhancedExtension??>
-						<#local enhancedExtension=student.cm2.enhancedExtension>
+					<#if student.enhancedExtension??>
+						<#local enhancedExtension=student.enhancedExtension>
 						<#local extension=enhancedExtension.extension>
 					</#if>
 
@@ -368,11 +368,11 @@
 										<#local attachments=feedback.attachments />
 										<#if attachments?size gt 0>
 											<#if attachments?size == 1>
-												<#local attachmentExtension = student.cm2.enhancedFeedback.feedback.attachments[0].fileExt>
+												<#local attachmentExtension = student.enhancedFeedback.feedback.attachments[0].fileExt>
 											<#else>
 												<#local attachmentExtension = "zip">
 											</#if>
-											<a class="long-running" href="<@url page='/cm2/admin/assignments/${assignment.id}/feedback/download/${student.cm2.enhancedFeedback.feedback.id}/feedback-${student.cm2.enhancedFeedback.feedback.studentIdentifier}.${attachmentExtension}'/>"><#compress>
+											<a class="long-running" href="<@url page='/cm2/admin/assignments/${assignment.id}/feedback/download/${student.enhancedFeedback.feedback.id}/feedback-${student.enhancedFeedback.feedback.studentIdentifier}.${attachmentExtension}'/>"><#compress>
 												${attachments?size}
 												<#if attachments?size == 1> file
 												<#else> files
@@ -407,7 +407,7 @@
 				</#macro>
 
 				<#macro row student>
-					<tr data-contentid="<@studentIdentifier student.user />" class="itemContainer<#if !student.cm2.enhancedSubmission??> awaiting-submission</#if>"<#if student.cm2.enhancedSubmission?? && student.cm2.enhancedSubmission.submission.suspectPlagiarised> data-plagiarised="true"</#if>>
+					<tr data-contentid="<@studentIdentifier student.user />" class="itemContainer<#if !student.enhancedSubmission??> awaiting-submission</#if>"<#if student.enhancedSubmission?? && student.enhancedSubmission.submission.suspectPlagiarised> data-plagiarised="true"</#if>>
 						<td class="check-col"><input type="checkbox" class="collection-checkbox" name="results.students" value="${student.user.userId!}"></td>
 						<#if department.showStudentName>
 							<td class="student-col toggle-cell">
