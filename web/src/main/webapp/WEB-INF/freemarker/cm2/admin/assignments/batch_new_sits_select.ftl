@@ -1,14 +1,17 @@
 <#import "*/modal_macros.ftl" as modal />
+<#import "*/cm2_macros.ftl" as cm2 />
 <#--
 first page of the form to setup a bunch of assignments from SITS.
 -->
 <#escape x as x?html>
 	<#assign commandName="command"/>
+
+	<@cm2.headerMenu department />
+
 	<#function route_function dept>
 		<#local result><@routes.cm2.create_sitsassignments dept /></#local>
 		<#return result />
 	</#function>
-
 	<@fmt.id7_deptheader "Setup assignments" route_function "for" />
 
 	<#assign step=action!'select'/>

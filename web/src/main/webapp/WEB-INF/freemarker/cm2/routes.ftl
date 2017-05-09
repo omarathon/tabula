@@ -47,7 +47,13 @@ TODO grab values from the Routes object in code, as that's pretty equivalent and
 <#macro extensionAttachment extension filename><@_u page="/admin/extensions/${extension.id}/supporting-file/${filename?url}" /></#macro>
 <#macro extensionSettings department><@_u page="/admin/department/${department.code}/settings/extensions" /></#macro>
 
-<#macro reusableWorkflowsHome department academicYear><@_u page="/admin/department/${department.code}/${academicYear.startYear?c}/markingworkflows" /></#macro>
+<#macro reusableWorkflowsHome department academicYear="">
+	<#if academicYear?has_content>
+		<@_u page="/admin/department/${department.code}/${academicYear.startYear?c}/markingworkflows" />
+	<#else>
+		<@_u page="/admin/department/${department.code}/markingworkflows" />
+	</#if>
+</#macro>
 <#macro reusableWorkflowAdd department academicYear><@_u page="/admin/department/${department.code}/${academicYear.startYear?c}/markingworkflows/add" /></#macro>
 <#macro reusableWorkflowAddToCurrentYear department academicYear workflow><@_u page="/admin/department/${department.code}/${academicYear.startYear?c}/markingworkflows/${workflow.id}/copy" /></#macro>
 <#macro reusableWorkflowEdit department academicYear workflow><@_u page="/admin/department/${department.code}/${academicYear.startYear?c}/markingworkflows/${workflow.id}/edit" /></#macro>

@@ -1,6 +1,14 @@
+<#import "*/modal_macros.ftl" as modal />
+<#import "*/cm2_macros.ftl" as cm2 />
+
 <#escape x as x?html>
-	<#import "*/modal_macros.ftl" as modal />
-	<h1>Create assignments from previous for ${title}</h1>
+	<@cm2.headerMenu department />
+
+	<#function route_function dept>
+		<#local result><@routes.cm2.copy_assignments_previous dept /></#local>
+		<#return result />
+	</#function>
+	<@fmt.id7_deptheader "Create assignments from previous" route_function "for" />
 
 	<form action="" method="post" class="copy-assignments">
 		<div class="submit-buttons">

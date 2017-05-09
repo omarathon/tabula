@@ -51,6 +51,8 @@ object Routes {
 				admin() + s"/department/${encoded(department.code)}/${encoded(academicYear.startYear.toString)}"
 		}
 		object module {
+			def apply(module: Module): String =
+				admin() + s"/module/${encoded(module.code)}"
 			def apply(module: Module, academicYear: AcademicYear): String =
 				admin() + s"/module/${encoded(module.code)}/${encoded(academicYear.startYear.toString)}"
 		}

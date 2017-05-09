@@ -11,13 +11,23 @@ import uk.ac.warwick.tabula.commands.SelfValidating
 import uk.ac.warwick.tabula.commands.cm2.departments.ExtensionSettingsCommand
 import uk.ac.warwick.tabula.commands.cm2.departments.ExtensionSettingsCommand.Command
 import uk.ac.warwick.tabula.data.model.Department
+import uk.ac.warwick.tabula.permissions.{Permission, Permissions}
+import uk.ac.warwick.tabula.services.{AutowiringMaintenanceModeServiceComponent, AutowiringModuleAndDepartmentServiceComponent, AutowiringUserSettingsServiceComponent}
 import uk.ac.warwick.tabula.web.Mav
+import uk.ac.warwick.tabula.web.controllers.DepartmentScopedController
 import uk.ac.warwick.tabula.web.controllers.cm2.CourseworkController
 
 @Profile(Array("cm2Enabled"))
 @Controller
 @RequestMapping(Array("/${cm2.prefix}/admin/department/{department}/settings/extensions"))
-class ExtensionSettingsController extends CourseworkController {
+class ExtensionSettingsController extends CourseworkController
+	with DepartmentScopedController with AutowiringModuleAndDepartmentServiceComponent with AutowiringUserSettingsServiceComponent
+	with AutowiringMaintenanceModeServiceComponent {
+
+	override val departmentPermission: Permission = Permissions.Department.ManageExtensionSettings
+
+	@ModelAttribute("activeDepartment")
+	override def activeDepartment(@PathVariable department: Department): Option[Department] = retrieveActiveDepartment(Option(department))
 
 	@ModelAttribute("extensionSettingsCommand")
 	def extensionSettingsCommand(@PathVariable department: Department): Command =

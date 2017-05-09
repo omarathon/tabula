@@ -1,5 +1,8 @@
 <#import "*/modal_macros.ftl" as modal />
+<#import "*/cm2_macros.ftl" as cm2 />
 <#escape x as x?html>
+	<@cm2.headerMenu department />
+
 	<#function route_function dept>
 		<#local result><@routes.cm2.feedbacktemplates dept /></#local>
 		<#return result />

@@ -1,11 +1,14 @@
+<#import "*/cm2_macros.ftl" as cm2 />
+
 <#escape x as x?html>
+	<@cm2.headerMenu department />
+
 	<#function route_function department>
 		<#local result><@routes.cm2.extensionSettings department /></#local>
 		<#return result />
 	</#function>
-	<@fmt.id7_deptheader "Extension Settings" route_function "for" />
+	<@fmt.id7_deptheader "Extension settings" route_function "for" />
 
-<div class="fix-area">
 	<#assign actionUrl><@routes.cm2.extensionSettings department /></#assign>
 	<@f.form method="post" class="form-inline" action=actionUrl commandName="extensionSettingsCommand" cssClass="dirty-check">
 		<#if features.extensions>
@@ -50,6 +53,5 @@
 			<#assign cancelDestination><@routes.cm2.departmenthome department /></#assign>
 			<a class="btn btn-default" href="${cancelDestination}">Cancel</a>
 		</div>
-
 	</@f.form>
 </#escape>
