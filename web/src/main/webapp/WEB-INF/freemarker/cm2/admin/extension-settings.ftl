@@ -31,8 +31,8 @@
 				</div>
 				</@bs3form.labelled_form_group>
 
-				<@bs3form.labelled_form_group>
-					<@bs3form.flexipicker name="extensionManagers" placeholder="Extension managers" list=true multiple=true auto_multiple=false />
+				<@bs3form.labelled_form_group path="extensionManagers">
+					<@bs3form.flexipicker path="extensionManagers" placeholder="Extension managers" list=true multiple=true auto_multiple=false />
 					<script>
 						jQuery('#extension-manager-list').on('click', function(e){
 							e.preventDefault();

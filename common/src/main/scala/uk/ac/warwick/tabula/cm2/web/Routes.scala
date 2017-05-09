@@ -44,6 +44,9 @@ object Routes {
 		def feedbackReports (department: Department): String = apply() + "/department/%s/reports/feedback/" format encoded(department.code)
 
 		object department {
+			def apply(department: Department): String =
+				admin() + s"/department/${encoded(department.code)}"
+
 			def apply(department: Department, academicYear: AcademicYear): String =
 				admin() + s"/department/${encoded(department.code)}/${encoded(academicYear.startYear.toString)}"
 		}
