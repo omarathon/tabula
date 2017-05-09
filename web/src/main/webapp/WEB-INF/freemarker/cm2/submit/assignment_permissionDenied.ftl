@@ -13,7 +13,7 @@
 	<p>If a student isn't in the enrolled list for your assignment, then they will receive a message on this page that
 	   they're not enrolled, and they won't be able to submit until they've been added to the list.</p>
 
-	<p><a class="btn" href="<@routes.cm2.depthome assignment.module/>">Module management - ${assignment.module.code}</a></p>
+	<p><a class="btn btn-default" href="<@routes.cm2.depthome assignment.module assignment.academicYear/>">Module management - ${assignment.module.code}</a></p>
 <#else>
 	<#function has_admin module>
 		<#list assignment.module.adminDepartment.owners.users as user>

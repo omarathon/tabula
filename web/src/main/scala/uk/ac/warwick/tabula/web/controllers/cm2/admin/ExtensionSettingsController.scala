@@ -37,7 +37,7 @@ class ExtensionSettingsController extends CourseworkController
 
 	@RequestMapping(method=Array(RequestMethod.POST))
 	def saveSettings(@PathVariable department:Department, @Valid cmd:ExtensionSettingsCommand, errors:Errors): Mav = {
-		if (errors.hasErrors){
+		if (errors.hasErrors) {
 			viewSettings(department, user, cmd, errors)
 		} else {
 			cmd.apply()

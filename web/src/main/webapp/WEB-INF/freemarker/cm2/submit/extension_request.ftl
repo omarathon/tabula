@@ -58,19 +58,18 @@
 			</p>
 		<#else>
 			<p>
-				This assignment closes <@fmt.date date=assignment.closeDate /> (${time_remaining} remaining).
-				To request an extension for this assignment please read the Extension Guidelines below and submit this form.
-				You will receive a notification when your request has been processed.
+				This assignment closes at <@fmt.date date=assignment.closeDate /> (${time_remaining} remaining).
+				${department.extensionGuidelineLink}
+				<#if department.extensionGuidelineLink?has_content>
+					Please read the full <a href="${department.extensionGuidelineLink}" target="_blank">extension guidelines</a> before submitting your request below.
+				<#elseif department.extensionGuidelineSummary??>
+					Please read the extension guidelines before submitting your request below.
+				</#if>
+				You will receive a notification when your request has been reviewed.
 			</p>
 			<div id="extensionGuidelines">
 				<#if department.extensionGuidelineSummary??>
 					<#include "/WEB-INF/freemarker/cm2/submit/formfields/guideline.ftl" >
-				</#if>
-				<#if department.extensionGuidelineLink?has_content>
-					<p>
-						You should read the full <a href="${department.extensionGuidelineLink}">extension guidelines</a>
-						before submitting your application for an extension.
-					</p>
 				</#if>
 			</div>
 		</#if>
@@ -147,7 +146,14 @@
 			</#if>
 
 			<@bs3form.checkbox path="readGuidelines">
-				<@f.checkbox path="readGuidelines"/> I confirm that I have read the <a href="#extensionGuidelines">extension guidelines</a>.
+				<@f.checkbox path="readGuidelines"/> I confirm that I have read the
+				<#if department.extensionGuidelineLink?has_content>
+					<a href="${department.extensionGuidelineLink}" target="_blank">extension guidelines</a>.
+				<#elseif department.extensionGuidelineSummary??>
+					<a href="#extensionGuidelines">extension guidelines</a>.
+				<#else>
+					extension guidelines.
+				</#if>
 			</@bs3form.checkbox>
 
 			<input type="hidden" name="returnTo" value="${returnTo}" />

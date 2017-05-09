@@ -81,7 +81,7 @@
 											<ul>
 												<#list template.assignments as assignment>
 													<li>
-														<a href="<@routes.cm2.depthome module=assignment.module />">
+														<a href="<@routes.cm2.depthome module=assignment.module academicYear=assignment.academicYear />">
 														<#if assignment.name?has_content>
 															${assignment.module.code} - ${assignment.name}
 														<#else>

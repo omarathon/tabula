@@ -16,8 +16,14 @@ TODO grab values from the Routes object in code, as that's pretty equivalent and
 		<@_u page="/" />
 	</#if>
 </#macro>
-<#-- to rename - also filter options will need to be added to jump to correct module -->
-<#macro depthome module><@_u page="/admin/department/${module.adminDepartment.code}/#module-${module.code}" /></#macro>
+
+<#macro depthome module academicYear="">
+	<#if academicYear?has_content>
+		<@_u page="/admin/department/${module.adminDepartment.code}/${academicYear.startYear}/?moduleFilters=Module(${module.code})#module-${module.code}" />
+	<#else>
+		<@_u page="/admin/department/${module.adminDepartment.code}/?moduleFilters=Module(${module.code})#module-${module.code}" />
+	</#if>
+</#macro>
 <#macro departmenthome department academicYear="">
 	<#if academicYear?has_content>
 		<@_u page="/admin/department/${department.code}/${academicYear.startYear}" />
