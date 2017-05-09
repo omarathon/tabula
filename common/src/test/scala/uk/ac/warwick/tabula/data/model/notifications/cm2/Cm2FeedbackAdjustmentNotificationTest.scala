@@ -8,10 +8,10 @@ import uk.ac.warwick.userlookup.User
 
 import scala.collection.JavaConverters._
 
-class Cm2Cm2FeedbackAdjustmentNotificationTest extends TestBase with Mockito {
+class Cm2FeedbackAdjustmentNotificationTest extends TestBase with Mockito {
 
-	val cm1Prefix = "coursework"
-	Routes.coursework._cm1Prefix = Some(cm1Prefix)
+	val cm2Prefix = "cm2"
+	Routes.cm2._cm2Prefix = Some(cm2Prefix)
 
 	val admin: User = Fixtures.user("1170836", "1170836")
 	val marker: User = Fixtures.user("1234567", "1234567")
@@ -44,7 +44,7 @@ class Cm2Cm2FeedbackAdjustmentNotificationTest extends TestBase with Mockito {
 	@Test
 	def urlIsMarkerPage() {
 		val n = createNotification
-		n.url should be(s"/$cm1Prefix/admin/module/hnz101/assignments/heronzzzz/marker/1234567/list")
+		n.url should be(s"/$cm2Prefix/admin/module/hnz101/assignments/heronzzzz/marker/1234567/list")
 	}
 
 	@Test
