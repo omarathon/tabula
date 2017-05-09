@@ -8,13 +8,13 @@ import uk.ac.warwick.tabula.data.model._
 import uk.ac.warwick.tabula.services.AutowiringUserLookupComponent
 import uk.ac.warwick.userlookup.User
 
-object FeedbackAdjustmentNotification {
+object Cm2FeedbackAdjustmentNotification {
 	val templateLocation = "/WEB-INF/freemarker/emails/feedback_adjustment_notification.ftl"
 }
 
 @Entity
-@DiscriminatorValue("FeedbackAdjustment")
-class FeedbackAdjustmentNotification
+@DiscriminatorValue("Cm2FeedbackAdjustment")
+class Cm2FeedbackAdjustmentNotification
 	extends NotificationWithTarget[AssignmentFeedback, Assignment]
 	with SingleItemNotification[AssignmentFeedback]
 	with AutowiringUserLookupComponent
@@ -39,7 +39,7 @@ class FeedbackAdjustmentNotification
 
 	def title = s"${assignment.module.code.toUpperCase} - for ${assignment.name} : Adjustments have been made to feedback for ${feedback.studentIdentifier}"
 
-	def content = FreemarkerModel(FeedbackAdjustmentNotification.templateLocation,
+	def content = FreemarkerModel(Cm2FeedbackAdjustmentNotification.templateLocation,
 		Map(
 			"assignment" -> assignment,
 			"feedback" -> feedback

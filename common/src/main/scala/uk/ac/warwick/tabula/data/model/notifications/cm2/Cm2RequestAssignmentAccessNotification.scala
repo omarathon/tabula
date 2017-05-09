@@ -9,7 +9,7 @@ import uk.ac.warwick.tabula.helpers.StringUtils._
 import uk.ac.warwick.userlookup.User
 
 @Entity
-@DiscriminatorValue("Cm2RequestAssignmentAccess")
+@DiscriminatorValue("Cm2RequestAssignmentAccessNotification")
 class Cm2RequestAssignmentAccessNotification
 	extends Notification[Assignment, Unit]
 	with SingleItemNotification[Assignment] with AllCompletedActionRequiredNotification {

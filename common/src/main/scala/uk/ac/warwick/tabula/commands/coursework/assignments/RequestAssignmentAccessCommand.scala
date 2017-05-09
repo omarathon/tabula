@@ -21,7 +21,7 @@ class RequestAssignmentAccessCommand(module: Module, assignment: Assignment, use
 
 	def admins: Seq[User] = {
 		// lookup the admin users - used to determine the recipients  for notifications
-		module.adminDepartment.owners.users.filter(admin => admin.isFoundUser && admin.getEmail.hasText).toSeq
+		module.adminDepartment.owners.users.filter(admin => admin.isFoundUser && admin.getEmail.hasText)
 	}
 
 	// Returns the Seq of admin users

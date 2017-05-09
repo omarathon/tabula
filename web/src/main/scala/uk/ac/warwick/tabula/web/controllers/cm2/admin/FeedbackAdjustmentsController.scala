@@ -7,7 +7,7 @@ import org.springframework.stereotype.Controller
 import org.springframework.validation.Errors
 import org.springframework.web.bind.annotation.{ModelAttribute, PathVariable, RequestMapping}
 import uk.ac.warwick.tabula.CurrentUser
-import uk.ac.warwick.tabula.commands.cm2.feedback.{AssignmentFeedbackAdjustmentCommand, FeedbackAdjustmentCommandState, FeedbackAdjustmentListCommand, GenerateGradesFromMarkCommand, StudentInfo}
+import uk.ac.warwick.tabula.commands.cm2.feedback.{Cm2AssignmentFeedbackAdjustmentCommand, FeedbackAdjustmentCommandState, FeedbackAdjustmentListCommand, GenerateGradesFromMarkCommand, StudentInfo}
 import uk.ac.warwick.tabula.commands.{Appliable, SelfValidating}
 import uk.ac.warwick.tabula.data.model._
 import uk.ac.warwick.tabula.services.AutowiringProfileServiceComponent
@@ -58,7 +58,7 @@ class FeedbackAdjustmentsController extends CourseworkController with Autowiring
 
 	@ModelAttribute("command")
 	def formCommand(@PathVariable module: Module, @PathVariable assignment: Assignment, @PathVariable student: User, submitter: CurrentUser) =
-		AssignmentFeedbackAdjustmentCommand(mandatory(assignment), student, submitter, GenerateGradesFromMarkCommand(mandatory(module), mandatory(assignment)))
+		Cm2AssignmentFeedbackAdjustmentCommand(mandatory(assignment), student, submitter, GenerateGradesFromMarkCommand(mandatory(module), mandatory(assignment)))
 
 	@RequestMapping(method=Array(GET))
 	def showForm(
