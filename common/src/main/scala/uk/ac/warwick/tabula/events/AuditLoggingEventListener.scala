@@ -17,7 +17,7 @@ class AuditLoggingEventListener extends EventListener {
 	override def onException(event: Event, exception: Throwable): Unit = {}
 
 	// Currently we only want afters
-	override def afterCommand(event: Event, returnValue: Any): Unit = {
+	override def afterCommand(event: Event, returnValue: Any, beforeEvent: Event): Unit = {
 		var info = RequestInformation.forEventType(event.name)
 		if (event.realUserId != null) {
 			info = info.withUsername(event.realUserId)
@@ -43,7 +43,7 @@ class AuditLoggingEventListener extends EventListener {
 			case notNull => notNull
 		}
 
-		val data = event.extra.map { case (k, v) => new Field(k) -> handle(v) }
+		val data = (beforeEvent.extra ++ event.extra).map { case (k, v) => new Field(k) -> handle(v) }
 
 		logger.log(info, data.asJava)
 	}
