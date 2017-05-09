@@ -28,13 +28,13 @@
 								<tbody>
 									<#list previousExtensions as e>
 									<tr>
-										<td>${e.assignment.module.code}</td>
+										<td><@fmt.module_name e.assignment.module false /></td>
 										<td>${e.assignment.name}</td>
 										<td>${e.state.description}</td>
 										<td>
 											<#if e.requestedOn?has_content>
-													<@fmt.date date=e.requestedOn />
-												<#else>
+												<@fmt.date date=e.requestedOn />
+											<#else>
 												<@fmt.date date=e.reviewedOn />
 											</#if>
 										</td>
@@ -73,12 +73,12 @@
 								<tbody>
 								<#list previousSubmissions as submission>
 								<tr>
-									<td>${submission.assignment.module.code}</td>
+									<td><@fmt.module_name submission.assignment.module false /></td>
 									<td>${submission.assignment.name}</td>
 									<td>
-									<#if submission.isAuthorisedLate()>
+									<#if submission.authorisedLate>
 										Within extension
-									<#elseif submission.isLate()>
+									<#elseif submission.late>
 										Late
 									<#else>
 										On time

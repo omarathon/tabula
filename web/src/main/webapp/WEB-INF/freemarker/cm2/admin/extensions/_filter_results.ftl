@@ -1,7 +1,7 @@
 <#import "/WEB-INF/freemarker/_profile_link.ftl" as pl />
 <div id="profile-modal" class="modal fade profile-subset"></div>
 
-<p>Found ${results.total} extensions.</p>
+<p>Found <@fmt.p results.total "extension" />.</p>
 <table class="table table-striped">
 	<thead>
 		<tr>
@@ -19,7 +19,7 @@
 			<tr data-toggle="collapse" data-target="#extension${graph.extension.id}" class="clickable collapsed expandable-row">
 				<td><h6 class="toggle-icon-large">&nbsp;${graph.user.firstName}</h6></td>
 				<td><h6>${graph.user.lastName}&nbsp;<#if graph.user.warwickId??><@pl.profile_link graph.user.warwickId /><#else><@pl.profile_link graph.user.userId /></#if></h6></td>
-				<td>${graph.extension.assignment.module.code}</td>
+				<td><@fmt.module_name graph.extension.assignment.module false /></td>
 				<td>${graph.extension.assignment.name}</td>
 				<td>${graph.extension.state.description}</td>
 				<td>
