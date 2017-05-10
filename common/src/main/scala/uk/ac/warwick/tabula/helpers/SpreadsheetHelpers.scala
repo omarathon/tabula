@@ -1,25 +1,21 @@
 package uk.ac.warwick.tabula.helpers
 
-import org.apache.poi.xssf.usermodel._
-import org.apache.poi.ss.usermodel.{Cell, Font}
-import uk.ac.warwick.tabula.DateFormats
-import org.apache.poi.ss.util.WorkbookUtil
-import uk.ac.warwick.tabula.data.model.Department
-import org.joda.time.DateTime
-import org.joda.time.LocalDate
 import java.io.InputStream
 
-import org.apache.poi.openxml4j.opc.OPCPackage
-import org.apache.poi.xssf.eventusermodel.XSSFReader
-import org.apache.poi.xssf.eventusermodel.ReadOnlySharedStringsTable
-import org.apache.poi.xssf.eventusermodel.XSSFSheetXMLHandler
-import org.apache.poi.xssf.model.StylesTable
-import org.xml.sax.helpers.XMLReaderFactory
-import org.apache.poi.xssf.eventusermodel.XSSFSheetXMLHandler.SheetContentsHandler
 import org.apache.poi.hssf.util.CellReference
-
-import scala.collection.JavaConverters._
+import org.apache.poi.openxml4j.opc.OPCPackage
+import org.apache.poi.ss.usermodel._
+import org.apache.poi.ss.util.WorkbookUtil
+import org.apache.poi.xssf.eventusermodel.XSSFSheetXMLHandler.SheetContentsHandler
+import org.apache.poi.xssf.eventusermodel.{ReadOnlySharedStringsTable, XSSFReader, XSSFSheetXMLHandler}
+import org.apache.poi.xssf.model.StylesTable
+import org.apache.poi.xssf.streaming.SXSSFWorkbook
+import org.apache.poi.xssf.usermodel.XSSFComment
+import org.joda.time.{DateTime, LocalDate}
+import org.xml.sax.helpers.XMLReaderFactory
 import org.xml.sax.{InputSource, XMLReader}
+import uk.ac.warwick.tabula.DateFormats
+import uk.ac.warwick.tabula.data.model.Department
 
 import scala.collection.mutable
 
@@ -43,77 +39,73 @@ object SpreadsheetHelpers extends SpreadsheetHelpers {
 	def safeDeptName(department: Department): String = WorkbookUtil.createSafeSheetName(trimmedDeptName(department))
 
 
-	def dateCellStyle(workbook: XSSFWorkbook) : XSSFCellStyle = {
+	def dateCellStyle(workbook: SXSSFWorkbook): CellStyle = {
 		val cellStyle = workbook.createCellStyle
 		cellStyle.setDataFormat(workbook.createDataFormat().getFormat(DateFormats.CSVDatePattern))
 		cellStyle
 	}
 
-	def percentageCellStyle(workbook: XSSFWorkbook) : XSSFCellStyle = {
+	def percentageCellStyle(workbook: SXSSFWorkbook) : CellStyle = {
 		val cellStyle = workbook.createCellStyle
 		cellStyle.setDataFormat(workbook.createDataFormat().getFormat("0.00%"))
 		cellStyle
 	}
 
-	def headerStyle(workbook: XSSFWorkbook) : XSSFCellStyle = {
+	def headerStyle(workbook: SXSSFWorkbook) : CellStyle = {
 		val cellStyle = workbook.createCellStyle
 		val font = workbook.createFont()
-		font.setBoldweight(Font.BOLDWEIGHT_BOLD)
+		font.setBold(true)
 		cellStyle.setFont(font)
 		cellStyle
 	}
 
-	def getNextCellNum(row: XSSFRow):Short = if(row.getLastCellNum == -1) 0 else row.getLastCellNum
+	def getNextCellNum(row: Row):Short = if(row.getLastCellNum == -1) 0 else row.getLastCellNum
 
-	def addCell(row: XSSFRow, cellType: Int): XSSFCell = {
-		val cell = row.createCell(getNextCellNum(row))
-		cell.setCellType(cellType)
-		cell
-	}
+	def addCell(row: Row, cellType: CellType): Cell = row.createCell(getNextCellNum(row), cellType)
 
-	def addStringCell(value: String, row: XSSFRow) {
-		val cell = addCell(row, Cell.CELL_TYPE_STRING)
+	def addStringCell(value: String, row: Row) {
+		val cell = addCell(row, CellType.STRING)
 		cell.setCellValue(value)
 	}
 
-	def addStringCell(value: String, row: XSSFRow, style: XSSFCellStyle) {
-		val cell = addCell(row, Cell.CELL_TYPE_STRING)
+	def addStringCell(value: String, row: Row, style: CellStyle) {
+		val cell = addCell(row, CellType.STRING)
 		cell.setCellStyle(style)
 		cell.setCellValue(value)
 	}
 
-	def addNumericCell(value: Double, row: XSSFRow) {
-		val cell = addCell(row, Cell.CELL_TYPE_NUMERIC)
+	def addNumericCell(value: Double, row: Row) {
+		val cell = addCell(row, CellType.NUMERIC)
 		cell.setCellValue(value)
 	}
 
-	def addNumericCell(value: Double, row: XSSFRow, style: XSSFCellStyle) {
-		val cell = addCell(row, Cell.CELL_TYPE_NUMERIC)
+	def addNumericCell(value: Double, row: Row, style: CellStyle) {
+		val cell = addCell(row, CellType.NUMERIC)
 		cell.setCellStyle(style)
 		cell.setCellValue(value)
 	}
 
-	def addDateCell(value: DateTime, row: XSSFRow, style: XSSFCellStyle) {
+	def addDateCell(value: DateTime, row: Row, style: CellStyle) {
 		addDateCell(Option(value).map { _.toLocalDate }.orNull, row, style)
 	}
 
-	def addDateCell(value: LocalDate, row: XSSFRow, style: XSSFCellStyle) {
+	def addDateCell(value: LocalDate, row: Row, style: CellStyle) {
 		if (value != null) {
-			val cell = addCell(row, Cell.CELL_TYPE_NUMERIC)
+			val cell = addCell(row, CellType.NUMERIC)
 			cell.setCellStyle(style)
 			cell.setCellValue(Option(value).map { _.toDate }.orNull)
-		} else addCell(row, Cell.CELL_TYPE_BLANK)
+		} else addCell(row, CellType.BLANK)
 	}
 
-	def addPercentageCell(num:Double, total:Double, row: XSSFRow, workbook: XSSFWorkbook) {
+	def addPercentageCell(num:Double, total:Double, row: Row, workbook: SXSSFWorkbook) {
 		if (total == 0)
 			addStringCell("N/A", row)
 		else
 			addNumericCell(num / total, row, percentageCellStyle(workbook))
 	}
 
-	def formatWorksheet(sheet: XSSFSheet, cols: Int) {
-		(0 to cols).map(sheet.autoSizeColumn)
+	def formatWorksheet(sheet: org.apache.poi.ss.usermodel.Sheet, cols: Int) {
+		(0 to cols).foreach(sheet.autoSizeColumn)
 	}
 
 	/**
@@ -123,23 +115,38 @@ object SpreadsheetHelpers extends SpreadsheetHelpers {
 	 * - trim the header and remove all non-ascii characters
 	 */
 	def parseXSSFExcelFile(file: InputStream, simpleHeaders: Boolean = true): Seq[Map[String, String]] = {
+		val sheets = parseXSSFExcelFileWithSheetMetadata(file, simpleHeaders)
+		sheets.flatMap(_.rows)
+	}
+
+	def parseXSSFExcelFileWithSheetMetadata(file: InputStream, simpleHeaders: Boolean = true): Seq[Sheet] = {
 		val pkg = OPCPackage.open(file)
 		val sst = new ReadOnlySharedStringsTable(pkg)
 		val reader = new XSSFReader(pkg)
 		val styles = reader.getStylesTable
 
-		reader.getSheetsData.asScala.toSeq.flatMap { sheet =>
+		val data = reader.getSheetsData.asInstanceOf[XSSFReader.SheetIterator]
+
+		// can't asScala the SheetIterator as is lubs back to a Seq[InputStream] losing the sheet metadata
+		val sheets: mutable.Buffer[Sheet] = mutable.Buffer()
+		while(data.hasNext){
+			val sheet = data.next
+			val sheetName = data.getSheetName
 			val handler = new XslxParser(styles, sst, simpleHeaders)
 			val parser = handler.fetchSheetParser
-
 			val sheetSource = new InputSource(sheet)
 			parser.parse(sheetSource)
 			sheet.close()
-
-			handler.rows.toSeq
+			sheets.append(Sheet(sheetName, handler.rows))
 		}
+		sheets
 	}
 }
+
+case class Sheet(
+	name: String,
+	rows: Seq[Map[String, String]]
+)
 
 class XslxParser(val styles: StylesTable, val sst: ReadOnlySharedStringsTable, val simpleHeaders: Boolean = true)
 	extends SheetContentsHandler with Logging {

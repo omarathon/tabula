@@ -1,9 +1,9 @@
 package uk.ac.warwick.tabula.exams.grids.columns
 
-import org.apache.poi.xssf.usermodel.{XSSFCell, XSSFCellStyle}
+import org.apache.poi.ss.usermodel.{Cell, CellStyle}
+import uk.ac.warwick.tabula.JavaImports._
 import uk.ac.warwick.tabula.commands.exams.grids.GenerateExamGridExporter
 import uk.ac.warwick.tabula.helpers.StringUtils._
-import uk.ac.warwick.tabula.JavaImports._
 
 sealed abstract class ExamGridColumnValueType(val label: String, val description: String)
 
@@ -29,10 +29,10 @@ object ExamGridColumnValueType {
 
 sealed trait ExamGridColumnValue {
 	protected def getValueStringForRender: String
-	protected def applyCellStyle(cell: XSSFCell, cellStyleMap: Map[GenerateExamGridExporter.Style, XSSFCellStyle]): Unit
+	protected def applyCellStyle(cell: Cell, cellStyleMap: Map[GenerateExamGridExporter.Style, CellStyle]): Unit
 	val isActual: Boolean
 	def toHTML: String
-	def populateCell(cell: XSSFCell, cellStyleMap: Map[GenerateExamGridExporter.Style, XSSFCellStyle]): Unit
+	def populateCell(cell: Cell, cellStyleMap: Map[GenerateExamGridExporter.Style, CellStyle]): Unit
 }
 
 object ExamGridColumnValue {
@@ -71,7 +71,7 @@ object ExamGridColumnValueDecimal {
 class ExamGridColumnValueDecimal(value: BigDecimal, val isActual: Boolean = false) extends ExamGridColumnValue {
 	protected final def getValueForRender: JBigDecimal = value.underlying.stripTrailingZeros()
 	override protected final def getValueStringForRender: String = getValueForRender.toPlainString
-	override protected def applyCellStyle(cell: XSSFCell, cellStyleMap: Map[GenerateExamGridExporter.Style, XSSFCellStyle]): Unit = {
+	override protected def applyCellStyle(cell: Cell, cellStyleMap: Map[GenerateExamGridExporter.Style, CellStyle]): Unit = {
 		if (isActual) {
 			cell.setCellStyle(cellStyleMap(GenerateExamGridExporter.ActualMark))
 		}
@@ -79,7 +79,7 @@ class ExamGridColumnValueDecimal(value: BigDecimal, val isActual: Boolean = fals
 	override def toHTML: String =
 		if (isActual) "<span class=\"exam-grid-actual-mark\">%s</span>".format(getValueStringForRender)
 		else getValueStringForRender
-	override final def populateCell(cell: XSSFCell, cellStyleMap: Map[GenerateExamGridExporter.Style, XSSFCellStyle]): Unit = {
+	override final def populateCell(cell: Cell, cellStyleMap: Map[GenerateExamGridExporter.Style, CellStyle]): Unit = {
 		cell.setCellValue(getValueForRender.doubleValue)
 		applyCellStyle(cell, cellStyleMap)
 	}
@@ -90,13 +90,13 @@ object ExamGridColumnValueString {
 }
 class ExamGridColumnValueString(value: String, val isActual: Boolean = false) extends ExamGridColumnValue {
 	override protected final def getValueStringForRender: String = value
-	override protected def applyCellStyle(cell: XSSFCell, cellStyleMap: Map[GenerateExamGridExporter.Style, XSSFCellStyle]): Unit = {
+	override protected def applyCellStyle(cell: Cell, cellStyleMap: Map[GenerateExamGridExporter.Style, CellStyle]): Unit = {
 		if (isActual) {
 			cell.setCellStyle(cellStyleMap(GenerateExamGridExporter.ActualMark))
 		}
 	}
 	override def toHTML: String = value
-	override def populateCell(cell: XSSFCell, cellStyleMap: Map[GenerateExamGridExporter.Style, XSSFCellStyle]): Unit = {
+	override def populateCell(cell: Cell, cellStyleMap: Map[GenerateExamGridExporter.Style, CellStyle]): Unit = {
 		cell.setCellValue(value)
 		applyCellStyle(cell, cellStyleMap)
 	}
@@ -112,7 +112,7 @@ trait ExamGridColumnValueFailed {
 		getValueStringForRender
 	)
 
-	override protected def applyCellStyle(cell: XSSFCell, cellStyleMap: Map[GenerateExamGridExporter.Style, XSSFCellStyle]): Unit = {
+	override protected def applyCellStyle(cell: Cell, cellStyleMap: Map[GenerateExamGridExporter.Style, CellStyle]): Unit = {
 		if (isActual) {
 			cell.setCellStyle(cellStyleMap(GenerateExamGridExporter.FailAndActualMark))
 		} else {
@@ -133,7 +133,7 @@ trait ExamGridColumnValueOvercat {
 	self: ExamGridColumnValue =>
 
 	override def toHTML: String = "<span class=\"exam-grid-overcat\">%s</span>".format(getValueStringForRender)
-	override protected def applyCellStyle(cell: XSSFCell, cellStyleMap: Map[GenerateExamGridExporter.Style, XSSFCellStyle]): Unit = {
+	override protected def applyCellStyle(cell: Cell, cellStyleMap: Map[GenerateExamGridExporter.Style, CellStyle]): Unit = {
 		if (isActual) {
 			cell.setCellStyle(cellStyleMap(GenerateExamGridExporter.OvercatAndActualMark))
 		} else {
@@ -154,7 +154,7 @@ trait ExamGridColumnValueOverride {
 	self: ExamGridColumnValue =>
 
 	override def toHTML: String = "<span class=\"exam-grid-override\">%s</span>".format(getValueStringForRender)
-	override protected def applyCellStyle(cell: XSSFCell, cellStyleMap: Map[GenerateExamGridExporter.Style, XSSFCellStyle]): Unit = {
+	override protected def applyCellStyle(cell: Cell, cellStyleMap: Map[GenerateExamGridExporter.Style, CellStyle]): Unit = {
 		cell.setCellStyle(cellStyleMap(GenerateExamGridExporter.Overridden))
 	}
 }
@@ -171,12 +171,12 @@ case class ExamGridColumnValueMissing(message: String = "") extends ExamGridColu
 		if (message.hasText) "use-tooltip" else "",
 		if (message.hasText) "title=\"%s\" data-container=\"body\"".format(message) else ""
 	)
-	override protected def applyCellStyle(cell: XSSFCell, cellStyleMap: Map[GenerateExamGridExporter.Style, XSSFCellStyle]): Unit = {
+	override protected def applyCellStyle(cell: Cell, cellStyleMap: Map[GenerateExamGridExporter.Style, CellStyle]): Unit = {
 		cell.setCellStyle(cellStyleMap(GenerateExamGridExporter.ActualMark))
 	}
 }
 
 case class ExamGridColumnValueStringHtmlOnly(value: String) extends ExamGridColumnValueString(value) {
 	override def toHTML: String = super.toHTML
-	override def populateCell(cell: XSSFCell, cellStyleMap: Map[GenerateExamGridExporter.Style, XSSFCellStyle]): Unit = {}
+	override def populateCell(cell: Cell, cellStyleMap: Map[GenerateExamGridExporter.Style, CellStyle]): Unit = {}
 }

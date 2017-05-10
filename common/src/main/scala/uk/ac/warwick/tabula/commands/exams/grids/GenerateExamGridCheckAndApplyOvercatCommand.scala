@@ -43,7 +43,7 @@ class GenerateExamGridCheckAndApplyOvercatCommandInternal(val department: Depart
 
 	override def applyInternal(): Result = {
 		val updatedEntities = filteredEntities.map { entity =>
-			val scyd = entity.years
+			val scyd = entity.validYears
 				.getOrElse(selectCourseCommand.yearOfStudy, throw new IllegalArgumentException(s"Could not find entity year for year ${selectCourseCommand.yearOfStudy}"))
 				.studentCourseYearDetails.get
 
@@ -100,7 +100,7 @@ trait GenerateExamGridCheckAndApplyOvercatDescription extends Describable[Genera
 		d.property("entities", result.updatedEntities.map{ case (entity, (mark, modules)) =>
 			Map(
 				"universityId" -> entity.universityId,
-				"studentCourseYearDetails" -> entity.years(selectCourseCommand.yearOfStudy).studentCourseYearDetails.get.id,
+				"studentCourseYearDetails" -> entity.years(selectCourseCommand.yearOfStudy).get.studentCourseYearDetails.get.id,
 				"modules" -> modules.map(_.module.code),
 				"mark" -> mark.toString
 			)
@@ -130,24 +130,28 @@ trait GenerateExamGridCheckAndApplyOvercatCommandState {
 	lazy val overcatSubsets: Map[ExamGridEntity, Seq[(BigDecimal, Seq[ModuleRegistration])]] =
 		entities.filter(entity =>
 			// We only want to apply a subset automaticaly if they have a valid year and have some route rules for that year
-			entity.years.get(selectCourseCommand.yearOfStudy).isDefined &&
-				routeRulesLookup(entity.years(selectCourseCommand.yearOfStudy).route).nonEmpty
-		).map(entity => entity ->
+			entity.years.get(selectCourseCommand.yearOfStudy).nonEmpty &&
+				entity.years(selectCourseCommand.yearOfStudy).nonEmpty &&
+				routeRulesLookup(entity.years(selectCourseCommand.yearOfStudy).get.route).nonEmpty
+		).map(entity => entity -> {
+			val year = entity.years(selectCourseCommand.yearOfStudy).get
 			moduleRegistrationService.overcattedModuleSubsets(
-				entity.years(selectCourseCommand.yearOfStudy),
-				entity.years(selectCourseCommand.yearOfStudy).markOverrides.getOrElse(Map()),
-				normalLoadLookup(entity.years(selectCourseCommand.yearOfStudy).route),
-				routeRulesLookup(entity.years(selectCourseCommand.yearOfStudy).route)
+				year,
+				year.markOverrides.getOrElse(Map()),
+				normalLoadLookup(year.route),
+				routeRulesLookup(year.route)
 			)
-		).toMap
+		}).toMap
 
 	lazy val filteredEntities: Seq[ExamGridEntity] =
 		entities.filter(entity =>
 			// Filter entities to those that have a entity year for the given academic year
 			// and have some route rules applied (both done in overcatSubsets)
 			// and have more than one some overcat subset
-			overcatSubsets.exists { case (overcatEntity, subsets) => overcatEntity == entity && subsets.size > 1 }
-		).filter(entity => entity.years(selectCourseCommand.yearOfStudy).overcattingModules match {
+			entity.years.get(selectCourseCommand.yearOfStudy).nonEmpty &&
+				entity.years(selectCourseCommand.yearOfStudy).nonEmpty &&
+				overcatSubsets.exists { case (overcatEntity, subsets) => overcatEntity == entity && subsets.size > 1 }
+		).filter(entity => entity.years(selectCourseCommand.yearOfStudy).get.overcattingModules match {
 			// And either their current overcat choice is empty...
 			case None => true
 			// Or the highest mark is now a different set of modules (in case the rules have changed)

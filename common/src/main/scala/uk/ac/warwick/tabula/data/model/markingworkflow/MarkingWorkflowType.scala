@@ -14,7 +14,10 @@ abstract class MarkingWorkflowType(
 	val description: String,
 	val allStages: Seq[MarkingWorkflowStage],
 	val initialStages: Seq[MarkingWorkflowStage],
-	val order: Int
+	val order: Int,
+	// in most workflows stages that share a role name also share student -> marker allocations
+	// in other workflows like double blind stages have their own seperate allocations
+	val rolesShareAllocations: Boolean = true
 ){
 	val roleNames: Seq[String] = allStages.map(_.roleName).distinct
 	override def toString: String = name
@@ -53,22 +56,15 @@ object MarkingWorkflowType {
 		description = "Double blind marking",
 		allStages =  Seq(DblBlndInitialMarkerA, DblBlndInitialMarkerB, DblBlndFinalMarker),
 		initialStages = Seq(DblBlndInitialMarkerA, DblBlndInitialMarkerB),
-		order = 3
+		order = 3,
+		rolesShareAllocations = false
 	)
 
-	case object StudentChoosesGroupMarking extends MarkingWorkflowType(
-		name = "StudentChooses",
-		description = "Student chooses group",
-		allStages =  Seq(SingleMarker),
-		initialStages = Seq(SingleMarker),
-		order = 4
-	)
-
-	val values: Seq[MarkingWorkflowType] = Seq(
+	// Don't change this to a val https://warwick.slack.com/archives/C029QTGBN/p1493995125972397
+	def values: Seq[MarkingWorkflowType] = Seq(
 		SingleMarking,
 		DoubleMarking,
 		ModeratedMarking
-		//StudentChoosesGroupMarking,
 		//DoubleBlindMarking
 	)
 

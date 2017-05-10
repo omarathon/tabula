@@ -11,14 +11,14 @@ import uk.ac.warwick.tabula.commands.cm2.assignments.{EditAssignmentDetailsComma
 import uk.ac.warwick.tabula.commands.{Appliable, PopulateOnForm, SelfValidating}
 import uk.ac.warwick.tabula.data.model._
 import uk.ac.warwick.tabula.web.Mav
-import uk.ac.warwick.tabula.web.controllers.cm2.{CourseworkBreadcrumbs, CourseworkController}
+import uk.ac.warwick.tabula.web.controllers.cm2.CourseworkBreadcrumbs
 
 @Profile(Array("cm2Enabled"))
 @Controller
 @RequestMapping(value = Array("/${cm2.prefix}/admin/assignments/{assignment}/edit"))
 class EditAssignmentDetailsController extends AbstractAssignmentController {
 
-	type EditAssignmentDetailsCommand =  Appliable[Assignment] with EditAssignmentDetailsCommandState with PopulateOnForm
+	type EditAssignmentDetailsCommand = Appliable[Assignment] with EditAssignmentDetailsCommandState with PopulateOnForm
 	validatesSelf[SelfValidating]
 
 	@ModelAttribute("command")
@@ -31,12 +31,15 @@ class EditAssignmentDetailsController extends AbstractAssignmentController {
 		showForm(cmd)
 	}
 
-
 	def showForm(cmd: EditAssignmentDetailsCommand): Mav = {
 		val module = cmd.module
 		Mav(s"$urlPrefix/admin/assignments/edit_assignment_details",
 			"department" -> module.adminDepartment,
-			"module" -> module
+			"module" -> module,
+			"academicYear" -> cmd.academicYear,
+			"reusableWorkflows" -> cmd.availableWorkflows,
+			"workflow" -> cmd.workflow,
+			"canDeleteMarkers" -> cmd.workflow.canDeleteMarkers
 		).crumbs(CourseworkBreadcrumbs.Assignment.AssignmentManagement())
 	}
 

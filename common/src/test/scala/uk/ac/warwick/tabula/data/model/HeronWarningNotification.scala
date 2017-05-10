@@ -1,8 +1,9 @@
 package uk.ac.warwick.tabula.data.model
 
-import javax.persistence.{ManyToOne, DiscriminatorValue, Entity}
-import uk.ac.warwick.userlookup.User
+import javax.persistence.{DiscriminatorValue, Entity, ManyToOne}
+
 import org.hibernate.annotations.Type
+import uk.ac.warwick.userlookup.User
 
 object HeronWarningNotification {
 	val templateLocation = "/WEB-INF/freemarker/notifications/i_really_hate_herons.ftl"

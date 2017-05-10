@@ -62,7 +62,7 @@ class FilterExtensionsController extends CourseworkController {
 	@ModelAttribute("filterExtensionsCommand")
 	def filterCommand() = FilterExtensionsCommand(user)
 
-	@RequestMapping(method=Array(HEAD,GET))
+	@RequestMapping(params=Array("!ajax"), headers=Array("!X-Requested-With"))
 	def viewForm(@ModelAttribute("filterExtensionsCommand") cmd: FilterExtensionsCommand): Mav = {
 		val results = cmd.apply()
 		Mav(s"$urlPrefix/admin/extensions/list",
@@ -71,7 +71,7 @@ class FilterExtensionsController extends CourseworkController {
 		)
 	}
 
-	@RequestMapping(method=Array(POST))
+	@RequestMapping
 	def listFilterResults(@ModelAttribute("filterExtensionsCommand") cmd: FilterExtensionsCommand): Mav = {
 		val results = cmd.apply()
 		Mav(s"$urlPrefix/admin/extensions/_filter_results",

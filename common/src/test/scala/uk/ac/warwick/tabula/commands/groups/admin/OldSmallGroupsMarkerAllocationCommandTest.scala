@@ -9,11 +9,11 @@ import uk.ac.warwick.userlookup.User
 
 import scala.collection.JavaConverters._
 
-class SmallGroupsMarkerAllocationCommandTest extends TestBase with Mockito {
+class OldSmallGroupsMarkerAllocationCommandTest extends TestBase with Mockito {
 
 	@Test
 	def getsAllocations() { new Fixture {
-		val cmd = new SmallGroupsMarkerAllocationCommandInternal(assignment) with MockServices
+		val cmd = new OldSmallGroupsMarkerAllocationCommandInternal(assignment) with MockServices
 		val allocations: Seq[SetAllocation] = cmd.applyInternal()
 		allocations.size should be (1)
 		val allocation: SetAllocation = allocations.head

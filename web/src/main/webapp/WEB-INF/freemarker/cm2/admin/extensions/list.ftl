@@ -10,7 +10,12 @@
 			commandName="command"
 			class="form-inline"
 		>
-			<button type="button" class="clear-all btn btn-xs">Clear all filters</button>
+			<button type="button" class="clear-all-filters btn btn-link">
+				<span class="fa-stack">
+					<i class="fa fa-filter fa-stack-1x"></i>
+					<i class="fa fa-ban fa-stack-2x"></i>
+				</span>
+			</button>
 
 			<#-- Department filter-->
 			<#assign placeholder = "All departments" />

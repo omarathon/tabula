@@ -12,11 +12,11 @@ import uk.ac.warwick.tabula.commands._
 import uk.ac.warwick.tabula.data.model.groups.SmallGroupSet
 import uk.ac.warwick.tabula.system.permissions.{PermissionsChecking, PermissionsCheckingMethods, RequiresPermissionsChecking}
 
-object SmallGroupsMarkerAllocationCommand {
+object OldSmallGroupsMarkerAllocationCommand {
 	def apply(assessment: Assessment) =
-		new SmallGroupsMarkerAllocationCommandInternal(assessment)
+		new OldSmallGroupsMarkerAllocationCommandInternal(assessment)
 			with ComposableCommand[Seq[SetAllocation]]
-			with SmallGroupsMarkerAllocationCommandPermissions
+			with OldSmallGroupsMarkerAllocationCommandPermissions
 			with AutowiringSmallGroupServiceComponent
 			with AutowiringAssessmentMembershipServiceComponent
 			with Unaudited
@@ -25,8 +25,8 @@ object SmallGroupsMarkerAllocationCommand {
 case class SetAllocation(set: SmallGroupSet, firstMarkerGroups: Seq[GroupAllocation], secondMarkerGroups: Seq[GroupAllocation])
 case class GroupAllocation(name: String, tutors: Seq[User], students: Seq[User])
 
-class SmallGroupsMarkerAllocationCommandInternal(val assessment: Assessment)
-	extends CommandInternal[Seq[SetAllocation]]	with SmallGroupsMarkerAllocationCommandState with Logging {
+class OldSmallGroupsMarkerAllocationCommandInternal(val assessment: Assessment)
+	extends CommandInternal[Seq[SetAllocation]]	with OldSmallGroupsMarkerAllocationCommandState with Logging {
 
 	self : SmallGroupServiceComponent with AssessmentMembershipServiceComponent =>
 
@@ -64,12 +64,12 @@ class SmallGroupsMarkerAllocationCommandInternal(val assessment: Assessment)
 	}
 }
 
-trait SmallGroupsMarkerAllocationCommandState {
+trait OldSmallGroupsMarkerAllocationCommandState {
 	val assessment: Assessment
 }
 
-trait SmallGroupsMarkerAllocationCommandPermissions extends RequiresPermissionsChecking with PermissionsCheckingMethods {
-	self: SmallGroupsMarkerAllocationCommandState =>
+trait OldSmallGroupsMarkerAllocationCommandPermissions extends RequiresPermissionsChecking with PermissionsCheckingMethods {
+	self: OldSmallGroupsMarkerAllocationCommandState =>
 	override def permissionsCheck(p: PermissionsChecking) {
 		p.PermissionCheck(Permissions.SmallGroups.ReadMembership, mandatory(assessment))
 	}

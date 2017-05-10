@@ -1,3 +1,10 @@
+<#ftl strip_text=true />
+
+<#-- FIXME why is this necessary? -->
+<#if JspTaglibs??>
+	<#assign spring=JspTaglibs["/WEB-INF/tld/spring.tld"]>
+</#if>
+
 <#macro filter name path placeholder currentFilter allItems validItems=allItems prefix="" customPicker="">
 	<@spring.bind path=path>
 	<div id="${name}-filter" class="btn-group filter<#if currentFilter == placeholder> empty</#if>">
@@ -41,10 +48,19 @@
 		<#if status.actualValue?has_content>
 			<#list status.actualValue as item><#nested item /><#if item_has_next>, </#if></#list>
 		<#else>
-		${placeholder}
+			${placeholder}
 		</#if>
 	</@spring.bind>
 </#compress></#macro>
+
+<#function contains_by_filter_name collection item>
+	<#list collection as c>
+		<#if c.name == item.name>
+			<#return true />
+		</#if>
+	</#list>
+	<#return false />
+</#function>
 
 <#function contains_by_code collection item>
 	<#list collection as c>

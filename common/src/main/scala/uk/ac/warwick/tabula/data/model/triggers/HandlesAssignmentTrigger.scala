@@ -2,7 +2,7 @@ package uk.ac.warwick.tabula.data.model.triggers
 
 import uk.ac.warwick.spring.Wire
 import uk.ac.warwick.tabula.Features
-import uk.ac.warwick.tabula.JavaImports.JArrayList
+import uk.ac.warwick.tabula.JavaImports._
 import uk.ac.warwick.tabula.commands.coursework.assignments.ReleaseForMarkingCommand
 import uk.ac.warwick.tabula.commands.coursework.turnitin.SubmitToTurnitinCommand
 import uk.ac.warwick.tabula.data.model.Assignment

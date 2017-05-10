@@ -144,7 +144,7 @@ class AssessmentMembershipDaoTest extends PersistenceTestBase {
 				session.save(dept)
 				session.flush()
 
-				assignmentMembershipService.getEnrolledAssignments(user).toSet should be (Set(assignment1, assignment2, assignment3))
+				assignmentMembershipService.getEnrolledAssignments(user, None).toSet should be (Set(assignment1, assignment2, assignment3))
 			}
 		}
 	}
@@ -168,7 +168,7 @@ class AssessmentMembershipDaoTest extends PersistenceTestBase {
 				session.save(dept)
 				session.flush()
 
-				assignmentMembershipService.getEnrolledAssignments(user).toSet should be (Set(assignment1, assignment2, assignment3))
+				assignmentMembershipService.getEnrolledAssignments(user, None).toSet should be (Set(assignment1, assignment2, assignment3))
 			}
 		}
 	}

@@ -30,6 +30,8 @@
 		<#assign newRecord=true />
 		<#include "_fields.ftl" />
 
+		<#include "_modify_assignment_workflow.ftl" />
+
 		<div class="fix-footer">
 			<input
 				type="submit"

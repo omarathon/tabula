@@ -3,7 +3,7 @@
 <#-- Field to support redirection post-submit -->
 <input type="hidden" name="action" value="submit" id="action-submit">
 
-	<@bs3form.labelled_form_group path="name" labelText="Assignment Title:">
+	<@bs3form.labelled_form_group path="name" labelText="Assignment Title">
 		<@f.input path="name" cssClass="form-control" />
 	</@bs3form.labelled_form_group>
 	<#if newRecord>
@@ -29,7 +29,7 @@
 
 	<@bs3form.labelled_form_group path="openEnded" labelText="">
 		<@bs3form.checkbox path="openEnded">
-			<@f.checkbox path="openEnded" id="openEnded" />Open ended
+			<@f.checkbox path="openEnded" id="openEnded" /> Open ended
 			<#assign popoverText>
             <p>
                 Check this box to mark the assignment as open-ended.
@@ -78,13 +78,16 @@
 		</#if>
 	</@bs3form.labelled_form_group>
 
-	<@bs3form.labelled_form_group path="workflowCategory" labelText="Workflow">
-		<@f.select path="workflowCategory" id="workflowCategory" cssClass="form-control">
+	<@bs3form.labelled_form_group path="workflowCategory" labelText="Marking workflow use">
+		<@f.select path="workflowCategory" id="workflowCategory" class="form-control">
 			<@f.options items=command.workflowCategories itemLabel="displayName" itemValue="code" />
 		</@f.select>
+		<div class="help-block">
+			A marking workflow defines the marking method and who the markers are. You can reuse an existing workflow, create a single use workflow or choose not to have one.
+			<span class="workflow-fields single-use-workflow-fields">
+				Single use workflows are only used once and aren't saved in Tabula. To create a reusable workflow, go to <a href="<@routes.cm2.reusableWorkflowsHome department academicYear />">marking workflows</a>.
+			</span>
+		</div>
 	</@bs3form.labelled_form_group>
 
-<div>Marking workflows define how and by whom the assignment will be marked. You can use an existing workflow, no
-    workflow or create a single use workflow.
-</div>
 </#escape>

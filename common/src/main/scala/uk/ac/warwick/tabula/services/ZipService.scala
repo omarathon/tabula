@@ -58,7 +58,7 @@ class ZipService extends ZipCreator with AutowiringObjectStorageServiceComponent
 
 	private def getFeedbackZipItems(feedback: Feedback): Seq[ZipItem] = {
 		(Seq(getOnlineFeedbackPdf(feedback)) ++ feedback.attachments.asScala).map { (attachment) =>
-			ZipFileItem(feedback.studentIdentifier + " - " + attachment.name, attachment.dataStream, attachment.actualDataLength)
+			ZipFileItem(feedback.studentIdentifier + " - " + attachment.name, attachment.asByteSource, attachment.actualDataLength)
 		}
 	}
 
@@ -75,7 +75,7 @@ class ZipService extends ZipCreator with AutowiringObjectStorageServiceComponent
 
 	private def getMarkerFeedbackZipItems(markerFeedback: MarkerFeedback): Seq[ZipItem] =
 		markerFeedback.attachments.asScala.filter { _.hasData }.map { attachment =>
-			ZipFileItem(markerFeedback.feedback.studentIdentifier + " - " + attachment.name, attachment.dataStream, attachment.actualDataLength)
+			ZipFileItem(markerFeedback.feedback.studentIdentifier + " - " + attachment.name, attachment.asByteSource, attachment.actualDataLength)
 		}
 
 	/**
@@ -95,7 +95,7 @@ class ZipService extends ZipCreator with AutowiringObjectStorageServiceComponent
 				s"${user.getFullName} - ${submission.studentIdentifier}"
 			}
 
-			ZipFileItem(code + " - " + userIdentifier + " - " + attachment.name, attachment.dataStream, attachment.actualDataLength)
+			ZipFileItem(code + " - " + userIdentifier + " - " + attachment.name, attachment.asByteSource, attachment.actualDataLength)
 		}
 
 		if (features.feedbackTemplates){
@@ -141,7 +141,7 @@ class ZipService extends ZipCreator with AutowiringObjectStorageServiceComponent
 		val templateFile = assignment.feedbackTemplate.attachment
 		val zipItems:Seq[ZipItem] = for (user <- users) yield {
 			val filename = assignment.module.code + " - " + user.getWarwickId + " - " + templateFile.name
-			ZipFileItem(filename, templateFile.dataStream, templateFile.actualDataLength)
+			ZipFileItem(filename, templateFile.asByteSource, templateFile.actualDataLength)
 		}
 		createUnnamedZip(zipItems)
 	}
@@ -153,7 +153,7 @@ class ZipService extends ZipCreator with AutowiringObjectStorageServiceComponent
 	def generateFeedbackSheet(submission: Submission): Seq[ZipItem] = {
 		// wrap template in an option to deal with nulls
 		Option(submission.assignment.feedbackTemplate) match {
-			case Some(t) => Seq(ZipFileItem(submission.zipFileName(t.attachment), t.attachment.dataStream, t.attachment.actualDataLength))
+			case Some(t) => Seq(ZipFileItem(submission.zipFileName(t.attachment), t.attachment.asByteSource, t.attachment.actualDataLength))
 			case None => Seq()
 		}
 	}
@@ -163,7 +163,7 @@ class ZipService extends ZipCreator with AutowiringObjectStorageServiceComponent
 
 	private def getMeetingRecordZipItems(meetingRecord: AbstractMeetingRecord): Seq[ZipItem] =
 		meetingRecord.attachments.asScala.map { (attachment) =>
-			ZipFileItem(attachment.name, attachment.dataStream, attachment.actualDataLength)
+			ZipFileItem(attachment.name, attachment.asByteSource, attachment.actualDataLength)
 		}
 
 	def getSomeMemberNoteAttachmentsZip(memberNote: MemberNote): RenderableFile =
@@ -171,16 +171,16 @@ class ZipService extends ZipCreator with AutowiringObjectStorageServiceComponent
 
 	private def getMemberNoteZipItems(memberNote: MemberNote): Seq[ZipItem] =
 		memberNote.attachments.asScala.map { (attachment) =>
-			ZipFileItem(attachment.name, attachment.dataStream, attachment.actualDataLength)
+			ZipFileItem(attachment.name, attachment.asByteSource, attachment.actualDataLength)
 		}
 
 	def getProfileExportZip(results: Map[String, Seq[FileAttachment]]): RenderableFile = {
 		createUnnamedZip(results.map{case(uniId, files) =>
 			ZipFolderItem(uniId, files.zipWithIndex.map{case(file, index) =>
 				if (index == 0)
-					ZipFileItem(file.name, file.dataStream, file.actualDataLength)
+					ZipFileItem(file.name, file.asByteSource, file.actualDataLength)
 				else
-					ZipFileItem(file.id + "-" + file.name, file.dataStream, file.actualDataLength)
+					ZipFileItem(file.id + "-" + file.name, file.asByteSource, file.actualDataLength)
 			})
 		}.toSeq)
 	}

@@ -1,21 +1,22 @@
 package uk.ac.warwick.tabula.commands.coursework.assignments
 
+import org.apache.poi.ss.usermodel.Sheet
 import org.apache.poi.ss.util.{CellRangeAddressList, WorkbookUtil}
-import org.apache.poi.xssf.usermodel._
+import org.apache.poi.xssf.streaming.SXSSFWorkbook
+import org.apache.poi.xssf.usermodel.XSSFDataValidationHelper
 import uk.ac.warwick.tabula.ItemNotFoundException
-import uk.ac.warwick.tabula.commands.{CommandInternal, Unaudited, ReadOnly, ComposableCommand}
+import uk.ac.warwick.tabula.commands.{CommandInternal, ComposableCommand, ReadOnly, Unaudited}
 import uk.ac.warwick.tabula.data.model.Assessment
 import uk.ac.warwick.tabula.permissions.Permissions
-
-import uk.ac.warwick.tabula.services.{AutowiringUserLookupComponent, AutowiringAssessmentMembershipServiceComponent}
+import uk.ac.warwick.tabula.services.{AutowiringAssessmentMembershipServiceComponent, AutowiringUserLookupComponent}
 import uk.ac.warwick.tabula.system.permissions.{PermissionsChecking, PermissionsCheckingMethods, RequiresPermissionsChecking}
 import uk.ac.warwick.tabula.web.views.ExcelView
 import uk.ac.warwick.userlookup.User
 
 
-object AssignMarkersTemplateCommand {
+object OldAssignMarkersTemplateCommand {
 	def apply(assessment: Assessment) =
-		new AssignMarkersTemplateCommandInternal(assessment)
+		new OldAssignMarkersTemplateCommandInternal(assessment)
 			with ComposableCommand[ExcelView]
 			with AssignMarkersTemplateCommandState
 			with AssignMarkersTemplateCommandPermissions
@@ -23,7 +24,7 @@ object AssignMarkersTemplateCommand {
 			with Unaudited
 }
 
-class AssignMarkersTemplateCommandInternal(val assessment: Assessment) extends CommandInternal[ExcelView]
+class OldAssignMarkersTemplateCommandInternal(val assessment: Assessment) extends CommandInternal[ExcelView]
 	with AutowiringAssessmentMembershipServiceComponent
 	with AutowiringUserLookupComponent {
 
@@ -37,21 +38,21 @@ class AssignMarkersTemplateCommandInternal(val assessment: Assessment) extends C
 	case class AllocationInfo (
 		markers: Seq[User],
 		roleName: String,
-		sheet: XSSFSheet,
+		sheet: Sheet,
 		getStudentsMarker: User => Option[User]
 	) {
 		def lookupSheetName =  s"${roleName.replaceAll(" ", "").toLowerCase}lookup"
 	}
 
 	private def generateWorkbook = {
-		val workbook = new XSSFWorkbook()
+		val workbook = new SXSSFWorkbook
 		val allocations = addAllocationSheets(workbook)
 		generateMarkerLookupSheets(workbook, allocations)
 		populateAllocationSheets(allocations)
 		workbook
 	}
 
-	private def addAllocationSheets(workbook: XSSFWorkbook) = {
+	private def addAllocationSheets(workbook: SXSSFWorkbook) = {
 		val workflow = Option(assessment.markingWorkflow).getOrElse(throw new ItemNotFoundException(s"No workflow exists for ${assessment.name}"))
 		val style = workbook.createCellStyle
 		val format = workbook.createDataFormat
@@ -63,7 +64,11 @@ class AssignMarkersTemplateCommandInternal(val assessment: Assessment) extends C
 			AllocationInfo(
 				workflow.firstMarkers.users,
 				roleName,
-				workbook.createSheet(roleName),
+				{
+					val sheet = workbook.createSheet(roleName)
+					sheet.trackAllColumnsForAutoSizing()
+					sheet
+				},
 				(user: User) => workflow.getStudentsFirstMarker(assessment, user.getWarwickId).map(userLookup.getUserByUserId)
 			)
 		}
@@ -72,7 +77,11 @@ class AssignMarkersTemplateCommandInternal(val assessment: Assessment) extends C
 			AllocationInfo(
 				workflow.secondMarkers.users,
 				roleName,
-				workbook.createSheet(roleName),
+				{
+					val sheet = workbook.createSheet(roleName)
+					sheet.trackAllColumnsForAutoSizing()
+					sheet
+				},
 				(user: User) => workflow.getStudentsSecondMarker(assessment, user.getWarwickId).map(userLookup.getUserByUserId)
 			)
 		})
@@ -112,7 +121,7 @@ class AssignMarkersTemplateCommandInternal(val assessment: Assessment) extends C
 		}
 	}
 
-	private def generateMarkerLookupSheets(workbook: XSSFWorkbook, allocations: Seq[AllocationInfo]) {
+	private def generateMarkerLookupSheets(workbook: SXSSFWorkbook, allocations: Seq[AllocationInfo]) {
 		for (allocation <- allocations) {
 			val sheet = workbook.createSheet(allocation.lookupSheetName)
 			for (marker <- allocation.markers) {
@@ -121,11 +130,11 @@ class AssignMarkersTemplateCommandInternal(val assessment: Assessment) extends C
 				row.createCell(1).setCellValue(marker.getWarwickId)
 			}
 			val dropdownRange = new CellRangeAddressList(1, students.length, 2, 2)
-			val dvHelper = new XSSFDataValidationHelper(allocation.sheet)
+			val dvHelper = new XSSFDataValidationHelper(null)
 			val dvConstraint = dvHelper.createFormulaListConstraint(
 				allocation.lookupSheetName + "!$A$2:$A$" + (allocation.markers.length + 1)
-			).asInstanceOf[XSSFDataValidationConstraint]
-			val validation = dvHelper.createValidation(dvConstraint, dropdownRange).asInstanceOf[XSSFDataValidation]
+			)
+			val validation = dvHelper.createValidation(dvConstraint, dropdownRange)
 			validation.setShowErrorBox(true)
 			allocation.sheet.addValidationData(validation)
 		}

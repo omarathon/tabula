@@ -109,13 +109,15 @@ class FileAttachment extends GeneratedId {
 		* Returns null if no data to return
 		*/
 	def dataStream: InputStream = objectStorageService.fetch(id).orNull
+	def asByteSource: ByteSource = new ByteSource {
+		override def openStream(): InputStream = dataStream
+		override def size(): Long = actualDataLength
+		override def isEmpty: Boolean = !objectStorageService.keyExists(id)
+	}
 
 	def duplicate(): FileAttachment = {
 		val newFile = new FileAttachment(name)
-		newFile.uploadedData = new ByteSource {
-			override def openStream(): InputStream = dataStream
-			override def size(): Long = actualDataLength
-		}
+		newFile.uploadedData = asByteSource
 		newFile.uploadedBy = uploadedBy
 		fileDao.savePermanent(newFile)
 		newFile

@@ -9,6 +9,7 @@ import uk.ac.warwick.tabula.data._
 import uk.ac.warwick.tabula.data.model.PlagiarismInvestigation.SuspectPlagiarised
 import uk.ac.warwick.tabula.data.model._
 import uk.ac.warwick.tabula.data.model.forms.{CommentField, Extension, FormFieldContext, WordCountField}
+import uk.ac.warwick.tabula.data.model.markingworkflow.StageMarkers
 import uk.ac.warwick.userlookup.User
 
 import scala.collection.JavaConverters._
@@ -19,14 +20,18 @@ class AssessmentServiceTest extends PersistenceTestBase with Mockito {
 	val thisAssignmentDao = new AssessmentDaoImpl
 	val thisFirstMarkerHelper: UserGroupMembershipHelper[MarkingWorkflow] = smartMock[UserGroupMembershipHelper[MarkingWorkflow]]
 	val thisSecondMarkerHelper: UserGroupMembershipHelper[MarkingWorkflow] = smartMock[UserGroupMembershipHelper[MarkingWorkflow]]
+	val thisCM2MarkerHelper: UserGroupMembershipHelper[StageMarkers] = smartMock[UserGroupMembershipHelper[StageMarkers]]
 	val thisMarkingWorkflowService: MarkingWorkflowService = smartMock[MarkingWorkflowService]
+	val thisCM2MarkingWorkflowService: CM2MarkingWorkflowService = smartMock[CM2MarkingWorkflowService]
 
 	val assignmentService = new AbstractAssessmentService with AssessmentDaoComponent
-		with AssessmentServiceUserGroupHelpers with MarkingWorkflowServiceComponent {
+		with AssessmentServiceUserGroupHelpers with MarkingWorkflowServiceComponent with CM2MarkingWorkflowServiceComponent {
 		val assessmentDao: AssessmentDaoImpl = thisAssignmentDao
 		val firstMarkerHelper: UserGroupMembershipHelper[MarkingWorkflow] = thisFirstMarkerHelper
 		val secondMarkerHelper: UserGroupMembershipHelper[MarkingWorkflow] = thisSecondMarkerHelper
+		val cm2MarkerHelper: UserGroupMembershipHelper[StageMarkers] = thisCM2MarkerHelper
 		val markingWorkflowService: MarkingWorkflowService = thisMarkingWorkflowService
+		val cm2MarkingWorkflowService: CM2MarkingWorkflowService = thisCM2MarkingWorkflowService
 	}
 	val assignmentMembershipService = new AssessmentMembershipServiceImpl
 	val feedbackService = new FeedbackServiceImpl
@@ -801,16 +806,16 @@ class AssessmentServiceTest extends PersistenceTestBase with Mockito {
 		new AssignmentMembershipFixture() {
 			val ams: AssessmentMembershipServiceImpl = assignmentMembershipService
 
-			withUser("manual1", "0000006") { ams.getEnrolledAssignments(currentUser.apparentUser).toSet should be (Seq(assignment1).toSet) }
-			withUser("manual2", "0000007") { ams.getEnrolledAssignments(currentUser.apparentUser).toSet should be (Seq(assignment1, assignment2).toSet) }
-			withUser("manual3", "0000008") { ams.getEnrolledAssignments(currentUser.apparentUser).toSet should be (Seq(assignment2).toSet) }
-			withUser("manual4", "0000009") { ams.getEnrolledAssignments(currentUser.apparentUser).toSet should be (Seq(assignment2).toSet) }
+			withUser("manual1", "0000006") { ams.getEnrolledAssignments(currentUser.apparentUser, None).toSet should be (Seq(assignment1).toSet) }
+			withUser("manual2", "0000007") { ams.getEnrolledAssignments(currentUser.apparentUser, None).toSet should be (Seq(assignment1, assignment2).toSet) }
+			withUser("manual3", "0000008") { ams.getEnrolledAssignments(currentUser.apparentUser, None).toSet should be (Seq(assignment2).toSet) }
+			withUser("manual4", "0000009") { ams.getEnrolledAssignments(currentUser.apparentUser, None).toSet should be (Seq(assignment2).toSet) }
 
-			withUser("student1", "0000001") { ams.getEnrolledAssignments(currentUser.apparentUser).toSet should be (Seq(assignment1, assignment2).toSet) }
-			withUser("student2", "0000002") { ams.getEnrolledAssignments(currentUser.apparentUser).toSet should be (Seq(assignment2).toSet) }
-			withUser("student3", "0000003") { ams.getEnrolledAssignments(currentUser.apparentUser).toSet should be (Seq().toSet) }
-			withUser("student4", "0000004") { ams.getEnrolledAssignments(currentUser.apparentUser).toSet should be (Seq().toSet) }
-			withUser("student5", "0000005") { ams.getEnrolledAssignments(currentUser.apparentUser).toSet should be (Seq(assignment2).toSet) }
+			withUser("student1", "0000001") { ams.getEnrolledAssignments(currentUser.apparentUser, None).toSet should be (Seq(assignment1, assignment2).toSet) }
+			withUser("student2", "0000002") { ams.getEnrolledAssignments(currentUser.apparentUser, None).toSet should be (Seq(assignment2).toSet) }
+			withUser("student3", "0000003") { ams.getEnrolledAssignments(currentUser.apparentUser, None).toSet should be (Seq().toSet) }
+			withUser("student4", "0000004") { ams.getEnrolledAssignments(currentUser.apparentUser, None).toSet should be (Seq().toSet) }
+			withUser("student5", "0000005") { ams.getEnrolledAssignments(currentUser.apparentUser, None).toSet should be (Seq(assignment2).toSet) }
 		}
 	}}
 

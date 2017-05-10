@@ -10,18 +10,23 @@ import uk.ac.warwick.tabula.data.AutowiringCM2MarkingWorkflowDaoComponent
 import uk.ac.warwick.tabula.data.model.markingworkflow._
 import uk.ac.warwick.tabula.data.model.{Assignment, AssignmentFeedback, Department, MarkerFeedback}
 import uk.ac.warwick.userlookup.User
-
 import scala.collection.immutable.{SortedMap, TreeMap}
+import CM2MarkingWorkflowService._
 
+object CM2MarkingWorkflowService {
+	type Marker = User
+	type Student = User
+	type Allocations = Map[Marker, Set[Student]]
+}
 
 trait CM2MarkingWorkflowService extends WorkflowUserGroupHelpers {
 
-	type Marker = User
-	type Student = User
-
 	def save(workflow: CM2MarkingWorkflow): Unit
 	def delete(workflow: CM2MarkingWorkflow): Unit
-	def releaseFeedback(feedbacks: Seq[AssignmentFeedback]): Seq[AssignmentFeedback]
+	def releaseForMarking(feedbacks: Seq[AssignmentFeedback]): Seq[AssignmentFeedback]
+
+	/** All assignments using this marking workflow. */
+	def getAssignmentsUsingMarkingWorkflow(workflow: CM2MarkingWorkflow): Seq[Assignment]
 
 	// move feedback onto the next stage when the next stage
 	def progressFeedback(markerStage: MarkingWorkflowStage, feedbacks: Seq[AssignmentFeedback]): Seq[AssignmentFeedback]
@@ -40,11 +45,11 @@ trait CM2MarkingWorkflowService extends WorkflowUserGroupHelpers {
 	def allocateMarkersForStage(
 		assignment: Assignment,
 		markerStage: MarkingWorkflowStage,
-		allocations: Map[Marker, Set[Student]]
+		allocations: Allocations
 	): Seq[MarkerFeedback]
 
 	// an anonymous Marker may be present in the map if a marker has been unassigned - these need to be handled
-	def getMarkerAllocations(assignment: Assignment, stage: MarkingWorkflowStage): Map[Marker, Set[Student]]
+	def getMarkerAllocations(assignment: Assignment, stage: MarkingWorkflowStage): Allocations
 	// an anonymous Marker may be present in the map if a marker has been unassigned - these need to be handled
 	def feedbackByMarker(assignment: Assignment, stage: MarkingWorkflowStage): Map[Marker, Seq[MarkerFeedback]]
 	// all the marker feedback for this feedback keyed and sorted by workflow stage
@@ -63,11 +68,14 @@ class CM2MarkingWorkflowServiceImpl extends CM2MarkingWorkflowService with Autow
 
 	override def delete(workflow: CM2MarkingWorkflow): Unit = markingWorkflowDao.delete(workflow)
 
-	override def releaseFeedback(feedbacks: Seq[AssignmentFeedback]): Seq[AssignmentFeedback] = feedbacks.map(f => {
+	override def releaseForMarking(feedbacks: Seq[AssignmentFeedback]): Seq[AssignmentFeedback] = feedbacks.map(f => {
 		f.outstandingStages = f.assignment.cm2MarkingWorkflow.initialStages.asJava
 		feedbackService.saveOrUpdate(f)
 		f
 	})
+
+	def getAssignmentsUsingMarkingWorkflow(workflow: CM2MarkingWorkflow): Seq[Assignment] =
+		markingWorkflowDao.getAssignmentsUsingMarkingWorkflow(workflow)
 
 	override def progressFeedback(currentStage: MarkingWorkflowStage , feedbacks: Seq[AssignmentFeedback]): Seq[AssignmentFeedback] = {
 		// don't progress if nextStages is empty
@@ -129,8 +137,7 @@ class CM2MarkingWorkflowServiceImpl extends CM2MarkingWorkflowService with Autow
 	}
 
 	// for a given assignment and workflow stage specify the markers for each student
-	override def allocateMarkersForStage(assignment: Assignment, stage: MarkingWorkflowStage, allocations: Map[Marker, Set[Student]]): Seq[MarkerFeedback] = {
-
+	override def allocateMarkersForStage(assignment: Assignment, stage: MarkingWorkflowStage, allocations: Allocations): Seq[MarkerFeedback] = {
 		val workflow = assignment.cm2MarkingWorkflow
 		if (workflow == null) throw new IllegalArgumentException("Can't assign markers for an assignment with no workflow")
 
@@ -138,7 +145,7 @@ class CM2MarkingWorkflowServiceImpl extends CM2MarkingWorkflowService with Autow
 
 		// if any students did have a marker and now don't, remove the marker ID
 		existingMarkerFeedback
-			.filter(mf => allocations.getOrElse(mf.marker, Set()).isEmpty)
+			.filter(mf => !allocations.values.toSeq.flatten.contains(mf.student))
 			.foreach(mf => {
 				mf.marker = null
 				feedbackService.save(mf)
@@ -154,6 +161,7 @@ class CM2MarkingWorkflowServiceImpl extends CM2MarkingWorkflowService with Autow
 				newFeedback._universityId = student.getWarwickId
 				newFeedback.released = false
 				newFeedback.createdDate = DateTime.now
+				assignment.feedbacks.add(newFeedback)
 				feedbackService.saveOrUpdate(newFeedback)
 				newFeedback
 			})
@@ -174,7 +182,7 @@ class CM2MarkingWorkflowServiceImpl extends CM2MarkingWorkflowService with Autow
 	private def allMarkerFeedbackForStage(assignment: Assignment, stage: MarkingWorkflowStage): Seq[MarkerFeedback] =
 		markingWorkflowDao.markerFeedbackForAssignmentAndStage(assignment, stage)
 
-	override def getMarkerAllocations(assignment: Assignment, stage: MarkingWorkflowStage): Map[Marker, Set[Student]] = {
+	override def getMarkerAllocations(assignment: Assignment, stage: MarkingWorkflowStage): Allocations = {
 		feedbackByMarker(assignment,stage).map{ case (marker, markerFeedbacks) =>
 			marker -> markerFeedbacks.map(_.student).toSet
 		}
@@ -216,6 +224,6 @@ trait CM2MarkingWorkflowServiceComponent {
 	def cm2MarkingWorkflowService: CM2MarkingWorkflowService
 }
 
-trait AutoWiringCM2MarkingWorkflowServiceComponent extends CM2MarkingWorkflowServiceComponent {
+trait AutowiringCM2MarkingWorkflowServiceComponent extends CM2MarkingWorkflowServiceComponent {
 	def cm2MarkingWorkflowService: CM2MarkingWorkflowService =  Wire.auto[CM2MarkingWorkflowService]
 }

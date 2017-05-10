@@ -24,7 +24,7 @@ class OvercattedYearMarkColumnOption extends ChosenYearExamGridColumnOption with
 
 		override def values: Map[ExamGridEntity, ExamGridColumnValue] = {
 			state.entities.map(entity =>
-				entity -> entity.years.get(state.yearOfStudy).map(entityYear => result(entityYear) match {
+				entity -> entity.validYears.get(state.yearOfStudy).map(entityYear => result(entityYear) match {
 					case Right(mark) => ExamGridColumnValueDecimal(mark)
 					case Left(message) => ExamGridColumnValueMissing(message)
 				}).getOrElse(ExamGridColumnValueMissing(s"Could not find course details for ${entity.universityId} for ${state.academicYear}"))

@@ -7,18 +7,18 @@
 </div>
 
 <#if can.do("Assignment.Update", assignment)>
-<div class="alert alert-info">
-  <button type="button" class="close" data-dismiss="alert">×</button>
-	<h4>Information for module managers</h4>
+	<div class="alert alert-info">
+		<button type="button" class="close" data-dismiss="alert">×</button>
+		<h4>Information for module managers</h4>
 
-	<p>This box is only shown to module managers. Click the &times; button to see the page as a student sees it.</p>
+		<p>This box is only shown to module managers. Click the &times; button to see the page as a student sees it.</p>
 
-	<p>You can give students a link to this page to
-	<#if assignment.collectSubmissions>submit their work and to</#if>
-	receive their feedback<#if assignment.collectMarks> and/or marks</#if>.</p>
+		<p>You can give students a link to this page to
+		<#if assignment.collectSubmissions>submit their work and to</#if>
+		receive their feedback<#if assignment.collectMarks> and/or marks</#if>.</p>
 
-	<p><a class="btn btn-default" href="<@routes.cm2.depthome assignment.module/>">Return to module management for ${assignment.module.code?upper_case}</a></p>
-</div>
+		<p><a class="btn btn-default" href="<@routes.cm2.depthome assignment.module assignment.academicYear/>">Return to module management for ${assignment.module.code?upper_case}</a></p>
+	</div>
 </#if>
 
 <a id="submittop"></a>
@@ -31,9 +31,7 @@
 			<#include "assignment_submissionthanks.ftl" />
 	    </#if>
 	</#if>
-
 <#else>
-
 	<#if features.submissions>
 		<#if submission??>
 			<#include "assignment_submissionthanks.ftl" />

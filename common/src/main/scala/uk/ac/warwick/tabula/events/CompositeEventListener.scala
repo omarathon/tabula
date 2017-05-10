@@ -10,8 +10,8 @@ class CompositeEventListener(val listeners: JList[EventListener]) extends EventL
 	override def beforeCommand(event: Event): Unit =
 		for (listener <- listeners) listener.beforeCommand(event)
 
-	override def afterCommand(event: Event, returnValue: Any): Unit =
-		for (listener <- listeners) listener.afterCommand(event, returnValue)
+	override def afterCommand(event: Event, returnValue: Any, beforeEvent: Event): Unit =
+		for (listener <- listeners) listener.afterCommand(event, returnValue, beforeEvent)
 
 	override def onException(event: Event, exception: Throwable): Unit =
 		for (listener <- listeners) listener.onException(event, exception)

@@ -1,6 +1,7 @@
 package uk.ac.warwick.tabula.commands.groups.admin
 
-import org.apache.poi.xssf.usermodel.{XSSFRow, XSSFSheet, XSSFWorkbook}
+import org.apache.poi.ss.usermodel.{Row, Sheet}
+import org.apache.poi.xssf.streaming.SXSSFWorkbook
 import uk.ac.warwick.tabula._
 import uk.ac.warwick.tabula.commands.{Appliable, ReadOnly, Unaudited}
 import uk.ac.warwick.tabula.data.model.groups.{SmallGroup, SmallGroupSet}
@@ -135,7 +136,7 @@ class AllocateStudentsTemplateCommandTest extends TestBase with Mockito {
 	}
 
 	@Test def allocateUsersSheet { new CommandFixture {
-		implicit class SearchableSheet(self:XSSFSheet) {
+		implicit class SearchableSheet(self: Sheet) {
 			def containsDataRow(id:String, name:String, maxRows:Int = self.getLastRowNum):Boolean = {
 				val rows = for (i<- 1 to maxRows) yield self.getRow(i)
 				val matchingRow = rows.find(r=>r.getCell(0).toString == id && r.getCell(1).toString == name)
@@ -143,11 +144,11 @@ class AllocateStudentsTemplateCommandTest extends TestBase with Mockito {
 			}
 		}
 
-		val workbook: XSSFWorkbook = command.generateWorkbook()
+		val workbook: SXSSFWorkbook = command.generateWorkbook()
 
-		val allocateSheet: XSSFSheet = workbook.getSheet(command.allocateSheetName)
+		val allocateSheet: Sheet = workbook.getSheet(command.allocateSheetName)
 
-		val headerRow: XSSFRow = allocateSheet.getRow(0)
+		val headerRow: Row = allocateSheet.getRow(0)
 		headerRow.getCell(0).toString should be ("student_id")
 		headerRow.getCell(1).toString should be ("Student name")
 		headerRow.getCell(2).toString should be ("Group name")
@@ -161,11 +162,11 @@ class AllocateStudentsTemplateCommandTest extends TestBase with Mockito {
 	}}
 
 	@Test def groupLookupSheet { new CommandFixture {
-		val workbook: XSSFWorkbook = command.generateWorkbook()
+		val workbook: SXSSFWorkbook = command.generateWorkbook()
 
-		val groupLookupSheet: XSSFSheet = workbook.getSheet(command.groupLookupSheetName)
+		val groupLookupSheet: Sheet = workbook.getSheet(command.groupLookupSheetName)
 
-		var groupRow: XSSFRow = groupLookupSheet.getRow(1)
+		var groupRow: Row = groupLookupSheet.getRow(1)
 		groupRow.getCell(0).toString should be ("Group 1")
 		groupRow.getCell(1).toString should be ("abcdefgh1")
 

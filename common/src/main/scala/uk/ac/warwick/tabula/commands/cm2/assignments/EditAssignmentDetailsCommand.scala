@@ -2,12 +2,13 @@ package uk.ac.warwick.tabula.commands.cm2.assignments
 
 import org.springframework.validation.Errors
 import uk.ac.warwick.tabula.commands._
+import uk.ac.warwick.tabula.commands.cm2.markingworkflows.EditMarkingWorkflowState
 import uk.ac.warwick.tabula.data.model._
+import uk.ac.warwick.tabula.data.model.markingworkflow.CM2MarkingWorkflow
 import uk.ac.warwick.tabula.permissions.Permissions
 import uk.ac.warwick.tabula.services._
 import uk.ac.warwick.tabula.system.permissions.{PermissionsChecking, PermissionsCheckingMethods, RequiresPermissionsChecking}
-
-import scala.collection.JavaConverters._
+import uk.ac.warwick.tabula.JavaImports._
 
 
 object EditAssignmentDetailsCommand {
@@ -20,14 +21,22 @@ object EditAssignmentDetailsCommand {
 			with EditAssignmentDetailsValidation
 			with ModifyAssignmentScheduledNotifications
 			with AutowiringAssessmentServiceComponent
+			with AutowiringUserLookupComponent
+			with AutowiringCM2MarkingWorkflowServiceComponent
 			with ModifyAssignmentsDetailsTriggers
 			with PopulateOnForm
 }
 
 class EditAssignmentDetailsCommandInternal(override val assignment: Assignment)
-	extends CommandInternal[Assignment] with EditAssignmentDetailsCommandState with EditAssignmentDetailsValidation with SharedAssignmentProperties with PopulateOnForm  with AssignmentDetailsCopy {
+	extends CommandInternal[Assignment] with EditAssignmentDetailsCommandState with EditAssignmentDetailsValidation
+		with SharedAssignmentProperties with PopulateOnForm with AssignmentDetailsCopy {
 
-	self: AssessmentServiceComponent =>
+	self: AssessmentServiceComponent with UserLookupComponent with CM2MarkingWorkflowServiceComponent =>
+
+	extractMarkers match { case (a, b) =>
+		markersA = JArrayList(a)
+		markersB = JArrayList(b)
+	}
 
 	override def applyInternal(): Assignment = {
 		copyTo(assignment)
@@ -41,20 +50,19 @@ class EditAssignmentDetailsCommandInternal(override val assignment: Assignment)
 		openEndedReminderDate = assignment.openEndedReminderDate
 		closeDate = assignment.closeDate
 		workflowCategory = assignment.workflowCategory.getOrElse(WorkflowCategory.NotDecided)
-
+		reusableWorkflow = assignment.cm2MarkingWorkflow
 	}
 
 }
 
 
-trait EditAssignmentDetailsCommandState extends ModifyAssignmentDetailsCommandState {
+trait EditAssignmentDetailsCommandState extends ModifyAssignmentDetailsCommandState with EditMarkingWorkflowState {
 
-	self: AssessmentServiceComponent =>
+	self: AssessmentServiceComponent with UserLookupComponent with CM2MarkingWorkflowServiceComponent =>
 
 	def assignment: Assignment
-
-	def module: Module = assignment.module
-
+	val module: Module = assignment.module
+	val workflow: CM2MarkingWorkflow = assignment.cm2MarkingWorkflow
 }
 
 

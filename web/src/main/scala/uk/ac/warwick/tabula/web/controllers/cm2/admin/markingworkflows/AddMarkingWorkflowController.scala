@@ -24,7 +24,7 @@ class AddMarkingWorkflowController extends CM2MarkingWorkflowController {
 
 	@ModelAttribute("addMarkingWorkflowCommand")
 	def command(@PathVariable department: Department, @PathVariable academicYear: AcademicYear) =
-		AddMarkingWorkflowCommand(mandatory(department), mandatory(academicYear), isResuable = true)
+		AddMarkingWorkflowCommand(mandatory(department), mandatory(academicYear))
 
 	@RequestMapping(method=Array(HEAD,GET))
 	def showForm(

@@ -1,7 +1,8 @@
 package uk.ac.warwick.tabula.commands.reports.smallgroups
 
 import org.apache.poi.hssf.usermodel.HSSFDataFormat
-import org.apache.poi.xssf.usermodel.{XSSFSheet, XSSFWorkbook}
+import org.apache.poi.ss.usermodel.Sheet
+import org.apache.poi.xssf.streaming.SXSSFWorkbook
 import uk.ac.warwick.tabula.data.AttendanceMonitoringStudentData
 import uk.ac.warwick.tabula.data.model.Department
 import uk.ac.warwick.tabula.data.model.attendance.AttendanceState
@@ -77,18 +78,19 @@ class SmallGroupsReportExporter(val processorResult: SmallGroupsReportProcessorR
 		}
 	}
 
-	def toXLSX: XSSFWorkbook = {
-		val workbook = new XSSFWorkbook()
+	def toXLSX: SXSSFWorkbook = {
+		val workbook = new SXSSFWorkbook
 		val sheet = generateNewSheet(workbook)
 
 		students.foreach(addRow(sheet))
 
-		(0 to headers.size) map sheet.autoSizeColumn
+		(0 to headers.size) foreach sheet.autoSizeColumn
 		workbook
 	}
 
-	private def generateNewSheet(workbook: XSSFWorkbook) = {
+	private def generateNewSheet(workbook: SXSSFWorkbook) = {
 		val sheet = workbook.createSheet(department.name)
+		sheet.trackAllColumnsForAutoSizing()
 
 		// add header row
 		val headerRow = sheet.createRow(0)
@@ -98,7 +100,7 @@ class SmallGroupsReportExporter(val processorResult: SmallGroupsReportProcessorR
 		sheet
 	}
 
-	private def addRow(sheet: XSSFSheet)(studentData: AttendanceMonitoringStudentData) {
+	private def addRow(sheet: Sheet)(studentData: AttendanceMonitoringStudentData) {
 		val plainCellStyle = {
 			val cs = sheet.getWorkbook.createCellStyle()
 			cs.setDataFormat(HSSFDataFormat.getBuiltinFormat("@"))

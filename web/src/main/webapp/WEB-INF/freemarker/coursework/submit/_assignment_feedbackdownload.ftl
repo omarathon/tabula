@@ -57,7 +57,7 @@
 <div class="feedback-notes">
 	<h3>General feedback on the assignment:</h3>
 	<div class="feedback-notes-content">
-		<p>${assignment.genericFeedback!""}</p>
+		<p>${assignment.genericFeedbackFormattedHtml!""}</p>
 	</div>
 </div>
 </#if>

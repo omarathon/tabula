@@ -39,7 +39,7 @@ class MarkerAssignmentsSummaryCommandInternal(marker: Member) extends CommandInt
 
 	override def applyInternal(): Result = {
 		val markerUser = MemberOrUser(marker).asUser
-		val allAssignments = benchmarkTask("allAssignments") { assessmentService.getAssignmentWhereMarker(markerUser) }
+		val allAssignments = benchmarkTask("allAssignments") { assessmentService.getAssignmentWhereMarker(markerUser, None) }
 
 		val parsedAssignments: Seq[MarkerAssignmentsSummaryCommand.Result] = benchmarkTask("parsedAssignments") { allAssignments.map { assignment =>
 			val markerStudents = assignment.markingWorkflow.getMarkersStudents(assignment, markerUser)

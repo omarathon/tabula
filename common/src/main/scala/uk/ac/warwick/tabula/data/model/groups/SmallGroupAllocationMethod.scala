@@ -14,7 +14,8 @@ object SmallGroupAllocationMethod {
 
   val Default = Manual
 	// lame manual collection. Keep in sync with the case objects above
-	val members = Seq(Manual, StudentSignUp, Linked, Random)
+	// Don't change this to a val https://warwick.slack.com/archives/C029QTGBN/p1493995125972397
+	def members = Seq(Manual, StudentSignUp, Linked, Random)
 
 	def fromDatabase(dbValue: String): SmallGroupAllocationMethod ={
 		if (dbValue == null) null

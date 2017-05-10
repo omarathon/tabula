@@ -22,7 +22,7 @@ class SLF4JEventLoggingTest extends TestBase {
 
 		val event = new Event("1235", command.eventName, null, null, description.allProperties, new DateTime)
 
-		listener.afterCommand(event, null)
+		listener.afterCommand(event, null, event)
 		TestLoggerFactory.retrieveEvents(testLogger).map(_.getMessage) should be (Seq("event=Null mykey=jibberjabber"))
 	}
 

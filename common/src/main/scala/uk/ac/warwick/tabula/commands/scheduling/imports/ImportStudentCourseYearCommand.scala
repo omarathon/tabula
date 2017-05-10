@@ -120,7 +120,10 @@ class ImportStudentCourseYearCommand(row: SitsStudentRow, studentCourseDetails: 
 		val oldValue = memberBean.getPropertyValue(property)
 
 		// EnrolledOrCompleted if SCE is not permanently withdrawn OR SCJ reason for transfer code is successful
-		val newValue = !enrolmentStatusCode.safeStartsWith("P") || reasonForTransferCode.safeStartsWith("S")
+		// TAB-5043 or if enrolment status code is not a "not enrolled yet" code
+		val newValue =
+			(!enrolmentStatusCode.safeStartsWith("P") && !enrolmentStatusCode.safeStartsWith("1") && !enrolmentStatusCode.safeStartsWith("2")) ||
+				reasonForTransferCode.safeStartsWith("S")
 
 		if (oldValue != newValue) {
 			logger.debug(s"Detected property change for $property: $oldValue -> $newValue; setting value")

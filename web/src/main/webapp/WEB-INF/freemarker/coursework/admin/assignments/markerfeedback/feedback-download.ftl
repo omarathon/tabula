@@ -67,7 +67,7 @@
 <#if feedback.assignment.genericFeedback??>
 	<div class="feedback-notes">
 		<h4>Feedback for all students on this assignment</h4>
-		${feedback.assignment.genericFeedback!""}
+		${feedback.assignment.genericFeedbackFormattedHtml!""}
 	</div>
 </#if>
 <#if feedback.comments??>

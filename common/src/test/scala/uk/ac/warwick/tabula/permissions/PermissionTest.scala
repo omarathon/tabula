@@ -1,9 +1,9 @@
 package uk.ac.warwick.tabula.permissions
 
-import uk.ac.warwick.tabula.permissions.Permissions._
 import uk.ac.warwick.tabula.TestBase
-import uk.ac.warwick.tabula.helpers.ReflectionHelper
 import uk.ac.warwick.tabula.data.model.StudentRelationshipType
+import uk.ac.warwick.tabula.helpers.ReflectionHelper
+import uk.ac.warwick.tabula.permissions.Permissions._
 
 class PermissionTest extends TestBase {
 
@@ -31,7 +31,7 @@ class PermissionTest extends TestBase {
 
 	// try and pick up broken equals/hashcode methods
 	@Test
-	def permissionsCanBeStoredInAHashSet(){
+	def permissionsCanBeStoredInAHashSet(): Unit = {
 		val allperms = ReflectionHelper.allPermissions
 		val permsInASet = allperms.toSet
 		permsInASet.size should be(allperms.size)

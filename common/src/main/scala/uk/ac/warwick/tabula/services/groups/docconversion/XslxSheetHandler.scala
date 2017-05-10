@@ -1,8 +1,6 @@
 package uk.ac.warwick.tabula.services.groups.docconversion
 
-
 import org.apache.poi.xssf.model.StylesTable
-import org.apache.poi.xssf.usermodel.XSSFComment
 import org.xml.sax.helpers.XMLReaderFactory
 
 import scala.collection.JavaConversions._
@@ -11,6 +9,7 @@ import uk.ac.warwick.tabula.helpers.Logging
 import org.apache.poi.xssf.eventusermodel.{ReadOnlySharedStringsTable, XSSFSheetXMLHandler}
 import org.apache.poi.ss.util.CellReference
 import org.apache.poi.xssf.eventusermodel.XSSFSheetXMLHandler.SheetContentsHandler
+import org.apache.poi.xssf.usermodel.XSSFComment
 import org.xml.sax.XMLReader
 import uk.ac.warwick.tabula.helpers.StringUtils._
 import uk.ac.warwick.tabula.UniversityId

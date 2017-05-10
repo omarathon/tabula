@@ -11,20 +11,23 @@
 		<@f.errors cssClass="error form-errors" />
 		<#assign newRecord=false />
 		<#include "_fields.ftl" />
-        <div class="fix-footer">
-            <input
-                    type="submit"
-                    class="btn btn-primary"
-                    name="${ManageAssignmentMappingParameters.editAndAddFeedback}"
-                    value="Save and continue"
-            />
-            <input
-                    type="submit"
-                    class="btn btn-primary"
-                    name="${ManageAssignmentMappingParameters.editAndEditDetails}"
-                    value="Save and exit"
-            />
-        </div>
+
+		<#include "_modify_assignment_workflow.ftl" />
+
+		<div class="fix-footer">
+			<input
+							type="submit"
+							class="btn btn-primary"
+							name="${ManageAssignmentMappingParameters.editAndAddFeedback}"
+							value="Save and continue"
+			/>
+			<input
+							type="submit"
+							class="btn btn-primary"
+							name="${ManageAssignmentMappingParameters.editAndEditDetails}"
+							value="Save and exit"
+			/>
+		</div>
 	</@f.form>
 </div>
 </#escape>

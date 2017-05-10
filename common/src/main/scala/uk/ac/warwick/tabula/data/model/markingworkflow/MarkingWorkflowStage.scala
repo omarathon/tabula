@@ -5,10 +5,14 @@ import java.sql.Types
 
 import uk.ac.warwick.tabula.data.model.AbstractBasicUserType
 import uk.ac.warwick.tabula.helpers.StringUtils
+import uk.ac.warwick.tabula.system.TwoWayConverter
+import uk.ac.warwick.tabula.helpers.StringUtils._
 
 sealed abstract class MarkingWorkflowStage(val name: String, val order: Int) {
 	def roleName: String = "Marker"
 	def verb: String = "mark"
+	// used when stages have their own allocations rather than allocations being at the roleName level
+	def allocationName: String = roleName
 
 	def previousStages: Seq[MarkingWorkflowStage] = Nil
 	def nextStages: Seq[MarkingWorkflowStage] = Nil
@@ -41,7 +45,7 @@ object MarkingWorkflowStage {
 		override def nextStages: Seq[MarkingWorkflowStage] = Seq(DblSecondMarker)
 	}
 	case object DblSecondMarker extends MarkingWorkflowStage("DblSecondMarker", 2) {
-		override def roleName = "Second marker"
+		override def roleName: String = "Second marker"
 		override def nextStages: Seq[MarkingWorkflowStage] = Seq(DblFinalMarker)
 		override def previousStages: Seq[MarkingWorkflowStage] = Seq(DblFirstMarker)
 	}
@@ -56,10 +60,14 @@ object MarkingWorkflowStage {
 
 	// double blind workflow
 	case object DblBlndInitialMarkerA extends MarkingWorkflowStage("DblBlndInitialMarkerA", 1) {
+		override def roleName: String = "Independent marker"
 		override def nextStages: Seq[MarkingWorkflowStage] = Seq(DblBlndFinalMarker)
+		override def allocationName = "Independent marker A"
 	}
 	case object DblBlndInitialMarkerB extends MarkingWorkflowStage("DblBlndInitialMarkerB", 1) {
+		override def roleName: String = "Independent marker"
 		override def nextStages: Seq[MarkingWorkflowStage] = Seq(DblBlndFinalMarker)
+		override def allocationName = "Independent marker B"
 	}
 	case object DblBlndFinalMarker extends MarkingWorkflowStage("DblBlndFinalMarker", 2) {
 		override def roleName = "Final marker"
@@ -117,4 +125,9 @@ class MarkingWorkflowStageUserType extends AbstractBasicUserType[MarkingWorkflow
 
 	override def convertToObject(string: String): MarkingWorkflowStage = MarkingWorkflowStage.fromCode(string)
 	override def convertToValue(stage: MarkingWorkflowStage): String = stage.name
+}
+
+class StringToMarkingWorkflowStage extends TwoWayConverter[String, MarkingWorkflowStage] {
+	override def convertRight(source: String): MarkingWorkflowStage = source.maybeText.map(MarkingWorkflowStage.fromCode).getOrElse(throw new IllegalArgumentException)
+	override def convertLeft(source: MarkingWorkflowStage): String = Option(source).map { _.name }.orNull
 }

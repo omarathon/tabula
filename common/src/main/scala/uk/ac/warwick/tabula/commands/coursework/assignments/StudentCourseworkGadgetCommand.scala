@@ -42,7 +42,7 @@ class StudentCourseworkGadgetCommandInternal(val studentCourseYearDetails: Stude
 	}
 
 	override lazy val overridableEnrolledAssignments: Seq[Assignment] = {
-		val allAssignments = assessmentMembershipService.getEnrolledAssignments(studentCourseYearDetails.studentCourseDetails.student.asSsoUser)
+		val allAssignments = assessmentMembershipService.getEnrolledAssignments(studentCourseYearDetails.studentCourseDetails.student.asSsoUser, None)
 		assessmentService.filterAssignmentsByCourseAndYear(allAssignments, studentCourseYearDetails)
 	}
 

@@ -7,7 +7,7 @@ import org.springframework.validation.Errors
 import org.springframework.web.bind.annotation.{ModelAttribute, PathVariable, RequestMapping}
 import uk.ac.warwick.tabula.CurrentUser
 import uk.ac.warwick.tabula.commands.Appliable
-import uk.ac.warwick.tabula.commands.coursework.assignments.AssignMarkersCommand
+import uk.ac.warwick.tabula.commands.coursework.assignments.OldAssignMarkersCommand
 import uk.ac.warwick.tabula.web.controllers.coursework.OldCourseworkController
 import uk.ac.warwick.tabula.coursework.web.{Routes => CourseworkRoutes}
 import uk.ac.warwick.tabula.data.model._
@@ -68,7 +68,7 @@ class OldAssignmentAssignMarkersController extends OldCourseworkController {
 
 	@ModelAttribute("command")
 	def getCommand(@PathVariable module: Module, @PathVariable assignment: Assignment) =
-		AssignMarkersCommand(module, assignment)
+		OldAssignMarkersCommand(module, assignment)
 
 	@ModelAttribute("firstMarkerRoleName")
 	def firstMarkerRoleName(@PathVariable assignment: Assignment): String = mandatory(assignment.markingWorkflow).firstMarkerRoleName
@@ -128,7 +128,7 @@ class OldAssignmentAssignMarkersController extends OldCourseworkController {
 							 @PathVariable(value = "assignment") assignment: Assignment,
 							 @ModelAttribute("command") cmd: Appliable[Assignment],
 							 errors: Errors): Mav = {
-			Mav(s"$urlPrefix/admin/assignments/assignmarkers/upload-preview",
+			Mav(s"$urlPrefix/admin/assignments/assignmarkers/upload-previewupload-preview",
 				"assessment" -> assignment,
 				"isExam" -> false,
 				"assignMarkersURL" -> CourseworkRoutes.admin.assignment.assignMarkers(assignment),

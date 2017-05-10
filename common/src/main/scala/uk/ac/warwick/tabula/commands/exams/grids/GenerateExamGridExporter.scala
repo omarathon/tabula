@@ -2,9 +2,10 @@ package uk.ac.warwick.tabula.commands.exams.grids
 
 import java.awt.Color
 
-import org.apache.poi.ss.usermodel.{FontUnderline, HorizontalAlignment, VerticalAlignment}
+import org.apache.poi.ss.usermodel._
 import org.apache.poi.ss.util.CellRangeAddress
-import org.apache.poi.xssf.usermodel._
+import org.apache.poi.xssf.streaming.SXSSFWorkbook
+import org.apache.poi.xssf.usermodel.{XSSFColor, XSSFFont, XSSFWorkbook}
 import org.joda.time.DateTime
 import uk.ac.warwick.tabula.AcademicYear
 import uk.ac.warwick.tabula.data.model._
@@ -41,13 +42,15 @@ object GenerateExamGridExporter {
 		perYearColumnValues: Map[PerYearExamGridColumn, Map[ExamGridEntity, Map[StudentCourseYearDetails.YearOfStudy, Map[ExamGridColumnValueType, Seq[ExamGridColumnValue]]]]],
 		showComponentMarks: Boolean,
 		yearOrder: Ordering[Int] = Ordering.Int
-	): XSSFWorkbook = {
-		val workbook = new XSSFWorkbook()
+	): Workbook = {
+		// Allow randomly accessing rows at any point during generation, don't flush
+		val workbook = new SXSSFWorkbook(null, -1)
 
 		// Styles
 		val cellStyleMap = getCellStyleMap(workbook)
 
 		val sheet = workbook.createSheet(academicYear.toString.replace("/","-"))
+		sheet.trackAllColumnsForAutoSizing()
 
 		summaryAndKey(sheet, cellStyleMap, department, academicYear, course, routes, yearOfStudy, yearWeightings, normalLoadLookup, entities.size, isStudentCount = true)
 
@@ -57,13 +60,13 @@ object GenerateExamGridExporter {
 		val secondaryValueRow = sheet.createRow(sheet.getLastRowNum + 1)
 		val entityRows = entities.map(entity => entity -> {
 			if (showComponentMarks) {
-				Map[ExamGridColumnValueType, XSSFRow](
+				Map[ExamGridColumnValueType, Row](
 					ExamGridColumnValueType.Overall -> sheet.createRow(sheet.getLastRowNum + 1),
 					ExamGridColumnValueType.Assignment -> sheet.createRow(sheet.getLastRowNum + 1),
 					ExamGridColumnValueType.Exam -> sheet.createRow(sheet.getLastRowNum + 1)
 				)
 			} else {
-				Map[ExamGridColumnValueType, XSSFRow](ExamGridColumnValueType.Overall -> sheet.createRow(sheet.getLastRowNum + 1))
+				Map[ExamGridColumnValueType, Row](ExamGridColumnValueType.Overall -> sheet.createRow(sheet.getLastRowNum + 1))
 			}
 		}).toMap
 
@@ -134,13 +137,18 @@ object GenerateExamGridExporter {
 						sheet.autoSizeColumn(currentColumnIndex)
 						categoryRowMaxCellWidth = Math.max(categoryRowMaxCellWidth, sheet.getColumnWidth(currentColumnIndex))
 						categoryCell.setCellStyle(cellStyleMap(HeaderRotated))
-						sheet.addMergedRegion(new CellRangeAddress(categoryCell.getRowIndex, categoryCell.getRowIndex, categoryCell.getColumnIndex, categoryCell.getColumnIndex + perYearColumnCategories(year)(hasCategory.category).size - 1))
+
+						// Guard against trying to create a merged region with only one cell in it
+						val startColumn = categoryCell.getColumnIndex
+						val endColumn = categoryCell.getColumnIndex + perYearColumnCategories(year)(hasCategory.category).size - 1
+
+						if (endColumn > startColumn)
+							sheet.addMergedRegion(new CellRangeAddress(categoryCell.getRowIndex, categoryCell.getRowIndex, startColumn, endColumn))
 					case _ =>
 				}
 				// Header row
 				val headerCell = headerRow.createCell(currentColumnIndex)
 				headerCell.setCellValue(perYearColumn.title)
-				sheet.autoSizeColumn(currentColumnIndex)
 				headerRowMaxCellWidth = Math.max(headerRowMaxCellWidth, sheet.getColumnWidth(currentColumnIndex))
 
 				if(perYearColumn.boldTitle)
@@ -198,12 +206,19 @@ object GenerateExamGridExporter {
 			rightColumn match {
 				case hasCategory: HasExamGridColumnCategory if hasCategory.category != currentCategory =>
 					currentCategory = hasCategory.category
+
 					val categoryCell = categoryRow.createCell(currentColumnIndex)
 					categoryCell.setCellValue(hasCategory.category)
 					sheet.autoSizeColumn(currentColumnIndex)
 					categoryRowMaxCellWidth = Math.max(categoryRowMaxCellWidth, sheet.getColumnWidth(currentColumnIndex))
 					categoryCell.setCellStyle(cellStyleMap(HeaderRotated))
-					sheet.addMergedRegion(new CellRangeAddress(categoryCell.getRowIndex, categoryCell.getRowIndex, categoryCell.getColumnIndex, categoryCell.getColumnIndex + chosenYearColumnCategories(hasCategory.category).size - 1))
+
+					// Guard against trying to create a merged region with only one cell in it
+					val startColumn = categoryCell.getColumnIndex
+					val endColumn = categoryCell.getColumnIndex + chosenYearColumnCategories(hasCategory.category).size - 1
+
+					if (endColumn > startColumn)
+						sheet.addMergedRegion(new CellRangeAddress(categoryCell.getRowIndex, categoryCell.getRowIndex, startColumn, endColumn))
 				case _ =>
 			}
 			// Header row
@@ -248,8 +263,8 @@ object GenerateExamGridExporter {
 	}
 
 	private def summaryAndKey(
-		sheet: XSSFSheet,
-		cellStyleMap: Map[GenerateExamGridExporter.Style, XSSFCellStyle],
+		sheet: Sheet,
+		cellStyleMap: Map[GenerateExamGridExporter.Style, CellStyle],
 		department: Department,
 		academicYear: AcademicYear,
 		course: Course,
@@ -340,11 +355,11 @@ object GenerateExamGridExporter {
 		sheet.autoSizeColumn(1)
 	}
 
-	private def getCellStyleMap(workbook: XSSFWorkbook): Map[GenerateExamGridExporter.Style, XSSFCellStyle] = {
+	private def getCellStyleMap(workbook: Workbook): Map[GenerateExamGridExporter.Style, CellStyle] = {
 		val headerStyle = {
 			val cs = workbook.createCellStyle()
 			val boldFont = workbook.createFont()
-			boldFont.setFontHeight(10)
+			boldFont.setFontHeightInPoints(10)
 			boldFont.setBold(true)
 			cs.setFont(boldFont)
 			cs.setVerticalAlignment(VerticalAlignment.CENTER)
@@ -354,7 +369,7 @@ object GenerateExamGridExporter {
 		val headerRotatedStyle = {
 			val cs = workbook.createCellStyle()
 			val boldFont = workbook.createFont()
-			boldFont.setFontHeight(10)
+			boldFont.setFontHeightInPoints(10)
 			boldFont.setBold(true)
 			cs.setFont(boldFont)
 			cs.setRotation(90)
@@ -371,8 +386,8 @@ object GenerateExamGridExporter {
 
 		val failStyle = {
 			val cs = workbook.createCellStyle()
-			val redFont = workbook.createFont()
-			redFont.setFontHeight(10)
+			val redFont = workbook.createFont().asInstanceOf[XSSFFont]
+			redFont.setFontHeightInPoints(10)
 			redFont.setColor(new XSSFColor(new Color(175, 39, 35)))
 			redFont.setUnderline(FontUnderline.DOUBLE)
 			cs.setFont(redFont)
@@ -381,8 +396,8 @@ object GenerateExamGridExporter {
 
 		val overcatStyle = {
 			val cs = workbook.createCellStyle()
-			val greenFont = workbook.createFont()
-			greenFont.setFontHeight(10)
+			val greenFont = workbook.createFont().asInstanceOf[XSSFFont]
+			greenFont.setFontHeightInPoints(10)
 			greenFont.setColor(new XSSFColor(new Color(89, 110, 49)))
 			greenFont.setUnderline(FontUnderline.SINGLE)
 			cs.setFont(greenFont)
@@ -391,8 +406,8 @@ object GenerateExamGridExporter {
 
 		val overriddenStyle = {
 			val cs = workbook.createCellStyle()
-			val blueFont = workbook.createFont()
-			blueFont.setFontHeight(10)
+			val blueFont = workbook.createFont().asInstanceOf[XSSFFont]
+			blueFont.setFontHeightInPoints(10)
 			blueFont.setColor(new XSSFColor(new Color(32, 79, 121)))
 			cs.setFont(blueFont)
 			cs
@@ -400,8 +415,8 @@ object GenerateExamGridExporter {
 
 		val actualMarkStyle = {
 			val cs = workbook.createCellStyle()
-			val blueFont = workbook.createFont()
-			blueFont.setFontHeight(10)
+			val blueFont = workbook.createFont().asInstanceOf[XSSFFont]
+			blueFont.setFontHeightInPoints(10)
 			blueFont.setColor(new XSSFColor(new Color(35, 155, 146)))
 			blueFont.setItalic(true)
 			cs.setFont(blueFont)
@@ -410,8 +425,8 @@ object GenerateExamGridExporter {
 
 		val failAndActualMarkStyle = {
 			val cs = workbook.createCellStyle()
-			val redFont = workbook.createFont()
-			redFont.setFontHeight(10)
+			val redFont = workbook.createFont().asInstanceOf[XSSFFont]
+			redFont.setFontHeightInPoints(10)
 			redFont.setColor(new XSSFColor(new Color(175, 39, 35)))
 			redFont.setUnderline(FontUnderline.DOUBLE)
 			redFont.setItalic(true)
@@ -421,8 +436,8 @@ object GenerateExamGridExporter {
 
 		val overcatAndActualMarkStyle = {
 			val cs = workbook.createCellStyle()
-			val greenFont = workbook.createFont()
-			greenFont.setFontHeight(10)
+			val greenFont = workbook.createFont().asInstanceOf[XSSFFont]
+			greenFont.setFontHeightInPoints(10)
 			greenFont.setColor(new XSSFColor(new Color(89, 110, 49)))
 			greenFont.setItalic(true)
 			greenFont.setUnderline(FontUnderline.SINGLE)
@@ -433,7 +448,7 @@ object GenerateExamGridExporter {
 		val boldText = {
 			val cs = workbook.createCellStyle()
 			val boldFont = workbook.createFont()
-			boldFont.setFontHeight(10)
+			boldFont.setFontHeightInPoints(10)
 			boldFont.setBold(true)
 			cs.setFont(boldFont)
 			cs

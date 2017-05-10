@@ -34,7 +34,7 @@ class DatabaseEventListener extends EventListener with InitializingBean with Log
 	}
 
 	def beforeCommand(event: Event): Unit = save(event, "before")
-	def afterCommand(event: Event, returnValue: Any): Unit = save(event, "after")
+	def afterCommand(event: Event, returnValue: Any, beforeEvent: Event): Unit = save(event, "after")
 	def onException(event: Event, exception: Throwable): Unit = save(event, "error")
 
 	def startLoggingToFile(): Unit = {

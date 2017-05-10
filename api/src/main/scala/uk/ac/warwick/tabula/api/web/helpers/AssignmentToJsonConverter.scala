@@ -16,10 +16,18 @@ trait AssignmentToJsonConverter {
 			"name" -> assignment.name,
 			"studentUrl" -> (toplevelUrl + Routes.coursework.assignment(assignment)),
 			"collectMarks" -> assignment.collectMarks,
-			"markingWorkflow" -> Option(assignment.markingWorkflow).map { mw => Map(
-				"id" -> mw.id,
-				"name" -> mw.name
-			)}.orNull,
+			"markingWorkflow" -> {
+				if (assignment.cm2Assignment)
+					Option(assignment.cm2MarkingWorkflow).map { mw => Map(
+						"id" -> mw.id,
+						"name" -> mw.name
+					)}.orNull
+				else
+					Option(assignment.markingWorkflow).map { mw => Map(
+						"id" -> mw.id,
+						"name" -> mw.name
+					)}.orNull
+			},
 			"feedbackTemplate" -> Option(assignment.feedbackTemplate).map { ft => Map(
 				"id" -> ft.id,
 				"name" -> ft.name

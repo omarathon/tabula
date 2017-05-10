@@ -5,9 +5,9 @@ import org.springframework.validation.Errors
 import uk.ac.warwick.tabula.AcademicYear
 import uk.ac.warwick.tabula.commands.{Describable, Description, _}
 import uk.ac.warwick.tabula.data.model.Department
-import uk.ac.warwick.tabula.data.model.markingworkflow.MarkingWorkflowType.{DoubleBlindMarking, DoubleMarking, ModeratedMarking, SingleMarking, StudentChoosesGroupMarking}
+import uk.ac.warwick.tabula.data.model.markingworkflow.MarkingWorkflowType.{DoubleBlindMarking, DoubleMarking, ModeratedMarking, SingleMarking}
 import uk.ac.warwick.tabula.data.model.markingworkflow._
-import uk.ac.warwick.tabula.services.{AutoWiringCM2MarkingWorkflowServiceComponent, CM2MarkingWorkflowServiceComponent}
+import uk.ac.warwick.tabula.services.{AutowiringCM2MarkingWorkflowServiceComponent, CM2MarkingWorkflowServiceComponent}
 
 
 object CopyMarkingWorkflowCommand {
@@ -21,7 +21,7 @@ object CopyMarkingWorkflowCommand {
 			with CopyMarkingWorkflowDescription
 			with CopyMarkingWorkflowState
 			with CopyMarkingWorkflowValidation
-			with AutoWiringCM2MarkingWorkflowServiceComponent
+			with AutowiringCM2MarkingWorkflowServiceComponent
 }
 
 class CopyMarkingWorkflowCommandInternal(val department: Department, val markingWorkflow: CM2MarkingWorkflow)
@@ -36,7 +36,6 @@ class CopyMarkingWorkflowCommandInternal(val department: Department, val marking
 		}
 
 		val newWorkflow = markingWorkflow.workflowType match {
-			case StudentChoosesGroupMarking => StudentsChooseGroupWorkflow(markingWorkflow.name, department, markersAUsers)
 			case DoubleMarking => DoubleWorkflow(markingWorkflow.name, department, markersAUsers, markersBUsers)
 			case ModeratedMarking => ModeratedWorkflow(markingWorkflow.name, department, markersAUsers, markersBUsers)
 			case SingleMarking => SingleMarkerWorkflow(markingWorkflow.name, department, markersAUsers)

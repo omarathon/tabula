@@ -90,8 +90,6 @@ object ScalaRestriction {
 			Some(addAliases(new ScalaRestriction(criterion), aliases: _*))
 		}
 
-
-
 	def gt(property: String, value: Any, aliases: (String, AliasAndJoinType)*): Option[ScalaRestriction] =
 		Some(addAliases(new ScalaRestriction(Restrictions.gt(property, value)), aliases: _*))
 

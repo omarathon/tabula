@@ -5,7 +5,7 @@ import org.springframework.validation.ValidationUtils.rejectIfEmptyOrWhitespace
 import uk.ac.warwick.tabula.AcademicYear
 import uk.ac.warwick.tabula.JavaImports.JList
 import uk.ac.warwick.tabula.data.model.Department
-import uk.ac.warwick.tabula.JavaImports.JArrayList
+import uk.ac.warwick.tabula.JavaImports._
 import uk.ac.warwick.tabula.commands._
 import uk.ac.warwick.tabula.data.model.markingworkflow._
 import uk.ac.warwick.tabula.helpers.StringUtils
@@ -23,7 +23,7 @@ object EditMarkingWorkflowCommand {
 			with MarkingWorkflowDepartmentPermissions
 			with ModifyMarkingWorkflowDescription
 			with EditMarkingWorkflowState
-			with AutoWiringCM2MarkingWorkflowServiceComponent
+			with AutowiringCM2MarkingWorkflowServiceComponent
 			with AutowiringUserLookupComponent
 }
 
@@ -35,14 +35,14 @@ class EditMarkingWorkflowCommandInternal(
 
 	self: EditMarkingWorkflowState with CM2MarkingWorkflowServiceComponent with UserLookupComponent =>
 
-	name = workflow.name
+	workflowName = workflow.name
 	extractMarkers match { case (a, b) =>
 		markersA = JArrayList(a)
 		markersB = JArrayList(b)
 	}
 
 	def applyInternal(): CM2MarkingWorkflow = {
-		workflow.name = name
+		workflow.name = workflowName
 		workflow.replaceMarkers(markersAUsers, markersBUsers)
 		cm2MarkingWorkflowService.save(workflow)
 		workflow
@@ -54,10 +54,12 @@ trait EditMarkingWorkflowValidation extends ModifyMarkingWorkflowValidation with
 	self: EditMarkingWorkflowState with UserLookupComponent =>
 
 	override def validate(errors: Errors) {
-		genericValidate(errors, workflow.workflowType)
+		rejectIfEmptyOrWhitespace(errors, "workflowName", "NotEmpty")
 
-		if (department.cm2MarkingWorkflows.exists(w => w.id != workflow.id && w.academicYear == academicYear && w.name == name)) {
-			errors.rejectValue("name", "name.duplicate.markingWorkflow", Array(name), null)
+		markerValidation(errors, workflow.workflowType)
+
+		if (department.cm2MarkingWorkflows.exists(w => w.id != workflow.id && w.academicYear == academicYear && w.name == workflowName)) {
+			errors.rejectValue("workflowName", "name.duplicate.markingWorkflow", Array(workflowName), null)
 		}
 
 		lazy val (existingMarkerAs, existingMarkerBs) = extractMarkers match { case (a, b) => (a.toSet, b.toSet) }
@@ -100,9 +102,8 @@ trait ModifyMarkingWorkflowValidation extends SelfValidating {
 	def hasDuplicates(usercodes: JList[String]): Boolean =
 		usercodes.asScala.distinct.size != usercodes.asScala.size
 
-	// validation shared between add and edit
-	def genericValidate(errors: Errors, workflowType: MarkingWorkflowType): Unit = {
-		rejectIfEmptyOrWhitespace(errors, "name", "NotEmpty")
+	// validation of the markers
+	def markerValidation(errors: Errors, workflowType: MarkingWorkflowType): Unit = {
 
 		val markerAValidator = new UsercodeListValidator(markersA, "markersA"){
 			override def alreadyHasCode: Boolean = hasDuplicates(markersA)
@@ -141,7 +142,7 @@ trait ModifyMarkingWorkflowState {
 	def academicYear: AcademicYear
 
 	// bindable
-	var name: String = _
+	var workflowName: String = _
 	// all the current workflows have at most 2 sets of markers
 	var markersA: JList[Usercode] = _
 	var markersB: JList[Usercode] = _

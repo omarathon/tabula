@@ -113,7 +113,8 @@ class SPRCodeColumnOption extends StudentExamGridColumnOption {
 			state.entities.map(entity => entity ->
 				ExamGridColumnValueString (
 					(for {
-						egey <- entity.years.get(state.yearOfStudy)
+						egeyOpt <- entity.years.get(state.yearOfStudy)
+						egey <- egeyOpt
 						scyd <- egey.studentCourseYearDetails
 					} yield scyd.studentCourseDetails.sprCode).getOrElse("[Unknown]")
 				)
@@ -143,7 +144,7 @@ class RouteColumnOption extends StudentExamGridColumnOption {
 		override def values: Map[ExamGridEntity, ExamGridColumnValue] = {
 			state.entities.map(entity => entity ->
 				ExamGridColumnValueString(
-					entity.years.get(state.yearOfStudy).flatMap(_.studentCourseYearDetails).flatMap(
+					entity.validYears.get(state.yearOfStudy).flatMap(_.studentCourseYearDetails).flatMap(
 						scyd => Option(scyd.route).map(_.code.toUpperCase)
 					).getOrElse("[Unknown]")
 				)
@@ -174,7 +175,7 @@ class StartYearColumnOption extends StudentExamGridColumnOption {
 		override def values: Map[ExamGridEntity, ExamGridColumnValue] = {
 			state.entities.map(entity => entity ->
 				ExamGridColumnValueString(
-					entity.years.get(state.yearOfStudy).flatMap(_.studentCourseYearDetails).flatMap(
+					entity.validYears.get(state.yearOfStudy).flatMap(_.studentCourseYearDetails).flatMap(
 						scyd => Option(scyd.studentCourseDetails.sprStartAcademicYear)
 					).map(_.toString).getOrElse("[Unknown]")
 				)

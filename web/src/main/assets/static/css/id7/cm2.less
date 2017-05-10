@@ -6,7 +6,6 @@ a.profile-link {
 	text-decoration: none;
 }
 
-
 // extension management
 .detail-row {
 	padding: 0;
@@ -89,6 +88,45 @@ table.expanding-row-pairs {
 
 }
 
+// allocate students to markers
+.tabula-dnd.marker-allocation {
+
+	// Give the student list some affordance for dragging around students
+	.student-list {
+		margin: -16px;
+		padding: 16px;
+	}
+
+	ul.drag-list li {
+		display: block;
+		float: none;
+
+		background: white;
+		margin: 0 0 10px;
+
+		&:hover { background-color: darken(@well-bg, 10%); }
+
+		&.ui-selecting { background: darken(@well-bg, 10%) !important; }
+		&.ui-selected { background: darken(@well-bg, 15%) !important; }
+	}
+
+	.well.drop-hover {
+		background-color: #dddddd;
+	}
+
+	.group-header {
+		> h4, > div { display: inline-block; }
+		> h4 { margin-right: 10px; }
+	}
+
+	.direction-icon {
+		font-size: 8em;
+		text-align: center;
+		color: #d6d6d6;
+	}
+
+}
+
 // setup assignments - hidden options groups
 .options-button .options-group {
 	display: none;
@@ -116,5 +154,101 @@ table.expanding-row-pairs {
 	.label-R { background-color: @tabulaGrayDark; }
 	.label-S { background-color: @tabulaGray; }
 	// if you've gone past S then you have too many options. Grey for you!
+}
 
+.student-assignment-list, .marker-assignment-list {
+	.module-title + h4.name {
+		margin-top: 0;
+	}
+
+	.progress {
+		margin-bottom: 3px; // Difference between progress height (22px) and a standard div with text (25px)
+	}
+}
+
+.admin-assignment-list {
+	h5.assignment-name {
+		margin-top: 0;
+	}
+
+	.list-unstyled li {
+		margin-bottom: 0;
+	}
+
+	// Don't hide empties
+	.striped-section.empty {
+		display: block;
+	}
+
+	.scrollable-list {
+		max-height: 340px;
+		overflow-y: auto;
+	}
+}
+
+.filters.admin-assignment-filters {
+	#status-filter .filter-short-values {
+		width: 140px;
+	}
+
+	label.control-label {
+		font-weight: normal;
+		font-size: 85%;
+	}
+
+	.filter + .form-group {
+		margin-left: 10px;
+	}
+
+	.form-inline > .form-group > .input-group {
+		width: 130px;
+	}
+}
+
+#workflowTypeHelp {
+	dd {
+		margin-bottom: 16px;
+	}
+}
+
+@progress-bar-default-bg: #999999;
+@stage-progress-bar-vertical-padding: 5px;
+.stage-progress-bar {
+	height: @line-height-computed;
+	line-height: @line-height-computed;
+	display: flex;
+
+	&.time-progress-bar .bar {
+		background-color: @progress-bar-default-bg;
+	}
+
+	.bar {
+		flex: 1;
+		margin: @stage-progress-bar-vertical-padding -(@line-height-computed / 2);
+
+		&.bar-default {
+			background-color: @progress-bar-default-bg;
+		}
+
+		&.bar-success {
+			background-color: @progress-bar-success-bg;
+		}
+
+		&.bar-warning {
+			background-color: @progress-bar-warning-bg;
+		}
+	}
+
+	> .fa-stack {
+		flex: 0;
+		flex-basis: @line-height-computed;
+		z-index: 1;
+		font-size: @line-height-computed;
+		height: auto;
+		line-height: inherit;
+
+		.text-default {
+			color: @progress-bar-default-bg;
+		}
+	}
 }
