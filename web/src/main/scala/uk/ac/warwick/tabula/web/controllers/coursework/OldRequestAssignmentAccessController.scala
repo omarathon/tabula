@@ -25,7 +25,7 @@ class OldRequestAssignmentAccessController extends OldCourseworkController {
 	@ModelAttribute def cmd(@PathVariable module: Module, @PathVariable assignment: Assignment, user: CurrentUser) =
 		new RequestAssignmentAccessCommand(module, assignment, user)
 
-	@RequestMapping(method = Array(GET, HEAD))
+	@RequestMapping
 	def nope(form: RequestAssignmentAccessCommand, @PathVariable assignment: Assignment) = Redirect(Routes.assignment(mandatory(assignment)))
 
 	@RequestMapping(method = Array(POST))
