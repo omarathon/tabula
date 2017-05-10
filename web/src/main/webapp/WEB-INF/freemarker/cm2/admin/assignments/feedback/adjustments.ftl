@@ -48,7 +48,7 @@
 </#if>
 
 <#assign submit_url>
-	<@routes.coursework.feedbackAdjustmentForm assignment markingId(command.student) />
+	<@routes.cm2.feedbackAdjustmentForm assignment markingId(command.student) />
 </#assign>
 
 <@f.form cssClass="form-horizontal double-submit-protection"
@@ -107,7 +107,7 @@
 
 	<@form.row>
 		<#if isGradeValidation>
-			<#assign generateUrl><@routes.coursework.generateGradesForMarks command.assignment /></#assign>
+			<#assign generateUrl><@routes.cm2.generateGradesForMarks command.assignment /></#assign>
 			<@courses_macros.autoGradeOnline "adjustedGrade" "Adjusted grade" "adjustedMark" markingId(command.student) generateUrl />
 		<#else>
 			<@form.label path="adjustedGrade">Adjusted grade</@form.label>

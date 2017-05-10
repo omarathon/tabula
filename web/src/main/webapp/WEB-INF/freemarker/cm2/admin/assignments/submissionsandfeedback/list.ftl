@@ -36,7 +36,7 @@
 	<div class="fix-header pad-when-fixed">
 		<#include "_filter.ftl" />
 		<#assign currentView = "table" />
-		<#include "_action-bar.ftl" />
+		<#include "./_action-bar.ftl" />
 	</div>
 
 	<#if results.students??>

@@ -43,7 +43,7 @@
 		<#include "_filter.ftl" />
 
 		<#assign currentView = "summary" />
-		<#include "_action-bar.ftl" />
+		<#include "./_action-bar.ftl" />
 
 		<#if results.students??>
 	</div>
