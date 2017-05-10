@@ -90,16 +90,19 @@ class CreatePremarkedAssignmentFixtureCommand extends CommandInternal[Assignment
 				f.usercode = student.userId
 				f.assignment = assignment
 				f.uploaderId = "tabula-functest-admin1"
+				f.actualMark = Some(41)
+				feedbackService.saveOrUpdate(f)
+
 				val mf = new MarkerFeedback(f)
 				f.firstMarkerFeedback = mf
 				mf.mark = Some(41)
 				mf.state = MarkingCompleted
-				f.actualMark = Some(41)
+
+				feedbackService.save(mf)
+
 				f
 			})
-			val markerFeedbacks = feedbacks.map(_.firstMarkerFeedback)
-			feedbacks.foreach(feedbackService.saveOrUpdate)
-			markerFeedbacks.foreach(feedbackService.save)
+
 			assignment.feedbacks = feedbacks.asJava
 			assignmentSrv.save(assignment)
 		}

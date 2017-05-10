@@ -84,7 +84,7 @@
 				<entry key="uk.ac.warwick.tabula.services.CannotPerformWriteOperationException" value="errors/readOnlyMasquerade" />
 				<entry key="uk.ac.warwick.tabula.services.ZipRequestTooLargeError" value="errors/zipTooBig" />
 				<entry key="uk.ac.warwick.tabula.api.web.filters.APILoginMethodMissingException" value="errors/apiLoginMethodMissing" />
-				<entry key="uk.ac.warwick.tabula.SubmitPermissionDeniedException" value="cm2/submit/assignment_permissionDenied" />
+				<entry key="uk.ac.warwick.tabula.SubmitPermissionDeniedException" value="coursework/submit/assignment_permissionDenied" />
 			</map>
 		</property>
 	</bean>
