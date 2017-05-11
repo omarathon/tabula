@@ -75,7 +75,7 @@ trait ZipCreator extends Logging with TaskBenchmarking {
 	/**
 	 * Create a new Zip with a randomly generated name.
 	 */
-	@throws[ZipRequestTooLargeError]("if the items are too large to be zipped")generate-grade
+	@throws[ZipRequestTooLargeError]("if the items are too large to be zipped")
 	def createUnnamedZip(items: Seq[ZipItem], progressCallback: (Int, Int) => Unit = {(_,_) => }): RenderableFile = benchmarkTask("Create unnamed zip") {
 		writeZip(unusedName, items, progressCallback)
 	}
