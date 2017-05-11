@@ -6,7 +6,7 @@ import uk.ac.warwick.tabula.commands.cm2.StudentSubmissionAndFeedbackCommand._
 import uk.ac.warwick.tabula.data.HibernateHelpers
 import uk.ac.warwick.tabula.data.model._
 import uk.ac.warwick.tabula.data.model.forms.Extension
-import uk.ac.warwick.tabula.data.model.notifications.coursework.{FeedbackPublishedNotification, FeedbackChangeNotification}
+import uk.ac.warwick.tabula.data.model.notifications.coursework.{FeedbackChangeNotification, FeedbackPublishedNotification}
 import uk.ac.warwick.tabula.events.NotificationHandling
 import uk.ac.warwick.tabula.permissions.{CheckablePermission, Permissions}
 import uk.ac.warwick.tabula.services._
@@ -27,8 +27,8 @@ object StudentSubmissionAndFeedbackCommand {
 		hasDisability: Boolean
   )
 
-	def apply(module: Module, assignment: Assignment, member: Member, viewingUser: CurrentUser) =
-		new StudentMemberSubmissionAndFeedbackCommandInternal(module, assignment, member, viewingUser)
+	def apply(assignment: Assignment, member: Member, viewingUser: CurrentUser) =
+		new StudentMemberSubmissionAndFeedbackCommandInternal(assignment, member, viewingUser)
 			with StudentMemberSubmissionAndFeedbackCommandPermissions
 			with AutowiringFeedbackServiceComponent
 			with AutowiringSubmissionServiceComponent
@@ -36,8 +36,8 @@ object StudentSubmissionAndFeedbackCommand {
 			with ComposableCommand[StudentSubmissionInformation]
 			with Unaudited with ReadOnly
 
-	def apply(module: Module, assignment: Assignment, user: CurrentUser) =
-		new CurrentUserSubmissionAndFeedbackCommandInternal(module, assignment, user)
+	def apply(assignment: Assignment, user: CurrentUser) =
+		new CurrentUserSubmissionAndFeedbackCommandInternal(assignment, user)
 			with CurrentUserSubmissionAndFeedbackCommandPermissions
 			with CurrentUserSubmissionAndFeedbackNotificationCompletion
 			with AutowiringFeedbackServiceComponent
@@ -50,7 +50,6 @@ object StudentSubmissionAndFeedbackCommand {
 trait StudentSubmissionAndFeedbackCommandState {
 	self: FeedbackServiceComponent with SubmissionServiceComponent =>
 
-	def module: Module
 	def assignment: Assignment
 	def studentUser: User
 	def viewer: User
@@ -80,17 +79,17 @@ trait CurrentUserSubmissionAndFeedbackCommandState extends StudentSubmissionAndF
 	final lazy val viewer: User = currentUser.apparentUser
 }
 
-abstract class StudentMemberSubmissionAndFeedbackCommandInternal(module: Module, assignment: Assignment, val studentMember: Member, val currentUser: CurrentUser)
-	extends StudentSubmissionAndFeedbackCommandInternal(module, assignment) with StudentMemberSubmissionAndFeedbackCommandState {
+abstract class StudentMemberSubmissionAndFeedbackCommandInternal(assignment: Assignment, val studentMember: Member, val currentUser: CurrentUser)
+	extends StudentSubmissionAndFeedbackCommandInternal(assignment) with StudentMemberSubmissionAndFeedbackCommandState {
 	self: FeedbackServiceComponent with SubmissionServiceComponent with ProfileServiceComponent =>
 }
 
-abstract class CurrentUserSubmissionAndFeedbackCommandInternal(module: Module, assignment: Assignment, val currentUser: CurrentUser)
-	extends StudentSubmissionAndFeedbackCommandInternal(module, assignment) with CurrentUserSubmissionAndFeedbackCommandState {
+abstract class CurrentUserSubmissionAndFeedbackCommandInternal(assignment: Assignment, val currentUser: CurrentUser)
+	extends StudentSubmissionAndFeedbackCommandInternal(assignment) with CurrentUserSubmissionAndFeedbackCommandState {
 	self: FeedbackServiceComponent with SubmissionServiceComponent with ProfileServiceComponent =>
 }
 
-abstract class StudentSubmissionAndFeedbackCommandInternal(val module: Module, val assignment: Assignment)
+abstract class StudentSubmissionAndFeedbackCommandInternal(val assignment: Assignment)
 	extends CommandInternal[StudentSubmissionInformation] with StudentSubmissionAndFeedbackCommandState {
 	self: FeedbackServiceComponent with SubmissionServiceComponent with ProfileServiceComponent =>
 
@@ -126,8 +125,6 @@ trait StudentMemberSubmissionAndFeedbackCommandPermissions extends RequiresPermi
 	self: StudentMemberSubmissionAndFeedbackCommandState =>
 
 	def permissionsCheck(p: PermissionsChecking) {
-		mustBeLinked(mandatory(assignment), mandatory(module))
-
 		p.PermissionCheck(Permissions.Submission.Read, mandatory(studentMember))
 		p.PermissionCheck(Permissions.AssignmentFeedback.Read, mandatory(studentMember))
 	}
@@ -137,8 +134,6 @@ trait CurrentUserSubmissionAndFeedbackCommandPermissions extends RequiresPermiss
 	self: CurrentUserSubmissionAndFeedbackCommandState =>
 
 	def permissionsCheck(p: PermissionsChecking) {
-		mustBeLinked(mandatory(assignment), mandatory(module))
-
 		var perms = collection.mutable.MutableList[CheckablePermission]()
 
 		submission.foreach { submission => perms += CheckablePermission(Permissions.Submission.Read, Some(submission)) }

@@ -19,16 +19,15 @@ abstract class AbstractAssignmentSubmissionsController extends AbstractAssignmen
 	@ModelAttribute("command") def command(@PathVariable assignment: Assignment): ModifyAssignmentSubmissionsCommand =
 		ModifyAssignmentSubmissionsCommand(mandatory(assignment))
 
-
 	def showForm(form: ModifyAssignmentSubmissionsCommand, mode: String): Mav = {
-		val module = form.module
+		val module = form.assignment.module
 		Mav(s"$urlPrefix/admin/assignments/assignment_submissions_details",
 			"module" -> module,
 			"mode" -> mode
 		).crumbs(CourseworkBreadcrumbs.Assignment.AssignmentManagement())
 	}
 
-	def submit(cmd: ModifyAssignmentSubmissionsCommand, errors: Errors, path: String, mode: String) = {
+	def submit(cmd: ModifyAssignmentSubmissionsCommand, errors: Errors, path: String, mode: String): Mav = {
 		if (errors.hasErrors) showForm(cmd, mode)
 		else {
 			cmd.apply()

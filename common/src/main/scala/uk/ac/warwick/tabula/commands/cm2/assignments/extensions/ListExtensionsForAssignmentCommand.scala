@@ -1,28 +1,41 @@
 package uk.ac.warwick.tabula.commands.cm2.assignments.extensions
 
 import org.joda.time.Days
-import uk.ac.warwick.spring.Wire
-import uk.ac.warwick.tabula.{CurrentUser, ItemNotFoundException}
 import uk.ac.warwick.tabula.commands._
-import uk.ac.warwick.tabula.data.model.{Assignment, Module}
+import uk.ac.warwick.tabula.commands.cm2.assignments.extensions.ListExtensionsForAssignmentCommand._
+import uk.ac.warwick.tabula.data.model.Assignment
 import uk.ac.warwick.tabula.helpers.coursework.ExtensionGraph
 import uk.ac.warwick.tabula.permissions._
-import uk.ac.warwick.tabula.services.{AssessmentMembershipService, UserLookupService}
+import uk.ac.warwick.tabula.services._
+import uk.ac.warwick.tabula.system.permissions.{PermissionsChecking, PermissionsCheckingMethods, RequiresPermissionsChecking}
+import uk.ac.warwick.tabula.{CurrentUser, ItemNotFoundException}
+
 import scala.collection.JavaConverters._
 
-class ListExtensionsForAssignmentCommand(val module: Module, val assignment: Assignment, val user: CurrentUser)
-	extends Command[Seq[ExtensionGraph]] with ReadOnly with Unaudited {
+object ListExtensionsForAssignmentCommand {
+	type Result = Seq[ExtensionGraph]
+	type Command = Appliable[Result] with ListExtensionsForAssignmentCommandState
 
-	mustBeLinked(mandatory(assignment), mandatory(module))
-	PermissionCheck(Permissions.Extension.Read, assignment)
+	def apply(assignment: Assignment, user: CurrentUser): Command =
+		new ListExtensionsForAssignmentCommandInternal(assignment, user)
+			with ComposableCommand[Result]
+			with ListExtensionsForAssignmentCommandPermissions
+			with AutowiringAssessmentMembershipServiceComponent
+			with AutowiringUserLookupComponent
+			with ReadOnly with Unaudited
+}
 
-	if (assignment.openEnded) throw new ItemNotFoundException
+trait ListExtensionsForAssignmentCommandState {
+	def assignment: Assignment
+	def user: CurrentUser
+}
 
-	var assignmentMembershipService: AssessmentMembershipService = Wire.auto[AssessmentMembershipService]
-	var userLookup: UserLookupService = Wire.auto[UserLookupService]
+class ListExtensionsForAssignmentCommandInternal(val assignment: Assignment, val user: CurrentUser) extends CommandInternal[Result]
+	with ListExtensionsForAssignmentCommandState {
+	self: AssessmentMembershipServiceComponent with UserLookupComponent =>
 
-	def applyInternal(): Seq[ExtensionGraph] = {
-		val assignmentUsers = assignmentMembershipService.determineMembershipUsers(assignment)
+	override def applyInternal(): Result = {
+		val assignmentUsers = assessmentMembershipService.determineMembershipUsers(assignment)
 
 		val assignmentMembership = assignmentUsers.map(u => u.getUserId -> u).toMap
 
@@ -46,7 +59,7 @@ class ListExtensionsForAssignmentCommand(val module: Module, val assignment: Ass
 				Days.daysBetween(e.expiryDate.getOrElse(assignment.closeDate), requestedExpiryDate).getDays
 			}).getOrElse(0)
 
-			new ExtensionGraph(
+			ExtensionGraph(
 				user,
 				assignment.submissionDeadline(user),
 				isAwaitingReview,
@@ -57,5 +70,15 @@ class ListExtensionsForAssignmentCommand(val module: Module, val assignment: Ass
 				extension
 			)
 		}).toSeq
+	}
+}
+
+trait ListExtensionsForAssignmentCommandPermissions extends RequiresPermissionsChecking with PermissionsCheckingMethods {
+	self: ListExtensionsForAssignmentCommandState =>
+
+	override def permissionsCheck(p: PermissionsChecking): Unit = {
+		if (assignment.openEnded) throw new ItemNotFoundException(assignment, "Open-ended assignments cannot have extensions")
+
+		p.PermissionCheck(Permissions.Extension.Read, mandatory(assignment))
 	}
 }

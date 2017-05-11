@@ -14,7 +14,6 @@ import uk.ac.warwick.tabula.services.turnitinlti.TurnitinLtiService
 import uk.ac.warwick.tabula.web.Mav
 import uk.ac.warwick.tabula.web.controllers.cm2.CourseworkBreadcrumbs
 
-
 abstract class AbstractAssignmentOptionsController extends AbstractAssignmentController {
 
 	type ModifyAssignmentOptionsCommand = Appliable[Assignment] with ModifyAssignmentOptionsCommandState with PopulateOnForm
@@ -26,7 +25,7 @@ abstract class AbstractAssignmentOptionsController extends AbstractAssignmentCon
 		ModifyAssignmentOptionsCommand(mandatory(assignment))
 
 	def showForm(form: ModifyAssignmentOptionsCommand, mode: String): Mav = {
-		val module = form.module
+		val module = form.assignment.module
 		Mav(s"$urlPrefix/admin/assignments/assignment_options_details",
 			"module" -> module,
 			"mode" -> mode,
@@ -34,7 +33,7 @@ abstract class AbstractAssignmentOptionsController extends AbstractAssignmentCon
 		).crumbs(CourseworkBreadcrumbs.Assignment.AssignmentManagement())
 	}
 
-	def submit(cmd: ModifyAssignmentOptionsCommand, errors: Errors, path: String, mode: String) = {
+	def submit(cmd: ModifyAssignmentOptionsCommand, errors: Errors, path: String, mode: String): Mav = {
 		if (errors.hasErrors) {
 			showForm(cmd, mode)
 		} else {

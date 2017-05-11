@@ -6,27 +6,27 @@ import org.joda.time.DateTime
 import org.springframework.util.Assert
 import org.springframework.validation.{BindingResult, Errors}
 import uk.ac.warwick.tabula.JavaImports._
-import uk.ac.warwick.tabula.events.{NotificationHandling, TriggerHandling}
-import uk.ac.warwick.tabula.{AutowiringFeaturesComponent, CurrentUser, FeaturesComponent}
 import uk.ac.warwick.tabula.commands._
 import uk.ac.warwick.tabula.data.Transactions._
 import uk.ac.warwick.tabula.data.model._
 import uk.ac.warwick.tabula.data.model.forms.{BooleanFormValue, FormValue, SavedFormValue}
 import uk.ac.warwick.tabula.data.model.notifications.coursework._
 import uk.ac.warwick.tabula.data.model.triggers.{SubmissionAfterCloseDateTrigger, Trigger}
+import uk.ac.warwick.tabula.events.{NotificationHandling, TriggerHandling}
 import uk.ac.warwick.tabula.permissions._
-import uk.ac.warwick.tabula.services.attendancemonitoring.{AttendanceMonitoringCourseworkSubmissionServiceComponent, AutowiringAttendanceMonitoringCourseworkSubmissionServiceComponent}
 import uk.ac.warwick.tabula.services._
+import uk.ac.warwick.tabula.services.attendancemonitoring.{AttendanceMonitoringCourseworkSubmissionServiceComponent, AutowiringAttendanceMonitoringCourseworkSubmissionServiceComponent}
 import uk.ac.warwick.tabula.system.BindListener
 import uk.ac.warwick.tabula.system.permissions.{PermissionsChecking, PermissionsCheckingMethods, RequiresPermissionsChecking}
+import uk.ac.warwick.tabula.{AutowiringFeaturesComponent, CurrentUser, FeaturesComponent}
 
 import scala.collection.JavaConverters._
 
 object SubmitAssignmentCommand {
 	type SubmitAssignmentCommand = Appliable[Submission] with SubmitAssignmentRequest
 
-	def self(module: Module, assignment: Assignment, user: CurrentUser) =
-		new SubmitAssignmentCommandInternal(module, assignment, MemberOrUser(user.profile, user.apparentUser))
+	def self(assignment: Assignment, user: CurrentUser) =
+		new SubmitAssignmentCommandInternal(assignment, MemberOrUser(user.profile, user.apparentUser))
 			with ComposableCommand[Submission]
 			with SubmitAssignmentBinding
 			with SubmitAssignmentAsSelfPermissions
@@ -39,8 +39,8 @@ object SubmitAssignmentCommand {
 			with AutowiringZipServiceComponent
 			with AutowiringAttendanceMonitoringCourseworkSubmissionServiceComponent
 
-	def onBehalfOf(module: Module, assignment: Assignment, member: Member) =
-		new SubmitAssignmentCommandInternal(module, assignment, MemberOrUser(member))
+	def onBehalfOf(assignment: Assignment, member: Member) =
+		new SubmitAssignmentCommandInternal(assignment, MemberOrUser(member))
 			with ComposableCommand[Submission]
 			with SubmitAssignmentBinding
 			with SubmitAssignmentOnBehalfOfPermissions
@@ -55,7 +55,6 @@ object SubmitAssignmentCommand {
 }
 
 trait SubmitAssignmentState {
-	def module: Module
 	def assignment: Assignment
 	def user: MemberOrUser
 }
@@ -90,7 +89,7 @@ trait SubmitAssignmentRequest extends SubmitAssignmentState {
 
 }
 
-abstract class SubmitAssignmentCommandInternal(val module: Module, val assignment: Assignment, val user: MemberOrUser)
+abstract class SubmitAssignmentCommandInternal(val assignment: Assignment, val user: MemberOrUser)
 	extends CommandInternal[Submission] with SubmitAssignmentRequest {
 
 	self: SubmissionServiceComponent
@@ -169,8 +168,7 @@ trait SubmitAssignmentAsSelfPermissions extends RequiresPermissionsChecking with
 	self: SubmitAssignmentState =>
 
 	override def permissionsCheck(p: PermissionsChecking) {
-		mustBeLinked(mandatory(assignment), mandatory(module))
-		p.PermissionCheck(Permissions.Submission.Create, assignment)
+		p.PermissionCheck(Permissions.Submission.Create, mandatory(assignment))
 	}
 }
 
@@ -178,8 +176,7 @@ trait SubmitAssignmentOnBehalfOfPermissions extends RequiresPermissionsChecking 
 	self: SubmitAssignmentState =>
 
 	override def permissionsCheck(p: PermissionsChecking) {
-		mustBeLinked(mandatory(assignment), mandatory(module))
-		p.PermissionCheck(Permissions.Submission.CreateOnBehalfOf, assignment)
+		p.PermissionCheck(Permissions.Submission.CreateOnBehalfOf, mandatory(assignment))
 		p.PermissionCheck(Permissions.Submission.CreateOnBehalfOf, mandatory(user.asMember))
 	}
 }
@@ -239,6 +236,8 @@ trait SubmitAssignmentValidation extends SelfValidating {
 
 trait SubmitAssignmentDescription extends Describable[Submission] {
 	self: SubmitAssignmentState =>
+
+	override lazy val eventName: String = "SubmitAssignment"
 
 	override def describe(d: Description): Unit =	{
 		d.assignment(assignment)

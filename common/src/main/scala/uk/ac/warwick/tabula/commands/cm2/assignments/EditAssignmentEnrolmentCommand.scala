@@ -21,16 +21,12 @@ object EditAssignmentMembershipCommand {
 			with ModifiesAssignmentMembership
 			with StubEditAssignmentMembershipPermissions
 			with Unaudited with ReadOnly
-
 }
-
 
 trait EditAssignmentMembershipCommandState extends CurrentSITSAcademicYear {
 	def assignment: Assignment
-
 	def module: Module = assignment.module
 }
-
 
 class StubEditAssignmentMembershipCommand(val assignment: Assignment, val updateStudentMembershipGroupIsUniversityIds: Boolean = false) extends CommandInternal[Assignment]
 	with EditAssignmentMembershipCommandState {

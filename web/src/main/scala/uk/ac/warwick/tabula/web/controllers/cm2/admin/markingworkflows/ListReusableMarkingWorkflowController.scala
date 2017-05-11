@@ -56,7 +56,7 @@ class ListReusableMarkingWorkflowController extends CM2MarkingWorkflowController
 }
 
 @Profile(Array("cm2Enabled")) @Controller
-@RequestMapping(Array("/${cm2.prefix}/admin/department/{department}/markingworkflows"))
+@RequestMapping(Array("/${cm2.prefix}/admin/department/{department}/markingworkflows", "/${cm2.prefix}/admin/department/{department}/markingworkflows/**"))
 class ListReusableMarkingWorkflowRedirectController extends BaseController
 	with AcademicYearScopedController with AutowiringUserSettingsServiceComponent with AutowiringMaintenanceModeServiceComponent {
 

@@ -41,8 +41,6 @@ trait ModifyAssignmentSubmissionsCommandState {
 
 	def assignment: Assignment
 
-	def module: Module = assignment.module
-
 	def copyTo(assignment: Assignment) {
 		assignment.collectSubmissions = collectSubmissions
 		assignment.automaticallySubmitToTurnitin = automaticallySubmitToTurnitin
@@ -69,6 +67,8 @@ trait ModifyAssignmentSubmissionsPermissions extends RequiresPermissionsChecking
 
 trait ModifyAssignmentSubmissionsDescription extends Describable[Assignment] {
 	self: ModifyAssignmentSubmissionsCommandState with SharedAssignmentProperties =>
+
+	override lazy val eventName: String = "ModifyAssignmentSubmissions"
 
 	override def describe(d: Description) {
 		d.assignment(assignment)
