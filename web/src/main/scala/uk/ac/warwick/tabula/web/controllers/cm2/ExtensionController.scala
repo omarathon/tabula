@@ -21,6 +21,7 @@ import uk.ac.warwick.tabula.services.{ProfileService, RelationshipService, UserL
 import uk.ac.warwick.tabula.web.Mav
 import uk.ac.warwick.tabula.web.views.JSONView
 import uk.ac.warwick.userlookup.User
+
 //FIXME: implemented as part of CM2 migration but will require further reworking due to CM2 workflow changes
 trait ExtensionServices {
 	var json: ObjectMapper = Wire[ObjectMapper]
@@ -151,16 +152,17 @@ class DownloadExtensionAttachmentController extends CourseworkController {
 @Profile(Array("cm2Enabled")) @Controller
 @RequestMapping(Array("/${cm2.prefix}/admin/assignments/{assignment}/manage/extensions"))
 class ListExtensionsForAssignmentController extends CourseworkController {
-	@ModelAttribute
-	def listCommand(@PathVariable assignment:Assignment)
-	= new ListExtensionsForAssignmentCommand(assignment.module, assignment, user)
+	@ModelAttribute("listCommand")
+	def listCommand(@PathVariable assignment: Assignment): ListExtensionsForAssignmentCommand.Command =
+		ListExtensionsForAssignmentCommand(assignment, user)
+
 	@RequestMapping(method=Array(HEAD,GET))
-	def listExtensions(cmd: ListExtensionsForAssignmentCommand, @RequestParam(value="universityId", required=false) universityId: String): Mav = {
+	def listExtensions(@ModelAttribute("listCommand") cmd: ListExtensionsForAssignmentCommand.Command, @RequestParam(value="universityId", required=false) universityId: String): Mav = {
 		val extensionGraphs = cmd.apply()
 		val model = Mav(s"$urlPrefix/admin/extensions/assignmentSummary",
 			"extensionToOpen" -> universityId,
 			"extensionGraphs" -> extensionGraphs,
-			"module" -> cmd.module,
+			"module" -> cmd.assignment.module,
 			"assignment" -> cmd.assignment,
 			"maxDaysToDisplayAsProgressBar" -> Extension.MaxDaysToDisplayAsProgressBar
 		)
@@ -182,7 +184,7 @@ class EditExtensionController extends CourseworkController with ExtensionService
 
 	@ModelAttribute("editExtensionCommand")
 	def editCommand(@PathVariable assignment: Assignment, @PathVariable student: User, @RequestParam(defaultValue = "") action: String) =
-		EditExtensionCommand(assignment.module, assignment, student, user, action)
+		EditExtensionCommand(assignment, student, user, action)
 
 	@RequestMapping(method=Array(GET), path=Array("detail"))
 	def detail(

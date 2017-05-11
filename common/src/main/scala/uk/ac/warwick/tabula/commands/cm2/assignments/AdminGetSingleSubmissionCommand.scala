@@ -1,21 +1,55 @@
 package uk.ac.warwick.tabula.commands.cm2.assignments
 
-import uk.ac.warwick.spring.Wire
-import uk.ac.warwick.tabula.commands.{Command, Description, ReadOnly}
-import uk.ac.warwick.tabula.data.model.{Assignment, Module, Submission}
+import uk.ac.warwick.tabula.commands._
+import uk.ac.warwick.tabula.commands.cm2.assignments.AdminGetSingleSubmissionCommand._
+import uk.ac.warwick.tabula.data.model.{Assignment, Submission}
 import uk.ac.warwick.tabula.permissions._
-import uk.ac.warwick.tabula.services.ZipService
 import uk.ac.warwick.tabula.services.fileserver.RenderableFile
+import uk.ac.warwick.tabula.services.{AutowiringZipServiceComponent, ZipServiceComponent}
+import uk.ac.warwick.tabula.system.permissions.{PermissionsChecking, PermissionsCheckingMethods, RequiresPermissionsChecking}
 
-class AdminGetSingleSubmissionCommand(val module: Module, val assignment: Assignment, val submission: Submission) extends Command[RenderableFile] with ReadOnly {
-	mustBeLinked(assignment, module)
-	PermissionCheck(Permissions.Submission.Read, submission)
+object AdminGetSingleSubmissionCommand {
+	type Result = RenderableFile
+	type Command = Appliable[Result] with AdminGetSingleSubmissionCommandState
 
-	var zipService: ZipService = Wire.auto[ZipService]
+	def apply(assignment: Assignment, submission: Submission) =
+		new AdminGetSingleSubmissionCommandInternal(assignment, submission)
+			with ComposableCommand[Result]
+			with AdminGetSingleSubmissionCommandPermissions
+			with AdminGetSingleSubmissionCommandDescription
+			with ReadOnly
+			with AutowiringZipServiceComponent
+}
+
+trait AdminGetSingleSubmissionCommandState {
+	def assignment: Assignment
+	def submission: Submission
+}
+
+class AdminGetSingleSubmissionCommandInternal(val assignment: Assignment, val submission: Submission)
+	extends CommandInternal[Result] with AdminGetSingleSubmissionCommandState {
+	self: ZipServiceComponent =>
 
 	override def applyInternal(): RenderableFile = zipService.getSubmissionZip(submission)
+}
 
-	override def describe(d: Description): Unit = d.submission(submission).properties(
-		"studentId" -> submission.studentIdentifier,
-		"attachmentCount" -> submission.allAttachments.size)
+trait AdminGetSingleSubmissionCommandPermissions extends RequiresPermissionsChecking with PermissionsCheckingMethods {
+	self: AdminGetSingleSubmissionCommandState =>
+
+	override def permissionsCheck(p: PermissionsChecking): Unit = {
+		mustBeLinked(submission, assignment)
+		p.PermissionCheck(Permissions.Submission.Read, mandatory(submission))
+	}
+}
+
+trait AdminGetSingleSubmissionCommandDescription extends Describable[Result] {
+	self: AdminGetSingleSubmissionCommandState =>
+
+	override lazy val eventName: String = "AdminGetSingleSubmission"
+
+	override def describe(d: Description): Unit =
+		d.submission(submission).properties(
+			"studentId" -> submission.studentIdentifier,
+			"attachmentCount" -> submission.allAttachments.size
+		)
 }

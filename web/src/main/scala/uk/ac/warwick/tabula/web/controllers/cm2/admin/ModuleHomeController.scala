@@ -42,7 +42,7 @@ abstract class AbstractModuleHomeController
 
 @Profile(Array("cm2Enabled"))
 @Controller
-@RequestMapping(Array("/${cm2.prefix}/admin/module/{module}"))
+@RequestMapping(Array("/${cm2.prefix}/admin/{module}"))
 class ModuleHomeController extends AbstractModuleHomeController {
 
 	@ModelAttribute("activeAcademicYear")
@@ -53,11 +53,22 @@ class ModuleHomeController extends AbstractModuleHomeController {
 
 @Profile(Array("cm2Enabled"))
 @Controller
-@RequestMapping(Array("/${cm2.prefix}/admin/module/{module}/{academicYear:\\d{4}}"))
+@RequestMapping(Array("/${cm2.prefix}/admin/{module}/{academicYear:\\d{4}}"))
 class ModuleHomeForYearController extends AbstractModuleHomeController {
 
 	@ModelAttribute("activeAcademicYear")
 	override def activeAcademicYear(@PathVariable academicYear: AcademicYear): Option[AcademicYear] =
 		retrieveActiveAcademicYear(Option(academicYear))
+
+}
+
+@Profile(Array("cm2Enabled"))
+@Controller
+@RequestMapping(Array("/${cm2.prefix}/admin/module/{module}", "/${cm2.prefix}/admin/module/{module}/**"))
+class ModuleHomeRedirectController extends CourseworkController {
+
+	@RequestMapping
+	def redirect(@PathVariable module: Module) =
+		Redirect(Routes.admin.module(mandatory(module)))
 
 }

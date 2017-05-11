@@ -37,12 +37,12 @@ class AssignmentController extends CourseworkController
 
 	@ModelAttribute("submitAssignmentCommand")
 	def formOrNull(@PathVariable assignment: Assignment, user: CurrentUser): SubmitAssignmentCommand = {
-		restricted(SubmitAssignmentCommand.self(mandatory(assignment.module), mandatory(assignment), user)).orNull
+		restricted(SubmitAssignmentCommand.self(mandatory(assignment), user)).orNull
 	}
 
 	@ModelAttribute("studentSubmissionAndFeedbackCommand")
 	def studentSubmissionAndFeedbackCommand(@PathVariable assignment: Assignment, user: CurrentUser) =
-		StudentSubmissionAndFeedbackCommand(assignment.module, assignment, user)
+		StudentSubmissionAndFeedbackCommand(assignment, user)
 
 	@ModelAttribute("willCheckpointBeCreated")
 	def willCheckpointBeCreated(
@@ -95,7 +95,7 @@ class AssignmentController extends CourseworkController
 			"extensionRequested" -> info.extensionRequested,
 			"hasDisability" -> info.hasDisability,
 			"isSelf" -> true)
-			.withTitle(infoCommand.module.name + " (" + infoCommand.module.code.toUpperCase + ")" + " - " + infoCommand.assignment.name)
+			.withTitle(infoCommand.assignment.module.name + " (" + infoCommand.assignment.module.code.toUpperCase + ")" + " - " + infoCommand.assignment.name)
 	}
 
 	@RequestMapping(method = Array(POST))
