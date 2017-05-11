@@ -105,13 +105,15 @@ class FeedbackServiceImpl extends FeedbackService with Daoisms with Logging {
 
 	def addAnonymousIds(feedbacks: Seq[AssignmentFeedback]): Seq[AssignmentFeedback] = transactional() {
 		val assignments = feedbacks.map(_.assignment).distinct
-		if(assignments.length != 1) throw new IllegalArgumentException("Can only generate IDs for feedback from the same assignment")
-		val nextIndex = dao.getLastAnonIndex(assignments.head) + 1
+		if(assignments.length > 1) throw new IllegalArgumentException("Can only generate IDs for feedback from the same assignment")
+		assignments.headOption.foreach(assignment => {
+			val nextIndex = dao.getLastAnonIndex(assignment) + 1
 
-		for((feedback, i) <- feedbacks.zipWithIndex) {
-			feedback.anonymousId = Some(nextIndex + i)
-			dao.save(feedback)
-		}
+			for((feedback, i) <- feedbacks.zipWithIndex) {
+				feedback.anonymousId = Some(nextIndex + i)
+				dao.save(feedback)
+			}
+		})
 		feedbacks
 	}
 
