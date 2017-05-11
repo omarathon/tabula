@@ -38,7 +38,6 @@ abstract class AbstractFeedbackDao extends FeedbackDao with Daoisms {
 
 	override def save(feedback: Feedback): Unit = {
 		session.saveOrUpdate(feedback)
-		session.flush()
 	}
 
 	override def delete(feedback: Feedback): Unit = {
@@ -54,7 +53,6 @@ abstract class AbstractFeedbackDao extends FeedbackDao with Daoisms {
 
 	override def save(feedback: MarkerFeedback): Unit = {
 		session.saveOrUpdate(feedback)
-		session.flush()
 	}
 
 	override def delete(feedback: MarkerFeedback): Unit = {
