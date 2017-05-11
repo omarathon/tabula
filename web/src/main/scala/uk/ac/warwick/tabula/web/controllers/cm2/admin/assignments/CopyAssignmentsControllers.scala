@@ -34,7 +34,7 @@ class CopyModuleAssignmentsController extends AbstractCopyAssignmentsController 
 	@ModelAttribute
 	def copyAssignmentsCommand(@PathVariable module: Module) = CopyAssignmentsCommand(mandatory(module).adminDepartment, Seq(module))
 
-	@RequestMapping(method = Array(HEAD, GET))
+	@RequestMapping
 	def showForm(@PathVariable module: Module, cmd: CopyAssignmentsCommand): Mav = {
 		Mav(s"$urlPrefix/admin/modules/copy_assignments",
 			"title" -> module.name,
@@ -72,7 +72,7 @@ class CopyDepartmentAssignmentsController extends AbstractCopyAssignmentsControl
 		CopyAssignmentsCommand(mandatory(department), modules)
 	}
 
-	@RequestMapping(method = Array(HEAD, GET))
+	@RequestMapping
 	def showForm(@PathVariable department: Department, cmd: CopyAssignmentsCommand): Mav = {
 		Mav(s"$urlPrefix/admin/modules/copy_assignments",
 			"title" -> department.name,

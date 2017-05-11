@@ -14,7 +14,7 @@ import uk.ac.warwick.tabula.cm2.web.Routes
 import uk.ac.warwick.tabula.commands.cm2.assignments.extensions.{EditExtensionCommand, _}
 import uk.ac.warwick.tabula.commands.{Appliable, SelfValidating}
 import uk.ac.warwick.tabula.data.model.forms.{Extension, ExtensionState}
-import uk.ac.warwick.tabula.data.model.{Assignment, StudentMember}
+import uk.ac.warwick.tabula.data.model.{Assignment, Department, StudentMember}
 import uk.ac.warwick.tabula.helpers.DateBuilder
 import uk.ac.warwick.tabula.services.fileserver.{RenderableAttachment, RenderableFile}
 import uk.ac.warwick.tabula.services.{ProfileService, RelationshipService, UserLookupService}
@@ -288,4 +288,11 @@ class EditExtensionController extends CourseworkController with ExtensionService
 			Mav("ajax_success", "data" -> extensionJson).noLayout()
 		}
 	}
+}
+
+@Profile(Array("cm2Enabled")) @Controller
+@RequestMapping(Array("/${cm2.prefix}/admin/department/{department}/manage/extensions"))
+class RedirectExtensionManagementController extends CourseworkController {
+	@RequestMapping def redirect(@PathVariable department: Department) =
+		Redirect(s"${Routes.admin.extensions()}?departments=${mandatory(department).code}")
 }
