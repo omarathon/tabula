@@ -61,7 +61,7 @@ abstract class AssignMarkersCommandInternal(val assignment: Assignment) extends 
 		})
 
 		// add anonymous marking IDs to each item of feedback - add regardless of setting in case anon marking is chosen later
-		feedbackService.addAnonymousIds(assignment.allFeedback.filter(_.anonymousId.isEmpty))
+		feedbackService.addAnonymousIds(assignment.allFeedback)
 		assignment
 	}
 }

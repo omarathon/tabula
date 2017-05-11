@@ -109,7 +109,8 @@ class FeedbackServiceImpl extends FeedbackService with Daoisms with Logging {
 		assignments.headOption.foreach(assignment => {
 			val nextIndex = dao.getLastAnonIndex(assignment) + 1
 
-			for((feedback, i) <- feedbacks.zipWithIndex) {
+			// add IDs to any feedback that doesn't already have one
+			for((feedback, i) <- feedbacks.filter(_.anonymousId.isEmpty).zipWithIndex) {
 				feedback.anonymousId = Some(nextIndex + i)
 				dao.save(feedback)
 			}
