@@ -78,7 +78,6 @@ class FeedbackServiceImpl extends FeedbackService with Daoisms with Logging {
 
 	def saveOrUpdate(feedback:Feedback){
 		session.saveOrUpdate(feedback)
-		session.flush()
 	}
 
 	def saveOrUpdate(mark: Mark) {
