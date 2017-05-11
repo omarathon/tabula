@@ -19,8 +19,8 @@ import uk.ac.warwick.userlookup.User
 object SubmitToTurnitinCommand {
 	type CommandType = Appliable[Assignment] with SubmitToTurnitinRequest with SelfValidating
 
-	def apply(module: Module, assignment: Assignment): CommandType =
-		new SubmitToTurnitinCommandInternal(module, assignment)
+	def apply(assignment: Assignment): CommandType =
+		new SubmitToTurnitinCommandInternal(assignment)
 			with ComposableCommand[Assignment]
 			with SubmitToTurnitinPermissions
 			with SubmitToTurnitinDescription
@@ -29,8 +29,8 @@ object SubmitToTurnitinCommand {
 			with AutowiringFeaturesComponent
 			with AutowiringTurnitinLtiQueueServiceComponent
 
-	def apply(module: Module, assignment: Assignment, user: CurrentUser): CommandType =
-		new SubmitToTurnitinCommandInternal(module, assignment, user)
+	def apply(assignment: Assignment, user: CurrentUser): CommandType =
+		new SubmitToTurnitinCommandInternal(assignment, user)
 			with ComposableCommand[Assignment]
 			with SubmitToTurnitinPermissions
 			with SubmitToTurnitinDescription
@@ -41,7 +41,6 @@ object SubmitToTurnitinCommand {
 }
 
 trait SubmitToTurnitinState {
-	def module: Module
 	def assignment: Assignment
 }
 
@@ -49,13 +48,13 @@ trait SubmitToTurnitinRequest extends SubmitToTurnitinState {
 	var submitter: User = _
 }
 
-abstract class SubmitToTurnitinCommandInternal(val module: Module, val assignment: Assignment)
+abstract class SubmitToTurnitinCommandInternal(val assignment: Assignment)
 	extends CommandInternal[Assignment] with SubmitToTurnitinRequest {
 
 	self: AssessmentServiceComponent with FeaturesComponent with TurnitinLtiQueueServiceComponent =>
 
-	def this(module: Module, assignment: Assignment, user: CurrentUser) {
-		this(module, assignment)
+	def this(assignment: Assignment, user: CurrentUser) {
+		this(assignment)
 
 		submitter = user.apparentUser
 	}
@@ -89,13 +88,14 @@ trait SubmitToTurnitinPermissions extends RequiresPermissionsChecking with Permi
 	self: SubmitToTurnitinState =>
 
 	override def permissionsCheck(p: PermissionsChecking) {
-		mustBeLinked(mandatory(assignment), mandatory(module))
 		p.PermissionCheck(Permissions.Submission.CheckForPlagiarism, assignment)
 	}
 }
 
 trait SubmitToTurnitinDescription extends Describable[Assignment] {
 	self: SubmitToTurnitinState =>
+
+	override lazy val eventName: String = "SubmitToTurnitin"
 
 	override def describe(d: Description): Unit = d.assignment(assignment)
 }

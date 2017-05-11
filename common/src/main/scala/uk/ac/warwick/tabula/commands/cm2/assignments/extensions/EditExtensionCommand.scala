@@ -4,21 +4,21 @@ import org.joda.time.DateTime
 import org.springframework.format.annotation.DateTimeFormat
 import org.springframework.validation.Errors
 import uk.ac.warwick.tabula.commands._
-import uk.ac.warwick.tabula.data.model.notifications.coursework._
-import uk.ac.warwick.tabula.events.NotificationHandling
-import uk.ac.warwick.tabula.system.permissions.{PermissionsChecking, RequiresPermissionsChecking}
-import uk.ac.warwick.tabula.permissions.Permissions
-import uk.ac.warwick.tabula.data.model.forms.{Extension, ExtensionState}
-import uk.ac.warwick.tabula.data.model.{Assignment, Module, Notification, ScheduledNotification}
-import uk.ac.warwick.tabula.{CurrentUser, DateFormats}
-import uk.ac.warwick.tabula.services.{AutowiringUserLookupComponent, UserLookupComponent}
 import uk.ac.warwick.tabula.data.Transactions._
+import uk.ac.warwick.tabula.data.model.forms.{Extension, ExtensionState}
+import uk.ac.warwick.tabula.data.model.notifications.coursework._
+import uk.ac.warwick.tabula.data.model.{Assignment, Notification, ScheduledNotification}
+import uk.ac.warwick.tabula.events.NotificationHandling
+import uk.ac.warwick.tabula.permissions.Permissions
+import uk.ac.warwick.tabula.services.{AutowiringUserLookupComponent, UserLookupComponent}
+import uk.ac.warwick.tabula.system.permissions.{PermissionsChecking, RequiresPermissionsChecking}
 import uk.ac.warwick.tabula.validators.WithinYears
+import uk.ac.warwick.tabula.{CurrentUser, DateFormats}
 import uk.ac.warwick.userlookup.User
 
 object EditExtensionCommand {
-	def apply(module: Module, assignment: Assignment, student: User, currentUser: CurrentUser, action: String) =
-		new EditExtensionCommandInternal(module, assignment, student, currentUser, action)
+	def apply(assignment: Assignment, student: User, currentUser: CurrentUser, action: String) =
+		new EditExtensionCommandInternal(assignment, student, currentUser, action)
 			with ComposableCommand[Extension]
 			with EditExtensionCommandPermissions
 			with EditExtensionCommandDescription
@@ -30,7 +30,7 @@ object EditExtensionCommand {
 			with HibernateExtensionPersistenceComponent
 }
 
-class EditExtensionCommandInternal(val module: Module, val assignment: Assignment, val student: User, val submitter: CurrentUser, val action: String) extends CommandInternal[Extension]
+class EditExtensionCommandInternal(val assignment: Assignment, val student: User, val submitter: CurrentUser, val action: String) extends CommandInternal[Extension]
 		with EditExtensionCommandState with EditExtensionCommandValidation with TaskBenchmarking {
 
 	self: ExtensionPersistenceComponent with UserLookupComponent =>
@@ -83,7 +83,6 @@ trait EditExtensionCommandState {
 
 	def student: User
 	def assignment: Assignment
-	def module: Module
 	def submitter: CurrentUser
 	def action: String
 
@@ -122,8 +121,6 @@ trait EditExtensionCommandPermissions extends RequiresPermissionsChecking {
 	self: EditExtensionCommandState =>
 
 	def permissionsCheck(p: PermissionsChecking) {
-		p.mustBeLinked(assignment, module)
-
 		extension match {
 			case e if e.isTransient => p.PermissionCheck(Permissions.Extension.Create, assignment)
 			case _ => p.PermissionCheck(Permissions.Extension.Update, assignment)
@@ -238,6 +235,8 @@ trait EditExtensionCommandNotificationCompletion extends CompletesNotifications[
 
 trait EditExtensionCommandDescription extends Describable[Extension] {
 	self: EditExtensionCommandState =>
+
+	override lazy val eventName: String = "EditExtension"
 
 	def describe(d: Description) {
 		d.assignment(assignment)

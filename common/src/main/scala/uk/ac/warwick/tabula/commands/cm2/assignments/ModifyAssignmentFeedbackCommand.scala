@@ -42,8 +42,6 @@ trait ModifyAssignmentFeedbackCommandState  {
 
 	def assignment: Assignment
 
-	def module: Module = assignment.module
-
 	def copyTo(assignment: Assignment) {
 		assignment.feedbackTemplate = feedbackTemplate
 		assignment.collectMarks = collectMarks
@@ -57,6 +55,8 @@ trait ModifyAssignmentFeedbackCommandState  {
 
 trait ModifyAssignmentFeedbackDescription extends Describable[Assignment] {
 	self: ModifyAssignmentFeedbackCommandState with SharedAssignmentProperties =>
+
+	override lazy val eventName: String = "ModifyAssignmentFeedback"
 
 	override def describe(d: Description) {
 		d.assignment(assignment).properties(

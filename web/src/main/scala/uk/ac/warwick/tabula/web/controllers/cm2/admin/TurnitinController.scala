@@ -29,7 +29,7 @@ class TurnitinController extends CourseworkController with AutowiringTurnitinLti
 
 	@ModelAttribute("command")
 	def model(@PathVariable assignment: Assignment, user: CurrentUser) =
-		SubmitToTurnitinCommand(assignment.module, assignment, user)
+		SubmitToTurnitinCommand(assignment, user)
 
 	@ModelAttribute("incompatibleFiles")
 	def incompatibleFiles(@PathVariable assignment: Assignment): mutable.Buffer[FileAttachment] = {

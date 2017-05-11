@@ -1,4 +1,4 @@
-package uk.ac.warwick.tabula.web.controllers.coursework
+package uk.ac.warwick.tabula.web.controllers.cm2
 
 import org.springframework.context.annotation.Profile
 import org.springframework.stereotype.Controller
@@ -9,13 +9,13 @@ import uk.ac.warwick.tabula.data.model.{Assignment, Module}
 import uk.ac.warwick.tabula.web.Mav
 import uk.ac.warwick.tabula.web.views.JSONView
 
-@Profile(Array("cm1Enabled")) @Controller
-@RequestMapping(value=Array("/${cm1.prefix}/module/{module}/{assignment}/attempt"))
-class SubmissionAttemptController extends OldCourseworkController {
+@Profile(Array("cm2Enabled")) @Controller
+@RequestMapping(value=Array("/${cm2.prefix}/submission/{assignment}/attempt"))
+class SubmissionAttemptController extends CourseworkController {
 
 	@ModelAttribute("command")
-	def command(@PathVariable module: Module, @PathVariable assignment: Assignment) =
-		SubmissionAttemptCommand(mandatory(module), mandatory(assignment), user)
+	def command(@PathVariable assignment: Assignment) =
+		SubmissionAttemptCommand(mandatory(assignment), user)
 
 	@RequestMapping(method = Array(POST))
 	def submit(@ModelAttribute("command") cmd: Appliable[Unit]): Mav = {

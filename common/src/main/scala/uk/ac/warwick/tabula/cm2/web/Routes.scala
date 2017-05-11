@@ -52,9 +52,9 @@ object Routes {
 		}
 		object module {
 			def apply(module: Module): String =
-				admin() + s"/module/${encoded(module.code)}"
+				admin() + s"/${encoded(module.code)}"
 			def apply(module: Module, academicYear: AcademicYear): String =
-				admin() + s"/module/${encoded(module.code)}/${encoded(academicYear.startYear.toString)}"
+				admin() + s"/${encoded(module.code)}/${encoded(academicYear.startYear.toString)}"
 		}
 
 		object workflows {
