@@ -6,7 +6,7 @@ import org.springframework.context.annotation.Profile
 import org.springframework.stereotype.Controller
 import org.springframework.validation.Errors
 import org.springframework.web.bind.annotation.{ModelAttribute, PathVariable, RequestMapping}
-import uk.ac.warwick.tabula.commands.coursework.feedback.GenerateGradesFromMarkCommand
+import uk.ac.warwick.tabula.commands.coursework.feedback.OldGenerateGradesFromMarkCommand
 import uk.ac.warwick.tabula.commands.exams.exams.{BulkAdjustmentCommand, BulkAdjustmentTemplateCommand}
 import uk.ac.warwick.tabula.commands.{Appliable, SelfValidating}
 import uk.ac.warwick.tabula.coursework.web.Routes
@@ -26,7 +26,7 @@ class OldBulkFeedbackAdjustmentController extends OldCourseworkController {
 	def command(@PathVariable module: Module, @PathVariable assignment: Assignment) =
 		BulkAdjustmentCommand(
 			mandatory(assignment),
-			GenerateGradesFromMarkCommand(mandatory(module), mandatory(assignment)),
+			OldGenerateGradesFromMarkCommand(mandatory(module), mandatory(assignment)),
 			SpreadsheetHelpers,
 			user
 		)

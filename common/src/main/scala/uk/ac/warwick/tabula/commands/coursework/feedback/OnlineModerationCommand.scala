@@ -22,7 +22,7 @@ object OnlineModerationCommand {
 		new OnlineModerationCommand(module, assignment, student, marker, submitter, gradeGenerator)
 			with ComposableCommand[MarkerFeedback]
 			with OnlineFeedbackFormPermissions
-			with MarkerFeedbackStateCopy
+			with OldMarkerFeedbackStateCopy
 			with CopyFromFormFields
 			with WriteToFormFields
 			with ModerationRejectedNotifier
@@ -49,7 +49,7 @@ abstract class OnlineModerationCommand(
 ) extends AbstractOnlineFeedbackFormCommand(module, assignment, student, user, gradeGenerator) with CommandInternal[MarkerFeedback] with Appliable[MarkerFeedback]
 	with ModerationState with UserAware {
 
-	self: FeedbackServiceComponent with FileAttachmentServiceComponent with ZipServiceComponent with MarkerFeedbackStateCopy
+	self: FeedbackServiceComponent with FileAttachmentServiceComponent with ZipServiceComponent with OldMarkerFeedbackStateCopy
 		with FinaliseFeedbackComponent =>
 
 	def markerFeedback: Option[MarkerFeedback] = assignment.getMarkerFeedback(student.getUserId, marker, SecondFeedback)

@@ -61,7 +61,7 @@ class OldFeedbackAdjustmentsController extends OldCourseworkController with Auto
 
 	@ModelAttribute("command")
 	def formCommand(@PathVariable module: Module, @PathVariable assignment: Assignment, @PathVariable student: User, submitter: CurrentUser) =
-		AssignmentFeedbackAdjustmentCommand(mandatory(assignment), student, submitter, GenerateGradesFromMarkCommand(mandatory(module), mandatory(assignment)))
+		AssignmentFeedbackAdjustmentCommand(mandatory(assignment), student, submitter, OldGenerateGradesFromMarkCommand(mandatory(module), mandatory(assignment)))
 
 	@RequestMapping(method=Array(GET))
 	def showForm(

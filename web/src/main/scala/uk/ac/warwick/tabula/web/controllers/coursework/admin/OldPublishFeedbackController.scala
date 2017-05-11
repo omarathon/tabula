@@ -25,7 +25,7 @@ class OldPublishFeedbackController extends OldCourseworkController {
 	validatesSelf[SelfValidating]
 
 	@ModelAttribute("publishFeedbackCommand") def cmd(@PathVariable module: Module, @PathVariable assignment: Assignment, user: CurrentUser): PublishFeedbackCommandInternal with ComposableCommand[PublishFeedbackResults] with AutowiringFeedbackServiceComponent with AutowiringFeedbackForSitsServiceComponent with PublishFeedbackCommandState with PublishFeedbackPermissions with PublishFeedbackValidation with PublishFeedbackDescription with PublishFeedbackNotification with PublishFeedbackNotificationCompletion with QueuesFeedbackForSits = {
-		PublishFeedbackCommand(mandatory(module), mandatory(assignment), user, GenerateGradesFromMarkCommand(mandatory(module), mandatory(assignment)))
+		PublishFeedbackCommand(mandatory(module), mandatory(assignment), user, OldGenerateGradesFromMarkCommand(mandatory(module), mandatory(assignment)))
 	}
 
 	@RequestMapping(method = Array(HEAD, GET), params = Array("!confirm"))

@@ -399,22 +399,16 @@ class Assignment
 
 	def lateSubmissionCount: Int = submissions.count(submission => isLate(submission))
 
-	def submissionDeadline(user: User): DateTime = submissionDeadline(user.getUserId)
-
+	/**
+		* Deadline taking into account any approved extension
+		*/
 	def submissionDeadline(usercode: String): DateTime =
 		if (openEnded) null
 		else
 			extensions.find(e => e.isForUser(usercode) && e.approved).flatMap(_.expiryDate).getOrElse(closeDate)
 
-	/**
-	 * Deadline taking into account any approved extension
-	 */
-	def submissionDeadline(submission: Submission): DateTime =
-		if (openEnded) null
-		else extensions
-			.find(e => e.isForUser(submission.usercode) && e.approved)
-			.flatMap(_.expiryDate)
-			.getOrElse(closeDate)
+	def submissionDeadline(user: User): DateTime = submissionDeadline(user.getUserId)
+	def submissionDeadline(submission: Submission): DateTime = submissionDeadline(submission.usercode)
 
 	def workingDaysLate(submission: Submission): Int =
 		if (isLate(submission)) {
