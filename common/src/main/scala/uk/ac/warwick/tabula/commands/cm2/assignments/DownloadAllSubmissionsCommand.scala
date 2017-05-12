@@ -14,6 +14,8 @@ object DownloadAllSubmissionsCommand {
 	type Result = RenderableFile
 	type Command = Appliable[Result] with DownloadAllSubmissionsCommandState
 
+	val AdminPermission = Permissions.Submission.Read
+
 	def apply(assignment: Assignment, filename: String): Command =
 		new DownloadAllSubmissionsCommandInternal(assignment, filename)
 			with ComposableCommand[Result]
@@ -39,7 +41,7 @@ trait DownloadAllSubmissionsCommandPermissions extends RequiresPermissionsChecki
 	self: DownloadAllSubmissionsCommandState =>
 
 	override def permissionsCheck(p: PermissionsChecking): Unit =
-		p.PermissionCheck(Permissions.Submission.Read, mandatory(assignment))
+		p.PermissionCheck(AdminPermission, mandatory(assignment))
 }
 
 trait DownloadAllSubmissionsCommandDescription extends Describable[Result] {

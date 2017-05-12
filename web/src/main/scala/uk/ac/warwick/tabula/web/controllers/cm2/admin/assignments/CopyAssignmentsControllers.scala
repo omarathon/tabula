@@ -9,7 +9,7 @@ import uk.ac.warwick.tabula.JavaImports.JList
 import uk.ac.warwick.tabula.cm2.web.Routes
 import uk.ac.warwick.tabula.commands.cm2.assignments.CopyAssignmentsCommand
 import uk.ac.warwick.tabula.data.model.{Assignment, Department, Module}
-import uk.ac.warwick.tabula.permissions.{Permission, Permissions}
+import uk.ac.warwick.tabula.permissions.Permission
 import uk.ac.warwick.tabula.services.{AutowiringMaintenanceModeServiceComponent, AutowiringModuleAndDepartmentServiceComponent, AutowiringUserSettingsServiceComponent}
 import uk.ac.warwick.tabula.web.Mav
 import uk.ac.warwick.tabula.web.controllers.DepartmentScopedController
@@ -31,11 +31,12 @@ abstract class AbstractCopyAssignmentsController extends CourseworkController {
 @RequestMapping(value = Array("/${cm2.prefix}/admin/module/{module}/copy-assignments"))
 class CopyModuleAssignmentsController extends AbstractCopyAssignmentsController with AliveAssignmentsMap {
 
-	@ModelAttribute
-	def copyAssignmentsCommand(@PathVariable module: Module) = CopyAssignmentsCommand(mandatory(module).adminDepartment, Seq(module))
+	@ModelAttribute("copyAssignmentsCommand")
+	def copyAssignmentsCommand(@PathVariable module: Module): CopyAssignmentsCommand.Command =
+		CopyAssignmentsCommand(mandatory(module).adminDepartment, Seq(module))
 
 	@RequestMapping
-	def showForm(@PathVariable module: Module, cmd: CopyAssignmentsCommand): Mav = {
+	def showForm(@PathVariable module: Module, @ModelAttribute("copyAssignmentsCommand") cmd: CopyAssignmentsCommand.Command): Mav = {
 		Mav(s"$urlPrefix/admin/modules/copy_assignments",
 			"title" -> module.name,
 			"cancel" -> Routes.admin.module(module),
@@ -45,7 +46,7 @@ class CopyModuleAssignmentsController extends AbstractCopyAssignmentsController 
 	}
 
 	@RequestMapping(method = Array(POST))
-	def submit(cmd: CopyAssignmentsCommand, @PathVariable module: Module): Mav = {
+	def submit(@ModelAttribute("copyAssignmentsCommand") cmd: CopyAssignmentsCommand.Command, @PathVariable module: Module): Mav = {
 		cmd.apply()
 		Redirect(Routes.admin.module(module))
 	}
@@ -61,19 +62,19 @@ class CopyDepartmentAssignmentsController extends AbstractCopyAssignmentsControl
 	with AutowiringMaintenanceModeServiceComponent
 	with DepartmentScopedController {
 
-	override val departmentPermission: Permission = Permissions.Assignment.Create
+	override val departmentPermission: Permission = CopyAssignmentsCommand.AdminPermission
 
 	@ModelAttribute("activeDepartment")
 	override def activeDepartment(@PathVariable department: Department): Option[Department] = retrieveActiveDepartment(Option(department))
 
-	@ModelAttribute
-	def copyAssignmentsCommand(@PathVariable department: Department): CopyAssignmentsCommand = {
+	@ModelAttribute("copyAssignmentsCommand")
+	def copyAssignmentsCommand(@PathVariable department: Department): CopyAssignmentsCommand.Command = {
 		val modules = department.modules.asScala.filter(_.assignments.asScala.exists(_.isAlive)).sortBy(_.code)
 		CopyAssignmentsCommand(mandatory(department), modules)
 	}
 
 	@RequestMapping
-	def showForm(@PathVariable department: Department, cmd: CopyAssignmentsCommand): Mav = {
+	def showForm(@PathVariable department: Department, @ModelAttribute("copyAssignmentsCommand") cmd: CopyAssignmentsCommand.Command): Mav = {
 		Mav(s"$urlPrefix/admin/modules/copy_assignments",
 			"title" -> department.name,
 			"cancel" -> Routes.admin.department(department),
@@ -83,7 +84,7 @@ class CopyDepartmentAssignmentsController extends AbstractCopyAssignmentsControl
 	}
 
 	@RequestMapping(method = Array(POST))
-	def submit(cmd: CopyAssignmentsCommand, @PathVariable department: Department): Mav = {
+	def submit(@ModelAttribute("copyAssignmentsCommand") cmd: CopyAssignmentsCommand.Command, @PathVariable department: Department): Mav = {
 		cmd.apply()
 		Redirect(Routes.admin.department(department))
 	}

@@ -16,6 +16,8 @@ object ListExtensionsForAssignmentCommand {
 	type Result = Seq[ExtensionGraph]
 	type Command = Appliable[Result] with ListExtensionsForAssignmentCommandState
 
+	val AdminPermission = Permissions.Extension.Read
+
 	def apply(assignment: Assignment, user: CurrentUser): Command =
 		new ListExtensionsForAssignmentCommandInternal(assignment, user)
 			with ComposableCommand[Result]
@@ -79,6 +81,6 @@ trait ListExtensionsForAssignmentCommandPermissions extends RequiresPermissionsC
 	override def permissionsCheck(p: PermissionsChecking): Unit = {
 		if (assignment.openEnded) throw new ItemNotFoundException(assignment, "Open-ended assignments cannot have extensions")
 
-		p.PermissionCheck(Permissions.Extension.Read, mandatory(assignment))
+		p.PermissionCheck(AdminPermission, mandatory(assignment))
 	}
 }
