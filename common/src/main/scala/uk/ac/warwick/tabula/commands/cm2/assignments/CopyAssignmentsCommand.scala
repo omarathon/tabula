@@ -4,8 +4,9 @@ import org.joda.time.{DateTime, Duration}
 import uk.ac.warwick.tabula.AcademicYear
 import uk.ac.warwick.tabula.JavaImports._
 import uk.ac.warwick.tabula.commands._
-import uk.ac.warwick.tabula.data.model.triggers.{AssignmentClosedTrigger, Trigger}
+import uk.ac.warwick.tabula.commands.cm2.assignments.CopyAssignmentsCommand._
 import uk.ac.warwick.tabula.data.model._
+import uk.ac.warwick.tabula.data.model.triggers.{AssignmentClosedTrigger, Trigger}
 import uk.ac.warwick.tabula.permissions.Permissions
 import uk.ac.warwick.tabula.services._
 import uk.ac.warwick.tabula.system.permissions.{PermissionsChecking, PermissionsCheckingMethods, RequiresPermissionsChecking}
@@ -13,8 +14,13 @@ import uk.ac.warwick.tabula.system.permissions.{PermissionsChecking, Permissions
 import scala.collection.JavaConverters._
 
 object CopyAssignmentsCommand {
-	def apply(department: Department, modules: Seq[Module]) =
-		new CopyAssignmentsCommand(department, modules)
+	type Result = Seq[Assignment]
+	type Command = Appliable[Result] with CopyAssignmentsState
+
+	val AdminPermission = Permissions.Assignment.Create
+
+	def apply(department: Department, modules: Seq[Module]): Command =
+		new CopyAssignmentsCommandInternal(department, modules)
 			with ComposableCommand[Seq[Assignment]]
 			with CopyAssignmentsPermissions
 			with CopyAssignmentsDescription
@@ -24,15 +30,12 @@ object CopyAssignmentsCommand {
 			with AutowiringAssessmentMembershipServiceComponent
 }
 
-abstract class CopyAssignmentsCommand(val department: Department, val modules: Seq[Module]) extends CommandInternal[Seq[Assignment]]
-	with Appliable[Seq[Assignment]] with CopyAssignmentsState {
-
+class CopyAssignmentsCommandInternal(val department: Department, val modules: Seq[Module])
+	extends CommandInternal[Result] with CopyAssignmentsState {
 	self: AssessmentServiceComponent with AssessmentMembershipServiceComponent =>
 
-	def applyInternal(): Seq[Assignment] = {
-
-		val scalaAssignments = assignments.asScala
-		scalaAssignments.map { assignment =>
+	override def applyInternal(): Result = {
+		assignments.asScala.map { assignment =>
 			val newAssignment = copy(assignment)
 			assessmentService.save(newAssignment)
 			newAssignment
@@ -106,10 +109,10 @@ abstract class CopyAssignmentsCommand(val department: Department, val modules: S
 trait CopyAssignmentsPermissions extends RequiresPermissionsChecking with PermissionsCheckingMethods {
 	self: CopyAssignmentsState =>
 	override def permissionsCheck(p: PermissionsChecking) {
-		if (modules.isEmpty) p.PermissionCheck(Permissions.Assignment.Create, mandatory(department))
+		if (modules.isEmpty) p.PermissionCheck(AdminPermission, mandatory(department))
 		else for (module <- modules) {
 			p.mustBeLinked(p.mandatory(module), mandatory(department))
-			p.PermissionCheck(Permissions.Assignment.Create, module)
+			p.PermissionCheck(AdminPermission, module)
 		}
 	}
 }
@@ -122,7 +125,7 @@ trait CopyAssignmentsState {
 	var academicYear: AcademicYear = AcademicYear.guessSITSAcademicYearByDate(new DateTime)
 }
 
-trait CopyAssignmentsDescription extends Describable[Seq[Assignment]] {
+trait CopyAssignmentsDescription extends Describable[Result] {
 	self: CopyAssignmentsState =>
 
 	override lazy val eventName = "CopyAssignmentsFromPrevious"
@@ -132,7 +135,7 @@ trait CopyAssignmentsDescription extends Describable[Seq[Assignment]] {
 		.properties("assignments" -> assignments.asScala.map(_.id))
 }
 
-trait CopyAssignmentsCommandTriggers extends GeneratesTriggers[Seq[Assignment]] {
+trait CopyAssignmentsCommandTriggers extends GeneratesTriggers[Result] {
 
 	def generateTriggers(assignments: Seq[Assignment]): Seq[Trigger[_ >: Null <: ToEntityReference, _]] = {
 		assignments.filter(assignment => assignment.closeDate != null && assignment.closeDate.isAfterNow).map(assignment =>
@@ -141,7 +144,7 @@ trait CopyAssignmentsCommandTriggers extends GeneratesTriggers[Seq[Assignment]] 
 	}
 }
 
-trait CopyAssignmentsCommandNotifications extends SchedulesNotifications[Seq[Assignment], Assignment] with GeneratesNotificationsForAssignment {
+trait CopyAssignmentsCommandNotifications extends SchedulesNotifications[Result, Assignment] with GeneratesNotificationsForAssignment {
 
 	override def transformResult(assignments: Seq[Assignment]): Seq[Assignment] = assignments
 

@@ -1,31 +1,30 @@
 <#import "*/modal_macros.ftl" as modal />
+<#import "*/cm2_macros.ftl" as cm2 />
+
 <#escape x as x?html>
-	<@modal.wrapper>
-		<@modal.header>
-			<h3>Feedback report for ${department.name}</h3>
-		</@modal.header>
+	<@cm2.headerMenu department />
 
-		<div class="fix-area">
-			<#assign actionUrl><@routes.cm2.feedbackreport department /></#assign>
-			<@f.form method="post" class="form-inline" action=actionUrl commandName="feedbackReportCommand" cssClass="dirty-check">
-				<@modal.body>
-					<p>Generate report for assignments with closing dates </p>
+	<#function route_function dept>
+		<#local result><@routes.cm2.feedbackreport dept /></#local>
+		<#return result />
+	</#function>
+	<@fmt.id7_deptheader "Feedback report" route_function "for" />
 
-					<@bs3form.labelled_form_group labelText="From">
-						<@f.input id="picker0" path="startDate" cssClass="form-control date-time-picker" value="${startDate}" />
-					</@bs3form.labelled_form_group>
+	<#assign actionUrl><@routes.cm2.feedbackreport department /></#assign>
+	<@f.form method="post" action=actionUrl commandName="feedbackReportCommand" cssClass="dirty-check">
+		<p>Generate a feedback report for assignments with closing dates:</p>
 
-					<@bs3form.labelled_form_group labelText="To">
-						<@f.input id="picker0" path="endDate" cssClass="form-control date-time-picker" value="${endDate}" />
-					</@bs3form.labelled_form_group>
-				</@modal.body>
-			<@modal.footer>
-				<div class="submit-buttons">
-					<input type="submit" value="Confirm" class="btn btn-primary">
-					<a data-dismiss="modal" class="close-model btn-default" href="#">Cancel</a>
-				</div>
-			</@modal.footer>
-			</@f.form>
+		<@bs3form.labelled_form_group labelText="From" path="startDate">
+			<@f.input path="startDate" cssClass="form-control date-time-picker" />
+		</@bs3form.labelled_form_group>
+
+		<@bs3form.labelled_form_group labelText="To" path="endDate">
+			<@f.input path="endDate" cssClass="form-control date-time-picker" />
+		</@bs3form.labelled_form_group>
+
+		<div class="submit-buttons">
+			<input type="submit" value="Generate report" class="btn btn-primary">
+			<a class="btn btn-default" href="<@routes.cm2.departmenthome department />">Cancel</a>
 		</div>
-	</@modal.wrapper>
+	</@f.form>
 </#escape>
