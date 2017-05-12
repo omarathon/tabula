@@ -1,5 +1,5 @@
 <#import "../submissionsandfeedback/_submission_details.ftl" as sd />
-<#import "*/submission_components.ftl" as components />
+<#import "../submission_components.ftl" as components />
 
 <div class="well">
 	<h3>Submission</h3>

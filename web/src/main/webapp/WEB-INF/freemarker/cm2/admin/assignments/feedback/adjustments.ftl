@@ -56,6 +56,8 @@
 		 commandName="command"
 		 action="${submit_url}">
 
+	<@f.errors cssClass="error form-errors" />
+
 	<@form.row>
 		<@form.label path="reason">Reason for adjustment</@form.label>
 		<@form.field>

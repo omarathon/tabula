@@ -1,63 +1,63 @@
 <#escape x as x?html>
-<#assign f=JspTaglibs["/WEB-INF/tld/spring-form.tld"]>
-<#import "*/modal_macros.ftl" as modal />
+	<#assign f=JspTaglibs["/WEB-INF/tld/spring-form.tld"]>
+	<#import "*/modal_macros.ftl" as modal />
 
-<#macro autoGradeOnline gradePath gradeLabel markPath markingId generateUrl>
-	<@form.label path="${gradePath}">${gradeLabel}</@form.label>
-	<@form.field>
-		<@f.input path="${gradePath}" cssClass="input-small auto-grade" id="auto-grade-${markingId}" />
+	<#macro autoGradeOnline gradePath gradeLabel markPath markingId generateUrl>
+		<@form.label path="${gradePath}">${gradeLabel}</@form.label>
+		<@form.field>
+			<@f.input path="${gradePath}" cssClass="input-small auto-grade" id="auto-grade-${markingId}" />
 		<select name="${gradePath}" class="input-small" disabled style="display:none;"></select>
-		<@fmt.help_popover id="auto-grade-${markingId}-help" content="The grades available depends on the mark entered and the SITS mark scheme in use" />
-		<@f.errors path="${gradePath}" cssClass="error" />
-	</@form.field>
+			<@fmt.help_popover id="auto-grade-${markingId}-help" content="The grades available depends on the mark entered and the SITS mark scheme in use" />
+			<@f.errors path="${gradePath}" cssClass="error" />
+		</@form.field>
 	<script>
 		jQuery(function($){
 			var $gradeInput = $('#auto-grade-${markingId}').hide()
 				, $markInput = $gradeInput.closest('form').find('input[name=${markPath}]')
 				, $select = $gradeInput.closest('div').find('select').on('click', function(){
-					$(this).closest('.control-group').removeClass('info');
-				})
+				$(this).closest('.control-group').removeClass('info');
+			})
 				, currentRequest = null
 				, data = {'studentMarks': {}}
 				, doRequest = function(){
-					if (currentRequest != null) {
-						currentRequest.abort();
-					}
-					data['studentMarks']['${markingId}'] = $markInput.val();
-					if ($select.is(':visible') || $gradeInput.val().length > 0) {
-						data['selected'] = {};
-						data['selected']['${markingId}'] = ($select.is(':visible')) ? $select.val() : $gradeInput.val();
-					}
-					currentRequest = $.ajax('${generateUrl}',{
-						'type': 'POST',
-						'data': data,
-						success: function(data) {
-							$select.html(data);
-							if ($select.find('option').length > 1) {
-								$gradeInput.hide().prop('disabled', true);
-								$select.prop('disabled', false).show()
-									.closest('.control-group').addClass('info');
-								$('#auto-grade-${markingId}-help').show();
-							} else {
-								$gradeInput.show().prop('disabled', false);
-								$select.prop('disabled', true).hide();
-								$('#auto-grade-${markingId}-help').hide();
-							}
-						}, error: function(xhr, errorText){
-							if (errorText != "abort") {
-								$gradeInput.show().prop('disabled', false);
-								$('#auto-grade-${markingId}-help').hide();
-							}
+				if (currentRequest != null) {
+					currentRequest.abort();
+				}
+				data['studentMarks']['${markingId}'] = $markInput.val();
+				if ($select.is(':visible') || $gradeInput.val().length > 0) {
+					data['selected'] = {};
+					data['selected']['${markingId}'] = ($select.is(':visible')) ? $select.val() : $gradeInput.val();
+				}
+				currentRequest = $.ajax('${generateUrl}',{
+					'type': 'POST',
+					'data': data,
+					success: function(data) {
+						$select.html(data);
+						if ($select.find('option').length > 1) {
+							$gradeInput.hide().prop('disabled', true);
+							$select.prop('disabled', false).show()
+								.closest('.control-group').addClass('info');
+							$('#auto-grade-${markingId}-help').show();
+						} else {
+							$gradeInput.show().prop('disabled', false);
+							$select.prop('disabled', true).hide();
+							$('#auto-grade-${markingId}-help').hide();
 						}
-					});
-				};
+					}, error: function(xhr, errorText){
+						if (errorText != "abort") {
+							$gradeInput.show().prop('disabled', false);
+							$('#auto-grade-${markingId}-help').hide();
+						}
+					}
+				});
+			};
 			$markInput.on('keyup', doRequest);
 			doRequest();
 		});
 	</script>
-</#macro>
+	</#macro>
 
-<#macro marksForm assignment templateUrl formUrl commandName cancelUrl generateUrl seatNumberMap="" showAddButton=true>
+	<#macro marksForm assignment templateUrl formUrl commandName cancelUrl generateUrl seatNumberMap="" showAddButton=true>
 	<div id="batch-feedback-form">
 		<h1>Submit marks for ${assignment.name}</h1>
 		<ul id="marks-tabs" class="nav nav-tabs">
@@ -265,8 +265,8 @@
 							var $markRow = $(this)
 								, universityId = $markRow.find('input.universityId').val()
 								, $thisSelect = $selects.find('select').filter(function(){
-									return $(this).data('universityid') == universityId;
-								});
+								return $(this).data('universityid') == universityId;
+							});
 							if ($thisSelect.length > 0 && ($thisSelect.find('option').length > 1 || $markRow.find('input.mark').val() == "")) {
 								$markRow.find('input.grade').hide().prop('disabled', true);
 								$markRow.find('select').html($thisSelect.html()).prop('disabled', false).show();
@@ -281,19 +281,19 @@
 			}
 		});
 	</script>
-</#macro>
+	</#macro>
 
-<#macro feedbackGradeValidation isGradeValidation gradeValidation>
-	<#local gradeValidationClass><#compress>
-		<#if isGradeValidation>
-			<#if gradeValidation.invalid?has_content || gradeValidation.zero?has_content>error<#elseif gradeValidation.populated?has_content>info</#if>
-		<#else>
-			<#if gradeValidation.populated?has_content || gradeValidation.invalid?has_content>error</#if>
-		</#if>
-	</#compress></#local>
+	<#macro feedbackGradeValidation isGradeValidation gradeValidation>
+		<#local gradeValidationClass><#compress>
+			<#if isGradeValidation>
+				<#if gradeValidation.invalid?has_content || gradeValidation.zero?has_content>error<#elseif gradeValidation.populated?has_content>info</#if>
+			<#else>
+				<#if gradeValidation.populated?has_content || gradeValidation.invalid?has_content>error</#if>
+			</#if>
+		</#compress></#local>
 
-	<#if gradeValidation.populated?has_content || gradeValidation.invalid?has_content || gradeValidation.zero?has_content>
-		<#if isGradeValidation>
+		<#if gradeValidation.populated?has_content || gradeValidation.invalid?has_content || gradeValidation.zero?has_content>
+			<#if isGradeValidation>
 			<div class="grade-validation alert alert-${gradeValidationClass}" style="display:none;">
 				<#if gradeValidation.invalid?has_content>
 					<#local total = gradeValidation.invalid?keys?size />
@@ -338,12 +338,12 @@
 						<thead><tr><th>University ID</th><th>Mark</th><th>Grade</th><th>Valid grades</th></tr></thead>
 						<tbody>
 							<#list gradeValidation.invalid?keys as feedback>
-								<tr>
-									<td>${feedback.studentIdentifier}</td>
-									<td>${(feedback.latestMark)!}</td>
-									<td>${(feedback.latestGrade)!}</td>
-									<td>${mapGet(gradeValidation.invalid, feedback)}</td>
-								</tr>
+							<tr>
+								<td>${feedback.studentIdentifier}</td>
+								<td>${(feedback.latestMark)!}</td>
+								<td>${(feedback.latestGrade)!}</td>
+								<td>${mapGet(gradeValidation.invalid, feedback)}</td>
+							</tr>
 							</#list>
 						</tbody>
 					</table>
@@ -387,7 +387,7 @@
 					</table>
 				</@modal.body>
 			</div>
-		<#else>
+			<#else>
 			<div class="grade-validation alert alert-${gradeValidationClass}" style="display:none;">
 				<#local total = gradeValidation.populated?keys?size + gradeValidation.invalid?keys?size />
 				<a href="#grade-validation-modal" data-toggle="modal"><@fmt.p total "student" /></a>
@@ -406,27 +406,27 @@
 						<thead><tr><th>University ID</th><th>Mark</th><th>Grade</th><th>Valid grades</th></tr></thead>
 						<tbody>
 							<#list gradeValidation.populated?keys as feedback>
-								<tr>
-									<td>${feedback.studentIdentifier}</td>
-									<td>${(feedback.latestMark)!}</td>
-									<td></td>
-									<td></td>
-								</tr>
+							<tr>
+								<td>${feedback.studentIdentifier}</td>
+								<td>${(feedback.latestMark)!}</td>
+								<td></td>
+								<td></td>
+							</tr>
 							</#list>
 							<#list gradeValidation.invalid?keys as feedback>
-								<tr>
-									<td>${feedback.studentIdentifier}</td>
-									<td>${(feedback.latestMark)!}</td>
-									<td>${(feedback.latestGrade)!}</td>
-									<td>${mapGet(gradeValidation.invalid, feedback)}</td>
-								</tr>
+							<tr>
+								<td>${feedback.studentIdentifier}</td>
+								<td>${(feedback.latestMark)!}</td>
+								<td>${(feedback.latestGrade)!}</td>
+								<td>${mapGet(gradeValidation.invalid, feedback)}</td>
+							</tr>
 							</#list>
 						</tbody>
 					</table>
 				</@modal.body>
 			</div>
+			</#if>
 		</#if>
-	</#if>
 	<script>
 		jQuery(function($){
 			$('#sendToSits').on('change', function(){
@@ -439,9 +439,9 @@
 			});
 		});
 	</script>
-</#macro>
+	</#macro>
 
-<#macro uploadToSits withValidation assignment verb isGradeValidation=false gradeValidation="">
+	<#macro uploadToSits withValidation assignment verb isGradeValidation=false gradeValidation="">
 	<div class="alert alert-info">
 		<label class="checkbox">
 			<@f.checkbox path="sendToSits" id="sendToSits" />
@@ -470,9 +470,9 @@
 		</#if>
 	</div>
 
-	<#if withValidation>
-		<@feedbackGradeValidation isGradeValidation gradeValidation />
-	</#if>
-</#macro>
+		<#if withValidation>
+			<@feedbackGradeValidation isGradeValidation gradeValidation />
+		</#if>
+	</#macro>
 
 </#escape>

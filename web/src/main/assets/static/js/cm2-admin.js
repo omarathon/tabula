@@ -1,5 +1,11 @@
 (function ($) { "use strict";
 
+	jQuery.fn.tabulaAjaxForm = function() {
+		var $row = $(this);
+		var $form = $row.find('form');
+		prepareAjaxForm($form, $row);
+	};
+
 	$.fn.bindFormHelpers = function() {
 		var $this = $(this);
 
@@ -9,6 +15,7 @@
 		$this.find('input.time-picker').tabulaTimePicker();
 		$this.find('input.date-time-minute-picker').tabulaDateTimeMinutePicker();
 		$this.find('form.double-submit-protection').tabulaSubmitOnce();
+		$this.tabulaAjaxForm();
 	};
 
 	$(function(){
@@ -60,6 +67,7 @@
 				}
 			});
 		});
+
 
 		$('table.expanding-row-pairs').each(function(){
 			$(this).find('tbody tr').each(function(i){
@@ -222,5 +230,75 @@
             }
         });
     });
+
+	/**
+	 * Helper for ajaxified forms in tabula expanding tables
+	 *
+	 * This glues together the ajaxForm and bootstrap collapsable plugins. It adds boilerplate for coping with
+	 * signed-out users, and provides a callback for giving UI feedback after the form has been processed.
+	 *
+	 * callback() is passed the raw response text.
+	 * It MUST return an empty string if the form has been successfully handled.
+	 * Otherwise, whatever is returned will be rendered in the container.
+	 */
+	var prepareAjaxForm = function($form, $row, callbackOption) {
+		var $container = $row.find('.detailrow-container');
+		var callback = callbackOption || function(resp) {
+				var $resp = $(resp);
+				// there should be an ajax-response class somewhere in the response text
+				var $response = $resp.find('.ajax-response').andSelf().filter('.ajax-response');
+				var success = $response.length && $response.data('status') == 'success';
+
+				if (success) {
+					return "";
+				} else {
+					return resp;
+				}
+			};
+		$form.ajaxForm({
+
+			beforeSubmit: function showRequest(formData, jqForm, options) {
+				// formData is an array; here we use $.param to convert it to a string to display it
+				// but the form plugin does this for you automatically when it submits the data
+				var queryString = $.param(formData);
+
+				// jqForm is a jQuery object encapsulating the form element.  To access the
+				// DOM element for the form do this:
+				// var formElement = jqForm[0];
+				alert('About to submit: \n\n' + queryString);
+
+				// here we could return false to prevent the form from being submitted;
+				// returning anything other than false will allow the form submit to continue
+				return true;
+			},
+			iframe: true,
+			statusCode: {
+				403: function(jqXHR) {
+					$container.html("<p class='text-error'><i class='icon-warning-sign'></i> Sorry, you don't have permission to see that. Have you signed out of Tabula?</p><p class='text-error'>Refresh the page and try again. If it remains a problem, please let us know using the comments link on the edge of the page.</p>");
+				}
+			},
+			success: function(response) {
+				var result;
+
+				if (response.indexOf('id="dev"') >= 0) {
+					// for debugging freemarker...
+					result = $(response).find('#column-1-content');
+				} else {
+					result = callback(response);
+				}
+
+				if (!result || /^\s*$/.test(result)) {
+					// reset if empty
+					$container.html("<p>No data is currently available. Please check that you are signed in.</p>");
+					$row.data('loaded', false);
+					$row.trigger('show.bs.collapse');
+				} else {
+					$container.html(result);
+				}
+			},
+			error: function(){alert("There has been an error. Please reload and try again.");}
+		});
+	};
+
 
 })(jQuery);

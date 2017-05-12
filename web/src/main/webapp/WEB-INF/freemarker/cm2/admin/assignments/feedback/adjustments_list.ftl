@@ -12,24 +12,19 @@
 
 <#macro row info>
 	<#assign u = info.student />
-	<tr class="item-container" data-contentid="${markingId(u)}" data-markingurl="<@routes.cm2.feedbackAdjustment assignment />">
-		<td class="student-col toggle-cell"><h6 class="toggle-icon">${u.firstName}</h6></td>
-		<td class="student-col toggle-cell">
+	<tr data-toggle="collapse" data-target="#row-${markingId(u)}" class="clickable collapsed expandable-row">
+		<td class="student-col"><h6 class="toggle-icon">${u.firstName}</h6></td>
+		<td class="student-col">
 			<h6>${u.lastName}&nbsp;<#if u.warwickId??><@pl.profile_link u.warwickId /><#else><@pl.profile_link u.userId /></#if></h6>
 		</td>
-		<td class="toggle-cell content-cell">
-			<dl style="margin: 0; border-bottom: 0;">
-				<dt>
+		<td class="content-cell">
 					<#if u.warwickId??>${u.warwickId}<#else>${u.userId!}</#if>
-				</dt>
-				<dd style="display: none;" class="table-content-container" data-contentid="${markingId(u)}">
-					<div id="content-${markingId(u)}" class="content-container" data-contentid="${markingId(u)}">
-						<p>No data is currently available. Please check that you are signed in.</p>
-					</div>
-				</dd>
-			</dl>
 		</td>
 	</tr>
+	<tr id="row-${markingId(u)}" data-detailurl="<@routes.cm2.feedbackAdjustmentForm assignment markingId(u) />" class="collapse detail-row">
+		<td colspan="3" class="detailrow-container"><p>No data is currently available. Please check that you are signed in.</p></td>
+	</tr>
+
 </#macro>
 
 <#escape x as x?html>
@@ -44,7 +39,7 @@
 	<div id="profile-modal" class="modal fade profile-subset"></div>
 
 	<#if studentInfo?size gt 0>
-		<table id="feedback-adjustment" class="students table table-bordered table-striped tabula-greenLight sticky-table-headers expanding-table">
+		<table id="feedback-adjustment" class="students table table-bordered table-striped tabula-greenLight sticky-table-headers">
 			<thead>
 				<tr>
 					<th class="student-col">First name</th>
@@ -66,13 +61,7 @@
 					headers: { 0: { sorter: false} }
 				};
 
-				$('.expanding-table').expandingTable({
-					contentUrlFunction: function($row){ return $row.data('markingurl'); },
-					useIframe: true,
-					tableSorterOptions: tsOptions
-				});
-
-				$('#container').on('change', 'select[name=reason]', function(e) {
+				$('#command').on('change', 'select[name=reason]', function(e) {
 					var $target = $(e.target);
 
 					var $otherInput = $target.siblings('.other-input');
@@ -95,15 +84,35 @@
 				});
 
 
-				$('#container').on('submit', function(e) {
+				$('.item-container').on('submit', function(e) {
 					var $form = $(e.target);
+					e.preventDefault();
+					alert("test");
+					var $form = $(e.target);
+					var $detailRow = $form.closest('.content-container');
+					alert("detail row: " + $detailRow.html());
+
+
+					/*var formData = $form.serializeArray();
+					var $buttonClicked =  $(document.activeElement);
+					formData.push({ name: $buttonClicked.attr('name'), value: $buttonClicked.val() });
+
+					$.post($form.attr('action'), formData, function(data) {
+						if (data.success) {
+							window.location.replace(data.redirect);
+						} else {
+							$detailRow.html(data);
+							$detailRow.bindFormHelpers();
+						}
+					});
+
 					var $select = $form.find('select[name=reason]');
 					if ($select.val() === "Other") {
 						$select.attr("disabled", "disabled");
-					}
+					}*/
 				});
 
-				$('#container').on('tabula.expandingTable.parentRowExpanded', function(e){
+				$('#command').on('tabula.expandingTable.parentRowExpanded', function(e){
 					var $content = $(e.target);
 
 					// activate any popovers
