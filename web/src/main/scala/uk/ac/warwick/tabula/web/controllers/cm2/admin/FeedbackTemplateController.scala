@@ -36,7 +36,7 @@ class FeedbackTemplateController extends CourseworkController
 
 			val dept = cmd.department
 
-		 	Mav(s"$urlPrefix/admin/feedbackforms/manage-feedback-templates",
+		 	Mav("cm2/admin/feedbackforms/manage-feedback-templates",
 				"department" -> dept
 		 	)
 		
@@ -71,7 +71,7 @@ class EditFeedbackTemplateController extends CourseworkController {
 		cmd.name = template.name
 		cmd.description = template.description
 
-		val model = Mav(s"$urlPrefix/admin/feedbackforms/edit-feedback-template",
+		val model = Mav("cm2/admin/feedbackforms/edit-feedback-template",
 			"department" -> dept,
 			"template" -> template
 		).noNavigation()
@@ -105,7 +105,7 @@ class DeleteFeedbackTemplateController extends CourseworkController {
 		val dept = cmd.department
 
 		cmd.id = template.id
-		val model = Mav(s"$urlPrefix/admin/feedbackforms/delete-feedback-template",
+		val model = Mav("cm2/admin/feedbackforms/delete-feedback-template",
 			"department" -> dept,
 			"template" -> template
 		).noNavigation()

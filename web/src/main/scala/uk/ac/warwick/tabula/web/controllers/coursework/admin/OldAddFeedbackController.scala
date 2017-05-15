@@ -27,7 +27,7 @@ class OldAddFeedbackController extends OldCourseworkController {
 
 	@RequestMapping(method = Array(GET, HEAD))
 	def showForm(@ModelAttribute form: AddFeedbackCommand): Mav = {
-		Mav(s"$urlPrefix/admin/assignments/feedback/form",
+		Mav("coursework/admin/assignments/feedback/form",
 			"department" -> form.module.adminDepartment,
 			"module" -> form.module,
 			"assignment" -> form.assignment)

@@ -40,7 +40,7 @@ class FeedbackReportController extends CourseworkController
 		FeedbackReportCommand(mandatory(department), user)
 
 	@RequestMapping(params = Array("!jobId"))
-	def requestReport(): Mav = Mav(s"$urlPrefix/admin/assignments/feedbackreport/report_range")
+	def requestReport(): Mav = Mav("cm2/admin/assignments/feedbackreport/report_range")
 
 	@RequestMapping(method = Array(POST), params = Array("!jobId"))
 	def generateReport(@Valid @ModelAttribute("feedbackReportCommand") cmd: FeedbackReportCommand.Command, errors: Errors): Mav = {
@@ -48,14 +48,14 @@ class FeedbackReportController extends CourseworkController
 			requestReport()
 		} else {
 			val job = cmd.apply()
-			Mav(s"$urlPrefix/admin/assignments/feedbackreport/progress", "job" -> job)
+			Mav("cm2/admin/assignments/feedbackreport/progress", "job" -> job)
 		}
 	}
 
 	@RequestMapping(params = Array("jobId"))
 	def checkProgress(@RequestParam jobId: String): Mav = {
 		val job = jobService.getInstance(jobId)
-		Mav(s"$urlPrefix/admin/assignments/feedbackreport/progress", "job" -> job).noLayoutIf(ajax)
+		Mav("cm2/admin/assignments/feedbackreport/progress", "job" -> job).noLayoutIf(ajax)
 	}
 
 }

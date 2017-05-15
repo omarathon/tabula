@@ -26,7 +26,7 @@ class OldModuleController extends OldCourseworkController {
 	def viewModule(@ModelAttribute cmd: ViewModuleCommand): Mav = {
 		val module = cmd.apply()
 
-		Mav(s"$urlPrefix/submit/module",
+		Mav("coursework/submit/module",
 			"module" -> module,
 			"assignments" -> module.assignments
 				.filterNot { _.deleted }

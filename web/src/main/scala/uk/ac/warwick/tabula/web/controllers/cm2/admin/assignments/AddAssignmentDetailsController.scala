@@ -12,7 +12,6 @@ import uk.ac.warwick.tabula.commands.{Appliable, SelfValidating}
 import uk.ac.warwick.tabula.data.model._
 import uk.ac.warwick.tabula.web.Mav
 import uk.ac.warwick.tabula.data.model.markingworkflow.MarkingWorkflowType
-import uk.ac.warwick.tabula.web.controllers.cm2.CourseworkBreadcrumbs
 
 @Profile(Array("cm2Enabled"))
 @Controller
@@ -37,16 +36,14 @@ class AddAssignmentDetailsController extends AbstractAssignmentController {
 	def showForm(form: CreateAssignmentDetailsCommand): Mav = {
 		val module = form.module
 
-		println(MarkingWorkflowType.values)
-
-		Mav(s"$urlPrefix/admin/assignments/new_assignment_details",
+		Mav("cm2/admin/assignments/new_assignment_details",
 			"department" -> module.adminDepartment,
 			"module" -> module,
 			"academicYear" -> form.academicYear,
 			"reusableWorkflows" -> form.availableWorkflows,
 			"availableWorkflows" -> MarkingWorkflowType.values.sorted,
 			"canDeleteMarkers" -> true
-		).crumbs(CourseworkBreadcrumbs.Assignment.AssignmentManagement())
+		)
 	}
 
 	@RequestMapping(method = Array(POST), params = Array(ManageAssignmentMappingParameters.createAndAddFeedback, "action!=refresh", "action!=update, action=submit"))

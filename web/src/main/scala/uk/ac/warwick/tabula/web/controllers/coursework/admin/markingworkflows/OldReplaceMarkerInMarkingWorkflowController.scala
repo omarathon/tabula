@@ -25,7 +25,7 @@ class OldReplaceMarkerInMarkingWorkflowController extends OldCourseworkControlle
 
 	@RequestMapping(method=Array(GET, HEAD))
 	def form(@ModelAttribute("command") cmd: Appliable[MarkingWorkflow], @PathVariable department: Department): Mav = {
-		Mav(s"$urlPrefix/admin/markingworkflows/replace").crumbs(Breadcrumbs.Department(department))
+		Mav("coursework/admin/markingworkflows/replace").crumbs(Breadcrumbs.Department(department))
 	}
 
 	@RequestMapping(method=Array(POST))

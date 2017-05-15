@@ -25,7 +25,7 @@ class OldEditMarkingWorkflowController extends OldCourseworkController {
 
 	@RequestMapping(method=Array(GET, HEAD))
 	def form(@ModelAttribute("command") cmd: Appliable[MarkingWorkflow] with MarkingWorkflowCommandState): Mav = {
-		Mav(s"$urlPrefix/admin/markingworkflows/edit", "isExams" -> false).crumbs(Breadcrumbs.Department(cmd.department))
+		Mav("coursework/admin/markingworkflows/edit", "isExams" -> false).crumbs(Breadcrumbs.Department(cmd.department))
 	}
 
 	@RequestMapping(method=Array(POST))

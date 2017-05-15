@@ -157,13 +157,6 @@ preposition: Text to relate the title to the department name in the second line,
 	</#if>
 </#compress></#macro>
 
-<#macro admin_assignment_link assignment>
-	<@module_name assignment.module />
-	<a href="<@url context='/coursework' page='/admin/module/${assignment.module.code}/assignments/${assignment.id}/list' />">
-		<span class="ass-name">${assignment.name}</span>
-	</a>
-</#macro>
-
 <#macro route_name route withFormatting=false routeCode=route.code routeName=route.name>
 	<#if withFormatting>
 		<span class="route-code">${routeCode?upper_case}</span> <span class="route-name">${routeName}</span>

@@ -24,7 +24,7 @@ class OldFeedbackTemplateController extends OldCourseworkController {
 	def list(cmd:BulkFeedbackTemplateCommand, errors:Errors): Mav = {
 		val dept = cmd.department
 
-		val model = Mav(s"$urlPrefix/admin/feedbackforms/manage-feedback-templates",
+		val model = Mav("coursework/admin/feedbackforms/manage-feedback-templates",
 			"department" -> dept
 		)
 		crumbed(model, dept)
@@ -59,7 +59,7 @@ class OldEditFeedbackTemplateController extends OldCourseworkController {
 		cmd.name = template.name
 		cmd.description = template.description
 
-		val model = Mav(s"$urlPrefix/admin/feedbackforms/edit-feedback-template",
+		val model = Mav("coursework/admin/feedbackforms/edit-feedback-template",
 			"department" -> dept,
 			"template" -> template
 		).noNavigation()
@@ -93,7 +93,7 @@ class OldDeleteFeedbackTemplateController extends OldCourseworkController {
 		val dept = cmd.department
 
 		cmd.id = template.id
-		val model = Mav(s"$urlPrefix/admin/feedbackforms/delete-feedback-template",
+		val model = Mav("coursework/admin/feedbackforms/delete-feedback-template",
 			"department" -> dept,
 			"template" -> template
 		).noNavigation()

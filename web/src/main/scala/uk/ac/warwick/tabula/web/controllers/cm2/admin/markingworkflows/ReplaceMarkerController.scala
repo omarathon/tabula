@@ -39,7 +39,7 @@ class ReplaceMarkerController extends CM2MarkingWorkflowController {
 		@ModelAttribute("replaceMarkerCommand") cmd: ReplaceMarkerCommand,
 		errors: Errors): Mav = {
 		commonCrumbs(
-			Mav(s"$urlPrefix/admin/workflows/replace_marker", Map(
+			Mav("cm2/admin/workflows/replace_marker", Map(
 				"workflow" -> workflow
 			)),
 			department,

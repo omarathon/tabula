@@ -23,7 +23,6 @@ class OldGenericFeedbackControllerTest extends TestBase with Mockito {
 	@Test def controllerShowsForm() {
 		new Fixture {
 			val controller = new OldGenericFeedbackController
-			controller.urlPrefix = "coursework"
 			val mav: Mav = controller.showForm(assignment, command, null)
 			mav.map("command") should be(command)
 			mav.viewName should be ("coursework/admin/assignments/feedback/generic_feedback")

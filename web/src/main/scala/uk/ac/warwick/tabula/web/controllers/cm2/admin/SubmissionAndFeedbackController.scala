@@ -16,7 +16,7 @@ import uk.ac.warwick.tabula.commands.cm2.assignments.SubmissionAndFeedbackComman
 import uk.ac.warwick.tabula.data.model._
 import uk.ac.warwick.tabula.helpers.cm2.{Cm2Filter, Cm2Filters}
 import uk.ac.warwick.tabula.web.Mav
-import uk.ac.warwick.tabula.web.controllers.cm2.{CourseworkBreadcrumbs, CourseworkController}
+import uk.ac.warwick.tabula.web.controllers.cm2.CourseworkController
 import uk.ac.warwick.util.web.bind.AbstractPropertyEditor
 
 //FIXME: implemented as part of CM2 migration but will require further reworking due to CM2 workflow changes
@@ -57,41 +57,34 @@ class SubmissionAndFeedbackController extends CourseworkController {
 		if (!features.assignmentProgressTable) Redirect(Routes.admin.assignment.submissionsandfeedback.table(assignment))
 		else {
 			if (errors.hasErrors) {
-
-				Mav(s"$urlPrefix/admin/assignments/submissionsandfeedback/progress",
+				Mav("cm2/admin/assignments/submissionsandfeedback/progress",
 					"module" -> assignment.module,
 					"department" -> assignment.module.adminDepartment
-				).crumbs(CourseworkBreadcrumbs.SubmissionsAndFeedback.SubmissionsAndFeedbackManagement(assignment))
-
+				)
 			} else {
-
 				val results = command.apply()
 
-				Mav(s"$urlPrefix/admin/assignments/submissionsandfeedback/progress",
+				Mav("cm2/admin/assignments/submissionsandfeedback/progress",
 					"module" -> assignment.module,
 					"department" -> assignment.module.adminDepartment,
 					"results" ->	resultMap(results)
-				).crumbs(CourseworkBreadcrumbs.SubmissionsAndFeedback.SubmissionsAndFeedbackManagement(assignment))
+				)
 			}
-	}
+		}
 	}
 
 	@RequestMapping(Array("/table"))
 	def table(@Valid @ModelAttribute("submissionAndFeedbackCommand") command: SubmissionAndFeedbackCommand.CommandType, errors: Errors, @PathVariable assignment: Assignment): Mav = {
 		if (errors.hasErrors) {
-
-			Mav(s"$urlPrefix/admin/assignments/submissionsandfeedback/list",
+			Mav("cm2/admin/assignments/submissionsandfeedback/list",
 				"department" -> assignment.module.adminDepartment
-			).crumbs(CourseworkBreadcrumbs.SubmissionsAndFeedback.SubmissionsAndFeedbackManagement(assignment))
-
+			)
 		} else {
-
 			val results = command.apply()
-			Mav(s"$urlPrefix/admin/assignments/submissionsandfeedback/list",
+			Mav("cm2/admin/assignments/submissionsandfeedback/list",
 				"department" -> assignment.module.adminDepartment,
 				"results" ->	resultMap(results)
-			).crumbs(CourseworkBreadcrumbs.SubmissionsAndFeedback.SubmissionsAndFeedbackManagement(assignment))
-
+			)
 		}
 	}
 

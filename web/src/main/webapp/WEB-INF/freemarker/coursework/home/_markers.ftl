@@ -43,7 +43,10 @@
 	<#list assignmentsForMarking as info>
 		<div class="simple-assignment-info">
 			<#if info.isAdmin>
-				<@fmt.admin_assignment_link info.assignment />
+				<@module_name assignment.module />
+				<a href="<@routes.coursework.assignmentsubmissionsandfeedback info.assignment />">
+					<span class="ass-name">${info.assignment.name}</span>
+				</a>
 			<#else>
 				<@fmt.assignment_name info.assignment />
 			</#if>

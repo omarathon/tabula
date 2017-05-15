@@ -35,7 +35,7 @@ class OldFeedbackRatingController extends OldCourseworkController {
 
 	@RequestMapping(method = Array(GET, HEAD))
 	def form(command: RateFeedbackCommand): Mav =
-		Mav(s"$urlPrefix/submit/rating").noLayoutIf(ajax)
+		Mav("coursework/submit/rating").noLayoutIf(ajax)
 
 	@RequestMapping(method = Array(POST))
 	def submit(command: RateFeedbackCommand, errors: Errors): Mav = {
@@ -44,7 +44,7 @@ class OldFeedbackRatingController extends OldCourseworkController {
 			form(command)
 		} else {
 			command.apply()
-			Mav(s"$urlPrefix/submit/rating", "rated" -> true).noLayoutIf(ajax)
+			Mav("coursework/submit/rating", "rated" -> true).noLayoutIf(ajax)
 		}
 	}
 

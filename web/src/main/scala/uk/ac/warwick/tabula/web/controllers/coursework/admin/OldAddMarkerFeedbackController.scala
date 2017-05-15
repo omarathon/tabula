@@ -27,7 +27,7 @@ class OldAddMarkerFeedbackController extends OldCourseworkController {
 								 @PathVariable assignment: Assignment,
 								 @PathVariable marker: User,
 								 @ModelAttribute cmd: AddMarkerFeedbackCommand): Mav = {
-		Mav(s"$urlPrefix/admin/assignments/markerfeedback/form",
+		Mav("coursework/admin/assignments/markerfeedback/form",
 			"isProxying" -> cmd.isProxying,
 			"proxyingAs" -> marker
 		).crumbs(
@@ -47,7 +47,7 @@ class OldAddMarkerFeedbackController extends OldCourseworkController {
 		} else {
 			cmd.postExtractValidation(errors)
 			cmd.processStudents()
-			Mav(s"$urlPrefix/admin/assignments/markerfeedback/preview",
+			Mav("coursework/admin/assignments/markerfeedback/preview",
 				"isProxying" -> cmd.isProxying,
 				"proxyingAs" -> marker
 			).crumbs(

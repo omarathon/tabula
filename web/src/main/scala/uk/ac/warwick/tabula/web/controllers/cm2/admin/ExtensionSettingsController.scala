@@ -35,7 +35,7 @@ class ExtensionSettingsController extends CourseworkController
 	validatesSelf[SelfValidating]
 
 	@RequestMapping
-	def viewSettings = Mav(s"$urlPrefix/admin/extension-settings")
+	def viewSettings = Mav("cm2/admin/extension-settings")
 
 	@RequestMapping(method = Array(RequestMethod.POST))
 	def saveSettings(@Valid @ModelAttribute("extensionSettingsCommand") cmd: ExtensionSettingsCommand.Command, errors: Errors): Mav =

@@ -11,7 +11,6 @@ import uk.ac.warwick.tabula.commands.cm2.assignments.{EditAssignmentDetailsComma
 import uk.ac.warwick.tabula.commands.{Appliable, PopulateOnForm, SelfValidating}
 import uk.ac.warwick.tabula.data.model._
 import uk.ac.warwick.tabula.web.Mav
-import uk.ac.warwick.tabula.web.controllers.cm2.CourseworkBreadcrumbs
 
 @Profile(Array("cm2Enabled"))
 @Controller
@@ -33,14 +32,14 @@ class EditAssignmentDetailsController extends AbstractAssignmentController {
 
 	def showForm(cmd: EditAssignmentDetailsCommand): Mav = {
 		val module = cmd.module
-		Mav(s"$urlPrefix/admin/assignments/edit_assignment_details",
+		Mav("cm2/admin/assignments/edit_assignment_details",
 			"department" -> module.adminDepartment,
 			"module" -> module,
 			"academicYear" -> cmd.academicYear,
 			"reusableWorkflows" -> cmd.availableWorkflows,
 			"workflow" -> cmd.workflow,
 			"canDeleteMarkers" -> cmd.workflow.canDeleteMarkers
-		).crumbs(CourseworkBreadcrumbs.Assignment.AssignmentManagement())
+		)
 	}
 
 	@RequestMapping(method = Array(POST), params = Array(ManageAssignmentMappingParameters.editAndAddFeedback, "action!=refresh", "action!=update, action=submit"))

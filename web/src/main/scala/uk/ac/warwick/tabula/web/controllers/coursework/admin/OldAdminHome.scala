@@ -41,7 +41,7 @@ class OldCourseworkAdminDepartmentHomeController extends OldCourseworkController
 	def adminDepartment(cmd: AdminDepartmentHomeCommand): Mav = {
 		val info = cmd.apply()
 
-		Mav(s"$urlPrefix/admin/department",
+		Mav("coursework/admin/department",
 			"department" -> cmd.department,
 			"modules" -> info.sortWith(_.code.toLowerCase < _.code.toLowerCase)
 		)
@@ -68,8 +68,8 @@ class OldCourseworkAdminModuleHomeController extends OldCourseworkController {
 	def adminModule(@ModelAttribute("command") cmd: Appliable[Module]): Mav = {
 		val module = cmd.apply()
 
-		if (ajax) Mav(s"$urlPrefix/admin/modules/admin_partial").noLayout()
-		else Mav(s"$urlPrefix/admin/modules/admin").crumbs(Breadcrumbs.Department(module.adminDepartment))
+		if (ajax) Mav("coursework/admin/modules/admin_partial").noLayout()
+		else Mav("coursework/admin/modules/admin").crumbs(Breadcrumbs.Department(module.adminDepartment))
 	}
 }
 

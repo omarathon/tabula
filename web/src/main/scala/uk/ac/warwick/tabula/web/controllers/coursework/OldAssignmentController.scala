@@ -76,7 +76,7 @@ class OldAssignmentController extends OldCourseworkController
 
 		// If the user has feedback but doesn't have permission to submit, form will be null here, so we can't just get module/assignment from that
 		Mav(
-			s"$urlPrefix/submit/assignment",
+			"coursework/submit/assignment",
 			"errors" -> errors,
 			"feedback" -> info.feedback,
 			"submission" -> info.submission,

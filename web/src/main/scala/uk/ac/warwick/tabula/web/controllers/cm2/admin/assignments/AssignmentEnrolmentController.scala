@@ -33,7 +33,7 @@ class AssignmentEnrolmentController extends CourseworkController {
 	@RequestMapping
 	def showForm(@ModelAttribute("command") form: EditAssignmentMembershipCommand, @PathVariable assignment: Assignment): Mav = {
 		form.afterBind()
-		Mav(s"$urlPrefix/admin/assignments/enrolment",
+		Mav("cm2/admin/assignments/enrolment",
 			"department" -> form.module.adminDepartment,
 			"module" -> form.module,
 			"academicYear" -> assignment.academicYear,

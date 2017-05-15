@@ -9,7 +9,6 @@ import uk.ac.warwick.tabula.commands.Appliable
 import uk.ac.warwick.tabula.commands.cm2.assignments._
 import uk.ac.warwick.tabula.data.model.Assignment
 import uk.ac.warwick.tabula.web.Mav
-import uk.ac.warwick.tabula.web.controllers.cm2.CourseworkBreadcrumbs
 
 @Profile(Array("cm2Enabled"))
 @Controller
@@ -30,14 +29,14 @@ class ModifyAssignmentMarkersSmallGroupsController extends AbstractAssignmentCon
 		val allocations = smallGroupCommand.apply()
 		val workflow = assignment.cm2MarkingWorkflow
 
-		Mav(s"$urlPrefix/admin/assignments/assignment_markers_smallgroups",
+		Mav("cm2/admin/assignments/assignment_markers_smallgroups",
 			"module" -> module,
 			"sets" -> allocations.map(_.set),
 			"allocations" -> allocations,
 			"allocationOrder" -> workflow.allocationOrder,
 			"stageNames" -> workflow.allStages.groupBy(_.roleName).mapValues(_.map(_.name)),
 			"mode" -> mode
-		).crumbs(CourseworkBreadcrumbs.Assignment.AssignmentManagement())
+		)
 	}
 
 	@RequestMapping(method = Array(GET, HEAD), value = Array("new/markers/smallgroups"))

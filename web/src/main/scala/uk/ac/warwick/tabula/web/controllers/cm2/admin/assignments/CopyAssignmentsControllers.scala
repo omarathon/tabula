@@ -37,7 +37,7 @@ class CopyModuleAssignmentsController extends AbstractCopyAssignmentsController 
 
 	@RequestMapping
 	def showForm(@PathVariable module: Module, @ModelAttribute("copyAssignmentsCommand") cmd: CopyAssignmentsCommand.Command): Mav = {
-		Mav(s"$urlPrefix/admin/modules/copy_assignments",
+		Mav("cm2/admin/modules/copy_assignments",
 			"title" -> module.name,
 			"cancel" -> Routes.admin.module(module),
 			"department" -> module.adminDepartment,
@@ -75,7 +75,7 @@ class CopyDepartmentAssignmentsController extends AbstractCopyAssignmentsControl
 
 	@RequestMapping
 	def showForm(@PathVariable department: Department, @ModelAttribute("copyAssignmentsCommand") cmd: CopyAssignmentsCommand.Command): Mav = {
-		Mav(s"$urlPrefix/admin/modules/copy_assignments",
+		Mav("cm2/admin/modules/copy_assignments",
 			"title" -> department.name,
 			"cancel" -> Routes.admin.department(department),
 			"map" -> moduleAssignmentMap(cmd.modules),

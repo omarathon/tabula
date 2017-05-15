@@ -30,7 +30,7 @@ abstract class AbstractHomeController
 	def home(@ModelAttribute("command") command: Command, user: CurrentUser) = {
 		val info = command.apply()
 
-		Mav(s"$urlPrefix/home/view",
+		Mav("cm2/home/view",
 			"academicYear" -> command.academicYear,
 			"homeDepartment" -> info.homeDepartment,
 			"studentInformation" -> info.studentInformation,

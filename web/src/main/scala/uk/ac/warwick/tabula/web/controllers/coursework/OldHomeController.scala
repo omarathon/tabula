@@ -21,7 +21,7 @@ import uk.ac.warwick.tabula.web.Mav
 	@RequestMapping(Array("/${cm1.prefix}")) def home(@ModelAttribute("command") cmd: Appliable[Option[CourseworkHomepageInformation]], user: CurrentUser): Mav =
 		cmd.apply() match {
 			case Some(info) =>
-				Mav(s"$urlPrefix/home/view",
+				Mav("coursework/home/view",
 					"student" -> MemberOrUser(user.profile, user.apparentUser),
 					"enrolledAssignments" -> info.enrolledAssignments,
 					"historicAssignments" -> info.historicAssignments,
@@ -32,7 +32,7 @@ import uk.ac.warwick.tabula.web.Mav
 					"ajax" -> ajax,
 					"userHomeDepartment" -> moduleAndDepartmentService.getDepartmentByCode(user.departmentCode)
 				)
-			case _ => Mav(s"$urlPrefix/home/view")
+			case _ => Mav("coursework/home/view")
 		}
 }
 
@@ -50,14 +50,14 @@ import uk.ac.warwick.tabula.web.Mav
 		try {
 			cmd.apply() match {
 				case Some(pagedActivities) =>
-					Mav(s"$urlPrefix/home/activities",
+					Mav("coursework/home/activities",
 						"activities" -> pagedActivities,
 						"async" -> true).noLayout()
-				case _ => Mav(s"$urlPrefix/home/empty").noLayout()
+				case _ => Mav("coursework/home/empty").noLayout()
 			}
 		} catch {
 			case e: IllegalStateException =>
-				Mav(s"$urlPrefix/home/activities",
+				Mav("coursework/home/activities",
 				"expired" -> true).noLayout()
 		}
 	}

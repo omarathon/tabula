@@ -394,6 +394,8 @@
 	<bean id="defaultFreemarkerConfiguration" class="uk.ac.warwick.tabula.web.views.ScalaFreemarkerConfiguration" abstract="true">
 		<property name="sharedVariables">
 			<map>
+				<entry key="cm1Context" value="/${cm1.prefix}" />
+				<entry key="cm2Context" value="/${cm2.prefix}" />
 				<entry key="url" value-ref="urlMethodModel" />
 				<entry key="topLevelUrl" value="${toplevel.url}" />
 				<entry key="rootUrl" value="${toplevel.url}${module.context}/" />
