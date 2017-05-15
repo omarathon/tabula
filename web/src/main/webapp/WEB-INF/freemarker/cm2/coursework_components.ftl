@@ -367,7 +367,7 @@
 	</#if>
 </#macro>
 
-<#macro marker_assignment_list id title assignments expand_by_default=true>
+<#macro marker_assignment_list id title assignments verb="Mark" expand_by_default=true>
 	<span id="${id}-container">
 		<#local has_assignments = (assignments!?size gt 0) />
 		<div id="${id}" class="striped-section marker-assignment-list<#if has_assignments> collapsible<#if expand_by_default> expanded</#if><#else> empty</#if>" data-name="${id}">
@@ -385,7 +385,7 @@
 
 						<#list assignments as info>
 							<span id="marker-assignment-container-${info.assignment.id}">
-								<@marker_assignment_info info />
+								<@marker_assignment_info info verb />
 							</span>
 						</#list>
 					</div>
@@ -437,14 +437,20 @@
 	</div>
 </#macro>
 
-<#macro marker_assignment_info info>
+<#macro marker_assignment_info info verb="Mark">
 	<#local assignment = info.assignment />
 	<div class="item-info row marker-assignment-${assignment.id}">
 		<div class="col-md-3">
 			<div class="module-title"><@fmt.module_name assignment.module /></div>
 			<h4 class="name">
-				<#-- TODO If the user can administer the assignment, link them to the admin page here -->
-				<span class="ass-name">${assignment.name}</span>
+				<#-- If the user can administer the assignment, link them to the admin page here -->
+				<#if can.do("Module.ManageAssignments", assignment.module)>
+					<a href="<@routes.cm2.depthome assignment.module assignment.academicYear/>" class="use-tooltip" title="Return to module management for <@fmt.module_name assignment.module false />">
+						<span class="ass-name">${assignment.name}</span>
+					</a>
+				<#else>
+					<span class="ass-name">${assignment.name}</span>
+				</#if>
 			</h4>
 		</div>
 		<div class="col-md-3">
@@ -500,11 +506,11 @@
 			<#if assignment.closed || assignment.openEnded>
 				<#if info.nextStages?size gt 0>
 					<a class="btn btn-block btn-primary" href="<@routes.cm2.listmarkersubmissions assignment user.apparentUser />">
-						Mark
+						${verb}
 					</a>
 				<#else>
 					<a class="btn btn-block btn-default btn-disabled use-tooltip" title="You'll be able to download submissions for marking when an administrator releases them." disabled>
-						Mark
+						${verb}
 					</a>
 				</#if>
 			</#if>
