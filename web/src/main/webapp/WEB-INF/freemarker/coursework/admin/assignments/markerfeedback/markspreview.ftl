@@ -10,7 +10,8 @@
 	</@spring.bind>
 
 <div class="fix-area">
-	<@f.form method="post" action="${url('/coursework/admin/module/${module.code}/assignments/${assignment.id}/marker/${marker.warwickId}/marks')}" commandName=commandName>
+	<#assign submitUrl><@routes.coursework.markeraddmarks assignment marker /></#assign>
+	<@f.form method="post" action=submitUrl commandName=commandName>
 
 		<#assign isfile=RequestParameters.isfile/>
 

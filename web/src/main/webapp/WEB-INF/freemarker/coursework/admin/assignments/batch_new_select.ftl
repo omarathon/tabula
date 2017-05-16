@@ -11,7 +11,8 @@ first page of the form to setup a bunch of assignments from SITS.
 
 <#assign step=action!'select'/>
 
-<@f.form method="post" id="batch-add-form" action="${url('/coursework/admin/department/${command.department.code}/setup-assignments')}" commandName=commandName cssClass="form-horizontal">
+<#assign submitUrl><@routes.coursework.setupSitsAssignments department /></#assign>
+<@f.form method="post" id="batch-add-form" action=submitUrl commandName=commandName cssClass="form-horizontal">
 
 	<#if step='select'>
 
@@ -220,7 +221,7 @@ first page of the form to setup a bunch of assignments from SITS.
 						<div id="selected-count">0 selected</div>
 						<div id="selected-deselect"><a href="#">Clear selection</a></div>
 						<#-- options sets -->
-						<a class="btn btn-info btn-block" id="set-options-button" data-target="#set-options-modal" href="<@url page="/coursework/admin/department/${department.code}/shared-options"/>">
+						<a class="btn btn-info btn-block" id="set-options-button" data-target="#set-options-modal" href="<@routes.coursework.setupSitsAssignmentsSharedOptions department />">
 							Set options&hellip;
 						</a>
 						<a class="btn btn-info btn-block" id="set-dates-button" data-target="#set-dates-modal">

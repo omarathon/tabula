@@ -1,10 +1,11 @@
 <#assign spring=JspTaglibs["/WEB-INF/tld/spring.tld"]>
 <#escape x as x?html>
 <div id="container">
+<#assign submitUrl><@routes.coursework.feedbacktemplateedit department template /></#assign>
 <@f.form enctype="multipart/form-data"
 	method="post"
 	class="form-horizontal"
-	action="${url('/coursework/admin/department/${department.code}/settings/feedback-templates/edit/${template.id}')}"
+	action=submitUrl
 	commandName="editFeedbackTemplateCommand">
 		<@f.hidden path="id"/>
 		<@form.labelled_row "file.upload" "Update feedback template">

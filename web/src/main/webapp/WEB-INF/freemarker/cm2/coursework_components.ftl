@@ -456,17 +456,13 @@
 		<div class="col-md-3">
 			<ul class="list-unstyled">
 				<#list info.currentStages as stage>
-					<li>
-						<#if stage.progress?size == 1>
-							<@workflowMessage stage.progress[0].progress.messageCode />
-						<#else>
-							<ul>
-								<#list stage.progress as progress>
-									<li><@workflowMessage progress.progress.messageCode /> (<@fmt.p progress.count "student" />)</li>
-								</#list>
-							</ul>
-						</#if>
-					</li>
+					<#if stage.progress?size == 1>
+						<li><@workflowMessage stage.progress[0].progress.messageCode /></li>
+					<#else>
+						<#list stage.progress as progress>
+							<li><@workflowMessage progress.progress.messageCode /> (<@fmt.p progress.count "student" />)</li>
+						</#list>
+					</#if>
 				</#list>
 			</ul>
 		</div>

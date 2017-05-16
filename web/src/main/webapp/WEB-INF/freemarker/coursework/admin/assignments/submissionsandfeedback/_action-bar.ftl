@@ -48,7 +48,7 @@
 					<ul class="dropdown-menu">
 						<li class="must-have-selected">
 							<a class="long-running use-tooltip form-post"
-								 data-href="<@url page='/coursework/admin/module/${module.code}/assignments/${assignment.id}/submissions.zip'/>"
+								 data-href="<@routes.coursework.submissionsZip assignment />"
 								 href=""
 								 title="Download the submission files for the selected students as a ZIP file."
 								 data-container="body"><i class="icon-download icon-fixed-width"></i> Download submissions
@@ -56,14 +56,14 @@
 						</li>
 						<li class="must-have-selected">
 							<a class="long-running use-tooltip download-pdf"
-							   data-href="<@url page='/coursework/admin/module/${module.code}/assignments/${assignment.id}/submissions.pdf'/>"
+							   data-href="<@routes.coursework.submissionsPdf assignment />"
 							   href=""
 							   title="Download the submission files for the selected students as a PDF for printing."
 							   data-container="body"><i class="icon-download icon-fixed-width"></i> Download submissions as PDF
 							</a>
 						</li>
 						<li class="must-have-selected">
-							<#assign deletesubmissionurl><@url page='/coursework/admin/module/${module.code}/assignments/${assignment.id}/submissionsandfeedback/delete' /></#assign>
+							<#assign deletesubmissionurl><@routes.coursework.deleteSubmissionsFeedback assignment /></#assign>
 							<@fmt.permission_button permission='Submission.Delete' scope=module action_descr='delete submission' classes="form-post" href=deletesubmissionurl tooltip='Delete submissions' >
 								<i class="icon-remove icon-fixed-width"></i> Delete submissions
 							</@fmt.permission_button>
@@ -89,7 +89,7 @@
 						<#if features.turnitin>
 							<#if features.turnitinSubmissions>
 								<li>
-									<#assign checkplagiarism_url><@url page='/coursework/admin/module/${module.code}/assignments/${assignment.id}/turnitin' /></#assign>
+									<#assign checkplagiarism_url><@routes.coursework.submitToTurnitin assignment /></#assign>
 									<@fmt.permission_button permission='Submission.CheckForPlagiarism' scope=assignment action_descr='check for plagiarism' href=checkplagiarism_url tooltip='Check for plagiarism'>
 										<i class="icon-book icon-fixed-width"></i> Check for plagiarism
 									</@fmt.permission_button>
@@ -104,7 +104,7 @@
 						</#if>
 
 						<li class="must-have-selected">
-							<#assign markplagiarised_url><@url page='/coursework/admin/module/${module.code}/assignments/${assignment.id}/submissionsandfeedback/mark-plagiarised' /></#assign>
+							<#assign markplagiarised_url><@routes.coursework.plagiarismInvestigation assignment /></#assign>
 							<@fmt.permission_button permission='Submission.ManagePlagiarismStatus' scope=assignment action_descr='mark plagiarised' href=markplagiarised_url id="mark-plagiarised-selected-button" tooltip="Toggle whether the selected student submissions are possibly plagiarised" data_attr='data-container=body'>
 								<i class="icon-exclamation-sign icon-fixed-width"></i> Mark plagiarised
 							</@fmt.permission_button>
@@ -211,7 +211,7 @@
 						<#if features.feedbackTemplates && assignment.hasFeedbackTemplate>
 							<li>
 								<a class="long-running use-tooltip"
-								   href="<@url page='/coursework/admin/module/${assignment.module.code}/assignments/${assignment.id}/feedback-templates.zip'/>"
+								   href="<@routes.coursework.feedbackTemplatesZip assignment />"
 								   title="Download feedback templates for all students as a ZIP file."
 								   data-container="body"><i class="icon-download icon-fixed-width"></i> Download templates
 								</a>
@@ -270,14 +270,14 @@
 					<#-- Download / Publish / Delete always available -->
 					<li class="must-have-selected">
 						<a class="long-running use-tooltip form-post"
-							 href="<@url page='/coursework/admin/module/${module.code}/assignments/${assignment.id}/feedback.zip'/>"
+							 href="<@routes.coursework.feedbackZip assignment />"
 							 title="Download the feedback files for the selected students as a ZIP file."
 							 data-container="body"><i class="icon-download icon-fixed-width"></i> Download feedback
 						</a>
 					</li>
 					<#if assignment.canPublishFeedback>
 						<li>
-							<#assign publishfeedbackurl><@url page='/coursework/admin/module/${module.code}/assignments/${assignment.id}/publish'/></#assign>
+							<#assign publishfeedbackurl><@routes.coursework.publishFeedback assignment /></#assign>
 							<@fmt.permission_button permission='AssignmentFeedback.Publish' scope=assignment type='a' action_descr='release feedback to students' tooltip="Release feedback to students" href=publishfeedbackurl>
 								<i class="icon-share icon-fixed-width"></i> Publish feedback
 							</@fmt.permission_button>
@@ -286,7 +286,7 @@
 						<li class="disabled"><a class="use-tooltip" data-container="body" title="No current feedback to publish, or the assignment is not yet closed."><i class="icon-share icon-fixed-width"></i> Publish feedback</a></li>
 					</#if>
 					<li class="must-have-selected">
-						<#assign deletefeedback_url><@url page='/coursework/admin/module/${module.code}/assignments/${assignment.id}/submissionsandfeedback/delete' /></#assign>
+						<#assign deletefeedback_url><@routes.coursework.deleteSubmissionsFeedback assignment /></#assign>
 						<@fmt.permission_button permission='AssignmentFeedback.Manage' scope=assignment action_descr='delete feedback' classes="form-post" href=deletefeedback_url tooltip='Delete feedback'>
 							<i class="icon-remove icon-fixed-width"></i> Delete feedback
 						</@fmt.permission_button>
@@ -319,13 +319,13 @@
 			</a>
 			<ul class="dropdown-menu">
 				<li>
-					<a class="long-running form-post include-filter" title="Export submissions info as XLSX, for advanced users." href="<@url page='/coursework/admin/module/${module.code}/assignments/${assignment.id}/export.xlsx'/>">Excel</a>
+					<a class="long-running form-post include-filter" title="Export submissions info as XLSX, for advanced users." href="<@routes.coursework.assignmentExportExcel assignment />">Excel</a>
 				</li>
 				<li>
-					<a class="long-running form-post include-filter" title="Export submissions info as CSV, for advanced users." href="<@url page='/coursework/admin/module/${module.code}/assignments/${assignment.id}/export.csv'/>">Text (CSV)</a>
+					<a class="long-running form-post include-filter" title="Export submissions info as CSV, for advanced users." href="<@routes.coursework.assignmentExportCSV assignment />">Text (CSV)</a>
 				</li>
 				<li>
-					<a class="long-running form-post include-filter" title="Export submissions info as XML, for advanced users." href="<@url page='/coursework/admin/module/${module.code}/assignments/${assignment.id}/export.xml'/>">Text (XML)</a>
+					<a class="long-running form-post include-filter" title="Export submissions info as XML, for advanced users." href="<@routes.coursework.assignmentExportXML assignment />">Text (XML)</a>
 				</li>
 			</ul>
 		</div>
@@ -340,7 +340,7 @@
 		<div class="modal-body">
 			<p>There are <span class="count"></span> submissions that have files that are not PDFs (shown below). The download will not include these files.</p>
 			<p><a class="long-running form-post btn btn-primary"
-				  data-href="<@url page='/coursework/admin/module/${module.code}/assignments/${assignment.id}/submissions.pdf?download'/>"
+				  data-href="<@routes.coursework.submissionsPdf assignment />?download"
 				  href=""
 			><i class="icon-download"></i> Download submissions as PDF
 			</a></p>
