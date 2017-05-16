@@ -22,9 +22,9 @@ object Cm2FeedbackAdjustmentCommand {
 	def apply(assignment: Assessment, student:User, submitter: CurrentUser, gradeGenerator: GeneratesGradesFromMarks) =
 		new Cm2FeedbackAdjustmentCommandInternal(assignment, student, submitter, gradeGenerator)
 			with ComposableCommand[Feedback]
-			with FeedbackAdjustmentCommandPermissions
-			with FeedbackAdjustmentCommandDescription
-			with FeedbackAdjustmentCommandValidation
+			with Cm2FeedbackAdjustmentCommandPermissions
+			with Cm2FeedbackAdjustmentCommandDescription
+			with Cm2FeedbackAdjustmentCommandValidation
 			with FeedbackAdjustmentNotifier
 			with AutowiringFeedbackServiceComponent
 			with AutowiringZipServiceComponent
@@ -39,9 +39,9 @@ object Cm2AssignmentFeedbackAdjustmentCommand {
 	def apply(thisAssignment: Assignment, student:User, submitter: CurrentUser, gradeGenerator: GeneratesGradesFromMarks) =
 		new Cm2FeedbackAdjustmentCommandInternal(thisAssignment, student, submitter, gradeGenerator)
 			with ComposableCommand[Feedback]
-			with FeedbackAdjustmentCommandPermissions
-			with FeedbackAdjustmentCommandDescription
-			with FeedbackAdjustmentCommandValidation
+			with Cm2FeedbackAdjustmentCommandPermissions
+			with Cm2FeedbackAdjustmentCommandDescription
+			with Cm2FeedbackAdjustmentCommandValidation
 			with FeedbackAdjustmentNotifier
 			with AutowiringFeedbackServiceComponent
 			with AutowiringZipServiceComponent
@@ -55,7 +55,7 @@ object Cm2AssignmentFeedbackAdjustmentCommand {
 }
 
 class Cm2FeedbackAdjustmentCommandInternal(val assessment: Assessment, val student:User, val submitter: CurrentUser, val gradeGenerator: GeneratesGradesFromMarks)
-	extends CommandInternal[Feedback] with FeedbackAdjustmentCommandState {
+	extends CommandInternal[Feedback] with Cm2FeedbackAdjustmentCommandState {
 
 	self: FeedbackServiceComponent with ZipServiceComponent with QueuesFeedbackForSits =>
 
@@ -96,8 +96,8 @@ class Cm2FeedbackAdjustmentCommandInternal(val assessment: Assessment, val stude
 
 }
 
-trait FeedbackAdjustmentCommandValidation extends SelfValidating {
-	self: FeedbackAdjustmentCommandState =>
+trait Cm2FeedbackAdjustmentCommandValidation extends SelfValidating {
+	self: Cm2FeedbackAdjustmentCommandState =>
 	def validate(errors: Errors) {
 		if (!reason.hasText)
 			errors.rejectValue("reason", "feedback.adjustment.reason.empty")
@@ -133,7 +133,7 @@ trait FeedbackAdjustmentCommandValidation extends SelfValidating {
 	}
 }
 
-trait FeedbackAdjustmentCommandState {
+trait Cm2FeedbackAdjustmentCommandState {
 	val assessment: Assessment
 	val student: User
 	val feedback: Feedback
@@ -152,8 +152,8 @@ trait FeedbackAdjustmentCommandState {
 	var sendToSits: Boolean = false
 }
 
-trait FeedbackAdjustmentCommandPermissions extends RequiresPermissionsChecking with PermissionsCheckingMethods {
-	self: FeedbackAdjustmentCommandState =>
+trait Cm2FeedbackAdjustmentCommandPermissions extends RequiresPermissionsChecking with PermissionsCheckingMethods {
+	self: Cm2FeedbackAdjustmentCommandState =>
 	override def permissionsCheck(p: PermissionsChecking) {
 		HibernateHelpers.initialiseAndUnproxy(mandatory(assessment)) match {
 			case assignment: Assignment =>
@@ -164,8 +164,8 @@ trait FeedbackAdjustmentCommandPermissions extends RequiresPermissionsChecking w
 	}
 }
 
-trait FeedbackAdjustmentCommandDescription extends Describable[Feedback] {
-	self: FeedbackAdjustmentCommandState =>
+trait Cm2FeedbackAdjustmentCommandDescription extends Describable[Feedback] {
+	self: Cm2FeedbackAdjustmentCommandState =>
 	def describe(d: Description) {
 		d.assessment(assessment)
 		d.studentIds(Option(student.getWarwickId).toSeq)
@@ -176,7 +176,7 @@ trait FeedbackAdjustmentCommandDescription extends Describable[Feedback] {
 }
 
 trait FeedbackAdjustmentNotifier extends Notifies[Feedback, Feedback] {
-	self: FeedbackAdjustmentCommandState =>
+	self: Cm2FeedbackAdjustmentCommandState =>
 
 		def emit(feedback: Feedback): Seq[NotificationWithTarget[AssignmentFeedback, Assignment] with SingleItemNotification[AssignmentFeedback] with AutowiringUserLookupComponent] = {
 			HibernateHelpers.initialiseAndUnproxy(feedback) match {

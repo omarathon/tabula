@@ -61,95 +61,30 @@
 					headers: { 0: { sorter: false} }
 				};
 
-				$('#command').on('change', 'select[name=reason]', function(e) {
-					var $target = $(e.target);
-
-					var $otherInput = $target.siblings('.other-input');
-					if ($target.val() === "Other") {
-						$otherInput.removeAttr("disabled");
-						$otherInput.fadeIn(400);
-					} else if ($otherInput.is(':visible')){
-						$otherInput.fadeOut(400, function() {
-							$otherInput.attr("disabled", "disabled");
-						});
-					}
-
-					var $suggestedPenalty = $target.closest('form').find('.late-penalty');
-					if ($target.val() === "Late submission penalty") {
-						$suggestedPenalty.fadeIn(400);
-					} else if ($suggestedPenalty.is(':visible')) {
-						$suggestedPenalty.fadeOut(400);
-					}
-
-				});
-
-
-				$('.item-container').on('submit', function(e) {
-					var $form = $(e.target);
-					e.preventDefault();
-					alert("test");
-					var $form = $(e.target);
-					var $detailRow = $form.closest('.content-container');
-					alert("detail row: " + $detailRow.html());
-
-
-					/*var formData = $form.serializeArray();
-					var $buttonClicked =  $(document.activeElement);
-					formData.push({ name: $buttonClicked.attr('name'), value: $buttonClicked.val() });
-
-					$.post($form.attr('action'), formData, function(data) {
-						if (data.success) {
-							window.location.replace(data.redirect);
-						} else {
-							$detailRow.html(data);
-							$detailRow.bindFormHelpers();
-						}
-					});
-
+				var beforeSubmit = function($form){
 					var $select = $form.find('select[name=reason]');
 					if ($select.val() === "Other") {
-						$select.attr("disabled", "disabled");
-					}*/
-				});
+						$select.prop("disabled", true);
+					}
+					return true;
+				};
 
-				$('#command').on('tabula.expandingTable.parentRowExpanded', function(e){
-					var $content = $(e.target);
-
-					// activate any popovers
-					$content.find('.use-popover').popover();
-
-					// bind suggested mark button
-					$content.find('.use-suggested-mark').on('click', function(e){
-						var $target = $(this);
-						var $markInput = $content.find('input[name=adjustedMark]');
-						var $commentsTextarea = $content.find('textarea[name=comments]');
-						var mark = $target.data('mark');
-						var comment = $target.data('comment');
-						$markInput.val(mark);
-						$commentsTextarea.val(comment);
-						// simulate a keyup to trigger and grade validation
-						$markInput.keyup();
-						e.preventDefault();
-					});
-
-					// pre-select the other dropdown when editing an existing adjustment with an "other" reason
-					var $select = $content.find('select[name=reason]');
-					var $otherInput = $content.find('.other-input');
-
-					if($otherInput.val() != "" && $select.children(':selected').index() === 0) {
-						$content.find('option[value=Other]').attr("selected", "selected");
+				var callback = function($row){
+					var $form = $row.find('form');
+					var $select = $form.find('select[name=reason]');
+					var $otherInput = $form.find('.other-input');
+					if($otherInput.val() !== "") {
+						$select.val("Other");
 						$otherInput.removeAttr("disabled");
-						$otherInput.show();
+						$otherInput.removeClass("hide");
 					}
+					$row.trigger('tabula.formLoaded');
+				};
 
-					// show the suggested mark button if late penalty is selected
-					var $suggestedPenalty = $select.closest('form').find('.late-penalty');
-					if ($select.val() === "Late submission penalty") {
-						$suggestedPenalty.show();
-					} else {
-						$suggestedPenalty.hide();
-					}
-				})
+				$('body').on('tabula.formLoaded',function() {
+					var $row = $(this);
+					$row.tabulaAjaxForm(beforeSubmit, callback);
+				});
 
 			})(jQuery);
 		</script>

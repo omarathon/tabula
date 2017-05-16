@@ -51,7 +51,7 @@
 	<@routes.cm2.feedbackAdjustmentForm assignment markingId(command.student) />
 </#assign>
 
-<@f.form cssClass="form-horizontal double-submit-protection"
+<@f.form cssClass="form-horizontal double-submit-protection ajax-form"
 		 method="post"
 		 commandName="command"
 		 action="${submit_url}">

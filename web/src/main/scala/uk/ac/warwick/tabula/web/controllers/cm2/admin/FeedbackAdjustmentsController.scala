@@ -7,7 +7,7 @@ import org.springframework.stereotype.Controller
 import org.springframework.validation.Errors
 import org.springframework.web.bind.annotation.{ModelAttribute, PathVariable, RequestMapping}
 import uk.ac.warwick.tabula.CurrentUser
-import uk.ac.warwick.tabula.commands.cm2.feedback.{Cm2AssignmentFeedbackAdjustmentCommand, FeedbackAdjustmentCommandState, FeedbackAdjustmentListCommand, GenerateGradesFromMarkCommand, StudentInfo}
+import uk.ac.warwick.tabula.commands.cm2.feedback.{Cm2AssignmentFeedbackAdjustmentCommand, Cm2FeedbackAdjustmentCommandState, Cm2FeedbackAdjustmentListCommand, GenerateGradesFromMarkCommand, StudentInfo}
 import uk.ac.warwick.tabula.commands.{Appliable, SelfValidating}
 import uk.ac.warwick.tabula.data.model._
 import uk.ac.warwick.tabula.services.AutowiringProfileServiceComponent
@@ -23,7 +23,7 @@ class FeedbackAdjustmentsListController extends CourseworkController {
 
 	@ModelAttribute("listCommand")
 	def listCommand(@PathVariable assignment: Assignment): FeedbackAdjustmentListCommand =
-		FeedbackAdjustmentListCommand(mandatory(assignment))
+		Cm2FeedbackAdjustmentListCommand(mandatory(assignment))
 
 	@RequestMapping
 	def list(
@@ -62,7 +62,7 @@ class FeedbackAdjustmentsController extends CourseworkController with Autowiring
 
 	@RequestMapping(method=Array(GET))
 	def showForm(
-		@ModelAttribute("command") command: Appliable[Feedback] with FeedbackAdjustmentCommandState,
+		@ModelAttribute("command") command: Appliable[Feedback] with Cm2FeedbackAdjustmentCommandState,
 		@PathVariable assignment: Assignment,
 		@PathVariable student: User
 	): Mav = {
@@ -100,7 +100,7 @@ class FeedbackAdjustmentsController extends CourseworkController with Autowiring
 
 	@RequestMapping(method = Array(POST))
 	def submit(
-		@Valid @ModelAttribute("command") command: Appliable[Feedback] with FeedbackAdjustmentCommandState,
+		@Valid @ModelAttribute("command") command: Appliable[Feedback] with Cm2FeedbackAdjustmentCommandState,
 		errors: Errors,
 		@PathVariable assignment: Assignment,
 		@PathVariable student: User
