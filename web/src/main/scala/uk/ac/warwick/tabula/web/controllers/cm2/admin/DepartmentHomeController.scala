@@ -40,7 +40,7 @@ abstract class AbstractDepartmentHomeController
 
 	@RequestMapping(params=Array("!ajax"), headers=Array("!X-Requested-With"))
 	def home(@ModelAttribute("command") command: DepartmentCommand, @PathVariable department: Department): Mav =
-		Mav(s"$urlPrefix/admin/home/department",
+		Mav("cm2/admin/home/department",
 			"modules" -> command.allModulesWithPermission,
 			"allModuleFilters" -> AssignmentInfoFilters.allModuleFilters(command.allModulesWithPermission.sortBy(_.code)),
 			"allWorkflowTypeFilters" -> AssignmentInfoFilters.allWorkflowTypeFilters,
@@ -50,7 +50,7 @@ abstract class AbstractDepartmentHomeController
 
 	@RequestMapping
 	def homeAjax(@ModelAttribute("command") command: DepartmentCommand): Mav =
-		Mav(s"$urlPrefix/admin/home/moduleList", "modules" -> command.apply()).noLayout()
+		Mav("cm2/admin/home/moduleList", "modules" -> command.apply()).noLayout()
 
 }
 

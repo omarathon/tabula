@@ -13,7 +13,6 @@ import uk.ac.warwick.tabula.commands.cm2.assignments.{AssignMarkersBySpreadsheet
 import uk.ac.warwick.tabula.data.model.Assignment
 import uk.ac.warwick.tabula.services.AssessmentMembershipService
 import uk.ac.warwick.tabula.web.Mav
-import uk.ac.warwick.tabula.web.controllers.cm2.CourseworkBreadcrumbs
 import uk.ac.warwick.tabula.web.views.ExcelView
 
 @Profile(Array("cm2Enabled"))
@@ -40,12 +39,12 @@ class ModifyAssignmentMarkersSpreadsheetController extends AbstractAssignmentCon
 
 	private def showSpreadsheetForm(assignment: Assignment, assignMarkersBySpreadsheetCommand: AssignMarkersCommand, errors: Errors, mode: String): Mav = {
 		val module =  mandatory(assignment.module)
-		Mav(s"$urlPrefix/admin/assignments/assignment_markers_spreadsheet",
+		Mav("cm2/admin/assignments/assignment_markers_spreadsheet",
 			"module" -> module,
 			"department" -> module.adminDepartment,
 			"fileTypes" -> AssignMarkersBySpreadsheetCommand.AcceptedFileExtensions,
 			"mode" -> mode
-		).crumbs(CourseworkBreadcrumbs.Assignment.AssignmentManagement())
+		)
 	}
 
 	@RequestMapping(method = Array(GET, HEAD), value=Array("new/markers/template"))
@@ -78,14 +77,14 @@ class ModifyAssignmentMarkersSpreadsheetController extends AbstractAssignmentCon
 			key -> (allStudents -- allocation.filterKeys(_.isFoundUser).values.flatten.toSet)
 		}
 
-		Mav(s"$urlPrefix/admin/assignments/assignment_markers_spreadsheet_preview",
+		Mav("cm2/admin/assignments/assignment_markers_spreadsheet_preview",
 			"module" -> module,
 			"department" -> module.adminDepartment,
 			"allocationPreview" -> allocationPreview,
 			"allocationOrder" -> workflow.allocationOrder,
 			"unallocatedStudents" -> unallocatedStudents,
 			"mode" -> mode
-		).crumbs(CourseworkBreadcrumbs.Assignment.AssignmentManagement())
+		)
 	}
 
 	@RequestMapping(method = Array(POST), value=Array("new/markers/template"), params = Array("preview"))

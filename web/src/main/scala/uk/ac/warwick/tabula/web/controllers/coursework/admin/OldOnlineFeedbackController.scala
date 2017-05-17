@@ -29,7 +29,7 @@ class OldOnlineFeedbackController extends OldCourseworkController with Autowirin
 		val feedbackGraphs = command.apply()
 		val (assignment, module) = (command.assignment, command.assignment.module)
 
-		Mav(s"$urlPrefix/admin/assignments/feedback/online_framework",
+		Mav("coursework/admin/assignments/feedback/online_framework",
 			"showMarkingCompleted" -> false,
 			"showGenericFeedback" -> true,
 			"assignment" -> assignment,
@@ -59,7 +59,7 @@ class OldOnlineFeedbackFormController extends OldCourseworkController {
 	@RequestMapping(method = Array(GET, HEAD))
 	def showForm(@ModelAttribute("command") command: OnlineFeedbackFormCommand, errors: Errors): Mav = {
 
-		Mav(s"$urlPrefix/admin/assignments/feedback/online_feedback",
+		Mav("coursework/admin/assignments/feedback/online_feedback",
 			"command" -> command,
 			"isGradeValidation" -> command.module.adminDepartment.assignmentGradeValidation
 		).noLayout()

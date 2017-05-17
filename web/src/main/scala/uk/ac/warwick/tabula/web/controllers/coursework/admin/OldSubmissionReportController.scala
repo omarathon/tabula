@@ -46,7 +46,7 @@ class OldSubmissionReportController extends OldCourseworkController {
 		val hasNoMarks = usersByUsercodes(report.withoutMarks.toList)
 		val plagiarised = usersByUsercodes(report.plagiarised.toList)
 
-		Mav(s"$urlPrefix/admin/assignments/submissionsreport",
+		Mav("coursework/admin/assignments/submissionsreport",
 			"assignment" -> command.assignment,
 			"submissionOnly" -> submissionOnly,
 			"feedbackOnly" -> feedbackOnly,

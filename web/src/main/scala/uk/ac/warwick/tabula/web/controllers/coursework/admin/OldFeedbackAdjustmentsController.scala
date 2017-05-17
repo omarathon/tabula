@@ -32,7 +32,7 @@ class OldFeedbackAdjustmentsListController extends OldCourseworkController {
 	): Mav = {
 		val (studentInfo, noFeedbackStudentInfo) = listCommand.apply().partition { _.feedback.isDefined }
 
-		Mav(s"$urlPrefix/admin/assignments/feedback/adjustments_list",
+		Mav("coursework/admin/assignments/feedback/adjustments_list",
 			"studentInfo" -> studentInfo,
 			"noFeedbackStudentInfo" -> noFeedbackStudentInfo,
 			"assignment" -> assignment,
@@ -92,7 +92,7 @@ class OldFeedbackAdjustmentsController extends OldCourseworkController with Auto
 			}
 		}
 
-		Mav(s"$urlPrefix/admin/assignments/feedback/adjustments", Map(
+		Mav("coursework/admin/assignments/feedback/adjustments", Map(
 			"daysLate" -> daysLate,
 			"marksSubtracted" -> marksSubtracted,
 			"proposedAdjustment" -> proposedAdjustment,

@@ -12,7 +12,7 @@
 					<a class="btn btn-danger <#if hasRecordedCheckpoints> disabled use-tooltip</#if>" <#if hasRecordedCheckpoints>title="This point cannot be removed as it has attendance marks against it."</#if> href="<@routes.attendance.manageDeletePoint groupedPoint.templatePoint filterQuery returnTo />">Delete</a>
 				</div>
 				${groupedPoint.templatePoint.name}
-				(<a class="use-tooltip" data-html="true" title="
+				(<span class="use-tooltip" data-html="true" title="
 					<@fmt.wholeWeekDateFormat
 						groupedPoint.templatePoint.startWeek
 						groupedPoint.templatePoint.endWeek
@@ -23,7 +23,7 @@
 					groupedPoint.templatePoint.endWeek
 					groupedPoint.templatePoint.scheme.academicYear
 					findCommand.department
-				/></a>)
+				/></span>)
 				<#assign popoverContent>
 					<ul>
 						<#list groupedPoint.schemes?sort_by("displayName") as scheme>

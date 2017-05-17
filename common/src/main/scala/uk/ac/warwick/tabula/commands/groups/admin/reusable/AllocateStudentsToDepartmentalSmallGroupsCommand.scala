@@ -82,7 +82,7 @@ trait AllocateStudentsToDepartmentalSmallGroupsFileUploadSupport extends GroupsO
 	}
 
 	override def extractDataFromFile(file: FileAttachment, result: BindingResult): Map[DepartmentSmallGroup, JList[User]] = {
-		val allocations = groupsExtractor.readXSSFExcelFile(file.dataStream)
+		val allocations = groupsExtractor.readXSSFExcelFile(file.asByteSource.openStream())
 
 		// work out users to add to set (all users mentioned in spreadsheet - users currently in set)
 		val allocateUsers = userLookup.getUsersByWarwickUniIds(allocations.asScala.map { _.universityId }.filter { _.hasText }).values.toSet

@@ -98,7 +98,7 @@ trait CombinesPdfs {
 		val copy = new PdfCopy(document, output)
 		document.open()
 		pdfs.foreach(attachment => {
-			val reader = new PdfReader(attachment.dataStream)
+			val reader = new PdfReader(attachment.asByteSource.openStream())
 
 			(1 to reader.getNumberOfPages).foreach(page => {
 				copy.addPage(copy.getImportedPage(reader, page))

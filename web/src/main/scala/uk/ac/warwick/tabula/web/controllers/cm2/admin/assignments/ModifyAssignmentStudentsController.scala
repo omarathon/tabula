@@ -12,7 +12,6 @@ import uk.ac.warwick.tabula.commands._
 import uk.ac.warwick.tabula.commands.cm2.assignments.{ModifyAssignmentStudentsCommand, _}
 import uk.ac.warwick.tabula.data.model._
 import uk.ac.warwick.tabula.web.Mav
-import uk.ac.warwick.tabula.web.controllers.cm2.CourseworkBreadcrumbs
 
 abstract class AbstractAssignmentStudentsController extends AbstractAssignmentController {
 
@@ -26,7 +25,7 @@ abstract class AbstractAssignmentStudentsController extends AbstractAssignmentCo
 
 	def showForm(form: ModifyAssignmentStudentsCommand, mode: String): Mav = {
 		val module = form.module
-		Mav(s"$urlPrefix/admin/assignments/assignment_student_details",
+		Mav("cm2/admin/assignments/assignment_student_details",
 			"department" -> module.adminDepartment,
 			"module" -> module,
 			"linkedUpstreamAssessmentGroups" -> form.linkedUpstreamAssessmentGroups,
@@ -34,7 +33,7 @@ abstract class AbstractAssignmentStudentsController extends AbstractAssignmentCo
 			"assessmentGroups" -> form.assessmentGroups,
 			"academicYear" -> form.assignment.academicYear,
 			"mode" -> mode
-		).crumbs(CourseworkBreadcrumbs.Assignment.AssignmentManagement())
+		)
 	}
 
 	def submit(cmd: ModifyAssignmentStudentsCommand, errors: Errors, path: String, mode: String) = {

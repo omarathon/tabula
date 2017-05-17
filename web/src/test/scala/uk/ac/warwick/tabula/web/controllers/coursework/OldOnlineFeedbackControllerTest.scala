@@ -30,7 +30,6 @@ class OldOnlineFeedbackControllerTest extends TestBase with Mockito {
 		new Fixture {
 			val controller = new OldOnlineFeedbackController
 			controller.userLookup = new MockUserLookup
-			controller.urlPrefix = "coursework"
 			val mav: Mav = controller.showTable(command, null)
 			mav.map("assignment") should be(assignment)
 			mav.map("command") should be(command)

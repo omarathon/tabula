@@ -25,7 +25,7 @@ class OldGenericFeedbackController extends OldCourseworkController {
 							 @ModelAttribute("command") command: GenericFeedbackCommand,
 							 errors: Errors): Mav = {
 
-		Mav(s"$urlPrefix/admin/assignments/feedback/generic_feedback",
+		Mav("coursework/admin/assignments/feedback/generic_feedback",
 			"command" -> command, "ajax" -> ajax).noLayoutIf(ajax).crumbs(
 				Breadcrumbs.Department(assignment.module.adminDepartment),
 				Breadcrumbs.Module(assignment.module)

@@ -29,14 +29,14 @@ abstract class AbstractModuleHomeController
 
 	@RequestMapping(params=Array("!ajax"), headers=Array("!X-Requested-With"))
 	def home(@ModelAttribute("command") command: ModuleCommand, @PathVariable module: Module): Mav =
-		Mav(s"$urlPrefix/admin/home/module",
+		Mav("cm2/admin/home/module",
 			"moduleInfo" -> command.apply(),
 			"academicYear" -> command.academicYear
 		).secondCrumbs(academicYearBreadcrumbs(command.academicYear)(Routes.admin.module(module, _)): _*)
 
 	@RequestMapping
 	def homeAjax(@ModelAttribute("command") command: ModuleCommand): Mav =
-		Mav(s"$urlPrefix/admin/home/assignments", "moduleInfo" -> command.apply()).noLayout()
+		Mav("cm2/admin/home/assignments", "moduleInfo" -> command.apply()).noLayout()
 
 }
 

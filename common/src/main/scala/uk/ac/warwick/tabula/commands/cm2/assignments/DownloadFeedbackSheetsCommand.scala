@@ -1,7 +1,7 @@
 package uk.ac.warwick.tabula.commands.cm2.assignments
 
 import uk.ac.warwick.tabula.commands._
-import uk.ac.warwick.tabula.commands.cm2.assignments.DownloadFeedbackSheetsCommand.Result
+import uk.ac.warwick.tabula.commands.cm2.assignments.DownloadFeedbackSheetsCommand._
 import uk.ac.warwick.tabula.data.model.Assignment
 import uk.ac.warwick.tabula.helpers.Logging
 import uk.ac.warwick.tabula.permissions._
@@ -16,6 +16,8 @@ import uk.ac.warwick.userlookup.User
 object DownloadFeedbackSheetsCommand {
 	type Result = RenderableFile
 	type Command = Appliable[RenderableFile] with DownloadFeedbackSheetsCommandState
+
+	val AdminPermission = Permissions.AssignmentFeedback.Read
 
 	def apply(assignment: Assignment): Command =
 		new DownloadFeedbackSheetsCommandInternal(assignment)
@@ -70,7 +72,7 @@ trait DownloadFeedbackSheetsCommandPermissions extends RequiresPermissionsChecki
 	self: DownloadFeedbackSheetsCommandState =>
 
 	override def permissionsCheck(p: PermissionsChecking): Unit =
-		p.PermissionCheck(Permissions.AssignmentFeedback.Read, mandatory(assignment))
+		p.PermissionCheck(AdminPermission, mandatory(assignment))
 }
 
 trait DownloadFeedbackSheetsCommandDescription extends Describable[Result] {

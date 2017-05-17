@@ -12,6 +12,8 @@ object AdminGetSingleSubmissionCommand {
 	type Result = RenderableFile
 	type Command = Appliable[Result] with AdminGetSingleSubmissionCommandState
 
+	val AdminPermission = Permissions.Submission.Read
+
 	def apply(assignment: Assignment, submission: Submission) =
 		new AdminGetSingleSubmissionCommandInternal(assignment, submission)
 			with ComposableCommand[Result]
@@ -38,7 +40,7 @@ trait AdminGetSingleSubmissionCommandPermissions extends RequiresPermissionsChec
 
 	override def permissionsCheck(p: PermissionsChecking): Unit = {
 		mustBeLinked(submission, assignment)
-		p.PermissionCheck(Permissions.Submission.Read, mandatory(submission))
+		p.PermissionCheck(AdminPermission, mandatory(submission))
 	}
 }
 

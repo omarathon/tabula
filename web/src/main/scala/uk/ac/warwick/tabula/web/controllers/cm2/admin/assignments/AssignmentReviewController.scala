@@ -8,7 +8,7 @@ import uk.ac.warwick.tabula.commands.cm2.assignments.SharedAssignmentPropertiesF
 import uk.ac.warwick.tabula.data.model._
 import uk.ac.warwick.tabula.permissions.Permissions
 import uk.ac.warwick.tabula.web.Mav
-import uk.ac.warwick.tabula.web.controllers.cm2.{CourseworkBreadcrumbs, CourseworkController}
+import uk.ac.warwick.tabula.web.controllers.cm2.CourseworkController
 
 @Profile(Array("cm2Enabled"))
 @Controller
@@ -26,12 +26,12 @@ class AssignmentReviewController extends CourseworkController {
 		val assignment = cmd.apply()
 		val sharedPropertiesForm = new SharedAssignmentPropertiesForm
 		sharedPropertiesForm.copySharedFrom(assignment)
-		Mav(s"$urlPrefix/admin/assignments/assignment_review_details",
+		Mav("cm2/admin/assignments/assignment_review_details",
 			"module" -> assignment.module,
 			"assignment" -> assignment,
 			"membershipInfo" -> assignment.membershipInfo,
 			"sharedPropertiesForm" -> sharedPropertiesForm
-		).crumbs(CourseworkBreadcrumbs.Assignment.AssignmentManagement())
+		)
 	}
 
 }

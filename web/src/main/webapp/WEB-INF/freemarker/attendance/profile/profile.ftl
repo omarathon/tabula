@@ -57,7 +57,7 @@
 										<tr class="point">
 											<td class="point">
 												${point.name}
-												(<a class="use-tooltip" data-html="true" title="
+												(<span class="use-tooltip" data-html="true" title="
 													<@fmt.wholeWeekDateFormat
 														point.startWeek
 														point.endWeek
@@ -68,7 +68,7 @@
 													point.endWeek
 													point.scheme.academicYear
 													point.scheme.department
-												/></a>)
+												/></span>)
 											</td>
 											<td class="state">
 												<#if pointPair._2()??>

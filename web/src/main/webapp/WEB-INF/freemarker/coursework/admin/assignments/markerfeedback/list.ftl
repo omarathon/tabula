@@ -166,7 +166,7 @@
 		<#if features.feedbackTemplates && assignment.hasFeedbackTemplate>
 			<a class="btn use-tooltip"
 				title="Download feedback templates for all students as a ZIP file."
-				href="<@url page='/coursework/admin/module/${assignment.module.code}/assignments/${assignment.id}/marker-templates.zip'/>"
+				href="<@routes.coursework.markerTemplatesZip assignment />"
 				data-container="body"
 			>
 				<i class="icon-download"></i> Download feedback templates

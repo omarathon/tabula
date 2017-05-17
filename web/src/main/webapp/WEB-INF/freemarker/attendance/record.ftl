@@ -103,7 +103,7 @@
 									</#if>
 								</div>
 								${point.name}
-								(<a class="use-tooltip" data-html="true" title="
+								(<span class="use-tooltip" data-html="true" title="
 									<@fmt.wholeWeekDateFormat
 										point.startWeek
 										point.endWeek
@@ -114,18 +114,18 @@
 									point.endWeek
 									point.scheme.academicYear
 									department
-								/></a>)
+								/></span>)
 								<div class="alert alert-info">
 									This student's attendance for ${reportedTerm.termTypeAsString}
 									(<@fmt.date date=reportedTerm.startDate relative=false includeTime=false shortMonth=true /> - <@fmt.date date=reportedTerm.endDate relative=false includeTime=false shortMonth=true />)
-									has already been uploaded to SITS:eVision.
+									has already been uploaded to SITS e:Vision.
 								</div>
 							<#else>
 								<div class="pull-right">
 									<@controls pointCheckpointPair/>
 								</div>
 								${point.name}
-								(<a class="use-tooltip" data-html="true" title="
+								(<span class="use-tooltip" data-html="true" title="
 									<@fmt.wholeWeekDateFormat
 										point.startWeek
 										point.endWeek
@@ -136,7 +136,7 @@
 									point.endWeek
 									point.scheme.academicYear
 									department
-								/></a>)
+								/></span>)
 								<@errorsAndScript pointCheckpointPair />
 							</#if>
 						</div>
@@ -163,7 +163,7 @@
 								<div class="alert alert-info">
 									This student's attendance for ${reportedTerm.termTypeAsString}
 									(<@fmt.date date=reportedTerm.startDate relative=false includeTime=false shortMonth=true /> - <@fmt.date date=reportedTerm.endDate relative=false includeTime=false shortMonth=true />)
-									has already been uploaded to SITS:eVision.
+									has already been uploaded to SITS e:Vision.
 								</div>
 							<#else>
 								<div class="col-md-12">
@@ -181,10 +181,8 @@
 			</#list>
 
 			<div class="submit-buttons fix-footer save-row">
-				<div class="pull-right">
-					<input type="submit" value="Save" class="btn btn-primary" data-loading-text="Saving&hellip;" autocomplete="off">
-					<a class="btn btn-default dirty-check-ignore" href="${returnTo}">Cancel</a>
-				</div>
+				<input type="submit" value="Save" class="btn btn-primary" data-loading-text="Saving&hellip;" autocomplete="off">
+				<a class="btn btn-default dirty-check-ignore" href="${returnTo}">Cancel</a>
 			</div>
 		</form>
 	</div>

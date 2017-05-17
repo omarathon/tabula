@@ -1,7 +1,6 @@
 package uk.ac.warwick.tabula.services.urkund
 
-import java.io.ByteArrayInputStream
-
+import com.google.common.io.ByteSource
 import dispatch.classic.Http
 import org.apache.http.client.HttpClient
 import org.apache.http.client.methods.HttpRequestBase
@@ -9,10 +8,10 @@ import org.apache.http.entity.{ContentType, StringEntity}
 import org.apache.http.message.BasicHttpResponse
 import org.apache.http.{HttpHost, HttpRequest, HttpVersion}
 import org.joda.time.{DateTime, DateTimeZone}
-import uk.ac.warwick.tabula.data.model.forms.SavedFormValue
 import uk.ac.warwick.tabula.data.model._
+import uk.ac.warwick.tabula.data.model.forms.SavedFormValue
 import uk.ac.warwick.tabula.data.{UrkundDao, UrkundDaoComponent}
-import uk.ac.warwick.tabula.services.objectstore.ObjectStorageService
+import uk.ac.warwick.tabula.services.objectstore.{ObjectStorageService, RichByteSource}
 import uk.ac.warwick.tabula.{Fixtures, JsonObjectMapperFactory, Mockito, TestBase}
 
 import scala.util.{Failure, Success}
@@ -42,7 +41,7 @@ class UrkundServiceTest extends TestBase with Mockito {
 		val string = "Doe, a deer, a female deer"
 		val bytes: Array[Byte] = string.getBytes("UTF-8")
 		attachment.id = "1234"
-		mockObjectStorageService.fetch(attachment.id) returns Some(new ByteArrayInputStream(bytes))
+		mockObjectStorageService.fetch(attachment.id) returns RichByteSource.wrap(ByteSource.wrap(bytes), None)
 
 		val submissionValue = new SavedFormValue
 		val submission: Submission = Fixtures.submission("1234")

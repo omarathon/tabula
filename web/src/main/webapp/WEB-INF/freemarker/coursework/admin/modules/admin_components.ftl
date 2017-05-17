@@ -324,7 +324,7 @@
 
 						<#if assignment.canPublishFeedback>
 							<li>
-								<#assign publishfeedbackurl><@url page="/coursework/admin/module/${module.code}/assignments/${assignment.id}/publish" /></#assign>
+								<#assign publishfeedbackurl><@routes.coursework.publishFeedback assignment /></#assign>
 								<@fmt.permission_button permission='AssignmentFeedback.Publish' scope=module action_descr='release feedback to students' href=publishfeedbackurl data_attr='data-container=body'>
 									<i class="icon-envelope-alt"></i> Publish feedback
 								</@fmt.permission_button>

@@ -12,7 +12,7 @@ import uk.ac.warwick.tabula.commands.coursework.assignments.{StudentCourseworkFu
 
 abstract class OldStudentCourseworkController extends OldCourseworkController {
 	def getMav(member: Member, info: StudentAssignments): Mav =
-		Mav(s"$urlPrefix/home/_student",
+		Mav("coursework/home/_student",
 			"student" -> member,
 			"enrolledAssignments" -> info.enrolledAssignments,
 			"historicAssignments" -> info.historicAssignments,

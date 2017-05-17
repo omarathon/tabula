@@ -27,7 +27,7 @@ class OldDeleteAssignmentController extends OldCourseworkController {
 	def showForm(form: DeleteAssignmentCommand): Mav = {
 		val (module, assignment) = (form.module, form.assignment)
 
-		Mav(s"$urlPrefix/admin/assignments/delete",
+		Mav("coursework/admin/assignments/delete",
 			"department" -> module.adminDepartment,
 			"module" -> module,
 			"assignment" -> assignment,

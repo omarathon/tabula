@@ -26,7 +26,7 @@ class OldUploadFeedbackToSitsController extends OldCourseworkController {
 
 	@RequestMapping(params = Array("!confirm"))
 	def form(@ModelAttribute("command") cmd: Appliable[Seq[Feedback]], @PathVariable module: Module): Mav = {
-		Mav(s"$urlPrefix/admin/assignments/publish/upload_to_sits",
+		Mav("coursework/admin/assignments/publish/upload_to_sits",
 			"isGradeValidation" -> module.adminDepartment.assignmentGradeValidation
 		)
 	}

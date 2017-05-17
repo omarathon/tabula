@@ -12,7 +12,7 @@
 			<li class="groups-active"><a href="<@url page="/" context="/groups" />">Small Group Teaching</a></li>
 		</#if>
 
-		<li class="courses-active"><a href="<@url page="/" context="/coursework" />">Coursework Management</a></li>
+		<li class="courses-active cm2-active"><a href="<@url page="/" context="/coursework" />">Coursework Management</a></li>
 
 		<#if examsEnabled || examGridsEnabled>
 			<li class="exams-active"><a href="<@url page="/" context="/exams" />">Exam Management</a></li>

@@ -66,7 +66,7 @@ class FilterExtensionsController extends CourseworkController {
 	@RequestMapping(params=Array("!ajax"), headers=Array("!X-Requested-With"))
 	def viewForm(@ModelAttribute("filterExtensionsCommand") cmd: FilterExtensionsCommand): Mav = {
 		val results = cmd.apply()
-		Mav(s"$urlPrefix/admin/extensions/list",
+		Mav("cm2/admin/extensions/list",
 			"command" -> cmd,
 			"results" -> results
 		)
@@ -75,7 +75,7 @@ class FilterExtensionsController extends CourseworkController {
 	@RequestMapping
 	def listFilterResults(@ModelAttribute("filterExtensionsCommand") cmd: FilterExtensionsCommand): Mav = {
 		val results = cmd.apply()
-		Mav(s"$urlPrefix/admin/extensions/_filter_results",
+		Mav("cm2/admin/extensions/_filter_results",
 			"command" -> cmd,
 			"results" -> results
 		).noLayout()
@@ -159,7 +159,7 @@ class ListExtensionsForAssignmentController extends CourseworkController {
 	@RequestMapping(method=Array(HEAD,GET))
 	def listExtensions(@ModelAttribute("listCommand") cmd: ListExtensionsForAssignmentCommand.Command, @RequestParam(value="universityId", required=false) universityId: String): Mav = {
 		val extensionGraphs = cmd.apply()
-		val model = Mav(s"$urlPrefix/admin/extensions/assignmentSummary",
+		val model = Mav("cm2/admin/extensions/assignmentSummary",
 			"extensionToOpen" -> universityId,
 			"extensionGraphs" -> extensionGraphs,
 			"module" -> cmd.assignment.module,
@@ -206,7 +206,7 @@ class EditExtensionController extends CourseworkController with ExtensionService
 				)
 			case _ => Map.empty
 		}
-		Mav(s"$urlPrefix/admin/extensions/assignmentdetail",
+		Mav("cm2/admin/extensions/assignmentdetail",
 			"usercode" -> student.getUserId,
 			"universityId" -> student.getWarwickId,
 			"student" -> studentMember,
@@ -260,7 +260,7 @@ class EditExtensionController extends CourseworkController with ExtensionService
 			case _ => Map.empty
 		}
 
-		val model = Mav(s"$urlPrefix/admin/extensions/detail",
+		val model = Mav("cm2/admin/extensions/detail",
 			"command" -> cmd,
 			"module" -> cmd.extension.assignment.module,
 			"assignment" -> cmd.extension.assignment,

@@ -32,7 +32,7 @@ class OldBulkModerationApprovalController extends OldCourseworkController {
 
 	@RequestMapping(method = Array(POST), params = Array("!confirmScreen"))
 	def showForm(@ModelAttribute("command") command: Appliable[Unit], errors: Errors): Mav = {
-		Mav(s"$urlPrefix/admin/assignments/markerfeedback/bulk-approve")
+		Mav("coursework/admin/assignments/markerfeedback/bulk-approve")
 	}
 
 	@RequestMapping(method = Array(POST), params = Array("confirmScreen"))

@@ -72,7 +72,7 @@ class OldListExtensionsForAssignmentController extends OldExtensionController {
 	def listExtensions(cmd: ListExtensionsForAssignmentCommand, @RequestParam(value="usercode", required=false) usercode: String): Mav = {
 		val extensionGraphs = cmd.apply()
 
-		val model = Mav(s"$urlPrefix/admin/assignments/extensions/summary",
+		val model = Mav("coursework/admin/assignments/extensions/summary",
 			"detailUrl" -> Routes.admin.assignment.extension.detail(cmd.assignment),
 			"module" -> cmd.module,
 			"extensionToOpen" -> usercode,
@@ -105,7 +105,7 @@ class OldListAllExtensionsController extends OldExtensionController {
 	def listExtensions(@ModelAttribute("command") cmd: ListAllExtensionsCommand, @RequestParam(value="usercode", required=false) usercode: String): Mav = {
 		val extensionGraphs = cmd.apply()
 
-		val model = Mav(s"$urlPrefix/admin/assignments/extensions/departmentSummary",
+		val model = Mav("coursework/admin/assignments/extensions/departmentSummary",
 			"extensionToOpen" -> usercode,
 			"extensionGraphs" -> extensionGraphs,
 			"maxDaysToDisplayAsProgressBar" -> Extension.MaxDaysToDisplayAsProgressBar
@@ -157,7 +157,7 @@ class OldEditExtensionController extends OldExtensionController {
 			case _ => Map.empty
 		}
 
-		val model = Mav(s"$urlPrefix/admin/assignments/extensions/detail",
+		val model = Mav("coursework/admin/assignments/extensions/detail",
 			"command" -> cmd,
 			"module" -> cmd.module,
 			"assignment" -> cmd.assignment,

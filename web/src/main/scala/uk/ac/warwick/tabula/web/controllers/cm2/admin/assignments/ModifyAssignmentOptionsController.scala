@@ -12,7 +12,6 @@ import uk.ac.warwick.tabula.commands.cm2.assignments.{ModifyAssignmentOptionsCom
 import uk.ac.warwick.tabula.data.model._
 import uk.ac.warwick.tabula.services.turnitinlti.TurnitinLtiService
 import uk.ac.warwick.tabula.web.Mav
-import uk.ac.warwick.tabula.web.controllers.cm2.CourseworkBreadcrumbs
 
 abstract class AbstractAssignmentOptionsController extends AbstractAssignmentController {
 
@@ -26,11 +25,11 @@ abstract class AbstractAssignmentOptionsController extends AbstractAssignmentCon
 
 	def showForm(form: ModifyAssignmentOptionsCommand, mode: String): Mav = {
 		val module = form.assignment.module
-		Mav(s"$urlPrefix/admin/assignments/assignment_options_details",
+		Mav("cm2/admin/assignments/assignment_options_details",
 			"module" -> module,
 			"mode" -> mode,
 			"turnitinFileSizeLimit" -> TurnitinLtiService.maxFileSizeInMegabytes
-		).crumbs(CourseworkBreadcrumbs.Assignment.AssignmentManagement())
+		)
 	}
 
 	def submit(cmd: ModifyAssignmentOptionsCommand, errors: Errors, path: String, mode: String): Mav = {

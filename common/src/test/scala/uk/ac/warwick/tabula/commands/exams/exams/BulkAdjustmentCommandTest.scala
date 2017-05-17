@@ -7,7 +7,7 @@ import uk.ac.warwick.tabula.commands.UploadedFile
 import uk.ac.warwick.tabula.data.FileDao
 import uk.ac.warwick.tabula.data.model._
 import uk.ac.warwick.tabula.helpers.SpreadsheetHelpers
-import uk.ac.warwick.tabula.services.objectstore.ObjectStorageService
+import uk.ac.warwick.tabula.services.objectstore.{ObjectStorageService, RichByteSource}
 import uk.ac.warwick.tabula.services.{GeneratesGradesFromMarks, MaintenanceModeService}
 import uk.ac.warwick.tabula.{CurrentUser, Fixtures, Mockito, TestBase}
 
@@ -18,8 +18,7 @@ class BulkAdjustmentCommandTest extends TestBase with Mockito {
 		val objectStorageService: ObjectStorageService = smartMock[ObjectStorageService]
 
 		// Start from the basis that the store is empty
-		objectStorageService.fetch(any[String]) returns None
-		objectStorageService.metadata(any[String]) returns None
+		objectStorageService.fetch(any[String]) returns RichByteSource.empty
 
 		val mockSpreadsheetHelper: SpreadsheetHelpers = smartMock[SpreadsheetHelpers]
 		val thisAssessment = new Assignment

@@ -30,7 +30,7 @@ class OldExtensionSettingsController extends OldCourseworkController {
 
 	@RequestMapping(method=Array(RequestMethod.GET, RequestMethod.HEAD))
 	def viewSettings(@PathVariable dept: Department, user: CurrentUser, cmd:ExtensionSettingsCommand, errors:Errors): Mav =
-		crumbed(Mav(s"$urlPrefix/admin/extension-settings",
+		crumbed(Mav("coursework/admin/extension-settings",
 			"department" -> dept
 		), dept)
 

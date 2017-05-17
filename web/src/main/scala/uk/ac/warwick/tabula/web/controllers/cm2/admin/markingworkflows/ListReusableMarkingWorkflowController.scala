@@ -37,7 +37,7 @@ class ListReusableMarkingWorkflowController extends CM2MarkingWorkflowController
 		val currentAcademicYear = AcademicYear.guessSITSAcademicYearByDate(DateTime.now)
 
 		commonCrumbs(
-			Mav(s"$urlPrefix/admin/workflows/list_reusable", Map(
+			Mav("cm2/admin/workflows/list_reusable", Map(
 				"department" -> department,
 				"academicYear" -> academicYear,
 				"workflows" -> cmd.apply(),

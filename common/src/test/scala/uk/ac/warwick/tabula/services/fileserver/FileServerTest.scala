@@ -1,15 +1,15 @@
 package uk.ac.warwick.tabula.services.fileserver
 
+import java.io.File
+
+import com.google.common.io.Files
 import com.google.common.net.MediaType
-import uk.ac.warwick.tabula.services.objectstore.ObjectStorageService
-import uk.ac.warwick.tabula.{FeaturesImpl, TestBase, Mockito}
-import org.springframework.mock.web.MockHttpServletResponse
-import org.springframework.mock.web.MockHttpServletRequest
-import uk.ac.warwick.tabula.data.model.FileAttachment
-import java.io.{FileInputStream, InputStream, File}
+import org.joda.time.{DateTime, Hours}
+import org.springframework.mock.web.{MockHttpServletRequest, MockHttpServletResponse}
 import org.springframework.util.FileCopyUtils
-import org.joda.time.{Hours, DateTime}
-import org.junit.Before
+import uk.ac.warwick.tabula.data.model.FileAttachment
+import uk.ac.warwick.tabula.services.objectstore.{ObjectStorageService, RichByteSource}
+import uk.ac.warwick.tabula.{FeaturesImpl, Mockito, TestBase}
 
 class FileServerTest extends TestBase with Mockito {
 
@@ -29,8 +29,7 @@ class FileServerTest extends TestBase with Mockito {
 		a.id = "123"
 		a.objectStorageService = smartMock[ObjectStorageService]
 
-		a.objectStorageService.fetch("123") returns None
-		a.objectStorageService.metadata("123") returns None
+		a.objectStorageService.fetch("123") returns RichByteSource.empty
 
 		val file = new RenderableAttachment(a)
 
@@ -49,8 +48,7 @@ class FileServerTest extends TestBase with Mockito {
 		a.id = "123"
 		a.objectStorageService = smartMock[ObjectStorageService]
 
-		a.objectStorageService.fetch("123") returns Some(new FileInputStream(tmpFile))
-		a.objectStorageService.metadata("123") returns Some(ObjectStorageService.Metadata(contentLength = content.length, contentType = MediaType.OCTET_STREAM.toString, fileHash = None))
+		a.objectStorageService.fetch("123") returns RichByteSource.wrap(Files.asByteSource(tmpFile), Some(ObjectStorageService.Metadata(contentLength = content.length, contentType = MediaType.OCTET_STREAM.toString, fileHash = None)))
 
 		val file = new RenderableAttachment(a)
 
@@ -71,8 +69,7 @@ class FileServerTest extends TestBase with Mockito {
 		a.id = "123"
 		a.objectStorageService = smartMock[ObjectStorageService]
 
-		a.objectStorageService.fetch("123") returns Some(new FileInputStream(tmpFile))
-		a.objectStorageService.metadata("123") returns Some(ObjectStorageService.Metadata(contentLength = content.length, contentType = MediaType.OCTET_STREAM.toString, fileHash = None))
+		a.objectStorageService.fetch("123") returns RichByteSource.wrap(Files.asByteSource(tmpFile), Some(ObjectStorageService.Metadata(contentLength = content.length, contentType = MediaType.OCTET_STREAM.toString, fileHash = None)))
 
 		val file = new RenderableAttachment(a)
 
@@ -95,8 +92,7 @@ class FileServerTest extends TestBase with Mockito {
 		a.id = "123"
 		a.objectStorageService = smartMock[ObjectStorageService]
 
-		a.objectStorageService.fetch("123") returns Some(new FileInputStream(tmpFile))
-		a.objectStorageService.metadata("123") returns Some(ObjectStorageService.Metadata(contentLength = content.length, contentType = "application/zip", fileHash = None))
+		a.objectStorageService.fetch("123") returns RichByteSource.wrap(Files.asByteSource(tmpFile), Some(ObjectStorageService.Metadata(contentLength = content.length, contentType = "application/zip", fileHash = None)))
 
 		val file = new RenderableAttachment(a)
 
@@ -104,7 +100,7 @@ class FileServerTest extends TestBase with Mockito {
 
 		res.getContentLength() should be (content.length)
 		res.getHeader("Content-Length") should be (content.length.toString)
-		res.getContentType() should be (MediaType.OCTET_STREAM.toString)
+		res.getContentType() should be ("application/zip")
 		res.getHeader("Content-Disposition") should be (null)
 		res.getContentAsByteArray().length should be (0)
 	}
@@ -119,8 +115,7 @@ class FileServerTest extends TestBase with Mockito {
 		a.id = "123"
 		a.objectStorageService = smartMock[ObjectStorageService]
 
-		a.objectStorageService.fetch("123") returns Some(new FileInputStream(tmpFile))
-		a.objectStorageService.metadata("123") returns Some(ObjectStorageService.Metadata(contentLength = content.length, contentType = "application/zip", fileHash = None))
+		a.objectStorageService.fetch("123") returns RichByteSource.wrap(Files.asByteSource(tmpFile), Some(ObjectStorageService.Metadata(contentLength = content.length, contentType = "application/zip", fileHash = None)))
 
 		val file = new RenderableAttachment(a)
 
@@ -128,7 +123,7 @@ class FileServerTest extends TestBase with Mockito {
 
 		res.getContentLength() should be (content.length)
 		res.getHeader("Content-Length") should be (content.length.toString)
-		res.getContentType() should be (MediaType.OCTET_STREAM.toString)
+		res.getContentType() should be ("application/zip")
 		res.getHeader("Content-Disposition") should be ("attachment")
 		res.getContentAsByteArray().length should be (0)
 	}

@@ -48,7 +48,7 @@ class OldOnlineMarkerFeedbackFormController extends OldCourseworkController {
 		val allCompletedMarkerFeedback = parentFeedback.getAllCompletedMarkerFeedback
 
 
-		Mav(s"$urlPrefix/admin/assignments/feedback/marker_online_feedback" ,
+		Mav("coursework/admin/assignments/feedback/marker_online_feedback" ,
 			"command" -> command,
 			"isCompleted" -> isCompleted,
 			"isRejected" -> isRejected,

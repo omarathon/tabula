@@ -33,7 +33,7 @@ class OldAssignmentEnrolmentController extends OldCourseworkController with Logg
 		form.afterBind()
 
 		logger.info(s"Assignment Enrolment includeCount: ${form.membershipInfo.includeCount}")
-		Mav(s"$urlPrefix/admin/assignments/enrolment",
+		Mav("coursework/admin/assignments/enrolment",
 			"department" -> form.module.adminDepartment,
 			"module" -> form.module,
 			"academicYear" -> form.academicYear,
