@@ -1,5 +1,6 @@
 package uk.ac.warwick.tabula.commands.cm2.assignments
 
+import uk.ac.warwick.tabula.commands.cm2.assignments.markers.CanProxy
 import uk.ac.warwick.tabula.commands.{Description, _}
 import uk.ac.warwick.tabula.data.model.Assignment
 import uk.ac.warwick.tabula.data.model.MarkingState._

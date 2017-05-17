@@ -26,9 +26,9 @@ case class MarkerFeedbackStage (
 	feedbackItems: Seq[MarkerFeedbackItem]
 )
 
-object ListMarkerFeedbackCommand  {
+object OldListMarkerFeedbackCommand  {
 	def apply(assignment:Assignment, module: Module, marker:User, submitter: CurrentUser) =
-		new ListMarkerFeedbackCommand(assignment, module, marker, submitter)
+		new OldListMarkerFeedbackCommand(assignment, module, marker, submitter)
 		with ComposableCommand[Seq[MarkerFeedbackStage]]
 		with ListMarkerFeedbackPermissions
 		with ListMarkerFeedbackCommandState
@@ -36,7 +36,7 @@ object ListMarkerFeedbackCommand  {
 		with Unaudited with ReadOnly
 }
 
-class ListMarkerFeedbackCommand(val assignment: Assignment, val module: Module, val marker: User, val submitter: CurrentUser)
+class OldListMarkerFeedbackCommand(val assignment: Assignment, val module: Module, val marker: User, val submitter: CurrentUser)
 	extends CommandInternal[Seq[MarkerFeedbackStage]] with CanProxy {
 
 	self: UserLookupComponent =>

@@ -1,6 +1,6 @@
 <div class="marking-and-feedback">
 	<h4>Marking and feedback</h4>
-	<#assign actionUrl><@routes.cm2.markerOnlineFeedback command.assignment command.marker command.student /></#assign>
+	<#assign actionUrl><@routes.cm2.markerOnlineFeedback command.assignment command.stage command.marker command.student /></#assign>
 	<@f.form method="post" enctype="multipart/form-data" commandName="command" action=actionUrl cssClass="dirty-check double-submit-protection">
 
 		<@f.errors cssClass="error form-errors" />
@@ -37,13 +37,13 @@
 							<@f.hidden path="attachedFiles" value="${attachment.id}" />
 						</li>
 					</#list>
-				</ul>
+				</ul>e
 			</@bs3form.labelled_form_group>
 		<#else>
-		<#-- Add invisible empty row for populating in case of copying files from a feedback further back in the workflow -->
-			<div class="feedbackAttachments" style="display: none;">
-				<@bs3form.labelled_form_group path="attachedFiles" labelText="Attached files"><ul class="list-unstyled attachments"></ul></@bs3form.labelled_form_group>
-			</div>
+			<#-- Add invisible empty row for populating in case of copying files from a feedback further back in the workflow -->
+			<@bs3form.labelled_form_group cssClass="hide" path="attachedFiles" labelText="Attached files">
+				<ul class="list-unstyled attachments"></ul>
+			</@bs3form.labelled_form_group>
 		</#if>
 
 		<@bs3form.labelled_form_group path="file.upload" labelText="Attachments">

@@ -13,18 +13,18 @@
 		<ul class="nav nav-tabs" role="tablist">
 		<#if command.assignment.collectSubmissions>
 			<li role="presentation" class="active">
-				<a href="#${student.userId}submission" aria-controls="${student.userId}submission" role="tab" data-toggle="tab">Submission details</a>
+				<a href="#${student.userId}${command.stage.name}submission" aria-controls="${student.userId}submission" role="tab" data-toggle="tab">Submission details</a>
 			</li>
 		</#if>
 		<#if command.previousMarkerFeedback?has_content>
 			<#assign stages=command.previousMarkerFeedback?keys />
 			<#list stages as stage>
 				<li role="presentation">
-					<a href="#${student.userId}${stage.name}" aria-controls="${student.userId}${stage.name}" role="tab" data-toggle="tab">${stage.allocationName} feedback</a>
+					<a href="#${student.userId}${command.stage.name}${stage.name}" aria-controls="${student.userId}${stage.name}" role="tab" data-toggle="tab">${stage.description} feedback</a>
 				</li>
 			</#list>
 		</#if>
-			<li role="presentation"><a href="#history" aria-controls="history" role="tab" data-toggle="tab">Submission history</a></li>
+			<li role="presentation"><a href="#${student.userId}${command.stage.name}history" aria-controls="history" role="tab" data-toggle="tab">Submission history</a></li>
 		</ul>
 		<div class="tab-content">
 		<#if command.assignment.collectSubmissions>
@@ -33,7 +33,7 @@
 		<#if command.previousMarkerFeedback?has_content>
 			<#include "_previous_feedback.ftl" />
 		</#if>
-			<div role="tabpanel" class="tab-pane" id="history">TODO<#--FIXME - add submission history --></div>
+			<div role="tabpanel" class="tab-pane" id="${student.userId}${command.stage.name}history">TODO<#--FIXME - add submission history --></div>
 		</div>
 	</div>
 	<#if command.currentMarkerFeedback?has_content>

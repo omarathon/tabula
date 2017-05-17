@@ -10,7 +10,6 @@ import uk.ac.warwick.tabula.data.model.forms.Extension
 import uk.ac.warwick.tabula.data.model.markingworkflow.MarkingWorkflowStage
 import uk.ac.warwick.tabula.services._
 import uk.ac.warwick.tabula.JavaImports._
-import uk.ac.warwick.tabula.data.model.MarkingState.InProgress
 import uk.ac.warwick.tabula.data.{AutowiringSavedFormValueDaoComponent, SavedFormValueDaoComponent}
 import uk.ac.warwick.userlookup.User
 import uk.ac.warwick.tabula.helpers.StringUtils._
@@ -19,8 +18,8 @@ import scala.collection.JavaConverters._
 
 
 object OnlineMarkerFeedbackCommand {
-	def apply(assignment: Assignment, student: User, marker: User, submitter: CurrentUser, gradeGenerator: GeneratesGradesFromMarks) =
-		new OnlineMarkerFeedbackCommandInternal(assignment, student, marker, submitter, gradeGenerator)
+	def apply(assignment: Assignment, stage: MarkingWorkflowStage, student: User, marker: User, submitter: CurrentUser, gradeGenerator: GeneratesGradesFromMarks) =
+		new OnlineMarkerFeedbackCommandInternal(assignment, stage, student, marker, submitter, gradeGenerator)
 			with ComposableCommand[MarkerFeedback]
 			with OnlineFeedbackPermissions
 			with OnlineFeedbackDescription[MarkerFeedback]
@@ -33,6 +32,7 @@ object OnlineMarkerFeedbackCommand {
 
 class OnlineMarkerFeedbackCommandInternal(
 		val assignment: Assignment,
+		val stage: MarkingWorkflowStage,
 		val student: User,
 		val marker: User,
 		val submitter: CurrentUser,
@@ -101,6 +101,7 @@ trait OnlineMarkerFeedbackState extends OnlineFeedbackState with SubmissionState
 
 	this: ProfileServiceComponent with CM2MarkingWorkflowServiceComponent =>
 
+	val stage: MarkingWorkflowStage
 	val module: Module = assignment.module
 	val gradeGenerator: GeneratesGradesFromMarks
 
@@ -115,11 +116,15 @@ trait OnlineMarkerFeedbackState extends OnlineFeedbackState with SubmissionState
 	val previousMarkerFeedback: Map[MarkingWorkflowStage, MarkerFeedback] = {
 		// if there are multiple outstanding stages they should all have the same order so only look at the first one
 		val currentStageIndex = feedback.outstandingStages.asScala.headOption.map(_.order).getOrElse(0)
-		allMarkerFeedback.filterKeys(_.order < currentStageIndex)
+		if (currentStageIndex == stage.order)
+			allMarkerFeedback.filterKeys(_.order < currentStageIndex) // show all the previous stages
+		else
+			allMarkerFeedback.filterKeys(_.order <= stage.order) // show all stages up to and including the current one
 	}
 
 	val currentMarkerFeedback: Option[MarkerFeedback] = feedback.outstandingStages.asScala
 		.flatMap(allMarkerFeedback.get)
 		.find(_.marker == marker)
+		.filter(_.stage == stage)
 
 }

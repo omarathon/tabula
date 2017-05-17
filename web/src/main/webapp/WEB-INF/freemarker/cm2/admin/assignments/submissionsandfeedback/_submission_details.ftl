@@ -96,7 +96,7 @@
 			Publications: ${r.publicationOverlap}%
 		</p>
 		<p>
-			<a target="turnitin-viewer" href="<@routes.coursework.turnitinLtiReport assignment attachment />">View full report</a>
+			<a target="turnitin-viewer" href="<@routes.cm2.turnitinLtiReport assignment attachment />">View full report</a>
 		</p>
 	</div>
 	<script type="text/javascript">

@@ -13,19 +13,26 @@ sealed abstract class MarkingWorkflowStage(val name: String, val order: Int) {
 	def verb: String = "mark"
 	// used when stages have their own allocations rather than allocations being at the roleName level
 	def allocationName: String = roleName
+	// used to describe a stage - when two stages share a role name (the same person is responsible for both stages) these will need to be distinct
+	def description: String = roleName
 
 	def previousStages: Seq[MarkingWorkflowStage] = Nil
 	def nextStages: Seq[MarkingWorkflowStage] = Nil
 
+	// get a description of the next stage - default works best when there is only one next stage - may need overriding in other cases
+	def nextStagesDescription: Option[String] = nextStages.headOption.map(_.description)
+
 	override def toString: String = name
 }
 
-abstract class FinalStage(n: String) extends MarkingWorkflowStage(name = n, order = Int.MaxValue)
+abstract class FinalStage(n: String) extends MarkingWorkflowStage(name = n, order = Int.MaxValue) {
+	override def roleName: String = "Admin"
+}
 
 /**
 	* Stages model the steps in any given workflow.
 	*
-	* If your creating a new worklow that has concurrent stages in the second or later step you need to consider the
+	* If your creating a new workflow that has concurrent stages in the second or later step you need to consider the
 	* implications of trying to call CM2MarkingWorkflowService.returnFeedback when on one of those concurrent stages.
 	* The model and services can cope with this operation but it will reset for both of the concurrent markers.
 	* Perhaps in these cases it should be an admin only operation.
@@ -53,6 +60,7 @@ object MarkingWorkflowStage {
 		override def verb: String = "finalise"
 		override def nextStages: Seq[MarkingWorkflowStage] = Seq(DblCompleted)
 		override def previousStages: Seq[MarkingWorkflowStage] = Seq(DblSecondMarker)
+		override def description: String = "Final marker"
 	}
 	case object DblCompleted extends FinalStage("DblCompleted") {
 		override def previousStages: Seq[MarkingWorkflowStage] = Seq(DblFinalMarker)
@@ -63,17 +71,20 @@ object MarkingWorkflowStage {
 		override def roleName: String = "Independent marker"
 		override def nextStages: Seq[MarkingWorkflowStage] = Seq(DblBlndFinalMarker)
 		override def allocationName = "Independent marker A"
+		override def description: String = allocationName
 	}
 	case object DblBlndInitialMarkerB extends MarkingWorkflowStage("DblBlndInitialMarkerB", 1) {
 		override def roleName: String = "Independent marker"
 		override def nextStages: Seq[MarkingWorkflowStage] = Seq(DblBlndFinalMarker)
 		override def allocationName = "Independent marker B"
+		override def description: String = allocationName
 	}
 	case object DblBlndFinalMarker extends MarkingWorkflowStage("DblBlndFinalMarker", 2) {
 		override def roleName = "Final marker"
 		override def verb = "finalise"
 		override def nextStages: Seq[MarkingWorkflowStage] = Seq(DblBlndCompleted)
 		override def previousStages: Seq[MarkingWorkflowStage] = Seq(DblBlndInitialMarkerA, DblBlndInitialMarkerA)
+		override def description = "Final marker"
 	}
 	case object DblBlndCompleted extends FinalStage("DblBlndCompleted") {
 		override def previousStages: Seq[MarkingWorkflowStage] = Seq(DblBlndFinalMarker)
