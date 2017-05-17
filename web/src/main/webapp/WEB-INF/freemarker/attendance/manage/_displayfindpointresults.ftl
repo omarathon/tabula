@@ -7,7 +7,7 @@
 			<@attendance_macros.groupedPointsBySection findResult.termGroupedPoints term ; groupedPoint >
 				<div class="col-md-12">
 					${groupedPoint.templatePoint.name}
-						(<a class="use-tooltip" data-html="true" title="
+						(<span class="use-tooltip" data-html="true" title="
 							<@fmt.wholeWeekDateFormat
 								groupedPoint.templatePoint.startWeek
 								groupedPoint.templatePoint.endWeek
@@ -20,7 +20,7 @@
 								groupedPoint.templatePoint.endWeek
 								groupedPoint.templatePoint.scheme.academicYear
 								command.department/>
-						</a>)
+						</span>)
 					<#if !templateScheme??><@attendance_macros.groupedPointSchemePopover groupedPoint /></#if>
 				</div>
 			</@attendance_macros.groupedPointsBySection>

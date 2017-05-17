@@ -449,13 +449,13 @@ preposition: Text to relate the title to the department name in the second line,
 	<#if emails?size gt 0>
 		<a class="btn btn-default <#if emails?size gt limit>use-tooltip disabled</#if>"
 			<#if emails?size gt limit>
-		   		title="Emailing is disabled for groups of more than ${limit} students"
+		   		title="Emailing is disabled for groups of more than ${limit}"
 			<#else>
 				href="mailto:<#list emails as email>${email}<#if email_has_next>${separator}</#if></#list><#if subject?? && subject?length gt 0>?subject=${subject?url}</#if>"
 			</#if> >
 			<i class="icon-envelope-alt fa fa-envelope-o"></i> ${title}
 		</a>
-		<a data-content="There is a known issue with sending emails to long lists of students. If the 'Email these students' button doesn't work try right-clicking on the button, choosing 'Copy email address' and pasting this into your email client directly."
+		<a data-content="There is a known issue with sending emails to long lists of staff or students. If the '${title}' button doesn't work try right-clicking on the button, choosing 'Copy email address' and pasting this into your email client directly."
 		   data-html="true"
 		   data-trigger="hover"
 		   class="use-popover tabulaPopover-init"

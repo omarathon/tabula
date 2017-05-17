@@ -1,8 +1,5 @@
 <#escape x as x?html>
-
-<p class="lead muted">
-	This is a service for viewing and managing attendance monitoring points.
-</p>
+<h1>Monitoring Points</h1>
 
 <#if hasProfile>
 	<h2>
@@ -28,7 +25,7 @@
 <#if can_record || can_manage>
 	<#if can_record>
 		<h2>View and record monitoring points</h2>
-		<ul class="unstyled">
+		<ul>
 			<#list viewPermissions as department>
 				<li>
 					<h3><a id="view-department-${department.code}" href="<@routes.attendance.viewHomeForYear department academicYear />">${department.name}</a></h3>
@@ -38,31 +35,34 @@
 	</#if>
 
 	<#if can_manage>
-		<h2>Create and edit monitoring schemes</h2>
-		<ul class="unstyled">
+		<h2>
+			Create and edit monitoring schemes
+
+			<#if showIntro("no-route-departments-intro", "anywhere")>
+				<#assign introText>
+					<p>
+						You can now view or manage monitoring points for any students who are enrolled in your department,
+						but whose route is owned by a different department.
+						This means that you will no longer see separate links to monitor students in departments
+						where you have been granted permissions on a specific route.
+					</p>
+				</#assign>
+				<a href="#"
+					 id="no-route-departments-intro"
+					 class="use-introductory<#if showIntro("no-route-departments-intro", "anywhere")> auto</#if>"
+					 data-hash="${introHash("no-route-departments-intro", "anywhere")}"
+					 data-placement="bottom"
+					 data-html="true"
+					 data-content="${introText}"><i class="fa fa-question-circle"></i></a>
+			</#if>
+		</h2>
+		<ul>
 			<#list managePermissions as department>
 				<li>
 					<h3><a id="manage-department-${department.code}" href="<@routes.attendance.manageHomeForYear department academicYear />">${department.name}</a></h3>
 				</li>
 			</#list>
 		</ul>
-		<#if showIntro("no-route-departments-intro", "anywhere")>
-			<#assign introText>
-			<p>
-				You can now view or manage monitoring points for any students who are enrolled in your department,
-				but whose route is owned by a different department.
-				This means that you will no longer see separate links to monitor students in departments
-				where you have been granted permissions on a specific route.
-			</p>
-			</#assign>
-			<a href="#"
-			   id="no-route-departments-intro"
-			   class="use-introductory<#if showIntro("no-route-departments-intro", "anywhere")> auto</#if>"
-			   data-hash="${introHash("no-route-departments-intro", "anywhere")}"
-			   data-placement="bottom"
-			   data-html="true"
-			   data-content="${introText}"><i class="fa fa-question-circle"></i></a>
-		</#if>
 	</#if>
 <#else>
 	<#if user.staff && !hasAnyRelationships>

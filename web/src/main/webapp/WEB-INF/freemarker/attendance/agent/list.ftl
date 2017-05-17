@@ -60,7 +60,7 @@
 							<a href="${record_url}" class="btn btn-primary btn-sm <#if !canRecordAny>disabled</#if>">Record</a>
 						</div>
 						${groupedPoint.templatePoint.name}
-						(<a class="use-tooltip" data-html="true" title="
+						(<span class="use-tooltip" data-html="true" title="
 							<@fmt.wholeWeekDateFormat
 								groupedPoint.templatePoint.startWeek
 								groupedPoint.templatePoint.endWeek
@@ -71,7 +71,7 @@
 							groupedPoint.templatePoint.endWeek
 							groupedPoint.templatePoint.scheme.academicYear
 							department
-						/></a>)
+						/></span>)
 						<#assign popoverContent>
 							<ul>
 								<#list groupedPoint.schemes?sort_by("displayName") as scheme>
