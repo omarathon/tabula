@@ -1,8 +1,5 @@
 package uk.ac.warwick.tabula.commands.scheduling
 
-import java.io.InputStream
-
-import com.google.common.io.ByteSource
 import uk.ac.warwick.tabula.commands._
 import uk.ac.warwick.tabula.commands.scheduling.ObjectStorageMigrationCommand._
 import uk.ac.warwick.tabula.data.{AutowiringFileDaoComponent, FileDaoComponent, FileHasherComponent, SHAFileHasherComponent}
@@ -41,16 +38,9 @@ class ObjectStorageMigrationCommandInternal extends CommandInternal[Set[String]]
 
 			benchmarkTask(s"Migrate $BatchSize keys") {
 				keysToMigrate.take(BatchSize).flatMap { key =>
-					val data = new ByteSource {
-						override def openStream(): InputStream = legacyStore.fetch(key).orNull
-					}
-
-					for {
-						metadata <- legacyStore.metadata(key)
-						fileHash <- legacyStore.fetch(key).map(fileHasher.hash) // Intentionally a different stream to above
-					} yield {
-						logger.info(s"Migrating blob (size: ${metadata.contentLength} bytes) for key $key to default store")
-						defaultStore.push(key, data, metadata.copy(fileHash = Some(fileHash)))
+					Option(legacyStore.fetch(key)).filterNot(_.isEmpty).map { obj =>
+						logger.info(s"Migrating blob (size: ${obj.size} bytes) for key $key to default store")
+						defaultStore.push(key, obj, obj.metadata.get.copy(fileHash = Some(fileHasher.hash(obj.openStream()))))
 						key
 					}
 				}

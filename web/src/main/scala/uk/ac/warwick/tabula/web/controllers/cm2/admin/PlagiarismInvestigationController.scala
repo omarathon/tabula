@@ -11,7 +11,7 @@ import uk.ac.warwick.tabula.commands.cm2.assignments.{PlagiarismInvestigationCom
 import uk.ac.warwick.tabula.cm2.web.Routes
 import uk.ac.warwick.tabula.data.model.{Assignment, Module}
 import uk.ac.warwick.tabula.web.Mav
-import uk.ac.warwick.tabula.web.controllers.cm2.{CourseworkBreadcrumbs, CourseworkController}
+import uk.ac.warwick.tabula.web.controllers.cm2.CourseworkController
 
 @Profile(Array("cm2Enabled")) @Controller
 @RequestMapping(value=Array("/${cm2.prefix}/admin/assignments/{assignment}/submissionsandfeedback/mark-plagiarised"))
@@ -23,9 +23,9 @@ class PlagiarismInvestigationController extends CourseworkController {
 	validatesSelf[PlagiarismInvestigationCommandValidation]
 
 	def formView(assignment: Assignment): Mav =
-		Mav(s"$urlPrefix/admin/assignments/submissionsandfeedback/mark-plagiarised",
-				"assignment" -> assignment
-		).crumbs(CourseworkBreadcrumbs.Plagiarism.PlagiarismInvestigation(assignment.module))
+		Mav("cm2/admin/assignments/submissionsandfeedback/mark-plagiarised",
+			"assignment" -> assignment
+		)
 
 	def RedirectBack(assignment: Assignment) = Redirect(Routes.admin.assignment.submissionsandfeedback(assignment))
 

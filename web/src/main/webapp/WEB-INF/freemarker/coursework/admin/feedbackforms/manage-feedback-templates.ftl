@@ -2,10 +2,11 @@
 <#escape x as x?html>
 <h1>Feedback forms for ${department.name}</h1>
 
+<#assign submitUrl><@routes.coursework.feedbacktemplates department /></#assign>
 <@f.form enctype="multipart/form-data"
 		 method="post"
 		 class="form-horizontal"
-		 action="${url('/coursework/admin/department/${department.code}/settings/feedback-templates')}"
+		 action=submitUrl
 		 commandName="bulkFeedbackTemplateCommand">
 	<@form.labelled_row "file.upload" "Upload feedback forms">
 		<input type="file" id="file.upload" name="file.upload" multiple />

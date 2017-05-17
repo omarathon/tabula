@@ -25,7 +25,7 @@ class OldAddBatchFeedbackController extends OldCourseworkController {
 
 	@RequestMapping(method = Array(HEAD, GET))
 	def uploadZipForm(@ModelAttribute cmd: AddFeedbackCommand): Mav = {
-		crumbed(Mav(s"$urlPrefix/admin/assignments/feedback/zipform"), cmd.module)
+		crumbed(Mav("coursework/admin/assignments/feedback/zipform"), cmd.module)
 	}
 
 	@RequestMapping(method = Array(POST), params = Array("!confirm"))
@@ -35,7 +35,7 @@ class OldAddBatchFeedbackController extends OldCourseworkController {
 			uploadZipForm(cmd)
 		} else {
 			cmd.postExtractValidation(errors)
-			crumbed(Mav(s"$urlPrefix/admin/assignments/feedback/zipreview"), cmd.module)
+			crumbed(Mav("coursework/admin/assignments/feedback/zipreview"), cmd.module)
 		}
 	}
 
@@ -44,7 +44,7 @@ class OldAddBatchFeedbackController extends OldCourseworkController {
 		cmd.preExtractValidation(errors)
 		cmd.postExtractValidation(errors)
 		if (errors.hasErrors) {
-			crumbed(Mav(s"$urlPrefix/admin/assignments/feedback/zipreview"), cmd.module)
+			crumbed(Mav("coursework/admin/assignments/feedback/zipreview"), cmd.module)
 		} else {
 			// do apply, redirect back
 			cmd.apply()

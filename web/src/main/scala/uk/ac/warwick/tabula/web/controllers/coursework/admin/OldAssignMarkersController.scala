@@ -102,7 +102,7 @@ class OldAssignmentAssignMarkersController extends OldCourseworkController {
 		val firstMarkerUnassignedStudents = members.toList.filterNot(firstMarkers.flatMap(_.students).contains).sortBy(_.sortValue)
 		val secondMarkerUnassignedStudents = members.toList.filterNot(secondMarkers.flatMap(_.students).contains).sortBy(_.sortValue)
 
-		Mav(s"$urlPrefix/admin/assignments/assignmarkers/form",
+		Mav("coursework/admin/assignments/assignmarkers/form",
 			"assessment" -> assignment,
 			"isExam" -> false,
 			"assignMarkersURL" -> CourseworkRoutes.admin.assignment.assignMarkers(assignment),
@@ -128,7 +128,7 @@ class OldAssignmentAssignMarkersController extends OldCourseworkController {
 							 @PathVariable(value = "assignment") assignment: Assignment,
 							 @ModelAttribute("command") cmd: Appliable[Assignment],
 							 errors: Errors): Mav = {
-			Mav(s"$urlPrefix/admin/assignments/assignmarkers/upload-previewupload-preview",
+			Mav("coursework/admin/assignments/assignmarkers/upload-previewupload-preview",
 				"assessment" -> assignment,
 				"isExam" -> false,
 				"assignMarkersURL" -> CourseworkRoutes.admin.assignment.assignMarkers(assignment),

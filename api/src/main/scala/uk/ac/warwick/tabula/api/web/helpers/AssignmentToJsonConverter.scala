@@ -11,6 +11,14 @@ trait AssignmentToJsonConverter {
 	def jsonAssignmentObject(assignment: Assignment): Map[String, Any] = {
 		val basicInfo = Map(
 			"id" -> assignment.id,
+			"module" -> Map(
+				"code" -> assignment.module.code.toUpperCase,
+				"name" -> assignment.module.name,
+				"adminDepartment" -> Map(
+					"code" -> assignment.module.adminDepartment.code.toUpperCase,
+					"name" -> assignment.module.adminDepartment.name
+				)
+			),
 			"archived" -> !assignment.isAlive, // TODO don't like this inferred value but don't want to change API spec
 			"academicYear" -> assignment.academicYear.toString,
 			"name" -> assignment.name,

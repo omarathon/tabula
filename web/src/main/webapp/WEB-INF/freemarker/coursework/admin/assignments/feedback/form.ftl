@@ -2,8 +2,8 @@
 <#assign f=JspTaglibs["/WEB-INF/tld/spring-form.tld"]>
 <#escape x as x?html>
 
-
-<@f.form method="post" enctype="multipart/form-data" action="${url('/coursework/admin/module/${module.code}/assignments/${assignment.id}/feedback/new')}" commandName="addFeedbackCommand">
+<#assign submitUrl><@routes.coursework.addFeedbackSingle assignment /></#assign>
+<@f.form method="post" enctype="multipart/form-data" action=submitUrl commandName="addFeedbackCommand">
 
 <h1>Submit feedback</h1>
 <h5><span class="muted">for</span> ${assignment.name}</h5>

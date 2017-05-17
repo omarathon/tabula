@@ -24,7 +24,7 @@ class OldFeedbackAuditController extends OldCourseworkController {
 					 @ModelAttribute("auditCommand") auditCommand: Appliable[FeedbackAuditData]
 						): Mav = {
 		val auditData = auditCommand.apply()
-		Mav(s"$urlPrefix/admin/assignments/feedback_audit",
+		Mav("coursework/admin/assignments/feedback_audit",
 			"command" -> auditCommand,
 			"auditData" -> auditData,
 			"assignment" -> assignment,

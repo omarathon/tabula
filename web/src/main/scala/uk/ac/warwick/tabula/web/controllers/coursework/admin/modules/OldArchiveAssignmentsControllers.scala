@@ -24,7 +24,7 @@ class OldArchiveModuleAssignmentsController extends OldCourseworkController with
 
 	@RequestMapping(method = Array(HEAD, GET))
 	def showForm(@PathVariable module: Module, cmd: ArchiveAssignmentsCommand): Mav = {
-		Mav(s"$urlPrefix/admin/modules/archive_assignments",
+		Mav("coursework/admin/modules/archive_assignments",
 			"title" -> module.name,
 			"cancel" -> Routes.admin.module(module),
 			"map" -> moduleAssignmentMap(cmd.modules)
@@ -53,7 +53,7 @@ class OldArchiveDepartmentAssignmentsController extends OldCourseworkController 
 
 	@RequestMapping(method = Array(HEAD, GET))
 	def showForm(@PathVariable department: Department, cmd: ArchiveAssignmentsCommand): Mav = {
-		Mav(s"$urlPrefix/admin/modules/archive_assignments",
+		Mav("coursework/admin/modules/archive_assignments",
 			"title" -> department.name,
 			"cancel" -> Routes.admin.department(department),
 			"map" -> moduleAssignmentMap(cmd.modules),

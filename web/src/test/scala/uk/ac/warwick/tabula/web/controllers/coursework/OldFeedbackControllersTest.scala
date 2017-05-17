@@ -14,7 +14,7 @@ class OldFeedbackControllersTest extends TestBase with Mockito {
 
 	@Test
 	def display() {
-		controller.showForm(command) should be (Mav("${cm1.prefix}/admin/assignments/feedback/read_only",
+		controller.showForm(command) should be (Mav("coursework/admin/assignments/feedback/read_only",
 			"embedded" -> true,
 			"renderLayout" -> "none",
 			"feedback" -> Some(feedback)))

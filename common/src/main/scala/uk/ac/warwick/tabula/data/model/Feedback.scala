@@ -190,6 +190,10 @@ abstract class Feedback extends GeneratedId with FeedbackAttachments with Permis
 
 	def studentIdentifier = universityId.getOrElse(usercode)
 
+	// simple sequential ID for feedback on the parent assignment
+	@Type(`type` = "uk.ac.warwick.tabula.data.model.OptionIntegerUserType")
+	var anonymousId: Option[Int] = None
+
 	// TODO - ADD Not null constraint after bulk populating usercode @NotNull
 	@Column(name = "userId")
 	var usercode: String = _

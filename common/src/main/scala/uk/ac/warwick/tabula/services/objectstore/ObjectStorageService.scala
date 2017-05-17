@@ -6,6 +6,7 @@ import java.util.Properties
 import com.google.common.io.ByteSource
 import com.google.common.net.MediaType
 import org.jclouds.ContextBuilder
+import org.jclouds.blobstore.domain.Blob
 import org.jclouds.blobstore.{BlobStoreContext, TransientApiMetadata}
 import org.jclouds.filesystem.FilesystemApiMetadata
 import org.jclouds.filesystem.reference.FilesystemConstants
@@ -29,35 +30,73 @@ object ObjectStorageService {
 	)
 }
 
+trait RichByteSource extends ByteSource {
+	def metadata: Option[ObjectStorageService.Metadata]
+	override final def slice(offset: Long, length: Long): ByteSource = throw new UnsupportedOperationException
+}
+
+object RichByteSource {
+	def apply(fetchBlob: => Option[Blob]) = new BlobBackedByteSource(fetchBlob)
+	def wrap(source: ByteSource, md: Option[ObjectStorageService.Metadata]) = new RichByteSource {
+		override lazy val metadata: Option[ObjectStorageService.Metadata] = md
+		override def openStream(): InputStream = source.openStream()
+		override lazy val size: Long = source.size()
+		override lazy val isEmpty: Boolean = source.isEmpty
+		override def read(): Array[Byte] = source.read()
+	}
+	def empty = new BlobBackedByteSource(None)
+}
+
+private[objectstore] class BlobBackedByteSource(fetchBlob: => Option[Blob]) extends RichByteSource {
+	private[this] lazy val firstFetch: Option[Blob] = fetchBlob
+	private[this] var payloadUsed: Boolean = false
+
+	override lazy val metadata: Option[ObjectStorageService.Metadata] = firstFetch.map { blob =>
+		val contentMetadata = blob.getPayload.getContentMetadata
+		val metadata = blob.getMetadata
+
+		ObjectStorageService.Metadata(
+			contentLength = contentMetadata.getContentLength,
+			contentType = contentMetadata.getContentType,
+			fileHash = metadata.getUserMetadata.get("shahex").maybeText
+		)
+	}
+
+	override def openStream(): InputStream = this.synchronized {
+		if (payloadUsed) fetchBlob.map(_.getPayload.openStream()).orNull
+		else firstFetch.map { blob =>
+			payloadUsed = true
+			blob.getPayload.openStream()
+		}.orNull
+	}
+	override lazy val isEmpty: Boolean = firstFetch.isEmpty
+	override lazy val size: Long = firstFetch.map(_.getMetadata.getSize.longValue).getOrElse(-1)
+}
+
 trait ObjectStorageService extends InitializingBean {
 	def keyExists(key: String): Boolean
-
-	def fetch(key: String): Option[InputStream]
-
-	def metadata(key: String): Option[ObjectStorageService.Metadata]
+	def fetch(key: String): RichByteSource
 
 	/**
 		* Combines calls to fetch() and metadata()
 		*/
 	def renderable(key: String, fileName: Option[String]): Option[RenderableFile] =
-		if (keyExists(key)) {
-			Some(new RenderableFile {
+		Option(fetch(key)).filterNot(_.isEmpty).map { source =>
+			new RenderableFile {
 				override val filename: String = fileName.getOrElse(key)
 
-				private lazy val fileMetadata = metadata(key)
+				private lazy val fileMetadata = source.metadata
 
 				override lazy val contentLength: Option[Long] = fileMetadata.map(_.contentLength)
 
 				override lazy val contentType: String = fileMetadata.map(_.contentType).getOrElse(MediaType.OCTET_STREAM.toString)
 
-				override def inputStream: InputStream = fetch(key).orNull
-			})
-		} else None
+				override def inputStream: InputStream = source.openStream()
+			}
+		}
 
 	def push(key: String, in: ByteSource, metadata: ObjectStorageService.Metadata): Unit
-
 	def delete(key: String): Unit
-
 	def listKeys(): Stream[String]
 }
 

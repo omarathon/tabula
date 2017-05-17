@@ -1,0 +1,1 @@
+ALTER TABLE FEEDBACK ADD (anonymousId NUMBER(5,0));

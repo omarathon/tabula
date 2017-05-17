@@ -1,6 +1,6 @@
 <#escape x as x?html>
 
-<h1>Upload missed monitoring points to SITS:eVision</h1>
+<h1>Upload missed monitoring points to SITS e:Vision</h1>
 
 <#assign confirmPath><@routes.attendance.viewReportConfirm department academicYear /></#assign>
 <@f.form commandName="command" action="${confirmPath}" method="POST">
@@ -10,7 +10,7 @@
 
 	<#if command.studentReportCounts?size == 0>
 		<div class="alert alert-info">
-			All of the selected students have already been uploaded to SITS:eVision for this period.
+			All of the selected students have already been uploaded to SITS e:Vision for this period.
 		</div>
 	<#elseif studentMissedReportCounts?size == 0>
 		<div class="alert alert-info">
@@ -59,12 +59,10 @@
 		</table>
 
 		<div class="submit-buttons">
-			<div class="pull-right">
-				<button class="btn btn-primary spinnable spinner-auto" type="submit" name="submit" data-loading-text="Loading&hellip;">
-					Upload
-				</button>
-				<a class="btn btn-default" href="<@routes.attendance.viewStudents department academicYear command.serializeFilter />">Cancel</a>
-			</div>
+			<button class="btn btn-primary spinnable spinner-auto" type="submit" name="submit" data-loading-text="Loading&hellip;">
+				Upload
+			</button>
+			<a class="btn btn-default" href="<@routes.attendance.viewStudents department academicYear command.serializeFilter />">Cancel</a>
 		</div>
 	</#if>
 

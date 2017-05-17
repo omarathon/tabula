@@ -77,7 +77,7 @@ class OldAddAssignmentController extends OldCourseworkController {
 	def showForm(form: AddAssignmentCommand): Mav = {
 		val module = form.module
 
-		Mav(s"$urlPrefix/admin/assignments/new",
+		Mav("coursework/admin/assignments/new",
 			"department" -> module.adminDepartment,
 			"module" -> module,
 			"academicYear" -> form.academicYear,

@@ -60,12 +60,12 @@ class OldSubmissionAndFeedbackController extends OldCourseworkController {
 		if (!features.assignmentProgressTable) Redirect(Routes.admin.assignment.submissionsandfeedback.table(assignment))
 		else {
 			if (errors.hasErrors) {
-				Mav(s"$urlPrefix/admin/assignments/submissionsandfeedback/progress")
+				Mav("coursework/admin/assignments/submissionsandfeedback/progress")
 					.crumbs(Breadcrumbs.Department(module.adminDepartment), Breadcrumbs.Module(module), Breadcrumbs.Current(s"Assignment progress for ${assignment.name}"))
 			} else {
 				val results = command.apply()
 
-				Mav(s"$urlPrefix/admin/assignments/submissionsandfeedback/progress",
+				Mav("coursework/admin/assignments/submissionsandfeedback/progress",
 					resultMap(results)
 				).crumbs(Breadcrumbs.Department(module.adminDepartment), Breadcrumbs.Module(module), Breadcrumbs.Current(s"Assignment progress for ${assignment.name}"))
 			}
@@ -75,12 +75,12 @@ class OldSubmissionAndFeedbackController extends OldCourseworkController {
 	@RequestMapping(Array("/table"))
 	def table(@Valid @ModelAttribute("submissionAndFeedbackCommand") command: SubmissionAndFeedbackCommand.CommandType, errors: Errors, @PathVariable module: Module, @PathVariable assignment: Assignment): Mav = {
 		if (errors.hasErrors) {
-			Mav(s"$urlPrefix/admin/assignments/submissionsandfeedback/list")
+			Mav("coursework/admin/assignments/submissionsandfeedback/list")
 				.crumbs(Breadcrumbs.Department(module.adminDepartment), Breadcrumbs.Module(module), Breadcrumbs.Current(s"Assignment table for ${assignment.name}"))
 		} else {
 			val results = command.apply()
 
-			Mav(s"$urlPrefix/admin/assignments/submissionsandfeedback/list",
+			Mav("coursework/admin/assignments/submissionsandfeedback/list",
 				resultMap(results)
 			).crumbs(Breadcrumbs.Department(module.adminDepartment), Breadcrumbs.Module(module), Breadcrumbs.Current(s"Assignment table for ${assignment.name}"))
 		}

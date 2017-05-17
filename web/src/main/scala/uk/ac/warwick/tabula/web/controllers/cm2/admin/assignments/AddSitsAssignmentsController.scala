@@ -77,7 +77,7 @@ class AddSitsAssignmentsController extends CourseworkController with DepartmentS
 
 	// The shared Mav for most of the request mappings
 	def getMav(department: Department) = {
-		Mav(s"$urlPrefix/admin/assignments/batch_new_sits_select")
+		Mav("cm2/admin/assignments/batch_new_sits_select")
 	}
 	// Change the academic year; restarts from scratch
 	@RequestMapping(method = Array(POST), params = Array("action=change-year"))
@@ -112,7 +112,7 @@ class AddSitsAssignmentsController extends CourseworkController with DepartmentS
 	// Do validation and return as a chunk of HTML errors.
 	@RequestMapping(method = Array(POST), params = Array("action=validate"))
 	def ajaxValidation(@Valid @ModelAttribute("command") cmd: AddSitsAssignmentsCommand, errors: Errors): Mav = {
-		Mav(s"$urlPrefix/admin/assignments/batch_new_validation").noLayout()
+		Mav("cm2/admin/assignments/batch_new_validation").noLayout()
 	}
 
 	// Final step where we actually do the work.

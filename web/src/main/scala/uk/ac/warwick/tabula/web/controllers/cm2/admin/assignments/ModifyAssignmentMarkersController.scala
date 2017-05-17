@@ -8,7 +8,6 @@ import uk.ac.warwick.tabula.commands.cm2.assignments._
 import uk.ac.warwick.tabula.commands.{Appliable, SelfValidating}
 import uk.ac.warwick.tabula.data.model.Assignment
 import uk.ac.warwick.tabula.web.Mav
-import uk.ac.warwick.tabula.web.controllers.cm2.CourseworkBreadcrumbs
 
 @Profile(Array("cm2Enabled"))
 @Controller
@@ -31,13 +30,13 @@ class ModifyAssignmentMarkersController extends AbstractAssignmentController {
 		val workflow = mandatory(assignMarkersCmd.assignment.cm2MarkingWorkflow)
 		val existingAllocations = listAllocationsCmd.apply()
 
-		Mav(s"$urlPrefix/admin/assignments/assignment_assign_markers",
+		Mav("cm2/admin/assignments/assignment_assign_markers",
 			"module" -> module,
 			"department" -> module.adminDepartment,
 			"stages" -> workflow.allStages.groupBy(_.roleName).mapValues(_.map(_.name)),
 			"state" -> existingAllocations,
 			"mode" -> mode
-		).crumbs(CourseworkBreadcrumbs.Assignment.AssignmentManagement())
+		)
 	}
 
 	@RequestMapping(method = Array(GET, HEAD), value = Array("new/markers"))

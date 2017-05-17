@@ -14,13 +14,14 @@ import uk.ac.warwick.tabula.cm2.web.Routes
 import uk.ac.warwick.tabula.commands.cm2.assignments.extensions.{EditExtensionCommand, _}
 import uk.ac.warwick.tabula.commands.{Appliable, SelfValidating}
 import uk.ac.warwick.tabula.data.model.forms.{Extension, ExtensionState}
-import uk.ac.warwick.tabula.data.model.{Assignment, StudentMember}
+import uk.ac.warwick.tabula.data.model.{Assignment, Department, StudentMember}
 import uk.ac.warwick.tabula.helpers.DateBuilder
 import uk.ac.warwick.tabula.services.fileserver.{RenderableAttachment, RenderableFile}
 import uk.ac.warwick.tabula.services.{ProfileService, RelationshipService, UserLookupService}
 import uk.ac.warwick.tabula.web.Mav
 import uk.ac.warwick.tabula.web.views.JSONView
 import uk.ac.warwick.userlookup.User
+
 //FIXME: implemented as part of CM2 migration but will require further reworking due to CM2 workflow changes
 trait ExtensionServices {
 	var json: ObjectMapper = Wire[ObjectMapper]
@@ -65,7 +66,7 @@ class FilterExtensionsController extends CourseworkController {
 	@RequestMapping(params=Array("!ajax"), headers=Array("!X-Requested-With"))
 	def viewForm(@ModelAttribute("filterExtensionsCommand") cmd: FilterExtensionsCommand): Mav = {
 		val results = cmd.apply()
-		Mav(s"$urlPrefix/admin/extensions/list",
+		Mav("cm2/admin/extensions/list",
 			"command" -> cmd,
 			"results" -> results
 		)
@@ -74,7 +75,7 @@ class FilterExtensionsController extends CourseworkController {
 	@RequestMapping
 	def listFilterResults(@ModelAttribute("filterExtensionsCommand") cmd: FilterExtensionsCommand): Mav = {
 		val results = cmd.apply()
-		Mav(s"$urlPrefix/admin/extensions/_filter_results",
+		Mav("cm2/admin/extensions/_filter_results",
 			"command" -> cmd,
 			"results" -> results
 		).noLayout()
@@ -151,16 +152,17 @@ class DownloadExtensionAttachmentController extends CourseworkController {
 @Profile(Array("cm2Enabled")) @Controller
 @RequestMapping(Array("/${cm2.prefix}/admin/assignments/{assignment}/manage/extensions"))
 class ListExtensionsForAssignmentController extends CourseworkController {
-	@ModelAttribute
-	def listCommand(@PathVariable assignment:Assignment)
-	= new ListExtensionsForAssignmentCommand(assignment.module, assignment, user)
+	@ModelAttribute("listCommand")
+	def listCommand(@PathVariable assignment: Assignment): ListExtensionsForAssignmentCommand.Command =
+		ListExtensionsForAssignmentCommand(assignment, user)
+
 	@RequestMapping(method=Array(HEAD,GET))
-	def listExtensions(cmd: ListExtensionsForAssignmentCommand, @RequestParam(value="universityId", required=false) universityId: String): Mav = {
+	def listExtensions(@ModelAttribute("listCommand") cmd: ListExtensionsForAssignmentCommand.Command, @RequestParam(value="universityId", required=false) universityId: String): Mav = {
 		val extensionGraphs = cmd.apply()
-		val model = Mav(s"$urlPrefix/admin/extensions/assignmentSummary",
+		val model = Mav("cm2/admin/extensions/assignmentSummary",
 			"extensionToOpen" -> universityId,
 			"extensionGraphs" -> extensionGraphs,
-			"module" -> cmd.module,
+			"module" -> cmd.assignment.module,
 			"assignment" -> cmd.assignment,
 			"maxDaysToDisplayAsProgressBar" -> Extension.MaxDaysToDisplayAsProgressBar
 		)
@@ -182,7 +184,7 @@ class EditExtensionController extends CourseworkController with ExtensionService
 
 	@ModelAttribute("editExtensionCommand")
 	def editCommand(@PathVariable assignment: Assignment, @PathVariable student: User, @RequestParam(defaultValue = "") action: String) =
-		EditExtensionCommand(assignment.module, assignment, student, user, action)
+		EditExtensionCommand(assignment, student, user, action)
 
 	@RequestMapping(method=Array(GET), path=Array("detail"))
 	def detail(
@@ -204,7 +206,7 @@ class EditExtensionController extends CourseworkController with ExtensionService
 				)
 			case _ => Map.empty
 		}
-		Mav(s"$urlPrefix/admin/extensions/assignmentdetail",
+		Mav("cm2/admin/extensions/assignmentdetail",
 			"usercode" -> student.getUserId,
 			"universityId" -> student.getWarwickId,
 			"student" -> studentMember,
@@ -258,7 +260,7 @@ class EditExtensionController extends CourseworkController with ExtensionService
 			case _ => Map.empty
 		}
 
-		val model = Mav(s"$urlPrefix/admin/extensions/detail",
+		val model = Mav("cm2/admin/extensions/detail",
 			"command" -> cmd,
 			"module" -> cmd.extension.assignment.module,
 			"assignment" -> cmd.extension.assignment,
@@ -288,4 +290,11 @@ class EditExtensionController extends CourseworkController with ExtensionService
 			Mav("ajax_success", "data" -> extensionJson).noLayout()
 		}
 	}
+}
+
+@Profile(Array("cm2Enabled")) @Controller
+@RequestMapping(Array("/${cm2.prefix}/admin/department/{department}/manage/extensions"))
+class RedirectExtensionManagementController extends CourseworkController {
+	@RequestMapping def redirect(@PathVariable department: Department) =
+		Redirect(s"${Routes.admin.extensions()}?departments=${mandatory(department).code}")
 }

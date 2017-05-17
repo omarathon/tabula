@@ -22,7 +22,8 @@
 <h2>Manage Marks Closure</h2>
 
 <div class="fix-area">
-<@f.form commandName="command" action="${url('/coursework/admin/marksmanagement/departments')}">
+	<#assign submitUrl><@routes.coursework.marksmanagementdepts /></#assign>
+<@f.form commandName="command" action=submitUrl>
 
 
 	<@form.label checkbox=true>

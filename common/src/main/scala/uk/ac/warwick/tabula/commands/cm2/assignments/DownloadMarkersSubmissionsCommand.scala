@@ -1,8 +1,8 @@
 package uk.ac.warwick.tabula.commands.cm2.assignments
 
 import uk.ac.warwick.tabula.commands.{Description, _}
+import uk.ac.warwick.tabula.data.model.Assignment
 import uk.ac.warwick.tabula.data.model.MarkingState._
-import uk.ac.warwick.tabula.data.model.{Assignment, Module}
 import uk.ac.warwick.tabula.permissions._
 import uk.ac.warwick.tabula.services._
 import uk.ac.warwick.tabula.services.fileserver.RenderableFile
@@ -15,8 +15,8 @@ import uk.ac.warwick.userlookup.User
  * Download one or more submissions from an assignment, as a Zip, for you as a marker.
  */
 object DownloadMarkersSubmissionsCommand {
-	def apply(module: Module, assignment: Assignment, marker: User, submitter: CurrentUser) =
-		new DownloadMarkersSubmissionsCommand(module, assignment, marker, submitter)
+	def apply(assignment: Assignment, marker: User, submitter: CurrentUser) =
+		new DownloadMarkersSubmissionsCommand(assignment, marker, submitter)
 		with ComposableCommand[RenderableFile]
 		with AutowiringZipServiceComponent
 		with AutowiringAssessmentServiceComponent
@@ -27,7 +27,7 @@ object DownloadMarkersSubmissionsCommand {
 		with ReadOnly
 }
 
-class DownloadMarkersSubmissionsCommand(val module: Module, val assignment: Assignment, val marker: User, val submitter: CurrentUser)
+class DownloadMarkersSubmissionsCommand(val assignment: Assignment, val marker: User, val submitter: CurrentUser)
 	extends CommandInternal[RenderableFile] with CanProxy {
 
 	self: ZipServiceComponent with AssessmentServiceComponent with StateServiceComponent =>
@@ -71,7 +71,6 @@ trait DownloadMarkersSubmissionsPermissions extends PermissionsCheckingMethods w
 	self: DownloadMarkersSubmissionsCommandState =>
 
 	override def permissionsCheck(p: PermissionsChecking) {
-		mustBeLinked(assignment, module)
 		p.PermissionCheck(Permissions.Submission.Read, assignment)
 		if(submitter.apparentUser != marker) {
 			p.PermissionCheck(Permissions.Assignment.MarkOnBehalf, assignment)
@@ -81,7 +80,6 @@ trait DownloadMarkersSubmissionsPermissions extends PermissionsCheckingMethods w
 }
 
 trait DownloadMarkersSubmissionsCommandState {
-	def module: Module
 	def assignment: Assignment
 	def marker: User
 	def submitter: CurrentUser

@@ -72,7 +72,7 @@ object SmallGroupSetFilters {
 		}
 		case object Completed extends SmallGroupSetFilter {
 			val description = "Complete"
-			def apply(set: SmallGroupSet): Boolean = set.fullyReleased
+			def apply(set: SmallGroupSet): Boolean = set.fullyReleased && set.unallocatedStudentsCount == 0
 		}
 
 		val all = Seq(NeedsGroupsCreating, UnallocatedStudents, NeedsEventsCreating, OpenForSignUp, ClosedForSignUp, NeedsNotificationsSending, Completed)

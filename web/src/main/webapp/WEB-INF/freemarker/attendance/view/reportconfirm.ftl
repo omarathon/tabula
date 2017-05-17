@@ -20,7 +20,7 @@
 
 		<p>When all missed monitoring points for the current reporting period have been entered and uploaded to SITS,
 		your Head of Department should be asked to sign	the Missed Monitoring Report, which can be obtained from the
-		<a href="http://warwick.ac.uk/evision/" >SITS:eVision portal</a>.
+		<a href="http://warwick.ac.uk/evision/" >SITS e:Vision portal</a>.
 		On this report, all students who have been reported as having missed one or more monitoring report will be listed.
 		Please print this report, obtain the signature of your Head of Department,
 		and return it to the Academic Office contact noted on the report screen. For further guidance please consult the guidance notes.</p>

@@ -37,7 +37,7 @@ class ListReusableMarkingWorkflowController extends CM2MarkingWorkflowController
 		val currentAcademicYear = AcademicYear.guessSITSAcademicYearByDate(DateTime.now)
 
 		commonCrumbs(
-			Mav(s"$urlPrefix/admin/workflows/list_reusable", Map(
+			Mav("cm2/admin/workflows/list_reusable", Map(
 				"department" -> department,
 				"academicYear" -> academicYear,
 				"workflows" -> cmd.apply(),
@@ -56,7 +56,7 @@ class ListReusableMarkingWorkflowController extends CM2MarkingWorkflowController
 }
 
 @Profile(Array("cm2Enabled")) @Controller
-@RequestMapping(Array("/${cm2.prefix}/admin/department/{department}/markingworkflows"))
+@RequestMapping(Array("/${cm2.prefix}/admin/department/{department}/markingworkflows", "/${cm2.prefix}/admin/department/{department}/markingworkflows/**"))
 class ListReusableMarkingWorkflowRedirectController extends BaseController
 	with AcademicYearScopedController with AutowiringUserSettingsServiceComponent with AutowiringMaintenanceModeServiceComponent {
 

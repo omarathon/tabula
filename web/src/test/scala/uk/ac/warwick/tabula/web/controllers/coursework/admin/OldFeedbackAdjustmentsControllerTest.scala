@@ -15,7 +15,6 @@ class OldFeedbackAdjustmentsControllerTest extends TestBase with Mockito {
 	private trait ControllerFixture {
 		val controller = new OldFeedbackAdjustmentsController
 		controller.profileService = smartMock[ProfileService]
-		controller.urlPrefix = "coursework"
 	}
 
 	private trait CommandFixture {

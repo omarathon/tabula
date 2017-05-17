@@ -11,8 +11,6 @@ import uk.ac.warwick.tabula.commands.cm2.assignments.{ModifyAssignmentFeedbackCo
 import uk.ac.warwick.tabula.commands.{Appliable, PopulateOnForm}
 import uk.ac.warwick.tabula.data.model.Assignment
 import uk.ac.warwick.tabula.web.Mav
-import uk.ac.warwick.tabula.web.controllers.cm2.CourseworkBreadcrumbs
-
 
 abstract class AbstractAssignmentFeedbackController extends AbstractAssignmentController {
 
@@ -23,15 +21,15 @@ abstract class AbstractAssignmentFeedbackController extends AbstractAssignmentCo
     ModifyAssignmentFeedbackCommand(mandatory(assignment))
 
   def showForm(form: ModifyAssignmentFeedbackCommand, mode: String): Mav = {
-    val module = form.module
-    Mav(s"$urlPrefix/admin/assignments/assignment_feedback",
+    val module = form.assignment.module
+    Mav("cm2/admin/assignments/assignment_feedback",
       "module" -> module,
       "department" -> module.adminDepartment,
       "mode" -> mode
-    ).crumbs(CourseworkBreadcrumbs.Assignment.AssignmentManagement())
+    )
   }
 
-  def submit(cmd: ModifyAssignmentFeedbackCommand, errors: Errors, path: String, mode: String) = {
+  def submit(cmd: ModifyAssignmentFeedbackCommand, errors: Errors, path: String, mode: String): Mav = {
     if (errors.hasErrors) {
       showForm(cmd, mode)
     } else {

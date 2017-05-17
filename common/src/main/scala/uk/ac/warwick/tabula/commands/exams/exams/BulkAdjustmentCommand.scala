@@ -108,7 +108,7 @@ trait BulkAdjustmentCommandBindListener extends BindListener {
 	}
 
 	private def extractDataFromFile(file: FileAttachment, result: BindingResult) = {
-		val rowData = spreadsheetHelper.parseXSSFExcelFile(file.dataStream)
+		val rowData = spreadsheetHelper.parseXSSFExcelFile(file.asByteSource.openStream())
 
 		val (rowsToValidate, badRows) = rowData.partition(row => {
 			row.get(BulkAdjustmentCommand.StudentIdHeader.toLowerCase) match {

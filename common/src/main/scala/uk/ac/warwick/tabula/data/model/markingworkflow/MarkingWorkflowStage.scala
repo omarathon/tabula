@@ -93,11 +93,13 @@ object MarkingWorkflowStage {
 		override def previousStages: Seq[MarkingWorkflowStage] = Seq(ModerationModerator)
 	}
 
-	val values: Set[MarkingWorkflowStage] = Set(
+	// lame manual collection. Keep in sync with the case objects above
+	// Don't change this to a val https://warwick.slack.com/archives/C029QTGBN/p1493995125972397
+	def values: Set[MarkingWorkflowStage] = Set(
 		SingleMarker, SingleMarkingCompleted,
 		DblFirstMarker, DblSecondMarker, DblFinalMarker, DblCompleted,
 		DblBlndInitialMarkerA, DblBlndInitialMarkerB, DblBlndFinalMarker, DblBlndCompleted,
-		ModerationMarker, ModerationModerator
+		ModerationMarker, ModerationModerator, ModerationCompleted
 	)
 
 	def fromCode(code: String): MarkingWorkflowStage =

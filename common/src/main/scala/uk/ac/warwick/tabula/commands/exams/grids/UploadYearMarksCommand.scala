@@ -91,7 +91,7 @@ trait UploadYearMarksCommandBindListener extends BindListener {
 				def processFiles(files: Seq[FileAttachment]) {
 					for (file <- files.filter(_.hasData)) {
 						try {
-							marks.addAll(yearMarksExtractor.readXSSFExcelFile(file.dataStream))
+							marks.addAll(yearMarksExtractor.readXSSFExcelFile(file.asByteSource.openBufferedStream()))
 							if (marks.size() > UploadYearMarksCommand.MAX_MARKS_ROWS) {
 								result.rejectValue("file", "file.tooManyRows", Array(UploadYearMarksCommand.MAX_MARKS_ROWS.toString), "")
 								marks.clear()

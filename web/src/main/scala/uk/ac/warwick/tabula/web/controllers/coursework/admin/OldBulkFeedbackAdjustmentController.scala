@@ -33,7 +33,7 @@ class OldBulkFeedbackAdjustmentController extends OldCourseworkController {
 
 	@RequestMapping(method = Array(GET, HEAD))
 	def form: Mav = {
-		Mav(s"$urlPrefix/admin/assignments/feedback/bulk/bulk_adjustment",
+		Mav("coursework/admin/assignments/feedback/bulk/bulk_adjustment",
 			"StudentIdHeader" -> BulkAdjustmentCommand.StudentIdHeader,
 			"MarkHeader" -> BulkAdjustmentCommand.MarkHeader,
 			"GradeHeader" -> BulkAdjustmentCommand.GradeHeader
@@ -45,7 +45,7 @@ class OldBulkFeedbackAdjustmentController extends OldCourseworkController {
 		if (errors.hasFieldErrors("file"))
 			form
 		else
-			Mav(s"$urlPrefix/admin/assignments/feedback/bulk/preview")
+			Mav("coursework/admin/assignments/feedback/bulk/preview")
 	}
 
 	@RequestMapping(method = Array(POST), params = Array("confirmStep=true"))

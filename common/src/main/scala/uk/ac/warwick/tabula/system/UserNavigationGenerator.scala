@@ -64,6 +64,7 @@ object UserNavigationGeneratorImpl extends UserNavigationGenerator with Autowire
 			"examsEnabled" -> examsEnabled,
 			"examGridsEnabled" -> examGridsEnabled
 		)
+
 		UserNavigation(
 			textRenderer.renderTemplate(NavigationTemplate, modelMap ++ Map("isCollapsed" -> true)),
 			textRenderer.renderTemplate(NavigationTemplate, modelMap ++ Map("isCollapsed" -> false))

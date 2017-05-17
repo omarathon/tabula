@@ -157,7 +157,7 @@
 			</#if>
 		</div>
 
-	<div class="submit-buttons">
+		<div class="submit-buttons">
 			<input class="btn btn-large btn-primary" type="submit" value="Submit">
 			<a class="btn btn-default" href="<@routes.cm2.home />">Cancel</a>
 			<#if willCheckpointBeCreated>
@@ -167,6 +167,14 @@
 			</#if>
 		</div>
 	</@f.form>
+
+	<script>
+		jQuery(function($){
+			$('form#submitAssignmentCommand').on('submit', function(){
+				$.post('<@routes.cm2.submission_attempt assignment />')
+			});
+		});
+	</script>
 
 <#elseif !submission??>
 

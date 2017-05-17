@@ -48,7 +48,6 @@ object SubmissionAndFeedbackCommand {
 
 trait SubmissionAndFeedbackState {
 	def assignment: Assignment
-	def module: Module = assignment.module
 }
 
 trait SubmissionAndFeedbackRequest extends SubmissionAndFeedbackState {
@@ -67,8 +66,8 @@ trait SubmissionAndFeedbackEnhancer {
 trait CommandSubmissionAndFeedbackEnhancer extends SubmissionAndFeedbackEnhancer {
 	self: SubmissionAndFeedbackState =>
 
-	val enhancedSubmissionsCommand = ListSubmissionsCommand(module, assignment)
-	val enhancedFeedbacksCommand = ListFeedbackCommand(module, assignment)
+	val enhancedSubmissionsCommand = ListSubmissionsCommand(assignment)
+	val enhancedFeedbacksCommand = ListFeedbackCommand(assignment)
 
 	override def enhanceSubmissions(): Seq[SubmissionListItem] = enhancedSubmissionsCommand.apply()
 	override def enhanceFeedback(): ListFeedbackResult = enhancedFeedbacksCommand.apply()
@@ -86,8 +85,7 @@ trait SubmissionAndFeedbackPermissions extends RequiresPermissionsChecking with 
 	self: SubmissionAndFeedbackState =>
 
 	override def permissionsCheck(p: PermissionsChecking): Unit = {
-		mustBeLinked(notDeleted(mandatory(assignment)), mandatory(module))
-		p.PermissionCheck(Permissions.Submission.Read, assignment)
+		p.PermissionCheck(Permissions.Submission.Read, notDeleted(mandatory(assignment)))
 	}
 }
 

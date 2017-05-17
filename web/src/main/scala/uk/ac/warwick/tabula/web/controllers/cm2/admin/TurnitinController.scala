@@ -29,7 +29,7 @@ class TurnitinController extends CourseworkController with AutowiringTurnitinLti
 
 	@ModelAttribute("command")
 	def model(@PathVariable assignment: Assignment, user: CurrentUser) =
-		SubmitToTurnitinCommand(assignment.module, assignment, user)
+		SubmitToTurnitinCommand(assignment, user)
 
 	@ModelAttribute("incompatibleFiles")
 	def incompatibleFiles(@PathVariable assignment: Assignment): mutable.Buffer[FileAttachment] = {
@@ -41,7 +41,7 @@ class TurnitinController extends CourseworkController with AutowiringTurnitinLti
 
 	@RequestMapping(method = Array(GET, HEAD))
 	def confirm(@Valid @ModelAttribute("command") command: SubmitToTurnitinCommand, errors: Errors): Mav = {
-		Mav(s"$urlPrefix/admin/assignments/turnitin/form", "errors" -> errors)
+		Mav("cm2/admin/assignments/turnitin/form", "errors" -> errors)
 	}
 
 	@RequestMapping(method = Array(POST))
@@ -60,7 +60,7 @@ class TurnitinController extends CourseworkController with AutowiringTurnitinLti
 		if (ajax) {
 			Mav(new JSONView(assignmentStatus.toMap))
 		} else {
-			Mav(s"$urlPrefix/admin/assignments/turnitin/status", "status" -> assignmentStatus)
+			Mav("cm2/admin/assignments/turnitin/status", "status" -> assignmentStatus)
 		}
 	}
 

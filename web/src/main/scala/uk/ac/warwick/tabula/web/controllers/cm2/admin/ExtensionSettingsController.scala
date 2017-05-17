@@ -9,9 +9,8 @@ import org.springframework.web.bind.annotation.{ModelAttribute, PathVariable, Re
 import uk.ac.warwick.tabula.cm2.web.Routes
 import uk.ac.warwick.tabula.commands.SelfValidating
 import uk.ac.warwick.tabula.commands.cm2.departments.ExtensionSettingsCommand
-import uk.ac.warwick.tabula.commands.cm2.departments.ExtensionSettingsCommand.Command
 import uk.ac.warwick.tabula.data.model.Department
-import uk.ac.warwick.tabula.permissions.{Permission, Permissions}
+import uk.ac.warwick.tabula.permissions.Permission
 import uk.ac.warwick.tabula.services.{AutowiringMaintenanceModeServiceComponent, AutowiringModuleAndDepartmentServiceComponent, AutowiringUserSettingsServiceComponent}
 import uk.ac.warwick.tabula.web.Mav
 import uk.ac.warwick.tabula.web.controllers.DepartmentScopedController
@@ -24,22 +23,22 @@ class ExtensionSettingsController extends CourseworkController
 	with DepartmentScopedController with AutowiringModuleAndDepartmentServiceComponent with AutowiringUserSettingsServiceComponent
 	with AutowiringMaintenanceModeServiceComponent {
 
-	override val departmentPermission: Permission = Permissions.Department.ManageExtensionSettings
+	override val departmentPermission: Permission = ExtensionSettingsCommand.AdminPermission
 
 	@ModelAttribute("activeDepartment")
 	override def activeDepartment(@PathVariable department: Department): Option[Department] = retrieveActiveDepartment(Option(department))
 
 	@ModelAttribute("extensionSettingsCommand")
-	def extensionSettingsCommand(@PathVariable department: Department): Command =
+	def extensionSettingsCommand(@PathVariable department: Department): ExtensionSettingsCommand.Command =
 		ExtensionSettingsCommand(mandatory(department))
 
 	validatesSelf[SelfValidating]
 
 	@RequestMapping
-	def viewSettings = Mav(s"$urlPrefix/admin/extension-settings")
+	def viewSettings = Mav("cm2/admin/extension-settings")
 
 	@RequestMapping(method = Array(RequestMethod.POST))
-	def saveSettings(@Valid @ModelAttribute("extensionSettingsCommand") cmd: Command, errors: Errors): Mav =
+	def saveSettings(@Valid @ModelAttribute("extensionSettingsCommand") cmd: ExtensionSettingsCommand.Command, errors: Errors): Mav =
 		if (errors.hasErrors) {
 			viewSettings
 		} else {

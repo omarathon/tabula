@@ -91,7 +91,7 @@ class OldAssignMarkersCommand(val module: Module, val assessment: Assessment)
 	}
 
 	def extractDataFromFile(file: FileAttachment, result: BindingResult): Unit = {
-		val rowData = alloctaionExtractor.extractMarkersFromSpreadsheet(file.dataStream, workflow)
+		val rowData = alloctaionExtractor.extractMarkersFromSpreadsheet(file.asByteSource.openStream(), workflow)
 
 		def rowsToMarkerMap(rows: Seq[ParsedRow]) = {
 			rows

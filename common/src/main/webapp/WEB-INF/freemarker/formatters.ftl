@@ -157,13 +157,6 @@ preposition: Text to relate the title to the department name in the second line,
 	</#if>
 </#compress></#macro>
 
-<#macro admin_assignment_link assignment>
-	<@module_name assignment.module />
-	<a href="<@url context='/coursework' page='/admin/module/${assignment.module.code}/assignments/${assignment.id}/list' />">
-		<span class="ass-name">${assignment.name}</span>
-	</a>
-</#macro>
-
 <#macro route_name route withFormatting=false routeCode=route.code routeName=route.name>
 	<#if withFormatting>
 		<span class="route-code">${routeCode?upper_case}</span> <span class="route-name">${routeName}</span>
@@ -456,13 +449,13 @@ preposition: Text to relate the title to the department name in the second line,
 	<#if emails?size gt 0>
 		<a class="btn btn-default <#if emails?size gt limit>use-tooltip disabled</#if>"
 			<#if emails?size gt limit>
-		   		title="Emailing is disabled for groups of more than ${limit} students"
+		   		title="Emailing is disabled for groups of more than ${limit}"
 			<#else>
 				href="mailto:<#list emails as email>${email}<#if email_has_next>${separator}</#if></#list><#if subject?? && subject?length gt 0>?subject=${subject?url}</#if>"
 			</#if> >
 			<i class="icon-envelope-alt fa fa-envelope-o"></i> ${title}
 		</a>
-		<a data-content="There is a known issue with sending emails to long lists of students. If the 'Email these students' button doesn't work try right-clicking on the button, choosing 'Copy email address' and pasting this into your email client directly."
+		<a data-content="There is a known issue with sending emails to long lists of staff or students. If the '${title}' button doesn't work try right-clicking on the button, choosing 'Copy email address' and pasting this into your email client directly."
 		   data-html="true"
 		   data-trigger="hover"
 		   class="use-popover tabulaPopover-init"

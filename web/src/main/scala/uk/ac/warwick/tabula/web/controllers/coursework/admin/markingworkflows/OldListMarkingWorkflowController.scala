@@ -18,7 +18,7 @@ class OldListMarkingWorkflowController extends OldCourseworkController {
 
 	@RequestMapping
 	def list(@ModelAttribute("command") cmd: Appliable[Seq[ListMarkingWorkflowCommandResult]], @PathVariable department: Department): Mav = {
-		Mav(s"$urlPrefix/admin/markingworkflows/list",
+		Mav("coursework/admin/markingworkflows/list",
 		    "markingWorkflowInfo" -> cmd.apply(),
 				"isExams" -> false
 		).crumbs(Breadcrumbs.Department(department))

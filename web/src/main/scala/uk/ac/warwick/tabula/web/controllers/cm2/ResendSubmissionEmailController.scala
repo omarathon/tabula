@@ -32,7 +32,7 @@ class ResendSubmissionEmailController extends CourseworkController {
 	def sendEmail(form: SendSubmissionReceiptCommand): Mav = {
 		val sent = form.apply()
 
-		Mav(s"$urlPrefix/submit/receipt",
+		Mav("cm2/submit/receipt",
 			"submission" -> form.submission,
 			"module" -> form.assignment.module,
 			"assignment" -> form.assignment,

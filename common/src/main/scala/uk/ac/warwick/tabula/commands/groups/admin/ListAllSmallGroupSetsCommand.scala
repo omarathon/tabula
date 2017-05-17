@@ -40,6 +40,8 @@ object ListAllSmallGroupSetsCommand {
 	type Result = ListAllSmallGroupSetsResult
 	type Command = Appliable[Result] with SelfValidating
 
+	val AdminPermission = Permissions.Module.ManageSmallGroups
+
 	def apply(): Command =
 		new ListAllSmallGroupSetsCommandInternal()
 			with ListAllSmallGroupSetsRequest
@@ -86,6 +88,6 @@ trait ListAllSmallGroupSetsValidation extends SelfValidating {
 
 trait ListAllSmallGroupSetsPermissions extends RequiresPermissionsChecking with PermissionsCheckingMethods {
 	override def permissionsCheck(p: PermissionsChecking): Unit = {
-		p.PermissionCheck(Permissions.Module.ManageSmallGroups, PermissionsTarget.Global)
+		p.PermissionCheck(AdminPermission, PermissionsTarget.Global)
 	}
 }

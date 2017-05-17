@@ -42,7 +42,7 @@ class OldOnlineModerationController extends OldCourseworkController {
 			case None => (false, null, None)
 		}
 
-		Mav(s"$urlPrefix/admin/assignments/feedback/marker_moderation" ,
+		Mav("coursework/admin/assignments/feedback/marker_moderation" ,
 			"command" -> command,
 			"isCompleted" -> isCompleted,
 			"completedDate" -> completedDate,

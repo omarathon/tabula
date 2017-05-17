@@ -69,7 +69,7 @@ class OldMarkingCompletedController extends OldCourseworkController {
 			.flatMap(_.requestParameters.get("nextStageRole"))
 			.flatMap(_.headOption)
 
-		Mav(s"$urlPrefix/admin/assignments/markerfeedback/marking-complete",
+		Mav("coursework/admin/assignments/markerfeedback/marking-complete",
 			"assignment" -> assignment,
 			"onlineMarking" -> form.onlineMarking,
 			"marker" -> form.user,

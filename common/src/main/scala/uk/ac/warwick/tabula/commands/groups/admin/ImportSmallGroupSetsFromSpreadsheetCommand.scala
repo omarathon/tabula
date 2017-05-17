@@ -143,7 +143,7 @@ trait ImportSmallGroupSetsFromSpreadsheetBinding extends BindListener {
 			transactional() {
 				file.onBind(result)
 				commands = file.attached.asScala.filter(_.hasData).flatMap { attachment =>
-					val extractedSets = smallGroupSetSpreadsheetHandler.readXSSFExcelFile(department, academicYear, attachment.dataStream, result)
+					val extractedSets = smallGroupSetSpreadsheetHandler.readXSSFExcelFile(department, academicYear, attachment.asByteSource.openStream(), result)
 
 					// Convert to commands
 					extractedSets.map { extracted =>

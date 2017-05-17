@@ -11,14 +11,14 @@ Students will be able to access their feedback by visiting this page:
 </p>
 
 <p>
-<#assign feedbackUrl><@url page="/coursework/module/${module.code}/${assignment.id}"/></#assign>
+<#assign feedbackUrl><@routes.coursework.assignment assignment /></#assign>
 <a href="${feedbackUrl}">
 ${feedbackUrl}
 </a>
 </p>
 
 <p>
-<a href="<@url page="/coursework/admin/department/${department.code}/#module-${module.code}" />">
+<a href="<@routes.coursework.depthome module />">
 Return to assignment info
 </a>
 </p>

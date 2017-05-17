@@ -1,7 +1,9 @@
 package uk.ac.warwick.tabula.services.objectstore
 
 import java.io.File
+import java.nio.charset.StandardCharsets
 
+import com.google.common.io.Files
 import uk.ac.warwick.tabula.{Mockito, TestBase}
 
 class LegacyFilesystemObjectStorageServiceTest extends TestBase with Mockito {
@@ -30,11 +32,12 @@ class LegacyFilesystemObjectStorageServiceTest extends TestBase with Mockito {
 			val file = new File(attachmentDir, path)
 			assert(file.getParentFile.exists || file.getParentFile.mkdirs())
 			assert(file.createNewFile())
+			Files.asByteSink(file).asCharSink(StandardCharsets.UTF_8).write("content") // just to make isEmpty return false
 		}
 
-		service.fetch("aaaabbbbccccdddd") should be('defined)
-		service.fetch("aaaabbbbddddeeee") should be('defined)
-		service.fetch("aaaabbbbccccefef") should be('defined)
+		service.fetch("aaaabbbbccccdddd").isEmpty should be(false)
+		service.fetch("aaaabbbbddddeeee").isEmpty should be(false)
+		service.fetch("aaaabbbbccccefef").isEmpty should be(false)
 	}
 
 }
