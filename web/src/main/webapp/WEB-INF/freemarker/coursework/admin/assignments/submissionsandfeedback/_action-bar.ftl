@@ -270,7 +270,7 @@
 					<#-- Download / Publish / Delete always available -->
 					<li class="must-have-selected">
 						<a class="long-running use-tooltip form-post"
-							 href="<@routes.coursework.feedbackZip assignment />"
+							 href="<@routes.coursework.assignmentFeedbackZip assignment />"
 							 title="Download the feedback files for the selected students as a ZIP file."
 							 data-container="body"><i class="icon-download icon-fixed-width"></i> Download feedback
 						</a>
