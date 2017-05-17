@@ -2,12 +2,14 @@ package uk.ac.warwick.tabula.services
 
 import java.io.FileInputStream
 
-import uk.ac.warwick.tabula.services.objectstore.ObjectStorageService
+import uk.ac.warwick.tabula.services.objectstore.{ObjectStorageService, RichByteSource}
 
 import collection.JavaConverters._
 import uk.ac.warwick.tabula.TestBase
 import uk.ac.warwick.tabula.Mockito
 import java.util.zip.ZipInputStream
+
+import com.google.common.io.Files
 import org.springframework.core.io.ClassPathResource
 import uk.ac.warwick.tabula.data.model.Submission
 import uk.ac.warwick.tabula.data.model.Module
@@ -75,8 +77,7 @@ class ZipServiceTest extends TestBase with Mockito {
 		val backingFile = createTemporaryFile()
 		attachment.objectStorageService = smartMock[ObjectStorageService]
 		attachment.objectStorageService.keyExists(attachment.id) returns true
-		attachment.objectStorageService.metadata(attachment.id) returns Some(ObjectStorageService.Metadata(backingFile.length(), "application/octet-stream", None))
-		attachment.objectStorageService.fetch(attachment.id) answers { _ => Some(new FileInputStream(backingFile)) }
+		attachment.objectStorageService.fetch(attachment.id) returns RichByteSource.wrap(Files.asByteSource(backingFile), Some(ObjectStorageService.Metadata(backingFile.length(), "application/octet-stream", None)))
 
 		submission.values = Set(SavedFormValue.withAttachments(submission, "files", Set(attachment))).asJava
 		assignment.module = module
@@ -110,8 +111,7 @@ class ZipServiceTest extends TestBase with Mockito {
 		val backingFile = createTemporaryFile()
 		attachment.objectStorageService = smartMock[ObjectStorageService]
 		attachment.objectStorageService.keyExists(attachment.id) returns true
-		attachment.objectStorageService.metadata(attachment.id) returns Some(ObjectStorageService.Metadata(backingFile.length(), "application/octet-stream", None))
-		attachment.objectStorageService.fetch(attachment.id) answers { _ => Some(new FileInputStream(backingFile)) }
+		attachment.objectStorageService.fetch(attachment.id) returns RichByteSource.wrap(Files.asByteSource(backingFile), Some(ObjectStorageService.Metadata(backingFile.length(), "application/octet-stream", None)))
 
 		submission.values = Set(SavedFormValue.withAttachments(submission, "files", Set(attachment))).asJava
 		assignment.module = module
@@ -147,8 +147,7 @@ class ZipServiceTest extends TestBase with Mockito {
 		val backingFile = createTemporaryFile()
 		attachment.objectStorageService = smartMock[ObjectStorageService]
 		attachment.objectStorageService.keyExists(attachment.id) returns true
-		attachment.objectStorageService.metadata(attachment.id) returns Some(ObjectStorageService.Metadata(backingFile.length(), "application/octet-stream", None))
-		attachment.objectStorageService.fetch(attachment.id) answers { _ => Some(new FileInputStream(backingFile)) }
+		attachment.objectStorageService.fetch(attachment.id) returns RichByteSource.wrap(Files.asByteSource(backingFile), Some(ObjectStorageService.Metadata(backingFile.length(), "application/octet-stream", None)))
 
 		submission.values = Set(SavedFormValue.withAttachments(submission, "files", Set(attachment))).asJava
 		assignment.module = module

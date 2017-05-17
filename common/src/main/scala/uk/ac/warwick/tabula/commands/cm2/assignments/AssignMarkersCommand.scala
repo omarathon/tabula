@@ -87,7 +87,7 @@ trait AssignMarkersBySpreadsheetBindListener extends BindListener {
 				if (!file.attached.isEmpty) {
 
 					val sheetData = markerAllocationExtractor
-						.extractMarkersFromSpreadsheet(file.attached.asScala.head.dataStream, assignment.cm2MarkingWorkflow)
+						.extractMarkersFromSpreadsheet(file.attached.asScala.head.asByteSource.openStream(), assignment.cm2MarkingWorkflow)
 
 					def rowsToAllocations(rows: Seq[ParsedRow]): Allocations = rows
 						.filter(_.errors.isEmpty)

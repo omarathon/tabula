@@ -1,12 +1,10 @@
 package uk.ac.warwick.tabula.data.model
 
-import java.io._
 import javax.persistence.CascadeType._
 import javax.persistence._
 
 import com.google.common.io.ByteSource
 import com.google.common.net.MediaType
-import org.apache.commons.io.IOUtils
 import org.joda.time.DateTime
 import uk.ac.warwick.spring.Wire
 import uk.ac.warwick.tabula.JavaImports._
@@ -14,7 +12,7 @@ import uk.ac.warwick.tabula.data.FileDao
 import uk.ac.warwick.tabula.data.model.forms.{Extension, SavedFormValue}
 import uk.ac.warwick.tabula.helpers.DetectMimeType._
 import uk.ac.warwick.tabula.helpers.StringUtils._
-import uk.ac.warwick.tabula.services.objectstore.ObjectStorageService
+import uk.ac.warwick.tabula.services.objectstore.{ObjectStorageService, RichByteSource}
 
 import scala.language.postfixOps
 import scala.util.matching.Regex
@@ -32,7 +30,7 @@ class FileAttachment extends GeneratedId {
 	// optional link to a SubmissionValue
 	@ManyToOne(fetch = FetchType.LAZY)
 	@JoinColumn(name = "submission_id")
-	var submissionValue: SavedFormValue = null
+	var submissionValue: SavedFormValue = _
 
 	// optional link to some Feedback
 	@ManyToOne(fetch = FetchType.LAZY)
@@ -92,7 +90,7 @@ class FileAttachment extends GeneratedId {
 		name = n
 	}
 
-	def length: Option[Long] = objectStorageService.metadata(id).map { _.contentLength }
+	def length: Option[Long] = Option(asByteSource).filterNot(_.isEmpty).map(_.size)
 
 	// checks the length field first. If that is not populated use uploadedData instead
 	def actualDataLength: Long = length.orElse(Option(uploadedData).map { _.size() }).getOrElse(0)
@@ -105,15 +103,8 @@ class FileAttachment extends GeneratedId {
 		}
 	}
 
-	/**
-		* Returns null if no data to return
-		*/
-	def dataStream: InputStream = objectStorageService.fetch(id).orNull
-	def asByteSource: ByteSource = new ByteSource {
-		override def openStream(): InputStream = dataStream
-		override def size(): Long = actualDataLength
-		override def isEmpty: Boolean = !objectStorageService.keyExists(id)
-	}
+	@transient
+	lazy val asByteSource: RichByteSource = objectStorageService.fetch(id)
 
 	def duplicate(): FileAttachment = {
 		val newFile = new FileAttachment(name)
@@ -140,30 +131,26 @@ class FileAttachment extends GeneratedId {
 
 	def hasData: Boolean = id.hasText && objectStorageService.keyExists(id)
 
-	@transient var uploadedData: ByteSource = null
+	@transient var uploadedData: ByteSource = _
 
 	def isDataEqual(other: Any): Boolean = other match {
 		case that: FileAttachment =>
 			if (this.id != null && that.id != null && this.id == that.id) true
 			else if (this.actualDataLength != that.actualDataLength) false
 			else {
-				val thisData = this.dataStream
-				val thatData = that.dataStream
+				val thisData = this.asByteSource
+				val thatData = that.asByteSource
 
 				if (thisData == null && thatData == null) true
-				else try {
-					thisData != null && thatData != null && IOUtils.contentEquals(thisData, thatData)
-				} finally {
-					IOUtils.closeQuietly(thisData)
-					IOUtils.closeQuietly(thatData)
-				}
+				else if (thisData != null && thatData != null && thisData.isEmpty && thatData.isEmpty) true
+				else thisData != null && thatData != null && thisData.contentEquals(thatData)
 			}
 		case _ => false
 	}
 
-	@transient lazy val mimeType: String = objectStorageService.metadata(id) match {
+	@transient lazy val mimeType: String = asByteSource.metadata match {
 		case Some(metadata) if metadata.contentType != MediaType.OCTET_STREAM.toString => metadata.contentType
-		case _ => objectStorageService.fetch(id).map(detectMimeType).getOrElse(MediaType.OCTET_STREAM.toString)
+		case _ => Option(asByteSource).filterNot(_.isEmpty).map { source => detectMimeType(source.openStream()) }.getOrElse(MediaType.OCTET_STREAM.toString)
 	}
 }
 

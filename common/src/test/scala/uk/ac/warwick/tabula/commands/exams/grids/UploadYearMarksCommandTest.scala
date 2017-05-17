@@ -1,7 +1,8 @@
 package uk.ac.warwick.tabula.commands.exams.grids
 
-import java.io.{File, FileInputStream, InputStream}
+import java.io.{File, InputStream}
 
+import com.google.common.io.Files
 import org.springframework.validation.BindException
 import uk.ac.warwick.tabula.JavaImports.JArrayList
 import uk.ac.warwick.tabula.commands.UploadedFile
@@ -10,7 +11,7 @@ import uk.ac.warwick.tabula.data.model.{Department, FileAttachment, StudentMembe
 import uk.ac.warwick.tabula.data.{StudentCourseYearDetailsDao, StudentCourseYearDetailsDaoComponent}
 import uk.ac.warwick.tabula.services.MaintenanceModeService
 import uk.ac.warwick.tabula.services.coursework.docconversion.{YearMarkItem, YearMarksExtractor, YearMarksExtractorComponent}
-import uk.ac.warwick.tabula.services.objectstore.ObjectStorageService
+import uk.ac.warwick.tabula.services.objectstore.{ObjectStorageService, RichByteSource}
 import uk.ac.warwick.tabula.{AcademicYear, Fixtures, Mockito, TestBase}
 
 class UploadYearMarksCommandTest extends TestBase with Mockito {
@@ -61,7 +62,7 @@ class UploadYearMarksCommandTest extends TestBase with Mockito {
 			attachment.objectStorageService = objectStorageService
 			attachment.objectStorageService.keyExists(attachment.id) returns {true}
 			val backingFile: File = createTemporaryFile()
-			attachment.objectStorageService.fetch(attachment.id) answers { _ => Some(new FileInputStream(backingFile)) }
+			attachment.objectStorageService.fetch(attachment.id) returns RichByteSource.wrap(Files.asByteSource(backingFile), None)
 			file.attached.add(attachment)
 			command.file = file
 

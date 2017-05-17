@@ -135,7 +135,7 @@ trait AddMarksCommandBindListener extends BindListener {
 				def processFiles(files: Seq[FileAttachment]) {
 					for (file <- files.filter(_.hasData)) {
 						try {
-							marks.addAll(marksExtractor.readXSSFExcelFile(file.dataStream))
+							marks.addAll(marksExtractor.readXSSFExcelFile(file.asByteSource.openStream()))
 							if (marks.size() > AddMarksCommandBindListener.MAX_MARKS_ROWS) {
 								result.rejectValue("file", "file.tooManyRows", Array(AddMarksCommandBindListener.MAX_MARKS_ROWS.toString), "")
 								marks.clear()
