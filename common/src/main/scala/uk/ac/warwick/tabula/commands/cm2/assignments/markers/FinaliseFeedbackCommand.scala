@@ -1,14 +1,13 @@
-package uk.ac.warwick.tabula.commands.coursework.assignments
+package uk.ac.warwick.tabula.commands.cm2.assignments.markers
 
 import org.joda.time.DateTime
-import uk.ac.warwick.spring.Wire
 import uk.ac.warwick.tabula.commands._
-import uk.ac.warwick.tabula.data.FileDao
+import uk.ac.warwick.tabula.data.{AutowiringFileDaoComponent, FileDaoComponent}
 import uk.ac.warwick.tabula.data.model.forms.SavedFormValue
 import uk.ac.warwick.tabula.data.model._
-import uk.ac.warwick.tabula.data.model.notifications.coursework.FinaliseFeedbackNotification
+import uk.ac.warwick.tabula.data.model.notifications.cm2.CM2FinaliseFeedbackNotification
 import uk.ac.warwick.tabula.permissions.Permissions
-import uk.ac.warwick.tabula.services.{AutowiringZipServiceComponent, ZipService, ZipServiceComponent}
+import uk.ac.warwick.tabula.services.{AutowiringZipServiceComponent, ZipServiceComponent}
 import uk.ac.warwick.tabula.system.permissions.{PermissionsChecking, PermissionsCheckingMethods, RequiresPermissionsChecking}
 import uk.ac.warwick.userlookup.User
 
@@ -18,27 +17,28 @@ import scala.collection.JavaConversions._
  * Copies the appropriate MarkerFeedback item to its parent Feedback ready for processing by administrators
  */
 object FinaliseFeedbackCommand {
-	def apply(assignment: Assignment, markerFeedbacks: Seq[MarkerFeedback], user: User) =
-		new FinaliseFeedbackCommandInternal(assignment, markerFeedbacks, user)
+	def apply(assignment: Assignment, markerFeedback: Seq[MarkerFeedback], user: User) =
+		new FinaliseFeedbackCommandInternal(assignment, markerFeedback, user)
 			with ComposableCommand[Seq[Feedback]]
 			with FinaliseFeedbackPermissions
 			with FinaliseFeedbackDescription
 			with FinaliseFeedbackNotifier
+			with AutowiringZipServiceComponent
+			with AutowiringFileDaoComponent
 }
 
 trait FinaliseFeedbackCommandState {
 	def assignment: Assignment
-	def markerFeedbacks: Seq[MarkerFeedback]
+	def markerFeedback: Seq[MarkerFeedback]
 }
 
-abstract class FinaliseFeedbackCommandInternal(val assignment: Assignment, val markerFeedbacks: Seq[MarkerFeedback], val user: User)
+abstract class FinaliseFeedbackCommandInternal(val assignment: Assignment, val markerFeedback: Seq[MarkerFeedback], val user: User)
 	extends CommandInternal[Seq[Feedback]] with FinaliseFeedbackCommandState with UserAware {
 
-	var fileDao: FileDao = Wire.auto[FileDao]
-	var zipService: ZipService = Wire.auto[ZipService]
+	this: FileDaoComponent with ZipServiceComponent =>
 
 	override def applyInternal(): Seq[Feedback] = {
-		markerFeedbacks.map { markerFeedback =>
+		markerFeedback.map { markerFeedback =>
 			this.copyToFeedback(markerFeedback)
 		}
 	}
@@ -84,7 +84,7 @@ trait FinaliseFeedbackDescription extends Describable[Seq[Feedback]] {
 
 	override def describe(d: Description) {
 		d.assignment(assignment)
-		d.property("updatedFeedback" -> markerFeedbacks.size)
+		d.property("updatedFeedback" -> markerFeedback.size)
 	}
 
 }
@@ -93,19 +93,20 @@ trait FinaliseFeedbackNotifier extends Notifies[Seq[Feedback], Seq[Feedback]] {
 	self: FinaliseFeedbackCommandState with UserAware =>
 
 	override def emit(feedbacks: Seq[Feedback]): Seq[Notification[Feedback, Assignment]] = {
-		Seq(Notification.init(new FinaliseFeedbackNotification, user, feedbacks.filterNot { _.checkedReleased }, assignment))
+		Seq(Notification.init(new CM2FinaliseFeedbackNotification, user, feedbacks.filterNot { _.checkedReleased }, assignment))
 	}
 }
 
 trait FinaliseFeedbackComponent {
-	def finaliseFeedback(assignment: Assignment, markerFeedbacks: Seq[MarkerFeedback])
+	def finaliseFeedback(assignment: Assignment, markerFeedback: Seq[MarkerFeedback])
 }
 
 trait FinaliseFeedbackComponentImpl extends FinaliseFeedbackComponent {
-	self: UserAware =>
 
-	def finaliseFeedback(assignment: Assignment, markerFeedbacks: Seq[MarkerFeedback]) {
-		val finaliseFeedbackCommand = FinaliseFeedbackCommand(assignment, markerFeedbacks, user)
+	val marker: User
+
+	def finaliseFeedback(assignment: Assignment, markerFeedback: Seq[MarkerFeedback]) {
+		val finaliseFeedbackCommand = FinaliseFeedbackCommand(assignment, markerFeedback, marker)
 		finaliseFeedbackCommand.apply()
 	}
 }

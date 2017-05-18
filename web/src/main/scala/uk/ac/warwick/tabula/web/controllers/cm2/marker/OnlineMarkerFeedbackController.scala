@@ -43,7 +43,7 @@ class OnlineMarkerFeedbackController extends CourseworkController {
 
 	@RequestMapping(method = Array(GET, HEAD))
 	def showForm(@ModelAttribute("command") command: Command, errors: Errors): Mav = {
-		Mav(s"$urlPrefix/admin/assignments/markers/marker_online_feedback",
+		Mav("cm2/admin/assignments/markers/marker_online_feedback",
 			"isGradeValidation" -> command.assignment.module.adminDepartment.assignmentGradeValidation,
 			"command" -> command
 		).noLayout()

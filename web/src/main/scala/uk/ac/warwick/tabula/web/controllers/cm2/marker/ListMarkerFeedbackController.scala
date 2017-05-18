@@ -13,7 +13,6 @@ import uk.ac.warwick.tabula.web.controllers.cm2.CourseworkController
 import uk.ac.warwick.userlookup.User
 
 
-
 @Profile(Array("cm2Enabled"))
 @Controller
 @RequestMapping(value = Array("/${cm2.prefix}/admin/assignments/{assignment}/marker/{marker}/list"))
@@ -28,7 +27,7 @@ class ListMarkerFeedbackController extends CourseworkController {
 
 	@RequestMapping(method = Array(GET, HEAD))
 	def list(@ModelAttribute command: Command): Mav = {
-		Mav(s"$urlPrefix/admin/assignments/markers/marker_list",
+		Mav("cm2/admin/assignments/markers/marker_list",
 			"department" -> command.assignment.module.adminDepartment,
 			"assignment" -> command.assignment,
 			"marker" -> command.marker,

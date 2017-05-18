@@ -371,7 +371,7 @@ class AssignmentFeedback extends Feedback {
 
 	def isMarkedByStage(stage: MarkingWorkflowStage): Boolean = {
 		val currentStages = outstandingStages.asScala
-		val currentPosition = currentStages.map(_.order).headOption.getOrElse(0)
+		val currentPosition = currentStages.headOption.map(_.order).getOrElse(0)
 
 		if(stage.order == currentPosition) !currentStages.contains(stage)
 		else stage.order < currentPosition

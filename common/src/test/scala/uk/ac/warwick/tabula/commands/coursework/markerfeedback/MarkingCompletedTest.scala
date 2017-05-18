@@ -64,7 +64,7 @@ class MarkingCompletedTest extends TestBase with MarkingWorkflowWorld with Mocki
 		self: UserAware =>
 
 		def finaliseFeedback(assignment: Assignment, markerFeedbacks: Seq[MarkerFeedback]) {
-			val finaliseFeedbackCommand = FinaliseFeedbackCommand(assignment, markerFeedbacks, user)
+			val finaliseFeedbackCommand = OldFinaliseFeedbackCommand(assignment, markerFeedbacks, user)
 			finaliseFeedbackCommand.zipService = smartMock[ZipService]
 			finaliseFeedbackCommand.applyInternal()
 		}
@@ -72,7 +72,7 @@ class MarkingCompletedTest extends TestBase with MarkingWorkflowWorld with Mocki
 
 	private trait CommandFixture {
 		val command =
-			new MarkingCompletedCommand(assignment.module, assignment, currentUser.apparentUser, currentUser)
+			new OldMarkingCompletedCommand(assignment.module, assignment, currentUser.apparentUser, currentUser)
 				with CommandTestSupport
 	}
 

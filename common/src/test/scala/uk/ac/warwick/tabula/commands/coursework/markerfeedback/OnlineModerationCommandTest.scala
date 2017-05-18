@@ -2,7 +2,7 @@ package uk.ac.warwick.tabula.commands.coursework.markerfeedback
 
 import org.mockito.Mockito._
 import uk.ac.warwick.tabula.commands.{Appliable, UserAware}
-import uk.ac.warwick.tabula.commands.coursework.assignments.{FinaliseFeedbackCommand, FinaliseFeedbackComponent}
+import uk.ac.warwick.tabula.commands.coursework.assignments.{OldFinaliseFeedbackCommand, FinaliseFeedbackComponent}
 import uk.ac.warwick.tabula.commands.coursework.feedback._
 import uk.ac.warwick.tabula.data.model.MarkingState.{MarkingCompleted, Rejected, ReleasedForMarking}
 import uk.ac.warwick.tabula.data.model._
@@ -98,7 +98,7 @@ class OnlineModerationCommandTest extends TestBase with Mockito {
 		self: UserAware =>
 
 		def finaliseFeedback(assignment: Assignment, markerFeedbacks: Seq[MarkerFeedback]) {
-			val finaliseFeedbackCommand = FinaliseFeedbackCommand(assignment, markerFeedbacks, user)
+			val finaliseFeedbackCommand = OldFinaliseFeedbackCommand(assignment, markerFeedbacks, user)
 			finaliseFeedbackCommand.zipService = smartMock[ZipService]
 			finaliseFeedbackCommand.applyInternal()
 		}

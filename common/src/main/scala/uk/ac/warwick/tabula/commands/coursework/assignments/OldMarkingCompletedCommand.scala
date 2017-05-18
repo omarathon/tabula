@@ -17,9 +17,9 @@ import uk.ac.warwick.userlookup.User
 import scala.collection.JavaConverters._
 import scala.collection.mutable
 
-object MarkingCompletedCommand {
+object OldMarkingCompletedCommand {
 	def apply(module: Module, assignment: Assignment, marker: User, submitter: CurrentUser) =
-		new MarkingCompletedCommand(module, assignment, marker, submitter)
+		new OldMarkingCompletedCommand(module, assignment, marker, submitter)
 			with ComposableCommand[Unit]
 			with MarkingCompletedCommandPermissions
 			with MarkingCompletedDescription
@@ -31,7 +31,7 @@ object MarkingCompletedCommand {
 			with FinaliseFeedbackComponentImpl
 }
 
-abstract class MarkingCompletedCommand(val module: Module, val assignment: Assignment, val user: User, val submitter: CurrentUser)
+abstract class OldMarkingCompletedCommand(val module: Module, val assignment: Assignment, val user: User, val submitter: CurrentUser)
 	extends CommandInternal[Unit] with SelfValidating with UserAware with MarkingCompletedState with ReleasedState with BindListener with CreatesNextMarkerFeedback with CanProxy {
 
 	self: StateServiceComponent with FeedbackServiceComponent with FinaliseFeedbackComponent =>

@@ -14,7 +14,7 @@
 	<#-- TODO - filters and actions -->
 
 	<#list feedbackByStage?keys as stage>
-		<#assign markingCompleted><@routes.cm2.markingCompleted assignment marker /></#assign>
+		<#assign markingCompleted><@routes.cm2.markingCompleted assignment stage marker /></#assign>
 		<div class="marking-stage">
 			<#if feedbackByStage?keys?size gt 0>
 				<h3>${stage.description}</h3>
@@ -48,7 +48,7 @@
 							class="clickable collapsed expandable-row <#if mf.readyForNextStage>ready-next-stage</#if>"
 						>
 							<td class="check-col">
-								<@bs3form.selector_check_row name="markerFeedback" value="${studentId}" />
+								<@bs3form.selector_check_row name="markerFeedback" value="${mf.id}" />
 							</td>
 							<#if assignment.anonymousMarking>
 								<#assign colspan = 4>
