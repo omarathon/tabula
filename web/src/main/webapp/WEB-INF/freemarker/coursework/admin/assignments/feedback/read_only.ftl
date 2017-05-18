@@ -25,9 +25,9 @@
 					<div class="control-group">
 						<label class="control-label">Feedback</label>
 						<div class="controls">
-						<#list feedback.customFormValues as formValue>
-							<p>${formValue.value!""}</p>
-						</#list>
+							<#list feedback.customFormValues as formValue>
+								<p>${formValue.valueFormattedHtml!""}</p>
+							</#list>
 						</div>
 					</div>
 				</div>
