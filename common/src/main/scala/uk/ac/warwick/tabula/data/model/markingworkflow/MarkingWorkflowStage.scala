@@ -9,8 +9,8 @@ import uk.ac.warwick.tabula.system.TwoWayConverter
 import uk.ac.warwick.tabula.helpers.StringUtils._
 
 sealed abstract class MarkingWorkflowStage(val name: String, val order: Int) {
-	def roleName: String = "Marker"
-	def verb: String = "mark"
+	def roleName: String = MarkingWorkflowStage.DefaultRole
+	def verb: String = MarkingWorkflowStage.DefaultVerb
 	// used when stages have their own allocations rather than allocations being at the roleName level
 	def allocationName: String = roleName
 	// used to describe a stage - when two stages share a role name (the same person is responsible for both stages) these will need to be distinct
@@ -38,6 +38,9 @@ abstract class FinalStage(n: String) extends MarkingWorkflowStage(name = n, orde
 	* Perhaps in these cases it should be an admin only operation.
 	*/
 object MarkingWorkflowStage {
+
+	val DefaultRole: String = "Marker"
+	val DefaultVerb: String = "mark"
 
 	// single marker workflow
 	case object SingleMarker extends MarkingWorkflowStage("SingleMarker", 1) {

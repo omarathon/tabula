@@ -116,7 +116,7 @@ trait OnlineMarkerFeedbackState extends OnlineFeedbackState with SubmissionState
 	val previousMarkerFeedback: Map[MarkingWorkflowStage, MarkerFeedback] = {
 		// if there are multiple outstanding stages they should all have the same order so only look at the first one
 		val currentStageIndex = feedback.outstandingStages.asScala.headOption.map(_.order).getOrElse(0)
-		if (currentStageIndex == stage.order)
+		if (currentStageIndex <= stage.order)
 			allMarkerFeedback.filterKeys(_.order < currentStageIndex) // show all the previous stages
 		else
 			allMarkerFeedback.filterKeys(_.order <= stage.order) // show all stages up to and including the current one

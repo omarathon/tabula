@@ -67,6 +67,7 @@ class CM2MarkingWorkflowDaoImpl extends CM2MarkingWorkflowDao with Daoisms {
 			.add(is("markerUsercode", marker.getUserId))
 			.add(is("f.assignment", assignment))
 			.seq
+			.distinct
 	}
 
 	override def delete(workflow: CM2MarkingWorkflow): Unit = {

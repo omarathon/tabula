@@ -9,7 +9,7 @@ import uk.ac.warwick.tabula.commands.UserAware
 import uk.ac.warwick.tabula.commands.coursework.assignments._
 import uk.ac.warwick.tabula.data.SessionComponent
 import uk.ac.warwick.tabula.data.model._
-import uk.ac.warwick.tabula.data.model.notifications.coursework.ReleaseToMarkerNotification
+import uk.ac.warwick.tabula.data.model.notifications.coursework.OldReleaseToMarkerNotification
 import uk.ac.warwick.tabula.events.EventListener
 import uk.ac.warwick.tabula.helpers.Logging
 import uk.ac.warwick.tabula.services._
@@ -197,7 +197,7 @@ class MarkingCompletedTest extends TestBase with MarkingWorkflowWorld with Mocki
 
 		val notifications: Seq[Notification[MarkerFeedback, Assignment]] = notifier.emit(())
 		notifications.foreach {
-			case n:ReleaseToMarkerNotification => n.userLookup = mockUserLookup
+			case n:OldReleaseToMarkerNotification => n.userLookup = mockUserLookup
 		}
 
 		notifications.size should be(2)

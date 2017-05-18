@@ -8,13 +8,13 @@ import uk.ac.warwick.tabula.data.model.{FreemarkerModel, _}
 import uk.ac.warwick.tabula.helpers.Logging
 import uk.ac.warwick.tabula.services.AutowiringUserLookupComponent
 
-object ReleaseToMarkerNotification {
+object OldReleaseToMarkerNotification {
 	val templateLocation = "/WEB-INF/freemarker/emails/released_to_marker_notification.ftl"
 }
 
 @Entity
 @DiscriminatorValue("ReleaseToMarker")
-class ReleaseToMarkerNotification
+class OldReleaseToMarkerNotification
 	extends NotificationWithTarget[MarkerFeedback, Assignment]
 	with SingleRecipientNotification
 	with UserIdRecipientNotification
@@ -47,7 +47,7 @@ class ReleaseToMarkerNotification
 
 	def title: String = "%s: Submissions for \"%s\" have been released for marking".format(assignment.module.code.toUpperCase, assignment.name)
 
-	def content = FreemarkerModel(ReleaseToMarkerNotification.templateLocation,
+	def content = FreemarkerModel(OldReleaseToMarkerNotification.templateLocation,
 		Map(
 			"assignment" -> assignment,
 			"numReleasedFeedbacks" -> items.size,

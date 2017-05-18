@@ -3,9 +3,9 @@ package uk.ac.warwick.tabula.commands.coursework.assignments
 import org.springframework.validation.{BindingResult, Errors}
 import uk.ac.warwick.tabula.CurrentUser
 import uk.ac.warwick.tabula.commands._
-import uk.ac.warwick.tabula.commands.coursework.{FeedbackReleasedNotifier, ReleasedState}
+import uk.ac.warwick.tabula.commands.coursework.{OldFeedbackReleasedNotifier, ReleasedState}
 import uk.ac.warwick.tabula.data.model._
-import uk.ac.warwick.tabula.data.model.notifications.coursework.{ModeratorRejectedNotification, ReleaseToMarkerNotification, ReturnToMarkerNotification}
+import uk.ac.warwick.tabula.data.model.notifications.coursework.{ModeratorRejectedNotification, OldReleaseToMarkerNotification, OldReturnToMarkerNotification}
 import uk.ac.warwick.tabula.events.NotificationHandling
 import uk.ac.warwick.tabula.helpers.Logging
 import uk.ac.warwick.tabula.permissions.Permissions
@@ -138,9 +138,9 @@ trait MarkingCompletedState {
 	val submitter: CurrentUser
 }
 
-trait SecondMarkerReleaseNotifier extends FeedbackReleasedNotifier[Unit] {
+trait SecondMarkerReleaseNotifier extends OldFeedbackReleasedNotifier[Unit] {
 	self: MarkingCompletedState with ReleasedState with UserAware with UserLookupComponent with Logging =>
-	def blankNotification = new ReleaseToMarkerNotification(2)
+	def blankNotification = new OldReleaseToMarkerNotification(2)
 }
 
 trait MarkerCompletedNotificationCompletion extends CompletesNotifications[Unit] {
@@ -153,8 +153,8 @@ trait MarkerCompletedNotificationCompletion extends CompletesNotifications[Unit]
 			.flatMap(mf =>
 				// TAB-4328-  ModeratorRejectedNotification is orphaned at this stage.
 				rejectedMarkerFeedbacks(mf) ++
-					notificationService.findActionRequiredNotificationsByEntityAndType[ReleaseToMarkerNotification](mf) ++
-					notificationService.findActionRequiredNotificationsByEntityAndType[ReturnToMarkerNotification](mf)
+					notificationService.findActionRequiredNotificationsByEntityAndType[OldReleaseToMarkerNotification](mf) ++
+					notificationService.findActionRequiredNotificationsByEntityAndType[OldReturnToMarkerNotification](mf)
 			)
 		CompletesNotificationsResult(notificationsToComplete, marker)
 	}

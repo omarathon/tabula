@@ -7,7 +7,7 @@ import uk.ac.warwick.tabula.commands._
 import uk.ac.warwick.tabula.commands.coursework.assignments.{FinaliseFeedbackComponent, FinaliseFeedbackComponentImpl}
 import uk.ac.warwick.tabula.data.AutowiringSavedFormValueDaoComponent
 import uk.ac.warwick.tabula.data.model.MarkingState.{MarkingCompleted, Rejected}
-import uk.ac.warwick.tabula.data.model.notifications.coursework.{ModeratorRejectedNotification, ReleaseToMarkerNotification, ReturnToMarkerNotification}
+import uk.ac.warwick.tabula.data.model.notifications.coursework.{ModeratorRejectedNotification, OldReleaseToMarkerNotification, OldReturnToMarkerNotification}
 import uk.ac.warwick.tabula.data.model.{MarkerFeedback, Notification, _}
 import uk.ac.warwick.tabula.events.NotificationHandling
 import uk.ac.warwick.tabula.helpers.Logging
@@ -148,8 +148,8 @@ trait OnlineModerationNotificationCompletion extends CompletesNotifications[Mark
 
 	def notificationsToComplete(commandResult: MarkerFeedback): CompletesNotificationsResult = {
 		CompletesNotificationsResult(
-			notificationService.findActionRequiredNotificationsByEntityAndType[ReleaseToMarkerNotification](secondMarkerFeedback) ++
-				notificationService.findActionRequiredNotificationsByEntityAndType[ReturnToMarkerNotification](secondMarkerFeedback),
+			notificationService.findActionRequiredNotificationsByEntityAndType[OldReleaseToMarkerNotification](secondMarkerFeedback) ++
+				notificationService.findActionRequiredNotificationsByEntityAndType[OldReturnToMarkerNotification](secondMarkerFeedback),
 			user
 		)
 	}

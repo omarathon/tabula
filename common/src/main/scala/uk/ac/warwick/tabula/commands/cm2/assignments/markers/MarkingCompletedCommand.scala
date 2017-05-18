@@ -4,15 +4,18 @@ import uk.ac.warwick.tabula.commands._
 import uk.ac.warwick.tabula.system.permissions.{PermissionsChecking, PermissionsCheckingMethods, RequiresPermissionsChecking}
 import org.springframework.validation.Errors
 import uk.ac.warwick.tabula.CurrentUser
+import uk.ac.warwick.tabula.commands.cm2.assignments.{FeedbackReleasedNotifier, ReleasedState}
 import uk.ac.warwick.tabula.data.HibernateHelpers
 import uk.ac.warwick.tabula.data.model.markingworkflow.{FinalStage, MarkingWorkflowStage}
-import uk.ac.warwick.tabula.data.model.{Assignment, AssignmentFeedback, Feedback, MarkerFeedback}
+import uk.ac.warwick.tabula.data.model._
+import uk.ac.warwick.tabula.data.model.notifications.cm2.{ReleaseToMarkerNotification, ReturnToMarkerNotification}
+import uk.ac.warwick.tabula.events.NotificationHandling
+import uk.ac.warwick.tabula.helpers.Logging
 import uk.ac.warwick.tabula.permissions.Permissions
-import uk.ac.warwick.tabula.services.{AutowiringCM2MarkingWorkflowServiceComponent, CM2MarkingWorkflowServiceComponent}
+import uk.ac.warwick.tabula.services.{AutowiringCM2MarkingWorkflowServiceComponent, CM2MarkingWorkflowServiceComponent, FeedbackServiceComponent}
 import uk.ac.warwick.userlookup.User
 
 import scala.collection.JavaConverters._
-import scala.util.Try
 
 
 object MarkingCompletedCommand {
@@ -24,24 +27,29 @@ object MarkingCompletedCommand {
 			with MarkingCompletedDescription
 			with AutowiringCM2MarkingWorkflowServiceComponent
 			with FinaliseFeedbackComponentImpl
+			with MarkerReleaseNotifier
 }
 
 class MarkingCompletedCommandInternal(val assignment: Assignment, val marker: User, val submitter: CurrentUser, val stage: MarkingWorkflowStage)
-	extends CommandInternal[Seq[AssignmentFeedback]] with MarkingCompletedState with MarkingCompletedValidation {
+	extends CommandInternal[Seq[AssignmentFeedback]] with MarkingCompletedState with ReleasedState with MarkingCompletedValidation {
 
 	this: CM2MarkingWorkflowServiceComponent with FinaliseFeedbackComponent =>
 
 	def applyInternal(): Seq[AssignmentFeedback] = {
-		val feedback = feedbackForRelease.map(mf => HibernateHelpers.initialiseAndUnproxy(mf.feedback)).collect{ case f: AssignmentFeedback => f }
 
-		val completed = cm2MarkingWorkflowService.progressFeedback(stage, feedback)
+		val feedback = feedbackForRelease.map(mf => HibernateHelpers.initialiseAndUnproxy(mf.feedback)).collect{ case f: AssignmentFeedback => f }
+		newReleasedFeedback = cm2MarkingWorkflowService.progressFeedback(stage, feedback).asJava
+
 		// finalise any feedback that has finished the workflow
 		val toFinalise = {
-			val feedbackAtFinalStage = completed.filter(f => f.outstandingStages.asScala.collect{case s: FinalStage => s}.nonEmpty).map(_.id)
+			val feedbackAtFinalStage = feedback.filter(f => f.outstandingStages.asScala.collect{case s: FinalStage => s}.nonEmpty).map(_.id)
 			feedbackForRelease.filter(mf => feedbackAtFinalStage.contains(mf.feedback.id))
 		}
-		finaliseFeedback(assignment, toFinalise)
-		completed
+		if (toFinalise.nonEmpty) {
+			finaliseFeedback(assignment, toFinalise)
+		}
+
+		feedback
 	}
 }
 
@@ -79,7 +87,7 @@ trait MarkingCompletedDescription extends Describable[Seq[AssignmentFeedback]] {
 	}
 }
 
-trait MarkingCompletedState extends CanProxy {
+trait MarkingCompletedState extends CanProxy with UserAware {
 
 	import uk.ac.warwick.tabula.JavaImports._
 
@@ -88,6 +96,7 @@ trait MarkingCompletedState extends CanProxy {
 
 	val assignment: Assignment
 	val marker: User
+	val user: User = marker
 	val submitter: CurrentUser
 	val stage: MarkingWorkflowStage
 
@@ -102,4 +111,23 @@ trait MarkingCompletedState extends CanProxy {
 
 	// do not update previously released feedback or feedback belonging to other markers
 	lazy val feedbackForRelease: Seq[MarkerFeedback] = markerFeedback.asScala.filter(_.marker == marker) -- releasedFeedback
+}
+
+trait MarkerReleaseNotifier extends FeedbackReleasedNotifier[Seq[AssignmentFeedback]] {
+	self: MarkingCompletedState with ReleasedState with UserAware with Logging =>
+	def blankNotification = new ReleaseToMarkerNotification
+}
+
+trait MarkerCompletedNotificationCompletion extends CompletesNotifications[Unit] {
+
+	self: MarkingCompletedState with NotificationHandling with FeedbackServiceComponent =>
+
+	def notificationsToComplete(commandResult: Unit): CompletesNotificationsResult = {
+		val notificationsToComplete = feedbackForRelease
+			.flatMap(mf =>
+				notificationService.findActionRequiredNotificationsByEntityAndType[ReleaseToMarkerNotification](mf) ++
+					notificationService.findActionRequiredNotificationsByEntityAndType[ReturnToMarkerNotification](mf)
+			)
+		CompletesNotificationsResult(notificationsToComplete, marker)
+	}
 }

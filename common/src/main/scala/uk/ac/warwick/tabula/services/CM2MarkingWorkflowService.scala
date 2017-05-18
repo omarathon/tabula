@@ -28,8 +28,8 @@ trait CM2MarkingWorkflowService extends WorkflowUserGroupHelpers {
 	/** All assignments using this marking workflow. */
 	def getAssignmentsUsingMarkingWorkflow(workflow: CM2MarkingWorkflow): Seq[Assignment]
 
-	// move feedback onto the next stage when the next stage
-	def progressFeedback(markerStage: MarkingWorkflowStage, feedbacks: Seq[AssignmentFeedback]): Seq[AssignmentFeedback]
+	// move feedback onto the next stage when all the current stages are finished - returns the markerFeedack for the next stage if applicable
+	def progressFeedback(markerStage: MarkingWorkflowStage, feedbacks: Seq[AssignmentFeedback]): Seq[MarkerFeedback]
 
 	// move feedback to a target stage - allows skipping of stages - will fail if target stage isn't a valid future stage
 	def progressFeedback(currentStage: MarkingWorkflowStage, targetStage: MarkingWorkflowStage, feedbacks: Seq[AssignmentFeedback]): Seq[AssignmentFeedback]
@@ -77,7 +77,7 @@ class CM2MarkingWorkflowServiceImpl extends CM2MarkingWorkflowService with Autow
 	def getAssignmentsUsingMarkingWorkflow(workflow: CM2MarkingWorkflow): Seq[Assignment] =
 		markingWorkflowDao.getAssignmentsUsingMarkingWorkflow(workflow)
 
-	override def progressFeedback(currentStage: MarkingWorkflowStage , feedbacks: Seq[AssignmentFeedback]): Seq[AssignmentFeedback] = {
+	override def progressFeedback(currentStage: MarkingWorkflowStage , feedbacks: Seq[AssignmentFeedback]): Seq[MarkerFeedback] = {
 		// don't progress if nextStages is empty
 		if(currentStage.nextStages.isEmpty)
 			throw new IllegalArgumentException("cannot progress feedback past the final stage")
@@ -86,11 +86,17 @@ class CM2MarkingWorkflowServiceImpl extends CM2MarkingWorkflowService with Autow
 		if (feedbacks.exists(f => !f.outstandingStages.asScala.contains(currentStage)))
 			throw new IllegalArgumentException(s"some of the specified feedback doesn't have outstanding stage - $currentStage")
 
-		feedbacks.map(f => {
+		feedbacks.flatMap(f => {
 			val remainingStages = f.outstandingStages.asScala diff Seq(currentStage)
-			f.outstandingStages = if(remainingStages.isEmpty) currentStage.nextStages.asJava else remainingStages.asJava
+			val releasedMarkerFeedback: Seq[MarkerFeedback] = if(remainingStages.isEmpty) {
+				f.outstandingStages = currentStage.nextStages.asJava
+				f.markerFeedback.asScala.filter(mf => currentStage.nextStages.contains(mf.stage))
+			} else {
+				f.outstandingStages = remainingStages.asJava
+				Nil
+			}
 			feedbackService.saveOrUpdate(f)
-			f
+			releasedMarkerFeedback
 		})
 	}
 

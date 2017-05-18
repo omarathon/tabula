@@ -37,7 +37,7 @@
 							<@f.hidden path="attachedFiles" value="${attachment.id}" />
 						</li>
 					</#list>
-				</ul>e
+				</ul>
 			</@bs3form.labelled_form_group>
 		<#else>
 			<#-- Add invisible empty row for populating in case of copying files from a feedback further back in the workflow -->

@@ -4,7 +4,7 @@ import uk.ac.warwick.tabula.commands.UserAware
 import uk.ac.warwick.tabula.commands.coursework.ReleasedState
 import uk.ac.warwick.tabula.commands.coursework.assignments.{FirstMarkerReleaseNotifier, ReleaseForMarkingState}
 import uk.ac.warwick.tabula.data.model._
-import uk.ac.warwick.tabula.data.model.notifications.coursework.ReleaseToMarkerNotification
+import uk.ac.warwick.tabula.data.model.notifications.coursework.OldReleaseToMarkerNotification
 import uk.ac.warwick.tabula.helpers.Logging
 import uk.ac.warwick.tabula.services.{UserLookupComponent, UserLookupService}
 import uk.ac.warwick.tabula.{Mockito, TestBase}
@@ -49,7 +49,7 @@ class ReleaseForMarkingNotifiesTest extends TestBase with Mockito {
 		val notifications: Seq[Notification[MarkerFeedback, Assignment]] = notifier.emit(List())
 
 		notifications.foreach {
-			case n: ReleaseToMarkerNotification => n.userLookup = mockUserLookup
+			case n: OldReleaseToMarkerNotification => n.userLookup = mockUserLookup
 		}
 
 		notifications.size should be(2)
