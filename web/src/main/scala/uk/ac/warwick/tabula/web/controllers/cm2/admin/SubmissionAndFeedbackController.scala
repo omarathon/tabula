@@ -2,40 +2,57 @@ package uk.ac.warwick.tabula.web.controllers.cm2.admin
 
 import javax.validation.Valid
 
+import org.joda.time.DateTime
 import org.springframework.context.annotation.Profile
 import org.springframework.stereotype.Controller
 import org.springframework.validation.Errors
-import org.springframework.web.bind.WebDataBinder
 import org.springframework.web.bind.annotation.{ModelAttribute, PathVariable, RequestMapping}
-import uk.ac.warwick.spring.Wire
-import uk.ac.warwick.tabula.Features
+import uk.ac.warwick.tabula.AcademicYear
 import uk.ac.warwick.tabula.cm2.web.Routes
 import uk.ac.warwick.tabula.commands.SelfValidating
 import uk.ac.warwick.tabula.commands.cm2.assignments.SubmissionAndFeedbackCommand
-import uk.ac.warwick.tabula.commands.cm2.assignments.SubmissionAndFeedbackCommand.SubmissionAndFeedbackResults
 import uk.ac.warwick.tabula.data.model._
-import uk.ac.warwick.tabula.helpers.cm2.{Cm2Filter, Cm2Filters}
+import uk.ac.warwick.tabula.helpers.cm2.SubmissionAndFeedbackInfoFilters
+import uk.ac.warwick.tabula.services.{AutowiringMaintenanceModeServiceComponent, AutowiringModuleAndDepartmentServiceComponent, AutowiringUserSettingsServiceComponent}
 import uk.ac.warwick.tabula.web.Mav
+import uk.ac.warwick.tabula.web.controllers.AcademicYearScopedController
 import uk.ac.warwick.tabula.web.controllers.cm2.CourseworkController
-import uk.ac.warwick.util.web.bind.AbstractPropertyEditor
 
-//FIXME: implemented as part of CM2 migration but will require further reworking due to CM2 workflow changes
+//FIXME: Summary page for cm2 needs fixing. Not implemented yet
 
-@Profile(Array("cm2Enabled")) @Controller
-@RequestMapping(Array("/${cm2.prefix}/admin/assignments/{assignment}"))
-class SubmissionAndFeedbackController extends CourseworkController {
-
-	var features: Features = Wire[Features]
+abstract class AbstractSubmissionAndFeedbackController extends CourseworkController
+	with AcademicYearScopedController
+	with AutowiringModuleAndDepartmentServiceComponent
+	with AutowiringUserSettingsServiceComponent
+	with AutowiringMaintenanceModeServiceComponent {
 
 	validatesSelf[SelfValidating]
+
 
 	@ModelAttribute("submissionAndFeedbackCommand")
 	def command(@PathVariable assignment: Assignment): SubmissionAndFeedbackCommand.CommandType =
 		SubmissionAndFeedbackCommand(assignment)
 
-	@ModelAttribute("allFilters")
-	def allFilters(@PathVariable assignment: Assignment): Seq[Cm2Filter with Product with Serializable] =
-		Cm2Filters.AllFilters.filter(_.applies(assignment))
+
+	@ModelAttribute("activeAcademicYear")
+	override def activeAcademicYear: Option[AcademicYear] =
+		retrieveActiveAcademicYear(None)
+
+	lazy val academicYear = activeAcademicYear.getOrElse(AcademicYear.guessSITSAcademicYearByDate(DateTime.now))
+
+
+}
+
+
+@Profile(Array("cm2Enabled"))
+@Controller
+@RequestMapping(Array("/${cm2.prefix}/admin/assignments/{assignment}"))
+class SubmissionAndFeedbackController extends AbstractSubmissionAndFeedbackController
+	with AcademicYearScopedController
+	with AutowiringModuleAndDepartmentServiceComponent
+	with AutowiringUserSettingsServiceComponent
+	with AutowiringMaintenanceModeServiceComponent {
+
 
 	@RequestMapping(Array("/list"))
 	def list(@Valid @ModelAttribute("submissionAndFeedbackCommand") command: SubmissionAndFeedbackCommand.CommandType, errors: Errors, @PathVariable assignment: Assignment): Mav = {
@@ -53,54 +70,66 @@ class SubmissionAndFeedbackController extends CourseworkController {
 	}
 
 	@RequestMapping(Array("/summary"))
-	def summary(@Valid @ModelAttribute("submissionAndFeedbackCommand") command: SubmissionAndFeedbackCommand.CommandType, errors: Errors, @PathVariable assignment: Assignment): Mav = {
+	def summary(
+		@Valid @ModelAttribute("submissionAndFeedbackCommand") command: SubmissionAndFeedbackCommand.CommandType,
+		errors: Errors, @PathVariable assignment: Assignment,
+		@ModelAttribute("activeAcademicYear") activeAcademicYear: Option[AcademicYear]
+	): Mav = {
+
 		if (!features.assignmentProgressTable) Redirect(Routes.admin.assignment.submissionsandfeedback.table(assignment))
 		else {
 			if (errors.hasErrors) {
 				Mav("cm2/admin/assignments/submissionsandfeedback/progress",
 					"module" -> assignment.module,
-					"department" -> assignment.module.adminDepartment
+					"department" -> assignment.module.adminDepartment,
+					"academicYear" -> academicYear
 				)
-			} else {
-				val results = command.apply()
 
+			} else {
+
+				val results = command.apply()
 				Mav("cm2/admin/assignments/submissionsandfeedback/progress",
 					"module" -> assignment.module,
 					"department" -> assignment.module.adminDepartment,
-					"results" ->	resultMap(results)
+					"academicYear" -> academicYear,
+					"results" -> results
 				)
 			}
 		}
 	}
 
-	@RequestMapping(Array("/table"))
-	def table(@Valid @ModelAttribute("submissionAndFeedbackCommand") command: SubmissionAndFeedbackCommand.CommandType, errors: Errors, @PathVariable assignment: Assignment): Mav = {
-		if (errors.hasErrors) {
-			Mav("cm2/admin/assignments/submissionsandfeedback/list",
-				"department" -> assignment.module.adminDepartment
-			)
-		} else {
-			val results = command.apply()
-			Mav("cm2/admin/assignments/submissionsandfeedback/list",
+}
+
+
+@Profile(Array("cm2Enabled"))
+@Controller
+@RequestMapping(Array("/${cm2.prefix}/admin/assignments/{assignment}/table"))
+class SubmissionAndFeedbackTableController extends AbstractSubmissionAndFeedbackController
+	with AcademicYearScopedController
+	with AutowiringModuleAndDepartmentServiceComponent
+	with AutowiringUserSettingsServiceComponent
+	with AutowiringMaintenanceModeServiceComponent {
+
+	@RequestMapping
+	def table(@ModelAttribute("submissionAndFeedbackCommand") command: SubmissionAndFeedbackCommand.CommandType, @PathVariable assignment: Assignment): Mav = {
+		val results = command.apply()
+		if (ajax) {
+			Mav("cm2/admin/assignments/submissionsandfeedback/table_results",
+				"results" -> results,
 				"department" -> assignment.module.adminDepartment,
-				"results" ->	resultMap(results)
+				"academicYear" -> academicYear,
+				"module" -> assignment.module
+			).noLayout()
+		} else {
+			Mav("cm2/admin/assignments/submissionsandfeedback/list",
+				"results" -> results,
+				"department" -> assignment.module.adminDepartment,
+				"allSubmissionStatesFilters" -> SubmissionAndFeedbackInfoFilters.SubmissionStates.allSubmissionStates.filter(_.apply(assignment)),
+				"allPlagiarismFilters" -> SubmissionAndFeedbackInfoFilters.PlagiarismStatuses.allPlagiarismStatuses.filter(_.apply(assignment)),
+				"allStatusFilters" -> SubmissionAndFeedbackInfoFilters.Statuses.allStatuses.filter(_.apply(assignment)),
+				"academicYear" -> academicYear
 			)
 		}
 	}
 
-	def resultMap(results: SubmissionAndFeedbackResults): Map[String, Any] = {
-		Map("students" -> results.students,
-			"whoDownloaded" -> results.whoDownloaded,
-			"stillToDownload" -> results.stillToDownload,
-			"hasPublishedFeedback" -> results.hasPublishedFeedback,
-			"hasOriginalityReport" -> results.hasOriginalityReport,
-			"mustReleaseForMarking" -> results.mustReleaseForMarking)
-	}
-
-	override def binding[A](binder: WebDataBinder, cmd: A) {
-		binder.registerCustomEditor(classOf[Cm2Filter], new AbstractPropertyEditor[Cm2Filter] {
-			override def fromString(name: String): Cm2Filter = Cm2Filters.of(name)
-			override def toString(filter: Cm2Filter): String = filter.getName
-		})
-	}
 }

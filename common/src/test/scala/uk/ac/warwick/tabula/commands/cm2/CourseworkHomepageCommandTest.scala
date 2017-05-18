@@ -9,7 +9,7 @@ import uk.ac.warwick.tabula.services.cm2.{CM2WorkflowProgressService, CM2Workflo
 import uk.ac.warwick.tabula._
 import uk.ac.warwick.tabula.commands.cm2.CourseworkHomepageCommand.{CourseworkHomepageMarkerInformation, MarkerAssignmentInfo}
 import uk.ac.warwick.tabula.data.model.markingworkflow.{CM2MarkingWorkflow, DoubleWorkflow}
-import uk.ac.warwick.tabula.helpers.cm2.WorkflowStudent
+import uk.ac.warwick.tabula.helpers.cm2.AssignmentSubmissionStudentInfo
 import uk.ac.warwick.tabula.services.cm2.CM2WorkflowStages.{CM2MarkingWorkflowStage, CM2ReleaseForMarking, CheckForPlagiarism}
 
 import scala.collection.immutable.SortedMap
@@ -147,7 +147,7 @@ class CourseworkHomepageCommandTest extends TestBase with Mockito {
 			val academicYear = AcademicYear(2016)
 			val user: CurrentUser = currentUser
 
-			override def workflowStudentsFor(assignment: Assignment): Seq[WorkflowStudent] = Nil
+			override def workflowStudentsFor(assignment: Assignment): Seq[AssignmentSubmissionStudentInfo] = Nil
 		}
 	}
 

@@ -130,3 +130,5 @@ TODO grab values from the Routes object in code, as that's pretty equivalent and
 
 <#macro submitToTurnitin assignment><@_u page="/admin/assignments/${assignment.id}/turnitin"/></#macro>
 <#macro submitToTurnitinStatus assignment><@_u page="/admin/assignments/${assignment.id}/turnitin/status"/></#macro>
+<#macro assignmentSubmissionSummary assignment><@_u page="/admin/assignments/${assignment.id}/summary"/></#macro>
+<#macro assignmentSubmissionTable assignment><@_u page="/admin/assignments/${assignment.id}/table"/></#macro>

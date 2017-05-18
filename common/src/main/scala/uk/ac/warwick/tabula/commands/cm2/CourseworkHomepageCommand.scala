@@ -9,7 +9,7 @@ import uk.ac.warwick.tabula.data.model._
 import uk.ac.warwick.tabula.data.model.forms.Extension
 import uk.ac.warwick.tabula.helpers.DateTimeOrdering._
 import uk.ac.warwick.tabula.helpers.StringUtils._
-import uk.ac.warwick.tabula.helpers.cm2.WorkflowStudent
+import uk.ac.warwick.tabula.helpers.cm2.AssignmentSubmissionStudentInfo
 import uk.ac.warwick.tabula.permissions.Permissions
 import uk.ac.warwick.tabula.services._
 import uk.ac.warwick.tabula.services.cm2.CM2WorkflowStages.{CM1ReleaseForMarking, CM2ReleaseForMarking}
@@ -364,11 +364,11 @@ trait CourseworkHomepageMarkerAssignments extends TaskBenchmarking {
 }
 
 trait WorkflowStudentsForAssignment {
-	def workflowStudentsFor(assignment: Assignment): Seq[WorkflowStudent]
+	def workflowStudentsFor(assignment: Assignment): Seq[AssignmentSubmissionStudentInfo]
 }
 
 trait CommandWorkflowStudentsForAssignment extends WorkflowStudentsForAssignment {
-	def workflowStudentsFor(assignment: Assignment): Seq[WorkflowStudent] = SubmissionAndFeedbackCommand(assignment).apply().students
+	def workflowStudentsFor(assignment: Assignment): Seq[AssignmentSubmissionStudentInfo] = SubmissionAndFeedbackCommand(assignment).apply().students
 }
 
 trait MarkerProgress extends TaskBenchmarking {

@@ -57,6 +57,10 @@ object Routes {
 				admin() + s"/${encoded(module.code)}/${encoded(academicYear.startYear.toString)}"
 		}
 
+		object moduleWithinDepartment {
+			def apply(module: Module, academicYear: AcademicYear): String = department(module.adminDepartment, academicYear) + "#module-" + encoded(module.code)
+		}
+
 		object workflows {
 			def apply(dept: Department, academicYear: AcademicYear): String =
 				department(dept, academicYear) + "/markingworkflows"
