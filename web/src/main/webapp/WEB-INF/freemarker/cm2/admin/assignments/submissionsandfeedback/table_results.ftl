@@ -114,7 +114,7 @@
 						</#if>
 
 						<th class="feedback">Files</th>
-						<th class="feedback1">Updated</th>
+						<th class="feedback">Updated</th>
 						<#if assignment.collectMarks>
 							<th class="feedback">Mark</th>
 							<th class="feedback">Grade</th>
@@ -150,7 +150,6 @@
 							</td>
 
 							<td class="files">
-
 								<#if submission??>
 									<#local attachments=submission.allAttachments />
 									<#if attachments?size gt 0>
@@ -159,7 +158,7 @@
 											<#local downloadUrl><@routes.cm2.downloadSubmission submission filename/>?single=true</#local>
 										<#else>
 											<#local filename = "submission-${submission.studentIdentifier}.zip">
-											<#local downloadUrl><@routes.downloadSubmission submission filename/></#local>
+											<#local downloadUrl><@routes.cm2.downloadSubmission submission filename/></#local>
 										</#if>
 										<a class="long-running" href="${downloadUrl}">
 										${attachments?size}
@@ -203,10 +202,7 @@
 										</#if>
 								</td>
 							</#if>
-
-
 							<#if assignment.markingWorkflow??>
-
 								<#if assignment.cm2Assignment>
 									<#if enhancedFeedback??>
 										<#local feedback=enhancedFeedback.feedback />
@@ -372,26 +368,6 @@
 			}
 
 		$('.fixed-container').fixHeaderFooter();
-
-		$('.submission-table1').sortableTable({
-			textExtraction: function(node) {
-				var $el = $(node);
-				if ($el.hasClass('originality-report')) {
-					var $tooltip = $el.find('.similarity-tooltip').first();
-					if ($tooltip.length) {
-						return $tooltip.text().substring(0, $tooltip.text().indexOf('%'));
-					} else {
-						return '0';
-					}
-				} else if ($el.hasClass('word-count')) {
-					return $el.text().trim().replace(',','');
-				} else {
-					return $el.text().trim();
-				}
-			}
-		});
-
-
 
 		$submissionFeedbackResultsTable = $(".submission-feedback-results table");
 		$submissionFeedbackResultsTable.tablesorter({
