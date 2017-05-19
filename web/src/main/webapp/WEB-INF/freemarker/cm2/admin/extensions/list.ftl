@@ -3,7 +3,7 @@
 	<h1>Extensions</h1>
 
 	<div class="filters btn-group-group well well-small well-sm">
-		<#assign formAction><@routes.cm2.filterExtensions /></#assign>
+		<#assign formAction><@routes.cm2.filterExtensions academicYear /></#assign>
 		<@f.form
 			method="GET"
 			action="${formAction}"

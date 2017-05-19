@@ -38,11 +38,12 @@ object Routes {
 		def feedbackTemplates(department: Department): String = apply() + s"/department/${encoded(department.code)}/settings/feedback-templates/"
 		def extensionSettings(department: Department): String = apply() + "/department/%s/settings/extensions" format encoded(department.code)
 		object extensions {
-			def apply(): String = admin() + "/extensions"
-			def detail(extension: Extension): String = extensions() + s"/${extension.id}/detail/"
-			def modify(extension: Extension): String = extensions() + s"/${extension.id}/update/"
+			def apply(academicYear: AcademicYear): String = admin() + s"/extensions/${encoded(academicYear.startYear.toString)}"
+			def detail(extension: Extension): String = extensions(extension.assignment.academicYear) + s"/${extension.id}/detail/"
+			def modify(extension: Extension): String = extensions(extension.assignment.academicYear) + s"/${extension.id}/update/"
 		}
-		def feedbackReports(department: Department): String = apply() + "/department/%s/reports/feedback/" format encoded(department.code)
+		def feedbackReports(dept: Department, academicYear: AcademicYear): String =
+			department(dept, academicYear) + "/reports/feedback"
 		def setupSitsAssignments(dept: Department, academicYear: AcademicYear): String =
 			department(dept, academicYear) + "/setup-assignments"
 		def copyAssignments(dept: Department, academicYear: AcademicYear): String =
@@ -167,7 +168,7 @@ object Routes {
 			object audit {
 				def apply(assignment: Assignment): String = admin() + s"/audit/assignment/${encoded(assignment.id)}"
 			}
-			def extensions(assignment: Assignment): String = assignmentroot(assignment) + "/manage/extensions"
+			def extensions(assignment: Assignment): String = assignmentroot(assignment) + "/extensions"
 
 			def submitToTurnitin(assignment: Assignment): String = assignmentroot(assignment) + "/turnitin"
 		}

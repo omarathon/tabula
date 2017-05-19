@@ -113,7 +113,7 @@ TODO grab values from the Routes object in code, as that's pretty equivalent and
 <#macro extensionsettings department><@_u page="/admin/department/${department.code}/settings/extensions" /></#macro>
 <#macro manage_extensions department academicYear=''>
 	<#if academicYear?has_content>
-		<@_u page="/admin/department/${department.code}/manage/extensions?academicYear=${academicYear.startYear?c}" />
+		<@_u page="/admin/department/${department.code}/${academicYear.startYear?c}/manage/extensions" />
 	<#else>
 		<@_u page="/admin/department/${department.code}/manage/extensions" />
 	</#if>

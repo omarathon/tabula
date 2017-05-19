@@ -668,7 +668,6 @@
 
 						<#if assignment.extensionsPossible>
 							<li>
-								<strong>Extension requests:</strong>
 								<#if can.do('Extension.Update', assignment)>
 									<#local ext_caption="Manage assignment's extensions" />
 								<#else>
@@ -680,7 +679,7 @@
 									scope=assignment
 									action_descr=ext_caption?lower_case
 									href=ext_url>
-										${assignment.countUnapprovedExtensions}
+										<strong>Extension requests:</strong> ${assignment.countUnapprovedExtensions}
 								</@fmt.permission_button>
 							</li>
 						</#if>

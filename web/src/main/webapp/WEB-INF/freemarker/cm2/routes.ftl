@@ -40,7 +40,13 @@ TODO grab values from the Routes object in code, as that's pretty equivalent and
 </#macro>
 <#macro downloadSubmission submission filename><@_u page="/admin/assignments/${submission.assignment.id}/submissions/download/${submission.id}/${filename?url}"/></#macro>
 
-<#macro filterExtensions><@_u page="/admin/extensions"/></#macro>
+<#macro filterExtensions academicYear="">
+	<#if academicYear?has_content>
+		<@_u page="/admin/extensions/${academicYear.startYear?c}"/>
+	<#else>
+		<@_u page="/admin/extensions"/>
+	</#if>
+</#macro>
 <#macro extensionDetail extension><@_u page="/admin/extensions/${extension.id}/detail"/></#macro>
 <#macro extensiondetail assignment usercode><@_u page="/admin/assignments/${assignment.id}/extensions/${usercode}/detail" /></#macro>
 <#macro extensionUpdate extension><@_u page="/admin/extensions/${extension.id}/update"/></#macro>
@@ -60,7 +66,14 @@ TODO grab values from the Routes object in code, as that's pretty equivalent and
 <#macro reusableWorkflowDelete department academicYear workflow><@_u page="/admin/department/${department.code}/${academicYear.startYear?c}/markingworkflows/${workflow.id}/delete" /></#macro>
 <#macro reusableWorkflowReplaceMarker department academicYear workflow><@_u page="/admin/department/${department.code}/${academicYear.startYear?c}/markingworkflows/${workflow.id}/replace" /></#macro>
 
-<#macro feedbackreport department><@_u page="/admin/department/${department.code}/reports/feedback" /></#macro>
+<#macro feedbackreport department academicYear="">
+	<#if academicYear?has_content>
+		<@_u page="/admin/department/${department.code}/${academicYear.startYear?c}/reports/feedback"/>
+	<#else>
+		<@_u page="/admin/department/${department.code}/reports/feedback"/>
+	</#if>
+	<@_u page="" />
+</#macro>
 
 <#macro createassignmentdetails module><@_u page="/admin/${module.code}/assignments/new" /></#macro>
 <#macro assignmentfeedback assignment mode><@_u page="/admin/assignments/${assignment.id}/${mode}/feedback" /></#macro>

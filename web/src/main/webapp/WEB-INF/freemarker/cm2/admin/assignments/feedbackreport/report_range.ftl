@@ -2,10 +2,10 @@
 <#import "*/cm2_macros.ftl" as cm2 />
 
 <#escape x as x?html>
-	<@cm2.headerMenu department />
+	<@cm2.headerMenu department academicYear />
 
 	<#function route_function dept>
-		<#local result><@routes.cm2.feedbackreport dept /></#local>
+		<#local result><@routes.cm2.feedbackreport dept academicYear /></#local>
 		<#return result />
 	</#function>
 	<@fmt.id7_deptheader "Feedback report" route_function "for" />

@@ -5,10 +5,10 @@
 	<#if info.ajax>
 		<#include "job-status-fragment.ftl" />
 	<#else>
-		<@cm2.headerMenu department />
+		<@cm2.headerMenu department academicYear />
 
 		<#function route_function dept>
-			<#local result><@routes.cm2.feedbackreport dept /></#local>
+			<#local result><@routes.cm2.feedbackreport dept academicYear /></#local>
 			<#return result />
 		</#function>
 		<@fmt.id7_deptheader "Feedback report status" route_function "for" />

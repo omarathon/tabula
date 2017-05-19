@@ -16,9 +16,10 @@ import uk.ac.warwick.tabula.commands.{Appliable, SelfValidating}
 import uk.ac.warwick.tabula.data.model.forms.{Extension, ExtensionState}
 import uk.ac.warwick.tabula.data.model.{Assignment, Department, StudentMember}
 import uk.ac.warwick.tabula.helpers.DateBuilder
+import uk.ac.warwick.tabula.services._
 import uk.ac.warwick.tabula.services.fileserver.{RenderableAttachment, RenderableFile}
-import uk.ac.warwick.tabula.services.{ProfileService, RelationshipService, UserLookupService}
 import uk.ac.warwick.tabula.web.Mav
+import uk.ac.warwick.tabula.web.controllers.AcademicYearScopedController
 import uk.ac.warwick.tabula.web.views.JSONView
 import uk.ac.warwick.userlookup.User
 
@@ -53,33 +54,56 @@ trait ExtensionServices {
 	implicit def asMap(e: Extension): ExtensionMap = new ExtensionMap(e)
 }
 
-
-@Profile(Array("cm2Enabled")) @Controller
-@RequestMapping(Array("/${cm2.prefix}/admin/extensions"))
-class FilterExtensionsController extends CourseworkController {
+abstract class AbstractFilterExtensionsController extends CourseworkController
+	with AcademicYearScopedController with AutowiringUserSettingsServiceComponent with AutowiringMaintenanceModeServiceComponent {
 
 	type FilterExtensionsCommand = Appliable[FilterExtensionResults] with FilterExtensionsState
 
 	@ModelAttribute("filterExtensionsCommand")
-	def filterCommand() = FilterExtensionsCommand(user)
+	def filterCommand(@ModelAttribute("activeAcademicYear") activeAcademicYear: Option[AcademicYear], user: CurrentUser) =
+		FilterExtensionsCommand(activeAcademicYear.getOrElse(AcademicYear.guessSITSAcademicYearByDate(DateTime.now)), user)
 
 	@RequestMapping(params=Array("!ajax"), headers=Array("!X-Requested-With"))
 	def viewForm(@ModelAttribute("filterExtensionsCommand") cmd: FilterExtensionsCommand): Mav = {
 		val results = cmd.apply()
 		Mav("cm2/admin/extensions/list",
+			"academicYear" -> cmd.academicYear,
 			"command" -> cmd,
-			"results" -> results
-		)
+			"results" -> results)
+			.secondCrumbs(academicYearBreadcrumbs(cmd.academicYear)(Routes.admin.extensions.apply): _*)
 	}
 
 	@RequestMapping
 	def listFilterResults(@ModelAttribute("filterExtensionsCommand") cmd: FilterExtensionsCommand): Mav = {
 		val results = cmd.apply()
 		Mav("cm2/admin/extensions/_filter_results",
+			"academicYear" -> cmd.academicYear,
 			"command" -> cmd,
 			"results" -> results
 		).noLayout()
 	}
+}
+
+@Profile(Array("cm2Enabled"))
+@Controller
+@RequestMapping(Array("/${cm2.prefix}/admin/extensions"))
+class FilterExtensionsController extends AbstractFilterExtensionsController {
+
+	@ModelAttribute("activeAcademicYear")
+	override def activeAcademicYear: Option[AcademicYear] =
+		retrieveActiveAcademicYear(None)
+
+}
+
+@Profile(Array("cm2Enabled"))
+@Controller
+@RequestMapping(Array("/${cm2.prefix}/admin/extensions/{academicYear:\\d{4}}"))
+class FilterExtensionsForYearController extends AbstractFilterExtensionsController {
+
+	@ModelAttribute("activeAcademicYear")
+	override def activeAcademicYear(@PathVariable academicYear: AcademicYear): Option[AcademicYear] =
+		retrieveActiveAcademicYear(Option(academicYear))
+
 }
 
 @Profile(Array("cm2Enabled")) @Controller
@@ -124,7 +148,7 @@ class ExtensionController extends CourseworkController {
 			updateCommand.apply()
 			Mav(new JSONView(Map(
 				"success" -> true,
-				"redirect" -> Routes.admin.extensions()
+				"redirect" -> Routes.admin.extensions(updateCommand.extension.assignment.academicYear)
 			)))
 		}
 	}
@@ -150,25 +174,24 @@ class DownloadExtensionAttachmentController extends CourseworkController {
 }
 
 @Profile(Array("cm2Enabled")) @Controller
-@RequestMapping(Array("/${cm2.prefix}/admin/assignments/{assignment}/manage/extensions"))
+@RequestMapping(Array("/${cm2.prefix}/admin/assignments/{assignment}/extensions"))
 class ListExtensionsForAssignmentController extends CourseworkController {
 	@ModelAttribute("listCommand")
 	def listCommand(@PathVariable assignment: Assignment): ListExtensionsForAssignmentCommand.Command =
 		ListExtensionsForAssignmentCommand(assignment, user)
 
-	@RequestMapping(method=Array(HEAD,GET))
-	def listExtensions(@ModelAttribute("listCommand") cmd: ListExtensionsForAssignmentCommand.Command, @RequestParam(value="universityId", required=false) universityId: String): Mav = {
-		val extensionGraphs = cmd.apply()
-		val model = Mav("cm2/admin/extensions/assignmentSummary",
+	@RequestMapping
+	def listExtensions(@ModelAttribute("listCommand") cmd: ListExtensionsForAssignmentCommand.Command, @RequestParam(value="universityId", required=false) universityId: String): Mav =
+		Mav("cm2/admin/extensions/assignmentSummary",
 			"extensionToOpen" -> universityId,
-			"extensionGraphs" -> extensionGraphs,
+			"extensionGraphs" -> cmd.apply(),
 			"module" -> cmd.assignment.module,
 			"assignment" -> cmd.assignment,
-			"maxDaysToDisplayAsProgressBar" -> Extension.MaxDaysToDisplayAsProgressBar
-		)
-		model
-	}
+			"maxDaysToDisplayAsProgressBar" -> Extension.MaxDaysToDisplayAsProgressBar)
+			.crumbs(Breadcrumbs.Department(cmd.assignment.module.adminDepartment, cmd.assignment.academicYear), Breadcrumbs.Assignment(cmd.assignment))
+
 }
+
 @Profile(Array("cm2Enabled")) @Controller
 @RequestMapping(Array("/${cm2.prefix}/admin/assignments/{assignment}/extensions/{student}"))
 class EditExtensionController extends CourseworkController with ExtensionServices {
@@ -186,7 +209,7 @@ class EditExtensionController extends CourseworkController with ExtensionService
 	def editCommand(@PathVariable assignment: Assignment, @PathVariable student: User, @RequestParam(defaultValue = "") action: String) =
 		EditExtensionCommand(assignment, student, user, action)
 
-	@RequestMapping(method=Array(GET), path=Array("detail"))
+	@RequestMapping(Array("detail"))
 	def detail(
 		@PathVariable student: User,
 		@ModelAttribute("extensionDetailCommand") detailCommand: ExtensionsDetailCommand,
@@ -242,7 +265,7 @@ class EditExtensionController extends CourseworkController with ExtensionService
 	}
 
 	// view an extension (or request)
-	@RequestMapping(method=Array(GET))
+	@RequestMapping
 	def editExtension(
 		@ModelAttribute("editExtensionCommand") cmd: EditExtensionCommand,
 		errors: Errors
@@ -294,7 +317,21 @@ class EditExtensionController extends CourseworkController with ExtensionService
 
 @Profile(Array("cm2Enabled")) @Controller
 @RequestMapping(Array("/${cm2.prefix}/admin/department/{department}/manage/extensions"))
-class RedirectExtensionManagementController extends CourseworkController {
-	@RequestMapping def redirect(@PathVariable department: Department) =
-		Redirect(s"${Routes.admin.extensions()}?departments=${mandatory(department).code}")
+class RedirectExtensionManagementController extends CourseworkController with AcademicYearScopedController
+	with AutowiringUserSettingsServiceComponent with AutowiringMaintenanceModeServiceComponent {
+
+	@ModelAttribute("activeAcademicYear")
+	override def activeAcademicYear: Option[AcademicYear] =
+		retrieveActiveAcademicYear(None)
+
+	@RequestMapping
+	def redirect(@PathVariable department: Department, @ModelAttribute("activeAcademicYear") activeAcademicYear: Option[AcademicYear]) =
+		Redirect(s"${Routes.admin.extensions(activeAcademicYear.getOrElse(AcademicYear.guessSITSAcademicYearByDate(DateTime.now)))}?departments=${mandatory(department).code}")
+}
+
+@Profile(Array("cm2Enabled")) @Controller
+@RequestMapping(Array("/${cm2.prefix}/admin/department/{department}/{academicYear:\\d{4}}/manage/extensions"))
+class RedirectExtensionManagementForYearController extends CourseworkController {
+	@RequestMapping def redirect(@PathVariable department: Department, @PathVariable academicYear: AcademicYear) =
+		Redirect(s"${Routes.admin.extensions(academicYear)}?departments=${mandatory(department).code}")
 }

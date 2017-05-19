@@ -125,7 +125,7 @@
 					</li>
 				</ul>
 			</div>
-			<#assign extensions_url><@routes.cm2.filterExtensions />?departments=${department.code}</#assign>
+			<#assign extensions_url><@routes.cm2.filterExtensions academicYear />?departments=${department.code}</#assign>
 			<@fmt.permission_button
 				permission='Extension.Read'
 				scope=department
