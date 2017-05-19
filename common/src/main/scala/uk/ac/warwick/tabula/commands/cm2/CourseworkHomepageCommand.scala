@@ -37,11 +37,12 @@ object CourseworkHomepageCommand {
 	)
 
 	case class CourseworkHomepageStudentInformation(
-		unsubmittedAssignments: Seq[StudentAssignmentInformation],
-		inProgressAssignments: Seq[StudentAssignmentInformation],
-		pastAssignments: Seq[StudentAssignmentInformation]
+		upcomingAssignments: Seq[StudentAssignmentInformation],
+		actionRequiredAssignments: Seq[StudentAssignmentInformation],
+		noActionRequiredAssignments: Seq[StudentAssignmentInformation],
+		completedAssignments: Seq[StudentAssignmentInformation]
 	) {
-		def isEmpty: Boolean = unsubmittedAssignments.isEmpty && inProgressAssignments.isEmpty && pastAssignments.isEmpty
+		def isEmpty: Boolean = upcomingAssignments.isEmpty && actionRequiredAssignments.isEmpty && noActionRequiredAssignments.isEmpty && completedAssignments.isEmpty
 		def nonempty: Boolean = !isEmpty
 	}
 
@@ -190,9 +191,10 @@ trait CourseworkHomepageStudentAssignments extends TaskBenchmarking {
 
 	lazy val studentInformation: CourseworkHomepageStudentInformation = benchmarkTask("Get student information") {
 		CourseworkHomepageStudentInformation(
-			unsubmittedAssignments,
-			inProgressAssignments,
-			pastAssignments
+			studentUpcomingAssignments,
+			studentActionRequiredAssignments,
+			studentNoActionRequiredAssignments,
+			studentCompletedAssignments
 		)
 	}
 
@@ -257,7 +259,7 @@ trait CourseworkHomepageStudentAssignments extends TaskBenchmarking {
 		}
 	}
 
-	lazy val unsubmittedAssignments: Seq[StudentAssignmentInformation] = benchmarkTask("Get un-submitted assignments") {
+	private lazy val allUnsubmittedAssignments: Seq[StudentAssignmentInformation] = benchmarkTask("Get un-submitted assignments") {
 		enrolledAssignments
 			.diff(assignmentsWithFeedback)
 			.diff(assignmentsWithSubmission)
@@ -265,6 +267,14 @@ trait CourseworkHomepageStudentAssignments extends TaskBenchmarking {
 			.filterNot(lateFormative)
 			.sortWith(hasEarlierPersonalDeadline)
 			.map(enhance)
+	}
+
+	private lazy val studentUpcomingAssignments: Seq[StudentAssignmentInformation] = benchmarkTask("Get upcoming assignments") {
+		allUnsubmittedAssignments.filterNot(_.assignment.isOpened)
+	}
+
+	private lazy val studentActionRequiredAssignments: Seq[StudentAssignmentInformation] = benchmarkTask("Get action required assignments") {
+		allUnsubmittedAssignments.diff(studentUpcomingAssignments)
 	}
 
 	private def hasEarlierEffectiveDate(ass1: StudentAssignmentInformation, ass2: StudentAssignmentInformation): Boolean = {
@@ -278,14 +288,14 @@ trait CourseworkHomepageStudentAssignments extends TaskBenchmarking {
 		effectiveDate(ass1) < effectiveDate(ass2)
 	}
 
-	lazy val inProgressAssignments: Seq[StudentAssignmentInformation] = benchmarkTask("Get in-progress assignments") {
+	lazy val studentNoActionRequiredAssignments: Seq[StudentAssignmentInformation] = benchmarkTask("Get in-progress assignments") {
 		assignmentsWithSubmission
 			.diff(assignmentsWithFeedback)
 			.map(enhance)
 			.sortWith(hasEarlierEffectiveDate)
 	}
 
-	lazy val pastAssignments: Seq[StudentAssignmentInformation] = benchmarkTask("Get past assignments") {
+	lazy val studentCompletedAssignments: Seq[StudentAssignmentInformation] = benchmarkTask("Get past assignments") {
 		(assignmentsWithFeedback ++ enrolledAssignments.filter(lateFormative))
 			.map(enhance)
 			.sortWith(hasEarlierEffectiveDate)
@@ -301,15 +311,15 @@ trait CourseworkHomepageMarkerAssignments extends TaskBenchmarking {
 
 	lazy val markerInformation: CourseworkHomepageMarkerInformation = benchmarkTask("Get marker information") {
 		CourseworkHomepageMarkerInformation(
-			upcomingAssignments,
-			actionRequiredAssignments,
-			noActionRequiredAssignments,
-			completedAssignments
+			markerUpcomingAssignments,
+			markerActionRequiredAssignments,
+			markerNoActionRequiredAssignments,
+			markerCompletedAssignments
 		)
 	}
 
 	// Upcoming - assignments involving marker but not yet released
-	private lazy val upcomingAssignments: Seq[MarkerAssignmentInfo] = benchmarkTask("Get upcoming assignments") {
+	private lazy val markerUpcomingAssignments: Seq[MarkerAssignmentInfo] = benchmarkTask("Get upcoming assignments") {
 		allMarkerAssignments.filterNot { info =>
 			info.stages
 				.filter { s => s.stage == CM1ReleaseForMarking || s.stage == CM2ReleaseForMarking }
@@ -318,19 +328,19 @@ trait CourseworkHomepageMarkerAssignments extends TaskBenchmarking {
 	}
 
 	// Action required - assignments which need an action
-	private lazy val actionRequiredAssignments: Seq[MarkerAssignmentInfo] = benchmarkTask("Get action required assignments") {
-		allMarkerAssignments.diff(upcomingAssignments).diff(completedAssignments).filter { info =>
+	private lazy val markerActionRequiredAssignments: Seq[MarkerAssignmentInfo] = benchmarkTask("Get action required assignments") {
+		allMarkerAssignments.diff(markerUpcomingAssignments).diff(markerCompletedAssignments).filter { info =>
 			info.nextStages.nonEmpty
 		}
 	}
 
 	// No action required - Assignments that are in the workflow but aren't in need of an action at this stage
-	private lazy val noActionRequiredAssignments: Seq[MarkerAssignmentInfo] = benchmarkTask("Get no action required assignments") {
-		allMarkerAssignments.diff(upcomingAssignments).diff(completedAssignments).diff(actionRequiredAssignments)
+	private lazy val markerNoActionRequiredAssignments: Seq[MarkerAssignmentInfo] = benchmarkTask("Get no action required assignments") {
+		allMarkerAssignments.diff(markerUpcomingAssignments).diff(markerCompletedAssignments).diff(markerActionRequiredAssignments)
 	}
 
 	// Completed - Assignments finished
-	private lazy val completedAssignments: Seq[MarkerAssignmentInfo] = benchmarkTask("Get completed assignments") {
+	private lazy val markerCompletedAssignments: Seq[MarkerAssignmentInfo] = benchmarkTask("Get completed assignments") {
 		allMarkerAssignments.filter { info =>
 			info.stages.nonEmpty && info.stages.last.progress.forall(_.progress.completed)
 		}

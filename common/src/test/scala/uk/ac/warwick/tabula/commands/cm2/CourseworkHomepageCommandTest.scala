@@ -62,9 +62,10 @@ class CourseworkHomepageCommandTest extends TestBase with Mockito {
 		command.assessmentService.getAssignmentsWithSubmission("cuscav", Some(command.academicYear)) returns Seq(submitted1, submitted2)
 
 		val info: CourseworkHomepageCommand.CourseworkHomepageStudentInformation = command.studentInformation
-		info.unsubmittedAssignments should have size 2
-		info.inProgressAssignments should have size 2
-		info.pastAssignments should have size 2
+		info.actionRequiredAssignments should have size 2
+		info.noActionRequiredAssignments should have size 2
+		info.completedAssignments should have size 2
+		info.upcomingAssignments should have size 0
 	}}
 
 	@Test

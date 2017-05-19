@@ -181,7 +181,7 @@
 				</#local>
 			<#elseif !assignment.opened>
 				<#local submissionStatus>
-					<strong>Not open yet</strong>
+					<strong>Assignment open:</strong> <span class="use-tooltip" title="<@fmt.dateToWeek assignment.openDate />" data-html="true"><@fmt.date date=assignment.openDate /> - ${durationFormatter(assignment.openDate)}</span>
 				</#local>
 			<#elseif assignment.openEnded>
 				<#local submissionStatus>
