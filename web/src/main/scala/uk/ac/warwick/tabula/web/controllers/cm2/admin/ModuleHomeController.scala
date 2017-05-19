@@ -64,10 +64,13 @@ class ModuleHomeForYearController extends AbstractModuleHomeController {
 @Profile(Array("cm2Enabled"))
 @Controller
 @RequestMapping(Array("/${cm2.prefix}/admin/module/{module}", "/${cm2.prefix}/admin/module/{module}/**"))
-class ModuleHomeRedirectController extends CourseworkController {
+class ModuleHomeRedirectController extends CourseworkController
+	with AcademicYearScopedController
+	with AutowiringUserSettingsServiceComponent
+	with AutowiringMaintenanceModeServiceComponent {
 
 	@RequestMapping
 	def redirect(@PathVariable module: Module) =
-		Redirect(Routes.admin.module(mandatory(module)))
+		Redirect(Routes.admin.module(mandatory(module), retrieveActiveAcademicYear(None).getOrElse(AcademicYear.guessSITSAcademicYearByDate(DateTime.now))))
 
 }

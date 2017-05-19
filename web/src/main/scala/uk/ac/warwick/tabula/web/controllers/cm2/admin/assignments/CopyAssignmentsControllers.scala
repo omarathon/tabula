@@ -17,48 +17,56 @@ import uk.ac.warwick.tabula.web.controllers.cm2.CourseworkController
 
 import scala.collection.JavaConverters._
 
-abstract class AbstractCopyAssignmentsController extends CourseworkController {
+abstract class AbstractCopyAssignmentsController extends CourseworkController
+	with AcademicYearScopedController
+	with AutowiringUserSettingsServiceComponent
+	with AutowiringMaintenanceModeServiceComponent {
 
 	@ModelAttribute("academicYearChoices")
 	def academicYearChoices: JList[AcademicYear] =
 		AcademicYear.guessSITSAcademicYearByDate(DateTime.now).yearsSurrounding(0, 1).asJava
+
+	@ModelAttribute("activeAcademicYear")
+	override def activeAcademicYear(@PathVariable academicYear: AcademicYear): Option[AcademicYear] =
+		retrieveActiveAcademicYear(Option(academicYear))
 
 }
 
 
 @Profile(Array("cm2Enabled"))
 @Controller
-@RequestMapping(value = Array("/${cm2.prefix}/admin/module/{module}/copy-assignments"))
+@RequestMapping(value = Array("/${cm2.prefix}/admin/{module}/{academicYear:\\d{4}}/copy-assignments"))
 class CopyModuleAssignmentsController extends AbstractCopyAssignmentsController with AliveAssignmentsMap {
 
+	@ModelAttribute("activeAcademicYear")
+	override def activeAcademicYear(@PathVariable academicYear: AcademicYear): Option[AcademicYear] =
+		retrieveActiveAcademicYear(Option(academicYear))
+
 	@ModelAttribute("copyAssignmentsCommand")
-	def copyAssignmentsCommand(@PathVariable module: Module): CopyAssignmentsCommand.Command =
-		CopyAssignmentsCommand(mandatory(module))
+	def copyAssignmentsCommand(@PathVariable module: Module, @PathVariable academicYear: AcademicYear): CopyAssignmentsCommand.Command =
+		CopyAssignmentsCommand(mandatory(module), mandatory(academicYear))
 
 	@RequestMapping
-	def showForm(@PathVariable module: Module, @ModelAttribute("copyAssignmentsCommand") cmd: CopyAssignmentsCommand.Command): Mav = {
+	def showForm(@PathVariable module: Module, @ModelAttribute("copyAssignmentsCommand") cmd: CopyAssignmentsCommand.Command): Mav =
 		Mav("cm2/admin/modules/copy_assignments",
 			"title" -> module.name,
-			"cancel" -> Routes.admin.module(module),
+			"cancel" -> Routes.admin.module(module, cmd.academicYear),
 			"department" -> module.adminDepartment,
 			"map" -> moduleAssignmentMap(cmd.modules))
 			.crumbs(Breadcrumbs.Department(module.adminDepartment, cmd.academicYear))
-	}
+			.secondCrumbs(academicYearBreadcrumbs(cmd.academicYear)(Routes.admin.module.copyAssignments(module, _)): _*)
 
 	@RequestMapping(method = Array(POST))
 	def submit(@ModelAttribute("copyAssignmentsCommand") cmd: CopyAssignmentsCommand.Command, @PathVariable module: Module): Mav = {
 		cmd.apply()
-		Redirect(Routes.admin.module(module))
+		Redirect(Routes.admin.module(module, cmd.academicYear))
 	}
 
 }
 
 abstract class AbstractCopyDepartmentAssignmentsController extends AbstractCopyAssignmentsController with AliveAssignmentsMap
-	with AutowiringUserSettingsServiceComponent
-	with AutowiringModuleAndDepartmentServiceComponent
-	with AutowiringMaintenanceModeServiceComponent
 	with DepartmentScopedController
-	with AcademicYearScopedController {
+	with AutowiringModuleAndDepartmentServiceComponent {
 
 	override val departmentPermission: Permission = CopyAssignmentsCommand.AdminPermission
 
@@ -70,7 +78,7 @@ abstract class AbstractCopyDepartmentAssignmentsController extends AbstractCopyA
 		CopyAssignmentsCommand(mandatory(department), activeAcademicYear.getOrElse(AcademicYear.guessSITSAcademicYearByDate(DateTime.now)))
 
 	@RequestMapping
-	def showForm(@PathVariable department: Department, @ModelAttribute("copyAssignmentsCommand") cmd: CopyAssignmentsCommand.Command): Mav = {
+	def showForm(@PathVariable department: Department, @ModelAttribute("copyAssignmentsCommand") cmd: CopyAssignmentsCommand.Command): Mav =
 		Mav("cm2/admin/modules/copy_assignments",
 			"academicYear" -> cmd.academicYear,
 			"title" -> department.name,
@@ -78,8 +86,7 @@ abstract class AbstractCopyDepartmentAssignmentsController extends AbstractCopyA
 			"map" -> moduleAssignmentMap(cmd.modules),
 			"showSubHeadings" -> true)
 			.crumbs(Breadcrumbs.Department(department, cmd.academicYear))
-			.secondCrumbs(academicYearBreadcrumbs(cmd.academicYear)(year => Routes.admin.copyAssignments(department, year)): _*)
-	}
+			.secondCrumbs(academicYearBreadcrumbs(cmd.academicYear)(Routes.admin.copyAssignments(department, _)): _*)
 
 	@RequestMapping(method = Array(POST))
 	def submit(@ModelAttribute("copyAssignmentsCommand") cmd: CopyAssignmentsCommand.Command, @PathVariable department: Department): Mav = {

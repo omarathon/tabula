@@ -57,10 +57,10 @@ object Routes {
 				admin() + s"/department/${encoded(department.code)}/${encoded(academicYear.startYear.toString)}"
 		}
 		object module {
-			def apply(module: Module): String =
-				admin() + s"/${encoded(module.code)}"
 			def apply(module: Module, academicYear: AcademicYear): String =
 				admin() + s"/${encoded(module.code)}/${encoded(academicYear.startYear.toString)}"
+			def copyAssignments(module: Module, academicYear: AcademicYear): String =
+				apply(module, academicYear) + "/copy-assignments"
 		}
 
 		object moduleWithinDepartment {
@@ -83,7 +83,7 @@ object Routes {
 		}
 
 		object assignment {
-			def createAssignmentDetails(module: Module): String = admin() + s"/${encoded(module.code)}/assignments/new"
+			def createAssignmentDetails(module: Module, academicYear: AcademicYear): String = admin() + s"/${encoded(module.code)}/${encoded(academicYear.startYear.toString)}/assignments/new"
 			def editAssignmentDetails(assignment: Assignment): String = admin()  + s"/assignments/${encoded(assignment.id)}/edit"
 			def createOrEditFeedback(assignment: Assignment, createOrEditMode: String): String = admin() + s"/assignments/${encoded(assignment.id)}/${encoded(createOrEditMode)}/feedback"
 			def createOrEditStudents(assignment: Assignment, createOrEditMode: String): String = admin() + s"/assignments/${encoded(assignment.id)}/${encoded(createOrEditMode)}/students"

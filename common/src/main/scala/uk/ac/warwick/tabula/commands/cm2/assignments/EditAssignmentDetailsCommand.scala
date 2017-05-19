@@ -1,6 +1,7 @@
 package uk.ac.warwick.tabula.commands.cm2.assignments
 
 import org.springframework.validation.Errors
+import uk.ac.warwick.tabula.AcademicYear
 import uk.ac.warwick.tabula.commands._
 import uk.ac.warwick.tabula.commands.cm2.markingworkflows.EditMarkingWorkflowState
 import uk.ac.warwick.tabula.data.model._
@@ -61,8 +62,9 @@ trait EditAssignmentDetailsCommandState extends ModifyAssignmentDetailsCommandSt
 	self: AssessmentServiceComponent with UserLookupComponent with CM2MarkingWorkflowServiceComponent =>
 
 	def assignment: Assignment
-	val module: Module = assignment.module
-	val workflow: CM2MarkingWorkflow = assignment.cm2MarkingWorkflow
+	def academicYear: AcademicYear = assignment.academicYear
+	def module: Module = assignment.module
+	def workflow: CM2MarkingWorkflow = assignment.cm2MarkingWorkflow
 }
 
 

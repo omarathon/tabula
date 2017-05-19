@@ -514,7 +514,7 @@
 	</div>
 </#macro>
 
-<#macro admin_assignment_list module assignments expand_by_default=true>
+<#macro admin_assignment_list module assignments academicYear expand_by_default=true>
 	<#local id>module-${module.code}</#local>
 	<#local title><@fmt.module_name module /></#local>
 
@@ -523,7 +523,7 @@
 		<div id="${id}" class="striped-section admin-assignment-list<#if has_assignments> collapsible<#if expand_by_default> expanded</#if><#else> empty</#if>" data-name="${id}"
 			<#if has_assignments && !expand_by_default>
 				 data-populate=".striped-section-contents"
-				 data-href="<@routes.cm2.modulehome module />?${info.requestedUri.query!}"
+				 data-href="<@routes.cm2.modulehome module academicYear />?${info.requestedUri.query!}"
 				 data-name="${id}"
 			</#if>
 		>
@@ -542,7 +542,7 @@
 							</@fmt.permission_button>
 						</li>
 						<li>
-						<#local create_url><@routes.cm2.createassignmentdetails module /></#local>
+						<#local create_url><@routes.cm2.createassignmentdetails module academicYear /></#local>
 							<@fmt.permission_button
 								permission='Assignment.Create'
 								scope=module
@@ -552,7 +552,7 @@
 							</@fmt.permission_button>
 						</li>
 						<li>
-							<#local copy_url><@routes.cm2.copy_assignments_previous_module module /></#local>
+							<#local copy_url><@routes.cm2.copy_assignments_previous_module module academicYear /></#local>
 							<@fmt.permission_button
 								permission='Assignment.Create'
 								scope=module

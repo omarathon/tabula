@@ -10,7 +10,7 @@
 	<h4 class="with-related"><span class="muted">for</span> <@fmt.module_name module /></h4>
 </div>
 <div class="fix-area">
-	<#assign actionUrl><@routes.cm2.createassignmentdetails module /></#assign>
+	<#assign actionUrl><@routes.cm2.createassignmentdetails module academicYear /></#assign>
 	<@f.form method="post" action=actionUrl>
 		<@components.assignment_wizard 'details' module />
 		<#if command.prefilled>

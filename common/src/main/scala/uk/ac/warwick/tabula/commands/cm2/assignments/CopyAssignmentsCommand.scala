@@ -1,6 +1,6 @@
 package uk.ac.warwick.tabula.commands.cm2.assignments
 
-import org.joda.time.{DateTime, Duration}
+import org.joda.time.Duration
 import uk.ac.warwick.tabula.AcademicYear
 import uk.ac.warwick.tabula.JavaImports._
 import uk.ac.warwick.tabula.commands._
@@ -29,8 +29,8 @@ object CopyAssignmentsCommand {
 			with AutowiringAssessmentServiceComponent
 			with AutowiringAssessmentMembershipServiceComponent
 
-	def apply(module: Module): Command =
-		new CopyModuleAssignmentsCommandInternal(module)
+	def apply(module: Module, academicYear: AcademicYear): Command =
+		new CopyModuleAssignmentsCommandInternal(module, academicYear)
 			with ComposableCommand[Seq[Assignment]]
 			with CopyModuleAssignmentsPermissions
 			with CopyAssignmentsDescription
@@ -121,7 +121,7 @@ class CopyDepartmentAssignmentsCommandInternal(val department: Department, val a
 	self: AssessmentServiceComponent with AssessmentMembershipServiceComponent =>
 }
 
-class CopyModuleAssignmentsCommandInternal(val module: Module)
+class CopyModuleAssignmentsCommandInternal(val module: Module, val academicYear: AcademicYear)
 	extends AbstractCopyAssignmentsCommandInternal with CopyModuleAssignmentsState {
 	self: AssessmentServiceComponent with AssessmentMembershipServiceComponent =>
 }
@@ -155,8 +155,6 @@ trait CopyDepartmentAssignmentsState extends CopyAssignmentsState {
 trait CopyModuleAssignmentsState extends CopyAssignmentsState {
 	def module: Module
 	def modules: Seq[Module] = Seq(module)
-
-	var academicYear: AcademicYear = AcademicYear.guessSITSAcademicYearByDate(DateTime.now)
 }
 
 trait CopyAssignmentsDescription extends Describable[Result] {
