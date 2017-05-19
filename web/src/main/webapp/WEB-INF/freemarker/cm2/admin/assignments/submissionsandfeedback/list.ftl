@@ -88,7 +88,8 @@
 			</div>
 		</div>
 	</div>
-
+	<#assign currentView = "table" />
+	<#include "_action-bar.ftl" />
 
 	<div class="filter-results admin-assignment-submission-list">
 		<i class="fa fa-spinner fa-spin"></i> Loading&hellip;

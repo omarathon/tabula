@@ -132,3 +132,25 @@ TODO grab values from the Routes object in code, as that's pretty equivalent and
 <#macro submitToTurnitinStatus assignment><@_u page="/admin/assignments/${assignment.id}/turnitin/status"/></#macro>
 <#macro assignmentSubmissionSummary assignment><@_u page="/admin/assignments/${assignment.id}/summary"/></#macro>
 <#macro assignmentSubmissionTable assignment><@_u page="/admin/assignments/${assignment.id}/table"/></#macro>
+
+<#macro submissionsZip assignment><@_u page="/admin/assignments/${assignment.id}/submissions.zip" /></#macro>
+<#macro submissionsPdf assignment><@_u page="/admin/assignments/${assignment.id}/submissions.pdf" /></#macro>
+<#macro assignmentFeedbackZip assignment><@_u page="/admin/assignments/${assignment.id}/feedback.zip" /></#macro>
+
+<#macro deleteSubmissions assignment><@_u page="/admin/assignments/${assignment.id}/submissionsandfeedback" /></#macro>
+<#macro downloadFeedbackTemplates assignment><@_u page="/admin/assignments/${assignment.id}/feedback-templates.zip" /></#macro>
+<#macro publishFeedback assignment><@_u page="/admin/assignments/${assignment.id}/publish'/>" /></#macro>
+<#macro deleteFeedback assignment><@_u page="/admin/assignments/${assignment.id}/submissionsandfeedback/delete" /></#macro>
+<#macro exportCsv assignment><@_u page="/admin/assignments/${assignment.id}/export.csv" /></#macro>
+<#macro exportXml assignment><@_u page="/admin/assignments/${assignment.id}/export.xml" /></#macro>
+<#macro exportXlsx assignment><@_u page="/admin/assignments/${assignment.id}/export.xlsx" /></#macro>
+<#macro addMarks assignment><@_u page="/admin/assignments/${assignment.id}/marks" /></#macro>
+<#macro addFeedback assignment><@_u page="/admin/assignments/${assignment.id}/feedback/batch" /></#macro>
+
+
+
+<!--Urls to support legacy cm1 based workflow links -->
+<#macro assignMarkers assignment><@url context='/cm1' page="/admin/module/${assignment.module.code}/assignments/${assignment.id}/assign-markers" /></#macro>
+<#macro releaseForMarking assignment><@url context='/cm1' page="/admin/module/${assignment.module.code}/assignments/${assignment.id}/submissionsandfeedback/release-submissions" /></#macro>
+<#macro returnForMarking assignment><@url context='/cm1' page="/admin/module/${assignment.module.code}/assignments/${assignment.id}/submissionsandfeedback/return-submissions" /></#macro>
+
