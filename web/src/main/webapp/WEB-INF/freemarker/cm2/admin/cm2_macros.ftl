@@ -104,7 +104,7 @@
 				</a>
 				<ul class="dropdown-menu">
 					<li>
-						<#assign setup_Url><@routes.cm2.create_sitsassignments department /></#assign>
+						<#assign setup_Url><@routes.cm2.create_sitsassignments department academicYear /></#assign>
 						<@fmt.permission_button
 							permission='Assignment.ImportFromExternalSystem'
 							scope=department

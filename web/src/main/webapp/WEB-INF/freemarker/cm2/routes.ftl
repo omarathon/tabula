@@ -11,7 +11,7 @@ TODO grab values from the Routes object in code, as that's pretty equivalent and
 
 <#macro home academicYear="">
 	<#if academicYear?has_content>
-		<@_u page="/${academicYear.startYear}" />
+		<@_u page="/${academicYear.startYear?c}" />
 	<#else>
 		<@_u page="/" />
 	</#if>
@@ -19,21 +19,21 @@ TODO grab values from the Routes object in code, as that's pretty equivalent and
 
 <#macro depthome module academicYear="">
 	<#if academicYear?has_content>
-		<@_u page="/admin/department/${module.adminDepartment.code}/${academicYear.startYear}/?moduleFilters=Module(${module.code})#module-${module.code}" />
+		<@_u page="/admin/department/${module.adminDepartment.code}/${academicYear.startYear?c}/?moduleFilters=Module(${module.code})#module-${module.code}" />
 	<#else>
 		<@_u page="/admin/department/${module.adminDepartment.code}/?moduleFilters=Module(${module.code})#module-${module.code}" />
 	</#if>
 </#macro>
 <#macro departmenthome department academicYear="">
 	<#if academicYear?has_content>
-		<@_u page="/admin/department/${department.code}/${academicYear.startYear}" />
+		<@_u page="/admin/department/${department.code}/${academicYear.startYear?c}" />
 	<#else>
 		<@_u page="/admin/department/${department.code}" />
 	</#if>
 </#macro>
 <#macro modulehome module academicYear="">
 	<#if academicYear?has_content>
-		<@_u page="/admin/${module.code}/${academicYear.startYear}" />
+		<@_u page="/admin/${module.code}/${academicYear.startYear?c}" />
 	<#else>
 		<@_u page="/admin/${module.code}" />
 	</#if>
@@ -75,8 +75,14 @@ TODO grab values from the Routes object in code, as that's pretty equivalent and
 <#macro assignmentreview assignment><@_u page="/admin/assignments/${assignment.id}/review" /></#macro>
 <#macro assignmentrequestaccess assignment><@_u page="/submission/${assignment.id}/request-access"/></#macro>
 
-<#macro create_sitsassignments department><@_u page="/admin/department/${department.code}/setup-assignments" /></#macro>
-<#macro assignmentSharedOptions department><@_u page="/admin/department/${department.code}/shared-options" /></#macro>
+<#macro create_sitsassignments department academicYear="">
+	<#if academicYear?has_content>
+		<@_u page="/admin/department/${department.code}/${academicYear.startYear?c}/setup-assignments" />
+	<#else>
+		<@_u page="/admin/department/${department.code}/setup-assignments" />
+	</#if>
+</#macro>
+<#macro assignmentSharedOptions><@_u page="/admin/shared-options" /></#macro>
 
 <#macro copy_assignments_previous department><@_u page="/admin/department/${department.code}/copy-assignments" /></#macro>
 <#macro copy_assignments_previous_module module><@_u page="/admin/${module.code}/copy-assignments" /></#macro>

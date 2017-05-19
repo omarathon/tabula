@@ -2,6 +2,7 @@ package uk.ac.warwick.tabula.cm2.web
 
 import uk.ac.warwick.spring.Wire
 import uk.ac.warwick.tabula.AcademicYear
+import uk.ac.warwick.tabula.cm2.web.Routes.admin.department
 import uk.ac.warwick.tabula.data.model._
 import uk.ac.warwick.tabula.data.model.forms.Extension
 import uk.ac.warwick.tabula.data.model.markingworkflow.CM2MarkingWorkflow
@@ -35,13 +36,15 @@ object Routes {
 	object admin {
 		def apply() = s"$context/admin"
 		def feedbackTemplates(department: Department): String = apply() + s"/department/${encoded(department.code)}/settings/feedback-templates/"
-		def extensionSettings (department: Department): String = apply() + "/department/%s/settings/extensions" format encoded(department.code)
+		def extensionSettings(department: Department): String = apply() + "/department/%s/settings/extensions" format encoded(department.code)
 		object extensions {
 			def apply(): String = admin() + "/extensions"
 			def detail(extension: Extension): String = extensions() + s"/${extension.id}/detail/"
 			def modify(extension: Extension): String = extensions() + s"/${extension.id}/update/"
 		}
-		def feedbackReports (department: Department): String = apply() + "/department/%s/reports/feedback/" format encoded(department.code)
+		def feedbackReports(department: Department): String = apply() + "/department/%s/reports/feedback/" format encoded(department.code)
+		def setupSitsAssignments(dept: Department, academicYear: AcademicYear): String =
+			department(dept, academicYear) + "/setup-assignments"
 
 		object department {
 			def apply(department: Department): String =
