@@ -30,6 +30,11 @@ object CourseworkBreadcrumbs {
 			Department(dept, Some(academicYear), active = false)
 		def active(dept: model.Department, academicYear: AcademicYear): Department =
 			Department(dept, Some(academicYear), active = true)
+
+		def apply(assignment: model.Assignment): Department =
+			apply(assignment.module.adminDepartment, assignment.academicYear)
+		def active(assignment: model.Assignment): Department =
+			active(assignment.module.adminDepartment, assignment.academicYear)
 	}
 
 	case class Assignment(assignment: model.Assignment, override val active: Boolean = false) extends BreadCrumb {
