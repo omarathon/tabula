@@ -25,7 +25,7 @@ class AssignmentSharedOptionsController extends CourseworkController {
 	@ModelAttribute("command")
 	def model(department: Department) = new SharedAssignmentPropertiesForm
 
-	@RequestMapping(method = Array(GET))
+	@RequestMapping
 	def showForm(@ModelAttribute form: SharedAssignmentPropertiesForm, errors: Errors, @PathVariable department: Department): Mav = {
 		mav(form, department)
 	}

@@ -23,7 +23,7 @@ abstract class AbstractAssignmentStudentsController extends AbstractAssignmentCo
 	def modifyAssignmentFeedbackCommand(@PathVariable assignment: Assignment) =
 		ModifyAssignmentFeedbackCommand(mandatory(assignment))
 
-	def showForm(form: ModifyAssignmentStudentsCommand, mode: String): Mav = {
+	def showForm(form: ModifyAssignmentStudentsCommand, assignment: Assignment, mode: String): Mav = {
 		val module = form.module
 		Mav("cm2/admin/assignments/assignment_student_details",
 			"department" -> module.adminDepartment,
@@ -32,13 +32,13 @@ abstract class AbstractAssignmentStudentsController extends AbstractAssignmentCo
 			"availableUpstreamGroups" -> form.availableUpstreamGroups,
 			"assessmentGroups" -> form.assessmentGroups,
 			"academicYear" -> form.assignment.academicYear,
-			"mode" -> mode
-		)
+			"mode" -> mode)
+			.crumbs(Breadcrumbs.Department(assignment.module.adminDepartment, assignment.academicYear), Breadcrumbs.Assignment(assignment))
 	}
 
-	def submit(cmd: ModifyAssignmentStudentsCommand, errors: Errors, path: String, mode: String) = {
+	def submit(cmd: ModifyAssignmentStudentsCommand, errors: Errors, assignment: Assignment, path: String, mode: String) = {
 		cmd.afterBind()
-		if (errors.hasErrors) showForm(cmd, mode)
+		if (errors.hasErrors) showForm(cmd, assignment, mode)
 		else {
 			cmd.apply()
 			RedirectForce(path)
@@ -64,39 +64,39 @@ class ModifyAssignmentStudentsController extends AbstractAssignmentStudentsContr
 		@PathVariable("assignment") assignment: Assignment,
 		@ModelAttribute("command") cmd: ModifyAssignmentStudentsCommand
 	): Mav =
-		getStudents(cmd, createMode)
+		getStudents(cmd, assignment, createMode)
 
 	@RequestMapping(method = Array(GET), value = Array("/edit/students"))
 	def formEdit(
 		@PathVariable("assignment") assignment: Assignment,
 		@ModelAttribute("command") cmd: ModifyAssignmentStudentsCommand
 	): Mav =
-		getStudents(cmd, editMode)
+		getStudents(cmd, assignment, editMode)
 
 
-	private def getStudents(cmd: ModifyAssignmentStudentsCommand, mode: String): Mav = {
+	private def getStudents(cmd: ModifyAssignmentStudentsCommand, assignment: Assignment, mode: String): Mav = {
 		cmd.afterBind()
 		cmd.populate()
-		showForm(cmd, mode)
+		showForm(cmd, assignment, mode)
 	}
 
 	@RequestMapping(method = Array(POST), value = Array("/new/students"), params = Array(ManageAssignmentMappingParameters.createAndAddMarkers, "action!=refresh", "action!=update"))
 	def submitAndAddFeedback(@Valid @ModelAttribute("command") cmd: ModifyAssignmentStudentsCommand, errors: Errors, @PathVariable assignment: Assignment): Mav =
-		submit(cmd, errors, Routes.admin.assignment.createOrEditMarkers(assignment, createMode), createMode)
+		submit(cmd, errors, assignment, Routes.admin.assignment.createOrEditMarkers(assignment, createMode), createMode)
 
 	@RequestMapping(method = Array(POST), value = Array("/new/students"), params = Array(ManageAssignmentMappingParameters.createAndAddStudents, "action!=refresh", "action!=update"))
-	def saveAndExit(@Valid @ModelAttribute("command") cmd: ModifyAssignmentStudentsCommand, errors: Errors): Mav = {
-		submit(cmd, errors, Routes.home, createMode)
+	def saveAndExit(@Valid @ModelAttribute("command") cmd: ModifyAssignmentStudentsCommand, errors: Errors, @PathVariable assignment: Assignment): Mav = {
+		submit(cmd, errors, assignment, Routes.home, createMode)
 	}
 
 	@RequestMapping(method = Array(POST), value = Array("/edit/students"), params = Array(ManageAssignmentMappingParameters.editAndAddMarkers, "action!=refresh", "action!=update"))
 	def submitAndAddFeedbackForEdit(@Valid @ModelAttribute("command") cmd: ModifyAssignmentStudentsCommand, errors: Errors, @PathVariable assignment: Assignment): Mav =
-		submit(cmd, errors, Routes.admin.assignment.createOrEditMarkers(assignment, editMode), editMode)
+		submit(cmd, errors, assignment, Routes.admin.assignment.createOrEditMarkers(assignment, editMode), editMode)
 
 
 	@RequestMapping(method = Array(POST), value = Array("/edit/students"), params = Array(ManageAssignmentMappingParameters.editAndAddStudents, "action!=refresh", "action!=update"))
-	def saveAndExitForEdit(@Valid @ModelAttribute("command") cmd: ModifyAssignmentStudentsCommand, errors: Errors): Mav = {
-		submit(cmd, errors, Routes.home, editMode)
+	def saveAndExitForEdit(@Valid @ModelAttribute("command") cmd: ModifyAssignmentStudentsCommand, errors: Errors, @PathVariable assignment: Assignment): Mav = {
+		submit(cmd, errors, assignment, Routes.home, editMode)
 	}
 
 }

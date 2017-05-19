@@ -40,6 +40,7 @@ class AssignmentEnrolmentController extends CourseworkController {
 			"availableUpstreamGroups" -> form.availableUpstreamGroups,
 			"linkedUpstreamAssessmentGroups" -> form.linkedUpstreamAssessmentGroups,
 			"assessmentGroups" -> form.assessmentGroups)
+			.crumbs(Breadcrumbs.Department(assignment.module.adminDepartment, assignment.academicYear), Breadcrumbs.Assignment(assignment))
 			.noLayout()
 	}
 

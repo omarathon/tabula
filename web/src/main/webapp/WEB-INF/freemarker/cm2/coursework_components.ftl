@@ -594,58 +594,32 @@
 	<div class="item-info admin-assignment-${assignment.id}">
 		<div class="clearfix">
 			<div class="pull-right">
-				<div class="btn-group">
-					<a class="btn btn-default btn-xs dropdown-toggle" data-toggle="dropdown">
-						Actions
-						<span class="caret"></span>
-					</a>
-					<ul class="dropdown-menu pull-right">
-						<li>
-							<#local edit_url><@routes.cm2.editassignmentdetails assignment /></#local>
-							<@fmt.permission_button
-								permission='Assignment.Update'
-								scope=assignment
-								action_descr='edit assignment properties'
-								href=edit_url>
-								Edit
-							</@fmt.permission_button>
-						</li>
-
-						<li>
-							<#if assignment.collectSubmissions>
-								<#local sub_caption="Manage assignment's submissions" />
-							<#else>
-								<#local sub_caption="Manage assignment's feedback" />
-							</#if>
-							<#local edit_url><@routes.cm2.assignmentsubmissionsandfeedback assignment /></#local>
-							<@fmt.permission_button
-								permission='AssignmentFeedback.Read'
-								scope=assignment
-								action_descr=sub_caption?lower_case
-								href=edit_url>
-									${sub_caption}
-							</@fmt.permission_button>
-						</li>
-
-						<li>
-							<#if can.do('Extension.Update', assignment)>
-								<#local ext_caption="Manage assignment's extensions" />
-							<#else>
-								<#local ext_caption="View assignment's extensions" />
-							</#if>
-							<#local ext_url><@routes.cm2.assignmentextensions assignment /></#local>
-							<@fmt.permission_button
-								permission='Extension.Read'
-								scope=assignment
-								action_descr=ext_caption?lower_case
-								href=ext_url>
-									${ext_caption}
-							</@fmt.permission_button>
-						</li>
-					</ul>
-				</div>
+				<#local edit_url><@routes.cm2.editassignmentdetails assignment /></#local>
+				<@fmt.permission_button
+					classes='btn btn-default btn-xs'
+					permission='Assignment.Update'
+					scope=assignment
+					action_descr='edit assignment properties'
+					href=edit_url>
+					Edit assignment
+				</@fmt.permission_button>
 			</div>
-			<h5 class="assignment-name">${assignment.name}</h5>
+
+			<h5 class="assignment-name">
+				<#if assignment.collectSubmissions>
+					<#local sub_caption="Manage assignment's submissions" />
+				<#else>
+					<#local sub_caption="Manage assignment's feedback" />
+				</#if>
+				<#local edit_url><@routes.cm2.assignmentsubmissionsandfeedback assignment /></#local>
+				<@fmt.permission_button
+					permission='AssignmentFeedback.Read'
+					scope=assignment
+					action_descr=sub_caption?lower_case
+					href=edit_url>
+						${assignment.name}
+				</@fmt.permission_button>
+			</h5>
 		</div>
 
 		<div class="row">
@@ -693,7 +667,22 @@
 						</#if>
 
 						<#if assignment.extensionsPossible>
-							<li><strong>Extension requests:</strong> ${assignment.countUnapprovedExtensions}</li>
+							<li>
+								<strong>Extension requests:</strong>
+								<#if can.do('Extension.Update', assignment)>
+									<#local ext_caption="Manage assignment's extensions" />
+								<#else>
+									<#local ext_caption="View assignment's extensions" />
+								</#if>
+								<#local ext_url><@routes.cm2.assignmentextensions assignment /></#local>
+								<@fmt.permission_button
+									permission='Extension.Read'
+									scope=assignment
+									action_descr=ext_caption?lower_case
+									href=ext_url>
+										${assignment.countUnapprovedExtensions}
+								</@fmt.permission_button>
+							</li>
 						</#if>
 					</ul>
 				</#if>

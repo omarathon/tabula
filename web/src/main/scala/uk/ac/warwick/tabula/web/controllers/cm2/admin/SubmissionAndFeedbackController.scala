@@ -83,7 +83,7 @@ class SubmissionAndFeedbackController extends AbstractSubmissionAndFeedbackContr
 					"module" -> assignment.module,
 					"department" -> assignment.module.adminDepartment,
 					"academicYear" -> academicYear
-				)
+				).crumbs(Breadcrumbs.Department(assignment.module.adminDepartment, assignment.academicYear), Breadcrumbs.Assignment(assignment, active = true))
 
 			} else {
 
@@ -93,7 +93,7 @@ class SubmissionAndFeedbackController extends AbstractSubmissionAndFeedbackContr
 					"department" -> assignment.module.adminDepartment,
 					"academicYear" -> academicYear,
 					"results" -> results
-				)
+				).crumbs(Breadcrumbs.Department(assignment.module.adminDepartment, assignment.academicYear), Breadcrumbs.Assignment(assignment, active = true))
 			}
 		}
 	}
@@ -128,7 +128,7 @@ class SubmissionAndFeedbackTableController extends AbstractSubmissionAndFeedback
 				"allPlagiarismFilters" -> SubmissionAndFeedbackInfoFilters.PlagiarismStatuses.allPlagiarismStatuses.filter(_.apply(assignment)),
 				"allStatusFilters" -> SubmissionAndFeedbackInfoFilters.Statuses.allStatuses.filter(_.apply(assignment)),
 				"academicYear" -> academicYear
-			)
+			).crumbs(Breadcrumbs.Department(assignment.module.adminDepartment, assignment.academicYear), Breadcrumbs.Assignment(assignment, active = true))
 		}
 	}
 

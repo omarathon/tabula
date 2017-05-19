@@ -4,8 +4,8 @@
 <#import "*/cm2_macros.ftl" as cm2 />
 
 <#escape x as x?html>
-	<@cm2.headerMenu department academicYear />
 	<h1>${assignment.name} (${assignment.module.code?upper_case})</h1>
+
 	<#if assignment.openEnded>
 		<p class="dates">
 			<@fmt.interval assignment.openDate />, never closes

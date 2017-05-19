@@ -25,34 +25,34 @@ class EditAssignmentDetailsController extends AbstractAssignmentController {
 		EditAssignmentDetailsCommand(mandatory(assignment))
 
 	@RequestMapping(method = Array(GET))
-	def form(@ModelAttribute("command") cmd: EditAssignmentDetailsCommand): Mav = {
+	def form(@ModelAttribute("command") cmd: EditAssignmentDetailsCommand, @PathVariable assignment: Assignment): Mav = {
 		cmd.populate()
-		showForm(cmd)
+		showForm(cmd, assignment)
 	}
 
-	def showForm(cmd: EditAssignmentDetailsCommand): Mav = {
-		val module = cmd.module
+	def showForm(cmd: EditAssignmentDetailsCommand, @PathVariable assignment: Assignment): Mav = {
+		val module = assignment.module
 		Mav("cm2/admin/assignments/edit_assignment_details",
 			"department" -> module.adminDepartment,
 			"module" -> module,
 			"academicYear" -> cmd.academicYear,
 			"reusableWorkflows" -> cmd.availableWorkflows,
 			"workflow" -> cmd.workflow,
-			"canDeleteMarkers" -> cmd.workflow.canDeleteMarkers
-		)
+			"canDeleteMarkers" -> cmd.workflow.canDeleteMarkers)
+			.crumbs(Breadcrumbs.Department(assignment.module.adminDepartment, assignment.academicYear), Breadcrumbs.Assignment(assignment))
 	}
 
 	@RequestMapping(method = Array(POST), params = Array(ManageAssignmentMappingParameters.editAndAddFeedback, "action!=refresh", "action!=update, action=submit"))
 	def submitAndAddFeedback(@Valid @ModelAttribute("command") cmd: EditAssignmentDetailsCommand, errors: Errors, @PathVariable assignment: Assignment): Mav =
-		submit(cmd, errors, Routes.admin.assignment.createOrEditFeedback(assignment, editMode))
+		submit(cmd, errors, assignment, Routes.admin.assignment.createOrEditFeedback(assignment, editMode))
 
 	@RequestMapping(method = Array(POST), params = Array(ManageAssignmentMappingParameters.editAndEditDetails, "action!=refresh", "action!=update"))
-	def saveAndExit(@ModelAttribute("command") cmd: EditAssignmentDetailsCommand, errors: Errors): Mav = {
-		submit(cmd, errors, Routes.home)
+	def saveAndExit(@ModelAttribute("command") cmd: EditAssignmentDetailsCommand, errors: Errors, @PathVariable assignment: Assignment): Mav = {
+		submit(cmd, errors, assignment, Routes.home)
 	}
 
-	private def submit(cmd: EditAssignmentDetailsCommand, errors: Errors, path: String) = {
-		if (errors.hasErrors) showForm(cmd)
+	private def submit(cmd: EditAssignmentDetailsCommand, errors: Errors, assignment: Assignment, path: String) = {
+		if (errors.hasErrors) showForm(cmd, assignment)
 		else {
 			cmd.apply()
 			RedirectForce(path)

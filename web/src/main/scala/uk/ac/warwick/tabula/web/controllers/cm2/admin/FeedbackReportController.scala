@@ -40,22 +40,27 @@ class FeedbackReportController extends CourseworkController
 		FeedbackReportCommand(mandatory(department), user)
 
 	@RequestMapping(params = Array("!jobId"))
-	def requestReport(): Mav = Mav("cm2/admin/assignments/feedbackreport/report_range")
+	def requestReport(@PathVariable department: Department): Mav =
+		Mav("cm2/admin/assignments/feedbackreport/report_range")
+			.crumbs(Breadcrumbs.Department(department))
 
 	@RequestMapping(method = Array(POST), params = Array("!jobId"))
-	def generateReport(@Valid @ModelAttribute("feedbackReportCommand") cmd: FeedbackReportCommand.Command, errors: Errors): Mav = {
+	def generateReport(@Valid @ModelAttribute("feedbackReportCommand") cmd: FeedbackReportCommand.Command, errors: Errors, @PathVariable department: Department): Mav = {
 		if (errors.hasErrors) {
-			requestReport()
+			requestReport(department)
 		} else {
 			val job = cmd.apply()
 			Mav("cm2/admin/assignments/feedbackreport/progress", "job" -> job)
+				.crumbs(Breadcrumbs.Department(department))
 		}
 	}
 
 	@RequestMapping(params = Array("jobId"))
-	def checkProgress(@RequestParam jobId: String): Mav = {
+	def checkProgress(@RequestParam jobId: String, @PathVariable department: Department): Mav = {
 		val job = jobService.getInstance(jobId)
-		Mav("cm2/admin/assignments/feedbackreport/progress", "job" -> job).noLayoutIf(ajax)
+		Mav("cm2/admin/assignments/feedbackreport/progress", "job" -> job)
+			.crumbs(Breadcrumbs.Department(department))
+			.noLayoutIf(ajax)
 	}
 
 }

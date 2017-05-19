@@ -104,16 +104,6 @@
 				</a>
 				<ul class="dropdown-menu">
 					<li>
-						<#assign manage_url><@routes.cm2.departmenthome department academicYear /></#assign>
-						<@fmt.permission_button
-							permission='Module.ManageAssignments'
-							scope=department
-							action_descr='manage assignments'
-							href=manage_url>
-								View all assignments
-						</@fmt.permission_button>
-					</li>
-					<li>
 						<#assign setup_Url><@routes.cm2.create_sitsassignments department /></#assign>
 						<@fmt.permission_button
 							permission='Assignment.ImportFromExternalSystem'

@@ -35,8 +35,8 @@ class ModifyAssignmentMarkersSmallGroupsController extends AbstractAssignmentCon
 			"allocations" -> allocations,
 			"allocationOrder" -> workflow.allocationOrder,
 			"stageNames" -> workflow.allStages.groupBy(_.roleName).mapValues(_.map(_.name)),
-			"mode" -> mode
-		)
+			"mode" -> mode)
+			.crumbs(Breadcrumbs.Department(assignment.module.adminDepartment, assignment.academicYear), Breadcrumbs.Assignment(assignment))
 	}
 
 	@RequestMapping(method = Array(GET, HEAD), value = Array("new/markers/smallgroups"))

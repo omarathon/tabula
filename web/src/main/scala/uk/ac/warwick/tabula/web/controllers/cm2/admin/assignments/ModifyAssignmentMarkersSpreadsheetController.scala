@@ -43,8 +43,8 @@ class ModifyAssignmentMarkersSpreadsheetController extends AbstractAssignmentCon
 			"module" -> module,
 			"department" -> module.adminDepartment,
 			"fileTypes" -> AssignMarkersBySpreadsheetCommand.AcceptedFileExtensions,
-			"mode" -> mode
-		)
+			"mode" -> mode)
+			.crumbs(Breadcrumbs.Department(assignment.module.adminDepartment, assignment.academicYear), Breadcrumbs.Assignment(assignment))
 	}
 
 	@RequestMapping(method = Array(GET, HEAD), value=Array("new/markers/template"))
@@ -83,8 +83,8 @@ class ModifyAssignmentMarkersSpreadsheetController extends AbstractAssignmentCon
 			"allocationPreview" -> allocationPreview,
 			"allocationOrder" -> workflow.allocationOrder,
 			"unallocatedStudents" -> unallocatedStudents,
-			"mode" -> mode
-		)
+			"mode" -> mode)
+			.crumbs(Breadcrumbs.Department(assignment.module.adminDepartment, assignment.academicYear), Breadcrumbs.Assignment(assignment))
 	}
 
 	@RequestMapping(method = Array(POST), value=Array("new/markers/template"), params = Array("preview"))

@@ -18,11 +18,11 @@ abstract class AbstractAssignmentSubmissionsController extends AbstractAssignmen
 		ModifyAssignmentSubmissionsCommand(mandatory(assignment))
 
 	def showForm(form: ModifyAssignmentSubmissionsCommand, mode: String): Mav = {
-		val module = form.assignment.module
+		val assignment = form.assignment
 		Mav("cm2/admin/assignments/assignment_submissions_details",
-			"module" -> module,
-			"mode" -> mode
-		)
+			"module" -> assignment.module,
+			"mode" -> mode)
+			.crumbs(Breadcrumbs.Department(assignment.module.adminDepartment, assignment.academicYear), Breadcrumbs.Assignment(assignment))
 	}
 
 	def submit(cmd: ModifyAssignmentSubmissionsCommand, errors: Errors, path: String, mode: String): Mav = {

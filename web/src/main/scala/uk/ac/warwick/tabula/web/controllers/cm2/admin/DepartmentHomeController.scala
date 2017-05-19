@@ -45,8 +45,9 @@ abstract class AbstractDepartmentHomeController
 			"allModuleFilters" -> AssignmentInfoFilters.allModuleFilters(command.allModulesWithPermission.sortBy(_.code)),
 			"allWorkflowTypeFilters" -> AssignmentInfoFilters.allWorkflowTypeFilters,
 			"allStatusFilters" -> AssignmentInfoFilters.Status.all,
-			"academicYear" -> command.academicYear
-		).secondCrumbs(academicYearBreadcrumbs(command.academicYear)(Routes.cm2.admin.department(department, _)): _*)
+			"academicYear" -> command.academicYear)
+			.crumbs(Breadcrumbs.Department.active(department, command.academicYear))
+			.secondCrumbs(academicYearBreadcrumbs(command.academicYear)(Routes.cm2.admin.department(department, _)): _*)
 
 	@RequestMapping
 	def homeAjax(@ModelAttribute("command") command: DepartmentCommand): Mav =

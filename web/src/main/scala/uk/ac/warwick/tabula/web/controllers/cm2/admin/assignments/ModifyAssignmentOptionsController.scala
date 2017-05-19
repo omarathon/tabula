@@ -23,18 +23,18 @@ abstract class AbstractAssignmentOptionsController extends AbstractAssignmentCon
 	def modifyAssignmentFeedbackCommand(@PathVariable assignment: Assignment) =
 		ModifyAssignmentOptionsCommand(mandatory(assignment))
 
-	def showForm(form: ModifyAssignmentOptionsCommand, mode: String): Mav = {
+	def showForm(form: ModifyAssignmentOptionsCommand, assignment: Assignment, mode: String): Mav = {
 		val module = form.assignment.module
 		Mav("cm2/admin/assignments/assignment_options_details",
 			"module" -> module,
 			"mode" -> mode,
-			"turnitinFileSizeLimit" -> TurnitinLtiService.maxFileSizeInMegabytes
-		)
+			"turnitinFileSizeLimit" -> TurnitinLtiService.maxFileSizeInMegabytes)
+			.crumbs(Breadcrumbs.Department(assignment.module.adminDepartment, assignment.academicYear), Breadcrumbs.Assignment(assignment))
 	}
 
-	def submit(cmd: ModifyAssignmentOptionsCommand, errors: Errors, path: String, mode: String): Mav = {
+	def submit(cmd: ModifyAssignmentOptionsCommand, errors: Errors, assignment: Assignment, path: String, mode: String): Mav = {
 		if (errors.hasErrors) {
-			showForm(cmd, mode)
+			showForm(cmd, assignment, mode)
 		} else {
 			cmd.apply()
 			Redirect(path)
@@ -58,7 +58,7 @@ class ModifyAssignmentOptionsController extends AbstractAssignmentOptionsControl
 		@ModelAttribute("command") cmd: ModifyAssignmentOptionsCommand
 	): Mav = {
 		cmd.populate()
-		showForm(cmd, createMode)
+		showForm(cmd, assignment, createMode)
 	}
 
 	@RequestMapping(method = Array(GET), value = Array("/edit/options"))
@@ -67,23 +67,23 @@ class ModifyAssignmentOptionsController extends AbstractAssignmentOptionsControl
 		@ModelAttribute("command") cmd: ModifyAssignmentOptionsCommand
 	): Mav = {
 		cmd.populate()
-		showForm(cmd, editMode)
+		showForm(cmd, assignment, editMode)
 	}
 
 	@RequestMapping(method = Array(POST), value = Array("/new/options"), params = Array(ManageAssignmentMappingParameters.reviewAssignment, "action!=refresh", "action!=update"))
 	def submitAndAddOptions(@Valid @ModelAttribute("command") cmd: ModifyAssignmentOptionsCommand, errors: Errors, @PathVariable assignment: Assignment): Mav =
-		submit(cmd, errors, Routes.admin.assignment.reviewAssignment(assignment), createMode)
+		submit(cmd, errors, assignment, Routes.admin.assignment.reviewAssignment(assignment), createMode)
 
 	@RequestMapping(method = Array(POST), value = Array("/new/options"), params = Array(ManageAssignmentMappingParameters.createAndAddOptions, "action!=refresh", "action!=update"))
-	def saveAndExit(@Valid @ModelAttribute("command") cmd: ModifyAssignmentOptionsCommand, errors: Errors): Mav =
-		submit(cmd, errors, Routes.home, createMode)
+	def saveAndExit(@Valid @ModelAttribute("command") cmd: ModifyAssignmentOptionsCommand, errors: Errors, @PathVariable assignment: Assignment): Mav =
+		submit(cmd, errors, assignment, Routes.home, createMode)
 
 	@RequestMapping(method = Array(POST), value = Array("/edit/options"), params = Array(ManageAssignmentMappingParameters.reviewAssignment, "action!=refresh", "action!=update"))
 	def submitAndAddOptionsForEdit(@Valid @ModelAttribute("command") cmd: ModifyAssignmentOptionsCommand, errors: Errors, @PathVariable assignment: Assignment): Mav =
-		submit(cmd, errors, Routes.admin.assignment.reviewAssignment(assignment), editMode)
+		submit(cmd, errors, assignment, Routes.admin.assignment.reviewAssignment(assignment), editMode)
 
 	@RequestMapping(method = Array(POST), value = Array("/edit/options"), params = Array(ManageAssignmentMappingParameters.editAndAddOptions, "action!=refresh", "action!=update"))
-	def saveAndExitForEdit(@Valid @ModelAttribute("command") cmd: ModifyAssignmentOptionsCommand, errors: Errors): Mav =
-		submit(cmd, errors, Routes.home, editMode)
+	def saveAndExitForEdit(@Valid @ModelAttribute("command") cmd: ModifyAssignmentOptionsCommand, errors: Errors, @PathVariable assignment: Assignment): Mav =
+		submit(cmd, errors, assignment, Routes.home, editMode)
 
 }

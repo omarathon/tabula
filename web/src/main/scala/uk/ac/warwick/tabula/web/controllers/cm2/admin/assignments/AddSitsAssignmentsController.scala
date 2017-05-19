@@ -78,6 +78,7 @@ class AddSitsAssignmentsController extends CourseworkController with DepartmentS
 	// The shared Mav for most of the request mappings
 	def getMav(department: Department) = {
 		Mav("cm2/admin/assignments/batch_new_sits_select")
+			.crumbs(Breadcrumbs.Department(department, academicYear))
 	}
 	// Change the academic year; restarts from scratch
 	@RequestMapping(method = Array(POST), params = Array("action=change-year"))

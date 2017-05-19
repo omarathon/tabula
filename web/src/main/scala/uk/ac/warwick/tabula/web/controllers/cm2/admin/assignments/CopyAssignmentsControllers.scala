@@ -41,8 +41,8 @@ class CopyModuleAssignmentsController extends AbstractCopyAssignmentsController 
 			"title" -> module.name,
 			"cancel" -> Routes.admin.module(module),
 			"department" -> module.adminDepartment,
-			"map" -> moduleAssignmentMap(cmd.modules)
-		)
+			"map" -> moduleAssignmentMap(cmd.modules))
+			.crumbs(Breadcrumbs.Department(module.adminDepartment, cmd.academicYear))
 	}
 
 	@RequestMapping(method = Array(POST))
@@ -79,8 +79,8 @@ class CopyDepartmentAssignmentsController extends AbstractCopyAssignmentsControl
 			"title" -> department.name,
 			"cancel" -> Routes.admin.department(department),
 			"map" -> moduleAssignmentMap(cmd.modules),
-			"showSubHeadings" -> true
-		)
+			"showSubHeadings" -> true)
+			.crumbs(Breadcrumbs.Department(department, cmd.academicYear))
 	}
 
 	@RequestMapping(method = Array(POST))

@@ -43,7 +43,7 @@ class AddAssignmentDetailsController extends AbstractAssignmentController {
 			"reusableWorkflows" -> form.availableWorkflows,
 			"availableWorkflows" -> MarkingWorkflowType.values.sorted,
 			"canDeleteMarkers" -> true
-		)
+		).crumbs(Breadcrumbs.Department(module.adminDepartment, form.academicYear))
 	}
 
 	@RequestMapping(method = Array(POST), params = Array(ManageAssignmentMappingParameters.createAndAddFeedback, "action!=refresh", "action!=update, action=submit"))
