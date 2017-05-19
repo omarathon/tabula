@@ -133,8 +133,8 @@
 										scope=assignment
 										action_descr='assign markers'
 										href=markers_url>
-										<i class="icon-user icon-fixed-width"></i> Assign markers
-			            </@fmt.permission_button>
+											<i class="icon-user icon-fixed-width"></i> Assign markers
+									</@fmt.permission_button>
 								</li>
 							<#elseif assignment.markingWorkflow??>
 								<li>
@@ -163,7 +163,7 @@
 										id="release-submissions-button"
 										tooltip="Release the submissions for marking. First markers will be able to download their submissions."
 										data_attr='data-container=body'>
-										<i class="icon-inbox icon-fixed-width"></i> Release selected for marking
+											<i class="icon-inbox icon-fixed-width"></i> Release selected for marking
 									</@fmt.permission_button>
 								<#else>
 									<!--FIXME CM2 related link-->
@@ -271,7 +271,7 @@
 								classes='form-post'
 								tooltip='Apply penalties or make adjustments to mark and grade'
 								href=onlinefeedback_url>
-								<i class="icon-sort icon-fixed-width"></i> Adjustments
+									<i class="icon-sort icon-fixed-width"></i> Adjustments
 							</@fmt.permission_button>
 						</li>
 					<#else>
