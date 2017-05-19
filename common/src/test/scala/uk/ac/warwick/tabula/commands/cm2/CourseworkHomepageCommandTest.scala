@@ -35,10 +35,12 @@ class CourseworkHomepageCommandTest extends TestBase with Mockito {
 
 		val enrolled1: Assignment = Fixtures.assignment("Enrolled assignment 1")
 		enrolled1.extensionService = extensionService
+		enrolled1.openDate = DateTime.now.minusDays(1)
 		enrolled1.closeDate = new DateTime(2016, DateTimeConstants.JULY, 4, 14, 0, 0, 0)
 
 		val enrolled2: Assignment = Fixtures.assignment("Enrolled assignment 2")
 		enrolled2.extensionService = extensionService
+		enrolled2.openDate = DateTime.now.minusDays(1)
 		enrolled2.closeDate = new DateTime(2016, DateTimeConstants.AUGUST, 8, 14, 0, 0, 0)
 
 		val feedback1: Assignment = Fixtures.assignment("Assignment with feedback 1")
