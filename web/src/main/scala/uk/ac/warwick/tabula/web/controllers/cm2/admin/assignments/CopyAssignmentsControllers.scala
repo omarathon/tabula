@@ -12,7 +12,7 @@ import uk.ac.warwick.tabula.data.model.{Assignment, Department, Module}
 import uk.ac.warwick.tabula.permissions.Permission
 import uk.ac.warwick.tabula.services.{AutowiringMaintenanceModeServiceComponent, AutowiringModuleAndDepartmentServiceComponent, AutowiringUserSettingsServiceComponent}
 import uk.ac.warwick.tabula.web.Mav
-import uk.ac.warwick.tabula.web.controllers.DepartmentScopedController
+import uk.ac.warwick.tabula.web.controllers.{AcademicYearScopedController, DepartmentScopedController}
 import uk.ac.warwick.tabula.web.controllers.cm2.CourseworkController
 
 import scala.collection.JavaConverters._
@@ -33,7 +33,7 @@ class CopyModuleAssignmentsController extends AbstractCopyAssignmentsController 
 
 	@ModelAttribute("copyAssignmentsCommand")
 	def copyAssignmentsCommand(@PathVariable module: Module): CopyAssignmentsCommand.Command =
-		CopyAssignmentsCommand(mandatory(module).adminDepartment, Seq(module))
+		CopyAssignmentsCommand(mandatory(module))
 
 	@RequestMapping
 	def showForm(@PathVariable module: Module, @ModelAttribute("copyAssignmentsCommand") cmd: CopyAssignmentsCommand.Command): Mav = {
@@ -53,14 +53,12 @@ class CopyModuleAssignmentsController extends AbstractCopyAssignmentsController 
 
 }
 
-@Profile(Array("cm2Enabled"))
-@Controller
-@RequestMapping(value = Array("/${cm2.prefix}/admin/department/{department}/copy-assignments"))
-class CopyDepartmentAssignmentsController extends AbstractCopyAssignmentsController with AliveAssignmentsMap
+abstract class AbstractCopyDepartmentAssignmentsController extends AbstractCopyAssignmentsController with AliveAssignmentsMap
 	with AutowiringUserSettingsServiceComponent
 	with AutowiringModuleAndDepartmentServiceComponent
 	with AutowiringMaintenanceModeServiceComponent
-	with DepartmentScopedController {
+	with DepartmentScopedController
+	with AcademicYearScopedController {
 
 	override val departmentPermission: Permission = CopyAssignmentsCommand.AdminPermission
 
@@ -68,19 +66,19 @@ class CopyDepartmentAssignmentsController extends AbstractCopyAssignmentsControl
 	override def activeDepartment(@PathVariable department: Department): Option[Department] = retrieveActiveDepartment(Option(department))
 
 	@ModelAttribute("copyAssignmentsCommand")
-	def copyAssignmentsCommand(@PathVariable department: Department): CopyAssignmentsCommand.Command = {
-		val modules = department.modules.asScala.filter(_.assignments.asScala.exists(_.isAlive)).sortBy(_.code)
-		CopyAssignmentsCommand(mandatory(department), modules)
-	}
+	def copyAssignmentsCommand(@PathVariable department: Department, @ModelAttribute("activeAcademicYear") activeAcademicYear: Option[AcademicYear]): CopyAssignmentsCommand.Command =
+		CopyAssignmentsCommand(mandatory(department), activeAcademicYear.getOrElse(AcademicYear.guessSITSAcademicYearByDate(DateTime.now)))
 
 	@RequestMapping
 	def showForm(@PathVariable department: Department, @ModelAttribute("copyAssignmentsCommand") cmd: CopyAssignmentsCommand.Command): Mav = {
 		Mav("cm2/admin/modules/copy_assignments",
+			"academicYear" -> cmd.academicYear,
 			"title" -> department.name,
 			"cancel" -> Routes.admin.department(department),
 			"map" -> moduleAssignmentMap(cmd.modules),
 			"showSubHeadings" -> true)
 			.crumbs(Breadcrumbs.Department(department, cmd.academicYear))
+			.secondCrumbs(academicYearBreadcrumbs(cmd.academicYear)(year => Routes.admin.copyAssignments(department, year)): _*)
 	}
 
 	@RequestMapping(method = Array(POST))
@@ -96,4 +94,22 @@ trait AliveAssignmentsMap {
 		modules.map { module => module.code -> module.assignments.asScala.filter(_.isAlive) }
 			.toMap
 			.filter { case (_, assignments) => assignments.nonEmpty }
+}
+
+@Profile(Array("cm2Enabled"))
+@Controller
+@RequestMapping(value = Array("/${cm2.prefix}/admin/department/{department}/copy-assignments"))
+class CopyDepartmentAssignmentsController extends AbstractCopyDepartmentAssignmentsController {
+	@ModelAttribute("activeAcademicYear")
+	override def activeAcademicYear: Option[AcademicYear] =
+		retrieveActiveAcademicYear(None)
+}
+
+@Profile(Array("cm2Enabled"))
+@Controller
+@RequestMapping(value = Array("/${cm2.prefix}/admin/department/{department}/{academicYear:\\d{4}}/copy-assignments"))
+class CopyDepartmentAssignmentsForYearController extends AbstractCopyDepartmentAssignmentsController {
+	@ModelAttribute("activeAcademicYear")
+	override def activeAcademicYear(@PathVariable academicYear: AcademicYear): Option[AcademicYear] =
+		retrieveActiveAcademicYear(Option(academicYear))
 }

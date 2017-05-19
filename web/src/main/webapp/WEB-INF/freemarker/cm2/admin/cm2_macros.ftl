@@ -114,7 +114,7 @@
 						</@fmt.permission_button>
 					</li>
 					<li>
-						<#assign copy_url><@routes.cm2.copy_assignments_previous department /></#assign>
+						<#assign copy_url><@routes.cm2.copy_assignments_previous department academicYear /></#assign>
 						<@fmt.permission_button
 							permission='Assignment.Create'
 							scope=department

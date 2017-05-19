@@ -50,7 +50,7 @@ class CopyAssignmentsCommandTest extends TestBase with Mockito {
 	@Test
 	def commandApply() {
 		new Fixture {
-			val command = new CopyAssignmentsCommandInternal(department, Seq(module)) with CommandTestSupport
+			val command = new CopyModuleAssignmentsCommandInternal(module) with CommandTestSupport
 			command.assignments = Seq(assignment).asJava
 
 			val newAssignment: Assignment = command.applyInternal().head
@@ -62,7 +62,7 @@ class CopyAssignmentsCommandTest extends TestBase with Mockito {
 	def copy() {
 		new Fixture with FindAssignmentFields {
 			withFakeTime(fakeDate) {
-				val command = new CopyAssignmentsCommandInternal(department, Seq(module)) with CommandTestSupport
+				val command = new CopyModuleAssignmentsCommandInternal(module) with CommandTestSupport
 				command.assignments = Seq(assignment).asJava
 				val newAssignment = command.applyInternal().head
 				newAssignment.academicYear.toString should be("16/17")
@@ -87,7 +87,7 @@ class CopyAssignmentsCommandTest extends TestBase with Mockito {
 
 	@Test def guessSitsLinks() {
 		new Fixture {
-			val command = new CopyAssignmentsCommandInternal(department, Seq(module)) with CommandTestSupport
+			val command = new CopyModuleAssignmentsCommandInternal(module) with CommandTestSupport
 			command.assignments = Seq(assignment).asJava
 			command.academicYear = AcademicYear.parse("13/14")
 
@@ -150,7 +150,7 @@ class CopyAssignmentsCommandTest extends TestBase with Mockito {
 	@Test
 	def copyDefaultFields() {
 		new Fixture with FindAssignmentFields {
-			val command = new CopyAssignmentsCommandInternal(department, Seq(module)) with CommandTestSupport
+			val command = new CopyModuleAssignmentsCommandInternal(module) with CommandTestSupport
 			command.assignments = Seq(assignment).asJava
 			val newAssignment: Assignment = command.applyInternal().head
 
@@ -178,7 +178,7 @@ class CopyAssignmentsCommandTest extends TestBase with Mockito {
 			findFileField(assignment).get.attachmentLimit = 9999
 			findFileField(assignment).get.attachmentTypes = Seq(".hateherons")
 			findFileField(assignment).get.individualFileSizeLimit = 100
-			val command = new CopyAssignmentsCommandInternal(department, Seq(module)) with CommandTestSupport
+			val command = new CopyModuleAssignmentsCommandInternal(module) with CommandTestSupport
 			command.assignments = Seq(assignment).asJava
 			val newAssignment: Assignment = command.applyInternal().head
 

@@ -115,16 +115,13 @@ abstract class AbstractAddSitsAssignmentsController extends CourseworkController
 	}
 }
 
-
 @Profile(Array("cm2Enabled"))
 @Controller
 @RequestMapping(value = Array("/${cm2.prefix}/admin/department/{department}/setup-assignments"))
 class AddSitsAssignmentsController extends AbstractAddSitsAssignmentsController {
-
 	@ModelAttribute("activeAcademicYear")
 	override def activeAcademicYear: Option[AcademicYear] =
 		retrieveActiveAcademicYear(None)
-
 }
 
 
@@ -132,9 +129,7 @@ class AddSitsAssignmentsController extends AbstractAddSitsAssignmentsController 
 @Controller
 @RequestMapping(value = Array("/${cm2.prefix}/admin/department/{department}/{academicYear:\\d{4}}/setup-assignments"))
 class AddSitsAssignmentsForYearController extends AbstractAddSitsAssignmentsController {
-
 	@ModelAttribute("activeAcademicYear")
 	override def activeAcademicYear(@PathVariable academicYear: AcademicYear): Option[AcademicYear] =
 		retrieveActiveAcademicYear(Option(academicYear))
-
 }

@@ -84,7 +84,13 @@ TODO grab values from the Routes object in code, as that's pretty equivalent and
 </#macro>
 <#macro assignmentSharedOptions><@_u page="/admin/shared-options" /></#macro>
 
-<#macro copy_assignments_previous department><@_u page="/admin/department/${department.code}/copy-assignments" /></#macro>
+<#macro copy_assignments_previous department academicYear="">
+	<#if academicYear?has_content>
+		<@_u page="/admin/department/${department.code}/${academicYear.startYear?c}/copy-assignments" />
+	<#else>
+		<@_u page="/admin/department/${department.code}/copy-assignments" />
+	</#if>
+</#macro>
 <#macro copy_assignments_previous_module module><@_u page="/admin/${module.code}/copy-assignments" /></#macro>
 
 <#macro editassignmentdetails assignment><@_u page="/admin/assignments/${assignment.id}/edit" /></#macro>

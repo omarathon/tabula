@@ -45,6 +45,8 @@ object Routes {
 		def feedbackReports(department: Department): String = apply() + "/department/%s/reports/feedback/" format encoded(department.code)
 		def setupSitsAssignments(dept: Department, academicYear: AcademicYear): String =
 			department(dept, academicYear) + "/setup-assignments"
+		def copyAssignments(dept: Department, academicYear: AcademicYear): String =
+			department(dept, academicYear) + "/copy-assignments"
 
 		object department {
 			def apply(department: Department): String =

@@ -19,10 +19,20 @@ object CopyAssignmentsCommand {
 
 	val AdminPermission = Permissions.Assignment.Create
 
-	def apply(department: Department, modules: Seq[Module]): Command =
-		new CopyAssignmentsCommandInternal(department, modules)
+	def apply(department: Department, academicYear: AcademicYear): Command =
+		new CopyDepartmentAssignmentsCommandInternal(department, academicYear)
 			with ComposableCommand[Seq[Assignment]]
-			with CopyAssignmentsPermissions
+			with CopyDepartmentAssignmentsPermissions
+			with CopyAssignmentsDescription
+			with CopyAssignmentsCommandTriggers
+			with CopyAssignmentsCommandNotifications
+			with AutowiringAssessmentServiceComponent
+			with AutowiringAssessmentMembershipServiceComponent
+
+	def apply(module: Module): Command =
+		new CopyModuleAssignmentsCommandInternal(module)
+			with ComposableCommand[Seq[Assignment]]
+			with CopyModuleAssignmentsPermissions
 			with CopyAssignmentsDescription
 			with CopyAssignmentsCommandTriggers
 			with CopyAssignmentsCommandNotifications
@@ -30,7 +40,7 @@ object CopyAssignmentsCommand {
 			with AutowiringAssessmentMembershipServiceComponent
 }
 
-class CopyAssignmentsCommandInternal(val department: Department, val modules: Seq[Module])
+abstract class AbstractCopyAssignmentsCommandInternal
 	extends CommandInternal[Result] with CopyAssignmentsState {
 	self: AssessmentServiceComponent with AssessmentMembershipServiceComponent =>
 
@@ -106,23 +116,47 @@ class CopyAssignmentsCommandInternal(val department: Department, val modules: Se
 	}
 }
 
-trait CopyAssignmentsPermissions extends RequiresPermissionsChecking with PermissionsCheckingMethods {
-	self: CopyAssignmentsState =>
-	override def permissionsCheck(p: PermissionsChecking) {
-		if (modules.isEmpty) p.PermissionCheck(AdminPermission, mandatory(department))
-		else for (module <- modules) {
-			p.mustBeLinked(p.mandatory(module), mandatory(department))
-			p.PermissionCheck(AdminPermission, module)
-		}
-	}
+class CopyDepartmentAssignmentsCommandInternal(val department: Department, val academicYear: AcademicYear)
+	extends AbstractCopyAssignmentsCommandInternal with CopyDepartmentAssignmentsState {
+	self: AssessmentServiceComponent with AssessmentMembershipServiceComponent =>
+}
+
+class CopyModuleAssignmentsCommandInternal(val module: Module)
+	extends AbstractCopyAssignmentsCommandInternal with CopyModuleAssignmentsState {
+	self: AssessmentServiceComponent with AssessmentMembershipServiceComponent =>
+}
+
+trait CopyDepartmentAssignmentsPermissions extends RequiresPermissionsChecking with PermissionsCheckingMethods {
+	self: CopyDepartmentAssignmentsState =>
+
+	override def permissionsCheck(p: PermissionsChecking): Unit =
+		p.PermissionCheck(AdminPermission, mandatory(department))
+}
+
+trait CopyModuleAssignmentsPermissions extends RequiresPermissionsChecking with PermissionsCheckingMethods {
+	self: CopyModuleAssignmentsState =>
+
+	override def permissionsCheck(p: PermissionsChecking): Unit =
+		p.PermissionCheck(AdminPermission, mandatory(module))
 }
 
 trait CopyAssignmentsState {
-	val department: Department
-	val modules: Seq[Module]
-	var assignments: JList[Assignment] = JArrayList()
+	def modules: Seq[Module]
+	def academicYear: AcademicYear
 
-	var academicYear: AcademicYear = AcademicYear.guessSITSAcademicYearByDate(new DateTime)
+	var assignments: JList[Assignment] = JArrayList()
+}
+
+trait CopyDepartmentAssignmentsState extends CopyAssignmentsState {
+	def department: Department
+	def modules: Seq[Module] = department.modules.asScala.filter(_.assignments.asScala.exists(_.isAlive)).sortBy(_.code)
+}
+
+trait CopyModuleAssignmentsState extends CopyAssignmentsState {
+	def module: Module
+	def modules: Seq[Module] = Seq(module)
+
+	var academicYear: AcademicYear = AcademicYear.guessSITSAcademicYearByDate(DateTime.now)
 }
 
 trait CopyAssignmentsDescription extends Describable[Result] {
