@@ -36,7 +36,7 @@
 							<col class="word-count" />
 						</#if>
 
-						<#if assignment.markingWorkflow??>
+						<#if assignment.markingWorkflow?? || assignment.cm2MarkingWorkflow??>
 							<#if assignment.cm2Assignment>
 								<#assign submissionColspan=submissionColspan+results.workflowMarkers?size />
 								<#list results.workflowMarkers as marker_col>
@@ -96,7 +96,7 @@
 						<#if assignment.wordCountField??>
 							<th class="submission" title="Declared word count">Words</th>
 						</#if>
-						<#if assignment.markingWorkflow??>
+						<#if assignment.markingWorkflow?? || assignment.cm2MarkingWorkflow??>
 							<#if assignment.cm2Assignment>
 								<#assign submissionColspan=submissionColspan+results.workflowMarkers?size />
 								<#list results.workflowMarkers as marker_col>
@@ -202,7 +202,7 @@
 										</#if>
 								</td>
 							</#if>
-							<#if assignment.markingWorkflow??>
+							<#if assignment.markingWorkflow?? || assignment.cm2MarkingWorkflow??>
 								<#if assignment.cm2Assignment>
 									<#if enhancedFeedback??>
 										<#local feedback=enhancedFeedback.feedback />
