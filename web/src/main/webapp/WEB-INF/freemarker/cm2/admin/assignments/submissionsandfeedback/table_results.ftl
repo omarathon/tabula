@@ -207,11 +207,11 @@
 									<#if enhancedFeedback??>
 										<#local feedback=enhancedFeedback.feedback />
 										<#list results.workflowMarkers as markerRole>
-											<#local markerUser=feedback.feedbackMarkerByRole(markerRole) />
+											<#local markerUser=feedback.feedbackMarkerByRole(markerRole)! />
 											<td>
-												<#if markerUser??>
-												${markerUser.fullName}
-											</#if>
+												<#if markerUser?has_content>
+													${markerUser.fullName}
+												</#if>
 											</td>
 										</#list>
 									</#if>

@@ -56,13 +56,14 @@ class DownloadSubmissionsCommandInternal(val assignment: Assignment, val user: C
 		with JobServiceComponent =>
 
 	override def applyInternal(): Result = {
-		if (submissions.isEmpty && students.isEmpty) throw new ItemNotFoundException
-		else if (!submissions.isEmpty && !students.isEmpty) throw new IllegalStateException("Only expecting one of students and submissions to be set")
-		else if (!students.isEmpty && submissions.isEmpty) {
+		if (!submissions.isEmpty && !students.isEmpty) throw new IllegalStateException("Only expecting one of students and submissions to be set")
+		else if (!students.isEmpty) {
 			submissions = (for (
 				uniId <- students.asScala;
 				submission <- submissionService.getSubmissionByUsercode(assignment, uniId)
 			) yield submission).asJava
+		} else {
+			submissions = assignment.submissions
 		}
 
 		if (submissions.asScala.exists(_.assignment != assignment)) {
