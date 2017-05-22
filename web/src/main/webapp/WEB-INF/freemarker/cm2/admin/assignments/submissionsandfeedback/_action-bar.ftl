@@ -1,4 +1,4 @@
-<p class="clearfix">
+<div class="clearfix">
 	<div class="pull-right view-selector">
 		<form class="form-inline">
 			<label class="radio">View as:</label>
@@ -99,13 +99,13 @@
 									<li>
 										<#assign checkplagiarism_url><@routes.cm2.submitToTurnitin assignment/></#assign>
 										<@fmt.permission_button permission='Submission.CheckForPlagiarism' scope=assignment action_descr='check for plagiarism' href=checkplagiarism_url tooltip='Check for plagiarism'>
-											<i class="icon-book icon-fixed-width"></i> Check for plagiarism
+											Check for plagiarism
 										</@fmt.permission_button>
 									</li>
 								<#else>
 									<li class="disabled">
 										<@fmt.permission_button permission='Submission.CheckForPlagiarism' scope=assignment action_descr='check for plagiarism - temporarily disabled' tooltip='Check for plagiarism - temporarily disabled'>
-											<i class="icon-book icon-fixed-width"></i> Check for plagiarism
+											Check for plagiarism
 										</@fmt.permission_button>
 									</li>
 								</#if>
@@ -113,7 +113,7 @@
 							<li class="must-have-selected">
 								<#assign markplagiarised_url><@routes.cm2.plagiarismInvestigation assignment/></#assign>
 								<@fmt.permission_button permission='Submission.ManagePlagiarismStatus' scope=assignment action_descr='mark plagiarised' href=markplagiarised_url id="mark-plagiarised-selected-button" tooltip="Toggle whether the selected student submissions are possibly plagiarised" data_attr='data-container=body'>
-									<i class="icon-exclamation-sign icon-fixed-width"></i> Mark plagiarised
+									Mark plagiarised
 								</@fmt.permission_button>
 							</li>
 						</ul>
@@ -150,7 +150,7 @@
 											scope=assignment
 											action_descr='assign markers'
 											href=markers_url>
-												<i class="icon-user icon-fixed-width"></i> Assign markers
+												Assign markers
 										</@fmt.permission_button>
 									</li>
 								<#elseif assignment.markingWorkflow??>
@@ -161,11 +161,11 @@
 										scope=assignment
 										action_descr='assign markers'
 										href=markers_url>
-											<i class="icon-user icon-fixed-width"></i> Assign markers
+											Assign markers
 										</@fmt.permission_button>
 									</li>
 								<#else>
-									<li class="disabled"><a><i class="icon-user icon-fixed-width"></i> Assign markers </a></li>
+									<li class="disabled"><a>Assign markers</a></li>
 								</#if>
 
 								<li class="must-have-selected">
@@ -180,7 +180,7 @@
 											id="release-submissions-button"
 											tooltip="Release the submissions for marking. First markers will be able to download their submissions."
 											data_attr='data-container=body'>
-												<i class="icon-inbox icon-fixed-width"></i> Release selected for marking
+												Release selected for marking
 										</@fmt.permission_button>
 									<#else>
 										<!--FIXME CM2 related link-->
@@ -198,7 +198,7 @@
 										id="return-submissions-button"
 										tooltip="Return the submissions for marking. The last marker in the workflow will be able to update their feedback. You can only return feedback that has not been published."
 										data_attr='data-container=body'>
-											<i class="icon-arrow-left icon-fixed-width"></i> Return selected for marking
+											Return selected for marking
 										</@fmt.permission_button>
 									<#else>
 										<!--FIXME CM2 related link-->
@@ -232,7 +232,7 @@
 								action_descr='add general feedback for all students'
 								tooltip='Add general feedback that will be sent to all students'
 								href=onlinefeedback_url>
-									<i class="icon-edit icon-fixed-width"></i> Generic feedback
+									Generic feedback
 								</@fmt.permission_button>
 							</li>
 						<#else>
@@ -241,7 +241,7 @@
 									<a class="long-running use-tooltip"
 										 href="<@route.cm2.downloadFeedbackTemplates assignment/>"
 										 title="Download feedback templates for all students as a ZIP file."
-										 data-container="body"><i class="icon-download icon-fixed-width"></i> Download templates
+										 data-container="body">Download templates
 									</a>
 								</li>
 								<li class="divider"></li>
@@ -253,7 +253,7 @@
 								scope=assignment
 								action_descr='add marks'
 								href=marks_url>
-									<i class="icon-check icon-fixed-width"></i> Add marks
+									Add marks
 								</@fmt.permission_button>
 							</li>
 							<li>
@@ -263,7 +263,7 @@
 									scope=assignment
 									action_descr='manage online feedback'
 									href=onlinefeedback_url>
-									<i class="icon-edit icon-fixed-width"></i> Online feedback
+									Online feedback
 								</@fmt.permission_button>
 							</li>
 							<li>
@@ -274,7 +274,7 @@
 								action_descr='upload feedback'
 								classes='feedback-link'
 								href=feedback_url>
-									<i class="icon-upload icon-fixed-width"></i> Upload feedback
+									Upload feedback
 								</@fmt.permission_button>
 							</li>
 						</#if>
@@ -288,11 +288,11 @@
 									classes='form-post'
 									tooltip='Apply penalties or make adjustments to mark and grade'
 									href=onlinefeedback_url>
-										<i class="icon-sort icon-fixed-width"></i> Adjustments
+										Adjustments
 								</@fmt.permission_button>
 							</li>
 						<#else>
-							<li class="disabled"><a class="use-tooltip" data-container="body" title="You cannot adjust marks on an assignment that does not collect marks"><i class="icon-sort icon-fixed-width"></i> Adjustments</a></li>
+							<li class="disabled"><a class="use-tooltip" data-container="body" title="You cannot adjust marks on an assignment that does not collect marks">Adjustments</a></li>
 						</#if>
 
 						<#-- Download / Publish / Delete always available -->
@@ -300,23 +300,23 @@
 							<a class="long-running use-tooltip form-post"
 								 href="<@routes.cm2.assignmentFeedbackZip assignment />"
 								 title="Download the feedback files for the selected students as a ZIP file."
-								 data-container="body"><i class="icon-download icon-fixed-width"></i> Download feedback
+								 data-container="body">Download feedback
 							</a>
 						</li>
 						<#if assignment.canPublishFeedback>
 							<li>
 								<#assign publishfeedbackurl><@routes.cm2.publishFeedback assignment/></#assign>
 								<@fmt.permission_button permission='AssignmentFeedback.Publish' scope=assignment type='a' action_descr='release feedback to students' tooltip="Release feedback to students" href=publishfeedbackurl>
-									<i class="icon-share icon-fixed-width"></i> Publish feedback
+									Publish feedback
 								</@fmt.permission_button>
 							</li>
 						<#else>
-							<li class="disabled"><a class="use-tooltip" data-container="body" title="No current feedback to publish, or the assignment is not yet closed."><i class="icon-share icon-fixed-width"></i> Publish feedback</a></li>
+							<li class="disabled"><a class="use-tooltip" data-container="body" title="No current feedback to publish, or the assignment is not yet closed.">Publish feedback</a></li>
 						</#if>
 						<li class="must-have-selected">
 							<#assign deletefeedback_url><@routes.cm2.deleteFeedback assignment/></#assign>
 							<@fmt.permission_button permission='AssignmentFeedback.Manage' scope=assignment action_descr='delete feedback' classes="form-post" href=deletefeedback_url tooltip='Delete feedback'>
-								<i class="icon-remove icon-fixed-width"></i> Delete feedback
+								Delete feedback
 							</@fmt.permission_button>
 						</li>
 
@@ -331,7 +331,7 @@
 									classes='form-post'
 									href=uploadToSitsUrl
 								>
-									<i class="icon-upload icon-fixed-width"></i> Upload to SITS
+									Upload to SITS
 								</@fmt.permission_button>
 							</li>
 						</#if>
@@ -367,10 +367,10 @@
 			<div class="modal-body">
 				<p>There are <span class="count"></span> submissions that have files that are not PDFs (shown below). The download will not include these files.</p>
 				<p><a class="long-running form-post btn btn-primary"
-						data-href="<@routes.cm2.submissionsPdf assignment/>?download" href=""><i class="icon-download"></i> Download submissions as PDF</a>
+						data-href="<@routes.cm2.submissionsPdf assignment/>?download" href="">Download submissions as PDF</a>
 				</p>
 				<ul class="submissions"></ul>
 			</div>
 		</div>
 	</#if>
-</p>
+</div>

@@ -146,7 +146,7 @@
 			<#if detail.extension?has_content>
 				<#if detail.extension.awaitingReview>
 					<input type="hidden" name="rawRequestedExpiryDate" value="${detail.extension.requestedExpiryDate}" />
-					<h5><i class="icon icon-question icon-large"></i> Requested <@fmt.date date=detail.extension.requestedExpiryDate capitalise=false at=true/>&ensp;
+					<h5>Requested <@fmt.date date=detail.extension.requestedExpiryDate capitalise=false at=true/>&ensp;
 						<span class="muted">${durationFormatter(assignment.closeDate, detail.extension.requestedExpiryDate)} after the set deadline</span></h5>
 					<#if detail.extension.approved>
 						<p>
@@ -155,7 +155,7 @@
 							(${durationFormatter(assignment.closeDate, detail.extension.expiryDate)} after the set deadline).
 							<#noescape>${feedbackNotice}</#noescape>
 						</p>
-						<p class="alert alert-info"><i class="icon-lightbulb"></i> To retain the existing extension, choose <i>Update</i> below,
+						<p class="alert alert-info">To retain the existing extension, choose <i>Update</i> below,
 							leaving a comment for the student if you wish.<br><i>Reject</i> will remove the existing extension as well.</p>
 					<#elseif detail.extension.rejected>
 						<p><b>This is a revised request from the student.</b> An earlier request was rejected
@@ -163,10 +163,10 @@
 					</#if>
 				<#elseif detail.extension.initiatedByStudent>
 					<#if detail.extension.approved && detail.extension.expiryDate?has_content >
-						<h5><i class="icon icon-exclamation icon-large"></i> Approved <@fmt.date date=detail.extension.reviewedOn capitalise=false includeTime=false /> until <@fmt.date date=detail.extension.expiryDate capitalise=false at=true />&ensp;
+						<h5>Approved <@fmt.date date=detail.extension.reviewedOn capitalise=false includeTime=false /> until <@fmt.date date=detail.extension.expiryDate capitalise=false at=true />&ensp;
 							<span class="muted">${durationFormatter(assignment.closeDate, detail.extension.expiryDate)} after the set deadline</span></h5>
 					<#elseif detail.extension.rejected>
-						<h5><i class="icon icon-exclamation icon-large"></i> Rejected <@fmt.date date=detail.extension.reviewedOn capitalise=false includeTime=false /></h5>
+						<h5>Rejected <@fmt.date date=detail.extension.reviewedOn capitalise=false includeTime=false /></h5>
 					</#if>
 					<p>
 						<#if (detail.extension.expiryDate?has_content)&&(detail.extension.requestedExpiryDate?has_content)&&(detail.extension.expiryDate != detail.extension.requestedExpiryDate)>
@@ -180,7 +180,7 @@
 				</#if>
 
 				<#if features.disabilityRenderingInExtensions && detail.extension.disabilityAdjustment && student?? && student.disability.reportable && can.do("Profiles.Read.Disability", student)>
-					<p><i class="icon icon-stethoscope icon-large"></i> ${student.firstName} has requested their ${(student.disability.definition)!"recorded disability"} be taken into consideration.</p>
+					<p>${student.firstName} has requested their ${(student.disability.definition)!"recorded disability"} be taken into consideration.</p>
 				</#if>
 
 				<#if detail.extension.attachments?has_content>

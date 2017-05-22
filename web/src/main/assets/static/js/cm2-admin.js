@@ -1,4 +1,5 @@
 (function ($) { "use strict";
+	var exports = {};
 
 	$.fn.bindFormHelpers = function() {
 		var $this = $(this);
@@ -204,9 +205,7 @@
 
     // code for bulk copy assignments
     $(function(){
-
         $('.copy-assignments').bigList({
-
             setup: function(e){
                 if(!$(".collection-checkbox").is(":checked")){
                     $('.btn-primary').prop('disabled', 'disabled');
@@ -223,4 +222,125 @@
         });
     });
 
+    exports.initBigList = function ($scope) {
+		$scope = $scope || $('body');
+
+		var biglistOptions = {
+			setup: function() {
+				var $container = this, $outerContainer = $container.closest('div.form-post-container');
+				// #delete-selected-button won't work for >1 set of checkboxes on a page.
+				$('#download-selected-button, #delete-selected-button', $outerContainer).click(function(event){
+					event.preventDefault();
+
+					var $checkedBoxes = $(".collection-checkbox:checked", $container);
+					if ($container.data('checked') !== 'none') {
+						var $form = $('<form />').attr({method:'POST',action:this.href}).hide();
+						$form.append($checkedBoxes.clone());
+						$(document.body).append($form);
+						$form.submit();
+					}
+					return false;
+				});
+
+				$('#mark-plagiarised-selected-button:not(.disabled)', $outerContainer).click(function(event){
+					event.preventDefault();
+
+					var $checkedBoxes = $(".collection-checkbox:checked", $container);
+
+					if ($container.data('checked') !== 'none') {
+
+						var $form = $('<form></form>').attr({method:'POST', action: this.href}).hide();
+						$form.append($checkedBoxes.clone());
+
+						if ($container.data("all-plagiarised") === true) {
+							$form.append("<input type='hidden' name='markPlagiarised' value='false'>");
+						}
+
+						$(document.body).append($form);
+						$form.submit();
+					}
+					return false;
+				});
+
+				$('.form-post', $outerContainer).click(function(event){
+					event.preventDefault();
+					var $this = $(this);
+					if(!$this.hasClass("disabled")) {
+						var action = this.href;
+						if ($this.data('href')) {
+							action = $this.data('href')
+						}
+
+						var $form = $('<form />').attr({method: 'POST', action: action}).hide();
+						var doFormSubmit = false;
+
+						if ($container.data('checked') !== 'none' || $this.closest('.must-have-selected').length === 0) {
+							var $checkedBoxes = $(".collection-checkbox:checked", $container);
+							$form.append($checkedBoxes.clone());
+
+							var $extraInputs = $(".post-field", $container);
+							$form.append($extraInputs.clone());
+
+							doFormSubmit = true;
+						}
+
+						if ($this.hasClass('include-filter') && ($('.filter-form').length > 0)) {
+							var $inputs = $(':input', '.filter-form:not("#floatedHeaderContainer *")');
+							$form.append($inputs.clone());
+
+							doFormSubmit = true;
+						}
+
+						if (doFormSubmit) {
+							$(document.body).append($form);
+							$form.submit();
+						} else {
+							return false;
+						}
+					}
+				});
+			},
+
+			// rather than just toggling the class check the state of the checkbox to avoid silly errors
+			onChange : function() {
+				this.closest(".itemContainer").toggleClass("selected", this.is(":checked"));
+				var $checkedBoxes = $(".collection-checkbox:checked");
+
+				var allPlagiarised = false;
+
+				if ($checkedBoxes.length > 0) {
+					allPlagiarised = true;
+					$checkedBoxes.each(function(index){
+						var $checkBox = $(this);
+						if ($checkBox.closest('tr').data('plagiarised') != true) {
+							allPlagiarised = false;
+						}
+					});
+				}
+				$('.submission-feedback-list,.submission-list,.coursework-progress-table').data("all-plagiarised", allPlagiarised);
+				if (allPlagiarised) {
+					$('#mark-plagiarised-selected-button').html('<i class="icon-exclamation-sign icon-fixed-width"></i> Unmark plagiarised');
+				} else {
+					$('#mark-plagiarised-selected-button').html('<i class="icon-exclamation-sign icon-fixed-width"></i> Mark plagiarised');
+				}
+			}
+		};
+
+		$('.submission-feedback-list, .submission-list, .feedback-list, .marker-feedback-list, .coursework-progress-table, .expanding-table', $scope).not('.marker-feedback-table').bigList(
+			$.extend(biglistOptions, {
+				onSomeChecked : function() {
+					$('.must-have-selected').removeClass('disabled');
+				},
+
+				onNoneChecked : function() {
+					$('.must-have-selected').addClass('disabled');
+				}
+			})
+		);
+	};
+	$(function () { exports.initBigList(); });
+
+	// take anything we've attached to "exports" and add it to the global "Courses"
+	// we use extend() to add to any existing variable rather than clobber it
+	window.Coursework = $.extend(window.Coursework, exports);
 })(jQuery);

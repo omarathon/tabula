@@ -64,13 +64,11 @@
 
 		<#if assignment.closed>
 			<p class="late deadline">
-				<i class="icon-calendar icon-3x pull-left"></i>
 				<span class="time-remaining">Closed ${time_remaining}</span>
 				Deadline was <@fmt.date date=assignment.closeDate />
 			</p>
 		<#else>
 			<p class="deadline">
-				<i class="icon-calendar icon-3x pull-left"></i>
 				<span class="time-remaining">Closes in ${time_remaining}</span>
 				Deadline <@fmt.date date=assignment.closeDate />
 			</p>
@@ -78,7 +76,7 @@
 	</div>
 	<div class="span5">
 		<p class="alert alert-info">
-			<i class="icon-envelope-alt"></i> Students will automatically be notified by email when you grant, modify or revoke an extension.
+			Students will automatically be notified by email when you grant, modify or revoke an extension.
 		</p>
 	</div>
 </div>

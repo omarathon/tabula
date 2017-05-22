@@ -138,7 +138,7 @@
 									<#elseif item.userId?has_content>
 										<@bs3form.selector_check_row "modifyEnrolment" item.userId />
 									<#else>
-										<i class="icon-ban-circle fa fa-ban use-tooltip" title="We are missing this person's usercode, without which we cannot modify their enrolment."></i>
+										<i class="fa fa-ban use-tooltip" title="We are missing this person's usercode, without which we cannot modify their enrolment."></i>
 									</#if>
 								</td>
 								<td class="source">

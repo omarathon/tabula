@@ -15,7 +15,7 @@
 		<@components.assignment_wizard 'details' module />
 		<#if command.prefilled>
 			<div class="alert alert-info">
-				<i class="icon-info-sign fa fa-info-circle"></i>
+				<i class="fa fa-info-circle"></i>
 				Some fields have been pre-filled from another recently created assignment for convenience.
 				<a href='${actionUrl}?prefillFromRecent=false'>Don't do this</a>
 			</div>

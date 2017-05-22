@@ -92,12 +92,10 @@
 						<div class="stage<#if !stage.completed> incomplete<#if !stage.preconditionsMet> preconditions-not-met</#if></#if><#if stage.started && !stage.completed> current</#if>">
 							<#if stage.completed>
 								<#if stage.health.toString == 'Good'>
-									<i class="icon-ok"></i>
+									<i class="fa fa-check"></i>
 								<#else>
-									<i class="icon-remove"></i>
+									<i class="fa fa-times"></i>
 								</#if>
-							<#else>
-								<i class="icon-blank"></i>
 							</#if>
 							<@spring.message code=stage.messageCode /><#nested/>
 						</div>
@@ -153,12 +151,6 @@
 						<#if student.stages?keys?seq_contains('CheckForPlagiarism')>
 							<div class="stage-group clearfix">
 								<h3>Plagiarism</h3>
-
-								<div class="labels">
-									<#if submission?? && submission.suspectPlagiarised>
-										<i class="icon-exclamation-sign use-tooltip" title="Suspected of being plagiarised" data-container="body"></i>
-									</#if>
-								</div>
 
 								<#-- If the current action is in this section, then add the next action blowout here -->
 								<#if student.nextStage?? && ['CheckForPlagiarism']?seq_contains(student.nextStage.toString)>
@@ -318,7 +310,6 @@
 						<#if feedback?? && !(feedback.placeholder)>
 							<#-- not really a stage but the best place to put a link to the feedback summary -->
 							<div class="stage">
-								<i class="icon-eye-open"></i>
 								<a href="<@routes.cm2.feedbackSummary assignment student.user.userId!''/>"
 								   class="ajax-modal"
 								   data-target="#feedback-modal">
@@ -327,7 +318,6 @@
 							</div>
 
 							<div class="stage">
-								<i class="icon-eye-open"></i>
 								<a href="<@routes.cm2.feedbackAudit assignment student.user.userId!''/>">
 									View audit
 								</a>
@@ -355,7 +345,7 @@
 								</#compress></@stage>
 								<#if feedback.hasPrivateOrNonPrivateAdjustments>
 									<div>
-										<i class="icon-ok"></i> Marks adjusted:
+										Marks adjusted:
 										<#if feedback.latestMark??>${feedback.latestMark}%</#if><#if feedback.latestGrade??>,</#if>
 										<#if feedback.latestGrade??> grade ${feedback.latestGrade}</#if>
 										<#if feedback.latestPrivateOrNonPrivateAdjustment?? && feedback.latestPrivateOrNonPrivateAdjustment.reason??>

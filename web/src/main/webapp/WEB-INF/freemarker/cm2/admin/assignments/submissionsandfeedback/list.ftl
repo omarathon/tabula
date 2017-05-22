@@ -27,7 +27,7 @@
 	</#if>
 
 	<#-- Filtering -->
-	<div class="fix-area">
+	<div class="fix-area form-post-container">
 		<div class="fix-header pad-when-fixed">
 			<div class="filters admin-assignment-submission-filters btn-group-group well well-sm" data-lazy="true">
 
@@ -87,12 +87,13 @@
 				</@f.form>
 			</div>
 		</div>
-	</div>
-	<#assign currentView = "table" />
-	<#include "_action-bar.ftl" />
 
-	<div class="filter-results admin-assignment-submission-list">
-		<i class="fa fa-spinner fa-spin"></i> Loading&hellip;
+		<#assign currentView = "table" />
+		<#include "_action-bar.ftl" />
+
+		<div class="filter-results admin-assignment-submission-list">
+			<i class="fa fa-spinner fa-spin"></i> Loading&hellip;
+		</div>
 	</div>
 
 </#escape>
