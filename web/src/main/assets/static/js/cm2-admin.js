@@ -23,7 +23,6 @@
 		$body.on('tabula.expandingTable.contentChanged',function(e){
 			var $this = $(e.target);
 			$this.bindFormHelpers();
-			//$this.tabulaAjaxForm();
 			$this.trigger('tabula.formLoaded');
 		});
 		$body.on('show.bs.collapse', '.detail-row', function(e){
@@ -35,44 +34,55 @@
 					$this.find('td').html(data);
 					// bind form helpers
 					$this.bindFormHelpers();
-					//$this.tabulaAjaxForm();
 					$this.data('loaded', true);
 					$this.trigger('tabula.formLoaded');
 				}));
 			}
 		});
-		$('#feedback-adjustment').on('show.bs.collapse', '.detail-row', function(e){ //feedback-adjustment is table
+		$('#feedback-adjustment').on('show.bs.collapse', '.detail-row', function(e){
 			var $content = $(e.target);
 			// activate any popovers
 			$content.find('.use-popover').popover();
-			// bind suggested mark button
-			$content.find('.use-suggested-mark').on('click', function(e){
-				var $target = $(this);
-				var $markInput = $content.find('input[name=adjustedMark]');
-				var $commentsTextarea = $content.find('textarea[name=comments]');
-				var mark = $target.data('mark');
-				var comment = $target.data('comment');
-				$markInput.val(mark);
-				$commentsTextarea.val(comment);
-				// simulate a keyup to trigger and grade validation
-				$markInput.keyup();
-				e.preventDefault();
-			});
-			// pre-select the other dropdown when editing an existing adjustment with an "other" reason
+
+
 			var $select = $content.find('select[name=reason]');
+			var $selectoption = $content.find('select[name=reason] option:selected');
+			// pre-select the other dropdown when editing an existing adjustment with an "other" reason
+			$select.find('option[value=Late submission penalty]').attr("selected", true);
+			
 			var $otherInput = $content.find('.other-input');
-			if($otherInput.val() != "" && $select.children(':selected').index() === 0) {
-				$content.find('option[value=Other]').attr("selected", "selected");
+			if($otherInput.val() != "" && $otherInput.val() != "Late submission penalty" && $otherInput.val() != "Plagarism penalty") {
+				$content.find('option[value=Other]').attr("selected", true);
+				$otherInput.removeAttr("disabled");
+				$otherInput.removeClass("hide");
+				$otherInput.fadeIn(400);
 			}
 			$otherInput.removeAttr("disabled");
 			$otherInput.removeClass("hide");
 			// show the suggested mark button if late penalty is selected
-			var $suggestedPenalty = $select.closest('form').find('.late-penalty');
-			if($select.val() === "Late submission penalty") {
-				$suggestedPenalty.removeClass("hide");
-			} else {
+			var $suggestedPenalty = $content.find('form').find('.late-penalty');
+			if($selectoption.text() === "") {
 				$suggestedPenalty.addClass("hide");
+				if($suggestedPenalty.hasClass("hide")){ alert("hidden"); }
 			}
+			if($selectoption.text() === "Late submission penalty") {
+				$(e.target).find('.late-penalty').removeClass("hide");
+			} else {
+				$(e.target).find('.late-penalty').addClass("hide");
+			}
+		});
+		// bind suggested mark button
+		$body.on('click', '.use-suggested-mark', function(e){
+			$(e).preventDefault();
+			var $content = $(e.target).closest('form');
+			var $markInput = $content.find('input[name=adjustedMark]');
+			var $commentsTextarea = $content.find('textarea[name=comments]');
+			var mark = $content.find('button.use-suggested-mark').attr('data-mark');
+			var comment =$content.find('button.use-suggested-mark').attr('data-comment');
+			$markInput.val(mark);
+			$commentsTextarea.val(comment);
+			var $select = $content.find('select[name=reason]');
+			$content.find('option[value=Late submission penalty]').attr("selected", true);
 		});
 		$body.on('change', 'select[name=reason]', function(e){
 			var $target = $(e.target);
@@ -88,10 +98,11 @@
 				});
 			}
 			var $suggestedPenalty = $target.closest('form').find('.late-penalty');
-			if ($target.val() === "Late submission penalty") {
+			$suggestedPenalty.attr("style", false);
+			if ($target.find('option:selected').text() === "Late submission penalty") {
 				$suggestedPenalty.fadeIn(400);
 				$suggestedPenalty.removeClass("hide");
-			} else if ($suggestedPenalty.is(':visible')) {
+			}else{
 				$suggestedPenalty.fadeOut(400);
 				$suggestedPenalty.addClass("hide");
 			}
@@ -266,6 +277,7 @@
 			},
 			success: function(response) {
 				var result;
+
 				if (response.indexOf('id="dev"') >= 0) {
 					// for debugging freemarker...
 					result = $(response).find('#column-1-content');
@@ -282,9 +294,10 @@
 				}
 				if (!result || /^\s*$/.test(result)) {
 					// reset if empty
+					$row.collapse("hide");
 					$container.html("<p>No data is currently available. Please check that you are signed in.</p>");
 					$row.data('loaded', false);
-					$row.trigger('show.bs.collapse');
+
 				} else {
 					$container.html(result);
 					callback($container);

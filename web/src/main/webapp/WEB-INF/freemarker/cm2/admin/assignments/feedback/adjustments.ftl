@@ -62,7 +62,7 @@
 		<@form.label path="reason">Reason for adjustment</@form.label>
 		<@form.field>
 			<@f.select path="reason">
-				<@f.option></@f.option>
+				<@f.option value=""></@f.option>
 				<@f.option value="Late submission penalty">Late submission penalty</@f.option>
 				<@f.option value="Plagarism penalty">Plagarism penalty</@f.option>
 				<@f.option value="Other">Other</@f.option>

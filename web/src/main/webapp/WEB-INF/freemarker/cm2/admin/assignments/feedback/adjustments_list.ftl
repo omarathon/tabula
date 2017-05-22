@@ -61,28 +61,35 @@
 					headers: { 0: { sorter: false} }
 				};
 
+				$('form').find('select[name=reason]>option:eq(0)').attr('selected', true);
+				$('document').find('div.late-penalty').addClass("hide");
+
 				var beforeSubmit = function($form){
-					var $select = $form.find('select[name=reason]');
-					if ($select.val() === "Other") {
-						$select.prop("disabled", true);
+					var $select = $form.find('select[name=reason]>option:selected');
+					if ($select.text === "Other") {
+						$select.prop("disabled", true); // disable the dropdown so only one value is passed through for the reason
 					}
 					return true;
 				};
 
 				var callback = function($row){
 					var $form = $row.find('form');
-					var $select = $form.find('select[name=reason]');
 					var $otherInput = $form.find('.other-input');
 					if($otherInput.val() !== "") {
-						$select.val("Other");
+						alert("other input = " + $otherInput);
+						$form.find('select[name=reason]>option:eq(3)').attr('selected', true);
 						$otherInput.removeAttr("disabled");
 						$otherInput.removeClass("hide");
+					}else{
+						if(daysLate > 0){
+							$form.find('select[name=reason]>option:eq(1)').attr('selected', true);
+						}
 					}
 					$row.trigger('tabula.formLoaded');
 				};
 
-				$('body').on('tabula.formLoaded',function() {
-					var $row = $(this);
+				$('body').on('tabula.formLoaded', function(e) {
+					var $row = $(e.target);
 					$row.tabulaAjaxForm(beforeSubmit, callback);
 				});
 
