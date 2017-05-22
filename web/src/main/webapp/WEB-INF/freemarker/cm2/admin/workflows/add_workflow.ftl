@@ -2,7 +2,7 @@
 
 <#assign formAction><@routes.cm2.reusableWorkflowAdd department academicYear /></#assign>
 <#assign commandName = "addMarkingWorkflowCommand" />
-<#assign isNew = true />
+<#assign newRecord = true />
 
 <#include "_modify_workflow.ftl" />
 

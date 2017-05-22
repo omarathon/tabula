@@ -4,17 +4,19 @@ import uk.ac.warwick.tabula.data.model.Department
 import uk.ac.warwick.tabula.jobs.{Job, JobPrototype}
 import org.joda.time.DateTime
 import org.springframework.stereotype.Component
-import uk.ac.warwick.tabula.helpers.{SpreadsheetHelpers, Logging}
+import uk.ac.warwick.tabula.helpers.{Logging, SpreadsheetHelpers}
 import uk.ac.warwick.tabula.web.views.FreemarkerRendering
 import uk.ac.warwick.tabula.services.jobs.JobInstance
-import uk.ac.warwick.tabula.services.{ModuleAndDepartmentService, AssessmentService}
-import uk.ac.warwick.tabula.{CurrentUser, DateFormats}
+import uk.ac.warwick.tabula.services.{AssessmentService, ModuleAndDepartmentService}
+import uk.ac.warwick.tabula.{AcademicYear, CurrentUser, DateFormats}
 import uk.ac.warwick.spring.Wire
 import org.springframework.mail.javamail.MimeMessageHelper
 import javax.annotation.Resource
+
 import uk.ac.warwick.util.mail.WarwickMailSender
 import org.springframework.beans.factory.annotation.Value
 import java.io.ByteArrayOutputStream
+
 import org.springframework.core.io.ByteArrayResource
 import freemarker.template.Configuration
 import uk.ac.warwick.tabula.services.coursework.feedbackreport.FeedbackReport
@@ -24,6 +26,12 @@ object FeedbackReportJob {
 	val identifier = "feedback-report"
 	def apply(department: Department, start: DateTime, end: DateTime) = JobPrototype(identifier, Map(
 		"department" -> department.id ,
+		"startDate" -> DateFormats.CSVDate.print(start),
+		"endDate" -> DateFormats.CSVDate.print(end)
+	))
+	def apply(department: Department, year: AcademicYear, start: DateTime, end: DateTime) = JobPrototype(identifier, Map(
+		"department" -> department.id,
+		"academicYear" -> year.startYear,
 		"startDate" -> DateFormats.CSVDate.print(start),
 		"endDate" -> DateFormats.CSVDate.print(end)
 	))
@@ -84,6 +92,8 @@ class FeedbackReportJob extends Job with Logging with FreemarkerRendering {
 			}
 		}
 
+		val academicYear: Option[AcademicYear] = job.optInt("academicYear").map(AcademicYear.apply)
+
 		val startDate: DateTime = {
 			val stringDate = job.getString("startDate")
 			try {
@@ -110,7 +120,7 @@ class FeedbackReportJob extends Job with Logging with FreemarkerRendering {
 		}
 
 		def run() {
-			val report = new FeedbackReport(department, startDate, endDate)
+			val report = new FeedbackReport(department, academicYear, startDate, endDate)
 
 			updateStatus("Generating base worksheets")
 			val assignmentSheet = report.generateAssignmentSheet(department)

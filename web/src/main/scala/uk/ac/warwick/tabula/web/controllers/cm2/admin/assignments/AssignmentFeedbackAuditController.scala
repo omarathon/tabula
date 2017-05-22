@@ -26,8 +26,8 @@ class AssignmentFeedbackAuditController extends CourseworkController {
 			"auditData" -> auditData,
 			"assignment" -> assignment,
 			"isModerated" -> Option(assignment.markingWorkflow).exists(_.markingMethod == MarkingMethod.ModeratedMarking),
-			"releasedFeedback" -> assignment.countReleasedFeedback
-		)
+			"releasedFeedback" -> assignment.countReleasedFeedback)
+			.crumbs(Breadcrumbs.Department(assignment.module.adminDepartment, assignment.academicYear), Breadcrumbs.Assignment(assignment))
 	}
 }
 

@@ -104,17 +104,7 @@
 				</a>
 				<ul class="dropdown-menu">
 					<li>
-						<#assign manage_url><@routes.cm2.departmenthome department academicYear /></#assign>
-						<@fmt.permission_button
-							permission='Module.ManageAssignments'
-							scope=department
-							action_descr='manage assignments'
-							href=manage_url>
-								View all assignments
-						</@fmt.permission_button>
-					</li>
-					<li>
-						<#assign setup_Url><@routes.cm2.create_sitsassignments department /></#assign>
+						<#assign setup_Url><@routes.cm2.create_sitsassignments department academicYear /></#assign>
 						<@fmt.permission_button
 							permission='Assignment.ImportFromExternalSystem'
 							scope=department
@@ -124,7 +114,7 @@
 						</@fmt.permission_button>
 					</li>
 					<li>
-						<#assign copy_url><@routes.cm2.copy_assignments_previous department /></#assign>
+						<#assign copy_url><@routes.cm2.copy_assignments_previous department academicYear /></#assign>
 						<@fmt.permission_button
 							permission='Assignment.Create'
 							scope=department
@@ -135,7 +125,7 @@
 					</li>
 				</ul>
 			</div>
-			<#assign extensions_url><@routes.cm2.filterExtensions />?departments=${department.code}</#assign>
+			<#assign extensions_url><@routes.cm2.filterExtensions academicYear />?departments=${department.code}</#assign>
 			<@fmt.permission_button
 				permission='Extension.Read'
 				scope=department

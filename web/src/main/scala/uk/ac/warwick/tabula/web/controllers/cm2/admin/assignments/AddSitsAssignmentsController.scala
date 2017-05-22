@@ -7,7 +7,7 @@ import org.springframework.context.annotation.Profile
 import org.springframework.stereotype.Controller
 import org.springframework.validation.Errors
 import org.springframework.web.bind.annotation.{ModelAttribute, PathVariable, RequestMapping}
-import uk.ac.warwick.tabula.AcademicYear
+import uk.ac.warwick.tabula.{AcademicYear, CurrentUser}
 import uk.ac.warwick.tabula.commands.cm2.assignments._
 import uk.ac.warwick.tabula.commands.{Appliable, SelfValidating}
 import uk.ac.warwick.tabula.data.model.{Assignment, Department}
@@ -33,60 +33,44 @@ import uk.ac.warwick.tabula.web.controllers.{AcademicYearScopedController, Depar
 	* - Before submitting we make an AJAX call to ajaxValidation() to display any errors.
 	* - Finally we submit everything to submit().
 	*/
-
-@Profile(Array("cm2Enabled"))
-@Controller
-@RequestMapping(value = Array("/${cm2.prefix}/admin/department/{department}/setup-assignments"))
-class AddSitsAssignmentsController extends CourseworkController with DepartmentScopedController
+abstract class AbstractAddSitsAssignmentsController extends CourseworkController with DepartmentScopedController
 	with AutowiringModuleAndDepartmentServiceComponent with AutowiringUserSettingsServiceComponent
 	with AutowiringMaintenanceModeServiceComponent with AcademicYearScopedController {
 
-	override def departmentPermission: Permission = Permissions.Assignment.ImportFromExternalSystem
+	override val departmentPermission: Permission = Permissions.Assignment.ImportFromExternalSystem
 
-	type AddSitsAssignmentsCommand = Appliable[Seq[Assignment]]
-		with PopulatesAddSitsAssignmentsCommand  with  AddSitsAssignmentsCommandOnBind with AddSitsAssignmentsValidation
+	@ModelAttribute("activeDepartment")
+	override def activeDepartment(@PathVariable department: Department): Option[Department] =
+		retrieveActiveDepartment(Option(department))
 
+	type AddSitsAssignmentsCommand = Appliable[Seq[Assignment]] with AddSitsAssignmentsCommandState
+		with PopulatesAddSitsAssignmentsCommand with AddSitsAssignmentsCommandOnBind with AddSitsAssignmentsValidation
 
 	validatesSelf[SelfValidating]
 
 	@ModelAttribute("command")
-	def command(@PathVariable department: Department) =
-		AddSitsAssignmentsCommand(mandatory(department), mandatory(user))
+	def command(@PathVariable department: Department, @ModelAttribute("activeAcademicYear") activeAcademicYear: Option[AcademicYear], user: CurrentUser): AddSitsAssignmentsCommand =
+		AddSitsAssignmentsCommand(mandatory(department), activeAcademicYear.getOrElse(AcademicYear.guessSITSAcademicYearByDate(DateTime.now)), user)
 
-	@ModelAttribute("activeDepartment")
-	override def activeDepartment(@PathVariable department: Department): Option[Department] = retrieveActiveDepartment(Option(department))
-
-
-	val academicYear = activeAcademicYear.getOrElse(AcademicYear.guessSITSAcademicYearByDate(DateTime.now))
-
-	//Command sets it to default -AcademicYear.guessSITSAcademicYearByDate(DateTime.now.plusMonths(3))
 	@ModelAttribute("academicYearChoices")
-	def academicYearChoices: JList[AcademicYear] =
-		AcademicYear.guessSITSAcademicYearByDate(DateTime.now).yearsSurrounding(0, 1).asJava
+	def academicYearChoices: JList[AcademicYear] = availableAcademicYears.asJava
 
 	// The initial load of page 1, where we select the items to import.
-	@RequestMapping(method = Array(GET))
+	@RequestMapping
 	def selectionForm(
 		@ModelAttribute("command") cmd: AddSitsAssignmentsCommand,
 		errors: Errors,
 		@PathVariable department: Department
 	): Mav = {
 		cmd.populate()
-		getMav(department).addObjects("action" -> "select")
+		getMav(department, cmd.academicYear).addObjects("action" -> "select")
 	}
 
 	// The shared Mav for most of the request mappings
-	def getMav(department: Department) = {
-		Mav("cm2/admin/assignments/batch_new_sits_select")
-	}
-	// Change the academic year; restarts from scratch
-	@RequestMapping(method = Array(POST), params = Array("action=change-year"))
-	def changeYear(
-		@ModelAttribute("command") cmd: AddSitsAssignmentsCommand,
-		errors: Errors,
-		@PathVariable department: Department
-	): Mav =
-	selectionForm(cmd, errors, department)
+	def getMav(department: Department, academicYear: AcademicYear): Mav =
+		Mav("cm2/admin/assignments/batch_new_sits_select", "academicYear" -> academicYear)
+			.crumbs(Breadcrumbs.Department(department, academicYear))
+			.secondCrumbs(academicYearBreadcrumbs(academicYear)(year => Routes.admin.setupSitsAssignments(department, year)): _*)
 
 	// Reloads page 1 with a POST, to show any updated information if necessary.
 	@RequestMapping(method = Array(POST), params = Array("action=refresh-select"))
@@ -95,7 +79,7 @@ class AddSitsAssignmentsController extends CourseworkController with DepartmentS
 		errors: Errors,
 		@PathVariable department: Department
 	): Mav = {
-		getMav(department).addObjects("action" -> "select")
+		getMav(department, cmd.academicYear).addObjects("action" -> "select")
 	}
 
 	// Loads page 2 where we set options on all the assignments.
@@ -106,7 +90,7 @@ class AddSitsAssignmentsController extends CourseworkController with DepartmentS
 		@PathVariable department: Department
 	): Mav = {
 		cmd.validateNames(errors)
-		getMav(department).addObjects("action" -> "options")
+		getMav(department, cmd.academicYear).addObjects("action" -> "options")
 	}
 
 	// Do validation and return as a chunk of HTML errors.
@@ -123,10 +107,29 @@ class AddSitsAssignmentsController extends CourseworkController with DepartmentS
 		@PathVariable department: Department
 	): Mav = {
 		if (errors.hasErrors) {
-			getMav(department).addObjects("action" -> "options")
+			getMav(department, cmd.academicYear).addObjects("action" -> "options")
 		} else {
 			cmd.apply()
-			Redirect(Routes.admin.department(department, academicYear))
+			Redirect(Routes.admin.department(department, cmd.academicYear))
 		}
 	}
+}
+
+@Profile(Array("cm2Enabled"))
+@Controller
+@RequestMapping(value = Array("/${cm2.prefix}/admin/department/{department}/setup-assignments"))
+class AddSitsAssignmentsController extends AbstractAddSitsAssignmentsController {
+	@ModelAttribute("activeAcademicYear")
+	override def activeAcademicYear: Option[AcademicYear] =
+		retrieveActiveAcademicYear(None)
+}
+
+
+@Profile(Array("cm2Enabled"))
+@Controller
+@RequestMapping(value = Array("/${cm2.prefix}/admin/department/{department}/{academicYear:\\d{4}}/setup-assignments"))
+class AddSitsAssignmentsForYearController extends AbstractAddSitsAssignmentsController {
+	@ModelAttribute("activeAcademicYear")
+	override def activeAcademicYear(@PathVariable academicYear: AcademicYear): Option[AcademicYear] =
+		retrieveActiveAcademicYear(Option(academicYear))
 }

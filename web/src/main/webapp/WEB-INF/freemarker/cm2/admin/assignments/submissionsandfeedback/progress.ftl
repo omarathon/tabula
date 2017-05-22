@@ -1,9 +1,11 @@
-<#-- FIXME: implemented as part of CM2 migration but will require further reworking due to CM2 workflow changes -->
 <#import "_submission_details.ftl" as sd />
 <#import "/WEB-INF/freemarker/_profile_link.ftl" as pl />
-<#import "*/webapp/WEB-INF/freemarker/cm2/admin/assignments/submissionsandfeedback/_submission_details.ftl" as components />
+<#import "*/_submission_details.ftl" as components />
+<#import "*/cm2_macros.ftl" as cm2_macros />
+
 <#escape x as x?html>
 
+<@cm2_macros.headerMenu department academicYear/>
 <#macro studentIdentifier user><#compress>
 	<#if user.warwickId??>${user.warwickId}<#else>${user.userId!}</#if>
 </#compress></#macro>
@@ -110,16 +112,16 @@
 				</#macro>
 
 				<#macro workflow student>
-					<#if student.cm2.enhancedSubmission??>
-						<#local enhancedSubmission=student.cm2.enhancedSubmission>
+					<#if student.enhancedSubmission??>
+						<#local enhancedSubmission=student.enhancedSubmission>
 						<#local submission=enhancedSubmission.submission>
 					</#if>
-					<#if student.cm2.enhancedFeedback??>
-						<#local enhancedFeedback=student.cm2.enhancedFeedback>
+					<#if student.enhancedFeedback??>
+						<#local enhancedFeedback=student.enhancedFeedback>
 						<#local feedback=enhancedFeedback.feedback>
 					</#if>
-					<#if student.cm2.enhancedExtension??>
-						<#local enhancedExtension=student.cm2.enhancedExtension>
+					<#if student.enhancedExtension??>
+						<#local enhancedExtension=student.enhancedExtension>
 						<#local extension=enhancedExtension.extension>
 					</#if>
 
@@ -170,9 +172,6 @@
 											<!-- Checking originality report for ${attachment.name} ... -->
 											<#if attachment.originalityReportReceived>
 												: <@components.originalityReport attachment />
-											</#if>
-											<#if can.do("Submission.ViewUrkundPlagiarismStatus", submission) && attachment.urkundResponseReceived>
-												: <@components.urkundOriginalityReport attachment />
 											</#if>
 										</#list>
 									</#if>

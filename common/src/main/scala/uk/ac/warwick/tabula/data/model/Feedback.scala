@@ -277,6 +277,16 @@ abstract class Feedback extends GeneratedId with FeedbackAttachments with Permis
 	@BatchSize(size = 200)
 	var markerFeedback: JList[MarkerFeedback] = JArrayList()
 
+	def feedbackMarkersByRole: Map[String,User] =   {
+		markerFeedback.asScala.groupBy(f => f.stage.roleName).toSeq
+			.sortBy {	case(_, fList) => fList.head.stage.order }
+			.map { case (s, fList) => s -> fList.head.marker }.toMap
+	}
+
+	def feedbackMarkerByRole(roleName: String): Option[User] =
+		feedbackMarkersByRole.get(roleName)
+
+
 	@ElementCollection @Column(name = "stage")
 	@JoinTable(name = "OutstandingStages", joinColumns = Array(
 		new JoinColumn(name = "feedback_id", referencedColumnName = "id")))
@@ -287,6 +297,9 @@ abstract class Feedback extends GeneratedId with FeedbackAttachments with Permis
 		case (s: FinalStage) :: Nil => true
 		case _ => false
 	}
+
+	def notReleasedToMarkers = outstandingStages.asScala.isEmpty
+
 
 	@Column(name = "released_date")
 	var releasedDate: DateTime = _
@@ -337,6 +350,14 @@ abstract class Feedback extends GeneratedId with FeedbackAttachments with Permis
 		attachment.temporary = false
 		attachment.feedback = this
 		attachments.add(attachment)
+	}
+
+	def isMarkedByStage(stage: MarkingWorkflowStage): Boolean = {
+		val currentStages = outstandingStages.asScala
+		val currentPosition = currentStages.headOption.map(_.order).getOrElse(0)
+
+		if(stage.order == currentPosition) !currentStages.contains(stage)
+		else stage.order < currentPosition
 	}
 
 }

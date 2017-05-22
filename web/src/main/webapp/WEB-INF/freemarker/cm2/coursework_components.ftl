@@ -181,7 +181,7 @@
 				</#local>
 			<#elseif !assignment.opened>
 				<#local submissionStatus>
-					<strong>Not open yet</strong>
+					<strong>Assignment open:</strong> <span class="use-tooltip" title="<@fmt.dateToWeek assignment.openDate />" data-html="true"><@fmt.date date=assignment.openDate /> - ${durationFormatter(assignment.openDate)}</span>
 				</#local>
 			<#elseif assignment.openEnded>
 				<#local submissionStatus>
@@ -547,7 +547,7 @@
 	</div>
 </#macro>
 
-<#macro admin_assignment_list module assignments expand_by_default=true>
+<#macro admin_assignment_list module assignments academicYear expand_by_default=true>
 	<#local id>module-${module.code}</#local>
 	<#local title><@fmt.module_name module /></#local>
 
@@ -556,7 +556,7 @@
 		<div id="${id}" class="striped-section admin-assignment-list<#if has_assignments> collapsible<#if expand_by_default> expanded</#if><#else> empty</#if>" data-name="${id}"
 			<#if has_assignments && !expand_by_default>
 				 data-populate=".striped-section-contents"
-				 data-href="<@routes.cm2.modulehome module />?${info.requestedUri.query!}"
+				 data-href="<@routes.cm2.modulehome module academicYear />?${info.requestedUri.query!}"
 				 data-name="${id}"
 			</#if>
 		>
@@ -575,7 +575,7 @@
 							</@fmt.permission_button>
 						</li>
 						<li>
-						<#local create_url><@routes.cm2.createassignmentdetails module /></#local>
+						<#local create_url><@routes.cm2.createassignmentdetails module academicYear /></#local>
 							<@fmt.permission_button
 								permission='Assignment.Create'
 								scope=module
@@ -585,7 +585,7 @@
 							</@fmt.permission_button>
 						</li>
 						<li>
-							<#local copy_url><@routes.cm2.copy_assignments_previous_module module /></#local>
+							<#local copy_url><@routes.cm2.copy_assignments_previous_module module academicYear /></#local>
 							<@fmt.permission_button
 								permission='Assignment.Create'
 								scope=module
@@ -627,58 +627,32 @@
 	<div class="item-info admin-assignment-${assignment.id}">
 		<div class="clearfix">
 			<div class="pull-right">
-				<div class="btn-group">
-					<a class="btn btn-default btn-xs dropdown-toggle" data-toggle="dropdown">
-						Actions
-						<span class="caret"></span>
-					</a>
-					<ul class="dropdown-menu pull-right">
-						<li>
-							<#local edit_url><@routes.cm2.editassignmentdetails assignment /></#local>
-							<@fmt.permission_button
-								permission='Assignment.Update'
-								scope=assignment
-								action_descr='edit assignment properties'
-								href=edit_url>
-								Edit
-							</@fmt.permission_button>
-						</li>
-
-						<li>
-							<#if assignment.collectSubmissions>
-								<#local sub_caption="Manage assignment's submissions" />
-							<#else>
-								<#local sub_caption="Manage assignment's feedback" />
-							</#if>
-							<#local edit_url><@routes.cm2.assignmentsubmissionsandfeedback assignment /></#local>
-							<@fmt.permission_button
-								permission='AssignmentFeedback.Read'
-								scope=assignment
-								action_descr=sub_caption?lower_case
-								href=edit_url>
-									${sub_caption}
-							</@fmt.permission_button>
-						</li>
-
-						<li>
-							<#if can.do('Extension.Update', assignment)>
-								<#local ext_caption="Manage assignment's extensions" />
-							<#else>
-								<#local ext_caption="View assignment's extensions" />
-							</#if>
-							<#local ext_url><@routes.cm2.assignmentextensions assignment /></#local>
-							<@fmt.permission_button
-								permission='Extension.Read'
-								scope=assignment
-								action_descr=ext_caption?lower_case
-								href=ext_url>
-									${ext_caption}
-							</@fmt.permission_button>
-						</li>
-					</ul>
-				</div>
+				<#local edit_url><@routes.cm2.editassignmentdetails assignment /></#local>
+				<@fmt.permission_button
+					classes='btn btn-default btn-xs'
+					permission='Assignment.Update'
+					scope=assignment
+					action_descr='edit assignment properties'
+					href=edit_url>
+					Edit assignment
+				</@fmt.permission_button>
 			</div>
-			<h5 class="assignment-name">${assignment.name}</h5>
+
+			<h5 class="assignment-name">
+				<#if assignment.collectSubmissions>
+					<#local sub_caption="Manage assignment's submissions" />
+				<#else>
+					<#local sub_caption="Manage assignment's feedback" />
+				</#if>
+				<#local edit_url><@routes.cm2.assignmentsubmissionsandfeedback assignment /></#local>
+				<@fmt.permission_button
+					permission='AssignmentFeedback.Read'
+					scope=assignment
+					action_descr=sub_caption?lower_case
+					href=edit_url>
+						${assignment.name}
+				</@fmt.permission_button>
+			</h5>
 		</div>
 
 		<div class="row">
@@ -726,7 +700,21 @@
 						</#if>
 
 						<#if assignment.extensionsPossible>
-							<li><strong>Extension requests:</strong> ${assignment.countUnapprovedExtensions}</li>
+							<li>
+								<#if can.do('Extension.Update', assignment)>
+									<#local ext_caption="Manage assignment's extensions" />
+								<#else>
+									<#local ext_caption="View assignment's extensions" />
+								</#if>
+								<#local ext_url><@routes.cm2.assignmentextensions assignment /></#local>
+								<@fmt.permission_button
+									permission='Extension.Read'
+									scope=assignment
+									action_descr=ext_caption?lower_case
+									href=ext_url>
+										<strong>Extension requests:</strong> ${assignment.countUnapprovedExtensions}
+								</@fmt.permission_button>
+							</li>
 						</#if>
 					</ul>
 				</#if>
@@ -810,3 +798,36 @@
 	<#local text><@spring.message code=code /></#local>
 	${(text!"")?replace("[STUDENT]", "student")?replace("[FIRST_MARKER]", "first marker")?replace("[SECOND_MARKER]", "second marker")}
 </#compress></#macro>
+
+<#-- Common template parts for use in other submission/coursework templates. -->
+<#macro originalityReport attachment>
+	<#local r=attachment.originalityReport />
+	<#local assignment=attachment.submissionValue.submission.assignment />
+
+<span id="tool-tip-${attachment.id}" class="similarity-${r.similarity} similarity-tooltip">${r.overlap}% similarity</span>
+<div id="tip-content-${attachment.id}" class="hide">
+	<p>${attachment.name} <img src="<@url resource="/static/images/icons/turnitin-16.png"/>"></p>
+	<p class="similarity-subcategories-tooltip">
+		Web: ${r.webOverlap}%<br>
+		Student papers: ${r.studentOverlap}%<br>
+		Publications: ${r.publicationOverlap}%
+	</p>
+	<p>
+		<#if r.turnitinId?has_content>
+			<a target="turnitin-viewer" href="<@routes.cm2.turnitinLtiReport assignment attachment />">View full report</a>
+		<#else>
+			<a target="turnitin-viewer" href="<@routes.cm2.turnitinReport assignment attachment />">View full report - available via Tabula until end of August 2016</a>
+		</#if>
+	</p>
+</div>
+<script type="text/javascript">
+	jQuery(function($){
+		$("#tool-tip-${attachment.id}").popover({
+			placement: 'right',
+			html: true,
+			content: function(){return $('#tip-content-${attachment.id}').html();},
+			title: 'Turnitin report summary'
+		});
+	});
+</script>
+</#macro>

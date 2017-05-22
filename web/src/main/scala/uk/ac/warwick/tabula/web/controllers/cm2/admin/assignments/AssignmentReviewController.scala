@@ -30,8 +30,8 @@ class AssignmentReviewController extends CourseworkController {
 			"module" -> assignment.module,
 			"assignment" -> assignment,
 			"membershipInfo" -> assignment.membershipInfo,
-			"sharedPropertiesForm" -> sharedPropertiesForm
-		)
+			"sharedPropertiesForm" -> sharedPropertiesForm)
+			.crumbs(Breadcrumbs.Department(assignment.module.adminDepartment, assignment.academicYear), Breadcrumbs.Assignment(assignment))
 	}
 
 }

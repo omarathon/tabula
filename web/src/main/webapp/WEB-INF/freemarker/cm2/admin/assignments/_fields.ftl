@@ -67,15 +67,9 @@
 </fieldset>
 
 	<@bs3form.labelled_form_group path="academicYear" labelText="Academic year">
-		<#if newRecord>
-			<@f.select path="academicYear" id="academicYearSelect" cssClass="form-control">
-				<@f.options items=academicYearChoices itemLabel="label" itemValue="storeValue" />
-			</@f.select>
-		<#else>
-			<@spring.bind path="academicYear">
-            <p class="form-control-static">${status.actualValue.label} <span class="very-subtle">(can't be changed)</span></p>
-			</@spring.bind>
-		</#if>
+		<@spring.bind path="academicYear">
+      <p class="form-control-static">${status.actualValue.label}<#if !newRecord> <span class="very-subtle">(can't be changed)</span></#if></p>
+		</@spring.bind>
 	</@bs3form.labelled_form_group>
 
 	<@bs3form.labelled_form_group path="workflowCategory" labelText="Marking workflow use">

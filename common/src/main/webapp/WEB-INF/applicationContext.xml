@@ -187,6 +187,8 @@
 		<bean class="uk.ac.warwick.tabula.data.model.markingworkflow.StringToMarkingWorkflowType" />
 		<bean class="uk.ac.warwick.tabula.data.model.markingworkflow.StringToMarkingWorkflowStage" />
 		<bean class="uk.ac.warwick.tabula.data.convert.AssignmentInfoFilterConverter"/>
+		<bean class="uk.ac.warwick.tabula.data.convert.SubmissionAndFeedbackInfoFilterConverter"/>
+
 	</util:list>
 
 	<bean id="typeConverter"

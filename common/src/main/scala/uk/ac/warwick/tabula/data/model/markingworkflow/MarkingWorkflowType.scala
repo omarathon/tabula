@@ -69,6 +69,8 @@ object MarkingWorkflowType {
 		//DoubleBlindMarking
 	)
 
+	def allPossibleStages: Map[MarkingWorkflowType, Seq[MarkingWorkflowStage]] = values.map(t => t -> t.allStages).toMap
+
 	def fromCode(code: String): MarkingWorkflowType =
 		if (code == null) null
 		else values.find{_.name == code} match {

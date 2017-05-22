@@ -11,7 +11,7 @@ import uk.ac.warwick.tabula.permissions._
 import uk.ac.warwick.tabula.services.jobs.{AutowiringJobServiceComponent, JobInstance, JobServiceComponent}
 import uk.ac.warwick.tabula.system.permissions.{PermissionsChecking, PermissionsCheckingMethods, RequiresPermissionsChecking}
 import uk.ac.warwick.tabula.validators.WithinYears
-import uk.ac.warwick.tabula.{CurrentUser, DateFormats}
+import uk.ac.warwick.tabula.{AcademicYear, CurrentUser, DateFormats}
 
 object FeedbackReportCommand {
 	type Result = JobInstance
@@ -19,8 +19,8 @@ object FeedbackReportCommand {
 
 	val AdminPermission = Permissions.Department.DownloadFeedbackReport
 
-	def apply(department: Department, user: CurrentUser): Command =
-		new FeedbackReportCommandInternal(department, user)
+	def apply(department: Department, academicYear: AcademicYear, user: CurrentUser): Command =
+		new FeedbackReportCommandInternal(department, academicYear, user)
 			with FeedbackReportCommandRequest
 			with ComposableCommand[Result]
 			with FeedbackReportCommandPermissions
@@ -31,6 +31,7 @@ object FeedbackReportCommand {
 
 trait FeedbackReportCommandState {
 	def department: Department
+	def academicYear: AcademicYear
 	def user: CurrentUser
 }
 
@@ -46,13 +47,13 @@ trait FeedbackReportCommandRequest {
 	var endDate: DateTime = DateTime.now.plusDays(1).withTimeAtStartOfDay()
 }
 
-class FeedbackReportCommandInternal(val department: Department, val user: CurrentUser)
+class FeedbackReportCommandInternal(val department: Department, val academicYear: AcademicYear, val user: CurrentUser)
 	extends CommandInternal[Result] with FeedbackReportCommandState {
 	self: FeedbackReportCommandRequest
 		with JobServiceComponent =>
 
 	override def applyInternal(): Result =
-		jobService.add(Option(user), FeedbackReportJob(department, startDate, endDate))
+		jobService.add(Option(user), FeedbackReportJob(department, academicYear, startDate, endDate))
 
 }
 

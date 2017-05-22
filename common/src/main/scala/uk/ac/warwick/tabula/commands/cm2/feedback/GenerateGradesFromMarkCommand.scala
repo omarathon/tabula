@@ -11,8 +11,8 @@ import uk.ac.warwick.userlookup.User
 import scala.collection.JavaConverters._
 
 object GenerateGradesFromMarkCommand {
-	def apply(module: Module, assessment: Assessment) =
-		new GenerateGradesFromMarkCommandInternal(module, assessment)
+	def apply(assessment: Assessment) =
+		new GenerateGradesFromMarkCommandInternal(assessment)
 			with AutowiringAssessmentMembershipServiceComponent
 			with ComposableCommand[Map[String, Seq[GradeBoundary]]]
 			with GenerateGradesFromMarkPermissions
@@ -21,7 +21,7 @@ object GenerateGradesFromMarkCommand {
 			with ReadOnly with Unaudited
 }
 
-class GenerateGradesFromMarkCommandInternal(val module: Module, val assessment: Assessment)
+class GenerateGradesFromMarkCommandInternal(val assessment: Assessment)
 	extends CommandInternal[Map[String, Seq[GradeBoundary]]] with GeneratesGradesFromMarks {
 
 	self: GenerateGradesFromMarkCommandRequest with AssessmentMembershipServiceComponent =>
@@ -43,18 +43,18 @@ class GenerateGradesFromMarkCommandInternal(val module: Module, val assessment: 
 		val membership = assessmentMembershipService.determineMembershipUsers(assessment)
 		val studentMarksMap: Map[User, Int] = studentMarks.asScala
 			.filter{ case (_, mark) => isNotNullAndInt(mark)}
-			.flatMap{ case (uniID, mark) =>
+			.flatMap{case(uniID, mark) =>
 				membership.find(_.getWarwickId == uniID).map(u => u -> mark.toInt)
 			}.toMap
 
-		val studentAssessmentComponentMap: Map[String, AssessmentComponent] = studentMarksMap.flatMap { case (student, _) =>
+		val studentAssesmentComponentMap: Map[String, AssessmentComponent] = studentMarksMap.flatMap { case (student, _) =>
 			assignmentUpstreamAssessmentGroupMap.find { case (group, upstreamGroup) =>
 				upstreamGroup.exists(_.membersIncludes(student))
 			}.map { case (group, _) => student.getWarwickId -> group.assessmentComponent }
 		}
 
-		studentMarks.asScala.map{ case (uniId, mark) =>
-			uniId -> studentAssessmentComponentMap.get(uniId).map(component => assessmentMembershipService.gradesForMark(component, mark.toInt)).getOrElse(Seq())
+		studentMarks.asScala.map{case(uniId, mark) =>
+			uniId -> studentAssesmentComponentMap.get(uniId).map(component => assessmentMembershipService.gradesForMark(component, mark.toInt)).getOrElse(Seq())
 		}.toMap
 	}
 
@@ -66,18 +66,14 @@ class GenerateGradesFromMarkCommandInternal(val module: Module, val assessment: 
 }
 
 trait GenerateGradesFromMarkPermissions extends RequiresPermissionsChecking with PermissionsCheckingMethods {
-
 	self: GenerateGradesFromMarkCommandState =>
 
 	override def permissionsCheck(p: PermissionsChecking) {
-		p.mustBeLinked(assessment, module)
 		p.PermissionCheck(Permissions.AssignmentMarkerFeedback.Manage, assessment)
 	}
-
 }
 
 trait GenerateGradesFromMarkCommandState {
-	def module: Module
 	def assessment: Assessment
 }
 

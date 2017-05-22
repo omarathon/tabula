@@ -49,7 +49,7 @@
 					<#if formValue.value?has_content>
 						<div class="feedback-comments">
 							<h5>Feedback comments</h5>
-							<p>${formValue.value!""}</p>
+							<p>${formValue.valueFormattedHtml!""}</p>
 						</div>
 					<#else>
 						<h5>No feedback comments added.</h5>

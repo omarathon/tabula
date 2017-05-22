@@ -2,6 +2,7 @@ package uk.ac.warwick.tabula.cm2.web
 
 import uk.ac.warwick.spring.Wire
 import uk.ac.warwick.tabula.AcademicYear
+import uk.ac.warwick.tabula.cm2.web.Routes.admin.department
 import uk.ac.warwick.tabula.data.model._
 import uk.ac.warwick.tabula.data.model.forms.Extension
 import uk.ac.warwick.tabula.data.model.markingworkflow.{CM2MarkingWorkflow, MarkingWorkflowStage}
@@ -35,13 +36,18 @@ object Routes {
 	object admin {
 		def apply() = s"$context/admin"
 		def feedbackTemplates(department: Department): String = apply() + s"/department/${encoded(department.code)}/settings/feedback-templates/"
-		def extensionSettings (department: Department): String = apply() + "/department/%s/settings/extensions" format encoded(department.code)
+		def extensionSettings(department: Department): String = apply() + "/department/%s/settings/extensions" format encoded(department.code)
 		object extensions {
-			def apply(): String = admin() + "/extensions"
-			def detail(extension: Extension): String = extensions() + s"/${extension.id}/detail/"
-			def modify(extension: Extension): String = extensions() + s"/${extension.id}/update/"
+			def apply(academicYear: AcademicYear): String = admin() + s"/extensions/${encoded(academicYear.startYear.toString)}"
+			def detail(extension: Extension): String = extensions(extension.assignment.academicYear) + s"/${extension.id}/detail/"
+			def modify(extension: Extension): String = extensions(extension.assignment.academicYear) + s"/${extension.id}/update/"
 		}
-		def feedbackReports (department: Department): String = apply() + "/department/%s/reports/feedback/" format encoded(department.code)
+		def feedbackReports(dept: Department, academicYear: AcademicYear): String =
+			department(dept, academicYear) + "/reports/feedback"
+		def setupSitsAssignments(dept: Department, academicYear: AcademicYear): String =
+			department(dept, academicYear) + "/setup-assignments"
+		def copyAssignments(dept: Department, academicYear: AcademicYear): String =
+			department(dept, academicYear) + "/copy-assignments"
 
 		object department {
 			def apply(department: Department): String =
@@ -51,10 +57,14 @@ object Routes {
 				admin() + s"/department/${encoded(department.code)}/${encoded(academicYear.startYear.toString)}"
 		}
 		object module {
-			def apply(module: Module): String =
-				admin() + s"/${encoded(module.code)}"
 			def apply(module: Module, academicYear: AcademicYear): String =
 				admin() + s"/${encoded(module.code)}/${encoded(academicYear.startYear.toString)}"
+			def copyAssignments(module: Module, academicYear: AcademicYear): String =
+				apply(module, academicYear) + "/copy-assignments"
+		}
+
+		object moduleWithinDepartment {
+			def apply(module: Module, academicYear: AcademicYear): String = department(module.adminDepartment, academicYear) + "#module-" + encoded(module.code)
 		}
 
 		object workflows {
@@ -73,7 +83,7 @@ object Routes {
 		}
 
 		object assignment {
-			def createAssignmentDetails(module: Module): String = admin() + s"/${encoded(module.code)}/assignments/new"
+			def createAssignmentDetails(module: Module, academicYear: AcademicYear): String = admin() + s"/${encoded(module.code)}/${encoded(academicYear.startYear.toString)}/assignments/new"
 			def editAssignmentDetails(assignment: Assignment): String = admin()  + s"/assignments/${encoded(assignment.id)}/edit"
 			def createOrEditFeedback(assignment: Assignment, createOrEditMode: String): String = admin() + s"/assignments/${encoded(assignment.id)}/${encoded(createOrEditMode)}/feedback"
 			def createOrEditStudents(assignment: Assignment, createOrEditMode: String): String = admin() + s"/assignments/${encoded(assignment.id)}/${encoded(createOrEditMode)}/students"
@@ -158,7 +168,7 @@ object Routes {
 			object audit {
 				def apply(assignment: Assignment): String = admin() + s"/audit/assignment/${encoded(assignment.id)}"
 			}
-			def extensions(assignment: Assignment): String = assignmentroot(assignment) + "/manage/extensions"
+			def extensions(assignment: Assignment): String = assignmentroot(assignment) + "/extensions"
 
 			def submitToTurnitin(assignment: Assignment): String = assignmentroot(assignment) + "/turnitin"
 		}
