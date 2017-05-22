@@ -30,6 +30,7 @@ class ListMarkerFeedbackController extends CourseworkController {
 		Mav("cm2/admin/assignments/markers/marker_list",
 			"department" -> command.assignment.module.adminDepartment,
 			"assignment" -> command.assignment,
+			"workflowType" -> command.assignment.cm2MarkingWorkflow.workflowType,
 			"marker" -> command.marker,
 			"feedbackByStage" -> command.apply()
 		)

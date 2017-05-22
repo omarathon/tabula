@@ -598,6 +598,7 @@ class Assignment
 
 	def newExtensionsCanBeRequested: Boolean = extensionsPossible && (!isClosed || allowExtensionsAfterCloseDate)
 
+	@Deprecated
 	def getMarkerFeedback(usercode: String, user: User, feedbackPosition: FeedbackPosition): Option[MarkerFeedback] = {
 		val parentFeedback = feedbacks.find(_.usercode == usercode)
 		parentFeedback.flatMap {
@@ -605,12 +606,14 @@ class Assignment
 		}
 	}
 
+	@Deprecated
 	def getMarkerFeedbackForCurrentPosition(usercode: String, user: User): Option[MarkerFeedback] = for {
 		feedback <- feedbacks.find(_.usercode == usercode)
 		position <- feedback.getCurrentWorkflowFeedbackPosition
 		markerFeedback <- getMarkerFeedbackForPositionInFeedback(user, position, feedback)
 	} yield markerFeedback
 
+	@Deprecated
 	def getLatestCompletedMarkerFeedback(usercode: String, user: User): Option[MarkerFeedback] = {
 		val parentFeedback = feedbacks.find(_.usercode == usercode)
 		parentFeedback.flatMap {
@@ -618,6 +621,7 @@ class Assignment
 		}
 	}
 
+	@Deprecated
 	def getAllMarkerFeedbacks(usercode: String, user: User): Seq[MarkerFeedback] = {
 		feedbacks.find(_.usercode == usercode).fold(Seq[MarkerFeedback]())(feedback =>
 			feedback.getCurrentWorkflowFeedbackPosition match {
@@ -628,6 +632,7 @@ class Assignment
 			})
 	}
 
+	@Deprecated
 	private def getUpToThirdFeedbacks(user: User, feedback: Feedback): Seq[MarkerFeedback] = {
 		if (this.markingWorkflow.hasThirdMarker && this.markingWorkflow.getStudentsThirdMarker(this, feedback.usercode).contains(user.getUserId)) {
 			Seq(feedback.getThirdMarkerFeedback, feedback.getSecondMarkerFeedback, feedback.getFirstMarkerFeedback).flatten
@@ -636,6 +641,7 @@ class Assignment
 		}
 	}
 
+	@Deprecated
 	private def getUpToSecondFeedbacks(user: User, feedback: Feedback): Seq[MarkerFeedback] = {
 		if (this.markingWorkflow.hasSecondMarker && this.markingWorkflow.getStudentsSecondMarker(this, feedback.usercode).contains(user.getUserId)) {
 			Seq(feedback.getSecondMarkerFeedback, feedback.getFirstMarkerFeedback).flatten
@@ -644,6 +650,7 @@ class Assignment
 		}
 	}
 
+	@Deprecated
 	private def getUpToFirstFeedbacks(user: User, feedback: Feedback): Seq[MarkerFeedback] = {
 		if (this.markingWorkflow.getStudentsFirstMarker(this, feedback.usercode).contains(user.getUserId)) {
 			Seq(feedback.getFirstMarkerFeedback).flatten
@@ -652,6 +659,7 @@ class Assignment
 		}
 	}
 
+	@Deprecated
 	private def getMarkerFeedbackForPositionInFeedback(user: User, feedbackPosition: FeedbackPosition, feedback: Feedback): Option[MarkerFeedback] = {
 		feedbackPosition match {
 			case FirstFeedback =>
@@ -676,6 +684,7 @@ class Assignment
 	 * Optionally returns the first marker for the given student ID
 	 * Returns none if this assignment doesn't have a valid marking workflow attached
 	 */
+	@Deprecated
 	def getStudentsFirstMarker(usercode: String): Option[User] =
 		Option(markingWorkflow)
 			.flatMap(_.getStudentsFirstMarker(this, usercode))
@@ -685,6 +694,7 @@ class Assignment
 	 * Optionally returns the second marker for the given student ID
 	 * Returns none if this assignment doesn't have a valid marking workflow attached
 	 */
+	@Deprecated
 	def getStudentsSecondMarker(usercode: String): Option[User] =
 		Option(markingWorkflow)
 			.flatMap(_.getStudentsSecondMarker(this, usercode))
@@ -694,6 +704,7 @@ class Assignment
 		* Optionally returns the second marker for the given student ID
 		* Returns none if this assignment doesn't have a valid marking workflow attached
 		*/
+	@Deprecated
 	def getStudentsThirdMarker(usercode: String): Option[User] =
 		Option(markingWorkflow)
 			.flatMap(_.getStudentsThirdMarker(this, usercode))
@@ -703,17 +714,20 @@ class Assignment
 	 * Optionally returns the submissions that are to be marked by the given user
 	 * Returns none if this assignment doesn't have a valid marking workflow attached
 	 */
+	@Deprecated
 	def getMarkersSubmissions(marker: User): Seq[Submission] = {
 		if (markingWorkflow != null) markingWorkflow.getSubmissions(this, marker)
 		else Seq()
 	}
 
 	//Return all first markes along with total students allocated
+	@Deprecated
 	def firstMarkersWithStudentAllocationCountMap: Map[User, Int] = {
 		firstMarkerMap.map { case (usercode, userGrp) => userLookup.getUserByUserId(usercode) -> userGrp.size }
 	}
 
 	//Return all second markes along with total students allocated
+	@Deprecated
 	def secondMarkersWithStudentAllocationCountMap: Map[User, Int] = {
 		secondMarkerMap.map { case (usercode, userGrp) => userLookup.getUserByUserId(usercode) -> userGrp.size }
 	}

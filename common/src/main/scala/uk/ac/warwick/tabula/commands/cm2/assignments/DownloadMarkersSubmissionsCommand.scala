@@ -2,14 +2,16 @@ package uk.ac.warwick.tabula.commands.cm2.assignments
 
 import uk.ac.warwick.tabula.commands.cm2.assignments.markers.CanProxy
 import uk.ac.warwick.tabula.commands.{Description, _}
-import uk.ac.warwick.tabula.data.model.Assignment
-import uk.ac.warwick.tabula.data.model.MarkingState._
+import uk.ac.warwick.tabula.data.model.{Assignment, MarkerFeedback, Submission}
+import uk.ac.warwick.tabula.JavaImports._
 import uk.ac.warwick.tabula.permissions._
 import uk.ac.warwick.tabula.services._
 import uk.ac.warwick.tabula.services.fileserver.RenderableFile
 import uk.ac.warwick.tabula.system.permissions.{PermissionsChecking, PermissionsCheckingMethods, RequiresPermissionsChecking}
 import uk.ac.warwick.tabula.{CurrentUser, ItemNotFoundException}
 import uk.ac.warwick.userlookup.User
+
+import scala.collection.JavaConverters._
 
 
 /**
@@ -29,24 +31,13 @@ object DownloadMarkersSubmissionsCommand {
 }
 
 class DownloadMarkersSubmissionsCommand(val assignment: Assignment, val marker: User, val submitter: CurrentUser)
-	extends CommandInternal[RenderableFile] with CanProxy {
+	extends CommandInternal[RenderableFile] with DownloadMarkersSubmissionsCommandState with CanProxy {
 
 	self: ZipServiceComponent with AssessmentServiceComponent with StateServiceComponent =>
 
 	override def applyInternal(): RenderableFile = {
-		val submissions = assignment.getMarkersSubmissions(marker)
-
-		// TODO - Maybe we should do some validation here instead or disable the link if there are no submissions
-		if (submissions.isEmpty) throw new ItemNotFoundException
-
-		// do not download submissions where the marker has completed marking
-		val filteredSubmissions = submissions.filter{ submission =>
-			assignment.getAllMarkerFeedbacks(submission.usercode, marker).headOption.exists(mf => mf.state != MarkingCompleted)
-		}
-
-		zipService.getSomeSubmissionsZip(filteredSubmissions)
+		zipService.getSomeSubmissionsZip(submissions)
 	}
-
 }
 
 trait DownloadMarkersSubmissionsDescription extends Describable[RenderableFile] {
@@ -56,13 +47,11 @@ trait DownloadMarkersSubmissionsDescription extends Describable[RenderableFile] 
 	override lazy val eventName = "DownloadMarkersSubmissions"
 
 	override def describe(d: Description) {
-		val downloads = assignment.getMarkersSubmissions(marker)
-
 		d.assignment(assignment)
-			.submissions(downloads)
-			.studentIds(downloads.flatMap(_.universityId))
-			.studentUsercodes(downloads.map(_.usercode))
-			.properties("submissionCount" -> downloads.size)
+			.submissions(submissions)
+			.studentIds(submissions.flatMap(_.universityId))
+			.studentUsercodes(submissions.map(_.usercode))
+			.properties("submissionCount" -> submissions.size)
 	}
 
 }
@@ -84,4 +73,14 @@ trait DownloadMarkersSubmissionsCommandState {
 	def assignment: Assignment
 	def marker: User
 	def submitter: CurrentUser
+	var markerFeedback: JList[MarkerFeedback] = JArrayList()
+	def students: Seq[User] = markerFeedback.asScala.map(_.student)
+	// can only download these students submissions or a subset
+	def markersStudents: Seq[User] = assignment.cm2MarkerAllocations.filter(_.marker == marker).flatMap(_.students).distinct
+
+	lazy val submissions: Seq[Submission] = {
+		// filter out ones we aren't the marker for
+		val studentsToDownload = students.filter(markersStudents.contains).map(_.getUserId)
+		assignment.submissions.asScala.filter(s => studentsToDownload.contains(s.usercode))
+	}
 }

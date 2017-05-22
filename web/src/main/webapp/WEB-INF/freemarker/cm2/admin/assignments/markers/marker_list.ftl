@@ -21,6 +21,37 @@
 				<#if stage.nextStagesDescription?has_content>
 					<a class="btn btn-primary must-have-selected form-post" href="${markingCompleted}">Confirm selected and send to ${stage.nextStagesDescription?lower_case}</a>
 				</#if>
+
+				<div class="btn-group">
+					<button type="button" class="btn btn-default dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+						Download <span class="caret"></span>
+					</button>
+					<ul class="dropdown-menu">
+						<li><a class="form-post" href="<@routes.cm2.downloadMarkerSubmissions assignment marker />">Download all selected submissions</a></li>
+						<li><a href="#">Download all selected submissions as pdf</a></li>
+						<#if features.feedbackTemplates && assignment.hasFeedbackTemplate>
+							<li>
+								<a class="btn use-tooltip" title="Download feedback templates for all students as a ZIP file." href="<@routes.cm2.markerTemplatesZip assignment />" data-container="body">
+									Download feedback templates
+								</a>
+							</li>
+						</#if>
+						<#list workflowType.allPreviousStages(stage) as pStage>
+							<li><a href="#">Download feedback from ${pStage.description?lower_case}</a></li>
+						</#list>
+					</ul>
+				</div>
+
+				<div class="btn-group">
+					<button type="button" class="btn btn-default dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+						Upload <span class="caret"></span>
+					</button>
+					<ul class="dropdown-menu">
+						<li><a href="<@routes.cm2.markerUploadFeedback assignment stage marker />">Upload attachments</a></li>
+						<li><a href="<@routes.cm2.markerUploadMarks assignment stage marker />">Upload marks & feedback</a></li>
+					</ul>
+				</div>
+
 			</#if>
 			<#assign enhancedMarkerFeedbacks = mapGet(feedbackByStage, stage)/>
 			<table class="table table-striped marking-table">
@@ -88,8 +119,6 @@
 	(function($) {
 
 		var $body = $('body');
-
-
 
 		// on cancel collapse the row and nuke the form
 		$body.on('click', '.cancel', function(e){
