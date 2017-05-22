@@ -104,7 +104,6 @@ $(function(){
 			});
 
 			$('#mark-plagiarised-selected-button:not(.disabled)', $outerContainer).click(function(event){
-
 				event.preventDefault();
 
 				var $checkedBoxes = $(".collection-checkbox:checked", $container);
