@@ -1,11 +1,10 @@
 <#escape x as x?html>
-	<h1>Delete assignment</h1>
-
+	<div class="deptheader">
+		<h1>Delete assignment</h1>
+		<h4 class="with-related">${assignment.name}</h4>
+	</div>
 	<#assign submitUrl><@routes.cm2.assignmentdelete assignment /></#assign>
 	<@f.form method="post" action=submitUrl commandName="deleteAssignmentCommand">
-
-		<h2>${assignment.name} (${assignment.academicYear.label})</h2>
-
 		<!-- global errors -->
 		<@f.errors cssClass="error" />
 

@@ -41,7 +41,7 @@ class DeleteAssignmentController extends CourseworkController {
 			showForm(form, assignment)
 		} else {
 			form.apply()
-			RedirectForce(Routes.home)
+			Redirect(Routes.admin.department(assignment.module.adminDepartment, assignment.academicYear))
 		}
 	}
 }
