@@ -77,7 +77,7 @@ private class ExamTimetableHttpTimetableFetchingService(examTimetableConfigurati
 				logger.warn(s"Tried to get exam timetable for $param but could find no such user")
 				Future(EventList(Nil, None))
 			case user =>
-				val endpoint = s"${examTimetableConfiguration.examTimetableUrl}$param.xml"
+				val endpoint = s"${examTimetableConfiguration.examTimetableUrl}timetable.xml"
 
 				val trustedAppHeaders = TrustedApplicationUtils.getRequestHeaders(
 					applicationManager.getCurrentApplication,
