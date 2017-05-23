@@ -60,7 +60,7 @@ trait EditMarkingWorkflowValidation extends ModifyMarkingWorkflowValidation with
 
 		markerValidation(errors, w.workflowType)
 
-		if (department.cm2MarkingWorkflows.exists(w => w.id != w.id && w.academicYear == academicYear && w.name == workflowName)) {
+		if (department.cm2MarkingWorkflows.exists(dw => dw.id != w.id && dw.academicYear == academicYear && dw.name == workflowName)) {
 			errors.rejectValue("workflowName", "name.duplicate.markingWorkflow", Array(workflowName), null)
 		}
 
