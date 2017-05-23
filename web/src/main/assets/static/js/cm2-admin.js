@@ -222,6 +222,46 @@
         });
     });
 
+	/**
+	 * Special case for downloading submissions as PDF.
+	 * Does a check for non PDF files in submissions before fetching the download
+	 */
+	$(function(){
+		$('a.download-pdf').on('click', function(e){
+			var $this = $(this);
+			e.preventDefault();
+			if(!$this.hasClass("disabled") && $this.closest('.disabled').length === 0) {
+				var $modal = $('#download-pdf-modal'), action = this.href;
+				if ($this.data('href')) {
+					action = $this.data('href')
+				}
+				var postData = $('div.form-post-container').find('.collection-checkbox:checked').map(function(){
+					var $input = $(this);
+					return $input.prop('name') + '=' + $input.val();
+				}).get().join('&');
+				$.post(action, postData, function(data){
+					if (data.submissionsWithNonPDFs.length === 0) {
+						// Use native click instead of trigger because there's no click handler for the marker version
+						$modal.find('.btn.btn-primary').get(0).click();
+					} else {
+						$modal.find('.count').html(data.submissionsWithNonPDFs.length);
+						var $submissionsContainer = $modal.find('.submissions').empty();
+						$.each(data.submissionsWithNonPDFs, function(i, submission){
+							var fileList = $('<ul/>');
+							$.each(submission.nonPDFFiles, function(i, file){
+								fileList.append($('<li/>').html(file));
+							});
+							$submissionsContainer.append($('<li/>').append(
+								(submission.name.length > 0) ? submission.name + ' (' + submission.universityId + ')' : submission.universityId
+							).append(fileList))
+						});
+						$modal.modal('show');
+					}
+				});
+			}
+		});
+	});
+
     exports.initBigList = function ($scope) {
 		$scope = $scope || $('body');
 
