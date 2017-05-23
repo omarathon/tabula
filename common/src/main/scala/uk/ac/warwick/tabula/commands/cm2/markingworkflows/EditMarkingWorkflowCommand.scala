@@ -18,10 +18,10 @@ import scala.collection.JavaConverters._
 object EditMarkingWorkflowCommand {
 	def apply(department:Department, academicYear: AcademicYear, workflow: CM2MarkingWorkflow) =
 		new EditMarkingWorkflowCommandInternal(department, academicYear, workflow)
-			with ComposableCommand[CM2MarkingWorkflow]
+			with ComposableCommand[Option[CM2MarkingWorkflow]]
 			with EditMarkingWorkflowValidation
 			with MarkingWorkflowDepartmentPermissions
-			with ModifyMarkingWorkflowDescription
+			with EditMarkingWorkflowDescription
 			with EditMarkingWorkflowState
 			with AutowiringCM2MarkingWorkflowServiceComponent
 			with AutowiringUserLookupComponent
@@ -31,34 +31,36 @@ object EditMarkingWorkflowCommand {
 class EditMarkingWorkflowCommandInternal(
 	val department: Department,
 	val academicYear: AcademicYear,
-	val workflow: CM2MarkingWorkflow) extends CommandInternal[CM2MarkingWorkflow] {
+	w: CM2MarkingWorkflow) extends CommandInternal[Option[CM2MarkingWorkflow]] {
 
 	self: EditMarkingWorkflowState with CM2MarkingWorkflowServiceComponent with UserLookupComponent =>
 
-	workflowName = workflow.name
+	val workflow = Some(w)
+
+	workflowName = w.name
 	extractMarkers match { case (a, b) =>
 		markersA = JArrayList(a)
 		markersB = JArrayList(b)
 	}
 
-	def applyInternal(): CM2MarkingWorkflow = {
-		workflow.name = workflowName
-		workflow.replaceMarkers(markersAUsers, markersBUsers)
-		cm2MarkingWorkflowService.save(workflow)
-		workflow
-	}
+	def applyInternal(): Option[CM2MarkingWorkflow] = workflow.map(w => {
+		w.name = workflowName
+		w.replaceMarkers(markersAUsers, markersBUsers)
+		cm2MarkingWorkflowService.save(w)
+		w
+	})
 }
 
 trait EditMarkingWorkflowValidation extends ModifyMarkingWorkflowValidation with StringUtils {
 
 	self: EditMarkingWorkflowState with UserLookupComponent =>
 
-	override def validate(errors: Errors) {
+	override def validate(errors: Errors): Unit = workflow.foreach( w => {
 		rejectIfEmptyOrWhitespace(errors, "workflowName", "NotEmpty")
 
-		markerValidation(errors, workflow.workflowType)
+		markerValidation(errors, w.workflowType)
 
-		if (department.cm2MarkingWorkflows.exists(w => w.id != workflow.id && w.academicYear == academicYear && w.name == workflowName)) {
+		if (department.cm2MarkingWorkflows.exists(w => w.id != w.id && w.academicYear == academicYear && w.name == workflowName)) {
 			errors.rejectValue("workflowName", "name.duplicate.markingWorkflow", Array(workflowName), null)
 		}
 
@@ -66,9 +68,9 @@ trait EditMarkingWorkflowValidation extends ModifyMarkingWorkflowValidation with
 		lazy val removedMarkerAs: Set[Usercode] = existingMarkerAs -- markersA.asScala.toSet
 		lazy val removedMarkerBs: Set[Usercode] = existingMarkerBs -- markersB.asScala.toSet
 
-		if(!workflow.canDeleteMarkers) {
+		if(!w.canDeleteMarkers) {
 			val errorCode =
-				if (workflow.studentsChooseMarkers) "markingWorkflow.studentsChoose.cannotRemoveMarkers"
+				if (w.studentsChooseMarkers) "markingWorkflow.studentsChoose.cannotRemoveMarkers"
 				else "markingWorkflow.markers.cannotRemoveMarkers"
 
 			if(removedMarkerAs.nonEmpty) {
@@ -80,19 +82,19 @@ trait EditMarkingWorkflowValidation extends ModifyMarkingWorkflowValidation with
 			}
 		}
 
-	}
+	})
 }
 
 trait EditMarkingWorkflowState extends ModifyMarkingWorkflowState {
 	this: UserLookupComponent =>
-	def  workflow: CM2MarkingWorkflow
+	def  workflow: Option[CM2MarkingWorkflow]
 
-	protected def extractMarkers: (Seq[Usercode], Seq[Usercode]) = {
-		workflow.markersByRole.values.toList match {
+	protected def extractMarkers: (Seq[Usercode], Seq[Usercode]) = workflow.map(w => {
+		w.markersByRole.values.toList match {
 			case a :: b => (a.map(_.getUserId), b.headOption.getOrElse(Nil).map(_.getUserId))
-			case _ => throw new IllegalArgumentException(s"workflow ${workflow.id} has no markers")
+			case _ => throw new IllegalArgumentException(s"workflow ${w.id} has no markers")
 		}
-	}
+	}).getOrElse((Nil, Nil))
 }
 
 trait ModifyMarkingWorkflowValidation extends SelfValidating {
@@ -123,7 +125,7 @@ trait ModifyMarkingWorkflowValidation extends SelfValidating {
 }
 
 
-trait ModifyMarkingWorkflowDescription extends Describable[CM2MarkingWorkflow] {
+trait EditMarkingWorkflowDescription extends Describable[Option[CM2MarkingWorkflow]] {
 	self: ModifyMarkingWorkflowState =>
 
 	def describe(d: Description) {
@@ -143,6 +145,7 @@ trait ModifyMarkingWorkflowState {
 
 	// bindable
 	var workflowName: String = _
+	var workflowType: MarkingWorkflowType = _
 	// all the current workflows have at most 2 sets of markers
 	var markersA: JList[Usercode] = _
 	var markersB: JList[Usercode] = _

@@ -23,7 +23,7 @@ class AddMarkingWorkflowCommandTest extends TestBase with Mockito with Validator
 		val dept = Fixtures.department("in")
 
 
-		val validator = new AddMarkingWorkflowValidation with AddMarkingWorkflowState with UserLookupComponent {
+		val validator = new AddMarkingWorkflowValidation with ModifyMarkingWorkflowState with UserLookupComponent {
 			val userLookup = userlookupService
 			val department = dept
 			val academicYear = AcademicYear(2016)
@@ -32,7 +32,7 @@ class AddMarkingWorkflowCommandTest extends TestBase with Mockito with Validator
 			markersB = JArrayList()
 		}
 
-		val cmd = new AddMarkingWorkflowCommandInternal(dept, AcademicYear(2016)) with AddMarkingWorkflowState with CM2MarkingWorkflowServiceComponent with UserLookupComponent {
+		val cmd = new AddMarkingWorkflowCommandInternal(dept, AcademicYear(2016)) with ModifyMarkingWorkflowState with CM2MarkingWorkflowServiceComponent with UserLookupComponent {
 			val userLookup = userlookupService
 			val cm2MarkingWorkflowService = workflowService
 			workflowName = "name"

@@ -1,6 +1,7 @@
 package uk.ac.warwick.tabula.commands.groups.admin
 
 import org.joda.time.DateTime
+import uk.ac.warwick.tabula.AutowiringTopLevelUrlComponent
 import uk.ac.warwick.tabula.JavaImports.{JArrayList, _}
 import uk.ac.warwick.tabula.commands.groups.admin.DownloadRegistersAsPdfHelper.{DisplayCheck, DisplayName, SortOrder}
 import uk.ac.warwick.tabula.commands.profiles.{MemberPhotoUrlGeneratorComponent, PhotosWarwickMemberPhotoUrlGeneratorComponent}
@@ -9,6 +10,7 @@ import uk.ac.warwick.tabula.data.{AutowiringFileDaoComponent, FileDaoComponent}
 import uk.ac.warwick.tabula.pdf.{CombinesPdfs, FreemarkerXHTMLPDFGeneratorWithFileStorageComponent, PDFGeneratorWithFileStorageComponent}
 import uk.ac.warwick.tabula.services._
 import uk.ac.warwick.tabula.web.views.{AutowiredTextRendererComponent, TextRendererComponent}
+
 import scala.collection.JavaConverters._
 
 trait AutowiringDownloadRegistersAsPdfCommandHelper
@@ -22,6 +24,7 @@ trait AutowiringDownloadRegistersAsPdfCommandHelper
 		with AutowiringUserLookupComponent
 		with AutowiringProfileServiceComponent
 		with AutowiringUserSettingsServiceComponent
+		with AutowiringTopLevelUrlComponent
 
 object DownloadRegistersAsPdfHelper {
 
