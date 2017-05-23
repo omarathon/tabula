@@ -11,7 +11,7 @@ import freemarker.ext.beans.BeanModel
 import freemarker.template.{DefaultObjectWrapper, _}
 import org.hibernate.proxy.HibernateProxyHelper
 import uk.ac.warwick.tabula.JavaImports._
-import uk.ac.warwick.tabula.{RequestInfo, ScalaConcurrentMapHelpers}
+import uk.ac.warwick.tabula.{CurrentUser, NoCurrentUser, RequestInfo, ScalaConcurrentMapHelpers}
 import uk.ac.warwick.tabula.helpers.Logging
 import uk.ac.warwick.tabula.permissions.{Permission, Permissions, PermissionsTarget, ScopelessPermission}
 import uk.ac.warwick.tabula.services.{AutowiringSecurityServiceComponent, SecurityService, SecurityServiceComponent}
@@ -152,7 +152,7 @@ class ScalaHashModel(sobj: Any, wrapper: ScalaBeansWrapper, useWrapperCache: Boo
 		def clear(): Unit = cache.clear()
 	}
 
-	private def user = RequestInfo.fromThread.get.user
+	private def user: CurrentUser = RequestInfo.fromThread.map(_.user).getOrElse(NoCurrentUser())
 
 	private def canDo(perms: Seq[Permission]) = perms forall {
 		case permission: ScopelessPermission => securityService.can(user, permission)
