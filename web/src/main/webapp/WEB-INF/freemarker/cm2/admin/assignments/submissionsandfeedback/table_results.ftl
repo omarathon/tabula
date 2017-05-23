@@ -19,7 +19,7 @@
 		<#else>
 			<div class="submission-feedback-results">
 				<#if (results.students?size > 0)>
-					<table id="submission-feedback-info" class="table table-striped table-condensed table-hover table-sortable table-checkable sticky-table-headers">
+					<table id="submission-feedback-info" class="submission-feedback-list table table-striped table-condensed table-hover table-sortable table-checkable sticky-table-headers">
 					<colgroup class="student">
 						<col class="checkbox" />
 						<col class="student-info" />
@@ -72,8 +72,8 @@
 
 					<thead>
 					<tr>
-						<th class="for-check-all sorter-false"><input  type="checkbox" class="collection-check-all" title="Select all/none" /> </th>
-						<th class="sorter-false">Student</th>
+						<th class="for-check-all"><input  type="checkbox" class="collection-check-all" title="Select all/none" /> </th>
+						<th>Student</th>
 
 						<th class="submission" colspan="${submissionColspan?c}">
 							Submission
@@ -91,36 +91,36 @@
 						<th class="student" colspan="2"></th>
 
 						<th class="submission">Files</th>
-						<th class="submission">Submitted</th>
-						<th class="submission">Status</th>
+						<th class="submission sortable">Submitted</th>
+						<th class="submission sortable">Status</th>
 						<#if assignment.wordCountField??>
-							<th class="submission" title="Declared word count">Words</th>
+							<th class="submission sortable" title="Declared word count">Words</th>
 						</#if>
 						<#if assignment.markingWorkflow?? || assignment.cm2MarkingWorkflow??>
 							<#if assignment.cm2Assignment>
 								<#assign submissionColspan=submissionColspan+results.workflowMarkers?size />
 								<#list results.workflowMarkers as marker_col>
-									<th class="submission">${marker_col}</th>
+									<th class="submission sortable">${marker_col}</th>
 								</#list>
 							<#else>
-								<th class="submission">First Marker</th>
-								<th class="submission">Second Marker</th>
+								<th class="submission sortable">First Marker</th>
+								<th class="submission sortable">Second Marker</th>
 							</#if>
 						</#if>
 
 
 						<#if results.hasOriginalityReport>
-							<th class="plagiarism">Report</th>
+							<th class="plagiarism sortable">Report</th>
 						</#if>
 
-						<th class="feedback">Files</th>
-						<th class="feedback">Updated</th>
+						<th class="feedback sortable">Files</th>
+						<th class="feedback sortable">Updated</th>
 						<#if assignment.collectMarks>
-							<th class="feedback">Mark</th>
-							<th class="feedback">Grade</th>
+							<th class="feedback sortable">Mark</th>
+							<th class="feedback sortable">Grade</th>
 						</#if>
 						<th class="feedback">Summary</th>
-						<th class="feedback">Status</th>
+						<th class="feedback sortable">Status</th>
 					</tr>
 					</thead>
 
@@ -182,15 +182,9 @@
 									<span class="label label-info">Markable</span>
 								</#if>
 								<#if submission??>
-								<#-- Downloaded -->
+									<#-- Downloaded -->
 									<#if enhancedSubmission.downloaded>
 										<span class="label label-info">Downloaded</span>
-									</#if>
-								<#-- Plagiarised -->
-									<#if submission.suspectPlagiarised>
-										<i class="icon-exclamation-sign use-tooltip" title="Suspected of being plagiarised"></i>
-									<#elseif submission.investigationCompleted>
-										<i class="icon-ok-sign use-tooltip" title="Plagiarism investigation completed"></i>
 									</#if>
 								</#if>
 								<@sd.submission_status submission coursework.enhancedExtension coursework.enhancedFeedback submissionfeedbackinfo />
@@ -213,6 +207,10 @@
 													${markerUser.fullName}
 												</#if>
 											</td>
+										</#list>
+									<#else>
+										<#list results.workflowMarkers as markerRole>
+											<td></td>
 										</#list>
 									</#if>
 								<#else>
@@ -369,15 +367,8 @@
 
 		$('.fixed-container').fixHeaderFooter();
 
-		$submissionFeedbackResultsTable = $(".submission-feedback-results table");
-		$submissionFeedbackResultsTable.tablesorter({
-			headers: {
-					0: { sorter: false },
-					2: { sorter: false },
-					3: { sorter: false },
-					4: { sorter: false },
-					5: { sorter: false }
-			},
+		var $submissionFeedbackResultsTable = $(".submission-feedback-results table");
+		$submissionFeedbackResultsTable.sortableTable({
 			textExtraction: function(node) {
 				var $el = $(node);
 				if ($el.hasClass('originality-report')) {
@@ -394,7 +385,9 @@
 				}
 			}
 		});
-		$submissionFeedbackResultsTable.bigList();
+
+		Coursework.initBigList();
+
 		$('.submission-feedback-results').wideTables();
 		// We probably just grew a scrollbar, so let's trigger a window resize
 		$(window).trigger('resize.ScrollToFixed');

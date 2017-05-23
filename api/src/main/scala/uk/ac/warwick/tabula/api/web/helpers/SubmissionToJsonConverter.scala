@@ -1,16 +1,15 @@
 package uk.ac.warwick.tabula.api.web.helpers
 
-import uk.ac.warwick.tabula.DateFormats
 import uk.ac.warwick.tabula.JavaImports._
-import uk.ac.warwick.tabula.api.web.controllers.TopLevelUrlAware
 import uk.ac.warwick.tabula.commands.coursework.assignments.SubmissionAndFeedbackCommand
 import uk.ac.warwick.tabula.data.model.Submission
 import uk.ac.warwick.tabula.web.Routes
+import uk.ac.warwick.tabula.{DateFormats, TopLevelUrlComponent}
 
 import scala.util.Try
 
 trait SubmissionToJsonConverter {
-	self: TopLevelUrlAware =>
+	self: TopLevelUrlComponent =>
 
 	def jsonSubmissionObject(submission: Submission): Map[String, Any] = {
 		Map(

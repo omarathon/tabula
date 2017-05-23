@@ -8,7 +8,7 @@ import uk.ac.warwick.tabula.pdf.FreemarkerXHTMLPDFGeneratorComponent
 import uk.ac.warwick.tabula.services.{ModuleAndDepartmentServiceComponent, TermServiceComponent, UserLookupComponent}
 import uk.ac.warwick.tabula.timetables.EventOccurrence
 import uk.ac.warwick.tabula.web.views.{AutowiredTextRendererComponent, FullCalendarEvent, PDFView}
-import uk.ac.warwick.tabula.{AcademicYear, CurrentUser}
+import uk.ac.warwick.tabula.{AcademicYear, AutowiringTopLevelUrlComponent, CurrentUser}
 
 trait DownloadsTimetableCalendar {
 
@@ -117,4 +117,5 @@ trait DownloadsTimetableCalendar {
 		) with FreemarkerXHTMLPDFGeneratorComponent
 			with AutowiredTextRendererComponent
 			with PhotosWarwickMemberPhotoUrlGeneratorComponent
+			with AutowiringTopLevelUrlComponent
 }

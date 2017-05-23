@@ -2,13 +2,11 @@ package uk.ac.warwick.tabula.web.controllers.sysadmin
 
 import org.joda.time.DateTime
 import org.quartz.Scheduler
-import org.springframework.beans.factory.annotation.Value
 import org.springframework.format.annotation.DateTimeFormat
 import org.springframework.scala.jdbc.core.JdbcTemplate
 import org.springframework.stereotype.Controller
 import org.springframework.web.bind.annotation.{ModelAttribute, PathVariable, RequestMapping, RequestParam}
 import uk.ac.warwick.spring.Wire
-import uk.ac.warwick.tabula.DateFormats
 import uk.ac.warwick.tabula.commands.scheduling.imports.{ImportProfilesCommand, RecheckMissingRowsCommand}
 import uk.ac.warwick.tabula.commands.{Appliable, Command, Description, ReadOnly}
 import uk.ac.warwick.tabula.data.model.{StaffMember, StudentMember}
@@ -23,6 +21,7 @@ import uk.ac.warwick.tabula.services.{ModuleAndDepartmentService, ProfileService
 import uk.ac.warwick.tabula.validators.WithinYears
 import uk.ac.warwick.tabula.web.views.JSONView
 import uk.ac.warwick.tabula.web.{Mav, Routes}
+import uk.ac.warwick.tabula.{AutowiringTopLevelUrlComponent, DateFormats}
 import uk.ac.warwick.util.web.Uri
 
 import scala.concurrent.Await
@@ -273,9 +272,7 @@ class CompleteScheduledNotificationsController extends BaseSysadminController {
 
 @Controller
 @RequestMapping(Array("/sysadmin/jobs/quartz-status"))
-class QuartzJobStatusController extends BaseSysadminController {
-
-	@Value("${toplevel.url}") var toplevelUrl: String = _
+class QuartzJobStatusController extends BaseSysadminController with AutowiringTopLevelUrlComponent {
 
 	@RequestMapping
 	def status(@RequestParam key: String): Mav = {

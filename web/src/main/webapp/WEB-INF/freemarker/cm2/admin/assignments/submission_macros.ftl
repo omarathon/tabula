@@ -3,12 +3,10 @@
 	<div class="stage<#if !stage.completed> incomplete<#if !stage.preconditionsMet> preconditions-not-met</#if></#if><#if stage.started && !stage.completed> current</#if>">
 		<#if stage.completed>
 			<#if stage.health.toString == 'Good'>
-				<i class="icon-ok"></i>
+				<i class="fa fa-check"></i>
 			<#else>
-				<i class="icon-remove"></i>
+				<i class="fa fa-times"></i>
 			</#if>
-		<#else>
-			<i class="icon-blank"></i>
 		</#if>
 		<#nested/>
 	</div>

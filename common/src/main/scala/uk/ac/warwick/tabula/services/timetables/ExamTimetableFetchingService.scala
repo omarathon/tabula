@@ -16,7 +16,7 @@ import uk.ac.warwick.tabula.profiles.web.Routes
 import uk.ac.warwick.tabula.services._
 import uk.ac.warwick.tabula.services.timetables.TimetableFetchingService.EventList
 import uk.ac.warwick.tabula.timetables.{TimetableEvent, TimetableEventType}
-import uk.ac.warwick.tabula.{AcademicYear, AutowiringFeaturesComponent, CurrentUser, FeaturesComponent}
+import uk.ac.warwick.tabula._
 
 import scala.collection.JavaConverters._
 import scala.concurrent.Future
@@ -50,12 +50,12 @@ private class ExamTimetableHttpTimetableFetchingService(examTimetableConfigurati
 	extends StaffTimetableFetchingService with StudentTimetableFetchingService with Logging {
 
 	self: DispatchHttpClientComponent with TrustedApplicationsManagerComponent
-		with UserLookupComponent with TermServiceComponent with FeaturesComponent =>
+		with UserLookupComponent with TermServiceComponent with FeaturesComponent with TopLevelUrlComponent =>
 
 	// a dispatch response handler which reads XML from the response and parses it into a list of TimetableEvents
 	def handler(uniId: String): (Map[String, Seq[String]], Request) => Handler[Seq[TimetableEvent]] = { (_: Map[String,Seq[String]], req: dispatch.classic.Request) =>
 		req <> { node =>
-			ExamTimetableHttpTimetableFetchingService.parseXml(node, uniId, termService)
+			ExamTimetableHttpTimetableFetchingService.parseXml(node, uniId, termService, toplevelUrl)
 		}
 	}
 
@@ -77,7 +77,7 @@ private class ExamTimetableHttpTimetableFetchingService(examTimetableConfigurati
 				logger.warn(s"Tried to get exam timetable for $param but could find no such user")
 				Future(EventList(Nil, None))
 			case user =>
-				val endpoint = s"${examTimetableConfiguration.examTimetableUrl}$param.xml"
+				val endpoint = s"${examTimetableConfiguration.examTimetableUrl}timetable.xml"
 
 				val trustedAppHeaders = TrustedApplicationUtils.getRequestHeaders(
 					applicationManager.getCurrentApplication,
@@ -112,11 +112,12 @@ object ExamTimetableHttpTimetableFetchingService extends Logging {
 			with AutowiringUserLookupComponent
 			with AutowiringTermServiceComponent
 			with AutowiringFeaturesComponent
+			with AutowiringTopLevelUrlComponent
 
 		new CachedStaffAndStudentTimetableFetchingService(service, cacheName)
 	}
 
-	def parseXml(xml: Elem, universityId: String, termService: TermService): Seq[TimetableEvent] = {
+	def parseXml(xml: Elem, universityId: String, termService: TermService, topLevelUrl: String): Seq[TimetableEvent] = {
 		val timetable = ExamTimetableFetchingService.examTimetableFromXml(xml, termService)
 		val examProfile = (xml \\ "exam-profile" \\ "profile").text
 
@@ -136,7 +137,7 @@ object ExamTimetableHttpTimetableFetchingService extends Logging {
 				startTime = timetableExam.startDateTime.toLocalTime,
 				endTime = timetableExam.endDateTime.toLocalTime,
 				location = None,
-				comments = Some("More information available on the <a href=\"%s\">exam timetable</a>".format(Routes.Profile.examTimetable(universityId))),
+				comments = Some(s"""More information available on the <a href="$topLevelUrl${Routes.Profile.examTimetable(universityId)}">exam timetable</a>"""),
 				parent = TimetableEvent.Parent(),
 				staff = Nil,
 				students = Nil,

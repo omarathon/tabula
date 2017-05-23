@@ -38,7 +38,7 @@
 			<#assign moduleCustomPicker>
 				<div class="module-search input-append input-group">
 					<input class="module-search-query module-picker module prevent-reload form-control" type="text" value="" placeholder="Search for a module" />
-					<span class="add-on input-group-addon"><i class="icon-search fa fa-search"></i></span>
+					<span class="add-on input-group-addon"><i class="fa fa-search"></i></span>
 				</div>
 			</#assign>
 			<@filter name="modules" path="command.modules" placeholder=placeholder currentFilter=currentfilter allItems=command.allModules customPicker=moduleCustomPicker; module>

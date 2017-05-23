@@ -21,7 +21,7 @@
 
 			<ul class="file-list">
 				<#list incompatibleFiles as f>
-					<li><i class="icon-file"></i> ${f.name?html}</li>
+					<li>${f.name?html}</li>
 				</#list>
 			</ul>
 
