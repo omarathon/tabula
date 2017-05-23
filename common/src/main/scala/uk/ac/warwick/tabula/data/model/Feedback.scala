@@ -390,7 +390,7 @@ class AssignmentFeedback extends Feedback {
 
 	override def toEntityReference: AssignmentFeedbackEntityReference = new AssignmentFeedbackEntityReference().put(this)
 
-	def isMarkedByStage(stage: MarkingWorkflowStage): Boolean = {
+	override def isMarkedByStage(stage: MarkingWorkflowStage): Boolean = {
 		val currentStages = outstandingStages.asScala
 		val currentPosition = currentStages.headOption.map(_.order).getOrElse(0)
 

@@ -38,7 +38,7 @@ class OnlineMarkerFeedbackController extends CourseworkController {
 		mandatory(student),
 		mandatory(marker),
 		submitter,
-		GenerateGradesFromMarkCommand(mandatory(assignment.module), mandatory(assignment))
+		GenerateGradesFromMarkCommand(mandatory(assignment))
 	)
 
 	@RequestMapping(method = Array(GET, HEAD))

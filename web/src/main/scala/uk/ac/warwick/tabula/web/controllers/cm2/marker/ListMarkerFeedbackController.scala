@@ -8,10 +8,19 @@ import uk.ac.warwick.tabula.commands.Appliable
 import uk.ac.warwick.tabula.commands.cm2.assignments.markers.ListMarkerFeedbackCommand.EnhancedFeedbackByStage
 import uk.ac.warwick.tabula.commands.cm2.assignments.markers.{ListMarkerFeedbackCommand, ListMarkerFeedbackState}
 import uk.ac.warwick.tabula.data.model.Assignment
+import uk.ac.warwick.tabula.helpers.cm2.SubmissionAndFeedbackInfoFilters.SubmissionStates._
+import uk.ac.warwick.tabula.helpers.cm2.SubmissionAndFeedbackInfoFilters.PlagiarismStatuses._
+import uk.ac.warwick.tabula.helpers.cm2.SubmissionAndFeedbackInfoFilters.Statuses._
 import uk.ac.warwick.tabula.web.Mav
 import uk.ac.warwick.tabula.web.controllers.cm2.CourseworkController
 import uk.ac.warwick.userlookup.User
 
+
+object ListMarkerFeedbackController {
+	val AllPlagiarismFilters = Seq(NotCheckedForPlagiarism, CheckedForPlagiarism, MarkedPlagiarised)
+	val AllSubmissionFilters = Seq(Submitted, Unsubmitted, OnTime, WithExtension, LateSubmission, ExtensionRequested, ExtensionDenied, ExtensionGranted)
+	val AllMarkerStatuses = Seq(MarkedByMarker, NotMarkedByMarker, FeedbackByMarker, NoFeedbackByMarker, NotSentByMarker)
+}
 
 @Profile(Array("cm2Enabled"))
 @Controller
@@ -19,21 +28,31 @@ import uk.ac.warwick.userlookup.User
 class ListMarkerFeedbackController extends CourseworkController {
 
 	type Command = Appliable[EnhancedFeedbackByStage] with ListMarkerFeedbackState
+	import ListMarkerFeedbackController._
 
-	@ModelAttribute
+	@ModelAttribute("command")
 	def command(@PathVariable assignment: Assignment, @PathVariable marker: User, currentUser: CurrentUser): Command =
 		ListMarkerFeedbackCommand(assignment, marker, currentUser)
 
 
-	@RequestMapping(method = Array(GET, HEAD))
-	def list(@ModelAttribute command: Command): Mav = {
-		Mav("cm2/admin/assignments/markers/marker_list",
+	@RequestMapping(params=Array("!ajax"), headers=Array("!X-Requested-With"))
+	def list(@ModelAttribute("command") command: Command): Mav = {
+		Mav("cm2/admin/assignments/markers/assignment",
+			"allSubmissionStatesFilters" -> AllSubmissionFilters.filter(_.apply(command.assignment)),
+			"allPlagiarismFilters" -> AllPlagiarismFilters.filter(_.apply(command.assignment)),
+			"allMarkerStateFilters" -> AllMarkerStatuses.filter(_.apply(command.assignment)),
 			"department" -> command.assignment.module.adminDepartment,
-			"assignment" -> command.assignment,
-			"workflowType" -> command.assignment.cm2MarkingWorkflow.workflowType,
-			"marker" -> command.marker,
-			"feedbackByStage" -> command.apply()
+			"assignment" -> command.assignment
 		)
 	}
+
+	@RequestMapping
+	def listAjax(@ModelAttribute("command") command: Command): Mav =
+		Mav("cm2/admin/assignments/markers/marker_feedback_list",
+			"feedbackByStage" -> command.apply(),
+			"assignment" -> command.assignment,
+			"workflowType" -> command.assignment.cm2MarkingWorkflow.workflowType,
+			"marker" -> command.marker
+		).noLayout()
 
 }
