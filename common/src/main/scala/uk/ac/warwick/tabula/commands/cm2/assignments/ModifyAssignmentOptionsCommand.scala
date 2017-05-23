@@ -52,6 +52,7 @@ trait ModifyAssignmentOptionsPermissions extends RequiresPermissionsChecking wit
 	self: ModifyAssignmentOptionsCommandState =>
 
 	override def permissionsCheck(p: PermissionsChecking): Unit = {
+		notDeleted(assignment)
 		p.PermissionCheck(Permissions.Assignment.Update, assignment.module)
 	}
 }

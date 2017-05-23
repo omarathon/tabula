@@ -32,13 +32,15 @@ class EditAssignmentDetailsController extends AbstractAssignmentController {
 
 	def showForm(cmd: EditAssignmentDetailsCommand, @PathVariable assignment: Assignment): Mav = {
 		val module = assignment.module
+		val canDeleteAssignment = !assignment.deleted  && assignment.submissions.isEmpty && !assignment.hasReleasedFeedback
 		Mav("cm2/admin/assignments/edit_assignment_details",
 			"department" -> module.adminDepartment,
 			"module" -> module,
 			"academicYear" -> cmd.academicYear,
 			"reusableWorkflows" -> cmd.availableWorkflows,
 			"workflow" -> cmd.workflow,
-			"canDeleteMarkers" -> cmd.workflow.canDeleteMarkers)
+			"canDeleteMarkers" -> cmd.workflow.canDeleteMarkers,
+			"canDeleteAssignment" -> canDeleteAssignment)
 			.crumbs(Breadcrumbs.Department(assignment.module.adminDepartment, assignment.academicYear), Breadcrumbs.Assignment(assignment))
 	}
 

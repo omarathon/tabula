@@ -80,7 +80,7 @@ TODO grab values from the Routes object in code, as that's pretty equivalent and
 <#macro assignmentoptions assignment mode><@_u page="/admin/assignments/${assignment.id}/${mode}/options" /></#macro>
 <#macro assignmentreview assignment><@_u page="/admin/assignments/${assignment.id}/review" /></#macro>
 <#macro assignmentrequestaccess assignment><@_u page="/submission/${assignment.id}/request-access"/></#macro>
-
+<#macro assignmentdelete assignment><@_u page="/admin/assignments/${assignment.id}/delete"/></#macro>
 <#macro create_sitsassignments department academicYear="">
 	<#if academicYear?has_content>
 		<@_u page="/admin/department/${department.code}/${academicYear.startYear?c}/setup-assignments" />
