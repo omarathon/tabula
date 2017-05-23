@@ -3,10 +3,8 @@ package uk.ac.warwick.tabula.services
 import java.util.zip.{ZipEntry, ZipInputStream}
 
 import org.apache.commons.compress.archivers.zip.{ZipArchiveEntry, ZipArchiveInputStream}
-import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.stereotype.Service
 import uk.ac.warwick.spring.Wire
-import uk.ac.warwick.tabula.Features
 import uk.ac.warwick.tabula.commands.TaskBenchmarking
 import uk.ac.warwick.tabula.commands.coursework.DownloadFeedbackAsPdfCommand
 import uk.ac.warwick.tabula.commands.profiles.PhotosWarwickMemberPhotoUrlGeneratorComponent
@@ -18,17 +16,25 @@ import uk.ac.warwick.tabula.pdf.FreemarkerXHTMLPDFGeneratorWithFileStorageCompon
 import uk.ac.warwick.tabula.services.fileserver.RenderableFile
 import uk.ac.warwick.tabula.services.objectstore.AutowiringObjectStorageServiceComponent
 import uk.ac.warwick.tabula.web.views.AutowiredTextRendererComponent
+import uk.ac.warwick.tabula.{AutowiringFeaturesComponent, AutowiringTopLevelUrlComponent}
 import uk.ac.warwick.userlookup.{AnonymousUser, User}
 
 import scala.collection.JavaConverters._
 
 @Service
-class ZipService extends ZipCreator with AutowiringObjectStorageServiceComponent with SHAFileHasherComponent
-	with FreemarkerXHTMLPDFGeneratorWithFileStorageComponent with AutowiredTextRendererComponent with PhotosWarwickMemberPhotoUrlGeneratorComponent
-	with AutowiringFileDaoComponent with Logging with TaskBenchmarking {
-
-	@Autowired var features: Features = _
-	@Autowired var userLookup: UserLookupService = _
+class ZipService
+	extends ZipCreator
+		with AutowiringObjectStorageServiceComponent
+		with SHAFileHasherComponent
+		with FreemarkerXHTMLPDFGeneratorWithFileStorageComponent
+		with AutowiredTextRendererComponent
+		with PhotosWarwickMemberPhotoUrlGeneratorComponent
+		with AutowiringFileDaoComponent
+		with AutowiringTopLevelUrlComponent
+		with AutowiringFeaturesComponent
+		with AutowiringUserLookupComponent
+		with Logging
+		with TaskBenchmarking {
 
 	val idSplitSize = 4
 

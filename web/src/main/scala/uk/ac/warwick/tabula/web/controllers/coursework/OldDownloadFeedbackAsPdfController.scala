@@ -4,7 +4,7 @@ import org.springframework.context.annotation.Profile
 import org.springframework.stereotype.Controller
 import org.springframework.web.bind.annotation.{ModelAttribute, PathVariable, RequestMapping}
 import uk.ac.warwick.spring.Wire
-import uk.ac.warwick.tabula.{CurrentUser, PermissionDeniedException}
+import uk.ac.warwick.tabula.{AutowiringTopLevelUrlComponent, CurrentUser, PermissionDeniedException}
 import uk.ac.warwick.tabula.commands._
 import uk.ac.warwick.tabula.commands.coursework.DownloadFeedbackAsPdfCommand
 import uk.ac.warwick.tabula.commands.profiles.PhotosWarwickMemberPhotoUrlGeneratorComponent
@@ -44,7 +44,7 @@ class OldDownloadFeedbackAsPdfController extends OldCourseworkController {
 				"feedback" -> command.apply(),
 				"studentId" -> CurrentUser.studentIdentifier(student)
 			)
-		) with FreemarkerXHTMLPDFGeneratorComponent with AutowiredTextRendererComponent with PhotosWarwickMemberPhotoUrlGeneratorComponent
+		) with FreemarkerXHTMLPDFGeneratorComponent with AutowiredTextRendererComponent with PhotosWarwickMemberPhotoUrlGeneratorComponent with AutowiringTopLevelUrlComponent
 	}
 
 }

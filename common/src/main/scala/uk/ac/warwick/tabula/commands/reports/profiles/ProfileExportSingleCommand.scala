@@ -12,7 +12,7 @@ import uk.ac.warwick.tabula.services._
 import uk.ac.warwick.tabula.services.attendancemonitoring.{AttendanceMonitoringServiceComponent, AutowiringAttendanceMonitoringServiceComponent}
 import uk.ac.warwick.tabula.system.permissions.{PermissionsChecking, PermissionsCheckingMethods, RequiresPermissionsChecking}
 import uk.ac.warwick.tabula.web.views.AutowiredTextRendererComponent
-import uk.ac.warwick.tabula.{AcademicYear, CurrentUser}
+import uk.ac.warwick.tabula.{AcademicYear, AutowiringTopLevelUrlComponent, CurrentUser}
 import uk.ac.warwick.userlookup.User
 
 import scala.collection.JavaConverters._
@@ -36,6 +36,7 @@ object ProfileExportSingleCommand {
 			with AutowiringMeetingRecordServiceComponent
 			with AutowiringSmallGroupServiceComponent
 			with AutowiringFileDaoComponent
+			with AutowiringTopLevelUrlComponent
 			with ComposableCommand[Seq[FileAttachment]]
 			with ProfileExportSingleDescription
 			with ProfileExportSinglePermissions

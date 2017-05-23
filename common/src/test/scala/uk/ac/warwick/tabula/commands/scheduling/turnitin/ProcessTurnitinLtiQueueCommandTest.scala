@@ -44,8 +44,8 @@ class ProcessTurnitinLtiQueueCommandTest extends TestBase with Mockito {
 		val mockTurnitinLtiQueueService: TurnitinLtiQueueService = smartMock[TurnitinLtiQueueService]
 		val cmd = new ProcessTurnitinLtiQueueCommandInternal with TurnitinLtiQueueServiceComponent
 			with TurnitinLtiServiceComponent with AssessmentServiceComponent with FileAttachmentServiceComponent
-			with OriginalityReportServiceComponent {
-			override val topLevelUrl: String = ""
+			with OriginalityReportServiceComponent with TopLevelUrlComponent {
+			override val toplevelUrl: String = ""
 			override val turnitinLtiQueueService: TurnitinLtiQueueService = mockTurnitinLtiQueueService
 			override val turnitinLtiService: TurnitinLtiService = mockTurnitinLtiService
 			override val assessmentService: AssessmentService = mockAssessmentService

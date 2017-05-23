@@ -8,7 +8,7 @@ import uk.ac.warwick.tabula.data.model.{Assignment, Member, Module, Submission}
 import uk.ac.warwick.tabula.commands._
 import uk.ac.warwick.tabula.system.permissions.{PermissionsChecking, PermissionsCheckingMethods, RequiresPermissionsChecking}
 import uk.ac.warwick.tabula.permissions.{CheckablePermission, Permissions}
-import uk.ac.warwick.tabula.{CurrentUser, PermissionDeniedException}
+import uk.ac.warwick.tabula.{AutowiringTopLevelUrlComponent, CurrentUser, PermissionDeniedException}
 import uk.ac.warwick.tabula.web.views.{AutowiredTextRendererComponent, PDFView}
 import uk.ac.warwick.tabula.pdf.FreemarkerXHTMLPDFGeneratorComponent
 import uk.ac.warwick.tabula.services.{AutowiringSubmissionServiceComponent, SubmissionServiceComponent}
@@ -36,7 +36,7 @@ class OldDownloadSubmissionReceiptAsPdfController extends OldCourseworkControlle
 			Map(
 				"submission" -> command.apply()
 			)
-		) with FreemarkerXHTMLPDFGeneratorComponent with AutowiredTextRendererComponent with PhotosWarwickMemberPhotoUrlGeneratorComponent
+		) with FreemarkerXHTMLPDFGeneratorComponent with AutowiredTextRendererComponent with PhotosWarwickMemberPhotoUrlGeneratorComponent with AutowiringTopLevelUrlComponent
 	}
 
 }
@@ -65,7 +65,7 @@ class OldDownloadSubmissionReceiptForStudentAsPdfController extends OldCoursewor
 			Map(
 				"submission" -> command.apply()
 			)
-		) with FreemarkerXHTMLPDFGeneratorComponent with AutowiredTextRendererComponent with PhotosWarwickMemberPhotoUrlGeneratorComponent
+		) with FreemarkerXHTMLPDFGeneratorComponent with AutowiredTextRendererComponent with PhotosWarwickMemberPhotoUrlGeneratorComponent with AutowiringTopLevelUrlComponent
 	}
 
 }

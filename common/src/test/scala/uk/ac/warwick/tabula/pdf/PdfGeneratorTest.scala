@@ -1,12 +1,12 @@
 package uk.ac.warwick.tabula.pdf
 
-import uk.ac.warwick.tabula.TestBase
+import uk.ac.warwick.tabula.{TestBase, TopLevelUrlComponent}
 import java.io.{ByteArrayOutputStream, File, FileOutputStream}
-import uk.ac.warwick.tabula.commands.profiles.{PhotosWarwickConfig, PhotosWarwickConfigComponent, PhotosWarwickMemberPhotoUrlGenerator, MemberPhotoUrlGeneratorComponent}
+
+import uk.ac.warwick.tabula.commands.profiles.{MemberPhotoUrlGeneratorComponent, PhotosWarwickConfig, PhotosWarwickConfigComponent, PhotosWarwickMemberPhotoUrlGenerator}
 import uk.ac.warwick.tabula.web.views.{TextRenderer, TextRendererComponent}
 
 class PdfGeneratorTest extends TestBase{
-
 
 	trait MockMemberPhotoUrlGeneratorComponent extends MemberPhotoUrlGeneratorComponent {
 		val photoUrlGenerator = new PhotosWarwickMemberPhotoUrlGenerator with PhotosWarwickConfigComponent {
@@ -14,7 +14,11 @@ class PdfGeneratorTest extends TestBase{
 		}
 	}
 
-	val pdfGenerator: PdfGenerator = new FreemarkerXHTMLPDFGeneratorComponent with MockMemberPhotoUrlGeneratorComponent with TextRendererComponent {
+	trait MockTopLevelUrlComponent extends TopLevelUrlComponent {
+		val toplevelUrl: String = "http://tabula.warwick.ac.uk"
+	}
+
+	val pdfGenerator: PdfGenerator = new FreemarkerXHTMLPDFGeneratorComponent with MockMemberPhotoUrlGeneratorComponent with TextRendererComponent with MockTopLevelUrlComponent {
 		def textRenderer:TextRenderer = new TextRenderer {
 			def renderTemplate(templateId: String, model: Any): String = {
 				templateId match {

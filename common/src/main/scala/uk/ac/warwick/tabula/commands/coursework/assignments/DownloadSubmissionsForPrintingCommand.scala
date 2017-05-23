@@ -14,17 +14,18 @@ import uk.ac.warwick.tabula.permissions.Permissions
 import uk.ac.warwick.tabula.services.fileserver.{RenderableAttachment, RenderableFile}
 import uk.ac.warwick.tabula.system.permissions.{PermissionsChecking, PermissionsCheckingMethods, RequiresPermissionsChecking}
 import uk.ac.warwick.tabula.web.views.AutowiredTextRendererComponent
-import uk.ac.warwick.tabula.{CurrentUser, ItemNotFoundException}
+import uk.ac.warwick.tabula.{AutowiringTopLevelUrlComponent, CurrentUser, ItemNotFoundException}
 import uk.ac.warwick.userlookup.User
 
 import scala.collection.JavaConverters._
 
 trait DownloadAdminSubmissionsForPrintingCommandHelper
 	extends FreemarkerXHTMLPDFGeneratorComponent
-	with AutowiredTextRendererComponent
-	with PhotosWarwickMemberPhotoUrlGeneratorComponent
-	with AutowiringFileDaoComponent
-	with CombinesPdfs
+		with AutowiredTextRendererComponent
+		with PhotosWarwickMemberPhotoUrlGeneratorComponent
+		with AutowiringFileDaoComponent
+		with AutowiringTopLevelUrlComponent
+		with CombinesPdfs
 
 object DownloadAdminSubmissionsForPrintingCommand {
 

@@ -1,12 +1,11 @@
 package uk.ac.warwick.tabula.api.web.helpers
 
-import uk.ac.warwick.tabula.DateFormats
-import uk.ac.warwick.tabula.api.web.controllers.TopLevelUrlAware
+import uk.ac.warwick.tabula.{DateFormats, TopLevelUrlComponent}
 import uk.ac.warwick.tabula.data.model.Assignment
 import uk.ac.warwick.tabula.web.Routes
 
 trait AssignmentToJsonConverter {
-	self: TopLevelUrlAware with AssessmentMembershipInfoToJsonConverter =>
+	self: TopLevelUrlComponent with AssessmentMembershipInfoToJsonConverter =>
 
 	def jsonAssignmentObject(assignment: Assignment): Map[String, Any] = {
 		val basicInfo = Map(
