@@ -5,9 +5,6 @@ import uk.ac.warwick.tabula.system.permissions.{PermissionsChecking, Permissions
 import org.springframework.validation.Errors
 import uk.ac.warwick.tabula.CurrentUser
 import uk.ac.warwick.tabula.data.model._
-import uk.ac.warwick.tabula.data.model.markingworkflow.CM2MarkingWorkflow
-import uk.ac.warwick.tabula.data.model.notifications.cm2.ReleaseToMarkerNotification
-import uk.ac.warwick.tabula.helpers.Logging
 import uk.ac.warwick.tabula.permissions.Permissions
 import uk.ac.warwick.tabula.services.{AutowiringCM2MarkingWorkflowServiceComponent, CM2MarkingWorkflowServiceComponent}
 import uk.ac.warwick.userlookup.User
@@ -16,16 +13,16 @@ import scala.collection.JavaConverters._
 
 
 object ReleaseForMarkingCommand {
-	def apply(assignment: Assignment, workflow: CM2MarkingWorkflow, user: CurrentUser) = new ReleaseForMarkingCommandInternal(assignment, workflow, user)
+	def apply(assignment: Assignment, user: CurrentUser) = new ReleaseForMarkingCommandInternal(assignment, user)
 		with ComposableCommand[Seq[AssignmentFeedback]]
 		with ReleaseForMarkingValidation
 		with ReleaseForMarkingPermissions
 		with ReleaseForMarkingDescription
-		with FirstMarkerReleaseNotifier
+		with FeedbackReleasedNotifier
 		with AutowiringCM2MarkingWorkflowServiceComponent
 }
 
-class ReleaseForMarkingCommandInternal(val assignment: Assignment, val workflow: CM2MarkingWorkflow, val currentUser: CurrentUser)
+class ReleaseForMarkingCommandInternal(val assignment: Assignment, val currentUser: CurrentUser)
 	extends CommandInternal[Seq[AssignmentFeedback]] with ReleaseForMarkingState with ReleaseForMarkingRequest with ReleasedState {
 
 	self: CM2MarkingWorkflowServiceComponent  =>
@@ -69,7 +66,6 @@ trait ReleaseForMarkingDescription extends Describable[Seq[AssignmentFeedback]] 
 
 trait ReleaseForMarkingState extends SelectedStudentsState with UserAware {
 	def assignment: Assignment
-	def workflow: CM2MarkingWorkflow
 	def currentUser: CurrentUser
 	val user: User = currentUser.apparentUser
 }
@@ -81,16 +77,11 @@ trait ReleaseForMarkingRequest extends SelectedStudentsRequest {
 	def studentsWithoutKnownMarkers: Seq[String] = {
 		val neverAssigned = students.asScala -- feedbacks.map(_.usercode)
 		val markerRemoved = feedbacks.filter(f => {
-			val initialStageFeedback = f.markerFeedback.asScala.filter(mf => workflow.initialStages.contains(mf.stage))
+			val initialStageFeedback = f.markerFeedback.asScala.filter(mf => assignment.cm2MarkingWorkflow.initialStages.contains(mf.stage))
 			initialStageFeedback.exists(_.marker == null)
 		}).map(_.usercode)
 		neverAssigned ++ markerRemoved
 	}
 	def studentsAlreadyReleased: Seq[String] = feedbacks.filter(_.outstandingStages.asScala.nonEmpty).map(_.usercode)
 	def unreleasableSubmissions: Seq[String] = studentsWithoutKnownMarkers ++ studentsAlreadyReleased
-}
-
-trait FirstMarkerReleaseNotifier extends FeedbackReleasedNotifier[Seq[AssignmentFeedback]] {
-	this: ReleaseForMarkingState with ReleasedState with UserAware with Logging =>
-	def blankNotification = new ReleaseToMarkerNotification
 }

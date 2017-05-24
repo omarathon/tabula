@@ -11,7 +11,6 @@ import uk.ac.warwick.tabula.data.model.markingworkflow.{FinalStage, MarkingWorkf
 import uk.ac.warwick.tabula.data.model._
 import uk.ac.warwick.tabula.data.model.notifications.cm2.{ReleaseToMarkerNotification, ReturnToMarkerNotification}
 import uk.ac.warwick.tabula.events.NotificationHandling
-import uk.ac.warwick.tabula.helpers.Logging
 import uk.ac.warwick.tabula.permissions.Permissions
 import uk.ac.warwick.tabula.services.{AutowiringCM2MarkingWorkflowServiceComponent, CM2MarkingWorkflowServiceComponent, FeedbackServiceComponent}
 import uk.ac.warwick.userlookup.User
@@ -28,7 +27,7 @@ object MarkingCompletedCommand {
 			with MarkingCompletedDescription
 			with AutowiringCM2MarkingWorkflowServiceComponent
 			with FinaliseFeedbackComponentImpl
-			with MarkerReleaseNotifier
+			with FeedbackReleasedNotifier
 }
 
 class MarkingCompletedCommandInternal(val assignment: Assignment, val marker: User, val submitter: CurrentUser, val stage: MarkingWorkflowStage)
@@ -112,11 +111,6 @@ trait MarkingCompletedState extends CanProxy with UserAware {
 
 	// do not update previously released feedback or feedback belonging to other markers
 	lazy val feedbackForRelease: Seq[MarkerFeedback] = markerFeedback.asScala.filter(_.marker == marker) -- releasedFeedback
-}
-
-trait MarkerReleaseNotifier extends FeedbackReleasedNotifier[Seq[AssignmentFeedback]] {
-	self: MarkingCompletedState with ReleasedState with UserAware with Logging =>
-	def blankNotification = new ReleaseToMarkerNotification
 }
 
 trait MarkerCompletedNotificationCompletion extends CompletesNotifications[Unit] {
