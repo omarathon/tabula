@@ -1,4 +1,4 @@
-<#import "*/_submission_details.ftl" as sd />
+<#import "../submissionsandfeedback/_submission_details.ftl" as sd />
 
 <div role="tabpanel" class="tab-pane active" id="${student.userId}${command.stage.name}submission">
 	<#if command.submission?has_content>
