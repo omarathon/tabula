@@ -43,7 +43,7 @@ class DownloadAllFeedbackController extends CourseworkController {
 
 	@ModelAttribute("command")
 	def selectedFeedbacksCommand(@PathVariable assignment: Assignment) =
-		new DownloadSelectedFeedbackCommand(assignment, user)
+		new DownloadSelectedFeedbackCommand(mandatory(assignment), user)
 
 	@RequestMapping
 	def getSelected(@ModelAttribute("command") command: DownloadSelectedFeedbackCommand, @PathVariable assignment: Assignment): Mav = {
