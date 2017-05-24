@@ -65,10 +65,10 @@ class OldDownloadAllFeedbackController extends OldCourseworkController {
 
 	@ModelAttribute("command")
 	def selectedFeedbacksCommand(@PathVariable module: Module, @PathVariable assignment: Assignment) =
-		new DownloadSelectedFeedbackCommand(module, assignment, user)
+		new OldDownloadSelectedFeedbackCommand(module, assignment, user)
 
 	@RequestMapping
-	def getSelected(@ModelAttribute("command") command: DownloadSelectedFeedbackCommand, @PathVariable assignment: Assignment): Mav = {
+	def getSelected(@ModelAttribute("command") command: OldDownloadSelectedFeedbackCommand, @PathVariable assignment: Assignment): Mav = {
 		command.apply() match {
 			case Left(renderable) =>
 				Mav(new RenderableFileView(renderable))
