@@ -173,19 +173,9 @@
 								<li class="must-have-selected">
 									<#if assignment.markingWorkflow??>
 										<#assign releaseForMarking_url><@routes.coursework.releaseForMarking assignment /></#assign>
-										<@fmt.permission_button
-											permission='Submission.ReleaseForMarking'
-											scope=assignment
-											action_descr='release for marking'
-											classes='form-post'
-											href=releaseForMarking_url
-											id="release-submissions-button"
-											tooltip="Release the submissions for marking. First markers will be able to download their submissions."
-											data_attr='data-container=body'>
-												Release selected for marking
-										</@fmt.permission_button>
-									<#elseif assignment.cm2MarkingWorkflow??>
+									<#else>
 										<#assign releaseForMarking_url><@routes.cm2.releaseForMarking assignment /></#assign>
+									</#if>
 										<@fmt.permission_button
 											permission='Submission.ReleaseForMarking'
 											scope=assignment
@@ -197,7 +187,6 @@
 											data_attr='data-container=body'>
 												Release selected for marking
 										</@fmt.permission_button>
-									</#if>
 								</li>
 								<li class="must-have-selected">
 									<#if assignment.markingWorkflow??>
