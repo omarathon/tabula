@@ -46,9 +46,9 @@
 	<#if submission?has_content>
 		<#if submission.late>
 			<#if enhancedExtension?has_content && enhancedExtension.extension.approved>
-				<span class="label label-important use-tooltip" title="<@extensionLateness enhancedExtension.extension submission/>" data-container="body">Late</span>
+				<span class="label label-danger use-tooltip" title="<@extensionLateness enhancedExtension.extension submission/>" data-container="body">Late</span>
 			<#else>
-				<span class="label label-important use-tooltip" title="<@lateness submission />" data-container="body">Late</span>
+				<span class="label label-danger use-tooltip" title="<@lateness submission />" data-container="body">Late</span>
 			</#if>
 		<#elseif submission.authorisedLate>
 			<span class="label label-info use-tooltip" data-html="true" title="Extended until <@fmt.date date=enhancedExtension.extension.expiryDate capitalise=false shortMonth=true />" data-container="body">Within Extension</span>
