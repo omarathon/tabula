@@ -1,7 +1,7 @@
 package uk.ac.warwick.tabula.commands.coursework.markerfeedback
 
 import org.joda.time.DateTime
-import uk.ac.warwick.tabula.commands.coursework.assignments.ReleaseForMarkingCommand
+import uk.ac.warwick.tabula.commands.coursework.assignments.OldReleaseForMarkingCommand
 import uk.ac.warwick.tabula.data.model._
 import uk.ac.warwick.tabula.services._
 import uk.ac.warwick.tabula.{MockUserLookup, Mockito, TestBase}
@@ -42,7 +42,7 @@ class ReleaseForMarkingTest extends TestBase with Mockito {
 			}
 
 			// override studentsWithKnownMarkers so we dont have to mock-up a whole workflow
-			val command = new ReleaseForMarkingCommand(assignment.module, assignment, currentUser.apparentUser)
+			val command = new OldReleaseForMarkingCommand(assignment.module, assignment, currentUser.apparentUser)
 			with MockUserLookupComponent with TestSupport {
 				override def studentsWithKnownMarkers = Seq("0678022", "1170836", "9170726")
 			}

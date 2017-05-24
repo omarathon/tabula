@@ -3,7 +3,7 @@ package uk.ac.warwick.tabula.data.model.triggers
 import uk.ac.warwick.spring.Wire
 import uk.ac.warwick.tabula.Features
 import uk.ac.warwick.tabula.JavaImports._
-import uk.ac.warwick.tabula.commands.coursework.assignments.ReleaseForMarkingCommand
+import uk.ac.warwick.tabula.commands.coursework.assignments.OldReleaseForMarkingCommand
 import uk.ac.warwick.tabula.commands.coursework.turnitin.SubmitToTurnitinCommand
 import uk.ac.warwick.tabula.data.model.Assignment
 import uk.ac.warwick.tabula.helpers.Logging
@@ -26,7 +26,7 @@ trait HandlesAssignmentTrigger extends Logging {
 
 	def handleAssignment(usercodes: Seq[String]): Unit = {
 		if (assignment.automaticallyReleaseToMarkers && assignment.hasWorkflow) {
-			val releaseToMarkersCommand = ReleaseForMarkingCommand(assignment.module, assignment, new AnonymousUser)
+			val releaseToMarkersCommand = OldReleaseForMarkingCommand(assignment.module, assignment, new AnonymousUser)
 			releaseToMarkersCommand.students = JArrayList(usercodes)
 			releaseToMarkersCommand.confirm = true
 			releaseToMarkersCommand.onBind(null)
