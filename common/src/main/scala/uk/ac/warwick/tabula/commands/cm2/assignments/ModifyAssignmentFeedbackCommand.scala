@@ -77,6 +77,7 @@ trait ModifyAssignmentFeedbackPermissions extends RequiresPermissionsChecking wi
 	self: ModifyAssignmentFeedbackCommandState =>
 
 	override def permissionsCheck(p: PermissionsChecking): Unit = {
+		notDeleted(assignment)
 		p.PermissionCheck(Permissions.Assignment.Update, assignment.module)
 	}
 }

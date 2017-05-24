@@ -38,7 +38,7 @@ object CourseworkBreadcrumbs {
 	}
 
 	case class Assignment(assignment: model.Assignment, override val active: Boolean = false) extends BreadCrumb {
-		val title: String = s"${assignment.name} (${assignment.module.code.toUpperCase})"
+		val title: String = s"${assignment.name} (${assignment.module.code.toUpperCase}, ${assignment.academicYear})"
 		val url: Option[String] = Some(Routes.admin.assignment.submissionsandfeedback(assignment))
 	}
 }

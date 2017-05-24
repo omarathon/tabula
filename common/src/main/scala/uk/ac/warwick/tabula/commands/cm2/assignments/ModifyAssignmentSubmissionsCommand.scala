@@ -60,6 +60,7 @@ trait ModifyAssignmentSubmissionsPermissions extends RequiresPermissionsChecking
 	self: ModifyAssignmentSubmissionsCommandState =>
 
 	override def permissionsCheck(p: PermissionsChecking): Unit = {
+		notDeleted(assignment)
 		p.PermissionCheck(Permissions.Assignment.Update, assignment.module)
 	}
 }
