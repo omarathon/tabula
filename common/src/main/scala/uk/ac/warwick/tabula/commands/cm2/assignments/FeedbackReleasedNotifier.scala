@@ -14,7 +14,7 @@ trait FeedbackReleasedNotifier[A] extends Notifies[A, Seq[MarkerFeedback]] {
 	def blankNotification: ReleaseToMarkerNotification
 
 	def emit(commandResult: A): Seq[Notification[MarkerFeedback, Assignment]] = {
-		// emit notifications to each second marker that has new feedback
+		// emit notifications to each marker that has new feedback
 		val markerMap : Map[String, Seq[MarkerFeedback]] = newReleasedFeedback.asScala.groupBy(_.marker.getUserId)
 
 		markerMap.map{ case (usercode, markerFeedback) =>

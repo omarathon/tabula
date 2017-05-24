@@ -760,7 +760,7 @@ class Assignment
 
 	// later we may do more complex checks to see if this particular markingWorkflow requires that feedback is released manually
 	// for now all markingWorkflow will require you to release feedback so if one exists for this assignment - provide it
-	def mustReleaseForMarking: Boolean = hasWorkflow
+	def mustReleaseForMarking: Boolean = hasWorkflow || cm2MarkingWorkflow != null
 
 	def needsFeedbackPublishing: Boolean = {
 		if (openEnded || dissertation || !collectSubmissions || _archived) {
