@@ -1,10 +1,16 @@
 package uk.ac.warwick.tabula.data.model.notifications.profiles.meetingrecord
 
-import org.joda.time.DateTime
-import uk.ac.warwick.tabula.{Fixtures, TestBase}
+import org.joda.time.{DateTime, DateTimeConstants}
 import uk.ac.warwick.tabula.data.model._
+import uk.ac.warwick.tabula.services.SecurityService
+import uk.ac.warwick.tabula.web.views.{FreemarkerRendering, ScalaBeansWrapper, ScalaFreemarkerConfiguration}
+import uk.ac.warwick.tabula.{Fixtures, Mockito, TestBase}
+import uk.ac.warwick.userlookup.User
 
-class MeetingRecordApprovalNotificationTest extends TestBase {
+class MeetingRecordApprovalNotificationTest extends TestBase with FreemarkerRendering with Mockito {
+
+	val freeMarkerConfig: ScalaFreemarkerConfiguration = newFreemarkerConfiguration()
+	freeMarkerConfig.getObjectWrapper.asInstanceOf[ScalaBeansWrapper].securityService = smartMock[SecurityService]
 
 	val agent: StaffMember = Fixtures.staff("1234567")
 	agent.firstName = "Tutor"
@@ -23,6 +29,22 @@ class MeetingRecordApprovalNotificationTest extends TestBase {
 
 		val notification = Notification.init(new NewMeetingRecordApprovalNotification, currentUser.apparentUser, meeting, relationship)
 		notification.title should be ("Personal tutor meeting record with Tutor Name needs review")
+	}
+
+	// TAB-5119
+	@Test def rendersOutsideThreadNewMeetingStudent() = {
+		val u = new User("cuscav")
+		u.setIsLoggedIn(true)
+		u.setFoundUser(true)
+		u.setWarwickId("0672089")
+
+		val meeting = new MeetingRecord(agent, relationship)
+		meeting.meetingDate = new DateTime(2017, DateTimeConstants.MARCH, 21, 18, 30, 0, 0)
+
+		val notification = Notification.init(new NewMeetingRecordApprovalNotification, u, meeting, relationship)
+
+		val notificationContent = renderToString(freeMarkerConfig.getTemplate(notification.content.template), notification.content.model)
+		notificationContent should startWith ("Tutor Name has created a record of your personal tutor meeting")
 	}
 
 	@Test def titleNewMeetingTutor() = withUser("cuscav", "0672089") {

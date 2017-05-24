@@ -1,3 +1,5 @@
+<#import "*/modal_macros.ftl" as modal />
+
 <div class="clearfix">
 	<div class="pull-right view-selector">
 		<form class="form-inline">
@@ -58,7 +60,7 @@
 									permission='Submission.Read'
 									scope=assignment
 									action_descr='download submissions'
-									classes='form-post'
+									classes='download-pdf'
 									href=download_url
 									tooltip='Download the submission files for the selected students as a PDF file'>
 										Download submissions as PDF
@@ -358,19 +360,20 @@
 				</div>
 			</div>
 		</div>
-
-		<div id="download-pdf-modal" class="modal hide fade">
-			<div class="modal-header">
-				<button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
-				<h3>Download submissions as PDF</h3>
-			</div>
-			<div class="modal-body">
-				<p>There are <span class="count"></span> submissions that have files that are not PDFs (shown below). The download will not include these files.</p>
-				<p><a class="long-running form-post btn btn-primary"
-						data-href="<@routes.cm2.submissionsPdf assignment/>?download" href="">Download submissions as PDF</a>
-				</p>
-				<ul class="submissions"></ul>
-			</div>
-		</div>
 	</#if>
+</div>
+
+<div id="download-pdf-modal" class="modal fade">
+	<@modal.wrapper>
+		<@modal.header>
+			<h3 class="modal-title">Download submissions as PDF</h3>
+		</@modal.header>
+		<@modal.body>
+			<p>There are <span class="count"></span> submissions that have files that are not PDFs (shown below). The download will not include these files.</p>
+			<p><a class="form-post btn btn-primary"
+						data-href="<@routes.cm2.submissionsPdf assignment/>?download" href="">Download submissions as PDF</a>
+			</p>
+			<ul class="submissions"></ul>
+		</@modal.body>
+	</@modal.wrapper>
 </div>

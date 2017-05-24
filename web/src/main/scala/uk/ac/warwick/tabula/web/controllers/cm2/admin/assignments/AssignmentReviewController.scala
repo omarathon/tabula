@@ -17,6 +17,7 @@ class AssignmentReviewController extends CourseworkController {
 
 	@ModelAttribute("command")
 	def command(@PathVariable assignment: Assignment): ViewViewableCommand[Assignment] = {
+		notDeleted(assignment)
 		new ViewViewableCommand(Permissions.Assignment.Read, mandatory(assignment))
 	}
 
