@@ -4,8 +4,8 @@ UPDATE markerfeedback set STAGE = 'dbl-first-marker' where STAGE = 'DblFirstMark
 UPDATE markerfeedback set STAGE = 'dbl-second-marker' where STAGE = 'DblSecondMarker';
 UPDATE markerfeedback set STAGE = 'dbl-final-marker' where STAGE = 'DblFinalMarker';
 UPDATE markerfeedback set STAGE = 'dbl-Completed' where STAGE = 'DblCompleted';
-UPDATE markerfeedback set STAGE = 'dbl-blnd-marker-a' where STAGE = 'DblBlndInitialMarker';
-UPDATE markerfeedback set STAGE = 'dbl-blnd-marker-b' where STAGE = 'DblBlndInitialMarker';
+UPDATE markerfeedback set STAGE = 'dbl-blnd-marker-a' where STAGE = 'DblBlndInitialMarkerA';
+UPDATE markerfeedback set STAGE = 'dbl-blnd-marker-b' where STAGE = 'DblBlndInitialMarkerB';
 UPDATE markerfeedback set STAGE = 'dbl-blnd-final-marker' where STAGE = 'DblBlndFinalMarker';
 UPDATE markerfeedback set STAGE = 'dbl-blnd-completed' where STAGE = 'DblBlndCompleted';
 UPDATE markerfeedback set STAGE = 'moderation-marker' where STAGE = 'ModerationMarker';
@@ -18,8 +18,8 @@ UPDATE STAGEMARKERS set STAGE = 'dbl-first-marker' where STAGE = 'DblFirstMarker
 UPDATE STAGEMARKERS set STAGE = 'dbl-second-marker' where STAGE = 'DblSecondMarker';
 UPDATE STAGEMARKERS set STAGE = 'dbl-final-marker' where STAGE = 'DblFinalMarker';
 UPDATE STAGEMARKERS set STAGE = 'dbl-Completed' where STAGE = 'DblCompleted';
-UPDATE STAGEMARKERS set STAGE = 'dbl-blnd-marker-a' where STAGE = 'DblBlndInitialMarker';
-UPDATE STAGEMARKERS set STAGE = 'dbl-blnd-marker-b' where STAGE = 'DblBlndInitialMarker';
+UPDATE STAGEMARKERS set STAGE = 'dbl-blnd-marker-a' where STAGE = 'DblBlndInitialMarkerA';
+UPDATE STAGEMARKERS set STAGE = 'dbl-blnd-marker-b' where STAGE = 'DblBlndInitialMarkerB';
 UPDATE STAGEMARKERS set STAGE = 'dbl-blnd-final-marker' where STAGE = 'DblBlndFinalMarker';
 UPDATE STAGEMARKERS set STAGE = 'dbl-blnd-completed' where STAGE = 'DblBlndCompleted';
 UPDATE STAGEMARKERS set STAGE = 'moderation-marker' where STAGE = 'ModerationMarker';
@@ -32,8 +32,8 @@ UPDATE OUTSTANDINGSTAGES set STAGE = 'dbl-first-marker' where STAGE = 'DblFirstM
 UPDATE OUTSTANDINGSTAGES set STAGE = 'dbl-second-marker' where STAGE = 'DblSecondMarker';
 UPDATE OUTSTANDINGSTAGES set STAGE = 'dbl-final-marker' where STAGE = 'DblFinalMarker';
 UPDATE OUTSTANDINGSTAGES set STAGE = 'dbl-Completed' where STAGE = 'DblCompleted';
-UPDATE OUTSTANDINGSTAGES set STAGE = 'dbl-blnd-marker-a' where STAGE = 'DblBlndInitialMarker';
-UPDATE OUTSTANDINGSTAGES set STAGE = 'dbl-blnd-marker-b' where STAGE = 'DblBlndInitialMarker';
+UPDATE OUTSTANDINGSTAGES set STAGE = 'dbl-blnd-marker-a' where STAGE = 'DblBlndInitialMarkerA';
+UPDATE OUTSTANDINGSTAGES set STAGE = 'dbl-blnd-marker-b' where STAGE = 'DblBlndInitialMarkerB';
 UPDATE OUTSTANDINGSTAGES set STAGE = 'dbl-blnd-final-marker' where STAGE = 'DblBlndFinalMarker';
 UPDATE OUTSTANDINGSTAGES set STAGE = 'dbl-blnd-completed' where STAGE = 'DblBlndCompleted';
 UPDATE OUTSTANDINGSTAGES set STAGE = 'moderation-marker' where STAGE = 'ModerationMarker';
