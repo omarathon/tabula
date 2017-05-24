@@ -98,7 +98,7 @@
 						<ul class="dropdown-menu">
 							<#if features.turnitin>
 								<#if features.turnitinSubmissions>
-									<li>
+									<li class="must-have-selected">
 										<#assign checkplagiarism_url><@routes.cm2.submitToTurnitin assignment/></#assign>
 										<@fmt.permission_button permission='Submission.CheckForPlagiarism' scope=assignment action_descr='check for plagiarism' href=checkplagiarism_url tooltip='Check for plagiarism'>
 											Check for plagiarism

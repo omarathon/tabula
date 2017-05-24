@@ -3,8 +3,8 @@ package uk.ac.warwick.tabula.commands.cm2.assignments
 import java.io.ByteArrayOutputStream
 
 import com.google.common.io.ByteSource
-import uk.ac.warwick.tabula.JavaImports.{JArrayList, _}
 import uk.ac.warwick.tabula.commands._
+import uk.ac.warwick.tabula.commands.cm2.assignments.DownloadSubmissionsForPrintingCommand.Result
 import uk.ac.warwick.tabula.commands.profiles.PhotosWarwickMemberPhotoUrlGeneratorComponent
 import uk.ac.warwick.tabula.data.model.MarkingState.MarkingCompleted
 import uk.ac.warwick.tabula.data.model.{Assignment, FileAttachment, Submission}
@@ -16,9 +16,6 @@ import uk.ac.warwick.tabula.system.permissions.{PermissionsChecking, Permissions
 import uk.ac.warwick.tabula.web.views.AutowiredTextRendererComponent
 import uk.ac.warwick.tabula.{AutowiringTopLevelUrlComponent, CurrentUser, ItemNotFoundException}
 import uk.ac.warwick.userlookup.User
-
-import scala.collection.JavaConverters._
-import DownloadSubmissionsForPrintingCommand.Result
 
 trait DownloadAdminSubmissionsForPrintingCommandHelper
 	extends FreemarkerXHTMLPDFGeneratorComponent
@@ -147,7 +144,7 @@ trait DownloadMarkerSubmissionsForPrintingPermissions extends RequiresPermission
 
 }
 
-trait DownloadSubmissionsForPrintingCommandState {
+trait DownloadSubmissionsForPrintingCommandState extends SelectedStudentsState {
 	def assignment: Assignment
 }
 
@@ -156,22 +153,12 @@ trait DownloadMarkerSubmissionsForPrintingCommandState extends DownloadSubmissio
 	def submitter: CurrentUser
 }
 
-trait DownloadSubmissionsForPrintingCommandRequest {
-
+trait DownloadSubmissionsForPrintingCommandRequest extends SelectedStudentsRequest {
 	self: DownloadSubmissionsForPrintingCommandState =>
-
-	var students: JList[String] = JArrayList()
-
-	def submissions: Seq[Submission]
 }
 
 trait DownloadAdminSubmissionsForPrintingCommandRequest extends DownloadSubmissionsForPrintingCommandRequest {
-
 	self: DownloadSubmissionsForPrintingCommandState =>
-
-	override def submissions: Seq[Submission] =
-		if (students.isEmpty) assignment.submissions.asScala
-		else students.asScala.flatMap { s => assignment.submissions.asScala.find(_.usercode == s) }
 }
 
 trait DownloadMarkerSubmissionsForPrintingCommandRequest extends DownloadSubmissionsForPrintingCommandRequest {
