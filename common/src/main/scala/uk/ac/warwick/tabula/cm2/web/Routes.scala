@@ -121,7 +121,7 @@ object Routes {
 					def apply(assignment: Assignment, marker: User): String = markerroot(assignment, marker) + "/marks-template"
 				}
 				object onlineFeedback {
-					def apply(assignment: Assignment, stage: MarkingWorkflowStage, marker: User): String = encoded(markerroot(assignment, marker) + s"${stage.name}/feedback/online")
+					def apply(assignment: Assignment, stage: MarkingWorkflowStage, marker: User): String = markerroot(assignment, marker) + s"/${encoded(stage.name)}/feedback/online"
 
 					object student {
 						def apply(assignment: Assignment, stage: MarkingWorkflowStage, marker: User, student: User): String =
