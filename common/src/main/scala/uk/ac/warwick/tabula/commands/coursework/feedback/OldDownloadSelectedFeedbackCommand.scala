@@ -16,7 +16,7 @@ import scala.collection.JavaConverters._
 /**
  * Download one or more submissions from an assignment, as a Zip.
  */
-class DownloadSelectedFeedbackCommand(val module: Module, val assignment: Assignment, user: CurrentUser)
+class OldDownloadSelectedFeedbackCommand(val module: Module, val assignment: Assignment, user: CurrentUser)
 	extends Command[Either[RenderableFile, JobInstance]] with ReadOnly {
 
 	mustBeLinked(assignment, module)

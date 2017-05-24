@@ -173,6 +173,9 @@
 								<li class="must-have-selected">
 									<#if assignment.markingWorkflow??>
 										<#assign releaseForMarking_url><@routes.coursework.releaseForMarking assignment /></#assign>
+									<#else>
+										<#assign releaseForMarking_url><@routes.cm2.releaseForMarking assignment /></#assign>
+									</#if>
 										<@fmt.permission_button
 											permission='Submission.ReleaseForMarking'
 											scope=assignment
@@ -184,9 +187,6 @@
 											data_attr='data-container=body'>
 												Release selected for marking
 										</@fmt.permission_button>
-									<#else>
-										<!--FIXME CM2 related link-->
-									</#if>
 								</li>
 								<li class="must-have-selected">
 									<#if assignment.markingWorkflow??>
