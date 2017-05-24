@@ -48,12 +48,12 @@ object ListMarkerFeedbackCommand {
 class ListMarkerFeedbackCommandInternal(val assignment:Assignment, val marker:User, val submitter: CurrentUser) extends CommandInternal[EnhancedFeedbackByStage]
 	with ListMarkerFeedbackState {
 
-	this: CM2MarkingWorkflowServiceComponent with CM2WorkflowProgressServiceComponent with MarkerProgress =>
+	self: CM2MarkingWorkflowServiceComponent with CM2WorkflowProgressServiceComponent with MarkerProgress =>
 
 	def applyInternal(): EnhancedFeedbackByStage = {
 		val enhancedFeedbackByStage = enhance(assignment, cm2MarkingWorkflowService.getAllFeedbackForMarker(assignment, marker))
 		enhancedFeedbackByStage.map{ case (stage, feedback) =>
-			val filtered = feedback.filter{ emf => benchmarkTask("Do marker feedback filtering") {
+			val filtered = benchmarkTask(s"Do marker feedback filtering for $stage.name") { feedback.filter { emf =>
 				val info = emf.workflowStudent.info
 				val itemExistsInPlagiarismFilters = plagiarismFilters.asScala.isEmpty || plagiarismFilters.asScala.exists(_.predicate(info))
 				val itemExistsInSubmissionStatesFilters = submissionStatesFilters.asScala.isEmpty || submissionStatesFilters.asScala.exists(_.predicate(info))

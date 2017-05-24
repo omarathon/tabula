@@ -38,11 +38,9 @@ abstract class FinaliseFeedbackCommandInternal(val assignment: Assignment, val m
 	this: FileDaoComponent with ZipServiceComponent =>
 
 	override def applyInternal(): Seq[Feedback] = {
-		markerFeedback.map { markerFeedback =>
-			this.copyToFeedback(markerFeedback)
-		}
+		markerFeedback.map(copyToFeedback)
 	}
-
+S
 	private def copyToFeedback(markerFeedback: MarkerFeedback): Feedback = {
 		val parent = markerFeedback.feedback
 

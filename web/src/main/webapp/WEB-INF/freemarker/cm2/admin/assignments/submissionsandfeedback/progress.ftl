@@ -1,6 +1,5 @@
 <#import "_submission_details.ftl" as sd />
 <#import "/WEB-INF/freemarker/_profile_link.ftl" as pl />
-<#import "*/_submission_details.ftl" as components />
 <#import "*/cm2_macros.ftl" as cm2_macros />
 
 <#escape x as x?html>
@@ -163,7 +162,7 @@
 										<#list submission.allAttachments as attachment>
 											<!-- Checking originality report for ${attachment.name} ... -->
 											<#if attachment.originalityReportReceived>
-												: <@components.originalityReport attachment />
+												: <@sd.originalityReport attachment />
 											</#if>
 										</#list>
 									</#if>

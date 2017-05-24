@@ -24,7 +24,7 @@ object ListMarkerFeedbackController {
 
 @Profile(Array("cm2Enabled"))
 @Controller
-@RequestMapping(value = Array("/${cm2.prefix}/admin/assignments/{assignment}/marker/{marker}/list"))
+@RequestMapping(value = Array("/${cm2.prefix}/admin/assignments/{assignment}/marker/{marker}"))
 class ListMarkerFeedbackController extends CourseworkController {
 
 	type Command = Appliable[EnhancedFeedbackByStage] with ListMarkerFeedbackState
@@ -35,24 +35,25 @@ class ListMarkerFeedbackController extends CourseworkController {
 		ListMarkerFeedbackCommand(assignment, marker, currentUser)
 
 
-	@RequestMapping(params=Array("!ajax"), headers=Array("!X-Requested-With"))
+	@RequestMapping()
 	def list(@ModelAttribute("command") command: Command): Mav = {
-		Mav("cm2/admin/assignments/markers/assignment",
-			"allSubmissionStatesFilters" -> AllSubmissionFilters.filter(_.apply(command.assignment)),
-			"allPlagiarismFilters" -> AllPlagiarismFilters.filter(_.apply(command.assignment)),
-			"allMarkerStateFilters" -> AllMarkerStatuses.filter(_.apply(command.assignment)),
-			"department" -> command.assignment.module.adminDepartment,
-			"assignment" -> command.assignment
-		)
+		val workflow = mandatory(command.assignment.cm2MarkingWorkflow)
+		if (ajax) {
+			Mav("cm2/admin/assignments/markers/assignment",
+				"allSubmissionStatesFilters" -> AllSubmissionFilters.filter(_.apply(command.assignment)),
+				"allPlagiarismFilters" -> AllPlagiarismFilters.filter(_.apply(command.assignment)),
+				"allMarkerStateFilters" -> AllMarkerStatuses.filter(_.apply(command.assignment)),
+				"department" -> command.assignment.module.adminDepartment,
+				"assignment" -> command.assignment
+			)
+		} else {
+			Mav("cm2/admin/assignments/markers/marker_feedback_list",
+				"feedbackByStage" -> command.apply(),
+				"assignment" -> command.assignment,
+				"workflowType" -> workflow.workflowType,
+				"marker" -> command.marker
+			).noLayout()
+		}
 	}
-
-	@RequestMapping
-	def listAjax(@ModelAttribute("command") command: Command): Mav =
-		Mav("cm2/admin/assignments/markers/marker_feedback_list",
-			"feedbackByStage" -> command.apply(),
-			"assignment" -> command.assignment,
-			"workflowType" -> command.assignment.cm2MarkingWorkflow.workflowType,
-			"marker" -> command.marker
-		).noLayout()
 
 }

@@ -10,7 +10,6 @@ import uk.ac.warwick.tabula.CurrentUser
 import uk.ac.warwick.tabula.cm2.web.Routes
 import uk.ac.warwick.tabula.commands.{Appliable, SelfValidating}
 import uk.ac.warwick.tabula.commands.cm2.assignments.markers.{MarkingCompletedCommand, MarkingCompletedState}
-import uk.ac.warwick.tabula.data.Transactions.transactional
 import uk.ac.warwick.tabula.data.model.{Assignment, AssignmentFeedback}
 import uk.ac.warwick.tabula.data.model.markingworkflow.MarkingWorkflowStage
 import uk.ac.warwick.tabula.web.Mav
@@ -31,32 +30,39 @@ class MarkingCompletedController extends CourseworkController {
 	def command(@PathVariable assignment: Assignment, @PathVariable marker: User, @PathVariable stage: MarkingWorkflowStage, currentUser: CurrentUser): Command =
 		MarkingCompletedCommand(mandatory(assignment), mandatory(marker), currentUser, mandatory(stage))
 
-	// shouldn't ever be called as a GET - if it is, just redirect back to the submission list
-	@RequestMapping(method = Array(GET))
+	// shouldn't ever be called as anything other than POST - if it is, just redirect back to the submission list
+	@RequestMapping
 	def get(@ModelAttribute("command") command: Command) =
 		Redirect(Routes.admin.assignment.markerFeedback(command.assignment, command.marker))
 
 	@RequestMapping(method = Array(POST), params = Array("!confirmScreen"))
-	def showForm(@ModelAttribute("command") command: Command, errors: Errors): Mav = {
+	def showForm(
+		@PathVariable assignment: Assignment,
+		@PathVariable marker: User,
+		@PathVariable stage: MarkingWorkflowStage,
+		@ModelAttribute("command") command: Command,
+		errors: Errors
+	): Mav = {
 		Mav("cm2/admin/assignments/markers/marking_complete",
-			"assignment" -> command.assignment,
 			"department" -> command.assignment.module.adminDepartment,
-			"stage" -> command.stage,
-			"marker" -> command.marker,
 			"isProxying" -> command.isProxying,
-			"proxyingAs" -> command.marker
+			"proxyingAs" -> marker
 		)
 	}
 
 	@RequestMapping(method = Array(POST), params = Array("confirmScreen"))
-	def submit(@Valid @ModelAttribute("command") command: Command, errors: Errors): Mav = {
+	def submit(
+		@PathVariable assignment: Assignment,
+		@PathVariable marker: User,
+		@PathVariable stage: MarkingWorkflowStage,
+		@Valid @ModelAttribute("command") command: Command,
+		errors: Errors
+	): Mav = {
 		if (errors.hasErrors)
-			showForm(command, errors)
+			showForm(assignment, marker, stage, command, errors)
 		else {
-			transactional() {
-				command.apply()
-				Redirect(Routes.admin.assignment.markerFeedback(command.assignment, command.marker))
-			}
+			command.apply()
+			Redirect(Routes.admin.assignment.markerFeedback(command.assignment, command.marker))
 		}
 	}
 

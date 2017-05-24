@@ -6,6 +6,7 @@ import org.springframework.validation.Errors
 import uk.ac.warwick.tabula.CurrentUser
 import uk.ac.warwick.tabula.commands.cm2.assignments.{FeedbackReleasedNotifier, ReleasedState}
 import uk.ac.warwick.tabula.data.HibernateHelpers
+import uk.ac.warwick.tabula.data.Transactions.transactional
 import uk.ac.warwick.tabula.data.model.markingworkflow.{FinalStage, MarkingWorkflowStage}
 import uk.ac.warwick.tabula.data.model._
 import uk.ac.warwick.tabula.data.model.notifications.cm2.{ReleaseToMarkerNotification, ReturnToMarkerNotification}
@@ -35,7 +36,7 @@ class MarkingCompletedCommandInternal(val assignment: Assignment, val marker: Us
 
 	this: CM2MarkingWorkflowServiceComponent with FinaliseFeedbackComponent =>
 
-	def applyInternal(): Seq[AssignmentFeedback] = {
+	def applyInternal(): Seq[AssignmentFeedback] = transactional() {
 
 		val feedback = feedbackForRelease.map(mf => HibernateHelpers.initialiseAndUnproxy(mf.feedback)).collect{ case f: AssignmentFeedback => f }
 		newReleasedFeedback = cm2MarkingWorkflowService.progressFeedback(stage, feedback).asJava
@@ -105,7 +106,7 @@ trait MarkingCompletedState extends CanProxy with UserAware {
 	def noFeedback: Seq[MarkerFeedback] = markerFeedback.asScala.filter(!_.hasFeedback)
 	def noContent: Seq[MarkerFeedback] = markerFeedback.asScala.filter(!_.hasContent) // should be empty
 	def releasedFeedback: Seq[MarkerFeedback] = markerFeedback.asScala.filter(mf => {
-		val currentStageIndex = mf.feedback.outstandingStages.asScala.map(_.order).headOption.getOrElse(0)
+		val currentStageIndex = mf.feedback.outstandingStages.asScala.headOption.map(_.order).getOrElse(0)
 		mf.stage.order < currentStageIndex
 	})
 

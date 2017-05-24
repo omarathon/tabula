@@ -1,6 +1,3 @@
-<#--<#assign spring=JspTaglibs["/WEB-INF/tld/spring.tld"]>-->
-<#--<#assign f=JspTaglibs["/WEB-INF/tld/spring-form.tld"]>-->
-
 <#import "*/cm2_macros.ftl" as cm2 />
 
 <#escape x as x?html>

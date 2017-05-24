@@ -6,6 +6,7 @@ import org.springframework.web.bind.annotation.{ModelAttribute, PathVariable, Re
 import uk.ac.warwick.spring.Wire
 import uk.ac.warwick.tabula.cm2.web.Routes
 import uk.ac.warwick.tabula.commands.Appliable
+import uk.ac.warwick.tabula.commands.cm2.assignments.markers.DownloadMarkersSubmissionsCommand
 import uk.ac.warwick.tabula.commands.cm2.assignments.{AdminGetSingleSubmissionCommand, DownloadAllSubmissionsCommand, _}
 import uk.ac.warwick.tabula.data.model.{Assignment, Submission}
 import uk.ac.warwick.tabula.services.fileserver.RenderableFile

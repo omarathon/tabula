@@ -41,7 +41,6 @@ class OnlineMarkerFeedbackController extends CourseworkController {
 		GenerateGradesFromMarkCommand(mandatory(assignment))
 	)
 
-	@RequestMapping(method = Array(GET, HEAD))
 	def showForm(@ModelAttribute("command") command: Command, errors: Errors): Mav = {
 		Mav("cm2/admin/assignments/markers/marker_online_feedback",
 			"isGradeValidation" -> command.assignment.module.adminDepartment.assignmentGradeValidation,
@@ -50,7 +49,7 @@ class OnlineMarkerFeedbackController extends CourseworkController {
 	}
 
 	@RequestMapping(method = Array(POST))
-	def submit(@PathVariable stage: MarkingWorkflowStage, @ModelAttribute("command") @Valid command: Command, errors: Errors): Mav = {
+	def submit(@PathVariable stage: MarkingWorkflowStage, @Valid @ModelAttribute("command") command: Command, errors: Errors): Mav = {
 		if (errors.hasErrors) {
 			showForm(command, errors)
 		} else {

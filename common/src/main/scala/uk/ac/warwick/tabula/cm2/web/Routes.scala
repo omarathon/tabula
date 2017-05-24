@@ -2,7 +2,6 @@ package uk.ac.warwick.tabula.cm2.web
 
 import uk.ac.warwick.spring.Wire
 import uk.ac.warwick.tabula.AcademicYear
-import uk.ac.warwick.tabula.cm2.web.Routes.admin.department
 import uk.ac.warwick.tabula.data.model._
 import uk.ac.warwick.tabula.data.model.forms.Extension
 import uk.ac.warwick.tabula.data.model.markingworkflow.{CM2MarkingWorkflow, MarkingWorkflowStage}
@@ -107,7 +106,7 @@ object Routes {
 			private def markerroot(assignment: Assignment, marker: User) = assignmentroot(assignment) + s"/marker/${marker.getWarwickId}"
 
 			object markerFeedback {
-				def apply(assignment: Assignment, marker: User): String = markerroot(assignment, marker) + "/list"
+				def apply(assignment: Assignment, marker: User): String = markerroot(assignment, marker)
 				object complete {
 					def apply(assignment: Assignment, marker: User): String = markerroot(assignment, marker) + "/marking-completed"
 				}
@@ -122,7 +121,7 @@ object Routes {
 					def apply(assignment: Assignment, marker: User): String = markerroot(assignment, marker) + "/marks-template"
 				}
 				object onlineFeedback {
-					def apply(assignment: Assignment, stage: MarkingWorkflowStage, marker: User): String = markerroot(assignment, marker) + s"${stage.name}/feedback/online"
+					def apply(assignment: Assignment, stage: MarkingWorkflowStage, marker: User): String = encoded(markerroot(assignment, marker) + s"${stage.name}/feedback/online")
 
 					object student {
 						def apply(assignment: Assignment, stage: MarkingWorkflowStage, marker: User, student: User): String =
