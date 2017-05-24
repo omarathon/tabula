@@ -34,11 +34,17 @@ class ListMarkerFeedbackController extends CourseworkController {
 	def command(@PathVariable assignment: Assignment, @PathVariable marker: User, currentUser: CurrentUser): Command =
 		ListMarkerFeedbackCommand(assignment, marker, currentUser)
 
-
-	@RequestMapping()
+	@RequestMapping
 	def list(@ModelAttribute("command") command: Command): Mav = {
 		val workflow = mandatory(command.assignment.cm2MarkingWorkflow)
 		if (ajax) {
+			Mav("cm2/admin/assignments/markers/marker_feedback_list",
+				"feedbackByStage" -> command.apply(),
+				"assignment" -> command.assignment,
+				"workflowType" -> workflow.workflowType,
+				"marker" -> command.marker
+			).noLayout()
+		} else {
 			Mav("cm2/admin/assignments/markers/assignment",
 				"allSubmissionStatesFilters" -> AllSubmissionFilters.filter(_.apply(command.assignment)),
 				"allPlagiarismFilters" -> AllPlagiarismFilters.filter(_.apply(command.assignment)),
@@ -46,13 +52,6 @@ class ListMarkerFeedbackController extends CourseworkController {
 				"department" -> command.assignment.module.adminDepartment,
 				"assignment" -> command.assignment
 			)
-		} else {
-			Mav("cm2/admin/assignments/markers/marker_feedback_list",
-				"feedbackByStage" -> command.apply(),
-				"assignment" -> command.assignment,
-				"workflowType" -> workflow.workflowType,
-				"marker" -> command.marker
-			).noLayout()
 		}
 	}
 

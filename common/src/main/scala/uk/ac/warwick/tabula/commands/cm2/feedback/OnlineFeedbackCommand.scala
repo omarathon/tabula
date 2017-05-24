@@ -163,7 +163,7 @@ trait OnlineFeedbackState {
 	var file:UploadedFile = new UploadedFile
 	var attachedFiles:JList[FileAttachment] = _
 
-	private def fieldHasValue = fields.asScala.exists{ case (_, value: StringFormValue) => value.value.hasText }
+	private def fieldHasValue = Try(fields.asScala.exists{ case (_, value: StringFormValue) => value.value.hasText}).toOption.getOrElse(false)
 	private def hasFile = Option(attachedFiles).exists(!_.isEmpty) || Option(file).exists(!_.attachedOrEmpty.isEmpty)
 	def hasContent: Boolean = mark.hasText || grade.hasText || hasFile || fieldHasValue
 }

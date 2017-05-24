@@ -48,7 +48,7 @@ class OnlineMarkerFeedbackController extends CourseworkController {
 		).noLayout()
 	}
 
-	@RequestMapping(method = Array(POST))
+	@RequestMapping
 	def submit(@PathVariable stage: MarkingWorkflowStage, @Valid @ModelAttribute("command") command: Command, errors: Errors): Mav = {
 		if (errors.hasErrors) {
 			showForm(command, errors)
