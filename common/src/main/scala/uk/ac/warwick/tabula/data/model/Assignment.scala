@@ -306,6 +306,7 @@ class Assignment
 		_workflowCategory = workflowCategoryOption.orNull
 	}
 
+	def hasCM2Workflow: Boolean = cm2MarkingWorkflow != null
 
 	@OneToMany(mappedBy = "assignment", fetch = LAZY, cascade = Array(ALL), orphanRemoval = true)
 	@BatchSize(size = 200)
@@ -760,7 +761,7 @@ class Assignment
 
 	// later we may do more complex checks to see if this particular markingWorkflow requires that feedback is released manually
 	// for now all markingWorkflow will require you to release feedback so if one exists for this assignment - provide it
-	def mustReleaseForMarking: Boolean = hasWorkflow
+	def mustReleaseForMarking: Boolean = hasWorkflow || hasCM2Workflow
 
 	def needsFeedbackPublishing: Boolean = {
 		if (openEnded || dissertation || !collectSubmissions || _archived) {
