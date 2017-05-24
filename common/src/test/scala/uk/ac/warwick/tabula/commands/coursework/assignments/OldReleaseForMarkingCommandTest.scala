@@ -7,7 +7,7 @@ import uk.ac.warwick.tabula.{MockUserLookup, Mockito, TestBase}
 
 import scala.collection.JavaConverters._
 
-class ReleaseForMarkingCommandTest extends TestBase  with Mockito {
+class OldReleaseForMarkingCommandTest extends TestBase  with Mockito {
 
 	trait MockUserLookupComponent extends UserLookupComponent {
 		override def userLookup = new MockUserLookup
@@ -31,7 +31,7 @@ class ReleaseForMarkingCommandTest extends TestBase  with Mockito {
 					a.module = new Module().tap(_.id = "module_id")
 			}
 
-			val cmd = new ReleaseForMarkingCommand(assignment.module, assignment, currentUser.apparentUser)
+			val cmd = new OldReleaseForMarkingCommand(assignment.module, assignment, currentUser.apparentUser)
 			with MockUserLookupComponent with ReleaseForMarkingCommandTestSupport {
 				override def studentsWithKnownMarkers = Seq()
 			}
@@ -52,7 +52,7 @@ class ReleaseForMarkingCommandTest extends TestBase  with Mockito {
 					a.module = new Module().tap(_.id = "module_id")
 			}
 
-			val cmd = new ReleaseForMarkingCommand(assignment.module, assignment, currentUser.apparentUser)
+			val cmd = new OldReleaseForMarkingCommand(assignment.module, assignment, currentUser.apparentUser)
 			with MockUserLookupComponent with ReleaseForMarkingCommandTestSupport {
 				override def studentsWithKnownMarkers = Seq("1","2")
 			}
@@ -72,7 +72,7 @@ class ReleaseForMarkingCommandTest extends TestBase  with Mockito {
 					a.module = new Module().tap(_.id = "module_id")
 			}
 
-			val cmd = new ReleaseForMarkingCommand(assignment.module, assignment, currentUser.apparentUser)
+			val cmd = new OldReleaseForMarkingCommand(assignment.module, assignment, currentUser.apparentUser)
 			with MockUserLookupComponent with ReleaseForMarkingCommandTestSupport {
 				override def studentsWithKnownMarkers = Seq("1","2", "3")
 			}
@@ -93,7 +93,7 @@ class ReleaseForMarkingCommandTest extends TestBase  with Mockito {
 					a.module = new Module().tap(_.id = "module_id")
 			}
 
-			val cmd = new ReleaseForMarkingCommand(assignment.module, assignment, currentUser.apparentUser)
+			val cmd = new OldReleaseForMarkingCommand(assignment.module, assignment, currentUser.apparentUser)
 			with MockUserLookupComponent with ReleaseForMarkingCommandTestSupport {
 				override def studentsWithKnownMarkers = Seq("1","2")
 			}

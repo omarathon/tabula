@@ -16,9 +16,9 @@ import uk.ac.warwick.userlookup.User
 import collection.JavaConverters._
 import scala.collection.mutable
 
-object ReleaseForMarkingCommand {
+object OldReleaseForMarkingCommand {
 	def apply(module: Module, assignment: Assignment, user: User) =
-		new ReleaseForMarkingCommand(module, assignment, user)
+		new OldReleaseForMarkingCommand(module, assignment, user)
 			with ComposableCommand[List[Feedback]]
 			with ReleaseForMarkingCommandPermissions
 			with ReleaseForMarkingCommandDescription
@@ -30,7 +30,7 @@ object ReleaseForMarkingCommand {
 }
 
 
-abstract class ReleaseForMarkingCommand(val module: Module, val assignment: Assignment, val user: User)
+abstract class OldReleaseForMarkingCommand(val module: Module, val assignment: Assignment, val user: User)
 	extends CommandInternal[List[Feedback]] with Appliable[List[Feedback]] with ReleaseForMarkingState with ReleasedState with BindListener
 	with SelfValidating with UserAware {
 
