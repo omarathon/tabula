@@ -40,7 +40,7 @@ abstract class FinaliseFeedbackCommandInternal(val assignment: Assignment, val m
 	override def applyInternal(): Seq[Feedback] = {
 		markerFeedback.map(copyToFeedback)
 	}
-S
+
 	private def copyToFeedback(markerFeedback: MarkerFeedback): Feedback = {
 		val parent = markerFeedback.feedback
 
