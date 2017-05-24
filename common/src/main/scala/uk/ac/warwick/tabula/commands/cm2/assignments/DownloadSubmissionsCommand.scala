@@ -1,6 +1,6 @@
 package uk.ac.warwick.tabula.commands.cm2.assignments
 
-import uk.ac.warwick.tabula.JavaImports._
+import uk.ac.warwick.tabula.CurrentUser
 import uk.ac.warwick.tabula.commands.cm2.assignments.DownloadSubmissionsCommand._
 import uk.ac.warwick.tabula.commands.{Description, _}
 import uk.ac.warwick.tabula.data.model.{Assignment, Submission}
@@ -10,9 +10,6 @@ import uk.ac.warwick.tabula.services._
 import uk.ac.warwick.tabula.services.fileserver.RenderableFile
 import uk.ac.warwick.tabula.services.jobs.{AutowiringJobServiceComponent, JobInstance, JobServiceComponent}
 import uk.ac.warwick.tabula.system.permissions.{PermissionsChecking, PermissionsCheckingMethods, RequiresPermissionsChecking}
-import uk.ac.warwick.tabula.{CurrentUser, ItemNotFoundException}
-
-import scala.collection.JavaConverters._
 
 /**
  * Download one or more submissions from an assignment, as a Zip.
@@ -36,17 +33,15 @@ object DownloadSubmissionsCommand {
 			with AutowiringJobServiceComponent
 }
 
-trait DownloadSubmissionsCommandState {
+trait DownloadSubmissionsCommandState extends SelectedStudentsState {
 	def assignment: Assignment
 	def user: CurrentUser
 }
 
-trait DownloadSubmissionsCommandRequest {
+trait DownloadSubmissionsCommandRequest extends SelectedStudentsRequest {
 	self: DownloadSubmissionsCommandState =>
 
 	var filename: String = _
-	var submissions: JList[Submission] = JArrayList()
-	var students: JList[String] = JArrayList()
 }
 
 class DownloadSubmissionsCommandInternal(val assignment: Assignment, val user: CurrentUser)
@@ -56,29 +51,19 @@ class DownloadSubmissionsCommandInternal(val assignment: Assignment, val user: C
 		with JobServiceComponent =>
 
 	override def applyInternal(): Result = {
-		if (!submissions.isEmpty && !students.isEmpty) throw new IllegalStateException("Only expecting one of students and submissions to be set")
-		else if (!students.isEmpty) {
-			submissions = (for (
-				uniId <- students.asScala;
-				submission <- submissionService.getSubmissionByUsercode(assignment, uniId)
-			) yield submission).asJava
-		} else {
-			submissions = assignment.submissions
-		}
-
-		if (submissions.asScala.exists(_.assignment != assignment)) {
+		if (submissions.exists(_.assignment != assignment)) {
 			throw new IllegalStateException("Submissions don't match the assignment")
 		}
 
 		val output =
-			if (submissions.size() < SubmissionZipFileJob.minimumSubmissions) {
-				val zip = zipService.getSomeSubmissionsZip(submissions.asScala)
+			if (submissions.size < SubmissionZipFileJob.minimumSubmissions) {
+				val zip = zipService.getSomeSubmissionsZip(submissions)
 				Left(zip)
 			} else {
-				Right(jobService.add(Option(user), SubmissionZipFileJob(submissions.asScala.map(_.id))))
+				Right(jobService.add(Option(user), SubmissionZipFileJob(submissions.map(_.id))))
 			}
 
-		Result(submissions.asScala, output)
+		Result(submissions, output)
 	}
 
 }
