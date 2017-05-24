@@ -35,7 +35,7 @@ abstract class AbstractModuleHomeController
 
 	@RequestMapping
 	def homeAjax(@ModelAttribute("command") command: ModuleCommand): Mav =
-		Mav("cm2/admin/home/assignments", "moduleInfo" -> command.apply()).noLayout()
+		Mav("cm2/admin/home/assignments", "moduleInfo" -> command.apply(), "academicYear" -> command.academicYear).noLayout()
 
 }
 
