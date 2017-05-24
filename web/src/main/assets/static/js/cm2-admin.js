@@ -42,7 +42,7 @@
 			}
 		});
 
-		// extension managemet - on submit replace html with validation errors or redirect
+		// extension management - on submit replace html with validation errors or redirect
 		$body.on('submit', 'form.modify-extension', function(e){
 			e.preventDefault();
 			var $form = $(e.target);

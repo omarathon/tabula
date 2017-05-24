@@ -12,6 +12,7 @@ import uk.ac.warwick.tabula.JavaImports._
 import uk.ac.warwick.tabula.data.model.forms.{FormattedHtml, SavedFormValue}
 import uk.ac.warwick.tabula.data.model.markingworkflow.{FinalStage, MarkingWorkflowStage}
 import uk.ac.warwick.tabula.permissions.PermissionsTarget
+import uk.ac.warwick.tabula.services.cm2.CM2WorkflowStages.CM2MarkingWorkflowStage
 import uk.ac.warwick.userlookup.User
 
 import scala.collection.JavaConverters._
@@ -388,6 +389,14 @@ class AssignmentFeedback extends Feedback {
 	def permissionsParents: Stream[Assignment] = Option(assignment).toStream
 
 	override def toEntityReference: AssignmentFeedbackEntityReference = new AssignmentFeedbackEntityReference().put(this)
+
+	override def isMarkedByStage(stage: MarkingWorkflowStage): Boolean = {
+		val currentStages = outstandingStages.asScala
+		val currentPosition = currentStages.headOption.map(_.order).getOrElse(0)
+
+		if(stage.order == currentPosition) !currentStages.contains(stage)
+		else stage.order < currentPosition
+	}
 
 }
 

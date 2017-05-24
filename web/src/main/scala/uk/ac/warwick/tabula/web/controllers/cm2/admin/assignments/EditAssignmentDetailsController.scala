@@ -10,6 +10,7 @@ import uk.ac.warwick.tabula.cm2.web.Routes
 import uk.ac.warwick.tabula.commands.cm2.assignments.{EditAssignmentDetailsCommand, _}
 import uk.ac.warwick.tabula.commands.{Appliable, PopulateOnForm, SelfValidating}
 import uk.ac.warwick.tabula.data.model._
+import uk.ac.warwick.tabula.data.model.markingworkflow.MarkingWorkflowType
 import uk.ac.warwick.tabula.web.Mav
 
 @Profile(Array("cm2Enabled"))
@@ -38,9 +39,11 @@ class EditAssignmentDetailsController extends AbstractAssignmentController {
 			"module" -> module,
 			"academicYear" -> cmd.academicYear,
 			"reusableWorkflows" -> cmd.availableWorkflows,
+			"availableWorkflows" -> MarkingWorkflowType.values.sorted,
 			"workflow" -> cmd.workflow,
-			"canDeleteMarkers" -> cmd.workflow.canDeleteMarkers,
-			"canDeleteAssignment" -> canDeleteAssignment)
+			"canDeleteMarkers" -> cmd.workflow.exists(_.canDeleteMarkers),
+			"canDeleteAssignment" -> canDeleteAssignment
+		)
 			.crumbs(Breadcrumbs.Department(assignment.module.adminDepartment, assignment.academicYear), Breadcrumbs.Assignment(assignment))
 	}
 

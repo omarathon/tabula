@@ -54,7 +54,7 @@ class SubmissionAndFeedbackController extends AbstractSubmissionAndFeedbackContr
 	with AutowiringMaintenanceModeServiceComponent {
 
 
-	@RequestMapping(Array("/list"))
+	@RequestMapping(Array("", "/list"))
 	def list(@Valid @ModelAttribute("submissionAndFeedbackCommand") command: SubmissionAndFeedbackCommand.CommandType, errors: Errors, @PathVariable assignment: Assignment): Mav = {
 		assignment.module.adminDepartment.assignmentInfoView match {
 			case Assignment.Settings.InfoViewType.Summary =>

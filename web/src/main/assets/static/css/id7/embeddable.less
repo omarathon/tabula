@@ -1095,6 +1095,10 @@ ul.profile-user-list {
 	}
 }
 
+textarea.big-textarea {
+	height: 10em;
+}
+
 // Colour keys for Turnitin results. Turnitin proper has a little coloured
 // box which academics are used to and will often use as the main decider
 // for whether to hold a document back (e.g. if it's orange or red). So we
@@ -1103,7 +1107,6 @@ ul.profile-user-list {
 .similarity-box(@color, @text-color) {
 	background-color: @color;
 	color: @text-color;
-	.border-radius(3px);
 	padding: 3px;
 	white-space: nowrap;
 }
@@ -1115,19 +1118,19 @@ ul.profile-user-list {
 }
 
 .similarity-0 {
-	.similarity-box(@tabulaGreenDark);
+	.similarity-box(@turnitin-green);
 }
 .similarity-1 {
-	.similarity-box(@tabulaBlue);
+	.similarity-box(@turnitin-blue);
 }
 .similarity-2 {
-	.similarity-box(@tabulaOrangeLight);
+	.similarity-box(@turnitin-yellow);
 }
 .similarity-3 {
-	.similarity-box(@tabulaOrange);
+	.similarity-box(@turnitin-orange);
 }
 .similarity-4 {
-	.similarity-box(@tabulaRedDark);
+	.similarity-box(@turnitin-red);
 }
 
 .similarity-tooltip {

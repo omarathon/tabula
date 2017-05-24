@@ -16,10 +16,11 @@ abstract class MarkingWorkflowType(
 	val initialStages: Seq[MarkingWorkflowStage],
 	val order: Int,
 	// in most workflows stages that share a role name also share student -> marker allocations
-	// in other workflows like double blind stages have their own seperate allocations
+	// in other workflows like double blind stages have their own separate allocations
 	val rolesShareAllocations: Boolean = true
 ){
 	val roleNames: Seq[String] = allStages.map(_.roleName).distinct
+	def allPreviousStages(stage: MarkingWorkflowStage): Seq[MarkingWorkflowStage] = allStages.filter(_.order < stage.order)
 	override def toString: String = name
 }
 

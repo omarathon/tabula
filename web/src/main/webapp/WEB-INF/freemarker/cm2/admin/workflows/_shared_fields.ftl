@@ -1,4 +1,4 @@
-<#if newRecord>
+<#if newRecord || !workflow??>
 	<@bs3form.labelled_form_group path="workflowType" labelText="Workflow type">
 		<@f.select path="workflowType" class="form-control" >
 			<option value="" disabled selected></option>
@@ -38,8 +38,6 @@
 		</div>
 	</div>
 </div>
-
-
 <#else>
 	<@bs3form.labelled_form_group labelText="Workflow type">
 		<select id="workflowType" name="workflowType" class="form-control" disabled="disabled">
@@ -73,7 +71,7 @@
 	<div class="help-block">${markerHelp}</div>
 </@bs3form.labelled_form_group>
 
-<#if !newRecord>
+<#if !newRecord && workflow??>
 	<@bs3form.labelled_form_group>
 		<a href="<@routes.cm2.reusableWorkflowReplaceMarker department academicYear workflow />">Replace marker</a>
 	</@bs3form.labelled_form_group>

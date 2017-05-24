@@ -1,7 +1,5 @@
-<#-- FIXME: implemented as part of CM2 migration but will require further reworking due to CM2 workflow changes -->
 <#import "_submission_details.ftl" as sd />
 <#import "/WEB-INF/freemarker/_profile_link.ftl" as pl />
-<#import "*/submission_components.ftl" as components />
 <#import "*/cm2_macros.ftl" as cm2_macros />
 
 <#escape x as x?html>
@@ -164,10 +162,7 @@
 										<#list submission.allAttachments as attachment>
 											<!-- Checking originality report for ${attachment.name} ... -->
 											<#if attachment.originalityReportReceived>
-												: <@components.originalityReport attachment />
-											</#if>
-											<#if can.do("Submission.ViewUrkundPlagiarismStatus", submission) && attachment.urkundResponseReceived>
-												: <@components.urkundOriginalityReport attachment />
+												: <@sd.originalityReport attachment />
 											</#if>
 										</#list>
 									</#if>

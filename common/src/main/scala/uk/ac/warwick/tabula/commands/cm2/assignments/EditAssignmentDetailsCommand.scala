@@ -64,7 +64,7 @@ trait EditAssignmentDetailsCommandState extends ModifyAssignmentDetailsCommandSt
 	def assignment: Assignment
 	def academicYear: AcademicYear = assignment.academicYear
 	def module: Module = assignment.module
-	def workflow: CM2MarkingWorkflow = assignment.cm2MarkingWorkflow
+	def workflow: Option[CM2MarkingWorkflow] = Option(assignment.cm2MarkingWorkflow)
 }
 
 

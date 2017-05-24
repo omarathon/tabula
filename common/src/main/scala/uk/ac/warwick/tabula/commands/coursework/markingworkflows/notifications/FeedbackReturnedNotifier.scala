@@ -3,7 +3,7 @@ package uk.ac.warwick.tabula.commands.coursework.markingworkflows.notifications
 import uk.ac.warwick.tabula.commands.coursework.ReleasedState
 import uk.ac.warwick.tabula.commands.{UserAware, Notifies}
 import uk.ac.warwick.tabula.data.model.{Assignment, Notification, MarkerFeedback}
-import uk.ac.warwick.tabula.data.model.notifications.coursework.ReturnToMarkerNotification
+import uk.ac.warwick.tabula.data.model.notifications.coursework.OldReturnToMarkerNotification
 import uk.ac.warwick.tabula.helpers.Logging
 import collection.JavaConverters._
 
@@ -11,7 +11,7 @@ trait FeedbackReturnedNotifier[A] extends Notifies[A, Seq[MarkerFeedback]] {
 
 	this: ReleasedState with UserAware with Logging =>
 
-	def blankNotification: ReturnToMarkerNotification
+	def blankNotification: OldReturnToMarkerNotification
 
 	def emit(commandResult: A): Seq[Notification[MarkerFeedback, Assignment]] = {
 

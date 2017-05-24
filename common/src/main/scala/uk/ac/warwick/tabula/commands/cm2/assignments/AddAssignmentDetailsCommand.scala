@@ -145,7 +145,6 @@ trait ModifyAssignmentDetailsCommandState {
 
   var reusableWorkflow: CM2MarkingWorkflow = _
 
-  var workflowType: MarkingWorkflowType = _
   lazy val department: Department = module.adminDepartment
   lazy val availableWorkflows: Seq[CM2MarkingWorkflow] =
     cm2MarkingWorkflowService.getReusableWorkflows(department, academicYear)

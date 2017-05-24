@@ -1,6 +1,9 @@
 <#import "*/_filters.ftl" as filters />
 
-<#import "*/submission_components.ftl" as components />
+<#import "*/_submission_details.ftl" as components />
+<#-- FIXME - investigate clash -->
+<#--<#import "*/submission_components.ftl" as components />-->
+
 <#import "*/cm2_macros.ftl" as cm2 />
 
 <#escape x as x?html>

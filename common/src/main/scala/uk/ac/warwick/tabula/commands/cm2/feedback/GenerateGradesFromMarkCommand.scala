@@ -30,24 +30,19 @@ class GenerateGradesFromMarkCommandInternal(val assessment: Assessment)
 		group -> group.toUpstreamAssessmentGroup(assessment.academicYear)
 	).toMap
 
-	private def isNotNullAndInt(intString: String): Boolean = {
-		if (intString == null) {
+	private def isNotNullAndInt(intString: String): Boolean = !(intString == null) && {
+		try {
+			intString.toInt
+			true
+		} catch { case _ @ (_: NumberFormatException | _: IllegalArgumentException) =>
 			false
-		} else {
-			try {
-				intString.toInt
-				true
-			} catch {
-				case _ @ (_: NumberFormatException | _: IllegalArgumentException) =>
-					false
-			}
 		}
 	}
 
 	override def applyInternal(): Map[String, Seq[GradeBoundary]] = {
 		val membership = assessmentMembershipService.determineMembershipUsers(assessment)
 		val studentMarksMap: Map[User, Int] = studentMarks.asScala
-			.filter(s => isNotNullAndInt(s._2))
+			.filter{ case (_, mark) => isNotNullAndInt(mark)}
 			.flatMap{case(uniID, mark) =>
 				membership.find(_.getWarwickId == uniID).map(u => u -> mark.toInt)
 			}.toMap

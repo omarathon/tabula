@@ -10,7 +10,7 @@ import uk.ac.warwick.userlookup.User
 
 import scala.collection.JavaConverters._
 
-object GenerateGradesFromMarkCommand {
+object OldGenerateGradesFromMarkCommand {
 	def apply(module: Module, assessment: Assessment) =
 		new GenerateGradesFromMarkCommandInternal(module, assessment)
 			with AutowiringAssessmentMembershipServiceComponent

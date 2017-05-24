@@ -36,7 +36,7 @@ class MarkerFeedback extends GeneratedId with FeedbackAttachments with ToEntityR
 	@Column(name = "marker")
 	private var markerUsercode: String = _
 
-	def marker_=(marker: User) = markerUsercode = marker match {
+	def marker_=(marker: User): Unit = markerUsercode = marker match {
 		case m: User if !m.isFoundUser => throw new IllegalStateException(s"Marker is not a valid user.")
 		case m: User =>  m.getUserId
 		case _ => null
@@ -94,7 +94,7 @@ class MarkerFeedback extends GeneratedId with FeedbackAttachments with ToEntityR
 		customFormValues.find( _.name == field.name )
 	}
 
-	def hasContent: Boolean = hasMarkOrGrade || hasFeedback || hasComments
+	def hasContent: Boolean = hasMarkOrGrade || hasFeedbackOrComments
 
 	def hasMarkOrGrade: Boolean = hasMark || hasGrade
 
@@ -102,9 +102,13 @@ class MarkerFeedback extends GeneratedId with FeedbackAttachments with ToEntityR
 
 	def hasGrade: Boolean = grade.isDefined
 
+	def hasFeedbackOrComments: Boolean = hasFeedback || hasFeedback
+
 	def hasFeedback: Boolean = attachments != null && attachments.size() > 0
 
 	def hasComments: Boolean = customFormValues.exists(_.value != null)
+
+	def readyForNextStage: Boolean = hasContent && feedback.outstandingStages.contains(stage)
 
 	override def toEntityReference: MarkerFeedbackEntityReference = new MarkerFeedbackEntityReference().put(this)
 }

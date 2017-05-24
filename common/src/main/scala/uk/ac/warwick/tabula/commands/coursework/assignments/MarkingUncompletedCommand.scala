@@ -6,7 +6,7 @@ import uk.ac.warwick.tabula.commands._
 import uk.ac.warwick.tabula.commands.coursework.ReleasedState
 import uk.ac.warwick.tabula.data.model._
 import org.springframework.validation.{BindingResult, Errors}
-import uk.ac.warwick.tabula.data.model.notifications.coursework.ReturnToMarkerNotification
+import uk.ac.warwick.tabula.data.model.notifications.coursework.OldReturnToMarkerNotification
 import uk.ac.warwick.tabula.helpers.Logging
 import uk.ac.warwick.tabula.services._
 import uk.ac.warwick.tabula.permissions.Permissions
@@ -117,7 +117,7 @@ trait MarkerReturnedNotifier extends FeedbackReturnedNotifier[Unit] {
 		case _ => 0
 	}
 
-	def blankNotification = new ReturnToMarkerNotification(position, comment)
+	def blankNotification = new OldReturnToMarkerNotification(position, comment)
 }
 
 

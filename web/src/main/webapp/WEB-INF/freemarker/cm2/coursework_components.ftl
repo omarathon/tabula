@@ -402,6 +402,7 @@
 	</#if>
 </#macro>
 
+<#-- Progress bar for all students in a marking workflow  -->
 <#macro stage_progress_bar stages>
 	<div class="stage-progress-bar">
 		<#list stages as stageInfo>
@@ -433,6 +434,38 @@
 				<i class="fa fa-stack-1x fa-circle fa-inverse"></i>
 				<i class="fa fa-stack-1x ${icon} text-${state} use-tooltip" title="${title}" data-html="true" data-container="body"></i>
 			</span>
+		</#list>
+	</div>
+</#macro>
+
+<#-- Progress bar for a single student in a marking workflow  -->
+<#macro individual_stage_progress_bar markerStages>
+	<div class="stage-progress-bar">
+
+		<#list markerStages as progress>
+
+			<#local stage = progress.stage />
+
+			<#local state = 'default' />
+			<#local icon = 'fa-circle-o' />
+			<#if progress.completed>
+				<#local state = 'success' />
+				<#local icon = 'fa-check-circle-o' />
+			<#elseif progress.started>
+				<#local state = 'warning' />
+				<#local icon = 'fa-dot-circle-o' />
+			</#if>
+
+
+			<#local title><@workflowMessage progress.stage.actionCode /></#local>
+			<#if progress_index gt 0>
+				<div class="bar bar-${state} use-tooltip" title="${title}" data-html="true" data-container="body"></div>
+			</#if>
+			<#local title><@workflowMessage progress.messageCode /></#local>
+			<span class="fa-stack">
+						<i class="fa fa-stack-1x fa-circle fa-inverse"></i>
+						<i class="fa fa-stack-1x ${icon} text-${state} use-tooltip" title="${title}" data-html="true" data-container="body"></i>
+					</span>
 		</#list>
 	</div>
 </#macro>

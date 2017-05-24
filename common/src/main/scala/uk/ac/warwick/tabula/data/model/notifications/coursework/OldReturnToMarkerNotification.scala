@@ -13,13 +13,13 @@ import uk.ac.warwick.tabula.data.model._
 import uk.ac.warwick.tabula.helpers.Logging
 import uk.ac.warwick.tabula.services.AutowiringUserLookupComponent
 
-object ReturnToMarkerNotification {
+object OldReturnToMarkerNotification {
 	val templateLocation = "/WEB-INF/freemarker/emails/return_to_marker_notification.ftl"
 }
 
 @Entity
 @DiscriminatorValue("ReturnToMarker")
-class ReturnToMarkerNotification
+class OldReturnToMarkerNotification
 	extends NotificationWithTarget[MarkerFeedback, Assignment]
 	with SingleRecipientNotification
 	with UserIdRecipientNotification
@@ -58,7 +58,7 @@ class ReturnToMarkerNotification
 
 	def title = s"${assignment.module.code.toUpperCase}: Submissions for ${assignment.name} have been returned to you"
 
-	def content = FreemarkerModel(ReturnToMarkerNotification.templateLocation,
+	def content = FreemarkerModel(OldReturnToMarkerNotification.templateLocation,
 		Map(
 			"assignment" -> assignment,
 			"numReleasedFeedbacks" -> items.size,

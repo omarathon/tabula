@@ -3,8 +3,8 @@ package uk.ac.warwick.tabula.commands.coursework.assignments
 import org.joda.time.DateTime
 import org.springframework.validation.{BindingResult, Errors}
 import uk.ac.warwick.tabula.commands._
-import uk.ac.warwick.tabula.commands.coursework.{FeedbackReleasedNotifier, ReleasedState}
-import uk.ac.warwick.tabula.data.model.notifications.coursework.ReleaseToMarkerNotification
+import uk.ac.warwick.tabula.commands.coursework.{OldFeedbackReleasedNotifier, ReleasedState}
+import uk.ac.warwick.tabula.data.model.notifications.coursework.OldReleaseToMarkerNotification
 import uk.ac.warwick.tabula.data.model.{Module, _}
 import uk.ac.warwick.tabula.helpers.Logging
 import uk.ac.warwick.tabula.permissions._
@@ -128,7 +128,7 @@ trait ReleaseForMarkingCommandDescription extends Describable[List[Feedback]] {
 	}
 }
 
-trait FirstMarkerReleaseNotifier extends FeedbackReleasedNotifier[List[Feedback]] {
+trait FirstMarkerReleaseNotifier extends OldFeedbackReleasedNotifier[List[Feedback]] {
 	this: ReleaseForMarkingState with ReleasedState with UserAware with UserLookupComponent with Logging =>
-	def blankNotification = new ReleaseToMarkerNotification(1)
+	def blankNotification = new OldReleaseToMarkerNotification(1)
 }

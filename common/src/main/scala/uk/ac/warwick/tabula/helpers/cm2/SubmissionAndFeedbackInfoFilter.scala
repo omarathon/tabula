@@ -6,6 +6,8 @@ import uk.ac.warwick.tabula.data.model.Assignment
 import uk.ac.warwick.tabula.data.model.MarkingState.MarkingCompleted
 import uk.ac.warwick.tabula.data.model.forms.ExtensionState
 import uk.ac.warwick.tabula.data.model.markingworkflow.{MarkingWorkflowStage, MarkingWorkflowType}
+import uk.ac.warwick.userlookup.User
+import scala.collection.JavaConverters._
 
 /**
 	* Filters a set of "Student" case objects (which are a representation of the current
@@ -28,6 +30,15 @@ sealed abstract class SubmissionAndFeedbackInfoFilter extends CaseObjectEquality
 
 	def apply(assignment: Assignment): Boolean
 
+}
+
+sealed abstract class SubmissionAndFeedbackInfoMarkerFilter extends SubmissionAndFeedbackInfoFilter {
+
+	def predicate(item: AssignmentSubmissionStudentInfo): Boolean = true
+
+	def predicate(item: AssignmentSubmissionStudentInfo, marker: User): Boolean
+
+	def apply(assignment: Assignment): Boolean = true
 }
 
 
@@ -244,7 +255,6 @@ object SubmissionAndFeedbackInfoFilters {
 			def apply(assignment: Assignment) = true
 		}
 
-
 		case object UnreleasedFeedback extends SubmissionAndFeedbackInfoFilter {
 			def description = "Unreleased feedback"
 
@@ -257,7 +267,6 @@ object SubmissionAndFeedbackInfoFilters {
 
 			def apply(assignment: Assignment) = true
 		}
-
 
 		case object LateFeedback extends SubmissionAndFeedbackInfoFilter {
 			def description = "Late feedback"
@@ -345,9 +354,51 @@ object SubmissionAndFeedbackInfoFilters {
 
 		}
 
-		lazy val allStatuses = Seq(NotReleasedForMarking, MarkedByFirst, MarkedBySecond, NoFeedback, AdjustedFeedback, UnreleasedFeedback, LateFeedback, ReleasedFeedback, SubmissionNotDownloaded, SubmissionDownloaded, FeedbackNotDownloaded, FeedbackDownloaded) ++ allWorkflowFilters.values
+		lazy val allStatuses: Seq[SubmissionAndFeedbackInfoFilter] = Seq(NotReleasedForMarking, MarkedByFirst, MarkedBySecond, NoFeedback, AdjustedFeedback, UnreleasedFeedback, LateFeedback, ReleasedFeedback, SubmissionNotDownloaded, SubmissionDownloaded, FeedbackNotDownloaded, FeedbackDownloaded) ++ allWorkflowFilters.values
 
+		// marker specific filters
+		case object MarkedByMarker extends SubmissionAndFeedbackInfoMarkerFilter {
+			def description = "Marked"
+
+			def predicate(item: AssignmentSubmissionStudentInfo, marker: User): Boolean =
+				item.coursework.enhancedFeedback.exists(_.feedback.markerFeedback.asScala.exists(mf => mf.marker == marker && mf.hasMarkOrGrade))
+
+			override def apply(assignment: Assignment): Boolean = assignment.collectMarks
+		}
+
+		case object NotMarkedByMarker extends SubmissionAndFeedbackInfoMarkerFilter {
+			def description = "Not marked"
+
+			def predicate(item: AssignmentSubmissionStudentInfo, marker: User): Boolean =
+				item.coursework.enhancedFeedback.exists(ef => !ef.feedback.markerFeedback.asScala.exists(mf => mf.marker == marker && mf.hasMarkOrGrade))
+
+			override def apply(assignment: Assignment): Boolean = assignment.collectMarks
+		}
+
+		case object FeedbackByMarker extends SubmissionAndFeedbackInfoMarkerFilter {
+			def description = "Feedback"
+
+			def predicate(item: AssignmentSubmissionStudentInfo, marker: User): Boolean =
+				item.coursework.enhancedFeedback.exists(_.feedback.markerFeedback.asScala.exists(mf => mf.marker == marker && mf.hasFeedbackOrComments))
+		}
+
+		case object NoFeedbackByMarker extends SubmissionAndFeedbackInfoMarkerFilter {
+			def description = "No feedback"
+
+			def predicate(item: AssignmentSubmissionStudentInfo, marker: User): Boolean =
+				item.coursework.enhancedFeedback.exists(ef => !ef.feedback.markerFeedback.asScala.exists(mf => mf.marker == marker && mf.hasFeedbackOrComments))
+		}
+
+		case object NotSentByMarker extends SubmissionAndFeedbackInfoMarkerFilter {
+			def description = "Not sent"
+
+			def predicate(item: AssignmentSubmissionStudentInfo, marker: User): Boolean = item.coursework.enhancedFeedback.exists(ef => {
+				val outstandingStages = ef.feedback.outstandingStages.asScala
+				ef.feedback.markerFeedback.asScala.exists(mf => mf.marker == marker && mf.hasContent && outstandingStages.contains(mf.stage))
+			})
+		}
 	}
+
 
 
 	class OverlapPlagiarismFilter extends SubmissionAndFeedbackInfoFilter {

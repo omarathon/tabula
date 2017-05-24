@@ -1,4 +1,3 @@
-<#-- FIXME: implemented as part of CM2 migration but will require further reworking due to CM2 workflow changes -->
 <#macro lateness submission="" assignment="" user=""><#compress>
 	<#if submission?has_content && submission.submittedDate?? && (submission.late || submission.authorisedLate)>
 		<#if submission.late>
@@ -18,11 +17,17 @@
 	</#if>
 </#compress></#macro>
 
-<#macro submission_details submission=""><#compress>
-	<#if submission?has_content>: <#compress>
+<#macro submission_details submission=[]><@compress single_line=true>
+	<#if submission?has_content>
 		<#local attachments = submission.allAttachments />
 		<#local assignment = submission.assignment />
-        <#local module = assignment.module />
+		<#local module = assignment.module />
+
+		<#if submission.submittedDate??>
+			<span class="date use-tooltip" title="<@lateness submission />" data-container="body">
+				<@fmt.date date=submission.submittedDate seconds=true capitalise=true shortMonth=true />
+			</span>
+		</#if>
 
 		<#if attachments?size gt 0>
 			<#if attachments?size == 1>
@@ -32,23 +37,10 @@
 				<#local filename = "submission-${submission.studentIdentifier}.zip">
 				<#local downloadUrl><@routes.cm2.downloadSubmission submission filename/></#local>
 			</#if>
-			<a class="long-running" href="${downloadUrl}"><#compress>
-				${attachments?size}
-				<#if attachments?size == 1> file
-				<#else> files
-				</#if>
-			</#compress></a><#--
-		--></#if><#--
-		--><#if submission.submittedDate??> <#compress>
-			<span class="date use-tooltip" title="<@lateness submission />" data-container="body"><#compress>
-				<@fmt.date date=submission.submittedDate seconds=true capitalise=true shortMonth=true />
-			</#compress></span>
-		</#compress></#if><#--
-		--><#if assignment.wordCountField?? && submission.valuesByFieldName[assignment.defaultWordCountName]??><#compress>
-			, ${submission.valuesByFieldName[assignment.defaultWordCountName]?number} words
-		</#compress></#if>
-	</#compress></#if>
-</#compress></#macro>
+			&emsp;<a class="long-running" href="${downloadUrl}">Download submission</a>
+		</#if>
+	</#if>
+</@compress></#macro>
 
 <#macro submission_status submission="" enhancedExtension="" enhancedFeedback="" student="">
 	<#if submission?has_content>
@@ -89,4 +81,32 @@
 			</#if>
 		</#if>
 	</#if>
+</#macro>
+
+<#macro originalityReport attachment>
+	<#local r=attachment.originalityReport />
+	<#local assignment=attachment.submissionValue.submission.assignment />
+
+	<span id="tool-tip-${attachment.id}" class="similarity-${r.similarity} similarity-tooltip">${r.overlap}% similarity</span>
+	<div id="tip-content-${attachment.id}" class="hide">
+		<p>${attachment.name} <img src="<@url resource="/static/images/icons/turnitin-16.png"/>"></p>
+		<p class="similarity-subcategories-tooltip">
+			Web: ${r.webOverlap}%<br>
+			Student papers: ${r.studentOverlap}%<br>
+			Publications: ${r.publicationOverlap}%
+		</p>
+		<p>
+			<a target="turnitin-viewer" href="<@routes.cm2.turnitinLtiReport assignment attachment />">View full report</a>
+		</p>
+	</div>
+	<script type="text/javascript">
+		jQuery(function($){
+			$("#tool-tip-${attachment.id}").popover({
+				placement: 'right',
+				html: true,
+				content: function(){return $('#tip-content-${attachment.id}').html();},
+				title: 'Turnitin report summary'
+			});
+		});
+	</script>
 </#macro>

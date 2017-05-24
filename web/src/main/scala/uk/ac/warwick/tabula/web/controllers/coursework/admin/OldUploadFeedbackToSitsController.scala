@@ -5,7 +5,7 @@ import org.springframework.stereotype.Controller
 import org.springframework.web.bind.annotation.{ModelAttribute, PathVariable, RequestMapping}
 import uk.ac.warwick.tabula.commands.Appliable
 import uk.ac.warwick.tabula.commands.coursework.UploadFeedbackToSitsCommand
-import uk.ac.warwick.tabula.commands.coursework.feedback.GenerateGradesFromMarkCommand
+import uk.ac.warwick.tabula.commands.coursework.feedback.OldGenerateGradesFromMarkCommand
 import uk.ac.warwick.tabula.coursework.web.Routes
 import uk.ac.warwick.tabula.web.controllers.coursework.OldCourseworkController
 import uk.ac.warwick.tabula.data.model.{Assignment, Feedback, Module}
@@ -21,7 +21,7 @@ class OldUploadFeedbackToSitsController extends OldCourseworkController {
 			mandatory(module),
 			mandatory(assignment),
 			user,
-			GenerateGradesFromMarkCommand(mandatory(module), mandatory(assignment))
+			OldGenerateGradesFromMarkCommand(mandatory(module), mandatory(assignment))
 		)
 
 	@RequestMapping(params = Array("!confirm"))

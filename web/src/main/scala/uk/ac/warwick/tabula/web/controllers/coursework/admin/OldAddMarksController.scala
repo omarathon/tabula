@@ -3,7 +3,7 @@ package uk.ac.warwick.tabula.web.controllers.coursework.admin
 import org.springframework.web.bind.annotation.RequestMapping
 import org.springframework.stereotype.Controller
 import uk.ac.warwick.tabula.commands.Appliable
-import uk.ac.warwick.tabula.commands.coursework.feedback.GenerateGradesFromMarkCommand
+import uk.ac.warwick.tabula.commands.coursework.feedback.OldGenerateGradesFromMarkCommand
 import uk.ac.warwick.tabula.web.controllers.coursework.OldCourseworkController
 import org.springframework.web.bind.annotation.PathVariable
 import uk.ac.warwick.tabula.commands.coursework.assignments.{AdminAddMarksCommand, PostExtractValidation}
@@ -33,7 +33,7 @@ class OldAddMarksController extends OldCourseworkController {
 	type AdminAddMarksCommand = Appliable[Seq[Feedback]] with PostExtractValidation
 
 	@ModelAttribute("adminAddMarksCommand") def command(@PathVariable module: Module, @PathVariable assignment: Assignment, user: CurrentUser): AdminAddMarksCommand =
-		AdminAddMarksCommand(mandatory(module), mandatory(assignment), user, GenerateGradesFromMarkCommand(mandatory(module), mandatory(assignment)))
+		AdminAddMarksCommand(mandatory(module), mandatory(assignment), user, OldGenerateGradesFromMarkCommand(mandatory(module), mandatory(assignment)))
 
 	// Add the common breadcrumbs to the model.
 	def crumbed(mav: Mav, module: Module): Mav = mav.crumbs(Breadcrumbs.Department(module.adminDepartment), Breadcrumbs.Module(module))
