@@ -88,8 +88,7 @@ class DownloadSelectedFeedbackFileController extends CourseworkController {
 	@ModelAttribute def singleFeedbackCommand(
 		@PathVariable assignment: Assignment,
 		@PathVariable feedbackId: String
-	) =
-		new AdminGetSingleFeedbackFileCommand(mandatory(assignment), mandatory(feedbackDao.getAssignmentFeedback(feedbackId)))
+	) = new AdminGetSingleFeedbackFileCommand(mandatory(assignment), mandatory(feedbackDao.getAssignmentFeedback(feedbackId)))
 
 	@RequestMapping(method = Array(GET))
 	def get(cmd: AdminGetSingleFeedbackFileCommand, @PathVariable filename: String): Mav = {
