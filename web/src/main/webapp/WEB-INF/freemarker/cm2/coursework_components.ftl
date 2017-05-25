@@ -1082,11 +1082,13 @@
 </#macro>
 
 <#macro marker_feedback_summary feedback stage isMarking=false>
+	<h4>${stage.description} <#if feedback.marker??>- ${feedback.marker.fullName}</#if></h4>
+
 	<#list feedback.customFormValues as formValue>
 		<#if formValue.value?has_content>
 			<@bs3form.form_group><textarea class="form-control feedback-comments" readonly="readonly">${formValue.value!""}</textarea></@bs3form.form_group>
 		<#else>
-			<p>No feedback comments added.</p>
+		<p>No feedback comments added.</p>
 		</#if>
 	</#list>
 
@@ -1109,7 +1111,7 @@
 		</#if>
 
 		<div class="col-xs-6">
-			<#-- Download a zip of all feedback or just a single file if there is only one -->
+		<#-- Download a zip of all feedback or just a single file if there is only one -->
 			<#if feedback.attachments?has_content >
 				<#local attachment = "" />
 				<#if !feedback.attachments?is_enumerable>
