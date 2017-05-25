@@ -224,20 +224,18 @@
 						<span class="caret"></span>
 					</a>
 					<ul class="dropdown-menu">
-
-						<#if assignment.hasWorkflow>
-							<li>
-								<#assign onlinefeedback_url><@routes.cm2.genericfeedback assignment /></#assign>
-								<@fmt.permission_button
-								permission='AssignmentFeedback.Manage'
-								scope=assignment
-								action_descr='add general feedback for all students'
-								tooltip='Add general feedback that will be sent to all students'
-								href=onlinefeedback_url>
-									Generic feedback
-								</@fmt.permission_button>
-							</li>
-						<#else>
+						<li>
+							<#assign onlinefeedback_url><@routes.cm2.genericfeedback assignment /></#assign>
+							<@fmt.permission_button
+							permission='AssignmentFeedback.Manage'
+							scope=assignment
+							action_descr='add general feedback for all students'
+							tooltip='Add general feedback that will be sent to all students'
+							href=onlinefeedback_url>
+								Generic feedback
+							</@fmt.permission_button>
+						</li>
+						<#if (!assignment.hasWorkflow && !assignment.hasCM2Workflow)>
 							<#if features.feedbackTemplates && assignment.hasFeedbackTemplate>
 								<li>
 									<a class="long-running use-tooltip"
