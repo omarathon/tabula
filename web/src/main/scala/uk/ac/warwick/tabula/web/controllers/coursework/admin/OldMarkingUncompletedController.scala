@@ -12,7 +12,7 @@ import javax.validation.Valid
 import org.springframework.context.annotation.Profile
 import uk.ac.warwick.tabula.data.Transactions._
 import uk.ac.warwick.tabula.commands.{Appliable, SelfValidating}
-import uk.ac.warwick.tabula.commands.coursework.assignments.{CanProxy, MarkingUncompletedCommand, MarkingUncompletedState}
+import uk.ac.warwick.tabula.commands.coursework.assignments.{CanProxy, OldMarkingUncompletedCommand, MarkingUncompletedState}
 import uk.ac.warwick.tabula.web.Mav
 import uk.ac.warwick.userlookup.User
 
@@ -29,7 +29,7 @@ class OldMarkingUncompletedController extends OldCourseworkController {
 							@PathVariable assignment: Assignment,
 							@PathVariable marker: User,
 							submitter: CurrentUser) =
-		MarkingUncompletedCommand(module, assignment, marker, submitter)
+		OldMarkingUncompletedCommand(module, assignment, marker, submitter)
 
 	def RedirectBack(assignment: Assignment, command: MarkingUncompletedCommand): Mav = {
 			Redirect(Routes.admin.assignment.markerFeedback(assignment, command.user))
