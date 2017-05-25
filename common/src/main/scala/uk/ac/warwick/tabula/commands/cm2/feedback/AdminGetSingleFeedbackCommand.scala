@@ -1,4 +1,4 @@
-package uk.ac.warwick.tabula.commands.coursework.feedback
+package uk.ac.warwick.tabula.commands.cm2.feedback
 
 import uk.ac.warwick.spring.Wire
 import uk.ac.warwick.tabula.commands.{Command, Description, ReadOnly}
@@ -7,8 +7,7 @@ import uk.ac.warwick.tabula.permissions._
 import uk.ac.warwick.tabula.services.ZipService
 import uk.ac.warwick.tabula.services.fileserver.{RenderableAttachment, RenderableFile}
 
-class AdminGetSingleFeedbackCommand(module: Module, assignment: Assignment, feedback: Feedback) extends Command[RenderableFile] with ReadOnly {
-	mustBeLinked(assignment, module)
+class AdminGetSingleFeedbackCommand(assignment: Assignment, feedback: Feedback) extends Command[RenderableFile] with ReadOnly {
 	PermissionCheck(Permissions.AssignmentFeedback.Read, feedback)
 
 	var zipService: ZipService = Wire.auto[ZipService]
@@ -20,8 +19,7 @@ class AdminGetSingleFeedbackCommand(module: Module, assignment: Assignment, feed
 		"attachmentCount" -> feedback.attachments.size)
 }
 
-class AdminGetSingleFeedbackFileCommand(module: Module, assignment: Assignment, feedback: Feedback) extends Command[Option[RenderableFile]] with ReadOnly {
-	mustBeLinked(assignment, module)
+class AdminGetSingleFeedbackFileCommand(assignment: Assignment, feedback: Feedback) extends Command[Option[RenderableFile]] with ReadOnly {
 	PermissionCheck(Permissions.AssignmentFeedback.Read, feedback)
 
 	var filename: String = _
@@ -44,7 +42,6 @@ class AdminGetSingleFeedbackFileCommand(module: Module, assignment: Assignment, 
 	}
 
 }
-
 
 
 class AdminGetSingleMarkerFeedbackCommand(module: Module, assignment: Assignment, markerFeedback: MarkerFeedback) extends Command[RenderableFile] with ReadOnly {

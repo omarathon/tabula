@@ -3,10 +3,12 @@ package uk.ac.warwick.tabula.web.controllers.cm2.admin
 import org.springframework.context.annotation.Profile
 import org.springframework.stereotype.Controller
 import org.springframework.web.bind.annotation.{ModelAttribute, PathVariable, RequestMapping}
+import uk.ac.warwick.spring.Wire
 import uk.ac.warwick.tabula.ItemNotFoundException
 import uk.ac.warwick.tabula.cm2.web.Routes
 import uk.ac.warwick.tabula.commands.Appliable
-import uk.ac.warwick.tabula.commands.cm2.feedback.{DownloadMarkerFeedbackCommand, DownloadMarkerFeedbackState, DownloadSelectedFeedbackCommand}
+import uk.ac.warwick.tabula.commands.cm2.feedback._
+import uk.ac.warwick.tabula.data.FeedbackDao
 import uk.ac.warwick.tabula.data.model.{Assignment, MarkerFeedback}
 import uk.ac.warwick.tabula.services.fileserver.RenderableFile
 import uk.ac.warwick.tabula.system.RenderableFileView
@@ -53,5 +55,47 @@ class DownloadAllFeedbackController extends CourseworkController {
 			case Right(jobInstance) =>
 				Redirect(Routes.zipFileJob(jobInstance), "returnTo" -> Routes.admin.assignment.submissionsandfeedback(assignment))
 		}
+	}
+}
+
+
+@Profile(Array("cm2Enabled"))
+@Controller
+@RequestMapping(Array("/${cm2.prefix}/admin/assignments/{assignment}/feedback/download/{feedbackId}/{filename}.zip"))
+class DownloadSelectedFeedbackController extends CourseworkController {
+
+	var feedbackDao: FeedbackDao = Wire.auto[FeedbackDao]
+
+	@ModelAttribute
+	def singleFeedbackCommand(
+		@PathVariable assignment: Assignment,
+		@PathVariable feedbackId: String
+	) = new AdminGetSingleFeedbackCommand(mandatory(assignment), mandatory(feedbackDao.getAssignmentFeedback(feedbackId)))
+
+	@RequestMapping(method = Array(GET))
+	def get(cmd: AdminGetSingleFeedbackCommand, @PathVariable filename: String): Mav = {
+		Mav(new RenderableFileView(cmd.apply()))
+	}
+}
+
+@Profile(Array("cm2Enabled"))
+@Controller
+@RequestMapping(Array("/${cm2.prefix}/admin/assignments/{assignment}/feedback/download/{feedbackId}/{filename}"))
+class DownloadSelectedFeedbackFileController extends CourseworkController {
+
+	var feedbackDao: FeedbackDao = Wire.auto[FeedbackDao]
+
+	@ModelAttribute def singleFeedbackCommand(
+		@PathVariable assignment: Assignment,
+		@PathVariable feedbackId: String
+	) =
+		new AdminGetSingleFeedbackFileCommand(mandatory(assignment), mandatory(feedbackDao.getAssignmentFeedback(feedbackId)))
+
+	@RequestMapping(method = Array(GET))
+	def get(cmd: AdminGetSingleFeedbackFileCommand, @PathVariable filename: String): Mav = {
+		val renderable = cmd.apply().getOrElse {
+			throw new ItemNotFoundException()
+		}
+		Mav(new RenderableFileView(renderable))
 	}
 }
