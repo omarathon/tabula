@@ -41,7 +41,7 @@ abstract class AbstractFeedbackReportController extends CourseworkController
 	@RequestMapping(params = Array("!jobId"))
 	def requestReport(@ModelAttribute("feedbackReportCommand") cmd: FeedbackReportCommand.Command, @PathVariable department: Department): Mav =
 		Mav("cm2/admin/assignments/feedbackreport/report_range", "academicYear" -> cmd.academicYear)
-			.crumbs(Breadcrumbs.Department(department, cmd.academicYear))
+			.crumbsList(Breadcrumbs.department(department, Some(cmd.academicYear)))
 			.secondCrumbs(academicYearBreadcrumbs(cmd.academicYear)(Routes.admin.feedbackReports(department, _)): _*)
 
 	@RequestMapping(method = Array(POST), params = Array("!jobId"))
@@ -51,7 +51,7 @@ abstract class AbstractFeedbackReportController extends CourseworkController
 		} else {
 			val job = cmd.apply()
 			Mav("cm2/admin/assignments/feedbackreport/progress", "job" -> job, "academicYear" -> cmd.academicYear)
-				.crumbs(Breadcrumbs.Department(department, cmd.academicYear))
+				.crumbsList(Breadcrumbs.department(department, Some(cmd.academicYear)))
 				.secondCrumbs(academicYearBreadcrumbs(cmd.academicYear)(Routes.admin.feedbackReports(department, _)): _*)
 		}
 	}
@@ -61,7 +61,7 @@ abstract class AbstractFeedbackReportController extends CourseworkController
 		val academicYear = activeAcademicYear.getOrElse(AcademicYear.guessSITSAcademicYearByDate(DateTime.now))
 		val job = jobService.getInstance(jobId)
 		Mav("cm2/admin/assignments/feedbackreport/progress", "job" -> job)
-			.crumbs(Breadcrumbs.Department(department, academicYear))
+			.crumbsList(Breadcrumbs.department(department, Some(academicYear)))
 			.secondCrumbs(academicYearBreadcrumbs(academicYear)(Routes.admin.feedbackReports(department, _)): _*)
 			.noLayoutIf(ajax)
 	}

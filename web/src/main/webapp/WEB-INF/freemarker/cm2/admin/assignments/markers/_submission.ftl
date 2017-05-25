@@ -1,11 +1,11 @@
-<#import "../submissionsandfeedback/_submission_details.ftl" as sd />
+<#import "*/coursework_components.ftl" as components />
 
 <div role="tabpanel" class="tab-pane active" id="${student.userId}${command.stage.name}submission">
 	<#if command.submission?has_content>
 		<#assign submission = command.submission />
 		<ul class="list-unstyled">
 
-			<li><strong><@spring.message code=command.submissionState />:</strong><@sd.submission_details submission /></li>
+			<li><strong><@spring.message code=command.submissionState />:</strong><@components.submission_details submission /></li>
 
 			<#if assignment.wordCountField?? && submission.valuesByFieldName[assignment.defaultWordCountName]??>
 				<li><strong>Word count:</strong> ${submission.valuesByFieldName[assignment.defaultWordCountName]?number}</li>
@@ -19,7 +19,7 @@
 					</@compress>
 					<div class="originality-reports">
 						<#list submission.attachmentsWithOriginalityReport as attachment>
-							<@sd.originalityReport attachment />
+							<@components.originalityReport attachment />
 						</#list>
 					</div>
 				<#else>

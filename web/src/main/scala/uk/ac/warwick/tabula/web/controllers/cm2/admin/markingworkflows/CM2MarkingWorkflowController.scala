@@ -14,6 +14,6 @@ trait CM2MarkingWorkflowController extends CourseworkController with CourseworkD
 
 	def commonCrumbs(view: Mav, department: Department, academicYear: AcademicYear): Mav =
 		view
-			.crumbs(Breadcrumbs.Department(department, academicYear))
+			.crumbsList(Breadcrumbs.department(department, Some(academicYear)))
 			.secondCrumbs(academicYearBreadcrumbs(academicYear)(year => Routes.cm2.admin.workflows(department, year)): _*)
 }

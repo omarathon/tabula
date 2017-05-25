@@ -277,11 +277,16 @@ abstract class Feedback extends GeneratedId with FeedbackAttachments with Permis
 	@BatchSize(size = 200)
 	var markerFeedback: JList[MarkerFeedback] = JArrayList()
 
-	def feedbackMarkersByRole: Map[String,User] =   {
+	def feedbackByStage: Map[MarkingWorkflowStage, MarkerFeedback] =
+		markerFeedback.asScala.groupBy(_.stage).mapValues(_.head)
+
+	def feedbackMarkers: Map[MarkingWorkflowStage, User] =
+		feedbackByStage.mapValues(_.marker)
+
+	def feedbackMarkersByRole: Map[String, User] =
 		markerFeedback.asScala.groupBy(f => f.stage.roleName).toSeq
 			.sortBy {	case(_, fList) => fList.head.stage.order }
 			.map { case (s, fList) => s -> fList.head.marker }.toMap
-	}
 
 	def feedbackMarkerByRole(roleName: String): Option[User] =
 		feedbackMarkersByRole.get(roleName)

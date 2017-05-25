@@ -33,7 +33,7 @@ abstract class AbstractAssignmentStudentsController extends AbstractAssignmentCo
 			"assessmentGroups" -> form.assessmentGroups,
 			"academicYear" -> form.assignment.academicYear,
 			"mode" -> mode)
-			.crumbs(Breadcrumbs.Department(assignment.module.adminDepartment, assignment.academicYear), Breadcrumbs.Assignment(assignment))
+			.crumbsList(Breadcrumbs.assignment(assignment))
 	}
 
 	def submit(cmd: ModifyAssignmentStudentsCommand, errors: Errors, assignment: Assignment, path: String, mode: String) = {

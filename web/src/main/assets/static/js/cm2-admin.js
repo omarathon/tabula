@@ -235,7 +235,7 @@
 				if ($this.data('href')) {
 					action = $this.data('href')
 				}
-				var postData = $('div.form-post-container').find('.collection-checkbox:checked').map(function(){
+				var postData = $this.closest('div.form-post-container').find('.collection-checkbox:checked').map(function(){
 					var $input = $(this);
 					return $input.prop('name') + '=' + $input.val();
 				}).get().join('&');
@@ -339,6 +339,33 @@
 						}
 					}
 				});
+
+				$('.form-post-single', $outerContainer).click(function(event){
+					event.preventDefault();
+					var $this = $(this);
+					if(!$this.hasClass("disabled")) {
+						var action = this.href;
+						if ($this.data('href')) {
+							action = $this.data('href')
+						}
+
+						var $form = $('<form />').attr({method: 'POST', action: action}).hide();
+						var doFormSubmit = true;
+
+						var $checkedBoxes = $(".collection-checkbox", $this.closest('itemContainer'));
+						$form.append($checkedBoxes.clone().prop('checked', true));
+
+						var $extraInputs = $(".post-field", $this.closest('itemContainer'));
+						$form.append($extraInputs.clone());
+
+						if (doFormSubmit) {
+							$(document.body).append($form);
+							$form.submit();
+						} else {
+							return false;
+						}
+					}
+				});
 			},
 
 			// rather than just toggling the class check the state of the checkbox to avoid silly errors
@@ -379,6 +406,27 @@
 		);
 	};
 	$(function () { exports.initBigList(); });
+
+	exports.equalHeightTabContent = function ($scope) {
+		$scope = $scope || $('body');
+		$scope.find('.tab-content-equal-height').each(function () {
+			var $container = $(this);
+			var maxHeight = 0;
+			$container.find('.tab-pane').each(function () {
+				var $pane = $(this);
+				if ($pane.is('.active')) {
+					var height = $pane.height();
+					maxHeight = (height > maxHeight) ? height : maxHeight;
+				} else {
+					$pane.addClass('active');
+					var height = $pane.height();
+					maxHeight = (height > maxHeight) ? height : maxHeight;
+					$pane.removeClass('active');
+				}
+			});
+			$container.find('.tab-pane').height(maxHeight);
+		});
+	};
 
 	// take anything we've attached to "exports" and add it to the global "Courses"
 	// we use extend() to add to any existing variable rather than clobber it

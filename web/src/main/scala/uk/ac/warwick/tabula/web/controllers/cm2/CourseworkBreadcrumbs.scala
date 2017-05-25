@@ -10,9 +10,18 @@ trait CourseworkBreadcrumbs {
 }
 
 object CourseworkBreadcrumbs {
-	case class Standard(title: String, url: Option[String], override val tooltip: String) extends BreadCrumb
+	def department(department: model.Department, academicYear: Option[AcademicYear], active: Boolean = false): Seq[BreadCrumb] =
+		Seq(Department(department, academicYear, active))
 
-	case class Department(dept: model.Department, academicYear: Option[AcademicYear], override val active: Boolean) extends BreadCrumb {
+	def module(module: model.Module, academicYear: AcademicYear, active: Boolean = false): Seq[BreadCrumb] =
+		department(module.adminDepartment, Some(academicYear)) ++ Seq(Year(module.adminDepartment, academicYear), Module(module, academicYear, active))
+
+	def assignment(assignment: model.Assignment, active: Boolean = false): Seq[BreadCrumb] =
+		module(assignment.module, assignment.academicYear) :+ Assignment(assignment, active)
+
+	private[CourseworkBreadcrumbs] case class Standard(title: String, url: Option[String], override val tooltip: String) extends BreadCrumb
+
+	private[CourseworkBreadcrumbs] case class Department(dept: model.Department, academicYear: Option[AcademicYear], override val active: Boolean) extends BreadCrumb {
 		val title: String = dept.name
 		val url: Option[String] = academicYear match {
 			case Some(year) => Some(Routes.admin.department(dept, year))
@@ -20,25 +29,18 @@ object CourseworkBreadcrumbs {
 		}
 	}
 
-	object Department {
-		def apply(dept: model.Department): Department =
-			Department(dept, None, active = false)
-		def active(dept: model.Department): Department =
-			Department(dept, None, active = true)
-
-		def apply(dept: model.Department, academicYear: AcademicYear): Department =
-			Department(dept, Some(academicYear), active = false)
-		def active(dept: model.Department, academicYear: AcademicYear): Department =
-			Department(dept, Some(academicYear), active = true)
-
-		def apply(assignment: model.Assignment): Department =
-			apply(assignment.module.adminDepartment, assignment.academicYear)
-		def active(assignment: model.Assignment): Department =
-			active(assignment.module.adminDepartment, assignment.academicYear)
+	private[CourseworkBreadcrumbs] case class Year(dept: model.Department, academicYear: AcademicYear) extends BreadCrumb {
+		val title: String = academicYear.toString
+		val url: Option[String] = Some(Routes.admin.department(dept, academicYear))
 	}
 
-	case class Assignment(assignment: model.Assignment, override val active: Boolean = false) extends BreadCrumb {
-		val title: String = s"${assignment.name} (${assignment.module.code.toUpperCase}, ${assignment.academicYear})"
+	private[CourseworkBreadcrumbs] case class Module(module: model.Module, academicYear: AcademicYear, override val active: Boolean = false) extends BreadCrumb {
+		val title: String = s"${module.code.toUpperCase} ${module.name}"
+		val url: Option[String] = Some(Routes.admin.moduleWithinDepartment(module, academicYear))
+	}
+
+	private[CourseworkBreadcrumbs] case class Assignment(assignment: model.Assignment, override val active: Boolean = false) extends BreadCrumb {
+		val title: String = assignment.name
 		val url: Option[String] = Some(Routes.admin.assignment.submissionsandfeedback(assignment))
 	}
 }

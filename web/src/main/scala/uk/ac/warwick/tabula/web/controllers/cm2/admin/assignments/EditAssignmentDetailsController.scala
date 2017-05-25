@@ -44,7 +44,7 @@ class EditAssignmentDetailsController extends AbstractAssignmentController {
 			"canDeleteMarkers" -> cmd.workflow.exists(_.canDeleteMarkers),
 			"canDeleteAssignment" -> canDeleteAssignment
 		)
-			.crumbs(Breadcrumbs.Department(assignment.module.adminDepartment, assignment.academicYear), Breadcrumbs.Assignment(assignment))
+			.crumbsList(Breadcrumbs.assignment(assignment))
 	}
 
 	@RequestMapping(method = Array(POST), params = Array(ManageAssignmentMappingParameters.editAndAddFeedback, "action!=refresh", "action!=update, action=submit"))

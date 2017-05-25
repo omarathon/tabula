@@ -27,7 +27,7 @@ class UploadFeedbackToSitsController extends CourseworkController {
 	def form(@ModelAttribute("command") cmd: Appliable[Seq[Feedback]], @PathVariable assignment: Assignment): Mav =
 		Mav("cm2/admin/assignments/publish/upload_to_sits",
 			"isGradeValidation" -> assignment.module.adminDepartment.assignmentGradeValidation)
-			.crumbs(Breadcrumbs.Department(assignment), Breadcrumbs.Assignment(assignment))
+			.crumbsList(Breadcrumbs.assignment(assignment))
 
 	@RequestMapping(method = Array(POST), params = Array("confirm"))
 	def submit(@ModelAttribute("command") cmd: Appliable[Seq[Feedback]], @PathVariable assignment: Assignment): Mav = {

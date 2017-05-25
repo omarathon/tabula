@@ -46,7 +46,7 @@ abstract class AbstractDepartmentHomeController
 			"allWorkflowTypeFilters" -> AssignmentInfoFilters.allWorkflowTypeFilters,
 			"allStatusFilters" -> AssignmentInfoFilters.Status.all,
 			"academicYear" -> command.academicYear)
-			.crumbs(Breadcrumbs.Department.active(department, command.academicYear))
+			.crumbsList(Breadcrumbs.department(department, Some(command.academicYear), active = true))
 			.secondCrumbs(academicYearBreadcrumbs(command.academicYear)(Routes.cm2.admin.department(department, _)): _*)
 
 	@RequestMapping
