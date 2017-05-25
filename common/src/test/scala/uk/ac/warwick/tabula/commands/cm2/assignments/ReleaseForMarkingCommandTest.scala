@@ -61,7 +61,6 @@ class ReleaseForMarkingCommandTest extends TestBase  with Mockito {
 			mf.userLookup = Fixtures.userLookupService(marker)
 			mf.marker = marker
 			mf.stage = SingleMarker
-			feedback.markerFeedback.add(mf)
 			assignment.feedbacks.add(feedback)
 			val cmd = new ReleaseForMarkingCommandInternal(assignment, currentUser) with MockCM2MarkingWorkflowServiceComponent
 			cmd.students = Seq("1", "2", "3").asJava

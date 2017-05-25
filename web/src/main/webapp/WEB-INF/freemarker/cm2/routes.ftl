@@ -152,6 +152,7 @@ TODO grab values from the Routes object in code, as that's pretty equivalent and
 <#macro assignmentsubmissionsandfeedbacktable assignment><@_u page="/admin/assignments/${assignment.id}/table"/></#macro>
 <#macro assignmentsubmissionsandfeedbacksummary assignment><@_u page="/admin/assignments/${assignment.id}/summary"/></#macro>
 <#macro releaseForMarking assignment><@_u page="/admin/assignments/${assignment.id}/release-submissions"/></#macro>
+<#macro stopMarking assignment><@_u page="/admin/assignments/${assignment.id}/stop-marking"/></#macro>
 
 <#macro assignmentextensions assignment><@_u page="/admin/assignments/${assignment.id}/extensions"/></#macro>
 
