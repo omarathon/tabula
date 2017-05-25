@@ -9,6 +9,8 @@
 
 <#macro markerFeedbackSummary feedback stage>
 
+		<h4>${stage.description} <#if feedback.marker??>- ${feedback.marker.fullName}</#if></h4>
+
 		<#list feedback.customFormValues as formValue>
 			<#if formValue.value?has_content>
 				<@bs3form.form_group><textarea class="form-control feedback-comments" readonly="readonly">${formValue.value!""}</textarea></@bs3form.form_group>

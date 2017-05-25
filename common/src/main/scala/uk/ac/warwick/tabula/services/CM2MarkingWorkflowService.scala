@@ -24,6 +24,7 @@ trait CM2MarkingWorkflowService extends WorkflowUserGroupHelpers {
 	def save(workflow: CM2MarkingWorkflow): Unit
 	def delete(workflow: CM2MarkingWorkflow): Unit
 	def releaseForMarking(feedbacks: Seq[AssignmentFeedback]): Seq[AssignmentFeedback]
+	def stopMarking(feedbacks: Seq[AssignmentFeedback]): Seq[AssignmentFeedback]
 
 	/** All assignments using this marking workflow. */
 	def getAssignmentsUsingMarkingWorkflow(workflow: CM2MarkingWorkflow): Seq[Assignment]
@@ -70,6 +71,12 @@ class CM2MarkingWorkflowServiceImpl extends CM2MarkingWorkflowService with Autow
 
 	override def releaseForMarking(feedbacks: Seq[AssignmentFeedback]): Seq[AssignmentFeedback] = feedbacks.map(f => {
 		f.outstandingStages = f.assignment.cm2MarkingWorkflow.initialStages.asJava
+		feedbackService.saveOrUpdate(f)
+		f
+	})
+
+	override def stopMarking(feedbacks: Seq[AssignmentFeedback]): Seq[AssignmentFeedback] = feedbacks.map(f => {
+		f.outstandingStages.clear()
 		feedbackService.saveOrUpdate(f)
 		f
 	})

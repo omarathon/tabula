@@ -270,7 +270,7 @@ abstract class SubmissionAndFeedbackCommandInternal(val assignment: Assignment)
 		val workflowMarkers = if (!assignment.cm2Assignment || feedbacks.isEmpty) {
 			Nil
 		} else {
-			feedbacks.head.feedbackMarkersByRole.keys.toSeq
+			feedbacks.head.feedbackMarkersByAllocationName.keys.toSeq
 		}
 		SubmissionAndFeedbackResults(
 			students = studentsFiltered,

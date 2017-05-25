@@ -173,8 +173,10 @@
 								<li class="must-have-selected">
 									<#if assignment.markingWorkflow??>
 										<#assign releaseForMarking_url><@routes.coursework.releaseForMarking assignment /></#assign>
+										<#assign releaseTooltip>Release the submissions for marking. First markers will be able to download their submissions.</#assign>
 									<#else>
 										<#assign releaseForMarking_url><@routes.cm2.releaseForMarking assignment /></#assign>
+										<#assign releaseTooltip>Release the students for marking. First markers will be able to start marking.</#assign>
 									</#if>
 										<@fmt.permission_button
 											permission='Submission.ReleaseForMarking'
@@ -183,11 +185,29 @@
 											classes='form-post'
 											href=releaseForMarking_url
 											id="release-submissions-button"
-											tooltip="Release the submissions for marking. First markers will be able to download their submissions."
+											tooltip=releaseTooltip
 											data_attr='data-container=body'>
 												Release selected for marking
 										</@fmt.permission_button>
 								</li>
+
+								<#if assignment.cm2MarkingWorkflow??>
+									<li class="must-have-selected">
+										<#assign suspendMarking_url><@routes.cm2.stopMarking assignment /></#assign>
+										<@fmt.permission_button
+											permission='Submission.ReleaseForMarking'
+											scope=assignment
+											action_descr='Stop marking'
+											classes='form-post'
+											href=suspendMarking_url
+											id="stop-marking-button"
+											tooltip="Stop marking. Markers will be notified."
+											data_attr='data-container=body'>
+												Stop marking for selected
+										</@fmt.permission_button>
+									</li>
+								</#if>
+
 								<li class="must-have-selected">
 									<#if assignment.markingWorkflow??>
 										<#assign returnForMarking_url><@routes.coursework.returnForMarking assignment /></#assign>

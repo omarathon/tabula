@@ -30,7 +30,7 @@ class ReleaseForMarkingCommandInternal(val assignment: Assignment, val currentUs
 	def applyInternal(): Seq[AssignmentFeedback] = {
 		val feedbackForRelease = feedbacks.filterNot(f => unreleasableSubmissions.contains(f.usercode))
 		val feedback = cm2MarkingWorkflowService.releaseForMarking(feedbackForRelease)
-		newReleasedFeedback = feedback.flatMap(f => f.markerFeedback.asScala.find(mf => f.outstandingStages.asScala.contains(mf.stage))).asJava
+		newReleasedFeedback = feedback.flatMap(_.markingInProgress).asJava
 		feedback
 	}
 }
