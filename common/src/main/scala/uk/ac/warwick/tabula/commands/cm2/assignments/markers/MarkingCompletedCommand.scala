@@ -105,8 +105,7 @@ trait MarkingCompletedState extends CanProxy with UserAware {
 	def noFeedback: Seq[MarkerFeedback] = markerFeedback.asScala.filter(!_.hasFeedback)
 	def noContent: Seq[MarkerFeedback] = markerFeedback.asScala.filter(!_.hasContent) // should be empty
 	def releasedFeedback: Seq[MarkerFeedback] = markerFeedback.asScala.filter(mf => {
-		val currentStageIndex = mf.feedback.outstandingStages.asScala.headOption.map(_.order).getOrElse(0)
-		mf.stage.order < currentStageIndex
+		mf.stage.order < mf.feedback.currentStageIndex
 	})
 
 	// do not update previously released feedback or feedback belonging to other markers

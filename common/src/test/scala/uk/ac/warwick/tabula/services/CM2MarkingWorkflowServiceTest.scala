@@ -122,9 +122,9 @@ class CM2MarkingWorkflowServiceTest extends TestBase with Mockito {
 		feedback.foreach(f => verify(fs, times(3)).saveOrUpdate(f))
 		finalDone.isEmpty should be {true}
 
-		val previous = service.returnFeedback(feedback)
-		previous.foreach(f => f.outstandingStages.asScala should be (Seq(DblBlndFinalMarker)))
-		previous.foreach(f => verify(fs, times(4)).saveOrUpdate(f))
+		val previous = service.returnFeedback(Seq(DblBlndFinalMarker), feedback)
+		feedback.foreach(f => f.outstandingStages.asScala should be (Seq(DblBlndFinalMarker)))
+		feedback.foreach(f => verify(fs, times(4)).saveOrUpdate(f))
 
 		// throws the expected IllegalArgumentException
 		service.progressFeedback(DblBlndCompleted, feedback)

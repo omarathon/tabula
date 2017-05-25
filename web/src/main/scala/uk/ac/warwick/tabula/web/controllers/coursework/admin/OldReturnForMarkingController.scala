@@ -8,7 +8,7 @@ import org.springframework.validation.Errors
 import org.springframework.web.bind.annotation.{ModelAttribute, PathVariable, RequestMapping}
 import uk.ac.warwick.tabula.CurrentUser
 import uk.ac.warwick.tabula.commands.{Appliable, SelfValidating}
-import uk.ac.warwick.tabula.commands.coursework.assignments.{AdminMarkingUncompletedCommand, MarkingUncompletedState}
+import uk.ac.warwick.tabula.commands.coursework.assignments.{OldAdminMarkingUncompletedCommand, MarkingUncompletedState}
 import uk.ac.warwick.tabula.coursework.web.Routes
 import uk.ac.warwick.tabula.web.controllers.coursework.OldCourseworkController
 import uk.ac.warwick.tabula.data.Transactions._
@@ -27,7 +27,7 @@ class OldReturnForMarkingController extends OldCourseworkController {
 	def command(@PathVariable module: Module,
 							@PathVariable assignment: Assignment,
 							submitter: CurrentUser) =
-		AdminMarkingUncompletedCommand(module, assignment, submitter.apparentUser, submitter)
+		OldAdminMarkingUncompletedCommand(module, assignment, submitter.apparentUser, submitter)
 
 	def redirectBack(assignment: Assignment, command: MarkingUncompletedCommand): Mav = {
 		Redirect(Routes.admin.assignment.submissionsandfeedback(assignment))

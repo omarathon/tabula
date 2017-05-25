@@ -211,20 +211,22 @@
 								<li class="must-have-selected">
 									<#if assignment.markingWorkflow??>
 										<#assign returnForMarking_url><@routes.coursework.returnForMarking assignment /></#assign>
-										<@fmt.permission_button
+										<#assign tooltip_text>Return the submissions for marking. The last marker in the workflow will be able to update their feedback. You can only return feedback that has not been published.</#assign>
+									<#else>
+										<#assign returnForMarking_url><@routes.cm2.returnToMarker assignment /></#assign>
+										<#assign tooltip_text>Return the submissions for marking. You can only return feedback that has not been published.</#assign>
+									</#if>
+									<@fmt.permission_button
 										permission='Submission.ReleaseForMarking'
 										scope=assignment
 										action_descr='return for marking'
 										classes='form-post'
 										href=returnForMarking_url
 										id="return-submissions-button"
-										tooltip="Return the submissions for marking. The last marker in the workflow will be able to update their feedback. You can only return feedback that has not been published."
+										tooltip=tooltip_text
 										data_attr='data-container=body'>
-											Return selected for marking
-										</@fmt.permission_button>
-									<#else>
-										<!--FIXME CM2 related link-->
-									</#if>
+										Return selected for marking
+									</@fmt.permission_button>
 								</li>
 							</ul>
 						</div>

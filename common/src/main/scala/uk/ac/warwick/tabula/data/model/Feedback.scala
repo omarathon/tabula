@@ -295,13 +295,14 @@ abstract class Feedback extends GeneratedId with FeedbackAttachments with Permis
 	@Type(`type` = "uk.ac.warwick.tabula.data.model.markingworkflow.MarkingWorkflowStageUserType")
 	var outstandingStages: JList[MarkingWorkflowStage] = JArrayList()
 
-	def isMarkingCompleted = outstandingStages.asScala.toList match {
+	def isMarkingCompleted: Boolean = outstandingStages.asScala.toList match {
 		case (s: FinalStage) :: Nil => true
 		case _ => false
 	}
 
-	def notReleasedToMarkers = outstandingStages.asScala.isEmpty
+	def notReleasedToMarkers: Boolean = outstandingStages.asScala.isEmpty
 
+	def currentStageIndex: Int = outstandingStages.asScala.headOption.map(_.order).getOrElse(0)
 
 	@Column(name = "released_date")
 	var releasedDate: DateTime = _

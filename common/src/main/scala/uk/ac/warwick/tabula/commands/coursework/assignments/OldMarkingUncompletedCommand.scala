@@ -16,9 +16,9 @@ import uk.ac.warwick.tabula.system.permissions.{PermissionsChecking, RequiresPer
 import uk.ac.warwick.tabula.commands.coursework.markingworkflows.notifications.FeedbackReturnedNotifier
 import uk.ac.warwick.tabula.system.BindListener
 
-object MarkingUncompletedCommand {
+object OldMarkingUncompletedCommand {
 	def apply(module: Module, assignment: Assignment, user: User, submitter: CurrentUser) =
-		new MarkingUncompletedCommand(module, assignment, user, submitter)
+		new OldMarkingUncompletedCommand(module, assignment, user, submitter)
 			with ComposableCommand[Unit]
 			with MarkingUncompletedCommandPermissions
 			with MarkingUncompletedDescription
@@ -27,7 +27,7 @@ object MarkingUncompletedCommand {
 			with AutowiringFeedbackServiceComponent
 }
 
-abstract class MarkingUncompletedCommand(val module: Module, val assignment: Assignment, val user: User, val submitter: CurrentUser)
+abstract class OldMarkingUncompletedCommand(val module: Module, val assignment: Assignment, val user: User, val submitter: CurrentUser)
 	extends CommandInternal[Unit]
 	with Appliable[Unit]
 	with SelfValidating
@@ -121,9 +121,9 @@ trait MarkerReturnedNotifier extends FeedbackReturnedNotifier[Unit] {
 }
 
 
-object AdminMarkingUncompletedCommand {
+object OldAdminMarkingUncompletedCommand {
 	def apply(module: Module, assignment: Assignment, user: User, submitter: CurrentUser) =
-		new AdminMarkingUncompletedCommand(module, assignment, user, submitter)
+		new OldAdminMarkingUncompletedCommand(module, assignment, user, submitter)
 			with ComposableCommand[Unit]
 			with MarkingUncompletedCommandPermissions
 			with MarkingUncompletedDescription
@@ -133,8 +133,8 @@ object AdminMarkingUncompletedCommand {
 }
 
 // an admin version of the above command that just resets the state of the last marker feedback
-abstract class AdminMarkingUncompletedCommand(module: Module, assignment: Assignment, user: User, submitter: CurrentUser)
-	extends MarkingUncompletedCommand(module, assignment, user, submitter) {
+abstract class OldAdminMarkingUncompletedCommand(module: Module, assignment: Assignment, user: User, submitter: CurrentUser)
+	extends OldMarkingUncompletedCommand(module, assignment, user, submitter) {
 
 	self: StateServiceComponent with FeedbackServiceComponent =>
 
