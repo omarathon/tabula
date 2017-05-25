@@ -277,15 +277,17 @@ abstract class Feedback extends GeneratedId with FeedbackAttachments with Permis
 	@BatchSize(size = 200)
 	var markerFeedback: JList[MarkerFeedback] = JArrayList()
 
-	def feedbackMarkersByRole: Map[String,User] =   {
-		markerFeedback.asScala.groupBy(f => f.stage.roleName).toSeq
+	def feedbackMarkersByAllocationName: Map[String, User] =   {
+		markerFeedback.asScala.groupBy(f => f.stage.allocationName).toSeq
 			.sortBy {	case(_, fList) => fList.head.stage.order }
 			.map { case (s, fList) => s -> fList.head.marker }.toMap
 	}
 
-	def feedbackMarkerByRole(roleName: String): Option[User] =
-		feedbackMarkersByRole.get(roleName)
+	def feedbackMarkerByAllocationName(allocationName: String): Option[User] =
+		feedbackMarkersByAllocationName.get(allocationName)
 
+	// gets marker feedback for the current workflow stages
+	def markingInProgress: Seq[MarkerFeedback] = markerFeedback.asScala.filter(mf => outstandingStages.asScala.contains(mf.stage))
 
 	@ElementCollection @Column(name = "stage")
 	@JoinTable(name = "OutstandingStages", joinColumns = Array(

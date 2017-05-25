@@ -10,7 +10,7 @@ import scala.collection.JavaConverters._
 
 trait FeedbackReleasedNotifier extends Notifies[Seq[AssignmentFeedback], Seq[MarkerFeedback]] {
 
-	this: ReleasedState with UserAware with Logging =>
+	self: ReleasedState with UserAware with Logging =>
 
 	def emit(commandResult: Seq[AssignmentFeedback]): Seq[Notification[MarkerFeedback, Assignment]] = {
 		// emit notifications to each marker that has new feedback
