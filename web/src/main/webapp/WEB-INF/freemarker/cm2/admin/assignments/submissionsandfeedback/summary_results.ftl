@@ -112,7 +112,7 @@
 								</td>
 								<td class="student toggle-cell">${student.user.lastName!}</td>
 							</#if>
-							<td class="id toggle-cell">
+							<td class="id toggle-cell<#if !department.showStudentName> toggle-icon</#if>">
 								${identifier} <@pl.profile_link identifier />
 							</td>
 

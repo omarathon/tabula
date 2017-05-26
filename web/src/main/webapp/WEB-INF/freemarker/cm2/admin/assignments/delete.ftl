@@ -22,7 +22,12 @@
 
 		<div class="submit-buttons">
 			<input type="submit" value="Delete" class="btn btn-danger">
-			<a href="<@routes.cm2.editassignmentdetails assignment=assignment />" class="btn btn-default">Cancel</a>
+			<#if assignment.cm2Assignment>
+				<#assign detailsUrl><@routes.cm2.editassignmentdetails assignment /></#assign>
+			<#else>
+				<#assign detailsUrl><@routes.coursework.assignmentedit assignment /></#assign>
+			</#if>
+			<a href="${detailsUrl}" class="btn btn-default">Cancel</a>
 		</div>
 	</@f.form>
 

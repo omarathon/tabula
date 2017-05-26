@@ -14,7 +14,11 @@
 <#macro assignment_wizard current_step module edit_mode=false assignment={}>
 <p class="progress-arrows">
 	<#if edit_mode>
-			<#local details_url><@routes.cm2.editassignmentdetails assignment /></#local>
+			<#if assignment.cm2Assignment>
+				<#local details_url><@routes.cm2.editassignmentdetails assignment /></#local>
+			<#else>
+				<#local details_url><@routes.coursework.assignmentedit assignment /></#local>
+			</#if>
 			<@wizard_link
 	label="Assignment details"
 	is_first=true
@@ -78,7 +82,11 @@
 	url=review_url />
 		<#else>
 		<#assign displayLink=assignment.id?? />
-		<#local details_url><#if displayLink><@routes.cm2.editassignmentdetails assignment /></#if></#local>
+		<#if assignment.cm2Assignment>
+			<#local details_url><#if displayLink><@routes.cm2.editassignmentdetails assignment /></#if></#local>
+		<#else>
+			<#local details_url><#if displayLink><@routes.coursework.assignmentedit assignment /></#if></#local>
+		</#if>
 		<@wizard_link
 		label="Assignment details"
 		is_first=true

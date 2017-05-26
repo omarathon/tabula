@@ -20,10 +20,10 @@ class ModifyAssignmentMarkersController extends AbstractAssignmentController {
 	validatesSelf[SelfValidating]
 
 	@ModelAttribute("assignMarkersCommand")
-	def assignMarkersCommand(@PathVariable assignment: Assignment) = AssignMarkersCommand(mandatory(assignment))
+	def assignMarkersCommand(@PathVariable assignment: Assignment) = AssignMarkersCommand(mustBeCM2(mandatory(assignment)))
 
 	@ModelAttribute("listAllocationsCommand")
-	def listAllocationsCommand(@PathVariable assignment: Assignment) = ListMarkerAllocationsCommand(mandatory(assignment))
+	def listAllocationsCommand(@PathVariable assignment: Assignment) = ListMarkerAllocationsCommand(mustBeCM2(mandatory(assignment)))
 
 	private def form(assignment: Assignment, listAllocationsCmd: ListMarkerAllocationsCommand, assignMarkersCmd: AssignMarkersCommand, mode: String): Mav = {
 		val module =  mandatory(assignMarkersCmd.assignment.module)

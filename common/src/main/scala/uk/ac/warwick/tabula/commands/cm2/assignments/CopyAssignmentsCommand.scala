@@ -82,7 +82,6 @@ abstract class AbstractCopyAssignmentsCommandInternal
 		newAssignment.automaticallyReleaseToMarkers = assignment.automaticallyReleaseToMarkers
 		newAssignment.automaticallySubmitToTurnitin = assignment.automaticallySubmitToTurnitin
 		newAssignment.anonymousMarking = assignment.anonymousMarking
-		newAssignment.cm2Assignment = true
 		newAssignment.cm2MarkingWorkflow = assignment.cm2MarkingWorkflow
 		var workflowCtg = assignment.workflowCategory match {
 			case Some(workflowCategory: WorkflowCategory) =>

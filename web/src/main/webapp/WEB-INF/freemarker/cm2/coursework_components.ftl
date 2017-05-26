@@ -618,7 +618,11 @@
 	<div class="item-info admin-assignment-${assignment.id}">
 		<div class="clearfix">
 			<div class="pull-right">
-				<#local edit_url><@routes.cm2.editassignmentdetails assignment /></#local>
+				<#if assignment.cm2Assignment>
+					<#local edit_url><@routes.cm2.editassignmentdetails assignment /></#local>
+				<#else>
+					<#local edit_url><@routes.coursework.assignmentedit assignment /></#local>
+				</#if>
 				<@fmt.permission_button
 					classes='btn btn-default btn-xs'
 					permission='Assignment.Update'
@@ -718,7 +722,7 @@
 				<div class="col-md-4">
 					<h6>Progress</h6>
 
-					<ul class="list-unstyled scrollable-list">
+					<ul class="list-unstyled">
 						<li><strong>Created:</strong> <span class="use-tooltip" title="<@fmt.dateToWeek assignment.createdDate />" data-html="true"><@fmt.date date=assignment.createdDate /></span></li>
 
 						<#if assignment.opened>
@@ -950,7 +954,7 @@
 					</#if>
 				<#elseif stage_name == 'CM2ReleaseForMarking'>
 
-				<#elseif student.stages[stage_name].stage.markingRelated>
+				<#elseif assignment.cm2Assignment && student.stages[stage_name].stage.markingRelated>
 					<#if feedback??>
 						<#local markingStage = student.stages[stage_name].stage.markingStage />
 						<#local marker = mapGet(feedback.feedbackMarkers, markingStage)! />
@@ -1042,6 +1046,7 @@
 							<#local queueSitsUploadEnabled=(features.queueFeedbackForSits && department.uploadCourseworkMarksToSits) />
 							<#if queueSitsUploadEnabled>
 								<li>
+									<span class="fa-stack"></span>
 									<#if enhancedFeedback.feedbackForSits??>
 										<#local feedbackSitsStatus=enhancedFeedback.feedbackForSits.status />
 										<#local sitsWarning = feedbackSitsStatus.dateOfUpload?has_content && feedbackSitsStatus.status.code != "uploadNotAttempted" && (

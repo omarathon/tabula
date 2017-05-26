@@ -11,26 +11,24 @@ import uk.ac.warwick.tabula.cm2.web.Routes
 import uk.ac.warwick.tabula.commands.Appliable
 import uk.ac.warwick.tabula.commands.cm2.assignments.{AssignMarkersBySpreadsheetCommand, AssignMarkersState, AssignMarkersTemplateCommand, AssignMarkersTemplateState}
 import uk.ac.warwick.tabula.data.model.Assignment
-import uk.ac.warwick.tabula.services.AssessmentMembershipService
+import uk.ac.warwick.tabula.services.{AssessmentMembershipService, AutowiringAssessmentMembershipServiceComponent}
 import uk.ac.warwick.tabula.web.Mav
 import uk.ac.warwick.tabula.web.views.ExcelView
 
 @Profile(Array("cm2Enabled"))
 @Controller
 @RequestMapping(value = Array("/${cm2.prefix}/admin/assignments/{assignment}"))
-class ModifyAssignmentMarkersSpreadsheetController extends AbstractAssignmentController {
+class ModifyAssignmentMarkersSpreadsheetController extends AbstractAssignmentController with AutowiringAssessmentMembershipServiceComponent {
 
 	type AssignMarkersCommand = Appliable[Assignment] with AssignMarkersState
 	type TemplateCommand = Appliable[ExcelView] with AssignMarkersTemplateState
 
-	val assessmentMembershipService: AssessmentMembershipService = Wire.auto[AssessmentMembershipService]
-
 	@ModelAttribute("assignMarkersBySpreadsheetCommand")
 	def assignMarkersBySpreadsheetCommand(@PathVariable assignment: Assignment) =
-		AssignMarkersBySpreadsheetCommand(mandatory(assignment))
+		AssignMarkersBySpreadsheetCommand(mustBeCM2(mandatory(assignment)))
 
 	@ModelAttribute("templateCommand")
-	def templateCommand(@PathVariable assignment: Assignment) = AssignMarkersTemplateCommand(mandatory(assignment))
+	def templateCommand(@PathVariable assignment: Assignment) = AssignMarkersTemplateCommand(mustBeCM2(mandatory(assignment)))
 
 	@RequestMapping(method = Array(GET, HEAD), value=Array("*/markers/template/download"))
 	def downloadTemplate(@ModelAttribute("templateCommand") templateCommand: TemplateCommand): ExcelView = {

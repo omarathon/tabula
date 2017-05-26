@@ -136,7 +136,7 @@
 					</div>
 				</#if>
 			<#if assignment.collectSubmissions && features.markingWorkflows>
-					<#if results.mustReleaseForMarking?default(false)>
+					<#if results.mustReleaseForMarking!false>
 						<div class="btn-group">
 							<a class="btn btn-default dropdown-toggle" data-toggle="dropdown">
 								Marking

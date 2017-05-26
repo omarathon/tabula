@@ -5,7 +5,11 @@
 	<@cm2.assignmentHeader "Edit assignment details" assignment "for" />
 
 <div class="fix-area">
-	<#assign actionUrl><@routes.cm2.editassignmentdetails assignment /></#assign>
+	<#if assignment.cm2Assignment>
+		<#assign actionUrl><@routes.cm2.editassignmentdetails assignment /></#assign>
+	<#else>
+		<#assign actionUrl><@routes.coursework.assignmentedit assignment /></#assign>
+	</#if>
 	<@f.form method="post" action=actionUrl cssClass="dirty-check">
 		<@components.assignment_wizard 'details'  assignment.module true assignment />
 		<@f.errors cssClass="error form-errors" />

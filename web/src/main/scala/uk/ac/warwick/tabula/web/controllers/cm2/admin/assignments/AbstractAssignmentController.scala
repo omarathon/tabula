@@ -15,7 +15,6 @@ abstract class AbstractAssignmentController extends CourseworkController with Cu
 	@ModelAttribute("ManageAssignmentMappingParameters")
 	def params = ManageAssignmentMappingParameters
 
-
 	@ModelAttribute("academicYearChoices") def academicYearChoices: JList[AcademicYear] = {
 		academicYear.yearsSurrounding(2, 2).asJava
 	}

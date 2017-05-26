@@ -23,7 +23,7 @@ class EditAssignmentDetailsController extends AbstractAssignmentController {
 
 	@ModelAttribute("command")
 	def createAssignmentDetailsCommand(@PathVariable assignment: Assignment) =
-		EditAssignmentDetailsCommand(mandatory(assignment))
+		EditAssignmentDetailsCommand(mustBeCM2(mandatory(assignment)))
 
 	@RequestMapping(method = Array(GET))
 	def form(@ModelAttribute("command") cmd: EditAssignmentDetailsCommand, @PathVariable assignment: Assignment): Mav = {

@@ -19,10 +19,10 @@ class ModifyAssignmentMarkersSmallGroupsController extends AbstractAssignmentCon
 	type SmallGroupCommand = Appliable[Seq[SetAllocation]] with AssignMarkersSmallGroupsState
 
 	@ModelAttribute("assignMarkersCommand")
-	def assignMarkersCommand(@PathVariable assignment: Assignment) = AssignMarkersCommand(mandatory(assignment))
+	def assignMarkersCommand(@PathVariable assignment: Assignment) = AssignMarkersCommand(mustBeCM2(mandatory(assignment)))
 
 	@ModelAttribute("smallGroupCommand")
-	def smallGroupCommand(@PathVariable assignment: Assignment) = AssignMarkersSmallGroupsCommand(mandatory(assignment))
+	def smallGroupCommand(@PathVariable assignment: Assignment) = AssignMarkersSmallGroupsCommand(mustBeCM2(mandatory(assignment)))
 
 	private def form(assignment: Assignment, assignMarkersCmd: AssignMarkersCommand,  smallGroupCommand: SmallGroupCommand, mode:String): Mav = {
 		val module =  mandatory(assignment.module)
