@@ -1,5 +1,5 @@
 <#import "../assignments/feedback/feedback_macros.ftl" as fs>
-<#import "../assignments/submissionsandfeedback/_submission_details.ftl" as sd />
+<#import "*/coursework_components.ftl" as components />
 <#import "submission_macros.ftl" as sub />
 
 <#escape x as x?html>
@@ -41,9 +41,9 @@
 									<div>
 										<strong>Submission received: </strong><@fmt.date date=submission.submittedDate />
 										<#if submission.late>
-											- <span class="label label-danger use-tooltip" data-title="<@sd.lateness submission />" data-container="body">Late</span>
+											- <span class="label label-danger use-tooltip" data-title="<@components.lateness submission />" data-container="body">Late</span>
 										<#elseif submission.authorisedLate>
-											- <span class="label label-info use-tooltip" title="<@sd.lateness submission />" data-container="body">Within Extension</span>
+											- <span class="label label-info use-tooltip" title="<@components.lateness submission />" data-container="body">Within Extension</span>
 										<#else>
 											<span> - On time</span>
 										</#if>

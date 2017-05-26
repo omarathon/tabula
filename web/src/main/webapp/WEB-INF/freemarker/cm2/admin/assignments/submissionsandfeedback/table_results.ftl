@@ -1,7 +1,8 @@
 <#import "*/coursework_components.ftl" as components />
-<#import "_submission_details.ftl" as sd />
-<#escape x as x?html>
+<#import "/WEB-INF/freemarker/_profile_link.ftl" as pl />
 
+<#escape x as x?html>
+	<div id="profile-modal" class="modal fade profile-subset"></div>
 
 	<#if results.students??>
 		<#function hasSubmissionOrFeedback students>
@@ -14,295 +15,299 @@
 			<#return result />
 		</#function>
 
-		<#if !results.submissionFeedbackExists>
-			<p>There are no submissions or feedback yet for this assignment.</p>
-		<#else>
-			<div class="submission-feedback-results">
-				<#if (results.students?size > 0)>
-					<table id="submission-feedback-info" class="submission-feedback-list table table-striped table-condensed table-hover table-sortable table-checkable sticky-table-headers">
-					<colgroup class="student">
-						<col class="checkbox" />
+		<div class="submission-feedback-results">
+			<#if (results.students?size > 0)>
+				<table id="submission-feedback-info" class="submission-feedback-list table table-striped table-condensed table-hover table-sortable table-checkable sticky-table-headers">
+				<colgroup class="student">
+					<col class="checkbox" />
+					<#if department.showStudentName>
 						<col class="student-info" />
-					</colgroup>
+						<col class="student-info" />
+					</#if>
+					<col class="student-info" />
+				</colgroup>
 
-					<colgroup class="submission">
-						<col class="files" />
-						<col class="submitted" />
-						<col class="status" />
-						<#assign submissionColspan=3 />
+				<colgroup class="submission">
+					<col class="files" />
+					<col class="submitted" />
+					<col class="status" />
+					<#assign submissionColspan=3 />
 
-						<#if assignment.wordCountField??>
-							<#assign submissionColspan=submissionColspan+1 />
-							<col class="word-count" />
-						</#if>
-
-						<#if assignment.markingWorkflow?? || assignment.cm2MarkingWorkflow??>
-							<#if assignment.cm2Assignment>
-								<#assign submissionColspan=submissionColspan+results.workflowMarkers?size />
-								<#list results.workflowMarkers as marker_col>
-									<col class="${marker_col}" />
-								</#list>
-							<#else>
-								<#assign submissionColspan=submissionColspan+2 />
-								<col class="first-marker" />
-								<col class="second-marker" />
-							</#if>
-						</#if>
-					</colgroup>
-
-					<#if results.hasOriginalityReport>
-						<colgroup class="plagiarism">
-							<col class="report" />
-						</colgroup>
+					<#if assignment.wordCountField??>
+						<#assign submissionColspan=submissionColspan+1 />
+						<col class="word-count" />
 					</#if>
 
-					<colgroup class="feedback">
-						<#assign feedbackColspan=4 />
-
-						<col class="files" />
-						<col class="uploaded" />
-						<#if assignment.collectMarks>
-							<#assign feedbackColspan=feedbackColspan+2 />
-							<col class="feedback-mark" />
-							<col class="feedback-grade" />
+					<#if assignment.markingWorkflow?? || assignment.cm2MarkingWorkflow??>
+						<#if assignment.cm2Assignment>
+							<#assign submissionColspan=submissionColspan+results.workflowMarkers?size />
+							<#list results.workflowMarkers as marker_col>
+								<col class="${marker_col}" />
+							</#list>
+						<#else>
+							<#assign submissionColspan=submissionColspan+2 />
+							<col class="first-marker" />
+							<col class="second-marker" />
 						</#if>
-						<col class="viewFeedback" />
-						<col class="status" />
+					</#if>
+				</colgroup>
+
+				<#if results.hasOriginalityReport>
+					<colgroup class="plagiarism">
+						<col class="report" />
 					</colgroup>
+				</#if>
 
-					<thead>
-					<tr>
-						<th class="for-check-all"><input  type="checkbox" class="collection-check-all" title="Select all/none" /> </th>
-						<th>Student</th>
+				<colgroup class="feedback">
+					<#assign feedbackColspan=4 />
 
-						<th class="submission" colspan="${submissionColspan?c}">
-							Submission
-						</th>
+					<col class="files" />
+					<col class="uploaded" />
+					<#if assignment.collectMarks>
+						<#assign feedbackColspan=feedbackColspan+2 />
+						<col class="feedback-mark" />
+						<col class="feedback-grade" />
+					</#if>
+					<col class="viewFeedback" />
+					<col class="status" />
+				</colgroup>
 
-						<#if results.hasOriginalityReport>
-							<th class="plagiarism">Plagiarism</th>
+				<thead>
+				<tr>
+					<th class="for-check-all"><input  type="checkbox" class="collection-check-all" title="Select all/none" /> </th>
+					<th<#if department.showStudentName> colspan="3"</#if>>Student</th>
+
+					<th class="submission" colspan="${submissionColspan?c}">
+						Submission
+					</th>
+
+					<#if results.hasOriginalityReport>
+						<th class="plagiarism">Plagiarism</th>
+					</#if>
+
+					<th class="feedback" colspan="${feedbackColspan?c}">
+						Feedback
+					</th>
+				</tr>
+				<tr>
+					<th class="student"></th>
+					<#if department.showStudentName>
+						<th class="student sortable">First name</th>
+						<th class="student sortable">Last name</th>
+					</#if>
+					<th class="student sortable">University ID</th>
+
+					<th class="submission">Files</th>
+					<th class="submission sortable">Submitted</th>
+					<th class="submission sortable">Status</th>
+					<#if assignment.wordCountField??>
+						<th class="submission sortable" title="Declared word count">Words</th>
+					</#if>
+					<#if assignment.markingWorkflow?? || assignment.cm2MarkingWorkflow??>
+						<#if assignment.cm2Assignment>
+							<#assign submissionColspan=submissionColspan+results.workflowMarkers?size />
+							<#list results.workflowMarkers as marker_col>
+								<th class="submission sortable">${marker_col}</th>
+							</#list>
+						<#else>
+							<th class="submission sortable">First Marker</th>
+							<th class="submission sortable">Second Marker</th>
 						</#if>
+					</#if>
 
-						<th class="feedback" colspan="${feedbackColspan?c}">
-							Feedback
-						</th>
-					</tr>
-					<tr>
-						<th class="student" colspan="2"></th>
 
-						<th class="submission">Files</th>
-						<th class="submission sortable">Submitted</th>
-						<th class="submission sortable">Status</th>
+					<#if results.hasOriginalityReport>
+						<th class="plagiarism sortable">Report</th>
+					</#if>
+
+					<th class="feedback sortable">Files</th>
+					<th class="feedback sortable">Updated</th>
+					<#if assignment.collectMarks>
+						<th class="feedback sortable">Mark</th>
+						<th class="feedback sortable">Grade</th>
+					</#if>
+					<th class="feedback">Summary</th>
+					<th class="feedback sortable">Status</th>
+				</tr>
+				</thead>
+
+				<tbody>
+					<#macro row submissionfeedbackinfo>
+						<#local coursework=submissionfeedbackinfo.coursework>
+						<#if coursework.enhancedSubmission??>
+							<#local enhancedSubmission=coursework.enhancedSubmission>
+							<#local submission=enhancedSubmission.submission>
+						</#if>
+						<#if coursework.enhancedFeedback??>
+							<#local enhancedFeedback=coursework.enhancedFeedback>
+						</#if>
+						<#if coursework.enhancedExtension??>
+							<#local enhancedExtension=coursework.enhancedExtension>
+						</#if>
+						<#local lateness><@components.lateness submission /></#local>
+
+					<tr class="itemContainer<#if !enhancedSubmission??> awaiting-submission</#if>" <#if enhancedSubmission?? && submission.suspectPlagiarised> data-plagiarised="true" </#if> >
+						<td><@bs3form.selector_check_row "students" submissionfeedbackinfo.user.userId /></td>
+						<#if department.showStudentName>
+							<td class="student">${submissionfeedbackinfo.user.firstName!}</td>
+							<td class="student">${submissionfeedbackinfo.user.lastName!}</td>
+						</#if>
+						<td class="id">
+							<#if submissionfeedbackinfo.user.warwickId??>${submissionfeedbackinfo.user.warwickId}<#else>${submissionfeedbackinfo.user.userId}</#if>
+							<#if submissionfeedbackinfo.user.warwickId??><@pl.profile_link submissionfeedbackinfo.user.warwickId /><#else><@pl.profile_link submissionfeedbackinfo.user.userId /></#if>
+						</td>
+
+						<td class="files">
+							<#if submission??>
+								<#local attachments=submission.allAttachments />
+								<#if attachments?size gt 0>
+									<#if attachments?size == 1>
+										<#local filename = "${attachments[0].name}">
+										<#local downloadUrl><@routes.cm2.downloadSubmission submission filename/>?single=true</#local>
+									<#else>
+										<#local filename = "submission-${submission.studentIdentifier}.zip">
+										<#local downloadUrl><@routes.cm2.downloadSubmission submission filename/></#local>
+									</#if>
+									<a class="long-running" href="${downloadUrl}">
+									${attachments?size}
+										<#if attachments?size == 1> file
+										<#else> files
+										</#if>
+									</a>
+								</#if>
+							</#if>
+						</td>
+						<td class="submitted">
+							<#if submission?? && submission.submittedDate??>
+								<span class="date use-tooltip" title="${lateness!''}" data-container="body">
+									<@fmt.date date=submission.submittedDate seconds=true capitalise=true shortMonth=true split=true />
+									</span>
+							</#if>
+						</td>
+						<td class="submission-status">
+						<#-- Markable - ignore placeholder submissions -->
+							<#if assignment.isReleasedForMarking(submissionfeedbackinfo.user.userId)>
+								<span class="label label-info">Markable</span>
+							</#if>
+							<#if submission??>
+								<#-- Downloaded -->
+								<#if enhancedSubmission.downloaded>
+									<span class="label label-info">Downloaded</span>
+								</#if>
+							</#if>
+							<@components.submission_status submission coursework.enhancedExtension coursework.enhancedFeedback submissionfeedbackinfo />
+						</td>
 						<#if assignment.wordCountField??>
-							<th class="submission sortable" title="Declared word count">Words</th>
+							<td class="word-count">
+								<#if submission?? && submission.valuesByFieldName[assignment.defaultWordCountName]??>
+										${submission.valuesByFieldName[assignment.defaultWordCountName]?number}
+									</#if>
+							</td>
 						</#if>
 						<#if assignment.markingWorkflow?? || assignment.cm2MarkingWorkflow??>
 							<#if assignment.cm2Assignment>
-								<#assign submissionColspan=submissionColspan+results.workflowMarkers?size />
-								<#list results.workflowMarkers as marker_col>
-									<th class="submission sortable">${marker_col}</th>
-								</#list>
+								<#if enhancedFeedback??>
+									<#local feedback=enhancedFeedback.feedback />
+									<#list results.workflowMarkers as markerRole>
+										<#local markerUser=feedback.feedbackMarkerByAllocationName(markerRole)! />
+										<td>
+											<#if markerUser?has_content>
+												${markerUser.fullName}
+											</#if>
+										</td>
+									</#list>
+								<#else>
+									<#list results.workflowMarkers as markerRole>
+										<td></td>
+									</#list>
+								</#if>
 							<#else>
-								<th class="submission sortable">First Marker</th>
-								<th class="submission sortable">Second Marker</th>
+								<td>
+									<#if (assignment.getStudentsFirstMarker(student.user.userId)!"")?has_content>
+										${assignment.getStudentsFirstMarker(student.user.userId).fullName}
+									</#if>
+								</td>
+								<td>
+									<#if (assignment.getStudentsSecondMarker(student.user.userId)!"")?has_content>
+										${assignment.getStudentsSecondMarker(student.user.userId).fullName}
+									</#if>
+								</td>
+
 							</#if>
 						</#if>
-
-
 						<#if results.hasOriginalityReport>
-							<th class="plagiarism sortable">Report</th>
+							<td class="originality-report">
+								<#if submission??>
+									<#list submission.allAttachments as attachment>
+										<!-- Checking originality report for ${attachment.name} ... -->
+										<#if attachment.originalityReportReceived>
+											<@components.originalityReport attachment />
+										</#if>
+									</#list>
+								</#if>
+							</td>
 						</#if>
 
-						<th class="feedback sortable">Files</th>
-						<th class="feedback sortable">Updated</th>
-						<#if assignment.collectMarks>
-							<th class="feedback sortable">Mark</th>
-							<th class="feedback sortable">Grade</th>
-						</#if>
-						<th class="feedback">Summary</th>
-						<th class="feedback sortable">Status</th>
-					</tr>
-					</thead>
-
-					<tbody>
-						<#macro row submissionfeedbackinfo>
-							<#local coursework=submissionfeedbackinfo.coursework>
-							<#if coursework.enhancedSubmission??>
-								<#local enhancedSubmission=coursework.enhancedSubmission>
-								<#local submission=enhancedSubmission.submission>
-							</#if>
-							<#if coursework.enhancedFeedback??>
-								<#local enhancedFeedback=coursework.enhancedFeedback>
-							</#if>
-							<#if coursework.enhancedExtension??>
-								<#local enhancedExtension=coursework.enhancedExtension>
-							</#if>
-							<#local lateness><@sd.lateness submission /></#local>
-
-						<tr class="itemContainer<#if !enhancedSubmission??> awaiting-submission</#if>" <#if enhancedSubmission?? && submission.suspectPlagiarised> data-plagiarised="true" </#if> >
-							<td><@bs3form.selector_check_row "students" submissionfeedbackinfo.user.userId /></td>
-							<td class="id">
-								<#if module.adminDepartment.showStudentName>
-									${submissionfeedbackinfo.user.fullName} <#if submissionfeedbackinfo.user.warwickId??><@pl.profile_link submissionfeedbackinfo.user.warwickId /><#else><@pl.profile_link submissionfeedbackinfo.user.userId /></#if>
-								<#else>
-									<#if submissionfeedbackinfo.user.warwickId??>${submissionfeedbackinfo.user.warwickId}<#else>${submissionfeedbackinfo.user.userId}</#if>
-								</#if>
-							</td>
-
-							<td class="files">
-								<#if submission??>
-									<#local attachments=submission.allAttachments />
-									<#if attachments?size gt 0>
-										<#if attachments?size == 1>
-											<#local filename = "${attachments[0].name}">
-											<#local downloadUrl><@routes.cm2.downloadSubmission submission filename/>?single=true</#local>
-										<#else>
-											<#local filename = "submission-${submission.studentIdentifier}.zip">
-											<#local downloadUrl><@routes.cm2.downloadSubmission submission filename/></#local>
-										</#if>
-										<a class="long-running" href="${downloadUrl}">
-										${attachments?size}
-											<#if attachments?size == 1> file
-											<#else> files
-											</#if>
-										</a>
-									</#if>
-								</#if>
-							</td>
-							<td class="submitted">
-								<#if submission?? && submission.submittedDate??>
-									<span class="date use-tooltip" title="${lateness!''}" data-container="body">
-										<@fmt.date date=submission.submittedDate seconds=true capitalise=true shortMonth=true split=true />
-										</span>
-								</#if>
-							</td>
-							<td class="submission-status">
-							<#-- Markable - ignore placeholder submissions -->
-								<#if assignment.isReleasedForMarking(submissionfeedbackinfo.user.userId)>
-									<span class="label label-info">Markable</span>
-								</#if>
-								<#if submission??>
-									<#-- Downloaded -->
-									<#if enhancedSubmission.downloaded>
-										<span class="label label-info">Downloaded</span>
-									</#if>
-								</#if>
-								<@sd.submission_status submission coursework.enhancedExtension coursework.enhancedFeedback submissionfeedbackinfo />
-							</td>
-							<#if assignment.wordCountField??>
-								<td class="word-count">
-									<#if submission?? && submission.valuesByFieldName[assignment.defaultWordCountName]??>
-											${submission.valuesByFieldName[assignment.defaultWordCountName]?number}
-										</#if>
-								</td>
-							</#if>
-							<#if assignment.markingWorkflow?? || assignment.cm2MarkingWorkflow??>
-								<#if assignment.cm2Assignment>
-									<#if enhancedFeedback??>
-										<#local feedback=enhancedFeedback.feedback />
-										<#list results.workflowMarkers as markerRole>
-											<#local markerUser=feedback.feedbackMarkerByRole(markerRole)! />
-											<td>
-												<#if markerUser?has_content>
-													${markerUser.fullName}
-												</#if>
-											</td>
-										</#list>
+						<td class="download">
+							<#if enhancedFeedback??>
+								<#local attachments=enhancedFeedback.feedback.attachments />
+								<#if attachments?size gt 0>
+									<#if attachments?size == 1>
+										<#local attachmentExtension = enhancedFeedback.feedback.attachments[0].fileExt>
 									<#else>
-										<#list results.workflowMarkers as markerRole>
-											<td></td>
-										</#list>
+										<#local attachmentExtension = "zip">
 									</#if>
-								<#else>
-									<td>
-										<#if (assignment.getStudentsFirstMarker(student.user.userId)!"")?has_content>
-											${assignment.getStudentsFirstMarker(student.user.userId).fullName}
+									<a class="long-running" href="<@url page='/cm2/admin/assignments/${assignment.id}/feedback/download/${enhancedFeedback.feedback.id}/feedback-${enhancedFeedback.feedback.studentIdentifier}.${attachmentExtension}'/>">
+									${attachments?size}
+										<#if attachments?size == 1> file
+										<#else> files
 										</#if>
-									</td>
-									<td>
-										<#if (assignment.getStudentsSecondMarker(student.user.userId)!"")?has_content>
-											${assignment.getStudentsSecondMarker(student.user.userId).fullName}
-										</#if>
-									</td>
-
-								</#if>
-							</#if>
-							<#if results.hasOriginalityReport>
-								<td class="originality-report">
-									<#if submission??>
-										<#list submission.allAttachments as attachment>
-											<!-- Checking originality report for ${attachment.name} ... -->
-											<#if attachment.originalityReportReceived>
-												<@components.originalityReport attachment />
-											</#if>
-										</#list>
-									</#if>
-								</td>
-							</#if>
-
-							<td class="download">
-								<#if enhancedFeedback??>
-									<#local attachments=enhancedFeedback.feedback.attachments />
-									<#if attachments?size gt 0>
-										<#if attachments?size == 1>
-											<#local attachmentExtension = enhancedFeedback.feedback.attachments[0].fileExt>
-										<#else>
-											<#local attachmentExtension = "zip">
-										</#if>
-										<a class="long-running" href="<@url page='/cm2/admin/assignments/${assignment.id}/feedback/download/${enhancedFeedback.feedback.id}/feedback-${enhancedFeedback.feedback.studentIdentifier}.${attachmentExtension}'/>">
-										${attachments?size}
-											<#if attachments?size == 1> file
-											<#else> files
-											</#if>
-										</a>
-									</#if>
-								</#if>
-							</td>
-							<td class="uploaded">
-								<#if enhancedFeedback?? && !enhancedFeedback.feedback.placeholder>
-										<@fmt.date date=enhancedFeedback.feedback.updatedDate seconds=true capitalise=true shortMonth=true split=true />
-									</#if>
-							</td>
-
-							<#if assignment.collectMarks>
-								<td class="feedback-mark">
-									<#if enhancedFeedback??>
-										<#local feedback = enhancedFeedback.feedback>
-									${(feedback.actualMark)!''}%
-										<#if feedback.hasPrivateOrNonPrivateAdjustments>
-											(Adjusted to - ${feedback.latestMark}%)
-										</#if>
-									</#if>
-								</td>
-								<td class="grade">
-									<#if enhancedFeedback??>
-										<#local feedback = enhancedFeedback.feedback>
-									${(feedback.actualGrade)!''}
-										<#if feedback.hasPrivateOrNonPrivateAdjustments && feedback.latestGrade??>
-											(Adjusted to - ${feedback.latestGrade})
-										</#if>
-									</#if>
-								</td>
-							</#if>
-
-							<td>
-								<#if enhancedFeedback??>
-									<a href="<@routes.cm2.feedbackSummary assignment submissionfeedbackinfo.user.userId/>"
-										 class="ajax-modal"
-										 data-target="#feedback-modal">
-										View
 									</a>
 								</#if>
-							</td>
+							</#if>
+						</td>
+						<td class="uploaded">
+							<#if enhancedFeedback?? && !enhancedFeedback.feedback.placeholder>
+									<@fmt.date date=enhancedFeedback.feedback.updatedDate seconds=true capitalise=true shortMonth=true split=true />
+								</#if>
+						</td>
 
-							<td class="feedbackReleased">
+						<#if assignment.collectMarks>
+							<td class="feedback-mark">
 								<#if enhancedFeedback??>
-									<#if enhancedFeedback.feedback.released>
-										<#if enhancedFeedback.downloaded><span class="label label-success">Downloaded</span>
-										<#else><span class="label label-info">Published</span>
-										</#if>
-									<#else>
-										<span class="label label-danger">Not yet published</span>
+									<#local feedback = enhancedFeedback.feedback>
+								${(feedback.actualMark)!''}%
+									<#if feedback.hasPrivateOrNonPrivateAdjustments>
+										(Adjusted to - ${feedback.latestMark}%)
+									</#if>
+								</#if>
+							</td>
+							<td class="grade">
+								<#if enhancedFeedback??>
+									<#local feedback = enhancedFeedback.feedback>
+								${(feedback.actualGrade)!''}
+									<#if feedback.hasPrivateOrNonPrivateAdjustments && feedback.latestGrade??>
+										(Adjusted to - ${feedback.latestGrade})
+									</#if>
+								</#if>
+							</td>
+						</#if>
+
+						<td>
+							<#if enhancedFeedback??>
+								<a href="<@routes.cm2.feedbackSummary assignment submissionfeedbackinfo.user.userId/>"
+									 class="ajax-modal"
+									 data-target="#feedback-modal">
+									View
+								</a>
+							</#if>
+						</td>
+
+						<td class="feedbackReleased">
+							<#if enhancedFeedback??>
+								<#if enhancedFeedback.feedback.released>
+									<#if enhancedFeedback.downloaded><span class="label label-success">Downloaded</span>
+									<#else><span class="label label-info">Published</span>
 									</#if>
 									<#assign queueSitsUploadEnabled=(features.queueFeedbackForSits && department.uploadCourseworkMarksToSits) />
 									<#if queueSitsUploadEnabled>
@@ -331,31 +336,30 @@
 										</#if>
 									</#if>
 								</#if>
-							</td>
-						</tr>
-						</#macro>
+							</#if>
+						</td>
+					</tr>
+					</#macro>
 
-						<#list results.students as submissionfeedbackinfo>
-							<@row submissionfeedbackinfo />
-						</#list>
-					</tbody>
-				</table>
-					<#assign users=[] />
-					<#list results.students as student>
-						<#assign users = users + [student.user] />
+					<#list results.students as submissionfeedbackinfo>
+						<@row submissionfeedbackinfo />
 					</#list>
-					<p><@fmt.bulk_email_students users /></p>
-				<#else>
-					<p>There are no records for selected filter criteria.</p>
-				</#if>
+				</tbody>
+			</table>
+				<#assign users=[] />
+				<#list results.students as student>
+					<#assign users = users + [student.user] />
+				</#list>
+				<p><@fmt.bulk_email_students users /></p>
+			<#else>
+				<p>There are no records for selected filter criteria.</p>
+			</#if>
 		</div>
-		</#if>
 
 	</#if>
 
-<script type="text/javascript">
-	(function ($) {
-
+	<script type="text/javascript">
+		(function ($) {
 			var $overlapPercentageCheckbox = $('.dropdown-menu.filter-list input[type=checkbox][value="PlagiarismStatuses.WithOverlapPercentage"]');
 			var checked = $overlapPercentageCheckbox.is(':checked');
 			var $percentageOverlapDiv = $('div.plagiarism-filter');
@@ -365,34 +369,35 @@
 				$percentageOverlapDiv.hide();
 			}
 
-		$('.fixed-container').fixHeaderFooter();
+			$('.fixed-container').fixHeaderFooter();
+			$('a.ajax-modal').ajaxModalLink();
 
-		var $submissionFeedbackResultsTable = $(".submission-feedback-results table");
-		$submissionFeedbackResultsTable.sortableTable({
-			textExtraction: function(node) {
-				var $el = $(node);
-				if ($el.hasClass('originality-report')) {
-					var $tooltip = $el.find('.similarity-tooltip').first();
-					if ($tooltip.length) {
-						return $tooltip.text().substring(0, $tooltip.text().indexOf('%'));
+			var $submissionFeedbackResultsTable = $(".submission-feedback-results table");
+			$submissionFeedbackResultsTable.sortableTable({
+				textExtraction: function(node) {
+					var $el = $(node);
+					if ($el.hasClass('originality-report')) {
+						var $tooltip = $el.find('.similarity-tooltip').first();
+						if ($tooltip.length) {
+							return $tooltip.text().substring(0, $tooltip.text().indexOf('%'));
+						} else {
+							return '0';
+						}
+					} else if ($el.hasClass('word-count')) {
+						return $el.text().trim().replace(',','');
 					} else {
-						return '0';
+						return $el.text().trim();
 					}
-				} else if ($el.hasClass('word-count')) {
-					return $el.text().trim().replace(',','');
-				} else {
-					return $el.text().trim();
 				}
-			}
-		});
+			});
 
-		Coursework.initBigList();
+			Coursework.initBigList();
 
-		$('.submission-feedback-results').wideTables();
-		// We probably just grew a scrollbar, so let's trigger a window resize
-		$(window).trigger('resize.ScrollToFixed');
+			$('.submission-feedback-results').wideTables();
+			// We probably just grew a scrollbar, so let's trigger a window resize
+			$(window).trigger('resize.ScrollToFixed');
 
 
-	})(jQuery);
-</script>
+		})(jQuery);
+	</script>
 </#escape>

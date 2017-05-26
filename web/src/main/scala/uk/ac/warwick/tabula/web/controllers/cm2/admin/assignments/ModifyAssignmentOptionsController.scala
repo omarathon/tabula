@@ -29,7 +29,7 @@ abstract class AbstractAssignmentOptionsController extends AbstractAssignmentCon
 			"module" -> module,
 			"mode" -> mode,
 			"turnitinFileSizeLimit" -> TurnitinLtiService.maxFileSizeInMegabytes)
-			.crumbs(Breadcrumbs.Department(assignment.module.adminDepartment, assignment.academicYear), Breadcrumbs.Assignment(assignment))
+			.crumbsList(Breadcrumbs.assignment(assignment))
 	}
 
 	def submit(cmd: ModifyAssignmentOptionsCommand, errors: Errors, assignment: Assignment, path: String, mode: String): Mav = {

@@ -21,16 +21,15 @@ class GenericFeedbackController extends CourseworkController {
 	def command(@PathVariable assignment: Assignment) =
 		GenericFeedbackCommand(mandatory(assignment))
 
-	@RequestMapping(method = Array(GET, HEAD))
+	@RequestMapping
 	def showForm(
 		@PathVariable assignment: Assignment,
 		@ModelAttribute("command") command: GenericFeedbackCommand,
 		errors: Errors
 	): Mav = {
 
-		Mav("cm2/admin/assignments/feedback/generic_feedback",
-			"command" -> command, "ajax" -> ajax).noLayoutIf(ajax)
-			.crumbs(Breadcrumbs.Department(assignment.module.adminDepartment, assignment.academicYear), Breadcrumbs.Assignment(assignment))
+		Mav("cm2/admin/assignments/feedback/generic_feedback", "ajax" -> ajax).noLayoutIf(ajax)
+		  .crumbsList(Breadcrumbs.assignment(assignment))
 	}
 
 

@@ -63,7 +63,7 @@ object Routes {
 		}
 
 		object moduleWithinDepartment {
-			def apply(module: Module, academicYear: AcademicYear): String = department(module.adminDepartment, academicYear) + "#module-" + encoded(module.code)
+			def apply(module: Module, academicYear: AcademicYear): String = department(module.adminDepartment, academicYear) + s"?moduleFilters=Module(${encoded(module.code)})#module-${encoded(module.code)}"
 		}
 
 		object workflows {
@@ -98,7 +98,7 @@ object Routes {
 			def submissionsZip(assignment: Assignment): String = assignmentroot(assignment) + "/submissions.zip"
 
 			object submissionsandfeedback {
-				def apply(assignment: Assignment): String = assignmentroot(assignment) + "/list"
+				def apply(assignment: Assignment): String = assignmentroot(assignment)
 				def summary(assignment: Assignment): String = assignmentroot(assignment) + "/summary"
 				def table(assignment: Assignment): String = assignmentroot(assignment) + "/table"
 			}

@@ -7,12 +7,11 @@ import javax.validation.constraints.NotNull
 
 import org.hibernate.annotations.{BatchSize, Type}
 import org.joda.time.DateTime
-import uk.ac.warwick.tabula.{AcademicYear, JavaImports}
 import uk.ac.warwick.tabula.JavaImports._
 import uk.ac.warwick.tabula.data.model.forms.{FormattedHtml, SavedFormValue}
 import uk.ac.warwick.tabula.data.model.markingworkflow.{FinalStage, MarkingWorkflowStage}
 import uk.ac.warwick.tabula.permissions.PermissionsTarget
-import uk.ac.warwick.tabula.services.cm2.CM2WorkflowStages.CM2MarkingWorkflowStage
+import uk.ac.warwick.tabula.{AcademicYear, JavaImports}
 import uk.ac.warwick.userlookup.User
 
 import scala.collection.JavaConverters._
@@ -277,15 +276,22 @@ abstract class Feedback extends GeneratedId with FeedbackAttachments with Permis
 	@BatchSize(size = 200)
 	var markerFeedback: JList[MarkerFeedback] = JArrayList()
 
-	def feedbackMarkersByRole: Map[String,User] =   {
-		markerFeedback.asScala.groupBy(f => f.stage.roleName).toSeq
+	def feedbackByStage: Map[MarkingWorkflowStage, MarkerFeedback] =
+		markerFeedback.asScala.groupBy(_.stage).mapValues(_.head)
+
+	def feedbackMarkers: Map[MarkingWorkflowStage, User] =
+		feedbackByStage.mapValues(_.marker)
+
+	def feedbackMarkersByAllocationName: Map[String, User] =
+		markerFeedback.asScala.groupBy(f => f.stage.allocationName).toSeq
 			.sortBy {	case(_, fList) => fList.head.stage.order }
 			.map { case (s, fList) => s -> fList.head.marker }.toMap
-	}
 
-	def feedbackMarkerByRole(roleName: String): Option[User] =
-		feedbackMarkersByRole.get(roleName)
+	def feedbackMarkerByAllocationName(allocationName: String): Option[User] =
+		feedbackMarkersByAllocationName.get(allocationName)
 
+	// gets marker feedback for the current workflow stages
+	def markingInProgress: Seq[MarkerFeedback] = markerFeedback.asScala.filter(mf => outstandingStages.asScala.contains(mf.stage))
 
 	@ElementCollection @Column(name = "stage")
 	@JoinTable(name = "OutstandingStages", joinColumns = Array(
@@ -293,13 +299,14 @@ abstract class Feedback extends GeneratedId with FeedbackAttachments with Permis
 	@Type(`type` = "uk.ac.warwick.tabula.data.model.markingworkflow.MarkingWorkflowStageUserType")
 	var outstandingStages: JList[MarkingWorkflowStage] = JArrayList()
 
-	def isMarkingCompleted = outstandingStages.asScala.toList match {
+	def isMarkingCompleted: Boolean = outstandingStages.asScala.toList match {
 		case (s: FinalStage) :: Nil => true
 		case _ => false
 	}
 
-	def notReleasedToMarkers = outstandingStages.asScala.isEmpty
+	def notReleasedToMarkers: Boolean = outstandingStages.asScala.isEmpty
 
+	def currentStageIndex: Int = outstandingStages.asScala.headOption.map(_.order).getOrElse(0)
 
 	@Column(name = "released_date")
 	var releasedDate: DateTime = _

@@ -128,8 +128,7 @@
 				$this.addClass('disabled').text('Feedback copied');
 			});
 
-			// checkbox helpers and form submission for bulk actions
-			$('.marking-table').bigList({
+			var bigListOptions = {
 
 				setup: function(){
 
@@ -172,6 +171,10 @@
 					var $markingStage = this.closest('.marking-stage');
 					$markingStage.find('.must-have-selected').addClass('disabled');
 				}
+			};
+
+			$(document).on('tabula.filterResultsChanged', function(e){
+				$('.marking-table').bigList(bigListOptions);
 			});
 
 			// prevent rows from expanding when selecting the checkbox column

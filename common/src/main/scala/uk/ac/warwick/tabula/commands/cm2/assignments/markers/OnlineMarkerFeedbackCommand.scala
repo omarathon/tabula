@@ -114,8 +114,7 @@ trait OnlineMarkerFeedbackState extends OnlineFeedbackState with SubmissionState
 	private val allMarkerFeedback = cm2MarkingWorkflowService.markerFeedbackForFeedback(feedback)
 
 	val previousMarkerFeedback: Map[MarkingWorkflowStage, MarkerFeedback] = {
-		// if there are multiple outstanding stages they should all have the same order so only look at the first one
-		val currentStageIndex = feedback.outstandingStages.asScala.headOption.map(_.order).getOrElse(0)
+		val currentStageIndex = feedback.currentStageIndex
 		if (currentStageIndex <= stage.order)
 			allMarkerFeedback.filterKeys(_.order < currentStageIndex) // show all the previous stages
 		else

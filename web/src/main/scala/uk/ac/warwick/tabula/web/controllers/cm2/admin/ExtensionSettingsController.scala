@@ -37,7 +37,7 @@ class ExtensionSettingsController extends CourseworkController
 	@RequestMapping
 	def viewSettings(@PathVariable department: Department): Mav =
 		Mav("cm2/admin/extension-settings")
-			.crumbs(Breadcrumbs.Department(department))
+			.crumbsList(Breadcrumbs.department(department, None))
 
 	@RequestMapping(method = Array(RequestMethod.POST))
 	def saveSettings(@Valid @ModelAttribute("extensionSettingsCommand") cmd: ExtensionSettingsCommand.Command, errors: Errors, @PathVariable department: Department): Mav =

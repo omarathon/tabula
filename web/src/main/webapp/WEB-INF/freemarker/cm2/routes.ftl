@@ -148,10 +148,12 @@ TODO grab values from the Routes object in code, as that's pretty equivalent and
 <#macro markerTemplatesZip assignment><@_u page="/admin/assignments/${assignment.id}/marker-templates.zip" /></#macro>
 <#macro generateGradesForMarks assignment><@_u page="/admin/assignments/${assignment.id}/generate-grade"/></#macro>
 
-<#macro assignmentsubmissionsandfeedback assignment><@_u page="/admin/assignments/${assignment.id}/list"/></#macro>
+<#macro assignmentsubmissionsandfeedback assignment><@_u page="/admin/assignments/${assignment.id}"/></#macro>
 <#macro assignmentsubmissionsandfeedbacktable assignment><@_u page="/admin/assignments/${assignment.id}/table"/></#macro>
 <#macro assignmentsubmissionsandfeedbacksummary assignment><@_u page="/admin/assignments/${assignment.id}/summary"/></#macro>
 <#macro releaseForMarking assignment><@_u page="/admin/assignments/${assignment.id}/release-submissions"/></#macro>
+<#macro returnToMarker assignment><@_u page="/admin/assignments/${assignment.id}/return-submissions"/></#macro>
+<#macro stopMarking assignment><@_u page="/admin/assignments/${assignment.id}/stop-marking"/></#macro>
 
 <#macro assignmentextensions assignment><@_u page="/admin/assignments/${assignment.id}/extensions"/></#macro>
 

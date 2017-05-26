@@ -29,10 +29,10 @@ class OldDownloadSelectedFeedbackController extends OldCourseworkController {
 		@PathVariable module: Module,
 		@PathVariable assignment: Assignment,
 		@PathVariable feedbackId: String
-	) = new AdminGetSingleFeedbackCommand(module, assignment, mandatory(feedbackDao.getAssignmentFeedback(feedbackId)))
+	) = new OldAdminGetSingleFeedbackCommand(module, assignment, mandatory(feedbackDao.getAssignmentFeedback(feedbackId)))
 
 	@RequestMapping(method = Array(RequestMethod.GET, RequestMethod.HEAD))
-	def get(cmd: AdminGetSingleFeedbackCommand, @PathVariable filename: String): Mav = {
+	def get(cmd: OldAdminGetSingleFeedbackCommand, @PathVariable filename: String): Mav = {
 		Mav(new RenderableFileView(cmd.apply()))
 	}
 }
@@ -48,10 +48,10 @@ class OldDownloadSelectedFeedbackFileController extends OldCourseworkController 
 		@PathVariable assignment: Assignment,
 		@PathVariable feedbackId: String
 	) =
-		new AdminGetSingleFeedbackFileCommand(module, assignment, mandatory(feedbackDao.getAssignmentFeedback(feedbackId)))
+		new OldAdminGetSingleFeedbackFileCommand(module, assignment, mandatory(feedbackDao.getAssignmentFeedback(feedbackId)))
 
 	@RequestMapping(method = Array(RequestMethod.GET, RequestMethod.HEAD))
-	def get(cmd: AdminGetSingleFeedbackFileCommand, @PathVariable filename: String): Mav = {
+	def get(cmd: OldAdminGetSingleFeedbackFileCommand, @PathVariable filename: String): Mav = {
 		val renderable = cmd.apply().getOrElse {
 			throw new ItemNotFoundException()
 		}

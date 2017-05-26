@@ -26,7 +26,7 @@ abstract class AbstractAssignmentFeedbackController extends AbstractAssignmentCo
       "module" -> module,
       "department" -> module.adminDepartment,
       "mode" -> mode)
-      .crumbs(Breadcrumbs.Department(form.assignment.module.adminDepartment, form.assignment.academicYear), Breadcrumbs.Assignment(form.assignment))
+      .crumbsList(Breadcrumbs.assignment(form.assignment))
   }
 
   def submit(cmd: ModifyAssignmentFeedbackCommand, errors: Errors, path: String, mode: String): Mav = {
