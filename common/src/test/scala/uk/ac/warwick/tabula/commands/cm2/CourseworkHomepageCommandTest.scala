@@ -59,9 +59,9 @@ class CourseworkHomepageCommandTest extends TestBase with Mockito {
 		submitted2.extensionService = extensionService
 		submitted2.closeDate = new DateTime(2016, DateTimeConstants.MAY, 4, 14, 0, 0, 0)
 
-		command.assessmentMembershipService.getEnrolledAssignments(command.user.apparentUser, Some(command.academicYear)) returns Seq(enrolled1, enrolled2)
-		command.assessmentService.getAssignmentsWithFeedback("cuscav", Some(command.academicYear)) returns Seq(feedback1, feedback2)
-		command.assessmentService.getAssignmentsWithSubmission("cuscav", Some(command.academicYear)) returns Seq(submitted1, submitted2)
+		command.assessmentMembershipService.getEnrolledAssignments(command.user.apparentUser, None) returns Seq(enrolled1, enrolled2)
+		command.assessmentService.getAssignmentsWithFeedback("cuscav", None) returns Seq(feedback1, feedback2)
+		command.assessmentService.getAssignmentsWithSubmission("cuscav", None) returns Seq(submitted1, submitted2)
 
 		val info: CourseworkHomepageCommand.CourseworkHomepageStudentInformation = command.studentInformation
 		info.actionRequiredAssignments should have size 2
@@ -194,10 +194,10 @@ class CourseworkHomepageCommandTest extends TestBase with Mockito {
 		val a8 = cm2Assignment("Assignment 8")
 
 		// CM1 assignments
-		command.assessmentService.getAssignmentWhereMarker(currentUser.apparentUser, Some(command.academicYear)) returns Seq(a1, a3, a5, a7)
+		command.assessmentService.getAssignmentWhereMarker(currentUser.apparentUser, None) returns Seq(a1, a3, a5, a7)
 
 		// CM2 assignments
-		command.assessmentService.getCM2AssignmentsWhereMarker(currentUser.apparentUser, Some(command.academicYear)) returns Seq(a2, a4, a6, a8)
+		command.assessmentService.getCM2AssignmentsWhereMarker(currentUser.apparentUser, None) returns Seq(a2, a4, a6, a8)
 		command.cm2MarkingWorkflowService.getAllFeedbackForMarker(a2, currentUser.apparentUser) returns SortedMap.empty
 		command.cm2MarkingWorkflowService.getAllFeedbackForMarker(a4, currentUser.apparentUser) returns SortedMap.empty
 		command.cm2MarkingWorkflowService.getAllFeedbackForMarker(a6, currentUser.apparentUser) returns SortedMap.empty

@@ -48,7 +48,7 @@ class HomeController extends AbstractHomeController {
 
 	@ModelAttribute("activeAcademicYear")
 	override def activeAcademicYear: Option[AcademicYear] =
-		Some(AcademicYear.guessSITSAcademicYearByDate(DateTime.now))
+		retrieveActiveAcademicYear(None)
 
 }
 

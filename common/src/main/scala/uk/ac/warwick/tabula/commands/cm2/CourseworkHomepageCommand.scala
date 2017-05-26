@@ -194,20 +194,20 @@ trait CourseworkHomepageStudentAssignments extends TaskBenchmarking {
 			studentUpcomingAssignments,
 			studentActionRequiredAssignments,
 			studentNoActionRequiredAssignments,
-			studentCompletedAssignments
+			studentCompletedAssignments.filter { _.assignment.academicYear == academicYear }
 		)
 	}
 
 	private lazy val assignmentsWithFeedback = benchmarkTask("Get assignments with feedback") {
-		assessmentService.getAssignmentsWithFeedback(user.userId, Some(academicYear))
+		assessmentService.getAssignmentsWithFeedback(user.userId, None) // Any academic year
 	}
 
 	private lazy val assignmentsWithSubmission = benchmarkTask("Get assignments with submission") {
-		assessmentService.getAssignmentsWithSubmission(user.userId, Some(academicYear))
+		assessmentService.getAssignmentsWithSubmission(user.userId, None) // Any academic year
 	}
 
 	private lazy val enrolledAssignments = benchmarkTask("Get enrolled assignments") {
-		assessmentMembershipService.getEnrolledAssignments(user.apparentUser, Some(academicYear))
+		assessmentMembershipService.getEnrolledAssignments(user.apparentUser, None) // Any academic year
 	}
 
 	private def lateFormative(assignment: Assignment) = !assignment.summative && assignment.isClosed
@@ -314,7 +314,7 @@ trait CourseworkHomepageMarkerAssignments extends TaskBenchmarking {
 			markerUpcomingAssignments,
 			markerActionRequiredAssignments,
 			markerNoActionRequiredAssignments,
-			markerCompletedAssignments
+			markerCompletedAssignments.filter { _.assignment.academicYear == academicYear }
 		)
 	}
 
@@ -347,7 +347,7 @@ trait CourseworkHomepageMarkerAssignments extends TaskBenchmarking {
 	}
 
 	private lazy val allCM1MarkerAssignments: Seq[MarkerAssignmentInfo] = benchmarkTask("Get CM1 assignments for marking") {
-		assessmentService.getAssignmentWhereMarker(user.apparentUser, Some(academicYear))
+		assessmentService.getAssignmentWhereMarker(user.apparentUser, None) // Any academic year
 			.map { assignment =>
 				val markingWorkflow = assignment.markingWorkflow
 				val students = markingWorkflow.getMarkersStudents(assignment, user.apparentUser).toSet
@@ -357,7 +357,7 @@ trait CourseworkHomepageMarkerAssignments extends TaskBenchmarking {
 	}
 
 	private lazy val allCM2MarkerAssignments: Seq[MarkerAssignmentInfo] = benchmarkTask("Get CM2 assignments for marking") {
-		assessmentService.getCM2AssignmentsWhereMarker(user.apparentUser, Some(academicYear))
+		assessmentService.getCM2AssignmentsWhereMarker(user.apparentUser, None) // Any academic year
 			.map { assignment =>
 				val markerFeedbacks = cm2MarkingWorkflowService.getAllFeedbackForMarker(assignment, user.apparentUser).values.flatten
 				val students = markerFeedbacks.map(_.student).toSet
