@@ -1,4 +1,4 @@
-<#import "../cm2_macros.ftl" as cm2_macros />
+<#import "*/cm2_macros.ftl" as cm2 />
 <#if detail.extension.requestedOn?has_content>
 	<div>
 		<label>Request received:</label> <@fmt.date date=detail.extension.requestedOn />
@@ -102,5 +102,5 @@
 
 </@f.form>
 
-<@cm2_macros.previousExtensions detail.extension.id detail.student.warwickId detail.student.fullName detail.numAcceptedExtensions detail.numRejectedExtensions detail.previousExtensions />
-<@cm2_macros.previousSubmissions detail.extension.id detail.student.warwickId detail.student.fullName detail.previousSubmissions />
+<@cm2.previousExtensions detail.extension.id detail.student.warwickId detail.student.fullName detail.numAcceptedExtensions detail.numRejectedExtensions detail.previousExtensions />
+<@cm2.previousSubmissions detail.extension.id detail.student.warwickId detail.student.fullName detail.previousSubmissions />
