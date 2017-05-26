@@ -1,29 +1,29 @@
-package uk.ac.warwick.tabula.commands.coursework.feedback
+package uk.ac.warwick.tabula.commands.cm2.feedback
 
-import uk.ac.warwick.tabula.data.model.{Assignment, Module}
 import uk.ac.warwick.tabula.commands._
-import uk.ac.warwick.tabula.system.permissions.{PermissionsChecking, RequiresPermissionsChecking}
+import uk.ac.warwick.tabula.data.model.Assignment
 import uk.ac.warwick.tabula.permissions.Permissions
-import uk.ac.warwick.tabula.services.{AutowiringAssessmentServiceComponent, AssessmentServiceComponent}
+import uk.ac.warwick.tabula.services.{AssessmentServiceComponent, AutowiringAssessmentServiceComponent}
+import uk.ac.warwick.tabula.system.permissions.{PermissionsChecking, RequiresPermissionsChecking}
 
 object GenericFeedbackCommand {
-	def apply(module: Module, assignment: Assignment) =
-		new GenericFeedbackCommand(module, assignment)
+	def apply(assignment: Assignment) =
+		new GenericFeedbackCommand(assignment)
 			with ComposableCommand[Assignment]
 			with AutowiringAssessmentServiceComponent
 			with GenericFeedbackPermissions
-			with GenericFeedbackFormDescription[Assignment] {
+			with GenericFeedbackDescription[Assignment] {
 			override lazy val eventName = "GenericFeedback"
 		}
 }
 
-abstract class GenericFeedbackCommand (val module: Module, val assignment: Assignment)
+abstract class GenericFeedbackCommand(val assignment: Assignment)
 	extends CommandInternal[Assignment] with Appliable[Assignment] with GenericFeedbackState {
-	this: AssessmentServiceComponent =>
+	self: AssessmentServiceComponent =>
 
 	genericFeedback = assignment.genericFeedback
 
-	def applyInternal() : Assignment = {
+	def applyInternal(): Assignment = {
 		assignment.genericFeedback = genericFeedback
 		assessmentService.save(assignment)
 		assignment
@@ -31,21 +31,19 @@ abstract class GenericFeedbackCommand (val module: Module, val assignment: Assig
 }
 
 trait GenericFeedbackPermissions extends RequiresPermissionsChecking {
-	this: GenericFeedbackState =>
+	self: GenericFeedbackState =>
 	def permissionsCheck(p: PermissionsChecking) {
-		p.mustBeLinked(assignment, module)
 		p.PermissionCheck(Permissions.AssignmentFeedback.Manage, assignment)
 	}
 }
 
 trait GenericFeedbackState {
 	val assignment: Assignment
-	val module: Module
 	var genericFeedback: String = _
 }
 
-trait GenericFeedbackFormDescription[A] extends Describable[A] {
-	this: GenericFeedbackState  =>
+trait GenericFeedbackDescription[A] extends Describable[A] {
+	self: GenericFeedbackState =>
 	def describe(d: Description) {
 		d.assignment(assignment)
 	}
