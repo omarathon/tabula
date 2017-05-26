@@ -624,6 +624,9 @@
 		<bean id="MarkingWorkflow-_secondMarkers" parent="userGroupCacheBean"
 			  p:runtimeClass="uk.ac.warwick.tabula.data.model.MarkingWorkflow"
 			  p:path="_secondMarkers" />
+		<bean id="StageMarkers-_markers" parent="userGroupCacheBean"
+					p:runtimeClass="uk.ac.warwick.tabula.data.model.markingworkflow.StageMarkers"
+					p:path="_markers" />
 
 		<bean id="defaultTilesConfigurer" class="org.springframework.web.servlet.view.tiles3.TilesConfigurer"
 			p:definitionsFactoryClass="uk.ac.warwick.tabula.web.views.ImpliedDefinitionsFactory" abstract="true">
