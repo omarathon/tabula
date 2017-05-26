@@ -2,7 +2,7 @@
 	<#import "*/assignment_components.ftl" as components />
 	<#import "*/cm2_macros.ftl" as cm2 />
 
-	<@cm2.assignmentHeader "Edit settings" assignment "for" />
+	<@cm2.assignmentHeader "Edit assignment details" assignment "for" />
 
 <div class="fix-area">
 	<#assign actionUrl><@routes.cm2.editassignmentdetails assignment /></#assign>

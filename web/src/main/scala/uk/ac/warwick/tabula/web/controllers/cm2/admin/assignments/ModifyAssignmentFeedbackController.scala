@@ -67,7 +67,7 @@ class ModifyAssignmentFeedbackController extends AbstractAssignmentFeedbackContr
 
   @RequestMapping(method = Array(POST), value = Array("/new/feedback"), params = Array(ManageAssignmentMappingParameters.createAndAddFeedback, "action!=refresh", "action!=update"))
   def saveAndExit(@ModelAttribute("command") cmd: ModifyAssignmentFeedbackCommand, errors: Errors, @PathVariable assignment: Assignment): Mav =
-    submit(cmd, errors, Redirect(Routes.admin.moduleWithinDepartment(assignment.module, assignment.academicYear)), createMode)
+    submit(cmd, errors, Redirect(Routes.admin.assignment.submissionsandfeedback(assignment)), createMode)
 
   @RequestMapping(method = Array(POST), value = Array("/new/feedback"), params = Array(ManageAssignmentMappingParameters.createAndAddStudents, "action!=refresh", "action!=update, action=submit"))
   def submitAndAddStudents(@Valid @ModelAttribute("command") cmd: ModifyAssignmentFeedbackCommand, errors: Errors, @PathVariable assignment: Assignment): Mav =
@@ -75,7 +75,7 @@ class ModifyAssignmentFeedbackController extends AbstractAssignmentFeedbackContr
 
   @RequestMapping(method = Array(POST), value = Array("/edit/feedback"), params = Array(ManageAssignmentMappingParameters.editAndAddFeedback, "action!=refresh", "action!=update"))
   def saveAndExitForEdit(@ModelAttribute("command") cmd: ModifyAssignmentFeedbackCommand, errors: Errors, @PathVariable assignment: Assignment): Mav =
-    submit(cmd, errors, Redirect(Routes.admin.moduleWithinDepartment(assignment.module, assignment.academicYear)), editMode)
+    submit(cmd, errors, Redirect(Routes.admin.assignment.submissionsandfeedback(assignment)), editMode)
 
   @RequestMapping(method = Array(POST), value = Array("/edit/feedback"), params = Array(ManageAssignmentMappingParameters.editAndAddStudents, "action!=refresh", "action!=update, action=submit"))
   def submitAndAddStudentsForEdit(@Valid @ModelAttribute("command") cmd: ModifyAssignmentFeedbackCommand, errors: Errors, @PathVariable assignment: Assignment): Mav =

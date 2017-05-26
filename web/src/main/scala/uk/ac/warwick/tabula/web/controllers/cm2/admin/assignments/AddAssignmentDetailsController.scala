@@ -69,8 +69,8 @@ class AddAssignmentDetailsController extends AbstractAssignmentController
 	def saveAndExit(@Valid @ModelAttribute("command") cmd: CreateAssignmentDetailsCommand, errors: Errors, @PathVariable module: Module, @PathVariable academicYear: AcademicYear): Mav = {
 		if (errors.hasErrors) showForm(cmd)
 		else {
-			cmd.apply()
-			Redirect(Routes.admin.moduleWithinDepartment(module, academicYear))
+			val assignment = cmd.apply()
+			Redirect(Routes.admin.assignment.submissionsandfeedback(assignment))
 		}
 	}
 

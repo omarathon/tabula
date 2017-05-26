@@ -3,14 +3,12 @@
 <#escape x as x?html>
 
 	<#if mode == 'new'>
-		<#assign assignmentHeaderText='Create a new assignment' />
 		<#assign assignmentEditMode=false />
 	<#else>
-		<#assign assignmentHeaderText='Edit assignment' />
 		<#assign assignmentEditMode=true />
 	</#if>
 
-	<@cm2.moduleHeader assignmentHeaderText module "for" />
+	<@cm2.assignmentHeader "Edit submission settings" assignment "for" />
 
 <div class="fix-area">
 	<#assign actionUrl><@routes.cm2.assignmentsubmissions assignment mode/></#assign>

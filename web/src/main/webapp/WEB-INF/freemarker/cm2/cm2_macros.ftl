@@ -106,6 +106,39 @@
 	</#macro>
 
 	<#macro assignmentHeader title assignment preposition="for" admin=true>
+		<#if can.do('Submission.Read', assignment)>
+			<div class="btn-toolbar dept-toolbar">
+				<#if assignment.extensionsPossible>
+					<#if can.do('Extension.Update', assignment)>
+						<#local ext_caption="Manage assignment's extensions" />
+						<#local ext_link="Manage extensions" />
+					<#else>
+						<#local ext_caption="View assignment's extensions" />
+						<#local ext_link="View extensions" />
+					</#if>
+					<#local ext_url><@routes.cm2.assignmentextensions assignment /></#local>
+					<@fmt.permission_button
+						permission='Extension.Read'
+						scope=assignment
+						action_descr=ext_caption?lower_case
+						href=ext_url
+						classes='btn btn-link'>
+							${ext_link}
+					</@fmt.permission_button>
+				</#if>
+
+				<#local edit_url><@routes.cm2.editassignmentdetails assignment /></#local>
+				<@fmt.permission_button
+					permission='Assignment.Update'
+					scope=assignment
+					action_descr='edit assignment properties'
+					href=edit_url
+					classes='btn btn-link'>
+						Edit assignment
+				</@fmt.permission_button>
+			</div>
+		</#if>
+
 		<#local two_line = assignment?has_content />
 		<div class="deptheader">
 			<h1 <#if !two_line>class="with-related"</#if>>${title}</h1>

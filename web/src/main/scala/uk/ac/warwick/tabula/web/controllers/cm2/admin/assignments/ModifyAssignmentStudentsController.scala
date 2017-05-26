@@ -86,7 +86,7 @@ class ModifyAssignmentStudentsController extends AbstractAssignmentStudentsContr
 
 	@RequestMapping(method = Array(POST), value = Array("/new/students"), params = Array(ManageAssignmentMappingParameters.createAndAddStudents, "action!=refresh", "action!=update"))
 	def saveAndExit(@Valid @ModelAttribute("command") cmd: ModifyAssignmentStudentsCommand, errors: Errors, @PathVariable assignment: Assignment): Mav = {
-		submit(cmd, errors, assignment, Redirect(Routes.admin.moduleWithinDepartment(assignment.module, assignment.academicYear)), createMode)
+		submit(cmd, errors, assignment, Redirect(Routes.admin.assignment.submissionsandfeedback(assignment)), createMode)
 	}
 
 	@RequestMapping(method = Array(POST), value = Array("/edit/students"), params = Array(ManageAssignmentMappingParameters.editAndAddMarkers, "action!=refresh", "action!=update"))
@@ -96,7 +96,7 @@ class ModifyAssignmentStudentsController extends AbstractAssignmentStudentsContr
 
 	@RequestMapping(method = Array(POST), value = Array("/edit/students"), params = Array(ManageAssignmentMappingParameters.editAndAddStudents, "action!=refresh", "action!=update"))
 	def saveAndExitForEdit(@Valid @ModelAttribute("command") cmd: ModifyAssignmentStudentsCommand, errors: Errors, @PathVariable assignment: Assignment): Mav = {
-		submit(cmd, errors, assignment, Redirect(Routes.admin.moduleWithinDepartment(assignment.module, assignment.academicYear)), editMode)
+		submit(cmd, errors, assignment, Redirect(Routes.admin.assignment.submissionsandfeedback(assignment)), editMode)
 	}
 
 }

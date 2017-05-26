@@ -3,14 +3,12 @@
 	<#import "*/cm2_macros.ftl" as cm2 />
 
 	<#if mode == 'new'>
-		<#assign assignmentHeaderText='Create a new assignment' />
 		<#assign assignmentEditMode=false />
 	<#else>
-		<#assign assignmentHeaderText='Edit assignment' />
 		<#assign assignmentEditMode=true />
 	</#if>
 
-	<@cm2.moduleHeader assignmentHeaderText module "for" />
+	<@cm2.assignmentHeader "Edit students" assignment "for" />
 
 <div class="fix-area assignment-student-details">
 	<#assign actionUrl><@routes.cm2.assignmentstudents assignment mode/></#assign>

@@ -3,7 +3,7 @@
 	<#import "*/cm2_macros.ftl" as cm2 />
 	<#include "assign_marker_macros.ftl" />
 
-	<@cm2.moduleHeader "Create a new assignment" module "for" />
+	<@cm2.assignmentHeader "Assign markers" assignment "for" />
 
 	<div class="fix-area">
 		<@components.assignment_wizard 'markers' assignment.module false assignment />

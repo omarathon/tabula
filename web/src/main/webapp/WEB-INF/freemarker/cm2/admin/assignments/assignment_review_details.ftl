@@ -140,7 +140,7 @@
 			</div>
 		</div>
 		<div class="fix-footer">
-			<a class="btn btn-default" href="<@routes.cm2.home />">Confirm</a>
+			<a class="btn btn-default" href="<@routes.cm2.assignmentsubmissionsandfeedback assignment />">Confirm</a>
 		</div>
 	</div>
 </#escape>

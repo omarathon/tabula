@@ -107,7 +107,7 @@ class ModifyAssignmentMarkersSpreadsheetController extends AbstractAssignmentCon
 		@Valid @ModelAttribute("assignMarkersBySpreadsheetCommand") assignMarkersBySpreadsheetCommand: AssignMarkersCommand
 	): Mav =  {
 		assignMarkersBySpreadsheetCommand.apply()
-		Redirect(Routes.admin.moduleWithinDepartment(assignment.module, assignment.academicYear))
+		Redirect(Routes.admin.assignment.submissionsandfeedback(assignment))
 	}
 
 	@RequestMapping(method = Array(POST), params = Array(ManageAssignmentMappingParameters.createAndAddSubmissions), value = Array("new/markers/template"))

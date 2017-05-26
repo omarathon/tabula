@@ -53,7 +53,7 @@ class EditAssignmentDetailsController extends AbstractAssignmentController {
 
 	@RequestMapping(method = Array(POST), params = Array(ManageAssignmentMappingParameters.editAndEditDetails, "action!=refresh", "action!=update"))
 	def saveAndExit(@ModelAttribute("command") cmd: EditAssignmentDetailsCommand, errors: Errors, @PathVariable assignment: Assignment): Mav = {
-		submit(cmd, errors, assignment, Redirect(Routes.admin.moduleWithinDepartment(assignment.module, assignment.academicYear)))
+		submit(cmd, errors, assignment, Redirect(Routes.admin.assignment.submissionsandfeedback(assignment)))
 	}
 
 	private def submit(cmd: EditAssignmentDetailsCommand, errors: Errors, assignment: Assignment, mav: Mav) = {
