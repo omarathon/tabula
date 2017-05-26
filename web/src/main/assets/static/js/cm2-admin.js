@@ -1,8 +1,8 @@
 (function ($) { "use strict";
-	jQuery.fn.tabulaAjaxForm = function(beforeSubmit, callback) {
+	jQuery.fn.tabulaAjaxForm = function(beforeSubmit, callback, typeForm) {
 		var $row = $(this);
 		var $form = $row.find('form.ajax-form');
-		prepareAjaxForm($form, $row, beforeSubmit, callback);
+		prepareAjaxForm($form, $row, beforeSubmit, callback, typeForm);
 	};
 	$.fn.bindFormHelpers = function() {
 		var $this = $(this);
@@ -39,51 +39,50 @@
 				}));
 			}
 		});
-		$('#feedback-adjustment').on('show.bs.collapse', '.detail-row', function(e){
+		$('#feedback-adjustment').on('tabula.formLoaded', '.detail-row', function(e){
+
 			var $content = $(e.target);
+
 			// activate any popovers
 			$content.find('.use-popover').popover();
 
+			// bind suggested mark button
+			$content.find('.use-suggested-mark').on('click', function(e){
+				var $target = $(this);
+				var $markInput = $content.find('input[name=adjustedMark]');
+				var $commentsTextarea = $content.find('textarea[name=comments]');
+				var mark = $content.find('button').attr("data-mark");
+				var comment =$content.find('button').attr("data-comment");
+				$markInput.val(mark);
+				$commentsTextarea.val(comment);
+				// simulate a keyup to trigger and grade validation
+				$markInput.keyup();
+				e.preventDefault();
+			});
 
 			var $select = $content.find('select[name=reason]');
-			var $selectoption = $content.find('select[name=reason] option:selected');
-			// pre-select the other dropdown when editing an existing adjustment with an "other" reason
-			$select.find('option[value=Late submission penalty]').attr("selected", true);
-			
 			var $otherInput = $content.find('.other-input');
-			if($otherInput.val() != "" && $otherInput.val() != "Late submission penalty" && $otherInput.val() != "Plagarism penalty") {
-				$content.find('option[value=Other]').attr("selected", true);
+			$otherInput.addClass("hide");
+			if($otherInput.val() == "Late submission penalty"){
+				$content.find('option[value=Late submission penalty]').prop('selected', true);
+			}
+			if($otherInput.val() == "Plagarism penalty") {
+				$content.find('option[value=Plagarism penalty]').prop('selected', true);
+			}
+			if (($otherInput.val() != "Plagarism penalty") && ($otherInput.val() != "Late submission penalty") && ($otherInput.val() != "") ){
+				$content.find('option[value=Other]').prop('selected', true);
 				$otherInput.removeAttr("disabled");
 				$otherInput.removeClass("hide");
-				$otherInput.fadeIn(400);
 			}
-			$otherInput.removeAttr("disabled");
-			$otherInput.removeClass("hide");
 			// show the suggested mark button if late penalty is selected
-			var $suggestedPenalty = $content.find('form').find('.late-penalty');
-			if($selectoption.text() === "") {
-				$suggestedPenalty.addClass("hide");
-				if($suggestedPenalty.hasClass("hide")){ alert("hidden"); }
-			}
-			if($selectoption.text() === "Late submission penalty") {
-				$(e.target).find('.late-penalty').removeClass("hide");
+			var $suggestedPenalty = $select.closest('form').find('.late-penalty');
+			if($select.val() === "Late submission penalty") {
+				$suggestedPenalty.removeClass("hide");
 			} else {
-				$(e.target).find('.late-penalty').addClass("hide");
+				$suggestedPenalty.addClass("hide");
 			}
 		});
-		// bind suggested mark button
-		$body.on('click', '.use-suggested-mark', function(e){
-			$(e).preventDefault();
-			var $content = $(e.target).closest('form');
-			var $markInput = $content.find('input[name=adjustedMark]');
-			var $commentsTextarea = $content.find('textarea[name=comments]');
-			var mark = $content.find('button.use-suggested-mark').attr('data-mark');
-			var comment =$content.find('button.use-suggested-mark').attr('data-comment');
-			$markInput.val(mark);
-			$commentsTextarea.val(comment);
-			var $select = $content.find('select[name=reason]');
-			$content.find('option[value=Late submission penalty]').attr("selected", true);
-		});
+
 		$body.on('change', 'select[name=reason]', function(e){
 			var $target = $(e.target);
 			var $otherInput = $target.siblings('.other-input');
@@ -98,11 +97,10 @@
 				});
 			}
 			var $suggestedPenalty = $target.closest('form').find('.late-penalty');
-			$suggestedPenalty.attr("style", false);
-			if ($target.find('option:selected').text() === "Late submission penalty") {
+			if ($target.val() === "Late submission penalty") {
 				$suggestedPenalty.fadeIn(400);
 				$suggestedPenalty.removeClass("hide");
-			}else{
+			} else if ($suggestedPenalty.is(':visible')) {
 				$suggestedPenalty.fadeOut(400);
 				$suggestedPenalty.addClass("hide");
 			}
@@ -263,12 +261,30 @@
 	 * It MUST return an empty string if the form has been successfully handled.
 	 * Otherwise, whatever is returned will be rendered in the container.
 	 */
-	var prepareAjaxForm = function($form, $row, beforeSubmitOption, callbackOption) {
+	var prepareAjaxForm = function($form, $row, beforeSubmitOption, callbackOption, typeOption) {
 		var $container = $row.find('.detailrow-container');
 		var callback = callbackOption || function(){};
 		var beforeSubmit = beforeSubmitOption || function() { return true; };
+		var formType = typeOption || "";
 		$form.ajaxForm({
 			beforeSerialize: beforeSubmit,
+			beforeSubmit: function() {
+				if(formType === 'feedback-adjustment') {
+					if($("#action").val() != "suggestmark") {
+						return true;
+					}else{
+						var $detailrow = $form.closest('.detail-row');
+						$detailrow.find('.btn-primary').removeClass('disabled');
+						$detailrow.find('.discard-changes').removeClass('disabled');
+						$form.unbind('submit');
+						$form.removeData('submitOnceSubmitted');
+						$detailrow.trigger('tabula.formLoaded');
+						return false;
+					}
+				}else{
+					return true;
+				}
+			},
 			iframe: true,
 			statusCode: {
 				403: function(jqXHR) {
@@ -293,17 +309,19 @@
 					}
 				}
 				if (!result || /^\s*$/.test(result)) {
+					var $detailrow = $container.closest('.detail-row');
 					// reset if empty
-					$row.collapse("hide");
+					$detailrow.collapse("hide");
+					$detailrow.data('loaded', false);
 					$container.html("<p>No data is currently available. Please check that you are signed in.</p>");
-					$row.data('loaded', false);
-
 				} else {
 					$container.html(result);
 					callback($container);
 				}
 			},
-			error: function(){alert("There has been an error. Please reload and try again.");}
+			error: function(){ alert("There has been an error. Please reload and try again."); }
 		});
 	};
+
+
 })(jQuery);

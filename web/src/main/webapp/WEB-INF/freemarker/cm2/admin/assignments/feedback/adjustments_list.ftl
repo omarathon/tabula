@@ -39,7 +39,7 @@
 	<div id="profile-modal" class="modal fade profile-subset"></div>
 
 	<#if studentInfo?size gt 0>
-		<table id="feedback-adjustment" class="students table table-bordered table-striped tabula-greenLight sticky-table-headers">
+		<table id="feedback-adjustment" class="students table table-striped tabula-greenLight sticky-table-headers">
 			<thead>
 				<tr>
 					<th class="student-col">First name</th>
@@ -60,39 +60,42 @@
 					sortList: [[2, 0], [1,0]],
 					headers: { 0: { sorter: false} }
 				};
+				$("#action").val("");
+				$("button.use-suggested-mark").click(function () {
+						$("#action").val("suggestmark");
+				});
 
-				$('form').find('select[name=reason]>option:eq(0)').attr('selected', true);
-				$('document').find('div.late-penalty').addClass("hide");
+				var typeForm = "feedback-adjustment";
 
 				var beforeSubmit = function($form){
-					var $select = $form.find('select[name=reason]>option:selected');
-					if ($select.text === "Other") {
-						$select.prop("disabled", true); // disable the dropdown so only one value is passed through for the reason
+					var $select = $form.find('select[name=reason]');
+					if ($select.val() === "Other") {
+						$select.prop("disabled", true);
 					}
 					return true;
 				};
 
 				var callback = function($row){
 					var $form = $row.find('form');
+					var $select = $form.find('select[name=reason]');
 					var $otherInput = $form.find('.other-input');
 					if($otherInput.val() !== "") {
-						alert("other input = " + $otherInput);
-						$form.find('select[name=reason]>option:eq(3)').attr('selected', true);
+						$select.val("Other");
 						$otherInput.removeAttr("disabled");
 						$otherInput.removeClass("hide");
-					}else{
-						if(daysLate > 0){
-							$form.find('select[name=reason]>option:eq(1)').attr('selected', true);
-						}
 					}
 					$row.trigger('tabula.formLoaded');
 				};
 
-				$('body').on('tabula.formLoaded', function(e) {
-					var $row = $(e.target);
-					$row.tabulaAjaxForm(beforeSubmit, callback);
+				$('body').on('tabula.formLoaded',function() {
+					var $row = $(this).find('.detail-row');
+					$("#action").val("");
+					$row.tabulaAjaxForm(beforeSubmit, callback, typeForm);
+					$row.find('form').removeData('submitOnceSubmitted');
+					$row.find("button.use-suggested-mark").click(function () {
+						$("#action").val("suggestmark");
+					});
 				});
-
 			})(jQuery);
 		</script>
 

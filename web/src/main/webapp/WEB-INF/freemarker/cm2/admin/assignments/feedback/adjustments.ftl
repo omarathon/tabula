@@ -62,7 +62,7 @@
 		<@form.label path="reason">Reason for adjustment</@form.label>
 		<@form.field>
 			<@f.select path="reason">
-				<@f.option value=""></@f.option>
+				<@f.option></@f.option>
 				<@f.option value="Late submission penalty">Late submission penalty</@f.option>
 				<@f.option value="Plagarism penalty">Plagarism penalty</@f.option>
 				<@f.option value="Other">Other</@f.option>
@@ -119,9 +119,9 @@
 			</@form.field>
 		</#if>
 	</@form.row>
-
+<#assign gradeValidation = isGradeValidation?string('true', 'false') />
 	<div class="alert alert-info">
-		The reason for adjustment and any comments will be made available to students when their feedback is published.
+		The reason for adjustment and any comments will be made available to students when their feedback is published. isGradeValidation: ${gradeValidation!""}
 	</div>
 
 	<#if features.queueFeedbackForSits && assignment.module.adminDepartment.uploadCourseworkMarksToSits && command.canBeUploadedToSits>
@@ -131,6 +131,7 @@
 	<div class="submit-buttons">
 		<input class="btn btn-primary" type="submit" value="Save">
 		<a class="btn discard-changes" href="">Cancel</a>
+		<input type="hidden" id="action" />
 	</div>
 
 </@f.form>

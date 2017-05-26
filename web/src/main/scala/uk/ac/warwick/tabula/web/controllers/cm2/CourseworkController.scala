@@ -9,6 +9,6 @@ abstract class CourseworkController extends BaseController with CourseworkBreadc
 	final def optionalCurrentMember: Option[Member] = user.profile
 	final def currentMember: Member = optionalCurrentMember getOrElse new RuntimeMember(user)
 
-	final val urlPrefix: String = Wire.property("${cm2.prefix}")
+	final var urlPrefix: String = Wire.property("${cm2.prefix}")
 
 }
