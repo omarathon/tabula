@@ -67,16 +67,6 @@
 										</li>
 									</#list>
 								</#if>
-
-								<li role="presentation">
-									<a href="#${identifier}-audit" aria-controls="${identifier}-audit" role="tab" data-toggle="tab">
-										<#if assignment.collectSubmissions>
-											Submission history
-										<#else>
-											History
-										</#if>
-									</a>
-								</li>
 							</ul>
 							<div class="tab-content tab-content-equal-height">
 								<div role="tabpanel" class="tab-pane active" id="${identifier}-submission">
@@ -93,10 +83,6 @@
 										</div>
 									</#list>
 								</#if>
-
-								<div role="tabpanel" class="tab-pane" id="${identifier}-audit">
-									TODO
-								</div>
 							</div>
 						</div>
 					</#macro>
