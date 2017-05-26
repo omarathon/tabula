@@ -330,7 +330,7 @@ trait CourseworkHomepageMarkerAssignments extends TaskBenchmarking {
 	// Action required - assignments which need an action
 	private lazy val markerActionRequiredAssignments: Seq[MarkerAssignmentInfo] = benchmarkTask("Get action required assignments") {
 		allMarkerAssignments.diff(markerUpcomingAssignments).diff(markerCompletedAssignments).filter { info =>
-			info.nextStages.nonEmpty
+			info.assignment.feedbacks.asScala.exists(_.markingInProgress.exists(_.marker == user.apparentUser))
 		}
 	}
 

@@ -1,7 +1,7 @@
 <#import "*/assignment_components.ftl" as components />
+<#import "*/cm2_macros.ftl" as cm2 />
 <#escape x as x?html>
 
-<div class="deptheader">
 	<#if mode == 'new'>
 		<#assign assignmentHeaderText='Create a new assignment' />
 		<#assign assignmentEditMode=false />
@@ -9,10 +9,9 @@
 		<#assign assignmentHeaderText='Edit assignment' />
 		<#assign assignmentEditMode=true />
 	</#if>
-    <h1>${assignmentHeaderText}</h1>
 
-    <h4 class="with-related"><span class="muted">for</span> <@fmt.module_name module /></h4>
-</div>
+	<@cm2.moduleHeader assignmentHeaderText module "for" />
+
 <div class="fix-area">
 	<#assign actionUrl><@routes.cm2.assignmentsubmissions assignment mode/></#assign>
 	<@f.form method="post" action=actionUrl cssClass="dirty-check">

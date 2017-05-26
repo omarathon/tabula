@@ -1,7 +1,7 @@
+<#import "*/cm2_macros.ftl" as cm2 />
 <#escape x as x?html>
 	<#compress>
-		<h1>${assignment.module.name} (${assignment.module.code?upper_case})
-			<br><strong>${assignment.name}</strong></h1>
+		<@cm2.assignmentHeader "Submit assignment" assignment "for" />
 
 <#if can.do("Assignment.Update", assignment)>
 	<h2>Assignment page for students</h2>

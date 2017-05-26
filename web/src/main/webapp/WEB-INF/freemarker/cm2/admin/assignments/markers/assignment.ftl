@@ -1,13 +1,7 @@
 <#import "*/cm2_macros.ftl" as cm2 />
 <#import "*/_filters.ftl" as filters />
 <#escape x as x?html>
-	<@cm2.headerMenu department />
-	<div class="deptheader">
-		<h1>${assignment.name}</h1>
-		<h4 class="with-related"><@fmt.module_name assignment.module /></h4>
-	</div>
-
-	<h2>Marking</h2>
+	<@cm2.assignmentHeader "Marking" assignment "for" />
 
 	<#-- Filtering -->
 	<div class="fix-area">

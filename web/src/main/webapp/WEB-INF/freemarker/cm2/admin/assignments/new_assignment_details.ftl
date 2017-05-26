@@ -1,14 +1,13 @@
 <#escape x as x?html>
 <#import "*/assignment_components.ftl" as components />
+<#import "*/cm2_macros.ftl" as cm2 />
 	<#--
 	HFC-166 Don't use #compress on this file because
 	the comments textarea needs to maintain newlines.
 	-->
 
-<div class="deptheader">
-	<h1>Create assignment</h1>
-	<h4 class="with-related"><span class="muted">for</span> <@fmt.module_name module /></h4>
-</div>
+	<@cm2.moduleHeader "Create a new assignment" module "for" />
+
 <div class="fix-area">
 	<#assign actionUrl><@routes.cm2.createassignmentdetails module academicYear /></#assign>
 	<@f.form method="post" action=actionUrl>

@@ -95,6 +95,36 @@
 		</#if>
 	</#macro>
 
+	<#macro moduleHeader title module preposition="for">
+		<#local two_line = module?has_content />
+		<div class="deptheader">
+			<h1 <#if !two_line>class="with-related"</#if>>${title}</h1>
+			<#if two_line>
+				<h4 class="with-related">${preposition} <@fmt.module_name module /></h4>
+			</#if>
+		</div>
+	</#macro>
+
+	<#macro assignmentHeader title assignment preposition="for">
+		<#local two_line = assignment?has_content />
+		<div class="deptheader">
+			<h1 <#if !two_line>class="with-related"</#if>>${title}</h1>
+			<#if two_line>
+				<h4 class="with-related">${preposition} ${assignment.name} (${assignment.module.code?upper_case}, ${assignment.academicYear.toString})</h4>
+			</#if>
+		</div>
+	</#macro>
+
+	<#macro workflowHeader title workflow preposition="for">
+		<#local two_line = workflow?has_content />
+		<div class="deptheader">
+			<h1 <#if !two_line>class="with-related"</#if>>${title}</h1>
+			<#if two_line>
+				<h4 class="with-related">${preposition} ${workflow.name}</h4>
+			</#if>
+		</div>
+	</#macro>
+
 	<#macro headerMenu department academicYear="">
 		<div class="btn-toolbar dept-toolbar">
 			<div class="btn-group">

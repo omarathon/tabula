@@ -1,15 +1,10 @@
 <#import "*/cm2_macros.ftl" as cm2 />
 
 <#escape x as x?html>
-	<@cm2.headerMenu department />
-	<div class="deptheader">
-		<h1>${assignment.name}</h1>
-		<h4 class="with-related"><@fmt.module_name assignment.module /></h4>
-	</div>
+	<@cm2.assignmentHeader "Send to ${stage.nextStagesDescription?lower_case}" assignment "for" />
 
 	<#assign formAction><@routes.cm2.markingCompleted assignment stage marker /></#assign>
 	<@f.form method="post" action="${formAction}" commandName="command">
-		<h1>Send to ${stage.nextStagesDescription?lower_case}</h1>
 		<@form.errors path="" />
 		<input type="hidden" name="confirmScreen" value="true" />
 

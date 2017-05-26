@@ -1,9 +1,12 @@
+<#import "*/cm2_macros.ftl" as cm2 />
 <#escape x as x?html>
 <#compress>
-	<div class="deptheader">
-		<h1>Request an extension<#if isModification && existingRequest.moreInfoRequired> - More information required</#if></h1>
-		<h5 class="with-related">for ${assignment.module.code?upper_case} - ${assignment.name}</h5>
-	</div>
+	<#assign title = "Request an extension" />
+	<#if isModification && existingRequest.moreInfoRequired>
+		<#assign title>${title} - More information required</#assign>
+	</#if>
+
+	<@cm2.assignmentHeader title assignment "for" />
 
 	<#assign time_remaining=durationFormatter(assignment.closeDate) />
 	<#if !assignment.newExtensionsCanBeRequested>

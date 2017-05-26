@@ -530,15 +530,9 @@
 		</div>
 		<div class="col-md-2">
 			<#if assignment.closed || assignment.openEnded>
-				<#if info.nextStages?size gt 0>
-					<a class="btn btn-block btn-primary" href="<@routes.cm2.listmarkersubmissions assignment user.apparentUser />">
-						${verb}
-					</a>
-				<#else>
-					<a class="btn btn-block btn-default btn-disabled use-tooltip" title="You'll be able to download submissions for marking when an administrator releases them." disabled>
-						${verb}
-					</a>
-				</#if>
+				<a class="btn btn-block btn-primary" href="<@routes.cm2.listmarkersubmissions assignment user.apparentUser />">
+					${verb}
+				</a>
 			</#if>
 		</div>
 	</div>

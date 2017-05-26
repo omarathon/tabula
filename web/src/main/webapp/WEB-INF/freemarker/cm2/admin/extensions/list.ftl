@@ -1,3 +1,4 @@
+<#import "*/cm2_macros.ftl" as cm2 />
 <#include "../_filters.ftl" />
 <#escape x as x?html><#compress>
 	<h1>Extensions</h1>

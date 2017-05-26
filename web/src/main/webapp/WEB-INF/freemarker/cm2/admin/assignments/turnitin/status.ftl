@@ -1,6 +1,7 @@
+<#import "*/cm2_macros.ftl" as cm2 />
 <#escape x as x?html>
 
-<h1>Job status</h1>
+	<@cm2.assignmentHeader "Turnitin status" assignment "for" />
 
 <p>This page will update itself automatically. You'll be sent an email when it completes so you don't have to keep this page open.</p>
 
