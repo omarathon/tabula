@@ -2,13 +2,11 @@
 <#import "*/cm2_macros.ftl" as cm2 />
 
 <#escape x as x?html>
-	<@cm2.headerMenu department academicYear />
-
 	<#function route_function dept>
 		<#local result><@routes.cm2.feedbackreport dept academicYear /></#local>
 		<#return result />
 	</#function>
-	<@fmt.id7_deptheader "Feedback report" route_function "for" />
+	<@cm2.departmentHeader "Feedback report" department route_function academicYear />
 
 	<#assign actionUrl><@routes.cm2.feedbackreport department /></#assign>
 	<@f.form method="post" action=actionUrl commandName="feedbackReportCommand" cssClass="dirty-check">

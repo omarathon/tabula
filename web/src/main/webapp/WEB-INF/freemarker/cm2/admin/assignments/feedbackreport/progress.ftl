@@ -5,13 +5,11 @@
 	<#if info.ajax>
 		<#include "job-status-fragment.ftl" />
 	<#else>
-		<@cm2.headerMenu department academicYear />
-
 		<#function route_function dept>
 			<#local result><@routes.cm2.feedbackreport dept academicYear /></#local>
 			<#return result />
 		</#function>
-		<@fmt.id7_deptheader "Feedback report status" route_function "for" />
+		<@cm2.departmentHeader "Feedback report status" department route_function academicYear />
 
 		<p>This page updates itself automatically. You'll receive an email with the report attached when it is ready, so you don't need to keep this page open.</p>
 

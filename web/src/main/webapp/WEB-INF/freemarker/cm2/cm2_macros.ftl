@@ -105,7 +105,7 @@
 		</div>
 	</#macro>
 
-	<#macro assignmentHeader title assignment preposition="for">
+	<#macro assignmentHeader title assignment preposition="for" admin=true>
 		<#local two_line = assignment?has_content />
 		<div class="deptheader">
 			<h1 <#if !two_line>class="with-related"</#if>>${title}</h1>
@@ -125,7 +125,7 @@
 		</div>
 	</#macro>
 
-	<#macro headerMenu department academicYear="">
+	<#macro departmentHeader title department routeFunction academicYear="" preposition="for">
 		<div class="btn-toolbar dept-toolbar">
 			<div class="btn-group">
 				<a class="btn btn-link dropdown-toggle" data-toggle="dropdown">
@@ -244,5 +244,7 @@
 				</ul>
 			</div>
 		</div>
+
+		<@fmt.id7_deptheader title routeFunction preposition />
 	</#macro>
 </#escape>
