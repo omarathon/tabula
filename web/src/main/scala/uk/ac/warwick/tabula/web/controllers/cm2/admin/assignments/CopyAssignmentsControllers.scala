@@ -53,13 +53,13 @@ class CopyModuleAssignmentsController extends AbstractCopyAssignmentsController 
 			"cancel" -> Routes.admin.module(module, cmd.academicYear),
 			"department" -> module.adminDepartment,
 			"map" -> moduleAssignmentMap(cmd.modules))
-			.crumbs(Breadcrumbs.Department(module.adminDepartment, cmd.academicYear))
+			.crumbsList(Breadcrumbs.module(module, cmd.academicYear))
 			.secondCrumbs(academicYearBreadcrumbs(cmd.academicYear)(Routes.admin.module.copyAssignments(module, _)): _*)
 
 	@RequestMapping(method = Array(POST))
 	def submit(@ModelAttribute("copyAssignmentsCommand") cmd: CopyAssignmentsCommand.Command, @PathVariable module: Module): Mav = {
 		cmd.apply()
-		Redirect(Routes.admin.module(module, cmd.academicYear))
+		Redirect(Routes.admin.moduleWithinDepartment(module, cmd.academicYear))
 	}
 
 }
@@ -85,13 +85,13 @@ abstract class AbstractCopyDepartmentAssignmentsController extends AbstractCopyA
 			"cancel" -> Routes.admin.department(department),
 			"map" -> moduleAssignmentMap(cmd.modules),
 			"showSubHeadings" -> true)
-			.crumbs(Breadcrumbs.Department(department, cmd.academicYear))
+			.crumbsList(Breadcrumbs.department(department, Some(cmd.academicYear)))
 			.secondCrumbs(academicYearBreadcrumbs(cmd.academicYear)(Routes.admin.copyAssignments(department, _)): _*)
 
 	@RequestMapping(method = Array(POST))
 	def submit(@ModelAttribute("copyAssignmentsCommand") cmd: CopyAssignmentsCommand.Command, @PathVariable department: Department): Mav = {
 		cmd.apply()
-		Redirect(Routes.admin.department(department))
+		Redirect(Routes.admin.department(department, cmd.academicYear))
 	}
 
 }

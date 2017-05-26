@@ -27,7 +27,7 @@ class DeleteAssignmentController extends CourseworkController {
 	def showForm(form: DeleteAssignmentCommand, assignment: Assignment): Mav = {
 		Mav("cm2/admin/assignments/delete",
 			"assignment" -> assignment
-		).crumbs(Breadcrumbs.Department(assignment.module.adminDepartment, assignment.academicYear), Breadcrumbs.Assignment(assignment))
+		).crumbsList(Breadcrumbs.assignment(assignment))
 	}
 
 	@RequestMapping(method = Array(GET))

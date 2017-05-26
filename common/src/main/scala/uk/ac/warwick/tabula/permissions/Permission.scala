@@ -34,9 +34,9 @@ sealed abstract class SelectorPermission[A <: PermissionsSelector[A]](val select
 
 	override def hashCode(): Int =
 		new HashCodeBuilder()
-		.append(getName)
-		.append(selector)
-		.build()
+			.append(getName)
+			.append(selector)
+			.build()
 
 	override def toString: String = "%s(%s)".format(super.toString(), selector)
 }

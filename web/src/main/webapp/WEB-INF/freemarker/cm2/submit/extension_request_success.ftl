@@ -1,15 +1,16 @@
+<#import "*/cm2_macros.ftl" as cm2 />
 <#escape x as x?html>
 <#compress>
 	<#if isReply>
-		<h1>You have replied to a request for more information</h1>
-		<h4><span class="muted">for</span> ${assignment.name}</h4>
+		<@cm2.assignmentHeader "You have replied to a request for more information" assignment "for" />
+
 		<p>
 			You will receive an email when your reply has been reviewed. If your request for an extension has not been
 			approved before the deadline, hand in any work that you have completed before the deadline passes.
 		</p>
 	<#else>
-		<h1>You have requested an extension</h1>
-		<h4><span class="muted">for</span> ${assignment.name}</h4>
+		<@cm2.assignmentHeader "You have requested an extension" assignment "for" />
+
 		<p>
 			You will receive an email when your request has been reviewed. If your request for an extension has not been
 			approved before the deadline, hand in any work that you have completed before the deadline passes.

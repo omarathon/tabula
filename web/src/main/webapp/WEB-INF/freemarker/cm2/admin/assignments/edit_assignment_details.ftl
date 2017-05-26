@@ -1,9 +1,9 @@
 <#escape x as x?html>
 	<#import "*/assignment_components.ftl" as components />
-<div class="deptheader">
-    <h1>Edit assignment</h1>
-    <h4 class="with-related"><span class="muted">for</span> <@fmt.module_name module /></h4>
-</div>
+	<#import "*/cm2_macros.ftl" as cm2 />
+
+	<@cm2.assignmentHeader "Edit settings" assignment "for" />
+
 <div class="fix-area">
 	<#assign actionUrl><@routes.cm2.editassignmentdetails assignment /></#assign>
 	<@f.form method="post" action=actionUrl cssClass="dirty-check">

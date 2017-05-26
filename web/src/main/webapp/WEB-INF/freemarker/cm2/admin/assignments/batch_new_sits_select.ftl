@@ -6,13 +6,11 @@ first page of the form to setup a bunch of assignments from SITS.
 <#escape x as x?html>
 	<#assign commandName="command"/>
 
-	<@cm2.headerMenu department academicYear />
-
 	<#function route_function dept>
 		<#local result><@routes.cm2.create_sitsassignments dept academicYear /></#local>
 		<#return result />
 	</#function>
-	<@fmt.id7_deptheader "Setup assignments" route_function "for" />
+	<@cm2.departmentHeader "Setup assignments" department route_function academicYear />
 
 	<#assign step=action!'select'/>
 

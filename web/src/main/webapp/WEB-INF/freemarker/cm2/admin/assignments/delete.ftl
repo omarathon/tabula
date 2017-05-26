@@ -1,8 +1,7 @@
+<#import "*/cm2_macros.ftl" as cm2 />
 <#escape x as x?html>
-	<div class="deptheader">
-		<h1>Delete assignment</h1>
-		<h4 class="with-related">${assignment.name}</h4>
-	</div>
+	<@cm2.assignmentHeader "Delete assignment" assignment "" />
+
 	<#assign submitUrl><@routes.cm2.assignmentdelete assignment /></#assign>
 	<@f.form method="post" action=submitUrl commandName="deleteAssignmentCommand">
 		<!-- global errors -->

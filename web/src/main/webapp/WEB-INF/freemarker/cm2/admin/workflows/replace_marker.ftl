@@ -1,12 +1,10 @@
+<#import "*/cm2_macros.ftl" as cm2 />
 <#escape x as x?html>
 
 <#assign formAction><@routes.cm2.reusableWorkflowReplaceMarker department academicYear workflow /></#assign>
 <#assign cancelAction><@routes.cm2.reusableWorkflowEdit department academicYear workflow /></#assign>
 
-<div class="deptheader">
-	<h1>Replace marker in </h1>
-	<h4 class="with-related">${workflow.name}</h4>
-</div>
+<@cm2.workflowHeader "Replace marker" workflow "in" />
 
 <@f.form
 	method="POST"

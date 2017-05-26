@@ -5,7 +5,7 @@ import uk.ac.warwick.tabula.services.{ AssessmentService, AssessmentServiceCompo
 import uk.ac.warwick.tabula.data.model.{Module, Assignment}
 
 
-class GenericFeedbackCommandTest extends TestBase with Mockito {
+class OldGenericFeedbackCommandTest extends TestBase with Mockito {
 
 	trait Fixture {
 		val assignment = new Assignment
@@ -13,7 +13,7 @@ class GenericFeedbackCommandTest extends TestBase with Mockito {
 		assignment.module = module
 
 		val heronRant = "A common mistake that most of you made; was to class herons as Avialae. They are actualy 'Rancid winged devils'"
-		val command = new GenericFeedbackCommand(module, assignment) with GenericFeedbackCommandTestSupport
+		val command = new OldGenericFeedbackCommand(module, assignment) with OldGenericFeedbackCommandTestSupport
 		command.genericFeedback = heronRant
 	}
 
@@ -30,7 +30,7 @@ class GenericFeedbackCommandTest extends TestBase with Mockito {
 }
 
 // Implements the dependencies declared by the command
-trait GenericFeedbackCommandTestSupport extends AssessmentServiceComponent with Mockito {
+trait OldGenericFeedbackCommandTestSupport extends AssessmentServiceComponent with Mockito {
 	val assessmentService: AssessmentService = mock[AssessmentService]
 	def apply(): Assignment = null
 }

@@ -36,27 +36,27 @@ class ModifyAssignmentMarkersController extends AbstractAssignmentController {
 			"stages" -> workflow.allStages.groupBy(_.roleName).mapValues(_.map(_.name)),
 			"state" -> existingAllocations,
 			"mode" -> mode)
-			.crumbs(Breadcrumbs.Department(assignment.module.adminDepartment, assignment.academicYear), Breadcrumbs.Assignment(assignment))
+			.crumbsList(Breadcrumbs.assignment(assignment))
 	}
 
 	@RequestMapping(method = Array(GET, HEAD), value = Array("new/markers"))
 	def newForm(
-		@PathVariable("assignment") assignment: Assignment,
+		@PathVariable assignment: Assignment,
 		@ModelAttribute("listAllocationsCommand") listAllocationsCmd: ListMarkerAllocationsCommand,
 		@ModelAttribute("assignMarkersCommand") assignMarkersCmd: AssignMarkersCommand
 	): Mav = form(assignment, listAllocationsCmd, assignMarkersCmd, createMode)
 
 	@RequestMapping(method = Array(GET, HEAD), value = Array("edit/markers"))
 	def editForm(
-		@PathVariable("assignment") assignment: Assignment,
+		@PathVariable assignment: Assignment,
 		@ModelAttribute("listAllocationsCommand") listAllocationsCmd: ListMarkerAllocationsCommand,
 		@ModelAttribute("assignMarkersCommand") assignMarkersCmd: AssignMarkersCommand
 	): Mav = form(assignment, listAllocationsCmd, assignMarkersCmd, editMode)
 
 	@RequestMapping(method = Array(POST), params = Array(ManageAssignmentMappingParameters.createAndAddMarkers), value = Array("*/markers"))
-	def saveAndExit(@ModelAttribute("assignMarkersCommand") assignMarkersCmd: AssignMarkersCommand): Mav =  {
+	def saveAndExit(@ModelAttribute("assignMarkersCommand") assignMarkersCmd: AssignMarkersCommand, @PathVariable assignment: Assignment): Mav =  {
 		assignMarkersCmd.apply()
-		RedirectForce(Routes.home)
+		Redirect(Routes.admin.moduleWithinDepartment(assignment.module, assignment.academicYear))
 	}
 
 	@RequestMapping(method = Array(POST), params = Array(ManageAssignmentMappingParameters.createAndAddSubmissions), value = Array("new/markers"))

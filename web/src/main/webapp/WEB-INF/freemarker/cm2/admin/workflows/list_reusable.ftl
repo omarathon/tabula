@@ -1,12 +1,11 @@
 <#import "*/cm2_macros.ftl" as cm2 />
 <#escape x as x?html>
-<@cm2.headerMenu department academicYear />
 
-<#function route_function dept>
-	<#local selectCourseCommand><@routes.cm2.reusableWorkflowsHome dept academicYear /></#local>
-	<#return selectCourseCommand />
-</#function>
-<@fmt.id7_deptheader title="Marking workflows" route_function=route_function preposition="for" />
+	<#function route_function dept>
+		<#local selectCourseCommand><@routes.cm2.reusableWorkflowsHome dept academicYear /></#local>
+		<#return selectCourseCommand />
+	</#function>
+	<@cm2.departmentHeader "Marking workflows" department route_function academicYear />
 
 <#if copiedWorkflow??>
 	<div class="alert alert-info">

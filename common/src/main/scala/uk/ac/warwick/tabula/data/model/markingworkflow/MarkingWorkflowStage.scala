@@ -3,12 +3,15 @@ package uk.ac.warwick.tabula.data.model.markingworkflow
 import org.hibernate.`type`.StandardBasicTypes
 import java.sql.Types
 
+import uk.ac.warwick.tabula.CaseObjectEqualityFixes
 import uk.ac.warwick.tabula.data.model.AbstractBasicUserType
 import uk.ac.warwick.tabula.helpers.StringUtils
 import uk.ac.warwick.tabula.system.TwoWayConverter
 import uk.ac.warwick.tabula.helpers.StringUtils._
 
-sealed abstract class MarkingWorkflowStage(val name: String, val order: Int) {
+sealed abstract class MarkingWorkflowStage(val name: String, val order: Int) extends CaseObjectEqualityFixes[MarkingWorkflowStage] {
+	override def getName: String = name
+
 	def roleName: String = MarkingWorkflowStage.DefaultRole
 	def verb: String = MarkingWorkflowStage.DefaultVerb
 	// used when stages have their own allocations rather than allocations being at the roleName level

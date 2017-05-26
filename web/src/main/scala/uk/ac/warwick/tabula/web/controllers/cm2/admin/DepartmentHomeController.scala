@@ -41,17 +41,18 @@ abstract class AbstractDepartmentHomeController
 	@RequestMapping(params=Array("!ajax"), headers=Array("!X-Requested-With"))
 	def home(@ModelAttribute("command") command: DepartmentCommand, @PathVariable department: Department): Mav =
 		Mav("cm2/admin/home/department",
+			"academicYear" -> command.academicYear,
 			"modules" -> command.allModulesWithPermission,
 			"allModuleFilters" -> AssignmentInfoFilters.allModuleFilters(command.allModulesWithPermission.sortBy(_.code)),
 			"allWorkflowTypeFilters" -> AssignmentInfoFilters.allWorkflowTypeFilters,
 			"allStatusFilters" -> AssignmentInfoFilters.Status.all,
 			"academicYear" -> command.academicYear)
-			.crumbs(Breadcrumbs.Department.active(department, command.academicYear))
+			.crumbsList(Breadcrumbs.department(department, Some(command.academicYear), active = true))
 			.secondCrumbs(academicYearBreadcrumbs(command.academicYear)(Routes.cm2.admin.department(department, _)): _*)
 
 	@RequestMapping
 	def homeAjax(@ModelAttribute("command") command: DepartmentCommand): Mav =
-		Mav("cm2/admin/home/moduleList", "modules" -> command.apply()).noLayout()
+		Mav("cm2/admin/home/moduleList", "modules" -> command.apply(), "academicYear" -> command.academicYear).noLayout()
 
 }
 

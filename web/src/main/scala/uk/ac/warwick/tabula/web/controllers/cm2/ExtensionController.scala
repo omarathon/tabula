@@ -167,7 +167,7 @@ class DownloadExtensionAttachmentController extends CourseworkController {
 	@RequestMapping(method=Array(GET))
 	def supportingFile(
 		@ModelAttribute("downloadAttachmentCommand") attachmentCommand: DownloadAttachmentCommand,
-		@PathVariable("filename") filename: String
+		@PathVariable filename: String
 	): RenderableFile = {
 		attachmentCommand.apply().getOrElse{ throw new ItemNotFoundException() }
 	}
@@ -188,7 +188,7 @@ class ListExtensionsForAssignmentController extends CourseworkController {
 			"module" -> cmd.assignment.module,
 			"assignment" -> cmd.assignment,
 			"maxDaysToDisplayAsProgressBar" -> Extension.MaxDaysToDisplayAsProgressBar)
-			.crumbs(Breadcrumbs.Department(cmd.assignment.module.adminDepartment, cmd.assignment.academicYear), Breadcrumbs.Assignment(cmd.assignment))
+			.crumbsList(Breadcrumbs.assignment(cmd.assignment))
 
 }
 

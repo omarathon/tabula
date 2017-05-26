@@ -1,10 +1,10 @@
 <#escape x as x?html>
 	<#import "*/assignment_components.ftl" as components />
+	<#import "*/cm2_macros.ftl" as cm2 />
 	<#include "assign_marker_macros.ftl" />
-	<div class="deptheader">
-		<h1>Create a new assignment</h1>
-		<h4 class="with-related"><span class="muted">for</span> <@fmt.module_name module /></h4>
-	</div>
+
+	<@cm2.moduleHeader "Create a new assignment" module "for" />
+
 	<div class="fix-area">
 		<#assign actionUrl><@routes.cm2.assignmentmarkerstemplate assignment mode /></#assign>
 		<@f.form method="post" action=actionUrl enctype="multipart/form-data" cssClass="dirty-check" commandName="assignMarkersBySpreadsheetCommand">
