@@ -103,7 +103,7 @@ object Routes {
 				def table(assignment: Assignment): String = assignmentroot(assignment) + "/table"
 			}
 
-			private def markerroot(assignment: Assignment, marker: User) = assignmentroot(assignment) + s"/marker/${marker.getWarwickId}"
+			private def markerroot(assignment: Assignment, marker: User) = assignmentroot(assignment) + s"/marker/${marker.getUserId}"
 
 			object markerFeedback {
 				def apply(assignment: Assignment, marker: User): String = markerroot(assignment, marker)

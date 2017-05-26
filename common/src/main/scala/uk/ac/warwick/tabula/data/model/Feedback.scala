@@ -53,6 +53,7 @@ trait FeedbackAttachments {
 	def clearAttachments() {
 		for(attachment <- attachments.asScala){
 			attachment.feedback = null
+			attachment.markerFeedback = null
 		}
 		attachments.clear()
 	}
