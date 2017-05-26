@@ -45,6 +45,8 @@ class ScalaBeansWrapper extends DefaultObjectWrapper(Configuration.VERSION_2_3_2
 			case jcol: java.util.Collection[_] => superWrap(jcol)
 			case jmap: JMap[_, _] => superWrap(jmap)
 			case smap: scala.collection.SortedMap[_, _] => superWrap(JLinkedHashMap(smap.toSeq: _*))
+			case lmap: scala.collection.immutable.ListMap[_, _] => superWrap(JLinkedHashMap(lmap.toSeq: _*))
+			case lmap: scala.collection.mutable.ListMap[_, _] => superWrap(JLinkedHashMap(lmap.toSeq: _*))
 			case smap: scala.collection.Map[_, _] => superWrap(mapAsJavaMapConverter(smap).asJava)
 			case sseq: scala.Seq[_] => superWrap(seqAsJavaListConverter(sseq).asJava)
 			case scol: scala.Iterable[_] => superWrap(asJavaCollectionConverter(scol).asJavaCollection)

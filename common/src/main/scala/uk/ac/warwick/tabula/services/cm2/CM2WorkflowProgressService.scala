@@ -308,21 +308,21 @@ object CM2WorkflowStages {
 		val markingRelated = true
 	}
 
-	case class CM2MarkingWorkflowStage(stage: MarkingWorkflowStage) extends CM2WorkflowStage {
-		override def actionCode: String = s"workflow.cm2.${stage.name}.action"
+	case class CM2MarkingWorkflowStage(markingStage: MarkingWorkflowStage) extends CM2WorkflowStage {
+		override def actionCode: String = s"workflow.cm2.${markingStage.name}.action"
 		override def progress(assignment: Assignment)(coursework: WorkflowItems): StageProgress = {
 			val currentStages = coursework.enhancedFeedback.toSeq.flatMap(_.feedback.outstandingStages.asScala)
-			val workflowStage = CM2MarkingWorkflowStage(stage)
+			val workflowStage = CM2MarkingWorkflowStage(markingStage)
 
-			if (currentStages.isEmpty || currentStages.head.order < stage.order) {
+			if (currentStages.isEmpty || currentStages.head.order < markingStage.order) {
 				// Not released for marking yet or this is a future stage
-				StageProgress(workflowStage, started = false, messageCode = s"workflow.cm2.${stage.name}.incomplete")
-			} else if (currentStages.contains(stage)) {
+				StageProgress(workflowStage, started = false, messageCode = s"workflow.cm2.${markingStage.name}.incomplete")
+			} else if (currentStages.contains(markingStage)) {
 				// This is the current stage
 				StageProgress(
 					workflowStage,
 					started = true,
-					messageCode = s"workflow.cm2.${stage.name}.inProgress",
+					messageCode = s"workflow.cm2.${markingStage.name}.inProgress",
 					health = Warning,
 					completed = false
 				)
@@ -331,7 +331,7 @@ object CM2WorkflowStages {
 				StageProgress(
 					workflowStage,
 					started = true,
-					messageCode = s"workflow.cm2.${stage.name}.complete",
+					messageCode = s"workflow.cm2.${markingStage.name}.complete",
 					health = Good,
 					completed = true
 				)
@@ -339,7 +339,7 @@ object CM2WorkflowStages {
 		}
 
 		// previousStages isn't recursive, but we expect it to be here
-		override def preconditions: Seq[Seq[WorkflowStage]] = Seq(CM2ReleaseForMarking +: stage.previousStages.flatMap { s =>
+		override def preconditions: Seq[Seq[WorkflowStage]] = Seq(CM2ReleaseForMarking +: markingStage.previousStages.flatMap { s =>
 			val previousStage = CM2MarkingWorkflowStage(s)
 			previousStage.preconditions.flatten :+ previousStage
 		})
@@ -385,7 +385,7 @@ object CM2WorkflowStages {
 			coursework.enhancedFeedback.filterNot(_.feedback.isPlaceholder) match {
 				case Some(item) if item.feedback.released =>
 					StageProgress(ReleaseFeedback, started = true, messageCode = "workflow.ReleaseFeedback.released", health = Good, completed = true)
-				case Some(item) if item.feedback.hasAttachments || item.feedback.hasOnlineFeedback || item.feedback.hasMarkOrGrade =>
+				case Some(item) if item.feedback.hasContent =>
 					StageProgress(ReleaseFeedback, started = true, messageCode = "workflow.ReleaseFeedback.notReleased", health = Warning, completed = false)
 				case _ => StageProgress(ReleaseFeedback, started = false, messageCode = "workflow.ReleaseFeedback.notReleased")
 			}

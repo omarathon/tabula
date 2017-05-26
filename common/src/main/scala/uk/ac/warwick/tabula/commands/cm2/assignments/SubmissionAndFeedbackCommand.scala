@@ -40,8 +40,7 @@ object SubmissionAndFeedbackCommand {
 		hasPublishedFeedback: Boolean,
 		hasOriginalityReport: Boolean,
 		mustReleaseForMarking: Boolean,
-		workflowMarkers: Seq[String],
-		submissionFeedbackExists: Boolean
+		workflowMarkers: Seq[String]
 	)
 
 }
@@ -244,11 +243,7 @@ abstract class SubmissionAndFeedbackCommandInternal(val assignment: Assignment)
 		val hasPublishedFeedback = membersWithPublishedFeedback.nonEmpty
 
 		val stillToDownload = membersWithPublishedFeedback.filterNot(_.coursework.enhancedFeedback.exists(_.downloaded))
-		val submissionFeedbackExists = (unsubmitted ++ submitted).exists { studentInfo =>
-			val submissions = studentInfo.coursework.enhancedSubmission
-			val feedback = studentInfo.coursework.enhancedFeedback
-			submissions.isDefined || feedback.isDefined
-		}
+
 		val studentsFiltered = benchmarkTask("Do filtering") {
 			val filteredStudents: Seq[AssignmentSubmissionStudentInfo] = (unsubmitted ++ submitted).filter {
 				assignmentSubmissionStudentInfo => {
@@ -279,8 +274,7 @@ abstract class SubmissionAndFeedbackCommandInternal(val assignment: Assignment)
 			hasPublishedFeedback = hasPublishedFeedback,
 			hasOriginalityReport = hasOriginalityReport,
 			mustReleaseForMarking = assignment.mustReleaseForMarking,
-			workflowMarkers = workflowMarkers,
-			submissionFeedbackExists = submissionFeedbackExists
+			workflowMarkers = workflowMarkers
 		)
 	}
 }

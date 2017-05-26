@@ -22,7 +22,7 @@ abstract class AbstractAssignmentSubmissionsController extends AbstractAssignmen
 		Mav("cm2/admin/assignments/assignment_submissions_details",
 			"module" -> assignment.module,
 			"mode" -> mode)
-			.crumbs(Breadcrumbs.Department(assignment.module.adminDepartment, assignment.academicYear), Breadcrumbs.Assignment(assignment))
+			.crumbsList(Breadcrumbs.assignment(assignment))
 	}
 
 	def submit(cmd: ModifyAssignmentSubmissionsCommand, errors: Errors, path: String, mode: String): Mav = {

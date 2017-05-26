@@ -52,7 +52,7 @@ class AddAssignmentDetailsController extends AbstractAssignmentController
 			"reusableWorkflows" -> form.availableWorkflows,
 			"availableWorkflows" -> MarkingWorkflowType.values.sorted,
 			"canDeleteMarkers" -> true)
-			.crumbs(Breadcrumbs.Department(module.adminDepartment, form.academicYear))
+			.crumbsList(Breadcrumbs.module(module, form.academicYear, active = true))
 			.secondCrumbs(academicYearBreadcrumbs(academicYear)(Routes.admin.assignment.createAssignmentDetails(module, _)): _*)
 	}
 

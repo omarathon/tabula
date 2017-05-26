@@ -42,7 +42,7 @@ class TurnitinController extends CourseworkController with AutowiringTurnitinLti
 	@RequestMapping
 	def confirm(@PathVariable assignment: Assignment): Mav =
 		Mav("cm2/admin/assignments/turnitin/form")
-			.crumbs(Breadcrumbs.Department(assignment.module.adminDepartment, assignment.academicYear), Breadcrumbs.Assignment(assignment))
+			.crumbsList(Breadcrumbs.assignment(assignment))
 
 	@RequestMapping(method = Array(POST))
 	def submit(@Valid @ModelAttribute("command") command: SubmitToTurnitinCommand, errors: Errors, @PathVariable assignment: Assignment): Mav =
@@ -60,7 +60,7 @@ class TurnitinController extends CourseworkController with AutowiringTurnitinLti
 			Mav(new JSONView(assignmentStatus.toMap))
 		} else {
 			Mav("cm2/admin/assignments/turnitin/status", "status" -> assignmentStatus)
-				.crumbs(Breadcrumbs.Department(assignment.module.adminDepartment, assignment.academicYear), Breadcrumbs.Assignment(assignment))
+				.crumbsList(Breadcrumbs.assignment(assignment))
 		}
 	}
 

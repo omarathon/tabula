@@ -30,7 +30,7 @@ abstract class AbstractModuleHomeController
 	@RequestMapping(params=Array("!ajax"), headers=Array("!X-Requested-With"))
 	def home(@ModelAttribute("command") command: ModuleCommand, @PathVariable module: Module): Mav =
 		Mav("cm2/admin/home/module", "moduleInfo" -> command.apply(), "academicYear" -> command.academicYear)
-			.crumbs(Breadcrumbs.Department(module.adminDepartment, command.academicYear))
+			.crumbsList(Breadcrumbs.department(module.adminDepartment, Some(command.academicYear)))
 			.secondCrumbs(academicYearBreadcrumbs(command.academicYear)(Routes.admin.module(module, _)): _*)
 
 	@RequestMapping

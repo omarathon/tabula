@@ -188,7 +188,7 @@ class ListExtensionsForAssignmentController extends CourseworkController {
 			"module" -> cmd.assignment.module,
 			"assignment" -> cmd.assignment,
 			"maxDaysToDisplayAsProgressBar" -> Extension.MaxDaysToDisplayAsProgressBar)
-			.crumbs(Breadcrumbs.Department(cmd.assignment.module.adminDepartment, cmd.assignment.academicYear), Breadcrumbs.Assignment(cmd.assignment))
+			.crumbsList(Breadcrumbs.assignment(cmd.assignment))
 
 }
 

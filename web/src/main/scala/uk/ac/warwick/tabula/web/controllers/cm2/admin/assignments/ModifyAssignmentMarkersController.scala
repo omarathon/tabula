@@ -36,7 +36,7 @@ class ModifyAssignmentMarkersController extends AbstractAssignmentController {
 			"stages" -> workflow.allStages.groupBy(_.roleName).mapValues(_.map(_.name)),
 			"state" -> existingAllocations,
 			"mode" -> mode)
-			.crumbs(Breadcrumbs.Department(assignment.module.adminDepartment, assignment.academicYear), Breadcrumbs.Assignment(assignment))
+			.crumbsList(Breadcrumbs.assignment(assignment))
 	}
 
 	@RequestMapping(method = Array(GET, HEAD), value = Array("new/markers"))

@@ -7,12 +7,11 @@ import javax.validation.constraints.NotNull
 
 import org.hibernate.annotations.{BatchSize, Type}
 import org.joda.time.DateTime
-import uk.ac.warwick.tabula.{AcademicYear, JavaImports}
 import uk.ac.warwick.tabula.JavaImports._
 import uk.ac.warwick.tabula.data.model.forms.{FormattedHtml, SavedFormValue}
 import uk.ac.warwick.tabula.data.model.markingworkflow.{FinalStage, MarkingWorkflowStage}
 import uk.ac.warwick.tabula.permissions.PermissionsTarget
-import uk.ac.warwick.tabula.services.cm2.CM2WorkflowStages.CM2MarkingWorkflowStage
+import uk.ac.warwick.tabula.{AcademicYear, JavaImports}
 import uk.ac.warwick.userlookup.User
 
 import scala.collection.JavaConverters._
@@ -277,11 +276,16 @@ abstract class Feedback extends GeneratedId with FeedbackAttachments with Permis
 	@BatchSize(size = 200)
 	var markerFeedback: JList[MarkerFeedback] = JArrayList()
 
-	def feedbackMarkersByAllocationName: Map[String, User] =   {
+	def feedbackByStage: Map[MarkingWorkflowStage, MarkerFeedback] =
+		markerFeedback.asScala.groupBy(_.stage).mapValues(_.head)
+
+	def feedbackMarkers: Map[MarkingWorkflowStage, User] =
+		feedbackByStage.mapValues(_.marker)
+
+	def feedbackMarkersByAllocationName: Map[String, User] =
 		markerFeedback.asScala.groupBy(f => f.stage.allocationName).toSeq
 			.sortBy {	case(_, fList) => fList.head.stage.order }
 			.map { case (s, fList) => s -> fList.head.marker }.toMap
-	}
 
 	def feedbackMarkerByAllocationName(allocationName: String): Option[User] =
 		feedbackMarkersByAllocationName.get(allocationName)

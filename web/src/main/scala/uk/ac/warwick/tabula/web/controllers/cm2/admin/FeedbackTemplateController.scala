@@ -38,7 +38,7 @@ class FeedbackTemplateController extends CourseworkController
 	@RequestMapping
 	def list(@PathVariable department: Department): Mav =
 		Mav("cm2/admin/feedbackforms/manage-feedback-templates")
-			.crumbs(Breadcrumbs.Department(department))
+			.crumbsList(Breadcrumbs.department(department, None))
 
 	@RequestMapping(method = Array(POST))
 	def saveBulk(@Valid @ModelAttribute("bulkFeedbackTemplateCommand") cmd: BulkFeedbackTemplateCommand, errors: Errors, @PathVariable department: Department): Mav =

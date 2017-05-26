@@ -69,7 +69,7 @@ abstract class AbstractAddSitsAssignmentsController extends CourseworkController
 	// The shared Mav for most of the request mappings
 	def getMav(department: Department, academicYear: AcademicYear): Mav =
 		Mav("cm2/admin/assignments/batch_new_sits_select", "academicYear" -> academicYear)
-			.crumbs(Breadcrumbs.Department(department, academicYear))
+			.crumbsList(Breadcrumbs.department(department, Some(academicYear)))
 			.secondCrumbs(academicYearBreadcrumbs(academicYear)(year => Routes.admin.setupSitsAssignments(department, year)): _*)
 
 	// Reloads page 1 with a POST, to show any updated information if necessary.
