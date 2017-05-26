@@ -50,7 +50,7 @@ class CopyModuleAssignmentsController extends AbstractCopyAssignmentsController 
 	def showForm(@PathVariable module: Module, @ModelAttribute("copyAssignmentsCommand") cmd: CopyAssignmentsCommand.Command): Mav =
 		Mav("cm2/admin/modules/copy_assignments",
 			"title" -> module.name,
-			"cancel" -> Routes.admin.module(module, cmd.academicYear),
+			"cancel" -> Routes.admin.moduleWithinDepartment(module, cmd.academicYear),
 			"department" -> module.adminDepartment,
 			"map" -> moduleAssignmentMap(cmd.modules))
 			.crumbsList(Breadcrumbs.module(module, cmd.academicYear))
