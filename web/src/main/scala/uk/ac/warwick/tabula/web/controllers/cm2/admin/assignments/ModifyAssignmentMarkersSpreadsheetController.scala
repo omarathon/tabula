@@ -49,14 +49,14 @@ class ModifyAssignmentMarkersSpreadsheetController extends AbstractAssignmentCon
 
 	@RequestMapping(method = Array(GET, HEAD), value=Array("new/markers/template"))
 	def createForm(
-		@PathVariable("assignment") assignment: Assignment,
+		@PathVariable assignment: Assignment,
 		@ModelAttribute("assignMarkersBySpreadsheetCommand") assignMarkersBySpreadsheetCommand: AssignMarkersCommand,
 		errors: Errors
 	): Mav = showSpreadsheetForm(assignment, assignMarkersBySpreadsheetCommand, errors, createMode)
 
 	@RequestMapping(method = Array(GET, HEAD),  value=Array("edit/markers/template"))
 	def editForm(
-		@PathVariable("assignment") assignment: Assignment,
+		@PathVariable assignment: Assignment,
 		@ModelAttribute("assignMarkersBySpreadsheetCommand") assignMarkersBySpreadsheetCommand: AssignMarkersCommand,
 		errors: Errors
 	): Mav = showSpreadsheetForm(assignment, assignMarkersBySpreadsheetCommand, errors, editMode)
@@ -89,30 +89,30 @@ class ModifyAssignmentMarkersSpreadsheetController extends AbstractAssignmentCon
 
 	@RequestMapping(method = Array(POST), value=Array("new/markers/template"), params = Array("preview"))
 	def createPreview(
-		@PathVariable("assignment") assignment: Assignment,
+		@PathVariable assignment: Assignment,
 		@Valid @ModelAttribute("assignMarkersBySpreadsheetCommand") assignMarkersBySpreadsheetCommand: AssignMarkersCommand,
 		errors: Errors
 	): Mav = previewSpreadsheet(assignment, assignMarkersBySpreadsheetCommand, errors, createMode)
 
 	@RequestMapping(method = Array(POST), value=Array("edit/markers/template"), params = Array("preview"))
 	def editPreview(
-		@PathVariable("assignment") assignment: Assignment,
+		@PathVariable assignment: Assignment,
 		@Valid @ModelAttribute("assignMarkersBySpreadsheetCommand") assignMarkersBySpreadsheetCommand: AssignMarkersCommand,
 		errors: Errors
 	): Mav = previewSpreadsheet(assignment, assignMarkersBySpreadsheetCommand, errors, editMode)
 
 	@RequestMapping(method = Array(POST), params = Array(ManageAssignmentMappingParameters.createAndAddMarkers), value = Array("*/markers/template"))
 	def saveAndExit(
-		@PathVariable("assignment") assignment: Assignment,
+		@PathVariable assignment: Assignment,
 		@Valid @ModelAttribute("assignMarkersBySpreadsheetCommand") assignMarkersBySpreadsheetCommand: AssignMarkersCommand
 	): Mav =  {
 		assignMarkersBySpreadsheetCommand.apply()
-		RedirectForce(Routes.home)
+		Redirect(Routes.admin.moduleWithinDepartment(assignment.module, assignment.academicYear))
 	}
 
 	@RequestMapping(method = Array(POST), params = Array(ManageAssignmentMappingParameters.createAndAddSubmissions), value = Array("new/markers/template"))
 	def submitAndAddSubmissionsCreate(
-		@PathVariable("assignment") assignment: Assignment,
+		@PathVariable assignment: Assignment,
 		@Valid @ModelAttribute("assignMarkersBySpreadsheetCommand") assignMarkersBySpreadsheetCommand: AssignMarkersCommand
 	): Mav = {
 		val assignment = assignMarkersBySpreadsheetCommand.apply()
@@ -121,7 +121,7 @@ class ModifyAssignmentMarkersSpreadsheetController extends AbstractAssignmentCon
 
 	@RequestMapping(method = Array(POST), params = Array(ManageAssignmentMappingParameters.createAndAddSubmissions), value = Array("edit/markers/template"))
 	def submitAndAddSubmissionsEdit(
-		@PathVariable("assignment") assignment: Assignment,
+		@PathVariable assignment: Assignment,
 		@Valid @ModelAttribute("assignMarkersBySpreadsheetCommand") assignMarkersBySpreadsheetCommand: AssignMarkersCommand
 	): Mav = {
 		val assignment = assignMarkersBySpreadsheetCommand.apply()

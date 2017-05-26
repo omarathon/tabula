@@ -49,18 +49,18 @@ class EditAssignmentDetailsController extends AbstractAssignmentController {
 
 	@RequestMapping(method = Array(POST), params = Array(ManageAssignmentMappingParameters.editAndAddFeedback, "action!=refresh", "action!=update, action=submit"))
 	def submitAndAddFeedback(@Valid @ModelAttribute("command") cmd: EditAssignmentDetailsCommand, errors: Errors, @PathVariable assignment: Assignment): Mav =
-		submit(cmd, errors, assignment, Routes.admin.assignment.createOrEditFeedback(assignment, editMode))
+		submit(cmd, errors, assignment, RedirectForce(Routes.admin.assignment.createOrEditFeedback(assignment, editMode)))
 
 	@RequestMapping(method = Array(POST), params = Array(ManageAssignmentMappingParameters.editAndEditDetails, "action!=refresh", "action!=update"))
 	def saveAndExit(@ModelAttribute("command") cmd: EditAssignmentDetailsCommand, errors: Errors, @PathVariable assignment: Assignment): Mav = {
-		submit(cmd, errors, assignment, Routes.home)
+		submit(cmd, errors, assignment, Redirect(Routes.admin.moduleWithinDepartment(assignment.module, assignment.academicYear)))
 	}
 
-	private def submit(cmd: EditAssignmentDetailsCommand, errors: Errors, assignment: Assignment, path: String) = {
+	private def submit(cmd: EditAssignmentDetailsCommand, errors: Errors, assignment: Assignment, mav: Mav) = {
 		if (errors.hasErrors) showForm(cmd, assignment)
 		else {
 			cmd.apply()
-			RedirectForce(path)
+			mav
 		}
 	}
 }

@@ -66,11 +66,11 @@ class AddAssignmentDetailsController extends AbstractAssignmentController
 	}
 
 	@RequestMapping(method = Array(POST), params = Array(ManageAssignmentMappingParameters.createAndAddDetails, "action!=refresh", "action!=update"))
-	def saveAndExit(@Valid @ModelAttribute("command") cmd: CreateAssignmentDetailsCommand, errors: Errors): Mav = {
+	def saveAndExit(@Valid @ModelAttribute("command") cmd: CreateAssignmentDetailsCommand, errors: Errors, @PathVariable module: Module, @PathVariable academicYear: AcademicYear): Mav = {
 		if (errors.hasErrors) showForm(cmd)
 		else {
 			cmd.apply()
-			RedirectForce(Routes.home)
+			Redirect(Routes.admin.moduleWithinDepartment(module, academicYear))
 		}
 	}
 

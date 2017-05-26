@@ -41,22 +41,22 @@ class ModifyAssignmentMarkersSmallGroupsController extends AbstractAssignmentCon
 
 	@RequestMapping(method = Array(GET, HEAD), value = Array("new/markers/smallgroups"))
 	def createForm(
-		@PathVariable("assignment") assignment: Assignment,
+		@PathVariable assignment: Assignment,
 		@ModelAttribute("assignMarkersCommand") assignMarkersCmd: AssignMarkersCommand,
 		@ModelAttribute("smallGroupCommand") smallGroupCommand: SmallGroupCommand
 	): Mav = form(assignment, assignMarkersCmd, smallGroupCommand, createMode)
 
 	@RequestMapping(method = Array(GET, HEAD), value = Array("edit/markers/smallgroups"))
 	def editForm(
-		@PathVariable("assignment") assignment: Assignment,
+		@PathVariable assignment: Assignment,
 		@ModelAttribute("assignMarkersCommand") assignMarkersCmd: AssignMarkersCommand,
 		@ModelAttribute("smallGroupCommand") smallGroupCommand: SmallGroupCommand
 	): Mav = form(assignment, assignMarkersCmd, smallGroupCommand, editMode)
 
 	@RequestMapping(method = Array(POST), params = Array(ManageAssignmentMappingParameters.createAndAddMarkers), value = Array("*/markers/smallgroups"))
-	def saveAndExit(@ModelAttribute("assignMarkersCommand") assignMarkersCmd: AssignMarkersCommand): Mav =  {
+	def saveAndExit(@ModelAttribute("assignMarkersCommand") assignMarkersCmd: AssignMarkersCommand, @PathVariable assignment: Assignment): Mav =  {
 		assignMarkersCmd.apply()
-		RedirectForce(Routes.home)
+		Redirect(Routes.admin.moduleWithinDepartment(assignment.module, assignment.academicYear))
 	}
 
 	@RequestMapping(method = Array(POST), params = Array(ManageAssignmentMappingParameters.createAndAddSubmissions), value = Array("new/markers/smallgroups"))
