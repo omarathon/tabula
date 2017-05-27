@@ -14,7 +14,7 @@ import uk.ac.warwick.tabula.roles.ModuleManagerRoleDefinition
 import uk.ac.warwick.tabula.services._
 import uk.ac.warwick.tabula.services.permissions.PermissionsService
 import uk.ac.warwick.tabula.web.views.{FreemarkerRendering, ScalaFreemarkerConfiguration}
-import uk.ac.warwick.tabula.{Fixtures, MockUserLookup, Mockito, TestBase}
+import uk.ac.warwick.tabula._
 import uk.ac.warwick.userlookup.AnonymousUser
 import uk.ac.warwick.tabula.JavaImports._
 
@@ -54,6 +54,7 @@ class FeedbackDueNotificationTest extends TestBase with Mockito with FreemarkerR
 		applicationContext.getBeansOfType(classOf[PermissionsService]) returns JMap("permissionsService" -> permissionsService)
 		applicationContext.getBeansOfType(classOf[NotificationService]) returns JMap("notificationService" -> smartMock[NotificationService])
 		applicationContext.getBeansOfType(classOf[ModuleAndDepartmentService]) returns JMap("moduleAndDepartmentService" -> moduleAndDepartmentService)
+		applicationContext.getBeansOfType(classOf[Features]) returns JMap("features" -> smartMock[Features])
 
 		SpringConfigurer.applicationContext = applicationContext
 	}
