@@ -36,7 +36,7 @@ class ExamFeedbackAdjustmentsListController extends ExamsController {
 			"noFeedbackStudentInfo" -> noFeedbackStudentInfo,
 			"isGradeValidation" -> exam.module.adminDepartment.assignmentGradeValidation
 		).crumbs(
-			Breadcrumbs.Exams.Home,
+			Breadcrumbs.Exams.Home(exam.academicYear),
 			Breadcrumbs.Exams.Department(exam.module.adminDepartment, exam.academicYear),
 			Breadcrumbs.Exams.Module(exam.module, exam.academicYear)
 		)

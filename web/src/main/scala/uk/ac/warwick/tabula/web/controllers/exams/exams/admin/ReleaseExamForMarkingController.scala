@@ -24,7 +24,7 @@ class ReleaseExamForMarkingController extends ExamsController {
 	@RequestMapping(method = Array(GET))
 	def form(@PathVariable module: Module, @PathVariable exam: Exam): Mav = {
 		Mav("exams/exams/admin/release").crumbs(
-			Breadcrumbs.Exams.Home,
+			Breadcrumbs.Exams.Home(exam.academicYear),
 			Breadcrumbs.Exams.Department(module.adminDepartment, exam.academicYear),
 			Breadcrumbs.Exams.Module(module, exam.academicYear)
 		)

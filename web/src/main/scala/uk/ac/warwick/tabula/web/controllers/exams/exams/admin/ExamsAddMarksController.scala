@@ -32,7 +32,7 @@ class ExamsAddMarksController extends ExamsController {
 
 	// Add the common breadcrumbs to the model.
 	def crumbed(mav: Mav, module: Module, academicYear: AcademicYear): Mav = mav.crumbs(
-		Breadcrumbs.Exams.Home,
+		Breadcrumbs.Exams.Home(academicYear),
 		Breadcrumbs.Exams.Department(module.adminDepartment, academicYear),
 		Breadcrumbs.Exams.Module(module, academicYear)
 	)
