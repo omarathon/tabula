@@ -25,12 +25,12 @@ class OldAddBatchFeedbackController extends OldCourseworkController {
 	def crumbed(mav: Mav, module: Module): Mav = mav.crumbs(Breadcrumbs.Department(module.adminDepartment), Breadcrumbs.Module(module))
 
 	@RequestMapping(method = Array(HEAD, GET))
-	def uploadZipForm(@ModelAttribute cmd: OldAddFeedbackCommand): Mav = {
+	def uploadZipForm(@ModelAttribute("addFeedbackCommand") cmd: OldAddFeedbackCommand): Mav = {
 		crumbed(Mav("coursework/admin/assignments/feedback/zipform"), cmd.module)
 	}
 
 	@RequestMapping(method = Array(POST), params = Array("!confirm"))
-	def confirmBatchUpload(@ModelAttribute cmd: OldAddFeedbackCommand, errors: Errors): Mav = {
+	def confirmBatchUpload(@ModelAttribute("addFeedbackCommand") cmd: OldAddFeedbackCommand, errors: Errors): Mav = {
 		cmd.preExtractValidation(errors)
 		if (errors.hasErrors) {
 			uploadZipForm(cmd)
@@ -41,7 +41,7 @@ class OldAddBatchFeedbackController extends OldCourseworkController {
 	}
 
 	@RequestMapping(method = Array(POST), params = Array("confirm=true"))
-	def doUpload(@ModelAttribute cmd: OldAddFeedbackCommand, errors: Errors): Mav = {
+	def doUpload(@ModelAttribute("addFeedbackCommand") cmd: OldAddFeedbackCommand, errors: Errors): Mav = {
 		cmd.preExtractValidation(errors)
 		cmd.postExtractValidation(errors)
 		if (errors.hasErrors) {
