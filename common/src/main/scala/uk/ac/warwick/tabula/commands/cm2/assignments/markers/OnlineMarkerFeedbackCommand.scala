@@ -52,7 +52,7 @@ class OnlineMarkerFeedbackCommandInternal(
 		)
 
 		copyTo(markerFeedback)
-		markerFeedback.updatedOn = DateTime.now // feedback hasn't just been approved
+		markerFeedback.updatedOn = DateTime.now
 		feedbackService.save(markerFeedback)
 		markerFeedback
 	}

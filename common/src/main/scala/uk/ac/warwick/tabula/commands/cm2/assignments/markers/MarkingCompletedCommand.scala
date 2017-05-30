@@ -34,7 +34,7 @@ object MarkingCompletedCommand {
 class MarkingCompletedCommandInternal(val assignment: Assignment, val marker: User, val submitter: CurrentUser, val stage: MarkingWorkflowStage)
 	extends CommandInternal[Seq[AssignmentFeedback]] with MarkingCompletedState with ReleasedState with MarkingCompletedValidation {
 
-	this: CM2MarkingWorkflowServiceComponent with FinaliseFeedbackComponent with PopulateMarkerFeedbackComponent =>
+	self: CM2MarkingWorkflowServiceComponent with FinaliseFeedbackComponent with PopulateMarkerFeedbackComponent =>
 
 	def applyInternal(): Seq[AssignmentFeedback] = transactional() {
 
@@ -43,7 +43,7 @@ class MarkingCompletedCommandInternal(val assignment: Assignment, val marker: Us
 
 		val toPopulate = newReleasedFeedback.asScala.filter(_.stage.populateWithPreviousFeedback)
 		if (toPopulate.nonEmpty) {
-			populateMarkerFeedback(assignment, toPopulate)
+			populateMarkerFeedback(assignment, toPopulate)OnlineMarkerFeedbackCommand
 		}
 
 		// finalise any feedback that has finished the workflow
