@@ -41,6 +41,7 @@ class EditAssignmentDetailsController extends AbstractAssignmentController {
 			"reusableWorkflows" -> cmd.availableWorkflows,
 			"availableWorkflows" -> MarkingWorkflowType.values.sorted,
 			"workflow" -> cmd.workflow,
+			"canEditWorkflowType" -> !assignment.isReleasedForMarking,
 			"canDeleteMarkers" -> cmd.workflow.exists(_.canDeleteMarkers),
 			"canDeleteAssignment" -> canDeleteAssignment
 		)
