@@ -22,7 +22,7 @@ object ReturnToMarkerCommand {
 		with ReturnToMarkerValidation
 		with ReturnToMarkerPermissions
 		with ReturnToMarkerDescription
-		with FeedbackReleasedNotifier
+		with ReturnToMarkerNotifier
 		with AutowiringCM2MarkingWorkflowServiceComponent
 }
 
