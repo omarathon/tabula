@@ -79,7 +79,7 @@
 										<#local incomplete = feedback.notReleasedToMarkers || !feedback.isMarkedByStage(markingStage) />
 										<div role="tabpanel" class="tab-pane" id="${identifier}-${markingStage.name}">
 											<#local markerFeedback = mapGet(feedback.feedbackByStage, markingStage) />
-												<@components.marker_feedback_summary markerFeedback markingStage />
+											<@components.marker_feedback_summary markerFeedback markingStage />
 										</div>
 									</#list>
 								</#if>

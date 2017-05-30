@@ -1,10 +1,6 @@
 <#escape x as x?html>
-
-	<div class="deptheader">
-		<h1>Submit feedback</h1>
-		<h4 class="with-related"><span class="muted">for</span> ${assignment.name}</h4>
-	</div>
-
+	<#import "*/cm2_macros.ftl" as cm2 />
+	<@cm2.assignmentHeader "Submit feedback" assignment "for" />
 	<#assign commandName="addFeedbackCommand" />
 	<@spring.bind path=commandName>
 		<#assign hasErrors=status.errors.allErrors?size gt 0 />
