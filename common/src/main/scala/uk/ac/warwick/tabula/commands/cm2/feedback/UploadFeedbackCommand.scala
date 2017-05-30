@@ -11,7 +11,7 @@ import uk.ac.warwick.spring.Wire
 import uk.ac.warwick.tabula.UniversityId
 import uk.ac.warwick.tabula.commands.{Command, Description, UploadedFile}
 import uk.ac.warwick.tabula.data.Transactions._
-import uk.ac.warwick.tabula.data.model.{Assignment, FileAttachment, Module}
+import uk.ac.warwick.tabula.data.model.{Assignment, FileAttachment}
 import uk.ac.warwick.tabula.data.{Daoisms, FileDao}
 import uk.ac.warwick.tabula.helpers._
 import uk.ac.warwick.tabula.services._
@@ -41,7 +41,7 @@ class FeedbackItem {
 		new AttachmentItem(f.name, duplicate, ignore)
 	})
 
-	def this(uniNumber:String, student: User) = {
+	def this(uniNumber: String, student: User) = {
 		this()
 		this.uniNumber = uniNumber
 		this.student = Option(student).filter(_.isFoundUser)
@@ -63,10 +63,10 @@ class ExtractFeedbackZip(cmd: UploadFeedbackCommand[_]) extends Command[Unit] {
 }
 
 /**
- * Command which adds feedback for an assignment.
- * It either takes a single uniNumber and file, or it takes a
- * zip of files with uni numbers embedded in their path.
- */
+	* Command which adds feedback for an assignment.
+	* It either takes a single uniNumber and file, or it takes a
+	* zip of files with uni numbers embedded in their path.
+	*/
 abstract class UploadFeedbackCommand[A](val assignment: Assignment, val marker: User)
 	extends Command[A] with Daoisms with Logging with BindListener {
 
@@ -126,7 +126,7 @@ abstract class UploadFeedbackCommand[A](val assignment: Assignment, val marker: 
 		val file = item.file
 
 		if (file.isMissing) errors.rejectValue("file", "file.missing")
-		for((f, i) <- file.attached.asScala.zipWithIndex){
+		for ((f, i) <- file.attached.asScala.zipWithIndex) {
 			if (f.actualDataLength == 0) {
 				errors.rejectValue("file.attached[" + i + "]", "file.empty")
 			}
@@ -171,10 +171,14 @@ abstract class UploadFeedbackCommand[A](val assignment: Assignment, val marker: 
 
 		for ((filename, file) <- bits) {
 			// match uni numbers found in file path
-			val allNumbers = uniNumberPattern.findAllIn(filename).matchData.map { _.subgroups(0) }.toList
+			val allNumbers = uniNumberPattern.findAllIn(filename).matchData.map {
+				_.subgroups(0)
+			}.toList
 
 			// ignore any numbers longer than 7 characters.
-			val numbers = allNumbers.filter { _.length == 7 }
+			val numbers = allNumbers.filter {
+				_.length == 7
+			}
 
 			if (numbers.isEmpty) {
 				// no numbers at all.
@@ -188,11 +192,13 @@ abstract class UploadFeedbackCommand[A](val assignment: Assignment, val marker: 
 			}
 
 			// match potential module codes found in file path
-			val allModuleCodes = moduleCodePattern.findAllIn(filename).matchData.map { _.subgroups(0)}.toList
+			val allModuleCodes = moduleCodePattern.findAllIn(filename).matchData.map {
+				_.subgroups(0)
+			}.toList
 
-			if(allModuleCodes.nonEmpty){
+			if (allModuleCodes.nonEmpty) {
 				// the potential module code doesn't match this assignment's module code
-				if (!allModuleCodes.distinct.head.equals(assignment.module.code)){
+				if (!allModuleCodes.distinct.head.equals(assignment.module.code)) {
 					moduleMismatchFiles.add(new ProblemFile(filename, file))
 				}
 			}

@@ -14,7 +14,7 @@ import uk.ac.warwick.tabula.web.controllers.cm2.CourseworkController
 @Profile(Array("cm2Enabled")) @Controller
 @RequestMapping(value=Array("/${cm2.prefix}/admin/assignments/{assignment}/feedback/batch"))
 class AddBatchFeedbackController extends CourseworkController {
-	@ModelAttribute("addFeedbackCommand")
+	@ModelAttribute
 	def command(@PathVariable assignment: Assignment, user: CurrentUser) =
 		new AddFeedbackCommand(mandatory(assignment), user.apparentUser, user)
 

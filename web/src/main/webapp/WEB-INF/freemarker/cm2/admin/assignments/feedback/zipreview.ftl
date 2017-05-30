@@ -39,109 +39,108 @@
 		<#if hasGlobalErrors>
 			<div class="alert alert-danger"><@f.errors path="" cssClass="error"/></div>
 		<#else>
-		<#if addFeedbackCommand.unrecognisedFiles?size gt 0>
-			<div class="alert alert-info">
-				<div>I didn't understand some of the files uploaded, and these will be ignored:</div>
-				<ul class="file-list">
-					<#list addFeedbackCommand.unrecognisedFiles as unrecognisedFile>
-						<li>
-							<@f.hidden path="unrecognisedFiles[${unrecognisedFile_index}].path" />
-							<@f.hidden path="unrecognisedFiles[${unrecognisedFile_index}].file" />
-							${unrecognisedFile.path}
-						</li>
-					</#list>
-				</ul>
-			</div>
-		</#if>
-		<#if addFeedbackCommand.moduleMismatchFiles?size gt 0>
-			<div class="invalid-files alert-block alert-info">
-				<div>There were some files which, from their names, look as if they may belong to another module. Please check these before confirming.</div>
-				<ul class="file-list">
-					<#list addFeedbackCommand.moduleMismatchFiles as moduleMismatchFile>
-						<li>
-							<@f.hidden path="moduleMismatchFiles[${moduleMismatchFile_index}].path" />
-							<@f.hidden path="moduleMismatchFiles[${moduleMismatchFile_index}].file" />
-							${moduleMismatchFile.path}
-						</li>
-					</#list>
-				</ul>
-			</div>
-		</#if>
-
-		<#if addFeedbackCommand.invalidFiles?size gt 0>
-		<div class="alert alert-block alert-info">
-		<div>There were some files with problem names. You'll need to fix these and then try uploading again.</div>
-			<ul class="file-list">
-				<#list addFeedbackCommand.invalidFiles as invalidFile>
-					<li>
-						<@f.hidden path="invalidFiles[${invalidFile_index}].path" />
-						<@f.hidden path="invalidFiles[${invalidFile_index}].file" />
-						${invalidFile.path}
-					</li>
-				</#list>
-			</ul>
-		</div>
-		</#if>
-
-		<@spring.bind path="items">
-		<#assign itemList=status.actualValue />
-		<#if itemList?size gt 0>
-			<table class="table table-striped">
-				<tr>
-					<th>University ID</th>
-					<th>Files</th>
-				</tr>
-				<#list itemList as item>
-					<tr>
-						<@spring.nestedPath path="items[${item_index}]">
-						<@f.hidden path="uniNumber" />
-						<td>
-							<@spring.bind path="uniNumber">
-								${status.value}
-							</@spring.bind>
-							<@f.errors path="uniNumber" cssClass="error" />
-							<#-- If there is nothing to upload hide these errors -->
-							<#if item.modified>
-								<#if item.submissionExists>
-									<span class="warning">Feedback already exists for this user. New files will be added to the existing ones</span>
-								</#if>
-								<#if item.published>
-									<span class="warning">Feedback for this student has already been published. They will be notified that their feedback has changed.</span>
-								</#if>
-							</#if>
-						</td>
-					<#noescape>
-					<@spring.bind path="file.attached" htmlEscape=false>
-						<td>
-							<#-- FIXME should be able to spring:bind to a list, not have to manually specify it like this -->
-							<ul class="file-list">
-								<#list addFeedbackCommand.items[item_index].listAttachments as attached>
-									<li>
-										<@f.hidden path="file.attached[${attached_index}]" />
-										${attached.name}
-										<@f.errors path="file.attached[${attached_index}]" cssClass="error" />
-										<#if attached.duplicate>
-											<span class="alert-warning">
-												A feedback file with this name already exists for this student. It will be overwritten.
-											</span>
-										</#if>
-										<#if attached.ignore>
-											<span class="alert-warning">
-												This feedback file has already been uploaded. It will be ignored.
-											</span>
-										</#if>
-									</li>
-								</#list>
-							</ul>
-						</td>
-					</@spring.bind>
-					</#noescape>
-				</@spring.nestedPath>
-				</tr>
-			</#list>
+			<#if addFeedbackCommand.unrecognisedFiles?size gt 0>
+				<div class="alert alert-info">
+					<div>I didn't understand some of the files uploaded, and these will be ignored:</div>
+					<ul class="file-list">
+						<#list addFeedbackCommand.unrecognisedFiles as unrecognisedFile>
+							<li>
+								<@f.hidden path="unrecognisedFiles[${unrecognisedFile_index}].path" />
+								<@f.hidden path="unrecognisedFiles[${unrecognisedFile_index}].file" />
+								${unrecognisedFile.path}
+							</li>
+						</#list>
+					</ul>
+				</div>
 			</#if>
+			<#if addFeedbackCommand.moduleMismatchFiles?size gt 0>
+				<div class="invalid-files alert-block alert-info">
+					<div>There were some files which, from their names, look as if they may belong to another module. Please check these before confirming.</div>
+					<ul class="file-list">
+						<#list addFeedbackCommand.moduleMismatchFiles as moduleMismatchFile>
+							<li>
+								<@f.hidden path="moduleMismatchFiles[${moduleMismatchFile_index}].path" />
+								<@f.hidden path="moduleMismatchFiles[${moduleMismatchFile_index}].file" />
+								${moduleMismatchFile.path}
+							</li>
+						</#list>
+					</ul>
+				</div>
+			</#if>
+
+			<#if addFeedbackCommand.invalidFiles?size gt 0>
+				<div class="alert alert-block alert-info">
+				<div>There were some files with problem names. You'll need to fix these and then try uploading again.</div>
+					<ul class="file-list">
+						<#list addFeedbackCommand.invalidFiles as invalidFile>
+							<li>
+								<@f.hidden path="invalidFiles[${invalidFile_index}].path" />
+								<@f.hidden path="invalidFiles[${invalidFile_index}].file" />
+								${invalidFile.path}
+							</li>
+						</#list>
+					</ul>
+				</div>
+			</#if>
+
+			<@spring.bind path="items">
+				<#assign itemList=status.actualValue />
+				<#if itemList?size gt 0>
+					<table class="table table-striped">
+						<tr>
+							<th>University ID</th>
+							<th>Files</th>
+						</tr>
+						<#list itemList as item>
+							<tr>
+								<@spring.nestedPath path="items[${item_index}]">
+									<@f.hidden path="uniNumber" />
+									<td>
+										<@spring.bind path="uniNumber">
+											${status.value}
+										</@spring.bind>
+										<@f.errors path="uniNumber" cssClass="error" />
+										<#-- If there is nothing to upload hide these errors -->
+										<#if item.modified>
+											<#if item.submissionExists>
+												<span class="warning">Feedback already exists for this user. New files will be added to the existing ones</span>
+											</#if>
+											<#if item.published>
+												<span class="warning">Feedback for this student has already been published. They will be notified that their feedback has changed.</span>
+											</#if>
+										</#if>
+									</td>
+									<#noescape>
+										<@spring.bind path="file.attached" htmlEscape=false>
+											<td>
+												<ul class="file-list">
+													<#list addFeedbackCommand.items[item_index].listAttachments as attached>
+														<li>
+															<@f.hidden path="file.attached[${attached_index}]" />
+															${attached.name}
+															<@f.errors path="file.attached[${attached_index}]" cssClass="error" />
+															<#if attached.duplicate>
+																<span class="alert-danger">
+																	A feedback file with this name already exists for this student. It will be overwritten.
+																</span>
+															</#if>
+															<#if attached.ignore>
+																<span class="alert-info">
+																	This feedback file has already been uploaded. It will be ignored.
+																</span>
+															</#if>
+														</li>
+													</#list>
+												</ul>
+											</td>
+										</@spring.bind>
+									</#noescape>
+								</@spring.nestedPath>
+							</tr>
+						</#list>
+					</table>
+				</#if>
 			</@spring.bind>
-			</table>
 		</#if>
 
 		<div class="submit-buttons form-actions">
