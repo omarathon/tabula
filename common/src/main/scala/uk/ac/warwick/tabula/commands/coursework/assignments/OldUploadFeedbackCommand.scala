@@ -23,7 +23,7 @@ import scala.collection.JavaConverters._
 import scala.collection.mutable
 import scala.util.matching.Regex
 
-class FeedbackItem {
+class OldFeedbackItem {
 	var uniNumber: String = _
 	var student: Option[User] = _
 	var file: UploadedFile = new UploadedFile
@@ -56,7 +56,7 @@ case class ProblemFile(var path: String, var file: FileAttachment) {
 }
 
 // Purely to generate an audit log event
-class ExtractFeedbackZip(cmd: UploadFeedbackCommand[_]) extends Command[Unit] {
+class OldExtractFeedbackZip(cmd: OldUploadFeedbackCommand[_]) extends Command[Unit] {
 	def applyInternal() {}
 	def describe(d: Description): Unit = d.assignment(cmd.assignment).properties(
 		"archive" -> cmd.archive.getOriginalFilename)
@@ -67,7 +67,7 @@ class ExtractFeedbackZip(cmd: UploadFeedbackCommand[_]) extends Command[Unit] {
  * It either takes a single uniNumber and file, or it takes a
  * zip of files with uni numbers embedded in their path.
  */
-abstract class UploadFeedbackCommand[A](val module: Module, val assignment: Assignment, val marker: User)
+abstract class OldUploadFeedbackCommand[A](val module: Module, val assignment: Assignment, val marker: User)
 	extends Command[A] with Daoisms with Logging with BindListener {
 
 	// Permissions checks delegated to implementing classes FOR THE MOMENT
@@ -88,7 +88,7 @@ abstract class UploadFeedbackCommand[A](val module: Module, val assignment: Assi
 
 	/* for multiple upload */
 	// use lazy list with factory as spring doesn't know how to dynamically create items
-	var items: JList[FeedbackItem] = LazyLists.create[FeedbackItem]()
+	var items: JList[OldFeedbackItem] = LazyLists.create[OldFeedbackItem]()
 	var unrecognisedFiles: JList[ProblemFile] = LazyLists.create[ProblemFile]()
 	var moduleMismatchFiles: JList[ProblemFile] = LazyLists.create[ProblemFile]()
 	var invalidFiles: JList[ProblemFile] = LazyLists.create[ProblemFile]()
@@ -122,7 +122,7 @@ abstract class UploadFeedbackCommand[A](val module: Module, val assignment: Assi
 		}
 	}
 
-	private def validateUploadedFile(item: FeedbackItem, errors: Errors) {
+	private def validateUploadedFile(item: OldFeedbackItem, errors: Errors) {
 		val file = item.file
 
 		if (file.isMissing) errors.rejectValue("file", "file.missing")
@@ -153,20 +153,20 @@ abstract class UploadFeedbackCommand[A](val module: Module, val assignment: Assi
 
 	}
 
-	def validateExisting(item: FeedbackItem, errors: Errors)
+	def validateExisting(item: OldFeedbackItem, errors: Errors)
 
 	private def processFiles(bits: Seq[(String, FileAttachment)]) {
 
-		def store(itemMap: collection.mutable.Map[String, FeedbackItem], number: String, name: String, file: FileAttachment) = {
+		def store(itemMap: collection.mutable.Map[String, OldFeedbackItem], number: String, name: String, file: FileAttachment) = {
 			val student = userLookup.getUserByWarwickUniId(number)
 			itemMap
-				.getOrElseUpdate(number, new FeedbackItem(number, student))
+				.getOrElseUpdate(number, new OldFeedbackItem(number, student))
 				.file.attached.add(file)
 		}
 
 		// go through individual files, extracting the uni number and grouping
 		// them into feedback items.
-		val itemMap = new collection.mutable.HashMap[String, FeedbackItem]()
+		val itemMap = new collection.mutable.HashMap[String, OldFeedbackItem]()
 		unrecognisedFiles.clear()
 
 		for ((filename, file) <- bits) {
@@ -242,7 +242,7 @@ abstract class UploadFeedbackCommand[A](val module: Module, val assignment: Assi
 				fromArchive = true
 
 				// this do-nothing command is to generate an audit event to record the unzipping
-				new ExtractFeedbackZip(this).apply()
+				new OldExtractFeedbackZip(this).apply()
 			} finally {
 				zip.close()
 				if (!tempFile.delete()) tempFile.deleteOnExit()

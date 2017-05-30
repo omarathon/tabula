@@ -9,7 +9,7 @@ import uk.ac.warwick.tabula.services.objectstore.{ObjectStorageService, RichByte
 import uk.ac.warwick.userlookup.User
 
 // scalastyle:off magic.number
-class AddMarkerFeedbackCommandTest extends TestBase with Mockito {
+class OldAddMarkerFeedbackCommandTest extends TestBase with Mockito {
 
 	var objectStorageService: ObjectStorageService = smartMock[ObjectStorageService]
 
@@ -31,7 +31,7 @@ class AddMarkerFeedbackCommandTest extends TestBase with Mockito {
 	 * TAB-535
 	 */
 	@Test def duplicateFileNamesInParent() = withUser("cuscav") {
-		val cmd = new AddMarkerFeedbackCommand(module, assignment, currentUser.apparentUser, currentUser)
+		val cmd = new OldAddMarkerFeedbackCommand(module, assignment, currentUser.apparentUser, currentUser)
 		cmd.userLookup = userLookup
 
 		val file = new UploadedFile
@@ -41,7 +41,7 @@ class AddMarkerFeedbackCommandTest extends TestBase with Mockito {
 		a.uploadedData = ByteSource.wrap("content".getBytes)
 		file.attached.add(a)
 
-		val item = new FeedbackItem("1010101", user)
+		val item = new OldFeedbackItem("1010101", user)
 		item.file = file
 		cmd.items.add(item)
 
@@ -66,7 +66,7 @@ class AddMarkerFeedbackCommandTest extends TestBase with Mockito {
 	}
 
 	@Test def duplicateFileNames() = withUser("cuscav") {
-		val cmd = new AddMarkerFeedbackCommand(module, assignment, currentUser.apparentUser, currentUser)
+		val cmd = new OldAddMarkerFeedbackCommand(module, assignment, currentUser.apparentUser, currentUser)
 		cmd.userLookup = userLookup
 
 		val file = new UploadedFile
@@ -76,7 +76,7 @@ class AddMarkerFeedbackCommandTest extends TestBase with Mockito {
 		a.uploadedData = ByteSource.wrap("content".getBytes)
 		file.attached.add(a)
 
-		val item = new FeedbackItem("1010101", user)
+		val item = new OldFeedbackItem("1010101", user)
 		item.file = file
 		cmd.items.add(item)
 

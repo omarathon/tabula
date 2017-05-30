@@ -5,7 +5,7 @@ import org.springframework.web.bind.annotation.RequestMapping
 import uk.ac.warwick.tabula.data.Transactions._
 import uk.ac.warwick.tabula.web.controllers.coursework.OldCourseworkController
 import uk.ac.warwick.tabula.CurrentUser
-import uk.ac.warwick.tabula.commands.coursework.assignments.AddFeedbackCommand
+import uk.ac.warwick.tabula.commands.coursework.assignments.OldAddFeedbackCommand
 import javax.validation.Valid
 
 import org.springframework.context.annotation.Profile
@@ -23,10 +23,10 @@ class OldAddFeedbackController extends OldCourseworkController {
 
 	@ModelAttribute
 	def command(@PathVariable module: Module, @PathVariable assignment: Assignment, user: CurrentUser) =
-		new AddFeedbackCommand(module, assignment, user.apparentUser, user)
+		new OldAddFeedbackCommand(module, assignment, user.apparentUser, user)
 
 	@RequestMapping(method = Array(GET, HEAD))
-	def showForm(@ModelAttribute form: AddFeedbackCommand): Mav = {
+	def showForm(@ModelAttribute form: OldAddFeedbackCommand): Mav = {
 		Mav("coursework/admin/assignments/feedback/form",
 			"department" -> form.module.adminDepartment,
 			"module" -> form.module,
@@ -35,7 +35,7 @@ class OldAddFeedbackController extends OldCourseworkController {
 	}
 
 	@RequestMapping(method = Array(POST))
-	def submit(@Valid form: AddFeedbackCommand, errors: Errors): Mav = {
+	def submit(@Valid form: OldAddFeedbackCommand, errors: Errors): Mav = {
 		transactional() {
 			form.preExtractValidation(errors)
 			form.postExtractValidation(errors)

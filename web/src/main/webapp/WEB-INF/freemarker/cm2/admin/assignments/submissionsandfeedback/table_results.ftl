@@ -252,17 +252,7 @@
 							<#if enhancedFeedback??>
 								<#local attachments=enhancedFeedback.feedback.attachments />
 								<#if attachments?size gt 0>
-									<#if attachments?size == 1>
-										<#local attachmentExtension = enhancedFeedback.feedback.attachments[0].fileExt>
-									<#else>
-										<#local attachmentExtension = "zip">
-									</#if>
-									<a class="long-running" href="<@url page='/cm2/admin/assignments/${assignment.id}/feedback/download/${enhancedFeedback.feedback.id}/feedback-${enhancedFeedback.feedback.studentIdentifier}.${attachmentExtension}'/>">
-									${attachments?size}
-										<#if attachments?size == 1> file
-										<#else> files
-										</#if>
-									</a>
+									<@components.studentFeedbackDownload enhancedFeedback.feedback />
 								</#if>
 							</#if>
 						</td>

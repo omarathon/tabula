@@ -13,7 +13,7 @@ import uk.ac.warwick.tabula.data.FileDao
 import uk.ac.warwick.tabula.Mockito
 
 // scalastyle:off magic.number
-class AddFeedbackCommandTest extends TestBase with Mockito {
+class OldAddFeedbackCommandTest extends TestBase with Mockito {
 
 	var objectStorageService: ObjectStorageService = smartMock[ObjectStorageService]
 
@@ -31,7 +31,7 @@ class AddFeedbackCommandTest extends TestBase with Mockito {
 	userLookup.users += ("student" -> user)
 
 	@Test def duplicateFileNames() = withUser("cuscav") {
-		val cmd = new AddFeedbackCommand(module, assignment, currentUser.apparentUser, currentUser)
+		val cmd = new OldAddFeedbackCommand(module, assignment, currentUser.apparentUser, currentUser)
 		cmd.userLookup = userLookup
 		cmd.fileDao = smartMock[FileDao]
 
@@ -48,7 +48,7 @@ class AddFeedbackCommandTest extends TestBase with Mockito {
 		b.objectStorageService = objectStorageService
 		file.attached.add(b)
 
-		val item = new FeedbackItem("1010101", user)
+		val item = new OldFeedbackItem("1010101", user)
 		item.file = file
 		cmd.items.add(item)
 
