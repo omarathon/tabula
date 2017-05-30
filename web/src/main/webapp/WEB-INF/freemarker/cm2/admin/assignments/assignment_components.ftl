@@ -82,10 +82,12 @@
 	url=review_url />
 		<#else>
 		<#assign displayLink=assignment.id?? />
-		<#if assignment.cm2Assignment>
-			<#local details_url><#if displayLink><@routes.cm2.editassignmentdetails assignment /></#if></#local>
-		<#else>
-			<#local details_url><#if displayLink><@routes.coursework.assignmentedit assignment /></#if></#local>
+		<#if displayLink><#-- Assignment not persisted yet - no link -->
+			<#if assignment.cm2Assignment>
+				<#local details_url><@routes.cm2.editassignmentdetails assignment /></#local>
+			<#else>
+				<#local details_url><@routes.coursework.assignmentedit assignment /></#local>
+			</#if>
 		</#if>
 		<@wizard_link
 		label="Assignment details"
