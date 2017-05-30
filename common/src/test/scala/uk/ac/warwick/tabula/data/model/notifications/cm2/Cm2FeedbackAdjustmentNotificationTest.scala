@@ -44,7 +44,7 @@ class Cm2FeedbackAdjustmentNotificationTest extends TestBase with Mockito {
 	@Test
 	def urlIsMarkerPage() {
 		val n = createNotification
-		n.url should be(s"/$cm2Prefix/admin/assignments/heronzzzz/marker/1234567/list")
+		n.url should be(s"/$cm2Prefix/admin/assignments/heronzzzz/marker/1234567")
 	}
 
 	@Test
