@@ -19,7 +19,8 @@ object Routes {
 
 		private val context = "/exams/exams"
 
-		def home: String = context + "/"
+		def homeDefaultYear: String = s"$context/"
+		def home(academicYear: AcademicYear): String = s"$context/${encoded(academicYear.startYear.toString)}"
 
 		object admin {
 
