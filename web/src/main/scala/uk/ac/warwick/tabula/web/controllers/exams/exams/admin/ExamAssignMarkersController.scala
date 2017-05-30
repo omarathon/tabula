@@ -76,7 +76,7 @@ class ExamAssignMarkersController extends ExamsController {
 			"firstMarkerUnassignedStudents" -> firstMarkerUnassignedStudents,
 			"cancelUrl" -> Routes.Exams.admin.module(module, academicYear)
 		).crumbs(
-			Breadcrumbs.Exams.Home,
+			Breadcrumbs.Exams.Home(exam.academicYear),
 			Breadcrumbs.Exams.Department(module.adminDepartment, exam.academicYear),
 			Breadcrumbs.Exams.Module(module, exam.academicYear)
 		)

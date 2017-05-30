@@ -107,7 +107,7 @@ class ExamsAdminDepartmentHomeController extends ExamsController
 			"modules" -> result.sortWith(_.code.toLowerCase < _.code.toLowerCase),
 			"examMap" -> cmd.modulesAndExams
 		)
-			.crumbs(Breadcrumbs.Exams.Home)
+			.crumbs(Breadcrumbs.Exams.Home(academicYear))
 			.secondCrumbs(academicYearBreadcrumbs(academicYear)(year => Routes.Exams.admin.department(department, year)):_*)
 	}
 
@@ -140,7 +140,7 @@ class ExamsAdminModuleHomeController extends ExamsController
 		if (ajax) Mav("exams/exams/admin/modules/admin_partial").noLayout()
 		else Mav("exams/exams/admin/modules/admin")
 			.crumbs(
-				Breadcrumbs.Exams.Home,
+				Breadcrumbs.Exams.Home(academicYear),
 				Breadcrumbs.Exams.Department(module.adminDepartment, academicYear)
 			).secondCrumbs(academicYearBreadcrumbs(academicYear)(year => Routes.Exams.admin.module(module, year)):_*)
 	}

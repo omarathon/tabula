@@ -42,7 +42,7 @@ class AddExamController extends ExamsController {
 			"assessmentGroups" -> cmd.assessmentGroups,
 			"department" -> cmd.module.adminDepartment
 		).crumbs(
-			Breadcrumbs.Exams.Home,
+			Breadcrumbs.Exams.Home(cmd.academicYear),
 			Breadcrumbs.Exams.Department(cmd.module.adminDepartment, cmd.academicYear),
 			Breadcrumbs.Exams.Module(cmd.module, cmd.academicYear)
 		)
