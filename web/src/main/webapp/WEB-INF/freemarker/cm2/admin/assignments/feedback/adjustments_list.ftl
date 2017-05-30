@@ -1,5 +1,5 @@
-<#import "../turnitin/_report_macro.ftl" as tin />
-<#import "../submissionsandfeedback/_submission_details.ftl" as sd />
+<#import "*/cm2_macros.ftl" as cm2 />
+<#import "*/coursework_components.ftl" as components />
 <#import "/WEB-INF/freemarker/_profile_link.ftl" as pl />
 
 <#function markingId user>
@@ -28,13 +28,13 @@
 </#macro>
 
 <#escape x as x?html>
+	<@cm2.assignmentHeader "Feedback adjustment" assignment "for" />
+
 	<#if studentInfo?size gt 0>
 		<div class="pull-right">
 			<a href="<@routes.cm2.feedbackBulkAdjustment assignment />" class="btn"><i class="icon-sort"></i> Adjust in bulk</a>
 		</div>
 	</#if>
-	<h1>Feedback adjustment</h1>
-	<h5><span class="muted">for</span> ${assignment.name} (${assignment.module.code?upper_case})</h5>
 
 	<div id="profile-modal" class="modal fade profile-subset"></div>
 

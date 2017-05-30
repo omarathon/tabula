@@ -1,118 +1,128 @@
 package uk.ac.warwick.tabula.commands.cm2.feedback
 
+import org.joda.time.DateTime
+import org.springframework.validation.{BindingResult, Errors}
 import uk.ac.warwick.tabula.CurrentUser
-import uk.ac.warwick.tabula.commands._
-import uk.ac.warwick.tabula.data.model.Assignment
-import uk.ac.warwick.tabula.data.model.MarkingState.{MarkingCompleted, Rejected}
-import uk.ac.warwick.tabula.helpers.StringUtils._
-import uk.ac.warwick.tabula.permissions.Permissions
-import uk.ac.warwick.tabula.services._
-import uk.ac.warwick.tabula.system.permissions.{PermissionsChecking, RequiresPermissionsChecking}
+import uk.ac.warwick.tabula.JavaImports.{JList, JMap}
+import uk.ac.warwick.tabula.commands.{Describable, Description, SelfValidating, UploadedFile}
+import uk.ac.warwick.tabula.data.SavedFormValueDaoComponent
+import uk.ac.warwick.tabula.data.model._
+import uk.ac.warwick.tabula.data.model.forms.{Extension, FormValue, SavedFormValue, StringFormValue}
+import uk.ac.warwick.tabula.services.{GeneratesGradesFromMarks, ProfileServiceComponent}
+import uk.ac.warwick.tabula.system.BindListener
 import uk.ac.warwick.userlookup.User
 
-import scala.collection.JavaConverters._
+import collection.JavaConverters._
+import uk.ac.warwick.tabula.helpers.StringUtils._
+import uk.ac.warwick.tabula.permissions.Permissions
+import uk.ac.warwick.tabula.system.permissions.{PermissionsChecking, RequiresPermissionsChecking}
 
-object OnlineFeedbackCommand {
-	def apply(assignment: Assignment, submitter: CurrentUser) =
-		new OnlineFeedbackCommand(assignment, submitter)
-			with ComposableCommand[Seq[StudentFeedbackGraph]]
-			with OnlineFeedbackPermissions
-			with AutowiringSubmissionServiceComponent
-			with AutowiringFeedbackServiceComponent
-			with AutowiringUserLookupComponent
-			with AutowiringAssessmentMembershipServiceComponent
-			with Unaudited
-			with ReadOnly
-}
+import scala.util.Try
 
-abstract class OnlineFeedbackCommand(val assignment: Assignment, val submitter: CurrentUser)
-	extends CommandInternal[Seq[StudentFeedbackGraph]] with Appliable[Seq[StudentFeedbackGraph]] with OnlineFeedbackState {
+//FIXME - break out into cake ingredients
+trait OnlineFeedbackCommand extends BindListener with SelfValidating {
 
-	self: SubmissionServiceComponent with FeedbackServiceComponent with UserLookupComponent with AssessmentMembershipServiceComponent =>
+	this: ProfileServiceComponent with OnlineFeedbackState =>
 
-	val marker: User = submitter.apparentUser
-
-	def applyInternal(): Seq[StudentFeedbackGraph] = {
-
-		val usercodes = assignment.getUsercodesWithSubmissionOrFeedback.filter(_.hasText).toSeq
-		val studentsWithSubmissionOrFeedback = userLookup.getUsersByUserIds(usercodes)
-			.values
-			.filter(_.isFoundUser)
-			.toSeq
-			.sortBy(u => s"${u.getWarwickId}${u.getUserId}")
-
-	  val studentsWithSubmissionOrFeedbackUsercodes = studentsWithSubmissionOrFeedback.map(_.getUserId)
-
-		val unsubmittedStudents = assessmentMembershipService.determineMembershipUsers(assignment)
-				.filterNot { u => studentsWithSubmissionOrFeedbackUsercodes.contains(u.getUserId) }
-
-		val students = studentsWithSubmissionOrFeedback ++ unsubmittedStudents
-		students.map { student =>
-			val hasSubmission = submissionService.getSubmissionByUsercode(assignment, student.getUserId).isDefined
-			val feedback = feedbackService.getAssignmentFeedbackByUsercode(assignment, student.getUserId)
-			val (hasFeedback, hasPublishedFeedback) = feedback match {
-				case Some(f) => (true, f.released.booleanValue)
-				case _ => (false, false)
+	override def onBind(result:BindingResult) {
+		if (fields != null) {
+			for ((key, field) <- fields.asScala) {
+				field.onBind(result)
 			}
-			StudentFeedbackGraph(student, hasSubmission, hasFeedback, hasPublishedFeedback, hasCompletedFeedback = false, hasRejectedFeedback = false)
+		}
+		file.onBind(result)
+	}
+
+	override def validate(errors: Errors) {
+		if(!hasContent) {
+			errors.reject("feedback.empty")
+		}
+
+		fieldValidation(errors)
+	}
+
+	private def fieldValidation(errors:Errors) {
+		// Individually validate all the custom fields
+		if(fields != null){
+			assignment.feedbackFields.foreach { field =>
+				errors.pushNestedPath("fields[%s]".format(field.id))
+				fields.asScala.get(field.id).foreach(field.validate(_, errors))
+				errors.popNestedPath()
+			}
+		}
+
+		if (mark.hasText) {
+			try {
+				val asInt = mark.toInt
+				if (asInt < 0 || asInt > 100) {
+					errors.rejectValue("mark", "actualMark.range")
+				}
+			} catch {
+				case _ @ (_: NumberFormatException | _: IllegalArgumentException) =>
+					errors.rejectValue("mark", "actualMark.format")
+			}
+		}
+
+		// validate grade is department setting is true
+		if (!errors.hasErrors && grade.hasText && module.adminDepartment.assignmentGradeValidation) {
+			val validGrades = Try(mark.toInt).toOption.toSeq.flatMap { m => gradeGenerator.applyForMarks(Map(student.getWarwickId -> m))(student.getWarwickId) }
+			if (validGrades.nonEmpty && !validGrades.exists(_.grade == grade)) {
+				errors.rejectValue("grade", "actualGrade.invalidSITS", Array(validGrades.map(_.grade).mkString(", ")), "")
+			}
 		}
 	}
 
 }
 
-object OnlineMarkerFeedbackCommand {
-	def apply(assignment: Assignment, marker: User, submitter: CurrentUser, gradeGenerator: GeneratesGradesFromMarks) =
-		new OnlineMarkerFeedbackCommand(assignment, marker, submitter, gradeGenerator)
-			with ComposableCommand[Seq[StudentFeedbackGraph]]
-			with OnlineFeedbackPermissions
-			with AutowiringUserLookupComponent
-			with AutowiringSubmissionServiceComponent
-			with AutowiringFeedbackServiceComponent
-			with Unaudited
-			with ReadOnly
-}
+trait CopyFromFormFields {
 
-abstract class OnlineMarkerFeedbackCommand(
-	val assignment: Assignment,
-	val marker: User,
-	val submitter: CurrentUser,
-	val gradeGenerator: GeneratesGradesFromMarks
-)	extends CommandInternal[Seq[StudentFeedbackGraph]] with Appliable[Seq[StudentFeedbackGraph]] with OnlineFeedbackState {
+	self: OnlineFeedbackState with SavedFormValueDaoComponent =>
 
-	self: SubmissionServiceComponent with FeedbackServiceComponent with UserLookupComponent =>
-
-	def applyInternal(): Seq[StudentFeedbackGraph] = {
-
-		val students = Option(assignment.markingWorkflow).map(_.getMarkersStudents(assignment, marker)).getOrElse(Nil)
-
-		students.filter(s => assignment.isReleasedForMarking(s.getUserId)).map { student =>
-
-			val hasSubmission = assignment.submissions.asScala.exists(_.usercode == student.getUserId)
-			val feedback = feedbackService.getAssignmentFeedbackByUsercode(assignment, student.getUserId)
-			// FIXME this is all CM1-centric
-			// get all the feedbacks for this user and pick the most recent
-			val markerFeedback = assignment.getAllMarkerFeedbacks(student.getUserId, marker).headOption
-
-			val hasUncompletedFeedback = markerFeedback.exists(_.hasContent)
-			// the current feedback for the marker is completed or if the parent feedback isn't a placeholder then marking is completed
-			val hasCompletedFeedback = markerFeedback.exists(_.state == MarkingCompleted)
-			val hasRejectedFeedback = markerFeedback.exists(_.state == Rejected)
-
-			val hasPublishedFeedback = feedback match {
-				case Some(f) => f.released.booleanValue
-				case None => false
+	def copyFormFields(markerFeedback: MarkerFeedback){
+		// get custom field values
+		fields = {
+			val pairs = assignment.feedbackFields.map { field =>
+				val currentValue = markerFeedback.customFormValues.asScala.find(_.name == field.name)
+				val formValue = currentValue match {
+					case Some(initialValue) => field.populatedFormValue(initialValue)
+					case None => field.blankFormValue
+				}
+				field.id -> formValue
 			}
-
-			StudentFeedbackGraph(
-				student,
-				hasSubmission,
-				hasUncompletedFeedback,
-				hasPublishedFeedback,
-				hasCompletedFeedback,
-				hasRejectedFeedback
-			)
+			Map(pairs: _*).asJava
 		}
 	}
+
+}
+
+trait WriteToFormFields {
+
+	self: OnlineFeedbackState with SavedFormValueDaoComponent =>
+
+	def saveFormFields(markerFeedback: MarkerFeedback) {
+		// save custom fields
+		markerFeedback.customFormValues = fields.asScala.map {
+			case (_, formValue) =>
+
+				def newValue = {
+					val newValue = new SavedFormValue()
+					newValue.name = formValue.field.name
+					newValue.markerFeedback = markerFeedback
+					newValue
+				}
+
+				// Don't send brand new feedback to the DAO or we'll get a TransientObjectException
+				val savedFormValue = if (markerFeedback.id == null) {
+					newValue
+				} else {
+					savedFormValueDao.get(formValue.field, markerFeedback).getOrElse(newValue)
+				}
+
+				formValue.persist(savedFormValue)
+				savedFormValue
+		}.toSet[SavedFormValue].asJava
+	}
+
 }
 
 trait OnlineFeedbackPermissions extends RequiresPermissionsChecking {
@@ -120,24 +130,83 @@ trait OnlineFeedbackPermissions extends RequiresPermissionsChecking {
 	self: OnlineFeedbackState =>
 
 	def permissionsCheck(p: PermissionsChecking) {
-		p.PermissionCheck(Permissions.AssignmentFeedback.Read, assignment)
+		p.mustBeLinked(assignment, module)
+		p.PermissionCheck(Permissions.AssignmentMarkerFeedback.Manage, assignment)
 		if(submitter.apparentUser != marker) {
 			p.PermissionCheck(Permissions.Assignment.MarkOnBehalf, assignment)
 		}
 	}
 }
 
-trait OnlineFeedbackState {
-	val assignment: Assignment
-	val marker: User
-	val submitter: CurrentUser
+trait OnlineFeedbackDescription[A] extends Describable[A] {
+
+	this: OnlineFeedbackState =>
+
+	def describe(d: Description) {
+		d.studentIds(Option(student.getWarwickId).toSeq)
+		d.studentUsercodes(student.getUserId)
+		d.assignment(assignment)
+	}
 }
 
-case class StudentFeedbackGraph(
-	student: User,
-	hasSubmission: Boolean,
-	hasUncompletedFeedback: Boolean,
-	hasPublishedFeedback: Boolean,
-	hasCompletedFeedback: Boolean,
-	hasRejectedFeedback: Boolean
-)
+trait OnlineFeedbackState {
+	def module: Module
+	def assignment: Assignment
+	def student: User
+	def marker: User
+	def gradeGenerator: GeneratesGradesFromMarks
+	def submitter: CurrentUser
+
+	var mark: String = _
+	var grade: String = _
+	var fields: JMap[String, FormValue] = _
+	var file:UploadedFile = new UploadedFile
+	var attachedFiles:JList[FileAttachment] = _
+
+	private def fieldHasValue = Try(fields.asScala.exists{ case (_, value: StringFormValue) => value.value.hasText}).toOption.getOrElse(false)
+	private def hasFile = Option(attachedFiles).exists(!_.isEmpty) || Option(file).exists(!_.attachedOrEmpty.isEmpty)
+	def hasContent: Boolean = mark.hasText || grade.hasText || hasFile || fieldHasValue
+}
+
+trait SubmissionState {
+
+	self: ProfileServiceComponent =>
+
+	def assignment: Assignment
+	def submission: Option[Submission]
+	def student: User
+
+	def submissionState: String = {
+		submission match {
+			case Some(s) if s.isAuthorisedLate => "workflow.Submission.authorisedLate"
+			case Some(s) if s.isLate => "workflow.Submission.late"
+			case Some(_) => "workflow.Submission.onTime"
+			case None if !assignment.isClosed => "workflow.Submission.unsubmitted.withinDeadline"
+			case None if assignment.extensions.asScala.exists(e => e.usercode == student.getUserId && e.expiryDate.exists(_.isBeforeNow))
+			=> "workflow.Submission.unsubmitted.withinExtension"
+			case None => "workflow.Submission.unsubmitted.late"
+		}
+	}
+
+	def disability: Option[Disability] = submission.filter(_.useDisability).flatMap(_ =>
+		profileService
+			.getMemberByUniversityId(student.getWarwickId)
+			.collect{case s:StudentMember => s}
+			.flatMap(_.disability)
+	)
+
+}
+
+trait ExtensionState {
+	def assignment: Assignment
+	def extension: Option[Extension]
+
+	def extensionState: String = extension match {
+		case Some(e) if e.rejected || e.revoked => "workflow.Extension.requestDenied"
+		case Some(e) if e.approved => "workflow.Extension.granted"
+		case Some(e) if !e.isManual => "workflow.Extension.requested"
+		case _ => "workflow.Extension.none"
+	}
+
+	def extensionDate: Option[DateTime] = extension.flatMap(e => e.expiryDate.orElse(e.requestedExpiryDate))
+}

@@ -1,14 +1,14 @@
-<#import "../submissionsandfeedback/_submission_details.ftl" as sd />
-<#import "../submission_components.ftl" as components />
+<#import "*/cm2_macros.ftl" as cm2 />
+<#import "*/coursework_components.ftl" as components />
 
 <div class="well">
 	<h3>Submission</h3>
 
 	<div class="labels">
 		<#if submission.late>
-			<span class="label label-important use-tooltip" title="<@sd.lateness submission />" data-container="body">Late</span>
+			<span class="label label-important use-tooltip" title="<@components.lateness submission />" data-container="body">Late</span>
 		<#elseif  submission.authorisedLate>
-			<span class="label label-info use-tooltip" title="<@sd.lateness submission />" data-container="body">Within Extension</span>
+			<span class="label label-info use-tooltip" title="<@components.lateness submission />" data-container="body">Within Extension</span>
 		</#if>
 
 		<#if submission.suspectPlagiarised>
@@ -29,7 +29,7 @@
 	</div>
 
 	<div>
-		<@spring.message code=command.submissionState /><@sd.submission_details command.submission />
+		<@spring.message code=command.submissionState /><@components.submission_details command.submission />
 
 		<#list submission.allAttachments as attachment>
 			<!-- Checking originality report for ${attachment.name} ... -->

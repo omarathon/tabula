@@ -7,12 +7,12 @@ import org.springframework.stereotype.Controller
 import org.springframework.validation.Errors
 import org.springframework.web.bind.annotation.{ModelAttribute, PathVariable, RequestMapping}
 import uk.ac.warwick.tabula.CurrentUser
-import uk.ac.warwick.tabula.commands.cm2.feedback.{Cm2AssignmentFeedbackAdjustmentCommand, Cm2FeedbackAdjustmentCommandState, Cm2FeedbackAdjustmentListCommand, GenerateGradesFromMarkCommand, StudentInfo}
+import uk.ac.warwick.tabula.commands.cm2.feedback._
 import uk.ac.warwick.tabula.commands.{Appliable, SelfValidating}
 import uk.ac.warwick.tabula.data.model._
 import uk.ac.warwick.tabula.services.AutowiringProfileServiceComponent
 import uk.ac.warwick.tabula.web.Mav
-import uk.ac.warwick.tabula.web.controllers.cm2.{CourseworkBreadcrumbs, CourseworkController}
+import uk.ac.warwick.tabula.web.controllers.cm2.CourseworkController
 import uk.ac.warwick.userlookup.User
 
 
@@ -24,7 +24,7 @@ class FeedbackAdjustmentsListController extends CourseworkController {
 
 	@ModelAttribute("listCommand")
 	def listCommand(@PathVariable assignment: Assignment): FeedbackAdjustmentListCommand =
-		Cm2FeedbackAdjustmentListCommand(mandatory(assignment))
+		FeedbackAdjustmentListCommand(mandatory(assignment))
 
 	@RequestMapping
 	def list(
@@ -33,12 +33,12 @@ class FeedbackAdjustmentsListController extends CourseworkController {
 	): Mav = {
 		val (studentInfo, noFeedbackStudentInfo) = listCommand.apply().partition { _.feedback.isDefined }
 
-		Mav(s"$urlPrefix/admin/assignments/feedback/adjustments_list",
+		Mav("cm2/admin/assignments/feedback/adjustments_list",
 			"studentInfo" -> studentInfo,
 			"noFeedbackStudentInfo" -> noFeedbackStudentInfo,
 			"assignment" -> assignment,
 			"isGradeValidation" -> assignment.module.adminDepartment.assignmentGradeValidation
-		).crumbs(CourseworkBreadcrumbs.SubmissionsAndFeedback.SubmissionsAndFeedbackManagement(assignment))
+		).crumbsList(Breadcrumbs.assignment(assignment))
 	}
 }
 
@@ -48,7 +48,7 @@ object FeedbackAdjustmentsController {
 		CourseType.UG -> 5,
 		CourseType.PGR -> 3,
 		CourseType.PGT -> 3
-	).withDefault { courseType => 5 }
+	).withDefault { _ => 5 }
 }
 
 @Profile(Array("cm2Enabled")) @Controller
@@ -59,11 +59,11 @@ class FeedbackAdjustmentsController extends CourseworkController with Autowiring
 
 	@ModelAttribute("command")
 	def formCommand(@PathVariable assignment: Assignment, @PathVariable student: User, submitter: CurrentUser) =
-		Cm2AssignmentFeedbackAdjustmentCommand(mandatory(assignment), student, submitter, GenerateGradesFromMarkCommand(mandatory(assignment)))
+		AssignmentFeedbackAdjustmentCommand(mandatory(assignment), student, submitter, GenerateGradesFromMarkCommand(mandatory(assignment)))
 
-	@RequestMapping(method=Array(GET))
+	@RequestMapping
 	def showForm(
-		@ModelAttribute("command") command: Appliable[Feedback] with Cm2FeedbackAdjustmentCommandState,
+		@ModelAttribute("command") command: Appliable[Feedback] with FeedbackAdjustmentCommandState,
 		@PathVariable assignment: Assignment,
 		@PathVariable student: User
 	): Mav = {
@@ -90,7 +90,7 @@ class FeedbackAdjustmentsController extends CourseworkController with Autowiring
 			}
 		}
 
-		Mav(s"$urlPrefix/admin/assignments/feedback/adjustments", Map(
+		Mav("cm2/admin/assignments/feedback/adjustments", Map(
 			"daysLate" -> daysLate,
 			"marksSubtracted" -> marksSubtracted,
 			"proposedAdjustment" -> proposedAdjustment,
@@ -101,7 +101,7 @@ class FeedbackAdjustmentsController extends CourseworkController with Autowiring
 
 	@RequestMapping(method = Array(POST))
 	def submit(
-		@Valid @ModelAttribute("command") command: Appliable[Feedback] with Cm2FeedbackAdjustmentCommandState,
+		@Valid @ModelAttribute("command") command: Appliable[Feedback] with FeedbackAdjustmentCommandState,
 		errors: Errors,
 		@PathVariable assignment: Assignment,
 		@PathVariable student: User

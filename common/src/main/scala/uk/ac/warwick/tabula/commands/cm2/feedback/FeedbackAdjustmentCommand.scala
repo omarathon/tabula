@@ -5,7 +5,7 @@ import org.springframework.validation.Errors
 import uk.ac.warwick.tabula.commands._
 import uk.ac.warwick.tabula.data.HibernateHelpers
 import uk.ac.warwick.tabula.data.model._
-import uk.ac.warwick.tabula.data.model.notifications.cm2.{FeedbackAdjustmentNotification, StudentFeedbackAdjustmentNotification}
+import uk.ac.warwick.tabula.data.model.notifications.cm2.{Cm2FeedbackAdjustmentNotification, Cm2StudentFeedbackAdjustmentNotification}
 import uk.ac.warwick.tabula.helpers.StringUtils._
 import uk.ac.warwick.tabula.permissions.Permissions
 import uk.ac.warwick.tabula.services._
@@ -182,12 +182,12 @@ trait FeedbackAdjustmentNotifier extends Notifies[Feedback, Feedback] {
 			HibernateHelpers.initialiseAndUnproxy(feedback) match {
 				case assignmentFeedback: AssignmentFeedback =>
 					val studentsNotifications = if (assignmentFeedback.released) {
-						Seq(Notification.init(new StudentFeedbackAdjustmentNotification, submitter.apparentUser, assignmentFeedback, assignmentFeedback.assignment))
+						Seq(Notification.init(new Cm2StudentFeedbackAdjustmentNotification, submitter.apparentUser, assignmentFeedback, assignmentFeedback.assignment))
 					} else {
 						Nil
 					}
 					val adminsNotifications = if (assessment.hasWorkflow) {
-						Seq(Notification.init(new FeedbackAdjustmentNotification, submitter.apparentUser, assignmentFeedback, assignmentFeedback.assignment))
+						Seq(Notification.init(new Cm2FeedbackAdjustmentNotification, submitter.apparentUser, assignmentFeedback, assignmentFeedback.assignment))
 					} else {
 						Nil
 					}

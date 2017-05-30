@@ -1,9 +1,8 @@
+<#import "*/cm2_macros.ftl" as cm2 />
+<#import "*/coursework_components.ftl" as components />
 <#import "*/courses_macros.ftl" as courses_macros />
-<#assign finalMarkingStage = (allCompletedMarkerFeedback?? && allCompletedMarkerFeedback?size > 1)>
 
-<#macro lateness submission=""><#compress>
-	${durationFormatter(submission.deadline, submission.submittedDate)}
-</#compress></#macro>
+<#assign finalMarkingStage = (allCompletedMarkerFeedback?? && allCompletedMarkerFeedback?size > 1)>
 
 <#function markingId user>
 	<#if !user.warwickId?has_content || user.getExtraProperty("urn:websignon:usersource")! == 'WarwickExtUsers'>
@@ -91,7 +90,7 @@
 				<div class="late-penalty">
 					<button class="btn btn-mini use-suggested-mark"
 							data-mark="${proposedAdjustment!""}"
-							data-comment="Your submission was <@lateness command.submission /> late. ${marksSubtracted} marks have been subtracted (${latePenalty} for each working day late).">
+							data-comment="Your submission was <@components.lateness command.submission /> late. ${marksSubtracted} marks have been subtracted (${latePenalty} for each working day late).">
 						Use suggested mark - ${proposedAdjustment!""}
 					</button>
 					<a class="use-popover" id="popover-${markingId(command.student)}" data-html="true"
