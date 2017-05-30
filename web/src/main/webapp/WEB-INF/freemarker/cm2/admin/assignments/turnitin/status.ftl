@@ -7,10 +7,9 @@
 
 <p>When the job is finished you'll be able to see the results on the <a href="<@routes.cm2.assignmentsubmissionsandfeedback assignment />">submissions page</a>.</p>
 
-
 <div id="job-progress">
-	<div class="progress progress-striped <#if !status.finished>active</#if>">
-		<div class="bar" style="width: ${status.progress}%;"></div>
+	<div class="progress">
+		<div class="progress-bar progress-bar-striped <#if !status.finished>active</#if>" style="min-width: 5%; width: ${status.progress}%;"></div>
 	</div>
 
 	<div id="job-status-value" data-progress="${status.progress}" data-succeeded="${status.succeeded?string}" data-finished="${status.finished?string}">
@@ -21,17 +20,17 @@
 <script>
 	(function($){
 		function buildStatus(field, type, string) {
-			return field + " " + type + ((field != 1)? "s" : "") + string;
+			return field + " " + type + ((field != 1) ? "s" : "") + string;
 		}
 		var updateStatus = function() {
 			$.get('<@routes.cm2.submitToTurnitinStatus assignment />', function(data){
-				var $progress = $('#job-progress').find('.bar').width(data.progress + '%').end();
+				var $progress = $('#job-progress').find('.progress-bar').width(data.progress + '%');
 				if (data.finished) {
 					$progress.removeClass('active');
 					if (!data.succeeded) {
-						$progress.addClass('progress-warning');
+						$progress.addClass('progress-bar-warning');
 					} else {
-						$progress.addClass('progress-success');
+						$progress.addClass('progress-bar-success');
 					}
 					$('#job-status-value').find('p').empty().html(data.status);
 				} else {
@@ -53,7 +52,7 @@
 				}
 			});
 		};
-		setTimeout(updateStatus, 5000);
+		updateStatus();
 	})(jQuery);
 </script>
 

@@ -1,7 +1,11 @@
+<#import "*/cm2_macros.ftl" as cm2 />
+
 <#escape x as x?html>
 
+<@cm2.assignmentHeader "Check submissions for plagiarism" assignment "in" />
+
 <p>
-	This will send all submissions in the assignment to Turnitin to be scored for similarity.
+	This will send <strong>all</strong> submissions in the assignment to Turnitin to be scored for similarity.
 	Scoring submissions will take some time so you'll receive an email when the scores are ready to view.
 	This upload will only include files that are not already in Turnitin. So, it's okay to send submissions to Turnitin more than once for an assignment.
 </p>
