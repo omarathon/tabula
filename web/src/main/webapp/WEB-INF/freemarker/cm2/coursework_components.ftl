@@ -1080,7 +1080,7 @@
 	</ul>
 </#macro>
 
-<#macro marker_feedback_summary feedback stage isMarking=false>
+<#macro marker_feedback_summary feedback stage currentStage=[] currentFeedback=[]>
 	<h4>${stage.description} <#if feedback.marker??>- ${feedback.marker.fullName}</#if></h4>
 
 	<#list feedback.customFormValues as formValue>
@@ -1109,7 +1109,7 @@
 			<div class="col-xs-6"><span>No mark or grade added.</span></div>
 		</#if>
 
-		<div class="col-xs-6">
+		<div class="col-xs-3">
 		<#-- Download a zip of all feedback or just a single file if there is only one -->
 			<#if feedback.attachments?has_content >
 				<#local attachment = "" />
@@ -1121,9 +1121,9 @@
 					<#local attachment = feedback.attachments?first />
 				</#if>
 				<#if attachment?has_content>
-					<#local downloadUrl><@routes.cm2.downloadMarkerFeedbackOne command.assignment command.marker feedback attachment /></#local>
+					<#local downloadUrl><@routes.cm2.downloadMarkerFeedbackOne assignment feedback.marker feedback attachment /></#local>
 				<#elseif feedback.attachments?size gt 1>
-					<#local downloadUrl><@routes.cm2.downloadMarkerFeedbackAll command.assignment command.marker feedback stage.description+" feedback" /></#local>
+					<#local downloadUrl><@routes.cm2.downloadMarkerFeedbackAll assignment feedback.marker feedback stage.description+" feedback" /></#local>
 				</#if>
 				<a class="btn btn-default long-running use-tooltip" href="${downloadUrl}">Download feedback</a>
 				<ul class="feedback-attachments hide">
@@ -1135,9 +1135,17 @@
 					</#list>
 				</ul>
 			</#if>
-
-			<#if isMarking>
-				<a class="copy-feedback btn btn-default long-running use-tooltip" href="#">Copy comments and files</a>
+		</div>
+		<div class="col-xs-3">
+			<#if currentFeedback?? && currentFeedback?has_content>
+				<#if currentStage?? && currentStage.populateWithPreviousFeedback>
+					<div class="form-group">
+						<label class="radio-inline"><input type="radio" name="changesState" <#if !currentFeedback.hasBeenModified>checked</#if> value="approve" />Approve</label>
+						<label class="radio-inline"><input type="radio" name="changesState" <#if currentFeedback.hasBeenModified>checked</#if> value="make-changes" >Make changes</label>
+					</div>
+				<#else>
+					<a class="copy-feedback btn btn-default long-running use-tooltip" href="#">Copy comments and files</a>
+				</#if>
 			</#if>
 		</div>
 	</div>

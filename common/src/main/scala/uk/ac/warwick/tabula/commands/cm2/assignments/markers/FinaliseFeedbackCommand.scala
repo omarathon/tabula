@@ -2,12 +2,11 @@ package uk.ac.warwick.tabula.commands.cm2.assignments.markers
 
 import org.joda.time.DateTime
 import uk.ac.warwick.tabula.commands._
-import uk.ac.warwick.tabula.data.{AutowiringFileDaoComponent, FileDaoComponent}
 import uk.ac.warwick.tabula.data.model.forms.SavedFormValue
 import uk.ac.warwick.tabula.data.model._
 import uk.ac.warwick.tabula.data.model.notifications.cm2.CM2FinaliseFeedbackNotification
 import uk.ac.warwick.tabula.permissions.Permissions
-import uk.ac.warwick.tabula.services.{AutowiringZipServiceComponent, ZipServiceComponent}
+import uk.ac.warwick.tabula.services.{AutowiringFeedbackServiceComponent, FeedbackServiceComponent, AutowiringZipServiceComponent, ZipServiceComponent}
 import uk.ac.warwick.tabula.system.permissions.{PermissionsChecking, PermissionsCheckingMethods, RequiresPermissionsChecking}
 import uk.ac.warwick.userlookup.User
 
@@ -23,8 +22,8 @@ object FinaliseFeedbackCommand {
 			with FinaliseFeedbackPermissions
 			with FinaliseFeedbackDescription
 			with FinaliseFeedbackNotifier
+			with AutowiringFeedbackServiceComponent
 			with AutowiringZipServiceComponent
-			with AutowiringFileDaoComponent
 }
 
 trait FinaliseFeedbackCommandState {
@@ -35,7 +34,7 @@ trait FinaliseFeedbackCommandState {
 abstract class FinaliseFeedbackCommandInternal(val assignment: Assignment, val markerFeedback: Seq[MarkerFeedback], val user: User)
 	extends CommandInternal[Seq[Feedback]] with FinaliseFeedbackCommandState with UserAware {
 
-	this: FileDaoComponent with ZipServiceComponent =>
+	self: FeedbackServiceComponent with ZipServiceComponent=>
 
 	override def applyInternal(): Seq[Feedback] = {
 		markerFeedback.map(copyToFeedback)
@@ -65,6 +64,8 @@ abstract class FinaliseFeedbackCommandInternal(val assignment: Assignment, val m
 
 		markerFeedback.attachments.foreach(parent.addAttachment)
 		zipService.invalidateIndividualFeedbackZip(parent)
+
+		feedbackService.saveOrUpdate(parent)
 		parent
 	}
 }

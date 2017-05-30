@@ -1,7 +1,7 @@
-<#import "*/cm2_macros.ftl" as cm2 />
 <#import "*/_filters.ftl" as filters />
+<#import "*/cm2_macros.ftl" as cm2 />
 <#escape x as x?html>
-	<@cm2.assignmentHeader "Marking" assignment "for" />
+	<@cm2.assignmentHeader "Marking" assignment />
 
 	<#-- Filtering -->
 	<div class="fix-area">
@@ -174,6 +174,12 @@
 			// prevent rows from expanding when selecting the checkbox column
 			$body.on('click', '.check-col', function(e){
 				e.stopPropagation()
+			});
+
+			// hide / show the feedback form when approve / make changes radio is present
+			$body.on('change', 'input[type=radio][name=changesState]', function(e){
+				var show = this.value === "make-changes";
+				$('.marking-and-feedback').toggle(!!show);
 			});
 
 		})(jQuery);
