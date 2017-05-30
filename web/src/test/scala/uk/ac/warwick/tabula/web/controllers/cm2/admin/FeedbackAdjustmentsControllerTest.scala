@@ -3,7 +3,7 @@ package uk.ac.warwick.tabula.web.controllers.cm2.admin
 import org.joda.time.{DateTime, DateTimeConstants}
 import uk.ac.warwick.tabula._
 import uk.ac.warwick.tabula.commands.Appliable
-import uk.ac.warwick.tabula.commands.cm2.feedback.Cm2FeedbackAdjustmentCommandState
+import uk.ac.warwick.tabula.commands.cm2.feedback.FeedbackAdjustmentCommandState
 import uk.ac.warwick.tabula.data.model._
 import uk.ac.warwick.tabula.helpers.Tap._
 import uk.ac.warwick.tabula.services.{GeneratesGradesFromMarks, ProfileService}
@@ -15,7 +15,6 @@ class FeedbackAdjustmentsControllerTest extends TestBase with Mockito {
 	private trait ControllerFixture {
 		val controller = new FeedbackAdjustmentsController
 		controller.profileService = smartMock[ProfileService]
-		controller.urlPrefix = "cm2"
 	}
 
 	private trait CommandFixture {
@@ -33,7 +32,7 @@ class FeedbackAdjustmentsControllerTest extends TestBase with Mockito {
 		val thisStudent = new User("1234567")
 		thisStudent.setWarwickId("1234567")
 
-		val command = new Appliable[Feedback] with Cm2FeedbackAdjustmentCommandState {
+		val command = new Appliable[Feedback] with FeedbackAdjustmentCommandState {
 			override def apply(): Feedback = {null}
 			override val gradeGenerator: GeneratesGradesFromMarks = mock[GeneratesGradesFromMarks]
 			override val student: User = thisStudent

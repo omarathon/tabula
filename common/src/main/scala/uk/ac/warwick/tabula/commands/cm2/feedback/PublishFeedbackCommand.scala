@@ -176,7 +176,7 @@ trait PublishFeedbackValidation extends SelfValidating {
 trait PublishFeedbackDescription extends Describable[PublishFeedbackCommand.PublishFeedbackResults] {
 	self: PublishFeedbackCommandState with FeedbackServiceComponent =>
 
-	override val eventName: String = "PublishFeedback"
+	override lazy val eventName: String = "PublishFeedback"
 
 	override def describe(d: Description) {
 		val students = feedbackToRelease map { case(_, user, _) => user }
