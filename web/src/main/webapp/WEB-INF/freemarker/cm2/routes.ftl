@@ -121,4 +121,4 @@ TODO grab values from the Routes object in code, as that's pretty equivalent and
 
 <#macro feedbackBulkAdjustment assignment><@_u page="/admin/assignments/${assignment.id}/feedback/bulk-adjustment"/></#macro>
 <#macro feedbackAdjustmentForm assignment studentid><@_u page="/admin/assignments/${assignment.id}/feedback/adjustments/${studentid}"/></#macro>
-<#macro generateGradesForMarks assignment><@_u page="/admin/module/assignments/${assignment.id}/generate-grade"/></#macro>
+<#macro generateGradesForMarks assignment><@_u page="/admin/assignments/${assignment.id}/generate-grade"/></#macro>
