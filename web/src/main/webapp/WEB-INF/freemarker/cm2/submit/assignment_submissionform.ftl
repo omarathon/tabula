@@ -1,9 +1,4 @@
-<#if !submission?? && assignment.collectSubmissions && assignment.alive>
-	<#include "_assignment_deadline.ftl" />
-</#if>
-
 <#if ((canSubmit && !submission??) || canReSubmit) && submitAssignmentCommand??>
-
 	<#if submission??>
 		<hr>
 		<h2>Re-submit</h2>
@@ -63,21 +58,37 @@
 		<@bs3form.labelled_form_group path="" labelText="Assignment information">
 			<div>
 				<#if !assignment.openEnded>
+					<#macro extensionButtonContents label assignment>
+						<a href="<@routes.cm2.extensionRequest assignment=assignment />?returnTo=<@routes.cm2.assignment assignment=assignment />" class="btn btn-default btn-xs">
+							${label}
+						</a>
+					</#macro>
+
+					<#macro extensionButton extensionRequested isExtended>
+						<#if extensionRequested>
+							<@extensionButtonContents "Review extension request" assignment />
+						<#elseif !isExtended && assignment.newExtensionsCanBeRequested>
+							<@extensionButtonContents "Request an extension" assignment />
+						</#if>
+					</#macro>
+
 					<#assign time_remaining = durationFormatter(assignment.closeDate) />
 					<p>
-						<span>Assignment due:</span> <@fmt.date date=assignment.closeDate />,
-						<span>${time_remaining}</span>.
-
 						<#if isExtended>
 							<#assign extension_time_remaining = durationFormatter(extension.expiryDate) />
 
-						<span>Assignment due:</span> You have an extension until <@fmt.date date=extension.expiryDate />,
-							<span>${extension_time_remaining}</span>.
+							<span>Assignment due:</span> You have an extension until <@fmt.date date=extension.expiryDate />,
+							<span class="very-subtle">${extension_time_remaining}</span>.
+							<@extensionButton extensionRequested isExtended />
+						<#else>
+							<span>Assignment due:</span> <@fmt.date date=assignment.closeDate /> -
+							<span class="very-subtle">${time_remaining}</span>.
+							<@extensionButton extensionRequested isExtended />
 						</#if>
 					</p>
 
 					<#if assignment.allowResubmission && (!assignment.closed || isExtended)>
-						<p>
+						<p class="very-subtle">
 							You can submit to this assignment multiple times up to the deadline. Only
 							the latest submission of your work will be accepted, and you will not be able
 							to change this once the deadline has passed.
@@ -85,13 +96,13 @@
 					</#if>
 
 					<#if assignment.allowLateSubmissions>
-						<p>
+						<p class="very-subtle">
 							You can submit<#if assignment.allowResubmission> once only</#if> to this assignment after the deadline, but your mark
 							may be affected.
 						</p>
 					</#if>
 				<#else>
-					<p>
+					<p class="very-subtle">
 						This assignment does not have a deadline.
 
 						<#if assignment.allowResubmission>
@@ -117,26 +128,12 @@
 				</div>
 			</#if>
 
-			<#if features.privacyStatement>
-				<@bs3form.labelled_form_group path="" labelText="Privacy statement">
-					<p>
-						The data on this form relates to your submission of
-						coursework. The date and time of your submission, your
-						identity and the work you have submitted will all be
-						stored, but will not be used for any purpose other than
-						administering and recording your coursework submission.
-					</p>
-				</@bs3form.labelled_form_group>
-			</#if>
-
 			<#if assignment.displayPlagiarismNotice>
 				<@bs3form.labelled_form_group path="" labelText="Plagiarism">
 					<p>
-						Work submitted to the University of Warwick for official
-						assessment must be all your own work and any parts that
-						are copied or used from other people must be appropriately
-						acknowledged. Failure to properly acknowledge any copied
-						work is plagiarism and may result in a mark of zero.
+						Work submitted to the University of Warwick for official assessment must be all your own work and any parts
+						that are copied or used from other people must be appropriately acknowledged. Failure to properly acknowledge
+						any copied work is plagiarism and may result in a mark of zero.
 					</p>
 				</@bs3form.labelled_form_group>
 
@@ -147,11 +144,20 @@
 						I confirm that this assignment is all my own work
 					</@bs3form.checkbox>
 				</@bs3form.labelled_form_group>
+			</#if>
 
+			<#if features.privacyStatement>
+				<@bs3form.labelled_form_group path="" labelText="Privacy statement">
+					<p>
+						The data on this form relates to your submission of coursework. The date and time of your submission,
+						your identity and the work you have submitted will be stored. We will not use this data for any purpose
+						other than administering and recording your coursework submission.
+					</p>
+				</@bs3form.labelled_form_group>
 			</#if>
 		</div>
 
-	<div class="submit-buttons">
+		<div class="submit-buttons">
 			<input class="btn btn-large btn-primary" type="submit" value="Submit">
 			<a class="btn btn-default" href="<@routes.cm2.home />">Cancel</a>
 			<#if willCheckpointBeCreated>
@@ -161,6 +167,14 @@
 			</#if>
 		</div>
 	</@f.form>
+
+	<script>
+		jQuery(function($){
+			$('form#submitAssignmentCommand').on('submit', function(){
+				$.post('<@routes.cm2.submission_attempt assignment />')
+			});
+		});
+	</script>
 
 <#elseif !submission??>
 

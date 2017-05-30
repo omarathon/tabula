@@ -26,7 +26,7 @@ ext {
     jacksonVersion = "2.6.5"
     elasticsearchVersion = "2.1.1"
     dispatchVersion = "0.8.10"
-    poiVersion = "3.13"
+    poiVersion = "3.16"
     tilesVersion = "3.0.5"
     jcloudsVersion = "2.0.0"
     warwickUtilsVersion = "20170503"

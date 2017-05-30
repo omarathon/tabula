@@ -7,7 +7,7 @@ import uk.ac.warwick.tabula._
 import uk.ac.warwick.tabula.data.model._
 import uk.ac.warwick.tabula.permissions.PermissionsTarget
 import uk.ac.warwick.tabula.services.NotificationListener
-import uk.ac.warwick.tabula.web.views.AutowiredTextRendererComponent
+import uk.ac.warwick.tabula.web.views.{AutowiredTextRendererComponent, TextRendererComponent}
 import uk.ac.warwick.util.mywarwick.MyWarwickService
 import uk.ac.warwick.util.mywarwick.model.request.{Activity, Tag}
 
@@ -15,7 +15,7 @@ import scala.collection.JavaConverters._
 import scala.language.existentials
 
 trait MyWarwickNotificationListener extends NotificationListener {
-	self: AutowiredTextRendererComponent with AutowiringFeaturesComponent with AutowiringMyWarwickServiceComponent =>
+	self: TextRendererComponent with FeaturesComponent with MyWarwickServiceComponent with TopLevelUrlComponent =>
 
 	private def toMyWarwickActivity(notification: Notification[_ >: Null <: ToEntityReference, _]): Option[Activity] = try {
 		val recipients = notification.recipientNotificationInfos.asScala
@@ -48,7 +48,7 @@ trait MyWarwickNotificationListener extends NotificationListener {
 			val activity = new Activity(
 				recipients.toSet.asJava,
 				notification.title,
-				topLevelUrl + notification.url,
+				toplevelUrl + notification.url,
 				textRenderer.renderTemplate(notification.content.template, notification.content.model),
 				notification.notificationType
 			)
@@ -82,10 +82,10 @@ class AutowiringMyWarwickNotificationListener extends MyWarwickNotificationListe
 	with AutowiredTextRendererComponent
 	with AutowiringFeaturesComponent
 	with AutowiringMyWarwickServiceComponent
+	with AutowiringTopLevelUrlComponent
 
 trait AutowiringMyWarwickServiceComponent extends MyWarwickServiceComponent {
 	var myWarwickService: MyWarwickService = Wire[MyWarwickService]
-	var topLevelUrl: String = Wire.property("${toplevel.url}")
 }
 
 trait MyWarwickServiceComponent {

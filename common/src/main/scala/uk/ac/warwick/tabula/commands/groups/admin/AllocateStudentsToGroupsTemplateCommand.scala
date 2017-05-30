@@ -1,10 +1,12 @@
 package uk.ac.warwick.tabula.commands.groups.admin
 
+import org.apache.poi.ss.usermodel.{Cell, DataValidation, Row, Sheet}
 import org.apache.poi.ss.util.CellRangeAddressList
-import org.apache.poi.xssf.usermodel._
+import org.apache.poi.xssf.streaming.SXSSFWorkbook
+import org.apache.poi.xssf.usermodel.XSSFDataValidationHelper
 import uk.ac.warwick.tabula.commands._
-import uk.ac.warwick.tabula.data.model.{Member, Module, StudentMember}
 import uk.ac.warwick.tabula.data.model.groups.SmallGroupSet
+import uk.ac.warwick.tabula.data.model.{Member, Module, StudentMember}
 import uk.ac.warwick.tabula.permissions.Permissions
 import uk.ac.warwick.tabula.services._
 import uk.ac.warwick.tabula.system.permissions.{PermissionsChecking, PermissionsCheckingMethods, RequiresPermissionsChecking}
@@ -36,11 +38,11 @@ class AllocateStudentsToGroupsTemplateCommandInternal(val module: Module, val se
 		new ExcelView("Allocation for " + set.name +  ".xlsx", workbook)
 	}
 
-	def generateWorkbook(): XSSFWorkbook = {
+	def generateWorkbook(): SXSSFWorkbook = {
 		val groups = set.groups.asScala.toList
 		val setUsers = removePermanentlyWithdrawn(set.allStudents)
-		val workbook = new XSSFWorkbook()
-		val sheet: XSSFSheet = generateAllocationSheet(workbook)
+		val workbook = new SXSSFWorkbook
+		val sheet = generateAllocationSheet(workbook)
 		generateGroupLookupSheet(workbook)
 		generateGroupDropdowns(sheet, groups, setUsers.size)
 
@@ -64,7 +66,7 @@ class AllocateStudentsToGroupsTemplateCommandInternal(val module: Module, val se
 		workbook
 	}
 
-	def createUnprotectedCell(workbook: XSSFWorkbook, row: XSSFRow, col: Int, value: String = ""): XSSFCell = {
+	def createUnprotectedCell(workbook: SXSSFWorkbook, row: Row, col: Int, value: String = ""): Cell = {
 		val lockedCellStyle = workbook.createCellStyle()
 		lockedCellStyle.setLocked(false)
 		val cell = row.createCell(col)
@@ -83,7 +85,7 @@ class AllocateStudentsToGroupsTemplateCommandInternal(val module: Module, val se
 	}
 
 	// attaches the data validation to the sheet
-	def generateGroupDropdowns(sheet: XSSFSheet, groups: Seq[_], totalStudents: Int) {
+	def generateGroupDropdowns(sheet: Sheet, groups: Seq[_], totalStudents: Int) {
 		var lastRow =  totalStudents
 		if(lastRow == 0) lastRow = 1
 		val dropdownRange = new CellRangeAddressList(1, lastRow, 2, 2)
@@ -93,20 +95,20 @@ class AllocateStudentsToGroupsTemplateCommandInternal(val module: Module, val se
 	}
 
 	// Excel data validation - will only accept the values fed to this method, also puts a dropdown on each cell
-	def getDataValidation(groups: Seq[_], sheet: XSSFSheet, addressList: CellRangeAddressList): XSSFDataValidation = {
-		val dvHelper = new XSSFDataValidationHelper(sheet)
-		val dvConstraint = dvHelper.createFormulaListConstraint(groupLookupSheetName + "!$A$2:$A$" + (groups.length + 1)).asInstanceOf[XSSFDataValidationConstraint]
-		val validation = dvHelper.createValidation(dvConstraint, addressList).asInstanceOf[XSSFDataValidation]
+	def getDataValidation(groups: Seq[_], sheet: Sheet, addressList: CellRangeAddressList): DataValidation = {
+		val dvHelper = new XSSFDataValidationHelper(null)
+		val dvConstraint = dvHelper.createFormulaListConstraint(groupLookupSheetName + "!$A$2:$A$" + (groups.length + 1))
+		val validation = dvHelper.createValidation(dvConstraint, addressList)
 
 		validation.setShowErrorBox(true)
 		validation
 	}
 
-	def generateGroupLookupSheet(workbook: XSSFWorkbook): XSSFSheet = {
-		val groupSheet: XSSFSheet = workbook.createSheet(groupLookupSheetName)
+	def generateGroupLookupSheet(workbook: SXSSFWorkbook): Sheet = {
+		val groupSheet = workbook.createSheet(groupLookupSheetName)
 
 		for (group <- set.groups.asScala) {
-			val row = groupSheet.createRow(groupSheet.getLastRowNum() + 1)
+			val row = groupSheet.createRow(groupSheet.getLastRowNum + 1)
 			row.createCell(0).setCellValue(group.name)
 			row.createCell(1).setCellValue(group.id)
 		}
@@ -115,8 +117,9 @@ class AllocateStudentsToGroupsTemplateCommandInternal(val module: Module, val se
 		groupSheet
 	}
 
-	def generateAllocationSheet(workbook: XSSFWorkbook): XSSFSheet =  {
+	def generateAllocationSheet(workbook: SXSSFWorkbook): Sheet =  {
 		val sheet = workbook.createSheet(allocateSheetName)
+		sheet.trackAllColumnsForAutoSizing()
 
 		// add header row
 		val header = sheet.createRow(0)
@@ -131,7 +134,7 @@ class AllocateStudentsToGroupsTemplateCommandInternal(val module: Module, val se
 		sheet
 	}
 
-	def formatWorkbook(workbook: XSSFWorkbook): Unit = {
+	def formatWorkbook(workbook: SXSSFWorkbook): Unit = {
 		val style = workbook.createCellStyle
 		val format = workbook.createDataFormat
 

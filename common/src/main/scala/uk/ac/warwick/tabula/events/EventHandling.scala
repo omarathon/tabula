@@ -32,7 +32,7 @@ trait EventHandling extends Logging {
 					listener.beforeCommand(event)
 					val result = f
 					val resultEvent = Event.resultFromDescribable(d, result, event.id)
-					listener.afterCommand(resultEvent, result)
+					listener.afterCommand(resultEvent, result, event)
 					result
 				} catch {
 					case e: Throwable => {

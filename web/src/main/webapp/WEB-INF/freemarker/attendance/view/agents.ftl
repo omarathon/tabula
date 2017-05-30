@@ -28,7 +28,7 @@
 	<table class="agents table table-striped">
 		<thead class="fix-header pad-when-fixed">
 			<tr>
-				<th>${relationshipType.agentRole?capitalize}s</th>
+				<th>${relationshipType.agentRole?capitalize}</th>
 				<th>${relationshipType.studentRole?capitalize}s</th>
 				<th>Unrecorded</th>
 				<th>Missed</th>

@@ -1,8 +1,7 @@
 package uk.ac.warwick.tabula.web.controllers.coursework
 
-import uk.ac.warwick.spring.Wire
-import uk.ac.warwick.tabula.web.controllers.BaseController
 import uk.ac.warwick.tabula.data.model.{Member, RuntimeMember}
+import uk.ac.warwick.tabula.web.controllers.BaseController
 
 abstract class OldCourseworkController extends BaseController with CourseworkBreadcrumbs with CurrentMemberComponent {
 	final def optionalCurrentMember: Option[Member] = user.profile
@@ -12,6 +11,4 @@ abstract class OldCourseworkController extends BaseController with CourseworkBre
 trait CurrentMemberComponent {
 	def optionalCurrentMember: Option[Member]
 	def currentMember: Member
-
-	final var urlPrefix: String = Wire.property("${cm1.prefix}")
 }

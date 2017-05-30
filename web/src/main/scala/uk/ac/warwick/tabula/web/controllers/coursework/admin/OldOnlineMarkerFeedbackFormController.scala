@@ -13,13 +13,13 @@ import uk.ac.warwick.tabula.data.model.{Assignment, MarkingMethod, Module}
 import uk.ac.warwick.tabula.web.Mav
 import uk.ac.warwick.userlookup.User
 import uk.ac.warwick.tabula.data.model.MarkingState.{MarkingCompleted, Rejected}
-import uk.ac.warwick.tabula.commands.coursework.feedback.{GenerateGradesFromMarkCommand, OnlineMarkerFeedbackFormCommand}
+import uk.ac.warwick.tabula.commands.coursework.feedback.{OldGenerateGradesFromMarkCommand, OldOnlineMarkerFeedbackFormCommand}
 
 @Profile(Array("cm1Enabled")) @Controller
 @RequestMapping(Array("/${cm1.prefix}/admin/module/{module}/assignments/{assignment}/marker/{marker}/feedback/online/{student}"))
 class OldOnlineMarkerFeedbackFormController extends OldCourseworkController {
 
-	validatesSelf[OnlineMarkerFeedbackFormCommand]
+	validatesSelf[OldOnlineMarkerFeedbackFormCommand]
 
 	@ModelAttribute("command")
 	def command(
@@ -28,17 +28,17 @@ class OldOnlineMarkerFeedbackFormController extends OldCourseworkController {
 		@PathVariable assignment: Assignment,
 		@PathVariable marker: User,
 		submitter: CurrentUser
-	) =	OnlineMarkerFeedbackFormCommand(
+	) =	OldOnlineMarkerFeedbackFormCommand(
 		mandatory(module),
 		mandatory(assignment),
 		student,
 		marker,
 		submitter,
-		GenerateGradesFromMarkCommand(mandatory(module), mandatory(assignment))
+		OldGenerateGradesFromMarkCommand(mandatory(module), mandatory(assignment))
 	)
 
 	@RequestMapping(method = Array(GET, HEAD))
-	def showForm(@ModelAttribute("command") command: OnlineMarkerFeedbackFormCommand, errors: Errors): Mav = {
+	def showForm(@ModelAttribute("command") command: OldOnlineMarkerFeedbackFormCommand, errors: Errors): Mav = {
 
 		val isCompleted = command.allMarkerFeedbacks.forall(_.state == MarkingCompleted)
 
@@ -48,7 +48,7 @@ class OldOnlineMarkerFeedbackFormController extends OldCourseworkController {
 		val allCompletedMarkerFeedback = parentFeedback.getAllCompletedMarkerFeedback
 
 
-		Mav(s"$urlPrefix/admin/assignments/feedback/marker_online_feedback" ,
+		Mav("coursework/admin/assignments/feedback/marker_online_feedback" ,
 			"command" -> command,
 			"isCompleted" -> isCompleted,
 			"isRejected" -> isRejected,
@@ -63,7 +63,7 @@ class OldOnlineMarkerFeedbackFormController extends OldCourseworkController {
 	}
 
 	@RequestMapping(method = Array(POST))
-	def submit(@ModelAttribute("command") @Valid command: OnlineMarkerFeedbackFormCommand, errors: Errors): Mav = {
+	def submit(@ModelAttribute("command") @Valid command: OldOnlineMarkerFeedbackFormCommand, errors: Errors): Mav = {
 		if (errors.hasErrors) {
 			showForm(command, errors)
 		} else {

@@ -1,7 +1,7 @@
 <#--
 	Used in /WEB-INF/freemarker/home/_student.ftl and assignment_submissionform.ftl
 -->
-<#import "../admin/assignments/submissionsandfeedback/_submission_details.ftl" as sd />
+<#import "*/coursework_components.ftl" as components />
 
 <#if !assignment.openEnded>
 	<#macro extensionButtonContents label assignment>
@@ -33,12 +33,12 @@
 	<#elseif assignment.closed>
 		<div class="alert alert-info">
 			<#if hasActiveExtension>
-				<#assign latenesstooltip><#if isSelf>"<@sd.lateness submission assignment user />"<#else>"<@sd.lateness submission assignment student />"</#if></#assign>
+				<#assign latenesstooltip><#if isSelf>"<@components.lateness submission assignment user />"<#else>"<@components.lateness submission assignment student />"</#if></#assign>
 				<div>${extension_time_remaining} <span class="label label-warning use-tooltip" title=${latenesstooltip} data-container="body">Late</span></div>
 				Extension deadline was <@fmt.date date=extension.expiryDate />
 				</div>
 			<#else>
-				<#assign latenesstooltip><#if isSelf>"<@sd.lateness submission assignment user />"<#else>"<@sd.lateness submission assignment student />"</#if></#assign>
+				<#assign latenesstooltip><#if isSelf>"<@components.lateness submission assignment user />"<#else>"<@components.lateness submission assignment student />"</#if></#assign>
 				<div>${time_remaining} <span class="label label-warning use-tooltip" title=${latenesstooltip} data-container="body">Late</span></div>
 				Deadline was <@fmt.date date=assignment.closeDate />
 			</#if>

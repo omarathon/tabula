@@ -18,8 +18,6 @@ import uk.ac.warwick.tabula.services.attendancemonitoring.AttendanceMonitoringSe
 import uk.ac.warwick.tabula.services.fileserver.RenderableFile
 import uk.ac.warwick.tabula.web.Mav
 import uk.ac.warwick.tabula.{AcademicYear, ItemNotFoundException}
-import uk.ac.warwick.tabula.JavaImports._
-import scala.collection.JavaConverters._
 
 import scala.collection.JavaConverters._
 
@@ -40,7 +38,6 @@ class AttendanceNoteController extends AttendanceController {
 
 		val mav = Mav("attendance/note/view_note",
 			"attendanceNote" -> attendanceNote,
-			"academicYear" -> academicYear.startYear.toString,
 			"updatedBy" -> userLookup.getUserByUserId(attendanceNote.updatedBy).getFullName,
 			"updatedDate" -> DateBuilder.format(attendanceNote.updatedDate),
 			"isModal" -> ajax

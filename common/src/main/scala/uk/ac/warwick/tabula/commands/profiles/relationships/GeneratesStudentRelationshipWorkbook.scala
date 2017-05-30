@@ -1,7 +1,9 @@
 package uk.ac.warwick.tabula.commands.profiles.relationships
 
+import org.apache.poi.ss.usermodel.{Row, Sheet}
 import org.apache.poi.ss.util.{CellRangeAddressList, WorkbookUtil}
-import org.apache.poi.xssf.usermodel._
+import org.apache.poi.xssf.streaming.SXSSFWorkbook
+import org.apache.poi.xssf.usermodel.XSSFDataValidationHelper
 import uk.ac.warwick.tabula.data.model.{Department, Member, StudentRelationshipType}
 
 trait GeneratesStudentRelationshipWorkbook {
@@ -9,9 +11,9 @@ trait GeneratesStudentRelationshipWorkbook {
 	private val agentLookupSheetName = "AgentLookup"
 	private val sheetPassword = "roygbiv"
 
-	def generateWorkbook(allAgents: Seq[Member], allAllocations: Seq[(Member, Seq[Member])], department: Department, relationshipType: StudentRelationshipType): XSSFWorkbook = {
-		val workbook = new XSSFWorkbook()
-		val sheet: XSSFSheet = generateAllocationSheet(workbook, department, relationshipType)
+	def generateWorkbook(allAgents: Seq[Member], allAllocations: Seq[(Member, Seq[Member])], department: Department, relationshipType: StudentRelationshipType): SXSSFWorkbook = {
+		val workbook = new SXSSFWorkbook
+		val sheet = generateAllocationSheet(workbook, department, relationshipType)
 		generateAgentLookupSheet(workbook, allAgents)
 		generateAgentDropdowns(sheet, allAgents, allAllocations)
 
@@ -38,8 +40,8 @@ trait GeneratesStudentRelationshipWorkbook {
 		workbook
 	}
 
-	private def generateAgentLookupSheet(workbook: XSSFWorkbook, agents: Seq[Member]) = {
-		val agentSheet: XSSFSheet = workbook.createSheet(agentLookupSheetName)
+	private def generateAgentLookupSheet(workbook: SXSSFWorkbook, agents: Seq[Member]) = {
+		val agentSheet = workbook.createSheet(agentLookupSheetName)
 
 		for (agent <- agents) {
 			val row = agentSheet.createRow(agentSheet.getLastRowNum + 1)
@@ -52,7 +54,7 @@ trait GeneratesStudentRelationshipWorkbook {
 	}
 
 	// attaches the data validation to the sheet
-	private def generateAgentDropdowns(sheet: XSSFSheet, agents: Seq[_], allAllocations: Seq[_]) {
+	private def generateAgentDropdowns(sheet: Sheet, agents: Seq[_], allAllocations: Seq[_]) {
 		if (agents.nonEmpty) {
 			val dropdownRange = new CellRangeAddressList(1, allAllocations.length, 2, 2)
 			val validation = getDataValidation(agents, sheet, dropdownRange)
@@ -62,18 +64,16 @@ trait GeneratesStudentRelationshipWorkbook {
 	}
 
 	// Excel data validation - will only accept the values fed to this method, also puts a dropdown on each cell
-	private def getDataValidation(agents: Seq[_], sheet: XSSFSheet, addressList: CellRangeAddressList) = {
-		val dvHelper = new XSSFDataValidationHelper(sheet)
-		val dvConstraint = dvHelper.createFormulaListConstraint(
-			agentLookupSheetName + "!$A$2:$A$" + (agents.length + 1)
-		).asInstanceOf[XSSFDataValidationConstraint]
-		val validation = dvHelper.createValidation(dvConstraint, addressList).asInstanceOf[XSSFDataValidation]
+	private def getDataValidation(agents: Seq[_], sheet: Sheet, addressList: CellRangeAddressList) = {
+		val dvHelper = new XSSFDataValidationHelper(null)
+		val dvConstraint = dvHelper.createFormulaListConstraint(agentLookupSheetName + "!$A$2:$A$" + (agents.length + 1))
+		val validation = dvHelper.createValidation(dvConstraint, addressList)
 
 		validation.setShowErrorBox(true)
 		validation
 	}
 
-	private def createUnprotectedCell(workbook: XSSFWorkbook, row: XSSFRow, col: Int, value: String = "") = {
+	private def createUnprotectedCell(workbook: SXSSFWorkbook, row: Row, col: Int, value: String = "") = {
 		val lockedCellStyle = workbook.createCellStyle()
 		lockedCellStyle.setLocked(false)
 		val cell = row.createCell(col)
@@ -82,7 +82,7 @@ trait GeneratesStudentRelationshipWorkbook {
 		cell
 	}
 
-	private def formatWorkbook(workbook: XSSFWorkbook, department: Department, relationshipType: StudentRelationshipType) = {
+	private def formatWorkbook(workbook: SXSSFWorkbook, department: Department, relationshipType: StudentRelationshipType) = {
 		val style = workbook.createCellStyle
 		val format = workbook.createDataFormat
 
@@ -102,8 +102,9 @@ trait GeneratesStudentRelationshipWorkbook {
 
 	}
 
-	private def generateAllocationSheet(workbook: XSSFWorkbook, department: Department, relationshipType: StudentRelationshipType): XSSFSheet =  {
+	private def generateAllocationSheet(workbook: SXSSFWorkbook, department: Department, relationshipType: StudentRelationshipType): Sheet =  {
 		val sheet = workbook.createSheet(allocateSheetName(department, relationshipType))
+		sheet.trackAllColumnsForAutoSizing()
 
 		// add header row
 		val header = sheet.createRow(0)

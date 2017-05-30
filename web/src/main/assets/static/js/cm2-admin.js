@@ -1,9 +1,12 @@
 (function ($) { "use strict";
-	jQuery.fn.tabulaAjaxForm = function(beforeSubmit, callback, typeForm) {
+	var exports = {};
+
+	$.fn.tabulaAjaxForm = function(beforeSubmit, callback, typeForm) {
 		var $row = $(this);
 		var $form = $row.find('form.ajax-form');
 		prepareAjaxForm($form, $row, beforeSubmit, callback, typeForm);
 	};
+
 	$.fn.bindFormHelpers = function() {
 		var $this = $(this);
 		// bind form helpers
@@ -105,6 +108,7 @@
 				$suggestedPenalty.addClass("hide");
 			}
 		});
+
 		// extension management - on submit replace html with validation errors or redirect
 		$body.on('submit', 'form.modify-extension', function(e){
 			e.preventDefault();
@@ -323,5 +327,213 @@
 		});
 	};
 
+	/**
+	 * Special case for downloading submissions as PDF.
+	 * Does a check for non PDF files in submissions before fetching the download
+	 */
+	$(function(){
+		$('a.download-pdf').on('click', function(e){
+			var $this = $(this);
+			e.preventDefault();
+			if(!$this.hasClass("disabled") && $this.closest('.disabled').length === 0) {
+				var $modal = $('#download-pdf-modal'), action = this.href;
+				if ($this.data('href')) {
+					action = $this.data('href')
+				}
+				var postData = $this.closest('div.form-post-container').find('.collection-checkbox:checked').map(function(){
+					var $input = $(this);
+					return $input.prop('name') + '=' + $input.val();
+				}).get().join('&');
+				$.post(action, postData, function(data){
+					if (data.submissionsWithNonPDFs.length === 0) {
+						// Use native click instead of trigger because there's no click handler for the marker version
+						$modal.find('.btn.btn-primary').get(0).click();
+					} else {
+						$modal.find('.count').html(data.submissionsWithNonPDFs.length);
+						var $submissionsContainer = $modal.find('.submissions').empty();
+						$.each(data.submissionsWithNonPDFs, function(i, submission){
+							var fileList = $('<ul/>');
+							$.each(submission.nonPDFFiles, function(i, file){
+								fileList.append($('<li/>').html(file));
+							});
+							$submissionsContainer.append($('<li/>').append(
+								(submission.name.length > 0) ? submission.name + ' (' + submission.universityId + ')' : submission.universityId
+							).append(fileList))
+						});
+						$modal.modal('show');
+					}
+				});
+			}
+		});
+	});
 
+    exports.initBigList = function ($scope) {
+		$scope = $scope || $('body');
+
+		var biglistOptions = {
+			setup: function() {
+				var $container = this, $outerContainer = $container.closest('div.form-post-container');
+				// #delete-selected-button won't work for >1 set of checkboxes on a page.
+				$('#download-selected-button, #delete-selected-button', $outerContainer).click(function(event){
+					event.preventDefault();
+
+					var $checkedBoxes = $(".collection-checkbox:checked", $container);
+					if ($container.data('checked') !== 'none') {
+						var $form = $('<form />').attr({method:'POST',action:this.href}).hide();
+						$form.append($checkedBoxes.clone());
+						$(document.body).append($form);
+						$form.submit();
+					}
+					return false;
+				});
+
+				$('#mark-plagiarised-selected-button:not(.disabled)', $outerContainer).click(function(event){
+					event.preventDefault();
+
+					var $checkedBoxes = $(".collection-checkbox:checked", $container);
+
+					if ($container.data('checked') !== 'none') {
+
+						var $form = $('<form></form>').attr({method:'POST', action: this.href}).hide();
+						$form.append($checkedBoxes.clone());
+
+						if ($container.data("all-plagiarised") === true) {
+							$form.append("<input type='hidden' name='markPlagiarised' value='false'>");
+						}
+
+						$(document.body).append($form);
+						$form.submit();
+					}
+					return false;
+				});
+
+				$('.form-post', $outerContainer).click(function(event){
+					event.preventDefault();
+					var $this = $(this);
+					if(!$this.hasClass("disabled")) {
+						var action = this.href;
+						if ($this.data('href')) {
+							action = $this.data('href')
+						}
+
+						var $form = $('<form />').attr({method: 'POST', action: action}).hide();
+						var doFormSubmit = false;
+
+						if ($container.data('checked') !== 'none' || $this.closest('.must-have-selected').length === 0) {
+							var $checkedBoxes = $(".collection-checkbox:checked", $container);
+							$form.append($checkedBoxes.clone());
+
+							var $extraInputs = $(".post-field", $container);
+							$form.append($extraInputs.clone());
+
+							doFormSubmit = true;
+						}
+
+						if ($this.hasClass('include-filter') && ($('.filter-form').length > 0)) {
+							var $inputs = $(':input', '.filter-form:not("#floatedHeaderContainer *")');
+							$form.append($inputs.clone());
+
+							doFormSubmit = true;
+						}
+
+						if (doFormSubmit) {
+							$(document.body).append($form);
+							$form.submit();
+						} else {
+							return false;
+						}
+					}
+				});
+
+				$('.form-post-single', $outerContainer).click(function(event){
+					event.preventDefault();
+					var $this = $(this);
+					if(!$this.hasClass("disabled")) {
+						var action = this.href;
+						if ($this.data('href')) {
+							action = $this.data('href')
+						}
+
+						var $form = $('<form />').attr({method: 'POST', action: action}).hide();
+						var doFormSubmit = true;
+
+						var $checkedBoxes = $(".collection-checkbox", $this.closest('itemContainer'));
+						$form.append($checkedBoxes.clone().prop('checked', true));
+
+						var $extraInputs = $(".post-field", $this.closest('itemContainer'));
+						$form.append($extraInputs.clone());
+
+						if (doFormSubmit) {
+							$(document.body).append($form);
+							$form.submit();
+						} else {
+							return false;
+						}
+					}
+				});
+			},
+
+			// rather than just toggling the class check the state of the checkbox to avoid silly errors
+			onChange : function() {
+				this.closest(".itemContainer").toggleClass("selected", this.is(":checked"));
+				var $checkedBoxes = $(".collection-checkbox:checked");
+
+				var allPlagiarised = false;
+
+				if ($checkedBoxes.length > 0) {
+					allPlagiarised = true;
+					$checkedBoxes.each(function(index){
+						var $checkBox = $(this);
+						if ($checkBox.closest('tr').data('plagiarised') != true) {
+							allPlagiarised = false;
+						}
+					});
+				}
+				$('.submission-feedback-list,.submission-list,.coursework-progress-table').data("all-plagiarised", allPlagiarised);
+				if (allPlagiarised) {
+					$('#mark-plagiarised-selected-button').html('<i class="icon-exclamation-sign icon-fixed-width"></i> Unmark plagiarised');
+				} else {
+					$('#mark-plagiarised-selected-button').html('<i class="icon-exclamation-sign icon-fixed-width"></i> Mark plagiarised');
+				}
+			}
+		};
+
+		$('.submission-feedback-list, .submission-list, .feedback-list, .marker-feedback-list, .coursework-progress-table, .expanding-table', $scope).not('.marker-feedback-table').bigList(
+			$.extend(biglistOptions, {
+				onSomeChecked : function() {
+					$('.must-have-selected').removeClass('disabled');
+				},
+
+				onNoneChecked : function() {
+					$('.must-have-selected').addClass('disabled');
+				}
+			})
+		);
+	};
+	$(function () { exports.initBigList(); });
+
+	exports.equalHeightTabContent = function ($scope) {
+		$scope = $scope || $('body');
+		$scope.find('.tab-content-equal-height').each(function () {
+			var $container = $(this);
+			var maxHeight = 0;
+			$container.find('.tab-pane').each(function () {
+				var $pane = $(this);
+				if ($pane.is('.active')) {
+					var height = $pane.height();
+					maxHeight = (height > maxHeight) ? height : maxHeight;
+				} else {
+					$pane.addClass('active');
+					var height = $pane.height();
+					maxHeight = (height > maxHeight) ? height : maxHeight;
+					$pane.removeClass('active');
+				}
+			});
+			$container.find('.tab-pane').height(maxHeight);
+		});
+	};
+
+	// take anything we've attached to "exports" and add it to the global "Courses"
+	// we use extend() to add to any existing variable rather than clobber it
+	window.Coursework = $.extend(window.Coursework, exports);
 })(jQuery);

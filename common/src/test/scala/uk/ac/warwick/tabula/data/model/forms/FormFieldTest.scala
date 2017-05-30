@@ -21,7 +21,7 @@ class FormFieldTest extends TestBase with Mockito {
 		field.value should be (null)
 		field.value = "my comment\n\nwith newlines!"
 		field.value should be ("my comment\n\nwith newlines!")
-		field.formattedHtml should be ("<p>my comment</p><p>with newlines!</p>")
+		field.formattedHtml should be ("<p>my comment</p>\n<p>with newlines!</p>\n")
 		field.propertiesMap should be (Map("value" -> "my comment\n\nwith newlines!"))
 		field.template should be ("comment")
 	}
@@ -272,7 +272,7 @@ class FormFieldTest extends TestBase with Mockito {
 		val comment = new CommentField
 
 		comment.value = " Text.\nMore text.\n\n   <b>New</b> paragraph "
-		comment.formattedHtml should be ("<p> Text.\nMore text.</p><p>&lt;b&gt;New&lt;/b&gt; paragraph </p>")
+		comment.formattedHtml should be ("<p>Text.\nMore text.</p>\n<p>&lt;b&gt;New&lt;/b&gt; paragraph</p>\n")
 	}
 
 	@Test def fileFieldCustomProperties() {

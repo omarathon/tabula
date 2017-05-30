@@ -5,11 +5,14 @@ import org.springframework.context.annotation.Profile
 import org.springframework.stereotype.Controller
 import org.springframework.web.bind.annotation.{ModelAttribute, PathVariable, RequestMapping, RequestParam}
 import uk.ac.warwick.tabula.AcademicYear
+import uk.ac.warwick.tabula.cm2.web.Routes
 import uk.ac.warwick.tabula.commands.Appliable
 import uk.ac.warwick.tabula.commands.cm2.markingworkflows.{ListReusableWorkflowsCommand, ListReusableWorkflowsState}
 import uk.ac.warwick.tabula.data.model.Department
 import uk.ac.warwick.tabula.data.model.markingworkflow.CM2MarkingWorkflow
+import uk.ac.warwick.tabula.services.{AutowiringMaintenanceModeServiceComponent, AutowiringUserSettingsServiceComponent}
 import uk.ac.warwick.tabula.web.Mav
+import uk.ac.warwick.tabula.web.controllers.{AcademicYearScopedController, BaseController}
 
 @Profile(Array("cm2Enabled")) @Controller
 @RequestMapping(Array("/${cm2.prefix}/admin/department/{department}/{academicYear}/markingworkflows"))
@@ -34,7 +37,7 @@ class ListReusableMarkingWorkflowController extends CM2MarkingWorkflowController
 		val currentAcademicYear = AcademicYear.guessSITSAcademicYearByDate(DateTime.now)
 
 		commonCrumbs(
-			Mav(s"$urlPrefix/admin/workflows/list_reusable", Map(
+			Mav("cm2/admin/workflows/list_reusable", Map(
 				"department" -> department,
 				"academicYear" -> academicYear,
 				"workflows" -> cmd.apply(),
@@ -49,5 +52,16 @@ class ListReusableMarkingWorkflowController extends CM2MarkingWorkflowController
 		)
 
 	}
+
+}
+
+@Profile(Array("cm2Enabled")) @Controller
+@RequestMapping(Array("/${cm2.prefix}/admin/department/{department}/markingworkflows", "/${cm2.prefix}/admin/department/{department}/markingworkflows/**"))
+class ListReusableMarkingWorkflowRedirectController extends BaseController
+	with AcademicYearScopedController with AutowiringUserSettingsServiceComponent with AutowiringMaintenanceModeServiceComponent {
+
+	@RequestMapping
+	def redirect(@PathVariable department: Department) =
+		Redirect(Routes.admin.workflows(department, retrieveActiveAcademicYear(None).getOrElse(AcademicYear.guessSITSAcademicYearByDate(DateTime.now))))
 
 }

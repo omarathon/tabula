@@ -59,7 +59,6 @@ abstract class OnlineFeedbackCommand(val module: Module, val assignment: Assignm
 
 }
 
-
 object OnlineMarkerFeedbackCommand {
 	def apply(module: Module, assignment: Assignment, marker: User, submitter: CurrentUser, gradeGenerator: GeneratesGradesFromMarks) =
 		new OnlineMarkerFeedbackCommand(module, assignment, marker, submitter, gradeGenerator)
@@ -115,7 +114,6 @@ abstract class OnlineMarkerFeedbackCommand(
 	}
 }
 
-
 trait OnlineFeedbackPermissions extends RequiresPermissionsChecking {
 
 	self: OnlineFeedbackState =>
@@ -135,7 +133,6 @@ trait OnlineFeedbackState {
 	val marker: User
 	val submitter: CurrentUser
 }
-
 
 case class StudentFeedbackGraph(
 	student: User,

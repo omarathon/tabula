@@ -1,16 +1,22 @@
+<#import "*/cm2_macros.ftl" as cm2 />
 <#include "../_filters.ftl" />
 <#escape x as x?html><#compress>
 	<h1>Extensions</h1>
 
 	<div class="filters btn-group-group well well-small well-sm">
-		<#assign formAction><@routes.cm2.filterExtensions /></#assign>
+		<#assign formAction><@routes.cm2.filterExtensions academicYear /></#assign>
 		<@f.form
 			method="GET"
 			action="${formAction}"
 			commandName="command"
 			class="form-inline"
 		>
-			<button type="button" class="clear-all btn btn-xs">Clear all filters</button>
+			<button type="button" class="clear-all-filters btn btn-link">
+				<span class="fa-stack">
+					<i class="fa fa-filter fa-stack-1x"></i>
+					<i class="fa fa-ban fa-stack-2x"></i>
+				</span>
+			</button>
 
 			<#-- Department filter-->
 			<#assign placeholder = "All departments" />
@@ -33,7 +39,7 @@
 			<#assign moduleCustomPicker>
 				<div class="module-search input-append input-group">
 					<input class="module-search-query module-picker module prevent-reload form-control" type="text" value="" placeholder="Search for a module" />
-					<span class="add-on input-group-addon"><i class="icon-search fa fa-search"></i></span>
+					<span class="add-on input-group-addon"><i class="fa fa-search"></i></span>
 				</div>
 			</#assign>
 			<@filter name="modules" path="command.modules" placeholder=placeholder currentFilter=currentfilter allItems=command.allModules customPicker=moduleCustomPicker; module>

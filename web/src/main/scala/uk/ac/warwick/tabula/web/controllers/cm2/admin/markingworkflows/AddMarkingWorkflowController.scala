@@ -7,7 +7,7 @@ import org.springframework.stereotype.Controller
 import org.springframework.validation.Errors
 import org.springframework.web.bind.annotation.{ModelAttribute, PathVariable, RequestMapping}
 import uk.ac.warwick.tabula.AcademicYear
-import uk.ac.warwick.tabula.commands.cm2.markingworkflows.{AddMarkingWorkflowCommand, AddMarkingWorkflowState}
+import uk.ac.warwick.tabula.commands.cm2.markingworkflows.{AddMarkingWorkflowCommand, ModifyMarkingWorkflowState}
 import uk.ac.warwick.tabula.commands.{Appliable, SelfValidating}
 import uk.ac.warwick.tabula.data.model.markingworkflow.{CM2MarkingWorkflow, MarkingWorkflowType}
 import uk.ac.warwick.tabula.data.model.Department
@@ -18,7 +18,7 @@ import uk.ac.warwick.tabula.web.{Mav, Routes}
 @RequestMapping(Array("/${cm2.prefix}/admin/department/{department}/{academicYear}/markingworkflows/add"))
 class AddMarkingWorkflowController extends CM2MarkingWorkflowController {
 
-	type AddMarkingWorkflowCommand = Appliable[CM2MarkingWorkflow] with AddMarkingWorkflowState
+	type AddMarkingWorkflowCommand = Appliable[CM2MarkingWorkflow] with ModifyMarkingWorkflowState
 
 	validatesSelf[SelfValidating]
 
@@ -33,7 +33,7 @@ class AddMarkingWorkflowController extends CM2MarkingWorkflowController {
 		@ModelAttribute("addMarkingWorkflowCommand") cmd: AddMarkingWorkflowCommand,
 		errors: Errors): Mav = {
 		commonCrumbs(
-			Mav(s"$urlPrefix/admin/workflows/add_workflow", Map(
+			Mav("cm2/admin/workflows/add_workflow", Map(
 				"availableWorkflows" -> MarkingWorkflowType.values.sorted,
 				"canDeleteMarkers" -> true
 			)),

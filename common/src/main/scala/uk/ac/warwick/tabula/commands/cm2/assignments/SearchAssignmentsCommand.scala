@@ -40,5 +40,4 @@ trait SearchAssignmentCommandState {
 	var query: String = _
 
 	def module: Module
-
 }

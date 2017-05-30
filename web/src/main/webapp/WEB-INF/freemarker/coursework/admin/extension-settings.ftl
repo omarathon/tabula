@@ -1,7 +1,8 @@
 <#assign spring=JspTaglibs["/WEB-INF/tld/spring.tld"]>
 <#escape x as x?html>
 <h1>Extension settings for ${department.name}</h1>
-<@f.form method="post" class="form-horizontal" action="${url('/coursework/admin/department/${department.code}/settings/extensions')}" commandName="extensionSettingsCommand">
+<#assign submitUrl><@routes.coursework.extensionsettings department /></#assign>
+<@f.form method="post" class="form-horizontal" action=submitUrl commandName="extensionSettingsCommand">
 <#if features.extensions>
 	<@form.row>
 		<@form.label></@form.label>

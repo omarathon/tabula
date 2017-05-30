@@ -4,7 +4,7 @@ import org.springframework.context.annotation.Profile
 import org.springframework.stereotype.Controller
 import org.springframework.web.bind.annotation.{ModelAttribute, PathVariable, RequestMapping}
 import uk.ac.warwick.spring.Wire
-import uk.ac.warwick.tabula.PermissionDeniedException
+import uk.ac.warwick.tabula.{AutowiringTopLevelUrlComponent, PermissionDeniedException}
 import uk.ac.warwick.tabula.commands._
 import uk.ac.warwick.tabula.commands.cm2.feedback.DownloadFeedbackAsPdfCommand
 import uk.ac.warwick.tabula.commands.profiles.PhotosWarwickMemberPhotoUrlGeneratorComponent
@@ -23,18 +23,14 @@ class DownloadFeedbackAsPdfController extends CourseworkController {
 	var feedbackService: FeedbackService = Wire[FeedbackService]
 	var profileService: ProfileService = Wire.auto[ProfileService]
 
-	@ModelAttribute def command(
-		@PathVariable module: Module,
-		@PathVariable assignment: Assignment,
-		@PathVariable student: User): DownloadFeedbackAsPdfCommand = {
-
+	@ModelAttribute def command(@PathVariable assignment: Assignment, @PathVariable student: User): DownloadFeedbackAsPdfCommand = {
 		// We send a permission denied explicitly (this would normally be a 404 for feedback not found) because PDF handling is silly in Chrome et al
 		if (!user.loggedIn) {
 			throw new PermissionDeniedException(user, Permissions.AssignmentFeedback.Read, assignment)
 		}
 		val studentMember = profileService.getMemberByUniversityIdStaleOrFresh(student.getWarwickId)
 
-		DownloadFeedbackAsPdfCommand(module, assignment, mandatory(feedbackService.getAssignmentFeedbackByUsercode(assignment, student.getUserId)), studentMember)
+		DownloadFeedbackAsPdfCommand(assignment, mandatory(feedbackService.getAssignmentFeedbackByUsercode(assignment, student.getUserId)), studentMember)
 	}
 
 	@RequestMapping
@@ -46,7 +42,7 @@ class DownloadFeedbackAsPdfController extends CourseworkController {
 				"feedback" -> command.apply(),
 				"studentId" -> student.universityId
 			)
-		) with FreemarkerXHTMLPDFGeneratorComponent with AutowiredTextRendererComponent with PhotosWarwickMemberPhotoUrlGeneratorComponent
+		) with FreemarkerXHTMLPDFGeneratorComponent with AutowiredTextRendererComponent with PhotosWarwickMemberPhotoUrlGeneratorComponent with AutowiringTopLevelUrlComponent
 	}
 
 }

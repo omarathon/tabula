@@ -181,7 +181,7 @@
 				</#local>
 			<#elseif !assignment.opened>
 				<#local submissionStatus>
-					<strong>Not open yet</strong>
+					<strong>Assignment open:</strong> <span class="use-tooltip" title="<@fmt.dateToWeek assignment.openDate />" data-html="true"><@fmt.date date=assignment.openDate /> - ${durationFormatter(assignment.openDate)}</span>
 				</#local>
 			<#elseif assignment.openEnded>
 				<#local submissionStatus>
@@ -367,7 +367,7 @@
 	</#if>
 </#macro>
 
-<#macro marker_assignment_list id title assignments expand_by_default=true>
+<#macro marker_assignment_list id title assignments verb="Mark" expand_by_default=true>
 	<span id="${id}-container">
 		<#local has_assignments = (assignments!?size gt 0) />
 		<div id="${id}" class="striped-section marker-assignment-list<#if has_assignments> collapsible<#if expand_by_default> expanded</#if><#else> empty</#if>" data-name="${id}">
@@ -385,7 +385,7 @@
 
 						<#list assignments as info>
 							<span id="marker-assignment-container-${info.assignment.id}">
-								<@marker_assignment_info info />
+								<@marker_assignment_info info verb />
 							</span>
 						</#list>
 					</div>
@@ -402,6 +402,7 @@
 	</#if>
 </#macro>
 
+<#-- Progress bar for all students in a marking workflow  -->
 <#macro stage_progress_bar stages>
 	<div class="stage-progress-bar">
 		<#list stages as stageInfo>
@@ -437,30 +438,61 @@
 	</div>
 </#macro>
 
-<#macro marker_assignment_info info>
+<#-- Progress bar for a single student in a marking workflow  -->
+<#macro individual_stage_progress_bar markerStages>
+	<div class="stage-progress-bar">
+		<#list markerStages as progress>
+			<#local stage = progress.stage />
+
+			<#local state = 'default' />
+			<#local icon = 'fa-circle-o' />
+			<#if progress.completed>
+				<#local state = 'success' />
+				<#local icon = 'fa-check-circle-o' />
+			<#elseif progress.started>
+				<#local state = 'warning' />
+				<#local icon = 'fa-dot-circle-o' />
+			</#if>
+
+			<#local title><@workflowMessage progress.stage.actionCode /></#local>
+			<#if progress_index gt 0>
+				<div class="bar bar-${state} use-tooltip" title="${title}" data-html="true" data-container="body"></div>
+			</#if>
+			<#local title><@workflowMessage progress.messageCode /></#local>
+			<span class="fa-stack">
+				<i class="fa fa-stack-1x fa-circle fa-inverse"></i>
+				<i class="fa fa-stack-1x ${icon} text-${state} use-tooltip" title="${title}" data-html="true" data-container="body"></i>
+			</span>
+		</#list>
+	</div>
+</#macro>
+
+<#macro marker_assignment_info info verb="Mark">
 	<#local assignment = info.assignment />
 	<div class="item-info row marker-assignment-${assignment.id}">
 		<div class="col-md-3">
 			<div class="module-title"><@fmt.module_name assignment.module /></div>
 			<h4 class="name">
-				<#-- TODO If the user can administer the assignment, link them to the admin page here -->
-				<span class="ass-name">${assignment.name}</span>
+				<#-- If the user can administer the assignment, link them to the admin page here -->
+				<#if can.do("Module.ManageAssignments", assignment.module)>
+					<a href="<@routes.cm2.depthome assignment.module assignment.academicYear/>" class="use-tooltip" title="Return to module management for <@fmt.module_name assignment.module false />">
+						<span class="ass-name">${assignment.name}</span>
+					</a>
+				<#else>
+					<span class="ass-name">${assignment.name}</span>
+				</#if>
 			</h4>
 		</div>
 		<div class="col-md-3">
 			<ul class="list-unstyled">
 				<#list info.currentStages as stage>
-					<li>
-						<#if stage.progress?size == 1>
-							<@workflowMessage stage.progress[0].progress.messageCode />
-						<#else>
-							<ul>
-								<#list stage.progress as progress>
-									<li><@workflowMessage progress.progress.messageCode /> (<@fmt.p progress.count "student" />)</li>
-								</#list>
-							</ul>
-						</#if>
-					</li>
+					<#if stage.progress?size == 1>
+						<li><@workflowMessage stage.progress[0].progress.messageCode /></li>
+					<#else>
+						<#list stage.progress as progress>
+							<li><@workflowMessage progress.progress.messageCode /> (<@fmt.p progress.count "student" />)</li>
+						</#list>
+					</#if>
 				</#list>
 			</ul>
 		</div>
@@ -498,21 +530,15 @@
 		</div>
 		<div class="col-md-2">
 			<#if assignment.closed || assignment.openEnded>
-				<#if info.nextStages?size gt 0>
-					<a class="btn btn-block btn-primary" href="<@routes.cm2.listmarkersubmissions assignment user.apparentUser />">
-						Mark
-					</a>
-				<#else>
-					<a class="btn btn-block btn-default btn-disabled use-tooltip" title="You'll be able to download submissions for marking when an administrator releases them." disabled>
-						Mark
-					</a>
-				</#if>
+				<a class="btn btn-block btn-primary" href="<@routes.cm2.listmarkersubmissions assignment user.apparentUser />">
+					${verb}
+				</a>
 			</#if>
 		</div>
 	</div>
 </#macro>
 
-<#macro admin_assignment_list module assignments expand_by_default=true>
+<#macro admin_assignment_list module assignments academicYear expand_by_default=true>
 	<#local id>module-${module.code}</#local>
 	<#local title><@fmt.module_name module /></#local>
 
@@ -521,7 +547,7 @@
 		<div id="${id}" class="striped-section admin-assignment-list<#if has_assignments> collapsible<#if expand_by_default> expanded</#if><#else> empty</#if>" data-name="${id}"
 			<#if has_assignments && !expand_by_default>
 				 data-populate=".striped-section-contents"
-				 data-href="<@routes.cm2.modulehome module />?${info.requestedUri.query!}"
+				 data-href="<@routes.cm2.modulehome module academicYear />?${info.requestedUri.query!}"
 				 data-name="${id}"
 			</#if>
 		>
@@ -540,7 +566,7 @@
 							</@fmt.permission_button>
 						</li>
 						<li>
-						<#local create_url><@routes.cm2.createassignmentdetails module /></#local>
+						<#local create_url><@routes.cm2.createassignmentdetails module academicYear /></#local>
 							<@fmt.permission_button
 								permission='Assignment.Create'
 								scope=module
@@ -550,7 +576,7 @@
 							</@fmt.permission_button>
 						</li>
 						<li>
-							<#local copy_url><@routes.cm2.copy_assignments_previous_module module /></#local>
+							<#local copy_url><@routes.cm2.copy_assignments_previous_module module academicYear /></#local>
 							<@fmt.permission_button
 								permission='Assignment.Create'
 								scope=module
@@ -592,58 +618,36 @@
 	<div class="item-info admin-assignment-${assignment.id}">
 		<div class="clearfix">
 			<div class="pull-right">
-				<div class="btn-group">
-					<a class="btn btn-default btn-xs dropdown-toggle" data-toggle="dropdown">
-						Actions
-						<span class="caret"></span>
-					</a>
-					<ul class="dropdown-menu pull-right">
-						<li>
-							<#local edit_url><@routes.cm2.editassignmentdetails assignment /></#local>
-							<@fmt.permission_button
-								permission='Assignment.Update'
-								scope=assignment
-								action_descr='edit assignment properties'
-								href=edit_url>
-								Edit
-							</@fmt.permission_button>
-						</li>
-
-						<li>
-							<#if assignment.collectSubmissions>
-								<#local sub_caption="Manage assignment's submissions" />
-							<#else>
-								<#local sub_caption="Manage assignment's feedback" />
-							</#if>
-							<#local edit_url><@routes.cm2.assignmentsubmissionsandfeedback assignment /></#local>
-							<@fmt.permission_button
-								permission='AssignmentFeedback.Read'
-								scope=assignment
-								action_descr=sub_caption?lower_case
-								href=edit_url>
-									${sub_caption}
-							</@fmt.permission_button>
-						</li>
-
-						<li>
-							<#if can.do('Extension.Update', assignment)>
-								<#local ext_caption="Manage assignment's extensions" />
-							<#else>
-								<#local ext_caption="View assignment's extensions" />
-							</#if>
-							<#local ext_url><@routes.cm2.assignmentextensions assignment /></#local>
-							<@fmt.permission_button
-								permission='Extension.Read'
-								scope=assignment
-								action_descr=ext_caption?lower_case
-								href=ext_url>
-									${ext_caption}
-							</@fmt.permission_button>
-						</li>
-					</ul>
-				</div>
+				<#if assignment.cm2Assignment>
+					<#local edit_url><@routes.cm2.editassignmentdetails assignment /></#local>
+				<#else>
+					<#local edit_url><@routes.coursework.assignmentedit assignment /></#local>
+				</#if>
+				<@fmt.permission_button
+					classes='btn btn-default btn-xs'
+					permission='Assignment.Update'
+					scope=assignment
+					action_descr='edit assignment properties'
+					href=edit_url>
+					Edit assignment
+				</@fmt.permission_button>
 			</div>
-			<h5 class="assignment-name">${assignment.name}</h5>
+
+			<h5 class="assignment-name">
+				<#if assignment.collectSubmissions>
+					<#local sub_caption="Manage assignment's submissions" />
+				<#else>
+					<#local sub_caption="Manage assignment's feedback" />
+				</#if>
+				<#local edit_url><@routes.cm2.assignmentsubmissionsandfeedback assignment /></#local>
+				<@fmt.permission_button
+					permission='AssignmentFeedback.Read'
+					scope=assignment
+					action_descr=sub_caption?lower_case
+					href=edit_url>
+						${assignment.name}
+				</@fmt.permission_button>
+			</h5>
 		</div>
 
 		<div class="row">
@@ -691,7 +695,21 @@
 						</#if>
 
 						<#if assignment.extensionsPossible>
-							<li><strong>Extension requests:</strong> ${assignment.countUnapprovedExtensions}</li>
+							<li>
+								<#if can.do('Extension.Update', assignment)>
+									<#local ext_caption="Manage assignment's extensions" />
+								<#else>
+									<#local ext_caption="View assignment's extensions" />
+								</#if>
+								<#local ext_url><@routes.cm2.assignmentextensions assignment /></#local>
+								<@fmt.permission_button
+									permission='Extension.Read'
+									scope=assignment
+									action_descr=ext_caption?lower_case
+									href=ext_url>
+										<strong>Extension requests:</strong> ${assignment.countUnapprovedExtensions}
+								</@fmt.permission_button>
+							</li>
 						</#if>
 					</ul>
 				</#if>
@@ -704,7 +722,7 @@
 				<div class="col-md-4">
 					<h6>Progress</h6>
 
-					<ul class="list-unstyled scrollable-list">
+					<ul class="list-unstyled">
 						<li><strong>Created:</strong> <span class="use-tooltip" title="<@fmt.dateToWeek assignment.createdDate />" data-html="true"><@fmt.date date=assignment.createdDate /></span></li>
 
 						<#if assignment.opened>
@@ -775,3 +793,473 @@
 	<#local text><@spring.message code=code /></#local>
 	${(text!"")?replace("[STUDENT]", "student")?replace("[FIRST_MARKER]", "first marker")?replace("[SECOND_MARKER]", "second marker")}
 </#compress></#macro>
+
+<#-- Common template parts for use in other submission/coursework templates. -->
+<#macro originalityReport attachment>
+	<#local r=attachment.originalityReport />
+	<#local assignment=attachment.submissionValue.submission.assignment />
+
+<span id="tool-tip-${attachment.id}" class="similarity-${r.similarity} similarity-tooltip">${r.overlap}% similarity</span>
+<div id="tip-content-${attachment.id}" class="hide">
+	<p>${attachment.name} <img src="<@url resource="/static/images/icons/turnitin-16.png"/>"></p>
+	<p class="similarity-subcategories-tooltip">
+		Web: ${r.webOverlap}%<br>
+		Student papers: ${r.studentOverlap}%<br>
+		Publications: ${r.publicationOverlap}%
+	</p>
+	<p>
+		<#if r.turnitinId?has_content>
+			<a target="turnitin-viewer" href="<@routes.cm2.turnitinLtiReport assignment attachment />">View full report</a>
+		<#else>
+			<a target="turnitin-viewer" href="<@routes.cm2.turnitinReport assignment attachment />">View full report - available via Tabula until end of August 2016</a>
+		</#if>
+	</p>
+</div>
+<script type="text/javascript">
+	jQuery(function($){
+		$("#tool-tip-${attachment.id}").popover({
+			placement: 'right',
+			html: true,
+			content: function(){return $('#tip-content-${attachment.id}').html();},
+			title: 'Turnitin report summary'
+		});
+	});
+</script>
+</#macro>
+
+<#macro workflow_stage stage>
+	<#if stage.messageCode!?length gt 0>
+		<li class="stage<#if !stage.completed> incomplete<#if !stage.preconditionsMet> preconditions-not-met</#if></#if><#if stage.started && !stage.completed> current</#if>">
+			<#local state = 'default' />
+			<#local icon = 'fa-circle-o' />
+			<#local title = 'Not started yet' />
+			<#if stage.completed>
+				<#local state = 'success' />
+				<#local icon = 'fa-check-circle-o' />
+				<#local title = 'Completed' />
+			<#elseif stage.started>
+				<#local state = 'warning' />
+				<#local icon = 'fa-dot-circle-o' />
+				<#local title = 'Current stage' />
+			<#elseif !stage.preconditionsMet>
+				<#local title = 'Preconditions not met' />
+			</#if>
+
+			<span class="fa-stack">
+				<i class="fa fa-stack-1x fa-circle fa-inverse"></i>
+				<i class="fa fa-stack-1x ${icon} text-${state} use-tooltip" title="${title}" data-html="true" data-container="body"></i>
+			</span>
+
+			<#local content><#nested/></#local>
+
+			<strong><@spring.message code=stage.messageCode /></strong><#if content?has_content>: ${content}</#if>
+		</li>
+	</#if>
+</#macro>
+
+<#macro uniIdSafeMarkerLink marker role>
+	<#if marker.warwickId?has_content>
+		- <a href="<@routes.coursework.listmarkersubmissions assignment marker />">Proxy as this ${role}</a>
+	<#else>
+		- Cannot proxy as this marker as they have no University ID
+	</#if>
+</#macro>
+
+<#macro uniIdSafeCM2MarkerLink stage marker student>
+	<#if marker.warwickId?has_content>
+	- <a href="<@routes.cm2.markerOnlineFeedback assignment stage marker student />">Proxy</a>
+	<#else>
+	- Cannot proxy as this marker as they have no University ID
+	</#if>
+</#macro>
+
+<#macro student_workflow_details student>
+	<#if student.coursework.enhancedSubmission??>
+		<#local enhancedSubmission=student.coursework.enhancedSubmission>
+		<#local submission=enhancedSubmission.submission>
+	</#if>
+	<#if student.coursework.enhancedFeedback??>
+		<#local enhancedFeedback=student.coursework.enhancedFeedback>
+		<#local feedback=enhancedFeedback.feedback>
+	</#if>
+	<#if student.coursework.enhancedExtension??>
+		<#local enhancedExtension=student.coursework.enhancedExtension>
+		<#local extension=enhancedExtension.extension>
+	</#if>
+
+	<ul class="list-unstyled stage-group">
+		<#list student.stages?keys as stage_name>
+			<@workflow_stage student.stages[stage_name]><#compress>
+				<#if stage_name == 'Submission'>
+					<@submission_details submission />
+				<#elseif stage_name == 'CheckForPlagiarism'>
+					<#if submission??>
+						<@fmt.p submission.allAttachments?size "file" />
+						<#list submission.allAttachments as attachment>
+							<#if attachment.originalityReportReceived>
+								<@components.originalityReport attachment />
+							</#if>
+							<#if can.do("Submission.ViewUrkundPlagiarismStatus", submission) && attachment.urkundResponseReceived>
+								<@components.urkundOriginalityReport attachment />
+							</#if>
+						</#list>
+					</#if>
+				<#elseif stage_name == 'CM1FirstMarking'>
+					<#local fm = assignment.getStudentsFirstMarker(student.user.userId)!"" />
+					<#if fm?has_content>
+						<#local firstMarker><span data-profile="${fm.warwickId!}">${fm.fullName}</span></#local>
+					</#if>
+
+					<#if firstMarker!?length gt 0>
+						(${firstMarker})
+						<#if can.do("Assignment.MarkOnBehalf", assignment)>
+							<@uniIdSafeMarkerLink fm "marker" />
+						</#if>
+					</#if>
+				<#elseif stage_name == 'CM1SecondMarking'>
+					<#local sm = assignment.getStudentsSecondMarker(student.user.userId)!"" />
+					<#if sm?has_content>
+						<#local secondMarker><span data-profile="${sm.warwickId!}">${sm.fullName}</span></#local>
+					</#if>
+
+					<#if secondMarker!?length gt 0>
+						(${secondMarker})
+						<#if can.do("Assignment.MarkOnBehalf", assignment)>
+							<@uniIdSafeMarkerLink sm "marker" />
+						</#if>
+					</#if>
+				<#elseif stage_name == 'CM1Moderation'>
+					<#local sm = assignment.getStudentsSecondMarker(student.user.userId)!"" />
+					<#if sm?has_content>
+						<#local secondMarker><span data-profile="${sm.warwickId!}">${sm.fullName}</span></#local>
+					</#if>
+
+					<#if secondMarker!?length gt 0>
+						(${secondMarker})
+						<#if can.do("Assignment.MarkOnBehalf", assignment)>
+							<@uniIdSafeMarkerLink sm "moderator" />
+						</#if>
+					</#if>
+				<#elseif stage_name == 'CM1FinaliseSeenSecondMarking'>
+					<#local fm = assignment.getStudentsFirstMarker(student.user.userId)!"" />
+					<#if fm?has_content>
+						<#local firstMarker><span data-profile="${fm.warwickId!}">${fm.fullName}</span></#local>
+					</#if>
+
+					<#if firstMarker!?length gt 0>
+						(${firstMarker})
+						<#if can.do("Assignment.MarkOnBehalf", assignment)>
+							<@uniIdSafeMarkerLink fm "marker" />
+						</#if>
+					</#if>
+				<#elseif stage_name == 'CM2ReleaseForMarking'>
+
+				<#elseif assignment.cm2Assignment && student.stages[stage_name].stage.markingRelated>
+					<#if feedback??>
+						<#local markingStage = student.stages[stage_name].stage.markingStage />
+						<#local marker = mapGet(feedback.feedbackMarkers, markingStage)! />
+
+						<#if marker?has_content>
+							${marker.fullName}
+							<#if can.do("Assignment.MarkOnBehalf", assignment)>
+								<@uniIdSafeCM2MarkerLink markingStage marker student.user />
+							</#if>
+						<#else>
+							Not assigned
+						</#if>
+					</#if>
+				<#elseif stage_name == 'AddMarks'>
+					<#if feedback?? && feedback.hasMarkOrGrade>
+						<#if feedback.hasMark>
+							${feedback.actualMark!''}%<#if feedback.hasGrade>,</#if>
+						</#if>
+						<#if feedback.hasGrade>
+							grade ${feedback.actualGrade!''}
+						</#if>
+
+						<#if feedback.hasPrivateOrNonPrivateAdjustments>
+							Marks adjusted:
+							<#if feedback.latestMark??>${feedback.latestMark}%</#if><#if feedback.latestGrade??>,</#if>
+							<#if feedback.latestGrade??> grade ${feedback.latestGrade}</#if>
+							<#if feedback.latestPrivateOrNonPrivateAdjustment?? && feedback.latestPrivateOrNonPrivateAdjustment.reason??>
+								- Reason for adjustment: ${feedback.latestPrivateOrNonPrivateAdjustment.reason!''}
+							</#if>
+						</#if>
+					</#if>
+				<#elseif stage_name == 'AddFeedback'>
+					<#if feedback?? && (feedback.hasAttachments || feedback.hasOnlineFeedback)>
+						<#local attachments=feedback.attachments />
+						<#if attachments?size gt 0>
+							<a class="long-running" href="<@routes.cm2.assignmentFeedbackZip assignment />">
+								<@fmt.p attachments?size "file" />
+							</a>
+							uploaded
+						<#-- If the feedback was entered online there may not be attachments  -->
+						<#elseif feedback?? && feedback.hasOnlineFeedback>
+							Comments entered online
+						</#if>
+						<#if feedback.updatedDate??>
+							<@fmt.date date=feedback.updatedDate seconds=true capitalise=true shortMonth=true />
+						</#if>
+					</#if>
+				<#elseif stage_name == 'ReleaseFeedback'>
+					<#if feedback?? && feedback.releasedDate??>
+						<@fmt.date date=feedback.releasedDate seconds=true capitalise=true shortMonth=true />
+					</#if>
+
+					<#if !student.stages?keys?seq_contains('AddFeedback') && feedback?? && feedback.hasContent>
+						<#local attachments=feedback.attachments />
+						<#if attachments?size gt 0>
+							<a class="long-running" href="<@routes.cm2.assignmentFeedbackZip assignment />">
+								<@fmt.p attachments?size "file" />
+							</a>
+							uploaded
+						<#-- If the feedback was entered online there may not be attachments  -->
+						<#elseif feedback?? && feedback.hasOnlineFeedback>
+							Comments entered online
+						<#elseif feedback?? && feedback.hasMark>
+							Marks added
+						<#elseif feedback?? && feedback.hasGrade>
+							Grade added
+						</#if>
+						<#if feedback.updatedDate??>
+							<@fmt.date date=feedback.updatedDate seconds=true capitalise=true shortMonth=true />
+						</#if>
+					</#if>
+
+					<#if feedback?? && feedback.hasContent>
+						<ul class="list-unstyled">
+							<li>
+								<span class="fa-stack"></span>
+								<a href="<@routes.cm2.feedbackSummary assignment student.user.userId!''/>"
+									 class="ajax-modal"
+									 data-target="#feedback-modal">
+									View feedback
+								</a>
+							</li>
+							<li>
+								<span class="fa-stack"></span>
+								<a href="<@routes.cm2.feedbackAudit assignment student.user.userId!''/>">
+									View audit
+								</a>
+							</li>
+							<#local queueSitsUploadEnabled=(features.queueFeedbackForSits && department.uploadCourseworkMarksToSits) />
+							<#if queueSitsUploadEnabled>
+								<li>
+									<span class="fa-stack"></span>
+									<#if enhancedFeedback.feedbackForSits??>
+										<#local feedbackSitsStatus=enhancedFeedback.feedbackForSits.status />
+										<#local sitsWarning = feedbackSitsStatus.dateOfUpload?has_content && feedbackSitsStatus.status.code != "uploadNotAttempted" && (
+											(feedbackSitsStatus.actualMarkLastUploaded!0) != (student.enhancedFeedback.feedback.latestMark!0) || (feedbackSitsStatus.actualGradeLastUploaded!"") != (student.enhancedFeedback.feedback.latestGrade!"")
+										) />
+										<#if feedbackSitsStatus.code == "failed">
+											<a href="<@routes.cm2.checkSitsUpload enhancedFeedback.feedback />" target="_blank">
+												<span style="cursor: pointer;" class="label label-danger use-tooltip" title="There was a problem uploading to SITS. Click to try and diagnose the problem.">
+													${feedbackSitsStatus.description}
+												</span><#--
+											--></a>
+										<#elseif sitsWarning>
+											<span class="label label-danger use-tooltip" title="The mark or grade uploaded differs from the current mark or grade. You will need to upload the marks to SITS again.">
+												${feedbackSitsStatus.description}
+											</span>
+										<#elseif feedbackSitsStatus.code == "successful">
+											<span class="label label-success">${feedbackSitsStatus.description}</span>
+										<#else>
+											<span class="label label-info">${feedbackSitsStatus.description}</span>
+										</#if>
+									<#else>
+										<span class="label label-info">Not queued for SITS upload</span>
+									</#if>
+								</#if>
+							</li>
+						</ul>
+					</#if>
+				</#if>
+			</#compress></@workflow_stage>
+		</#list>
+	</ul>
+</#macro>
+
+<#macro marker_feedback_summary feedback stage currentStage=[] currentFeedback=[]>
+	<h4>${stage.description} <#if feedback.marker??>- ${feedback.marker.fullName}</#if></h4>
+
+	<#list feedback.customFormValues as formValue>
+		<#if formValue.value?has_content>
+			<@bs3form.form_group><textarea class="form-control feedback-comments" readonly="readonly">${formValue.value!""}</textarea></@bs3form.form_group>
+		<#else>
+		<p>No feedback comments added.</p>
+		</#if>
+	</#list>
+
+	<div class="row form-inline">
+		<#if feedback.mark?has_content || feedback.grade?has_content>
+			<div class="col-xs-3">
+				<label>Mark</label>
+				<div class="input-group">
+					<input type="text" class="form-control" readonly="readonly" value="${feedback.mark!""}">
+					<div class="input-group-addon">%</div>
+				</div>
+			</div>
+
+			<div class="col-xs-3">
+				<label>Grade</label>
+				<input type="text" class="form-control" readonly="readonly" value="${feedback.grade!""}">
+			</div>
+		<#else>
+			<div class="col-xs-6"><span>No mark or grade added.</span></div>
+		</#if>
+
+		<div class="col-xs-3">
+		<#-- Download a zip of all feedback or just a single file if there is only one -->
+			<#if feedback.attachments?has_content >
+				<#local attachment = "" />
+				<#if !feedback.attachments?is_enumerable>
+				<#-- assume it's a FileAttachment -->
+					<#local attachment = feedback.attachments />
+				<#elseif feedback.attachments?size == 1>
+				<#-- take the first and continue as above -->
+					<#local attachment = feedback.attachments?first />
+				</#if>
+				<#if attachment?has_content>
+					<#local downloadUrl><@routes.cm2.downloadMarkerFeedbackOne assignment feedback.marker feedback attachment /></#local>
+				<#elseif feedback.attachments?size gt 1>
+					<#local downloadUrl><@routes.cm2.downloadMarkerFeedbackAll assignment feedback.marker feedback stage.description+" feedback" /></#local>
+				</#if>
+				<a class="btn btn-default long-running use-tooltip" href="${downloadUrl}">Download feedback</a>
+				<ul class="feedback-attachments hide">
+					<#list feedback.attachments as attachment>
+						<li id="attachment-${attachment.id}" class="attachment">
+							<span>${attachment.name}</span>&nbsp;<a href="#" class="remove-attachment">Remove</a>
+							<input type="hidden" name="attachedFiles" value="${attachment.id}" />
+						</li>
+					</#list>
+				</ul>
+			</#if>
+		</div>
+		<div class="col-xs-3">
+			<#if currentFeedback?? && currentFeedback?has_content>
+				<#if currentStage?? && currentStage.populateWithPreviousFeedback>
+					<div class="form-group">
+						<label class="radio-inline"><input type="radio" name="changesState" <#if !currentFeedback.hasBeenModified>checked</#if> value="approve" />Approve</label>
+						<label class="radio-inline"><input type="radio" name="changesState" <#if currentFeedback.hasBeenModified>checked</#if> value="make-changes" >Make changes</label>
+					</div>
+				<#else>
+					<a class="copy-feedback btn btn-default long-running use-tooltip" href="#">Copy comments and files</a>
+				</#if>
+			</#if>
+		</div>
+	</div>
+</#macro>
+
+<#macro lateness submission="" assignment="" user=""><#compress>
+	<#if submission?has_content && submission.submittedDate?? && (submission.late || submission.authorisedLate)>
+		<#if submission.late>
+			<@fmt.p submission.workingDaysLate "working day" /> late, ${durationFormatter(submission.deadline, submission.submittedDate)} after deadline
+		<#else>
+			${durationFormatter(submission.assignment.closeDate, submission.submittedDate)} after close
+		</#if>
+	<#elseif assignment?has_content && user?has_content>
+		<#local lateness = assignment.workingDaysLateIfSubmittedNow(user.userId) />
+		<@fmt.p lateness "working day" /> overdue, the deadline/extension was ${durationFormatter(assignment.submissionDeadline(user.userId))}
+	</#if>
+</#compress></#macro>
+
+<#macro extensionLateness extension submission><#compress>
+	<#if extension?has_content && extension.expiryDate?? && submission.late>
+		<@fmt.p submission.workingDaysLate "working day" /> late, ${durationFormatter(extension.expiryDate, submission.submittedDate)} after extended deadline (<@fmt.date date=extension.expiryDate capitalise=false shortMonth=true stripHtml=true />)
+	</#if>
+</#compress></#macro>
+
+<#macro submission_details submission=[]><@compress single_line=true>
+	<#if submission?has_content>
+		<#local attachments = submission.allAttachments />
+		<#local assignment = submission.assignment />
+		<#local module = assignment.module />
+
+		<#if submission.submittedDate??>
+			<span class="date use-tooltip" title="<@lateness submission />" data-container="body">
+				<@fmt.date date=submission.submittedDate seconds=true capitalise=true shortMonth=true />
+			</span>
+		</#if>
+
+		<#if attachments?size gt 0>
+			<#if attachments?size == 1>
+				<#local filename = "${attachments[0].name}">
+				<#local downloadUrl><@routes.cm2.downloadSubmission submission filename/>?single=true</#local>
+			<#else>
+				<#local filename = "submission-${submission.studentIdentifier}.zip">
+				<#local downloadUrl><@routes.cm2.downloadSubmission submission filename/></#local>
+			</#if>
+			&emsp;<a class="long-running" href="${downloadUrl}">Download submission</a>
+		</#if>
+	</#if>
+</@compress></#macro>
+
+<#macro submission_status submission="" enhancedExtension="" enhancedFeedback="" student="">
+	<#if submission?has_content>
+		<#if submission.late>
+			<#if enhancedExtension?has_content && enhancedExtension.extension.approved>
+				<span class="label label-danger use-tooltip" title="<@extensionLateness enhancedExtension.extension submission/>" data-container="body">Late</span>
+			<#else>
+				<span class="label label-danger use-tooltip" title="<@lateness submission />" data-container="body">Late</span>
+			</#if>
+		<#elseif submission.authorisedLate>
+			<span class="label label-info use-tooltip" data-html="true" title="Extended until <@fmt.date date=enhancedExtension.extension.expiryDate capitalise=false shortMonth=true />" data-container="body">Within Extension</span>
+		</#if>
+		<#if features.disabilityOnSubmission && student.disability??>
+			<a class="use-popover cue-popover" id="popover-disability" data-html="true"
+			   data-original-title="Disability disclosed"
+			   data-content="<p>This student has chosen to make the marker of this submission aware of their disability and for it to be taken it into consideration. This student has self-reported the following disability code:</p><div class='well'><h6>${student.disability.code}</h6><small>${(student.disability.sitsDefinition)!}</small></div>"
+			>
+				<span class="label label-info">Disability disclosed</span>
+			</a>
+		</#if>
+	<#elseif !enhancedFeedback?has_content>
+		<span class="label label-info">Unsubmitted</span>
+		<#if enhancedExtension?has_content>
+			<#local extension=enhancedExtension.extension>
+			<#if extension.approved && !extension.rejected>
+				<#local date>
+					<@fmt.date date=extension.expiryDate capitalise=true shortMonth=true stripHtml=true />
+				</#local>
+			</#if>
+			<#if enhancedExtension.within>
+				<span class="label label-info use-tooltip" data-html="true" title="${date}" data-container="body">Within Extension</span>
+			<#elseif extension.rejected>
+				<span class="label label-info">Extension Rejected</span>
+			<#elseif !extension.approved>
+				<span class="label label-info">Extension Requested</span>
+			<#else>
+				<span class="label label-info use-tooltip" title="${date}" data-container="body">Extension Expired</span>
+			</#if>
+		</#if>
+	</#if>
+</#macro>
+
+<#macro originalityReport attachment>
+	<#local r=attachment.originalityReport />
+	<#local assignment=attachment.submissionValue.submission.assignment />
+
+	<span id="tool-tip-${attachment.id}" class="similarity-${r.similarity} similarity-tooltip">${r.overlap}% similarity</span>
+	<div id="tip-content-${attachment.id}" class="hide">
+		<p>${attachment.name} <img src="<@url resource="/static/images/icons/turnitin-16.png"/>"></p>
+		<p class="similarity-subcategories-tooltip">
+			Web: ${r.webOverlap}%<br>
+			Student papers: ${r.studentOverlap}%<br>
+			Publications: ${r.publicationOverlap}%
+		</p>
+		<p>
+			<a target="turnitin-viewer" href="<@routes.cm2.turnitinLtiReport assignment attachment />">View full report</a>
+		</p>
+	</div>
+	<script type="text/javascript">
+		jQuery(function($){
+			$("#tool-tip-${attachment.id}").popover({
+				placement: 'right',
+				html: true,
+				content: function(){return $('#tip-content-${attachment.id}').html();},
+				title: 'Turnitin report summary'
+			});
+		});
+	</script>
+</#macro>

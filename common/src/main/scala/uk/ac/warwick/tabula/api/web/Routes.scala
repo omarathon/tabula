@@ -22,6 +22,15 @@ object Routes {
 			context + "/module/%s/assignments/%s" format (encoded(assignment.module.code), encoded(assignment.id))
 	}
 
+	object department {
+		object assignments {
+			def apply(department: Department): String =
+				s"$context/department/${encoded(department.code)}/assignments"
+			def xml(department: Department): String =
+				s"$context/department/${encoded(department.code)}/assignments.xml"
+		}
+	}
+
 	object submission {
 		def apply(submission: Submission): String =
 			context + "/module/%s/assignments/%s/submissions/%s" format (encoded(submission.assignment.module.code), encoded(submission.assignment.id), encoded(submission.id))

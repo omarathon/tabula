@@ -7,7 +7,7 @@ import org.springframework.validation.BindException
 import uk.ac.warwick.tabula.commands.UploadedFile
 import uk.ac.warwick.tabula.data.model.FileAttachment
 import uk.ac.warwick.tabula.data.model.attendance.AttendanceState
-import uk.ac.warwick.tabula.services.objectstore.ObjectStorageService
+import uk.ac.warwick.tabula.services.objectstore.{ObjectStorageService, RichByteSource}
 import uk.ac.warwick.tabula.services.{ProfileService, ProfileServiceComponent}
 import uk.ac.warwick.tabula.{Fixtures, Mockito, TestBase}
 
@@ -44,14 +44,14 @@ class CSVAttendanceExporterTest extends TestBase with Mockito {
 	@Test
 	def notEnoughFields(): Unit = {
 		new FileFixture {
-			attachment.objectStorageService.fetch(attachment.id) returns Option(new ByteArrayInputStream("test".getBytes))
+			attachment.objectStorageService.fetch(attachment.id) returns RichByteSource.wrap(ByteSource.wrap("test".getBytes), None)
 			private val result = exporter.extract(errors)
 			result should be (Map())
 			errors.hasErrors should be (true)
 			errors.getAllErrors.get(0).getCode should be ("attendanceMonitoringCheckpoint.upload.wrongFields")
 		}
 		new FileFixture {
-			attachment.objectStorageService.fetch(attachment.id) returns Option(new ByteArrayInputStream("one,two,three".getBytes))
+			attachment.objectStorageService.fetch(attachment.id) returns RichByteSource.wrap(ByteSource.wrap("one,two,three".getBytes), None)
 			private val result = exporter.extract(errors)
 			result should be (Map())
 			errors.hasErrors should be (true)
@@ -62,14 +62,14 @@ class CSVAttendanceExporterTest extends TestBase with Mockito {
 	@Test
 	def noSuchState(): Unit = {
 		new FileFixture {
-			attachment.objectStorageService.fetch(attachment.id) returns Option(new ByteArrayInputStream("test,".getBytes))
+			attachment.objectStorageService.fetch(attachment.id) returns RichByteSource.wrap(ByteSource.wrap("test,".getBytes), None)
 			private val result = exporter.extract(errors)
 			result should be (Map())
 			errors.hasErrors should be (true)
 			errors.getAllErrors.get(0).getCode should be ("attendanceMonitoringCheckpoint.upload.wrongState")
 		}
 		new FileFixture {
-			attachment.objectStorageService.fetch(attachment.id) returns Option(new ByteArrayInputStream("test,noshow".getBytes))
+			attachment.objectStorageService.fetch(attachment.id) returns RichByteSource.wrap(ByteSource.wrap("test,noshow".getBytes), None)
 			private val result = exporter.extract(errors)
 			result should be (Map())
 			errors.hasErrors should be (true)
@@ -80,7 +80,7 @@ class CSVAttendanceExporterTest extends TestBase with Mockito {
 	@Test
 	def noSuchStudent(): Unit = {
 		new FileFixture {
-			attachment.objectStorageService.fetch(attachment.id) returns Option(new ByteArrayInputStream("1234,attended".getBytes))
+			attachment.objectStorageService.fetch(attachment.id) returns RichByteSource.wrap(ByteSource.wrap("1234,attended".getBytes), None)
 			exporter.profileService.getAllMembersWithUniversityIds(Seq("1234")) returns Seq()
 			private val result = exporter.extract(errors)
 			result should be (Map())
@@ -89,7 +89,7 @@ class CSVAttendanceExporterTest extends TestBase with Mockito {
 			errors.getAllErrors.get(0).getArguments.apply(0).asInstanceOf[String] should be ("1234,attended")
 		}
 		new FileFixture {
-			attachment.objectStorageService.fetch(attachment.id) returns Option(new ByteArrayInputStream("1234,attended".getBytes))
+			attachment.objectStorageService.fetch(attachment.id) returns RichByteSource.wrap(ByteSource.wrap("1234,attended".getBytes), None)
 			exporter.profileService.getAllMembersWithUniversityIds(Seq("1234")) returns Seq(Fixtures.staff("1234"))
 			private val result = exporter.extract(errors)
 			result should be (Map())
@@ -104,7 +104,7 @@ class CSVAttendanceExporterTest extends TestBase with Mockito {
 		new FileFixture {
 			private val student1 = Fixtures.student("1234")
 			private val student2 = Fixtures.student("2345")
-			attachment.objectStorageService.fetch(attachment.id) returns Option(new ByteArrayInputStream("1234,attended\n2345,not-recorded".getBytes))
+			attachment.objectStorageService.fetch(attachment.id) returns RichByteSource.wrap(ByteSource.wrap("1234,attended\n2345,not-recorded".getBytes), None)
 			exporter.profileService.getAllMembersWithUniversityIds(Seq("1234", "2345")) returns Seq(student1, student2)
 			private val result = exporter.extract(errors)
 			result should be (Map(student1 -> AttendanceState.Attended, student2 -> AttendanceState.NotRecorded))

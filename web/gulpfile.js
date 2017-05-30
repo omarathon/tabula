@@ -319,7 +319,7 @@ gulp.task('clean', () => {
 // Shortcuts for building all asset types at once
 gulp.task('assets', ['all-assets', 'hash-assets']);
 gulp.task('watch-less', () => {
-  return gulp.watch('src/main/assets/**/*.less', ['compile-less']);
+  return gulp.watch('src/main/assets/**/*.*ss', ['compile-less']);
 });
 gulp.task('watch-js', () => {
   return gulp.watch('src/main/assets/**/*.js', ['concat-scripts']);

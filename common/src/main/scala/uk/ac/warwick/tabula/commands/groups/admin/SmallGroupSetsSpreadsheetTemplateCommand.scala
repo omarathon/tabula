@@ -1,9 +1,10 @@
 package uk.ac.warwick.tabula.commands.groups.admin
 
-import org.apache.poi.ss.usermodel.{DateUtil, Row}
 import org.apache.poi.ss.usermodel.Row.MissingCellPolicy
+import org.apache.poi.ss.usermodel.{DateUtil, Sheet}
 import org.apache.poi.ss.util.CellRangeAddressList
-import org.apache.poi.xssf.usermodel._
+import org.apache.poi.xssf.streaming.SXSSFWorkbook
+import org.apache.poi.xssf.usermodel.XSSFDataValidationHelper
 import uk.ac.warwick.tabula.AcademicYear
 import uk.ac.warwick.tabula.commands._
 import uk.ac.warwick.tabula.commands.groups.admin.SmallGroupSetsSpreadsheetTemplateCommand._
@@ -39,9 +40,9 @@ abstract class SmallGroupSetsSpreadsheetTemplateCommandInternal(val department: 
 	}
 
 	// Publicly visible for testing
-	def generateWorkbook(): XSSFWorkbook = {
-		val workbook = new XSSFWorkbook()
-		workbook.setMissingCellPolicy(Row.CREATE_NULL_AS_BLANK)
+	def generateWorkbook(): SXSSFWorkbook = {
+		val workbook = new SXSSFWorkbook
+		workbook.setMissingCellPolicy(MissingCellPolicy.CREATE_NULL_AS_BLANK)
 
 		val sets = smallGroupService.getSmallGroupSets(department, academicYear).sorted
 
@@ -54,7 +55,7 @@ abstract class SmallGroupSetsSpreadsheetTemplateCommandInternal(val department: 
 		workbook
 	}
 
-	private def addLookupsSheet(workbook: XSSFWorkbook): XSSFSheet = {
+	private def addLookupsSheet(workbook: SXSSFWorkbook): Sheet = {
 		val style = workbook.createCellStyle
 		val format = workbook.createDataFormat
 
@@ -67,6 +68,7 @@ abstract class SmallGroupSetsSpreadsheetTemplateCommandInternal(val department: 
 		})
 
 		val sheet = workbook.createSheet("Lookups")
+		sheet.trackAllColumnsForAutoSizing()
 
 		// set style on all columns
 		0 to 2 foreach  { col =>
@@ -120,7 +122,7 @@ abstract class SmallGroupSetsSpreadsheetTemplateCommandInternal(val department: 
 		sheet
 	}
 
-	private def addSetsSheet(workbook: XSSFWorkbook, sets: Seq[SmallGroupSet]): XSSFSheet = {
+	private def addSetsSheet(workbook: SXSSFWorkbook, sets: Seq[SmallGroupSet]): Sheet = {
 		val style = workbook.createCellStyle
 		val format = workbook.createDataFormat
 
@@ -133,6 +135,7 @@ abstract class SmallGroupSetsSpreadsheetTemplateCommandInternal(val department: 
 		})
 
 		val sheet = workbook.createSheet("Sets")
+		sheet.trackAllColumnsForAutoSizing()
 
 		val header = sheet.createRow(0)
 
@@ -172,11 +175,10 @@ abstract class SmallGroupSetsSpreadsheetTemplateCommandInternal(val department: 
 			// Small group format validation
 			{
 				val dropdownRange = new CellRangeAddressList(1, sheet.getLastRowNum + 100, 1, 1)
-				val dvHelper = new XSSFDataValidationHelper(sheet)
+				val dvHelper = new XSSFDataValidationHelper(null)
 				val dvConstraint =
 					dvHelper.createFormulaListConstraint("Lookups!$A$2:$A$" + (SmallGroupFormat.members.size + 1))
-						.asInstanceOf[XSSFDataValidationConstraint]
-				val validation = dvHelper.createValidation(dvConstraint, dropdownRange).asInstanceOf[XSSFDataValidation]
+				val validation = dvHelper.createValidation(dvConstraint, dropdownRange)
 				validation.setShowErrorBox(true)
 				sheet.addValidationData(validation)
 			}
@@ -184,11 +186,10 @@ abstract class SmallGroupSetsSpreadsheetTemplateCommandInternal(val department: 
 			// Small group allocation method validation
 			{
 				val dropdownRange = new CellRangeAddressList(1, sheet.getLastRowNum + 100, 3, 3)
-				val dvHelper = new XSSFDataValidationHelper(sheet)
+				val dvHelper = new XSSFDataValidationHelper(null)
 				val dvConstraint =
 					dvHelper.createFormulaListConstraint("Lookups!$B$2:$B$" + (SmallGroupAllocationMethod.members.size + 1))
-						.asInstanceOf[XSSFDataValidationConstraint]
-				val validation = dvHelper.createValidation(dvConstraint, dropdownRange).asInstanceOf[XSSFDataValidation]
+				val validation = dvHelper.createValidation(dvConstraint, dropdownRange)
 				validation.setShowErrorBox(true)
 				sheet.addValidationData(validation)
 			}
@@ -203,7 +204,7 @@ abstract class SmallGroupSetsSpreadsheetTemplateCommandInternal(val department: 
 		sheet
 	}
 
-	private def addGroupsSheet(workbook: XSSFWorkbook, sets: Seq[SmallGroupSet]): XSSFSheet = {
+	private def addGroupsSheet(workbook: SXSSFWorkbook, sets: Seq[SmallGroupSet]): Sheet = {
 		val style = workbook.createCellStyle
 		val format = workbook.createDataFormat
 
@@ -216,6 +217,7 @@ abstract class SmallGroupSetsSpreadsheetTemplateCommandInternal(val department: 
 		})
 
 		val sheet = workbook.createSheet("Groups")
+		sheet.trackAllColumnsForAutoSizing()
 
 		val header = sheet.createRow(0)
 
@@ -263,7 +265,7 @@ abstract class SmallGroupSetsSpreadsheetTemplateCommandInternal(val department: 
 		sheet
 	}
 
-	private def addEventsSheet(workbook: XSSFWorkbook, sets: Seq[SmallGroupSet]): XSSFSheet = {
+	private def addEventsSheet(workbook: SXSSFWorkbook, sets: Seq[SmallGroupSet]): Sheet = {
 		val style = workbook.createCellStyle
 		val format = workbook.createDataFormat
 
@@ -276,6 +278,7 @@ abstract class SmallGroupSetsSpreadsheetTemplateCommandInternal(val department: 
 		})
 
 		val sheet = workbook.createSheet("Events")
+		sheet.trackAllColumnsForAutoSizing()
 
 		val header = sheet.createRow(0)
 
@@ -325,11 +328,10 @@ abstract class SmallGroupSetsSpreadsheetTemplateCommandInternal(val department: 
 		// Day of week validation
 		if (sets.flatMap(_.groups.asScala.sorted).flatMap(_.events.sorted).nonEmpty) {
 			val dropdownRange = new CellRangeAddressList(1, sheet.getLastRowNum + 1000, 6, 6)
-			val dvHelper = new XSSFDataValidationHelper(sheet)
+			val dvHelper = new XSSFDataValidationHelper(null)
 			val dvConstraint =
 				dvHelper.createFormulaListConstraint("Lookups!$C$2:$C$" + (DayOfWeek.members.size + 1))
-					.asInstanceOf[XSSFDataValidationConstraint]
-			val validation = dvHelper.createValidation(dvConstraint, dropdownRange).asInstanceOf[XSSFDataValidation]
+			val validation = dvHelper.createValidation(dvConstraint, dropdownRange)
 			validation.setShowErrorBox(true)
 			sheet.addValidationData(validation)
 		}

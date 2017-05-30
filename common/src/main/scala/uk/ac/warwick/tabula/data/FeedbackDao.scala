@@ -1,5 +1,6 @@
 package uk.ac.warwick.tabula.data
 
+import org.hibernate.criterion.Projections
 import uk.ac.warwick.tabula.data.model._
 import org.springframework.stereotype.Repository
 import uk.ac.warwick.userlookup.User
@@ -15,6 +16,7 @@ trait FeedbackDao {
 	def save(feedback: MarkerFeedback)
 	def delete(feedback: MarkerFeedback)
 	def getExamFeedbackMap(exam: Exam, users: Seq[User]): Map[User, ExamFeedback]
+	def getLastAnonIndex(assignment: Assignment): Int
 }
 
 abstract class AbstractFeedbackDao extends FeedbackDao with Daoisms {
@@ -38,7 +40,6 @@ abstract class AbstractFeedbackDao extends FeedbackDao with Daoisms {
 
 	override def save(feedback: Feedback): Unit = {
 		session.saveOrUpdate(feedback)
-		session.flush()
 	}
 
 	override def delete(feedback: Feedback): Unit = {
@@ -54,7 +55,6 @@ abstract class AbstractFeedbackDao extends FeedbackDao with Daoisms {
 
 	override def save(feedback: MarkerFeedback): Unit = {
 		session.saveOrUpdate(feedback)
-		session.flush()
 	}
 
 	override def delete(feedback: MarkerFeedback): Unit = {
@@ -72,6 +72,15 @@ abstract class AbstractFeedbackDao extends FeedbackDao with Daoisms {
 		).groupBy(_.usercode).map{case(usercode, feedbacks) =>
 			users.find(_.getUserId == usercode).get -> feedbacks.head
 		}
+	}
+
+	override def getLastAnonIndex(assignment: Assignment): Int = {
+		session.newCriteria[Feedback]
+			.add(is("assignment", assignment))
+			.project[Option[Int]](Projections.max("anonymousId"))
+			.uniqueResult
+			.flatten
+			.getOrElse(0)
 	}
 
 

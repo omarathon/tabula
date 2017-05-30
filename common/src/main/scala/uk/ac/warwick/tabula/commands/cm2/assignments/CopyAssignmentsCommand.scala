@@ -1,11 +1,12 @@
 package uk.ac.warwick.tabula.commands.cm2.assignments
 
-import org.joda.time.{DateTime, Duration}
+import org.joda.time.Duration
 import uk.ac.warwick.tabula.AcademicYear
 import uk.ac.warwick.tabula.JavaImports._
 import uk.ac.warwick.tabula.commands._
-import uk.ac.warwick.tabula.data.model.triggers.{AssignmentClosedTrigger, Trigger}
+import uk.ac.warwick.tabula.commands.cm2.assignments.CopyAssignmentsCommand._
 import uk.ac.warwick.tabula.data.model._
+import uk.ac.warwick.tabula.data.model.triggers.{AssignmentClosedTrigger, Trigger}
 import uk.ac.warwick.tabula.permissions.Permissions
 import uk.ac.warwick.tabula.services._
 import uk.ac.warwick.tabula.system.permissions.{PermissionsChecking, PermissionsCheckingMethods, RequiresPermissionsChecking}
@@ -13,10 +14,25 @@ import uk.ac.warwick.tabula.system.permissions.{PermissionsChecking, Permissions
 import scala.collection.JavaConverters._
 
 object CopyAssignmentsCommand {
-	def apply(department: Department, modules: Seq[Module]) =
-		new CopyAssignmentsCommand(department, modules)
+	type Result = Seq[Assignment]
+	type Command = Appliable[Result] with CopyAssignmentsState
+
+	val AdminPermission = Permissions.Assignment.Create
+
+	def apply(department: Department, academicYear: AcademicYear): Command =
+		new CopyDepartmentAssignmentsCommandInternal(department, academicYear)
 			with ComposableCommand[Seq[Assignment]]
-			with CopyAssignmentsPermissions
+			with CopyDepartmentAssignmentsPermissions
+			with CopyAssignmentsDescription
+			with CopyAssignmentsCommandTriggers
+			with CopyAssignmentsCommandNotifications
+			with AutowiringAssessmentServiceComponent
+			with AutowiringAssessmentMembershipServiceComponent
+
+	def apply(module: Module, academicYear: AcademicYear): Command =
+		new CopyModuleAssignmentsCommandInternal(module, academicYear)
+			with ComposableCommand[Seq[Assignment]]
+			with CopyModuleAssignmentsPermissions
 			with CopyAssignmentsDescription
 			with CopyAssignmentsCommandTriggers
 			with CopyAssignmentsCommandNotifications
@@ -24,15 +40,12 @@ object CopyAssignmentsCommand {
 			with AutowiringAssessmentMembershipServiceComponent
 }
 
-abstract class CopyAssignmentsCommand(val department: Department, val modules: Seq[Module]) extends CommandInternal[Seq[Assignment]]
-	with Appliable[Seq[Assignment]] with CopyAssignmentsState {
-
+abstract class AbstractCopyAssignmentsCommandInternal
+	extends CommandInternal[Result] with CopyAssignmentsState {
 	self: AssessmentServiceComponent with AssessmentMembershipServiceComponent =>
 
-	def applyInternal(): Seq[Assignment] = {
-
-		val scalaAssignments = assignments.asScala
-		scalaAssignments.map { assignment =>
+	override def applyInternal(): Result = {
+		assignments.asScala.map { assignment =>
 			val newAssignment = copy(assignment)
 			assessmentService.save(newAssignment)
 			newAssignment
@@ -69,7 +82,6 @@ abstract class CopyAssignmentsCommand(val department: Department, val modules: S
 		newAssignment.automaticallyReleaseToMarkers = assignment.automaticallyReleaseToMarkers
 		newAssignment.automaticallySubmitToTurnitin = assignment.automaticallySubmitToTurnitin
 		newAssignment.anonymousMarking = assignment.anonymousMarking
-		newAssignment.cm2Assignment = true
 		newAssignment.cm2MarkingWorkflow = assignment.cm2MarkingWorkflow
 		var workflowCtg = assignment.workflowCategory match {
 			case Some(workflowCategory: WorkflowCategory) =>
@@ -103,26 +115,48 @@ abstract class CopyAssignmentsCommand(val department: Department, val modules: S
 	}
 }
 
-trait CopyAssignmentsPermissions extends RequiresPermissionsChecking with PermissionsCheckingMethods {
-	self: CopyAssignmentsState =>
-	override def permissionsCheck(p: PermissionsChecking) {
-		if (modules.isEmpty) p.PermissionCheck(Permissions.Assignment.Create, mandatory(department))
-		else for (module <- modules) {
-			p.mustBeLinked(p.mandatory(module), mandatory(department))
-			p.PermissionCheck(Permissions.Assignment.Create, module)
-		}
-	}
+class CopyDepartmentAssignmentsCommandInternal(val department: Department, val academicYear: AcademicYear)
+	extends AbstractCopyAssignmentsCommandInternal with CopyDepartmentAssignmentsState {
+	self: AssessmentServiceComponent with AssessmentMembershipServiceComponent =>
+}
+
+class CopyModuleAssignmentsCommandInternal(val module: Module, val academicYear: AcademicYear)
+	extends AbstractCopyAssignmentsCommandInternal with CopyModuleAssignmentsState {
+	self: AssessmentServiceComponent with AssessmentMembershipServiceComponent =>
+}
+
+trait CopyDepartmentAssignmentsPermissions extends RequiresPermissionsChecking with PermissionsCheckingMethods {
+	self: CopyDepartmentAssignmentsState =>
+
+	override def permissionsCheck(p: PermissionsChecking): Unit =
+		p.PermissionCheck(AdminPermission, mandatory(department))
+}
+
+trait CopyModuleAssignmentsPermissions extends RequiresPermissionsChecking with PermissionsCheckingMethods {
+	self: CopyModuleAssignmentsState =>
+
+	override def permissionsCheck(p: PermissionsChecking): Unit =
+		p.PermissionCheck(AdminPermission, mandatory(module))
 }
 
 trait CopyAssignmentsState {
-	val department: Department
-	val modules: Seq[Module]
-	var assignments: JList[Assignment] = JArrayList()
+	def modules: Seq[Module]
+	def academicYear: AcademicYear
 
-	var academicYear: AcademicYear = AcademicYear.guessSITSAcademicYearByDate(new DateTime)
+	var assignments: JList[Assignment] = JArrayList()
 }
 
-trait CopyAssignmentsDescription extends Describable[Seq[Assignment]] {
+trait CopyDepartmentAssignmentsState extends CopyAssignmentsState {
+	def department: Department
+	def modules: Seq[Module] = department.modules.asScala.filter(_.assignments.asScala.exists(_.isAlive)).sortBy(_.code)
+}
+
+trait CopyModuleAssignmentsState extends CopyAssignmentsState {
+	def module: Module
+	def modules: Seq[Module] = Seq(module)
+}
+
+trait CopyAssignmentsDescription extends Describable[Result] {
 	self: CopyAssignmentsState =>
 
 	override lazy val eventName = "CopyAssignmentsFromPrevious"
@@ -132,7 +166,7 @@ trait CopyAssignmentsDescription extends Describable[Seq[Assignment]] {
 		.properties("assignments" -> assignments.asScala.map(_.id))
 }
 
-trait CopyAssignmentsCommandTriggers extends GeneratesTriggers[Seq[Assignment]] {
+trait CopyAssignmentsCommandTriggers extends GeneratesTriggers[Result] {
 
 	def generateTriggers(assignments: Seq[Assignment]): Seq[Trigger[_ >: Null <: ToEntityReference, _]] = {
 		assignments.filter(assignment => assignment.closeDate != null && assignment.closeDate.isAfterNow).map(assignment =>
@@ -141,7 +175,7 @@ trait CopyAssignmentsCommandTriggers extends GeneratesTriggers[Seq[Assignment]] 
 	}
 }
 
-trait CopyAssignmentsCommandNotifications extends SchedulesNotifications[Seq[Assignment], Assignment] with GeneratesNotificationsForAssignment {
+trait CopyAssignmentsCommandNotifications extends SchedulesNotifications[Result, Assignment] with GeneratesNotificationsForAssignment {
 
 	override def transformResult(assignments: Seq[Assignment]): Seq[Assignment] = assignments
 

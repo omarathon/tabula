@@ -5,7 +5,7 @@ import org.springframework.context.annotation.Profile
 import org.springframework.stereotype.Controller
 import org.springframework.web.bind.annotation.{ModelAttribute, PathVariable, RequestMapping}
 import uk.ac.warwick.tabula.{AcademicYear, CurrentUser}
-import uk.ac.warwick.tabula.cm2.web.Routes
+import uk.ac.warwick.tabula.web.Routes
 import uk.ac.warwick.tabula.services.{AutowiringMaintenanceModeServiceComponent, AutowiringModuleAndDepartmentServiceComponent, AutowiringUserSettingsServiceComponent}
 import uk.ac.warwick.tabula.web.controllers.{AcademicYearScopedController, DepartmentScopedController}
 import uk.ac.warwick.tabula.web.controllers.cm2.CourseworkController
@@ -40,17 +40,19 @@ abstract class AbstractDepartmentHomeController
 
 	@RequestMapping(params=Array("!ajax"), headers=Array("!X-Requested-With"))
 	def home(@ModelAttribute("command") command: DepartmentCommand, @PathVariable department: Department): Mav =
-		Mav(s"$urlPrefix/admin/home/department",
+		Mav("cm2/admin/home/department",
+			"academicYear" -> command.academicYear,
 			"modules" -> command.allModulesWithPermission,
 			"allModuleFilters" -> AssignmentInfoFilters.allModuleFilters(command.allModulesWithPermission.sortBy(_.code)),
 			"allWorkflowTypeFilters" -> AssignmentInfoFilters.allWorkflowTypeFilters,
 			"allStatusFilters" -> AssignmentInfoFilters.Status.all,
-			"academicYear" -> command.academicYear
-		).secondCrumbs(academicYearBreadcrumbs(command.academicYear)(Routes.admin.department(department, _)): _*)
+			"academicYear" -> command.academicYear)
+			.crumbsList(Breadcrumbs.department(department, Some(command.academicYear), active = true))
+			.secondCrumbs(academicYearBreadcrumbs(command.academicYear)(Routes.cm2.admin.department(department, _)): _*)
 
 	@RequestMapping
 	def homeAjax(@ModelAttribute("command") command: DepartmentCommand): Mav =
-		Mav(s"$urlPrefix/admin/home/moduleList", "modules" -> command.apply()).noLayout()
+		Mav("cm2/admin/home/moduleList", "modules" -> command.apply(), "academicYear" -> command.academicYear).noLayout()
 
 }
 
@@ -73,5 +75,14 @@ class DepartmentHomeForYearController extends AbstractDepartmentHomeController {
 	@ModelAttribute("activeAcademicYear")
 	override def activeAcademicYear(@PathVariable academicYear: AcademicYear): Option[AcademicYear] =
 		retrieveActiveAcademicYear(Option(academicYear))
+
+}
+
+@Profile(Array("cm2Enabled")) @Controller
+@RequestMapping(Array("/${cm2.prefix}/admin/department/{department}/assignments.xml"))
+class LegacyApiRedirectController extends CourseworkController {
+
+	@RequestMapping def redirect(@PathVariable department: Department) =
+		Redirect(Routes.api.department.assignments.xml(mandatory(department)))
 
 }

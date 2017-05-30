@@ -1,33 +1,35 @@
 package uk.ac.warwick.tabula.services.coursework.feedbackreport
 
+import org.apache.poi.ss.usermodel.Sheet
+import org.apache.poi.xssf.streaming.SXSSFWorkbook
+import org.joda.time.{DateTime, LocalDate}
+import uk.ac.warwick.spring.Wire
+import uk.ac.warwick.tabula.AcademicYear
+import uk.ac.warwick.tabula.data.model.{Assignment, Department, FeedbackReportGenerator}
+import uk.ac.warwick.tabula.helpers.SpreadsheetHelpers._
 import uk.ac.warwick.tabula.services.elasticsearch.AuditEventQueryMethods
+import uk.ac.warwick.tabula.services.{AssessmentMembershipService, FeedbackService, SubmissionService}
 import uk.ac.warwick.userlookup.User
 
 import scala.collection.JavaConverters._
-import collection.immutable.TreeMap
-import org.apache.poi.xssf.usermodel.{XSSFSheet, XSSFWorkbook}
-import org.joda.time.{DateTime, LocalDate}
-import uk.ac.warwick.tabula.helpers.SpreadsheetHelpers._
-import uk.ac.warwick.tabula.data.model.{Assignment, Department, FeedbackReportGenerator}
-import uk.ac.warwick.spring.Wire
-import uk.ac.warwick.tabula.services.{AssessmentMembershipService, FeedbackService, SubmissionService}
-
-import scala.concurrent.{Await, TimeoutException}
+import scala.collection.immutable.TreeMap
 import scala.concurrent.duration._
+import scala.concurrent.{Await, TimeoutException}
 
-class FeedbackReport(department: Department, startDate: DateTime, endDate: DateTime) {
+class FeedbackReport(department: Department, academicYear: Option[AcademicYear], startDate: DateTime, endDate: DateTime) {
 	import FeedbackReport._
 
 	var auditEventQueryMethods: AuditEventQueryMethods = Wire[AuditEventQueryMethods]
 	var assignmentMembershipService: AssessmentMembershipService = Wire[AssessmentMembershipService]
 	var submissionService: SubmissionService = Wire[SubmissionService]
 	var feedbackService: FeedbackService = Wire[FeedbackService]
-	val workbook = new XSSFWorkbook()
+	val workbook = new SXSSFWorkbook
 
 	var assignmentData : List[AssignmentInfo] = List()
 
-	def generateAssignmentSheet(dept: Department): XSSFSheet = {
+	def generateAssignmentSheet(dept: Department): Sheet = {
 		val sheet = workbook.createSheet("Report for " + safeDeptName(department))
+		sheet.trackAllColumnsForAutoSizing()
 
 		// add header row
 		val header = sheet.createRow(0)
@@ -55,7 +57,7 @@ class FeedbackReport(department: Department, startDate: DateTime, endDate: DateT
 		sheet
 	}
 
-	def populateAssignmentSheet(sheet: XSSFSheet) {
+	def populateAssignmentSheet(sheet: Sheet) {
 		for (assignmentInfo <- assignmentData) {
 			val row = sheet.createRow(sheet.getLastRowNum + 1)
 
@@ -86,8 +88,7 @@ class FeedbackReport(department: Department, startDate: DateTime, endDate: DateT
 	}
 
 	def buildAssignmentData() {
-
-		val allAssignments = department.modules.asScala.flatMap(_.assignments.asScala)
+		val allAssignments = department.modules.asScala.flatMap(_.assignments.asScala).filter(a => academicYear.isEmpty || academicYear.contains(a.academicYear))
 		val inDateAssignments = allAssignments.filter(a => ((a.collectSubmissions && a.submissions.size > 0) || (!a.collectSubmissions && a.includeInFeedbackReportWithoutSubmissions))
 			&& a.closeDate.isAfter(startDate) && a.closeDate.isBefore(endDate)).toList
 		val sortedAssignments = inDateAssignments.sortWith{(a1, a2) =>
@@ -122,8 +123,10 @@ class FeedbackReport(department: Department, startDate: DateTime, endDate: DateT
 		}
 	}
 
-	def generateModuleSheet(dept: Department): XSSFSheet = {
+	def generateModuleSheet(dept: Department): Sheet = {
 		val sheet = workbook.createSheet("Module report for " + safeDeptName(department))
+		sheet.trackAllColumnsForAutoSizing()
+
 		val style = headerStyle(workbook)
 		// add header row
 		val header = sheet.createRow(0)
@@ -145,7 +148,7 @@ class FeedbackReport(department: Department, startDate: DateTime, endDate: DateT
 	}
 
 
-	def populateModuleSheet(sheet: XSSFSheet) {
+	def populateModuleSheet(sheet: Sheet) {
 		val modules = assignmentData.groupBy(_.assignment.module.code)
 		val sortedModules = TreeMap(modules.toSeq:_*)
 		for ((moduleCode, assignmentInfoList) <- sortedModules) {

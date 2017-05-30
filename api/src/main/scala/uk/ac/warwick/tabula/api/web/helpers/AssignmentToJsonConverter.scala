@@ -1,25 +1,40 @@
 package uk.ac.warwick.tabula.api.web.helpers
 
-import uk.ac.warwick.tabula.DateFormats
-import uk.ac.warwick.tabula.api.web.controllers.TopLevelUrlAware
+import uk.ac.warwick.tabula.{DateFormats, TopLevelUrlComponent}
 import uk.ac.warwick.tabula.data.model.Assignment
 import uk.ac.warwick.tabula.web.Routes
 
 trait AssignmentToJsonConverter {
-	self: TopLevelUrlAware with AssessmentMembershipInfoToJsonConverter =>
+	self: TopLevelUrlComponent with AssessmentMembershipInfoToJsonConverter =>
 
 	def jsonAssignmentObject(assignment: Assignment): Map[String, Any] = {
 		val basicInfo = Map(
 			"id" -> assignment.id,
+			"module" -> Map(
+				"code" -> assignment.module.code.toUpperCase,
+				"name" -> assignment.module.name,
+				"adminDepartment" -> Map(
+					"code" -> assignment.module.adminDepartment.code.toUpperCase,
+					"name" -> assignment.module.adminDepartment.name
+				)
+			),
 			"archived" -> !assignment.isAlive, // TODO don't like this inferred value but don't want to change API spec
 			"academicYear" -> assignment.academicYear.toString,
 			"name" -> assignment.name,
 			"studentUrl" -> (toplevelUrl + Routes.coursework.assignment(assignment)),
 			"collectMarks" -> assignment.collectMarks,
-			"markingWorkflow" -> Option(assignment.markingWorkflow).map { mw => Map(
-				"id" -> mw.id,
-				"name" -> mw.name
-			)}.orNull,
+			"markingWorkflow" -> {
+				if (assignment.cm2Assignment)
+					Option(assignment.cm2MarkingWorkflow).map { mw => Map(
+						"id" -> mw.id,
+						"name" -> mw.name
+					)}.orNull
+				else
+					Option(assignment.markingWorkflow).map { mw => Map(
+						"id" -> mw.id,
+						"name" -> mw.name
+					)}.orNull
+			},
 			"feedbackTemplate" -> Option(assignment.feedbackTemplate).map { ft => Map(
 				"id" -> ft.id,
 				"name" -> ft.name

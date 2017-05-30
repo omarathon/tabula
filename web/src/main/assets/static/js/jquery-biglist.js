@@ -5,7 +5,7 @@
     so that you can select some/all rows and do stuff with them.
 
     Options:
-
+        setup($container): function called when the plugin is instantiated.
         onSomeChecked($container): callback when at least 1 is checked.
         onNoneChecked($container): callback when no rows are checked.
         onAllChecked($container): callback when all rows selected. defaults to behaviour of onSomeChecked.

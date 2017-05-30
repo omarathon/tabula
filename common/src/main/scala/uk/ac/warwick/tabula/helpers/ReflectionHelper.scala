@@ -14,15 +14,15 @@ import scala.reflect._
 
 object ReflectionHelper extends Logging {
 
-	private def subtypesOf[A : ClassTag] = {
+	private def subtypesOf[A : ClassTag](pkg: String) = {
 		val scanner = new ClassPathScanningCandidateComponentProvider(false)
 		scanner.addIncludeFilter(new AssignableTypeFilter(classTag[A].runtimeClass))
-		val components = scanner.findCandidateComponents("uk.ac.warwick.tabula")
+		val components = scanner.findCandidateComponents(pkg)
 		components.asScala.map { _.getBeanClassName }.toSeq.sorted.map(Class.forName).map { _.asInstanceOf[Class[A]] }
 	}
 
-	lazy val allNotifications : Map[String, Class[_ <: Notification[ToEntityReference, Unit]]] = {
-		val notifications = subtypesOf[Notification[ToEntityReference, Unit]].filter(_.getAnnotation(classOf[DiscriminatorValue]) != null)
+	lazy val allNotifications: Map[String, Class[_ <: Notification[ToEntityReference, Unit]]] = {
+		val notifications = subtypesOf[Notification[ToEntityReference, Unit]]("uk.ac.warwick.tabula.data.model").filter(_.getAnnotation(classOf[DiscriminatorValue]) != null)
 		if (notifications.isEmpty) {
 			logger.error("Reflections found no Notification classes!")
 		}
@@ -32,7 +32,7 @@ object ReflectionHelper extends Logging {
 		}.toMap
 	}
 
-	lazy val allPermissionTargets: Seq[Class[PermissionsTarget]] = subtypesOf[PermissionsTarget].sortBy(_.getSimpleName)
+	lazy val allPermissionTargets: Seq[Class[PermissionsTarget]] = subtypesOf[PermissionsTarget]("uk.ac.warwick.tabula.data.model").sortBy(_.getSimpleName)
 
 	lazy val allPermissions: Seq[Permission] = {
 		def sortFn(clazz1: Class[_ <: Permission], clazz2: Class[_ <: Permission]) = {
@@ -48,7 +48,7 @@ object ReflectionHelper extends Logging {
 			else shortName1 < shortName2
 		}
 
-		subtypesOf[Permission]
+		subtypesOf[Permission]("uk.ac.warwick.tabula.permissions")
 			.filter {_.getName.substring(Permissions.getClass.getName.length).contains('$')}
 			.sortWith(sortFn)
 			.map { clz =>
@@ -65,9 +65,9 @@ object ReflectionHelper extends Logging {
 	}
 
 	lazy val allBuiltInRoleDefinitions: Seq[BuiltInRoleDefinition] = {
-		val selectorDefinitions = subtypesOf[SelectorBuiltInRoleDefinition[_]]
+		val selectorDefinitions = subtypesOf[SelectorBuiltInRoleDefinition[_]]("uk.ac.warwick.tabula.roles")
 
-		subtypesOf[BuiltInRoleDefinition]
+		subtypesOf[BuiltInRoleDefinition]("uk.ac.warwick.tabula.roles")
 			.filterNot { clz => Modifier.isAbstract(clz.getModifiers) }
 			.filterNot { clz => selectorDefinitions.contains(clz) }
 			.sortBy(_.getSimpleName)
@@ -81,7 +81,7 @@ object ReflectionHelper extends Logging {
 	}
 
 	lazy val allSelectorBuiltInRoleDefinitionNames: Seq[String] = {
-		subtypesOf[SelectorBuiltInRoleDefinition[_]]
+		subtypesOf[SelectorBuiltInRoleDefinition[_]]("uk.ac.warwick.tabula.roles")
 			.filterNot { clz => Modifier.isAbstract(clz.getModifiers) }
 			.sortBy(_.getSimpleName)
 			.map { clz =>

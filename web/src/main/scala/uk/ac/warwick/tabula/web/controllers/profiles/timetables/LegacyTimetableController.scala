@@ -2,21 +2,18 @@ package uk.ac.warwick.tabula.web.controllers.profiles.timetables
 
 import javax.servlet.http.HttpServletRequest
 
-import org.springframework.beans.factory.annotation.Value
 import org.springframework.http.HttpStatus
 import org.springframework.stereotype.Controller
 import org.springframework.web.bind.annotation._
 import org.springframework.web.servlet.view.RedirectView
-import uk.ac.warwick.tabula.CurrentUser
 import uk.ac.warwick.tabula.data.model.Member
-import uk.ac.warwick.tabula.web.{Mav, Routes}
 import uk.ac.warwick.tabula.web.controllers.BaseController
+import uk.ac.warwick.tabula.web.{Mav, Routes}
+import uk.ac.warwick.tabula.{AutowiringTopLevelUrlComponent, CurrentUser}
 
 @Controller
 @RequestMapping(value = Array("/profiles/timetable"))
-class LegacyTimetableController extends BaseController {
-
-	@Value("${toplevel.url}") var toplevelUrl: String = _
+class LegacyTimetableController extends BaseController with AutowiringTopLevelUrlComponent {
 
 	@RequestMapping
 	def redirectCurrentUser(user: CurrentUser): Mav =

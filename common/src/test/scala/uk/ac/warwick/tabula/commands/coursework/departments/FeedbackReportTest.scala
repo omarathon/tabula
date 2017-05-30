@@ -3,8 +3,7 @@ package uk.ac.warwick.tabula.commands.coursework.departments
 import java.util.Date
 
 import scala.collection.JavaConverters._
-import org.apache.poi.ss.usermodel.Cell
-import org.apache.poi.xssf.usermodel.XSSFRow
+import org.apache.poi.ss.usermodel.{Cell, Row}
 import org.joda.time.base.AbstractInstant
 import uk.ac.warwick.tabula.TestBase
 import uk.ac.warwick.tabula.services.coursework.feedbackreport.FeedbackReport
@@ -137,7 +136,7 @@ class FeedbackReportTest extends TestBase with ReportWorld {
 		}
 
 		/** Check each cell in the row against the corresponding item in expected. */
-		def check(description:String, row:XSSFRow, expected: Seq[Any]) {
+		def check(description:String, row: Row, expected: Seq[Any]) {
 			for ((cell, (expectedValue, i)) <- row.cellIterator().asScala.toSeq zip expected.zipWithIndex) {
 				withClue(s"$description column index $i:") {
 					compare(cell, expectedValue)
@@ -212,7 +211,7 @@ class FeedbackReportTest extends TestBase with ReportWorld {
 	}
 
 	def getTestFeedbackReport: FeedbackReport = {
-		val report = new FeedbackReport(department, dateTime(2013, 3, 1), dateTime(2013, 9, 30))
+		val report = new FeedbackReport(department, None, dateTime(2013, 3, 1), dateTime(2013, 9, 30))
 		report.assignmentMembershipService = assignmentMembershipService
 		report.auditEventQueryMethods = auditEventQueryMethods
 		report.submissionService = submissionService

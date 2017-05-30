@@ -3,7 +3,7 @@ package uk.ac.warwick.tabula.commands.cm2.assignments
 import java.util.concurrent.TimeoutException
 
 import uk.ac.warwick.tabula.commands._
-import uk.ac.warwick.tabula.data.model.{Assignment, Module}
+import uk.ac.warwick.tabula.data.model.Assignment
 import uk.ac.warwick.tabula.helpers.DateTimeOrdering._
 import uk.ac.warwick.tabula.helpers.cm2.SubmissionListItem
 import uk.ac.warwick.tabula.permissions.Permissions
@@ -14,15 +14,11 @@ import scala.collection.JavaConversions._
 import scala.concurrent.Await
 import scala.concurrent.duration._
 
-// FIXME: implemented as part of CM2 migration but will require further reworking due to CM2 workflow changes
-
 object ListSubmissionsCommand {
 	type CommandType = Appliable[Seq[SubmissionListItem]] with ListSubmissionsRequest
 
-	//case class SubmissionListItem(submission: Submission, downloaded: Boolean)
-
-	def apply(module: Module, assignment: Assignment) =
-		new ListSubmissionsCommandInternal(module, assignment)
+	def apply(assignment: Assignment) =
+		new ListSubmissionsCommandInternal(assignment)
 			with ComposableCommand[Seq[SubmissionListItem]]
 			with ListSubmissionsRequest
 			with ListSubmissionsPermissions
@@ -31,7 +27,6 @@ object ListSubmissionsCommand {
 }
 
 trait ListSubmissionsState {
-	def module: Module
 	def assignment: Assignment
 }
 
@@ -39,7 +34,7 @@ trait ListSubmissionsRequest extends ListSubmissionsState {
 	var checkIndex: Boolean = true
 }
 
-abstract class ListSubmissionsCommandInternal(val module: Module, val assignment: Assignment)
+abstract class ListSubmissionsCommandInternal(val assignment: Assignment)
 	extends CommandInternal[Seq[SubmissionListItem]]
 		with ListSubmissionsState {
 	self: ListSubmissionsRequest with AuditEventQueryServiceComponent =>
@@ -62,7 +57,6 @@ trait ListSubmissionsPermissions extends RequiresPermissionsChecking with Permis
 	self: ListSubmissionsState =>
 
 	override def permissionsCheck(p: PermissionsChecking): Unit = {
-		mustBeLinked(mandatory(assignment), mandatory(module))
-		p.PermissionCheck(Permissions.Submission.Read, assignment)
+		p.PermissionCheck(Permissions.Submission.Read, mandatory(assignment))
 	}
 }

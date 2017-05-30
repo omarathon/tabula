@@ -30,7 +30,7 @@ abstract class AbstractHomeController
 	def home(@ModelAttribute("command") command: Command, user: CurrentUser) = {
 		val info = command.apply()
 
-		Mav(s"$urlPrefix/home/view",
+		Mav("cm2/home/view",
 			"academicYear" -> command.academicYear,
 			"homeDepartment" -> info.homeDepartment,
 			"studentInformation" -> info.studentInformation,
@@ -65,7 +65,7 @@ class HomeForYearController extends AbstractHomeController {
 
 @Profile(Array("cm2Enabled"))
 @Controller
-@RequestMapping(Array("/${cm2.prefix}/admin", "/${cm2.prefix}/admin/department", "/${cm2.prefix}/admin/module"))
+@RequestMapping(Array("/${cm2.prefix}/admin", "/${cm2.prefix}/admin/department", "/${cm2.prefix}/submission", "/${cm2.prefix}/module/**"))
 class HomeRewritesController extends BaseController {
 
 	@RequestMapping

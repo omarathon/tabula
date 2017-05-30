@@ -67,13 +67,13 @@
 <#if feedback.assignment.genericFeedback??>
 	<div class="feedback-notes">
 		<h4>Feedback for all students on this assignment</h4>
-		${feedback.assignment.genericFeedback!""}
+		<#noescape>${feedback.assignment.genericFeedbackFormattedHtml!""}</#noescape>
 	</div>
 </#if>
 <#if feedback.comments??>
 	<div class="feedback-notes">
 		<h4>Feedback on your submission</h4>
-		${feedback.comments!""}
+		<#noescape>${feedback.commentsFormattedHtml!""}</#noescape>
 	</div>
 </#if>
 

@@ -26,7 +26,7 @@ trait FeedbackService {
 	def save(feedback: MarkerFeedback)
 	def delete(feedback: MarkerFeedback)
 	def getExamFeedbackMap(exam: Exam, users: Seq[User]): Map[User, ExamFeedback]
-
+	def addAnonymousIds(feedbacks: Seq[AssignmentFeedback]): Seq[AssignmentFeedback]
 }
 
 @Service(value = "feedbackService")
@@ -78,7 +78,6 @@ class FeedbackServiceImpl extends FeedbackService with Daoisms with Logging {
 
 	def saveOrUpdate(feedback:Feedback){
 		session.saveOrUpdate(feedback)
-		session.flush()
 	}
 
 	def saveOrUpdate(mark: Mark) {
@@ -103,6 +102,21 @@ class FeedbackServiceImpl extends FeedbackService with Daoisms with Logging {
 
 	def getExamFeedbackMap(exam: Exam, users: Seq[User]): Map[User, ExamFeedback] =
 		dao.getExamFeedbackMap(exam, users)
+
+	def addAnonymousIds(feedbacks: Seq[AssignmentFeedback]): Seq[AssignmentFeedback] = transactional() {
+		val assignments = feedbacks.map(_.assignment).distinct
+		if(assignments.length > 1) throw new IllegalArgumentException("Can only generate IDs for feedback from the same assignment")
+		assignments.headOption.foreach(assignment => {
+			val nextIndex = dao.getLastAnonIndex(assignment) + 1
+
+			// add IDs to any feedback that doesn't already have one
+			for((feedback, i) <- feedbacks.filter(_.anonymousId.isEmpty).zipWithIndex) {
+				feedback.anonymousId = Some(nextIndex + i)
+				dao.save(feedback)
+			}
+		})
+		feedbacks
+	}
 
 }
 

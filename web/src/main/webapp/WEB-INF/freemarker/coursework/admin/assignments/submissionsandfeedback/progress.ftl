@@ -371,11 +371,8 @@
 											<#else>
 												<#local attachmentExtension = "zip">
 											</#if>
-											<a class="long-running" href="<@url page='/coursework/admin/module/${module.code}/assignments/${assignment.id}/feedback/download/${student.coursework.enhancedFeedback.feedback.id}/feedback-${student.coursework.enhancedFeedback.feedback.studentIdentifier}.${attachmentExtension}'/>"><#compress>
-												${attachments?size}
-												<#if attachments?size == 1> file
-												<#else> files
-												</#if>
+											<a class="long-running" href="<@routes.coursework.adminFeedbackZip assignment student.coursework.enhancedFeedback.feedback attachmentExtension />"><#compress>
+												<@fmt.p attachments?size "file" />
 											</#compress></a>
 										<#-- If the feedback was entered online there may not be attachments  -->
 										<#elseif feedback?? && feedback.hasOnlineFeedback>

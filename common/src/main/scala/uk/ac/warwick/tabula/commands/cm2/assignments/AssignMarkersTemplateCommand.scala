@@ -1,7 +1,8 @@
 package uk.ac.warwick.tabula.commands.cm2.assignments
 
 import org.apache.poi.ss.util.CellRangeAddressList
-import org.apache.poi.xssf.usermodel.{XSSFDataValidation, XSSFDataValidationConstraint, XSSFDataValidationHelper, XSSFWorkbook}
+import org.apache.poi.xssf.streaming.SXSSFWorkbook
+import org.apache.poi.xssf.usermodel.{XSSFDataValidation, XSSFDataValidationConstraint, XSSFDataValidationHelper}
 import uk.ac.warwick.tabula.commands._
 import uk.ac.warwick.tabula.commands.cm2.assignments.ListMarkerAllocationsCommand.{Marker, _}
 import uk.ac.warwick.tabula.data.model.Assignment
@@ -37,7 +38,7 @@ class AssignMarkersTemplateCommandInternal(val assignment: Assignment) extends C
 	def applyInternal(): ExcelView = {
 		val existingAllocations = fetchAllocations(assignment)
 
-		val workbook = new XSSFWorkbook()
+		val workbook = new SXSSFWorkbook
 		val style = workbook.createCellStyle
 		val format = workbook.createDataFormat
 		// using an @ sets text format (from BuiltinFormats.class)
@@ -52,6 +53,8 @@ class AssignMarkersTemplateCommandInternal(val assignment: Assignment) extends C
 
 			// create allocation sheets and headers
 			val sheet = workbook.createSheet(role)
+			sheet.trackAllColumnsForAutoSizing()
+
 			val header = sheet.createRow(0)
 			header.createCell(0).setCellValue(AssignMarkersTemplateCommand.StudentUsercode)
 			header.createCell(1).setCellValue(AssignMarkersTemplateCommand.StudentName)
@@ -74,7 +77,7 @@ class AssignMarkersTemplateCommandInternal(val assignment: Assignment) extends C
 
 			// add dropdown and validation to the main sheet
 			val dropdownRange = new CellRangeAddressList(1, existingAllocations.allStudents.size, 2, 2)
-			val dvHelper = new XSSFDataValidationHelper(sheet)
+			val dvHelper = new XSSFDataValidationHelper(null)
 			val dvConstraint = dvHelper.createFormulaListConstraint(
 				lookupSheetName + "!$A$2:$A$" + (markers.size + 1)
 			).asInstanceOf[XSSFDataValidationConstraint]

@@ -24,7 +24,7 @@ class BoardAgreedMarksColumnOption extends ChosenYearExamGridColumnOption {
 		override def values: Map[ExamGridEntity, ExamGridColumnValue] = {
 			state.entities.map(entity => entity ->
 				ExamGridColumnValueString(
-					entity.years.get(state.yearOfStudy)
+					entity.validYears.get(state.yearOfStudy)
 						.flatMap(_.studentCourseYearDetails)
 						.flatMap(scyd => Option(scyd.agreedMark))
 						.map(_.toPlainString).getOrElse("")

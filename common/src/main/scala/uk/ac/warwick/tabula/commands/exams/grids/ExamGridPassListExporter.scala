@@ -50,13 +50,15 @@ object ExamGridPassListExporter extends TaskBenchmarking with AddConfidentialWat
 
 		val passedEntites = {
 			entities.filter(entity =>
-				progressionService.suggestedResult(
-					entity.years(yearOfStudy).studentCourseYearDetails.get,
-					normalLoadLookup(entity.years(yearOfStudy).route),
-					routeRulesLookup(entity.years(yearOfStudy).route)
-				) match {
-					case ProgressionResult.Proceed | ProgressionResult.PossiblyProceed | ProgressionResult.Pass => true
-					case _ => false
+				entity.years(yearOfStudy).exists { year =>
+					progressionService.suggestedResult(
+						year.studentCourseYearDetails.get,
+						normalLoadLookup(year.route),
+						routeRulesLookup(year.route)
+					) match {
+						case ProgressionResult.Proceed | ProgressionResult.PossiblyProceed | ProgressionResult.Pass => true
+						case _ => false
+					}
 				}
 			)
 		}

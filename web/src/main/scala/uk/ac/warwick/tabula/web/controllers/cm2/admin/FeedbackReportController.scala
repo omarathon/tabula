@@ -3,56 +3,89 @@ package uk.ac.warwick.tabula.web.controllers.cm2.admin
 import javax.validation.Valid
 
 import org.joda.time.DateTime
-import org.joda.time.format.DateTimeFormat
 import org.springframework.context.annotation.Profile
 import org.springframework.stereotype.Controller
 import org.springframework.validation.Errors
 import org.springframework.web.bind.annotation.{ModelAttribute, PathVariable, RequestMapping, RequestParam}
-import uk.ac.warwick.spring.Wire
 import uk.ac.warwick.tabula.cm2.web.Routes
+import uk.ac.warwick.tabula.{AcademicYear, CurrentUser}
+import uk.ac.warwick.tabula.commands.SelfValidating
 import uk.ac.warwick.tabula.commands.cm2.departments.FeedbackReportCommand
 import uk.ac.warwick.tabula.data.model.Department
-import uk.ac.warwick.tabula.services.jobs.JobService
+import uk.ac.warwick.tabula.permissions.Permission
+import uk.ac.warwick.tabula.services.jobs.AutowiringJobServiceComponent
+import uk.ac.warwick.tabula.services.{AutowiringMaintenanceModeServiceComponent, AutowiringModuleAndDepartmentServiceComponent, AutowiringUserSettingsServiceComponent}
 import uk.ac.warwick.tabula.web.Mav
+import uk.ac.warwick.tabula.web.controllers.{AcademicYearScopedController, DepartmentScopedController}
 import uk.ac.warwick.tabula.web.controllers.cm2.CourseworkController
-import uk.ac.warwick.tabula.web.views.{JSONErrorView, JSONView}
-import uk.ac.warwick.tabula.{CurrentUser, DateFormats}
 
-@Profile(Array("cm2Enabled")) @Controller
-@RequestMapping(Array("/${cm2.prefix}/admin/department/{department}/reports/feedback"))
-class FeedbackReportController extends CourseworkController {
+abstract class AbstractFeedbackReportController extends CourseworkController
+	with DepartmentScopedController with AcademicYearScopedController
+	with AutowiringUserSettingsServiceComponent
+	with AutowiringModuleAndDepartmentServiceComponent
+	with AutowiringMaintenanceModeServiceComponent
+	with AutowiringJobServiceComponent {
 
-	validatesSelf[FeedbackReportCommand]
+	override val departmentPermission: Permission = FeedbackReportCommand.AdminPermission
 
-	var jobService: JobService = Wire.auto[JobService]
+	@ModelAttribute("activeDepartment")
+	override def activeDepartment(@PathVariable department: Department): Option[Department] =
+		retrieveActiveDepartment(Option(department))
 
-	@ModelAttribute def command(@PathVariable(value = "department") dept: Department, user: CurrentUser) =
-		new FeedbackReportCommand(mandatory(dept), mandatory(user))
+	validatesSelf[SelfValidating]
 
-	@RequestMapping(method=Array(HEAD, GET), params = Array("!jobId"))
-	def requestReport(cmd:FeedbackReportCommand, errors:Errors):Mav = {
-		val formatter = DateTimeFormat.forPattern(DateFormats.DateTimePickerPattern)
-		Mav(s"$urlPrefix/admin/assignments/feedbackreport/report_range",
-			"startDate" ->  formatter.print(new DateTime().minusMonths(3)),
-			"endDate" ->  formatter.print(new DateTime())
-		).noLayout()
-	}
+	@ModelAttribute("feedbackReportCommand")
+	def command(@PathVariable department: Department, @ModelAttribute("activeAcademicYear") activeAcademicYear: Option[AcademicYear], user: CurrentUser): FeedbackReportCommand.Command =
+		FeedbackReportCommand(mandatory(department), activeAcademicYear.getOrElse(AcademicYear.guessSITSAcademicYearByDate(DateTime.now)), user)
+
+	@RequestMapping(params = Array("!jobId"))
+	def requestReport(@ModelAttribute("feedbackReportCommand") cmd: FeedbackReportCommand.Command, @PathVariable department: Department): Mav =
+		Mav("cm2/admin/assignments/feedbackreport/report_range", "academicYear" -> cmd.academicYear)
+			.crumbsList(Breadcrumbs.department(department, Some(cmd.academicYear)))
+			.secondCrumbs(academicYearBreadcrumbs(cmd.academicYear)(Routes.admin.feedbackReports(department, _)): _*)
 
 	@RequestMapping(method = Array(POST), params = Array("!jobId"))
-	def generateReport(@Valid cmd: FeedbackReportCommand, errors: Errors): Mav = {
-		if(errors.hasErrors) {
-			Mav(new JSONErrorView(errors))
+	def generateReport(@Valid @ModelAttribute("feedbackReportCommand") cmd: FeedbackReportCommand.Command, errors: Errors, @PathVariable department: Department): Mav = {
+		if (errors.hasErrors) {
+			requestReport(cmd, department)
 		} else {
-			val jobId = cmd.apply().id
-			val successUrl = Routes.admin.feedbackReports(cmd.department) + "?jobId=" + jobId
-			Mav(new JSONView(Map("status" -> "success", "result" -> successUrl)))
+			val job = cmd.apply()
+			Mav("cm2/admin/assignments/feedbackreport/progress", "job" -> job, "academicYear" -> cmd.academicYear)
+				.crumbsList(Breadcrumbs.department(department, Some(cmd.academicYear)))
+				.secondCrumbs(academicYearBreadcrumbs(cmd.academicYear)(Routes.admin.feedbackReports(department, _)): _*)
 		}
 	}
 
 	@RequestMapping(params = Array("jobId"))
-	def checkProgress(@RequestParam jobId: String): Mav = {
+	def checkProgress(@RequestParam jobId: String, @PathVariable department: Department, @ModelAttribute("activeAcademicYear") activeAcademicYear: Option[AcademicYear]): Mav = {
+		val academicYear = activeAcademicYear.getOrElse(AcademicYear.guessSITSAcademicYearByDate(DateTime.now))
 		val job = jobService.getInstance(jobId)
-		Mav(s"$urlPrefix/admin/assignments/feedbackreport/progress", "job" -> job).noLayoutIf(ajax)
+		Mav("cm2/admin/assignments/feedbackreport/progress", "job" -> job)
+			.crumbsList(Breadcrumbs.department(department, Some(academicYear)))
+			.secondCrumbs(academicYearBreadcrumbs(academicYear)(Routes.admin.feedbackReports(department, _)): _*)
+			.noLayoutIf(ajax)
 	}
+
+}
+
+@Profile(Array("cm2Enabled"))
+@Controller
+@RequestMapping(Array("/${cm2.prefix}/admin/department/{department}/reports/feedback"))
+class FeedbackReportController extends AbstractFeedbackReportController {
+
+	@ModelAttribute("activeAcademicYear")
+	override def activeAcademicYear: Option[AcademicYear] =
+		retrieveActiveAcademicYear(None)
+
+}
+
+@Profile(Array("cm2Enabled"))
+@Controller
+@RequestMapping(Array("/${cm2.prefix}/admin/department/{department}/{academicYear:\\d{4}}/reports/feedback"))
+class FeedbackReportForYearController extends AbstractFeedbackReportController {
+
+	@ModelAttribute("activeAcademicYear")
+	override def activeAcademicYear(@PathVariable academicYear: AcademicYear): Option[AcademicYear] =
+		retrieveActiveAcademicYear(Option(academicYear))
 
 }

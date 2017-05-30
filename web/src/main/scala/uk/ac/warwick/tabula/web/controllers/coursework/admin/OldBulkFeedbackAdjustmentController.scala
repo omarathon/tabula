@@ -6,7 +6,7 @@ import org.springframework.context.annotation.Profile
 import org.springframework.stereotype.Controller
 import org.springframework.validation.Errors
 import org.springframework.web.bind.annotation.{ModelAttribute, PathVariable, RequestMapping}
-import uk.ac.warwick.tabula.commands.coursework.feedback.GenerateGradesFromMarkCommand
+import uk.ac.warwick.tabula.commands.coursework.feedback.OldGenerateGradesFromMarkCommand
 import uk.ac.warwick.tabula.commands.exams.exams.{BulkAdjustmentCommand, BulkAdjustmentTemplateCommand}
 import uk.ac.warwick.tabula.commands.{Appliable, SelfValidating}
 import uk.ac.warwick.tabula.coursework.web.Routes
@@ -26,14 +26,14 @@ class OldBulkFeedbackAdjustmentController extends OldCourseworkController {
 	def command(@PathVariable module: Module, @PathVariable assignment: Assignment) =
 		BulkAdjustmentCommand(
 			mandatory(assignment),
-			GenerateGradesFromMarkCommand(mandatory(module), mandatory(assignment)),
+			OldGenerateGradesFromMarkCommand(mandatory(module), mandatory(assignment)),
 			SpreadsheetHelpers,
 			user
 		)
 
 	@RequestMapping(method = Array(GET, HEAD))
 	def form: Mav = {
-		Mav(s"$urlPrefix/admin/assignments/feedback/bulk/bulk_adjustment",
+		Mav("coursework/admin/assignments/feedback/bulk/bulk_adjustment",
 			"StudentIdHeader" -> BulkAdjustmentCommand.StudentIdHeader,
 			"MarkHeader" -> BulkAdjustmentCommand.MarkHeader,
 			"GradeHeader" -> BulkAdjustmentCommand.GradeHeader
@@ -45,7 +45,7 @@ class OldBulkFeedbackAdjustmentController extends OldCourseworkController {
 		if (errors.hasFieldErrors("file"))
 			form
 		else
-			Mav(s"$urlPrefix/admin/assignments/feedback/bulk/preview")
+			Mav("coursework/admin/assignments/feedback/bulk/preview")
 	}
 
 	@RequestMapping(method = Array(POST), params = Array("confirmStep=true"))

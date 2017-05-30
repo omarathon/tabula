@@ -22,7 +22,7 @@ trait CM2MarkingWorkflowDao {
 	def saveOrUpdate(workflow: CM2MarkingWorkflow): Unit
 	def saveOrUpdate(markers: StageMarkers): Unit
 	def markerFeedbackForAssignmentAndStage(assignment: Assignment, stage: MarkingWorkflowStage): Seq[MarkerFeedback]
-	def markerFeedbackForFeedback(feedback: AssignmentFeedback): Seq[MarkerFeedback]
+	def markerFeedbackForFeedback(feedback: Feedback): Seq[MarkerFeedback]
 	def markerFeedbackForMarker(assignment: Assignment, marker: User): Seq[MarkerFeedback]
 	def delete(workflow: CM2MarkingWorkflow): Unit
 
@@ -55,7 +55,7 @@ class CM2MarkingWorkflowDaoImpl extends CM2MarkingWorkflowDao with Daoisms {
 			.seq
 	}
 
-	override def markerFeedbackForFeedback(feedback: AssignmentFeedback): Seq[MarkerFeedback] = {
+	override def markerFeedbackForFeedback(feedback: Feedback): Seq[MarkerFeedback] = {
 		session.newCriteria[MarkerFeedback]
 			.add(is("feedback", feedback))
 			.seq
@@ -67,6 +67,7 @@ class CM2MarkingWorkflowDaoImpl extends CM2MarkingWorkflowDao with Daoisms {
 			.add(is("markerUsercode", marker.getUserId))
 			.add(is("f.assignment", assignment))
 			.seq
+			.distinct
 	}
 
 	override def delete(workflow: CM2MarkingWorkflow): Unit = {

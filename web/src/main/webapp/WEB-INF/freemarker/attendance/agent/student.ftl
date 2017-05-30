@@ -84,7 +84,7 @@
 				<#assign point = groupedPointPair._1() />
 				<div class="col-md-10">
 					${point.name}
-					(<a class="use-tooltip" data-html="true" title="
+					(<span class="use-tooltip" data-html="true" title="
 						<@fmt.wholeWeekDateFormat
 							point.startWeek
 							point.endWeek
@@ -95,7 +95,7 @@
 						point.endWeek
 						point.scheme.academicYear
 						department
-					/></a>)
+					/></span>)
 				</div>
 				<div class="col-md-2">
 					<#if groupedPointPair._2()??>

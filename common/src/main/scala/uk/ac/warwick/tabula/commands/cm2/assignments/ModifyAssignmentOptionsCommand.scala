@@ -43,8 +43,6 @@ trait ModifyAssignmentOptionsCommandState {
 
 	def assignment: Assignment
 
-	def module: Module = assignment.module
-
 	def copyTo(assignment: Assignment) {
 		copyOptionsTo(assignment)
 	}
@@ -54,12 +52,15 @@ trait ModifyAssignmentOptionsPermissions extends RequiresPermissionsChecking wit
 	self: ModifyAssignmentOptionsCommandState =>
 
 	override def permissionsCheck(p: PermissionsChecking): Unit = {
+		notDeleted(assignment)
 		p.PermissionCheck(Permissions.Assignment.Update, assignment.module)
 	}
 }
 
 trait ModifyAssignmentOptionsDescription extends Describable[Assignment] {
 	self: ModifyAssignmentOptionsCommandState with SharedAssignmentProperties =>
+
+	override lazy val eventName: String = "ModifyAssignmentOptions"
 
 	override def describe(d: Description) {
 		d.assignment(assignment)

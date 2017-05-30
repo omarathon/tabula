@@ -5,7 +5,7 @@ import org.springframework.validation.BindException
 import uk.ac.warwick.tabula.{Fixtures, MockUserLookup, Mockito, TestBase}
 import uk.ac.warwick.tabula.commands.UploadedFile
 import uk.ac.warwick.tabula.data.model._
-import uk.ac.warwick.tabula.services.objectstore.ObjectStorageService
+import uk.ac.warwick.tabula.services.objectstore.{ObjectStorageService, RichByteSource}
 import uk.ac.warwick.userlookup.User
 
 // scalastyle:off magic.number
@@ -14,8 +14,7 @@ class AddMarkerFeedbackCommandTest extends TestBase with Mockito {
 	var objectStorageService: ObjectStorageService = smartMock[ObjectStorageService]
 
 	// Start from the basis that the store is empty
-	objectStorageService.fetch(any[String]) returns None
-	objectStorageService.metadata(any[String]) returns None
+	objectStorageService.fetch(any[String]) returns RichByteSource.empty
 
 	val module: Module = Fixtures.module("cs118")
 	val assignment: Assignment = Fixtures.assignment("my assignment")

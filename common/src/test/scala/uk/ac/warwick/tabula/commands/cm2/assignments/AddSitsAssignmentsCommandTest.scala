@@ -41,14 +41,13 @@ class AddSitsAssignmentsCommandTest extends TestBase with Mockito {
 	@Test def validate(): Unit = new Fixture { withUser("cuscav") {
 		val validator = new AddSitsAssignmentsValidation with AddSitsAssignmentsCommandState
 			with ModuleAndDepartmentServiceComponent with AssessmentServiceComponent {
-
+			val academicYear = AcademicYear(2016)
 			val department: Department = thisDepartment
 			val user: CurrentUser = currentUser
 			val moduleAndDepartmentService: ModuleAndDepartmentService = thisModuleAndDepartmentService
 			val assessmentService: AssessmentService = thisAssignmentService
 		}
 
-		validator.academicYear = new AcademicYear(2016)
 		validator.sitsAssignmentItems = Seq(
 			item(upstream1, include = true, optionsId = "A"),
 			item(upstream2, include = false, optionsId = null),
@@ -64,14 +63,13 @@ class AddSitsAssignmentsCommandTest extends TestBase with Mockito {
 	}}
 
 	@Test def applyCommand() { new Fixture { withUser("cuscav") {
-		val cmd = new AddSitsAssignmentsCommandInternal(thisDepartment, currentUser) with AddSitsAssignmentsCommandState
+		val cmd = new AddSitsAssignmentsCommandInternal(thisDepartment, AcademicYear(2016), currentUser) with AddSitsAssignmentsCommandState
 			with ModuleAndDepartmentServiceComponent with AssessmentServiceComponent with AssessmentMembershipServiceComponent {
 			val moduleAndDepartmentService: ModuleAndDepartmentService = thisModuleAndDepartmentService
 			val assessmentService: AssessmentService = thisAssignmentService
 			val assessmentMembershipService: AssessmentMembershipService = thisAssignmentMembershipService
 		}
 
-		cmd.academicYear = new AcademicYear(2016)
 		cmd.sitsAssignmentItems = Seq(
 			item(upstream1, include = true, optionsId = "A"),
 			item(upstream2, include = false, optionsId = null),
@@ -101,7 +99,7 @@ class AddSitsAssignmentsCommandTest extends TestBase with Mockito {
 	}}}
 
 	@Test	def optionsMapBinding() { new Fixture {
-		val cmd = new AddSitsAssignmentsCommandInternal(null, null) with AddSitsAssignmentsCommandState
+		val cmd = new AddSitsAssignmentsCommandInternal(null, AcademicYear(2016), null) with AddSitsAssignmentsCommandState
 			with ModuleAndDepartmentServiceComponent with AssessmentServiceComponent with AssessmentMembershipServiceComponent {
 			val moduleAndDepartmentService: ModuleAndDepartmentService = thisModuleAndDepartmentService
 			val assessmentService: AssessmentService = thisAssignmentService

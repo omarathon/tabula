@@ -14,7 +14,7 @@
 					<div class="control-group">
 						<label class="control-label">Generic feedback</label>
 						<div class="controls">
-							<p>${assignment.genericFeedback}</p>
+							<p>${assignment.genericFeedbackFormattedHtml}</p>
 						</div>
 					</div>
 				</div>
@@ -25,9 +25,9 @@
 					<div class="control-group">
 						<label class="control-label">Feedback</label>
 						<div class="controls">
-						<#list feedback.customFormValues as formValue>
-							<p>${formValue.value!""}</p>
-						</#list>
+							<#list feedback.customFormValues as formValue>
+								<p>${formValue.valueFormattedHtml!""}</p>
+							</#list>
 						</div>
 					</div>
 				</div>

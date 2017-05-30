@@ -1,6 +1,6 @@
 package uk.ac.warwick.tabula.web.controllers.coursework.admin
 
-import org.apache.poi.xssf.usermodel.XSSFWorkbook
+import org.apache.poi.xssf.streaming.SXSSFWorkbook
 import org.springframework.context.annotation.Profile
 import org.springframework.stereotype.Controller
 import org.springframework.web.bind.annotation.{ModelAttribute, PathVariable, RequestMapping}
@@ -10,10 +10,10 @@ import uk.ac.warwick.tabula.commands.Appliable
 import uk.ac.warwick.tabula.commands.coursework.feedback.MarksTemplateCommand._
 import uk.ac.warwick.tabula.commands.coursework.feedback.{GenerateMarksTemplateCommand, GenerateOwnMarksTemplateCommand}
 import uk.ac.warwick.tabula.coursework.web.Routes
-import uk.ac.warwick.tabula.web.controllers.coursework.OldCourseworkController
 import uk.ac.warwick.tabula.data.model.{Assignment, Module}
 import uk.ac.warwick.tabula.services.AssessmentMembershipService
 import uk.ac.warwick.tabula.web.Mav
+import uk.ac.warwick.tabula.web.controllers.coursework.OldCourseworkController
 import uk.ac.warwick.tabula.web.views.ExcelView
 import uk.ac.warwick.userlookup.User
 
@@ -32,7 +32,7 @@ class OldAssignmentMarksTemplateController extends OldCourseworkController {
 		)
 
 	@RequestMapping(method = Array(HEAD, GET))
-	def generateMarksTemplate(@ModelAttribute("command") cmd: Appliable[XSSFWorkbook], @PathVariable assignment: Assignment): ExcelView = {
+	def generateMarksTemplate(@ModelAttribute("command") cmd: Appliable[SXSSFWorkbook], @PathVariable assignment: Assignment): ExcelView = {
 		new ExcelView(safeAssessmentName(assignment) + " marks.xlsx", cmd.apply())
 	}
 }
@@ -55,7 +55,7 @@ class OldAssignmentMarkerMarksTemplateController extends OldCourseworkController
 		)
 
 	@RequestMapping(method = Array(HEAD, GET))
-	def generateMarksTemplate(@ModelAttribute("command") cmd: Appliable[XSSFWorkbook], @PathVariable assignment: Assignment): ExcelView = {
+	def generateMarksTemplate(@ModelAttribute("command") cmd: Appliable[SXSSFWorkbook], @PathVariable assignment: Assignment): ExcelView = {
 		new ExcelView(safeAssessmentName(assignment) + " marks.xlsx", cmd.apply())
 	}
 }

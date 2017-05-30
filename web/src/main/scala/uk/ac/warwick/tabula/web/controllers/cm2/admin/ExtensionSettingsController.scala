@@ -2,46 +2,50 @@ package uk.ac.warwick.tabula.web.controllers.cm2.admin
 
 import javax.validation.Valid
 
-import org.joda.time.DateTime
-import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.context.annotation.Profile
 import org.springframework.stereotype.Controller
 import org.springframework.validation.Errors
 import org.springframework.web.bind.annotation.{ModelAttribute, PathVariable, RequestMapping, RequestMethod}
 import uk.ac.warwick.tabula.cm2.web.Routes
+import uk.ac.warwick.tabula.commands.SelfValidating
 import uk.ac.warwick.tabula.commands.cm2.departments.ExtensionSettingsCommand
 import uk.ac.warwick.tabula.data.model.Department
-import uk.ac.warwick.tabula.services.{AutowiringMaintenanceModeServiceComponent, AutowiringUserSettingsServiceComponent, ModuleAndDepartmentService}
+import uk.ac.warwick.tabula.permissions.Permission
+import uk.ac.warwick.tabula.services.{AutowiringMaintenanceModeServiceComponent, AutowiringModuleAndDepartmentServiceComponent, AutowiringUserSettingsServiceComponent}
 import uk.ac.warwick.tabula.web.Mav
-import uk.ac.warwick.tabula.web.controllers.AcademicYearScopedController
+import uk.ac.warwick.tabula.web.controllers.DepartmentScopedController
 import uk.ac.warwick.tabula.web.controllers.cm2.CourseworkController
-import uk.ac.warwick.tabula.{AcademicYear, CurrentUser}
 
-@Profile(Array("cm2Enabled")) @Controller
+@Profile(Array("cm2Enabled"))
+@Controller
 @RequestMapping(Array("/${cm2.prefix}/admin/department/{department}/settings/extensions"))
 class ExtensionSettingsController extends CourseworkController
-	with AcademicYearScopedController with AutowiringUserSettingsServiceComponent with AutowiringMaintenanceModeServiceComponent {
+	with DepartmentScopedController with AutowiringModuleAndDepartmentServiceComponent with AutowiringUserSettingsServiceComponent
+	with AutowiringMaintenanceModeServiceComponent {
 
-	@Autowired var moduleService: ModuleAndDepartmentService = _
+	override val departmentPermission: Permission = ExtensionSettingsCommand.AdminPermission
 
-	@ModelAttribute def extensionSettingsCommand(@PathVariable department:Department) = new ExtensionSettingsCommand(mandatory(department))
+	@ModelAttribute("activeDepartment")
+	override def activeDepartment(@PathVariable department: Department): Option[Department] = retrieveActiveDepartment(Option(department))
 
-	val academicYear = activeAcademicYear.getOrElse(AcademicYear.guessSITSAcademicYearByDate(DateTime.now))
+	@ModelAttribute("extensionSettingsCommand")
+	def extensionSettingsCommand(@PathVariable department: Department): ExtensionSettingsCommand.Command =
+		ExtensionSettingsCommand(mandatory(department))
 
-	validatesSelf[ExtensionSettingsCommand]
+	validatesSelf[SelfValidating]
 
-	@RequestMapping(method=Array(RequestMethod.GET, RequestMethod.HEAD))
-	def viewSettings(@PathVariable department:Department, user:CurrentUser, cmd:ExtensionSettingsCommand, errors:Errors): Mav =
-		Mav(s"$urlPrefix/admin/extension-settings"
-	)
+	@RequestMapping
+	def viewSettings(@PathVariable department: Department): Mav =
+		Mav("cm2/admin/extension-settings")
+			.crumbsList(Breadcrumbs.department(department, None))
 
-	@RequestMapping(method=Array(RequestMethod.POST))
-	def saveSettings(@PathVariable department:Department, @Valid cmd:ExtensionSettingsCommand, errors:Errors): Mav = {
-		if (errors.hasErrors){
-			viewSettings(department, user, cmd, errors)
+	@RequestMapping(method = Array(RequestMethod.POST))
+	def saveSettings(@Valid @ModelAttribute("extensionSettingsCommand") cmd: ExtensionSettingsCommand.Command, errors: Errors, @PathVariable department: Department): Mav =
+		if (errors.hasErrors) {
+			viewSettings(department)
 		} else {
 			cmd.apply()
-			Redirect(Routes.admin.department(cmd.department, academicYear))
+			Redirect(Routes.admin.department(cmd.department))
 		}
-	}
+
 }

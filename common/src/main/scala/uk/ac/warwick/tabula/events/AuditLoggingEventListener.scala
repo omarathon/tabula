@@ -17,7 +17,7 @@ class AuditLoggingEventListener extends EventListener {
 	override def onException(event: Event, exception: Throwable): Unit = {}
 
 	// Currently we only want afters
-	override def afterCommand(event: Event, returnValue: Any): Unit = {
+	override def afterCommand(event: Event, returnValue: Any, beforeEvent: Event): Unit = {
 		var info = RequestInformation.forEventType(event.name)
 		if (event.realUserId != null) {
 			info = info.withUsername(event.realUserId)
@@ -33,6 +33,8 @@ class AuditLoggingEventListener extends EventListener {
 			case jcol: java.util.Collection[_] => jcol.asScala.map(handle).asJavaCollection
 			case jmap: JMap[_, _] => jmap.asScala.mapValues(handle).asJava
 			case smap: scala.collection.SortedMap[_, _] => JLinkedHashMap(smap.mapValues(handle).toSeq: _*)
+			case lmap: scala.collection.immutable.ListMap[_, _] => JLinkedHashMap(lmap.mapValues(handle).toSeq: _*)
+			case lmap: scala.collection.mutable.ListMap[_, _] => JLinkedHashMap(lmap.mapValues(handle).toSeq: _*)
 			case smap: scala.collection.Map[_, _] => mapAsJavaMapConverter(smap.mapValues(handle)).asJava
 			case sseq: scala.Seq[_] => seqAsJavaListConverter(sseq.map(handle)).asJava
 			case scol: scala.Iterable[_] => asJavaCollectionConverter(scol.map(handle)).asJavaCollection
@@ -43,7 +45,7 @@ class AuditLoggingEventListener extends EventListener {
 			case notNull => notNull
 		}
 
-		val data = event.extra.map { case (k, v) => new Field(k) -> handle(v) }
+		val data = (beforeEvent.extra ++ event.extra).map { case (k, v) => new Field(k) -> handle(v) }
 
 		logger.log(info, data.asJava)
 	}

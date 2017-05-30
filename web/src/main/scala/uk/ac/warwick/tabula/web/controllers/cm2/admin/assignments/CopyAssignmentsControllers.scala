@@ -4,96 +4,119 @@ import org.joda.time.DateTime
 import org.springframework.context.annotation.Profile
 import org.springframework.stereotype.Controller
 import org.springframework.web.bind.annotation.{ModelAttribute, PathVariable, RequestMapping}
+import uk.ac.warwick.tabula.AcademicYear
 import uk.ac.warwick.tabula.JavaImports.JList
 import uk.ac.warwick.tabula.cm2.web.Routes
 import uk.ac.warwick.tabula.commands.cm2.assignments.CopyAssignmentsCommand
 import uk.ac.warwick.tabula.data.model.{Assignment, Department, Module}
-import uk.ac.warwick.tabula.services.{AutowiringMaintenanceModeServiceComponent, AutowiringUserSettingsServiceComponent}
+import uk.ac.warwick.tabula.permissions.Permission
+import uk.ac.warwick.tabula.services.{AutowiringMaintenanceModeServiceComponent, AutowiringModuleAndDepartmentServiceComponent, AutowiringUserSettingsServiceComponent}
 import uk.ac.warwick.tabula.web.Mav
+import uk.ac.warwick.tabula.web.controllers.{AcademicYearScopedController, DepartmentScopedController}
 import uk.ac.warwick.tabula.web.controllers.cm2.CourseworkController
-import uk.ac.warwick.tabula.web.controllers.AcademicYearScopedController
-import uk.ac.warwick.tabula.AcademicYear
 
 import scala.collection.JavaConverters._
 
-
 abstract class AbstractCopyAssignmentsController extends CourseworkController
+	with AcademicYearScopedController
 	with AutowiringUserSettingsServiceComponent
-	with AutowiringMaintenanceModeServiceComponent
-	with AcademicYearScopedController {
-
-	val academicYear = activeAcademicYear.getOrElse(AcademicYear.guessSITSAcademicYearByDate(DateTime.now))
+	with AutowiringMaintenanceModeServiceComponent {
 
 	@ModelAttribute("academicYearChoices")
 	def academicYearChoices: JList[AcademicYear] =
 		AcademicYear.guessSITSAcademicYearByDate(DateTime.now).yearsSurrounding(0, 1).asJava
 
+	@ModelAttribute("activeAcademicYear")
+	override def activeAcademicYear(@PathVariable academicYear: AcademicYear): Option[AcademicYear] =
+		retrieveActiveAcademicYear(Option(academicYear))
+
 }
 
 
 @Profile(Array("cm2Enabled"))
 @Controller
-@RequestMapping(value = Array("/${cm2.prefix}/admin/module/{module}/copy-assignments"))
+@RequestMapping(value = Array("/${cm2.prefix}/admin/{module}/{academicYear:\\d{4}}/copy-assignments"))
 class CopyModuleAssignmentsController extends AbstractCopyAssignmentsController with AliveAssignmentsMap {
 
-	@ModelAttribute
-	def copyAssignmentsCommand(@PathVariable module: Module) = CopyAssignmentsCommand(mandatory(module).adminDepartment, Seq(module))
+	@ModelAttribute("activeAcademicYear")
+	override def activeAcademicYear(@PathVariable academicYear: AcademicYear): Option[AcademicYear] =
+		retrieveActiveAcademicYear(Option(academicYear))
 
-	@RequestMapping(method = Array(HEAD, GET))
-	def showForm(@PathVariable module: Module, cmd: CopyAssignmentsCommand): Mav = {
+	@ModelAttribute("copyAssignmentsCommand")
+	def copyAssignmentsCommand(@PathVariable module: Module, @PathVariable academicYear: AcademicYear): CopyAssignmentsCommand.Command =
+		CopyAssignmentsCommand(mandatory(module), mandatory(academicYear))
 
-		Mav(s"$urlPrefix/admin/modules/copy_assignments",
+	@RequestMapping
+	def showForm(@PathVariable module: Module, @ModelAttribute("copyAssignmentsCommand") cmd: CopyAssignmentsCommand.Command): Mav =
+		Mav("cm2/admin/modules/copy_assignments",
 			"title" -> module.name,
-			"cancel" -> Routes.admin.module(module, academicYear),
+			"cancel" -> Routes.admin.moduleWithinDepartment(module, cmd.academicYear),
 			"department" -> module.adminDepartment,
-			"map" -> moduleAssignmentMap(cmd.modules)
-		)
-	}
+			"map" -> moduleAssignmentMap(cmd.modules))
+			.crumbsList(Breadcrumbs.module(module, cmd.academicYear))
+			.secondCrumbs(academicYearBreadcrumbs(cmd.academicYear)(Routes.admin.module.copyAssignments(module, _)): _*)
 
 	@RequestMapping(method = Array(POST))
-	def submit(cmd: CopyAssignmentsCommand, @PathVariable module: Module): Mav = {
+	def submit(@ModelAttribute("copyAssignmentsCommand") cmd: CopyAssignmentsCommand.Command, @PathVariable module: Module): Mav = {
 		cmd.apply()
-		Redirect(Routes.admin.module(module, academicYear))
+		Redirect(Routes.admin.moduleWithinDepartment(module, cmd.academicYear))
 	}
 
 }
 
-@Profile(Array("cm2Enabled"))
-@Controller
-@RequestMapping(value = Array("/${cm2.prefix}/admin/department/{department}/copy-assignments"))
-class CopyDepartmentAssignmentsController extends AbstractCopyAssignmentsController with AliveAssignmentsMap {
+abstract class AbstractCopyDepartmentAssignmentsController extends AbstractCopyAssignmentsController with AliveAssignmentsMap
+	with DepartmentScopedController
+	with AutowiringModuleAndDepartmentServiceComponent {
 
-	@ModelAttribute
-	def copyAssignmentsCommand(@PathVariable department: Department): CopyAssignmentsCommand = {
-		val modules = department.modules.asScala.filter(_.assignments.asScala.exists(_.isAlive)).sortBy {
-			_.code
-		}
-		CopyAssignmentsCommand(mandatory(department), modules)
-	}
+	override val departmentPermission: Permission = CopyAssignmentsCommand.AdminPermission
 
-	@RequestMapping(method = Array(HEAD, GET))
-	def showForm(@PathVariable department: Department, cmd: CopyAssignmentsCommand): Mav = {
+	@ModelAttribute("activeDepartment")
+	override def activeDepartment(@PathVariable department: Department): Option[Department] = retrieveActiveDepartment(Option(department))
 
-		Mav(s"$urlPrefix/admin/modules/copy_assignments",
+	@ModelAttribute("copyAssignmentsCommand")
+	def copyAssignmentsCommand(@PathVariable department: Department, @ModelAttribute("activeAcademicYear") activeAcademicYear: Option[AcademicYear]): CopyAssignmentsCommand.Command =
+		CopyAssignmentsCommand(mandatory(department), activeAcademicYear.getOrElse(AcademicYear.guessSITSAcademicYearByDate(DateTime.now)))
+
+	@RequestMapping
+	def showForm(@PathVariable department: Department, @ModelAttribute("copyAssignmentsCommand") cmd: CopyAssignmentsCommand.Command): Mav =
+		Mav("cm2/admin/modules/copy_assignments",
+			"academicYear" -> cmd.academicYear,
 			"title" -> department.name,
-			"cancel" -> Routes.admin.department(department, academicYear),
+			"cancel" -> Routes.admin.department(department),
 			"map" -> moduleAssignmentMap(cmd.modules),
-			"showSubHeadings" -> true
-		)
-	}
+			"showSubHeadings" -> true)
+			.crumbsList(Breadcrumbs.department(department, Some(cmd.academicYear)))
+			.secondCrumbs(academicYearBreadcrumbs(cmd.academicYear)(Routes.admin.copyAssignments(department, _)): _*)
 
 	@RequestMapping(method = Array(POST))
-	def submit(cmd: CopyAssignmentsCommand, @PathVariable department: Department): Mav = {
+	def submit(@ModelAttribute("copyAssignmentsCommand") cmd: CopyAssignmentsCommand.Command, @PathVariable department: Department): Mav = {
 		cmd.apply()
-		Redirect(Routes.admin.department(department, academicYear))
+		Redirect(Routes.admin.department(department, cmd.academicYear))
 	}
 
 }
 
 trait AliveAssignmentsMap {
-	def moduleAssignmentMap(modules: Seq[Module]): Map[String, Seq[Assignment]] = (
-		for (module <- modules) yield module.code -> module.assignments.asScala.filter {
-			_.isAlive
-		}
-		).toMap.filterNot(_._2.isEmpty)
+	def moduleAssignmentMap(modules: Seq[Module]): Map[String, Seq[Assignment]] =
+		modules.map { module => module.code -> module.assignments.asScala.filter(_.isAlive) }
+			.toMap
+			.filter { case (_, assignments) => assignments.nonEmpty }
+}
+
+@Profile(Array("cm2Enabled"))
+@Controller
+@RequestMapping(value = Array("/${cm2.prefix}/admin/department/{department}/copy-assignments"))
+class CopyDepartmentAssignmentsController extends AbstractCopyDepartmentAssignmentsController {
+	@ModelAttribute("activeAcademicYear")
+	override def activeAcademicYear: Option[AcademicYear] =
+		retrieveActiveAcademicYear(None)
+}
+
+@Profile(Array("cm2Enabled"))
+@Controller
+@RequestMapping(value = Array("/${cm2.prefix}/admin/department/{department}/{academicYear:\\d{4}}/copy-assignments"))
+class CopyDepartmentAssignmentsForYearController extends AbstractCopyDepartmentAssignmentsController {
+	@ModelAttribute("activeAcademicYear")
+	override def activeAcademicYear(@PathVariable academicYear: AcademicYear): Option[AcademicYear] =
+		retrieveActiveAcademicYear(Option(academicYear))
 }

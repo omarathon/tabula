@@ -1,63 +1,60 @@
-<#-- FIXME: implemented as part of CM2 migration but will require further reworking due to CM2 workflow changes -->
-<@f.form method="post" action="${info.requestedUri.path}" cssClass="form-inline filter-form" commandName="submissionAndFeedbackCommand">
-	<div class="filter">
-		<label for="filter">Show all</label>
-		&nbsp;
-		<@f.select path="filter" cssClass="span4">
-			<@f.options items=allFilters itemValue="name" itemLabel="description" />
-		</@f.select>
+<#import "*/_filters.ftl" as filters />
 
-		<#list allFilters as filter>
-			<#if filter.parameters?size gt 0>
-				<fieldset data-filter="${filter.name}" class="form-horizontal filter-options"<#if filter.name != submissionAndFeedbackCommand.filter.name> style="display: none;"</#if>>
-					<#list filter.parameters as param>
-						<@form.labelled_row "filterParameters[${param._1()}]" param._2()>
-							<#if param._3() == 'datetime'>
-								<@f.input path="filterParameters[${param._1()}]" cssClass="date-time-picker" />
-							<#elseif param._3() == 'percentage'>
-								<div class="input-append">
-									<@f.input path="filterParameters[${param._1()}]" type="number" min="0" max="100" cssClass="input-small" />
-									<span class="add-on">%</span>
-								</div>
-							<#else>
-								<@f.input path="filterParameters[${param._1()}]" type=param._3() />
-							</#if>
-						</@form.labelled_row>
-					</#list>
+<#escape x as x?html>
+	<div class="filters admin-assignment-submission-filters btn-group-group well well-sm" data-lazy="true">
+		<@f.form commandName="submissionAndFeedbackCommand" action="${info.requestedUri.path}" method="GET" cssClass="form-inline filter-form">
+			<@f.errors cssClass="error form-errors" />
+			<button type="button" class="clear-all-filters btn btn-link">
+				<span class="fa-stack">
+					<i class="fa fa-filter fa-stack-1x"></i>
+					<i class="fa fa-ban fa-stack-2x"></i>
+				</span>
+			</button>
 
-					<@form.row>
-						<@form.field>
-							<button class="btn btn-primary" type="submit">Filter</button>
-						</@form.field>
-					</@form.row>
-				</fieldset>
-			</#if>
-		</#list>
+			<#assign placeholder = "All submission states" />
+			<#assign currentfilter><@filters.current_filter_value "submissionStatesFilters" placeholder; f>${f.description}</@filters.current_filter_value></#assign>
+			<@filters.filter "submission-states" "submissionAndFeedbackCommand.submissionStatesFilters" placeholder currentfilter allSubmissionStatesFilters; f>
+				<input type="checkbox" name="${status.expression}"
+							 value="${f.name}"
+							 data-short-value="${f.description}"
+				${filters.contains_by_filter_name(submissionAndFeedbackCommand.submissionStatesFilters, f)?string('checked','')}>
+			${f.description}
+			</@filters.filter>
+
+			<#assign placeholder = "All  plagiarism statuses" />
+			<#assign currentfilter><@filters.current_filter_value "plagiarismFilters" placeholder; f>${f.description}</@filters.current_filter_value></#assign>
+			<@filters.filter "plagiarism-status" "submissionAndFeedbackCommand.plagiarismFilters" placeholder currentfilter allPlagiarismFilters; f>
+				<input type="checkbox" name="${status.expression}"
+							 value="${f.name}"
+							 data-short-value="${f.description}"
+				${filters.contains_by_filter_name(submissionAndFeedbackCommand.plagiarismFilters, f)?string('checked','')}>
+			${f.description}
+			</@filters.filter>
+			<#assign placeholder = "All  statuses" />
+			<#assign currentfilter><@filters.current_filter_value "statusesFilters" placeholder; f>${f.description}</@filters.current_filter_value></#assign>
+			<@filters.filter "other-statuses" "submissionAndFeedbackCommand.statusesFilters" placeholder currentfilter allStatusFilters; f>
+				<input type="checkbox" name="${status.expression}"
+							 value="${f.name}"
+							 data-short-value="${f.description}"
+				${filters.contains_by_filter_name(submissionAndFeedbackCommand.statusesFilters, f)?string('checked','')}>
+			${f.description}
+			</@filters.filter>
+
+			<div class='plagiarism-filter' style="display: none;">
+				<@bs3form.labelled_form_group path="overlapFilter.min" labelText="Min overlap">
+					<div class="input-group">
+						<@f.input type="text" path="overlapFilter.min" cssClass="form-control input-sm" type="number" min="0" max="100" />
+						<span class="input-group-addon">%</span>
+					</div>
+				</@bs3form.labelled_form_group>
+
+				<@bs3form.labelled_form_group path="overlapFilter.max" labelText="Max overlap">
+					<div class="input-group">
+						<@f.input type="text" path="overlapFilter.max" cssClass="form-control input-sm" type="number" min="0" max="100" />
+						<span class="input-group-addon">%</span>
+					</div>
+				</@bs3form.labelled_form_group>
+			</div>
+		</@f.form>
 	</div>
-
-	<script type="text/javascript">
-		jQuery(function($) {
-			$('.filter-form select[name=filter]').on('keyup change', function() {
-				var $select = $(this);
-				var val = $select.val();
-
-				var $options = $select.closest('form').find('.filter fieldset[data-filter="' + val + '"]');
-				var $openOptions = $select.closest('form').find('.filter .filter-options:visible');
-
-				var cb = function() {
-					if ($options.length) {
-						$options.slideDown();
-					} else {
-						$select.closest('form').submit();
-					}
-				};
-
-				if ($openOptions.length) {
-					$openOptions.slideUp('fast', cb);
-				} else {
-					cb();
-				}
-			});
-		});
-	</script>
-</@f.form>
+</#escape>

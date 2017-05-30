@@ -9,7 +9,7 @@ import org.springframework.web.bind.annotation.{ModelAttribute, PathVariable, Re
 import uk.ac.warwick.tabula.CurrentUser
 import uk.ac.warwick.tabula.commands.Appliable
 import uk.ac.warwick.tabula.commands.coursework.assignments.{CanProxy, MarkerAddMarksCommand, PostExtractValidation}
-import uk.ac.warwick.tabula.commands.coursework.feedback.GenerateGradesFromMarkCommand
+import uk.ac.warwick.tabula.commands.coursework.feedback.OldGenerateGradesFromMarkCommand
 import uk.ac.warwick.tabula.services.coursework.docconversion.MarkItem
 import uk.ac.warwick.tabula.coursework.web.Routes
 import uk.ac.warwick.tabula.web.controllers.coursework.OldCourseworkController
@@ -39,7 +39,7 @@ class OldMarkerAddMarksController extends OldCourseworkController {
 		marker,
 		submitter,
 		assignment.isFirstMarker(marker),
-		GenerateGradesFromMarkCommand(mandatory(module), mandatory(assignment))
+		OldGenerateGradesFromMarkCommand(mandatory(module), mandatory(assignment))
 	)
 
 	@RequestMapping(method = Array(HEAD, GET))
@@ -65,7 +65,7 @@ class OldMarkerAddMarksController extends OldCourseworkController {
 			}
 		}.sortBy(markItem => s"${markItem.user.getWarwickId}${markItem.user.getUserId}")
 
-		Mav(s"$urlPrefix/admin/assignments/markerfeedback/marksform",
+		Mav("coursework/admin/assignments/markerfeedback/marksform",
 			"marksToDisplay" -> marksToDisplay,
 			"isGradeValidation" -> module.adminDepartment.assignmentGradeValidation,
 			"isProxying" -> cmd.isProxying,
@@ -101,7 +101,7 @@ class OldMarkerAddMarksController extends OldCourseworkController {
 		if (errors.hasErrors) viewMarkUploadForm(module, assignment, marker, cmd, errors)
 		else {
 			bindAndValidate(assignment, cmd, errors)
-			Mav(s"$urlPrefix/admin/assignments/markerfeedback/markspreview",
+			Mav("coursework/admin/assignments/markerfeedback/markspreview",
 				"isProxying" -> cmd.isProxying,
 				"proxyingAs" -> marker
 			)

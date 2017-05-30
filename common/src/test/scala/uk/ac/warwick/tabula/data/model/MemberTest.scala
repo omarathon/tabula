@@ -251,9 +251,9 @@ class MemberTest extends TestBase with Mockito {
 		scyd2016.yearOfStudy = 1
 
 		val entity = student.toExamGridEntity(scyd2015)
-		entity.years(1).studentCourseYearDetails.get should be (scyd2013) // Latest year 1 BEFORE the baseSCYD (15/16)
-		entity.years(2).studentCourseYearDetails.get should be (scyd2014)
-		entity.years(3).studentCourseYearDetails.get should be (scyd2015)
+		entity.validYears(1).studentCourseYearDetails.get should be (scyd2013) // Latest year 1 BEFORE the baseSCYD (15/16)
+		entity.validYears(2).studentCourseYearDetails.get should be (scyd2014)
+		entity.validYears(3).studentCourseYearDetails.get should be (scyd2015)
 	}
 
 }

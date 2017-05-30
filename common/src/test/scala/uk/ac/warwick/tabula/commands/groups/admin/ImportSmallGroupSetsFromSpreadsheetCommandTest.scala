@@ -1,8 +1,9 @@
 package uk.ac.warwick.tabula.commands.groups.admin
 
-import java.io.ByteArrayInputStream
+import java.io.InputStream
 import java.util.UUID
 
+import com.google.common.io.ByteSource
 import org.joda.time.LocalTime
 import org.springframework.validation.{BindException, BindingResult, Errors}
 import uk.ac.warwick.tabula.JavaImports._
@@ -11,7 +12,7 @@ import uk.ac.warwick.tabula.data.FileDao
 import uk.ac.warwick.tabula.data.model.groups._
 import uk.ac.warwick.tabula.data.model.{Department, FileAttachment, Module, NamedLocation}
 import uk.ac.warwick.tabula.services.groups.docconversion._
-import uk.ac.warwick.tabula.services.objectstore.ObjectStorageService
+import uk.ac.warwick.tabula.services.objectstore.{ObjectStorageService, RichByteSource}
 import uk.ac.warwick.tabula.services.{MaintenanceModeService, SmallGroupService, SmallGroupServiceComponent}
 import uk.ac.warwick.tabula.system.BindListener
 import uk.ac.warwick.tabula.{AcademicYear, Fixtures, Mockito, TestBase}
@@ -44,12 +45,10 @@ class ImportSmallGroupSetsFromSpreadsheetCommandTest extends TestBase with Mocki
 		attachment.name = "file2.xlsx"
 		attachment.objectStorageService = smartMock[ObjectStorageService]
 		attachment.objectStorageService.keyExists(attachment.id) returns true
-		attachment.objectStorageService.metadata(attachment.id) returns Some(ObjectStorageService.Metadata(3, "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet", None))
-		val is = new ByteArrayInputStream("one".getBytes)
-		attachment.objectStorageService.fetch(attachment.id) answers { _ => Some(is) }
+		attachment.objectStorageService.fetch(attachment.id) returns RichByteSource.wrap(ByteSource.wrap("one".getBytes), Some(ObjectStorageService.Metadata(3, "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet", None)))
 		binding.file.attached.add(attachment)
 
-		binding.smallGroupSetSpreadsheetHandler.readXSSFExcelFile(isEq(binding.department), isEq(binding.academicYear), isEq(is), isA[BindException]) returns Nil
+		binding.smallGroupSetSpreadsheetHandler.readXSSFExcelFile(isEq(binding.department), isEq(binding.academicYear), isAn[InputStream], isA[BindException]) returns Nil
 
 		val result = new BindException(binding, "command")
 		binding.onBind(result)
@@ -64,9 +63,7 @@ class ImportSmallGroupSetsFromSpreadsheetCommandTest extends TestBase with Mocki
 		attachment.name = "file2.xlsx"
 		attachment.objectStorageService = smartMock[ObjectStorageService]
 		attachment.objectStorageService.keyExists(attachment.id) returns true
-		attachment.objectStorageService.metadata(attachment.id) returns Some(ObjectStorageService.Metadata(3, "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet", None))
-		val is = new ByteArrayInputStream("one".getBytes)
-		attachment.objectStorageService.fetch(attachment.id) answers { _ => Some(is) }
+		attachment.objectStorageService.fetch(attachment.id) returns RichByteSource.wrap(ByteSource.wrap("one".getBytes), Some(ObjectStorageService.Metadata(3, "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet", None)))
 		binding.file.attached.add(attachment)
 
 		val extracted = Seq(ExtractedSmallGroupSet(
@@ -111,7 +108,7 @@ class ImportSmallGroupSetsFromSpreadsheetCommandTest extends TestBase with Mocki
 			)
 		))
 
-		binding.smallGroupSetSpreadsheetHandler.readXSSFExcelFile(isEq(binding.department), isEq(binding.academicYear), isEq(is), isA[BindException]) returns extracted
+		binding.smallGroupSetSpreadsheetHandler.readXSSFExcelFile(isEq(binding.department), isEq(binding.academicYear), isAn[InputStream], isA[BindException]) returns extracted
 		binding.smallGroupService.getSmallGroupSets(in101, binding.academicYear) returns Nil
 
 		val result = new BindException(binding, "command")

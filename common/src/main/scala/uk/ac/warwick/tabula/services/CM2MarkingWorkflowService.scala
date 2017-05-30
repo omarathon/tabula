@@ -24,18 +24,19 @@ trait CM2MarkingWorkflowService extends WorkflowUserGroupHelpers {
 	def save(workflow: CM2MarkingWorkflow): Unit
 	def delete(workflow: CM2MarkingWorkflow): Unit
 	def releaseForMarking(feedbacks: Seq[AssignmentFeedback]): Seq[AssignmentFeedback]
+	def stopMarking(feedbacks: Seq[AssignmentFeedback]): Seq[AssignmentFeedback]
 
 	/** All assignments using this marking workflow. */
 	def getAssignmentsUsingMarkingWorkflow(workflow: CM2MarkingWorkflow): Seq[Assignment]
 
-	// move feedback onto the next stage when the next stage
-	def progressFeedback(markerStage: MarkingWorkflowStage, feedbacks: Seq[AssignmentFeedback]): Seq[AssignmentFeedback]
+	// move feedback onto the next stage when all the current stages are finished - returns the markerFeedback for the next stage if applicable
+	def progressFeedback(markerStage: MarkingWorkflowStage, feedbacks: Seq[AssignmentFeedback]): Seq[MarkerFeedback]
 
 	// move feedback to a target stage - allows skipping of stages - will fail if target stage isn't a valid future stage
 	def progressFeedback(currentStage: MarkingWorkflowStage, targetStage: MarkingWorkflowStage, feedbacks: Seq[AssignmentFeedback]): Seq[AssignmentFeedback]
 
 	// essentially an undo for progressFeedback if it was done in error - not a normal step in the workflow
-	def returnFeedback(feedbacks: Seq[AssignmentFeedback]): Seq[AssignmentFeedback]
+	def returnFeedback(stages: Seq[MarkingWorkflowStage], feedbacks: Seq[AssignmentFeedback]): Seq[MarkerFeedback]
 
 	// add new markers for a workflow stage
 	def addMarkersForStage(workflow: CM2MarkingWorkflow, markerStage: MarkingWorkflowStage, markers: Seq[Marker]): Unit
@@ -74,10 +75,16 @@ class CM2MarkingWorkflowServiceImpl extends CM2MarkingWorkflowService with Autow
 		f
 	})
 
+	override def stopMarking(feedbacks: Seq[AssignmentFeedback]): Seq[AssignmentFeedback] = feedbacks.map(f => {
+		f.outstandingStages.clear()
+		feedbackService.saveOrUpdate(f)
+		f
+	})
+
 	def getAssignmentsUsingMarkingWorkflow(workflow: CM2MarkingWorkflow): Seq[Assignment] =
 		markingWorkflowDao.getAssignmentsUsingMarkingWorkflow(workflow)
 
-	override def progressFeedback(currentStage: MarkingWorkflowStage , feedbacks: Seq[AssignmentFeedback]): Seq[AssignmentFeedback] = {
+	override def progressFeedback(currentStage: MarkingWorkflowStage , feedbacks: Seq[AssignmentFeedback]): Seq[MarkerFeedback] = {
 		// don't progress if nextStages is empty
 		if(currentStage.nextStages.isEmpty)
 			throw new IllegalArgumentException("cannot progress feedback past the final stage")
@@ -86,11 +93,17 @@ class CM2MarkingWorkflowServiceImpl extends CM2MarkingWorkflowService with Autow
 		if (feedbacks.exists(f => !f.outstandingStages.asScala.contains(currentStage)))
 			throw new IllegalArgumentException(s"some of the specified feedback doesn't have outstanding stage - $currentStage")
 
-		feedbacks.map(f => {
+		feedbacks.flatMap(f => {
 			val remainingStages = f.outstandingStages.asScala diff Seq(currentStage)
-			f.outstandingStages = if(remainingStages.isEmpty) currentStage.nextStages.asJava else remainingStages.asJava
+			val releasedMarkerFeedback: Seq[MarkerFeedback] = if(remainingStages.isEmpty) {
+				f.outstandingStages = currentStage.nextStages.asJava
+				f.markerFeedback.asScala.filter(mf => currentStage.nextStages.contains(mf.stage))
+			} else {
+				f.outstandingStages = remainingStages.asJava
+				Nil
+			}
 			feedbackService.saveOrUpdate(f)
-			f
+			releasedMarkerFeedback
 		})
 	}
 
@@ -103,15 +116,19 @@ class CM2MarkingWorkflowServiceImpl extends CM2MarkingWorkflowService with Autow
 		???
 	}
 
-	override def returnFeedback(feedbacks: Seq[AssignmentFeedback]): Seq[AssignmentFeedback] = feedbacks.map(f => {
-		val previousStages = f.outstandingStages.asScala.head.previousStages
-		if(previousStages.isEmpty)
-			throw new IllegalArgumentException("cannot return feedback past the initial stage")
+	override def returnFeedback(stages: Seq[MarkingWorkflowStage], feedbacks: Seq[AssignmentFeedback]): Seq[MarkerFeedback] = {
+		if(stages.isEmpty)
+			throw new IllegalArgumentException(s"Must supply a target stage to return to")
 
-		f.outstandingStages = previousStages.asJava
-		feedbackService.saveOrUpdate(f)
-		f
-	})
+		if(stages.map(_.order).distinct.tail.nonEmpty)
+			throw new IllegalArgumentException(s"The following stages aren't all in the same workflow step - ${stages.map(_.name).mkString(", ")}")
+
+		feedbacks.flatMap(f => {
+			f.outstandingStages = stages.asJava
+			feedbackService.saveOrUpdate(f)
+			f.markerFeedback.asScala.filter(mf => f.outstandingStages.contains(mf.stage))
+		})
+	}
 
 
 	override def addMarkersForStage(workflow: CM2MarkingWorkflow, stage: MarkingWorkflowStage, markers: Seq[Marker]): Unit = {

@@ -13,5 +13,7 @@ trait CM2MarkingWorkflowController extends CourseworkController with CourseworkD
 	override val departmentPermission: Permission = Permissions.MarkingWorkflow.Manage
 
 	def commonCrumbs(view: Mav, department: Department, academicYear: AcademicYear): Mav =
-		view.secondCrumbs(academicYearBreadcrumbs(academicYear)(year => Routes.cm2.admin.workflows(department, year)): _*)
+		view
+			.crumbsList(Breadcrumbs.department(department, Some(academicYear)))
+			.secondCrumbs(academicYearBreadcrumbs(academicYear)(year => Routes.cm2.admin.workflows(department, year)): _*)
 }

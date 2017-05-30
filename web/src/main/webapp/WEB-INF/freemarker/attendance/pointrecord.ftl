@@ -82,9 +82,9 @@
 										   data-placement="bottom"
 										   data-container="body"
 										   data-content='${popoverContent}'
-										   data-html="true">
+										   data-html="true"><#compress>
 											<i class="fa fa-question-circle"></i>
-										</a>
+										</#compress></a>
 									</span>
 									<div class="btn-group">
 										<button
@@ -231,13 +231,13 @@
 					</div>
 				</div>
 				<div class="fix-footer submit-buttons">
-					<div class="pull-right">
+					<p>
 						<input type="submit" value="Save" class="btn btn-primary" data-loading-text="Saving&hellip;" autocomplete="off">
 						<a class="btn btn-default dirty-check-ignore" href="${returnTo}">Cancel</a>
-					</div>
-					<#if command.checkpointMap?keys?size < 500>
-						<@fmt.bulk_email_students students=command.checkpointMap?keys />
-					</#if>
+						<#if command.checkpointMap?keys?size < 500>
+							<@fmt.bulk_email_students students=command.checkpointMap?keys />
+						</#if>
+					</p>
 				</div>
 			</form>
 		</div>

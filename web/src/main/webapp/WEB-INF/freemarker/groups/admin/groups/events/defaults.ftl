@@ -12,7 +12,7 @@
 		<@f.errors cssClass="error form-errors" />
 
 		<@bs3form.labelled_form_group path="defaultTutors" labelText="Tutors">
-			<@form.flexipicker path="defaultTutors" placeholder="User name" list=true multiple=true auto_multiple=false />
+			<@bs3form.flexipicker path="defaultTutors" placeholder="User name" list=true multiple=true auto_multiple=false />
 		</@bs3form.labelled_form_group>
 
 		<@components.week_selector "defaultWeeks" allTerms smallGroupSet />

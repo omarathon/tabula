@@ -29,7 +29,7 @@ class TurnitinController extends CourseworkController with AutowiringTurnitinLti
 
 	@ModelAttribute("command")
 	def model(@PathVariable assignment: Assignment, user: CurrentUser) =
-		SubmitToTurnitinCommand(assignment.module, assignment, user)
+		SubmitToTurnitinCommand(assignment, user)
 
 	@ModelAttribute("incompatibleFiles")
 	def incompatibleFiles(@PathVariable assignment: Assignment): mutable.Buffer[FileAttachment] = {
@@ -39,20 +39,19 @@ class TurnitinController extends CourseworkController with AutowiringTurnitinLti
 		)
 	}
 
-	@RequestMapping(method = Array(GET, HEAD))
-	def confirm(@Valid @ModelAttribute("command") command: SubmitToTurnitinCommand, errors: Errors): Mav = {
-		Mav(s"$urlPrefix/admin/assignments/turnitin/form", "errors" -> errors)
-	}
+	@RequestMapping
+	def confirm(@PathVariable assignment: Assignment): Mav =
+		Mav("cm2/admin/assignments/turnitin/form")
+			.crumbsList(Breadcrumbs.assignment(assignment))
 
 	@RequestMapping(method = Array(POST))
-	def submit(@Valid @ModelAttribute("command") command: SubmitToTurnitinCommand, errors: Errors): Mav = {
+	def submit(@Valid @ModelAttribute("command") command: SubmitToTurnitinCommand, errors: Errors, @PathVariable assignment: Assignment): Mav =
 		if (errors.hasErrors) {
-			confirm(command, errors)
+			confirm(assignment)
 		} else {
 			command.apply()
 			Redirect(Routes.admin.assignment.turnitin.status(command.assignment))
 		}
-	}
 
 	@RequestMapping(value = Array("/status"))
 	def status(@PathVariable assignment: Assignment): Mav = {
@@ -60,7 +59,8 @@ class TurnitinController extends CourseworkController with AutowiringTurnitinLti
 		if (ajax) {
 			Mav(new JSONView(assignmentStatus.toMap))
 		} else {
-			Mav(s"$urlPrefix/admin/assignments/turnitin/status", "status" -> assignmentStatus)
+			Mav("cm2/admin/assignments/turnitin/status", "status" -> assignmentStatus)
+				.crumbsList(Breadcrumbs.assignment(assignment))
 		}
 	}
 

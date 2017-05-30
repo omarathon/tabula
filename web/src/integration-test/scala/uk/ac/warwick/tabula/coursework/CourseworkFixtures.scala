@@ -228,7 +228,7 @@ trait CourseworkFixtures extends BrowserTest with FeaturesDriver with FixturesDr
 
 			click on linkText(assignmentName)
 
-			currentUrl should endWith(assignmentId + "/")
+			currentUrl should endWith(assignmentId)
 		} else {
 			// Just go straight to the submission URL
 			go to Path("/coursework/module/" + moduleCode.toLowerCase + "/" + assignmentId + "/")
@@ -257,7 +257,7 @@ trait CourseworkFixtures extends BrowserTest with FeaturesDriver with FixturesDr
 
 			click on linkText(assignmentName)
 
-			currentUrl should endWith(assignmentId + "/")
+			currentUrl should endWith(assignmentId)
 		} else {
 			// Just go straight to the submission URL
 			go to Path("/coursework/module/" + moduleCode.toLowerCase + "/" + assignmentId + "/")

@@ -41,13 +41,12 @@ class GenerateGradesFromMarkCommandInternal(val assessment: Assessment)
 				case _ @ (_: NumberFormatException | _: IllegalArgumentException) =>
 					false
 			}
-		}
 	}
 
 	override def applyInternal(): Map[String, Seq[GradeBoundary]] = {
 		val membership = assessmentMembershipService.determineMembershipUsers(assessment)
 		val studentMarksMap: Map[User, Int] = studentMarks.asScala
-			.filter(s => isNotNullAndInt(s._2))
+			.filter{ case (_, mark) => isNotNullAndInt(mark)}
 			.flatMap{case(uniID, mark) =>
 				membership.find(_.getWarwickId == uniID).map(u => u -> mark.toInt)
 			}.toMap
@@ -71,13 +70,11 @@ class GenerateGradesFromMarkCommandInternal(val assessment: Assessment)
 }
 
 trait GenerateGradesFromMarkPermissions extends RequiresPermissionsChecking with PermissionsCheckingMethods {
-
 	self: GenerateGradesFromMarkCommandState =>
 
 	override def permissionsCheck(p: PermissionsChecking) {
 		p.PermissionCheck(Permissions.AssignmentMarkerFeedback.Manage, assessment)
 	}
-
 }
 
 trait GenerateGradesFromMarkCommandState {

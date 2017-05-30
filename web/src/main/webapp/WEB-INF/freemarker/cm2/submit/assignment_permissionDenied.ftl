@@ -1,7 +1,7 @@
+<#import "*/cm2_macros.ftl" as cm2 />
 <#escape x as x?html>
 	<#compress>
-		<h1>${assignment.module.name} (${assignment.module.code?upper_case})
-			<br><strong>${assignment.name}</strong></h1>
+		<@cm2.assignmentHeader "Submit assignment" assignment "for" />
 
 <#if can.do("Assignment.Update", assignment)>
 	<h2>Assignment page for students</h2>
@@ -13,7 +13,7 @@
 	<p>If a student isn't in the enrolled list for your assignment, then they will receive a message on this page that
 	   they're not enrolled, and they won't be able to submit until they've been added to the list.</p>
 
-	<p><a class="btn" href="<@routes.cm2.depthome assignment.module/>">Module management - ${assignment.module.code}</a></p>
+	<p><a class="btn btn-default" href="<@routes.cm2.depthome assignment.module assignment.academicYear/>">Module management - ${assignment.module.code}</a></p>
 <#else>
 	<#function has_admin module>
 		<#list assignment.module.adminDepartment.owners.users as user>

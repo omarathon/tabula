@@ -117,7 +117,7 @@ trait ExtractRelationshipsFromFileCommandBindListener extends BindListener {
 	}
 
 	private def extractDataFromFile(attachment: FileAttachment, result: BindingResult): Map[String, Seq[String]] = {
-		val rows = SpreadsheetHelpers.parseXSSFExcelFile(attachment.dataStream)
+		val rows = SpreadsheetHelpers.parseXSSFExcelFile(attachment.asByteSource.openStream())
 		if (rows.size > ExtractRelationshipsFromFileCommand.MaxUploadRows) {
 			result.rejectValue("file", "file.tooManyRows", Array(ExtractRelationshipsFromFileCommand.MaxUploadRows.toString), "")
 			Map()

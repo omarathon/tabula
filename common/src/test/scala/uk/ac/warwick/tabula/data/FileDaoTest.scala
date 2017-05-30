@@ -1,6 +1,7 @@
 package uk.ac.warwick.tabula.data
 
-import java.io.{ByteArrayInputStream, InputStream}
+import java.io.InputStream
+import java.nio.charset.StandardCharsets
 
 import com.google.common.io.ByteSource
 import org.joda.time.{DateTime, DateTimeConstants}
@@ -8,7 +9,7 @@ import org.junit.{After, Before}
 import org.springframework.transaction.annotation.Transactional
 import org.springframework.util.FileCopyUtils
 import uk.ac.warwick.tabula.data.model.FileAttachment
-import uk.ac.warwick.tabula.services.objectstore.ObjectStorageService
+import uk.ac.warwick.tabula.services.objectstore.{ObjectStorageService, RichByteSource}
 import uk.ac.warwick.tabula.{Mockito, PersistenceTestBase}
 
 // scalastyle:off magic.number
@@ -95,9 +96,9 @@ class FileDaoTest extends PersistenceTestBase with Mockito {
 					//val blob = loadedAttachment.data
 					loadedAttachment.fileDao = dao
 					loadedAttachment.objectStorageService = objectStorageService
-					loadedAttachment.objectStorageService.fetch(attachment.id) returns Some(new ByteArrayInputStream(bytes))
+					loadedAttachment.objectStorageService.fetch(attachment.id) returns RichByteSource.wrap(ByteSource.wrap(bytes), None)
 
-					val data = readStream(loadedAttachment.dataStream, "UTF-8")
+					val data = loadedAttachment.asByteSource.asCharSource(StandardCharsets.UTF_8).read()
 					data should be (string)
 				}
 				case None => fail("nope")

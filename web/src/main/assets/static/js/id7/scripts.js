@@ -833,6 +833,14 @@
 			}
 		});
 
+		// TAB-4210 http://stackoverflow.com/questions/27371918/stacking-modals-scrolls-the-main-page-when-one-is-closed
+		$body.on('hidden.bs.modal', function() {
+			// If there are other open modals, re-add the modal-open class to the body
+			if ($('.modal').hasClass('in')) {
+				$body.addClass('modal-open');
+			}
+		});
+
 		$(document).on("ajaxComplete", function(e, xhr) {
 			if (xhr.responseText && xhr.responseText.indexOf('<details') != -1) {
 				$('details').details();

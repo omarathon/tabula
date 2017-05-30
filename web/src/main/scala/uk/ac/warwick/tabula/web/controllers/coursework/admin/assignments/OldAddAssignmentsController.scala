@@ -91,7 +91,7 @@ class OldAddAssignmentsController extends OldCourseworkController {
 	// Do validation and return as a chunk of HTML errors.
 	@RequestMapping(method = Array(POST), params = Array("action=validate"))
 	def ajaxValidation(@Valid @ModelAttribute("command") cmd: AddAssignmentsCommand, errors: Errors): Mav = {
-		Mav(s"$urlPrefix/admin/assignments/batch_new_validation").noLayout()
+		Mav("coursework/admin/assignments/batch_new_validation").noLayout()
 	}
 
 	// Final step where we actually do the work.
@@ -111,7 +111,7 @@ class OldAddAssignmentsController extends OldCourseworkController {
 
 	// The shared Mav for most of the request mappings
 	def getMav(department: Department): Mav = {
-		Mav(s"$urlPrefix/admin/assignments/batch_new_select")
+		Mav("coursework/admin/assignments/batch_new_select")
 			.crumbs(Breadcrumbs.Department(department))
 	}
 

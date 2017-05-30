@@ -12,7 +12,7 @@ import javax.validation.Valid
 import org.springframework.context.annotation.Profile
 import uk.ac.warwick.tabula.data.Transactions._
 import uk.ac.warwick.tabula.commands.{Appliable, SelfValidating}
-import uk.ac.warwick.tabula.commands.coursework.assignments.{CanProxy, MarkingUncompletedCommand, MarkingUncompletedState}
+import uk.ac.warwick.tabula.commands.coursework.assignments.{CanProxy, OldMarkingUncompletedCommand, MarkingUncompletedState}
 import uk.ac.warwick.tabula.web.Mav
 import uk.ac.warwick.userlookup.User
 
@@ -29,7 +29,7 @@ class OldMarkingUncompletedController extends OldCourseworkController {
 							@PathVariable assignment: Assignment,
 							@PathVariable marker: User,
 							submitter: CurrentUser) =
-		MarkingUncompletedCommand(module, assignment, marker, submitter)
+		OldMarkingUncompletedCommand(module, assignment, marker, submitter)
 
 	def RedirectBack(assignment: Assignment, command: MarkingUncompletedCommand): Mav = {
 			Redirect(Routes.admin.assignment.markerFeedback(assignment, command.user))
@@ -52,7 +52,7 @@ class OldMarkingUncompletedController extends OldCourseworkController {
 			.flatMap(_.requestParameters.get("previousStageRole"))
 			.flatMap(_.headOption)
 
-		Mav(s"$urlPrefix/admin/assignments/markerfeedback/marking-uncomplete",
+		Mav("coursework/admin/assignments/markerfeedback/marking-uncomplete",
 			"assignment" -> assignment,
 			"formAction" -> Routes.admin.assignment.markerFeedback.uncomplete(assignment, marker, previousStageRole.getOrElse("Marker")),
 			"marker" -> form.user,

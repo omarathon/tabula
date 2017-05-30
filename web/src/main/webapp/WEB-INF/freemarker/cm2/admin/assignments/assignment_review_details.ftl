@@ -1,4 +1,5 @@
 <#import "*/assignment_components.ftl" as components />
+<#import "*/cm2_macros.ftl" as cm2 />
 
 <#macro review_details_header header_info tab_link>
 	<div class="row">
@@ -15,15 +16,16 @@
 </#macro>
 
 <#escape x as x?html>
-	<div class="deptheader">
-		<h1>Review assignment</h1>
+	<@cm2.assignmentHeader "Review settings" assignment "for" />
 
-		<h4 class="with-related"><span class="muted">for</span> <@fmt.module_name module /></h4>
-	</div>
 	<div class="fix-area">
 		<@components.assignment_wizard 'review' assignment.module true assignment/>
 		<div class="form-group">
-			<#assign detailsUrl><@routes.cm2.editassignmentdetails assignment /></#assign>
+			<#if assignment.cm2Assignment>
+				<#assign detailsUrl><@routes.cm2.editassignmentdetails assignment /></#assign>
+			<#else>
+				<#assign detailsUrl><@routes.coursework.assignmentedit assignment /></#assign>
+			</#if>
 
 			<@review_details_header 'Assignment details' detailsUrl />
 			<@review_details 'Assignment title' assignment.name />
@@ -142,7 +144,7 @@
 			</div>
 		</div>
 		<div class="fix-footer">
-			<a class="btn btn-default" href="<@routes.cm2.home />">Confirm</a>
+			<a class="btn btn-default" href="<@routes.cm2.assignmentsubmissionsandfeedback assignment />">Confirm</a>
 		</div>
 	</div>
 </#escape>

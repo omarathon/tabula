@@ -49,7 +49,7 @@ class ExtensionRequestController extends CourseworkController {
 			val profile = profileService.getMemberByUser(user.apparentUser)
 			// is this an edit of an existing request
 			val isModification = existingRequest.isDefined && !existingRequest.get.isManual
-			Mav(s"$urlPrefix/submit/extension_request",
+			Mav("cm2/submit/extension_request",
 				"profile" -> profile,
 				"module" -> assignment.module,
 				"assignment" -> assignment,
@@ -70,7 +70,7 @@ class ExtensionRequestController extends CourseworkController {
 		} else {
 			val extension = cmd.apply()
 			Mav(
-				s"$urlPrefix/submit/extension_request_success",
+				"cm2/submit/extension_request_success",
 				"isReply" -> extension.moreInfoReceived,
 				"assignment" -> cmd.assignment
 			)

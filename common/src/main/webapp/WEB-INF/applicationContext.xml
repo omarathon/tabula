@@ -84,7 +84,7 @@
 				<entry key="uk.ac.warwick.tabula.services.CannotPerformWriteOperationException" value="errors/readOnlyMasquerade" />
 				<entry key="uk.ac.warwick.tabula.services.ZipRequestTooLargeError" value="errors/zipTooBig" />
 				<entry key="uk.ac.warwick.tabula.api.web.filters.APILoginMethodMissingException" value="errors/apiLoginMethodMissing" />
-				<entry key="uk.ac.warwick.tabula.SubmitPermissionDeniedException" value="cm2/submit/assignment_permissionDenied" />
+				<entry key="uk.ac.warwick.tabula.SubmitPermissionDeniedException" value="errors/assignment_permissionDenied" />
 			</map>
 		</property>
 	</bean>
@@ -187,6 +187,8 @@
 		<bean class="uk.ac.warwick.tabula.data.model.markingworkflow.StringToMarkingWorkflowType" />
 		<bean class="uk.ac.warwick.tabula.data.model.markingworkflow.StringToMarkingWorkflowStage" />
 		<bean class="uk.ac.warwick.tabula.data.convert.AssignmentInfoFilterConverter"/>
+		<bean class="uk.ac.warwick.tabula.data.convert.SubmissionAndFeedbackInfoFilterConverter"/>
+
 	</util:list>
 
 	<bean id="typeConverter"
@@ -394,6 +396,8 @@
 	<bean id="defaultFreemarkerConfiguration" class="uk.ac.warwick.tabula.web.views.ScalaFreemarkerConfiguration" abstract="true">
 		<property name="sharedVariables">
 			<map>
+				<entry key="cm1Context" value="/${cm1.prefix}" />
+				<entry key="cm2Context" value="/${cm2.prefix}" />
 				<entry key="url" value-ref="urlMethodModel" />
 				<entry key="topLevelUrl" value="${toplevel.url}" />
 				<entry key="rootUrl" value="${toplevel.url}${module.context}/" />
@@ -620,6 +624,9 @@
 		<bean id="MarkingWorkflow-_secondMarkers" parent="userGroupCacheBean"
 			  p:runtimeClass="uk.ac.warwick.tabula.data.model.MarkingWorkflow"
 			  p:path="_secondMarkers" />
+		<bean id="StageMarkers-_markers" parent="userGroupCacheBean"
+					p:runtimeClass="uk.ac.warwick.tabula.data.model.markingworkflow.StageMarkers"
+					p:path="_markers" />
 
 		<bean id="defaultTilesConfigurer" class="org.springframework.web.servlet.view.tiles3.TilesConfigurer"
 			p:definitionsFactoryClass="uk.ac.warwick.tabula.web.views.ImpliedDefinitionsFactory" abstract="true">

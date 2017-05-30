@@ -2,7 +2,8 @@ package uk.ac.warwick.tabula.commands.reports.attendancemonitoring
 
 import freemarker.template.{Configuration, DefaultObjectWrapper}
 import org.apache.poi.hssf.usermodel.HSSFDataFormat
-import org.apache.poi.xssf.usermodel.{XSSFSheet, XSSFWorkbook}
+import org.apache.poi.ss.usermodel.Sheet
+import org.apache.poi.xssf.streaming.SXSSFWorkbook
 import uk.ac.warwick.tabula.DateFormats
 import uk.ac.warwick.tabula.JavaImports._
 import uk.ac.warwick.tabula.data.AttendanceMonitoringStudentData
@@ -29,7 +30,7 @@ class AttendanceReportExporter(val processorResult: AttendanceReportProcessorRes
 		points.map(p => s"${p.name} (${intervalFormatter.exec(JList(
 			wrapper.wrap(p.startDate.toDate),
 			wrapper.wrap(p.endDate.toDate)
-		)).asInstanceOf[String].replaceAll("<sup>","").replaceAll("</sup>","")})") ++
+		)).replaceAll("<sup>","").replaceAll("</sup>","")})") ++
 		Seq("Unrecorded","Missed (unauthorised)")
 
 	val unrecordedIndex: Int = headers.size - 2
@@ -69,18 +70,19 @@ class AttendanceReportExporter(val processorResult: AttendanceReportProcessorRes
 		}
 	}
 
-	def toXLSX: XSSFWorkbook = {
-		val workbook = new XSSFWorkbook()
+	def toXLSX: SXSSFWorkbook = {
+		val workbook = new SXSSFWorkbook
 		val sheet = generateNewSheet(workbook)
 
 		result.keys.foreach(addRow(sheet))
 
-		(0 to headers.size) map sheet.autoSizeColumn
+		(0 to headers.size) foreach sheet.autoSizeColumn
 		workbook
 	}
 
-	private def generateNewSheet(workbook: XSSFWorkbook) = {
+	private def generateNewSheet(workbook: SXSSFWorkbook) = {
 		val sheet = workbook.createSheet(department.name)
+		sheet.trackAllColumnsForAutoSizing()
 
 		// add header row
 		val headerRow = sheet.createRow(0)
@@ -90,7 +92,7 @@ class AttendanceReportExporter(val processorResult: AttendanceReportProcessorRes
 		sheet
 	}
 
-	private def addRow(sheet: XSSFSheet)(studentData: AttendanceMonitoringStudentData) {
+	private def addRow(sheet: Sheet)(studentData: AttendanceMonitoringStudentData) {
 		val plainCellStyle = {
 			val cs = sheet.getWorkbook.createCellStyle()
 			cs.setDataFormat(HSSFDataFormat.getBuiltinFormat("@"))

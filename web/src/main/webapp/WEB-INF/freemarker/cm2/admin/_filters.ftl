@@ -48,7 +48,7 @@
 		<#if status.actualValue?has_content>
 			<#list status.actualValue as item><#nested item /><#if item_has_next>, </#if></#list>
 		<#else>
-		${placeholder}
+			${placeholder}
 		</#if>
 	</@spring.bind>
 </#compress></#macro>

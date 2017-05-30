@@ -12,7 +12,7 @@ class SLF4JEventListener extends EventListener {
 		logger.info(s.toString)
 	}
 
-	override def afterCommand(event: Event, returnValue: Any) {
+	override def afterCommand(event: Event, returnValue: Any, beforeEvent: Event) {
 		val s = generateMessage(event)
 		logger.info(s.toString)
 	}

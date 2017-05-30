@@ -3,6 +3,7 @@ package uk.ac.warwick.tabula.commands.cm2.assignments
 import org.hibernate.validator.constraints.{Length, NotEmpty}
 import org.joda.time.DateTime
 import org.springframework.validation.Errors
+import uk.ac.warwick.tabula.AcademicYear
 import uk.ac.warwick.tabula.commands._
 import uk.ac.warwick.tabula.commands.cm2.markingworkflows.{CreatesMarkingWorkflow, ModifyMarkingWorkflowState, ModifyMarkingWorkflowValidation}
 import uk.ac.warwick.tabula.data.model._
@@ -13,11 +14,9 @@ import uk.ac.warwick.tabula.services._
 import uk.ac.warwick.tabula.system.permissions.{PermissionsChecking, PermissionsCheckingMethods, RequiresPermissionsChecking}
 import uk.ac.warwick.tabula.JavaImports._
 
-
-
 object CreateAssignmentDetailsCommand {
-  def apply(module: Module) =
-    new CreateAssignmentDetailsCommandInternal(module)
+  def apply(module: Module, academicYear: AcademicYear) =
+    new CreateAssignmentDetailsCommandInternal(module, academicYear)
       with ComposableCommand[Assignment]
       with BooleanAssignmentProperties
       with CreateAssignmentPermissions
@@ -31,7 +30,7 @@ object CreateAssignmentDetailsCommand {
       with AutowiringCM2MarkingWorkflowServiceComponent
 }
 
-class CreateAssignmentDetailsCommandInternal(val module: Module)
+class CreateAssignmentDetailsCommandInternal(val module: Module, val academicYear: AcademicYear)
   extends CommandInternal[Assignment] with CreateAssignmentDetailsCommandState with SharedAssignmentProperties with AssignmentDetailsCopy with CreatesMarkingWorkflow {
 
   self: AssessmentServiceComponent with UserLookupComponent with CM2MarkingWorkflowServiceComponent =>
@@ -116,16 +115,16 @@ trait AssignmentDetailsCopy extends ModifyAssignmentDetailsCommandState with Sha
     if(workflowCategory == WorkflowCategory.Reusable){
       assignment.cm2MarkingWorkflow = reusableWorkflow
     }
-    assignment.cm2Assignment = true
     copySharedTo(assignment: Assignment)
   }
 }
 
-trait ModifyAssignmentDetailsCommandState extends CurrentSITSAcademicYear {
+trait ModifyAssignmentDetailsCommandState {
 
   self: AssessmentServiceComponent with UserLookupComponent with CM2MarkingWorkflowServiceComponent with ModifyMarkingWorkflowState =>
 
   def module: Module
+  def academicYear: AcademicYear
 
   @Length(max = 200)
   @NotEmpty(message = "{NotEmpty.assignmentName}")
@@ -145,7 +144,6 @@ trait ModifyAssignmentDetailsCommandState extends CurrentSITSAcademicYear {
 
   var reusableWorkflow: CM2MarkingWorkflow = _
 
-  var workflowType: MarkingWorkflowType = _
   lazy val department: Department = module.adminDepartment
   lazy val availableWorkflows: Seq[CM2MarkingWorkflow] =
     cm2MarkingWorkflowService.getReusableWorkflows(department, academicYear)

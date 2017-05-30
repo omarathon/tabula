@@ -34,7 +34,7 @@ class DatabaseEventListenerTest extends TestBase with Mockito {
 		listener.beforeCommand(event)
 		verify(auditEventService, times(1)).save(event, "before")
 
-		listener.afterCommand(event, Fixtures.assignment("my assignment"))
+		listener.afterCommand(event, Fixtures.assignment("my assignment"), event)
 		verify(auditEventService, times(1)).save(event, "after")
 
 		listener.onException(event, new ItemNotFoundException)
@@ -52,7 +52,7 @@ class DatabaseEventListenerTest extends TestBase with Mockito {
 		listener.beforeCommand(event)
 		verify(auditEventService, times(0)).save(event, "before")
 
-		listener.afterCommand(event, Fixtures.assignment("my assignment"))
+		listener.afterCommand(event, Fixtures.assignment("my assignment"), event)
 		verify(auditEventService, times(0)).save(event, "after")
 
 		listener.onException(event, new ItemNotFoundException)

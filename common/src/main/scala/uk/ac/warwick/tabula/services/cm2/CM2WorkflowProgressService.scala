@@ -8,7 +8,7 @@ import uk.ac.warwick.tabula.cm2.web.Routes
 import uk.ac.warwick.tabula.data.model.Assignment
 import uk.ac.warwick.tabula.data.model.MarkingMethod.{ModeratedMarking, SeenSecondMarking}
 import uk.ac.warwick.tabula.data.model.MarkingState.{MarkingCompleted, Rejected}
-import uk.ac.warwick.tabula.data.model.markingworkflow.MarkingWorkflowStage
+import uk.ac.warwick.tabula.data.model.markingworkflow.{FinalStage, MarkingWorkflowStage}
 import uk.ac.warwick.tabula.helpers.cm2.WorkflowItems
 
 import scala.collection.JavaConverters._
@@ -25,6 +25,11 @@ class CM2WorkflowProgressService {
 
 	def getStagesFor(assignment: Assignment): Seq[CM2WorkflowStage] = {
 		val stages = Seq.newBuilder[CM2WorkflowStage]
+
+		val hasCM1MarkingWorkflow = features.markingWorkflows && assignment.markingWorkflow != null
+		val hasCM2MarkingWorkflow = features.markingWorkflows && assignment.cm2MarkingWorkflow != null
+		val hasMarkingWorkflow = hasCM1MarkingWorkflow || hasCM2MarkingWorkflow
+
 		if (assignment.collectSubmissions) {
 			stages += Submission
 
@@ -32,33 +37,39 @@ class CM2WorkflowProgressService {
 				stages += CheckForPlagiarism
 			}
 
-			stages += DownloadSubmission
-
-			if (features.markingWorkflows && assignment.markingWorkflow != null) {
-				stages ++= Seq(CM1ReleaseForMarking, CM1FirstMarking)
-
-				if (assignment.markingWorkflow.hasSecondMarker) {
-					if (assignment.markingWorkflow.markingMethod == ModeratedMarking) {
-						stages += CM1Moderation
-					} else {
-						stages += CM1SecondMarking
-					}
-				}
-
-				if (assignment.markingWorkflow.markingMethod == SeenSecondMarking) {
-					stages += CM1FinaliseSeenSecondMarking
-				}
-			} else if (features.markingWorkflows && assignment.cm2MarkingWorkflow != null) {
-				stages += CM2ReleaseForMarking
-				stages ++= assignment.cm2MarkingWorkflow.allStages.map(CM2MarkingWorkflowStage.apply)
+			if (!hasMarkingWorkflow) {
+				stages += DownloadSubmission
 			}
 		}
 
-		if (assignment.collectMarks) {
-			stages += AddMarks
+		if (hasCM1MarkingWorkflow) {
+			stages ++= Seq(CM1ReleaseForMarking, CM1FirstMarking)
+
+			if (assignment.markingWorkflow.hasSecondMarker) {
+				if (assignment.markingWorkflow.markingMethod == ModeratedMarking) {
+					stages += CM1Moderation
+				} else {
+					stages += CM1SecondMarking
+				}
+			}
+
+			if (assignment.markingWorkflow.markingMethod == SeenSecondMarking) {
+				stages += CM1FinaliseSeenSecondMarking
+			}
+		} else if (hasCM2MarkingWorkflow) {
+			stages += CM2ReleaseForMarking
+			stages ++= assignment.cm2MarkingWorkflow.allStages.map(CM2MarkingWorkflowStage.apply)
 		}
 
-		stages ++= Seq(AddFeedback, ReleaseFeedback, ViewOnlineFeedback, DownloadFeedback)
+		if (!hasMarkingWorkflow) {
+			if (assignment.collectMarks) {
+				stages += AddMarks
+			}
+
+			stages += AddFeedback
+		}
+
+		stages ++= Seq(ReleaseFeedback, ViewOnlineFeedback, DownloadFeedback)
 
 		stages.result()
 	}
@@ -104,7 +115,7 @@ object CM2WorkflowStages {
 		def progress(assignment: Assignment)(coursework: WorkflowItems): StageProgress = coursework.enhancedSubmission match {
 			// If the student hasn't submitted, but we have uploaded feedback for them, don't record their submission status
 			case None if coursework.enhancedFeedback.exists(!_.feedback.isPlaceholder) =>
-				StageProgress(Submission, started = false, messageCode = "workflow.Submission.unsubmitted.withFeedback")
+				StageProgress(Submission, started = false, messageCode = "workflow.Submission.unsubmitted.withFeedback", completed = true)
 			case Some(submission) if submission.submission.isLate =>
 				StageProgress(Submission, started = true, messageCode = "workflow.Submission.late", health = Warning, completed = true)
 			case Some(submission) if submission.submission.isAuthorisedLate =>
@@ -121,7 +132,7 @@ object CM2WorkflowStages {
 			case Some(extension) if extension.within =>
 				StageProgress(Submission, started = false, messageCode = "workflow.Submission.unsubmitted.withinExtension")
 			case _ if assignment.isClosed && !assignment.allowLateSubmissions =>
-				StageProgress(Submission, started = true, messageCode = "workflow.Submission.unsubmitted.failedToSubmit", health = Danger, completed = false)
+				StageProgress(Submission, started = true, messageCode = "workflow.Submission.unsubmitted.failedToSubmit", health = Danger, completed = true)
 
 			case _ => StageProgress(Submission, started = true, messageCode = "workflow.Submission.unsubmitted.late", health = Danger, completed = false)
 		}
@@ -297,21 +308,21 @@ object CM2WorkflowStages {
 		val markingRelated = true
 	}
 
-	case class CM2MarkingWorkflowStage(stage: MarkingWorkflowStage) extends CM2WorkflowStage {
-		override def actionCode: String = s"workflow.cm2.${stage.name}.action"
+	case class CM2MarkingWorkflowStage(markingStage: MarkingWorkflowStage) extends CM2WorkflowStage {
+		override def actionCode: String = s"workflow.cm2.${markingStage.name}.action"
 		override def progress(assignment: Assignment)(coursework: WorkflowItems): StageProgress = {
 			val currentStages = coursework.enhancedFeedback.toSeq.flatMap(_.feedback.outstandingStages.asScala)
-			val workflowStage = CM2MarkingWorkflowStage(stage)
+			val workflowStage = CM2MarkingWorkflowStage(markingStage)
 
-			if (currentStages.isEmpty || currentStages.head.order < stage.order) {
+			if (currentStages.isEmpty || currentStages.head.order < markingStage.order) {
 				// Not released for marking yet or this is a future stage
-				StageProgress(workflowStage, started = false, messageCode = s"workflow.cm2.${stage.name}.incomplete")
-			} else if (currentStages.contains(stage)) {
+				StageProgress(workflowStage, started = false, messageCode = s"workflow.cm2.${markingStage.name}.incomplete")
+			} else if (currentStages.contains(markingStage)) {
 				// This is the current stage
 				StageProgress(
 					workflowStage,
 					started = true,
-					messageCode = s"workflow.cm2.${stage.name}.inProgress",
+					messageCode = s"workflow.cm2.${markingStage.name}.inProgress",
 					health = Warning,
 					completed = false
 				)
@@ -320,7 +331,7 @@ object CM2WorkflowStages {
 				StageProgress(
 					workflowStage,
 					started = true,
-					messageCode = s"workflow.cm2.${stage.name}.complete",
+					messageCode = s"workflow.cm2.${markingStage.name}.complete",
 					health = Good,
 					completed = true
 				)
@@ -328,7 +339,7 @@ object CM2WorkflowStages {
 		}
 
 		// previousStages isn't recursive, but we expect it to be here
-		override def preconditions: Seq[Seq[WorkflowStage]] = Seq(CM2ReleaseForMarking +: stage.previousStages.flatMap { s =>
+		override def preconditions: Seq[Seq[WorkflowStage]] = Seq(CM2ReleaseForMarking +: markingStage.previousStages.flatMap { s =>
 			val previousStage = CM2MarkingWorkflowStage(s)
 			previousStage.preconditions.flatten :+ previousStage
 		})
@@ -374,11 +385,18 @@ object CM2WorkflowStages {
 			coursework.enhancedFeedback.filterNot(_.feedback.isPlaceholder) match {
 				case Some(item) if item.feedback.released =>
 					StageProgress(ReleaseFeedback, started = true, messageCode = "workflow.ReleaseFeedback.released", health = Good, completed = true)
-				case Some(item) if item.feedback.hasAttachments || item.feedback.hasOnlineFeedback || item.feedback.hasMarkOrGrade =>
+				case Some(item) if item.feedback.hasContent =>
 					StageProgress(ReleaseFeedback, started = true, messageCode = "workflow.ReleaseFeedback.notReleased", health = Warning, completed = false)
 				case _ => StageProgress(ReleaseFeedback, started = false, messageCode = "workflow.ReleaseFeedback.notReleased")
 			}
-		override def preconditions = Seq(Seq(AddMarks), Seq(AddFeedback))
+		override def preconditions: Seq[Seq[WorkflowStage]] = Seq(
+			Seq(AddMarks), // Assignments with no marking workflow
+			Seq(AddFeedback), // Assignments with no marking workflow
+			Seq(CM1FirstMarking, CM1SecondMarking, CM1FinaliseSeenSecondMarking), // CM1 seen second marking
+			Seq(CM1FirstMarking) // CM1 single marker
+		) ++ MarkingWorkflowStage.values.collect { case f: FinalStage =>
+			f.previousStages.map(CM2MarkingWorkflowStage.apply)
+		}
 
 		// FIXME this is the wrong route
 		def route(assignment: Assignment): Option[Route] = Some(Route("Release feedback", Routes.admin.assignment.submissionsandfeedback(assignment)))

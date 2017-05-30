@@ -24,7 +24,7 @@ class AssignmentEnrolmentController extends CourseworkController {
 	type EditAssignmentMembershipCommand = Appliable[Assignment] with ModifiesAssignmentMembership
 
 	@ModelAttribute("command")
-	def formObject(@PathVariable assignment: Assignment) = {
+	def formObject(@PathVariable assignment: Assignment): EditAssignmentMembershipCommand = {
 		val cmd = EditAssignmentMembershipCommand.stub(mandatory(assignment))
 		cmd.upstreamGroups.clear()
 		cmd
@@ -33,13 +33,14 @@ class AssignmentEnrolmentController extends CourseworkController {
 	@RequestMapping
 	def showForm(@ModelAttribute("command") form: EditAssignmentMembershipCommand, @PathVariable assignment: Assignment): Mav = {
 		form.afterBind()
-		Mav(s"$urlPrefix/admin/assignments/enrolment",
+		Mav("cm2/admin/assignments/enrolment",
 			"department" -> form.module.adminDepartment,
 			"module" -> form.module,
 			"academicYear" -> assignment.academicYear,
 			"availableUpstreamGroups" -> form.availableUpstreamGroups,
 			"linkedUpstreamAssessmentGroups" -> form.linkedUpstreamAssessmentGroups,
 			"assessmentGroups" -> form.assessmentGroups)
+			.crumbsList(Breadcrumbs.assignment(assignment))
 			.noLayout()
 	}
 

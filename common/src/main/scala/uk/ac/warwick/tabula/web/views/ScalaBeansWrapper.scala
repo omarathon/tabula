@@ -11,7 +11,7 @@ import freemarker.ext.beans.BeanModel
 import freemarker.template.{DefaultObjectWrapper, _}
 import org.hibernate.proxy.HibernateProxyHelper
 import uk.ac.warwick.tabula.JavaImports._
-import uk.ac.warwick.tabula.{RequestInfo, ScalaConcurrentMapHelpers}
+import uk.ac.warwick.tabula.{CurrentUser, NoCurrentUser, RequestInfo, ScalaConcurrentMapHelpers}
 import uk.ac.warwick.tabula.helpers.Logging
 import uk.ac.warwick.tabula.permissions.{Permission, Permissions, PermissionsTarget, ScopelessPermission}
 import uk.ac.warwick.tabula.services.{AutowiringSecurityServiceComponent, SecurityService, SecurityServiceComponent}
@@ -45,6 +45,8 @@ class ScalaBeansWrapper extends DefaultObjectWrapper(Configuration.VERSION_2_3_2
 			case jcol: java.util.Collection[_] => superWrap(jcol)
 			case jmap: JMap[_, _] => superWrap(jmap)
 			case smap: scala.collection.SortedMap[_, _] => superWrap(JLinkedHashMap(smap.toSeq: _*))
+			case lmap: scala.collection.immutable.ListMap[_, _] => superWrap(JLinkedHashMap(lmap.toSeq: _*))
+			case lmap: scala.collection.mutable.ListMap[_, _] => superWrap(JLinkedHashMap(lmap.toSeq: _*))
 			case smap: scala.collection.Map[_, _] => superWrap(mapAsJavaMapConverter(smap).asJava)
 			case sseq: scala.Seq[_] => superWrap(seqAsJavaListConverter(sseq).asJava)
 			case scol: scala.Iterable[_] => superWrap(asJavaCollectionConverter(scol).asJavaCollection)
@@ -152,7 +154,7 @@ class ScalaHashModel(sobj: Any, wrapper: ScalaBeansWrapper, useWrapperCache: Boo
 		def clear(): Unit = cache.clear()
 	}
 
-	private def user = RequestInfo.fromThread.get.user
+	private def user: CurrentUser = RequestInfo.fromThread.map(_.user).getOrElse(NoCurrentUser())
 
 	private def canDo(perms: Seq[Permission]) = perms forall {
 		case permission: ScopelessPermission => securityService.can(user, permission)

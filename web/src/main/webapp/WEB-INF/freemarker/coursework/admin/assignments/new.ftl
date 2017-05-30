@@ -9,13 +9,14 @@ the comments textarea needs to maintain newlines.
 <h1>Create assignment for <@fmt.module_name module /></h1>
 <#assign commandName="addAssignmentCommand" />
 <#assign command=addAssignmentCommand />
-<@f.form method="post" action="${url('/coursework/admin/module/${module.code}/assignments/new')}" commandName=commandName cssClass="form-horizontal">
+<#assign submitUrl><@routes.coursework.createAssignment module /></#assign>
+<@f.form method="post" action=submitUrl commandName=commandName cssClass="form-horizontal">
 
 <#if command.prefilled>
 <div class="alert alert-success">
 <i class="icon-info-sign"></i>
 Some fields have been pre-filled from another recently created assignment for convenience.
-<a href="${url('/coursework/admin/module/${module.code}/assignments/new')}?prefillFromRecent=false">Don't do this</a>
+<a href="<@routes.coursework.createAssignment module />?prefillFromRecent=false">Don't do this</a>
 </div>
 </#if>
 

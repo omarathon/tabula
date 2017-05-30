@@ -37,7 +37,7 @@ class EditMarkingWorkflowController extends CM2MarkingWorkflowController {
 		@ModelAttribute("editMarkingWorkflowCommand") cmd: EditMarkingWorkflowCommand,
 		errors: Errors): Mav = {
 		commonCrumbs(
-			Mav(s"$urlPrefix/admin/workflows/edit_workflow", Map(
+			Mav("cm2/admin/workflows/edit_workflow", Map(
 				"workflow" -> workflow,
 				"canDeleteMarkers" -> workflow.canDeleteMarkers
 			)),
