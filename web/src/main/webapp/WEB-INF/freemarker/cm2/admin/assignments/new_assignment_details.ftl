@@ -27,6 +27,7 @@
 		</#if>
 		<@f.errors cssClass="error form-errors" />
 		<#assign newRecord=true />
+		<#assign canEditWorkflowType=true />
 		<#include "_fields.ftl" />
 
 		<#include "_modify_assignment_workflow.ftl" />
