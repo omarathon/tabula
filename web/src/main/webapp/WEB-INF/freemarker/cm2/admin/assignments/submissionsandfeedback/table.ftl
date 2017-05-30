@@ -2,7 +2,12 @@
 <#import "*/cm2_macros.ftl" as cm2 />
 
 <#escape x as x?html>
-	<h1>${assignment.name} (${assignment.module.code?upper_case})</h1>
+	<#if assignment.collectSubmissions>
+		<#assign title="Submissions and feedback" />
+	<#else>
+		<#assign title="Feedback" />
+	</#if>
+	<@cm2.assignmentHeader title assignment "for" />
 
 	<#if assignment.openEnded>
 		<p class="dates">

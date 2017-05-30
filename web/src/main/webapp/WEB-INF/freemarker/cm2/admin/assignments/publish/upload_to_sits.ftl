@@ -1,9 +1,7 @@
+<#import "*/cm2_macros.ftl" as cm2 />
 <#escape x as x?html>
 
-<div class="deptheader">
-	<h1>Upload feedback to SITS</h1>
-	<h4 class="with-related">for ${assignment.name}</h4>
-</div>
+	<@cm2.assignmentHeader "Upload feedback to SITS" assignment "for" />
 
 <#if isGradeValidation>
 

@@ -95,7 +95,74 @@
 		</#if>
 	</#macro>
 
-	<#macro headerMenu department academicYear="">
+	<#macro moduleHeader title module preposition="for">
+		<#local two_line = module?has_content />
+		<div class="deptheader">
+			<h1 <#if !two_line>class="with-related"</#if>>${title}</h1>
+			<#if two_line>
+				<h4 class="with-related">${preposition} <@fmt.module_name module /></h4>
+			</#if>
+		</div>
+	</#macro>
+
+	<#macro assignmentHeader title assignment preposition="for" admin=true>
+		<#if can.do('Submission.Read', assignment)>
+			<div class="btn-toolbar dept-toolbar">
+				<#if assignment.extensionsPossible>
+					<#if can.do('Extension.Update', assignment)>
+						<#local ext_caption="Manage assignment's extensions" />
+						<#local ext_link="Manage extensions" />
+					<#else>
+						<#local ext_caption="View assignment's extensions" />
+						<#local ext_link="View extensions" />
+					</#if>
+					<#local ext_url><@routes.cm2.assignmentextensions assignment /></#local>
+					<@fmt.permission_button
+						permission='Extension.Read'
+						scope=assignment
+						action_descr=ext_caption?lower_case
+						href=ext_url
+						classes='btn btn-link'>
+							${ext_link}
+					</@fmt.permission_button>
+				</#if>
+
+				<#if assignment.cm2Assignment>
+					<#local edit_url><@routes.cm2.editassignmentdetails assignment /></#local>
+				<#else>
+					<#local edit_url><@routes.coursework.assignmentedit assignment /></#local>
+				</#if>
+				<@fmt.permission_button
+					permission='Assignment.Update'
+					scope=assignment
+					action_descr='edit assignment properties'
+					href=edit_url
+					classes='btn btn-link'>
+						Edit assignment
+				</@fmt.permission_button>
+			</div>
+		</#if>
+
+		<#local two_line = assignment?has_content />
+		<div class="deptheader">
+			<h1 <#if !two_line>class="with-related"</#if>>${title}</h1>
+			<#if two_line>
+				<h4 class="with-related">${preposition} ${assignment.name} (${assignment.module.code?upper_case}, ${assignment.academicYear.toString})</h4>
+			</#if>
+		</div>
+	</#macro>
+
+	<#macro workflowHeader title workflow preposition="for">
+		<#local two_line = workflow?has_content />
+		<div class="deptheader">
+			<h1 <#if !two_line>class="with-related"</#if>>${title}</h1>
+			<#if two_line>
+				<h4 class="with-related">${preposition} ${workflow.name}</h4>
+			</#if>
+		</div>
+	</#macro>
+
+	<#macro departmentHeader title department routeFunction academicYear="" preposition="for">
 		<div class="btn-toolbar dept-toolbar">
 			<div class="btn-group">
 				<a class="btn btn-link dropdown-toggle" data-toggle="dropdown">
@@ -214,5 +281,7 @@
 				</ul>
 			</div>
 		</div>
+
+		<@fmt.id7_deptheader title routeFunction preposition />
 	</#macro>
 </#escape>

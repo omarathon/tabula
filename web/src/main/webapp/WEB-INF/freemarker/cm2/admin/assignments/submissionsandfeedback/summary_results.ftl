@@ -67,16 +67,6 @@
 										</li>
 									</#list>
 								</#if>
-
-								<li role="presentation">
-									<a href="#${identifier}-audit" aria-controls="${identifier}-audit" role="tab" data-toggle="tab">
-										<#if assignment.collectSubmissions>
-											Submission history
-										<#else>
-											History
-										</#if>
-									</a>
-								</li>
 							</ul>
 							<div class="tab-content tab-content-equal-height">
 								<div role="tabpanel" class="tab-pane active" id="${identifier}-submission">
@@ -86,17 +76,13 @@
 								<#-- One tab for each stage in the workflow; previous stages are active, incomplete stages are not -->
 								<#if assignment.cm2MarkingWorkflow?? && feedback??>
 									<#list assignment.cm2MarkingWorkflow.allStages as markingStage>
-										<#local incomplete = feedback?? && (feedback.notReleasedToMarkers || !feedback.isMarkedByStage(markingStage)) />
+										<#local incomplete = feedback.notReleasedToMarkers || !feedback.isMarkedByStage(markingStage) />
 										<div role="tabpanel" class="tab-pane" id="${identifier}-${markingStage.name}">
 											<#local markerFeedback = mapGet(feedback.feedbackByStage, markingStage) />
 												<@components.marker_feedback_summary markerFeedback markingStage />
 										</div>
 									</#list>
 								</#if>
-
-								<div role="tabpanel" class="tab-pane" id="${identifier}-audit">
-									TODO
-								</div>
 							</div>
 						</div>
 					</#macro>
@@ -126,7 +112,7 @@
 								</td>
 								<td class="student toggle-cell">${student.user.lastName!}</td>
 							</#if>
-							<td class="id toggle-cell">
+							<td class="id toggle-cell<#if !department.showStudentName> toggle-icon</#if>">
 								${identifier} <@pl.profile_link identifier />
 							</td>
 

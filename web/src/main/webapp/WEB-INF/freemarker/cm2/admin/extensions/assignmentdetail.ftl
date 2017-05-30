@@ -1,4 +1,4 @@
-<#import "../cm2_macros.ftl" as cm2_macros />
+<#import "*/cm2_macros.ftl" as cm2 />
 <#if detail.extension?has_content>
 
 	<#if detail.extension.requestedOn?has_content>
@@ -123,8 +123,8 @@
 		>
 	</@f.form>
 
-	<@cm2_macros.previousExtensions detail.extension.id detail.student.warwickId detail.student.fullName detail.numAcceptedExtensions detail.numRejectedExtensions detail.previousExtensions />
-	<@cm2_macros.previousSubmissions detail.extension.id detail.student.warwickId detail.student.fullName detail.previousSubmissions />
+	<@cm2.previousExtensions detail.extension.id detail.student.warwickId detail.student.fullName detail.numAcceptedExtensions detail.numRejectedExtensions detail.previousExtensions />
+	<@cm2.previousSubmissions detail.extension.id detail.student.warwickId detail.student.fullName detail.previousSubmissions />
 
 	<#assign feedbackNotice>
 		<#if detail.extension.approved>

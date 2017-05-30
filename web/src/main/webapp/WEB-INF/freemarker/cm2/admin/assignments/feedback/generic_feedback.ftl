@@ -1,10 +1,8 @@
+<#import "*/cm2_macros.ftl" as cm2 />
 <#escape x as x?html>
 	<#assign submit_url><@routes.cm2.genericfeedback assignment /></#assign>
 	<#if !ajax>
-		<div class="deptheader">
-			<h1>Generic feedback</h1>
-			<h4><span class="muted">for</span> ${assignment.name}</h4>
-		</div>
+		<@cm2.assignmentHeader "Generic feedback" assignment "for" />
 	</#if>
 
 	<@f.form  method="post" commandName="command" action="${submit_url}">

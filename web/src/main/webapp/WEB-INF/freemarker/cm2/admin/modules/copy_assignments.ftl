@@ -2,13 +2,11 @@
 <#import "*/cm2_macros.ftl" as cm2 />
 
 <#escape x as x?html>
-	<@cm2.headerMenu department academicYear />
-
 	<#function route_function dept>
 		<#local result><@routes.cm2.copy_assignments_previous dept academicYear /></#local>
 		<#return result />
 	</#function>
-	<@fmt.id7_deptheader "Create assignments from previous" route_function "for" />
+	<@cm2.departmentHeader "Create assignments from previous" department route_function academicYear />
 
 	<form action="" method="post" class="copy-assignments">
 		<div class="submit-buttons">

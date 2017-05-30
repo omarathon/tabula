@@ -98,24 +98,40 @@
 						<ul class="dropdown-menu">
 							<#if features.turnitin>
 								<#if features.turnitinSubmissions>
-									<li class="must-have-selected">
+									<li>
 										<#assign checkplagiarism_url><@routes.cm2.submitToTurnitin assignment/></#assign>
-										<@fmt.permission_button permission='Submission.CheckForPlagiarism' scope=assignment action_descr='check for plagiarism' href=checkplagiarism_url tooltip='Check for plagiarism'>
-											Check for plagiarism
+										<@fmt.permission_button
+											permission='Submission.CheckForPlagiarism'
+											scope=assignment
+											action_descr='check for plagiarism'
+											href=checkplagiarism_url
+											tooltip='Check for plagiarism'>
+												Check for plagiarism
 										</@fmt.permission_button>
 									</li>
 								<#else>
 									<li class="disabled">
-										<@fmt.permission_button permission='Submission.CheckForPlagiarism' scope=assignment action_descr='check for plagiarism - temporarily disabled' tooltip='Check for plagiarism - temporarily disabled'>
-											Check for plagiarism
+										<@fmt.permission_button
+											permission='Submission.CheckForPlagiarism'
+											scope=assignment
+											action_descr='check for plagiarism - temporarily disabled'
+											tooltip='Check for plagiarism - temporarily disabled'>
+												Check for plagiarism
 										</@fmt.permission_button>
 									</li>
 								</#if>
 							</#if>
 							<li class="must-have-selected">
 								<#assign markplagiarised_url><@routes.cm2.plagiarismInvestigation assignment/></#assign>
-								<@fmt.permission_button permission='Submission.ManagePlagiarismStatus' scope=assignment action_descr='mark plagiarised' href=markplagiarised_url id="mark-plagiarised-selected-button" tooltip="Toggle whether the selected student submissions are possibly plagiarised" data_attr='data-container=body'>
-									Mark plagiarised
+								<@fmt.permission_button
+									permission='Submission.ManagePlagiarismStatus'
+									scope=assignment
+									action_descr='mark plagiarised'
+									href=markplagiarised_url
+									id="mark-plagiarised-selected-button"
+									tooltip="Toggle whether the selected student submissions are possibly plagiarised"
+									data_attr='data-container=body'>
+										Mark plagiarised
 								</@fmt.permission_button>
 							</li>
 						</ul>
@@ -136,7 +152,7 @@
 					</div>
 				</#if>
 			<#if assignment.collectSubmissions && features.markingWorkflows>
-					<#if results.mustReleaseForMarking?default(false)>
+					<#if results.mustReleaseForMarking!false>
 						<div class="btn-group">
 							<a class="btn btn-default dropdown-toggle" data-toggle="dropdown">
 								Marking

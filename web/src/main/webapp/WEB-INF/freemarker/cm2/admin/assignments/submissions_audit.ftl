@@ -1,10 +1,11 @@
 <#import "../assignments/feedback/feedback_macros.ftl" as fs>
 <#import "*/coursework_components.ftl" as components />
+<#import "*/cm2_macros.ftl" as cm2 />
 <#import "submission_macros.ftl" as sub />
 
 <#escape x as x?html>
-	<h1>${assignment.module.code?upper_case} - (${assignment.name}) </h1>
-	<h4>View audit </h4>
+	<@cm2.assignmentHeader "View audit" assignment "for" />
+
 	<ul id="marks-tabs" class="nav nav-tabs">
 		<li class="active"><a href="#submissions">Submissions</a></li>
 		<li class="webform-tab"><a href="#summary">Summary</a></li>

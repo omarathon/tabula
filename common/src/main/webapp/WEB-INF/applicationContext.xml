@@ -84,7 +84,7 @@
 				<entry key="uk.ac.warwick.tabula.services.CannotPerformWriteOperationException" value="errors/readOnlyMasquerade" />
 				<entry key="uk.ac.warwick.tabula.services.ZipRequestTooLargeError" value="errors/zipTooBig" />
 				<entry key="uk.ac.warwick.tabula.api.web.filters.APILoginMethodMissingException" value="errors/apiLoginMethodMissing" />
-				<entry key="uk.ac.warwick.tabula.SubmitPermissionDeniedException" value="coursework/submit/assignment_permissionDenied" />
+				<entry key="uk.ac.warwick.tabula.SubmitPermissionDeniedException" value="errors/assignment_permissionDenied" />
 			</map>
 		</property>
 	</bean>
@@ -624,6 +624,9 @@
 		<bean id="MarkingWorkflow-_secondMarkers" parent="userGroupCacheBean"
 			  p:runtimeClass="uk.ac.warwick.tabula.data.model.MarkingWorkflow"
 			  p:path="_secondMarkers" />
+		<bean id="StageMarkers-_markers" parent="userGroupCacheBean"
+					p:runtimeClass="uk.ac.warwick.tabula.data.model.markingworkflow.StageMarkers"
+					p:path="_markers" />
 
 		<bean id="defaultTilesConfigurer" class="org.springframework.web.servlet.view.tiles3.TilesConfigurer"
 			p:definitionsFactoryClass="uk.ac.warwick.tabula.web.views.ImpliedDefinitionsFactory" abstract="true">

@@ -20,10 +20,10 @@ class ModifyAssignmentMarkersController extends AbstractAssignmentController {
 	validatesSelf[SelfValidating]
 
 	@ModelAttribute("assignMarkersCommand")
-	def assignMarkersCommand(@PathVariable assignment: Assignment) = AssignMarkersCommand(mandatory(assignment))
+	def assignMarkersCommand(@PathVariable assignment: Assignment) = AssignMarkersCommand(mustBeCM2(mandatory(assignment)))
 
 	@ModelAttribute("listAllocationsCommand")
-	def listAllocationsCommand(@PathVariable assignment: Assignment) = ListMarkerAllocationsCommand(mandatory(assignment))
+	def listAllocationsCommand(@PathVariable assignment: Assignment) = ListMarkerAllocationsCommand(mustBeCM2(mandatory(assignment)))
 
 	private def form(assignment: Assignment, listAllocationsCmd: ListMarkerAllocationsCommand, assignMarkersCmd: AssignMarkersCommand, mode: String): Mav = {
 		val module =  mandatory(assignMarkersCmd.assignment.module)
@@ -41,22 +41,22 @@ class ModifyAssignmentMarkersController extends AbstractAssignmentController {
 
 	@RequestMapping(method = Array(GET, HEAD), value = Array("new/markers"))
 	def newForm(
-		@PathVariable("assignment") assignment: Assignment,
+		@PathVariable assignment: Assignment,
 		@ModelAttribute("listAllocationsCommand") listAllocationsCmd: ListMarkerAllocationsCommand,
 		@ModelAttribute("assignMarkersCommand") assignMarkersCmd: AssignMarkersCommand
 	): Mav = form(assignment, listAllocationsCmd, assignMarkersCmd, createMode)
 
 	@RequestMapping(method = Array(GET, HEAD), value = Array("edit/markers"))
 	def editForm(
-		@PathVariable("assignment") assignment: Assignment,
+		@PathVariable assignment: Assignment,
 		@ModelAttribute("listAllocationsCommand") listAllocationsCmd: ListMarkerAllocationsCommand,
 		@ModelAttribute("assignMarkersCommand") assignMarkersCmd: AssignMarkersCommand
 	): Mav = form(assignment, listAllocationsCmd, assignMarkersCmd, editMode)
 
 	@RequestMapping(method = Array(POST), params = Array(ManageAssignmentMappingParameters.createAndAddMarkers), value = Array("*/markers"))
-	def saveAndExit(@ModelAttribute("assignMarkersCommand") assignMarkersCmd: AssignMarkersCommand): Mav =  {
+	def saveAndExit(@ModelAttribute("assignMarkersCommand") assignMarkersCmd: AssignMarkersCommand, @PathVariable assignment: Assignment): Mav =  {
 		assignMarkersCmd.apply()
-		RedirectForce(Routes.home)
+		Redirect(Routes.admin.assignment.submissionsandfeedback(assignment))
 	}
 
 	@RequestMapping(method = Array(POST), params = Array(ManageAssignmentMappingParameters.createAndAddSubmissions), value = Array("new/markers"))

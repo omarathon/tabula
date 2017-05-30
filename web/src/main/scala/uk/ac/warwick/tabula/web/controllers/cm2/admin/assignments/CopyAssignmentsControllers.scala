@@ -50,7 +50,7 @@ class CopyModuleAssignmentsController extends AbstractCopyAssignmentsController 
 	def showForm(@PathVariable module: Module, @ModelAttribute("copyAssignmentsCommand") cmd: CopyAssignmentsCommand.Command): Mav =
 		Mav("cm2/admin/modules/copy_assignments",
 			"title" -> module.name,
-			"cancel" -> Routes.admin.module(module, cmd.academicYear),
+			"cancel" -> Routes.admin.moduleWithinDepartment(module, cmd.academicYear),
 			"department" -> module.adminDepartment,
 			"map" -> moduleAssignmentMap(cmd.modules))
 			.crumbsList(Breadcrumbs.module(module, cmd.academicYear))
@@ -59,7 +59,7 @@ class CopyModuleAssignmentsController extends AbstractCopyAssignmentsController 
 	@RequestMapping(method = Array(POST))
 	def submit(@ModelAttribute("copyAssignmentsCommand") cmd: CopyAssignmentsCommand.Command, @PathVariable module: Module): Mav = {
 		cmd.apply()
-		Redirect(Routes.admin.module(module, cmd.academicYear))
+		Redirect(Routes.admin.moduleWithinDepartment(module, cmd.academicYear))
 	}
 
 }
@@ -91,7 +91,7 @@ abstract class AbstractCopyDepartmentAssignmentsController extends AbstractCopyA
 	@RequestMapping(method = Array(POST))
 	def submit(@ModelAttribute("copyAssignmentsCommand") cmd: CopyAssignmentsCommand.Command, @PathVariable department: Department): Mav = {
 		cmd.apply()
-		Redirect(Routes.admin.department(department))
+		Redirect(Routes.admin.department(department, cmd.academicYear))
 	}
 
 }

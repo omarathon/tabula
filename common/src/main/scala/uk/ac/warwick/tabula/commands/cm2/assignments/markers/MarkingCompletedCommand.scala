@@ -27,18 +27,24 @@ object MarkingCompletedCommand {
 			with MarkingCompletedDescription
 			with AutowiringCM2MarkingWorkflowServiceComponent
 			with FinaliseFeedbackComponentImpl
+			with PopulateMarkerFeedbackComponentImpl
 			with FeedbackReleasedNotifier
 }
 
 class MarkingCompletedCommandInternal(val assignment: Assignment, val marker: User, val submitter: CurrentUser, val stage: MarkingWorkflowStage)
 	extends CommandInternal[Seq[AssignmentFeedback]] with MarkingCompletedState with ReleasedState with MarkingCompletedValidation {
 
-	this: CM2MarkingWorkflowServiceComponent with FinaliseFeedbackComponent =>
+	self: CM2MarkingWorkflowServiceComponent with FinaliseFeedbackComponent with PopulateMarkerFeedbackComponent =>
 
 	def applyInternal(): Seq[AssignmentFeedback] = transactional() {
 
 		val feedback = feedbackForRelease.map(mf => HibernateHelpers.initialiseAndUnproxy(mf.feedback)).collect{ case f: AssignmentFeedback => f }
 		newReleasedFeedback = cm2MarkingWorkflowService.progressFeedback(stage, feedback).asJava
+
+		val toPopulate = newReleasedFeedback.asScala.filter(_.stage.populateWithPreviousFeedback)
+		if (toPopulate.nonEmpty) {
+			populateMarkerFeedback(assignment, toPopulate)
+		}
 
 		// finalise any feedback that has finished the workflow
 		val toFinalise = {

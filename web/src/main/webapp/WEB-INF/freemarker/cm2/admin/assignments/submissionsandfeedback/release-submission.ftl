@@ -1,9 +1,10 @@
+<#import "*/cm2_macros.ftl" as cm2 />
 <#escape x as x?html>
 <#assign formAction><@routes.cm2.releaseForMarking assignment /></#assign>
 
 <@f.form method="post" action="${formAction}" commandName="command">
 
-	<h1>Release submissions to markers for ${assignment.name}</h1>
+	<@cm2.assignmentHeader "Release submissions to markers" assignment "for" />
 
 	<@bs3form.errors path="" />
 	<input type="hidden" name="confirmScreen" value="true" />

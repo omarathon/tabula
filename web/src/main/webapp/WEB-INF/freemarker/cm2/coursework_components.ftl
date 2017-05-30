@@ -530,15 +530,9 @@
 		</div>
 		<div class="col-md-2">
 			<#if assignment.closed || assignment.openEnded>
-				<#if info.nextStages?size gt 0>
-					<a class="btn btn-block btn-primary" href="<@routes.cm2.listmarkersubmissions assignment user.apparentUser />">
-						${verb}
-					</a>
-				<#else>
-					<a class="btn btn-block btn-default btn-disabled use-tooltip" title="You'll be able to download submissions for marking when an administrator releases them." disabled>
-						${verb}
-					</a>
-				</#if>
+				<a class="btn btn-block btn-primary" href="<@routes.cm2.listmarkersubmissions assignment user.apparentUser />">
+					${verb}
+				</a>
 			</#if>
 		</div>
 	</div>
@@ -624,7 +618,11 @@
 	<div class="item-info admin-assignment-${assignment.id}">
 		<div class="clearfix">
 			<div class="pull-right">
-				<#local edit_url><@routes.cm2.editassignmentdetails assignment /></#local>
+				<#if assignment.cm2Assignment>
+					<#local edit_url><@routes.cm2.editassignmentdetails assignment /></#local>
+				<#else>
+					<#local edit_url><@routes.coursework.assignmentedit assignment /></#local>
+				</#if>
 				<@fmt.permission_button
 					classes='btn btn-default btn-xs'
 					permission='Assignment.Update'
@@ -724,7 +722,7 @@
 				<div class="col-md-4">
 					<h6>Progress</h6>
 
-					<ul class="list-unstyled scrollable-list">
+					<ul class="list-unstyled">
 						<li><strong>Created:</strong> <span class="use-tooltip" title="<@fmt.dateToWeek assignment.createdDate />" data-html="true"><@fmt.date date=assignment.createdDate /></span></li>
 
 						<#if assignment.opened>
@@ -956,7 +954,7 @@
 					</#if>
 				<#elseif stage_name == 'CM2ReleaseForMarking'>
 
-				<#elseif student.stages[stage_name].stage.markingRelated>
+				<#elseif assignment.cm2Assignment && student.stages[stage_name].stage.markingRelated>
 					<#if feedback??>
 						<#local markingStage = student.stages[stage_name].stage.markingStage />
 						<#local marker = mapGet(feedback.feedbackMarkers, markingStage)! />
@@ -1044,6 +1042,7 @@
 							<#local queueSitsUploadEnabled=(features.queueFeedbackForSits && department.uploadCourseworkMarksToSits) />
 							<#if queueSitsUploadEnabled>
 								<li>
+									<span class="fa-stack"></span>
 									<#if enhancedFeedback.feedbackForSits??>
 										<#local feedbackSitsStatus=enhancedFeedback.feedbackForSits.status />
 										<#local sitsWarning = feedbackSitsStatus.dateOfUpload?has_content && feedbackSitsStatus.status.code != "uploadNotAttempted" && (
@@ -1077,7 +1076,7 @@
 	</ul>
 </#macro>
 
-<#macro marker_feedback_summary feedback stage isMarking=false>
+<#macro marker_feedback_summary feedback stage currentStage=[] currentFeedback=[]>
 	<h4>${stage.description} <#if feedback.marker??>- ${feedback.marker.fullName}</#if></h4>
 
 	<#list feedback.customFormValues as formValue>
@@ -1106,7 +1105,7 @@
 			<div class="col-xs-6"><span>No mark or grade added.</span></div>
 		</#if>
 
-		<div class="col-xs-6">
+		<div class="col-xs-3">
 		<#-- Download a zip of all feedback or just a single file if there is only one -->
 			<#if feedback.attachments?has_content >
 				<#local attachment = "" />
@@ -1132,9 +1131,17 @@
 					</#list>
 				</ul>
 			</#if>
-
-			<#if isMarking>
-				<a class="copy-feedback btn btn-default long-running use-tooltip" href="#">Copy comments and files</a>
+		</div>
+		<div class="col-xs-3">
+			<#if currentFeedback?? && currentFeedback?has_content>
+				<#if currentStage?? && currentStage.populateWithPreviousFeedback>
+					<div class="form-group">
+						<label class="radio-inline"><input type="radio" name="changesState" <#if !currentFeedback.hasBeenModified>checked</#if> value="approve" />Approve</label>
+						<label class="radio-inline"><input type="radio" name="changesState" <#if currentFeedback.hasBeenModified>checked</#if> value="make-changes" >Make changes</label>
+					</div>
+				<#else>
+					<a class="copy-feedback btn btn-default long-running use-tooltip" href="#">Copy comments and files</a>
+				</#if>
 			</#if>
 		</div>
 	</div>

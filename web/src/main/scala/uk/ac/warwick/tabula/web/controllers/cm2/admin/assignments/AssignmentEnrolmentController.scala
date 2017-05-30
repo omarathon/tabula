@@ -24,7 +24,7 @@ class AssignmentEnrolmentController extends CourseworkController {
 	type EditAssignmentMembershipCommand = Appliable[Assignment] with ModifiesAssignmentMembership
 
 	@ModelAttribute("command")
-	def formObject(@PathVariable assignment: Assignment) = {
+	def formObject(@PathVariable assignment: Assignment): EditAssignmentMembershipCommand = {
 		val cmd = EditAssignmentMembershipCommand.stub(mandatory(assignment))
 		cmd.upstreamGroups.clear()
 		cmd

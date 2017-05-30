@@ -1,3 +1,4 @@
+<#import "*/cm2_macros.ftl" as cm2 />
 <#assign module = assignment.module />
 <#assign department = module.adminDepartment />
 <#assign time_remaining=durationFormatter(assignment.closeDate) />
@@ -53,8 +54,7 @@
 </#macro>
 
 <#escape x as x?html>
-<h1>Manage extensions</h1>
-<h5><span class="muted">for</span> ${assignment.name} (${assignment.module.code?upper_case})</h5>
+	<@cm2.assignmentHeader "Manage extensions" assignment "for" />
 
 <#import "/WEB-INF/freemarker/_profile_link.ftl" as pl />
 <div id="profile-modal" class="modal fade profile-subset"></div>

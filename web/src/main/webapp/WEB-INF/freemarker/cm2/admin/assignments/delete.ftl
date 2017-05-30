@@ -1,8 +1,7 @@
+<#import "*/cm2_macros.ftl" as cm2 />
 <#escape x as x?html>
-	<div class="deptheader">
-		<h1>Delete assignment</h1>
-		<h4 class="with-related">${assignment.name}</h4>
-	</div>
+	<@cm2.assignmentHeader "Delete assignment" assignment "" />
+
 	<#assign submitUrl><@routes.cm2.assignmentdelete assignment /></#assign>
 	<@f.form method="post" action=submitUrl commandName="deleteAssignmentCommand">
 		<!-- global errors -->
@@ -23,7 +22,12 @@
 
 		<div class="submit-buttons">
 			<input type="submit" value="Delete" class="btn btn-danger">
-			<a href="<@routes.cm2.editassignmentdetails assignment=assignment />" class="btn btn-default">Cancel</a>
+			<#if assignment.cm2Assignment>
+				<#assign detailsUrl><@routes.cm2.editassignmentdetails assignment /></#assign>
+			<#else>
+				<#assign detailsUrl><@routes.coursework.assignmentedit assignment /></#assign>
+			</#if>
+			<a href="${detailsUrl}" class="btn btn-default">Cancel</a>
 		</div>
 	</@f.form>
 

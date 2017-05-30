@@ -7,6 +7,7 @@ import uk.ac.warwick.tabula.commands.cm2.assignments.SubmissionAndFeedbackComman
 import uk.ac.warwick.tabula.commands.cm2.feedback.ListFeedbackCommand
 import uk.ac.warwick.tabula.commands.cm2.feedback.ListFeedbackCommand._
 import uk.ac.warwick.tabula.data.model._
+import uk.ac.warwick.tabula.helpers.StringUtils._
 import uk.ac.warwick.tabula.helpers.cm2.SubmissionAndFeedbackInfoFilters.OverlapPlagiarismFilter
 import uk.ac.warwick.tabula.helpers.cm2._
 import uk.ac.warwick.tabula.permissions._
@@ -111,7 +112,7 @@ abstract class SubmissionAndFeedbackCommandInternal(val assignment: Assignment)
 			enhancedSubmissions.exists(_.submission.hasOriginalityReport)
 		}
 		val usercodesWithSubmissionOrFeedback = benchmarkTask("Get usercodes with submissions or feedback") {
-			assignment.getUsercodesWithSubmissionOrFeedback.toSeq.sorted
+			assignment.getUsercodesWithSubmissionOrFeedback.filter(_.hasText).toSeq.sorted
 		}
 		val moduleMembers = benchmarkTask("Get module membership") {
 			assessmentMembershipService.determineMembershipUsers(assignment)

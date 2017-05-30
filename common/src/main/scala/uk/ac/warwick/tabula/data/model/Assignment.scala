@@ -15,7 +15,7 @@ import uk.ac.warwick.tabula.data.model.permissions.AssignmentGrantedRole
 import uk.ac.warwick.tabula.helpers.DateTimeOrdering._
 import uk.ac.warwick.tabula.helpers.StringUtils._
 import uk.ac.warwick.tabula.services._
-import uk.ac.warwick.tabula.{AcademicYear, ToString}
+import uk.ac.warwick.tabula.{AcademicYear, Features, ToString}
 import uk.ac.warwick.userlookup.User
 import uk.ac.warwick.util.workingdays.WorkingDaysHelperImpl
 
@@ -82,6 +82,9 @@ class Assignment
 	type Entity = Assignment
 
 	@transient
+	var features: Features = Wire[Features]
+
+	@transient
 	var assignmentService: AssessmentService = Wire[AssessmentService]("assignmentService")
 
 	@transient
@@ -143,7 +146,7 @@ class Assignment
 	var allowExtensions: JBoolean = _
 	@Column(name="anonymous_marking")
 	var anonymousMarking: JBoolean = _
-	var cm2Assignment: JBoolean = false
+	def cm2Assignment: Boolean = features.cm2 && Option(markingWorkflow).isEmpty
 
 	var genericFeedback: String = ""
 

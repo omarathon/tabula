@@ -16,7 +16,7 @@ trait FeedbackReleasedNotifier extends Notifies[Seq[AssignmentFeedback], Seq[Mar
 		// emit notifications to each marker that has new feedback
 		val markerMap : Map[String, Seq[MarkerFeedback]] = newReleasedFeedback.asScala.groupBy(_.marker.getUserId)
 
-		markerMap.map{ case (usercode, markerFeedback) =>
+		markerMap.map{ case (usercode, markerFeedback) if markerFeedback.nonEmpty =>
 			val notification = Notification.init(new ReleaseToMarkerNotification, user, markerFeedback, assignment)
 			notification.recipientUserId = usercode
 			notification

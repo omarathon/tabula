@@ -25,11 +25,11 @@ abstract class AbstractAssignmentSubmissionsController extends AbstractAssignmen
 			.crumbsList(Breadcrumbs.assignment(assignment))
 	}
 
-	def submit(cmd: ModifyAssignmentSubmissionsCommand, errors: Errors, path: String, mode: String): Mav = {
+	def submit(cmd: ModifyAssignmentSubmissionsCommand, errors: Errors, mav: Mav, mode: String): Mav = {
 		if (errors.hasErrors) showForm(cmd, mode)
 		else {
 			cmd.apply()
-			RedirectForce(path)
+			mav
 		}
 	}
 
@@ -43,7 +43,7 @@ class ModifyAssignmentSubmissionsController extends AbstractAssignmentSubmission
 
 	@RequestMapping(method = Array(GET), value = Array("/new/submissions"))
 	def form(
-		@PathVariable("assignment") assignment: Assignment,
+		@PathVariable assignment: Assignment,
 		@ModelAttribute("command") cmd: ModifyAssignmentSubmissionsCommand
 	): Mav = {
 		cmd.populate()
@@ -53,7 +53,7 @@ class ModifyAssignmentSubmissionsController extends AbstractAssignmentSubmission
 
 	@RequestMapping(method = Array(GET), value = Array("/edit/submissions"))
 	def formEdit(
-		@PathVariable("assignment") assignment: Assignment,
+		@PathVariable assignment: Assignment,
 		@ModelAttribute("command") cmd: ModifyAssignmentSubmissionsCommand
 	): Mav = {
 		cmd.populate()
@@ -62,19 +62,19 @@ class ModifyAssignmentSubmissionsController extends AbstractAssignmentSubmission
 
 	@RequestMapping(method = Array(POST), value = Array("/new/submissions"), params = Array(ManageAssignmentMappingParameters.createAndAddOptions, "action!=refresh", "action!=update"))
 	def submitAndAddSubmissions(@ModelAttribute("command") cmd: ModifyAssignmentSubmissionsCommand, errors: Errors, @PathVariable assignment: Assignment): Mav =
-		submit(cmd, errors, Routes.admin.assignment.createOrEditOptions(assignment, createMode), createMode)
+		submit(cmd, errors, RedirectForce(Routes.admin.assignment.createOrEditOptions(assignment, createMode)), createMode)
 
 	@RequestMapping(method = Array(POST), value = Array("/new/submissions"), params = Array(ManageAssignmentMappingParameters.createAndAddSubmissions, "action!=refresh", "action!=update"))
-	def saveAndExit(@ModelAttribute("command") cmd: ModifyAssignmentSubmissionsCommand, errors: Errors): Mav =
-		submit(cmd, errors, Routes.home, createMode)
+	def saveAndExit(@ModelAttribute("command") cmd: ModifyAssignmentSubmissionsCommand, errors: Errors, @PathVariable assignment: Assignment): Mav =
+		submit(cmd, errors, Redirect(Routes.admin.assignment.submissionsandfeedback(assignment)), createMode)
 
 
 	@RequestMapping(method = Array(POST), value = Array("/edit/submissions"), params = Array(ManageAssignmentMappingParameters.editAndAddOptions, "action!=refresh", "action!=update"))
 	def submitAndAddSubmissionsForEdit(@ModelAttribute("command") cmd: ModifyAssignmentSubmissionsCommand, errors: Errors, @PathVariable assignment: Assignment): Mav =
-		submit(cmd, errors, Routes.admin.assignment.createOrEditOptions(assignment, editMode), editMode)
+		submit(cmd, errors, RedirectForce(Routes.admin.assignment.createOrEditOptions(assignment, editMode)), editMode)
 
 	@RequestMapping(method = Array(POST), value = Array("/edit/submissions"), params = Array(ManageAssignmentMappingParameters.editAndAddSubmissions, "action!=refresh", "action!=update"))
-	def saveAndExitForEdit(@ModelAttribute("command") cmd: ModifyAssignmentSubmissionsCommand, errors: Errors): Mav =
-		submit(cmd, errors, Routes.home, editMode)
+	def saveAndExitForEdit(@ModelAttribute("command") cmd: ModifyAssignmentSubmissionsCommand, errors: Errors, @PathVariable assignment: Assignment): Mav =
+		submit(cmd, errors, Redirect(Routes.admin.assignment.submissionsandfeedback(assignment)), editMode)
 
 }

@@ -1,13 +1,11 @@
 <#import "*/modal_macros.ftl" as modal />
 <#import "*/cm2_macros.ftl" as cm2 />
 <#escape x as x?html>
-	<@cm2.headerMenu department />
-
 	<#function route_function dept>
 		<#local result><@routes.cm2.feedbacktemplates dept /></#local>
 		<#return result />
 	</#function>
-	<@fmt.id7_deptheader "Feedback templates" route_function "in" />
+	<@cm2.departmentHeader "Feedback templates" department route_function />
 
 	<#assign actionUrl><@routes.cm2.feedbacktemplates department /></#assign>
 	<@f.form enctype="multipart/form-data"

@@ -94,7 +94,6 @@ class AddSitsAssignmentsCommandInternal(val department: Department, val academic
 			assignment.openDate = item.openDate
 			assignment.closeDate = item.closeDate
 			assignment.workflowCategory = Some(WorkflowCategory.NotDecided)
-			assignment.cm2Assignment = true
 
 			// validation should have verified that there is an options set for us to use
 			val options = optionsMap.get(item.optionsId)

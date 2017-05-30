@@ -27,7 +27,7 @@ class StopMarkingNotification
 
 	def title: String = "%s: Marking has been stopped for \"%s\"".format(assignment.module.code.toUpperCase, assignment.name)
 
-	def content = FreemarkerModel(ReleaseToMarkerNotification.templateLocation,
+	def content = FreemarkerModel(StopMarkingNotification.templateLocation,
 		Map(
 			"assignment" -> assignment,
 			"numStoppedFeedbacks" -> items.size

@@ -24,7 +24,6 @@
 				</li>
 			</#list>
 		</#if>
-			<li role="presentation"><a href="#${student.userId}${command.stage.name}history" aria-controls="history" role="tab" data-toggle="tab">Submission history</a></li>
 		</ul>
 		<div class="tab-content">
 		<#if command.assignment.collectSubmissions>
@@ -33,7 +32,6 @@
 		<#if command.previousMarkerFeedback?has_content>
 			<#include "_previous_feedback.ftl" />
 		</#if>
-			<div role="tabpanel" class="tab-pane" id="${student.userId}${command.stage.name}history">TODO<#--FIXME - add submission history --></div>
 		</div>
 	</div>
 	<#if command.currentMarkerFeedback?has_content>

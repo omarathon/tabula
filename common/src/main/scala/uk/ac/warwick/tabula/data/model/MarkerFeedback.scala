@@ -16,6 +16,7 @@ import uk.ac.warwick.spring.Wire
 import uk.ac.warwick.tabula.data.HibernateHelpers
 import uk.ac.warwick.tabula.data.model.markingworkflow.MarkingWorkflowStage
 import uk.ac.warwick.tabula.services.UserLookupService
+import scala.collection.JavaConverters._
 
 @Entity @Access(AccessType.FIELD)
 class MarkerFeedback extends GeneratedId with FeedbackAttachments with ToEntityReference with CanBeDeleted with CM1MarkerFeedbackSupport {
@@ -63,6 +64,11 @@ class MarkerFeedback extends GeneratedId with FeedbackAttachments with ToEntityR
 	@Column(name = "uploaded_date")
 	var uploadedDate: DateTime = new DateTime
 
+	// initially starts as null - if the marker makes any changes then this is set
+	// allows us to distinguish between feedback that has been approved (copied from the previous stage) and feedback that has been modified
+	@Column(name = "updated_on")
+	var updatedOn: DateTime = null
+
 	@Type(`type` = "uk.ac.warwick.tabula.data.model.OptionIntegerUserType")
 	var mark: Option[Int] = None
 
@@ -90,9 +96,18 @@ class MarkerFeedback extends GeneratedId with FeedbackAttachments with ToEntityR
 	@OneToMany(mappedBy = "markerFeedback", cascade = Array(ALL))
 	var customFormValues: JSet[SavedFormValue] = JHashSet()
 
+	def clearCustomFormValues(): Unit = {
+		customFormValues.asScala.foreach { v =>
+			v.markerFeedback = null
+		}
+		customFormValues.clear()
+	}
+
 	def getValue(field: FormField): Option[SavedFormValue] = {
 		customFormValues.find( _.name == field.name )
 	}
+
+	def hasBeenModified: Boolean = updatedOn != null
 
 	def hasContent: Boolean = hasMarkOrGrade || hasFeedbackOrComments
 
