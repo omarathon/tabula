@@ -93,63 +93,6 @@ object Routes {
 			def createOrEditOptions(assignment: Assignment, createOrEditMode: String): String = admin() + s"/assignments/${encoded(assignment.id)}/${encoded(createOrEditMode)}/options"
 			def reviewAssignment(assignment: Assignment): String = admin()  + s"/assignments/${encoded(assignment.id)}/review"
 
-			private def markerroot(assignment: Assignment, marker: User) = assignmentroot(assignment) + s"/marker/${marker.getWarwickId}"
-
-			object markerFeedback {
-				def apply(assignment: Assignment, marker: User): String = markerroot(assignment, marker) + "/list"
-				object complete {
-					def apply(assignment: Assignment, marker: User): String = markerroot(assignment, marker) + "/marking-completed"
-				}
-				object uncomplete {
-					def apply(assignment: Assignment, marker: User): String = markerroot(assignment, marker) + "/marking-uncompleted"
-					def apply(assignment: Assignment, marker: User, previousRole: String): String = markerroot(assignment, marker) + "/marking-uncompleted?previousStageRole="+previousRole
-				}
-				object bulkApprove {
-					def apply(assignment: Assignment, marker: User): String = markerroot(assignment, marker) + "/moderation/bulk-approve"
-				}
-				object marksTemplate {
-					def apply(assignment: Assignment, marker: User): String = markerroot(assignment, marker) + "/marks-template"
-				}
-				object onlineFeedback {
-					def apply(assignment: Assignment, marker: User): String = markerroot(assignment, marker) + "/feedback/online"
-
-					object student {
-						def apply(assignment: Assignment, marker: User, student: User): String =
-							markerroot(assignment, marker) + s"/feedback/online/${student.getUserId}/"
-					}
-					object moderation {
-						def apply(assignment: Assignment, marker: User, student: User): String =
-							markerroot(assignment, marker) + s"/feedback/online/moderation/${student.getUserId}/"
-					}
-				}
-				object marks {
-					def apply(assignment: Assignment, marker: User): String = markerroot(assignment, marker) + "/marks"
-				}
-				object feedback {
-					def apply(assignment: Assignment, marker: User): String = markerroot(assignment, marker) + "/feedback"
-				}
-				object submissions {
-					def apply(assignment: Assignment, marker: User): String = markerroot(assignment, marker) + "/submissions.zip"
-				}
-				object downloadFeedback {
-					object marker {
-						def apply(assignment: Assignment, marker: User, feedbackId: String, filename: String): String =
-							markerroot(assignment, marker) + s"/feedback/download/$feedbackId/$filename"
-					}
-
-					object all {
-						def apply(assignment: Assignment, marker: User, markerFeedback: String): String = markerroot(assignment, marker) + s"/feedback/download/$markerFeedback/attachments/"
-					}
-
-					object one {
-						def apply(assignment: Assignment, marker: User, markerFeedback: String, filename: String): String = markerroot(assignment, marker) + s"/feedback/download/$markerFeedback/attachment/$filename"
-					}
-				}
-				object returnsubmissions {
-					def apply(assignment: Assignment): String = assignmentroot(assignment) + "/submissionsandfeedback/return-submissions"
-				}
-			}
-
 			private def assignmentroot(assignment: Assignment) = admin() + s"/assignments/${encoded(assignment.id)}"
 
 			object feedbackAdjustment {

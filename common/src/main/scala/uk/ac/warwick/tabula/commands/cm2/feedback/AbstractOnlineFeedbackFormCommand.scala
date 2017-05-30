@@ -12,7 +12,7 @@ import uk.ac.warwick.userlookup.User
 
 import scala.util.Try
 
-abstract class AbstractOnlineFeedbackFormCommand(val module: Module, val assignment: Assignment, val student: User, val marker: User, val gradeGenerator: GeneratesGradesFromMarks)
+abstract class AbstractOnlineFeedbackFormCommand(val assignment: Assignment, val student: User, val marker: User, val gradeGenerator: GeneratesGradesFromMarks)
 	extends OnlineFeedbackState with OnlineFeedbackStudentState with SubmissionState with BindListener with SelfValidating with ProfileServiceComponent {
 
 	def submission: Option[Submission] = assignment.findSubmission(student.getUserId)

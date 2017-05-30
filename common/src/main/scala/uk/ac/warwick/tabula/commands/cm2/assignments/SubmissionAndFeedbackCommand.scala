@@ -5,7 +5,7 @@ import uk.ac.warwick.tabula.JavaImports._
 import uk.ac.warwick.tabula.commands._
 import uk.ac.warwick.tabula.commands.cm2.assignments.SubmissionAndFeedbackCommand._
 import uk.ac.warwick.tabula.commands.cm2.feedback.ListFeedbackCommand
-import uk.ac.warwick.tabula.commands.cm2.feedback.ListFeedbackCommand.ListFeedbackResult
+import uk.ac.warwick.tabula.commands.cm2.feedback.ListFeedbackCommand._
 import uk.ac.warwick.tabula.data.model._
 import uk.ac.warwick.tabula.helpers.StringUtils._
 import uk.ac.warwick.tabula.helpers.cm2.SubmissionAndFeedbackInfoFilters.OverlapPlagiarismFilter

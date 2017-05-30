@@ -25,8 +25,8 @@ object PublishFeedbackCommand {
 		badEmails: Seq[BadEmail] = Nil
 	)
 
-def apply(module: Module, assignment: Assignment, submitter: CurrentUser, gradeGenerator: GeneratesGradesFromMarks) =
-	new PublishFeedbackCommandInternal(module, assignment, submitter, gradeGenerator)
+def apply(assignment: Assignment, submitter: CurrentUser, gradeGenerator: GeneratesGradesFromMarks) =
+	new PublishFeedbackCommandInternal(assignment, submitter, gradeGenerator)
 		with ComposableCommand[PublishFeedbackCommand.PublishFeedbackResults]
 		with AutowiringFeedbackServiceComponent
 		with AutowiringFeedbackForSitsServiceComponent
@@ -39,7 +39,7 @@ def apply(module: Module, assignment: Assignment, submitter: CurrentUser, gradeG
 		with QueuesFeedbackForSits
 }
 
-class PublishFeedbackCommandInternal(val module: Module, val assignment: Assignment, val submitter: CurrentUser, val gradeGenerator: GeneratesGradesFromMarks)
+class PublishFeedbackCommandInternal(val assignment: Assignment, val submitter: CurrentUser, val gradeGenerator: GeneratesGradesFromMarks)
 	extends CommandInternal[PublishFeedbackCommand.PublishFeedbackResults]{
 
 	self: PublishFeedbackCommandState with QueuesFeedbackForSits =>
@@ -119,7 +119,6 @@ trait PublishFeedbackCommandState {
 
 	self: FeedbackServiceComponent with FeedbackForSitsServiceComponent =>
 
-	val module: Module
 	val assignment: Assignment
 	val submitter: CurrentUser
 	val gradeGenerator: GeneratesGradesFromMarks
@@ -158,8 +157,7 @@ trait PublishFeedbackPermissions extends RequiresPermissionsChecking with Permis
 	self: PublishFeedbackCommandState =>
 
 	override def permissionsCheck(p: PermissionsChecking) {
-		p.mustBeLinked(mandatory(assignment), mandatory(module))
-		p.PermissionCheck(Permissions.AssignmentFeedback.Publish, assignment)
+		p.PermissionCheck(Permissions.AssignmentFeedback.Publish, mandatory(assignment))
 	}
 }
 
@@ -176,8 +174,9 @@ trait PublishFeedbackValidation extends SelfValidating {
 }
 
 trait PublishFeedbackDescription extends Describable[PublishFeedbackCommand.PublishFeedbackResults] {
-
 	self: PublishFeedbackCommandState with FeedbackServiceComponent =>
+
+	override val eventName: String = "PublishFeedback"
 
 	override def describe(d: Description) {
 		val students = feedbackToRelease map { case(_, user, _) => user }

@@ -11,11 +11,11 @@ import uk.ac.warwick.userlookup.User
 
 import scala.collection.JavaConverters._
 
-object Cm2FeedbackAdjustmentListCommand {
+object FeedbackAdjustmentListCommand {
 	def apply(assessment: Assessment) =
-		new Cm2FeedbackAdjustmentListCommandInternal(assessment)
+		new FeedbackAdjustmentListCommandInternal(assessment)
 			with ComposableCommand[Seq[StudentInfo]]
-			with Cm2FeedbackAdjustmentListCommandPermissions
+			with FeedbackAdjustmentListCommandPermissions
 			with AutowiringUserLookupComponent
 			with AutowiringAssessmentMembershipServiceComponent
 			with Unaudited
@@ -24,8 +24,8 @@ object Cm2FeedbackAdjustmentListCommand {
 
 case class StudentInfo(student: User, feedback: Option[Feedback])
 
-class Cm2FeedbackAdjustmentListCommandInternal(val assessment: Assessment)
-	extends CommandInternal[Seq[StudentInfo]] with Cm2FeedbackAdjustmentListCommandState {
+class FeedbackAdjustmentListCommandInternal(val assessment: Assessment)
+	extends CommandInternal[Seq[StudentInfo]] with FeedbackAdjustmentListCommandState {
 
 	self: UserLookupComponent with AssessmentMembershipServiceComponent =>
 
@@ -48,13 +48,13 @@ class Cm2FeedbackAdjustmentListCommandInternal(val assessment: Assessment)
 	}
 }
 
-trait Cm2FeedbackAdjustmentListCommandState {
+trait FeedbackAdjustmentListCommandState {
 	def assessment: Assessment
 	var students: JList[String] = JArrayList()
 }
 
-trait Cm2FeedbackAdjustmentListCommandPermissions extends RequiresPermissionsChecking with PermissionsCheckingMethods {
-	self: Cm2FeedbackAdjustmentListCommandState =>
+trait FeedbackAdjustmentListCommandPermissions extends RequiresPermissionsChecking with PermissionsCheckingMethods {
+	self: FeedbackAdjustmentListCommandState =>
 	override def permissionsCheck(p: PermissionsChecking) {
 		HibernateHelpers.initialiseAndUnproxy(mandatory(assessment)) match {
 			case assignment: Assignment =>

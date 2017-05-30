@@ -2,7 +2,7 @@ package uk.ac.warwick.tabula.commands.coursework.assignments
 
 import uk.ac.warwick.tabula.CurrentUser
 import uk.ac.warwick.tabula.commands.{Command, Description, Notifies}
-import uk.ac.warwick.tabula.data.model.notifications.cm2.RequestAssignmentAccessNotification
+import uk.ac.warwick.tabula.data.model.notifications.coursework.OldRequestAssignmentAccessNotification
 import uk.ac.warwick.tabula.data.model.{Assignment, Module, Notification}
 import uk.ac.warwick.tabula.helpers.StringUtils._
 import uk.ac.warwick.tabula.helpers.UnicodeEmails
@@ -31,7 +31,7 @@ class RequestAssignmentAccessCommand(module: Module, assignment: Assignment, use
 		d.assignment(assignment)
 	}
 
-	def emit(admins: Seq[User]): Seq[RequestAssignmentAccessNotification] = {
-		Seq(Notification.init(new RequestAssignmentAccessNotification, user.apparentUser, Seq(assignment)))
+	def emit(admins: Seq[User]): Seq[OldRequestAssignmentAccessNotification] = {
+		Seq(Notification.init(new OldRequestAssignmentAccessNotification, user.apparentUser, Seq(assignment)))
 	}
 }

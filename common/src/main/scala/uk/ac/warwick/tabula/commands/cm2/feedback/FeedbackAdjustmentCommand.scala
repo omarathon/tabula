@@ -5,7 +5,7 @@ import org.springframework.validation.Errors
 import uk.ac.warwick.tabula.commands._
 import uk.ac.warwick.tabula.data.HibernateHelpers
 import uk.ac.warwick.tabula.data.model._
-import uk.ac.warwick.tabula.data.model.notifications.cm2.{Cm2FeedbackAdjustmentNotification, Cm2StudentFeedbackAdjustmentNotification}
+import uk.ac.warwick.tabula.data.model.notifications.cm2.{FeedbackAdjustmentNotification, StudentFeedbackAdjustmentNotification}
 import uk.ac.warwick.tabula.helpers.StringUtils._
 import uk.ac.warwick.tabula.permissions.Permissions
 import uk.ac.warwick.tabula.services._
@@ -15,16 +15,16 @@ import uk.ac.warwick.userlookup.User
 
 import scala.collection.JavaConverters._
 
-object Cm2FeedbackAdjustmentCommand {
+object FeedbackAdjustmentCommand {
 
 	final val REASON_SIZE_LIMIT = 600
 
 	def apply(assignment: Assessment, student:User, submitter: CurrentUser, gradeGenerator: GeneratesGradesFromMarks) =
-		new Cm2FeedbackAdjustmentCommandInternal(assignment, student, submitter, gradeGenerator)
+		new FeedbackAdjustmentCommandInternal(assignment, student, submitter, gradeGenerator)
 			with ComposableCommand[Feedback]
-			with Cm2FeedbackAdjustmentCommandPermissions
-			with Cm2FeedbackAdjustmentCommandDescription
-			with Cm2FeedbackAdjustmentCommandValidation
+			with FeedbackAdjustmentCommandPermissions
+			with FeedbackAdjustmentCommandDescription
+			with FeedbackAdjustmentCommandValidation
 			with FeedbackAdjustmentNotifier
 			with AutowiringFeedbackServiceComponent
 			with AutowiringZipServiceComponent
@@ -32,16 +32,16 @@ object Cm2FeedbackAdjustmentCommand {
 			with QueuesFeedbackForSits
 }
 
-object Cm2AssignmentFeedbackAdjustmentCommand {
+object AssignmentFeedbackAdjustmentCommand {
 
 	final val REASON_SIZE_LIMIT = 600
 
 	def apply(thisAssignment: Assignment, student:User, submitter: CurrentUser, gradeGenerator: GeneratesGradesFromMarks) =
-		new Cm2FeedbackAdjustmentCommandInternal(thisAssignment, student, submitter, gradeGenerator)
+		new FeedbackAdjustmentCommandInternal(thisAssignment, student, submitter, gradeGenerator)
 			with ComposableCommand[Feedback]
-			with Cm2FeedbackAdjustmentCommandPermissions
-			with Cm2FeedbackAdjustmentCommandDescription
-			with Cm2FeedbackAdjustmentCommandValidation
+			with FeedbackAdjustmentCommandPermissions
+			with FeedbackAdjustmentCommandDescription
+			with FeedbackAdjustmentCommandValidation
 			with FeedbackAdjustmentNotifier
 			with AutowiringFeedbackServiceComponent
 			with AutowiringZipServiceComponent
@@ -54,8 +54,8 @@ object Cm2AssignmentFeedbackAdjustmentCommand {
 			}
 }
 
-class Cm2FeedbackAdjustmentCommandInternal(val assessment: Assessment, val student:User, val submitter: CurrentUser, val gradeGenerator: GeneratesGradesFromMarks)
-	extends CommandInternal[Feedback] with Cm2FeedbackAdjustmentCommandState {
+class FeedbackAdjustmentCommandInternal(val assessment: Assessment, val student:User, val submitter: CurrentUser, val gradeGenerator: GeneratesGradesFromMarks)
+	extends CommandInternal[Feedback] with FeedbackAdjustmentCommandState {
 
 	self: FeedbackServiceComponent with ZipServiceComponent with QueuesFeedbackForSits =>
 
@@ -96,12 +96,12 @@ class Cm2FeedbackAdjustmentCommandInternal(val assessment: Assessment, val stude
 
 }
 
-trait Cm2FeedbackAdjustmentCommandValidation extends SelfValidating {
-	self: Cm2FeedbackAdjustmentCommandState =>
+trait FeedbackAdjustmentCommandValidation extends SelfValidating {
+	self: FeedbackAdjustmentCommandState =>
 	def validate(errors: Errors) {
 		if (!reason.hasText)
 			errors.rejectValue("reason", "feedback.adjustment.reason.empty")
-		else if(reason.length > Cm2FeedbackAdjustmentCommand.REASON_SIZE_LIMIT)
+		else if(reason.length > FeedbackAdjustmentCommand.REASON_SIZE_LIMIT)
 			errors.rejectValue("reason", "feedback.adjustment.reason.tooBig")
 		if (!comments.hasText) errors.rejectValue("comments", "feedback.adjustment.comments.empty")
 		// validate mark (must be int between 0 and 100)
@@ -133,7 +133,7 @@ trait Cm2FeedbackAdjustmentCommandValidation extends SelfValidating {
 	}
 }
 
-trait Cm2FeedbackAdjustmentCommandState {
+trait FeedbackAdjustmentCommandState {
 	val assessment: Assessment
 	val student: User
 	val feedback: Feedback
@@ -152,8 +152,8 @@ trait Cm2FeedbackAdjustmentCommandState {
 	var sendToSits: Boolean = false
 }
 
-trait Cm2FeedbackAdjustmentCommandPermissions extends RequiresPermissionsChecking with PermissionsCheckingMethods {
-	self: Cm2FeedbackAdjustmentCommandState =>
+trait FeedbackAdjustmentCommandPermissions extends RequiresPermissionsChecking with PermissionsCheckingMethods {
+	self: FeedbackAdjustmentCommandState =>
 	override def permissionsCheck(p: PermissionsChecking) {
 		HibernateHelpers.initialiseAndUnproxy(mandatory(assessment)) match {
 			case assignment: Assignment =>
@@ -164,8 +164,8 @@ trait Cm2FeedbackAdjustmentCommandPermissions extends RequiresPermissionsCheckin
 	}
 }
 
-trait Cm2FeedbackAdjustmentCommandDescription extends Describable[Feedback] {
-	self: Cm2FeedbackAdjustmentCommandState =>
+trait FeedbackAdjustmentCommandDescription extends Describable[Feedback] {
+	self: FeedbackAdjustmentCommandState =>
 	def describe(d: Description) {
 		d.assessment(assessment)
 		d.studentIds(Option(student.getWarwickId).toSeq)
@@ -176,18 +176,18 @@ trait Cm2FeedbackAdjustmentCommandDescription extends Describable[Feedback] {
 }
 
 trait FeedbackAdjustmentNotifier extends Notifies[Feedback, Feedback] {
-	self: Cm2FeedbackAdjustmentCommandState =>
+	self: FeedbackAdjustmentCommandState =>
 
 		def emit(feedback: Feedback): Seq[NotificationWithTarget[AssignmentFeedback, Assignment] with SingleItemNotification[AssignmentFeedback] with AutowiringUserLookupComponent] = {
 			HibernateHelpers.initialiseAndUnproxy(feedback) match {
 				case assignmentFeedback: AssignmentFeedback =>
 					val studentsNotifications = if (assignmentFeedback.released) {
-						Seq(Notification.init(new Cm2StudentFeedbackAdjustmentNotification, submitter.apparentUser, assignmentFeedback, assignmentFeedback.assignment))
+						Seq(Notification.init(new StudentFeedbackAdjustmentNotification, submitter.apparentUser, assignmentFeedback, assignmentFeedback.assignment))
 					} else {
 						Nil
 					}
 					val adminsNotifications = if (assessment.hasWorkflow) {
-						Seq(Notification.init(new Cm2FeedbackAdjustmentNotification, submitter.apparentUser, assignmentFeedback, assignmentFeedback.assignment))
+						Seq(Notification.init(new FeedbackAdjustmentNotification, submitter.apparentUser, assignmentFeedback, assignmentFeedback.assignment))
 					} else {
 						Nil
 					}

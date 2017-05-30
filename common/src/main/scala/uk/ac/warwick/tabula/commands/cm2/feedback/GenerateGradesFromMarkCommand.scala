@@ -38,9 +38,10 @@ class GenerateGradesFromMarkCommandInternal(val assessment: Assessment)
 				intString.toInt
 				true
 			} catch {
-				case _ @ (_: NumberFormatException | _: IllegalArgumentException) =>
+				case _@(_: NumberFormatException | _: IllegalArgumentException) =>
 					false
 			}
+		}
 	}
 
 	override def applyInternal(): Map[String, Seq[GradeBoundary]] = {

@@ -8,17 +8,17 @@ import uk.ac.warwick.tabula.data.model._
 import uk.ac.warwick.tabula.commands._
 import uk.ac.warwick.tabula.services._
 import uk.ac.warwick.tabula.JavaImports._
-import uk.ac.warwick.tabula.data.model.forms.{StringFormValue, SavedFormValue, FormValue}
+import uk.ac.warwick.tabula.data.model.forms.{FormValue, SavedFormValue, StringFormValue}
 import uk.ac.warwick.tabula.data.{AutowiringSavedFormValueDaoComponent, SavedFormValueDaoComponent}
 import uk.ac.warwick.tabula.helpers.StringUtils._
-import uk.ac.warwick.tabula.system.permissions.{PermissionsChecking, RequiresPermissionsChecking}
+import uk.ac.warwick.tabula.system.permissions.{PermissionsChecking, PermissionsCheckingMethods, RequiresPermissionsChecking}
 import uk.ac.warwick.tabula.permissions.Permissions
 import uk.ac.warwick.userlookup.User
 
 
 object OnlineFeedbackFormCommand {
-	def apply(module: Module, assignment: Assignment, student: User, marker: User, submitter: CurrentUser, gradeGenerator: GeneratesGradesFromMarks) =
-		new OnlineFeedbackFormCommand(module, assignment, student, marker, submitter, gradeGenerator)
+	def apply(assignment: Assignment, student: User, marker: User, submitter: CurrentUser, gradeGenerator: GeneratesGradesFromMarks) =
+		new OnlineFeedbackFormCommand(assignment, student, marker, submitter, gradeGenerator)
 			with ComposableCommand[Feedback]
 			with OnlineFeedbackFormPermissions
 			with AutowiringFeedbackServiceComponent
@@ -32,13 +32,12 @@ object OnlineFeedbackFormCommand {
 }
 
 abstract class OnlineFeedbackFormCommand(
-	module: Module,
 	assignment: Assignment,
 	student: User,
 	marker: User,
 	val submitter: CurrentUser,
 	gradeGenerator: GeneratesGradesFromMarks
-) extends AbstractOnlineFeedbackFormCommand(module, assignment, student, marker, gradeGenerator) with CommandInternal[Feedback] with Appliable[Feedback] {
+) extends AbstractOnlineFeedbackFormCommand(assignment, student, marker, gradeGenerator) with CommandInternal[Feedback] with Appliable[Feedback] {
 
 	self: FeedbackServiceComponent with SavedFormValueDaoComponent with FileAttachmentServiceComponent with ZipServiceComponent =>
 
@@ -201,14 +200,12 @@ trait WriteToFormFields {
 
 }
 
-trait OnlineFeedbackFormPermissions extends RequiresPermissionsChecking {
-
+trait OnlineFeedbackFormPermissions extends RequiresPermissionsChecking with PermissionsCheckingMethods {
 	self: OnlineFeedbackState =>
 
 	def permissionsCheck(p: PermissionsChecking) {
-		p.mustBeLinked(assignment, module)
-		p.PermissionCheck(Permissions.AssignmentMarkerFeedback.Manage, assignment)
-		if(submitter.apparentUser != marker) {
+		p.PermissionCheck(Permissions.AssignmentMarkerFeedback.Manage, mandatory(assignment))
+		if (submitter.apparentUser != marker) {
 			p.PermissionCheck(Permissions.Assignment.MarkOnBehalf, assignment)
 		}
 	}
@@ -231,8 +228,7 @@ trait OnlineFeedbackStudentState {
 }
 
 trait OnlineFeedbackFormDescription[A] extends Describable[A] {
-
-	this: OnlineFeedbackState with OnlineFeedbackStudentState =>
+	self: OnlineFeedbackState with OnlineFeedbackStudentState =>
 
 	def describe(d: Description) {
 		d.studentIds(Option(student.getWarwickId).toSeq)
