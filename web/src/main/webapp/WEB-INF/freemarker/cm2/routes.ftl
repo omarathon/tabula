@@ -182,5 +182,4 @@ TODO grab values from the Routes object in code, as that's pretty equivalent and
 <#macro addMarks assignment><@_u page="/admin/assignments/${assignment.id}/marks" /></#macro>
 <#macro addFeedback assignment><@_u page="/admin/assignments/${assignment.id}/feedback/batch" /></#macro>
 
-<#macro feedbackTemplatesZip assignment><@_u page="/admin/assignments/${assignment.id}/feedback-templates.zip" /></#macro>
 <#macro feedbackDownload feedback attachmentExtension><@_u page="/admin/assignments/${feedback.assignment.id}/feedback/download/${feedback.id}/feedback-${feedback.studentIdentifier}.${attachmentExtension}" /></#macro>
