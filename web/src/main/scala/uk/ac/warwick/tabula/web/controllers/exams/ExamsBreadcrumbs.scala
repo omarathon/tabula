@@ -15,9 +15,14 @@ object ExamsBreadcrumbs {
 
 	object Exams {
 
-		case object Home extends Abstract {
+		case object HomeDefaultYear extends Abstract {
 			val title = "Manage Exams"
-			val url = Some(Routes.Exams.home)
+			val url = Some(Routes.Exams.homeDefaultYear)
+		}
+
+		case class Home(academicYear: AcademicYear) extends Abstract {
+			val title = "Manage Exams"
+			val url = Some(Routes.Exams.home(academicYear))
 		}
 
 		case class Department(department: model.Department, academicYear: AcademicYear) extends Abstract {

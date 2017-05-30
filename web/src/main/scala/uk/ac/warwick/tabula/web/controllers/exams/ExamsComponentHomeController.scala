@@ -22,7 +22,7 @@ class ExamsComponentHomeController extends ExamsController {
 		val examGridsEnabled = features.examGrids && user.isStaff
 
 		if (examsEnabled && !examGridsEnabled) {
-			Redirect(Routes.Exams.home)
+			Redirect(Routes.Exams.homeDefaultYear)
 		} else if (!examsEnabled && examGridsEnabled) {
 			Redirect(Routes.Grids.home)
 		} else {
@@ -31,7 +31,7 @@ class ExamsComponentHomeController extends ExamsController {
 				"examGridsEnabled" -> examGridsEnabled
 			).secondCrumbs(
 				(examsEnabled match {
-					case true => Seq(ExamsBreadcrumbs.Exams.Home)
+					case true => Seq(ExamsBreadcrumbs.Exams.HomeDefaultYear)
 					case false => Nil
 				}) ++
 				(examGridsEnabled match {
