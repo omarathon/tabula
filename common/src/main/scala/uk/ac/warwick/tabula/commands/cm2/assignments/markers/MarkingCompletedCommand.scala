@@ -43,7 +43,7 @@ class MarkingCompletedCommandInternal(val assignment: Assignment, val marker: Us
 
 		val toPopulate = newReleasedFeedback.asScala.filter(_.stage.populateWithPreviousFeedback)
 		if (toPopulate.nonEmpty) {
-			populateMarkerFeedback(assignment, toPopulate)OnlineMarkerFeedbackCommand
+			populateMarkerFeedback(assignment, toPopulate)
 		}
 
 		// finalise any feedback that has finished the workflow
