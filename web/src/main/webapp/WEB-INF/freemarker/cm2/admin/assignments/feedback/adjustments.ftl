@@ -121,7 +121,7 @@
 	</@form.row>
 <#assign gradeValidation = isGradeValidation?string('true', 'false') />
 	<div class="alert alert-info">
-		The reason for adjustment and any comments will be made available to students when their feedback is published. isGradeValidation: ${gradeValidation!""}
+		The reason for adjustment and any comments will be made available to students when their feedback is published.
 	</div>
 
 	<#if features.queueFeedbackForSits && assignment.module.adminDepartment.uploadCourseworkMarksToSits && command.canBeUploadedToSits>

@@ -11,8 +11,8 @@ import uk.ac.warwick.userlookup.User
 import scala.collection.JavaConverters._
 
 object GenerateGradesFromMarkCommand {
-	def apply(module: Module, assessment: Assessment) =
-		new GenerateGradesFromMarkCommandInternal(module, assessment)
+	def apply(assessment: Assessment) =
+		new GenerateGradesFromMarkCommandInternal(assessment)
 			with AutowiringAssessmentMembershipServiceComponent
 			with ComposableCommand[Map[String, Seq[GradeBoundary]]]
 			with GenerateGradesFromMarkPermissions
@@ -21,7 +21,7 @@ object GenerateGradesFromMarkCommand {
 			with ReadOnly with Unaudited
 }
 
-class GenerateGradesFromMarkCommandInternal(val module: Module, val assessment: Assessment)
+class GenerateGradesFromMarkCommandInternal(val assessment: Assessment)
 	extends CommandInternal[Map[String, Seq[GradeBoundary]]] with GeneratesGradesFromMarks {
 
 	self: GenerateGradesFromMarkCommandRequest with AssessmentMembershipServiceComponent =>
@@ -75,14 +75,12 @@ trait GenerateGradesFromMarkPermissions extends RequiresPermissionsChecking with
 	self: GenerateGradesFromMarkCommandState =>
 
 	override def permissionsCheck(p: PermissionsChecking) {
-		p.mustBeLinked(assessment, module)
 		p.PermissionCheck(Permissions.AssignmentMarkerFeedback.Manage, assessment)
 	}
 
 }
 
 trait GenerateGradesFromMarkCommandState {
-	def module: Module
 	def assessment: Assessment
 }
 

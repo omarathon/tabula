@@ -13,7 +13,7 @@
 <#macro row info>
 	<#assign u = info.student />
 	<tr data-toggle="collapse" data-target="#row-${markingId(u)}" class="clickable collapsed expandable-row">
-		<td class="student-col"><h6 class="toggle-icon">${u.firstName}</h6></td>
+		<td class="student-col"><h6 class="toggle-icon">&nbsp;${u.firstName}</h6></td>
 		<td class="student-col">
 			<h6>${u.lastName}&nbsp;<#if u.warwickId??><@pl.profile_link u.warwickId /><#else><@pl.profile_link u.userId /></#if></h6>
 		</td>

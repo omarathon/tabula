@@ -4,9 +4,9 @@ import org.springframework.validation.Errors
 import org.springframework.web.bind.annotation.ModelAttribute
 import uk.ac.warwick.tabula.commands.Appliable
 import uk.ac.warwick.tabula.commands.cm2.feedback.GenerateGradesFromMarkCommandRequest
-import uk.ac.warwick.tabula.data.model.{Assessment, Assignment, GradeBoundary, Module}
+import uk.ac.warwick.tabula.data.model.{Assessment, GradeBoundary}
 import uk.ac.warwick.tabula.web.Mav
-import uk.ac.warwick.tabula.web.controllers.AbstractGenerateGradeFromMarkController.GenerateGradesFromMarkCommand
+import uk.ac.warwick.tabula.web.controllers.cm2.AbstractGenerateGradeFromMarkController.GenerateGradesFromMarkCommand
 import uk.ac.warwick.tabula.web.controllers.BaseController
 
 import scala.collection.JavaConverters._
@@ -17,7 +17,7 @@ object AbstractGenerateGradeFromMarkController {
 
 abstract class AbstractGenerateGradeFromMarkController[A <: Assessment] extends BaseController {
 
-	def command(module: Module, assessment: A): GenerateGradesFromMarkCommand
+	def command(assessment: A): GenerateGradesFromMarkCommand
 
 	def defaultGrade(
 		universityId: String,

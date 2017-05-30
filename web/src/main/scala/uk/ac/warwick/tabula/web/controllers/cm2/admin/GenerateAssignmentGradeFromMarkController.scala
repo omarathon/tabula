@@ -12,7 +12,7 @@ import uk.ac.warwick.tabula.web.controllers.cm2.AbstractGenerateGradeFromMarkCon
 class GenerateAssignmentGradeFromMarkController extends AbstractGenerateGradeFromMarkController[Assignment] {
 
 	@ModelAttribute("command")
-	def command(module: Module, @PathVariable assignment: Assignment) =
-		GenerateGradesFromMarkCommand(mandatory(assignment).module, mandatory(assignment))
+	def command(@PathVariable assignment: Assignment) =
+		GenerateGradesFromMarkCommand(mandatory(assignment))
 
 }

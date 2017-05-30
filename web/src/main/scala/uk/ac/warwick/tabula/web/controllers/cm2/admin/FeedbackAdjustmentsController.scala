@@ -59,7 +59,7 @@ class FeedbackAdjustmentsController extends CourseworkController with Autowiring
 
 	@ModelAttribute("command")
 	def formCommand(@PathVariable assignment: Assignment, @PathVariable student: User, submitter: CurrentUser) =
-		Cm2AssignmentFeedbackAdjustmentCommand(mandatory(assignment), student, submitter, GenerateGradesFromMarkCommand(mandatory(assignment).module, mandatory(assignment)))
+		Cm2AssignmentFeedbackAdjustmentCommand(mandatory(assignment), student, submitter, GenerateGradesFromMarkCommand(mandatory(assignment)))
 
 	@RequestMapping(method=Array(GET))
 	def showForm(

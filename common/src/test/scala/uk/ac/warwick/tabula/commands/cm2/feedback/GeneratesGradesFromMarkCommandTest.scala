@@ -29,7 +29,7 @@ class GeneratesGradesFromMarkCommandTest extends TestBase with Mockito {
 
 		mockAssignmentMembershipService.determineMembershipUsers(assignment) returns Seq(studentUser)
 
-		val command = new GenerateGradesFromMarkCommandInternal(module, assignment) with CommandTestSupport {
+		val command = new GenerateGradesFromMarkCommandInternal(assignment) with CommandTestSupport {
 			val assessmentMembershipService: AssessmentMembershipService = mockAssignmentMembershipService
 		}
 	}
