@@ -52,7 +52,7 @@ class OnlineMarkerFeedbackCommandInternal(
 		)
 
 		copyTo(markerFeedback)
-		markerFeedback.uploadedDate = DateTime.now
+		markerFeedback.updatedOn = DateTime.now
 		feedbackService.save(markerFeedback)
 		markerFeedback
 	}
