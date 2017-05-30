@@ -84,12 +84,12 @@
 								</div>
 
 								<#-- One tab for each stage in the workflow; previous stages are active, incomplete stages are not -->
-								<#if assignment.cm2MarkingWorkflow??>
+								<#if assignment.cm2MarkingWorkflow?? && feedback??>
 									<#list assignment.cm2MarkingWorkflow.allStages as markingStage>
 										<#local incomplete = feedback?? && (feedback.notReleasedToMarkers || !feedback.isMarkedByStage(markingStage)) />
 										<div role="tabpanel" class="tab-pane" id="${identifier}-${markingStage.name}">
 											<#local markerFeedback = mapGet(feedback.feedbackByStage, markingStage) />
-											<@components.marker_feedback_summary markerFeedback markingStage />
+												<@components.marker_feedback_summary markerFeedback markingStage />
 										</div>
 									</#list>
 								</#if>

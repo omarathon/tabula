@@ -13,8 +13,8 @@ import uk.ac.warwick.tabula.data.model._
 import uk.ac.warwick.tabula.permissions._
 import org.springframework.validation.Errors
 
-class AddFeedbackCommand(module: Module, assignment: Assignment, marker: User, currentUser: CurrentUser)
-	extends UploadFeedbackCommand[Seq[Feedback]](module, assignment, marker) with Notifies[Seq[Feedback], Feedback] {
+class OldAddFeedbackCommand(module: Module, assignment: Assignment, marker: User, currentUser: CurrentUser)
+	extends OldUploadFeedbackCommand[Seq[Feedback]](module, assignment, marker) with Notifies[Seq[Feedback], Feedback] {
 
 	PermissionCheck(Permissions.AssignmentFeedback.Manage, assignment)
 
@@ -50,7 +50,7 @@ class AddFeedbackCommand(module: Module, assignment: Assignment, marker: User, c
 		}).toList.flatten
 	}
 
-	override def validateExisting(item: FeedbackItem, errors: Errors) {
+	override def validateExisting(item: OldFeedbackItem, errors: Errors) {
 		// warn if feedback for this student is already uploaded
 		assignment.feedbacks.find { feedback => feedback._universityId == item.uniNumber && feedback.hasAttachments } match {
 			case Some(feedback) =>
@@ -62,7 +62,7 @@ class AddFeedbackCommand(module: Module, assignment: Assignment, marker: User, c
 		}
 	}
 
-	private def checkForDuplicateFiles(item: FeedbackItem, feedback: Feedback){
+	private def checkForDuplicateFiles(item: OldFeedbackItem, feedback: Feedback){
 		case class duplicatePair(attached:FileAttachment, feedback:FileAttachment)
 
 		val attachmentNames = item.file.attached.map(_.name)

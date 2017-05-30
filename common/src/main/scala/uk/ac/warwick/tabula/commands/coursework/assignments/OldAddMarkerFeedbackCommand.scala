@@ -14,8 +14,8 @@ import uk.ac.warwick.tabula.permissions._
 import org.springframework.validation.Errors
 
 
-class AddMarkerFeedbackCommand(module: Module, assignment:Assignment, marker: User, val submitter: CurrentUser)
-	extends UploadFeedbackCommand[List[MarkerFeedback]](module, assignment, marker) with CanProxy {
+class OldAddMarkerFeedbackCommand(module: Module, assignment:Assignment, marker: User, val submitter: CurrentUser)
+	extends OldUploadFeedbackCommand[List[MarkerFeedback]](module, assignment, marker) with CanProxy {
 
 	PermissionCheck(Permissions.AssignmentMarkerFeedback.Manage, assignment)
 	if(submitter.apparentUser != marker) {
@@ -23,9 +23,9 @@ class AddMarkerFeedbackCommand(module: Module, assignment:Assignment, marker: Us
 	}
 
 	// list to contain feedback files that are not for a student you should be marking
-	var invalidStudents: JList[FeedbackItem] = LazyLists.create()
+	var invalidStudents: JList[OldFeedbackItem] = LazyLists.create()
 	// list to contain feedback files that are  for a student that has already been completed
-	var markedStudents: JList[FeedbackItem] = LazyLists.create()
+	var markedStudents: JList[OldFeedbackItem] = LazyLists.create()
 
 	val submissions: Seq[Submission] = assignment.getMarkersSubmissions(marker)
 
@@ -92,7 +92,7 @@ class AddMarkerFeedbackCommand(module: Module, assignment:Assignment, marker: Us
 		markerFeedbacks.toList
 	}
 
-	override def validateExisting(item: FeedbackItem, errors: Errors) {
+	override def validateExisting(item: OldFeedbackItem, errors: Errors) {
 
 		val usercode = item.student.map(_.getUserId)
 		val feedback = usercode.flatMap(u => assignment.feedbacks.find(_.usercode == u))
@@ -108,7 +108,7 @@ class AddMarkerFeedbackCommand(module: Module, assignment:Assignment, marker: Us
 		}
 	}
 
-	private def checkForDuplicateFiles(item: FeedbackItem, feedback: MarkerFeedback){
+	private def checkForDuplicateFiles(item: OldFeedbackItem, feedback: MarkerFeedback){
 		val attachedFiles = item.file.attachedFileNames.toSet
 		val feedbackFiles = feedback.attachments.map(file => file.getName).toSet
 		item.duplicateFileNames = attachedFiles & feedbackFiles
