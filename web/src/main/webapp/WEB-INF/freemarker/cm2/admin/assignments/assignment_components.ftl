@@ -117,7 +117,7 @@
 		tooltip="Edit students"
 		url=students_url />
 
-			<#if assignment.cm2Assignment && assignment.cm2MarkingWorkflow??>
+			<#if displayLink && assignment.cm2Assignment && assignment.cm2MarkingWorkflow??>
 				<#local markers_url><#if assignment.id??><@routes.cm2.assignmentmarkers assignment 'new' /></#if></#local>
 				<@wizard_link
 				label="Markers"
