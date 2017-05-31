@@ -274,7 +274,9 @@ trait CourseworkHomepageStudentAssignments extends TaskBenchmarking {
 	}
 
 	private lazy val studentActionRequiredAssignments: Seq[StudentAssignmentInformation] = benchmarkTask("Get action required assignments") {
-		allUnsubmittedAssignments.diff(studentUpcomingAssignments)
+		allUnsubmittedAssignments
+			.diff(studentUpcomingAssignments)
+			.filter(_.submittable)
 	}
 
 	private def hasEarlierEffectiveDate(ass1: StudentAssignmentInformation, ass2: StudentAssignmentInformation): Boolean = {
@@ -289,9 +291,17 @@ trait CourseworkHomepageStudentAssignments extends TaskBenchmarking {
 	}
 
 	lazy val studentNoActionRequiredAssignments: Seq[StudentAssignmentInformation] = benchmarkTask("Get in-progress assignments") {
-		assignmentsWithSubmission
-			.diff(assignmentsWithFeedback)
-			.map(enhance)
+		val submittedAwaitingFeedback =
+			assignmentsWithSubmission
+				.diff(assignmentsWithFeedback)
+				.map(enhance)
+
+		val unsubmittedAndUnsubmittable =
+			allUnsubmittedAssignments
+				.diff(studentUpcomingAssignments)
+				.diff(studentActionRequiredAssignments)
+
+		(submittedAwaitingFeedback ++ unsubmittedAndUnsubmittable)
 			.sortWith(hasEarlierEffectiveDate)
 	}
 
