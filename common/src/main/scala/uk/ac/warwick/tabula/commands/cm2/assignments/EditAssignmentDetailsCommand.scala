@@ -3,11 +3,11 @@ package uk.ac.warwick.tabula.commands.cm2.assignments
 import org.springframework.validation.Errors
 import uk.ac.warwick.tabula.AcademicYear
 import uk.ac.warwick.tabula.commands._
-import uk.ac.warwick.tabula.commands.cm2.markingworkflows.{CreatesMarkingWorkflow, EditMarkingWorkflowState}
+import uk.ac.warwick.tabula.commands.cm2.markingworkflows.{CreatesMarkingWorkflow, EditMarkingWorkflowState, ModifyMarkingWorkflowState, ModifyMarkingWorkflowValidation}
 import uk.ac.warwick.tabula.data.model._
 import uk.ac.warwick.tabula.data.model.markingworkflow.CM2MarkingWorkflow
 import uk.ac.warwick.tabula.permissions.Permissions
-import uk.ac.warwick.tabula.services._
+import uk.ac.warwick.tabula.services.{AssessmentServiceComponent, UserLookupComponent, _}
 import uk.ac.warwick.tabula.system.permissions.{PermissionsChecking, PermissionsCheckingMethods, RequiresPermissionsChecking}
 import uk.ac.warwick.tabula.JavaImports._
 
@@ -34,29 +34,30 @@ class EditAssignmentDetailsCommandInternal(override val assignment: Assignment) 
 	self: AssessmentServiceComponent with UserLookupComponent with CM2MarkingWorkflowServiceComponent =>
 
 	override def applyInternal(): Assignment = {
-		copyTo(assignment)
 
-		workflow.foreach(w => {
-			if(workflowType != null && w.workflowType != workflowType){
-				// delete the old workflow and make a new one with the new type
-				cm2MarkingWorkflowService.delete(w)
-				val data = MarkingWorkflowData(
-					department,
-					s"${module.code} ${assignment.name}",
-					markersAUsers,
-					markersBUsers,
-					workflowType
-				)
-				val workflow = createWorkflow(data)
-				workflow.isReusable = false
-				cm2MarkingWorkflowService.save(workflow)
-				assignment.cm2MarkingWorkflow = workflow
-
-			} else {
-				w.replaceMarkers(markersAUsers, markersBUsers)
-				cm2MarkingWorkflowService.save(w)
+		if(workflowCategory == WorkflowCategory.SingleUse) {
+			workflow.filterNot(_.isReusable) match {
+				// update any existing single use workflows
+				case Some(w) =>
+					if(workflowType != null && w.workflowType != workflowType){
+						// delete the old workflow and make a new one with the new type
+						cm2MarkingWorkflowService.delete(w)
+						createAndSaveSingleUseWorkflow(assignment)
+					} else {
+						w.replaceMarkers(markersAUsers, markersBUsers)
+						cm2MarkingWorkflowService.save(w)
+					}
+				// persist any new workflows
+				case _ => createAndSaveSingleUseWorkflow(assignment)
 			}
-		})
+		} else if(workflowCategory == WorkflowCategory.NoneUse) {
+			assignment.cm2MarkingWorkflow = null
+			workflow.filterNot(_.isReusable).foreach(cm2MarkingWorkflowService.delete)
+		} else if(workflowCategory == WorkflowCategory.Reusable) {
+			workflow.filterNot(_.isReusable).foreach(cm2MarkingWorkflowService.delete)
+		}
+
+		copyTo(assignment)
 
 		assessmentService.save(assignment)
 		assignment
@@ -68,7 +69,7 @@ class EditAssignmentDetailsCommandInternal(override val assignment: Assignment) 
 		openEndedReminderDate = assignment.openEndedReminderDate
 		closeDate = assignment.closeDate
 		workflowCategory = assignment.workflowCategory.getOrElse(WorkflowCategory.NotDecided)
-		reusableWorkflow = assignment.cm2MarkingWorkflow
+		reusableWorkflow = Option(assignment.cm2MarkingWorkflow).filter(_.isReusable).orNull
 		workflow.foreach(w => workflowType = w.workflowType)
 		extractMarkers match { case (a, b) =>
 			markersA = JArrayList(a)
@@ -90,8 +91,9 @@ trait EditAssignmentDetailsCommandState extends ModifyAssignmentDetailsCommandSt
 }
 
 
-trait EditAssignmentDetailsValidation extends ModifyAssignmentDetailsValidation {
-	self: EditAssignmentDetailsCommandState with BooleanAssignmentProperties with AssessmentServiceComponent =>
+trait EditAssignmentDetailsValidation extends ModifyAssignmentDetailsValidation with ModifyMarkingWorkflowValidation {
+	self: EditAssignmentDetailsCommandState with BooleanAssignmentProperties with AssessmentServiceComponent with ModifyMarkingWorkflowState
+		with UserLookupComponent =>
 
 	override def validate(errors: Errors): Unit = {
 		if (name != null && name.length < 3000) {

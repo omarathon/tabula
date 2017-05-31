@@ -46,17 +46,7 @@ class CreateAssignmentDetailsCommandInternal(val module: Module, val academicYea
     assignment.addDefaultFields()
     copyTo(assignment)
     if(workflowCategory == WorkflowCategory.SingleUse){
-      val data = MarkingWorkflowData(
-        department,
-        s"${module.code} ${assignment.name}",
-        markersAUsers,
-        markersBUsers,
-        workflowType
-      )
-      val workflow = createWorkflow(data)
-      workflow.isReusable = false
-      cm2MarkingWorkflowService.save(workflow)
-      assignment.cm2MarkingWorkflow = workflow
+      createAndSaveSingleUseWorkflow(assignment)
     }
     assessmentService.save(assignment)
     assignment
@@ -158,8 +148,9 @@ trait CreateAssignmentDetailsCommandState extends ModifyAssignmentDetailsCommand
   var prefillAssignment: Assignment = _
 }
 
-trait ModifyAssignmentDetailsValidation extends SelfValidating {
-  self: ModifyAssignmentDetailsCommandState with BooleanAssignmentProperties with AssessmentServiceComponent =>
+trait ModifyAssignmentDetailsValidation extends SelfValidating with ModifyMarkingWorkflowValidation {
+  self: ModifyAssignmentDetailsCommandState with BooleanAssignmentProperties with AssessmentServiceComponent with ModifyMarkingWorkflowState
+    with UserLookupComponent=>
 
   // validation shared between add and edit
   def genericValidate(errors: Errors): Unit = {
@@ -173,6 +164,15 @@ trait ModifyAssignmentDetailsValidation extends SelfValidating {
       } else if (openDate != null && openDate.isAfter(closeDate)) {
         errors.reject("closeDate.early")
       }
+    }
+
+    if(workflowCategory == WorkflowCategory.Reusable && reusableWorkflow == null){
+      errors.rejectValue("reusableWorkflow", "markingWorkflow.reusableWorkflow.none")
+    } else if (workflowCategory == WorkflowCategory.SingleUse) {
+      if (workflowType == null)
+        errors.rejectValue("workflowType", "markingWorkflow.workflowType.none")
+      else
+        markerValidation(errors, workflowType)
     }
   }
 }
@@ -189,15 +189,6 @@ trait CreateAssignmentDetailsValidation extends ModifyAssignmentDetailsValidatio
       for (duplicate <- duplicates.headOption) {
         errors.rejectValue("name", "name.duplicate.assignment", Array(name), "")
       }
-    }
-
-    if(workflowCategory == WorkflowCategory.Reusable && reusableWorkflow == null){
-      errors.rejectValue("reusableWorkflow", "markingWorkflow.reusableWorkflow.none")
-    } else if (workflowCategory == WorkflowCategory.SingleUse) {
-      if (workflowType == null)
-        errors.rejectValue("workflowType", "markingWorkflow.workflowType.none")
-      else
-        markerValidation(errors, workflowType)
     }
 
     genericValidate(errors)
