@@ -8,15 +8,14 @@ import uk.ac.warwick.tabula.commands.{Describable, Description, SelfValidating, 
 import uk.ac.warwick.tabula.data.SavedFormValueDaoComponent
 import uk.ac.warwick.tabula.data.model._
 import uk.ac.warwick.tabula.data.model.forms.{Extension, FormValue, SavedFormValue, StringFormValue}
-import uk.ac.warwick.tabula.services.{GeneratesGradesFromMarks, ProfileServiceComponent}
-import uk.ac.warwick.tabula.system.BindListener
-import uk.ac.warwick.userlookup.User
-
-import collection.JavaConverters._
 import uk.ac.warwick.tabula.helpers.StringUtils._
 import uk.ac.warwick.tabula.permissions.Permissions
-import uk.ac.warwick.tabula.system.permissions.{PermissionsChecking, RequiresPermissionsChecking}
+import uk.ac.warwick.tabula.services.{GeneratesGradesFromMarks, ProfileServiceComponent}
+import uk.ac.warwick.tabula.system.BindListener
+import uk.ac.warwick.tabula.system.permissions.{PermissionsChecking, PermissionsCheckingMethods, RequiresPermissionsChecking}
+import uk.ac.warwick.userlookup.User
 
+import scala.collection.JavaConverters._
 import scala.util.Try
 
 //FIXME - break out into cake ingredients
@@ -64,7 +63,7 @@ trait OnlineFeedbackCommand extends BindListener with SelfValidating {
 		}
 
 		// validate grade is department setting is true
-		if (!errors.hasErrors && grade.hasText && module.adminDepartment.assignmentGradeValidation) {
+		if (!errors.hasErrors && grade.hasText && assignment.module.adminDepartment.assignmentGradeValidation) {
 			val validGrades = Try(mark.toInt).toOption.toSeq.flatMap { m => gradeGenerator.applyForMarks(Map(student.getWarwickId -> m))(student.getWarwickId) }
 			if (validGrades.nonEmpty && !validGrades.exists(_.grade == grade)) {
 				errors.rejectValue("grade", "actualGrade.invalidSITS", Array(validGrades.map(_.grade).mkString(", ")), "")
@@ -125,13 +124,12 @@ trait WriteToFormFields {
 
 }
 
-trait OnlineFeedbackPermissions extends RequiresPermissionsChecking {
+trait OnlineFeedbackPermissions extends RequiresPermissionsChecking with PermissionsCheckingMethods {
 
 	self: OnlineFeedbackState =>
 
 	def permissionsCheck(p: PermissionsChecking) {
-		p.mustBeLinked(assignment, module)
-		p.PermissionCheck(Permissions.AssignmentMarkerFeedback.Manage, assignment)
+		p.PermissionCheck(Permissions.AssignmentMarkerFeedback.Manage, mandatory(assignment))
 		if(submitter.apparentUser != marker) {
 			p.PermissionCheck(Permissions.Assignment.MarkOnBehalf, assignment)
 		}
@@ -150,7 +148,6 @@ trait OnlineFeedbackDescription[A] extends Describable[A] {
 }
 
 trait OnlineFeedbackState {
-	def module: Module
 	def assignment: Assignment
 	def student: User
 	def marker: User

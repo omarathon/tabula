@@ -99,10 +99,9 @@ class OnlineMarkerFeedbackCommandInternal(
 
 trait OnlineMarkerFeedbackState extends OnlineFeedbackState with SubmissionState with ExtensionState {
 
-	this: ProfileServiceComponent with CM2MarkingWorkflowServiceComponent =>
+	self: ProfileServiceComponent with CM2MarkingWorkflowServiceComponent =>
 
 	val stage: MarkingWorkflowStage
-	val module: Module = assignment.module
 	val gradeGenerator: GeneratesGradesFromMarks
 
 	val feedback: AssignmentFeedback = assignment.allFeedback.find(_.usercode == student.getUserId).getOrElse(

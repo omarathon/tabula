@@ -30,12 +30,17 @@ class GenerateGradesFromMarkCommandInternal(val assessment: Assessment)
 		group -> group.toUpstreamAssessmentGroup(assessment.academicYear)
 	).toMap
 
-	private def isNotNullAndInt(intString: String): Boolean = !(intString == null) && {
-		try {
-			intString.toInt
-			true
-		} catch { case _ @ (_: NumberFormatException | _: IllegalArgumentException) =>
+	private def isNotNullAndInt(intString: String): Boolean = {
+		if (intString == null) {
 			false
+		} else {
+			try {
+				intString.toInt
+				true
+			} catch {
+				case _@(_: NumberFormatException | _: IllegalArgumentException) =>
+					false
+			}
 		}
 	}
 

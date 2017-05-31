@@ -95,6 +95,10 @@ object Routes {
 
 			private def assignmentroot(assignment: Assignment) = admin() + s"/assignments/${encoded(assignment.id)}"
 
+			object feedbackAdjustment {
+				def apply(assignment: Assignment, student: User): String = assignmentroot(assignment) + " /feedback/adjustments"
+			}
+
 			def submissionsZip(assignment: Assignment): String = assignmentroot(assignment) + "/submissions.zip"
 
 			object submissionsandfeedback {
