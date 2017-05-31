@@ -7,7 +7,7 @@ import uk.ac.warwick.tabula.AcademicYear
 import uk.ac.warwick.tabula.commands._
 import uk.ac.warwick.tabula.commands.cm2.markingworkflows.{CreatesMarkingWorkflow, ModifyMarkingWorkflowState, ModifyMarkingWorkflowValidation}
 import uk.ac.warwick.tabula.data.model._
-import uk.ac.warwick.tabula.data.model.markingworkflow.{CM2MarkingWorkflow, MarkingWorkflowType}
+import uk.ac.warwick.tabula.data.model.markingworkflow.CM2MarkingWorkflow
 import uk.ac.warwick.tabula.data.model.triggers.{AssignmentClosedTrigger, Trigger}
 import uk.ac.warwick.tabula.permissions.Permissions
 import uk.ac.warwick.tabula.services._
@@ -30,8 +30,8 @@ object CreateAssignmentDetailsCommand {
       with AutowiringCM2MarkingWorkflowServiceComponent
 }
 
-class CreateAssignmentDetailsCommandInternal(val module: Module, val academicYear: AcademicYear)
-  extends CommandInternal[Assignment] with CreateAssignmentDetailsCommandState with SharedAssignmentProperties with AssignmentDetailsCopy with CreatesMarkingWorkflow {
+class CreateAssignmentDetailsCommandInternal(val module: Module, val academicYear: AcademicYear) extends CommandInternal[Assignment]
+  with CreateAssignmentDetailsCommandState with SharedAssignmentProperties with AssignmentDetailsCopy with CreatesMarkingWorkflow {
 
   self: AssessmentServiceComponent with UserLookupComponent with CM2MarkingWorkflowServiceComponent =>
 

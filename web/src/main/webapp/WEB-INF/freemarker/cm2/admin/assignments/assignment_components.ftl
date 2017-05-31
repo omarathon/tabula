@@ -45,14 +45,16 @@
 	tooltip="Edit students"
 	url=students_url />
 
-			<#local markers_url><@routes.cm2.assignmentmarkers assignment 'edit'/></#local>
-			<@wizard_link
-	label="Markers"
-	is_first=false
-	is_active=(current_step == 'markers')
-	is_available=true
-	tooltip="Assign markers"
-	url=markers_url />
+			<#if assignment.cm2Assignment && assignment.cm2MarkingWorkflow??>
+				<#local markers_url><@routes.cm2.assignmentmarkers assignment 'edit'/></#local>
+				<@wizard_link
+					label="Markers"
+					is_first=false
+					is_active=(current_step == 'markers')
+					is_available=true
+					tooltip="Assign markers"
+					url=markers_url />
+			</#if>
 
 			<#local submissions_url><@routes.cm2.assignmentsubmissions assignment 'edit' /></#local>
 			<@wizard_link
@@ -115,14 +117,16 @@
 		tooltip="Edit students"
 		url=students_url />
 
-		<#local markers_url><#if assignment.id??><@routes.cm2.assignmentmarkers assignment 'new' /></#if></#local>
-		<@wizard_link
-		label="Markers"
-		is_first=false
-		is_active=(current_step == 'markers')
-		is_available=displayLink
-		tooltip="Assign markers"
-		url=markers_url />
+			<#if assignment.cm2Assignment && assignment.cm2MarkingWorkflow??>
+				<#local markers_url><#if assignment.id??><@routes.cm2.assignmentmarkers assignment 'new' /></#if></#local>
+				<@wizard_link
+				label="Markers"
+				is_first=false
+				is_active=(current_step == 'markers')
+				is_available=displayLink
+				tooltip="Assign markers"
+				url=markers_url />
+			</#if>
 
 		<#local submissions_url><#if displayLink><@routes.cm2.assignmentsubmissions assignment 'new' /></#if></#local>
 		<@wizard_link

@@ -990,9 +990,7 @@
 					<#if feedback?? && (feedback.hasAttachments || feedback.hasOnlineFeedback)>
 						<#local attachments=feedback.attachments />
 						<#if attachments?size gt 0>
-							<a class="long-running" href="<@routes.cm2.assignmentFeedbackZip assignment />">
-								<@fmt.p attachments?size "file" />
-							</a>
+							<@studentFeedbackDownload feedback />
 							uploaded
 						<#-- If the feedback was entered online there may not be attachments  -->
 						<#elseif feedback?? && feedback.hasOnlineFeedback>
@@ -1010,9 +1008,7 @@
 					<#if !student.stages?keys?seq_contains('AddFeedback') && feedback?? && feedback.hasContent>
 						<#local attachments=feedback.attachments />
 						<#if attachments?size gt 0>
-							<a class="long-running" href="<@routes.cm2.assignmentFeedbackZip assignment />">
-								<@fmt.p attachments?size "file" />
-							</a>
+							<@studentFeedbackDownload feedback />
 							uploaded
 						<#-- If the feedback was entered online there may not be attachments  -->
 						<#elseif feedback?? && feedback.hasOnlineFeedback>
@@ -1733,4 +1729,17 @@
 	<#if withValidation>
 		<@feedbackGradeValidation isGradeValidation gradeValidation />
 	</#if>
+</#macro>
+
+<#macro studentFeedbackDownload feedback>
+	<#local attachments=feedback.attachments />
+	<#if attachments?size == 1>
+		<#local attachmentExtension = feedback.attachments[0].fileExt>
+	<#else>
+		<#local attachmentExtension = "zip">
+	</#if>
+
+	<a class="long-running" href="<@routes.cm2.feedbackDownload feedback attachmentExtension/>">
+		<@fmt.p attachments?size "file" />
+	</a>
 </#macro>

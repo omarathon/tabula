@@ -3,7 +3,7 @@ package uk.ac.warwick.tabula.commands.cm2.assignments
 import org.springframework.validation.Errors
 import uk.ac.warwick.tabula.AcademicYear
 import uk.ac.warwick.tabula.commands._
-import uk.ac.warwick.tabula.commands.cm2.markingworkflows.EditMarkingWorkflowState
+import uk.ac.warwick.tabula.commands.cm2.markingworkflows.{CreatesMarkingWorkflow, EditMarkingWorkflowState}
 import uk.ac.warwick.tabula.data.model._
 import uk.ac.warwick.tabula.data.model.markingworkflow.CM2MarkingWorkflow
 import uk.ac.warwick.tabula.permissions.Permissions
@@ -28,19 +28,36 @@ object EditAssignmentDetailsCommand {
 			with PopulateOnForm
 }
 
-class EditAssignmentDetailsCommandInternal(override val assignment: Assignment)
-	extends CommandInternal[Assignment] with EditAssignmentDetailsCommandState with EditAssignmentDetailsValidation
-		with SharedAssignmentProperties with PopulateOnForm with AssignmentDetailsCopy {
+class EditAssignmentDetailsCommandInternal(override val assignment: Assignment) extends CommandInternal[Assignment] with EditAssignmentDetailsCommandState
+	with EditAssignmentDetailsValidation with SharedAssignmentProperties with PopulateOnForm with AssignmentDetailsCopy with CreatesMarkingWorkflow {
 
 	self: AssessmentServiceComponent with UserLookupComponent with CM2MarkingWorkflowServiceComponent =>
 
-	extractMarkers match { case (a, b) =>
-		markersA = JArrayList(a)
-		markersB = JArrayList(b)
-	}
-
 	override def applyInternal(): Assignment = {
 		copyTo(assignment)
+
+		workflow.foreach(w => {
+			if(workflowType != null && w.workflowType != workflowType){
+				// delete the old workflow and make a new one with the new type
+				cm2MarkingWorkflowService.delete(w)
+				val data = MarkingWorkflowData(
+					department,
+					s"${module.code} ${assignment.name}",
+					markersAUsers,
+					markersBUsers,
+					workflowType
+				)
+				val workflow = createWorkflow(data)
+				workflow.isReusable = false
+				cm2MarkingWorkflowService.save(workflow)
+				assignment.cm2MarkingWorkflow = workflow
+
+			} else {
+				w.replaceMarkers(markersAUsers, markersBUsers)
+				cm2MarkingWorkflowService.save(w)
+			}
+		})
+
 		assessmentService.save(assignment)
 		assignment
 	}
@@ -52,6 +69,11 @@ class EditAssignmentDetailsCommandInternal(override val assignment: Assignment)
 		closeDate = assignment.closeDate
 		workflowCategory = assignment.workflowCategory.getOrElse(WorkflowCategory.NotDecided)
 		reusableWorkflow = assignment.cm2MarkingWorkflow
+		workflow.foreach(w => workflowType = w.workflowType)
+		extractMarkers match { case (a, b) =>
+			markersA = JArrayList(a)
+			markersB = JArrayList(b)
+		}
 	}
 
 }

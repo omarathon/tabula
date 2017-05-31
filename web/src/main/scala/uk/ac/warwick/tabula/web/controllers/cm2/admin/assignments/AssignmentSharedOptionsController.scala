@@ -21,17 +21,17 @@ import uk.ac.warwick.tabula.web.controllers.cm2.CourseworkController
 @RequestMapping(value=Array("/${cm2.prefix}/admin/shared-options"))
 class AssignmentSharedOptionsController extends CourseworkController {
 
-	@ModelAttribute("command")
+	@ModelAttribute("sharedAssignmentPropertiesForm")
 	def model() = new SharedAssignmentPropertiesForm
 
 	@RequestMapping
-	def showForm(@ModelAttribute("command") form: SharedAssignmentPropertiesForm): Mav =
+	def showForm(@ModelAttribute("sharedAssignmentPropertiesForm") form: SharedAssignmentPropertiesForm): Mav =
 		Mav("cm2/admin/assignments/shared_options",
 			"turnitinFileSizeLimit" -> TurnitinLtiService.maxFileSizeInMegabytes
 		).noLayout()
 
 	@RequestMapping(method = Array(POST))
-	def submitForm(@Valid @ModelAttribute("command") form: SharedAssignmentPropertiesForm, errors: Errors): Mav =
+	def submitForm(@Valid @ModelAttribute("sharedAssignmentPropertiesForm") form: SharedAssignmentPropertiesForm, errors: Errors): Mav =
 		showForm(form).addObjects(
 			"submitted" -> true,
 			"hasErrors" -> errors.hasErrors

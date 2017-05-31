@@ -1,4 +1,4 @@
-<#if newRecord || !workflow??>
+<#if newRecord || canEditWorkflowType>
 	<@bs3form.labelled_form_group path="workflowType" labelText="Workflow type">
 		<@f.select path="workflowType" class="form-control" >
 			<option value="" disabled selected></option>
@@ -51,7 +51,11 @@
 			</option>
 		</select>
 		<div class="help-block">
-			It is not possible to modify the marking method once a marking workflow has been created.
+			<#if workflow.isReusable()>
+				It is not possible to modify the marking method once a marking workflow has been created.
+			<#else>
+				It is not possible to modify the marking method once marking has started.
+			</#if>
 		</div>
 	</@bs3form.labelled_form_group>
 </#if>

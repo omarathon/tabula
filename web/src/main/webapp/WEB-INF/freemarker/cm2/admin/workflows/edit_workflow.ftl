@@ -4,6 +4,7 @@
 <#assign formAction><@routes.cm2.reusableWorkflowEdit department academicYear workflow/></#assign>
 <#assign commandName = "editMarkingWorkflowCommand" />
 <#assign newRecord = false />
+<#assign canEditWorkflowType = false />
 
 <#include "_modify_workflow.ftl" />
 
