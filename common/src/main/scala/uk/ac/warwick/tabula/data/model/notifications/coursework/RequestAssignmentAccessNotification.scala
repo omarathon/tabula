@@ -10,7 +10,7 @@ import uk.ac.warwick.userlookup.User
 
 @Entity
 @DiscriminatorValue("RequestAssignmentAccess")
-class OldRequestAssignmentAccessNotification
+class RequestAssignmentAccessNotification
 	extends Notification[Assignment, Unit]
 	with SingleItemNotification[Assignment] with AllCompletedActionRequiredNotification {
 

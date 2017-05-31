@@ -18,7 +18,7 @@
 			<h6>${u.lastName}&nbsp;<#if u.warwickId??><@pl.profile_link u.warwickId /><#else><@pl.profile_link u.userId /></#if></h6>
 		</td>
 		<td class="content-cell">
-					<#if u.warwickId??>${u.warwickId}<#else>${u.userId!}</#if>
+			<#if u.warwickId??>${u.warwickId}<#else>${u.userId!}</#if>
 		</td>
 	</tr>
 	<tr id="row-${markingId(u)}" data-detailurl="<@routes.cm2.feedbackAdjustmentForm assignment markingId(u) />" class="collapse detail-row">
@@ -32,7 +32,7 @@
 
 	<#if studentInfo?size gt 0>
 		<div class="pull-right">
-			<a href="<@routes.cm2.feedbackBulkAdjustment assignment />" class="btn"><i class="icon-sort"></i> Adjust in bulk</a>
+			<a href="<@routes.cm2.feedbackBulkAdjustment assignment />" class="btn btn-default">Adjust in bulk</a>
 		</div>
 	</#if>
 
@@ -106,7 +106,7 @@
 	<#if noFeedbackStudentInfo?size gt 0>
 		<p><@fmt.p noFeedbackStudentInfo?size "student does" "students do" /> not have feedback you can adjust. You can only adjust feedback once marking is completed.</p>
 
-		<table class="students table table-bordered table-striped tabula-greenLight">
+		<table class="students table table-striped">
 			<thead>
 			<tr>
 				<th class="student-col">First name</th>
@@ -117,9 +117,9 @@
 			<tbody>
 				<#list noFeedbackStudentInfo as info>
 					<tr>
-						<td class="student-col"><h6>${info.student.firstName}</h6></td>
+						<td class="student-col">${info.student.firstName}</td>
 						<td class="student-col">
-							<h6>${info.student.lastName}&nbsp;<#if info.student.warwickId??><@pl.profile_link info.student.warwickId /><#else><@pl.profile_link info.student.userId /></#if></h6>
+							${info.student.lastName}&nbsp;<#if info.student.warwickId??><@pl.profile_link info.student.warwickId /><#else><@pl.profile_link info.student.userId /></#if>
 						</td>
 						<td>
 							<#if info.student.warwickId??>${info.student.warwickId}<#else>${info.student.userId!}</#if>
@@ -129,6 +129,4 @@
 			</tbody>
 		</table>
 	</#if>
-
-	<p><a class="btn" href="<@routes.cm2.assignmentsubmissionsandfeedback assignment />"><i class="icon-reply"></i> Return to previous page</a></p>
 </#escape>

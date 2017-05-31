@@ -40,7 +40,7 @@
 					<a class="use-popover" id="popover-marks" data-html="true"
 						 data-original-title="<span class='text-info'><strong>No marks</strong></span>"
 						 data-content="${noMarksIds}">
-						<i class="icon-question-sign"></i>
+						<i class="fa fa-question-sign"></i>
 					</a>
 				</div>
 			</#if>
@@ -55,7 +55,7 @@
 					<a class="use-popover" id="popover-files" data-html="true"
 						 data-original-title="<span class='text-info'><strong>No feedback files</strong></span>"
 						 data-content="${noFilesIds}">
-						<i class="icon-question-sign"></i>
+						<i class="fa fa-question-sign"></i>
 					</a>
 				</div>
 			</#if>

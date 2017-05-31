@@ -1,6 +1,5 @@
 <#import "*/cm2_macros.ftl" as cm2 />
 <#import "*/coursework_components.ftl" as components />
-<#import "*/courses_macros.ftl" as courses_macros />
 
 <#assign finalMarkingStage = (allCompletedMarkerFeedback?? && allCompletedMarkerFeedback?size > 1)>
 
@@ -50,66 +49,54 @@
 	<@routes.cm2.feedbackAdjustmentForm assignment markingId(command.student) />
 </#assign>
 
-<@f.form cssClass="form-horizontal double-submit-protection ajax-form"
+<@f.form cssClass="double-submit-protection ajax-form"
 		 method="post"
 		 commandName="command"
 		 action="${submit_url}">
 
-	<@f.errors cssClass="error form-errors" />
+	<@bs3form.errors path="" />
 
-	<@form.row>
-		<@form.label path="reason">Reason for adjustment</@form.label>
-		<@form.field>
-			<@f.select path="reason">
-				<@f.option></@f.option>
-				<@f.option value="Late submission penalty">Late submission penalty</@f.option>
-				<@f.option value="Plagarism penalty">Plagarism penalty</@f.option>
-				<@f.option value="Other">Other</@f.option>
-			</@f.select>
-			<@f.input type="text" path="reason" cssClass="hide other-input" placeholder="Enter your reason" disabled=true/>
-			<@f.errors path="reason" cssClass="error" />
-		</@form.field>
-	</@form.row>
+	<@bs3form.labelled_form_group path="reason" labelText="Reason for adjustment">
+		<@f.select path="reason" class="form-control">
+			<@f.option></@f.option>
+			<@f.option value="Late submission penalty">Late submission penalty</@f.option>
+			<@f.option value="Plagarism penalty">Plagarism penalty</@f.option>
+			<@f.option value="Other">Other</@f.option>
+		</@f.select>
+		<@f.input type="text" path="reason" cssClass="form-control hide other-input" placeholder="Enter your reason" disabled=true/>
+	</@bs3form.labelled_form_group>
 
-	<@form.row>
-		<@form.label path="comments">Adjustment comments</@form.label>
-		<@form.field>
-			<@f.textarea path="comments" cssClass="big-textarea" />
-			<@f.errors path="comments" cssClass="error" />
-		</@form.field>
-	</@form.row>
+	<@bs3form.labelled_form_group path="comments" labelText="Adjustment comments">
+		<@f.textarea path="comments" cssClass="big-textarea" />
+	</@bs3form.labelled_form_group>
 
-	<@form.row>
-		<@form.label path="adjustedMark">Adjusted mark</@form.label>
-		<@form.field>
-			<div class="input-append">
-				<@f.input path="adjustedMark" cssClass="input-small" />
-				<span class="add-on">%</span>
-			</div>
-			<#if proposedAdjustment??>
-				<div class="late-penalty">
-					<button class="btn btn-mini use-suggested-mark"
-							data-mark="${proposedAdjustment!""}"
-							data-comment="Your submission was <@components.lateness command.submission /> late. ${marksSubtracted} marks have been subtracted (${latePenalty} for each working day late).">
-						Use suggested mark - ${proposedAdjustment!""}
-					</button>
-					<a class="use-popover" id="popover-${markingId(command.student)}" data-html="true"
-					   data-original-title="Late penalty calculation"
-					   data-content="The submission was <@fmt.p daysLate "working day" /> late. The suggested penalty
+	<@bs3form.labelled_form_group path="adjustedMark" labelText="Adjusted mark">
+		<div class="input-append">
+			<@f.input path="adjustedMark" cssClass="input-small" />
+			<span class="add-on">%</span>
+		</div>
+		<#if proposedAdjustment??>
+			<div class="late-penalty">
+				<button class="btn btn-xs use-suggested-mark"
+								data-mark="${proposedAdjustment!""}"
+								data-comment="Your submission was <@components.lateness command.submission /> late. ${marksSubtracted} marks have been subtracted (${latePenalty} for each working day late).">
+					Use suggested mark - ${proposedAdjustment!""}
+				</button>
+				<a class="use-popover" id="popover-${markingId(command.student)}" data-html="true"
+					 data-original-title="Late penalty calculation"
+					 data-content="The submission was <@fmt.p daysLate "working day" /> late. The suggested penalty
 					   was derived by subtracting ${latePenalty} marks from the actual mark for each day the submission
 					   was late.">
-						<i class="icon-question-sign"></i>
-					</a>
-				</div>
-			</#if>
-			<@f.errors path="adjustedMark" cssClass="error" />
-		</@form.field>
-	</@form.row>
+					<i class="fa fa-question-sign"></i>
+				</a>
+			</div>
+		</#if>
+	</@bs3form.labelled_form_group>
 
 	<@form.row>
 		<#if isGradeValidation>
 			<#assign generateUrl><@routes.cm2.generateGradesForMarks command.assignment /></#assign>
-			<@courses_macros.autoGradeOnline "adjustedGrade" "Adjusted grade" "adjustedMark" markingId(command.student) generateUrl />
+			<@components.autoGradeOnline "adjustedGrade" "Adjusted grade" "adjustedMark" markingId(command.student) generateUrl />
 		<#else>
 			<@form.label path="adjustedGrade">Adjusted grade</@form.label>
 			<@form.field>
@@ -124,12 +111,12 @@
 	</div>
 
 	<#if features.queueFeedbackForSits && assignment.module.adminDepartment.uploadCourseworkMarksToSits && command.canBeUploadedToSits>
-		<@courses_macros.uploadToSits assignment=assignment verb="Adjusting" withValidation=false/>
+		<@components.uploadToSits assignment=assignment verb="Adjusting" withValidation=false/>
 	</#if>
 
 	<div class="submit-buttons">
 		<input class="btn btn-primary" type="submit" value="Save">
-		<a class="btn discard-changes" href="">Cancel</a>
+		<a class="btn btn-default discard-changes" href="">Cancel</a>
 		<input type="hidden" id="action" />
 	</div>
 
