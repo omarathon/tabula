@@ -737,13 +737,6 @@ class Assignment
 		secondMarkerMap.map { case (usercode, userGrp) => userLookup.getUserByUserId(usercode) -> userGrp.size }
 	}
 
-
-	/**
-	 * Report on the submissions and feedbacks, noting
-	 * where the lists of students don't match up.
-	 */
-	def submissionsReport = SubmissionsReport(this)
-
 	@OneToMany(mappedBy="scope", fetch = FetchType.LAZY, cascade = Array(CascadeType.ALL))
 	@ForeignKey(name="none")
 	@BatchSize(size=200)
@@ -845,41 +838,6 @@ class Assignment
 	}
 
 	def toEntityReference: AssignmentEntityReference = new AssignmentEntityReference().put(this)
-}
-
-case class SubmissionsReport(assignment: Assignment) {
-
-	private def feedbacks = assignment.fullFeedback
-	private def submissions = assignment.submissions
-
-	private val feedbackUsercodes = feedbacks.map(_.usercode).toSet
-	private val submissionUsercodes = submissions.map(_.usercode).toSet
-
-	// Subtract the sets from each other to obtain discrepancies
-	val feedbackOnly: Set[String] = feedbackUsercodes &~ submissionUsercodes
-	val submissionOnly: Set[String] = submissionUsercodes &~ feedbackUsercodes
-
-	/**
-	 * We want to show a warning if some feedback items are missing either marks or attachments
-	 * If however, all feedback items have only marks or attachments then we don't send a warning.
-	 */
-	val withoutAttachments: Set[String] = feedbacks
-		.filter(f => !f.hasAttachments && !f.comments.exists(_.hasText))
-		.map(_.usercode).toSet
-	val withoutMarks: Set[String] = feedbacks.filter(!_.hasMarkOrGrade).map(_.usercode).toSet
-	val plagiarised: Set[String] = submissions.filter(_.suspectPlagiarised).map(_.usercode).toSet
-
-	def hasProblems: Boolean = {
-		val shouldBeEmpty = Set(feedbackOnly, submissionOnly, plagiarised)
-		val problems = assignment.collectSubmissions && shouldBeEmpty.exists { _.nonEmpty }
-
-		if (assignment.collectMarks) {
-			val shouldBeEmptyWhenCollectingMarks = Set(withoutAttachments, withoutMarks)
-			problems || shouldBeEmptyWhenCollectingMarks.exists { _.nonEmpty }
-		} else {
-		    problems
-		}
-	}
 }
 
 /**
