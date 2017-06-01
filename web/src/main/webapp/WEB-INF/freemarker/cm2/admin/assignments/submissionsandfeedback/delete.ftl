@@ -46,8 +46,8 @@
 		<#if assignment.cm2Assignment && assignment.cm2MarkingWorkflow??>
 			<p>
 				<strong>Warning:</strong>
-				If you delete feedback for students who have been released for marking, all in-progress marking will be permanently deleted and the students will
-				need to be released for marking again.
+				If you delete feedback for students who have been allocated to a marker and/or released for marking, all in-progress marking will be permanently deleted and the students will
+				need to be allocated to markers and released for marking again.
 			</p>
 		</#if>
 
