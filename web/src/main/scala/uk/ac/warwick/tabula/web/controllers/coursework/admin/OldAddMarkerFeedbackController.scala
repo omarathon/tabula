@@ -16,17 +16,17 @@ import uk.ac.warwick.userlookup.User
 @RequestMapping(value=Array("/${cm1.prefix}/admin/module/{module}/assignments/{assignment}/marker/{marker}/feedback"))
 class OldAddMarkerFeedbackController extends OldCourseworkController {
 
-	@ModelAttribute def command(@PathVariable module: Module,
-															@PathVariable assignment: Assignment,
-															@PathVariable marker: User,
-															user: CurrentUser) =
-		new OldAddMarkerFeedbackCommand(module, assignment, marker, user)
+	@ModelAttribute("addMarkerFeedbackCommand")
+	def command(@PathVariable module: Module,
+		@PathVariable assignment: Assignment,
+		@PathVariable marker: User,
+		user: CurrentUser) = new OldAddMarkerFeedbackCommand(module, assignment, marker, user)
 
 	@RequestMapping(method = Array(HEAD, GET))
 	def uploadForm(@PathVariable module: Module,
 								 @PathVariable assignment: Assignment,
 								 @PathVariable marker: User,
-								 @ModelAttribute cmd: OldAddMarkerFeedbackCommand): Mav = {
+								 @ModelAttribute("addMarkerFeedbackCommand") cmd: OldAddMarkerFeedbackCommand): Mav = {
 		Mav("coursework/admin/assignments/markerfeedback/form",
 			"isProxying" -> cmd.isProxying,
 			"proxyingAs" -> marker
@@ -39,7 +39,7 @@ class OldAddMarkerFeedbackController extends OldCourseworkController {
 	def confirmUpload(@PathVariable module: Module,
 										@PathVariable assignment: Assignment,
 										@PathVariable marker: User,
-										@ModelAttribute cmd: OldAddMarkerFeedbackCommand,
+										@ModelAttribute("addMarkerFeedbackCommand") cmd: OldAddMarkerFeedbackCommand,
 										errors: Errors): Mav = {
 		cmd.preExtractValidation(errors)
 		if (errors.hasErrors) {
@@ -60,7 +60,7 @@ class OldAddMarkerFeedbackController extends OldCourseworkController {
 	def doUpload(@PathVariable module: Module,
 							 @PathVariable assignment: Assignment,
 							 @PathVariable marker: User,
-							 @ModelAttribute cmd: OldAddMarkerFeedbackCommand,
+							 @ModelAttribute("addMarkerFeedbackCommand") cmd: OldAddMarkerFeedbackCommand,
 							 errors: Errors): Mav = {
 
 		cmd.preExtractValidation(errors)
