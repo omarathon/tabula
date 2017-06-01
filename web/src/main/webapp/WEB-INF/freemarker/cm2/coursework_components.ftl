@@ -867,7 +867,7 @@
 
 <#macro uniIdSafeCM2MarkerLink stage marker student>
 	<#if marker.warwickId?has_content>
-	- <a href="<@routes.cm2.markerOnlineFeedback assignment stage marker student />">Proxy</a>
+	- <a href="<@routes.cm2.listmarkersubmissions assignment marker />#${stage.name}-${student.userId}">Proxy</a>
 	<#else>
 	- Cannot proxy as this marker as they have no University ID
 	</#if>

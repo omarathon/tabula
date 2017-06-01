@@ -80,8 +80,8 @@
 						</td>
 						<td>
 							<#if emf.workflowStudent.nextAction?has_content>
-											<@spring.message code=emf.workflowStudent.nextAction />
-										</#if>
+								<@spring.message code=emf.workflowStudent.nextAction />
+							</#if>
 						</td>
 					</tr>
 						<#assign detailUrl><@routes.cm2.markerOnlineFeedback assignment stage marker student /></#assign>
