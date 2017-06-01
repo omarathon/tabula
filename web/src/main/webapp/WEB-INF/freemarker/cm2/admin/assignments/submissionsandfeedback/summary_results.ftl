@@ -161,7 +161,7 @@
 												</@fmt.permission_button>
 											</li>
 											<li>
-												<#local deletesubmissionurl><@routes.cm2.deleteSubmissions assignment /></#local>
+												<#local deletesubmissionurl><@routes.cm2.deleteSubmissionsAndFeedback assignment /></#local>
 												<@fmt.permission_button
 													permission='Submission.Delete'
 													scope=submission

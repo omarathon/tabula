@@ -67,7 +67,7 @@
 								</@fmt.permission_button>
 							</li>
 							<li class="must-have-selected">
-								<#assign deletesubmissionurl><@routes.cm2.deleteSubmissions assignment/></#assign>
+								<#assign deletesubmissionurl><@routes.cm2.deleteSubmissionsAndFeedback assignment/></#assign>
 								<@fmt.permission_button
 									permission='Submission.Delete'
 									scope=assignment
@@ -352,7 +352,7 @@
 							<li class="disabled"><a class="use-tooltip" data-container="body" title="No current feedback to publish, or the assignment is not yet closed.">Publish feedback</a></li>
 						</#if>
 						<li class="must-have-selected">
-							<#assign deletefeedback_url><@routes.cm2.deleteFeedback assignment/></#assign>
+							<#assign deletefeedback_url><@routes.cm2.deleteSubmissionsAndFeedback assignment/></#assign>
 							<@fmt.permission_button permission='AssignmentFeedback.Manage' scope=assignment action_descr='delete feedback' classes="form-post" href=deletefeedback_url tooltip='Delete feedback'>
 								Delete feedback
 							</@fmt.permission_button>

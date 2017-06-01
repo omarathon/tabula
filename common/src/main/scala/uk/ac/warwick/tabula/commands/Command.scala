@@ -300,6 +300,11 @@ abstract class Description {
 	 */
 	def submissions(submissions: Seq[Submission]): Description = property("submissions" -> submissions.map(_.id))
 
+	/**
+	  * List of Feedback IDs
+	  */
+	def feedbacks(feedbacks: Seq[Feedback]): Description = property("feedbacks" -> feedbacks.map(_.id))
+
 	def fileAttachments(attachments: Seq[FileAttachment]): Description = property("attachments" -> attachments.map(a =>
 		s"${a.id} - ${a.hash}"
 	))
