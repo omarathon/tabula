@@ -167,8 +167,36 @@
 				}
 			};
 
-			$(document).on('tabula.filterResultsChanged', function(e){
-				$('.marking-table').bigList(bigListOptions);
+			var firstTime = true;
+			$(document).on('tabula.filterResultsChanged', function(e) {
+				$('.marking-table')
+					.bigList(bigListOptions)
+					.on('show.bs.collapse', function (e) {
+						var $target = $(e.target);
+						var id = $target.attr('id');
+
+						// Use history.pushState here if supported as it stops the page jumping
+						if (window.history && window.history.pushState && window.location.hash !== ('#' + id)) {
+							window.history.pushState({}, document.title, window.location.pathname + '#' + id);
+						} else {
+							window.location.hash = id;
+						}
+					});
+
+				if (firstTime && window.location.hash && $(window.location.hash).length) {
+					var $target = $(window.location.hash);
+					$target.collapse(); // opens
+
+					var $source = $('[data-target="' + window.location.hash + '"]');
+					if ($source.length) {
+						// Scroll to the right location
+						$('html, body').animate({
+							scrollTop: $source.offset().top - 150
+						}, 300);
+					}
+				}
+
+				firstTime = false;
 			});
 
 			// prevent rows from expanding when selecting the checkbox column
