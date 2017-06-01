@@ -313,7 +313,7 @@ object SubmissionAndFeedbackInfoFilters {
 
 			def predicate(item: AssignmentSubmissionStudentInfo): Boolean =
 				if (item.assignment.cm2Assignment) {
-					item.coursework.enhancedFeedback.exists(!_.downloaded)
+					!item.coursework.enhancedFeedback.exists { i => i.downloaded || (i.feedback.released && !i.feedback.hasAttachments && i.onlineViewed) }
 				} else {
 					item.coursework.enhancedFeedback.filterNot(_.feedback.isPlaceholder).exists(!_.downloaded)
 				}
@@ -326,7 +326,7 @@ object SubmissionAndFeedbackInfoFilters {
 
 			def predicate(item: AssignmentSubmissionStudentInfo): Boolean =
 				if (item.assignment.cm2Assignment) {
-					item.coursework.enhancedFeedback.exists(_.downloaded)
+					item.coursework.enhancedFeedback.exists { i => i.downloaded || (i.feedback.released && !i.feedback.hasAttachments && i.onlineViewed) }
 				} else {
 					item.coursework.enhancedFeedback.filterNot(_.feedback.isPlaceholder).exists(_.downloaded)
 				}
