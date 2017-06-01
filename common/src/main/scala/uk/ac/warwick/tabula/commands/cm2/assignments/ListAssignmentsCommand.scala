@@ -111,7 +111,7 @@ abstract class ListAssignmentsCommandInternal(val academicYear: AcademicYear, va
 
 	protected def moduleInfo(module: Module) = ModuleAssignmentsInfo(
 		module,
-		module.assignments.asScala.filter(_.academicYear == academicYear).map { assignment =>
+		module.assignments.asScala.filter(_.isAlive).filter(_.academicYear == academicYear).map { assignment =>
 			BasicAssignmentInfo(assignment)
 		}.filter { info =>
 			(moduleFilters.asScala.isEmpty || moduleFilters.asScala.exists(_(info))) &&
