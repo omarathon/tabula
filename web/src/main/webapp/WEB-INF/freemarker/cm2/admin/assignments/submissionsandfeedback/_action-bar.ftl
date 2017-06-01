@@ -335,17 +335,28 @@
 
 						<#-- Download / Publish / Delete always available -->
 						<li class="must-have-selected">
-							<a class="long-running use-tooltip form-post"
-								 href="<@routes.cm2.assignmentFeedbackZip assignment />"
-								 title="Download the feedback files for the selected students as a ZIP file."
-								 data-container="body">Download feedback
-							</a>
+							<#assign download_url><@routes.cm2.assignmentFeedbackZip assignment/></#assign>
+							<@fmt.permission_button
+								permission='AssignmentFeedback.Read'
+								scope=assignment
+								action_descr='download feedback'
+								classes='form-post'
+								href=download_url
+								tooltip='Download the feedback files for the selected students as a ZIP file'>
+									Download feedback
+							</@fmt.permission_button>
 						</li>
 						<#if assignment.canPublishFeedback>
-							<li>
+							<li class="must-have-selected">
 								<#assign publishfeedbackurl><@routes.cm2.publishFeedback assignment/></#assign>
-								<@fmt.permission_button permission='AssignmentFeedback.Publish' scope=assignment type='a' action_descr='release feedback to students' tooltip="Release feedback to students" href=publishfeedbackurl>
-									Publish feedback
+								<@fmt.permission_button
+									permission='AssignmentFeedback.Publish'
+									scope=assignment
+									action_descr='release feedback to students'
+									classes='form-post'
+									href=publishfeedbackurl
+									tooltip='Release feedback to students'>
+										Publish feedback
 								</@fmt.permission_button>
 							</li>
 						<#else>
