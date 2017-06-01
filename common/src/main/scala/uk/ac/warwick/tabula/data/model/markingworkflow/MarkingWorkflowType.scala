@@ -30,7 +30,7 @@ object MarkingWorkflowType {
 
 	case object SingleMarking extends MarkingWorkflowType(
 		name = "Single",
-		description = "First marker only",
+		description = "Single marking",
 		allStages =  Seq(SingleMarker),
 		initialStages = Seq(SingleMarker),
 		order = 0
@@ -38,7 +38,7 @@ object MarkingWorkflowType {
 
 	case object DoubleMarking extends MarkingWorkflowType(
 		name = "Double",
-		description = "Double marking",
+		description = "Double seen marking",
 		allStages =  Seq(DblFirstMarker, DblSecondMarker, DblFinalMarker),
 		initialStages = Seq(DblFirstMarker),
 		order = 1
