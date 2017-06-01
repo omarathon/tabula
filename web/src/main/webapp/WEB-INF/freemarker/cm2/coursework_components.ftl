@@ -3,7 +3,10 @@
 <#-- FIXME why is this necessary? -->
 <#if JspTaglibs??>
 	<#assign spring=JspTaglibs["/WEB-INF/tld/spring.tld"]>
+	<#assign f=JspTaglibs["/WEB-INF/tld/spring-form.tld"]>
 </#if>
+
+<#import "*/modal_macros.ftl" as modal />
 
 <#macro student_assignment_list id title assignments expand_by_default=true show_submission_progress=false>
 	<span id="${id}-container">
@@ -1542,9 +1545,9 @@
 <#macro feedbackGradeValidation isGradeValidation gradeValidation>
 	<#local gradeValidationClass><#compress>
 		<#if isGradeValidation>
-			<#if gradeValidation.invalid?has_content || gradeValidation.zero?has_content>error<#elseif gradeValidation.populated?has_content>info</#if>
+			<#if gradeValidation.invalid?has_content || gradeValidation.zero?has_content>danger<#elseif gradeValidation.populated?has_content>info</#if>
 		<#else>
-			<#if gradeValidation.populated?has_content || gradeValidation.invalid?has_content>error</#if>
+			<#if gradeValidation.populated?has_content || gradeValidation.invalid?has_content>danger</#if>
 		</#if>
 	</#compress></#local>
 
@@ -1586,62 +1589,68 @@
 			</#if>
 		</div>
 		<div id="grade-validation-invalid-modal" class="modal fade">
-			<@modal.header>
-				<h3 class="modal-title">Students with invalid grades</h3>
-			</@modal.header>
-			<@modal.body>
-				<table class="table table-condensed table-bordered table-striped table-hover">
-					<thead><tr><th>University ID</th><th>Mark</th><th>Grade</th><th>Valid grades</th></tr></thead>
-					<tbody>
-						<#list gradeValidation.invalid?keys as feedback>
-						<tr>
-							<td>${feedback.studentIdentifier}</td>
-							<td>${(feedback.latestMark)!}</td>
-							<td>${(feedback.latestGrade)!}</td>
-							<td>${mapGet(gradeValidation.invalid, feedback)}</td>
-						</tr>
-						</#list>
-					</tbody>
-				</table>
-			</@modal.body>
+			<@modal.wrapper>
+				<@modal.header>
+					<h3 class="modal-title">Students with invalid grades</h3>
+				</@modal.header>
+				<@modal.body>
+					<table class="table table-condensed table-bordered table-striped table-hover">
+						<thead><tr><th>University ID</th><th>Mark</th><th>Grade</th><th>Valid grades</th></tr></thead>
+						<tbody>
+							<#list gradeValidation.invalid?keys as feedback>
+							<tr>
+								<td>${feedback.studentIdentifier}</td>
+								<td>${(feedback.latestMark)!}</td>
+								<td>${(feedback.latestGrade)!}</td>
+								<td>${mapGet(gradeValidation.invalid, feedback)}</td>
+							</tr>
+							</#list>
+						</tbody>
+					</table>
+				</@modal.body>
+			</@modal.wrapper>
 		</div>
 		<div id="grade-validation-zero-modal" class="modal fade">
-			<@modal.header>
-				<h3 class="modal-title">Students with zero marks and empty grades</h3>
-			</@modal.header>
-			<@modal.body>
-				<table class="table table-condensed table-bordered table-striped table-hover">
-					<thead><tr><th>University ID</th><th>Mark</th><th>Grade</th></tr></thead>
-					<tbody>
-						<#list gradeValidation.zero?keys as feedback>
-						<tr>
-							<td>${feedback.studentIdentifier}</td>
-							<td>${(feedback.latestMark)!}</td>
-							<td>${(feedback.latestGrade)!}</td>
-						</tr>
-						</#list>
-					</tbody>
-				</table>
-			</@modal.body>
+			<@modal.wrapper>
+				<@modal.header>
+					<h3 class="modal-title">Students with zero marks and empty grades</h3>
+				</@modal.header>
+				<@modal.body>
+					<table class="table table-condensed table-bordered table-striped table-hover">
+						<thead><tr><th>University ID</th><th>Mark</th><th>Grade</th></tr></thead>
+						<tbody>
+							<#list gradeValidation.zero?keys as feedback>
+							<tr>
+								<td>${feedback.studentIdentifier}</td>
+								<td>${(feedback.latestMark)!}</td>
+								<td>${(feedback.latestGrade)!}</td>
+							</tr>
+							</#list>
+						</tbody>
+					</table>
+				</@modal.body>
+			</@modal.wrapper>
 		</div>
 		<div id="grade-validation-populated-modal" class="modal fade">
-			<@modal.header>
-				<h3 class="modal-title">Students with empty grades</h3>
-			</@modal.header>
-			<@modal.body>
-				<table class="table table-condensed table-bordered table-striped table-hover">
-					<thead><tr><th>University ID</th><th>Mark</th><th>Populated grade</th></tr></thead>
-					<tbody>
-						<#list gradeValidation.populated?keys as feedback>
-						<tr>
-							<td>${feedback.studentIdentifier}</td>
-							<td>${(feedback.latestMark)!}</td>
-							<td>${mapGet(gradeValidation.populated, feedback)}</td>
-						</tr>
-						</#list>
-					</tbody>
-				</table>
-			</@modal.body>
+			<@modal.wrapper>
+				<@modal.header>
+					<h3 class="modal-title">Students with empty grades</h3>
+				</@modal.header>
+				<@modal.body>
+					<table class="table table-condensed table-bordered table-striped table-hover">
+						<thead><tr><th>University ID</th><th>Mark</th><th>Populated grade</th></tr></thead>
+						<tbody>
+							<#list gradeValidation.populated?keys as feedback>
+							<tr>
+								<td>${feedback.studentIdentifier}</td>
+								<td>${(feedback.latestMark)!}</td>
+								<td>${mapGet(gradeValidation.populated, feedback)}</td>
+							</tr>
+							</#list>
+						</tbody>
+					</table>
+				</@modal.body>
+			</@modal.wrapper>
 		</div>
 		<#else>
 		<div class="grade-validation alert alert-${gradeValidationClass}" style="display:none;">
@@ -1654,32 +1663,34 @@
 			</#if>
 		</div>
 		<div id="grade-validation-modal" class="modal fade">
-			<@modal.header>
-				<h3 class="modal-title">Students with empty or invalid grades</h3>
-			</@modal.header>
-			<@modal.body>
-				<table class="table table-condensed table-bordered table-striped table-hover">
-					<thead><tr><th>University ID</th><th>Mark</th><th>Grade</th><th>Valid grades</th></tr></thead>
-					<tbody>
-						<#list gradeValidation.populated?keys as feedback>
-						<tr>
-							<td>${feedback.studentIdentifier}</td>
-							<td>${(feedback.latestMark)!}</td>
-							<td></td>
-							<td></td>
-						</tr>
-						</#list>
-						<#list gradeValidation.invalid?keys as feedback>
-						<tr>
-							<td>${feedback.studentIdentifier}</td>
-							<td>${(feedback.latestMark)!}</td>
-							<td>${(feedback.latestGrade)!}</td>
-							<td>${mapGet(gradeValidation.invalid, feedback)}</td>
-						</tr>
-						</#list>
-					</tbody>
-				</table>
-			</@modal.body>
+			<@modal.wrapper>
+				<@modal.header>
+					<h3 class="modal-title">Students with empty or invalid grades</h3>
+				</@modal.header>
+				<@modal.body>
+					<table class="table table-condensed table-bordered table-striped table-hover">
+						<thead><tr><th>University ID</th><th>Mark</th><th>Grade</th><th>Valid grades</th></tr></thead>
+						<tbody>
+							<#list gradeValidation.populated?keys as feedback>
+							<tr>
+								<td>${feedback.studentIdentifier}</td>
+								<td>${(feedback.latestMark)!}</td>
+								<td></td>
+								<td></td>
+							</tr>
+							</#list>
+							<#list gradeValidation.invalid?keys as feedback>
+							<tr>
+								<td>${feedback.studentIdentifier}</td>
+								<td>${(feedback.latestMark)!}</td>
+								<td>${(feedback.latestGrade)!}</td>
+								<td>${mapGet(gradeValidation.invalid, feedback)}</td>
+							</tr>
+							</#list>
+						</tbody>
+					</table>
+				</@modal.body>
+			</@modal.wrapper>
 		</div>
 		</#if>
 	</#if>
@@ -1687,7 +1698,7 @@
 	jQuery(function($){
 		$('#sendToSits').on('change', function(){
 			var $validationDiv = $('.grade-validation');
-			if ($(this).is(':checked') && ($validationDiv.hasClass('alert-info') || $validationDiv.hasClass('alert-error'))) {
+			if ($(this).is(':checked') && ($validationDiv.hasClass('alert-info') || $validationDiv.hasClass('alert-danger'))) {
 				$validationDiv.show();
 			} else {
 				$validationDiv.hide();
@@ -1698,11 +1709,12 @@
 </#macro>
 
 <#macro uploadToSits withValidation assignment verb isGradeValidation=false gradeValidation="">
-<div class="alert alert-info">
-	<label class="checkbox">
-		<@f.checkbox path="sendToSits" id="sendToSits" />
-		Queue these marks for upload to SITS
-	</label>
+	<@bs3form.form_group path="sendToSits">
+		<@bs3form.checkbox path="sendToSits">
+			<@f.checkbox path="sendToSits" id="sendToSits" /> Queue these marks for upload to SITS
+		</@bs3form.checkbox>
+	</@bs3form.form_group>
+
 	<#if assignment.module.adminDepartment.canUploadMarksToSitsForYear(assignment.academicYear, assignment.module)>
 		<div>
 			<p>${verb} this feedback will cause marks to be queued for upload to SITS.</p>
@@ -1724,7 +1736,6 @@
 			</p>
 		</div>
 	</#if>
-</div>
 
 	<#if withValidation>
 		<@feedbackGradeValidation isGradeValidation gradeValidation />

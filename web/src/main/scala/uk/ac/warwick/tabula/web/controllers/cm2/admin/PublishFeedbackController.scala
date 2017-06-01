@@ -29,8 +29,11 @@ class PublishFeedbackController extends CourseworkController {
 
 	@RequestMapping(params = Array("!confirm"))
 	def confirmationPage(@ModelAttribute("command") command: PublishFeedbackCommand.Command, @PathVariable assignment: Assignment): Mav =
-		Mav("cm2/admin/assignments/publish/form", "gradeValidation" -> command.validateGrades)
-			.crumbsList(Breadcrumbs.assignment(assignment))
+		Mav("cm2/admin/assignments/publish/form",
+			"gradeValidation" -> command.validateGrades,
+			"recipientCheckReport" -> command.recipientCheckReport,
+			"submissionsReport" -> command.submissionsReport
+		).crumbsList(Breadcrumbs.assignment(assignment))
 
 	@RequestMapping(params = Array("confirm"))
 	def publish(@Valid @ModelAttribute("command") command: PublishFeedbackCommand.Command, errors: Errors, @PathVariable assignment: Assignment): Mav =

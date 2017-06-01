@@ -39,7 +39,7 @@
 
 			<script type="text/javascript">
 				jQuery(function($) {
-					$(".alert-error").each(function() {
+					$(".alert-danger").each(function() {
 						$("html, body").animate({
 							scrollTop: $(this).offset().top - 35
 						}, 300);
