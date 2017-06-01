@@ -49,7 +49,7 @@
 
 				var $fragment = $('#job-status-fragment');
 				var updateFragment = function() {
-					$fragment.load('?ajax&jobId=${job.id}', function(){
+					$fragment.load('?ajax&jobId=${job.id}&ts=' + new Date().getTime(), function(){
 						updateProgress();
 					});
 				};
