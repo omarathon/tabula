@@ -247,14 +247,14 @@ class EditExtensionController extends CourseworkController with ExtensionService
 	@RequestMapping(method=Array(POST), path=Array("detail"))
 	def update(
 		@PathVariable assignment: Assignment,
-		@PathVariable user: User,
+		@PathVariable student: User,
 		@ModelAttribute("extensionDetailCommand") detailCommand: ExtensionsDetailCommand,
 		@Valid @ModelAttribute("editExtensionCommand") updateCommand: EditExtensionCommand,
 		result: BindingResult,
 		errors: Errors
 	): Mav = {
 		if (errors.hasErrors) {
-			detail(user, detailCommand, updateCommand, errors)
+			detail(student, detailCommand, updateCommand, errors)
 		} else {
 			updateCommand.apply()
 			Mav(new JSONView(Map(

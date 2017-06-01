@@ -7,13 +7,13 @@
 <#macro row graph>
 	<#assign state = (graph.extension.state.description)!"None" />
 <tr class="itemContainer"
-	data-contentid ="${assignment.id}_${graph.user.userId}"
+	data-contentid ="${assignment.id}__${graph.user.userId}"
 	data-detailurl ="<@routes.cm2.extensiondetail assignment graph.user.userId />"
 >
 
 <#-- TAB-2063 - The extension manager will need to know who is doing the asking, so we should always show names -->
-	<td class="student-col toggle-cell"><h6 class="toggle-icon">${graph.user.firstName}</h6></td>
-	<td class="student-col toggle-cell"><h6>${graph.user.lastName}&nbsp;<#if graph.user.warwickId??><@pl.profile_link graph.user.warwickId /><#else><@pl.profile_link graph.user.userId /></#if></h6></td>
+	<td class="student-col toggle-cell toggle-icon">${graph.user.firstName}</td>
+	<td class="student-col toggle-cell">${graph.user.lastName}&nbsp;<#if graph.user.warwickId??><@pl.profile_link graph.user.warwickId /><#else><@pl.profile_link graph.user.userId /></#if></td>
 
 	<td class="status-col toggle-cell content-cell">
 		<dl style="margin: 0; border-bottom: 0;">
@@ -34,7 +34,7 @@
 				</#if>
 			</dt>
 			<dd style="display: none;" class="table-content-container" data-contentid="${assignment.id}__${graph.user.userId}">
-				<div id="content-${assignment.id}_${graph.user.userId}" class="content-container" data-contentid="${assignment.id}__${graph.user.userId}">
+				<div id="content-${assignment.id}__${graph.user.userId}" class="content-container" data-contentid="${assignment.id}__${graph.user.userId}">
 					<p>No extension data is currently available.</p>
 				</div>
 			</dd>
@@ -59,8 +59,8 @@
 <#import "/WEB-INF/freemarker/_profile_link.ftl" as pl />
 <div id="profile-modal" class="modal fade profile-subset"></div>
 
-<div class="row-fluid extension-metadata">
-	<div class="span7">
+<div class="row extension-metadata">
+	<div class="col-md-7">
 
 		<#if assignment.closed>
 			<p class="late deadline">
@@ -74,7 +74,7 @@
 			</p>
 		</#if>
 	</div>
-	<div class="span5">
+	<div class="col-md-5">
 		<p class="alert alert-info">
 			Students will automatically be notified by email when you grant, modify or revoke an extension.
 		</p>
@@ -82,7 +82,7 @@
 </div>
 
 	<#if extensionGraphs?size gt 0>
-	<table id="student-extension-management" class="students table table-bordered table-striped tabula-orangeLight sticky-table-headers expanding-table"
+	<table id="student-extension-management" class="students table table-striped sticky-table-headers expanding-table"
 		   data-max-days="${maxDaysToDisplayAsProgressBar}"
 		   data-row-to-open="${extensionToOpen!""}">
 		<thead>
