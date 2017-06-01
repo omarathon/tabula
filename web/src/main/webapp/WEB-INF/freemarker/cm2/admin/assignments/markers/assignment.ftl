@@ -81,6 +81,11 @@
 				$row.trigger('show.bs.collapse');
 			});
 
+			$body.on('shown.bs.collapse', function(e){
+				var $row = $(e.target);
+				$row.tabulaAjaxForm();
+			});
+
 			// remove attachment
 			$body.on("click", '.remove-attachment', function(e) {
 				e.preventDefault();
