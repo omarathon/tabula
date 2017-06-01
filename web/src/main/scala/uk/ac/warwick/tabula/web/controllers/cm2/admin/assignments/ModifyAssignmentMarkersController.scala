@@ -53,7 +53,7 @@ class ModifyAssignmentMarkersController extends AbstractAssignmentController {
 		@ModelAttribute("assignMarkersCommand") assignMarkersCmd: AssignMarkersCommand
 	): Mav = form(assignment, listAllocationsCmd, assignMarkersCmd, editMode)
 
-	@RequestMapping(method = Array(POST), params = Array(ManageAssignmentMappingParameters.createAndAddMarkers), value = Array("*/markers"))
+	@RequestMapping(method = Array(POST), params = Array(ManageAssignmentMappingParameters.createAndAddMarkers), value = Array("new/markers", "edit/markers"))
 	def saveAndExit(@ModelAttribute("assignMarkersCommand") assignMarkersCmd: AssignMarkersCommand, @PathVariable assignment: Assignment): Mav =  {
 		assignMarkersCmd.apply()
 		Redirect(Routes.admin.assignment.submissionsandfeedback(assignment))

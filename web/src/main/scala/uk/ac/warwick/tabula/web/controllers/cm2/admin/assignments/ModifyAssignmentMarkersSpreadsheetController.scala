@@ -30,7 +30,7 @@ class ModifyAssignmentMarkersSpreadsheetController extends AbstractAssignmentCon
 	@ModelAttribute("templateCommand")
 	def templateCommand(@PathVariable assignment: Assignment) = AssignMarkersTemplateCommand(mustBeCM2(mandatory(assignment)))
 
-	@RequestMapping(method = Array(GET, HEAD), value=Array("*/markers/template/download"))
+	@RequestMapping(value = Array("new/markers/template/download", "edit/markers/template/download"))
 	def downloadTemplate(@ModelAttribute("templateCommand") templateCommand: TemplateCommand): ExcelView = {
 		templateCommand.apply()
 	}
@@ -99,7 +99,7 @@ class ModifyAssignmentMarkersSpreadsheetController extends AbstractAssignmentCon
 		errors: Errors
 	): Mav = previewSpreadsheet(assignment, assignMarkersBySpreadsheetCommand, errors, editMode)
 
-	@RequestMapping(method = Array(POST), params = Array(ManageAssignmentMappingParameters.createAndAddMarkers), value = Array("*/markers/template"))
+	@RequestMapping(method = Array(POST), params = Array(ManageAssignmentMappingParameters.createAndAddMarkers), value = Array("new/markers/template", "edit/markers/template"))
 	def saveAndExit(
 		@PathVariable assignment: Assignment,
 		@Valid @ModelAttribute("assignMarkersBySpreadsheetCommand") assignMarkersBySpreadsheetCommand: AssignMarkersCommand
