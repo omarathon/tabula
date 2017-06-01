@@ -21,12 +21,12 @@ import uk.ac.warwick.tabula.web.Mav
 @RequestMapping(value=Array("/${cm1.prefix}/admin/module/{module}/assignments/{assignment}/feedback/new"))
 class OldAddFeedbackController extends OldCourseworkController {
 
-	@ModelAttribute
+	@ModelAttribute("addFeedbackCommand")
 	def command(@PathVariable module: Module, @PathVariable assignment: Assignment, user: CurrentUser) =
 		new OldAddFeedbackCommand(module, assignment, user.apparentUser, user)
 
 	@RequestMapping(method = Array(GET, HEAD))
-	def showForm(@ModelAttribute form: OldAddFeedbackCommand): Mav = {
+	def showForm(@ModelAttribute("addFeedbackCommand") form: OldAddFeedbackCommand): Mav = {
 		Mav("coursework/admin/assignments/feedback/form",
 			"department" -> form.module.adminDepartment,
 			"module" -> form.module,
