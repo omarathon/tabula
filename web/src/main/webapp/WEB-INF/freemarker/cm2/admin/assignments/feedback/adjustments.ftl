@@ -1,5 +1,6 @@
 <#import "*/cm2_macros.ftl" as cm2 />
 <#import "*/coursework_components.ftl" as components />
+<#import "*/marking_macros.ftl" as marking />
 
 <#assign finalMarkingStage = (allCompletedMarkerFeedback?? && allCompletedMarkerFeedback?size > 1)>
 
@@ -96,7 +97,7 @@
 	<@form.row>
 		<#if isGradeValidation>
 			<#assign generateUrl><@routes.cm2.generateGradesForMarks command.assignment /></#assign>
-			<@components.autoGradeOnline "adjustedGrade" "Adjusted grade" "adjustedMark" markingId(command.student) generateUrl />
+			<@marking.autoGradeOnline "adjustedGrade" "Adjusted grade" "adjustedMark" markingId(command.student) generateUrl />
 		<#else>
 			<@form.label path="adjustedGrade">Adjusted grade</@form.label>
 			<@form.field>
@@ -111,7 +112,7 @@
 	</div>
 
 	<#if features.queueFeedbackForSits && assignment.module.adminDepartment.uploadCourseworkMarksToSits && command.canBeUploadedToSits>
-		<@components.uploadToSits assignment=assignment verb="Adjusting" withValidation=false/>
+		<@marking.uploadToSits assignment=assignment verb="Adjusting" withValidation=false/>
 	</#if>
 
 	<div class="submit-buttons">

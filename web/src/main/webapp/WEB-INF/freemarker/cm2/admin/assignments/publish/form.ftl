@@ -1,5 +1,6 @@
 <#import "*/cm2_macros.ftl" as cm2 />
 <#import "*/coursework_components.ftl" as components />
+<#import "*/marking_macros.ftl" as marking />
 <#escape x as x?html>
 	<@cm2.assignmentHeader "Publish feedback" assignment "for" />
 	<#assign module = assignment.module />
@@ -162,7 +163,7 @@
 		</p>
 
 		<#if features.queueFeedbackForSits && department.uploadCourseworkMarksToSits>
-			<@components.uploadToSits assignment=assignment verb="Publishing" withValidation=true isGradeValidation=isGradeValidation gradeValidation=gradeValidation />
+			<@marking.uploadToSits assignment=assignment verb="Publishing" withValidation=true isGradeValidation=isGradeValidation gradeValidation=gradeValidation />
 		</#if>
 
 		<#if features.emailStudents>
