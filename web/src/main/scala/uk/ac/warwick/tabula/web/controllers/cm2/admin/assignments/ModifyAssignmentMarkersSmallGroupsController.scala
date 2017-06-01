@@ -53,7 +53,7 @@ class ModifyAssignmentMarkersSmallGroupsController extends AbstractAssignmentCon
 		@ModelAttribute("smallGroupCommand") smallGroupCommand: SmallGroupCommand
 	): Mav = form(assignment, assignMarkersCmd, smallGroupCommand, editMode)
 
-	@RequestMapping(method = Array(POST), params = Array(ManageAssignmentMappingParameters.createAndAddMarkers), value = Array("*/markers/smallgroups"))
+	@RequestMapping(method = Array(POST), params = Array(ManageAssignmentMappingParameters.createAndAddMarkers), value = Array("new/markers/smallgroups", "edit/markers/smallgroups"))
 	def saveAndExit(@ModelAttribute("assignMarkersCommand") assignMarkersCmd: AssignMarkersCommand, @PathVariable assignment: Assignment): Mav =  {
 		assignMarkersCmd.apply()
 		Redirect(Routes.admin.assignment.submissionsandfeedback(assignment))
