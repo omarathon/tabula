@@ -1139,8 +1139,10 @@
 			<#if currentFeedback?? && currentFeedback?has_content>
 				<#if currentStage?? && currentStage.populateWithPreviousFeedback>
 					<div class="form-group">
-						<label class="radio-inline"><input type="radio" name="changesState" <#if !currentFeedback.hasBeenModified>checked</#if> value="approve" />Approve</label>
-						<label class="radio-inline"><input type="radio" name="changesState" <#if currentFeedback.hasBeenModified>checked</#if> value="make-changes" >Make changes</label>
+						<form>
+							<label class="radio-inline"><input type="radio" name="changesState" <#if !currentFeedback.hasBeenModified>checked</#if> value="approve" />Approve</label>
+							<label class="radio-inline"><input type="radio" name="changesState" <#if currentFeedback.hasBeenModified>checked</#if> value="make-changes" >Make changes</label>
+						</form>
 					</div>
 				<#else>
 					<a class="copy-feedback btn btn-default long-running use-tooltip" href="#">Copy comments and files</a>
