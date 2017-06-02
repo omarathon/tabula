@@ -143,8 +143,6 @@ abstract class Features {
 	@Value("${features.exams:true}") var exams: Boolean = defaults.exams
 	@Value("${features.exams.grids:true}") var examGrids: Boolean = defaults.examGrids
 
-	@Value("${cm2.enabled:false}") var cm2: Boolean = defaults.cm2
-
 	private val bean = new BeanWrapperImpl(this)
 	def update(message: FeaturesMessage): Features = {
 		val values = new BeanWrapperImpl(message)
@@ -276,8 +274,6 @@ class FeaturesMessage {
 	@BeanProperty var examGrids = true
 
 	@BeanProperty var reports = true
-
-	@BeanProperty var cm2 = false
 }
 
 class FeatureFlagListener extends QueueListener with InitializingBean with Logging {

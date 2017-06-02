@@ -105,6 +105,7 @@ trait AssignmentDetailsCopy extends ModifyAssignmentDetailsCommandState with Sha
     if(workflowCategory == WorkflowCategory.Reusable){
       assignment.cm2MarkingWorkflow = reusableWorkflow
     }
+    assignment.cm2Assignment = true
     copySharedTo(assignment: Assignment)
   }
 }
