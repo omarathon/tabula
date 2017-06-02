@@ -342,7 +342,7 @@
 								action_descr='download feedback'
 								classes='form-post'
 								href=download_url
-								tooltip='Download the feedback files for the selected students as a ZIP file'>
+								tooltip='Download feedback files for selected students as ZIP file'>
 									Download feedback
 							</@fmt.permission_button>
 						</li>
@@ -352,10 +352,10 @@
 								<@fmt.permission_button
 									permission='AssignmentFeedback.Publish'
 									scope=assignment
-									action_descr='release feedback to students'
+									action_descr='publish feedback to students'
 									classes='form-post'
 									href=publishfeedbackurl
-									tooltip='Release feedback to students'>
+									tooltip='Publish feedback to selected students'>
 										Publish feedback
 								</@fmt.permission_button>
 							</li>
@@ -364,8 +364,14 @@
 						</#if>
 						<li class="must-have-selected">
 							<#assign deletefeedback_url><@routes.cm2.deleteSubmissionsAndFeedback assignment/></#assign>
-							<@fmt.permission_button permission='AssignmentFeedback.Manage' scope=assignment action_descr='delete feedback' classes="form-post" href=deletefeedback_url tooltip='Delete feedback'>
-								Delete feedback
+							<@fmt.permission_button
+								permission='AssignmentFeedback.Manage'
+								scope=assignment
+								action_descr='delete feedback'
+								classes='form-post'
+								href=deletefeedback_url
+								tooltip='Delete feedback for selected students'>
+									Delete feedback
 							</@fmt.permission_button>
 						</li>
 
@@ -376,11 +382,10 @@
 									permission='AssignmentFeedback.Publish'
 									scope=assignment
 									action_descr='upload feedback to SITS'
-									tooltip='Upload mark and grade to SITS'
 									classes='form-post'
 									href=uploadToSitsUrl
-								>
-									Upload to SITS
+									tooltip='Upload mark and grade to SITS for selected students'>
+										Upload to SITS
 								</@fmt.permission_button>
 							</li>
 						</#if>
