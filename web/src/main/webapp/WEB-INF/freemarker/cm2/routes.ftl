@@ -180,7 +180,7 @@ TODO grab values from the Routes object in code, as that's pretty equivalent and
 <#macro deleteSubmissionsAndFeedback assignment><@_u page="/admin/assignments/${assignment.id}/submissionsandfeedback/delete" /></#macro>
 
 <#macro downloadFeedbackTemplates assignment><@_u page="/admin/assignments/${assignment.id}/feedback-templates.zip" /></#macro>
-<#macro publishFeedback assignment><@_u page="/admin/assignments/${assignment.id}/publish'/>" /></#macro>
+<#macro publishFeedback assignment><@_u page="/admin/assignments/${assignment.id}/publish" /></#macro>
 <#macro exportCsv assignment><@_u page="/admin/assignments/${assignment.id}/export.csv" /></#macro>
 <#macro exportXml assignment><@_u page="/admin/assignments/${assignment.id}/export.xml" /></#macro>
 <#macro exportXlsx assignment><@_u page="/admin/assignments/${assignment.id}/export.xlsx" /></#macro>
