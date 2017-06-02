@@ -7,7 +7,7 @@ import org.springframework.web.bind.annotation.{ModelAttribute, PathVariable, Re
 import uk.ac.warwick.tabula.{AcademicYear, CurrentUser}
 import uk.ac.warwick.tabula.commands.Appliable
 import uk.ac.warwick.tabula.commands.coursework.assignments.PostExtractValidation
-import uk.ac.warwick.tabula.commands.coursework.feedback.GenerateGradesFromMarkCommand
+import uk.ac.warwick.tabula.commands.coursework.feedback.OldGenerateGradesFromMarkCommand
 import uk.ac.warwick.tabula.commands.exams.exams.ExamMarkerAddMarksCommand
 import uk.ac.warwick.tabula.services.coursework.docconversion.MarkItem
 import uk.ac.warwick.tabula.exams.web.Routes
@@ -33,7 +33,7 @@ class ExamMarkerAddMarksController extends ExamsController {
 		@PathVariable marker: User,
 		user: CurrentUser
 	): ExamMarkerAddMarksCommand =
-		ExamMarkerAddMarksCommand(mandatory(module), mandatory(exam), user, GenerateGradesFromMarkCommand(mandatory(module), mandatory(exam)))
+		ExamMarkerAddMarksCommand(mandatory(module), mandatory(exam), user, OldGenerateGradesFromMarkCommand(mandatory(module), mandatory(exam)))
 
 	// Add the common breadcrumbs to the model.
 	def crumbed(mav: Mav, module: Module, academicYear: AcademicYear): Mav = mav.crumbs(

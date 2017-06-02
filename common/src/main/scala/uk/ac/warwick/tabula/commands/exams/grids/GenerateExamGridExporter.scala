@@ -124,7 +124,12 @@ object GenerateExamGridExporter {
 			val yearCell = yearRow.createCell(currentColumnIndex)
 			yearCell.setCellValue(s"Year $year")
 			yearCell.setCellStyle(cellStyleMap(Header))
-			sheet.addMergedRegion(new CellRangeAddress(yearCell.getRowIndex, yearCell.getRowIndex, yearCell.getColumnIndex, yearCell.getColumnIndex + Math.max(perYearColumns(year).size - 1, 0)))
+
+			val startColumn = yearCell.getColumnIndex
+			val endColumn = yearCell.getColumnIndex + Math.max(perYearColumns(year).size - 1, 0)
+
+			if (endColumn > startColumn)
+				sheet.addMergedRegion(new CellRangeAddress(yearCell.getRowIndex, yearCell.getRowIndex, startColumn, endColumn))
 
 			var currentCategory = ""
 			perYearColumns(year).foreach(perYearColumn => {

@@ -1,6 +1,7 @@
+<#import "*/cm2_macros.ftl" as cm2 />
 <#escape x as x?html>
-<h1>${assignment.module.name} (${assignment.module.code?upper_case})
-<br><strong>${assignment.name}</strong></h1>
+
+  <@cm2.assignmentHeader "Submission receipt" assignment "for" />
 
 <#if submission??>
 <#if sent>

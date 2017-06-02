@@ -8,7 +8,7 @@ import org.springframework.validation.Errors
 import org.springframework.web.bind.annotation.{ModelAttribute, PathVariable, RequestMapping}
 import uk.ac.warwick.tabula.CurrentUser
 import uk.ac.warwick.tabula.commands.{Appliable, SelfValidating, UserAware}
-import uk.ac.warwick.tabula.commands.coursework.assignments.{CanProxy, CreatesNextMarkerFeedback, MarkingCompletedCommand, MarkingCompletedState}
+import uk.ac.warwick.tabula.commands.coursework.assignments.{CanProxy, CreatesNextMarkerFeedback, OldMarkingCompletedCommand, MarkingCompletedState}
 import uk.ac.warwick.tabula.coursework.web.Routes
 import uk.ac.warwick.tabula.web.controllers.coursework.OldCourseworkController
 import uk.ac.warwick.tabula.data.Transactions._
@@ -32,7 +32,7 @@ class OldMarkingCompletedController extends OldCourseworkController {
 		@PathVariable assignment: Assignment,
 		@PathVariable marker: User,
 		submitter: CurrentUser
-	): MarkingCompletedCommand = MarkingCompletedCommand(mandatory(module), mandatory(assignment), marker, submitter)
+	): MarkingCompletedCommand = OldMarkingCompletedCommand(mandatory(module), mandatory(assignment), marker, submitter)
 
 
 	def RedirectBack(assignment: Assignment, command: MarkingCompletedCommand): Mav = {

@@ -115,6 +115,7 @@ trait AssignMarkersPermissions extends RequiresPermissionsChecking with Permissi
 	self: AssignMarkersState =>
 
 	def permissionsCheck(p: PermissionsChecking) {
+		notDeleted(assignment)
 		p.PermissionCheck(Permissions.Assignment.Update, assignment.module)
 	}
 }

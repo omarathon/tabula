@@ -9,7 +9,7 @@ class CourseworkAssignmentSubmissionTest extends BrowserTest with CourseworkFixt
 		withAssignment("xxx01", "Fully featured assignment") { assignmentId =>
 			as(P.Student1) {
 				click on linkText("Fully featured assignment")
-				currentUrl should endWith(assignmentId + "/")
+				currentUrl should endWith(assignmentId)
 
 				click on getInputByLabel("File").get
 				pressKeys(getClass.getResource("/file1.txt").getFile)

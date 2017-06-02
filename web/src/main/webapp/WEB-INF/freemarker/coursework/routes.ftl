@@ -47,7 +47,6 @@ TODO grab values from the Routes object in code, as that's pretty equivalent and
 <#macro uploadToSits assignment><@_u page="/admin/module/${assignment.module.code}/assignments/${assignment.id}/upload-to-sits"/></#macro>
 <#macro checkSitsUpload feedback><@_u page="/admin/module/${feedback.assignment.module.code}/assignments/${feedback.assignment.id}/feedback/${feedback.id}/check-sits"/></#macro>
 
-<#macro genericfeedback assignment><@_u page="/admin/module/${assignment.module.code}/assignments/${assignment.id}/feedback/generic"/></#macro>
 <#macro markerFeedbackFiles assignment markerFeedback><@_u page="/admin/module/${assignment.module.code}/assignments/${assignment.id}/marker/feedback/download/${markerFeedback.id}/feedback-${markerFeedback.feedback.studentIdentifier}.zip"/></#macro>
 <#macro markerFeedbackFilesDownload markerFeedback><@_u page="/admin/module/${markerFeedback.feedback.assignment.module.code}/assignments/${markerFeedback.feedback.assignment.id}/marker/${markerFeedback.markerUser.warwickId}/feedback/download/${markerFeedback.id}/" /></#macro>
 
@@ -113,7 +112,7 @@ TODO grab values from the Routes object in code, as that's pretty equivalent and
 <#macro extensionsettings department><@_u page="/admin/department/${department.code}/settings/extensions" /></#macro>
 <#macro manage_extensions department academicYear=''>
 	<#if academicYear?has_content>
-		<@_u page="/admin/department/${department.code}/manage/extensions?academicYear=${academicYear.startYear?c}" />
+		<@_u page="/admin/department/${department.code}/${academicYear.startYear?c}/manage/extensions" />
 	<#else>
 		<@_u page="/admin/department/${department.code}/manage/extensions" />
 	</#if>

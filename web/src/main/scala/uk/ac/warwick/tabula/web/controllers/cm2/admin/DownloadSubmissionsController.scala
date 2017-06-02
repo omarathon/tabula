@@ -6,6 +6,7 @@ import org.springframework.web.bind.annotation.{ModelAttribute, PathVariable, Re
 import uk.ac.warwick.spring.Wire
 import uk.ac.warwick.tabula.cm2.web.Routes
 import uk.ac.warwick.tabula.commands.Appliable
+import uk.ac.warwick.tabula.commands.cm2.assignments.markers.DownloadMarkersSubmissionsCommand
 import uk.ac.warwick.tabula.commands.cm2.assignments.{AdminGetSingleSubmissionCommand, DownloadAllSubmissionsCommand, _}
 import uk.ac.warwick.tabula.data.model.{Assignment, Submission}
 import uk.ac.warwick.tabula.services.fileserver.RenderableFile
@@ -43,7 +44,11 @@ class DownloadMarkerSubmissionsController extends CourseworkController {
 	def getMarkersSubmissionCommand(@PathVariable assignment: Assignment, @PathVariable marker: User, submitter: CurrentUser) =
 		DownloadMarkersSubmissionsCommand(assignment, marker, submitter)
 
-	@RequestMapping
+	// shouldn't ever be called as a GET - if it is, just redirect back to the submission list
+	@RequestMapping(method = Array(GET))
+	def get(@PathVariable assignment: Assignment, @PathVariable marker: User) = Redirect(Routes.admin.assignment.markerFeedback(assignment, marker))
+
+	@RequestMapping(method = Array(POST))
 	def downloadMarkersSubmissions(@ModelAttribute("command") command: Appliable[RenderableFile]): RenderableFile = {
 		command.apply()
 	}
@@ -130,14 +135,10 @@ class DownloadFeedbackSheetsController extends CourseworkController {
 @RequestMapping(value=Array("/${cm2.prefix}/admin/assignments/{assignment}/marker-templates.zip"))
 class DownloadMarkerTemplatesController extends CourseworkController {
 
-	var userLookup: UserLookupService = Wire.auto[UserLookupService]
-
 	@ModelAttribute("downloadFeedbackSheetsCommand")
 	def feedbackSheetsCommand(@PathVariable assignment: Assignment): DownloadFeedbackSheetsCommand.Command = {
-		val submissions = assignment.getMarkersSubmissions(user.apparentUser)
-		val users = submissions.map(s => userLookup.getUserByUserId(s.usercode))
-
-		DownloadFeedbackSheetsCommand.marker(assignment, users)
+		val students = assignment.cm2MarkerAllocations.filter(_.marker == user.apparentUser).flatMap(_.students).distinct
+		DownloadFeedbackSheetsCommand.marker(assignment, students)
 	}
 
 	@RequestMapping

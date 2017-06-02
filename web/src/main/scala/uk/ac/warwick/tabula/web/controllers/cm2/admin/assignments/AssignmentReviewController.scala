@@ -17,6 +17,7 @@ class AssignmentReviewController extends CourseworkController {
 
 	@ModelAttribute("command")
 	def command(@PathVariable assignment: Assignment): ViewViewableCommand[Assignment] = {
+		notDeleted(assignment)
 		new ViewViewableCommand(Permissions.Assignment.Read, mandatory(assignment))
 	}
 
@@ -30,8 +31,8 @@ class AssignmentReviewController extends CourseworkController {
 			"module" -> assignment.module,
 			"assignment" -> assignment,
 			"membershipInfo" -> assignment.membershipInfo,
-			"sharedPropertiesForm" -> sharedPropertiesForm
-		)
+			"sharedPropertiesForm" -> sharedPropertiesForm)
+			.crumbsList(Breadcrumbs.assignment(assignment))
 	}
 
 }

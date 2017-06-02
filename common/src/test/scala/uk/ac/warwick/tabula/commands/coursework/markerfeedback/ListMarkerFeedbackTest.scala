@@ -1,6 +1,6 @@
 package uk.ac.warwick.tabula.commands.coursework.markerfeedback
 
-import uk.ac.warwick.tabula.commands.coursework.assignments.ListMarkerFeedbackCommand
+import uk.ac.warwick.tabula.commands.coursework.assignments.OldListMarkerFeedbackCommand
 import uk.ac.warwick.tabula.data.model._
 import uk.ac.warwick.tabula.services.UserLookupComponent
 import uk.ac.warwick.tabula.{MockUserLookup, Mockito, TestBase}
@@ -19,13 +19,13 @@ class ListMarkerFeedbackTest extends TestBase with MarkingWorkflowWorld with Moc
 	@Test
 	def firstMarkerTest() {
 		withUser("cuslaj") {
-			val command =	new ListMarkerFeedbackCommand(assignment, assignment.module, currentUser.apparentUser, currentUser) with CommandTestSupport
+			val command =	new OldListMarkerFeedbackCommand(assignment, assignment.module, currentUser.apparentUser, currentUser) with CommandTestSupport
 			val markerFeedbackCollections = command.applyInternal()
 
 			markerFeedbackCollections.head.feedbackItems.size should be (3)
 		}
 		withUser("cuscav") {
-			val command =	new ListMarkerFeedbackCommand(assignment, assignment.module, currentUser.apparentUser, currentUser) with CommandTestSupport
+			val command =	new OldListMarkerFeedbackCommand(assignment, assignment.module, currentUser.apparentUser, currentUser) with CommandTestSupport
 			val markerFeedbackCollections = command.applyInternal()
 
 			markerFeedbackCollections.head.feedbackItems.size should be (2)
@@ -44,13 +44,13 @@ class ListMarkerFeedbackTest extends TestBase with MarkingWorkflowWorld with Moc
 		}
 
 		withUser("cuslat") {
-			val command =	new ListMarkerFeedbackCommand(assignment, assignment.module, currentUser.apparentUser, currentUser) with CommandTestSupport
+			val command =	new OldListMarkerFeedbackCommand(assignment, assignment.module, currentUser.apparentUser, currentUser) with CommandTestSupport
 			val markerFeedbackCollections = command.applyInternal()
 
 			markerFeedbackCollections.head.feedbackItems.size should be (3)
 		}
 		withUser("cuday") {
-			val command =	new ListMarkerFeedbackCommand(assignment, assignment.module, currentUser.apparentUser, currentUser) with CommandTestSupport
+			val command =	new OldListMarkerFeedbackCommand(assignment, assignment.module, currentUser.apparentUser, currentUser) with CommandTestSupport
 			val markerFeedbackCollections = command.applyInternal()
 
 			markerFeedbackCollections.head.feedbackItems.size should be (2)

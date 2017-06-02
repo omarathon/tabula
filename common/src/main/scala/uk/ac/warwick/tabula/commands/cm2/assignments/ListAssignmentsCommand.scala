@@ -7,6 +7,7 @@ import uk.ac.warwick.tabula.commands._
 import uk.ac.warwick.tabula.commands.cm2.assignments.AssignmentInfoFilters.DueDateFilter
 import uk.ac.warwick.tabula.commands.cm2.assignments.ListAssignmentsCommand._
 import uk.ac.warwick.tabula.data.model
+import uk.ac.warwick.tabula.data.model.markingworkflow.{FinalStage, MarkingWorkflowStage}
 import uk.ac.warwick.tabula.data.model.{Assignment, Department, MarkingMethod, Module}
 import uk.ac.warwick.tabula.permissions.Permissions
 import uk.ac.warwick.tabula.services._
@@ -110,7 +111,7 @@ abstract class ListAssignmentsCommandInternal(val academicYear: AcademicYear, va
 
 	protected def moduleInfo(module: Module) = ModuleAssignmentsInfo(
 		module,
-		module.assignments.asScala.filter(_.academicYear == academicYear).map { assignment =>
+		module.assignments.asScala.filter(_.isAlive).filter(_.academicYear == academicYear).map { assignment =>
 			BasicAssignmentInfo(assignment)
 		}.filter { info =>
 			(moduleFilters.asScala.isEmpty || moduleFilters.asScala.exists(_(info))) &&
@@ -285,7 +286,10 @@ object AssignmentInfoFilters {
 		}
 		case object NoMarkers extends AssignmentInfoFilter {
 			val description = "No markers"
-			def apply(info: AssignmentInfo): Boolean = ??? // Unimplemented pending CM2 workflow stuff
+			def apply(info: AssignmentInfo): Boolean = info.assignment.allFeedback
+				.flatMap(_.markerFeedback.asScala)
+				.flatMap(m => Option(m.marker)) // markers may have been removed so could be null
+				.isEmpty
 		}
 		case object ReleasedToStudents extends AssignmentInfoFilter {
 			val description = "Released to students"
@@ -309,15 +313,21 @@ object AssignmentInfoFilters {
 		}
 		case object NotReleasedToMarkers extends AssignmentInfoFilter {
 			val description = "Not released to markers"
-			def apply(info: AssignmentInfo): Boolean = ??? // Unimplemented pending CM2 workflow stuff
+			def apply(info: AssignmentInfo): Boolean = info.assignment.allFeedback.flatMap(_.outstandingStages.asScala).isEmpty
 		}
 		case object BeingMarked extends AssignmentInfoFilter {
 			val description = "Being marked"
-			def apply(info: AssignmentInfo): Boolean = ??? // Unimplemented pending CM2 workflow stuff
+			def apply(info: AssignmentInfo): Boolean = info.assignment.allFeedback
+				.flatMap(_.outstandingStages.asScala).flatMap{
+					case f: FinalStage => None
+					case s: MarkingWorkflowStage => Some(s)
+				}.nonEmpty
 		}
 		case object MarkingComplete extends AssignmentInfoFilter {
 			val description = "Marking complete"
-			def apply(info: AssignmentInfo): Boolean = ??? // Unimplemented pending CM2 workflow stuff
+			def apply(info: AssignmentInfo): Boolean = info.assignment.allFeedback
+				.map(_.outstandingStages.asScala)
+				.forall(stages => stages.nonEmpty && stages.collect{case f: FinalStage => f}.size == stages.size)
 		}
 		case object LateFeedback extends AssignmentInfoFilter {
 			val description = "Late feedback"

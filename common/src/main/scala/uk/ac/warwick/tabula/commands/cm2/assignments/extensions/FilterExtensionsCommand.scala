@@ -2,18 +2,19 @@ package uk.ac.warwick.tabula.commands.cm2.assignments.extensions
 
 import org.hibernate.criterion.Order
 import org.hibernate.criterion.Order._
-import uk.ac.warwick.tabula.CurrentUser
+import org.hibernate.criterion.Restrictions.in
+import uk.ac.warwick.tabula.{AcademicYear, CurrentUser, PermissionDeniedException}
 import uk.ac.warwick.tabula.JavaImports._
 import uk.ac.warwick.tabula.commands._
+import uk.ac.warwick.tabula.data.Aliasable.addAliases
 import uk.ac.warwick.tabula.data.ScalaRestriction
 import uk.ac.warwick.tabula.data.ScalaRestriction._
 import uk.ac.warwick.tabula.data.model.{Assignment, Department, Module}
 import uk.ac.warwick.tabula.data.model.forms.ExtensionState
 import uk.ac.warwick.tabula.helpers.coursework.ExtensionGraph
 import uk.ac.warwick.tabula.permissions.Permissions
-
 import uk.ac.warwick.tabula.services._
-import uk.ac.warwick.tabula.system.permissions.Public
+import uk.ac.warwick.tabula.system.permissions.{PermissionsChecking, Public, RequiresPermissionsChecking}
 
 import scala.collection.JavaConverters._
 
@@ -23,8 +24,8 @@ case class FilterExtensionResults(
 )
 
 object FilterExtensionsCommand {
-	def apply(user: CurrentUser) =
-		new FilterExtensionsCommandInternal(user)
+	def apply(academicYear: AcademicYear, user: CurrentUser) =
+		new FilterExtensionsCommandInternal(academicYear, user)
 			with Command[FilterExtensionResults]
 			with AutowiringUserLookupComponent
 			with AutowiringExtensionServiceComponent
@@ -33,7 +34,7 @@ object FilterExtensionsCommand {
 			with ReadOnly with Unaudited with Public
 }
 
-class FilterExtensionsCommandInternal(val user: CurrentUser) extends CommandInternal[FilterExtensionResults]
+class FilterExtensionsCommandInternal(val academicYear: AcademicYear, val user: CurrentUser) extends CommandInternal[FilterExtensionResults]
 	with FilterExtensionsState with TaskBenchmarking {
 
 	this: UserLookupComponent with ExtensionServiceComponent with ModuleAndDepartmentServiceComponent
@@ -53,6 +54,10 @@ class FilterExtensionsCommandInternal(val user: CurrentUser) extends CommandInte
 
 	def applyInternal(): FilterExtensionResults = {
 
+		// permission to manage extensions are all scoped by dept or module - we can't do normal permissions checking as there could be no scope to check against
+		if(allDepartments.isEmpty)
+			throw new PermissionDeniedException(user, Permissions.Department.ManageExtensionSettings, null)
+
 		// on the off chance that someone has tried to hack extra departments or modules into the filter remove them
 		departments = departments.asScala.filter(d => allDepartments.contains(d)).asJava
 		modules = modules.asScala.filter(m => allModules.contains(m)).asJava
@@ -69,6 +74,7 @@ class FilterExtensionsCommandInternal(val user: CurrentUser) extends CommandInte
 		)
 
 		val restrictions: Seq[ScalaRestriction] = Seq(
+			academicYearRestriction,
 			receivedRestriction,
 			stateRestriction,
 			assignmentRestriction,
@@ -76,13 +82,13 @@ class FilterExtensionsCommandInternal(val user: CurrentUser) extends CommandInte
 			departmentRestriction.orElse(defaultDepartmentRestrictions)
 		).flatten
 
-		val totalResults = benchmarkTask("countStudentsByRestrictions") { extensionService.countFilteredExtensions(
+		val totalResults = benchmarkTask("countExtensionsByRestrictions") { extensionService.countFilteredExtensions(
 			restrictions = restrictions
 		)}
 
 		val orders = if (sortOrder.isEmpty) defaultOrder else sortOrder
 
-		val extensions = benchmarkTask("findStudentsByRestrictions") { extensionService.filterExtensions(
+		val extensions = benchmarkTask("findExtensionsByRestrictions") { extensionService.filterExtensions(
 			restrictions,
 			buildOrders(orders.asScala),
 			extensionsPerPage,
@@ -95,7 +101,6 @@ class FilterExtensionsCommandInternal(val user: CurrentUser) extends CommandInte
 }
 
 trait FilterExtensionsState extends FiltersExtensions {
-
 	self: TermServiceComponent =>
 
 	var page = 1
@@ -109,9 +114,10 @@ trait FilterExtensionsState extends FiltersExtensions {
 	var modules: JList[Module] = JArrayList()
 	var departments: JList[Department] = JArrayList()
 
-	val user: CurrentUser
-	val allModules: Seq[Module]
-	val allDepartments: Seq[Department]
+	def academicYear: AcademicYear
+	def user: CurrentUser
+	def allModules: Seq[Module]
+	def allDepartments: Seq[Department]
 	lazy val allStates: Seq[ExtensionState with Product with Serializable] = ExtensionState.all
 	lazy val allTimes: Seq[TimeFilter with Product with Serializable] = TimeFilter.all
 }

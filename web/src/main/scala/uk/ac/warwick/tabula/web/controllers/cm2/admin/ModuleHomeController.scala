@@ -29,14 +29,13 @@ abstract class AbstractModuleHomeController
 
 	@RequestMapping(params=Array("!ajax"), headers=Array("!X-Requested-With"))
 	def home(@ModelAttribute("command") command: ModuleCommand, @PathVariable module: Module): Mav =
-		Mav("cm2/admin/home/module",
-			"moduleInfo" -> command.apply(),
-			"academicYear" -> command.academicYear
-		).secondCrumbs(academicYearBreadcrumbs(command.academicYear)(Routes.admin.module(module, _)): _*)
+		Mav("cm2/admin/home/module", "moduleInfo" -> command.apply(), "academicYear" -> command.academicYear)
+			.crumbsList(Breadcrumbs.department(module.adminDepartment, Some(command.academicYear)))
+			.secondCrumbs(academicYearBreadcrumbs(command.academicYear)(Routes.admin.module(module, _)): _*)
 
 	@RequestMapping
 	def homeAjax(@ModelAttribute("command") command: ModuleCommand): Mav =
-		Mav("cm2/admin/home/assignments", "moduleInfo" -> command.apply()).noLayout()
+		Mav("cm2/admin/home/assignments", "moduleInfo" -> command.apply(), "academicYear" -> command.academicYear).noLayout()
 
 }
 
@@ -65,10 +64,13 @@ class ModuleHomeForYearController extends AbstractModuleHomeController {
 @Profile(Array("cm2Enabled"))
 @Controller
 @RequestMapping(Array("/${cm2.prefix}/admin/module/{module}", "/${cm2.prefix}/admin/module/{module}/**"))
-class ModuleHomeRedirectController extends CourseworkController {
+class ModuleHomeRedirectController extends CourseworkController
+	with AcademicYearScopedController
+	with AutowiringUserSettingsServiceComponent
+	with AutowiringMaintenanceModeServiceComponent {
 
 	@RequestMapping
 	def redirect(@PathVariable module: Module) =
-		Redirect(Routes.admin.module(mandatory(module)))
+		Redirect(Routes.admin.module(mandatory(module), retrieveActiveAcademicYear(None).getOrElse(AcademicYear.guessSITSAcademicYearByDate(DateTime.now))))
 
 }

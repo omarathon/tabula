@@ -1094,3 +1094,55 @@ ul.profile-user-list {
 		width: 40%;
 	}
 }
+
+textarea.big-textarea {
+	height: 10em;
+}
+
+// Colour keys for Turnitin results. Turnitin proper has a little coloured
+// box which academics are used to and will often use as the main decider
+// for whether to hold a document back (e.g. if it's orange or red). So we
+// need to adopt the same colour scheme.
+
+.similarity-box(@color, @text-color) {
+	background-color: @color;
+	color: @text-color;
+	padding: 3px;
+	white-space: nowrap;
+}
+.similarity-box(@color) when (lightness(@color) >= 60%) {
+	.similarity-box(@color, black)
+}
+.similarity-box(@color) when (lightness(@color) < 60%) {
+	.similarity-box(@color, white)
+}
+
+.similarity-0 {
+	.similarity-box(@turnitin-green);
+}
+.similarity-1 {
+	.similarity-box(@turnitin-blue);
+}
+.similarity-2 {
+	.similarity-box(@turnitin-yellow);
+}
+.similarity-3 {
+	.similarity-box(@turnitin-orange);
+}
+.similarity-4 {
+	.similarity-box(@turnitin-red);
+}
+
+.similarity-tooltip {
+	.cursor-pointer();
+}
+
+.similarity-subcategories {
+	margin-left: 0.5em;
+	font-size: @very-subtle-font-size;
+	color: @very-subtle-text-color;
+}
+
+.btn.disabled {
+	pointer-events: auto !important;
+}

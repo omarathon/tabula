@@ -1,3 +1,4 @@
+<#import "*/cm2_macros.ftl" as cm2 />
 <#escape x as x?html>
 
 <#assign formAction>
@@ -15,7 +16,7 @@
 		<#assign message = "Items will be included when feedback is published.">
 	</#if>
 
-	<h1>Suspected plagiarism for ${assignment.name}</h1>
+	<@cm2.assignmentHeader "Suspect plagiarised" assignment "for" />
 
 	<@form.errors path="" />
 	<@f.hidden path="markPlagiarised"  />

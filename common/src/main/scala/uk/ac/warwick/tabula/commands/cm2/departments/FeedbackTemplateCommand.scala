@@ -68,9 +68,9 @@ class EditFeedbackTemplateCommand(department:Department, val template: FeedbackT
 
 	var zipService: ZipService = Wire.auto[ZipService]
 
-	var id:String = _
-	var name:String = _
-	var description:String = _
+	var id: String = template.id
+	var name: String = template.name
+	var description: String = template.description
 
 	override def applyInternal(): Seq[FeedbackTemplate] = {
 		transactional() {
@@ -97,11 +97,11 @@ class DeleteFeedbackTemplateCommand(department:Department, val template: Feedbac
 	mustBeLinked(template, department)
 	PermissionCheck(Permissions.FeedbackTemplate.Manage, template)
 
-	var id:String = _
+	var id: String = template.id
 
 	override def applyInternal(): Seq[FeedbackTemplate] = {
 		transactional() {
-			val feedbackTemplate= department.feedbackTemplates.find(_.id == id).get
+			val feedbackTemplate = department.feedbackTemplates.find(_.id == id).get
 			if (feedbackTemplate.hasAssignments) {
 				logger.error("Cannot delete feedback template " + feedbackTemplate.id + " - it is still linked to assignments")
 				Nil

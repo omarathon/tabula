@@ -6,17 +6,15 @@ first page of the form to setup a bunch of assignments from SITS.
 <#escape x as x?html>
 	<#assign commandName="command"/>
 
-	<@cm2.headerMenu department />
-
 	<#function route_function dept>
-		<#local result><@routes.cm2.create_sitsassignments dept /></#local>
+		<#local result><@routes.cm2.create_sitsassignments dept academicYear /></#local>
 		<#return result />
 	</#function>
-	<@fmt.id7_deptheader "Setup assignments" route_function "for" />
+	<@cm2.departmentHeader "Setup assignments" department route_function academicYear />
 
 	<#assign step=action!'select'/>
 
-	<#assign actionUrl><@routes.cm2.create_sitsassignments department /></#assign>
+	<#assign actionUrl><@routes.cm2.create_sitsassignments department academicYear /></#assign>
 	<@f.form method="post" id="batch-add-form" action=actionUrl commandName=commandName>
 		<#if step =='select'>
 			<div class="alert alert-info slow-page-warning">
@@ -56,19 +54,6 @@ first page of the form to setup a bunch of assignments from SITS.
 		</#if>
 			<input type="hidden" name="action" value="error" /><!-- this is changed before submit -->
 
-			<@bs3form.labelled_form_group path="academicYear" labelText="Academic year">
-				<#if step="select">
-					<@f.select path="academicYear" id="academicYearSelect" cssClass="form-control">
-						<@f.options items=academicYearChoices itemLabel="label" itemValue="storeValue" />
-					</@f.select>
-				<#else>
-					<@f.hidden path="academicYear"/>
-					<@f.hidden path="includeSubDepartments"/>
-					<span class="form-control-static">
-						<@spring.bind path="academicYear">${status.actualValue.label}</@spring.bind>
-					</span>
-				</#if>
-			</@bs3form.labelled_form_group>
 			<#if department.children?size gt 0>
 				<@bs3form.labelled_form_group path="includeSubDepartments" labelText="">
 					<@bs3form.checkbox path="includeSubDepartments">
@@ -201,7 +186,7 @@ first page of the form to setup a bunch of assignments from SITS.
 					<div id="selected-count">0 selected</div>
 					<div id="selected-deselect"><a href="#">Clear selection</a></div>
 					<#-- options sets -->
-					<a class="btn btn-default btn-default btn-block" id="set-options-button" data-target="#set-options-modal" href="<@routes.cm2.assignmentSharedOptions department />">
+					<a class="btn btn-default btn-default btn-block" id="set-options-button" data-target="#set-options-modal" href="<@routes.cm2.assignmentSharedOptions />">
 						Set options&hellip;
 					</a>
 					<a class="btn btn-default btn-default btn-block" id="set-dates-button" data-target="#set-dates-modal">

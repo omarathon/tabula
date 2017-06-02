@@ -67,27 +67,31 @@
 </fieldset>
 
 	<@bs3form.labelled_form_group path="academicYear" labelText="Academic year">
-		<#if newRecord>
-			<@f.select path="academicYear" id="academicYearSelect" cssClass="form-control">
-				<@f.options items=academicYearChoices itemLabel="label" itemValue="storeValue" />
-			</@f.select>
-		<#else>
-			<@spring.bind path="academicYear">
-            <p class="form-control-static">${status.actualValue.label} <span class="very-subtle">(can't be changed)</span></p>
-			</@spring.bind>
-		</#if>
+		<@spring.bind path="academicYear">
+      <p class="form-control-static">${status.actualValue.label}<#if !newRecord> <span class="very-subtle">(can't be changed)</span></#if></p>
+		</@spring.bind>
 	</@bs3form.labelled_form_group>
 
-	<@bs3form.labelled_form_group path="workflowCategory" labelText="Marking workflow use">
-		<@f.select path="workflowCategory" id="workflowCategory" class="form-control">
-			<@f.options items=command.workflowCategories itemLabel="displayName" itemValue="code" />
-		</@f.select>
+<@bs3form.labelled_form_group path="workflowCategory" labelText="Marking workflow use">
+	<#if canEditWorkflowType>
+			<@f.select path="workflowCategory" id="workflowCategory" class="form-control">
+				<@f.options items=command.workflowCategories itemLabel="displayName" itemValue="code" />
+			</@f.select>
+			<div class="help-block">
+				A marking workflow defines the marking method and who the markers are. You can reuse an existing workflow, create a single use workflow or choose not to have one.
+				<span class="workflow-fields single-use-workflow-fields">
+					Single use workflows are only used once and aren't saved in Tabula. To create a reusable workflow, go to <a href="<@routes.cm2.reusableWorkflowsHome department academicYear />">marking workflows</a>.
+				</span>
+			</div>
+	<#else>
+		<select id="workflowCategory" name="workflowCategory" class="form-control" disabled="disabled">
+			<option selected="selected" value="${command.workflowCategory.code}">${command.workflowCategory.displayName}</option>
+		</select>
 		<div class="help-block">
-			A marking workflow defines the marking method and who the markers are. You can reuse an existing workflow, create a single use workflow or choose not to have one.
-			<span class="workflow-fields single-use-workflow-fields">
-				Single use workflows are only used once and aren't saved in Tabula. To create a reusable workflow, go to <a href="<@routes.cm2.reusableWorkflowsHome department academicYear />">marking workflows</a>.
-			</span>
+			You cannot change or remove the marking workflow used on this assignment once marking has started. If you need to make changes then stop any current marking first.
 		</div>
-	</@bs3form.labelled_form_group>
+	</#if>
+</@bs3form.labelled_form_group>
+
 
 </#escape>

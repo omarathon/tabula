@@ -9,7 +9,7 @@ import uk.ac.warwick.tabula.commands.UserAware
 import uk.ac.warwick.tabula.commands.coursework.assignments._
 import uk.ac.warwick.tabula.data.SessionComponent
 import uk.ac.warwick.tabula.data.model._
-import uk.ac.warwick.tabula.data.model.notifications.coursework.ReleaseToMarkerNotification
+import uk.ac.warwick.tabula.data.model.notifications.coursework.OldReleaseToMarkerNotification
 import uk.ac.warwick.tabula.events.EventListener
 import uk.ac.warwick.tabula.helpers.Logging
 import uk.ac.warwick.tabula.services._
@@ -64,7 +64,7 @@ class MarkingCompletedTest extends TestBase with MarkingWorkflowWorld with Mocki
 		self: UserAware =>
 
 		def finaliseFeedback(assignment: Assignment, markerFeedbacks: Seq[MarkerFeedback]) {
-			val finaliseFeedbackCommand = FinaliseFeedbackCommand(assignment, markerFeedbacks, user)
+			val finaliseFeedbackCommand = OldFinaliseFeedbackCommand(assignment, markerFeedbacks, user)
 			finaliseFeedbackCommand.zipService = smartMock[ZipService]
 			finaliseFeedbackCommand.applyInternal()
 		}
@@ -72,7 +72,7 @@ class MarkingCompletedTest extends TestBase with MarkingWorkflowWorld with Mocki
 
 	private trait CommandFixture {
 		val command =
-			new MarkingCompletedCommand(assignment.module, assignment, currentUser.apparentUser, currentUser)
+			new OldMarkingCompletedCommand(assignment.module, assignment, currentUser.apparentUser, currentUser)
 				with CommandTestSupport
 	}
 
@@ -197,7 +197,7 @@ class MarkingCompletedTest extends TestBase with MarkingWorkflowWorld with Mocki
 
 		val notifications: Seq[Notification[MarkerFeedback, Assignment]] = notifier.emit(())
 		notifications.foreach {
-			case n:ReleaseToMarkerNotification => n.userLookup = mockUserLookup
+			case n:OldReleaseToMarkerNotification => n.userLookup = mockUserLookup
 		}
 
 		notifications.size should be(2)

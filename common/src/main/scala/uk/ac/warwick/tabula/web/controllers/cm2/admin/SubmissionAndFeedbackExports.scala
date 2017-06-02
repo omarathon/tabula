@@ -344,7 +344,7 @@ trait SubmissionAndFeedbackExport {
 			) ++
 			item.feedback.actualMark.map { mark => "mark" -> mark }.toMap ++
 			item.feedback.actualGrade.map { grade => "grade" -> grade }.toMap ++
-			Map("downloaded" -> item.downloaded)
+			Map("downloaded" -> (item.downloaded || (item.feedback.released && !item.feedback.hasAttachments && item.onlineViewed)))
 		case None => Map()
 	}
 

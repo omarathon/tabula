@@ -2,8 +2,6 @@ package uk.ac.warwick.tabula.commands.scheduling.turnitin
 
 import org.joda.time.DateTime
 import org.springframework.transaction.annotation.Propagation._
-import uk.ac.warwick.spring.Wire
-import uk.ac.warwick.tabula.CurrentUser
 import uk.ac.warwick.tabula.commands._
 import uk.ac.warwick.tabula.commands.scheduling.turnitin.ProcessTurnitinLtiQueueCommand.ProcessTurnitinLtiQueueCommandResult
 import uk.ac.warwick.tabula.coursework.web.Routes
@@ -15,6 +13,7 @@ import uk.ac.warwick.tabula.permissions.Permissions
 import uk.ac.warwick.tabula.services.turnitinlti._
 import uk.ac.warwick.tabula.services.{AutowiringOriginalityReportServiceComponent, _}
 import uk.ac.warwick.tabula.system.permissions.{PermissionsChecking, PermissionsCheckingMethods, RequiresPermissionsChecking}
+import uk.ac.warwick.tabula.{AutowiringTopLevelUrlComponent, CurrentUser, TopLevelUrlComponent}
 import uk.ac.warwick.userlookup.User
 
 object ProcessTurnitinLtiQueueCommand {
@@ -31,23 +30,18 @@ object ProcessTurnitinLtiQueueCommand {
 			with AutowiringAssessmentServiceComponent
 			with AutowiringFileAttachmentServiceComponent
 			with AutowiringOriginalityReportServiceComponent
+			with AutowiringTopLevelUrlComponent
 			with ComposableCommand[ProcessTurnitinLtiQueueCommandResult]
 			with ProcessTurnitinLtiQueuePermissions
 			with ProcessTurnitinLtiQueueNotification
-			with Unaudited {
-
-			var topLevelUrl: String = Wire.property("${toplevel.url}")
-		}
+			with Unaudited
 }
-
 
 abstract class ProcessTurnitinLtiQueueCommandInternal extends CommandInternal[ProcessTurnitinLtiQueueCommandResult] with Logging {
 
 	self: TurnitinLtiQueueServiceComponent with TurnitinLtiServiceComponent
 		with AssessmentServiceComponent with FileAttachmentServiceComponent
-		with OriginalityReportServiceComponent =>
-
-	def topLevelUrl: String
+		with OriginalityReportServiceComponent with TopLevelUrlComponent =>
 
 	override def applyInternal(): ProcessTurnitinLtiQueueCommandResult = {
 		lazy val processedAssignment: Option[Assignment] =
@@ -110,7 +104,7 @@ abstract class ProcessTurnitinLtiQueueCommandInternal extends CommandInternal[Pr
 			}
 		}
 
-		val attachmentUrl = s"$topLevelUrl${Routes.admin.assignment.turnitinlti.fileByToken(submission, attachment, token)}"
+		val attachmentUrl = s"$toplevelUrl${Routes.admin.assignment.turnitinlti.fileByToken(submission, attachment, token)}"
 
 		val response = turnitinLtiService.submitPaper(
 			assignment = assignment,

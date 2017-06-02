@@ -3,7 +3,7 @@
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "DTD/xhtml1-transitional.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
 
-<#import "../admin/assignments/submissionsandfeedback/_submission_details.ftl" as sd />
+<#import "*/coursework_components.ftl" as components />
 <#assign assignment=submission.assignment />
 <#assign module=assignment.module />
 <#if assignment.findExtension(submission.universityId)??>
@@ -75,9 +75,9 @@
 		<p>Submission received <@fmt.date date=submission.submittedDate at=true seconds=true relative=false /> (<#compress>
 			<#if submission.late>
 				<#if (extension.approved)!false>
-					<@sd.extensionLateness extension submission />
+					<@components.extensionLateness extension submission />
 				<#else>
-					<@sd.lateness submission />
+					<@components.lateness submission />
 				</#if>
 			<#elseif submission.authorisedLate>
 				within extension until <@fmt.date date=extension.expiryDate capitalise=false shortMonth=true relative=false />

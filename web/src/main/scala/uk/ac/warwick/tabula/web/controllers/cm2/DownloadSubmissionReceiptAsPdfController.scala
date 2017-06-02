@@ -11,7 +11,7 @@ import uk.ac.warwick.tabula.permissions.{CheckablePermission, Permissions}
 import uk.ac.warwick.tabula.services.{AutowiringProfileServiceComponent, AutowiringSubmissionServiceComponent, ProfileServiceComponent, SubmissionServiceComponent}
 import uk.ac.warwick.tabula.system.permissions.{PermissionsChecking, PermissionsCheckingMethods, RequiresPermissionsChecking}
 import uk.ac.warwick.tabula.web.views.{AutowiredTextRendererComponent, PDFView}
-import uk.ac.warwick.tabula.{CurrentUser, PermissionDeniedException}
+import uk.ac.warwick.tabula.{AutowiringTopLevelUrlComponent, CurrentUser, PermissionDeniedException}
 import uk.ac.warwick.userlookup.User
 
 @Profile(Array("cm2Enabled")) @Controller
@@ -34,7 +34,7 @@ class DownloadSubmissionReceiptAsPdfController extends CourseworkController {
 			Map(
 				"submission" -> command.apply()
 			)
-		) with FreemarkerXHTMLPDFGeneratorComponent with AutowiredTextRendererComponent with PhotosWarwickMemberPhotoUrlGeneratorComponent
+		) with FreemarkerXHTMLPDFGeneratorComponent with AutowiredTextRendererComponent with PhotosWarwickMemberPhotoUrlGeneratorComponent with AutowiringTopLevelUrlComponent
 	}
 
 }
@@ -62,7 +62,7 @@ class DownloadSubmissionReceiptForStudentAsPdfController extends CourseworkContr
 			Map(
 				"submission" -> command.apply()
 			)
-		) with FreemarkerXHTMLPDFGeneratorComponent with AutowiredTextRendererComponent with PhotosWarwickMemberPhotoUrlGeneratorComponent
+		) with FreemarkerXHTMLPDFGeneratorComponent with AutowiredTextRendererComponent with PhotosWarwickMemberPhotoUrlGeneratorComponent with AutowiringTopLevelUrlComponent
 	}
 
 }

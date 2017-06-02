@@ -1,13 +1,11 @@
 <#import "*/cm2_macros.ftl" as cm2 />
 
 <#escape x as x?html>
-	<@cm2.headerMenu department />
-
 	<#function route_function department>
 		<#local result><@routes.cm2.extensionSettings department /></#local>
 		<#return result />
 	</#function>
-	<@fmt.id7_deptheader "Extension settings" route_function "for" />
+	<@cm2.departmentHeader "Extension settings" department route_function />
 
 	<#assign actionUrl><@routes.cm2.extensionSettings department /></#assign>
 	<@f.form method="post" class="form-inline" action=actionUrl commandName="extensionSettingsCommand" cssClass="dirty-check">

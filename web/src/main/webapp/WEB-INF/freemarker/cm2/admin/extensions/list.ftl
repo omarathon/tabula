@@ -1,9 +1,10 @@
+<#import "*/cm2_macros.ftl" as cm2 />
 <#include "../_filters.ftl" />
 <#escape x as x?html><#compress>
 	<h1>Extensions</h1>
 
 	<div class="filters btn-group-group well well-small well-sm">
-		<#assign formAction><@routes.cm2.filterExtensions /></#assign>
+		<#assign formAction><@routes.cm2.filterExtensions academicYear /></#assign>
 		<@f.form
 			method="GET"
 			action="${formAction}"
@@ -38,7 +39,7 @@
 			<#assign moduleCustomPicker>
 				<div class="module-search input-append input-group">
 					<input class="module-search-query module-picker module prevent-reload form-control" type="text" value="" placeholder="Search for a module" />
-					<span class="add-on input-group-addon"><i class="icon-search fa fa-search"></i></span>
+					<span class="add-on input-group-addon"><i class="fa fa-search"></i></span>
 				</div>
 			</#assign>
 			<@filter name="modules" path="command.modules" placeholder=placeholder currentFilter=currentfilter allItems=command.allModules customPicker=moduleCustomPicker; module>

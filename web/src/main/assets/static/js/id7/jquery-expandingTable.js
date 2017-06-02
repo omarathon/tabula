@@ -221,7 +221,14 @@ jQuery.fn.expandingTable = function(options) {
 
 			var widgetOptions = { widgets: ['repositionContentBoxes'] };
 			var sortOptions = $.extend(widgetOptions, tableSorterOptions);
-			$table.tablesorter(sortOptions);
+			var headerSettings = {};
+			$('th', $table).each(function(index){
+				var sortable = $(this).hasClass("sortable");
+				if(!sortable){
+					headerSettings[index] = {sorter: false};
+				}
+			});
+			$table.tablesorter($.extend({headers: headerSettings}, sortOptions));
 		}
 
 		// TAB-2075 open expanded row when fragment identifier present

@@ -37,7 +37,7 @@ case class ExtensionInfo(
 )
 
 case class AssignmentFeedbackAuditResults(
-	students: Seq[WorkflowStudent],
+	students: Seq[AssignmentSubmissionStudentInfo],
 	totalFilesCheckedForPlagiarism: Int,
 	extensionInfo: ExtensionInfo,
 	markerInfo: MarkerInfo
@@ -97,7 +97,7 @@ class AssignmentFeedbackAuditCommandInternal(val assignment: Assignment) extends
 			}
 		}
 
-		val unsubmitted: Seq[WorkflowStudent] = benchmarkTask("Get unsubmitted users") {
+		val unsubmitted: Seq[AssignmentSubmissionStudentInfo] = benchmarkTask("Get unsubmitted users") {
 			for (user <- unsubmittedMembers) yield {
 				val usersExtension = assignment.extensions.asScala.filter(_.usercode == user.getUserId)
 				if (usersExtension.size > 1) throw new IllegalStateException("More than one Extension for " + user.getWarwickId)
@@ -117,7 +117,7 @@ class AssignmentFeedbackAuditCommandInternal(val assignment: Assignment) extends
 				)
 
 				val progress = workflowProgressService.progress(assignment)(coursework)
-				WorkflowStudent(
+				AssignmentSubmissionStudentInfo(
 					user,
 					Progress(progress.percentage, progress.cssClass, progress.messageCode),
 					progress.nextStage,
@@ -129,7 +129,7 @@ class AssignmentFeedbackAuditCommandInternal(val assignment: Assignment) extends
 			}
 		}
 
-		val submitted: Seq[WorkflowStudent] = benchmarkTask("Get submitted users") {
+		val submitted: Seq[AssignmentSubmissionStudentInfo] = benchmarkTask("Get submitted users") {
 			for (usercode <- usercodesWithSubmissionOrFeedback) yield {
 				val usersSubmissions = submissions.asScala.filter(_.usercode == usercode)
 				val usersExtension = assignment.extensions.asScala.filter(_.usercode == usercode)
@@ -163,7 +163,7 @@ class AssignmentFeedbackAuditCommandInternal(val assignment: Assignment) extends
 
 				val progress = workflowProgressService.progress(assignment)(coursework)
 
-				WorkflowStudent(
+				AssignmentSubmissionStudentInfo(
 					user,
 					Progress(progress.percentage, progress.cssClass, progress.messageCode),
 					progress.nextStage,

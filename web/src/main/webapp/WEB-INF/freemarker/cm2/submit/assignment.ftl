@@ -1,10 +1,8 @@
+<#import "*/cm2_macros.ftl" as cm2 />
 <#escape x as x?html>
 <#compress>
 
-<div class="deptheader">
-	<h1>Submit Assignment</h1>
-	<h4 class="with-related">For ${assignment.name} (${assignment.module.code?upper_case})</h4>
-</div>
+<@cm2.assignmentHeader "Submit assignment" assignment "for" />
 
 <#if can.do("Assignment.Update", assignment)>
 	<div class="alert alert-info">

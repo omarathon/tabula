@@ -103,6 +103,8 @@ trait FeedbackAdjustmentCommandValidation extends SelfValidating {
 			errors.rejectValue("reason", "feedback.adjustment.reason.empty")
 		else if(reason.length > FeedbackAdjustmentCommand.REASON_SIZE_LIMIT)
 			errors.rejectValue("reason", "feedback.adjustment.reason.tooBig")
+
+
 		if (!comments.hasText) errors.rejectValue("comments", "feedback.adjustment.comments.empty")
 		// validate mark (must be int between 0 and 100)
 		if (adjustedMark.hasText) {
@@ -146,6 +148,7 @@ trait FeedbackAdjustmentCommandState {
 	var actualGrade: String = _
 
 	var reason: String = _
+
 	var comments: String = _
 
 	val submitter: CurrentUser

@@ -25,7 +25,7 @@ class PlagiarismInvestigationController extends CourseworkController {
 	def formView(assignment: Assignment): Mav =
 		Mav("cm2/admin/assignments/submissionsandfeedback/mark-plagiarised",
 			"assignment" -> assignment
-		)
+		).crumbsList(Breadcrumbs.assignment(assignment))
 
 	def RedirectBack(assignment: Assignment) = Redirect(Routes.admin.assignment.submissionsandfeedback(assignment))
 

@@ -35,12 +35,14 @@ class ExtensionSettingsController extends CourseworkController
 	validatesSelf[SelfValidating]
 
 	@RequestMapping
-	def viewSettings = Mav("cm2/admin/extension-settings")
+	def viewSettings(@PathVariable department: Department): Mav =
+		Mav("cm2/admin/extension-settings")
+			.crumbsList(Breadcrumbs.department(department, None))
 
 	@RequestMapping(method = Array(RequestMethod.POST))
-	def saveSettings(@Valid @ModelAttribute("extensionSettingsCommand") cmd: ExtensionSettingsCommand.Command, errors: Errors): Mav =
+	def saveSettings(@Valid @ModelAttribute("extensionSettingsCommand") cmd: ExtensionSettingsCommand.Command, errors: Errors, @PathVariable department: Department): Mav =
 		if (errors.hasErrors) {
-			viewSettings
+			viewSettings(department)
 		} else {
 			cmd.apply()
 			Redirect(Routes.admin.department(cmd.department))

@@ -51,7 +51,7 @@ class ExamFeedbackAdjustmentsController extends ExamsController with AutowiringP
 
 	@ModelAttribute("command")
 	def formCommand(@PathVariable module: Module, @PathVariable exam: Exam, @PathVariable student: User, submitter: CurrentUser) =
-		FeedbackAdjustmentCommand(mandatory(exam), student, submitter, GenerateGradesFromMarkCommand(mandatory(module), mandatory(exam)))
+		FeedbackAdjustmentCommand(mandatory(exam), student, submitter, OldGenerateGradesFromMarkCommand(mandatory(module), mandatory(exam)))
 
 	@RequestMapping(method=Array(GET))
 	def showForm(@PathVariable exam: Exam): Mav = {

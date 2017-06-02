@@ -179,15 +179,35 @@ table.expanding-row-pairs {
 	.striped-section.empty {
 		display: block;
 	}
+}
 
-	.scrollable-list {
-		max-height: 340px;
-		overflow-y: auto;
+.filters.marker-feedback-filters {
+	.filter-short-values {
+		width: 120px;
 	}
 }
 
 .filters.admin-assignment-filters {
 	#status-filter .filter-short-values {
+		width: 140px;
+	}
+
+	label.control-label {
+		font-weight: normal;
+		font-size: 85%;
+	}
+
+	.filter + .form-group {
+		margin-left: 10px;
+	}
+
+	.form-inline > .form-group > .input-group {
+		width: 130px;
+	}
+}
+
+.filters.admin-assignment-submission-filters {
+	#submission-states-filter .filter-short-values, #plagiarism-status-filter .filter-short-values {
 		width: 140px;
 	}
 
@@ -249,6 +269,58 @@ table.expanding-row-pairs {
 
 		.text-default {
 			color: @progress-bar-default-bg;
+		}
+	}
+}
+
+.originality-reports{
+	margin-top: 5px;
+
+	.similarity-tooltip {
+		margin-right: 10px;
+	}
+}
+
+.marking-stage {
+	margin-bottom: 30px
+}
+
+.marking-table {
+
+	margin-top: 20px;
+
+	.check-col {
+		width: 1%;
+		cursor: default;
+	}
+
+	.student-col {
+		width: 10%;
+	}
+
+	.progress-col {
+		width: 40%;
+	}
+
+	.action-col {
+		width: 40%;
+	}
+}
+
+.online-marking {
+	.details {
+		margin-bottom: 45px; // three times as much spacing as a form-group
+
+		.nav-tabs {
+			margin-bottom: 10px;
+		}
+
+		.tab-pane {
+			margin: 0;
+		}
+
+		.list-unstyled {
+			margin-bottom: 0;
 		}
 	}
 }

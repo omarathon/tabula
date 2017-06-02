@@ -11,8 +11,9 @@ case class SubmissionListItem(submission: Submission, downloaded: Boolean)
 case class ExtensionListItem (extension: Extension,	within: Boolean)
 case class FeedbackListItem(feedback: Feedback, downloaded: Boolean, onlineViewed: Boolean, feedbackForSits: FeedbackForSits)
 case class Progress (percentage: Int, t: String, messageCode: String)
+
 // Simple object holder
-case class WorkflowStudent (
+case class AssignmentSubmissionStudentInfo (
 	user: User,
 	progress: Progress,
 	nextStage: Option[WorkflowStage],

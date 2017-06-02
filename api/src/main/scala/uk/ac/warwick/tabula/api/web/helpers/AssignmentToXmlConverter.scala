@@ -1,6 +1,6 @@
 package uk.ac.warwick.tabula.api.web.helpers
 
-import uk.ac.warwick.tabula.api.web.controllers.TopLevelUrlAware
+import uk.ac.warwick.tabula.TopLevelUrlComponent
 import uk.ac.warwick.tabula.coursework.web.Routes
 import uk.ac.warwick.tabula.data.model.Assignment
 import uk.ac.warwick.tabula.helpers.XmlUtils._
@@ -9,7 +9,7 @@ import scala.collection.JavaConverters._
 import scala.xml.Elem
 
 trait AssignmentToXmlConverter {
-	self: TopLevelUrlAware =>
+	self: TopLevelUrlComponent =>
 
 	def xmlAssignmentObject(assignment: Assignment): Elem = {
 		<assignment /> % Map(

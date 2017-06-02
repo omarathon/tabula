@@ -16,10 +16,11 @@ abstract class MarkingWorkflowType(
 	val initialStages: Seq[MarkingWorkflowStage],
 	val order: Int,
 	// in most workflows stages that share a role name also share student -> marker allocations
-	// in other workflows like double blind stages have their own seperate allocations
+	// in other workflows like double blind stages have their own separate allocations
 	val rolesShareAllocations: Boolean = true
 ){
 	val roleNames: Seq[String] = allStages.map(_.roleName).distinct
+	def allPreviousStages(stage: MarkingWorkflowStage): Seq[MarkingWorkflowStage] = allStages.filter(_.order < stage.order)
 	override def toString: String = name
 }
 
@@ -29,7 +30,7 @@ object MarkingWorkflowType {
 
 	case object SingleMarking extends MarkingWorkflowType(
 		name = "Single",
-		description = "First marker only",
+		description = "Single marking",
 		allStages =  Seq(SingleMarker),
 		initialStages = Seq(SingleMarker),
 		order = 0
@@ -37,7 +38,7 @@ object MarkingWorkflowType {
 
 	case object DoubleMarking extends MarkingWorkflowType(
 		name = "Double",
-		description = "Double marking",
+		description = "Double seen marking",
 		allStages =  Seq(DblFirstMarker, DblSecondMarker, DblFinalMarker),
 		initialStages = Seq(DblFirstMarker),
 		order = 1
@@ -67,6 +68,8 @@ object MarkingWorkflowType {
 		ModeratedMarking
 		//DoubleBlindMarking
 	)
+
+	def allPossibleStages: Map[MarkingWorkflowType, Seq[MarkingWorkflowStage]] = values.map(t => t -> t.allStages).toMap
 
 	def fromCode(code: String): MarkingWorkflowType =
 		if (code == null) null

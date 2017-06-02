@@ -7,7 +7,7 @@ import org.springframework.stereotype.Controller
 import org.springframework.validation.Errors
 import org.springframework.web.bind.annotation.{ModelAttribute, PathVariable, RequestMapping}
 import uk.ac.warwick.tabula.CurrentUser
-import uk.ac.warwick.tabula.commands.coursework.feedback.{GenerateGradesFromMarkCommand, OnlineFeedbackCommand, OnlineFeedbackFormCommand}
+import uk.ac.warwick.tabula.commands.coursework.feedback.{OldGenerateGradesFromMarkCommand, OnlineFeedbackCommand, OnlineFeedbackFormCommand}
 import uk.ac.warwick.tabula.coursework.web.Routes
 import uk.ac.warwick.tabula.web.controllers.coursework.OldCourseworkController
 import uk.ac.warwick.tabula.data.model._
@@ -54,7 +54,7 @@ class OldOnlineFeedbackFormController extends OldCourseworkController {
 
 	@ModelAttribute("command")
 	def command(@PathVariable student: User, @PathVariable module: Module, @PathVariable assignment: Assignment, currentUser: CurrentUser) =
-		OnlineFeedbackFormCommand(module, assignment, student, currentUser.apparentUser, currentUser, GenerateGradesFromMarkCommand(mandatory(module), mandatory(assignment)))
+		OnlineFeedbackFormCommand(module, assignment, student, currentUser.apparentUser, currentUser, OldGenerateGradesFromMarkCommand(mandatory(module), mandatory(assignment)))
 
 	@RequestMapping(method = Array(GET, HEAD))
 	def showForm(@ModelAttribute("command") command: OnlineFeedbackFormCommand, errors: Errors): Mav = {
