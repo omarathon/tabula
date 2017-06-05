@@ -23,7 +23,7 @@ class AddMarksCommandTest extends TestBase with Mockito {
 	def emptyMarkField() {
 		withUser("cusebr") {
 			val currentUser = RequestInfo.fromThread.get.user
-			val validator = new PostExtractValidation with AdminAddMarksCommandState with ValidatesMarkItem with UserLookupComponent with AdminAddMarksCommandValidation {
+			val validator = new PostExtractValidation with OldAdminAddMarksCommandState with ValidatesMarkItem with UserLookupComponent with OldAdminAddMarksCommandValidation {
 				val module: Module = thisAssignment.module
 				val assessment: Assignment = thisAssignment
 				val gradeGenerator: GeneratesGradesFromMarks = smartMock[GeneratesGradesFromMarks]
@@ -56,7 +56,7 @@ class AddMarksCommandTest extends TestBase with Mockito {
 	def gradeButEmptyMarkFieldGradeValidation() {
 		withUser("cusebr") {
 			val currentUser = RequestInfo.fromThread.get.user
-			val validator = new PostExtractValidation with AdminAddMarksCommandState with ValidatesMarkItem with UserLookupComponent with AdminAddMarksCommandValidation {
+			val validator = new PostExtractValidation with OldAdminAddMarksCommandState with ValidatesMarkItem with UserLookupComponent with OldAdminAddMarksCommandValidation {
 				val module: Module = thisAssignment.module
 				module.adminDepartment.assignmentGradeValidation = true
 				val assessment: Assignment = thisAssignment
@@ -106,7 +106,7 @@ class AddMarksCommandTest extends TestBase with Mockito {
 	def gradeButEmptyMarkFieldNoGradeValidation() {
 		withUser("cusebr") {
 			val currentUser = RequestInfo.fromThread.get.user
-			val validator = new PostExtractValidation with AdminAddMarksCommandState with ValidatesMarkItem with UserLookupComponent with AdminAddMarksCommandValidation {
+			val validator = new PostExtractValidation with OldAdminAddMarksCommandState with ValidatesMarkItem with UserLookupComponent with OldAdminAddMarksCommandValidation {
 				val module: Module = thisAssignment.module
 				module.adminDepartment.assignmentGradeValidation = false
 				val assessment: Assignment = thisAssignment
@@ -153,7 +153,7 @@ class AddMarksCommandTest extends TestBase with Mockito {
 		trait Fixture {
 			val currentUser: CurrentUser = RequestInfo.fromThread.get.user
 			val newAssignment: Assignment = newDeepAssignment()
-			val validator = new PostExtractValidation with AdminAddMarksCommandState with ValidatesMarkItem with UserLookupComponent with AdminAddMarksCommandValidation {
+			val validator = new PostExtractValidation with OldAdminAddMarksCommandState with ValidatesMarkItem with UserLookupComponent with OldAdminAddMarksCommandValidation {
 				val module: Module = newAssignment.module
 				val assessment: Assignment = newAssignment
 				val gradeGenerator: GeneratesGradesFromMarks = smartMock[GeneratesGradesFromMarks]

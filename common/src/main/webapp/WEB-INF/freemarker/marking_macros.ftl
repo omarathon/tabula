@@ -55,6 +55,7 @@
 	</script>
 </#macro>
 
+<#-- used in exams -->
 <#macro marksForm assignment templateUrl formUrl commandName cancelUrl generateUrl seatNumberMap="" showAddButton=true>
 	<div id="batch-feedback-form">
 		<h1>Submit marks for ${assignment.name}</h1>

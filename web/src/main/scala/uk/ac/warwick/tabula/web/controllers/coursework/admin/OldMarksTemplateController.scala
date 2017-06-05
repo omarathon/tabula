@@ -7,8 +7,8 @@ import org.springframework.web.bind.annotation.{ModelAttribute, PathVariable, Re
 import uk.ac.warwick.spring.Wire
 import uk.ac.warwick.tabula.CurrentUser
 import uk.ac.warwick.tabula.commands.Appliable
-import uk.ac.warwick.tabula.commands.coursework.feedback.MarksTemplateCommand._
-import uk.ac.warwick.tabula.commands.coursework.feedback.{GenerateMarksTemplateCommand, GenerateOwnMarksTemplateCommand}
+import uk.ac.warwick.tabula.commands.coursework.feedback.OldMarksTemplateCommand._
+import uk.ac.warwick.tabula.commands.coursework.feedback.{OldGenerateMarksTemplateCommand, OldGenerateOwnMarksTemplateCommand}
 import uk.ac.warwick.tabula.coursework.web.Routes
 import uk.ac.warwick.tabula.data.model.{Assignment, Module}
 import uk.ac.warwick.tabula.services.AssessmentMembershipService
@@ -25,7 +25,7 @@ class OldAssignmentMarksTemplateController extends OldCourseworkController {
 
 	@ModelAttribute("command")
 	def command(@PathVariable module: Module, @PathVariable assignment: Assignment) =
-		GenerateMarksTemplateCommand(
+		OldGenerateMarksTemplateCommand(
 			mandatory(module),
 			mandatory(assignment),
 			assignmentMembershipService.determineMembershipUsers(assignment).map(_.getWarwickId)
@@ -48,7 +48,7 @@ class OldAssignmentMarkerMarksTemplateController extends OldCourseworkController
 		@PathVariable assignment: Assignment,
 		@PathVariable marker: User
 	) =
-		GenerateOwnMarksTemplateCommand(
+		OldGenerateOwnMarksTemplateCommand(
 			mandatory(module),
 			mandatory(assignment),
 			assignment.getMarkersSubmissions(mandatory(marker)).flatMap(_.universityId)
