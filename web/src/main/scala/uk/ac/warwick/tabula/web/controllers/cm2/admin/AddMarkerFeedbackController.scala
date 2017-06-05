@@ -36,10 +36,7 @@ class AddMarkerFeedbackController extends CourseworkController {
 		Mav("cm2/admin/assignments/markerfeedback/form",
 			"isProxying" -> cmd.isProxying,
 			"proxyingAs" -> marker
-		)
-		//	crumbs(
-		//	CourseworkBreadcrumbs.Standard(s"Marking for ${assignment.name}", Some(Routes.admin.assignment.markerFeedback(assignment, marker)), "")
-		//)
+		).crumbsList(Breadcrumbs.marker(assignment, marker))
 	}
 
 	@RequestMapping(method = Array(POST), params = Array("!confirm"))
@@ -58,10 +55,7 @@ class AddMarkerFeedbackController extends CourseworkController {
 			Mav("cm2/admin/assignments/markerfeedback/preview",
 				"isProxying" -> cmd.isProxying,
 				"proxyingAs" -> marker
-			)
-			//.crumbs(
-			//CourseworkBreadcrumbs.Standard(s"Marking for ${assignment.name}", Some(Routes.admin.assignment.markerFeedback(assignment, marker)), "")
-			//)
+			).crumbsList(Breadcrumbs.marker(assignment, marker))
 		}
 	}
 

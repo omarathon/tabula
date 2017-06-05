@@ -14,7 +14,7 @@ import uk.ac.warwick.userlookup.User
 
 import scala.collection.JavaConverters._
 
-//FIXME - Ideally should use cake pattern  for this and UploadFeedbackCommand but leaving it as it is and using existing cm1 command code
+//FIXME - Ideally should use cake pattern  for this and UploadFeedbackCommand - currently used migrated cm1 commands
 class AddMarkerFeedbackCommand(assignment: Assignment, marker: User, val submitter: CurrentUser)
 	extends UploadFeedbackCommand[List[MarkerFeedback]](assignment, marker) with CanProxy {
 
@@ -31,6 +31,7 @@ class AddMarkerFeedbackCommand(assignment: Assignment, marker: User, val submitt
 
 
 	def processStudents() {
+		//bring all feedbacks belonging to the current marker along with  completed marking. Completed marking records are displayed to the user at front end if marker did upload again
 		val allMarkerFeedbacks = assignment.allFeedback.flatMap { feedback =>
 			val outstandingStages = feedback.outstandingStages.asScala
 			val mFeedback = feedback.allMarkerFeedback.filter { mFeedback =>
@@ -42,10 +43,12 @@ class AddMarkerFeedbackCommand(assignment: Assignment, marker: User, val submitt
 
 
 		val allMarkerFeedbackUsercodes = allMarkerFeedbacks.map(_.student.getUserId)
+
 		invalidStudents = items.asScala.filter(item => {
 			val usercode = item.student.map(_.getUserId).getOrElse("")
 			!allMarkerFeedbackUsercodes.contains(usercode)
 		}).asJava
+
 		markedStudents = items.asScala.filter(item => {
 			val usercode = item.student.map(_.getUserId).getOrElse("")
 			allMarkedFeedbackUserCodes.contains(usercode)

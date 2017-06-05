@@ -4,6 +4,7 @@ import uk.ac.warwick.tabula.AcademicYear
 import uk.ac.warwick.tabula.cm2.web.Routes
 import uk.ac.warwick.tabula.data.model
 import uk.ac.warwick.tabula.web.BreadCrumb
+import uk.ac.warwick.userlookup.User
 
 trait CourseworkBreadcrumbs {
 	val Breadcrumbs = CourseworkBreadcrumbs
@@ -19,7 +20,15 @@ object CourseworkBreadcrumbs {
 	def assignment(assignment: model.Assignment, active: Boolean = false): Seq[BreadCrumb] =
 		module(assignment.module, assignment.academicYear) :+ Assignment(assignment, active)
 
-	private[CourseworkBreadcrumbs] case class Standard(title: String, url: Option[String], override val tooltip: String) extends BreadCrumb
+	def marker(assignment: model.Assignment, marker: User): Seq[BreadCrumb] = {
+		Seq(Standard(assignment, marker))
+	}
+
+	private[CourseworkBreadcrumbs] case class Standard(assignment: model.Assignment, marker: User) extends BreadCrumb {
+		val title: String = s"Marking for ${assignment.name}"
+		val url: Option[String] = Some(Routes.admin.assignment.markerFeedback(assignment, marker))
+	}
+
 
 	private[CourseworkBreadcrumbs] case class Department(dept: model.Department, academicYear: Option[AcademicYear], override val active: Boolean) extends BreadCrumb {
 		val title: String = dept.name

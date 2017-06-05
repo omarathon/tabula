@@ -190,4 +190,4 @@ TODO grab values from the Routes object in code, as that's pretty equivalent and
 
 <#macro feedbackDownload feedback attachmentExtension><@_u page="/admin/assignments/${feedback.assignment.id}/feedback/download/${feedback.id}/feedback-${feedback.studentIdentifier}.${attachmentExtension}" /></#macro>
 
-<#macro uploadmarkerfeedback assignment marker><@_u page="/admin/assignments/${assignment.id}/marker/${marker.warwickId}/feedback"/></#macro>
+<#macro uploadmarkerfeedback assignment marker><@_u page="/admin/assignments/${assignment.id}/marker/${marker.userId}/feedback"/></#macro>

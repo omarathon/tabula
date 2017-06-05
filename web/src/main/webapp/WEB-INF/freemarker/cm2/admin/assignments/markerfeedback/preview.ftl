@@ -1,4 +1,6 @@
 <#escape x as x?html>
+	<#import "*/cm2_macros.ftl" as cm2 />
+	<@cm2.assignmentHeader "Submit feedback" assignment "for" />
 	<#assign commandName="addMarkerFeedbackCommand" />
 	<@spring.bind path=commandName>
 		<#assign hasErrors=status.errors.allErrors?size gt 0 />
@@ -8,9 +10,6 @@
 	<#assign submitUrl><@routes.cm2.uploadmarkerfeedback assignment marker /></#assign>
 	<@f.form method="post" class="double-submit-protection"  action=submitUrl commandName=commandName>
 		<input type="hidden" name="batch" value="true">
-
-		<h1>Submit feedback for ${assignment.name}</h1>
-
 			<@spring.bind path="fromArchive"><#assign fromArchive=status.actualValue /></@spring.bind>
 			<#if fromArchive>
 				<#assign verbed_your_noun="unpacked your Zip file"/>
@@ -38,7 +37,6 @@
 			</@spring.bind>
 
 			<#if hasGlobalErrors>
-
 				<div class="alert alert-danger"><@f.errors path="" cssClass="error"/></div>
 			<#else>
 				<#if addMarkerFeedbackCommand.unrecognisedFiles?size gt 0>
