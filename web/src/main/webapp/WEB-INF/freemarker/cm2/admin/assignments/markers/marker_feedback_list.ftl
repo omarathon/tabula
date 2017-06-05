@@ -1,5 +1,7 @@
 <#import "/WEB-INF/freemarker/_profile_link.ftl" as pl />
 <#import "*/coursework_components.ftl" as components />
+<#import "*/modal_macros.ftl" as modal />
+
 <#list feedbackByStage?keys as stage>
 	<#assign markingCompleted><@routes.cm2.markingCompleted assignment stage marker /></#assign>
 	<#assign enhancedMarkerFeedbacks = mapGet(feedbackByStage, stage)/>
@@ -14,8 +16,16 @@
 					Download <span class="caret"></span>
 				</button>
 				<ul class="dropdown-menu">
-					<li><a class="form-post" href="<@routes.cm2.downloadMarkerSubmissions assignment marker />">Download all selected submissions</a></li>
-					<li><a href="#">Download all selected submissions as pdf</a></li>
+					<li class="must-have-selected">
+						<a class="form-post" href="<@routes.cm2.downloadMarkerSubmissions assignment marker />">
+							Download all selected submissions
+						</a>
+					</li>
+					<li class="must-have-selected">
+						<a class="download-pdf" data-target="#download-pdf-modal-${stage.name}" href="<@routes.cm2.downloadMarkerSubmissionsPdf assignment marker />">
+							Download all selected submissions as pdf
+						</a>
+					</li>
 					<#if features.feedbackTemplates && assignment.hasFeedbackTemplate>
 						<li>
 							<a class="btn use-tooltip" title="Download feedback templates for all students as a ZIP file." href="<@routes.cm2.markerTemplatesZip assignment />" data-container="body">
@@ -99,6 +109,21 @@
 					<a class="btn btn-primary must-have-selected form-post" href="${markingCompleted}">Confirm selected and send to ${stage.nextStagesDescription?lower_case}</a>
 				</#if>
 			</#if>
+
+			<div id="download-pdf-modal-${stage.name}" class="modal fade">
+				<@modal.wrapper>
+					<@modal.header>
+						<h3 class="modal-title">Download submissions as PDF</h3>
+					</@modal.header>
+					<@modal.body>
+						<p>There are <span class="count"></span> submissions that have files that are not PDFs (shown below). The download will not include these files.</p>
+						<p><a class="form-post btn btn-primary"
+									data-href="<@routes.cm2.downloadMarkerSubmissionsPdf assignment marker />?download" href="">Download submissions as PDF</a>
+						</p>
+						<ul class="submissions"></ul>
+					</@modal.body>
+				</@modal.wrapper>
+			</div>
 		<#else>
 			No students found
 		</#if>

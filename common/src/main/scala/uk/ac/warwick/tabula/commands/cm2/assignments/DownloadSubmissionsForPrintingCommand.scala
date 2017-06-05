@@ -3,11 +3,12 @@ package uk.ac.warwick.tabula.commands.cm2.assignments
 import java.io.ByteArrayOutputStream
 
 import com.google.common.io.ByteSource
+import uk.ac.warwick.tabula.JavaImports.JList
 import uk.ac.warwick.tabula.commands._
 import uk.ac.warwick.tabula.commands.cm2.assignments.DownloadSubmissionsForPrintingCommand.Result
 import uk.ac.warwick.tabula.commands.profiles.PhotosWarwickMemberPhotoUrlGeneratorComponent
 import uk.ac.warwick.tabula.data.model.MarkingState.MarkingCompleted
-import uk.ac.warwick.tabula.data.model.{Assignment, FileAttachment, Submission}
+import uk.ac.warwick.tabula.data.model.{Assignment, FileAttachment, MarkerFeedback, Submission}
 import uk.ac.warwick.tabula.data.{AutowiringFileDaoComponent, FileDaoComponent}
 import uk.ac.warwick.tabula.pdf.{CombinesPdfs, FreemarkerXHTMLPDFGeneratorComponent}
 import uk.ac.warwick.tabula.permissions.Permissions
@@ -16,6 +17,9 @@ import uk.ac.warwick.tabula.system.permissions.{PermissionsChecking, Permissions
 import uk.ac.warwick.tabula.web.views.AutowiredTextRendererComponent
 import uk.ac.warwick.tabula.{AutowiringTopLevelUrlComponent, CurrentUser, ItemNotFoundException}
 import uk.ac.warwick.userlookup.User
+import uk.ac.warwick.tabula.JavaImports._
+
+import scala.collection.JavaConverters._
 
 trait DownloadAdminSubmissionsForPrintingCommandHelper
 	extends FreemarkerXHTMLPDFGeneratorComponent
@@ -162,13 +166,27 @@ trait DownloadAdminSubmissionsForPrintingCommandRequest extends DownloadSubmissi
 }
 
 trait DownloadMarkerSubmissionsForPrintingCommandRequest extends DownloadSubmissionsForPrintingCommandRequest {
-
 	self: DownloadMarkerSubmissionsForPrintingCommandState =>
 
+	var markerFeedback: JList[MarkerFeedback] = JArrayList()
+
 	override def submissions: Seq[Submission] = {
-		assignment.getMarkersSubmissions(marker).filter { submission =>
-			val markerFeedback = assignment.getMarkerFeedbackForCurrentPosition(submission.usercode, marker)
-			markerFeedback.exists(mf => mf.state != MarkingCompleted)
-		}
+		val selectedStudents =
+			if (markerFeedback.isEmpty) students.asScala
+			else markerFeedback.asScala.map(_.student.getUserId)
+
+		val allMarkerSubmissions =
+			if (assignment.cm2Assignment)
+				assignment.cm2MarkerAllocations.filter(_.marker == marker)
+					.flatMap(_.students.map(_.getUserId)).distinct
+					.flatMap { s => assignment.submissions.asScala.find(_.usercode == s) }
+			else
+				assignment.getMarkersSubmissions(marker).filter { submission =>
+					val markerFeedback = assignment.getMarkerFeedbackForCurrentPosition(submission.usercode, marker)
+					markerFeedback.exists(mf => mf.state != MarkingCompleted)
+				}
+
+		if (selectedStudents.isEmpty) allMarkerSubmissions
+		else selectedStudents.flatMap { s => allMarkerSubmissions.find(_.usercode == s) }
 	}
 }

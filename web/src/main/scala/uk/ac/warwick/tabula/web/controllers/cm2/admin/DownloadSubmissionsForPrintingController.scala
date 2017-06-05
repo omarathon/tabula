@@ -3,13 +3,15 @@ package uk.ac.warwick.tabula.web.controllers.cm2.admin
 import org.springframework.context.annotation.Profile
 import org.springframework.stereotype.Controller
 import org.springframework.web.bind.annotation.{ModelAttribute, PathVariable, RequestMapping}
-import uk.ac.warwick.tabula.commands.cm2.assignments.{DownloadAdminSubmissionsForPrintingCommand, DownloadSubmissionsForPrintingCommand}
+import uk.ac.warwick.tabula.CurrentUser
+import uk.ac.warwick.tabula.commands.cm2.assignments.{DownloadAdminSubmissionsForPrintingCommand, DownloadMarkerSubmissionsForPrintingCommand, DownloadSubmissionsForPrintingCommand}
 import uk.ac.warwick.tabula.data.model.Assignment
 import uk.ac.warwick.tabula.services.AutowiringUserLookupComponent
 import uk.ac.warwick.tabula.system.RenderableFileView
 import uk.ac.warwick.tabula.web.Mav
 import uk.ac.warwick.tabula.web.controllers.cm2.CourseworkController
 import uk.ac.warwick.tabula.web.views.JSONView
+import uk.ac.warwick.userlookup.User
 
 trait DownloadSubmissionsForPrintingController extends CourseworkController with AutowiringUserLookupComponent {
 
@@ -43,7 +45,17 @@ trait DownloadSubmissionsForPrintingController extends CourseworkController with
 class DownloadAdminSubmissionsForPrintingController extends DownloadSubmissionsForPrintingController {
 
 	@ModelAttribute("command")
-	def command(@PathVariable assignment: Assignment) =
+	def command(@PathVariable assignment: Assignment): DownloadSubmissionsForPrintingCommand.Command =
 		DownloadAdminSubmissionsForPrintingCommand(assignment)
+
+}
+
+@Profile(Array("cm2Enabled")) @Controller
+@RequestMapping(Array("/${cm2.prefix}/admin/assignments/{assignment}/marker/{marker}/submissions.pdf"))
+class DownloadMarkerSubmissionsForPrintingController extends DownloadSubmissionsForPrintingController {
+
+	@ModelAttribute("command")
+	def command(@PathVariable assignment: Assignment, @PathVariable marker: User, submitter: CurrentUser): DownloadSubmissionsForPrintingCommand.Command =
+		DownloadMarkerSubmissionsForPrintingCommand(assignment, marker, submitter)
 
 }

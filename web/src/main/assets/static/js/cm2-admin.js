@@ -331,12 +331,14 @@
 	 * Special case for downloading submissions as PDF.
 	 * Does a check for non PDF files in submissions before fetching the download
 	 */
-	$(function(){
-		$('a.download-pdf').on('click', function(e){
+	exports.wirePDFDownload = function ($scope) {
+		$scope = $scope || $('body');
+
+		$('a.download-pdf', $scope).on('click', function(e){
 			var $this = $(this);
 			e.preventDefault();
 			if(!$this.hasClass("disabled") && $this.closest('.disabled').length === 0) {
-				var $modal = $('#download-pdf-modal'), action = this.href;
+				var $modal = $($this.data('target') || '#download-pdf-modal'), action = this.href;
 				if ($this.data('href')) {
 					action = $this.data('href')
 				}
@@ -347,7 +349,7 @@
 				$.post(action, postData, function(data){
 					if (data.submissionsWithNonPDFs.length === 0) {
 						// Use native click instead of trigger because there's no click handler for the marker version
-						$modal.find('.btn.btn-primary').get(0).click();
+						$modal.find('.btn.btn-primary').click();
 					} else {
 						$modal.find('.count').html(data.submissionsWithNonPDFs.length);
 						var $submissionsContainer = $modal.find('.submissions').empty();
@@ -365,7 +367,8 @@
 				});
 			}
 		});
-	});
+	};
+	$(function () { exports.wirePDFDownload(); });
 
     exports.initBigList = function ($scope) {
 		$scope = $scope || $('body');
