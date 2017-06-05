@@ -28,7 +28,7 @@
 					</li>
 					<#if features.feedbackTemplates && assignment.hasFeedbackTemplate>
 						<li>
-							<a title="Download feedback templates for all students as a ZIP file." href="<@routes.cm2.markerTemplatesZip assignment marker/>" data-container="body">
+							<a class="use-tooltip" title="Download feedback templates for all students as a ZIP file." href="<@routes.cm2.markerTemplatesZip assignment marker/>" data-container="body">
 								Download feedback templates
 							</a>
 						</li>
