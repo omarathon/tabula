@@ -146,7 +146,7 @@ TODO grab values from the Routes object in code, as that's pretty equivalent and
 <#macro downloadMarkerSubmissions assignment marker><@_u page="/admin/assignments/${assignment.id}/marker/${marker.warwickId}/submissions.zip"/></#macro>
 <#macro downloadMarkerSubmissionsPdf assignment marker><@_u page="/admin/assignments/${assignment.id}/marker/${marker.warwickId}/submissions.pdf"/></#macro>
 
-<#macro markerTemplatesZip assignment><@_u page="/admin/assignments/${assignment.id}/marker-templates.zip" /></#macro>
+<#macro markerTemplatesZip assignment marker><@_u page="/admin/assignments/${assignment.id}/${marker.userId}/marker-templates.zip" /></#macro>
 <#macro generateGradesForMarks assignment><@_u page="/admin/assignments/${assignment.id}/generate-grade"/></#macro>
 
 <#macro assignmentsubmissionsandfeedback assignment><@_u page="/admin/assignments/${assignment.id}"/></#macro>

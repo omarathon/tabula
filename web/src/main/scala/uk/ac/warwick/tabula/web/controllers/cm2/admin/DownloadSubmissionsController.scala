@@ -125,11 +125,22 @@ class DownloadFeedbackSheetsController extends CourseworkController {
 
 @Profile(Array("cm2Enabled")) @Controller
 @RequestMapping(value=Array("/${cm2.prefix}/admin/assignments/{assignment}/marker-templates.zip"))
+class DownloadMarkerTemplatesAsCurrentUserController extends CourseworkController {
+	@RequestMapping
+	def downloadFeedbackTemplates(@PathVariable assignment: Assignment): Mav = {
+		Redirect(Routes.admin.assignment.markerTemplates(assignment, user.apparentUser))
+	}
+}
+
+
+@Profile(Array("cm2Enabled")) @Controller
+@RequestMapping(value=Array("/${cm2.prefix}/admin/assignments/{assignment}/marker/{marker}/marker-templates.zip"))
 class DownloadMarkerTemplatesController extends CourseworkController {
 
 	@ModelAttribute("downloadFeedbackSheetsCommand")
-	def feedbackSheetsCommand(@PathVariable assignment: Assignment): DownloadFeedbackSheetsCommand.Command = {
-		val students = assignment.cm2MarkerAllocations.filter(_.marker == user.apparentUser).flatMap(_.students).distinct
+	def feedbackSheetsCommand(@PathVariable assignment: Assignment, @PathVariable marker: User): DownloadFeedbackSheetsCommand.Command = {
+		mandatory(marker)
+		val students = assignment.cm2MarkerAllocations.filter(_.marker == marker).flatMap(_.students).distinct
 		DownloadFeedbackSheetsCommand.marker(assignment, students)
 	}
 
