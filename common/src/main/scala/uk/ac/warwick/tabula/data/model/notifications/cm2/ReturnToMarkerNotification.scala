@@ -29,7 +29,10 @@ class ReturnToMarkerNotification
 		comment.value = commentValue
 	}
 
-	def workflowVerb: String = MarkingWorkflowStage.fromCode(whichMarker.value).verb
+	def workflowVerb: String = whichMarker.value match {
+		case MarkingWorkflowStage(s) => s.verb
+		case _ => MarkingWorkflowStage.DefaultVerb
+	}
 
 	@transient val whichMarker = StringSetting("stage", "")
 	@transient val comment = StringSetting("comment", "")

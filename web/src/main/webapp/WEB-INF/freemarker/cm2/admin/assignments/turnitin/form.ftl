@@ -11,7 +11,7 @@
 </p>
 
 <#if errors?? && errors.allErrors?size gt 0>
-	<div class="alert alert-error">
+	<div class="alert alert-danger">
 		<#list errors.allErrors as error>
 			<p><@spring.message code=error.code arguments=error.arguments/></p>
 		</#list>

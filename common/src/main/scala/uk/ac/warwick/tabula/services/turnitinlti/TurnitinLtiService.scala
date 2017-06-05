@@ -96,7 +96,7 @@ object TurnitinLtiService {
 			Seq(assignment.closeDate),
 			assignment.extensions.asScala.flatMap(_.expiryDate),
 			Seq(DateTime.now)
-		).flatten.max.plusMonths(1)
+		).flatten.filter(Option(_).nonEmpty).max.plusMonths(1)
 	}
 }
 

@@ -99,7 +99,7 @@ class CM2MarkingWorkflowServiceImpl extends CM2MarkingWorkflowService with Autow
 			val remainingStages = f.outstandingStages.asScala diff Seq(currentStage)
 			val releasedMarkerFeedback: Seq[MarkerFeedback] = if(remainingStages.isEmpty) {
 				f.outstandingStages = currentStage.nextStages.asJava
-				f.markerFeedback.asScala.filter(mf => currentStage.nextStages.contains(mf.stage))
+				f.allMarkerFeedback.filter(mf => currentStage.nextStages.contains(mf.stage))
 			} else {
 				f.outstandingStages = remainingStages.asJava
 				Nil
@@ -128,7 +128,7 @@ class CM2MarkingWorkflowServiceImpl extends CM2MarkingWorkflowService with Autow
 		feedbacks.flatMap(f => {
 			f.outstandingStages = stages.asJava
 			feedbackService.saveOrUpdate(f)
-			f.markerFeedback.asScala.filter(mf => f.outstandingStages.contains(mf.stage))
+			f.allMarkerFeedback.filter(mf => f.outstandingStages.contains(mf.stage))
 		})
 	}
 

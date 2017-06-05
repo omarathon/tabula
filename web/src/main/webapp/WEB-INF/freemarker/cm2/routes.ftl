@@ -134,9 +134,9 @@ TODO grab values from the Routes object in code, as that's pretty equivalent and
 
 <#macro listmarkersubmissions assignment marker><@_u page="/admin/assignments/${assignment.id}/marker/${marker.warwickId}"/></#macro>
 
-<#macro markerUploadFeedback assignment marker><@_u page="/admin/assignments/${assignment.id}/marker/${marker.warwickId}/feedback"/></#macro>
-<#macro markerUploadMarks assignment marker><@_u page="/admin/assignments/${assignment.id}/marker/${marker.warwickId}/marks"/></#macro>
-<#macro markerUploadMarksTemplate assignment marker><@_u page="/admin/assignments/${assignment.id}/marker/${marker.warwickId}/marks-template"/></#macro>
+<#macro markerUploadFeedback assignment marker><@_u page="/admin/assignments/${assignment.id}/marker/${marker.userId}/feedback"/></#macro>
+<#macro markerUploadMarks assignment marker><@_u page="/admin/assignments/${assignment.id}/marker/${marker.userId}/marks"/></#macro>
+<#macro markerUploadMarksTemplate assignment marker><@_u page="/admin/assignments/${assignment.id}/marker/${marker.userId}/marks-template"/></#macro>
 
 <#macro markerOnlineFeedback assignment stage marker student><@_u page="/admin/assignments/${assignment.id}/marker/${marker.warwickId}/${stage.name}/feedback/online/${student.warwickId}"/></#macro>
 <#macro markingCompleted assignment stage marker><@_u page="/admin/assignments/${assignment.id}/marker/${marker.warwickId}/${stage.name}/marking-completed"/></#macro>
@@ -145,8 +145,9 @@ TODO grab values from the Routes object in code, as that's pretty equivalent and
 <#macro downloadMarkerFeedbackOne assignment marker markerFeedback attachment><@_u page="/admin/assignments/${assignment.id}/marker/${marker.warwickId}/feedback/download/${markerFeedback.id}/attachment/${attachment.name?url}"/></#macro>
 <#macro downloadMarkerFeedbackAll assignment marker markerFeedback zipName><@_u page="/admin/assignments/${assignment.id}/marker/${marker.warwickId}/feedback/download/${markerFeedback.id}/attachments/${zipName}.zip"/></#macro>
 <#macro downloadMarkerSubmissions assignment marker><@_u page="/admin/assignments/${assignment.id}/marker/${marker.warwickId}/submissions.zip"/></#macro>
+<#macro downloadMarkerSubmissionsPdf assignment marker><@_u page="/admin/assignments/${assignment.id}/marker/${marker.warwickId}/submissions.pdf"/></#macro>
 
-<#macro markerTemplatesZip assignment><@_u page="/admin/assignments/${assignment.id}/marker-templates.zip" /></#macro>
+<#macro markerTemplatesZip assignment marker><@_u page="/admin/assignments/${assignment.id}/${marker.userId}/marker-templates.zip" /></#macro>
 <#macro generateGradesForMarks assignment><@_u page="/admin/assignments/${assignment.id}/generate-grade"/></#macro>
 
 <#macro assignmentsubmissionsandfeedback assignment><@_u page="/admin/assignments/${assignment.id}"/></#macro>
@@ -178,10 +179,10 @@ TODO grab values from the Routes object in code, as that's pretty equivalent and
 <#macro submissionsPdf assignment><@_u page="/admin/assignments/${assignment.id}/submissions.pdf" /></#macro>
 <#macro assignmentFeedbackZip assignment><@_u page="/admin/assignments/${assignment.id}/feedback.zip" /></#macro>
 
-<#macro deleteSubmissions assignment><@_u page="/admin/assignments/${assignment.id}/submissionsandfeedback" /></#macro>
+<#macro deleteSubmissionsAndFeedback assignment><@_u page="/admin/assignments/${assignment.id}/submissionsandfeedback/delete" /></#macro>
+
 <#macro downloadFeedbackTemplates assignment><@_u page="/admin/assignments/${assignment.id}/feedback-templates.zip" /></#macro>
-<#macro publishFeedback assignment><@_u page="/admin/assignments/${assignment.id}/publish'/>" /></#macro>
-<#macro deleteFeedback assignment><@_u page="/admin/assignments/${assignment.id}/submissionsandfeedback/delete" /></#macro>
+<#macro publishFeedback assignment><@_u page="/admin/assignments/${assignment.id}/publish" /></#macro>
 <#macro exportCsv assignment><@_u page="/admin/assignments/${assignment.id}/export.csv" /></#macro>
 <#macro exportXml assignment><@_u page="/admin/assignments/${assignment.id}/export.xml" /></#macro>
 <#macro exportXlsx assignment><@_u page="/admin/assignments/${assignment.id}/export.xlsx" /></#macro>
@@ -189,3 +190,5 @@ TODO grab values from the Routes object in code, as that's pretty equivalent and
 <#macro addFeedback assignment><@_u page="/admin/assignments/${assignment.id}/feedback/batch" /></#macro>
 
 <#macro feedbackDownload feedback attachmentExtension><@_u page="/admin/assignments/${feedback.assignment.id}/feedback/download/${feedback.id}/feedback-${feedback.studentIdentifier}.${attachmentExtension}" /></#macro>
+
+<#macro uploadmarkerfeedback assignment marker><@_u page="/admin/assignments/${assignment.id}/marker/${marker.userId}/feedback"/></#macro>

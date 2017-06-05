@@ -1,12 +1,13 @@
 package uk.ac.warwick.tabula.data.model
 
 import uk.ac.warwick.tabula.services.{ExtensionService, FeedbackService, SubmissionService}
-import uk.ac.warwick.tabula.{Mockito, Fixtures, TestBase}
+import uk.ac.warwick.tabula.{Fixtures, Mockito, TestBase}
 import org.joda.time.DateTime
 import org.joda.time.DateTimeConstants._
 import org.joda.time.DateTimeConstants
+import uk.ac.warwick.tabula.commands.coursework.feedback.SubmissionsReport
 import uk.ac.warwick.tabula.data.model.MarkingState.MarkingCompleted
-import uk.ac.warwick.tabula.data.model.forms.{FormFieldContext, TextField, Extension}
+import uk.ac.warwick.tabula.data.model.forms.{Extension, FormFieldContext, TextField}
 
 // scalastyle:off magic.number
 class AssignmentTest extends TestBase with Mockito {
@@ -78,7 +79,7 @@ class AssignmentTest extends TestBase with Mockito {
 		val assignment = new Assignment
 		assignment.collectSubmissions = false
 		assignment.collectMarks = false
-		assignment.submissionsReport should not be 'hasProblems
+		SubmissionsReport(assignment) should not be 'hasProblems
 
 		for (i <- 1 to 10) {// 0000001 .. 0000010
 			val feedback = Fixtures.assignmentFeedback(universityId = idFormat(i))
@@ -94,7 +95,7 @@ class AssignmentTest extends TestBase with Mockito {
 			}
 
 		// only 0000008 .. 0000010 are common to both lists
-		val report = assignment.submissionsReport
+		val report = SubmissionsReport(assignment)
 		assignment.collectSubmissions = false
 		report should not be 'hasProblems // be has problems.
 		assignment.collectSubmissions = true

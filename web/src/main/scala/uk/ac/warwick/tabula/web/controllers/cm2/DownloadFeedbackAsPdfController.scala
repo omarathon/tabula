@@ -21,7 +21,7 @@ class DownloadFeedbackAsPdfController extends CourseworkController {
 
 	type DownloadFeedbackAsPdfCommand = Appliable[Feedback]
 	var feedbackService: FeedbackService = Wire[FeedbackService]
-	var profileService: ProfileService = Wire.auto[ProfileService]
+	var profileService: ProfileService = Wire[ProfileService]
 
 	@ModelAttribute def command(@PathVariable assignment: Assignment, @PathVariable student: User): DownloadFeedbackAsPdfCommand = {
 		// We send a permission denied explicitly (this would normally be a 404 for feedback not found) because PDF handling is silly in Chrome et al
@@ -30,17 +30,17 @@ class DownloadFeedbackAsPdfController extends CourseworkController {
 		}
 		val studentMember = profileService.getMemberByUniversityIdStaleOrFresh(student.getWarwickId)
 
-		DownloadFeedbackAsPdfCommand(assignment, mandatory(feedbackService.getAssignmentFeedbackByUsercode(assignment, student.getUserId)), studentMember)
+		DownloadFeedbackAsPdfCommand(assignment, mandatory(feedbackService.getAssignmentFeedbackByUsercode(assignment, student.getUserId).filter(_.released)), studentMember)
 	}
 
 	@RequestMapping
-	def viewAsPdf(command: DownloadFeedbackAsPdfCommand, @PathVariable student: Member): PDFView with FreemarkerXHTMLPDFGeneratorComponent with AutowiredTextRendererComponent with PhotosWarwickMemberPhotoUrlGeneratorComponent = {
+	def viewAsPdf(command: DownloadFeedbackAsPdfCommand, @PathVariable student: User): PDFView with FreemarkerXHTMLPDFGeneratorComponent with AutowiredTextRendererComponent with PhotosWarwickMemberPhotoUrlGeneratorComponent = {
 		new PDFView(
 			"feedback.pdf",
 			DownloadFeedbackAsPdfCommand.feedbackDownloadTemple,
 			Map(
 				"feedback" -> command.apply(),
-				"studentId" -> student.universityId
+				"studentId" -> student.getWarwickId
 			)
 		) with FreemarkerXHTMLPDFGeneratorComponent with AutowiredTextRendererComponent with PhotosWarwickMemberPhotoUrlGeneratorComponent with AutowiringTopLevelUrlComponent
 	}

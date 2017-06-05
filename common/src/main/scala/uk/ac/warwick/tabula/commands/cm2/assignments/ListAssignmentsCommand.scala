@@ -111,7 +111,7 @@ abstract class ListAssignmentsCommandInternal(val academicYear: AcademicYear, va
 
 	protected def moduleInfo(module: Module) = ModuleAssignmentsInfo(
 		module,
-		module.assignments.asScala.filter(_.academicYear == academicYear).map { assignment =>
+		module.assignments.asScala.filter(_.isAlive).filter(_.academicYear == academicYear).map { assignment =>
 			BasicAssignmentInfo(assignment)
 		}.filter { info =>
 			(moduleFilters.asScala.isEmpty || moduleFilters.asScala.exists(_(info))) &&
@@ -287,7 +287,7 @@ object AssignmentInfoFilters {
 		case object NoMarkers extends AssignmentInfoFilter {
 			val description = "No markers"
 			def apply(info: AssignmentInfo): Boolean = info.assignment.allFeedback
-				.flatMap(_.markerFeedback.asScala)
+				.flatMap(_.allMarkerFeedback)
 				.flatMap(m => Option(m.marker)) // markers may have been removed so could be null
 				.isEmpty
 		}
