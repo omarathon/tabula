@@ -13,7 +13,7 @@
 			</p>
 			<#if features.feedbackTemplates && assignment.hasFeedbackTemplate>
 				<p>
-					You can <a  href="<@routes.cm2.markerTemplatesZip assignment />">download a zip</a>
+					You can <a  href="<@routes.cm2.markerTemplatesZip assignment marker/>">download a zip</a>
 					containing copies of this assignments feedback template for each student with the university IDs added for you.
 				</p>
 			</#if>

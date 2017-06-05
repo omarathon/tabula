@@ -164,6 +164,10 @@ object Routes {
 				}
 			}
 
+			object markerTemplates {
+				def apply(assignment: Assignment, marker: User): String = markerroot(assignment, marker) + "/marker-templates.zip"
+			}
+
 			object turnitin {
 				def status(assignment: Assignment): String = assignmentroot(assignment) + "/turnitin/status"
 			}
