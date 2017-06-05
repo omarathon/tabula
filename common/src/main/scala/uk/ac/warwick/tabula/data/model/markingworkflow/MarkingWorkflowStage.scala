@@ -119,12 +119,14 @@ object MarkingWorkflowStage {
 		ModerationMarker, ModerationModerator, ModerationCompleted
 	)
 
-	def fromCode(code: String): MarkingWorkflowStage =
-		if (code == null) null
-		else values.find{_.name == code} match {
-			case Some(stage) => stage
-			case None => throw new IllegalArgumentException(s"Invalid marking stage: $code")
-		}
+	def unapply(code: String): Option[MarkingWorkflowStage] =
+		code.maybeText.flatMap { name => values.find(_.name == name) }
+
+	def fromCode(code: String): MarkingWorkflowStage = code match {
+		case null => null
+		case MarkingWorkflowStage(s) => s
+		case _ => throw new IllegalArgumentException(s"Invalid marking stage: $code")
+	}
 
 	implicit val defaultOrdering = new Ordering[MarkingWorkflowStage] {
 		def compare(a: MarkingWorkflowStage, b: MarkingWorkflowStage): Int = {
