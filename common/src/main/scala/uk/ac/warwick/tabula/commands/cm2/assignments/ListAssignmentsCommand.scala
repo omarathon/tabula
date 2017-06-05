@@ -287,7 +287,7 @@ object AssignmentInfoFilters {
 		case object NoMarkers extends AssignmentInfoFilter {
 			val description = "No markers"
 			def apply(info: AssignmentInfo): Boolean = info.assignment.allFeedback
-				.flatMap(_.markerFeedback.asScala)
+				.flatMap(_.allMarkerFeedback)
 				.flatMap(m => Option(m.marker)) // markers may have been removed so could be null
 				.isEmpty
 		}
