@@ -81,6 +81,8 @@ trait MarkerAddMarksDescription extends Describable[Seq[MarkerFeedback]] {
 
 	self: MarkerAddMarksState =>
 
+	override lazy val eventName = "MarkerAddMarks"
+
 	override def describe(d: Description) {
 		d.assignment(assignment)
 	}

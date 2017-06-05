@@ -22,6 +22,7 @@ object AdminAddMarksCommand {
 			with AddMarksCommandBindListener
 			with AdminAddMarksPermissions
 			with AdminAddMarksDescription
+			with AdminAddMarksNotifications
 			with AutowiringMarksExtractorComponent
 			with AutowiringFeedbackServiceComponent
 }
@@ -74,6 +75,8 @@ trait AdminAddMarksPermissions extends RequiresPermissionsChecking with Permissi
 
 trait AdminAddMarksDescription extends Describable[Seq[Feedback]] {
 	self: AdminAddMarksState =>
+
+	override lazy val eventName = "AdminAddMarks"
 
 	override def describe(d: Description) {
 		d.assignment(assignment)

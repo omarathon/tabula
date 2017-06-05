@@ -48,7 +48,7 @@
 		<@spring.bind path="marks">
 			<#assign itemList=status.actualValue />
 			<#if itemList?size gt 0>
-				<table class="table table-bordered upload-marks-preview">
+				<table class="table upload-marks-preview">
 					<tr>
 						<th>ID</th>
 						<th>Marks</th>
