@@ -151,7 +151,8 @@
 						</a>
 					</div>
 				</#if>
-			<#if assignment.collectSubmissions && features.markingWorkflows>
+
+				<#if (assignment.collectSubmissions || assignment.cm2Assignment) && features.markingWorkflows>
 					<#if results.mustReleaseForMarking!false>
 						<div class="btn-group">
 							<a class="btn btn-default dropdown-toggle" data-toggle="dropdown">
