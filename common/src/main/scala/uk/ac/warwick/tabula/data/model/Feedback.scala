@@ -328,6 +328,18 @@ abstract class Feedback extends GeneratedId with FeedbackAttachments with Permis
 
 	def comments: Option[String] = commentsFormValue.map(_.value)
 
+	def comments_=(value: String) {
+		commentsFormValue
+			.getOrElse({
+				val newValue = new SavedFormValue()
+				newValue.name = Assignment.defaultFeedbackTextFieldName
+				newValue.feedback = this
+				this.customFormValues.add(newValue)
+				newValue
+			})
+			.value = value
+	}
+
 	def commentsFormattedHtml: String = formattedHtml(comments)
 
 	def hasContent: Boolean = hasMarkOrGrade || hasAttachments || hasOnlineFeedback

@@ -4,7 +4,7 @@ import org.apache.poi.ss.usermodel.{ComparisonOperator, IndexedColors, Sheet}
 import org.apache.poi.ss.util.CellRangeAddress
 import org.apache.poi.xssf.streaming.SXSSFWorkbook
 import uk.ac.warwick.tabula.commands._
-import uk.ac.warwick.tabula.commands.coursework.feedback.MarksTemplateCommand
+import uk.ac.warwick.tabula.commands.coursework.feedback.OldMarksTemplateCommand
 import uk.ac.warwick.tabula.data.model.{Exam, Module}
 import uk.ac.warwick.tabula.permissions.Permissions
 import uk.ac.warwick.tabula.services.{AutowiringFeedbackServiceComponent, FeedbackServiceComponent}
@@ -53,7 +53,7 @@ class GenerateExamMarksTemplateCommandInternal(val module: Module, val exam: Exa
 	}
 
 	private def generateNewMarkSheet(exam: Exam, workbook: SXSSFWorkbook) = {
-		val sheet = workbook.createSheet("Marks for " + MarksTemplateCommand.safeAssessmentName(exam))
+		val sheet = workbook.createSheet("Marks for " + OldMarksTemplateCommand.safeAssessmentName(exam))
 
 		// add header row
 		val header = sheet.createRow(0)

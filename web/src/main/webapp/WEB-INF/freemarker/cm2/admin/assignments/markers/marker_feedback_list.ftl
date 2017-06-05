@@ -44,8 +44,8 @@
 					Upload <span class="caret"></span>
 				</button>
 				<ul class="dropdown-menu">
-					<li><a href="<@routes.cm2.markerUploadFeedback assignment stage marker />">Upload attachments</a></li>
-					<li><a href="<@routes.cm2.markerUploadMarks assignment stage marker />">Upload marks & feedback</a></li>
+					<li><a href="<@routes.cm2.markerUploadFeedback assignment marker />">Upload attachments</a></li>
+					<li><a href="<@routes.cm2.markerUploadMarks assignment marker />">Upload marks & feedback</a></li>
 				</ul>
 			</div>
 

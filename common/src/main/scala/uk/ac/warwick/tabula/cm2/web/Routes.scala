@@ -99,6 +99,14 @@ object Routes {
 				def apply(assignment: Assignment, student: User): String = assignmentroot(assignment) + " /feedback/adjustments"
 			}
 
+			object marks {
+				def apply(assignment: Assignment): String = assignmentroot(assignment) + " /marks"
+			}
+
+			object marksTemplate {
+				def apply(assignment: Assignment): String = assignmentroot(assignment) + "/marks-template"
+			}
+
 			def submissionsZip(assignment: Assignment): String = assignmentroot(assignment) + "/submissions.zip"
 
 			object submissionsandfeedback {
@@ -139,6 +147,7 @@ object Routes {
 				object marks {
 					def apply(assignment: Assignment, marker: User): String = markerroot(assignment, marker) + "/marks"
 				}
+
 				object feedback {
 					def apply(assignment: Assignment, marker: User): String = markerroot(assignment, marker) + "/feedback"
 				}

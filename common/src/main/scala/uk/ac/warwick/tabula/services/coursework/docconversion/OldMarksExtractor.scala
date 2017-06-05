@@ -27,7 +27,7 @@ class MarkItem {
 }
 
 @Service
-class MarksExtractor extends AutowiringUserLookupComponent {
+class OldMarksExtractor extends AutowiringUserLookupComponent {
 
 	/**
 	 * Method for reading in a xlsx spreadsheet and converting it into a list of MarkItems
@@ -38,7 +38,7 @@ class MarksExtractor extends AutowiringUserLookupComponent {
 		val reader = new XSSFReader(pkg)
 		val styles = reader.getStylesTable
 		val markItems: JList[MarkItem] = JArrayList()
-		val sheetHandler = MarkItemXslxSheetHandler(styles, sst, markItems, userLookup)
+		val sheetHandler = OldMarkItemXslxSheetHandler(styles, sst, markItems, userLookup)
 		val parser = sheetHandler.fetchSheetParser
 		for (sheet <- reader.getSheetsData) {
 			val sheetSource = new InputSource(sheet)
@@ -50,9 +50,9 @@ class MarksExtractor extends AutowiringUserLookupComponent {
 }
 
 trait MarksExtractorComponent {
-	val marksExtractor: MarksExtractor
+	val marksExtractor: OldMarksExtractor
 }
 
 trait AutowiringMarksExtractorComponent extends MarksExtractorComponent {
-	val marksExtractor: MarksExtractor = Wire[MarksExtractor]
+	val marksExtractor: OldMarksExtractor = Wire[OldMarksExtractor]
 }

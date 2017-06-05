@@ -16,25 +16,25 @@ import uk.ac.warwick.userlookup.User
 
 import collection.JavaConverters._
 
-object MarkerAddMarksCommand {
+object OldMarkerAddMarksCommand {
 	def apply(module: Module, assignment: Assignment, marker: User, submitter: CurrentUser, firstMarker: Boolean, gradeGenerator: GeneratesGradesFromMarks) =
-		new MarkerAddMarksCommandInternal(module, assignment, marker, submitter, firstMarker, gradeGenerator)
+		new OldMarkerAddMarksCommandInternal(module, assignment, marker, submitter, firstMarker, gradeGenerator)
 			with AutowiringFeedbackServiceComponent
 			with AutowiringUserLookupComponent
 			with AutowiringMarksExtractorComponent
 			with ComposableCommand[List[MarkerFeedback]]
-			with MarkerAddMarksDescription
-			with MarkerAddMarksPermissions
-			with MarkerAddMarksCommandValidation
-			with MarkerAddMarksCommandState
+			with OldMarkerAddMarksDescription
+			with OldMarkerAddMarksPermissions
+			with OldMarkerAddMarksCommandValidation
+			with OldMarkerAddMarksCommandState
 			with PostExtractValidation
 			with AddMarksCommandBindListener
 }
 
-class MarkerAddMarksCommandInternal(val module: Module, val assignment: Assignment, val marker: User, val submitter: CurrentUser, val firstMarker: Boolean, val gradeGenerator: GeneratesGradesFromMarks)
+class OldMarkerAddMarksCommandInternal(val module: Module, val assignment: Assignment, val marker: User, val submitter: CurrentUser, val firstMarker: Boolean, val gradeGenerator: GeneratesGradesFromMarks)
 	extends CommandInternal[List[MarkerFeedback]] with CanProxy {
 
-	self: MarkerAddMarksCommandState with FeedbackServiceComponent  =>
+	self: OldMarkerAddMarksCommandState with FeedbackServiceComponent  =>
 
 	override def applyInternal(): List[MarkerFeedback] = transactional() {
 
@@ -81,9 +81,9 @@ class MarkerAddMarksCommandInternal(val module: Module, val assignment: Assignme
 
 }
 
-trait MarkerAddMarksCommandValidation extends ValidatesMarkItem {
+trait OldMarkerAddMarksCommandValidation extends ValidatesMarkItem {
 
-	self: MarkerAddMarksCommandState with UserLookupComponent =>
+	self: OldMarkerAddMarksCommandState with UserLookupComponent =>
 
 	override def checkMarkUpdated(mark: MarkItem) {
 		// Warn if marks for this student are already uploaded
@@ -124,9 +124,9 @@ trait MarkerAddMarksCommandValidation extends ValidatesMarkItem {
 	}
 }
 
-trait MarkerAddMarksDescription extends Describable[List[MarkerFeedback]] {
+trait OldMarkerAddMarksDescription extends Describable[List[MarkerFeedback]] {
 
-	self: MarkerAddMarksCommandState =>
+	self: OldMarkerAddMarksCommandState =>
 
 	override lazy val eventName = "MarkerAddMarks"
 
@@ -135,9 +135,9 @@ trait MarkerAddMarksDescription extends Describable[List[MarkerFeedback]] {
 	}
 }
 
-trait MarkerAddMarksPermissions extends RequiresPermissionsChecking with PermissionsCheckingMethods {
+trait OldMarkerAddMarksPermissions extends RequiresPermissionsChecking with PermissionsCheckingMethods {
 
-	self: MarkerAddMarksCommandState =>
+	self: OldMarkerAddMarksCommandState =>
 
 	override def permissionsCheck(p: PermissionsChecking) {
 		p.mustBeLinked(assessment, module)
@@ -149,7 +149,7 @@ trait MarkerAddMarksPermissions extends RequiresPermissionsChecking with Permiss
 
 }
 
-trait MarkerAddMarksCommandState extends AddMarksCommandState {
+trait OldMarkerAddMarksCommandState extends AddMarksCommandState {
 	def marker: User
 	def submitter: CurrentUser
 	def assignment: Assignment

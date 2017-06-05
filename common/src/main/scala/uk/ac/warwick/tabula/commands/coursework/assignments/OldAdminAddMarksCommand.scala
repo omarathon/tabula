@@ -16,29 +16,29 @@ import uk.ac.warwick.userlookup.User
 
 import scala.collection.JavaConversions._
 
-object AdminAddMarksCommand {
+object OldAdminAddMarksCommand {
 	def apply(module: Module, assessment: Assessment, submitter: CurrentUser, gradeGenerator: GeneratesGradesFromMarks) =
-		new AdminAddMarksCommandInternal(module, assessment, submitter, gradeGenerator)
+		new OldAdminAddMarksCommandInternal(module, assessment, submitter, gradeGenerator)
 			with AutowiringFeedbackServiceComponent
 			with AutowiringUserLookupComponent
 			with AutowiringMarksExtractorComponent
 			with AutowiringSubmissionServiceComponent
 			with AutowiringProfileServiceComponent
 			with ComposableCommand[Seq[Feedback]]
-			with AdminAddMarksDescription
-			with AdminAddMarksPermissions
-			with AdminAddMarksCommandValidation
-			with AdminAddMarksNotifications
-			with AdminAddMarksCommandState
+			with OldAdminAddMarksDescription
+			with OldAdminAddMarksPermissions
+			with OldAdminAddMarksCommandValidation
+			with OldAdminAddMarksNotifications
+			with OldAdminAddMarksCommandState
 			with PostExtractValidation
 			with AddMarksCommandBindListener
 			with FetchDisabilities
 }
 
-class AdminAddMarksCommandInternal(val module: Module, val assessment: Assessment, val submitter: CurrentUser, val gradeGenerator: GeneratesGradesFromMarks)
+class OldAdminAddMarksCommandInternal(val module: Module, val assessment: Assessment, val submitter: CurrentUser, val gradeGenerator: GeneratesGradesFromMarks)
 	extends CommandInternal[Seq[Feedback]] {
 
-	self: AdminAddMarksCommandState with FeedbackServiceComponent =>
+	self: OldAdminAddMarksCommandState with FeedbackServiceComponent =>
 
 	override def applyInternal(): List[Feedback] = transactional() {
 		def saveFeedback(user: User, actualMark: String, actualGrade: String, isModified: Boolean) = {
@@ -90,9 +90,9 @@ class AdminAddMarksCommandInternal(val module: Module, val assessment: Assessmen
 
 }
 
-trait AdminAddMarksCommandValidation extends ValidatesMarkItem {
+trait OldAdminAddMarksCommandValidation extends ValidatesMarkItem {
 
-	self: AdminAddMarksCommandState with UserLookupComponent =>
+	self: OldAdminAddMarksCommandState with UserLookupComponent =>
 
 	override def checkMarkUpdated(mark: MarkItem) {
 		// Warn if marks for this student are already uploaded
@@ -123,9 +123,9 @@ trait AdminAddMarksCommandValidation extends ValidatesMarkItem {
 	}
 }
 
-trait AdminAddMarksDescription extends Describable[Seq[Feedback]] {
+trait OldAdminAddMarksDescription extends Describable[Seq[Feedback]] {
 
-	self: AdminAddMarksCommandState =>
+	self: OldAdminAddMarksCommandState =>
 
 	override lazy val eventName = "AdminAddMarks"
 
@@ -138,9 +138,9 @@ trait AdminAddMarksDescription extends Describable[Seq[Feedback]] {
 	}
 }
 
-trait AdminAddMarksNotifications extends Notifies[Seq[Feedback], Feedback] {
+trait OldAdminAddMarksNotifications extends Notifies[Seq[Feedback], Feedback] {
 
-	self: AdminAddMarksCommandState =>
+	self: OldAdminAddMarksCommandState =>
 
 	def emit(updatedFeedback: Seq[Feedback]): Seq[FeedbackChangeNotification] = updatedReleasedFeedback.flatMap { feedback => HibernateHelpers.initialiseAndUnproxy(feedback) match {
 		case assignmentFeedback: AssignmentFeedback =>
@@ -150,9 +150,9 @@ trait AdminAddMarksNotifications extends Notifies[Seq[Feedback], Feedback] {
 	}}
 }
 
-trait AdminAddMarksPermissions extends RequiresPermissionsChecking with PermissionsCheckingMethods {
+trait OldAdminAddMarksPermissions extends RequiresPermissionsChecking with PermissionsCheckingMethods {
 
-	self: AdminAddMarksCommandState =>
+	self: OldAdminAddMarksCommandState =>
 
 	override def permissionsCheck(p: PermissionsChecking) {
 		p.mustBeLinked(assessment, module)
@@ -166,7 +166,7 @@ trait AdminAddMarksPermissions extends RequiresPermissionsChecking with Permissi
 
 }
 
-trait AdminAddMarksCommandState extends AddMarksCommandState {
+trait OldAdminAddMarksCommandState extends AddMarksCommandState {
 	def submitter: CurrentUser
 	var updatedReleasedFeedback: Seq[Feedback] = Nil
 }

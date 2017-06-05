@@ -8,7 +8,7 @@ import org.springframework.validation.Errors
 import org.springframework.web.bind.annotation.{ModelAttribute, PathVariable, RequestMapping}
 import uk.ac.warwick.tabula.CurrentUser
 import uk.ac.warwick.tabula.commands.Appliable
-import uk.ac.warwick.tabula.commands.coursework.assignments.{CanProxy, MarkerAddMarksCommand, PostExtractValidation}
+import uk.ac.warwick.tabula.commands.coursework.assignments.{CanProxy, OldMarkerAddMarksCommand, PostExtractValidation}
 import uk.ac.warwick.tabula.commands.coursework.feedback.OldGenerateGradesFromMarkCommand
 import uk.ac.warwick.tabula.services.coursework.docconversion.MarkItem
 import uk.ac.warwick.tabula.coursework.web.Routes
@@ -33,7 +33,7 @@ class OldMarkerAddMarksController extends OldCourseworkController {
 		@PathVariable assignment: Assignment,
 		@PathVariable marker: User,
 		submitter: CurrentUser
-	) = MarkerAddMarksCommand(
+	) = OldMarkerAddMarksCommand(
 		mandatory(module),
 		mandatory(assignment),
 		marker,

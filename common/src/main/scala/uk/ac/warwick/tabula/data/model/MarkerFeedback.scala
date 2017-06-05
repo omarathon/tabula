@@ -107,6 +107,20 @@ class MarkerFeedback extends GeneratedId with FeedbackAttachments with ToEntityR
 		customFormValues.find( _.name == field.name )
 	}
 
+	def comments: Option[String] = customFormValues.find(_.name == Assignment.defaultFeedbackTextFieldName).map(_.value)
+	def comments_=(value: String) {
+		customFormValues
+			.find(_.name == Assignment.defaultFeedbackTextFieldName)
+			.getOrElse({
+				val newValue = new SavedFormValue()
+				newValue.name = Assignment.defaultFeedbackTextFieldName
+				newValue.markerFeedback = this
+				this.customFormValues.add(newValue)
+				newValue
+			}).value = value
+	}
+
+
 	def hasBeenModified: Boolean = updatedOn != null
 
 	def hasContent: Boolean = hasMarkOrGrade || hasFeedbackOrComments
