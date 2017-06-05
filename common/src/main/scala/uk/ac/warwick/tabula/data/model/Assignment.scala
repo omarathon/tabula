@@ -790,7 +790,7 @@ class Assignment
 							MarkerAllocation(
 								stage.roleName,
 								marker,
-								allFeedback.flatMap(_.markerFeedback.asScala).filter { mf => mf.stage == stage && mf.marker == marker }.map(_.student).toSet
+								allFeedback.flatMap(_.allMarkerFeedback).filter { mf => mf.stage == stage && mf.marker == marker }.map(_.student).toSet
 							)
 						}
 					}

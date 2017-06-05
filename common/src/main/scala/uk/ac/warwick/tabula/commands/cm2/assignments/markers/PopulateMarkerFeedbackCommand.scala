@@ -34,7 +34,7 @@ abstract class PopulateMarkerFeedbackCommandInternal(val assignment: Assignment,
 
 	override def applyInternal(): Seq[MarkerFeedback] = {
 		markerFeedback.foreach(mf => {
-			val allMarkerFeedback = mf.feedback.markerFeedback.asScala
+			val allMarkerFeedback = mf.feedback.allMarkerFeedback
 			val previousStage = mf.stage.previousStages.headOption
 			for(ps <- previousStage; pmf <- allMarkerFeedback.find(_.stage == ps)) copyPreviousFeedback(pmf, mf)
 		})

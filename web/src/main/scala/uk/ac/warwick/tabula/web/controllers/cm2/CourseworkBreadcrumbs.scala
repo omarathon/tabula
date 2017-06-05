@@ -20,11 +20,11 @@ object CourseworkBreadcrumbs {
 	def assignment(assignment: model.Assignment, active: Boolean = false): Seq[BreadCrumb] =
 		module(assignment.module, assignment.academicYear) :+ Assignment(assignment, active)
 
-	def marker(assignment: model.Assignment, marker: User): Seq[BreadCrumb] = {
-		Seq(Standard(assignment, marker))
+	def markerAssignment(assignment: model.Assignment, marker: User): Seq[BreadCrumb] = {
+		Seq(MarkerAssignment(assignment, marker))
 	}
 
-	private[CourseworkBreadcrumbs] case class Standard(assignment: model.Assignment, marker: User) extends BreadCrumb {
+	private[CourseworkBreadcrumbs] case class MarkerAssignment(assignment: model.Assignment, marker: User) extends BreadCrumb {
 		val title: String = s"Marking for ${assignment.name}"
 		val url: Option[String] = Some(Routes.admin.assignment.markerFeedback(assignment, marker))
 	}
