@@ -1,10 +1,19 @@
 (function ($) { "use strict";
 	var exports = {};
 
-	$.fn.tabulaAjaxForm = function(beforeSubmit, callback, typeForm) {
+	/**
+	 *
+	 * Valid options
+	 *
+	 * beforeSubmit - function run before the form is submitted
+	 * errorCallback - callback when the form returns validation errors
+	 * successCallback - callback when the form is submitted with no errors
+	 * type - the type of this form
+	 */
+	$.fn.tabulaAjaxForm = function(options) {
 		var $row = $(this);
 		var $form = $row.find('form.ajax-form');
-		prepareAjaxForm($form, $row, beforeSubmit, callback, typeForm);
+		prepareAjaxForm($form, $row, options);
 	};
 
 	$.fn.bindFormHelpers = function() {
@@ -265,11 +274,13 @@
 	 * It MUST return an empty string if the form has been successfully handled.
 	 * Otherwise, whatever is returned will be rendered in the container.
 	 */
-	var prepareAjaxForm = function($form, $row, beforeSubmitOption, callbackOption, typeOption) {
+	var prepareAjaxForm = function($form, $row, options) {
+		options = options || {};
 		var $container = $row.find('.detailrow-container');
-		var callback = callbackOption || function(){};
-		var beforeSubmit = beforeSubmitOption || function() { return true; };
-		var formType = typeOption || "";
+		var errorCallback = options.errorCallback || function(){};
+		var successCallback = options.successCallback || function(){};
+		var beforeSubmit = options.beforeSubmit || function() { return true; };
+		var formType = options.type || "";
 		$form.ajaxForm({
 			beforeSerialize: beforeSubmit,
 			beforeSubmit: function() {
@@ -318,9 +329,10 @@
 					$detailrow.collapse("hide");
 					$detailrow.data('loaded', false);
 					$container.html("<p>No data is currently available. Please check that you are signed in.</p>");
+					successCallback($container);
 				} else {
 					$container.html(result);
-					callback($container);
+					errorCallback($container);
 				}
 			},
 			error: function(){ alert("There has been an error. Please reload and try again."); }

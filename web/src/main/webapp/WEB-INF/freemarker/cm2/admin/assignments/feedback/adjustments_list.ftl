@@ -90,7 +90,11 @@
 				$('body').on('tabula.formLoaded',function() {
 					var $row = $(this).find('.detail-row');
 					$("#action").val("");
-					$row.tabulaAjaxForm(beforeSubmit, callback, typeForm);
+					$row.tabulaAjaxForm({
+						beforeSubmit: beforeSubmit,
+						errorCallback: callback,
+						type: typeForm
+					});
 					$row.find('form').removeData('submitOnceSubmitted');
 					$row.find("button.use-suggested-mark").click(function () {
 						$("#action").val("suggestmark");
