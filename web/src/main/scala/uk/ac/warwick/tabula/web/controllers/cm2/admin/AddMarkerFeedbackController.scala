@@ -17,10 +17,15 @@ import uk.ac.warwick.userlookup.User
 @RequestMapping(value = Array("/${cm2.prefix}/admin/assignments/{assignment}/marker/{marker}/feedback"))
 class AddMarkerFeedbackController extends CourseworkController {
 
-	@ModelAttribute def command(
+	@ModelAttribute
+	def command(
 		@PathVariable assignment: Assignment,
 		@PathVariable marker: User,
-		user: CurrentUser) = new AddMarkerFeedbackCommand(assignment, marker, user)
+		user: CurrentUser
+	) = {
+		mandatory(Option(assignment.cm2MarkingWorkflow))
+		new AddMarkerFeedbackCommand(assignment, marker, user)
+	}
 
 	@RequestMapping
 	def uploadForm(
@@ -49,6 +54,7 @@ class AddMarkerFeedbackController extends CourseworkController {
 		} else {
 			cmd.postExtractValidation(errors)
 			cmd.processStudents()
+			val test = cmd.markedStudents.size()
 			Mav("cm2/admin/assignments/markerfeedback/preview",
 				"isProxying" -> cmd.isProxying,
 				"proxyingAs" -> marker
@@ -63,8 +69,7 @@ class AddMarkerFeedbackController extends CourseworkController {
 	def doUpload(
 		@PathVariable assignment: Assignment,
 		@PathVariable marker: User,
-		@ModelAttribute cmd: AddMarkerFeedbackCommand,
-		errors: Errors): Mav = {
+		@ModelAttribute cmd: AddMarkerFeedbackCommand, errors: Errors): Mav = {
 
 		cmd.preExtractValidation(errors)
 		cmd.postExtractValidation(errors)

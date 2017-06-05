@@ -15,6 +15,7 @@ import uk.ac.warwick.tabula.{AcademicYear, JavaImports}
 import uk.ac.warwick.userlookup.User
 
 import scala.collection.JavaConverters._
+import scala.collection.mutable
 
 trait FeedbackAttachments {
 
@@ -99,7 +100,6 @@ trait CM1WorkflowSupport {
 	@JoinColumn(name = "second_marker_feedback")
 	@Deprecated
 	var secondMarkerFeedback: MarkerFeedback = _
-
 	@OneToOne(cascade=Array(PERSIST,MERGE,REFRESH,DETACH), fetch = FetchType.LAZY)
 	@JoinColumn(name = "third_marker_feedback")
 	@Deprecated
@@ -276,6 +276,7 @@ abstract class Feedback extends GeneratedId with FeedbackAttachments with Permis
 	@OneToMany(mappedBy = "feedback", fetch = LAZY, cascade = Array(ALL), orphanRemoval = true)
 	@BatchSize(size = 200)
 	var markerFeedback: JList[MarkerFeedback] = JArrayList()
+	def allMarkerFeedback: mutable.Buffer[MarkerFeedback] = markerFeedback.asScala
 
 	def feedbackByStage: Map[MarkingWorkflowStage, MarkerFeedback] =
 		markerFeedback.asScala.groupBy(_.stage).mapValues(_.head)
