@@ -218,7 +218,10 @@ abstract class Notification[A >: Null <: ToEntityReference, B]
 		onPreSave(newRecord)
 		// Generate recipientNotificationInfos for non-null recipients
 		// (users could be null if inflating user entities that no longer exist in membership)
-		recipients.flatMap(Option(_)).foreach(getOrCreateRecipientNotificationInfo)
+		recipients.flatMap {
+			case FoundUser(u) => Some(u)
+			case _ => None
+		}.foreach(getOrCreateRecipientNotificationInfo)
 	}
 	def onPreSave(newRecord: Boolean) {}
 
