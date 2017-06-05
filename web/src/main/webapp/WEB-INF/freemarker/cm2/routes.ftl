@@ -144,6 +144,7 @@ TODO grab values from the Routes object in code, as that's pretty equivalent and
 <#macro downloadMarkerFeedbackOne assignment marker markerFeedback attachment><@_u page="/admin/assignments/${assignment.id}/marker/${marker.warwickId}/feedback/download/${markerFeedback.id}/attachment/${attachment.name?url}"/></#macro>
 <#macro downloadMarkerFeedbackAll assignment marker markerFeedback zipName><@_u page="/admin/assignments/${assignment.id}/marker/${marker.warwickId}/feedback/download/${markerFeedback.id}/attachments/${zipName}.zip"/></#macro>
 <#macro downloadMarkerSubmissions assignment marker><@_u page="/admin/assignments/${assignment.id}/marker/${marker.warwickId}/submissions.zip"/></#macro>
+<#macro downloadMarkerSubmissionsPdf assignment marker><@_u page="/admin/assignments/${assignment.id}/marker/${marker.warwickId}/submissions.pdf"/></#macro>
 
 <#macro markerTemplatesZip assignment><@_u page="/admin/assignments/${assignment.id}/marker-templates.zip" /></#macro>
 <#macro generateGradesForMarks assignment><@_u page="/admin/assignments/${assignment.id}/generate-grade"/></#macro>
@@ -177,10 +178,10 @@ TODO grab values from the Routes object in code, as that's pretty equivalent and
 <#macro submissionsPdf assignment><@_u page="/admin/assignments/${assignment.id}/submissions.pdf" /></#macro>
 <#macro assignmentFeedbackZip assignment><@_u page="/admin/assignments/${assignment.id}/feedback.zip" /></#macro>
 
-<#macro deleteSubmissions assignment><@_u page="/admin/assignments/${assignment.id}/submissionsandfeedback" /></#macro>
+<#macro deleteSubmissionsAndFeedback assignment><@_u page="/admin/assignments/${assignment.id}/submissionsandfeedback/delete" /></#macro>
+
 <#macro downloadFeedbackTemplates assignment><@_u page="/admin/assignments/${assignment.id}/feedback-templates.zip" /></#macro>
-<#macro publishFeedback assignment><@_u page="/admin/assignments/${assignment.id}/publish'/>" /></#macro>
-<#macro deleteFeedback assignment><@_u page="/admin/assignments/${assignment.id}/submissionsandfeedback/delete" /></#macro>
+<#macro publishFeedback assignment><@_u page="/admin/assignments/${assignment.id}/publish" /></#macro>
 <#macro exportCsv assignment><@_u page="/admin/assignments/${assignment.id}/export.csv" /></#macro>
 <#macro exportXml assignment><@_u page="/admin/assignments/${assignment.id}/export.xml" /></#macro>
 <#macro exportXlsx assignment><@_u page="/admin/assignments/${assignment.id}/export.xlsx" /></#macro>

@@ -28,8 +28,7 @@ class ExamGridsDepartmentController extends ExamsController
 	override def activeAcademicYear: Option[AcademicYear] = retrieveActiveAcademicYear(None)
 
 	@RequestMapping
-	def home(@PathVariable department: Department, @ModelAttribute("activeAcademicYear") activeAcademicYear: Option[AcademicYear]): Mav = {
-		Redirect(Routes.Grids.departmentAcademicYear(department, activeAcademicYear.getOrElse(academicYear)))
-	}
+	def home(@PathVariable department: Department, @ModelAttribute("activeAcademicYear") activeAcademicYear: Option[AcademicYear]): Mav =
+		Redirect(Routes.Grids.departmentAcademicYear(mandatory(department), activeAcademicYear.getOrElse(academicYear)))
 
 }
