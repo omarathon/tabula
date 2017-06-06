@@ -13,14 +13,13 @@ import uk.ac.warwick.tabula.commands.cm2.feedback.GenerateGradesFromMarkCommand
 import uk.ac.warwick.tabula.data.model.markingworkflow.MarkingWorkflowStage
 import uk.ac.warwick.tabula.data.model.{Assignment, MarkerFeedback}
 import uk.ac.warwick.tabula.web.Mav
-import uk.ac.warwick.tabula.web.controllers.PreventCaching
 import uk.ac.warwick.tabula.web.controllers.cm2.CourseworkController
 import uk.ac.warwick.userlookup.User
 
 @Profile(Array("cm2Enabled"))
 @Controller
 @RequestMapping(value = Array("/${cm2.prefix}/admin/assignments/{assignment}/marker/{marker}/{stage}/feedback/online/{student}"))
-class OnlineMarkerFeedbackController extends CourseworkController with PreventCaching {
+class OnlineMarkerFeedbackController extends CourseworkController {
 
 	validatesSelf[SelfValidating]
 

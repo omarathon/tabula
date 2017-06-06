@@ -184,13 +184,3 @@ abstract class BaseController extends ControllerMethods
 	def binding[A](binder: WebDataBinder, target: A) {}
 
 }
-
-trait PreventCaching {
-	self: BaseController =>
-
-	@ModelAttribute def preventCaching(response: HttpServletResponse): Unit = {
-		response.setHeader("Cache-control", "no-cache, no-store")
-		response.setHeader("Pragma", "no-cache")
-		response.setHeader("Expires", "0")
-	}
-}
