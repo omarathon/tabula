@@ -7,9 +7,11 @@ import org.springframework.context.MessageSource
 import org.springframework.stereotype.Controller
 import org.springframework.validation.Validator
 import org.springframework.web.bind.WebDataBinder
-import org.springframework.web.bind.annotation.InitBinder
+import org.springframework.web.bind.annotation.{InitBinder, ModelAttribute}
 import javax.annotation.Resource
-import uk.ac.warwick.tabula.{PermissionDeniedException, CurrentUser, ItemNotFoundException, RequestInfo}
+import javax.servlet.http.HttpServletResponse
+
+import uk.ac.warwick.tabula.{CurrentUser, ItemNotFoundException, PermissionDeniedException, RequestInfo}
 import uk.ac.warwick.tabula.data.Daoisms
 import uk.ac.warwick.tabula.events.EventHandling
 import uk.ac.warwick.tabula.helpers.Logging
@@ -181,4 +183,14 @@ abstract class BaseController extends ControllerMethods
 	 */
 	def binding[A](binder: WebDataBinder, target: A) {}
 
+}
+
+trait PreventCaching {
+	self: BaseController =>
+
+	@ModelAttribute def preventCaching(response: HttpServletResponse): Unit = {
+		response.setHeader("Cache-control", "no-cache, no-store")
+		response.setHeader("Pragma", "no-cache")
+		response.setHeader("Expires", "0")
+	}
 }
