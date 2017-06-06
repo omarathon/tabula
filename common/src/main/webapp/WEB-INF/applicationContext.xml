@@ -242,7 +242,6 @@
 			<mvc:mapping path="/**"/>
 			<bean class="uk.ac.warwick.tabula.system.RequestBenchmarkingInterceptor" />
 		</mvc:interceptor>
-
 		<mvc:interceptor>
 			<mvc:mapping path="/**"/>
 			<bean class="uk.ac.warwick.tabula.system.ConditionalInterceptor" p:excludePath="/static/*">

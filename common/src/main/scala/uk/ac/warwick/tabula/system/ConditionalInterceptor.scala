@@ -1,12 +1,8 @@
 package uk.ac.warwick.tabula.system
 import org.springframework.beans.factory.InitializingBean
-import org.springframework.web.servlet.HandlerInterceptor
 import javax.servlet.http.HttpServletRequest
-
 import org.springframework.web.servlet.ModelAndView
 import javax.servlet.http.HttpServletResponse
-
-import org.springframework.web.servlet.support.RequestContext
 import org.springframework.web.context.request.WebRequestInterceptor
 import org.springframework.web.context.request.WebRequest
 import org.springframework.ui.ModelMap
