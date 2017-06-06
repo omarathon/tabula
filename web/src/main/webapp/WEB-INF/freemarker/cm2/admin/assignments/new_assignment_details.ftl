@@ -11,6 +11,7 @@
 <div class="fix-area">
 	<#assign actionUrl><@routes.cm2.createassignmentdetails module academicYear /></#assign>
 	<@f.form method="post" action=actionUrl>
+		<#include "_oldversion_redirect_banner.ftl" />
 		<@components.assignment_wizard 'details' module />
 		<#if command.prefilled>
 			<div class="alert alert-info">
