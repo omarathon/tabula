@@ -163,7 +163,7 @@ trait ModifyAssignmentDetailsValidation extends SelfValidating with ModifyMarkin
       if (closeDate == null) {
         errors.rejectValue("closeDate", "closeDate.missing")
       } else if (openDate != null && openDate.isAfter(closeDate)) {
-        errors.reject("closeDate.early")
+        errors.rejectValue("closeDate", "closeDate.early")
       }
     }
 
