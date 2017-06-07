@@ -1,18 +1,12 @@
 <#import "*/cm2_macros.ftl" as cm2 />
 <#import "*/coursework_components.ftl" as components />
 <#import "/WEB-INF/freemarker/_profile_link.ftl" as pl />
+<#import "*/marking_macros.ftl" as marking />
 
-<#function markingId user>
-	<#if !user.warwickId?has_content || user.getExtraProperty("urn:websignon:usersource")! == 'WarwickExtUsers'>
-		<#return user.userId />
-	<#else>
-		<#return user.warwickId />
-	</#if>
-</#function>
 
 <#macro row info>
 	<#assign u = info.student />
-	<tr data-toggle="collapse" data-target="#row-${markingId(u)}" class="clickable collapsed expandable-row">
+	<tr data-toggle="collapse" data-target="#row-${marking.extractId(u)}" class="clickable collapsed expandable-row">
 		<td class="student-col"><h6 class="toggle-icon">&nbsp;${u.firstName}</h6></td>
 		<td class="student-col">
 			<h6>${u.lastName}&nbsp;<#if u.warwickId??><@pl.profile_link u.warwickId /><#else><@pl.profile_link u.userId /></#if></h6>
@@ -21,7 +15,7 @@
 			<#if u.warwickId??>${u.warwickId}<#else>${u.userId!}</#if>
 		</td>
 	</tr>
-	<tr id="row-${markingId(u)}" data-detailurl="<@routes.cm2.feedbackAdjustmentForm assignment markingId(u) />" class="collapse detail-row">
+	<tr id="row-${marking.extractId(u)}" data-detailurl="<@routes.cm2.feedbackAdjustmentForm assignment marking.extractId(u) />" class="collapse detail-row">
 		<td colspan="3" class="detailrow-container"><p>No data is currently available. Please check that you are signed in.</p></td>
 	</tr>
 

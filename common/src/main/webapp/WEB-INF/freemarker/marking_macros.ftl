@@ -470,4 +470,11 @@
 	</#if>
 </#macro>
 
+<#function extractId user>
+	<#if !user.warwickId?has_content || user.getExtraProperty("urn:websignon:usersource")! == 'WarwickExtUsers'>
+		<#return user.userId />
+	<#else>
+		<#return user.warwickId! />
+	</#if>
+</#function>
 </#escape>

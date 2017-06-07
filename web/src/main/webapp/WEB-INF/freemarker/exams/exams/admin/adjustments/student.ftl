@@ -1,13 +1,5 @@
 <#import "*/marking_macros.ftl" as marking_macros />
 
-<#function markingId user>
-	<#if !user.warwickId?has_content || user.getExtraProperty("urn:websignon:usersource")! == 'WarwickExtUsers'>
-		<#return user.userId />
-	<#else>
-		<#return user.warwickId! />
-	</#if>
-</#function>
-
 <div class="content feedback-adjustment feedback-summary">
 
 	<#if command.feedback??>
@@ -36,10 +28,10 @@
 	</#if>
 
 	<#assign submit_url>
-		<@routes.exams.feedbackAdjustmentForm exam markingId(command.student) />
+		<@routes.exams.feedbackAdjustmentForm exam marking_macros.extractId(command.student) />
 	</#assign>
 
-	<@f.form id="adjust-form-${markingId(command.student)}"
+	<@f.form id="adjust-form-${marking_macros.extractId(command.student)}"
 		cssClass="double-submit-protection"
 		method="post"
 		commandName="command"
@@ -63,7 +55,7 @@
 
 		<#if isGradeValidation>
 			<#assign generateUrl><@routes.exams.generateGradesForMarks exam /></#assign>
-			<@marking_macros.autoGradeOnline "adjustedGrade" "Adjusted grade" "adjustedMark" markingId(command.student) generateUrl />
+			<@marking_macros.autoGradeOnline "adjustedGrade" "Adjusted grade" "adjustedMark" marking_macros.extractId(command.student) generateUrl />
 		<#else>
 			<@bs3form.labelled_form_group path="adjustedGrade" labelText="Adjusted grade">
 				<@f.input path="adjustedGrade" cssClass="form-control" />
@@ -79,7 +71,7 @@
 
 	<script>
 		jQuery(function($){
-			Exams.prepareAjaxForm($('#adjust-form-${markingId(command.student)}'), function(resp) {
+			Exams.prepareAjaxForm($('#adjust-form-${marking_macros.extractId(command.student)}'), function(resp) {
 				var $resp = $(resp);
 				// there should be an ajax-response class somewhere in the response text
 				var $response = $resp.find('.ajax-response').andSelf().filter('.ajax-response');

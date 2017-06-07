@@ -19,8 +19,8 @@
 			</@bs3form.labelled_form_group>
 
 			<#if isGradeValidation>
-				<#assign generateUrl><@routes.coursework.generateGradesForMarks command.assignment /></#assign>
-				<@marking_macros.autoGradeOnline "grade" "Grade" "mark" markingId(command.student) generateUrl />
+				<#assign generateUrl><@routes.cm2.generateGradesForMarks command.assignment /></#assign>
+				<@marking_macros.autoGradeOnline "grade" "Grade" "mark" marking_macros.extractId(command.student) generateUrl />
 			<#else>
 				<@bs3form.labelled_form_group path="grade" labelText="Grade">
 					<@f.input path="grade" cssClass="form-control" />
