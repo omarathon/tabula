@@ -17,12 +17,7 @@
 
 	<td class="status-col toggle-cell content-cell">
 		<dl style="margin: 0; border-bottom: 0;">
-			<dt data-duration="${graph.duration}"
-				data-requested-extra-duration="${graph.requestedExtraDuration}"
-				data-awaiting-review="${graph.awaitingReview?string}"
-				data-approved="${graph.hasApprovedExtension?string}"
-				data-rejected="${graph.hasRejectedExtension?string}"
-				data-deadline="<#if graph.deadline?has_content><@fmt.date date=graph.deadline /></#if>">
+			<dt>
 				<#if graph.awaitingReview>
 					<span>Awaiting review</span>
 				<#elseif graph.hasApprovedExtension>

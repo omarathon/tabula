@@ -1,6 +1,6 @@
 <#escape x as x?html>
 
-	<#macro previousExtensions extensionId warwickId fullName acceptedExtensions rejectedExtensions previousExtensions>
+	<#macro previousExtensions extensionId studentIdentifier fullName acceptedExtensions rejectedExtensions previousExtensions>
 
 		<#if previousExtensions?has_content>
 			<div id="prev-extensions-${extensionId}" class="modal fade" role="dialog">
@@ -13,7 +13,7 @@
 							<h4 class="modal-title">Previous extension requests</h4>
 						</div>
 						<div class="modal-body">
-							<h5>${fullName} - ${warwickId}</h5>
+							<h5>${fullName} - ${studentIdentifier}</h5>
 							<div><strong>Accepted requests: </strong> ${acceptedExtensions}</div>
 							<div><strong>Denied requests: </strong> ${rejectedExtensions}</div>
 							<table class="table table-striped">
@@ -49,7 +49,7 @@
 		</#if>
 	</#macro>
 
-	<#macro previousSubmissions extensionId warwickId fullName previousSubmissions>
+	<#macro previousSubmissions extensionId studentIdentifier fullName previousSubmissions>
 		<#if previousSubmissions?has_content>
 			<div id="prev-submissions-${extensionId}" class="modal fade" role="dialog">
 				<div class="modal-dialog" role="document">
@@ -61,7 +61,7 @@
 							<h4 class="modal-title">Previous submissions</h4>
 						</div>
 						<div class="modal-body">
-							<h5>${fullName} - ${warwickId}</h5>
+							<h5>${fullName} - ${studentIdentifier}</h5>
 							<table class="table table-striped">
 								<thead>
 								<tr>
