@@ -148,7 +148,6 @@ TODO grab values from the Routes object in code, as that's pretty equivalent and
 <#macro downloadMarkerSubmissionsPdf assignment marker><@_u page="/admin/assignments/${assignment.id}/marker/${marker.warwickId}/submissions.pdf"/></#macro>
 
 <#macro markerTemplatesZip assignment marker><@_u page="/admin/assignments/${assignment.id}/${marker.userId}/marker-templates.zip" /></#macro>
-<#macro generateGradesForMarks assignment><@_u page="/admin/assignments/${assignment.id}/generate-grade"/></#macro>
 
 <#macro assignmentsubmissionsandfeedback assignment><@_u page="/admin/assignments/${assignment.id}"/></#macro>
 <#macro assignmentsubmissionsandfeedbacktable assignment><@_u page="/admin/assignments/${assignment.id}/table"/></#macro>
@@ -169,6 +168,7 @@ TODO grab values from the Routes object in code, as that's pretty equivalent and
 <#macro submitToTurnitinStatus assignment><@_u page="/admin/assignments/${assignment.id}/turnitin/status"/></#macro>
 
 <#macro feedbackBulkAdjustment assignment><@_u page="/admin/assignments/${assignment.id}/feedback/bulk-adjustment"/></#macro>
+<#macro feedbackBulkAdjustmentTemplate assignment><@_u page="/admin/assignments/${assignment.id}/feedback/bulk-adjustment/template"/></#macro>
 <#macro feedbackAdjustmentForm assignment studentid><@_u page="/admin/assignments/${assignment.id}/feedback/adjustments/${studentid}"/></#macro>
 <#macro generateGradesForMarks assignment><@_u page="/admin/assignments/${assignment.id}/generate-grade"/></#macro>
 
