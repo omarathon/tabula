@@ -92,17 +92,15 @@
 				<#assign generateUrl><@routes.cm2.generateGradesForMarks command.assignment /></#assign>
 				<@marking.autoGradeOnline "adjustedGrade" "Adjusted grade" "adjustedMark" marking.extractId(command.student) generateUrl />
 			<#else>
-					<@f.input path="adjustedGrade" cssClass="form-control" />
+				<@f.input path="adjustedGrade" cssClass="form-control" />
 			</#if>
 		</@bs3form.labelled_form_group>
 
-
-	<#assign gradeValidation = isGradeValidation?string('true', 'false') />
+		<#assign gradeValidation = isGradeValidation?string('true', 'false') />
 		<div class="alert alert-info">
 			The reason for adjustment and any comments will be made available to students when their feedback is published.
 		</div>
 		<#if features.queueFeedbackForSits>
-			ajjajaja
 			<@marking.uploadToSits assignment=assignment verb="Adjusting" withValidation=false/>
 		</#if>
 
@@ -113,8 +111,6 @@
 		<div class="buttons form-group">
 			<button type="submit" class="btn btn-primary">Save</button>
 			<a class="btn btn-default cancel" href="#">Cancel</a>
-
 		</div>
-
 	</@f.form>
 </div>

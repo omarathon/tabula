@@ -11,10 +11,10 @@
 	<@f.form method="post" enctype="multipart/form-data" action="${formUrl}" commandName="command">
 		<input name="isfile" value="true" type="hidden"/>
 		<h3>Select file</h3>
-			<@bs3form.labelled_form_group path="file.upload" labelText="File">
-				<input type="file" name="file.upload" />
-			</@bs3form.labelled_form_group>
-			<@f.errors path="file" cssClass="error" />
+		<@bs3form.labelled_form_group path="file.upload" labelText="File">
+			<input type="file" name="file.upload" />
+		</@bs3form.labelled_form_group>
+		<@f.errors path="file" cssClass="error" />
 		<div>
 			<button class="btn btn-primary btn-large"><i class="icon-upload icon-white"></i> Upload</button>
 		</div>

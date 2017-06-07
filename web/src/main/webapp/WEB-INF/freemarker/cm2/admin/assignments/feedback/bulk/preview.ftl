@@ -52,7 +52,6 @@
 
 		<#if command.requiresDefaultReason || command.requiresDefaultComments>
 			<p>Some of the adjustments do not have a reason or comment. You need to provide them:</p>
-
 			<@bs3form.labelled_form_group path="defaultReason" labelText="Reason">
 				<@f.input path="defaultReason" cssClass="form-control" />
 			</@bs3form.labelled_form_group>

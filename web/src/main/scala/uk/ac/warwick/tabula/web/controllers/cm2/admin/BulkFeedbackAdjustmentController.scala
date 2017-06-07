@@ -35,9 +35,7 @@ class BulkFeedbackAdjustmentController extends CourseworkController {
 
 
 	@RequestMapping
-	def form(
-		@PathVariable assignment: Assignment
-	): Mav = {
+	def form(@PathVariable assignment: Assignment): Mav = {
 		Mav("cm2/admin/assignments/feedback/bulk/bulk_adjustment",
 			"StudentIdHeader" -> BulkAdjustmentCommand.StudentIdHeader,
 			"MarkHeader" -> BulkAdjustmentCommand.MarkHeader,
@@ -55,7 +53,8 @@ class BulkFeedbackAdjustmentController extends CourseworkController {
 
 	@RequestMapping(method = Array(POST), params = Array("confirmStep=true"))
 	def confirm(
-		@Valid @ModelAttribute("command") cmd: BulkAdjustmentCommand, errors: Errors,
+		@Valid @ModelAttribute("command") cmd: BulkAdjustmentCommand,
+		errors: Errors,
 		@PathVariable assignment: Assignment
 	): Mav = {
 		if (errors.hasFieldErrors("defaultReason") || errors.hasFieldErrors("defaultComment")) {
