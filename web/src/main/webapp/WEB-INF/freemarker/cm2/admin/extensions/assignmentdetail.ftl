@@ -123,8 +123,8 @@
 		>
 	</@f.form>
 
-	<@cm2.previousExtensions detail.extension.id detail.student.warwickId detail.student.fullName detail.numAcceptedExtensions detail.numRejectedExtensions detail.previousExtensions />
-	<@cm2.previousSubmissions detail.extension.id detail.student.warwickId detail.student.fullName detail.previousSubmissions />
+	<@cm2.previousExtensions detail.extension.id detail.studentIdentifier detail.student.fullName detail.numAcceptedExtensions detail.numRejectedExtensions detail.previousExtensions />
+	<@cm2.previousSubmissions detail.extension.id detail.studentIdentifier detail.student.fullName detail.previousSubmissions />
 
 	<#assign feedbackNotice>
 		<#if detail.extension.approved>
@@ -183,20 +183,6 @@
 					<p>${student.firstName} has requested their ${(student.disability.definition)!"recorded disability"} be taken into consideration.</p>
 				</#if>
 
-				<#if detail.extension.attachments?has_content>
-					<details>
-						<summary>Supporting documents</summary>
-						<ul>
-							<#list detail.extension.attachments as attachment>
-								<li>
-									<a href="<@routes.cm2.extensionreviewattachment assignment=assignment userid=universityId filename=attachment.name />">
-									${attachment.name}
-									</a>
-								</li>
-							</#list>
-						</ul>
-					</details>
-				</#if>
 			</#if>
 			<@bs3form.labelled_form_group "expiryDate" "Extended deadline">
 				<div class="input-group">

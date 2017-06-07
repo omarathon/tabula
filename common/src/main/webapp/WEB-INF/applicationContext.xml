@@ -254,6 +254,14 @@
 			<mvc:mapping path="/**"/>
 			<bean class="uk.ac.warwick.tabula.system.ControllerPreRequestInterceptor" />
 		</mvc:interceptor>
+		<mvc:interceptor>
+			<mvc:mapping path="/**"/>
+			<bean class="uk.ac.warwick.tabula.system.ConditionalHandlerInterceptorAdapter" p:excludePath="/static/*">
+				<constructor-arg>
+					<bean class="uk.ac.warwick.tabula.system.CacheControlInterceptor" />
+				</constructor-arg>
+			</bean>
+		</mvc:interceptor>
 	</mvc:interceptors>
 
 	<bean id="propertyEditorRegistrar" class="uk.ac.warwick.tabula.system.CommonPropertyEditors" />

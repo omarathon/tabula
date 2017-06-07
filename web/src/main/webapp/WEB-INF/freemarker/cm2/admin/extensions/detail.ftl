@@ -102,5 +102,5 @@
 
 </@f.form>
 
-<@cm2.previousExtensions detail.extension.id detail.student.warwickId detail.student.fullName detail.numAcceptedExtensions detail.numRejectedExtensions detail.previousExtensions />
-<@cm2.previousSubmissions detail.extension.id detail.student.warwickId detail.student.fullName detail.previousSubmissions />
+<@cm2.previousExtensions detail.extension.id detail.studentIdentifier detail.student.fullName detail.numAcceptedExtensions detail.numRejectedExtensions detail.previousExtensions />
+<@cm2.previousSubmissions detail.extension.id detail.studentIdentifier detail.student.fullName detail.previousSubmissions />
