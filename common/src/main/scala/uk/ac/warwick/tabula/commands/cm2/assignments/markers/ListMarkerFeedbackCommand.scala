@@ -76,7 +76,7 @@ trait ListMarkerFeedbackPermissions extends RequiresPermissionsChecking with Per
 	}
 }
 
-trait ListMarkerFeedbackState {
+trait ListMarkerFeedbackState extends CanProxy {
 	val assignment: Assignment
 	val marker: User
 	val submitter: CurrentUser
