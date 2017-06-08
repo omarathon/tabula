@@ -1,6 +1,5 @@
 <#import "*/coursework_components.ftl" as components />
 
-
 <#if command.submission?has_content>
 	<#assign submission = command.submission />
 	<ul class="list-unstyled">
