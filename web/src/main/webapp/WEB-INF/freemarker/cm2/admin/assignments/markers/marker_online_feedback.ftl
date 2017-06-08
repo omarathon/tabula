@@ -28,7 +28,9 @@
 			</ul>
 			<div class="tab-content">
 				<#if command.assignment.collectSubmissions>
-					<#include "_submission.ftl" />
+					<div role="tabpanel" class="tab-pane active" id="${student.userId}${command.stage.name}submission">
+						<#include "../feedback/_submission.ftl" />
+					</div>
 				</#if>
 				<#if command.previousMarkerFeedback?has_content>
 					<#include "_previous_feedback.ftl" />

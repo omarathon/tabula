@@ -13,7 +13,11 @@
 	$.fn.tabulaAjaxForm = function(options) {
 		var $row = $(this);
 		var $form = $row.find('form.ajax-form');
-		prepareAjaxForm($form, $row, options);
+		var $container = $row.find('.detailrow-container');
+		if($container.size() === 0){
+			$container = $('#content-'+$row.data('contentid'));
+		}
+		prepareAjaxForm($form, $container, options);
 	};
 
 	$.fn.bindFormHelpers = function() {
@@ -132,11 +136,58 @@
 				} else {
 					$detailRow.html(data);
 					var $form = $detailRow.find('form');
-					prepareAjaxForm($form, $detailRow);
+					var $container = $detailRow.find('.detailrow-container');
+					prepareAjaxForm($form, $container);
 					$detailRow.bindFormHelpers();
 				}
 			});
 		});
+
+		// handlers for online marking form
+
+		// on cancel collapse the row and nuke the form
+		$body.on('click', '.cancel', function(e){
+			e.preventDefault();
+			var $row = $(e.target).closest('.detail-row');
+			$row.collapse("hide");
+
+			$row.on('hidden.bs.collapse', function(e) {
+				$row.data('loaded', false);
+				$row.find('.detailrow-container').html('<i class="fa fa-spinner fa-spin"></i> Loading');
+				$(this).unbind(e);
+			});
+		});
+
+		// on reset fetch the form again
+		$body.on('click', '.reset', function(e){
+			e.preventDefault();
+			var $row = $(e.target).closest('.detail-row');
+			$row.data('loaded', false);
+			$row.trigger('show.bs.collapse');
+		});
+
+		// remove attachment
+		$body.on("click", '.remove-attachment', function(e) {
+			e.preventDefault();
+			var $this = $(this);
+			var $form = $this.closest('form');
+			var $li = $this.closest("li");
+			$li.find('input, a').remove();
+			$li.find('span').wrap('<del />');
+			$li.find('i').css('display', 'none');
+			var $ul = $li.closest('ul');
+
+			if (!$ul.find('li').last().is('.pending-removal')) {
+				var alertMarkup = '<li class="pending-removal">Files marked for removal won\'t be deleted until you <samp>Save</samp>.</li>';
+				$ul.append(alertMarkup);
+			}
+
+			if($form.find('input[name=attachedFiles]').length === 0){
+				var $blankInput = $('<input name="attachedFiles" type="hidden" />');
+				$form.append($blankInput);
+			}
+		});
+
 		$('table.expanding-row-pairs').each(function(){
 			$(this).find('tbody tr').each(function(i){
 				if (i % 2 === 0) {
@@ -274,9 +325,9 @@
 	 * It MUST return an empty string if the form has been successfully handled.
 	 * Otherwise, whatever is returned will be rendered in the container.
 	 */
-	var prepareAjaxForm = function($form, $row, options) {
+	var prepareAjaxForm = function($form, $container, options) {
 		options = options || {};
-		var $container = $row.find('.detailrow-container');
+
 		var errorCallback = options.errorCallback || function(){};
 		var successCallback = options.successCallback || function(){};
 		var beforeSubmit = options.beforeSubmit || function() { return true; };

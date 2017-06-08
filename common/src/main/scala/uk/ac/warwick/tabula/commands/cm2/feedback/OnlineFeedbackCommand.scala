@@ -4,13 +4,14 @@ import org.joda.time.DateTime
 import org.springframework.validation.{BindingResult, Errors}
 import uk.ac.warwick.tabula.CurrentUser
 import uk.ac.warwick.tabula.JavaImports.{JList, JMap}
-import uk.ac.warwick.tabula.commands.{Describable, Description, SelfValidating, UploadedFile}
-import uk.ac.warwick.tabula.data.SavedFormValueDaoComponent
+import uk.ac.warwick.tabula.commands._
+import uk.ac.warwick.tabula.data.{AutowiringSavedFormValueDaoComponent, SavedFormValueDaoComponent}
+import uk.ac.warwick.tabula.JavaImports._
 import uk.ac.warwick.tabula.data.model._
 import uk.ac.warwick.tabula.data.model.forms.{Extension, FormValue, SavedFormValue, StringFormValue}
 import uk.ac.warwick.tabula.helpers.StringUtils._
 import uk.ac.warwick.tabula.permissions.Permissions
-import uk.ac.warwick.tabula.services.{GeneratesGradesFromMarks, ProfileServiceComponent}
+import uk.ac.warwick.tabula.services._
 import uk.ac.warwick.tabula.system.BindListener
 import uk.ac.warwick.tabula.system.permissions.{PermissionsChecking, PermissionsCheckingMethods, RequiresPermissionsChecking}
 import uk.ac.warwick.userlookup.User
@@ -18,10 +19,103 @@ import uk.ac.warwick.userlookup.User
 import scala.collection.JavaConverters._
 import scala.util.Try
 
-//FIXME - break out into cake ingredients
-trait OnlineFeedbackCommand extends BindListener with SelfValidating {
+object OnlineFeedbackCommand {
+	def apply(assignment: Assignment, student: User, submitter: CurrentUser, gradeGenerator: GeneratesGradesFromMarks) =
+		new OnlineFeedbackCommandInternal(assignment, student, submitter, gradeGenerator)
+			with ComposableCommand[Feedback]
+			with OnlineFeedbackPermissions
+			with OnlineFeedbackDescription[Feedback]
+			with OnlineFeedbackValidation
+			with OnlineFeedbackBindListener
+			with AutowiringProfileServiceComponent
+			with AutowiringFileAttachmentServiceComponent
+			with AutowiringSavedFormValueDaoComponent
+			with AutowiringFeedbackServiceComponent
+			with AutowiringZipServiceComponent {
+			override lazy val eventName = "OnlineFeedback"
+		}
+}
 
-	this: ProfileServiceComponent with OnlineFeedbackState =>
+class OnlineFeedbackCommandInternal(val assignment: Assignment, val student: User, val submitter: CurrentUser, val gradeGenerator: GeneratesGradesFromMarks)
+	extends CommandInternal[Feedback] with OnlineFeedbackState with CopyFromFormFields with WriteToFormFields {
+
+	self: ProfileServiceComponent with FileAttachmentServiceComponent with SavedFormValueDaoComponent with FeedbackServiceComponent with ZipServiceComponent =>
+
+	feedback match {
+		case Some(f) => copyFrom(f)
+		case None =>
+			fields = {
+				val pairs = assignment.feedbackFields.map(field => field.id -> field.blankFormValue)
+				Map(pairs: _*).asJava
+			}
+	}
+
+	def applyInternal(): Feedback = {
+
+		val updatedFeedback:AssignmentFeedback = feedback.getOrElse({
+			val newFeedback = new AssignmentFeedback
+			newFeedback.assignment = assignment
+			newFeedback.uploaderId = submitter.apparentUser.getUserId
+			newFeedback.usercode = student.getUserId
+			newFeedback._universityId = student.getWarwickId
+			newFeedback.released = false
+			newFeedback.createdDate = DateTime.now
+			newFeedback
+		})
+
+		copyTo(updatedFeedback)
+		updatedFeedback.updatedDate = DateTime.now
+		feedbackService.saveOrUpdate(updatedFeedback)
+
+		// if we are updating existing feedback then invalidate any cached feedback zips
+		if(updatedFeedback.id != null) {
+			zipService.invalidateIndividualFeedbackZip(updatedFeedback)
+		}
+
+		updatedFeedback
+	}
+
+	private def copyFrom(feedback: AssignmentFeedback) {
+
+		copyFormFields(feedback)
+
+		// mark and grade
+		if (assignment.collectMarks) {
+			mark = feedback.actualMark.map(_.toString).getOrElse("")
+			grade = feedback.actualGrade.getOrElse("")
+		}
+
+		// get attachments
+		attachedFiles = feedback.attachments
+	}
+
+	private def copyTo(feedback: AssignmentFeedback) {
+
+		saveFormFields(feedback)
+
+		// save mark and grade
+		if (assignment.collectMarks) {
+			feedback.actualMark = mark.maybeText.map(_.toInt)
+			feedback.actualGrade = grade.maybeText
+		}
+
+		// save attachments
+		if (feedback.attachments != null) {
+			val filesToKeep =  Option(attachedFiles).getOrElse(JList()).asScala
+			val existingFiles = Option(feedback.attachments).getOrElse(JList()).asScala
+			val filesToRemove = existingFiles -- filesToKeep
+			val filesToReplicate = filesToKeep -- existingFiles
+			fileAttachmentService.deleteAttachments(filesToRemove)
+			feedback.attachments = JArrayList[FileAttachment](filesToKeep)
+			val replicatedFiles = filesToReplicate.map ( _.duplicate() )
+			replicatedFiles.foreach(feedback.addAttachment)
+		}
+		feedback.addAttachments(file.attached.asScala)
+	}
+}
+
+trait OnlineFeedbackBindListener extends BindListener {
+	self: OnlineFeedbackState =>
 
 	override def onBind(result:BindingResult) {
 		if (fields != null) {
@@ -31,6 +125,10 @@ trait OnlineFeedbackCommand extends BindListener with SelfValidating {
 		}
 		file.onBind(result)
 	}
+}
+
+trait OnlineFeedbackValidation extends SelfValidating {
+	self: OnlineFeedbackState =>
 
 	override def validate(errors: Errors) {
 		if(!hasContent) {
@@ -70,18 +168,17 @@ trait OnlineFeedbackCommand extends BindListener with SelfValidating {
 			}
 		}
 	}
-
 }
 
 trait CopyFromFormFields {
 
 	self: OnlineFeedbackState with SavedFormValueDaoComponent =>
 
-	def copyFormFields(markerFeedback: MarkerFeedback){
+	def copyFormFields(feedback: AssignmentFeedback){
 		// get custom field values
 		fields = {
 			val pairs = assignment.feedbackFields.map { field =>
-				val currentValue = markerFeedback.customFormValues.asScala.find(_.name == field.name)
+				val currentValue = feedback.customFormValues.asScala.find(_.name == field.name)
 				val formValue = currentValue match {
 					case Some(initialValue) => field.populatedFormValue(initialValue)
 					case None => field.blankFormValue
@@ -98,28 +195,29 @@ trait WriteToFormFields {
 
 	self: OnlineFeedbackState with SavedFormValueDaoComponent =>
 
-	def saveFormFields(markerFeedback: MarkerFeedback) {
+	def saveFormFields(feedback: AssignmentFeedback) {
 		// save custom fields
-		markerFeedback.customFormValues = fields.asScala.map {
-			case (_, formValue) =>
-
+		feedback.clearCustomFormValues()
+		feedback.customFormValues.addAll(
+			fields.asScala.map { case (_, formValue) =>
 				def newValue = {
 					val newValue = new SavedFormValue()
 					newValue.name = formValue.field.name
-					newValue.markerFeedback = markerFeedback
+					newValue.feedback = feedback
 					newValue
 				}
 
 				// Don't send brand new feedback to the DAO or we'll get a TransientObjectException
-				val savedFormValue = if (markerFeedback.id == null) {
+				val savedFormValue = if (feedback.id == null) {
 					newValue
 				} else {
-					savedFormValueDao.get(formValue.field, markerFeedback).getOrElse(newValue)
+					savedFormValueDao.get(formValue.field, feedback).getOrElse(newValue)
 				}
 
 				formValue.persist(savedFormValue)
 				savedFormValue
-		}.toSet[SavedFormValue].asJava
+			}.toSet[SavedFormValue].asJava
+		)
 	}
 
 }
@@ -129,10 +227,7 @@ trait OnlineFeedbackPermissions extends RequiresPermissionsChecking with Permiss
 	self: OnlineFeedbackState =>
 
 	def permissionsCheck(p: PermissionsChecking) {
-		p.PermissionCheck(Permissions.AssignmentMarkerFeedback.Manage, mandatory(assignment))
-		if(submitter.apparentUser != marker) {
-			p.PermissionCheck(Permissions.Assignment.MarkOnBehalf, assignment)
-		}
+		p.PermissionCheck(Permissions.AssignmentFeedback.Manage, assignment)
 	}
 }
 
@@ -147,12 +242,18 @@ trait OnlineFeedbackDescription[A] extends Describable[A] {
 	}
 }
 
-trait OnlineFeedbackState {
+trait OnlineFeedbackState extends SubmissionState with ExtensionState {
+
+	self: ProfileServiceComponent =>
+
 	def assignment: Assignment
 	def student: User
-	def marker: User
 	def gradeGenerator: GeneratesGradesFromMarks
 	def submitter: CurrentUser
+
+	val feedback: Option[AssignmentFeedback] = assignment.allFeedback.find(_.usercode == student.getUserId)
+	val submission: Option[Submission] = assignment.submissions.asScala.find(_.usercode == student.getUserId)
+	val extension: Option[Extension] = assignment.extensions.asScala.find(_.usercode == student.getUserId)
 
 	var mark: String = _
 	var grade: String = _

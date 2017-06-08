@@ -11,9 +11,9 @@ import uk.ac.warwick.tabula.data.model.MarkingState.{MarkingCompleted, Rejected}
 import uk.ac.warwick.tabula.helpers.StringUtils._
 import scala.collection.JavaConverters._
 
-object OnlineFeedbackCommand {
+object OldOnlineFeedbackCommand {
 	def apply(module: Module, assignment: Assignment, submitter: CurrentUser) =
-		new OnlineFeedbackCommand(module, assignment, submitter)
+		new OldOnlineFeedbackCommand(module, assignment, submitter)
 			with ComposableCommand[Seq[StudentFeedbackGraph]]
 			with OnlineFeedbackPermissions
 			with AutowiringSubmissionServiceComponent
@@ -24,7 +24,7 @@ object OnlineFeedbackCommand {
 			with ReadOnly
 }
 
-abstract class OnlineFeedbackCommand(val module: Module, val assignment: Assignment, val submitter: CurrentUser)
+abstract class OldOnlineFeedbackCommand(val module: Module, val assignment: Assignment, val submitter: CurrentUser)
 	extends CommandInternal[Seq[StudentFeedbackGraph]] with Appliable[Seq[StudentFeedbackGraph]] with OnlineFeedbackState {
 
 	self: SubmissionServiceComponent with FeedbackServiceComponent with UserLookupComponent with AssessmentMembershipServiceComponent =>

@@ -6,7 +6,7 @@ import uk.ac.warwick.tabula.services._
 import uk.ac.warwick.userlookup.User
 
 
-class OnlineFeedbackCommandTest extends TestBase with Mockito {
+class OldOnlineFeedbackCommandTest extends TestBase with Mockito {
 
 	trait Fixture {
 
@@ -34,7 +34,7 @@ class OnlineFeedbackCommandTest extends TestBase with Mockito {
 		assignment.submissions.add(submission1)
 		assignment.feedbacks.add(feedback2)
 
-		val command = new OnlineFeedbackCommand(module, assignment, new CurrentUser(marker, marker)) with OnlineFeedbackCommandTestSupport
+		val command = new OldOnlineFeedbackCommand(module, assignment, new CurrentUser(marker, marker)) with OnlineFeedbackCommandTestSupport
 
 		command.assessmentMembershipService.determineMembershipUsers(assignment) returns Seq(user1, user2, user3)
 
