@@ -1,12 +1,4 @@
-<#import "/WEB-INF/freemarker/marking_macros.ftl" as marking_macros />
-
-<#function markingId user>
-	<#if !user.warwickId?has_content || user.getExtraProperty("urn:websignon:usersource")! == 'WarwickExtUsers'>
-		<#return user.userId />
-	<#else>
-		<#return user.warwickId! />
-	</#if>
-</#function>
+<#import "*/marking_macros.ftl" as marking_macros />
 
 <div class="online-marking">
 	<#if command.assignment.collectSubmissions || command.previousMarkerFeedback?has_content>

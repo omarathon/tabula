@@ -1,16 +1,9 @@
 <#import "/WEB-INF/freemarker/_profile_link.ftl" as pl />
-
-<#function markingId user>
-	<#if !user.warwickId?has_content || user.getExtraProperty("urn:websignon:usersource")! == 'WarwickExtUsers'>
-		<#return user.userId />
-	<#else>
-		<#return user.warwickId />
-	</#if>
-</#function>
+<#import "*/marking_macros.ftl" as marking />
 
 <#macro row info>
 	<#assign u = info.student />
-	<tr class="item-container" data-contentid="${markingId(u)}" data-markingurl="<@routes.exams.feedbackAdjustment exam />">
+	<tr class="item-container" data-contentid="${marking.extractId(u)}" data-markingurl="<@routes.exams.feedbackAdjustment exam />">
 		<td class="student-col toggle-cell"><h6 class="toggle-icon">${u.firstName}</h6></td>
 		<td class="student-col toggle-cell">
 			<h6>${u.lastName}&nbsp;<#if u.warwickId??><@pl.profile_link u.warwickId /><#else><@pl.profile_link u.userId /></#if></h6>
@@ -20,8 +13,8 @@
 				<dt>
 					<#if u.warwickId??>${u.warwickId}<#else>${u.userId!}</#if>
 				</dt>
-				<dd style="display: none;" class="table-content-container" data-contentid="${markingId(u)}">
-					<div id="content-${markingId(u)}" class="content-container" data-contentid="${markingId(u)}">
+				<dd style="display: none;" class="table-content-container" data-contentid="${marking.extractId(u)}">
+					<div id="content-${marking.extractId(u)}" class="content-container" data-contentid="${marking.extractId(u)}">
 						<p>No data is currently available. Please check that you are signed in.</p>
 					</div>
 				</dd>
