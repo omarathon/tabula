@@ -437,7 +437,7 @@
 			<#else>
 				<#local title><#compress>
 					<#list stageInfo.progress as progress>
-						<@workflowMessage progress.progress.messageCode /> (<@fmt.p progress.count "student" />)<#if progress_has_next>, </#if>
+						<@workflowMessage progress.progress.messageCode /> (${progress.count})<#if progress_has_next>, </#if>
 					</#list>
 				</#compress></#local>
 			</#if>
@@ -505,7 +505,7 @@
 						<li><@workflowMessage stage.progress[0].progress.messageCode /></li>
 					<#else>
 						<#list stage.progress as progress>
-							<li><@workflowMessage progress.progress.messageCode /> (<@fmt.p progress.count "student" />)</li>
+							<li><@workflowMessage progress.progress.messageCode /> (${progress.count})</li>
 						</#list>
 					</#if>
 				</#list>
@@ -630,6 +630,8 @@
 
 <#macro admin_assignment_info info>
 	<#local assignment = info.assignment />
+	<#local studentCount = assignment.membershipInfo.totalCount />
+
 	<div class="item-info admin-assignment-${assignment.id}">
 		<div class="clearfix">
 			<div class="pull-right">
@@ -752,11 +754,11 @@
 							<li>
 								<strong><@workflowMessage stage.stage.actionCode /></strong>:
 								<#if stage.progress?size == 1>
-									<@workflowMessage stage.progress[0].progress.messageCode /> (<@fmt.p stage.progress[0].count "student" />)
+									<@workflowMessage stage.progress[0].progress.messageCode /> (${stage.progress[0].count} of ${studentCount})
 								<#else>
 									<ul>
 										<#list stage.progress as progress>
-											<li><@workflowMessage progress.progress.messageCode /> (<@fmt.p progress.count "student" />)</li>
+											<li><@workflowMessage progress.progress.messageCode /> (${progress.count} of ${studentCount})</li>
 										</#list>
 									</ul>
 								</#if>
@@ -788,7 +790,7 @@
 						<#else>
 							<#list info.nextStages as nextStage>
 								<li>
-									<#local nextStageDescription><@workflowMessage nextStage.stage.actionCode /> (<@fmt.p nextStage.count "student" />)</#local>
+									<#local nextStageDescription><@workflowMessage nextStage.stage.actionCode /> (${nextStage.count} of ${studentCount})</#local>
 									<#if nextStage.url??>
 										<a href="${nextStage.url}">${nextStageDescription}</a>
 									<#else>
