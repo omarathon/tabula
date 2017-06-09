@@ -15,14 +15,15 @@ object ModifyAssignmentFeedbackCommand {
 			with ModifyAssignmentFeedbackDescription
 			with ModifyAssignmentFeedbackCommandState
 			with AutowiringAssessmentServiceComponent
-			with SharedAssignmentProperties
+			with SharedAssignmentFeedbackProperties
+			with AutowiringZipServiceComponent
 
 }
 
 class ModifyAssignmentFeedbackCommandInternal(override val assignment: Assignment)
 	extends CommandInternal[Assignment] with PopulateOnForm {
 
-	self: AssessmentServiceComponent with ModifyAssignmentFeedbackCommandState with SharedAssignmentProperties =>
+	self: AssessmentServiceComponent with ModifyAssignmentFeedbackCommandState with SharedAssignmentFeedbackProperties =>
 
 	override def applyInternal(): Assignment = {
 		this.copyTo(assignment)
@@ -31,30 +32,22 @@ class ModifyAssignmentFeedbackCommandInternal(override val assignment: Assignmen
 	}
 
 	override def populate(): Unit = {
-		copySharedFrom(assignment)
+		copySharedFeedbackFrom(assignment)
 	}
-
 }
 
-trait ModifyAssignmentFeedbackCommandState  {
-
-	self: AssessmentServiceComponent with SharedAssignmentProperties =>
+trait ModifyAssignmentFeedbackCommandState {
+	self: AssessmentServiceComponent with SharedAssignmentFeedbackProperties =>
 
 	def assignment: Assignment
 
 	def copyTo(assignment: Assignment) {
-		assignment.feedbackTemplate = feedbackTemplate
-		assignment.collectMarks = collectMarks
-		assignment.summative = summative
-		assignment.dissertation = dissertation
-		assignment.automaticallyReleaseToMarkers = automaticallyReleaseToMarkers
+		copySharedFeedbackTo(assignment)
 	}
-
-
 }
 
 trait ModifyAssignmentFeedbackDescription extends Describable[Assignment] {
-	self: ModifyAssignmentFeedbackCommandState with SharedAssignmentProperties =>
+	self: ModifyAssignmentFeedbackCommandState with SharedAssignmentFeedbackProperties =>
 
 	override lazy val eventName: String = "ModifyAssignmentFeedback"
 

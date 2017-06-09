@@ -24,10 +24,8 @@ object ModifyAssignmentStudentsCommand {
 			with AutowiringAssessmentMembershipServiceComponent
 			with CurrentSITSAcademicYear
 			with ModifiesAssignmentMembership
-			with SharedAssignmentProperties {
-
+			with SharedAssignmentStudentProperties {
 			copyMembers(assignment)
-
 		}
 }
 
@@ -36,7 +34,7 @@ class ModifyAssignmentStudentsCommandInternal(override val assignment: Assignmen
 
 	self: AssessmentServiceComponent with UserLookupComponent
 		with AssessmentMembershipServiceComponent with ModifyAssignmentStudentsCommandState
-		with SharedAssignmentProperties with ModifiesAssignmentMembership =>
+		with SharedAssignmentStudentProperties with ModifiesAssignmentMembership =>
 
 
 	override def applyInternal(): Assignment = {
@@ -46,7 +44,7 @@ class ModifyAssignmentStudentsCommandInternal(override val assignment: Assignmen
 	}
 
 	override def populate(): Unit = {
-		copySharedFrom(assignment)
+		copySharedStudentFrom(assignment)
 		assessmentGroups = assignment.assessmentGroups
 		upstreamGroups.addAll(allUpstreamGroups.filter { ug =>
 			assessmentGroups.asScala.exists(ag => ug.assessmentComponent == ag.assessmentComponent && ag.occurrence == ug.occurrence)
@@ -57,15 +55,13 @@ class ModifyAssignmentStudentsCommandInternal(override val assignment: Assignmen
 
 
 trait ModifyAssignmentStudentsCommandState extends EditAssignmentMembershipCommandState with UpdatesStudentMembership {
-
-	self: AssessmentServiceComponent with UserLookupComponent with SpecifiesGroupType with SharedAssignmentProperties
+	self: AssessmentServiceComponent with UserLookupComponent with SpecifiesGroupType with SharedAssignmentStudentProperties
 		with AssessmentMembershipServiceComponent =>
 
 	val updateStudentMembershipGroupIsUniversityIds: Boolean = false
 
-
 	def copyTo(assignment: Assignment) {
-		assignment.anonymousMarking = anonymousMarking
+		copySharedStudentTo(assignment)
 		assignment.assessmentGroups.clear()
 		assignment.assessmentGroups.addAll(assessmentGroups)
 

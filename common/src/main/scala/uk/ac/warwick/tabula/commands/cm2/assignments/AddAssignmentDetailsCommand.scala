@@ -18,7 +18,7 @@ object CreateAssignmentDetailsCommand {
   def apply(module: Module, academicYear: AcademicYear) =
     new CreateAssignmentDetailsCommandInternal(module, academicYear)
       with ComposableCommand[Assignment]
-      with BooleanAssignmentProperties
+      with BooleanAssignmentDetailProperties
       with CreateAssignmentPermissions
       with CreateAssignmentDetailsDescription
       with CreateAssignmentDetailsCommandState
@@ -31,7 +31,7 @@ object CreateAssignmentDetailsCommand {
 }
 
 class CreateAssignmentDetailsCommandInternal(val module: Module, val academicYear: AcademicYear) extends CommandInternal[Assignment]
-  with CreateAssignmentDetailsCommandState with SharedAssignmentProperties with AssignmentDetailsCopy with CreatesMarkingWorkflow {
+  with CreateAssignmentDetailsCommandState with SharedAssignmentDetailProperties with AssignmentDetailsCopy with CreatesMarkingWorkflow {
 
   self: AssessmentServiceComponent with UserLookupComponent with CM2MarkingWorkflowServiceComponent =>
 
@@ -79,14 +79,12 @@ class CreateAssignmentDetailsCommandInternal(val module: Module, val academicYea
     if(assignment.workflowCategory.contains(WorkflowCategory.Reusable)){
       reusableWorkflow = assignment.cm2MarkingWorkflow
     }
-    copySharedFrom(assignment)
+    copySharedDetailFrom(assignment)
   }
-
 
 }
 
-
-trait AssignmentDetailsCopy extends ModifyAssignmentDetailsCommandState with SharedAssignmentProperties {
+trait AssignmentDetailsCopy extends ModifyAssignmentDetailsCommandState with SharedAssignmentDetailProperties {
   self: AssessmentServiceComponent  with UserLookupComponent with CM2MarkingWorkflowServiceComponent with ModifyMarkingWorkflowState =>
 
   def copyTo(assignment: Assignment) {
@@ -106,7 +104,7 @@ trait AssignmentDetailsCopy extends ModifyAssignmentDetailsCommandState with Sha
       assignment.cm2MarkingWorkflow = reusableWorkflow
     }
     assignment.cm2Assignment = true
-    copySharedTo(assignment: Assignment)
+    copySharedDetailTo(assignment)
   }
 }
 
@@ -150,7 +148,7 @@ trait CreateAssignmentDetailsCommandState extends ModifyAssignmentDetailsCommand
 }
 
 trait ModifyAssignmentDetailsValidation extends SelfValidating with ModifyMarkingWorkflowValidation {
-  self: ModifyAssignmentDetailsCommandState with BooleanAssignmentProperties with AssessmentServiceComponent with ModifyMarkingWorkflowState
+  self: ModifyAssignmentDetailsCommandState with BooleanAssignmentDetailProperties with AssessmentServiceComponent with ModifyMarkingWorkflowState
     with UserLookupComponent=>
 
   // validation shared between add and edit
@@ -180,7 +178,7 @@ trait ModifyAssignmentDetailsValidation extends SelfValidating with ModifyMarkin
 
 
 trait CreateAssignmentDetailsValidation extends ModifyAssignmentDetailsValidation with ModifyMarkingWorkflowValidation {
-  self: CreateAssignmentDetailsCommandState with BooleanAssignmentProperties with AssessmentServiceComponent
+  self: CreateAssignmentDetailsCommandState with BooleanAssignmentDetailProperties with AssessmentServiceComponent
     with ModifyMarkingWorkflowState with UserLookupComponent =>
 
   override def validate(errors: Errors): Unit = {

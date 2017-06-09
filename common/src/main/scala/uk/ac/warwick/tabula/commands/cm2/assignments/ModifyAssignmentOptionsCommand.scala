@@ -17,13 +17,12 @@ object ModifyAssignmentOptionsCommand {
 			with ModifyAssignmentOptionsCommandState
 			with ModifyAssignmentOptionsValidation
 			with AutowiringAssessmentServiceComponent
-			with SharedAssignmentProperties
+			with SharedAssignmentOptionsProperties
 }
 
 class ModifyAssignmentOptionsCommandInternal(override val assignment: Assignment)
 	extends CommandInternal[Assignment] with PopulateOnForm {
-
-	self: AssessmentServiceComponent with ModifyAssignmentOptionsCommandState with SharedAssignmentProperties =>
+	self: AssessmentServiceComponent with ModifyAssignmentOptionsCommandState with SharedAssignmentOptionsProperties =>
 
 	override def applyInternal(): Assignment = {
 		this.copyTo(assignment)
@@ -32,19 +31,18 @@ class ModifyAssignmentOptionsCommandInternal(override val assignment: Assignment
 	}
 
 	override def populate(): Unit = {
-		copySharedFrom(assignment)
+		copySharedOptionsFrom(assignment)
 	}
 
 }
 
 trait ModifyAssignmentOptionsCommandState {
-
-	self: AssessmentServiceComponent with SharedAssignmentProperties =>
+	self: AssessmentServiceComponent with SharedAssignmentOptionsProperties =>
 
 	def assignment: Assignment
 
 	def copyTo(assignment: Assignment) {
-		copyOptionsTo(assignment)
+		copySharedOptionsTo(assignment)
 	}
 }
 
@@ -58,7 +56,7 @@ trait ModifyAssignmentOptionsPermissions extends RequiresPermissionsChecking wit
 }
 
 trait ModifyAssignmentOptionsDescription extends Describable[Assignment] {
-	self: ModifyAssignmentOptionsCommandState with SharedAssignmentProperties =>
+	self: ModifyAssignmentOptionsCommandState with SharedAssignmentOptionsProperties =>
 
 	override lazy val eventName: String = "ModifyAssignmentOptions"
 
@@ -76,10 +74,9 @@ trait ModifyAssignmentOptionsDescription extends Describable[Assignment] {
 }
 
 trait ModifyAssignmentOptionsValidation extends SelfValidating {
-
-	self: ModifyAssignmentOptionsCommandState with AssessmentServiceComponent  with SharedAssignmentProperties  =>
+	self: ModifyAssignmentOptionsCommandState with AssessmentServiceComponent with SharedAssignmentOptionsProperties =>
 
 	override def validate(errors: Errors) {
-		validateShared(errors)
+		validateSharedOptions(errors)
 	}
 }

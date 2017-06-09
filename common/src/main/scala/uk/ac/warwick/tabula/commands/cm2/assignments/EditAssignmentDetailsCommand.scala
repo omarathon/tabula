@@ -16,7 +16,7 @@ object EditAssignmentDetailsCommand {
 	def apply(assignment: Assignment) =
 		new EditAssignmentDetailsCommandInternal(assignment)
 			with ComposableCommand[Assignment]
-			with BooleanAssignmentProperties
+			with BooleanAssignmentDetailProperties
 			with EditAssignmentPermissions
 			with EditAssignmentDetailsDescription
 			with EditAssignmentDetailsValidation
@@ -29,7 +29,7 @@ object EditAssignmentDetailsCommand {
 }
 
 class EditAssignmentDetailsCommandInternal(override val assignment: Assignment) extends CommandInternal[Assignment] with EditAssignmentDetailsCommandState
-	with EditAssignmentDetailsValidation with SharedAssignmentProperties with PopulateOnForm with AssignmentDetailsCopy with CreatesMarkingWorkflow {
+	with EditAssignmentDetailsValidation with SharedAssignmentDetailProperties with PopulateOnForm with AssignmentDetailsCopy with CreatesMarkingWorkflow {
 
 	self: AssessmentServiceComponent with UserLookupComponent with CM2MarkingWorkflowServiceComponent =>
 
@@ -92,7 +92,7 @@ trait EditAssignmentDetailsCommandState extends ModifyAssignmentDetailsCommandSt
 
 
 trait EditAssignmentDetailsValidation extends ModifyAssignmentDetailsValidation with ModifyMarkingWorkflowValidation {
-	self: EditAssignmentDetailsCommandState with BooleanAssignmentProperties with AssessmentServiceComponent with ModifyMarkingWorkflowState
+	self: EditAssignmentDetailsCommandState with BooleanAssignmentDetailProperties with AssessmentServiceComponent with ModifyMarkingWorkflowState
 		with UserLookupComponent =>
 
 	override def validate(errors: Errors): Unit = {

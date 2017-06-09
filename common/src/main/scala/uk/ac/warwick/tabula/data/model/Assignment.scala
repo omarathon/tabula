@@ -841,9 +841,44 @@ class Assignment
  *
  * Includes @BeanProperty to allow JSON binding
  */
-trait BooleanAssignmentProperties {
+trait BooleanAssignmentDetailProperties {
+	@BeanProperty var cm2Assignment: JBoolean = false
 	@BeanProperty var openEnded: JBoolean = false
+
+	def copyDetailBooleansTo(assignment: Assignment) {
+		assignment.openEnded = openEnded
+	}
+}
+
+trait BooleanAssignmentFeedbackProperties {
 	@BeanProperty var collectMarks: JBoolean = true
+	@BeanProperty var automaticallyReleaseToMarkers: JBoolean = false
+	@BeanProperty var summative: JBoolean = true
+	@BeanProperty var dissertation: JBoolean = false
+	@BeanProperty var includeInFeedbackReportWithoutSubmissions: JBoolean = false
+
+	def copyFeedbackBooleansTo(assignment: Assignment) {
+		assignment.collectMarks = collectMarks
+		assignment.summative = summative
+		assignment.dissertation = dissertation
+		assignment.includeInFeedbackReportWithoutSubmissions = includeInFeedbackReportWithoutSubmissions
+		assignment.automaticallyReleaseToMarkers = automaticallyReleaseToMarkers
+	}
+}
+
+trait BooleanAssignmentStudentProperties {
+	@BeanProperty var anonymousMarking: JBoolean = false
+	@BeanProperty var hiddenFromStudents: JBoolean = false
+
+	def copyStudentBooleansTo(assignment: Assignment) {
+		assignment.anonymousMarking = anonymousMarking
+
+		// You can only hide an assignment, no un-hiding.
+		if (hiddenFromStudents) assignment.hideFromStudents()
+	}
+}
+
+trait BooleanAssignmentSubmissionProperties {
 	@BeanProperty var collectSubmissions: JBoolean = true
 	@BeanProperty var restrictSubmissions: JBoolean = false
 	@BeanProperty var allowLateSubmissions: JBoolean = true
@@ -852,20 +887,9 @@ trait BooleanAssignmentProperties {
 	@BeanProperty var allowExtensions: JBoolean = true
 	@BeanProperty var extensionAttachmentMandatory: JBoolean = false
 	@BeanProperty var allowExtensionsAfterCloseDate: JBoolean = false
-	@BeanProperty var summative: JBoolean = true
-	@BeanProperty var dissertation: JBoolean = false
-	@BeanProperty var includeInFeedbackReportWithoutSubmissions: JBoolean = false
-	@BeanProperty var automaticallyReleaseToMarkers: JBoolean = false
 	@BeanProperty var automaticallySubmitToTurnitin: JBoolean = false
-	@BeanProperty var hiddenFromStudents: JBoolean = false
-	@BeanProperty var anonymousMarking: JBoolean = false
-	@BeanProperty var cm2Assignment: JBoolean = false
 
-
-
-	def copyBooleansTo(assignment: Assignment) {
-		assignment.openEnded = openEnded
-		assignment.collectMarks = collectMarks
+	def copySubmissionBooleansTo(assignment: Assignment) {
 		assignment.collectSubmissions = collectSubmissions
 		assignment.restrictSubmissions = restrictSubmissions
 		assignment.allowLateSubmissions = allowLateSubmissions
@@ -874,17 +898,21 @@ trait BooleanAssignmentProperties {
 		assignment.allowExtensions = allowExtensions
 		assignment.extensionAttachmentMandatory = extensionAttachmentMandatory
 		assignment.allowExtensionsAfterCloseDate = allowExtensionsAfterCloseDate
-		assignment.summative = summative
-		assignment.dissertation = dissertation
-		assignment.includeInFeedbackReportWithoutSubmissions = includeInFeedbackReportWithoutSubmissions
-		assignment.automaticallyReleaseToMarkers = automaticallyReleaseToMarkers
 		assignment.automaticallySubmitToTurnitin = automaticallySubmitToTurnitin
-		assignment.anonymousMarking = anonymousMarking
+	}
+}
 
+trait BooleanAssignmentProperties
+	extends BooleanAssignmentDetailProperties
+		with BooleanAssignmentFeedbackProperties
+		with BooleanAssignmentStudentProperties
+		with BooleanAssignmentSubmissionProperties {
 
-
-		// You can only hide an assignment, no un-hiding.
-		if (hiddenFromStudents) assignment.hideFromStudents()
+	def copyBooleansTo(assignment: Assignment) {
+		copyDetailBooleansTo(assignment)
+		copyFeedbackBooleansTo(assignment)
+		copyStudentBooleansTo(assignment)
+		copySubmissionBooleansTo(assignment)
 	}
 }
 
