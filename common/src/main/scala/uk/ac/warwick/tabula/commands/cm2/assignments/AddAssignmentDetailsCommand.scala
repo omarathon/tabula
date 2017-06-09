@@ -32,7 +32,6 @@ object CreateAssignmentDetailsCommand {
 
 class CreateAssignmentDetailsCommandInternal(val module: Module, val academicYear: AcademicYear) extends CommandInternal[Assignment]
   with CreateAssignmentDetailsCommandState with SharedAssignmentDetailProperties with AssignmentDetailsCopy with CreatesMarkingWorkflow {
-
   self: AssessmentServiceComponent with UserLookupComponent with CM2MarkingWorkflowServiceComponent =>
 
   private var _prefilled: Boolean = _
@@ -43,6 +42,9 @@ class CreateAssignmentDetailsCommandInternal(val module: Module, val academicYea
 
   override def applyInternal(): Assignment = {
     val assignment = new Assignment(module)
+    // Set default booleans
+    BooleanAssignmentProperties(assignment)
+
     assignment.addDefaultFields()
     copyTo(assignment)
     if(workflowCategory == WorkflowCategory.SingleUse){
