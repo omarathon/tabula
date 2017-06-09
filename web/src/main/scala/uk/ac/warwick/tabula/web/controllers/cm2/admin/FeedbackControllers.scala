@@ -9,11 +9,12 @@ import uk.ac.warwick.tabula.cm2.web.Routes
 import uk.ac.warwick.tabula.commands.Appliable
 import uk.ac.warwick.tabula.commands.cm2.feedback._
 import uk.ac.warwick.tabula.data.FeedbackDao
-import uk.ac.warwick.tabula.data.model.{Assignment, MarkerFeedback}
+import uk.ac.warwick.tabula.data.model.{Assignment, Feedback, MarkerFeedback}
 import uk.ac.warwick.tabula.services.fileserver.RenderableFile
 import uk.ac.warwick.tabula.system.RenderableFileView
 import uk.ac.warwick.tabula.web.Mav
 import uk.ac.warwick.tabula.web.controllers.cm2.CourseworkController
+import uk.ac.warwick.userlookup.User
 
 @Profile(Array("cm2Enabled")) @Controller
 @RequestMapping(Array("/${cm2.prefix}/admin/assignments/{assignment}/marker/{marker}/feedback/download/{markerFeedback}"))
@@ -97,4 +98,21 @@ class DownloadSelectedFeedbackFileController extends CourseworkController {
 		}
 		Mav(new RenderableFileView(renderable))
 	}
+}
+
+@Profile(Array("cm2Enabled"))
+@Controller
+@RequestMapping(Array("/${cm2.prefix}/admin/assignments/{assignment}/feedback/summary/{student}"))
+class FeedbackSummaryController extends CourseworkController {
+
+	@ModelAttribute("command")
+	def command(@PathVariable assignment: Assignment, @PathVariable student: User): FeedbackSummaryCommand.Command =
+		FeedbackSummaryCommand(assignment, student)
+
+	@RequestMapping
+	def showFeedback(@ModelAttribute("command") command: FeedbackSummaryCommand.Command): Mav = {
+		val feedback = command.apply()
+		Mav("cm2/admin/assignments/feedback/read_only", "feedback" -> feedback).noLayout()
+	}
+
 }

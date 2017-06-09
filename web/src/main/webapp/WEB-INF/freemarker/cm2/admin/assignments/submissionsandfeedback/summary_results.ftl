@@ -105,7 +105,7 @@
 						<#local lateness><@components.lateness submission /></#local>
 
 						<tr class="itemContainer<#if !enhancedSubmission??> awaiting-submission</#if>" <#if enhancedSubmission?? && submission.suspectPlagiarised> data-plagiarised="true"</#if> data-contentid="${identifier}">
-							<td><@bs3form.selector_check_row "students" student.user.userId /></td>
+							<td class="check-col"><@bs3form.selector_check_row "students" student.user.userId /></td>
 
 							<#if department.showStudentName>
 								<td class="student toggle-cell toggle-icon" data-profile="${identifier}">
