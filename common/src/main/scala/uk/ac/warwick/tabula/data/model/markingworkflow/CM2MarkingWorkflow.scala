@@ -53,7 +53,7 @@ abstract class CM2MarkingWorkflow extends GeneratedId with PermissionsTarget wit
 	var stageMarkers: JList[StageMarkers] = JArrayList()
 
 	def markers: Map[MarkingWorkflowStage, Seq[Marker]] =
-		stageMarkers.asScala.map(sm => sm.stage -> sm.markers.knownType.users.sorted).toMap
+		stageMarkers.asScala.map(sm => sm.stage -> sm.markers.users.sorted).toMap
 
 	def allMarkers: SortedSet[Marker] = SortedSet(markers.values.flatten.toSeq.distinct:_ *)
 
@@ -93,9 +93,11 @@ abstract class CM2MarkingWorkflow extends GeneratedId with PermissionsTarget wit
 	def permissionsParents: Stream[Department] = Option(department).toStream
 
 	// replace the markers for a specified stage in the workflow
-	protected def replaceStageMarkers(stage:MarkingWorkflowStage, markers:Seq[Marker]): Unit = {
+	protected def replaceStageMarkers(stage: MarkingWorkflowStage, markers: Seq[Marker]): Unit = {
 		stageMarkers.asScala.find(_.stage == stage).foreach(sm => {
-			sm.markers.knownType.includedUserIds = markers.map(_.getUserId)
+			// Do this in a roundabout way for the cache manager's benefit
+			sm.markers.users.foreach(sm.markers.remove)
+			markers.foreach(sm.markers.add)
 		})
 	}
 	// replace the markers in this workflow

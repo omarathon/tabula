@@ -171,7 +171,6 @@ class CM2MarkingWorkflowServiceImpl extends CM2MarkingWorkflowService with Autow
 			})
 
 		for((marker, students) <- allocations.toSeq; student <- students) yield {
-
 			val parentFeedback = assignment.feedbacks.asScala.find(_.usercode == student.getUserId).getOrElse({
 				val newFeedback = new AssignmentFeedback
 				newFeedback.assignment = assignment
@@ -192,7 +191,7 @@ class CM2MarkingWorkflowServiceImpl extends CM2MarkingWorkflowService with Autow
 			})
 
 			// set the marker (possibly moving the MarkerFeedback to another marker - any existing data remains)
-			markerFeedback.marker = marker
+			markerFeedback.marker = if (marker.isFoundUser) marker else null
 			feedbackService.save(markerFeedback)
 			markerFeedback
 		}
@@ -235,11 +234,11 @@ class CM2MarkingWorkflowServiceImpl extends CM2MarkingWorkflowService with Autow
 }
 
 trait WorkflowUserGroupHelpers {
-	val markerHelper: UserGroupMembershipHelper[CM2MarkingWorkflow]
+	val markerHelper: UserGroupMembershipHelper[StageMarkers]
 }
 
 trait WorkflowUserGroupHelpersImpl extends WorkflowUserGroupHelpers {
-	val markerHelper = new UserGroupMembershipHelper[CM2MarkingWorkflow]("_markers")
+	val markerHelper = new UserGroupMembershipHelper[StageMarkers]("_markers")
 }
 
 trait CM2MarkingWorkflowServiceComponent {

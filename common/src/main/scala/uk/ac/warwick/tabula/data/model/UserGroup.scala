@@ -211,8 +211,8 @@ trait UnspecifiedTypeUserGroup {
 	def remove(user:User)
 	def exclude(user:User)
 	def unexclude(user:User)
-	def size:Int
-	def isEmpty:Boolean
+	def size: Int
+	def isEmpty: Boolean
   def includesUser(user:User):Boolean
   def excludesUser(user:User):Boolean
 

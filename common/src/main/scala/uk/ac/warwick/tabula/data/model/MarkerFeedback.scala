@@ -38,8 +38,8 @@ class MarkerFeedback extends GeneratedId with FeedbackAttachments with ToEntityR
 	private var markerUsercode: String = _
 
 	def marker_=(marker: User): Unit = markerUsercode = marker match {
-		case m: User if !m.isFoundUser => throw new IllegalStateException(s"Marker is not a valid user.")
-		case m: User =>  m.getUserId
+		case m: User if !m.isFoundUser => throw new IllegalStateException(s"${m.getUserId} is not a valid user.")
+		case m: User => m.getUserId
 		case _ => null
 	}
 
