@@ -15,10 +15,10 @@ trait SelectedStudentsRequest {
 	var students: JList[String] = JArrayList()
 
 	def submissions: Seq[Submission] =
-		if (students.isEmpty) assignment.submissions.asScala
-		else students.asScala.flatMap { s => assignment.submissions.asScala.find(_.usercode == s) }
+		if (students.isEmpty) JArrayList(assignment.submissions).asScala
+		else students.asScala.flatMap { s => JArrayList(assignment.submissions).asScala.find(_.usercode == s) }
 
 	def feedbacks: Seq[AssignmentFeedback] =
-		if (students.isEmpty) assignment.feedbacks.asScala
-		else students.asScala.flatMap { s => assignment.feedbacks.asScala.find(_.usercode == s) }
+		if (students.isEmpty) JArrayList(assignment.feedbacks).asScala
+		else students.asScala.flatMap { s => JArrayList(assignment.feedbacks).asScala.find(_.usercode == s) }
 }
