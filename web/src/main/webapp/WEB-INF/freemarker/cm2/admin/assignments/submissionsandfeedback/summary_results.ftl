@@ -24,7 +24,6 @@
 
 						<th class="progress-col">Progress</th>
 						<th class="action-col">Next action</th>
-						<th></th>
 					</tr>
 				</thead>
 				<tbody>
@@ -132,53 +131,6 @@
 								<#if student.nextStage?has_content>
 									<@spring.message code=student.nextStage.actionCode />
 								</#if>
-							</td>
-							<td>
-								<div class="btn-group">
-									<a class="btn btn-default btn-xs dropdown-toggle" data-toggle="dropdown">Actions <span class="caret"></span></a>
-									<ul class="dropdown-menu pull-right">
-										<#if submission??>
-											<li>
-												<#local download_url><@routes.cm2.submissionsZip assignment /></#local>
-												<@fmt.permission_button
-													permission='Submission.Read'
-													scope=submission
-													action_descr='download submission'
-													classes='form-post-single'
-													href=download_url
-													tooltip='Download the submission files for this student as a ZIP file'>
-														Download submission
-												</@fmt.permission_button>
-											</li>
-											<li>
-												<#local download_url><@routes.cm2.submissionsPdf assignment /></#local>
-												<@fmt.permission_button
-													permission='Submission.Read'
-													scope=submission
-													action_descr='download submission'
-													classes='form-post-single'
-													href=download_url
-													tooltip='Download the submission files for this student as a PDF file'>
-														Download submission as PDF
-												</@fmt.permission_button>
-											</li>
-											<li>
-												<#local deletesubmissionurl><@routes.cm2.deleteSubmissionsAndFeedback assignment /></#local>
-												<@fmt.permission_button
-													permission='Submission.Delete'
-													scope=submission
-													action_descr='delete submission'
-													classes='form-post-single'
-													href=deletesubmissionurl
-													tooltip='Delete this submission'>
-														Delete submission
-												</@fmt.permission_button>
-											</li>
-										</#if>
-
-										<#-- TODO other actions -->
-									</ul>
-								</div>
 							</td>
 						</tr>
 					</#macro>
