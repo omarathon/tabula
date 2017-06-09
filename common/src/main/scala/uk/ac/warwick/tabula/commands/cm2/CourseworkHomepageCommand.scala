@@ -377,7 +377,7 @@ trait CourseworkHomepageMarkerAssignments extends TaskBenchmarking {
 
 	private lazy val allMarkerAssignments: Seq[MarkerAssignmentInfo] = benchmarkTask("Get assignments for marking") {
 		(allCM1MarkerAssignments ++ allCM2MarkerAssignments)
-			.sortBy(info => (info.assignment.openEnded, info.assignment.closeDate))
+			.sortBy(info => (info.assignment.openEnded, Option(info.assignment.closeDate)))
 	}
 
 }
