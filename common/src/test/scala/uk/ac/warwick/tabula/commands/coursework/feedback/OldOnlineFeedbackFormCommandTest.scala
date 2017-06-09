@@ -12,7 +12,7 @@ import uk.ac.warwick.userlookup.User
 
 import scala.collection.JavaConversions._
 
-class OnlineFeedbackFormCommandTest extends TestBase with Mockito {
+class OldOnlineFeedbackFormCommandTest extends TestBase with Mockito {
 
 	trait Fixture {
 
@@ -40,7 +40,7 @@ class OnlineFeedbackFormCommandTest extends TestBase with Mockito {
 		val gradeGenerator: GeneratesGradesFromMarks = smartMock[GeneratesGradesFromMarks]
 		gradeGenerator.applyForMarks(Map("student" -> 67)) returns Map("student" -> Seq())
 
-		val command = new OnlineFeedbackFormCommand(module, assignment, student, currentUser.apparentUser, currentUser, gradeGenerator)
+		val command = new OldOnlineFeedbackFormCommand(module, assignment, student, currentUser.apparentUser, currentUser, gradeGenerator)
 			with OnlineFeedbackFormCommandTestSupport
 	}
 
@@ -105,7 +105,7 @@ class OnlineFeedbackFormCommandTest extends TestBase with Mockito {
 
 			assignment.feedbacks = Seq(existingFeedback)
 
-			val command2 = new OnlineFeedbackFormCommand(module, assignment, student, currentUser.apparentUser, currentUser, gradeGenerator)
+			val command2 = new OldOnlineFeedbackFormCommand(module, assignment, student, currentUser.apparentUser, currentUser, gradeGenerator)
 				with OnlineFeedbackFormCommandTestSupport
 			command2.mark should be("55")
 			command2.grade should be("2:2")
@@ -175,7 +175,7 @@ class OnlineFeedbackFormCommandTest extends TestBase with Mockito {
 trait OnlineFeedbackFormCommandTestSupport extends FileAttachmentServiceComponent with FeedbackServiceComponent
 	with ZipServiceComponent with SavedFormValueDaoComponent with Mockito with ProfileServiceComponent {
 
-	this : OnlineFeedbackFormCommand =>
+	this : OldOnlineFeedbackFormCommand =>
 
 	val fileAttachmentService: FileAttachmentService = smartMock[FileAttachmentService]
 	val feedbackService: FeedbackService = smartMock[FeedbackService]

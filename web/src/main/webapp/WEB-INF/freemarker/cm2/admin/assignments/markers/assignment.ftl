@@ -63,57 +63,14 @@
 
 			var $body = $('body');
 
-			// on cancel collapse the row and nuke the form
-			$body.on('click', '.cancel', function(e){
-				e.preventDefault();
-				var $row = $(e.target).closest('.detail-row');
-				$row.collapse("hide");
-
-				$row.on('hidden.bs.collapse', function(e) {
-					$row.data('loaded', false);
-					$row.find('.detailrow-container').html('<i class="fa fa-spinner fa-spin"></i> Loading');
-					$(this).unbind(e);
-				});
-			});
-
-			// on reset fetch the form again
-			$body.on('click', '.reset', function(e){
-				e.preventDefault();
-				var $row = $(e.target).closest('.detail-row');
-				$row.data('loaded', false);
-				$row.trigger('show.bs.collapse');
-			});
-
 			$body.on('shown.bs.collapse', function(e){
 				var $row = $(e.target);
 				$row.tabulaAjaxForm({
 					successCallback: function($container){
-						var $row = $container.closest('tr').prev()
-						$row.addClass('ready-next-stage')
+						var $row = $container.closest('tr').prev();
+						$row.addClass('ready-next-stage');
 					}
 				});
-			});
-
-			// remove attachment
-			$body.on("click", '.remove-attachment', function(e) {
-				e.preventDefault();
-				var $this = $(this);
-				var $form = $this.closest('form');
-				var $li = $this.closest("li");
-				$li.find('input, a').remove();
-				$li.find('span').wrap('<del />');
-				$li.find('i').css('display', 'none');
-				var $ul = $li.closest('ul');
-
-				if (!$ul.find('li').last().is('.pending-removal')) {
-					var alertMarkup = '<li class="pending-removal">Files marked for removal won\'t be deleted until you <samp>Save</samp>.</li>';
-					$ul.append(alertMarkup);
-				}
-
-				if($form.find('input[name=attachedFiles]').length === 0){
-					var $blankInput = $('<input name="attachedFiles" type="hidden" />');
-					$form.append($blankInput);
-				}
 			});
 
 			// copy feedback
