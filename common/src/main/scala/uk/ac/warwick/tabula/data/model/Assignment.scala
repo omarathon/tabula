@@ -595,9 +595,9 @@ class Assignment
 	}
 
 	// if the department allows extensions we must be able to manually create extensions even if requests aren't allowed
-	def extensionsPossible: Boolean = !openEnded && module.adminDepartment.allowExtensionRequests
+	def extensionsPossible: Boolean = !openEnded && allowExtensions
 
-	def newExtensionsCanBeRequested: Boolean = extensionsPossible && allowExtensions && (!isClosed || allowExtensionsAfterCloseDate)
+	def newExtensionsCanBeRequested: Boolean = extensionsPossible && module.adminDepartment.allowExtensionRequests && (!isClosed || allowExtensionsAfterCloseDate)
 
 	@Deprecated
 	def getMarkerFeedback(usercode: String, user: User, feedbackPosition: FeedbackPosition): Option[MarkerFeedback] = {

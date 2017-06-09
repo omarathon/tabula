@@ -710,7 +710,7 @@
 									scope=assignment
 									action_descr=ext_caption?lower_case
 									href=ext_url>
-										<strong>Extension requests:</strong> ${assignment.countUnapprovedExtensions}
+										<strong>Extension<#if assignment.module.adminDepartment.allowExtensionRequests> request</#if>s:</strong> ${assignment.countUnapprovedExtensions}
 								</@fmt.permission_button>
 							</li>
 						</#if>
