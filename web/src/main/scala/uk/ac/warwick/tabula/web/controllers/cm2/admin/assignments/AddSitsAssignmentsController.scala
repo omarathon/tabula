@@ -89,8 +89,12 @@ abstract class AbstractAddSitsAssignmentsController extends CourseworkController
 		errors: Errors,
 		@PathVariable department: Department
 	): Mav = {
-		cmd.validateNames(errors)
-		getMav(department, cmd.academicYear).addObjects("action" -> "options")
+		if (cmd.includedItems.isEmpty) {
+			selectionForm(cmd, errors, department)
+		} else {
+			cmd.validateNames(errors)
+			getMav(department, cmd.academicYear).addObjects("action" -> "options")
+		}
 	}
 
 	// Do validation and return as a chunk of HTML errors.

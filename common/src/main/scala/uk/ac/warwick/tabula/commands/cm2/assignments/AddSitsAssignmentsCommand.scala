@@ -297,7 +297,7 @@ trait AddSitsAssignmentsCommandState {
 	// All the possible assignments, prepopulated from SITS.
 	var sitsAssignmentItems: JList[SitsAssignmentItem] = LazyLists.create[SitsAssignmentItem]()
 
-	protected def includedItems: mutable.Buffer[SitsAssignmentItem] = sitsAssignmentItems.asScala.filter { _.include }
+	def includedItems: mutable.Buffer[SitsAssignmentItem] = sitsAssignmentItems.asScala.filter { _.include }
 
 	/**
 		* options which are referenced by key by SitsAssignmentItem.optionsId
