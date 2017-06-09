@@ -8,10 +8,10 @@
 
 <#import "*/modal_macros.ftl" as modal />
 
-<#macro student_assignment_list id title assignments expand_by_default=true show_submission_progress=false>
+<#macro student_assignment_list id title assignments empty_message expand_by_default=true show_submission_progress=false>
 	<span id="${id}-container">
 		<#local has_assignments = (assignments!?size gt 0) />
-		<div id="${id}" class="striped-section student-assignment-list<#if has_assignments> collapsible<#if expand_by_default> expanded</#if><#else> empty</#if>" data-name="${id}">
+		<div id="${id}" class="striped-section student-assignment-list collapsible<#if expand_by_default> expanded</#if>" data-name="${id}">
 			<div class="clearfix">
 				<h4 class="section-title">${title}</h4>
 
@@ -28,6 +28,12 @@
 								<@student_assignment_info info show_submission_progress />
 							</span>
 						</#list>
+					</div>
+				<#else>
+					<div class="striped-section-contents">
+						<div class="item-info">
+							${empty_message}
+						</div>
 					</div>
 				</#if>
 			</div>
@@ -220,9 +226,15 @@
 
 			<#local feedbackStatus = "" />
 			<#if info.feedback?? && info.feedback.released>
-				<#local feedbackStatus>
-					<strong>Feedback received:</strong> <@fmt.date date=info.feedback.releasedDate />
-				</#local>
+				<#if info.feedback.releasedDate??>
+					<#local feedbackStatus>
+						<strong>Feedback received:</strong> <@fmt.date date=info.feedback.releasedDate />
+					</#local>
+				<#else>
+					<#local feedbackStatus>
+						<strong>Feedback received</strong>
+					</#local>
+				</#if>
 			<#elseif assignment.collectSubmissions>
 				<#if info.submission?? && info.feedbackDeadline??>
 					<#local feedbackStatus>
@@ -282,13 +294,13 @@
 					<#if assignment.extensionsPossible>
 						<#if info.extensionRequested>
 							<div class="col-md-6">
-								<a href="<@routes.cm2.extensionRequest assignment=assignment />?returnTo=<@routes.cm2.home academicYear />" class="btn btn-block btn-default">
+								<a href="<@routes.cm2.extensionRequest assignment=assignment />?returnTo=<@routes.cm2.home />" class="btn btn-block btn-default">
 									Review extension request
 								</a>
 							</div>
 						<#elseif !info.extended && assignment.newExtensionsCanBeRequested>
 							<div class="col-md-6">
-								<a href="<@routes.cm2.extensionRequest assignment=assignment />?returnTo=<@routes.cm2.home academicYear />" class="btn btn-block btn-default">
+								<a href="<@routes.cm2.extensionRequest assignment=assignment />?returnTo=<@routes.cm2.home />" class="btn btn-block btn-default">
 									Request extension
 								</a>
 							</div>

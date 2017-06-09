@@ -9,13 +9,7 @@ TODO grab values from the Routes object in code, as that's pretty equivalent and
 	<@url context=context page=page />
 </#macro>
 
-<#macro home academicYear="">
-	<#if academicYear?has_content>
-		<@_u page="/${academicYear.startYear?c}" />
-	<#else>
-		<@_u page="/" />
-	</#if>
-</#macro>
+<#macro home><@_u page="/" /></#macro>
 
 <#macro depthome module academicYear="">
 	<#if academicYear?has_content>

@@ -26,7 +26,6 @@ object Routes {
 
 	private lazy val context = s"/$cm2Prefix"
 	def home: String = context + "/"
-	def homeForYear(academicYear: AcademicYear): String = context + s"/${encoded(academicYear.startYear.toString)}"
 
 	object assignment {
 		def apply(assignment: Assignment): String = context + s"/submission/${encoded(assignment.id)}/"
