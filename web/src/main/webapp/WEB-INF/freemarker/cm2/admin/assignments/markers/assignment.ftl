@@ -128,10 +128,16 @@
 
 				onSomeChecked : function() {
 					var $markingStage = this.closest('.marking-stage');
-					if(this.find('.ready-next-stage input:checked').length){
+					if (this.find('input:checked').length) {
 						$markingStage.find('.must-have-selected').removeClass('disabled');
 					} else {
 						$markingStage.find('.must-have-selected').addClass('disabled');
+					}
+
+					if (this.find('.ready-next-stage input:checked').length) {
+						$markingStage.find('.must-have-ready-next-stage').removeClass('disabled');
+					} else {
+						$markingStage.find('.must-have-ready-next-stage').addClass('disabled');
 					}
 				},
 

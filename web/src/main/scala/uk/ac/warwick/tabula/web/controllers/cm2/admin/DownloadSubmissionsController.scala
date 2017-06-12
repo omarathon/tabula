@@ -3,14 +3,12 @@ package uk.ac.warwick.tabula.web.controllers.cm2.admin
 import org.springframework.context.annotation.Profile
 import org.springframework.stereotype.Controller
 import org.springframework.web.bind.annotation.{ModelAttribute, PathVariable, RequestMapping}
-import uk.ac.warwick.spring.Wire
 import uk.ac.warwick.tabula.CurrentUser
 import uk.ac.warwick.tabula.cm2.web.Routes
 import uk.ac.warwick.tabula.commands.Appliable
 import uk.ac.warwick.tabula.commands.cm2.assignments.markers.DownloadMarkersSubmissionsCommand
 import uk.ac.warwick.tabula.commands.cm2.assignments.{AdminGetSingleSubmissionCommand, DownloadAllSubmissionsCommand, _}
 import uk.ac.warwick.tabula.data.model.{Assignment, Submission}
-import uk.ac.warwick.tabula.services.UserLookupService
 import uk.ac.warwick.tabula.services.fileserver.RenderableFile
 import uk.ac.warwick.tabula.system.RenderableFileView
 import uk.ac.warwick.tabula.web.Mav
@@ -110,8 +108,6 @@ class DownloadSingleSubmissionFileController extends CourseworkController {
 @RequestMapping(value=Array("/${cm2.prefix}/admin/assignments/{assignment}/feedback-templates.zip"))
 class DownloadFeedbackSheetsController extends CourseworkController {
 
-	var userLookup: UserLookupService = Wire.auto[UserLookupService]
-
 	@ModelAttribute("downloadFeedbackSheetsCommand")
 	def feedbackSheetsCommand(@PathVariable assignment: Assignment): DownloadFeedbackSheetsCommand.Command =
 		DownloadFeedbackSheetsCommand(assignment)
@@ -131,7 +127,6 @@ class DownloadMarkerTemplatesAsCurrentUserController extends CourseworkControlle
 		Redirect(Routes.admin.assignment.markerTemplates(assignment, user.apparentUser))
 	}
 }
-
 
 @Profile(Array("cm2Enabled")) @Controller
 @RequestMapping(value=Array("/${cm2.prefix}/admin/assignments/{assignment}/marker/{marker}/marker-templates.zip"))

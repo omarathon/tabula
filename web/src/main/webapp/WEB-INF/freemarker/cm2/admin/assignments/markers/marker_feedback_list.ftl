@@ -9,7 +9,7 @@
 		<h3>${stage.description}</h3>
 		<#if enhancedMarkerFeedbacks?has_content>
 			<#if stage.nextStagesDescription?has_content>
-				<a class="btn btn-primary must-have-selected form-post" href="${markingCompleted}">Confirm selected and send to ${stage.nextStagesDescription?lower_case}</a>
+				<a class="btn btn-primary must-have-selected must-have-ready-next-stage form-post" href="${markingCompleted}">Confirm selected and send to ${stage.nextStagesDescription?lower_case}</a>
 			</#if>
 			<div class="btn-group">
 				<button type="button" class="btn btn-default dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
@@ -34,7 +34,9 @@
 						</li>
 					</#if>
 					<#list workflowType.allPreviousStages(stage) as pStage>
-						<li><a href="#">Download feedback from ${pStage.description?lower_case}</a></li>
+						<li class="must-have-selected">
+							<a class="form-post" href="<@routes.cm2.downloadMarkerFeedbackStage assignment marker pStage />">Download feedback from ${pStage.description?lower_case}</a>
+						</li>
 					</#list>
 				</ul>
 			</div>
@@ -106,7 +108,7 @@
 
 			<#if feedbackByStage?keys?size gt 0>
 				<#if stage.nextStagesDescription?has_content>
-					<a class="btn btn-primary must-have-selected form-post" href="${markingCompleted}">Confirm selected and send to ${stage.nextStagesDescription?lower_case}</a>
+					<a class="btn btn-primary must-have-selected must-have-ready-next-stage form-post" href="${markingCompleted}">Confirm selected and send to ${stage.nextStagesDescription?lower_case}</a>
 				</#if>
 			</#if>
 

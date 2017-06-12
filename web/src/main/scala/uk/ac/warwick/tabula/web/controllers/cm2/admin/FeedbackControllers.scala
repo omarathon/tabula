@@ -9,6 +9,7 @@ import uk.ac.warwick.tabula.cm2.web.Routes
 import uk.ac.warwick.tabula.commands.Appliable
 import uk.ac.warwick.tabula.commands.cm2.feedback._
 import uk.ac.warwick.tabula.data.FeedbackDao
+import uk.ac.warwick.tabula.data.model.markingworkflow.MarkingWorkflowStage
 import uk.ac.warwick.tabula.data.model.{Assignment, Feedback, MarkerFeedback}
 import uk.ac.warwick.tabula.services.fileserver.RenderableFile
 import uk.ac.warwick.tabula.system.RenderableFileView
@@ -114,5 +115,18 @@ class FeedbackSummaryController extends CourseworkController {
 		val feedback = command.apply()
 		Mav("cm2/admin/assignments/feedback/read_only", "feedback" -> feedback).noLayout()
 	}
+
+}
+
+@Profile(Array("cm2Enabled")) @Controller
+@RequestMapping(value = Array("/${cm2.prefix}/admin/assignments/{assignment}/marker/{marker}/{stage}/feedback.zip"))
+class DownloadMarkerFeedbackForStageController extends CourseworkController {
+
+	@ModelAttribute("command")
+	def command(@PathVariable assignment: Assignment, @PathVariable marker: User, @PathVariable stage: MarkingWorkflowStage): DownloadMarkerFeedbackForStageCommand.Command =
+		DownloadMarkerFeedbackForStageCommand(mandatory(assignment), mandatory(marker), mandatory(stage), user)
+
+	@RequestMapping
+	def download(@ModelAttribute("command") command: DownloadMarkerFeedbackForStageCommand.Command): RenderableFile = command.apply()
 
 }

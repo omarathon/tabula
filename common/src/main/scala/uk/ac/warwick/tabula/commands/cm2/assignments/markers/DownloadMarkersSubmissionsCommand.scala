@@ -19,14 +19,14 @@ import scala.collection.JavaConverters._
 object DownloadMarkersSubmissionsCommand {
 	def apply(assignment: Assignment, marker: User, submitter: CurrentUser) =
 		new DownloadMarkersSubmissionsCommand(assignment, marker, submitter)
-		with ComposableCommand[RenderableFile]
-		with AutowiringZipServiceComponent
-		with AutowiringAssessmentServiceComponent
-		with AutowiringStateServiceComponent
-		with DownloadMarkersSubmissionsDescription
-		with DownloadMarkersSubmissionsCommandState
-		with DownloadMarkersSubmissionsPermissions
-		with ReadOnly
+			with ComposableCommand[RenderableFile]
+			with AutowiringZipServiceComponent
+			with AutowiringAssessmentServiceComponent
+			with AutowiringStateServiceComponent
+			with DownloadMarkersSubmissionsDescription
+			with DownloadMarkersSubmissionsCommandState
+			with DownloadMarkersSubmissionsPermissions
+			with ReadOnly
 }
 
 class DownloadMarkersSubmissionsCommand(val assignment: Assignment, val marker: User, val submitter: CurrentUser)
