@@ -180,7 +180,7 @@ trait AssignmentProgress extends TaskBenchmarking {
 
 		val stagesByCategory = CM2WorkflowCategory.members.map { category =>
 			AssignmentStageCategory(category, stages.getOrElse(category, Nil))
-		}
+		}.filterNot(_.stages.isEmpty)
 
 		val allNextStages =
 			results.students.flatMap(_.nextStage).groupBy(identity).mapValues(_.size)
