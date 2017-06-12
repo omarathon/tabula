@@ -14,7 +14,7 @@ trait CreatesMarkingWorkflow {
 	def createAndSaveSingleUseWorkflow(assignment: Assignment): Unit = {
 		val data = MarkingWorkflowData(
 			department,
-			s"${assignment.module.code} ${assignment.name}",
+			s"${assignment.module.code.toUpperCase} ${assignment.name}",
 			markersAUsers,
 			markersBUsers,
 			workflowType

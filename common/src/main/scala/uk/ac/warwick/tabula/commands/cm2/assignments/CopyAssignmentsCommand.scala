@@ -5,7 +5,9 @@ import uk.ac.warwick.tabula.AcademicYear
 import uk.ac.warwick.tabula.JavaImports._
 import uk.ac.warwick.tabula.commands._
 import uk.ac.warwick.tabula.commands.cm2.assignments.CopyAssignmentsCommand._
+import uk.ac.warwick.tabula.commands.cm2.markingworkflows.{CopyMarkingWorkflowCommandComponent, CopyMarkingWorkflowComponent}
 import uk.ac.warwick.tabula.data.model._
+import uk.ac.warwick.tabula.data.model.markingworkflow.CM2MarkingWorkflow
 import uk.ac.warwick.tabula.data.model.triggers.{AssignmentClosedTrigger, Trigger}
 import uk.ac.warwick.tabula.permissions.Permissions
 import uk.ac.warwick.tabula.services._
@@ -28,6 +30,7 @@ object CopyAssignmentsCommand {
 			with CopyAssignmentsCommandNotifications
 			with AutowiringAssessmentServiceComponent
 			with AutowiringAssessmentMembershipServiceComponent
+			with CopyMarkingWorkflowCommandComponent
 
 	def apply(module: Module, academicYear: AcademicYear): Command =
 		new CopyModuleAssignmentsCommandInternal(module, academicYear)
@@ -38,11 +41,12 @@ object CopyAssignmentsCommand {
 			with CopyAssignmentsCommandNotifications
 			with AutowiringAssessmentServiceComponent
 			with AutowiringAssessmentMembershipServiceComponent
+			with CopyMarkingWorkflowCommandComponent
 }
 
 abstract class AbstractCopyAssignmentsCommandInternal
 	extends CommandInternal[Result] with CopyAssignmentsState {
-	self: AssessmentServiceComponent with AssessmentMembershipServiceComponent =>
+	self: AssessmentServiceComponent with AssessmentMembershipServiceComponent with CopyMarkingWorkflowComponent =>
 
 	override def applyInternal(): Result = {
 		assignments.asScala.map { assignment =>
@@ -83,7 +87,17 @@ abstract class AbstractCopyAssignmentsCommandInternal
 		newAssignment.automaticallySubmitToTurnitin = assignment.automaticallySubmitToTurnitin
 		newAssignment.anonymousMarking = assignment.anonymousMarking
 		newAssignment.cm2Assignment = assignment.cm2Assignment || Option(assignment.markingWorkflow).isEmpty
-		newAssignment.cm2MarkingWorkflow = assignment.cm2MarkingWorkflow
+		newAssignment.cm2MarkingWorkflow = assignment.cm2MarkingWorkflow match {
+			// None
+			case null => null
+
+			// Re-usable
+			case workflow: CM2MarkingWorkflow if workflow.isReusable => workflow
+
+			// Single-use
+			case workflow: CM2MarkingWorkflow => copyMarkingWorkflow(assignment.module.adminDepartment, workflow)
+		}
+
 		var workflowCtg = assignment.workflowCategory match {
 			case Some(workflowCategory: WorkflowCategory) =>
 				Some(workflowCategory)
@@ -118,12 +132,12 @@ abstract class AbstractCopyAssignmentsCommandInternal
 
 class CopyDepartmentAssignmentsCommandInternal(val department: Department, val academicYear: AcademicYear)
 	extends AbstractCopyAssignmentsCommandInternal with CopyDepartmentAssignmentsState {
-	self: AssessmentServiceComponent with AssessmentMembershipServiceComponent =>
+	self: AssessmentServiceComponent with AssessmentMembershipServiceComponent with CopyMarkingWorkflowComponent =>
 }
 
 class CopyModuleAssignmentsCommandInternal(val module: Module, val academicYear: AcademicYear)
 	extends AbstractCopyAssignmentsCommandInternal with CopyModuleAssignmentsState {
-	self: AssessmentServiceComponent with AssessmentMembershipServiceComponent =>
+	self: AssessmentServiceComponent with AssessmentMembershipServiceComponent with CopyMarkingWorkflowComponent =>
 }
 
 trait CopyDepartmentAssignmentsPermissions extends RequiresPermissionsChecking with PermissionsCheckingMethods {
