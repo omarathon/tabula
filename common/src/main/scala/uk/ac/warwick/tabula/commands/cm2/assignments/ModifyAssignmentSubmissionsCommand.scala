@@ -13,6 +13,7 @@ object ModifyAssignmentSubmissionsCommand {
 			with ModifyAssignmentSubmissionsPermissions
 			with ModifyAssignmentSubmissionsDescription
 			with ModifyAssignmentSubmissionsCommandState
+			with ModifyAssignmentScheduledNotifications
 			with AutowiringAssessmentServiceComponent
 			with SharedAssignmentSubmissionProperties
 }

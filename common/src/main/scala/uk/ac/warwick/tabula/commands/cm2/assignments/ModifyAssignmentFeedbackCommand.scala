@@ -14,6 +14,7 @@ object ModifyAssignmentFeedbackCommand {
 			with ModifyAssignmentFeedbackPermissions
 			with ModifyAssignmentFeedbackDescription
 			with ModifyAssignmentFeedbackCommandState
+			with ModifyAssignmentScheduledNotifications
 			with AutowiringAssessmentServiceComponent
 			with SharedAssignmentFeedbackProperties
 			with AutowiringZipServiceComponent

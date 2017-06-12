@@ -769,6 +769,8 @@
 								<#-- Complete? -->
 								<#if assignment.hasReleasedFeedback>
 									<li><a href="<@routes.cm2.assignmentAudit assignment />">View audit</a></li>
+								<#elseif assignment.openEnded && assignment.collectSubmissions && studentCount gt 0>
+									<li>Assignment needs submitting (${studentCount} of ${studentCount})</li>
 								<#else>
 									<li>Awaiting feedback</li>
 								</#if>

@@ -75,5 +75,14 @@ trait CopyMarkingWorkflowDescription extends Describable[CM2MarkingWorkflow] {
 trait CopyMarkingWorkflowState {
 	def department: Department
 	def markingWorkflow: CM2MarkingWorkflow
-	val currentAcademicYear = AcademicYear.guessSITSAcademicYearByDate(DateTime.now)
+	val currentAcademicYear: AcademicYear = AcademicYear.guessSITSAcademicYearByDate(DateTime.now)
+}
+
+trait CopyMarkingWorkflowComponent {
+	def copyMarkingWorkflow(department: Department, workflow: CM2MarkingWorkflow): CM2MarkingWorkflow
+}
+
+trait CopyMarkingWorkflowCommandComponent extends CopyMarkingWorkflowComponent {
+	def copyMarkingWorkflow(department: Department, workflow: CM2MarkingWorkflow): CM2MarkingWorkflow =
+		CopyMarkingWorkflowCommand(department, workflow).apply()
 }
