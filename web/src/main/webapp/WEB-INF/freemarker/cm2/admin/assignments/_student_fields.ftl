@@ -30,7 +30,6 @@
 			</details>
 		</div>
 		<@bs3form.labelled_form_group path="anonymousMarking" labelText="Set anonymity">
-			<div class="help-block">If set to 'on', markers won't be able to set student ID or name.</div>
 			<@bs3form.radio>
 				<@f.radiobutton path="anonymousMarking" value="false" /> Off <span class="very-subtle">- markers can see University IDs and names</span>
 			</@bs3form.radio>
