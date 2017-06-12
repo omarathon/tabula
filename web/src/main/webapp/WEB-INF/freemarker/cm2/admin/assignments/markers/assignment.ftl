@@ -65,6 +65,12 @@
 
 			$body.on('shown.bs.collapse', function(e){
 				var $row = $(e.target);
+
+				$row.find('.use-popover').tabulaPopover({
+					trigger: 'click',
+					container: '.id7-fixed-width-container'
+				});
+
 				$row.tabulaAjaxForm({
 					successCallback: function($container){
 						var $row = $container.closest('tr').prev();
