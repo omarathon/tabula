@@ -333,13 +333,23 @@ object CM2WorkflowStages {
 				StageProgress(workflowStage, started = false, messageCode = s"workflow.cm2.${markingStage.name}.incomplete")
 			} else if (currentStages.contains(markingStage)) {
 				// This is the current stage
-				StageProgress(
-					workflowStage,
-					started = true,
-					messageCode = s"workflow.cm2.${markingStage.name}.inProgress",
-					health = Warning,
-					completed = false
-				)
+				val markerFeedback = coursework.enhancedFeedback.flatMap(_.feedback.markerFeedback.asScala.find(_.stage == markingStage))
+
+				if (markerFeedback.exists(_.hasBeenModified)) {
+					StageProgress(
+						workflowStage,
+						started = true,
+						messageCode = s"workflow.cm2.${markingStage.name}.inProgress",
+						health = Warning
+					)
+				} else {
+					StageProgress(
+						workflowStage,
+						started = false,
+						messageCode = s"workflow.cm2.${markingStage.name}.incomplete",
+						health = Warning
+					)
+				}
 			} else {
 				// This is a past stage
 				StageProgress(

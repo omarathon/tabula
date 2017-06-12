@@ -10,7 +10,7 @@ first page of the form to setup a bunch of assignments from SITS.
 		<#local result><@routes.cm2.create_sitsassignments dept academicYear /></#local>
 		<#return result />
 	</#function>
-	<@cm2.departmentHeader "Setup assignments" department route_function academicYear />
+	<@cm2.departmentHeader "Create assignments from SITS" department route_function academicYear />
 
 	<#assign step=action!'select'/>
 
@@ -20,37 +20,32 @@ first page of the form to setup a bunch of assignments from SITS.
 			<div class="alert alert-info slow-page-warning">
 				<p>This page may take a few seconds to fully load, please wait &hellip;</p>
 			</div>
-			<h2>Step 1 - choose which assignments to setup</h2>
-			<div class="col-md-10">
-				<p>Below are all of the assessment components defined for this department in SITS, the central system.</p>
+			<h2>Step 1: choose assignments</h2>
 
-				<p>The first thing to do is choose which ones you want to set up to use for assessment.
-					Use the checkboxes on the left hand side to choose which ones you want to setup in the coursework submission system,
-					and then click Next. Some items (such as exams and "Audit Only" components) have already been unchecked,
-					but you can check them if you want (for example, if you want to publish feedback for an exam).
-				</p>
+		<div class="row">
+			<div class="col-md-10">
+				<p>Below are all the assessment components defined for this department in SITS.</p>
+
+				<ol>
+					<li>Use the checkboxes at the left-hand side to select the assignments to create in Tabula.
+						Some components, such as exams and 'Audit Only', are not selected by default.
+						You can still select these – for example, if you want to publish feedback for an exam.</li>
+					<li>Click the <strong>Next</strong> button.</li>
+				</ol>
 		<#elseif step =='options'>
-			<h2>Step 2 - choose options for assignments</h2>
+			<h2>Step 2: set assignment options</h2>
 			<div class="col-md-10">
 				<div id="batch-add-errors">
 					<#include "batch_new_sits_validation.ftl" />
 				</div>
 				<p>
-					Now you need to choose how you want these assignments to behave, such as submission dates
-					and resubmission behaviour.
+					You can change each assignment's options later, but it's a good idea to set the most common options in bulk now.
 				</p>
-				<ul>
-					<li>Select/unselect assignments using the checkboxes on the left.</li>
-					<li>Click <strong>Set options</strong> to set e-submission and other options for selected assignments.
-						You can overwrite the options for an assignment so it might be a good idea to set the most common options with
-						all the assignments selected, and then set more specific options for assignments that require it.
-					</li>
-					<li>Click <strong>Set dates</strong> to set the opening and closing dates for selected assignments.</li>
-					<li>
-						Once you've set the options for some assignments, you can click one of the <strong>Re-use</strong> buttons
-						to quickly apply those same options to some other assignments.
-					</li>
-				</ul>
+				<ol>
+					<li>Select one or more assignments using the checkboxes at the left-hand side.</li>
+					<li>Apply common options such as a feedback template, and open and close dates.</li>
+					<li>Click the <strong>Submit</strong> button to create the assignments.</li>
+				</ol>
 		</#if>
 			<input type="hidden" name="action" value="error" /><!-- this is changed before submit -->
 
@@ -210,6 +205,7 @@ first page of the form to setup a bunch of assignments from SITS.
 				</div>
 			</#if>
 		</div>
+	</div>
 	</@f.form>
 
 	<#if step='options'>

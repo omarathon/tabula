@@ -2,18 +2,19 @@ package uk.ac.warwick.tabula.commands.cm2.assignments.markers
 
 import uk.ac.warwick.tabula.JavaImports._
 import uk.ac.warwick.tabula.commands._
-import uk.ac.warwick.tabula.system.permissions.{PermissionsChecking, PermissionsCheckingMethods, RequiresPermissionsChecking}
-import uk.ac.warwick.tabula.{CurrentUser, WorkflowStages}
 import uk.ac.warwick.tabula.commands.cm2.assignments.markers.ListMarkerFeedbackCommand.EnhancedFeedbackByStage
 import uk.ac.warwick.tabula.commands.cm2.{CommandWorkflowStudentsForAssignment, WorkflowStudentsForAssignment}
-import uk.ac.warwick.tabula.data.model.{Assignment, MarkerFeedback}
 import uk.ac.warwick.tabula.data.model.markingworkflow.MarkingWorkflowStage
+import uk.ac.warwick.tabula.data.model.{Assignment, MarkerFeedback}
 import uk.ac.warwick.tabula.helpers.cm2.SubmissionAndFeedbackInfoFilters.OverlapPlagiarismFilter
 import uk.ac.warwick.tabula.helpers.cm2.{AssignmentSubmissionStudentInfo, SubmissionAndFeedbackInfoFilter, SubmissionAndFeedbackInfoMarkerFilter, WorkflowItems}
 import uk.ac.warwick.tabula.permissions.Permissions
 import uk.ac.warwick.tabula.services.cm2.{AutowiringCM2WorkflowProgressServiceComponent, CM2WorkflowProgressServiceComponent}
 import uk.ac.warwick.tabula.services.{AutowiringCM2MarkingWorkflowServiceComponent, CM2MarkingWorkflowServiceComponent}
+import uk.ac.warwick.tabula.system.permissions.{PermissionsChecking, PermissionsCheckingMethods, RequiresPermissionsChecking}
+import uk.ac.warwick.tabula.{CurrentUser, WorkflowStages}
 import uk.ac.warwick.userlookup.User
+
 import scala.collection.JavaConverters._
 import scala.collection.immutable.SortedMap
 

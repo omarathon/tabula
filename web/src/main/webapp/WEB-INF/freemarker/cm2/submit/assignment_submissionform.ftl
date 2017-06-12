@@ -150,8 +150,8 @@
 				<@bs3form.labelled_form_group path="" labelText="Privacy statement">
 					<p>
 						The data on this form relates to your submission of coursework. The date and time of your submission,
-						your identity and the work you have submitted will be stored. We will not use this data for any purpose
-						other than administering and recording your coursework submission.
+						your identity and the work you have submitted will be stored. We will only use this data to administer
+						and record your coursework submission.
 					</p>
 				</@bs3form.labelled_form_group>
 			</#if>

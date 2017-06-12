@@ -2,19 +2,17 @@ package uk.ac.warwick.tabula.commands.cm2.assignments.extensions
 
 import org.hibernate.criterion.Order
 import org.hibernate.criterion.Order._
-import org.hibernate.criterion.Restrictions.in
-import uk.ac.warwick.tabula.{AcademicYear, CurrentUser, PermissionDeniedException}
 import uk.ac.warwick.tabula.JavaImports._
 import uk.ac.warwick.tabula.commands._
-import uk.ac.warwick.tabula.data.Aliasable.addAliases
 import uk.ac.warwick.tabula.data.ScalaRestriction
 import uk.ac.warwick.tabula.data.ScalaRestriction._
-import uk.ac.warwick.tabula.data.model.{Assignment, Department, Module}
 import uk.ac.warwick.tabula.data.model.forms.ExtensionState
+import uk.ac.warwick.tabula.data.model.{Assignment, Department, Module}
 import uk.ac.warwick.tabula.helpers.coursework.ExtensionGraph
 import uk.ac.warwick.tabula.permissions.Permissions
 import uk.ac.warwick.tabula.services._
-import uk.ac.warwick.tabula.system.permissions.{PermissionsChecking, Public, RequiresPermissionsChecking}
+import uk.ac.warwick.tabula.system.permissions.Public
+import uk.ac.warwick.tabula.{AcademicYear, CurrentUser, PermissionDeniedException}
 
 import scala.collection.JavaConverters._
 
@@ -42,21 +40,24 @@ class FilterExtensionsCommandInternal(val academicYear: AcademicYear, val user: 
 
 	import FiltersExtensions._
 
-	private def departmentsWithPermssion =
-		moduleAndDepartmentService.departmentsWithPermission(user, Permissions.Department.ManageExtensionSettings)
-	private def modulesWithPermssion =
-		moduleAndDepartmentService.modulesWithPermission(user, Permissions.Module.Administer)
-	private def modulesInDepartmentsWithPermission =
-		moduleAndDepartmentService.modulesInDepartmentsWithPermission(user, Permissions.Department.ManageExtensionSettings)
+	private def includeChildDepartments(department: Department): Set[Department] =
+		Set(department) ++ department.children.asScala.flatMap(includeChildDepartments)
+
+	private def departmentsWithPermssion: Set[Department] =
+		moduleAndDepartmentService.departmentsWithPermission(user, Permissions.Extension.Read)
+			.flatMap(includeChildDepartments)
+	private def modulesWithPermssion: Set[Module] =
+		moduleAndDepartmentService.modulesWithPermission(user, Permissions.Extension.Read)
+	private def modulesInDepartmentsWithPermission: Set[Module] =
+		departmentsWithPermssion.flatMap(_.modules.asScala)
 
 	lazy val allModules: Seq[Module] = (modulesWithPermssion ++ modulesInDepartmentsWithPermission).toSeq.sortBy(_.code)
 	lazy val allDepartments: Seq[Department] = (departmentsWithPermssion ++ allModules.map(_.adminDepartment)).toSeq.sortBy(_.fullName)
 
 	def applyInternal(): FilterExtensionResults = {
-
 		// permission to manage extensions are all scoped by dept or module - we can't do normal permissions checking as there could be no scope to check against
-		if(allDepartments.isEmpty)
-			throw new PermissionDeniedException(user, Permissions.Department.ManageExtensionSettings, null)
+		if (allDepartments.isEmpty)
+			throw new PermissionDeniedException(user, Permissions.Extension.Read, null)
 
 		// on the off chance that someone has tried to hack extra departments or modules into the filter remove them
 		departments = departments.asScala.filter(d => allDepartments.contains(d)).asJava
