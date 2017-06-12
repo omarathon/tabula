@@ -28,18 +28,15 @@ object PlagiarismInvestigationCommand {
 
 class PlagiarismInvestigationCommandInternal(val assignment: Assignment)
 	extends CommandInternal[Unit] with PlagiarismInvestigationCommandState {
-
 	self: SubmissionServiceComponent =>
 
-	def applyInternal(): Unit = {
-		submissions = students.asScala.flatMap(submissionService.getSubmissionByUsercode(assignment, _))
+	def applyInternal(): Unit =
 		submissions.foreach { submission =>
 			submission.plagiarismInvestigation =
 				if (markPlagiarised) SuspectPlagiarised
 				else InvestigationCompleted
 			submissionService.saveSubmission(submission)
 		}
-	}
 }
 
 trait PlagiarismInvestigationCommandValidation extends SelfValidating {
@@ -56,7 +53,7 @@ trait PlagiarismInvestigationCommandState {
 	var confirm: Boolean = false
 	var markPlagiarised: Boolean = true
 
-	var submissions: Seq[Submission] = Seq()
+	lazy val submissions: Seq[Submission] = students.asScala.flatMap { s => JArrayList(assignment.submissions).asScala.find(_.usercode == s) }
 }
 
 trait PlagiarismInvestigationCommandPermissions extends RequiresPermissionsChecking with PermissionsCheckingMethods {
@@ -81,9 +78,7 @@ trait PlagiarismInvestigationCommandDescription extends Describable[Unit] {
 trait PlagiarismInvestigationCommandNotification extends Notifies[Unit, Unit] {
 	self: PlagiarismInvestigationCommandState with UserAware =>
 
-	def emit(result: Unit): Seq[Cm2MarkedPlagiarisedNotification] = if(markPlagiarised) {
-		submissions.map(s=> Notification.init(new Cm2MarkedPlagiarisedNotification, user, s, s.assignment))
-	} else {
-		Seq()
-	}
+	def emit(result: Unit): Seq[Cm2MarkedPlagiarisedNotification] =
+		if (markPlagiarised) submissions.map(s => Notification.init(new Cm2MarkedPlagiarisedNotification, user, s, s.assignment))
+		else Nil
 }

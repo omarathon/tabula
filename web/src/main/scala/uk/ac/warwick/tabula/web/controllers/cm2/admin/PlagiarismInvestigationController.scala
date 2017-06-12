@@ -18,7 +18,7 @@ import uk.ac.warwick.tabula.web.controllers.cm2.CourseworkController
 class PlagiarismInvestigationController extends CourseworkController {
 
 	@ModelAttribute("command")
-	def command(@PathVariable assignment: Assignment) = PlagiarismInvestigationCommand(assignment, user.apparentUser)
+	def command(@PathVariable assignment: Assignment) = PlagiarismInvestigationCommand(mandatory(assignment), user.apparentUser)
 
 	validatesSelf[PlagiarismInvestigationCommandValidation]
 
@@ -30,27 +30,19 @@ class PlagiarismInvestigationController extends CourseworkController {
 	def RedirectBack(assignment: Assignment) = Redirect(Routes.admin.assignment.submissionsandfeedback(assignment))
 
 	// shouldn't ever be called as a GET - if it is, just redirect back to the submission list
-	@RequestMapping(method = Array(GET))
+	@RequestMapping
 	def get(@PathVariable assignment: Assignment) = RedirectBack(assignment)
 
 	@RequestMapping(method = Array(POST), params = Array("!confirmScreen"))
-	def showForm(
-			@PathVariable module: Module,
-			@PathVariable assignment: Assignment,
-			@ModelAttribute("command") form: Appliable[Unit], errors: Errors): Mav = {
+	def showForm(@PathVariable assignment: Assignment, @ModelAttribute("command") form: Appliable[Unit], errors: Errors): Mav =
 		formView(assignment)
-	}
 
 	@RequestMapping(method = Array(POST), params = Array("confirmScreen"))
-	def submit(
-			@PathVariable module: Module,
-			@PathVariable assignment: Assignment,
-			@Valid @ModelAttribute("command") form: Appliable[Unit], errors: Errors): Mav = {
+	def submit(@PathVariable assignment: Assignment, @Valid @ModelAttribute("command") form: Appliable[Unit], errors: Errors): Mav =
 		if (errors.hasErrors) {
 			formView(assignment)
 		} else {
 			form.apply()
 			RedirectBack(assignment)
 		}
-	}
 }
