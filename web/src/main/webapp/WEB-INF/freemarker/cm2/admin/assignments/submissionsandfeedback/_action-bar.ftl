@@ -396,18 +396,18 @@
 			<div class="btn-group">
 			<div class="btn-group">
 					<a class="btn btn-default dropdown-toggle" data-toggle="dropdown">
-						Save As
+						Save as
 						<span class="caret"></span>
 					</a>
 					<ul class="dropdown-menu">
 						<li>
-							<a class="long-running form-post include-filter" title="Export submissions info as XLSX, for advanced users." href="<@routes.cm2.exportXlsx assignment/>">Excel</a>
+							<a class="long-running form-post include-filter" title="Export submissions information as XLSX" href="<@routes.cm2.exportXlsx assignment/>">Excel</a>
 						</li>
 						<li>
-							<a class="long-running form-post include-filter" title="Export submissions info as CSV, for advanced users." href="<@routes.cm2.exportCsv assignment/>">Text (CSV)</a>
+							<a class="long-running form-post include-filter" title="Export submissions information as CSV" href="<@routes.cm2.exportCsv assignment/>">Text (CSV)</a>
 						</li>
 						<li>
-							<a class="long-running form-post include-filter" title="Export submissions info as XML, for advanced users." href="<@routes.cm2.exportXml assignment/>">Text (XML)</a>
+							<a class="long-running form-post include-filter" title="Export submissions information as XML" href="<@routes.cm2.exportXml assignment/>">Text (XML)</a>
 						</li>
 					</ul>
 				</div>

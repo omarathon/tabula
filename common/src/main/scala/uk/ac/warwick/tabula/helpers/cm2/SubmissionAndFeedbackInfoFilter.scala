@@ -232,7 +232,7 @@ object SubmissionAndFeedbackInfoFilters {
 		}
 
 		case object NoFeedback extends SubmissionAndFeedbackInfoFilter {
-			def description = "No Feedback"
+			def description = "No feedback"
 
 			def predicate(item: AssignmentSubmissionStudentInfo): Boolean =
 				if (item.assignment.cm2Assignment) {
