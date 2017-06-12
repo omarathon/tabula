@@ -178,7 +178,7 @@
 				</a>
 			</h4>
 		</div>
-		<div class="col-md-4 col-lg-5">
+		<div class="col-md-6">
 			<#local submissionStatus = "" />
 
 			<#if !assignment.collectSubmissions>
@@ -254,67 +254,55 @@
 			<div class="submission-status">${submissionStatus}</div>
 			<div class="feedback-status">${feedbackStatus}</div>
 		</div>
-		<div class="col-md-5 col-lg-4">
-			<div class="row">
-				<#if info.feedback??>
-					<#-- View feedback -->
-					<div class="col-md-6">
-						<a class="btn btn-block btn-primary" href="<@routes.cm2.assignment assignment />">
-							View feedback
-						</a>
-					</div>
-				<#elseif info.submission?? && info.resubmittable>
-					<#-- Resubmission allowed -->
-					<div class="col-md-6">
-						<a class="btn btn-block btn-primary" href="<@routes.cm2.assignment assignment />">
-							View receipt
-						</a>
-					</div>
+		<div class="col-md-3">
+			<#if info.feedback??>
+				<#-- View feedback -->
+				<a class="btn btn-block btn-primary" href="<@routes.cm2.assignment assignment />">
+					View feedback
+				</a>
+			<#elseif info.submission?? && info.resubmittable>
+				<#-- Resubmission allowed -->
+				<a class="btn btn-block btn-primary" href="<@routes.cm2.assignment assignment />">
+					View receipt
+				</a>
 
-					<div class="col-md-6">
-						<a class="btn btn-block btn-default" href="<@routes.cm2.assignment assignment />#submittop">
-							Re-submit assignment
-						</a>
-					</div>
-				<#elseif info.submission??>
-					<#-- View receipt -->
-					<div class="col-md-6">
-						<a class="btn btn-block btn-primary" href="<@routes.cm2.assignment assignment />">
-							View receipt
-						</a>
-					</div>
-				<#elseif info.submittable>
-					<#-- First submission allowed -->
-					<div class="col-md-6">
-						<a class="btn btn-block btn-primary" href="<@routes.cm2.assignment assignment />">
-							Submit assignment
-						</a>
-					</div>
+				<a class="btn btn-block btn-default" href="<@routes.cm2.assignment assignment />#submittop">
+					Re-submit assignment
+				</a>
+			<#elseif info.submission??>
+				<#-- View receipt -->
+				<a class="btn btn-block btn-primary" href="<@routes.cm2.assignment assignment />">
+					View receipt
+				</a>
+			<#elseif info.submittable>
+				<#-- First submission allowed -->
+				<p>
+					<a class="btn btn-block btn-primary" href="<@routes.cm2.assignment assignment />">
+						Submit assignment
+					</a>
+				</p>
 
-					<#if assignment.extensionsPossible>
-						<#if info.extensionRequested>
-							<div class="col-md-6">
-								<a href="<@routes.cm2.extensionRequest assignment=assignment />?returnTo=<@routes.cm2.home />" class="btn btn-block btn-default">
-									Review extension request
-								</a>
-							</div>
-						<#elseif !info.extended && assignment.newExtensionsCanBeRequested>
-							<div class="col-md-6">
-								<a href="<@routes.cm2.extensionRequest assignment=assignment />?returnTo=<@routes.cm2.home />" class="btn btn-block btn-default">
-									Request extension
-								</a>
-							</div>
-						</#if>
+				<#if assignment.extensionsPossible>
+					<#if info.extensionRequested>
+						<p>
+							<a href="<@routes.cm2.extensionRequest assignment=assignment />?returnTo=<@routes.cm2.home />" class="btn btn-block btn-default">
+								Review extension request
+							</a>
+						</p>
+					<#elseif !info.extended && assignment.newExtensionsCanBeRequested>
+						<p>
+							<a href="<@routes.cm2.extensionRequest assignment=assignment />?returnTo=<@routes.cm2.home />" class="btn btn-block btn-default">
+								Request extension
+							</a>
+						</p>
 					</#if>
-				<#else>
-					<#-- Assume formative, so just show info -->
-					<div class="col-md-6">
-						<a class="btn btn-block btn-default" href="<@routes.cm2.assignment assignment />">
-							View details
-						</a>
-					</div>
 				</#if>
-			</div>
+			<#else>
+				<#-- Assume formative, so just show info -->
+				<a class="btn btn-block btn-default" href="<@routes.cm2.assignment assignment />">
+					View details
+				</a>
+			</#if>
 		</div>
 	</div>
 </#macro>
