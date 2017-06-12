@@ -28,23 +28,25 @@
 	</@bs3form.labelled_form_group>
 
 	<#if replaceMarkerCommand.affectedAssignments?has_content>
-		<@bs3form.labelled_form_group path="" labelText="The following assignments use this marking workflow">
-			<ul>
-				<#list replaceMarkerCommand.affectedAssignments as assignment>
-					<li>${assignment.module.code?upper_case} ${assignment.name}</li>
-				</#list>
-			</ul>
-		</@bs3form.labelled_form_group>
+		<#if workflow.reusable>
+			<@bs3form.labelled_form_group path="" labelText="The following assignments use this marking workflow">
+				<ul>
+					<#list replaceMarkerCommand.affectedAssignments as assignment>
+						<li>${assignment.module.code?upper_case} ${assignment.name}</li>
+					</#list>
+				</ul>
+			</@bs3form.labelled_form_group>
 
-		<@bs3form.labelled_form_group path="includeCompleted" labelText="Should the marker be replaced for completed assignments?">
-			<@bs3form.checkbox path="includeCompleted">
-				<@f.checkbox path="includeCompleted" /> Replace the marker for assginments where marking has finished.
-			</@bs3form.checkbox>
-		</@bs3form.labelled_form_group>
+			<@bs3form.labelled_form_group path="includeCompleted" labelText="Should the marker be replaced for completed assignments?">
+				<@bs3form.checkbox path="includeCompleted">
+					<@f.checkbox path="includeCompleted" /> Replace the marker for assginments where marking has finished.
+				</@bs3form.checkbox>
+			</@bs3form.labelled_form_group>
+		</#if>
 
 		<div class="alert alert-info">
 			<p>
-				Any submissions to the assignments listed above that have already been released will not be re-released, so the new marker will not be notified that they need to mark the submissions. You should contact the new marker yourself.
+				Any submissions <#if workflow.reusable>to the assignments listed above </#if>that have already been released will not be re-released, so the new marker will not be notified that they need to mark the submissions. You should contact the new marker yourself.
 			</p>
 			<@bs3form.checkbox path="confirm">
 				<@f.checkbox path="confirm" /> I understand that I need to contact the new marker to inform them that they may need to mark submissions.
