@@ -750,18 +750,16 @@
 							<li><strong>Closed:</strong> <span class="use-tooltip" title="<@fmt.dateToWeek assignment.closeDate />" data-html="true"><@fmt.date date=assignment.closeDate /></span></li>
 						</#if>
 
-						<#list info.stages as stage>
+						<#list info.stages as category>
 							<li>
-								<strong><@workflowMessage stage.stage.actionCode /></strong>:
-								<#if stage.progress?size == 1>
-									<@workflowMessage stage.progress[0].progress.messageCode /> (${stage.progress[0].count} of ${studentCount})
-								<#else>
-									<ul>
+								<strong><@workflowMessage category.category.code /></strong>:
+								<ul>
+									<#list category.stages as stage>
 										<#list stage.progress as progress>
 											<li><@workflowMessage progress.progress.messageCode /> (${progress.count} of ${studentCount})</li>
 										</#list>
-									</ul>
-								</#if>
+									</#list>
+								</ul>
 							</li>
 						</#list>
 					</ul>

@@ -21,7 +21,7 @@ class CM2WorkflowProgressService {
 	import CM2WorkflowStages._
 
 	final val MaxPower = 100
-	var features: Features = Wire.auto[Features]
+	var features: Features = Wire[Features]
 
 	def getStagesFor(assignment: Assignment): Seq[CM2WorkflowStage] = {
 		val stages = Seq.newBuilder[CM2WorkflowStage]
@@ -98,7 +98,20 @@ class CM2WorkflowProgressService {
 	}
 }
 
-sealed abstract class CM2WorkflowStage extends WorkflowStage {
+sealed abstract class CM2WorkflowCategory(val code: String)
+
+object CM2WorkflowCategory {
+	case object Submissions extends CM2WorkflowCategory("workflow.categories.Submissions")
+	case object Plagiarism extends CM2WorkflowCategory("workflow.categories.Plagiarism")
+	case object Marking extends CM2WorkflowCategory("workflow.categories.Marking")
+	case object Feedback extends CM2WorkflowCategory("workflow.categories.Feedback")
+
+	// lame manual collection. Keep in sync with the case objects above
+	// Don't change this to a val https://warwick.slack.com/archives/C029QTGBN/p1493995125972397
+	def members = Seq(Submissions, Plagiarism, Marking, Feedback)
+}
+
+sealed abstract class CM2WorkflowStage(val category: CM2WorkflowCategory) extends WorkflowStage {
 	def progress(assignment: Assignment)(coursework: WorkflowItems): WorkflowStages.StageProgress
 
 	case class Route(title: String, url: String)
@@ -109,8 +122,9 @@ sealed abstract class CM2WorkflowStage extends WorkflowStage {
 
 object CM2WorkflowStages {
 	import WorkflowStages._
+	import CM2WorkflowCategory._
 
-	case object Submission extends CM2WorkflowStage {
+	case object Submission extends CM2WorkflowStage(Submissions) {
 		def actionCode = "workflow.Submission.action"
 		def progress(assignment: Assignment)(coursework: WorkflowItems): StageProgress = coursework.enhancedSubmission match {
 			// If the student hasn't submitted, but we have uploaded feedback for them, don't record their submission status
@@ -141,7 +155,7 @@ object CM2WorkflowStages {
 		val markingRelated = false
 	}
 
-	case object DownloadSubmission extends CM2WorkflowStage {
+	case object DownloadSubmission extends CM2WorkflowStage(Marking) {
 		def actionCode = "workflow.DownloadSubmission.action"
 		def progress(assignment: Assignment)(coursework: WorkflowItems): StageProgress = coursework.enhancedSubmission match {
 			case Some(submission) if submission.downloaded =>
@@ -156,7 +170,7 @@ object CM2WorkflowStages {
 		val markingRelated = false
 	}
 
-	case object CheckForPlagiarism extends CM2WorkflowStage {
+	case object CheckForPlagiarism extends CM2WorkflowStage(Plagiarism) {
 		def actionCode = "workflow.CheckForPlagiarism.action"
 		def progress(assignment: Assignment)(coursework: WorkflowItems): StageProgress = coursework.enhancedSubmission match {
 			case Some(item) if item.submission.suspectPlagiarised =>
@@ -171,7 +185,7 @@ object CM2WorkflowStages {
 		val markingRelated = false
 	}
 
-	case object CM1ReleaseForMarking extends CM2WorkflowStage {
+	case object CM1ReleaseForMarking extends CM2WorkflowStage(Marking) {
 		def actionCode = "workflow.cm1.ReleaseForMarking.action"
 		def progress(assignment: Assignment)(coursework: WorkflowItems): StageProgress = {
 			if (assignment.isReleasedForMarking(coursework.student.getUserId)) {
@@ -187,7 +201,7 @@ object CM2WorkflowStages {
 		val markingRelated = true
 	}
 
-	case object CM1FirstMarking extends CM2WorkflowStage {
+	case object CM1FirstMarking extends CM2WorkflowStage(Marking) {
 		def actionCode = "workflow.cm1.FirstMarking.action"
 		def progress(assignment: Assignment)(coursework: WorkflowItems): StageProgress = coursework.enhancedFeedback match {
 			case Some(item) =>
@@ -202,7 +216,7 @@ object CM2WorkflowStages {
 		val markingRelated = true
 	}
 
-	case object CM1SecondMarking extends CM2WorkflowStage {
+	case object CM1SecondMarking extends CM2WorkflowStage(Marking) {
 		def actionCode = "workflow.cm1.SecondMarking.action"
 		def progress(assignment: Assignment)(coursework: WorkflowItems): StageProgress = {
 			val released = assignment.isReleasedToSecondMarker(coursework.student.getUserId)
@@ -232,7 +246,7 @@ object CM2WorkflowStages {
 		val markingRelated = true
 	}
 
-	case object CM1Moderation extends CM2WorkflowStage {
+	case object CM1Moderation extends CM2WorkflowStage(Marking) {
 		def actionCode = "workflow.cm1.ModeratedMarking.action"
 		def progress(assignment: Assignment)(coursework: WorkflowItems): StageProgress = {
 			val released = assignment.isReleasedToSecondMarker(coursework.student.getWarwickId)
@@ -262,7 +276,7 @@ object CM2WorkflowStages {
 		val markingRelated = true
 	}
 
-	case object CM1FinaliseSeenSecondMarking extends CM2WorkflowStage {
+	case object CM1FinaliseSeenSecondMarking extends CM2WorkflowStage(Marking) {
 		def actionCode = "workflow.cm1.FinaliseSeenSecondMarking.action"
 		def progress(assignment: Assignment)(coursework: WorkflowItems): StageProgress = {
 			val released = assignment.isReleasedToThirdMarker(coursework.student.getUserId)
@@ -292,7 +306,7 @@ object CM2WorkflowStages {
 		val markingRelated = true
 	}
 
-	case object CM2ReleaseForMarking extends CM2WorkflowStage {
+	case object CM2ReleaseForMarking extends CM2WorkflowStage(Marking) {
 		def actionCode = "workflow.cm2.ReleaseForMarking.action"
 		def progress(assignment: Assignment)(coursework: WorkflowItems): StageProgress = {
 			if (coursework.enhancedFeedback.exists(_.feedback.outstandingStages.asScala.nonEmpty)) {
@@ -308,7 +322,7 @@ object CM2WorkflowStages {
 		val markingRelated = true
 	}
 
-	case class CM2MarkingWorkflowStage(markingStage: MarkingWorkflowStage) extends CM2WorkflowStage {
+	case class CM2MarkingWorkflowStage(markingStage: MarkingWorkflowStage) extends CM2WorkflowStage(Marking) {
 		override def actionCode: String = s"workflow.cm2.${markingStage.name}.action"
 		override def progress(assignment: Assignment)(coursework: WorkflowItems): StageProgress = {
 			val currentStages = coursework.enhancedFeedback.toSeq.flatMap(_.feedback.outstandingStages.asScala)
@@ -348,7 +362,7 @@ object CM2WorkflowStages {
 		val markingRelated = true
 	}
 
-	case object AddMarks extends CM2WorkflowStage {
+	case object AddMarks extends CM2WorkflowStage(Marking) {
 		def actionCode = "workflow.AddMarks.action"
 		def progress(assignment: Assignment)(coursework: WorkflowItems): StageProgress =
 			coursework.enhancedFeedback.filterNot(_.feedback.isPlaceholder) match {
@@ -363,7 +377,7 @@ object CM2WorkflowStages {
 		val markingRelated = false
 	}
 
-	case object AddFeedback extends CM2WorkflowStage {
+	case object AddFeedback extends CM2WorkflowStage(Marking) {
 		def actionCode = "workflow.AddFeedback.action"
 		def progress(assignment: Assignment)(coursework: WorkflowItems): StageProgress = coursework.enhancedFeedback.filterNot(_.feedback.isPlaceholder) match {
 			case Some(item) if item.feedback.hasAttachments || item.feedback.hasOnlineFeedback =>
@@ -379,7 +393,7 @@ object CM2WorkflowStages {
 		val markingRelated = false
 	}
 
-	case object ReleaseFeedback extends CM2WorkflowStage {
+	case object ReleaseFeedback extends CM2WorkflowStage(Feedback) {
 		def actionCode = "workflow.ReleaseFeedback.action"
 		def progress(assignment: Assignment)(coursework: WorkflowItems): StageProgress =
 			coursework.enhancedFeedback.filterNot(_.feedback.isPlaceholder) match {
@@ -403,7 +417,7 @@ object CM2WorkflowStages {
 		val markingRelated = false
 	}
 
-	case object ViewOnlineFeedback extends CM2WorkflowStage {
+	case object ViewOnlineFeedback extends CM2WorkflowStage(Feedback) {
 		def actionCode = "workflow.ViewOnlineFeedback.action"
 		def progress(assignment: Assignment)(coursework: WorkflowItems): StageProgress =
 			coursework.enhancedFeedback.filterNot(_.feedback.isPlaceholder) match {
@@ -418,7 +432,7 @@ object CM2WorkflowStages {
 		val markingRelated = false
 	}
 
-	case object DownloadFeedback extends CM2WorkflowStage {
+	case object DownloadFeedback extends CM2WorkflowStage(Feedback) {
 		def actionCode = "workflow.DownloadFeedback.action"
 		def progress(assignment: Assignment)(coursework: WorkflowItems): StageProgress =
 			coursework.enhancedFeedback.filterNot(_.feedback.isPlaceholder) match {

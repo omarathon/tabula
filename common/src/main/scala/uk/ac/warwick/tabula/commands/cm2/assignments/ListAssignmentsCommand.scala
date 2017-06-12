@@ -11,7 +11,7 @@ import uk.ac.warwick.tabula.data.model.markingworkflow.{FinalStage, MarkingWorkf
 import uk.ac.warwick.tabula.data.model.{Assignment, Department, MarkingMethod, Module}
 import uk.ac.warwick.tabula.permissions.Permissions
 import uk.ac.warwick.tabula.services._
-import uk.ac.warwick.tabula.services.cm2.{AutowiringCM2WorkflowProgressServiceComponent, CM2WorkflowProgressServiceComponent}
+import uk.ac.warwick.tabula.services.cm2.{AutowiringCM2WorkflowProgressServiceComponent, CM2WorkflowCategory, CM2WorkflowProgressServiceComponent, CM2WorkflowStage}
 import uk.ac.warwick.tabula.system.permissions.{PermissionsChecking, PermissionsCheckingMethods, RequiresPermissionsChecking}
 import uk.ac.warwick.tabula.{AcademicYear, CurrentUser, WorkflowStage}
 
@@ -26,8 +26,13 @@ object ListAssignmentsCommand {
 		assignment: Assignment
 	) extends AssignmentInfo
 
+	case class AssignmentStageCategory(
+		category: CM2WorkflowCategory,
+		stages: Seq[AssignmentStage]
+	)
+
 	case class AssignmentStage(
-		stage: WorkflowStage,
+		stage: CM2WorkflowStage,
 		progress: Seq[AssignmentStageProgress]
 	)
 
@@ -45,7 +50,7 @@ object ListAssignmentsCommand {
 
 	case class EnhancedAssignmentInfo(
 		assignment: Assignment,
-		stages: Seq[AssignmentStage],
+		stages: Seq[AssignmentStageCategory],
 		nextStages: Seq[AssignmentNextStage]
 	) extends AssignmentInfo
 
@@ -171,6 +176,10 @@ trait AssignmentProgress extends TaskBenchmarking {
 			} else {
 				Nil
 			}
+		}.groupBy(_.stage.category)
+
+		val stagesByCategory = CM2WorkflowCategory.members.map { category =>
+			AssignmentStageCategory(category, stages.getOrElse(category, Nil))
 		}
 
 		val allNextStages =
@@ -186,7 +195,7 @@ trait AssignmentProgress extends TaskBenchmarking {
 				)
 			}
 
-		EnhancedAssignmentInfo(assignment, stages, nextStages)
+		EnhancedAssignmentInfo(assignment, stagesByCategory, nextStages)
 	}
 
 }
