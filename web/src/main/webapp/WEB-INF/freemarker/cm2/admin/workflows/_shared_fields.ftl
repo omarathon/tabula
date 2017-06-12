@@ -1,5 +1,5 @@
 <#if newRecord || canEditWorkflowType>
-	<@bs3form.labelled_form_group path="workflowType" labelText="Workflow type">
+	<@bs3form.labelled_form_group path="workflowType" labelText="Marking workflow type">
 		<@f.select path="workflowType" class="form-control" >
 			<option value="" disabled selected></option>
 			<#list availableWorkflows as workflowType>

@@ -37,7 +37,7 @@
 				You may <a href="<@routes.cm2.assignmentdelete assignment=assignment />" class="btn btn-danger">delete</a> it if you definitely won't need it again.</p>
 		<#else>
 			<p class="alert alert-info">
-				It's not possible to delete this assignment, probably because it already has some submissions and/or published feedback.
+				It's not possible to delete this assignment because it has submissions and/or feedback is published.
 			</p>
 		</#if>
 
