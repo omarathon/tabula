@@ -29,13 +29,16 @@
 				<@membership_picker.fieldset command enrolment_url />
 			</details>
 		</div>
-		<@bs3form.labelled_form_group path="anonymousMarking" labelText="Set anonymity">
-			<@bs3form.radio>
-				<@f.radiobutton path="anonymousMarking" value="false" /> Off <span class="very-subtle">- markers can see University IDs and names</span>
-			</@bs3form.radio>
-			<@bs3form.radio>
-				<@f.radiobutton path="anonymousMarking" value="true" /> On <span class="very-subtle">- markers cannot see University IDs and names</span>
-			</@bs3form.radio>
-		</@bs3form.labelled_form_group>
+
+		<#if features.anonymousMarkingCM2>
+			<@bs3form.labelled_form_group path="anonymousMarking" labelText="Set anonymity">
+				<@bs3form.radio>
+					<@f.radiobutton path="anonymousMarking" value="false" /> Off <span class="very-subtle">- markers can see University IDs and names</span>
+				</@bs3form.radio>
+				<@bs3form.radio>
+					<@f.radiobutton path="anonymousMarking" value="true" /> On <span class="very-subtle">- markers cannot see University IDs and names</span>
+				</@bs3form.radio>
+			</@bs3form.labelled_form_group>
+		</#if>
 	</div>
 </#escape>
