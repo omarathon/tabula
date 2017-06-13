@@ -278,7 +278,7 @@
 							<#if features.feedbackTemplates && assignment.hasFeedbackTemplate>
 								<li>
 									<a class="long-running use-tooltip"
-										 href="<@route.cm2.downloadFeedbackTemplates assignment/>"
+										 href="<@routes.cm2.downloadFeedbackTemplates assignment/>"
 										 title="Download feedback templates for all students as a ZIP file."
 										 data-container="body">Download templates
 									</a>
