@@ -144,6 +144,8 @@ abstract class Features {
 	@Value("${features.exams.grids:true}") var examGrids: Boolean = defaults.examGrids
 
 	@Value("${features.anonymousMarkingCM2:false}") var anonymousMarkingCM2: Boolean = defaults.anonymousMarkingCM2
+	@Value("${features.openEndedReminderDateCM2:false}") var openEndedReminderDateCM2: Boolean = defaults.openEndedReminderDateCM2
+
 
 	private val bean = new BeanWrapperImpl(this)
 	def update(message: FeaturesMessage): Features = {
@@ -278,6 +280,7 @@ class FeaturesMessage {
 	@BeanProperty var reports = true
 
 	@BeanProperty var anonymousMarkingCM2 = false
+	@BeanProperty var openEndedReminderDateCM2 = false
 }
 
 class FeatureFlagListener extends QueueListener with InitializingBean with Logging {

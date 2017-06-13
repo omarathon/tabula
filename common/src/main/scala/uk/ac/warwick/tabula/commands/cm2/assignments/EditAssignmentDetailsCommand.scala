@@ -66,6 +66,7 @@ class EditAssignmentDetailsCommandInternal(override val assignment: Assignment) 
 	override def populate(): Unit = {
 		name = assignment.name
 		openDate = assignment.openDate
+		openEnded = assignment.openEnded
 		openEndedReminderDate = assignment.openEndedReminderDate
 		closeDate = assignment.closeDate
 		workflowCategory = assignment.workflowCategory.getOrElse(WorkflowCategory.NotDecided)
