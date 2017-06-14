@@ -35,7 +35,7 @@ object Assignment {
 	final val MaximumFileAttachments = 50
 	final val MaximumWordCount = 1000000
 
-	case class MarkerAllocation(role: String, marker: User, students: Set[User])
+	case class MarkerAllocation(role: String, description: String, marker: User, students: Set[User])
 
 	object Settings {
 		object InfoViewType {
@@ -789,6 +789,7 @@ class Assignment
 						markers.sortBy { u => (u.getLastName, u.getFirstName) }.map { marker =>
 							MarkerAllocation(
 								stage.roleName,
+								stage.description,
 								marker,
 								allFeedback.flatMap(_.allMarkerFeedback).filter { mf => mf.stage == stage && mf.marker == marker }.map(_.student).toSet
 							)

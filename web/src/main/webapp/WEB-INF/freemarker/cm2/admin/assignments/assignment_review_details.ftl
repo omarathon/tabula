@@ -90,7 +90,7 @@
 
 				<#list assignment.cm2MarkerAllocations as allocation>
 					<#assign markerDetails>${allocation.marker.fullName} (<@fmt.p allocation.students?size "student" />)</#assign>
-					<@review_details allocation.role markerDetails />
+					<@review_details allocation.description markerDetails />
 				</#list>
 			</div>
 		</#if>
