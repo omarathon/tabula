@@ -47,16 +47,17 @@
 		</@bs3form.checkbox>
 	</@bs3form.labelled_form_group>
 
-	<#assign openEnd =  command.openEnded?string('true','false') />
-<fieldset id="open-reminder-dt" <#if openEnd == 'false'>disabled</#if>>
-	<@bs3form.labelled_form_group path="openEndedReminderDate" labelText="Open-ended reminder date">
-        <div class="input-group disabled">
-			<@f.input type="text" path="openEndedReminderDate" cssClass="disabled form-control date-time-minute-picker" placeholder="Pick the date" />
-            <span class="input-group-addon"><i class="fa fa-calendar"></i></span>
-        </div>
-	</@bs3form.labelled_form_group>
-</fieldset>
-
+<#assign openEnd =  command.openEnded?string('true','false') />
+<#if features.openEndedReminderDateCM2>
+	<fieldset id="open-reminder-dt" <#if openEnd == 'false'>disabled</#if>>
+		<@bs3form.labelled_form_group path="openEndedReminderDate" labelText="Open-ended reminder date">
+					<div class="input-group disabled">
+				<@f.input type="text" path="openEndedReminderDate" cssClass="disabled form-control date-time-minute-picker" placeholder="Pick the date" />
+							<span class="input-group-addon"><i class="fa fa-calendar"></i></span>
+					</div>
+		</@bs3form.labelled_form_group>
+	</fieldset>
+</#if>
 <fieldset id="close-dt" <#if openEnd == 'true'>disabled</#if>>
 	<@bs3form.labelled_form_group path="closeDate" labelText="Closing date">
         <div class="input-group">
