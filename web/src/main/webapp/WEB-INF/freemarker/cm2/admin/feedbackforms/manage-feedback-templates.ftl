@@ -103,7 +103,7 @@
 							</td>
 							<td>
 								<#if template.attachment??>
-								<a class="btn btn-xs btn-default" href="<@routes.cm2.feedbacktemplatedownload department=department feedbacktemplate=template />">
+								<a class="btn btn-xs btn-primary" href="<@routes.cm2.feedbacktemplatedownload department=department feedbacktemplate=template />">
 									 Download
 								</a>
 								</#if>
@@ -111,11 +111,11 @@
 									 Edit
 								</a>
 								<#if !template.hasAssignments>
-									<a class="btn btn-xs btn-danger" href="#feedback-template-model" data-toggle="modal" data-url="<@routes.cm2.deletefeedbacktemplate department=department template=template />">
+									<a class="btn btn-xs btn-default" href="#feedback-template-model" data-toggle="modal" data-url="<@routes.cm2.deletefeedbacktemplate department=department template=template />">
 									Delete
 									</a>
 								<#else>
-									<a class="btn btn-xs btn-danger disabled" href="#" title="You cannot delete a feedback template with linked assignments">
+									<a class="btn btn-xs btn-default disabled" href="#" title="You cannot delete a feedback template with linked assignments">
 									Delete
 									</a>
 								</#if>

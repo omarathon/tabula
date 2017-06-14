@@ -395,7 +395,7 @@
 	</div>
 			<div class="btn-group">
 			<div class="btn-group">
-					<a class="btn btn-default dropdown-toggle" data-toggle="dropdown">
+					<a class="btn btn-primary dropdown-toggle" data-toggle="dropdown">
 						Save as
 						<span class="caret"></span>
 					</a>

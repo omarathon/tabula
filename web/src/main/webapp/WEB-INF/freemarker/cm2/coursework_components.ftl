@@ -556,7 +556,7 @@
 		>
 			<div class="clearfix">
 				<div class="btn-group section-manage-button">
-					<a class="btn btn-default btn-sm dropdown-toggle" data-toggle="dropdown">Manage this module <span class="caret"></span></a>
+					<a class="btn btn-primary btn-sm dropdown-toggle" data-toggle="dropdown">Manage this module <span class="caret"></span></a>
 					<ul class="dropdown-menu pull-right">
 						<li>
 							<#local perms_url><@routes.admin.moduleperms module /></#local>
@@ -629,7 +629,7 @@
 					<#local edit_url><@routes.coursework.assignmentedit assignment /></#local>
 				</#if>
 				<@fmt.permission_button
-					classes='btn btn-default btn-xs'
+					classes='btn btn-primary btn-xs'
 					permission='Assignment.Update'
 					scope=assignment
 					action_descr='edit assignment properties'
