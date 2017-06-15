@@ -87,7 +87,7 @@
 			</#if>
 		</@bs3form.labelled_form_group>
 
-		<@bs3form.labelled_form_group path="adjustedGrade" labelText="Adjusted grade">
+		<@bs3form.labelled_form_group path="adjustedGrade" labelText="">
 			<#if isGradeValidation>
 				<#assign generateUrl><@routes.cm2.generateGradesForMarks command.assignment /></#assign>
 				<@marking.autoGradeOnline "adjustedGrade" "Adjusted grade" "adjustedMark" marking.extractId(command.student) generateUrl />
@@ -100,9 +100,6 @@
 		<div class="alert alert-info">
 			The reason for adjustment and any comments will be made available to students when their feedback is published.
 		</div>
-		<#if features.queueFeedbackForSits>
-			<@marking.uploadToSits assignment=assignment verb="Adjusting" withValidation=false/>
-		</#if>
 
 		<#if features.queueFeedbackForSits && assignment.module.adminDepartment.uploadCourseworkMarksToSits && command.canBeUploadedToSits>
 			<@marking.uploadToSits assignment=assignment verb="Adjusting" withValidation=false/>
