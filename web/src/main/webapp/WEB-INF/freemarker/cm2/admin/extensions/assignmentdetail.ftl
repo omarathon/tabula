@@ -213,7 +213,7 @@
 						<input class="btn btn-danger revoke" type="submit" value="${revocationAction}" name="action">
 					</#if>
 				</#if>
-				<a class="btn discard-changes" href="">Discard changes</a>
+				<a class="btn btn-default discard-changes" href="">Discard changes</a>
 			</div>
 		</@f.form>
 	</div>

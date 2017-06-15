@@ -71,7 +71,7 @@
 	</div>
 	<div class="col-md-5">
 		<p class="alert alert-info">
-			Students will automatically be notified by email when you grant, modify or revoke an extension.
+			Students will automatically be notified by email when you approve, modify or revoke an extension.
 		</p>
 	</div>
 </div>

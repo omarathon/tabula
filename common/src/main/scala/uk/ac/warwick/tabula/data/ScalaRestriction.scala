@@ -51,7 +51,7 @@ object ScalaRestriction {
 	// if the collection is empty, don't return any restriction - else return the restriction that the property must be in the collection
 	def inIfNotEmpty(property: String, collection: Iterable[Any], aliases: (String, AliasAndJoinType)*): Option[ScalaRestriction] =
 		if (collection.isEmpty) None
-		else Some(addAliases(new ScalaRestriction(in(property, collection.toSeq.distinct.asJavaCollection)), aliases: _*))
+		else Some(addAliases(new ScalaRestriction(HibernateHelpers.safeIn(property, collection.toSeq.distinct)), aliases: _*))
 
 	// If *any* of the properties are empty, don't return any restriction.
 	// This was written for the case of module registrations, where we should only check the
@@ -60,7 +60,7 @@ object ScalaRestriction {
 		val criterion = conjunction()
 		(properties, collections).zipped.foreach { (property, collection) =>
 			if (collection.nonEmpty) {
-				criterion.add(in(property, collection.toSeq.distinct.asJavaCollection))
+				criterion.add(HibernateHelpers.safeIn(property, collection.toSeq.distinct))
 			}
 		}
 		if (!collections.exists(coll => coll.isEmpty)) // if all the collections are non-empty

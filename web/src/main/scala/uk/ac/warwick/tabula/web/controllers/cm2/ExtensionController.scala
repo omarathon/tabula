@@ -229,6 +229,7 @@ class EditExtensionController extends CourseworkController with ExtensionService
 				)
 			case _ => Map.empty
 		}
+
 		Mav("cm2/admin/extensions/assignmentdetail",
 			"usercode" -> student.getUserId,
 			"universityId" -> student.getWarwickId,
