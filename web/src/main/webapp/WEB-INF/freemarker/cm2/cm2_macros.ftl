@@ -108,38 +108,40 @@
 	<#macro assignmentHeader title assignment preposition="for" admin=true>
 		<#if can.do('Submission.Read', assignment)>
 			<div class="btn-toolbar dept-toolbar">
-				<#if assignment.extensionsPossible>
-					<#if can.do('Extension.Update', assignment)>
-						<#local ext_caption="Manage assignment's extensions" />
-						<#local ext_link="Manage extensions" />
-					<#else>
-						<#local ext_caption="View assignment's extensions" />
-						<#local ext_link="View extensions" />
+				<div class="btn-group">
+					<#if assignment.extensionsPossible>
+						<#if can.do('Extension.Update', assignment)>
+							<#local ext_caption="Manage assignment's extensions" />
+							<#local ext_link="Manage extensions" />
+						<#else>
+							<#local ext_caption="View assignment's extensions" />
+							<#local ext_link="View extensions" />
+						</#if>
+						<#local ext_url><@routes.cm2.assignmentextensions assignment /></#local>
+						<@fmt.permission_button
+							permission='Extension.Read'
+							scope=assignment
+							action_descr=ext_caption?lower_case
+							href=ext_url
+							classes='btn btn-default'>
+								${ext_link}
+						</@fmt.permission_button>
 					</#if>
-					<#local ext_url><@routes.cm2.assignmentextensions assignment /></#local>
-					<@fmt.permission_button
-						permission='Extension.Read'
-						scope=assignment
-						action_descr=ext_caption?lower_case
-						href=ext_url
-						classes='btn btn-link'>
-							${ext_link}
-					</@fmt.permission_button>
-				</#if>
 
-				<#if assignment.cm2Assignment>
-					<#local edit_url><@routes.cm2.editassignmentdetails assignment /></#local>
-				<#else>
-					<#local edit_url><@routes.coursework.assignmentedit assignment /></#local>
-				</#if>
-				<@fmt.permission_button
-					permission='Assignment.Update'
-					scope=assignment
-					action_descr='edit assignment properties'
-					href=edit_url
-					classes='btn btn-link'>
-						Edit assignment
-				</@fmt.permission_button>
+					<#if assignment.cm2Assignment>
+						<#local edit_url><@routes.cm2.editassignmentdetails assignment /></#local>
+					<#else>
+						<#local edit_url><@routes.coursework.assignmentedit assignment /></#local>
+					</#if>
+					<@fmt.permission_button
+						permission='Assignment.Update'
+						scope=assignment
+						action_descr='edit assignment properties'
+						href=edit_url
+						classes='btn btn-default'>
+							Edit assignment
+					</@fmt.permission_button>
+				</div>
 			</div>
 		</#if>
 
@@ -165,120 +167,122 @@
 	<#macro departmentHeader title department routeFunction academicYear="" preposition="for">
 		<div class="btn-toolbar dept-toolbar">
 			<div class="btn-group">
-				<a class="btn btn-link dropdown-toggle" data-toggle="dropdown">
-					Assignments
-					<span class="caret"></span>
-				</a>
-				<ul class="dropdown-menu">
-					<li>
-						<#assign setup_Url><@routes.cm2.create_sitsassignments department academicYear /></#assign>
-						<@fmt.permission_button
-							permission='Assignment.ImportFromExternalSystem'
-							scope=department
-							action_descr='setup assignments from SITS'
-							href=setup_Url>
-								Create assignments from SITS
-						</@fmt.permission_button>
-					</li>
-					<li>
-						<#assign copy_url><@routes.cm2.copy_assignments_previous department academicYear /></#assign>
-						<@fmt.permission_button
-							permission='Assignment.Create'
-							scope=department
-							action_descr='copy existing assignments'
-							href=copy_url>
-								Create assignments from previous
-						</@fmt.permission_button>
-					</li>
-				</ul>
-			</div>
-			<#assign extensions_url><@routes.cm2.filterExtensions academicYear />?departments=${department.code}</#assign>
-			<@fmt.permission_button
-				permission='Extension.Read'
-				scope=department
-				action_descr='manage extensions'
-				href=extensions_url
-				classes='btn btn-link'>
-					Extension requests
-			</@fmt.permission_button>
-			<#if features.markingWorkflows>
-				<#assign markingflow_url><@routes.cm2.reusableWorkflowsHome department academicYear /></#assign>
-				<@fmt.permission_button
-					permission='MarkingWorkflow.Read'
-					scope=department
-					action_descr='manage marking workflows'
-					href=markingflow_url
-					classes='btn btn-link'>
-						Marking workflows
-				</@fmt.permission_button>
-			</#if>
-			<div class="btn-group">
-				<a class="btn btn-link dropdown-toggle" data-toggle="dropdown">
-					Feedback
-					<span class="caret"></span>
-				</a>
-				<ul class="dropdown-menu">
-					<#if features.feedbackTemplates>
+				<div class="btn-group">
+					<a class="btn btn-default dropdown-toggle" data-toggle="dropdown">
+						Assignments
+						<span class="caret"></span>
+					</a>
+					<ul class="dropdown-menu">
 						<li>
-							<#assign feedback_url><@routes.cm2.feedbacktemplates department /></#assign>
+							<#assign setup_Url><@routes.cm2.create_sitsassignments department academicYear /></#assign>
 							<@fmt.permission_button
-								permission='FeedbackTemplate.Manage'
+								permission='Assignment.ImportFromExternalSystem'
 								scope=department
-								action_descr='create feedback template'
-								href=feedback_url>
-									Feedback templates
+								action_descr='setup assignments from SITS'
+								href=setup_Url>
+									Create assignments from SITS
 							</@fmt.permission_button>
 						</li>
-					</#if>
-					<li>
-						<#assign feedbackrep_url><@routes.cm2.feedbackreport department /></#assign>
-						<@fmt.permission_button
-							permission='Department.DownloadFeedbackReport'
-							scope=department
-							action_descr='generate a feedback report'
-							href=feedbackrep_url>
-								Feedback reports
-						</@fmt.permission_button>
-					</li>
-				</ul>
-			</div>
-			<div class="btn-group">
-				<a class="btn btn-link dropdown-toggle" data-toggle="dropdown">
-					Settings
-					<span class="caret"></span>
-				</a>
-				<ul class="dropdown-menu pull-right">
-					<li>
-						<#assign settings_url><@routes.admin.displaysettings department />?returnTo=${(info.requestedUri!"")?url}</#assign>
-						<@fmt.permission_button
-							permission='Department.ManageDisplaySettings'
-							scope=department
-							action_descr='manage department settings'
-							href=settings_url>
-								Department settings
-						</@fmt.permission_button>
-					</li>
-					<li>
-						<#assign settings_url><@routes.admin.notificationsettings department />?returnTo=${(info.requestedUri!"")?url}</#assign>
-						<@fmt.permission_button
-							permission='Department.ManageNotificationSettings'
-							scope=department
-							action_descr='manage department notification settings'
-							href=settings_url>
-								Notification settings
-						</@fmt.permission_button>
-					</li>
-					<li>
-						<#assign extensions_url><@routes.cm2.extensionSettings department /></#assign>
-						<@fmt.permission_button
-							permission='Department.ManageExtensionSettings'
-							scope=department
-							action_descr='manage extension settings'
-							href=extensions_url>
-								Extension settings
-						</@fmt.permission_button>
-					</li>
-				</ul>
+						<li>
+							<#assign copy_url><@routes.cm2.copy_assignments_previous department academicYear /></#assign>
+							<@fmt.permission_button
+								permission='Assignment.Create'
+								scope=department
+								action_descr='copy existing assignments'
+								href=copy_url>
+									Create assignments from previous
+							</@fmt.permission_button>
+						</li>
+					</ul>
+				</div>
+				<#assign extensions_url><@routes.cm2.filterExtensions academicYear />?departments=${department.code}</#assign>
+				<@fmt.permission_button
+					permission='Extension.Read'
+					scope=department
+					action_descr='manage extensions'
+					href=extensions_url
+					classes='btn btn-default'>
+						Extension requests
+				</@fmt.permission_button>
+				<#if features.markingWorkflows>
+					<#assign markingflow_url><@routes.cm2.reusableWorkflowsHome department academicYear /></#assign>
+					<@fmt.permission_button
+						permission='MarkingWorkflow.Read'
+						scope=department
+						action_descr='manage marking workflows'
+						href=markingflow_url
+						classes='btn btn-default'>
+							Marking workflows
+					</@fmt.permission_button>
+				</#if>
+				<div class="btn-group">
+					<a class="btn btn-default dropdown-toggle" data-toggle="dropdown">
+						Feedback
+						<span class="caret"></span>
+					</a>
+					<ul class="dropdown-menu">
+						<#if features.feedbackTemplates>
+							<li>
+								<#assign feedback_url><@routes.cm2.feedbacktemplates department /></#assign>
+								<@fmt.permission_button
+									permission='FeedbackTemplate.Manage'
+									scope=department
+									action_descr='create feedback template'
+									href=feedback_url>
+										Feedback templates
+								</@fmt.permission_button>
+							</li>
+						</#if>
+						<li>
+							<#assign feedbackrep_url><@routes.cm2.feedbackreport department /></#assign>
+							<@fmt.permission_button
+								permission='Department.DownloadFeedbackReport'
+								scope=department
+								action_descr='generate a feedback report'
+								href=feedbackrep_url>
+									Feedback reports
+							</@fmt.permission_button>
+						</li>
+					</ul>
+				</div>
+				<div class="btn-group">
+					<a class="btn btn-default dropdown-toggle" data-toggle="dropdown">
+						Settings
+						<span class="caret"></span>
+					</a>
+					<ul class="dropdown-menu pull-right">
+						<li>
+							<#assign settings_url><@routes.admin.displaysettings department />?returnTo=${(info.requestedUri!"")?url}</#assign>
+							<@fmt.permission_button
+								permission='Department.ManageDisplaySettings'
+								scope=department
+								action_descr='manage department settings'
+								href=settings_url>
+									Department settings
+							</@fmt.permission_button>
+						</li>
+						<li>
+							<#assign settings_url><@routes.admin.notificationsettings department />?returnTo=${(info.requestedUri!"")?url}</#assign>
+							<@fmt.permission_button
+								permission='Department.ManageNotificationSettings'
+								scope=department
+								action_descr='manage department notification settings'
+								href=settings_url>
+									Notification settings
+							</@fmt.permission_button>
+						</li>
+						<li>
+							<#assign extensions_url><@routes.cm2.extensionSettings department /></#assign>
+							<@fmt.permission_button
+								permission='Department.ManageExtensionSettings'
+								scope=department
+								action_descr='manage extension settings'
+								href=extensions_url>
+									Extension settings
+							</@fmt.permission_button>
+						</li>
+					</ul>
+				</div>
 			</div>
 		</div>
 
