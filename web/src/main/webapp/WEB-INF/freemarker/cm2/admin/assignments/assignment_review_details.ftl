@@ -80,7 +80,9 @@
 				</#if>
 			</div>
 
-			<@review_details 'Anonymity' assignment.anonymousMarking?string('On (markers cannot see University IDs and names)','Off (markers can see University IDs and names)') />
+			<#if features.anonymousMarkingCM2>
+				<@review_details 'Anonymity' assignment.anonymousMarking?string('On (markers cannot see University IDs and names)','Off (markers can see University IDs and names)') />
+			</#if>
 		</div>
 
 		<#if assignment.cm2MarkerAllocations?has_content>
