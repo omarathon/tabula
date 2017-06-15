@@ -119,7 +119,7 @@
 
 							<td class="progress-col content-cell toggle-cell">
 								<dl style="margin: 0; border-bottom: 0;">
-									<dt><@components.individual_stage_progress_bar student.stages?values /></dt>
+									<dt><@components.individual_stage_progress_bar student.stages?values assignment student.user /></dt>
 									<dd style="display: none;" class="table-content-container" data-contentid="${identifier}">
 										<div id="content-${identifier}" class="content-container" data-contentid="${identifier}">
 											<@details student />
@@ -129,7 +129,7 @@
 							</td>
 							<td class="action-col">
 								<#if student.nextStage?has_content>
-									<@spring.message code=student.nextStage.actionCode />
+									<@components.workflowMessage student.nextStage.actionCode assignment student.user />
 								</#if>
 							</td>
 						</tr>

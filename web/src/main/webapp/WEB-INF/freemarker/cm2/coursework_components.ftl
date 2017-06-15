@@ -442,7 +442,7 @@
 </#macro>
 
 <#-- Progress bar for a single student in a marking workflow  -->
-<#macro individual_stage_progress_bar markerStages>
+<#macro individual_stage_progress_bar markerStages assignment student>
 	<div class="stage-progress-bar">
 		<#list markerStages as progress>
 			<#local stage = progress.stage />
@@ -457,14 +457,14 @@
 				<#local icon = 'fa-dot-circle-o' />
 			</#if>
 
-			<#local title><@workflowMessage progress.stage.actionCode /></#local>
+			<#local title><@workflowMessage progress.stage.actionCode assignment student /></#local>
 			<#if progress_index gt 0>
-				<div class="bar bar-${state} use-tooltip" title="${title}" data-html="true" data-container="body"></div>
+				<div class="bar bar-${state} use-tooltip" title="${title?html}" data-html="true" data-container="body"></div>
 			</#if>
-			<#local title><@workflowMessage progress.messageCode /></#local>
+			<#local title><@workflowMessage progress.messageCode assignment student /></#local>
 			<span class="fa-stack">
 				<i class="fa fa-stack-1x fa-circle fa-inverse"></i>
-				<i class="fa fa-stack-1x ${icon} text-${state} use-tooltip" title="${title}" data-html="true" data-container="body"></i>
+				<i class="fa fa-stack-1x ${icon} text-${state} use-tooltip" title="${title?html}" data-html="true" data-container="body"></i>
 			</span>
 		</#list>
 	</div>
@@ -794,9 +794,26 @@
 	</div>
 </#macro>
 
-<#macro workflowMessage code><#compress>
+<#macro workflowMessage code assignment="" student=""><#compress>
+	<#local studentName = "student" />
+	<#local firstMarkerName = "first marker" />
+	<#local secondMarkerName = "second marker" />
+	<#if assignment?has_content && student?has_content>
+		<#local studentName><span data-profile="${student.warwickId!(student.userId)}"><#if assignment.module.adminDepartment.showStudentName>${student.fullName}<#else>${student.warwickId!(student.userId)}</#if></span></#local>
+
+		<#local firstMarker = assignment.getStudentsFirstMarker(student.userId)!"" />
+		<#if firstMarker?has_content>
+			<#local firstMarkerName><span data-profile="${firstMarker.warwickId!(firstMarker.userId)}">${firstMarker.fullName}</span></#local>
+		</#if>
+
+		<#local secondMarker = assignment.getStudentsSecondMarker(student.userId)!"" />
+		<#if secondMarker?has_content>
+			<#local secondMarkerName><span data-profile="${secondMarker.warwickId!(secondMarker.userId)}">${secondMarker.fullName}</span></#local>
+		</#if>
+	</#if>
+
 	<#local text><@spring.message code=code /></#local>
-	${(text!"")?replace("[STUDENT]", "student")?replace("[FIRST_MARKER]", "first marker")?replace("[SECOND_MARKER]", "second marker")}
+	${(text!"")?replace("[STUDENT]", studentName)?replace("[FIRST_MARKER]", firstMarkerName)?replace("[SECOND_MARKER]", secondMarkerName)}
 </#compress></#macro>
 
 <#-- Common template parts for use in other submission/coursework templates. -->

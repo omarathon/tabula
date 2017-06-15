@@ -88,11 +88,11 @@
 							<td class="student-col">${student.lastName}&nbsp;<#if student.warwickId??><@pl.profile_link student.warwickId /><#else><@pl.profile_link student.userId /></#if></td>
 						</#if>
 						<td class="progress-col">
-							<@components.individual_stage_progress_bar emf.workflowStudent.stages/>
+							<@components.individual_stage_progress_bar emf.workflowStudent.stages assignment student />
 						</td>
 						<td>
 							<#if emf.workflowStudent.nextAction?has_content>
-								<@spring.message code=emf.workflowStudent.nextAction />
+								<@components.workflowMessage emf.workflowStudent.nextAction assignment student />
 							</#if>
 						</td>
 					</tr>
