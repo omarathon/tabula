@@ -2,7 +2,6 @@
 <#escape x as x?html>
 
 <#assign formAction><@routes.cm2.reusableWorkflowReplaceMarker department academicYear workflow /></#assign>
-<#assign cancelAction><@routes.cm2.reusableWorkflowEdit department academicYear workflow /></#assign>
 
 <@cm2.workflowHeader "Replace marker" workflow "in" />
 
@@ -58,7 +57,7 @@
 
 	<@bs3form.labelled_form_group>
 		<input type="submit" value="Save" class="btn btn-primary">
-		<a class="btn btn-default" href="${cancelAction}">Cancel</a>
+		<a class="btn btn-default" href="${returnTo}">Cancel</a>
 	</@bs3form.labelled_form_group>
 
 </@f.form>

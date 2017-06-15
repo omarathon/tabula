@@ -8,7 +8,6 @@ import org.springframework.stereotype.Controller
 import org.springframework.validation.Errors
 import org.springframework.web.bind.annotation.{ModelAttribute, PathVariable, RequestMapping}
 import uk.ac.warwick.spring.Wire
-
 import uk.ac.warwick.tabula.AcademicYear
 import uk.ac.warwick.tabula.commands.cm2.markingworkflows.{ReplaceMarkerCommand, ReplaceMarkerState}
 import uk.ac.warwick.tabula.commands.{Appliable, SelfValidating}
@@ -16,6 +15,7 @@ import uk.ac.warwick.tabula.data.model.Department
 import uk.ac.warwick.tabula.data.model.markingworkflow.CM2MarkingWorkflow
 import uk.ac.warwick.tabula.web.{Mav, Routes}
 
+import scala.collection.JavaConverters._
 
 @Profile(Array("cm2Enabled")) @Controller
 @RequestMapping(Array("/${cm2.prefix}/admin/department/{department}/{academicYear}/markingworkflows/{workflow}/replace"))
@@ -31,36 +31,36 @@ class ReplaceMarkerController extends CM2MarkingWorkflowController {
 	def command(@PathVariable department: Department, @PathVariable workflow: CM2MarkingWorkflow) =
 		ReplaceMarkerCommand(mandatory(department), mandatory(workflow))
 
-	@RequestMapping(method=Array(HEAD,GET))
+	@ModelAttribute("returnTo")
+	def returnTo(@PathVariable department: Department, @PathVariable academicYear: AcademicYear, @PathVariable workflow: CM2MarkingWorkflow): String =
+		if (workflow.isReusable || workflow.assignments.isEmpty) Routes.cm2.admin.workflows(department, academicYear)
+		else Routes.cm2.admin.assignment.editAssignmentDetails(workflow.assignments.asScala.head)
+
+	@RequestMapping
 	def showForm(
 		@PathVariable department: Department,
 		@PathVariable academicYear: AcademicYear,
-		@PathVariable workflow: CM2MarkingWorkflow,
-		@ModelAttribute("replaceMarkerCommand") cmd: ReplaceMarkerCommand,
-		errors: Errors): Mav = {
+		@PathVariable workflow: CM2MarkingWorkflow
+	): Mav =
 		commonCrumbs(
-			Mav("cm2/admin/workflows/replace_marker", Map(
-				"workflow" -> workflow
-			)),
+			Mav("cm2/admin/workflows/replace_marker"),
 			department,
 			academicYear
 		)
-	}
 
 	@RequestMapping(method=Array(POST))
 	def submitForm(
 		@PathVariable department: Department,
 		@PathVariable academicYear: AcademicYear,
 		@PathVariable workflow: CM2MarkingWorkflow,
-		@Valid @ModelAttribute("replaceMarkerCommand") cmd: ReplaceMarkerCommand,
-		errors: Errors
-	): Mav = {
+		@ModelAttribute("returnTo") returnTo: String,
+		@Valid @ModelAttribute("replaceMarkerCommand") cmd: ReplaceMarkerCommand, errors: Errors
+	): Mav =
 		if (errors.hasErrors) {
-			showForm(department, academicYear, workflow, cmd, errors)
+			showForm(department, academicYear, workflow)
 		} else {
 			cmd.apply()
-			Redirect(Routes.cm2.admin.workflows(department, academicYear))
+			Redirect(returnTo)
 		}
-	}
 
 }
