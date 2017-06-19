@@ -4,7 +4,7 @@ import org.springframework.validation.Errors
 import uk.ac.warwick.tabula.AcademicYear
 import uk.ac.warwick.tabula.commands._
 import uk.ac.warwick.tabula.commands.cm2.markingworkflows.{CreatesMarkingWorkflow, EditMarkingWorkflowState, ModifyMarkingWorkflowState, ModifyMarkingWorkflowValidation}
-import uk.ac.warwick.tabula.data.model._
+import uk.ac.warwick.tabula.data.model.{WorkflowCategory, _}
 import uk.ac.warwick.tabula.data.model.markingworkflow.CM2MarkingWorkflow
 import uk.ac.warwick.tabula.permissions.Permissions
 import uk.ac.warwick.tabula.services.{AssessmentServiceComponent, UserLookupComponent, _}
@@ -50,9 +50,11 @@ class EditAssignmentDetailsCommandInternal(override val assignment: Assignment) 
 				// persist any new workflows
 				case _ => createAndSaveSingleUseWorkflow(assignment)
 			}
-		} else if(workflowCategory == WorkflowCategory.NoneUse) {
+		} else if(workflowCategory == WorkflowCategory.NoneUse || workflowCategory == WorkflowCategory.NotDecided) {
+			// before we de-attach, store it to be deleted afterwards
+			val existingWorkflow = workflow
 			assignment.cm2MarkingWorkflow = null
-			workflow.filterNot(_.isReusable).foreach(cm2MarkingWorkflowService.delete)
+			existingWorkflow.filterNot(_.isReusable).foreach(cm2MarkingWorkflowService.delete)
 		} else if(workflowCategory == WorkflowCategory.Reusable) {
 			workflow.filterNot(_.isReusable).foreach(cm2MarkingWorkflowService.delete)
 		}
@@ -118,13 +120,19 @@ trait EditAssignmentPermissions extends RequiresPermissionsChecking with Permiss
 }
 
 trait EditAssignmentDetailsDescription extends Describable[Assignment] {
+
 	self: EditAssignmentDetailsCommandState =>
+
+	override lazy val eventName = "EditAssignmentDetails"
 
 	override def describe(d: Description) {
 		d.assignment(assignment).properties(
 			"name" -> name,
 			"openDate" -> openDate,
-			"closeDate" -> closeDate)
+			"closeDate" -> closeDate,
+			"workflowCtg" -> Option(workflowCategory).map(_.code).orNull,
+			"workflowType" -> Option(workflowType).map(_.name).orNull
+		)
 	}
 
 }

@@ -9,6 +9,8 @@ import uk.ac.warwick.tabula.permissions._
 class DeleteAssignmentCommand(val assignment: Assignment = null)
 	extends Command[Assignment] with SelfValidating with SchedulesNotifications[Assignment, Assignment] {
 
+	override lazy val eventName = "DeleteAssignment"
+
 	PermissionCheck(Permissions.Assignment.Delete, assignment)
 
 	var confirm: JBoolean = false

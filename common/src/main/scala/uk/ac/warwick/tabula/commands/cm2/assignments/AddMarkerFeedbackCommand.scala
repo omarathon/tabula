@@ -18,6 +18,8 @@ import scala.collection.JavaConverters._
 class AddMarkerFeedbackCommand(assignment: Assignment, marker: User, val submitter: CurrentUser)
 	extends UploadFeedbackCommand[List[MarkerFeedback]](assignment, marker) with CanProxy {
 
+	override lazy val eventName = "AddMarkerFeedback"
+
 	PermissionCheck(Permissions.AssignmentMarkerFeedback.Manage, assignment)
 	if (submitter.apparentUser != marker) {
 		PermissionCheck(Permissions.Assignment.MarkOnBehalf, assignment)

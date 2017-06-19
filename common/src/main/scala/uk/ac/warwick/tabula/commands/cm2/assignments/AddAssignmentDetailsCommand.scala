@@ -207,11 +207,16 @@ trait CreateAssignmentPermissions extends RequiresPermissionsChecking with Permi
 trait CreateAssignmentDetailsDescription extends Describable[Assignment] {
   self: CreateAssignmentDetailsCommandState =>
 
+  override lazy val eventName = "AddAssignmentDetails"
+
   override def describe(d: Description) {
     d.module(module).properties(
       "name" -> name,
       "openDate" -> openDate,
-      "closeDate" -> closeDate)
+      "closeDate" -> closeDate,
+      "workflowCtg" -> Option(workflowCategory).map(_.code).orNull,
+      "workflowType" -> Option(workflowType).map(_.name).orNull
+    )
   }
 
 }
