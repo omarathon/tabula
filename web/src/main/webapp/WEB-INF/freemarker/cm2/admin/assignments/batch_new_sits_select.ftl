@@ -181,7 +181,7 @@ first page of the form to setup a bunch of assignments from SITS.
 					<div id="selected-count">0 selected</div>
 					<div id="selected-deselect"><a href="#">Clear selection</a></div>
 					<#-- options sets -->
-					<a class="btn btn-default btn-default btn-block" id="set-options-button" data-target="#set-options-modal" href="<@routes.cm2.assignmentSharedOptions />">
+					<a class="btn btn-default btn-default btn-block" id="set-options-button" data-target="#set-options-modal" href="<@routes.cm2.assignmentSharedOptions department/>">
 						Set options&hellip;
 					</a>
 					<a class="btn btn-default btn-default btn-block" id="set-dates-button" data-target="#set-dates-modal">
