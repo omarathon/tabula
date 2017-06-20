@@ -88,12 +88,14 @@
 		</@bs3form.labelled_form_group>
 
 		<@bs3form.labelled_form_group path="adjustedGrade" labelText="">
-			<#if isGradeValidation>
-				<#assign generateUrl><@routes.cm2.generateGradesForMarks command.assignment /></#assign>
-				<@marking.autoGradeOnline "adjustedGrade" "Adjusted grade" "adjustedMark" marking.extractId(command.student) generateUrl />
-			<#else>
-				<@f.input path="adjustedGrade" cssClass="form-control" />
-			</#if>
+			<div class="input-group">
+				<#if isGradeValidation>
+					<#assign generateUrl><@routes.cm2.generateGradesForMarks command.assignment /></#assign>
+					<@marking.autoGradeOnline "adjustedGrade" "Adjusted grade" "adjustedMark" marking.extractId(command.student) generateUrl />
+				<#else>
+					<@f.input path="adjustedGrade" cssClass="form-control" />
+				</#if>
+			</div>
 		</@bs3form.labelled_form_group>
 
 		<#assign gradeValidation = isGradeValidation?string('true', 'false') />

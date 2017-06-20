@@ -23,7 +23,9 @@
 				<@marking_macros.autoGradeOnline "grade" "Grade" "mark" marking_macros.extractId(command.student) generateUrl />
 			<#else>
 				<@bs3form.labelled_form_group path="grade" labelText="Grade">
-					<@f.input path="grade" cssClass="form-control" />
+					<div class="input-group">
+						<@f.input path="grade" cssClass="form-control" />
+					</div>
 				</@bs3form.labelled_form_group>
 			</#if>
 		</#if>
