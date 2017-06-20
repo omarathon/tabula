@@ -14,8 +14,6 @@ class PreviousYearMarksColumnOption extends ChosenYearExamGridColumnOption with 
 
 	override val sortOrder: Int = ExamGridColumnOption.SortOrders.PreviousYears
 
-	override val mandatory = true
-
 	case class Column(state: ExamGridColumnState, thisYearOfStudy: Int) extends ChosenYearExamGridColumn(state) with HasExamGridColumnCategory {
 
 		override val title: String = s"Year $thisYearOfStudy"
