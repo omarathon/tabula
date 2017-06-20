@@ -25,7 +25,7 @@ class ReleaseForMarkingController extends CourseworkController {
 	@ModelAttribute("command")
 	def command(@PathVariable assignment: Assignment, user: CurrentUser): Command = {
 		mandatory(Option(assignment.cm2MarkingWorkflow))
-		ReleaseForMarkingCommand(mandatory(assignment), user)
+		ReleaseForMarkingCommand(mandatory(assignment), user.apparentUser)
 	}
 
 	def RedirectBack(assignment: Assignment) = Redirect(Routes.admin.assignment.submissionsandfeedback(assignment))
