@@ -30,7 +30,7 @@ class OnlineFeedbackListController extends CourseworkController {
 			"department" -> assignment.module.adminDepartment,
 			"studentToOpen" -> usercode,
 			"enhancedFeedbacks" -> command.apply()
-		)
+		).crumbsList(Breadcrumbs.assignment(assignment))
 	}
 
 }

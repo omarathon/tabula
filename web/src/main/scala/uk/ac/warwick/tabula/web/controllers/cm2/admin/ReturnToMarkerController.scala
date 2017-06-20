@@ -35,12 +35,11 @@ class ReturnToMarkerController extends CourseworkController {
 	def get(@PathVariable assignment: Assignment) = RedirectBack(assignment)
 
 	@RequestMapping(method = Array(POST), params = Array("!confirmScreen"))
-	def showForm(@PathVariable assignment: Assignment, @ModelAttribute("command") cmd: Command, errors: Errors): Mav = {
+	def showForm(@PathVariable assignment: Assignment, @ModelAttribute("command") cmd: Command, errors: Errors): Mav =
 		Mav(
 			"cm2/admin/assignments/submissionsandfeedback/return-submission",
 			"allStages" -> assignment.cm2MarkingWorkflow.allStages
-		)
-	}
+		).crumbsList(Breadcrumbs.assignment(assignment))
 
 	@RequestMapping(method = Array(POST), params = Array("confirmScreen"))
 	def submit(@PathVariable assignment: Assignment, @Valid @ModelAttribute("command") cmd: Command, errors: Errors): Mav = {

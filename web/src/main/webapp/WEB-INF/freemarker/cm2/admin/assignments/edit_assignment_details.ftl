@@ -32,16 +32,17 @@
 							value="Save and exit"
 			/>
 		</div>
-		<#if canDeleteAssignment>
-			<p class="alert alert-info">Did you create this assignment in error?
-				You may <a href="<@routes.cm2.assignmentdelete assignment=assignment />" class="btn btn-danger">delete</a> it if you definitely won't need it again.</p>
-		<#else>
-			<p class="alert alert-info">
-				It's not possible to delete this assignment because it has submissions and/or feedback is published.
-			</p>
+
+		<#if can.do("Assignment.Delete", assignment)>
+			<#if canDeleteAssignment>
+				<p class="alert alert-info">Did you create this assignment in error?
+					You may <a href="<@routes.cm2.assignmentdelete assignment=assignment />" class="btn btn-danger">delete</a> it if you definitely won't need it again.</p>
+			<#else>
+				<p class="alert alert-info">
+					It's not possible to delete this assignment because it has submissions and/or feedback is published.
+				</p>
+			</#if>
 		</#if>
-
-
 	</@f.form>
 </div>
 </#escape>

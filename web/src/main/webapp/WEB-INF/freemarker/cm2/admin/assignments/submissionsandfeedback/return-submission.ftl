@@ -66,7 +66,7 @@
 
 	<#else>
 		<div class="alert alert-info">
-			None of the students that you selected can be released for marking. <a href="<@routes.cm2.assignmentsubmissionsandfeedback assignment />">Go back to the assignment summary.</a>
+			None of the students that you selected can be returned for marking. <a href="<@routes.cm2.assignmentsubmissionsandfeedback assignment />">Go back to the assignment summary.</a>
 		</div>
 	</#if>
 

@@ -1,3 +1,5 @@
+<#import "*/marking_macros.ftl" as marking />
+
 <div class="online-marking">
 	<#if command.assignment.collectSubmissions>
 		<div class="details">
@@ -36,7 +38,7 @@
 
 				<#if isGradeValidation>
 					<#assign generateUrl><@routes.cm2.generateGradesForMarks command.assignment /></#assign>
-					<@marking_macros.autoGradeOnline "grade" "Grade" "mark" markingId(command.student) generateUrl />
+					<@marking.autoGradeOnline "grade" "Grade" "mark" marking.extractId(command.student) generateUrl />
 				<#else>
 					<@bs3form.labelled_form_group path="grade" labelText="Grade">
 						<@f.input path="grade" cssClass="form-control" />

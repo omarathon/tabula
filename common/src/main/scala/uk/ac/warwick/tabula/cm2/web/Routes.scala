@@ -99,12 +99,19 @@ object Routes {
 			}
 
 			object marks {
-				def apply(assignment: Assignment): String = assignmentroot(assignment) + " /marks"
+				def apply(assignment: Assignment): String = assignmentroot(assignment) + "/marks"
 			}
 
 			object marksTemplate {
 				def apply(assignment: Assignment): String = assignmentroot(assignment) + "/marks-template"
 			}
+
+			object feedback {
+				def online(assignment: Assignment): String = assignmentroot(assignment) + "/feedback/online"
+				def batch(assignment: Assignment): String = assignmentroot(assignment) + "/feedback/batch"
+			}
+
+			def publishFeedback(assignment: Assignment): String = assignmentroot(assignment) + "/publish"
 
 			def submissionsZip(assignment: Assignment): String = assignmentroot(assignment) + "/submissions.zip"
 

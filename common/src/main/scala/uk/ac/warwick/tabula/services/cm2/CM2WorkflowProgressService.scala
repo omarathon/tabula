@@ -195,8 +195,6 @@ object CM2WorkflowStages {
 			}
 		}
 		override def preconditions = Seq()
-
-		// FIXME this is the wrong route
 		def route(assignment: Assignment): Option[Route] = Some(Route("Release for marking", Routes.admin.assignment.submissionsandfeedback(assignment)))
 		val markingRelated = true
 	}
@@ -316,8 +314,6 @@ object CM2WorkflowStages {
 			}
 		}
 		override def preconditions = Seq()
-
-		// FIXME this is the wrong route
 		def route(assignment: Assignment): Option[Route] = Some(Route("Release for marking", Routes.admin.assignment.submissionsandfeedback(assignment)))
 		val markingRelated = true
 	}
@@ -382,8 +378,7 @@ object CM2WorkflowStages {
 				case _ => StageProgress(AddMarks, started = false, messageCode = "workflow.AddMarks.notMarked")
 			}
 
-		// FIXME this is the wrong route
-		def route(assignment: Assignment): Option[Route] = Some(Route("Add marks", Routes.admin.assignment.submissionsandfeedback(assignment)))
+		def route(assignment: Assignment): Option[Route] = Some(Route("Add marks", Routes.admin.assignment.marks(assignment)))
 		val markingRelated = false
 	}
 
@@ -398,8 +393,7 @@ object CM2WorkflowStages {
 				StageProgress(AddFeedback, started = false, messageCode = "workflow.AddFeedback.notUploaded")
 		}
 
-		// FIXME this is the wrong route
-		def route(assignment: Assignment): Option[Route] = Some(Route("Add feedback", Routes.admin.assignment.submissionsandfeedback(assignment)))
+		def route(assignment: Assignment): Option[Route] = Some(Route("Add feedback", Routes.admin.assignment.feedback.online(assignment)))
 		val markingRelated = false
 	}
 
@@ -422,8 +416,7 @@ object CM2WorkflowStages {
 			f.previousStages.map(CM2MarkingWorkflowStage.apply)
 		}
 
-		// FIXME this is the wrong route
-		def route(assignment: Assignment): Option[Route] = Some(Route("Release feedback", Routes.admin.assignment.submissionsandfeedback(assignment)))
+		def route(assignment: Assignment): Option[Route] = Some(Route("Release feedback", Routes.admin.assignment.publishFeedback(assignment)))
 		val markingRelated = false
 	}
 
