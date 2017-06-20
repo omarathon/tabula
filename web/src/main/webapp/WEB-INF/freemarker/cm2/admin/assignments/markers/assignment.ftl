@@ -63,7 +63,7 @@
 
 			var $body = $('body');
 
-			$body.on('shown.bs.collapse', function(e){
+			$body.on('tabula.formLoaded', function(e){
 				var $row = $(e.target);
 
 				$row.find('.use-popover').tabulaPopover({

@@ -374,8 +374,8 @@
 						result =  response;
 					}
 				}
+				var $detailrow = $container.closest('.detail-row');
 				if (!result || /^\s*$/.test(result)) {
-					var $detailrow = $container.closest('.detail-row');
 					// reset if empty
 					$detailrow.collapse("hide");
 					$detailrow.data('loaded', false);
@@ -383,6 +383,7 @@
 					successCallback($container);
 				} else {
 					$container.html(result);
+					$detailrow.trigger('tabula.formLoaded');
 					errorCallback($container);
 				}
 			},
