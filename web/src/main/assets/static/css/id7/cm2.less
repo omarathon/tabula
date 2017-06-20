@@ -337,3 +337,17 @@ table.expanding-row-pairs {
 		display: block;
 	}
 }
+
+//Grey out links to actions that are not permitted and remove state changes
+.dropdown-menu > li > a.disabled {
+
+	color: @grayLight;
+	text-decoration: none;
+	cursor: not-allowed;
+
+	&:hover, &:focus {
+		background-color: transparent;
+		background-image: none; // Remove CSS gradient
+
+	}
+}
