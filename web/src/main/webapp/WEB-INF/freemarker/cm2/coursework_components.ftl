@@ -880,19 +880,11 @@
 </#macro>
 
 <#macro uniIdSafeMarkerLink marker role>
-	<#if marker.warwickId?has_content>
-		- <a href="<@routes.coursework.listmarkersubmissions assignment marker />">Proxy as this ${role}</a>
-	<#else>
-		- Cannot proxy as this marker as they have no University ID
-	</#if>
+	- <a href="<@routes.coursework.listmarkersubmissions assignment marker />">Proxy as this ${role}</a>
 </#macro>
 
 <#macro uniIdSafeCM2MarkerLink stage marker student>
-	<#if marker.warwickId?has_content>
 	- <a href="<@routes.cm2.listmarkersubmissions assignment marker />#${stage.name}-${student.userId}">Proxy</a>
-	<#else>
-	- Cannot proxy as this marker as they have no University ID
-	</#if>
 </#macro>
 
 <#macro student_workflow_details student>

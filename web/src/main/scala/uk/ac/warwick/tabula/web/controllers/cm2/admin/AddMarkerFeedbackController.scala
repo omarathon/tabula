@@ -32,12 +32,11 @@ class AddMarkerFeedbackController extends CourseworkController {
 		@PathVariable assignment: Assignment,
 		@PathVariable marker: User,
 		@ModelAttribute cmd: AddMarkerFeedbackCommand
-	): Mav = {
+	): Mav =
 		Mav("cm2/admin/assignments/markerfeedback/form",
 			"isProxying" -> cmd.isProxying,
 			"proxyingAs" -> marker
-		).crumbsList(Breadcrumbs.markerAssignment(assignment, marker))
-	}
+		).crumbsList(Breadcrumbs.markerAssignment(assignment, marker, proxying = cmd.isProxying))
 
 	@RequestMapping(method = Array(POST), params = Array("!confirm"))
 	def confirmUpload(
@@ -51,11 +50,11 @@ class AddMarkerFeedbackController extends CourseworkController {
 		} else {
 			cmd.postExtractValidation(errors)
 			cmd.processStudents()
-			val test = cmd.markedStudents.size()
+
 			Mav("cm2/admin/assignments/markerfeedback/preview",
 				"isProxying" -> cmd.isProxying,
 				"proxyingAs" -> marker
-			).crumbsList(Breadcrumbs.markerAssignment(assignment, marker))
+			).crumbsList(Breadcrumbs.markerAssignment(assignment, marker, proxying = cmd.isProxying))
 		}
 	}
 

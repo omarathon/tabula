@@ -22,7 +22,6 @@ import uk.ac.warwick.tabula.helpers.StringUtils._
 
 import scala.collection.mutable
 
-
 object MarkerAddMarksCommand {
 	def apply(assignment: Assignment, marker: User, submitter: CurrentUser, gradeGenerator: GeneratesGradesFromMarks) =
 		new MarkerAddMarksCommandInternal(assignment, marker, submitter, gradeGenerator)
@@ -93,7 +92,7 @@ trait MarkerAddMarksDescription extends Describable[Seq[MarkerFeedback]] {
 	}
 }
 
-trait MarkerAddMarksState extends AddMarksState {
+trait MarkerAddMarksState extends AddMarksState with CanProxy {
 	def marker: User
 }
 

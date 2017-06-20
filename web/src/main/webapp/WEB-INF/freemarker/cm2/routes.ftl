@@ -127,21 +127,21 @@ TODO grab values from the Routes object in code, as that's pretty equivalent and
 <#macro turnitinLtiReport assignment attachment><@_u page="/admin/assignments/${assignment.id}/turnitin/lti-report/${attachment.id}"/></#macro>
 <#macro turnitinReport assignment attachment><@_u page="/admin/assignments/${assignment.id}/turnitin/report/${attachment.id}"/></#macro>
 
-<#macro listmarkersubmissions assignment marker><@_u page="/admin/assignments/${assignment.id}/marker/${marker.warwickId}"/></#macro>
+<#macro listmarkersubmissions assignment marker><@_u page="/admin/assignments/${assignment.id}/marker/${marker.userId}"/></#macro>
 
 <#macro markerUploadFeedback assignment marker><@_u page="/admin/assignments/${assignment.id}/marker/${marker.userId}/feedback"/></#macro>
 <#macro markerUploadMarks assignment marker><@_u page="/admin/assignments/${assignment.id}/marker/${marker.userId}/marks"/></#macro>
 <#macro markerUploadMarksTemplate assignment marker><@_u page="/admin/assignments/${assignment.id}/marker/${marker.userId}/marks-template"/></#macro>
 
-<#macro markerOnlineFeedback assignment stage marker student><@_u page="/admin/assignments/${assignment.id}/marker/${marker.warwickId}/${stage.name}/feedback/online/${student.warwickId}"/></#macro>
-<#macro markingCompleted assignment stage marker><@_u page="/admin/assignments/${assignment.id}/marker/${marker.warwickId}/${stage.name}/marking-completed"/></#macro>
+<#macro markerOnlineFeedback assignment stage marker student><@_u page="/admin/assignments/${assignment.id}/marker/${marker.userId}/${stage.name}/feedback/online/${student.userId}"/></#macro>
+<#macro markingCompleted assignment stage marker><@_u page="/admin/assignments/${assignment.id}/marker/${marker.userId}/${stage.name}/marking-completed"/></#macro>
 <#macro releaseForMarking assignment><@_u page="/admin/assignments/${assignment.id}/submissionsandfeedback/release-submissions" /></#macro>
 
-<#macro downloadMarkerFeedbackOne assignment marker markerFeedback attachment><@_u page="/admin/assignments/${assignment.id}/marker/${marker.warwickId}/feedback/download/${markerFeedback.id}/attachment/${attachment.name?url}"/></#macro>
-<#macro downloadMarkerFeedbackAll assignment marker markerFeedback zipName><@_u page="/admin/assignments/${assignment.id}/marker/${marker.warwickId}/feedback/download/${markerFeedback.id}/attachments/${zipName}.zip"/></#macro>
-<#macro downloadMarkerFeedbackStage assignment marker stage><@_u page="/admin/assignments/${assignment.id}/marker/${marker.warwickId}/${stage.name}/feedback.zip" /></#macro>
-<#macro downloadMarkerSubmissions assignment marker><@_u page="/admin/assignments/${assignment.id}/marker/${marker.warwickId}/submissions.zip"/></#macro>
-<#macro downloadMarkerSubmissionsPdf assignment marker><@_u page="/admin/assignments/${assignment.id}/marker/${marker.warwickId}/submissions.pdf"/></#macro>
+<#macro downloadMarkerFeedbackOne assignment marker markerFeedback attachment><@_u page="/admin/assignments/${assignment.id}/marker/${marker.userId}/feedback/download/${markerFeedback.id}/attachment/${attachment.name?url}"/></#macro>
+<#macro downloadMarkerFeedbackAll assignment marker markerFeedback zipName><@_u page="/admin/assignments/${assignment.id}/marker/${marker.userId}/feedback/download/${markerFeedback.id}/attachments/${zipName}.zip"/></#macro>
+<#macro downloadMarkerFeedbackStage assignment marker stage><@_u page="/admin/assignments/${assignment.id}/marker/${marker.userId}/${stage.name}/feedback.zip" /></#macro>
+<#macro downloadMarkerSubmissions assignment marker><@_u page="/admin/assignments/${assignment.id}/marker/${marker.userId}/submissions.zip"/></#macro>
+<#macro downloadMarkerSubmissionsPdf assignment marker><@_u page="/admin/assignments/${assignment.id}/marker/${marker.userId}/submissions.pdf"/></#macro>
 
 <#macro markerTemplatesZip assignment marker><@_u page="/admin/assignments/${assignment.id}/marker/${marker.userId}/marker-templates.zip" /></#macro>
 

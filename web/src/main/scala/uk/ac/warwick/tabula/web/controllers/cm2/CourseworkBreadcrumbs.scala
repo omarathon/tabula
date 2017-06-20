@@ -20,15 +20,14 @@ object CourseworkBreadcrumbs {
 	def assignment(assignment: model.Assignment, active: Boolean = false): Seq[BreadCrumb] =
 		module(assignment.module, assignment.academicYear) :+ Assignment(assignment, active)
 
-	def markerAssignment(assignment: model.Assignment, marker: User): Seq[BreadCrumb] = {
-		Seq(MarkerAssignment(assignment, marker))
-	}
+	def markerAssignment(ass: model.Assignment, marker: User, active: Boolean = false, proxying: Boolean = false): Seq[BreadCrumb] =
+		if (proxying) assignment(ass) :+ MarkerAssignment(ass, marker, active)
+		else Seq(MarkerAssignment(ass, marker, active))
 
-	private[CourseworkBreadcrumbs] case class MarkerAssignment(assignment: model.Assignment, marker: User) extends BreadCrumb {
+	private[CourseworkBreadcrumbs] case class MarkerAssignment(assignment: model.Assignment, marker: User, override val active: Boolean) extends BreadCrumb {
 		val title: String = s"Marking for ${assignment.name}"
 		val url: Option[String] = Some(Routes.admin.assignment.markerFeedback(assignment, marker))
 	}
-
 
 	private[CourseworkBreadcrumbs] case class Department(dept: model.Department, academicYear: Option[AcademicYear], override val active: Boolean) extends BreadCrumb {
 		val title: String = dept.name
