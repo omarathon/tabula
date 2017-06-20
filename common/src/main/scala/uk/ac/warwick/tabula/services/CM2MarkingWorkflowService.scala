@@ -53,8 +53,6 @@ trait CM2MarkingWorkflowService extends WorkflowUserGroupHelpers {
 	def getMarkerAllocations(assignment: Assignment, stage: MarkingWorkflowStage): Allocations
 	// an anonymous Marker may be present in the map if a marker has been unassigned - these need to be handled
 	def feedbackByMarker(assignment: Assignment, stage: MarkingWorkflowStage): Map[Marker, Seq[MarkerFeedback]]
-	// all the marker feedback for this feedback keyed and sorted by workflow stage
-	def markerFeedbackForFeedback(feedback: AssignmentFeedback): SortedMap[MarkingWorkflowStage, MarkerFeedback]
 
 	def getAllFeedbackForMarker(assignment: Assignment, marker: User): SortedMap[MarkingWorkflowStage, Seq[MarkerFeedback]]
 
@@ -209,14 +207,6 @@ class CM2MarkingWorkflowServiceImpl extends CM2MarkingWorkflowService with Autow
 	// marker can be an Anon marker if marking
 	override def feedbackByMarker(assignment: Assignment, stage: MarkingWorkflowStage): Map[Marker, Seq[MarkerFeedback]] = {
 		allMarkerFeedbackForStage(assignment,stage).groupBy(_.marker)
-	}
-
-	override def markerFeedbackForFeedback(feedback: AssignmentFeedback): SortedMap[MarkingWorkflowStage, MarkerFeedback] = {
-		val unsortedMap = markingWorkflowDao.markerFeedbackForFeedback(feedback)
-			.groupBy(_.stage)
-			.map{case (k, v) => k -> v.head}
-
-		TreeMap(unsortedMap.toSeq:_*)
 	}
 
 	override def getAllFeedbackForMarker(assignment: Assignment, marker: User): SortedMap[MarkingWorkflowStage, Seq[MarkerFeedback]] = {

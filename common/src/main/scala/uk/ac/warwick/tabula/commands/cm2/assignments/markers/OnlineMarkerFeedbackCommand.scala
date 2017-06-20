@@ -174,7 +174,7 @@ trait OnlineMarkerFeedbackState extends OnlineFeedbackState {
 	val stage: MarkingWorkflowStage
 	val gradeGenerator: GeneratesGradesFromMarks
 
-	private val allMarkerFeedback = feedback.map(cm2MarkingWorkflowService.markerFeedbackForFeedback).getOrElse(SortedMap[MarkingWorkflowStage, MarkerFeedback]())
+	private val allMarkerFeedback = feedback.map(_.feedbackByStage).getOrElse(SortedMap[MarkingWorkflowStage, MarkerFeedback]())
 
 	val previousMarkerFeedback: Map[MarkingWorkflowStage, MarkerFeedback] = {
 		val currentStageIndex = feedback.map(_.currentStageIndex).getOrElse(0)

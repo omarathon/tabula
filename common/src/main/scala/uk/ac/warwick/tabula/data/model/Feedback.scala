@@ -15,6 +15,7 @@ import uk.ac.warwick.tabula.{AcademicYear, JavaImports}
 import uk.ac.warwick.userlookup.User
 
 import scala.collection.JavaConverters._
+import scala.collection.immutable.{SortedMap, TreeMap}
 import scala.collection.mutable
 
 trait FeedbackAttachments {
@@ -278,8 +279,10 @@ abstract class Feedback extends GeneratedId with FeedbackAttachments with Permis
 	var markerFeedback: JList[MarkerFeedback] = JArrayList()
 	def allMarkerFeedback: Seq[MarkerFeedback] = markerFeedback.asScala
 
-	def feedbackByStage: Map[MarkingWorkflowStage, MarkerFeedback] =
-		allMarkerFeedback.groupBy(_.stage).mapValues(_.head)
+	def feedbackByStage: SortedMap[MarkingWorkflowStage, MarkerFeedback] = {
+		val unsortedMap =  allMarkerFeedback.groupBy(_.stage).mapValues(_.head)
+		TreeMap(unsortedMap.toSeq:_*)
+	}
 
 	def feedbackMarkers: Map[MarkingWorkflowStage, User] =
 		feedbackByStage.mapValues(_.marker)
