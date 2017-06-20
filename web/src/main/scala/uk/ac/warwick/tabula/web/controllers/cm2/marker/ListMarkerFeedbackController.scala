@@ -15,7 +15,6 @@ import uk.ac.warwick.tabula.web.Mav
 import uk.ac.warwick.tabula.web.controllers.cm2.CourseworkController
 import uk.ac.warwick.userlookup.User
 
-
 object ListMarkerFeedbackController {
 	val AllPlagiarismFilters = Seq(NotCheckedForPlagiarism, CheckedForPlagiarism, MarkedPlagiarised)
 	val AllSubmissionFilters = Seq(Submitted, Unsubmitted, OnTime, WithExtension, LateSubmission, ExtensionRequested, ExtensionDenied, ExtensionGranted)
@@ -53,7 +52,7 @@ class ListMarkerFeedbackController extends CourseworkController {
 				"assignment" -> command.assignment,
 				"isProxying" -> command.isProxying,
 				"proxyingAs" -> marker
-			)
+			).crumbsList(Breadcrumbs.markerAssignment(assignment, marker, active = true, proxying = command.isProxying))
 		}
 	}
 

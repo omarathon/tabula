@@ -89,9 +89,8 @@ trait ListMarkerFeedbackState extends CanProxy {
 }
 
 trait CanProxy {
-
-	val marker: User
-	val submitter: CurrentUser
+	def marker: User
+	def submitter: CurrentUser
 
 	def isProxying: Boolean = marker != submitter.apparentUser
 }

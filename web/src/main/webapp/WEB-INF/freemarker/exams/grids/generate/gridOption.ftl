@@ -242,13 +242,15 @@
 		</div>
 		<div class="col-md-3">
 			<div class="checkbox">
-				<label><input type="checkbox" name="predefinedColumnIdentifiers" value="overcatted" checked disabled
+				<label><input type="checkbox" name="predefinedColumnIdentifiers" value="overcatted"
+					<#if gridOptionsCommand.predefinedColumnIdentifiers?seq_contains("overcatted")>checked</#if>
 				/> Overcatted year mark <@fmt.help_popover id="overcatted" content="Result and best mark from applying the overcatting calculation." /></label>
 			</div>
 		</div>
 		<div class="col-md-3">
 			<div class="checkbox">
-				<label><input type="checkbox" name="predefinedColumnIdentifiers" value="board" checked disabled
+				<label><input type="checkbox" name="predefinedColumnIdentifiers" value="board"
+					<#if gridOptionsCommand.predefinedColumnIdentifiers?seq_contains("board")>checked</#if>
 				/> Board agreed mark <@fmt.help_popover id="board" content="Agreed mark from SITS after the exam board has taken place." /></label>
 			</div>
 		</div>

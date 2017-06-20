@@ -14,7 +14,6 @@ import uk.ac.warwick.tabula.web.Mav
 import uk.ac.warwick.tabula.web.controllers.cm2.CourseworkController
 import uk.ac.warwick.userlookup.User
 
-
 @Profile(Array("cm2Enabled"))
 @Controller
 @RequestMapping(value=Array("/${cm2.prefix}/admin/assignments/{assignment}/marker/{marker}/marks"))
@@ -23,17 +22,16 @@ class MarkerUploadMarksController extends CourseworkController {
 	type Command = Appliable[Seq[MarkerFeedback]] with MarkerAddMarksState with AddMarksCommandBindListener
 
 	@ModelAttribute("command")
-	def command(@PathVariable assignment: Assignment, @PathVariable marker: User, currentUser: CurrentUser) =
+	def command(@PathVariable assignment: Assignment, @PathVariable marker: User, currentUser: CurrentUser): Command =
 		MarkerAddMarksCommand(mandatory(assignment), mandatory(marker), currentUser, GenerateGradesFromMarkCommand(assignment))
 
 	@RequestMapping
-	def viewForm(@ModelAttribute("command") cmd: Command, @PathVariable assignment: Assignment, @PathVariable marker: User, errors: Errors): Mav = {
+	def viewForm(@ModelAttribute("command") cmd: Command, @PathVariable assignment: Assignment, @PathVariable marker: User, errors: Errors): Mav =
 		Mav("cm2/admin/assignments/upload_marks",
 			"templateUrl" -> Routes.admin.assignment.markerFeedback.marksTemplate(assignment, marker),
 			"formUrl" -> Routes.admin.assignment.markerFeedback.marks(assignment, marker),
 			"cancelUrl" -> Routes.admin.assignment.markerFeedback(assignment, marker)
-		)
-	}
+		).crumbsList(Breadcrumbs.markerAssignment(assignment, marker, proxying = cmd.isProxying))
 
 	@RequestMapping(method = Array(POST), params = Array("!confirm"))
 	def preview(@ModelAttribute("command") cmd: Command, @PathVariable assignment: Assignment, @PathVariable marker: User, errors: Errors): Mav = {
@@ -43,7 +41,7 @@ class MarkerUploadMarksController extends CourseworkController {
 			Mav("cm2/admin/assignments/upload_marks_preview",
 				"formUrl" -> Routes.admin.assignment.markerFeedback.marks(assignment, marker),
 				"cancelUrl" -> Routes.admin.assignment.markerFeedback(assignment, marker)
-			)
+			).crumbsList(Breadcrumbs.markerAssignment(assignment, marker, proxying = cmd.isProxying))
 		}
 	}
 
@@ -52,7 +50,6 @@ class MarkerUploadMarksController extends CourseworkController {
 		cmd.apply()
 		Redirect(Routes.admin.assignment.markerFeedback(assignment, marker))
 	}
-
 
 }
 

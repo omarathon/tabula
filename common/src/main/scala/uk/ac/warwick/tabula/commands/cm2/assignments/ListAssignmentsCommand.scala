@@ -7,7 +7,7 @@ import uk.ac.warwick.tabula.commands._
 import uk.ac.warwick.tabula.commands.cm2.assignments.AssignmentInfoFilters.DueDateFilter
 import uk.ac.warwick.tabula.commands.cm2.assignments.ListAssignmentsCommand._
 import uk.ac.warwick.tabula.data.model
-import uk.ac.warwick.tabula.data.model.markingworkflow.{FinalStage, MarkingWorkflowStage}
+import uk.ac.warwick.tabula.data.model.markingworkflow.{FinalStage, MarkingWorkflowStage, MarkingWorkflowType}
 import uk.ac.warwick.tabula.data.model.{Assignment, Department, MarkingMethod, Module}
 import uk.ac.warwick.tabula.permissions.Permissions
 import uk.ac.warwick.tabula.services._
@@ -275,12 +275,18 @@ object AssignmentInfoFilters {
 	def allModuleFilters(modules: Seq[model.Module]): Seq[Module] = modules.map(Module.apply)
 
 	case class WorkflowType(method: MarkingMethod) extends AssignmentInfoFilter {
-		val description: String = method.description
+		val description: String = s"${method.description}-CM1"
 		override val getName: String = method.name
 		def apply(info: AssignmentInfo): Boolean = Option(info.assignment.markingWorkflow).map(_.markingMethod).contains(method)
 	}
 
-	def allWorkflowTypeFilters: Seq[WorkflowType] = MarkingMethod.values.toSeq.map(WorkflowType.apply)
+	case class CM2WorkflowType(method: MarkingWorkflowType) extends AssignmentInfoFilter {
+		val description: String = method.description
+		override val getName: String = method.name
+		def apply(info: AssignmentInfo): Boolean = Option(info.assignment.cm2MarkingWorkflow).map(_.workflowType).contains(method)
+	}
+
+	def allWorkflowTypeFilters: Seq[AssignmentInfoFilter] = MarkingMethod.values.toSeq.map(WorkflowType.apply) ++ MarkingWorkflowType.values.map(CM2WorkflowType.apply)
 
 	object Status {
 		case object Active extends AssignmentInfoFilter {

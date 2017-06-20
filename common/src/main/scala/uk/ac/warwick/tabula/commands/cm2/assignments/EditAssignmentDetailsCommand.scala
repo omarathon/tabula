@@ -11,7 +11,6 @@ import uk.ac.warwick.tabula.services.{AssessmentServiceComponent, UserLookupComp
 import uk.ac.warwick.tabula.system.permissions.{PermissionsChecking, PermissionsCheckingMethods, RequiresPermissionsChecking}
 import uk.ac.warwick.tabula.JavaImports._
 
-
 object EditAssignmentDetailsCommand {
 	def apply(assignment: Assignment) =
 		new EditAssignmentDetailsCommandInternal(assignment)
@@ -43,6 +42,8 @@ class EditAssignmentDetailsCommandInternal(override val assignment: Assignment) 
 						// delete the old workflow and make a new one with the new type
 						cm2MarkingWorkflowService.delete(w)
 						createAndSaveSingleUseWorkflow(assignment)
+						//user has changed workflow category so remove all previous feedbacks
+						assignment.removeFeedbacks()
 					} else {
 						w.replaceMarkers(markersAUsers, markersBUsers)
 						cm2MarkingWorkflowService.save(w)
@@ -55,7 +56,12 @@ class EditAssignmentDetailsCommandInternal(override val assignment: Assignment) 
 			val existingWorkflow = workflow
 			assignment.cm2MarkingWorkflow = null
 			existingWorkflow.filterNot(_.isReusable).foreach(cm2MarkingWorkflowService.delete)
+			//if we have any prior markerfeedbacks/feedbacks attached -  remove them
+			assignment.removeFeedbacks()
 		} else if(workflowCategory == WorkflowCategory.Reusable) {
+			if(reusableWorkflow != null && assignment.cm2MarkingWorkflow != null && reusableWorkflow.workflowType != assignment.cm2MarkingWorkflow.workflowType){
+				assignment.removeFeedbacks()
+			}
 			workflow.filterNot(_.isReusable).foreach(cm2MarkingWorkflowService.delete)
 		}
 
