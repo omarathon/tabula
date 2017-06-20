@@ -780,6 +780,13 @@ class Assignment
 		}
 	}
 
+	def removeFeedbacks(): Unit = {
+		val markerFeedbacks  = allFeedback.flatMap(_.allMarkerFeedback)
+		markerFeedbacks.foreach(feedbackService.delete)
+		feedbacks.foreach(feedbackService.delete)
+		allFeedback.removeAll(feedbacks)
+	}
+
 	def cm2MarkerAllocations: Seq[MarkerAllocation] =
 		Option(cm2MarkingWorkflow)
 			.map { workflow =>
