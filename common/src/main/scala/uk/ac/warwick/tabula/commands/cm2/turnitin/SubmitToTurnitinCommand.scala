@@ -66,6 +66,7 @@ abstract class SubmitToTurnitinCommandInternal(val assignment: Assignment)
 			assignment.turnitinLtiNotifyUsers = Seq()
 			assignment.submitToTurnitin = true
 		}
+
 		if (assignment.turnitinId != null) {
 			// Assignment won't be re-submitted, so create empty reports now
 			turnitinLtiQueueService.createEmptyOriginalityReports(assignment)
@@ -73,6 +74,7 @@ abstract class SubmitToTurnitinCommandInternal(val assignment: Assignment)
 			// For all new assignments, create academic year-scoped classes
 			assignment.turnitinLtiClassWithAcademicYear = true
 		}
+
 		// Add the requesting user on to the list
 		if (Option(submitter).nonEmpty) {
 			assignment.turnitinLtiNotifyUsers = (assignment.turnitinLtiNotifyUsers ++ Seq(submitter)).distinct

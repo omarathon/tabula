@@ -109,6 +109,7 @@ object Routes {
 			object feedback {
 				def online(assignment: Assignment): String = assignmentroot(assignment) + "/feedback/online"
 				def batch(assignment: Assignment): String = assignmentroot(assignment) + "/feedback/batch"
+				def generic(assignment: Assignment): String = assignmentroot(assignment) + "/feedback/generic"
 			}
 
 			def publishFeedback(assignment: Assignment): String = assignmentroot(assignment) + "/publish"

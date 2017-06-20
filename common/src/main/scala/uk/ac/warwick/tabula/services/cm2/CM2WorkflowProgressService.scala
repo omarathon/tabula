@@ -177,6 +177,8 @@ object CM2WorkflowStages {
 				StageProgress(CheckForPlagiarism, started = true, messageCode = "workflow.CheckForPlagiarism.suspectPlagiarised", health = Danger, completed = true)
 			case Some(item) if item.submission.allAttachments.exists(_.originalityReportReceived) =>
 				StageProgress(CheckForPlagiarism, started = true, messageCode = "workflow.CheckForPlagiarism.checked", health = Good, completed = true)
+			case Some(item) if item.submission.allAttachments.nonEmpty && assignment.submitToTurnitin =>
+				StageProgress(CheckForPlagiarism, started = true, messageCode = "workflow.CheckForPlagiarism.started", health = Good)
 			case Some(_) => StageProgress(CheckForPlagiarism, started = false, messageCode = "workflow.CheckForPlagiarism.notChecked")
 			case _ => StageProgress(CheckForPlagiarism, started = false, messageCode = "workflow.CheckForPlagiarism.notChecked")
 		}
