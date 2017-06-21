@@ -35,29 +35,37 @@
 	</#if>
 </@spring.hasBindErrors>
 
-<@f.form commandName="${commandName}" action="${submitUrl}">
-	<div class="tabula-dnd">
-		<#macro renderObjects department objects>
-			<div class="drag-target clearfix form-group">
-				<h1>${department.name}</h1>
-				<ul class="drag-list full-width" data-bindpath="mapping[${department.code}]">
-					<#list objects as object>
-						<li class="label label-default" title="${object.name}">
-							<i class="fa fa-bars"></i>
-							${object.code?upper_case}
-							<input type="hidden" name="mapping[${department.code}][${object_index}]" value="${object.id}" />
-						</li>
-					</#list>
-				</ul>
+<div class="fix-area">
+	<@f.form commandName="${commandName}" action="${submitUrl}">
+		<div class="tabula-dnd">
+			<#macro renderObjects department objects>
+				<div class="drag-target clearfix form-group">
+					<h1>${department.name}</h1>
+					<ul class="drag-list full-width" data-bindpath="mapping[${department.code}]">
+						<#list objects as object>
+							<li class="label label-default" title="${object.name}">
+								<i class="fa fa-bars"></i>
+								${object.code?upper_case}
+								<input type="hidden" name="mapping[${department.code}][${object_index}]" value="${object.id}" />
+							</li>
+						</#list>
+					</ul>
+				</div>
+			</#macro>
+
+			<#list command.departments as dept>
+				<@renderObjects dept command.mappingByCode[dept.code]![] />
+			</#list>
+
+			<div class="fix-footer submit-buttons">
+				<input id="sort-object-submit" class="btn btn-primary" type="submit" value="Save changes" />
 			</div>
-		</#macro>
-
-		<#list command.departments as dept>
-			<@renderObjects dept command.mappingByCode[dept.code]![] />
-		</#list>
-
-		<div class="form-group">
-			<input id="sort-object-submit" class="btn btn-primary" type="submit" value="Save changes" />
 		</div>
-	</div>
-</@f.form>
+	</@f.form>
+</div>
+
+<script>
+	jQuery(function($){
+		$('.fix-area').fixHeaderFooter();
+	})
+</script>
