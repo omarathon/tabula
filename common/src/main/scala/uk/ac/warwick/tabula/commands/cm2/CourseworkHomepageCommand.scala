@@ -198,7 +198,7 @@ trait CourseworkHomepageStudentAssignments extends TaskBenchmarking {
 	}
 
 	private lazy val assignmentsWithFeedback = benchmarkTask("Get assignments with feedback") {
-		assessmentService.getAssignmentsWithFeedback(user.userId, None).filterNot(_.publishFeedback) // Any academic year
+		assessmentService.getAssignmentsWithFeedback(user.userId, None).filter(_.publishFeedback) // Any academic year
 	}
 
 	private lazy val assignmentsWithSubmission = benchmarkTask("Get assignments with submission") {
