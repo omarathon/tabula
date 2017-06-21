@@ -198,7 +198,7 @@ trait CourseworkHomepageStudentAssignments extends TaskBenchmarking {
 	}
 
 	private lazy val assignmentsWithFeedback = benchmarkTask("Get assignments with feedback") {
-		assessmentService.getAssignmentsWithFeedback(user.userId, None) // Any academic year
+		assessmentService.getAssignmentsWithFeedback(user.userId, None).filterNot(_.publishFeedback) // Any academic year
 	}
 
 	private lazy val assignmentsWithSubmission = benchmarkTask("Get assignments with submission") {
@@ -293,6 +293,7 @@ trait CourseworkHomepageStudentAssignments extends TaskBenchmarking {
 		val submittedAwaitingFeedback =
 			assignmentsWithSubmission
 				.diff(assignmentsWithFeedback)
+				.filter(_.publishFeedback)
 				.map(enhance)
 
 		val unsubmittedAndUnsubmittable =
@@ -305,7 +306,7 @@ trait CourseworkHomepageStudentAssignments extends TaskBenchmarking {
 	}
 
 	lazy val studentCompletedAssignments: Seq[StudentAssignmentInformation] = benchmarkTask("Get past assignments") {
-		(assignmentsWithFeedback ++ enrolledAssignments.filter(lateFormative))
+		(assignmentsWithFeedback ++ enrolledAssignments.filter(lateFormative) ++ assignmentsWithSubmission.filterNot(_.publishFeedback))
 			.map(enhance)
 			.sortWith(hasEarlierEffectiveDate)
 	}

@@ -69,7 +69,9 @@ class CM2WorkflowProgressService {
 			stages += AddFeedback
 		}
 
-		stages ++= Seq(ReleaseFeedback, ViewOnlineFeedback, DownloadFeedback)
+		if (assignment.publishFeedback) {
+			stages ++= Seq(ReleaseFeedback, ViewOnlineFeedback, DownloadFeedback)
+		}
 
 		stages.result()
 	}
