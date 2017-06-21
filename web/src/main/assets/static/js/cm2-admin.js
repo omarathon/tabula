@@ -60,7 +60,10 @@
 			var $content = $(e.target);
 
 			// activate any popovers
-			$content.find('.use-popover').popover();
+			$content.find('.use-popover').tabulaPopover({
+				trigger: 'click',
+				container: 'body'
+			});
 
 			// bind suggested mark button
 			$content.find('.use-suggested-mark').on('click', function(e){
