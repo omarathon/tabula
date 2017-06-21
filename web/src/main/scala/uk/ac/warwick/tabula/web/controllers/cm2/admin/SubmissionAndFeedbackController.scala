@@ -58,13 +58,13 @@ class SubmissionAndFeedbackController extends CourseworkController with Autowiri
 	def summary(@ModelAttribute("submissionAndFeedbackCommand") command: SubmissionAndFeedbackCommand.CommandType, @PathVariable assignment: Assignment): Mav =
 		if (!features.assignmentProgressTable) Redirect(Routes.admin.assignment.submissionsandfeedback.table(assignment))
 		else if (ajax) Mav("cm2/admin/assignments/submissionsandfeedback/summary_results", "results" -> command.apply()).noLayout()
-		else Mav("cm2/admin/assignments/submissionsandfeedback/summary", "results" -> command.apply())
+		else Mav("cm2/admin/assignments/submissionsandfeedback/summary")
 			.crumbsList(Breadcrumbs.assignment(assignment, active = true))
 
 	@RequestMapping(Array("/table"))
 	def table(@ModelAttribute("submissionAndFeedbackCommand") command: SubmissionAndFeedbackCommand.CommandType, @PathVariable assignment: Assignment): Mav =
 		if (ajax) Mav("cm2/admin/assignments/submissionsandfeedback/table_results", "results" -> command.apply()).noLayout()
-		else Mav("cm2/admin/assignments/submissionsandfeedback/table", "results" -> command.apply())
+		else Mav("cm2/admin/assignments/submissionsandfeedback/table")
 			.crumbsList(Breadcrumbs.assignment(assignment, active = true))
 
 }

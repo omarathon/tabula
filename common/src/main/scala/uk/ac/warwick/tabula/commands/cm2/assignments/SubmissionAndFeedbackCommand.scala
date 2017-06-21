@@ -40,7 +40,6 @@ object SubmissionAndFeedbackCommand {
 		stillToDownload: Seq[AssignmentSubmissionStudentInfo],
 		hasPublishedFeedback: Boolean,
 		hasOriginalityReport: Boolean,
-		mustReleaseForMarking: Boolean,
 		workflowMarkers: Seq[String]
 	)
 
@@ -270,7 +269,6 @@ abstract class SubmissionAndFeedbackCommandInternal(val assignment: Assignment)
 			stillToDownload = stillToDownload,
 			hasPublishedFeedback = hasPublishedFeedback,
 			hasOriginalityReport = hasOriginalityReport,
-			mustReleaseForMarking = assignment.mustReleaseForMarking,
 			workflowMarkers = workflowMarkers
 		)
 	}

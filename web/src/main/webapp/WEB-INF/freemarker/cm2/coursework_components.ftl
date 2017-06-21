@@ -970,7 +970,7 @@
 						<#local markingStage = student.stages[stage_name].stage.markingStage />
 						<#local marker = mapGet(feedback.feedbackMarkers, markingStage)! />
 
-						<#if marker?has_content>
+						<#if (marker.userId)??>
 							${marker.fullName}
 							<#if can.do("Assignment.MarkOnBehalf", assignment)>
 								<@uniIdSafeCM2MarkerLink markingStage marker student.user />
