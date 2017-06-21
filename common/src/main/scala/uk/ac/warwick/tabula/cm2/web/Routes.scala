@@ -26,7 +26,6 @@ object Routes {
 
 	private lazy val context = s"/$cm2Prefix"
 	def home: String = context + "/"
-	def homeForYear(academicYear: AcademicYear): String = context + s"/${encoded(academicYear.startYear.toString)}"
 
 	object assignment {
 		def apply(assignment: Assignment): String = context + s"/submission/${encoded(assignment.id)}/"
@@ -99,6 +98,22 @@ object Routes {
 				def apply(assignment: Assignment, student: User): String = assignmentroot(assignment) + " /feedback/adjustments"
 			}
 
+			object marks {
+				def apply(assignment: Assignment): String = assignmentroot(assignment) + "/marks"
+			}
+
+			object marksTemplate {
+				def apply(assignment: Assignment): String = assignmentroot(assignment) + "/marks-template"
+			}
+
+			object feedback {
+				def online(assignment: Assignment): String = assignmentroot(assignment) + "/feedback/online"
+				def batch(assignment: Assignment): String = assignmentroot(assignment) + "/feedback/batch"
+				def generic(assignment: Assignment): String = assignmentroot(assignment) + "/feedback/generic"
+			}
+
+			def publishFeedback(assignment: Assignment): String = assignmentroot(assignment) + "/publish"
+
 			def submissionsZip(assignment: Assignment): String = assignmentroot(assignment) + "/submissions.zip"
 
 			object submissionsandfeedback {
@@ -139,6 +154,7 @@ object Routes {
 				object marks {
 					def apply(assignment: Assignment, marker: User): String = markerroot(assignment, marker) + "/marks"
 				}
+
 				object feedback {
 					def apply(assignment: Assignment, marker: User): String = markerroot(assignment, marker) + "/feedback"
 				}
@@ -162,6 +178,10 @@ object Routes {
 				object returnsubmissions {
 					def apply(assignment: Assignment): String = assignmentroot(assignment) + "/submissionsandfeedback/return-submissions"
 				}
+			}
+
+			object markerTemplates {
+				def apply(assignment: Assignment, marker: User): String = markerroot(assignment, marker) + "/marker-templates.zip"
 			}
 
 			object turnitin {

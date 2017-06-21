@@ -46,15 +46,11 @@ object SubmissionAndFeedbackCommand {
 
 }
 
-trait SubmissionAndFeedbackState {
+trait SubmissionAndFeedbackState extends SelectedStudentsState {
 	def assignment: Assignment
 }
 
-trait SubmissionAndFeedbackRequest extends SubmissionAndFeedbackState {
-
-	// When we call export commands, we may want to further filter by a subset of student IDs
-	var usercodes: JList[String] = JArrayList()
-
+trait SubmissionAndFeedbackRequest extends SubmissionAndFeedbackState with SelectedStudentsRequest {
 	var submissionStatesFilters: JList[SubmissionAndFeedbackInfoFilter] = JArrayList()
 	var plagiarismFilters: JList[SubmissionAndFeedbackInfoFilter] = JArrayList()
 	var statusesFilters: JList[SubmissionAndFeedbackInfoFilter] = JArrayList()
@@ -258,7 +254,7 @@ abstract class SubmissionAndFeedbackCommandInternal(val assignment: Assignment)
 					itemExistsInPlagiarismFilters && itemExistsInSubmissionStatesFilters && itemExistsInStatusesFilters
 				}
 			}
-			val studentsFiltered = if (usercodes.isEmpty) filteredStudents else filteredStudents.filter { studentInfo => usercodes.contains(studentInfo.user.getUserId) }
+			val studentsFiltered = if (students.isEmpty) filteredStudents else filteredStudents.filter(studentInfo => students.contains(studentInfo.user.getUserId))
 			studentsFiltered
 		}
 

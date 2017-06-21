@@ -6,7 +6,7 @@ import org.springframework.validation.Errors
 import org.springframework.web.bind.annotation.{ModelAttribute, PathVariable, RequestMapping}
 import uk.ac.warwick.tabula.{AcademicYear, CurrentUser}
 import uk.ac.warwick.tabula.commands.Appliable
-import uk.ac.warwick.tabula.commands.coursework.assignments.{AdminAddMarksCommand, PostExtractValidation}
+import uk.ac.warwick.tabula.commands.coursework.assignments.{OldAdminAddMarksCommand, PostExtractValidation}
 import uk.ac.warwick.tabula.commands.coursework.feedback.OldGenerateGradesFromMarkCommand
 import uk.ac.warwick.tabula.services.coursework.docconversion.MarkItem
 import uk.ac.warwick.tabula.exams.web.Routes
@@ -28,7 +28,7 @@ class ExamsAddMarksController extends ExamsController {
 
 	@ModelAttribute("adminAddMarksCommand")
 	def command(@PathVariable module: Module, @PathVariable exam: Exam, user: CurrentUser): AdminAddMarksCommand =
-		AdminAddMarksCommand(mandatory(module), mandatory(exam), user, OldGenerateGradesFromMarkCommand(mandatory(module), mandatory(exam)))
+		OldAdminAddMarksCommand(mandatory(module), mandatory(exam), user, OldGenerateGradesFromMarkCommand(mandatory(module), mandatory(exam)))
 
 	// Add the common breadcrumbs to the model.
 	def crumbed(mav: Mav, module: Module, academicYear: AcademicYear): Mav = mav.crumbs(

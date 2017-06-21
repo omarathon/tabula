@@ -17,7 +17,6 @@ import uk.ac.warwick.userlookup.User
 
 import scala.collection.JavaConverters._
 
-
 object MarkingCompletedCommand {
 	def apply(assignment: Assignment, marker: User, submitter: CurrentUser, stage: MarkingWorkflowStage) =
 		new MarkingCompletedCommandInternal(assignment, marker, submitter, stage)

@@ -80,7 +80,9 @@
 				</#if>
 			</div>
 
-			<@review_details 'Anonymity' assignment.anonymousMarking?string('On (markers cannot see University IDs and names)','Off (markers can see University IDs and names)') />
+			<#if features.anonymousMarkingCM2>
+				<@review_details 'Anonymity' assignment.anonymousMarking?string('On (markers cannot see University IDs and names)','Off (markers can see University IDs and names)') />
+			</#if>
 		</div>
 
 		<#if assignment.cm2MarkerAllocations?has_content>
@@ -90,7 +92,7 @@
 
 				<#list assignment.cm2MarkerAllocations as allocation>
 					<#assign markerDetails>${allocation.marker.fullName} (<@fmt.p allocation.students?size "student" />)</#assign>
-					<@review_details allocation.role markerDetails />
+					<@review_details allocation.description markerDetails />
 				</#list>
 			</div>
 		</#if>
@@ -144,7 +146,7 @@
 			</div>
 		</div>
 		<div class="fix-footer">
-			<a class="btn btn-default" href="<@routes.cm2.assignmentsubmissionsandfeedback assignment />">Confirm</a>
+			<a class="btn btn-primary" href="<@routes.cm2.assignmentsubmissionsandfeedback assignment />">Confirm</a>
 		</div>
 	</div>
 </#escape>

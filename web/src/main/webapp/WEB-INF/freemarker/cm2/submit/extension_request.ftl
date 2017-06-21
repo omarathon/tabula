@@ -15,68 +15,6 @@
 			You cannot request an extension after the close date has passed.
 		</p>
 	<#else>
-		<#if isModification>
-			<#if existingRequest.approved>
-				<div class="alert alert-info">
-					<#assign approved_ago=durationFormatter(existingRequest.reviewedOn) />
-					Your extension request was approved - <@fmt.date date=existingRequest.reviewedOn /> (${approved_ago}).
-				</div>
-			<#elseif existingRequest.rejected>
-				<div class="alert alert-danger">
-					Your extension request has been rejected.
-				</div>
-			<#elseif existingRequest.moreInfoRequired>
-				<div class="alert alert-info">
-					<div class="control-group">
-						<label class="control-label">Request for more information</label>
-						<div class="controls"><p>${existingRequest.reviewerComments}</p></div>
-					</div>
-				</div>
-			<#else>
-				<div class="alert alert-info">Your extension request is being reviewed.</div>
-			</#if>
-			<#if existingRequest.expiryDate?? && existingRequest.approved>
-				<div class="control-group">
-					<label class="control-label">New submission deadline</label>
-					<div class="controls">
-						<p>
-							Your new submission deadline is <@fmt.date date=existingRequest.expiryDate at=true/>
-						</p>
-					</div>
-				</div>
-			</#if>
-			<#if existingRequest.reviewerComments?? && !existingRequest.moreInfoRequired>
-				<div class="control-group">
-					<label class="control-label">Review comments</label>
-					<div class="controls"><p>${existingRequest.reviewerComments}</p></div>
-				</div>
-			</#if>
-			<#if existingRequest.expiryDate?? || existingRequest.reviewerComments??>
-				<hr/>
-			</#if>
-			<#assign time_since_request=durationFormatter(existingRequest.requestedOn) />
-			<p>
-				You requested an extension for this assignment <@fmt.date date=existingRequest.requestedOn /> (${time_since_request}).
-				Use the form below to update the details of your extension request.
-			</p>
-		<#else>
-			<p>
-				This assignment closes at <@fmt.date date=assignment.closeDate /> (${time_remaining} remaining).
-				${department.extensionGuidelineLink}
-				<#if department.extensionGuidelineLink?has_content>
-					Please read the full <a href="${department.extensionGuidelineLink}" target="_blank">extension guidelines</a> before submitting your request below.
-				<#elseif department.extensionGuidelineSummary??>
-					Please read the extension guidelines before submitting your request below.
-				</#if>
-				You will receive a notification when your request has been reviewed.
-			</p>
-			<div id="extensionGuidelines">
-				<#if department.extensionGuidelineSummary??>
-					<#include "/WEB-INF/freemarker/cm2/submit/formfields/guideline.ftl" >
-				</#if>
-			</div>
-		</#if>
-
 		<#assign formAction><@routes.cm2.extensionRequest assignment /></#assign>
 
 		<@f.form
@@ -84,8 +22,72 @@
 			enctype="multipart/form-data"
 			class="double-submit-protection"
 			action="${formAction}"
-			commandName="command"
-		>
+			commandName="command">
+			<#if isModification>
+				<#if existingRequest.approved>
+					<div class="alert alert-info">
+						<#assign approved_ago=durationFormatter(existingRequest.reviewedOn) />
+						Your extension request was approved - <@fmt.date date=existingRequest.reviewedOn /> (${approved_ago}).
+					</div>
+				<#elseif existingRequest.rejected>
+					<div class="alert alert-danger">
+						Your extension request has been rejected.
+					</div>
+				<#elseif existingRequest.moreInfoRequired>
+					<div class="alert alert-info">
+						<div class="control-group">
+							<label class="control-label">Request for more information</label>
+							<div class="controls"><p>${existingRequest.reviewerComments}</p></div>
+						</div>
+					</div>
+				<#else>
+					<div class="alert alert-info">Your extension request is being reviewed.</div>
+				</#if>
+				<#if existingRequest.expiryDate?? && existingRequest.approved>
+					<div class="control-group">
+						<label class="control-label">New submission deadline</label>
+						<div class="controls">
+							<p>
+								Your new submission deadline is <@fmt.date date=existingRequest.expiryDate at=true/>
+							</p>
+						</div>
+					</div>
+				</#if>
+				<#if existingRequest.reviewerComments?? && !existingRequest.moreInfoRequired>
+					<div class="control-group">
+						<label class="control-label">Review comments</label>
+						<div class="controls"><p>${existingRequest.reviewerComments}</p></div>
+					</div>
+				</#if>
+				<#if existingRequest.expiryDate?? || existingRequest.reviewerComments??>
+					<hr/>
+				</#if>
+				<#assign time_since_request=durationFormatter(existingRequest.requestedOn) />
+				<p>
+					You requested an extension for this assignment <@fmt.date date=existingRequest.requestedOn /> (${time_since_request}).
+					Use the form below to update the details of your extension request.
+				</p>
+			<#else>
+				<p>This assignment closes at <@fmt.date date=assignment.closeDate /> (${time_remaining} remaining).</p>
+
+				<div id="extensionGuidelines">
+					<@bs3form.labelled_form_group "" "Extension guidelines">
+						<#if department.extensionGuidelineSummary??>
+							<#include "/WEB-INF/freemarker/cm2/submit/formfields/guideline.ftl" >
+						</#if>
+
+						<p>
+							<#if department.extensionGuidelineLink?has_content>
+								Please read the full <a href="${department.extensionGuidelineLink}" target="_blank">extension guidelines</a> before submitting your request below.
+							<#elseif department.extensionGuidelineSummary??>
+								Please read the extension guidelines before submitting your request below.
+							</#if>
+
+							You will receive a notification when your request has been reviewed.
+						</p>
+					</@bs3form.labelled_form_group>
+				</div>
+			</#if>
 
 			<@bs3form.labelled_form_group "" "Your University ID">
 				<div class="uneditable-input">${user.studentIdentifier}</div>

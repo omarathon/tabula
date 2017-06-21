@@ -33,10 +33,10 @@
 	<div class="fix-area form-post-container">
 		<div class="fix-header pad-when-fixed">
 			<#include "_filter.ftl" />
-		</div>
 
-		<#assign currentView = "table" />
-		<#include "_action-bar.ftl" />
+			<#assign currentView = "table" />
+			<#include "_action-bar.ftl" />
+		</div>
 
 		<div class="filter-results admin-assignment-submission-list">
 			<i class="fa fa-spinner fa-spin"></i> Loading&hellip;

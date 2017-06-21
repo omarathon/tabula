@@ -1,14 +1,14 @@
 package uk.ac.warwick.tabula.services.permissions
 
+import uk.ac.warwick.tabula._
 import uk.ac.warwick.tabula.data.model.{Assignment, Department, Module, SeenSecondMarkingLegacyWorkflow}
 import uk.ac.warwick.tabula.helpers.MutablePromise
+import uk.ac.warwick.tabula.helpers.Promises._
+import uk.ac.warwick.tabula.roles.Marker
 import uk.ac.warwick.tabula.services.AssessmentService
-import uk.ac.warwick.tabula._
 import uk.ac.warwick.userlookup.User
 
 import scala.collection.JavaConversions._
-import uk.ac.warwick.tabula.roles.Marker
-import uk.ac.warwick.tabula.helpers.Promises._
 
 class MarkerRoleProviderTest extends TestBase with Mockito {
 
@@ -17,9 +17,6 @@ class MarkerRoleProviderTest extends TestBase with Mockito {
 		override val assignmentService: MutablePromise[AssessmentService] = promise { mockAssignmentService }
 	}
 
-	val features: Features = new FeaturesImpl
-	features.cm2 = true
-
 	val mw1: SeenSecondMarkingLegacyWorkflow = Fixtures.seenSecondMarkingLegacyWorkflow("workflow is marker")
 	mw1.firstMarkers.knownType.addUserId("cuscav")
 
@@ -27,15 +24,12 @@ class MarkerRoleProviderTest extends TestBase with Mockito {
 	mw2.firstMarkers.knownType.addUserId("cusebr")
 
 	val assignmentIsMarker1: Assignment = Fixtures.assignment("assignment is marker 1")
-	assignmentIsMarker1.features = features
 	assignmentIsMarker1.markingWorkflow = mw1
 
 	val assignmentIsMarker2: Assignment = Fixtures.assignment("assignment is marker 2")
-	assignmentIsMarker2.features = features
 	assignmentIsMarker2.markingWorkflow = mw1
 
 	val assignmentNotMarker: Assignment = Fixtures.assignment("not marker")
-	assignmentNotMarker.features = features
 	assignmentNotMarker.markingWorkflow = mw2
 
 	val mod1: Module = Fixtures.module("mod1", "mod 1")

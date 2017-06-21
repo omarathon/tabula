@@ -18,7 +18,7 @@ object CreateAssignmentDetailsCommand {
   def apply(module: Module, academicYear: AcademicYear) =
     new CreateAssignmentDetailsCommandInternal(module, academicYear)
       with ComposableCommand[Assignment]
-      with BooleanAssignmentProperties
+      with BooleanAssignmentDetailProperties
       with CreateAssignmentPermissions
       with CreateAssignmentDetailsDescription
       with CreateAssignmentDetailsCommandState
@@ -31,8 +31,7 @@ object CreateAssignmentDetailsCommand {
 }
 
 class CreateAssignmentDetailsCommandInternal(val module: Module, val academicYear: AcademicYear) extends CommandInternal[Assignment]
-  with CreateAssignmentDetailsCommandState with SharedAssignmentProperties with AssignmentDetailsCopy with CreatesMarkingWorkflow {
-
+  with CreateAssignmentDetailsCommandState with SharedAssignmentDetailProperties with AssignmentDetailsCopy with CreatesMarkingWorkflow {
   self: AssessmentServiceComponent with UserLookupComponent with CM2MarkingWorkflowServiceComponent =>
 
   private var _prefilled: Boolean = _
@@ -43,6 +42,9 @@ class CreateAssignmentDetailsCommandInternal(val module: Module, val academicYea
 
   override def applyInternal(): Assignment = {
     val assignment = new Assignment(module)
+    // Set default booleans
+    BooleanAssignmentProperties(assignment)
+
     assignment.addDefaultFields()
     copyTo(assignment)
     if(workflowCategory == WorkflowCategory.SingleUse){
@@ -79,14 +81,12 @@ class CreateAssignmentDetailsCommandInternal(val module: Module, val academicYea
     if(assignment.workflowCategory.contains(WorkflowCategory.Reusable)){
       reusableWorkflow = assignment.cm2MarkingWorkflow
     }
-    copySharedFrom(assignment)
+    copySharedDetailFrom(assignment)
   }
-
 
 }
 
-
-trait AssignmentDetailsCopy extends ModifyAssignmentDetailsCommandState with SharedAssignmentProperties {
+trait AssignmentDetailsCopy extends ModifyAssignmentDetailsCommandState with SharedAssignmentDetailProperties {
   self: AssessmentServiceComponent  with UserLookupComponent with CM2MarkingWorkflowServiceComponent with ModifyMarkingWorkflowState =>
 
   def copyTo(assignment: Assignment) {
@@ -105,7 +105,8 @@ trait AssignmentDetailsCopy extends ModifyAssignmentDetailsCommandState with Sha
     if(workflowCategory == WorkflowCategory.Reusable){
       assignment.cm2MarkingWorkflow = reusableWorkflow
     }
-    copySharedTo(assignment: Assignment)
+    assignment.cm2Assignment = true
+    copySharedDetailTo(assignment)
   }
 }
 
@@ -149,7 +150,7 @@ trait CreateAssignmentDetailsCommandState extends ModifyAssignmentDetailsCommand
 }
 
 trait ModifyAssignmentDetailsValidation extends SelfValidating with ModifyMarkingWorkflowValidation {
-  self: ModifyAssignmentDetailsCommandState with BooleanAssignmentProperties with AssessmentServiceComponent with ModifyMarkingWorkflowState
+  self: ModifyAssignmentDetailsCommandState with BooleanAssignmentDetailProperties with AssessmentServiceComponent with ModifyMarkingWorkflowState
     with UserLookupComponent=>
 
   // validation shared between add and edit
@@ -162,7 +163,7 @@ trait ModifyAssignmentDetailsValidation extends SelfValidating with ModifyMarkin
       if (closeDate == null) {
         errors.rejectValue("closeDate", "closeDate.missing")
       } else if (openDate != null && openDate.isAfter(closeDate)) {
-        errors.reject("closeDate.early")
+        errors.rejectValue("closeDate", "closeDate.early")
       }
     }
 
@@ -179,7 +180,7 @@ trait ModifyAssignmentDetailsValidation extends SelfValidating with ModifyMarkin
 
 
 trait CreateAssignmentDetailsValidation extends ModifyAssignmentDetailsValidation with ModifyMarkingWorkflowValidation {
-  self: CreateAssignmentDetailsCommandState with BooleanAssignmentProperties with AssessmentServiceComponent
+  self: CreateAssignmentDetailsCommandState with BooleanAssignmentDetailProperties with AssessmentServiceComponent
     with ModifyMarkingWorkflowState with UserLookupComponent =>
 
   override def validate(errors: Errors): Unit = {
@@ -206,11 +207,16 @@ trait CreateAssignmentPermissions extends RequiresPermissionsChecking with Permi
 trait CreateAssignmentDetailsDescription extends Describable[Assignment] {
   self: CreateAssignmentDetailsCommandState =>
 
+  override lazy val eventName = "AddAssignmentDetails"
+
   override def describe(d: Description) {
     d.module(module).properties(
       "name" -> name,
       "openDate" -> openDate,
-      "closeDate" -> closeDate)
+      "closeDate" -> closeDate,
+      "workflowCtg" -> Option(workflowCategory).map(_.code).orNull,
+      "workflowType" -> Option(workflowType).map(_.name).orNull
+    )
   }
 
 }

@@ -13,14 +13,15 @@ object ModifyAssignmentSubmissionsCommand {
 			with ModifyAssignmentSubmissionsPermissions
 			with ModifyAssignmentSubmissionsDescription
 			with ModifyAssignmentSubmissionsCommandState
+			with ModifyAssignmentScheduledNotifications
 			with AutowiringAssessmentServiceComponent
-			with SharedAssignmentProperties
+			with SharedAssignmentSubmissionProperties
 }
 
 class ModifyAssignmentSubmissionsCommandInternal(override val assignment: Assignment)
 	extends CommandInternal[Assignment] with PopulateOnForm {
 
-	self: AssessmentServiceComponent with ModifyAssignmentSubmissionsCommandState with SharedAssignmentProperties =>
+	self: AssessmentServiceComponent with ModifyAssignmentSubmissionsCommandState with SharedAssignmentSubmissionProperties =>
 
 
 	override def applyInternal(): Assignment = {
@@ -30,27 +31,18 @@ class ModifyAssignmentSubmissionsCommandInternal(override val assignment: Assign
 	}
 
 	override def populate(): Unit = {
-		copySharedFrom(assignment)
+		copySharedSubmissionFrom(assignment)
 	}
 
 }
 
 trait ModifyAssignmentSubmissionsCommandState {
-
-	self: AssessmentServiceComponent with SharedAssignmentProperties =>
+	self: AssessmentServiceComponent with SharedAssignmentSubmissionProperties =>
 
 	def assignment: Assignment
 
 	def copyTo(assignment: Assignment) {
-		assignment.collectSubmissions = collectSubmissions
-		assignment.automaticallySubmitToTurnitin = automaticallySubmitToTurnitin
-		assignment.displayPlagiarismNotice = displayPlagiarismNotice
-		assignment.restrictSubmissions = restrictSubmissions
-		assignment.allowResubmission = allowResubmission
-		assignment.allowLateSubmissions = allowLateSubmissions
-		assignment.allowExtensions = allowExtensions
-		assignment.extensionAttachmentMandatory = extensionAttachmentMandatory
-		assignment.allowExtensionsAfterCloseDate = allowExtensionsAfterCloseDate
+		copySharedSubmissionTo(assignment)
 	}
 
 }
@@ -67,7 +59,7 @@ trait ModifyAssignmentSubmissionsPermissions extends RequiresPermissionsChecking
 
 
 trait ModifyAssignmentSubmissionsDescription extends Describable[Assignment] {
-	self: ModifyAssignmentSubmissionsCommandState with SharedAssignmentProperties =>
+	self: ModifyAssignmentSubmissionsCommandState with SharedAssignmentSubmissionProperties =>
 
 	override lazy val eventName: String = "ModifyAssignmentSubmissions"
 

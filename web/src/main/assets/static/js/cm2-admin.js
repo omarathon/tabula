@@ -1,10 +1,23 @@
 (function ($) { "use strict";
 	var exports = {};
 
-	$.fn.tabulaAjaxForm = function(beforeSubmit, callback, typeForm) {
+	/**
+	 *
+	 * Valid options
+	 *
+	 * beforeSubmit - function run before the form is submitted
+	 * errorCallback - callback when the form returns validation errors
+	 * successCallback - callback when the form is submitted with no errors
+	 * type - the type of this form
+	 */
+	$.fn.tabulaAjaxForm = function(options) {
 		var $row = $(this);
 		var $form = $row.find('form.ajax-form');
-		prepareAjaxForm($form, $row, beforeSubmit, callback, typeForm);
+		var $container = $row.find('.detailrow-container');
+		if($container.size() === 0){
+			$container = $('#content-'+$row.data('contentid'));
+		}
+		prepareAjaxForm($form, $container, options);
 	};
 
 	$.fn.bindFormHelpers = function() {
@@ -123,11 +136,58 @@
 				} else {
 					$detailRow.html(data);
 					var $form = $detailRow.find('form');
-					prepareAjaxForm($form, $detailRow);
+					var $container = $detailRow.find('.detailrow-container');
+					prepareAjaxForm($form, $container);
 					$detailRow.bindFormHelpers();
 				}
 			});
 		});
+
+		// handlers for online marking form
+
+		// on cancel collapse the row and nuke the form
+		$body.on('click', '.cancel', function(e){
+			e.preventDefault();
+			var $row = $(e.target).closest('.detail-row');
+			$row.collapse("hide");
+
+			$row.on('hidden.bs.collapse', function(e) {
+				$row.data('loaded', false);
+				$row.find('.detailrow-container').html('<i class="fa fa-spinner fa-spin"></i> Loading');
+				$(this).unbind(e);
+			});
+		});
+
+		// on reset fetch the form again
+		$body.on('click', '.reset', function(e){
+			e.preventDefault();
+			var $row = $(e.target).closest('.detail-row');
+			$row.data('loaded', false);
+			$row.trigger('show.bs.collapse');
+		});
+
+		// remove attachment
+		$body.on("click", '.remove-attachment', function(e) {
+			e.preventDefault();
+			var $this = $(this);
+			var $form = $this.closest('form');
+			var $li = $this.closest("li");
+			$li.find('input, a').remove();
+			$li.find('span').wrap('<del />');
+			$li.find('i').css('display', 'none');
+			var $ul = $li.closest('ul');
+
+			if (!$ul.find('li').last().is('.pending-removal')) {
+				var alertMarkup = '<li class="pending-removal">Files marked for removal won\'t be deleted until you <samp>Save</samp>.</li>';
+				$ul.append(alertMarkup);
+			}
+
+			if($form.find('input[name=attachedFiles]').length === 0){
+				var $blankInput = $('<input name="attachedFiles" type="hidden" />');
+				$form.append($blankInput);
+			}
+		});
+
 		$('table.expanding-row-pairs').each(function(){
 			$(this).find('tbody tr').each(function(i){
 				if (i % 2 === 0) {
@@ -265,11 +325,13 @@
 	 * It MUST return an empty string if the form has been successfully handled.
 	 * Otherwise, whatever is returned will be rendered in the container.
 	 */
-	var prepareAjaxForm = function($form, $row, beforeSubmitOption, callbackOption, typeOption) {
-		var $container = $row.find('.detailrow-container');
-		var callback = callbackOption || function(){};
-		var beforeSubmit = beforeSubmitOption || function() { return true; };
-		var formType = typeOption || "";
+	var prepareAjaxForm = function($form, $container, options) {
+		options = options || {};
+
+		var errorCallback = options.errorCallback || function(){};
+		var successCallback = options.successCallback || function(){};
+		var beforeSubmit = options.beforeSubmit || function() { return true; };
+		var formType = options.type || "";
 		$form.ajaxForm({
 			beforeSerialize: beforeSubmit,
 			beforeSubmit: function() {
@@ -312,15 +374,17 @@
 						result =  response;
 					}
 				}
+				var $detailrow = $container.closest('.detail-row');
 				if (!result || /^\s*$/.test(result)) {
-					var $detailrow = $container.closest('.detail-row');
 					// reset if empty
 					$detailrow.collapse("hide");
 					$detailrow.data('loaded', false);
 					$container.html("<p>No data is currently available. Please check that you are signed in.</p>");
+					successCallback($container);
 				} else {
 					$container.html(result);
-					callback($container);
+					$detailrow.trigger('tabula.formLoaded');
+					errorCallback($container);
 				}
 			},
 			error: function(){ alert("There has been an error. Please reload and try again."); }
@@ -331,12 +395,14 @@
 	 * Special case for downloading submissions as PDF.
 	 * Does a check for non PDF files in submissions before fetching the download
 	 */
-	$(function(){
-		$('a.download-pdf').on('click', function(e){
+	exports.wirePDFDownload = function ($scope) {
+		$scope = $scope || $('body');
+
+		$('a.download-pdf', $scope).on('click', function(e){
 			var $this = $(this);
 			e.preventDefault();
 			if(!$this.hasClass("disabled") && $this.closest('.disabled').length === 0) {
-				var $modal = $('#download-pdf-modal'), action = this.href;
+				var $modal = $($this.data('target') || '#download-pdf-modal'), action = this.href;
 				if ($this.data('href')) {
 					action = $this.data('href')
 				}
@@ -347,7 +413,7 @@
 				$.post(action, postData, function(data){
 					if (data.submissionsWithNonPDFs.length === 0) {
 						// Use native click instead of trigger because there's no click handler for the marker version
-						$modal.find('.btn.btn-primary').get(0).click();
+						$modal.find('.btn.btn-primary').click();
 					} else {
 						$modal.find('.count').html(data.submissionsWithNonPDFs.length);
 						var $submissionsContainer = $modal.find('.submissions').empty();
@@ -365,7 +431,8 @@
 				});
 			}
 		});
-	});
+	};
+	$(function () { exports.wirePDFDownload(); });
 
     exports.initBigList = function ($scope) {
 		$scope = $scope || $('body');

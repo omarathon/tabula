@@ -8,10 +8,10 @@
 
 <#import "*/modal_macros.ftl" as modal />
 
-<#macro student_assignment_list id title assignments expand_by_default=true show_submission_progress=false>
+<#macro student_assignment_list id title assignments empty_message expand_by_default=true show_submission_progress=false>
 	<span id="${id}-container">
 		<#local has_assignments = (assignments!?size gt 0) />
-		<div id="${id}" class="striped-section student-assignment-list<#if has_assignments> collapsible<#if expand_by_default> expanded</#if><#else> empty</#if>" data-name="${id}">
+		<div id="${id}" class="striped-section student-assignment-list collapsible<#if expand_by_default> expanded</#if>" data-name="${id}">
 			<div class="clearfix">
 				<h4 class="section-title">${title}</h4>
 
@@ -28,6 +28,12 @@
 								<@student_assignment_info info show_submission_progress />
 							</span>
 						</#list>
+					</div>
+				<#else>
+					<div class="striped-section-contents">
+						<div class="item-info">
+							${empty_message}
+						</div>
 					</div>
 				</#if>
 			</div>
@@ -172,7 +178,7 @@
 				</a>
 			</h4>
 		</div>
-		<div class="col-md-4 col-lg-5">
+		<div class="col-md-6">
 			<#local submissionStatus = "" />
 
 			<#if !assignment.collectSubmissions>
@@ -220,9 +226,15 @@
 
 			<#local feedbackStatus = "" />
 			<#if info.feedback?? && info.feedback.released>
-				<#local feedbackStatus>
-					<strong>Feedback received:</strong> <@fmt.date date=info.feedback.releasedDate />
-				</#local>
+				<#if info.feedback.releasedDate??>
+					<#local feedbackStatus>
+						<strong>Feedback received:</strong> <@fmt.date date=info.feedback.releasedDate />
+					</#local>
+				<#else>
+					<#local feedbackStatus>
+						<strong>Feedback received</strong>
+					</#local>
+				</#if>
 			<#elseif assignment.collectSubmissions>
 				<#if info.submission?? && info.feedbackDeadline??>
 					<#local feedbackStatus>
@@ -242,67 +254,55 @@
 			<div class="submission-status">${submissionStatus}</div>
 			<div class="feedback-status">${feedbackStatus}</div>
 		</div>
-		<div class="col-md-5 col-lg-4">
-			<div class="row">
-				<#if info.feedback??>
-					<#-- View feedback -->
-					<div class="col-md-6">
-						<a class="btn btn-block btn-primary" href="<@routes.cm2.assignment assignment />">
-							View feedback
-						</a>
-					</div>
-				<#elseif info.submission?? && info.resubmittable>
-					<#-- Resubmission allowed -->
-					<div class="col-md-6">
-						<a class="btn btn-block btn-primary" href="<@routes.cm2.assignment assignment />">
-							View receipt
-						</a>
-					</div>
+		<div class="col-md-3">
+			<#if info.feedback??>
+				<#-- View feedback -->
+				<a class="btn btn-block btn-primary" href="<@routes.cm2.assignment assignment />">
+					View feedback
+				</a>
+			<#elseif info.submission?? && info.resubmittable>
+				<#-- Resubmission allowed -->
+				<a class="btn btn-block btn-primary" href="<@routes.cm2.assignment assignment />">
+					View receipt
+				</a>
 
-					<div class="col-md-6">
-						<a class="btn btn-block btn-default" href="<@routes.cm2.assignment assignment />#submittop">
-							Re-submit assignment
-						</a>
-					</div>
-				<#elseif info.submission??>
-					<#-- View receipt -->
-					<div class="col-md-6">
-						<a class="btn btn-block btn-primary" href="<@routes.cm2.assignment assignment />">
-							View receipt
-						</a>
-					</div>
-				<#elseif info.submittable>
-					<#-- First submission allowed -->
-					<div class="col-md-6">
-						<a class="btn btn-block btn-primary" href="<@routes.cm2.assignment assignment />">
-							Submit assignment
-						</a>
-					</div>
+				<a class="btn btn-block btn-default" href="<@routes.cm2.assignment assignment />#submittop">
+					Re-submit assignment
+				</a>
+			<#elseif info.submission??>
+				<#-- View receipt -->
+				<a class="btn btn-block btn-primary" href="<@routes.cm2.assignment assignment />">
+					View receipt
+				</a>
+			<#elseif info.submittable>
+				<#-- First submission allowed -->
+				<p>
+					<a class="btn btn-block btn-primary" href="<@routes.cm2.assignment assignment />">
+						Submit assignment
+					</a>
+				</p>
 
-					<#if assignment.extensionsPossible>
-						<#if info.extensionRequested>
-							<div class="col-md-6">
-								<a href="<@routes.cm2.extensionRequest assignment=assignment />?returnTo=<@routes.cm2.home academicYear />" class="btn btn-block btn-default">
-									Review extension request
-								</a>
-							</div>
-						<#elseif !info.extended && assignment.newExtensionsCanBeRequested>
-							<div class="col-md-6">
-								<a href="<@routes.cm2.extensionRequest assignment=assignment />?returnTo=<@routes.cm2.home academicYear />" class="btn btn-block btn-default">
-									Request extension
-								</a>
-							</div>
-						</#if>
+				<#if assignment.extensionsPossible>
+					<#if info.extensionRequested>
+						<p>
+							<a href="<@routes.cm2.extensionRequest assignment=assignment />?returnTo=<@routes.cm2.home />" class="btn btn-block btn-default">
+								Review extension request
+							</a>
+						</p>
+					<#elseif !info.extended && assignment.newExtensionsCanBeRequested>
+						<p>
+							<a href="<@routes.cm2.extensionRequest assignment=assignment />?returnTo=<@routes.cm2.home />" class="btn btn-block btn-default">
+								Request extension
+							</a>
+						</p>
 					</#if>
-				<#else>
-					<#-- Assume formative, so just show info -->
-					<div class="col-md-6">
-						<a class="btn btn-block btn-default" href="<@routes.cm2.assignment assignment />">
-							View details
-						</a>
-					</div>
 				</#if>
-			</div>
+			<#else>
+				<#-- Assume formative, so just show info -->
+				<a class="btn btn-block btn-default" href="<@routes.cm2.assignment assignment />">
+					View details
+				</a>
+			</#if>
 		</div>
 	</div>
 </#macro>
@@ -425,7 +425,7 @@
 			<#else>
 				<#local title><#compress>
 					<#list stageInfo.progress as progress>
-						<@workflowMessage progress.progress.messageCode /> (<@fmt.p progress.count "student" />)<#if progress_has_next>, </#if>
+						<@workflowMessage progress.progress.messageCode /> (${progress.count})<#if progress_has_next>, </#if>
 					</#list>
 				</#compress></#local>
 			</#if>
@@ -442,7 +442,7 @@
 </#macro>
 
 <#-- Progress bar for a single student in a marking workflow  -->
-<#macro individual_stage_progress_bar markerStages>
+<#macro individual_stage_progress_bar markerStages assignment student>
 	<div class="stage-progress-bar">
 		<#list markerStages as progress>
 			<#local stage = progress.stage />
@@ -457,14 +457,14 @@
 				<#local icon = 'fa-dot-circle-o' />
 			</#if>
 
-			<#local title><@workflowMessage progress.stage.actionCode /></#local>
+			<#local title><@workflowMessage progress.stage.actionCode assignment student /></#local>
 			<#if progress_index gt 0>
-				<div class="bar bar-${state} use-tooltip" title="${title}" data-html="true" data-container="body"></div>
+				<div class="bar bar-${state} use-tooltip" title="${title?html}" data-html="true" data-container="body"></div>
 			</#if>
-			<#local title><@workflowMessage progress.messageCode /></#local>
+			<#local title><@workflowMessage progress.messageCode assignment student /></#local>
 			<span class="fa-stack">
 				<i class="fa fa-stack-1x fa-circle fa-inverse"></i>
-				<i class="fa fa-stack-1x ${icon} text-${state} use-tooltip" title="${title}" data-html="true" data-container="body"></i>
+				<i class="fa fa-stack-1x ${icon} text-${state} use-tooltip" title="${title?html}" data-html="true" data-container="body"></i>
 			</span>
 		</#list>
 	</div>
@@ -493,7 +493,7 @@
 						<li><@workflowMessage stage.progress[0].progress.messageCode /></li>
 					<#else>
 						<#list stage.progress as progress>
-							<li><@workflowMessage progress.progress.messageCode /> (<@fmt.p progress.count "student" />)</li>
+							<li><@workflowMessage progress.progress.messageCode /> (${progress.count})</li>
 						</#list>
 					</#if>
 				</#list>
@@ -556,7 +556,7 @@
 		>
 			<div class="clearfix">
 				<div class="btn-group section-manage-button">
-					<a class="btn btn-default btn-sm dropdown-toggle" data-toggle="dropdown">Manage this module <span class="caret"></span></a>
+					<a class="btn btn-primary btn-sm dropdown-toggle" data-toggle="dropdown">Manage this module <span class="caret"></span></a>
 					<ul class="dropdown-menu pull-right">
 						<li>
 							<#local perms_url><@routes.admin.moduleperms module /></#local>
@@ -618,6 +618,8 @@
 
 <#macro admin_assignment_info info>
 	<#local assignment = info.assignment />
+	<#local studentCount = assignment.membershipInfo.totalCount />
+
 	<div class="item-info admin-assignment-${assignment.id}">
 		<div class="clearfix">
 			<div class="pull-right">
@@ -627,7 +629,7 @@
 					<#local edit_url><@routes.coursework.assignmentedit assignment /></#local>
 				</#if>
 				<@fmt.permission_button
-					classes='btn btn-default btn-xs'
+					classes='btn btn-primary btn-xs'
 					permission='Assignment.Update'
 					scope=assignment
 					action_descr='edit assignment properties'
@@ -710,7 +712,7 @@
 									scope=assignment
 									action_descr=ext_caption?lower_case
 									href=ext_url>
-										<strong>Extension requests:</strong> ${assignment.countUnapprovedExtensions}
+										<strong>Extension<#if assignment.module.adminDepartment.allowExtensionRequests> request</#if>s:</strong> ${assignment.countUnapprovedExtensions}
 								</@fmt.permission_button>
 							</li>
 						</#if>
@@ -736,18 +738,16 @@
 							<li><strong>Closed:</strong> <span class="use-tooltip" title="<@fmt.dateToWeek assignment.closeDate />" data-html="true"><@fmt.date date=assignment.closeDate /></span></li>
 						</#if>
 
-						<#list info.stages as stage>
+						<#list info.stages as category>
 							<li>
-								<strong><@workflowMessage stage.stage.actionCode /></strong>:
-								<#if stage.progress?size == 1>
-									<@workflowMessage stage.progress[0].progress.messageCode /> (<@fmt.p stage.progress[0].count "student" />)
-								<#else>
-									<ul>
+								<strong><@workflowMessage category.category.code /></strong>:
+								<ul>
+									<#list category.stages as stage>
 										<#list stage.progress as progress>
-											<li><@workflowMessage progress.progress.messageCode /> (<@fmt.p progress.count "student" />)</li>
+											<li><@workflowMessage progress.progress.messageCode /> (${progress.count} of ${studentCount})</li>
 										</#list>
-									</ul>
-								</#if>
+									</#list>
+								</ul>
 							</li>
 						</#list>
 					</ul>
@@ -769,6 +769,8 @@
 								<#-- Complete? -->
 								<#if assignment.hasReleasedFeedback>
 									<li><a href="<@routes.cm2.assignmentAudit assignment />">View audit</a></li>
+								<#elseif assignment.openEnded && assignment.collectSubmissions && studentCount gt 0>
+									<li>Assignment needs submitting (${studentCount} of ${studentCount})</li>
 								<#else>
 									<li>Awaiting feedback</li>
 								</#if>
@@ -776,7 +778,7 @@
 						<#else>
 							<#list info.nextStages as nextStage>
 								<li>
-									<#local nextStageDescription><@workflowMessage nextStage.stage.actionCode /> (<@fmt.p nextStage.count "student" />)</#local>
+									<#local nextStageDescription><@workflowMessage nextStage.stage.actionCode /> (${nextStage.count} of ${studentCount})</#local>
 									<#if nextStage.url??>
 										<a href="${nextStage.url}">${nextStageDescription}</a>
 									<#else>
@@ -792,9 +794,26 @@
 	</div>
 </#macro>
 
-<#macro workflowMessage code><#compress>
+<#macro workflowMessage code assignment="" student=""><#compress>
+	<#local studentName = "student" />
+	<#local firstMarkerName = "first marker" />
+	<#local secondMarkerName = "second marker" />
+	<#if assignment?has_content && student?has_content>
+		<#local studentName><span data-profile="${student.warwickId!(student.userId)}"><#if assignment.module.adminDepartment.showStudentName>${student.fullName}<#else>${student.warwickId!(student.userId)}</#if></span></#local>
+
+		<#local firstMarker = assignment.getStudentsFirstMarker(student.userId)!"" />
+		<#if firstMarker?has_content>
+			<#local firstMarkerName><span data-profile="${firstMarker.warwickId!(firstMarker.userId)}">${firstMarker.fullName}</span></#local>
+		</#if>
+
+		<#local secondMarker = assignment.getStudentsSecondMarker(student.userId)!"" />
+		<#if secondMarker?has_content>
+			<#local secondMarkerName><span data-profile="${secondMarker.warwickId!(secondMarker.userId)}">${secondMarker.fullName}</span></#local>
+		</#if>
+	</#if>
+
 	<#local text><@spring.message code=code /></#local>
-	${(text!"")?replace("[STUDENT]", "student")?replace("[FIRST_MARKER]", "first marker")?replace("[SECOND_MARKER]", "second marker")}
+	${(text!"")?replace("[STUDENT]", studentName)?replace("[FIRST_MARKER]", firstMarkerName)?replace("[SECOND_MARKER]", secondMarkerName)}
 </#compress></#macro>
 
 <#-- Common template parts for use in other submission/coursework templates. -->
@@ -861,19 +880,11 @@
 </#macro>
 
 <#macro uniIdSafeMarkerLink marker role>
-	<#if marker.warwickId?has_content>
-		- <a href="<@routes.coursework.listmarkersubmissions assignment marker />">Proxy as this ${role}</a>
-	<#else>
-		- Cannot proxy as this marker as they have no University ID
-	</#if>
+	- <a href="<@routes.coursework.listmarkersubmissions assignment marker />">Proxy as this ${role}</a>
 </#macro>
 
 <#macro uniIdSafeCM2MarkerLink stage marker student>
-	<#if marker.warwickId?has_content>
 	- <a href="<@routes.cm2.listmarkersubmissions assignment marker />#${stage.name}-${student.userId}">Proxy</a>
-	<#else>
-	- Cannot proxy as this marker as they have no University ID
-	</#if>
 </#macro>
 
 <#macro student_workflow_details student>
@@ -901,9 +912,6 @@
 						<#list submission.allAttachments as attachment>
 							<#if attachment.originalityReportReceived>
 								<@components.originalityReport attachment />
-							</#if>
-							<#if can.do("Submission.ViewUrkundPlagiarismStatus", submission) && attachment.urkundResponseReceived>
-								<@components.urkundOriginalityReport attachment />
 							</#if>
 						</#list>
 					</#if>
@@ -1139,8 +1147,10 @@
 			<#if currentFeedback?? && currentFeedback?has_content>
 				<#if currentStage?? && currentStage.populateWithPreviousFeedback>
 					<div class="form-group">
-						<label class="radio-inline"><input type="radio" name="changesState" <#if !currentFeedback.hasBeenModified>checked</#if> value="approve" />Approve</label>
-						<label class="radio-inline"><input type="radio" name="changesState" <#if currentFeedback.hasBeenModified>checked</#if> value="make-changes" >Make changes</label>
+						<form>
+							<label class="radio-inline"><input type="radio" name="changesState" <#if !currentFeedback.hasBeenModified>checked</#if> value="approve" />Approve</label>
+							<label class="radio-inline"><input type="radio" name="changesState" <#if currentFeedback.hasBeenModified>checked</#if> value="make-changes" >Make changes</label>
+						</form>
 					</div>
 				<#else>
 					<a class="copy-feedback btn btn-default long-running use-tooltip" href="#">Copy comments and files</a>

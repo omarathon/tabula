@@ -18,14 +18,13 @@
 				<@bs3form.errors path="allowExtensionRequests" />
 			</@bs3form.labelled_form_group>
 			<div id="request-extension-fields" style="display:none;">
-				<@bs3form.labelled_form_group>
+				<@bs3form.labelled_form_group "" "Summary of extension guidelines">
 					<@f.textarea path="extensionGuidelineSummary" cssClass="form-control text big-textarea" maxlength=4000 />
-					Summary of extension guidelines:
 					<div class="help-block">This should be a short outline of the department's extension guidelines. Use the field below to provide
 						a link to the full guidelines. You can leave this blank if you wish. You can make a new paragraph by
 						leaving a blank line (i.e. press Enter twice).</div>
 				</@bs3form.labelled_form_group>
-				<@bs3form.labelled_form_group path="extensionGuidelineLink" labelText="Link to full extension guidelines:">
+				<@bs3form.labelled_form_group path="extensionGuidelineLink" labelText="Link to full extension guidelines">
 					<@f.input path="extensionGuidelineLink" cssClass="form-control text big-input" />
 					<div class="help-block">
 					Copy the URL of a page or file containing your full extension guidelines and paste it here.

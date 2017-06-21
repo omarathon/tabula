@@ -1,16 +1,15 @@
 package uk.ac.warwick.tabula.commands.cm2
 
 import org.joda.time.{DateTime, DateTimeConstants, LocalDate}
-import uk.ac.warwick.tabula.data.model.forms.Extension
+import uk.ac.warwick.tabula._
+import uk.ac.warwick.tabula.commands.cm2.CourseworkHomepageCommand.{CourseworkHomepageMarkerInformation, MarkerAssignmentInfo}
 import uk.ac.warwick.tabula.data.model._
+import uk.ac.warwick.tabula.data.model.forms.Extension
+import uk.ac.warwick.tabula.data.model.markingworkflow.DoubleWorkflow
+import uk.ac.warwick.tabula.helpers.cm2.AssignmentSubmissionStudentInfo
 import uk.ac.warwick.tabula.permissions.Permissions
 import uk.ac.warwick.tabula.services._
 import uk.ac.warwick.tabula.services.cm2.{CM2WorkflowProgressService, CM2WorkflowProgressServiceComponent, CM2WorkflowStage, CM2WorkflowStages}
-import uk.ac.warwick.tabula._
-import uk.ac.warwick.tabula.commands.cm2.CourseworkHomepageCommand.{CourseworkHomepageMarkerInformation, MarkerAssignmentInfo}
-import uk.ac.warwick.tabula.data.model.markingworkflow.{CM2MarkingWorkflow, DoubleWorkflow}
-import uk.ac.warwick.tabula.helpers.cm2.AssignmentSubmissionStudentInfo
-import uk.ac.warwick.tabula.services.cm2.CM2WorkflowStages.{CM2MarkingWorkflowStage, CM2ReleaseForMarking, CheckForPlagiarism}
 
 import scala.collection.immutable.SortedMap
 
@@ -24,7 +23,6 @@ class CourseworkHomepageCommandTest extends TestBase with Mockito {
 			val assessmentService: AssessmentService = smartMock[AssessmentService]
 			val assessmentMembershipService: AssessmentMembershipService = smartMock[AssessmentMembershipService]
 
-			val academicYear = AcademicYear(2016)
 			val user: CurrentUser = currentUser
 		}
 	}
@@ -111,8 +109,6 @@ class CourseworkHomepageCommandTest extends TestBase with Mockito {
 	private trait AdminCommandFixture {
 		val command = new CourseworkHomepageAdminDepartments with CourseworkHomepageCommandState with ModuleAndDepartmentServiceComponent {
 			val moduleAndDepartmentService: ModuleAndDepartmentService = smartMock[ModuleAndDepartmentService]
-
-			val academicYear = AcademicYear(2016)
 			val user: CurrentUser = currentUser
 		}
 	}
@@ -147,7 +143,6 @@ class CourseworkHomepageCommandTest extends TestBase with Mockito {
 			val cm2MarkingWorkflowService: CM2MarkingWorkflowService = smartMock[CM2MarkingWorkflowService]
 			val workflowProgressService: CM2WorkflowProgressService = smartMock[CM2WorkflowProgressService]
 
-			val academicYear = AcademicYear(2016)
 			val user: CurrentUser = currentUser
 
 			override def workflowStudentsFor(assignment: Assignment): Seq[AssignmentSubmissionStudentInfo] = Nil

@@ -16,9 +16,9 @@ import uk.ac.warwick.tabula.permissions.Permissions
 import uk.ac.warwick.userlookup.User
 
 
-object OnlineFeedbackFormCommand {
+object OldOnlineFeedbackFormCommand {
 	def apply(module: Module, assignment: Assignment, student: User, marker: User, submitter: CurrentUser, gradeGenerator: GeneratesGradesFromMarks) =
-		new OnlineFeedbackFormCommand(module, assignment, student, marker, submitter, gradeGenerator)
+		new OldOnlineFeedbackFormCommand(module, assignment, student, marker, submitter, gradeGenerator)
 			with ComposableCommand[Feedback]
 			with OnlineFeedbackFormPermissions
 			with AutowiringFeedbackServiceComponent
@@ -31,7 +31,7 @@ object OnlineFeedbackFormCommand {
 		}
 }
 
-abstract class OnlineFeedbackFormCommand(
+abstract class OldOnlineFeedbackFormCommand(
 	module: Module,
 	assignment: Assignment,
 	student: User,

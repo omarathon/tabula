@@ -5,8 +5,13 @@
 <#macro autoGradeOnline gradePath gradeLabel markPath markingId generateUrl>
 	<#local labelText>${gradeLabel} <@fmt.help_popover id="auto-grade-${markingId}-help" content="The grades available depends on the mark entered and the SITS mark scheme in use" /></#local>
 	<@bs3form.labelled_form_group path=gradePath labelText=labelText>
-		<@f.input path="${gradePath}" cssClass="form-control auto-grade" id="auto-grade-${markingId}" />
-		<select name="${gradePath}" class="form-control" disabled style="display:none;"></select>
+		<div class="input-group">
+			<@f.input path="${gradePath}" cssClass="form-control auto-grade" id="auto-grade-${markingId}" />
+		</div>
+
+		<div class="input-group">
+			<select name="${gradePath}" class="form-control" disabled style="display:none;"></select>
+		</div>
 	</@bs3form.labelled_form_group>
 	<script>
 		jQuery(function($){
@@ -55,6 +60,7 @@
 	</script>
 </#macro>
 
+<#-- used in exams -->
 <#macro marksForm assignment templateUrl formUrl commandName cancelUrl generateUrl seatNumberMap="" showAddButton=true>
 	<div id="batch-feedback-form">
 		<h1>Submit marks for ${assignment.name}</h1>
@@ -469,4 +475,11 @@
 	</#if>
 </#macro>
 
+<#function extractId user>
+	<#if !user.warwickId?has_content || user.getExtraProperty("urn:websignon:usersource")! == 'WarwickExtUsers'>
+		<#return user.userId />
+	<#else>
+		<#return user.warwickId! />
+	</#if>
+</#function>
 </#escape>

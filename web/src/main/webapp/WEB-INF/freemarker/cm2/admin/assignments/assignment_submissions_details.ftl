@@ -14,6 +14,7 @@
 	<#assign actionUrl><@routes.cm2.assignmentsubmissions assignment mode/></#assign>
 	<@f.form method="post" action=actionUrl cssClass="dirty-check">
 		<@components.assignment_wizard 'submissions' assignment.module assignmentEditMode assignment />
+		<#assign department = assignment.module.adminDepartment />
 		<#include "_submissions_fields.ftl" />
         <div class="fix-footer">
 			<#if mode == 'new'>

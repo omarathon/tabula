@@ -93,7 +93,7 @@ trait EditExtensionCommandState {
 
 	var extension: Extension =_
 
-	final val ApprovalAction = "Grant"
+	final val ApprovalAction = "Approve"
 	final val RejectionAction = "Reject"
 	final val RevocationAction = "Revoke"
 	final val UpdateApprovalAction = "Update"

@@ -9,13 +9,7 @@ TODO grab values from the Routes object in code, as that's pretty equivalent and
 	<@url context=context page=page />
 </#macro>
 
-<#macro home academicYear="">
-	<#if academicYear?has_content>
-		<@_u page="/${academicYear.startYear?c}" />
-	<#else>
-		<@_u page="/" />
-	</#if>
-</#macro>
+<#macro home><@_u page="/" /></#macro>
 
 <#macro depthome module academicYear="">
 	<#if academicYear?has_content>
@@ -88,7 +82,7 @@ TODO grab values from the Routes object in code, as that's pretty equivalent and
 		<@_u page="/admin/department/${department.code}/setup-assignments" />
 	</#if>
 </#macro>
-<#macro assignmentSharedOptions><@_u page="/admin/shared-options" /></#macro>
+<#macro assignmentSharedOptions department><@_u page="/admin/department/${department.code}/shared-options" /></#macro>
 
 <#macro copy_assignments_previous department academicYear="">
 	<#if academicYear?has_content>
@@ -106,6 +100,7 @@ TODO grab values from the Routes object in code, as that's pretty equivalent and
 <#macro feedbackAudit assignment studentid><@_u page="/admin/assignments/${assignment.id}/audit/${studentid}"/></#macro>
 <#macro plagiarismInvestigation assignment><@_u page='/admin/assignments/${assignment.id}/submissionsandfeedback/mark-plagiarised'/></#macro>
 <#macro onlinefeedback assignment><@_u page="/admin/assignments/${assignment.id}/feedback/online"/></#macro>
+<#macro onlinefeedbackform assignment student><@_u page="/admin/assignments/${assignment.id}/feedback/online/${student.userId}"/></#macro>
 <#macro feedbackAdjustment assignment><@_u page="/admin/assignments/${assignment.id}/feedback/adjustments"/></#macro>
 
 <#macro feedbacktemplates department><@_u page="/admin/department/${department.code}/settings/feedback-templates" /></#macro>
@@ -132,21 +127,23 @@ TODO grab values from the Routes object in code, as that's pretty equivalent and
 <#macro turnitinLtiReport assignment attachment><@_u page="/admin/assignments/${assignment.id}/turnitin/lti-report/${attachment.id}"/></#macro>
 <#macro turnitinReport assignment attachment><@_u page="/admin/assignments/${assignment.id}/turnitin/report/${attachment.id}"/></#macro>
 
-<#macro listmarkersubmissions assignment marker><@_u page="/admin/assignments/${assignment.id}/marker/${marker.warwickId}"/></#macro>
+<#macro listmarkersubmissions assignment marker><@_u page="/admin/assignments/${assignment.id}/marker/${marker.userId}"/></#macro>
 
-<#macro markerUploadFeedback assignment stage marker><@_u page="/admin/assignments/${assignment.id}/marker/${marker.warwickId}/${stage.name}/feedback"/></#macro>
-<#macro markerUploadMarks assignment stage marker><@_u page="/admin/assignments/${assignment.id}/marker/${marker.warwickId}/${stage.name}/marks"/></#macro>
+<#macro markerUploadFeedback assignment marker><@_u page="/admin/assignments/${assignment.id}/marker/${marker.userId}/feedback"/></#macro>
+<#macro markerUploadMarks assignment marker><@_u page="/admin/assignments/${assignment.id}/marker/${marker.userId}/marks"/></#macro>
+<#macro markerUploadMarksTemplate assignment marker><@_u page="/admin/assignments/${assignment.id}/marker/${marker.userId}/marks-template"/></#macro>
 
-<#macro markerOnlineFeedback assignment stage marker student><@_u page="/admin/assignments/${assignment.id}/marker/${marker.warwickId}/${stage.name}/feedback/online/${student.warwickId}"/></#macro>
-<#macro markingCompleted assignment stage marker><@_u page="/admin/assignments/${assignment.id}/marker/${marker.warwickId}/${stage.name}/marking-completed"/></#macro>
+<#macro markerOnlineFeedback assignment stage marker student><@_u page="/admin/assignments/${assignment.id}/marker/${marker.userId}/${stage.name}/feedback/online/${student.userId}"/></#macro>
+<#macro markingCompleted assignment stage marker><@_u page="/admin/assignments/${assignment.id}/marker/${marker.userId}/${stage.name}/marking-completed"/></#macro>
 <#macro releaseForMarking assignment><@_u page="/admin/assignments/${assignment.id}/submissionsandfeedback/release-submissions" /></#macro>
 
-<#macro downloadMarkerFeedbackOne assignment marker markerFeedback attachment><@_u page="/admin/assignments/${assignment.id}/marker/${marker.warwickId}/feedback/download/${markerFeedback.id}/attachment/${attachment.name?url}"/></#macro>
-<#macro downloadMarkerFeedbackAll assignment marker markerFeedback zipName><@_u page="/admin/assignments/${assignment.id}/marker/${marker.warwickId}/feedback/download/${markerFeedback.id}/attachments/${zipName}.zip"/></#macro>
-<#macro downloadMarkerSubmissions assignment marker><@_u page="/admin/assignments/${assignment.id}/marker/${marker.warwickId}/submissions.zip"/></#macro>
+<#macro downloadMarkerFeedbackOne assignment marker markerFeedback attachment><@_u page="/admin/assignments/${assignment.id}/marker/${marker.userId}/feedback/download/${markerFeedback.id}/attachment/${attachment.name?url}"/></#macro>
+<#macro downloadMarkerFeedbackAll assignment marker markerFeedback zipName><@_u page="/admin/assignments/${assignment.id}/marker/${marker.userId}/feedback/download/${markerFeedback.id}/attachments/${zipName}.zip"/></#macro>
+<#macro downloadMarkerFeedbackStage assignment marker stage><@_u page="/admin/assignments/${assignment.id}/marker/${marker.userId}/${stage.name}/feedback.zip" /></#macro>
+<#macro downloadMarkerSubmissions assignment marker><@_u page="/admin/assignments/${assignment.id}/marker/${marker.userId}/submissions.zip"/></#macro>
+<#macro downloadMarkerSubmissionsPdf assignment marker><@_u page="/admin/assignments/${assignment.id}/marker/${marker.userId}/submissions.pdf"/></#macro>
 
-<#macro markerTemplatesZip assignment><@_u page="/admin/assignments/${assignment.id}/marker-templates.zip" /></#macro>
-<#macro generateGradesForMarks assignment><@_u page="/admin/assignments/${assignment.id}/generate-grade"/></#macro>
+<#macro markerTemplatesZip assignment marker><@_u page="/admin/assignments/${assignment.id}/marker/${marker.userId}/marker-templates.zip" /></#macro>
 
 <#macro assignmentsubmissionsandfeedback assignment><@_u page="/admin/assignments/${assignment.id}"/></#macro>
 <#macro assignmentsubmissionsandfeedbacktable assignment><@_u page="/admin/assignments/${assignment.id}/table"/></#macro>
@@ -167,6 +164,7 @@ TODO grab values from the Routes object in code, as that's pretty equivalent and
 <#macro submitToTurnitinStatus assignment><@_u page="/admin/assignments/${assignment.id}/turnitin/status"/></#macro>
 
 <#macro feedbackBulkAdjustment assignment><@_u page="/admin/assignments/${assignment.id}/feedback/bulk-adjustment"/></#macro>
+<#macro feedbackBulkAdjustmentTemplate assignment><@_u page="/admin/assignments/${assignment.id}/feedback/bulk-adjustment/template"/></#macro>
 <#macro feedbackAdjustmentForm assignment studentid><@_u page="/admin/assignments/${assignment.id}/feedback/adjustments/${studentid}"/></#macro>
 <#macro generateGradesForMarks assignment><@_u page="/admin/assignments/${assignment.id}/generate-grade"/></#macro>
 
@@ -188,3 +186,5 @@ TODO grab values from the Routes object in code, as that's pretty equivalent and
 <#macro addFeedback assignment><@_u page="/admin/assignments/${assignment.id}/feedback/batch" /></#macro>
 
 <#macro feedbackDownload feedback attachmentExtension><@_u page="/admin/assignments/${feedback.assignment.id}/feedback/download/${feedback.id}/feedback-${feedback.studentIdentifier}.${attachmentExtension}" /></#macro>
+
+<#macro uploadmarkerfeedback assignment marker><@_u page="/admin/assignments/${assignment.id}/marker/${marker.userId}/feedback"/></#macro>

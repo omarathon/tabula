@@ -80,6 +80,7 @@ subprojects {
         maven { url 'http://repo.spring.io/snapshot' }
         maven { url "https://oss.sonatype.org/content/repositories/snapshots" }
         maven { url "https://repository.apache.org/content/repositories/snapshots" }
+        maven { url "http://dl.bintray.com/scalaz/releases" }
         mavenLocal()
     }
 

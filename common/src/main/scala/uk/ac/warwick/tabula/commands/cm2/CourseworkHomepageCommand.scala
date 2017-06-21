@@ -15,7 +15,7 @@ import uk.ac.warwick.tabula.services._
 import uk.ac.warwick.tabula.services.cm2.CM2WorkflowStages.{CM1ReleaseForMarking, CM2ReleaseForMarking}
 import uk.ac.warwick.tabula.services.cm2.{AutowiringCM2WorkflowProgressServiceComponent, CM2WorkflowProgressServiceComponent}
 import uk.ac.warwick.tabula.system.permissions.PubliclyVisiblePermissions
-import uk.ac.warwick.tabula.{AcademicYear, CurrentUser, WorkflowStage}
+import uk.ac.warwick.tabula.{CurrentUser, WorkflowStage}
 import uk.ac.warwick.userlookup.User
 
 import scala.collection.JavaConverters._
@@ -105,8 +105,8 @@ object CourseworkHomepageCommand {
 
 	val AdminPermission = Permissions.Module.ManageAssignments
 
-	def apply(academicYear: AcademicYear, user: CurrentUser): Command =
-		new CourseworkHomepageCommandInternal(academicYear, user)
+	def apply(user: CurrentUser): Command =
+		new CourseworkHomepageCommandInternal(user)
 			with ComposableCommand[Result]
 			with AutowiringModuleAndDepartmentServiceComponent
 			with AutowiringAssessmentServiceComponent
@@ -119,11 +119,10 @@ object CourseworkHomepageCommand {
 }
 
 trait CourseworkHomepageCommandState {
-	def academicYear: AcademicYear
 	def user: CurrentUser
 }
 
-class CourseworkHomepageCommandInternal(val academicYear: AcademicYear, val user: CurrentUser) extends CommandInternal[Result]
+class CourseworkHomepageCommandInternal(val user: CurrentUser) extends CommandInternal[Result]
 	with CourseworkHomepageCommandState
 	with CourseworkHomepageHomeDepartment
 	with CourseworkHomepageStudentAssignments
@@ -194,7 +193,7 @@ trait CourseworkHomepageStudentAssignments extends TaskBenchmarking {
 			studentUpcomingAssignments,
 			studentActionRequiredAssignments,
 			studentNoActionRequiredAssignments,
-			studentCompletedAssignments.filter { _.assignment.academicYear == academicYear }
+			studentCompletedAssignments
 		)
 	}
 
@@ -324,7 +323,7 @@ trait CourseworkHomepageMarkerAssignments extends TaskBenchmarking {
 			markerUpcomingAssignments,
 			markerActionRequiredAssignments,
 			markerNoActionRequiredAssignments,
-			markerCompletedAssignments.filter { _.assignment.academicYear == academicYear }
+			markerCompletedAssignments
 		)
 	}
 
@@ -378,7 +377,7 @@ trait CourseworkHomepageMarkerAssignments extends TaskBenchmarking {
 
 	private lazy val allMarkerAssignments: Seq[MarkerAssignmentInfo] = benchmarkTask("Get assignments for marking") {
 		(allCM1MarkerAssignments ++ allCM2MarkerAssignments)
-			.sortBy(info => (info.assignment.openEnded, info.assignment.closeDate))
+			.sortBy(info => (info.assignment.openEnded, Option(info.assignment.closeDate)))
 	}
 
 }

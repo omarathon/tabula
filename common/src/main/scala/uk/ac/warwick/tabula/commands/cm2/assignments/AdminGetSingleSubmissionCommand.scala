@@ -1,10 +1,11 @@
 package uk.ac.warwick.tabula.commands.cm2.assignments
 
+import uk.ac.warwick.tabula.ItemNotFoundException
 import uk.ac.warwick.tabula.commands._
 import uk.ac.warwick.tabula.commands.cm2.assignments.AdminGetSingleSubmissionCommand._
 import uk.ac.warwick.tabula.data.model.{Assignment, Submission}
 import uk.ac.warwick.tabula.permissions._
-import uk.ac.warwick.tabula.services.fileserver.RenderableFile
+import uk.ac.warwick.tabula.services.fileserver.{RenderableAttachment, RenderableFile}
 import uk.ac.warwick.tabula.services.{AutowiringZipServiceComponent, ZipServiceComponent}
 import uk.ac.warwick.tabula.system.permissions.{PermissionsChecking, PermissionsCheckingMethods, RequiresPermissionsChecking}
 
@@ -14,11 +15,18 @@ object AdminGetSingleSubmissionCommand {
 
 	val AdminPermission = Permissions.Submission.Read
 
-	def apply(assignment: Assignment, submission: Submission) =
-		new AdminGetSingleSubmissionCommandInternal(assignment, submission)
+	def single(assignment: Assignment, submission: Submission, filename: String) =
+		new AdminGetSingleSubmissionFileCommandInternal(assignment, submission, filename)
 			with ComposableCommand[Result]
 			with AdminGetSingleSubmissionCommandPermissions
-			with AdminGetSingleSubmissionCommandDescription
+			with AdminGetSingleSubmissionFileCommandDescription
+			with ReadOnly
+
+	def zip(assignment: Assignment, submission: Submission) =
+		new AdminGetSingleSubmissionAsZipCommandInternal(assignment, submission)
+			with ComposableCommand[Result]
+			with AdminGetSingleSubmissionCommandPermissions
+			with AdminGetSingleSubmissionAsZipCommandDescription
 			with ReadOnly
 			with AutowiringZipServiceComponent
 }
@@ -28,7 +36,18 @@ trait AdminGetSingleSubmissionCommandState {
 	def submission: Submission
 }
 
-class AdminGetSingleSubmissionCommandInternal(val assignment: Assignment, val submission: Submission)
+trait AdminGetSingleSubmissionFilenameCommandState extends AdminGetSingleSubmissionCommandState {
+	def filename: String
+}
+
+class AdminGetSingleSubmissionFileCommandInternal(val assignment: Assignment, val submission: Submission, val filename: String)
+	extends CommandInternal[Result] with AdminGetSingleSubmissionFilenameCommandState {
+
+	override def applyInternal(): RenderableFile =
+		submission.allAttachments.find(_.name == filename).map(new RenderableAttachment(_)).getOrElse { throw new ItemNotFoundException() }
+}
+
+class AdminGetSingleSubmissionAsZipCommandInternal(val assignment: Assignment, val submission: Submission)
 	extends CommandInternal[Result] with AdminGetSingleSubmissionCommandState {
 	self: ZipServiceComponent =>
 
@@ -44,7 +63,19 @@ trait AdminGetSingleSubmissionCommandPermissions extends RequiresPermissionsChec
 	}
 }
 
-trait AdminGetSingleSubmissionCommandDescription extends Describable[Result] {
+trait AdminGetSingleSubmissionFileCommandDescription extends Describable[Result] {
+	self: AdminGetSingleSubmissionFilenameCommandState =>
+
+	override lazy val eventName: String = "AdminGetSingleSubmission"
+
+	override def describe(d: Description): Unit =
+		d.submission(submission).properties(
+			"studentId" -> submission.studentIdentifier,
+			"filename" -> filename
+		)
+}
+
+trait AdminGetSingleSubmissionAsZipCommandDescription extends Describable[Result] {
 	self: AdminGetSingleSubmissionCommandState =>
 
 	override lazy val eventName: String = "AdminGetSingleSubmission"

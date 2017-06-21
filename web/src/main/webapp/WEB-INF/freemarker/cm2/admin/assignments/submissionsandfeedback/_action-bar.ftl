@@ -151,7 +151,8 @@
 						</a>
 					</div>
 				</#if>
-			<#if assignment.collectSubmissions && features.markingWorkflows>
+
+				<#if (assignment.collectSubmissions || assignment.cm2Assignment) && features.markingWorkflows>
 					<#if results.mustReleaseForMarking!false>
 						<div class="btn-group">
 							<a class="btn btn-default dropdown-toggle" data-toggle="dropdown">
@@ -277,7 +278,7 @@
 							<#if features.feedbackTemplates && assignment.hasFeedbackTemplate>
 								<li>
 									<a class="long-running use-tooltip"
-										 href="<@route.cm2.downloadFeedbackTemplates assignment/>"
+										 href="<@routes.cm2.downloadFeedbackTemplates assignment/>"
 										 title="Download feedback templates for all students as a ZIP file."
 										 data-container="body">Download templates
 									</a>
@@ -342,7 +343,7 @@
 								action_descr='download feedback'
 								classes='form-post'
 								href=download_url
-								tooltip='Download the feedback files for the selected students as a ZIP file'>
+								tooltip='Download feedback files for selected students as ZIP file'>
 									Download feedback
 							</@fmt.permission_button>
 						</li>
@@ -352,10 +353,10 @@
 								<@fmt.permission_button
 									permission='AssignmentFeedback.Publish'
 									scope=assignment
-									action_descr='release feedback to students'
+									action_descr='publish feedback to students'
 									classes='form-post'
 									href=publishfeedbackurl
-									tooltip='Release feedback to students'>
+									tooltip='Publish feedback to selected students'>
 										Publish feedback
 								</@fmt.permission_button>
 							</li>
@@ -364,8 +365,14 @@
 						</#if>
 						<li class="must-have-selected">
 							<#assign deletefeedback_url><@routes.cm2.deleteSubmissionsAndFeedback assignment/></#assign>
-							<@fmt.permission_button permission='AssignmentFeedback.Manage' scope=assignment action_descr='delete feedback' classes="form-post" href=deletefeedback_url tooltip='Delete feedback'>
-								Delete feedback
+							<@fmt.permission_button
+								permission='AssignmentFeedback.Manage'
+								scope=assignment
+								action_descr='delete feedback'
+								classes='form-post'
+								href=deletefeedback_url
+								tooltip='Delete feedback for selected students'>
+									Delete feedback
 							</@fmt.permission_button>
 						</li>
 
@@ -376,11 +383,10 @@
 									permission='AssignmentFeedback.Publish'
 									scope=assignment
 									action_descr='upload feedback to SITS'
-									tooltip='Upload mark and grade to SITS'
 									classes='form-post'
 									href=uploadToSitsUrl
-								>
-									Upload to SITS
+									tooltip='Upload mark and grade to SITS for selected students'>
+										Upload to SITS
 								</@fmt.permission_button>
 							</li>
 						</#if>
@@ -389,19 +395,19 @@
 	</div>
 			<div class="btn-group">
 			<div class="btn-group">
-					<a class="btn btn-default dropdown-toggle" data-toggle="dropdown">
-						Save As
+					<a class="btn btn-primary dropdown-toggle" data-toggle="dropdown">
+						Save as
 						<span class="caret"></span>
 					</a>
 					<ul class="dropdown-menu">
 						<li>
-							<a class="long-running form-post include-filter" title="Export submissions info as XLSX, for advanced users." href="<@routes.cm2.exportXlsx assignment/>">Excel</a>
+							<a class="long-running form-post include-filter" title="Export submissions information as XLSX" href="<@routes.cm2.exportXlsx assignment/>">Excel</a>
 						</li>
 						<li>
-							<a class="long-running form-post include-filter" title="Export submissions info as CSV, for advanced users." href="<@routes.cm2.exportCsv assignment/>">Text (CSV)</a>
+							<a class="long-running form-post include-filter" title="Export submissions information as CSV" href="<@routes.cm2.exportCsv assignment/>">Text (CSV)</a>
 						</li>
 						<li>
-							<a class="long-running form-post include-filter" title="Export submissions info as XML, for advanced users." href="<@routes.cm2.exportXml assignment/>">Text (XML)</a>
+							<a class="long-running form-post include-filter" title="Export submissions information as XML" href="<@routes.cm2.exportXml assignment/>">Text (XML)</a>
 						</li>
 					</ul>
 				</div>

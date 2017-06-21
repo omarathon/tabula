@@ -46,16 +46,6 @@
 		</sscookie>
 		<!-- provider id, as assigned by single sign on -->
 		<providerid>urn:augustus.warwick.ac.uk:tabula:service</providerid>
-		<keystore>
-			<!-- location of the java keystore -->
-			<location>file:/etc/apache2/SSL/augustus.warwick.ac.uk.keystore</location>
-			<!-- password for that keystore -->
-			<password>changeit</password>
-			<!-- keystore alias for the client service machine -->
-			<shire-alias>augustus.warwick.ac.uk</shire-alias>
-			<!-- keystore alias for the single sign on origin machine -->
-			<origin-alias>websignon.warwick.ac.uk</origin-alias>
-		</keystore>
 	</shire>
 	<logout>
 		<location>https://augustus.warwick.ac.uk/sso/logout</location>
@@ -75,4 +65,10 @@
 		<publickey>MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEAm+kWBb/c3RI4w7xW0TUWLk4IlwsH+W3rMC+R2FOKUASBBKm/VzpFU+OXqBLJpqOvwcaCSMrSkT7m5cR6FcxQ4lXwrWla0JUmDasLoqiwmGatfMw5dTNi0nqh3m0jcujdyaq9R4gtwvctv5NwfgDZzOGc/YxWeaPG7CYotQu24bG6nQoGfs9Bg1RxuamoZFvfF7/5hgS1NQ3jXgvUe0yED0utlfY8tITXSAKeu7VU2ullpQpEf4fLR4XElrRM4bmyKgvwCv1sW/hIP4k8hhRyzdyoEzYW+8CQPfBTGCkdsQDqMjFRDJ5z/fNbN1hEzOEqncPRqxd3b0qEKwUcKkrYLwIDAQAB</publickey>
 		<privatekey>MIIEogIBAAKCAQEAm+kWBb/c3RI4w7xW0TUWLk4IlwsH+W3rMC+R2FOKUASBBKm/VzpFU+OXqBLJpqOvwcaCSMrSkT7m5cR6FcxQ4lXwrWla0JUmDasLoqiwmGatfMw5dTNi0nqh3m0jcujdyaq9R4gtwvctv5NwfgDZzOGc/YxWeaPG7CYotQu24bG6nQoGfs9Bg1RxuamoZFvfF7/5hgS1NQ3jXgvUe0yED0utlfY8tITXSAKeu7VU2ullpQpEf4fLR4XElrRM4bmyKgvwCv1sW/hIP4k8hhRyzdyoEzYW+8CQPfBTGCkdsQDqMjFRDJ5z/fNbN1hEzOEqncPRqxd3b0qEKwUcKkrYLwIDAQABAoIBAE4ihhLjkICKPUB7BtdZz3/tQ4jO0nRCjfdcH69WTp7DYxU/LNE+NrhP+xUUNVL5/X8TSP/KBbUc3QKRcM2z02VaxH9jqUuXM7bt3arq93WpH5DHmJQP6JqrMqwR7g4MffovQySyLpzi216DOYEsU/rFprO6vSvA1FRM22HAOSrp6tLGM23CqK6IWchIuCWSLXAjqvAw5LGST6KAacooWWwWAfclXr2t0qsjWfevLs2wZYJ3SF/AaaBNuGimwXfkj5ORwwV+IZBuXxEHFDOHogINqPq59F9uyMfBTEcYgO8gh+nuRBMzwSG1shIv0zP0Qk7JL3UXsoJPy+KZueAwTEECgYEAzcIJoihQ+69IrcpaOlYj9MP+h2dioECmtvgZ1SAV/wuu8lkPou1e0oIjbv86gUbCsk3099/fexlPMYUEJChCooJl3rghb4pHnJpvne0nx9Bvoae8wlib08CJGdUgwWGIChGlkQElb6vHAs4Ygw4ERchxo7IsmO6Gj6+i4wyNYIkCgYEAwfsTTLSaOFmqXSMTsKoWuAT+AAKrBeBtBoLQwoIzF+OI6uZLWi7PV4rON5m9Jzi+ksSyoYctRnqKj8bmPGB/04MZF9h6WK4F+f/HfOe2OD4vPQpFLWepvRf3S6dTP8kls24pTnv2kRunD/x8it/iXQ/YccQb6i3QmJUnsumYFPcCgYAC5qV0H9VkdwgzSxMSl3xSSyEfj5mYYND4626Rzq4Ato105USPK4GWvjb5raeJgxHjqa22gPWJqsWvEQ0J5XdrCyOcjEQMaoqv7o18UIerDYlFYjQLGWy5A5HrR1H66AEfAziuXrHEbUuVAord7iipQzY29KAkV9iV1ggZ42dq4QKBgFgRX4/BpwrSWrByTmw0rJ/bVF441+CRJa6BEbpdVkkQOoc7CxbkjaoXEMzZdbEq6ArGVrtTHdETrXjdOoZK4X3r1SaoV9OPHpOD9tPUdzxNrzCtSv70Q3HgQZwNWZRqBD3UU9iYGzeCMHTnkruSLblGimQMPwgwyLWdciqeNze9AoGAB+MyENckhqXGBppKLG+jkipXIOMliNqdMCGPh/hYAawJqi7ieL846lsSexZwDVp9ljN1Z/UN+2Km3TNELbysCkZZRjTvVwQrHo7WmhDXdrcMfKHNZasRN6d+hx8LIlBrnSGWkZMJNsnAeh/1bsnwIkgVBfVhxdaqN8fJ88fOf3U=</privatekey>
 	</trustedapps>
+
+  <credentials>
+    <certificate>file:/home/mat/.ssl/augustus.warwick.ac.uk.crt</certificate>
+    <key>file:/home/mat/.ssl/augustus.warwick.ac.uk.key</key>
+    <chain>file:/home/mat/.ssl/terena-sha2-ca.crt</chain>
+  </credentials>
 </config>

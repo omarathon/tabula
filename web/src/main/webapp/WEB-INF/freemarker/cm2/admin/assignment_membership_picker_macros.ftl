@@ -212,7 +212,7 @@
 			};
 			// ensure that the close handler for any popovers still work
 			$('.assignment-student-details').on('click', '.close', function() { $enrolment.find('.use-popover').popover('hide') });
-			//TODO - This needs to be replaced with bigLisrt. Leaving it as it is for time being as it is breaking some other things
+
 			$enrolment.find('.table-checkable').bigList({
 				onChange: function(){
 					var $table = $(this).closest('table');
@@ -239,10 +239,7 @@
 			$enrolment.on('click', '.table-checkable tr', function(e) {
 				if ($(e.target).is(':not(input:checkbox)')) {
 					e.preventDefault();
-					var $chk = $(this).find('input:checkbox');
-					if ($chk.length) {
-						$chk.prop('checked', !$chk.prop('checked'));
-					}
+					$(this).find('input:checkbox').trigger('click');
 				}
 			});
 

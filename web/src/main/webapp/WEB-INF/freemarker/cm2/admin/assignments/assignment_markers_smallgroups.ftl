@@ -153,9 +153,13 @@
 			</@f.form>
 		<#else>
 			<div>
-				Not enough tutors are set up as markers in the workflow for Small Group sets for
-				<@fmt.module_name module=assignment.module withFormatting=false /> in ${assignment.academicYear.toString}.
-				You need to make sure that every Small Group has tutors who are also markers.
+				<p>
+					The small group set allocation for <@fmt.module_name module=assignment.module withFormatting=false />
+					in ${assignment.academicYear.toString} could not be imported.
+				</p>
+				The list of markers in the marking workflow for this assignment must include all tutors in the small group
+				set allocation. Return to the <a href="<@routes.cm2.editassignmentdetails assignment />">
+				Assignment details</a> section and ensure that you have added all the small group tutors as markers.
 			</div>
 		</#if>
 	</div>

@@ -53,7 +53,7 @@ class CM2FinaliseFeedbackNotification
 		} else {
 			var users: Seq[User] = Seq()
 
-			val settings = new CM2FinaliseFeedbackNotificationSettings(departmentSettings)
+			val settings = new CM2FinaliseFeedbackNotificationSettings(configuringDepartment.notificationSettings("FinaliseFeedback"))
 			val notifyAllGroups = !settings.notifyFirstNonEmptyGroupOnly.value
 
 			val moduleAndDepartmentService = Wire[ModuleAndDepartmentService]

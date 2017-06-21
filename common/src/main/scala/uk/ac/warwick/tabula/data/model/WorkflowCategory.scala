@@ -16,7 +16,7 @@ object WorkflowCategory {
 
 	case object NoneUse extends WorkflowCategory("N", "None")
 
-	case object SingleUse extends WorkflowCategory("S", "Single Use")
+	case object SingleUse extends WorkflowCategory("S", "Single use")
 
 	case object Reusable extends WorkflowCategory("R", "Reusable")
 

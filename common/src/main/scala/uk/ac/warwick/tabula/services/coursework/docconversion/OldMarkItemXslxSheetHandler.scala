@@ -12,15 +12,15 @@ import uk.ac.warwick.tabula.services.{UserLookupComponent, UserLookupService}
 
 import scala.collection.JavaConversions._
 
-object MarkItemXslxSheetHandler {
+object OldMarkItemXslxSheetHandler {
 	def apply(styles: StylesTable, sst: ReadOnlySharedStringsTable, markItems: JList[MarkItem], userLookupService: UserLookupService) =
-		new MarkItemXslxSheetHandler(styles, sst, markItems) {
+		new OldMarkItemXslxSheetHandler(styles, sst, markItems) {
 			def userLookup = userLookupService
 		}
 }
 
 
-abstract class MarkItemXslxSheetHandler(styles: StylesTable, sst: ReadOnlySharedStringsTable, markItems: JList[MarkItem])
+abstract class OldMarkItemXslxSheetHandler(styles: StylesTable, sst: ReadOnlySharedStringsTable, markItems: JList[MarkItem])
 	extends AbstractXslxSheetHandler(styles, sst, markItems) with SheetContentsHandler with Logging with UserLookupComponent {
 
 	override def newCurrentItem = new MarkItem()

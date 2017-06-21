@@ -53,10 +53,10 @@ trait CM2MarkingWorkflowService extends WorkflowUserGroupHelpers {
 	def getMarkerAllocations(assignment: Assignment, stage: MarkingWorkflowStage): Allocations
 	// an anonymous Marker may be present in the map if a marker has been unassigned - these need to be handled
 	def feedbackByMarker(assignment: Assignment, stage: MarkingWorkflowStage): Map[Marker, Seq[MarkerFeedback]]
-	// all the marker feedback for this feedback keyed and sorted by workflow stage
-	def markerFeedbackForFeedback(feedback: AssignmentFeedback): SortedMap[MarkingWorkflowStage, MarkerFeedback]
 
 	def getAllFeedbackForMarker(assignment: Assignment, marker: User): SortedMap[MarkingWorkflowStage, Seq[MarkerFeedback]]
+
+	def getAllStudentsForMarker(assignment: Assignment, marker: User): Seq[User]
 
 	def getReusableWorkflows(department: Department, academicYear: AcademicYear): Seq[CM2MarkingWorkflow]
 }
@@ -97,7 +97,7 @@ class CM2MarkingWorkflowServiceImpl extends CM2MarkingWorkflowService with Autow
 			val remainingStages = f.outstandingStages.asScala diff Seq(currentStage)
 			val releasedMarkerFeedback: Seq[MarkerFeedback] = if(remainingStages.isEmpty) {
 				f.outstandingStages = currentStage.nextStages.asJava
-				f.markerFeedback.asScala.filter(mf => currentStage.nextStages.contains(mf.stage))
+				f.allMarkerFeedback.filter(mf => currentStage.nextStages.contains(mf.stage))
 			} else {
 				f.outstandingStages = remainingStages.asJava
 				Nil
@@ -126,7 +126,7 @@ class CM2MarkingWorkflowServiceImpl extends CM2MarkingWorkflowService with Autow
 		feedbacks.flatMap(f => {
 			f.outstandingStages = stages.asJava
 			feedbackService.saveOrUpdate(f)
-			f.markerFeedback.asScala.filter(mf => f.outstandingStages.contains(mf.stage))
+			f.allMarkerFeedback.filter(mf => f.outstandingStages.contains(mf.stage))
 		})
 	}
 
@@ -169,7 +169,6 @@ class CM2MarkingWorkflowServiceImpl extends CM2MarkingWorkflowService with Autow
 			})
 
 		for((marker, students) <- allocations.toSeq; student <- students) yield {
-
 			val parentFeedback = assignment.feedbacks.asScala.find(_.usercode == student.getUserId).getOrElse({
 				val newFeedback = new AssignmentFeedback
 				newFeedback.assignment = assignment
@@ -190,7 +189,7 @@ class CM2MarkingWorkflowServiceImpl extends CM2MarkingWorkflowService with Autow
 			})
 
 			// set the marker (possibly moving the MarkerFeedback to another marker - any existing data remains)
-			markerFeedback.marker = marker
+			markerFeedback.marker = if (marker.isFoundUser) marker else null
 			feedbackService.save(markerFeedback)
 			markerFeedback
 		}
@@ -210,18 +209,13 @@ class CM2MarkingWorkflowServiceImpl extends CM2MarkingWorkflowService with Autow
 		allMarkerFeedbackForStage(assignment,stage).groupBy(_.marker)
 	}
 
-	override def markerFeedbackForFeedback(feedback: AssignmentFeedback): SortedMap[MarkingWorkflowStage, MarkerFeedback] = {
-		val unsortedMap = markingWorkflowDao.markerFeedbackForFeedback(feedback)
-			.groupBy(_.stage)
-			.map{case (k, v) => k -> v.head}
-
-		TreeMap(unsortedMap.toSeq:_*)
-	}
-
 	override def getAllFeedbackForMarker(assignment: Assignment, marker: User): SortedMap[MarkingWorkflowStage, Seq[MarkerFeedback]] = {
 		val unsortedMap = markingWorkflowDao.markerFeedbackForMarker(assignment, marker).groupBy(_.stage)
 		TreeMap(unsortedMap.toSeq:_*)
 	}
+
+	override def getAllStudentsForMarker(assignment: Assignment, marker: User): Seq[User] =
+		getAllFeedbackForMarker(assignment: Assignment, marker: User).values.flatten.map(_.student).toSeq.distinct
 
 	override def getReusableWorkflows(department: Department, academicYear: AcademicYear): Seq[CM2MarkingWorkflow] = {
 		markingWorkflowDao.getReusableWorkflows(department, academicYear)
@@ -230,11 +224,11 @@ class CM2MarkingWorkflowServiceImpl extends CM2MarkingWorkflowService with Autow
 }
 
 trait WorkflowUserGroupHelpers {
-	val markerHelper: UserGroupMembershipHelper[CM2MarkingWorkflow]
+	val markerHelper: UserGroupMembershipHelper[StageMarkers]
 }
 
 trait WorkflowUserGroupHelpersImpl extends WorkflowUserGroupHelpers {
-	val markerHelper = new UserGroupMembershipHelper[CM2MarkingWorkflow]("_markers")
+	val markerHelper = new UserGroupMembershipHelper[StageMarkers]("_markers")
 }
 
 trait CM2MarkingWorkflowServiceComponent {

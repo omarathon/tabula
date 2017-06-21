@@ -6,7 +6,7 @@ import uk.ac.warwick.tabula.commands.Appliable
 import uk.ac.warwick.tabula.commands.coursework.feedback.OldGenerateGradesFromMarkCommand
 import uk.ac.warwick.tabula.web.controllers.coursework.OldCourseworkController
 import org.springframework.web.bind.annotation.PathVariable
-import uk.ac.warwick.tabula.commands.coursework.assignments.{AdminAddMarksCommand, PostExtractValidation}
+import uk.ac.warwick.tabula.commands.coursework.assignments.{OldAdminAddMarksCommand, PostExtractValidation}
 import uk.ac.warwick.tabula.permissions.Permissions
 import uk.ac.warwick.tabula.{CurrentUser, PermissionDeniedException}
 import org.springframework.web.bind.annotation.ModelAttribute
@@ -33,7 +33,7 @@ class OldAddMarksController extends OldCourseworkController {
 	type AdminAddMarksCommand = Appliable[Seq[Feedback]] with PostExtractValidation
 
 	@ModelAttribute("adminAddMarksCommand") def command(@PathVariable module: Module, @PathVariable assignment: Assignment, user: CurrentUser): AdminAddMarksCommand =
-		AdminAddMarksCommand(mandatory(module), mandatory(assignment), user, OldGenerateGradesFromMarkCommand(mandatory(module), mandatory(assignment)))
+		OldAdminAddMarksCommand(mandatory(module), mandatory(assignment), user, OldGenerateGradesFromMarkCommand(mandatory(module), mandatory(assignment)))
 
 	// Add the common breadcrumbs to the model.
 	def crumbed(mav: Mav, module: Module): Mav = mav.crumbs(Breadcrumbs.Department(module.adminDepartment), Breadcrumbs.Module(module))

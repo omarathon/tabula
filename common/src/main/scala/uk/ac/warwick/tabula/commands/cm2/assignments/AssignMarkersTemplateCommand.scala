@@ -94,7 +94,7 @@ class AssignMarkersTemplateCommandInternal(val assignment: Assignment) extends C
 				val marker = getStudentsMarker(student)
 				row.createCell(2).setCellValue(marker.map(_.getFullName).getOrElse(""))
 				row.createCell(3).setCellFormula(
-					"IF(ISTEXT($C" + (row.getRowNum + 1) + "), VLOOKUP($C" + (row.getRowNum + 1) + ", " + markerLookupRange + ", 2, FALSE), \" \")"
+					"IF(TRIM($C" + (row.getRowNum + 1) + ")<>\"\", VLOOKUP($C" + (row.getRowNum + 1) + ", " + markerLookupRange + ", 2, FALSE), \" \")"
 				)
 			}
 		}

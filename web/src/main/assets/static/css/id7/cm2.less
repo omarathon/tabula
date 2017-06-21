@@ -1,4 +1,5 @@
 @import (reference) "../../libs/font-awesome/less/variables.less";
+@import (reference) "../bootstrap/variables.less";
 @import (reference) "colours.less";
 @import "embeddable";
 
@@ -322,5 +323,31 @@ table.expanding-row-pairs {
 		.list-unstyled {
 			margin-bottom: 0;
 		}
+	}
+}
+
+.upload-marks-preview {
+	.error {
+		color: @errorText;
+		display: block;
+	}
+
+	.warning {
+		color: @warningText;
+		display: block;
+	}
+}
+
+//Grey out links to actions that are not permitted and remove state changes
+.dropdown-menu > li > a.disabled {
+
+	color: @grayLight;
+	text-decoration: none;
+	cursor: not-allowed;
+
+	&:hover, &:focus {
+		background-color: transparent;
+		background-image: none; // Remove CSS gradient
+
 	}
 }

@@ -47,7 +47,7 @@ class MarksExtractionListenerTest extends TestBase with Logging with Mockito {
 	@Test(expected=classOf[InvalidFormatException])
 	def unexpectedZipFile() {
 		val fin =  new ByteArrayInputStream(resourceAsBytes("feedback1.zip"))
-		val marksExtractor = new MarksExtractor()
+		val marksExtractor = new OldMarksExtractor()
 		marksExtractor.userLookup = mockUserLookup
 		val marksList = marksExtractor.readXSSFExcelFile(fin)
 		marksList.size should be (10)
@@ -55,7 +55,7 @@ class MarksExtractionListenerTest extends TestBase with Logging with Mockito {
 
 	@Test def readXSSFExcelFile() {
 		val fin =  new ByteArrayInputStream(resourceAsBytes("marks.xlsx"))
-		val marksExtractor = new MarksExtractor()
+		val marksExtractor = new OldMarksExtractor()
 		marksExtractor.userLookup = mockUserLookup
 		val marksList = marksExtractor.readXSSFExcelFile(fin)
 		marksList.size should be (10)

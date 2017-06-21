@@ -13,23 +13,23 @@ import uk.ac.warwick.tabula.system.permissions.{PermissionsChecking, Permissions
 
 object ExamMarkerAddMarksCommand {
 	def apply(module: Module, assessment: Assessment, submitter: CurrentUser, gradeGenerator: GeneratesGradesFromMarks) =
-		new AdminAddMarksCommandInternal(module, assessment, submitter, gradeGenerator)
+		new OldAdminAddMarksCommandInternal(module, assessment, submitter, gradeGenerator)
 			with AutowiringFeedbackServiceComponent
 			with AutowiringUserLookupComponent
 			with AutowiringMarksExtractorComponent
 			with ComposableCommand[Seq[Feedback]]
 			with MarkerAddMarksDescription
 			with MarkerAddMarksPermissions
-			with AdminAddMarksCommandValidation
+			with OldAdminAddMarksCommandValidation
 			with MarkerAddMarksNotifications
-			with AdminAddMarksCommandState
+			with OldAdminAddMarksCommandState
 			with PostExtractValidation
 			with AddMarksCommandBindListener
 }
 
 trait MarkerAddMarksDescription extends Describable[Seq[Feedback]] {
 
-	self: AdminAddMarksCommandState =>
+	self: OldAdminAddMarksCommandState =>
 
 	override lazy val eventName = "MarkerAddMarks"
 
@@ -44,7 +44,7 @@ trait MarkerAddMarksDescription extends Describable[Seq[Feedback]] {
 
 trait MarkerAddMarksNotifications extends Notifies[Seq[Feedback], Feedback] {
 
-	self: AdminAddMarksCommandState =>
+	self: OldAdminAddMarksCommandState =>
 
 	def emit(updatedFeedback: Seq[Feedback]): Seq[ExamMarkedNotification] = updatedFeedback.headOption.flatMap { feedback => HibernateHelpers.initialiseAndUnproxy(feedback) match {
 		case examFeedback: ExamFeedback =>
@@ -56,7 +56,7 @@ trait MarkerAddMarksNotifications extends Notifies[Seq[Feedback], Feedback] {
 
 trait MarkerAddMarksPermissions extends RequiresPermissionsChecking with PermissionsCheckingMethods {
 
-	self: AdminAddMarksCommandState =>
+	self: OldAdminAddMarksCommandState =>
 
 	override def permissionsCheck(p: PermissionsChecking) {
 		p.mustBeLinked(assessment, module)

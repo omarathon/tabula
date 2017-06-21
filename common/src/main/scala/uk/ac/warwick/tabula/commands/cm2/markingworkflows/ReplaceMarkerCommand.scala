@@ -109,7 +109,7 @@ trait ReplaceMarkerState {
 	// feedback associated with a marker is feedback that has that marker in at least one of it's workflow stages
 	lazy val finishedAssignments: Set[Assignment] = affectedAssignments.filter(assignment => {
 		val feedbackFromOldMarker = assignment.allFeedback
-			.filter(_.markerFeedback.asScala.exists(_.marker == oldMarkerUser))
+			.filter(_.allMarkerFeedback.exists(_.marker == oldMarkerUser))
 		feedbackFromOldMarker.nonEmpty && feedbackFromOldMarker.forall(_.released)
 	})
 

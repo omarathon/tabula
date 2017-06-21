@@ -3,7 +3,6 @@ package uk.ac.warwick.tabula.commands.cm2.assignments
 import uk.ac.warwick.tabula.commands._
 import uk.ac.warwick.tabula.system.permissions.{PermissionsChecking, PermissionsCheckingMethods, RequiresPermissionsChecking}
 import org.springframework.validation.Errors
-import uk.ac.warwick.tabula.CurrentUser
 import uk.ac.warwick.tabula.data.model._
 import uk.ac.warwick.tabula.permissions.Permissions
 import uk.ac.warwick.tabula.services.{AutowiringCM2MarkingWorkflowServiceComponent, CM2MarkingWorkflowServiceComponent}
@@ -13,7 +12,7 @@ import scala.collection.JavaConverters._
 
 
 object ReleaseForMarkingCommand {
-	def apply(assignment: Assignment, user: CurrentUser) = new ReleaseForMarkingCommandInternal(assignment, user)
+	def apply(assignment: Assignment, user: User) = new ReleaseForMarkingCommandInternal(assignment, user)
 		with ComposableCommand[Seq[AssignmentFeedback]]
 		with ReleaseForMarkingValidation
 		with ReleaseForMarkingPermissions
@@ -22,7 +21,7 @@ object ReleaseForMarkingCommand {
 		with AutowiringCM2MarkingWorkflowServiceComponent
 }
 
-class ReleaseForMarkingCommandInternal(val assignment: Assignment, val currentUser: CurrentUser)
+class ReleaseForMarkingCommandInternal(val assignment: Assignment, val user: User)
 	extends CommandInternal[Seq[AssignmentFeedback]] with ReleaseForMarkingState with ReleaseForMarkingRequest with ReleasedState {
 
 	self: CM2MarkingWorkflowServiceComponent  =>
@@ -66,8 +65,6 @@ trait ReleaseForMarkingDescription extends Describable[Seq[AssignmentFeedback]] 
 
 trait ReleaseForMarkingState extends SelectedStudentsState with UserAware {
 	def assignment: Assignment
-	def currentUser: CurrentUser
-	val user: User = currentUser.apparentUser
 }
 
 trait ReleaseForMarkingRequest extends SelectedStudentsRequest {
@@ -77,7 +74,7 @@ trait ReleaseForMarkingRequest extends SelectedStudentsRequest {
 	def studentsWithoutKnownMarkers: Seq[String] = {
 		val neverAssigned = students.asScala -- feedbacks.map(_.usercode)
 		val markerRemoved = feedbacks.filter(f => {
-			val initialStageFeedback = f.markerFeedback.asScala.filter(mf => assignment.cm2MarkingWorkflow.initialStages.contains(mf.stage))
+			val initialStageFeedback = f.allMarkerFeedback.filter(mf => assignment.cm2MarkingWorkflow.initialStages.contains(mf.stage))
 			initialStageFeedback.exists(_.marker == null)
 		}).map(_.usercode)
 		neverAssigned ++ markerRemoved

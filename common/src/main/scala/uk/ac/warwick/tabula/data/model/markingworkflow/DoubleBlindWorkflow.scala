@@ -39,14 +39,14 @@ object DoubleBlindWorkflow {
 		initialBMarkers.workflow = workflow
 
 		initialMarkers.foreach(user => {
-			initialAMarkers.markers.knownType.add(user)
-			initialBMarkers.markers.knownType.add(user)
+			initialAMarkers.markers.add(user)
+			initialBMarkers.markers.add(user)
 		})
 
 		val lastMarkers = new StageMarkers
 		lastMarkers.stage = DblBlndFinalMarker
 		lastMarkers.workflow = workflow
-		finalMarkers.foreach(lastMarkers.markers.knownType.add)
+		finalMarkers.foreach(lastMarkers.markers.add)
 
 		workflow.stageMarkers = JList(initialAMarkers, initialBMarkers, lastMarkers)
 

@@ -38,8 +38,8 @@ class MarkerFeedback extends GeneratedId with FeedbackAttachments with ToEntityR
 	private var markerUsercode: String = _
 
 	def marker_=(marker: User): Unit = markerUsercode = marker match {
-		case m: User if !m.isFoundUser => throw new IllegalStateException(s"Marker is not a valid user.")
-		case m: User =>  m.getUserId
+		case m: User if !m.isFoundUser => throw new IllegalStateException(s"${m.getUserId} is not a valid user.")
+		case m: User => m.getUserId
 		case _ => null
 	}
 
@@ -106,6 +106,20 @@ class MarkerFeedback extends GeneratedId with FeedbackAttachments with ToEntityR
 	def getValue(field: FormField): Option[SavedFormValue] = {
 		customFormValues.find( _.name == field.name )
 	}
+
+	def comments: Option[String] = customFormValues.find(_.name == Assignment.defaultFeedbackTextFieldName).map(_.value)
+	def comments_=(value: String) {
+		customFormValues
+			.find(_.name == Assignment.defaultFeedbackTextFieldName)
+			.getOrElse({
+				val newValue = new SavedFormValue()
+				newValue.name = Assignment.defaultFeedbackTextFieldName
+				newValue.markerFeedback = this
+				this.customFormValues.add(newValue)
+				newValue
+			}).value = value
+	}
+
 
 	def hasBeenModified: Boolean = updatedOn != null
 

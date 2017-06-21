@@ -14,6 +14,9 @@ case class DisplayExtensionDetail(
 	previousExtensions: Seq[Extension],
 	previousSubmissions: Seq[Submission]
 ){
+	def studentIdentifier: String = {
+		Option(student.getWarwickId).getOrElse(student.getUserId)
+	}
 	def numAcceptedExtensions: Int = previousExtensions.count(_.approved)
 	def numRejectedExtensions: Int = previousExtensions.count(_.rejected)
 }

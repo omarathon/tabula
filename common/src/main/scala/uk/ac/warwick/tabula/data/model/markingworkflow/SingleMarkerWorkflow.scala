@@ -33,7 +33,7 @@ object SingleMarkerWorkflow {
 		val singleMarkers = new StageMarkers()
 		singleMarkers.stage = SingleMarker
 		singleMarkers.workflow = singleWorkflow
-		firstMarkers.foreach(singleMarkers.markers.knownType.add)
+		firstMarkers.foreach(singleMarkers.markers.add)
 
 		singleWorkflow.stageMarkers = JList(singleMarkers)
 

@@ -25,7 +25,7 @@ class ReleaseForMarkingController extends CourseworkController {
 	@ModelAttribute("command")
 	def command(@PathVariable assignment: Assignment, user: CurrentUser): Command = {
 		mandatory(Option(assignment.cm2MarkingWorkflow))
-		ReleaseForMarkingCommand(mandatory(assignment), user)
+		ReleaseForMarkingCommand(mandatory(assignment), user.apparentUser)
 	}
 
 	def RedirectBack(assignment: Assignment) = Redirect(Routes.admin.assignment.submissionsandfeedback(assignment))
@@ -35,9 +35,9 @@ class ReleaseForMarkingController extends CourseworkController {
 	def get(@PathVariable assignment: Assignment) = RedirectBack(assignment)
 
 	@RequestMapping(method = Array(POST), params = Array("!confirmScreen"))
-	def showForm(@PathVariable assignment: Assignment, @ModelAttribute("command") cmd: Command, errors: Errors): Mav = {
+	def showForm(@PathVariable assignment: Assignment, @ModelAttribute("command") cmd: Command, errors: Errors): Mav =
 		Mav("cm2/admin/assignments/submissionsandfeedback/release-submission")
-	}
+	  	.crumbsList(Breadcrumbs.assignment(assignment))
 
 	@RequestMapping(method = Array(POST), params = Array("confirmScreen"))
 	def submit(@PathVariable assignment: Assignment, @Valid @ModelAttribute("command") cmd: Command, errors: Errors): Mav = {

@@ -13,9 +13,8 @@ import uk.ac.warwick.tabula.data.model.forms.{WordCountField, _}
 import uk.ac.warwick.tabula.data.model.markingworkflow.CM2MarkingWorkflow
 import uk.ac.warwick.tabula.data.model.permissions.AssignmentGrantedRole
 import uk.ac.warwick.tabula.helpers.DateTimeOrdering._
-import uk.ac.warwick.tabula.helpers.StringUtils._
 import uk.ac.warwick.tabula.services._
-import uk.ac.warwick.tabula.{AcademicYear, Features, ToString}
+import uk.ac.warwick.tabula.{AcademicYear, ToString}
 import uk.ac.warwick.userlookup.User
 import uk.ac.warwick.util.workingdays.WorkingDaysHelperImpl
 
@@ -36,7 +35,7 @@ object Assignment {
 	final val MaximumFileAttachments = 50
 	final val MaximumWordCount = 1000000
 
-	case class MarkerAllocation(role: String, marker: User, students: Set[User])
+	case class MarkerAllocation(role: String, description: String, marker: User, students: Set[User])
 
 	object Settings {
 		object InfoViewType {
@@ -80,9 +79,6 @@ class Assignment
 	import uk.ac.warwick.tabula.data.model.Assignment._
 
 	type Entity = Assignment
-
-	@transient
-	var features: Features = Wire[Features]
 
 	@transient
 	var assignmentService: AssessmentService = Wire[AssessmentService]("assignmentService")
@@ -146,7 +142,7 @@ class Assignment
 	var allowExtensions: JBoolean = _
 	@Column(name="anonymous_marking")
 	var anonymousMarking: JBoolean = _
-	def cm2Assignment: Boolean = features.cm2 && Option(markingWorkflow).isEmpty
+	var cm2Assignment: JBoolean = false
 
 	var genericFeedback: String = ""
 
@@ -599,9 +595,9 @@ class Assignment
 	}
 
 	// if the department allows extensions we must be able to manually create extensions even if requests aren't allowed
-	def extensionsPossible: Boolean = !openEnded && module.adminDepartment.allowExtensionRequests
+	def extensionsPossible: Boolean = !openEnded && allowExtensions
 
-	def newExtensionsCanBeRequested: Boolean = extensionsPossible && allowExtensions && (!isClosed || allowExtensionsAfterCloseDate)
+	def newExtensionsCanBeRequested: Boolean = extensionsPossible && module.adminDepartment.allowExtensionRequests && (!isClosed || allowExtensionsAfterCloseDate)
 
 	@Deprecated
 	def getMarkerFeedback(usercode: String, user: User, feedbackPosition: FeedbackPosition): Option[MarkerFeedback] = {
@@ -784,6 +780,13 @@ class Assignment
 		}
 	}
 
+	def removeFeedbacks(): Unit = {
+		val markerFeedbacks  = allFeedback.flatMap(_.allMarkerFeedback)
+		markerFeedbacks.foreach(feedbackService.delete)
+		feedbacks.foreach(feedbackService.delete)
+		allFeedback.removeAll(feedbacks)
+	}
+
 	def cm2MarkerAllocations: Seq[MarkerAllocation] =
 		Option(cm2MarkingWorkflow)
 			.map { workflow =>
@@ -793,8 +796,9 @@ class Assignment
 						markers.sortBy { u => (u.getLastName, u.getFirstName) }.map { marker =>
 							MarkerAllocation(
 								stage.roleName,
+								stage.description,
 								marker,
-								allFeedback.flatMap(_.markerFeedback.asScala).filter { mf => mf.stage == stage && mf.marker == marker }.map(_.student).toSet
+								allFeedback.flatMap(_.allMarkerFeedback).filter { mf => mf.stage == stage && mf.marker == marker }.map(_.student).toSet
 							)
 						}
 					}
@@ -845,9 +849,44 @@ class Assignment
  *
  * Includes @BeanProperty to allow JSON binding
  */
-trait BooleanAssignmentProperties {
+trait BooleanAssignmentDetailProperties {
+	@BeanProperty var cm2Assignment: JBoolean = false
 	@BeanProperty var openEnded: JBoolean = false
+
+	def copyDetailBooleansTo(assignment: Assignment) {
+		assignment.openEnded = openEnded
+	}
+}
+
+trait BooleanAssignmentFeedbackProperties {
 	@BeanProperty var collectMarks: JBoolean = true
+	@BeanProperty var automaticallyReleaseToMarkers: JBoolean = false
+	@BeanProperty var summative: JBoolean = true
+	@BeanProperty var dissertation: JBoolean = false
+	@BeanProperty var includeInFeedbackReportWithoutSubmissions: JBoolean = false
+
+	def copyFeedbackBooleansTo(assignment: Assignment) {
+		assignment.collectMarks = collectMarks
+		assignment.summative = summative
+		assignment.dissertation = dissertation
+		assignment.includeInFeedbackReportWithoutSubmissions = includeInFeedbackReportWithoutSubmissions
+		assignment.automaticallyReleaseToMarkers = automaticallyReleaseToMarkers
+	}
+}
+
+trait BooleanAssignmentStudentProperties {
+	@BeanProperty var anonymousMarking: JBoolean = false
+	@BeanProperty var hiddenFromStudents: JBoolean = false
+
+	def copyStudentBooleansTo(assignment: Assignment) {
+		assignment.anonymousMarking = anonymousMarking
+
+		// You can only hide an assignment, no un-hiding.
+		if (hiddenFromStudents) assignment.hideFromStudents()
+	}
+}
+
+trait BooleanAssignmentSubmissionProperties {
 	@BeanProperty var collectSubmissions: JBoolean = true
 	@BeanProperty var restrictSubmissions: JBoolean = false
 	@BeanProperty var allowLateSubmissions: JBoolean = true
@@ -856,20 +895,9 @@ trait BooleanAssignmentProperties {
 	@BeanProperty var allowExtensions: JBoolean = true
 	@BeanProperty var extensionAttachmentMandatory: JBoolean = false
 	@BeanProperty var allowExtensionsAfterCloseDate: JBoolean = false
-	@BeanProperty var summative: JBoolean = true
-	@BeanProperty var dissertation: JBoolean = false
-	@BeanProperty var includeInFeedbackReportWithoutSubmissions: JBoolean = false
-	@BeanProperty var automaticallyReleaseToMarkers: JBoolean = false
 	@BeanProperty var automaticallySubmitToTurnitin: JBoolean = false
-	@BeanProperty var hiddenFromStudents: JBoolean = false
-	@BeanProperty var anonymousMarking: JBoolean = false
-	@BeanProperty var cm2Assignment: JBoolean = false
 
-
-
-	def copyBooleansTo(assignment: Assignment) {
-		assignment.openEnded = openEnded
-		assignment.collectMarks = collectMarks
+	def copySubmissionBooleansTo(assignment: Assignment) {
 		assignment.collectSubmissions = collectSubmissions
 		assignment.restrictSubmissions = restrictSubmissions
 		assignment.allowLateSubmissions = allowLateSubmissions
@@ -878,17 +906,21 @@ trait BooleanAssignmentProperties {
 		assignment.allowExtensions = allowExtensions
 		assignment.extensionAttachmentMandatory = extensionAttachmentMandatory
 		assignment.allowExtensionsAfterCloseDate = allowExtensionsAfterCloseDate
-		assignment.summative = summative
-		assignment.dissertation = dissertation
-		assignment.includeInFeedbackReportWithoutSubmissions = includeInFeedbackReportWithoutSubmissions
-		assignment.automaticallyReleaseToMarkers = automaticallyReleaseToMarkers
 		assignment.automaticallySubmitToTurnitin = automaticallySubmitToTurnitin
-		assignment.anonymousMarking = anonymousMarking
+	}
+}
 
+trait BooleanAssignmentProperties
+	extends BooleanAssignmentDetailProperties
+		with BooleanAssignmentFeedbackProperties
+		with BooleanAssignmentStudentProperties
+		with BooleanAssignmentSubmissionProperties {
 
-
-		// You can only hide an assignment, no un-hiding.
-		if (hiddenFromStudents) assignment.hideFromStudents()
+	def copyBooleansTo(assignment: Assignment) {
+		copyDetailBooleansTo(assignment)
+		copyFeedbackBooleansTo(assignment)
+		copyStudentBooleansTo(assignment)
+		copySubmissionBooleansTo(assignment)
 	}
 }
 

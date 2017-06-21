@@ -2,8 +2,10 @@ package uk.ac.warwick.tabula.commands.cm2.assignments
 
 import org.joda.time.DateTime
 import uk.ac.warwick.tabula._
+import uk.ac.warwick.tabula.commands.cm2.markingworkflows.CopyMarkingWorkflowComponent
 import uk.ac.warwick.tabula.data.model._
 import uk.ac.warwick.tabula.data.model.forms.WordCountField
+import uk.ac.warwick.tabula.data.model.markingworkflow.CM2MarkingWorkflow
 import uk.ac.warwick.tabula.services._
 
 import scala.collection.JavaConverters._
@@ -12,9 +14,11 @@ import scala.collection.JavaConverters._
 
 class CopyAssignmentsCommandTest extends TestBase with Mockito {
 
-	trait CommandTestSupport extends AssessmentServiceComponent with AssessmentMembershipServiceComponent {
+	trait CommandTestSupport extends AssessmentServiceComponent with AssessmentMembershipServiceComponent with CopyMarkingWorkflowComponent {
 		val assessmentService: AssessmentService = smartMock[AssessmentService]
 		val assessmentMembershipService: AssessmentMembershipService = smartMock[AssessmentMembershipService]
+
+		def copyMarkingWorkflow(department: Department, workflow: CM2MarkingWorkflow): CM2MarkingWorkflow = workflow
 	}
 
 	trait Fixture {

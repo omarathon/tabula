@@ -1,5 +1,7 @@
 <#import "/WEB-INF/freemarker/_profile_link.ftl" as pl />
 <#import "*/coursework_components.ftl" as components />
+<#import "*/modal_macros.ftl" as modal />
+
 <#list feedbackByStage?keys as stage>
 	<#assign markingCompleted><@routes.cm2.markingCompleted assignment stage marker /></#assign>
 	<#assign enhancedMarkerFeedbacks = mapGet(feedbackByStage, stage)/>
@@ -7,24 +9,34 @@
 		<h3>${stage.description}</h3>
 		<#if enhancedMarkerFeedbacks?has_content>
 			<#if stage.nextStagesDescription?has_content>
-				<a class="btn btn-primary must-have-selected form-post" href="${markingCompleted}">Confirm selected and send to ${stage.nextStagesDescription?lower_case}</a>
+				<a class="btn btn-primary must-have-selected must-have-ready-next-stage form-post" href="${markingCompleted}">Confirm selected and send to ${stage.nextStagesDescription?lower_case}</a>
 			</#if>
 			<div class="btn-group">
 				<button type="button" class="btn btn-default dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
 					Download <span class="caret"></span>
 				</button>
 				<ul class="dropdown-menu">
-					<li><a class="form-post" href="<@routes.cm2.downloadMarkerSubmissions assignment marker />">Download all selected submissions</a></li>
-					<li><a href="#">Download all selected submissions as pdf</a></li>
+					<li class="must-have-selected">
+						<a class="form-post" href="<@routes.cm2.downloadMarkerSubmissions assignment marker />">
+							Download all selected submissions
+						</a>
+					</li>
+					<li class="must-have-selected">
+						<a class="download-pdf" data-target="#download-pdf-modal-${stage.name}" href="<@routes.cm2.downloadMarkerSubmissionsPdf assignment marker />">
+							Download all selected submissions as pdf
+						</a>
+					</li>
 					<#if features.feedbackTemplates && assignment.hasFeedbackTemplate>
 						<li>
-							<a class="btn use-tooltip" title="Download feedback templates for all students as a ZIP file." href="<@routes.cm2.markerTemplatesZip assignment />" data-container="body">
+							<a class="use-tooltip" title="Download feedback templates for all students as a ZIP file." href="<@routes.cm2.markerTemplatesZip assignment marker/>" data-container="body">
 								Download feedback templates
 							</a>
 						</li>
 					</#if>
 					<#list workflowType.allPreviousStages(stage) as pStage>
-						<li><a href="#">Download feedback from ${pStage.description?lower_case}</a></li>
+						<li class="must-have-selected">
+							<a class="form-post" href="<@routes.cm2.downloadMarkerFeedbackStage assignment marker pStage />">Download feedback from ${pStage.description?lower_case}</a>
+						</li>
 					</#list>
 				</ul>
 			</div>
@@ -34,8 +46,8 @@
 					Upload <span class="caret"></span>
 				</button>
 				<ul class="dropdown-menu">
-					<li><a href="<@routes.cm2.markerUploadFeedback assignment stage marker />">Upload attachments</a></li>
-					<li><a href="<@routes.cm2.markerUploadMarks assignment stage marker />">Upload marks & feedback</a></li>
+					<li><a href="<@routes.cm2.markerUploadFeedback assignment marker />">Upload attachments</a></li>
+					<li><a href="<@routes.cm2.markerUploadMarks assignment marker />">Upload marks & feedback</a></li>
 				</ul>
 			</div>
 
@@ -76,11 +88,11 @@
 							<td class="student-col">${student.lastName}&nbsp;<#if student.warwickId??><@pl.profile_link student.warwickId /><#else><@pl.profile_link student.userId /></#if></td>
 						</#if>
 						<td class="progress-col">
-							<@components.individual_stage_progress_bar emf.workflowStudent.stages/>
+							<@components.individual_stage_progress_bar emf.workflowStudent.stages assignment student />
 						</td>
 						<td>
 							<#if emf.workflowStudent.nextAction?has_content>
-								<@spring.message code=emf.workflowStudent.nextAction />
+								<@components.workflowMessage emf.workflowStudent.nextAction assignment student />
 							</#if>
 						</td>
 					</tr>
@@ -96,9 +108,24 @@
 
 			<#if feedbackByStage?keys?size gt 0>
 				<#if stage.nextStagesDescription?has_content>
-					<a class="btn btn-primary must-have-selected form-post" href="${markingCompleted}">Confirm selected and send to ${stage.nextStagesDescription?lower_case}</a>
+					<a class="btn btn-primary must-have-selected must-have-ready-next-stage form-post" href="${markingCompleted}">Confirm selected and send to ${stage.nextStagesDescription?lower_case}</a>
 				</#if>
 			</#if>
+
+			<div id="download-pdf-modal-${stage.name}" class="modal fade">
+				<@modal.wrapper>
+					<@modal.header>
+						<h3 class="modal-title">Download submissions as PDF</h3>
+					</@modal.header>
+					<@modal.body>
+						<p>There are <span class="count"></span> submissions that have files that are not PDFs (shown below). The download will not include these files.</p>
+						<p><a class="form-post btn btn-primary"
+									data-href="<@routes.cm2.downloadMarkerSubmissionsPdf assignment marker />?download" href="">Download submissions as PDF</a>
+						</p>
+						<ul class="submissions"></ul>
+					</@modal.body>
+				</@modal.wrapper>
+			</div>
 		<#else>
 			No students found
 		</#if>

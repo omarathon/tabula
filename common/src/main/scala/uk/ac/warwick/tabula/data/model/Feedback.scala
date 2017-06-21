@@ -15,6 +15,8 @@ import uk.ac.warwick.tabula.{AcademicYear, JavaImports}
 import uk.ac.warwick.userlookup.User
 
 import scala.collection.JavaConverters._
+import scala.collection.immutable.{SortedMap, TreeMap}
+import scala.collection.mutable
 
 trait FeedbackAttachments {
 
@@ -99,7 +101,6 @@ trait CM1WorkflowSupport {
 	@JoinColumn(name = "second_marker_feedback")
 	@Deprecated
 	var secondMarkerFeedback: MarkerFeedback = _
-
 	@OneToOne(cascade=Array(PERSIST,MERGE,REFRESH,DETACH), fetch = FetchType.LAZY)
 	@JoinColumn(name = "third_marker_feedback")
 	@Deprecated
@@ -276,15 +277,18 @@ abstract class Feedback extends GeneratedId with FeedbackAttachments with Permis
 	@OneToMany(mappedBy = "feedback", fetch = LAZY, cascade = Array(ALL), orphanRemoval = true)
 	@BatchSize(size = 200)
 	var markerFeedback: JList[MarkerFeedback] = JArrayList()
+	def allMarkerFeedback: Seq[MarkerFeedback] = markerFeedback.asScala
 
-	def feedbackByStage: Map[MarkingWorkflowStage, MarkerFeedback] =
-		markerFeedback.asScala.groupBy(_.stage).mapValues(_.head)
+	def feedbackByStage: SortedMap[MarkingWorkflowStage, MarkerFeedback] = {
+		val unsortedMap =  allMarkerFeedback.groupBy(_.stage).mapValues(_.head)
+		TreeMap(unsortedMap.toSeq:_*)
+	}
 
 	def feedbackMarkers: Map[MarkingWorkflowStage, User] =
 		feedbackByStage.mapValues(_.marker)
 
 	def feedbackMarkersByAllocationName: Map[String, User] =
-		markerFeedback.asScala.groupBy(f => f.stage.allocationName).toSeq
+		allMarkerFeedback.groupBy(f => f.stage.allocationName).toSeq
 			.sortBy {	case(_, fList) => fList.head.stage.order }
 			.map { case (s, fList) => s -> fList.head.marker }.toMap
 
@@ -292,7 +296,7 @@ abstract class Feedback extends GeneratedId with FeedbackAttachments with Permis
 		feedbackMarkersByAllocationName.get(allocationName)
 
 	// gets marker feedback for the current workflow stages
-	def markingInProgress: Seq[MarkerFeedback] = markerFeedback.asScala.filter(mf => outstandingStages.asScala.contains(mf.stage))
+	def markingInProgress: Seq[MarkerFeedback] = allMarkerFeedback.filter(mf => outstandingStages.asScala.contains(mf.stage))
 
 	@ElementCollection @Column(name = "stage")
 	@JoinTable(name = "OutstandingStages", joinColumns = Array(
@@ -326,6 +330,18 @@ abstract class Feedback extends GeneratedId with FeedbackAttachments with Permis
 	def commentsFormValue: Option[SavedFormValue] = customFormValues.asScala.find(_.name == Assignment.defaultFeedbackTextFieldName)
 
 	def comments: Option[String] = commentsFormValue.map(_.value)
+
+	def comments_=(value: String) {
+		commentsFormValue
+			.getOrElse({
+				val newValue = new SavedFormValue()
+				newValue.name = Assignment.defaultFeedbackTextFieldName
+				newValue.feedback = this
+				this.customFormValues.add(newValue)
+				newValue
+			})
+			.value = value
+	}
 
 	def commentsFormattedHtml: String = formattedHtml(comments)
 

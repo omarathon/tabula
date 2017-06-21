@@ -4,19 +4,18 @@ import org.springframework.validation.Errors
 import uk.ac.warwick.tabula.AcademicYear
 import uk.ac.warwick.tabula.commands._
 import uk.ac.warwick.tabula.commands.cm2.markingworkflows.{CreatesMarkingWorkflow, EditMarkingWorkflowState, ModifyMarkingWorkflowState, ModifyMarkingWorkflowValidation}
-import uk.ac.warwick.tabula.data.model._
+import uk.ac.warwick.tabula.data.model.{WorkflowCategory, _}
 import uk.ac.warwick.tabula.data.model.markingworkflow.CM2MarkingWorkflow
 import uk.ac.warwick.tabula.permissions.Permissions
 import uk.ac.warwick.tabula.services.{AssessmentServiceComponent, UserLookupComponent, _}
 import uk.ac.warwick.tabula.system.permissions.{PermissionsChecking, PermissionsCheckingMethods, RequiresPermissionsChecking}
 import uk.ac.warwick.tabula.JavaImports._
 
-
 object EditAssignmentDetailsCommand {
 	def apply(assignment: Assignment) =
 		new EditAssignmentDetailsCommandInternal(assignment)
 			with ComposableCommand[Assignment]
-			with BooleanAssignmentProperties
+			with BooleanAssignmentDetailProperties
 			with EditAssignmentPermissions
 			with EditAssignmentDetailsDescription
 			with EditAssignmentDetailsValidation
@@ -29,7 +28,7 @@ object EditAssignmentDetailsCommand {
 }
 
 class EditAssignmentDetailsCommandInternal(override val assignment: Assignment) extends CommandInternal[Assignment] with EditAssignmentDetailsCommandState
-	with EditAssignmentDetailsValidation with SharedAssignmentProperties with PopulateOnForm with AssignmentDetailsCopy with CreatesMarkingWorkflow {
+	with EditAssignmentDetailsValidation with SharedAssignmentDetailProperties with PopulateOnForm with AssignmentDetailsCopy with CreatesMarkingWorkflow {
 
 	self: AssessmentServiceComponent with UserLookupComponent with CM2MarkingWorkflowServiceComponent =>
 
@@ -43,6 +42,8 @@ class EditAssignmentDetailsCommandInternal(override val assignment: Assignment) 
 						// delete the old workflow and make a new one with the new type
 						cm2MarkingWorkflowService.delete(w)
 						createAndSaveSingleUseWorkflow(assignment)
+						//user has changed workflow category so remove all previous feedbacks
+						assignment.removeFeedbacks()
 					} else {
 						w.replaceMarkers(markersAUsers, markersBUsers)
 						cm2MarkingWorkflowService.save(w)
@@ -50,10 +51,17 @@ class EditAssignmentDetailsCommandInternal(override val assignment: Assignment) 
 				// persist any new workflows
 				case _ => createAndSaveSingleUseWorkflow(assignment)
 			}
-		} else if(workflowCategory == WorkflowCategory.NoneUse) {
+		} else if(workflowCategory == WorkflowCategory.NoneUse || workflowCategory == WorkflowCategory.NotDecided) {
+			// before we de-attach, store it to be deleted afterwards
+			val existingWorkflow = workflow
 			assignment.cm2MarkingWorkflow = null
-			workflow.filterNot(_.isReusable).foreach(cm2MarkingWorkflowService.delete)
+			existingWorkflow.filterNot(_.isReusable).foreach(cm2MarkingWorkflowService.delete)
+			//if we have any prior markerfeedbacks/feedbacks attached -  remove them
+			assignment.removeFeedbacks()
 		} else if(workflowCategory == WorkflowCategory.Reusable) {
+			if(reusableWorkflow != null && assignment.cm2MarkingWorkflow != null && reusableWorkflow.workflowType != assignment.cm2MarkingWorkflow.workflowType){
+				assignment.removeFeedbacks()
+			}
 			workflow.filterNot(_.isReusable).foreach(cm2MarkingWorkflowService.delete)
 		}
 
@@ -66,6 +74,7 @@ class EditAssignmentDetailsCommandInternal(override val assignment: Assignment) 
 	override def populate(): Unit = {
 		name = assignment.name
 		openDate = assignment.openDate
+		openEnded = assignment.openEnded
 		openEndedReminderDate = assignment.openEndedReminderDate
 		closeDate = assignment.closeDate
 		workflowCategory = assignment.workflowCategory.getOrElse(WorkflowCategory.NotDecided)
@@ -92,7 +101,7 @@ trait EditAssignmentDetailsCommandState extends ModifyAssignmentDetailsCommandSt
 
 
 trait EditAssignmentDetailsValidation extends ModifyAssignmentDetailsValidation with ModifyMarkingWorkflowValidation {
-	self: EditAssignmentDetailsCommandState with BooleanAssignmentProperties with AssessmentServiceComponent with ModifyMarkingWorkflowState
+	self: EditAssignmentDetailsCommandState with BooleanAssignmentDetailProperties with AssessmentServiceComponent with ModifyMarkingWorkflowState
 		with UserLookupComponent =>
 
 	override def validate(errors: Errors): Unit = {
@@ -117,13 +126,19 @@ trait EditAssignmentPermissions extends RequiresPermissionsChecking with Permiss
 }
 
 trait EditAssignmentDetailsDescription extends Describable[Assignment] {
+
 	self: EditAssignmentDetailsCommandState =>
+
+	override lazy val eventName = "EditAssignmentDetails"
 
 	override def describe(d: Description) {
 		d.assignment(assignment).properties(
 			"name" -> name,
 			"openDate" -> openDate,
-			"closeDate" -> closeDate)
+			"closeDate" -> closeDate,
+			"workflowCtg" -> Option(workflowCategory).map(_.code).orNull,
+			"workflowType" -> Option(workflowType).map(_.name).orNull
+		)
 	}
 
 }

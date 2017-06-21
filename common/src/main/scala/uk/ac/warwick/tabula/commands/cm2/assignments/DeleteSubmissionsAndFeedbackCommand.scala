@@ -55,24 +55,23 @@ class DeleteSubmissionsAndFeedbackCommandInternal(val assignment: Assignment)
 
 	override def applyInternal(): Result = transactional() {
 		val deletedSubmissions =
-			if (shouldDeleteSubmissions)
-				submissions.map { sub =>
-					submissionService.delete(sub)
-					sub
-				}
-			else Nil
+			if (shouldDeleteSubmissions) {
+				submissions.foreach(submissionService.delete)
+				submissions
+			} else Nil
 
 		if (deletedSubmissions.nonEmpty)
 			zipService.invalidateSubmissionZip(assignment)
 
 		val deletedFeedback =
-			if (shouldDeleteFeedback)
-				feedbacks.map { f =>
+			if (shouldDeleteFeedback) {
+				feedbacks.foreach { f =>
+					assignment.feedbacks.remove(f)
 					feedbackService.delete(f)
 					zipService.invalidateIndividualFeedbackZip(f)
-					f
 				}
-			else Nil
+				feedbacks
+		 	} else Nil
 
 		Result(deletedSubmissions, deletedFeedback)
 	}

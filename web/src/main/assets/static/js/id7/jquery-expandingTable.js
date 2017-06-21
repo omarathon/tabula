@@ -166,6 +166,12 @@ jQuery.fn.expandingTable = function(options) {
 							$icon.removeClass('fa-spinner fa-spin');
 							showContent($content, $row, $icon);
 							$content.data("loaded", "true");
+
+							// reposition the content when a details section expands
+							$('details', $content).on('toggle', function() {
+								repositionContentBoxes();
+							});
+
 							$content.trigger('tabula.expandingTable.contentChanged');
 						});
 

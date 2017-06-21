@@ -232,7 +232,7 @@ object SubmissionAndFeedbackInfoFilters {
 		}
 
 		case object NoFeedback extends SubmissionAndFeedbackInfoFilter {
-			def description = "No Feedback"
+			def description = "No feedback"
 
 			def predicate(item: AssignmentSubmissionStudentInfo): Boolean =
 				if (item.assignment.cm2Assignment) {
@@ -361,7 +361,7 @@ object SubmissionAndFeedbackInfoFilters {
 			def description = "Marked"
 
 			def predicate(item: AssignmentSubmissionStudentInfo, marker: User): Boolean =
-				item.coursework.enhancedFeedback.exists(_.feedback.markerFeedback.asScala.exists(mf => mf.marker == marker && mf.hasMarkOrGrade))
+				item.coursework.enhancedFeedback.exists(_.feedback.allMarkerFeedback.exists(mf => mf.marker == marker && mf.hasMarkOrGrade))
 
 			override def apply(assignment: Assignment): Boolean = assignment.collectMarks
 		}
@@ -379,7 +379,7 @@ object SubmissionAndFeedbackInfoFilters {
 			def description = "Feedback"
 
 			def predicate(item: AssignmentSubmissionStudentInfo, marker: User): Boolean =
-				item.coursework.enhancedFeedback.exists(_.feedback.markerFeedback.asScala.exists(mf => mf.marker == marker && mf.hasFeedbackOrComments))
+				item.coursework.enhancedFeedback.exists(_.feedback.allMarkerFeedback.exists(mf => mf.marker == marker && mf.hasFeedbackOrComments))
 		}
 
 		case object NoFeedbackByMarker extends SubmissionAndFeedbackInfoMarkerFilter {
@@ -394,7 +394,7 @@ object SubmissionAndFeedbackInfoFilters {
 
 			def predicate(item: AssignmentSubmissionStudentInfo, marker: User): Boolean = item.coursework.enhancedFeedback.exists(ef => {
 				val outstandingStages = ef.feedback.outstandingStages.asScala
-				ef.feedback.markerFeedback.asScala.exists(mf => mf.marker == marker && mf.hasContent && outstandingStages.contains(mf.stage))
+				ef.feedback.allMarkerFeedback.exists(mf => mf.marker == marker && mf.hasContent && outstandingStages.contains(mf.stage))
 			})
 		}
 	}

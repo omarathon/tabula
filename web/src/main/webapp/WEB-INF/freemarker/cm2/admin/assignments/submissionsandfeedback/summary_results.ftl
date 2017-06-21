@@ -24,7 +24,6 @@
 
 						<th class="progress-col">Progress</th>
 						<th class="action-col">Next action</th>
-						<th></th>
 					</tr>
 				</thead>
 				<tbody>
@@ -78,8 +77,10 @@
 									<#list assignment.cm2MarkingWorkflow.allStages as markingStage>
 										<#local incomplete = feedback.notReleasedToMarkers || !feedback.isMarkedByStage(markingStage) />
 										<div role="tabpanel" class="tab-pane" id="${identifier}-${markingStage.name}">
-											<#local markerFeedback = mapGet(feedback.feedbackByStage, markingStage) />
-											<@components.marker_feedback_summary markerFeedback markingStage />
+											<#if mapGet(feedback.feedbackByStage, markingStage)??>
+												<#local markerFeedback = mapGet(feedback.feedbackByStage, markingStage) />
+												<@components.marker_feedback_summary markerFeedback markingStage />
+											</#if>
 										</div>
 									</#list>
 								</#if>
@@ -104,7 +105,7 @@
 						<#local lateness><@components.lateness submission /></#local>
 
 						<tr class="itemContainer<#if !enhancedSubmission??> awaiting-submission</#if>" <#if enhancedSubmission?? && submission.suspectPlagiarised> data-plagiarised="true"</#if> data-contentid="${identifier}">
-							<td><@bs3form.selector_check_row "students" student.user.userId /></td>
+							<td class="check-col"><@bs3form.selector_check_row "students" student.user.userId /></td>
 
 							<#if department.showStudentName>
 								<td class="student toggle-cell toggle-icon" data-profile="${identifier}">
@@ -118,7 +119,7 @@
 
 							<td class="progress-col content-cell toggle-cell">
 								<dl style="margin: 0; border-bottom: 0;">
-									<dt><@components.individual_stage_progress_bar student.stages?values /></dt>
+									<dt><@components.individual_stage_progress_bar student.stages?values assignment student.user /></dt>
 									<dd style="display: none;" class="table-content-container" data-contentid="${identifier}">
 										<div id="content-${identifier}" class="content-container" data-contentid="${identifier}">
 											<@details student />
@@ -128,55 +129,8 @@
 							</td>
 							<td class="action-col">
 								<#if student.nextStage?has_content>
-									<@spring.message code=student.nextStage.actionCode />
+									<@components.workflowMessage student.nextStage.actionCode assignment student.user />
 								</#if>
-							</td>
-							<td>
-								<div class="btn-group">
-									<a class="btn btn-default btn-xs dropdown-toggle" data-toggle="dropdown">Actions <span class="caret"></span></a>
-									<ul class="dropdown-menu pull-right">
-										<#if submission??>
-											<li>
-												<#local download_url><@routes.cm2.submissionsZip assignment /></#local>
-												<@fmt.permission_button
-													permission='Submission.Read'
-													scope=submission
-													action_descr='download submission'
-													classes='form-post-single'
-													href=download_url
-													tooltip='Download the submission files for this student as a ZIP file'>
-														Download submission
-												</@fmt.permission_button>
-											</li>
-											<li>
-												<#local download_url><@routes.cm2.submissionsPdf assignment /></#local>
-												<@fmt.permission_button
-													permission='Submission.Read'
-													scope=submission
-													action_descr='download submission'
-													classes='form-post-single'
-													href=download_url
-													tooltip='Download the submission files for this student as a PDF file'>
-														Download submission as PDF
-												</@fmt.permission_button>
-											</li>
-											<li>
-												<#local deletesubmissionurl><@routes.cm2.deleteSubmissionsAndFeedback assignment /></#local>
-												<@fmt.permission_button
-													permission='Submission.Delete'
-													scope=submission
-													action_descr='delete submission'
-													classes='form-post-single'
-													href=deletesubmissionurl
-													tooltip='Delete this submission'>
-														Delete submission
-												</@fmt.permission_button>
-											</li>
-										</#if>
-
-										<#-- TODO other actions -->
-									</ul>
-								</div>
 							</td>
 						</tr>
 					</#macro>

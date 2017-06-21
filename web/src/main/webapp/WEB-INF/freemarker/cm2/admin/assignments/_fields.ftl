@@ -3,7 +3,7 @@
 <#-- Field to support redirection post-submit -->
 <input type="hidden" name="action" value="submit" id="action-submit">
 
-	<@bs3form.labelled_form_group path="name" labelText="Assignment Title">
+	<@bs3form.labelled_form_group path="name" labelText="Assignment title">
 		<@f.input path="name" cssClass="form-control" />
 	</@bs3form.labelled_form_group>
 	<#if newRecord>
@@ -11,13 +11,13 @@
 			<#assign pHolder = "${command.prefillAssignment.name} - ${command.prefillAssignment.module.code}">
 		</#if>
     <span class ="assignment-picker-input"  data-target="<@routes.cm2.assignemnts_json module/>">
-		<@bs3form.labelled_form_group path="prefillAssignment" labelText="Copy assignment options (optional):">
+		<@bs3form.labelled_form_group path="prefillAssignment" labelText="Copy assignment options (optional)">
             <input id="prefillAssignment" name="prefillAssignment" type="hidden" value=""/>
 			<input name="query" type="text" class="form-control"  value="${pHolder!''}"/>
 		</@bs3form.labelled_form_group>
 	</span>
-    <div>To find an assignment to pre-populate from, just start typing its name.</div>
-    <div>Assignments within your department will be matched. Click on an assignment to choose it.</div>
+    <p>You can copy details from a previous assignment within your department.
+		Start typing the assignment's name to see matches and click the name to choose it.</p>
 	</#if>
 
 	<@bs3form.labelled_form_group path="openDate" labelText="Open date">
@@ -29,7 +29,7 @@
 
 	<@bs3form.labelled_form_group path="openEnded" labelText="">
 		<@bs3form.checkbox path="openEnded">
-			<@f.checkbox path="openEnded" id="openEnded" /> Open ended
+			<@f.checkbox path="openEnded" id="openEnded" /> Open-ended
 			<#assign popoverText>
             <p>
                 Check this box to mark the assignment as open-ended.
@@ -47,16 +47,17 @@
 		</@bs3form.checkbox>
 	</@bs3form.labelled_form_group>
 
-	<#assign openEnd =  command.openEnded?string('true','false') />
-<fieldset id="open-reminder-dt" <#if openEnd == 'false'>disabled</#if>>
-	<@bs3form.labelled_form_group path="openEndedReminderDate" labelText="Open ended reminder date">
-        <div class="input-group disabled">
-			<@f.input type="text" path="openEndedReminderDate" cssClass="disabled form-control date-time-minute-picker" placeholder="Pick the date" />
-            <span class="input-group-addon"><i class="fa fa-calendar"></i></span>
-        </div>
-	</@bs3form.labelled_form_group>
-</fieldset>
-
+<#assign openEnd =  command.openEnded?string('true','false') />
+<#if features.openEndedReminderDateCM2>
+	<fieldset id="open-reminder-dt" <#if openEnd == 'false'>disabled</#if>>
+		<@bs3form.labelled_form_group path="openEndedReminderDate" labelText="Open-ended reminder date">
+					<div class="input-group disabled">
+				<@f.input type="text" path="openEndedReminderDate" cssClass="disabled form-control date-time-minute-picker" placeholder="Pick the date" />
+							<span class="input-group-addon"><i class="fa fa-calendar"></i></span>
+					</div>
+		</@bs3form.labelled_form_group>
+	</fieldset>
+</#if>
 <fieldset id="close-dt" <#if openEnd == 'true'>disabled</#if>>
 	<@bs3form.labelled_form_group path="closeDate" labelText="Closing date">
         <div class="input-group">

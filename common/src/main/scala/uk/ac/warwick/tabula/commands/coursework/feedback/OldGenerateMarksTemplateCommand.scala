@@ -9,27 +9,27 @@ import uk.ac.warwick.tabula.permissions.Permissions
 import uk.ac.warwick.tabula.services.{AutowiringFeedbackServiceComponent, FeedbackServiceComponent}
 import uk.ac.warwick.tabula.system.permissions.{PermissionsChecking, PermissionsCheckingMethods, RequiresPermissionsChecking}
 
-object GenerateOwnMarksTemplateCommand {
+object OldGenerateOwnMarksTemplateCommand {
 	def apply(module: Module, assignment: Assignment, members: Seq[String]) =
-		new GenerateMarksTemplateCommandInternal(module, assignment, members)
+		new OldGenerateMarksTemplateCommandInternal(module, assignment, members)
 			with AutowiringFeedbackServiceComponent
 			with ComposableCommand[SXSSFWorkbook]
-			with GenerateOwnMarksTemplatePermissions
-			with GenerateMarksTemplateCommandState
+			with OldGenerateOwnMarksTemplatePermissions
+			with OldGenerateMarksTemplateCommandState
 			with Unaudited with ReadOnly
 }
 
-object GenerateMarksTemplateCommand {
+object OldGenerateMarksTemplateCommand {
 	def apply(module: Module, assignment: Assignment, members: Seq[String]) =
-		new GenerateMarksTemplateCommandInternal(module, assignment, members)
+		new OldGenerateMarksTemplateCommandInternal(module, assignment, members)
 			with AutowiringFeedbackServiceComponent
 			with ComposableCommand[SXSSFWorkbook]
-			with GenerateAllMarksTemplatePermissions
-			with GenerateMarksTemplateCommandState
+			with OldGenerateAllMarksTemplatePermissions
+			with OldGenerateMarksTemplateCommandState
 			with Unaudited with ReadOnly
 }
 
-object MarksTemplateCommand {
+object OldMarksTemplateCommand {
 
 	// util to replace unsafe characters with spaces
 	def safeAssessmentName(assessment: Assessment): String = WorkbookUtil.createSafeSheetName(trimmedAssessmentName(assessment))
@@ -48,7 +48,7 @@ object MarksTemplateCommand {
 
 }
 
-class GenerateMarksTemplateCommandInternal(val module: Module, val assignment: Assignment, val members: Seq[String]) extends CommandInternal[SXSSFWorkbook] {
+class OldGenerateMarksTemplateCommandInternal(val module: Module, val assignment: Assignment, val members: Seq[String]) extends CommandInternal[SXSSFWorkbook] {
 
 	self: FeedbackServiceComponent =>
 
@@ -70,7 +70,7 @@ class GenerateMarksTemplateCommandInternal(val module: Module, val assignment: A
 	}
 
 	private def generateNewMarkSheet(assignment: Assignment, workbook: SXSSFWorkbook) = {
-		val sheet = workbook.createSheet("Marks for " + MarksTemplateCommand.safeAssessmentName(assignment))
+		val sheet = workbook.createSheet("Marks for " + OldMarksTemplateCommand.safeAssessmentName(assignment))
 
 		// add header row
 		val header = sheet.createRow(0)
@@ -96,14 +96,14 @@ class GenerateMarksTemplateCommandInternal(val module: Module, val assignment: A
 
 }
 
-trait GenerateMarksTemplateCommandState {
+trait OldGenerateMarksTemplateCommandState {
 	def module: Module
 	def assignment: Assignment
 }
 
-trait GenerateOwnMarksTemplatePermissions extends RequiresPermissionsChecking with PermissionsCheckingMethods {
+trait OldGenerateOwnMarksTemplatePermissions extends RequiresPermissionsChecking with PermissionsCheckingMethods {
 
-	self: GenerateMarksTemplateCommandState =>
+	self: OldGenerateMarksTemplateCommandState =>
 
 	mustBeLinked(assignment, module)
 
@@ -113,9 +113,9 @@ trait GenerateOwnMarksTemplatePermissions extends RequiresPermissionsChecking wi
 
 }
 
-trait GenerateAllMarksTemplatePermissions extends RequiresPermissionsChecking with PermissionsCheckingMethods {
+trait OldGenerateAllMarksTemplatePermissions extends RequiresPermissionsChecking with PermissionsCheckingMethods {
 
-	self: GenerateMarksTemplateCommandState =>
+	self: OldGenerateMarksTemplateCommandState =>
 
 	mustBeLinked(assignment, module)
 
