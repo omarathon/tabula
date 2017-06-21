@@ -129,6 +129,7 @@ trait SharedAssignmentProperties extends BooleanAssignmentProperties with FindAs
 		allowExtensionsAfterCloseDate = assignment.allowExtensionsAfterCloseDate
 		summative = assignment.summative
 		dissertation = assignment.dissertation
+		publishFeedback = assignment.publishFeedback
 		feedbackTemplate = assignment.feedbackTemplate
 		markingWorkflow = assignment.markingWorkflow
 		includeInFeedbackReportWithoutSubmissions = assignment.includeInFeedbackReportWithoutSubmissions

@@ -1050,36 +1050,29 @@
 									View audit
 								</a>
 							</li>
-							<#local queueSitsUploadEnabled=(features.queueFeedbackForSits && department.uploadCourseworkMarksToSits) />
-							<#if queueSitsUploadEnabled>
-								<li>
-									<span class="fa-stack"></span>
-									<#if enhancedFeedback.feedbackForSits??>
-										<#local feedbackSitsStatus=enhancedFeedback.feedbackForSits.status />
-										<#local sitsWarning = feedbackSitsStatus.dateOfUpload?has_content && feedbackSitsStatus.status.code != "uploadNotAttempted" && (
-											(feedbackSitsStatus.actualMarkLastUploaded!0) != (student.enhancedFeedback.feedback.latestMark!0) || (feedbackSitsStatus.actualGradeLastUploaded!"") != (student.enhancedFeedback.feedback.latestGrade!"")
-										) />
-										<#if feedbackSitsStatus.code == "failed">
-											<a href="<@routes.cm2.checkSitsUpload enhancedFeedback.feedback />" target="_blank">
-												<span style="cursor: pointer;" class="label label-danger use-tooltip" title="There was a problem uploading to SITS. Click to try and diagnose the problem.">
-													${feedbackSitsStatus.description}
-												</span><#--
-											--></a>
-										<#elseif sitsWarning>
-											<span class="label label-danger use-tooltip" title="The mark or grade uploaded differs from the current mark or grade. You will need to upload the marks to SITS again.">
-												${feedbackSitsStatus.description}
-											</span>
-										<#elseif feedbackSitsStatus.code == "successful">
-											<span class="label label-success">${feedbackSitsStatus.description}</span>
-										<#else>
-											<span class="label label-info">${feedbackSitsStatus.description}</span>
-										</#if>
-									<#else>
-										<span class="label label-info">Not queued for SITS upload</span>
-									</#if>
-								</#if>
-							</li>
 						</ul>
+					</#if>
+				<#elseif stage_name == 'UploadMarksToSits'>
+					<#if feedback?? && feedback.hasContent>
+						<#if enhancedFeedback.feedbackForSits??>
+							<#local feedbackForSits = enhancedFeedback.feedbackForSits />
+							<#local feedbackSitsStatus = feedbackForSits.status />
+							<#local sitsWarning = feedbackForSits.dateOfUpload?? && feedbackSitsStatus.code != "uploadNotAttempted" && (
+								(feedbackForSits.actualMarkLastUploaded!0) != (feedback.latestMark!0) || (feedbackForSits.actualGradeLastUploaded!"") != (feedback.latestGrade!"")
+							) />
+
+							<#if feedbackSitsStatus.code == "failed">
+								<a href="<@routes.cm2.checkSitsUpload feedback />" target="_blank">
+									Diagnose problems
+								</a>
+							<#elseif sitsWarning>
+								The mark or grade uploaded differs from the current mark or grade. You will need to upload the marks to SITS again.
+							</#if>
+						<#else>
+							<a href="<@routes.cm2.checkSitsUpload feedback />" target="_blank">
+								Check settings
+							</a>
+						</#if>
 					</#if>
 				</#if>
 			</#compress></@workflow_stage>

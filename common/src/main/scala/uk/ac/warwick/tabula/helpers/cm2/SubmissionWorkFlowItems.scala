@@ -9,7 +9,7 @@ import scala.collection.immutable.ListMap
 
 case class SubmissionListItem(submission: Submission, downloaded: Boolean)
 case class ExtensionListItem (extension: Extension,	within: Boolean)
-case class FeedbackListItem(feedback: Feedback, downloaded: Boolean, onlineViewed: Boolean, feedbackForSits: FeedbackForSits)
+case class FeedbackListItem(feedback: Feedback, downloaded: Boolean, onlineViewed: Boolean, feedbackForSits: Option[FeedbackForSits])
 case class Progress (percentage: Int, t: String, messageCode: String)
 
 // Simple object holder

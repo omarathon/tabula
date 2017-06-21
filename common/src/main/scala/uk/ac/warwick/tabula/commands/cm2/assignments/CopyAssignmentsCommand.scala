@@ -81,6 +81,7 @@ abstract class AbstractCopyAssignmentsCommandInternal
 		newAssignment.allowExtensionsAfterCloseDate = assignment.allowExtensionsAfterCloseDate
 		newAssignment.summative = assignment.summative
 		newAssignment.dissertation = assignment.dissertation
+		newAssignment.publishFeedback = assignment.publishFeedback
 		newAssignment.feedbackTemplate = assignment.feedbackTemplate
 		newAssignment.includeInFeedbackReportWithoutSubmissions = assignment.includeInFeedbackReportWithoutSubmissions
 		newAssignment.automaticallyReleaseToMarkers = assignment.automaticallyReleaseToMarkers

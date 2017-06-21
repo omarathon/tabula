@@ -167,6 +167,7 @@ trait AssignmentPropertiesRequest[A <: ModifyAssignmentCommand] extends JsonApiR
 		Option(allowExtensionsAfterCloseDate).foreach { state.allowExtensionsAfterCloseDate = _ }
 		Option(summative).foreach { state.summative = _ }
 		Option(dissertation).foreach { state.dissertation = _ }
+		Option(publishFeedback).foreach { state.publishFeedback = _ }
 		Option(includeInFeedbackReportWithoutSubmissions).foreach { state.includeInFeedbackReportWithoutSubmissions = _ }
 		Option(automaticallyReleaseToMarkers).foreach { state.automaticallyReleaseToMarkers = _ }
 		Option(automaticallySubmitToTurnitin).foreach { state.automaticallySubmitToTurnitin = _ }
