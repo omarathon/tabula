@@ -52,6 +52,8 @@ trait ReleaseForMarkingValidation extends SelfValidating {
 trait ReleaseForMarkingDescription extends Describable[Seq[AssignmentFeedback]] {
 	self: ReleaseForMarkingState with ReleaseForMarkingRequest =>
 
+	override lazy val eventName: String = "ReleaseForMarking"
+
 	override def describe(d: Description){
 		d.assignment(assignment)
 			.property("students" -> students)

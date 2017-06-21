@@ -44,6 +44,7 @@ trait GenericFeedbackState {
 
 trait GenericFeedbackDescription[A] extends Describable[A] {
 	self: GenericFeedbackState =>
+
 	def describe(d: Description) {
 		d.assignment(assignment)
 	}

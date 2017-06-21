@@ -232,8 +232,7 @@ trait OnlineFeedbackPermissions extends RequiresPermissionsChecking with Permiss
 }
 
 trait OnlineFeedbackDescription[A] extends Describable[A] {
-
-	this: OnlineFeedbackState =>
+	self: OnlineFeedbackState =>
 
 	def describe(d: Description) {
 		d.studentIds(Option(student.getWarwickId).toSeq)

@@ -51,6 +51,7 @@ object Assignment {
 		val AllowExtensionsAfterCloseDate = "allowExtensionsAfterCloseDate"
 		val TurnitinLtiNotifyUsers = "turnitinLtiNotifyUsers"
 		val TurnitinLtiClassWithAcademicYear = "turnitinLtiClassWithAcademicYear"
+		val PublishFeedback = "publishFeedback"
 	}
 }
 
@@ -185,6 +186,9 @@ class Assignment
 
 	def includeInFeedbackReportWithoutSubmissions: Boolean = getBooleanSetting(Settings.IncludeInFeedbackReportWithoutSubmissions, default = false)
 	def includeInFeedbackReportWithoutSubmissions_= (include: Boolean): Unit = settings += (Settings.IncludeInFeedbackReportWithoutSubmissions -> include)
+
+	def publishFeedback: Boolean = getBooleanSetting(Settings.PublishFeedback, default = true)
+	def publishFeedback_=(publish: Boolean): Unit = settings += (Settings.PublishFeedback -> publish)
 
 	def hasFeedbackTemplate: Boolean = feedbackTemplate != null
 
@@ -579,8 +583,9 @@ class Assignment
 
 	// Help views decide whether to show a publish button.
 	def canPublishFeedback: Boolean =
+		publishFeedback &&
 		fullFeedback.nonEmpty &&
-			unreleasedFeedback.nonEmpty &&
+		unreleasedFeedback.nonEmpty &&
 			(openEnded || closeDate.isBeforeNow)
 
 	def canSubmit(user: User): Boolean = { user.isFoundUser && (
@@ -746,10 +751,10 @@ class Assignment
 		"module" -> module)
 
 	def getUsercodesWithSubmissionOrFeedback: Set[String] = {
-			val submissionIds = submissions.asScala.map { _.usercode }.toSet
-			val feedbackIds = fullFeedback.map { _.usercode }.toSet
+		val submissionIds = submissions.asScala.map { _.usercode }.toSet
+		val feedbackIds = fullFeedback.map { _.usercode }.toSet
 
-			submissionIds ++ feedbackIds
+		submissionIds ++ feedbackIds
 	}
 
 	// later we may do more complex checks to see if this particular markingWorkflow requires that feedback is released manually
@@ -863,12 +868,14 @@ trait BooleanAssignmentFeedbackProperties {
 	@BeanProperty var automaticallyReleaseToMarkers: JBoolean = false
 	@BeanProperty var summative: JBoolean = true
 	@BeanProperty var dissertation: JBoolean = false
+	@BeanProperty var publishFeedback: JBoolean = true
 	@BeanProperty var includeInFeedbackReportWithoutSubmissions: JBoolean = false
 
 	def copyFeedbackBooleansTo(assignment: Assignment) {
 		assignment.collectMarks = collectMarks
 		assignment.summative = summative
 		assignment.dissertation = dissertation
+		assignment.publishFeedback = publishFeedback
 		assignment.includeInFeedbackReportWithoutSubmissions = includeInFeedbackReportWithoutSubmissions
 		assignment.automaticallyReleaseToMarkers = automaticallyReleaseToMarkers
 	}

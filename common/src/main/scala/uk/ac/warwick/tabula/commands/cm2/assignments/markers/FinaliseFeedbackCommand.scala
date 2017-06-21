@@ -81,6 +81,8 @@ trait FinaliseFeedbackPermissions extends RequiresPermissionsChecking with Permi
 trait FinaliseFeedbackDescription extends Describable[Seq[Feedback]] {
 	self: FinaliseFeedbackCommandState =>
 
+	override lazy val eventName: String = "FinaliseFeedback"
+
 	override def describe(d: Description) {
 		d.assignment(assignment)
 		d.property("updatedFeedback" -> markerFeedback.size)

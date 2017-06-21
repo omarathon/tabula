@@ -63,7 +63,7 @@ class ExportFeedbackToSitsCommandTest extends TestBase  with ComponentMixins wit
 
 			val feedbackForSits: FeedbackForSits = Fixtures.feedbackForSits(feedback, currentUser.apparentUser)
 
-			exportFeedbackToSitsService.exportToSits(feedbackForSits) returns 1
+			exportFeedbackToSitsService.exportToSits(feedback) returns 1
 			cmd.exportFeedbackToSitsService = exportFeedbackToSitsService
 
 			// upload the feedback to SITS
@@ -86,7 +86,7 @@ class ExportFeedbackToSitsCommandTest extends TestBase  with ComponentMixins wit
 
 			val feedbackForSits: FeedbackForSits = Fixtures.feedbackForSits(feedback, currentUser.apparentUser)
 
-			exportFeedbackToSitsService.exportToSits(feedbackForSits) returns 1
+			exportFeedbackToSitsService.exportToSits(feedback) returns 1
 			cmd.exportFeedbackToSitsService = exportFeedbackToSitsService
 
 			// upload the feedback to SITS
@@ -113,8 +113,8 @@ class ExportFeedbackToSitsCommandTest extends TestBase  with ComponentMixins wit
 			feedbackForSitsDao.feedbackToLoad returns Seq(feedbackForSits)
 			cmd.feedbackForSitsDao = feedbackForSitsDao
 
-			exportFeedbackToSitsService.countMatchingSasRecords(feedbackForSits) returns 1
-			exportFeedbackToSitsService.exportToSits(feedbackForSits) returns 1
+			exportFeedbackToSitsService.countMatchingSasRecords(feedback) returns 1
+			exportFeedbackToSitsService.exportToSits(feedback) returns 1
 
 			cmd.exportFeedbackToSitsService = exportFeedbackToSitsService
 

@@ -45,6 +45,8 @@ trait DownloadMarkerFeedbackPermissions extends RequiresPermissionsChecking with
 trait DownloadMarkerFeedbackDescription extends Describable[Option[RenderableFile]] {
 	self: DownloadMarkerFeedbackState =>
 
+	override lazy val eventName: String = "DownloadMarkerFeedback"
+
 	override def describe(d: Description): Unit = {
 		d.assignment(assignment)
 		d.property("filename", filename)

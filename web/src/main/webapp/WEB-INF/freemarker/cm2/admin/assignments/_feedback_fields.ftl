@@ -46,4 +46,14 @@
 			Dissertations don't have a 20-day turnaround time for feedback.
 		</div>
 	</@bs3form.labelled_form_group>
+
+	<@bs3form.labelled_form_group path="publishFeedback" labelText="Publish feedback to students">
+		<@bs3form.checkbox path="publishFeedback">
+			<@f.checkbox path="publishFeedback" id="publishFeedback" />
+			Allow feedback to be published to students for this assignment
+		</@bs3form.checkbox>
+		<div class="help-block">
+			If you don't check this box, you won't be able to publish any feedback to students.
+		</div>
+	</@bs3form.labelled_form_group>
 </#escape>

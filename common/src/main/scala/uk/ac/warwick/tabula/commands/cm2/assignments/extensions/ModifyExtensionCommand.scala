@@ -86,6 +86,8 @@ trait ModifyExtensionValidation extends SelfValidating {
 trait ModifyExtensionDescription extends Describable[Extension] {
 	self: ModifyExtensionState =>
 
+	override lazy val eventName: String = "ModifyExtension"
+
 	def describe(d: Description) {
 		d.assignment(extension.assignment)
 		d.module(extension.assignment.module)

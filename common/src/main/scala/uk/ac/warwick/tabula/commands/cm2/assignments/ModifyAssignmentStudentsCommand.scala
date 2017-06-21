@@ -87,6 +87,8 @@ trait ModifyAssignmentStudentsPermissions extends RequiresPermissionsChecking wi
 trait ModifyAssignmentStudentsDescription extends Describable[Assignment] {
 	self: ModifyAssignmentStudentsCommandState =>
 
+	override lazy val eventName: String = "ModifyAssignmentStudents"
+
 	override def describe(d: Description) {
 		d.assignment(assignment)
 	}

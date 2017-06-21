@@ -66,6 +66,8 @@ trait PlagiarismInvestigationCommandPermissions extends RequiresPermissionsCheck
 trait PlagiarismInvestigationCommandDescription extends Describable[Unit] {
 	self: PlagiarismInvestigationCommandState =>
 
+	override lazy val eventName: String = "PlagiarismInvestigation"
+
 	def describe(d: Description) {
 		d.assignment(assignment)
 			.submissions(submissions)
