@@ -5,7 +5,7 @@ import javax.mail.internet.InternetAddress
 
 import org.joda.time.DateTime
 import org.springframework.validation.Errors
-import uk.ac.warwick.tabula.CurrentUser
+import uk.ac.warwick.tabula.{CurrentUser, ItemNotFoundException}
 import uk.ac.warwick.tabula.commands._
 import uk.ac.warwick.tabula.commands.cm2.assignments.{SelectedStudentsRequest, SelectedStudentsState}
 import uk.ac.warwick.tabula.commands.cm2.feedback.PublishFeedbackCommand._
@@ -68,6 +68,8 @@ object PublishFeedbackCommand {
 class PublishFeedbackCommandInternal(val assignment: Assignment, val submitter: CurrentUser, val gradeGenerator: GeneratesGradesFromMarks)
 	extends CommandInternal[PublishFeedbackResults] with PublishFeedbackCommandRequest {
 	self: QueuesFeedbackForSits with UserLookupComponent =>
+
+	if (!assignment.publishFeedback) throw new ItemNotFoundException(assignment, "Publishing feedback to students is disabled for this assignment")
 
 	def applyInternal(): PublishFeedbackResults = {
 		val allResults = feedbackToRelease.map { feedback =>

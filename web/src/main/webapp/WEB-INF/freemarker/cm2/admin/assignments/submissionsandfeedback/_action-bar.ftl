@@ -360,7 +360,7 @@
 										Publish feedback
 								</@fmt.permission_button>
 							</li>
-						<#else>
+						<#elseif assignment.publishFeedback>
 							<li class="disabled"><a class="use-tooltip" data-container="body" title="No current feedback to publish, or the assignment is not yet closed.">Publish feedback</a></li>
 						</#if>
 						<li class="must-have-selected">
