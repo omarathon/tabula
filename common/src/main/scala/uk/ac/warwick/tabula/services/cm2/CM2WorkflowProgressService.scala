@@ -5,10 +5,11 @@ import uk.ac.warwick.spring.Wire
 import uk.ac.warwick.tabula.WorkflowStageHealth._
 import uk.ac.warwick.tabula._
 import uk.ac.warwick.tabula.cm2.web.Routes
-import uk.ac.warwick.tabula.data.model.{Assignment, FeedbackForSits, FeedbackForSitsStatus}
 import uk.ac.warwick.tabula.data.model.MarkingMethod.{ModeratedMarking, SeenSecondMarking}
 import uk.ac.warwick.tabula.data.model.MarkingState.{MarkingCompleted, Rejected}
 import uk.ac.warwick.tabula.data.model.markingworkflow.{FinalStage, MarkingWorkflowStage}
+import uk.ac.warwick.tabula.data.model.{Assignment, FeedbackForSits, FeedbackForSitsStatus}
+import uk.ac.warwick.tabula.helpers.RequestLevelCaching
 import uk.ac.warwick.tabula.helpers.cm2.WorkflowItems
 
 import scala.collection.JavaConverters._
@@ -17,13 +18,13 @@ import scala.collection.JavaConverters._
 	* This isn't code for marking workflows. It drives the progress bar and next action on various coursework pages.
 	*/
 @Service
-class CM2WorkflowProgressService {
+class CM2WorkflowProgressService extends RequestLevelCaching[Assignment, Seq[CM2WorkflowStage]] {
 	import CM2WorkflowStages._
 
 	final val MaxPower = 100
 	var features: Features = Wire[Features]
 
-	def getStagesFor(assignment: Assignment): Seq[CM2WorkflowStage] = {
+	def getStagesFor(assignment: Assignment): Seq[CM2WorkflowStage] = cachedBy(assignment) {
 		val stages = Seq.newBuilder[CM2WorkflowStage]
 
 		val hasCM1MarkingWorkflow = features.markingWorkflows && assignment.markingWorkflow != null
@@ -73,7 +74,7 @@ class CM2WorkflowProgressService {
 			stages ++= Seq(ReleaseFeedback, ViewOnlineFeedback, DownloadFeedback)
 		}
 
-		if (features.queueFeedbackForSits && (hasMarkingWorkflow || assignment.collectMarks) && assignment.module.adminDepartment.uploadCourseworkMarksToSits && assignment.membershipInfo.sitsCount > 0) {
+		if (features.queueFeedbackForSits && (hasMarkingWorkflow || assignment.collectMarks) && assignment.module.adminDepartment.uploadCourseworkMarksToSits && !assignment.assessmentGroups.isEmpty) {
 			stages += UploadMarksToSits
 		}
 
@@ -127,8 +128,8 @@ sealed abstract class CM2WorkflowStage(val category: CM2WorkflowCategory) extend
 }
 
 object CM2WorkflowStages {
-	import WorkflowStages._
 	import CM2WorkflowCategory._
+	import WorkflowStages._
 
 	case object Submission extends CM2WorkflowStage(Submissions) {
 		def actionCode = "workflow.Submission.action"

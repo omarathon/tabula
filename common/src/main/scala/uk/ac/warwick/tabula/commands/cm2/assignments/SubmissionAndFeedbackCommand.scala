@@ -161,7 +161,9 @@ abstract class SubmissionAndFeedbackCommandInternal(val assignment: Assignment)
 					enhancedExtension = enhancedExtensionForUniId
 				)
 
-				val progress = workflowProgressService.progress(assignment)(coursework)
+				val progress = benchmarkTask(s"Get progress for ${user.getFullName} (${user.getUserId})") {
+					workflowProgressService.progress(assignment)(coursework)
+				}
 
 				AssignmentSubmissionStudentInfo(
 					user = user,
