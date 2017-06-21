@@ -28,7 +28,7 @@ class ExportFeedbackToSitsServiceTest extends TestBase {
 
 		val feedbackForSits: FeedbackForSits = Fixtures.feedbackForSits(feedback, currentUser.apparentUser)
 
-		val paramGetter = new ParameterGetter(feedbackForSits)
+		val paramGetter = new ParameterGetter(feedback)
 
 	}
 
@@ -46,7 +46,7 @@ class ExportFeedbackToSitsServiceTest extends TestBase {
 	def noAssessmentGroups(): Unit = withUser("0070790", "cusdx") {
 		new Environment {
 			assignment.assessmentGroups.clear()
-			val newParamGetter = new ParameterGetter(feedbackForSits)
+			val newParamGetter = new ParameterGetter(feedback)
 			val inspectMe: Option[util.HashMap[String, Object]] = newParamGetter.getQueryParams
 			inspectMe.isEmpty should be (true)
 		}

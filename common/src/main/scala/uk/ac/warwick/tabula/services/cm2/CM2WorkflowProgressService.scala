@@ -5,7 +5,7 @@ import uk.ac.warwick.spring.Wire
 import uk.ac.warwick.tabula.WorkflowStageHealth._
 import uk.ac.warwick.tabula._
 import uk.ac.warwick.tabula.cm2.web.Routes
-import uk.ac.warwick.tabula.data.model.Assignment
+import uk.ac.warwick.tabula.data.model.{Assignment, FeedbackForSits, FeedbackForSitsStatus}
 import uk.ac.warwick.tabula.data.model.MarkingMethod.{ModeratedMarking, SeenSecondMarking}
 import uk.ac.warwick.tabula.data.model.MarkingState.{MarkingCompleted, Rejected}
 import uk.ac.warwick.tabula.data.model.markingworkflow.{FinalStage, MarkingWorkflowStage}
@@ -71,6 +71,10 @@ class CM2WorkflowProgressService {
 
 		if (assignment.publishFeedback) {
 			stages ++= Seq(ReleaseFeedback, ViewOnlineFeedback, DownloadFeedback)
+		}
+
+		if (features.queueFeedbackForSits && (hasMarkingWorkflow || assignment.collectMarks) && assignment.module.adminDepartment.uploadCourseworkMarksToSits && assignment.membershipInfo.sitsCount > 0) {
+			stages += UploadMarksToSits
 		}
 
 		stages.result()
@@ -453,6 +457,52 @@ object CM2WorkflowStages {
 			}
 		override def preconditions = Seq(Seq(ReleaseFeedback, ViewOnlineFeedback), Seq(ReleaseFeedback))
 		def route(assignment: Assignment): Option[Route] = None
+		val markingRelated = false
+	}
+
+	case object UploadMarksToSits extends CM2WorkflowStage(Feedback) {
+		def actionCode = "workflow.UploadMarksToSits.action"
+
+		def progress(assignment: Assignment)(coursework: WorkflowItems): StageProgress = {
+			def isMarkOrGradeChanged(feedbackForSits: FeedbackForSits): Boolean = {
+				// This is safe as you can only have a FFS if you have a Feedback
+				val actualFeedback = coursework.enhancedFeedback.map(_.feedback).get
+
+				Option(feedbackForSits.dateOfUpload).nonEmpty &&
+					feedbackForSits.status != FeedbackForSitsStatus.UploadNotAttempted &&
+					(
+						Option(feedbackForSits.actualMarkLastUploaded).getOrElse(0) != actualFeedback.latestMark.getOrElse(0) ||
+						Option(feedbackForSits.actualGradeLastUploaded).getOrElse("") != actualFeedback.latestGrade.getOrElse("")
+					)
+			}
+
+			coursework.enhancedFeedback.flatMap(_.feedbackForSits) match {
+				case Some(feedbackForSits) if feedbackForSits.status == FeedbackForSitsStatus.Failed =>
+					StageProgress(UploadMarksToSits, started = true, messageCode = "workflow.UploadMarksToSits.failed", health = Danger)
+
+				case Some(feedbackForSits) if isMarkOrGradeChanged(feedbackForSits) =>
+					StageProgress(UploadMarksToSits, started = true, messageCode = "workflow.UploadMarksToSits.outOfDate", health = Danger)
+
+				case Some(feedbackForSits) if feedbackForSits.status == FeedbackForSitsStatus.Successful =>
+					StageProgress(UploadMarksToSits, started = true, messageCode = "workflow.UploadMarksToSits.successful", health = Good, completed = true)
+
+				case Some(_) =>
+					StageProgress(UploadMarksToSits, started = true, messageCode = "workflow.UploadMarksToSits.queued", health = Warning)
+
+				case _ => StageProgress(UploadMarksToSits, started = false, messageCode = "workflow.UploadMarksToSits.notQueued")
+			}
+		}
+
+		override def preconditions: Seq[Seq[WorkflowStage]] = Seq(
+			Seq(AddMarks), // Assignments with no marking workflow
+			Seq(AddFeedback), // Assignments with no marking workflow
+			Seq(CM1FirstMarking, CM1SecondMarking, CM1FinaliseSeenSecondMarking), // CM1 seen second marking
+			Seq(CM1FirstMarking) // CM1 single marker
+		) ++ MarkingWorkflowStage.values.collect { case f: FinalStage =>
+			f.previousStages.map(CM2MarkingWorkflowStage.apply)
+		}
+
+		def route(assignment: Assignment): Option[Route] = Some(Route("Upload feedback to SITS", Routes.admin.assignment.uploadToSits(assignment)))
 		val markingRelated = false
 	}
 }

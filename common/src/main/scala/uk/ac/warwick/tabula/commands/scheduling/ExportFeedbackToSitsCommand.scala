@@ -44,7 +44,7 @@ class ExportFeedbackToSitsCommand extends CommandInternal[Seq[FeedbackForSits]] 
 			else {
 
 				// first check to see if there is one and only one matching row
-				val rowCount = exportFeedbackToSitsService.countMatchingSasRecords(feedbackToLoad)
+				val rowCount = exportFeedbackToSitsService.countMatchingSasRecords(feedback)
 
 				if (rowCount == 0) {
 					feedbackToLoad.status = Failed
@@ -69,7 +69,7 @@ class ExportFeedbackToSitsCommand extends CommandInternal[Seq[FeedbackForSits]] 
 		val studentId = feedback.studentIdentifier
 
 		//  update - expecting to update one row
-		val expectedRowCount = exportFeedbackToSitsService.exportToSits(feedbackToLoad)
+		val expectedRowCount = exportFeedbackToSitsService.exportToSits(feedback)
 
 		if (expectedRowCount == 0) {
 			feedbackToLoad.status = Failed

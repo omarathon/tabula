@@ -139,7 +139,7 @@ abstract class SubmissionAndFeedbackCommandInternal(val assignment: Assignment)
 					usercode == feedback.usercode && dateTime.isAfter(latestUpdate)
 				})
 
-				FeedbackListItem(feedback, downloaded, viewed, feedbackForSitsService.getByFeedback(feedback).orNull)
+				FeedbackListItem(feedback, downloaded, viewed, feedbackForSitsService.getByFeedback(feedback))
 			}
 		}
 
