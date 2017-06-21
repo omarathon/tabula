@@ -132,6 +132,8 @@ trait RequestExtensionCommandPermission extends RequiresPermissionsChecking with
 trait RequestExtensionCommandDescription extends Describable[Extension] {
 	self: RequestExtensionCommandState =>
 
+	override lazy val eventName: String = "RequestExtension"
+
 	def describe(d: Description) {
 		d.assignment(assignment)
 		d.module(assignment.module)

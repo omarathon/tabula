@@ -63,6 +63,8 @@ trait AddMarkingWorkflowValidation extends ModifyMarkingWorkflowValidation with 
 trait AddMarkingWorkflowDescription extends Describable[CM2MarkingWorkflow] {
 	self: ModifyMarkingWorkflowState =>
 
+	override lazy val eventName: String = "AddMarkingWorkflow"
+
 	def describe(d: Description) {
 		d.department(department)
 	}

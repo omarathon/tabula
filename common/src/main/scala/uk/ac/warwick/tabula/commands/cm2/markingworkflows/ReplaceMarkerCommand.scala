@@ -79,6 +79,9 @@ trait ReplaceMarkerValidation extends SelfValidating {
 
 trait ReplaceMarkerDescription extends Describable[CM2MarkingWorkflow] {
 	self: ReplaceMarkerState =>
+
+	override lazy val eventName: String = "ReplaceMarker"
+
 	def describe(d: Description) {
 		d.department(department)
 		d.markingWorkflow(markingWorkflow)

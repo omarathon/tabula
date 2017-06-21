@@ -63,6 +63,8 @@ trait ReturnToMarkerValidation extends SelfValidating {
 trait ReturnToMarkerDescription extends Describable[Seq[AssignmentFeedback]] {
 	self: ReturnToMarkerState with ReturnToMarkerRequest =>
 
+	override lazy val eventName: String = "ReturnToMarker"
+
 	override def describe(d: Description){
 		d.assignment(assignment)
 			.property("students" -> students)

@@ -95,5 +95,7 @@ trait ExtensionSettingsCommandValidation extends SelfValidating {
 trait ExtensionSettingsCommandDescription extends Describable[Result] {
 	self: ExtensionSettingsCommandState =>
 
+	override lazy val eventName: String = "ExtensionSettings"
+
 	override def describe(d: Description): Unit = d.department(department)
 }
