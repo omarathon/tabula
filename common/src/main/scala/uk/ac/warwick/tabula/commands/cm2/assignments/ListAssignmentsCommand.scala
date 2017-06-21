@@ -9,6 +9,7 @@ import uk.ac.warwick.tabula.commands.cm2.assignments.ListAssignmentsCommand._
 import uk.ac.warwick.tabula.data.model
 import uk.ac.warwick.tabula.data.model.markingworkflow.{FinalStage, MarkingWorkflowStage, MarkingWorkflowType}
 import uk.ac.warwick.tabula.data.model.{Assignment, Department, MarkingMethod, Module}
+import uk.ac.warwick.tabula.helpers.DateTimeOrdering._
 import uk.ac.warwick.tabula.permissions.Permissions
 import uk.ac.warwick.tabula.services._
 import uk.ac.warwick.tabula.services.cm2.{AutowiringCM2WorkflowProgressServiceComponent, CM2WorkflowCategory, CM2WorkflowProgressServiceComponent, CM2WorkflowStage}
