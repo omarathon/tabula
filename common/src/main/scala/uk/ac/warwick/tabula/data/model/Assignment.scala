@@ -751,10 +751,10 @@ class Assignment
 		"module" -> module)
 
 	def getUsercodesWithSubmissionOrFeedback: Set[String] = {
-			val submissionIds = submissions.asScala.map { _.usercode }.toSet
-			val feedbackIds = fullFeedback.map { _.usercode }.toSet
+		val submissionIds = submissions.asScala.map { _.usercode }.toSet
+		val feedbackIds = fullFeedback.map { _.usercode }.toSet
 
-			submissionIds ++ feedbackIds
+		submissionIds ++ feedbackIds
 	}
 
 	// later we may do more complex checks to see if this particular markingWorkflow requires that feedback is released manually

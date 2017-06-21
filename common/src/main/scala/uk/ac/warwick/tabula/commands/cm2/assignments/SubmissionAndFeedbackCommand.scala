@@ -114,20 +114,23 @@ abstract class SubmissionAndFeedbackCommandInternal(val assignment: Assignment)
 		}
 		val unsubmittedMembers = moduleMembers.filterNot(m => usercodesWithSubmissionOrFeedback.contains(m.getUserId))
 
+		val allFeedback = assignment.feedbacks.asScala
+		val allExtensions = assignment.extensions.asScala
+
 		def enhancedFeedbackForUsercode(usercode: String) = {
-			val usersFeedback = assignment.feedbacks.asScala.filter(feedback => feedback.usercode == usercode)
+			val usersFeedback = allFeedback.filter(feedback => feedback.usercode == usercode)
 			if (usersFeedback.size > 1) throw new IllegalStateException("More than one Feedback for " + usercode)
-			usersFeedback.headOption map { feedback =>
-				val downloaded = !feedback.attachments.isEmpty && (whoDownloaded exists { case (user, dateTime) =>
+			usersFeedback.headOption.map { feedback =>
+				val downloaded = feedback.hasContent && !feedback.attachments.isEmpty && (whoDownloaded exists { case (user, dateTime) =>
 					user.getUserId == feedback.usercode &&
 						dateTime.isAfter(feedback.mostRecentAttachmentUpload)
 				})
 
-				val viewed = (feedback.hasOnlineFeedback || feedback.hasGenericFeedback) && (whoViewed exists { case (user, dateTime) =>
+				val viewed = feedback.hasContent && (feedback.hasOnlineFeedback || feedback.hasGenericFeedback) && whoViewed.filterKeys(_.getUserId == feedback.usercode).exists { case (user, dateTime) =>
 					val usercode = user.getUserId
 
 					val latestOnlineUpdate = latestModifiedOnlineFeedback
-						.find { case (u, _) => user.getUserId == usercode }
+						.find { case (u, _) => u.getUserId == usercode }
 						.map { case (_, dt) => dt }
 						.getOrElse(new DateTime(0))
 
@@ -135,33 +138,33 @@ abstract class SubmissionAndFeedbackCommandInternal(val assignment: Assignment)
 						.filter(_.isAfter(latestOnlineUpdate))
 						.getOrElse(latestOnlineUpdate)
 
-					usercode == feedback.usercode && dateTime.isAfter(latestUpdate)
-				})
+					dateTime.isAfter(latestUpdate)
+				}
 
-				FeedbackListItem(feedback, downloaded, viewed, feedbackForSitsService.getByFeedback(feedback))
+				FeedbackListItem(feedback, downloaded, viewed, if (feedback.hasContent) feedbackForSitsService.getByFeedback(feedback) else None)
 			}
 		}
 
 		val unsubmitted: Seq[AssignmentSubmissionStudentInfo] = benchmarkTask("Get unsubmitted users") {
-			for (user <- unsubmittedMembers) yield {
-				val usersExtension = assignment.extensions.asScala.filter(_.usercode == user.getUserId)
+			for (user <- unsubmittedMembers) yield benchmarkTask(s"Inflate information for ${user.getFullName} (${user.getUserId})") {
+				val usersExtension = benchmarkTask("Find extension") { allExtensions.filter(_.usercode == user.getUserId) }
 				if (usersExtension.size > 1) throw new IllegalStateException("More than one Extension for " + user.getUserId)
 
-				val enhancedExtensionForUniId = usersExtension.headOption map { extension =>
+				val enhancedExtensionForUniId = benchmarkTask("Enhance extension") { usersExtension.headOption map { extension =>
 					ExtensionListItem(
 						extension = extension,
 						within = assignment.isWithinExtension(user)
 					)
-				}
+				}}
 
-				val coursework = WorkflowItems(
+				val coursework = benchmarkTask("Create workflow items") { WorkflowItems(
 					user,
 					enhancedSubmission = None,
-					enhancedFeedback = enhancedFeedbackForUsercode(user.getUserId),
+					enhancedFeedback = benchmarkTask("Enhance feedback") { enhancedFeedbackForUsercode(user.getUserId) },
 					enhancedExtension = enhancedExtensionForUniId
-				)
+				) }
 
-				val progress = benchmarkTask(s"Get progress for ${user.getFullName} (${user.getUserId})") {
+				val progress = benchmarkTask("Get progress") {
 					workflowProgressService.progress(assignment)(coursework)
 				}
 
@@ -180,7 +183,7 @@ abstract class SubmissionAndFeedbackCommandInternal(val assignment: Assignment)
 		val submitted: Seq[AssignmentSubmissionStudentInfo] = benchmarkTask("Get submitted users") {
 			for (usercode <- usercodesWithSubmissionOrFeedback) yield {
 				val usersSubmissions = enhancedSubmissions.filter(_.submission.usercode == usercode)
-				val usersExtension = assignment.extensions.asScala.filter(extension => extension.usercode == usercode)
+				val usersExtension = allExtensions.filter(extension => extension.usercode == usercode)
 
 				val userFilter = moduleMembers.filter(u => u.getUserId == usercode)
 				val user = if (userFilter.isEmpty) {
