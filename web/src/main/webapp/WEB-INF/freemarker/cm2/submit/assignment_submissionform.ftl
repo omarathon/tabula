@@ -137,7 +137,7 @@
 					</p>
 				</@bs3form.labelled_form_group>
 
-				<@bs3form.labelled_form_group path="" labelText="Authorship confirmation">
+				<@bs3form.labelled_form_group path="" labelText="Confirm you are the author of this assignment">
 					<@bs3form.checkbox path="plagiarismDeclaration">
 						<@f.errors path="plagiarismDeclaration" cssClass="error" />
 						<@f.checkbox path="plagiarismDeclaration" id="plagiarismDeclaration" required="true"/>
