@@ -739,7 +739,7 @@
 						</#if>
 
 						<#list info.stages as category>
-							<li>
+							<li class="category">
 								<strong><@workflowMessage category.category.code /></strong>:
 								<ul>
 									<#list category.stages as stage>
