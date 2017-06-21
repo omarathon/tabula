@@ -58,11 +58,11 @@
 
 			<#local submissions_url><@routes.cm2.assignmentsubmissions assignment 'edit' /></#local>
 			<@wizard_link
-	label="Edit submission settings"
+	label="Submissions"
 	is_first=false
 	is_active=(current_step == 'submissions')
 	is_available=true
-	tooltip="Edit submissions"
+	tooltip="Edit submission settings"
 	url=submissions_url />
 
 			<#local options_url><@routes.cm2.assignmentoptions assignment 'edit' /></#local>
