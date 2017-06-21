@@ -137,7 +137,7 @@ class ListDepartmentAssignmentsCommandInternal(val department: Department, acade
 	override def applyInternal(): DepartmentResult =
 		allModulesWithPermission.filter { module =>
 			moduleFilters.asScala.isEmpty || moduleFilters.asScala.exists(_.module == module)
-		}.map(moduleInfo).filter { info => showEmptyModules || info.assignments.nonEmpty } .sortBy(_.module.code)
+		}.map(moduleInfo).filter { info => showEmptyModules || info.assignments.nonEmpty }.sortBy(_.module.code)
 
 }
 
