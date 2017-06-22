@@ -129,7 +129,7 @@
 		$body.on('submit', 'form.modify-extension', function(e){
 			e.preventDefault();
 			var $form = $(e.target);
-			var $detailRow = $form.closest('.detailrow-container');
+			var $detailRow = $form.closest('.content-container,.detailrow-container');
 			var formData = $form.serializeArray();
 			var $buttonClicked =  $(document.activeElement);
 			formData.push({ name: $buttonClicked.attr('name'), value: $buttonClicked.val() });
