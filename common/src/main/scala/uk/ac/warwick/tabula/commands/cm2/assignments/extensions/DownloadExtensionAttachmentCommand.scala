@@ -33,6 +33,8 @@ trait DownloadExtensionAttachmentPermissions extends RequiresPermissionsChecking
 trait DownloadExtensionAttachmentDescription extends Describable[Option[RenderableAttachment]] {
 	self: DownloadExtensionAttachmentState =>
 
+	override lazy val eventName: String = "DownloadExtensionAttachment"
+
 	override def describe(d: Description) {
 		d.assignment(extension.assignment)
 		d.property("filename", filename)

@@ -13,7 +13,7 @@ import org.springframework.stereotype.Service
 import uk.ac.warwick.spring.Wire
 import uk.ac.warwick.tabula.JavaImports._
 import uk.ac.warwick.tabula.commands.scheduling.imports.ImportMemberHelpers
-import uk.ac.warwick.tabula.data.model.{AssessmentGroup, FeedbackForSits}
+import uk.ac.warwick.tabula.data.model.{AssessmentGroup, Feedback}
 import uk.ac.warwick.tabula.helpers.Logging
 import uk.ac.warwick.tabula.services.scheduling.ExportFeedbackToSitsService.{CountQuery, ExportFeedbackToSitsQuery, PartialMatchQuery, SasRow}
 
@@ -29,22 +29,22 @@ trait AutowiringExportFeedbackToSitsServiceComponent extends ExportFeedbackToSit
 }
 
 trait ExportFeedbackToSitsService {
-	def countMatchingSasRecords(feedbackForSits: FeedbackForSits): Integer
-	def exportToSits(feedbackToLoad: FeedbackForSits): Integer
-	def getPartialMatchingSasRecords(feedbackForSits: FeedbackForSits): Seq[ExportFeedbackToSitsService.SasRow]
+	def countMatchingSasRecords(feedback: Feedback): Integer
+	def exportToSits(feedback: Feedback): Integer
+	def getPartialMatchingSasRecords(feedback: Feedback): Seq[ExportFeedbackToSitsService.SasRow]
 }
 
-class ParameterGetter(feedbackForSits: FeedbackForSits) {
-	val assessGroups: mutable.Buffer[AssessmentGroup] = feedbackForSits.feedback.assessmentGroups.asScala
+class ParameterGetter(feedback: Feedback) {
+	val assessGroups: mutable.Buffer[AssessmentGroup] = feedback.assessmentGroups.asScala
 	val possibleOccurrenceSequencePairs: mutable.Buffer[(String, String)] = assessGroups.map(assessGroup => (assessGroup.occurrence, assessGroup.assessmentComponent.sequence))
 
 	def getQueryParams: Option[util.HashMap[String, Object]] = possibleOccurrenceSequencePairs match {
 		case pairs if pairs.isEmpty => None
 		case _ => Option(JHashMap(
 			// for the where clause
-			("studentId", feedbackForSits.feedback.studentIdentifier),
-			("academicYear", feedbackForSits.feedback.academicYear.toString),
-			("moduleCodeMatcher", feedbackForSits.feedback.module.code.toUpperCase + "%"),
+			("studentId", feedback.studentIdentifier),
+			("academicYear", feedback.academicYear.toString),
+			("moduleCodeMatcher", feedback.module.code.toUpperCase + "%"),
 			("now", DateTime.now.toDate),
 
 			// in theory we should look for a record with occurrence and sequence from the same pair,
@@ -59,9 +59,9 @@ class ParameterGetter(feedbackForSits: FeedbackForSits) {
 		case pairs if pairs.isEmpty => None
 		case _ => Option(JHashMap(
 			// for the where clause
-			("studentId", feedbackForSits.feedback.studentIdentifier),
-			("academicYear", feedbackForSits.feedback.academicYear.toString),
-			("moduleCodeMatcher", feedbackForSits.feedback.module.code.toUpperCase + "%"),
+			("studentId", feedback.studentIdentifier),
+			("academicYear", feedback.academicYear.toString),
+			("moduleCodeMatcher", feedback.module.code.toUpperCase + "%"),
 			("now", DateTime.now.toDate),
 
 			// in theory we should look for a record with occurrence and sequence from the same pair,
@@ -80,52 +80,51 @@ class ParameterGetter(feedbackForSits: FeedbackForSits) {
 
 
 class AbstractExportFeedbackToSitsService extends ExportFeedbackToSitsService with Logging {
-
 	self: SitsDataSourceComponent =>
 
-	def countMatchingSasRecords(feedbackForSits: FeedbackForSits): Integer = {
+	def countMatchingSasRecords(feedback: Feedback): Integer = {
 		val countQuery = new CountQuery(sitsDataSource)
-		val parameterGetter: ParameterGetter = new ParameterGetter(feedbackForSits)
+		val parameterGetter: ParameterGetter = new ParameterGetter(feedback)
 		parameterGetter.getQueryParams match {
 			case Some(params) =>
 				countQuery.getCount(params)
 			case None =>
-				logger.warn(s"Cannot upload feedback ${feedbackForSits.feedback.id} for SITS as no assessment groups found")
+				logger.warn(s"Cannot upload feedback ${feedback.id} for SITS as no assessment groups found")
 				0
 		}
 	}
 
-	def exportToSits(feedbackForSits: FeedbackForSits): Integer = {
-		val parameterGetter: ParameterGetter = new ParameterGetter(feedbackForSits)
+	def exportToSits(feedback: Feedback): Integer = {
+		val parameterGetter: ParameterGetter = new ParameterGetter(feedback)
 		val updateQuery = new ExportFeedbackToSitsQuery(sitsDataSource)
 
-		val grade = feedbackForSits.feedback.latestGrade
-		val mark = feedbackForSits.feedback.latestMark
+		val grade = feedback.latestGrade
+		val mark = feedback.latestMark
 		val numRowsChanged = {
 			if (grade.isDefined && mark.isDefined) {
 				parameterGetter.getUpdateParams(mark.get, grade.get) match {
 					case Some(params) =>
 						updateQuery.updateByNamedParam(params)
 					case None =>
-						logger.warn(s"Cannot upload feedback ${feedbackForSits.feedback.id} for SITS as no assessment groups found")
+						logger.warn(s"Cannot upload feedback ${feedback.id} for SITS as no assessment groups found")
 						0
 				}
 			} else {
-				logger.warn(f"Not updating SITS CAM_SAS for feedback ${feedbackForSits.feedback.id} - no latest mark or grade found")
+				logger.warn(f"Not updating SITS CAM_SAS for feedback ${feedback.id} - no latest mark or grade found")
 				0 // issue a warning when the FeedbackForSits record is created, not here
 			}
 		}
 		numRowsChanged
 	}
 
-	def getPartialMatchingSasRecords(feedbackForSits: FeedbackForSits): Seq[ExportFeedbackToSitsService.SasRow] = {
-		val parameterGetter: ParameterGetter = new ParameterGetter(feedbackForSits)
+	def getPartialMatchingSasRecords(feedback: Feedback): Seq[ExportFeedbackToSitsService.SasRow] = {
+		val parameterGetter: ParameterGetter = new ParameterGetter(feedback)
 		parameterGetter.getQueryParams match {
 			case Some(params) =>
 				val query = new PartialMatchQuery(sitsDataSource)
 				query.executeByNamedParam(params.asScala.filterKeys(_ != "now").asJava).asScala
 			case None =>
-				logger.warn(s"Cannot get partial matching SAS records for feedback ${feedbackForSits.feedback.id} as no assessment groups found")
+				logger.warn(s"Cannot get partial matching SAS records for feedback ${feedback.id} as no assessment groups found")
 				Nil
 		}
 	}
@@ -230,7 +229,7 @@ class ExportFeedbackToSitsServiceImpl
 @Profile(Array("sandbox"))
 @Service
 class ExportFeedbackToSitsSandboxService extends ExportFeedbackToSitsService {
-	def countMatchingSasRecords(feedbackForSits: FeedbackForSits) = 0
-	def exportToSits(feedbackForSits: FeedbackForSits) = 0
-	def getPartialMatchingSasRecords(feedbackForSits: FeedbackForSits): Seq[SasRow] = Nil
+	def countMatchingSasRecords(feedback: Feedback) = 0
+	def exportToSits(feedback: Feedback) = 0
+	def getPartialMatchingSasRecords(feedback: Feedback): Seq[SasRow] = Nil
 }

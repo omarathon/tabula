@@ -64,8 +64,9 @@ trait MarksOpenAndCloseDepartmentsCommandPermissions extends RequiresPermissions
 }
 
 trait MarksOpenAndCloseDepartmentsCommandDescription extends Describable[DegreeType] {
-
 	self: MarksOpenAndCloseDepartmentsCommandState =>
+
+	override lazy val eventName: String = "MarksOpenAndCloseDepartments"
 
 	def describe(d: Description): Unit = d.properties(
 		"degreeType" -> {

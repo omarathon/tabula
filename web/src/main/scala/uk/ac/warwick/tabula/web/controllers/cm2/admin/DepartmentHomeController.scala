@@ -3,6 +3,7 @@ package uk.ac.warwick.tabula.web.controllers.cm2.admin
 import org.joda.time.DateTime
 import org.springframework.context.annotation.Profile
 import org.springframework.stereotype.Controller
+import org.springframework.validation.Errors
 import org.springframework.web.bind.annotation.{ModelAttribute, PathVariable, RequestMapping}
 import uk.ac.warwick.tabula.{AcademicYear, CurrentUser}
 import uk.ac.warwick.tabula.web.Routes
@@ -39,7 +40,7 @@ abstract class AbstractDepartmentHomeController
 	}
 
 	@RequestMapping(params=Array("!ajax"), headers=Array("!X-Requested-With"))
-	def home(@ModelAttribute("command") command: DepartmentCommand, @PathVariable department: Department): Mav =
+	def home(@ModelAttribute("command") command: DepartmentCommand, errors: Errors, @PathVariable department: Department): Mav =
 		Mav("cm2/admin/home/department",
 			"academicYear" -> command.academicYear,
 			"modules" -> command.allModulesWithPermission,
@@ -51,7 +52,7 @@ abstract class AbstractDepartmentHomeController
 			.secondCrumbs(academicYearBreadcrumbs(command.academicYear)(Routes.cm2.admin.department(department, _)): _*)
 
 	@RequestMapping
-	def homeAjax(@ModelAttribute("command") command: DepartmentCommand): Mav =
+	def homeAjax(@ModelAttribute("command") command: DepartmentCommand, errors: Errors): Mav =
 		Mav("cm2/admin/home/moduleList", "modules" -> command.apply(), "academicYear" -> command.academicYear).noLayout()
 
 }

@@ -80,6 +80,8 @@ trait FeedbackReportCommandValidation extends SelfValidating {
 trait FeedbackReportCommandDescription extends Describable[Result] {
 	self: FeedbackReportCommandState with FeedbackReportCommandRequest =>
 
+	override lazy val eventName: String = "FeedbackReport"
+
 	override def describe(d: Description): Unit =
 		d.department(department).properties(
 			"startDate" -> startDate,

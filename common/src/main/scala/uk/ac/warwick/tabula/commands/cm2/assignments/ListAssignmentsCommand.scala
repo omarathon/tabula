@@ -9,6 +9,7 @@ import uk.ac.warwick.tabula.commands.cm2.assignments.ListAssignmentsCommand._
 import uk.ac.warwick.tabula.data.model
 import uk.ac.warwick.tabula.data.model.markingworkflow.{FinalStage, MarkingWorkflowStage, MarkingWorkflowType}
 import uk.ac.warwick.tabula.data.model.{Assignment, Department, MarkingMethod, Module}
+import uk.ac.warwick.tabula.helpers.DateTimeOrdering._
 import uk.ac.warwick.tabula.permissions.Permissions
 import uk.ac.warwick.tabula.services._
 import uk.ac.warwick.tabula.services.cm2.{AutowiringCM2WorkflowProgressServiceComponent, CM2WorkflowCategory, CM2WorkflowProgressServiceComponent, CM2WorkflowStage}
@@ -116,7 +117,7 @@ abstract class ListAssignmentsCommandInternal(val academicYear: AcademicYear, va
 
 	protected def moduleInfo(module: Module) = ModuleAssignmentsInfo(
 		module,
-		module.assignments.asScala.filter(_.isAlive).filter(_.academicYear == academicYear).map { assignment =>
+		module.assignments.asScala.filter(_.isAlive).filter(_.academicYear == academicYear).sortBy { a => (a.openDate, a.name) }.map { assignment =>
 			BasicAssignmentInfo(assignment)
 		}.filter { info =>
 			(moduleFilters.asScala.isEmpty || moduleFilters.asScala.exists(_(info))) &&
@@ -137,7 +138,7 @@ class ListDepartmentAssignmentsCommandInternal(val department: Department, acade
 	override def applyInternal(): DepartmentResult =
 		allModulesWithPermission.filter { module =>
 			moduleFilters.asScala.isEmpty || moduleFilters.asScala.exists(_.module == module)
-		}.map(moduleInfo).filter { info => showEmptyModules || info.assignments.nonEmpty } .sortBy(_.module.code)
+		}.map(moduleInfo).filter { info => showEmptyModules || info.assignments.nonEmpty }.sortBy(_.module.code)
 
 }
 

@@ -66,6 +66,9 @@ trait CopyMarkingWorkflowValidation extends SelfValidating {
 
 trait CopyMarkingWorkflowDescription extends Describable[CM2MarkingWorkflow] {
 	self: CopyMarkingWorkflowState =>
+
+	override lazy val eventName: String = "CopyMarkingWorkflow"
+
 	def describe(d: Description) {
 		d.department(department)
 		d.markingWorkflow(markingWorkflow)

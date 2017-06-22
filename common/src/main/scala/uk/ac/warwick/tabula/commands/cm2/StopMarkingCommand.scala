@@ -59,6 +59,8 @@ trait StopMarkingValidation extends SelfValidating {
 trait StopMarkingDescription extends Describable[Seq[AssignmentFeedback]] {
 	self: StopMarkingState with StopMarkingRequest =>
 
+	override lazy val eventName: String = "StopMarking"
+
 	override def describe(d: Description){
 		d.assignment(assignment)
 			.property("students" -> students)

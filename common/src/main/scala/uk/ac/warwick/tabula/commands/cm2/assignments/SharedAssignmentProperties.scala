@@ -46,6 +46,7 @@ trait SharedAssignmentFeedbackProperties extends BooleanAssignmentFeedbackProper
 		collectMarks = assignment.collectMarks
 		summative = assignment.summative
 		dissertation = assignment.dissertation
+		publishFeedback = assignment.publishFeedback
 		feedbackTemplate = assignment.feedbackTemplate
 		includeInFeedbackReportWithoutSubmissions = assignment.includeInFeedbackReportWithoutSubmissions
 		automaticallyReleaseToMarkers = assignment.automaticallyReleaseToMarkers

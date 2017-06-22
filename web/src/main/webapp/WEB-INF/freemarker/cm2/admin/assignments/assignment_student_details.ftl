@@ -15,38 +15,38 @@
 	<@f.form method="post" action=actionUrl cssClass="dirty-check">
 		<@components.assignment_wizard 'students' assignment.module assignmentEditMode assignment />
 		<@f.errors cssClass="error form-errors" />
-        <div>
+		<div>
 			<#include "_student_fields.ftl" />
-        </div>
-        <div class="fix-footer">
+		</div>
+		<div class="fix-footer">
 			<#if mode == 'new'>
-                <input
-                        type="submit"
-                        class="btn btn-primary"
-                        name="${ManageAssignmentMappingParameters.createAndAddMarkers}"
-                        value="Save and continue"
-                />
-                <input
-                        type="submit"
-                        class="btn btn-primary"
-                        name="${ManageAssignmentMappingParameters.createAndAddStudents}"
-                        value="Save and exit"
-                />
+				<input
+					type="submit"
+					class="btn btn-primary"
+					name="${ManageAssignmentMappingParameters.createAndAddMarkers}"
+					value="Save and continue"
+				/>
+				<input
+					type="submit"
+					class="btn btn-primary"
+					name="${ManageAssignmentMappingParameters.createAndAddStudents}"
+					value="Save and exit"
+				/>
 			<#else>
-                <input
-                        type="submit"
-                        class="btn btn-primary"
-                        name="${ManageAssignmentMappingParameters.editAndAddMarkers}"
-                        value="Save and continue"
-                />
-                <input
-                        type="submit"
-                        class="btn btn-primary"
-                        name="${ManageAssignmentMappingParameters.editAndAddStudents}"
-                        value="Save and exit"
-                />
+				<input
+					type="submit"
+					class="btn btn-primary"
+					name="${ManageAssignmentMappingParameters.editAndAddMarkers}"
+					value="Save and continue"
+				/>
+				<input
+					type="submit"
+					class="btn btn-primary"
+					name="${ManageAssignmentMappingParameters.editAndAddStudents}"
+					value="Save and exit"
+				/>
 			</#if>
-        </div>
+		</div>
 	</@f.form>
 </div>
 </#escape>

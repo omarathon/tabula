@@ -128,6 +128,8 @@ trait AssignMarkersValidation extends SelfValidating {
 trait AssignMarkersDescription extends Describable[Assignment] {
 	self: AssignMarkersState =>
 
+	override lazy val eventName: String = "AssignMarkers"
+
 	private def printAllocation(allocation: Allocations): String = allocation.map{ case(marker, students) =>
 			s"${marker.getUserId} -> ${students.map(_.getUserId).toSeq.sorted.mkString(",")}"
 	}.mkString("\n")

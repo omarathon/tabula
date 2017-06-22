@@ -81,6 +81,8 @@ trait MarkingCompletedDescription extends Describable[Seq[AssignmentFeedback]] {
 
 	self: MarkingCompletedState =>
 
+	override lazy val eventName: String = "MarkingCompleted"
+
 	override def describe(d: Description){
 		d.assignment(assignment)
 			.property("students" -> feedbackForRelease.map(_.feedback.usercode))

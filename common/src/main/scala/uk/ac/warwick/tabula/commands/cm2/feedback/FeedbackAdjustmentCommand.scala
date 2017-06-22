@@ -166,6 +166,9 @@ trait FeedbackAdjustmentCommandPermissions extends RequiresPermissionsChecking w
 
 trait FeedbackAdjustmentCommandDescription extends Describable[Feedback] {
 	self: FeedbackAdjustmentCommandState =>
+
+	override lazy val eventName: String = "FeedbackAdjustment"
+
 	def describe(d: Description) {
 		d.assessment(assessment)
 		d.studentIds(Option(student.getWarwickId).toSeq)

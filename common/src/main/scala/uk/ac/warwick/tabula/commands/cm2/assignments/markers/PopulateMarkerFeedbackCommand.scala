@@ -84,6 +84,8 @@ trait PopulateMarkerFeedbackPermissions extends RequiresPermissionsChecking with
 trait PopulateMarkerFeedbackDescription extends Describable[Seq[MarkerFeedback]] {
 	self: PopulateMarkerFeedbackCommandState =>
 
+	override lazy val eventName: String = "PopulateMarkerFeedback"
+
 	override def describe(d: Description) {
 		d.assignment(assignment)
 		d.property("copiedFeedback" -> markerFeedback.size)

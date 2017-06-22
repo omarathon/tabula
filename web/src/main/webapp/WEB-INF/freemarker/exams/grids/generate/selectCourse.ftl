@@ -153,6 +153,11 @@
 				<#list gridOptionsCommand.customColumnTitles as column>
 					<li>Additional: ${column}</li>
 				</#list>
+				<#if gridOptionsCommand.nameToShow == 'full'>
+					<li>Official name</li>
+				<#else>
+					<li>First and last name</li>
+				</#if>
 				<#if gridOptionsCommand.yearsToShow == 'current'>
 					<li>Current year</li>
 				<#else>

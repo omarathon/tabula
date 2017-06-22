@@ -5,6 +5,8 @@
 	<#assign spring=JspTaglibs["/WEB-INF/tld/spring.tld"]>
 </#if>
 
+<#escape x as x?html>
+
 <#macro filter name path placeholder currentFilter allItems validItems=allItems prefix="" customPicker="">
 	<@spring.bind path=path>
 	<div id="${name}-filter" class="btn-group filter<#if currentFilter == placeholder> empty</#if>">
@@ -79,3 +81,5 @@
 	</#list>
 	<#return false />
 </#function>
+
+</#escape>

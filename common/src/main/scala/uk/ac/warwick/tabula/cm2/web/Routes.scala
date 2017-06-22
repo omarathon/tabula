@@ -112,6 +112,8 @@ object Routes {
 				def generic(assignment: Assignment): String = assignmentroot(assignment) + "/feedback/generic"
 			}
 
+			def uploadToSits(assignment: Assignment): String = assignmentroot(assignment) + "/upload-to-sits"
+
 			def publishFeedback(assignment: Assignment): String = assignmentroot(assignment) + "/publish"
 
 			def submissionsZip(assignment: Assignment): String = assignmentroot(assignment) + "/submissions.zip"

@@ -40,7 +40,8 @@ trait AssignmentToJsonConverter {
 				"name" -> ft.name
 			)}.orNull,
 			"summative" -> assignment.summative,
-			"dissertation" -> assignment.dissertation
+			"dissertation" -> assignment.dissertation,
+			"publishFeedback" -> assignment.publishFeedback
 		)
 
 		val submissionsInfo =
