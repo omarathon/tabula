@@ -8,7 +8,7 @@ import org.springframework.validation.Errors
 import org.springframework.web.bind.annotation.{ModelAttribute, PathVariable, RequestMapping}
 import uk.ac.warwick.tabula.cm2.web.Routes
 import uk.ac.warwick.tabula.commands.cm2.feedback.GenerateGradesFromMarkCommand
-import uk.ac.warwick.tabula.commands.exams.exams.{BulkAdjustmentCommand, BulkAdjustmentTemplateCommand}
+import uk.ac.warwick.tabula.commands.exams.exams.{BulkAdjustmentCommand, BulkAdjustmentCommandState, BulkAdjustmentTemplateCommand}
 import uk.ac.warwick.tabula.commands.{Appliable, SelfValidating}
 import uk.ac.warwick.tabula.data.model.{Assignment, Mark}
 import uk.ac.warwick.tabula.helpers.SpreadsheetHelpers
@@ -21,7 +21,7 @@ import uk.ac.warwick.tabula.web.views.ExcelView
 @RequestMapping(Array("/${cm2.prefix}/admin/assignments/{assignment}/feedback/bulk-adjustment"))
 class BulkFeedbackAdjustmentController extends CourseworkController {
 
-	type BulkAdjustmentCommand = Appliable[Seq[Mark]]
+	type BulkAdjustmentCommand = Appliable[Seq[Mark]] with BulkAdjustmentCommandState
 	validatesSelf[SelfValidating]
 
 	@ModelAttribute("command")
@@ -44,7 +44,7 @@ class BulkFeedbackAdjustmentController extends CourseworkController {
 	}
 
 	@RequestMapping(method = Array(POST), params = Array("!confirmStep"))
-	def upload(@Valid @ModelAttribute("command") cmd: BulkAdjustmentCommand, @PathVariable assignment: Assignment, errors: Errors): Mav = {
+	def upload(@Valid @ModelAttribute("command") cmd: BulkAdjustmentCommand, errors: Errors, @PathVariable assignment: Assignment): Mav = {
 		if (errors.hasFieldErrors("file"))
 			form(assignment)
 		else
@@ -58,7 +58,7 @@ class BulkFeedbackAdjustmentController extends CourseworkController {
 		@PathVariable assignment: Assignment
 	): Mav = {
 		if (errors.hasFieldErrors("defaultReason") || errors.hasFieldErrors("defaultComment")) {
-			upload(cmd, assignment, errors)
+			upload(cmd, errors, assignment)
 		} else {
 			cmd.apply()
 			Redirect(Routes.admin.assignment.submissionsandfeedback(assignment))
