@@ -160,6 +160,7 @@ class OvercattingOptionsView(
 		routeRulesLookup = null, // Not used
 		academicYear = academicYear,
 		yearOfStudy = scyd.yearOfStudy,
+		showFullName = false,
 		showComponentMarks = false,
 		showModuleNames = false
 	)

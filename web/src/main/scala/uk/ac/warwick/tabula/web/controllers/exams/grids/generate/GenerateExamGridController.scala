@@ -261,7 +261,7 @@ class GenerateExamGridController extends ExamsController
 		val jobInstance = jobService.getInstance(jobId)
 		if (jobInstance.isDefined && !jobInstance.get.finished) {
 			val studentLastImportDates = selectCourseCommand.apply().map(e =>
-				(e.universityId, e.lastImportDate.getOrElse(new DateTime(0)))
+				(Seq(e.firstName, e.lastName).mkString(" "), e.lastImportDate.getOrElse(new DateTime(0)))
 			).sortBy(_._2)
 			commonCrumbs(
 				Mav("exams/grids/generate/jobProgress",
@@ -415,6 +415,7 @@ class GenerateExamGridController extends ExamsController
 			routeRulesLookup = routeRulesLookup,
 			academicYear = selectCourseCommand.academicYear,
 			yearOfStudy = selectCourseCommand.yearOfStudy,
+			showFullName = gridOptionsCommand.showFullName,
 			showComponentMarks = gridOptionsCommand.showComponentMarks,
 			showModuleNames = gridOptionsCommand.showModuleNames
 		)
