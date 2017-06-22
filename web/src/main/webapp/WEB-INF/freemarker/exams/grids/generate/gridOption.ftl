@@ -42,6 +42,22 @@
 
 	<div class="row">
 		<div class="col-md-3">
+			<div class="radio">
+				<label><input type="radio" name="nameToShow" value="full"
+					<#if gridOptionsCommand.nameToShow == 'full'>checked</#if>
+				/> Official name</label>
+			</div>
+		</div>
+		<div class="col-md-3">
+			<div class="radio">
+				<label><input type="radio" name="nameToShow" value="both"
+					<#if gridOptionsCommand.nameToShow == 'both'>checked</#if>
+				/> First and last name</label>
+			</div>
+		</div>
+	</div>
+	<div class="row">
+		<div class="col-md-3">
 			<div class="checkbox">
 				<label><input type="checkbox" name="predefinedColumnIdentifiers" value="universityId" checked disabled
 				/> University ID</label>
