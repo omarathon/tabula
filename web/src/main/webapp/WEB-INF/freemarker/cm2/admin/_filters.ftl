@@ -7,7 +7,7 @@
 
 <#escape x as x?html>
 
-<#macro filter name path placeholder currentFilter allItems validItems=allItems prefix="" customPicker="">
+	<#macro filter name path placeholder currentFilter allItems validItems=allItems prefix="" customPicker="">
 	<@spring.bind path=path>
 	<div id="${name}-filter" class="btn-group filter<#if currentFilter == placeholder> empty</#if>">
 		<a class="btn btn-default btn-xs dropdown-toggle" data-toggle="dropdown">
@@ -18,7 +18,7 @@
 			<button type="button" class="close" data-dismiss="dropdown" aria-hidden="true" title="Close">×</button>
 			<ul>
 				<#if customPicker?has_content>
-					<li>${customPicker}</li>
+					<li><#noescape>${customPicker}</#noescape></li>
 				</#if>
 				<#if allItems?has_content>
 					<#list allItems as item>
