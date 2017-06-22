@@ -27,7 +27,7 @@
 				</table>
 			</div>
 
-			<h3>Select an overcatted mark for ${scyd.studentCourseDetails.student.universityId}</h3>
+			<h3>Select an overcatted mark for ${scyd.studentCourseDetails.student.fullName!} - ${scyd.studentCourseDetails.student.universityId}</h3>
 
 			<p>You can change module marks but any changes made at this stage will not be saved back to SITS.</p>
 
