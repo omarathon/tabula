@@ -3,7 +3,7 @@
 
 <#macro coursework_sits_groups command >
 	<#if command.availableUpstreamGroups?has_content>
-		<div class="assessment-component">
+		<div class="assessment-component form-group">
 			<table id="sits-table" class="table table-striped table-condensed table-hover table-sortable table-checkable sticky-table-headers">
 				<thead>
 				<tr>
@@ -47,8 +47,9 @@
 			</div>
 		</div>
 	<#else>
-			<p class="alert alert-danger">No SITS membership groups for ${command.module.code?upper_case} are available</p>
+		<div class="form-group alert alert-danger">No SITS membership groups for ${command.module.code?upper_case} are available</div>
 	</#if>
+	<div class="pending-data-info hide alert alert-info"><i class="fa fa-info-sign fa fa-exclamation-triangle"></i> Your changes will not be recorded until you save this assignment.</div>
 </#macro>
 
 <#macro header command>
@@ -210,6 +211,15 @@
 					container: 'body'
 				});
 			};
+
+			var alertPending = function() {
+				$pendingDataInfo = 	$('.pending-data-info');
+				if ($pendingDataInfo.hasClass('hide')) {
+					$pendingDataInfo.removeClass('hide')
+				}
+			};
+
+
 			// ensure that the close handler for any popovers still work
 			$('.assignment-student-details').on('click', '.close', function() { $enrolment.find('.use-popover').popover('hide') });
 
@@ -248,6 +258,7 @@
 				e.preventDefault();
 				var $assessment = $('.assessment-component');
 				var $linkUnlink = $(this);
+				var $manualListTextArea = $('.manualList textarea');
 				if ($linkUnlink.is(':not(.disabled)')) {
 					$('.sits-picker .btn').addClass('disabled');
 					<#-- get current list of values and remove and/or add changes -->
@@ -272,6 +283,8 @@
 							$enrolment.find('.assignmentEnrolmentInner').html($(data).find('.assignmentEnrolmentInner').contents());
 							$enrolment.find('.enrolledCount').html($(data).find('.enrolledCount').contents());
 							initEnrolment();
+							// display message when user links/unlinks
+							alertPending();
 							$assessment.find('td input:checked').each( function() {
 								var $tr = $(this).closest('tr');
 								if ($linkUnlink.is('.link-sits')) {
@@ -290,6 +303,7 @@
 			$enrolment.on('click', '.btn.add-students-manually', function(e) {
 				e.preventDefault();
 				var $addManualStudentBtn = $(this);
+				var $manualListTextArea = $('.manualList textarea');
 				$addManualStudentBtn.addClass('disabled');
 					$.ajax({
 						type: 'POST',
@@ -298,8 +312,10 @@
 						success: function(data, status) {
 							$enrolment.find('.assignmentEnrolmentInner').html($(data).find('.assignmentEnrolmentInner').contents());
 							$enrolment.find('.enrolledCount').html($(data).find('.enrolledCount').contents());
+							$manualListTextArea.val('');
 							$addManualStudentBtn.removeClass('disabled');
 							initEnrolment();
+							alertPending();
 						}
 					});
 			});
