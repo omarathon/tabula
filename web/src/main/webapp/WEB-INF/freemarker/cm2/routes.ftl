@@ -10,6 +10,7 @@ TODO grab values from the Routes object in code, as that's pretty equivalent and
 </#macro>
 
 <#macro home><@_u page="/" /></#macro>
+<#macro markerHome><@_u page="/marker" /></#macro>
 
 <#macro depthome module academicYear="">
 	<#if academicYear?has_content>
