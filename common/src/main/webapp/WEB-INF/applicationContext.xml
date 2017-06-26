@@ -56,6 +56,7 @@
 				<bean class="uk.ac.warwick.tabula.events.SLF4JEventListener" />
 				<bean class="uk.ac.warwick.tabula.events.AuditLoggingEventListener" />
 				<bean class="uk.ac.warwick.tabula.events.DatabaseEventListener" />
+				<bean class="uk.ac.warwick.tabula.events.CacheClearingEventListener" />
 			</list>
 		</constructor-arg>
 	</bean>

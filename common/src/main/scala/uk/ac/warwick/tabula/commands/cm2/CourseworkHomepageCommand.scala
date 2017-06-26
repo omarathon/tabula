@@ -1,7 +1,9 @@
 package uk.ac.warwick.tabula.commands.cm2
 
 import org.joda.time.{DateTime, LocalDate}
+import uk.ac.warwick.tabula.JavaImports._
 import uk.ac.warwick.tabula.WorkflowStages.StageProgress
+import uk.ac.warwick.tabula._
 import uk.ac.warwick.tabula.commands._
 import uk.ac.warwick.tabula.commands.cm2.CourseworkHomepageCommand._
 import uk.ac.warwick.tabula.commands.cm2.assignments.SubmissionAndFeedbackCommand
@@ -13,12 +15,14 @@ import uk.ac.warwick.tabula.helpers.cm2.AssignmentSubmissionStudentInfo
 import uk.ac.warwick.tabula.permissions.Permissions
 import uk.ac.warwick.tabula.services._
 import uk.ac.warwick.tabula.services.cm2.CM2WorkflowStages.{CM1ReleaseForMarking, CM2ReleaseForMarking}
-import uk.ac.warwick.tabula.services.cm2.{AutowiringCM2WorkflowProgressServiceComponent, CM2WorkflowProgressServiceComponent}
+import uk.ac.warwick.tabula.services.cm2.{AutowiringCM2WorkflowProgressServiceComponent, CM2WorkflowProgressServiceComponent, CM2WorkflowStages}
+import uk.ac.warwick.tabula.services.permissions.{AutowiringCacheStrategyComponent, CacheStrategyComponent}
 import uk.ac.warwick.tabula.system.permissions.PubliclyVisiblePermissions
-import uk.ac.warwick.tabula.{CurrentUser, WorkflowStage}
 import uk.ac.warwick.userlookup.User
+import uk.ac.warwick.util.cache._
 
 import scala.collection.JavaConverters._
+import scala.util.{Failure, Success, Try}
 
 object CourseworkHomepageCommand {
 	case class StudentAssignmentInformation(
@@ -114,6 +118,8 @@ object CourseworkHomepageCommand {
 			with AutowiringCM2MarkingWorkflowServiceComponent
 			with MarkerProgress
 			with CommandWorkflowStudentsForAssignment
+			with CachedMarkerWorkflowInformation
+			with AutowiringCacheStrategyComponent
 			with AutowiringCM2WorkflowProgressServiceComponent
 			with PubliclyVisiblePermissions with Unaudited with ReadOnly
 }
@@ -391,19 +397,120 @@ trait CommandWorkflowStudentsForAssignment extends WorkflowStudentsForAssignment
 	def workflowStudentsFor(assignment: Assignment): Seq[AssignmentSubmissionStudentInfo] = SubmissionAndFeedbackCommand(assignment).apply().students
 }
 
+object MarkerWorkflowInformation {
+	type Usercode = String
+	type StageName = String
+
+	case class WorkflowProgressInformation(
+		stages: Map[StageName, WorkflowStages.StageProgress],
+		nextStage: Option[WorkflowStage]
+	)
+}
+
+trait MarkerWorkflowInformation {
+	import MarkerWorkflowInformation._
+
+	def markerWorkflowInformation(assignment: Assignment): Map[Usercode, WorkflowProgressInformation]
+}
+
+object MarkerWorkflowCache {
+	type AssignmentId = String
+	type Json = String
+
+	final val CacheName: String = "MarkerWorkflowInformation"
+
+	/**
+		* 1 day in seconds - note we can cache this for a reasonably long time because none of the *marking* related events are time based,
+		* but if we extend caching this information to other places (which is probably a good idea) they *will* be time based and we will
+		* probably have to look at a custom expiry based on the assignment itself (so that we don't cache across deadlines)
+		*/
+	final val CacheExpiryTime: Long = 60 * 60 * 24
+}
+
+trait MarkerWorkflowCache {
+	self: WorkflowStudentsForAssignment with CacheStrategyComponent with AssessmentServiceComponent =>
+
+	import MarkerWorkflowCache._
+	import MarkerWorkflowInformation._
+
+	private val markerWorkflowCacheEntryFactory = new CacheEntryFactory[AssignmentId, Json] {
+
+		override def create(id: AssignmentId): Json = {
+			val assignment = assessmentService.getAssignmentById(id).getOrElse { throw new CacheEntryUpdateException(s"Could not find assignment $id") }
+
+			Try {
+				toJson(workflowStudentsFor(assignment).map { student =>
+					student.user.getUserId -> WorkflowProgressInformation(student.stages, student.nextStage)
+				}.toMap)
+			} match {
+				case Success(info) => info
+				case Failure(e) => throw new CacheEntryUpdateException(e)
+			}
+		}
+
+		override def create(ids: JList[AssignmentId]): JMap[AssignmentId, Json] =
+			JMap(ids.asScala.map(id => (id, create(id))): _*)
+
+		override def isSupportsMultiLookups: Boolean = true
+		override def shouldBeCached(info: Json): Boolean = true
+	}
+
+	private def toJson(markerInformation: Map[Usercode, WorkflowProgressInformation]): Json =
+		JsonHelper.toJson(markerInformation.mapValues { progressInfo =>
+			Map(
+				"stages" -> progressInfo.stages,
+				"nextStage" -> progressInfo.nextStage.map(_.toString)
+			)
+		})
+
+	lazy val markerWorkflowCache: Cache[AssignmentId, Json] =
+		Caches.newCache(CacheName, markerWorkflowCacheEntryFactory, CacheExpiryTime, cacheStrategy)
+}
+
+trait CachedMarkerWorkflowInformation extends MarkerWorkflowInformation with MarkerWorkflowCache {
+	self: WorkflowStudentsForAssignment with CacheStrategyComponent with AssessmentServiceComponent =>
+
+	import MarkerWorkflowCache._
+	import MarkerWorkflowInformation._
+
+	private def fromJson(json: Json): Map[Usercode, WorkflowProgressInformation] =
+		JsonHelper.toMap[Map[String, Any]](json).mapValues { progressInfo =>
+			WorkflowProgressInformation(
+				stages = progressInfo("stages").asInstanceOf[Map[StageName, Map[String, Any]]].map { case (stageName, progress) =>
+					stageName -> StageProgress(
+						stage = CM2WorkflowStages.of(stageName),
+						started = progress("started").asInstanceOf[Boolean],
+						messageCode = progress("messageCode").asInstanceOf[String],
+						health = WorkflowStageHealth.fromCssClass(progress("health").asInstanceOf[Map[String, Any]]("cssClass").asInstanceOf[String]),
+						completed = progress("completed").asInstanceOf[Boolean],
+						preconditionsMet = progress("preconditionsMet").asInstanceOf[Boolean]
+					)
+				},
+				nextStage = progressInfo.get("nextStage") match {
+					case Some(null) => None
+					case Some(nextStage: String) => Some(CM2WorkflowStages.of(nextStage))
+					case _ => None
+				}
+			)
+		}
+
+	def markerWorkflowInformation(assignment: Assignment): Map[Usercode, WorkflowProgressInformation] =
+		fromJson(markerWorkflowCache.get(assignment.id))
+}
+
 trait MarkerProgress extends TaskBenchmarking {
-	self: WorkflowStudentsForAssignment
+	self: MarkerWorkflowInformation
 		with CM2WorkflowProgressServiceComponent =>
 
 	protected def enhance(assignment: Assignment, students: Set[User]): MarkerAssignmentInfo = benchmarkTask(s"Get progress information for ${assignment.name}") {
-		val workflowStudents = workflowStudentsFor(assignment).filter(s => students.contains(s.user))
+		val workflowStudents = markerWorkflowInformation(assignment).filterKeys(usercode => students.exists(_.getUserId == usercode))
 
 		val allStages = workflowProgressService.getStagesFor(assignment).filter(_.markingRelated)
 
 		val currentStages = allStages.flatMap { stage =>
 			val name = stage.toString
 
-			val progresses = workflowStudents.flatMap(_.stages.get(name)).filter(_.preconditionsMet)
+			val progresses = workflowStudents.values.flatMap(_.stages.get(name)).filter(_.preconditionsMet)
 			if (progresses.nonEmpty) {
 				Seq(MarkingStage(
 					stage,
@@ -417,7 +524,7 @@ trait MarkerProgress extends TaskBenchmarking {
 		val stages = allStages.flatMap { stage =>
 			val name = stage.toString
 
-			val progresses = workflowStudents.flatMap(_.stages.get(name))
+			val progresses = workflowStudents.values.flatMap(_.stages.get(name))
 			if (progresses.nonEmpty) {
 				Seq(MarkingStage(
 					stage,
@@ -429,7 +536,7 @@ trait MarkerProgress extends TaskBenchmarking {
 		}
 
 		val allNextStages =
-			workflowStudents.flatMap(_.nextStage).groupBy(identity).mapValues(_.size)
+			workflowStudents.values.flatMap(_.nextStage).groupBy(identity).mapValues(_.size)
 
 		val nextStages =
 			allStages.filter(allNextStages.contains).map { stage =>

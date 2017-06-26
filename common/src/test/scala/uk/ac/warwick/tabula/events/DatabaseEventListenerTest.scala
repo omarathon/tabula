@@ -27,7 +27,7 @@ class DatabaseEventListenerTest extends TestBase with Mockito {
 		maintenanceModeService.disable
 
 		val event = Event(
-			id="event", name="AddAssignment", userId="cuscav", realUserId="cuscav",
+			id="event", name="AddAssignment", userId="cuscav", realUserId="cuscav", ipAddress="137.205.194.132", userAgent="Chrome/58", readOnly=false,
 			date=DateTime.now, extra=Map()
 		)
 
@@ -45,7 +45,7 @@ class DatabaseEventListenerTest extends TestBase with Mockito {
 		maintenanceModeService.enable
 
 		val event = Event(
-			id="event", name="AddAssignment", userId="cuscav", realUserId="cuscav",
+			id="event", name="AddAssignment", userId="cuscav", realUserId="cuscav", ipAddress="137.205.194.132", userAgent="Chrome/58", readOnly=true,
 			date=DateTime.now, extra=Map()
 		)
 
