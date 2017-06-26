@@ -24,12 +24,12 @@
 				<#if students?size gt 0>
 					<#list students as student>
 						<tr>
-							<td>${student.user.firstName}-${student.user.warwickId}</td>
+							<td>${student.user.firstName}</td>
 							<td>${student.user.lastName}</td>
 						</tr>
-						<tr>
-							<td colspan="2">
-								<div calss="audit-info">
+					<tr>
+					<td colspan="2">
+						<div class="audit-info">
 									<h2>Submission</h2>
 									<#if !assignment.openEnded>
 										<strong>Assignment closed: </strong><@fmt.date date=assignment.closeDate />
