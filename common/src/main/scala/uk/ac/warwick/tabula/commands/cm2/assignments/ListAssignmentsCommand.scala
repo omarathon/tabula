@@ -177,9 +177,9 @@ object AssignmentProgressCache {
 	final val CacheName: String = "AssignmentProgress"
 
 	/**
-		* 1 day in seconds - we can cache this for a reasonably long time because we don't cache across deadline boundaries
+		* 7 days in seconds - we can cache this for a reasonably long time because we don't cache across deadline boundaries
 		*/
-	final val CacheExpiryTime: Long = 60 * 60 * 24
+	final val CacheExpiryTime: Long = 60 * 60 * 24 * 7
 }
 
 trait AssignmentProgressCache extends TaskBenchmarking {

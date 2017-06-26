@@ -423,11 +423,9 @@ object MarkerWorkflowCache {
 	final val CacheName: String = "MarkerWorkflowInformation"
 
 	/**
-		* 1 day in seconds - note we can cache this for a reasonably long time because none of the *marking* related events are time based,
-		* but if we extend caching this information to other places (which is probably a good idea) they *will* be time based and we will
-		* probably have to look at a custom expiry based on the assignment itself (so that we don't cache across deadlines)
+		* 7 days in seconds - note we can cache this for a reasonably long time because none of the *marking* related events are time based.
 		*/
-	final val CacheExpiryTime: Long = 60 * 60 * 24
+	final val CacheExpiryTime: Long = 60 * 60 * 24 * 7
 }
 
 trait MarkerWorkflowCache {
