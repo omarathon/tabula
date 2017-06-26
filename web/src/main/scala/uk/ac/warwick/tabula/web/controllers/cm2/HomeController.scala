@@ -52,7 +52,7 @@ class MarkerHomeController extends CourseworkController {
 	def markerHome(@ModelAttribute("command") command: CourseworkMarkerHomepageCommand.Command): Mav =
 		Mav("cm2/home/_marker",
 			"markerInformation" -> command.apply(),
-			"embedded" -> true
+			"embedded" -> ajax
 		).noLayoutIf(ajax)
 
 }
