@@ -1,6 +1,8 @@
 package uk.ac.warwick.tabula.commands.cm2
 
-import org.joda.time.{DateTime, LocalDate}
+import java.util.concurrent.TimeUnit
+
+import org.joda.time.{DateTime, LocalDate, Seconds}
 import uk.ac.warwick.tabula.JavaImports._
 import uk.ac.warwick.tabula.WorkflowStages.StageProgress
 import uk.ac.warwick.tabula._
@@ -20,6 +22,7 @@ import uk.ac.warwick.tabula.services.permissions.{AutowiringCacheStrategyCompone
 import uk.ac.warwick.tabula.system.permissions.PubliclyVisiblePermissions
 import uk.ac.warwick.userlookup.User
 import uk.ac.warwick.util.cache._
+import uk.ac.warwick.util.collections.Pair
 
 import scala.collection.JavaConverters._
 import scala.util.{Failure, Success, Try}
@@ -463,8 +466,29 @@ trait MarkerWorkflowCache {
 			)
 		})
 
-	lazy val markerWorkflowCache: Cache[AssignmentId, Json] =
-		Caches.newCache(CacheName, markerWorkflowCacheEntryFactory, CacheExpiryTime, cacheStrategy)
+	lazy val markerWorkflowCache: Cache[AssignmentId, Json] = {
+		val cache = Caches.newCache(CacheName, markerWorkflowCacheEntryFactory, CacheExpiryTime, cacheStrategy)
+		cache.setExpiryStrategy(new TTLCacheExpiryStrategy[AssignmentId, Json] {
+			override def getTTL(entry: CacheEntry[AssignmentId, Json]): Pair[Number, TimeUnit] = {
+				// Extend the cache time to the next deadline if it's shorter than the default cache expiry
+				val seconds: Number = assessmentService.getAssignmentById(entry.getKey) match {
+					case Some(assignment) if !assignment.isClosed && Option(assignment.closeDate).nonEmpty =>
+						Seconds.secondsBetween(DateTime.now, assignment.closeDate).getSeconds
+
+					case Some(assignment) =>
+						val futureExtensionDate = assignment.extensions.asScala.flatMap(_.expiryDate).sorted.find(_.isAfterNow)
+
+						futureExtensionDate.map[Number] { dt => Seconds.secondsBetween(DateTime.now, dt).getSeconds }
+							.getOrElse(CacheExpiryTime)
+
+					case _ => CacheExpiryTime
+				}
+
+				Pair.of(seconds, TimeUnit.SECONDS)
+			}
+		})
+		cache
+	}
 }
 
 trait CachedMarkerWorkflowInformation extends MarkerWorkflowInformation with MarkerWorkflowCache {
