@@ -6,7 +6,6 @@ import uk.ac.warwick.tabula.commands.cm2.CourseworkHomepageCommand.{CourseworkHo
 import uk.ac.warwick.tabula.data.model._
 import uk.ac.warwick.tabula.data.model.forms.Extension
 import uk.ac.warwick.tabula.data.model.markingworkflow.DoubleWorkflow
-import uk.ac.warwick.tabula.helpers.cm2.AssignmentSubmissionStudentInfo
 import uk.ac.warwick.tabula.permissions.Permissions
 import uk.ac.warwick.tabula.services._
 import uk.ac.warwick.tabula.services.cm2.{CM2WorkflowProgressService, CM2WorkflowProgressServiceComponent, CM2WorkflowStage, CM2WorkflowStages}
@@ -137,7 +136,8 @@ class CourseworkHomepageCommandTest extends TestBase with Mockito {
 
 	private trait MarkerCommandFixture {
 		val command = new CourseworkHomepageMarkerAssignments with CourseworkHomepageCommandState with AssessmentServiceComponent
-			with CM2MarkingWorkflowServiceComponent with CM2WorkflowProgressServiceComponent with MarkerProgress with WorkflowStudentsForAssignment {
+			with CM2MarkingWorkflowServiceComponent with CM2WorkflowProgressServiceComponent with MarkerProgress with MarkerWorkflowInformation {
+			import MarkerWorkflowInformation._
 
 			val assessmentService: AssessmentService = smartMock[AssessmentService]
 			val cm2MarkingWorkflowService: CM2MarkingWorkflowService = smartMock[CM2MarkingWorkflowService]
@@ -145,7 +145,7 @@ class CourseworkHomepageCommandTest extends TestBase with Mockito {
 
 			val user: CurrentUser = currentUser
 
-			override def workflowStudentsFor(assignment: Assignment): Seq[AssignmentSubmissionStudentInfo] = Nil
+			override def markerWorkflowInformation(assignment: Assignment): Map[Usercode, WorkflowProgressInformation] = Map.empty
 		}
 	}
 

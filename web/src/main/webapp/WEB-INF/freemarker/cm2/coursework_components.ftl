@@ -533,9 +533,15 @@
 		</div>
 		<div class="col-md-2">
 			<#if verb?has_content>
-				<a class="btn btn-block btn-primary" href="<@routes.cm2.listmarkersubmissions assignment user.apparentUser />">
-					${verb}
-				</a>
+				<#if assignment.cm2Assignment>
+					<a class="btn btn-block btn-primary" href="<@routes.cm2.listmarkersubmissions assignment user.apparentUser />">
+						${verb}
+					</a>
+				<#else>
+					<a class="btn btn-block btn-primary" href="<@routes.coursework.listmarkersubmissions assignment user.apparentUser />">
+						${verb}
+					</a>
+				</#if>
 			</#if>
 		</div>
 	</div>

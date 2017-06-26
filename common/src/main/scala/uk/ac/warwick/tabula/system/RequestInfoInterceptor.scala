@@ -80,7 +80,8 @@ object RequestInfoInterceptor {
 			requestLevelCache = cache,
 			hasEmergencyMessage = emergencyMessageService.enabled,
 			emergencyMessage = emergencyMessage,
-			userAgent = request.getHeader(UserAgentHeader).textOrEmpty
+			userAgent = request.getHeader(UserAgentHeader).textOrEmpty,
+			ipAddress = request.getRemoteAddr.textOrEmpty
 		)
 	}
 

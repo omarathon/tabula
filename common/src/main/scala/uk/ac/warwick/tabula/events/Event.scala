@@ -1,11 +1,12 @@
 package uk.ac.warwick.tabula.events
 
-import java.util.UUID
-import org.joda.time.DateTime
-import uk.ac.warwick.tabula.commands.Describable
-import uk.ac.warwick.tabula.commands.DescriptionImpl
-import uk.ac.warwick.tabula.RequestInfo
 import java.io.Serializable
+import java.util.UUID
+
+import org.joda.time.DateTime
+import uk.ac.warwick.tabula.RequestInfo
+import uk.ac.warwick.tabula.commands.{Describable, DescriptionImpl, ReadOnly}
+import uk.ac.warwick.tabula.helpers.StringUtils._
 
 /**
  * Event is a transient object created by the event listener to
@@ -13,12 +14,16 @@ import java.io.Serializable
  * saved to database is [[uk.ac.warwick.tabula.data.model.AuditEvent]].
  */
 case class Event(
-	val id: String,
-	val name: String,
-	val userId: String,
-	val realUserId: String,
-	val extra: Map[String, Any],
-	val date: DateTime = new DateTime) extends Serializable
+	id: String,
+	name: String,
+	userId: String,
+	realUserId: String,
+	ipAddress: String,
+	userAgent: String,
+	readOnly: Boolean,
+	extra: Map[String, Any],
+	date: DateTime = DateTime.now
+) extends Serializable
 
 /**
  * Stores an Event with its stage (before, after, error).
@@ -33,23 +38,37 @@ object Event {
 
 	private def doFromDescribable[A](describable: Describable[A], result: Option[A], id: String = null) = {
 		val description = new DescriptionImpl
-		result.map(r => describable.describeResult(description, r))
-			.getOrElse(describable.describe(description))
+
+		result match {
+			case Some(r) => describable.describeResult(description, r)
+			case _ => describable.describe(description)
+		}
 
 		val (apparentId, realUserId) = getUser match {
 			case Some(user) => (user.apparentId, user.realId)
 			case None => (null, null)
 		}
+
+		val ipAddress = RequestInfo.fromThread.flatMap { _.ipAddress.maybeText }.orNull
+		val userAgent = RequestInfo.fromThread.flatMap { _.userAgent.maybeText }.orNull
+
 		val eventId = id match {
 			case id: String => id
 			case _ => UUID.randomUUID.toString
 		}
-		new Event(
+
+		val readOnly = describable.isInstanceOf[ReadOnly]
+
+		Event(
 			eventId,
 			describable.eventName,
 			apparentId,
 			realUserId,
-			description.allProperties.toMap)
+			ipAddress,
+			userAgent,
+			readOnly,
+			description.allProperties
+		)
 	}
 
 	private def getUser = RequestInfo.fromThread.map { _.user }
