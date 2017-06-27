@@ -49,7 +49,6 @@
 	<#else>
 		<div class="form-group alert alert-danger">No SITS membership groups for ${command.module.code?upper_case} are available</div>
 	</#if>
-	<div class="pending-data-info hide alert alert-info"><i class="fa fa-info-sign fa fa-exclamation-triangle"></i> Your changes will not be recorded until you save this assignment.</div>
 </#macro>
 
 <#macro header command>
@@ -294,10 +293,21 @@
 								}
 							});
 							$('.sits-picker .btn').removeClass('disabled');
+							initEnrolmentMemberTable();
 						}
 					});
 				}
 			});
+
+
+			var initEnrolmentMemberTable = function() {
+				$enrolment.find('#enrolment-table').bigList({
+					onChange: function(){
+						var $table = $(this).closest('table');
+						enableActions($table);
+					}
+				});
+			};
 
 			<#-- adder click handler -->
 			$enrolment.on('click', '.btn.add-students-manually', function(e) {
@@ -315,6 +325,7 @@
 							$manualListTextArea.val('');
 							$addManualStudentBtn.removeClass('disabled');
 							initEnrolment();
+							initEnrolmentMemberTable();
 							alertPending();
 						}
 					});
@@ -339,7 +350,8 @@
 					$tr.removeClass(function(i, css) {
 						return (css.match(/\bitem-type-\S+/g) || []).join(' ');
 					}).addClass('item-type-exclude');
-					this.checked = '';
+					alertPending();
+					$tr.find('input:checkbox').trigger('click');
 				});
 			});
 
@@ -357,7 +369,8 @@
 					$tr.removeClass(function(i, css) {
 						return (css.match(/\bitem-type-\S+/g) || []).join(' ');
 					}).addClass('item-type-include pending');
-					this.checked = '';
+					alertPending();
+					$tr.find('input:checkbox').trigger('click');
 				});
 			});
 		});

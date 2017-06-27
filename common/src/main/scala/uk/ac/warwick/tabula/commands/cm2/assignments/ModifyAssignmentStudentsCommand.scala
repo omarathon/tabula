@@ -106,7 +106,7 @@ trait ModifyAssignmentStudentsValidation extends SelfValidating {
 
 		def isValidUserCode(userString: String) = {
 			val user = userLookup.getUserByUserId(userString)
-			user.isFoundUser && null != user.getWarwickId
+			user.isFoundUser && (user.getWarwickId != null  || user.getUserId != null)
 		}
 
 		val invalidUserStrings = massAddUsersEntries.filterNot(userString => isValidUniID(userString) || isValidUserCode(userString))
