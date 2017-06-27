@@ -56,7 +56,7 @@
 	</appender>
 
 	<appender name="AUDIT_LOGSTASH" class="net.logstash.logback.appender.LogstashTcpSocketAppender">
-		<destination>ibrar.lnx.warwick.ac.uk:10570</destination>
+		<destination>ibrar.lnx.warwick.ac.uk:10571</destination>
 
 		<encoder class="net.logstash.logback.encoder.LoggingEventCompositeJsonEncoder">
 			<providers>
@@ -72,6 +72,13 @@
 				<arguments />
 			</providers>
 		</encoder>
+
+		<ssl>
+			<trustStore>
+				<location>classpath:logging.truststore</location>
+				<password>clogging</password>
+			</trustStore>
+		</ssl>
 	</appender>
 
 	<appender name="POSTLOG" class="ch.qos.logback.core.rolling.RollingFileAppender">
@@ -97,10 +104,10 @@
 		<encoder>
 			<pattern>%d{"HH:mm:ss,SSS"} %-5p [%c{1}] %m%n</pattern>
 		</encoder>
-
+<!--
 		<filter class="ch.qos.logback.classic.filter.ThresholdFilter">
 			<level>INFO</level>
-		</filter>
+		</filter>-->
 	</appender>
 
 	<!-- categories -->
