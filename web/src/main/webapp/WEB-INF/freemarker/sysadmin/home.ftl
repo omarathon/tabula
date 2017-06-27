@@ -116,12 +116,6 @@
 		<@reindex_form 'profiles' 'profiles index' />
 		<@reindex_form 'notifications' 'notification stream index' />
 
-		<h2>Scary special stuff</h2>
-
-		<p>
-			<a href="<@url page="/sysadmin/repl" />">Evaluator</a>
-		</p>
-
 		<h4>Maintenance mode</h4>
 
 		<#if maintenanceModeEnabled>
