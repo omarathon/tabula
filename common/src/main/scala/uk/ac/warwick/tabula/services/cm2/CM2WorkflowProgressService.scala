@@ -360,7 +360,7 @@ object CM2WorkflowStages {
 
 			if (currentStages.isEmpty || currentStages.head.order < markingStage.order) {
 				// Not released for marking yet or this is a future stage
-				StageProgress(workflowStage, started = false, messageCode = s"workflow.cm2.${markingStage.name}.incomplete")
+				StageProgress(workflowStage, started = false, messageCode = s"workflow.cm2.${markingStage.name}.notReady")
 			} else if (currentStages.contains(markingStage)) {
 				// This is the current stage
 				val markerFeedback = coursework.enhancedFeedback.flatMap(_.feedback.markerFeedback.asScala.find(_.stage == markingStage))
