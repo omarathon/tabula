@@ -2,10 +2,6 @@
 <#import "*/marking_macros.ftl" as marking_macros />
 <#escape x as x?html>
 
-<#macro markRow>
-
-</#macro>
-
 <@cm2.assignmentHeader "Submit marks and feedback" assignment />
 <div>
 	<!-- Nav tabs -->
