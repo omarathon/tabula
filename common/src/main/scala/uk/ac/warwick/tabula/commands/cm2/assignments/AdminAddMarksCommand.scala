@@ -10,7 +10,7 @@ import uk.ac.warwick.tabula.data.HibernateHelpers
 import uk.ac.warwick.tabula.data.model.notifications.coursework.FeedbackChangeNotification
 import uk.ac.warwick.tabula.data.model.{Assignment, AssignmentFeedback, Feedback, Notification}
 import uk.ac.warwick.tabula.permissions.Permissions
-import uk.ac.warwick.tabula.services.{AutowiringFeedbackServiceComponent, FeedbackServiceComponent, GeneratesGradesFromMarks}
+import uk.ac.warwick.tabula.services._
 import uk.ac.warwick.tabula.services.cm2.docconversion.{AutowiringMarksExtractorComponent, MarkItem}
 
 import scala.collection.JavaConverters._
@@ -25,12 +25,13 @@ object AdminAddMarksCommand {
 			with AdminAddMarksNotifications
 			with AutowiringMarksExtractorComponent
 			with AutowiringFeedbackServiceComponent
+			with AutowiringAssessmentMembershipServiceComponent
 }
 
-class AdminAddMarksCommandInternal(val assignment: Assignment, val submitter: CurrentUser, val gradeGenerator: GeneratesGradesFromMarks) 
+abstract class AdminAddMarksCommandInternal(val assignment: Assignment, val submitter: CurrentUser, val gradeGenerator: GeneratesGradesFromMarks)
 	extends CommandInternal[Seq[Feedback]] with AdminAddMarksState {
 
-	self: FeedbackServiceComponent =>
+	self: FeedbackServiceComponent with AssessmentMembershipServiceComponent with FeedbackServiceComponent =>
 
 	def isModified(markItem: MarkItem): Boolean = {
 		markItem.currentFeedback(assignment).exists(f => f.hasMarkOrGrade || f.hasOnlineFeedback)
@@ -100,6 +101,7 @@ trait AdminAddMarksNotifications extends Notifies[Seq[Feedback], Feedback] {
 	}}
 }
 
-trait AdminAddMarksState extends AddMarksState {
+trait AdminAddMarksState extends AddMarksState with FeedbackServiceComponent {
+	self: AssessmentMembershipServiceComponent =>
 	def updatedReleasedFeedback: Seq[Feedback] = marks.asScala.filter(_.isModified).flatMap(_.currentFeedback(assignment)).filter(_.released)
 }
