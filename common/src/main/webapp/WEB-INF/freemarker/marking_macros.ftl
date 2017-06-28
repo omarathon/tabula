@@ -7,16 +7,18 @@
 	<@bs3form.labelled_form_group path=gradePath labelText=labelText>
 		<div class="input-group">
 			<@f.input path="${gradePath}" cssClass="form-control auto-grade" id="auto-grade-${markingId}" />
-		</div>
-
-		<div class="input-group">
 			<select name="${gradePath}" class="form-control" disabled style="display:none;"></select>
 		</div>
 	</@bs3form.labelled_form_group>
+
+	<@autoGradeOnlineScripts markPath markingId generateUrl />
+</#macro>
+
+<#macro autoGradeOnlineScripts markPath markingId generateUrl>
 	<script>
 		jQuery(function($){
 			var $gradeInput = $('#auto-grade-${markingId}').hide()
-				, $markInput = $gradeInput.closest('form').find('input[name=${markPath}]')
+				, $markInput = $gradeInput.closest('form').find('input[name="${markPath}"]')
 				, $select = $gradeInput.closest('div').find('select').on('click', function(){
 					$(this).closest('.control-group').removeClass('info');
 				})

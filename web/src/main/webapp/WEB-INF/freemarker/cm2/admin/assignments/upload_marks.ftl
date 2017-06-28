@@ -1,5 +1,11 @@
 <#import "*/cm2_macros.ftl" as cm2 />
+<#import "*/marking_macros.ftl" as marking_macros />
 <#escape x as x?html>
+
+<#macro markRow>
+
+</#macro>
+
 <@cm2.assignmentHeader "Submit marks and feedback" assignment />
 <div>
 	<!-- Nav tabs -->
@@ -35,16 +41,55 @@
 		</div>
 		<div role="tabpanel" class="tab-pane" id="webform">
 			<p>Click the add button below to enter marks and feedback for a student.</p>
-		<@f.form cssClass="marks-web-form" method="post" enctype="multipart/form-data" action="${formUrl}" commandName="command">
-			<input type="hidden" name="isfile" value="true" />
-			<div class="form-group">
-				<button class="add-mark-row btn btn-default">+ Add</button>
-			</div>
-			<div class="buttons form-group">
-				<button type="submit" class="btn btn-primary">Save</button>
-				<a class="btn btn-default cancel" href="${cancelUrl}">Cancel</a>
-			</div>
-		</@f.form>
+			<@f.form cssClass="marks-web-form" method="post" enctype="multipart/form-data" action="${formUrl}" commandName="command">
+				<#list command.existingMarks as markItem>
+					<div class="row">
+						<div class="col-md-2">
+							<div class="form-group">
+								<input class="form-control" value="${markItem.id}" name="marks[${markItem_index}].id" type="text" readonly="readonly" />
+							</div>
+						</div>
+						<div class="col-md-2">
+							<div class="form-group">
+								<div class="input-group">
+									<input class="form-control" name="marks[${markItem_index}].actualMark" value="<#if markItem.actualMark??>${markItem.actualMark}</#if>" type="number" /><div class="input-group-addon">%</div>
+								</div>
+							</div>
+						</div>
+						<div class="col-md-2">
+							<div class="form-group">
+								<#if isGradeValidation>
+									<#assign generateUrl><@routes.cm2.generateGradesForMarks command.assignment /></#assign>
+									<div class="input-group">
+										<input id="auto-grade-${markItem.id}" class="form-control auto-grade" name="marks[${markItem_index}].actualGrade" value="<#if markItem.actualGrade??>${markItem.actualGrade}</#if>" type="text" />
+										<select name="marks[${markItem_index}].actualGrade" class="form-control" disabled style="display:none;"></select>
+									</div>
+									<@marking_macros.autoGradeOnlineScripts "marks[${markItem_index}].actualMark" markItem.id generateUrl />
+								<#else>
+									<div class="form-group">
+										<div class="input-group">
+											<input name="marks[${markItem_index}].actualGrade" class="form-control" value="<#if markItem.actualGrade??>${markItem.actualGrade}</#if>" type="text" placeholder="grade"/>
+										</div>
+									</div class="form-group">
+								</#if>
+							</div>
+						</div>
+						<div class="col-md-6">
+							<div class="form-group">
+								<textarea class="small-textarea form-control" name="marks[${markItem_index}].feedbackComment" placeholder="Feedback"><#if markItem.feedbackComment??>${markItem.feedbackComment}</#if></textarea>
+							</div>
+						</div>
+					</div>
+				</#list>
+				<input type="hidden" name="isfile" value="true" />
+				<div class="form-group">
+					<button class="add-mark-row btn btn-default">+ Add</button>
+				</div>
+				<div class="buttons form-group">
+					<button type="submit" class="btn btn-primary">Save</button>
+					<a class="btn btn-default cancel" href="${cancelUrl}">Cancel</a>
+				</div>
+			</@f.form>
 			<div class="hidden mark-row">
 				<div class="row">
 					<div class="col-md-2">
@@ -72,12 +117,11 @@
 				</div>
 			</div>
 		</div>
-		</div>
 	</div>
+</div>
 
 	<script type="text/javascript">
 		(function($) {
-			var $form = $('form.marks-web-form');
 			var $rowTemplate = $('div.mark-row .row');
 
 			$('.add-mark-row').on('click', function(e){
@@ -88,7 +132,7 @@
 					var newName = 'marks['+ numExistingRows +'].' + $(field).attr('name');
 					$(field).attr('name', newName);
 				});
-				$form.prepend($newRow);
+				$(this).before($newRow);
 			});
 		})(jQuery);
 	</script>

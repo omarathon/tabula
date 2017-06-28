@@ -19,6 +19,7 @@ import uk.ac.warwick.userlookup.User
 
 import scala.collection.JavaConverters._
 import uk.ac.warwick.tabula.helpers.StringUtils._
+import uk.ac.warwick.tabula.helpers.UserOrderingByIds._
 
 import scala.collection.mutable
 
@@ -31,12 +32,13 @@ object MarkerAddMarksCommand {
 			with MarkerAddMarksDescription
 			with AutowiringFeedbackServiceComponent
 			with AutowiringMarksExtractorComponent
+			with AutowiringAssessmentMembershipServiceComponent
 }
 
 class MarkerAddMarksCommandInternal(val assignment: Assignment, val marker: User, val submitter: CurrentUser, val gradeGenerator: GeneratesGradesFromMarks)
 	extends CommandInternal[Seq[MarkerFeedback]] with MarkerAddMarksState {
 
-	self: FeedbackServiceComponent =>
+	self: FeedbackServiceComponent with AssessmentMembershipServiceComponent =>
 
 	def isModified(markItem: MarkItem): Boolean = {
 		markItem.currentMarkerFeedback(assignment, marker).exists(cmf => cmf.hasComments || cmf.hasMarkOrGrade)
@@ -93,13 +95,43 @@ trait MarkerAddMarksDescription extends Describable[Seq[MarkerFeedback]] {
 }
 
 trait MarkerAddMarksState extends AddMarksState with CanProxy {
+
+	self: AssessmentMembershipServiceComponent with FeedbackServiceComponent =>
+
 	def marker: User
+	override def existingMarks: Seq[MarkItem] = (for {
+		student <- assessmentMembershipService.determineMembershipUsers(assignment)
+		feedback <- assignment.allFeedback.find(_.usercode == student.getUserId)
+		(stage, markerFeedback) <- feedback.feedbackByStage.find{case (s, mf) => mf.marker == marker && s.order == feedback.currentStageIndex}
+	} yield {
+		val markItem = new MarkItem
+		markItem.id = Option(student.getWarwickId).getOrElse(student.getUserId)
+		markItem.actualMark = markerFeedback.mark.map(_.toString).getOrElse("")
+		markItem.actualGrade = markerFeedback.grade.getOrElse("")
+		markItem.feedbackComment = markerFeedback.comments.getOrElse("")
+		markItem.stage = Some(stage)
+		markItem
+	}).sortBy(_.user(assignment))
+
 }
 
 trait AddMarksState {
+
+	self: AssessmentMembershipServiceComponent with FeedbackServiceComponent =>
+
 	def assignment: Assignment
 	def gradeGenerator: GeneratesGradesFromMarks
 	def submitter: CurrentUser
+
+	def existingMarks: Seq[MarkItem] = assessmentMembershipService.determineMembershipUsers(assignment).map(student => {
+		val feedback = feedbackService.getStudentFeedback(assignment, student.getUserId)
+		val markItem = new MarkItem
+		markItem.id = Option(student.getWarwickId).getOrElse(student.getUserId)
+		markItem.actualMark = feedback.flatMap(_.actualMark).map(_.toString).getOrElse("")
+		markItem.actualGrade = feedback.flatMap(_.actualGrade).getOrElse("")
+		markItem.feedbackComment = feedback.flatMap(_.comments).getOrElse("")
+		markItem
+	}).sortBy(_.user(assignment))
 
 	// bindable
 	var file: UploadedFile = new UploadedFile

@@ -29,10 +29,11 @@ class AdminUploadMarksController extends CourseworkController {
 	@RequestMapping
 	def viewForm(@ModelAttribute("command") cmd: Command, @PathVariable assignment: Assignment, errors: Errors): Mav = {
 		Mav("cm2/admin/assignments/upload_marks",
+			"isGradeValidation" -> cmd.assignment.module.adminDepartment.assignmentGradeValidation,
 			"templateUrl" -> Routes.admin.assignment.marksTemplate(assignment),
 			"formUrl" -> Routes.admin.assignment.marks(assignment),
 			"cancelUrl" -> Routes.admin.assignment.submissionsandfeedback(assignment)
-		)
+		).crumbsList(Breadcrumbs.assignment(assignment))
 	}
 
 	@RequestMapping(method = Array(POST), params = Array("!confirm"))
@@ -43,7 +44,7 @@ class AdminUploadMarksController extends CourseworkController {
 			Mav("cm2/admin/assignments/upload_marks_preview",
 				"formUrl" -> Routes.admin.assignment.marks(assignment),
 				"cancelUrl" -> Routes.admin.assignment.submissionsandfeedback(assignment)
-			)
+			).crumbsList(Breadcrumbs.assignment(assignment))
 		}
 	}
 

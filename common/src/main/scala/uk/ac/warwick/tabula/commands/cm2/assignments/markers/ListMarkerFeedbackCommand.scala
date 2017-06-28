@@ -17,6 +17,7 @@ import uk.ac.warwick.userlookup.User
 
 import scala.collection.JavaConverters._
 import scala.collection.immutable.SortedMap
+import uk.ac.warwick.tabula.helpers.UserOrderingByIds._
 
 case class EnhancedMarkerFeedback(
 	markerFeedback: MarkerFeedback,
@@ -61,7 +62,7 @@ class ListMarkerFeedbackCommandInternal(val assignment:Assignment, val marker:Us
 				val itemExistsInMarkerStatusesFilters = markerStateFilters.asScala.isEmpty || markerStateFilters.asScala.exists(_.predicate(info, marker))
 				itemExistsInPlagiarismFilters && itemExistsInSubmissionStatesFilters && itemExistsInMarkerStatusesFilters
 			}}
-			stage -> filtered
+			stage -> filtered.sortBy(_.markerFeedback.student)
 		}
 	}
 }
