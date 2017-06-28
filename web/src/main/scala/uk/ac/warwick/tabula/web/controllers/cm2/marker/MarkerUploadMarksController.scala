@@ -31,7 +31,9 @@ class MarkerUploadMarksController extends CourseworkController {
 			"isGradeValidation" -> cmd.assignment.module.adminDepartment.assignmentGradeValidation,
 			"templateUrl" -> Routes.admin.assignment.markerFeedback.marksTemplate(assignment, marker),
 			"formUrl" -> Routes.admin.assignment.markerFeedback.marks(assignment, marker),
-			"cancelUrl" -> Routes.admin.assignment.markerFeedback(assignment, marker)
+			"cancelUrl" -> Routes.admin.assignment.markerFeedback(assignment, marker),
+			"isProxying" -> cmd.isProxying,
+			"proxyingAs" -> marker
 		).crumbsList(Breadcrumbs.markerAssignment(assignment, marker, proxying = cmd.isProxying))
 	}
 
@@ -42,7 +44,9 @@ class MarkerUploadMarksController extends CourseworkController {
 			cmd.postBindValidation(errors)
 			Mav("cm2/admin/assignments/upload_marks_preview",
 				"formUrl" -> Routes.admin.assignment.markerFeedback.marks(assignment, marker),
-				"cancelUrl" -> Routes.admin.assignment.markerFeedback(assignment, marker)
+				"cancelUrl" -> Routes.admin.assignment.markerFeedback(assignment, marker),
+				"isProxying" -> cmd.isProxying,
+				"proxyingAs" -> marker
 			).crumbsList(Breadcrumbs.markerAssignment(assignment, marker, proxying = cmd.isProxying))
 		}
 	}
