@@ -8,7 +8,7 @@ class CourseworkExtensionsTest extends BrowserTest with CourseworkFixtures {
 	val ExtensionGuidelines = "You must be dying of something awful"
 	val ExtensionInfoUrl = "http://warwick.ac.uk/"
 
-	private def openExtensionsScreen() {
+	private def openExtensionsScreen(): Unit = {
 		When("I go the admin page")
 		if (!currentUrl.contains("/department/xxx")) {
 			click on linkText("Test Services")
