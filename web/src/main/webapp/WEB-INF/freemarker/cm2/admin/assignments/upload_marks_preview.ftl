@@ -62,7 +62,7 @@
 								<@f.hidden path="actualMark" />
 								<@f.hidden path="actualGrade" />
 								<@f.hidden path="feedbackComment" />
-								<@f.hidden path="valid" />
+								<input type="hidden" name="marks[${item_index}].isValid" value="<@spring.bind path="valid">${status.value}</@spring.bind>" />
 								<td>
 										<@spring.bind path="id">${status.value}</@spring.bind>
 										<@f.errors path="id" cssClass="error" />

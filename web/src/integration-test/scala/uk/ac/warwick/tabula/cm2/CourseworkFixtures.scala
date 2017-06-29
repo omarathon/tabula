@@ -1,6 +1,9 @@
 package uk.ac.warwick.tabula.cm2
 
+import org.openqa.selenium.{By, WebElement}
 import org.scalatest.GivenWhenThen
+import org.scalatest.exceptions.TestFailedException
+import uk.ac.warwick.tabula.data.model.WorkflowCategory
 import uk.ac.warwick.tabula.web.{FeaturesDriver, FixturesDriver}
 import uk.ac.warwick.tabula.{BrowserTest, FunctionalTestAcademicYear, LoginDetails}
 
@@ -77,12 +80,57 @@ trait CourseworkFixtures extends BrowserTest with FeaturesDriver with FixturesDr
 		for { job <- concurrentJobs } Await.ready(job, Duration(60, duration.SECONDS))
 	}
 
+	/* Runs callback with assignment ID */
+	def withAssignment(
+		moduleCode: String,
+		assignmentName: String,
+		settings: Seq[String] => Unit = Nil => (),
+		students: Seq[String] = Seq(P.Student1.usercode, P.Student2.usercode))(callback: String => Unit): Unit = as(P.Admin1) {
+
+		click on linkText("Test Services")
+		verifyPageLoaded {
+			// wait for the page to load
+			find(cssSelector("div.deptheader")) should be('defined)
+		}
+
+		val module = getModule(moduleCode)
+		click on module.findElement(By.partialLinkText("Manage this module"))
+
+		val addAssignment = module.findElement(By.partialLinkText("Create new assignment"))
+		eventually {
+			addAssignment.isDisplayed should be {true}
+		}
+		click on addAssignment
+
+		val prefilledReset = linkText("Don't do this")
+		if (prefilledReset.findElement.isDefined) {
+			click on prefilledReset
+		}
+
+		textField("name").value = assignmentName
+		singleSel("workflowCategory").value = WorkflowCategory.NoneUse.code
+
+		cssSelector(s"input[name=createAndAddDetails]").webElement.click()
+
+		// Ensure that we've been redirected back
+		withClue(pageSource) {
+			currentUrl should endWith ("/summary")
+		}
+
+	}
 
 	def as[T](user: LoginDetails)(fn: => T): T = {
 		currentUser = user
 		signIn as user to Path("/cm2")
 
 		fn
+	}
+
+	def getModule(moduleCode: String): WebElement = {
+		val matchingModule = find(id(s"module-$moduleCode"))
+		if (matchingModule.isEmpty)
+			throw new TestFailedException(s"No module found for ${moduleCode.toUpperCase}", 0)
+		matchingModule.head.underlying
 	}
 
 //FIXME - Add additional methods based on new functional tests
