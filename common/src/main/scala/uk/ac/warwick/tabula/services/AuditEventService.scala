@@ -54,7 +54,7 @@ class AuditEventServiceImpl extends AuditEventService {
 	@Resource(name = "mainDatabaseDialect") var dialect: Dialect = _
 
 	private val baseSelect = """select
-		eventdate,eventstage,eventtype,masquerade_user_id,real_user_id,data,eventid,id
+		eventdate,eventstage,eventtype,masquerade_user_id,real_user_id,ip_address,user_agent,read_only,data,eventid,id
 		from auditevent a"""
 
 	private val DateIndex = 0
@@ -62,9 +62,12 @@ class AuditEventServiceImpl extends AuditEventService {
 	private val TypeIndex = 2
 	private val MasqueradeIdIndex = 3
 	private val RealIdIndex = 4
-	private val DataIndex = 5
-	private val EventIdIndex = 6
-	private val IdIndex = 7
+	private val IpAddressIndex = 5
+	private val UserAgentIndex = 6
+	private val ReadOnlyIndex = 7
+	private val DataIndex = 8
+	private val EventIdIndex = 9
+	private val IdIndex = 10
 
 	private val idSql = baseSelect + " where id = :id"
 	private def idsSql = baseSelect + " where id in (:ids)"
@@ -108,6 +111,12 @@ class AuditEventServiceImpl extends AuditEventService {
 			a.eventType = array(TypeIndex).toString
 			a.masqueradeUserId = array(MasqueradeIdIndex).asInstanceOf[String]
 			a.userId = array(RealIdIndex).asInstanceOf[String]
+			a.ipAddress = array(IpAddressIndex).asInstanceOf[String]
+			a.userAgent = array(UserAgentIndex).asInstanceOf[String]
+			a.readOnly = array(ReadOnlyIndex) match {
+				case null => false
+				case n: Number => n.intValue == 1
+			}
 			a.data = unclob(array(DataIndex))
 			a.eventId = array(EventIdIndex).asInstanceOf[String]
 			a.id = toIdType(array(IdIndex))
@@ -141,7 +150,7 @@ class AuditEventServiceImpl extends AuditEventService {
 		ids.grouped(Daoisms.MaxInClauseCount).flatMap { group =>
 			val query = session.createSQLQuery(idsSql)
 			query.setParameterList("ids", group.asJava)
-			val results = query.list.asScala.toSeq.asInstanceOf[Seq[Array[Object]]]
+			val results = query.list.asScala.asInstanceOf[Seq[Array[Object]]]
 			results.map(mapListToObject).map(addRelated)
 		}.toSeq
 
@@ -175,14 +184,17 @@ class AuditEventServiceImpl extends AuditEventService {
 			val nextSeq = dialect.getSelectSequenceNextValString("auditevent_seq")
 
 			val query = session.createSQLQuery("insert into auditevent " +
-				"(id,eventid,eventdate,eventtype,eventstage,real_user_id,masquerade_user_id,data) " +
-				"values(" + nextSeq + ", :eventid, :date,:name,:stage,:user_id,:masquerade_user_id,:data)")
+				"(id, eventid, eventdate, eventtype, eventstage, real_user_id, masquerade_user_id, ip_address, user_agent, read_only, data) " +
+				"values(" + nextSeq + ", :eventid, :date, :name, :stage, :user_id, :masquerade_user_id, :ip_address, :user_agent, :read_only, :data)")
 			query.setString("eventid", event.id)
 			query.setTimestamp("date", timestampColumnMapper.toNonNullValue(event.date))
 			query.setString("name", event.name)
 			query.setString("stage", stage)
 			query.setString("user_id", event.realUserId)
 			query.setString("masquerade_user_id", event.userId)
+			query.setString("ip_address", event.ipAddress)
+			query.setString("user_agent", event.userAgent)
+			query.setInteger("read_only", if (event.readOnly) 1 else 0)
 			if (event.extra != null) {
 				val data = new StringWriter()
 				json.writeValue(data, event.extra)
@@ -216,7 +228,7 @@ class AuditEventServiceImpl extends AuditEventService {
 	def parseData(data: String): Option[Map[String, Any]] = try {
 		Option(data).map { json.readValue(_, classOf[Map[String, Any]]) }
 	} catch {
-		case e @ (_: JsonParseException | _: JsonMappingException) => None
+		case _ @ (_: JsonParseException | _: JsonMappingException) => None
 	}
 
 }

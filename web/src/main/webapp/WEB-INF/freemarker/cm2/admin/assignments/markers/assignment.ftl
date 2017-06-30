@@ -75,6 +75,7 @@
 					successCallback: function($container){
 						var $row = $container.closest('tr').prev();
 						$row.addClass('ready-next-stage');
+						$('input.collection-checkbox').trigger('change');
 					}
 				});
 			});

@@ -92,7 +92,7 @@
 		<div class="submit-buttons form-actions fix-footer">
 			<input type="hidden" name="confirm" value="true">
 			<input class="btn btn-primary" type="submit" value="Confirm">
-			<a class="btn btn-default cancel" href="${cancelUrl}">Cancel</a>
+			<a class="btn btn-default" href="${cancelUrl}">Cancel</a>
 		</div>
 	</@f.form>
 </div>

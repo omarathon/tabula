@@ -2,16 +2,11 @@ package uk.ac.warwick.tabula.commands.cm2
 
 import org.joda.time.{DateTime, DateTimeConstants, LocalDate}
 import uk.ac.warwick.tabula._
-import uk.ac.warwick.tabula.commands.cm2.CourseworkHomepageCommand.{CourseworkHomepageMarkerInformation, MarkerAssignmentInfo}
 import uk.ac.warwick.tabula.data.model._
 import uk.ac.warwick.tabula.data.model.forms.Extension
-import uk.ac.warwick.tabula.data.model.markingworkflow.DoubleWorkflow
-import uk.ac.warwick.tabula.helpers.cm2.AssignmentSubmissionStudentInfo
 import uk.ac.warwick.tabula.permissions.Permissions
 import uk.ac.warwick.tabula.services._
-import uk.ac.warwick.tabula.services.cm2.{CM2WorkflowProgressService, CM2WorkflowProgressServiceComponent, CM2WorkflowStage, CM2WorkflowStages}
-
-import scala.collection.immutable.SortedMap
+import uk.ac.warwick.tabula.services.cm2.{CM2WorkflowProgressService, CM2WorkflowProgressServiceComponent}
 
 // scalastyle:off public.methods.have.type
 // scalastyle:off public.property.type.annotation
@@ -137,7 +132,8 @@ class CourseworkHomepageCommandTest extends TestBase with Mockito {
 
 	private trait MarkerCommandFixture {
 		val command = new CourseworkHomepageMarkerAssignments with CourseworkHomepageCommandState with AssessmentServiceComponent
-			with CM2MarkingWorkflowServiceComponent with CM2WorkflowProgressServiceComponent with MarkerProgress with WorkflowStudentsForAssignment {
+			with CM2MarkingWorkflowServiceComponent with CM2WorkflowProgressServiceComponent with MarkerProgress with MarkerWorkflowInformation {
+			import MarkerWorkflowInformation._
 
 			val assessmentService: AssessmentService = smartMock[AssessmentService]
 			val cm2MarkingWorkflowService: CM2MarkingWorkflowService = smartMock[CM2MarkingWorkflowService]
@@ -145,82 +141,7 @@ class CourseworkHomepageCommandTest extends TestBase with Mockito {
 
 			val user: CurrentUser = currentUser
 
-			override def workflowStudentsFor(assignment: Assignment): Seq[AssignmentSubmissionStudentInfo] = Nil
+			override def markerWorkflowInformation(assignment: Assignment): Map[Usercode, WorkflowProgressInformation] = Map.empty
 		}
 	}
-
-	@Test
-	def markerInfo(): Unit = withUser("cuscav") { new MarkerCommandFixture {
-		val extensionService = smartMock[ExtensionService]
-
-		val cm1MarkingWorkflow = Fixtures.seenSecondMarkingWorkflow("Seen second marking")
-		val cm2MarkingWorkflow = new DoubleWorkflow
-
-		def cm1Assignment(name: String) = {
-			val assignment = Fixtures.assignment(name)
-			assignment.markingWorkflow = cm1MarkingWorkflow
-			assignment.extensionService = extensionService
-			assignment.closeDate = DateTime.now.plusDays(1)
-			assignment
-		}
-
-		def cm2Assignment(name: String) = {
-			val assignment = Fixtures.assignment(name)
-			assignment.cm2MarkingWorkflow = cm2MarkingWorkflow
-			assignment.extensionService = extensionService
-			assignment.closeDate = DateTime.now.plusDays(2)
-			assignment
-		}
-
-		val a1 = cm1Assignment("Assignment 1")
-
-		val a2 = cm2Assignment("Assignment 2")
-
-		val a3 = cm1Assignment("Assignment 3")
-
-		val a4 = cm2Assignment("Assignment 4")
-
-		val a5 = cm1Assignment("Assignment 5")
-
-		val a6 = cm2Assignment("Assignment 6")
-
-		val a7 = cm1Assignment("Assignment 7")
-
-		val a8 = cm2Assignment("Assignment 8")
-
-		// CM1 assignments
-		command.assessmentService.getAssignmentWhereMarker(currentUser.apparentUser, None) returns Seq(a1, a3, a5, a7)
-
-		// CM2 assignments
-		command.assessmentService.getCM2AssignmentsWhereMarker(currentUser.apparentUser, None) returns Seq(a2, a4, a6, a8)
-		command.cm2MarkingWorkflowService.getAllFeedbackForMarker(a2, currentUser.apparentUser) returns SortedMap.empty
-		command.cm2MarkingWorkflowService.getAllFeedbackForMarker(a4, currentUser.apparentUser) returns SortedMap.empty
-		command.cm2MarkingWorkflowService.getAllFeedbackForMarker(a6, currentUser.apparentUser) returns SortedMap.empty
-		command.cm2MarkingWorkflowService.getAllFeedbackForMarker(a8, currentUser.apparentUser) returns SortedMap.empty
-
-		val cm1WorkflowStages: Seq[CM2WorkflowStage] = Seq(CM2WorkflowStages.Submission, CM2WorkflowStages.CheckForPlagiarism, CM2WorkflowStages.CM1ReleaseForMarking, CM2WorkflowStages.CM1FirstMarking, CM2WorkflowStages.CM1SecondMarking, CM2WorkflowStages.CM1FinaliseSeenSecondMarking)
-		val cm2WorkflowStages: Seq[CM2WorkflowStage] = Seq(CM2WorkflowStages.Submission, CM2WorkflowStages.CheckForPlagiarism, CM2WorkflowStages.CM2ReleaseForMarking) ++ cm2MarkingWorkflow.allStages.map(CM2WorkflowStages.CM2MarkingWorkflowStage.apply)
-		command.workflowProgressService.getStagesFor(a1) returns cm1WorkflowStages
-		command.workflowProgressService.getStagesFor(a2) returns cm2WorkflowStages
-		command.workflowProgressService.getStagesFor(a3) returns cm1WorkflowStages
-		command.workflowProgressService.getStagesFor(a4) returns cm2WorkflowStages
-		command.workflowProgressService.getStagesFor(a5) returns cm1WorkflowStages
-		command.workflowProgressService.getStagesFor(a6) returns cm2WorkflowStages
-		command.workflowProgressService.getStagesFor(a7) returns cm1WorkflowStages
-		command.workflowProgressService.getStagesFor(a8) returns cm2WorkflowStages
-
-		val a1Info = MarkerAssignmentInfo(a1, None, 0, 0, 0, Nil, Nil, Nil)
-		val a2Info = MarkerAssignmentInfo(a2, None, 0, 0, 0, Nil, Nil, Nil)
-		val a3Info = MarkerAssignmentInfo(a3, None, 0, 0, 0, Nil, Nil, Nil)
-		val a4Info = MarkerAssignmentInfo(a4, None, 0, 0, 0, Nil, Nil, Nil)
-		val a5Info = MarkerAssignmentInfo(a5, None, 0, 0, 0, Nil, Nil, Nil)
-		val a6Info = MarkerAssignmentInfo(a6, None, 0, 0, 0, Nil, Nil, Nil)
-		val a7Info = MarkerAssignmentInfo(a7, None, 0, 0, 0, Nil, Nil, Nil)
-		val a8Info = MarkerAssignmentInfo(a8, None, 0, 0, 0, Nil, Nil, Nil)
-
-		val info: CourseworkHomepageMarkerInformation = command.markerInformation
-		// TODO we could test this better but there's a massive amount of boilerplate so it'd take ages.
-		// Sorry to whoever finds this and wants to reproduce a bug
-	}}
-
 }

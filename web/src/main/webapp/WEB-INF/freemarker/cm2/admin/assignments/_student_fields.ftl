@@ -19,6 +19,7 @@
 			</@bs3form.labelled_form_group>
 			<a class="btn btn-primary spinnable spinner-auto add-students-manually" data-url="<@routes.cm2.enrolment command.assignment />">Add</a>
 		</div>
+		<div class="pending-data-info hide alert alert-info"><i class="fa fa-info-sign fa fa-exclamation-triangle"></i> Your changes will not be recorded until you save this assignment.</div>
 		<div class="assignmentEnrolmentInfo">
 			<details id="students-details">
 				<summary id="students-summary" class="collapsible large-chevron">

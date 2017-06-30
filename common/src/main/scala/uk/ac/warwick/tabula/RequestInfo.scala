@@ -28,7 +28,8 @@ class RequestInfo(
 	val requestLevelCache: RequestLevelCache = new RequestLevelCache,
 	val hasEmergencyMessage: Boolean = false,
 	val emergencyMessage: String = "",
-	val userAgent: String = ""
+	val userAgent: String = "",
+	val ipAddress: String = ""
 ) extends EarlyRequestInfo
 
 object RequestInfo {

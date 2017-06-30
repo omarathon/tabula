@@ -533,9 +533,15 @@
 		</div>
 		<div class="col-md-2">
 			<#if verb?has_content>
-				<a class="btn btn-block btn-primary" href="<@routes.cm2.listmarkersubmissions assignment user.apparentUser />">
-					${verb}
-				</a>
+				<#if assignment.cm2Assignment>
+					<a class="btn btn-block btn-primary" href="<@routes.cm2.listmarkersubmissions assignment user.apparentUser />">
+						${verb}
+					</a>
+				<#else>
+					<a class="btn btn-block btn-primary" href="<@routes.coursework.listmarkersubmissions assignment user.apparentUser />">
+						${verb}
+					</a>
+				</#if>
 			</#if>
 		</div>
 	</div>
@@ -987,15 +993,6 @@
 						<#if feedback.hasGrade>
 							grade ${feedback.actualGrade!''}
 						</#if>
-
-						<#if feedback.hasPrivateOrNonPrivateAdjustments>
-							Marks adjusted:
-							<#if feedback.latestMark??>${feedback.latestMark}%</#if><#if feedback.latestGrade??>,</#if>
-							<#if feedback.latestGrade??> grade ${feedback.latestGrade}</#if>
-							<#if feedback.latestPrivateOrNonPrivateAdjustment?? && feedback.latestPrivateOrNonPrivateAdjustment.reason??>
-								- Reason for adjustment: ${feedback.latestPrivateOrNonPrivateAdjustment.reason!''}
-							</#if>
-						</#if>
 					</#if>
 				<#elseif stage_name == 'AddFeedback'>
 					<#if feedback?? && (feedback.hasAttachments || feedback.hasOnlineFeedback)>
@@ -1050,6 +1047,12 @@
 									View audit
 								</a>
 							</li>
+							<#if feedback.hasPrivateOrNonPrivateAdjustments>
+								<li>
+									<span class="fa-stack"></span>
+									<@studentFeedbackAdjustment feedback />
+								</li>
+							</#if>
 						</ul>
 					</#if>
 				<#elseif stage_name == 'UploadMarksToSits'>
@@ -1277,4 +1280,14 @@
 	<a class="long-running" href="<@routes.cm2.feedbackDownload feedback attachmentExtension/>">
 		<@fmt.p attachments?size "file" />
 	</a>
+</#macro>
+
+<#macro studentFeedbackAdjustment feedback>
+		<#local adjustmentReasonAdded=(feedback.latestPrivateOrNonPrivateAdjustment?? && feedback.latestPrivateOrNonPrivateAdjustment.reason??) />
+		<span class="very-subtle">Marks adjusted:</span>
+		<#if feedback.latestMark??>${feedback.latestMark}%</#if><#if feedback.latestGrade??>, </#if>
+		<#if feedback.latestGrade??><span class="very-subtle">Grade:</span> ${feedback.latestGrade}</#if><#if adjustmentReasonAdded>, </#if>
+		<#if adjustmentReasonAdded>
+			 <span class="very-subtle">Reason for adjustment:</span> ${feedback.latestPrivateOrNonPrivateAdjustment.reason!''}
+		</#if>
 </#macro>

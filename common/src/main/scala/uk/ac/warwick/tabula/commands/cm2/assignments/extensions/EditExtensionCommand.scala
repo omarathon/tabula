@@ -104,7 +104,7 @@ trait EditExtensionCommandValidation extends SelfValidating {
 	self: EditExtensionCommandState =>
 	def validate(errors: Errors) {
 		if(expiryDate == null) {
-			if (state == ExtensionState.Approved) {
+			if (action == ApprovalAction || action == UpdateApprovalAction) {
 				errors.rejectValue("expiryDate", "extension.requestedExpiryDate.provideExpiry")
 			}
 		} else if(expiryDate.isBefore(assignment.closeDate)) {

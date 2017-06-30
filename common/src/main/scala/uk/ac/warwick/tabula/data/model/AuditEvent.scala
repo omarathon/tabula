@@ -38,6 +38,10 @@ case class AuditEvent(
 	// while userId will contain your ID.
 	var masqueradeUserId: String = null,
 
+	var ipAddress: String = null,
+	var userAgent: String = null,
+	var readOnly: Boolean = false,
+
 	//todo convert to/from json
 	var data: String = null,
 
@@ -102,9 +106,13 @@ case class AuditEvent(
 		eventType,
 		masqueradeUserId,
 		userId,
+		ipAddress,
+		userAgent,
+		readOnly,
 		parsedData.getOrElse(Map.empty),
-		eventDate)
+		eventDate
+	)
 
-	override def toString = s"AuditEvent[id=$id, eventId=$eventId, eventDate=$eventDate, eventType=$eventType, eventStage=$eventStage, userId=$userId, masqueradeUserId=$masqueradeUserId, data=$data]"
+	override def toString = s"AuditEvent[id=$id, eventId=$eventId, eventDate=$eventDate, eventType=$eventType, eventStage=$eventStage, userId=$userId, masqueradeUserId=$masqueradeUserId, ipAddress=$ipAddress, userAgent=$userAgent, readOnly=$readOnly, data=$data]"
 
 }

@@ -1,4 +1,5 @@
 <#import "*/cm2_macros.ftl" as cm2 />
+<#import "*/_profile_link.ftl" as pl />
 <#escape x as x?html>
 	<@cm2.assignmentHeader "Online marking" assignment />
 
@@ -70,6 +71,7 @@
 
 			})(jQuery);
 		</script>
+		<div id="profile-modal" class="modal fade profile-subset"></div>
 	<#else>
 		No students to mark for this assignment
 	</#if>

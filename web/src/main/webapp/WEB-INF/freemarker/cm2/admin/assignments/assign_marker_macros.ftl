@@ -1,7 +1,7 @@
 <#macro student_item student index stages marker={}>
 	<li class="student well well-sm">
 		<div class="name">
-			<h6>${student.fullName}&nbsp;${student.warwickId!userId}</h6>
+			<h6>${student.fullName}&nbsp;${student.warwickId!student.userId}</h6>
 			<#list stages as stage>
 				<#-- one input per stage. if no marker is defined leave the name blank (unallocated students aren't bound) -->
 				<input

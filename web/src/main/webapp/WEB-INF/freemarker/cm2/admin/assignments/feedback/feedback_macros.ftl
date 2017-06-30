@@ -1,5 +1,9 @@
 <#macro feedbackSummary feedback isModerated=false>
-	<#if isModerated && ((feedback.feedbackPosition.toString)!"") == "SecondFeedback">
+	<#assign assignment=feedback.assignment />
+	<#assign feedbacks=feedback.assignment.feedbacks />
+	<#if (assignment.cm2Assignment)>
+	<#else>
+		<#if isModerated && ((feedback.feedbackPosition.toString)!"") == "SecondFeedback">
 		<div class="feedback-summary" >
 			<h3>Moderation</h3>
 			<h6>${feedback.markerUser.fullName}</h6>
@@ -13,13 +17,13 @@
 			<strong>Feedback</strong>
 			<div class="feedback-comments muted">
 				<#if feedback.rejectionComments?has_content>
-					${feedback.rejectionComments}
+				${feedback.rejectionComments}
 				<#else>
 					No feedback comments added.
 				</#if>
 			</div>
 		</div>
-	<#elseif feedback.feedbackPosition??>
+		<#elseif feedback.feedbackPosition??>
 		<div class="feedback-summary" >
 			<h5>${feedback.feedbackPosition.description} [${(feedback.markerUser.fullName)!''}]</h5>
 			<#if feedback.mark?has_content || feedback.grade?has_content>
@@ -30,20 +34,26 @@
 			</#if>
 			<@feedbackComments feedback />
 		</div>
+		</#if>
 	</#if>
 </#macro>
 
 <#macro secondMarkerNotes feedback isModerated>
-	<#if isModerated?? && !isModerated && feedback.rejectionComments?? && feedback.feedbackPosition.toString == "SecondFeedback">
-	<div class="feedback-notes alert alert-info">
-		<h2>Notes from Second Marker</h2>
-		<p>${feedback.rejectionComments!""}</p>
-	</div>
+	<#assign assignment=feedback.assignment />
+	<#assign feedbacks=feedback.assignment.feedbacks />
+	<#if (assignment.cm2Assignment)>
+	<#else>
+		<#if isModerated?? && !isModerated && feedback.rejectionComments?? && feedback.feedbackPosition.toString == "SecondFeedback">
+		<div class="feedback-notes alert alert-info">
+			<h2>Notes from Second Marker</h2>
+			<p>${feedback.rejectionComments!""}</p>
+		</div>
+		</#if>
 	</#if>
 </#macro>
 
 <#macro feedbackComments feedback>
-	<strong>Feedback</strong>
+<strong>Feedback</strong>
 	<#assign formValues = feedback.customFormValues>
 	<#if formValues?size == 0>
 	<div>No feedback comments added<div>

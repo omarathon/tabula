@@ -16,6 +16,7 @@ import org.apache.poi.ss.util.CellReference
 import org.apache.poi.xssf.eventusermodel.XSSFSheetXMLHandler.SheetContentsHandler
 import org.apache.poi.xssf.model.StylesTable
 import org.apache.poi.xssf.usermodel.XSSFComment
+import uk.ac.warwick.tabula.data.model.markingworkflow.MarkingWorkflowStage
 import uk.ac.warwick.tabula.data.model.{Assignment, Feedback, MarkerFeedback}
 import uk.ac.warwick.tabula.helpers.Logging
 import uk.ac.warwick.tabula.services.coursework.docconversion.AbstractXslxSheetHandler
@@ -28,6 +29,7 @@ class MarkItem extends AutowiringUserLookupComponent {
 	var actualMark: String = _
 	var actualGrade: String = _
 	var feedbackComment: String = _
+	var stage: Option[MarkingWorkflowStage] = None
 	var isValid = true
 	var isModified = false
 

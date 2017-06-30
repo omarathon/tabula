@@ -56,7 +56,7 @@
 									<ul>
 										<#if customPicker?has_content>
 											<li>
-												${customPicker}
+												<#noescape>${customPicker}</#noescape>
 											</li>
 										</#if>
 										<#if allItems?has_content>

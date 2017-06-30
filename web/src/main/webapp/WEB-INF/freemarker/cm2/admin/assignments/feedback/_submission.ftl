@@ -47,7 +47,7 @@
 <#if command.extension?has_content>
 	<ul class="list-unstyled">
 		<li>
-			<strong>Extension:</strong> <@spring.message code=command.extensionState /> for <@fmt.date date=command.extensionDate capitalise=true shortMonth=true />
+			<strong>Extension:</strong> <@spring.message code=command.extensionState /><#if command.extensionDate??> for <@fmt.date date=command.extensionDate capitalise=true shortMonth=true /></#if>
 		</li>
 	</ul>
 </#if>

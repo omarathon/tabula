@@ -11,6 +11,7 @@ import uk.ac.warwick.tabula.data.model.markingworkflow.{FinalStage, MarkingWorkf
 import uk.ac.warwick.tabula.data.model.{Assignment, FeedbackForSits, FeedbackForSitsStatus}
 import uk.ac.warwick.tabula.helpers.RequestLevelCaching
 import uk.ac.warwick.tabula.helpers.cm2.WorkflowItems
+import uk.ac.warwick.tabula.helpers.StringUtils._
 
 import scala.collection.JavaConverters._
 
@@ -130,6 +131,30 @@ sealed abstract class CM2WorkflowStage(val category: CM2WorkflowCategory) extend
 object CM2WorkflowStages {
 	import CM2WorkflowCategory._
 	import WorkflowStages._
+
+	private val ObjectClassPrefix = CM2WorkflowStages.getClass.getName
+
+	/**
+		* Create an Permission from an action name (e.g. "Module.Create").
+		* Most likely useful in view templates, for permissions checking.
+		*
+		* Note that, like the templates they're used in, the correctness isn't
+		* checked at runtime.
+		*/
+	def of(name: String): CM2WorkflowStage =
+		name match {
+			case r"""CM2MarkingWorkflowStage\((.+)${markingWorkflowStageCode}\)""" =>
+				CM2MarkingWorkflowStage(MarkingWorkflowStage.fromCode(markingWorkflowStageCode))
+
+			case _ => try {
+				// Go through the magical hierarchy
+				val clz = Class.forName(ObjectClassPrefix + name.replace('.', '$') + "$")
+				clz.getDeclaredField("MODULE$").get(null).asInstanceOf[CM2WorkflowStage]
+			} catch {
+				case _: ClassNotFoundException => throw new IllegalArgumentException(s"CM2WorkflowStage $name not recognised")
+				case _: ClassCastException => throw new IllegalArgumentException(s"CM2WorkflowStage $name is not an endpoint of the hierarchy")
+			}
+		}
 
 	case object Submission extends CM2WorkflowStage(Submissions) {
 		def actionCode = "workflow.Submission.action"
@@ -335,7 +360,7 @@ object CM2WorkflowStages {
 
 			if (currentStages.isEmpty || currentStages.head.order < markingStage.order) {
 				// Not released for marking yet or this is a future stage
-				StageProgress(workflowStage, started = false, messageCode = s"workflow.cm2.${markingStage.name}.incomplete")
+				StageProgress(workflowStage, started = false, messageCode = s"workflow.cm2.${markingStage.name}.notReady")
 			} else if (currentStages.contains(markingStage)) {
 				// This is the current stage
 				val markerFeedback = coursework.enhancedFeedback.flatMap(_.feedback.markerFeedback.asScala.find(_.stage == markingStage))

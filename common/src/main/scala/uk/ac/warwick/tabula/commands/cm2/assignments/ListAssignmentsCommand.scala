@@ -1,9 +1,12 @@
 package uk.ac.warwick.tabula.commands.cm2.assignments
 
-import org.joda.time.LocalDate
+import java.util.concurrent.TimeUnit
+
+import org.joda.time.{DateTime, LocalDate, Seconds}
 import uk.ac.warwick.tabula.JavaImports._
 import uk.ac.warwick.tabula.WorkflowStages.StageProgress
 import uk.ac.warwick.tabula.commands._
+import uk.ac.warwick.tabula.commands.cm2.MarkerWorkflowCache.Json
 import uk.ac.warwick.tabula.commands.cm2.assignments.AssignmentInfoFilters.DueDateFilter
 import uk.ac.warwick.tabula.commands.cm2.assignments.ListAssignmentsCommand._
 import uk.ac.warwick.tabula.data.model
@@ -12,11 +15,15 @@ import uk.ac.warwick.tabula.data.model.{Assignment, Department, MarkingMethod, M
 import uk.ac.warwick.tabula.helpers.DateTimeOrdering._
 import uk.ac.warwick.tabula.permissions.Permissions
 import uk.ac.warwick.tabula.services._
-import uk.ac.warwick.tabula.services.cm2.{AutowiringCM2WorkflowProgressServiceComponent, CM2WorkflowCategory, CM2WorkflowProgressServiceComponent, CM2WorkflowStage}
+import uk.ac.warwick.tabula.services.cm2._
+import uk.ac.warwick.tabula.services.permissions.{AutowiringCacheStrategyComponent, CacheStrategyComponent}
 import uk.ac.warwick.tabula.system.permissions.{PermissionsChecking, PermissionsCheckingMethods, RequiresPermissionsChecking}
-import uk.ac.warwick.tabula.{AcademicYear, CurrentUser, WorkflowStage}
+import uk.ac.warwick.tabula._
+import uk.ac.warwick.util.cache._
+import uk.ac.warwick.util.collections.Pair
 
 import scala.collection.JavaConverters._
+import scala.util.{Failure, Success, Try}
 
 object ListAssignmentsCommand {
 	trait AssignmentInfo {
@@ -82,8 +89,10 @@ object ListAssignmentsCommand {
 			with ListModuleAssignmentsPermissions
 			with AutowiringModuleAndDepartmentServiceComponent
 			with AutowiringSecurityServiceComponent
-			with AssignmentProgress
+			with CachedAssignmentProgress
+			with AutowiringAssessmentServiceComponent
 			with AutowiringCM2WorkflowProgressServiceComponent
+			with AutowiringCacheStrategyComponent
 			with ComposableCommand[ModuleResult]
 			with Unaudited with ReadOnly
 
@@ -157,10 +166,28 @@ class ListModuleAssignmentsCommandInternal(val module: Module, academicYear: Aca
 
 }
 
-trait AssignmentProgress extends TaskBenchmarking {
-	self: CM2WorkflowProgressServiceComponent =>
+trait AssignmentProgress {
+	def enhance(assignment: Assignment): EnhancedAssignmentInfo
+}
 
-	def enhance(assignment: Assignment): EnhancedAssignmentInfo = benchmarkTask(s"Get progress information for ${assignment.name}") {
+object AssignmentProgressCache {
+	type AssignmentId = String
+	type Json = String
+
+	final val CacheName: String = "AssignmentProgress"
+
+	/**
+		* 7 days in seconds - we can cache this for a reasonably long time because we don't cache across deadline boundaries
+		*/
+	final val CacheExpiryTime: Long = 60 * 60 * 24 * 7
+}
+
+trait AssignmentProgressCache extends TaskBenchmarking {
+	self: AssessmentServiceComponent with CM2WorkflowProgressServiceComponent with CacheStrategyComponent =>
+
+	import AssignmentProgressCache._
+
+	private def enhanceUncached(assignment: Assignment): EnhancedAssignmentInfo = benchmarkTask(s"Get progress information for ${assignment.name}") {
 		val results = SubmissionAndFeedbackCommand(assignment).apply()
 
 		val allStages = workflowProgressService.getStagesFor(assignment)
@@ -198,6 +225,126 @@ trait AssignmentProgress extends TaskBenchmarking {
 
 		EnhancedAssignmentInfo(assignment, stagesByCategory, nextStages)
 	}
+
+	private val assignmentProgressCacheEntryFactory = new CacheEntryFactory[AssignmentId, Json] {
+
+		override def create(id: AssignmentId): Json = {
+			val assignment = assessmentService.getAssignmentById(id).getOrElse { throw new CacheEntryUpdateException(s"Could not find assignment $id") }
+
+			Try {
+				println(toJson(enhanceUncached(assignment)))
+
+				toJson(enhanceUncached(assignment))
+			} match {
+				case Success(info) => info
+				case Failure(e) => throw new CacheEntryUpdateException(e)
+			}
+		}
+
+		override def create(ids: JList[AssignmentId]): JMap[AssignmentId, Json] =
+			JMap(ids.asScala.map(id => (id, create(id))): _*)
+
+		override def isSupportsMultiLookups: Boolean = true
+		override def shouldBeCached(info: Json): Boolean = true
+	}
+
+	private def toJson(info: EnhancedAssignmentInfo): Json =
+		JsonHelper.toJson(Map(
+			"assignment" -> info.assignment.id,
+			"stages" -> info.stages.map { c =>
+				Map(
+					"category" -> c.category.code,
+					"stages" -> c.stages.map { s =>
+						Map(
+							"stage" -> s.stage.toString,
+							"progress" -> s.progress
+						)
+					}
+				)
+			},
+			"nextStages" -> info.nextStages.map { ns =>
+				Map(
+					"stage" -> ns.stage.toString,
+					"title" -> ns.title,
+					"url" -> ns.url,
+					"count" -> ns.count
+				)
+			}
+		))
+
+	lazy val assignmentProgressCache: Cache[AssignmentId, Json] = {
+		val cache = Caches.newCache(CacheName, assignmentProgressCacheEntryFactory, CacheExpiryTime, cacheStrategy)
+		cache.setExpiryStrategy(new TTLCacheExpiryStrategy[AssignmentId, Json] {
+			override def getTTL(entry: CacheEntry[AssignmentId, Json]): Pair[Number, TimeUnit] = {
+				// Extend the cache time to the next deadline if it's shorter than the default cache expiry
+				val seconds: Number = assessmentService.getAssignmentById(entry.getKey) match {
+					case Some(assignment) if !assignment.isClosed && Option(assignment.closeDate).nonEmpty =>
+						Seconds.secondsBetween(DateTime.now, assignment.closeDate).getSeconds
+
+					case Some(assignment) =>
+						val futureExtensionDate = assignment.extensions.asScala.flatMap(_.expiryDate).sorted.find(_.isAfterNow)
+
+						futureExtensionDate.map[Number] { dt => Seconds.secondsBetween(DateTime.now, dt).getSeconds }
+							.getOrElse(CacheExpiryTime)
+
+					case _ => CacheExpiryTime
+				}
+
+				Pair.of(seconds, TimeUnit.SECONDS)
+			}
+		})
+		cache
+	}
+}
+
+trait CachedAssignmentProgress extends AssignmentProgress with AssignmentProgressCache {
+	self: AssessmentServiceComponent with CM2WorkflowProgressServiceComponent with CacheStrategyComponent =>
+
+	private def fromJson(json: Json): EnhancedAssignmentInfo = {
+		val map = JsonHelper.toMap[Any](json)
+
+		EnhancedAssignmentInfo(
+			assignment = assessmentService.getAssignmentById(map("assignment").asInstanceOf[String]).get,
+			stages = map("stages").asInstanceOf[Seq[Map[String, Any]]].map { c =>
+				AssignmentStageCategory(
+					category = CM2WorkflowCategory.members.find(_.code == c("category").asInstanceOf[String]).get,
+					stages = c("stages").asInstanceOf[Seq[Map[String, Any]]].map { s =>
+						val stage = CM2WorkflowStages.of(s("stage").asInstanceOf[String])
+
+						AssignmentStage(
+							stage = stage,
+							progress = s("progress").asInstanceOf[Seq[Map[String, Any]]].map { p =>
+								val progress = p("progress").asInstanceOf[Map[String, Any]]
+
+								AssignmentStageProgress(
+									progress = StageProgress(
+										stage = stage,
+										started = progress("started").asInstanceOf[Boolean],
+										messageCode = progress("messageCode").asInstanceOf[String],
+										health = WorkflowStageHealth.fromCssClass(progress("health").asInstanceOf[Map[String, Any]]("cssClass").asInstanceOf[String]),
+										completed = progress("completed").asInstanceOf[Boolean],
+										preconditionsMet = progress("preconditionsMet").asInstanceOf[Boolean]
+									),
+									count = p("count").asInstanceOf[Int]
+								)
+							}
+						)
+					}
+				)
+			},
+			nextStages = map("nextStages").asInstanceOf[Seq[Map[String, Any]]].map { ns =>
+				AssignmentNextStage(
+					stage = CM2WorkflowStages.of(ns("stage").asInstanceOf[String]),
+					title = ns.get("title").map(_.asInstanceOf[String]),
+					url = ns.get("url").map(_.asInstanceOf[String]),
+					count = ns("count").asInstanceOf[Int]
+				)
+			}
+		)
+	}
+
+	def enhance(assignment: Assignment): EnhancedAssignmentInfo =
+		fromJson(assignmentProgressCache.get(assignment.id))
 
 }
 

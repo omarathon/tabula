@@ -8,6 +8,9 @@ create table auditevent (
 	eventStage varchar(64) not null,
 	real_user_id varchar(255),
 	masquerade_user_id varchar(255),
+	ip_address varchar(255),
+	user_agent varchar(4000),
+	read_only integer,
 	data varchar(4000) not null
 );
 create sequence auditevent_seq increment by 1 minvalue 1 maxvalue 999999999 start with 1;

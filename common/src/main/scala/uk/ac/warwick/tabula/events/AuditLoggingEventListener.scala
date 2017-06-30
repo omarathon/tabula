@@ -3,6 +3,7 @@ package uk.ac.warwick.tabula.events
 import uk.ac.warwick.tabula.JavaImports._
 import uk.ac.warwick.util.logging.AuditLogger
 import uk.ac.warwick.util.logging.AuditLogger.{Field, RequestInformation}
+import uk.ac.warwick.tabula.helpers.StringUtils._
 
 import scala.collection.JavaConverters._
 
@@ -19,11 +20,9 @@ class AuditLoggingEventListener extends EventListener {
 	// Currently we only want afters
 	override def afterCommand(event: Event, returnValue: Any, beforeEvent: Event): Unit = {
 		var info = RequestInformation.forEventType(event.name)
-		if (event.realUserId != null) {
-			info = info.withUsername(event.realUserId)
-		}
-
-		// TODO We have no way this far down to get things like IP address or User-Agent
+		event.realUserId.maybeText.foreach { realUserId => info = info.withUsername(realUserId) }
+		event.userAgent.maybeText.foreach { userAgent => info = info.withUserAgent(userAgent) }
+		event.ipAddress.maybeText.foreach { ipAddress => info = info.withIpAddress(ipAddress) }
 
 		// We need to convert all Scala collections into Java collections
 		def handle(in: Any): AnyRef = (in match {
