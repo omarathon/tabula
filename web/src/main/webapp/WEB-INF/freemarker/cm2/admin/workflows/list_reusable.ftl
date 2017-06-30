@@ -39,7 +39,7 @@
 </#if>
 <#if workflows?has_content>
 	<#if !isCurrentYear><p>The following workflows relate to the year selected in the main menu. Use the Add to button to copy a workflow to the current academic year.</p></#if>
-	<table class="table-sortable table table-bordered table-striped">
+	<table class="table-sortable table table-striped">
 		<thead>
 		<tr>
 			<th class="sortable">Name</th>
