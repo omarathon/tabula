@@ -66,6 +66,7 @@ object CourseworkHomepageCommand {
 			with AutowiringModuleAndDepartmentServiceComponent
 			with AutowiringAssessmentServiceComponent
 			with AutowiringAssessmentMembershipServiceComponent
+			with AutowiringCM2MarkingWorkflowServiceComponent
 			with PubliclyVisiblePermissions with Unaudited with ReadOnly
 }
 
@@ -82,7 +83,8 @@ class CourseworkHomepageCommandInternal(val user: CurrentUser) extends CommandIn
 	with TaskBenchmarking {
 	self: ModuleAndDepartmentServiceComponent
 		with AssessmentServiceComponent
-		with AssessmentMembershipServiceComponent =>
+		with AssessmentMembershipServiceComponent
+		with CM2MarkingWorkflowServiceComponent =>
 
 	override def applyInternal(): Result =
 		CourseworkHomepageInformation(
