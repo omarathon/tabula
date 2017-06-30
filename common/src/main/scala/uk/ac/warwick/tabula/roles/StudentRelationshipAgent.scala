@@ -69,6 +69,8 @@ case class StudentRelationshipAgentRoleDefinition(relationshipType: PermissionsS
 
 		Profiles.ScheduledMeetingRecord.Manage(relationshipType),
 
+		Department.ManageProfiles,
+
 		MemberNotes.Create,
 
 		MonitoringPoints.Record
