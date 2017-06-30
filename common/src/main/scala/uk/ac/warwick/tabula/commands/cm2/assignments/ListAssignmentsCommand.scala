@@ -232,8 +232,6 @@ trait AssignmentProgressCache extends TaskBenchmarking {
 			val assignment = assessmentService.getAssignmentById(id).getOrElse { throw new CacheEntryUpdateException(s"Could not find assignment $id") }
 
 			Try {
-				println(toJson(enhanceUncached(assignment)))
-
 				toJson(enhanceUncached(assignment))
 			} match {
 				case Success(info) => info
