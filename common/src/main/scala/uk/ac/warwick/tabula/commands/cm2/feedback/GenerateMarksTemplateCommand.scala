@@ -5,6 +5,7 @@ import org.apache.poi.ss.util.{CellRangeAddress, WorkbookUtil}
 import org.apache.poi.xssf.streaming.SXSSFWorkbook
 import uk.ac.warwick.tabula.commands._
 import uk.ac.warwick.tabula.data.model.{Assessment, Assignment, MarkerFeedback}
+import uk.ac.warwick.tabula.helpers.UserOrderingByIds._
 import uk.ac.warwick.tabula.permissions.Permissions
 import uk.ac.warwick.tabula.services._
 import uk.ac.warwick.tabula.system.permissions.{PermissionsChecking, PermissionsCheckingMethods, RequiresPermissionsChecking}
@@ -59,7 +60,7 @@ class GenerateOwnMarksTemplateCommandInternal(val assignment: Assignment, val ma
 
 	override def applyInternal(): SXSSFWorkbook = {
 
-		val students: Seq[User] = cm2MarkingWorkflowService.getAllStudentsForMarker(assignment, marker)
+		val students: Seq[User] = cm2MarkingWorkflowService.getAllStudentsForMarker(assignment, marker).sorted
 		val markerFeedbackToDo = students.flatMap(s => {
 			val feedback = assignment.allFeedback.find(_.usercode == s.getUserId)
 			feedback.flatMap(f => f.markerFeedback.asScala.find(mf => marker == mf.marker && f.outstandingStages.asScala.contains(mf.stage)))
@@ -118,7 +119,7 @@ class GenerateMarksTemplateCommandInternal(val assignment: Assignment) extends C
 
 	override def applyInternal(): SXSSFWorkbook = {
 
-		val students = assessmentMembershipService.determineMembershipUsers(assignment)
+		val students = assessmentMembershipService.determineMembershipUsers(assignment).sorted
 		val workbook = new SXSSFWorkbook
 		val sheet =  workbook.createSheet("Marks for " + MarksTemplateCommand.safeAssessmentName(assignment))
 
