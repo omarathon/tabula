@@ -66,11 +66,11 @@
 					<td>
 						<#if isCurrentYear>
 							<a class="btn btn-default" href="<@routes.cm2.reusableWorkflowEdit department academicYear workflow/>">Modify</a>
-							<a	<#if inUse>
+							<a <#if inUse>
 									disabled="disabled"
 									class="btn btn-default use-tooltip"
 									data-toggle=""
-									title="You can't delete this marking workflow because <@fmt.p number=workflow.assignments?size singular="assignment" /> are using it"
+									title="You can't delete this marking workflow because <@fmt.p number=workflow.assignments?size singular="assignment is" plural="assignments are" /> using it"
 							<#else>
 									class="btn btn-default"
 									href="<@routes.cm2.reusableWorkflowDelete department academicYear workflow/>"
