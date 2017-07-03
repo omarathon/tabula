@@ -69,6 +69,10 @@ class SmallGroupEvent extends GeneratedId with ToString with PermissionsTarget w
 
 	var title: String = _
 
+	override def humanReadableId: String = Option(title).getOrElse(
+		Option(group.name).map(name => s"$name event").getOrElse(s"${group.groupSet.name} event")
+	)
+
 	@URL
 	var relatedUrl: String = _
 	var relatedUrlTitle: String = _
