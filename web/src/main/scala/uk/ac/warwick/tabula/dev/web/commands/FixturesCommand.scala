@@ -194,6 +194,15 @@ class FixturesCommand extends Command[Unit] with Public with Daoisms {
 					session.delete(markingWorkflow)
 				}
 
+				for (cm2MarkingWorkflow <- dept.cm2MarkingWorkflows) {
+					val markersForStage = cm2MarkingWorkflow.stageMarkers.asScala
+					dept.removeCM2MarkingWorkflow(cm2MarkingWorkflow)
+					session.delete(cm2MarkingWorkflow)
+					for (stageMarker <- markersForStage) {
+						session.delete(stageMarker)
+					}
+				}
+
 				routes.foreach(invalidateAndDeletePermissions[Route])
 				routes.foreach(session.delete)
 				dept.routes.clear()

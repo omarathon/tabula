@@ -398,6 +398,8 @@ class AssignmentFeedback extends Feedback {
 
 	def module: Module = assignment.module
 
+	override def humanReadableId: String = s"Feedback for $usercode for ${assignment.humanReadableId}"
+
 	override def markingWorkflow: MarkingWorkflow = assignment.markingWorkflow
 
 	override def hasGenericFeedback: Boolean = Option(assignment.genericFeedback).isDefined

@@ -47,6 +47,8 @@ class Submission extends GeneratedId with PermissionsTarget with ToEntityReferen
 	@Column(name = "userId")
 	var usercode: String = _
 
+	override def humanReadableId: String = s"Submission by $usercode for ${assignment.humanReadableId}"
+
 	@Type(`type` = "uk.ac.warwick.tabula.data.model.PlagiarismInvestigationUserType")
 	var plagiarismInvestigation: PlagiarismInvestigation = PlagiarismInvestigation.Default
 

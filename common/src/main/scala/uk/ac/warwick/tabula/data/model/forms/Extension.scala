@@ -40,6 +40,8 @@ class Extension extends GeneratedId with PermissionsTarget with ToEntityReferenc
 	@Column(name = "universityId")
 	var _universityId: String = _
 
+	override def humanReadableId: String = s"Extension for $usercode for ${assignment.humanReadableId}"
+
 	def universityId = Option(_universityId)
 
 	def studentIdentifier = universityId.getOrElse(usercode)

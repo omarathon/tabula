@@ -285,6 +285,22 @@ class CreatePremarkedAssignmentFixtureController {
 }
 
 @Controller
+@RequestMapping(Array("/fixtures/create/premarkedCM2Assignment"))
+class CreatePremarkedCM2AssignmentFixtureController {
+
+	@ModelAttribute("createPremarkedCM2AssignmentFixtureCommand")
+	def command(): Appliable[Assignment] = {
+		CreatePremarkedCM2AssignmentFixtureCommand()
+	}
+
+	@RequestMapping(method = Array(POST))
+	def submit(@ModelAttribute("createPremarkedCM2AssignmentFixtureCommand") cmd: Appliable[Assignment]) {
+		cmd.apply()
+	}
+}
+
+
+@Controller
 @RequestMapping(Array("/fixtures/create/memberNote"))
 class MemberNoteCreationFixturesController {
 
