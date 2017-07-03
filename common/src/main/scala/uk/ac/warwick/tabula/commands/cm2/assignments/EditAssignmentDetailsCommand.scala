@@ -3,7 +3,7 @@ package uk.ac.warwick.tabula.commands.cm2.assignments
 import org.springframework.validation.Errors
 import uk.ac.warwick.tabula.AcademicYear
 import uk.ac.warwick.tabula.commands._
-import uk.ac.warwick.tabula.commands.cm2.markingworkflows.{CreatesMarkingWorkflow, EditMarkingWorkflowState, ModifyMarkingWorkflowState, ModifyMarkingWorkflowValidation}
+import uk.ac.warwick.tabula.commands.cm2.markingworkflows._
 import uk.ac.warwick.tabula.data.model.{WorkflowCategory, _}
 import uk.ac.warwick.tabula.data.model.markingworkflow.CM2MarkingWorkflow
 import uk.ac.warwick.tabula.permissions.Permissions
@@ -23,6 +23,7 @@ object EditAssignmentDetailsCommand {
 			with AutowiringAssessmentServiceComponent
 			with AutowiringUserLookupComponent
 			with AutowiringCM2MarkingWorkflowServiceComponent
+			with AutowiringFeedbackServiceComponent
 			with ModifyAssignmentsDetailsTriggers
 			with PopulateOnForm
 }
@@ -49,7 +50,9 @@ class EditAssignmentDetailsCommandInternal(override val assignment: Assignment) 
 						cm2MarkingWorkflowService.save(w)
 					}
 				// persist any new workflows
-				case _ => createAndSaveSingleUseWorkflow(assignment)
+				case _ =>
+					createAndSaveSingleUseWorkflow(assignment)
+					assignment.removeFeedbacks() // remove any feedback created from the old reusable marking workflow
 			}
 		} else if(workflowCategory == WorkflowCategory.NoneUse || workflowCategory == WorkflowCategory.NotDecided) {
 			// before we de-attach, store it to be deleted afterwards

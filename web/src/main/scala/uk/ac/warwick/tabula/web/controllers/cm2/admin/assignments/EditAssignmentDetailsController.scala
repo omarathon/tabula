@@ -9,6 +9,7 @@ import org.springframework.web.bind.annotation._
 import uk.ac.warwick.tabula.cm2.web.Routes
 import uk.ac.warwick.tabula.commands.cm2.assignments.{EditAssignmentDetailsCommand, _}
 import uk.ac.warwick.tabula.commands.{Appliable, PopulateOnForm, SelfValidating}
+import uk.ac.warwick.tabula.data.model.WorkflowCategory.SingleUse
 import uk.ac.warwick.tabula.data.model._
 import uk.ac.warwick.tabula.data.model.markingworkflow.MarkingWorkflowType
 import uk.ac.warwick.tabula.web.Mav
@@ -34,6 +35,7 @@ class EditAssignmentDetailsController extends AbstractAssignmentController {
 	def showForm(cmd: EditAssignmentDetailsCommand, @PathVariable assignment: Assignment): Mav = {
 		val module = assignment.module
 		val canDeleteAssignment = !assignment.deleted  && assignment.submissions.isEmpty && !assignment.hasReleasedFeedback
+		val canDeleteMarkers = cmd.workflowCategory != SingleUse || cmd.workflow.exists(_.canDeleteMarkers)
 		Mav("cm2/admin/assignments/edit_assignment_details",
 			"department" -> module.adminDepartment,
 			"module" -> module,
@@ -42,7 +44,8 @@ class EditAssignmentDetailsController extends AbstractAssignmentController {
 			"availableWorkflows" -> MarkingWorkflowType.values.sorted,
 			"workflow" -> cmd.workflow,
 			"canEditWorkflowType" -> !assignment.isReleasedForMarking,
-			"canDeleteMarkers" -> cmd.workflow.exists(_.canDeleteMarkers),
+			// if the current workflow type isn't Single use then allow markers to be deleted if we switch to it
+			"canDeleteMarkers" -> canDeleteMarkers,
 			"canDeleteAssignment" -> canDeleteAssignment
 		)
 			.crumbsList(Breadcrumbs.assignment(assignment))
