@@ -14,9 +14,9 @@ import scala.concurrent.duration.Duration
 trait CourseworkFixtures extends BrowserTest with FeaturesDriver with FixturesDriver with GivenWhenThen {
 
 	val TEST_MODULE_CODE = "xxx02"
-	val TEST_ROUTE_CODE="xx456"
-	val TEST_DEPARTMENT_CODE="xxx"
-	val TEST_COURSE_CODE="Ux456"
+	val TEST_ROUTE_CODE = "xx456"
+	val TEST_DEPARTMENT_CODE = "xxx"
+	val TEST_COURSE_CODE = "Ux456"
 
 	before {
 		Given("The test department exists")
@@ -24,6 +24,7 @@ trait CourseworkFixtures extends BrowserTest with FeaturesDriver with FixturesDr
 		pageSource should include("Fixture setup successful")
 
 		createPremarkedAssignment(TEST_MODULE_CODE)
+		createPremarkedCM2Assignment(TEST_MODULE_CODE)
 
 		val assessmentFuture = Future {
 			And("There is an assessment component for module xxx01")
@@ -46,38 +47,46 @@ trait CourseworkFixtures extends BrowserTest with FeaturesDriver with FixturesDr
 		// Make them at the same time.
 		val concurrentJobs = Seq(
 			assessmentFuture,
-			Future { createStudentMember(
-				P.Student1.usercode,
-				routeCode = TEST_ROUTE_CODE,
-				courseCode = TEST_COURSE_CODE,
-				deptCode = TEST_DEPARTMENT_CODE,
-				academicYear = FunctionalTestAcademicYear.current.startYear.toString
-			) },
-			Future { createStudentMember(
-				P.Student2.usercode,
-				routeCode = TEST_ROUTE_CODE,
-				courseCode = TEST_COURSE_CODE,
-				deptCode = TEST_DEPARTMENT_CODE,
-				academicYear = FunctionalTestAcademicYear.current.startYear.toString
-			) },
-			Future { createStudentMember(
-				P.Student3.usercode,
-				routeCode = TEST_ROUTE_CODE,
-				courseCode = TEST_COURSE_CODE,
-				deptCode = TEST_DEPARTMENT_CODE,
-				academicYear = FunctionalTestAcademicYear.current.startYear.toString
-			) },
-			Future { createStudentMember(
-				P.Student4.usercode,
-				routeCode = TEST_ROUTE_CODE,
-				courseCode = TEST_COURSE_CODE,
-				deptCode = TEST_DEPARTMENT_CODE,
-				academicYear = FunctionalTestAcademicYear.current.startYear.toString
-			) }
+			Future {
+				createStudentMember(
+					P.Student1.usercode,
+					routeCode = TEST_ROUTE_CODE,
+					courseCode = TEST_COURSE_CODE,
+					deptCode = TEST_DEPARTMENT_CODE,
+					academicYear = FunctionalTestAcademicYear.current.startYear.toString
+				)
+			},
+			Future {
+				createStudentMember(
+					P.Student2.usercode,
+					routeCode = TEST_ROUTE_CODE,
+					courseCode = TEST_COURSE_CODE,
+					deptCode = TEST_DEPARTMENT_CODE,
+					academicYear = FunctionalTestAcademicYear.current.startYear.toString
+				)
+			},
+			Future {
+				createStudentMember(
+					P.Student3.usercode,
+					routeCode = TEST_ROUTE_CODE,
+					courseCode = TEST_COURSE_CODE,
+					deptCode = TEST_DEPARTMENT_CODE,
+					academicYear = FunctionalTestAcademicYear.current.startYear.toString
+				)
+			},
+			Future {
+				createStudentMember(
+					P.Student4.usercode,
+					routeCode = TEST_ROUTE_CODE,
+					courseCode = TEST_COURSE_CODE,
+					deptCode = TEST_DEPARTMENT_CODE,
+					academicYear = FunctionalTestAcademicYear.current.startYear.toString
+				)
+			}
 		)
 
 		// Wait to complete
-		for { job <- concurrentJobs } Await.ready(job, Duration(60, duration.SECONDS))
+		for {job <- concurrentJobs} Await.ready(job, Duration(60, duration.SECONDS))
 	}
 
 	/* Runs callback with assignment ID */
@@ -98,7 +107,9 @@ trait CourseworkFixtures extends BrowserTest with FeaturesDriver with FixturesDr
 
 		val addAssignment = module.findElement(By.partialLinkText("Create new assignment"))
 		eventually {
-			addAssignment.isDisplayed should be {true}
+			addAssignment.isDisplayed should be {
+				true
+			}
 		}
 		click on addAssignment
 
@@ -114,7 +125,7 @@ trait CourseworkFixtures extends BrowserTest with FeaturesDriver with FixturesDr
 
 		// Ensure that we've been redirected back
 		withClue(pageSource) {
-			currentUrl should endWith ("/summary")
+			currentUrl should endWith("/summary")
 		}
 
 	}
@@ -133,6 +144,14 @@ trait CourseworkFixtures extends BrowserTest with FeaturesDriver with FixturesDr
 		matchingModule.head.underlying
 	}
 
-//FIXME - Add additional methods based on new functional tests
+	def openAdminPage(): Unit = {
+		When("I go the admin page")
+		click on linkText("Test Services")
 
+		Then("I should reach the admin coursework page")
+		currentUrl should endWith("/department/xxx")
+
+		//FIXME - Add additional methods based on new functional tests
+
+	}
 }
