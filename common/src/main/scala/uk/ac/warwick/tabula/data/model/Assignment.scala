@@ -113,6 +113,8 @@ class Assignment
 
 	override var name: String = _
 
+	override def humanReadableId: String = s"$name (${module.code.toUpperCase})"
+
 	@Column(name="archived")
 	@deprecated("118", "Archived will be removed in future in preference to academic year scoping")
 	private var _archived: JBoolean = false
