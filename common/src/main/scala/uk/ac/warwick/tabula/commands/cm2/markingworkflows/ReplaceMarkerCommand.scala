@@ -70,7 +70,7 @@ trait ReplaceMarkerValidation extends SelfValidating {
 		if (newMarker.hasText && !userLookup.getUserByUserId(newMarker).isFoundUser){
 			errors.rejectValue("newMarker", "markingWorkflow.marker.unknownUser")
 		}
-		if(oldMarkerUser == newMarkerUser){
+		if(newMarkerUser.isFoundUser && oldMarkerUser == newMarkerUser){
 			errors.rejectValue("newMarker", "markingWorkflow.marker.sameMarker")
 		}
 		if (!confirm) {
