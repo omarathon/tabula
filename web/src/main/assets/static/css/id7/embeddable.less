@@ -1150,3 +1150,53 @@ textarea.small-textarea {
 .btn.disabled {
 	pointer-events: auto !important;
 }
+
+.feedback-summary {
+
+	.feedback-details {
+		display: inline-block;
+		max-width: 100%;
+
+		.mark-grade {
+			margin-bottom: 10px;
+
+			> div {
+				display: table-row;
+				width: 600px;
+				padding: 1rem 0 2rem 0;
+
+				.mg-label {
+					display: table-cell;
+					padding-right: 0.5rem;
+					+ div {
+						padding-right: 0.5rem;
+					}
+				}
+			}
+		}
+
+		.feedback-comments {
+			margin-bottom: 10px;
+			h5 {
+				font-size: 18px;
+			}
+
+			> div {
+				margin-top: 0.3rem;
+				max-width: 550px;
+			}
+
+			> p {
+				white-space: pre-wrap;
+			}
+		}
+	}
+
+	.feedback-attachments {
+		> div {
+			display: table-row;
+			margin-bottom: 0.5rem;
+		}
+	}
+
+}

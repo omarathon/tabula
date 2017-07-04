@@ -284,6 +284,14 @@ abstract class Feedback extends GeneratedId with FeedbackAttachments with Permis
 		TreeMap(unsortedMap.toSeq:_*)
 	}
 
+	def completedFeedbackByStage : SortedMap[MarkingWorkflowStage, MarkerFeedback] = {
+		feedbackByStage.filterKeys(stage => {
+			def isPrevious = stage.order < currentStageIndex
+			def isCurrentAndFinished =  stage.order == currentStageIndex && !outstandingStages.asScala.contains(stage)
+			isPrevious || isCurrentAndFinished
+		})
+	}
+
 	def feedbackMarkers: Map[MarkingWorkflowStage, User] =
 		feedbackByStage.mapValues(_.marker)
 
