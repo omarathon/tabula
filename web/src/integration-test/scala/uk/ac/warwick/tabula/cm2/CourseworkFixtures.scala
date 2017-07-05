@@ -128,6 +128,10 @@ trait CourseworkFixtures extends BrowserTest with FeaturesDriver with FixturesDr
 			currentUrl should endWith("/summary")
 		}
 
+		val pattern = """.*admin/assignments/(.*)/summary""".r
+		val assignmentId = pattern.findAllIn(currentUrl).matchData.toSeq.headOption.map(_.group(1))
+		assignmentId.isDefined should be { true }
+		callback(assignmentId.get)
 	}
 
 	def as[T](user: LoginDetails)(fn: => T): T = {
