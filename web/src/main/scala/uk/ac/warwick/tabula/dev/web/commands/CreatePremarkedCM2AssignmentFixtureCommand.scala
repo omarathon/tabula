@@ -52,21 +52,17 @@ class CreatePremarkedCM2AssignmentFixtureCommand extends CommandInternal[Assignm
 		assignment.displayPlagiarismNotice = true
 		assignment.allowExtensions = true
 		assignment.summative = false
+		assignment.workflowCategory = Some(WorkflowCategory.Reusable)
 		assignment.cm2Assignment = true
 
 		transactional() {
 
 		// persist the assignment to give it an ID
-//		createAndSaveSingleUseWorkflow(assignment)
 		assignmentSrv.save(assignment)
 
 
 		val markersAUsers: Seq[User] = userLookup.getUsersByUserIds(CreatePremarkedCM2AssignmentFixtureCommand.firstMarkers).values.toSeq
 		val markersBUsers: Seq[User] = JArrayList().asScala
-	//	val data = MarkingWorkflowData(module.adminDepartment, "module.adminDepartment", markersAUsers, markersBUsers, MarkingWorkflowType.SingleMarking)
-	//	val workflow = createWorkflow(data)
-//		workflow.isReusable = true
-	//	cm2MarkingWorkflowService.save(workflow)
 
 
 			val singleMarkerWorkflow = SingleMarkerWorkflow("Single marker workflow", module.adminDepartment, markersAUsers)
@@ -74,26 +70,6 @@ class CreatePremarkedCM2AssignmentFixtureCommand extends CommandInternal[Assignm
 		singleMarkerWorkflow.isReusable = true
 		cm2MarkingWorkflowService.save(singleMarkerWorkflow)
 		assignment.cm2MarkingWorkflow = singleMarkerWorkflow
-
-	//		val workflow = new FirstMarkerOnlyWorkflow(module.adminDepartment)
-	//		workflow.name = "First marker only workflow"
-	//		workflow.firstMarkers.knownType.includedUserIds = CreatePremarkedAssignmentFixtureCommand.firstMarkers
-	//		markingWorkflowService.save(workflow)
-	//		assignment.markingWorkflow = workflow
-
-	/**		val group = UserGroup.ofUniversityIds
-			assignment.members = group
-			assignment.members.knownType.addUserId("3000001")
-			assignment.members.knownType.addUserId("3000003")
-			userGroupDao.saveOrUpdate(group)
-
-
-			val markerBGroup = UserGroup.ofUniversityIds
-			markerBGroup.addUserId("3000001")
-			markerBGroup.addUserId("3000003")
-			userGroupDao.saveOrUpdate(markerBGroup)
-			val map1 = FirstMarkersMap(assignment, "tabula-functest-marker1", marker1Group)
-			assignment.firstMarkers = Seq(map1).asJava    **/
 
 			val submissions = CreatePremarkedCM2AssignmentFixtureCommand.students.map(student => {
 				val s = new Submission
@@ -117,20 +93,11 @@ class CreatePremarkedCM2AssignmentFixtureCommand extends CommandInternal[Assignm
 				f.outstandingStages = currentStage.nextStages.asJava
 				feedbackService.saveOrUpdate(f)
 
-				//val newMarkerFeedback = new MarkerFeedback(f)
-				//newMarkerFeedback.stage = singleMarkerWorkflow.initialStages.head
-				//newMarkerFeedback
-
 				val mf = new MarkerFeedback(f)
 				mf.marker = markersAUsers.head
 				mf.stage = currentStage
-				//f.firstMarkerFeedback = mf
 				mf.mark = Some(41)
-
-				//f.outstandingStages = f.assignment.cm2MarkingWorkflow.initialStages.asJava
 				feedbackService.saveOrUpdate(f)
-				//mf.state = MarkingCompleted
-			//	val mf1 = new Outstandin(f)
 				feedbackService.save(mf)
 				f
 			})
