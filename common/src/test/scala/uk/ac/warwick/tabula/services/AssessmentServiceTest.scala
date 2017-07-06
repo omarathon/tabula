@@ -181,6 +181,7 @@ class AssessmentServiceTest extends PersistenceTestBase with Mockito {
 	@Transactional @Test def usersForFeedbackTest() {
 		val assignment = assignmentService.getAssignmentById("1")
 		assignment should be('defined)
+		assignment.foreach(_.cm2Assignment = false)
 
 		assignment.foreach { assmt =>
 			// create a feedback for the assignment, not yet released
