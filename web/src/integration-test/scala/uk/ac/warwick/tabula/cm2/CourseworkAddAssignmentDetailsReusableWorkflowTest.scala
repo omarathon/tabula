@@ -136,10 +136,11 @@ class CourseworkAddAssignmentDetailsReusableWorkflowTest extends BrowserTest wit
 		enter("pdf txt")
 
 		And("Enter some more data")
-		textField("individualFileSizeLimit").value = "10"
+		textField("individualFileSizeLimit").value = "3"
 		textField("wordCountMin").value = "100"
-		textArea("wordCountConventions").value = "Exclude any bibliography or appendices from your word count-XXX."
-		textArea("assignmentComment").value = "This assignment should not be ingored as it will impact final marks."
+		textField("wordCountMax").value = "1000"
+		textArea("wordCountConventions").value = "Exclude any bibliography or appendices from your word count-XXX"
+		textArea("assignmentComment").value = "This assignment should not be ignored as it will impact final marks"
 		submitAndContinueClick()
 	}
 
@@ -148,28 +149,43 @@ class CourseworkAddAssignmentDetailsReusableWorkflowTest extends BrowserTest wit
 		currentUrl should include("/review")
 
 		Then("I cross check various assignment details")
-
+		//assignment page details
 		var labels = webDriver.findElements(By.className("review-label")).asScala
 		checkReviewTabRow(labels,"Assignment title",assignmentName)
 		checkReviewTabRow(labels,"Marking workflow use", "Reusable")
 		checkReviewTabRow(labels,"Marking workflow name", reusableWorkflowName)
 		checkReviewTabRow(labels,"Marking workflow type", "Single marking")
 
+		//assignment feedback page details
 		checkReviewTabRow(labels,"Automatically release to markers when assignment closes or after plagiarism check", "No")
 		checkReviewTabRow(labels,"Collect marks", "Yes")
 
+		//students page
 		checkReviewTabRow(labels,"Total number of students enrolled", "2")
 
+		//marker page details
+		checkReviewTabRow(labels,"Marker", "tabula-functest-marker1 user (2 students)")
+
+		//submissions page details
 		checkReviewTabRow(labels,"Collect submissions", "Yes")
 		checkReviewTabRow(labels,"Automatically check submissions for plagiarism", "No")
 		checkReviewTabRow(labels,"Submission scope", "Only students enrolled on this assignment can submit coursework")
 		checkReviewTabRow(labels,"Allow new submissions after close date", "No")
+
+		//Options page details
+		checkReviewTabRow(labels,"Minimum attachments per submission", "2")
+		checkReviewTabRow(labels,"Maximum attachments per submission", "3")
+		checkReviewTabRow(labels,"Accepted attachment file types", "PDF, TXT")
+		checkReviewTabRow(labels,"Maximum file size", "3")
+		checkReviewTabRow(labels,"Minimum word count", "100")
+		checkReviewTabRow(labels,"Maximum word count", "1000")
+		checkReviewTabRow(labels,"Word count conventions", "Exclude any bibliography or appendices from your word count-XXX")
 	}
 
 	private def checkReviewTabRow(labels: mutable.Buffer[WebElement], labelRow: String, fieldValue: String) = {
-		var assignmentTitleElement = labels.find(_.getText.contains(labelRow)).getOrElse(fail(s"{labelRow} not found"))
-		var parent = assignmentTitleElement.findElement(By.xpath(".."))
-		parent.getText contains {fieldValue}
+		var element = labels.find(_.getText.contains(labelRow)).getOrElse(fail(s"{labelRow} not found"))
+		var parent = element.findElement(By.xpath(".."))
+		parent.getText should include (fieldValue)
 	}
 
 	private def submitAndContinueClick(): Unit = {
