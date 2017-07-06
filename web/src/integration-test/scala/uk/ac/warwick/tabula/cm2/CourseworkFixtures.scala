@@ -4,6 +4,7 @@ import org.openqa.selenium.{By, WebElement}
 import org.scalatest.GivenWhenThen
 import org.scalatest.exceptions.TestFailedException
 import uk.ac.warwick.tabula.data.model.WorkflowCategory
+import uk.ac.warwick.tabula.data.model.markingworkflow.MarkingWorkflowType
 import uk.ac.warwick.tabula.web.{FeaturesDriver, FixturesDriver}
 import uk.ac.warwick.tabula.{BrowserTest, FunctionalTestAcademicYear, LoginDetails}
 
@@ -132,6 +133,44 @@ trait CourseworkFixtures extends BrowserTest with FeaturesDriver with FixturesDr
 		val assignmentId = pattern.findAllIn(currentUrl).matchData.toSeq.headOption.map(_.group(1))
 		assignmentId.isDefined should be { true }
 		callback(assignmentId.get)
+	}
+
+	def withAssignmentWithWorkflow(workflowType: MarkingWorkflowType, markers: Seq[LoginDetails]*)(callback: String => Unit): Unit = {
+		withAssignment("xxx01", s"${workflowType.description} - single use") { id =>
+
+			When("I click on the edit button")
+			click on partialLinkText("Edit assignment")
+			Then("I see the edit details screen")
+			eventually(pageSource contains "Edit assignment details" should be {true})
+
+			When("I choose Single use")
+			singleSel("workflowCategory").value = WorkflowCategory.SingleUse.code
+			Then("I see the options for single use workflows")
+			eventuallyAjax(pageSource contains "Marking workflow type" should be {true})
+
+			When("I select single marking add a markers usercode")
+			singleSel("workflowType").value = workflowType.name
+			eventuallyAjax(pageSource contains "Add marker" should be {true})
+
+			Seq("markersA" -> markers.headOption.getOrElse(Nil), "markersB" -> markers.tail.headOption.getOrElse(Nil)).foreach{case (field, m) =>
+				m.zipWithIndex.foreach{ case(marker, i) =>
+					new TextField(findAll(cssSelector(s".$field input.flexi-picker")).toList.apply(i).underlying).value = marker.usercode
+					click on className(field).webElement.findElement(By.cssSelector("button.btn"))
+					eventually {
+						findAll(cssSelector(s".$field input.flexi-picker")).toList.count(_.isDisplayed) should be (i+2)
+					}
+				}
+			}
+
+			And("I submit the form")
+			cssSelector(s"input[name=editAndEditDetails]").webElement.click()
+			Then("I should be back on the summary page")
+			withClue(pageSource) {
+				currentUrl should endWith("/summary")
+			}
+
+			callback(id)
+		}
 	}
 
 	def as[T](user: LoginDetails)(fn: => T): T = {
