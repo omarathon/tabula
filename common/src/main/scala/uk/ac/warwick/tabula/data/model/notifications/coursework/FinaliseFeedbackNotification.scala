@@ -40,7 +40,10 @@ class FinaliseFeedbackNotification
 			"finalisedFeedbacks" -> entities
 		))
 
-	override def url: String = Routes.coursework.admin.assignment.submissionsandfeedback(assignment)
+	override def url: String = if(assignment.cm2Assignment)
+		Routes.cm2.admin.assignment.submissionsandfeedback(assignment)
+	else
+		Routes.coursework.admin.assignment.submissionsandfeedback(assignment)
 	override def urlTitle = s"publish ${if (entities.length > 1) "these items of" else "this item of"} feedback"
 
 	@transient
