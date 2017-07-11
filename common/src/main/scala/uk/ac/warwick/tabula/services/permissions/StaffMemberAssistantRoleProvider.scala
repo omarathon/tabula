@@ -25,6 +25,7 @@ class StaffMemberAssistantRoleProvider extends RoleProvider with TaskBenchmarkin
 	val profileService: MutablePromise[ProfileService] = promise { Wire[ProfileService] }
 
 	def getRolesFor(user: CurrentUser, scope: PermissionsTarget): Stream[Role] = benchmarkTask("Get roles for StaffMemberAssistantRoleProvider") {
+
 		profileService.get.findStaffMembersWithAssistant(user.apparentUser).toStream.flatMap { staff =>
 			// Treat it as a masquerade, so if we have any role providers that explicitly ignore masquerade this is taken into account
 			val staffCurrentUser =
@@ -37,7 +38,7 @@ class StaffMemberAssistantRoleProvider extends RoleProvider with TaskBenchmarkin
 					god = false
 				)
 
-			roleService.get.getRolesFor(staffCurrentUser, scope)
+			roleService.get.getRolesFor(staffCurrentUser, scope, isAssistant = true)
 		}
 	}
 
