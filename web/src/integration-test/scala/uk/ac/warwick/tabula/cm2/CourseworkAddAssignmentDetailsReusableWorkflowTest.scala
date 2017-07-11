@@ -101,7 +101,7 @@ class CourseworkAddAssignmentDetailsReusableWorkflowTest extends BrowserTest wit
 	}
 
 
-	private def assigmentSubmissionDetails(): Unit = {
+	private def assignmentSubmissionDetails(): Unit = {
 		When("I go to assignment submissions assignemnt page")
 		currentUrl should include("/submissions")
 
@@ -206,7 +206,7 @@ class CourseworkAddAssignmentDetailsReusableWorkflowTest extends BrowserTest wit
 		assigmentFeedbackDetails()
 		assigmentStudentDetails()
 		assigmentMarkerDetails()
-		assigmentSubmissionDetails()
+		assignmentSubmissionDetails()
 		assigmentOptions()
 		assigmentReview(assignmentName,reusableWorkflowName)
 	}

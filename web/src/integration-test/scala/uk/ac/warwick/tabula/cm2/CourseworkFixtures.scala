@@ -1,16 +1,19 @@
 package uk.ac.warwick.tabula.cm2
 
+import org.openqa.selenium.support.ui.Select
 import org.openqa.selenium.{By, WebElement}
 import org.scalatest.GivenWhenThen
 import org.scalatest.exceptions.TestFailedException
 import uk.ac.warwick.tabula.data.model.WorkflowCategory
 import uk.ac.warwick.tabula.data.model.markingworkflow.MarkingWorkflowType
+import uk.ac.warwick.tabula.data.model.markingworkflow.MarkingWorkflowType.{DoubleMarking, SingleMarking}
 import uk.ac.warwick.tabula.web.{FeaturesDriver, FixturesDriver}
 import uk.ac.warwick.tabula.{BrowserTest, FunctionalTestAcademicYear, LoginDetails}
 
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent._
 import scala.concurrent.duration.Duration
+import scala.collection.JavaConverters._
 
 trait CourseworkFixtures extends BrowserTest with FeaturesDriver with FixturesDriver with GivenWhenThen {
 
@@ -175,7 +178,7 @@ trait CourseworkFixtures extends BrowserTest with FeaturesDriver with FixturesDr
 
 	def as[T](user: LoginDetails)(fn: => T): T = {
 		currentUser = user
-		signIn as user to Path("/cm2")
+		signIn as user to Path("/coursework")
 
 		fn
 	}
@@ -192,9 +195,86 @@ trait CourseworkFixtures extends BrowserTest with FeaturesDriver with FixturesDr
 		click on linkText("Test Services")
 
 		Then("I should reach the admin coursework page")
-		currentUrl should endWith("/department/xxx")
+		eventually {
+			currentUrl should endWith("/department/xxx")
+		}
 
-		//FIXME - Add additional methods based on new functional tests
+	}
 
+	def openMarkingWorkflowSettings(): Unit = {
+		When("I click on the Marking workflows link")
+		click on linkText("Marking workflows")
+		Then("I should reach the marking workflow page")
+		eventually {
+			currentUrl should include("/markingworkflows")
+		}
+	}
+
+	def createMarkingWorkflow(workflowName: String, workflowType: MarkingWorkflowType, markers: Seq[LoginDetails]*): String = as(P.Admin1) {
+		openAdminPage()
+		openMarkingWorkflowSettings()
+
+		When("I click create")
+		click on partialLinkText("Create")
+		Then("I should reach the create marking workflow page")
+		currentUrl should include("/add")
+
+		And("I enter the necessary data")
+		textField("workflowName").value = workflowName
+		singleSel("workflowType").value = workflowType.name
+		var markerA = markers.headOption.getOrElse(Nil)
+		Seq("markersA" -> markers.headOption.getOrElse(Nil), "markersB" -> markers.tail.headOption.getOrElse(Nil)).foreach{case (field, m) =>
+			m.zipWithIndex.foreach{ case(marker, i) =>
+				new TextField(findAll(cssSelector(s".$field input.flexi-picker")).toList.apply(i).underlying).value = marker.usercode
+				click on className(field).webElement.findElement(By.cssSelector("button.btn"))
+				eventually {
+					findAll(cssSelector(s".$field input.flexi-picker")).toList.count(_.isDisplayed) should be (i+2)
+				}
+			}
+		}
+		And("I submit the form")
+		submit()
+		Then("I should be redirected back to the marking workflow page")
+		eventually{
+			currentUrl should endWith ("/markingworkflows")
+		}
+		And("Row with that workflow should be there")
+		val tbody = className("table").webElement.findElement(By.tagName("tbody"))
+		val row = tbody.findElements(By.tagName("tr")).asScala.find({
+			_.findElement(By.tagName("td")).getText == workflowName
+		})
+		row should be('defined)
+		var link = row.get.findElement(By.partialLinkText("Modify"))
+		val url =  link.getAttribute("href")
+		val pattern = """.*markingworkflows/(.*)/edit""".r
+		val workflowId = pattern.findAllIn(url).matchData.toSeq.headOption.map(_.group(1))
+		workflowId.get
+	}
+
+
+	def addMarkingWorkflow(workflowName: String, workflowType: MarkingWorkflowType)(callback: String => Unit): Unit = as(P.Admin1) {
+		callback(createMarkingWorkflow(workflowName, workflowType, Seq(P.Marker1, P.Marker2), Seq(P.Marker3)))
+	}
+
+	def editAssignment(workflowId: String) = {
+		When("I click on the edit button")
+		click on partialLinkText("Edit assignment")
+		Then("I see the edit details screen")
+		eventually(pageSource contains "Edit assignment details" should be {true})
+
+		When("I choose Reusable workflow")
+		singleSel("workflowCategory").value = WorkflowCategory.Reusable.code
+		Then("I see the reusable workflow list")
+		eventuallyAjax(pageSource contains "Marking workflow type" should be {true})
+
+		When("I select reusable workflow")
+		val select = new Select(find(cssSelector("select[name=reusableWorkflow]")).get.underlying)
+		select.selectByValue(workflowId)
+		And("I submit the form")
+		cssSelector(s"input[name=editAndEditDetails]").webElement.click()
+		Then("I should be back on the summary page")
+		withClue(pageSource) {
+			currentUrl should endWith("/summary")
+		}
 	}
 }
