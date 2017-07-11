@@ -95,7 +95,7 @@ trait ScopelessPermissionsProvider extends PermissionsProvider with RequestLevel
 
 trait RoleService {
 	def getExplicitPermissionsFor(user: CurrentUser, scope: PermissionsTarget): Stream[PermissionDefinition]
-	def getRolesFor(user: CurrentUser, scope: PermissionsTarget): Stream[Role]
+	def getRolesFor(user: CurrentUser, scope: PermissionsTarget, isAssistant: Boolean = false): Stream[Role]
 	def hasRole(user: CurrentUser, role: Role): Boolean
 }
 
@@ -117,7 +117,7 @@ class RoleServiceImpl extends RoleService with Logging {
 		def streamScoped(providers: Stream[PermissionsProvider], scope: PermissionsTarget): Stream[PermissionDefinition] = {
 			if (scope == null) Stream.empty
 			else {
-				val results = providers.toStream map { provider => (provider, provider.getPermissionsFor(user, scope)) }
+				val results = providers map { provider => (provider, provider.getPermissionsFor(user, scope)) }
 				val (hasResults, noResults) = results.partition { _._2.nonEmpty }
 
 				val stream = hasResults flatMap { _._2 }
@@ -133,9 +133,12 @@ class RoleServiceImpl extends RoleService with Logging {
 	}
 
 
-	def getRolesFor(user: CurrentUser, scope: PermissionsTarget): Stream[Role] = {
+	def getRolesFor(user: CurrentUser, scope: PermissionsTarget, isAssistant: Boolean = false): Stream[Role] = {
 		// Split providers into Scopeless and scoped
-		val (scopeless, scoped) = roleProviders.partition(_.isInstanceOf[ScopelessRoleProvider])
+		val (scopeless, allScoped) = roleProviders.partition(_.isInstanceOf[ScopelessRoleProvider])
+
+		// if we are getting roles for an assistant then don't use the StaffMemberAssistantRoleProvider again (avoids assistant relationships chaining)
+		val scoped = if(isAssistant) allScoped.filterNot(_.isInstanceOf[StaffMemberAssistantRoleProvider]) else allScoped
 
 		// We only need to do scopeless once
 		// (we call the (User, Target) method signature otherwise it bypasses the request level caching)
@@ -148,7 +151,7 @@ class RoleServiceImpl extends RoleService with Logging {
 		def streamScoped(providers: Stream[RoleProvider], scope: PermissionsTarget): Stream[Role] = {
 			if (scope == null) Stream.empty
 			else {
-				val results = providers.toStream map { provider => (provider, provider.getRolesFor(user, scope)) }
+				val results = providers map { provider => (provider, provider.getRolesFor(user, scope)) }
 				val (hasResults, noResults) = results.partition { _._2.nonEmpty }
 
 				val stream = hasResults flatMap { _._2 }
