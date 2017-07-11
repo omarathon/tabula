@@ -47,7 +47,7 @@ class PermissionsHelperCommandTest extends TestBase with Mockito {
 		val r1 = new GeneratedRole(EmptyBuiltInDefinition, None, "r1")
 		val r2 = new GeneratedRole(EmptyBuiltInDefinition, None, "r2")
 
-		roleService.getRolesFor(isA[CurrentUser], isNull[PermissionsTarget]) returns (Stream(
+		roleService.getRolesFor(isA[CurrentUser], isNull[PermissionsTarget], isEq(false)) returns (Stream(
 			r1, r2
 		))
 
@@ -79,7 +79,7 @@ class PermissionsHelperCommandTest extends TestBase with Mockito {
 		val r1 = new GeneratedRole(EmptyBuiltInDefinition, None, "r1")
 		val r2 = new GeneratedRole(EmptyBuiltInDefinition, None, "r2")
 
-		roleService.getRolesFor(isA[CurrentUser], isNull[PermissionsTarget]) returns (Stream(
+		roleService.getRolesFor(isA[CurrentUser], isNull[PermissionsTarget], isEq(false)) returns (Stream(
 			r1, r2
 		))
 
@@ -114,7 +114,7 @@ class PermissionsHelperCommandTest extends TestBase with Mockito {
 		val r1 = new GeneratedRole(EmptyBuiltInDefinition, None, "r1")
 		val r2 = new GeneratedRole(EmptyBuiltInDefinition, None, "r2")
 
-		roleService.getRolesFor(isA[CurrentUser], isNull[PermissionsTarget]) returns (Stream(
+		roleService.getRolesFor(isA[CurrentUser], isNull[PermissionsTarget], isEq(false)) returns (Stream(
 			r1, r2
 		))
 
@@ -153,7 +153,7 @@ class PermissionsHelperCommandTest extends TestBase with Mockito {
 		val r1 = new GeneratedRole(EmptyBuiltInDefinition, None, "r1")
 		val r2 = new GeneratedRole(EmptyBuiltInDefinition, None, "r2")
 
-		roleService.getRolesFor(isA[CurrentUser], isEq(dept)) returns (Stream(
+		roleService.getRolesFor(isA[CurrentUser], isEq(dept), isEq(false)) returns (Stream(
 			r1, r2
 		))
 
@@ -191,7 +191,7 @@ class PermissionsHelperCommandTest extends TestBase with Mockito {
 		val r1 = new GeneratedRole(EmptyBuiltInDefinition, None, "r1")
 		val r2 = new GeneratedRole(EmptyBuiltInDefinition, None, "r2")
 
-		roleService.getRolesFor(isA[CurrentUser], isNull[PermissionsTarget]) returns (Stream(
+		roleService.getRolesFor(isA[CurrentUser], isNull[PermissionsTarget], isEq(false)) returns (Stream(
 			r1, r2
 		))
 
