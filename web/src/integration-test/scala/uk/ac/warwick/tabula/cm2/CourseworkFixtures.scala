@@ -110,11 +110,7 @@ trait CourseworkFixtures extends BrowserTest with FeaturesDriver with FixturesDr
 		click on module.findElement(By.partialLinkText("Manage this module"))
 
 		val addAssignment = module.findElement(By.partialLinkText("Create new assignment"))
-		eventually {
-			addAssignment.isDisplayed should be {
-				true
-			}
-		}
+		eventually(addAssignment.isDisplayed should be {true})
 		click on addAssignment
 
 		val prefilledReset = linkText("Don't do this")
@@ -125,8 +121,20 @@ trait CourseworkFixtures extends BrowserTest with FeaturesDriver with FixturesDr
 		textField("name").value = assignmentName
 		singleSel("workflowCategory").value = WorkflowCategory.NoneUse.code
 
-		cssSelector(s"input[name=createAndAddDetails]").webElement.click()
+		cssSelector(s"input[name=createAndAddFeedback]").webElement.click()
 
+		eventually(pageSource contains "Edit feedback settings" should be {true})
+		click on linkText("Students").findElement.get.underlying
+		eventually { textArea("massAddUsers").isDisplayed should be {true} }
+
+		if (students.nonEmpty) {
+			textArea("massAddUsers").value = students.mkString("\n")
+			click on className("add-students-manually")
+			eventuallyAjax(pageSource contains "Your changes will not be recorded until you save this assignment." should be {true})
+			eventuallyAjax{pageSource should include(students.size + " manually enrolled")}
+		}
+
+		cssSelector(s"input[name=createAndAddStudents]").webElement.click()
 		// Ensure that we've been redirected back
 		withClue(pageSource) {
 			currentUrl should endWith("/summary")

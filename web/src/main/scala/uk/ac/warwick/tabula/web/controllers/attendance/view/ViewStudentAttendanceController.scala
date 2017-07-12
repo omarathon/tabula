@@ -3,7 +3,7 @@ package uk.ac.warwick.tabula.web.controllers.attendance.view
 import org.springframework.stereotype.Controller
 import org.springframework.web.bind.annotation.{ModelAttribute, PathVariable, RequestMapping}
 import uk.ac.warwick.tabula.web.controllers.attendance.{AttendanceController, HasMonthNames}
-import uk.ac.warwick.tabula.AcademicYear
+import uk.ac.warwick.tabula.{AcademicYear, CurrentUser}
 import uk.ac.warwick.tabula.attendance.web.Routes
 import uk.ac.warwick.tabula.data.model.{Department, StudentMember}
 import uk.ac.warwick.tabula.commands.attendance.view.ViewStudentAttendanceCommand
@@ -31,9 +31,11 @@ class ViewStudentAttendanceController extends AttendanceController with HasMonth
 		@PathVariable department: Department,
 		@PathVariable academicYear: AcademicYear,
 		@PathVariable student: StudentMember,
-		@ModelAttribute("command") cmd: Appliable[Map[String, Seq[(AttendanceMonitoringPoint, AttendanceMonitoringCheckpoint)]]]
+		@ModelAttribute("command") cmd: Appliable[Map[String, Seq[(AttendanceMonitoringPoint, AttendanceMonitoringCheckpoint)]]],
+		currentUser: CurrentUser
 	): Mav = {
 		Mav("attendance/view/student",
+			"isSelf" -> (currentUser.apparentId == student.userId),
 			"groupedPointMap" -> cmd.apply()
 		).crumbs(
 			Breadcrumbs.View.HomeForYear(academicYear),

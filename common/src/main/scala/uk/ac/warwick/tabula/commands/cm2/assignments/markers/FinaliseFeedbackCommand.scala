@@ -4,7 +4,7 @@ import org.joda.time.DateTime
 import uk.ac.warwick.tabula.commands._
 import uk.ac.warwick.tabula.data.model.forms.SavedFormValue
 import uk.ac.warwick.tabula.data.model._
-import uk.ac.warwick.tabula.data.model.notifications.cm2.CM2FinaliseFeedbackNotification
+import uk.ac.warwick.tabula.data.model.notifications.coursework.FinaliseFeedbackNotification
 import uk.ac.warwick.tabula.permissions.Permissions
 import uk.ac.warwick.tabula.services.{AutowiringFeedbackServiceComponent, FeedbackServiceComponent, AutowiringZipServiceComponent, ZipServiceComponent}
 import uk.ac.warwick.tabula.system.permissions.{PermissionsChecking, PermissionsCheckingMethods, RequiresPermissionsChecking}
@@ -94,7 +94,7 @@ trait FinaliseFeedbackNotifier extends Notifies[Seq[Feedback], Seq[Feedback]] {
 	self: FinaliseFeedbackCommandState with UserAware =>
 
 	override def emit(feedbacks: Seq[Feedback]): Seq[Notification[Feedback, Assignment]] = {
-		Seq(Notification.init(new CM2FinaliseFeedbackNotification, user, feedbacks.filterNot { _.checkedReleased }, assignment))
+		Seq(Notification.init(new FinaliseFeedbackNotification, user, feedbacks.filterNot { _.checkedReleased }, assignment))
 	}
 }
 
