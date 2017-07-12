@@ -183,7 +183,7 @@ trait CourseworkFixtures extends BrowserTest with FeaturesDriver with FixturesDr
 
 	def as[T](user: LoginDetails)(fn: => T): T = {
 		currentUser = user
-		signIn as user to Path("/cm2")
+		signIn as user to Path("/coursework")
 
 		fn
 	}
