@@ -16,9 +16,9 @@ import scala.reflect._
 import uk.ac.warwick.tabula.system.permissions.{PermissionsChecking, PermissionsCheckingMethods, RequiresPermissionsChecking}
 
 object RevokeRoleCommand {
-	def apply[A <: PermissionsTarget : ClassTag](scope: A): Appliable[GrantedRole[A]] with RevokeRoleCommandState[A] =
+	def apply[A <: PermissionsTarget : ClassTag](scope: A): Appliable[Option[GrantedRole[A]]] with RevokeRoleCommandState[A] =
 		new RevokeRoleCommandInternal(scope)
-			with ComposableCommand[GrantedRole[A]]
+			with ComposableCommand[Option[GrantedRole[A]]]
 			with RevokeRoleCommandPermissions
 			with RevokeRoleCommandValidation
 			with RevokeRoleCommandDescription[A]
@@ -26,31 +26,34 @@ object RevokeRoleCommand {
 			with AutowiringSecurityServiceComponent
 			with AutowiringUserLookupComponent
 
-	def apply[A <: PermissionsTarget : ClassTag](scope: A, defin: RoleDefinition): Appliable[GrantedRole[A]] with RevokeRoleCommandState[A] = {
+	def apply[A <: PermissionsTarget : ClassTag](scope: A, defin: RoleDefinition): Appliable[Option[GrantedRole[A]]] with RevokeRoleCommandState[A] = {
 		val command = apply(scope)
 		command.roleDefinition = defin
 		command
 	}
 }
 
-class RevokeRoleCommandInternal[A <: PermissionsTarget : ClassTag](val scope: A) extends CommandInternal[GrantedRole[A]] with RevokeRoleCommandState[A] {
+class RevokeRoleCommandInternal[A <: PermissionsTarget : ClassTag](val scope: A) extends CommandInternal[Option[GrantedRole[A]]] with RevokeRoleCommandState[A] {
 	self: PermissionsServiceComponent with UserLookupComponent =>
 
 	lazy val grantedRole: Option[GrantedRole[A]] = permissionsService.getGrantedRole(scope, roleDefinition)
 
-	def applyInternal(): GrantedRole[A] = transactional() {
-		grantedRole.foreach { role =>
+	def applyInternal(): Option[GrantedRole[A]] = transactional() {
+		grantedRole.flatMap { role =>
 			usercodes.asScala.foreach(role.users.knownType.removeUserId)
 
-			permissionsService.saveOrUpdate(role)
+			val result = if (role.users.size == 0) {
+				permissionsService.delete(role)
+				None
+			} else {
+				permissionsService.saveOrUpdate(role)
+				Some(role)
+			}
 
 			// For each usercode that we've removed, clear the cache
-			usercodes.asScala.foreach { usercode =>
-				permissionsService.clearCachesForUser((usercode, classTag[A]))
-			}
+			usercodes.asScala.foreach { usercode =>permissionsService.clearCachesForUser((usercode, classTag[A]))}
+			result
 		}
-
-		grantedRole.orNull
 	}
 
 }
@@ -105,7 +108,7 @@ trait RevokeRoleCommandPermissions extends RequiresPermissionsChecking with Perm
 	}
 }
 
-trait RevokeRoleCommandDescription[A <: PermissionsTarget] extends Describable[GrantedRole[A]] {
+trait RevokeRoleCommandDescription[A <: PermissionsTarget] extends Describable[Option[GrantedRole[A]]] {
 	self: RevokeRoleCommandState[A] =>
 
 	def describe(d: Description): Unit = d.properties(

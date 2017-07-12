@@ -34,6 +34,7 @@ trait PermissionsService {
 	def saveOrUpdate(roleDefinition: CustomRoleDefinition)
 	def saveOrUpdate(permission: GrantedPermission[_])
 	def saveOrUpdate(role: GrantedRole[_])
+	def delete(role: GrantedRole[_])
 
 	def delete(roleDefinition: CustomRoleDefinition)
 
@@ -167,6 +168,7 @@ abstract class AbstractPermissionsService extends PermissionsService {
 	def saveOrUpdate(roleDefinition: CustomRoleDefinition): Unit = permissionsDao.saveOrUpdate(roleDefinition)
 	def saveOrUpdate(permission: GrantedPermission[_]): Unit = permissionsDao.saveOrUpdate(permission)
 	def saveOrUpdate(role: GrantedRole[_]): Unit = permissionsDao.saveOrUpdate(role)
+	def delete(role: GrantedRole[_]): Unit = permissionsDao.delete(role)
 
 	def delete(roleDefinition: CustomRoleDefinition): Unit = {
 		roleDefinition.department.customRoleDefinitions.remove(roleDefinition)
