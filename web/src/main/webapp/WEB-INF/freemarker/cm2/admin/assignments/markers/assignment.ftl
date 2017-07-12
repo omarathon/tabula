@@ -74,8 +74,10 @@
 				$row.tabulaAjaxForm({
 					successCallback: function($container){
 						var $row = $container.closest('tr').prev();
+						var $next = $container.closest('tr').next();
 						$row.addClass('ready-next-stage');
 						$('input.collection-checkbox').trigger('change');
+						$next.trigger('click');
 					}
 				});
 			});

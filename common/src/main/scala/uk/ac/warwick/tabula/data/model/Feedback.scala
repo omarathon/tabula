@@ -155,10 +155,6 @@ trait CM1WorkflowSupport {
 	@Deprecated
 	def getThirdMarkerFeedback: Option[MarkerFeedback] = Option(thirdMarkerFeedback)
 
-	// The current workflow position isn't None so this must be a placeholder
-	@Deprecated
-	def isPlaceholder: Boolean = getCurrentWorkflowFeedbackPosition.isDefined || !hasContent
-
 	@Deprecated
 	def getAllMarkerFeedback: Seq[MarkerFeedback] = Seq(firstMarkerFeedback, secondMarkerFeedback, thirdMarkerFeedback)
 
@@ -284,6 +280,14 @@ abstract class Feedback extends GeneratedId with FeedbackAttachments with Permis
 		TreeMap(unsortedMap.toSeq:_*)
 	}
 
+	def completedFeedbackByStage : SortedMap[MarkingWorkflowStage, MarkerFeedback] = {
+		feedbackByStage.filterKeys(stage => {
+			def isPrevious = stage.order < currentStageIndex
+			def isCurrentAndFinished =  stage.order == currentStageIndex && !outstandingStages.asScala.contains(stage)
+			isPrevious || isCurrentAndFinished
+		})
+	}
+
 	def feedbackMarkers: Map[MarkingWorkflowStage, User] =
 		feedbackByStage.mapValues(_.marker)
 
@@ -303,6 +307,11 @@ abstract class Feedback extends GeneratedId with FeedbackAttachments with Permis
 		new JoinColumn(name = "feedback_id", referencedColumnName = "id")))
 	@Type(`type` = "uk.ac.warwick.tabula.data.model.markingworkflow.MarkingWorkflowStageUserType")
 	var outstandingStages: JList[MarkingWorkflowStage] = JArrayList()
+
+	def isPlaceholder: Boolean = assessment match {
+		case a: Assignment if a.cm2Assignment => if(a.cm2MarkingWorkflow != null) !isMarkingCompleted else !hasContent
+		case _ => getCurrentWorkflowFeedbackPosition.isDefined || !hasContent
+	}
 
 	def isMarkingCompleted: Boolean = outstandingStages.asScala.toList match {
 		case (s: FinalStage) :: Nil => true
@@ -397,6 +406,8 @@ class AssignmentFeedback extends Feedback {
 	def assessment: Assessment = assignment
 
 	def module: Module = assignment.module
+
+	override def humanReadableId: String = s"Feedback for $usercode for ${assignment.humanReadableId}"
 
 	override def markingWorkflow: MarkingWorkflow = assignment.markingWorkflow
 

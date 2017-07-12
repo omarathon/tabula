@@ -38,8 +38,9 @@ class ReplaceMarkerCommandInternal(val department: Department, val markingWorkfl
 		for(stage <- stages) {
 			for(assignment <- assignmentsToUpdate) {
 				val existingAllocations = cm2MarkingWorkflowService.getMarkerAllocations(assignment, stage)
-				val students = existingAllocations.getOrElse(oldMarkerUser, Set())
-				val newAllocations = (existingAllocations - oldMarkerUser) + (newMarkerUser -> students)
+				val newStudents = existingAllocations.getOrElse(oldMarkerUser, Set())
+				val existingStudents = existingAllocations.getOrElse(newMarkerUser, Set())
+				val newAllocations = (existingAllocations - oldMarkerUser - newMarkerUser) + (newMarkerUser -> existingStudents.union(newStudents))
 				cm2MarkingWorkflowService.allocateMarkersForStage(assignment, stage, newAllocations)
 			}
 
@@ -69,6 +70,9 @@ trait ReplaceMarkerValidation extends SelfValidating {
 		}
 		if (newMarker.hasText && !userLookup.getUserByUserId(newMarker).isFoundUser){
 			errors.rejectValue("newMarker", "markingWorkflow.marker.unknownUser")
+		}
+		if(newMarkerUser.isFoundUser && oldMarkerUser == newMarkerUser){
+			errors.rejectValue("newMarker", "markingWorkflow.marker.sameMarker")
 		}
 		if (!confirm) {
 			errors.rejectValue("confirm", "markingWorkflow.marker.confirm")

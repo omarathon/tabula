@@ -1,6 +1,8 @@
 <#escape x as x?html>
 <div class="fix-area">
 
+	<#assign can_reallocate = features.personalTutorAssignment && !relationshipType.readOnly(department) && can.do_with_selector("Profiles.StudentRelationship.Manage", department, relationshipType) />
+
 	<h1 class="with-settings">Students in ${department.name} with no ${relationshipType.agentRole}</h1>
 
 	<form action="<@routes.profiles.relationship_allocate department relationshipType />" method="post">
@@ -10,7 +12,7 @@
 				<table class="related_students table table-striped table-condensed">
 					<thead>
 						<tr>
-							<th><@bs3form.selector_check_all /></th>
+							<#if can_reallocate><th><@bs3form.selector_check_all /></th></#if>
 							<th class="student-col">First name</th>
 							<th class="student-col">Last name</th>
 							<th class="id-col">ID</th>
@@ -23,7 +25,7 @@
 					<tbody>
 						<#list missingStudents as student>
 							<tr class="student">
-								<td><@bs3form.selector_check_row name="preselectStudents" value="${student.universityId}" /></td>
+							<#if can_reallocate><td><@bs3form.selector_check_row name="preselectStudents" value="${student.universityId}" /></td></#if>
 								<td><h6>${student.firstName}</h6></td>
 								<td><h6>${student.lastName}</h6></td>
 								<td><a class="profile-link" href="<@routes.profiles.profile student />">${student.universityId}</a></td>
@@ -40,7 +42,7 @@
 				</table>
 
 				<div class="fix-footer">
-					<#if features.personalTutorAssignment && !relationshipType.readOnly(department)>
+					<#if can_reallocate>
 						<button type="submit" class="btn btn-primary">
 							Allocate ${relationshipType.description}s
 						</button>

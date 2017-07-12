@@ -56,16 +56,15 @@
 
 <div class="row extension-metadata">
 	<div class="col-md-7">
-
 		<#if assignment.closed>
 			<p class="late deadline">
-				<span class="time-remaining">Closed ${time_remaining}</span>
-				Deadline was <@fmt.date date=assignment.closeDate />
+				<span class="time-remaining">Closed ${time_remaining}.</span>
+				Deadline was <@fmt.date date=assignment.closeDate />.
 			</p>
 		<#else>
 			<p class="deadline">
-				<span class="time-remaining">Closes in ${time_remaining}</span>
-				Deadline <@fmt.date date=assignment.closeDate />
+				<span class="time-remaining">Closes in ${time_remaining}.</span>
+				Deadline <@fmt.date date=assignment.closeDate />.
 			</p>
 		</#if>
 	</div>

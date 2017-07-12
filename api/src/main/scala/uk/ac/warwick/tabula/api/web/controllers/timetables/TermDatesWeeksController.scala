@@ -18,7 +18,7 @@ import TermDatesWeeksController._
 import uk.ac.warwick.tabula.web.Mav
 
 object TermDatesWeeksController {
-	case class TermWeek(weekNumber: Week, interval: Interval, name: String)
+	case class TermWeek(academicYear: AcademicYear, weekNumber: Week, interval: Interval, name: String)
 }
 
 @Controller
@@ -43,12 +43,12 @@ sealed trait AcademicYearScopedApi
 
 trait PathVariableAcademicYearScopedApi extends AcademicYearScopedApi {
 	self: PermissionsCheckingMethods =>
-	@ModelAttribute("academicYear") def academicYear(@PathVariable year: AcademicYear): AcademicYear = mandatory(year)
+	@ModelAttribute("academicYear") def academicYears(@PathVariable year: AcademicYear): Seq[AcademicYear] = Seq(mandatory(year))
 }
 
 trait DefaultAcademicYearApi extends AcademicYearScopedApi {
 	self: TermServiceComponent =>
-	@ModelAttribute("academicYear") def academicYear: AcademicYear = AcademicYear.findAcademicYearContainingDate(DateTime.now)
+	@ModelAttribute("academicYear") def academicYears: Seq[AcademicYear] = AcademicYear.findAcademicYearContainingDate(DateTime.now).yearsSurrounding(1, 1)
 }
 
 trait GetTermDatesWeeksApi {
@@ -58,7 +58,7 @@ trait GetTermDatesWeeksApi {
 		with KnowsUserNumberingSystem =>
 
 	@ModelAttribute("termDates")
-	def getTermDates(@ModelAttribute("academicYear") academicYear: AcademicYear, @RequestParam(value = "numberingSystem", required = false) reqNumberingSystem: String): Seq[TermWeek] = {
+	def getTermDates(@ModelAttribute("academicYear") academicYears: Seq[AcademicYear], @RequestParam(value = "numberingSystem", required = false) reqNumberingSystem: String): Seq[TermWeek] = academicYears.flatMap { academicYear =>
 		val weeks = termService.getAcademicWeeksForYear(academicYear.dateInTermOne)
 		val formatter = new WholeWeekFormatter(academicYear)
 
@@ -70,7 +70,7 @@ trait GetTermDatesWeeksApi {
 		weeks.map { case (weekNumber, interval) =>
 			val asString = formatter.format(Seq(WeekRange(weekNumber)), DayOfWeek.Monday, numbSystem, short = false)
 
-			TermWeek(weekNumber, interval, asString)
+			TermWeek(academicYear, weekNumber, interval, asString)
 		}
 	}
 
@@ -80,6 +80,7 @@ trait GetTermDatesWeeksApi {
 			"success" -> true,
 			"status" -> "ok",
 			"weeks" -> weeks.map { w => Map(
+				"academicYear" -> w.academicYear.toString,
 				"weekNumber" -> w.weekNumber,
 				"start" -> DateFormats.IsoDate.print(w.interval.getStart.toLocalDate),
 				"end" -> DateFormats.IsoDate.print(w.interval.getEnd.toLocalDate.minusDays(1)),
@@ -89,14 +90,14 @@ trait GetTermDatesWeeksApi {
 	}
 
 	@RequestMapping(method = Array(GET), produces = Array("text/calendar"))
-	def icalTermDates(@ModelAttribute("termDates") weeks: Seq[TermWeek], @ModelAttribute("academicYear") academicYear: AcademicYear): Mav = {
+	def icalTermDates(@ModelAttribute("termDates") weeks: Seq[TermWeek], @ModelAttribute("academicYear") academicYears: Seq[AcademicYear]): Mav = {
 		val cal: Calendar = new Calendar
 		cal.getProperties.add(Version.VERSION_2_0)
 		cal.getProperties.add(new ProdId("-//Tabula//University of Warwick IT Services//EN"))
 		cal.getProperties.add(CalScale.GREGORIAN)
 		cal.getProperties.add(Method.PUBLISH)
 		cal.getProperties.add(new XProperty("X-PUBLISHED-TTL", "PT1W")) // 1 week
-		cal.getProperties.add(new XProperty("X-WR-CALNAME", s"Week numbers - ${academicYear.toString}"))
+		cal.getProperties.add(new XProperty("X-WR-CALNAME", s"Week numbers - ${academicYears.head.startYear}-${academicYears.last.endYear}"))
 
 		def toIcalDate(date: LocalDate): net.fortuna.ical4j.model.Date =
 			new net.fortuna.ical4j.model.Date(date.toString("yyyyMMdd"))
@@ -104,7 +105,7 @@ trait GetTermDatesWeeksApi {
 		weeks.foreach { w =>
 			val event: VEvent = new VEvent(toIcalDate(w.interval.getStart.toLocalDate), toIcalDate(w.interval.getEnd.toLocalDate), w.name.safeSubstring(0, 255))
 
-			event.getProperties.add(new Uid(s"${academicYear.startYear}-week-${w.weekNumber}"))
+			event.getProperties.add(new Uid(s"${w.academicYear.startYear}-week-${w.weekNumber}"))
 			event.getProperties.add(Method.PUBLISH)
 			event.getProperties.add(Transp.OPAQUE)
 
@@ -116,7 +117,7 @@ trait GetTermDatesWeeksApi {
 			cal.getComponents.add(event)
 		}
 
-		Mav(new IcalView(cal), "filename" -> s"weeknumbers-${academicYear.startYear}.ics")
+		Mav(new IcalView(cal), "filename" -> s"weeknumbers-${academicYears.head.startYear}-${academicYears.last.endYear}.ics")
 	}
 
 }

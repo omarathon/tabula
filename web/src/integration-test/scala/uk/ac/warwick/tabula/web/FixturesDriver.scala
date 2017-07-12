@@ -233,6 +233,13 @@ trait FixturesDriver extends SimpleHttpFetching {
 		http.when(_==200)(req >|)
 	}
 
+	def createPremarkedCM2Assignment(moduleCode: String): Unit = {
+		val uri = FunctionalTestProperties.SiteRoot + "/fixtures/create/premarkedCM2Assignment"
+		val args = Map("moduleCode" -> moduleCode)
+		val req = url(uri).POST << args
+		http.when(_==200)(req >|)
+	}
+
 	def createMemberNote(memberId: String, creatorId: String, note: String, title: String = ""): Unit = {
 		val uri = FunctionalTestProperties.SiteRoot + "/fixtures/create/memberNote"
 		val req = url(uri).POST << Map(

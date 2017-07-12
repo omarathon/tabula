@@ -1,6 +1,10 @@
 package uk.ac.warwick.tabula.cm2
 
+import org.openqa.selenium.{By, WebElement}
 import org.scalatest.GivenWhenThen
+import org.scalatest.exceptions.TestFailedException
+import uk.ac.warwick.tabula.data.model.WorkflowCategory
+import uk.ac.warwick.tabula.data.model.markingworkflow.MarkingWorkflowType
 import uk.ac.warwick.tabula.web.{FeaturesDriver, FixturesDriver}
 import uk.ac.warwick.tabula.{BrowserTest, FunctionalTestAcademicYear, LoginDetails}
 
@@ -11,9 +15,9 @@ import scala.concurrent.duration.Duration
 trait CourseworkFixtures extends BrowserTest with FeaturesDriver with FixturesDriver with GivenWhenThen {
 
 	val TEST_MODULE_CODE = "xxx02"
-	val TEST_ROUTE_CODE="xx456"
-	val TEST_DEPARTMENT_CODE="xxx"
-	val TEST_COURSE_CODE="Ux456"
+	val TEST_ROUTE_CODE = "xx456"
+	val TEST_DEPARTMENT_CODE = "xxx"
+	val TEST_COURSE_CODE = "Ux456"
 
 	before {
 		Given("The test department exists")
@@ -21,6 +25,7 @@ trait CourseworkFixtures extends BrowserTest with FeaturesDriver with FixturesDr
 		pageSource should include("Fixture setup successful")
 
 		createPremarkedAssignment(TEST_MODULE_CODE)
+		createPremarkedCM2Assignment(TEST_MODULE_CODE)
 
 		val assessmentFuture = Future {
 			And("There is an assessment component for module xxx01")
@@ -43,40 +48,138 @@ trait CourseworkFixtures extends BrowserTest with FeaturesDriver with FixturesDr
 		// Make them at the same time.
 		val concurrentJobs = Seq(
 			assessmentFuture,
-			Future { createStudentMember(
-				P.Student1.usercode,
-				routeCode = TEST_ROUTE_CODE,
-				courseCode = TEST_COURSE_CODE,
-				deptCode = TEST_DEPARTMENT_CODE,
-				academicYear = FunctionalTestAcademicYear.current.startYear.toString
-			) },
-			Future { createStudentMember(
-				P.Student2.usercode,
-				routeCode = TEST_ROUTE_CODE,
-				courseCode = TEST_COURSE_CODE,
-				deptCode = TEST_DEPARTMENT_CODE,
-				academicYear = FunctionalTestAcademicYear.current.startYear.toString
-			) },
-			Future { createStudentMember(
-				P.Student3.usercode,
-				routeCode = TEST_ROUTE_CODE,
-				courseCode = TEST_COURSE_CODE,
-				deptCode = TEST_DEPARTMENT_CODE,
-				academicYear = FunctionalTestAcademicYear.current.startYear.toString
-			) },
-			Future { createStudentMember(
-				P.Student4.usercode,
-				routeCode = TEST_ROUTE_CODE,
-				courseCode = TEST_COURSE_CODE,
-				deptCode = TEST_DEPARTMENT_CODE,
-				academicYear = FunctionalTestAcademicYear.current.startYear.toString
-			) }
+			Future {
+				createStudentMember(
+					P.Student1.usercode,
+					routeCode = TEST_ROUTE_CODE,
+					courseCode = TEST_COURSE_CODE,
+					deptCode = TEST_DEPARTMENT_CODE,
+					academicYear = FunctionalTestAcademicYear.current.startYear.toString
+				)
+			},
+			Future {
+				createStudentMember(
+					P.Student2.usercode,
+					routeCode = TEST_ROUTE_CODE,
+					courseCode = TEST_COURSE_CODE,
+					deptCode = TEST_DEPARTMENT_CODE,
+					academicYear = FunctionalTestAcademicYear.current.startYear.toString
+				)
+			},
+			Future {
+				createStudentMember(
+					P.Student3.usercode,
+					routeCode = TEST_ROUTE_CODE,
+					courseCode = TEST_COURSE_CODE,
+					deptCode = TEST_DEPARTMENT_CODE,
+					academicYear = FunctionalTestAcademicYear.current.startYear.toString
+				)
+			},
+			Future {
+				createStudentMember(
+					P.Student4.usercode,
+					routeCode = TEST_ROUTE_CODE,
+					courseCode = TEST_COURSE_CODE,
+					deptCode = TEST_DEPARTMENT_CODE,
+					academicYear = FunctionalTestAcademicYear.current.startYear.toString
+				)
+			}
 		)
 
 		// Wait to complete
-		for { job <- concurrentJobs } Await.ready(job, Duration(60, duration.SECONDS))
+		for {job <- concurrentJobs} Await.ready(job, Duration(60, duration.SECONDS))
 	}
 
+	/* Runs callback with assignment ID */
+	def withAssignment(
+		moduleCode: String,
+		assignmentName: String,
+		settings: Seq[String] => Unit = Nil => (),
+		students: Seq[String] = Seq(P.Student1.usercode, P.Student2.usercode))(callback: String => Unit): Unit = as(P.Admin1) {
+
+		click on linkText("Test Services")
+		verifyPageLoaded {
+			// wait for the page to load
+			find(cssSelector("div.deptheader")) should be('defined)
+		}
+
+		val module = getModule(moduleCode)
+		click on module.findElement(By.partialLinkText("Manage this module"))
+
+		val addAssignment = module.findElement(By.partialLinkText("Create new assignment"))
+		eventually(addAssignment.isDisplayed should be {true})
+		click on addAssignment
+
+		val prefilledReset = linkText("Don't do this")
+		if (prefilledReset.findElement.isDefined) {
+			click on prefilledReset
+		}
+
+		textField("name").value = assignmentName
+		singleSel("workflowCategory").value = WorkflowCategory.NoneUse.code
+
+		cssSelector(s"input[name=createAndAddFeedback]").webElement.click()
+
+		eventually(pageSource contains "Edit feedback settings" should be {true})
+		click on linkText("Students").findElement.get.underlying
+		eventually { textArea("massAddUsers").isDisplayed should be {true} }
+
+		if (students.nonEmpty) {
+			textArea("massAddUsers").value = students.mkString("\n")
+			click on className("add-students-manually")
+			eventuallyAjax(pageSource contains "Your changes will not be recorded until you save this assignment." should be {true})
+			eventuallyAjax{pageSource should include(students.size + " manually enrolled")}
+		}
+
+		cssSelector(s"input[name=createAndAddStudents]").webElement.click()
+		// Ensure that we've been redirected back
+		withClue(pageSource) {
+			currentUrl should endWith("/summary")
+		}
+
+		val pattern = """.*admin/assignments/(.*)/summary""".r
+		val assignmentId = pattern.findAllIn(currentUrl).matchData.toSeq.headOption.map(_.group(1))
+		assignmentId.isDefined should be { true }
+		callback(assignmentId.get)
+	}
+
+	def withAssignmentWithWorkflow(workflowType: MarkingWorkflowType, markers: Seq[LoginDetails]*)(callback: String => Unit): Unit = {
+		withAssignment("xxx01", s"${workflowType.description} - single use") { id =>
+
+			When("I click on the edit button")
+			click on partialLinkText("Edit assignment")
+			Then("I see the edit details screen")
+			eventually(pageSource contains "Edit assignment details" should be {true})
+
+			When("I choose Single use")
+			singleSel("workflowCategory").value = WorkflowCategory.SingleUse.code
+			Then("I see the options for single use workflows")
+			eventuallyAjax(pageSource contains "Marking workflow type" should be {true})
+
+			When("I select single marking add a markers usercode")
+			singleSel("workflowType").value = workflowType.name
+			eventuallyAjax(pageSource contains "Add marker" should be {true})
+
+			Seq("markersA" -> markers.headOption.getOrElse(Nil), "markersB" -> markers.tail.headOption.getOrElse(Nil)).foreach{case (field, m) =>
+				m.zipWithIndex.foreach{ case(marker, i) =>
+					new TextField(findAll(cssSelector(s".$field input.flexi-picker")).toList.apply(i).underlying).value = marker.usercode
+					click on className(field).webElement.findElement(By.cssSelector("button.btn"))
+					eventually {
+						findAll(cssSelector(s".$field input.flexi-picker")).toList.count(_.isDisplayed) should be (i+2)
+					}
+				}
+			}
+
+			And("I submit the form")
+			cssSelector(s"input[name=editAndEditDetails]").webElement.click()
+			Then("I should be back on the summary page")
+			withClue(pageSource) {
+				currentUrl should endWith("/summary")
+			}
+
+			callback(id)
+		}
+	}
 
 	def as[T](user: LoginDetails)(fn: => T): T = {
 		currentUser = user
@@ -85,6 +188,21 @@ trait CourseworkFixtures extends BrowserTest with FeaturesDriver with FixturesDr
 		fn
 	}
 
-//FIXME - Add additional methods based on new functional tests
+	def getModule(moduleCode: String): WebElement = {
+		val matchingModule = find(id(s"module-$moduleCode"))
+		if (matchingModule.isEmpty)
+			throw new TestFailedException(s"No module found for ${moduleCode.toUpperCase}", 0)
+		matchingModule.head.underlying
+	}
 
+	def openAdminPage(): Unit = {
+		When("I go the admin page")
+		click on linkText("Test Services")
+
+		Then("I should reach the admin coursework page")
+		currentUrl should endWith("/department/xxx")
+
+		//FIXME - Add additional methods based on new functional tests
+
+	}
 }

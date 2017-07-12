@@ -76,14 +76,16 @@ class AssignMarkersTemplateCommandInternal(val assignment: Assignment) extends C
 			}
 
 			// add dropdown and validation to the main sheet
-			val dropdownRange = new CellRangeAddressList(1, existingAllocations.allStudents.size, 2, 2)
-			val dvHelper = new XSSFDataValidationHelper(null)
-			val dvConstraint = dvHelper.createFormulaListConstraint(
-				lookupSheetName + "!$A$2:$A$" + (markers.size + 1)
-			).asInstanceOf[XSSFDataValidationConstraint]
-			val validation = dvHelper.createValidation(dvConstraint, dropdownRange).asInstanceOf[XSSFDataValidation]
-			validation.setShowErrorBox(true)
-			sheet.addValidationData(validation)
+			if (existingAllocations.allStudents.nonEmpty) {
+				val dropdownRange = new CellRangeAddressList(1, existingAllocations.allStudents.size, 2, 2)
+				val dvHelper = new XSSFDataValidationHelper(null)
+				val dvConstraint = dvHelper.createFormulaListConstraint(
+					lookupSheetName + "!$A$2:$A$" + (markers.size + 1)
+				).asInstanceOf[XSSFDataValidationConstraint]
+				val validation = dvHelper.createValidation(dvConstraint, dropdownRange).asInstanceOf[XSSFDataValidation]
+				validation.setShowErrorBox(true)
+				sheet.addValidationData(validation)
+			}
 
 			// populate existing allocations
 			for (student <- existingAllocations.allStudents) {

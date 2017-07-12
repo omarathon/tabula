@@ -16,7 +16,7 @@ import uk.ac.warwick.tabula.web.Mav
 import uk.ac.warwick.util.termdates.Term
 
 object TermDatesController {
-	case class NamedTerm(name: String, term: Term, weekRange: WeekRange)
+	case class NamedTerm(academicYear: AcademicYear, name: String, term: Term, weekRange: WeekRange)
 }
 
 @Controller
@@ -39,7 +39,7 @@ trait GetTermDatesApi {
 		with TermServiceComponent =>
 
 	@ModelAttribute("terms")
-	def terms(@ModelAttribute("academicYear") academicYear: AcademicYear): Seq[NamedTerm] = {
+	def terms(@ModelAttribute("academicYear") academicYears: Seq[AcademicYear]): Seq[NamedTerm] = academicYears.flatMap { academicYear =>
 		val weeks = termService.getAcademicWeeksForYear(academicYear.dateInTermOne).toMap
 
 		val terms =
@@ -54,7 +54,7 @@ trait GetTermDatesApi {
 				.toSeq
 				.sortBy { case (_, weekRange) => weekRange.minWeek }
 
-		TermService.orderedTermNames.zip(terms).map { case (name, (term, weekRange)) => NamedTerm(name, term, weekRange) }
+		TermService.orderedTermNames.zip(terms).map { case (name, (term, weekRange)) => NamedTerm(academicYear, name, term, weekRange) }
 	}
 
 	@RequestMapping(method = Array(GET), produces = Array("application/json"))
@@ -63,6 +63,7 @@ trait GetTermDatesApi {
 			"success" -> true,
 			"status" -> "ok",
 			"terms" -> terms.map { t => Map(
+				"academicYear" -> t.academicYear.toString,
 				"name" -> t.name,
 				"start" -> DateFormats.IsoDate.print(t.term.getStartDate.toLocalDate),
 				"end" -> DateFormats.IsoDate.print(t.term.getEndDate.toLocalDate),
@@ -75,14 +76,14 @@ trait GetTermDatesApi {
 	}
 
 	@RequestMapping(method = Array(GET), produces = Array("text/calendar"))
-	def icalTermDates(@ModelAttribute("terms") terms: Seq[NamedTerm], @ModelAttribute("academicYear") academicYear: AcademicYear): Mav = {
+	def icalTermDates(@ModelAttribute("terms") terms: Seq[NamedTerm], @ModelAttribute("academicYear") academicYears: Seq[AcademicYear]): Mav = {
 		val cal: Calendar = new Calendar
 		cal.getProperties.add(Version.VERSION_2_0)
 		cal.getProperties.add(new ProdId("-//Tabula//University of Warwick IT Services//EN"))
 		cal.getProperties.add(CalScale.GREGORIAN)
 		cal.getProperties.add(Method.PUBLISH)
 		cal.getProperties.add(new XProperty("X-PUBLISHED-TTL", "PT1W")) // 1 week
-		cal.getProperties.add(new XProperty("X-WR-CALNAME", s"Term dates - ${academicYear.toString}"))
+		cal.getProperties.add(new XProperty("X-WR-CALNAME", s"Term dates - ${academicYears.head.startYear}-${academicYears.last.endYear}"))
 
 		def toIcalDate(date: LocalDate): net.fortuna.ical4j.model.Date =
 			new net.fortuna.ical4j.model.Date(date.toString("yyyyMMdd"))
@@ -90,7 +91,7 @@ trait GetTermDatesApi {
 		terms.zipWithIndex.foreach { case (t, termNumber) =>
 			val event: VEvent = new VEvent(toIcalDate(t.term.getStartDate.toLocalDate), toIcalDate(t.term.getEndDate.toLocalDate.plusDays(1)), t.name.safeSubstring(0, 255))
 
-			event.getProperties.add(new Uid(s"${academicYear.startYear}-term-$termNumber"))
+			event.getProperties.add(new Uid(s"${t.academicYear.startYear}-term-$termNumber"))
 			event.getProperties.add(Method.PUBLISH)
 			event.getProperties.add(Transp.OPAQUE)
 
@@ -102,7 +103,7 @@ trait GetTermDatesApi {
 			cal.getComponents.add(event)
 		}
 
-		Mav(new IcalView(cal), "filename" -> s"termdates-${academicYear.startYear}.ics")
+		Mav(new IcalView(cal), "filename" -> s"termdates-${academicYears.head.startYear}-${academicYears.last.endYear}.ics")
 	}
 
 }

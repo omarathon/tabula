@@ -102,7 +102,7 @@ class CourseworkMarkerHomepageCommandInternal(val user: CurrentUser)
 }
 
 trait CourseworkHomepageMarkerAssignmentList extends TaskBenchmarking {
-	self: CourseworkHomepageCommandState with AssessmentServiceComponent =>
+	self: CourseworkHomepageCommandState with AssessmentServiceComponent with CM2MarkingWorkflowServiceComponent =>
 
 	protected lazy val allCM1MarkerAssignments: Seq[Assignment] = benchmarkTask("Get CM1 assignments for marking") {
 		assessmentService.getAssignmentWhereMarker(user.apparentUser, None) // Any academic year
@@ -110,6 +110,7 @@ trait CourseworkHomepageMarkerAssignmentList extends TaskBenchmarking {
 
 	protected lazy val allCM2MarkerAssignments: Seq[Assignment] = benchmarkTask("Get CM2 assignments for marking") {
 		assessmentService.getCM2AssignmentsWhereMarker(user.apparentUser, None) // Any academic year
+			.filter { assignment => cm2MarkingWorkflowService.getAllStudentsForMarker(assignment, user.apparentUser).nonEmpty }
 	}
 
 	lazy val isMarker: Boolean = allCM1MarkerAssignments.nonEmpty || allCM2MarkerAssignments.nonEmpty

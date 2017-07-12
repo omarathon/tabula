@@ -266,7 +266,7 @@
 							<td class="feedback-mark">
 								<#if enhancedFeedback??>
 									<#local feedback = enhancedFeedback.feedback>
-								${(feedback.actualMark)!''}%
+									<#if feedback.actualMark??>${feedback.actualMark}%</#if>
 									<#if feedback.hasPrivateOrNonPrivateAdjustments>
 										(Adjusted to - ${feedback.latestMark}%)
 									</#if>

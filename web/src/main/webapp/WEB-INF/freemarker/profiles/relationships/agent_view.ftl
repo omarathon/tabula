@@ -3,8 +3,10 @@
 </#function>
 
 <#escape x as x?html>
+<#assign can_reallocate = features.personalTutorAssignment && !relationshipType.readOnly(department) && can.do_with_selector("Profiles.StudentRelationship.Manage", department, relationshipType) />
+
 <div class="pull-right">
-	<#if features.personalTutorAssignment && !relationshipType.readOnly(department)>
+	<#if can_reallocate>
 		<a href="<@routes.profiles.relationship_allocate department relationshipType />" class="btn btn-default pull-right">
 			Allocate ${relationshipType.description}s
 		</a>
@@ -51,7 +53,7 @@
 								<table class="related_students table table-striped table-condensed">
 									<thead>
 										<tr>
-											<th><@bs3form.selector_check_all /></th>
+											<#if can_reallocate><th><@bs3form.selector_check_all /></th></#if>
 											<th class="student-col">First name</th>
 											<th class="student-col">Last name</th>
 											<th class="id-col">ID</th>
@@ -66,18 +68,20 @@
 											<#assign studentCourseDetails = studentRelationship.studentCourseDetails />
 											<tr class="student">
 												<#assign readOnly=(studentCourseDetails.department.code!=department.code) />
-												<td>
-													<#if readOnly>
-														<#assign studentDepartment=studentCourseDetails.department />
-														<div class="use-tooltip" data-html="true" data-container ="body" data-title= "This student can be reallocated from their profile page or from within the ${studentDepartment.name} department.">
-													</#if>
-													<@bs3form.selector_check_row
-														name="preselectStudents"
-														value="${studentCourseDetails.student.universityId}"
-														readOnly=readOnly
-													/>
-													<#if readOnly></div></#if>
-												</td>
+												<#if can_reallocate>
+													<td>
+														<#if readOnly>
+															<#assign studentDepartment=studentCourseDetails.department />
+															<div class="use-tooltip" data-html="true" data-container ="body" data-title= "This student can be reallocated from their profile page or from within the ${studentDepartment.name} department.">
+														</#if>
+														<@bs3form.selector_check_row
+															name="preselectStudents"
+															value="${studentCourseDetails.student.universityId}"
+															readOnly=readOnly
+														/>
+														<#if readOnly></div></#if>
+													</td>
+												</#if>
 												<td><h6>${studentCourseDetails.student.firstName}</h6></td>
 												<td><h6>${studentCourseDetails.student.lastName}</h6></td>
 												<td><a class="profile-link" href="/profiles/view/course/${studentCourseDetails.urlSafeId}">${studentCourseDetails.student.universityId}</a></td>
@@ -90,7 +94,7 @@
 								</table>
 
 								<p>
-									<#if canReallocateStudents><button type="submit" class="btn btn-primary reallocate">Reallocate students</button></#if>
+									<#if canReallocateStudents && can_reallocate><button type="submit" class="btn btn-primary reallocate">Reallocate students</button></#if>
 								</p>
 							</form>
 						</div>

@@ -1,7 +1,17 @@
 <#import "/WEB-INF/freemarker/_profile_link.ftl" as pl />
 <div id="profile-modal" class="modal fade profile-subset"></div>
 
-<p>Found <@fmt.p results.total "extension" />.</p>
+<div class="row extension-metadata">
+	<div class="col-md-7">
+		<p>Found <@fmt.p results.total "extension" />.</p>
+	</div>
+	<div class="col-md-5">
+		<p class="alert alert-info">
+			Students will automatically be notified by email when you approve, modify or revoke an extension.
+		</p>
+	</div>
+</div>
+
 <table class="students table table-striped sticky-table-headers expanding-table">
 	<thead>
 		<tr>
