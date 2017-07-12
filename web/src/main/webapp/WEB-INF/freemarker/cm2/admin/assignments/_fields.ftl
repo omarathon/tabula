@@ -88,6 +88,7 @@
 		<select id="workflowCategory" name="workflowCategory" class="form-control" disabled="disabled">
 			<option selected="selected" value="${command.workflowCategory.code}">${command.workflowCategory.displayName}</option>
 		</select>
+		<input type="hidden" name="workflowCategory" value="${command.workflowCategory.code}" />
 		<div class="help-block">
 			You cannot change or remove the marking workflow used on this assignment once marking has started. If you need to make changes then stop any current marking first.
 		</div>
