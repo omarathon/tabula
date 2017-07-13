@@ -16,6 +16,7 @@ trait PermissionsDao {
 	def saveOrUpdate(roleDefinition: CustomRoleDefinition)
 	def saveOrUpdate(permission: GrantedPermission[_])
 	def saveOrUpdate(role: GrantedRole[_])
+	def delete(role: GrantedRole[_])
 
 	def delete(roleDefinition: CustomRoleDefinition)
 
@@ -54,6 +55,7 @@ class PermissionsDaoImpl extends PermissionsDao with Daoisms {
 	def saveOrUpdate(roleDefinition: CustomRoleDefinition): Unit = session.saveOrUpdate(roleDefinition)
 	def saveOrUpdate(permission: GrantedPermission[_]): Unit = session.saveOrUpdate(permission)
 	def saveOrUpdate(role: GrantedRole[_]): Unit = session.saveOrUpdate(role)
+	def delete(role: GrantedRole[_]): Unit = session.delete(role)
 
 	def delete(roleDefinition: CustomRoleDefinition): Unit = session.delete(roleDefinition)
 

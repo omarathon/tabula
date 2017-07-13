@@ -119,11 +119,11 @@ class ModulePermissionControllerTest extends TestBase with Mockito {
 	@Test def remove { new Fixture {
 		val removedRole = new ModuleGrantedRole(module, ModuleManagerRoleDefinition)
 
-		val command = new Appliable[GrantedRole[Module]] with RevokeRoleCommandState[Module] with PermissionsServiceComponent {
+		val command = new Appliable[Option[GrantedRole[Module]]] with RevokeRoleCommandState[Module] with PermissionsServiceComponent {
 			val permissionsService = null
 			def scope: Module = module
 			def grantedRole = Some(removedRole)
-			def apply: ModuleGrantedRole = removedRole
+			def apply: Option[ModuleGrantedRole] = Some(removedRole)
 		}
 		command.usercodes.add("cuscav")
 		command.usercodes.add("cusebr")
@@ -144,13 +144,13 @@ class ModulePermissionControllerTest extends TestBase with Mockito {
 	@Test def removeValidationErrors { new Fixture {
 		val removedRole = new ModuleGrantedRole(module, ModuleManagerRoleDefinition)
 
-		val command = new Appliable[GrantedRole[Module]] with RevokeRoleCommandState[Module] with PermissionsServiceComponent {
+		val command = new Appliable[Option[GrantedRole[Module]]] with RevokeRoleCommandState[Module] with PermissionsServiceComponent {
 			val permissionsService = null
 			def scope: Module = module
 			def grantedRole = Some(removedRole)
-			def apply(): Null = {
+			def apply(): Option[GrantedRole[Module]] = {
 				fail("Should not be called")
-				null
+				None
 			}
 		}
 		command.usercodes.add("cuscav")

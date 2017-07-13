@@ -32,7 +32,7 @@ abstract class PermissionsControllerMethods[A <: PermissionsTarget : ClassTag] e
 	validatesSelf[SelfValidating]
 
 	type GrantRoleCommand = Appliable[GrantedRole[A]] with GrantRoleCommandState[A]
-	type RevokeRoleCommand = Appliable[GrantedRole[A]] with RevokeRoleCommandState[A]
+	type RevokeRoleCommand = Appliable[Option[GrantedRole[A]]] with RevokeRoleCommandState[A]
 
 	type GrantPermissionsCommand = Appliable[GrantedPermission[A]] with GrantPermissionsCommandState[A]
 	type RevokePermissionsCommand = Appliable[GrantedPermission[A]] with RevokePermissionsCommandState[A]
@@ -92,7 +92,7 @@ abstract class PermissionsControllerMethods[A <: PermissionsTarget : ClassTag] e
 		if (errors.hasErrors) {
 			form(target)
 		} else {
-			val role = Some(command.apply().roleDefinition)
+			val role = command.apply().map(_.roleDefinition)
 			val userCodes = command.usercodes.asScala
 			form(target, userCodes, role, "remove")
 		}
