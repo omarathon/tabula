@@ -92,12 +92,51 @@ trait CourseworkFixtures extends BrowserTest with FeaturesDriver with FixturesDr
 		for {job <- concurrentJobs} Await.ready(job, Duration(60, duration.SECONDS))
 	}
 
+	def addModuleManagers(
+		moduleCode: String,
+		managers: Seq[String] = Seq(),
+		assistants: Seq[String] = Seq()): Unit = as(P.Admin1) {
+		click on linkText("Test Services")
+		verifyPageLoaded {
+			// wait for the page to load
+			find(cssSelector("div.deptheader")) should be('defined)
+		}
+		if ((assistants ++ managers).nonEmpty) {
+			val module = getModule(moduleCode)
+			click on module.findElement(By.partialLinkText("Manage this module"))
+			val editPerms = module.findElement(By.partialLinkText("Module permissions"))
+			eventually(editPerms.isDisplayed should be {
+				true
+			})
+			click on editPerms
+
+			def pick(table: String, usercodes: Seq[String]) {
+				verifyPageLoaded {
+					find(cssSelector(s"$table .pickedUser")) should be('defined)
+				}
+				usercodes.foreach { u =>
+					click on cssSelector(s"$table .pickedUser")
+					enter(u)
+					val typeahead = cssSelector(".typeahead .active a")
+					eventuallyAjax {
+						find(typeahead) should not be None
+					}
+					click on typeahead
+					find(cssSelector(s"$table form.add-permissions")).get.underlying.submit()
+				}
+			}
+			pick(".modulemanager-table", managers)
+			pick(".moduleassistant-table", assistants)
+		}
+	}
+
 	/* Runs callback with assignment ID */
 	def withAssignment(
 		moduleCode: String,
 		assignmentName: String,
 		settings: Seq[String] => Unit = Nil => (),
-		students: Seq[String] = Seq(P.Student1.usercode, P.Student2.usercode), loggedUser: LoginDetails = P.Admin1)(callback: String => Unit): Unit = as(loggedUser) {
+		students: Seq[String] = Seq(P.Student1.usercode, P.Student2.usercode),
+		loggedUser: LoginDetails = P.Admin1)(callback: String => Unit): Unit = as(loggedUser) {
 
 		click on linkText("Test Services")
 		verifyPageLoaded {
