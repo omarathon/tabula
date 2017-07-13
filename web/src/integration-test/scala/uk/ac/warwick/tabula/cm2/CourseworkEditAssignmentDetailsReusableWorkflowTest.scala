@@ -4,8 +4,9 @@ import org.openqa.selenium.support.ui.Select
 import org.openqa.selenium.{By, WebElement}
 import org.scalatest.GivenWhenThen
 import uk.ac.warwick.tabula.data.model.WorkflowCategory
+import uk.ac.warwick.tabula.data.model.markingworkflow.MarkingWorkflowStage.{DblFinalMarker, DblFirstMarker, DblSecondMarker, ModerationMarker, ModerationModerator, SingleMarker}
 import uk.ac.warwick.tabula.data.model.markingworkflow.MarkingWorkflowType
-import uk.ac.warwick.tabula.data.model.markingworkflow.MarkingWorkflowType.{DoubleMarking, ModeratedMarking}
+import uk.ac.warwick.tabula.data.model.markingworkflow.MarkingWorkflowType.{DoubleMarking, ModeratedMarking, SingleMarking}
 import uk.ac.warwick.tabula.{BrowserTest, LoginDetails}
 
 import scala.collection.JavaConverters._
@@ -23,11 +24,11 @@ class CourseworkEditAssignmentDetailsReusableWorkflowTest extends BrowserTest wi
 		var doubleWorkflowId = createMarkingWorkflow(doubleMarkingWorkflowName, DoubleMarking, Seq(P.Marker1, P.Marker2), Seq(P.Marker3))
 		var moderatedworkflowId = createMarkingWorkflow(moderatedWorkflowName, ModeratedMarking, Seq(P.Marker1, P.Marker2), Seq(P.Marker3))
 
-		withAssignment("xxx02", "Double marking") { assignmentId =>
+		withAssignment("xxx02", "Double marking-1C") { assignmentId =>
 			editAssignment(doubleWorkflowId)
 			var checkboxFeedbackFieldDetails: Seq[(String, Boolean)] = Seq(("automaticallyReleaseToMarkers", false), ("collectMarks", true), ("dissertation", true))
 
-			amendAssignmentDetails(modifiedAssignmentTitle,moderatedworkflowId)
+			amendAssignmentDetails(modifiedAssignmentTitle, moderatedworkflowId)
 			amendAssignmentFeedback(checkboxFeedbackFieldDetails)
 			assigmentStudentDetails(studentList)
 
@@ -50,11 +51,11 @@ class CourseworkEditAssignmentDetailsReusableWorkflowTest extends BrowserTest wi
 				++ singleSelOptionFieldDetails
 				++ checkboxFeedbackFieldDetails.map { case (field, value) => field -> value.toString }
 				++ Seq(("title", modifiedAssignmentTitle), ("workflowName", moderatedWorkflowName), ("workflowType", "Reusable"))
-				++ Seq(("fileTypes",fileTypes.mkString(", ").toUpperCase))
-				++ Seq(("studentList",studentList.size.toString))
+				++ Seq(("fileTypes", fileTypes.mkString(", ").toUpperCase))
+				++ Seq(("studentList", studentList.size.toString))
 				).toMap
 
-			assigmentReview(Some(ModeratedMarking), allFields)
+			assigmentReview(Some(ModeratedMarking), allFields, Seq(P.Marker1, P.Marker2), Seq(P.Marker3))
 		}
 
 	}
@@ -69,7 +70,7 @@ class CourseworkEditAssignmentDetailsReusableWorkflowTest extends BrowserTest wi
 		var doubleWorkflowId = createMarkingWorkflow(doubleMarkingWorkflowName, DoubleMarking, Seq(P.Marker1, P.Marker2), Seq(P.Marker3))
 		var moderatedworkflowId = createMarkingWorkflow(moderatedWorkflowName, ModeratedMarking, Seq(P.Marker1), Seq(P.Marker2, P.Marker3))
 
-		withAssignment("xxx02", "Moderated Assignment") { assignmentId =>
+		withAssignment("xxx02", "Moderated Assignment-1B") { assignmentId =>
 			editAssignment(moderatedworkflowId)
 			var checkboxFeedbackFieldDetails: Seq[(String, Boolean)] = Seq(("automaticallyReleaseToMarkers", true), ("collectMarks", false), ("dissertation", false))
 
@@ -96,11 +97,10 @@ class CourseworkEditAssignmentDetailsReusableWorkflowTest extends BrowserTest wi
 				++ singleSelOptionFieldDetails
 				++ checkboxFeedbackFieldDetails.map { case (field, value) => field -> value.toString }
 				++ Seq(("title", modifiedAssignmentTitle), ("workflowName", moderatedWorkflowName), ("workflowType", "Reusable"))
-				++ Seq(("fileTypes",fileTypes.mkString(", ").toUpperCase))
-				++ Seq(("studentList",studentList.size.toString))
+				++ Seq(("fileTypes", fileTypes.mkString(", ").toUpperCase))
+				++ Seq(("studentList", studentList.size.toString))
 				).toMap
-
-			assigmentReview(Some(DoubleMarking), allFields)
+			assigmentReview(Some(DoubleMarking), allFields, Seq(P.Marker1, P.Marker2), Seq(P.Marker3))
 		}
 
 	}
@@ -108,22 +108,18 @@ class CourseworkEditAssignmentDetailsReusableWorkflowTest extends BrowserTest wi
 
 	"Department admin" should "be able to edit reusable moderated marker workflow and change to workflowless" in {
 		var moderatedWorkflowName = "Moderated Marking Test"
-	//	var doubleMarkingWorkflowName = "Double Marking Test"
 		var studentList = Seq("tabula-functest-student1", "tabula-functest-student2")
-		var modifiedAssignmentTitle = "Moderated reusable marker workflow assignment modified to Double"
+		var modifiedAssignmentTitle = "Moderated reusable marker workflow assignment modified to workflowless"
 
-	//	var doubleWorkflowId = createMarkingWorkflow(doubleMarkingWorkflowName, DoubleMarking, Seq(P.Marker1, P.Marker2), Seq(P.Marker3))
 		var moderatedworkflowId = createMarkingWorkflow(moderatedWorkflowName, ModeratedMarking, Seq(P.Marker1), Seq(P.Marker2, P.Marker3))
 
-		withAssignment("xxx02", "Reusable Double marking") { assignmentId =>
+		withAssignment("xxx02", "Moderated marking-1A") { assignmentId =>
 			editAssignment(moderatedworkflowId)
 			var checkboxFeedbackFieldDetails: Seq[(String, Boolean)] = Seq(("automaticallyReleaseToMarkers", true), ("collectMarks", false), ("dissertation", false))
 
 			amendAssignmentDetails(modifiedAssignmentTitle, "")
 			amendAssignmentFeedback(checkboxFeedbackFieldDetails)
 			assigmentStudentDetails(studentList)
-
-//			assigmentMarkerDetails(studentList.size, DoubleMarking)
 
 			var checkboxSubmissionFieldDetails: Seq[(String, Boolean)] = Seq(("collectSubmissions", false), ("automaticallySubmitToTurnitin", false), ("allowLateSubmissions", false))
 			var radioButtonSubmissionFieldDetails: Seq[(String, String)] = Seq(("restrictSubmissions", "false"))
@@ -142,8 +138,8 @@ class CourseworkEditAssignmentDetailsReusableWorkflowTest extends BrowserTest wi
 				++ singleSelOptionFieldDetails
 				++ checkboxFeedbackFieldDetails.map { case (field, value) => field -> value.toString }
 				++ Seq(("title", modifiedAssignmentTitle), ("workflowName", moderatedWorkflowName), ("workflowType", "Reusable"))
-				++ Seq(("fileTypes",fileTypes.mkString(", ").toUpperCase))
-				++ Seq(("studentList",studentList.size.toString))
+				++ Seq(("fileTypes", fileTypes.mkString(", ").toUpperCase))
+				++ Seq(("studentList", studentList.size.toString))
 				).toMap
 
 			assigmentReview(None, allFields)
@@ -317,7 +313,7 @@ class CourseworkEditAssignmentDetailsReusableWorkflowTest extends BrowserTest wi
 
 
 	def checkReviewTabRow(labels: mutable.Buffer[WebElement], labelRow: String, fieldValue: String) = {
-		var element = labels.find(_.getText.contains(labelRow)).getOrElse(fail(s"{labelRow} not found"))
+		var element = labels.find(_.getText.contains(labelRow)).getOrElse(fail(s"${labelRow} not found"))
 		var parent = element.findElement(By.xpath(".."))
 		parent.getText should include(fieldValue)
 	}
@@ -327,50 +323,84 @@ class CourseworkEditAssignmentDetailsReusableWorkflowTest extends BrowserTest wi
 		value match {
 			case "false" => "No"
 			case "true" => "Yes"
-			case _ =>  value
+			case _ => value
 		}
 	}
 
-	def assigmentReview(workflowType: Option[MarkingWorkflowType], fieldDetails: Map[String, String]): Unit = {
+	def assigmentReview(workflowType: Option[MarkingWorkflowType], fieldDetails: Map[String, String], markers: Seq[LoginDetails]*): Unit = {
 		When("I go to assignment review page")
 		currentUrl should include("/review")
 
 		Then("I cross check various assignment details")
 		//assignment page details
 		var labels = webDriver.findElements(By.className("review-label")).asScala
-		checkReviewTabRow(labels, "Assignment title", getFieldValue("title",fieldDetails))
-		checkReviewTabRow(labels, "Marking workflow use", getFieldValue("workflowType",fieldDetails))
-		checkReviewTabRow(labels, "Marking workflow name", getFieldValue("workflow",fieldDetails))
+		checkReviewTabRow(labels, "Assignment title", getFieldValue("title", fieldDetails))
 		workflowType match {
-			case Some(wf) =>  {
+			case Some(wf) => {
+				checkReviewTabRow(labels, "Marking workflow use", getFieldValue("workflowType", fieldDetails))
+				checkReviewTabRow(labels, "Marking workflow name", getFieldValue("workflow", fieldDetails))
 				checkReviewTabRow(labels, "Marking workflow type", workflowType.get.name)
-				//marker page details
-				checkReviewTabRow(labels, "Marker", "tabula-functest-marker1 user (2 students)")
+				wf match {
+					case ModeratedMarking => {
+
+						Seq(ModerationMarker.roleName -> markers.headOption.getOrElse(Nil), ModerationModerator.roleName -> markers.tail.headOption.getOrElse(Nil)).foreach { case (field, m) =>
+							m.zipWithIndex.foreach { case (marker, i) =>
+								pageSource contains field should be { true }
+								pageSource contains marker.usercode should be { true }
+							}
+						}
+					}
+					case DoubleMarking => {
+
+						Seq(DblFirstMarker.roleName -> markers.headOption.getOrElse(Nil),
+							DblSecondMarker.roleName -> markers.tail.headOption.getOrElse(Nil),
+							DblFinalMarker.roleName -> markers.headOption.getOrElse(Nil)).foreach { case (field, m) =>
+							m.zipWithIndex.foreach { case (marker, i) =>
+								pageSource contains field should be { true }
+								pageSource contains marker.usercode should be { true }
+							}
+						}
+					}
+
+					case SingleMarking => {
+						Seq(SingleMarker.roleName -> markers.headOption.getOrElse(Nil)).foreach { case (field, m) =>
+							m.zipWithIndex.foreach { case (marker, i) =>
+								pageSource contains field should be { true }
+								pageSource contains marker.usercode should be { true }
+							}
+						}
+
+					}
+					case _ =>
+				}
 			}
-			case None =>
+			case None => 	pageSource contains "Marking workflow" should be { false }
 		}
 		//assignment feedback page details
-		checkReviewTabRow(labels, "Automatically release to markers when assignment closes or after plagiarism check", getFieldValue("automaticallyReleaseToMarkers",fieldDetails))
-		checkReviewTabRow(labels, "Collect marks",  getFieldValue("collectMarks",fieldDetails))
+		checkReviewTabRow(labels, "Automatically release to markers when assignment closes or after plagiarism check", getFieldValue("automaticallyReleaseToMarkers", fieldDetails))
+		checkReviewTabRow(labels, "Collect marks", getFieldValue("collectMarks", fieldDetails))
 
 		//students page
-		checkReviewTabRow(labels, "Total number of students enrolled", getFieldValue("studentList",fieldDetails))
+		checkReviewTabRow(labels, "Total number of students enrolled", getFieldValue("studentList", fieldDetails))
 
 
 		//submissions page details
-		checkReviewTabRow(labels, "Collect submissions", getFieldValue("collectSubmissions",fieldDetails))
-		checkReviewTabRow(labels, "Automatically check submissions for plagiarism", getFieldValue("automaticallySubmitToTurnitin",fieldDetails))
-	//	checkReviewTabRow(labels, "Submission scope", "Only students enrolled on this assignment can submit coursework")
-		checkReviewTabRow(labels, "Allow new submissions after close date", getFieldValue("allowLateSubmissions",fieldDetails))
+		var collectSubmissions = getFieldValue("collectSubmissions", fieldDetails)
+		checkReviewTabRow(labels, "Collect submissions", collectSubmissions)
+		if(collectSubmissions == "Yes") {
+			checkReviewTabRow(labels, "Automatically check submissions for plagiarism", getFieldValue("automaticallySubmitToTurnitin", fieldDetails))
+			checkReviewTabRow(labels, "Allow new submissions after close date", getFieldValue("allowLateSubmissions", fieldDetails))
+		}
+
 
 		//Options page details
-		checkReviewTabRow(labels, "Minimum attachments per submission", getFieldValue("minimumFileAttachmentLimit",fieldDetails))
-		checkReviewTabRow(labels, "Maximum attachments per submission", getFieldValue("fileAttachmentLimit",fieldDetails))
-		checkReviewTabRow(labels, "Accepted attachment file types", getFieldValue("fileTypes",fieldDetails))
-		checkReviewTabRow(labels, "Maximum file size", getFieldValue("individualFileSizeLimit",fieldDetails))
-		checkReviewTabRow(labels, "Minimum word count", getFieldValue("wordCountMin",fieldDetails))
-		checkReviewTabRow(labels, "Maximum word count", getFieldValue("wordCountMax",fieldDetails))
-		checkReviewTabRow(labels, "Word count conventions", getFieldValue("wordCountConventions",fieldDetails))
+		checkReviewTabRow(labels, "Minimum attachments per submission", getFieldValue("minimumFileAttachmentLimit", fieldDetails))
+		checkReviewTabRow(labels, "Maximum attachments per submission", getFieldValue("fileAttachmentLimit", fieldDetails))
+		checkReviewTabRow(labels, "Accepted attachment file types", getFieldValue("fileTypes", fieldDetails))
+		checkReviewTabRow(labels, "Maximum file size", getFieldValue("individualFileSizeLimit", fieldDetails))
+		checkReviewTabRow(labels, "Minimum word count", getFieldValue("wordCountMin", fieldDetails))
+		checkReviewTabRow(labels, "Maximum word count", getFieldValue("wordCountMax", fieldDetails))
+		checkReviewTabRow(labels, "Word count conventions", getFieldValue("wordCountConventions", fieldDetails))
 	}
 
 }
