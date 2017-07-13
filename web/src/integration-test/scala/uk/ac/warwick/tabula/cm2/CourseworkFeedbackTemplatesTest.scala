@@ -5,7 +5,7 @@ import uk.ac.warwick.tabula.BrowserTest
 
 import scala.collection.JavaConverters._
 
-class Cm2FeedbackTemplatesTest extends BrowserTest with CourseworkFixtures {
+class CourseworkFeedbackTemplatesTest extends BrowserTest with CourseworkFixtures {
 
 	//check to see how many template files are currently showing on screen
 	def currentCount() = {
