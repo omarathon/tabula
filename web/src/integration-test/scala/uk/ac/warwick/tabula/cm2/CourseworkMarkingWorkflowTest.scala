@@ -8,15 +8,6 @@ import scala.collection.JavaConverters._
 
 class CourseworkMarkingWorkflowTest extends BrowserTest with CourseworkFixtures with GivenWhenThen {
 
-/**	private def openMarkingWorkflowSettings(): Unit = {
-		When("I click on the Marking workflows link")
-		click on linkText("Marking workflows")
-
-		Then("I should reach the marking workflow page")
-		currentUrl should include("/markingworkflows")
-
-	}   **/
-
 	private def loadCreateMarkingworkflow(): Unit = {
 		When("I click create")
 		click on partialLinkText("Create")

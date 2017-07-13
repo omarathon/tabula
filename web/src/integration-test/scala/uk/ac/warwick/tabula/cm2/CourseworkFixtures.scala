@@ -6,7 +6,6 @@ import org.scalatest.GivenWhenThen
 import org.scalatest.exceptions.TestFailedException
 import uk.ac.warwick.tabula.data.model.WorkflowCategory
 import uk.ac.warwick.tabula.data.model.markingworkflow.MarkingWorkflowType
-import uk.ac.warwick.tabula.data.model.markingworkflow.MarkingWorkflowType.{DoubleMarking, SingleMarking}
 import uk.ac.warwick.tabula.web.{FeaturesDriver, FixturesDriver}
 import uk.ac.warwick.tabula.{BrowserTest, FunctionalTestAcademicYear, LoginDetails}
 
@@ -98,7 +97,7 @@ trait CourseworkFixtures extends BrowserTest with FeaturesDriver with FixturesDr
 		moduleCode: String,
 		assignmentName: String,
 		settings: Seq[String] => Unit = Nil => (),
-		students: Seq[String] = Seq(P.Student1.usercode, P.Student2.usercode))(callback: String => Unit): Unit = as(P.Admin1) {
+		students: Seq[String] = Seq(P.Student1.usercode, P.Student2.usercode), loggedUser: LoginDetails = P.Admin1)(callback: String => Unit): Unit = as(loggedUser) {
 
 		click on linkText("Test Services")
 		verifyPageLoaded {

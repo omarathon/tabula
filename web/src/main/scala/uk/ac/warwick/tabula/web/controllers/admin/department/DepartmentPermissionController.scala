@@ -23,7 +23,7 @@ trait DepartmentPermissionControllerMethods extends AdminController
 	with AutowiringMaintenanceModeServiceComponent {
 
 	type GrantRoleCommand = Appliable[GrantedRole[Department]] with GrantRoleCommandState[Department]
-	type RevokeRoleCommand = Appliable[GrantedRole[Department]] with RevokeRoleCommandState[Department]
+	type RevokeRoleCommand = Appliable[Option[GrantedRole[Department]]] with RevokeRoleCommandState[Department]
 
 	@ModelAttribute("addCommand")
 	def addCommandModel(@PathVariable department: Department): GrantRoleCommand = GrantRoleCommand(department)
@@ -97,7 +97,7 @@ class DepartmentRemovePermissionController extends AdminController with Departme
 		if (errors.hasErrors) {
 			form(department)
 		} else {
-			val role = Some(command.apply().roleDefinition)
+			val role = command.apply().map(_.roleDefinition)
 			val userCodes = command.usercodes.asScala
 			form(department, userCodes, role, "remove")
 		}

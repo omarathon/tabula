@@ -420,6 +420,11 @@ object AssignmentInfoFilters {
 
 	def allModuleFilters(modules: Seq[model.Module]): Seq[Module] = modules.map(Module.apply)
 
+	object NoWorkflow extends AssignmentInfoFilter {
+		val description: String = "No workflow"
+		def apply(info: AssignmentInfo): Boolean = info.assignment.markingWorkflow == null && info.assignment.cm2MarkingWorkflow == null
+	}
+
 	case class WorkflowType(method: MarkingMethod) extends AssignmentInfoFilter {
 		val description: String = s"${method.description}-CM1"
 		override val getName: String = method.name
@@ -432,7 +437,7 @@ object AssignmentInfoFilters {
 		def apply(info: AssignmentInfo): Boolean = Option(info.assignment.cm2MarkingWorkflow).map(_.workflowType).contains(method)
 	}
 
-	def allWorkflowTypeFilters: Seq[AssignmentInfoFilter] = MarkingMethod.values.toSeq.map(WorkflowType.apply) ++ MarkingWorkflowType.values.map(CM2WorkflowType.apply)
+	def allWorkflowTypeFilters: Seq[AssignmentInfoFilter] = Seq(NoWorkflow) ++ MarkingMethod.values.toSeq.map(WorkflowType.apply) ++ MarkingWorkflowType.values.map(CM2WorkflowType.apply)
 
 	object Status {
 		case object Active extends AssignmentInfoFilter {
