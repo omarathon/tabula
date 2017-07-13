@@ -147,6 +147,51 @@ class CourseworkEditAssignmentDetailsReusableWorkflowTest extends BrowserTest wi
 
 	}
 
+	"Module manager" should "be able to edit reusable Moderated marker workflow and change to Single" in {
+		var moderatedWorkflowName = "Moderated Marking Test"
+		var singleMarkingWorkflowName = "Single Marking Test"
+		var studentList = Seq("tabula-functest-student1", "tabula-functest-student2", "tabula-functest-student3")
+		var modifiedAssignmentTitle = "Moderated reusable marker workflow assignment modified to Single"
+
+		var singleWorkflowId = createMarkingWorkflow(singleMarkingWorkflowName, SingleMarking, Seq(P.Marker1, P.Marker2, P.Marker3))
+		var moderatedworkflowId = createMarkingWorkflow(moderatedWorkflowName, ModeratedMarking, Seq(P.Marker1, P.Marker2), Seq(P.Marker3))
+		addModuleManagers("xxx02", managers= Seq(P.ModuleManager1.usercode))
+		withAssignment("xxx02", "Moderated marking-4C") { assignmentId =>
+			editAssignment(moderatedworkflowId)
+			var checkboxFeedbackFieldDetails: Seq[(String, Boolean)] = Seq(("automaticallyReleaseToMarkers", false), ("collectMarks", true), ("dissertation", true))
+
+			amendAssignmentDetails(modifiedAssignmentTitle, singleWorkflowId)
+			amendAssignmentFeedback(checkboxFeedbackFieldDetails)
+			assigmentStudentDetails(studentList)
+
+			assigmentMarkerDetails(studentList.size, SingleMarking)
+
+			var checkboxSubmissionFieldDetails: Seq[(String, Boolean)] = Seq(("collectSubmissions", true), ("automaticallySubmitToTurnitin", false), ("allowLateSubmissions", false))
+			var radioButtonSubmissionFieldDetails: Seq[(String, String)] = Seq(("restrictSubmissions", "true"))
+			assignmentSubmissionDetails(checkboxSubmissionFieldDetails, radioButtonSubmissionFieldDetails)
+
+			var textFieldOptionFieldDetails: Seq[(String, String)] = Seq(("individualFileSizeLimit", "4"), ("wordCountMin", "200"), ("wordCountMax", "600"))
+			var textAreaFieldOptionFieldDetails: Seq[(String, String)] = Seq(("wordCountConventions", "Exclude any bibliography"), ("assignmentComment", "Important assignment"))
+			var singleSelOptionFieldDetails: Seq[(String, String)] = Seq(("minimumFileAttachmentLimit", "1"), ("fileAttachmentLimit", "3"))
+
+			var fileTypes = Seq("pdf", "doc")
+			assigmentOptions(textFieldOptionFieldDetails, textAreaFieldOptionFieldDetails, singleSelOptionFieldDetails, fileTypes)
+
+			var allFields: Map[String, String] = (checkboxSubmissionFieldDetails.map { case (field, value) => field -> value.toString }
+				++ textFieldOptionFieldDetails
+				++ textAreaFieldOptionFieldDetails
+				++ singleSelOptionFieldDetails
+				++ checkboxFeedbackFieldDetails.map { case (field, value) => field -> value.toString }
+				++ Seq(("title", modifiedAssignmentTitle), ("workflowName", singleMarkingWorkflowName), ("workflowType", "Reusable"))
+				++ Seq(("fileTypes", fileTypes.mkString(", ").toUpperCase))
+				++ Seq(("studentList", studentList.size.toString))
+				).toMap
+
+			assigmentReview(Some(SingleMarking), allFields, Seq(P.Marker1, P.Marker2, P.Marker3))
+		}
+
+	}
+
 	def submitAndContinueClick(): Unit = {
 		Then("I click submit button")
 		val button = webDriver.findElement(By.id("command")).findElement(By.cssSelector("input[value='Save and continue']"))
