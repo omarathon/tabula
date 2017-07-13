@@ -190,9 +190,6 @@ object Routes {
 				def status(assignment: Assignment): String = assignmentroot(assignment) + "/turnitin/status"
 			}
 
-			object audit {
-				def apply(assignment: Assignment): String = admin() + s"/audit/assignment/${encoded(assignment.id)}"
-			}
 			def extensions(assignment: Assignment): String = assignmentroot(assignment) + "/extensions"
 
 			def submitToTurnitin(assignment: Assignment): String = assignmentroot(assignment) + "/turnitin"
