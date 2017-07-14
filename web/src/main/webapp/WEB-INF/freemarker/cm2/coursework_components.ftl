@@ -835,9 +835,17 @@
 	</p>
 	<p>
 		<#if r.turnitinId?has_content>
-			<a target="turnitin-viewer" href="<@routes.cm2.turnitinLtiReport assignment attachment />">View full report</a>
+			<#if assignment.cm2Assignment>
+				<a target="turnitin-viewer" href="<@routes.cm2.turnitinLtiReport assignment attachment />">View full report</a>
+			<#else>
+				<a target="turnitin-viewer" href="<@routes.coursework.turnitinLtiReport assignment attachment />">View full report</a>
+			</#if>
 		<#else>
-			<a target="turnitin-viewer" href="<@routes.cm2.turnitinReport assignment attachment />">View full report - available via Tabula until end of August 2016</a>
+			<#if assignment.cm2Assignment>
+				<a target="turnitin-viewer" href="<@routes.cm2.turnitinReport assignment attachment />">View full report - available via Tabula until end of August 2016</a>
+			<#else>
+				<a target="turnitin-viewer" href="<@routes.coursework.turnitinReport assignment attachment />">View full report - available via Tabula until end of August 2016</a>
+			</#if>
 		</#if>
 	</p>
 </div>

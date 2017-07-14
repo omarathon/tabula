@@ -1,12 +1,12 @@
-package uk.ac.warwick.tabula.web.controllers.coursework.admin
+package uk.ac.warwick.tabula.web.controllers.cm2.admin
 
 import org.springframework.context.annotation.Profile
 import org.springframework.stereotype.Controller
 import org.springframework.web.bind.annotation.{ModelAttribute, PathVariable, RequestMapping}
 import uk.ac.warwick.tabula.commands.coursework.turnitin.{TurnitinReportErrorWithMessage, ViewPlagiarismReportCommand}
-import uk.ac.warwick.tabula.web.controllers.coursework.OldCourseworkController
 import uk.ac.warwick.tabula.data.model.{Assignment, FileAttachment, Module}
 import uk.ac.warwick.tabula.web.Mav
+import uk.ac.warwick.tabula.web.controllers.cm2.CourseworkController
 
 /**
  * Provides access to the Turnitin Document Viewer for a submission
@@ -14,12 +14,12 @@ import uk.ac.warwick.tabula.web.Mav
  *
  * Supports both LTI and non-LTI versions
  */
-@Profile(Array("cm1Enabled")) @Controller
+@Profile(Array("cm2Enabled")) @Controller
 @RequestMapping(value = Array(
-	"/${cm1.prefix}/admin/module/{module}/assignments/{assignment}/turnitin/report/{attachment}",
-	"/${cm1.prefix}/admin/module/{module}/assignments/{assignment}/turnitin/lti-report/{attachment}"
+	"/${cm2.prefix}/admin/assignments/{assignment}/turnitin/report/{attachment}",
+	"/${cm2.prefix}/admin/assignments/{assignment}/turnitin/lti-report/{attachment}"
 ))
-class OldTurnitinReportController extends OldCourseworkController {
+class TurnitinReportController extends CourseworkController {
 
 	type ViewPlagiarismReportCommand = ViewPlagiarismReportCommand.CommandType
 
@@ -32,14 +32,14 @@ class OldTurnitinReportController extends OldCourseworkController {
 	@RequestMapping
 	def goToReport(@ModelAttribute("command") command: ViewPlagiarismReportCommand): Mav = command.apply() match {
 		case Left(uri) =>
-			if (command.ltiParams.nonEmpty)	Mav("coursework/admin/assignments/turnitin/lti_report_forward", "turnitin_report_url" -> uri, "params" -> command.ltiParams)
+			if (command.ltiParams.nonEmpty)	Mav("cm2/admin/assignments/turnitin/lti_report_forward", "turnitin_report_url" -> uri, "params" -> command.ltiParams)
 			else Mav("redirect:" + uri.toString)
 
 		case Right(error: TurnitinReportErrorWithMessage) =>
-			Mav("coursework/admin/assignments/turnitin/report_error", "problem" -> error.code, "message" -> error.message)
+			Mav("cm2/admin/assignments/turnitin/report_error", "problem" -> error.code, "message" -> error.message)
 
 		case Right(error) =>
-			Mav("coursework/admin/assignments/turnitin/report_error", "problem" -> error.code)
+			Mav("cm2/admin/assignments/turnitin/report_error", "problem" -> error.code)
 	}
 
 }
