@@ -4,7 +4,7 @@ import org.springframework.validation.Errors
 import uk.ac.warwick.tabula.CurrentUser
 import uk.ac.warwick.tabula.commands._
 import uk.ac.warwick.tabula.data.model.notifications.coursework.TurnitinJobSuccessNotification
-import uk.ac.warwick.tabula.data.model.{Module, FileAttachment, Assignment}
+import uk.ac.warwick.tabula.data.model.{FileAttachment, Assignment}
 import uk.ac.warwick.tabula.events.NotificationHandling
 import uk.ac.warwick.tabula.helpers.Logging
 import uk.ac.warwick.tabula.helpers.StringUtils._
