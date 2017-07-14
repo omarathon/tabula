@@ -40,7 +40,7 @@
 	</p>
 	<p>
 		<#if r.turnitinId?has_content>
-			<a target="turnitin-viewer" href="<@routes.coursework.turnitinLtiReport assignment attachment />">View full report</a>
+			<a target="turnitin-viewer" href="<@routes.cm2.turnitinLtiReport assignment attachment />">View full report</a>
 		</#if>
 	</p>
 </div>
