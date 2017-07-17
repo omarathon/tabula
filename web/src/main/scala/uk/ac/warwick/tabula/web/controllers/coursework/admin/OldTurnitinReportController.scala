@@ -16,8 +16,8 @@ import uk.ac.warwick.tabula.web.Mav
  */
 @Profile(Array("cm1Enabled")) @Controller
 @RequestMapping(value = Array(
-	"/coursework/admin/module/{module}/assignments/{assignment}/turnitin/report/{attachment}",
-	"/coursework/admin/module/{module}/assignments/{assignment}/turnitin/lti-report/{attachment}"
+	"/${cm1.prefix}/admin/module/{module}/assignments/{assignment}/turnitin/report/{attachment}",
+	"/${cm1.prefix}/admin/module/{module}/assignments/{assignment}/turnitin/lti-report/{attachment}"
 ))
 class OldTurnitinReportController extends OldCourseworkController {
 
