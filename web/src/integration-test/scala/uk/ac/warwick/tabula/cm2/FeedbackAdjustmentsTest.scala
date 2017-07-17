@@ -1,6 +1,5 @@
-package uk.ac.warwick.tabula.coursework
+package uk.ac.warwick.tabula.cm2
 
-import org.openqa.selenium.By
 import org.openqa.selenium.support.ui.Select
 import org.scalatest.GivenWhenThen
 import uk.ac.warwick.tabula.BrowserTest
@@ -15,7 +14,7 @@ class FeedbackAdjustmentsTest extends BrowserTest with CourseworkFixtures with G
 			go to Path("/coursework/admin/department/xxx/#module-xxx02")
 			Then("I should see the premarked assignment")
 			eventually(pageSource contains "Premarked assignment" should be {true})
-			click on linkText("2 submissions and 2 items of feedback")
+			click on linkText("Premarked assignment")
 
 			When("I go to the adjustments page")
 
@@ -29,11 +28,11 @@ class FeedbackAdjustmentsTest extends BrowserTest with CourseworkFixtures with G
 					go to Path(s"/coursework/admin/module/xxx02/assignments/$assignmentId/feedback/adjustments")
 				},
 				otherwise = { _ =>
-          click on className("collection-check-all")
-
-					val toolbar = eventually(findAll(cssSelector(".btn-toolbar")).next().underlying)
-					eventually(toolbar.findElement(By.partialLinkText("Feedback")).click())
-					eventually(toolbar.findElement(By.partialLinkText("Adjustments")).click())
+					click on className("collection-check-all")
+					eventually(pageSource contains "Feedback" should be {true})
+					click on linkText("Feedback")
+					eventually(pageSource contains "Adjustments" should be {true})
+					click on linkText("Adjustments")
 				}
 			)
 
@@ -52,12 +51,12 @@ class FeedbackAdjustmentsTest extends BrowserTest with CourseworkFixtures with G
 			val select = new Select(find(cssSelector("select[name=reason]")).get.underlying)
 			select.selectByValue("Late submission penalty")
 			textArea("comments").value = "Deducting 10 marks (5 marks per day)"
-			textField("adjustedMark").value = "31"
-			find(cssSelector(s"#content-${P.Student1.usercode} input.btn-primary")).get.underlying.click()
+			numberField("adjustedMark").value = "31"
+			find(cssSelector(s"#row-${P.Student1.usercode} button.btn-primary")).get.underlying.click()
 			Then("the students marks get adjusted")
 
       eventuallyAjax {
-        id(s"content-${P.Student1.usercode}").webElement.isDisplayed should be (false)
+        id(s"row-${P.Student1.usercode}").webElement.isDisplayed should be (false)
       }
 
 			When("I click on the student's ID again")
@@ -65,39 +64,24 @@ class FeedbackAdjustmentsTest extends BrowserTest with CourseworkFixtures with G
 			Then("I see the form and the adusted mark")
       eventuallyAjax(pageSource contains "Adjusted mark - 31" should be {true})
 
-      click on partialLinkText("Return to previous page")
+      click on partialLinkText("XXX02 Test Module 2")
 
 			When("I publish the feedback")
+			click on partialLinkText("Feedback needs publishing (2 of 2)")
 
-      // For some dumb reason all of the hrefs in the toolbar links are stripped out by htmlunit lame!
-      ifHtmlUnitDriver(
-        operation = { _ =>
-          val assignmentId = currentUrl.split("/").reverse.toList match {
-            case _ :: id :: _ => id
-            case _ => ""
-          }
-          go to Path(s"/coursework/admin/module/xxx02/assignments/$assignmentId/feedback/adjustments")
-        },
-        otherwise = { _ =>
-          val toolbar = eventually(findAll(cssSelector(".btn-toolbar")).next().underlying)
-          eventually(toolbar.findElement(By.partialLinkText("Feedback")).click())
-          eventually(toolbar.findElement(By.partialLinkText("Publish feedback")).click())
-        }
-      )
-
-			checkbox(name("confirm")).select
-			find(cssSelector("input.btn-primary")).get.underlying.click()
+			click on checkbox("confirm")
+			cssSelector("div.submit-buttons button[type=submit]").findElement.get.underlying.click()
 			Then("all is well in the world for all the Herons are in a deep slumber")
-			eventually(pageSource contains "Published feedback for Premarked assignment" should be {true})
+			eventually(pageSource contains "The feedback has been published." should be {true})
 		}
 
-    click on partialLinkText("module/xxx02/")
-    val assignmentId = currentUrl.split("/").last
+    click on partialLinkText("Premarked assignment")
+    val assignmentId = currentUrl.split("/")(6)
 
 		Then("The student can see the adjustment")
 		as(P.Student1) {
 			When("I visit the feedback page")
-			go to Path(s"/coursework/module/xxx02/$assignmentId")
+			go to Path(s"/coursework/submission/$assignmentId")
 			Then("I can see the adjusted mark only")
 			pageSource contains "Adjusted mark: 31" should be {true}
 			pageSource contains "Mark: 41" should be {true}
@@ -105,7 +89,7 @@ class FeedbackAdjustmentsTest extends BrowserTest with CourseworkFixtures with G
 
 		When("Admin goes back in to make non-private adjustments")
 		as(P.Admin1) {
-			go to Path(s"/coursework/admin/module/xxx02/assignments/$assignmentId/feedback/adjustments")
+			go to Path(s"/coursework/admin/assignments/$assignmentId/feedback/adjustments")
 			Then("I see a list of students")
 			pageSource contains "Feedback adjustment" should be {true}
 			pageSource contains "tabula-functest-student1" should be {true}
@@ -115,7 +99,7 @@ class FeedbackAdjustmentsTest extends BrowserTest with CourseworkFixtures with G
 			click on linkText("Adjust in bulk")
 
 			Then("I should see the bulk adjustment form")
-			eventually(currentUrl should include(s"/coursework/admin/module/xxx02/assignments/$assignmentId/feedback/bulk-adjustment"))
+			eventually(currentUrl should include(s"/coursework/admin/assignments/$assignmentId/feedback/bulk-adjustment"))
 
 			Then("I upload a valid adjustments file")
 			click on "file.upload"
@@ -140,14 +124,14 @@ class FeedbackAdjustmentsTest extends BrowserTest with CourseworkFixtures with G
 
 			Then("I should get redirected back to the submissions summary page")
 			eventually {
-				currentUrl should include(s"/coursework/admin/module/xxx02/assignments/$assignmentId/summary")
+				currentUrl should include(s"/coursework/admin/assignments/$assignmentId/summary")
 			}
 		}
 
 		Then("The student can see these adjustments")
 		as(P.Student1) {
 			When("I visit the feedback page")
-			go to Path(s"/coursework/module/xxx02/$assignmentId")
+			go to Path(s"/coursework/submission/$assignmentId")
 			Then("I should see the adjustments")
 			pageSource contains "Adjusted" should be {true}
 			pageSource contains "Adjusted mark: 43" should be {true}
@@ -159,7 +143,7 @@ class FeedbackAdjustmentsTest extends BrowserTest with CourseworkFixtures with G
 
 		Then("Admin goes back in to make private adjustments")
 		as(P.Admin1) {
-			go to Path(s"/coursework/admin/module/xxx02/assignments/$assignmentId/feedback/adjustments")
+			go to Path(s"/coursework/admin/assignments/$assignmentId/feedback/adjustments")
 			Then("I see a list of students")
 			pageSource contains "Feedback adjustment" should be {true}
 			pageSource contains "tabula-functest-student1" should be {true}
@@ -169,7 +153,7 @@ class FeedbackAdjustmentsTest extends BrowserTest with CourseworkFixtures with G
 			click on linkText("Adjust in bulk")
 
 			Then("I should see the bulk adjustment form")
-			eventually(currentUrl should include(s"/coursework/admin/module/xxx02/assignments/$assignmentId/feedback/bulk-adjustment"))
+			eventually(currentUrl should include(s"/coursework/admin/assignments/$assignmentId/feedback/bulk-adjustment"))
 
 			Then("I upload a valid adjustments file")
 			click on "file.upload"
@@ -191,14 +175,14 @@ class FeedbackAdjustmentsTest extends BrowserTest with CourseworkFixtures with G
 
 			Then("I should get redirected back to the submissions summary page")
 			eventually {
-				currentUrl should include(s"/coursework/admin/module/xxx02/assignments/$assignmentId/summary")
+				currentUrl should include(s"/coursework/admin/assignments/$assignmentId/summary")
 			}
 		}
 
 		Then("The student cannot see private adjustments or any previous adjustments")
 		as(P.Student1) {
 			When("I visit the feedback page")
-			go to Path(s"/coursework/module/xxx02/$assignmentId")
+			go to Path(s"/coursework/submission/$assignmentId")
 			Then("I cannot see any adjustments as the last one was private")
 			pageSource contains "Adjusted" should be {false}
 			pageSource contains "Mark: 43" should be {true}
