@@ -13,7 +13,7 @@ class FeedbackAdjustmentsTest extends BrowserTest with CourseworkFixtures with G
 			When("I go to the department admin page")
 			go to Path("/coursework/admin/department/xxx/#module-xxx02")
 			Then("I should see the premarked assignment")
-			eventually(pageSource contains "Premarked assignment" should be {true})
+			eventuallyAjax(pageSource contains "Premarked assignment" should be {true})
 			click on linkText("Premarked assignment")
 
 			When("I go to the adjustments page")
