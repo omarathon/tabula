@@ -46,11 +46,9 @@ class AssignmentsTest extends BrowserTest with GivenWhenThen with FeaturesDriver
 
 		Given("There is an assignment with feedback released")
 		signIn as P.Admin1 to Path("/coursework/admin/department/xxx/#module-xxx02")
-		click on linkText("2 submissions and 2 items of feedback")
-		click on linkText("Feedback")
-		cssSelector("i.icon-share").findElement.get.underlying.findElement(By.xpath("./..")).click()
+		click on linkText("Feedback needs publishing (2 of 2)")
 		click on checkbox("confirm")
-		cssSelector("div.submit-buttons input[type=submit]").findElement.get.underlying.click()
+		cssSelector("div.submit-buttons button[type=submit]").findElement.get.underlying.click()
 
 		When("Student1 views their profile")
 		signIn as P.Student1 to Path(s"/profiles")
