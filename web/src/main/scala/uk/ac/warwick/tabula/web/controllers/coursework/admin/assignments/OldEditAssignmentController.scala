@@ -10,11 +10,13 @@ import org.springframework.web.bind.annotation._
 import uk.ac.warwick.tabula.CurrentUser
 import uk.ac.warwick.tabula.commands.{UpstreamGroup, UpstreamGroupPropertyEditor}
 import uk.ac.warwick.tabula.commands.coursework.assignments._
-import uk.ac.warwick.tabula.coursework.web.Routes
 import uk.ac.warwick.tabula.web.controllers.coursework.OldCourseworkController
 import uk.ac.warwick.tabula.data.model._
 import uk.ac.warwick.tabula.services.turnitinlti.TurnitinLtiService
 import uk.ac.warwick.tabula.web.Mav
+import uk.ac.warwick.tabula.cm2.web.Routes
+
+
 
 @Profile(Array("cm1Enabled")) @Controller
 @RequestMapping(value=Array("/${cm1.prefix}/admin/module/{module}/assignments/{assignment}/edit"))
@@ -55,8 +57,8 @@ class OldEditAssignmentController extends OldCourseworkController {
 		if (errors.hasErrors) {
 			showForm(form)
 		} else {
-			form.apply()
-			Redirect(Routes.admin.module(form.module))
+			val assignment = form.apply()
+			Redirect(Routes.admin.assignment.submissionsandfeedback(assignment))
 		}
 
 	}

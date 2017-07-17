@@ -5,7 +5,7 @@ if we end up changing any of them.
 TODO grab values from the Routes object in code, as that's pretty equivalent and
    we're repeating ourselves here. OR expose Routes directly.
 -->
-<#macro _u page context=component.context?default('/cm2')>
+<#macro _u page context=cm2Context>
 	<@url context=context page=page />
 </#macro>
 
