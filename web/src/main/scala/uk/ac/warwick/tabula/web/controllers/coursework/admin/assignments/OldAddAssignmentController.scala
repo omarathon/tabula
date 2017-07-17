@@ -14,6 +14,7 @@ import uk.ac.warwick.tabula.JavaImports._
 import uk.ac.warwick.tabula.commands.coursework.assignments._
 import uk.ac.warwick.tabula.commands.{UpstreamGroup, UpstreamGroupPropertyEditor}
 import uk.ac.warwick.tabula.coursework.web.Routes
+import uk.ac.warwick.tabula.cm2.web.{Routes => CM2Routes}
 import uk.ac.warwick.tabula.web.controllers.coursework.OldCourseworkController
 import uk.ac.warwick.tabula.data.model._
 import uk.ac.warwick.tabula.services._
@@ -51,8 +52,8 @@ class OldAddAssignmentController extends OldCourseworkController {
 		if (errors.hasErrors) {
 			showForm(form)
 		} else {
-			form.apply()
-			Redirect(Routes.admin.module(form.module))
+			val assignment = form.apply()
+			Redirect(CM2Routes.admin.department(assignment.module.adminDepartment))
 		}
 	}
 

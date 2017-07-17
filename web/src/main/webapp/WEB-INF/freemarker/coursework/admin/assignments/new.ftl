@@ -12,31 +12,37 @@ the comments textarea needs to maintain newlines.
 <#assign submitUrl><@routes.coursework.createAssignment module /></#assign>
 <@f.form method="post" action=submitUrl commandName=commandName cssClass="form-horizontal">
 
-<#if command.prefilled>
-<div class="alert alert-success">
-<i class="icon-info-sign"></i>
-Some fields have been pre-filled from another recently created assignment for convenience.
-<a href="<@routes.coursework.createAssignment module />?prefillFromRecent=false">Don't do this</a>
-</div>
-</#if>
+	<div class="alert alert-success">
+		<i class="icon-info-sign"></i>
+		We've built a new version of coursework management. Please try it out and
+		<a href="<@routes.cm2.createassignmentdetails module academicYear/>">create this assignment in the new version</a>
+	</div>
 
-<#if command.prefillAssignment??>
-<div class="alert alert-success">
-<i class="icon-info-sign"></i>
-Some fields have been pre-filled from assignment ${command.prefillAssignment.name}.
-</div>
-</#if>
+	<#if command.prefilled>
+		<div class="alert alert-success">
+			<i class="icon-info-sign"></i>
+			Some fields have been pre-filled from another recently created assignment for convenience.
+			<a href="<@routes.coursework.createAssignment module />?prefillFromRecent=false">Don't do this</a>
+		</div>
+	</#if>
 
-<@f.errors cssClass="error form-errors" />
+	<#if command.prefillAssignment??>
+		<div class="alert alert-success">
+			<i class="icon-info-sign"></i>
+			Some fields have been pre-filled from assignment ${command.prefillAssignment.name}.
+		</div>
+	</#if>
+
+	<@f.errors cssClass="error form-errors" />
 
 <#assign newRecord=true />
 
 <#include "_fields.ftl" />
 
-<div class="submit-buttons form-actions">
-	<input type="submit" value="Create" class="btn btn-primary">
-	<a class="btn" href="<@routes.coursework.depthome module=module />">Cancel</a>
-</div>
+	<div class="submit-buttons form-actions">
+		<input type="submit" value="Create" class="btn btn-primary">
+		<a class="btn" href="<@routes.cm2.departmenthome department=assignment.module.adminDepartment />">Cancel</a>
+	</div>
 </@f.form>
 
 </#escape>
