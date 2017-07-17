@@ -46,7 +46,7 @@ class ContextProfileInitializer extends ApplicationContextInitializer[Configurab
   def scheduler: Option[String] = extraProfile("scheduling.enabled", "scheduling", default = false)
   def web: Option[String] = extraProfile("web.enabled", "web", default = true)
   def cm1Enabled: Option[String] = extraProfile("cm1.enabled", "cm1Enabled", default = true)
-  def cm2Enabled: Option[String] = extraProfile("cm2.enabled", "cm2Enabled", default = false)
+  def cm2Enabled: Option[String] = extraProfile("cm2.enabled", "cm2Enabled", default = true)
 
   /**
     * Function that checks a config property and returns an Option[String] of
