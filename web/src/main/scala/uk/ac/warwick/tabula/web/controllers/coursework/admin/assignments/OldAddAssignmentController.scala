@@ -52,7 +52,7 @@ class OldAddAssignmentController extends OldCourseworkController {
 		if (errors.hasErrors) {
 			showForm(form)
 		} else {
-			var assignment = form.apply()
+			val assignment = form.apply()
 			Redirect(CM2Routes.admin.department(assignment.module.adminDepartment))
 		}
 	}
