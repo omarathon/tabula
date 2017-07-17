@@ -12,7 +12,7 @@ import uk.ac.warwick.tabula.helpers.StringUtils
 import uk.ac.warwick.tabula.services.{UserLookupComponent, _}
 import uk.ac.warwick.tabula.validators.UsercodeListValidator
 import uk.ac.warwick.userlookup.User
-
+import uk.ac.warwick.tabula.helpers.StringUtils._
 import scala.collection.JavaConverters._
 
 object EditMarkingWorkflowCommand {
@@ -101,8 +101,10 @@ trait ModifyMarkingWorkflowValidation extends SelfValidating {
 
 	self: ModifyMarkingWorkflowState with UserLookupComponent =>
 
-	def hasDuplicates(usercodes: JList[String]): Boolean =
-		usercodes.asScala.distinct.size != usercodes.asScala.size
+	def hasDuplicates(usercodes: JList[String]): Boolean = {
+		val trimmed = usercodes.asScala.filter(_.hasText).map(_.trim)
+		trimmed.distinct.size != trimmed.size
+	}
 
 	// validation of the markers
 	def markerValidation(errors: Errors, workflowType: MarkingWorkflowType): Unit = {
