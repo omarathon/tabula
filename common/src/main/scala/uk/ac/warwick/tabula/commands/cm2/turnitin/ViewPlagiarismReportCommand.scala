@@ -1,18 +1,19 @@
 package uk.ac.warwick.tabula.commands.cm2.turnitin
 
 import org.springframework.validation.Errors
+import uk.ac.warwick.spring.Wire
 import uk.ac.warwick.tabula.CurrentUser
 import uk.ac.warwick.tabula.commands._
 import uk.ac.warwick.tabula.data.model.notifications.coursework.TurnitinJobSuccessNotification
-import uk.ac.warwick.tabula.data.model.{FileAttachment, Assignment}
+import uk.ac.warwick.tabula.data.model.{Assignment, FileAttachment}
 import uk.ac.warwick.tabula.events.NotificationHandling
 import uk.ac.warwick.tabula.helpers.Logging
 import uk.ac.warwick.tabula.helpers.StringUtils._
 import uk.ac.warwick.tabula.permissions.Permissions
 import uk.ac.warwick.tabula.services.turnitinlti.{AutowiringTurnitinLtiServiceComponent, TurnitinLtiServiceComponent}
-import uk.ac.warwick.tabula.services.{OriginalityReportServiceComponent, AutowiringOriginalityReportServiceComponent}
+import uk.ac.warwick.tabula.services.{AutowiringOriginalityReportServiceComponent, OriginalityReportServiceComponent}
 import uk.ac.warwick.tabula.services.turnitin.{GotSubmissions, Turnitin}
-import uk.ac.warwick.tabula.system.permissions.{RequiresPermissionsChecking, PermissionsCheckingMethods, PermissionsChecking}
+import uk.ac.warwick.tabula.system.permissions.{PermissionsChecking, PermissionsCheckingMethods, RequiresPermissionsChecking}
 import uk.ac.warwick.userlookup.User
 import uk.ac.warwick.util.web.Uri
 
@@ -25,7 +26,7 @@ object ViewPlagiarismReportCommand {
 			with ViewPlagiarismReportPermissions
 			with ViewPlagiarismReportValidation
 			with ReadOnly with Unaudited
-			with HasTurnitinApi
+			with AutowiringTurnitinApiComponent
 			with AutowiringTurnitinLtiServiceComponent
 			with AutowiringOriginalityReportServiceComponent
 
@@ -36,7 +37,7 @@ object ViewPlagiarismReportCommand {
 			with ViewPlagiarismReportValidation
 			with CompletesViewPlagiarismReportNotifications
 			with ReadOnly with Unaudited
-			with HasTurnitinApi
+			with AutowiringTurnitinApiComponent
 			with AutowiringTurnitinLtiServiceComponent
 			with AutowiringOriginalityReportServiceComponent
 }
@@ -56,7 +57,7 @@ trait ViewPlagiarismReportRequest extends ViewPlagiarismReportState {
 
 class ViewPlagiarismReportCommandInternal(val assignment: Assignment, val attachment: FileAttachment)
 	extends CommandInternal[Either[Uri, TurnitinReportError]] with ViewPlagiarismReportRequest with Logging {
-	self: HasTurnitinApi with TurnitinLtiServiceComponent =>
+	self: TurnitinApiComponent with TurnitinLtiServiceComponent =>
 
 	def this(assignment: Assignment, attachment: FileAttachment, user: CurrentUser) {
 		this(assignment, attachment)
@@ -162,4 +163,12 @@ object TurnitinReportError {
 	case object NoObjectError extends TurnitinReportError("no-object")
 	case object NoSessionError extends TurnitinReportError("no-session")
 	case class ApiError(message: String) extends TurnitinReportError("api-error") with TurnitinReportErrorWithMessage
+}
+
+trait AutowiringTurnitinApiComponent  extends TurnitinApiComponent {
+	var api: Turnitin = Wire[Turnitin]
+}
+
+trait TurnitinApiComponent {
+	def api: Turnitin
 }
