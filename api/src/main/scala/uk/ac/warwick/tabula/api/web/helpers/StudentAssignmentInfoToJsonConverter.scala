@@ -119,8 +119,8 @@ trait StudentAssignmentInfoToJsonConverter extends CourseworkCommandTypes {
 					"filename" -> attachment.name,
 					"id" -> attachment.id
 				)},
-				"downloadZip" -> (toplevelUrl + Routes.coursework.assignment.feedback(assignment)),
-				"downloadPdf" -> (toplevelUrl + Routes.coursework.assignment.feedbackPdf(assignment, f))
+				"downloadZip" -> (toplevelUrl + Routes.cm2.assignment.feedback(assignment)),
+				"downloadPdf" -> (toplevelUrl + Routes.cm2.assignment.feedbackPdf(assignment, f))
 			)
 		}.orNull)
 
