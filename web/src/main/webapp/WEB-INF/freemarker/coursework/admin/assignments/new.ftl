@@ -41,7 +41,7 @@ the comments textarea needs to maintain newlines.
 
 	<div class="submit-buttons form-actions">
 		<input type="submit" value="Create" class="btn btn-primary">
-		<a class="btn" href="<@routes.cm2.departmenthome department=assignment.module.adminDepartment />">Cancel</a>
+		<a class="btn" href="<@routes.cm2.departmenthome department=module.adminDepartment />">Cancel</a>
 	</div>
 </@f.form>
 
