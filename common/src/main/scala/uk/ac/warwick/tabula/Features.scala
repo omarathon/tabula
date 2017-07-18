@@ -145,6 +145,10 @@ abstract class Features {
 
 	@Value("${features.anonymousMarkingCM2:false}") var anonymousMarkingCM2: Boolean = defaults.anonymousMarkingCM2
 	@Value("${features.openEndedReminderDateCM2:false}") var openEndedReminderDateCM2: Boolean = defaults.openEndedReminderDateCM2
+	@Value("${features.redirectAdminDepartmentModuleCM1:true}") var redirectAdminDepartmentModuleCM1: Boolean = defaults.redirectAdminDepartmentModuleCM1
+	@Value("${features.redirectHomeCM1:true}") var redirectHomeCM1: Boolean = defaults.redirectHomeCM1
+
+
 
 
 	private val bean = new BeanWrapperImpl(this)
@@ -281,6 +285,8 @@ class FeaturesMessage {
 
 	@BeanProperty var anonymousMarkingCM2 = false
 	@BeanProperty var openEndedReminderDateCM2 = false
+	@BeanProperty var redirectAdminDepartmentModuleCM1 = true
+	@BeanProperty var redirectHomeCM1 = true
 }
 
 class FeatureFlagListener extends QueueListener with InitializingBean with Logging {
