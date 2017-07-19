@@ -1,4 +1,4 @@
-package uk.ac.warwick.tabula.coursework
+package uk.ac.warwick.tabula.cm2
 
 import org.openqa.selenium.By
 import org.scalatest.GivenWhenThen
@@ -20,18 +20,19 @@ class CourseworkModuleManagerTest extends BrowserTest with CourseworkFixtures wi
 
 	private def getToPermissionsPage() = {
 		When("I go the admin page, and expand the module list")
-		click on linkText("Go to the Test Services admin page")
-		click on linkText("Show")
-		findAll(className("module-info")).size should be (3)
+		click on linkText("Test Services")
+		var element = className("filter-results").webElement.findElements(By.cssSelector("div.striped-section.admin-assignment-list "))
+		element.size should be (3)
 
 		Then("I should be able to click on the Manage button")
-		val modInfo = findAll(className("module-info")).filter(_.underlying.findElement(By.className("mod-code")).getText == "XXX01").next().underlying
-		click on modInfo.findElement(By.partialLinkText("Manage"))
-
-		And("I should see the permissions menu option")
-		val managersLink = modInfo.findElement(By.partialLinkText("Edit module permissions"))
+		val manageModule = id("module-xxx01").webElement
+		click on manageModule.findElement(By.partialLinkText("Manage this module"))
+		Then("I should see the module permissions option")
+		val managersLink = manageModule.findElement(By.partialLinkText("Module permissions"))
 		eventually {
-			managersLink.isDisplayed should be {true}
+			managersLink.isDisplayed should be {
+				true
+			}
 		}
 
 		When("I click the permissions link")
@@ -138,18 +139,17 @@ class CourseworkModuleManagerTest extends BrowserTest with CourseworkFixtures wi
 	"Module manager" should "be able to see only modules they can manage" in {
 		withRoleInElement("xxx01", ".modulemanager-table", Seq(P.ModuleManager1.usercode, P.ModuleManager2.usercode)) {
 			as(P.ModuleManager1) {
-				When("I go to the admin page")
-				click on linkText("Go to the Test Services admin page")
 
-				Then("I should only see one of the test modules, as I'm not a departmental admin")
-				findAll(className("module-info")).size should be (1)
+				When("I go the admin page, and expand the module list")
+				click on linkText("Test Services")
+				var element = className("filter-results").webElement.findElements(By.cssSelector("div.striped-section.admin-assignment-list "))
+				element.size should be (1)
 
-				When("I click on the Manage button")
-				val modInfo = findAll(className("module-info")).filter(_.underlying.findElement(By.className("mod-code")).getText == "XXX01").next().underlying
-				click on modInfo.findElement(By.partialLinkText("Manage"))
-
-				Then("I should see the permissions menu option")
-				val managersLink = modInfo.findElement(By.partialLinkText("Edit module permissions"))
+				Then("I should be able to click on the Manage button")
+				val manageModule = id("module-xxx01").webElement
+				click on manageModule.findElement(By.partialLinkText("Manage this module"))
+				Then("I should see the module permissions option")
+				val managersLink = manageModule.findElement(By.partialLinkText("Module permissions"))
 				eventually {
 					managersLink.isDisplayed should be {true}
 				}
@@ -191,4 +191,5 @@ class CourseworkModuleManagerTest extends BrowserTest with CourseworkFixtures wi
 			lastUsers.size should be (1)
 		}
 	}
+
 }
