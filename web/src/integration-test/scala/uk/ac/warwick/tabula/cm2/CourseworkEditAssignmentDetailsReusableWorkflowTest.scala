@@ -155,8 +155,8 @@ class CourseworkEditAssignmentDetailsReusableWorkflowTest extends BrowserTest wi
 
 		var singleWorkflowId = createMarkingWorkflow(singleMarkingWorkflowName, SingleMarking, Seq(P.Marker1, P.Marker2, P.Marker3))
 		var moderatedworkflowId = createMarkingWorkflow(moderatedWorkflowName, ModeratedMarking, Seq(P.Marker1, P.Marker2), Seq(P.Marker3))
-		addModuleManagers("xxx02", managers= Seq(P.ModuleManager1.usercode))
-		withAssignment("xxx02", "Moderated marking-4C") { assignmentId =>
+		addModuleManagers("xxx02", managers = Seq(P.ModuleManager1.usercode))
+		withAssignment("xxx02", "Moderated marking-4C", loggedUser = P.ModuleManager1) { assignmentId =>
 			editAssignment(moderatedworkflowId)
 			var checkboxFeedbackFieldDetails: Seq[(String, Boolean)] = Seq(("automaticallyReleaseToMarkers", false), ("collectMarks", true), ("dissertation", true))
 
