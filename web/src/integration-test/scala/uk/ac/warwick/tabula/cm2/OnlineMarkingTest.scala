@@ -19,8 +19,8 @@ class OnlineMarkingTest  extends BrowserTest with CourseworkFixtures with GivenW
 
 
 	"Marker" should "be able to mark work and send to next step" in {
-
-		as(P.Marker1) {
+		addModuleManagers("xxx01", assistants= Seq(P.Marker2.usercode))
+		as(P.Marker2) {
 			When("I click to mark the assignment")
 			eventuallyAjax({
 				val mark = partialLinkText("Mark").webElement
