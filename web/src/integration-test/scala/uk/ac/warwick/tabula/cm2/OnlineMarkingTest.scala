@@ -22,7 +22,7 @@ class OnlineMarkingTest  extends BrowserTest with CourseworkFixtures with GivenW
 
 		as(P.Marker1) {
 			When("I click to mark the assignment")
-			eventually({
+			eventuallyAjax({
 				val mark = partialLinkText("Mark").webElement
 				mark.isDisplayed should be {true}
 				click on mark
