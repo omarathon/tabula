@@ -7,22 +7,6 @@ import uk.ac.warwick.tabula.data.model.markingworkflow.MarkingWorkflowType.{Doub
 
 class AssignMarkersTest  extends BrowserTest with CourseworkFixtures with GivenWhenThen {
 
-	private def navigateToMarkerAllocation(): Unit = {
-		When("I click on the edit button again")
-		click on partialLinkText("Edit assignment")
-		Then("I see the edit details screen")
-		eventually(pageSource contains "Edit assignment details" should be {
-			true
-		})
-
-		When("I click on the Markers link")
-		click on partialLinkText("Markers")
-		Then("I see the assign markers screen")
-		eventually(pageSource contains "Assign markers" should be {
-			true
-		})
-	}
-
 	"Department admin" should "be able to allocate markers to a single marker workflow " in {
 		withAssignmentWithWorkflow(SingleMarking, Seq(P.Marker1, P.Marker2)) { id =>
 

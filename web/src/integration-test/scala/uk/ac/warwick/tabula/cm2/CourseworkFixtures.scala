@@ -21,6 +21,8 @@ trait CourseworkFixtures extends BrowserTest with FeaturesDriver with FixturesDr
 	val TEST_DEPARTMENT_CODE = "xxx"
 	val TEST_COURSE_CODE = "Ux456"
 
+	val moreBefore: () => Unit = () => Unit
+
 	before {
 		Given("The test department exists")
 		go to Path("/fixtures/setup")
@@ -90,6 +92,8 @@ trait CourseworkFixtures extends BrowserTest with FeaturesDriver with FixturesDr
 
 		// Wait to complete
 		for {job <- concurrentJobs} Await.ready(job, Duration(60, duration.SECONDS))
+
+		moreBefore()
 	}
 
 	def addModuleManagers(
@@ -134,9 +138,11 @@ trait CourseworkFixtures extends BrowserTest with FeaturesDriver with FixturesDr
 	def withAssignment(
 		moduleCode: String,
 		assignmentName: String,
-		settings: Seq[String] => Unit = Nil => (),
+		studentSettings: Seq[String] => Unit = Nil => (),
+		submissionSettings: () => Unit = () => (),
 		students: Seq[String] = Seq(P.Student1.usercode, P.Student2.usercode),
-		loggedUser: LoginDetails = P.Admin1)(callback: String => Unit): Unit = as(loggedUser) {
+		loggedUser: LoginDetails = P.Admin1
+	)(callback: String => Unit): Unit = as(loggedUser) {
 
 		click on linkText("Test Services")
 		verifyPageLoaded {
@@ -160,19 +166,22 @@ trait CourseworkFixtures extends BrowserTest with FeaturesDriver with FixturesDr
 		singleSel("workflowCategory").value = WorkflowCategory.NoneUse.code
 
 		cssSelector(s"input[name=createAndAddFeedback]").webElement.click()
-
 		eventually(pageSource contains "Edit feedback settings" should be {true})
 		click on linkText("Students").findElement.get.underlying
-		eventually { textArea("massAddUsers").isDisplayed should be {true} }
 
+		eventually { textArea("massAddUsers").isDisplayed should be {true} }
 		if (students.nonEmpty) {
 			textArea("massAddUsers").value = students.mkString("\n")
 			click on className("add-students-manually")
 			eventuallyAjax(pageSource contains "Your changes will not be recorded until you save this assignment." should be {true})
 			eventuallyAjax{pageSource should include(students.size + " manually enrolled")}
 		}
+		studentSettings(students)
 
-		cssSelector(s"input[name=createAndAddStudents]").webElement.click()
+		cssSelector(s"input[value='Save and continue']").webElement.click()
+		submissionSettings()
+		cssSelector(s"input[name=createAndAddSubmissions]").webElement.click()
+
 		// Ensure that we've been redirected back
 		withClue(pageSource) {
 			currentUrl should endWith("/summary")
@@ -224,8 +233,7 @@ trait CourseworkFixtures extends BrowserTest with FeaturesDriver with FixturesDr
 
 	def as[T](user: LoginDetails)(fn: => T): T = {
 		currentUser = user
-		signIn as user to Path("/coursework")
-
+		signIn as user to Path(s"/coursework")
 		fn
 	}
 
@@ -244,7 +252,54 @@ trait CourseworkFixtures extends BrowserTest with FeaturesDriver with FixturesDr
 		eventually {
 			currentUrl should endWith("/department/xxx")
 		}
+	}
 
+	// assumes that you start at the summary screen for an assignment
+	def navigateToMarkerAllocation(): Unit = {
+		When("I click on the edit button again")
+		click on partialLinkText("Edit assignment")
+		Then("I see the edit details screen")
+		eventually(pageSource contains "Edit assignment details" should be {true})
+
+		When("I click on the Markers link")
+		click on partialLinkText("Markers")
+		Then("I see the assign markers screen")
+		eventually(pageSource contains "Assign markers" should be {
+			true
+		})
+	}
+
+	// assumes that you start at the summary screen for an assignment
+	def releaseForMarking(id: String): Unit = {
+		navigateToMarkerAllocation()
+
+		When("I randomly assign the markers")
+		click on partialLinkText("Randomly allocate")
+		Then("The two markers should be assigned")
+		findAll(cssSelector(".drag-count"))foreach(_.underlying.getText should be ("1"))
+
+		When("I submit the marker allocation")
+		cssSelector(s"input[name=createAndAddMarkers]").webElement.click()
+		Then("I am redirected to the summary screen ")
+		eventually(currentUrl should include(s"/admin/assignments/$id/summary"))
+
+		When("I select all the submissions")
+		click on cssSelector(".collection-check-all")
+		And("I choose to release for marking")
+		click on partialLinkText("Marking")
+		eventually({
+			val release = partialLinkText("Release selected for marking").webElement
+			release.isDisplayed should be {true}
+			click on release
+		})
+		Then("I reach the release submissions screen")
+		eventually(currentUrl should include(s"/admin/assignments/$id/release-submissions"))
+
+		When("I confirm")
+		cssSelector(s"input[name=confirm]").webElement.click()
+		cssSelector(s"input[value=Confirm]").webElement.click()
+		Then("The submissions are released")
+		eventually(currentUrl should include(s"/admin/assignments/$id/summary"))
 	}
 
 	def openMarkingWorkflowSettings(): Unit = {
@@ -302,7 +357,7 @@ trait CourseworkFixtures extends BrowserTest with FeaturesDriver with FixturesDr
 		callback(createMarkingWorkflow(workflowName, workflowType, Seq(P.Marker1, P.Marker2), Seq(P.Marker3)))
 	}
 
-	def editAssignment(workflowId: String) = {
+	def editAssignment(workflowId: String): Unit = {
 		When("I click on the edit button")
 		click on partialLinkText("Edit assignment")
 		Then("I see the edit details screen")
@@ -323,4 +378,28 @@ trait CourseworkFixtures extends BrowserTest with FeaturesDriver with FixturesDr
 			currentUrl should endWith("/summary")
 		}
 	}
+
+	def submitAssignment(user: LoginDetails, moduleCode: String, assignmentName: String, assignmentId: String, file: String, mustBeEnrolled: Boolean = true): Unit = as(user) {
+		if (mustBeEnrolled) {
+			linkText(assignmentName).findElement should be ('defined)
+			click on linkText(assignmentName)
+			currentUrl should endWith(assignmentId)
+		} else {
+			// Just go straight to the submission URL
+			go to Path(s"/coursework/submission/$assignmentId")
+		}
+
+		click on find(cssSelector("input[type=file]")).get
+		pressKeys(getClass.getResource(file).getFile)
+
+		checkbox("plagiarismDeclaration").select()
+
+		submit()
+		verifyPageLoaded(
+			pageSource contains "Thanks, we've received your submission." should be {true}
+		)
+	}
+
+	def getInputByLabel(label: String): Option[WebElement] =
+		findAll(tagName("label")).find(_.underlying.getText.trim == label) map { _.underlying.getAttribute("for") } map { id(_).webElement }
 }

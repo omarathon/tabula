@@ -1,9 +1,8 @@
 package uk.ac.warwick.tabula.profiles.profile
 
-import org.openqa.selenium.By
 import org.scalatest.GivenWhenThen
 import uk.ac.warwick.tabula.BrowserTest
-import uk.ac.warwick.tabula.coursework.CourseworkFixtures
+import uk.ac.warwick.tabula.cm2.CourseworkFixtures
 import uk.ac.warwick.tabula.web.FeaturesDriver
 
 class AssignmentsTest extends BrowserTest with GivenWhenThen with FeaturesDriver with CourseworkFixtures {
