@@ -20,13 +20,21 @@ class CourseworkMarkingWorkflowTest extends BrowserTest with CourseworkFixtures 
 			click on markingWorkflowsLink
 		}
 
-		When("I go the admin page")
-		click on linkText("Go to the Test Services admin page")
+		When("I go the cm1 workflow page")
+		var page = "/cm1/admin/department/xxx/markingworkflows"
+		go to Path(page)
+		eventually{
+			currentUrl should include(page)
+		}
 
-		Then("I should be able to open workflow settings")
-		openMarkingWorkflowSettings()
 
-		And("There should be one at first")
+
+//		click on linkText("Go to the Test Services admin page")
+
+//		Then("I should be able to open workflow settings")
+	//	openMarkingWorkflowSettings()
+
+		Then("There should be one at first")
 		cssSelector("table.marking-workflows tbody tr").findAllElements.size should be (1)
 
 		When("I click on the create workflows button")
