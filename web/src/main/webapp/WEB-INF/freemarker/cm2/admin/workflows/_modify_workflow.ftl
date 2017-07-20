@@ -4,8 +4,7 @@
 	<#local selectCourseCommand><@routes.cm2.reusableWorkflowsHome dept academicYear /></#local>
 	<#return selectCourseCommand />
 </#function>
-
-<@fmt.id7_deptheader title="Define marking workflow" route_function=route_function preposition="for" />
+<@cm2.departmentHeader "Define marking workflow" department route_function academicYear />
 
 <@f.form
 	method="POST"

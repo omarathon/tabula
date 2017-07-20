@@ -1,19 +1,18 @@
 package uk.ac.warwick.tabula.api.web.helpers
 
 import org.joda.time.DateTime
-import uk.ac.warwick.tabula.DateFormats
-import uk.ac.warwick.tabula.api.web.controllers.TopLevelUrlAware
+import uk.ac.warwick.tabula.JavaImports._
 import uk.ac.warwick.tabula.commands.coursework.assignments.CourseworkCommandTypes
 import uk.ac.warwick.tabula.data.model.forms.Extension
-import uk.ac.warwick.tabula.data.model.{AssignmentFeedback, Submission, Assignment}
+import uk.ac.warwick.tabula.data.model.{Assignment, AssignmentFeedback, Submission}
 import uk.ac.warwick.tabula.web.Routes
-import uk.ac.warwick.tabula.JavaImports._
-import scala.collection.JavaConverters._
+import uk.ac.warwick.tabula.{DateFormats, TopLevelUrlComponent}
 
+import scala.collection.JavaConverters._
 import scala.util.Try
 
 trait StudentAssignmentInfoToJsonConverter extends CourseworkCommandTypes {
-	self: TopLevelUrlAware =>
+	self: TopLevelUrlComponent =>
 
 	def jsonAssignmentInfoObject(info: AssignmentInfo): Map[String, Any] = {
 		val assignment: Assignment = info("assignment").asInstanceOf[Assignment]
@@ -120,8 +119,8 @@ trait StudentAssignmentInfoToJsonConverter extends CourseworkCommandTypes {
 					"filename" -> attachment.name,
 					"id" -> attachment.id
 				)},
-				"downloadZip" -> (toplevelUrl + Routes.coursework.assignment.feedback(assignment)),
-				"downloadPdf" -> (toplevelUrl + Routes.coursework.assignment.feedbackPdf(assignment, f))
+				"downloadZip" -> (toplevelUrl + Routes.cm2.assignment.feedback(assignment)),
+				"downloadPdf" -> (toplevelUrl + Routes.cm2.assignment.feedbackPdf(assignment, f))
 			)
 		}.orNull)
 

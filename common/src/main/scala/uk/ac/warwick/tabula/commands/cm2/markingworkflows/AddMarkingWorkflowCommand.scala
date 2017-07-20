@@ -17,8 +17,8 @@ object AddMarkingWorkflowCommand {
 			with ComposableCommand[CM2MarkingWorkflow]
 			with AddMarkingWorkflowValidation
 			with MarkingWorkflowDepartmentPermissions
-			with ModifyMarkingWorkflowDescription
-			with AddMarkingWorkflowState
+			with AddMarkingWorkflowDescription
+			with ModifyMarkingWorkflowState
 			with AutowiringCM2MarkingWorkflowServiceComponent
 			with AutowiringUserLookupComponent
 }
@@ -27,7 +27,7 @@ class AddMarkingWorkflowCommandInternal(
 	val department: Department,
 	val academicYear: AcademicYear) extends CommandInternal[CM2MarkingWorkflow] with CreatesMarkingWorkflow {
 
-	self: AddMarkingWorkflowState with CM2MarkingWorkflowServiceComponent with UserLookupComponent =>
+	self: ModifyMarkingWorkflowState with CM2MarkingWorkflowServiceComponent with UserLookupComponent =>
 
 	markersA = JArrayList()
 	markersB = JArrayList()
@@ -35,7 +35,7 @@ class AddMarkingWorkflowCommandInternal(
 	def applyInternal(): CM2MarkingWorkflow = {
 		val data = MarkingWorkflowData(department, workflowName, markersAUsers, markersBUsers, workflowType)
 		val workflow = createWorkflow(data)
-		workflow.isReusable = isResuable
+		workflow.isReusable = true
 		cm2MarkingWorkflowService.save(workflow)
 		workflow
 	}
@@ -43,7 +43,7 @@ class AddMarkingWorkflowCommandInternal(
 
 trait AddMarkingWorkflowValidation extends ModifyMarkingWorkflowValidation with StringUtils {
 
-	self: AddMarkingWorkflowState with UserLookupComponent =>
+	self: ModifyMarkingWorkflowState with UserLookupComponent =>
 
 	def validate(errors: Errors) {
 
@@ -60,9 +60,12 @@ trait AddMarkingWorkflowValidation extends ModifyMarkingWorkflowValidation with 
 	}
 }
 
+trait AddMarkingWorkflowDescription extends Describable[CM2MarkingWorkflow] {
+	self: ModifyMarkingWorkflowState =>
 
-trait AddMarkingWorkflowState extends ModifyMarkingWorkflowState {
-	this: UserLookupComponent =>
-	def isResuable: Boolean = true
-	var workflowType: MarkingWorkflowType = _
+	override lazy val eventName: String = "AddMarkingWorkflow"
+
+	def describe(d: Description) {
+		d.department(department)
+	}
 }

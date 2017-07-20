@@ -14,7 +14,8 @@
 </#if>
 
 <div class="fix-area">
-	<@f.form method="post" action="${url('/coursework/admin/module/${module.code}/assignments/${assignment.id}/marks')}" commandName=commandName>
+	<#assign submitUrl><@routes.coursework.addMarks assignment /></#assign>
+	<@f.form method="post" action=submitUrl commandName=commandName cssClass="double-submit-protection">
 
 	<#assign isfile=RequestParameters.isfile/>
 

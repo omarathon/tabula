@@ -9,7 +9,7 @@ import org.springframework.web.bind.annotation.{ModelAttribute, PathVariable, Re
 import uk.ac.warwick.tabula.CurrentUser
 import uk.ac.warwick.tabula.commands.{Appliable, SelfValidating}
 import uk.ac.warwick.tabula.commands.coursework.assignments.{BulkModerationApprovalCommand, BulkModerationApprovalState}
-import uk.ac.warwick.tabula.commands.coursework.feedback.GenerateGradesFromMarkCommand
+import uk.ac.warwick.tabula.commands.coursework.feedback.OldGenerateGradesFromMarkCommand
 import uk.ac.warwick.tabula.coursework.web.Routes
 import uk.ac.warwick.tabula.web.controllers.coursework.OldCourseworkController
 import uk.ac.warwick.tabula.data.model.{Assignment, Module}
@@ -28,11 +28,11 @@ class OldBulkModerationApprovalController extends OldCourseworkController {
 		@PathVariable assignment: Assignment,
 		@PathVariable marker: User,
 		submitter: CurrentUser
-	) = BulkModerationApprovalCommand(mandatory(assignment), marker, submitter, GenerateGradesFromMarkCommand(mandatory(module), mandatory(assignment)))
+	) = BulkModerationApprovalCommand(mandatory(assignment), marker, submitter, OldGenerateGradesFromMarkCommand(mandatory(module), mandatory(assignment)))
 
 	@RequestMapping(method = Array(POST), params = Array("!confirmScreen"))
 	def showForm(@ModelAttribute("command") command: Appliable[Unit], errors: Errors): Mav = {
-		Mav(s"$urlPrefix/admin/assignments/markerfeedback/bulk-approve")
+		Mav("coursework/admin/assignments/markerfeedback/bulk-approve")
 	}
 
 	@RequestMapping(method = Array(POST), params = Array("confirmScreen"))

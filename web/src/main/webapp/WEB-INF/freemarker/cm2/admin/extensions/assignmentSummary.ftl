@@ -1,29 +1,23 @@
+<#import "*/cm2_macros.ftl" as cm2 />
 <#assign module = assignment.module />
 <#assign department = module.adminDepartment />
 <#assign time_remaining=durationFormatter(assignment.closeDate) />
-<#import "/WEB-INF/freemarker/_profile_link.ftl" as pl />
-<div id="profile-modal" class="modal fade profile-subset"></div>
 <#--noinspection FtlWellformednessInspection-->
 
 <#macro row graph>
 	<#assign state = (graph.extension.state.description)!"None" />
 <tr class="itemContainer"
-	data-contentid ="${assignment.id}_${graph.user.userId}"
+	data-contentid ="${assignment.id}__${graph.user.userId}"
 	data-detailurl ="<@routes.cm2.extensiondetail assignment graph.user.userId />"
 >
 
 <#-- TAB-2063 - The extension manager will need to know who is doing the asking, so we should always show names -->
-	<td class="student-col toggle-cell"><h6 class="toggle-icon">${graph.user.firstName}</h6></td>
-	<td class="student-col toggle-cell"><h6>${graph.user.lastName}&nbsp;<#if graph.user.warwickId??><@pl.profile_link graph.user.warwickId /><#else><@pl.profile_link graph.user.userId /></#if></h6></td>
+	<td class="student-col toggle-cell toggle-icon">${graph.user.firstName}</td>
+	<td class="student-col toggle-cell">${graph.user.lastName}&nbsp;<#if graph.user.warwickId??><@pl.profile_link graph.user.warwickId /><#else><@pl.profile_link graph.user.userId /></#if></td>
 
 	<td class="status-col toggle-cell content-cell">
 		<dl style="margin: 0; border-bottom: 0;">
-			<dt data-duration="${graph.duration}"
-				data-requested-extra-duration="${graph.requestedExtraDuration}"
-				data-awaiting-review="${graph.awaitingReview?string}"
-				data-approved="${graph.hasApprovedExtension?string}"
-				data-rejected="${graph.hasRejectedExtension?string}"
-				data-deadline="<#if graph.deadline?has_content><@fmt.date date=graph.deadline /></#if>">
+			<dt>
 				<#if graph.awaitingReview>
 					<span>Awaiting review</span>
 				<#elseif graph.hasApprovedExtension>
@@ -35,7 +29,7 @@
 				</#if>
 			</dt>
 			<dd style="display: none;" class="table-content-container" data-contentid="${assignment.id}__${graph.user.userId}">
-				<div id="content-${assignment.id}_${graph.user.userId}" class="content-container" data-contentid="${assignment.id}__${graph.user.userId}">
+				<div id="content-${assignment.id}__${graph.user.userId}" class="content-container" data-contentid="${assignment.id}__${graph.user.userId}">
 					<p>No extension data is currently available.</p>
 				</div>
 			</dd>
@@ -55,35 +49,34 @@
 </#macro>
 
 <#escape x as x?html>
-<h1>Manage extensions</h1>
-<h5><span class="muted">for</span> ${assignment.name} (${assignment.module.code?upper_case})</h5>
+	<@cm2.assignmentHeader "Manage extensions" assignment "for" />
 
-<div class="row-fluid extension-metadata">
-	<div class="span7">
+<#import "/WEB-INF/freemarker/_profile_link.ftl" as pl />
+<div id="profile-modal" class="modal fade profile-subset"></div>
 
+<div class="row extension-metadata">
+	<div class="col-md-7">
 		<#if assignment.closed>
 			<p class="late deadline">
-				<i class="icon-calendar icon-3x pull-left"></i>
-				<span class="time-remaining">Closed ${time_remaining}</span>
-				Deadline was <@fmt.date date=assignment.closeDate />
+				<span class="time-remaining">Closed ${time_remaining}.</span>
+				Deadline was <@fmt.date date=assignment.closeDate />.
 			</p>
 		<#else>
 			<p class="deadline">
-				<i class="icon-calendar icon-3x pull-left"></i>
-				<span class="time-remaining">Closes in ${time_remaining}</span>
-				Deadline <@fmt.date date=assignment.closeDate />
+				<span class="time-remaining">Closes in ${time_remaining}.</span>
+				Deadline <@fmt.date date=assignment.closeDate />.
 			</p>
 		</#if>
 	</div>
-	<div class="span5">
+	<div class="col-md-5">
 		<p class="alert alert-info">
-			<i class="icon-envelope-alt"></i> Students will automatically be notified by email when you grant, modify or revoke an extension.
+			Students will automatically be notified by email when you approve, modify or revoke an extension.
 		</p>
 	</div>
 </div>
 
 	<#if extensionGraphs?size gt 0>
-	<table id="student-extension-management" class="students table table-bordered table-striped tabula-orangeLight sticky-table-headers expanding-table"
+	<table id="student-extension-management" class="students table table-striped sticky-table-headers expanding-table"
 		   data-max-days="${maxDaysToDisplayAsProgressBar}"
 		   data-row-to-open="${extensionToOpen!""}">
 		<thead>

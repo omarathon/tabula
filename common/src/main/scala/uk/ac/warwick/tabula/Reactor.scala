@@ -36,7 +36,7 @@ object Reactor {
 		 * to effect the operation of the event source.
 		 */
 		def observe(ob: Observer) {
-			observers = (ob :: observers)
+			observers = ob :: observers
 		}
 		def emit(a:A) {
 			observers.foreach { _(a) }

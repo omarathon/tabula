@@ -7,7 +7,7 @@ import org.springframework.stereotype.Controller
 import org.springframework.validation.Errors
 import org.springframework.web.bind.annotation.{ModelAttribute, PathVariable, RequestMapping}
 import uk.ac.warwick.tabula.commands.cm2.assignments.SharedAssignmentPropertiesForm
-import uk.ac.warwick.tabula.data.model.{Assignment, Department}
+import uk.ac.warwick.tabula.data.model.Department
 import uk.ac.warwick.tabula.services.turnitinlti.TurnitinLtiService
 import uk.ac.warwick.tabula.web.Mav
 import uk.ac.warwick.tabula.web.controllers.cm2.CourseworkController
@@ -22,25 +22,20 @@ import uk.ac.warwick.tabula.web.controllers.cm2.CourseworkController
 @RequestMapping(value=Array("/${cm2.prefix}/admin/department/{department}/shared-options"))
 class AssignmentSharedOptionsController extends CourseworkController {
 
-	@ModelAttribute("command")
-	def model(department: Department) = new SharedAssignmentPropertiesForm
+	@ModelAttribute("sharedAssignmentPropertiesForm")
+	def model() = new SharedAssignmentPropertiesForm
 
-	@RequestMapping(method = Array(GET))
-	def showForm(@ModelAttribute form: SharedAssignmentPropertiesForm, errors: Errors, @PathVariable department: Department): Mav = {
-		mav(form, department)
-	}
-
-	@RequestMapping(method = Array(POST))
-	def submitForm(@Valid @ModelAttribute form: SharedAssignmentPropertiesForm, errors: Errors, @PathVariable department: Department): Mav = {
-		mav(form, department).addObjects(
-			"submitted" -> true,
-			"hasErrors" -> errors.hasErrors)
-	}
-
-	def mav(form: SharedAssignmentPropertiesForm, @PathVariable department: Department): Mav = {
-		Mav(s"$urlPrefix/admin/assignments/shared_options",
+	@RequestMapping
+	def showForm(@ModelAttribute("sharedAssignmentPropertiesForm") form: SharedAssignmentPropertiesForm, @PathVariable department: Department): Mav =
+		Mav("cm2/admin/assignments/shared_options",
 			"turnitinFileSizeLimit" -> TurnitinLtiService.maxFileSizeInMegabytes
 		).noLayout()
-	}
+
+	@RequestMapping(method = Array(POST))
+	def submitForm(@Valid @ModelAttribute("sharedAssignmentPropertiesForm") form: SharedAssignmentPropertiesForm, errors: Errors, @PathVariable department: Department): Mav =
+		showForm(form, department).addObjects(
+			"submitted" -> true,
+			"hasErrors" -> errors.hasErrors
+		)
 
 }

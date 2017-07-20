@@ -5,7 +5,7 @@ import org.springframework.web.bind.annotation.{ModelAttribute, PathVariable, Re
 import uk.ac.warwick.tabula.CurrentUser
 import uk.ac.warwick.tabula.coursework.web.Routes
 import uk.ac.warwick.tabula.web.controllers.coursework.OldCourseworkController
-import uk.ac.warwick.tabula.commands.coursework.feedback.{GenerateGradesFromMarkCommand, OnlineModerationCommand}
+import uk.ac.warwick.tabula.commands.coursework.feedback.{OldGenerateGradesFromMarkCommand, OnlineModerationCommand}
 import uk.ac.warwick.tabula.data.model.{Assignment, Module}
 import org.springframework.validation.Errors
 import uk.ac.warwick.tabula.web.Mav
@@ -28,7 +28,7 @@ class OldOnlineModerationController extends OldCourseworkController {
 		@PathVariable assignment: Assignment,
 		@PathVariable marker: User,
 		submitter: CurrentUser
-	) = OnlineModerationCommand(module, assignment, student, marker, submitter, GenerateGradesFromMarkCommand(mandatory(module), mandatory(assignment)))
+	) = OnlineModerationCommand(module, assignment, student, marker, submitter, OldGenerateGradesFromMarkCommand(mandatory(module), mandatory(assignment)))
 
 	@RequestMapping(method = Array(GET, HEAD))
 	def showForm(@ModelAttribute("command") command: OnlineModerationCommand, errors: Errors): Mav = {
@@ -42,7 +42,7 @@ class OldOnlineModerationController extends OldCourseworkController {
 			case None => (false, null, None)
 		}
 
-		Mav(s"$urlPrefix/admin/assignments/feedback/marker_moderation" ,
+		Mav("coursework/admin/assignments/feedback/marker_moderation" ,
 			"command" -> command,
 			"isCompleted" -> isCompleted,
 			"completedDate" -> completedDate,

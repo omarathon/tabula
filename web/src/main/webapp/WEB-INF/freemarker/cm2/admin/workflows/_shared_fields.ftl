@@ -1,5 +1,5 @@
-<#if newRecord>
-	<@bs3form.labelled_form_group path="workflowType" labelText="Workflow type">
+<#if newRecord || canEditWorkflowType>
+	<@bs3form.labelled_form_group path="workflowType" labelText="Marking workflow type">
 		<@f.select path="workflowType" class="form-control" >
 			<option value="" disabled selected></option>
 			<#list availableWorkflows as workflowType>
@@ -38,8 +38,6 @@
 		</div>
 	</div>
 </div>
-
-
 <#else>
 	<@bs3form.labelled_form_group labelText="Workflow type">
 		<select id="workflowType" name="workflowType" class="form-control" disabled="disabled">
@@ -53,7 +51,11 @@
 			</option>
 		</select>
 		<div class="help-block">
-			It is not possible to modify the marking method once a marking workflow has been created.
+			<#if workflow.isReusable()>
+				It is not possible to modify the marking method once a marking workflow has been created.
+			<#else>
+				It is not possible to modify the marking method once marking has started.
+			</#if>
 		</div>
 	</@bs3form.labelled_form_group>
 </#if>
@@ -73,7 +75,7 @@
 	<div class="help-block">${markerHelp}</div>
 </@bs3form.labelled_form_group>
 
-<#if !newRecord>
+<#if !newRecord && workflow??>
 	<@bs3form.labelled_form_group>
 		<a href="<@routes.cm2.reusableWorkflowReplaceMarker department academicYear workflow />">Replace marker</a>
 	</@bs3form.labelled_form_group>

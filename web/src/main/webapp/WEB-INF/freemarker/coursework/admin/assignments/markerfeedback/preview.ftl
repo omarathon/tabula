@@ -9,7 +9,8 @@
 <#assign hasGlobalErrors=status.errors.globalErrors?size gt 0 />
 </@spring.bind>
 
-<@f.form method="post" class="double-submit-protection"  action="${url('/coursework/admin/module/${module.code}/assignments/${assignment.id}/marker/${marker.warwickId}/feedback')}" commandName=commandName>
+<#assign submitUrl><@routes.coursework.uploadmarkerfeedback assignment marker /></#assign>
+<@f.form method="post" class="double-submit-protection"  action=submitUrl commandName=commandName>
 <input type="hidden" name="batch" value="true">
 
 <h1>Submit feedback for ${assignment.name}</h1>

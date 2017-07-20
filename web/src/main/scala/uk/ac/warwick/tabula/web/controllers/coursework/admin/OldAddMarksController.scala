@@ -3,10 +3,10 @@ package uk.ac.warwick.tabula.web.controllers.coursework.admin
 import org.springframework.web.bind.annotation.RequestMapping
 import org.springframework.stereotype.Controller
 import uk.ac.warwick.tabula.commands.Appliable
-import uk.ac.warwick.tabula.commands.coursework.feedback.GenerateGradesFromMarkCommand
+import uk.ac.warwick.tabula.commands.coursework.feedback.OldGenerateGradesFromMarkCommand
 import uk.ac.warwick.tabula.web.controllers.coursework.OldCourseworkController
 import org.springframework.web.bind.annotation.PathVariable
-import uk.ac.warwick.tabula.commands.coursework.assignments.{AdminAddMarksCommand, PostExtractValidation}
+import uk.ac.warwick.tabula.commands.coursework.assignments.{OldAdminAddMarksCommand, PostExtractValidation}
 import uk.ac.warwick.tabula.permissions.Permissions
 import uk.ac.warwick.tabula.{CurrentUser, PermissionDeniedException}
 import org.springframework.web.bind.annotation.ModelAttribute
@@ -33,7 +33,7 @@ class OldAddMarksController extends OldCourseworkController {
 	type AdminAddMarksCommand = Appliable[Seq[Feedback]] with PostExtractValidation
 
 	@ModelAttribute("adminAddMarksCommand") def command(@PathVariable module: Module, @PathVariable assignment: Assignment, user: CurrentUser): AdminAddMarksCommand =
-		AdminAddMarksCommand(mandatory(module), mandatory(assignment), user, GenerateGradesFromMarkCommand(mandatory(module), mandatory(assignment)))
+		OldAdminAddMarksCommand(mandatory(module), mandatory(assignment), user, OldGenerateGradesFromMarkCommand(mandatory(module), mandatory(assignment)))
 
 	// Add the common breadcrumbs to the model.
 	def crumbed(mav: Mav, module: Module): Mav = mav.crumbs(Breadcrumbs.Department(module.adminDepartment), Breadcrumbs.Module(module))
@@ -58,7 +58,7 @@ class OldAddMarksController extends OldCourseworkController {
 			noteMarkItem(member, feedback)
 		}.sortBy(_.studentIdentifier)
 
-		crumbed(Mav(s"$urlPrefix/admin/assignments/marks/marksform",
+		crumbed(Mav("coursework/admin/assignments/marks/marksform",
 			"marksToDisplay" -> marksToDisplay,
 			"isGradeValidation" -> module.adminDepartment.assignmentGradeValidation
 		), module)
@@ -92,7 +92,7 @@ class OldAddMarksController extends OldCourseworkController {
 		if (errors.hasErrors) viewMarkUploadForm(module, assignment, cmd, errors)
 		else {
 			bindAndValidate(module, cmd, errors)
-			crumbed(Mav(s"$urlPrefix/admin/assignments/marks/markspreview"), module)
+			crumbed(Mav("coursework/admin/assignments/marks/markspreview"), module)
 		}
 	}
 

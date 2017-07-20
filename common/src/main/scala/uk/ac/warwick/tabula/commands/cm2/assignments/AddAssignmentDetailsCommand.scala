@@ -3,23 +3,22 @@ package uk.ac.warwick.tabula.commands.cm2.assignments
 import org.hibernate.validator.constraints.{Length, NotEmpty}
 import org.joda.time.DateTime
 import org.springframework.validation.Errors
+import uk.ac.warwick.tabula.AcademicYear
 import uk.ac.warwick.tabula.commands._
 import uk.ac.warwick.tabula.commands.cm2.markingworkflows.{CreatesMarkingWorkflow, ModifyMarkingWorkflowState, ModifyMarkingWorkflowValidation}
 import uk.ac.warwick.tabula.data.model._
-import uk.ac.warwick.tabula.data.model.markingworkflow.{CM2MarkingWorkflow, MarkingWorkflowType}
+import uk.ac.warwick.tabula.data.model.markingworkflow.CM2MarkingWorkflow
 import uk.ac.warwick.tabula.data.model.triggers.{AssignmentClosedTrigger, Trigger}
 import uk.ac.warwick.tabula.permissions.Permissions
 import uk.ac.warwick.tabula.services._
 import uk.ac.warwick.tabula.system.permissions.{PermissionsChecking, PermissionsCheckingMethods, RequiresPermissionsChecking}
 import uk.ac.warwick.tabula.JavaImports._
 
-
-
 object CreateAssignmentDetailsCommand {
-  def apply(module: Module) =
-    new CreateAssignmentDetailsCommandInternal(module)
+  def apply(module: Module, academicYear: AcademicYear) =
+    new CreateAssignmentDetailsCommandInternal(module, academicYear)
       with ComposableCommand[Assignment]
-      with BooleanAssignmentProperties
+      with BooleanAssignmentDetailProperties
       with CreateAssignmentPermissions
       with CreateAssignmentDetailsDescription
       with CreateAssignmentDetailsCommandState
@@ -31,9 +30,8 @@ object CreateAssignmentDetailsCommand {
       with AutowiringCM2MarkingWorkflowServiceComponent
 }
 
-class CreateAssignmentDetailsCommandInternal(val module: Module)
-  extends CommandInternal[Assignment] with CreateAssignmentDetailsCommandState with SharedAssignmentProperties with AssignmentDetailsCopy with CreatesMarkingWorkflow {
-
+class CreateAssignmentDetailsCommandInternal(val module: Module, val academicYear: AcademicYear) extends CommandInternal[Assignment]
+  with CreateAssignmentDetailsCommandState with SharedAssignmentDetailProperties with AssignmentDetailsCopy with CreatesMarkingWorkflow {
   self: AssessmentServiceComponent with UserLookupComponent with CM2MarkingWorkflowServiceComponent =>
 
   private var _prefilled: Boolean = _
@@ -44,20 +42,13 @@ class CreateAssignmentDetailsCommandInternal(val module: Module)
 
   override def applyInternal(): Assignment = {
     val assignment = new Assignment(module)
+    // Set default booleans
+    BooleanAssignmentProperties(assignment)
+
     assignment.addDefaultFields()
     copyTo(assignment)
     if(workflowCategory == WorkflowCategory.SingleUse){
-      val data = MarkingWorkflowData(
-        department,
-        s"${module.code} ${assignment.name}",
-        markersAUsers,
-        markersBUsers,
-        workflowType
-      )
-      val workflow = createWorkflow(data)
-      workflow.isReusable = false
-      cm2MarkingWorkflowService.save(workflow)
-      assignment.cm2MarkingWorkflow = workflow
+      createAndSaveSingleUseWorkflow(assignment)
     }
     assessmentService.save(assignment)
     assignment
@@ -90,14 +81,12 @@ class CreateAssignmentDetailsCommandInternal(val module: Module)
     if(assignment.workflowCategory.contains(WorkflowCategory.Reusable)){
       reusableWorkflow = assignment.cm2MarkingWorkflow
     }
-    copySharedFrom(assignment)
+    copySharedDetailFrom(assignment)
   }
-
 
 }
 
-
-trait AssignmentDetailsCopy extends ModifyAssignmentDetailsCommandState with SharedAssignmentProperties {
+trait AssignmentDetailsCopy extends ModifyAssignmentDetailsCommandState with SharedAssignmentDetailProperties {
   self: AssessmentServiceComponent  with UserLookupComponent with CM2MarkingWorkflowServiceComponent with ModifyMarkingWorkflowState =>
 
   def copyTo(assignment: Assignment) {
@@ -117,15 +106,16 @@ trait AssignmentDetailsCopy extends ModifyAssignmentDetailsCommandState with Sha
       assignment.cm2MarkingWorkflow = reusableWorkflow
     }
     assignment.cm2Assignment = true
-    copySharedTo(assignment: Assignment)
+    copySharedDetailTo(assignment)
   }
 }
 
-trait ModifyAssignmentDetailsCommandState extends CurrentSITSAcademicYear {
+trait ModifyAssignmentDetailsCommandState {
 
   self: AssessmentServiceComponent with UserLookupComponent with CM2MarkingWorkflowServiceComponent with ModifyMarkingWorkflowState =>
 
   def module: Module
+  def academicYear: AcademicYear
 
   @Length(max = 200)
   @NotEmpty(message = "{NotEmpty.assignmentName}")
@@ -145,7 +135,6 @@ trait ModifyAssignmentDetailsCommandState extends CurrentSITSAcademicYear {
 
   var reusableWorkflow: CM2MarkingWorkflow = _
 
-  var workflowType: MarkingWorkflowType = _
   lazy val department: Department = module.adminDepartment
   lazy val availableWorkflows: Seq[CM2MarkingWorkflow] =
     cm2MarkingWorkflowService.getReusableWorkflows(department, academicYear)
@@ -160,8 +149,9 @@ trait CreateAssignmentDetailsCommandState extends ModifyAssignmentDetailsCommand
   var prefillAssignment: Assignment = _
 }
 
-trait ModifyAssignmentDetailsValidation extends SelfValidating {
-  self: ModifyAssignmentDetailsCommandState with BooleanAssignmentProperties with AssessmentServiceComponent =>
+trait ModifyAssignmentDetailsValidation extends SelfValidating with ModifyMarkingWorkflowValidation {
+  self: ModifyAssignmentDetailsCommandState with BooleanAssignmentDetailProperties with AssessmentServiceComponent with ModifyMarkingWorkflowState
+    with UserLookupComponent=>
 
   // validation shared between add and edit
   def genericValidate(errors: Errors): Unit = {
@@ -173,23 +163,7 @@ trait ModifyAssignmentDetailsValidation extends SelfValidating {
       if (closeDate == null) {
         errors.rejectValue("closeDate", "closeDate.missing")
       } else if (openDate != null && openDate.isAfter(closeDate)) {
-        errors.reject("closeDate.early")
-      }
-    }
-  }
-}
-
-
-trait CreateAssignmentDetailsValidation extends ModifyAssignmentDetailsValidation with ModifyMarkingWorkflowValidation {
-  self: CreateAssignmentDetailsCommandState with BooleanAssignmentProperties with AssessmentServiceComponent
-    with ModifyMarkingWorkflowState with UserLookupComponent =>
-
-  override def validate(errors: Errors): Unit = {
-    // TAB-255 Guard to avoid SQL error - if it's null or gigantic it will fail validation in other ways.
-    if (name != null && name.length < 3000) {
-      val duplicates = assessmentService.getAssignmentByNameYearModule(name, academicYear, module).filter(_.isAlive)
-      for (duplicate <- duplicates.headOption) {
-        errors.rejectValue("name", "name.duplicate.assignment", Array(name), "")
+        errors.rejectValue("closeDate", "closeDate.early")
       }
     }
 
@@ -200,6 +174,22 @@ trait CreateAssignmentDetailsValidation extends ModifyAssignmentDetailsValidatio
         errors.rejectValue("workflowType", "markingWorkflow.workflowType.none")
       else
         markerValidation(errors, workflowType)
+    }
+  }
+}
+
+
+trait CreateAssignmentDetailsValidation extends ModifyAssignmentDetailsValidation with ModifyMarkingWorkflowValidation {
+  self: CreateAssignmentDetailsCommandState with BooleanAssignmentDetailProperties with AssessmentServiceComponent
+    with ModifyMarkingWorkflowState with UserLookupComponent =>
+
+  override def validate(errors: Errors): Unit = {
+    // TAB-255 Guard to avoid SQL error - if it's null or gigantic it will fail validation in other ways.
+    if (name != null && name.length < 3000) {
+      val duplicates = assessmentService.getAssignmentByNameYearModule(name, academicYear, module).filter(_.isAlive)
+      for (duplicate <- duplicates.headOption) {
+        errors.rejectValue("name", "name.duplicate.assignment", Array(name), "")
+      }
     }
 
     genericValidate(errors)
@@ -217,11 +207,16 @@ trait CreateAssignmentPermissions extends RequiresPermissionsChecking with Permi
 trait CreateAssignmentDetailsDescription extends Describable[Assignment] {
   self: CreateAssignmentDetailsCommandState =>
 
+  override lazy val eventName = "AddAssignmentDetails"
+
   override def describe(d: Description) {
     d.module(module).properties(
       "name" -> name,
       "openDate" -> openDate,
-      "closeDate" -> closeDate)
+      "closeDate" -> closeDate,
+      "workflowCtg" -> Option(workflowCategory).map(_.code).orNull,
+      "workflowType" -> Option(workflowType).map(_.name).orNull
+    )
   }
 
 }

@@ -4,35 +4,41 @@ import org.joda.time.DateTime
 import org.springframework.context.annotation.Profile
 import org.springframework.stereotype.Controller
 import org.springframework.web.bind.annotation._
-import uk.ac.warwick.tabula.CurrentUser
+import uk.ac.warwick.tabula.{AutowiringFeaturesComponent, CurrentUser}
 import uk.ac.warwick.tabula.commands.{Appliable, MemberOrUser}
 import uk.ac.warwick.tabula.commands.coursework.assignments.CourseworkHomepageCommand.CourseworkHomepageInformation
 import uk.ac.warwick.tabula.commands.coursework.assignments.{CourseworkHomepageActivityPageletCommand, CourseworkHomepageCommand}
 import uk.ac.warwick.tabula.services.ActivityService.PagedActivities
 import uk.ac.warwick.tabula.services.AutowiringModuleAndDepartmentServiceComponent
 import uk.ac.warwick.tabula.web.Mav
+import uk.ac.warwick.tabula.cm2.web.Routes
 
-@Profile(Array("cm1Enabled")) @Controller class OldHomeController extends OldCourseworkController with AutowiringModuleAndDepartmentServiceComponent {
+@Profile(Array("cm1Enabled")) @Controller class OldHomeController extends OldCourseworkController with AutowiringModuleAndDepartmentServiceComponent  with AutowiringFeaturesComponent {
 
 	hideDeletedItems
 
 	@ModelAttribute("command") def command(user: CurrentUser) = CourseworkHomepageCommand(user)
 
 	@RequestMapping(Array("/${cm1.prefix}")) def home(@ModelAttribute("command") cmd: Appliable[Option[CourseworkHomepageInformation]], user: CurrentUser): Mav =
-		cmd.apply() match {
-			case Some(info) =>
-				Mav(s"$urlPrefix/home/view",
-					"student" -> MemberOrUser(user.profile, user.apparentUser),
-					"enrolledAssignments" -> info.enrolledAssignments,
-					"historicAssignments" -> info.historicAssignments,
-					"assignmentsForMarking" -> info.assignmentsForMarking,
-					"ownedDepartments" -> info.ownedDepartments,
-					"ownedModule" -> info.ownedModules,
-					"ownedModuleDepartments" -> info.ownedModules.map { _.adminDepartment },
-					"ajax" -> ajax,
-					"userHomeDepartment" -> moduleAndDepartmentService.getDepartmentByCode(user.departmentCode)
-				)
-			case _ => Mav(s"$urlPrefix/home/view")
+		if(features.redirectHomeCM1) {
+			Redirect(Routes.home)
+		} else {
+			cmd.apply() match {
+				case Some(info) =>
+					Mav("coursework/home/view",
+						"student" -> MemberOrUser(user.profile, user.apparentUser),
+						"enrolledAssignments" -> info.enrolledAssignments,
+						"historicAssignments" -> info.historicAssignments,
+						"assignmentsForMarking" -> info.assignmentsForMarking,
+						"ownedDepartments" -> info.ownedDepartments,
+						"ownedModule" -> info.ownedModules,
+						"ownedModuleDepartments" -> info.ownedModules.map { _.adminDepartment },
+						"ajax" -> ajax,
+						"userHomeDepartment" -> moduleAndDepartmentService.getDepartmentByCode(user.departmentCode)
+					)
+				case _ => Mav("coursework/home/view")
+			}
+
 		}
 }
 
@@ -50,14 +56,14 @@ import uk.ac.warwick.tabula.web.Mav
 		try {
 			cmd.apply() match {
 				case Some(pagedActivities) =>
-					Mav(s"$urlPrefix/home/activities",
+					Mav("coursework/home/activities",
 						"activities" -> pagedActivities,
 						"async" -> true).noLayout()
-				case _ => Mav(s"$urlPrefix/home/empty").noLayout()
+				case _ => Mav("coursework/home/empty").noLayout()
 			}
 		} catch {
 			case e: IllegalStateException =>
-				Mav(s"$urlPrefix/home/activities",
+				Mav("coursework/home/activities",
 				"expired" -> true).noLayout()
 		}
 	}

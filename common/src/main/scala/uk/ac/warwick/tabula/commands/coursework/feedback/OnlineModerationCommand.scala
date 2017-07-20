@@ -7,7 +7,7 @@ import uk.ac.warwick.tabula.commands._
 import uk.ac.warwick.tabula.commands.coursework.assignments.{FinaliseFeedbackComponent, FinaliseFeedbackComponentImpl}
 import uk.ac.warwick.tabula.data.AutowiringSavedFormValueDaoComponent
 import uk.ac.warwick.tabula.data.model.MarkingState.{MarkingCompleted, Rejected}
-import uk.ac.warwick.tabula.data.model.notifications.coursework.{ModeratorRejectedNotification, ReleaseToMarkerNotification, ReturnToMarkerNotification}
+import uk.ac.warwick.tabula.data.model.notifications.coursework.{ModeratorRejectedNotification, OldReleaseToMarkerNotification, OldReturnToMarkerNotification}
 import uk.ac.warwick.tabula.data.model.{MarkerFeedback, Notification, _}
 import uk.ac.warwick.tabula.events.NotificationHandling
 import uk.ac.warwick.tabula.helpers.Logging
@@ -22,7 +22,7 @@ object OnlineModerationCommand {
 		new OnlineModerationCommand(module, assignment, student, marker, submitter, gradeGenerator)
 			with ComposableCommand[MarkerFeedback]
 			with OnlineFeedbackFormPermissions
-			with MarkerFeedbackStateCopy
+			with OldMarkerFeedbackStateCopy
 			with CopyFromFormFields
 			with WriteToFormFields
 			with ModerationRejectedNotifier
@@ -49,7 +49,7 @@ abstract class OnlineModerationCommand(
 ) extends AbstractOnlineFeedbackFormCommand(module, assignment, student, user, gradeGenerator) with CommandInternal[MarkerFeedback] with Appliable[MarkerFeedback]
 	with ModerationState with UserAware {
 
-	self: FeedbackServiceComponent with FileAttachmentServiceComponent with ZipServiceComponent with MarkerFeedbackStateCopy
+	self: FeedbackServiceComponent with FileAttachmentServiceComponent with ZipServiceComponent with OldMarkerFeedbackStateCopy
 		with FinaliseFeedbackComponent =>
 
 	def markerFeedback: Option[MarkerFeedback] = assignment.getMarkerFeedback(student.getUserId, marker, SecondFeedback)
@@ -148,8 +148,8 @@ trait OnlineModerationNotificationCompletion extends CompletesNotifications[Mark
 
 	def notificationsToComplete(commandResult: MarkerFeedback): CompletesNotificationsResult = {
 		CompletesNotificationsResult(
-			notificationService.findActionRequiredNotificationsByEntityAndType[ReleaseToMarkerNotification](secondMarkerFeedback) ++
-				notificationService.findActionRequiredNotificationsByEntityAndType[ReturnToMarkerNotification](secondMarkerFeedback),
+			notificationService.findActionRequiredNotificationsByEntityAndType[OldReleaseToMarkerNotification](secondMarkerFeedback) ++
+				notificationService.findActionRequiredNotificationsByEntityAndType[OldReturnToMarkerNotification](secondMarkerFeedback),
 			user
 		)
 	}

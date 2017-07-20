@@ -1,4 +1,4 @@
-<#import "../cm2_macros.ftl" as cm2_macros />
+<#import "*/cm2_macros.ftl" as cm2 />
 <#if detail.extension.requestedOn?has_content>
 	<div>
 		<label>Request received:</label> <@fmt.date date=detail.extension.requestedOn />
@@ -88,13 +88,13 @@
 			<button type="submit" name="state" value="${states.Revoked.dbValue}" class="btn btn-default">Revoke</button>
 		<#elseif detail.extension.rejected || detail.extension.revoked>
 			<button type="submit" name="state" value="${modifyExtensionCommand.state.dbValue}" class="btn btn-primary">Update</button>
-			<button type="submit" name="state" value="${states.Approved.dbValue}" class="btn btn-primary">Accept</button>
+			<button type="submit" name="state" value="${states.Approved.dbValue}" class="btn btn-primary">Approve</button>
 		<#elseif detail.extension.moreInfoRequired>
 			<button type="submit" name="state" value="${modifyExtensionCommand.state.dbValue}" class="btn btn-default">Update</button>
-			<button type="submit" name="state" value="${states.Approved.dbValue}" class="btn btn-primary">Accept</button>
+			<button type="submit" name="state" value="${states.Approved.dbValue}" class="btn btn-primary">Approve</button>
 			<button type="submit" name="state" value="${states.Rejected.dbValue}" class="btn btn-default">Reject</button>
 		<#elseif detail.extension.unreviewed || detail.extension.moreInfoReceived>
-			<button type="submit" name="state" value="${states.Approved.dbValue}" class="btn btn-primary">Accept</button>
+			<button type="submit" name="state" value="${states.Approved.dbValue}" class="btn btn-primary">Approve</button>
 			<button type="submit" name="state" value="${states.Rejected.dbValue}" class="btn btn-default">Reject</button>
 			<button type="submit" name="state" value="${states.MoreInformationRequired.dbValue}" class="btn btn-default">Request more information</button>
 		</#if>
@@ -102,5 +102,5 @@
 
 </@f.form>
 
-<@cm2_macros.previousExtensions detail.extension.id detail.student.warwickId detail.student.fullName detail.numAcceptedExtensions detail.numRejectedExtensions detail.previousExtensions />
-<@cm2_macros.previousSubmissions detail.extension.id detail.student.warwickId detail.student.fullName detail.previousSubmissions />
+<@cm2.previousExtensions detail.extension.id detail.studentIdentifier detail.student.fullName detail.numAcceptedExtensions detail.numRejectedExtensions detail.previousExtensions />
+<@cm2.previousSubmissions detail.extension.id detail.studentIdentifier detail.student.fullName detail.previousSubmissions />

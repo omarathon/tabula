@@ -16,6 +16,7 @@ import uk.ac.warwick.spring.Wire
 import uk.ac.warwick.tabula.data.HibernateHelpers
 import uk.ac.warwick.tabula.data.model.markingworkflow.MarkingWorkflowStage
 import uk.ac.warwick.tabula.services.UserLookupService
+import scala.collection.JavaConverters._
 
 @Entity @Access(AccessType.FIELD)
 class MarkerFeedback extends GeneratedId with FeedbackAttachments with ToEntityReference with CanBeDeleted with CM1MarkerFeedbackSupport {
@@ -36,9 +37,9 @@ class MarkerFeedback extends GeneratedId with FeedbackAttachments with ToEntityR
 	@Column(name = "marker")
 	private var markerUsercode: String = _
 
-	def marker_=(marker: User) = markerUsercode = marker match {
-		case m: User if !m.isFoundUser => throw new IllegalStateException(s"Marker is not a valid user.")
-		case m: User =>  m.getUserId
+	def marker_=(marker: User): Unit = markerUsercode = marker match {
+		case m: User if !m.isFoundUser => throw new IllegalStateException(s"${m.getUserId} is not a valid user.")
+		case m: User => m.getUserId
 		case _ => null
 	}
 
@@ -62,6 +63,11 @@ class MarkerFeedback extends GeneratedId with FeedbackAttachments with ToEntityR
 
 	@Column(name = "uploaded_date")
 	var uploadedDate: DateTime = new DateTime
+
+	// initially starts as null - if the marker makes any changes then this is set
+	// allows us to distinguish between feedback that has been approved (copied from the previous stage) and feedback that has been modified
+	@Column(name = "updated_on")
+	var updatedOn: DateTime = null
 
 	@Type(`type` = "uk.ac.warwick.tabula.data.model.OptionIntegerUserType")
 	var mark: Option[Int] = None
@@ -90,11 +96,34 @@ class MarkerFeedback extends GeneratedId with FeedbackAttachments with ToEntityR
 	@OneToMany(mappedBy = "markerFeedback", cascade = Array(ALL))
 	var customFormValues: JSet[SavedFormValue] = JHashSet()
 
+	def clearCustomFormValues(): Unit = {
+		customFormValues.asScala.foreach { v =>
+			v.markerFeedback = null
+		}
+		customFormValues.clear()
+	}
+
 	def getValue(field: FormField): Option[SavedFormValue] = {
 		customFormValues.find( _.name == field.name )
 	}
 
-	def hasContent: Boolean = hasMarkOrGrade || hasFeedback || hasComments
+	def comments: Option[String] = customFormValues.find(_.name == Assignment.defaultFeedbackTextFieldName).map(_.value)
+	def comments_=(value: String) {
+		customFormValues
+			.find(_.name == Assignment.defaultFeedbackTextFieldName)
+			.getOrElse({
+				val newValue = new SavedFormValue()
+				newValue.name = Assignment.defaultFeedbackTextFieldName
+				newValue.markerFeedback = this
+				this.customFormValues.add(newValue)
+				newValue
+			}).value = value
+	}
+
+
+	def hasBeenModified: Boolean = updatedOn != null
+
+	def hasContent: Boolean = hasMarkOrGrade || hasFeedbackOrComments
 
 	def hasMarkOrGrade: Boolean = hasMark || hasGrade
 
@@ -102,9 +131,13 @@ class MarkerFeedback extends GeneratedId with FeedbackAttachments with ToEntityR
 
 	def hasGrade: Boolean = grade.isDefined
 
+	def hasFeedbackOrComments: Boolean = hasFeedback || hasFeedback
+
 	def hasFeedback: Boolean = attachments != null && attachments.size() > 0
 
 	def hasComments: Boolean = customFormValues.exists(_.value != null)
+
+	def readyForNextStage: Boolean = hasContent && feedback.outstandingStages.contains(stage)
 
 	override def toEntityReference: MarkerFeedbackEntityReference = new MarkerFeedbackEntityReference().put(this)
 }

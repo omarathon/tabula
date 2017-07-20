@@ -13,7 +13,6 @@ import uk.ac.warwick.tabula.data.model.forms.{WordCountField, _}
 import uk.ac.warwick.tabula.data.model.markingworkflow.CM2MarkingWorkflow
 import uk.ac.warwick.tabula.data.model.permissions.AssignmentGrantedRole
 import uk.ac.warwick.tabula.helpers.DateTimeOrdering._
-import uk.ac.warwick.tabula.helpers.StringUtils._
 import uk.ac.warwick.tabula.services._
 import uk.ac.warwick.tabula.{AcademicYear, ToString}
 import uk.ac.warwick.userlookup.User
@@ -36,7 +35,7 @@ object Assignment {
 	final val MaximumFileAttachments = 50
 	final val MaximumWordCount = 1000000
 
-	case class MarkerAllocation(role: String, marker: User, students: Set[User])
+	case class MarkerAllocation(role: String, description: String, marker: User, students: Set[User])
 
 	object Settings {
 		object InfoViewType {
@@ -52,6 +51,7 @@ object Assignment {
 		val AllowExtensionsAfterCloseDate = "allowExtensionsAfterCloseDate"
 		val TurnitinLtiNotifyUsers = "turnitinLtiNotifyUsers"
 		val TurnitinLtiClassWithAcademicYear = "turnitinLtiClassWithAcademicYear"
+		val PublishFeedback = "publishFeedback"
 	}
 }
 
@@ -112,6 +112,8 @@ class Assignment
 	var attachmentLimit: Int = 1
 
 	override var name: String = _
+
+	override def humanReadableId: String = s"$name (${module.code.toUpperCase})"
 
 	@Column(name="archived")
 	@deprecated("118", "Archived will be removed in future in preference to academic year scoping")
@@ -188,6 +190,9 @@ class Assignment
 
 	def includeInFeedbackReportWithoutSubmissions: Boolean = getBooleanSetting(Settings.IncludeInFeedbackReportWithoutSubmissions, default = false)
 	def includeInFeedbackReportWithoutSubmissions_= (include: Boolean): Unit = settings += (Settings.IncludeInFeedbackReportWithoutSubmissions -> include)
+
+	def publishFeedback: Boolean = getBooleanSetting(Settings.PublishFeedback, default = true)
+	def publishFeedback_=(publish: Boolean): Unit = settings += (Settings.PublishFeedback -> publish)
 
 	def hasFeedbackTemplate: Boolean = feedbackTemplate != null
 
@@ -308,6 +313,7 @@ class Assignment
 		_workflowCategory = workflowCategoryOption.orNull
 	}
 
+	def hasCM2Workflow: Boolean = cm2MarkingWorkflow != null
 
 	@OneToMany(mappedBy = "assignment", fetch = LAZY, cascade = Array(ALL), orphanRemoval = true)
 	@BatchSize(size = 200)
@@ -401,22 +407,16 @@ class Assignment
 
 	def lateSubmissionCount: Int = submissions.count(submission => isLate(submission))
 
-	def submissionDeadline(user: User): DateTime = submissionDeadline(user.getUserId)
-
+	/**
+		* Deadline taking into account any approved extension
+		*/
 	def submissionDeadline(usercode: String): DateTime =
 		if (openEnded) null
 		else
 			extensions.find(e => e.isForUser(usercode) && e.approved).flatMap(_.expiryDate).getOrElse(closeDate)
 
-	/**
-	 * Deadline taking into account any approved extension
-	 */
-	def submissionDeadline(submission: Submission): DateTime =
-		if (openEnded) null
-		else extensions
-			.find(e => e.isForUser(submission.usercode) && e.approved)
-			.flatMap(_.expiryDate)
-			.getOrElse(closeDate)
+	def submissionDeadline(user: User): DateTime = submissionDeadline(user.getUserId)
+	def submissionDeadline(submission: Submission): DateTime = submissionDeadline(submission.usercode)
 
 	def workingDaysLate(submission: Submission): Int =
 		if (isLate(submission)) {
@@ -587,8 +587,9 @@ class Assignment
 
 	// Help views decide whether to show a publish button.
 	def canPublishFeedback: Boolean =
+		publishFeedback &&
 		fullFeedback.nonEmpty &&
-			unreleasedFeedback.nonEmpty &&
+		unreleasedFeedback.nonEmpty &&
 			(openEnded || closeDate.isBeforeNow)
 
 	def canSubmit(user: User): Boolean = { user.isFoundUser && (
@@ -602,10 +603,12 @@ class Assignment
 		})
 	}
 
-	def extensionsPossible: Boolean = allowExtensions && !openEnded && module.adminDepartment.allowExtensionRequests
+	// if the department allows extensions we must be able to manually create extensions even if requests aren't allowed
+	def extensionsPossible: Boolean = !openEnded && allowExtensions
 
-	def newExtensionsCanBeRequested: Boolean = extensionsPossible && (!isClosed || allowExtensionsAfterCloseDate)
+	def newExtensionsCanBeRequested: Boolean = extensionsPossible && module.adminDepartment.allowExtensionRequests && (!isClosed || allowExtensionsAfterCloseDate)
 
+	@Deprecated
 	def getMarkerFeedback(usercode: String, user: User, feedbackPosition: FeedbackPosition): Option[MarkerFeedback] = {
 		val parentFeedback = feedbacks.find(_.usercode == usercode)
 		parentFeedback.flatMap {
@@ -613,12 +616,14 @@ class Assignment
 		}
 	}
 
+	@Deprecated
 	def getMarkerFeedbackForCurrentPosition(usercode: String, user: User): Option[MarkerFeedback] = for {
 		feedback <- feedbacks.find(_.usercode == usercode)
 		position <- feedback.getCurrentWorkflowFeedbackPosition
 		markerFeedback <- getMarkerFeedbackForPositionInFeedback(user, position, feedback)
 	} yield markerFeedback
 
+	@Deprecated
 	def getLatestCompletedMarkerFeedback(usercode: String, user: User): Option[MarkerFeedback] = {
 		val parentFeedback = feedbacks.find(_.usercode == usercode)
 		parentFeedback.flatMap {
@@ -626,6 +631,7 @@ class Assignment
 		}
 	}
 
+	@Deprecated
 	def getAllMarkerFeedbacks(usercode: String, user: User): Seq[MarkerFeedback] = {
 		feedbacks.find(_.usercode == usercode).fold(Seq[MarkerFeedback]())(feedback =>
 			feedback.getCurrentWorkflowFeedbackPosition match {
@@ -636,6 +642,7 @@ class Assignment
 			})
 	}
 
+	@Deprecated
 	private def getUpToThirdFeedbacks(user: User, feedback: Feedback): Seq[MarkerFeedback] = {
 		if (this.markingWorkflow.hasThirdMarker && this.markingWorkflow.getStudentsThirdMarker(this, feedback.usercode).contains(user.getUserId)) {
 			Seq(feedback.getThirdMarkerFeedback, feedback.getSecondMarkerFeedback, feedback.getFirstMarkerFeedback).flatten
@@ -644,6 +651,7 @@ class Assignment
 		}
 	}
 
+	@Deprecated
 	private def getUpToSecondFeedbacks(user: User, feedback: Feedback): Seq[MarkerFeedback] = {
 		if (this.markingWorkflow.hasSecondMarker && this.markingWorkflow.getStudentsSecondMarker(this, feedback.usercode).contains(user.getUserId)) {
 			Seq(feedback.getSecondMarkerFeedback, feedback.getFirstMarkerFeedback).flatten
@@ -652,6 +660,7 @@ class Assignment
 		}
 	}
 
+	@Deprecated
 	private def getUpToFirstFeedbacks(user: User, feedback: Feedback): Seq[MarkerFeedback] = {
 		if (this.markingWorkflow.getStudentsFirstMarker(this, feedback.usercode).contains(user.getUserId)) {
 			Seq(feedback.getFirstMarkerFeedback).flatten
@@ -660,6 +669,7 @@ class Assignment
 		}
 	}
 
+	@Deprecated
 	private def getMarkerFeedbackForPositionInFeedback(user: User, feedbackPosition: FeedbackPosition, feedback: Feedback): Option[MarkerFeedback] = {
 		feedbackPosition match {
 			case FirstFeedback =>
@@ -684,6 +694,7 @@ class Assignment
 	 * Optionally returns the first marker for the given student ID
 	 * Returns none if this assignment doesn't have a valid marking workflow attached
 	 */
+	@Deprecated
 	def getStudentsFirstMarker(usercode: String): Option[User] =
 		Option(markingWorkflow)
 			.flatMap(_.getStudentsFirstMarker(this, usercode))
@@ -693,6 +704,7 @@ class Assignment
 	 * Optionally returns the second marker for the given student ID
 	 * Returns none if this assignment doesn't have a valid marking workflow attached
 	 */
+	@Deprecated
 	def getStudentsSecondMarker(usercode: String): Option[User] =
 		Option(markingWorkflow)
 			.flatMap(_.getStudentsSecondMarker(this, usercode))
@@ -702,6 +714,7 @@ class Assignment
 		* Optionally returns the second marker for the given student ID
 		* Returns none if this assignment doesn't have a valid marking workflow attached
 		*/
+	@Deprecated
 	def getStudentsThirdMarker(usercode: String): Option[User] =
 		Option(markingWorkflow)
 			.flatMap(_.getStudentsThirdMarker(this, usercode))
@@ -711,27 +724,23 @@ class Assignment
 	 * Optionally returns the submissions that are to be marked by the given user
 	 * Returns none if this assignment doesn't have a valid marking workflow attached
 	 */
+	@Deprecated
 	def getMarkersSubmissions(marker: User): Seq[Submission] = {
 		if (markingWorkflow != null) markingWorkflow.getSubmissions(this, marker)
 		else Seq()
 	}
 
 	//Return all first markes along with total students allocated
+	@Deprecated
 	def firstMarkersWithStudentAllocationCountMap: Map[User, Int] = {
 		firstMarkerMap.map { case (usercode, userGrp) => userLookup.getUserByUserId(usercode) -> userGrp.size }
 	}
 
 	//Return all second markes along with total students allocated
+	@Deprecated
 	def secondMarkersWithStudentAllocationCountMap: Map[User, Int] = {
 		secondMarkerMap.map { case (usercode, userGrp) => userLookup.getUserByUserId(usercode) -> userGrp.size }
 	}
-
-
-	/**
-	 * Report on the submissions and feedbacks, noting
-	 * where the lists of students don't match up.
-	 */
-	def submissionsReport = SubmissionsReport(this)
 
 	@OneToMany(mappedBy="scope", fetch = FetchType.LAZY, cascade = Array(CascadeType.ALL))
 	@ForeignKey(name="none")
@@ -746,15 +755,15 @@ class Assignment
 		"module" -> module)
 
 	def getUsercodesWithSubmissionOrFeedback: Set[String] = {
-			val submissionIds = submissions.asScala.map { _.usercode }.toSet
-			val feedbackIds = fullFeedback.map { _.usercode }.toSet
+		val submissionIds = submissions.asScala.map { _.usercode }.toSet
+		val feedbackIds = fullFeedback.map { _.usercode }.toSet
 
-			submissionIds ++ feedbackIds
+		submissionIds ++ feedbackIds
 	}
 
 	// later we may do more complex checks to see if this particular markingWorkflow requires that feedback is released manually
 	// for now all markingWorkflow will require you to release feedback so if one exists for this assignment - provide it
-	def mustReleaseForMarking: Boolean = hasWorkflow
+	def mustReleaseForMarking: Boolean = hasWorkflow || hasCM2Workflow
 
 	def needsFeedbackPublishing: Boolean = {
 		if (openEnded || dissertation || !collectSubmissions || _archived) {
@@ -780,6 +789,13 @@ class Assignment
 		}
 	}
 
+	def removeFeedbacks(): Unit = {
+		val markerFeedbacks  = allFeedback.flatMap(_.allMarkerFeedback)
+		markerFeedbacks.foreach(feedbackService.delete)
+		feedbacks.foreach(feedbackService.delete)
+		allFeedback.removeAll(feedbacks)
+	}
+
 	def cm2MarkerAllocations: Seq[MarkerAllocation] =
 		Option(cm2MarkingWorkflow)
 			.map { workflow =>
@@ -789,8 +805,9 @@ class Assignment
 						markers.sortBy { u => (u.getLastName, u.getFirstName) }.map { marker =>
 							MarkerAllocation(
 								stage.roleName,
+								stage.description,
 								marker,
-								allFeedback.flatMap(_.markerFeedback.asScala).filter { mf => mf.stage == stage && mf.marker == marker }.map(_.student).toSet
+								allFeedback.flatMap(_.allMarkerFeedback).filter { mf => mf.stage == stage && mf.marker == marker }.map(_.student).toSet
 							)
 						}
 					}
@@ -836,49 +853,51 @@ class Assignment
 	def toEntityReference: AssignmentEntityReference = new AssignmentEntityReference().put(this)
 }
 
-case class SubmissionsReport(assignment: Assignment) {
-
-	private def feedbacks = assignment.fullFeedback
-	private def submissions = assignment.submissions
-
-	private val feedbackUsercodes = feedbacks.map(_.usercode).toSet
-	private val submissionUsercodes = submissions.map(_.usercode).toSet
-
-	// Subtract the sets from each other to obtain discrepancies
-	val feedbackOnly: Set[String] = feedbackUsercodes &~ submissionUsercodes
-	val submissionOnly: Set[String] = submissionUsercodes &~ feedbackUsercodes
-
-	/**
-	 * We want to show a warning if some feedback items are missing either marks or attachments
-	 * If however, all feedback items have only marks or attachments then we don't send a warning.
-	 */
-	val withoutAttachments: Set[String] = feedbacks
-		.filter(f => !f.hasAttachments && !f.comments.exists(_.hasText))
-		.map(_.usercode).toSet
-	val withoutMarks: Set[String] = feedbacks.filter(!_.hasMarkOrGrade).map(_.usercode).toSet
-	val plagiarised: Set[String] = submissions.filter(_.suspectPlagiarised).map(_.usercode).toSet
-
-	def hasProblems: Boolean = {
-		val shouldBeEmpty = Set(feedbackOnly, submissionOnly, plagiarised)
-		val problems = assignment.collectSubmissions && shouldBeEmpty.exists { _.nonEmpty }
-
-		if (assignment.collectMarks) {
-			val shouldBeEmptyWhenCollectingMarks = Set(withoutAttachments, withoutMarks)
-			problems || shouldBeEmptyWhenCollectingMarks.exists { _.nonEmpty }
-		} else {
-		    problems
-		}
-	}
-}
-
 /**
  * One stop shop for setting default boolean values for assignment properties.
  *
  * Includes @BeanProperty to allow JSON binding
  */
-trait BooleanAssignmentProperties {
+trait BooleanAssignmentDetailProperties {
+	@BeanProperty var cm2Assignment: JBoolean = false
 	@BeanProperty var openEnded: JBoolean = false
+
+	def copyDetailBooleansTo(assignment: Assignment) {
+		assignment.openEnded = openEnded
+	}
+}
+
+trait BooleanAssignmentFeedbackProperties {
 	@BeanProperty var collectMarks: JBoolean = true
+	@BeanProperty var automaticallyReleaseToMarkers: JBoolean = false
+	@BeanProperty var summative: JBoolean = true
+	@BeanProperty var dissertation: JBoolean = false
+	@BeanProperty var publishFeedback: JBoolean = true
+	@BeanProperty var includeInFeedbackReportWithoutSubmissions: JBoolean = false
+
+	def copyFeedbackBooleansTo(assignment: Assignment) {
+		assignment.collectMarks = collectMarks
+		assignment.summative = summative
+		assignment.dissertation = dissertation
+		assignment.publishFeedback = publishFeedback
+		assignment.includeInFeedbackReportWithoutSubmissions = includeInFeedbackReportWithoutSubmissions
+		assignment.automaticallyReleaseToMarkers = automaticallyReleaseToMarkers
+	}
+}
+
+trait BooleanAssignmentStudentProperties {
+	@BeanProperty var anonymousMarking: JBoolean = false
+	@BeanProperty var hiddenFromStudents: JBoolean = false
+
+	def copyStudentBooleansTo(assignment: Assignment) {
+		assignment.anonymousMarking = anonymousMarking
+
+		// You can only hide an assignment, no un-hiding.
+		if (hiddenFromStudents) assignment.hideFromStudents()
+	}
+}
+
+trait BooleanAssignmentSubmissionProperties {
 	@BeanProperty var collectSubmissions: JBoolean = true
 	@BeanProperty var restrictSubmissions: JBoolean = false
 	@BeanProperty var allowLateSubmissions: JBoolean = true
@@ -887,20 +906,9 @@ trait BooleanAssignmentProperties {
 	@BeanProperty var allowExtensions: JBoolean = true
 	@BeanProperty var extensionAttachmentMandatory: JBoolean = false
 	@BeanProperty var allowExtensionsAfterCloseDate: JBoolean = false
-	@BeanProperty var summative: JBoolean = true
-	@BeanProperty var dissertation: JBoolean = false
-	@BeanProperty var includeInFeedbackReportWithoutSubmissions: JBoolean = false
-	@BeanProperty var automaticallyReleaseToMarkers: JBoolean = false
 	@BeanProperty var automaticallySubmitToTurnitin: JBoolean = false
-	@BeanProperty var hiddenFromStudents: JBoolean = false
-	@BeanProperty var anonymousMarking: JBoolean = false
-	@BeanProperty var cm2Assignment: JBoolean = false
 
-
-
-	def copyBooleansTo(assignment: Assignment) {
-		assignment.openEnded = openEnded
-		assignment.collectMarks = collectMarks
+	def copySubmissionBooleansTo(assignment: Assignment) {
 		assignment.collectSubmissions = collectSubmissions
 		assignment.restrictSubmissions = restrictSubmissions
 		assignment.allowLateSubmissions = allowLateSubmissions
@@ -909,17 +917,21 @@ trait BooleanAssignmentProperties {
 		assignment.allowExtensions = allowExtensions
 		assignment.extensionAttachmentMandatory = extensionAttachmentMandatory
 		assignment.allowExtensionsAfterCloseDate = allowExtensionsAfterCloseDate
-		assignment.summative = summative
-		assignment.dissertation = dissertation
-		assignment.includeInFeedbackReportWithoutSubmissions = includeInFeedbackReportWithoutSubmissions
-		assignment.automaticallyReleaseToMarkers = automaticallyReleaseToMarkers
 		assignment.automaticallySubmitToTurnitin = automaticallySubmitToTurnitin
-		assignment.anonymousMarking = anonymousMarking
+	}
+}
 
+trait BooleanAssignmentProperties
+	extends BooleanAssignmentDetailProperties
+		with BooleanAssignmentFeedbackProperties
+		with BooleanAssignmentStudentProperties
+		with BooleanAssignmentSubmissionProperties {
 
-
-		// You can only hide an assignment, no un-hiding.
-		if (hiddenFromStudents) assignment.hideFromStudents()
+	def copyBooleansTo(assignment: Assignment) {
+		copyDetailBooleansTo(assignment)
+		copyFeedbackBooleansTo(assignment)
+		copyStudentBooleansTo(assignment)
+		copySubmissionBooleansTo(assignment)
 	}
 }
 

@@ -4,7 +4,7 @@ import org.springframework.stereotype.Controller
 import org.springframework.web.bind.annotation.{ModelAttribute, PathVariable, RequestMapping}
 import uk.ac.warwick.tabula.coursework.web.Routes
 import uk.ac.warwick.tabula.web.controllers.coursework.OldCourseworkController
-import uk.ac.warwick.tabula.commands.coursework.feedback.GenericFeedbackCommand
+import uk.ac.warwick.tabula.commands.coursework.feedback.OldGenericFeedbackCommand
 import uk.ac.warwick.tabula.data.model.{Assignment, Module}
 import org.springframework.validation.Errors
 import uk.ac.warwick.tabula.web.Mav
@@ -18,14 +18,14 @@ class OldGenericFeedbackController extends OldCourseworkController {
 
 	@ModelAttribute("command")
 	def command(@PathVariable module: Module, @PathVariable assignment: Assignment) =
-		GenericFeedbackCommand(module, assignment)
+		OldGenericFeedbackCommand(module, assignment)
 
 	@RequestMapping(method = Array(GET, HEAD))
 	def showForm(@PathVariable assignment: Assignment,
-							 @ModelAttribute("command") command: GenericFeedbackCommand,
+							 @ModelAttribute("command") command: OldGenericFeedbackCommand,
 							 errors: Errors): Mav = {
 
-		Mav(s"$urlPrefix/admin/assignments/feedback/generic_feedback",
+		Mav("coursework/admin/assignments/feedback/generic_feedback",
 			"command" -> command, "ajax" -> ajax).noLayoutIf(ajax).crumbs(
 				Breadcrumbs.Department(assignment.module.adminDepartment),
 				Breadcrumbs.Module(assignment.module)
@@ -34,7 +34,7 @@ class OldGenericFeedbackController extends OldCourseworkController {
 
 	@RequestMapping(method = Array(POST))
 	def submit(@PathVariable assignment: Assignment,
-						 @ModelAttribute("command") @Valid command: GenericFeedbackCommand,
+						 @ModelAttribute("command") @Valid command: OldGenericFeedbackCommand,
 						 errors: Errors): Mav = {
 		command.apply()
 		if(ajax)

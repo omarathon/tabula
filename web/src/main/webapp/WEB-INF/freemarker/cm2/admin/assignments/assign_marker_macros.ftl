@@ -1,7 +1,7 @@
 <#macro student_item student index stages marker={}>
 	<li class="student well well-sm">
 		<div class="name">
-			<h6>${student.fullName}&nbsp;${student.warwickId!userId}</h6>
+			<h6>${student.fullName}&nbsp;${student.warwickId!student.userId}</h6>
 			<#list stages as stage>
 				<#-- one input per stage. if no marker is defined leave the name blank (unallocated students aren't bound) -->
 				<input
@@ -15,6 +15,7 @@
 </#macro>
 
 <#macro allocateStudents assignment role stages markers unassigned assigned>
+	<#local safeRole = role?lower_case?replace('[^a-z0-9\\-_]+', '', 'r') />
 <h2>Allocate students to ${role}s</h2>
 <p>Drag students onto a ${role} to allocate them. Select multiple students by dragging a box around them. You can also hold the <kbd class="keyboard-control-key">Ctrl</kbd> key and drag to add to a selection.</p>
 <div class="fix-area">
@@ -48,7 +49,7 @@
 		<!-- end persist header -->
 		<div class="row fix-on-scroll-container">
 			<div class="col-md-5">
-				<div id="${role}StudentsList" class="students" data-item-selector=".student-list li">
+				<div id="${safeRole}StudentsList" class="students" data-item-selector=".student-list li">
 					<div class="well">
 						<h4>Not allocated to a marker</h4>
 						<#if assignment.anonymousMarking>
@@ -71,10 +72,10 @@
 				</div>
 			</div>
 			<div class="col-md-5">
-				<div id="${role}MarkerList" class="groups fix-on-scroll">
+				<div id="${safeRole}MarkerList" class="groups fix-on-scroll">
 					<#list markers as marker>
 						<#assign existingStudents = mapGet(assigned, marker)![] />
-						<div class="drag-target well clearfix ${role}-${marker.userId}">
+						<div class="drag-target well clearfix ${safeRole}-${marker.userId}">
 							<div class="group-header">
 								<#assign popoverHeader>Students assigned to ${marker.fullName}</#assign>
 								<h4 class="name">
@@ -83,7 +84,7 @@
 								<div>
 									<#assign count = existingStudents?size />
 									<span class="drag-count">${count}</span> <span class="drag-counted" data-singular="student" data-plural="students">student<#if count != 1>s</#if></span>
-									<a id="show-list-${role}-${marker.userId}" class="show-list" title="View students" data-container=".${role}-${marker.userId}" data-title="${popoverHeader}" data-placement="left"><i class="fa fa-pencil-square-o"></i></a>
+									<a id="show-list-${safeRole}-${marker.userId}" class="show-list" title="View students" data-container=".${safeRole}-${marker.userId}" data-title="${popoverHeader}" data-placement="left"><i class="fa fa-pencil-square-o"></i></a>
 								</div>
 							</div>
 

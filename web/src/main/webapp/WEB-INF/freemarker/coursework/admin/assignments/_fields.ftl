@@ -107,7 +107,7 @@ the comments textarea needs to maintain newlines.
 		    var assignmentPickerMappings;
 			$(".assignment-picker-input").typeahead({
 				source: function(query, process) {
-					$.get("${url('/coursework/admin/module/${module.code}/assignments/picker')}", { searchTerm : query}, function(data) {
+					$.get("<@url context=cm1Context page="/admin/module/${module.code}/assignments/picker" />", { searchTerm : query}, function(data) {
 						var labels = []; // labels is the list of Strings representing assignments displayed on the screen
 						assignmentPickerMappings = {};
 

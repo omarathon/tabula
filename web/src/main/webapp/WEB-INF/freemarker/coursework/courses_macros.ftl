@@ -72,7 +72,7 @@
 					You can use this <a href="${templateUrl}" >generated spreadsheet</a> as a template.
 					Note that you can upload just marks, or marks and grades.
 				</p>
-				<@f.form method="post" enctype="multipart/form-data" action="${formUrl}" commandName="${commandName}">
+				<@f.form method="post" enctype="multipart/form-data" action="${formUrl}" commandName="${commandName}" cssClass="double-submit-protection">
 					<input name="isfile" value="true" type="hidden"/>
 					<table role="presentation" class="narrowed-form">
 						<tr>

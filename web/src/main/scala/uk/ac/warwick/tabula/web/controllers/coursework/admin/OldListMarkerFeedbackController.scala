@@ -5,7 +5,7 @@ import org.springframework.stereotype.Controller
 import org.springframework.web.bind.annotation.{ModelAttribute, PathVariable, RequestMapping}
 import uk.ac.warwick.tabula.CurrentUser
 import uk.ac.warwick.tabula.commands.Appliable
-import uk.ac.warwick.tabula.commands.coursework.assignments.{CanProxy, ListMarkerFeedbackCommand, MarkerFeedbackStage}
+import uk.ac.warwick.tabula.commands.coursework.assignments.{CanProxy, OldListMarkerFeedbackCommand, MarkerFeedbackStage}
 import uk.ac.warwick.tabula.coursework.web.Routes
 import uk.ac.warwick.tabula.web.controllers.coursework.OldCourseworkController
 import uk.ac.warwick.tabula.data.model.{Assignment, Module}
@@ -22,7 +22,7 @@ class OldListMarkerFeedbackController extends OldCourseworkController {
 		@PathVariable module: Module,
 		@PathVariable marker: User,
 		submitter: CurrentUser
-	) = ListMarkerFeedbackCommand(assignment, module, marker, submitter)
+	) = OldListMarkerFeedbackCommand(assignment, module, marker, submitter)
 
 	@RequestMapping(method = Array(HEAD, GET))
 	def list(
@@ -31,7 +31,7 @@ class OldListMarkerFeedbackController extends OldCourseworkController {
 		@PathVariable marker: User
 	): Mav = {
 		if(assignment.markingWorkflow == null) {
-			Mav(s"$urlPrefix/errors/no_workflow", "assignmentUrl" -> Routes.admin.assignment.submissionsandfeedback.summary(assignment))
+			Mav("coursework/errors/no_workflow", "assignmentUrl" -> Routes.admin.assignment.submissionsandfeedback.summary(assignment))
 		} else {
 			val markerFeedback = command.apply()
 			val feedbackItems = markerFeedback.flatMap(_.feedbackItems)
@@ -41,7 +41,7 @@ class OldListMarkerFeedbackController extends OldCourseworkController {
 			val hasFirstMarkerFeedback = maxFeedbackCount > 1
 			val hasSecondMarkerFeedback = maxFeedbackCount > 2
 
-			Mav(s"$urlPrefix/admin/assignments/markerfeedback/list",
+			Mav("coursework/admin/assignments/markerfeedback/list",
 				"assignment" -> assignment,
 				"markerFeedback" -> markerFeedback,
 				"feedbackToDoCount" -> markerFeedback.map(_.feedbackItems.size).sum,

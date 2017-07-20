@@ -39,7 +39,7 @@
 
 			<script type="text/javascript">
 				jQuery(function($) {
-					$(".alert-error").each(function() {
+					$(".alert-danger").each(function() {
 						$("html, body").animate({
 							scrollTop: $(this).offset().top - 35
 						}, 300);
@@ -137,7 +137,7 @@
 					</p>
 				</@bs3form.labelled_form_group>
 
-				<@bs3form.labelled_form_group path="" labelText="Authorship confirmation">
+				<@bs3form.labelled_form_group path="" labelText="Confirm you are the author of this assignment">
 					<@bs3form.checkbox path="plagiarismDeclaration">
 						<@f.errors path="plagiarismDeclaration" cssClass="error" />
 						<@f.checkbox path="plagiarismDeclaration" id="plagiarismDeclaration" required="true"/>
@@ -150,14 +150,14 @@
 				<@bs3form.labelled_form_group path="" labelText="Privacy statement">
 					<p>
 						The data on this form relates to your submission of coursework. The date and time of your submission,
-						your identity and the work you have submitted will be stored. We will not use this data for any purpose
-						other than administering and recording your coursework submission.
+						your identity and the work you have submitted will be stored. We will only use this data to administer
+						and record your coursework submission.
 					</p>
 				</@bs3form.labelled_form_group>
 			</#if>
 		</div>
 
-	<div class="submit-buttons">
+		<div class="submit-buttons">
 			<input class="btn btn-large btn-primary" type="submit" value="Submit">
 			<a class="btn btn-default" href="<@routes.cm2.home />">Cancel</a>
 			<#if willCheckpointBeCreated>
@@ -167,6 +167,14 @@
 			</#if>
 		</div>
 	</@f.form>
+
+	<script>
+		jQuery(function($){
+			$('form#submitAssignmentCommand').on('submit', function(){
+				$.post('<@routes.cm2.submission_attempt assignment />')
+			});
+		});
+	</script>
 
 <#elseif !submission??>
 

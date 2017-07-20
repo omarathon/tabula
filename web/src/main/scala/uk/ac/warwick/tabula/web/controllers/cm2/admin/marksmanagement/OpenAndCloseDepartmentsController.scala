@@ -22,13 +22,13 @@ class OpenAndCloseDepartmentsController extends CourseworkController {
 	@RequestMapping(method=Array(GET, HEAD))
 	def showForm(@ModelAttribute("command") cmd: OpenAndCloseDepartmentsCommand):Mav = {
 		cmd.populate()
-		Mav(s"$urlPrefix/admin/marksmanagement/open_close_departments")
+		Mav("cm2/admin/marksmanagement/open_close_departments")
 	}
 
 	@RequestMapping(method=Array(POST))
 	def submit(@ModelAttribute("command") cmd: OpenAndCloseDepartmentsCommand): Mav = {
 		val degreeTypeUpdated: DegreeType = cmd.apply()
-		val mav = Mav(s"$urlPrefix/admin/marksmanagement/open_close_departments")
+		val mav = Mav("cm2/admin/marksmanagement/open_close_departments")
 		if (degreeTypeUpdated == DegreeType.Undergraduate) {
 			mav.addObjects("undergraduateUpdated" -> true)
 		}	else {

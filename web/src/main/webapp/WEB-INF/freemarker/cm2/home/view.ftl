@@ -4,7 +4,7 @@
 <#-- Do we expect this user to submit assignments, and therefore show them some text even if there aren't any? -->
 <#assign expect_assignments = user.student || user.PGR || user.alumni />
 <#assign is_student = expect_assignments || !studentInformation.empty />
-<#assign is_marker = !markerInformation.empty />
+<#assign is_marker = isMarker />
 <#assign is_admin = !adminInformation.empty />
 
 <#if is_student>

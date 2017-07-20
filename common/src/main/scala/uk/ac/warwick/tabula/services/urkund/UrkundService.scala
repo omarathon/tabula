@@ -1,8 +1,9 @@
 package uk.ac.warwick.tabula.services.urkund
 
-import java.io.{File, FileOutputStream}
+import java.io.File
 
 import com.fasterxml.jackson.databind.ObjectMapper
+import com.google.common.io.Files
 import dispatch.classic.thread.ThreadSafeHttpClient
 import dispatch.classic.{Http, thread, _}
 import org.apache.commons.io.FilenameUtils._
@@ -15,8 +16,8 @@ import org.joda.time.DateTime
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.beans.factory.{DisposableBean, InitializingBean}
 import org.springframework.stereotype.Service
-import org.springframework.util.FileCopyUtils
 import uk.ac.warwick.spring.Wire
+import uk.ac.warwick.tabula.JavaImports._
 import uk.ac.warwick.tabula.data.model.{Assignment, FileAttachment, OriginalityReport, Submission}
 import uk.ac.warwick.tabula.data.{AutowiringUrkundDaoComponent, UrkundDaoComponent}
 import uk.ac.warwick.tabula.helpers.Logging
@@ -24,7 +25,6 @@ import uk.ac.warwick.util.core.StringUtils
 
 import scala.util.parsing.json.JSON
 import scala.util.{Failure, Success, Try}
-import uk.ac.warwick.tabula.JavaImports._
 
 object UrkundService {
 	final val responseTimeout: Int = 60 * 1000
@@ -225,7 +225,7 @@ abstract class AbstractUrkundService extends UrkundService
 		getReceiverAddress(report) match {
 			case Success(_) =>
 				val tempFile = File.createTempFile(report.attachment.id, null)
-				FileCopyUtils.copy(report.attachment.dataStream, new FileOutputStream(tempFile))
+				report.attachment.asByteSource.copyTo(Files.asByteSink(tempFile))
 
 				val req = url(documentUrl(report))
 					.as_!(username, password) // Add mandatory Basic auth

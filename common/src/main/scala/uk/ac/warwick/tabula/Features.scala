@@ -140,9 +140,16 @@ abstract class Features {
 	@Value("${features.scheduling.monitoringPointMigration:false}") var schedulingMonitoringPointMigration: Boolean = defaults.schedulingMonitoringPointMigration
 	@Value("${features.scheduling.groups.updateDepartmentSets:true}") var schedulingGroupsUpdateDepartmentSets: Boolean = defaults.schedulingGroupsUpdateDepartmentSets
 
-
 	@Value("${features.exams:true}") var exams: Boolean = defaults.exams
 	@Value("${features.exams.grids:true}") var examGrids: Boolean = defaults.examGrids
+
+	@Value("${features.anonymousMarkingCM2:false}") var anonymousMarkingCM2: Boolean = defaults.anonymousMarkingCM2
+	@Value("${features.openEndedReminderDateCM2:false}") var openEndedReminderDateCM2: Boolean = defaults.openEndedReminderDateCM2
+	@Value("${features.redirectAdminDepartmentModuleCM1:true}") var redirectAdminDepartmentModuleCM1: Boolean = defaults.redirectAdminDepartmentModuleCM1
+	@Value("${features.redirectHomeCM1:true}") var redirectHomeCM1: Boolean = defaults.redirectHomeCM1
+
+
+
 
 	private val bean = new BeanWrapperImpl(this)
 	def update(message: FeaturesMessage): Features = {
@@ -271,11 +278,15 @@ class FeaturesMessage {
 	@BeanProperty var schedulingMonitoringPointMigration = false
 	@BeanProperty var schedulingGroupsUpdateDepartmentSets = true
 
-
 	@BeanProperty var exams = true
 	@BeanProperty var examGrids = true
 
 	@BeanProperty var reports = true
+
+	@BeanProperty var anonymousMarkingCM2 = false
+	@BeanProperty var openEndedReminderDateCM2 = false
+	@BeanProperty var redirectAdminDepartmentModuleCM1 = true
+	@BeanProperty var redirectHomeCM1 = true
 }
 
 class FeatureFlagListener extends QueueListener with InitializingBean with Logging {

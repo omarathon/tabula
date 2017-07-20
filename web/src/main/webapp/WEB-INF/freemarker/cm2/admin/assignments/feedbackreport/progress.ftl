@@ -1,62 +1,62 @@
-<#-- TODO refactor this into a macro -->
-<#if info.ajax>
+<#import "*/modal_macros.ftl" as modal />
+<#import "*/cm2_macros.ftl" as cm2 />
 
-    <#include "job-status-fragment.ftl" />
+<#escape x as x?html>
+	<#if info.ajax>
+		<#include "job-status-fragment.ftl" />
+	<#else>
+		<#function route_function dept>
+			<#local result><@routes.cm2.feedbackreport dept academicYear /></#local>
+			<#return result />
+		</#function>
+		<@cm2.departmentHeader "Feedback report status" department route_function academicYear />
 
-    <#else>
+		<p>This page updates itself automatically. You'll receive an email with the report attached when it is ready, so you don't need to keep this page open.</p>
 
-        <#assign jobId=job.id/>
+		<!-- <p>Job ID ${job.id}</p> -->
 
-        <h1>Feedback report status</h1>
+		<div id="job-status-fragment" class="well">
+			<#include "job-status-fragment.ftl" />
+		</div>
 
-        <p>This page will update itself automatically.</p>
+		<div id="job-progress">
+			<div class="progress">
+				<div class="progress-bar progress-bar-striped active" style="min-width: 5%; width: ${job.progress}%;"></div>
+			</div>
+		</div>
 
-        <p>You'll be sent an email containing the report when it completes so you don't have to keep this page open.</p>
+		<script>
+			(function($){
 
-        <!-- <p>Job ID ${jobId}</p> -->
-
-        <div id="job-status-fragment" class="well">
-            <#include "job-status-fragment.ftl" />
-        </div>
-
-        <div id="job-progress">
-            <div class="progress progress-striped active">
-                <div class="bar" style="width: ${5 + job.progress*0.95}%;"></div>
-            </div>
-        </div>
-
-        <script>
-            (function($){
-
-            var updateProgress = function() {
-				// grab progress from data-progress attribute in response.
-				var $value = $('#job-status-value');
-				var $progress = $('#job-progress .progress');
-				var percent = $value.data('progress');
-				$progress.find('.bar').css('width', Math.floor(5+(percent*0.95))+'%');
-				if ($value.data('finished')) {
-					console.log($progress);
-					$progress.removeClass('active');
-					if ($value.data('succeeded') == false) {
-						$progress.addClass('progress-warning');
+				var updateProgress = function() {
+					// grab progress from data-progress attribute in response.
+					var $value = $('#job-status-value');
+					var $progress = $('#job-progress .progress');
+					var $bar = $progress.find('.progress-bar');
+					var percent = parseInt($value.data('progress'));
+					$bar.css('width', Math.floor(percent) + '%');
+					if ($value.data('finished')) {
+						$bar.removeClass('active');
+						if ($value.data('succeeded') == false) {
+							$bar.addClass('progress-bar-warning');
+						} else {
+							$bar.addClass('progress-bar-success');
+						}
 					} else {
-						$progress.addClass('progress-success');
+						setTimeout(updateFragment, 2000);
 					}
-				} else {
-					setTimeout(updateFragment, 2000);
 				}
-            }
 
-            var $fragment = $('#job-status-fragment');
-            var updateFragment = function() {
-				$fragment.load('?ajax&jobId=${jobId}', function(){
-					updateProgress();
-				});
-            };
-            setTimeout(updateFragment, 2000);
-            updateProgress();
+				var $fragment = $('#job-status-fragment');
+				var updateFragment = function() {
+					$fragment.load('?ajax&jobId=${job.id}&ts=' + new Date().getTime(), function(){
+						updateProgress();
+					});
+				};
+				setTimeout(updateFragment, 2000);
+				updateProgress();
 
-            })(jQuery);
-        </script>
-
-</#if>
+			})(jQuery);
+		</script>
+	</#if>
+</#escape>

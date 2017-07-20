@@ -28,19 +28,25 @@ class DeleteMarkingWorkflowController extends CM2MarkingWorkflowController {
 
 	var messageSource: MessageSource = Wire.auto[MessageSource]
 
-
 	@ModelAttribute("deleteMarkingWorkflowCommand")
 	def command(@PathVariable department: Department, @PathVariable academicYear: AcademicYear, @PathVariable workflow: CM2MarkingWorkflow) =
 		DeleteMarkingWorkflowCommand(mandatory(department), mandatory(workflow))
 
 	@RequestMapping
+	def confirm(@PathVariable department: Department, @PathVariable academicYear: AcademicYear, @PathVariable workflow: CM2MarkingWorkflow): Mav =
+		commonCrumbs(
+			Mav("cm2/admin/workflows/delete_workflow"),
+			department,
+			academicYear
+		)
+
+	@RequestMapping(method = Array(POST))
 	def submitForm(
 		@PathVariable department: Department,
 		@PathVariable academicYear: AcademicYear,
 		@Valid @ModelAttribute("deleteMarkingWorkflowCommand") cmd: DeleteMarkingWorkflowCommand,
 		errors: Errors
 	): Mav = {
-
 		val model = if(errors.hasErrors) {
 			"actionErrors" -> errors.getAllErrors.asScala.map(
 				e => messageSource.getMessage(e.getCode, e.getArguments, null)

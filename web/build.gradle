@@ -11,12 +11,13 @@ war.archiveName = 'ROOT.war'
 // Define integration test sources
 sourceSets {
     integrationTest {
+        java.srcDirs = []
         scala {
             compileClasspath += test.output + main.output
             runtimeClasspath += test.output + main.output
-            srcDir file('src/integration-test/scala')
+            srcDirs = [file('src/integration-test/scala')]
         }
-        resources.srcDir file('src/integration-test/resources')
+        resources.srcDirs = [file('src/integration-test/resources')]
     }
 }
 
@@ -159,7 +160,7 @@ task integrationTest(type: Test) {
     systemProperty 'phantomjs.binary.path', new File(projectDir, "node_modules/.bin/phantomjs").absolutePath
     systemProperty 'screenshot.dir', new File(projectDir, "build/integrationTest-screenshots").absolutePath
 
-    testClassesDir = sourceSets.integrationTest.output.classesDir
+    testClassesDirs = sourceSets.integrationTest.output.classesDirs
     classpath = sourceSets.integrationTest.runtimeClasspath
 }
 
@@ -168,7 +169,7 @@ task installPhantomJSDependency(type: NpmTask) {
     inputs.file 'package.json'
     outputs.dir 'node_modules/phantomjs'
 
-    args = ['install', 'phantomjs-prebuilt']
+    args = ['install', 'phantomjs-prebuilt', '--no-save']
 }
 
 integrationTest.dependsOn 'installPhantomJSDependency'

@@ -47,6 +47,8 @@ class Submission extends GeneratedId with PermissionsTarget with ToEntityReferen
 	@Column(name = "userId")
 	var usercode: String = _
 
+	override def humanReadableId: String = s"Submission by $usercode for ${assignment.humanReadableId}"
+
 	@Type(`type` = "uk.ac.warwick.tabula.data.model.PlagiarismInvestigationUserType")
 	var plagiarismInvestigation: PlagiarismInvestigation = PlagiarismInvestigation.Default
 
@@ -66,7 +68,7 @@ class Submission extends GeneratedId with PermissionsTarget with ToEntityReferen
 
 	def universityId = Option(_universityId)
 
-	def studentIdentifier = universityId.getOrElse(usercode)
+	def studentIdentifier: String = universityId.getOrElse(usercode)
 
 
 	@OneToMany(mappedBy = "submission", cascade = Array(ALL))
@@ -79,8 +81,9 @@ class Submission extends GeneratedId with PermissionsTarget with ToEntityReferen
 
 	def isForUser(user: User): Boolean = usercode == user.getUserId
 
+	@Deprecated
 	def firstMarker:Option[User] = assignment.getStudentsFirstMarker(usercode)
-
+	@Deprecated
 	def secondMarker:Option[User] = assignment.getStudentsSecondMarker(usercode)
 
 	def valuesByFieldName: Map[String, String] = (values map { v => (v.name, v.value) }).toMap
@@ -89,7 +92,9 @@ class Submission extends GeneratedId with PermissionsTarget with ToEntityReferen
 
 	def allAttachments: Seq[FileAttachment] = valuesWithAttachments.toSeq flatMap { _.attachments }
 
-	def hasOriginalityReport: JBoolean = allAttachments.exists( _.originalityReportReceived )
+	def attachmentsWithOriginalityReport: Seq[FileAttachment] = allAttachments.filter(_.originalityReportReceived)
+
+	def hasOriginalityReport: JBoolean = allAttachments.exists(_.originalityReportReceived)
 
 	def isNoteworthy: Boolean = suspectPlagiarised || isAuthorisedLate || isLate
 

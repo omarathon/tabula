@@ -106,6 +106,15 @@
             return position === 'fixed';
         }
 
+        function navHeight() {
+			// calculate the height of the nav header if it's been fixed
+			var navElementsHeight = 0;
+			$('.headroom--pinned').each(function(){
+				navElementsHeight = navElementsHeight + $(this).outerHeight(true);
+			});
+			return navElementsHeight;
+        }
+
         // Returns whether the target element is absolute or not.
         function isAbsolute() {
             return position === 'absolute';
@@ -266,7 +275,7 @@
                 // If the vertical scroll position, plus the optional margin, would
                 // put the target element at the specified limit, set the target
                 // element to absolute.
-                if (limit > 0 && y >= limit - getMarginTop()) {
+                if (limit > 0 && y >= limit - navHeight() - getMarginTop()) {
                     if (!isAbsolute() || !wasReset) {
                         postPosition();
                         target.trigger('preAbsolute.ScrollToFixed');
@@ -276,7 +285,7 @@
                 // If the vertical scroll position, plus the optional margin, would
                 // put the target element above the top of the page, set the target
                 // element to fixed.
-                } else if (y >= offsetTop - getMarginTop()) {
+                } else if (y >= offsetTop - navHeight() - getMarginTop()) {
                     if (!isFixed() || !wasReset) {
                         postPosition();
                         target.trigger('preFixed.ScrollToFixed');
@@ -504,6 +513,16 @@
 
                 target.unbind('.ScrollToFixed');
                 base.$el.removeData('ScrollToFixed');
+            });
+
+            $('body').on('id7:headroom:onPin', 'h1', function(){
+                if(isFixed()){
+                    target.css({ 'top' : base.options.bottom == -1?getMarginTop()+navHeight():'' });
+                }
+            });
+
+            $('body').on('id7:headroom:onUnpin', 'h1', function(){
+                target.css({ 'top' : base.options.bottom == -1?getMarginTop():'' });
             });
 
             // Reset everything.

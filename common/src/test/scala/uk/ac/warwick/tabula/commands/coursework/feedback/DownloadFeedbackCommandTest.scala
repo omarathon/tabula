@@ -1,13 +1,12 @@
 package uk.ac.warwick.tabula.commands.coursework.feedback
 
-import java.io.FileInputStream
-
+import com.google.common.io.Files
 import org.springframework.validation.BindException
 import uk.ac.warwick.tabula._
 import uk.ac.warwick.tabula.data.FileDao
 import uk.ac.warwick.tabula.data.model._
 import uk.ac.warwick.tabula.pdf.PdfGeneratorWithFileStorage
-import uk.ac.warwick.tabula.services.objectstore.ObjectStorageService
+import uk.ac.warwick.tabula.services.objectstore.{ObjectStorageService, RichByteSource}
 import uk.ac.warwick.tabula.services.{UserLookupService, ZipService}
 import uk.ac.warwick.userlookup.{AnonymousUser, User}
 
@@ -39,8 +38,7 @@ class DownloadFeedbackCommandTest extends TestBase with Mockito {
 		val attachment = new FileAttachment
 		attachment.id = "123"
 		attachment.objectStorageService = mockObjectStorageService
-		attachment.objectStorageService.fetch(attachment.id) returns Some(new FileInputStream(createTemporaryFile()))
-		attachment.objectStorageService.metadata(attachment.id) returns Some(ObjectStorageService.Metadata(contentLength = 0, contentType = "application/doc", fileHash = None))
+		attachment.objectStorageService.fetch(attachment.id) returns RichByteSource.wrap(Files.asByteSource(createTemporaryFile()), Some(ObjectStorageService.Metadata(contentLength = 0, contentType = "application/doc", fileHash = None)))
 		attachment.name = "0123456-feedback.doc"
 		feedback.attachments.add(attachment)
 
@@ -49,8 +47,7 @@ class DownloadFeedbackCommandTest extends TestBase with Mockito {
 			val attachment = new FileAttachment
 			attachment.id = "234"
 			attachment.objectStorageService = mockObjectStorageService
-			attachment.objectStorageService.fetch(attachment.id) returns Some(new FileInputStream(createTemporaryFile()))
-			attachment.objectStorageService.metadata(attachment.id) returns Some(ObjectStorageService.Metadata(contentLength = 0, contentType = "application/doc", fileHash = None))
+			attachment.objectStorageService.fetch(attachment.id) returns RichByteSource.wrap(Files.asByteSource(createTemporaryFile()), Some(ObjectStorageService.Metadata(contentLength = 0, contentType = "application/doc", fileHash = None)))
 			attachment.name = "feedback.pdf"
 			attachment
 		})

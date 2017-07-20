@@ -39,7 +39,7 @@ class CheckSitsUploadCommandInternal(val feedback: Feedback) extends CommandInte
 		if (feedback.assessmentGroups.isEmpty) {
 			CheckSitsUploadCommand.Result(hasAssessmentGroups = false)
 		} else {
-			exportFeedbackToSitsService.getPartialMatchingSasRecords(feedbackForSits.get) match {
+			exportFeedbackToSitsService.getPartialMatchingSasRecords(feedback) match {
 				case Seq() =>
 					CheckSitsUploadCommand.Result(
 						hasAssessmentGroups = true,

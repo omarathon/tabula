@@ -25,13 +25,13 @@ class OldPublishFeedbackController extends OldCourseworkController {
 	validatesSelf[SelfValidating]
 
 	@ModelAttribute("publishFeedbackCommand") def cmd(@PathVariable module: Module, @PathVariable assignment: Assignment, user: CurrentUser): PublishFeedbackCommandInternal with ComposableCommand[PublishFeedbackResults] with AutowiringFeedbackServiceComponent with AutowiringFeedbackForSitsServiceComponent with PublishFeedbackCommandState with PublishFeedbackPermissions with PublishFeedbackValidation with PublishFeedbackDescription with PublishFeedbackNotification with PublishFeedbackNotificationCompletion with QueuesFeedbackForSits = {
-		PublishFeedbackCommand(mandatory(module), mandatory(assignment), user, GenerateGradesFromMarkCommand(mandatory(module), mandatory(assignment)))
+		PublishFeedbackCommand(mandatory(module), mandatory(assignment), user, OldGenerateGradesFromMarkCommand(mandatory(module), mandatory(assignment)))
 	}
 
 	@RequestMapping(method = Array(HEAD, GET), params = Array("!confirm"))
 	def confirmation(@ModelAttribute("publishFeedbackCommand") command: PublishFeedbackCommand, errors: Errors): Mav = {
 		if (errors.hasErrors) command.prevalidate(errors)
-		Mav(s"$urlPrefix/admin/assignments/publish/form",
+		Mav("coursework/admin/assignments/publish/form",
 			"assignment" -> command.assignment,
 			"isGradeValidation" -> command.module.adminDepartment.assignmentGradeValidation,
 			"gradeValidation" -> command.validateGrades
@@ -44,7 +44,7 @@ class OldPublishFeedbackController extends OldCourseworkController {
 			confirmation(command, errors)
 		} else {
 			command.apply()
-			Mav(s"$urlPrefix/admin/assignments/publish/done", "assignment" -> command.assignment)
+			Mav("coursework/admin/assignments/publish/done", "assignment" -> command.assignment)
 		}
 	}
 

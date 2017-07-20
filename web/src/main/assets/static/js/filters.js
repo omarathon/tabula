@@ -11,7 +11,7 @@ $.fn.enableFilters = function(options) {
 		var $this = $(this);
 		var $form = $this.find('form');
 		var $results = $(resultSelector);
-		var $clearAll = $this.find('.clear-all');
+		var $clearAll = $this.find('.clear-all-filters');
 
 		// bind event handlers
 		$this.on('change', function(e) {

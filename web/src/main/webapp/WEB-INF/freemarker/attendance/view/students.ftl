@@ -5,7 +5,7 @@
 
 <#if features.attendanceMonitoringReport && can.do("MonitoringPoints.Report", department) >
 	<div class="pull-right send-to-sits">
-		<a href="<@routes.attendance.viewReport department academicYear filterQuery />" class="btn btn-primary">Upload to SITS:eVision</a>
+		<a href="<@routes.attendance.viewReport department academicYear filterQuery />" class="btn btn-primary">Upload to SITS e:Vision</a>
 	</div>
 </#if>
 
@@ -18,7 +18,7 @@
 <#if reports?? && monitoringPeriod??>
 	<div class="alert alert-info">
 		<button type="button" class="close" data-dismiss="alert">&times;</button>
-		Missed points for <@fmt.p reports "student" /> in the ${monitoringPeriod} monitoring period have been uploaded to SITS:eVision.
+		Missed points for <@fmt.p reports "student" /> in the ${monitoringPeriod} monitoring period have been uploaded to SITS e:Vision.
 	</div>
 </#if>
 

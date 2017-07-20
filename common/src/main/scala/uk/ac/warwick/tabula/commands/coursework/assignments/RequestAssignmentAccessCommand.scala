@@ -1,4 +1,5 @@
 package uk.ac.warwick.tabula.commands.coursework.assignments
+
 import uk.ac.warwick.tabula.CurrentUser
 import uk.ac.warwick.tabula.commands.{Command, Description, Notifies}
 import uk.ac.warwick.tabula.data.model.notifications.coursework.RequestAssignmentAccessNotification
@@ -20,7 +21,7 @@ class RequestAssignmentAccessCommand(module: Module, assignment: Assignment, use
 
 	def admins: Seq[User] = {
 		// lookup the admin users - used to determine the recipients  for notifications
-		module.adminDepartment.owners.users.filter(admin => admin.isFoundUser && admin.getEmail.hasText).toSeq
+		module.adminDepartment.owners.users.filter(admin => admin.isFoundUser && admin.getEmail.hasText)
 	}
 
 	// Returns the Seq of admin users

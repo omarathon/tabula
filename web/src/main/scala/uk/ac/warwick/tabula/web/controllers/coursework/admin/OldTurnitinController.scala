@@ -44,7 +44,7 @@ class OldTurnitinController extends OldCourseworkController with AutowiringTurni
 
 	@RequestMapping(method = Array(GET, HEAD))
 	def confirm(@Valid @ModelAttribute("command") command: SubmitToTurnitinCommand, errors: Errors): Mav = {
-		Mav(s"$urlPrefix/admin/assignments/turnitin/form", "errors" -> errors)
+		Mav("coursework/admin/assignments/turnitin/form", "errors" -> errors)
 	}
 
 	@RequestMapping(method = Array(POST))
@@ -63,7 +63,7 @@ class OldTurnitinController extends OldCourseworkController with AutowiringTurni
 		if (ajax) {
 			Mav(new JSONView(assignmentStatus.toMap))
 		} else {
-			Mav(s"$urlPrefix/admin/assignments/turnitin/status", "status" -> assignmentStatus)
+			Mav("coursework/admin/assignments/turnitin/status", "status" -> assignmentStatus)
 		}
 	}
 

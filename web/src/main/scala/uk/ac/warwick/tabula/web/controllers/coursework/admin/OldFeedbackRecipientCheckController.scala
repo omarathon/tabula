@@ -27,7 +27,7 @@ class OldFeedbackRecipientCheckController extends OldCourseworkController {
 	@RequestMapping()
 	def confirmation(command: FeedbackRecipientCheckCommand, errors: Errors): Mav = {
 		val report = command.apply()
-		Mav(s"$urlPrefix/admin/assignments/publish/checkrecipients",
+		Mav("coursework/admin/assignments/publish/checkrecipients",
 			"assignment" -> command.assignment,
 			"report" -> report).noLayout()
 	}

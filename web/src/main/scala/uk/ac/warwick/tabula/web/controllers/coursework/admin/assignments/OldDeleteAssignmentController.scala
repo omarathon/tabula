@@ -7,7 +7,7 @@ import org.springframework.stereotype.Controller
 import org.springframework.validation.Errors
 import org.springframework.web.bind.annotation._
 import uk.ac.warwick.tabula.commands.coursework.assignments._
-import uk.ac.warwick.tabula.coursework.web.Routes
+import uk.ac.warwick.tabula.cm2.web.Routes
 import uk.ac.warwick.tabula.web.controllers.coursework.OldCourseworkController
 import uk.ac.warwick.tabula.data.model._
 import uk.ac.warwick.tabula.services.turnitinlti.TurnitinLtiService
@@ -27,7 +27,7 @@ class OldDeleteAssignmentController extends OldCourseworkController {
 	def showForm(form: DeleteAssignmentCommand): Mav = {
 		val (module, assignment) = (form.module, form.assignment)
 
-		Mav(s"$urlPrefix/admin/assignments/delete",
+		Mav("coursework/admin/assignments/delete",
 			"department" -> module.adminDepartment,
 			"module" -> module,
 			"assignment" -> assignment,
@@ -41,8 +41,8 @@ class OldDeleteAssignmentController extends OldCourseworkController {
 		if (errors.hasErrors) {
 			showForm(form)
 		} else {
-			form.apply()
-			Redirect(Routes.admin.module(form.module))
+			val assignment = form.apply()
+			Redirect(Routes.admin.department(assignment.module.adminDepartment))
 		}
 
 	}

@@ -211,7 +211,7 @@ class FeedbackReportTest extends TestBase with ReportWorld {
 	}
 
 	def getTestFeedbackReport: FeedbackReport = {
-		val report = new FeedbackReport(department, dateTime(2013, 3, 1), dateTime(2013, 9, 30))
+		val report = new FeedbackReport(department, None, dateTime(2013, 3, 1), dateTime(2013, 9, 30))
 		report.assignmentMembershipService = assignmentMembershipService
 		report.auditEventQueryMethods = auditEventQueryMethods
 		report.submissionService = submissionService

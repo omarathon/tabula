@@ -14,15 +14,17 @@ object ModifyAssignmentFeedbackCommand {
 			with ModifyAssignmentFeedbackPermissions
 			with ModifyAssignmentFeedbackDescription
 			with ModifyAssignmentFeedbackCommandState
+			with ModifyAssignmentScheduledNotifications
 			with AutowiringAssessmentServiceComponent
-			with SharedAssignmentProperties
+			with SharedAssignmentFeedbackProperties
+			with AutowiringZipServiceComponent
 
 }
 
 class ModifyAssignmentFeedbackCommandInternal(override val assignment: Assignment)
 	extends CommandInternal[Assignment] with PopulateOnForm {
 
-	self: AssessmentServiceComponent with ModifyAssignmentFeedbackCommandState with SharedAssignmentProperties =>
+	self: AssessmentServiceComponent with ModifyAssignmentFeedbackCommandState with SharedAssignmentFeedbackProperties =>
 
 	override def applyInternal(): Assignment = {
 		this.copyTo(assignment)
@@ -31,32 +33,24 @@ class ModifyAssignmentFeedbackCommandInternal(override val assignment: Assignmen
 	}
 
 	override def populate(): Unit = {
-		copySharedFrom(assignment)
+		copySharedFeedbackFrom(assignment)
 	}
-
 }
 
-trait ModifyAssignmentFeedbackCommandState  {
-
-	self: AssessmentServiceComponent with SharedAssignmentProperties =>
+trait ModifyAssignmentFeedbackCommandState {
+	self: AssessmentServiceComponent with SharedAssignmentFeedbackProperties =>
 
 	def assignment: Assignment
 
-	def module: Module = assignment.module
-
 	def copyTo(assignment: Assignment) {
-		assignment.feedbackTemplate = feedbackTemplate
-		assignment.collectMarks = collectMarks
-		assignment.summative = summative
-		assignment.dissertation = dissertation
-		assignment.automaticallyReleaseToMarkers = automaticallyReleaseToMarkers
+		copySharedFeedbackTo(assignment)
 	}
-
-
 }
 
 trait ModifyAssignmentFeedbackDescription extends Describable[Assignment] {
-	self: ModifyAssignmentFeedbackCommandState with SharedAssignmentProperties =>
+	self: ModifyAssignmentFeedbackCommandState with SharedAssignmentFeedbackProperties =>
+
+	override lazy val eventName: String = "ModifyAssignmentFeedback"
 
 	override def describe(d: Description) {
 		d.assignment(assignment).properties(
@@ -77,6 +71,7 @@ trait ModifyAssignmentFeedbackPermissions extends RequiresPermissionsChecking wi
 	self: ModifyAssignmentFeedbackCommandState =>
 
 	override def permissionsCheck(p: PermissionsChecking): Unit = {
+		notDeleted(assignment)
 		p.PermissionCheck(Permissions.Assignment.Update, assignment.module)
 	}
 }

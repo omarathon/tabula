@@ -5,6 +5,96 @@
 
 var exports = {};
 
+exports.bindModulePickers = function(){
+	$('.module-search-query')
+		.closest('.module-choice')
+		.find('.modules-list').on('click', 'a.remove', function(e){
+			e.preventDefault();
+			$(this).closest('li').remove();
+		}).end()
+		.end()
+		.each(function(){
+			var $this = $(this),
+				$parent = $this.closest('.module-choice'),
+				$hiddenInput = $parent.find('input[type=hidden]:first');
+			$this.on('change', function(){
+				if ($(this).data('moduleid') === undefined || $(this).data('moduleid').length === 0)
+					return;
+
+				$this.closest('.module-choice').find('input.specific[name=isAnySmallGroupEventModules]').attr('checked', true);
+				var icon = $('<i/>').addClass('icon-fixed-width');
+				if ($this.hasClass('smallGroup') && $this.data('hasgroups') != true) {
+					icon.addClass('icon-exclamation-sign').attr({
+						'title':'This module has no small groups set up in Tabula'
+					});
+				}
+				if ($this.hasClass('assignment') && $this.data('hasassignments') != true) {
+					icon.addClass('icon-exclamation-sign').attr({
+						'title':'This module has no assignments set up in Tabula'
+					});
+				}
+				$this.closest('.module-choice').find('.modules-list ol').append(
+					$('<li/>').append(
+						$('<input/>').attr({
+							'type':'hidden',
+							'name':$hiddenInput.attr('name').replace('_',''),
+							'value':$this.data('moduleid')
+						})
+					).append(
+						icon
+					).append(
+						$('<span/>').attr('title', $this.val()).html($this.val() + '&nbsp;')
+					).append(
+						$('<a/>').attr('href', '#').addClass('remove').text('Remove')
+					)
+				);
+				$this.data('moduleid','').val('');
+			});
+		});
+	$('.pointTypeOption.smallGroup .module-search-query').modulePicker({
+		checkGroups: true
+	});
+	$('.pointTypeOption.assignmentSubmission .module-search-query').modulePicker({
+		checkAssignments: true
+	});
+};
+
+exports.bindAssignmentPickers = function(){
+	$('.assignment-search-query')
+		.closest('.assignment-choice')
+		.find('.assignments-list').on('click', 'a.remove', function(e){
+			e.preventDefault();
+			$(this).closest('li').remove();
+		}).end()
+		.end()
+		.each(function(){
+			var $this = $(this),
+				$parent = $this.closest('.assignment-choice'),
+				$hiddenInput = $parent.find('input[type=hidden]:first');
+			$this.on('change', function(){
+				if ($(this).data('assignmentid') === undefined || $(this).data('assignmentid').length === 0)
+					return;
+
+				$this.closest('.assignment-choice').find('.assignments-list ol').append(
+					$('<li/>').append(
+						$('<input/>').attr({
+							'type':'hidden',
+							'name':$hiddenInput.attr('name').replace('_',''),
+							'value':$this.data('assignmentid')
+						})
+					).append(
+						$('<span/>').attr('title', $this.val()).html($this.val() + '&nbsp;')
+					).append(
+						$('<a/>').attr('href', '#').addClass('remove').text('Remove')
+					)
+				);
+				$this.data('assignmentid','').val('');
+			});
+		});
+
+	$('.pointTypeOption.assignmentSubmission .assignment-search-query').assignmentPicker({});
+};
+
 $(function(){
 
 	// Scripts for Add students

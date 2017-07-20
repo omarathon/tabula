@@ -20,16 +20,17 @@ class RequestAssignmentAccessController extends CourseworkController {
 	// clumsy way to prevent a user spamming admins with emails.
 	var requestedAccess: mutable.Queue[(String, String)] = mutable.Queue[(String, String)]()
 
-	@ModelAttribute def cmd(@PathVariable assignment: Assignment, user: CurrentUser) =
-		new RequestAssignmentAccessCommand(mandatory(assignment.module), mandatory(assignment), mandatory(user))
+	@ModelAttribute("requestAssignmentAccessCommand")
+	def cmd(@PathVariable assignment: Assignment, user: CurrentUser): RequestAssignmentAccessCommand.Command =
+		RequestAssignmentAccessCommand(mandatory(assignment), mandatory(user))
 
-	@RequestMapping(method = Array(GET, HEAD))
-	def nope(form: RequestAssignmentAccessCommand, @PathVariable assignment: Assignment) = Redirect(Routes.assignment(mandatory(assignment)))
+	@RequestMapping
+	def nope(@PathVariable assignment: Assignment) = Redirect(Routes.assignment(mandatory(assignment)))
 
 	@RequestMapping(method = Array(POST))
-	def sendEmail(user: CurrentUser, form: RequestAssignmentAccessCommand, @PathVariable assignment: Assignment): Mav = {
+	def sendEmail(user: CurrentUser, @ModelAttribute("requestAssignmentAccessCommand") form: RequestAssignmentAccessCommand.Command, @PathVariable assignment: Assignment): Mav = {
 		if (!user.loggedIn) {
-			nope(form, assignment)
+			nope(assignment)
 		} else {
 			if (!alreadyEmailed(user, form, assignment)) {
 				form.apply()
@@ -42,7 +43,7 @@ class RequestAssignmentAccessController extends CourseworkController {
 	// if user+assignment is in the queue, they already sent an email recently so don't resend.
 	// queue size is limited to 1000 so eventually they would be able to send again, but not rapidly.
 	// They will still be able to send as many times as there are app JVMs (currently 2).
-	def alreadyEmailed(user: CurrentUser, form: RequestAssignmentAccessCommand, assignment: Assignment): Boolean = {
+	def alreadyEmailed(user: CurrentUser, form: RequestAssignmentAccessCommand.Command, assignment: Assignment): Boolean = {
 		val key = (user.apparentId, assignment.id)
 		if (requestedAccess contains key) {
 			true

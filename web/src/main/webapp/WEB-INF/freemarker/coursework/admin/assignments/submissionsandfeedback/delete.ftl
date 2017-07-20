@@ -2,8 +2,8 @@
 <#assign f=JspTaglibs["/WEB-INF/tld/spring-form.tld"]>
 <#escape x as x?html>
 
-
-<@f.form method="post" action="${url('/coursework/admin/module/${module.code}/assignments/${assignment.id}/submissionsandfeedback/delete')}" commandName="deleteSubmissionsAndFeedbackCommand">
+<#assign submitUrl><@routes.coursework.deleteSubmissionsFeedback assignment /></#assign>
+<@f.form method="post" action=submitUrl commandName="deleteSubmissionsAndFeedbackCommand">
 <h1>Delete submissions and/or feedback for ${assignment.name}</h1>
 
 <@form.errors path="" />

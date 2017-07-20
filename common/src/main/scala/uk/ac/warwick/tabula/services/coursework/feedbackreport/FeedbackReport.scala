@@ -4,6 +4,7 @@ import org.apache.poi.ss.usermodel.Sheet
 import org.apache.poi.xssf.streaming.SXSSFWorkbook
 import org.joda.time.{DateTime, LocalDate}
 import uk.ac.warwick.spring.Wire
+import uk.ac.warwick.tabula.AcademicYear
 import uk.ac.warwick.tabula.data.model.{Assignment, Department, FeedbackReportGenerator}
 import uk.ac.warwick.tabula.helpers.SpreadsheetHelpers._
 import uk.ac.warwick.tabula.services.elasticsearch.AuditEventQueryMethods
@@ -15,7 +16,7 @@ import scala.collection.immutable.TreeMap
 import scala.concurrent.duration._
 import scala.concurrent.{Await, TimeoutException}
 
-class FeedbackReport(department: Department, startDate: DateTime, endDate: DateTime) {
+class FeedbackReport(department: Department, academicYear: Option[AcademicYear], startDate: DateTime, endDate: DateTime) {
 	import FeedbackReport._
 
 	var auditEventQueryMethods: AuditEventQueryMethods = Wire[AuditEventQueryMethods]
@@ -87,8 +88,7 @@ class FeedbackReport(department: Department, startDate: DateTime, endDate: DateT
 	}
 
 	def buildAssignmentData() {
-
-		val allAssignments = department.modules.asScala.flatMap(_.assignments.asScala)
+		val allAssignments = department.modules.asScala.flatMap(_.assignments.asScala).filter(a => academicYear.isEmpty || academicYear.contains(a.academicYear))
 		val inDateAssignments = allAssignments.filter(a => ((a.collectSubmissions && a.submissions.size > 0) || (!a.collectSubmissions && a.includeInFeedbackReportWithoutSubmissions))
 			&& a.closeDate.isAfter(startDate) && a.closeDate.isBefore(endDate)).toList
 		val sortedAssignments = inDateAssignments.sortWith{(a1, a2) =>

@@ -29,10 +29,10 @@ class OldDownloadSelectedFeedbackController extends OldCourseworkController {
 		@PathVariable module: Module,
 		@PathVariable assignment: Assignment,
 		@PathVariable feedbackId: String
-	) = new AdminGetSingleFeedbackCommand(module, assignment, mandatory(feedbackDao.getAssignmentFeedback(feedbackId)))
+	) = new OldAdminGetSingleFeedbackCommand(module, assignment, mandatory(feedbackDao.getAssignmentFeedback(feedbackId)))
 
 	@RequestMapping(method = Array(RequestMethod.GET, RequestMethod.HEAD))
-	def get(cmd: AdminGetSingleFeedbackCommand, @PathVariable filename: String): Mav = {
+	def get(cmd: OldAdminGetSingleFeedbackCommand, @PathVariable filename: String): Mav = {
 		Mav(new RenderableFileView(cmd.apply()))
 	}
 }
@@ -48,10 +48,10 @@ class OldDownloadSelectedFeedbackFileController extends OldCourseworkController 
 		@PathVariable assignment: Assignment,
 		@PathVariable feedbackId: String
 	) =
-		new AdminGetSingleFeedbackFileCommand(module, assignment, mandatory(feedbackDao.getAssignmentFeedback(feedbackId)))
+		new OldAdminGetSingleFeedbackFileCommand(module, assignment, mandatory(feedbackDao.getAssignmentFeedback(feedbackId)))
 
 	@RequestMapping(method = Array(RequestMethod.GET, RequestMethod.HEAD))
-	def get(cmd: AdminGetSingleFeedbackFileCommand, @PathVariable filename: String): Mav = {
+	def get(cmd: OldAdminGetSingleFeedbackFileCommand, @PathVariable filename: String): Mav = {
 		val renderable = cmd.apply().getOrElse {
 			throw new ItemNotFoundException()
 		}
@@ -65,10 +65,10 @@ class OldDownloadAllFeedbackController extends OldCourseworkController {
 
 	@ModelAttribute("command")
 	def selectedFeedbacksCommand(@PathVariable module: Module, @PathVariable assignment: Assignment) =
-		new DownloadSelectedFeedbackCommand(module, assignment, user)
+		new OldDownloadSelectedFeedbackCommand(module, assignment, user)
 
 	@RequestMapping
-	def getSelected(@ModelAttribute("command") command: DownloadSelectedFeedbackCommand, @PathVariable assignment: Assignment): Mav = {
+	def getSelected(@ModelAttribute("command") command: OldDownloadSelectedFeedbackCommand, @PathVariable assignment: Assignment): Mav = {
 		command.apply() match {
 			case Left(renderable) =>
 				Mav(new RenderableFileView(renderable))
@@ -183,7 +183,7 @@ class OldFeedbackSummaryController extends OldCourseworkController {
 	@RequestMapping(method = Array(GET, HEAD))
 	def showForm(@ModelAttribute("command") command: Appliable[Option[Feedback]]): Mav = {
 		val feedback = command.apply()
-		Mav(s"$urlPrefix/admin/assignments/feedback/read_only", "feedback" -> feedback).noLayout()
+		Mav("coursework/admin/assignments/feedback/read_only", "feedback" -> feedback).noLayout()
 	}
 
 }

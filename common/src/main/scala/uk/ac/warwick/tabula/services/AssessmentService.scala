@@ -48,6 +48,8 @@ trait AssessmentService {
 	def getAssignmentsByModuleAndMarker(module: Module, user: CurrentUser, academicYearOption: Option[AcademicYear]): Seq[Assignment]
 
 	def getCM2AssignmentsWhereMarker(user: User, academicYearOption: Option[AcademicYear]): Seq[Assignment]
+	def getCM2AssignmentsByDepartmentAndMarker(department: Department, user: CurrentUser, academicYearOption: Option[AcademicYear]): Seq[Assignment]
+	def getCM2AssignmentsByModuleAndMarker(module: Module, user: CurrentUser, academicYearOption: Option[AcademicYear]): Seq[Assignment]
 
 	/**
 	 * Find a recent assignment within this module or possible department.
@@ -128,6 +130,12 @@ abstract class AbstractAssessmentService extends AssessmentService {
 			.flatMap(cm2MarkingWorkflowService.getAssignmentsUsingMarkingWorkflow)
 			.filter { a => a.isAlive && (academicYearOption.isEmpty || academicYearOption.contains(a.academicYear)) }
 	}
+
+	def getCM2AssignmentsByDepartmentAndMarker(department: Department, user: CurrentUser, academicYearOption: Option[AcademicYear]): Seq[Assignment] =
+		getCM2AssignmentsWhereMarker(user.apparentUser, academicYearOption).filter { _.module.adminDepartment == department }
+
+	def getCM2AssignmentsByModuleAndMarker(module: Module, user: CurrentUser, academicYearOption: Option[AcademicYear]): Seq[Assignment] =
+		getCM2AssignmentsWhereMarker(user.apparentUser, academicYearOption).filter { _.module == module }
 
 	/**
 	 * Find a recent assignment within this module or possible department.

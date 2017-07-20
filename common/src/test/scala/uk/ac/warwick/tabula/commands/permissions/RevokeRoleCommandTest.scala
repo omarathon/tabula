@@ -44,7 +44,7 @@ class RevokeRoleCommandTest extends TestBase with Mockito {
 		command.permissionsService.getGrantedRole(department, singlePermissionsRoleDefinition) returns (None)
 
 		// Doesn't blow up, just a no-op
-		command.applyInternal() should be (null)
+		command.applyInternal() should be (None)
 
 		verify(command.permissionsService, times(0)).saveOrUpdate(any[GrantedRole[_]])
 	}}
@@ -63,7 +63,7 @@ class RevokeRoleCommandTest extends TestBase with Mockito {
 
 		command.permissionsService.getGrantedRole(department, singlePermissionsRoleDefinition) returns (Some(existing))
 
-		val grantedRole: GrantedRole[Department] = command.applyInternal()
+		val grantedRole: GrantedRole[Department] = command.applyInternal().get
 		(grantedRole.eq(existing)) should be (true)
 
 		grantedRole.roleDefinition should be (singlePermissionsRoleDefinition)
@@ -76,6 +76,27 @@ class RevokeRoleCommandTest extends TestBase with Mockito {
 		verify(command.permissionsService, times(1)).saveOrUpdate(existing)
 		verify(command.permissionsService, atLeast(1)).clearCachesForUser(("cuscav", classTag[Department]))
 		verify(command.permissionsService, atLeast(1)).clearCachesForUser(("cusebr", classTag[Department]))
+	}}
+
+	@Test def deletesTheRoleWhenNoUsersAreLeft { new Fixture {
+		command.roleDefinition = singlePermissionsRoleDefinition
+		command.usercodes.add("cuscav")
+		command.usercodes.add("cusebr")
+		command.usercodes.add("cuscao")
+		command.userLookup.registerUsers("cuscav", "cusebr", "cuscao")
+
+		val existing = GrantedRole(department, singlePermissionsRoleDefinition)
+		existing.users.knownType.addUserId("cuscao")
+		existing.users.knownType.addUserId("cuscav")
+		existing.users.knownType.addUserId("cusebr")
+
+		command.permissionsService.getGrantedRole(department, singlePermissionsRoleDefinition) returns (Some(existing))
+		command.applyInternal() should be (None)
+
+		verify(command.permissionsService, times(1)).delete(existing)
+		verify(command.permissionsService, atLeast(1)).clearCachesForUser(("cuscav", classTag[Department]))
+		verify(command.permissionsService, atLeast(1)).clearCachesForUser(("cusebr", classTag[Department]))
+		verify(command.permissionsService, atLeast(1)).clearCachesForUser(("cuscao", classTag[Department]))
 	}}
 
 	@Test def validatePasses { withUser("cuscav", "0672089") { new Fixture {

@@ -1,10 +1,10 @@
 <#escape x as x?html>
 	<#import "*/assignment_components.ftl" as components />
+	<#import "*/cm2_macros.ftl" as cm2 />
 	<#include "assign_marker_macros.ftl" />
-	<div class="deptheader">
-		<h1>Create a new assignment</h1>
-		<h4 class="with-related"><span class="muted">for</span> <@fmt.module_name module /></h4>
-	</div>
+
+	<@cm2.assignmentHeader "Assign markers" assignment "for" />
+
 	<div class="fix-area">
 		<@components.assignment_wizard 'markers' assignment.module false assignment />
 		<p class="btn-toolbar">
@@ -153,9 +153,13 @@
 			</@f.form>
 		<#else>
 			<div>
-				Not enough tutors are set up as markers in the workflow for Small Group sets for
-				<@fmt.module_name module=assignment.module withFormatting=false /> in ${assignment.academicYear.toString}.
-				You need to make sure that every Small Group has tutors who are also markers.
+				<p>
+					The small group set allocation for <@fmt.module_name module=assignment.module withFormatting=false />
+					in ${assignment.academicYear.toString} could not be imported.
+				</p>
+				The list of markers in the marking workflow for this assignment must include all tutors in the small group
+				set allocation. Return to the <a href="<@routes.cm2.editassignmentdetails assignment />">
+				Assignment details</a> section and ensure that you have added all the small group tutors as markers.
 			</div>
 		</#if>
 	</div>

@@ -35,7 +35,6 @@ class AssignMarkersCommandTest extends TestBase with Mockito with ValidatorHelpe
 		val d = new  DescriptionImpl
 		val description = new AssignMarkersDescription with AssignMarkersState with UserLookupComponent {
 			val userLookup = userlookupService
-			val eventName = "AssignMarkers"
 			val assignment: Assignment = a1
 			override val allocationMap: Map[MarkingWorkflowStage, Allocations] = alloc
 		}

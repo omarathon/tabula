@@ -20,7 +20,7 @@
 				<#list map[module.code] as assignment>
 					<tr>
 						<td><input type="checkbox" class="collection-checkbox" name="assignments" value="${assignment.id}"></td>
-						<td>${assignment.name}<span class="very-subtle">${assignment.academicYear.toString}</span></td>
+						<td>${assignment.name} <span class="very-subtle">${assignment.academicYear.toString}</span></td>
 					</tr>
 				</#list>
 			</#if>

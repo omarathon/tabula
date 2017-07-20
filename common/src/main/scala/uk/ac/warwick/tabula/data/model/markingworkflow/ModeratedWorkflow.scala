@@ -32,7 +32,7 @@ object ModeratedWorkflow {
 		val markersStage = new StageMarkers
 		markersStage.stage = ModerationMarker
 		markersStage.workflow = workflow
-		markers.foreach(markersStage.markers.knownType.add)
+		markers.foreach(markersStage.markers.add)
 
 		// TODO - may not need this ?
 		//val allocationStage = new StageMarkers
@@ -42,7 +42,7 @@ object ModeratedWorkflow {
 		val moderatorStage = new StageMarkers
 		moderatorStage.stage = ModerationModerator
 		moderatorStage.workflow = workflow
-		moderators.foreach(moderatorStage.markers.knownType.add)
+		moderators.foreach(moderatorStage.markers.add)
 
 		workflow.stageMarkers = JList(markersStage, moderatorStage)
 		workflow

@@ -31,7 +31,7 @@ class OldDeleteMarkingWorkflowController extends OldCourseworkController {
 
 	@RequestMapping(method=Array(GET, HEAD))
 	def form(@ModelAttribute("command") cmd: DeleteMarkingWorkflowCommand): Mav = {
-		Mav(s"$urlPrefix/admin/markingworkflows/delete").noLayoutIf(ajax)
+		Mav("coursework/admin/markingworkflows/delete").noLayoutIf(ajax)
 	}
 
 	@RequestMapping(method=Array(POST))

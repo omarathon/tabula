@@ -17,13 +17,12 @@ object ModifyAssignmentOptionsCommand {
 			with ModifyAssignmentOptionsCommandState
 			with ModifyAssignmentOptionsValidation
 			with AutowiringAssessmentServiceComponent
-			with SharedAssignmentProperties
+			with SharedAssignmentOptionsProperties
 }
 
 class ModifyAssignmentOptionsCommandInternal(override val assignment: Assignment)
 	extends CommandInternal[Assignment] with PopulateOnForm {
-
-	self: AssessmentServiceComponent with ModifyAssignmentOptionsCommandState with SharedAssignmentProperties =>
+	self: AssessmentServiceComponent with ModifyAssignmentOptionsCommandState with SharedAssignmentOptionsProperties =>
 
 	override def applyInternal(): Assignment = {
 		this.copyTo(assignment)
@@ -32,21 +31,18 @@ class ModifyAssignmentOptionsCommandInternal(override val assignment: Assignment
 	}
 
 	override def populate(): Unit = {
-		copySharedFrom(assignment)
+		copySharedOptionsFrom(assignment)
 	}
 
 }
 
 trait ModifyAssignmentOptionsCommandState {
-
-	self: AssessmentServiceComponent with SharedAssignmentProperties =>
+	self: AssessmentServiceComponent with SharedAssignmentOptionsProperties =>
 
 	def assignment: Assignment
 
-	def module: Module = assignment.module
-
 	def copyTo(assignment: Assignment) {
-		copyOptionsTo(assignment)
+		copySharedOptionsTo(assignment)
 	}
 }
 
@@ -54,12 +50,15 @@ trait ModifyAssignmentOptionsPermissions extends RequiresPermissionsChecking wit
 	self: ModifyAssignmentOptionsCommandState =>
 
 	override def permissionsCheck(p: PermissionsChecking): Unit = {
+		notDeleted(assignment)
 		p.PermissionCheck(Permissions.Assignment.Update, assignment.module)
 	}
 }
 
 trait ModifyAssignmentOptionsDescription extends Describable[Assignment] {
-	self: ModifyAssignmentOptionsCommandState with SharedAssignmentProperties =>
+	self: ModifyAssignmentOptionsCommandState with SharedAssignmentOptionsProperties =>
+
+	override lazy val eventName: String = "ModifyAssignmentOptions"
 
 	override def describe(d: Description) {
 		d.assignment(assignment)
@@ -75,10 +74,9 @@ trait ModifyAssignmentOptionsDescription extends Describable[Assignment] {
 }
 
 trait ModifyAssignmentOptionsValidation extends SelfValidating {
-
-	self: ModifyAssignmentOptionsCommandState with AssessmentServiceComponent  with SharedAssignmentProperties  =>
+	self: ModifyAssignmentOptionsCommandState with AssessmentServiceComponent with SharedAssignmentOptionsProperties =>
 
 	override def validate(errors: Errors) {
-		validateShared(errors)
+		validateSharedOptions(errors)
 	}
 }

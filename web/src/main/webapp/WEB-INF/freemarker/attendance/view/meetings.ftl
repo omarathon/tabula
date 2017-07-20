@@ -23,18 +23,18 @@
 			<#if command.point.scheme.pointStyle.dbValue == "week">
 				<#if command.point.startWeek == command.point.endWeek>
 					in
-					<a class="use-tooltip" data-html="true" data-placement="bottom" title="<@fmt.wholeWeekDateFormat command.point.startWeek command.point.endWeek command.point.scheme.academicYear />">
+					<span class="use-tooltip" data-html="true" data-placement="bottom" title="<@fmt.wholeWeekDateFormat command.point.startWeek command.point.endWeek command.point.scheme.academicYear />">
 						<@fmt.monitoringPointWeeksFormat command.point.startWeek command.point.endWeek command.point.scheme.academicYear command.point.scheme.department />
-					</a>
+					</span>
 				<#else>
 					between
-					<a class="use-tooltip" data-html="true" data-placement="bottom" title="<@fmt.wholeWeekDateFormat command.point.startWeek command.point.startWeek command.point.scheme.academicYear />">
+					<span class="use-tooltip" data-html="true" data-placement="bottom" title="<@fmt.wholeWeekDateFormat command.point.startWeek command.point.startWeek command.point.scheme.academicYear />">
 						<@fmt.monitoringPointWeeksFormat command.point.startWeek command.point.startWeek command.point.scheme.academicYear command.point.scheme.department />
-					</a>
+					</span>
 					and
-					<a class="use-tooltip" data-html="true" data-placement="bottom" title="<@fmt.wholeWeekDateFormat command.point.endWeek command.point.endWeek command.point.scheme.academicYear />">
+					<span class="use-tooltip" data-html="true" data-placement="bottom" title="<@fmt.wholeWeekDateFormat command.point.endWeek command.point.endWeek command.point.scheme.academicYear />">
 						<@fmt.monitoringPointWeeksFormat command.point.endWeek command.point.endWeek command.point.scheme.academicYear command.point.scheme.department />
-					</a>
+					</span>
 				</#if>
 			<#else>
 				(<@fmt.interval command.point.startDate command.point.endDate />)

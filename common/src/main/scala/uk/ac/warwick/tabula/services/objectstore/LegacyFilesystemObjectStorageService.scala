@@ -1,8 +1,8 @@
 package uk.ac.warwick.tabula.services.objectstore
 
-import java.io.{File, FileInputStream, FileOutputStream, InputStream}
+import java.io._
 
-import com.google.common.io.ByteSource
+import com.google.common.io._
 import org.springframework.util.FileCopyUtils
 import uk.ac.warwick.tabula.data.SHAFileHasherComponent
 import uk.ac.warwick.tabula.helpers.DetectMimeType._
@@ -30,18 +30,18 @@ class LegacyFilesystemObjectStorageService(attachmentDir: File, createMissingDir
 
 	override def keyExists(key: String): Boolean = targetFile(key).exists()
 
-	override def fetch(key: String): Option[InputStream] = targetFile(key) match {
-		case f: File if f.exists() => Some(new FileInputStream(f))
-		case _ => None
-	}
+	override def fetch(key: String): RichByteSource = {
+		val source = Files.asByteSource(targetFile(key))
 
-	override def metadata(key: String): Option[ObjectStorageService.Metadata] = targetFile(key) match {
-		case f: File if f.exists() => Some(ObjectStorageService.Metadata(
-			contentLength = f.length(),
-			contentType = detectMimeType(new FileInputStream(f)),
-			fileHash = None
-		))
-		case _ => None
+		val metadata =
+			if (source.isEmpty) None
+			else Some(ObjectStorageService.Metadata(
+				contentLength = source.size(),
+				contentType = detectMimeType(source.openStream()),
+				fileHash = None
+			))
+
+		RichByteSource.wrap(source, metadata)
 	}
 
 	override def push(key: String, in: ByteSource, /* ignored */ metadata: ObjectStorageService.Metadata): Unit = {

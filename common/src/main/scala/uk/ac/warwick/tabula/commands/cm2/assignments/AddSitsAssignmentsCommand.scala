@@ -22,8 +22,8 @@ import scala.collection.convert.Wrappers.MapWrapper
 import scala.collection.mutable
 
 object AddSitsAssignmentsCommand {
-	def apply(department: Department, user: CurrentUser) =
-		new AddSitsAssignmentsCommandInternal(department, user)
+	def apply(department: Department, academicYear: AcademicYear, user: CurrentUser) =
+		new AddSitsAssignmentsCommandInternal(department, academicYear, user)
 			with AutowiringModuleAndDepartmentServiceComponent
 			with AutowiringAssessmentServiceComponent
 			with AutowiringAssessmentMembershipServiceComponent
@@ -77,7 +77,7 @@ class SitsAssignmentItem(
 }
 
 
-class AddSitsAssignmentsCommandInternal(val department: Department, val user: CurrentUser) extends CommandInternal[Seq[Assignment]] {
+class AddSitsAssignmentsCommandInternal(val department: Department, val academicYear: AcademicYear, val user: CurrentUser) extends CommandInternal[Seq[Assignment]] {
 
 	self: AddSitsAssignmentsCommandState with ModuleAndDepartmentServiceComponent with AssessmentServiceComponent with AssessmentMembershipServiceComponent =>
 
@@ -130,9 +130,7 @@ trait PopulatesAddSitsAssignmentsCommand extends PopulateOnForm {
 
 	override def populate(): Unit = {
 		sitsAssignmentItems.clear()
-		if (academicYear != null) {
-			sitsAssignmentItems.addAll(fetchSitsAssignmentItems())
-		}
+		sitsAssignmentItems.addAll(fetchSitsAssignmentItems())
 	}
 
 	/**
@@ -291,18 +289,15 @@ trait AddSitsAssignmentsDescription extends Describable[Seq[Assignment]] {
 
 trait AddSitsAssignmentsCommandState {
 	def department: Department
+	def academicYear: AcademicYear
 	def user: CurrentUser
 
-	// academic year to create all these assignments under. Defaults to whatever academic year it will be in 3
-	// months, which means it will start defaulting to next year from about May (under the assumption that
-	// you would've done the current year's import long before then).
-	var academicYear: AcademicYear = AcademicYear.guessSITSAcademicYearByDate(DateTime.now.plusMonths(3))
 	var includeSubDepartments: Boolean = false
 
 	// All the possible assignments, prepopulated from SITS.
 	var sitsAssignmentItems: JList[SitsAssignmentItem] = LazyLists.create[SitsAssignmentItem]()
 
-	protected def includedItems: mutable.Buffer[SitsAssignmentItem] = sitsAssignmentItems.asScala.filter { _.include }
+	def includedItems: mutable.Buffer[SitsAssignmentItem] = sitsAssignmentItems.asScala.filter { _.include }
 
 	/**
 		* options which are referenced by key by SitsAssignmentItem.optionsId

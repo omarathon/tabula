@@ -31,7 +31,7 @@ class DeleteExamController extends ExamsController {
 
 	private def render(cmd: DeleteExamCommand) = {
 		Mav("exams/exams/admin/delete").crumbs(
-			Breadcrumbs.Exams.Home,
+			Breadcrumbs.Exams.Home(cmd.exam.academicYear),
 			Breadcrumbs.Exams.Department(cmd.exam.module.adminDepartment, cmd.exam.academicYear),
 			Breadcrumbs.Exams.Module(cmd.exam.module, cmd.exam.academicYear)
 		)

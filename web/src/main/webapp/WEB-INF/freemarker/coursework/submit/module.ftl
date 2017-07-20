@@ -11,7 +11,7 @@
 	<div class="assignment ${assignment.alive?string("active", "inactive")}">
 		<h2>
 		<#if assignment.alive>
-			<a href="${url('/coursework/module/${module.code}/${assignment.id}')}">${assignment.name}</a>
+			<a href="<@routes.coursework.assignment assignment />">${assignment.name}</a>
 		<#else>
 			${assignment.name}
 		</#if>

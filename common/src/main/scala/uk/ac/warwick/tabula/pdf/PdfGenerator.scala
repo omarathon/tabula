@@ -1,25 +1,24 @@
 package uk.ac.warwick.tabula.pdf
 
+import java.io.{ByteArrayOutputStream, OutputStream}
 import java.net.URL
 
+import com.google.common.io.ByteSource
+import com.itextpdf.text.pdf.{PdfCopy, PdfReader}
 import com.itextpdf.text.{Document, Image}
 import org.w3c.dom.Element
 import org.xhtmlrenderer.extend.{ReplacedElement, ReplacedElementFactory, UserAgentCallback}
 import org.xhtmlrenderer.layout.LayoutContext
+import org.xhtmlrenderer.pdf.{ITextFSImage, ITextImageElement, ITextRenderer}
 import org.xhtmlrenderer.render.BlockBox
 import org.xhtmlrenderer.simple.extend.FormSubmissionListener
+import uk.ac.warwick.tabula.TopLevelUrlComponent
 import uk.ac.warwick.tabula.commands.profiles.{MemberPhotoUrlGenerator, MemberPhotoUrlGeneratorComponent, PhotosWarwickMemberPhotoUrlGeneratorComponent, ServesPhotosFromExternalApplication}
-import uk.ac.warwick.tabula.services.AutowiringProfileServiceComponent
-import uk.ac.warwick.tabula.web.views.TextRendererComponent
-import org.xhtmlrenderer.pdf.{ITextFSImage, ITextImageElement, ITextRenderer}
-import java.io.{ByteArrayOutputStream, OutputStream}
-
-import com.google.common.io.ByteSource
-import com.itextpdf.text.pdf.{PdfCopy, PdfReader}
-import uk.ac.warwick.spring.Wire
 import uk.ac.warwick.tabula.data.FileDaoComponent
 import uk.ac.warwick.tabula.data.Transactions._
 import uk.ac.warwick.tabula.data.model.FileAttachment
+import uk.ac.warwick.tabula.services.AutowiringProfileServiceComponent
+import uk.ac.warwick.tabula.web.views.TextRendererComponent
 
 import scala.util.Try
 
@@ -32,9 +31,7 @@ trait PDFGeneratorComponent {
 }
 
 trait FreemarkerXHTMLPDFGeneratorComponent extends PDFGeneratorComponent {
-	self: TextRendererComponent with MemberPhotoUrlGeneratorComponent =>
-
-	var topLevelUrl: String = Wire.property("${toplevel.url}")
+	self: TextRendererComponent with MemberPhotoUrlGeneratorComponent with TopLevelUrlComponent =>
 
 	def pdfGenerator: PdfGenerator = new PdfGeneratorImpl()
 	val parentUrlGenerator: MemberPhotoUrlGenerator = photoUrlGenerator
@@ -47,7 +44,7 @@ trait FreemarkerXHTMLPDFGeneratorComponent extends PDFGeneratorComponent {
 			val elementFactory = new ProfileImageReplacedElementFactory(renderer.getSharedContext.getReplacedElementFactory)
 				with MemberPhotoUrlGeneratorComponent
 			renderer.getSharedContext.setReplacedElementFactory(elementFactory)
-			renderer.setDocumentFromString(xthml.replace("&#8194;", " "), topLevelUrl)
+			renderer.setDocumentFromString(xthml.replace("&#8194;", " "), toplevelUrl)
 			renderer.layout()
 			renderer.createPDF(out)
 		}
@@ -65,7 +62,7 @@ trait PDFGeneratorWithFileStorageComponent extends PDFGeneratorComponent {
 
 trait FreemarkerXHTMLPDFGeneratorWithFileStorageComponent extends FreemarkerXHTMLPDFGeneratorComponent with PDFGeneratorWithFileStorageComponent {
 
-	self: FileDaoComponent with TextRendererComponent with MemberPhotoUrlGeneratorComponent =>
+	self: FileDaoComponent with TextRendererComponent with MemberPhotoUrlGeneratorComponent with TopLevelUrlComponent =>
 
 	override def pdfGenerator: PdfGeneratorWithFileStorage = new PdfGeneratorWithFileStorageImpl()
 
@@ -98,7 +95,7 @@ trait CombinesPdfs {
 		val copy = new PdfCopy(document, output)
 		document.open()
 		pdfs.foreach(attachment => {
-			val reader = new PdfReader(attachment.dataStream)
+			val reader = new PdfReader(attachment.asByteSource.openStream())
 
 			(1 to reader.getNumberOfPages).foreach(page => {
 				copy.addPage(copy.getImportedPage(reader, page))

@@ -1,14 +1,14 @@
 package uk.ac.warwick.tabula.services.permissions
 
+import uk.ac.warwick.tabula._
 import uk.ac.warwick.tabula.data.model.{Assignment, Department, Module, SeenSecondMarkingLegacyWorkflow}
 import uk.ac.warwick.tabula.helpers.MutablePromise
+import uk.ac.warwick.tabula.helpers.Promises._
+import uk.ac.warwick.tabula.roles.Marker
 import uk.ac.warwick.tabula.services.AssessmentService
-import uk.ac.warwick.tabula.{CurrentUser, Fixtures, Mockito, TestBase}
 import uk.ac.warwick.userlookup.User
 
 import scala.collection.JavaConversions._
-import uk.ac.warwick.tabula.roles.Marker
-import uk.ac.warwick.tabula.helpers.Promises._
 
 class MarkerRoleProviderTest extends TestBase with Mockito {
 
@@ -57,6 +57,11 @@ class MarkerRoleProviderTest extends TestBase with Mockito {
 	mockAssignmentService.getAssignmentsByModuleAndMarker(mod1, cuscavUser, None) returns Seq(assignmentIsMarker1)
 	mockAssignmentService.getAssignmentsByModuleAndMarker(mod2, cuscavUser, None) returns Seq(assignmentIsMarker2)
 	mockAssignmentService.getAssignmentsByModuleAndMarker(mod3, cuscavUser, None) returns Seq()
+
+	mockAssignmentService.getCM2AssignmentsByDepartmentAndMarker(dept, cuscavUser, None) returns Seq()
+	mockAssignmentService.getCM2AssignmentsByModuleAndMarker(mod1, cuscavUser, None) returns Seq()
+	mockAssignmentService.getCM2AssignmentsByModuleAndMarker(mod2, cuscavUser, None) returns Seq()
+	mockAssignmentService.getCM2AssignmentsByModuleAndMarker(mod3, cuscavUser, None) returns Seq()
 
 	@Test def forAssignment() = withCurrentUser(cuscavUser) {
 		provider.getRolesFor(currentUser, assignmentIsMarker1) should be (Seq(Marker(assignmentIsMarker1)))

@@ -5,7 +5,7 @@
     so that you can select some/all rows and do stuff with them.
 
     Options:
-
+        setup($container): function called when the plugin is instantiated.
         onSomeChecked($container): callback when at least 1 is checked.
         onNoneChecked($container): callback when no rows are checked.
         onAllChecked($container): callback when all rows selected. defaults to behaviour of onSomeChecked.
@@ -18,7 +18,7 @@ $.fn.bigList = function(options) {
     this.each(function(){
         var $this = $(this);
 
-        if (options == 'changed') {
+        if (options === 'changed') {
             this.checkboxChangedFunction();
             return;
         }
@@ -38,7 +38,7 @@ $.fn.bigList = function(options) {
 
         this.checkboxChangedFunction = function(){
             onChange.call($(this)); // pass the checkbox as the context
-            var allChecked = $checkboxes.not(':checked').length == 0;
+            var allChecked = $checkboxes.not(':checked').length === 0;
             $selectAll.prop('checked', allChecked);
             if (allChecked) {
                 $this.data('checked','all');
@@ -68,18 +68,18 @@ $.fn.bigList = function(options) {
             }
         });
 
-		var doNothing = function(){};
 		var setupFunction = options.setup || doNothing;
 		setupFunction.call($this);
 
         $(function(){
             $checkboxes.trigger('change');
+            $this.closest('form.dirty-check').trigger('reinitialize.areYouSure');
         });
-
-        // Returns an array of IDs.
-        var getCheckedFeedbacks = function() {
-            return $checkboxes.filter(':checked').map(function(i,input){ return input.value; });
-        };
+		//
+        // // Returns an array of IDs.
+        // var getCheckedFeedbacks = function() {
+        //     return $checkboxes.filter(':checked').map(function(i,input){ return input.value; });
+        // };
     });
     return this;
 }

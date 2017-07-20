@@ -26,6 +26,7 @@ import uk.ac.warwick.tabula.commands.TaskBenchmarking
 
 trait UserGroupMembershipHelperMethods[A <: StringId with Serializable] {
 	def findBy(user: User): Seq[A]
+	def cacheName: String
 	def cache: Option[Cache[String, Array[String]]]
 }
 
@@ -205,16 +206,20 @@ class UserGroupMembershipHelperCacheService extends QueueListener with Initializ
 	var context: String = Wire.property("${module.context}")
 
 	def invalidate(helper: UserGroupMembershipHelperMethods[_], user: User) {
-		helper.cache.foreach { cache =>
-			cache.remove(user.getUserId)
+		helper.cache match {
+			case Some(cache: Cache[String, Array[String]]) =>
+				cache.remove(user.getUserId)
 
-			// Must also inform other app servers - unless we're using a shared distributed cache, i.e. Memcached
-			if (cacheStrategy != CacheStrategy.MemcachedRequired && cacheStrategy != CacheStrategy.MemcachedIfAvailable) {
-				val msg = new UserGroupMembershipHelperCacheBusterMessage
-				msg.cacheName = cache.getName
-				msg.usercode = user.getUserId
-				queue.send(msg)
-			}
+				// Must also inform other app servers - unless we're using a shared distributed cache, i.e. Memcached
+				if (cacheStrategy != CacheStrategy.MemcachedRequired && cacheStrategy != CacheStrategy.MemcachedIfAvailable) {
+					val msg = new UserGroupMembershipHelperCacheBusterMessage
+					msg.cacheName = cache.getName
+					msg.usercode = user.getUserId
+					queue.send(msg)
+				}
+
+			case None =>
+				logger.warn(s"Couldn't find a cache bean named ${helper.cacheName}")
 		}
 	}
 

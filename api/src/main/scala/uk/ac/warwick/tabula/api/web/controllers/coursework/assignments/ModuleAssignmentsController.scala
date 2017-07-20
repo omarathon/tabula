@@ -11,13 +11,14 @@ import org.springframework.web.bind.annotation._
 import uk.ac.warwick.tabula.JavaImports._
 import uk.ac.warwick.tabula.api.commands.JsonApiRequest
 import uk.ac.warwick.tabula.api.web.controllers.ApiController
-import uk.ac.warwick.tabula.api.web.helpers.{AssessmentMembershipInfoToJsonConverter, AssignmentToJsonConverter}
+import uk.ac.warwick.tabula.api.web.helpers.{AssessmentMembershipInfoToJsonConverter, AssignmentToJsonConverter, AssignmentToXmlConverter}
 import uk.ac.warwick.tabula.commands.coursework.assignments.{AddAssignmentCommand, ModifyAssignmentCommand}
 import uk.ac.warwick.tabula.commands.{UpstreamGroup, UpstreamGroupPropertyEditor, ViewViewableCommand}
 import uk.ac.warwick.tabula.data.model._
+import uk.ac.warwick.tabula.helpers.XmlUtils._
 import uk.ac.warwick.tabula.permissions.Permissions
+import uk.ac.warwick.tabula.web.views.{JSONErrorView, JSONView, XmlErrorView, XmlView}
 import uk.ac.warwick.tabula.web.{Mav, Routes}
-import uk.ac.warwick.tabula.web.views.{JSONErrorView, JSONView}
 import uk.ac.warwick.tabula.{AcademicYear, CurrentUser}
 
 import scala.beans.BeanProperty
@@ -25,6 +26,7 @@ import scala.collection.JavaConverters._
 
 abstract class ModuleAssignmentsController extends ApiController
 	with AssignmentToJsonConverter
+	with AssignmentToXmlConverter
 	with AssessmentMembershipInfoToJsonConverter
 
 @Controller
@@ -51,6 +53,28 @@ class ListAssignmentsForModuleController extends ModuleAssignmentsController {
 				"academicYear" -> Option(academicYear).map { _.toString }.orNull,
 				"assignments" -> assignments.map(jsonAssignmentObject)
 			)))
+		}
+	}
+
+	@RequestMapping(method = Array(GET), produces = Array("application/xml"))
+	def listXML(@ModelAttribute("listCommand") command: ViewViewableCommand[Module], errors: Errors, @RequestParam(required = false) academicYear: AcademicYear): Mav = {
+		if (errors.hasErrors) {
+			Mav(new XmlErrorView(errors))
+		} else {
+			val module = command.apply()
+			val assignments = module.assignments.asScala.filter { assignment =>
+				!assignment.deleted && (academicYear == null || academicYear == assignment.academicYear)
+			}
+
+			Mav(new XmlView(
+				<assignments>
+					{ assignments.map(xmlAssignmentObject) }
+				</assignments> % Map(
+					"success" -> true,
+					"status" -> "ok",
+					"academicYear" -> Option(academicYear).map { _.toString }.orNull
+				)
+			))
 		}
 	}
 }
@@ -143,6 +167,7 @@ trait AssignmentPropertiesRequest[A <: ModifyAssignmentCommand] extends JsonApiR
 		Option(allowExtensionsAfterCloseDate).foreach { state.allowExtensionsAfterCloseDate = _ }
 		Option(summative).foreach { state.summative = _ }
 		Option(dissertation).foreach { state.dissertation = _ }
+		Option(publishFeedback).foreach { state.publishFeedback = _ }
 		Option(includeInFeedbackReportWithoutSubmissions).foreach { state.includeInFeedbackReportWithoutSubmissions = _ }
 		Option(automaticallyReleaseToMarkers).foreach { state.automaticallyReleaseToMarkers = _ }
 		Option(automaticallySubmitToTurnitin).foreach { state.automaticallySubmitToTurnitin = _ }

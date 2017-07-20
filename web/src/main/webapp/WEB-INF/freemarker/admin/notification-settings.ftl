@@ -159,7 +159,7 @@
 					</@bs3form.checkbox>
 				</div>
 				<div class="col-md-6">
-					<p>Send to all selected groups or only to the first group with someone in it (e.g. Departmental Adminsitrators will only be notified if there are no Module Managers for that module).</p>
+					<p>Send to all selected groups or only to the first group with someone in it (e.g. Departmental Administrators will only be notified if there are no Module Managers for that module).</p>
 					<@bs3form.radio>
 						<@f.radiobutton path="finaliseFeedbackNotificationNotifyFirstNonEmptyGroupOnly" value="false" />
 						Notify all selected groups of people

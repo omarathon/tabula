@@ -2,13 +2,11 @@
 <#import "*/cm2_macros.ftl" as cm2 />
 <#import "../_filters.ftl" as filters />
 <#escape x as x?html>
-	<@cm2.headerMenu department academicYear />
-
 	<#function route_function dept>
 		<#local result><@routes.cm2.departmenthome dept academicYear /></#local>
 		<#return result />
 	</#function>
-	<@fmt.id7_deptheader "Assignments" route_function "in" />
+	<@cm2.departmentHeader "Assignments" department route_function academicYear "in" />
 
 	<#-- Filtering -->
 	<div class="fix-area">

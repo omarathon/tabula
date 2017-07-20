@@ -2,10 +2,10 @@ package uk.ac.warwick.tabula.coursework
 
 import org.joda.time.DateTime
 import org.openqa.selenium.{By, WebElement}
-import uk.ac.warwick.tabula.{BrowserTest, FunctionalTestAcademicYear, LoginDetails}
-import uk.ac.warwick.tabula.web.{FeaturesDriver, FixturesDriver}
-import org.scalatest.exceptions.TestFailedException
 import org.scalatest.GivenWhenThen
+import org.scalatest.exceptions.TestFailedException
+import uk.ac.warwick.tabula.web.{FeaturesDriver, FixturesDriver}
+import uk.ac.warwick.tabula.{BrowserTest, FunctionalTestAcademicYear, LoginDetails}
 
 import scala.collection.JavaConverters._
 import scala.concurrent.ExecutionContext.Implicits.global
@@ -84,7 +84,7 @@ trait CourseworkFixtures extends BrowserTest with FeaturesDriver with FixturesDr
 
 	def as[T](user: LoginDetails)(fn: => T): T = {
 		currentUser = user
-		signIn as user to Path("/coursework")
+		signIn as user to Path("/cm1")
 
 		fn
 	}
@@ -136,7 +136,7 @@ trait CourseworkFixtures extends BrowserTest with FeaturesDriver with FixturesDr
 			pick(".moduleassistant-table", assistants)
 
 			// as you were...
-			go to Path("/coursework")
+			go to Path("/cm1")
 			click on linkText("Go to the Test Services admin page")
 			verifyPageLoaded{
 				// wait for the page to load
@@ -228,10 +228,10 @@ trait CourseworkFixtures extends BrowserTest with FeaturesDriver with FixturesDr
 
 			click on linkText(assignmentName)
 
-			currentUrl should endWith(assignmentId + "/")
+			currentUrl should endWith(assignmentId)
 		} else {
 			// Just go straight to the submission URL
-			go to Path("/coursework/module/" + moduleCode.toLowerCase + "/" + assignmentId + "/")
+			go to Path("/cm1/module/" + moduleCode.toLowerCase + "/" + assignmentId + "/")
 		}
 
 		// The assignment submission page uses FormFields which don't have readily memorable names, so we need to get fields by their label
@@ -257,10 +257,10 @@ trait CourseworkFixtures extends BrowserTest with FeaturesDriver with FixturesDr
 
 			click on linkText(assignmentName)
 
-			currentUrl should endWith(assignmentId + "/")
+			currentUrl should endWith(assignmentId)
 		} else {
 			// Just go straight to the submission URL
-			go to Path("/coursework/module/" + moduleCode.toLowerCase + "/" + assignmentId + "/")
+			go to Path("/cm1/module/" + moduleCode.toLowerCase + "/" + assignmentId + "/")
 		}
 
 		click on partialLinkText("Request an extension")

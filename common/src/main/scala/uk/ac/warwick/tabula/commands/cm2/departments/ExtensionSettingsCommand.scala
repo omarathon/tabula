@@ -3,7 +3,7 @@ package uk.ac.warwick.tabula.commands.cm2.departments
 import org.springframework.validation.Errors
 import uk.ac.warwick.tabula.JavaImports._
 import uk.ac.warwick.tabula.commands._
-import uk.ac.warwick.tabula.commands.cm2.departments.ExtensionSettingsCommand.Result
+import uk.ac.warwick.tabula.commands.cm2.departments.ExtensionSettingsCommand._
 import uk.ac.warwick.tabula.data.Transactions._
 import uk.ac.warwick.tabula.data.model.Department
 import uk.ac.warwick.tabula.helpers.StringUtils._
@@ -18,6 +18,8 @@ import scala.collection.JavaConverters._
 object ExtensionSettingsCommand {
 	type Result = Department
 	type Command = Appliable[Result] with ExtensionSettingsCommandState with SelfValidating
+
+	val AdminPermission = Permissions.Department.ManageExtensionSettings
 
 	def apply(department: Department): Command =
 		new ExtensionSettingsCommandInternal(department)
@@ -65,7 +67,7 @@ trait ExtensionSettingsCommandPermissions extends RequiresPermissionsChecking wi
 	self: ExtensionSettingsCommandState =>
 
 	override def permissionsCheck(p: PermissionsChecking): Unit =
-		p.PermissionCheck(Permissions.Department.ManageExtensionSettings, mandatory(department))
+		p.PermissionCheck(AdminPermission, mandatory(department))
 
 }
 
@@ -92,6 +94,8 @@ trait ExtensionSettingsCommandValidation extends SelfValidating {
 
 trait ExtensionSettingsCommandDescription extends Describable[Result] {
 	self: ExtensionSettingsCommandState =>
+
+	override lazy val eventName: String = "ExtensionSettings"
 
 	override def describe(d: Description): Unit = d.department(department)
 }

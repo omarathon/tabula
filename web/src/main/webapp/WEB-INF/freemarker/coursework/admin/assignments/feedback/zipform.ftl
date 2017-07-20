@@ -2,7 +2,8 @@
 <#assign f=JspTaglibs["/WEB-INF/tld/spring-form.tld"]>
 <#escape x as x?html>
 <div id="batch-feedback-form">
-<@f.form method="post" enctype="multipart/form-data" action="${url('/coursework/admin/module/${module.code}/assignments/${assignment.id}/feedback/batch')}" commandName="addFeedbackCommand">
+	<#assign submitUrl><@routes.coursework.addFeedback assignment /></#assign>
+<@f.form method="post" enctype="multipart/form-data" action=submitUrl commandName="addFeedbackCommand">
 <input type="hidden" name="batch" value="true">
 
 <h1>Submit feedback for ${assignment.name}</h1>
@@ -15,7 +16,7 @@
 </p>
 <#if features.feedbackTemplates && assignment.hasFeedbackTemplate>
 	<p>
-		You can <a  href="<@url page='/coursework/admin/module/${assignment.module.code}/assignments/${assignment.id}/feedback-templates.zip'/>">download a zip</a>
+		You can <a  href="<@routes.coursework.feedbackTemplatesZip assignment />">download a zip</a>
 		containing copies of this assignments feedback template for each student with the university IDs added for you.
 	</p>
 </#if>

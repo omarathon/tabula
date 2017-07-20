@@ -3,38 +3,91 @@ package uk.ac.warwick.tabula.commands.cm2.departments
 import org.joda.time.DateTime
 import org.springframework.format.annotation.DateTimeFormat
 import org.springframework.validation.{Errors, ValidationUtils}
-import uk.ac.warwick.spring.Wire
 import uk.ac.warwick.tabula.commands._
+import uk.ac.warwick.tabula.commands.cm2.departments.FeedbackReportCommand._
 import uk.ac.warwick.tabula.data.model.Department
 import uk.ac.warwick.tabula.jobs.coursework.FeedbackReportJob
 import uk.ac.warwick.tabula.permissions._
-import uk.ac.warwick.tabula.services.jobs.{JobInstance, JobService}
+import uk.ac.warwick.tabula.services.jobs.{AutowiringJobServiceComponent, JobInstance, JobServiceComponent}
+import uk.ac.warwick.tabula.system.permissions.{PermissionsChecking, PermissionsCheckingMethods, RequiresPermissionsChecking}
 import uk.ac.warwick.tabula.validators.WithinYears
-import uk.ac.warwick.tabula.{CurrentUser, DateFormats}
+import uk.ac.warwick.tabula.{AcademicYear, CurrentUser, DateFormats}
 
-class FeedbackReportCommand (val department:Department, val user: CurrentUser) extends Command[JobInstance]
-			with Unaudited with SelfValidating {
+object FeedbackReportCommand {
+	type Result = JobInstance
+	type Command = Appliable[Result] with FeedbackReportCommandState with SelfValidating
 
-	PermissionCheck(Permissions.Department.DownloadFeedbackReport, department)
+	val AdminPermission = Permissions.Department.DownloadFeedbackReport
 
-	@WithinYears(maxFuture = 3, maxPast = 3) @DateTimeFormat(pattern = DateFormats.DateTimePickerPattern)
-	var startDate:DateTime = _
+	def apply(department: Department, academicYear: AcademicYear, user: CurrentUser): Command =
+		new FeedbackReportCommandInternal(department, academicYear, user)
+			with FeedbackReportCommandRequest
+			with ComposableCommand[Result]
+			with FeedbackReportCommandPermissions
+			with FeedbackReportCommandValidation
+			with FeedbackReportCommandDescription
+			with AutowiringJobServiceComponent
+}
 
-	@WithinYears(maxFuture = 3, maxPast = 3) @DateTimeFormat(pattern = DateFormats.DateTimePickerPattern)
-	var endDate:DateTime = _
+trait FeedbackReportCommandState {
+	def department: Department
+	def academicYear: AcademicYear
+	def user: CurrentUser
+}
 
-	var jobService: JobService = Wire.auto[JobService]
+trait FeedbackReportCommandRequest {
+	self: FeedbackReportCommandState =>
 
-	def applyInternal(): JobInstance = jobService.add(Option(user), FeedbackReportJob(department, startDate, endDate))
+	@WithinYears(maxFuture = 3, maxPast = 3)
+	@DateTimeFormat(pattern = DateFormats.DateTimePickerPattern)
+	var startDate: DateTime = DateTime.now.minusMonths(3).withTimeAtStartOfDay()
 
-	override def describe(d: Description): Unit = d.department(department)
+	@WithinYears(maxFuture = 3, maxPast = 3)
+	@DateTimeFormat(pattern = DateFormats.DateTimePickerPattern)
+	var endDate: DateTime = DateTime.now.plusDays(1).withTimeAtStartOfDay()
+}
 
-	override def validate(errors: Errors) {
+class FeedbackReportCommandInternal(val department: Department, val academicYear: AcademicYear, val user: CurrentUser)
+	extends CommandInternal[Result] with FeedbackReportCommandState {
+	self: FeedbackReportCommandRequest
+		with JobServiceComponent =>
+
+	override def applyInternal(): Result =
+		jobService.add(Option(user), FeedbackReportJob(department, academicYear, startDate, endDate))
+
+}
+
+trait FeedbackReportCommandPermissions extends RequiresPermissionsChecking with PermissionsCheckingMethods {
+	self: FeedbackReportCommandState =>
+
+	override def permissionsCheck(p: PermissionsChecking): Unit = {
+		p.PermissionCheck(AdminPermission, mandatory(department))
+	}
+}
+
+trait FeedbackReportCommandValidation extends SelfValidating {
+	self: FeedbackReportCommandRequest =>
+
+	override def validate(errors: Errors): Unit = {
 		ValidationUtils.rejectIfEmptyOrWhitespace(errors, "startDate", "feedback.report.emptyDate")
 		ValidationUtils.rejectIfEmptyOrWhitespace(errors, "endDate", "feedback.report.emptyDate")
-		if(endDate.isBefore(startDate)) {
+		if (endDate.isBefore(startDate)) {
 			errors.rejectValue("startDate", "feedback.report.dateRange")
 		}
 	}
+}
 
+trait FeedbackReportCommandDescription extends Describable[Result] {
+	self: FeedbackReportCommandState with FeedbackReportCommandRequest =>
+
+	override lazy val eventName: String = "FeedbackReport"
+
+	override def describe(d: Description): Unit =
+		d.department(department).properties(
+			"startDate" -> startDate,
+			"endDate" -> endDate
+		)
+
+	override def describeResult(d: Description, result: Result): Unit =
+		d.property("jobInstance" -> result.id)
 }

@@ -5,7 +5,7 @@
 
 <#assign requestPath = (info.requestedUri.path!"") />
 
-<#if requestPath == '/coursework' || requestPath?starts_with('/coursework/')>
+<#if requestPath == cm1Context || requestPath?starts_with("${cm1Context}/")>
 	<#assign brand_name = "id6" />
 </#if>
 

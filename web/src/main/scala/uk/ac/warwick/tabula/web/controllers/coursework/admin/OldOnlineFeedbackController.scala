@@ -7,7 +7,7 @@ import org.springframework.stereotype.Controller
 import org.springframework.validation.Errors
 import org.springframework.web.bind.annotation.{ModelAttribute, PathVariable, RequestMapping}
 import uk.ac.warwick.tabula.CurrentUser
-import uk.ac.warwick.tabula.commands.coursework.feedback.{GenerateGradesFromMarkCommand, OnlineFeedbackCommand, OnlineFeedbackFormCommand}
+import uk.ac.warwick.tabula.commands.coursework.feedback.{OldGenerateGradesFromMarkCommand, OldOnlineFeedbackCommand, OldOnlineFeedbackFormCommand}
 import uk.ac.warwick.tabula.coursework.web.Routes
 import uk.ac.warwick.tabula.web.controllers.coursework.OldCourseworkController
 import uk.ac.warwick.tabula.data.model._
@@ -21,15 +21,15 @@ class OldOnlineFeedbackController extends OldCourseworkController with Autowirin
 
 	@ModelAttribute
 	def command(@PathVariable module: Module, @PathVariable assignment: Assignment, submitter: CurrentUser) =
-		OnlineFeedbackCommand(mandatory(module), mandatory(assignment), submitter)
+		OldOnlineFeedbackCommand(mandatory(module), mandatory(assignment), submitter)
 
 	@RequestMapping
-	def showTable(@ModelAttribute command: OnlineFeedbackCommand, errors: Errors): Mav = {
+	def showTable(@ModelAttribute command: OldOnlineFeedbackCommand, errors: Errors): Mav = {
 
 		val feedbackGraphs = command.apply()
 		val (assignment, module) = (command.assignment, command.assignment.module)
 
-		Mav(s"$urlPrefix/admin/assignments/feedback/online_framework",
+		Mav("coursework/admin/assignments/feedback/online_framework",
 			"showMarkingCompleted" -> false,
 			"showGenericFeedback" -> true,
 			"assignment" -> assignment,
@@ -50,23 +50,23 @@ class OldOnlineFeedbackController extends OldCourseworkController with Autowirin
 @RequestMapping(Array("/${cm1.prefix}/admin/module/{module}/assignments/{assignment}/feedback/online/{student}"))
 class OldOnlineFeedbackFormController extends OldCourseworkController {
 
-	validatesSelf[OnlineFeedbackFormCommand]
+	validatesSelf[OldOnlineFeedbackFormCommand]
 
 	@ModelAttribute("command")
 	def command(@PathVariable student: User, @PathVariable module: Module, @PathVariable assignment: Assignment, currentUser: CurrentUser) =
-		OnlineFeedbackFormCommand(module, assignment, student, currentUser.apparentUser, currentUser, GenerateGradesFromMarkCommand(mandatory(module), mandatory(assignment)))
+		OldOnlineFeedbackFormCommand(module, assignment, student, currentUser.apparentUser, currentUser, OldGenerateGradesFromMarkCommand(mandatory(module), mandatory(assignment)))
 
 	@RequestMapping(method = Array(GET, HEAD))
-	def showForm(@ModelAttribute("command") command: OnlineFeedbackFormCommand, errors: Errors): Mav = {
+	def showForm(@ModelAttribute("command") command: OldOnlineFeedbackFormCommand, errors: Errors): Mav = {
 
-		Mav(s"$urlPrefix/admin/assignments/feedback/online_feedback",
+		Mav("coursework/admin/assignments/feedback/online_feedback",
 			"command" -> command,
 			"isGradeValidation" -> command.module.adminDepartment.assignmentGradeValidation
 		).noLayout()
 	}
 
 	@RequestMapping(method = Array(POST))
-	def submit(@ModelAttribute("command") @Valid command: OnlineFeedbackFormCommand, errors: Errors): Mav = {
+	def submit(@ModelAttribute("command") @Valid command: OldOnlineFeedbackFormCommand, errors: Errors): Mav = {
 		if (errors.hasErrors) {
 			showForm(command, errors)
 		} else {

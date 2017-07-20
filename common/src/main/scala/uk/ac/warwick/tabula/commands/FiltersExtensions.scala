@@ -4,23 +4,25 @@ import java.net.{URI, URLDecoder}
 
 import org.apache.http.client.utils.URLEncodedUtils
 import org.hibernate.NullPrecedence
-import org.hibernate.criterion.{Order, Restrictions}
 import org.hibernate.criterion.Restrictions.{gt => _, _}
+import org.hibernate.criterion.{Order, Restrictions}
 import org.joda.time.DateTime
 import org.springframework.beans.factory.annotation.Autowired
+import uk.ac.warwick.tabula.AcademicYear
 import uk.ac.warwick.tabula.JavaImports.{JArrayList, _}
+import uk.ac.warwick.tabula.data.Aliasable.addAliases
 import uk.ac.warwick.tabula.data.ScalaRestriction._
-import uk.ac.warwick.tabula.data.convert._
 import uk.ac.warwick.tabula.data._
+import uk.ac.warwick.tabula.data.convert._
 import uk.ac.warwick.tabula.data.model._
 import uk.ac.warwick.tabula.data.model.forms.ExtensionState
 import uk.ac.warwick.tabula.helpers.Logging
+import uk.ac.warwick.tabula.helpers.StringUtils._
 import uk.ac.warwick.tabula.services._
+import uk.ac.warwick.tabula.system.TwoWayConverter
 import uk.ac.warwick.util.web.UriBuilder
 
 import scala.collection.JavaConverters._
-import uk.ac.warwick.tabula.helpers.StringUtils._
-import uk.ac.warwick.tabula.system.TwoWayConverter
 
 object FiltersExtensions {
 	val AliasPaths: Map[String, Seq[(String, AliasAndJoinType)]] = Seq(
@@ -46,11 +48,11 @@ object FiltersExtensions {
 }
 
 trait FiltersExtensions extends {
-
 	self: TermServiceComponent =>
 
 	import FiltersExtensions._
 
+	def academicYear: AcademicYear
 	def times: JList[TimeFilter]
 	def states: JList[ExtensionState]
 	def assignments: JList[Assignment]
@@ -72,8 +74,11 @@ trait FiltersExtensions extends {
 		Option(result.getQuery).getOrElse("")
 	}
 
+	def academicYearRestriction: Option[ScalaRestriction] =
+		is("assignment.academicYear", academicYear, AliasPaths("assignment"): _*)
+
 	def receivedRestriction: Option[ScalaRestriction] = if (times.isEmpty) {
-			None
+		None
 	} else {
 		val criterion = disjunction()
 		times.asScala.foreach(t => criterion.add(Restrictions.gt("requestedOn", t.time)))

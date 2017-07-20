@@ -6,7 +6,7 @@ import org.springframework.web.bind.annotation.{ModelAttribute, PathVariable, Re
 import uk.ac.warwick.tabula.CurrentUser
 import uk.ac.warwick.tabula.web.controllers.coursework.OldCourseworkController
 import uk.ac.warwick.tabula.data.model.{Assignment, Module}
-import uk.ac.warwick.tabula.commands.coursework.assignments.AddMarkerFeedbackCommand
+import uk.ac.warwick.tabula.commands.coursework.assignments.OldAddMarkerFeedbackCommand
 import org.springframework.validation.Errors
 import uk.ac.warwick.tabula.web.Mav
 import uk.ac.warwick.tabula.coursework.web.Routes
@@ -16,18 +16,18 @@ import uk.ac.warwick.userlookup.User
 @RequestMapping(value=Array("/${cm1.prefix}/admin/module/{module}/assignments/{assignment}/marker/{marker}/feedback"))
 class OldAddMarkerFeedbackController extends OldCourseworkController {
 
-	@ModelAttribute def command(@PathVariable module: Module,
-															@PathVariable assignment: Assignment,
-															@PathVariable marker: User,
-															user: CurrentUser) =
-		new AddMarkerFeedbackCommand(module, assignment, marker, user)
+	@ModelAttribute("addMarkerFeedbackCommand")
+	def command(@PathVariable module: Module,
+		@PathVariable assignment: Assignment,
+		@PathVariable marker: User,
+		user: CurrentUser) = new OldAddMarkerFeedbackCommand(module, assignment, marker, user)
 
 	@RequestMapping(method = Array(HEAD, GET))
 	def uploadForm(@PathVariable module: Module,
 								 @PathVariable assignment: Assignment,
 								 @PathVariable marker: User,
-								 @ModelAttribute cmd: AddMarkerFeedbackCommand): Mav = {
-		Mav(s"$urlPrefix/admin/assignments/markerfeedback/form",
+								 @ModelAttribute("addMarkerFeedbackCommand") cmd: OldAddMarkerFeedbackCommand): Mav = {
+		Mav("coursework/admin/assignments/markerfeedback/form",
 			"isProxying" -> cmd.isProxying,
 			"proxyingAs" -> marker
 		).crumbs(
@@ -39,7 +39,7 @@ class OldAddMarkerFeedbackController extends OldCourseworkController {
 	def confirmUpload(@PathVariable module: Module,
 										@PathVariable assignment: Assignment,
 										@PathVariable marker: User,
-										@ModelAttribute cmd: AddMarkerFeedbackCommand,
+										@ModelAttribute("addMarkerFeedbackCommand") cmd: OldAddMarkerFeedbackCommand,
 										errors: Errors): Mav = {
 		cmd.preExtractValidation(errors)
 		if (errors.hasErrors) {
@@ -47,7 +47,7 @@ class OldAddMarkerFeedbackController extends OldCourseworkController {
 		} else {
 			cmd.postExtractValidation(errors)
 			cmd.processStudents()
-			Mav(s"$urlPrefix/admin/assignments/markerfeedback/preview",
+			Mav("coursework/admin/assignments/markerfeedback/preview",
 				"isProxying" -> cmd.isProxying,
 				"proxyingAs" -> marker
 			).crumbs(
@@ -60,7 +60,7 @@ class OldAddMarkerFeedbackController extends OldCourseworkController {
 	def doUpload(@PathVariable module: Module,
 							 @PathVariable assignment: Assignment,
 							 @PathVariable marker: User,
-							 @ModelAttribute cmd: AddMarkerFeedbackCommand,
+							 @ModelAttribute("addMarkerFeedbackCommand") cmd: OldAddMarkerFeedbackCommand,
 							 errors: Errors): Mav = {
 
 		cmd.preExtractValidation(errors)

@@ -2,7 +2,7 @@ package uk.ac.warwick.tabula.web.controllers.coursework
 
 import org.mockito.Mockito._
 import org.springframework.validation.Errors
-import uk.ac.warwick.tabula.commands.coursework.feedback.{OnlineFeedbackCommand, OnlineFeedbackCommandTestSupport, OnlineFeedbackFormCommand}
+import uk.ac.warwick.tabula.commands.coursework.feedback.{OldOnlineFeedbackCommand, OnlineFeedbackCommandTestSupport, OldOnlineFeedbackFormCommand}
 import uk.ac.warwick.tabula.web.controllers.coursework.admin.{OldOnlineFeedbackController, OldOnlineFeedbackFormController}
 import uk.ac.warwick.tabula.data.model.{Assignment, Department, Module, StudentMember}
 import uk.ac.warwick.tabula._
@@ -21,7 +21,7 @@ class OldOnlineFeedbackControllerTest extends TestBase with Mockito {
 		assignment.module = module
 		assignment.name = "Herons are evil"
 
-		val command = new OnlineFeedbackCommand(module, assignment, currentUser) with OnlineFeedbackCommandTestSupport
+		val command = new OldOnlineFeedbackCommand(module, assignment, currentUser) with OnlineFeedbackCommandTestSupport
 
 	}
 
@@ -30,7 +30,6 @@ class OldOnlineFeedbackControllerTest extends TestBase with Mockito {
 		new Fixture {
 			val controller = new OldOnlineFeedbackController
 			controller.userLookup = new MockUserLookup
-			controller.urlPrefix = "coursework"
 			val mav: Mav = controller.showTable(command, null)
 			mav.map("assignment") should be(assignment)
 			mav.map("command") should be(command)
@@ -56,7 +55,7 @@ class OldOnlineFeedbackFormControllerTest extends AppContextTestBase with Mockit
 		val marker = new User("marker")
 		val currentUser = new CurrentUser(marker, marker)
 
-		val command: OnlineFeedbackFormCommand = mock[OnlineFeedbackFormCommand]
+		val command: OldOnlineFeedbackFormCommand = mock[OldOnlineFeedbackFormCommand]
 		command.module returns module
 		val controller = new OldOnlineFeedbackFormController
 	}

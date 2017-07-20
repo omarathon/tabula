@@ -7,7 +7,7 @@ import org.springframework.stereotype.Controller
 import org.springframework.validation.Errors
 import org.springframework.web.bind.annotation.{ModelAttribute, PathVariable, RequestMapping}
 import uk.ac.warwick.tabula.CurrentUser
-import uk.ac.warwick.tabula.commands.coursework.assignments.{ReleaseForMarkingCommand, ReleaseForMarkingState}
+import uk.ac.warwick.tabula.commands.coursework.assignments.{OldReleaseForMarkingCommand, ReleaseForMarkingState}
 import uk.ac.warwick.tabula.commands.{Appliable, SelfValidating}
 import uk.ac.warwick.tabula.coursework.web.Routes
 import uk.ac.warwick.tabula.web.controllers.coursework.OldCourseworkController
@@ -25,11 +25,11 @@ class OldReleaseForMarkingController extends OldCourseworkController {
 	def command(@PathVariable module: Module,
 				@PathVariable assignment: Assignment,
 				user: CurrentUser
-				): ReleaseForMarkingCommand = ReleaseForMarkingCommand(module, assignment, user.apparentUser)
+				): ReleaseForMarkingCommand = OldReleaseForMarkingCommand(module, assignment, user.apparentUser)
 
 	validatesSelf[SelfValidating]
 
-	def confirmView(assignment: Assignment): Mav = Mav(s"$urlPrefix/admin/assignments/submissionsandfeedback/release-submission",
+	def confirmView(assignment: Assignment): Mav = Mav("coursework/admin/assignments/submissionsandfeedback/release-submission",
 		"assignment" -> assignment)
 		.crumbs(Breadcrumbs.Department(assignment.module.adminDepartment), Breadcrumbs.Module(assignment.module))
 

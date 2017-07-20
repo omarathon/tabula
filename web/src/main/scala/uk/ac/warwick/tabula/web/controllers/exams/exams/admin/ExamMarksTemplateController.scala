@@ -5,7 +5,7 @@ import org.springframework.stereotype.Controller
 import org.springframework.web.bind.annotation.{ModelAttribute, PathVariable, RequestMapping}
 import uk.ac.warwick.spring.Wire
 import uk.ac.warwick.tabula.commands.Appliable
-import uk.ac.warwick.tabula.commands.coursework.feedback.MarksTemplateCommand._
+import uk.ac.warwick.tabula.commands.coursework.feedback.OldMarksTemplateCommand._
 import uk.ac.warwick.tabula.commands.exams.exams.{GenerateExamMarksTemplateCommand, GenerateOwnExamMarksTemplateCommand}
 import uk.ac.warwick.tabula.data.model.{Exam, Module}
 import uk.ac.warwick.tabula.services.AssessmentMembershipService

@@ -1,7 +1,7 @@
 package uk.ac.warwick.tabula.web.controllers.profiles.timetables
 
 import org.joda.time.{Hours, LocalTime, Minutes}
-import uk.ac.warwick.tabula.AcademicYear
+import uk.ac.warwick.tabula.{AcademicYear, AutowiringTopLevelUrlComponent}
 import uk.ac.warwick.tabula.commands.TaskBenchmarking
 import uk.ac.warwick.tabula.commands.profiles.PhotosWarwickMemberPhotoUrlGeneratorComponent
 import uk.ac.warwick.tabula.data.model.groups.DayOfWeek
@@ -36,6 +36,7 @@ trait DownloadsTimetable extends TaskBenchmarking {
 			) with FreemarkerXHTMLPDFGeneratorComponent
 				with AutowiredTextRendererComponent
 				with PhotosWarwickMemberPhotoUrlGeneratorComponent
+				with AutowiringTopLevelUrlComponent
 
 		} else {
 
@@ -125,7 +126,7 @@ trait DownloadsTimetable extends TaskBenchmarking {
 			) with FreemarkerXHTMLPDFGeneratorComponent
 				with AutowiredTextRendererComponent
 				with PhotosWarwickMemberPhotoUrlGeneratorComponent
-
+				with AutowiringTopLevelUrlComponent
 		}
 	}
 

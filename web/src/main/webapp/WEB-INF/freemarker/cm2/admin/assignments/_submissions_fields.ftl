@@ -55,21 +55,28 @@
 			<@f.checkbox path="allowExtensions" id="allowExtensions" /> Allow extensions
 		</@bs3form.checkbox>
 	<span class="help-block">
-		You can grant extensions for an assignment to individual students and students can request extensions via Tabula.
+		You can grant extensions for an assignment to individual students<#if department.allowExtensionRequests> and students can request extensions via Tabula</#if>.
+		<#if can.do("Department.ManageExtensionSettings", department)>
+			<a class="btn btn-default btn-xs use-tooltip" title="Department extension request settings (opens in a new window/tab)" href="<@routes.cm2.extensionSettings department />" target="_blank">Review</a>
+		<#else>
+			Departmental administrators control whether extension requests are allowed across a department.
+		</#if>
 	</span>
 	</@bs3form.labelled_form_group>
 
-	<@bs3form.labelled_form_group path="">
-		<@bs3form.checkbox path="extensionAttachmentMandatory">
-			<@f.checkbox path="extensionAttachmentMandatory" id="extensionAttachmentMandatory" /> Students must attach at least one file to an extension request
-		</@bs3form.checkbox>
-	</@bs3form.labelled_form_group>
+	<#if department.allowExtensionRequests>
+		<@bs3form.labelled_form_group path="">
+			<@bs3form.checkbox path="extensionAttachmentMandatory">
+				<@f.checkbox path="extensionAttachmentMandatory" id="extensionAttachmentMandatory" /> Students must attach at least one file to an extension request
+			</@bs3form.checkbox>
+		</@bs3form.labelled_form_group>
 
-	<@bs3form.labelled_form_group path="">
-		<@bs3form.checkbox path="allowExtensionsAfterCloseDate">
-			<@f.checkbox path="allowExtensionsAfterCloseDate"  id="allowExtensionsAfterCloseDate" /> Allow extensions after close date
-		</@bs3form.checkbox>
-	<span class="help-block">Select this option to permit students to request an extension for late or unsubmitted work.</span>
+		<@bs3form.labelled_form_group path="">
+			<@bs3form.checkbox path="allowExtensionsAfterCloseDate">
+				<@f.checkbox path="allowExtensionsAfterCloseDate"  id="allowExtensionsAfterCloseDate" /> Allow extensions after close date
+			</@bs3form.checkbox>
+		<span class="help-block">Select this option to permit students to request an extension for late or unsubmitted work.</span>
 
-	</@bs3form.labelled_form_group>
+		</@bs3form.labelled_form_group>
+	</#if>
 </#escape>

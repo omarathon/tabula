@@ -1,6 +1,6 @@
 package uk.ac.warwick.tabula.commands.attendance
 
-import java.io.InputStreamReader
+import java.nio.charset.StandardCharsets
 
 import org.springframework.validation.{BindingResult, Errors}
 import uk.ac.warwick.tabula.JavaImports._
@@ -9,7 +9,6 @@ import uk.ac.warwick.tabula.data.model.StudentMember
 import uk.ac.warwick.tabula.data.model.attendance.AttendanceState
 import uk.ac.warwick.tabula.services.{AutowiringProfileServiceComponent, ProfileServiceComponent}
 import uk.ac.warwick.tabula.system.BindListener
-import uk.ac.warwick.util.core.StringUtils
 import uk.ac.warwick.util.csv.{GoodCsvDocument, NamedValueCSVLineReader}
 
 import scala.collection.JavaConverters._
@@ -39,7 +38,7 @@ class CSVAttendanceExtractorInternal extends BindListener {
 			val reader = new NamedValueCSVLineReader
 			reader.setHasHeaders(false)
 			val doc = new GoodCsvDocument[JList[String]](null, reader)
-			doc.read(new InputStreamReader(file.attached.get(0).dataStream, StringUtils.DEFAULT_ENCODING))
+			doc.read(file.attached.get(0).asByteSource.asCharSource(StandardCharsets.UTF_8).openStream())
 
 			val rows: Seq[Map[String, String]] = reader.getData.asScala.map(_.asScala.toMap)
 			val goodRows = rows.filter { row =>

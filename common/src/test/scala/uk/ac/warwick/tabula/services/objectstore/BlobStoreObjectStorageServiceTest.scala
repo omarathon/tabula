@@ -3,6 +3,7 @@ package uk.ac.warwick.tabula.services.objectstore
 import java.io.InputStream
 import java.security.{DigestInputStream, MessageDigest}
 
+import com.google.common.hash.Hashing
 import com.google.common.io.ByteSource
 import org.apache.commons.io.IOUtils
 import org.jclouds.ContextBuilder
@@ -90,24 +91,24 @@ class BlobStoreObjectStorageServiceTest extends TestBase with Mockito {
 			fileHash = None
 		))
 
-		val fetchedFile: Option[InputStream] = service.fetch(key)
-		fetchedFile should be ('defined)
+		val fetchedFile: RichByteSource = service.fetch(key)
+		fetchedFile.isEmpty should be (false)
 
-		val fetchedMd5: Array[Byte] = MessageDigest.getInstance("MD5").digest(IOUtils.toByteArray(fetchedFile.get))
+		val fetchedMd5: Array[Byte] = fetchedFile.hash(Hashing.md5()).asBytes()
 		originalMd5 should be (fetchedMd5)
 	}
 
 	@Test def metadata(): Unit = new TransientBlobStoreFixture {
 		val key = "my-lovely-file"
 
-		service.metadata(key) should be (None)
+		service.fetch(key).metadata should be (None)
 		service.push(key, byteSource, ObjectStorageService.Metadata(
 			contentLength = 14949,
 			contentType = "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
 			fileHash = Some(new SHAFileHasher().hash(byteSource.openStream()))
 		))
 
-		service.metadata(key) should be (Some(ObjectStorageService.Metadata(
+		service.fetch(key).metadata should be (Some(ObjectStorageService.Metadata(
 			contentLength = 14949,
 			contentType = "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
 			fileHash = Some("f992551ba3325d20a529f0821375ca0b544a4598")

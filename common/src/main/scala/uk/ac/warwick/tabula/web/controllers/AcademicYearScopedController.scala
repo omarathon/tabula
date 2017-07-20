@@ -35,7 +35,7 @@ trait AcademicYearScopedController {
 				// Don't store if maintenance mode is enabled
 				Some(academicYear)
 			case Some(academicYear) if user.apparentUser.isFoundUser =>
-				// Store the new active department and return it
+				// Store the new active academic year and return it
 				val settings = new UserSettings(user.apparentId)
 				settings.activeAcademicYear = academicYear
 				transactional() {

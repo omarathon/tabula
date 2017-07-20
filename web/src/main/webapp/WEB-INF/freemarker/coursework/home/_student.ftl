@@ -34,7 +34,7 @@
 						<div class="span5">
 							<div class="module-title"><@fmt.module_name assignment.module /></div>
 							<h4 class="name">
-								<#if isSelf><a href="<@url context='/coursework' page='/module/${assignment.module.code}/${assignment.id}/' />"></#if>
+								<#if isSelf><a href="<@routes.coursework.assignment assignment />"></#if>
 									<span class="ass-name">${assignment.name}</span>
 								<#if isSelf></a></#if>
 							</h4>
@@ -66,17 +66,17 @@
 						<div class="span3 button-list">
 							<#if isSelf>
 								<#if info.submittable>
-									<a class="btn btn-block btn-primary" href="<@url context='/coursework' page='/module/${assignment.module.code}/${assignment.id}/' />">
+									<a class="btn btn-block btn-primary" href="<@routes.coursework.assignment assignment />">
 										<i class="icon-folder-close icon-white"></i> Submit
 									</a>
 
 									<#if assignment.extensionsPossible>
 										<#if extensionRequested>
-											<a href="<@routes.coursework.extensionRequest assignment=assignment />?returnTo=/coursework" class="btn btn-block">
+											<a href="<@routes.coursework.extensionRequest assignment=assignment />?returnTo=${cm1Context}" class="btn btn-block">
 												<i class="icon-calendar"></i> Review extension request
 											</a>
 										<#elseif !isExtended && assignment.newExtensionsCanBeRequested>
-											<a href="<@routes.coursework.extensionRequest assignment=assignment />?returnTo=/coursework" class="btn btn-block">
+											<a href="<@routes.coursework.extensionRequest assignment=assignment />?returnTo=${cm1Context}" class="btn btn-block">
 												<i class="icon-calendar"></i> Request extension
 											</a>
 										</#if>

@@ -46,7 +46,7 @@
     "watchify": "^3.7.0"
   },
   "dependencies": {
-    "id7": "UniversityofWarwick/id7#v1.3.2"
+    "id7": "UniversityofWarwick/id7#v1.3.4"
   },
   "scripts": {
     "lint": "gulp lint",

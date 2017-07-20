@@ -307,7 +307,7 @@ class Department extends GeneratedId
 	@OneToMany(mappedBy="scope", fetch = FetchType.LAZY, cascade = Array(CascadeType.ALL))
 	@ForeignKey(name="none")
 	@BatchSize(size=200)
-	var grantedRoles:JList[DepartmentGrantedRole] = JArrayList()
+	var grantedRoles: JList[DepartmentGrantedRole] = JArrayList()
 
 	@Type(`type` = "uk.ac.warwick.tabula.data.model.DepartmentFilterRuleUserType")
 	@Column(name="FilterRuleName")

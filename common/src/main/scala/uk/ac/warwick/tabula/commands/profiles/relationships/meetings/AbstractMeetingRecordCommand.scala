@@ -16,6 +16,7 @@ import uk.ac.warwick.tabula.services.{FileAttachmentServiceComponent, MeetingRec
 import uk.ac.warwick.tabula.system.BindListener
 
 import scala.collection.JavaConverters._
+import scala.util.Try
 
 abstract class AbstractMeetingRecordCommand {
 
@@ -123,11 +124,9 @@ trait MeetingRecordValidation extends SelfValidating {
 		rejectIfEmptyOrWhitespace(errors, "format", "NotEmpty")
 
 		val dateToCheck: DateTime = if (isRealTime) {
-			if ((!meetingDateStr.isEmptyOrWhitespace) && (!meetingTimeStr.isEmptyOrWhitespace)) {
-				DateTimePickerFormatter.parseDateTime(meetingDateStr + " " + meetingTimeStr)
-			} else {
-				new DateTime
-			}
+			Try(DateTimePickerFormatter.parseDateTime(meetingDateStr + " " + meetingTimeStr))
+				.orElse(Try(DatePickerFormatter.parseDateTime(meetingDateStr)))
+				.getOrElse(null)
 		} else {
 			meetingDate.toDateTimeAtStartOfDay
 		}

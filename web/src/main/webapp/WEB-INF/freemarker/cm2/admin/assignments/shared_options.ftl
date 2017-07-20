@@ -1,6 +1,6 @@
 <#escape x as x?html>
 	<#assign command = sharedAssignmentPropertiesForm />
-	<#assign actionUrl><@routes.cm2.assignmentSharedOptions department /></#assign>
+	<#assign actionUrl><@routes.cm2.assignmentSharedOptions department/></#assign>
 
 	<@f.form method="post" action=actionUrl commandName="sharedAssignmentPropertiesForm" >
 		<#if submitted?? && submitted && !hasErrors>

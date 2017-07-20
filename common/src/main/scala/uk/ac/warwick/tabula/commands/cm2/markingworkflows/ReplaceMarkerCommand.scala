@@ -38,8 +38,9 @@ class ReplaceMarkerCommandInternal(val department: Department, val markingWorkfl
 		for(stage <- stages) {
 			for(assignment <- assignmentsToUpdate) {
 				val existingAllocations = cm2MarkingWorkflowService.getMarkerAllocations(assignment, stage)
-				val students = existingAllocations.getOrElse(oldMarkerUser, Set())
-				val newAllocations = (existingAllocations - oldMarkerUser) + (newMarkerUser -> students)
+				val newStudents = existingAllocations.getOrElse(oldMarkerUser, Set())
+				val existingStudents = existingAllocations.getOrElse(newMarkerUser, Set())
+				val newAllocations = (existingAllocations - oldMarkerUser - newMarkerUser) + (newMarkerUser -> existingStudents.union(newStudents))
 				cm2MarkingWorkflowService.allocateMarkersForStage(assignment, stage, newAllocations)
 			}
 
@@ -70,6 +71,9 @@ trait ReplaceMarkerValidation extends SelfValidating {
 		if (newMarker.hasText && !userLookup.getUserByUserId(newMarker).isFoundUser){
 			errors.rejectValue("newMarker", "markingWorkflow.marker.unknownUser")
 		}
+		if(newMarkerUser.isFoundUser && oldMarkerUser == newMarkerUser){
+			errors.rejectValue("newMarker", "markingWorkflow.marker.sameMarker")
+		}
 		if (!confirm) {
 			errors.rejectValue("confirm", "markingWorkflow.marker.confirm")
 		}
@@ -79,6 +83,9 @@ trait ReplaceMarkerValidation extends SelfValidating {
 
 trait ReplaceMarkerDescription extends Describable[CM2MarkingWorkflow] {
 	self: ReplaceMarkerState =>
+
+	override lazy val eventName: String = "ReplaceMarker"
+
 	def describe(d: Description) {
 		d.department(department)
 		d.markingWorkflow(markingWorkflow)
@@ -109,7 +116,7 @@ trait ReplaceMarkerState {
 	// feedback associated with a marker is feedback that has that marker in at least one of it's workflow stages
 	lazy val finishedAssignments: Set[Assignment] = affectedAssignments.filter(assignment => {
 		val feedbackFromOldMarker = assignment.allFeedback
-			.filter(_.markerFeedback.asScala.exists(_.marker == oldMarkerUser))
+			.filter(_.allMarkerFeedback.exists(_.marker == oldMarkerUser))
 		feedbackFromOldMarker.nonEmpty && feedbackFromOldMarker.forall(_.released)
 	})
 

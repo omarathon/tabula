@@ -1,8 +1,18 @@
 <#import "/WEB-INF/freemarker/_profile_link.ftl" as pl />
 <div id="profile-modal" class="modal fade profile-subset"></div>
 
-<p>Found <@fmt.p results.total "extension" />.</p>
-<table class="table table-striped">
+<div class="row extension-metadata">
+	<div class="col-md-7">
+		<p>Found <@fmt.p results.total "extension" />.</p>
+	</div>
+	<div class="col-md-5">
+		<p class="alert alert-info">
+			Students will automatically be notified by email when you approve, modify or revoke an extension.
+		</p>
+	</div>
+</div>
+
+<table class="students table table-striped sticky-table-headers expanding-table">
 	<thead>
 		<tr>
 			<th>First name</th>
@@ -17,8 +27,8 @@
 	<tbody>
 		<#list results.extensions as graph>
 			<tr data-toggle="collapse" data-target="#extension${graph.extension.id}" class="clickable collapsed expandable-row">
-				<td><h6 class="toggle-icon-large">&nbsp;${graph.user.firstName}</h6></td>
-				<td><h6>${graph.user.lastName}&nbsp;<#if graph.user.warwickId??><@pl.profile_link graph.user.warwickId /><#else><@pl.profile_link graph.user.userId /></#if></h6></td>
+				<td class="student-col toggle-cell toggle-icon">&nbsp;${graph.user.firstName}</td>
+				<td class="student-col toggle-cell">&nbsp;${graph.user.lastName}&nbsp;<#if graph.user.warwickId??><@pl.profile_link graph.user.warwickId /><#else><@pl.profile_link graph.user.userId /></#if></td>
 				<td><@fmt.module_name graph.extension.assignment.module false /></td>
 				<td>${graph.extension.assignment.name}</td>
 				<td>${graph.extension.state.description}</td>
@@ -31,7 +41,7 @@
 						</#if>
 					</#if>
 				</td>
-				<td>
+				<td data-datesort="${graph.deadline.millis?c!''}" class="deadline-col <#if graph.hasApprovedExtension>approved<#else>very-subtle</#if>">
 					<#if graph.deadline?has_content><@fmt.date date=graph.deadline /></#if>
 				</td>
 			</tr>

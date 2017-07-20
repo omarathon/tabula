@@ -1,7 +1,7 @@
 <#assign spring=JspTaglibs["/WEB-INF/tld/spring.tld"]>
 <#assign f=JspTaglibs["/WEB-INF/tld/spring-form.tld"]>
 <#escape x as x?html>
-<#assign formAction><@url page='/coursework/admin/module/${module.code}/assignments/${assignment.id}/submissionsandfeedback/release-submissions'/></#assign>
+<#assign formAction><@routes.coursework.releaseForMarking assignment /></#assign>
 
 <@f.form method="post" action="${formAction}" commandName="releaseForMarkingCommand">
 

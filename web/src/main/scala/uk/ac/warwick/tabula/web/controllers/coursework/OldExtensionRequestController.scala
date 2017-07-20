@@ -54,7 +54,7 @@ class OldExtensionRequestController extends OldCourseworkController{
 				val profile = profileService.getMemberByUser(user.apparentUser)
 				// is this an edit of an existing request
 				val isModification = existingRequest.isDefined && !existingRequest.get.isManual
-				Mav(s"$urlPrefix/submit/extension_request",
+				Mav("coursework/submit/extension_request",
 					"profile" -> profile,
 					"module" -> module,
 					"assignment" -> assignment,
@@ -62,7 +62,7 @@ class OldExtensionRequestController extends OldCourseworkController{
 					"isModification" -> isModification,
 					"existingRequest" -> existingRequest.orNull,
 					"command" -> cmd,
-					"returnTo" -> getReturnTo(s"/$urlPrefix" + Routes.assignment(assignment))
+					"returnTo" -> getReturnTo(Routes.assignment(assignment))
 				)
 			} else {
 				RedirectToSignin()
@@ -78,7 +78,7 @@ class OldExtensionRequestController extends OldCourseworkController{
 			showForm(cmd)
 		} else {
 			val extension = cmd.apply()
-			val model = Mav(s"$urlPrefix/submit/extension_request_success",
+			val model = Mav("coursework/submit/extension_request_success",
 				"module" -> module,
 				"assignment" -> assignment
 			)

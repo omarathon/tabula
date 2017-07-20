@@ -10,6 +10,7 @@ import uk.ac.warwick.tabula.data.model.MeetingFormat._
 import uk.ac.warwick.tabula.data.model.{ExternalStudentRelationship, FileAttachment, StudentRelationshipType}
 import uk.ac.warwick.tabula.services._
 import uk.ac.warwick.tabula.services.attendancemonitoring.{AttendanceMonitoringMeetingRecordService, AttendanceMonitoringMeetingRecordServiceComponent}
+import uk.ac.warwick.tabula.services.objectstore.{ObjectStorageService, RichByteSource}
 
 
 class DownloadMeetingRecordCommandTest extends TestBase with Mockito {
@@ -34,6 +35,8 @@ class DownloadMeetingRecordCommandTest extends TestBase with Mockito {
 
 		val fileAttach = new FileAttachment
 		fileAttach.name = "Beltane.txt"
+		fileAttach.objectStorageService = smartMock[ObjectStorageService]
+		fileAttach.objectStorageService.fetch(any[String]) returns RichByteSource.empty
 		fileAttach.fileDao = smartMock[FileDao]
 		uploadedFile.attached.add(fileAttach)
 

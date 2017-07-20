@@ -21,9 +21,9 @@
 			${attendanceNote.point.name}
 			<#if point.scheme.pointStyle.dbValue == "week">
 				(<@fmt.wholeWeekDateFormat
-				point.startWeek
-				point.endWeek
-				point.scheme.academicYear
+					point.startWeek
+					point.endWeek
+					point.scheme.academicYear
 				/>)
 			<#else>
 				(<@fmt.interval point.startDate point.endDate />)
@@ -43,7 +43,7 @@
 		<#if attendanceNote.attachment?has_content>
 			<p>
 				<@fmt.download_link
-					filePath="/attendance/note/${academicYear}/${attendanceNote.student.universityId}/${attendanceNote.point.id}/attachment/${attendanceNote.attachment.name}"
+					filePath="/attendance/note/${academicYear.startYear?c}/${attendanceNote.student.universityId}/${attendanceNote.point.id}/attachment/${attendanceNote.attachment.name}"
 					mimeType=attendanceNote.attachment.mimeType
 					title="Download file ${attendanceNote.attachment.name}"
 					text="Download ${attendanceNote.attachment.name}"

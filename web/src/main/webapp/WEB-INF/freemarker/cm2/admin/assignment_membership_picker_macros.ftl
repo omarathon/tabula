@@ -3,7 +3,7 @@
 
 <#macro coursework_sits_groups command >
 	<#if command.availableUpstreamGroups?has_content>
-		<div class="assessment-component">
+		<div class="assessment-component form-group">
 			<table id="sits-table" class="table table-striped table-condensed table-hover table-sortable table-checkable sticky-table-headers">
 				<thead>
 				<tr>
@@ -47,7 +47,7 @@
 			</div>
 		</div>
 	<#else>
-			<p class="alert alert-danger">No SITS membership groups for ${command.module.code?upper_case} are available</p>
+		<div class="form-group alert alert-danger">No SITS membership groups for ${command.module.code?upper_case} are available</div>
 	</#if>
 </#macro>
 
@@ -138,7 +138,7 @@
 									<#elseif item.userId?has_content>
 										<@bs3form.selector_check_row "modifyEnrolment" item.userId />
 									<#else>
-										<i class="icon-ban-circle fa fa-ban use-tooltip" title="We are missing this person's usercode, without which we cannot modify their enrolment."></i>
+										<i class="fa fa-ban use-tooltip" title="We are missing this person's usercode, without which we cannot modify their enrolment."></i>
 									</#if>
 								</td>
 								<td class="source">
@@ -210,9 +210,18 @@
 					container: 'body'
 				});
 			};
+
+			var alertPending = function() {
+				$pendingDataInfo = 	$('.pending-data-info');
+				if ($pendingDataInfo.hasClass('hide')) {
+					$pendingDataInfo.removeClass('hide')
+				}
+			};
+
+
 			// ensure that the close handler for any popovers still work
 			$('.assignment-student-details').on('click', '.close', function() { $enrolment.find('.use-popover').popover('hide') });
-			//TODO - This needs to be replaced with bigLisrt. Leaving it as it is for time being as it is breaking some other things
+
 			$enrolment.find('.table-checkable').bigList({
 				onChange: function(){
 					var $table = $(this).closest('table');
@@ -239,10 +248,7 @@
 			$enrolment.on('click', '.table-checkable tr', function(e) {
 				if ($(e.target).is(':not(input:checkbox)')) {
 					e.preventDefault();
-					var $chk = $(this).find('input:checkbox');
-					if ($chk.length) {
-						$chk.prop('checked', !$chk.prop('checked'));
-					}
+					$(this).find('input:checkbox').trigger('click');
 				}
 			});
 
@@ -251,6 +257,7 @@
 				e.preventDefault();
 				var $assessment = $('.assessment-component');
 				var $linkUnlink = $(this);
+				var $manualListTextArea = $('.manualList textarea');
 				if ($linkUnlink.is(':not(.disabled)')) {
 					$('.sits-picker .btn').addClass('disabled');
 					<#-- get current list of values and remove and/or add changes -->
@@ -275,6 +282,8 @@
 							$enrolment.find('.assignmentEnrolmentInner').html($(data).find('.assignmentEnrolmentInner').contents());
 							$enrolment.find('.enrolledCount').html($(data).find('.enrolledCount').contents());
 							initEnrolment();
+							// display message when user links/unlinks
+							alertPending();
 							$assessment.find('td input:checked').each( function() {
 								var $tr = $(this).closest('tr');
 								if ($linkUnlink.is('.link-sits')) {
@@ -284,15 +293,27 @@
 								}
 							});
 							$('.sits-picker .btn').removeClass('disabled');
+							initEnrolmentMemberTable();
 						}
 					});
 				}
 			});
 
+
+			var initEnrolmentMemberTable = function() {
+				$enrolment.find('#enrolment-table').bigList({
+					onChange: function(){
+						var $table = $(this).closest('table');
+						enableActions($table);
+					}
+				});
+			};
+
 			<#-- adder click handler -->
 			$enrolment.on('click', '.btn.add-students-manually', function(e) {
 				e.preventDefault();
 				var $addManualStudentBtn = $(this);
+				var $manualListTextArea = $('.manualList textarea');
 				$addManualStudentBtn.addClass('disabled');
 					$.ajax({
 						type: 'POST',
@@ -301,8 +322,11 @@
 						success: function(data, status) {
 							$enrolment.find('.assignmentEnrolmentInner').html($(data).find('.assignmentEnrolmentInner').contents());
 							$enrolment.find('.enrolledCount').html($(data).find('.enrolledCount').contents());
+							$manualListTextArea.val('');
 							$addManualStudentBtn.removeClass('disabled');
 							initEnrolment();
+							initEnrolmentMemberTable();
+							alertPending();
 						}
 					});
 			});
@@ -326,7 +350,8 @@
 					$tr.removeClass(function(i, css) {
 						return (css.match(/\bitem-type-\S+/g) || []).join(' ');
 					}).addClass('item-type-exclude');
-					this.checked = '';
+					alertPending();
+					$tr.find('input:checkbox').trigger('click');
 				});
 			});
 
@@ -344,7 +369,8 @@
 					$tr.removeClass(function(i, css) {
 						return (css.match(/\bitem-type-\S+/g) || []).join(' ');
 					}).addClass('item-type-include pending');
-					this.checked = '';
+					alertPending();
+					$tr.find('input:checkbox').trigger('click');
 				});
 			});
 		});

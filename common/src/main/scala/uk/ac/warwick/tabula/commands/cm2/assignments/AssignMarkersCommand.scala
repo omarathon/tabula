@@ -29,6 +29,7 @@ object AssignMarkersCommand {
 			with AssignMarkersDescription
 			with AutowiringUserLookupComponent
 			with AutowiringCM2MarkingWorkflowServiceComponent
+			with AutowiringFeedbackServiceComponent
 }
 
 object AssignMarkersBySpreadsheetCommand {
@@ -44,13 +45,14 @@ object AssignMarkersBySpreadsheetCommand {
 			with AutowiringUserLookupComponent
 			with AutowiringCM2MarkingWorkflowServiceComponent
 			with AutowiringMarkerAllocationExtractorComponent
+			with AutowiringFeedbackServiceComponent
 
 	val AcceptedFileExtensions = Seq(".xlsx")
 }
 
 abstract class AssignMarkersCommandInternal(val assignment: Assignment) extends CommandInternal[Assignment] {
 
-	this: UserLookupComponent with CM2MarkingWorkflowServiceComponent with AssignMarkersState =>
+	this: UserLookupComponent with CM2MarkingWorkflowServiceComponent with AssignMarkersState with FeedbackServiceComponent =>
 
 	def applyInternal(): Assignment = {
 		assignment.cm2MarkingWorkflow.allStages.foreach(stage => {
@@ -58,6 +60,8 @@ abstract class AssignMarkersCommandInternal(val assignment: Assignment) extends 
 			cm2MarkingWorkflowService.allocateMarkersForStage(assignment, stage, allocations)
 		})
 
+		// add anonymous marking IDs to each item of feedback - add regardless of setting in case anon marking is chosen later
+		feedbackService.addAnonymousIds(assignment.allFeedback)
 		assignment
 	}
 }
@@ -83,7 +87,7 @@ trait AssignMarkersBySpreadsheetBindListener extends BindListener {
 				if (!file.attached.isEmpty) {
 
 					val sheetData = markerAllocationExtractor
-						.extractMarkersFromSpreadsheet(file.attached.asScala.head.dataStream, assignment.cm2MarkingWorkflow)
+						.extractMarkersFromSpreadsheet(file.attached.asScala.head.asByteSource.openStream(), assignment.cm2MarkingWorkflow)
 
 					def rowsToAllocations(rows: Seq[ParsedRow]): Allocations = rows
 						.filter(_.errors.isEmpty)
@@ -111,6 +115,7 @@ trait AssignMarkersPermissions extends RequiresPermissionsChecking with Permissi
 	self: AssignMarkersState =>
 
 	def permissionsCheck(p: PermissionsChecking) {
+		notDeleted(assignment)
 		p.PermissionCheck(Permissions.Assignment.Update, assignment.module)
 	}
 }
@@ -122,6 +127,8 @@ trait AssignMarkersValidation extends SelfValidating {
 
 trait AssignMarkersDescription extends Describable[Assignment] {
 	self: AssignMarkersState =>
+
+	override lazy val eventName: String = "AssignMarkers"
 
 	private def printAllocation(allocation: Allocations): String = allocation.map{ case(marker, students) =>
 			s"${marker.getUserId} -> ${students.map(_.getUserId).toSeq.sorted.mkString(",")}"

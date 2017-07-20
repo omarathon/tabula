@@ -7,14 +7,16 @@ import javax.validation.constraints.NotNull
 
 import org.hibernate.annotations.{BatchSize, Type}
 import org.joda.time.DateTime
-import uk.ac.warwick.tabula.{AcademicYear, JavaImports}
 import uk.ac.warwick.tabula.JavaImports._
 import uk.ac.warwick.tabula.data.model.forms.{FormattedHtml, SavedFormValue}
 import uk.ac.warwick.tabula.data.model.markingworkflow.{FinalStage, MarkingWorkflowStage}
 import uk.ac.warwick.tabula.permissions.PermissionsTarget
+import uk.ac.warwick.tabula.{AcademicYear, JavaImports}
 import uk.ac.warwick.userlookup.User
 
 import scala.collection.JavaConverters._
+import scala.collection.immutable.{SortedMap, TreeMap}
+import scala.collection.mutable
 
 trait FeedbackAttachments {
 
@@ -53,6 +55,7 @@ trait FeedbackAttachments {
 	def clearAttachments() {
 		for(attachment <- attachments.asScala){
 			attachment.feedback = null
+			attachment.markerFeedback = null
 		}
 		attachments.clear()
 	}
@@ -98,7 +101,6 @@ trait CM1WorkflowSupport {
 	@JoinColumn(name = "second_marker_feedback")
 	@Deprecated
 	var secondMarkerFeedback: MarkerFeedback = _
-
 	@OneToOne(cascade=Array(PERSIST,MERGE,REFRESH,DETACH), fetch = FetchType.LAZY)
 	@JoinColumn(name = "third_marker_feedback")
 	@Deprecated
@@ -153,10 +155,6 @@ trait CM1WorkflowSupport {
 	@Deprecated
 	def getThirdMarkerFeedback: Option[MarkerFeedback] = Option(thirdMarkerFeedback)
 
-	// The current workflow position isn't None so this must be a placeholder
-	@Deprecated
-	def isPlaceholder: Boolean = getCurrentWorkflowFeedbackPosition.isDefined || !hasContent
-
 	@Deprecated
 	def getAllMarkerFeedback: Seq[MarkerFeedback] = Seq(firstMarkerFeedback, secondMarkerFeedback, thirdMarkerFeedback)
 
@@ -189,6 +187,10 @@ abstract class Feedback extends GeneratedId with FeedbackAttachments with Permis
 	def isForUser(theUsercode: String): Boolean = usercode == theUsercode
 
 	def studentIdentifier = universityId.getOrElse(usercode)
+
+	// simple sequential ID for feedback on the parent assignment
+	@Type(`type` = "uk.ac.warwick.tabula.data.model.OptionIntegerUserType")
+	var anonymousId: Option[Int] = None
 
 	// TODO - ADD Not null constraint after bulk populating usercode @NotNull
 	@Column(name = "userId")
@@ -271,6 +273,34 @@ abstract class Feedback extends GeneratedId with FeedbackAttachments with Permis
 	@OneToMany(mappedBy = "feedback", fetch = LAZY, cascade = Array(ALL), orphanRemoval = true)
 	@BatchSize(size = 200)
 	var markerFeedback: JList[MarkerFeedback] = JArrayList()
+	def allMarkerFeedback: Seq[MarkerFeedback] = markerFeedback.asScala
+
+	def feedbackByStage: SortedMap[MarkingWorkflowStage, MarkerFeedback] = {
+		val unsortedMap =  allMarkerFeedback.groupBy(_.stage).mapValues(_.head)
+		TreeMap(unsortedMap.toSeq:_*)
+	}
+
+	def completedFeedbackByStage : SortedMap[MarkingWorkflowStage, MarkerFeedback] = {
+		feedbackByStage.filterKeys(stage => {
+			def isPrevious = stage.order < currentStageIndex
+			def isCurrentAndFinished =  stage.order == currentStageIndex && !outstandingStages.asScala.contains(stage)
+			isPrevious || isCurrentAndFinished
+		})
+	}
+
+	def feedbackMarkers: Map[MarkingWorkflowStage, User] =
+		feedbackByStage.mapValues(_.marker)
+
+	def feedbackMarkersByAllocationName: Map[String, User] =
+		allMarkerFeedback.groupBy(f => f.stage.allocationName).toSeq
+			.sortBy {	case(_, fList) => fList.head.stage.order }
+			.map { case (s, fList) => s -> fList.head.marker }.toMap
+
+	def feedbackMarkerByAllocationName(allocationName: String): Option[User] =
+		feedbackMarkersByAllocationName.get(allocationName)
+
+	// gets marker feedback for the current workflow stages
+	def markingInProgress: Seq[MarkerFeedback] = allMarkerFeedback.filter(mf => outstandingStages.asScala.contains(mf.stage))
 
 	@ElementCollection @Column(name = "stage")
 	@JoinTable(name = "OutstandingStages", joinColumns = Array(
@@ -278,10 +308,19 @@ abstract class Feedback extends GeneratedId with FeedbackAttachments with Permis
 	@Type(`type` = "uk.ac.warwick.tabula.data.model.markingworkflow.MarkingWorkflowStageUserType")
 	var outstandingStages: JList[MarkingWorkflowStage] = JArrayList()
 
-	def isMarkingCompleted = outstandingStages.asScala.toList match {
+	def isPlaceholder: Boolean = assessment match {
+		case a: Assignment if a.cm2Assignment => if(a.cm2MarkingWorkflow != null) !isMarkingCompleted else !hasContent
+		case _ => getCurrentWorkflowFeedbackPosition.isDefined || !hasContent
+	}
+
+	def isMarkingCompleted: Boolean = outstandingStages.asScala.toList match {
 		case (s: FinalStage) :: Nil => true
 		case _ => false
 	}
+
+	def notReleasedToMarkers: Boolean = outstandingStages.asScala.isEmpty
+
+	def currentStageIndex: Int = outstandingStages.asScala.headOption.map(_.order).getOrElse(0)
 
 	@Column(name = "released_date")
 	var releasedDate: DateTime = _
@@ -300,6 +339,18 @@ abstract class Feedback extends GeneratedId with FeedbackAttachments with Permis
 	def commentsFormValue: Option[SavedFormValue] = customFormValues.asScala.find(_.name == Assignment.defaultFeedbackTextFieldName)
 
 	def comments: Option[String] = commentsFormValue.map(_.value)
+
+	def comments_=(value: String) {
+		commentsFormValue
+			.getOrElse({
+				val newValue = new SavedFormValue()
+				newValue.name = Assignment.defaultFeedbackTextFieldName
+				newValue.feedback = this
+				this.customFormValues.add(newValue)
+				newValue
+			})
+			.value = value
+	}
 
 	def commentsFormattedHtml: String = formattedHtml(comments)
 
@@ -334,6 +385,14 @@ abstract class Feedback extends GeneratedId with FeedbackAttachments with Permis
 		attachments.add(attachment)
 	}
 
+	def isMarkedByStage(stage: MarkingWorkflowStage): Boolean = {
+		val currentStages = outstandingStages.asScala
+		val currentPosition = currentStages.headOption.map(_.order).getOrElse(0)
+
+		if(stage.order == currentPosition) !currentStages.contains(stage)
+		else stage.order < currentPosition
+	}
+
 }
 
 @Entity @DiscriminatorValue("assignment")
@@ -347,6 +406,8 @@ class AssignmentFeedback extends Feedback {
 	def assessment: Assessment = assignment
 
 	def module: Module = assignment.module
+
+	override def humanReadableId: String = s"Feedback for $usercode for ${assignment.humanReadableId}"
 
 	override def markingWorkflow: MarkingWorkflow = assignment.markingWorkflow
 
@@ -363,6 +424,14 @@ class AssignmentFeedback extends Feedback {
 	def permissionsParents: Stream[Assignment] = Option(assignment).toStream
 
 	override def toEntityReference: AssignmentFeedbackEntityReference = new AssignmentFeedbackEntityReference().put(this)
+
+	override def isMarkedByStage(stage: MarkingWorkflowStage): Boolean = {
+		val currentStages = outstandingStages.asScala
+		val currentPosition = currentStages.headOption.map(_.order).getOrElse(0)
+
+		if(stage.order == currentPosition) !currentStages.contains(stage)
+		else stage.order < currentPosition
+	}
 
 }
 

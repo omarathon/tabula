@@ -2,6 +2,7 @@ package uk.ac.warwick.tabula.commands.groups.admin.reusable
 
 import java.io.{File, FileInputStream}
 
+import com.google.common.io.Files
 import org.springframework.validation.{BindException, BindingResult}
 import uk.ac.warwick.tabula.JavaImports._
 import uk.ac.warwick.tabula._
@@ -11,7 +12,7 @@ import uk.ac.warwick.tabula.data.model.{Department, FileAttachment, UnspecifiedT
 import uk.ac.warwick.tabula.permissions.Permissions
 import uk.ac.warwick.tabula.services._
 import uk.ac.warwick.tabula.services.groups.docconversion.{AllocateStudentItem, GroupsExtractor, GroupsExtractorComponent}
-import uk.ac.warwick.tabula.services.objectstore.ObjectStorageService
+import uk.ac.warwick.tabula.services.objectstore.{ObjectStorageService, RichByteSource}
 import uk.ac.warwick.tabula.system.BindListener
 import uk.ac.warwick.tabula.system.permissions.PermissionsChecking
 import uk.ac.warwick.userlookup.User
@@ -219,8 +220,7 @@ class AllocateStudentsToDepartmentalSmallGroupsCommandTest extends TestBase with
 		val backingFile: File = createTemporaryFile()
 		attachment.objectStorageService = smartMock[ObjectStorageService]
 		attachment.objectStorageService.keyExists(attachment.id) returns true
-		attachment.objectStorageService.metadata(attachment.id) returns Some(ObjectStorageService.Metadata(backingFile.length(), "application/octet-stream", None))
-		attachment.objectStorageService.fetch(attachment.id) answers { _ => Some(new FileInputStream(backingFile)) }
+		attachment.objectStorageService.fetch(attachment.id) returns RichByteSource.wrap(Files.asByteSource(backingFile), Some(ObjectStorageService.Metadata(backingFile.length(), "application/octet-stream", None)))
 
 		val file = new UploadedFile
 		file.attached.add(attachment)
@@ -248,8 +248,7 @@ class AllocateStudentsToDepartmentalSmallGroupsCommandTest extends TestBase with
 		val backingFile: File = createTemporaryFile()
 		attachment.objectStorageService = smartMock[ObjectStorageService]
 		attachment.objectStorageService.keyExists(attachment.id) returns true
-		attachment.objectStorageService.metadata(attachment.id) returns Some(ObjectStorageService.Metadata(backingFile.length(), "application/octet-stream", None))
-		attachment.objectStorageService.fetch(attachment.id) answers { _ => Some(new FileInputStream(backingFile)) }
+		attachment.objectStorageService.fetch(attachment.id) returns RichByteSource.wrap(Files.asByteSource(backingFile), Some(ObjectStorageService.Metadata(backingFile.length(), "application/octet-stream", None)))
 
 		val file = new UploadedFile
 		file.attached.add(attachment)

@@ -34,9 +34,9 @@ class OldCheckAssignmentSitsUploadController extends OldCourseworkController wit
 			case _ => None
 		}.getOrElse(Seq())
 		if (errors.hasErrors) {
-			Mav(s"$urlPrefix/admin/assignments/publish/check_sits")
+			Mav("coursework/admin/assignments/publish/check_sits")
 		} else {
-			Mav(s"$urlPrefix/admin/assignments/publish/check_sits",
+			Mav("coursework/admin/assignments/publish/check_sits",
 				"result" -> cmd.apply(),
 				"assessmentGroupPairs" -> feedback.assessmentGroups.asScala.map(assessGroup => (assessGroup.occurrence, assessGroup.assessmentComponent.sequence)),
 				"sprCodes" -> sprCodes

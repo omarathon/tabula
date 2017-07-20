@@ -1,13 +1,11 @@
 <#import "*/modal_macros.ftl" as modal />
 <#import "*/cm2_macros.ftl" as cm2 />
 <#escape x as x?html>
-	<@cm2.headerMenu department />
-
 	<#function route_function dept>
 		<#local result><@routes.cm2.feedbacktemplates dept /></#local>
 		<#return result />
 	</#function>
-	<@fmt.id7_deptheader "Feedback templates" route_function "in" />
+	<@cm2.departmentHeader "Feedback templates" department route_function />
 
 	<#assign actionUrl><@routes.cm2.feedbacktemplates department /></#assign>
 	<@f.form enctype="multipart/form-data"
@@ -105,7 +103,7 @@
 							</td>
 							<td>
 								<#if template.attachment??>
-								<a class="btn btn-xs btn-default" href="<@routes.cm2.feedbacktemplatedownload department=department feedbacktemplate=template />">
+								<a class="btn btn-xs btn-primary" href="<@routes.cm2.feedbacktemplatedownload department=department feedbacktemplate=template />">
 									 Download
 								</a>
 								</#if>
@@ -113,11 +111,11 @@
 									 Edit
 								</a>
 								<#if !template.hasAssignments>
-									<a class="btn btn-xs btn-danger" href="#feedback-template-model" data-toggle="modal" data-url="<@routes.cm2.deletefeedbacktemplate department=department template=template />">
+									<a class="btn btn-xs btn-default" href="#feedback-template-model" data-toggle="modal" data-url="<@routes.cm2.deletefeedbacktemplate department=department template=template />">
 									Delete
 									</a>
 								<#else>
-									<a class="btn btn-xs btn-danger disabled" href="#" title="You cannot delete a feedback template with linked assignments">
+									<a class="btn btn-xs btn-default disabled" href="#" title="You cannot delete a feedback template with linked assignments">
 									Delete
 									</a>
 								</#if>

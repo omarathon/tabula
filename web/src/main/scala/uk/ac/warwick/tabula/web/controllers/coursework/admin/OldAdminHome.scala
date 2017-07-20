@@ -10,8 +10,9 @@ import uk.ac.warwick.tabula.web.controllers.coursework.OldCourseworkController
 import uk.ac.warwick.tabula.data.model._
 import uk.ac.warwick.tabula.permissions._
 import uk.ac.warwick.tabula.services._
-import uk.ac.warwick.tabula.web.Mav
-import uk.ac.warwick.tabula.{CurrentUser, PermissionDeniedException}
+import uk.ac.warwick.tabula.web.{Mav, Routes => WebRoutes}
+import uk.ac.warwick.tabula.{AutowiringFeaturesComponent, CurrentUser, PermissionDeniedException}
+import uk.ac.warwick.tabula.cm2.web.{Routes => CM2Routes}
 
 import scala.collection.JavaConversions._
 import scala.collection.mutable
@@ -23,14 +24,20 @@ import scala.xml.Elem
 
 @Profile(Array("cm1Enabled")) @Controller
 @RequestMapping(Array("/${cm1.prefix}/admin", "/${cm1.prefix}/admin/department", "/${cm1.prefix}/admin/module"))
-class OldCourseworkAdminHomeController extends OldCourseworkController {
+class OldCourseworkAdminHomeController extends OldCourseworkController with AutowiringFeaturesComponent {
 	@RequestMapping(method=Array(GET, HEAD))
-	def homeScreen(user: CurrentUser) = Redirect(Routes.home)
+	def homeScreen(user: CurrentUser) = {
+		if(features.redirectHomeCM1) {
+			Redirect(CM2Routes.home)
+		} else {
+			Redirect(Routes.home)
+		}
+	}
 }
 
 @Profile(Array("cm1Enabled")) @Controller
 @RequestMapping(value=Array("/${cm1.prefix}/admin/department/{dept}"))
-class OldCourseworkAdminDepartmentHomeController extends OldCourseworkController {
+class OldCourseworkAdminDepartmentHomeController extends OldCourseworkController with AutowiringFeaturesComponent {
 
 	hideDeletedItems
 
@@ -39,12 +46,16 @@ class OldCourseworkAdminDepartmentHomeController extends OldCourseworkController
 
 	@RequestMapping
 	def adminDepartment(cmd: AdminDepartmentHomeCommand): Mav = {
-		val info = cmd.apply()
+		if(features.redirectAdminDepartmentModuleCM1) {
+			Redirect(CM2Routes.admin.department(cmd.department))
+		} else {
+			val info = cmd.apply()
 
-		Mav(s"$urlPrefix/admin/department",
-			"department" -> cmd.department,
-			"modules" -> info.sortWith(_.code.toLowerCase < _.code.toLowerCase)
-		)
+			Mav("coursework/admin/department",
+				"department" -> cmd.department,
+				"modules" -> info.sortWith(_.code.toLowerCase < _.code.toLowerCase)
+			)
+		}
 	}
 
 	@RequestMapping(Array("/assignments.xml"))
@@ -57,7 +68,7 @@ class OldCourseworkAdminDepartmentHomeController extends OldCourseworkController
 
 @Profile(Array("cm1Enabled")) @Controller
 @RequestMapping(value=Array("/${cm1.prefix}/admin/module/{module}"))
-class OldCourseworkAdminModuleHomeController extends OldCourseworkController {
+class OldCourseworkAdminModuleHomeController extends OldCourseworkController with AutowiringFeaturesComponent {
 
 	hideDeletedItems
 
@@ -67,9 +78,12 @@ class OldCourseworkAdminModuleHomeController extends OldCourseworkController {
 	@RequestMapping
 	def adminModule(@ModelAttribute("command") cmd: Appliable[Module]): Mav = {
 		val module = cmd.apply()
-
-		if (ajax) Mav(s"$urlPrefix/admin/modules/admin_partial").noLayout()
-		else Mav(s"$urlPrefix/admin/modules/admin").crumbs(Breadcrumbs.Department(module.adminDepartment))
+		if(features.redirectAdminDepartmentModuleCM1) {
+			Redirect(WebRoutes.admin.module(module))
+		}  else {
+			if (ajax) Mav("coursework/admin/modules/admin_partial").noLayout()
+			else Mav("coursework/admin/modules/admin").crumbs(Breadcrumbs.Department(module.adminDepartment))
+		}
 	}
 }
 

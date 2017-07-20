@@ -47,6 +47,9 @@ trait DeleteMarkingWorkflowValidation extends SelfValidating {
 
 trait DeleteMarkingWorkflowDescription extends Describable[String] {
 	self: DeleteMarkingWorkflowState =>
+
+	override lazy val eventName: String = "DeleteMarkingWorkflow"
+
 	def describe(d: Description) {
 		d.department(department)
 		d.markingWorkflow(markingWorkflow)

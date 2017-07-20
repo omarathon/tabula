@@ -94,9 +94,11 @@
 						<div class="btn-group pull-right">
 						  <a class="btn btn-sm btn-default dropdown-toggle" data-toggle="dropdown">Manage <span class="caret"></span></a>
 						  <ul class="dropdown-menu pull-right">
-								<li><a href="<@routes.profiles.deptperms dept/>">
-									Edit departmental permissions
-								</a></li>
+								<#if can.do("Module.Administer", dept)>
+									<li><a href="<@routes.profiles.deptperms dept/>">
+										Edit departmental permissions
+									</a></li>
+								</#if>
 
 								<li><a href="<@routes.profiles.filter_students dept/>">
 									View students
@@ -110,7 +112,7 @@
 										Students with no ${relationshipType.description}
 									</a></li>
 
-									<#if features.personalTutorAssignment && !relationshipType.readOnly(dept)>
+									<#if features.personalTutorAssignment && !relationshipType.readOnly(dept) && can.do_with_selector("Profiles.StudentRelationship.Manage", dept, relationshipType)>
 										<li><a href="<@routes.profiles.relationship_allocate dept relationshipType />">
 											Allocate ${relationshipType.description}s</a>
 										</li>
@@ -121,9 +123,11 @@
 									</li>
 								</#list>
 
-								<li><a href="<@routes.profiles.displaysettings dept />?returnTo=${(info.requestedUri!"")?url}">
-									Settings</a>
-								</li>
+								<#if can.do("Department.ManageDisplaySettings", dept)>
+									<li><a href="<@routes.profiles.displaysettings dept />?returnTo=${(info.requestedUri!"")?url}">
+										Settings</a>
+									</li>
+								</#if>
 						  </ul>
 						</div>
 

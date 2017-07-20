@@ -32,7 +32,7 @@ class OldFeedbackAdjustmentsListController extends OldCourseworkController {
 	): Mav = {
 		val (studentInfo, noFeedbackStudentInfo) = listCommand.apply().partition { _.feedback.isDefined }
 
-		Mav(s"$urlPrefix/admin/assignments/feedback/adjustments_list",
+		Mav("coursework/admin/assignments/feedback/adjustments_list",
 			"studentInfo" -> studentInfo,
 			"noFeedbackStudentInfo" -> noFeedbackStudentInfo,
 			"assignment" -> assignment,
@@ -61,7 +61,7 @@ class OldFeedbackAdjustmentsController extends OldCourseworkController with Auto
 
 	@ModelAttribute("command")
 	def formCommand(@PathVariable module: Module, @PathVariable assignment: Assignment, @PathVariable student: User, submitter: CurrentUser) =
-		AssignmentFeedbackAdjustmentCommand(mandatory(assignment), student, submitter, GenerateGradesFromMarkCommand(mandatory(module), mandatory(assignment)))
+		AssignmentFeedbackAdjustmentCommand(mandatory(assignment), student, submitter, OldGenerateGradesFromMarkCommand(mandatory(module), mandatory(assignment)))
 
 	@RequestMapping(method=Array(GET))
 	def showForm(
@@ -92,7 +92,7 @@ class OldFeedbackAdjustmentsController extends OldCourseworkController with Auto
 			}
 		}
 
-		Mav(s"$urlPrefix/admin/assignments/feedback/adjustments", Map(
+		Mav("coursework/admin/assignments/feedback/adjustments", Map(
 			"daysLate" -> daysLate,
 			"marksSubtracted" -> marksSubtracted,
 			"proposedAdjustment" -> proposedAdjustment,

@@ -16,8 +16,8 @@ import uk.ac.warwick.tabula.web.Mav
  */
 @Profile(Array("cm1Enabled")) @Controller
 @RequestMapping(value = Array(
-	"/coursework/admin/module/{module}/assignments/{assignment}/turnitin/report/{attachment}",
-	"/coursework/admin/module/{module}/assignments/{assignment}/turnitin/lti-report/{attachment}"
+	"/${cm1.prefix}/admin/module/{module}/assignments/{assignment}/turnitin/report/{attachment}",
+	"/${cm1.prefix}/admin/module/{module}/assignments/{assignment}/turnitin/lti-report/{attachment}"
 ))
 class OldTurnitinReportController extends OldCourseworkController {
 
@@ -32,14 +32,14 @@ class OldTurnitinReportController extends OldCourseworkController {
 	@RequestMapping
 	def goToReport(@ModelAttribute("command") command: ViewPlagiarismReportCommand): Mav = command.apply() match {
 		case Left(uri) =>
-			if (command.ltiParams.nonEmpty)	Mav(s"$urlPrefix/admin/assignments/turnitin/lti_report_forward", "turnitin_report_url" -> uri, "params" -> command.ltiParams)
+			if (command.ltiParams.nonEmpty)	Mav("coursework/admin/assignments/turnitin/lti_report_forward", "turnitin_report_url" -> uri, "params" -> command.ltiParams)
 			else Mav("redirect:" + uri.toString)
 
 		case Right(error: TurnitinReportErrorWithMessage) =>
-			Mav(s"$urlPrefix/admin/assignments/turnitin/report_error", "problem" -> error.code, "message" -> error.message)
+			Mav("coursework/admin/assignments/turnitin/report_error", "problem" -> error.code, "message" -> error.message)
 
 		case Right(error) =>
-			Mav(s"$urlPrefix/admin/assignments/turnitin/report_error", "problem" -> error.code)
+			Mav("coursework/admin/assignments/turnitin/report_error", "problem" -> error.code)
 	}
 
 }

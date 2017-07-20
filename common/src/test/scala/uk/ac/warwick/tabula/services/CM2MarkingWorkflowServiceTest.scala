@@ -97,30 +97,37 @@ class CM2MarkingWorkflowServiceTest extends TestBase with Mockito {
 		feedback.foreach(f => {
 			f.assignment = assignment
 			f.outstandingStages = workflow.initialStages.asJava
+			f.markerFeedback = Seq(
+				new MarkerFeedback{stage = DblBlndInitialMarkerA}, new MarkerFeedback{stage = DblBlndInitialMarkerB}, new MarkerFeedback{stage = DblBlndFinalMarker}
+			).asJava
 		})
 
 		val doneA = service.progressFeedback(DblBlndInitialMarkerA, Seq(feedback.head))
 		val doneB = service.progressFeedback(DblBlndInitialMarkerB, feedback.tail)
-		doneA.foreach(f => f.outstandingStages.asScala should be (Seq(DblBlndInitialMarkerB)))
-		doneB.foreach(f => f.outstandingStages.asScala should be (Seq(DblBlndInitialMarkerA)))
-		(doneA ++ doneB).foreach(f => verify(fs, times(1)).saveOrUpdate(f))
+		Seq(feedback.head).foreach(f => f.outstandingStages.asScala should be (Seq(DblBlndInitialMarkerB)))
+		feedback.tail.foreach(f => f.outstandingStages.asScala should be (Seq(DblBlndInitialMarkerA)))
+		feedback.foreach(f => verify(fs, times(1)).saveOrUpdate(f))
+		(doneA ++ doneB).isEmpty should be {true}
 
-		val initalDone = service.progressFeedback(DblBlndInitialMarkerB, Seq(feedback.head)) ++
+		val initialDone = service.progressFeedback(DblBlndInitialMarkerB, Seq(feedback.head)) ++
 			service.progressFeedback(DblBlndInitialMarkerA, feedback.tail)
 
-		initalDone.foreach(f => f.outstandingStages.asScala should be (Seq(DblBlndFinalMarker)))
-		initalDone.foreach(f => verify(fs, times(2)).saveOrUpdate(f))
+		feedback.foreach(f => f.outstandingStages.asScala should be (Seq(DblBlndFinalMarker)))
+		feedback.foreach(f => verify(fs, times(2)).saveOrUpdate(f))
+		initialDone.size should be (3)
+		initialDone.forall(_.stage == DblBlndFinalMarker) should be {true}
 
-		val finalDone = service.progressFeedback(DblBlndFinalMarker, initalDone)
-		finalDone.foreach(f => f.outstandingStages.asScala should be (Seq(DblBlndCompleted)))
-		finalDone.foreach(f => verify(fs, times(3)).saveOrUpdate(f))
+		val finalDone = service.progressFeedback(DblBlndFinalMarker, feedback)
+		feedback.foreach(f => f.outstandingStages.asScala should be (Seq(DblBlndCompleted)))
+		feedback.foreach(f => verify(fs, times(3)).saveOrUpdate(f))
+		finalDone.isEmpty should be {true}
 
-		val previous = service.returnFeedback(finalDone)
-		previous.foreach(f => f.outstandingStages.asScala should be (Seq(DblBlndFinalMarker)))
-		previous.foreach(f => verify(fs, times(4)).saveOrUpdate(f))
+		val previous = service.returnFeedback(Seq(DblBlndFinalMarker), feedback)
+		feedback.foreach(f => f.outstandingStages.asScala should be (Seq(DblBlndFinalMarker)))
+		feedback.foreach(f => verify(fs, times(4)).saveOrUpdate(f))
 
 		// throws the expected IllegalArgumentException
-		service.progressFeedback(DblBlndCompleted, finalDone)
+		service.progressFeedback(DblBlndCompleted, feedback)
 	}
 
 	@Test

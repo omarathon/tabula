@@ -12,6 +12,12 @@ the comments textarea needs to maintain newlines.
 
 <@f.form method="post" action=route commandName=commandName cssClass="form-horizontal edit-assignment">
 
+	<div class="alert alert-success">
+		<i class="icon-info-sign"></i>
+		We've built a new version of coursework management.
+		<a target='_blank' href="http://www2.warwick.ac.uk/services/its/servicessupport/web/tabula/cm2-transition/">Learn more</a> about the changes.
+	</div>
+
 <#--
 <div id="form-editor-sidebar">
 
@@ -53,7 +59,7 @@ the comments textarea needs to maintain newlines.
 -->
 <div class="submit-buttons form-actions">
 	<input type="submit" value="Save" class="btn btn-primary">
-	<a class="btn" href="<@routes.coursework.depthome module=assignment.module />">Cancel</a>
+	<a class="btn" href="<@routes.cm2.departmenthome department=assignment.module.adminDepartment />">Cancel</a>
 </div>
 </@f.form>
 

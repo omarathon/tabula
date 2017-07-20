@@ -9,7 +9,7 @@ import uk.ac.warwick.tabula.services.AutowiringUserLookupComponent
 import uk.ac.warwick.userlookup.User
 
 @Entity
-@DiscriminatorValue(value="Cm2MarkedPlagarised")
+@DiscriminatorValue(value="Cm2MarkedPlagiarised")
 class Cm2MarkedPlagiarisedNotification extends NotificationWithTarget[Submission, Assignment]
 	with SingleItemNotification[Submission] with AutowiringUserLookupComponent
 	with MyWarwickActivity {

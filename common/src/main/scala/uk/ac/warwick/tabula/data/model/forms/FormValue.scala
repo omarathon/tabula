@@ -72,7 +72,7 @@ class FileFormValue(val field: FormField) extends FormValue {
  * is left as an exercise for the Hibernate fanbois.
  */
 @Entity(name = "SubmissionValue") @Access(AccessType.FIELD)
-class SavedFormValue extends GeneratedId {
+class SavedFormValue extends GeneratedId with FormattedHtml {
 
 	@ManyToOne(fetch = LAZY)
 	@JoinColumn(name = "submission_id")
@@ -99,6 +99,8 @@ class SavedFormValue extends GeneratedId {
 	def hasAttachments: Boolean = attachments != null && !attachments.isEmpty
 
 	var value: String = _
+
+	def valueFormattedHtml: String = formattedHtml(value)
 }
 
 object SavedFormValue {

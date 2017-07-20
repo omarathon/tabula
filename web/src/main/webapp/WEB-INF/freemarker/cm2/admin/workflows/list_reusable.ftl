@@ -1,12 +1,11 @@
 <#import "*/cm2_macros.ftl" as cm2 />
 <#escape x as x?html>
-<@cm2.headerMenu department academicYear />
 
-<#function route_function dept>
-	<#local selectCourseCommand><@routes.cm2.reusableWorkflowsHome dept academicYear /></#local>
-	<#return selectCourseCommand />
-</#function>
-<@fmt.id7_deptheader title="Marking workflows" route_function=route_function preposition="for" />
+	<#function route_function dept>
+		<#local selectCourseCommand><@routes.cm2.reusableWorkflowsHome dept academicYear /></#local>
+		<#return selectCourseCommand />
+	</#function>
+	<@cm2.departmentHeader "Marking workflows" department route_function academicYear />
 
 <#if copiedWorkflow??>
 	<div class="alert alert-info">
@@ -40,7 +39,7 @@
 </#if>
 <#if workflows?has_content>
 	<#if !isCurrentYear><p>The following workflows relate to the year selected in the main menu. Use the Add to button to copy a workflow to the current academic year.</p></#if>
-	<table class="table-sortable table table-bordered table-striped">
+	<table class="table-sortable table table-striped">
 		<thead>
 		<tr>
 			<th class="sortable">Name</th>
@@ -67,11 +66,11 @@
 					<td>
 						<#if isCurrentYear>
 							<a class="btn btn-default" href="<@routes.cm2.reusableWorkflowEdit department academicYear workflow/>">Modify</a>
-							<a	<#if inUse>
+							<a <#if inUse>
 									disabled="disabled"
 									class="btn btn-default use-tooltip"
 									data-toggle=""
-									title="You can't delete this marking workflow because <@fmt.p number=workflow.assignments?size singular="assignment" /> are using it"
+									title="You can't delete this marking workflow because <@fmt.p number=workflow.assignments?size singular="assignment is" plural="assignments are" /> using it"
 							<#else>
 									class="btn btn-default"
 									href="<@routes.cm2.reusableWorkflowDelete department academicYear workflow/>"
