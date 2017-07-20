@@ -17,8 +17,8 @@ object DownloadFeedbackCommand {
 
 	val RequiredPermission = Permissions.AssignmentFeedback.Read
 
-	def apply(assignment: Assignment, feedback: Feedback): Command =
-		new DownloadFeedbackCommandInternal(assignment, feedback)
+	def apply(assignment: Assignment, feedback: Feedback, student: Option[Member]): Command =
+		new DownloadFeedbackCommandInternal(assignment, feedback, student)
 			with ComposableCommand[Result]
 			with AutowiringZipServiceComponent
 			with DownloadFeedbackPermissions
@@ -29,13 +29,14 @@ object DownloadFeedbackCommand {
 trait DownloadFeedbackState {
 	def assignment: Assignment
 	def feedback: Feedback
+	def student: Option[Member]
 }
 
 trait DownloadFeedbackRequest extends DownloadFeedbackState {
 	var filename: String = _
 }
 
-class DownloadFeedbackCommandInternal(val assignment: Assignment, val feedback: Feedback) extends CommandInternal[Result]
+class DownloadFeedbackCommandInternal(val assignment: Assignment, val feedback: Feedback, val student: Option[Member]) extends CommandInternal[Result]
 	with DownloadFeedbackRequest {
 	self: ZipServiceComponent =>
 
@@ -56,7 +57,14 @@ trait DownloadFeedbackPermissions extends RequiresPermissionsChecking with Permi
 
 	override def permissionsCheck(p: PermissionsChecking): Unit = {
 		notDeleted(mandatory(assignment))
-		p.PermissionCheck(RequiredPermission, mandatory(feedback))
+		student match {
+			case Some(student: StudentMember) => p.PermissionCheckAny(
+				Seq(CheckablePermission(RequiredPermission, mandatory(feedback)),
+					CheckablePermission(RequiredPermission, student))
+			)
+			case _ => p.PermissionCheck(Permissions.AssignmentFeedback.Read, mandatory(feedback))
+		}
+
 	}
 }
 
