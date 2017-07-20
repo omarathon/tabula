@@ -117,6 +117,8 @@ class Assignment
 	@deprecated("118", "Archived will be removed in future in preference to academic year scoping")
 	private var _archived: JBoolean = false
 
+	def archived = Option(_archived).getOrElse(false)
+
 	def archive(): Unit = { _archived = true }
 	def unarchive(): Unit = { _archived = false }
 
