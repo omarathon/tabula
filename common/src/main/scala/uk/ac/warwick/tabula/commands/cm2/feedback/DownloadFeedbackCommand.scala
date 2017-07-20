@@ -62,7 +62,7 @@ trait DownloadFeedbackPermissions extends RequiresPermissionsChecking with Permi
 				Seq(CheckablePermission(RequiredPermission, mandatory(feedback)),
 					CheckablePermission(RequiredPermission, student))
 			)
-			case _ => p.PermissionCheck(Permissions.AssignmentFeedback.Read, mandatory(feedback))
+			case _ => p.PermissionCheck(RequiredPermission, mandatory(feedback))
 		}
 
 	}
