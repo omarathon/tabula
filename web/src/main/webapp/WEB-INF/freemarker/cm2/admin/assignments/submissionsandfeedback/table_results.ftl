@@ -307,7 +307,7 @@
 											(feedbackSitsStatus.actualMarkLastUploaded!0) != (student.enhancedFeedback.feedback.latestMark!0) || (feedbackSitsStatus.actualGradeLastUploaded!"") != (student.enhancedFeedback.feedback.latestGrade!"")
 											) />
 											<#if feedbackSitsStatus.code == "failed">
-												<a href="<@routes.checkSitsUpload enhancedFeedback.feedback />" target="_blank">
+												<a href="<@routes.cm2.checkSitsUpload enhancedFeedback.feedback />" target="_blank">
 														<span style="cursor: pointer;" class="label label-danger use-tooltip" title="There was a problem uploading to SITS. Click to try and diagnose the problem.">
 														${feedbackSitsStatus.description}
 														</span><#--

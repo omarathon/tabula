@@ -666,6 +666,7 @@
 				<h6 class="sr-only">Assignment information</h6>
 
 				<ul class="list-unstyled">
+					<#if assignment.archived><li><strong>Archived</strong></li></#if>
 					<#if !assignment.opened>
 						<li><strong>Assignment opens:</strong> <span class="use-tooltip" title="<@fmt.dateToWeek assignment.openDate />" data-html="true"><@fmt.date date=assignment.openDate /></span></li>
 					</#if>
