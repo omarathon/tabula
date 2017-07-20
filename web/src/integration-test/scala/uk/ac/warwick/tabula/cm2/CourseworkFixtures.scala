@@ -140,6 +140,7 @@ trait CourseworkFixtures extends BrowserTest with FeaturesDriver with FixturesDr
 		assignmentName: String,
 		studentSettings: Seq[String] => Unit = Nil => (),
 		submissionSettings: () => Unit = () => (),
+		optionSettings: () => Unit = () => (),
 		students: Seq[String] = Seq(P.Student1.usercode, P.Student2.usercode),
 		loggedUser: LoginDetails = P.Admin1
 	)(callback: String => Unit): Unit = as(loggedUser) {
@@ -180,7 +181,11 @@ trait CourseworkFixtures extends BrowserTest with FeaturesDriver with FixturesDr
 
 		cssSelector(s"input[value='Save and continue']").webElement.click()
 		submissionSettings()
-		cssSelector(s"input[name=createAndAddSubmissions]").webElement.click()
+
+		cssSelector(s"input[value='Save and continue']").webElement.click()
+		optionSettings()
+
+		cssSelector(s"input[value='Save and exit']").webElement.click()
 
 		// Ensure that we've been redirected back
 		withClue(pageSource) {
@@ -395,9 +400,6 @@ trait CourseworkFixtures extends BrowserTest with FeaturesDriver with FixturesDr
 		checkbox("plagiarismDeclaration").select()
 
 		submit()
-		verifyPageLoaded(
-			pageSource contains "Thanks, we've received your submission." should be {true}
-		)
 	}
 
 	def getInputByLabel(label: String): Option[WebElement] =

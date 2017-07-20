@@ -38,8 +38,10 @@ class CourseworkAssignmentMembershipTest extends BrowserTest with CourseworkFixt
 		withAssignment("xxx01", "Fully featured assignment", submissionSettings=submissionSettings) { assignmentId =>
 			// Student1 is enrolled
 			submitAssignment(P.Student1, "xxx01", "Fully featured assignment", assignmentId, "/file1.txt")
+			verifyPageLoaded(pageSource contains "Thanks, we've received your submission." should be {true})
 			// Student 3 is not enrolled but can submit anyway
 			submitAssignment(P.Student3, "xxx01", "Fully featured assignment", assignmentId, "/file2.txt", mustBeEnrolled = false)
+			verifyPageLoaded(pageSource contains "Thanks, we've received your submission." should be {true})
 		}
 	}
 
@@ -64,6 +66,7 @@ class CourseworkAssignmentMembershipTest extends BrowserTest with CourseworkFixt
 		withAssignment("xxx01", "Fully featured assignment", studentSettings = assignmentSettings, submissionSettings = submissionSettings, students=Nil) { assignmentId =>
 			// Student 3 is enrolled via SITS and can submit
 			submitAssignment(P.Student3, "xxx01", "Fully featured assignment", assignmentId, "/file1.txt")
+			verifyPageLoaded(pageSource contains "Thanks, we've received your submission." should be {true})
 
 			// Student 5 isn't in the SITS group. Poor Student5
 			as(P.Student5) {

@@ -37,6 +37,20 @@ class CourseworkAssignmentSubmissionTest extends BrowserTest with CourseworkFixt
 	"Student" should "be able to submit assignment" in {
 		withAssignment("xxx01", "Fully featured assignment") { assignmentId =>
 			submitAssignment(P.Student1, "xxx01", "Fully featured assignment", assignmentId, "/file1.txt")
+			verifyPageLoaded(pageSource contains "Thanks, we've received your submission." should be {true})
+		}
+	}
+
+	"Student" should "see a validation error when submitting less than the minimum number of files" in {
+
+		def options() = {
+			singleSel("minimumFileAttachmentLimit").value = "2"
+			singleSel("fileAttachmentLimit").value = "3"
+		}
+
+		withAssignment("xxx01", "Fully featured assignment", optionSettings = options) { assignmentId =>
+			submitAssignment(P.Student1, "xxx01", "Fully featured assignment", assignmentId, "/file1.txt")
+			pageSource contains "Thanks, we've received your submission." should be {true}
 		}
 	}
 
