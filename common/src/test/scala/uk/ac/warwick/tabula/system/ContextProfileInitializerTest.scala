@@ -12,11 +12,12 @@ class ContextProfileInitializerTest extends TestBase {
     )
     val profiles = initializer.resolve()
     profiles should (
-      have size 4 and
+      have size 5 and
         contain("dev") and
         contain("web") and
         contain("scheduling") and
-        contain("cm1Enabled")
+        contain("cm1Enabled") and
+        contain("cm2Enabled")
       )
   }
 
@@ -29,9 +30,10 @@ class ContextProfileInitializerTest extends TestBase {
     )
     val profiles = initializer.resolve()
     profiles should (
-      have size 2 and
+      have size 3 and
         contain("production") and
-        contain("cm1Enabled")
+        contain("cm1Enabled") and
+        contain("cm2Enabled")
       )
   }
 

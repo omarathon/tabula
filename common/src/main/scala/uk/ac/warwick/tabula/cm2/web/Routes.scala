@@ -29,6 +29,8 @@ object Routes {
 
 	object assignment {
 		def apply(assignment: Assignment): String = context + s"/submission/${encoded(assignment.id)}/"
+		def feedback(assignment: Assignment): String = apply(assignment) + "all/feedback.zip"
+		def feedbackPdf(assignment: Assignment, feedback: AssignmentFeedback): String = apply(assignment) + s"${encoded(feedback.usercode)}/feedback.pdf"
 	}
 
 	object admin {
@@ -190,9 +192,6 @@ object Routes {
 				def status(assignment: Assignment): String = assignmentroot(assignment) + "/turnitin/status"
 			}
 
-			object audit {
-				def apply(assignment: Assignment): String = admin() + s"/audit/assignment/${encoded(assignment.id)}"
-			}
 			def extensions(assignment: Assignment): String = assignmentroot(assignment) + "/extensions"
 
 			def submitToTurnitin(assignment: Assignment): String = assignmentroot(assignment) + "/turnitin"

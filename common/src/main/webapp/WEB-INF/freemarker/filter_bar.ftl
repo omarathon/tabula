@@ -275,7 +275,7 @@
 
 					$('.use-wide-popover').tabulaPopover({
 						trigger: 'click',
-						container: '#container',
+						container: 'body',
 						template: '<div class="popover wide"><div class="arrow"></div><div class="popover-inner"><button type="button" class="close" aria-hidden="true">&#215;</button><h3 class="popover-title"></h3><div class="popover-content"><p></p></div></div></div>'
 					});
 

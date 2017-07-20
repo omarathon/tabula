@@ -84,7 +84,7 @@ trait CourseworkFixtures extends BrowserTest with FeaturesDriver with FixturesDr
 
 	def as[T](user: LoginDetails)(fn: => T): T = {
 		currentUser = user
-		signIn as user to Path("/coursework")
+		signIn as user to Path("/cm1")
 
 		fn
 	}
@@ -136,7 +136,7 @@ trait CourseworkFixtures extends BrowserTest with FeaturesDriver with FixturesDr
 			pick(".moduleassistant-table", assistants)
 
 			// as you were...
-			go to Path("/coursework")
+			go to Path("/cm1")
 			click on linkText("Go to the Test Services admin page")
 			verifyPageLoaded{
 				// wait for the page to load
@@ -231,7 +231,7 @@ trait CourseworkFixtures extends BrowserTest with FeaturesDriver with FixturesDr
 			currentUrl should endWith(assignmentId)
 		} else {
 			// Just go straight to the submission URL
-			go to Path("/coursework/module/" + moduleCode.toLowerCase + "/" + assignmentId + "/")
+			go to Path("/cm1/module/" + moduleCode.toLowerCase + "/" + assignmentId + "/")
 		}
 
 		// The assignment submission page uses FormFields which don't have readily memorable names, so we need to get fields by their label
@@ -260,7 +260,7 @@ trait CourseworkFixtures extends BrowserTest with FeaturesDriver with FixturesDr
 			currentUrl should endWith(assignmentId)
 		} else {
 			// Just go straight to the submission URL
-			go to Path("/coursework/module/" + moduleCode.toLowerCase + "/" + assignmentId + "/")
+			go to Path("/cm1/module/" + moduleCode.toLowerCase + "/" + assignmentId + "/")
 		}
 
 		click on partialLinkText("Request an extension")

@@ -5,7 +5,7 @@ if we end up changing any of them.
 TODO grab values from the Routes object in code, as that's pretty equivalent and
    we're repeating ourselves here. OR expose Routes directly.
 -->
-<#macro _u page context=component.context?default('/cm2')>
+<#macro _u page context=cm2Context>
 	<@url context=context page=page />
 </#macro>
 
@@ -96,7 +96,6 @@ TODO grab values from the Routes object in code, as that's pretty equivalent and
 
 <#macro editassignmentdetails assignment><@_u page="/admin/assignments/${assignment.id}/edit" /></#macro>
 
-<#macro assignmentAudit assignment><@_u page="/admin/assignments/${assignment.id}/audit"/></#macro>
 <#macro feedbackSummary assignment studentid><@_u page="/admin/assignments/${assignment.id}/feedback/summary/${studentid}"/></#macro>
 <#macro feedbackAudit assignment studentid><@_u page="/admin/assignments/${assignment.id}/audit/${studentid}"/></#macro>
 <#macro plagiarismInvestigation assignment><@_u page='/admin/assignments/${assignment.id}/submissionsandfeedback/mark-plagiarised'/></#macro>

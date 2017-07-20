@@ -118,11 +118,11 @@ class DepartmentPermissionControllerTest extends TestBase with Mockito {
 	@Test def remove { new Fixture {
 		val removedRole = new DepartmentGrantedRole(department, DepartmentalAdministratorRoleDefinition)
 
-		val command = new Appliable[GrantedRole[Department]] with RevokeRoleCommandState[Department] with PermissionsServiceComponent {
+		val command = new Appliable[Option[GrantedRole[Department]]] with RevokeRoleCommandState[Department] with PermissionsServiceComponent {
 			val permissionsService = null
 			def scope: Department = department
 			def grantedRole = Some(removedRole)
-			def apply: DepartmentGrantedRole = removedRole
+			def apply: Option[DepartmentGrantedRole] = Some(removedRole)
 		}
 		command.usercodes.add("cuscav")
 		command.usercodes.add("cusebr")
@@ -143,13 +143,13 @@ class DepartmentPermissionControllerTest extends TestBase with Mockito {
 	@Test def removeValidationErrors { new Fixture {
 		val removedRole = new DepartmentGrantedRole(department, DepartmentalAdministratorRoleDefinition)
 
-		val command = new Appliable[GrantedRole[Department]] with RevokeRoleCommandState[Department] with PermissionsServiceComponent {
+		val command = new Appliable[Option[GrantedRole[Department]]] with RevokeRoleCommandState[Department] with PermissionsServiceComponent {
 			val permissionsService = null
 			def scope: Department = department
 			def grantedRole = Some(removedRole)
-			def apply(): Null = {
+			def apply(): Option[GrantedRole[Department]] = {
 				fail("Should not be called")
-				null
+				None
 			}
 		}
 		command.usercodes.add("cuscav")

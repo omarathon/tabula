@@ -1,4 +1,4 @@
-package uk.ac.warwick.tabula.coursework
+package uk.ac.warwick.tabula.cm2
 
 import uk.ac.warwick.tabula.BrowserTest
 
@@ -11,10 +11,8 @@ class CourseworkAssignmentSubmissionTest extends BrowserTest with CourseworkFixt
 				click on linkText("Fully featured assignment")
 				currentUrl should endWith(assignmentId)
 
-				click on getInputByLabel("File").get
+				click on find(cssSelector("input[type=file]")).get
 				pressKeys(getClass.getResource("/file1.txt").getFile)
-
-				new TextField(getInputByLabel("Word count").get).value = "1000"
 
 				// Don't click the plagiarism detection button yet
 				submit()

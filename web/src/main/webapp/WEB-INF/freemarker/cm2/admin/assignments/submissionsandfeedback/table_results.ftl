@@ -3,7 +3,7 @@
 
 <#escape x as x?html>
 	<div id="profile-modal" class="modal fade profile-subset"></div>
-
+	<div id="feedback-modal" class="modal fade"></div>
 	<#if results.students??>
 		<#function hasSubmissionOrFeedback students>
 			<#local result = [] />

@@ -19,7 +19,7 @@ import uk.ac.warwick.tabula.data.model.permissions.GrantedRole
 trait RoutePermissionControllerMethods extends AdminController {
 
 	type GrantRoleCommand = Appliable[GrantedRole[Route]] with GrantRoleCommandState[Route]
-	type RevokeRoleCommand = Appliable[GrantedRole[Route]] with RevokeRoleCommandState[Route]
+	type RevokeRoleCommand = Appliable[Option[GrantedRole[Route]]] with RevokeRoleCommandState[Route]
 
 	@ModelAttribute("addCommand") def addCommandModel(@PathVariable route: Route): GrantRoleCommand = GrantRoleCommand(route)
 	@ModelAttribute("removeCommand") def removeCommandModel(@PathVariable route: Route): RevokeRoleCommand = RevokeRoleCommand(route)
@@ -59,7 +59,7 @@ class RouteAddPermissionController extends AdminController with RoutePermissionC
 	@RequestMapping(method = Array(POST), params = Array("_command=add"))
 	def addPermission(@Valid @ModelAttribute("addCommand") command: GrantRoleCommand, errors: Errors) : Mav = {
 		val route = command.scope
-		if (errors.hasErrors()) {
+		if (errors.hasErrors) {
 			form(route)
 		} else {
 			val role = Some(command.apply().roleDefinition)
@@ -78,10 +78,10 @@ class RouteRemovePermissionController extends AdminController with RoutePermissi
 	def removePermission(@Valid @ModelAttribute("removeCommand") command: RevokeRoleCommand,
 	                     errors: Errors): Mav = {
 		val route = command.scope
-		if (errors.hasErrors()) {
+		if (errors.hasErrors) {
 			form(route)
 		} else {
-			val role = Some(command.apply().roleDefinition)
+			val role = command.apply().map(_.roleDefinition)
 			val userCodes = command.usercodes.asScala
 			form(route, userCodes, role, "remove")
 		}

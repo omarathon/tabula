@@ -12,21 +12,9 @@ class CourseworkFeedbackTemplatesTest extends BrowserTest with CourseworkFixture
 	}
 
 	"Department admin" should "be able to manage feedback templates" in as(P.Admin1) {
-
-		click on linkText("Go to the Test Services admin page")
-
-		def openFeedbackTemplates() = {
-			click on (cssSelector(".dept-settings a.dropdown-toggle"))
-
-			val feedbackTemplatesLink = cssSelector(".dept-settings .dropdown-menu").webElement.findElement(By.partialLinkText("Feedback templates"))
-			eventually {
-				feedbackTemplatesLink.isDisplayed should be(true)
-			}
-			click on (feedbackTemplatesLink)
-		}
-
-		openFeedbackTemplates()
-
+		var templatePage = "/cm1/admin/department/xxx/settings/feedback-templates"
+		go to Path(templatePage)
+		currentUrl should include(templatePage)
 		var currCnt = currentCount()
 
 		def uploadNewTemplate(file: String) {

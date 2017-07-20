@@ -9,9 +9,9 @@ import org.springframework.validation.Errors
 import org.springframework.web.bind.annotation.{ModelAttribute, PathVariable, RequestMapping}
 import uk.ac.warwick.tabula.AcademicYear
 import uk.ac.warwick.tabula.JavaImports._
+import uk.ac.warwick.tabula.cm2.web.Routes
 import uk.ac.warwick.tabula.commands.{Appliable, SelfValidating}
 import uk.ac.warwick.tabula.commands.coursework.assignments.{AddAssignmentsCommand, AddAssignmentsCommandOnBind, AddAssignmentsValidation, PopulatesAddAssignmentsCommand}
-import uk.ac.warwick.tabula.coursework.web.Routes
 import uk.ac.warwick.tabula.web.controllers.coursework.OldCourseworkController
 import uk.ac.warwick.tabula.data.model.{Assignment, Department}
 import uk.ac.warwick.tabula.web.Mav
