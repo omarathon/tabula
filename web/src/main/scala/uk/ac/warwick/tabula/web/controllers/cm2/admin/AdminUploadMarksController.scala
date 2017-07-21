@@ -1,5 +1,7 @@
 package uk.ac.warwick.tabula.web.controllers.cm2.admin
 
+import javax.validation.Valid
+
 import org.springframework.context.annotation.Profile
 import org.springframework.stereotype.Controller
 import org.springframework.validation.Errors
@@ -27,7 +29,7 @@ class AdminUploadMarksController extends CourseworkController {
 		AdminAddMarksCommand(mandatory(assignment), currentUser, GenerateGradesFromMarkCommand(assignment))
 
 	@RequestMapping
-	def viewForm(@ModelAttribute("command") cmd: Command, @PathVariable assignment: Assignment, errors: Errors): Mav = {
+	def viewForm(@PathVariable assignment: Assignment, @Valid @ModelAttribute("command") cmd: Command, errors: Errors): Mav = {
 		Mav("cm2/admin/assignments/upload_marks",
 			"isGradeValidation" -> cmd.assignment.module.adminDepartment.assignmentGradeValidation,
 			"templateUrl" -> Routes.admin.assignment.marksTemplate(assignment),
@@ -37,8 +39,8 @@ class AdminUploadMarksController extends CourseworkController {
 	}
 
 	@RequestMapping(method = Array(POST), params = Array("!confirm"))
-	def preview(@ModelAttribute("command") cmd: Command, @PathVariable assignment: Assignment, errors: Errors): Mav = {
-		if (errors.hasErrors) viewForm(cmd, assignment, errors)
+	def preview(@PathVariable assignment: Assignment, @Valid @ModelAttribute("command") cmd: Command, errors: Errors): Mav = {
+		if (errors.hasErrors) viewForm(assignment, cmd, errors)
 		else {
 			cmd.postBindValidation(errors)
 			Mav("cm2/admin/assignments/upload_marks_preview",
@@ -49,7 +51,7 @@ class AdminUploadMarksController extends CourseworkController {
 	}
 
 	@RequestMapping(method = Array(POST), params = Array("confirm=true"))
-	def upload(@ModelAttribute("command") cmd: Command, @PathVariable assignment: Assignment, errors: Errors): Mav = {
+	def upload(@PathVariable assignment: Assignment, @Valid @ModelAttribute("command") cmd: Command, errors: Errors): Mav = {
 		cmd.apply()
 		Redirect(Routes.admin.assignment.submissionsandfeedback(assignment))
 	}
