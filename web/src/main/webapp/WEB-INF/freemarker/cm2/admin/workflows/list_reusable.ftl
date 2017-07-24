@@ -28,15 +28,18 @@
 	</div>
 </#if>
 
+<p>Marking workflows define the marking method and who the markers are. Create workflows here and use them with one or more assignments.</p>
 <#if isCurrentYear>
-	<p>Marking workflows define the marking method and who the markers are. Create workflows here and use them with one or more assignments.</p>
 	<p>Below is the list of current workflows available. To copy an old workflow, navigate to the relevant academic year and add the workflow to the current year.</p>
+</#if>
+<#if isCurrentYearOrLater>
 	<@bs3form.labelled_form_group>
 		<a class="btn btn-primary" href="<@routes.cm2.reusableWorkflowAdd department academicYear />">
 			Create workflow
 		</a>
 	</@bs3form.labelled_form_group>
 </#if>
+
 <#if workflows?has_content>
 	<#if !isCurrentYear><p>The following workflows relate to the year selected in the main menu. Use the Add to button to copy a workflow to the current academic year.</p></#if>
 	<table class="table-sortable table table-striped">
@@ -64,7 +67,7 @@
 						</#compress></#list>
 					</td>
 					<td>
-						<#if isCurrentYear>
+						<#if isCurrentYearOrLater>
 							<a class="btn btn-default" href="<@routes.cm2.reusableWorkflowEdit department academicYear workflow/>">Modify</a>
 							<a <#if inUse>
 									disabled="disabled"
