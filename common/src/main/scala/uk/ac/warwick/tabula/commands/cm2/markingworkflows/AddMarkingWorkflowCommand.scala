@@ -36,6 +36,7 @@ class AddMarkingWorkflowCommandInternal(
 		val data = MarkingWorkflowData(department, workflowName, markersAUsers, markersBUsers, workflowType)
 		val workflow = createWorkflow(data)
 		workflow.isReusable = true
+		workflow.academicYear = academicYear
 		cm2MarkingWorkflowService.save(workflow)
 		workflow
 	}
