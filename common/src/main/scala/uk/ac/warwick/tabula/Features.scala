@@ -113,7 +113,7 @@ abstract class Features {
 	@Value("${features.celcatTimetablesChemistry:true}") var celcatTimetablesChemistry: Boolean = defaults.celcatTimetablesChemistry
 	@Value("${features.celcatTimetablesWBS:true}") var celcatTimetablesWBS: Boolean = defaults.celcatTimetablesWBS
 	@Value("${features.smallGroupTeaching.autoMarkMissedMonitoringPoints:true}") var autoMarkMissedMonitoringPoints: Boolean = defaults.autoMarkMissedMonitoringPoints
-	@Value("${features.notificationListeners.mywarwick:false}") var myWarwickNotificationListener: Boolean = defaults.myWarwickNotificationListener
+	@Value("${features.notificationListeners.mywarwick:true}") var myWarwickNotificationListener: Boolean = defaults.myWarwickNotificationListener
 	@Value("${features.urkund.submissions:false}") var urkundSubmissions: Boolean = defaults.urkundSubmissions
 
 	@Value("${features.scheduling.academicInformationImport:true}") var schedulingAcademicInformationImport: Boolean = defaults.schedulingAcademicInformationImport
@@ -233,7 +233,7 @@ class FeaturesMessage {
 	@BeanProperty var autoGroupDeregistration = false
 	@BeanProperty var celcatTimetablesChemistry = true
 	@BeanProperty var celcatTimetablesWBS = true
-	@BeanProperty var myWarwickNotificationListener = false
+	@BeanProperty var myWarwickNotificationListener = true
 
 	@BeanProperty var smallGroupTeaching = true
 	@BeanProperty var smallGroupTeachingStudentSignUp = true
