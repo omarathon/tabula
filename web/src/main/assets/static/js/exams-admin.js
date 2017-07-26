@@ -17,7 +17,7 @@ examsExports.prepareAjaxForm = function($form, callback) {
 		iframe: true,
 		statusCode: {
 			403: function(jqXHR) {
-				$container.html("<p>Sorry, you don't have permission to see that. Have you signed out of Tabula?</p><p>Refresh the page and try again. If it remains a problem, please let us know using the 'Problems, questions?' button at the top of the page.</p>");
+				$container.html("<p>Sorry, you don't have permission to see that. Have you signed out of Tabula?</p><p>Refresh the page and try again. If it remains a problem, please let us know using the 'Need help?' button at the top of the page.</p>");
 				$container.trigger('tabula.expandingTable.contentChanged');
 			}
 		},

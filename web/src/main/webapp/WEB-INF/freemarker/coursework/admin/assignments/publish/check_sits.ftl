@@ -64,7 +64,7 @@
 
 	<div class="final-status hidden">
 		<p>We couldn't find a reason why this mark could not be uploaded.
-			Try uploading to SITS again and if the problem persists contact the Web Team using the "Problems, questions?" button above.</p>
+			Try uploading to SITS again and if the problem persists contact the Web Team using the "Need help?" button above.</p>
 	</div>
 
 	<script>

@@ -28,7 +28,7 @@
 	<input type="hidden" name="ipAddress" value="" />
 </#macro>
 
-<h1>Problems, questions?</h1>
+<h1>Need help?</h1>
 
 <div class="row">
 	<div class="col-md-9">
@@ -60,7 +60,7 @@
 				<div class="row">
 					<div class="col-sm-6">
 						<p><a target="_blank" href="http://www2.warwick.ac.uk/services/its/servicessupport/web/tabula/manual/administration-permissions/">Administration and permissions<i class="new-window-link" title="Link opens in a new window"></i></a></p>
-						<p><a target="_blank" href="http://www2.warwick.ac.uk/services/its/servicessupport/web/tabula/manual/coursework-management/">Coursework management<i class="new-window-link" title="Link opens in a new window"></i></a></p>
+						<p><a target="_blank" href="http://www2.warwick.ac.uk/services/its/servicessupport/web/tabula/manual/cm2/">Coursework management<i class="new-window-link" title="Link opens in a new window"></i></a></p>
 						<p><a target="_blank" href="http://www2.warwick.ac.uk/services/its/servicessupport/web/tabula/manual/grids/">Exam grids<i class="new-window-link" title="Link opens in a new window"></i></a></p>
 					</div>
 					<div class="col-sm-6">
@@ -77,7 +77,7 @@
 			<h2>Contact your administrator</h2>
 			<p>If you're having problems with Tabula, use the form below to contact your department's Tabula administrator.</p>
 
-			<@f.form commandName="command" action="${url('/comments')}" cssClass="comment-form">
+			<@f.form commandName="command" action="${url('/help')}" cssClass="comment-form">
 				<@bs3form.labelled_form_group path="name" labelText="Your name">
 					<@f.input path="name" cssClass="form-control"/>
 				</@bs3form.labelled_form_group>
@@ -101,7 +101,7 @@
 			<h2>Technical support</h2>
 			<p>If you're experiencing technical issues with Tabula, please  <a href="#comment-modal" data-toggle="modal">contact the IT Services Web Team</a>.</p>
 
-			<@f.form commandName="command" action="${url('/comments')}" cssClass="comment-form">
+			<@f.form commandName="command" action="${url('/help')}" cssClass="comment-form">
 
 				<div class="modal fade" id="comment-modal">
 					<@modal.wrapper>
@@ -123,7 +123,7 @@
 		<#else>
 			<h2>Technical support</h2>
 			<p>If you're experiencing technical issues with Tabula, please contact the web team who can help with your query.</p>
-			<@f.form commandName="command" action="${url('/comments')}" cssClass="comment-form">
+			<@f.form commandName="command" action="${url('/help')}" cssClass="comment-form">
 				<@webTeamForm />
 				<button type="submit" class="btn btn-primary" name="recipient" value="${Recipients.WebTeam}">Send</button>
 			</@f.form>
@@ -134,13 +134,13 @@
 	<div class="col-md-3">
 		<div class="boxstyle_ box2">
 			<h4>Release notes</h4>
-			<p>You can view the <a href="/tabulainfo/releases">Tabula release notes</a> to learn about new features and improvements we add to Tabula.</p>
+			<p>You can view the <a href="https://warwick.ac.uk/tabulainfo/releases">Tabula release notes</a> to learn about new features and improvements we add to Tabula.</p>
 			<h4>Discussion forum</h4>
-			<p>To discuss Tabula with other users and the development team, visit the <a href="/tabulainfo/forum">Tabula discussion forum</a>.</p>
+			<p>To discuss Tabula with other users and the development team, visit the <a href="https://warwick.ac.uk/tabulainfo/forum">Tabula discussion forum</a>.</p>
 		</div>
 		<div class="boxstyle_ box2">
 			<h4>Request a feature</h4>
-			<p>If there's something new you'd like to see in Tabula, please <a href="http://warwick.ac.uk/tabulainfo/request-feature">let us know</a>.</p>
+			<p>If there's something new you'd like to see in Tabula, please <a href="https://warwick.ac.uk/tabulainfo/request-feature">let us know</a>.</p>
 		</div>
 	</div>
 

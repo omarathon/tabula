@@ -16,7 +16,7 @@ import uk.ac.warwick.tabula.services.AutowiringModuleAndDepartmentServiceCompone
 import scala.concurrent.Future
 
 @Controller
-@RequestMapping(Array("/comments"))
+@RequestMapping(Array("/help"))
 class AppCommentsController extends BaseController with AutowiringModuleAndDepartmentServiceComponent {
 
 	validatesSelf[SelfValidating]
