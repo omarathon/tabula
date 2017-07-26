@@ -36,7 +36,6 @@ class ModifyAssignmentStudentsCommandInternal(override val assignment: Assignmen
 
 
 	override def applyInternal(): Assignment = {
-
 		this.copyTo(assignment)
 		assessmentService.save(assignment)
 		assignment
