@@ -109,7 +109,7 @@ subprojects {
         compile 'javax.servlet:jstl:1.2'
 
         /* LOGGING */
-        providedCompile 'uk.ac.warwick:warwick-logging:1.0-SNAPSHOT:all'
+        providedCompile 'uk.ac.warwick:warwick-logging:1.0:all'
 
         // Provided by the above
         providedCompile 'ch.qos.logback:logback-classic:1.2.3'
