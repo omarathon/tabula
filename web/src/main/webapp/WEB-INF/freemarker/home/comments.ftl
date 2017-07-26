@@ -133,10 +133,10 @@
 
 	<div class="col-md-3">
 		<div class="boxstyle_ box2">
+			<h4>Notice board</h4>
+			<p>Visit the <a href="https://warwick.ac.uk/tabulainfo/forum">Tabula notice board</a> for updates on new developments, events and other news from the Tabula team.</p>
 			<h4>Release notes</h4>
-			<p>You can view the <a href="https://warwick.ac.uk/tabulainfo/releases">Tabula release notes</a> to learn about new features and improvements we add to Tabula.</p>
-			<h4>Discussion forum</h4>
-			<p>To discuss Tabula with other users and the development team, visit the <a href="https://warwick.ac.uk/tabulainfo/forum">Tabula discussion forum</a>.</p>
+			<p>We regularly release updated versions of Tabula. Read the <a href="https://warwick.ac.uk/tabulainfo/releases">release notes</a> to learn about new features, improvements and bug fixes in each version.</p>
 		</div>
 		<div class="boxstyle_ box2">
 			<h4>Request a feature</h4>
