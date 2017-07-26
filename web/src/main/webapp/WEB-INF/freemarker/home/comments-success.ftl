@@ -9,4 +9,6 @@
 	<p>Thank you for your feedback.</p>
 </#if>
 
+<p><a href="${previousPage}" class="btn btn-default">Return to previous page</a></p>
+
 </#escape>
