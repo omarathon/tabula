@@ -50,7 +50,6 @@
 				<ul>
 					<#if IS_SSO_PROTECTED!true>
 						<#if user?? && user.loggedIn>
-							<li><a href="http://warwick.ac.uk/tabula/manual/" target="_blank">Manual</a></li>
 							<li><a href="http://warwick.ac.uk/tabula/whatsnew/" target="_blank">What's new?</a></li>
 							<li>
 								<a class="sso-link sign-out" href="<@sso.logoutlink target="${component.rootUrl!rootUrl}" />" data-toggle="id7:account-popover" data-loginlink="<@sso.loginlink />" data-name="${user.fullName}">Sign out</a>
@@ -94,7 +93,7 @@
 							<#if user?? && user.loggedIn>
 								<a class="btn btn-brand btn-sm" href="/settings">Tabula settings</a>
 							</#if>
-							<a class="btn btn-brand btn-sm" href="/comments<#if info??>?currentPage=${info.requestedUri}</#if>">Problems, questions?</a>
+							<a class="btn btn-brand btn-sm" href="/help<#if info??>?currentPage=${info.requestedUri}</#if>">Need help?</a>
 						</div>
 						<#if (info.maintenance)!false || (activeSpringProfiles!"") == "sandbox">
 							<div class="pull-right" style="line-height: 54px;">
