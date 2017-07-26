@@ -1,7 +1,6 @@
 package uk.ac.warwick.tabula.commands.cm2.assignments
 
 import org.springframework.validation.Errors
-import uk.ac.warwick.tabula.JavaImports.JBoolean
 import uk.ac.warwick.tabula.UniversityId
 import uk.ac.warwick.tabula.commands._
 import uk.ac.warwick.tabula.data.model._
@@ -22,7 +21,6 @@ object ModifyAssignmentStudentsCommand {
 			with ModifyAssignmentStudentsValidation
 			with AutowiringAssessmentServiceComponent
 			with AutowiringAssessmentMembershipServiceComponent
-			with CurrentSITSAcademicYear
 			with ModifiesAssignmentMembership
 			with SharedAssignmentStudentProperties {
 			copyMembers(assignment)
@@ -38,6 +36,7 @@ class ModifyAssignmentStudentsCommandInternal(override val assignment: Assignmen
 
 
 	override def applyInternal(): Assignment = {
+
 		this.copyTo(assignment)
 		assessmentService.save(assignment)
 		assignment

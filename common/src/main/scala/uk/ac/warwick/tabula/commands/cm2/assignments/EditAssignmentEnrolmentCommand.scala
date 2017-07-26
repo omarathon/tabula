@@ -1,5 +1,6 @@
 package uk.ac.warwick.tabula.commands.cm2.assignments
 
+import uk.ac.warwick.tabula.AcademicYear
 import uk.ac.warwick.tabula.commands._
 import uk.ac.warwick.tabula.data.model._
 import uk.ac.warwick.tabula.permissions.{CheckablePermission, Permissions}
@@ -23,9 +24,10 @@ object EditAssignmentMembershipCommand {
 			with Unaudited with ReadOnly
 }
 
-trait EditAssignmentMembershipCommandState extends CurrentSITSAcademicYear {
+trait EditAssignmentMembershipCommandState extends HasAcademicYear {
 	def assignment: Assignment
 	def module: Module = assignment.module
+	def academicYear: AcademicYear = assignment.academicYear
 }
 
 class StubEditAssignmentMembershipCommand(val assignment: Assignment, val updateStudentMembershipGroupIsUniversityIds: Boolean = false) extends CommandInternal[Assignment]
