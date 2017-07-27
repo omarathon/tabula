@@ -21,6 +21,7 @@ trait CreatesMarkingWorkflow {
 		)
 		val workflow = createWorkflow(data)
 		workflow.isReusable = false
+		workflow.academicYear = assignment.academicYear
 		cm2MarkingWorkflowService.save(workflow)
 		assignment.cm2MarkingWorkflow = workflow
 	}
