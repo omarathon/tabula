@@ -20,7 +20,7 @@ import uk.ac.warwick.tabula.cm2.web.Routes
 	@ModelAttribute("command") def command(user: CurrentUser) = CourseworkHomepageCommand(user)
 
 	@RequestMapping(Array("/${cm1.prefix}")) def home(@ModelAttribute("command") cmd: Appliable[Option[CourseworkHomepageInformation]], user: CurrentUser): Mav =
-		if(features.redirectHomeCM1) {
+		if(features.redirectCM1) {
 			Redirect(Routes.home)
 		} else {
 			cmd.apply() match {

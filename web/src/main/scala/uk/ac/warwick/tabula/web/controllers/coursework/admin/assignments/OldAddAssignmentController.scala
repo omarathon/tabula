@@ -9,7 +9,7 @@ import org.springframework.stereotype.Controller
 import org.springframework.validation.Errors
 import org.springframework.web.bind.WebDataBinder
 import org.springframework.web.bind.annotation._
-import uk.ac.warwick.tabula.AcademicYear
+import uk.ac.warwick.tabula.{AcademicYear, AutowiringFeaturesComponent}
 import uk.ac.warwick.tabula.JavaImports._
 import uk.ac.warwick.tabula.commands.coursework.assignments._
 import uk.ac.warwick.tabula.commands.{UpstreamGroup, UpstreamGroupPropertyEditor}
@@ -25,7 +25,7 @@ import scala.collection.JavaConverters._
 
 @Profile(Array("cm1Enabled")) @Controller
 @RequestMapping(value=Array("/${cm1.prefix}/admin/module/{module}/assignments/new"))
-class OldAddAssignmentController extends OldCourseworkController {
+class OldAddAssignmentController extends OldCourseworkController with AutowiringFeaturesComponent {
 
 	@Autowired var assignmentService: AssessmentService = _
 
@@ -41,9 +41,14 @@ class OldAddAssignmentController extends OldCourseworkController {
 	// Used for initial load and for prefilling from a chosen assignment
 	@RequestMapping()
 	def form(form: AddAssignmentCommand): Mav = {
-		form.afterBind()
-		form.prefillFromRecentAssignment()
-		showForm(form)
+		if(features.redirectCM1) {
+			Redirect(CM2Routes.admin.assignment.createAssignmentDetails(form.module, form.academicYear))
+		} else {
+			form.afterBind()
+			form.prefillFromRecentAssignment()
+			showForm(form)
+		}
+
 	}
 
 	@RequestMapping(method = Array(POST), params = Array("action=submit"))
