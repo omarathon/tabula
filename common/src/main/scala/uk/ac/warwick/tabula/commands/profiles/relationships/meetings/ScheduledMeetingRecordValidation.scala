@@ -17,7 +17,7 @@ trait ScheduledMeetingRecordValidation {
 			errors.rejectValue("title", "meetingRecord.title.long", Array(MeetingRecord.MaxTitleLength.toString), "")
 		}
 
-		if(meetingLocation.length > MeetingRecord.MaxLocationLength) {
+		if(meetingLocation != null && meetingLocation.length > MeetingRecord.MaxLocationLength) {
 			errors.rejectValue("meetingLocation", "meetingRecord.location.long", Array(MeetingRecord.MaxLocationLength.toString), "")
 		}
 
