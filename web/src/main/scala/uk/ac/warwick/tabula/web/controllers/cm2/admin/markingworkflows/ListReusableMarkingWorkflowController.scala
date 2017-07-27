@@ -43,6 +43,7 @@ class ListReusableMarkingWorkflowController extends CM2MarkingWorkflowController
 				"workflows" -> cmd.apply(),
 				"currentYear" -> currentAcademicYear,
 				"isCurrentYear" -> (currentAcademicYear == academicYear),
+				"isCurrentYearOrLater" -> (academicYear >= currentAcademicYear),
 				"actionErrors" -> actionErrors,
 				"copiedWorkflow" -> copiedWorkflow,
 				"deletedWorkflow" -> deletedWorkflow

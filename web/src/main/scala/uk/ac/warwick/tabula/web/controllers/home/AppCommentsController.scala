@@ -7,7 +7,7 @@ import org.springframework.stereotype.Controller
 import org.springframework.validation.Errors
 import org.springframework.web.bind.annotation.{ModelAttribute, RequestMapping}
 import uk.ac.warwick.tabula.commands.{Appliable, SelfValidating}
-import uk.ac.warwick.tabula.commands.home.AppCommentCommand
+import uk.ac.warwick.tabula.commands.home.{AppCommentCommand, AppCommentCommandRequest}
 import uk.ac.warwick.tabula.web.Mav
 import uk.ac.warwick.tabula.web.controllers.BaseController
 import uk.ac.warwick.tabula.JavaImports._
@@ -16,7 +16,7 @@ import uk.ac.warwick.tabula.services.AutowiringModuleAndDepartmentServiceCompone
 import scala.concurrent.Future
 
 @Controller
-@RequestMapping(Array("/comments"))
+@RequestMapping(Array("/help"))
 class AppCommentsController extends BaseController with AutowiringModuleAndDepartmentServiceComponent {
 
 	validatesSelf[SelfValidating]
@@ -37,12 +37,12 @@ class AppCommentsController extends BaseController with AutowiringModuleAndDepar
 	}
 
 	@RequestMapping(method = Array(POST))
-	def submit(@Valid @ModelAttribute("command") cmd: Appliable[Future[JBoolean]], errors: Errors): Mav = {
+	def submit(@Valid @ModelAttribute("command") cmd: Appliable[Future[JBoolean]] with AppCommentCommandRequest, errors: Errors): Mav = {
 		if (errors.hasErrors) {
 			form(cmd)
 		} else {
 			cmd.apply()
-			Mav("home/comments-success")
+			Mav("home/comments-success", "previousPage" -> cmd.url)
 		}
 
 	}

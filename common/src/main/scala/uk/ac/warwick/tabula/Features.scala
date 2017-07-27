@@ -46,7 +46,7 @@ abstract class Features {
 	@Value("${features.academicYear.2014:true}") var academicYear2014: Boolean = defaults.academicYear2014
 	@Value("${features.academicYear.2015:true}") var academicYear2015: Boolean = defaults.academicYear2015
 	@Value("${features.academicYear.2016:true}") var academicYear2016: Boolean = defaults.academicYear2016
-	@Value("${features.academicYear.2017:false}") var academicYear2017: Boolean = defaults.academicYear2017
+	@Value("${features.academicYear.2017:true}") var academicYear2017: Boolean = defaults.academicYear2017
 	@Value("${features.academicYear.2018:false}") var academicYear2018: Boolean = defaults.academicYear2018
 
 	@Value("${features.emailStudents:false}") var emailStudents: Boolean = defaults.emailStudents
@@ -113,7 +113,7 @@ abstract class Features {
 	@Value("${features.celcatTimetablesChemistry:true}") var celcatTimetablesChemistry: Boolean = defaults.celcatTimetablesChemistry
 	@Value("${features.celcatTimetablesWBS:true}") var celcatTimetablesWBS: Boolean = defaults.celcatTimetablesWBS
 	@Value("${features.smallGroupTeaching.autoMarkMissedMonitoringPoints:true}") var autoMarkMissedMonitoringPoints: Boolean = defaults.autoMarkMissedMonitoringPoints
-	@Value("${features.notificationListeners.mywarwick:false}") var myWarwickNotificationListener: Boolean = defaults.myWarwickNotificationListener
+	@Value("${features.notificationListeners.mywarwick:true}") var myWarwickNotificationListener: Boolean = defaults.myWarwickNotificationListener
 	@Value("${features.urkund.submissions:false}") var urkundSubmissions: Boolean = defaults.urkundSubmissions
 
 	@Value("${features.scheduling.academicInformationImport:true}") var schedulingAcademicInformationImport: Boolean = defaults.schedulingAcademicInformationImport
@@ -185,7 +185,7 @@ class FeaturesMessage {
 	@BeanProperty var academicYear2014 = true
 	@BeanProperty var academicYear2015 = true
 	@BeanProperty var academicYear2016 = true
-	@BeanProperty var academicYear2017 = false
+	@BeanProperty var academicYear2017 = true
 	@BeanProperty var academicYear2018 = false
 
 	@BeanProperty var emailStudents = false
@@ -233,7 +233,7 @@ class FeaturesMessage {
 	@BeanProperty var autoGroupDeregistration = false
 	@BeanProperty var celcatTimetablesChemistry = true
 	@BeanProperty var celcatTimetablesWBS = true
-	@BeanProperty var myWarwickNotificationListener = false
+	@BeanProperty var myWarwickNotificationListener = true
 
 	@BeanProperty var smallGroupTeaching = true
 	@BeanProperty var smallGroupTeachingStudentSignUp = true

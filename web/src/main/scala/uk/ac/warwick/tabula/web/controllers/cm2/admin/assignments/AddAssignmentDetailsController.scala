@@ -37,12 +37,12 @@ class AddAssignmentDetailsController extends AbstractAssignmentController
 		CreateAssignmentDetailsCommand(mandatory(module), mandatory(academicYear))
 
 	@RequestMapping
-	def form(@ModelAttribute("command") form: CreateAssignmentDetailsCommand): Mav = {
+	def form(@ModelAttribute("command") form: CreateAssignmentDetailsCommand, @PathVariable academicYear: AcademicYear): Mav = {
 		form.prefillFromRecentAssignment()
-		showForm(form)
+		showForm(form, academicYear)
 	}
 
-	def showForm(form: CreateAssignmentDetailsCommand): Mav = {
+	def showForm(form: CreateAssignmentDetailsCommand, academicYear: AcademicYear): Mav = {
 		val module = form.module
 
 		Mav("cm2/admin/assignments/new_assignment_details",
@@ -57,8 +57,8 @@ class AddAssignmentDetailsController extends AbstractAssignmentController
 	}
 
 	@RequestMapping(method = Array(POST), params = Array(ManageAssignmentMappingParameters.createAndAddFeedback, "action!=refresh", "action!=update, action=submit"))
-	def submitAndAddFeedback(@Valid @ModelAttribute("command") cmd: CreateAssignmentDetailsCommand, errors: Errors): Mav = {
-		if (errors.hasErrors) showForm(cmd)
+	def submitAndAddFeedback(@Valid @ModelAttribute("command") cmd: CreateAssignmentDetailsCommand, errors: Errors, @PathVariable academicYear: AcademicYear): Mav = {
+		if (errors.hasErrors) showForm(cmd, academicYear)
 		else {
 			val assignment = cmd.apply()
 			RedirectForce(Routes.admin.assignment.createOrEditFeedback(assignment, createMode))
@@ -67,7 +67,7 @@ class AddAssignmentDetailsController extends AbstractAssignmentController
 
 	@RequestMapping(method = Array(POST), params = Array(ManageAssignmentMappingParameters.createAndAddDetails, "action!=refresh", "action!=update"))
 	def saveAndExit(@Valid @ModelAttribute("command") cmd: CreateAssignmentDetailsCommand, errors: Errors, @PathVariable module: Module, @PathVariable academicYear: AcademicYear): Mav = {
-		if (errors.hasErrors) showForm(cmd)
+		if (errors.hasErrors) showForm(cmd, academicYear)
 		else {
 			val assignment = cmd.apply()
 			Redirect(Routes.admin.assignment.submissionsandfeedback(assignment))

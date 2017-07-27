@@ -79,7 +79,7 @@
 				<#else>
 					<@components.lateness submission />
 				</#if>
-			<#elseif submission.authorisedLate>
+			<#elseif submission.authorisedLate && extension??>
 				within extension until <@fmt.date date=extension.expiryDate capitalise=false shortMonth=true relative=false />
 			<#else>
 				on time

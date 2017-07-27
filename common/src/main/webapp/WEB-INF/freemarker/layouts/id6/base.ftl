@@ -247,7 +247,7 @@
 			          			</li>
 		          			</ul>
 
-		          			<a id="app-feedback-link" href="/comments<#if info??>?currentPage=${info.requestedUri}</#if>"><span>Give feedback</span></a>
+		          			<a id="app-feedback-link" href="/help<#if info??>?currentPage=${info.requestedUri}</#if>"><span>Give feedback</span></a>
 
 									<#if user?? && user.sysadmin>
 										<div id="sysadmin-link">

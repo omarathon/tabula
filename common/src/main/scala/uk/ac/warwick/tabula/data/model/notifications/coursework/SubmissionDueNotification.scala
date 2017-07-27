@@ -107,7 +107,7 @@ class SubmissionDueWithExtensionNotification extends Notification[Extension, Uni
 	def extension: Extension = item.entity
 
 	def deadline: DateTime = extension.expiryDate.getOrElse(
-		throw new IllegalArgumentException("Can't send an SubmissionDueWithExtensionNotification without a deadline")
+		throw new IllegalArgumentException(s"Can't send an SubmissionDueWithExtensionNotification without a deadline - extension ${extension.id}")
 	)
 
 	def assignment: Assignment = extension.assignment
