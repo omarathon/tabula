@@ -20,6 +20,7 @@ object MeetingRecord {
 	val DefaultMeetingTimeOfDay = 12 // Should be used for legacy meetings (where isRealTime is false)
 	val MeetingTooOldThresholdYears = 5
 	val MaxTitleLength = 140
+	val MaxLocationLength = 255
 }
 
 @Entity

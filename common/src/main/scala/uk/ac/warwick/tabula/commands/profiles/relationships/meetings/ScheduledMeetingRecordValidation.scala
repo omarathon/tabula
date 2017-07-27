@@ -11,10 +11,14 @@ import scala.util.Try
 
 trait ScheduledMeetingRecordValidation {
 
-	def sharedValidation(errors: Errors, title: String, meetingDateStr: String, meetingTimeStr: String, meetingEndTimeStr: String) {
+	def sharedValidation(errors: Errors, title: String, meetingDateStr: String, meetingTimeStr: String, meetingEndTimeStr: String, meetingLocation: String) {
 		rejectIfEmptyOrWhitespace(errors, "title", "NotEmpty")
 		if (title.hasText && title.length > MeetingRecord.MaxTitleLength){
-			errors.rejectValue("title", "meetingRecord.title.long", new Array(MeetingRecord.MaxTitleLength), "")
+			errors.rejectValue("title", "meetingRecord.title.long", Array(MeetingRecord.MaxTitleLength.toString), "")
+		}
+
+		if(meetingLocation.length > MeetingRecord.MaxLocationLength) {
+			errors.rejectValue("meetingLocation", "meetingRecord.location.long", Array(MeetingRecord.MaxLocationLength.toString), "")
 		}
 
 		rejectIfEmptyOrWhitespace(errors, "relationship", "NotEmpty")

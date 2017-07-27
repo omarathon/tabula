@@ -123,7 +123,7 @@ trait EditScheduledMeetingRecordCommandValidation extends SelfValidating with Sc
 
 	override def validate(errors: Errors) {
 
-		sharedValidation(errors, title, meetingDateStr, meetingTimeStr, meetingEndTimeStr)
+		sharedValidation(errors, title, meetingDateStr, meetingTimeStr, meetingEndTimeStr, meetingLocation)
 
 		meetingRecordService.listScheduled(Set(meetingRecord.relationship), Some(editor)).foreach(
 			m => if ((!meetingDateStr.isEmptyOrWhitespace) && (!meetingTimeStr.isEmptyOrWhitespace) && (!meetingEndTimeStr.isEmptyOrWhitespace)) {

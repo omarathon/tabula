@@ -118,7 +118,7 @@ trait MeetingRecordValidation extends SelfValidating {
 
 		rejectIfEmptyOrWhitespace(errors, "title", "NotEmpty")
 		if (title.length > MeetingRecord.MaxTitleLength) {
-			errors.rejectValue("title", "meetingRecord.title.long", new Array(MeetingRecord.MaxTitleLength), "")
+			errors.rejectValue("title", "meetingRecord.title.long", Array(MeetingRecord.MaxTitleLength.toString), "")
 		}
 
 		rejectIfEmptyOrWhitespace(errors, "format", "NotEmpty")
@@ -129,6 +129,10 @@ trait MeetingRecordValidation extends SelfValidating {
 				.getOrElse(null)
 		} else {
 			meetingDate.toDateTimeAtStartOfDay
+		}
+
+		if(meetingLocation.length > MeetingRecord.MaxLocationLength) {
+			errors.rejectValue("meetingLocation", "meetingRecord.location.long", Array(MeetingRecord.MaxLocationLength.toString), "")
 		}
 
 		if (dateToCheck == null) {
