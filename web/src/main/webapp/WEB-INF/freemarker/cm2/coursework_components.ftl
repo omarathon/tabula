@@ -548,7 +548,7 @@
 </#macro>
 
 <#macro admin_assignment_list module assignments academicYear expand_by_default=true>
-	<#local id>module-${module.code}</#local>
+	<#local id>module-${module.id}</#local>
 	<#local title><@fmt.module_name module /></#local>
 
 	<span id="${id}-container">
