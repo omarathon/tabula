@@ -30,15 +30,16 @@ trait SubmissionReminder extends RecipientCompletedActionRequiredNotification {
 		Days.daysBetween(now, closeDate).getDays
 	}
 
-	override final def onPreSave(newRecord: Boolean) = Try{
-		priority = if (daysLeft == 1) {
-			Warning
-		} else if (daysLeft < 1) {
-			Critical
-		} else {
-			Info
-		}
-	}.getOrElse(Info) // deadline could be null in which case we won't be sending anything so Info is fine
+	override final def onPreSave(newRecord: Boolean): Unit =
+		priority = Try {
+			if (daysLeft == 1) {
+				Warning
+			} else if (daysLeft < 1) {
+				Critical
+			} else {
+				Info
+			}
+		}.getOrElse(Info) // deadline could be null in which case we won't be sending anything so Info is fine
 
 	def url: String = Routes.assignment(assignment)
 

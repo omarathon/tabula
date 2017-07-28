@@ -224,7 +224,7 @@ abstract class Notification[A >: Null <: ToEntityReference, B]
 			case _ => None
 		}.foreach(getOrCreateRecipientNotificationInfo)
 	}
-	def onPreSave(newRecord: Boolean) {}
+	def onPreSave(newRecord: Boolean): Unit = {}
 
 	override def toString = s"Notification[${if (id != null) id else "transient " + hashCode}]{${Option(agent).fold("(no agent)") { _.getFullName }}, $verb, ${items.getClass.getSimpleName}}"
 }
@@ -278,7 +278,7 @@ trait UserIdRecipientNotification extends SingleRecipientNotification with Notif
 }
 
 trait NotificationPreSaveBehaviour {
-	def onPreSave(newRecord: Boolean)
+	def onPreSave(newRecord: Boolean): Unit
 }
 
 /** Stores a single recipient as a University ID in the Notification table. */
