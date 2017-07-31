@@ -6,10 +6,11 @@ import scala.collection.JavaConverters._
 import org.springframework.stereotype.Controller
 import org.springframework.web.bind.annotation.{ModelAttribute, PathVariable, RequestMapping}
 import uk.ac.warwick.tabula.data.model.{Assignment, Department, Module}
-import uk.ac.warwick.tabula.CurrentUser
+import uk.ac.warwick.tabula.{AutowiringFeaturesComponent, CurrentUser}
 import org.springframework.validation.Errors
 import uk.ac.warwick.tabula.commands.ComposableCommand
 import uk.ac.warwick.tabula.coursework.web.Routes
+import uk.ac.warwick.tabula.cm2.web.{Routes => CM2Routes}
 import uk.ac.warwick.tabula.commands.coursework.assignments.{CopyAssignmentsCommand, CopyAssignmentsDescription, CopyAssignmentsPermissions}
 import uk.ac.warwick.tabula.services.{AutowiringAssessmentMembershipServiceComponent, AutowiringAssessmentServiceComponent}
 import uk.ac.warwick.tabula.web.Mav
@@ -17,19 +18,23 @@ import uk.ac.warwick.tabula.web.controllers.coursework.OldCourseworkController
 
 @Profile(Array("cm1Enabled")) @Controller
 @RequestMapping(value=Array("/${cm1.prefix}/admin/module/{module}/copy-assignments"))
-class OldCopyModuleAssignmentsController extends OldCourseworkController with UnarchivedAssignmentsMap {
+class OldCopyModuleAssignmentsController extends OldCourseworkController with UnarchivedAssignmentsMap with AutowiringFeaturesComponent {
 
 	@ModelAttribute
 	def copyAssignmentsCommand(@PathVariable module: Module) = CopyAssignmentsCommand(module.adminDepartment, Seq(module))
 
 	@RequestMapping(method = Array(HEAD, GET))
 	def showForm(@PathVariable module: Module, cmd: CopyAssignmentsCommand): Mav = {
+		if(features.redirectCM1) {
+			Redirect(CM2Routes.admin.module.copyAssignments(module, cmd.academicYear))
+		} else {
+			Mav("coursework/admin/modules/copy_assignments",
+				"title" -> module.name,
+				"cancel" -> Routes.admin.module(module),
+				"map" -> moduleAssignmentMap(cmd.modules)
+			)
 
-		Mav("coursework/admin/modules/copy_assignments",
-			"title" -> module.name,
-			"cancel" -> Routes.admin.module(module),
-			"map" -> moduleAssignmentMap(cmd.modules)
-		)
+		}
 	}
 
 	@RequestMapping(method = Array(POST))
@@ -42,7 +47,7 @@ class OldCopyModuleAssignmentsController extends OldCourseworkController with Un
 
 @Profile(Array("cm1Enabled")) @Controller
 @RequestMapping(value=Array("/${cm1.prefix}/admin/department/{department}/copy-assignments"))
-class OldCopyDepartmentAssignmentsController extends OldCourseworkController with UnarchivedAssignmentsMap {
+class OldCopyDepartmentAssignmentsController extends OldCourseworkController with UnarchivedAssignmentsMap with AutowiringFeaturesComponent {
 
 	@ModelAttribute
 	def copyAssignmentsCommand(@PathVariable department: Department): CopyAssignmentsCommand with ComposableCommand[Seq[Assignment]] with CopyAssignmentsPermissions with CopyAssignmentsDescription with AutowiringAssessmentServiceComponent with AutowiringAssessmentMembershipServiceComponent = {
@@ -52,13 +57,16 @@ class OldCopyDepartmentAssignmentsController extends OldCourseworkController wit
 
 	@RequestMapping(method = Array(HEAD, GET))
 	def showForm(@PathVariable department: Department, cmd: CopyAssignmentsCommand): Mav = {
-
-		Mav("coursework/admin/modules/copy_assignments",
-			"title" -> department.name,
-			"cancel" -> Routes.admin.department(department),
-			"map" -> moduleAssignmentMap(cmd.modules),
-			"showSubHeadings" -> true
-		)
+		if(features.redirectCM1) {
+			Redirect(CM2Routes.admin.copyAssignments(department, cmd.academicYear))
+		} else {
+			Mav("coursework/admin/modules/copy_assignments",
+				"title" -> department.name,
+				"cancel" -> Routes.admin.department(department),
+				"map" -> moduleAssignmentMap(cmd.modules),
+				"showSubHeadings" -> true
+			)
+		}
 	}
 
 	@RequestMapping(method = Array(POST))
