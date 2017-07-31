@@ -22,14 +22,25 @@
 				</#if>
 			</#list>
 		<#else>
-			<#list auditData.feedback.allMarkerFeedback as feedback>
-				<#if feedback??>
+			<#-- For CM1 assignments we can't cycle through allFeedback as it may contained orphened rejected feedback -->
+			<#if auditData.feedback.firstMarkerFeedback??>
 				<div class="well">
-					<@cm1fs.feedbackSummary feedback isModerated true/>
-					<@cm1fs.secondMarkerNotes feedback isModerated />
+					<@cm1fs.feedbackSummary auditData.feedback.firstMarkerFeedback isModerated true/>
+					<@cm1fs.secondMarkerNotes auditData.feedback.firstMarkerFeedback isModerated />
 				</div>
-				</#if>
-			</#list>
+			</#if>
+			<#if auditData.feedback.secondMarkerFeedback??>
+				<div class="well">
+					<@cm1fs.feedbackSummary auditData.feedback.secondMarkerFeedback isModerated true/>
+					<@cm1fs.secondMarkerNotes auditData.feedback.secondMarkerFeedback isModerated />
+				</div>
+			</#if>
+			<#if auditData.feedback.thirdMarkerFeedback??>
+				<div class="well">
+					<@cm1fs.feedbackSummary auditData.feedback.thirdMarkerFeedback isModerated true/>
+					<@cm1fs.secondMarkerNotes auditData.feedback.thirdMarkerFeedback isModerated />
+				</div>
+			</#if>
 		</#if>
 
 		<#assign feedback = auditData.feedback />

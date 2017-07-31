@@ -12,6 +12,7 @@ import uk.ac.warwick.tabula.services.{AssessmentMembershipService, AutowiringUse
 import uk.ac.warwick.userlookup.User
 
 import scala.collection.JavaConverters._
+import scala.util.Try
 
 trait SubmissionReminder extends RecipientCompletedActionRequiredNotification {
 	self : Notification[_, Unit] with NotificationPreSaveBehaviour =>
@@ -29,15 +30,16 @@ trait SubmissionReminder extends RecipientCompletedActionRequiredNotification {
 		Days.daysBetween(now, closeDate).getDays
 	}
 
-	override final def onPreSave(newRecord: Boolean) {
-		priority = if (daysLeft == 1) {
-			Warning
-		} else if (daysLeft < 1) {
-			Critical
-		} else {
-			Info
-		}
-	}
+	override final def onPreSave(newRecord: Boolean): Unit =
+		priority = Try {
+			if (daysLeft == 1) {
+				Warning
+			} else if (daysLeft < 1) {
+				Critical
+			} else {
+				Info
+			}
+		}.getOrElse(Info) // deadline could be null in which case we won't be sending anything so Info is fine
 
 	def url: String = Routes.assignment(assignment)
 
@@ -116,7 +118,7 @@ class SubmissionDueWithExtensionNotification extends Notification[Extension, Uni
 		val hasSubmitted = assignment.submissions.asScala.exists(_.usercode == extension.usercode)
 
 		// Don't send if the user has submitted or if there's no expiry date on the extension (i.e. it's been rejected)
-		if (hasSubmitted || (!extension.approved || extension.expiryDate.isEmpty) || !shouldSend) {
+		if (hasSubmitted || !extension.approved || extension.expiryDate.isEmpty || !shouldSend) {
 			Nil
 		} else {
 			Seq(userLookup.getUserByUserId(extension.usercode))

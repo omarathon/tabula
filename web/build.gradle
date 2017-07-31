@@ -175,8 +175,8 @@ task installPhantomJSDependency(type: NpmTask) {
 integrationTest.dependsOn 'installPhantomJSDependency'
 
 def bundlerEnvironment = [
-        GEM_HOME: 'vendor/gem_home',
-        GEM_PATH: 'vendor/gem_home'
+    GEM_HOME: 'vendor/gem_home',
+    GEM_PATH: 'vendor/gem_home'
 ]
 
 task cukeInstallBundler(type: JavaExec) {

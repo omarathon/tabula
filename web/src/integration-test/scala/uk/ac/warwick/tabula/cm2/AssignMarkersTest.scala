@@ -8,6 +8,10 @@ import uk.ac.warwick.tabula.data.model.markingworkflow.MarkingWorkflowType.{Doub
 class AssignMarkersTest  extends BrowserTest with CourseworkFixtures with GivenWhenThen {
 
 	"Department admin" should "be able to allocate markers to a single marker workflow " in {
+
+		ifPhantomJSDriver(driver => driver.manage().logs().get("browser") )
+
+
 		withAssignmentWithWorkflow(SingleMarking, Seq(P.Marker1, P.Marker2)) { id =>
 
 			navigateToMarkerAllocation()

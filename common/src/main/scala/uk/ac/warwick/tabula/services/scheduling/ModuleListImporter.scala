@@ -133,6 +133,7 @@ object ModuleListImporter {
 	 		fme.fme_modp as glob
 		from %s.cam_fme fme
 		where fme.fmc_code in (:lists)
+			and fme_modp is not null
 			and %s(fme.fmc_code, '\w{4}-\d-\d{2}-\w\w\w')
 	""".format(sitsSchema, dialectRegexpLike)
 

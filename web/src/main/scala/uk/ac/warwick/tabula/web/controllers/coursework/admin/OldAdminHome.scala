@@ -27,7 +27,7 @@ import scala.xml.Elem
 class OldCourseworkAdminHomeController extends OldCourseworkController with AutowiringFeaturesComponent {
 	@RequestMapping(method=Array(GET, HEAD))
 	def homeScreen(user: CurrentUser) = {
-		if(features.redirectHomeCM1) {
+		if(features.redirectCM1) {
 			Redirect(CM2Routes.home)
 		} else {
 			Redirect(Routes.home)
@@ -46,7 +46,7 @@ class OldCourseworkAdminDepartmentHomeController extends OldCourseworkController
 
 	@RequestMapping
 	def adminDepartment(cmd: AdminDepartmentHomeCommand): Mav = {
-		if(features.redirectAdminDepartmentModuleCM1) {
+		if(features.redirectCM1) {
 			Redirect(CM2Routes.admin.department(cmd.department))
 		} else {
 			val info = cmd.apply()
@@ -78,7 +78,7 @@ class OldCourseworkAdminModuleHomeController extends OldCourseworkController wit
 	@RequestMapping
 	def adminModule(@ModelAttribute("command") cmd: Appliable[Module]): Mav = {
 		val module = cmd.apply()
-		if(features.redirectAdminDepartmentModuleCM1) {
+		if(features.redirectCM1) {
 			Redirect(WebRoutes.admin.module(module))
 		}  else {
 			if (ajax) Mav("coursework/admin/modules/admin_partial").noLayout()

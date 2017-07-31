@@ -41,7 +41,7 @@
 						</#if>
 					</#if>
 				</td>
-				<td data-datesort="${graph.deadline.millis?c!''}" class="deadline-col <#if graph.hasApprovedExtension>approved<#else>very-subtle</#if>">
+				<td <#if graph.deadline?has_content>data-datesort="${graph.deadline.millis?c!''}"</#if> class="deadline-col <#if graph.hasApprovedExtension>approved<#else>very-subtle</#if>">
 					<#if graph.deadline?has_content><@fmt.date date=graph.deadline /></#if>
 				</td>
 			</tr>

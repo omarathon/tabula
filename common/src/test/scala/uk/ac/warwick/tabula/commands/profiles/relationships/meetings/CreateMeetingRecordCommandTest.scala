@@ -45,6 +45,7 @@ class CreateMeetingRecordCommandTest extends TestBase with Mockito {
 		validator.meetingDateTime  = dateTime(3903, DateTimeConstants.MARCH) // it's the future
 		validator.meetingDateStr = validator.meetingDateTime.toString(DatePickerFormatter)
 		validator.meetingTimeStr = validator.meetingDateTime.toString(TimePickerFormatter)
+		validator.meetingLocation = "CM.1.01"
 
 		var errors = new BindException(validator, "command")
 		validator.validate(errors)
@@ -61,6 +62,7 @@ class CreateMeetingRecordCommandTest extends TestBase with Mockito {
 		validator.meetingDateTime = dateTime(2007, DateTimeConstants.MARCH) // > 5 years ago
 		validator.meetingDateStr = dateTime(2007, DateTimeConstants.MARCH).toString(DatePickerFormatter)
 		validator.meetingTimeStr = dateTime(2007, DateTimeConstants.MARCH).toString(TimePickerFormatter)
+		validator.meetingLocation = "CM.1.01"
 
 		var errors = new BindException(validator, "command")
 		validator.validate(errors)
@@ -74,6 +76,7 @@ class CreateMeetingRecordCommandTest extends TestBase with Mockito {
 	def invalidTimes(): Unit = withUser("cuscav") { withFakeTime(aprilFool) { new ValidationFixture {
 		validator.title = "A title"
 		validator.format = FaceToFace
+		validator.meetingLocation = "CM.1.01"
 
 		val yesterday: DateTime = DateTime.now.minusDays(1).plusHours(10)
 		validator.meetingDateTime = yesterday
@@ -82,6 +85,7 @@ class CreateMeetingRecordCommandTest extends TestBase with Mockito {
 
 		validator.meetingEndDateTime = yesterday.minusHours(1) // end is before the start
 		validator.meetingEndTimeStr = yesterday.minusHours(1).toString(TimePickerFormatter)
+		validator.meetingLocation = "CM.1.01"
 
 		var errors = new BindException(validator, "command")
 		validator.validate(errors)
@@ -99,6 +103,7 @@ class CreateMeetingRecordCommandTest extends TestBase with Mockito {
 		validator.meetingEndTimeStr = "10:00:00"
 		validator.title = "A good title"
 		validator.format = FaceToFace
+		validator.meetingLocation = "CM.1.01"
 
 		var errors = new BindException(validator, "command")
 		validator.validate(errors)
@@ -116,6 +121,7 @@ class CreateMeetingRecordCommandTest extends TestBase with Mockito {
 		validator.meetingEndTimeStr = ""
 		validator.title = "A good title"
 		validator.format = FaceToFace
+		validator.meetingLocation = "CM.1.01"
 
 		var errors = new BindException(validator, "command")
 		validator.validate(errors)
@@ -133,6 +139,7 @@ class CreateMeetingRecordCommandTest extends TestBase with Mockito {
 		validator.meetingEndTimeStr = validator.meetingDateTime.plusHours(1).toString(TimePickerFormatter)
 		validator.format = FaceToFace
 		validator.title = ""
+		validator.meetingLocation = "CM.1.01"
 
 		var errors = new BindException(validator, "command")
 		validator.validate(errors)
@@ -151,6 +158,7 @@ class CreateMeetingRecordCommandTest extends TestBase with Mockito {
 		validator.meetingEndTimeStr = validator.meetingDateTime.plusHours(1).toString(TimePickerFormatter)
 		validator.title = "A good title"
 		validator.format = null
+		validator.meetingLocation = "CM.1.01"
 
 		var errors = new BindException(validator, "command")
 		validator.validate(errors)
@@ -168,6 +176,7 @@ class CreateMeetingRecordCommandTest extends TestBase with Mockito {
 		validator.meetingEndTimeStr = validator.meetingDateTime.plusHours(1).toString(TimePickerFormatter)
 		validator.title = "A good title"
 		validator.format = Email
+		validator.meetingLocation = "CM.1.01"
 
 		var errors = new BindException(validator, "command")
 		validator.validate(errors)

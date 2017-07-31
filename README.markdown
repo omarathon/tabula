@@ -35,19 +35,12 @@ tabula/
 │   ├── tabula-ds.xml
 │   └── web.xml
 ├── lib/
-│   ├── jackson-annotations-2.6.5.jar
-│   ├── jackson-core-2.6.5.jar
-│   ├── jackson-databind-2.6.5.jar
 │   ├── jtds-1.3.1.jar
-│   ├── logback-access-1.1.7.jar
-│   ├── logback-classic-1.1.7.jar
-│   ├── logback-core-1.1.7.jar
 │   ├── logback.xml
-│   ├── logstash-logback-encoder-4.7.jar
 │   ├── ojdbc7.jar
-│   ├── slf4j-api-1.7.20.jar
 │   ├── tabula.properties
-│   └── tabula-sso-config.xml
+│   ├── tabula-sso-config.xml
+│   └── warwick-logging-1.0-all.xml
 ├── logs/
 ├── temp/
 ├── webapps/
@@ -80,41 +73,15 @@ There is a sample `server.xml` in `config/servers/augustus/conf`
 
 This is just copied from the `conf` directory in the Tomcat 8 install. I couldn't get Tomcat to run without it being copied, which sucks a bit.
 
-### `lib/jackson-annotations-2.6.5.jar`
+### `lib/warwick-logging-1.0.jar`
 
-You can get this from http://pkg.elab.warwick.ac.uk/net.logstash.logback/dependencies/jackson-annotations-2.6.5.jar
+You can get this from http://pkg.elab.warwick.ac.uk/ch.qos.logback/warwick-logging-1.0-all.jar
 
-### `lib/jackson-core-2.6.5.jar`
-
-You can get this from http://pkg.elab.warwick.ac.uk/net.logstash.logback/dependencies/jackson-core-2.6.5.jar
-
-### `lib/jackson-databind-2.6.5.jar`
-
-You can get this from http://pkg.elab.warwick.ac.uk/net.logstash.logback/dependencies/jackson-databind-2.6.5.jar
+Note that this dependency replaces previous dependencies on logback, logstash-logback-encoder, jackson and slf4j-api
 
 ### `lib/jtds-1.3.1.jar`
 
 You can get this from http://pkg.elab.warwick.ac.uk/net.sourceforge.jtds/jtds-1.3.1.jar
-
-### `lib/logback-access-1.1.7.jar`
-
-You can get this from http://pkg.elab.warwick.ac.uk/ch.qos.logback/logback-access-1.1.7.jar
-
-### `lib/logback-classic-1.1.7.jar`
-
-You can get this from http://pkg.elab.warwick.ac.uk/ch.qos.logback/logback-classic-1.1.7.jar
-
-### `lib/logback-core-1.1.7.jar`
-
-You can get this from http://pkg.elab.warwick.ac.uk/ch.qos.logback/logback-core-1.1.7.jar
-
-### `lib/logstash-logback-encoder-4.7.jar`
-
-You can get this from http://pkg.elab.warwick.ac.uk/net.logstash.logback/logstash-logback-encoder-4.7.jar
-
-### `lib/slf4j-api-1.7.20.jar`
-
-You can get this from http://pkg.elab.warwick.ac.uk/net.logstash.logback/dependencies/slf4j-api-1.7.20.jar
 
 ### `lib/ojdbc7.jar`
 

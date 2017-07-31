@@ -9,7 +9,7 @@ buildscript {
     }
 
     dependencies {
-        classpath group: 'org.zeroturnaround', name: 'gradle-jrebel-plugin', version: '1.1.2'
+        classpath "gradle.plugin.org.zeroturnaround:gradle-jrebel-plugin:1.1.5"
     }
 }
 
@@ -37,8 +37,28 @@ ext {
 subprojects {
     apply plugin: 'java'
     apply plugin: 'scala'
-    apply plugin: 'rebel'
+    apply plugin: "org.zeroturnaround.gradle.jrebel"
     apply plugin: 'war'
+
+    // TAB-5441 - additional jrebel config to include language specific build dirs
+    rebel {
+        classpath {
+            // the default element
+            resource {}
+
+            resource {
+                directory = "build/classes/java/main"
+                includes = ["**/*"]
+                excludes = ["*.java", "*.properties"]
+            }
+
+            resource {
+                directory = "build/classes/scala/main"
+                includes = ["**/*"]
+                excludes = ["*.scala", "*.properties"]
+            }
+        }
+    }
 
     // Target Java 8
     sourceCompatibility = 1.8
@@ -109,18 +129,20 @@ subprojects {
         compile 'javax.servlet:jstl:1.2'
 
         /* LOGGING */
-        providedCompile 'ch.qos.logback:logback-classic:1.1.7'
-        providedCompile 'net.logstash.logback:logstash-logback-encoder:4.7'
-        providedCompile 'org.slf4j:slf4j-api:1.7.20'
-        compile 'org.slf4j:log4j-over-slf4j:1.7.20'
-        compile 'org.slf4j:jcl-over-slf4j:1.7.20'
+        providedCompile 'uk.ac.warwick:warwick-logging:1.0:all'
+
+        // Provided by the above
+        providedCompile 'ch.qos.logback:logback-classic:1.2.3'
+        providedCompile ('net.logstash.logback:logstash-logback-encoder:4.11') {
+            exclude group: 'com.fasterxml.jackson.core'
+        }
+        providedCompile 'org.slf4j:slf4j-api:1.7.25'
+
+        compile 'org.slf4j:log4j-over-slf4j:1.7.25'
+        compile 'org.slf4j:jcl-over-slf4j:1.7.25'
         // Not actually provided -  it's a ruse to exclude commons-logging from the WAR.
         // The API at runtime is provided by jcl-over-slf4j.
         providedCompile 'commons-logging:commons-logging:1.2'
-
-        providedCompile "com.fasterxml.jackson.core:jackson-core:${jacksonVersion}"
-        providedCompile "com.fasterxml.jackson.core:jackson-databind:${jacksonVersion}"
-        providedCompile "com.fasterxml.jackson.core:jackson-annotations:${jacksonVersion}"
         /* ******* */
 
         testCompile 'junit:junit:4.12'
