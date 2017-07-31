@@ -9,7 +9,7 @@ buildscript {
     }
 
     dependencies {
-        classpath group: 'org.zeroturnaround', name: 'gradle-jrebel-plugin', version: '1.1.2'
+        classpath "gradle.plugin.org.zeroturnaround:gradle-jrebel-plugin:1.1.5"
     }
 }
 
@@ -37,8 +37,28 @@ ext {
 subprojects {
     apply plugin: 'java'
     apply plugin: 'scala'
-    apply plugin: 'rebel'
+    apply plugin: "org.zeroturnaround.gradle.jrebel"
     apply plugin: 'war'
+
+    // TAB-5441 - additional jrebel config to include language specific build dirs
+    rebel {
+        classpath {
+            // the default element
+            resource {}
+
+            resource {
+                directory = "build/classes/java/main"
+                includes = ["**/*"]
+                excludes = ["*.java", "*.properties"]
+            }
+
+            resource {
+                directory = "build/classes/scala/main"
+                includes = ["**/*"]
+                excludes = ["*.scala", "*.properties"]
+            }
+        }
+    }
 
     // Target Java 8
     sourceCompatibility = 1.8
