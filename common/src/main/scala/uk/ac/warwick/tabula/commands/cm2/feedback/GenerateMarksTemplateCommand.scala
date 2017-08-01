@@ -1,6 +1,6 @@
 package uk.ac.warwick.tabula.commands.cm2.feedback
 
-import org.apache.poi.ss.usermodel.{ComparisonOperator, IndexedColors, Sheet}
+import org.apache.poi.ss.usermodel.{ComparisonOperator, IndexedColors, Row, Sheet}
 import org.apache.poi.ss.util.{CellRangeAddress, WorkbookUtil}
 import org.apache.poi.xssf.streaming.SXSSFWorkbook
 import uk.ac.warwick.tabula.commands._
@@ -58,6 +58,8 @@ class GenerateOwnMarksTemplateCommandInternal(val assignment: Assignment, val ma
 
 	self: FeedbackServiceComponent with CM2MarkingWorkflowServiceComponent with GenerateMarksTemplateCommandState =>
 
+	private val sheetPassword = "roygbiv"
+
 	override def applyInternal(): SXSSFWorkbook = {
 
 		val students: Seq[User] = cm2MarkingWorkflowService.getAllStudentsForMarker(assignment, marker).sorted
@@ -69,6 +71,19 @@ class GenerateOwnMarksTemplateCommandInternal(val assignment: Assignment, val ma
 		val workbook = new SXSSFWorkbook
 		val sheet =  workbook.createSheet("Marks for " + MarksTemplateCommand.safeAssessmentName(assignment))
 
+		val lockedCellStyle = workbook.createCellStyle()
+		lockedCellStyle.setLocked(false)
+
+		def createUnprotectedCell(row: Row, col: Int) = {
+			val cell = row.createCell(col)
+			cell.setCellStyle(lockedCellStyle)
+			cell
+		}
+
+		// using apache-poi, we can't protect certain cells - rather we have to protect
+		// the entire sheet and then unprotect the ones we want to remain editable
+		sheet.protectSheet(sheetPassword)
+
 		// add header row
 		val header = sheet.createRow(0)
 		val idHeader = if(assignment.anonymousMarking) "ID" else "University ID"
@@ -77,7 +92,8 @@ class GenerateOwnMarksTemplateCommandInternal(val assignment: Assignment, val ma
 		header.createCell(2).setCellValue("Grade")
 		header.createCell(3).setCellValue("Feedback")
 
-		val stages = assignment.cm2MarkingWorkflow.allStages
+		val maxCurrentStage = markerFeedbackToDo.map(_.feedback.currentStageIndex).max
+		val stages = assignment.cm2MarkingWorkflow.allStages.filter(_.order < maxCurrentStage)
 		for((stage, i) <- stages.zipWithIndex){
 			val cell = 3 + ((i+1)*2)
 			header.createCell(cell-1).setCellValue(stage.description)
@@ -87,7 +103,7 @@ class GenerateOwnMarksTemplateCommandInternal(val assignment: Assignment, val ma
 		// populate the mark sheet with ids and existing data
 		for ((currentMarkerFeedback, i) <- markerFeedbackToDo.zipWithIndex) {
 			val feedback = currentMarkerFeedback.feedback
-			val previousMarkerFeedback: Seq[MarkerFeedback] = feedback.markerFeedback.asScala.filter(_.stage.order <= feedback.currentStageIndex)
+			val previousMarkerFeedback: Seq[MarkerFeedback] = feedback.markerFeedback.asScala.filter(_.stage.order < feedback.currentStageIndex)
 
 			val row = sheet.createRow(i + 1)
 			val id = if(assignment.anonymousMarking) {
@@ -96,9 +112,15 @@ class GenerateOwnMarksTemplateCommandInternal(val assignment: Assignment, val ma
 				Option(currentMarkerFeedback.student.getWarwickId).getOrElse(currentMarkerFeedback.student.getUserId)
 			}
 			row.createCell(0).setCellValue(id)
-			for (mark <- currentMarkerFeedback.mark) row.createCell(1).setCellValue(mark)
-			for (grade <- currentMarkerFeedback.grade) row.createCell(2).setCellValue(grade)
-			for (comments <- currentMarkerFeedback.comments) row.createCell(3).setCellValue(comments)
+
+			val markCell = createUnprotectedCell(row, 1)
+			val gradeCell = createUnprotectedCell(row, 2)
+			val commentsCell = createUnprotectedCell(row, 3)
+
+			for (mark <- currentMarkerFeedback.mark) markCell.setCellValue(mark)
+			for (grade <- currentMarkerFeedback.grade) gradeCell.setCellValue(grade)
+			for (comments <- currentMarkerFeedback.comments) commentsCell.setCellValue(comments)
+
 			for((stage, i) <- stages.zipWithIndex){
 				val cell = 3 + ((i+1)*2)
 				val pmf = previousMarkerFeedback.find(_.stage == stage)
