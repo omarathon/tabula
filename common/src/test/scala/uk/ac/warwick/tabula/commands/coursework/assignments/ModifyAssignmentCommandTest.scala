@@ -168,6 +168,8 @@ class ModifyAssignmentCommandTest extends TestBase with Mockito with FunctionalC
 	@Test def validateName() { new Fixture {
 		// TAB-1263
 		val cmd = new AddAssignmentCommand(module)
+		cmd.openDate = DateTime.parse("2016-08-01T00:00")
+		cmd.closeDate = DateTime.parse("2016-10-01T00:00")
 		cmd.service = mockAssignmentService
 		cmd.service.getAssignmentByNameYearModule("New assignment", academicYear, module) returns Seq()
 

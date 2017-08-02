@@ -21,7 +21,7 @@ class TermAwareWeekRangeToDateConversionServiceTest extends TestBase with Mockit
 	val currentAcademicYear: AcademicYear = AcademicYear.guessSITSAcademicYearByDate(DateTime.now)
 	val autumnTerm: Term = mock[Term]
 	autumnTerm.getTermType returns TermType.autumn
-	autumnTerm.getStartDate returns new LocalDate(currentAcademicYear.startYear, DateTimeConstants.NOVEMBER, 1).toDateTimeAtStartOfDay.toDateTime
+	autumnTerm.getStartDate returns new LocalDate(localCurrentYear.startYear, DateTimeConstants.NOVEMBER, 1).toDateTimeAtStartOfDay.toDateTime
 
 	val mockTf: TermService = smartMock[TermService]
 	val converter: WeekToDateConverter = new TermAwareWeekToDateConverterComponent with TermServiceComponent {
