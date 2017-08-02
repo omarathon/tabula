@@ -361,6 +361,7 @@
 
 			$('.fixed-container').fixHeaderFooter();
 			$('a.ajax-modal').ajaxModalLink();
+			$('.use-popover').tabulaPopover({trigger: 'click', container: 'body'});
 
 			var $submissionFeedbackResultsTable = $(".submission-feedback-results table");
 			$submissionFeedbackResultsTable.sortableTable({
