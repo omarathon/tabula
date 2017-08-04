@@ -163,6 +163,19 @@ class ImportDeptModulesController extends BaseSysadminController {
 }
 
 @Controller
+@RequestMapping(Array("/sysadmin/import-locations"))
+class ImportMissingEventLocationsController extends BaseSysadminController {
+
+	var scheduler: Scheduler = Wire[Scheduler]
+
+	@RequestMapping(method = Array(POST))
+	def importModules(@RequestParam academicYear: String): Mav = {
+		Redirect(Routes.sysadmin.jobs.quartzStatus(scheduler.scheduleNow[ImportSmallGroupEventLocationsJob]("academicYear" -> academicYear)))
+	}
+}
+
+
+@Controller
 @RequestMapping(Array("/sysadmin/import-sits"))
 class ImportSitsAssignmentsController extends BaseSysadminController {
 

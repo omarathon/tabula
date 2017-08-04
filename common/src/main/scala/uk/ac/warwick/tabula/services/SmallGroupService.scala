@@ -90,6 +90,8 @@ trait SmallGroupService {
 	def listMemberDataForAllocation(members: Seq[Member], academicYear: AcademicYear): Map[Member, MemberAllocationData]
 
 	def listDepartmentSetsForMembershipUpdate: Seq[DepartmentSmallGroupSet]
+
+	def listSmallGroupsWithoutLocation(academicYear: AcademicYear): Seq[SmallGroupEvent]
 }
 
 abstract class AbstractSmallGroupService extends SmallGroupService {
@@ -394,6 +396,10 @@ abstract class AbstractSmallGroupService extends SmallGroupService {
 
 	def listDepartmentSetsForMembershipUpdate: Seq[DepartmentSmallGroupSet] =
 		smallGroupDao.listDepartmentSetsForMembershipUpdate
+
+	def listSmallGroupsWithoutLocation(academicYear: AcademicYear): Seq[SmallGroupEvent] =
+		smallGroupDao.listSmallGroupsWithoutLocation(academicYear: AcademicYear)
+
 }
 
 trait SmallGroupMembershipHelpers {
