@@ -5,7 +5,6 @@ import uk.ac.warwick.tabula.AcademicYear
 import uk.ac.warwick.tabula.commands._
 import uk.ac.warwick.tabula.data.Transactions.transactional
 import uk.ac.warwick.tabula.data.model.groups.SmallGroupEvent
-import uk.ac.warwick.tabula.data.{Daoisms, SessionComponent}
 import uk.ac.warwick.tabula.helpers.Logging
 import uk.ac.warwick.tabula.permissions._
 import uk.ac.warwick.tabula.services.{AutowiringSmallGroupServiceComponent, SmallGroupServiceComponent}
@@ -18,14 +17,13 @@ object ImportSmallGroupEventLocationsCommand {
 		with ImportSmallGroupEventLocationsDescription
 		with AutowiringWAI2GoConfigurationComponent
 		with WAI2GoHttpLocationFetchingServiceComponent
-		with AutowiringSmallGroupServiceComponent
-		with Daoisms {
+		with AutowiringSmallGroupServiceComponent {
 			val year: AcademicYear = academicYear
 		}
 }
 
 
-trait ImportSmallGroupEventLocationsCommand extends CommandInternal[Unit] with RequiresPermissionsChecking with Logging with SessionComponent {
+trait ImportSmallGroupEventLocationsCommand extends CommandInternal[Unit] with RequiresPermissionsChecking with Logging {
 
 	self: LocationFetchingServiceComponent with SmallGroupServiceComponent =>
 
@@ -53,5 +51,6 @@ trait ImportSmallGroupEventLocationsCommand extends CommandInternal[Unit] with R
 
 
 trait ImportSmallGroupEventLocationsDescription extends Describable[Unit] {
+	override val eventName = "ImportSmallGroupEventLocations"
 	def describe(d: Description) {}
 }

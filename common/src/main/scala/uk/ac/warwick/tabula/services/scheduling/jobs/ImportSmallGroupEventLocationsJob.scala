@@ -20,7 +20,6 @@ class ImportSmallGroupEventLocationsJob extends AutowiredJobBean {
 	override def executeInternal(context: JobExecutionContext): Unit = {
 
 		exceptionResolver.reportExceptions {
-			// If we get department codes, just do module import for that department
 			context.getMergedJobDataMap.getString("academicYear").maybeText.flatMap(s => Try(s.toInt).toOption).foreach(year => {
 				val cmd = ImportSmallGroupEventLocationsCommand(AcademicYear(year))
 				cmd.apply()
