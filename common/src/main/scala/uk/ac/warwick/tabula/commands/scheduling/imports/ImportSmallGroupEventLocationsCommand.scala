@@ -51,6 +51,6 @@ trait ImportSmallGroupEventLocationsCommand extends CommandInternal[Unit] with R
 
 
 trait ImportSmallGroupEventLocationsDescription extends Describable[Unit] {
-	override val eventName = "ImportSmallGroupEventLocations"
+	override lazy val eventName = "ImportSmallGroupEventLocations"
 	def describe(d: Description) {}
 }
