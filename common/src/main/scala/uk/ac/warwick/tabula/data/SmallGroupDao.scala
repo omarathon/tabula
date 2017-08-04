@@ -98,6 +98,8 @@ trait SmallGroupDao {
 	def listMemberDataForAllocation(members: Seq[Member], academicYear: AcademicYear): Map[Member, MemberAllocationData]
 
 	def listDepartmentSetsForMembershipUpdate: Seq[DepartmentSmallGroupSet]
+
+	def listSmallGroupsWithoutLocation(academicYear: AcademicYear): Seq[SmallGroupEvent]
 }
 
 @Repository
@@ -512,5 +514,17 @@ class SmallGroupDaoImpl extends SmallGroupDao
 					where memberQuery is not null and length(memberQuery) > 0
 			"""
 		).seq
+
+	def listSmallGroupsWithoutLocation(academicYear: AcademicYear): Seq[SmallGroupEvent] = {
+		val results = session.newQuery[Array[java.lang.Object]]("""
+					from SmallGroupEvent e
+					join e.group as g
+					join g.groupSet as s
+					where s.academicYear = :academicYear and location not like '%|%'
+			""")
+			.setString("academicYear", academicYear.getStoreValue.toString)
+			.seq
+		results.map(objArray => objArray(0).asInstanceOf[SmallGroupEvent])
+	}
 
 }
