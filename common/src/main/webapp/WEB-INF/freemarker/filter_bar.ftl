@@ -1,6 +1,7 @@
 <#escape x as x?html>
-	<div class="fix-area">
+	<div class="fix-area filter-container disabled">
 		<div class="fix-header pad-when-fixed">
+			<div class="placeholder"><i class="fa fa-spinner fa-spin"></i>&nbsp;Loading…</div>
 			<@f.form commandName=filterCommandName action=submitUrl method="GET" cssClass="form-inline">
 				<@f.errors cssClass="error form-errors" />
 				<#--Don't send academic year if it's a path variable (therefore global in the model)-->
@@ -392,6 +393,9 @@
 
 				$picker.data('modulecode','').val('');
 			}).modulePicker({});
+
+			// enable the filter as the page has loaded
+			$('.filter-container').removeClass('disabled');
 		});
 	</script>
 </#escape>
