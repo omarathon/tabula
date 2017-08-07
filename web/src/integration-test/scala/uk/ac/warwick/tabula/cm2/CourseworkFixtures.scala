@@ -1,5 +1,6 @@
 package uk.ac.warwick.tabula.cm2
 
+import org.joda.time.DateTime
 import org.openqa.selenium.support.ui.Select
 import org.openqa.selenium.{By, WebElement}
 import org.scalatest.GivenWhenThen
@@ -7,7 +8,7 @@ import org.scalatest.exceptions.TestFailedException
 import uk.ac.warwick.tabula.data.model.WorkflowCategory
 import uk.ac.warwick.tabula.data.model.markingworkflow.MarkingWorkflowType
 import uk.ac.warwick.tabula.web.{FeaturesDriver, FixturesDriver}
-import uk.ac.warwick.tabula.{BrowserTest, FunctionalTestAcademicYear, LoginDetails}
+import uk.ac.warwick.tabula.{AcademicYear, BrowserTest, FunctionalTestAcademicYear, LoginDetails}
 
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent._
@@ -150,6 +151,7 @@ trait CourseworkFixtures extends BrowserTest with FeaturesDriver with FixturesDr
 			// wait for the page to load
 			find(cssSelector("div.deptheader")) should be('defined)
 		}
+		loadCurrentAcademicyYearTab()
 
 		val module = getModule(moduleCode)
 		click on module.findElement(By.partialLinkText("Manage this module"))
@@ -406,4 +408,14 @@ trait CourseworkFixtures extends BrowserTest with FeaturesDriver with FixturesDr
 
 	def getInputByLabel(label: String): Option[WebElement] =
 		findAll(tagName("label")).find(_.underlying.getText.trim == label) map { _.underlying.getAttribute("for") } map { id(_).webElement }
+
+	def loadCurrentAcademicyYearTab(): Unit =  {
+		And("I click the current academic year tertiary nav bar")
+		var tertiaryNavBar = find(cssSelector("nav.navbar.navbar-tertiary"))
+		var tertiaryNavBarElement = tertiaryNavBar.get.underlying
+		var currentYear = AcademicYear.guessSITSAcademicYearByDate(DateTime.now)
+		var currentAcademicYear = tertiaryNavBarElement.findElement(By.partialLinkText(currentYear.getLabel))
+		click on tertiaryNavBarElement.findElement(By.partialLinkText(currentYear.getLabel))
+	}
+
 }
