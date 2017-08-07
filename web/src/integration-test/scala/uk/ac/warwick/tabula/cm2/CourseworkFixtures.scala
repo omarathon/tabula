@@ -243,10 +243,12 @@ trait CourseworkFixtures extends BrowserTest with FeaturesDriver with FixturesDr
 	}
 
 	def getModule(moduleCode: String): WebElement = {
-		val matchingModule = find(id(s"module-$moduleCode"))
+		var element = className("filter-results").webElement.findElements(By.cssSelector("div.striped-section.admin-assignment-list "))
+		val module = moduleCode.toUpperCase
+		val matchingModule = element.asScala.find({_.findElement(By.cssSelector("span.mod-code")).getText == module })
 		if (matchingModule.isEmpty)
-			throw new TestFailedException(s"No module found for ${moduleCode.toUpperCase}", 0)
-		matchingModule.head.underlying
+			throw new TestFailedException(s"No module found for ${module}", 0)
+		matchingModule.get
 	}
 
 	def openAdminPage(): Unit = {
