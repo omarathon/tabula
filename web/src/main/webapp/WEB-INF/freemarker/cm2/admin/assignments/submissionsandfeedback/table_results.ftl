@@ -223,16 +223,19 @@
 								</#if>
 							<#else>
 								<td>
-									<#if (assignment.getStudentsFirstMarker(student.user.userId)!"")?has_content>
-										${assignment.getStudentsFirstMarker(student.user.userId).fullName}
+									<#if enhancedFeedback??>
+										<#if (assignment.getStudentsFirstMarker(enhancedFeedback.feedback.usercode)!"")?has_content>
+											${assignment.getStudentsFirstMarker(enhancedFeedback.feedback.usercode).fullName}
+										</#if>
 									</#if>
 								</td>
 								<td>
-									<#if (assignment.getStudentsSecondMarker(student.user.userId)!"")?has_content>
-										${assignment.getStudentsSecondMarker(student.user.userId).fullName}
+									<#if enhancedFeedback??>
+										<#if (assignment.getStudentsSecondMarker(enhancedFeedback.feedback.usercode)!"")?has_content>
+											${assignment.getStudentsSecondMarker(enhancedFeedback.feedback.usercode).fullName}
+										</#if>
 									</#if>
 								</td>
-
 							</#if>
 						</#if>
 						<#if results.hasOriginalityReport>
