@@ -14,6 +14,7 @@ import uk.ac.warwick.tabula.commands.SelfValidating
 import uk.ac.warwick.tabula.commands.coursework.assignments.SubmissionAndFeedbackCommand
 import uk.ac.warwick.tabula.commands.coursework.assignments.SubmissionAndFeedbackCommand.SubmissionAndFeedbackResults
 import uk.ac.warwick.tabula.coursework.web.Routes
+import uk.ac.warwick.tabula.cm2.web.{Routes => CM2Routes}
 import uk.ac.warwick.tabula.web.controllers.coursework.OldCourseworkController
 import uk.ac.warwick.tabula.data.model._
 import uk.ac.warwick.tabula.helpers.coursework.{CourseworkFilter, CourseworkFilters}
@@ -42,47 +43,59 @@ class OldSubmissionAndFeedbackController extends OldCourseworkController {
 
 	@RequestMapping(Array("/list"))
 	def list(@Valid @ModelAttribute("submissionAndFeedbackCommand") command: SubmissionAndFeedbackCommand.CommandType, errors: Errors, @PathVariable module: Module, @PathVariable assignment: Assignment): Mav = {
-		module.adminDepartment.assignmentInfoView match {
-			case Assignment.Settings.InfoViewType.Summary =>
-				Redirect(Routes.admin.assignment.submissionsandfeedback.summary(assignment))
-			case Assignment.Settings.InfoViewType.Table =>
-				Redirect(Routes.admin.assignment.submissionsandfeedback.table(assignment))
-			case _ => // default
-				if (features.assignmentProgressTableByDefault)
+		if(features.redirectCM1) {
+			Redirect(CM2Routes.admin.assignment.submissionsandfeedback.list(assignment))
+		} else {
+			module.adminDepartment.assignmentInfoView match {
+				case Assignment.Settings.InfoViewType.Summary =>
 					Redirect(Routes.admin.assignment.submissionsandfeedback.summary(assignment))
-				else
+				case Assignment.Settings.InfoViewType.Table =>
 					Redirect(Routes.admin.assignment.submissionsandfeedback.table(assignment))
+				case _ => // default
+					if (features.assignmentProgressTableByDefault)
+						Redirect(Routes.admin.assignment.submissionsandfeedback.summary(assignment))
+					else
+						Redirect(Routes.admin.assignment.submissionsandfeedback.table(assignment))
+			}
 		}
 	}
 
 	@RequestMapping(Array("/summary"))
 	def summary(@Valid @ModelAttribute("submissionAndFeedbackCommand") command: SubmissionAndFeedbackCommand.CommandType, errors: Errors, @PathVariable module: Module, @PathVariable assignment: Assignment): Mav = {
-		if (!features.assignmentProgressTable) Redirect(Routes.admin.assignment.submissionsandfeedback.table(assignment))
-		else {
-			if (errors.hasErrors) {
-				Mav("coursework/admin/assignments/submissionsandfeedback/progress")
-					.crumbs(Breadcrumbs.Department(module.adminDepartment), Breadcrumbs.Module(module), Breadcrumbs.Current(s"Assignment progress for ${assignment.name}"))
-			} else {
-				val results = command.apply()
+		if(features.redirectCM1) {
+			Redirect(CM2Routes.admin.assignment.submissionsandfeedback.summary(assignment))
+		} else {
+			if (!features.assignmentProgressTable) Redirect(Routes.admin.assignment.submissionsandfeedback.table(assignment))
+			else {
+				if (errors.hasErrors) {
+					Mav("coursework/admin/assignments/submissionsandfeedback/progress")
+						.crumbs(Breadcrumbs.Department(module.adminDepartment), Breadcrumbs.Module(module), Breadcrumbs.Current(s"Assignment progress for ${assignment.name}"))
+				} else {
+					val results = command.apply()
 
-				Mav("coursework/admin/assignments/submissionsandfeedback/progress",
-					resultMap(results)
-				).crumbs(Breadcrumbs.Department(module.adminDepartment), Breadcrumbs.Module(module), Breadcrumbs.Current(s"Assignment progress for ${assignment.name}"))
+					Mav("coursework/admin/assignments/submissionsandfeedback/progress",
+						resultMap(results)
+					).crumbs(Breadcrumbs.Department(module.adminDepartment), Breadcrumbs.Module(module), Breadcrumbs.Current(s"Assignment progress for ${assignment.name}"))
+				}
 			}
 		}
 	}
 
 	@RequestMapping(Array("/table"))
 	def table(@Valid @ModelAttribute("submissionAndFeedbackCommand") command: SubmissionAndFeedbackCommand.CommandType, errors: Errors, @PathVariable module: Module, @PathVariable assignment: Assignment): Mav = {
-		if (errors.hasErrors) {
-			Mav("coursework/admin/assignments/submissionsandfeedback/list")
-				.crumbs(Breadcrumbs.Department(module.adminDepartment), Breadcrumbs.Module(module), Breadcrumbs.Current(s"Assignment table for ${assignment.name}"))
+		if(features.redirectCM1) {
+			Redirect(CM2Routes.admin.assignment.submissionsandfeedback.table(assignment))
 		} else {
-			val results = command.apply()
+			if (errors.hasErrors) {
+				Mav("coursework/admin/assignments/submissionsandfeedback/list")
+					.crumbs(Breadcrumbs.Department(module.adminDepartment), Breadcrumbs.Module(module), Breadcrumbs.Current(s"Assignment table for ${assignment.name}"))
+			} else {
+				val results = command.apply()
 
-			Mav("coursework/admin/assignments/submissionsandfeedback/list",
-				resultMap(results)
-			).crumbs(Breadcrumbs.Department(module.adminDepartment), Breadcrumbs.Module(module), Breadcrumbs.Current(s"Assignment table for ${assignment.name}"))
+				Mav("coursework/admin/assignments/submissionsandfeedback/list",
+					resultMap(results)
+				).crumbs(Breadcrumbs.Department(module.adminDepartment), Breadcrumbs.Module(module), Breadcrumbs.Current(s"Assignment table for ${assignment.name}"))
+			}
 		}
 	}
 
