@@ -13,6 +13,11 @@ class CopyAssignmentsTest extends BrowserTest with CourseworkFixtures {
 			click on linkText("Test Services")
 		}
 
+		// make sure we are looking at the latest academic year
+		val yearNav = findAll(cssSelector(".navbar-tertiary .navbar-nav")).next().underlying
+		val latestAcademicYear = yearNav.findElements(By.cssSelector("li")).asScala
+		click on latestAcademicYear.last
+
 		Then("I should be able to click on the Assignments dropdown")
 		val toolbar = findAll(className("dept-toolbar")).next().underlying
 		click on toolbar.findElement(By.partialLinkText("Assignments"))
@@ -50,13 +55,14 @@ class CopyAssignmentsTest extends BrowserTest with CourseworkFixtures {
 
 		And("I choose to save the changes")
 		val confirmModalBtn = id("main").webElement.findElement(By.xpath("//button[@name='submit']"))
-		click on confirmModalBtn
+		eventuallyAjax({
+			confirmModalBtn.isDisplayed should be (true)
+			click on confirmModalBtn
+		})
 
 		eventually(timeout(45.seconds), interval(300.millis)) ({
-
 			Then("The changes are saved and I am redirected")
-			currentUrl should not include ("copy-assignments")
-
+			currentUrl should not include "copy-assignments"
 		})
 
 		When("I expand Test Module 2")
@@ -64,20 +70,17 @@ class CopyAssignmentsTest extends BrowserTest with CourseworkFixtures {
 		click on testModule
 
 		eventually(timeout(45.seconds), interval(300.millis)) ({
-
 			And("Assignments should be displayed")
 			val assignment1 = id("main").webElement.findElement(By.xpath("//*[contains(text(),'Premarked assignment')]"))
 			assignment1.isDisplayed should be(true)
-
 		})
 
 		And("3 assignments should be found")
-		var cm1AssignmentsCnt = id("main").webElement.findElements(By.xpath("//*[contains(text(),'Premarked assignment') and not(contains(text(), 'Premarked assignment CM2'))]")).size()
-		var cm2AssignmentsCnt = id("main").webElement.findElements(By.xpath("//*[contains(text(),'Premarked assignment CM2')]")).size()
+		val cm1AssignmentsCnt = id("main").webElement.findElements(By.xpath("//*[contains(text(),'Premarked assignment') and not(contains(text(), 'Premarked assignment CM2'))]")).size()
+		val cm2AssignmentsCnt = id("main").webElement.findElements(By.xpath("//*[contains(text(),'Premarked assignment CM2')]")).size()
 
 		cm1AssignmentsCnt should be(2)
 		cm2AssignmentsCnt should be(1)
-
 	}
 
 	private def copyCm2Assignment(): Unit = {
@@ -85,7 +88,7 @@ class CopyAssignmentsTest extends BrowserTest with CourseworkFixtures {
 		When("I select the Premarked assignment checkbox")
 		val tbody2 = id("main").webElement.findElement(By.tagName("tbody"))
 		val row2 = tbody2.findElements(By.tagName("tr")).get(3)
-		row2.getText() should be ("Premarked assignment CM2 16/17")
+		row2.getText should startWith ("Premarked assignment CM2")
 
 		val td2 = row2.findElements(By.tagName("td")).get(0)
 
@@ -100,13 +103,14 @@ class CopyAssignmentsTest extends BrowserTest with CourseworkFixtures {
 
 		When("I choose to save the changes")
 		val confirmModalBtn = id("main").webElement.findElement(By.xpath("//button[@name='submit']"))
-		click on confirmModalBtn
+		eventuallyAjax({
+			confirmModalBtn.isDisplayed should be (true)
+			click on confirmModalBtn
+		})
 
 		eventually(timeout(45.seconds), interval(300.millis)) ({
-
 			Then("The changes are saved and I am redirected")
-			currentUrl should not include ("copy-assignments")
-
+			currentUrl should not include "copy-assignments"
 		})
 
 		When("I expand Test Module 2")
@@ -114,16 +118,14 @@ class CopyAssignmentsTest extends BrowserTest with CourseworkFixtures {
 		click on testModule
 
 		eventually(timeout(45.seconds), interval(300.millis)) ({
-
 			Then("Assignments should be displayed")
 			val content = id("main").webElement.findElement(By.xpath("//*[contains(text(),'Premarked assignment CM2')]"))
 			content.isDisplayed should be(true)
-
 		})
 
 		Then("4 assignments should be found")
-		var cm1AssignmentsCnt = id("main").webElement.findElements(By.xpath("//*[contains(text(),'Premarked assignment') and not(contains(text(), 'Premarked assignment CM2'))]")).size()
-		var cm2AssignmentsCnt = id("main").webElement.findElements(By.xpath("//*[contains(text(),'Premarked assignment CM2')]")).size()
+		val cm1AssignmentsCnt = id("main").webElement.findElements(By.xpath("//*[contains(text(),'Premarked assignment') and not(contains(text(), 'Premarked assignment CM2'))]")).size()
+		val cm2AssignmentsCnt = id("main").webElement.findElements(By.xpath("//*[contains(text(),'Premarked assignment CM2')]")).size()
 
 		cm1AssignmentsCnt should be(2)
 		cm2AssignmentsCnt should be(2)

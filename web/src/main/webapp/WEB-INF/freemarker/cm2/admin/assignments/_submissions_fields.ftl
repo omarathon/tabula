@@ -19,6 +19,20 @@
 		</@bs3form.checkbox>
 	</@bs3form.labelled_form_group>
 
+	<@bs3form.labelled_form_group path="" labelText="Declarations">
+		<span class="help-block">These appear on a student's assignment submission screen.</span>
+		<span class="help-block">Plagiarism declaration required by <a href="#">Teaching Quality regulations</a></span>
+		<blockquote class="help-block">
+			<p>No substantial part(s) of the work submitted here has also been submitted by me in other assessments for accredited courses of study whether at Warwick or elsewhere, and I acknowledge that if this has been done an appropriate reduction in the mark I may otherwise have received will be made.</p>
+		</blockquote>
+
+		<#--<@bs3form.checkbox path="additionalDeclaration">-->
+			<#--<@f.checkbox path="additionalDeclaration" id="additionalDeclaration" /> Additional declaration-->
+		<#--</@bs3form.checkbox>-->
+
+
+	</@bs3form.labelled_form_group>
+
 	<@bs3form.labelled_form_group path="" labelText="Submission scope">
 		<@bs3form.radio>
 			<@f.radiobutton path="restrictSubmissions" value="true" />
