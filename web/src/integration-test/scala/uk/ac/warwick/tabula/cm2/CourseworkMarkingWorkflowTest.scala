@@ -62,15 +62,14 @@ class CourseworkMarkingWorkflowTest extends BrowserTest with CourseworkFixtures 
 
 	private def deleteMarkingWorkflow(workflowName: String):Unit = {
 		When("I delete a workflow")
-		({
-			val tbody = className("table").webElement.findElement(By.tagName("tbody"))
-			val row = tbody.findElements(By.tagName("tr")).asScala.find({
-				_.findElement(By.tagName("td")).getText == workflowName
-			})
-			row should be('defined)
-
-			click on row.get.findElement(By.partialLinkText("Delete"))
+		val tbody = className("table").webElement.findElement(By.tagName("tbody"))
+		val row = tbody.findElements(By.tagName("tr")).asScala.find({
+			_.findElement(By.tagName("td")).getText == workflowName
 		})
+		row should be('defined)
+
+		click on row.get.findElement(By.partialLinkText("Delete"))
+
 
 		Then("I should reach the delete marking workflow page")
 		eventually {
@@ -91,7 +90,6 @@ class CourseworkMarkingWorkflowTest extends BrowserTest with CourseworkFixtures 
 	private def editMarkingWorkflow(): Unit = {
 			// brackets/braces isolate vals and prevent block being treated as implicit for When() above
 			When("I edit Single marker workflow 2")
-		({
 			val tbody = className("table-sortable").webElement.findElement(By.tagName("tbody"))
 			val row = tbody.findElements(By.tagName("tr")).asScala.find({
 				_.findElement(By.tagName("td")).getText == "Single marker workflow 2"
@@ -103,7 +101,6 @@ class CourseworkMarkingWorkflowTest extends BrowserTest with CourseworkFixtures 
 				currentUrl should endWith ("/edit")
 			}
 
-		})
 
 		Then("I should see the correct fields")
 		textField("workflowName").value should be ("Single marker workflow 2")
@@ -146,12 +143,11 @@ class CourseworkMarkingWorkflowTest extends BrowserTest with CourseworkFixtures 
 		And("It should have removed the workflow")
 		listMarkingWorkflow(2)
 		And("No row with that workflow should be there")
-		({
-			val tbody = className("table").webElement.findElement(By.tagName("tbody"))
-			val row = tbody.findElements(By.tagName("tr")).asScala.find({
-				_.findElement(By.tagName("td")).getText == "Single marker workflow 2"
-			})
-			row should not be('defined)
+		val tbody = className("table").webElement.findElement(By.tagName("tbody"))
+		val row = tbody.findElements(By.tagName("tr")).asScala.find({
+			_.findElement(By.tagName("td")).getText == "Single marker workflow 2"
 		})
+		row should not be 'defined
+
 	}
 }
