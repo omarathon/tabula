@@ -1,5 +1,6 @@
 package uk.ac.warwick.tabula.cm2
 
+import org.openqa.selenium.By
 import org.openqa.selenium.support.ui.Select
 import org.scalatest.GivenWhenThen
 import uk.ac.warwick.tabula.BrowserTest
@@ -11,7 +12,9 @@ class FeedbackAdjustmentsTest extends BrowserTest with CourseworkFixtures with G
 	"Admin" should "be able to make feedback adjustments" in {
 		as(P.Admin1) {
 			When("I go to the department admin page")
-			go to Path("/coursework/admin/department/xxx/#module-xxx02")
+			go to Path("/coursework/admin/department/xxx")
+			val module = getModule("XXX02").get
+			click on module.findElement(By.className("mod-code"))
 			Then("I should see the premarked assignment")
 			eventuallyAjax(pageSource contains "Premarked assignment" should be {true})
 			click on linkText("Premarked assignment")
@@ -65,6 +68,7 @@ class FeedbackAdjustmentsTest extends BrowserTest with CourseworkFixtures with G
       eventuallyAjax(pageSource contains "Adjusted mark - 31" should be {true})
 
       click on partialLinkText("XXX02 Test Module 2")
+			click on getModule("XXX02").get.findElement(By.className("mod-code"))
 
 			When("I publish the feedback")
 			click on partialLinkText("Feedback needs publishing (2 of 2)")
