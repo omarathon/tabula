@@ -150,7 +150,7 @@ trait CourseworkFixtures extends BrowserTest with FeaturesDriver with FixturesDr
 			// wait for the page to load
 			find(cssSelector("div.deptheader")) should be('defined)
 		}
-		loadCurrentAcademicyYearTab()
+		loadCurrentAcademicYearTab()
 
 		val module = getModule(moduleCode).get
 		click on module.findElement(By.partialLinkText("Manage this module"))
@@ -351,7 +351,7 @@ trait CourseworkFixtures extends BrowserTest with FeaturesDriver with FixturesDr
 			_.findElement(By.tagName("td")).getText == workflowName
 		})
 		row should be('defined)
-		var link = row.get.findElement(By.partialLinkText("Modify"))
+		val link = row.get.findElement(By.partialLinkText("Modify"))
 		val url =  link.getAttribute("href")
 		val pattern = """.*markingworkflows/(.*)/edit""".r
 		val workflowId = pattern.findAllIn(url).matchData.toSeq.headOption.map(_.group(1))
@@ -385,7 +385,7 @@ trait CourseworkFixtures extends BrowserTest with FeaturesDriver with FixturesDr
 		}
 	}
 
-	def submitAssignment(user: LoginDetails, moduleCode: String, assignmentName: String, assignmentId: String, file: String, mustBeEnrolled: Boolean = true): Unit = as(user) {
+	def submitAssignment(user: LoginDetails, assignmentName: String, assignmentId: String, file: String, mustBeEnrolled: Boolean = true): Unit = as(user) {
 		if (mustBeEnrolled) {
 			linkText(assignmentName).findElement should be ('defined)
 			click on linkText(assignmentName)
@@ -395,23 +395,29 @@ trait CourseworkFixtures extends BrowserTest with FeaturesDriver with FixturesDr
 			go to Path(s"/coursework/submission/$assignmentId")
 		}
 
-		click on find(cssSelector("input[type=file]")).get
-		pressKeys(getClass.getResource(file).getFile)
+		ifPhantomJSDriver(
+			operation = { d =>
+				// This hangs forever for some reason in PhantomJS if you use the normal pressKeys method
+				d.executePhantomJS("var page = this; page.uploadFile('input[type=file]', '" + getClass.getResource(file).getFile + "');")
+			},
+			otherwise = { _ =>
+				click on find(cssSelector("input[type=file]")).get
+				pressKeys(getClass.getResource(file).getFile)
+			}
+		)
 
 		checkbox("plagiarismDeclaration").select()
-
 		submit()
 	}
 
 	def getInputByLabel(label: String): Option[WebElement] =
 		findAll(tagName("label")).find(_.underlying.getText.trim == label) map { _.underlying.getAttribute("for") } map { id(_).webElement }
 
-	def loadCurrentAcademicyYearTab(): Unit =  {
+	def loadCurrentAcademicYearTab(): Unit =  {
 		And("I click the current academic year tertiary nav bar")
-		var tertiaryNavBar = find(cssSelector("nav.navbar.navbar-tertiary"))
-		var tertiaryNavBarElement = tertiaryNavBar.get.underlying
-		var currentYear = AcademicYear.guessSITSAcademicYearByDate(DateTime.now)
-		var currentAcademicYear = tertiaryNavBarElement.findElement(By.partialLinkText(currentYear.getLabel))
+		val tertiaryNavBar = find(cssSelector("nav.navbar.navbar-tertiary"))
+		val tertiaryNavBarElement = tertiaryNavBar.get.underlying
+		val currentYear = AcademicYear.guessSITSAcademicYearByDate(DateTime.now)
 		click on tertiaryNavBarElement.findElement(By.partialLinkText(currentYear.getLabel))
 	}
 
