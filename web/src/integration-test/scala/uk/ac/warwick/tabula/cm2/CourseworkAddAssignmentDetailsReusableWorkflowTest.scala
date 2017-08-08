@@ -15,7 +15,7 @@ class CourseworkAddAssignmentDetailsReusableWorkflowTest extends BrowserTest wit
 
 	private def openCreateAssignmentDetails(moduleCode: String): Unit = {
 		When("I click manage this module drop down ")
-		val manageModule = getModule(moduleCode)
+		val manageModule = getModule(moduleCode).get
 
 		click on manageModule.findElement(By.partialLinkText("Manage this module"))
 		Then("I should see the create new assignment option")

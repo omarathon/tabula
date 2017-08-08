@@ -4,7 +4,6 @@ import org.joda.time.DateTime
 import org.openqa.selenium.support.ui.Select
 import org.openqa.selenium.{By, WebElement}
 import org.scalatest.GivenWhenThen
-import org.scalatest.exceptions.TestFailedException
 import uk.ac.warwick.tabula.data.model.WorkflowCategory
 import uk.ac.warwick.tabula.data.model.markingworkflow.MarkingWorkflowType
 import uk.ac.warwick.tabula.web.{FeaturesDriver, FixturesDriver}
@@ -107,7 +106,7 @@ trait CourseworkFixtures extends BrowserTest with FeaturesDriver with FixturesDr
 			find(cssSelector("div.deptheader")) should be('defined)
 		}
 		if ((assistants ++ managers).nonEmpty) {
-			val module = getModule(moduleCode)
+			val module = getModule(moduleCode).get
 			click on module.findElement(By.partialLinkText("Manage this module"))
 			val editPerms = module.findElement(By.partialLinkText("Module permissions"))
 			eventually(editPerms.isDisplayed should be {
@@ -153,7 +152,7 @@ trait CourseworkFixtures extends BrowserTest with FeaturesDriver with FixturesDr
 		}
 		loadCurrentAcademicyYearTab()
 
-		val module = getModule(moduleCode)
+		val module = getModule(moduleCode).get
 		click on module.findElement(By.partialLinkText("Manage this module"))
 
 		val addAssignment = module.findElement(By.partialLinkText("Create new assignment"))
@@ -244,13 +243,11 @@ trait CourseworkFixtures extends BrowserTest with FeaturesDriver with FixturesDr
 		fn
 	}
 
-	def getModule(moduleCode: String): WebElement = {
-		var element = className("filter-results").webElement.findElements(By.cssSelector("div.striped-section.admin-assignment-list "))
+	def getModule(moduleCode: String): Option[WebElement] = {
+		val element = className("filter-results").webElement.findElements(By.cssSelector("div.striped-section.admin-assignment-list "))
 		val module = moduleCode.toUpperCase
 		val matchingModule = element.asScala.find({_.findElement(By.cssSelector("span.mod-code")).getText == module })
-		if (matchingModule.isEmpty)
-			throw new TestFailedException(s"No module found for ${module}", 0)
-		matchingModule.get
+		matchingModule
 	}
 
 	def openAdminPage(): Unit = {
