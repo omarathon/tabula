@@ -62,6 +62,7 @@ jQuery(function($){
 	// Set up checkboxes for the big table
 
 	$('#batch-add-table').bigList({
+
 		setup : function() {
 			var $container = this;
 
