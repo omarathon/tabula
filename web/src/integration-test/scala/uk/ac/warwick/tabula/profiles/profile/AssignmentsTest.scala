@@ -1,5 +1,6 @@
 package uk.ac.warwick.tabula.profiles.profile
 
+import org.openqa.selenium.By
 import org.scalatest.GivenWhenThen
 import uk.ac.warwick.tabula.BrowserTest
 import uk.ac.warwick.tabula.cm2.CourseworkFixtures
@@ -44,7 +45,10 @@ class AssignmentsTest extends BrowserTest with GivenWhenThen with FeaturesDriver
 	"A student" should "see assignments that have released feedback" in {
 
 		Given("There is an assignment with feedback released")
-		signIn as P.Admin1 to Path("/coursework/admin/department/xxx/#module-xxx02")
+		signIn as P.Admin1 to Path("/coursework/admin/department/xxx")
+		val module = getModule("XXX02").get
+		click on module.findElement(By.className("mod-code"))
+
 		click on linkText("Feedback needs publishing (2 of 2)")
 		click on checkbox("confirm")
 		cssSelector("div.submit-buttons button[type=submit]").findElement.get.underlying.click()
