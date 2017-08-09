@@ -422,7 +422,7 @@ class CourseworkEditAssignmentDetailsReusableWorkflowTest extends BrowserTest wi
 			case None => 	pageSource contains "Marking workflow" should be { false }
 		}
 		//assignment feedback page details
-		checkReviewTabRow(labels, "Automatically release to markers when assignment closes or after plagiarism check", getFieldValue("automaticallyReleaseToMarkers", fieldDetails))
+		checkReviewTabRow(labels, "Automatically release submissions to markers", getFieldValue("automaticallyReleaseToMarkers", fieldDetails))
 		checkReviewTabRow(labels, "Collect marks", getFieldValue("collectMarks", fieldDetails))
 
 		//students page

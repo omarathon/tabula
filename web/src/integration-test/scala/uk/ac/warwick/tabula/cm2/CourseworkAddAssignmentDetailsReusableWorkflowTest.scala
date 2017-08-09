@@ -158,7 +158,7 @@ class CourseworkAddAssignmentDetailsReusableWorkflowTest extends BrowserTest wit
 		checkReviewTabRow(labels,"Marking workflow type", "Single marking")
 
 		//assignment feedback page details
-		checkReviewTabRow(labels,"Automatically release to markers when assignment closes or after plagiarism check", "No")
+		checkReviewTabRow(labels,"Automatically release submissions to markers", "No")
 		checkReviewTabRow(labels,"Collect marks", "Yes")
 
 		//students page

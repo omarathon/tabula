@@ -13,7 +13,7 @@
 	<@bs3form.labelled_form_group path="automaticallyReleaseToMarkers" labelText="Automated submission release">
 		<@bs3form.checkbox path="automaticallyReleaseToMarkers">
 			<@f.checkbox path="automaticallyReleaseToMarkers" id="automaticallyReleaseToMarkers" />
-				Automatically release to markers when assignment closes or after plagiarism check
+			Automatically release submissions to markers
 		</@bs3form.checkbox>
 		<div class="help-block">
 			Students who do not submit work are not released automatically - you need to release them manually.
