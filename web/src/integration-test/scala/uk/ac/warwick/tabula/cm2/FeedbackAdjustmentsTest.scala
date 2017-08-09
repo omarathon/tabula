@@ -31,6 +31,7 @@ class FeedbackAdjustmentsTest extends BrowserTest with CourseworkFixtures with G
 					go to Path(s"/coursework/admin/module/xxx02/assignments/$assignmentId/feedback/adjustments")
 				},
 				otherwise = { _ =>
+					eventually(className("collection-check-all").findElement.get.isDisplayed should be {true})
 					click on className("collection-check-all")
 					eventually(pageSource contains "Feedback" should be {true})
 					click on linkText("Feedback")
