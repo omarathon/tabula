@@ -12,9 +12,9 @@ class CourseworkAdminTest extends BrowserTest with CourseworkFixtures {
 
 		// check that we can see some modules on the page.
 
-		id("module-xxx01").webElement.isDisplayed should be {true}
-		id("module-xxx02").webElement.isDisplayed should be {true}
-		id("module-xxx03").webElement.isDisplayed should be {true}
+		getModule("xxx01").get.isDisplayed should be {true}
+		getModule("xxx02").get.isDisplayed should be {true}
+		getModule("xxx03").get.isDisplayed should be {true}
 
 		// check that we can hide modules
 		click on linkText("All modules")
@@ -25,9 +25,9 @@ class CourseworkAdminTest extends BrowserTest with CourseworkFixtures {
 		})
 
 		eventuallyAjax({
-			find(id("module-xxx01")).isDefined should be {false}
-			id("module-xxx02").webElement.isDisplayed should be {true}
-			find(id("module-xxx03")).isDefined should be {false}
+			getModule("xxx01").isDefined should be {false}
+			getModule("xxx02").get.isDisplayed should be {true}
+			getModule("xxx03").isDefined should be {false}
 		})
 	}
 }

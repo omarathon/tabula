@@ -13,9 +13,10 @@ import scala.collection.mutable
  */
 class CourseworkAddAssignmentDetailsReusableWorkflowTest extends BrowserTest with CourseworkFixtures with GivenWhenThen {
 
-	private def openCreateAssignmentDetails(moduleId: String): Unit = {
+	private def openCreateAssignmentDetails(moduleCode: String): Unit = {
 		When("I click manage this module drop down ")
-		val manageModule = id(moduleId).webElement
+		val manageModule = getModule(moduleCode).get
+
 		click on manageModule.findElement(By.partialLinkText("Manage this module"))
 		Then("I should see the create new assignment option")
 		val createAssignmentLink = manageModule.findElement(By.partialLinkText("Create new assignment"))
@@ -30,7 +31,7 @@ class CourseworkAddAssignmentDetailsReusableWorkflowTest extends BrowserTest wit
 
 
 	}
-	private def createReusableAssigmentDetails(assignmentName: String, module: String, reusableWorkflowName: String): Unit = {
+	private def createReusableAssigmentDetails(assignmentName: String, reusableWorkflowName: String): Unit = {
 		When("I go to assignment creation page")
 		currentUrl should include("/assignments/new")
 
@@ -72,7 +73,7 @@ class CourseworkAddAssignmentDetailsReusableWorkflowTest extends BrowserTest wit
 		Then("I should see manually enrolled students")
 		eventually {
 			val enrolledCount = form.findElement(By.className("enrolledCount"))
-			val enrolledCountText = enrolledCount.getText()
+			val enrolledCountText = enrolledCount.getText
 			enrolledCountText should include("2 manually enrolled")
 		}
 		submitAndContinueClick()
@@ -157,7 +158,7 @@ class CourseworkAddAssignmentDetailsReusableWorkflowTest extends BrowserTest wit
 		checkReviewTabRow(labels,"Marking workflow type", "Single marking")
 
 		//assignment feedback page details
-		checkReviewTabRow(labels,"Automatically release to markers when assignment closes or after plagiarism check", "No")
+		checkReviewTabRow(labels,"Automatically release submissions to markers", "No")
 		checkReviewTabRow(labels,"Collect marks", "Yes")
 
 		//students page
@@ -197,12 +198,11 @@ class CourseworkAddAssignmentDetailsReusableWorkflowTest extends BrowserTest wit
 
 	"Department admin" should "be able to create reusable single marker workflow assignment" in  as(P.Admin1) {
 
-		var assignmentName = "Test Module 2 Reusableworkflow Assignment"
-		var reusableWorkflowName = "Single marker workflow"
+		val assignmentName = "Test Module 2 Reusableworkflow Assignment"
+		val reusableWorkflowName = "Single marker workflow"
 		openAdminPage()
-		openCreateAssignmentDetails("module-xxx02")
-
-		createReusableAssigmentDetails(assignmentName, "module-xxx02",reusableWorkflowName)
+		openCreateAssignmentDetails("xxx02")
+		createReusableAssigmentDetails(assignmentName, reusableWorkflowName)
 		assigmentFeedbackDetails()
 		assigmentStudentDetails()
 		assigmentMarkerDetails()

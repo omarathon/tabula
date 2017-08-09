@@ -59,7 +59,7 @@
 
 			<#assign feedbackTemplateName>${(assignment.feedbackTemplate.name)!'None'}</#assign>
 			<@review_details 'Feedback template' feedbackTemplateName />
-			<@review_details 'Automatically release to markers when assignment closes or after plagiarism check' sharedPropertiesForm.automaticallyReleaseToMarkers?string('Yes','No') />
+			<@review_details 'Automatically release submissions to markers' sharedPropertiesForm.automaticallyReleaseToMarkers?string('Yes','No') />
 			<@review_details 'Collect marks' sharedPropertiesForm.collectMarks?string('Yes','No') />
 			<@review_details 'Credit bearing' sharedPropertiesForm.summative?string('Summative','Formative') />
 			<@review_details 'Dissertation' sharedPropertiesForm.dissertation?string('Yes','No') />

@@ -5,13 +5,12 @@ import uk.ac.warwick.spring.Wire
 import uk.ac.warwick.tabula.AcademicYear
 import uk.ac.warwick.tabula.commands.{CommandInternal, ComposableCommand, Unaudited}
 import uk.ac.warwick.tabula.data.model._
-import uk.ac.warwick.tabula.data.model.markingworkflow.{MarkingWorkflowType, SingleMarkerWorkflow}
+import uk.ac.warwick.tabula.data.model.markingworkflow.SingleMarkerWorkflow
 import uk.ac.warwick.tabula.data.{AutowiringTransactionalComponent, TransactionalComponent, UserGroupDao}
 import uk.ac.warwick.tabula.helpers.Logging
 import uk.ac.warwick.tabula.services._
 import uk.ac.warwick.tabula.system.permissions.PubliclyVisiblePermissions
 import uk.ac.warwick.userlookup.User
-import uk.ac.warwick.tabula.commands.cm2.markingworkflows.CreatesMarkingWorkflow
 
 import scala.collection.JavaConverters._
 import uk.ac.warwick.tabula.JavaImports._
@@ -64,9 +63,12 @@ class CreatePremarkedCM2AssignmentFixtureCommand extends CommandInternal[Assignm
 		val markersAUsers: Seq[User] = userLookup.getUsersByUserIds(CreatePremarkedCM2AssignmentFixtureCommand.firstMarkers).values.toSeq
 		val markersBUsers: Seq[User] = JArrayList().asScala
 
+		val oldSingleMarkerWorkflow = SingleMarkerWorkflow("Old single marker workflow", module.adminDepartment, markersAUsers)
+		oldSingleMarkerWorkflow.academicYear = AcademicYear.guessSITSAcademicYearByDate(DateTime.now).previous
+		oldSingleMarkerWorkflow.isReusable = true
+		cm2MarkingWorkflowService.save(oldSingleMarkerWorkflow)
 
 		val singleMarkerWorkflow = SingleMarkerWorkflow("Single marker workflow", module.adminDepartment, markersAUsers)
-		singleMarkerWorkflow.academicYear = AcademicYear(2016)
 		singleMarkerWorkflow.isReusable = true
 		cm2MarkingWorkflowService.save(singleMarkerWorkflow)
 		assignment.cm2MarkingWorkflow = singleMarkerWorkflow

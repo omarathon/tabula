@@ -258,7 +258,8 @@ class SandboxProfileImporter extends ProfileImporter {
 					null,
 					gender,
 					null,
-					userType
+					userType,
+					JBoolean(Some(true))
 				)
 			)
 		}
@@ -303,7 +304,8 @@ class SandboxProfileImporter extends ProfileImporter {
 						null,
 						gender,
 						null,
-						userType
+						userType,
+						null
 					)
 				)
 			}
@@ -329,7 +331,11 @@ class SandboxProfileImporter extends ProfileImporter {
 					member.phoneNumber,
 					member.gender,
 					member.homeEmail,
-					member.userType
+					member.userType,
+					member match {
+						case staff: StaffMember => staff.teachingStaff
+						case _ => null
+					}
 				)
 			)
 		}
@@ -548,7 +554,8 @@ object ProfileImporter extends Logging {
 			phoneNumber							= rs.getString("telephoneNumber"), // unpopulated in FIM
 			gender									= Gender.fromCode(rs.getString("gender")),
 			alternativeEmailAddress	= rs.getString("externalEmail"),
-			userType								= MemberUserType.fromTargetGroup(rs.getString("targetGroup"))
+			userType								= MemberUserType.fromTargetGroup(rs.getString("targetGroup")),
+			teachingStaff           = JBoolean(Option(rs.getString("warwickTeachingStaff")).map(_ == "Y"))
 		)
 
 	private def sqlDateToDateTime(date: java.sql.Date): DateTime =
@@ -573,7 +580,8 @@ case class MembershipMember(
 	phoneNumber: String = null,
 	gender: Gender = null,
 	alternativeEmailAddress: String = null,
-	userType: MemberUserType
+	userType: MemberUserType,
+	teachingStaff: JBoolean
 )
 
 

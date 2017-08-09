@@ -3,8 +3,7 @@ package uk.ac.warwick.tabula.coursework
 import org.scalatest.GivenWhenThen
 import uk.ac.warwick.tabula.BrowserTest
 import uk.ac.warwick.tabula.coursework.pages.SetupAssignmentsPage
-import com.gargoylesoftware.htmlunit.BrowserVersion
-import org.openqa.selenium.Keys
+
 
 /**
  * Test the setup-assignments form.
@@ -79,7 +78,7 @@ class CourseworkAddAssignmentsTest extends BrowserTest with CourseworkFixtures w
 
 
 	def assertNoFreemarkerErrors() {
-		pageSource should not include("FreeMarker")
+		pageSource should not include "FreeMarker"
 	}
 
 }

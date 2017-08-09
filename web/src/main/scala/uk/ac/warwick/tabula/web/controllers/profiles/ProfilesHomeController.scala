@@ -35,7 +35,8 @@ import uk.ac.warwick.tabula.web.Mav
 				"relationshipTypesMapById" -> info.relationshipTypesMap.map { case (k, v) => (k.id, v) },
 				"universityId" -> user.universityId,
 				"isPGR" -> user.isPGR,
-				"smallGroups" -> info.smallGroups,
+				"smallGroups" -> info.currentSmallGroups,
+				"previousSmallGroups" -> info.previousSmallGroups,
 				"adminDepartments" -> info.adminDepartments,
 				"searchDepartments" -> (departmentService.departmentsWithPermission(user, Permissions.Profiles.Search) ++ user.profile.map { _.homeDepartment }.toSet)
 			)

@@ -50,7 +50,7 @@
 			<#if showMyStudents>
 				<h2>My students</h2>
 
-				<ul>
+				<ul class="my-students">
 					<#list relationshipTypesMap?keys as relationshipType>
 						<#if relationshipTypesMapById[relationshipType.id]>
 							<li><a href="<@routes.profiles.relationship_students relationshipType />">${relationshipType.studentRole?cap_first}s</a></li>
@@ -64,6 +64,18 @@
 							${_module.code?upper_case} (${_module.name}) ${_groupSet.nameWithoutModulePrefix}, ${smallGroup.name}
 						</a></li>
 					</#list>
+
+					<#list previousSmallGroups as smallGroup>
+						<#assign _groupSet=smallGroup.groupSet />
+						<#assign _module=smallGroup.groupSet.module />
+						<li class="hidden"><a href="<@routes.profiles.smallgroup smallGroup />">
+							${_module.code?upper_case} (${_module.name}) ${_groupSet.nameWithoutModulePrefix}, ${smallGroup.name}
+						</a></li>
+					</#list>
+
+					<#if previousSmallGroups?has_content>
+						<li><a class="view-old" href="#">View older groups</a></li>
+					</#if>
 				</ul>
 			<#elseif is_staff>
 				<h2>My students</h2>
@@ -151,4 +163,13 @@
 		</p>
 	</#if>
 </#if>
+<script type="text/javascript">
+	jQuery(function($) {
+		$('a.view-old').on('click', function(e){
+			e.preventDefault();
+			$('.my-students li').removeClass('hidden');
+			$(this).closest('li').remove();
+		});
+	});
+</script>
 </#escape>
