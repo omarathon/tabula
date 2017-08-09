@@ -10,11 +10,11 @@ import uk.ac.warwick.tabula.helpers.Logging
 import uk.ac.warwick.tabula.services.scheduling.MembershipInformation
 import uk.ac.warwick.userlookup.User
 
-class ImportStaffMemberCommand(member: MembershipInformation, ssoUser: User)
-	extends ImportMemberCommand(member, ssoUser, None)
+class ImportStaffMemberCommand(info: MembershipInformation, ssoUser: User)
+	extends ImportMemberCommand(info, ssoUser, None)
 	with Logging with Daoisms with StaffProperties with Unaudited {
 
-	this.teachingStaff = member.member.teachingStaff
+	this.teachingStaff = info.member.teachingStaff
 
 	def applyInternal(): Member = transactional() {
 		val memberExisting = memberDao.getByUniversityIdStaleOrFresh(universityId)

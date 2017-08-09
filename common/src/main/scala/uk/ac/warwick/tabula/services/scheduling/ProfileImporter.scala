@@ -259,7 +259,7 @@ class SandboxProfileImporter extends ProfileImporter {
 					gender,
 					null,
 					userType,
-					JBoolean(Option(true))
+					JBoolean(Some(true))
 				)
 			)
 		}
