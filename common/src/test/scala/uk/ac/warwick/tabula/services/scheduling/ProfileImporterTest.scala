@@ -11,6 +11,7 @@ import uk.ac.warwick.tabula.data.{FileDao, MemberDao}
 import uk.ac.warwick.tabula.helpers.scheduling.SitsStudentRow
 import uk.ac.warwick.tabula.{Mockito, PersistenceTestBase}
 import uk.ac.warwick.userlookup.{AnonymousUser, User}
+import uk.ac.warwick.tabula.JavaImports._
 
 // scalastyle:off magic.number
 class ProfileImporterTest extends PersistenceTestBase with Mockito {
@@ -31,15 +32,16 @@ class ProfileImporterTest extends PersistenceTestBase with Mockito {
 		rs.getString("spr_code") returns "0672089/2"
 
 		val mm = MembershipMember(
-			universityId 			= "0672089",
-			email					= "M.Mannion@warwick.ac.uk",
-			title					= "Mr",
-			preferredForenames		= "Mathew",
-			preferredSurname		= "MacIntosh",
-			dateOfBirth				= new LocalDate(1984, DateTimeConstants.AUGUST, 19),
-			usercode				= "cuscav",
-			gender					= Male,
-			userType				= Staff
+			universityId = "0672089",
+			email = "M.Mannion@warwick.ac.uk",
+			title = "Mr",
+			preferredForenames = "Mathew",
+			preferredSurname = "MacIntosh",
+			dateOfBirth = new LocalDate(1984, DateTimeConstants.AUGUST, 19),
+			usercode = "cuscav",
+			gender = Male,
+			userType = Staff,
+			teachingStaff = JBoolean(Some(true))
 		)
 
 		val mac = MembershipInformation(mm)
@@ -56,7 +58,8 @@ class ProfileImporterTest extends PersistenceTestBase with Mockito {
 					universityId = "0672089",
 					usercode = "cuscav",
 					preferredForenames = name.toUpperCase,
-					userType = Staff
+					userType = Staff,
+					teachingStaff = JBoolean(Some(true))
 				))
 
 				val member = ImportStudentRowCommand(mac, new AnonymousUser, Seq(SitsStudentRow(rs)), importCommandFactory)
@@ -77,7 +80,8 @@ class ProfileImporterTest extends PersistenceTestBase with Mockito {
 					universityId = "0672089",
 					usercode = "cuscav",
 					preferredSurname = name.toUpperCase,
-					userType = Staff
+					userType = Staff,
+					teachingStaff = JBoolean(Some(true))
 				))
 
 				val member = ImportStudentRowCommand(mac, new AnonymousUser, Seq(SitsStudentRow(rs)), importCommandFactory)
@@ -112,15 +116,16 @@ class ProfileImporterTest extends PersistenceTestBase with Mockito {
 
 	@Test def importStaff() {
 		val mac = MembershipInformation(MembershipMember(
-			universityId 			= "0672089",
-			email					= "M.Mannion@warwick.ac.uk",
-			title					= "Mr",
-			preferredForenames		= "Mathew",
-			preferredSurname		= "Mannion",
-			dateOfBirth				= new LocalDate(1984, DateTimeConstants.AUGUST, 19),
-			usercode				= "cuscav",
-			gender					= Male,
-			userType				= Staff
+			universityId  = "0672089",
+			email = "M.Mannion@warwick.ac.uk",
+			title = "Mr",
+			preferredForenames = "Mathew",
+			preferredSurname = "Mannion",
+			dateOfBirth = new LocalDate(1984, DateTimeConstants.AUGUST, 19),
+			usercode = "cuscav",
+			gender = Male,
+			userType = Staff,
+			teachingStaff = JBoolean(Some(true))
 		))
 
 		val importer = new ProfileImporterImpl

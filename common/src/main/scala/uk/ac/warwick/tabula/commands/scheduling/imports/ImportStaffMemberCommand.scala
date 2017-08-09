@@ -10,12 +10,11 @@ import uk.ac.warwick.tabula.helpers.Logging
 import uk.ac.warwick.tabula.services.scheduling.MembershipInformation
 import uk.ac.warwick.userlookup.User
 
-class ImportStaffMemberCommand(member: MembershipInformation, ssoUser: User)
-	extends ImportMemberCommand(member, ssoUser, None)
+class ImportStaffMemberCommand(info: MembershipInformation, ssoUser: User)
+	extends ImportMemberCommand(info, ssoUser, None)
 	with Logging with Daoisms with StaffProperties with Unaudited {
 
-	// TODO reinstate this, one day
-//	this.teachingStaff = rs.getString("teaching_staff") == "Y"
+	this.teachingStaff = info.member.teachingStaff
 
 	def applyInternal(): Member = transactional() {
 		val memberExisting = memberDao.getByUniversityIdStaleOrFresh(universityId)
@@ -45,7 +44,7 @@ class ImportStaffMemberCommand(member: MembershipInformation, ssoUser: User)
 	}
 
 	private val basicStaffProperties: Set[String] = Set(
-//		"teachingStaff"
+		"teachingStaff"
 	)
 
 	private def copyStaffProperties(commandBean: BeanWrapper, memberBean: BeanWrapper) =

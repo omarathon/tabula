@@ -589,4 +589,6 @@ trait RestrictedPhoneNumber {
 trait StaffProperties {
 	// Anyone can view staff phone number
 	def phoneNumberPermissions = Nil
+
+	var teachingStaff: JBoolean = _
 }
