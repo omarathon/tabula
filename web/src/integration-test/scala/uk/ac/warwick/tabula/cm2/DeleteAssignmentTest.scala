@@ -22,11 +22,11 @@ class DeleteAssignmentTest extends BrowserTest with CourseworkFixtures {
 		click on arrow
 
 		Then("The  module should expand")
-		eventually {
+		eventually(timeout(45.seconds), interval(300.millis)) ({
 			And("I should find an assignment with no submissions")
 			val noSubmissionsAssignmentsSize = id("main").webElement.findElements(By.xpath("//*[contains(text(),'No Submissions Assignment CM2')]")).size()
 			noSubmissionsAssignmentsSize should be(1)
-		}
+		})
 	}
 
 	private def checkUndeletableAssignment(): Unit = {
@@ -59,14 +59,14 @@ class DeleteAssignmentTest extends BrowserTest with CourseworkFixtures {
 
 		When("When I click on the confirmation checkbox")
 		click on id("confirmCheck").webElement
-
-		Then("The delete button should be enabled")
-		cssSelector("btn-danger").webElement.isEnabled should be (true)
-		click on cssSelector("btn-danger")
-
+		eventually {
+			Then("The delete button should be enabled")
+			cssSelector("btn-danger").webElement.isEnabled should be(true)
+			click on cssSelector("btn-danger")
+		}
 		eventuallyAjax {
 			Then("I should reach the delete page")
-			currentUrl should include("/department/xxx/20")
+			currentUrl should not include("/edit")
 		}
 
 		Then("I should find not an assignment with no assignments")
