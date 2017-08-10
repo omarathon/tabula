@@ -45,7 +45,11 @@ trait GetSmallGroupApi {
 			Mav(new JSONErrorView(errors))
 		} else {
 			val result = command.apply()
-			Mav(new JSONView(jsonSmallGroupObject(result)))
+			Mav(new JSONView(Map(
+				"success" -> true,
+				"status" -> "ok",
+				"group" -> jsonSmallGroupObject(result)
+			)))
 		}
 	}
 }
