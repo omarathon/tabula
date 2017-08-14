@@ -216,7 +216,6 @@ class TurnitinLtiService extends Logging with DisposableBean with InitializingBe
 				(headers, request) =>
 					request >- {
 						(json) => {
-							logger.info("Submission details response - " + json)
 							TurnitinLtiResponse.fromJson(json)
 						}
 					}
