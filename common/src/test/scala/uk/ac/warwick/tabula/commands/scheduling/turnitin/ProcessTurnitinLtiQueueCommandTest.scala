@@ -355,7 +355,7 @@ class ProcessTurnitinLtiQueueCommandTest extends TestBase with Mockito {
 				json = Some("{}")
 			)
 			mockTurnitinLtiQueueService.listCompletedAssignments returns Seq()
-			mockTurnitinLtiQueueService.listFailedAssignm -ents returns Seq()
+			mockTurnitinLtiQueueService.listFailedAssignments returns Seq()
 			cmd.applyInternal()
 			report.lastReportRequest should be (now)
 			report.reportRequestRetries should be (1)
