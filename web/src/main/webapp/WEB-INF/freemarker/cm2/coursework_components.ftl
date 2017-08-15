@@ -1211,7 +1211,7 @@
 			<span class="label label-info use-tooltip" data-html="true" title="Extended until <@fmt.date date=enhancedExtension.extension.expiryDate capitalise=false shortMonth=true />" data-container="body">Within Extension</span>
 		</#if>
 		<#if features.disabilityOnSubmission && student.disability??>
-			<a href="#" class="use-popover cue-popover" id="popover-disability" data-html="true"
+			<a href="#" class="use-popover cue-popover white-text-decoration" id="popover-disability" data-html="true"
 			   data-content="<p>This student has chosen to make the marker of this submission aware of their disability and for it to be taken it into consideration. This student has self-reported the following disability code:</p><div class='well'><h6>${student.disability.code}</h6><small>${(student.disability.sitsDefinition)!}</small></div>"
 			>
 				<span class="label label-info">Disability disclosed</span>

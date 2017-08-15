@@ -150,23 +150,25 @@ class ImportStudentRowCommandTest extends TestBase with Mockito with Logging {
 
 	trait MemberSetup {
 		val mm = MembershipMember(
-			universityId 			= "0672089",
-			departmentCode			= "ph",
-			email					= "M.Mannion@warwick.ac.uk",
-			targetGroup				= null,
-			title					= "Mr",
-			preferredForenames		= "Mathew",
-			preferredSurname		= "Mannion",
-			position				= null,
-			dateOfBirth				= new LocalDate(1984, DateTimeConstants.AUGUST, 19),
-			usercode				= "cuscav",
-			startDate				= null,
-			endDate					= null,
-			modified				= null,
-			phoneNumber				= null,
-			gender					= null,
+			universityId = "0672089",
+			departmentCode = "ph",
+			email = "M.Mannion@warwick.ac.uk",
+			targetGroup = null,
+			title = "Mr",
+			preferredForenames = "Mathew",
+			preferredSurname = "Mannion",
+			position = null,
+			dateOfBirth = new LocalDate(1984, DateTimeConstants.AUGUST, 19),
+			usercode = "cuscav",
+			startDate = null,
+			endDate = null,
+			modified = null,
+			phoneNumber = null,
+			gender = null,
 			alternativeEmailAddress	= null,
-			userType				= Student)
+			userType = Student,
+			teachingStaff = null
+		)
 	}
 
 	trait EnvironmentWithoutResultSet extends ImportCommandFactorySetup	with MemberSetup {

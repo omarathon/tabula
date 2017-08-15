@@ -100,11 +100,15 @@ trait SmallGroupDao {
 	def listDepartmentSetsForMembershipUpdate: Seq[DepartmentSmallGroupSet]
 
 	def listSmallGroupsWithoutLocation(academicYear: AcademicYear): Seq[SmallGroupEvent]
+
+	def findSmallGroupsByNameOrModule(query: String): Seq[SmallGroup]
 }
 
 @Repository
 class SmallGroupDaoImpl extends SmallGroupDao
 	with Daoisms with TaskBenchmarking with AutowiringUserLookupComponent {
+
+	val MaxGroupsByName = 15
 
 	def getSmallGroupSetById(id: String): Option[SmallGroupSet] = getById[SmallGroupSet](id)
 	def getSmallGroupById(id: String): Option[SmallGroup] = getById[SmallGroup](id)
@@ -525,6 +529,19 @@ class SmallGroupDaoImpl extends SmallGroupDao
 			.setString("academicYear", academicYear.getStoreValue.toString)
 			.seq
 		results.map(objArray => objArray(0).asInstanceOf[SmallGroupEvent])
+	}
+
+	def findSmallGroupsByNameOrModule(query: String): Seq[SmallGroup] = {
+		session.newQuery[SmallGroup]("""
+			from SmallGroup g
+			where g.groupSet.deleted = false and (
+				lower(g.uk$ac$warwick$tabula$data$model$groups$SmallGroup$$_name) like :nameLike
+				or lower(g.groupSet.name) like :nameLike
+				or lower(g.groupSet.module.code) like :nameLike
+		 	)
+		""")
+			.setString("nameLike", "%" + query.toLowerCase + "%")
+			.setMaxResults(MaxGroupsByName).seq
 	}
 
 }

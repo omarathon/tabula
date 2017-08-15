@@ -1,11 +1,12 @@
 package uk.ac.warwick.tabula.cm2
 
+import org.joda.time.DateTime
 import org.openqa.selenium.By
-import uk.ac.warwick.tabula.BrowserTest
-
-import scala.collection.JavaConverters._
+import uk.ac.warwick.tabula.{AcademicYear, BrowserTest}
 
 class ReplaceMarkerSingleUseWorkflowTest extends BrowserTest with CourseworkFixtures {
+
+	private val currentYear = AcademicYear.guessSITSAcademicYearByDate(DateTime.now)
 
 	private def openModifyMarkerScreen(): Unit = {
 
@@ -16,26 +17,26 @@ class ReplaceMarkerSingleUseWorkflowTest extends BrowserTest with CourseworkFixt
 		val toolbar = findAll(className("dept-toolbar")).next().underlying
 		click on toolbar.findElement(By.partialLinkText("Marking workflows"))
 
-		val getCurrentYear = linkText("16/17");
+		val getCurrentYear = linkText(currentYear.previous.toString)
 		click on getCurrentYear
 
 		eventuallyAjax {
-			Then("I should be on the 16/17 version of the page")
-			currentUrl should include("/2016/markingworkflows")
+			Then(s"I should be on the ${currentYear.previous} version of the page")
+			currentUrl should include(s"/${currentYear.previous.startYear}/markingworkflows")
 		}
 
-		val addToYear = id("main").webElement.findElement(By.linkText("Add to 17/18"));
+		val addToYear = id("main").webElement.findElement(By.linkText(s"Add to $currentYear"))
 		click on addToYear
 
 		eventuallyAjax {
 			Then("I should reach the marking workflows page")
-			currentUrl should include("/2017/markingworkflows")
+			currentUrl should include(s"/${currentYear.startYear}/markingworkflows")
 		}
 
 		val currentMarker = id("main").webElement.findElements(By.tagName("td")).get(2).getText == "Marker: tabula-functest-marker1 user"
 		currentMarker should be (true)
 
-		val modifyBtn = id("main").webElement.findElement(By.cssSelector(" td a.btn-default"))
+		val modifyBtn = id("main").webElement.findElement(By.cssSelector("td a.btn-default"))
 		click on modifyBtn
 
 		eventuallyAjax {
@@ -70,7 +71,7 @@ class ReplaceMarkerSingleUseWorkflowTest extends BrowserTest with CourseworkFixt
 
 		eventuallyAjax {
 			Then("I should reach the modify workflows page again")
-			currentUrl should include("/xxx/2017/markingworkflows")
+			currentUrl should include(s"/xxx/${currentYear.startYear}/markingworkflows")
 		}
 
 		val addedMarker = id("main").webElement.findElements(By.tagName("td")).get(2).getText == "Marker: tabula-functest-marker2 user"

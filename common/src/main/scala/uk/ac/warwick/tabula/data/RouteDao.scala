@@ -5,7 +5,7 @@ import org.hibernate.criterion.Restrictions._
 import org.joda.time.DateTime
 import org.springframework.stereotype.Repository
 import uk.ac.warwick.spring.Wire
-import uk.ac.warwick.tabula.data.model.{RouteTeachingInformation, Department, Route}
+import uk.ac.warwick.tabula.data.model.{Department, Route, RouteTeachingInformation}
 
 trait RouteDaoComponent {
 	val routeDao: RouteDao
@@ -75,8 +75,8 @@ class RouteDaoImpl extends RouteDao with Daoisms {
 	def findRoutesNamedLike(query: String): Seq[Route] = {
 		session.newCriteria[Route]
 			.add(disjunction()
-			.add(like("code", s"%${query.toLowerCase}%").ignoreCase)
-			.add(like("name", s"%${query.toLowerCase}%").ignoreCase)
+			.add(likeIgnoreCase("code", s"%${query.toLowerCase}%"))
+			.add(likeIgnoreCase("name", s"%${query.toLowerCase}%"))
 			)
 			.setMaxResults(20).seq.sorted(Route.DegreeTypeOrdering)
 	}
