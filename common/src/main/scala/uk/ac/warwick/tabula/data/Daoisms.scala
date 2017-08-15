@@ -79,6 +79,9 @@ trait HelperRestrictions extends Logging {
 			c.project[B](projection).seq
 		})
 	}
+	def like: (String, Any) => Criterion = org.hibernate.criterion.Restrictions.like
+	def likeIgnoreCase: (String, Any) => Criterion =
+		(property, value) => org.hibernate.criterion.Restrictions.like(property, value).ignoreCase
 }
 
 trait HibernateHelpers {
