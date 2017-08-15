@@ -62,6 +62,12 @@ trait MemberDao {
 
 	def getMemberByTimetableHash(timetableHash: String): Option[Member]
 	def setTimetableHash(member: Member, timetableHash: String)
+
+	def findAllUsercodesByRestrictions(
+		restrictions: Iterable[ScalaRestriction],
+		staffOnly: Boolean = false,
+		studentOnly: Boolean = false
+	): Seq[String]
 }
 
 @Repository
@@ -445,5 +451,38 @@ class MemberDaoImpl extends MemberDao with Logging with AttendanceMonitoringStud
 				.setParameter("timetableHash", timetableHash)
 				.setParameter("universityId", member.universityId)
 				.executeUpdate()
+	}
+
+	def findAllUsercodesByRestrictions(
+		restrictions: Iterable[ScalaRestriction],
+		staffOnly: Boolean = false,
+		studentOnly: Boolean = false
+	): Seq[String] = {
+		if (staffOnly && studentOnly) {
+			throw new IllegalArgumentException("Cannot be both staff only and student only")
+		}
+
+		val filterEnabled = Option(session.getEnabledFilter(Member.StudentsOnlyFilter)).isDefined
+		try {
+			if (!studentOnly) {
+				session.disableFilter(Member.StudentsOnlyFilter)
+			}
+
+			val criteria = {
+				if (staffOnly) {
+					session.newCriteria[StaffMember]
+				} else if (studentOnly) {
+					session.newCriteria[StudentMember]
+				} else {
+					session.newCriteria[Member]
+				}
+			}
+			restrictions.foreach { _.apply(criteria) }
+			criteria.project[String](Projections.property("userId")).seq
+		} finally {
+			if (filterEnabled) {
+				session.enableFilter(Member.StudentsOnlyFilter)
+			}
+		}
 	}
 }
