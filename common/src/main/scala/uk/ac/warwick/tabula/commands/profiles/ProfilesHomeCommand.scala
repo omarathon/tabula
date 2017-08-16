@@ -11,7 +11,8 @@ import uk.ac.warwick.tabula.{CurrentUser, FeaturesComponent}
 import scala.collection.JavaConverters._
 
 case class ProfilesHomeInformation(
-	smallGroups: Seq[SmallGroup] = Nil,
+	currentSmallGroups: Seq[SmallGroup] = Nil,
+	previousSmallGroups: Seq[SmallGroup] = Nil,
 	relationshipTypesMap: Map[StudentRelationshipType, Boolean] = Map(),
 	adminDepartments: Seq[Department] = Seq()
 )
@@ -29,17 +30,17 @@ object ProfilesHomeCommand {
 }
 
 abstract class ProfilesHomeCommand(val user: CurrentUser, val currentMember: Option[Member])
-	extends CommandInternal[ProfilesHomeInformation] with TaskBenchmarking with ChecksAgent {
+	extends CommandInternal[ProfilesHomeInformation] with TaskBenchmarking with ChecksAgent with CurrentSITSAcademicYear {
 
 	self: FeaturesComponent with SmallGroupServiceComponent with RelationshipServiceComponent with ModuleAndDepartmentServiceComponent with SecurityServiceComponent =>
 
 	override def applyInternal(): ProfilesHomeInformation = {
 		if (user.isStaff || isAgent(user.universityId)) {
-			val smallGroups =
+			val (smallGroups, previousSmallGroups) =
 				if (features.smallGroupTeachingTutorView) benchmarkTask("Find all small groups with user as tutor") {
-					smallGroupService.findReleasedSmallGroupsByTutor(user)
+					smallGroupService.findReleasedSmallGroupsByTutor(user).partition(_.groupSet.academicYear == academicYear)
 				}
-				else Nil
+				else (Nil, Nil)
 
 			// Get all the relationship types that the current member is an agent of
 			val downwardRelationshipTypes = currentMember.map { m =>
@@ -63,7 +64,8 @@ abstract class ProfilesHomeCommand(val user: CurrentUser, val currentMember: Opt
 			}
 
 			ProfilesHomeInformation(
-				smallGroups = smallGroups,
+				currentSmallGroups = smallGroups,
+				previousSmallGroups = previousSmallGroups,
 				relationshipTypesMap = relationshipTypesMap,
 				adminDepartments = adminDepartments
 			)

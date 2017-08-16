@@ -653,6 +653,38 @@ table.tablesorter {
 	background: white;
 }
 
+.filter-container {
+
+	.placeholder {
+		display: none;
+	}
+
+	&.disabled {
+
+		.fix-header {
+			position:relative;
+		}
+
+		.placeholder {
+			display: flex;
+			align-items: center;
+			justify-content: center;
+			width: 100%;
+			height: 100%;
+			position: absolute;
+			z-index: 100;
+			top: 0;
+			left: 0;
+		}
+
+		form.form-inline {
+			opacity: 0.1;
+		}
+
+	}
+
+}
+
 //Filter pages
 .student-filter, .small-groups-filter, .filters {
 	.filter-list {
@@ -1199,4 +1231,11 @@ textarea.small-textarea {
 		}
 	}
 
+}
+
+a.white-text-decoration {
+	text-decoration-color: white;
+	&:hover {
+		text-decoration-color: darken(white, 20%);
+	}
 }

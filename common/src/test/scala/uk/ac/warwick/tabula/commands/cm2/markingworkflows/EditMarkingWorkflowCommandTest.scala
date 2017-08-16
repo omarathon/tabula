@@ -36,6 +36,7 @@ class EditMarkingWorkflowCommandTest extends TestBase with Mockito with Validato
 	def validateDupeNames(): Unit = new Fixture {
 
 		val wflow2 = SingleMarkerWorkflow("workflow2", dept, Seq(marker1))
+		wflow2.academicYear = AcademicYear(2016)
 		wflow2.id = "workflow2"
 		wflow.academicYear = AcademicYear(2016)
 		dept.addCM2MarkingWorkflow(wflow)

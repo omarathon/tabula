@@ -1,5 +1,6 @@
 package uk.ac.warwick.tabula.web.controllers.attendance
 
+import org.joda.time.DateTime
 import uk.ac.warwick.tabula.commands.Appliable
 import uk.ac.warwick.tabula.commands.attendance.{HomeCommand, HomeCommandState, HomeInformation}
 import uk.ac.warwick.tabula.data.model.{Department, StudentRelationshipType, UserSettings}
@@ -84,7 +85,7 @@ class AttendanceHomeControllerTest extends TestBase with Mockito{
 		)
 
 		val mav: Mav = controller.home(command, None)
-		mav.viewName should be(s"redirect:/attendance/manage/$departmentCode/${AcademicYear(2016).startYear.toString}")
+		mav.viewName should be(s"redirect:/attendance/manage/$departmentCode/${AcademicYear.guessSITSAcademicYearByDate(DateTime.now).startYear.toString}")
 
 	}}
 

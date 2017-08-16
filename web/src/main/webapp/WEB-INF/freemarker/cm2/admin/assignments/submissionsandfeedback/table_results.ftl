@@ -223,16 +223,19 @@
 								</#if>
 							<#else>
 								<td>
-									<#if (assignment.getStudentsFirstMarker(student.user.userId)!"")?has_content>
-										${assignment.getStudentsFirstMarker(student.user.userId).fullName}
+									<#if submissionfeedbackinfo.user.userId??>
+										<#if (assignment.getStudentsFirstMarker(submissionfeedbackinfo.user.userId)!"")?has_content>
+											${assignment.getStudentsFirstMarker(submissionfeedbackinfo.user.userId).fullName}
+										</#if>
 									</#if>
 								</td>
 								<td>
-									<#if (assignment.getStudentsSecondMarker(student.user.userId)!"")?has_content>
-										${assignment.getStudentsSecondMarker(student.user.userId).fullName}
+									<#if submissionfeedbackinfo.user.userId??>
+										<#if (assignment.getStudentsSecondMarker(submissionfeedbackinfo.user.userId)!"")?has_content>
+											${assignment.getStudentsSecondMarker(submissionfeedbackinfo.user.userId).fullName}
+										</#if>
 									</#if>
 								</td>
-
 							</#if>
 						</#if>
 						<#if results.hasOriginalityReport>
@@ -361,6 +364,7 @@
 
 			$('.fixed-container').fixHeaderFooter();
 			$('a.ajax-modal').ajaxModalLink();
+			$('.use-popover').tabulaPopover({trigger: 'click', container: 'body'});
 
 			var $submissionFeedbackResultsTable = $(".submission-feedback-results table");
 			$submissionFeedbackResultsTable.sortableTable({

@@ -11,11 +11,11 @@ import scala.collection.JavaConverters._
 
 class SetupAssignmentsPage(val departmentCode: String)(implicit driver: WebDriver) extends WebBrowser with Matchers with Eventually with IntegrationPatience {
 	val thisYear: FunctionalTestAcademicYear = FunctionalTestAcademicYear.currentSITS
-	val url = s"${FunctionalTestProperties.SiteRoot}/cm1/admin/department/$departmentCode/setup-assignments?academicYear=${thisYear}"
+	val url = s"${FunctionalTestProperties.SiteRoot}/coursework/admin/department/$departmentCode/${thisYear.startYear}/setup-assignments"
 
 	def shouldBeCurrentPage() {
-		currentUrl should include(s"/cm1/admin/department/$departmentCode/setup-assignments")
-		cssSelector("#main-content h1").element.text should be ("Setup assignments")
+		currentUrl should include(s"/coursework/admin/department/$departmentCode/${thisYear.startYear}/setup-assignments")
+		cssSelector(".deptheader h1").element.text should be ("Create assignments from SITS")
 	}
 
 	def itemRows: Seq[Element] = cssSelector("tr.itemContainer").findAllElements.toSeq
@@ -47,7 +47,7 @@ class SetupAssignmentsPage(val departmentCode: String)(implicit driver: WebDrive
 
 	// All the navigation buttons have an "action" data attribute.
 	private def clickButtonWithAction(action: String) {
-		cssSelector(s"button[data-action=${action}]").webElement.click()
+		cssSelector(s"button[data-action=$action]").webElement.click()
 	}
 
 }

@@ -6,12 +6,11 @@ import org.hibernate.`type`.StandardBasicTypes
 
 sealed abstract class Location extends Serializable {
 	def name: String
-
 	override def toString: String = name
 }
 
-@SerialVersionUID(372489712389245l) case class NamedLocation(val name: String) extends Location
-@SerialVersionUID(372489712389246l) case class MapLocation(val name: String, val locationId: String) extends Location
+@SerialVersionUID(372489712389245l) case class NamedLocation(name: String) extends Location
+@SerialVersionUID(372489712389246l) case class MapLocation(name: String, locationId: String) extends Location
 
 object Location {
 	def fromDatabase(value: String): Location =
@@ -23,7 +22,7 @@ object Location {
 	def toDatabase(location: Location): String =
 		location match {
 			case NamedLocation(name) => name
-			case MapLocation(name, locationId) => s"${name}|${locationId}"
+			case MapLocation(name, locationId) => s"$name|$locationId"
 		}
 }
 

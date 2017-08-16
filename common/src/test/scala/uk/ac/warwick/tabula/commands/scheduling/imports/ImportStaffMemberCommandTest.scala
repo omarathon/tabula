@@ -8,21 +8,23 @@ import uk.ac.warwick.tabula.data.model.{Member, StaffMember, StaffProperties}
 import uk.ac.warwick.tabula.services.scheduling.{MembershipInformation, MembershipMember}
 import uk.ac.warwick.tabula.{Mockito, TestBase}
 import uk.ac.warwick.userlookup.AnonymousUser
+import uk.ac.warwick.tabula.JavaImports._
 
 // scalastyle:off magic.number
 class ImportStaffMemberCommandTest extends TestBase with Mockito {
 
 	trait Environment {
 		val mm = MembershipMember(
-			universityId 			= "0672089",
-			email					= "M.Mannion@warwick.ac.uk",
-			title					= "Mr",
-			preferredForenames		= "Mathew",
-			preferredSurname		= "Mannion",
-			dateOfBirth				= new LocalDate(1984, DateTimeConstants.AUGUST, 19),
-			usercode				= "cuscav",
-			gender					= Male,
-			userType				= Staff
+			universityId = "0672089",
+			email = "M.Mannion@warwick.ac.uk",
+			title = "Mr",
+			preferredForenames = "Mathew",
+			preferredSurname = "Mannion",
+			dateOfBirth = new LocalDate(1984, DateTimeConstants.AUGUST, 19),
+			usercode = "cuscav",
+			gender = Male,
+			userType = Staff,
+			teachingStaff = JBoolean(Option(true))
 		)
 
 		val mac = MembershipInformation(mm)
@@ -49,6 +51,7 @@ class ImportStaffMemberCommandTest extends TestBase with Mockito {
 			member.lastName should be ("Mannion")
 			member.dateOfBirth should be (new LocalDate(1984, DateTimeConstants.AUGUST, 19))
 			member.timetableHash should not be null
+			member.asInstanceOf[StaffProperties].teachingStaff.booleanValue() should be (true)
 
 			verify(memberDao, times(1)).saveOrUpdate(any[Member])
 		}
@@ -78,6 +81,7 @@ class ImportStaffMemberCommandTest extends TestBase with Mockito {
 			member.lastName should be ("Mannion")
 			member.dateOfBirth should be (new LocalDate(1984, DateTimeConstants.AUGUST, 19))
 			member.timetableHash should be (existingTimetableHash)
+			member.asInstanceOf[StaffProperties].teachingStaff.booleanValue() should be (true)
 
 			verify(memberDao, times(1)).saveOrUpdate(existing)
 		}

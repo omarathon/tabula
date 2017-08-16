@@ -3,6 +3,7 @@ package uk.ac.warwick.tabula.cm2
 import org.openqa.selenium.By
 import org.scalatest.GivenWhenThen
 import uk.ac.warwick.tabula.BrowserTest
+import scala.collection.JavaConverters._
 
 class CourseworkModuleManagerTest extends BrowserTest with CourseworkFixtures with GivenWhenThen {
 
@@ -25,7 +26,11 @@ class CourseworkModuleManagerTest extends BrowserTest with CourseworkFixtures wi
 		element.size should be (3)
 
 		Then("I should be able to click on the Manage button")
-		val manageModule = id("module-xxx01").webElement
+
+		val row = element.asScala.find({_.findElement(By.cssSelector("span.mod-code")).getText == "XXX01" })
+		row should be (defined)
+
+		val manageModule = row.get
 		click on manageModule.findElement(By.partialLinkText("Manage this module"))
 		Then("I should see the module permissions option")
 		val managersLink = manageModule.findElement(By.partialLinkText("Module permissions"))
@@ -46,29 +51,29 @@ class CourseworkModuleManagerTest extends BrowserTest with CourseworkFixtures wi
 		implicit val currentElement = parentElement
 
 		When("I try to go to the permissions page")
-			getToPermissionsPage()
+		getToPermissionsPage()
 
 		Then("I should be able to record the initial users with the role")
-			changedUsers
+		changedUsers
 
 		When("I enter a usercode in the tutor picker")
-			click on cssSelector(s"$parentElement .pickedUser")
-			enter(usersToBeAdded.head)
+		click on cssSelector(s"$parentElement .pickedUser")
+		enter(usersToBeAdded.head)
 
 		Then("I should get a result back")
-			val typeahead = cssSelector(".typeahead .active a")
-			eventuallyAjax {
-				find(typeahead) should not be None
-			}
+		val typeahead = cssSelector(".typeahead .active a")
+		eventuallyAjax {
+			find(typeahead) should not be None
+		}
 
 		And("The picker result should match the entry")
-			textField(cssSelector(s"$parentElement .pickedUser")).value should be (usersToBeAdded.head)
+		textField(cssSelector(s"$parentElement .pickedUser")).value should be (usersToBeAdded.head)
 
 		When("I pick the matching user")
-			click on typeahead
+		click on typeahead
 
 		Then("It should stay in the picker (confirming HTMLUnit hasn't introduced a regression)")
-			textField(cssSelector(s"$parentElement .pickedUser")).value should be (usersToBeAdded.head)
+		textField(cssSelector(s"$parentElement .pickedUser")).value should be (usersToBeAdded.head)
 
 		And("The usercode should be injected into the form correctly")
 		({
@@ -78,10 +83,10 @@ class CourseworkModuleManagerTest extends BrowserTest with CourseworkFixtures wi
 		})
 
 		When("I submit the form")
-			find(cssSelector(s"$parentElement form.add-permissions")).get.underlying.submit()
+		find(cssSelector(s"$parentElement form.add-permissions")).get.underlying.submit()
 
 		Then("I should see the new entry")
-			withClue(pageSource) { changedUsers should be (Set(usersToBeAdded.head)) }
+		withClue(pageSource) { changedUsers should be (Set(usersToBeAdded.head)) }
 
 		When("I add another entry")
 		({
@@ -96,8 +101,8 @@ class CourseworkModuleManagerTest extends BrowserTest with CourseworkFixtures wi
 		})
 
 		Then("I should see both users")
-			changedUsers should be (Set(usersToBeAdded.last))
-			lastUsers.size should be (2)
+		changedUsers should be (Set(usersToBeAdded.last))
+		lastUsers.size should be (2)
 
 		fn
 	}
@@ -146,7 +151,11 @@ class CourseworkModuleManagerTest extends BrowserTest with CourseworkFixtures wi
 				element.size should be (1)
 
 				Then("I should be able to click on the Manage button")
-				val manageModule = id("module-xxx01").webElement
+				val row = element.asScala.find({_.findElement(By.cssSelector("span.mod-code")).getText == "XXX01" })
+				row should be (defined)
+
+				val manageModule = row.get
+
 				click on manageModule.findElement(By.partialLinkText("Manage this module"))
 				Then("I should see the module permissions option")
 				val managersLink = manageModule.findElement(By.partialLinkText("Module permissions"))

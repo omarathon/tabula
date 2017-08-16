@@ -16,7 +16,7 @@ import org.springframework.transaction.PlatformTransactionManager
 import uk.ac.warwick.spring.Wire
 import uk.ac.warwick.tabula.Features
 import uk.ac.warwick.tabula.services.MaintenanceModeService
-import uk.ac.warwick.tabula.services.scheduling.SchedulingConfiguration.{ScheduledJob, UnscheduledJob}
+import uk.ac.warwick.tabula.services.scheduling.SchedulingConfiguration.ScheduledJob
 import uk.ac.warwick.tabula.services.scheduling.jobs._
 import uk.ac.warwick.tabula.system.exceptions.ExceptionResolver
 import uk.ac.warwick.util.core.spring.scheduling.{AutowiringSpringBeanJobFactory, PersistableCronTriggerFactoryBean, PersistableSimpleTriggerFactoryBean}
@@ -92,7 +92,8 @@ object SchedulingConfiguration {
 
 	val unscheduledJobs: Seq[UnscheduledJob[_]] = Seq(
 		SimpleUnscheduledJob[ImportProfilesSingleDepartmentJob](),
-		SimpleUnscheduledJob[ImportAssignmentsAllYearsJob]()
+		SimpleUnscheduledJob[ImportAssignmentsAllYearsJob](),
+		SimpleUnscheduledJob[ImportSmallGroupEventLocationsJob]()
 	)
 
 	/**
