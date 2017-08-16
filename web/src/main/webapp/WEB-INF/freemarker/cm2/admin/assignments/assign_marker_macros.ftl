@@ -1,5 +1,5 @@
 <#macro student_item student index stages marker={}>
-	<li class="student well well-sm">
+	<li class="student well well-sm" data-student="${student.userId}">
 		<div class="name">
 			<h6>${student.fullName}&nbsp;${student.warwickId!student.userId}</h6>
 			<#list stages as stage>
@@ -14,12 +14,12 @@
 	</li>
 </#macro>
 
-<#macro allocateStudents assignment role stages markers unassigned assigned>
+<#macro allocateStudents assignment role stages markers unassigned assigned stageAllocation>
 	<#local safeRole = role?lower_case?replace('[^a-z0-9\\-_]+', '', 'r') />
 <h2>Allocate students to ${role}s</h2>
 <p>Drag students onto a ${role} to allocate them. Select multiple students by dragging a box around them. You can also hold the <kbd class="keyboard-control-key">Ctrl</kbd> key and drag to add to a selection.</p>
-<div class="fix-area">
-	<div class="tabula-dnd marker-allocation"
+<#--<div class="fix-area">-->
+	<div class="tabula-dnd marker-allocation <#if stageAllocation!false>linkedRandomAllocation</#if>"
 		 data-item-name="student"
 		 data-text-selector=".name h6"
 		 data-selectables=".students .drag-target"
@@ -27,9 +27,17 @@
 		 data-remove-tooltip="Unassign this student from the marker">
 
 		<!-- persist header -->
-		<div class="fix-header pad-when-fixed">
+		<div>
 			<p class="btn-toolbar">
-				<a class="random btn btn-default" data-toggle="randomise" data-disabled-on="empty-list" href="#" >
+				<a
+					<#if stageAllocation!false>
+						class="linkedRandom btn btn-default" data-toggle="linkedRandom"
+					<#else>
+						class="random btn btn-default" data-toggle="randomise"
+					</#if>
+					data-disabled-on="empty-list"
+					href="#"
+				>
 					Randomly allocate
 				</a>
 				<a class="return-items btn btn-default" data-toggle="return" data-disabled-on="no-allocation" href="#" >
@@ -47,7 +55,7 @@
 			</div>
 		</div>
 		<!-- end persist header -->
-		<div class="row fix-on-scroll-container">
+		<div class="row">
 			<div class="col-md-5">
 				<div id="${safeRole}StudentsList" class="students" data-item-selector=".student-list li">
 					<div class="well">
@@ -67,12 +75,12 @@
 			</div>
 			<div class="col-md-2">
 				<#-- all hail our jumbo icon overlords! -->
-				<div class="direction-icon fix-on-scroll">
+				<div class="direction-icon">
 					<i class="fa fa-arrow-right"></i>
 				</div>
 			</div>
 			<div class="col-md-5">
-				<div id="${safeRole}MarkerList" class="groups fix-on-scroll">
+				<div id="${safeRole}MarkerList" class="groups">
 					<#list markers as marker>
 						<#assign existingStudents = mapGet(assigned, marker)![] />
 						<div class="drag-target well clearfix ${safeRole}-${marker.userId}">
@@ -89,10 +97,10 @@
 							</div>
 
 							<#assign bindpath><#compress>
-								<#list stages as stage>allocations['${stage}']['${marker.userId}']<#if stage_has_next>,</#if></#list>
+								<#list stages as stage>allocations['${safeRole}']['${marker.userId}']<#if stage_has_next>,</#if></#list>
 							</#compress></#assign>
 
-							<ul class="drag-list hide" data-bindpath="${bindpath}">
+							<ul class="drag-list hide" data-bindpath="${bindpath}" data-marker="${marker.userId}">
 								<#if existingStudents?has_content><#list existingStudents as student>
 									<@student_item student student_index stages marker/>
 								</#list></#if>
@@ -103,6 +111,6 @@
 			</div>
 		</div>
 	</div>
-</div>
+<#--</div>-->
 </#macro>
 

@@ -21,7 +21,7 @@
 
 		<@f.errors cssClass="error form-errors" />
 		<#list state.keys as roleOrStage>
-			<@allocateStudents assignment roleOrStage mapGet(stages, roleOrStage)![roleOrStage] mapGet(state.markers, roleOrStage) mapGet(state.unallocatedStudents, roleOrStage) mapGet(state.allocations, roleOrStage) />
+			<@allocateStudents assignment roleOrStage mapGet(stages, roleOrStage)![roleOrStage] mapGet(state.markers, roleOrStage) mapGet(state.unallocatedStudents, roleOrStage) mapGet(state.allocations, roleOrStage) mapGet(state.allocateByStage, roleOrStage)/>
 		</#list>
 		<div class="fix-footer">
 			<input

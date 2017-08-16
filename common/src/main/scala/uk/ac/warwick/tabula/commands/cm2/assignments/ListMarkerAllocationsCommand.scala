@@ -18,7 +18,8 @@ case class MarkerAllocations(
 	keys: List[String], // ordered keys for all of the other maps - getting freemarker to iterate across maps in order is dumb
 	unallocatedStudents: Map[String, SortedSet[Student]],
 	allocations: Map[String, Map[Marker, SortedSet[Student]]],
-	markers: Map[String, SortedSet[Marker]]
+	markers: Map[String, SortedSet[Marker]],
+	allocateByStage: Map[String, Boolean]
 )
 
 trait FetchMarkerAllocations {
@@ -32,6 +33,7 @@ trait FetchMarkerAllocations {
 
 		val allocations = mutable.Map[String, Map[Marker, SortedSet[Student]]]()
 		val markers = mutable.Map[String, SortedSet[Marker]]()
+		val allocateByStage = mutable.Map[String, Boolean]()
 
 		def toSortedSet(allocations: Allocations) = allocations.map{case(marker, students) =>
 			marker -> SortedSet(students.toSeq: _*)
@@ -44,9 +46,11 @@ trait FetchMarkerAllocations {
 			// key by role as the allocations are the same
 			allocations += role -> toSortedSet(cm2MarkingWorkflowService.getMarkerAllocations(assignment, stage))
 			markers += role -> SortedSet(workflow.markers(stage): _*)
+			allocateByStage += role -> false
 		} else {
 			allocations += stage.allocationName -> toSortedSet(cm2MarkingWorkflowService.getMarkerAllocations(assignment, stage))
 			markers += stage.allocationName -> SortedSet(workflow.markers(stage): _*)
+			allocateByStage += stage.allocationName -> stage.stageAllocation
 		}
 
 		val unallocatedStudents = allocations.map{ case(key, allocation) =>
@@ -58,7 +62,8 @@ trait FetchMarkerAllocations {
 			keys = workflow.allocationOrder,
 			unallocatedStudents = Map(unallocatedStudents.toList: _*),
 			allocations = Map(allocations.toList: _*),
-			markers = Map(markers.toList: _*)
+			markers = Map(markers.toList: _*),
+			allocateByStage = Map(allocateByStage.toList: _*)
 		)
 	}
 }
