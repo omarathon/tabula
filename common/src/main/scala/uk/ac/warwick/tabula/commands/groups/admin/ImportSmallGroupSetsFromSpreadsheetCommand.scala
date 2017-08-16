@@ -83,10 +83,11 @@ trait ImportSmallGroupSetsFromSpreadsheetValidation extends SelfValidating {
 
 	override def validate(errors: Errors): Unit = {
 		commands.asScala.zipWithIndex.foreach { case (set, i) =>
-			errors.pushNestedPath(s"commands[$i].command")
-
+			errors.pushNestedPath(s"commands[$i]")
+			errors.pushNestedPath("command")
 			set.command.validate(errors)
-
+			// need to just pop command from commands[$i].command leaving setCommandHolder -commands[$i]
+			errors.popNestedPath()
 			set.deleteGroupCommands.asScala.zipWithIndex.foreach { case (command, j) =>
 				errors.pushNestedPath(s"deleteGroupCommands[$j]")
 				command.validate(errors)
@@ -95,26 +96,31 @@ trait ImportSmallGroupSetsFromSpreadsheetValidation extends SelfValidating {
 
 			set.modifyGroupCommands.asScala.zipWithIndex.foreach { case (group, j) =>
 				errors.pushNestedPath(s"modifyGroupCommands[$j]")
-
 				errors.pushNestedPath("command")
 				group.command.validate(errors)
+
+				// pop command only with remaining structure as  commands[$i].modifyGroupCommands[$j]
 				errors.popNestedPath()
 
 				group.deleteEventCommands.asScala.zipWithIndex.foreach { case (command, k) =>
+					// commands[$i].modifyGroupCommands[$j].deleteEventCommands[$k]
 					errors.pushNestedPath(s"deleteEventCommands[$k]")
 					command.validate(errors)
 					errors.popNestedPath()
 				}
 
 				group.modifyEventCommands.asScala.zipWithIndex.foreach { case (event, k) =>
+					// commands[$i].modifyGroupCommands[$j].modifyEventCommands[$k].command
 					errors.pushNestedPath(s"modifyEventCommands[$k].command")
 					event.command.validate(errors)
 					errors.popNestedPath()
 				}
 
+				// remove modifyGroupCommands[$j] from commands[$i].modifyGroupCommands[$j]
 				errors.popNestedPath()
 			}
 
+			// remove commands[$i]
 			errors.popNestedPath()
 		}
 	}
