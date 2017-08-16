@@ -1,7 +1,10 @@
 package uk.ac.warwick.tabula.web.controllers.cm2.admin.assignments
 
+import javax.validation.Valid
+
 import org.springframework.context.annotation.Profile
 import org.springframework.stereotype.Controller
+import org.springframework.validation.Errors
 import org.springframework.web.bind.annotation.{ModelAttribute, PathVariable, RequestMapping}
 import uk.ac.warwick.tabula.cm2.web.Routes
 import uk.ac.warwick.tabula.commands.cm2.assignments._
@@ -31,10 +34,16 @@ class ModifyAssignmentMarkersController extends AbstractAssignmentController {
 		val workflow = mandatory(assignMarkersCmd.assignment.cm2MarkingWorkflow)
 		val existingAllocations = listAllocationsCmd.apply()
 
+		val stages: Map[String, Seq[String]] = if (workflow.workflowType.rolesShareAllocations) {
+			workflow.allStages.groupBy(_.roleName).mapValues(_.map(_.name))
+		} else {
+			workflow.allStages.map(s => s.allocationName -> Seq(s.name)).toMap
+		}
+
 		Mav("cm2/admin/assignments/assignment_assign_markers",
 			"module" -> module,
 			"department" -> module.adminDepartment,
-			"stages" -> workflow.allStages.groupBy(_.roleName).mapValues(_.map(_.name)),
+			"stages" -> stages,
 			"state" -> existingAllocations,
 			"isDoubleBlind" -> (workflow.workflowType == DoubleBlindMarking),
 			"mode" -> mode)
@@ -55,21 +64,45 @@ class ModifyAssignmentMarkersController extends AbstractAssignmentController {
 		@ModelAttribute("assignMarkersCommand") assignMarkersCmd: AssignMarkersCommand
 	): Mav = form(assignment, listAllocationsCmd, assignMarkersCmd, editMode)
 
-	@RequestMapping(method = Array(POST), params = Array(ManageAssignmentMappingParameters.createAndAddMarkers), value = Array("new/markers", "edit/markers"))
-	def saveAndExit(@ModelAttribute("assignMarkersCommand") assignMarkersCmd: AssignMarkersCommand, @PathVariable assignment: Assignment): Mav =  {
-		assignMarkersCmd.apply()
-		Redirect(Routes.admin.assignment.submissionsandfeedback(assignment))
+	def apply(assignment: Assignment, listAllocationsCmd: ListMarkerAllocationsCommand, assignMarkersCmd: AssignMarkersCommand, errors: Errors, redirect: String, mode:String): Mav = {
+		if(errors.hasErrors) {
+			form(assignment, listAllocationsCmd, assignMarkersCmd, mode)
+		} else {
+			assignMarkersCmd.apply()
+			Redirect(redirect)
+		}
 	}
+
+	@RequestMapping(method = Array(POST), params = Array(ManageAssignmentMappingParameters.createAndAddMarkers), value = Array("new/markers"))
+	def saveAndExitCreate(
+		@PathVariable assignment: Assignment,
+		@ModelAttribute("listAllocationsCommand") listAllocationsCmd: ListMarkerAllocationsCommand,
+		@Valid @ModelAttribute("assignMarkersCommand") assignMarkersCmd: AssignMarkersCommand,
+		errors: Errors
+	): Mav = apply(assignment, listAllocationsCmd, assignMarkersCmd, errors, Routes.admin.assignment.submissionsandfeedback(assignment), createMode)
+
+	@RequestMapping(method = Array(POST), params = Array(ManageAssignmentMappingParameters.createAndAddMarkers), value = Array("edit/markers"))
+	def saveAndExitEdit(
+		@PathVariable assignment: Assignment,
+		@ModelAttribute("listAllocationsCommand") listAllocationsCmd: ListMarkerAllocationsCommand,
+		@Valid @ModelAttribute("assignMarkersCommand") assignMarkersCmd: AssignMarkersCommand,
+		errors: Errors
+	): Mav = apply(assignment, listAllocationsCmd, assignMarkersCmd, errors, Routes.admin.assignment.submissionsandfeedback(assignment), editMode)
 
 	@RequestMapping(method = Array(POST), params = Array(ManageAssignmentMappingParameters.createAndAddSubmissions), value = Array("new/markers"))
-	def submitAndAddSubmissionsCreate(@ModelAttribute("assignMarkersCommand") assignMarkersCmd: AssignMarkersCommand): Mav = {
-		val assignment = assignMarkersCmd.apply()
-		RedirectForce(Routes.admin.assignment.createOrEditSubmissions(assignment, createMode))
-	}
+	def submitAndAddSubmissionsCreate(
+		@PathVariable assignment: Assignment,
+		@ModelAttribute("listAllocationsCommand") listAllocationsCmd: ListMarkerAllocationsCommand,
+		@Valid @ModelAttribute("assignMarkersCommand") assignMarkersCmd: AssignMarkersCommand,
+		errors: Errors
+	): Mav = apply(assignment, listAllocationsCmd, assignMarkersCmd, errors, Routes.admin.assignment.createOrEditSubmissions(assignment, createMode), createMode)
 
 	@RequestMapping(method = Array(POST), params = Array(ManageAssignmentMappingParameters.createAndAddSubmissions), value = Array("edit/markers"))
-	def submitAndAddSubmissionsEdit(@ModelAttribute("assignMarkersCommand") assignMarkersCmd: AssignMarkersCommand): Mav = {
-		val assignment = assignMarkersCmd.apply()
-		RedirectForce(Routes.admin.assignment.createOrEditSubmissions(assignment, editMode))
-	}
+	def submitAndAddSubmissionsEdit(
+		@PathVariable assignment: Assignment,
+		@ModelAttribute("listAllocationsCommand") listAllocationsCmd: ListMarkerAllocationsCommand,
+		@Valid @ModelAttribute("assignMarkersCommand") assignMarkersCmd: AssignMarkersCommand,
+		errors: Errors
+	): Mav = apply(assignment, listAllocationsCmd, assignMarkersCmd, errors, Routes.admin.assignment.createOrEditSubmissions(assignment, editMode), editMode)
+
 }

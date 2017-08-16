@@ -15,7 +15,6 @@ import uk.ac.warwick.tabula.services.cm2.docconversion.MarkerAllocationExtractor
 import uk.ac.warwick.tabula.services.cm2.docconversion.{AutowiringMarkerAllocationExtractorComponent, MarkerAllocationExtractorComponent}
 import uk.ac.warwick.tabula.system.BindListener
 
-
 import scala.collection.JavaConverters._
 
 object AssignMarkersCommand {
@@ -122,7 +121,25 @@ trait AssignMarkersPermissions extends RequiresPermissionsChecking with Permissi
 
 trait AssignMarkersValidation extends SelfValidating {
 	self: AssignMarkersState =>
-	def validate(errors: Errors) {}
+	def validate(errors: Errors): Unit = {
+
+		val noDupesAllowed = allocationMap.filterKeys(_.stageAllocation)
+		val allocations = noDupesAllowed.values.toSeq
+		val stages = noDupesAllowed.keys.toSeq
+
+		val markers = allocations.flatMap(_.keys).toSet
+
+		markers.foreach(marker => {
+			val students = allocations.flatMap(_.getOrElse(marker, Set()).toSeq)
+			val dupes = students.groupBy(identity).collect{case (k, v) if v.size > 1 => k}
+
+			if(dupes.nonEmpty) {
+				errors.reject("markingWorkflow.marker.noDupes", Array(marker.getFullName, dupes.map(_.getFullName).mkString(", ")), "")
+			}
+
+		})
+
+	}
 }
 
 trait AssignMarkersDescription extends Describable[Assignment] {
@@ -167,7 +184,6 @@ trait AssignMarkersDragAndDropState extends AssignMarkersState {
 		}.toMap
 	}
 
-	// will this bind? who knows! - spring is a capricious monster
 	var allocations: JMap[MarkingWorkflowStage, JMap[String, JList[String]]] = LazyMaps.create{ _: MarkingWorkflowStage =>
 		LazyMaps.create{ _: String => JArrayList(): JList[String] }.asJava
 	}.asJava

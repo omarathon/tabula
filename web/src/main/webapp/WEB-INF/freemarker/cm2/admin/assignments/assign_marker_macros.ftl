@@ -18,7 +18,6 @@
 	<#local safeRole = role?lower_case?replace('[^a-z0-9\\-_]+', '', 'r') />
 <h2>Allocate students to ${role}s</h2>
 <p>Drag students onto a ${role} to allocate them. Select multiple students by dragging a box around them. You can also hold the <kbd class="keyboard-control-key">Ctrl</kbd> key and drag to add to a selection.</p>
-<#--<div class="fix-area">-->
 	<div class="tabula-dnd marker-allocation <#if stageAllocation!false>linkedRandomAllocation</#if>"
 		 data-item-name="student"
 		 data-text-selector=".name h6"
@@ -97,7 +96,7 @@
 							</div>
 
 							<#assign bindpath><#compress>
-								<#list stages as stage>allocations['${safeRole}']['${marker.userId}']<#if stage_has_next>,</#if></#list>
+								<#list stages as stage>allocations['${stage}']['${marker.userId}']<#if stage_has_next>,</#if></#list>
 							</#compress></#assign>
 
 							<ul class="drag-list hide" data-bindpath="${bindpath}" data-marker="${marker.userId}">
@@ -111,6 +110,5 @@
 			</div>
 		</div>
 	</div>
-<#--</div>-->
 </#macro>
 
