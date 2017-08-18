@@ -1,9 +1,12 @@
 <#import "*/cm2_macros.ftl" as cm2 />
 
 <#escape x as x?html>
-	<@cm2.assignmentHeader "Send to ${stage.nextStagesDescription?lower_case}" assignment "for" />
+	<#if nextStagesDescription??>
+		<@cm2.assignmentHeader "Send to ${nextStagesDescription?lower_case}" assignment "for" />
+	</#if>
 
-	<#assign formAction><@routes.cm2.markingCompleted assignment stage marker /></#assign>
+
+	<#assign formAction><@routes.cm2.markingCompleted assignment stagePosition marker /></#assign>
 	<@f.form method="post" action="${formAction}" commandName="command">
 		<@form.errors path="" />
 		<input type="hidden" name="confirmScreen" value="true" />

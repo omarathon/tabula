@@ -5,7 +5,7 @@ import org.springframework.stereotype.Controller
 import org.springframework.web.bind.annotation.{ModelAttribute, PathVariable, RequestMapping}
 import uk.ac.warwick.tabula.CurrentUser
 import uk.ac.warwick.tabula.commands.Appliable
-import uk.ac.warwick.tabula.commands.cm2.assignments.markers.ListMarkerFeedbackCommand.EnhancedFeedbackByStage
+import uk.ac.warwick.tabula.commands.cm2.assignments.markers.ListMarkerFeedbackCommand.EnhancedFeedbackForOrderAndStage
 import uk.ac.warwick.tabula.commands.cm2.assignments.markers.{ListMarkerFeedbackCommand, ListMarkerFeedbackState}
 import uk.ac.warwick.tabula.data.model.Assignment
 import uk.ac.warwick.tabula.helpers.cm2.SubmissionAndFeedbackInfoFilters.SubmissionStates._
@@ -26,7 +26,7 @@ object ListMarkerFeedbackController {
 @RequestMapping(value = Array("/${cm2.prefix}/admin/assignments/{assignment}/marker/{marker}"))
 class ListMarkerFeedbackController extends CourseworkController {
 
-	type Command = Appliable[EnhancedFeedbackByStage] with ListMarkerFeedbackState
+	type Command = Appliable[Seq[EnhancedFeedbackForOrderAndStage]] with ListMarkerFeedbackState
 	import ListMarkerFeedbackController._
 
 	@ModelAttribute("command")
@@ -38,7 +38,7 @@ class ListMarkerFeedbackController extends CourseworkController {
 		val workflow = mandatory(command.assignment.cm2MarkingWorkflow)
 		if (ajax) {
 			Mav("cm2/admin/assignments/markers/marker_feedback_list",
-				"feedbackByStage" -> command.apply(),
+				"feedbackByOrderAndStage" -> command.apply(),
 				"assignment" -> command.assignment,
 				"workflowType" -> workflow.workflowType,
 				"marker" -> command.marker
