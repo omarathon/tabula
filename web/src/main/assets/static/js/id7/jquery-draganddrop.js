@@ -200,6 +200,59 @@ Method calls (after initialising):
             self.randomise();
         });
 
+		// Wire button to trigger linked randomise
+		$el.find('.linkedRandom, [data-toggle="linkedRandom"]').click(function(e) {
+			e.preventDefault();
+			e.stopPropagation();
+			var $otherDnd = $('.linkedRandomAllocation').not($el);
+
+			self.randomise();
+			$otherDnd.dragAndDrop('return');
+
+			var $otherSourceList = $otherDnd.find('.return-list');
+			var $otherTargets = $otherDnd.find(sortables).not('.return-list');
+
+			var allocations = {};
+			var markers = [];
+			$el.find(sortables).not('.return-list').each(function(i, e) {
+				var students = [];
+				var $list = $(e);
+				var marker = $list.data('marker');
+				markers[i] = marker;
+				$list.find('input').each(function(i, input) {students[i] = $(input).val()});
+				allocations[marker] = students;
+			});
+
+			// we need to have each markers students assigned to a different random marker
+			// shuffle the order of the marker list
+			var shuffledMarkers = markers.sort(function(){return Math.random() > 0.5 ? 1 : -1 });
+
+			// each marker gets the students from the next marker in the list (last in the list gets the firsts markers)
+			var swaps = {};
+			shuffledMarkers.forEach(function(e,i,a){
+				swaps[e] = i+1 > a.length-1 ? a[0] : a[i+1];
+			});
+
+			$otherTargets.each(function(i, target){
+				var $target = $(target);
+				var marker = $target.data('marker');
+				var studentsToGet = allocations[swaps[marker]];
+				var itemsForTarget = $(''); // empty element array
+				studentsToGet.forEach(function(student){
+					itemsForTarget = itemsForTarget.add($otherSourceList.find('li[data-student='+student+']'));
+				});
+
+				self.batchMove([{
+					target: $target,
+					items: itemsForTarget,
+					sources: [] // don't trigger change for source every time
+				}]);
+			});
+
+			$otherSourceList.trigger('changed.tabula');
+
+		});
+
         $el.on('changed.tabula', function() {
 			// trigger resize event for headerfooter fixing plugin
             $(window).resize();

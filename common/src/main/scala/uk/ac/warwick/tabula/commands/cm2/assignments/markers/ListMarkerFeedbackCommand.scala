@@ -2,7 +2,7 @@ package uk.ac.warwick.tabula.commands.cm2.assignments.markers
 
 import uk.ac.warwick.tabula.JavaImports._
 import uk.ac.warwick.tabula.commands._
-import uk.ac.warwick.tabula.commands.cm2.assignments.markers.ListMarkerFeedbackCommand.EnhancedFeedbackByStage
+import uk.ac.warwick.tabula.commands.cm2.assignments.markers.ListMarkerFeedbackCommand.EnhancedFeedbackForOrderAndStage
 import uk.ac.warwick.tabula.commands.cm2.{CommandWorkflowStudentsForAssignment, WorkflowStudentsForAssignment}
 import uk.ac.warwick.tabula.data.model.markingworkflow.MarkingWorkflowStage
 import uk.ac.warwick.tabula.data.model.{Assignment, MarkerFeedback}
@@ -35,10 +35,15 @@ case class MarkingWorkflowStudent (
 
 object ListMarkerFeedbackCommand {
 
-	type EnhancedFeedbackByStage = SortedMap[MarkingWorkflowStage, Seq[EnhancedMarkerFeedback]]
+	case class EnhancedFeedbackForOrderAndStage(
+		hasFeedback: Boolean,
+		enhancedFeedbackByStage: Map[MarkingWorkflowStage, Seq[EnhancedMarkerFeedback]]
+	) {
+		def headerStage: MarkingWorkflowStage = enhancedFeedbackByStage.keys.head
+	}
 
 	def apply(assignment:Assignment, marker:User, submitter: CurrentUser) = new ListMarkerFeedbackCommandInternal(assignment, marker, submitter)
-		with ComposableCommand[EnhancedFeedbackByStage]
+		with ComposableCommand[Seq[EnhancedFeedbackForOrderAndStage]]
 		with ListMarkerFeedbackPermissions
 		with AutowiringCM2MarkingWorkflowServiceComponent
 		with AutowiringCM2WorkflowProgressServiceComponent
@@ -47,12 +52,12 @@ object ListMarkerFeedbackCommand {
 		with Unaudited with ReadOnly
 }
 
-class ListMarkerFeedbackCommandInternal(val assignment:Assignment, val marker:User, val submitter: CurrentUser) extends CommandInternal[EnhancedFeedbackByStage]
+class ListMarkerFeedbackCommandInternal(val assignment:Assignment, val marker:User, val submitter: CurrentUser) extends CommandInternal[Seq[EnhancedFeedbackForOrderAndStage]]
 	with ListMarkerFeedbackState {
 
 	self: CM2MarkingWorkflowServiceComponent with CM2WorkflowProgressServiceComponent with MarkerProgress =>
 
-	def applyInternal(): EnhancedFeedbackByStage = {
+	def applyInternal(): Seq[EnhancedFeedbackForOrderAndStage] = {
 		val enhancedFeedbackByStage = enhance(assignment, cm2MarkingWorkflowService.getAllFeedbackForMarker(assignment, marker))
 		enhancedFeedbackByStage.map{ case (stage, feedback) =>
 			val filtered = benchmarkTask(s"Do marker feedback filtering for ${stage.name}") { feedback.filter { emf =>
@@ -64,6 +69,12 @@ class ListMarkerFeedbackCommandInternal(val assignment:Assignment, val marker:Us
 			}}
 			stage -> filtered.sortBy(_.markerFeedback.student)
 		}
+
+		// squash stages with the same order
+		enhancedFeedbackByStage
+			.groupBy{ case (stage, _) => stage.order }
+			.map{ case(_, map) => EnhancedFeedbackForOrderAndStage(map.values.flatten.nonEmpty, map)}
+			.toSeq
 	}
 }
 

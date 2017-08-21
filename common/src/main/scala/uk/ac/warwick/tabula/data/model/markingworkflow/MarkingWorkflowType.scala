@@ -65,8 +65,8 @@ object MarkingWorkflowType {
 	def values: Seq[MarkingWorkflowType] = Seq(
 		SingleMarking,
 		DoubleMarking,
-		ModeratedMarking
-		//DoubleBlindMarking
+		ModeratedMarking,
+		DoubleBlindMarking
 	)
 
 	def allPossibleStages: Map[MarkingWorkflowType, Seq[MarkingWorkflowStage]] = values.map(t => t -> t.allStages).toMap
