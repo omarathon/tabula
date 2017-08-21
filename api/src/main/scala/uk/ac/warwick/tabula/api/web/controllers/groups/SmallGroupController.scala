@@ -10,10 +10,11 @@ import org.springframework.web.bind.annotation._
 import uk.ac.warwick.tabula.JavaImports._
 import uk.ac.warwick.tabula.api.commands.JsonApiRequest
 import uk.ac.warwick.tabula.api.web.controllers.groups.SmallGroupController.{DeleteSmallGroupCommand, ModifySmallGroupCommand}
-import uk.ac.warwick.tabula.commands.Appliable
+import uk.ac.warwick.tabula.commands.{Appliable, ViewViewableCommand}
 import uk.ac.warwick.tabula.commands.groups.admin._
 import uk.ac.warwick.tabula.data.model._
 import uk.ac.warwick.tabula.data.model.groups.{SmallGroup, SmallGroupSet}
+import uk.ac.warwick.tabula.permissions.Permissions
 import uk.ac.warwick.tabula.web.{Mav, Routes}
 import uk.ac.warwick.tabula.web.views.{JSONErrorView, JSONView}
 
@@ -23,6 +24,34 @@ import scala.beans.BeanProperty
 object SmallGroupController {
 	type DeleteSmallGroupCommand = DeleteSmallGroupCommand.Command
 	type ModifySmallGroupCommand = ModifySmallGroupCommand.Command
+}
+
+@Controller
+@RequestMapping(Array("/v1/groups/{smallGroup}"))
+class GetSmallGroupControllerForApi extends SmallGroupSetController with GetSmallGroupApi
+
+trait GetSmallGroupApi {
+	self: SmallGroupSetController =>
+
+	@ModelAttribute("getCommand")
+	def getCommand(@PathVariable smallGroup: SmallGroup): ViewViewableCommand[SmallGroup] = {
+		new ViewViewableCommand(Permissions.SmallGroups.ReadMembership, mandatory(smallGroup))
+	}
+
+	@RequestMapping(method = Array(GET), produces = Array("application/json"))
+	def getIt(@Valid @ModelAttribute("getCommand") command: Appliable[SmallGroup], errors: Errors, @PathVariable smallGroup: SmallGroup): Mav = {
+		// Return the GET representation
+		if (errors.hasErrors) {
+			Mav(new JSONErrorView(errors))
+		} else {
+			val result = command.apply()
+			Mav(new JSONView(Map(
+				"success" -> true,
+				"status" -> "ok",
+				"group" -> jsonSmallGroupObject(result)
+			)))
+		}
+	}
 }
 
 @Controller

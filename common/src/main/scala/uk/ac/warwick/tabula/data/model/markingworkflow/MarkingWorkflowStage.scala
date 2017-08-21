@@ -28,6 +28,8 @@ sealed abstract class MarkingWorkflowStage(val name: String, val order: Int) ext
 	// get a description of the next stage - default works best when there is only one next stage - may need overriding in other cases
 	def nextStagesDescription: Option[String] = nextStages.headOption.map(_.description)
 
+	// by default allocation is based by role rather than by stage
+	def stageAllocation: Boolean = false
 	override def toString: String = name
 }
 
@@ -75,14 +77,14 @@ object MarkingWorkflowStage {
 	case object DblBlndInitialMarkerA extends MarkingWorkflowStage("dbl-blnd-marker-a", 1) {
 		override def roleName: String = "Independent marker"
 		override def nextStages: Seq[MarkingWorkflowStage] = Seq(DblBlndFinalMarker)
-		override def allocationName = "Independent marker A"
-		override def description: String = allocationName
+		override def allocationName = "First independent marker"
+		override def stageAllocation = true
 	}
 	case object DblBlndInitialMarkerB extends MarkingWorkflowStage("dbl-blnd-marker-b", 1) {
 		override def roleName: String = "Independent marker"
 		override def nextStages: Seq[MarkingWorkflowStage] = Seq(DblBlndFinalMarker)
-		override def allocationName = "Independent marker B"
-		override def description: String = allocationName
+		override def allocationName = "Second independent marker"
+		override def stageAllocation = true
 	}
 	case object DblBlndFinalMarker extends MarkingWorkflowStage("dbl-blnd-final-marker", 2) {
 		override def roleName = "Final marker"

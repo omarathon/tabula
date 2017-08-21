@@ -7,7 +7,7 @@
 
 <div class="fix-area">
 	<#assign actionUrl><@routes.cm2.assignmentmarkers assignment mode /></#assign>
-	<@f.form method="post" action=actionUrl  cssClass="dirty-check">
+	<@f.form method="post" action=actionUrl  cssClass="dirty-check" commandName="assignMarkersCommand">
 		<@components.assignment_wizard 'markers' assignment.module false assignment />
 
 		<p class="btn-toolbar">
@@ -19,9 +19,10 @@
 			</a>
 		</p>
 
-		<@f.errors cssClass="error form-errors" />
+		<div class="has-error"><@f.errors cssClass="error help-block" /></div>
+
 		<#list state.keys as roleOrStage>
-			<@allocateStudents assignment roleOrStage mapGet(stages, roleOrStage)![roleOrStage] mapGet(state.markers, roleOrStage) mapGet(state.unallocatedStudents, roleOrStage) mapGet(state.allocations, roleOrStage) />
+			<@allocateStudents assignment roleOrStage mapGet(stages, roleOrStage)![roleOrStage] mapGet(state.markers, roleOrStage) mapGet(state.unallocatedStudents, roleOrStage) mapGet(state.allocations, roleOrStage) mapGet(state.allocateByStage, roleOrStage)/>
 		</#list>
 		<div class="fix-footer">
 			<input

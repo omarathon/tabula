@@ -351,7 +351,8 @@ class ProcessTurnitinLtiQueueCommandTest extends TestBase with Mockito {
 			mockTurnitinLtiQueueService.findReportToProcessForReport(true) returns Option(report)
 			mockTurnitinLtiService.getSubmissionDetails(report.turnitinId, new CurrentUser(user1, user1)) returns new TurnitinLtiResponse(
 				success = false,
-				statusMessage = Option("How bout no!")
+				statusMessage = Option("How bout no!"),
+				json = Some("{}")
 			)
 			mockTurnitinLtiQueueService.listCompletedAssignments returns Seq()
 			mockTurnitinLtiQueueService.listFailedAssignments returns Seq()

@@ -17,7 +17,7 @@
 		</#if>
 
 		<#if features.disabilityOnSubmission && command.disability??>
-			<a class="use-popover" id="popover-disability" data-html="true"
+			<a class="use-popover white-text-decoration" id="popover-disability" data-html="true"
 			   data-original-title="Disability disclosed"
 			   data-container="body"
 			   data-content="<p>This student has chosen to make the marker of this submission aware of their disability and for it to be taken it into consideration. This student has self-reported the following disability code:</p><div class='well'><h6>${command.disability.code}</h6><small>${(command.disability.sitsDefinition)!}</small></div>"

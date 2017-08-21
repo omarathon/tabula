@@ -4,7 +4,7 @@ import javax.persistence.{DiscriminatorValue, Entity}
 
 import uk.ac.warwick.tabula.JavaImports._
 import uk.ac.warwick.tabula.data.model.Department
-import uk.ac.warwick.tabula.data.model.markingworkflow.MarkingWorkflowStage.{DblBlndFinalMarker, DblBlndInitialMarkerA, DblBlndInitialMarkerB, DblFinalMarker, DblFirstMarker, DblSecondMarker}
+import uk.ac.warwick.tabula.data.model.markingworkflow.MarkingWorkflowStage.{DblBlndFinalMarker, DblBlndInitialMarkerA, DblBlndInitialMarkerB}
 import uk.ac.warwick.tabula.data.model.markingworkflow.MarkingWorkflowType.DoubleBlindMarking
 import uk.ac.warwick.userlookup.User
 

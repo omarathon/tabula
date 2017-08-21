@@ -12,12 +12,14 @@
 	<!-- Tab panes -->
 	<div class="tab-content">
 		<div role="tabpanel" class="tab-pane active" id="upload">
-			<p>
-				You can upload marks and feedback in a spreadsheet, which must be saved as an XLSX file (i.e. created in Microsoft Office 2007 or later).
-				The spreadsheet should have the following column headings: ID, Mark, Grade and Feedback.
-				You can use this <a href="${templateUrl}" >generated spreadsheet</a> as a template.
-				Note that you can upload just marks, marks and grades, or marks, grades and feedback.
-			</p>
+			<p>You can upload marks and feedback in a spreadsheet, which must be an XLSX file (i.e. created in Microsoft Office 2007 or later). The spreadsheet should have the following column headings: <strong>University ID</strong>, <strong>Mark</strong>, <strong>Grade</strong> and <strong>Feedback</strong>. You can use this <a href="${templateUrl}" >generated spreadsheet</a> as a template.</p>
+      <p>Enter the results in the following columns (all other columns are locked):</p>
+      <ul>
+        <li>Column B - Mark</li>
+        <li>Column C - Grade</li>
+        <li>Column D - Feedback</li>
+      </ul>
+      <p>Note that you can upload any of the following: marks only; marks and grades only; marks, grades and feedback.</p>      
 		<@f.form method="post" enctype="multipart/form-data" action="${formUrl}" commandName="command">
 			<h3>Select file</h3>
 			<p id="multifile-column-description">

@@ -99,7 +99,9 @@ class ImportProfilesCommand extends CommandWithoutTransaction[Unit] with Logging
 							case e: StaleObjectStateException =>
 								logger.error(s"Tried to import ${cmd.universityId} in department ${department.code} but member was already imported")
 								logger.error(e.getMessage)
-							case e => throw e
+							case e =>
+								logger.error(e.getMessage)
+								throw e
 						})
 						session.flush()
 					}

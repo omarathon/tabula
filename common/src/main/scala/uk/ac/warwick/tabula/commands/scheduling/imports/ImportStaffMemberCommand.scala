@@ -31,7 +31,8 @@ class ImportStaffMemberCommand(info: MembershipInformation, ssoUser: User)
 		val memberBean = new BeanWrapperImpl(member)
 
 		// We intentionally use a single pipe rather than a double pipe here - we want both statements to be evaluated
-		val hasChanged = copyMemberProperties(commandBean, memberBean) | copyStaffProperties(commandBean, memberBean)
+		val hasChanged = copyMemberProperties(commandBean, memberBean) |
+			(member.isInstanceOf[StaffMember] && copyStaffProperties(commandBean, memberBean))
 
 		if (isTransient || hasChanged) {
 			logger.debug("Saving changes for " + member)

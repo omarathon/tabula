@@ -11,7 +11,6 @@ import uk.ac.warwick.tabula.cm2.web.Routes
 import uk.ac.warwick.tabula.commands.{Appliable, SelfValidating}
 import uk.ac.warwick.tabula.commands.cm2.assignments.markers.{MarkingCompletedCommand, MarkingCompletedState}
 import uk.ac.warwick.tabula.data.model.{Assignment, AssignmentFeedback}
-import uk.ac.warwick.tabula.data.model.markingworkflow.MarkingWorkflowStage
 import uk.ac.warwick.tabula.web.Mav
 import uk.ac.warwick.tabula.web.controllers.cm2.CourseworkController
 import uk.ac.warwick.userlookup.User
@@ -19,7 +18,7 @@ import uk.ac.warwick.userlookup.User
 
 @Profile(Array("cm2Enabled"))
 @Controller
-@RequestMapping(value = Array("/${cm2.prefix}/admin/assignments/{assignment}/marker/{marker}/{stage}/marking-completed"))
+@RequestMapping(value = Array("/${cm2.prefix}/admin/assignments/{assignment}/marker/{marker}/{stagePosition}/marking-completed"))
 class MarkingCompletedController extends CourseworkController {
 
 	validatesSelf[SelfValidating]
@@ -27,8 +26,8 @@ class MarkingCompletedController extends CourseworkController {
 	type Command = Appliable[Seq[AssignmentFeedback]] with MarkingCompletedState
 
 	@ModelAttribute("command")
-	def command(@PathVariable assignment: Assignment, @PathVariable marker: User, @PathVariable stage: MarkingWorkflowStage, currentUser: CurrentUser): Command =
-		MarkingCompletedCommand(mandatory(assignment), mandatory(marker), currentUser, mandatory(stage))
+	def command(@PathVariable assignment: Assignment, @PathVariable marker: User, @PathVariable stagePosition: Int, currentUser: CurrentUser): Command =
+		MarkingCompletedCommand(mandatory(assignment), mandatory(marker), currentUser, mandatory(stagePosition))
 
 	// shouldn't ever be called as anything other than POST - if it is, just redirect back to the submission list
 	@RequestMapping
@@ -39,14 +38,15 @@ class MarkingCompletedController extends CourseworkController {
 	def showForm(
 		@PathVariable assignment: Assignment,
 		@PathVariable marker: User,
-		@PathVariable stage: MarkingWorkflowStage,
+		@PathVariable stagePosition: Int,
 		@ModelAttribute("command") command: Command,
 		errors: Errors
 	): Mav = {
 		Mav("cm2/admin/assignments/markers/marking_complete",
 			"department" -> command.assignment.module.adminDepartment,
 			"isProxying" -> command.isProxying,
-			"proxyingAs" -> marker
+			"proxyingAs" -> marker,
+			"nextStagesDescription" ->  command.feedbackForRelease.headOption.flatMap(_.stage.nextStagesDescription)
 		)
 	}
 
@@ -54,12 +54,12 @@ class MarkingCompletedController extends CourseworkController {
 	def submit(
 		@PathVariable assignment: Assignment,
 		@PathVariable marker: User,
-		@PathVariable stage: MarkingWorkflowStage,
+		@PathVariable stagePosition: Int,
 		@Valid @ModelAttribute("command") command: Command,
 		errors: Errors
 	): Mav = {
 		if (errors.hasErrors)
-			showForm(assignment, marker, stage, command, errors)
+			showForm(assignment, marker, stagePosition, command, errors)
 		else {
 			command.apply()
 			Redirect(Routes.admin.assignment.markerFeedback(command.assignment, command.marker))

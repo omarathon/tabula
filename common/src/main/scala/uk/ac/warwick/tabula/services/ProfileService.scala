@@ -68,6 +68,13 @@ trait ProfileService {
 	def allModesOfAttendance(department: Department): Seq[ModeOfAttendance]
 	def allSprStatuses(department: Department): Seq[SitsStatus]
 	def getDisability(code: String): Option[Disability]
+
+	def findUsercodesInHomeDepartment(department: Department): Seq[String]
+	def findTeachingStaffUsercodesInHomeDepartment(department: Department): Seq[String]
+	def findAdminStaffUsercodesInHomeDepartment(department: Department): Seq[String]
+	def findUndergraduatesUsercodesInHomeDepartment(department: Department): Seq[String]
+	def findTaughtPostgraduatesUsercodesInHomeDepartment(department: Department): Seq[String]
+	def findResearchPostgraduatesUsercodesInHomeDepartment(department: Department): Seq[String]
 }
 
 abstract class AbstractProfileService extends ProfileService with Logging {
@@ -358,6 +365,48 @@ abstract class AbstractProfileService extends ProfileService with Logging {
 		// lookup disability iff a non-null code is passed, otherwise fallback to None - I <3 scala options and flatMap
 		Option(code).flatMap(memberDao.getDisability)
 	}
+
+	override def findUsercodesInHomeDepartment(department: Department): Seq[String] = transactional(readOnly = true) {
+		memberDao.findAllUsercodesByRestrictions(Seq(
+			ScalaRestriction.is("homeDepartment", department.rootDepartment).get
+		))
+	}
+
+	override def findTeachingStaffUsercodesInHomeDepartment(department: Department): Seq[String] = transactional(readOnly = true) {
+		memberDao.findAllUsercodesByRestrictions(Seq(
+			ScalaRestriction.is("homeDepartment", department.rootDepartment).get,
+			ScalaRestriction.is("teachingStaff", true).get
+		), staffOnly = true)
+	}
+
+	override def findAdminStaffUsercodesInHomeDepartment(department: Department): Seq[String] = transactional(readOnly = true) {
+		memberDao.findAllUsercodesByRestrictions(Seq(
+			ScalaRestriction.is("homeDepartment", department.rootDepartment).get,
+			ScalaRestriction.is("teachingStaff", false).get
+		), staffOnly = true)
+	}
+
+	override def findUndergraduatesUsercodesInHomeDepartment(department: Department): Seq[String] = transactional(readOnly = true) {
+		memberDao.findAllUsercodesByRestrictions(Seq(
+			ScalaRestriction.is("homeDepartment", department.rootDepartment).get,
+			new ScalaRestriction(HibernateHelpers.like("groupName", "Undergraduate%"))
+		), studentOnly = true)
+	}
+
+	override def findTaughtPostgraduatesUsercodesInHomeDepartment(department: Department): Seq[String] = transactional(readOnly = true) {
+		memberDao.findAllUsercodesByRestrictions(Seq(
+			ScalaRestriction.is("homeDepartment", department.rootDepartment).get,
+			new ScalaRestriction(HibernateHelpers.like("groupName", "Postgraduate (taught)%"))
+		), studentOnly = true)
+	}
+
+	override def findResearchPostgraduatesUsercodesInHomeDepartment(department: Department): Seq[String] = transactional(readOnly = true) {
+		memberDao.findAllUsercodesByRestrictions(Seq(
+			ScalaRestriction.is("homeDepartment", department.rootDepartment).get,
+			new ScalaRestriction(HibernateHelpers.like("groupName", "Postgraduate (research)%"))
+		), studentOnly = true)
+	}
+
 }
 
 trait StaffAssistantsHelpers {

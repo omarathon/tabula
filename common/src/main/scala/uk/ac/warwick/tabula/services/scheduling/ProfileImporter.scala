@@ -499,7 +499,8 @@ object ProfileImporter extends Logging {
 			stu.stu_updd as last_modification_date,
 			null as telephoneNumber,
 			stu.stu_gend as gender,
-			stu.stu_haem as externalEmail
+			stu.stu_haem as externalEmail,
+	 		'N' as warwickTeachingStaff
 		from $sitsSchema.ins_stu stu
 		where
 			stu.stu_sta1 like '%%A' and -- applicant
