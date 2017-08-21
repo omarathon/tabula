@@ -10,7 +10,6 @@ import uk.ac.warwick.tabula.cm2.web.Routes
 import uk.ac.warwick.tabula.commands.cm2.assignments._
 import uk.ac.warwick.tabula.commands.{Appliable, SelfValidating}
 import uk.ac.warwick.tabula.data.model.Assignment
-import uk.ac.warwick.tabula.data.model.markingworkflow.MarkingWorkflowType.DoubleBlindMarking
 import uk.ac.warwick.tabula.web.Mav
 
 @Profile(Array("cm2Enabled"))
@@ -45,7 +44,6 @@ class ModifyAssignmentMarkersController extends AbstractAssignmentController {
 			"department" -> module.adminDepartment,
 			"stages" -> stages,
 			"state" -> existingAllocations,
-			"isDoubleBlind" -> (workflow.workflowType == DoubleBlindMarking),
 			"mode" -> mode)
 			.crumbsList(Breadcrumbs.assignment(assignment))
 	}

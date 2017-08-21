@@ -35,9 +35,6 @@ case class MarkingWorkflowStudent (
 
 object ListMarkerFeedbackCommand {
 
-	//type EnhancedFeedbackByOrderAndStage = SortedMap[Int, Map[MarkingWorkflowStage, Seq[EnhancedMarkerFeedback]]]
-
-
 	case class EnhancedFeedbackForOrderAndStage(
 		hasFeedback: Boolean,
 		enhancedFeedbackByStage: Map[MarkingWorkflowStage, Seq[EnhancedMarkerFeedback]]

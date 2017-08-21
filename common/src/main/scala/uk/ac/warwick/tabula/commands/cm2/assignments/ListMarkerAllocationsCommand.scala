@@ -60,10 +60,10 @@ trait FetchMarkerAllocations {
 		MarkerAllocations(
 			allStudents = allStudents,
 			keys = workflow.allocationOrder,
-			unallocatedStudents = Map(unallocatedStudents.toList: _*),
-			allocations = Map(allocations.toList: _*),
-			markers = Map(markers.toList: _*),
-			allocateByStage = Map(allocateByStage.toList: _*)
+			unallocatedStudents = unallocatedStudents.toMap,
+			allocations = allocations.toMap,
+			markers = markers.toMap,
+			allocateByStage = allocateByStage.toMap
 		)
 	}
 }
