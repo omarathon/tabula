@@ -7,7 +7,7 @@
 
 <div class="fix-area">
 	<#assign actionUrl><@routes.cm2.assignmentmarkers assignment mode /></#assign>
-	<@f.form method="post" action=actionUrl  cssClass="dirty-check" commandName="assignMarkersCommand">
+	<@f.form id="command" method="post" action=actionUrl  cssClass="dirty-check" commandName="assignMarkersCommand">
 		<@components.assignment_wizard 'markers' assignment.module false assignment />
 
 		<p class="btn-toolbar">
