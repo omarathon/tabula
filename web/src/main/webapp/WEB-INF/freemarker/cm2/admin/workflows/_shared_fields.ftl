@@ -33,8 +33,8 @@
 					<dd>The first marker marks the submission and passes it to the moderator. The moderator decides the final mark and passes the submission to the administrator.</dd>
 					<dt>Double seen marking</dt>
 					<dd>The first marker adds their feedback. They send the submission to a second marker, who can see the first marker's feedback, mark or grade. The second marker adds their own feedback, mark or grade. They return the submission to the first marker, who decides the final mark and summarises comments into a single item of feedback for the student. Comments can be combined or rewritten entirely.</dd>
-          <dt>Double blind marking</dt>
-          <dd>Multiple independent markers concurrently mark a submission and do not see others’ marks. All submissions go to final markers who finalise the feedback and can average marks. The final marker passes the submission to the administrator. Note that only one final marker is allocated to each submission.</dd>
+					<dt>Double blind marking</dt>
+					<dd>Multiple independent markers concurrently mark a submission and do not see others’ marks. All submissions go to final markers who finalise the feedback and can average marks. The final marker passes the submission to the administrator. Note that only one final marker is allocated to each submission.</dd>
 				</dl>
 			</div>
 		</div>
