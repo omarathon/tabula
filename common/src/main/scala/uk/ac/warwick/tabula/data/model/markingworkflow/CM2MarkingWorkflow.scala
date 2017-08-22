@@ -7,7 +7,7 @@ import javax.persistence.{Column, DiscriminatorType, OneToMany, _}
 import org.hibernate.annotations.{BatchSize, Type}
 import org.joda.time.DateTime
 
-import scala.collection.immutable.{SortedMap, SortedSet, TreeMap}
+import scala.collection.immutable.{ListMap, SortedSet, TreeMap}
 import scala.collection.JavaConverters._
 import uk.ac.warwick.spring.Wire
 import uk.ac.warwick.tabula.AcademicYear
@@ -58,11 +58,13 @@ abstract class CM2MarkingWorkflow extends GeneratedId with PermissionsTarget wit
 	def allMarkers: SortedSet[Marker] = SortedSet(markers.values.flatten.toSeq.distinct:_ *)
 
 	// If two stages have the same roleName only keep the earliest stage.
-	def markersByRole: SortedMap[String, Seq[Marker]] =  {
-		val unsorted = markers.foldRight(Map.empty[String, Seq[Marker]]){ case ((s, m), acc) =>
-			if (acc.keys.exists(role => role == s.roleName)) acc else acc + (s.roleName -> m)
+	def markersByRole: Map[String, Seq[Marker]] =  {
+		val unsorted = markers.foldRight(Map.empty[MarkingWorkflowStage, Seq[Marker]]){ case ((s, m), acc) =>
+			if (acc.keys.exists(stage => stage.roleName == s.roleName)) acc else acc + (s -> m)
 		}
-		TreeMap(unsorted.toSeq:_*)
+		val sortedByStage = TreeMap(unsorted.toSeq:_*)
+		// now that we have sorted by stage insert into a list map to preserve the order
+		ListMap(sortedByStage.toSeq:_*).map{case (k,v) => k.roleName -> v}
 	}
 
 	@Column(name="is_reusable", nullable = false)
