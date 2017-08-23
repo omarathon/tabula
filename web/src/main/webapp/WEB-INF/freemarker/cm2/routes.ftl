@@ -107,6 +107,7 @@ TODO grab values from the Routes object in code, as that's pretty equivalent and
 <#macro editfeedbacktemplate department template><@_u page="/admin/department/${department.code}/settings/feedback-templates/edit/${template.id}" /></#macro>
 <#macro deletefeedbacktemplate department template><@_u page="/admin/department/${department.code}/settings/feedback-templates/delete/${template.id}" /></#macro>
 <#macro feedbacktemplatedownload department feedbacktemplate><@_u page="/admin/department/${department.code}/settings/feedback-templates/download/${feedbacktemplate.id}/${feedbacktemplate.attachment.name}" /></#macro>
+<#macro assignment_in_profile assignment student><@_u page="/submission/${assignment.id}/${student.universityId}"/></#macro>
 
 <#-- non admin -->
 <#macro assignment assignment><@_u page="/submission/${assignment.id}"/></#macro>
