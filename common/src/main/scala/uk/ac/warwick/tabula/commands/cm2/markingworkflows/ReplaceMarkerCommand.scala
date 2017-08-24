@@ -33,9 +33,9 @@ class ReplaceMarkerCommandInternal(val department: Department, val markingWorkfl
 	self: ReplaceMarkerState with CM2MarkingWorkflowServiceComponent with UserLookupComponent =>
 
 	def applyInternal(): CM2MarkingWorkflow = {
-		val stages = markingWorkflow.workflowType.allStages
-
-		for(stage <- stages) {
+		// only do replacements on stages containing the old marker
+		val stagesToReplace = markingWorkflow.markers.filter{case (_, v) => v.contains(oldMarkerUser)}.keys
+		for(stage <- stagesToReplace) {
 			for(assignment <- assignmentsToUpdate) {
 				val existingAllocations = cm2MarkingWorkflowService.getMarkerAllocations(assignment, stage)
 				val newStudents = existingAllocations.getOrElse(oldMarkerUser, Set())
