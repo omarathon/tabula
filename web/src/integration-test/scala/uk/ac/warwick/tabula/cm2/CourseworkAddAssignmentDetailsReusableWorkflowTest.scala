@@ -132,7 +132,7 @@ class CourseworkAddAssignmentDetailsReusableWorkflowTest extends BrowserTest wit
 		singleSel("fileAttachmentLimit").value = "3"
 
 		And("I enter data in file extension field")
-		var fielExt = webDriver.findElement(By.id("fileExtensionList")).findElement(By.cssSelector("input.text"))
+		val fielExt = webDriver.findElement(By.id("fileExtensionList")).findElement(By.cssSelector("input.text"))
 		click on fielExt
 		enter("pdf txt")
 
@@ -151,7 +151,7 @@ class CourseworkAddAssignmentDetailsReusableWorkflowTest extends BrowserTest wit
 
 		Then("I cross check various assignment details")
 		//assignment page details
-		var labels = webDriver.findElements(By.className("review-label")).asScala
+		val labels = webDriver.findElements(By.className("review-label")).asScala
 		checkReviewTabRow(labels,"Assignment title",assignmentName)
 		checkReviewTabRow(labels,"Marking workflow use", "Reusable")
 		checkReviewTabRow(labels,"Marking workflow name", reusableWorkflowName)
@@ -184,8 +184,8 @@ class CourseworkAddAssignmentDetailsReusableWorkflowTest extends BrowserTest wit
 	}
 
 	private def checkReviewTabRow(labels: mutable.Buffer[WebElement], labelRow: String, fieldValue: String) = {
-		var element = labels.find(_.getText.contains(labelRow)).getOrElse(fail(s"{labelRow} not found"))
-		var parent = element.findElement(By.xpath(".."))
+		val element = labels.find(_.getText.contains(labelRow)).getOrElse(fail(s"{labelRow} not found"))
+		val parent = element.findElement(By.xpath(".."))
 		parent.getText should include (fieldValue)
 	}
 

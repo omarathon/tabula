@@ -1,5 +1,6 @@
 package uk.ac.warwick.tabula.data
 
+import org.hibernate.criterion.Projections
 import org.springframework.stereotype.Repository
 import uk.ac.warwick.spring.Wire
 import uk.ac.warwick.tabula.data.model._
@@ -27,6 +28,7 @@ trait ModuleRegistrationDao {
 	): Option[ModuleRegistration]
 	def getByUsercodesAndYear(usercodes: Seq[String], academicYear: AcademicYear) : Seq[ModuleRegistration]
 	def findCoreRequiredModules(route: Route, academicYear: AcademicYear, yearOfStudy: Int): Seq[CoreRequiredModule]
+	def findRegisteredUsercodes(module: Module, academicYear: AcademicYear): Seq[String]
 }
 
 @Repository
@@ -72,6 +74,16 @@ class ModuleRegistrationDaoImpl extends ModuleRegistrationDao with Daoisms {
 		  .add(is("route", route))
 			.add(is("academicYear", academicYear))
 			.add(is("yearOfStudy", yearOfStudy))
+		  .seq
+	}
+
+	def findRegisteredUsercodes(module: Module, academicYear: AcademicYear): Seq[String] = {
+		session.newCriteria[ModuleRegistration]
+		  .createAlias("studentCourseDetails", "studentCourseDetails")
+		 	.createAlias("studentCourseDetails.student", "student")
+			.add(is("module", module))
+	  	.add(is("academicYear", academicYear))
+		  .project[String](Projections.property("student.userId"))
 		  .seq
 	}
 }

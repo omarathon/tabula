@@ -86,19 +86,22 @@
 			$body.on('click', '.copy-feedback', function(e){
 				e.preventDefault();
 				var $this = $(this);
-				var $prevFeedback = $this.closest('.previous-marker-feedback');
-				var $comments = $prevFeedback.find('.feedback-comments');
-				var $attachments = $prevFeedback.find('.feedback-attachments li');
-				var $form = $('.marking-and-feedback form');
-				var $newComments = $form.find('textarea');
-				if ($newComments.val()){
-					$newComments.val($newComments.val() + '\n\n')
+				if(!$this.hasClass('disabled')) {
+					var $prevFeedback = $this.closest('.previous-marker-feedback');
+					var $row = $this.closest('tr');
+					var $comments = $prevFeedback.find('.feedback-comments');
+					var $attachments = $prevFeedback.find('.feedback-attachments li');
+					var $form = $('.marking-and-feedback form', $row);
+					var $newComments = $form.find('textarea');
+					if ($newComments.val()) {
+						$newComments.val($newComments.val() + '\n\n')
+					}
+					$newComments.val($newComments.val() + $comments.val());
+					var $newAttachments = $form.find('ul.attachments');
+					$newAttachments.append($attachments.clone());
+					$newAttachments.parent('.form-group.hide').removeClass('hide');
+					$this.addClass('disabled').text('Feedback copied');
 				}
-				$newComments.val($newComments.val() + $comments.val());
-				var $newAttachments = $form.find('ul.attachments');
-				$newAttachments.append($attachments.clone());
-				$newAttachments.parent('.form-group.hide').removeClass('hide');
-				$this.addClass('disabled').text('Feedback copied');
 			});
 
 			var bigListOptions = {

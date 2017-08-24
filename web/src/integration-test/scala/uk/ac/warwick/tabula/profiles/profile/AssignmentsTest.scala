@@ -11,7 +11,7 @@ class AssignmentsTest extends BrowserTest with GivenWhenThen with FeaturesDriver
 	"A student" should "see assignments requiring submission" in {
 
 		Given("There is an assignment requiring a submission")
-		withAssignment("xxx01", "Fully featured assignment"){ assignmentId => }
+		withAssignment("xxx01", "Fully featured assignment"){_ => }
 
 		When("Student1 views their profile")
 		signIn as P.Student1 to Path(s"/profiles")
@@ -25,7 +25,7 @@ class AssignmentsTest extends BrowserTest with GivenWhenThen with FeaturesDriver
 
 	}
 
-	"A student" should "see assignments they have submited" in {
+	"A student" should "see assignments they have submitted" in {
 
 		Given("There is an assignment requiring a submission")
 		// Done in the before
@@ -49,7 +49,7 @@ class AssignmentsTest extends BrowserTest with GivenWhenThen with FeaturesDriver
 		val module = getModule("XXX02").get
 		click on module.findElement(By.className("mod-code"))
 
-		eventually(pageSource.contains("Feedback needs publishing (2 of 2)") should be (true))
+		eventuallyAjax(pageSource.contains("Feedback needs publishing (2 of 2)") should be (true))
 		click on linkText("Feedback needs publishing (2 of 2)")
 		click on checkbox("confirm")
 		cssSelector("div.submit-buttons button[type=submit]").findElement.get.underlying.click()

@@ -1,7 +1,6 @@
 package uk.ac.warwick.tabula.data
 
-import org.hibernate.criterion.Restrictions._
-import org.hibernate.criterion.{Order, Projections}
+import org.hibernate.criterion.Order
 import org.joda.time.DateTime.now
 import org.springframework.stereotype.Repository
 import uk.ac.warwick.tabula.AcademicYear
@@ -83,13 +82,13 @@ class ModuleDaoImpl extends ModuleDao with Daoisms {
 	def findModulesNamedLike(query: String): Seq[Module] = {
 		val maxResults = 20
 		val modulesByCode = session.newCriteria[Module]
-			.add(like("code", s"%${query.toLowerCase}%").ignoreCase)
+			.add(likeIgnoreCase("code", s"%${query.toLowerCase}%"))
 			.addOrder(Order.asc("code"))
 			.setMaxResults(maxResults).seq
 
 		if (modulesByCode.size < maxResults) {
 			val modulesByName = session.newCriteria[Module]
-				.add(like("name", s"%${query.toLowerCase}%").ignoreCase)
+				.add(likeIgnoreCase("name", s"%${query.toLowerCase}%"))
 				.addOrder(Order.asc("code"))
 				.setMaxResults(maxResults - modulesByCode.size).seq
 			(modulesByCode ++ modulesByName).distinct

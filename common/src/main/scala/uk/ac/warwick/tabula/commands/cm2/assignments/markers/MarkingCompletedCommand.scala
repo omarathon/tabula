@@ -7,7 +7,7 @@ import uk.ac.warwick.tabula.CurrentUser
 import uk.ac.warwick.tabula.commands.cm2.assignments.{FeedbackReleasedNotifier, ReleasedState}
 import uk.ac.warwick.tabula.data.HibernateHelpers
 import uk.ac.warwick.tabula.data.Transactions.transactional
-import uk.ac.warwick.tabula.data.model.markingworkflow.{FinalStage, MarkingWorkflowStage}
+import uk.ac.warwick.tabula.data.model.markingworkflow.FinalStage
 import uk.ac.warwick.tabula.data.model._
 import uk.ac.warwick.tabula.data.model.notifications.cm2.{ReleaseToMarkerNotification, ReturnToMarkerNotification}
 import uk.ac.warwick.tabula.events.NotificationHandling
@@ -18,8 +18,8 @@ import uk.ac.warwick.userlookup.User
 import scala.collection.JavaConverters._
 
 object MarkingCompletedCommand {
-	def apply(assignment: Assignment, marker: User, submitter: CurrentUser, stage: MarkingWorkflowStage) =
-		new MarkingCompletedCommandInternal(assignment, marker, submitter, stage)
+	def apply(assignment: Assignment, marker: User, submitter: CurrentUser, stagePosition: Int) =
+		new MarkingCompletedCommandInternal(assignment, marker, submitter, stagePosition)
 			with ComposableCommand[Seq[AssignmentFeedback]]
 			with MarkingCompletedValidation
 			with MarkingCompletedPermissions
@@ -30,7 +30,7 @@ object MarkingCompletedCommand {
 			with FeedbackReleasedNotifier
 }
 
-class MarkingCompletedCommandInternal(val assignment: Assignment, val marker: User, val submitter: CurrentUser, val stage: MarkingWorkflowStage)
+class MarkingCompletedCommandInternal(val assignment: Assignment, val marker: User, val submitter: CurrentUser, val stagePosition: Int)
 	extends CommandInternal[Seq[AssignmentFeedback]] with MarkingCompletedState with ReleasedState with MarkingCompletedValidation {
 
 	self: CM2MarkingWorkflowServiceComponent with FinaliseFeedbackComponent with PopulateMarkerFeedbackComponent =>
@@ -38,7 +38,15 @@ class MarkingCompletedCommandInternal(val assignment: Assignment, val marker: Us
 	def applyInternal(): Seq[AssignmentFeedback] = transactional() {
 
 		val feedback = feedbackForRelease.map(mf => HibernateHelpers.initialiseAndUnproxy(mf.feedback)).collect{ case f: AssignmentFeedback => f }
-		newReleasedFeedback = cm2MarkingWorkflowService.progressFeedback(stage, feedback).asJava
+
+		val feedbackByStage = cm2MarkingWorkflowService.getAllFeedbackForMarker(assignment, marker)
+			.filterKeys(_.order == stagePosition)
+			.mapValues(_.filter(feedbackForRelease.contains))
+
+		newReleasedFeedback = feedbackByStage.flatMap{case (stage, mf) =>
+			val f = mf.map(mf => HibernateHelpers.initialiseAndUnproxy(mf.feedback)).collect{ case f: AssignmentFeedback => f }
+			cm2MarkingWorkflowService.progressFeedback(stage, f)
+		}.toSeq.asJava
 
 		val toPopulate = newReleasedFeedback.asScala.filter(_.stage.populateWithPreviousFeedback)
 		if (toPopulate.nonEmpty) {
@@ -105,7 +113,7 @@ trait MarkingCompletedState extends CanProxy with UserAware {
 	val marker: User
 	val user: User = marker
 	val submitter: CurrentUser
-	val stage: MarkingWorkflowStage
+	val stagePosition: Int
 
 	// Pre-submit validation
 	def noMarks: Seq[MarkerFeedback] = markerFeedback.asScala.filter(!_.hasMark)

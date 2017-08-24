@@ -44,7 +44,7 @@ trait AddModuleCommandValidation extends SelfValidating {
 		ValidationUtils.rejectIfEmptyOrWhitespace(errors, "code", "NotEmpty")
 		ValidationUtils.rejectIfEmptyOrWhitespace(errors, "name", "NotEmpty")
 
-		if (code.hasText && !code.matches("^[a-z0-9][a-z0-9\\-]*[a-z0-9]$")) {
+		if (code.hasText && !code.matches("^[a-z0-9][a-z0-9\\-\\.]*[a-z0-9]$")) {
 			errors.rejectValue("code", "code.invalid.module")
 		}
 
