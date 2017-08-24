@@ -10,4 +10,8 @@
 	<p>
 		<a href="<@routes.cm2.assignment assignment />"><@routes.cm2.assignment assignment /></a>
 	</p>
+
+	<p>
+		<a href="<@routes.cm2.assignmentsubmissionsandfeedbacksummary assignment />">Return to assignment info</a>
+	</p>
 </#escape>
