@@ -216,9 +216,9 @@
 						<div class="col-md-2">
 							<#assign assignmentLink><#compress>
 								<#if isSelf>
-									<@routes.coursework.assignment enhancedAssignment.assignment />
+									<@routes.cm2.assignment enhancedAssignment.assignment />
 								<#else>
-									<@routes.coursework.assignment_in_profile enhancedAssignment.assignment member />
+									<@routes.cm2.assignment_in_profile enhancedAssignment.assignment member />
 								</#if>
 							</#compress></#assign>
 							<a href="${assignmentLink}?returnTo=${info.requestedUri}" class="btn btn-primary btn-block">View feedback</a>
