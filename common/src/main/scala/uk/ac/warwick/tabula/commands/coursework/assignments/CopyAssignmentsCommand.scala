@@ -80,7 +80,7 @@ abstract class CopyAssignmentsCommand(val department: Department, val modules: S
 		newAssignment.includeInFeedbackReportWithoutSubmissions = assignment.includeInFeedbackReportWithoutSubmissions
 		newAssignment.automaticallyReleaseToMarkers = assignment.automaticallyReleaseToMarkers
 		newAssignment.automaticallySubmitToTurnitin = assignment.automaticallySubmitToTurnitin
-		newAssignment.anonymousMarking = assignment.anonymousMarking
+		newAssignment.anonymity = assignment.anonymity
 
 		newAssignment.addDefaultFields()
 

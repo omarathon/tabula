@@ -4,6 +4,7 @@ import org.apache.poi.ss.usermodel.{ComparisonOperator, IndexedColors, Row, Shee
 import org.apache.poi.ss.util.{CellRangeAddress, WorkbookUtil}
 import org.apache.poi.xssf.streaming.SXSSFWorkbook
 import uk.ac.warwick.tabula.commands._
+import uk.ac.warwick.tabula.data.model.AssignmentAnonymity.FullyAnonymous
 import uk.ac.warwick.tabula.data.model.{Assessment, Assignment, MarkerFeedback}
 import uk.ac.warwick.tabula.helpers.UserOrderingByIds._
 import uk.ac.warwick.tabula.permissions.Permissions
@@ -86,7 +87,7 @@ class GenerateOwnMarksTemplateCommandInternal(val assignment: Assignment, val ma
 
 		// add header row
 		val header = sheet.createRow(0)
-		val idHeader = if(assignment.anonymousMarking) "ID" else "University ID"
+		val idHeader = if(assignment.anonymity == FullyAnonymous) "ID" else "University ID"
 		header.createCell(0).setCellValue(idHeader)
 		header.createCell(1).setCellValue("Mark")
 		header.createCell(2).setCellValue("Grade")
@@ -106,7 +107,7 @@ class GenerateOwnMarksTemplateCommandInternal(val assignment: Assignment, val ma
 			val previousMarkerFeedback: Seq[MarkerFeedback] = feedback.markerFeedback.asScala.filter(_.stage.order < feedback.currentStageIndex)
 
 			val row = sheet.createRow(i + 1)
-			val id = if(assignment.anonymousMarking) {
+			val id = if(assignment.anonymity == FullyAnonymous) {
 				feedback.anonymousId.map(_.toString).getOrElse("")
 			} else {
 				Option(currentMarkerFeedback.student.getWarwickId).getOrElse(currentMarkerFeedback.student.getUserId)

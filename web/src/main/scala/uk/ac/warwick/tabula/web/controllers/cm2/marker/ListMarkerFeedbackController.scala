@@ -7,7 +7,7 @@ import uk.ac.warwick.tabula.CurrentUser
 import uk.ac.warwick.tabula.commands.Appliable
 import uk.ac.warwick.tabula.commands.cm2.assignments.markers.ListMarkerFeedbackCommand.EnhancedFeedbackForOrderAndStage
 import uk.ac.warwick.tabula.commands.cm2.assignments.markers.{ListMarkerFeedbackCommand, ListMarkerFeedbackState}
-import uk.ac.warwick.tabula.data.model.Assignment
+import uk.ac.warwick.tabula.data.model.{Assignment, AssignmentAnonymity}
 import uk.ac.warwick.tabula.helpers.cm2.SubmissionAndFeedbackInfoFilters.SubmissionStates._
 import uk.ac.warwick.tabula.helpers.cm2.SubmissionAndFeedbackInfoFilters.PlagiarismStatuses._
 import uk.ac.warwick.tabula.helpers.cm2.SubmissionAndFeedbackInfoFilters.Statuses._
@@ -41,7 +41,8 @@ class ListMarkerFeedbackController extends CourseworkController {
 				"feedbackByOrderAndStage" -> command.apply(),
 				"assignment" -> command.assignment,
 				"workflowType" -> workflow.workflowType,
-				"marker" -> command.marker
+				"marker" -> command.marker,
+				"AssignmentAnonymity" -> AssignmentAnonymity
 			).noLayout()
 		} else {
 			Mav("cm2/admin/assignments/markers/assignment",

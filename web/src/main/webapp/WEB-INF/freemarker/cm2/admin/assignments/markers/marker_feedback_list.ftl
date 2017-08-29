@@ -52,8 +52,10 @@
 				<thead>
 				<tr>
 					<th class="check-col"><@bs3form.selector_check_all /></th>
-					<#if assignment.anonymousMarking>
+					<#if assignment.anonymity.equals(AssignmentAnonymity.FullyAnonymous)>
 						<th class="student-col">ID</th>
+					<#elseif assignment.anonymity.equals(AssignmentAnonymity.IDOnly)>
+						<th class="student-col">University ID</th>
 					<#else>
 						<th class="student-col">University ID</th>
 						<th class="student-col">First name</th>
@@ -68,7 +70,7 @@
 						<#list enhancedMarkerFeedbacks as emf>
 							<#assign mf = emf.markerFeedback />
 							<#assign student = mf.student />
-							<#assign studentId><#if assignment.anonymousMarking>${mf.feedback.anonymousId}<#else>${student.userId}</#if></#assign>
+							<#assign studentId><#if assignment.anonymity.equals(AssignmentAnonymity.FullyAnonymous)>${mf.feedback.anonymousId}<#else>${student.userId}</#if></#assign>
 							<tr
 								data-toggle="collapse"
 								data-target="#${stage.name}-${studentId}"
@@ -77,9 +79,12 @@
 								<td class="check-col">
 									<@bs3form.selector_check_row name="markerFeedback" value="${mf.id}" />
 								</td>
-								<#if assignment.anonymousMarking>
+								<#if assignment.anonymity.equals(AssignmentAnonymity.FullyAnonymous)>
 									<#assign colspan = 4>
 									<td class="toggle-icon-large student-col"><span class=""></span>Student${mf.feedback.anonymousId}</td>
+								<#elseif assignment.anonymity.equals(AssignmentAnonymity.IDOnly)>
+									<#assign colspan = 4>
+									<td class="toggle-icon-large student-col"><span class=""></span>${mf.feedback.studentIdentifier!""}</td>
 								<#else>
 									<#assign colspan = 6>
 									<td class="toggle-icon-large student-col">${mf.feedback.studentIdentifier!""}</td>
