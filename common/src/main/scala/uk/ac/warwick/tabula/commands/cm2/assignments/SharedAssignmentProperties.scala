@@ -10,6 +10,7 @@ import uk.ac.warwick.tabula.data.model._
 import uk.ac.warwick.tabula.data.model.forms.{CommentField, FileField, MarkerSelectField, WordCountField}
 import uk.ac.warwick.tabula.services.{AutowiringZipServiceComponent, ZipService, ZipServiceComponent}
 
+import scala.beans.BeanProperty
 import scala.collection.JavaConversions._
 
 /**
@@ -64,8 +65,11 @@ trait SharedAssignmentFeedbackProperties extends BooleanAssignmentFeedbackProper
 }
 
 trait SharedAssignmentStudentProperties extends BooleanAssignmentStudentProperties {
+
+	var anonymity: AssignmentAnonymity =_
+
 	def copySharedStudentFrom(assignment: Assignment): Unit = {
-		anonymousMarking = assignment.anonymousMarking
+		anonymity = assignment.anonymity
 	}
 
 	def copySharedStudentTo(assignment: Assignment): Unit = {

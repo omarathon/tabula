@@ -46,7 +46,9 @@ class EditAssignmentDetailsController extends AbstractAssignmentController {
 			"canEditWorkflowType" -> !assignment.isReleasedForMarking,
 			// if the current workflow type isn't Single use then allow markers to be deleted if we switch to it
 			"canDeleteMarkers" -> canDeleteMarkers,
-			"canDeleteAssignment" -> canDeleteAssignment
+			"canDeleteAssignment" -> canDeleteAssignment,
+			"possibleAnonymityOptions" -> AssignmentAnonymity.values,
+			"departmentAnonymity" -> (if(module.adminDepartment.showStudentName) AssignmentAnonymity.NameAndID else AssignmentAnonymity.IDOnly)
 		)
 			.crumbsList(Breadcrumbs.assignment(assignment))
 	}

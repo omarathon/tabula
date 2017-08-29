@@ -46,7 +46,7 @@ class CopyAssignmentsCommandTest extends TestBase with Mockito {
 		assignment.allowExtensionsAfterCloseDate = true
 		assignment.summative = false
 		assignment.assignmentService = smartMock[AssessmentService]
-		assignment.anonymousMarking = assignment.anonymousMarking
+		assignment.anonymity = assignment.anonymity
 		assignment.workflowCategory = Some(WorkflowCategory.NotDecided)
 
 	}

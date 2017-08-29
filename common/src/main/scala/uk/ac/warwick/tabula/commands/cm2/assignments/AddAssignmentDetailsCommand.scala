@@ -13,6 +13,7 @@ import uk.ac.warwick.tabula.permissions.Permissions
 import uk.ac.warwick.tabula.services._
 import uk.ac.warwick.tabula.system.permissions.{PermissionsChecking, PermissionsCheckingMethods, RequiresPermissionsChecking}
 import uk.ac.warwick.tabula.JavaImports._
+import uk.ac.warwick.tabula.data.model.AssignmentAnonymity.{IDOnly, NameAndID}
 
 object CreateAssignmentDetailsCommand {
   def apply(module: Module, academicYear: AcademicYear) =
@@ -106,6 +107,7 @@ trait AssignmentDetailsCopy extends ModifyAssignmentDetailsCommandState with Sha
       assignment.cm2MarkingWorkflow = reusableWorkflow
     }
     assignment.cm2Assignment = true
+		assignment.anonymity = anonymity
     copySharedDetailTo(assignment)
   }
 }
@@ -138,6 +140,8 @@ trait ModifyAssignmentDetailsCommandState {
   lazy val department: Department = module.adminDepartment
   lazy val availableWorkflows: Seq[CM2MarkingWorkflow] =
     cm2MarkingWorkflowService.getReusableWorkflows(department, academicYear)
+
+  var anonymity:AssignmentAnonymity = if (module.adminDepartment.showStudentName) NameAndID else IDOnly
 
 }
 
@@ -175,6 +179,9 @@ trait ModifyAssignmentDetailsValidation extends SelfValidating with ModifyMarkin
       else
         markerValidation(errors, workflowType)
     }
+
+		// TODO - VALIDATION ON NULL anonymity?
+
   }
 }
 
@@ -215,7 +222,8 @@ trait CreateAssignmentDetailsDescription extends Describable[Assignment] {
       "openDate" -> openDate,
       "closeDate" -> closeDate,
       "workflowCtg" -> Option(workflowCategory).map(_.code).orNull,
-      "workflowType" -> Option(workflowType).map(_.name).orNull
+      "workflowType" -> Option(workflowType).map(_.name).orNull,
+			"anonymity" -> Option(anonymity).map(_.code).orNull
     )
   }
 
