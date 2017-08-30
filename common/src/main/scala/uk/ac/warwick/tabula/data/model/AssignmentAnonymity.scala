@@ -4,6 +4,7 @@ import java.sql.Types
 
 import org.hibernate.`type`.StandardBasicTypes
 import uk.ac.warwick.tabula.system.TwoWayConverter
+import uk.ac.warwick.tabula.helpers.StringUtils._
 
 
 sealed abstract class AssignmentAnonymity(val code: String, val description: String) {
@@ -30,7 +31,7 @@ object AssignmentAnonymity {
 	def values: Seq[AssignmentAnonymity] = Seq(NameAndID, IDOnly)
 
 	def fromCode(code: String): AssignmentAnonymity =
-		if (code == null) null
+		if (code == null || code.isEmptyOrWhitespace) null
 		else values.find{_.code == code} match {
 			case Some(method) => method
 			case None => throw new IllegalArgumentException()

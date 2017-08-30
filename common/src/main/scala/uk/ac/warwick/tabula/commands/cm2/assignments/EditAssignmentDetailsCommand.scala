@@ -82,7 +82,7 @@ class EditAssignmentDetailsCommandInternal(override val assignment: Assignment) 
 		closeDate = assignment.closeDate
 		workflowCategory = assignment.workflowCategory.getOrElse(WorkflowCategory.NotDecided)
 		reusableWorkflow = Option(assignment.cm2MarkingWorkflow).filter(_.isReusable).orNull
-		anonymity = assignment.anonymity
+		anonymity = assignment._anonymity
 		workflow.foreach(w => workflowType = w.workflowType)
 		extractMarkers match { case (a, b) =>
 			markersA = JArrayList(a)

@@ -141,7 +141,7 @@ trait ModifyAssignmentDetailsCommandState {
   lazy val availableWorkflows: Seq[CM2MarkingWorkflow] =
     cm2MarkingWorkflowService.getReusableWorkflows(department, academicYear)
 
-  var anonymity:AssignmentAnonymity = if (module.adminDepartment.showStudentName) NameAndID else IDOnly
+  var anonymity:AssignmentAnonymity = _
 
 }
 
@@ -179,9 +179,6 @@ trait ModifyAssignmentDetailsValidation extends SelfValidating with ModifyMarkin
       else
         markerValidation(errors, workflowType)
     }
-
-		// TODO - VALIDATION ON NULL anonymity?
-
   }
 }
 
