@@ -11,6 +11,7 @@ import uk.ac.warwick.tabula.AcademicYear
 import org.springframework.stereotype.Repository
 import uk.ac.warwick.spring.Wire
 import uk.ac.warwick.tabula.data.model.groups.SmallGroupSet
+import uk.ac.warwick.tabula.services.ManualMembershipInfo
 import scala.collection.JavaConverters._
 
 trait AssessmentMembershipDaoComponent {
@@ -77,6 +78,9 @@ trait AssessmentMembershipDao {
 	def save(gb: GradeBoundary): Unit
 	def deleteGradeBoundaries(marksCode: String): Unit
 	def getGradeBoundaries(marksCode: String): Seq[GradeBoundary]
+
+	def departmentsManualMembership(department: Department, academicYear: AcademicYear): ManualMembershipInfo
+	def departmentsWithManualAssessmentsOrGroups(academicYear: AcademicYear): Seq[Department]
 }
 
 @Repository
@@ -308,4 +312,44 @@ class AssessmentMembershipDaoImpl extends AssessmentMembershipDao with Daoisms w
 			.add(is("marksCode", marksCode))
 			.seq
 	}
+
+	def departmentsManualMembership(department: Department, academicYear: AcademicYear): ManualMembershipInfo = {
+		val assignments = session.createSQLQuery(s"""
+			select a.* from Assignment a
+				join Module m on a.module_id = m.id
+				join Department d on m.department_id = d.id and a.academicyear = :academicYear and d.code = :departmentCode
+				where a.membersgroup_id in (select distinct(i.group_id) from usergroupinclude i where i.group_id = a.membersgroup_id)
+			""")
+			.addEntity(classOf[Assignment])
+			.setString("academicYear", academicYear.startYear.toString)
+			.setString("departmentCode", department.code)
+			.list.asScala.asInstanceOf[Seq[Assignment]]
+
+		val smallGroupSets = session.createSQLQuery(s"""
+			select s.* from smallgroupset s
+				join module m on s.module_id = m.id
+				join department d on m.department_id = d.id and s.academicyear = :academicYear and d.code = :departmentCode
+				where s.membersgroup_id in (select distinct(i.group_id) from usergroupinclude i where i.group_id = s.membersgroup_id)
+			""")
+			.addEntity(classOf[SmallGroupSet])
+			.setString("academicYear", academicYear.startYear.toString)
+			.setString("departmentCode", department.code)
+			.list.asScala.asInstanceOf[Seq[SmallGroupSet]]
+
+		ManualMembershipInfo(department, assignments, smallGroupSets)
+	}
+
+	def departmentsWithManualAssessmentsOrGroups(academicYear: AcademicYear): Seq[Department] = session.createSQLQuery("""
+		select d.id from department d
+		  join module m on m.department_id = d.id
+		  left join assignment a on a.module_id = m.id and a.academicyear = :academicYear and a.membersgroup_id in
+		  	(select distinct(i.group_id) from usergroupinclude i where i.group_id = a.membersgroup_id)
+		  left join smallgroupset s on s.module_id = m.id and s.academicyear = :academicYear and s.membersgroup_id in
+		  	(select distinct(i.group_id) from usergroupinclude i where i.group_id = s.membersgroup_id)
+		  where not (s.id is null and a.id is null)
+		  group by (d.id)
+	""")
+		.addEntity(classOf[Department])
+		.setString("academicYear", academicYear.startYear.toString)
+		.list.asScala.asInstanceOf[Seq[Department]]
 }

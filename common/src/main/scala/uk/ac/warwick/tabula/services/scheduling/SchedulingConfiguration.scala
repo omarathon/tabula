@@ -110,6 +110,7 @@ object SchedulingConfiguration {
 		CronTriggerJob[ImportProfilesJob](cronExpression = "0 30 0 * * ?"), // 12:30am
 		CronTriggerJob[StampMissingRowsJob](cronExpression = "23 0 0 * * ?"), // 11:00pm
 		CronTriggerJob[ImportAssignmentsJob](cronExpression = "0 0 7 * * ?"), // 7am
+		CronTriggerJob[ManualMembershipWarningJob](cronExpression = "0 0 9 ? 1/1 MON#1 *"), // first Monday of the month at 9am
 		CronTriggerJob[ImportModuleListsJob](cronExpression = "0 0 8 * * ?"), // 8am
 
 		CronTriggerJob[CleanupTemporaryFilesJob](cronExpression = "0 0 2 * * ?"), // 2am

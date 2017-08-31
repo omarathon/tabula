@@ -152,6 +152,7 @@ object Permissions {
 
 	object Department {
 		case object ArrangeRoutesAndModules extends Permission("Sort routes and modules into sub-departments")
+		case object ViewManualMembershipSummary extends Permission("View all assignments and small group sets with manually added students")
 		case object ManageExtensionSettings extends Permission("Manage extension settings")
 		case object ManageDisplaySettings extends Permission("Manage display settings")
 		case object ManageNotificationSettings extends Permission("Manage notification settings")
