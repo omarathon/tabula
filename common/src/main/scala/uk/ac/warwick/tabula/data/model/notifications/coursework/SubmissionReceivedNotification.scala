@@ -4,7 +4,7 @@ import javax.persistence.{DiscriminatorValue, Entity}
 
 import uk.ac.warwick.spring.Wire
 import uk.ac.warwick.tabula.CurrentUser
-import uk.ac.warwick.tabula.coursework.web.Routes
+import uk.ac.warwick.tabula.cm2.web.Routes
 import uk.ac.warwick.tabula.data.model.NotificationPriority.Warning
 import uk.ac.warwick.tabula.data.model.UserSettings
 import uk.ac.warwick.tabula.data.model.permissions.{GrantedPermission, RoleOverride}
@@ -56,7 +56,7 @@ class SubmissionReceivedNotification extends SubmissionNotification {
 		}
 	}
 
-	def url: String = Routes.admin.assignment.submissionsandfeedback(assignment)
+	def url: String = Routes.admin.assignment.submissionsandfeedback.list(assignment)
 	def urlTitle = "view all submissions for this assignment"
 
 	def recipients: Seq[User] = {

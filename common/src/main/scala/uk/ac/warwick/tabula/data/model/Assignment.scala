@@ -9,6 +9,7 @@ import org.joda.time.{DateTime, LocalDate}
 import uk.ac.warwick.spring.Wire
 import uk.ac.warwick.tabula.JavaImports._
 import uk.ac.warwick.tabula.data.PostLoadBehaviour
+import uk.ac.warwick.tabula.data.model.AssignmentAnonymity.{IDOnly, NameAndID}
 import uk.ac.warwick.tabula.data.model.forms.{WordCountField, _}
 import uk.ac.warwick.tabula.data.model.markingworkflow.CM2MarkingWorkflow
 import uk.ac.warwick.tabula.data.model.permissions.AssignmentGrantedRole
@@ -145,8 +146,16 @@ class Assignment
 	var summative: JBoolean = _
 	var dissertation: JBoolean = _
 	var allowExtensions: JBoolean = _
-	@Column(name="anonymous_marking")
-	var anonymousMarking: JBoolean = _
+
+	@Column(name="anonymous_marking_method")
+	@Type(`type` = "uk.ac.warwick.tabula.data.model.AssignmentAnonymityUserType")
+	var _anonymity: AssignmentAnonymity = _
+	// if the assignment doesn't have a setting use the department default
+	def anonymity: AssignmentAnonymity = if(_anonymity != null) _anonymity else {
+		if (module.adminDepartment.showStudentName) NameAndID else IDOnly
+	}
+	def anonymity_= (anonymity: AssignmentAnonymity) { _anonymity = anonymity }
+
 	var cm2Assignment: JBoolean = false
 
 	var genericFeedback: String = ""
@@ -886,12 +895,9 @@ trait BooleanAssignmentFeedbackProperties {
 }
 
 trait BooleanAssignmentStudentProperties {
-	@BeanProperty var anonymousMarking: JBoolean = false
 	@BeanProperty var hiddenFromStudents: JBoolean = false
 
 	def copyStudentBooleansTo(assignment: Assignment) {
-		assignment.anonymousMarking = anonymousMarking
-
 		// You can only hide an assignment, no un-hiding.
 		if (hiddenFromStudents) assignment.hideFromStudents()
 	}

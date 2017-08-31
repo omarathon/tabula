@@ -189,7 +189,7 @@
 		<bean class="uk.ac.warwick.tabula.data.model.markingworkflow.StringToMarkingWorkflowStage" />
 		<bean class="uk.ac.warwick.tabula.data.convert.AssignmentInfoFilterConverter"/>
 		<bean class="uk.ac.warwick.tabula.data.convert.SubmissionAndFeedbackInfoFilterConverter"/>
-
+		<bean class="uk.ac.warwick.tabula.data.model.AssignmentAnonymityConverter" />
 	</util:list>
 
 	<bean id="typeConverter"

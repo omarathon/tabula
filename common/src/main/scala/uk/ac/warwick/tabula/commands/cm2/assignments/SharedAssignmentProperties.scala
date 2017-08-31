@@ -4,11 +4,10 @@ import javax.validation.constraints.{Max, Min}
 
 import org.hibernate.validator.constraints.Length
 import org.springframework.validation.Errors
-import uk.ac.warwick.spring.Wire
 import uk.ac.warwick.tabula.JavaImports._
 import uk.ac.warwick.tabula.data.model._
 import uk.ac.warwick.tabula.data.model.forms.{CommentField, FileField, MarkerSelectField, WordCountField}
-import uk.ac.warwick.tabula.services.{AutowiringZipServiceComponent, ZipService, ZipServiceComponent}
+import uk.ac.warwick.tabula.services.{AutowiringZipServiceComponent, ZipServiceComponent}
 
 import scala.collection.JavaConversions._
 
@@ -64,8 +63,11 @@ trait SharedAssignmentFeedbackProperties extends BooleanAssignmentFeedbackProper
 }
 
 trait SharedAssignmentStudentProperties extends BooleanAssignmentStudentProperties {
+
+	var anonymity: AssignmentAnonymity =_
+
 	def copySharedStudentFrom(assignment: Assignment): Unit = {
-		anonymousMarking = assignment.anonymousMarking
+		anonymity = assignment._anonymity // get the underlying field in case it's null
 	}
 
 	def copySharedStudentTo(assignment: Assignment): Unit = {

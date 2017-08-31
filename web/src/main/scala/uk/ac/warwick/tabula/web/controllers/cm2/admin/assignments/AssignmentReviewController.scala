@@ -31,7 +31,8 @@ class AssignmentReviewController extends CourseworkController {
 			"module" -> assignment.module,
 			"assignment" -> assignment,
 			"membershipInfo" -> assignment.membershipInfo,
-			"sharedPropertiesForm" -> sharedPropertiesForm)
+			"sharedPropertiesForm" -> sharedPropertiesForm,
+			"AssignmentAnonymity" -> AssignmentAnonymity)
 			.crumbsList(Breadcrumbs.assignment(assignment))
 	}
 

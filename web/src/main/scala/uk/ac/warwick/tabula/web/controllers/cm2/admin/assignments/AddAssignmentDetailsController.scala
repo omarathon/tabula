@@ -51,7 +51,10 @@ class AddAssignmentDetailsController extends AbstractAssignmentController
 			"academicYear" -> form.academicYear,
 			"reusableWorkflows" -> form.availableWorkflows,
 			"availableWorkflows" -> MarkingWorkflowType.values.sorted,
-			"canDeleteMarkers" -> true)
+			"canDeleteMarkers" -> true,
+			"possibleAnonymityOptions" -> AssignmentAnonymity.values,
+			"departmentAnonymity" -> (if(module.adminDepartment.showStudentName) AssignmentAnonymity.NameAndID else AssignmentAnonymity.IDOnly)
+		)
 			.crumbsList(Breadcrumbs.module(module, form.academicYear, active = true))
 			.secondCrumbs(academicYearBreadcrumbs(academicYear)(Routes.admin.assignment.createAssignmentDetails(module, _)): _*)
 	}
