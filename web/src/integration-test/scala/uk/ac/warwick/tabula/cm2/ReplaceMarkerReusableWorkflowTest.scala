@@ -43,7 +43,7 @@ class ReplaceMarkerReusableWorkflowTest extends BrowserTest with CourseworkFixtu
 	}
 
 	private def replaceIncompleteMarker(): Unit = {
-
+		When("I select to modify the Old single marker workflow")
 		val currentMarker = id("main").webElement.findElements(By.tagName("td")).get(2).getText == "Marker: tabula-functest-marker1 user"
 		currentMarker should be(true)
 
@@ -63,6 +63,7 @@ class ReplaceMarkerReusableWorkflowTest extends BrowserTest with CourseworkFixtu
 			currentUrl should include("/replace")
 		}
 
+		When("I replace the marker with new marker")
 		val markerToReplace2 = id("oldMarker").webElement
 		click on markerToReplace2
 
@@ -81,13 +82,14 @@ class ReplaceMarkerReusableWorkflowTest extends BrowserTest with CourseworkFixtu
 			currentUrl should include(s"/xxx/${currentYear.startYear}/markingworkflows")
 		}
 
+		And("Marker should be updated")
 		val addedMarker = id("main").webElement.findElements(By.tagName("td")).get(2).getText == "Marker: tabula-functest-marker2 user"
 		addedMarker should be (true)
 
 	}
 
 	private def replaceCompletedMarker(): Unit = {
-
+		When("I select to modify the Single marker workflow")
 		val currentMarker = id("main").webElement.findElements(By.tagName("td")).get(6).getText == "Marker: tabula-functest-marker1 user"
 		currentMarker should be(true)
 
@@ -107,7 +109,7 @@ class ReplaceMarkerReusableWorkflowTest extends BrowserTest with CourseworkFixtu
 			currentUrl should include("/replace")
 		}
 
-
+		When("I replace the marker with new marker")
 		val markerToReplace = id("oldMarker").webElement
 		click on markerToReplace
 
@@ -120,11 +122,13 @@ class ReplaceMarkerReusableWorkflowTest extends BrowserTest with CourseworkFixtu
 		val newMarker = id("main").webElement.findElement(By.cssSelector("input[name=newMarker]"))
 		newMarker.sendKeys("tabula-functest-marker3")
 
+		And("Confirm to replaced completed marking assignments")
 		val replaceFinished = id("main").webElement.findElement(By.id("includeCompleted1"))
 		click on replaceFinished
 
 		replaceFinished.isSelected should be (true)
 
+		And("Confirm awareness of needing to notify students")
 		val confirmNotify = id("main").webElement.findElement(By.id("confirm1"))
 		click on confirmNotify
 
@@ -137,7 +141,7 @@ class ReplaceMarkerReusableWorkflowTest extends BrowserTest with CourseworkFixtu
 			Then("I should reach the modify workflows page again")
 			currentUrl should include(s"/xxx/${currentYear.startYear}/markingworkflows")
 		}
-
+		And("Marker should be updated")
 		val addedMarker = id("main").webElement.findElements(By.tagName("td")).get(6).getText == "Marker: tabula-functest-marker3 user"
 		addedMarker should be (true)
 
