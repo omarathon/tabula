@@ -91,7 +91,7 @@ class ReplaceMarkerReusableWorkflowTest extends BrowserTest with CourseworkFixtu
 		val currentMarker = id("main").webElement.findElements(By.tagName("td")).get(6).getText == "Marker: tabula-functest-marker1 user"
 		currentMarker should be(true)
 
-		val modifyBtn = id("main").webElement.findElement(By.cssSelector("td a.btn-default"))
+		val modifyBtn = id("main").webElement.findElements(By.cssSelector("td a.btn-default")).get(2)
 		click on modifyBtn
 
 		eventuallyAjax {
@@ -120,6 +120,16 @@ class ReplaceMarkerReusableWorkflowTest extends BrowserTest with CourseworkFixtu
 		val newMarker = id("main").webElement.findElement(By.cssSelector("input[name=newMarker]"))
 		newMarker.sendKeys("tabula-functest-marker3")
 
+		val replaceFinished = id("main").webElement.findElement(By.id("includeCompleted1"))
+		click on replaceFinished
+
+		replaceFinished.isSelected should be (true)
+
+		val confirmNotify = id("main").webElement.findElement(By.id("confirm1"))
+		click on confirmNotify
+
+		confirmNotify.isSelected should be (true)
+
 		val saveButton = cssSelector("input.btn-primary")
 		click on saveButton
 
@@ -128,7 +138,7 @@ class ReplaceMarkerReusableWorkflowTest extends BrowserTest with CourseworkFixtu
 			currentUrl should include(s"/xxx/${currentYear.startYear}/markingworkflows")
 		}
 
-		val addedMarker = id("main").webElement.findElements(By.tagName("td")).get(2).getText == "Marker: tabula-functest-marker3 user"
+		val addedMarker = id("main").webElement.findElements(By.tagName("td")).get(6).getText == "Marker: tabula-functest-marker3 user"
 		addedMarker should be (true)
 
 	}
