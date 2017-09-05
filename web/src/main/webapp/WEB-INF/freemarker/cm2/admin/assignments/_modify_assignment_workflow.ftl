@@ -1,7 +1,7 @@
 <div class="workflow-fields single-use-workflow-fields reusable-workflow-picker">
 	<@bs3form.labelled_form_group path="anonymity" labelText="Anonymity">
 		<@f.select path="anonymity" class="form-control" >
-			<option value="" <#if !status.value??>selected</#if>>Use the department setting (currently ${departmentAnonymity.description?lower_case})</option>
+			<option value="" <#if !status.value??>selected</#if>>Use the department setting (currently ${departmentAnonymity.description})</option>
 			<@f.options items=possibleAnonymityOptions itemLabel="description" itemValue="code" />
 		</@f.select>
 		<div class="help-block"></div>
