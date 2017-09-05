@@ -40,7 +40,7 @@
 				Show student name with submission
 			</@bs3form.checkbox>
 			<div class="help-block">
-				If this option is enabled, all assignments in this department will display the student's name in place of their university ID.
+				When this setting is enabled, markers, moderators and module auditors see students' names and University IDs with submissions by default. You can override this setting at the assignment level.
 			</div>
 		</@bs3form.labelled_form_group>
 
