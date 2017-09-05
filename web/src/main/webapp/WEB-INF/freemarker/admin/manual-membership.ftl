@@ -22,7 +22,7 @@
 				</h4>
 				<ul>
 					<#list mapGet(assignmentsByModule, module) as assignment>
-						<li><a href="<@routes.cm2.assignmentstudents assignment "edit" />">${assignment.name}</a></li>
+						<li><a href="<@routes.cm2.assignmentstudents assignment "edit" />">${assignment.name}</a> (<@fmt.p assignment.members.size "manually added student" />)</li>
 					</#list>
 				</ul>
 			</#list>
@@ -39,7 +39,7 @@
 			</h4>
 			<ul>
 				<#list mapGet(smallGroupSetsByModule, module) as groupset>
-					<li><a href="<@routes.groups.editsetstudents groupset />">${groupset.name}</a></li>
+					<li><a href="<@routes.groups.editsetstudents groupset />">${groupset.name}</a> (<@fmt.p groupset.members.size "manually added student" />)</li>
 				</#list>
 			</ul>
 		</#list>

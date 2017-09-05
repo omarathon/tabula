@@ -283,6 +283,19 @@ class CompleteScheduledNotificationsController extends BaseSysadminController {
 	}
 }
 
+
+@Controller
+@RequestMapping(Array("/sysadmin/manual-membership-warning"))
+class ManualMembershipWarningController extends BaseSysadminController {
+
+	var scheduler: Scheduler = Wire[Scheduler]
+
+	@RequestMapping
+	def warn(): Mav = {
+		Redirect(Routes.sysadmin.jobs.quartzStatus(scheduler.scheduleNow[ManualMembershipWarningJob]()))
+	}
+}
+
 @Controller
 @RequestMapping(Array("/sysadmin/jobs/quartz-status"))
 class QuartzJobStatusController extends BaseSysadminController with AutowiringTopLevelUrlComponent {

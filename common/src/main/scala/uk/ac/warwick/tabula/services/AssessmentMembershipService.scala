@@ -76,7 +76,7 @@ trait AssessmentMembershipService {
 	def save(gb: GradeBoundary): Unit
 	def deleteGradeBoundaries(marksCode: String): Unit
 	def gradesForMark(component: AssessmentComponent, mark: Int): Seq[GradeBoundary]
-	def departmentsWithManualAssessmentsOrGroups(academicYear: AcademicYear): Seq[Department]
+	def departmentsWithManualAssessmentsOrGroups(academicYear: AcademicYear): Seq[DepartmentWithManualUsers]
 	def departmentsManualMembership(department: Department, academicYear: AcademicYear): ManualMembershipInfo
 }
 
@@ -210,7 +210,7 @@ class AssessmentMembershipServiceImpl
 		}
 	}
 
-	def departmentsWithManualAssessmentsOrGroups(academicYear: AcademicYear): Seq[Department] = dao.departmentsWithManualAssessmentsOrGroups(academicYear)
+	def departmentsWithManualAssessmentsOrGroups(academicYear: AcademicYear): Seq[DepartmentWithManualUsers] = dao.departmentsWithManualAssessmentsOrGroups(academicYear)
 
 	def departmentsManualMembership(department: Department, academicYear: AcademicYear): ManualMembershipInfo =
 		dao.departmentsManualMembership(department: Department, academicYear: AcademicYear)

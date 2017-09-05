@@ -35,7 +35,6 @@ class ManualMembershipSummaryController extends AdminController with DepartmentS
 		val assignmentsByModule = info.assignments.groupBy(_.module)
 		val smallGroupSetsByModule = info.smallGroupSets.groupBy(_.module)
 
-
 		Mav("admin/manual-membership",
 			"returnTo" -> getReturnTo(Routes.admin.department(department)),
 			"assignmentsByModule" -> TreeMap(assignmentsByModule.toSeq:_*),

@@ -16,7 +16,6 @@ class AssessmentMembershipDaoTest extends PersistenceTestBase {
 
 	trait Fixture {
 		val dept: Department = Fixtures.department("in")
-
 		val module1: Module = Fixtures.module("in101")
 		val module2: Module = Fixtures.module("in102")
 
@@ -189,7 +188,6 @@ class AssessmentMembershipDaoTest extends PersistenceTestBase {
 		transactional { _ =>
 			new Fixture {
 				val thisYear: AcademicYear = AcademicYear.guessSITSAcademicYearByDate(new DateTime())
-				assignmentMembershipService.departmentsWithManualAssessmentsOrGroups(thisYear) should be (Seq(dept))
 
 				assignment1.members.knownType.removeUserId("cuscav")
 				session.save(assignment1)
