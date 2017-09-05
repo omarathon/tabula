@@ -122,7 +122,9 @@ object MarkingWorkflowStage {
 	)
 
 	def unapply(code: String): Option[MarkingWorkflowStage] =
-		code.maybeText.flatMap { name => values.find(_.name == name) }
+		code.maybeText.flatMap { code =>
+			values.find(_.name == code).orElse(values.find(_.allocationName == code))
+		}
 
 	def fromCode(code: String): MarkingWorkflowStage = code match {
 		case null => null
