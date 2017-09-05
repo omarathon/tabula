@@ -5,6 +5,7 @@ import uk.ac.warwick.tabula.data.model.{Assignment, AssignmentFeedback, MarkerFe
 import uk.ac.warwick.tabula.data.model.notifications.cm2.ReleaseToMarkerNotification
 import uk.ac.warwick.tabula.helpers.Logging
 import uk.ac.warwick.tabula.JavaImports._
+import uk.ac.warwick.tabula.helpers.Tap._
 
 import scala.collection.JavaConverters._
 
@@ -16,10 +17,10 @@ trait FeedbackReleasedNotifier extends Notifies[Seq[AssignmentFeedback], Seq[Mar
 		// emit notifications to each marker that has new feedback
 		val markerMap : Map[String, Seq[MarkerFeedback]] = newReleasedFeedback.asScala.groupBy(_.marker.getUserId)
 
-		markerMap.map{ case (usercode, markerFeedback) if markerFeedback.nonEmpty =>
-			val notification = Notification.init(new ReleaseToMarkerNotification, user, markerFeedback, assignment)
-			notification.recipientUserId = usercode
-			notification
+		markerMap.map{ case (usercode, markerFeedback) if markerFeedback.nonEmpty && usercode != null =>
+			Notification.init(new ReleaseToMarkerNotification, user, markerFeedback, assignment).tap{n =>
+				n.recipientUserId = usercode
+			}
 		}.toSeq
 	}
 }
