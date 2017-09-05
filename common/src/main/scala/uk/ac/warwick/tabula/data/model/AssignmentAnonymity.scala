@@ -23,8 +23,8 @@ sealed abstract class AssignmentAnonymity(val code: String, val description: Str
 
 object AssignmentAnonymity {
 	// you can't infer from state alone whether there's a request outstanding - use extension.awaitingReview()
-	case object NameAndID extends AssignmentAnonymity("NameAndID", "Show name and university ID")
-	case object IDOnly extends AssignmentAnonymity("IDOnly", "Show university ID only")
+	case object NameAndID extends AssignmentAnonymity("NameAndID", "Show name and University ID")
+	case object IDOnly extends AssignmentAnonymity("IDOnly", "Show University ID only")
 	case object FullyAnonymous extends AssignmentAnonymity("FullyAnonymous", "Fully anonymous")
 
 	// Don't change this to a val https://warwick.slack.com/archives/C029QTGBN/p1493995125972397
