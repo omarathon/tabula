@@ -39,6 +39,7 @@ object AssignMarkersBySpreadsheetCommand {
 			with AssignMarkersBySpreadsheetState
 			with AssignMarkersBySpreadsheetBindListener
 			with AssignMarkersValidation
+			with ValidateConcurrentStages
 			with AssignMarkersPermissions
 			with AssignMarkersDescription
 			with AutowiringUserLookupComponent
@@ -68,16 +69,20 @@ abstract class AssignMarkersCommandInternal(val assignment: Assignment) extends 
 trait AssignMarkersBySpreadsheetBindListener extends BindListener {
 
 	this: UserLookupComponent with CM2MarkingWorkflowServiceComponent with MarkerAllocationExtractorComponent
-		with AssignMarkersBySpreadsheetState =>
+		with AssignMarkersBySpreadsheetState with ValidateConcurrentStages =>
 
 	override def onBind(result: BindingResult): Unit = transactional() {
 
 		val fileNames = file.fileNames.map(_.toLowerCase)
 		val invalidFiles = fileNames.filter(s => !AssignMarkersBySpreadsheetCommand.AcceptedFileExtensions.exists(s.endsWith))
 
+//		if (file.isMissing) {
+//			result.rejectValue("file", "file.missing")
+//		}
+
 		if (invalidFiles.nonEmpty) {
 			if (invalidFiles.size == 1) result.rejectValue("file", "file.wrongtype.one", Array(invalidFiles.mkString("")), "")
-			else result.rejectValue("", "file.wrongtype", Array(invalidFiles.mkString(", ")), "")
+			else result.rejectValue("file", "file.wrongtype", Array(invalidFiles.mkString(", ")), "")
 		}
 
 		if (!result.hasErrors) {
@@ -103,7 +108,7 @@ trait AssignMarkersBySpreadsheetBindListener extends BindListener {
 							Seq(MarkingWorkflowStage.fromCode(key) -> rowsToAllocations(rows))
 						}
 					}
-
+					validateConcurrentStages(_allocationMap, result)
 				}
 			}
 		}
@@ -119,13 +124,13 @@ trait AssignMarkersPermissions extends RequiresPermissionsChecking with Permissi
 	}
 }
 
-trait AssignMarkersValidation extends SelfValidating {
-	self: AssignMarkersState =>
-	def validate(errors: Errors): Unit = {
+trait ValidateConcurrentStages {
 
+	self :SelfValidating =>
+
+	def validateConcurrentStages(allocationMap: Map[MarkingWorkflowStage, Allocations], errors: Errors) {
 		val noDupesAllowed = allocationMap.filterKeys(_.stageAllocation)
 		val allocations = noDupesAllowed.values.toSeq
-		val stages = noDupesAllowed.keys.toSeq
 
 		val markers = allocations.flatMap(_.keys).toSet
 
@@ -136,10 +141,14 @@ trait AssignMarkersValidation extends SelfValidating {
 			if(dupes.nonEmpty) {
 				errors.reject("markingWorkflow.marker.noDupes", Array(marker.getFullName, dupes.map(_.getFullName).mkString(", ")), "")
 			}
-
 		})
-
 	}
+
+}
+
+trait AssignMarkersValidation extends SelfValidating with ValidateConcurrentStages {
+	self: AssignMarkersState =>
+	def validate(errors: Errors): Unit = validateConcurrentStages(allocationMap, errors)
 }
 
 trait AssignMarkersDescription extends Describable[Assignment] {
