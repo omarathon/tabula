@@ -6,6 +6,7 @@ import uk.ac.warwick.spring.Wire
 import uk.ac.warwick.tabula.AcademicYear
 import uk.ac.warwick.tabula.data.AssessmentMembershipDao
 import uk.ac.warwick.tabula.data.model._
+import uk.ac.warwick.tabula.data.model.groups.SmallGroupSet
 import uk.ac.warwick.tabula.helpers.StringUtils._
 import uk.ac.warwick.tabula.helpers.{FoundUser, Logging}
 import uk.ac.warwick.userlookup.{AnonymousUser, User}
@@ -75,8 +76,12 @@ trait AssessmentMembershipService {
 	def save(gb: GradeBoundary): Unit
 	def deleteGradeBoundaries(marksCode: String): Unit
 	def gradesForMark(component: AssessmentComponent, mark: Int): Seq[GradeBoundary]
+	def departmentsWithManualAssessmentsOrGroups(academicYear: AcademicYear): Seq[DepartmentWithManualUsers]
+	def departmentsManualMembership(department: Department, academicYear: AcademicYear): ManualMembershipInfo
 }
 
+// all the small group sets and assignments in Tabula for a department with manually added students
+case class ManualMembershipInfo(department: Department, assignments: Seq[Assignment], smallGroupSets: Seq[SmallGroupSet])
 
 
 @Service(value = "assignmentMembershipService")
@@ -204,6 +209,11 @@ class AssessmentMembershipServiceImpl
 				Seq()
 		}
 	}
+
+	def departmentsWithManualAssessmentsOrGroups(academicYear: AcademicYear): Seq[DepartmentWithManualUsers] = dao.departmentsWithManualAssessmentsOrGroups(academicYear)
+
+	def departmentsManualMembership(department: Department, academicYear: AcademicYear): ManualMembershipInfo =
+		dao.departmentsManualMembership(department: Department, academicYear: AcademicYear)
 
 }
 

@@ -144,7 +144,7 @@ class TurnitinLtiService extends Logging with DisposableBean with InitializingBe
 	override def afterPropertiesSet() {}
 
 	def submitAssignment(assignment: Assignment, user: CurrentUser): TurnitinLtiResponse = {
-		// 
+		//
 		// Don't allow an end date more than 1 year away, regardless of assignment properties
 		val customDueDate = Seq(TurnitinLtiService.assignmentEndDate(assignment), DateTime.now.plusYears(1)).min
 		doRequest(

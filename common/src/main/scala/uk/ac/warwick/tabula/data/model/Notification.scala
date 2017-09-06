@@ -299,7 +299,7 @@ trait UniversityIdRecipientNotification extends SingleRecipientNotification with
 	* If you need to support external users you must use UserIdRecipientNotification
 	*
 	* This is only here so we don't have to migrate a bunch of existing notification data as part of TAB-4838
-	* The horrible thing about this is that 'recipientUniversityId' may will usercodes for these Notifications after this is merged
+	* The horrible thing about this is that 'recipientUniversityId' will use usercodes for these Notifications after this is merged
 	*/
 trait UniversityIdOrUserIdRecipientNotification extends SingleRecipientNotification with NotificationPreSaveBehaviour
 	with FetchByUniIdOrUsercode {
