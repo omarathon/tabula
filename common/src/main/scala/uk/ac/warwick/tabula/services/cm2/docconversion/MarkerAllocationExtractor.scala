@@ -40,7 +40,7 @@ class MarkerAllocationExtractor {
 			val markers = if(workflow.workflowType.rolesShareAllocations) {
 				workflow.markersByRole
 			} else {
-				workflow.markers.map{case (s, m) => s.name -> m }
+				workflow.markers.map{case (s, m) => s.allocationName -> m }
 			}
 			(s: String) => markers.get(s)
 		}
