@@ -513,7 +513,7 @@ object AssignmentInfoFilters {
 
 		override def description: String = "Between two dates"
 		override def apply(info: AssignmentInfo): Boolean =
-			(Option(from).isEmpty || !info.assignment.closeDate.isBefore(from.toDateTimeAtStartOfDay))&&
-			(Option(to).isEmpty || !info.assignment.closeDate.isAfter(to.plusDays(1).toDateTimeAtStartOfDay))
+			(Option(from).isEmpty || (info.assignment.closeDate != null && !info.assignment.closeDate.isBefore(from.toDateTimeAtStartOfDay))) &&
+			(Option(to).isEmpty || (info.assignment.closeDate != null && !info.assignment.closeDate.isAfter(to.plusDays(1).toDateTimeAtStartOfDay)))
 	}
 }
