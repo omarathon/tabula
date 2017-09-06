@@ -6,12 +6,11 @@ import org.springframework.context.annotation.Profile
 import org.springframework.stereotype.Controller
 import org.springframework.validation.Errors
 import org.springframework.web.bind.annotation.{ModelAttribute, PathVariable, RequestMapping}
-import uk.ac.warwick.spring.Wire
 import uk.ac.warwick.tabula.cm2.web.Routes
 import uk.ac.warwick.tabula.commands.Appliable
 import uk.ac.warwick.tabula.commands.cm2.assignments.{AssignMarkersBySpreadsheetCommand, AssignMarkersState, AssignMarkersTemplateCommand, AssignMarkersTemplateState}
 import uk.ac.warwick.tabula.data.model.Assignment
-import uk.ac.warwick.tabula.services.{AssessmentMembershipService, AutowiringAssessmentMembershipServiceComponent}
+import uk.ac.warwick.tabula.services.AutowiringAssessmentMembershipServiceComponent
 import uk.ac.warwick.tabula.web.Mav
 import uk.ac.warwick.tabula.web.views.ExcelView
 
@@ -90,14 +89,16 @@ class ModifyAssignmentMarkersSpreadsheetController extends AbstractAssignmentCon
 		@PathVariable assignment: Assignment,
 		@Valid @ModelAttribute("assignMarkersBySpreadsheetCommand") assignMarkersBySpreadsheetCommand: AssignMarkersCommand,
 		errors: Errors
-	): Mav = previewSpreadsheet(assignment, assignMarkersBySpreadsheetCommand, errors, createMode)
+	): Mav = if (errors.hasErrors) showSpreadsheetForm(assignment, assignMarkersBySpreadsheetCommand, errors, createMode) else
+		previewSpreadsheet(assignment, assignMarkersBySpreadsheetCommand, errors, createMode)
 
 	@RequestMapping(method = Array(POST), value=Array("edit/markers/template"), params = Array("preview"))
 	def editPreview(
 		@PathVariable assignment: Assignment,
 		@Valid @ModelAttribute("assignMarkersBySpreadsheetCommand") assignMarkersBySpreadsheetCommand: AssignMarkersCommand,
 		errors: Errors
-	): Mav = previewSpreadsheet(assignment, assignMarkersBySpreadsheetCommand, errors, editMode)
+	): Mav = if (errors.hasErrors) showSpreadsheetForm(assignment, assignMarkersBySpreadsheetCommand, errors, createMode) else
+		previewSpreadsheet(assignment, assignMarkersBySpreadsheetCommand, errors, createMode)
 
 	@RequestMapping(method = Array(POST), params = Array(ManageAssignmentMappingParameters.createAndAddMarkers), value = Array("new/markers/template", "edit/markers/template"))
 	def saveAndExit(

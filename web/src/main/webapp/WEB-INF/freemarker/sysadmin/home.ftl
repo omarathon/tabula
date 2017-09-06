@@ -19,6 +19,7 @@
 		<p><a class="btn btn-default" href="<@url page="/sysadmin/features" />">Set feature flags</a></p>
 		<p><a class="btn btn-default" href="<@url page="/sysadmin/statistics" />">Internal statistics</a></p>
 		<p><a class="btn btn-default" href="<@url page="/sysadmin/complete-scheduled-notification" />">Complete scheduled notifications</a></p>
+		<p><a class="btn btn-default" href="<@url page="/sysadmin/manual-membership-warning" />">Send warnings about manual membership</a></p>
 		<p><a class="btn btn-default" href="<@url page="/sysadmin/event-calendar" />">Upcoming event calendar</a></p>
 		<p><a class="btn btn-default" href="<@url page="/sysadmin/metrics" />">Metrics</a></p>
 		<p><a class="btn btn-default" href="<@url page="/profiles/admin/timetablechecker" />">Timetable feed checker</a></p>

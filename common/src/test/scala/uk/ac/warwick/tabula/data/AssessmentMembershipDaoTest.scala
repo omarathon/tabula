@@ -1,9 +1,10 @@
 package uk.ac.warwick.tabula.data
 
+import org.joda.time.DateTime
 import org.junit.Before
 import uk.ac.warwick.tabula.JavaImports.JArrayList
 import uk.ac.warwick.tabula.data.model._
-import uk.ac.warwick.tabula.services.AssessmentMembershipServiceImpl
+import uk.ac.warwick.tabula.services.{AssessmentMembershipServiceImpl, ManualMembershipInfo}
 import uk.ac.warwick.tabula.{AcademicYear, Fixtures, MockUserLookup, PersistenceTestBase}
 import uk.ac.warwick.userlookup.User
 
@@ -15,12 +16,13 @@ class AssessmentMembershipDaoTest extends PersistenceTestBase {
 
 	trait Fixture {
 		val dept: Department = Fixtures.department("in")
-
 		val module1: Module = Fixtures.module("in101")
 		val module2: Module = Fixtures.module("in102")
 
 		dept.modules.add(module1)
 		dept.modules.add(module2)
+		module1.adminDepartment = dept
+		module2.adminDepartment = dept
 
 		session.save(dept)
 		session.save(module1)
@@ -38,10 +40,19 @@ class AssessmentMembershipDaoTest extends PersistenceTestBase {
 		val assignment4: Assignment = Fixtures.assignment("assignment 4")
 		assignment4.assessmentMembershipService = assignmentMembershipService
 
+		val assignment5: Assignment = Fixtures.assignment("assignment 5")
+		assignment5.assessmentMembershipService = assignmentMembershipService
+
 		module1.assignments.add(assignment1)
 		module1.assignments.add(assignment2)
 		module2.assignments.add(assignment3)
 		module2.assignments.add(assignment4)
+		module2.assignments.add(assignment5)
+		assignment1.module = module1
+		assignment2.module = module1
+		assignment3.module = module2
+		assignment4.module = module2
+		assignment5.module = module2
 
 		// manually enrolled on assignment 1
 		assignment1.members.knownType.addUserId("cuscav")
@@ -133,7 +144,7 @@ class AssessmentMembershipDaoTest extends PersistenceTestBase {
 	}
 
 	@Test def enrolledAssignments(): Unit = {
-		transactional { tx =>
+		transactional { _ =>
 			new Fixture {
 				session.save(assignment2AC)
 				session.save(upstreamGroup2)
@@ -151,7 +162,7 @@ class AssessmentMembershipDaoTest extends PersistenceTestBase {
 
 	/** TAB-1824 if uniid appears twice in upstream group users, SQL sadness can result. */
 	@Test def duplicateImportedUser() {
-		transactional { tx =>
+		transactional { _ =>
 			new Fixture {
 				// Add user again
 				upstreamGroup3.members = JArrayList(
@@ -169,6 +180,46 @@ class AssessmentMembershipDaoTest extends PersistenceTestBase {
 				session.flush()
 
 				assignmentMembershipService.getEnrolledAssignments(user, None).toSet should be (Set(assignment1, assignment2, assignment3))
+			}
+		}
+	}
+
+	@Test def departmentsWithManualAssessmentsOrGroups(): Unit = {
+		transactional { _ =>
+			new Fixture {
+				val thisYear: AcademicYear = AcademicYear.guessSITSAcademicYearByDate(new DateTime())
+
+				assignment1.members.knownType.removeUserId("cuscav")
+				session.save(assignment1)
+				session.flush()
+
+				assignmentMembershipService.departmentsWithManualAssessmentsOrGroups(thisYear) should be (Seq())
+			}
+		}
+	}
+
+	@Test def departmentsManualMembership(): Unit = {
+		transactional { _ =>
+			new Fixture {
+				assignment4.members.knownType.addUserId("cuscav")
+				session.save(assignment4)
+				assignment5.members.knownType.addUserId("cuscav")
+				assignment5.members.knownType.addUserId("cuslaj")
+				assignment5.members.knownType.addUserId("cuslat")
+				session.save(assignment5)
+				session.flush()
+
+				val thisYear: AcademicYear = AcademicYear.guessSITSAcademicYearByDate(new DateTime())
+				val membershipInfo: ManualMembershipInfo = assignmentMembershipService.departmentsManualMembership(dept, thisYear)
+
+				membershipInfo.assignments should be {Seq(assignment1, assignment5)}
+
+				assignment1.members.knownType.removeUserId("cuscav")
+				session.save(assignment1)
+				session.flush()
+
+				val membershipInfo2: ManualMembershipInfo = assignmentMembershipService.departmentsManualMembership(dept, thisYear)
+				membershipInfo2.assignments should be {Seq(assignment5)}
 			}
 		}
 	}

@@ -93,12 +93,8 @@ Macros for customised form elements, containers and more complex pickers.
 </#compress></#macro>
 
 <#macro filewidget types basename multiple=true max=10 labelText="File" maxFileSize="" required=false customHelp="">
-<#-- <#local command=.vars[Request[commandVarName]] /> -->
 	<#local elementId="file-upload-${basename?replace('[','')?replace(']','')?replace('.','-')}"/>
 	<@labelled_form_group basename labelText>
-		<@errors path="${basename}" />
-		<@errors path="${basename}.upload" />
-		<@errors path="${basename}.attached" />
 		<@spring.bind path="${basename}">
 			<#local f=status.actualValue />
 			<div id="${elementId}">
@@ -152,6 +148,8 @@ Macros for customised form elements, containers and more complex pickers.
 				</#if>
 			</small>
 
+			<@errors path="${basename}.upload" />
+			<@errors path="${basename}.attached" />
 			<script><!--
 
 			jQuery(function($){

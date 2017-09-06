@@ -22,8 +22,7 @@
 				<li>Save your updated spreadsheet as an XLSX file.</li>
 				<li>Upload the spreadsheet to Tabula.</li>
 			</ol>
-			<@f.errors cssClass="error form-errors" />
-
+			<div class="has-error"><@f.errors path="" cssClass="help-block" /></div>
 			<@bs3form.filewidget
 				basename="file"
 				labelText="Choose your updated spreadsheet"

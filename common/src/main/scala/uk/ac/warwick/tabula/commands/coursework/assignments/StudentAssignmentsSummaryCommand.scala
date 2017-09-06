@@ -45,7 +45,7 @@ class StudentAssignmentsSummaryCommandInternal(val student: MemberOrUser, val ac
 				if (enhancedAssignment.submission.nonEmpty) {
 					enhancedAssignment.submission.get.submittedDate
 				} else {
-					enhancedAssignment.feedback.flatMap(f => Some(f.releasedDate)).getOrElse(new DateTime())
+					enhancedAssignment.feedback.flatMap(f => Option(f.releasedDate)).getOrElse(new DateTime())
 				}
 			)
 		}
