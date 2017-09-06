@@ -44,7 +44,7 @@ class ExamsOfficeMembershipNotification extends Notification[Department, Unit]
 	def url: String = Routes.home
 	def urlTitle = s"Sign in to Tabula"
 
-	def content = FreemarkerModel(ManualMembershipWarningNotification.templateLocation, Map (
+	def content = FreemarkerModel(ExamsOfficeMembershipNotification.templateLocation, Map (
 		"departments" -> departments,
 		"numAssignments" -> numAssignments,
 		"numSmallGroupSets" -> numSmallGroupSets
