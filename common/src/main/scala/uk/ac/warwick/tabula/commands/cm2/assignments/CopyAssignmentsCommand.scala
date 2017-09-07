@@ -87,7 +87,8 @@ abstract class AbstractCopyAssignmentsCommandInternal
 		newAssignment.automaticallyReleaseToMarkers = assignment.automaticallyReleaseToMarkers
 		newAssignment.automaticallySubmitToTurnitin = assignment.automaticallySubmitToTurnitin
 		newAssignment.anonymity = assignment._anonymity
-		newAssignment.cm2Assignment = assignment.cm2Assignment || Option(assignment.markingWorkflow).isEmpty
+		// all new assignments are now cm2 based
+		newAssignment.cm2Assignment = true
 		newAssignment.cm2MarkingWorkflow = assignment.cm2MarkingWorkflow match {
 			// None
 			case null => null
