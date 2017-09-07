@@ -150,7 +150,7 @@ abstract class ProcessTurnitinLtiQueueCommandInternal extends CommandInternal[Pr
 				report.studentOverlap = result.student_overlap.map(_.toInt)
 				report.reportReceived = true
 			case response =>
-				logger.info("Bad response for submission details  - " + response.json.get)
+				logger.info("Bad response for submission details  - " + response.json.orElse(response.html).orElse(response.xml).getOrElse(""))
 				report.lastTurnitinError = response.statusMessage.getOrElse("Failed to retrieve results")
 				report.reportRequestRetries += 1
 		}
