@@ -64,10 +64,10 @@ abstract class AbstractAttendanceMonitoringCourseworkSubmissionService extends A
 		points.filter(point =>
 			// Is it the correct type
 			point.pointType == AttendanceMonitoringPointType.AssignmentSubmission
-				// Is the assignment's due date inside the point's weeks
-				&& point.isDateValidForPoint(submission.assignment.closeDate.toLocalDate)
+				// Is the assignment's due date inside the point's weeks  or for open ended return true always
+				&& (submission.assignment.openEnded || point.isDateValidForPoint(submission.assignment.closeDate.toLocalDate))
 				// Is the submission on time or the submission time inside the point's weeks
-				&& (!submission.isLate || point.isDateValidForPoint(submission.submittedDate.toLocalDate))
+				&& (!submission.isLate ||  (submission.submittedDate != null && point.isDateValidForPoint(submission.submittedDate.toLocalDate)))
 				// Is the submission's assignment or module valid
 				&& isAssignmentOrModuleValidForPoint(point, submission.assignment)
 				// Is there no existing checkpoint
