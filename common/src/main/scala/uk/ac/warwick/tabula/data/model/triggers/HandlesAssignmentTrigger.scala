@@ -35,7 +35,8 @@ trait HandlesAssignmentTrigger extends Logging {
 				releaseToMarkersCommand.confirm = true
 				releaseToMarkersCommand.onBind(null)
 				releaseToMarkersCommand.apply()
-			} else if (assignment.hasCM2Workflow) {
+			} else if (assignment.hasCM2Workflow && !usercodes.isEmpty) {
+				// check if there are any submissions at all -Students who do not submit work are not released automatically.
 				val releaseToMarkersCommand = ReleaseForMarkingCommand(assignment, new AnonymousUser)
 				releaseToMarkersCommand.students = JArrayList(usercodes)
 				releaseToMarkersCommand.confirm = true
