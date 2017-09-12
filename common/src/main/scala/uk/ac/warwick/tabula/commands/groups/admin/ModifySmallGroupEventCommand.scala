@@ -285,13 +285,17 @@ trait GeneratesNotificationsForSmallGroupEventOccurrence {
 	def generateNotifications(occurrence: SmallGroupEventOccurrence): Seq[ScheduledNotification[_]] = {
 		// Only generate notifications for sets that collect attendance and occurrences that are in valid weeks...
 		if (occurrence.event.group.groupSet.collectAttendance && occurrence.event.allWeeks.contains(occurrence.week)) {
-			occurrence.dateTime.map(dt =>
+			occurrence.dateTime.map(dt => {
 				// ... and have a valid date time
+				val endOfEvent = if (occurrence.event.endTime == null)
+						dt.withTime(occurrence.event.endTime.getHourOfDay, occurrence.event.endTime.getMinuteOfHour, 0, 0)
+					else
+						dt
 				Seq(
 					new ScheduledNotification[SmallGroupEventOccurrence](
 						"SmallGroupEventAttendanceReminder",
 						occurrence,
-						dt.withTime(occurrence.event.endTime.getHourOfDay, occurrence.event.endTime.getMinuteOfHour, 0, 0)
+						endOfEvent
 					),
 					new ScheduledNotification[SmallGroupEventOccurrence](
 						"SmallGroupEventAttendanceReminder",
@@ -304,7 +308,7 @@ trait GeneratesNotificationsForSmallGroupEventOccurrence {
 						dt.plusDays(6)
 					)
 				)
-			).getOrElse(Seq())
+			}).getOrElse(Seq())
 		} else {
 			Seq()
 		}
