@@ -58,18 +58,19 @@ class ProxyAsMarkerTest extends BrowserTest with CourseworkFixtures {
 				click on linkText("Coursework Management")
 				currentUrl.contains("/coursework/") should be(true)
 
-				openAdminPage()
+				click on linkText("Test Services")
 
 				// make sure we are looking at the latest academic year
 				val yearNav = findAll(cssSelector(".navbar-tertiary .navbar-nav")).next().underlying
 				val latestAcademicYear = yearNav.findElements(By.cssSelector("li"))
 				click on latestAcademicYear.last
-				currentUrl.contains("/department/xxx/20") should be (true)
+				currentUrl.contains("/department/xxx") should be (true)
 
-				//val testRow = id("main").webElement.findElements(By.cssSelector("span.mod-code")).get(0)
-				//click on testRow
+				click on cssSelector("span.mod-code")
 
-				releaseForMarking(id)
+				eventuallyAjax {
+					releaseForMarking(id)
+				}
 
 				openProxyMarkingScreen()
 			}
