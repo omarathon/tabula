@@ -27,17 +27,18 @@ trait HandlesAssignmentTrigger extends Logging {
 
 	def assignment: Assignment
 
-	def handleAssignment(usercodes: Seq[String]): Unit = {
+	def handleAssignment(submissionUsercodes: Seq[String]): Unit = {
 		if (assignment.automaticallyReleaseToMarkers) {
 			if (assignment.hasWorkflow) {
 				val releaseToMarkersCommand = OldReleaseForMarkingCommand(assignment.module, assignment, new AnonymousUser)
-				releaseToMarkersCommand.students = JArrayList(usercodes)
+				releaseToMarkersCommand.students = JArrayList(submissionUsercodes)
 				releaseToMarkersCommand.confirm = true
 				releaseToMarkersCommand.onBind(null)
 				releaseToMarkersCommand.apply()
-			} else if (assignment.hasCM2Workflow) {
+				// for cm2 - check if there are any submissions at all -Students who do not submit work are not released automatically.
+			} else if (assignment.hasCM2Workflow && !submissionUsercodes.isEmpty) {
 				val releaseToMarkersCommand = ReleaseForMarkingCommand(assignment, new AnonymousUser)
-				releaseToMarkersCommand.students = JArrayList(usercodes)
+				releaseToMarkersCommand.students = JArrayList(submissionUsercodes)
 				releaseToMarkersCommand.confirm = true
 				releaseToMarkersCommand.apply()
 			}
