@@ -4,7 +4,7 @@ import org.joda.time.LocalTime
 import org.mockito.Matchers
 import uk.ac.warwick.tabula._
 import uk.ac.warwick.tabula.data.model.groups.{DayOfWeek, WeekRange}
-import uk.ac.warwick.tabula.data.model.{Module, NamedLocation}
+import uk.ac.warwick.tabula.data.model.{MapLocation, Module, NamedLocation}
 import uk.ac.warwick.tabula.services.ModuleAndDepartmentService
 import uk.ac.warwick.tabula.timetables.{TimetableEvent, TimetableEventType}
 import uk.ac.warwick.userlookup.User
@@ -39,7 +39,7 @@ class TimetableFetchingServiceTest extends TestBase with Mockito {
 		val events = ScientiaHttpTimetableFetchingService.parseXml(XML.loadString(TimetableEvents), AcademicYear(2012), student.getWarwickId, locationFetchingService, mockModuleAndDepartmentService, userLookup)
 		events.size should be (10)
 		events.head should be (TimetableEvent(
-			uid="9d6a9b75399d1b61791569af49abcc7e",
+			uid="625c69daa83eaaa6c12da006276eb947",
 			name="CS132L",
 			title="",
 			description="",
@@ -48,7 +48,7 @@ class TimetableFetchingServiceTest extends TestBase with Mockito {
 			weekRanges=Seq(WeekRange(6, 10)),
 			day=DayOfWeek.Friday,
 			eventType=TimetableEventType.Lecture,
-			location=Some(NamedLocation("L5")),
+			location=Some(MapLocation("Lecture Theatre 5", "31389")),
 			parent=TimetableEvent.Parent(Some(module)),
 			comments=None,
 			staff=Seq(tutor),
