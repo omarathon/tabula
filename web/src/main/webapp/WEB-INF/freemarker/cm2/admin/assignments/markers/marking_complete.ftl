@@ -17,6 +17,7 @@
 			<#assign noMarks = command.noMarks />
 			<#assign noFeedback = command.noFeedback />
 			<#assign releasedFeedback = command.releasedFeedback />
+			<#assign notReadyToMark = command.notReadyToMark />
 
 			<#if releasedFeedback?has_content>
 				<div class="alert alert-info">
@@ -31,6 +32,23 @@
 						has already been marked as completed. This will be ignored.
 					<#else>
 						have already been marked as completed. These will be ignored.
+					</#if>
+				</div>
+			</#if>
+
+			<#if notReadyToMark?has_content>
+				<div class="alert alert-info">
+					<#assign notReadyToMarkIds><ul><#list notReadyToMark as markerFeedback><li>${markerFeedback.feedback.studentIdentifier}</li></#list></ul></#assign>
+					<a class="use-popover"
+						 data-html="true"
+						 data-original-title="<span class='text-info'><strong>Already released</strong></span>"
+						 data-content="${notReadyToMarkIds}">
+						<@fmt.p (notReadyToMark?size ) "submission" />
+					</a>
+					<#if notReadyToMark?size == 1>
+						is not ready for you to mark. This will be ignored.
+					<#else>
+						are not ready for you to mark. These will be ignored.
 					</#if>
 				</div>
 			</#if>
