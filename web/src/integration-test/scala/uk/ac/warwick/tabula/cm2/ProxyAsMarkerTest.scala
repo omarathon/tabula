@@ -44,27 +44,29 @@ class ProxyAsMarkerTest extends BrowserTest with CourseworkFixtures {
 
 	private def modifyMarksFeedback(): Unit = {
 
-		When("I add feedback, marks and grade")
-		val feedback = id("main").webElement.findElement(By.tagName("textarea"))
-		feedback.sendKeys("Well written essay")
+		eventuallyAjax {
+			When("I add feedback, marks and grade")
+			val feedback = id("main").webElement.findElement(By.tagName("textarea"))
+			feedback.sendKeys("Well written essay")
 
-		id("mark").webElement.sendKeys("71")
+			id("mark").webElement.sendKeys("71")
 
-		id("grade").webElement.sendKeys("2.1")
+			id("grade").webElement.sendKeys("2.1")
 
-		And("I upload a valid file")
-		val uploadFile = id("main").webElement.findElement(By.name("file.upload"))
-		click on uploadFile
-		pressKeys(getClass.getResource("/adjustments.xlsx").getFile)
+			And("I upload a valid file")
+			val uploadFile = id("main").webElement.findElement(By.name("file.upload"))
+			click on uploadFile
+			pressKeys(getClass.getResource("/adjustments.xlsx").getFile)
 
-		And("submit the form")
-		click on cssSelector(".btn-primary")
+			And("submit the form")
+			click on cssSelector(".btn-primary")
 
-		Then("Results are saved and hidden away")
-		feedback.isDisplayed should be (false)
+			Then("Results are saved and hidden away")
+			feedback.isDisplayed should be (false)
 
-		And("The Confirm and send to admin button is greyed out")
-		cssSelector(".must-have-selected").webElement.isEnabled should be (false)
+			And("The Confirm and send to admin button is greyed out")
+			cssSelector(".must-have-selected").webElement.isEnabled should be (false)
+		}
 
 		When("I select the student with feedback")
 		cssSelector(".collection-checkbox").webElement.click()
