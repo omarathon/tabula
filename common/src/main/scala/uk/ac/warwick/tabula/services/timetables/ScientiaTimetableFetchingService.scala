@@ -254,7 +254,7 @@ object ScientiaHttpTimetableFetchingService extends Logging {
 		"S0.10" -> MapLocation("S0.10", "37490"),"S0.13" -> MapLocation("S0.13", "37476"),"S0.18" -> MapLocation("S0.18", "37482"),
 		"S1.141" -> MapLocation("S1.141", "37910"),"S0.19" -> MapLocation("S0.19", "37483"),"GLT1" -> MapLocation("GLT1", "37286"),
 		"H0.51" -> MapLocation("H0.51", "21336"),"H3.44" -> MapLocation("H3.44", "21601"),"WLT" -> MapLocation("WT0.02", "38986"),
-		"B2.04/5 (Sci Conc)" -> MapLocation("B2.04", "31395"),"A0.05 (Soc Sci)" -> MapLocation("A0.05", "37626"),"L3" -> MapLocation("null", "31456"),
+		"B2.04/5 (Sci Conc)" -> MapLocation("B2.04", "31395"),"A0.05 (Soc Sci)" -> MapLocation("A0.05", "37626"),"L3" -> MapLocation("L3", "31456"),
 		"S0.28" -> MapLocation("S0.28", "37406"),"S0.20" -> MapLocation("S0.20", "37484"),"PLT" -> MapLocation("PLT", "35601"),
 		"S0.21" -> MapLocation("S0.21", "37486"),"F1.07" -> MapLocation("F1.07", "30933"),"S2.73" -> MapLocation("S2.73", "37727"),
 		"F1.10" -> MapLocation("F1.10", "30918"),"H0.52" -> MapLocation("H0.51", "21336"),"H4.45" -> MapLocation("H4.45", "21670"),
