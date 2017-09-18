@@ -140,6 +140,7 @@ subprojects {
 
         compile 'org.slf4j:log4j-over-slf4j:1.7.25'
         compile 'org.slf4j:jcl-over-slf4j:1.7.25'
+        compile 'org.slf4j:jul-to-slf4j:1.7.25'
         // Not actually provided -  it's a ruse to exclude commons-logging from the WAR.
         // The API at runtime is provided by jcl-over-slf4j.
         providedCompile 'commons-logging:commons-logging:1.2'

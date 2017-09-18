@@ -52,6 +52,8 @@
 				${workflow.workflowType.description}
 			</option>
 		</select>
+		<input type="hidden" name="workflowType" value="${workflow.workflowType.name}" />
+
 		<div class="help-block">
 			<#if workflow.isReusable()>
 				It is not possible to modify the marking method once a marking workflow has been created.

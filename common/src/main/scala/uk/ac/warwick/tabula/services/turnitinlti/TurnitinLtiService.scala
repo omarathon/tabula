@@ -1,6 +1,7 @@
 package uk.ac.warwick.tabula.services.turnitinlti
 
 import java.io.IOException
+import java.net.URLEncoder
 import javax.crypto.spec.SecretKeySpec
 import javax.crypto.{Mac, SecretKey}
 
@@ -29,6 +30,7 @@ import uk.ac.warwick.tabula.helpers.StringUtils._
 import uk.ac.warwick.tabula.services.AutowiringOriginalityReportServiceComponent
 import uk.ac.warwick.tabula.{CurrentUser, DateFormats}
 import uk.ac.warwick.util.core.StringUtils
+
 import scala.collection.JavaConverters._
 import scala.util.{Failure, Success, Try}
 import uk.ac.warwick.tabula.helpers.DateTimeOrdering._
@@ -126,7 +128,7 @@ class TurnitinLtiService extends Logging with DisposableBean with InitializingBe
 
 	val isoFormatter = DateFormats.IsoDateTime
 
-	val http: Http = new Http with thread.Safety {
+	val http: Http = new Http with thread.Safety  with JdkLogging {
 		override def make_client = new ThreadSafeHttpClient(new Http.CurrentCredentials(None), maxConnections, maxConnectionsPerRoute) {
 			HttpConnectionParams.setConnectionTimeout(getParams, 120000)
 			HttpConnectionParams.setSoTimeout(getParams, 120000)
@@ -283,6 +285,8 @@ class TurnitinLtiService extends Logging with DisposableBean with InitializingBe
 		)
 
 		logger.debug("doRequest: " + signedParams)
+		//helpful if we want to check/fire curl request directly when there are issues
+		logger.debug(s"""curl -d "${signedParams.toSeq.map { case (k, v) => s"$k=${URLEncoder.encode(v, "UTF-8")}" }.mkString("&")}" -X POST "$endpoint"""")
 
 		signedParams
 

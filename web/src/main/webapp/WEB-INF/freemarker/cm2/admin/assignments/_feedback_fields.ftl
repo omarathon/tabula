@@ -16,7 +16,7 @@
 			Automatically release submissions to markers
 		</@bs3form.checkbox>
 		<div class="help-block">
-			Students who do not submit work are not released automatically - you need to release them manually.
+			Students who do not submit work are still released automatically to markers.
 		</div>
 	</@bs3form.labelled_form_group>
 

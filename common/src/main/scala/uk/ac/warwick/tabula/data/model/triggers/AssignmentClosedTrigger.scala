@@ -26,8 +26,12 @@ class AssignmentClosedTrigger extends Trigger[Assignment, Unit] with HandlesAssi
 
 	override def apply(): Unit = transactional() {
 		if (assignment.isClosed) {
-			handleAssignment(assignment.submissions.asScala.map(_.usercode))
+			if (assignment.cm2Assignment) {
+				handleAssignment(assignment.feedbacks.asScala.map(_.usercode))
+			} else {
+				//behaviour for cm1 same as before (no changes)
+				handleAssignment(assignment.submissions.asScala.map(_.usercode))
+			}
 		}
-
 	}
 }

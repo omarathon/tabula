@@ -39,9 +39,13 @@
 		</#if>
 	</ul>
 <#else>
-	<#assign wasIs><#if command.assignment.isClosed() && !command.assignment.isWithinExtension(command.student)>was<#else>is</#if></#assign>
-	<#assign dueDate = command.assignment.submissionDeadline(command.student) />
-	<span>This student has not submitted yet. Their submission ${wasIs} due at <@fmt.date date=dueDate capitalise=true shortMonth=true /></span>
+	<#if command.assignment.openEnded>
+		<span>This student has not submitted yet.</span>
+	<#else>
+		<#assign wasIs><#if command.assignment.isClosed() && !command.assignment.isWithinExtension(command.student)>was<#else>is</#if></#assign>
+		<#assign dueDate = command.assignment.submissionDeadline(command.student) />
+		<span>This student has not submitted yet. Their submission ${wasIs} due at <@fmt.date date=dueDate capitalise=true shortMonth=true /></span>
+	</#if>
 </#if>
 <#if command.extension?has_content>
 	<ul class="list-unstyled">
