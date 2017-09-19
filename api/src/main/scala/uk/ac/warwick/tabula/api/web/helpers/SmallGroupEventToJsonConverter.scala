@@ -20,7 +20,9 @@ trait SmallGroupEventToJsonConverter {
 			"endTime" -> Option(event.endTime).map { _.toString("HH:mm") }.orNull,
 			"location" -> Option(event.location).map {
 				case NamedLocation(name) => Map("name" -> name)
-				case MapLocation(name, locationId) => Map("name" -> name, "locationId" -> locationId)
+				case MapLocation(name, locationId, syllabusPlusName) => {
+					Map("name" -> name, "locationId" -> locationId) ++ syllabusPlusName.map(n => Map("syllabusPlusName" -> n)).getOrElse(Map())
+				}
 			}.orNull,
 			"tutors" -> event.tutors.users.map { user =>
 				Seq(
