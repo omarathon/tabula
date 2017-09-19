@@ -21,7 +21,8 @@ trait TimetableEventToJsonConverter {
 		"location" -> (event.location match {
 			case Some(l: MapLocation) => Map(
 				"name" -> l.name,
-				"locationId" -> l.locationId
+				"locationId" -> l.locationId,
+				"syllabusPlusName" -> l.syllabusPlusName
 			)
 			case Some(l) => Map("name" -> l.name)
 			case _ => null
