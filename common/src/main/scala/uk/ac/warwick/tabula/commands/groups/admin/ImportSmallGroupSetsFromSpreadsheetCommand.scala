@@ -220,7 +220,7 @@ trait ImportSmallGroupSetsFromSpreadsheetBinding extends BindListener {
 									case NamedLocation(name) =>
 										eventCommand.location = name
 										eventCommand.locationId = null
-									case MapLocation(name, lid) =>
+									case MapLocation(name, lid, _) =>
 										eventCommand.location = name
 										eventCommand.locationId = lid
 								}

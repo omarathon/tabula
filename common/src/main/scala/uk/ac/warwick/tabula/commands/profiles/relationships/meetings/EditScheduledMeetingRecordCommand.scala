@@ -107,7 +107,7 @@ trait PopulateScheduledMeetingRecordCommand extends PopulateOnForm {
 
 		Option(meetingRecord.meetingLocation).foreach {
 			case NamedLocation(name) => meetingLocation = name
-			case MapLocation(name, lid) =>
+			case MapLocation(name, lid, _) =>
 				meetingLocation = name
 				meetingLocationId = lid
 		}

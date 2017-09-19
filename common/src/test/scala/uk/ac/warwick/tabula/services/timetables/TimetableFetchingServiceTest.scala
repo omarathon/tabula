@@ -48,7 +48,7 @@ class TimetableFetchingServiceTest extends TestBase with Mockito {
 			weekRanges=Seq(WeekRange(6, 10)),
 			day=DayOfWeek.Friday,
 			eventType=TimetableEventType.Lecture,
-			location=Some(MapLocation("Lecture Theatre 5", "31389")),
+			location=Some(MapLocation("Lecture Theatre 5", "31389", Some("L5"))),
 			parent=TimetableEvent.Parent(Some(module)),
 			comments=None,
 			staff=Seq(tutor),
