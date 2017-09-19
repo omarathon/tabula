@@ -29,6 +29,7 @@ case class FullCalendarEvent(
 	formattedInterval: String,
 	location: String = "",
 	locationId: String = "", // for map links
+	syllabusPlusName: Option[String] = None, // for events imported from S+
 	name: String = "",
 	description: String = "",
 	shorterTitle: String = "", // used in the pop-up to display event details
@@ -80,6 +81,7 @@ object FullCalendarEvent {
 			formattedInterval = intervalFormatter.format(source.start.toDateTime, source.end.toDateTime),
 			location = source.location.fold("") { _.name },
 			locationId = source.location.collect { case l: MapLocation => l }.fold("") { _.locationId },
+			syllabusPlusName = source.location.collect { case l: MapLocation => l }.flatMap(_.syllabusPlusName),
 			name = source.name,
 			description = source.description,
 			shorterTitle = source.parent.shortName.map { _ + " " }.getOrElse("") + source.eventType.displayName,
