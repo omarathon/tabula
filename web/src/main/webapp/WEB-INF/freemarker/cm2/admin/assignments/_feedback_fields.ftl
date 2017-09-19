@@ -10,13 +10,13 @@
     <div class="help-block"><a href="<@routes.cm2.feedbacktemplates department />">Create new feedback template</a></div>
 	</@bs3form.labelled_form_group>
 
-	<@bs3form.labelled_form_group path="automaticallyReleaseToMarkers" labelText="Automated submission release">
+	<@bs3form.labelled_form_group path="automaticallyReleaseToMarkers" labelText="Automated release for marking">
 		<@bs3form.checkbox path="automaticallyReleaseToMarkers">
 			<@f.checkbox path="automaticallyReleaseToMarkers" id="automaticallyReleaseToMarkers" />
-			Automatically release submissions to markers
+			Automatically release assignment to markers on the assignment closing date
 		</@bs3form.checkbox>
 		<div class="help-block">
-			Students who do not submit work are still released automatically to markers.
+			Markers are notified of all students allocated to them, including students who have not submitted work.
 		</div>
 	</@bs3form.labelled_form_group>
 
