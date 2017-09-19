@@ -77,7 +77,7 @@ class EditSmallGroupSetDefaultPropertiesCommandInternal(val module: Module, val 
 	def copyFrom(set: SmallGroupSet) {
 		Option(set.defaultLocation).foreach {
 			case NamedLocation(name) => defaultLocation = name
-			case MapLocation(name, lid) =>
+			case MapLocation(name, lid, _) =>
 				defaultLocation = name
 				defaultLocationId = lid
 		}

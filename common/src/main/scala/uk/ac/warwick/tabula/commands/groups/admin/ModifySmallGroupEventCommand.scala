@@ -121,7 +121,7 @@ abstract class ModifySmallGroupEventCommandInternal
 
 		Option(set.defaultLocation).foreach {
 			case NamedLocation(name) => location = name
-			case MapLocation(name, lid) =>
+			case MapLocation(name, lid, _) =>
 				location = name
 				locationId = lid
 		}
@@ -134,7 +134,7 @@ abstract class ModifySmallGroupEventCommandInternal
 
 		Option(event.location).foreach {
 			case NamedLocation(name) => location = name
-			case MapLocation(name, lid) =>
+			case MapLocation(name, lid, _) =>
 				location = name
 				locationId = lid
 		}
