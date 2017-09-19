@@ -186,7 +186,7 @@ trait CommandSmallGroupEventGenerator extends SmallGroupEventGenerator {
 		location.collect {
 			case NamedLocation(name) => command.location = name
 
-			case MapLocation(name, locationId) =>
+			case MapLocation(name, locationId, _) =>
 				command.location = name
 				command.locationId = locationId
 		}
