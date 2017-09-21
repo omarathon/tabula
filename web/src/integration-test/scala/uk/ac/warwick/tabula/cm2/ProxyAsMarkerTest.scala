@@ -5,8 +5,6 @@ import org.openqa.selenium.By
 import uk.ac.warwick.tabula.data.model.markingworkflow.MarkingWorkflowType.SingleMarking
 import uk.ac.warwick.tabula.{AcademicYear, BrowserTest}
 
-import scala.collection.JavaConversions._
-
 class ProxyAsMarkerTest extends BrowserTest with CourseworkFixtures {
 
 	private val currentYear = AcademicYear.guessSITSAcademicYearByDate(DateTime.now)
@@ -18,10 +16,7 @@ class ProxyAsMarkerTest extends BrowserTest with CourseworkFixtures {
 			click on linkText("Test Services")
 		}
 
-		// make sure we are looking at the latest academic year
-		val yearNav = findAll(cssSelector(".navbar-tertiary .navbar-nav")).next().underlying
-		val latestAcademicYear = yearNav.findElements(By.cssSelector("li"))
-		click on latestAcademicYear.last
+		loadCurrentAcademicYearTab()
 
 		val testModulerow = id("main").webElement.findElements(By.cssSelector("span.mod-code")).get(0)
 		click on testModulerow
@@ -100,10 +95,7 @@ class ProxyAsMarkerTest extends BrowserTest with CourseworkFixtures {
 
 				click on linkText("Test Services")
 
-				// make sure we are looking at the latest academic year
-				val yearNav = findAll(cssSelector(".navbar-tertiary .navbar-nav")).next().underlying
-				val latestAcademicYear = yearNav.findElements(By.cssSelector("li"))
-				click on latestAcademicYear.last
+				loadCurrentAcademicYearTab()
 				currentUrl.contains("/department/xxx") should be (true)
 
 				click on cssSelector("span.mod-code")
