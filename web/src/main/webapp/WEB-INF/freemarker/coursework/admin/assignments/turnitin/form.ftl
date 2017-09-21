@@ -17,7 +17,7 @@
 		<div class="alert alert-warning">
 			<p>Some attachments won't be sent to Turnitin because they aren't a type that Turnitin is able
 				to process (supported types are <strong>MS Word, Acrobat PDF, Postscript, Text, HTML, WordPerfect (WPD) and Rich Text Format</strong>),
-				or they are too big to send (maximum Turnitin file size is 20MB)</p>
+				or they are too big to send (maximum Turnitin file size is 40MB)</p>
 
 			<ul class="file-list">
 				<#list incompatibleFiles as f>

@@ -57,8 +57,8 @@ object TurnitinLtiService {
 	 * https://guides.turnitin.com/01_Manuals_and_Guides/Student/Student_User_Manual/09_Submitting_a_Paper#File_Types_and_Size
 	 */
 	val validExtensions = Seq("doc", "docx", "odt", "wpd", "ps", "eps", "htm", "html", "hwp", "rtf", "txt", "pdf", "pptx", "ppt", "ppsx", "pps", "xls", "xlsx")
-	val maxFileSizeInMegabytes = 20
-	val maxFileSize: Int = maxFileSizeInMegabytes * 1024 * 1024  // 20M
+	val maxFileSizeInMegabytes = 40
+	val maxFileSize: Int = maxFileSizeInMegabytes * 1024 * 1024  // 40M
 
 	def validFileType(file: FileAttachment): Boolean =
 		validExtensions contains getExtension(file.name).toLowerCase
