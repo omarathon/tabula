@@ -3,17 +3,16 @@ package uk.ac.warwick.tabula.services.timetables
 import uk.ac.warwick.tabula.data.model.attendance.AttendanceState
 import uk.ac.warwick.tabula.data.model.groups.{SmallGroupEvent, WeekRange}
 import uk.ac.warwick.tabula.data.model.{Module, StaffMember, StudentMember}
+import uk.ac.warwick.tabula.helpers.Futures._
 import uk.ac.warwick.tabula.permissions.Permissions
 import uk.ac.warwick.tabula.services._
 import uk.ac.warwick.tabula.services.timetables.TimetableFetchingService.EventList
 import uk.ac.warwick.tabula.timetables.TimetableEvent
 import uk.ac.warwick.tabula.{AcademicYear, CurrentUser}
 import uk.ac.warwick.userlookup.User
-import uk.ac.warwick.tabula.helpers.Futures._
 
 import scala.collection.JavaConverters._
 import scala.concurrent.Future
-import scala.util.Try
 
 trait SmallGroupEventTimetableEventSourceComponent {
 	val studentGroupEventSource: StudentTimetableEventSource
@@ -31,14 +30,14 @@ trait SmallGroupEventTimetableEventSourceComponentImpl extends SmallGroupEventTi
 	class StudentSmallGroupEventTimetableEventSource extends StudentTimetableEventSource with SmallGroupEventTimetableEventSource {
 
 		def eventsFor(student: StudentMember, currentUser: CurrentUser, context: TimetableEvent.Context): Future[EventList] =
-			Future.fromTry(Try(eventsFor(userLookup.getUserByUserId(student.userId), currentUser)))
+			Future(eventsFor(userLookup.getUserByUserId(student.userId), currentUser))
 
 	}
 
 	class StaffSmallGroupEventTimetableEventSource extends StaffTimetableEventSource with SmallGroupEventTimetableEventSource {
 
 		def eventsFor(staff: StaffMember, currentUser: CurrentUser, context: TimetableEvent.Context): Future[EventList] =
-			Future.fromTry(Try(eventsFor(userLookup.getUserByUserId(staff.userId), currentUser)))
+			Future(eventsFor(userLookup.getUserByUserId(staff.userId), currentUser))
 
 	}
 

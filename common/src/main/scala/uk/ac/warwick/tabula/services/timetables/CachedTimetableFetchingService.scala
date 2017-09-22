@@ -9,6 +9,7 @@ import uk.ac.warwick.tabula.services.timetables.TimetableCacheKey._
 import uk.ac.warwick.tabula.services.timetables.TimetableFetchingService.EventList
 import uk.ac.warwick.util.cache._
 import uk.ac.warwick.util.collections.Pair
+import uk.ac.warwick.tabula.helpers.Futures._
 
 import scala.collection.JavaConverters._
 import scala.concurrent.duration._
@@ -25,9 +26,9 @@ object CachedPartialTimetableFetchingService {
  *
  */
 class CachedPartialTimetableFetchingService(
-	delegate: PartialTimetableFetchingService,
-	cacheName: String,
-	cacheExpiryTime: Int = CachedPartialTimetableFetchingService.defaultCacheExpiryTime
+	val delegate: PartialTimetableFetchingService,
+	val cacheName: String,
+	val cacheExpiryTime: Int = CachedPartialTimetableFetchingService.defaultCacheExpiryTime
 ) extends PartialTimetableFetchingService with AutowiringCacheStrategyComponent {
 
 	val FetchTimeout: FiniteDuration = 15.seconds
@@ -88,18 +89,17 @@ class CachedPartialTimetableFetchingService(
 	}
 
 	// Unwraps the CacheEntryUpdateException into its cause, for case matching
-	private def toFuture(eventList: Try[EventList]) = Future.fromTry(
-		eventList.recoverWith { case e: CacheEntryUpdateException => Failure(e.getCause) }
-	)
+	private def toFuture(eventList: => EventList) =
+		Future(eventList).recoverWith { case e: CacheEntryUpdateException => Future.failed(e.getCause) }
 
-	def getTimetableForStudent(universityId: String): Future[EventList] = toFuture(Try(timetableCache.get(StudentKey(universityId))))
+	def getTimetableForStudent(universityId: String): Future[EventList] = toFuture(timetableCache.get(StudentKey(universityId)))
 	def getTimetableForModule(moduleCode: String, includeStudents: Boolean): Future[EventList] = {
-		if (includeStudents) toFuture(Try(timetableCache.get(ModuleWithStudentsKey(moduleCode))))
-		else toFuture(Try(timetableCache.get(ModuleKey(moduleCode))))
+		if (includeStudents) toFuture(timetableCache.get(ModuleWithStudentsKey(moduleCode)))
+		else toFuture(timetableCache.get(ModuleKey(moduleCode)))
 	}
-	def getTimetableForCourse(courseCode: String): Future[EventList] = toFuture(Try(timetableCache.get(CourseKey(courseCode))))
-	def getTimetableForRoom(roomName: String): Future[EventList] = toFuture(Try(timetableCache.get(RoomKey(roomName))))
-	def getTimetableForStaff(universityId: String): Future[EventList] = toFuture(Try(timetableCache.get(StaffKey(universityId))))
+	def getTimetableForCourse(courseCode: String): Future[EventList] = toFuture(timetableCache.get(CourseKey(courseCode)))
+	def getTimetableForRoom(roomName: String): Future[EventList] = toFuture(timetableCache.get(RoomKey(roomName)))
+	def getTimetableForStaff(universityId: String): Future[EventList] = toFuture(timetableCache.get(StaffKey(universityId)))
 
 }
 
