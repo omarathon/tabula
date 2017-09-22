@@ -145,7 +145,19 @@ class UserGroup private(val universityIds: Boolean)
 		case list => userLookup.getUsersByUserIds(list.asJava).values.asScala.toSeq
 	}
 
-	def users: Seq[User] = getUsersFromIds(members)
+	@transient private var _cachedUsers: Option[Seq[User]] = None
+	@transient private var _cachedUsersMembers: Option[Seq[String]] = None
+	def users: Seq[User] = {
+		val resolvedMembers = members
+		_cachedUsers match {
+			case Some(result) if _cachedUsersMembers.contains(resolvedMembers) => result
+			case _ =>
+				val result = getUsersFromIds(resolvedMembers)
+				_cachedUsers = Some(result)
+				_cachedUsersMembers = Some(resolvedMembers)
+				result
+		}
+	}
 
 	def excludes: Seq[User] = getUsersFromIds(excludeUsers.asScala)
 
