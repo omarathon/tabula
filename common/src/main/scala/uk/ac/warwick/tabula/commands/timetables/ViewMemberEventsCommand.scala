@@ -126,10 +126,11 @@ abstract class ViewStudentEventsCommandInternal(val member: StudentMember, curre
 			studentTimetableEventSource.eventsFor(member, currentUser, TimetableEvent.Context.Student)
 				.map(eventsToOccurrences)
 
-		val meetingOccurrences = scheduledMeetingEventSource.occurrencesFor(member, currentUser, TimetableEvent.Context.Student)
-			.map(_.filterNot { event =>
-				event.end.toLocalDate.isBefore(start) || event.start.toLocalDate.isAfter(end)
-			})
+		val meetingOccurrences =
+			scheduledMeetingEventSource.occurrencesFor(member, currentUser, TimetableEvent.Context.Student)
+				.map(_.filterNot { event =>
+					event.end.toLocalDate.isBefore(start) || event.start.toLocalDate.isAfter(end)
+				})
 
 		Try(Await.result(
 			Futures.combine(Seq(timetableOccurrences, meetingOccurrences), EventOccurrenceList.combine), ViewMemberEventsCommand.Timeout

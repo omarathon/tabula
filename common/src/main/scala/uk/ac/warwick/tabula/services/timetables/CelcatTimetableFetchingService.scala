@@ -219,12 +219,12 @@ class CelcatHttpTimetableFetchingService(celcatConfiguration: CelcatConfiguratio
 
 	def getTimetableForStudent(universityId: UniversityId): Future[EventList] = {
 		if (wbsConfig.enabled) doRequest(universityId, wbsConfig)
-		else Future(EventList(Nil, None))
+		else Future.successful(EventList(Nil, None))
 	}
 
 	def getTimetableForStaff(universityId: UniversityId): Future[EventList] = {
 		if (wbsConfig.enabled) doRequest(universityId, wbsConfig)
-		else Future(EventList(Nil, None))
+		else Future.successful(EventList(Nil, None))
 	}
 
 	def doRequest(filename: String, config: CelcatDepartmentConfiguration): Future[EventList] = {
