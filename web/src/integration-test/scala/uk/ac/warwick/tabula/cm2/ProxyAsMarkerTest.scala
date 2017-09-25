@@ -38,29 +38,30 @@ class ProxyAsMarkerTest extends BrowserTest with CourseworkFixtures {
 	}
 
 	private def modifyMarksFeedback(): Unit = {
+		When("I add feedback, marks and grade")
+		val feedback = id("main").webElement.findElement(By.tagName("textarea"))
+		feedback.sendKeys("Well written essay")
+
+		id("mark").webElement.sendKeys("71")
+
+		id("grade").webElement.sendKeys("2.1")
+
+		And("I upload a valid file")
+
+		ifPhantomJSDriver(
+			operation = { d =>
+				// This hangs forever for some reason in PhantomJS if you use the normal pressKeys method
+				d.executePhantomJS("var page = this; page.uploadFile('input[type=file]', '" + getClass.getResource("/adjustments.xlsx").getFile + "');")
+			},
+			otherwise = { _ =>
+				click on find(cssSelector("input[type=file]")).get
+				pressKeys(getClass.getResource("/adjustments.xlsx").getFile)
+			}
+		)
 
 		eventuallyAjax {
-			When("I add feedback, marks and grade")
-			val feedback = id("main").webElement.findElement(By.tagName("textarea"))
-			feedback.sendKeys("Well written essay")
-
-			id("mark").webElement.sendKeys("71")
-
-			id("grade").webElement.sendKeys("2.1")
-
-			And("I upload a valid file")
-			val uploadFile = id("main").webElement.findElement(By.name("file.upload"))
-			click on uploadFile
-			pressKeys(getClass.getResource("/adjustments.xlsx").getFile)
-
 			And("submit the form")
-			click on cssSelector(".btn-primary")
-
-			Then("Results are saved and hidden away")
-			feedback.isDisplayed should be (false)
-
-			And("The Confirm and send to admin button is greyed out")
-			cssSelector(".must-have-selected").webElement.isEnabled should be (false)
+			cssSelector(s"button[type=submit]").webElement.click()
 		}
 
 		When("I select the student with feedback")
@@ -70,14 +71,15 @@ class ProxyAsMarkerTest extends BrowserTest with CourseworkFixtures {
 		cssSelector(".collection-checkbox").webElement.isSelected should be (true)
 		cssSelector(".collection-check-all").webElement.isSelected should be (true)
 
-		And("The Confirm and send to admin button is greyed out")
 		cssSelector(".must-have-selected").webElement.isEnabled should be (true)
 
 		When("I confirm and send to admin")
 		cssSelector(".must-have-selected").webElement.click()
 
-		Then("The marking should be complete")
-		currentUrl should include("1/marking-completed")
+		eventuallyAjax {
+			Then("The marking should be complete")
+			currentUrl should include("marking-completed")
+		}
 
 	}
 
