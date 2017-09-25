@@ -14,7 +14,7 @@
 			</@modal.header>
 
 			<@modal.body>
-				<p>Publish allocations for ${smallGroupSet.name} so they are shown in Tabula to:</p>
+				<p>Publish allocations for ${smallGroupSet.name} and show them in Tabula to:</p>
 
 				<@bs3form.checkbox "notifyStudents">
 					<@f.checkbox path="notifyStudents" disabled=smallGroupSet.releasedToStudents />
@@ -25,6 +25,10 @@
 					<@f.checkbox path="notifyTutors" disabled=smallGroupSet.releasedToTutors />
 					<span class="${smallGroupSet.releasedToTutors?string('disabled','')}">Tutors</span>
 				</@bs3form.checkbox>
+
+				<p class="help-block">
+					By default, a lecture event is not displayed to students because it may duplicate a Syllabus+ whole cohort event. You can still select the <strong>Students</strong> checkbox and publish the lecture event to students' timetables e.g. when there is no Syllabus+ event.
+				</p>
 
 				<hr>
 
