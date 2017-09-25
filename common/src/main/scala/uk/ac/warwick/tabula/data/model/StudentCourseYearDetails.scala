@@ -108,7 +108,7 @@ class StudentCourseYearDetails extends StudentCourseYearProperties
 				.filter(r => r.endDate == null || r.startDate.isBefore(r.endDate))
 				.filter(relationship => {
 				// For the most recent YoS, only show current relationships
-				if (studentCourseDetails.freshStudentCourseYearDetails.max == this) {
+				if (studentCourseDetails.freshStudentCourseYearDetails.nonEmpty && studentCourseDetails.freshStudentCourseYearDetails.max == this) {
 					relationship.isCurrent
 				} else {
 					// Otherwise return the relationship if it lasted for at least 6 months in this academic year

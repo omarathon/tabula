@@ -122,9 +122,12 @@ trait MarkingCompletedState extends CanProxy with UserAware {
 	def releasedFeedback: Seq[MarkerFeedback] = markerFeedback.asScala.filter(mf => {
 		mf.stage.order < mf.feedback.currentStageIndex
 	})
+	def notReadyToMark: Seq[MarkerFeedback] = markerFeedback.asScala.filter(mf => {
+		mf.stage.order > mf.feedback.currentStageIndex
+	})
 
 	// do not update previously released feedback or feedback belonging to other markers
-	lazy val feedbackForRelease: Seq[MarkerFeedback] = markerFeedback.asScala.filter(_.marker == marker) -- releasedFeedback
+	lazy val feedbackForRelease: Seq[MarkerFeedback] = markerFeedback.asScala.filter(_.marker == marker) -- releasedFeedback -- notReadyToMark
 }
 
 trait MarkerCompletedNotificationCompletion extends CompletesNotifications[Unit] {

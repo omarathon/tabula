@@ -62,7 +62,7 @@ class StudentTimetableTest extends BrowserTest with TimetablingFixture with Give
 
 		And("the first should be the lecture")
 		val lecture = events.head
-		lecture("title") should be("CS132 Computer Organisation & Architecture Lecture (L5)")
+		lecture("title") should be("CS132 Computer Organisation & Architecture Lecture (Lecture Theatre 5)")
 
 		And("the second should be the small group event")
 		val smallGroup = events.last
@@ -79,7 +79,7 @@ class StudentTimetableTest extends BrowserTest with TimetablingFixture with Give
 		Then("Marker 1 should be able to view Student 1's timetable")
 		val events = requestWholeYearsTimetableFeedFor(P.Student1, asUser = Some(P.Marker1))
 		// we should be able to find the event we just created
-		events.find(e => e("title") == "CS132 Computer Organisation & Architecture Lecture (L5)") should be('defined)
+		events.find(e => e("title") == "CS132 Computer Organisation & Architecture Lecture (Lecture Theatre 5)") should be('defined)
 	}
 
 	"A member of staff" should "be able to view any student's timetable" in {

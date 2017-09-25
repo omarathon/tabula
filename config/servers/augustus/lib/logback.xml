@@ -21,7 +21,6 @@
 		</rollingPolicy>
 	</appender>
 
-	<!--
 	<appender name="DEBUG" class="ch.qos.logback.core.rolling.RollingFileAppender">
 		<file>${catalina.base}/logs/debug.log</file>
 		<append>true</append>
@@ -35,7 +34,6 @@
 			<maxHistory>${max.retention.days}</maxHistory>
 		</rollingPolicy>
 	</appender>
-	-->
 
 	<appender name="AUDIT" class="ch.qos.logback.core.rolling.RollingFileAppender">
 		<file>${catalina.base}/logs/audit.log</file>
@@ -132,6 +130,7 @@
 
 	<logger name="org.springframework" level="INFO" />
 	<logger name="org.apache" level="INFO" />
+	<logger name="org.hibernate" level="INFO" />
 
 	<!-- TAB-2343 Stop logging ObjectNotFoundException info notices -->
 	<logger name="org.hibernate.event.internal.DefaultLoadEventListener" level="WARN" />
@@ -146,6 +145,9 @@
 	<logger name="facelets.compiler" level="WARN" />
 	<logger name="org.ajax4jsf.cache" level="WARN" />
 	<logger name="org.rhq" level="WARN" />
+	<logger name="org.hibernate.SQL" level="DEBUG" additivity="false">
+		<appender-ref ref="DEBUG" />
+	</logger>
 
 	<root level="INFO">
 		<appender-ref ref="CONSOLE" />

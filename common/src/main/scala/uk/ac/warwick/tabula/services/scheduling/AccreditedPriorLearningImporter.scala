@@ -108,7 +108,7 @@ object AccreditedPriorLearningImporter {
 		join $sitsSchema.ins_spr spr -- join to Student Program Route table to get SPR code
 			on spr.spr_stuc = stu.stu_code
 
-		join $sitsSchema.cam_sac sac -- join to Student Award Crecits table
+		join $sitsSchema.cam_sac sac -- join to Student Award Credits table
 			on sac.spr_code = spr.spr_code
 
 	join $sitsSchema.srs_scj scj -- join to Student Course Join table to get the SCJ code

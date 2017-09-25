@@ -74,7 +74,6 @@ class ImportStudentCourseCommand(rows: Seq[SitsStudentRow], stuMem: StudentMembe
 						+ studentCourseDetails.scjCode + ", SPR " + studentCourseDetails.sprCode
 						+ ".  Might be invalid data in SITS - working on the assumption "
 						+ "there shouldn't be multiple SPR codes for one current SCJ code")
-					exception.printStackTrace()
 			}
 		}
 

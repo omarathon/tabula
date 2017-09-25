@@ -67,20 +67,22 @@
 										<#list students as studentRelationship>
 											<#assign studentCourseDetails = studentRelationship.studentCourseDetails />
 											<tr class="student">
-												<#assign readOnly=(studentCourseDetails.department.code!=department.code) />
-												<#if can_reallocate>
-													<td>
-														<#if readOnly>
-															<#assign studentDepartment=studentCourseDetails.department />
-															<div class="use-tooltip" data-html="true" data-container ="body" data-title= "This student can be reallocated from their profile page or from within the ${studentDepartment.name} department.">
-														</#if>
-														<@bs3form.selector_check_row
-															name="preselectStudents"
-															value="${studentCourseDetails.student.universityId}"
-															readOnly=readOnly
-														/>
-														<#if readOnly></div></#if>
-													</td>
+												<#if (studentCourseDetails.department)??>
+													<#assign readOnly=(studentCourseDetails.department.code!=department.code) />
+													<#if can_reallocate>
+														<td>
+															<#if readOnly>
+																<#assign studentDepartment=studentCourseDetails.department />
+																<div class="use-tooltip" data-html="true" data-container ="body" data-title= "This student can be reallocated from their profile page or from within the ${studentDepartment.name} department.">
+															</#if>
+															<@bs3form.selector_check_row
+																name="preselectStudents"
+																value="${studentCourseDetails.student.universityId}"
+																readOnly=readOnly
+															/>
+															<#if readOnly></div></#if>
+														</td>
+													</#if>
 												</#if>
 												<td><h6>${studentCourseDetails.student.firstName}</h6></td>
 												<td><h6>${studentCourseDetails.student.lastName}</h6></td>

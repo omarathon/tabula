@@ -10,6 +10,7 @@ import uk.ac.warwick.tabula.data.model._
 import uk.ac.warwick.tabula.data.model.markingworkflow.FinalStage
 import uk.ac.warwick.tabula.data.model.notifications.cm2.{ReleaseToMarkerNotification, ReturnToMarkerNotification, StopMarkingNotification}
 import uk.ac.warwick.tabula.events.NotificationHandling
+import uk.ac.warwick.tabula.helpers.StringUtils._
 import uk.ac.warwick.tabula.permissions.Permissions
 import uk.ac.warwick.tabula.services.{AutowiringCM2MarkingWorkflowServiceComponent, CM2MarkingWorkflowServiceComponent}
 import uk.ac.warwick.userlookup.User
@@ -96,7 +97,7 @@ trait StopMarkingNotifier extends Notifies[Seq[AssignmentFeedback], Seq[MarkerFe
 
 	def emit(commandResult: Seq[AssignmentFeedback]): Seq[Notification[MarkerFeedback, Assignment]] = {
 		// emit notifications to each marker that has new feedback
-		val markerMap : Map[String, Seq[MarkerFeedback]] = stoppedMarkerFeedback.asScala.groupBy(_.marker.getUserId)
+		val markerMap : Map[String, Seq[MarkerFeedback]] = stoppedMarkerFeedback.asScala.groupBy(_.marker.getUserId).filterKeys(_.hasText)
 
 		markerMap.map{ case (usercode, markerFeedback) =>
 			val notification = Notification.init(new StopMarkingNotification, user, markerFeedback, assignment)

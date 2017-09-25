@@ -44,7 +44,8 @@ trait DownloadsTimetable extends TaskBenchmarking {
 			def roundTime(time: LocalTime): LocalTime = {
 				val floor = new LocalTime(time.getHourOfDay, 0)
 				if (Minutes.minutesBetween(floor, time).getMinutes >= 30) {
-					new LocalTime(time.getHourOfDay + 1, 0)
+					val nextHour = if(time.getHourOfDay > 22) 0 else time.getHourOfDay + 1
+					new LocalTime(nextHour, 0)
 				} else {
 					floor
 				}

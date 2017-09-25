@@ -50,9 +50,8 @@
 						<@f.checkbox path="findCommand.linkToSits" />
 						Link to SITS
 						<#assign popoverContent><#noescape>
-							If ticked, this filter will be automatically update this group of students from SITS.
-							<br />
-							If not, these students will be imported into a static list which will <strong>not</strong> be updated from SITS.
+							<p>Select this option to automatically update the filtered list of students from SITS. If you choose not to link to SITS, these students are imported to Tabula as a static list, which does not update when SITS data changes. Therefore, you need to maintain the list yourself &ndash; e.g. when a student withdraws from their course.</p>
+							<p>You can still upload missed monitoring points to SITS regardless of whether you select this option or not.</p>
 						</#noescape></#assign>
 						<a class="use-popover"
 						   id="popover-linkToSits"

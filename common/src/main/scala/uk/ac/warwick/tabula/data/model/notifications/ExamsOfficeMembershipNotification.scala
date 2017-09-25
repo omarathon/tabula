@@ -8,7 +8,9 @@ import uk.ac.warwick.tabula.data.model.NotificationPriority.Warning
 import uk.ac.warwick.tabula.data.model._
 import uk.ac.warwick.tabula.services.{AutowiringUserLookupComponent, LenientGroupService}
 import uk.ac.warwick.userlookup.User
+
 import scala.collection.JavaConverters._
+import scala.util.Try
 
 
 object ExamsOfficeMembershipNotification {
@@ -46,8 +48,8 @@ class ExamsOfficeMembershipNotification extends Notification[Department, Unit]
 
 	def content = FreemarkerModel(ExamsOfficeMembershipNotification.templateLocation, Map (
 		"departments" -> departments,
-		"numAssignments" -> numAssignments,
-		"numSmallGroupSets" -> numSmallGroupSets
+		"numAssignments" -> numAssignments.mapValues(s => Try(s.toInt).getOrElse(0)),
+		"numSmallGroupSets" -> numSmallGroupSets.mapValues(s => Try(s.toInt).getOrElse(0))
 	))
 
 	@transient
