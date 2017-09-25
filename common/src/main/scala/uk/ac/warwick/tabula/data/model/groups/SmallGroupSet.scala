@@ -54,7 +54,8 @@ class SmallGroupSet
 		with Serializable
 		with PostLoadBehaviour
 		with ToEntityReference
-		with TaskBenchmarking {
+		with TaskBenchmarking
+		with HasManualMembership  {
 	type Entity = SmallGroupSet
 
 	import SmallGroupSet.Settings
@@ -311,7 +312,7 @@ class SmallGroupSet
     newSet
   }
 
-	def postLoad {
+	def postLoad() {
 		ensureSettings
 	}
 

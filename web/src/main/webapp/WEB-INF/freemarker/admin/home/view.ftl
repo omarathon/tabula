@@ -12,7 +12,7 @@
 	<h1>Hello</h1>
 </#if>
 
-<#if nonempty(ownedDepartments) || nonempty(ownedModuleDepartments) || nonempty(ownedRouteDepartments)>
+<#if nonempty(ownedDepartments) || nonempty(ownedModuleDepartments) || nonempty(ownedRouteDepartments) || nonempty(departmentsWithManualUsers)>
 	<div><h2 class="section">Administration</h2></div>
 
 	<#if nonempty(ownedModuleDepartments)>
@@ -50,6 +50,21 @@
 			</#list>
 		</ul>
 	</#if>
+
+	<#if nonempty(departmentsWithManualUsers)>
+		<h6>Departments with manually added users</h6>
+		<ul class="links">
+			<#list departmentsWithManualUsers?keys as department>
+				<li>
+						<a href="<@routes.admin.manualmembershipeo department />">
+							${department.name} - (<@fmt.p mapGet(departmentsWithManualUsers, department).assignments "assignment"/> and <@fmt.p mapGet(departmentsWithManualUsers, department).smallGroupSets "small group set"/>)
+						</a>
+				</li>
+			</#list>
+		</ul>
+	</#if>
+
+
 </#if>
 
 </#escape>

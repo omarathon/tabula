@@ -413,3 +413,8 @@ trait AutowiringAssessmentMembershipServiceComponent extends AssessmentMembershi
 trait GeneratesGradesFromMarks {
 	def applyForMarks(marks: Map[String, Int]): Map[String, Seq[GradeBoundary]]
 }
+
+trait HasManualMembership {
+	def members: UnspecifiedTypeUserGroup
+	def module: Module
+}
