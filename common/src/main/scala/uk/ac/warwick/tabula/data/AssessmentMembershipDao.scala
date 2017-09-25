@@ -320,7 +320,7 @@ class AssessmentMembershipDaoImpl extends AssessmentMembershipDao with Daoisms w
 			select a.* from Assignment a
 				join Module m on a.module_id = m.id
 				join Department d on m.department_id = d.id and a.academicyear = :academicYear and d.code = :departmentCode
-				where a.membersgroup_id in (select distinct(i.group_id) from usergroupinclude i where i.group_id = a.membersgroup_id)
+				where a.membersgroup_id in (select distinct(i.group_id) from usergroupinclude i join member m on i.usercode = m.userid where i.group_id = a.membersgroup_id)
 			""")
 			.addEntity(classOf[Assignment])
 			.setString("academicYear", academicYear.startYear.toString)
@@ -331,7 +331,7 @@ class AssessmentMembershipDaoImpl extends AssessmentMembershipDao with Daoisms w
 			select s.* from smallgroupset s
 				join module m on s.module_id = m.id
 				join department d on m.department_id = d.id and s.academicyear = :academicYear and d.code = :departmentCode
-				where s.membersgroup_id in (select distinct(i.group_id) from usergroupinclude i where i.group_id = s.membersgroup_id)
+				where s.membersgroup_id in (select distinct(i.group_id) from usergroupinclude i join member m on i.usercode = m.userid where i.group_id = s.membersgroup_id)
 			""")
 			.addEntity(classOf[SmallGroupSet])
 			.setString("academicYear", academicYear.startYear.toString)
@@ -344,13 +344,14 @@ class AssessmentMembershipDaoImpl extends AssessmentMembershipDao with Daoisms w
 
 	def departmentsWithManualAssessmentsOrGroups(academicYear: AcademicYear): Seq[DepartmentWithManualUsers] = {
 
+		// join the usergroupinclude table with member to weed out manually added ext-users
 		val results = session.createSQLQuery("""
 			select distinct(d.id) as id, count(distinct(a.id)) as assignments, count(distinct(s.id)) as smallGroupSets from department d
 				join module m on m.department_id = d.id
 				left join assignment a on a.module_id = m.id and a.academicyear = :academicYear and a.membersgroup_id in
-					(select distinct(i.group_id) from usergroupinclude i where i.group_id = a.membersgroup_id)
+					(select distinct(i.group_id) from usergroupinclude i join member m on i.usercode = m.userid where i.group_id = a.membersgroup_id)
 				left join smallgroupset s on s.module_id = m.id and s.academicyear = :academicYear and s.membersgroup_id in
-					(select distinct(i.group_id) from usergroupinclude i where i.group_id = s.membersgroup_id)
+					(select distinct(i.group_id) from usergroupinclude i join member m on i.usercode = m.userid where i.group_id = s.membersgroup_id)
 				where not (s.id is null and a.id is null)
 				group by d.id, d.parent_id
 		""")

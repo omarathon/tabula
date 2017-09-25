@@ -1,12 +1,12 @@
 package uk.ac.warwick.tabula.system
 
 import uk.ac.warwick.spring.Wire
-import uk.ac.warwick.tabula.{Features, CurrentUser}
+import uk.ac.warwick.tabula.{CurrentUser, Features}
 import uk.ac.warwick.tabula.JavaImports._
 import uk.ac.warwick.tabula.helpers.FoundUser
 import uk.ac.warwick.tabula.permissions.Permissions
 import uk.ac.warwick.tabula.services.permissions.{AutowiringCacheStrategyComponent, PermissionsService}
-import uk.ac.warwick.tabula.services.{CourseAndRouteService, ModuleAndDepartmentService}
+import uk.ac.warwick.tabula.services.{CourseAndRouteService, ModuleAndDepartmentService, SecurityService}
 import uk.ac.warwick.tabula.web.views.AutowiredTextRendererComponent
 import uk.ac.warwick.userlookup.{User, UserLookupInterface}
 import uk.ac.warwick.util.cache.{CacheEntryFactory, Caches}
@@ -31,6 +31,7 @@ object UserNavigationGeneratorImpl extends UserNavigationGenerator with Autowire
 	var moduleService: ModuleAndDepartmentService = Wire[ModuleAndDepartmentService]
 	var routeService: CourseAndRouteService = Wire[CourseAndRouteService]
 	var permissionsService: PermissionsService = Wire[PermissionsService]
+	var securityService: SecurityService = Wire[SecurityService]
 	var userLookup: UserLookupInterface = Wire[UserLookupInterface]
 	var features: Features = Wire[Features]
 
@@ -44,7 +45,8 @@ object UserNavigationGeneratorImpl extends UserNavigationGenerator with Autowire
 				moduleService.departmentsWithPermission(user, Permissions.Module.Administer).nonEmpty ||
 				moduleService.departmentsWithPermission(user, Permissions.Route.Administer).nonEmpty ||
 				moduleService.modulesWithPermission(user, Permissions.Module.Administer).nonEmpty ||
-				routeService.routesWithPermission(user, Permissions.Route.Administer).nonEmpty
+				routeService.routesWithPermission(user, Permissions.Route.Administer).nonEmpty ||
+				securityService.can(user, Permissions.Department.ViewManualMembershipSummary, homeDepartment.orNull)
 			)
 
 		val canViewProfiles =

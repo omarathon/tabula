@@ -15,6 +15,7 @@ object Routes {
 	import RoutesUtils._
 	private val context = "/admin"
 	def home: String = context + "/"
+	def adminHome: String = context
 	def masquerade: String = context + "/masquerade"
 
 	object department {

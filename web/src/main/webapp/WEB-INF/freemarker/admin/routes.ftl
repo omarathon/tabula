@@ -19,6 +19,7 @@ TODO grab values from the Routes object in code, as that's pretty equivalent and
 <#macro displaysettings department><@_u page="/department/${department.code}/settings/display" /></#macro>
 <#macro notificationsettings department><@_u page="/department/${department.code}/settings/notification" /></#macro>
 <#macro manualmembership department><@_u page="/department/${department.code}/manualmembership" /></#macro>
+<#macro manualmembershipeo department><@_u page="/department/${department.code}/manualmembership/eo" /></#macro>
 
 <#macro editdepartment department><@_u page="/department/${department.code}/edit" /></#macro>
 <#macro createsubdepartment department><@_u page="/department/${department.code}/subdepartment/new" /></#macro>

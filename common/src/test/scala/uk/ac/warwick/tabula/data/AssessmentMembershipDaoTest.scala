@@ -201,6 +201,16 @@ class AssessmentMembershipDaoTest extends PersistenceTestBase {
 	@Test def departmentsManualMembership(): Unit = {
 		transactional { _ =>
 			new Fixture {
+
+				def testMember(id: String): StudentMember = {
+					val m = new StudentMember(id)
+					m.userId = id
+					m
+				}
+				val members = Seq(testMember("cuscav"), testMember("cuslaj"), testMember("cuslat"))
+				members.foreach(session.save)
+				session.flush()
+
 				assignment4.members.knownType.addUserId("cuscav")
 				session.save(assignment4)
 				assignment5.members.knownType.addUserId("cuscav")

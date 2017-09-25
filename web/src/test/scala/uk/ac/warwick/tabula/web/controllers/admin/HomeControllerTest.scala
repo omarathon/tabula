@@ -2,6 +2,8 @@ package uk.ac.warwick.tabula.web.controllers.admin
 
 import uk.ac.warwick.tabula.data.model.{Department, Module, Route}
 import uk.ac.warwick.tabula.permissions.Permissions
+import uk.ac.warwick.tabula.roles.AcademicOfficeUser
+import uk.ac.warwick.tabula.services.permissions.RoleService
 import uk.ac.warwick.tabula.services.{CourseAndRouteService, ModuleAndDepartmentService}
 import uk.ac.warwick.tabula.web.Mav
 import uk.ac.warwick.tabula.{Fixtures, Mockito, TestBase}
@@ -33,6 +35,7 @@ class HomeControllerTest extends TestBase with Mockito {
 		val controller = new AdminHomeController
 		controller.moduleAndDepartmentService = smartMock[ModuleAndDepartmentService]
 		controller.courseAndRouteService = smartMock[CourseAndRouteService]
+		controller.roleService = smartMock[RoleService]
 	}
 
 	@Test def itWorks() = withUser("cuscav") { new Fixture {
@@ -40,13 +43,15 @@ class HomeControllerTest extends TestBase with Mockito {
 		controller.moduleAndDepartmentService.departmentsWithPermission(currentUser, Permissions.Route.Administer) returns Set(dept1)
 		controller.moduleAndDepartmentService.modulesWithPermission(currentUser, Permissions.Module.Administer) returns Set(mod1, mod2, mod3)
 		controller.courseAndRouteService.routesWithPermission(currentUser, Permissions.Route.Administer) returns Set(route1, route2, route3)
+		controller.roleService.hasRole(currentUser, AcademicOfficeUser()) returns false
 
-		val mav: Mav = controller.home(None)
+		val mav: Mav = controller.home(None, null, currentUser)
 		mav.viewName should be ("admin/home/view")
 		mav.toModel should be (Map(
 			"ownedDepartments" -> Set(dept1),
 			"ownedModuleDepartments" -> Set(dept1, dept2),
-			"ownedRouteDepartments" -> Set(dept1, dept2)
+			"ownedRouteDepartments" -> Set(dept1, dept2),
+			"departmentsWithManualUsers" -> Map()
 		))
 	}}
 
