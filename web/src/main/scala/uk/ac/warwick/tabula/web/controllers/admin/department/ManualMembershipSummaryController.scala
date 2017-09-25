@@ -6,14 +6,16 @@ import org.springframework.stereotype.Controller
 import org.springframework.web.bind.annotation.{ModelAttribute, PathVariable, RequestMapping}
 import uk.ac.warwick.tabula.commands.{Appliable, CurrentSITSAcademicYear, SelfValidating}
 import uk.ac.warwick.tabula.commands.admin.department.ManualMembershipSummaryCommand
-import uk.ac.warwick.tabula.data.model.Department
+import uk.ac.warwick.tabula.data.model.{Department, Module}
 import uk.ac.warwick.tabula.permissions.{Permission, Permissions}
 import uk.ac.warwick.tabula.services.{AutowiringMaintenanceModeServiceComponent, AutowiringModuleAndDepartmentServiceComponent, AutowiringUserSettingsServiceComponent, ManualMembershipInfo}
 import uk.ac.warwick.tabula.web.{Mav, Routes}
 import uk.ac.warwick.tabula.web.controllers.DepartmentScopedController
 import uk.ac.warwick.tabula.web.controllers.admin.AdminController
+import uk.ac.warwick.userlookup.User
 
 import scala.collection.immutable.TreeMap
+import scala.collection.mutable
 
 @Controller
 @RequestMapping(Array("/admin/department/{department}/manualmembership"))
@@ -50,21 +52,25 @@ class ManualMembershipSummaryController extends AdminController with DepartmentS
 
 	@RequestMapping(path = Array("eo"), method = Array(GET, HEAD))
 	def eoForm(@Valid @ModelAttribute("summaryCommand") cmd: ManualMembershipSummaryCommand, @PathVariable department: Department): Mav = {
-		val info = cmd.apply()
-		val assignmentsByModule = info.assignments.groupBy(_.module)
-		val smallGroupSetsByModule = info.smallGroupSets.groupBy(_.module)
 
-		val modules = (assignmentsByModule.keys ++ smallGroupSetsByModule.keys).toSeq.distinct
-		val studentsByModule = modules.map(module => module -> {
-			val assignments = assignmentsByModule.getOrElse(module, Nil)
-			val smallGroupSets = smallGroupSetsByModule.getOrElse(module, Nil)
-			(assignments.flatMap(_.members.users) ++ smallGroupSets.flatMap(_.members.users)).distinct.sortBy(_.getWarwickId)
-		}).toMap
+		import uk.ac.warwick.tabula.helpers.UserOrderingByIds._
+
+		val info = cmd.apply()
+
+		val studentModuleMap = mutable.Map[User, Set[Module]]()
+
+		for(assignment <- info.assignments; student <- assignment.members.users) {
+			studentModuleMap(student) = studentModuleMap.getOrElse(student, Set()) + assignment.module
+		}
+
+		for(smallGroupSet <- info.smallGroupSets; student <- smallGroupSet.members.users) {
+			studentModuleMap(student) = studentModuleMap.getOrElse(student, Set()) + smallGroupSet.module
+		}
 
 		Mav("admin/manual-membership-eo",
 			"academicYear" -> cmd.getAcademicYearString,
 			"returnTo" -> getReturnTo(Routes.admin.home),
-			"studentsByModule" -> TreeMap(studentsByModule.toSeq:_*)
+			"studentModuleMap" -> TreeMap(studentModuleMap.toSeq:_*)
 		).crumbs(Breadcrumbs.Department(department))
 	}
 

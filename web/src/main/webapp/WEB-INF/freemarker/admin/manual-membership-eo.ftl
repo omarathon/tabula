@@ -11,27 +11,20 @@
 		This page shows a list of all ${department.name} assignments and small group sets in ${academicYear} that have manually added students.
 	</p>
 
-	<#if studentsByModule?has_content>
-	<div>
-		<#list studentsByModule?keys as module>
-			<h4>
-				<span class="mod-code">${module.code}</span>
-				<span class="mod-name">${module.name}</span>
-			</h4>
-
-			<table class="table table-bordered table-striped table-condensed sortable">
-				<thead><tr><th class="sortable">ID</th><th class="sortable">Usercode</th><th class="sortable">First name</th><th class="sortable">Last name</th></tr></thead>
-				<tbody><#list  mapGet(studentsByModule, module) as student>
+	<#if studentModuleMap?has_content>
+		<table class="table table-bordered table-striped table-condensed sortable">
+			<thead><tr><th class="sortable">ID</th><th class="sortable">First name</th><th class="sortable">Last name</th><th>Modules</th></tr></thead>
+			<tbody>
+				<#list studentModuleMap?keys as student>
 				<tr>
 					<td>${student.warwickId}</td>
-					<td>${student.userId}</td>
 					<td>${student.firstName}</td>
 					<td>${student.lastName}</td>
+					<td><#list mapGet(studentModuleMap, student) as module>${module.code}<#if module_has_next>, </#if></#list></td>
 				</tr>
-				</#list></tbody>
-			</table>
-		</#list>
-	</div>
+				</#list>
+			</tbody>
+		</table>
 	</#if>
 
 	<script type="text/javascript">
