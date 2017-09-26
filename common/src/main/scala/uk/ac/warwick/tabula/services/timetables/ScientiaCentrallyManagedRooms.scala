@@ -387,7 +387,7 @@ object ScientiaCentrallyManagedRooms {
 		"WM_S0.15" -> MapLocation("S0.15", "47896", Some("WM_S0.15")),
 		"OC0.01" -> MapLocation("OC0.01", "52134", Some("OC0.01")),
 		"OC1.01" -> MapLocation("OC1.01", "52205", Some("OC1.01")),
-		"OC1.09" -> MapLocation("Cinema", "41920", Some("OC1.09")),
+		"OC1.09" -> MapLocation("OC1.09", "52204", Some("OC1.09")),
 		"OC1.04" -> MapLocation("OC1.04", "52175", Some("OC1.04")),
 		"OC1.06" -> MapLocation("OC1.06", "52178", Some("OC1.06")),
 		"OC0.05" -> MapLocation("OC0.05", "52131", Some("OC0.05")),
