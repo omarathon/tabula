@@ -271,7 +271,7 @@ object ScientiaCentrallyManagedRooms {
 		"IN_B0.52 (PC room - G.Hill)" -> MapLocation("B0.52", "37017", Some("IN_B0.52 (PC room - G.Hill)")),
 		"BS_E018" -> MapLocation("Teaching Laboratory 1", "35310", Some("BS_E018")),
 		"BS_E109" -> MapLocation("Teaching Lab 3", "35375", Some("BS_E109")),
-		"ES_F2.11" -> MapLocation("F2.11", "31017", Some("ES_F2.11")),
+		"ES_F2.11" -> MapLocation("F2.11", "31029", Some("ES_F2.11")),
 		"ES_F2.15" -> MapLocation("F2.15", "31019", Some("ES_F2.15")),
 		"ES_D0.09" -> MapLocation("D0.09/D0.04", "30650", Some("ES_D0.09")),
 		"H1.02" -> MapLocation("H1.02", "21431", Some("H1.02")),
