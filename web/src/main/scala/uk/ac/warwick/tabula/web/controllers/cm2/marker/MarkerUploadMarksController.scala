@@ -26,7 +26,7 @@ class MarkerUploadMarksController extends CourseworkController {
 		MarkerAddMarksCommand(mandatory(assignment), mandatory(marker), currentUser, GenerateGradesFromMarkCommand(assignment))
 
 	@RequestMapping
-	def viewForm(@ModelAttribute("command") cmd: Command, @PathVariable assignment: Assignment, @PathVariable marker: User, errors: Errors): Mav = {
+	def viewForm (@PathVariable assignment: Assignment, @PathVariable marker: User, @ModelAttribute("command") cmd: Command, errors: Errors): Mav = {
 		Mav("cm2/admin/assignments/upload_marks",
 			"isGradeValidation" -> cmd.assignment.module.adminDepartment.assignmentGradeValidation,
 			"templateUrl" -> Routes.admin.assignment.markerFeedback.marksTemplate(assignment, marker),
@@ -38,8 +38,8 @@ class MarkerUploadMarksController extends CourseworkController {
 	}
 
 	@RequestMapping(method = Array(POST), params = Array("!confirm"))
-	def preview(@ModelAttribute("command") cmd: Command, @PathVariable assignment: Assignment, @PathVariable marker: User, errors: Errors): Mav = {
-		if (errors.hasErrors) viewForm(cmd, assignment, marker, errors)
+	def preview(@PathVariable assignment: Assignment, @PathVariable marker: User, @ModelAttribute("command") cmd: Command, errors: Errors): Mav = {
+		if (errors.hasErrors) viewForm(assignment, marker, cmd, errors)
 		else {
 			cmd.postBindValidation(errors)
 			Mav("cm2/admin/assignments/upload_marks_preview",
@@ -52,7 +52,7 @@ class MarkerUploadMarksController extends CourseworkController {
 	}
 
 	@RequestMapping(method = Array(POST), params = Array("confirm=true"))
-	def upload(@ModelAttribute("command") cmd: Command, @PathVariable assignment: Assignment, @PathVariable marker: User, errors: Errors): Mav = {
+	def upload(@PathVariable assignment: Assignment, @PathVariable marker: User, @ModelAttribute("command") cmd: Command, errors: Errors): Mav = {
 		cmd.apply()
 		Redirect(Routes.admin.assignment.markerFeedback(assignment, marker))
 	}
