@@ -37,53 +37,6 @@ class ProxyAsMarkerTest extends BrowserTest with CourseworkFixtures {
 
 	}
 
-	private def modifyMarksFeedback(): Unit = {
-		When("I add feedback, marks and grade")
-		val feedback = id("main").webElement.findElement(By.tagName("textarea"))
-		feedback.sendKeys("Well written essay")
-
-		id("mark").webElement.sendKeys("71")
-
-		id("grade").webElement.sendKeys("2.1")
-
-		And("I upload a valid file")
-
-		ifPhantomJSDriver(
-			operation = { d =>
-				// This hangs forever for some reason in PhantomJS if you use the normal pressKeys method
-				d.executePhantomJS("var page = this; page.uploadFile('input[type=file]', '" + getClass.getResource("/adjustments.xlsx").getFile + "');")
-			},
-			otherwise = { _ =>
-				click on find(cssSelector("input[type=file]")).get
-				pressKeys(getClass.getResource("/adjustments.xlsx").getFile)
-			}
-		)
-
-		eventuallyAjax {
-			And("submit the form")
-			cssSelector(s"button[type=submit]").webElement.click()
-		}
-
-		When("I select the student with feedback")
-		cssSelector(".collection-checkbox").webElement.click()
-
-		Then("Both the all results checkbox and the individual record checkbox are selected")
-		cssSelector(".collection-checkbox").webElement.isSelected should be (true)
-		cssSelector(".collection-check-all").webElement.isSelected should be (true)
-
-		cssSelector(".must-have-selected").webElement.isEnabled should be (true)
-
-		When("I confirm and send to admin")
-		cssSelector(".must-have-selected").webElement.click()
-
-		eventuallyAjax {
-			Then("The marking should be complete")
-			currentUrl should include("marking-completed")
-		}
-
-	}
-
-
 	"Department admin" should "be able to proxy as marker" in as(P.Admin1) {
 
 		withAssignmentWithWorkflow(SingleMarking, Seq(P.Marker1, P.Marker2)) { id =>
@@ -107,7 +60,6 @@ class ProxyAsMarkerTest extends BrowserTest with CourseworkFixtures {
 				}
 
 				openProxyMarkingScreen()
-				modifyMarksFeedback()
 
 			}
 		}
