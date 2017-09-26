@@ -38,16 +38,17 @@ class ProxyAsMarkerTest extends BrowserTest with CourseworkFixtures {
 	}
 
 	private def modifyMarksFeedback(): Unit = {
-		When("I add feedback, marks and grade")
-		val feedback = id("main").webElement.findElement(By.tagName("textarea"))
-		feedback.sendKeys("Well written essay")
+		eventually {
+			When("I add feedback, marks and grade")
+			val feedback = id("main").webElement.findElement(By.tagName("textarea"))
+			feedback.sendKeys("Well written essay")
 
-		id("mark").webElement.sendKeys("71")
+			id("mark").webElement.sendKeys("71")
 
-		id("grade").webElement.sendKeys("2.1")
+			id("grade").webElement.sendKeys("2.1")
 
-		And("I upload a valid file")
-
+			And("I upload a valid file")
+		}
 		ifPhantomJSDriver(
 			operation = { d =>
 				// This hangs forever for some reason in PhantomJS if you use the normal pressKeys method
