@@ -30,4 +30,4 @@
 
 		$('table.sortable').sortableTable();
 	});
-</script>sor
+</script>
