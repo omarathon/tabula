@@ -326,6 +326,41 @@ class AssignmentTest extends TestBase with Mockito {
 
 		submission.submittedDate = new DateTime(2013, DateTimeConstants.FEBRUARY, 4, 23, 0, 0, 0) // Monday 11pm
 		assignment.workingDaysLate(submission) should be (2)
+
+
+		val assignment2 = new Assignment
+		assignment2.openDate = new DateTime(2016, DateTimeConstants.SEPTEMBER, 13, 23, 59, 59, 0)
+		assignment2.closeDate = new DateTime(2017, DateTimeConstants.SEPTEMBER, 13, 23, 59, 59, 0)
+		assignment2.openEnded = false
+
+		val assignment3 = new Assignment
+		assignment3.openDate = new DateTime(2016, DateTimeConstants.SEPTEMBER, 14, 0, 0, 0, 0)
+		assignment3.closeDate = new DateTime(2017, DateTimeConstants.SEPTEMBER, 14, 0, 0, 0, 0)
+		assignment3.openEnded = false
+
+		val s = new Submission
+		s.usercode = "u1234567"
+
+		s.submittedDate = new DateTime(2017, 9, 13, 23, 56, 51, 0)
+		assignment2.workingDaysLate(s) should be (0)
+		assignment3.workingDaysLate(s) should be (0)
+
+		s.submittedDate = new DateTime(2017, 9, 14, 23, 56, 51, 0)
+		assignment2.workingDaysLate(s) should be (1)
+		assignment3.workingDaysLate(s) should be (1)
+
+		s.submittedDate = new DateTime(2017, 9, 15, 23, 56, 51, 0)
+		assignment2.workingDaysLate(s) should be (2)
+		assignment3.workingDaysLate(s) should be (2)
+
+		s.submittedDate = new DateTime(2017, 9, 16, 0, 0, 0, 0)
+		assignment2.workingDaysLate(s) should be (3) // ignoring the time spent on Sat this is 2 days and 1 second late (round up to 3)
+		assignment3.workingDaysLate(s) should be (2)
+
+		s.submittedDate = new DateTime(2017, 9, 17, 23, 56, 51, 0)
+		assignment2.workingDaysLate(s) should be (3) // ignoring the time spent on Sat and Sun this is 2 days and 1 second late (round up to 3)
+		assignment3.workingDaysLate(s) should be (2)
+
 	}
 
 	@Test def testHasOutstandingFeedback(): Unit = {
