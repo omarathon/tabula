@@ -13,19 +13,19 @@ import scala.collection.JavaConverters._
 import scala.util.Try
 
 
-object ExamsOfficeMembershipNotification {
+object AcademicOfficeMembershipNotification {
 	val templateLocation = "/WEB-INF/freemarker/emails/manual_membership_eo.ftl"
 }
 
 @Entity
 @DiscriminatorValue("ExamsOfficeManualMembershipSummary")
-class ExamsOfficeMembershipNotification extends Notification[Department, Unit]
+class AcademicOfficeMembershipNotification extends Notification[Department, Unit]
 	with AutowiringUserLookupComponent
 	with MyWarwickNotification {
 
 	@transient
-	lazy val RecipientWebGroup: String = Wire.optionProperty("${examsoffice.manualmembership.recipients}").getOrElse(
-		throw new IllegalStateException("examsoffice.manualmembership.recipients property is missing")
+	lazy val RecipientWebGroup: String = Wire.optionProperty("${permissions.academicoffice.group}").getOrElse(
+		throw new IllegalStateException("permissions.academicoffice.group property is missing")
 	)
 	@transient
 	def groupService: LenientGroupService = userLookup.getGroupService
@@ -34,22 +34,14 @@ class ExamsOfficeMembershipNotification extends Notification[Department, Unit]
 
 	def departments: Seq[Department] = entities
 
-	def numAssignments: Map[String, String] = getStringMapSetting("summary" , default=Map())
-	def numAssignments_= (numAssignments:Map[String, String]) { settings += ("numAssignments" -> numAssignments) }
-
-	def numSmallGroupSets: Map[String, String] = getStringMapSetting("numSmallGroupSets", default=Map())
-	def numSmallGroupSets_= (numSmallGroupSets:Map[String, String]) { settings += ("numSmallGroupSets" -> numSmallGroupSets) }
-
 
 	def verb = "view"
 	def title: String = s"${departments.size} have assignments or small group sets with manually added students."
-	def url: String = Routes.home
+	def url: String = Routes.adminHome
 	def urlTitle = s"Sign in to Tabula"
 
-	def content = FreemarkerModel(ExamsOfficeMembershipNotification.templateLocation, Map (
-		"departments" -> departments,
-		"numAssignments" -> numAssignments.mapValues(s => Try(s.toInt).getOrElse(0)),
-		"numSmallGroupSets" -> numSmallGroupSets.mapValues(s => Try(s.toInt).getOrElse(0))
+	def content = FreemarkerModel(AcademicOfficeMembershipNotification.templateLocation, Map (
+		"departments" -> departments
 	))
 
 	@transient

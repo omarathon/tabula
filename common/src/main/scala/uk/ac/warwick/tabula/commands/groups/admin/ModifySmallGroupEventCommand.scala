@@ -221,7 +221,7 @@ trait ModifySmallGroupEventValidation extends SelfValidating {
 				if (!new UrlValidator().isValid(relatedUrl)) errors.rejectValue("relatedUrl", "smallGroupEvent.url.invalid")
 		}
 
-		if (endTime != null && endTime.isBefore(startTime)) errors.rejectValue("endTime", "smallGroupEvent.endTime.beforeStartTime")
+		if (startTime != null && endTime != null && endTime.isBefore(startTime)) errors.rejectValue("endTime", "smallGroupEvent.endTime.beforeStartTime")
 
 		if (location.safeContains("|")) errors.rejectValue("location", "smallGroupEvent.location.invalidChar")
 	}

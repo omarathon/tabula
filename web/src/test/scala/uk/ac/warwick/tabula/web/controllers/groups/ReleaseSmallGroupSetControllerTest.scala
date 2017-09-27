@@ -31,7 +31,7 @@ class ReleaseSmallGroupSetControllerTest extends TestBase with Mockito {
       val controller = new ReleaseSmallGroupSetController
       val cmd = mock[ReleaseSmallGroupSetCommand]
       controller.form(cmd).viewName should be("groups/admin/groups/release")
-      controller.form(cmd).map should be(Map())
+      controller.form(cmd).map should be(Map("isLectures" -> false))
     }
   }
 

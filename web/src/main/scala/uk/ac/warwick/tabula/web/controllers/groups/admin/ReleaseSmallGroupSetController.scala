@@ -21,7 +21,7 @@ class ReleaseSmallGroupSetController extends GroupsController {
 
 	@RequestMapping
 	def form(@ModelAttribute("releaseGroupSetCommand") cmd: ReleaseSmallGroupSetCommand): Mav =
-		Mav("groups/admin/groups/release").noLayoutIf(ajax)
+		Mav("groups/admin/groups/release", "isLectures" -> cmd.isLectures).noLayoutIf(ajax)
 
 
 	@RequestMapping(method = Array(POST))

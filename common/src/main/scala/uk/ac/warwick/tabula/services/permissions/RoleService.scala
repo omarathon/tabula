@@ -3,7 +3,8 @@ package uk.ac.warwick.tabula.services.permissions
 import uk.ac.warwick.tabula.CurrentUser
 import org.springframework.stereotype.Service
 import org.springframework.beans.factory.annotation.Autowired
-import uk.ac.warwick.tabula.permissions.{PermissionsSelector, PermissionsTarget, Permission}
+import uk.ac.warwick.spring.Wire
+import uk.ac.warwick.tabula.permissions.{Permission, PermissionsSelector, PermissionsTarget}
 import uk.ac.warwick.tabula.roles._
 import uk.ac.warwick.tabula.helpers.Logging
 import uk.ac.warwick.tabula.data.model.permissions.{CustomRoleDefinition, GrantedPermission}
@@ -177,4 +178,12 @@ class RoleServiceImpl extends RoleService with Logging {
 		allRoles contains role
 	}
 
+}
+
+trait RoleServiceComponent {
+	def roleService: RoleService
+}
+
+trait AutowiringRoleServiceComponent extends RoleServiceComponent {
+	var roleService: RoleService = Wire[RoleService]
 }

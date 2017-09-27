@@ -1,5 +1,5 @@
 The following departments have manually added students to assignments and/or small group sets in Tabula:
 
 <#list departments as department>
- * ${department.name} - (<@fmt.p mapGet(numAssignments, department.code) "assignment"/> and <@fmt.p mapGet(numSmallGroupSets, department.code) "small group set"/>)
+ * ${department.name} - <@url context='/admin' page='/department/${department.code}/manualmembership/eo'/>
 </#list>

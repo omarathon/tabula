@@ -8,7 +8,7 @@ var exports = {};
 exports.bindModulePickers = function(){
 	$('.module-search-query')
 		.closest('.module-choice')
-		.find('.modules-list').on('click', 'a.remove', function(e){
+		.find('.modules-list').on('click', '.remove', function(e){
 			e.preventDefault();
 			$(this).closest('li').remove();
 		}).end()

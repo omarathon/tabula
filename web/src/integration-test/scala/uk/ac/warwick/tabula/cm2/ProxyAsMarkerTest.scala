@@ -5,8 +5,6 @@ import org.openqa.selenium.By
 import uk.ac.warwick.tabula.data.model.markingworkflow.MarkingWorkflowType.SingleMarking
 import uk.ac.warwick.tabula.{AcademicYear, BrowserTest}
 
-import scala.collection.JavaConversions._
-
 class ProxyAsMarkerTest extends BrowserTest with CourseworkFixtures {
 
 	private val currentYear = AcademicYear.guessSITSAcademicYearByDate(DateTime.now)
@@ -18,10 +16,7 @@ class ProxyAsMarkerTest extends BrowserTest with CourseworkFixtures {
 			click on linkText("Test Services")
 		}
 
-		// make sure we are looking at the latest academic year
-		val yearNav = findAll(cssSelector(".navbar-tertiary .navbar-nav")).next().underlying
-		val latestAcademicYear = yearNav.findElements(By.cssSelector("li"))
-		click on latestAcademicYear.last
+		loadCurrentAcademicYearTab()
 
 		val testModulerow = id("main").webElement.findElements(By.cssSelector("span.mod-code")).get(0)
 		click on testModulerow
@@ -42,51 +37,6 @@ class ProxyAsMarkerTest extends BrowserTest with CourseworkFixtures {
 
 	}
 
-	private def modifyMarksFeedback(): Unit = {
-
-		eventuallyAjax {
-			When("I add feedback, marks and grade")
-			val feedback = id("main").webElement.findElement(By.tagName("textarea"))
-			feedback.sendKeys("Well written essay")
-
-			id("mark").webElement.sendKeys("71")
-
-			id("grade").webElement.sendKeys("2.1")
-
-			And("I upload a valid file")
-			val uploadFile = id("main").webElement.findElement(By.name("file.upload"))
-			click on uploadFile
-			pressKeys(getClass.getResource("/adjustments.xlsx").getFile)
-
-			And("submit the form")
-			click on cssSelector(".btn-primary")
-
-			Then("Results are saved and hidden away")
-			feedback.isDisplayed should be (false)
-
-			And("The Confirm and send to admin button is greyed out")
-			cssSelector(".must-have-selected").webElement.isEnabled should be (false)
-		}
-
-		When("I select the student with feedback")
-		cssSelector(".collection-checkbox").webElement.click()
-
-		Then("Both the all results checkbox and the individual record checkbox are selected")
-		cssSelector(".collection-checkbox").webElement.isSelected should be (true)
-		cssSelector(".collection-check-all").webElement.isSelected should be (true)
-
-		And("The Confirm and send to admin button is greyed out")
-		cssSelector(".must-have-selected").webElement.isEnabled should be (true)
-
-		When("I confirm and send to admin")
-		cssSelector(".must-have-selected").webElement.click()
-
-		Then("The marking should be complete")
-		currentUrl should include("1/marking-completed")
-
-	}
-
-
 	"Department admin" should "be able to proxy as marker" in as(P.Admin1) {
 
 		withAssignmentWithWorkflow(SingleMarking, Seq(P.Marker1, P.Marker2)) { id =>
@@ -100,10 +50,7 @@ class ProxyAsMarkerTest extends BrowserTest with CourseworkFixtures {
 
 				click on linkText("Test Services")
 
-				// make sure we are looking at the latest academic year
-				val yearNav = findAll(cssSelector(".navbar-tertiary .navbar-nav")).next().underlying
-				val latestAcademicYear = yearNav.findElements(By.cssSelector("li"))
-				click on latestAcademicYear.last
+				loadCurrentAcademicYearTab()
 				currentUrl.contains("/department/xxx") should be (true)
 
 				click on cssSelector("span.mod-code")
@@ -113,7 +60,6 @@ class ProxyAsMarkerTest extends BrowserTest with CourseworkFixtures {
 				}
 
 				openProxyMarkingScreen()
-				modifyMarksFeedback()
 
 			}
 		}

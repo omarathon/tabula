@@ -147,7 +147,7 @@
 						<#list command.smallGroupEventModules![] as module>
 							<li>
 								<input type="hidden" name="smallGroupEventModules" value="${module.id}" />
-								<#if command.moduleHasSmallGroups(module)><i class="fa fa-fw"></i><#else><i class="fa fa-fw fa-exclamation-circle" title="This module has no small groups set up in Tabula"></i></#if><span title="<@fmt.module_name module false />"><@fmt.module_name module false /></span> <button class="btn btn-danger btn-xs">Remove</button>
+								<#if command.moduleHasSmallGroups(module)><i class="fa fa-fw"></i><#else><i class="fa fa-fw fa-exclamation-circle" title="This module has no small groups set up in Tabula"></i></#if><span title="<@fmt.module_name module false />"><@fmt.module_name module false /></span> <button class="btn btn-danger btn-xs remove">Remove</button>
 							</li>
 						</#list>
 
@@ -217,7 +217,7 @@
 						<#list command.assignmentSubmissionModules![] as module>
 							<li>
 								<input type="hidden" name="assignmentSubmissionModules" value="${module.id}" />
-								<#if command.moduleHasAssignments(module)><i class="fa fa-fw"></i><#else><i class="fa fa-fw fa-exclamation-circle" title="This module has no assignments set up in Tabula"></i></#if><span title="<@fmt.module_name module false />"><@fmt.module_name module false /></span><button class="btn btn-danger btn-xs"><i class="fa fa-times"></i></button>
+								<#if command.moduleHasAssignments(module)><i class="fa fa-fw"></i><#else><i class="fa fa-fw fa-exclamation-circle" title="This module has no assignments set up in Tabula"></i></#if><span title="<@fmt.module_name module false />"><@fmt.module_name module false /></span><button class="btn btn-danger btn-xs remove"><i class="fa fa-times"></i></button>
 							</li>
 						</#list>
 					</ol>
@@ -247,7 +247,7 @@
 						<#list command.assignmentSubmissionAssignments![] as assignment>
 							<li>
 								<input type="hidden" name="assignmentSubmissionAssignments" value="${assignment.id}" />
-								<span title="<@fmt.assignment_name assignment false />"><@fmt.assignment_name assignment false /></span><button class="btn btn-danger btn-xs"><i class="fa fa-times"></i></button>
+								<span title="<@fmt.assignment_name assignment false />"><@fmt.assignment_name assignment false /></span><button class="btn btn-danger btn-xs remove"><i class="fa fa-times"></i></button>
 							</li>
 						</#list>
 					</ol>

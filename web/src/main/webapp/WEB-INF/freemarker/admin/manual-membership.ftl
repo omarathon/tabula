@@ -7,7 +7,7 @@
 	<@fmt.id7_deptheader "Manual membership summary" route_function "for" />
 
 	<p>
-		This page shows a list of all assignments and small group sets that have manually added students. It is important that SITS holds up to date information
+		This page shows a list of all assignments and small group sets in ${academicYear} that have manually added students. It is important that SITS holds up to date information
 		about the students taking each module. Once the SITS membership for these assignments and small group sets is correct you should remove the manually added
 		students.
 	</p>
@@ -22,7 +22,14 @@
 				</h4>
 				<ul>
 					<#list mapGet(assignmentsByModule, module) as assignment>
-						<li><a href="<@routes.cm2.assignmentstudents assignment "edit" />">${assignment.name}</a> (<@fmt.p assignment.members.size "manually added student" />)</li>
+						<li>
+							<#if can.do("Assignment.Update", assignment.module)>
+								<a href="<@routes.cm2.assignmentstudents assignment "edit" />">${assignment.name}</a>
+							<#else>
+								${assignment.name}
+							</#if>
+							(<@fmt.p assignment.members.size "manually added student" />)
+						</li>
 					</#list>
 				</ul>
 			</#list>
@@ -39,7 +46,14 @@
 			</h4>
 			<ul>
 				<#list mapGet(smallGroupSetsByModule, module) as groupset>
-					<li><a href="<@routes.groups.editsetstudents groupset />">${groupset.name}</a> (<@fmt.p groupset.members.size "manually added student" />)</li>
+					<li>
+						<#if can.do("SmallGroups.Update", groupset)>
+							<a href="<@routes.groups.editsetstudents groupset />">${groupset.name}</a>
+						<#else>
+							${groupset.name}
+						</#if>
+						(<@fmt.p groupset.members.size "manually added student" />)
+					</li>
 				</#list>
 			</ul>
 		</#list>
