@@ -133,8 +133,13 @@ trait CourseworkHomepageMarkerAssignments extends CourseworkHomepageMarkerAssign
 
 	// Action required - assignments which need an action
 	lazy val markerActionRequiredAssignments: Seq[MarkerAssignmentInfo] = benchmarkTask("Get action required assignments") {
+		// needed to retrieve CM1 assignments for marking
+		lazy val cm1AssignmentsForMarking = benchmarkTask("Get CM1 assignments for marking") {
+			assessmentService.getAssignmentWhereMarker(user.apparentUser, None).sortBy(_.closeDate)
+		}
+
 		allMarkerAssignments.diff(markerUpcomingAssignments).diff(markerCompletedAssignments).filter { info =>
-			info.assignment.feedbacks.asScala.exists(_.markingInProgress.exists(_.marker == user.apparentUser))
+			info.assignment.feedbacks.asScala.exists(_.markingInProgress.exists(_.marker == user.apparentUser)) || cm1AssignmentsForMarking.contains(info.assignment)
 		}
 	}
 
