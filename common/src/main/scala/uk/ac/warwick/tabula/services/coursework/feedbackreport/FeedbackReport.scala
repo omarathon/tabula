@@ -90,7 +90,7 @@ class FeedbackReport(department: Department, academicYear: Option[AcademicYear],
 	def buildAssignmentData() {
 		val allAssignments = department.modules.asScala.flatMap(_.assignments.asScala).filter(a => academicYear.isEmpty || academicYear.contains(a.academicYear))
 		val inDateAssignments = allAssignments.filter(a => ((a.collectSubmissions && a.submissions.size > 0) || (!a.collectSubmissions && a.includeInFeedbackReportWithoutSubmissions))
-			&& a.closeDate.isAfter(startDate) && a.closeDate.isBefore(endDate)).toList
+			&& a.closeDate != null && a.closeDate.isAfter(startDate) && a.closeDate.isBefore(endDate)).toList
 		val sortedAssignments = inDateAssignments.sortWith{(a1, a2) =>
 			a1.module.code < a2.module.code || (a1.module.code == a2.module.code && a1.closeDate.isBefore(a2.closeDate))
 		}

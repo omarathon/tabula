@@ -281,7 +281,7 @@ object CM2WorkflowStages {
 	case object CM1Moderation extends CM2WorkflowStage(Marking) {
 		def actionCode = "workflow.cm1.ModeratedMarking.action"
 		def progress(assignment: Assignment)(coursework: WorkflowItems): StageProgress = {
-			val released = assignment.isReleasedToSecondMarker(coursework.student.getWarwickId)
+			val released = assignment.isReleasedToSecondMarker(coursework.student.getUserId)
 			coursework.enhancedFeedback match {
 				case Some(item) if released && item.feedback.getSecondMarkerFeedback.exists(_.state != Rejected) =>
 					if (item.feedback.getSecondMarkerFeedback.exists(_.state == MarkingCompleted))

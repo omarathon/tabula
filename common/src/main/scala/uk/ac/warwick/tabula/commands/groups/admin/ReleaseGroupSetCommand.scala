@@ -1,12 +1,14 @@
 package uk.ac.warwick.tabula.commands.groups.admin
 
 
-import uk.ac.warwick.tabula.commands.{Appliable, Notifies, Command, Description}
-import uk.ac.warwick.tabula.data.model.groups.{SmallGroupSet, SmallGroup}
+import uk.ac.warwick.tabula.commands.{Appliable, Command, Description, Notifies}
+import uk.ac.warwick.tabula.data.model.groups.{SmallGroup, SmallGroupSet}
 import uk.ac.warwick.tabula.data.model.notifications.groups.ReleaseSmallGroupSetsNotification
-import uk.ac.warwick.tabula.data.model.{NotificationPriority, Notification}
+import uk.ac.warwick.tabula.data.model.{Notification, NotificationPriority}
+
 import scala.collection.JavaConverters._
 import uk.ac.warwick.spring.Wire
+import uk.ac.warwick.tabula.data.model.groups.SmallGroupFormat.Lecture
 import uk.ac.warwick.tabula.services.UserLookupService
 import uk.ac.warwick.userlookup.User
 import uk.ac.warwick.tabula.helpers.Tap._
@@ -14,6 +16,7 @@ import uk.ac.warwick.tabula.permissions.Permissions
 
 trait ReleaseSmallGroupSetCommand extends Appliable[Seq[ReleasedSmallGroupSet]] {
 	def describeOutcome:Option[String]
+	def isLectures: Boolean
 }
 class ReleaseGroupSetCommandImpl(val groupsToPublish:Seq[SmallGroupSet], private val currentUser: User)
 	extends Command[Seq[ReleasedSmallGroupSet]] with Notifies[Seq[ReleasedSmallGroupSet], Seq[SmallGroup]] with ReleaseSmallGroupSetCommand {
@@ -21,14 +24,16 @@ class ReleaseGroupSetCommandImpl(val groupsToPublish:Seq[SmallGroupSet], private
   var userLookup:UserLookupService = Wire.auto[UserLookupService]
 
   var notifyStudents: JBoolean = groupsToPublish match {
-    case singleGroup::Nil => !singleGroup.releasedToStudents
-    case _ => true
+    case singleGroup::Nil => !isLectures && !singleGroup.releasedToStudents
+    case _ => !isLectures
   }
 
   var notifyTutors: JBoolean = groupsToPublish match {
     case singleGroup::Nil => !singleGroup.releasedToTutors
     case _=> true
   }
+
+	def isLectures: Boolean = groupsToPublish.forall(_.format == Lecture)
 
 	var sendEmail: JBoolean = true
 
@@ -54,7 +59,7 @@ class ReleaseGroupSetCommandImpl(val groupsToPublish:Seq[SmallGroupSet], private
 				val n = Notification.init(new ReleaseSmallGroupSetsNotification(), currentUser, List(group))
 					.tap { _.isStudent = false }
 				n.recipientUserId = tutor.getUserId
-				n.priority = (if (sendEmail) NotificationPriority.Info else NotificationPriority.Trivial)
+				n.priority = if (sendEmail) NotificationPriority.Info else NotificationPriority.Trivial
 				n
 			}
 
@@ -69,27 +74,26 @@ class ReleaseGroupSetCommandImpl(val groupsToPublish:Seq[SmallGroupSet], private
 				val n = Notification.init(new ReleaseSmallGroupSetsNotification(), currentUser, List(group))
 					.tap { _.isStudent = true }
 				n.recipientUserId = student.getUserId
-				n.priority = (if (sendEmail) NotificationPriority.Info else NotificationPriority.Trivial)
+				n.priority = if (sendEmail) NotificationPriority.Info else NotificationPriority.Trivial
 				n
 			}
 
 		studentNotifications ++ tutorNotifications
 	}
 
-	def describeOutcome():Option[String]={
+	def describeOutcome:Option[String] = {
 		groupsToPublish match {
-			case singleGroup::Nil=>{
+			case singleGroup :: Nil =>
 				val tutors = Some("tutors").filter(_ => notifyTutors.booleanValue())
 				val students = Some("students").filter(_=>notifyStudents.booleanValue())
 				Seq(tutors,students).flatten match {
-					case Nil=>None // we've selected to notify neither staff nor students.
-					case list=>{
+					case Nil => None // we've selected to notify neither staff nor students.
+					case list =>
 						val updatedUsers = list.mkString(" and ").capitalize
 						val moduleName = singleGroup.module.code.toUpperCase
-						Some(s"$updatedUsers in <strong>${singleGroup.name} for ${moduleName}</strong> have been notified")
-					}
+						Some(s"$updatedUsers in <strong>${singleGroup.name} for $moduleName</strong> have been notified")
 				}
-			}
+
 			case _ => None // this function is only used when releasing a single group
 		}
 	}

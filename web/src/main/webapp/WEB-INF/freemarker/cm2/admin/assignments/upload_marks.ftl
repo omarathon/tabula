@@ -25,10 +25,10 @@
 			<p id="multifile-column-description">
 				<#include "/WEB-INF/freemarker/multiple_upload_help.ftl" />
 			</p>
-			<@bs3form.labelled_form_group path="file.upload" labelText="Files">
+			<@bs3form.labelled_form_group path="file" labelText="Files">
 				<input type="file" name="file.upload" multiple/>
 			</@bs3form.labelled_form_group>
-			<@f.errors path="file" cssClass="error" />
+
 			<input type="hidden" name="isfile" value="true" />
 
 			<div class="buttons form-group">
