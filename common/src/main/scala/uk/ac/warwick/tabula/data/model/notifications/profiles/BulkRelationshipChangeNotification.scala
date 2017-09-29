@@ -70,11 +70,11 @@ class BulkStudentRelationshipNotification() extends BulkRelationshipChangeNotifi
 
 	def recipients: Seq[User] = student.map {_.asSsoUser}.toSeq
 
-	def url: String = student.headOption.map(stu => Routes.Profile.relationshipType(stu, relationshipType)).getOrElse("")
+	def url: String = student.map(stu => Routes.Profile.relationshipType(stu, relationshipType)).getOrElse("")
 
 	def urlTitle: String = "view this information on your student profile"
 
-	def extraModel = Map( "student" -> student.getOrElse(""),
+	def extraModel = Map(
 		"oldAgents" -> oldAgents,
 		"newAgents" -> newAgents
 	)
