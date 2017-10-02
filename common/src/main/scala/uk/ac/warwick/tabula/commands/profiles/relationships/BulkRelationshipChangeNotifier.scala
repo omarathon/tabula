@@ -15,8 +15,10 @@ trait BulkRelationshipChangeNotifier[A, B] extends Notifies[A, B] {
 				val additionsByStudent = addedRelationships.groupBy(_.studentMember)
 				val allStudents: Set[StudentMember] = (removalsByStudent.keySet ++ additionsByStudent.keySet).flatten
 				allStudents.map { student =>
-					val notification = Notification.init(new BulkStudentRelationshipNotification, user.apparentUser, additionsByStudent.getOrElse(Some(student), Seq()))
+					val recipient = additionsByStudent.getOrElse(Some(student), removalsByStudent.getOrElse(Some(student),Seq()))
+					val notification = Notification.init(new BulkStudentRelationshipNotification, user.apparentUser, recipient)
 					notification.oldAgentIds.value = removalsByStudent.getOrElse(Some(student), Seq()).map(_.agent)
+					notification.newAgentIds.value = additionsByStudent.getOrElse(Some(student), Seq()).map(_.agent)
 					if (scheduledDateToUse.isAfterNow) notification.scheduledDate = scheduledDateToUse
 					if (previouslyScheduledDate.nonEmpty) notification.previouslyScheduledDate = previouslyScheduledDate.get
 					notification

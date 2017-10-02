@@ -64,7 +64,12 @@ class BulkStudentRelationshipNotification() extends BulkRelationshipChangeNotifi
 
 	def title: String = s"${relationshipType.agentRole.capitalize} allocation change"
 
-	def newAgents: Seq[Member] = entities.flatMap(_.agentMember)
+	@transient val newAgentIds = StringSeqSetting("newAgents", Nil)
+
+	def newAgents: Seq[Member] = newAgentIds.value.flatMap {
+		id => profileService.getMemberByUniversityId(id)
+	}
+
 
 	def student: Option[StudentMember] = entities.headOption.map {_.studentCourseDetails.student }
 
