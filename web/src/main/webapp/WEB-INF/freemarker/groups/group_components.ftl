@@ -15,17 +15,17 @@
 </#function>
 
 <#macro event_schedule_info event>
-<#if event.unscheduled>
-	<span class="badge progress-bar-warning use-tooltip" data-toggle="tooltip" data-placement="bottom" data-title="This event has not yet been scheduled">Not scheduled</span>
-<#else>
-	<#-- Weeks, day/time, location -->
-	<#if event.title?has_content><span class="eventTitle">${event.title} - </span></#if>
-	<@fmt.weekRanges event />,
-	${event.day.shortName} <@fmt.time event.startTime /> - <@fmt.time event.endTime /><#if ((event.location.name)!)?has_content>,</#if>
-	<#if ((event.location.name)!)?has_content>
-		<@fmt.location event.location />
+	<#if event.unscheduled>
+		<span class="badge progress-bar-warning use-tooltip" data-toggle="tooltip" data-placement="bottom" data-title="This event has not yet been scheduled">Not scheduled</span>
+	<#else>
+		<#-- Weeks, day/time, location -->
+		<#if event.title?has_content><span class="eventTitle">${event.title} - </span></#if>
+		<@fmt.weekRanges event />,
+		${event.day.shortName} <@fmt.time event.startTime /> - <@fmt.time event.endTime /><#if ((event.location.name)!)?has_content>,</#if>
+		<#if ((event.location.name)!)?has_content>
+			<@fmt.location event.location />
+		</#if>
 	</#if>
-</#if>
 </#macro>
 
 <#-- Output a dropdown menu only if there is anything in it. -->
@@ -33,10 +33,10 @@
 	<#-- Capture the content between the macro tags into a string -->
 	<#local content><#nested /></#local>
 	<#if content?trim?has_content>
-	<a class="btn btn-default ${button_size} dropdown-toggle" data-toggle="dropdown">${text} <span class="caret"></span></a>
-	<ul class="dropdown-menu pull-right">
-	${content}
-	</ul>
+		<a class="btn btn-default ${button_size} dropdown-toggle" data-toggle="dropdown">${text} <span class="caret"></span></a>
+		<ul class="dropdown-menu pull-right">
+			${content}
+		</ul>
 	</#if>
 </#macro>
 
@@ -699,7 +699,6 @@
 				<#if setItem.viewerMustSignUp>
 					<input type="submit" class="btn btn-primary pull-right sign-up-button" value="Sign Up"/>
 					<a data-href="<@routes.groups.signup_to_group_timetableclash_info setItem.set />" class="timetable-clash-link"  data-toggle="modal" data-target="#timetable-clash-modal"></a>
-					</form>
 				</#if>
 				<#-- Only show warnings to users that can do somthing about them -->
 				<#if moduleItem.canManageGroups>
