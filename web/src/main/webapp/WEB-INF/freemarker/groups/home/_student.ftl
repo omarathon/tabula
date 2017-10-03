@@ -42,7 +42,7 @@
 		$('[id^=select-signup]').submit( function(e) {
 			e.preventDefault();
 			var self = this;
-			var selectedFormGrpId = this.elements['group'].value;
+			var selectedFormGrpId = $('#' + self.id).find("input[name='group']:checked").val();
 			var signupPostFormLink = $(this).prop('action');
 			var clashInfoLink = $('a.timetable-clash-link').data('href');
 
