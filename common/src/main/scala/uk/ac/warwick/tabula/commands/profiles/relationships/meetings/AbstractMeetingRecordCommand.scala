@@ -16,7 +16,7 @@ import uk.ac.warwick.tabula.services.{FileAttachmentServiceComponent, MeetingRec
 import uk.ac.warwick.tabula.system.BindListener
 
 import scala.collection.JavaConverters._
-import scala.util.Try
+import scala.util.{Failure, Success, Try}
 
 abstract class AbstractMeetingRecordCommand {
 
@@ -154,13 +154,18 @@ trait MeetingRecordValidation extends SelfValidating {
 
 		if ((!meetingDateStr.isEmptyOrWhitespace) && (!meetingTimeStr.isEmptyOrWhitespace) && (!meetingEndTimeStr.isEmptyOrWhitespace)) {
 
-			val startDateTime: DateTime = DateTimePickerFormatter.parseDateTime(meetingDateStr + " " + meetingTimeStr)
-			val endDateTime: DateTime = DateTimePickerFormatter.parseDateTime(meetingDateStr + " " + meetingEndTimeStr)
+			val startDateTime: Try[DateTime] = Try(DateTimePickerFormatter.parseDateTime(meetingDateStr + " " + meetingTimeStr))
+			val endDateTime: Try[DateTime] = Try(DateTimePickerFormatter.parseDateTime(meetingDateStr + " " + meetingEndTimeStr))
 
-			if (endDateTime.isBefore(startDateTime) || startDateTime.isEqual(endDateTime)) {
-				errors.rejectValue("meetingTimeStr", "meetingRecord.date.endbeforestart")
+			(startDateTime, endDateTime) match {
+				case (Failure(_), Failure(_)) =>
+					errors.rejectValue("meetingTimeStr", "meetingRecord.time.invalid")
+					errors.rejectValue("meetingEndTimeStr", "meetingRecord.time.invalid")
+				case (Failure(_), _) => errors.rejectValue("meetingTimeStr", "meetingRecord.time.invalid")
+				case (_, Failure(_)) => errors.rejectValue("meetingEndTimeStr", "meetingRecord.time.invalid")
+				case (Success(start), Success(end)) if end.isBefore(start) || start.isEqual(end) => errors.rejectValue("meetingTimeStr", "meetingRecord.date.endbeforestart")
+				case _ => // no validation errors
 			}
-
 		}
 	}
 }
