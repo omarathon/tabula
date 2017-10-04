@@ -12,6 +12,8 @@ import uk.ac.warwick.tabula.permissions.Permissions
 import uk.ac.warwick.tabula.services.groups.docconversion._
 import uk.ac.warwick.tabula.services.{AutowiringSmallGroupServiceComponent, SmallGroupServiceComponent}
 import uk.ac.warwick.tabula.system.BindListener
+import uk.ac.warwick.tabula.helpers.Logging
+
 import uk.ac.warwick.tabula.system.permissions.{PermissionsChecking, PermissionsCheckingMethods, RequiresPermissionsChecking}
 
 import scala.collection.JavaConverters._
@@ -127,7 +129,7 @@ trait ImportSmallGroupSetsFromSpreadsheetValidation extends SelfValidating {
 
 }
 
-trait ImportSmallGroupSetsFromSpreadsheetBinding extends BindListener {
+trait ImportSmallGroupSetsFromSpreadsheetBinding extends BindListener  with Logging {
 	self: ImportSmallGroupSetsFromSpreadsheetRequest
 		with SmallGroupSetSpreadsheetHandlerComponent
 		with SmallGroupServiceComponent =>
@@ -231,7 +233,10 @@ trait ImportSmallGroupSetsFromSpreadsheetBinding extends BindListener {
 							val deleteEventCommands =
 								existingGroup.toSeq.flatMap(_.events.sorted)
 									.filterNot { e => extractedGroup.events.exists(matchesEvent(_)(e)) }
-									.map { e => DeleteSmallGroupEventCommand(e.group, e) }
+									.map { e =>
+										logger.info(s"DeleteSmallGroupEventCommand event details- ${e.id} / ${e.group.id} ")
+										DeleteSmallGroupEventCommand(e.group, e)
+									}
 
 							new ModifySmallGroupCommandHolder(groupCommand, groupCommandType, eventCommands.asJava, deleteEventCommands.asJava)
 						}
