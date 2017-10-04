@@ -44,26 +44,26 @@ class EditAssignmentDetailsCommandInternal(override val assignment: Assignment) 
 						cm2MarkingWorkflowService.delete(w)
 						createAndSaveSingleUseWorkflow(assignment)
 						//user has changed workflow category so remove all previous feedbacks
-						assignment.removeFeedbacks()
+						assignment.resetMarkerFeedback()
 					} else {
 						w.replaceMarkers(markersAUsers, markersBUsers)
 						cm2MarkingWorkflowService.save(w)
 					}
-				// persist any new workflows
+				// persist any new workflow
 				case _ =>
 					createAndSaveSingleUseWorkflow(assignment)
-					assignment.removeFeedbacks() // remove any feedback created from the old reusable marking workflow
+					assignment.resetMarkerFeedback() // remove any feedback created from the old reusable marking workflow
 			}
-		} else if(workflowCategory == WorkflowCategory.NoneUse || workflowCategory == WorkflowCategory.NotDecided) {
+		} else if((workflowCategory == WorkflowCategory.NoneUse || workflowCategory == WorkflowCategory.NotDecided) && workflow.isDefined) {
 			// before we de-attach, store it to be deleted afterwards
 			val existingWorkflow = workflow
 			assignment.cm2MarkingWorkflow = null
 			existingWorkflow.filterNot(_.isReusable).foreach(cm2MarkingWorkflowService.delete)
 			//if we have any prior markerfeedbacks/feedbacks attached -  remove them
-			assignment.removeFeedbacks()
+			assignment.resetMarkerFeedback()
 		} else if(workflowCategory == WorkflowCategory.Reusable) {
 			if(reusableWorkflow != null && assignment.cm2MarkingWorkflow != null && reusableWorkflow.workflowType != assignment.cm2MarkingWorkflow.workflowType){
-				assignment.removeFeedbacks()
+				assignment.resetMarkerFeedback()
 			}
 			workflow.filterNot(_.isReusable).foreach(cm2MarkingWorkflowService.delete)
 		}
