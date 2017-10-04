@@ -223,8 +223,8 @@ object ScientiaHttpTimetableFetchingService extends Logging {
 			val startTime = new LocalTime((activity \\ "start").text)
 			val endTime = new LocalTime((activity \\ "end").text)
 
-			val location = (activity \\ "room").text match {
-				case text if !text.isEmpty =>
+			val location = (activity \\ "room").headOption.map(_.text) match {
+				case Some(text) if !text.isEmpty =>
 					// try and get the location from the map of managed rooms without calling the api. fall back to searching for this room
 					ScientiaCentrallyManagedRooms.CentrallyManagedRooms.get(text)
 						.orElse({
