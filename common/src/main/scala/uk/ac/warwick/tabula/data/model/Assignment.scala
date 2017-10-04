@@ -798,11 +798,13 @@ class Assignment
 		}
 	}
 
-	def removeFeedbacks(): Unit = {
+	def resetMarkerFeedback(): Unit = {
 		val markerFeedbacks  = allFeedback.flatMap(_.allMarkerFeedback)
 		markerFeedbacks.foreach(feedbackService.delete)
-		feedbacks.foreach(feedbackService.delete)
-		allFeedback.removeAll(feedbacks)
+		feedbacks.foreach(f => {
+			f.outstandingStages = JArrayList()
+			feedbackService.saveOrUpdate(f)
+		})
 	}
 
 	def cm2MarkerAllocations: Seq[MarkerAllocation] =
