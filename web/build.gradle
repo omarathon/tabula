@@ -34,6 +34,12 @@ configurations {
     integrationTestRuntime.extendsFrom testRuntime
 }
 
+configurations.all {
+    resolutionStrategy {
+        force 'org.seleniumhq.selenium:selenium-support:3.3.1'
+    }
+}
+
 dependencies {
     compile project(':common')
     testCompile project(path: ':common', configuration: 'testArtifacts')

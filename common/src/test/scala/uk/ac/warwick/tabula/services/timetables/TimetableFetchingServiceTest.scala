@@ -57,6 +57,8 @@ class TimetableFetchingServiceTest extends TestBase with Mockito {
 			relatedUrl = None,
 			attendance = Map()
 		))
+		// When faced with multiple rooms - snatch the first and run away
+		events(1).location should be (Some(MapLocation("MS.02", "40879", Some("MS.02"))))
 		events(1).comments should be (Some("Some comments"))
 		events(1).students should be (Seq(student))
 	}
@@ -94,6 +96,7 @@ class TimetableFetchingServiceTest extends TestBase with Mockito {
          <comments>Some comments</comments>
          <rooms>
             <room>MS.02</room>
+						<room>LIB4</room>
          </rooms>
          <modules>
             <module>CS133</module>

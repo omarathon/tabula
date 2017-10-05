@@ -73,7 +73,7 @@ class BulkRelationshipChangeNotificationTest extends TestBase with Mockito {
 			notification.profileService = profiles
 
 			notification.addItems(Seq(rel2))
-			notification.newAgents.head.universityId should be ("2")	// rel2 is not ended, so the new agent for the notification is the agent of the relationship
+			notification.entities.flatMap(_.agentMember).head.universityId should be ("2")	// rel2 is not ended, so the new agent for the notification is the agent of the relationship
 		}
 	}
 
@@ -86,7 +86,7 @@ class BulkRelationshipChangeNotificationTest extends TestBase with Mockito {
 
 			notification.addItems(Seq(rel2, rel3))
 			notification.oldAgentIds.value = Seq(agent0.universityId, agent1.universityId)
-
+			notification.newAgentIds.value = Seq(agent2.universityId, agent3.universityId)
 			notification.newAgents.size should be (2)
 			notification.oldAgents.size should be (2)
 

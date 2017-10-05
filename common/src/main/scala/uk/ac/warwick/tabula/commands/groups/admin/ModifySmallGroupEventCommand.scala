@@ -287,7 +287,7 @@ trait GeneratesNotificationsForSmallGroupEventOccurrence {
 		if (occurrence.event.group.groupSet.collectAttendance && occurrence.event.allWeeks.contains(occurrence.week)) {
 			occurrence.dateTime.map(dt => {
 				// ... and have a valid date time
-				val endOfEvent = if (occurrence.event.endTime == null)
+				val endOfEvent = if (occurrence.event.endTime != null)
 						dt.withTime(occurrence.event.endTime.getHourOfDay, occurrence.event.endTime.getMinuteOfHour, 0, 0)
 					else
 						dt
