@@ -803,6 +803,7 @@ class Assignment
 		markerFeedbacks.foreach(feedbackService.delete)
 		feedbacks.foreach(f => {
 			f.outstandingStages = JArrayList()
+			f.markerFeedback = JArrayList()
 			feedbackService.saveOrUpdate(f)
 		})
 	}
