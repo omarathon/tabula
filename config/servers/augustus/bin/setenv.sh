@@ -9,7 +9,7 @@ fi
 # NOTE: You must choose the library architecture, x86 or x64, based on the JVM you'll be running, _not_ based on the OS.
 #
 #JVM_LIBRARY_PATH="$CATALINA_HOME/lib/native"
-JVM_LIBRARY_PATH="/usr/local/apr/lib"
+#JVM_LIBRARY_PATH="/usr/local/apr/lib"
 
 #
 # The following 2 settings control the minimum and maximum given to the Java virtual machine.
@@ -122,5 +122,5 @@ if [ -z "$CATALINA_PID" ] ; then
 fi
 export CATALINA_PID
 
-LD_LIBRARY_PATH="${LD_LIBRARY_PATH}:/usr/local/apr/lib"
-export LD_LIBRARY_PATH
+#LD_LIBRARY_PATH="${LD_LIBRARY_PATH}:/usr/local/apr/lib"
+#export LD_LIBRARY_PATH
