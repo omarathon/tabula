@@ -412,7 +412,7 @@ object AssignmentImporter {
 			$GetConfirmedModuleRegistrations
 				union all
 			$GetAutoUploadedConfirmedModuleRegistrations
-		order by academic_year_code, module_code, mav_occurrence, assessment_group, sequence, spr_code"""
+		order by academic_year_code, module_code, assessment_group, mav_occurrence, sequence, spr_code"""
 
 	def GetAllGradeBoundaries = s"""
 		select
