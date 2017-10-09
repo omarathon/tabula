@@ -1,21 +1,23 @@
 package uk.ac.warwick.tabula.services
 
+import org.joda.time.{DateTime, LocalDateTime}
 import org.springframework.stereotype.Service
 import uk.ac.warwick.spring.Wire
-import uk.ac.warwick.tabula.data._
-import uk.ac.warwick.tabula.data.model._
-import uk.ac.warwick.tabula.data.model.groups._
-import uk.ac.warwick.tabula.helpers.Logging
-import uk.ac.warwick.tabula.permissions.Permissions
-import uk.ac.warwick.userlookup.User
 import uk.ac.warwick.tabula.commands.groups.RemoveUserFromSmallGroupCommand
 import uk.ac.warwick.tabula.commands.{Appliable, TaskBenchmarking}
-import uk.ac.warwick.tabula.{AcademicYear, CurrentUser}
+import uk.ac.warwick.tabula.data._
+import uk.ac.warwick.tabula.data.model._
 import uk.ac.warwick.tabula.data.model.attendance.AttendanceState
-import org.joda.time.{DateTime, LocalDateTime}
-import uk.ac.warwick.tabula.data.Transactions._
+import uk.ac.warwick.tabula.data.model.groups._
+import uk.ac.warwick.tabula.helpers.Futures._
+import uk.ac.warwick.tabula.helpers.Logging
+import uk.ac.warwick.tabula.permissions.Permissions
+import uk.ac.warwick.tabula.{AcademicYear, CurrentUser}
+import uk.ac.warwick.userlookup.User
 
 import scala.collection.JavaConverters._
+import scala.concurrent.duration.Duration
+import scala.concurrent.{Await, Future}
 
 trait SmallGroupServiceComponent {
 	def smallGroupService: SmallGroupService
@@ -347,10 +349,14 @@ abstract class AbstractSmallGroupService extends SmallGroupService {
 		}
 
 		val studentsWithOtherGroupOccurrenceAndDateInfo = benchmarkTask("studentsWithOtherGroupOccurrenceAndDateInfo") {
-			//TAB-4425 - Aiming for performance improvement using parallel threads
+			// TAB-4425 - Aiming for performance improvement by doing this in parallel
+			def groupsForStudent(student: User): Future[(User, Seq[SmallGroup])] = Future {
+				student -> findSmallGroupsByStudent(student).filterNot { group => group.groupSet.id == set.id }
+			}
+
 			val groupsByStudent = benchmarkTask("groupsByStudent") {
-				students.par.map(student => student -> transactional(readOnly = true) { findSmallGroupsByStudent(student).filterNot { group => group.groupSet.id == set.id }})
-			}.seq.toMap
+				Await.result(Future.sequence(students.map(groupsForStudent)), Duration.Inf).toMap
+			}
 			val otherGroups = benchmarkTask("otherGroups") { groupsByStudent.values.flatten.toSeq.distinct }
 			val otherGroupOccurrencesWithTimes: Map[SmallGroup, Seq[(SmallGroupEventOccurrence, Option[LocalDateTime], Option[LocalDateTime])]] =
 				otherGroups.map(group => group -> groupOccurrencesWithStartEndDateTimeInfo(group)).toMap
