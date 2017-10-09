@@ -68,7 +68,7 @@ trait Futures {
 
 object Futures extends Futures {
 
-	private lazy val executionContextExecutor = ExecutionContext.fromExecutorService(Executors.newWorkStealingPool())
+	private lazy val executionContextExecutor = ExecutionContext.fromExecutorService(Executors.newCachedThreadPool())
 
 	/**
 		* One big problem with threads is that Hibernate binds the current session to a thread local, and then other
