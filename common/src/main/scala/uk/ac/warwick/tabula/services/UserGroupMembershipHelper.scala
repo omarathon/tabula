@@ -66,9 +66,10 @@ private[services] class UserGroupMembershipHelper[A <: StringId with Serializabl
 			case Some(c) => benchmarkTask("findByUsingCache") {
 				c.get(user.getUserId).toSeq
 			}
-			case None =>
+			case None => benchmarkTask("findByInternal") {
 				logger.warn(s"Couldn't find a cache bean named $cacheName")
 				findByInternal(user)
+			}
 		}
 
 		if (ids.isEmpty) Nil
