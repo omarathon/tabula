@@ -121,10 +121,10 @@ case class UpstreamModuleRegistration(
 
 	def universityId: String = SprCode.getUniversityId(sprCode)
 
-	// Assessment group membership doesn't vary by sequence
+	// Assessment group membership doesn't vary by sequence - for groups that are null we want to return same group -TAB-5615
 	def differentGroup(other: UpstreamModuleRegistration): Boolean =
 		year != other.year ||
-			occurrence != other.occurrence ||
+			(occurrence != other.occurrence && assessmentGroup != null) ||
 			moduleCode != other.moduleCode ||
 			assessmentGroup != other.assessmentGroup
 
