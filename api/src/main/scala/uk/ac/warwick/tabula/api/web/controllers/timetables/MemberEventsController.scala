@@ -40,7 +40,7 @@ trait GetMemberEventsApi {
 		ViewMemberEventsCommand(mandatory(member), currentUser)
 
 	@RequestMapping(method = Array(GET), produces = Array("application/json"))
-	def showModuleTimetable(
+	def showMemberTimetable(
 		@Valid @ModelAttribute("getTimetableCommand") command: ViewMemberEventsCommand,
 		errors: Errors,
 		@RequestParam(required = false) start: LocalDate,

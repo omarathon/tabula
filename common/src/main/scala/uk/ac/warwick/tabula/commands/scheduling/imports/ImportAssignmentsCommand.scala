@@ -169,7 +169,7 @@ trait ImportAssignmentsCommand extends CommandInternal[Unit] with RequiresPermis
 			// Now sort out properties
 			val hasSequence = registrations.filter(r => r.sequence != null)
 			assessmentGroups.foreach(group => {
-				// Find the registations for this exact group (including sequence)
+				// Find the registrations for this exact group (including sequence)
 				val theseRegistrations = hasSequence.filter(_.toExactUpstreamAssessmentGroup.isEquivalentTo(group))
 				if (theseRegistrations.nonEmpty) {
 					val registrationsByStudent = theseRegistrations.groupBy(_.sprCode)

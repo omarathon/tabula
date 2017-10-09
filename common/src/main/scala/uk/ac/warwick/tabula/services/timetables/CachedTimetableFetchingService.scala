@@ -78,10 +78,10 @@ class CachedPartialTimetableFetchingService(
 
 	// rather than using 5 little caches, use one big one with a composite key
 	lazy val timetableCache: Cache[TimetableCacheKey, EventList] = {
-		val cache = Caches.newCache(cacheName, cacheEntryFactory, cacheExpiryTime * 4, cacheStrategy)
+		val cache = Caches.newCache(cacheName, cacheEntryFactory, cacheExpiryTime * 10, cacheStrategy)
 		// serve stale data if we have it while we update in the background
 		cache.setExpiryStrategy(new TTLCacheExpiryStrategy[TimetableCacheKey, EventList] {
-			override def getTTL(entry: CacheEntry[TimetableCacheKey, EventList]): Pair[Number, TimeUnit] = Pair.of(cacheExpiryTime * 4, TimeUnit.SECONDS)
+			override def getTTL(entry: CacheEntry[TimetableCacheKey, EventList]): Pair[Number, TimeUnit] = Pair.of(cacheExpiryTime * 10, TimeUnit.SECONDS)
 			override def isStale(entry: CacheEntry[TimetableCacheKey, EventList]): Boolean = (entry.getTimestamp + cacheExpiryTime * 1000) <= DateTime.now.getMillis
 		})
 		cache.setAsynchronousUpdateEnabled(true)

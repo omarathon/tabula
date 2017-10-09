@@ -126,14 +126,6 @@ abstract class AbstractPermissionsService extends PermissionsService {
 	}
 
 	def clearCachesForUser(cacheKey: (String, ClassTag[_ <: PermissionsTarget]), propagate: Boolean = true) {
-
-
-		// TODO-Ritchie remove this dumb stuff - trying to work out why my local EHcache won't clear
-		GrantedRolesForUserCache.clear()
-		GrantedRolesForGroupCache.clear()
-		GrantedPermissionsForUserCache.clear()
-		GrantedPermissionsForGroupCache.clear()
-
 		GrantedRolesForUserCache.remove(cacheKey)
 		GrantedPermissionsForUserCache.remove(cacheKey)
 

@@ -68,14 +68,14 @@ trait Futures {
 
 object Futures extends Futures {
 
-	private lazy val executionContextExecutor = ExecutionContext.fromExecutorService(Executors.newWorkStealingPool())
+	private lazy val executionContextExecutor = ExecutionContext.fromExecutorService(Executors.newWorkStealingPool(100))
 
 	/**
 		* One big problem with threads is that Hibernate binds the current session to a thread local, and then other
 		* things depend on it. What's a safe way to do that? Well there isn't one, really. We can open a new read-only
 		* session and bind that, though, which is better than always having a null session.
 		*/
-	implicit lazy val executionContext = new ExecutionContext {
+	implicit lazy val executionContext: ExecutionContext = new ExecutionContext {
 		private lazy val sessionFactory: Option[SessionFactory] = Wire.option[SessionFactory]
 
 		override def execute(runnable: java.lang.Runnable): Unit = sessionFactory match {

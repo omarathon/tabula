@@ -66,9 +66,10 @@ private[services] class UserGroupMembershipHelper[A <: StringId with Serializabl
 			case Some(c) => benchmarkTask("findByUsingCache") {
 				c.get(user.getUserId).toSeq
 			}
-			case None =>
+			case None => benchmarkTask("findByInternal") {
 				logger.warn(s"Couldn't find a cache bean named $cacheName")
 				findByInternal(user)
+			}
 		}
 
 		if (ids.isEmpty) Nil
@@ -256,45 +257,65 @@ class UserGroupCacheManager(val underlying: UnspecifiedTypeUserGroup, private va
 	var cacheService: Option[UserGroupMembershipHelperCacheService] = Wire.option[UserGroupMembershipHelperCacheService]
 	var userLookup: UserLookupService = Wire[UserLookupService]
 
-	def add(user: User) {
-		underlying.add(user)
-		cacheService.foreach { _.invalidate(helper, user) }
+	def add(user: User): Boolean = {
+		if (underlying.add(user)) {
+			cacheService.foreach(_.invalidate(helper, user))
+			true
+		} else false
 	}
-	def remove(user: User) {
-		underlying.remove(user)
-		cacheService.foreach { _.invalidate(helper, user) }
+	def remove(user: User): Boolean = {
+		if (underlying.remove(user)) {
+			cacheService.foreach(_.invalidate(helper, user))
+			true
+		} else false
 	}
-	def exclude(user: User) {
-		underlying.exclude(user)
-		cacheService.foreach { _.invalidate(helper, user) }
+	def exclude(user: User): Boolean = {
+		if (underlying.exclude(user)) {
+			cacheService.foreach(_.invalidate(helper, user))
+			true
+		} else false
 	}
-	def unexclude(user: User) {
-		underlying.unexclude(user)
-		cacheService.foreach { _.invalidate(helper, user) }
+	def unexclude(user: User): Boolean = {
+		if (underlying.unexclude(user)) {
+			cacheService.foreach(_.invalidate(helper, user))
+			true
+		} else false
 	}
 
 	private def getUserFromUserId(userId: String): User =
 		if (universityIds) userLookup.getUserByWarwickUniId(userId)
 		else userLookup.getUserByUserId(userId)
 
-	def addUserId(userId: String): Unit = {
-		underlying.knownType.addUserId(userId)
-		cacheService.foreach { _.invalidate(helper, getUserFromUserId(userId)) }
+	def addUserId(userId: String): Boolean = {
+		if (underlying.knownType.addUserId(userId)) {
+			cacheService.foreach(_.invalidate(helper, getUserFromUserId(userId)))
+			true
+		} else false
 	}
-	def removeUserId(userId: String): Unit = {
-		underlying.knownType.removeUserId(userId)
-		cacheService.foreach { _.invalidate(helper, getUserFromUserId(userId)) }
+	def removeUserId(userId: String): Boolean = {
+		if (underlying.knownType.removeUserId(userId)) {
+			cacheService.foreach(_.invalidate(helper, getUserFromUserId(userId)))
+			true
+		} else false
 	}
-	def excludeUserId(userId: String): Unit = {
-		underlying.knownType.excludeUserId(userId)
-		cacheService.foreach { _.invalidate(helper, getUserFromUserId(userId)) }
+	def excludeUserId(userId: String): Boolean = {
+		if (underlying.knownType.excludeUserId(userId)) {
+			cacheService.foreach(_.invalidate(helper, getUserFromUserId(userId)))
+			true
+		} else false
 	}
-	def unexcludeUserId(userId: String): Unit = {
-		underlying.knownType.unexcludeUserId(userId)
-		cacheService.foreach { _.invalidate(helper, getUserFromUserId(userId)) }
+	def unexcludeUserId(userId: String): Boolean = {
+		if (underlying.knownType.unexcludeUserId(userId)) {
+			cacheService.foreach(_.invalidate(helper, getUserFromUserId(userId)))
+			true
+		} else false
 	}
 	def staticUserIds_=(newIds: Seq[String]): Unit = {
-		val allIds = (underlying.knownType.staticUserIds ++ newIds).distinct
+		val existingIds = underlying.knownType.staticUserIds
+		val addedIds = newIds.diff(existingIds)
+		val removedIds = existingIds.diff(newIds)
+
+		val allIds = addedIds ++ removedIds
 
 		underlying.knownType.staticUserIds = newIds
 
@@ -302,7 +323,11 @@ class UserGroupCacheManager(val underlying: UnspecifiedTypeUserGroup, private va
 			cacheService.invalidate(helper, user)
 	}
 	def includedUserIds_=(newIds: Seq[String]): Unit = {
-		val allIds = (underlying.knownType.includedUserIds ++ newIds).distinct
+		val existingIds = underlying.knownType.includedUserIds
+		val addedIds = newIds.diff(existingIds)
+		val removedIds = existingIds.diff(newIds)
+
+		val allIds = addedIds ++ removedIds
 
 		underlying.knownType.includedUserIds = newIds
 
@@ -310,7 +335,11 @@ class UserGroupCacheManager(val underlying: UnspecifiedTypeUserGroup, private va
 			cacheService.invalidate(helper, user)
 	}
 	def excludedUserIds_=(newIds: Seq[String]): Unit = {
-		val allIds = (underlying.knownType.excludedUserIds ++ newIds).distinct
+		val existingIds = underlying.knownType.excludedUserIds
+		val addedIds = newIds.diff(existingIds)
+		val removedIds = existingIds.diff(newIds)
+
+		val allIds = addedIds ++ removedIds
 
 		underlying.knownType.excludedUserIds = newIds
 
@@ -318,7 +347,13 @@ class UserGroupCacheManager(val underlying: UnspecifiedTypeUserGroup, private va
 			cacheService.invalidate(helper, user)
 	}
 	def copyFrom(otherGroup: UnspecifiedTypeUserGroup): Unit = {
-		val allIds = (underlying.knownType.members ++ otherGroup.knownType.members).distinct
+		val existingIds = underlying.knownType.members
+		val newIds = otherGroup.knownType.members
+
+		val addedIds = newIds.diff(existingIds)
+		val removedIds = existingIds.diff(newIds)
+
+		val allIds = addedIds ++ removedIds
 
 		underlying.copyFrom(otherGroup)
 
