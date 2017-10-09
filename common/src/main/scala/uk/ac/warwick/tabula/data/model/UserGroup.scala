@@ -81,30 +81,30 @@ class UserGroup private(val universityIds: Boolean)
 		excludeUsers.addAll(userIds.asJava)
 	}
 
-	def add(user:User): Unit = {
+	def add(user:User): Boolean = {
 		addUserId(getIdFromUser(user))
 	}
-	def addUserId(user: String) {
+	def addUserId(user: String): Boolean = {
 		if (!includeUsers.contains(user) && user.hasText) {
 			includeUsers.add(user)
-		}
+		} else false
 	}
-	def removeUserId(user: String): Unit = includeUsers.remove(user)
+	def removeUserId(user: String): Boolean = includeUsers.remove(user)
 
-	def remove(user:User): Unit = {
+	def remove(user:User): Boolean = {
 		removeUserId(getIdFromUser(user))
 	}
 
-	def excludeUserId(user: String) {
+	def excludeUserId(user: String): Boolean = {
 		if (!excludeUsers.contains(user) && user.hasText) {
 			excludeUsers.add(user)
-		}
+		} else false
 	}
-	def exclude(user:User): Unit ={
+	def exclude(user:User): Boolean = {
 		excludeUserId(getIdFromUser(user))
 	}
-	def unexcludeUserId(user: String): Unit = excludeUsers.remove(user)
-  def unexclude(user:User): Unit ={
+	def unexcludeUserId(user: String): Boolean = excludeUsers.remove(user)
+  def unexclude(user:User): Boolean = {
 		unexcludeUserId(getIdFromUser(user))
 	}
 
@@ -219,14 +219,14 @@ trait UnspecifiedTypeUserGroup {
 	 * @return The explicitly excluded users
 	 */
 	def excludes: Seq[User]
-	def add(user:User)
-	def remove(user:User)
-	def exclude(user:User)
-	def unexclude(user:User)
+	def add(user: User): Boolean
+	def remove(user: User): Boolean
+	def exclude(user: User): Boolean
+	def unexclude(user: User): Boolean
 	def size: Int
 	def isEmpty: Boolean
-  def includesUser(user:User):Boolean
-  def excludesUser(user:User):Boolean
+  def includesUser(user: User): Boolean
+  def excludesUser(user: User): Boolean
 
 	/**
 	 * @return true if the other.users() would return the same values as this.users(), else false
@@ -245,10 +245,10 @@ trait KnownTypeUserGroup extends UnspecifiedTypeUserGroup {
 	def allExcludedIds: Seq[String]
 	def members: Seq[String]
 
-	def addUserId(userId: String)
-	def removeUserId(userId: String)
-	def excludeUserId(userId: String)
-	def unexcludeUserId(userId: String)
+	def addUserId(userId: String): Boolean
+	def removeUserId(userId: String): Boolean
+	def excludeUserId(userId: String): Boolean
+	def unexcludeUserId(userId: String): Boolean
 
 	def staticUserIds: Seq[String]
 	def staticUserIds_=(userIds: Seq[String])

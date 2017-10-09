@@ -1,6 +1,7 @@
 package uk.ac.warwick.tabula.services
 
 import java.io.Serializable
+import java.util.concurrent.TimeUnit
 
 import uk.ac.warwick.userlookup.webgroups.{GroupInfo, GroupNotFoundException, GroupServiceException}
 
@@ -11,6 +12,7 @@ import uk.ac.warwick.util.cache._
 import uk.ac.warwick.tabula.helpers.StringUtils._
 import javax.annotation.PreDestroy
 
+import org.joda.time.DateTime
 import uk.ac.warwick.userlookup.User
 import uk.ac.warwick.spring.Wire
 import uk.ac.warwick.sso.client.core.OnCampusService
@@ -20,6 +22,7 @@ import uk.ac.warwick.tabula.data.model.MemberUserType
 import uk.ac.warwick.tabula.services.UserLookupService._
 import uk.ac.warwick.tabula.helpers.Logging
 import uk.ac.warwick.tabula.services.permissions.{AutowiringCacheStrategyComponent, CacheStrategyComponent}
+import uk.ac.warwick.util.collections.Pair
 
 import scala.util.{Failure, Success, Try}
 
@@ -148,6 +151,10 @@ trait UserByWarwickIdCache extends CacheEntryFactory[UniversityId, User] { self:
 
 	final lazy val UserByWarwickIdCache: Cache[UniversityId, User] = {
 		val cache = Caches.newCache(UserByWarwickIdCacheName, this, UserByWarwickIdCacheMaxAgeSecs, cacheStrategy)
+		cache.setExpiryStrategy(new TTLCacheExpiryStrategy[UniversityId, User] {
+			override def getTTL(entry: CacheEntry[UniversityId, User]): Pair[Number, TimeUnit] = Pair.of(UserByWarwickIdCacheMaxAgeSecs * 10, TimeUnit.SECONDS)
+			override def isStale(entry: CacheEntry[UniversityId, User]): Boolean = (entry.getTimestamp + UserByWarwickIdCacheMaxAgeSecs * 1000) <= DateTime.now.getMillis
+		})
 		cache.setAsynchronousUpdateEnabled(true)
 		cache
 	}
