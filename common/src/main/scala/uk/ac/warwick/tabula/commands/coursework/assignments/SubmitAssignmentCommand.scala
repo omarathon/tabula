@@ -83,8 +83,6 @@ trait SubmitAssignmentRequest extends SubmitAssignmentState {
 
 	var useDisability: JBoolean = null
 
-	var plagiarismDeclaration: Boolean = false
-
 	// used as a hint to the view.
 	var justSubmitted: Boolean = false
 
@@ -117,6 +115,7 @@ abstract class SubmitAssignmentCommandInternal(val module: Module, val assignmen
 		submission.submittedDate = new DateTime
 		submission.usercode = user.usercode
 		submission._universityId = user.universityId
+		submission.submitAssignmentCommand
 
 		val savedValues = fields.asScala.map {
 			case (_, submissionValue) =>
@@ -212,10 +211,6 @@ trait SubmitAssignmentValidation extends SelfValidating {
 			} else {
 				errors.reject("assignment.submit.already")
 			}
-		}
-
-		if (assignment.displayPlagiarismNotice && !plagiarismDeclaration) {
-			errors.rejectValue("plagiarismDeclaration", "assignment.submit.plagiarism")
 		}
 
 		// TODO for multiple attachments, check filenames are unique

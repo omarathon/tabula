@@ -406,7 +406,6 @@ trait CourseworkFixtures extends BrowserTest with FeaturesDriver with FixturesDr
 			}
 		)
 
-		checkbox("plagiarismDeclaration").select()
 		submit()
 	}
 

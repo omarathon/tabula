@@ -863,6 +863,7 @@ class Assignment
 	}
 
 	def toEntityReference: AssignmentEntityReference = new AssignmentEntityReference().put(this)
+
 }
 
 /**
@@ -958,4 +959,5 @@ case class EnhancedAssignment(
 	extension: Option[Extension],
 	withinExtension: Boolean,
 	extensionRequested: Boolean
+
 )

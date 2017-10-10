@@ -14,17 +14,6 @@ class CourseworkAssignmentSubmissionTest extends BrowserTest with CourseworkFixt
 				click on find(cssSelector("input[type=file]")).get
 				pressKeys(getClass.getResource("/file1.txt").getFile)
 
-				// Don't click the plagiarism detection button yet
-				submit()
-
-				pageSource contains "Thanks, we've received your submission." should be (false)
-
-				id("plagiarismDeclaration.errors").webElement.isDisplayed should be (true)
-				pageSource contains "You must confirm that this submission is all your own work." should be (true)
-
-				// Click the button and submit again
-				checkbox("plagiarismDeclaration").select()
-
 				submit()
 
 				pageSource contains "Thanks, we've received your submission." should be (true)

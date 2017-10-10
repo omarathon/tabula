@@ -33,11 +33,6 @@ class SubmitAssignmentCommandTest extends TestBase with Mockito {
 		cmd.validate(errors)
 		errors.hasErrors should be {true}
 		errors.getErrorCount should be (1)
-		errors.getFieldErrors.asScala.head.getField should be ("plagiarismDeclaration")
-		errors.getFieldErrors.asScala.head.getCodes should contain ("assignment.submit.plagiarism")
-
-		// oops, sorry, yes, it's totally mine
-		cmd.plagiarismDeclaration = true
 
 		errors = new BindException(cmd, "command")
 		cmd.validate(errors)
@@ -53,7 +48,6 @@ class SubmitAssignmentCommandTest extends TestBase with Mockito {
 
 		// scenario
 		assignment.allowResubmission = false
-		cmd.plagiarismDeclaration = true
 
 		var errors = new BindException(cmd, "command")
 		cmd.validate(errors)
@@ -94,8 +88,7 @@ class SubmitAssignmentCommandTest extends TestBase with Mockito {
 			val cmd: SubmitAssignmentCommandInternal with ComposableCommand[Submission] with SubmitAssignmentBinding with SubmitAssignmentAsSelfPermissions with SubmitAssignmentDescription with SubmitAssignmentValidation with SubmitAssignmentNotifications with SubmitAssignmentTriggers with AutowiringSubmissionServiceComponent with AutowiringFeaturesComponent with AutowiringZipServiceComponent with AutowiringAttendanceMonitoringCourseworkSubmissionServiceComponent = SubmitAssignmentCommand.self(assignment.module, assignment, user)
 			cmd.features = emptyFeatures
 			cmd.features.disabilityOnSubmission = true
-			// pre-tick the box
-			cmd.plagiarismDeclaration = true
+
 			var errors = new BindException(cmd, "command")
 			val submissionValue: FileFormValue = cmd.fields.get("upload").asInstanceOf[FileFormValue]
 		}
@@ -150,7 +143,6 @@ class SubmitAssignmentCommandTest extends TestBase with Mockito {
 
 			cmd.features = emptyFeatures
 			cmd.features.disabilityOnSubmission = true
-			cmd.plagiarismDeclaration = true
 
 			// no disability use selected
 			var errors = new BindException(cmd, "command")
