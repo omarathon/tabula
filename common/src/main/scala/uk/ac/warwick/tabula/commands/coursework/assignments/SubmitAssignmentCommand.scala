@@ -115,7 +115,6 @@ abstract class SubmitAssignmentCommandInternal(val module: Module, val assignmen
 		submission.submittedDate = new DateTime
 		submission.usercode = user.usercode
 		submission._universityId = user.universityId
-		submission.submitAssignmentCommand
 
 		val savedValues = fields.asScala.map {
 			case (_, submissionValue) =>
