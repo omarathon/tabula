@@ -110,6 +110,7 @@ class Submission extends GeneratedId with PermissionsTarget with ToEntityReferen
 	def useDisability: Boolean = values.find(_.name == Submission.UseDisabilityFieldName).exists(_.value.toBoolean)
 
 	def toEntityReference: SubmissionEntityReference = new SubmissionEntityReference().put(this)
+
 }
 
 trait FeedbackReportGenerator {

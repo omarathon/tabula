@@ -8,7 +8,7 @@ import net.fortuna.ical4j.model.{Parameter, Property}
 import org.apache.commons.codec.digest.DigestUtils
 import org.joda.time.{DateTime, DateTimeZone}
 import uk.ac.warwick.spring.Wire
-import uk.ac.warwick.tabula.data.model.Module
+import uk.ac.warwick.tabula.data.model.{Module, StudentMember}
 import uk.ac.warwick.tabula.data.model.groups.{DayOfWeek, WeekRange}
 import uk.ac.warwick.tabula.helpers.Futures._
 import uk.ac.warwick.tabula.helpers.StringUtils._
@@ -72,6 +72,7 @@ object CelcatHttpTimetableFetchingService {
 		val delegate =
 			new CelcatHttpTimetableFetchingService(celcatConfiguration)
 				with AutowiringUserLookupComponent
+				with AutowiringProfileServiceComponent
 				with AutowiringTermServiceComponent
 				with AutowiringCacheStrategyComponent
 				with WAI2GoHttpLocationFetchingServiceComponent
@@ -202,6 +203,7 @@ object CelcatHttpTimetableFetchingService {
 
 class CelcatHttpTimetableFetchingService(celcatConfiguration: CelcatConfiguration) extends StaffTimetableFetchingService with StudentTimetableFetchingService with Logging {
 	self: UserLookupComponent
+		with ProfileServiceComponent
 		with TermServiceComponent
 		with LocationFetchingServiceComponent
 		with CacheStrategyComponent
@@ -211,23 +213,24 @@ class CelcatHttpTimetableFetchingService(celcatConfiguration: CelcatConfiguratio
 	lazy val wbsConfig: CelcatDepartmentConfiguration = celcatConfiguration.wbsConfiguration
 
 	// a dispatch response handler which reads JSON from the response and parses it into a list of TimetableEvents
-	def handler(config: CelcatDepartmentConfiguration): (Map[String, Seq[String]], Request) => Handler[EventList] = { (_: Map[String,Seq[String]], req: dispatch.classic.Request) =>
+	def handler(config: CelcatDepartmentConfiguration, filterLectures: Boolean): (Map[String, Seq[String]], Request) => Handler[EventList] = { (_: Map[String,Seq[String]], req: dispatch.classic.Request) =>
 		req >- { (rawJSON) =>
-			combineIdenticalEvents(parseJSON(rawJSON))
+			combineIdenticalEvents(parseJSON(rawJSON, filterLectures))
 		}
 	}
 
 	def getTimetableForStudent(universityId: UniversityId): Future[EventList] = {
-		if (wbsConfig.enabled) doRequest(universityId, wbsConfig)
+		val member = profileService.getMemberByUniversityId(universityId)
+		if (wbsConfig.enabled) doRequest(universityId, wbsConfig, filterLectures = member.collect{case s: StudentMember if s.isUG => s}.isDefined)
 		else Future.successful(EventList(Nil, None))
 	}
 
 	def getTimetableForStaff(universityId: UniversityId): Future[EventList] = {
-		if (wbsConfig.enabled) doRequest(universityId, wbsConfig)
+		if (wbsConfig.enabled) doRequest(universityId, wbsConfig, filterLectures = true)
 		else Future.successful(EventList(Nil, None))
 	}
 
-	def doRequest(filename: String, config: CelcatDepartmentConfiguration): Future[EventList] = {
+	def doRequest(filename: String, config: CelcatDepartmentConfiguration, filterLectures: Boolean): Future[EventList] = {
 		val req =
 			(url(config.baseUri) / filename <<? Map("forcebasic" -> "true"))
 				.as_!(config.credentials.username, config.credentials.password)
@@ -237,7 +240,7 @@ class CelcatHttpTimetableFetchingService(celcatConfiguration: CelcatConfiguratio
 		// else return an empty list.
 		logger.info(s"Requesting timetable data from ${req.to_uri.toString}")
 		val result =
-			Future(httpClient.when(_==200)(req >:+ handler(config)))
+			Future(httpClient.when(_==200)(req >:+ handler(config, filterLectures)))
 				.recover { case StatusCode(404, _) =>
 					// Special case a 404, just return no events
 					logger.warn(s"Request for ${req.to_uri.toString} returned a 404")
@@ -288,12 +291,12 @@ class CelcatHttpTimetableFetchingService(celcatConfiguration: CelcatConfiguratio
 		}}.toList
 	}
 
-	def parseJSON(incomingJson: String): EventList = {
+	def parseJSON(incomingJson: String, filterLectures: Boolean): EventList = {
 		JSON.parseFull(incomingJson) match {
 			case Some(jsonData: List[Map[String, Any]]@unchecked) =>
 				EventList.fresh(jsonData.filterNot { event =>
 					// TAB-4754 These lectures are already in Syllabus+ so we don't include them again
-					event("contactType") == "L" && event("lectureStreamCount") == 1
+					filterLectures && event("contactType") == "L" && event("lectureStreamCount") == 1
 				}.flatMap { event =>
 					val start = DateFormats.IsoDateTime.parseDateTime(event.getOrElse("start", "").toString)
 					val end = DateFormats.IsoDateTime.parseDateTime(event.getOrElse("end", "").toString)

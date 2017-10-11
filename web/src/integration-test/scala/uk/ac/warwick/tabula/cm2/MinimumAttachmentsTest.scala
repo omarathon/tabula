@@ -68,13 +68,6 @@ class MinimumAttachmentsTest extends BrowserTest with CourseworkFixtures {
 			}
 		)
 
-		And("confirm it is my own work")
-		if(!id("plagiarismDeclaration").webElement.isSelected){
-			click on id("plagiarismDeclaration").webElement
-		}
-
-		id("plagiarismDeclaration").webElement.isSelected should be (true)
-
 		And("press submit")
 		click on id("main").webElement.findElements(By.cssSelector(".btn-primary")).get(0)
 
