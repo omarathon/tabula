@@ -90,8 +90,8 @@
 						</#if>
 						<div class="col-md-2">
 							<#if isSelf>
-							<a href="<@routes.coursework.assignment enhancedAssignment.assignment />?returnTo=${info.requestedUri}" class="btn btn-primary btn-block">Submit</a>
-								<#if enhancedAssignment.assignment.extensionsPossible>
+							<a href="<@routes.cm2.assignment enhancedAssignment.assignment />?returnTo=${info.requestedUri}" class="btn btn-primary btn-block">Submit</a>
+								<#if enhancedAssignment.assignment.extensionsPossible>plagiarismDeclaration
 									<#if enhancedAssignment.extensionRequested>
 										<a href="<@routes.coursework.extensionRequest assignment=enhancedAssignment.assignment />?returnTo=${info.requestedUri}" class="btn btn-default btn-block">
 											Review extension request
@@ -160,7 +160,7 @@
 						</div>
 						<div class="col-md-2">
 							<#if isSelf>
-								<a href="<@routes.coursework.assignment enhancedAssignment.assignment />?returnTo=${info.requestedUri}" class="btn btn-primary btn-block">View receipt</a>
+								<a href="<@routes.cm2.assignment enhancedAssignment.assignment />?returnTo=${info.requestedUri}" class="btn btn-primary btn-block">View receipt</a>
 								<#if enhancedAssignment.assignment.extensionsPossible>
 									<#if enhancedAssignment.extensionRequested>
 										<a href="<@routes.coursework.extensionRequest assignment=enhancedAssignment.assignment />?returnTo=${info.requestedUri}" class="btn btn-default btn-block">
