@@ -25,8 +25,9 @@ class CelcatTimetableFetchingServiceTest extends TestBase with Mockito {
 			credentials = Credentials(Wire.property("username"), "password")
 		)
 		val cacheEnabled = false
-	}) with UserLookupComponent with TermServiceComponent with CacheStrategyComponent with LocationFetchingServiceComponent with ModuleAndDepartmentServiceComponent with DispatchHttpClientComponent {
+	}) with UserLookupComponent with ProfileServiceComponent with TermServiceComponent with CacheStrategyComponent with LocationFetchingServiceComponent with ModuleAndDepartmentServiceComponent with DispatchHttpClientComponent {
 		val userLookup = new MockUserLookup
+		val profileService = mock[ProfileService]
 		val termService = new TermServiceImpl
 		val cacheStrategy = CacheStrategy.InMemoryOnly
 		val locationFetchingService = new LocationFetchingService {
