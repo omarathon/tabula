@@ -44,7 +44,8 @@ class CelcatTimetableFetchingServiceTest extends TestBase with Mockito {
 
 	@Test def parseJSON() {
 		val events = service.parseJSON(
-			resourceAsString("1503003.json")
+			resourceAsString("1503003.json"),
+			filterLectures=true
 		)
 		// 24 events, of which 9 are filtered out - TAB-4754
 		events.events.size should be (15)
@@ -96,7 +97,8 @@ class CelcatTimetableFetchingServiceTest extends TestBase with Mockito {
 
 	@Test def tab2662() {
 		val events = service.parseJSON(
-			resourceAsString("duplicates.json")
+			resourceAsString("duplicates.json"),
+			filterLectures = true
 		)
 		events.events.size should be (2)
 

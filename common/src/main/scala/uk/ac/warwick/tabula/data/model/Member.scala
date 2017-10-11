@@ -421,7 +421,10 @@ class StudentMember extends Member with StudentProperties {
 	def moduleRegistrationsByYear(year: Option[AcademicYear]): Set[ModuleRegistration] =
 		freshStudentCourseDetails.toSet[StudentCourseDetails].flatMap(_.moduleRegistrationsByYear(year))
 
+
 	def isPGR: Boolean = groupName == "Postgraduate (research) FT" || groupName == "Postgraduate (research) PT"
+	def isPGT: Boolean = groupName == "Postgraduate (taught) FT" || groupName == "Postgraduate (taught) PT"
+	def isUG: Boolean = groupName == "Undergraduate - full-time" || groupName == "Undergraduate - part-time"
 
 	def toExamGridEntity(baseSCYD: StudentCourseYearDetails): ExamGridEntity = {
 		val allSCYDs: Seq[StudentCourseYearDetails] = freshOrStaleStudentCourseDetails.toSeq.sorted
