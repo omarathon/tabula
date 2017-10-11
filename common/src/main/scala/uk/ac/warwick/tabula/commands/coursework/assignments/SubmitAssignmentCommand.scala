@@ -83,8 +83,6 @@ trait SubmitAssignmentRequest extends SubmitAssignmentState {
 
 	var useDisability: JBoolean = null
 
-	var plagiarismDeclaration: Boolean = false
-
 	// used as a hint to the view.
 	var justSubmitted: Boolean = false
 
@@ -212,10 +210,6 @@ trait SubmitAssignmentValidation extends SelfValidating {
 			} else {
 				errors.reject("assignment.submit.already")
 			}
-		}
-
-		if (assignment.displayPlagiarismNotice && !plagiarismDeclaration) {
-			errors.rejectValue("plagiarismDeclaration", "assignment.submit.plagiarism")
 		}
 
 		// TODO for multiple attachments, check filenames are unique

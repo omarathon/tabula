@@ -242,8 +242,6 @@ trait CourseworkFixtures extends BrowserTest with FeaturesDriver with FixturesDr
 
 		new TextField(getInputByLabel("Word count").orNull).value = "1000"
 
-		checkbox("plagiarismDeclaration").select()
-
 		submit()
 		verifyPageLoaded(
 			pageSource contains "Thanks, we've received your submission." should be {true}

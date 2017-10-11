@@ -129,21 +129,22 @@
 			</#if>
 
 			<#if assignment.displayPlagiarismNotice>
-				<@bs3form.labelled_form_group path="" labelText="Plagiarism">
-					<p>
-						Work submitted to the University of Warwick for official assessment must be all your own work and any parts
-						that are copied or used from other people must be appropriately acknowledged. Failure to properly acknowledge
-						any copied work is plagiarism and may result in a mark of zero.
-					</p>
-				</@bs3form.labelled_form_group>
+			<div class="panel panel-default">
+				<div class="panel-body">
+					<@bs3form.labelled_form_group path="" labelText="Plagiarism declaration">
+						<p>
+							In submitting my work I confirm that:
+							<ol>
+								<li>I have read the guidance on plagiarism/cheating provided in the handbook and understand the University regulations in relation to plagiarism/cheating. I am aware of the potential consequences of committing plagiarism/cheating. I declare all work is my own, except where I have stated otherwise.</li>
+								<li>No substantial part(s) of the work here has also been submitted by me in other assessments for accredited courses of study (other than in the case of a resubmission of a piece of work), and I acknowledge that if this has been done an appropriate reduction in the mark I might otherwise have received will be made.</li>
+								<li>I understand that should this piece of work raise concerns requiring investigation in relation points 1 and 2 above, it is possible that other work I have submitted for assesment will be checked, even if the marking process has been completed.</li>
+								<li>Where a proof reader, paid or unpaid was used, I confirm that the proof reader was made aware of and has complied with the <a target='_blank' href='https://www2.warwick.ac.uk/services/aro/dar/quality/categories/examinations/policies/v_proofreading'>University's proof reading policy</a>.</li>
+							</ol>
+						</p>
+					</@bs3form.labelled_form_group>
+				</div>
+			</div>
 
-				<@bs3form.labelled_form_group path="" labelText="Confirm you are the author of this assignment">
-					<@bs3form.checkbox path="plagiarismDeclaration">
-						<@f.errors path="plagiarismDeclaration" cssClass="error" />
-						<@f.checkbox path="plagiarismDeclaration" id="plagiarismDeclaration" required="true"/>
-						I confirm that this assignment is all my own work
-					</@bs3form.checkbox>
-				</@bs3form.labelled_form_group>
 			</#if>
 
 			<#if features.privacyStatement>

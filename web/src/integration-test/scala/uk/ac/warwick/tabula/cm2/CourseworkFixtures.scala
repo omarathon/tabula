@@ -387,7 +387,7 @@ trait CourseworkFixtures extends BrowserTest with FeaturesDriver with FixturesDr
 
 	def submitAssignment(user: LoginDetails, assignmentName: String, assignmentId: String, file: String, mustBeEnrolled: Boolean = true): Unit = as(user) {
 		if (mustBeEnrolled) {
-			linkText(assignmentName).findElement should be ('defined)
+			linkText(assignmentName).findElement should be (defined)
 			click on linkText(assignmentName)
 			currentUrl should endWith(assignmentId)
 		} else {
@@ -395,6 +395,7 @@ trait CourseworkFixtures extends BrowserTest with FeaturesDriver with FixturesDr
 			go to Path(s"/coursework/submission/$assignmentId")
 		}
 
+		click on find(cssSelector("input[type=file]")).get
 		ifPhantomJSDriver(
 			operation = { d =>
 				// This hangs forever for some reason in PhantomJS if you use the normal pressKeys method
@@ -406,7 +407,6 @@ trait CourseworkFixtures extends BrowserTest with FeaturesDriver with FixturesDr
 			}
 		)
 
-		checkbox("plagiarismDeclaration").select()
 		submit()
 	}
 
