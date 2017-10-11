@@ -28,13 +28,7 @@ class SubmitAssignmentCommandTest extends TestBase with Mockito {
 		cmd.features = emptyFeatures
 		cmd.features.disabilityOnSubmission = true
 
-		// no plagiarism box ticked
 		var errors = new BindException(cmd, "command")
-		cmd.validate(errors)
-		errors.hasErrors should be {true}
-		errors.getErrorCount should be (1)
-
-		errors = new BindException(cmd, "command")
 		cmd.validate(errors)
 		errors.hasErrors should be {false}
 	}
