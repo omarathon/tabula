@@ -156,7 +156,8 @@ class CombinedTimetableFetchingService(services: PartialTimetableFetchingService
 		events.map(events => events.groupBy { event => (event.year, event.day, event.startTime, event.endTime, event.weekRanges,
 			event.eventType, event.parent.shortName, event.location, event.staff) }
 			.mapValues {
-				case event :: Nil => event
+				// values are Seq so List cons (::) never matches
+				case event +: Nil => event
 				case groupedEvents =>
 					val event = groupedEvents.head
 					TimetableEvent(
