@@ -28,7 +28,9 @@
 	</div>
 </#if>
 
-<p>Marking workflows define the marking method and who the markers are. Create workflows here and use them with one or more assignments.</p>
+<p>
+	Marking workflows define the marking method and who the markers are. Create workflows here and use them with one or more assignments. <#if isCurrentYear><a href="<@routes.coursework.markingworkflowlist department />">Edit legacy workflows created before August 2017 here</a>.</#if>
+</p>
 <#if isCurrentYear>
 	<p>Below is the list of current workflows available. To copy an old workflow, navigate to the relevant academic year and add the workflow to the current year.</p>
 </#if>
@@ -90,6 +92,9 @@
 		</tbody>
 	</table>
 <#else>
-	<p>There are no workflows for ${department.name} in ${academicYear.toString}.</p>
+	<p>
+		There are no workflows for ${department.name} in ${academicYear.toString}.
+		<#if !isCurrentYear><a href="<@routes.coursework.markingworkflowlist department />">Edit legacy workflows created before August 2017 here</a>.</#if>
+	</p>
 </#if>
 </#escape>
