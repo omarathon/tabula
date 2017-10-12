@@ -154,32 +154,34 @@ trait CreateAssignmentDetailsCommandState extends ModifyAssignmentDetailsCommand
 }
 
 trait ModifyAssignmentDetailsValidation extends SelfValidating with ModifyMarkingWorkflowValidation {
-  self: ModifyAssignmentDetailsCommandState with BooleanAssignmentDetailProperties with AssessmentServiceComponent with ModifyMarkingWorkflowState
-    with UserLookupComponent=>
+	self: ModifyAssignmentDetailsCommandState with BooleanAssignmentDetailProperties with AssessmentServiceComponent with ModifyMarkingWorkflowState
+		with UserLookupComponent =>
 
-  // validation shared between add and edit
-  def genericValidate(errors: Errors): Unit = {
-    if (openDate == null) {
-      errors.rejectValue("openDate", "openDate.missing")
-    }
+	// validation shared between add and edit
+	def genericValidate(errors: Errors): Unit = {
+		if (openDate == null) {
+			errors.rejectValue("openDate", "openDate.missing")
+		}
 
-    if (!openEnded) {
-      if (closeDate == null) {
-        errors.rejectValue("closeDate", "closeDate.missing")
-      } else if (openDate != null && openDate.isAfter(closeDate)) {
-        errors.rejectValue("closeDate", "closeDate.early")
-      }
-    }
-
-    if(workflowCategory == WorkflowCategory.Reusable && reusableWorkflow == null){
-      errors.rejectValue("reusableWorkflow", "markingWorkflow.reusableWorkflow.none")
-    } else if (workflowCategory == WorkflowCategory.SingleUse) {
-      if (workflowType == null)
-        errors.rejectValue("workflowType", "markingWorkflow.workflowType.none")
-      else
-        markerValidation(errors, workflowType)
-    }
-  }
+		if (!openEnded) {
+			if (closeDate == null) {
+				errors.rejectValue("closeDate", "closeDate.missing")
+			} else if (openDate != null && openDate.isAfter(closeDate)) {
+				errors.rejectValue("closeDate", "closeDate.early")
+			}
+		}
+		if (workflowCategory == WorkflowCategory.Reusable && reusableWorkflow == null) {
+			errors.rejectValue("reusableWorkflow", "markingWorkflow.reusableWorkflow.none")
+		} else if (workflowCategory == WorkflowCategory.SingleUse) {
+			if (workflowType == null){
+				errors.rejectValue("workflowType", "markingWorkflow.workflowType.none")
+			} else if ((workflowType.name == "DoubleBlind") && (markersA.size() <= 1)){
+				errors.rejectValue("markersA", "NotEnough.markersA", Array("two"), "")
+			}else{
+				markerValidation(errors, workflowType)
+			}
+		}
+	}
 }
 
 

@@ -115,6 +115,7 @@ trait EditAssignmentDetailsValidation extends ModifyAssignmentDetailsValidation 
 				errors.rejectValue("name", "name.duplicate.assignment", Array(name), "")
 			}
 		}
+
 		genericValidate(errors)
 	}
 }
