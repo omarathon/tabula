@@ -89,14 +89,13 @@ class FeedbackServiceImpl extends FeedbackService with Daoisms with Logging {
 	}
 
 	def delete(markerFeedback: MarkerFeedback): Unit = transactional() {
-
 		// remove link to parent
 		val parentFeedback = markerFeedback.feedback
 		if (markerFeedback == parentFeedback.firstMarkerFeedback) parentFeedback.firstMarkerFeedback = null
 		else if (markerFeedback == parentFeedback.secondMarkerFeedback) parentFeedback.secondMarkerFeedback = null
 		else if (markerFeedback == parentFeedback.thirdMarkerFeedback) parentFeedback.thirdMarkerFeedback = null
+		parentFeedback.markerFeedback.remove(markerFeedback)
 		saveOrUpdate(parentFeedback)
-
 		dao.delete(markerFeedback)
 	}
 

@@ -802,8 +802,8 @@ class Assignment
 		val markerFeedbacks  = allFeedback.flatMap(_.allMarkerFeedback)
 		markerFeedbacks.foreach(feedbackService.delete)
 		feedbacks.foreach(f => {
-			f.outstandingStages = JArrayList()
-			f.markerFeedback = JArrayList()
+			f.outstandingStages.clear()
+			f.markerFeedback.clear()
 			feedbackService.saveOrUpdate(f)
 		})
 	}
