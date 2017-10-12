@@ -56,7 +56,7 @@ trait CreateAssignmentTurnitinJobApi {
 			val assignment = command.apply()
 
 			response.setStatus(HttpStatus.ACCEPTED.value())
-			response.addHeader("Location", toplevelUrl + Routes.coursework.admin.assignment.turnitin.status(assignment))
+			response.addHeader("Location", toplevelUrl + Routes.cm2.admin.assignment.turnitin.status(assignment))
 
 			Mav(new JSONView(Map(
 				"success" -> true,
