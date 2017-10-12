@@ -28,7 +28,10 @@
 	</div>
 </#if>
 
-<p>Marking workflows define the marking method and who the markers are. Create workflows here and use them with one or more assignments.</p>
+<p>
+	Marking workflows define the marking method and who the markers are. Create workflows here and use them with one or more assignments.
+	If you need to make workflow changes for an existing CM1 assignment you can still <a href="<@routes.coursework.markingworkflowlist department />">manage CM1 workflows</a>.
+</p>
 <#if isCurrentYear>
 	<p>Below is the list of current workflows available. To copy an old workflow, navigate to the relevant academic year and add the workflow to the current year.</p>
 </#if>
