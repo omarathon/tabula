@@ -49,7 +49,7 @@ trait StudentAssignmentInfoToJsonConverter extends CourseworkCommandTypes {
 			"id" -> assignment.id,
 			"academicYear" -> assignment.academicYear.toString,
 			"name" -> assignment.name,
-			"studentUrl" -> (toplevelUrl + Routes.coursework.assignment(assignment))
+			"studentUrl" -> (toplevelUrl + Routes.cm2.assignment(assignment))
 		)
 
 		val assignmentSubmissionInfo =

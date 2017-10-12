@@ -191,6 +191,7 @@ object Routes {
 
 			object turnitin {
 				def status(assignment: Assignment): String = assignmentroot(assignment) + "/turnitin/status"
+				def report(assignment: Assignment, report: OriginalityReport): String = assignmentroot(assignment) + s"/turnitin/report/${encoded(report.attachment.id)}"
 			}
 
 			def extensions(assignment: Assignment): String = assignmentroot(assignment) + "/extensions"
