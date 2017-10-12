@@ -264,7 +264,7 @@ $(function() {
 			var $filterList = $el.closest(".student-filter, .small-groups-filter");
 
 			if ($filterList.find(".empty-filter").length == $filterList.find(".btn-group").length) {
-				$('.clear-all-filters').attr("disabled", "disabled");
+				$('.clear-all-filters').prop("disabled", "disabled");
 			} else {
 				$('.clear-all-filters').removeAttr("disabled");
 			}

@@ -208,7 +208,7 @@ jQuery(function($){
 	$('input#modal-open-ended').change(function(){
 		var $this = $(this);
 		if ($this.is(':checked'))  {
-			$('#modal-close-date').attr("disabled", "disabled");
+			$('#modal-close-date').prop("disabled", "disabled");
 		}  else {
 			$('#modal-close-date').removeAttr("disabled");
 		}

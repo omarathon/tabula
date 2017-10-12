@@ -221,7 +221,7 @@ jQuery(function($){
 		var $filterList = $el.closest(".student-filter");
 
 		if ($filterList.find(".empty-filter").length == $filterList.find(".btn-group").length) {
-			$filterList.find('.clear-all-filters').attr("disabled", "disabled");
+			$filterList.find('.clear-all-filters').prop("disabled", "disabled");
 		} else {
 			$filterList.find('.clear-all-filters').removeAttr("disabled");
 		}

@@ -222,10 +222,10 @@
 			var $this = $(this);
 			if ($this.is(':checked'))  {
 				$('#open-reminder-dt').removeAttr("disabled");
-				$('#close-dt').attr("disabled", "disabled");
+				$('#close-dt').prop("disabled", "disabled");
 			}  else {
 				$('#close-dt').removeAttr("disabled");
-				$('#open-reminder-dt').attr("disabled","disabled");
+				$('#open-reminder-dt').prop("disabled","disabled");
 			}
 		});
 		// check that the extension UI elements are present

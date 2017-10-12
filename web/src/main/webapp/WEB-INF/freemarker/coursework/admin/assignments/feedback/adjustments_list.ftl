@@ -81,7 +81,7 @@
 						$otherInput.fadeIn(400);
 					} else if ($otherInput.is(':visible')){
 						$otherInput.fadeOut(400, function() {
-							$otherInput.attr("disabled", "disabled");
+							$otherInput.prop("disabled", "disabled");
 						});
 					}
 
@@ -99,7 +99,7 @@
 					var $form = $(e.target);
 					var $select = $form.find('select[name=reason]');
 					if ($select.val() === "Other") {
-						$select.attr("disabled", "disabled");
+						$select.prop("disabled", "disabled");
 					}
 				});
 
