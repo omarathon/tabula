@@ -92,6 +92,9 @@
 		</tbody>
 	</table>
 <#else>
-	<p>There are no workflows for ${department.name} in ${academicYear.toString}.</p>
+	<p>
+		There are no workflows for ${department.name} in ${academicYear.toString}.
+		<#if !isCurrentYear><a href="<@routes.coursework.markingworkflowlist department />">Edit legacy workflows created before August 2017 here</a>.</#if>
+	</p>
 </#if>
 </#escape>
