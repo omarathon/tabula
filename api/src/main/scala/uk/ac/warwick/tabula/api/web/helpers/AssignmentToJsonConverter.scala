@@ -21,7 +21,7 @@ trait AssignmentToJsonConverter {
 			"archived" -> !assignment.isAlive, // TODO don't like this inferred value but don't want to change API spec
 			"academicYear" -> assignment.academicYear.toString,
 			"name" -> assignment.name,
-			"studentUrl" -> (toplevelUrl + Routes.coursework.assignment(assignment)),
+			"studentUrl" -> (toplevelUrl + Routes.cm2.assignment(assignment)),
 			"collectMarks" -> assignment.collectMarks,
 			"markingWorkflow" -> {
 				if (assignment.cm2Assignment)

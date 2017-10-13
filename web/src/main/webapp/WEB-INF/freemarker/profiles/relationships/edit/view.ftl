@@ -132,7 +132,7 @@
 			});
 
 			$('#confirm-remove-agent').click(function() {
-				$('[name=notifyNewAgent]').prop("disabled", "disabled")
+				$('[name=notifyNewAgent]').attr("disabled", "disabled")
 					.prop("checked", false)
 					.closest("label").addClass("muted");
 				$('#removeAgentMessage').hide();

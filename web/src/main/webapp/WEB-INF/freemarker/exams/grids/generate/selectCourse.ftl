@@ -228,7 +228,7 @@
 			var $filterList = $el.closest(".filters");
 
 			if ($filterList.find(".empty-filter").length == $filterList.find(".btn-group").length) {
-				$('.clear-all-filters').prop("disabled", "disabled");
+				$('.clear-all-filters').attr("disabled", "disabled");
 
 			} else {
 				$('.clear-all-filters').removeAttr("disabled");
