@@ -77,7 +77,7 @@
 
 					var $otherInput = $target.siblings('.other-input');
 					if ($target.val() === "Other") {
-						$otherInput.removeAttr("disabled");
+						$otherInput.prop("disabled", true);
 						$otherInput.fadeIn(400);
 					} else if ($otherInput.is(':visible')){
 						$otherInput.fadeOut(400, function() {
@@ -129,7 +129,7 @@
 
 					if($otherInput.val() != "" && $select.children(':selected').index() === 0) {
 						$content.find('option[value=Other]').attr("selected", "selected");
-						$otherInput.removeAttr("disabled");
+						$otherInput.prop("disabled", false);
 						$otherInput.show();
 					}
 
