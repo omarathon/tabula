@@ -53,8 +53,7 @@ class ReleaseGroupSetCommandImpl(val groupsToPublish:Seq[SmallGroupSet], private
 				releasedSet <- releasedSets
 				if releasedSet.releasedToTutors
 				group <- releasedSet.set.groups.asScala
-				event <- group.events
-				tutor <- event.tutors.users
+				tutor <- group.events.flatMap(_.tutors.users).distinct
 			} yield {
 				val n = Notification.init(new ReleaseSmallGroupSetsNotification(), currentUser, List(group))
 					.tap { _.isStudent = false }
