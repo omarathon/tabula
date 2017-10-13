@@ -91,16 +91,9 @@ trait SmallGroupFixture extends Mockito {
       .withLocation("CMR0.1")
       .build
 
-		val event2 = new SmallGroupEventBuilder()
-			.withTutors(tutors)
-			.withStartTime(new LocalTime(12,0,0,0))
-			.withDay(DayOfWeek.Tuesday)
-			.withLocation("CMR0.1")
-			.build
-
     val smallGroup = new SmallGroupBuilder()
       .withStudents(students)
-      .withEvents(Seq(event, event2))
+      .withEvents(Seq(event))
       .withGroupName(groupName)
       .build
 
@@ -114,6 +107,13 @@ trait SmallGroupFixture extends Mockito {
 
     (gs.groups.asScala.head, gs)
   }
+
+	def extraEvent(day: DayOfWeek = DayOfWeek.Monday, start:LocalTime = new LocalTime(12,0,0,0), location:String = "CMR0.1") =  new SmallGroupEventBuilder()
+		.withTutors(createUserGroup(Seq(tutor1.getUserId,tutor2.getUserId), identifierIsUniNumber = false))
+		.withStartTime(start)
+		.withDay(day)
+		.withLocation(location)
+		.build
 
   def createUserGroup(userIds:Seq[String], identifierIsUniNumber:Boolean = true): UserGroup = {
     val ug = if (identifierIsUniNumber) UserGroup.ofUniversityIds else UserGroup.ofUsercodes

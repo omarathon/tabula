@@ -137,6 +137,7 @@ class ReleaseGroupSetCommandTest extends TestBase with Mockito {
     cmd.userLookup = userLookup
     cmd.applyInternal()
 
+    groupSet1.groups.get(0).addEvent(extraEvent(day = DayOfWeek.Tuesday))
 
     val notifications: Seq[ReleaseSmallGroupSetsNotification] = cmd.emit(Seq(ReleasedSmallGroupSet(groupSet1, cmd.notifyStudents, cmd.notifyTutors)))
     notifications.foreach {
