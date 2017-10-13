@@ -42,15 +42,16 @@
 		$('[id^=select-signup]').submit( function(e) {
 			e.preventDefault();
 			var self = this;
-			var selectedFormGrpId = $('#' + self.id).find("input[name='group']:checked").val();
+			var formId = $('#' + self.id);
+			var selectedFormGrpId = formId.find("input[name='group']:checked").val();
 			var signupPostFormLink = $(this).prop('action');
-			var clashInfoLink = $('a.timetable-clash-link').data('href');
+			var clashInfoLink = formId.find('a.timetable-clash-link').data('href');
 
 			$.getJSON(clashInfoLink, { group:selectedFormGrpId, ts: new Date().getTime()},function(data) {
 				if(data.clash) {
 					$('.timetable-clash-info input[name="group"]').prop("value", selectedFormGrpId);
 					$('.timetable-clash-info form').prop("action", signupPostFormLink);
-					$('a.timetable-clash-link').click();
+					formId.find('a.timetable-clash-link').click();
 				} else {
 					self.submit();
 				}

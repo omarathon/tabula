@@ -25,7 +25,7 @@ trait SubmissionToJsonConverter {
 					"webOverlap" -> JInteger(report.webOverlap),
 					"studentOverlap" -> JInteger(report.studentOverlap),
 					"publicationOverlap" -> JInteger(report.publicationOverlap),
-					"reportUrl" -> (toplevelUrl + Routes.coursework.admin.assignment.turnitin.report(submission, attachment.originalityReport))
+					"reportUrl" -> (toplevelUrl + Routes.cm2.admin.assignment.turnitin.report(submission.assignment, attachment.originalityReport))
 				)}.orNull
 			)},
 			"submittedDate" -> Option(submission.submittedDate).map(DateFormats.IsoDateTime.print).orNull,
