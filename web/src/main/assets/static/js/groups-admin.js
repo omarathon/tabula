@@ -18,8 +18,8 @@ $(function(){
 	window.Groups = jQuery.extend(window.Groups, exports);
 	$('#action-submit').closest('form').on('click', '.update-only', function() {
 		$('#action-submit').val('update');
-		$('#action-submit').closest('form').find('[type=submit]').prop('disabled', true);
-		$(this).prop('disabled', false);
+		$('#action-submit').closest('form').find('[type=submit]').attr('disabled', true);
+		$(this).attr('disabled', false);
 	});
 
     // Zebra striping on lists of modules/groups
