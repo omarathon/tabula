@@ -77,7 +77,7 @@
 
 					var $otherInput = $target.siblings('.other-input');
 					if ($target.val() === "Other") {
-						$otherInput.prop("disabled", true);
+						$otherInput.prop("disabled", false);
 						$otherInput.fadeIn(400);
 					} else if ($otherInput.is(':visible')){
 						$otherInput.fadeOut(400, function() {
