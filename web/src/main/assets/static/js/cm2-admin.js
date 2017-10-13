@@ -221,11 +221,11 @@
 		$('input#openEnded').change(function(){
 			var $this = $(this);
 			if ($this.is(':checked'))  {
-				$('#open-reminder-dt').removeAttr("disabled");
-				$('#close-dt').prop("disabled", "disabled");
+				$('#open-reminder-dt').prop("disabled", false);
+				$('#close-dt').prop("disabled", true);
 			}  else {
-				$('#close-dt').removeAttr("disabled");
-				$('#open-reminder-dt').prop("disabled","disabled");
+				$('#close-dt').prop("disabled", false);
+				$('#open-reminder-dt').prop("disabled", true);
 			}
 		});
 		// check that the extension UI elements are present
