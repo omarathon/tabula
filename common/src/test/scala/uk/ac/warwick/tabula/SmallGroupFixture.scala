@@ -91,9 +91,16 @@ trait SmallGroupFixture extends Mockito {
       .withLocation("CMR0.1")
       .build
 
+		val event2 = new SmallGroupEventBuilder()
+			.withTutors(tutors)
+			.withStartTime(new LocalTime(12,0,0,0))
+			.withDay(DayOfWeek.Tuesday)
+			.withLocation("CMR0.1")
+			.build
+
     val smallGroup = new SmallGroupBuilder()
       .withStudents(students)
-      .withEvents(Seq(event))
+      .withEvents(Seq(event, event2))
       .withGroupName(groupName)
       .build
 

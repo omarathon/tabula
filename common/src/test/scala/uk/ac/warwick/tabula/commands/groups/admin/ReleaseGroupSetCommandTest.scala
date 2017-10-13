@@ -1,10 +1,11 @@
 package uk.ac.warwick.tabula.commands.groups.admin
 
+import org.joda.time.LocalTime
 import org.mockito.Mockito._
 import uk.ac.warwick.tabula.commands.Description
-import uk.ac.warwick.tabula.data.model.groups.{SmallGroup, SmallGroupSet}
+import uk.ac.warwick.tabula.data.model.groups.{DayOfWeek, SmallGroup, SmallGroupSet}
 import uk.ac.warwick.tabula.data.model.notifications.groups.ReleaseSmallGroupSetsNotification
-import uk.ac.warwick.tabula.{Mockito, SmallGroupFixture, TestBase}
+import uk.ac.warwick.tabula.{Mockito, SmallGroupEventBuilder, SmallGroupFixture, TestBase}
 
 class ReleaseGroupSetCommandTest extends TestBase with Mockito {
 
@@ -127,6 +128,24 @@ class ReleaseGroupSetCommandTest extends TestBase with Mockito {
 		}
     notifications.exists(n=>n.recipients.exists(u=>u.getUserId == "tutor1"))  should be (true)
     notifications.exists(n=>n.recipients.exists(u=>u.getUserId == "tutor2"))  should be (true)
+  }}
+
+  @Test
+  def emitShouldCreateOneNotificationPerTutor(){new SmallGroupFixture {
+    val cmd = new ReleaseGroupSetCommandImpl(Seq(groupSet1), requestingUser)
+    cmd.notifyTutors = true
+    cmd.userLookup = userLookup
+    cmd.applyInternal()
+
+
+    val notifications: Seq[ReleaseSmallGroupSetsNotification] = cmd.emit(Seq(ReleasedSmallGroupSet(groupSet1, cmd.notifyStudents, cmd.notifyTutors)))
+    notifications.foreach {
+      case n : ReleaseSmallGroupSetsNotification => n.userLookup = userLookup
+    }
+
+    notifications.count(n=>n.recipients.exists(u=>u.getUserId == "tutor1")) should be (1)
+    notifications.count(n=>n.recipients.exists(u=>u.getUserId == "tutor2")) should be (1)
+
   }}
 
   @Test
