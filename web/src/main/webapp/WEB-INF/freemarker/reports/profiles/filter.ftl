@@ -14,9 +14,9 @@
 		jQuery(function($){
 			var updateButton = function(){
 				if ($('input[name="students"]:checked').length > 0) {
-					$('input.generate').prop('disabled', false);
+					$('input.generate').attr('disabled', false);
 				} else {
-					$('input.generate').prop('disabled', true);
+					$('input.generate').attr('disabled', true);
 				}
 			};
 			$(document).on('click', 'input[name="students"]', updateButton);

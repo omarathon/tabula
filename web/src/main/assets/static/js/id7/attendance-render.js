@@ -114,9 +114,9 @@ $(function(){
 			var checkboxes = $('.manually-added tbody input')
 				, checkedBoxes = checkboxes.filter(function(){ return $(this).is(':checked'); });
 			if (checkedBoxes.length == 0) {
-				$('.manually-added summary input.btn-warning').prop('disabled', true);
+				$('.manually-added summary input.btn-warning').attr('disabled', true);
 			} else {
-				$('.manually-added summary input.btn-warning').prop('disabled', false);
+				$('.manually-added summary input.btn-warning').attr('disabled', false);
 			}
 		};
 		updateButtons();
