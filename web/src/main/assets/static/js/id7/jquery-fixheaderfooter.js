@@ -139,6 +139,9 @@
                     // remove shadows
                     $headers.children(':last-child').remove(selHeaderShadow);
 
+                    // restore the position of the header to static
+                    $this.css({'position': 'static'});
+
                     // restore <thead> properties, remove cloned header
                     if ($this.is('thead')) {
                         for (var i in theadProperties) $(this).css(theadProperties[i], 'inherit');
@@ -199,7 +202,7 @@
             if (!isSmallscreen && targetList.height() < this.viewableArea() && ($(window).scrollTop() > $container.offset().top)) {
                 targetList.css({'top': fixHeaderTop + 14, 'position': 'fixed', 'width': targetList.parent().width()});
             } else {
-                targetList.css({'top': 'auto', 'position': 'relative', 'width': 'auto'});
+                targetList.css({'top': 'auto', 'position': 'static', 'width': 'auto'});
             }
         };
 
