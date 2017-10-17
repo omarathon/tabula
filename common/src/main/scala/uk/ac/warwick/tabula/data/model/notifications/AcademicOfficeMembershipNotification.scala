@@ -9,9 +9,6 @@ import uk.ac.warwick.tabula.data.model._
 import uk.ac.warwick.tabula.services.{AutowiringUserLookupComponent, LenientGroupService}
 import uk.ac.warwick.userlookup.User
 
-import scala.collection.JavaConverters._
-import scala.util.Try
-
 
 object AcademicOfficeMembershipNotification {
 	val templateLocation = "/WEB-INF/freemarker/emails/manual_membership_eo.ftl"
@@ -24,8 +21,8 @@ class AcademicOfficeMembershipNotification extends Notification[Department, Unit
 	with MyWarwickNotification {
 
 	@transient
-	lazy val RecipientWebGroup: String = Wire.optionProperty("${permissions.academicoffice.group}").getOrElse(
-		throw new IllegalStateException("permissions.academicoffice.group property is missing")
+	lazy val RecipientUsercode: String = Wire.optionProperty("${academicoffice.notificationrecipient}").getOrElse(
+		throw new IllegalStateException("academicoffice.notificationrecipient property is missing")
 	)
 	@transient
 	def groupService: LenientGroupService = userLookup.getGroupService
@@ -46,8 +43,8 @@ class AcademicOfficeMembershipNotification extends Notification[Department, Unit
 
 	@transient
 	override def recipients: Seq[User] = {
-		val users = userLookup.getUsersByUserIds(groupService.getUserCodesInGroup(RecipientWebGroup)).values.asScala.toSeq
-		if (users.isEmpty) throw new IllegalStateException(s"No users found in the recipient webgroup - $RecipientWebGroup")
-		users
+		val user = userLookup.getUserByUserId(RecipientUsercode)
+		if (!user.isFoundUser) throw new IllegalStateException(s"No recipient found with the usercode - $RecipientUsercode")
+		Seq(user)
 	}
 }
