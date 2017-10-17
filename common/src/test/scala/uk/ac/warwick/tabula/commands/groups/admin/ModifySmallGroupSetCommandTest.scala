@@ -183,7 +183,7 @@ class ModifySmallGroupSetCommandTest extends TestBase with Mockito {
 		command.academicYear = AcademicYear.guessSITSAcademicYearByDate(DateTime.now)
 		command.format = SmallGroupFormat.Seminar
 		command.allocationMethod = SmallGroupAllocationMethod.Manual
-
+		command.smallGroupService.getSmallGroupSetByNameAndYear(command.name,command.academicYear) returns (Seq())
 		val errors = new BindException(command, "command")
 		command.validate(errors)
 
@@ -205,12 +205,31 @@ class ModifySmallGroupSetCommandTest extends TestBase with Mockito {
 		errors.getFieldError.getCodes should contain ("smallGroupSet.name.NotEmpty")
 	}}
 
+	@Test def validateDuplicateName { new ValidationFixture {
+		command.name = "Test1"
+		command.academicYear = AcademicYear.guessSITSAcademicYearByDate(DateTime.now)
+		command.format = SmallGroupFormat.Seminar
+		command.allocationMethod = SmallGroupAllocationMethod.Manual
+		val set = new SmallGroupSet
+		set.name = command.name
+
+		command.smallGroupService.getSmallGroupSetByNameAndYear(command.name,command.academicYear) returns (Seq(set))
+		val errors = new BindException(command, "command")
+		command.validate(errors)
+
+		errors.hasErrors should be (true)
+		errors.getErrorCount should be (1)
+		errors.getFieldError.getField should be ("name")
+		errors.getFieldError.getCodes should contain ("smallGroupSet.name.duplicate")
+	}}
+
+
 	@Test def validateNameTooLong { new ValidationFixture {
 		command.name = (1 to 300).map { _ => "a" }.mkString("")
 		command.academicYear = AcademicYear.guessSITSAcademicYearByDate(DateTime.now)
 		command.format = SmallGroupFormat.Seminar
 		command.allocationMethod = SmallGroupAllocationMethod.Manual
-
+		command.smallGroupService.getSmallGroupSetByNameAndYear(command.name,command.academicYear) returns (Seq())
 		val errors = new BindException(command, "command")
 		command.validate(errors)
 
@@ -224,7 +243,7 @@ class ModifySmallGroupSetCommandTest extends TestBase with Mockito {
 		command.name = "That's not my name"
 		command.academicYear = AcademicYear.guessSITSAcademicYearByDate(DateTime.now)
 		command.allocationMethod = SmallGroupAllocationMethod.Manual
-
+		command.smallGroupService.getSmallGroupSetByNameAndYear(command.name,command.academicYear) returns (Seq())
 		val errors = new BindException(command, "command")
 		command.validate(errors)
 
@@ -239,7 +258,7 @@ class ModifySmallGroupSetCommandTest extends TestBase with Mockito {
 		command.academicYear = AcademicYear.guessSITSAcademicYearByDate(DateTime.now)
 		command.format = SmallGroupFormat.Seminar
 		command.allocationMethod = null
-
+		command.smallGroupService.getSmallGroupSetByNameAndYear(command.name,command.academicYear) returns (Seq())
 		val errors = new BindException(command, "command")
 		command.validate(errors)
 
@@ -256,7 +275,7 @@ class ModifySmallGroupSetCommandTest extends TestBase with Mockito {
 		command.academicYear = set.academicYear + 1
 		command.format = SmallGroupFormat.Seminar
 		command.allocationMethod = SmallGroupAllocationMethod.Manual
-
+		command.smallGroupService.getSmallGroupSetByNameAndYear(command.name,command.academicYear) returns (Seq())
 		val errors = new BindException(command, "command")
 		command.validate(errors)
 
@@ -273,7 +292,7 @@ class ModifySmallGroupSetCommandTest extends TestBase with Mockito {
 		command.allocationMethod = SmallGroupAllocationMethod.Manual
 
 		set.allocationMethod = SmallGroupAllocationMethod.Linked
-
+		command.smallGroupService.getSmallGroupSetByNameAndYear(command.name,command.academicYear) returns (Seq())
 		val errors = new BindException(command, "command")
 		command.validate(errors)
 
@@ -286,7 +305,7 @@ class ModifySmallGroupSetCommandTest extends TestBase with Mockito {
 		command.format = SmallGroupFormat.Seminar
 		command.allocationMethod = SmallGroupAllocationMethod.Linked
 		command.linkedDepartmentSmallGroupSet = Fixtures.departmentSmallGroupSet("A set")
-
+		command.smallGroupService.getSmallGroupSetByNameAndYear(command.name,command.academicYear) returns (Seq())
 		set.allocationMethod = SmallGroupAllocationMethod.Linked
 		set.linkedDepartmentSmallGroupSet = Fixtures.departmentSmallGroupSet("Another set")
 
@@ -302,7 +321,7 @@ class ModifySmallGroupSetCommandTest extends TestBase with Mockito {
 		command.format = SmallGroupFormat.Seminar
 		command.allocationMethod = SmallGroupAllocationMethod.Linked
 		command.linkedDepartmentSmallGroupSet = Fixtures.departmentSmallGroupSet("A set")
-
+		command.smallGroupService.getSmallGroupSetByNameAndYear(command.name,command.academicYear) returns (Seq())
 		set.allocationMethod = SmallGroupAllocationMethod.Linked
 		set.linkedDepartmentSmallGroupSet = Fixtures.departmentSmallGroupSet("Another set")
 		set.collectAttendance = true
@@ -346,6 +365,7 @@ class ModifySmallGroupSetCommandTest extends TestBase with Mockito {
 		command.format = SmallGroupFormat.Seminar
 		command.allocationMethod = SmallGroupAllocationMethod.Linked
 		command.linkedDepartmentSmallGroupSet = Fixtures.departmentSmallGroupSet("A set")
+		command.smallGroupService.getSmallGroupSetByNameAndYear(command.name,command.academicYear) returns (Seq())
 
 		set.allocationMethod = SmallGroupAllocationMethod.Manual
 		set.collectAttendance = true
@@ -384,6 +404,7 @@ class ModifySmallGroupSetCommandTest extends TestBase with Mockito {
 		command.academicYear = set.academicYear
 		command.allocationMethod = SmallGroupAllocationMethod.Linked
 		command.linkedDepartmentSmallGroupSet = set.linkedDepartmentSmallGroupSet
+		command.smallGroupService.getSmallGroupSetByNameAndYear(command.name,command.academicYear) returns (Seq())
 
 		val errors = new BindException(command, "command")
 		command.validate(errors)
@@ -396,7 +417,7 @@ class ModifySmallGroupSetCommandTest extends TestBase with Mockito {
 		command.academicYear = set.academicYear
 		command.format = SmallGroupFormat.Seminar
 		command.allocationMethod = SmallGroupAllocationMethod.Manual
-
+		command.smallGroupService.getSmallGroupSetByNameAndYear(command.name,command.academicYear) returns (Seq())
 		set.allocationMethod = SmallGroupAllocationMethod.Linked
 		set.releasedToStudents = true
 		set.releasedToTutors = true
@@ -416,6 +437,7 @@ class ModifySmallGroupSetCommandTest extends TestBase with Mockito {
 		command.academicYear = set.academicYear
 		command.allocationMethod = SmallGroupAllocationMethod.Linked
 		command.linkedDepartmentSmallGroupSet = Fixtures.departmentSmallGroupSet("A set")
+		command.smallGroupService.getSmallGroupSetByNameAndYear(command.name,command.academicYear) returns (Seq())
 
 		set.allocationMethod = SmallGroupAllocationMethod.Linked
 		set.linkedDepartmentSmallGroupSet = Fixtures.departmentSmallGroupSet("Another set")
