@@ -45,6 +45,8 @@ case class MemberAllocationData(
 
 trait SmallGroupDao {
 	def getSmallGroupSetById(id: String): Option[SmallGroupSet]
+	def  getSmallGroupSetsByNameYearModule(name: String, year: AcademicYear, module: Module): Seq[SmallGroupSet]
+
 	def getSmallGroupById(id: String): Option[SmallGroup]
 	def getSmallGroupEventById(id: String): Option[SmallGroupEvent]
 	def getSmallGroupEventOccurrenceById(id: String): Option[SmallGroupEventOccurrence]
@@ -111,6 +113,14 @@ class SmallGroupDaoImpl extends SmallGroupDao
 	val MaxGroupsByName = 15
 
 	def getSmallGroupSetById(id: String): Option[SmallGroupSet] = getById[SmallGroupSet](id)
+	def getSmallGroupSetsByNameYearModule(name: String, year: AcademicYear, module: Module): Seq[SmallGroupSet] =
+		session.newCriteria[SmallGroupSet]
+			.add(is("module", module))
+			.add(is("academicYear", year))
+		  .add(is("name", name))
+			.add(is("deleted", false))
+			.seq
+
 	def getSmallGroupById(id: String): Option[SmallGroup] = getById[SmallGroup](id)
 	def getSmallGroupEventById(id: String): Option[SmallGroupEvent] = getById[SmallGroupEvent](id)
 	def getSmallGroupEventOccurrenceById(id: String): Option[SmallGroupEventOccurrence] = getById[SmallGroupEventOccurrence](id)

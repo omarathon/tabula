@@ -225,6 +225,20 @@ trait ModifySmallGroupSetValidation extends SelfValidating {
 		if (!name.hasText) errors.rejectValue("name", "smallGroupSet.name.NotEmpty")
 		else if (name.orEmpty.length > 200) errors.rejectValue("name", "smallGroupSet.name.Length", Array[Object](200: JInteger), "")
 
+		if (name.hasText) {
+			val duplicates = smallGroupService.getSmallGroupSetsByNameYearModule(name, academicYear, module)
+			if (duplicates.nonEmpty) {
+				existingSet match {
+					//new set
+					case None => errors.rejectValue("name", "smallGroupSet.name.duplicate", Array(name, module.code), "")
+					case Some(set) => //existingSet
+						if (!duplicates.contains(set)) {
+							errors.rejectValue("name", "smallGroupSet.name.duplicate", Array(name, module.code), "")
+						}
+				}
+			}
+		}
+
 		if (format == null) errors.rejectValue("format", "smallGroupSet.format.NotEmpty")
 		if (allocationMethod == null) errors.rejectValue("allocationMethod", "smallGroupSet.allocationMethod.NotEmpty")
 		else if (allocationMethod == SmallGroupAllocationMethod.Linked && linkedDepartmentSmallGroupSet == null)

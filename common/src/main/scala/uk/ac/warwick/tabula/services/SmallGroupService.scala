@@ -29,6 +29,8 @@ trait AutowiringSmallGroupServiceComponent extends SmallGroupServiceComponent {
 
 trait SmallGroupService {
 	def getSmallGroupSetById(id: String): Option[SmallGroupSet]
+	def getSmallGroupSetsByNameYearModule(name: String, year: AcademicYear, module: Module): Seq[SmallGroupSet]
+
 	def getSmallGroupById(id: String): Option[SmallGroup]
 	def getSmallGroupEventById(id: String): Option[SmallGroupEvent]
 	def getSmallGroupEventOccurrenceById(id: String): Option[SmallGroupEventOccurrence]
@@ -110,6 +112,7 @@ abstract class AbstractSmallGroupService extends SmallGroupService {
 		with Logging with TaskBenchmarking =>
 
 	def getSmallGroupSetById(id: String): Option[SmallGroupSet] = smallGroupDao.getSmallGroupSetById(id)
+	def getSmallGroupSetsByNameYearModule(name: String, year: AcademicYear, module: Module): Seq[SmallGroupSet] = smallGroupDao.getSmallGroupSetsByNameYearModule(name, year, module)
 	def getSmallGroupById(id: String): Option[SmallGroup] = smallGroupDao.getSmallGroupById(id)
 	def getSmallGroupEventById(id: String): Option[SmallGroupEvent] = smallGroupDao.getSmallGroupEventById(id)
 	def getSmallGroupEventOccurrenceById(id: String): Option[SmallGroupEventOccurrence] = smallGroupDao.getSmallGroupEventOccurrenceById(id)
