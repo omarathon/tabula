@@ -2,6 +2,7 @@ package uk.ac.warwick.tabula.attendance.profile
 
 import org.openqa.selenium.By
 import org.scalatest.GivenWhenThen
+import uk.ac.warwick.tabula.FunctionalTestAcademicYear
 import uk.ac.warwick.tabula.attendance.AttendanceFixture
 
 class AttendanceStudentProfileTest extends AttendanceFixture with GivenWhenThen {
@@ -12,6 +13,10 @@ class AttendanceStudentProfileTest extends AttendanceFixture with GivenWhenThen 
 
 		When("I go to /attendance/")
 		go to Path("/attendance/")
+		eventually(currentUrl should include("/attendance/profile"))
+
+		And("I click on the latest academic year to be sure I'm looking at the right place")
+		click on linkText(FunctionalTestAcademicYear.current.toString)
 
 		Then("I am redirected to my profile")
 		eventually(currentUrl should include("/attendance/profile"))
