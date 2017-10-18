@@ -122,10 +122,10 @@
 					<#if unallocated?has_content>
 
 						<p>
-							<button class="btn btn-default distribute-selected" name="action" value="${commandActions.DistributeSelected}" type="submit">Distribute between selected personal tutors</button>
+							<button class="btn btn-default distribute-selected" name="action" value="${commandActions.DistributeSelected}" type="submit">Distribute between selected ${relationshipType.agentRole}s</button>
 						</p>
 						<p>
-							<button class="btn btn-default distribute-all" name="action" value="${commandActions.DistributeAll}" type="submit">Distribute all students between selected personal tutors</button>
+							<button class="btn btn-default distribute-all" name="action" value="${commandActions.DistributeAll}" type="submit">Distribute all students between selected ${relationshipType.agentRole}s</button>
 						</p>
 
 						<table class="table table-condensed table-striped table-hover scrollable-tbody">
@@ -185,8 +185,8 @@
 					</div>
 
 					<p>
-						<button class="btn btn-default remove-all" name="action" value="${commandActions.RemoveFromAll}" type="submit" title="You need to select some personal tutors from which to remove students">
-							Remove all students from selected ${relationshipType.description}(s)
+						<button class="btn btn-default remove-all" name="action" value="${commandActions.RemoveFromAll}" type="submit" title="You need to select some ${relationshipType.agentRole}s from which to remove students">
+							Remove all students from selected ${relationshipType.agentRole}s
 						</button>
 					</p>
 
