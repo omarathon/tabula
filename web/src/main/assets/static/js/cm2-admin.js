@@ -91,7 +91,7 @@
 			}
 			if (($otherInput.val() != "Plagarism penalty") && ($otherInput.val() != "Late submission penalty") && ($otherInput.val() != "") ){
 				$content.find('option[value=Other]').prop('selected', true);
-				$otherInput.removeAttr("disabled");
+				$otherInput.prop("disabled", false);
 				$otherInput.removeClass("hide");
 			}
 			// show the suggested mark button if late penalty is selected
@@ -107,7 +107,7 @@
 			var $target = $(e.target);
 			var $otherInput = $target.siblings('.other-input');
 			if ($target.find('option:selected').text() === "Other") {
-				$otherInput.removeAttr("disabled");
+				$otherInput.prop("disabled", false);
 				$otherInput.removeClass("hide");
 				$otherInput.fadeIn(400);
 			} else if ($otherInput.is(':visible')){
@@ -221,11 +221,11 @@
 		$('input#openEnded').change(function(){
 			var $this = $(this);
 			if ($this.is(':checked'))  {
-				$('#open-reminder-dt').removeAttr("disabled");
-				$('#close-dt').attr("disabled", "disabled");
+				$('#open-reminder-dt').prop("disabled", false);
+				$('#close-dt').prop("disabled", true);
 			}  else {
-				$('#close-dt').removeAttr("disabled");
-				$('#open-reminder-dt').attr("disabled","disabled");
+				$('#close-dt').prop("disabled", false);
+				$('#open-reminder-dt').prop("disabled", true);
 			}
 		});
 		// check that the extension UI elements are present
