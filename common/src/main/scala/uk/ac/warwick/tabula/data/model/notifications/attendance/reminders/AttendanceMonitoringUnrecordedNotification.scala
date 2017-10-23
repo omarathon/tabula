@@ -69,7 +69,7 @@ class AttendanceMonitoringUnrecordedPointsNotification
 	))
 
 	override final def recipients: Seq[User] = {
-		if (unrecordedPoints.size > 0) {
+		if (unrecordedPoints.nonEmpty) {
 			// department.owners is not populated correctly if department not fetched directly
 			moduleAndDepartmentService.getDepartmentById(department.id).get.owners.users
 		} else {
@@ -98,7 +98,7 @@ class AttendanceMonitoringUnrecordedStudentsNotification
 
 	@transient
 	final lazy val unrecordedStudents: Seq[AttendanceMonitoringStudentData] = {
-		attendanceMonitoringService.findUnrecordedStudents(department, academicYear, referenceDate.toLocalDate)
+		attendanceMonitoringService.findUnrecordedStudents(department, academicYear, created.toLocalDate)
 			.sortBy(u => (u.lastName, u.firstName))
 	}
 
@@ -111,7 +111,7 @@ class AttendanceMonitoringUnrecordedStudentsNotification
 
 	@transient
 	override def recipients: Seq[User] =
-		if (unrecordedStudents.size > 0) {
+		if (unrecordedStudents.nonEmpty) {
 			// department.owners is not populated correctly if department not fetched directly
 			moduleAndDepartmentService.getDepartmentById(department.id).get.owners.users
 		} else {

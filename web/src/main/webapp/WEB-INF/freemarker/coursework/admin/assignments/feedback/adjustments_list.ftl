@@ -77,11 +77,11 @@
 
 					var $otherInput = $target.siblings('.other-input');
 					if ($target.val() === "Other") {
-						$otherInput.removeAttr("disabled");
+						$otherInput.prop("disabled", false);
 						$otherInput.fadeIn(400);
 					} else if ($otherInput.is(':visible')){
 						$otherInput.fadeOut(400, function() {
-							$otherInput.attr("disabled", "disabled");
+							$otherInput.prop("disabled", true);
 						});
 					}
 
@@ -129,7 +129,7 @@
 
 					if($otherInput.val() != "" && $select.children(':selected').index() === 0) {
 						$content.find('option[value=Other]').attr("selected", "selected");
-						$otherInput.removeAttr("disabled");
+						$otherInput.prop("disabled", false);
 						$otherInput.show();
 					}
 

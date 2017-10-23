@@ -2,7 +2,7 @@
 <#escape x as x?html>
 <#assign formAction><@routes.cm2.releaseForMarking assignment /></#assign>
 
-<@f.form method="post" action="${formAction}" commandName="command">
+<@f.form cssClass="double-submit-protection" method="post" action="${formAction}" commandName="command">
 
 	<@cm2.assignmentHeader "Release submissions to markers" assignment "for" />
 

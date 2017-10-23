@@ -221,7 +221,7 @@ class Assignment
 	} else if (extensions.exists(_.feedbackDeadline.isDefined)) {
 		Option(extensions.filter(_.approved).flatMap(_.feedbackDeadline).map(_.toLocalDate).min)
 	} else if (submissions.size() == 0 && doesAllMembersHaveApprovedExtensions) {
-		Option(workingDaysHelper.datePlusWorkingDays(extensions.map(_.expiryDate).min.get.toLocalDate, Feedback.PublishDeadlineInWorkingDays))
+		Option(workingDaysHelper.datePlusWorkingDays(extensions.filter(_.expiryDate != None).map(_.expiryDate).min.get.toLocalDate, Feedback.PublishDeadlineInWorkingDays))
 	}	else None
 
 

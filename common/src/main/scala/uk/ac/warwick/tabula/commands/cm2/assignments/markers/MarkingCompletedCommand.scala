@@ -39,12 +39,13 @@ class MarkingCompletedCommandInternal(val assignment: Assignment, val marker: Us
 
 		val feedback = feedbackForRelease.map(mf => HibernateHelpers.initialiseAndUnproxy(mf.feedback)).collect{ case f: AssignmentFeedback => f }
 
-		val feedbackByStage = cm2MarkingWorkflowService.getAllFeedbackForMarker(assignment, marker)
+		val feedbackForReleaseByStage = cm2MarkingWorkflowService.getAllFeedbackForMarker(assignment, marker)
 			.filterKeys(_.order == stagePosition)
 			.mapValues(_.filter(feedbackForRelease.contains))
 
-		newReleasedFeedback = feedbackByStage.flatMap{case (stage, mf) =>
+		newReleasedFeedback = feedbackForReleaseByStage.flatMap{case (stage, mf) =>
 			val f = mf.map(mf => HibernateHelpers.initialiseAndUnproxy(mf.feedback)).collect{ case f: AssignmentFeedback => f }
+				.filter(_.outstandingStages.contains(stage))
 			cm2MarkingWorkflowService.progressFeedback(stage, f)
 		}.toSeq.asJava
 

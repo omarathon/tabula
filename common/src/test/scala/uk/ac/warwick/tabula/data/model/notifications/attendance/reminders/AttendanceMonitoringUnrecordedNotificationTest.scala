@@ -68,7 +68,7 @@ class AttendanceMonitoringUnrecordedNotificationTest extends TestBase with Mocki
 			)
 		)
 
-		notification.attendanceMonitoringService.findUnrecordedStudents(department, new AcademicYear(2014), notification.created.minusDays(7).toLocalDate) returns unrecorded
+		notification.attendanceMonitoringService.findUnrecordedStudents(department, new AcademicYear(2014), notification.created.toLocalDate) returns unrecorded
 
 		notification.title should be ("1 student needs monitoring points recording")
 	}
@@ -106,7 +106,7 @@ class AttendanceMonitoringUnrecordedNotificationTest extends TestBase with Mocki
 			)
 		)
 
-		notification.attendanceMonitoringService.findUnrecordedStudents(department, new AcademicYear(2014), notification.created.minusDays(7).toLocalDate) returns unrecorded
+		notification.attendanceMonitoringService.findUnrecordedStudents(department, new AcademicYear(2014), notification.created.toLocalDate) returns unrecorded
 
 		notification.title should be ("2 students need monitoring points recording")
 	}
