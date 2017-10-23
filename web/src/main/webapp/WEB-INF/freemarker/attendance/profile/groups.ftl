@@ -25,7 +25,7 @@
 					</#if>
 				</strong>
 				during <strong>
-					<#if point.pointType.dbValue == 'date'>
+					<#if point.scheme.pointStyle.dbValue == 'date'>
 						<@fmt.interval point.startDate point.endDate />
 					<#else>
 						<@fmt.monitoringPointWeeksFormat
