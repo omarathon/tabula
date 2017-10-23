@@ -103,7 +103,7 @@ trait SmallGroupDao {
 
 	def listSmallGroupsWithoutLocation(academicYear: AcademicYear): Seq[SmallGroupEvent]
 
-	def findSmallGroupsByNameOrModule(query: String): Seq[SmallGroup]
+	def findSmallGroupsByNameOrModule(query: String, academicYear: AcademicYear): Seq[SmallGroup]
 }
 
 @Repository
@@ -541,15 +541,16 @@ class SmallGroupDaoImpl extends SmallGroupDao
 		results.map(objArray => objArray(0).asInstanceOf[SmallGroupEvent])
 	}
 
-	def findSmallGroupsByNameOrModule(query: String): Seq[SmallGroup] = {
+	def findSmallGroupsByNameOrModule(query: String, academicYear: AcademicYear): Seq[SmallGroup] = {
 		session.newQuery[SmallGroup]("""
 			from SmallGroup g
-			where g.groupSet.deleted = false and (
+			where g.groupSet.deleted = false and g.groupSet.academicYear = :academicYear and (
 				lower(g.uk$ac$warwick$tabula$data$model$groups$SmallGroup$$_name) like :nameLike
 				or lower(g.groupSet.name) like :nameLike
 				or lower(g.groupSet.module.code) like :nameLike
 		 	)
 		""")
+			.setParameter("academicYear", academicYear)
 			.setString("nameLike", "%" + query.toLowerCase + "%")
 			.setMaxResults(MaxGroupsByName).seq
 	}
