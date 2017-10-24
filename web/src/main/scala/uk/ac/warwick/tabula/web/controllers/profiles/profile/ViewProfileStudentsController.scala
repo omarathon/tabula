@@ -17,7 +17,7 @@ class ViewProfileStudentsController extends AbstractViewProfileController {
 		@PathVariable member: Member,
 		@ModelAttribute("activeAcademicYear") activeAcademicYear: Option[AcademicYear]
 	): Mav = {
-		val info = ProfilesHomeCommand(user, optionalCurrentMember).apply()
+		val info = ProfilesHomeCommand(user, Some(member)).apply()
 		Mav("profiles/profile/students",
 			"relationshipTypesMap" -> info.relationshipTypesMap,
 			"relationshipTypesMapById" -> info.relationshipTypesMap.map { case (k, v) => (k.id, v) },
