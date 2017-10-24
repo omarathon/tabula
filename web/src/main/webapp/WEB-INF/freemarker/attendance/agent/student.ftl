@@ -30,7 +30,7 @@
 						<#if features.disabilityRenderingInProfiles && (student.disability.reportable)!false>
 							<strong>Disability:</strong>
 							<a href="#" class="use-popover cue-popover" id="popover-disability" data-html="true"
-							   data-content="<p><#if isSelf>You have<#else>This student has</#if> self-reported the following disability code:</p><div class='well'><h6>${student.disability.code}</h6><small>${(student.disability.sitsDefinition)!}</small></div>"> ${student.disability.definition}</a><br/>
+							   data-content="<p>This student has self-reported the following disability code:</p><div class='well'><h6>${student.disability.code}</h6><small>${(student.disability.sitsDefinition)!}</small></div>"> ${student.disability.definition}</a><br/>
 						</#if>
 						<#if features.visaInStudentProfile && student.hasTier4Visa?? && student.casUsed??>
 							<strong>Tier 4 requirements:</strong>
