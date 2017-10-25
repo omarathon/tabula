@@ -55,13 +55,13 @@ class OnlineMarkingTest  extends BrowserTest with CourseworkFixtures with GivenW
 
 			go to Path("/coursework")
 			When("I click to mark the assignment")
-			eventually({
+			eventuallyAjax({
 				val mark = partialLinkText("Mark").webElement
 				mark.isDisplayed should be {true}
 				click on mark
 			})
 			Then("I am redirected to the summary screen ")
-			eventually(currentUrl should include(s"/admin/assignments/$assignmentId/mark"))
+			eventuallyAjax(currentUrl should include(s"/admin/assignments/$assignmentId/mark"))
 
 			When("I expand the student again")
 			click on cssSelector(".toggle-icon-large.student-col").webElement
@@ -81,7 +81,7 @@ class OnlineMarkingTest  extends BrowserTest with CourseworkFixtures with GivenW
 			cssSelector("input[name=confirm]").webElement.click()
 			cssSelector("input[type=submit]").webElement.click()
 			Then("I end up back on the marker overview page")
-			eventually(currentUrl should include(s"/admin/assignments/$assignmentId/mark"))
+			eventuallyAjax(currentUrl should include(s"/admin/assignments/$assignmentId/mark"))
 			cssSelector("i[data-original-title=Marked]").webElement.getAttribute("class").contains("text-success") should be {true}
 
 		}
