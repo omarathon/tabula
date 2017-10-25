@@ -5,7 +5,7 @@ import org.springframework.beans.{BeanWrapper, BeanWrapperImpl}
 import uk.ac.warwick.tabula.commands.{Description, Unaudited}
 import uk.ac.warwick.tabula.data.Daoisms
 import uk.ac.warwick.tabula.data.Transactions.transactional
-import uk.ac.warwick.tabula.data.model.{EmeritusMember, Member, MemberUserType, StaffMember, StaffProperties}
+import uk.ac.warwick.tabula.data.model._
 import uk.ac.warwick.tabula.helpers.Logging
 import uk.ac.warwick.tabula.services.scheduling.MembershipInformation
 import uk.ac.warwick.userlookup.User
@@ -22,10 +22,27 @@ class ImportStaffMemberCommand(info: MembershipInformation, ssoUser: User)
 		logger.debug("Importing staff member " + universityId + " into " + memberExisting)
 
 		val isTransient = memberExisting.nonEmpty
-		val member = memberExisting getOrElse {
+
+		def newMember: Member = {
 			if (this.userType == MemberUserType.Emeritus) new EmeritusMember(universityId)
 			else new StaffMember(universityId)
 		}
+
+		/* If the member exists and it's type has changed, delete the member and create a fresh one of the correct type - allows
+		 * Other, Emeritus => Staff
+		 * Other, Staff, => Emeritus
+		 * (this.userType will be Emeritus or Staff if this command is being executed)
+		 */
+		val recreatedMember = memberExisting
+			.filter(_.userType != this.userType)
+			.collect { case m @ (_: EmeritusMember | _: StaffMember | _:OtherMember) => m }
+			.map(m => {
+				logger.info(s"Deleting $m while importing $universityId")
+				memberDao.delete(m)
+				newMember
+			})
+
+		val member = recreatedMember.orElse(memberExisting).getOrElse(newMember)
 
 		val commandBean = new BeanWrapperImpl(this)
 		val memberBean = new BeanWrapperImpl(member)
