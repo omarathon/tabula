@@ -103,8 +103,15 @@ trait SmallGroupDao {
 
 	def listSmallGroupsWithoutLocation(academicYear: AcademicYear): Seq[SmallGroupEvent]
 
-	def findSmallGroupsByNameOrModule(query: String, academicYear: AcademicYear): Seq[SmallGroup]
+	def findSmallGroupsByNameOrModule(query: FindSmallGroupQuery): Seq[SmallGroup]
 }
+
+case class FindSmallGroupQuery(
+	terms: Seq[String],
+	modules: Seq[String],
+	academicYear: AcademicYear,
+	department: Option[String]
+)
 
 @Repository
 class SmallGroupDaoImpl extends SmallGroupDao
@@ -541,18 +548,46 @@ class SmallGroupDaoImpl extends SmallGroupDao
 		results.map(objArray => objArray(0).asInstanceOf[SmallGroupEvent])
 	}
 
-	def findSmallGroupsByNameOrModule(query: String, academicYear: AcademicYear): Seq[SmallGroup] = {
-		session.newQuery[SmallGroup]("""
+	def findSmallGroupsByNameOrModule(query: FindSmallGroupQuery): Seq[SmallGroup] = {
+		val indexedTerms = query.terms.zipWithIndex
+
+		val termConditions = indexedTerms.zipWithIndex.map{ case (_, i) => s"""(
+			(
+			 lower(g.uk$$ac$$warwick$$tabula$$data$$model$$groups$$SmallGroup$$$$_name) like :ot$i or
+			 lower(g.uk$$ac$$warwick$$tabula$$data$$model$$groups$$SmallGroup$$$$_name) like :fw$i or
+       lower(g.uk$$ac$$warwick$$tabula$$data$$model$$groups$$SmallGroup$$$$_name) like :lw$i
+			 )
+			or
+			(
+			 lower(g.groupSet.name) like :ot$i or
+			 lower(g.groupSet.name) like :fw$i or
+			 lower(g.groupSet.name) like :lw$i
+			)
+		)"""}.mkString(" and ")
+
+		val termCondition = if (termConditions.nonEmpty) s" and ($termConditions)" else ""
+		val departmentCondition = if(query.department.isDefined) " and g.groupSet.module.adminDepartment.code = :department" else ""
+		val moduleCondition = if(query.modules.nonEmpty)" and g.groupSet.module.code in (:modules)" else ""
+
+		val hql = s"""
 			from SmallGroup g
-			where g.groupSet.deleted = false and g.groupSet.academicYear = :academicYear and (
-				lower(g.uk$ac$warwick$tabula$data$model$groups$SmallGroup$$_name) like :nameLike
-				or lower(g.groupSet.name) like :nameLike
-				or lower(g.groupSet.module.code) like :nameLike
-		 	)
-		""")
-			.setParameter("academicYear", academicYear)
-			.setString("nameLike", "%" + query.toLowerCase + "%")
-			.setMaxResults(MaxGroupsByName).seq
+			where g.groupSet.deleted = false and g.groupSet.academicYear = :academicYear
+			$termCondition
+			$departmentCondition
+	 		$moduleCondition
+		"""
+
+		val scalaQuery = session.newQuery[SmallGroup](hql)
+			.setParameter("academicYear", query.academicYear)
+			.setMaxResults(MaxGroupsByName)
+
+		indexedTerms.foreach{ case (t, i) => scalaQuery.setString(s"fw$i", t.toLowerCase + " %") }
+		indexedTerms.foreach{ case (t, i) => scalaQuery.setString(s"ot$i", "% " + t.toLowerCase + " %") }
+		indexedTerms.foreach{ case (t, i) => scalaQuery.setString(s"lw$i", "% " + t.toLowerCase) }
+		if(query.modules.nonEmpty) scalaQuery.setParameterList("modules", query.modules.map(_.toLowerCase))
+		query.department.foreach(d => scalaQuery.setParameter("department", d))
+
+		scalaQuery.seq
 	}
 
 }
