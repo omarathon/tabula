@@ -49,13 +49,15 @@ class SmallGroupPickerCommand extends CommandInternal[Seq[SmallGroup]] {
 
 	var query: String = _
 	var academicYear: String = _
+	var department: String = _
 
 	def applyInternal(): Seq[SmallGroup] = {
 		if (!query.hasText) {
 			Seq()
 		} else {
 			val year = Try(AcademicYear(academicYear.toInt)).getOrElse(AcademicYear.guessSITSAcademicYearByDate(DateTime.now))
-			smallGroupService.findSmallGroupsByNameOrModule(query, year)
+			val dept = Option(department).filter(_.nonEmpty)
+			smallGroupService.findSmallGroupsByNameOrModule(query, year, dept)
 		}
 	}
 

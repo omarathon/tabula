@@ -18,6 +18,7 @@ import uk.ac.warwick.userlookup.User
 import scala.collection.JavaConverters._
 import scala.concurrent.duration.Duration
 import scala.concurrent.{Await, Future}
+import scala.util.matching.Regex
 
 trait SmallGroupServiceComponent {
 	def smallGroupService: SmallGroupService
@@ -97,7 +98,7 @@ trait SmallGroupService {
 
 	def listSmallGroupsWithoutLocation(academicYear: AcademicYear): Seq[SmallGroupEvent]
 
-	def findSmallGroupsByNameOrModule(query: String, academicYear: AcademicYear): Seq[SmallGroup]
+	def findSmallGroupsByNameOrModule(query: String, academicYear: AcademicYear, department: Option[String]): Seq[SmallGroup]
 }
 
 abstract class AbstractSmallGroupService extends SmallGroupService {
@@ -411,8 +412,18 @@ abstract class AbstractSmallGroupService extends SmallGroupService {
 	def listSmallGroupsWithoutLocation(academicYear: AcademicYear): Seq[SmallGroupEvent] =
 		smallGroupDao.listSmallGroupsWithoutLocation(academicYear: AcademicYear)
 
-	def findSmallGroupsByNameOrModule(query: String, academicYear: AcademicYear): Seq[SmallGroup] =
-		smallGroupDao.findSmallGroupsByNameOrModule(query, academicYear)
+	def findSmallGroupsByNameOrModule(query: String, academicYear: AcademicYear, department: Option[String]): Seq[SmallGroup] = {
+
+		val moduleCodePattern = new Regex("""([A-z][A-z][0-9][0-z][0-z])""")
+		val modules = moduleCodePattern.findAllIn(query).toList
+		val otherTerms = query.split("\\s+").filter(_.nonEmpty).filterNot(modules.contains)
+
+		if (modules.nonEmpty || otherTerms.nonEmpty)
+			smallGroupDao.findSmallGroupsByNameOrModule(FindSmallGroupQuery(otherTerms, modules, academicYear, department))
+		else
+			Nil
+	}
+
 
 }
 
