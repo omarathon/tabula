@@ -208,8 +208,8 @@ $(function(){
 				var $checkboxes = $markingContainer.find("input[type=checkbox][name=markerFeedback]:checked");
 				var $sendBack = $markingContainer.find(".must-be-blank");
 				var $sendForward = $markingContainer.find(".must-be-populated");
-				var allPopulated = $checkboxes.closest("tr").filter(".in-progress").size() == $checkboxes.size();
-				var allBlank = $checkboxes.closest("tr").filter(".in-progress,.marking-completed").size() == 0;
+				var allPopulated = $checkboxes.closest("tr").filter(".in-progress").length == $checkboxes.length;
+				var allBlank = $checkboxes.closest("tr").filter(".in-progress,.marking-completed").length == 0;
 				if (allBlank) { $sendBack.removeClass("disabled");} else { $sendBack.addClass("disabled");}
 				if (allPopulated) { $sendForward.removeClass("disabled");} else{ $sendForward.addClass("disabled");}
 			},
@@ -273,16 +273,16 @@ $(function(){
 
 		setup: function(e){
 			if(!$(".collection-checkbox").is(":checked")){
-				$('.btn-primary').prop('disabled', 'disabled');
+				$('.btn-primary').prop('disabled', true);
 			}
 		},
 
 		onSomeChecked: function() {
-			$('.btn-primary').removeProp('disabled');
+			$('.btn-primary').prop('disabled', false);
 		},
 
 		onNoneChecked: function() {
-			$('.btn-primary').prop('disabled', 'disabled');
+			$('.btn-primary').prop('disabled', true);
 		}
 	});
 
@@ -544,7 +544,7 @@ $(function() {
 			var $resp = $(resp);
 
 			// there should be an ajax-response class somewhere in the response text
-			var $response = $resp.find('.ajax-response').andSelf().filter('.ajax-response');
+			var $response = $resp.find('.ajax-response').addBack().filter('.ajax-response');
 			var success = $response.length && $response.data('status') == 'success';
 
 			if (success) {
@@ -586,7 +586,7 @@ $(function() {
 		if ($form.parents('.feedback-adjustment').length) prepareAjaxForm($form, function(resp) {
 			var $resp = $(resp);
 			// there should be an ajax-response class somewhere in the response text
-			var $response = $resp.find('.ajax-response').andSelf().filter('.ajax-response');
+			var $response = $resp.find('.ajax-response').addBack().filter('.ajax-response');
 			var success = $response.length && $response.data('status') == 'success';
 
 			if (success) {
@@ -600,7 +600,7 @@ $(function() {
 			var $resp = $(resp);
 
 			// there should be an ajax-response class somewhere in the response text
-			var $response = $resp.find('.ajax-response').andSelf().filter('.ajax-response');
+			var $response = $resp.find('.ajax-response').addBack().filter('.ajax-response');
 			var success = $response.length && $response.data('status') == 'success';
 
 			if (success) {

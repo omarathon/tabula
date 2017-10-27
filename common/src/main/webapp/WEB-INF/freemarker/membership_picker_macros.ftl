@@ -372,7 +372,7 @@ Generates the bulk of the picker HTML, inside a fieldset element
 
 			<#-- preset to open -->
 			if ($enrolment.data('open')) {
-				$('.${classifier}Enrolment details').prop('open', 'open');
+				$('.${classifier}Enrolment details').prop('open', true);
 				window.id6nav=window.id6nav||{};
 				$("html, body").delay(200).animate({
 					scrollTop: $enrolment.offset().top - window.id6nav.navigationHeight
@@ -434,7 +434,7 @@ Generates the bulk of the picker HTML, inside a fieldset element
 			e.preventDefault();
 			var $m = $(this).closest('.modal');
 			if ($(this).is(':not(.disabled)')) {
-				$('.sits-picker .btn').addClass('disabled').prop('disabled', 'disabled');
+				$('.sits-picker .btn').addClass('disabled').prop('disabled', true);
 
 				<#-- get current list of values and remove and/or add changes -->
 				var current = $('.upstreamGroups').map(function(i, input) { return input.value }).toArray();

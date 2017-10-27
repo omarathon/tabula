@@ -73,7 +73,7 @@
 						var key, key1, key2;
 						window.ReportBuilder.reportData = data;
 						$('form.report-target-form').append(
-							$('<input/>').prop({
+							$('<input/>').attr({
 								'type': 'hidden',
 								'name': 'data',
 								'value': JSON.stringify(data)
@@ -85,7 +85,7 @@
 
 						$mainContent.find('div.complete div.download ul.dropdown-menu a').on('click', function(e) {
 							e.preventDefault();
-							$('form.report-target-form').prop('action', $(this).data('href')).submit();
+							$('form.report-target-form').attr('action', $(this).data('href')).submit();
 						});
 
 						var showReport = function(){
@@ -187,9 +187,9 @@
 					)
 				});
 				container.append(
-					$('<th/>').addClass('sortable').append($('<i/>').addClass('fa fa-exclamation-triangle fa-fw late').prop('title', 'Unrecorded'))
+					$('<th/>').addClass('sortable').append($('<i/>').addClass('fa fa-exclamation-triangle fa-fw late').attr('title', 'Unrecorded'))
 				).append(
-					$('<th/>').addClass('sortable').append($('<i/>').addClass('fa fa-times fa-fw unauthorised').prop('title', 'Missed monitoring points'))
+					$('<th/>').addClass('sortable').append($('<i/>').addClass('fa fa-times fa-fw unauthorised').attr('title', 'Missed monitoring points'))
 				);
 				return container;
 			};
@@ -202,7 +202,7 @@
 					$('<td/>').html(student.lastName)
 				).append(
 					$('<td/>').append(
-						$('<a/>').prop({
+						$('<a/>').attr({
 							'href' : '/profiles/view/' + student.universityId,
 							'target' : '_blank'
 						}).html(student.universityId)
@@ -272,11 +272,11 @@
 					)
 				});
 				container.append(
-					$('<th/>').addClass('sortable').append($('<i/>').addClass('fa fa-exclamation-triangle fa-fw late').prop('title', 'Unrecorded'))
+					$('<th/>').addClass('sortable').append($('<i/>').addClass('fa fa-exclamation-triangle fa-fw late').attr('title', 'Unrecorded'))
 				).append(
-					$('<th/>').addClass('sortable').append($('<i/>').addClass('fa fa-times fa-fw unauthorised').prop('title', 'Missed (unauthorised) events'))
+					$('<th/>').addClass('sortable').append($('<i/>').addClass('fa fa-times fa-fw unauthorised').attr('title', 'Missed (unauthorised) events'))
 				).append(
-					$('<th/>').addClass('sortable').append($('<i/>').addClass('fa fa-times-circle-o fa-fw authorised').prop('title', 'Missed (authorised) events'))
+					$('<th/>').addClass('sortable').append($('<i/>').addClass('fa fa-times-circle-o fa-fw authorised').attr('title', 'Missed (authorised) events'))
 				);
 				return container;
 			};
@@ -289,7 +289,7 @@
 					$('<td/>').html(student.lastName)
 				).append(
 					$('<td/>').append(
-						$('<a/>').prop({
+						$('<a/>').attr({
 							'href' : '/profiles/view/' + student.universityId,
 							'target' : '_blank'
 						}).html(student.universityId)
@@ -335,7 +335,7 @@
 			window.ReportBuilder.buildFooter = function() {
 				var container = $('<tr/>');
 				container.append(
-					$('<th/>').prop('colspan', 2)
+					$('<th/>').attr('colspan', 2)
 				).append(
 					$('<th/>').html('Tutor/s')
 				);
@@ -386,7 +386,7 @@
 				$('<td/>').html(student.lastName)
 			).append(
 				$('<td/>').append(
-					$('<a/>').prop({
+					$('<a/>').attr({
 						'href' : '/profiles/view/' + student.universityId,
 						'target' : '_blank'
 						}).html(student.universityId)

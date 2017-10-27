@@ -154,8 +154,8 @@
 		if ($(this).hasClass('startDateTime')) {
 
 			$(this).on('click', function () {
-				var indexValue = $(this).children(':selected').prop('value');
-				$(this).closest('.dateTimePair').find('.endDateTime').prop('value', indexValue).closest('.control-group').addClass('warning');
+				var indexValue = $(this).children(':selected').attr('value');
+				$(this).closest('.dateTimePair').find('.endDateTime').attr('value', indexValue).closest('.control-group').addClass('warning');
 			});
 
 		}
@@ -1111,7 +1111,7 @@
 				e.stopPropagation();
 				var $a = $(this).parent();
 				var title = $a.data("title");
-				$(this).prop("title", "Expand " + title);
+				$(this).attr("title", "Expand " + title);
 				$a.data("href", $a.attr("href")).removeAttr("href").removeAttr("data-toggle").html($a.html().replace(title, "").replace("resize-small", "resize-full")).addClass("disabled");
 				$t.trigger('tabbablechanged');
 			});
@@ -1120,7 +1120,7 @@
 				e.stopPropagation();
 				var $a = $(this).parent();
 				var title = $a.data("title");
-				$(this).prop("title", "Collapse");
+				$(this).attr("title", "Collapse");
 				$a.attr("href", $a.data("href")).removeData("href").attr("data-toggle", "tab").html(title + $a.html().replace("resize-full", "resize-small")).removeClass("disabled");
 				$t.trigger('tabbablechanged');
 			});
@@ -1130,7 +1130,7 @@
 				var $a = $(this).parent();
 				$a.closest('.gadget').find('.tab-content').slideUp('fast');
 				var title = $a.data("title");
-				$(this).prop("title", "Show " + title);
+				$(this).attr("title", "Show " + title);
 				$a.data("href", $a.attr("href")).removeAttr("href").removeAttr("data-toggle").html($a.html().replace("minus-sign", "plus-sign"));
 				$t.trigger('tabbablechanged');
 			});
@@ -1140,7 +1140,7 @@
 				var $a = $(this).parent();
 				$a.closest('.gadget').find('.tab-content').slideDown('fast');
 				var title = $a.data("title");
-				$(this).prop("title", "Hide " + title);
+				$(this).attr("title", "Hide " + title);
 				$a.attr("href", $a.data("href")).removeData("href").attr("data-toggle", "tab").html($a.html().replace("plus-sign", "minus-sign"));
 				$t.trigger('tabbablechanged');
 			});
