@@ -187,5 +187,5 @@ subprojects {
 // value then running `./gradlew wrapper`. Next time gradlew
 // is run it will fetch and use that version.
 task wrapper(type: Wrapper) {
-    gradleVersion = '4.0.1'
+    gradleVersion = '4.1'
 }

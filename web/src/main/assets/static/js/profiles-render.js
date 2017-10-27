@@ -348,7 +348,7 @@
 								, $tbody = $table.find('tbody');
 							$thead.append(
 								$('<tr/>').append(
-									$('<th/>').prop('colspan', 3).append(
+									$('<th/>').attr('colspan', 3).append(
 										$('<h6/>').html(date.calendar(null, {
 											sameDay: '[Today] D MMMM',
 											nextDay: '[Tomorrow] D MMMM',

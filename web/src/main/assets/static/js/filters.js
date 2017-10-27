@@ -121,7 +121,7 @@ $.fn.enableFilters = function(options) {
 		}
 
 		function toggleClearAll() {
-			$clearAll.prop('disabled', ($this.find('input:checked').size() === 0));
+			$clearAll.prop('disabled', ($this.find('input:checked').length === 0));
 		}
 
 		function updateFilterText($checkbox) {

@@ -46,7 +46,8 @@
     "watchify": "^3.7.0"
   },
   "dependencies": {
-    "id7": "UniversityofWarwick/id7#v1.3.4"
+    "gulp-purge-sourcemaps": "^1.0.0",
+    "id7": "UniversityofWarwick/id7#v1.4.1"
   },
   "scripts": {
     "lint": "gulp lint",

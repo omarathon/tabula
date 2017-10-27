@@ -74,7 +74,7 @@
 				    $summary = $('summary', $details).first();
 
 				if (op === 'open') {
-					$details.prop('open', 'open');
+					$details.prop('open', true);
 					return;
 				} else if (op === 'close') {
 					$details.prop('open', false);

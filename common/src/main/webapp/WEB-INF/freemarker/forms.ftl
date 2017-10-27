@@ -314,7 +314,7 @@ To not bind:
 		var $container = $('#${elementId}'),
 		    $file = $container.find('input[type=file]'),
 		    $addButton;
-		if (Supports.multipleFiles) {
+		if (window.Supports.multipleFiles) {
 			// nothing, already works
 		} else {
 			// Add button which generates more file inputs
