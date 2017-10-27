@@ -288,7 +288,6 @@ trait CourseworkFixtures extends BrowserTest with FeaturesDriver with FixturesDr
 		cssSelector(s"input[name=createAndAddMarkers]").webElement.click()
 		Then("I am redirected to the summary screen ")
 		eventually(currentUrl should include(s"/admin/assignments/$id/summary"))
-		println(currentUrl)
 
 		When("I select all the submissions")
 		click on cssSelector(".collection-check-all")
