@@ -29,6 +29,7 @@
 		$this.find('input.date-time-minute-picker').tabulaDateTimeMinutePicker();
 		$this.find('form.double-submit-protection').tabulaSubmitOnce();
 		$this.find('.use-popover').tabulaPopover({trigger: 'click', container: 'body'});
+		$this.find('.table-sortable').sortableTable();
 	};
 	$(function(){
 		var $body = $('body');

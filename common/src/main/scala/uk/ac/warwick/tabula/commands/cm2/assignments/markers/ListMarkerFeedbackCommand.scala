@@ -22,7 +22,12 @@ import uk.ac.warwick.tabula.helpers.UserOrderingByIds._
 case class EnhancedMarkerFeedback(
 	markerFeedback: MarkerFeedback,
 	workflowStudent: MarkingWorkflowStudent
-)
+) {
+	def previousMarkerFeedback: Seq[MarkerFeedback] = {
+		val previousStages = markerFeedback.stage.previousStages
+		markerFeedback.feedback.markerFeedback.asScala.filter(s => previousStages.contains(s.stage))
+	}
+}
 
 case class MarkingWorkflowStudent (
 	stages: Seq[WorkflowStages.StageProgress],

@@ -25,6 +25,9 @@ sealed abstract class MarkingWorkflowStage(val name: String, val order: Int) ext
 	// should the online marker and upload marks commands be pre-populated with the previous stages feedback
 	def populateWithPreviousFeedback: Boolean = false
 
+	// should the stage show the mark and marker name for the previous feedback in ListMarkerFeedback
+	def summarisePreviousFeedback: Boolean = false
+
 	// get a description of the next stage - default works best when there is only one next stage - may need overriding in other cases
 	def nextStagesDescription: Option[String] = nextStages.headOption.map(_.description)
 
@@ -107,6 +110,7 @@ object MarkingWorkflowStage {
 		override def nextStages: Seq[MarkingWorkflowStage] = Seq(ModerationCompleted)
 		override def previousStages: Seq[MarkingWorkflowStage] = Seq(ModerationMarker)
 		override def populateWithPreviousFeedback: Boolean = true
+		override def summarisePreviousFeedback: Boolean = true
 	}
 	case object ModerationCompleted extends FinalStage("moderation-completed") {
 		override def previousStages: Seq[MarkingWorkflowStage] = Seq(ModerationModerator)
