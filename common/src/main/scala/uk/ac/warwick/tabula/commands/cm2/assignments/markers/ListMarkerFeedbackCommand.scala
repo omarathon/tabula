@@ -25,7 +25,7 @@ case class EnhancedMarkerFeedback(
 ) {
 	def previousMarkerFeedback: Seq[MarkerFeedback] = {
 		val previousStages = markerFeedback.stage.previousStages
-		markerFeedback.feedback.markerFeedback.asScala.filter(s => previousStages.contains(s.stage))
+		markerFeedback.feedback.allMarkerFeedback.filter(s => previousStages.contains(s.stage))
 	}
 }
 
