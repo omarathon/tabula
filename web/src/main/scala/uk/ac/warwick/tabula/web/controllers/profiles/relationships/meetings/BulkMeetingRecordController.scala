@@ -31,7 +31,7 @@ class BulkMeetingRecordController extends ProfilesController with TaskBenchmarki
 	): Seq[StudentRelationship] = {
 		benchmarkTask("Get StudentRelationships") {
 			studentCourseDetails.asScala.flatMap { studentCourse =>
-				relationshipService.getCurrentRelationship(relationshipType, studentCourse.student, currentMember)
+				relationshipService.getCurrentRelationship(relationshipType, studentCourse, currentMember)
 			}
 		}
 	}
