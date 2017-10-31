@@ -47,7 +47,7 @@
   },
   "dependencies": {
     "gulp-purge-sourcemaps": "^1.0.0",
-    "id7": "UniversityofWarwick/id7#v1.4.1"
+    "id7": "github:UniversityofWarwick/id7#v1.5.0"
   },
   "scripts": {
     "lint": "gulp lint",
