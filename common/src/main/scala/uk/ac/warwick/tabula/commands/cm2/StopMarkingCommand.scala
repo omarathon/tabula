@@ -8,7 +8,7 @@ import uk.ac.warwick.tabula.JavaImports.{JArrayList, _}
 import uk.ac.warwick.tabula.commands.cm2.assignments.{SelectedStudentsRequest, SelectedStudentsState}
 import uk.ac.warwick.tabula.data.model._
 import uk.ac.warwick.tabula.data.model.markingworkflow.FinalStage
-import uk.ac.warwick.tabula.data.model.notifications.cm2.{ReleaseToMarkerNotification, ReturnToMarkerNotification, StopMarkingNotification}
+import uk.ac.warwick.tabula.data.model.notifications.cm2.{ReleaseToMarkerNoSubmissionsNotification, ReleaseToMarkerNotification, ReturnToMarkerNotification, StopMarkingNotification}
 import uk.ac.warwick.tabula.events.NotificationHandling
 import uk.ac.warwick.tabula.helpers.StringUtils._
 import uk.ac.warwick.tabula.permissions.Permissions
@@ -113,8 +113,12 @@ trait StopMarkingNotificationCompletion extends CompletesNotifications[Seq[Assig
 
 	def notificationsToComplete(commandResult: Seq[AssignmentFeedback]): CompletesNotificationsResult = {
 		val notificationsToComplete = stoppedMarkerFeedback.asScala.flatMap(mf =>
-				notificationService.findActionRequiredNotificationsByEntityAndType[ReleaseToMarkerNotification](mf) ++
-					notificationService.findActionRequiredNotificationsByEntityAndType[ReturnToMarkerNotification](mf)
+			if(assignment.collectSubmissions) {
+				notificationService.findActionRequiredNotificationsByEntityAndType[ReleaseToMarkerNotification](mf)
+			}else{
+				notificationService.findActionRequiredNotificationsByEntityAndType[ReleaseToMarkerNoSubmissionsNotification](mf)
+			} ++
+				notificationService.findActionRequiredNotificationsByEntityAndType[ReturnToMarkerNotification](mf)
 		)
 		CompletesNotificationsResult(notificationsToComplete, user)
 	}

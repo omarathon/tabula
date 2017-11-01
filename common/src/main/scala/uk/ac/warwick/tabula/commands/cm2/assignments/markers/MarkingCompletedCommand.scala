@@ -9,7 +9,7 @@ import uk.ac.warwick.tabula.data.HibernateHelpers
 import uk.ac.warwick.tabula.data.Transactions.transactional
 import uk.ac.warwick.tabula.data.model.markingworkflow.FinalStage
 import uk.ac.warwick.tabula.data.model._
-import uk.ac.warwick.tabula.data.model.notifications.cm2.{ReleaseToMarkerNotification, ReturnToMarkerNotification}
+import uk.ac.warwick.tabula.data.model.notifications.cm2.{ReleaseToMarkerNoSubmissionsNotification, ReleaseToMarkerNotification, ReturnToMarkerNotification}
 import uk.ac.warwick.tabula.events.NotificationHandling
 import uk.ac.warwick.tabula.permissions.Permissions
 import uk.ac.warwick.tabula.services.{AutowiringCM2MarkingWorkflowServiceComponent, CM2MarkingWorkflowServiceComponent, FeedbackServiceComponent}
@@ -138,7 +138,11 @@ trait MarkerCompletedNotificationCompletion extends CompletesNotifications[Unit]
 	def notificationsToComplete(commandResult: Unit): CompletesNotificationsResult = {
 		val notificationsToComplete = feedbackForRelease
 			.flatMap(mf =>
-				notificationService.findActionRequiredNotificationsByEntityAndType[ReleaseToMarkerNotification](mf) ++
+				if(assignment.collectSubmissions) {
+					notificationService.findActionRequiredNotificationsByEntityAndType[ReleaseToMarkerNotification](mf)
+				}else{
+					notificationService.findActionRequiredNotificationsByEntityAndType[ReleaseToMarkerNoSubmissionsNotification](mf)
+				} ++
 					notificationService.findActionRequiredNotificationsByEntityAndType[ReturnToMarkerNotification](mf)
 			)
 		CompletesNotificationsResult(notificationsToComplete, marker)

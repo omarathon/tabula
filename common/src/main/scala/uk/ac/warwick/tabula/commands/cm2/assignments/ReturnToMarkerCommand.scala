@@ -7,7 +7,7 @@ import uk.ac.warwick.tabula.CurrentUser
 import uk.ac.warwick.tabula.data.model._
 import uk.ac.warwick.tabula.data.model.markingworkflow.MarkingWorkflowStage
 import uk.ac.warwick.tabula.JavaImports._
-import uk.ac.warwick.tabula.data.model.notifications.cm2.{ReleaseToMarkerNotification, ReturnToMarkerNotification}
+import uk.ac.warwick.tabula.data.model.notifications.cm2.{ReleaseToMarkerNotification, ReleaseToMarkerNoSubmissionsNotification, ReturnToMarkerNotification}
 import uk.ac.warwick.tabula.events.NotificationHandling
 import uk.ac.warwick.tabula.permissions.Permissions
 import uk.ac.warwick.tabula.services.{AutowiringCM2MarkingWorkflowServiceComponent, CM2MarkingWorkflowServiceComponent}
@@ -115,7 +115,11 @@ trait ReturnToMarkerNotificationCompletion extends CompletesNotifications[Seq[As
 
 	def notificationsToComplete(commandResult: Seq[AssignmentFeedback]): CompletesNotificationsResult = {
 		val notificationsToComplete = returnedMarkerFeedback.asScala.flatMap(mf =>
-			notificationService.findActionRequiredNotificationsByEntityAndType[ReleaseToMarkerNotification](mf) ++
+			if(assignment.collectSubmissions) {
+				notificationService.findActionRequiredNotificationsByEntityAndType[ReleaseToMarkerNotification](mf)
+			}else{
+				notificationService.findActionRequiredNotificationsByEntityAndType[ReleaseToMarkerNoSubmissionsNotification](mf)
+			} ++
 				notificationService.findActionRequiredNotificationsByEntityAndType[ReturnToMarkerNotification](mf)
 		)
 		CompletesNotificationsResult(notificationsToComplete, user)
