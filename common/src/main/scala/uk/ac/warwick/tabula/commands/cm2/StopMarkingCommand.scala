@@ -114,7 +114,7 @@ trait StopMarkingNotificationCompletion extends CompletesNotifications[Seq[Assig
 	def notificationsToComplete(commandResult: Seq[AssignmentFeedback]): CompletesNotificationsResult = {
 		val notificationsToComplete = stoppedMarkerFeedback.asScala.flatMap(mf =>
 				notificationService.findActionRequiredNotificationsByEntityAndType[ReleaseToMarkerNotification](mf) ++
-				notificationService.findActionRequiredNotificationsByEntityAndType[ReturnToMarkerNotification](mf)
+					notificationService.findActionRequiredNotificationsByEntityAndType[ReturnToMarkerNotification](mf)
 		)
 		CompletesNotificationsResult(notificationsToComplete, user)
 	}
