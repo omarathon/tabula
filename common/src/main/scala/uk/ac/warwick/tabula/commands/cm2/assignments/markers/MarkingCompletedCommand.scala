@@ -138,11 +138,7 @@ trait MarkerCompletedNotificationCompletion extends CompletesNotifications[Unit]
 	def notificationsToComplete(commandResult: Unit): CompletesNotificationsResult = {
 		val notificationsToComplete = feedbackForRelease
 			.flatMap(mf =>
-				if(assignment.collectSubmissions) {
-					notificationService.findActionRequiredNotificationsByEntityAndType[ReleaseToMarkerNotification](mf)
-				}else{
-					notificationService.findActionRequiredNotificationsByEntityAndType[ReleaseToMarkerNoSubmissionsNotification](mf)
-				} ++
+				notificationService.findActionRequiredNotificationsByEntityAndType[ReleaseToMarkerNotification](mf) ++
 					notificationService.findActionRequiredNotificationsByEntityAndType[ReturnToMarkerNotification](mf)
 			)
 		CompletesNotificationsResult(notificationsToComplete, marker)
