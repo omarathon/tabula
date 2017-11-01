@@ -1,4 +1,5 @@
 (function ($) { "use strict";
+
 	var exports = {};
 
 	/**
@@ -607,4 +608,6 @@
 	// take anything we've attached to "exports" and add it to the global "Courses"
 	// we use extend() to add to any existing variable rather than clobber it
 	window.Coursework = $.extend(window.Coursework, exports);
+
 })(jQuery);
+

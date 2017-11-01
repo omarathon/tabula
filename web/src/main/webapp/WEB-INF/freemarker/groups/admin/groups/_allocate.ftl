@@ -274,10 +274,6 @@
 			$('#studentslist').css('min-height', function() {
 				return $('#groupslist').outerHeight();
 			});
-			$('.return-items').on('click', function(e){
-				e.preventDefault();
-				confirm('Are you sure ?');
-			})
 
 			$(window).scroll(function() {
 				Groups.fixHeaderFooter.fixDirectionIcon();

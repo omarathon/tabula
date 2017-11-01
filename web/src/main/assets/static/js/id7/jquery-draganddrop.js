@@ -190,7 +190,10 @@ Method calls (after initialising):
         $el.find('.return-items, [data-toggle="return"]').click(function(e) {
             e.preventDefault();
             e.stopPropagation();
-            self.returnItems();
+			var answer=confirm('Are you sure?');
+			if(answer){
+            	self.returnItems();
+			}
         });
 
         // Wire button to trigger randomise

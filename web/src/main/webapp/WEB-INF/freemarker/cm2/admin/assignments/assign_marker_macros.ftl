@@ -115,12 +115,4 @@
 			</div>
 		</div>
 	</div>
-	<script type="text/javascript">
-		(function($) {
-			$('.return-items').on('click', function(e){
-				e.preventDefault();
-				confirm('Are you sure ?');
-			});
-		})(jQuery);
-	</script>
 </#macro>
