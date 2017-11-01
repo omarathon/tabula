@@ -407,11 +407,11 @@
 		}).on('sortEnd', function(){
 			$printForm.find('input[name^=studentSort]').remove();
 			$.each($table.data('tablesorter').sortList, function(i, fieldOrderPair){
-				$printForm.append($('<input/>').prop({
+				$printForm.append($('<input/>').attr({
 					type: 'hidden',
 					name: 'studentSortFields[' + i + ']',
 					value: sorterFieldLookup[fieldOrderPair[0]]
-				})).append($('<input/>').prop({
+				})).append($('<input/>').attr({
 					type: 'hidden',
 					name: 'studentSortOrders[' + i + ']',
 					value: sorterOrderLookup[fieldOrderPair[1]]

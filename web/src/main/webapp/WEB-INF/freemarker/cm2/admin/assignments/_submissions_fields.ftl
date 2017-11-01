@@ -14,9 +14,8 @@
 		Select this option to check all submissions for plagiarism when the assignment closes.
 		Late submissions, or submissions within an extension, are checked for plagiarism when the submission is received.
 	</span>
-		<@bs3form.checkbox path="displayPlagiarismNotice">
-			<@f.checkbox path="displayPlagiarismNotice" id="displayPlagiarismNotice" /> Show plagiarism declaration
-		</@bs3form.checkbox>
+	<@f.hidden path="displayPlagiarismNotice" value="true" />
+
 	</@bs3form.labelled_form_group>
 
 	<@bs3form.labelled_form_group path="" labelText="Submission scope">

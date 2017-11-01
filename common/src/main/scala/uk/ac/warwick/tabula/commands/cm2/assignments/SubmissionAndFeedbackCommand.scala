@@ -196,6 +196,10 @@ abstract class SubmissionAndFeedbackCommandInternal(val assignment: Assignment)
 				if (usersExtension.size > 1) throw new IllegalStateException("More than one Extension for " + usercode)
 
 				val enhancedSubmissionForUniId = usersSubmissions.headOption
+				//for expired users store university ID -TAB-5652
+				if (!user.isFoundUser && enhancedSubmissionForUniId.isDefined) {
+					user.setWarwickId(enhancedSubmissionForUniId.head.submission._universityId)
+				}
 
 				val enhancedExtensionForUniId = usersExtension.headOption map { extension =>
 					ExtensionListItem(

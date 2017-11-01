@@ -356,7 +356,7 @@
 	jQuery(function($){
 		var fixCustomColumnIndexes = function(){
 			$('.customColumnTitle').each(function(index){
-				$(this).find('input').prop('name', 'customColumnTitles[' + index + ']');
+				$(this).find('input').attr('name', 'customColumnTitles[' + index + ']');
 			});
 		};
 		$('.customColumnTitles').on('click', 'button.btn-danger', function(){

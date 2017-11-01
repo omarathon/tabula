@@ -2,7 +2,11 @@
 <#assign stages = command.previousMarkerFeedback?keys />
 <#list stages as stage>
 	<#assign markerFeedback = mapGet(command.previousMarkerFeedback, stage) />
-	<div role="tabpanel" class="tab-pane previous-marker-feedback" id="${student.userId}${command.stage.name}${stage.name}">
+	<div
+		role="tabpanel"
+		class="tab-pane previous-marker-feedback<#if !command.assignment.collectSubmissions && stage_index == 0> active</#if>"
+		id="${student.userId}${command.stage.name}${stage.name}"
+	>
 		<@components.marker_feedback_summary markerFeedback stage command.stage command.currentMarkerFeedback />
 	</div>
 </#list>

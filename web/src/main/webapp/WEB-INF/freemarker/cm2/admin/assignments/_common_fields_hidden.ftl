@@ -21,7 +21,6 @@ TODO a way to not have to do these, or at least way to make it obvious when this
 <#if !(ignoreQueueFeedbackForSits!false)>
 	<@hiddenorfalse path="queueFeedbackForSits" />
 </#if>
-<@hiddenorfalse path="displayPlagiarismNotice" />
 <@hiddenorfalse path="restrictSubmissions" />
 <@hiddenorfalse path="allowLateSubmissions" />
 <@hiddenorfalse path="allowResubmission" />
@@ -32,6 +31,7 @@ TODO a way to not have to do these, or at least way to make it obvious when this
 <@hiddenorfalse path="includeInFeedbackReportWithoutSubmissions" />
 <@hiddenorfalse path="automaticallyReleaseToMarkers" />
 <@hiddenorfalse path="automaticallySubmitToTurnitin" />
+<@f.hidden path="displayPlagiarismNotice" />
 <@f.hidden path="wordCountMin" />
 <@f.hidden path="wordCountMax" />
 <@f.hidden path="wordCountConventions" />

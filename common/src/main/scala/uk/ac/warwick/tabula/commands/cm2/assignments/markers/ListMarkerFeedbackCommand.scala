@@ -22,7 +22,12 @@ import uk.ac.warwick.tabula.helpers.UserOrderingByIds._
 case class EnhancedMarkerFeedback(
 	markerFeedback: MarkerFeedback,
 	workflowStudent: MarkingWorkflowStudent
-)
+) {
+	def previousMarkerFeedback: Seq[MarkerFeedback] = {
+		val previousStages = markerFeedback.stage.previousStages
+		markerFeedback.feedback.allMarkerFeedback.filter(s => previousStages.contains(s.stage))
+	}
+}
 
 case class MarkingWorkflowStudent (
 	stages: Seq[WorkflowStages.StageProgress],
@@ -59,7 +64,7 @@ class ListMarkerFeedbackCommandInternal(val assignment:Assignment, val marker:Us
 
 	def applyInternal(): Seq[EnhancedFeedbackForOrderAndStage] = {
 		val enhancedFeedbackByStage = enhance(assignment, cm2MarkingWorkflowService.getAllFeedbackForMarker(assignment, marker))
-		enhancedFeedbackByStage.map{ case (stage, feedback) =>
+		val filteredEnhancedFeedbackByStage = enhancedFeedbackByStage.map { case (stage, feedback) =>
 			val filtered = benchmarkTask(s"Do marker feedback filtering for ${stage.name}") { feedback.filter { emf =>
 				val info = emf.workflowStudent.info
 				val itemExistsInPlagiarismFilters = plagiarismFilters.asScala.isEmpty || plagiarismFilters.asScala.exists(_.predicate(info))
@@ -71,9 +76,9 @@ class ListMarkerFeedbackCommandInternal(val assignment:Assignment, val marker:Us
 		}
 
 		// squash stages with the same order
-		enhancedFeedbackByStage
-			.groupBy{ case (stage, _) => stage.order }
-			.map{ case(_, map) => EnhancedFeedbackForOrderAndStage(map.values.flatten.nonEmpty, map)}
+		filteredEnhancedFeedbackByStage
+			.groupBy { case (stage, _) => stage.order }
+			.map { case(_, map) => EnhancedFeedbackForOrderAndStage(map.values.flatten.nonEmpty, map)}
 			.toSeq
 	}
 }

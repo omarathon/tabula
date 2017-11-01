@@ -49,7 +49,7 @@ trait RelationshipService {
 	def findCurrentRelationships(relationshipType: StudentRelationshipType, scd: StudentCourseDetails): Seq[StudentRelationship]
 	def findFutureRelationships(relationshipType: StudentRelationshipType, scd: StudentCourseDetails): Seq[StudentRelationship]
 	def findCurrentRelationships(relationshipType: StudentRelationshipType, student: StudentMember): Seq[StudentRelationship]
-	def getCurrentRelationship(relationshipType: StudentRelationshipType, student: StudentMember, agent: Member): Option[StudentRelationship]
+	def getCurrentRelationship(relationshipType: StudentRelationshipType, studentCourse: StudentCourseDetails, agent: Member): Option[StudentRelationship]
 	def getCurrentRelationships(student: StudentMember, agentId: String): Seq[StudentRelationship]
 	def getRelationships(relationshipType: StudentRelationshipType, studentCourseDetails:StudentCourseDetails): Seq[StudentRelationship]
 	def getRelationships(relationshipType: StudentRelationshipType, student: StudentMember): Seq[StudentRelationship]
@@ -121,8 +121,8 @@ abstract class AbstractRelationshipService extends RelationshipService with Logg
 		relationshipDao.getCurrentRelationships(relationshipType, student)
 	}
 
-	def getCurrentRelationship(relationshipType: StudentRelationshipType, student: StudentMember, agent: Member): Option[StudentRelationship] = transactional() {
-		relationshipDao.getCurrentRelationship(relationshipType, student, agent)
+	def getCurrentRelationship(relationshipType: StudentRelationshipType, studentCourse: StudentCourseDetails, agent: Member): Option[StudentRelationship] = transactional() {
+		relationshipDao.getCurrentRelationship(relationshipType, studentCourse, agent)
 	}
 
 	def getCurrentRelationships(student: StudentMember, agentId: String): Seq[StudentRelationship] = transactional() {

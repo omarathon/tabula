@@ -72,3 +72,4 @@ CVS
 pom.xml.versionsBackup
 .DS_Store
 phantomjsdriver.log
+.gradletasknamecache

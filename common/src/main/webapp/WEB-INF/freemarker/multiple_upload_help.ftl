@@ -8,7 +8,7 @@ You can still upload a single file here if you want.
 </div>
 
 <script>
-	if (Supports.multipleFiles) {
+	if (window.Supports.multipleFiles) {
 		jQuery('#multifile-column').find('h3').html('Select files');
 		jQuery('#multifile-column-description').html(jQuery('#multifile-column-description-enabled').html());
 	}

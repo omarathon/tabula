@@ -176,6 +176,15 @@
 						} else {
 							window.location.hash = id;
 						}
+					})
+					.sortableTable()
+					.on('sortEnd', function(){
+						// reposition detail rows after the sort
+						var $table = $(this);
+						$table.find('tr.clickable').each(function(){
+							var $row = $(this);
+							$($row.data('target')).detach().insertAfter($row);
+						});
 					});
 
 				if (firstTime && window.location.hash && $(window.location.hash).length) {

@@ -49,8 +49,8 @@
 
 			$.getJSON(clashInfoLink, { group:selectedFormGrpId, ts: new Date().getTime()},function(data) {
 				if(data.clash) {
-					$('.timetable-clash-info input[name="group"]').prop("value", selectedFormGrpId);
-					$('.timetable-clash-info form').prop("action", signupPostFormLink);
+					$('.timetable-clash-info input[name="group"]').attr("value", selectedFormGrpId);
+					$('.timetable-clash-info form').attr("action", signupPostFormLink);
 					formId.find('a.timetable-clash-link').click();
 				} else {
 					self.submit();

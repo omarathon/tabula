@@ -74,7 +74,7 @@
 			Exams.prepareAjaxForm($('#adjust-form-${marking_macros.extractId(command.student)}'), function(resp) {
 				var $resp = $(resp);
 				// there should be an ajax-response class somewhere in the response text
-				var $response = $resp.find('.ajax-response').andSelf().filter('.ajax-response');
+				var $response = $resp.find('.ajax-response').addBack().filter('.ajax-response');
 				var success = $response.length && $response.data('status') == 'success';
 
 				if (success) {

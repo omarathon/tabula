@@ -14,7 +14,7 @@
 		var $row = $(this);
 		var $form = $row.find('form.ajax-form');
 		var $container = $row.find('.detailrow-container');
-		if($container.size() === 0){
+		if($container.length === 0){
 			$container = $('#content-'+$row.data('contentid'));
 		}
 		prepareAjaxForm($form, $container, options);
@@ -29,6 +29,7 @@
 		$this.find('input.date-time-minute-picker').tabulaDateTimeMinutePicker();
 		$this.find('form.double-submit-protection').tabulaSubmitOnce();
 		$this.find('.use-popover').tabulaPopover({trigger: 'click', container: 'body'});
+		$this.find('.table-sortable').sortableTable();
 	};
 	$(function(){
 		var $body = $('body');
@@ -308,14 +309,14 @@
 		$('.copy-assignments').bigList({
 			setup: function(e){
 				if(!$(".collection-checkbox").is(":checked")){
-					$('.btn-primary').prop('disabled', 'disabled');
+					$('.btn-primary').prop('disabled', true);
 				}
 			},
 			onSomeChecked: function() {
-				$('.btn-primary').removeProp('disabled');
+				$('.btn-primary').prop('disabled', false);
 			},
 			onNoneChecked: function() {
-				$('.btn-primary').prop('disabled', 'disabled');
+				$('.btn-primary').prop('disabled', true);
 			}
 		});
 	});
@@ -370,7 +371,7 @@
 				} else {
 					var $resp = $(response);
 					// there should be an ajax-response class somewhere in the response text
-					var $response = $resp.find('.ajax-response').andSelf().filter('.ajax-response');
+					var $response = $resp.find('.ajax-response').addBack().filter('.ajax-response');
 					var success = $response.length && $response.data('status') == 'success';
 					if (success) {
 						result =  "";

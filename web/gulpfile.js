@@ -10,6 +10,7 @@ const fs = require('fs');
 const gutil = require('gulp-util');
 const rename = require('gulp-rename');
 const sourcemaps = require('gulp-sourcemaps');
+const purgeSourcemaps = require('gulp-purge-sourcemaps');
 const uglify = require('gulp-uglify');
 const concat = require('gulp-concat');
 const postcss = require('gulp-postcss');
@@ -42,6 +43,8 @@ function option(name, fallback) {
   return (value === 'true' || value === true);
 }
 
+const isProduction = option('PRODUCTION', true);
+
 const uglifyOptions = { output: { ascii_only:true } };
 
 // Copy static to target
@@ -64,10 +67,10 @@ function concatScripts(name, target, srcs, minify, dependencies) {
     const base = 'build/rootContent/static';
 
     return gulp.src(srcs.map(s => `${base}/${s}`), {base: base})
-      .pipe(sourcemaps.init())
+      .pipe(sourcemaps.init({ loadMaps: isProduction }))
       .pipe(concat(target))
-      //.pipe(minify ? uglify(uglifyOptions) : gutil.noop())
-      .pipe(sourcemaps.write({ includeContent: false, sourceRoot: '/static' }))
+      .pipe(minify ? uglify(uglifyOptions) : gutil.noop())
+      .pipe(isProduction ? purgeSourcemaps() : sourcemaps.write({ includeContent: false, sourceRoot: '/static' }))
       .pipe(gulp.dest(base));
   });
 }
@@ -281,7 +284,7 @@ gulp.task('compile-less', ['copy-assets', 'copy-id7'], () => {
   ];
 
   return gulp.src(srcs, {base: base})
-    .pipe(sourcemaps.init())
+    .pipe(sourcemaps.init({ loadMaps: isProduction }))
     .pipe(less({
       // Allow requiring less relative to node_modules, plus any other dir under node_modules
       // that's in styleModules.
@@ -290,7 +293,7 @@ gulp.task('compile-less', ['copy-assets', 'copy-id7'], () => {
     .pipe(postcss([
       autoprefix({ browsers: ['> 1% in GB', 'last 2 versions', 'IE 9'] }),
     ]))
-    .pipe(sourcemaps.write({ includeContent: false, sourceRoot: '/static' }))
+    .pipe(isProduction ? purgeSourcemaps() : sourcemaps.write({ includeContent: false, sourceRoot: '/static' }))
     .pipe(gulp.dest(base));
 
 });
