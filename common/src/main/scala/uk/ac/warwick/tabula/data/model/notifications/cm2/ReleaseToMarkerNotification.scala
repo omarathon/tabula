@@ -3,7 +3,6 @@ package uk.ac.warwick.tabula.data.model.notifications.cm2
 import javax.persistence.{DiscriminatorValue, Entity}
 
 import uk.ac.warwick.tabula.cm2.web.Routes
-import uk.ac.warwick.tabula.cm2.web.Routes.admin.assignment.markerFeedback.downloadFeedback.marker
 import uk.ac.warwick.tabula.data.model.NotificationPriority.Warning
 import uk.ac.warwick.tabula.data.model.markingworkflow.MarkingWorkflowStage
 import uk.ac.warwick.tabula.data.model.{FreemarkerModel, _}
