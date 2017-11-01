@@ -115,11 +115,7 @@ trait ReturnToMarkerNotificationCompletion extends CompletesNotifications[Seq[As
 
 	def notificationsToComplete(commandResult: Seq[AssignmentFeedback]): CompletesNotificationsResult = {
 		val notificationsToComplete = returnedMarkerFeedback.asScala.flatMap(mf =>
-			if(assignment.collectSubmissions) {
-				notificationService.findActionRequiredNotificationsByEntityAndType[ReleaseToMarkerNotification](mf)
-			}else{
-				notificationService.findActionRequiredNotificationsByEntityAndType[ReleaseToMarkerNoSubmissionsNotification](mf)
-			} ++
+				notificationService.findActionRequiredNotificationsByEntityAndType[ReleaseToMarkerNotification](mf) ++
 				notificationService.findActionRequiredNotificationsByEntityAndType[ReturnToMarkerNotification](mf)
 		)
 		CompletesNotificationsResult(notificationsToComplete, user)
