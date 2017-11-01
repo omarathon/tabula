@@ -163,7 +163,7 @@
 			$this.closest('div').find('input:checked').each(function(){
 				$form.find('input[name=' + $(this).prop('name') + ']').val('true');
 			});
-			$form.append($('<input/>').prop({
+			$form.append($('<input/>').attr({
 				'type' : 'hidden',
 				'name' : 'action',
 				'value' : $this.prop('value')

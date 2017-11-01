@@ -192,7 +192,7 @@
 							var link = data.link.split('/json').join('');
 							$('ul.results').append(
 								$('<li />')
-									.append($('<a />').prop({'href': link, 'target': '_blank'}).html('More results'))
+									.append($('<a />').attr({'href': link, 'target': '_blank'}).html('More results'))
 							);
 						}
 					}
@@ -205,7 +205,7 @@
 			$.each(items, function (i, item) {
 				that.$menu.append(
 					$('<li />').append(
-						$('<a />').prop({
+						$('<a />').attr({
 							'href': item.link,
 							'target': '_blank'
 						}).html(item.title),

@@ -48,18 +48,24 @@
 					<li><a href="<@routes.cm2.markerUploadMarks assignment marker />">Upload marks & feedback</a></li>
 				</ul>
 			</div>
-			<table class="table table-striped marking-table">
+			<table class="table table-striped marking-table table-sortable<#if order.headerStage.summarisePreviousFeedback> preview-marks</#if>">
 				<thead>
 				<tr>
 					<th class="check-col"><@bs3form.selector_check_all /></th>
 					<#if assignment.anonymity.equals(AssignmentAnonymity.FullyAnonymous)>
-						<th class="student-col">ID</th>
+						<th class="student-col sortable">ID</th>
 					<#elseif assignment.anonymity.equals(AssignmentAnonymity.IDOnly)>
-						<th class="student-col">University ID</th>
+						<th class="student-col sortable">University ID</th>
 					<#else>
-						<th class="student-col">University ID</th>
-						<th class="student-col">First name</th>
-						<th class="student-col">Last name</th>
+						<th class="student-col sortable">University ID</th>
+						<th class="student-col sortable">First name</th>
+						<th class="student-col sortable">Last name</th>
+					</#if>
+					<#if order.headerStage.summarisePreviousFeedback>
+						<#list order.headerStage.previousStages as prevStage>
+							<th class="sortable">${prevStage.allocationName}</th>
+							<th class="sortable">${prevStage.allocationName} Mark</th>
+						</#list>
 					</#if>
 					<th colspan="2">Progress</th>
 				</tr>
@@ -90,6 +96,13 @@
 									<td class="toggle-icon-large student-col">${mf.feedback.studentIdentifier!""}</td>
 									<td class="student-col">${student.firstName}</td>
 									<td class="student-col">${student.lastName}&nbsp;<#if student.warwickId??><@pl.profile_link student.warwickId /><#else><@pl.profile_link student.userId /></#if></td>
+								</#if>
+								<#if order.headerStage.summarisePreviousFeedback>
+									<#list emf.previousMarkerFeedback as prevMf>
+										<th><#if prevMf.marker??>${prevMf.marker.fullName}</#if></th>
+										<th><#if prevMf.mark??>${prevMf.mark}</#if></th>
+										<#assign colspan = colspan + 2>
+									</#list>
 								</#if>
 								<td class="progress-col">
 									<@components.individual_stage_progress_bar emf.workflowStudent.stages assignment student />

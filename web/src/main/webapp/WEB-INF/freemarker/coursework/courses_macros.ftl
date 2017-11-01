@@ -242,7 +242,7 @@
 				$('.marksUploadTable').on('keyup', 'input[name*="actualMark"]', doIndividualRequest).on('tableFormNewRow', function(){
 					// Make sure all the selects have the correct name
 					$('.marksUploadTable .mark-row select').each(function(){
-						$(this).prop('name', $(this).closest('td').find('input').prop('name'));
+						$(this).attr('name', $(this).closest('td').find('input').attr('name'));
 					});
 				});
 

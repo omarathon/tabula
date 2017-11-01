@@ -35,7 +35,7 @@ trait RelationshipDao {
 	def getFutureRelationships(relationshipType: StudentRelationshipType, scd: StudentCourseDetails): Seq[StudentRelationship]
 	def getAllFutureRelationships(student: StudentMember): Seq[StudentRelationship]
 	def getCurrentRelationships(relationshipType: StudentRelationshipType, student: StudentMember): Seq[StudentRelationship]
-	def getCurrentRelationship(relationshipType: StudentRelationshipType, student: StudentMember, agent: Member): Option[StudentRelationship]
+	def getCurrentRelationship(relationshipType: StudentRelationshipType, studentCourse: StudentCourseDetails, agent: Member): Option[StudentRelationship]
 	def getCurrentRelationships(student: StudentMember, agentId: String): Seq[StudentRelationship]
 	def getRelationshipsByTarget(relationshipType: StudentRelationshipType, student: StudentMember): Seq[StudentRelationship]
 	def getRelationshipsByCourseDetails(relationshipType: StudentRelationshipType, details: StudentCourseDetails): Seq[StudentRelationship]
@@ -181,14 +181,14 @@ class RelationshipDaoImpl extends RelationshipDao with Daoisms with Logging {
 			.seq
 	}
 
-	def getCurrentRelationship(relationshipType: StudentRelationshipType, student: StudentMember, agent: Member): Option[StudentRelationship] = {
+	def getCurrentRelationship(relationshipType: StudentRelationshipType, studentCourse: StudentCourseDetails, agent: Member): Option[StudentRelationship] = {
 		try {
-			currentRelationsipBaseCriteria(student, Some(agent.universityId))
+			currentRelationsipBaseCriteria(studentCourse, Some(agent.universityId))
 				.add(is("relationshipType", relationshipType))
 				.uniqueResult
 		} catch {
 			case e: NonUniqueResultException =>
-				logger.error(s"Tried to find single current relationship for ${relationshipType.id}, ${student.universityId}, ${agent.universityId} but found multiple")
+				logger.error(s"Tried to find single current relationship for ${relationshipType.id}, ${studentCourse.student.universityId}, ${agent.universityId} but found multiple")
 				throw e
 		}
 	}

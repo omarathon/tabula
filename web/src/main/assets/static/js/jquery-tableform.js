@@ -25,14 +25,14 @@ jQuery.fn.tableForm = function(options) {
         var $header = $this.find('tr.'+headerClass);
         var $rows = $this.find('tr.'+rowClass);
 
-        if($rows.size() === 0){
+        if($rows.length === 0){
             $header.hide();
         }
 
         $addButton.on('click', function(e){
             e.preventDefault();
             $header.show();
-            var newIndex = $this.find('tr.'+rowClass).size();
+            var newIndex = $this.find('tr.'+rowClass).length;
             var newRow = $(rowMarkup);
              // add items[index]. to the input names in the new row
             $("input", newRow).each(function(){

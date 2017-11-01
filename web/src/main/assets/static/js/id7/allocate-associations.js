@@ -55,15 +55,9 @@ jQuery(function($){
 
 		$table.on('click tabula.selectDeselectCheckboxes.toggle', 'input', function(){
 			if ($table.find('input:checked').length === 0) {
-				$removeButton.prop({
-					'disabled': true,
-					'title': 'You need to select some personal tutors from which to remove students'
-				});
+				$removeButton.prop('disabled', true).attr('title', 'You need to select some personal tutors from which to remove students');
 			} else {
-				$removeButton.prop({
-					'disabled': false,
-					'title': 'All students will be removed from selected personal tutors'
-				});
+				$removeButton.prop('disabled', false).attr('title', 'All students will be removed from selected personal tutors');
 			}
 		});
 		$removeButton.prop('disabled', true);
@@ -85,20 +79,11 @@ jQuery(function($){
 				'title': 'You need to select some students and personal tutors to allocate'
 			}).removeClass('btn-primary');
 		} else {
-			$distributeAllButton.prop({
-				'disabled': false,
-				'title': 'All students will be equally distributed between selected personal tutors'
-			}).addClass('btn-primary');
+			$distributeAllButton.prop('disabled', false).attr('title', 'All students will be equally distributed between selected personal tutors').addClass('btn-primary');
 			if (studentsChecked) {
-				$distributeSelectedButton.prop({
-					'disabled': false,
-					'title': 'Selected students will be equally distributed between selected personal tutors'
-				}).addClass('btn-primary');
+				$distributeSelectedButton.prop('disabled', false).attr('title', 'Selected students will be equally distributed between selected personal tutors').addClass('btn-primary');
 			} else {
-				$distributeSelectedButton.prop({
-					'disabled': true,
-					'title': 'You need to select some students and personal tutors to allocate'
-				}).removeClass('btn-primary');
+				$distributeSelectedButton.prop('disabled', true).attr('title', 'You need to select some students and personal tutors to allocate').removeClass('btn-primary');
 			}
 		}
 	};

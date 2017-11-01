@@ -93,7 +93,7 @@ class GenerateOwnMarksTemplateCommandInternal(val assignment: Assignment, val ma
 		header.createCell(2).setCellValue("Grade")
 		header.createCell(3).setCellValue("Feedback")
 
-		val maxCurrentStage = markerFeedbackToDo.map(_.feedback.currentStageIndex).max
+		val maxCurrentStage = markerFeedbackToDo.map(_.feedback.currentStageIndex).reduceOption(_ max _).getOrElse(0)
 		val stages = assignment.cm2MarkingWorkflow.allStages.filter(_.order < maxCurrentStage)
 		for((stage, i) <- stages.zipWithIndex){
 			val cell = 3 + ((i+1)*2)

@@ -12,7 +12,7 @@
 				<#if command.previousMarkerFeedback?has_content>
 					<#assign stages=command.previousMarkerFeedback?keys />
 					<#list stages as stage>
-						<li role="presentation">
+						<li role="presentation" <#if !command.assignment.collectSubmissions && stage_index == 0>class="active"</#if>>
 							<a href="#${student.userId}${command.stage.name}${stage.name}" aria-controls="${student.userId}${stage.name}" role="tab" data-toggle="tab">${stage.description} feedback</a>
 						</li>
 					</#list>

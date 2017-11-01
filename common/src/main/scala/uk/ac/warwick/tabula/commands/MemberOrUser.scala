@@ -21,6 +21,7 @@ object MemberOrUser {
 
 sealed trait MemberOrUser{
 	def isMember: Boolean
+	def isStaff: Boolean
 	def fullName: Option[String]
 	def firstName: String
 	def lastName: String
@@ -41,6 +42,7 @@ sealed trait MemberOrUser{
 
 private case class WrappedUser(user: User) extends MemberOrUser {
 	def isMember = false
+	def isStaff = user.isStaff
 	def fullName = Some(user.getFullName)
 	def firstName: String = user.getFirstName
 	def lastName: String = user.getLastName
@@ -54,6 +56,7 @@ private case class WrappedUser(user: User) extends MemberOrUser {
 
 private case class WrappedMember(member: Member) extends MemberOrUser {
 	def isMember = true
+	def isStaff = member.isStaff
 	def fullName: Option[String] = member.fullName
 	def firstName: String = member.firstName
 	def lastName: String = member.lastName
