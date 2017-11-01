@@ -8,7 +8,7 @@ import uk.ac.warwick.tabula.JavaImports.{JArrayList, _}
 import uk.ac.warwick.tabula.commands.cm2.assignments.{SelectedStudentsRequest, SelectedStudentsState}
 import uk.ac.warwick.tabula.data.model._
 import uk.ac.warwick.tabula.data.model.markingworkflow.FinalStage
-import uk.ac.warwick.tabula.data.model.notifications.cm2.{ReleaseToMarkerNoSubmissionsNotification, ReleaseToMarkerNotification, ReturnToMarkerNotification, StopMarkingNotification}
+import uk.ac.warwick.tabula.data.model.notifications.cm2.{ ReleaseToMarkerNotification, ReturnToMarkerNotification, StopMarkingNotification}
 import uk.ac.warwick.tabula.events.NotificationHandling
 import uk.ac.warwick.tabula.helpers.StringUtils._
 import uk.ac.warwick.tabula.permissions.Permissions

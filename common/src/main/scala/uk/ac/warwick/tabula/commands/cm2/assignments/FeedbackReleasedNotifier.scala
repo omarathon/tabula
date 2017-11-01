@@ -2,7 +2,7 @@ package uk.ac.warwick.tabula.commands.cm2.assignments
 
 import uk.ac.warwick.tabula.commands.{Notifies, UserAware}
 import uk.ac.warwick.tabula.data.model.{Assignment, AssignmentFeedback, MarkerFeedback, Notification}
-import uk.ac.warwick.tabula.data.model.notifications.cm2.{ReleaseToMarkerNotification, ReleaseToMarkerNoSubmissionsNotification}
+import uk.ac.warwick.tabula.data.model.notifications.cm2.ReleaseToMarkerNotification
 import uk.ac.warwick.tabula.helpers.Logging
 import uk.ac.warwick.tabula.JavaImports._
 import uk.ac.warwick.tabula.helpers.Tap._
@@ -19,8 +19,7 @@ trait FeedbackReleasedNotifier extends Notifies[Seq[AssignmentFeedback], Seq[Mar
 
 		markerMap.flatMap{
 			case (usercode, markerFeedback) if markerFeedback.nonEmpty && usercode != null =>
-				val markerNotification = if (assignment.collectSubmissions) new ReleaseToMarkerNotification else new ReleaseToMarkerNoSubmissionsNotification
-				Some(Notification.init(markerNotification, user, markerFeedback, assignment).tap{n =>
+				Some(Notification.init(new ReleaseToMarkerNotification, user, markerFeedback, assignment).tap{n =>
 					n.recipientUserId = usercode
 				})
 			case _ => None
