@@ -63,6 +63,12 @@ Macros for customised form elements, containers and more complex pickers.
 	</div>
 </#macro>
 
+<#macro radio_inline>
+	<div class="radio-inline">
+		<label><#compress><#nested /></#compress></label>
+	</div>
+</#macro>
+
 <#macro checkbox path="">
 	<#local errorClass="" />
 	<#if path?has_content>

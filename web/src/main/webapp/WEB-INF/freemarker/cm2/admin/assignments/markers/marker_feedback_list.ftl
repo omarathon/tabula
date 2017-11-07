@@ -4,11 +4,16 @@
 
 <#list feedbackByOrderAndStage as order>
 	<#assign markingCompleted><@routes.cm2.markingCompleted assignment order.headerStage.order marker /></#assign>
+	<#assign finishMarking><@routes.cm2.finishMarking assignment order.headerStage.order marker /></#assign>
 	<div class="marking-stage">
 		<h3>${order.headerStage.description}</h3>
 		<#if order.hasFeedback>
 			<#if order.headerStage.nextStagesDescription?has_content>
 				<a class="btn btn-primary must-have-selected must-have-ready-next-stage form-post" href="${markingCompleted}">Confirm selected and send to ${order.headerStage.nextStagesDescription?lower_case}</a>
+			</#if>
+			<#-- TODO - only if this is a moderated workflow with markers doing the admin selection and this user is a marker -->
+			<#if order.headerStage.canFinish(assignment.cm2MarkingWorkflow)>
+				<a class="btn btn-primary must-have-selected must-have-ready-next-stage form-post" href="${finishMarking}">Confirm selected and send to admin</a>
 			</#if>
 			<div class="btn-group">
 				<button type="button" class="btn btn-default dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
@@ -61,6 +66,9 @@
 						<th class="student-col sortable">First name</th>
 						<th class="student-col sortable">Last name</th>
 					</#if>
+					<#if order.headerStage.summariseCurrentFeedback>
+							<th class="sortable">Mark</th>
+					</#if>
 					<#if order.headerStage.summarisePreviousFeedback>
 						<#list order.headerStage.previousStages as prevStage>
 							<th class="sortable">${prevStage.allocationName}</th>
@@ -97,10 +105,14 @@
 									<td class="student-col">${student.firstName}</td>
 									<td class="student-col">${student.lastName}&nbsp;<#if student.warwickId??><@pl.profile_link student.warwickId /><#else><@pl.profile_link student.userId /></#if></td>
 								</#if>
+								<#if order.headerStage.summariseCurrentFeedback>
+									<td><#if mf.mark??>${mf.mark}</#if></td>
+									<#assign colspan = colspan + 1>
+								</#if>
 								<#if order.headerStage.summarisePreviousFeedback>
 									<#list emf.previousMarkerFeedback as prevMf>
-										<th><#if prevMf.marker??>${prevMf.marker.fullName}</#if></th>
-										<th><#if prevMf.mark??>${prevMf.mark}</#if></th>
+										<td><#if prevMf.marker??>${prevMf.marker.fullName}</#if></td>
+										<td><#if prevMf.mark??>${prevMf.mark}</#if></td>
 										<#assign colspan = colspan + 2>
 									</#list>
 								</#if>

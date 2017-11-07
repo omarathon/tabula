@@ -124,12 +124,6 @@ jQuery.fn.expandingTable = function(options) {
 			$('.id7-main-content').append($content);
 			$content.show();
 
-			if ($row.is(':nth-child(odd)')) {
-				$content.css('background-color', '#ebebeb');
-			} else {
-				$content.css('background-color', '#f5f5f5');
-			}
-
 			$content.css({
 				width: ($row.closest('table').width()) + 'px'
 			});

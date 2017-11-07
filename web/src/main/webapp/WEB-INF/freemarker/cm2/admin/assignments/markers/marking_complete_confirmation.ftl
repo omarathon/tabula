@@ -5,8 +5,6 @@
 		<@cm2.assignmentHeader "Send to ${nextStagesDescription?lower_case}" assignment "for" />
 	</#if>
 
-
-	<#assign formAction><@routes.cm2.markingCompleted assignment stagePosition marker /></#assign>
 	<@f.form method="post" action="${formAction}" commandName="command">
 		<@form.errors path="" />
 		<input type="hidden" name="confirmScreen" value="true" />

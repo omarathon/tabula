@@ -1,16 +1,12 @@
 package uk.ac.warwick.tabula.commands.cm2.assignments.markers
 
-import org.joda.time.DateTime
 import uk.ac.warwick.tabula.commands._
-import uk.ac.warwick.tabula.data.model.forms.SavedFormValue
 import uk.ac.warwick.tabula.data.model._
 import uk.ac.warwick.tabula.data.model.notifications.coursework.FinaliseFeedbackNotification
 import uk.ac.warwick.tabula.permissions.Permissions
-import uk.ac.warwick.tabula.services.{AutowiringFeedbackServiceComponent, FeedbackServiceComponent, AutowiringZipServiceComponent, ZipServiceComponent}
+import uk.ac.warwick.tabula.services._
 import uk.ac.warwick.tabula.system.permissions.{PermissionsChecking, PermissionsCheckingMethods, RequiresPermissionsChecking}
 import uk.ac.warwick.userlookup.User
-
-import scala.collection.JavaConversions._
 
 /**
  * Copies the appropriate MarkerFeedback item to its parent Feedback ready for processing by administrators
@@ -22,11 +18,10 @@ object FinaliseFeedbackCommand {
 			with FinaliseFeedbackPermissions
 			with FinaliseFeedbackDescription
 			with FinaliseFeedbackNotifier
-			with AutowiringFeedbackServiceComponent
-			with AutowiringZipServiceComponent
+			with AutowiringCM2MarkingWorkflowServiceComponent
 }
 
-trait FinaliseFeedbackCommandState {
+trait FinaliseFeedbackCommandState extends HasAssignment {
 	def assignment: Assignment
 	def markerFeedback: Seq[MarkerFeedback]
 }
@@ -34,39 +29,10 @@ trait FinaliseFeedbackCommandState {
 abstract class FinaliseFeedbackCommandInternal(val assignment: Assignment, val markerFeedback: Seq[MarkerFeedback], val user: User)
 	extends CommandInternal[Seq[Feedback]] with FinaliseFeedbackCommandState with UserAware {
 
-	self: FeedbackServiceComponent with ZipServiceComponent=>
+	self: CM2MarkingWorkflowServiceComponent =>
 
 	override def applyInternal(): Seq[Feedback] = {
-		markerFeedback.map(copyToFeedback)
-	}
-
-	private def copyToFeedback(markerFeedback: MarkerFeedback): Feedback = {
-		val parent = markerFeedback.feedback
-
-		parent.clearCustomFormValues()
-
-		// save custom fields
-		parent.customFormValues.addAll(markerFeedback.customFormValues.map { formValue =>
-			val newValue = new SavedFormValue()
-			newValue.name = formValue.name
-			newValue.feedback = formValue.markerFeedback.feedback
-			newValue.value = formValue.value
-			newValue
-		}.toSet[SavedFormValue])
-
-		parent.actualGrade = markerFeedback.grade
-		parent.actualMark = markerFeedback.mark
-
-		parent.updatedDate = DateTime.now
-
-		// erase any existing attachments - these will be replaced
-		parent.clearAttachments()
-
-		markerFeedback.attachments.foreach(parent.addAttachment)
-		zipService.invalidateIndividualFeedbackZip(parent)
-
-		feedbackService.saveOrUpdate(parent)
-		parent
+		markerFeedback.map(cm2MarkingWorkflowService.finaliseFeedback)
 	}
 }
 
@@ -91,7 +57,7 @@ trait FinaliseFeedbackDescription extends Describable[Seq[Feedback]] {
 }
 
 trait FinaliseFeedbackNotifier extends Notifies[Seq[Feedback], Seq[Feedback]] {
-	self: FinaliseFeedbackCommandState with UserAware =>
+	self: HasAssignment with UserAware =>
 
 	override def emit(feedbacks: Seq[Feedback]): Seq[Notification[Feedback, Assignment]] = {
 		Seq(Notification.init(new FinaliseFeedbackNotification, user, feedbacks.filterNot { _.checkedReleased }, assignment))

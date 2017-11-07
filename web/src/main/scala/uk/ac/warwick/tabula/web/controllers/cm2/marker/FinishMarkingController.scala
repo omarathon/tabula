@@ -8,18 +8,20 @@ import org.springframework.validation.Errors
 import org.springframework.web.bind.annotation.{ModelAttribute, PathVariable, RequestMapping}
 import uk.ac.warwick.tabula.CurrentUser
 import uk.ac.warwick.tabula.cm2.web.Routes
+import uk.ac.warwick.tabula.commands.cm2.assignments.markers.{FinishMarkingCommand, WorkflowProgressState}
 import uk.ac.warwick.tabula.commands.{Appliable, SelfValidating}
-import uk.ac.warwick.tabula.commands.cm2.assignments.markers.{MarkingCompletedCommand, WorkflowProgressState}
 import uk.ac.warwick.tabula.data.model.{Assignment, AssignmentFeedback}
 import uk.ac.warwick.tabula.web.Mav
 import uk.ac.warwick.tabula.web.controllers.cm2.CourseworkController
 import uk.ac.warwick.userlookup.User
 
-
+/**
+	* Sends the feedback straight to the admin and skips any intermediate stages
+	*/
 @Profile(Array("cm2Enabled"))
 @Controller
-@RequestMapping(value = Array("/${cm2.prefix}/admin/assignments/{assignment}/marker/{marker}/{stagePosition}/marking-completed"))
-class MarkingCompletedController extends CourseworkController {
+@RequestMapping(value = Array("/${cm2.prefix}/admin/assignments/{assignment}/marker/{marker}/{stagePosition}/finish-marking"))
+class FinishMarkingController extends CourseworkController {
 
 	validatesSelf[SelfValidating]
 
@@ -27,7 +29,7 @@ class MarkingCompletedController extends CourseworkController {
 
 	@ModelAttribute("command")
 	def command(@PathVariable assignment: Assignment, @PathVariable marker: User, @PathVariable stagePosition: Int, currentUser: CurrentUser): Command =
-		MarkingCompletedCommand(mandatory(assignment), mandatory(marker), currentUser, mandatory(stagePosition))
+		FinishMarkingCommand(mandatory(assignment), mandatory(marker), currentUser, mandatory(stagePosition))
 
 	// shouldn't ever be called as anything other than POST - if it is, just redirect back to the submission list
 	@RequestMapping
@@ -47,7 +49,7 @@ class MarkingCompletedController extends CourseworkController {
 			"department" -> command.assignment.module.adminDepartment,
 			"isProxying" -> command.isProxying,
 			"proxyingAs" -> marker,
-			"nextStagesDescription" ->  command.feedbackForRelease.headOption.flatMap(_.stage.nextStagesDescription)
+			"nextStagesDescription" ->  "Admin"
 		)
 	}
 
@@ -66,4 +68,7 @@ class MarkingCompletedController extends CourseworkController {
 			Redirect(Routes.admin.assignment.markerFeedback(command.assignment, command.marker))
 		}
 	}
+
+
+
 }

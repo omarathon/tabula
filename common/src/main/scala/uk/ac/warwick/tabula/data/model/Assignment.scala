@@ -961,3 +961,7 @@ case class EnhancedAssignment(
 	extensionRequested: Boolean
 
 )
+
+trait HasAssignment {
+	def assignment: Assignment
+}
