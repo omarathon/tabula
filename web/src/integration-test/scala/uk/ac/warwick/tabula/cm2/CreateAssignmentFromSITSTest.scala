@@ -84,11 +84,6 @@ class CreateAssignmentFromSITSTest extends BrowserTest with CourseworkFixtures {
 		dissertationCheckbox.click()
 		Then("The Automatically Release To Markers Checkbox should be checked")
 		dissertationCheckbox.isSelected should be (true)
-		When("I uncheck the display plagiarism notice checkbox")
-		val displayPlagiarismNoticeCheckbox = id("displayPlagiarismNotice").webElement
-		displayPlagiarismNoticeCheckbox.click()
-		Then("The display plagiarism notice checkbox should not be checked")
-		displayPlagiarismNoticeCheckbox.isSelected should be (false)
 		When("I change maximum attachments dropdown")
 		val fileAttachmentDropbox = id("fileAttachmentLimit").webElement
 		fileAttachmentDropbox.click()
