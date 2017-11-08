@@ -1085,13 +1085,17 @@
 <#macro marker_feedback_summary feedback stage currentStage=[] currentFeedback=[]>
 	<h4>${stage.description} <#if feedback.marker??>- ${feedback.marker.fullName}</#if></h4>
 
-	<#list feedback.customFormValues as formValue>
-		<#if formValue.value?has_content>
-			<@bs3form.form_group><textarea class="form-control feedback-comments" readonly="readonly">${formValue.value!""}</textarea></@bs3form.form_group>
-		<#else>
+	<#if feedback.customFormValues?has_content>
+		<#list feedback.customFormValues as formValue>
+			<#if formValue.value?has_content>
+				<@bs3form.form_group><textarea class="form-control feedback-comments" readonly="readonly">${formValue.value!""}</textarea></@bs3form.form_group>
+			<#else>
+				<p>No feedback comments added.</p>
+			</#if>
+		</#list>
+	<#else>
 		<p>No feedback comments added.</p>
-		</#if>
-	</#list>
+	</#if>
 
 	<div class="row form-inline">
 		<#if feedback.mark?has_content || feedback.grade?has_content>

@@ -13,6 +13,7 @@ import uk.ac.warwick.spring.Wire
 import uk.ac.warwick.tabula.AcademicYear
 import uk.ac.warwick.userlookup.User
 import uk.ac.warwick.tabula.JavaImports.{JArrayList, _}
+import uk.ac.warwick.tabula.data.PostLoadBehaviour
 import uk.ac.warwick.tabula.data.model._
 import uk.ac.warwick.tabula.permissions.PermissionsTarget
 import uk.ac.warwick.tabula.services.{CM2MarkingWorkflowService, UserGroupCacheManager}
@@ -30,7 +31,7 @@ object CM2MarkingWorkflow {
 @Inheritance(strategy=InheritanceType.SINGLE_TABLE)
 @DiscriminatorColumn(name="WorkflowType", discriminatorType = DiscriminatorType.STRING, length=255)
 @Access(AccessType.FIELD)
-abstract class CM2MarkingWorkflow extends GeneratedId with PermissionsTarget with Serializable {
+abstract class CM2MarkingWorkflow extends GeneratedId with PermissionsTarget with Serializable with HasSettings with PostLoadBehaviour {
 
 	type Usercode = String
 	type UniversityId = String
@@ -113,6 +114,10 @@ abstract class CM2MarkingWorkflow extends GeneratedId with PermissionsTarget wit
 		def hasSubmissions = assignments.asScala.exists(_.submissions.asScala.nonEmpty)
 		def markersAssigned = assignments.asScala.exists(_.markersAssigned)
 		!((studentsChooseMarkers && hasSubmissions) || markersAssigned)
+	}
+
+	override def postLoad() {
+		ensureSettings
 	}
 }
 

@@ -33,7 +33,7 @@ class AddMarkingWorkflowCommandInternal(
 	markersB = JArrayList()
 
 	def applyInternal(): CM2MarkingWorkflow = {
-		val data = MarkingWorkflowData(department, workflowName, markersAUsers, markersBUsers, workflowType)
+		val data = MarkingWorkflowData(department, workflowName, markersAUsers, markersBUsers, workflowType, Some(sampler))
 		val workflow = createWorkflow(data)
 		workflow.isReusable = true
 		workflow.academicYear = academicYear

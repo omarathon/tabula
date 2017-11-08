@@ -8,10 +8,13 @@ import uk.ac.warwick.spring.Wire
 import uk.ac.warwick.tabula.AcademicYear
 import uk.ac.warwick.tabula.data.AutowiringCM2MarkingWorkflowDaoComponent
 import uk.ac.warwick.tabula.data.model.markingworkflow._
-import uk.ac.warwick.tabula.data.model.{Assignment, AssignmentFeedback, Department, MarkerFeedback}
+import uk.ac.warwick.tabula.data.model._
+import uk.ac.warwick.tabula.JavaImports._
 import uk.ac.warwick.userlookup.User
 import scala.collection.immutable.{SortedMap, TreeMap}
 import CM2MarkingWorkflowService._
+import uk.ac.warwick.tabula.data.model.forms.SavedFormValue
+import uk.ac.warwick.tabula.helpers.Logging
 
 object CM2MarkingWorkflowService {
 	type Marker = User
@@ -30,10 +33,13 @@ trait CM2MarkingWorkflowService extends WorkflowUserGroupHelpers {
 	def getAssignmentsUsingMarkingWorkflow(workflow: CM2MarkingWorkflow): Seq[Assignment]
 
 	// move feedback onto the next stage when all the current stages are finished - returns the markerFeedback for the next stage if applicable
-	def progressFeedback(markerStage: MarkingWorkflowStage, feedbacks: Seq[AssignmentFeedback]): Seq[MarkerFeedback]
+	def progress(markerStage: MarkingWorkflowStage, feedbacks: Seq[Feedback]): Seq[MarkerFeedback]
 
-	// move feedback to a target stage - allows skipping of stages - will fail if target stage isn't a valid future stage
-	def progressFeedback(currentStage: MarkingWorkflowStage, targetStage: MarkingWorkflowStage, feedbacks: Seq[AssignmentFeedback]): Seq[AssignmentFeedback]
+	// finalise the specified feedback using the marker feedback from the specified stage - allows stages of the workflow to be skipped
+	def finish(currentStage: MarkingWorkflowStage, feedbacks: Seq[Feedback]): Seq[Feedback]
+
+	// copy the details from the given MarkerFeedback to it's parent feedback
+	def finaliseFeedback(markerFeedback: MarkerFeedback): Feedback
 
 	// essentially an undo for progressFeedback if it was done in error - not a normal step in the workflow
 	def returnFeedback(stages: Seq[MarkingWorkflowStage], feedbacks: Seq[AssignmentFeedback]): Seq[MarkerFeedback]
@@ -63,7 +69,7 @@ trait CM2MarkingWorkflowService extends WorkflowUserGroupHelpers {
 
 @Service
 class CM2MarkingWorkflowServiceImpl extends CM2MarkingWorkflowService with AutowiringFeedbackServiceComponent
-	with WorkflowUserGroupHelpersImpl with AutowiringCM2MarkingWorkflowDaoComponent {
+	with WorkflowUserGroupHelpersImpl with AutowiringCM2MarkingWorkflowDaoComponent with AutowiringZipServiceComponent with Logging {
 
 	override def save(workflow: CM2MarkingWorkflow): Unit = markingWorkflowDao.saveOrUpdate(workflow)
 
@@ -84,7 +90,7 @@ class CM2MarkingWorkflowServiceImpl extends CM2MarkingWorkflowService with Autow
 	def getAssignmentsUsingMarkingWorkflow(workflow: CM2MarkingWorkflow): Seq[Assignment] =
 		markingWorkflowDao.getAssignmentsUsingMarkingWorkflow(workflow)
 
-	override def progressFeedback(currentStage: MarkingWorkflowStage , feedbacks: Seq[AssignmentFeedback]): Seq[MarkerFeedback] = {
+	override def progress(currentStage: MarkingWorkflowStage , feedbacks: Seq[Feedback]): Seq[MarkerFeedback] = {
 		// don't progress if nextStages is empty
 		if(currentStage.nextStages.isEmpty)
 			throw new IllegalArgumentException("cannot progress feedback past the final stage")
@@ -107,13 +113,67 @@ class CM2MarkingWorkflowServiceImpl extends CM2MarkingWorkflowService with Autow
 		})
 	}
 
-	override def progressFeedback(currentStage: MarkingWorkflowStage, targetStage: MarkingWorkflowStage, feedbacks: Seq[AssignmentFeedback]): Seq[AssignmentFeedback] = {
-		// don't progress if outstanding stages doesn't contain the one we are trying to complete
-		if (feedbacks.exists(f => !f.outstandingStages.asScala.contains(currentStage)))
-			throw new IllegalArgumentException(s"some of the specified feedback doesn't have outstanding stage - $currentStage")
+	override def finish(currentStage: MarkingWorkflowStage, feedbacks: Seq[Feedback]): Seq[Feedback] = {
 
-		// TODO - walk through next stages until we find target stage or reach the end. if end then throw an exception
-		???
+		if(currentStage.isInstanceOf[FinalStage])
+			throw new IllegalArgumentException("cannot progress feedback past the final stage")
+
+		// find marker feedback from the specified stage that we want to finalise - make sure it has content
+		val mfAtStage = for {
+			feedback <- feedbacks
+			markerFeedback <- feedback.allMarkerFeedback if markerFeedback.stage == currentStage
+		} yield markerFeedback
+
+		val (mfToFinalise, mfToSkip) = mfAtStage.partition(_.hasContent)
+
+		if (mfToSkip.nonEmpty)
+			logger.info(s"No feedback is available for ${mfToSkip.map(_.student.getUserId).mkString(", ")} at ${currentStage.description} - skipping")
+
+		// find the final stage for this workflow
+		val finalStage: MarkingWorkflowStage = {
+			def findFinalStage(stage: MarkingWorkflowStage): MarkingWorkflowStage = stage match {
+				case f: FinalStage => f
+				case s: MarkingWorkflowStage if s.nextStages.nonEmpty => findFinalStage(s.nextStages.head)
+				case _ => throw new IllegalStateException(s"Dead end in workflow at stage ${stage.description}")
+			}
+			findFinalStage(currentStage)
+		}
+
+		// move the stage pointer on feedback to the end of the workflow and finalise the feedback
+		mfToFinalise.map(mf => {
+			mf.feedback.outstandingStages = JArrayList(finalStage)
+			finaliseFeedback(mf)
+		})
+
+	}
+
+	override def finaliseFeedback(markerFeedback: MarkerFeedback): Feedback = {
+		val parent = markerFeedback.feedback
+
+		parent.clearCustomFormValues()
+
+		// save custom fields
+		parent.customFormValues.addAll(markerFeedback.customFormValues.asScala.map { formValue =>
+			val newValue = new SavedFormValue()
+			newValue.name = formValue.name
+			newValue.feedback = formValue.markerFeedback.feedback
+			newValue.value = formValue.value
+			newValue
+		}.asJava)
+
+		parent.actualGrade = markerFeedback.grade
+		parent.actualMark = markerFeedback.mark
+
+		parent.updatedDate = DateTime.now
+
+		// erase any existing attachments - these will be replaced
+		parent.clearAttachments()
+
+		markerFeedback.attachments.asScala.foreach(parent.addAttachment)
+		zipService.invalidateIndividualFeedbackZip(parent)
+
+		feedbackService.saveOrUpdate(parent)
+		parent
 	}
 
 	override def returnFeedback(stages: Seq[MarkingWorkflowStage], feedbacks: Seq[AssignmentFeedback]): Seq[MarkerFeedback] = {

@@ -21,8 +21,8 @@ object MarkingCompletedCommand {
 	def apply(assignment: Assignment, marker: User, submitter: CurrentUser, stagePosition: Int) =
 		new MarkingCompletedCommandInternal(assignment, marker, submitter, stagePosition)
 			with ComposableCommand[Seq[AssignmentFeedback]]
-			with MarkingCompletedValidation
-			with MarkingCompletedPermissions
+			with WorkflowProgressValidation
+			with WorkflowProgressPermissions
 			with MarkingCompletedDescription
 			with AutowiringCM2MarkingWorkflowServiceComponent
 			with FinaliseFeedbackComponentImpl
@@ -31,7 +31,7 @@ object MarkingCompletedCommand {
 }
 
 class MarkingCompletedCommandInternal(val assignment: Assignment, val marker: User, val submitter: CurrentUser, val stagePosition: Int)
-	extends CommandInternal[Seq[AssignmentFeedback]] with MarkingCompletedState with ReleasedState with MarkingCompletedValidation {
+	extends CommandInternal[Seq[AssignmentFeedback]] with WorkflowProgressState with ReleasedState with WorkflowProgressValidation {
 
 	self: CM2MarkingWorkflowServiceComponent with FinaliseFeedbackComponent with PopulateMarkerFeedbackComponent =>
 
@@ -44,9 +44,8 @@ class MarkingCompletedCommandInternal(val assignment: Assignment, val marker: Us
 			.mapValues(_.filter(feedbackForRelease.contains))
 
 		newReleasedFeedback = feedbackForReleaseByStage.flatMap{case (stage, mf) =>
-			val f = mf.map(mf => HibernateHelpers.initialiseAndUnproxy(mf.feedback)).collect{ case f: AssignmentFeedback => f }
-				.filter(_.outstandingStages.contains(stage))
-			cm2MarkingWorkflowService.progressFeedback(stage, f)
+			val f = mf.map(mf => HibernateHelpers.initialiseAndUnproxy(mf.feedback)).filter(_.outstandingStages.contains(stage))
+			cm2MarkingWorkflowService.progress(stage, f)
 		}.toSeq.asJava
 
 		val toPopulate = newReleasedFeedback.asScala.filter(_.stage.populateWithPreviousFeedback)
@@ -67,8 +66,8 @@ class MarkingCompletedCommandInternal(val assignment: Assignment, val marker: Us
 	}
 }
 
-trait MarkingCompletedPermissions extends RequiresPermissionsChecking with PermissionsCheckingMethods {
-	self: MarkingCompletedState =>
+trait WorkflowProgressPermissions extends RequiresPermissionsChecking with PermissionsCheckingMethods {
+	self: WorkflowProgressState =>
 
 	def permissionsCheck(p: PermissionsChecking) {
 		p.PermissionCheck(Permissions.AssignmentMarkerFeedback.Manage, assignment)
@@ -78,19 +77,22 @@ trait MarkingCompletedPermissions extends RequiresPermissionsChecking with Permi
 	}
 }
 
-trait MarkingCompletedValidation extends SelfValidating {
-	self: MarkingCompletedState =>
+trait WorkflowProgressValidation extends SelfValidating {
+	self: WorkflowProgressState =>
 	def validate(errors: Errors) {
 		if (!confirm) errors.rejectValue("confirm", "markers.finishMarking.confirm")
 		if (markerFeedback.isEmpty) errors.rejectValue("markerFeedback", "markerFeedback.finishMarking.noStudents")
 	}
 }
 
-trait MarkingCompletedDescription extends Describable[Seq[AssignmentFeedback]] {
-
-	self: MarkingCompletedState =>
-
+trait MarkingCompletedDescription extends WorkflowProgressDescription {
+	self: WorkflowProgressState =>
 	override lazy val eventName: String = "MarkingCompleted"
+}
+
+trait WorkflowProgressDescription extends Describable[Seq[AssignmentFeedback]] {
+
+	self: WorkflowProgressState =>
 
 	override def describe(d: Description){
 		d.assignment(assignment)
@@ -103,7 +105,7 @@ trait MarkingCompletedDescription extends Describable[Seq[AssignmentFeedback]] {
 	}
 }
 
-trait MarkingCompletedState extends CanProxy with UserAware {
+trait WorkflowProgressState extends CanProxy with UserAware with HasAssignment {
 
 	import uk.ac.warwick.tabula.JavaImports._
 
@@ -131,9 +133,9 @@ trait MarkingCompletedState extends CanProxy with UserAware {
 	lazy val feedbackForRelease: Seq[MarkerFeedback] = markerFeedback.asScala.filter(_.marker == marker) -- releasedFeedback -- notReadyToMark
 }
 
-trait MarkerCompletedNotificationCompletion extends CompletesNotifications[Unit] {
+trait WorkflowProgressNotificationCompletion extends CompletesNotifications[Unit] {
 
-	self: MarkingCompletedState with NotificationHandling with FeedbackServiceComponent =>
+	self: WorkflowProgressState with NotificationHandling with FeedbackServiceComponent =>
 
 	def notificationsToComplete(commandResult: Unit): CompletesNotificationsResult = {
 		val notificationsToComplete = feedbackForRelease

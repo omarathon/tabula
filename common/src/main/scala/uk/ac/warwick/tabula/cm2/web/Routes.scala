@@ -131,8 +131,11 @@ object Routes {
 
 			object markerFeedback {
 				def apply(assignment: Assignment, marker: User): String = markerroot(assignment, marker)
+				object finish {
+					def apply(assignment: Assignment, stagePosition:Int, marker: User): String = markerroot(assignment, marker) + s"/$stagePosition/marking-completed"
+				}
 				object complete {
-					def apply(assignment: Assignment, marker: User): String = markerroot(assignment, marker) + "/marking-completed"
+					def apply(assignment: Assignment, stagePosition:Int, marker: User): String = markerroot(assignment, marker) + s"/$stagePosition/finish-marking"
 				}
 				object uncomplete {
 					def apply(assignment: Assignment, marker: User): String = markerroot(assignment, marker) + "/marking-uncompleted"
