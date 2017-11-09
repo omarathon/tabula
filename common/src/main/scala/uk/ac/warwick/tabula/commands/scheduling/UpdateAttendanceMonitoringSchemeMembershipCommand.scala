@@ -37,7 +37,7 @@ class UpdateAttendanceMonitoringSchemeMembershipCommandInternal extends CommandI
 		// However, whenever I try and narrow the transaction to only when it's needed,
 		// hibernate isn't picking up the change in staticUserIds before the manual flush (UserGroup.scala line 86).
 		// That means it doesn't think there are any deletions to do, so it doesn't bother to flush.
-		// Than when you save the scheme it suddently sees them all, but does the inserts first,
+		// Than when you save the scheme it suddenly sees them all, but does the inserts first,
 		// so the DB constraints are violated.
 		// Every place I put the transaction, other than around the whole thing, have the same problem,
 		// so maybe at some point someone else will think of a way around this.
@@ -61,6 +61,10 @@ class UpdateAttendanceMonitoringSchemeMembershipCommandInternal extends CommandI
 				scheme.members.staticUserIds = staticStudentIds
 				attendanceMonitoringService.saveOrUpdate(scheme)
 
+				val added = scheme.members.members.toSet -- previousUniversityIds.toSet
+				if (added.nonEmpty) logger.info(s"Added to scheme ${scheme.id} - ${added.mkString(", ")}")
+				val removed = previousUniversityIds.toSet -- scheme.members.members.toSet
+				if (removed.nonEmpty) logger.info(s"Removed from scheme ${scheme.id} - ${removed.mkString(", ")}")
 
 				(previousUniversityIds ++ scheme.members.members).distinct.map((_, scheme.department, scheme.academicYear))
 
