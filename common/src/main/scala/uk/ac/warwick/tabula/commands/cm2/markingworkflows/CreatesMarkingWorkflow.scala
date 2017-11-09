@@ -18,7 +18,7 @@ trait CreatesMarkingWorkflow {
 			markersAUsers,
 			markersBUsers,
 			workflowType,
-			Some(sampler)
+			Option(sampler)
 		)
 		val workflow = createWorkflow(data)
 		workflow.isReusable = false
