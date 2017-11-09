@@ -30,16 +30,35 @@ class ReleaseToMarkerNotification
 	def verb = "released"
 	def assignment: Assignment = target.entity
 
-	def title: String = "%s: Submissions for \"%s\" have been released for marking".format(assignment.module.code.toUpperCase, assignment.name)
+	def title: String = s"${assignment.module.code.toUpperCase}: ${assignment.name} has been released for marking"
 
+	def noSubmissionsCnt = (items.size - items.asScala.find(_ => assignment.submissions.size() > 0).size)
+	def allocatedStudents = if(assignment.cm2Assignment){
+		assignment.cm2MarkerAllocations.filter(_.marker == recipient).flatMap(_.students).distinct.size
+	}else{
+		assignment.markingWorkflow.getMarkersStudents(assignment, recipient).distinct.size
+	}
 	def content = FreemarkerModel(ReleaseToMarkerNotification.templateLocation,
-		Map(
-			"assignment" -> assignment,
-			"numReleasedFeedbacks" -> items.size,
-			"workflowVerb" -> workflowVerb
-		))
+		if(assignment.collectSubmissions) {
+			Map(
+				"assignment" -> assignment,
+				"numAllocated" -> allocatedStudents,
+				"numReleasedFeedbacks" -> items.size,
+				"numReleasedSubmissionsFeedbacks" -> items.asScala.find(_ => assignment.submissions.size() > 0).size,
+				"numReleasedNoSubmissionsFeedbacks" -> noSubmissionsCnt,
+				"workflowVerb" -> workflowVerb
+			)
+		}else{
+			Map(
+				"assignment" -> assignment,
+				"numReleasedFeedbacks" -> items.size,
+				"workflowVerb" -> workflowVerb
+			)
+		}
+	)
+
 	def url: String = Routes.admin.assignment.markerFeedback(assignment, recipient)
-	def urlTitle = s"$workflowVerb these submissions"
+	def urlTitle = s"${workflowVerb} the assignment '${assignment.module.code.toUpperCase} - ${assignment.name}'"
 
 	priority = Warning
 
