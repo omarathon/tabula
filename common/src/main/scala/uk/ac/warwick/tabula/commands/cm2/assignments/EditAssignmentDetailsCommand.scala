@@ -11,6 +11,7 @@ import uk.ac.warwick.tabula.services.{AssessmentServiceComponent, UserLookupComp
 import uk.ac.warwick.tabula.system.permissions.{PermissionsChecking, PermissionsCheckingMethods, RequiresPermissionsChecking}
 import uk.ac.warwick.tabula.JavaImports._
 import uk.ac.warwick.tabula.data.HibernateHelpers
+import uk.ac.warwick.tabula.data.model.markingworkflow.MarkingWorkflowType.{SelectedModeratedMarking, ModeratedMarking}
 
 object EditAssignmentDetailsCommand {
 	def apply(assignment: Assignment) =
@@ -48,6 +49,7 @@ class EditAssignmentDetailsCommandInternal(override val assignment: Assignment) 
 						assignment.resetMarkerFeedback()
 					} else {
 						w.replaceMarkers(markersAUsers, markersBUsers)
+						workflow.map(HibernateHelpers.initialiseAndUnproxy).collect{case w: ModeratedWorkflow => w}.foreach(w => w.moderationSampler = sampler)
 						cm2MarkingWorkflowService.save(w)
 					}
 				// persist any new workflow

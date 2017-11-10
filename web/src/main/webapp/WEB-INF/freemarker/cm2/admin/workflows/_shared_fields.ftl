@@ -42,9 +42,10 @@
 	</div>
 	<@bs3form.labelled_form_group path="sampler" labelText="Moderated assignment selection" cssClass="hidden sampler">
 		<div class="radio">
-			<@bs3form.radio_inline>
-				<@f.radiobutton path="sampler" value="admin" /> Administrator
-			</@bs3form.radio_inline>
+			<#-- TODO-Enable when admin version is ready -->
+			<#--<@bs3form.radio_inline>-->
+				<#--<@f.radiobutton path="sampler" value="admin" /> Administrator-->
+			<#--</@bs3form.radio_inline>-->
 			<@bs3form.radio_inline>
 				<@f.radiobutton path="sampler" value="marker" /> Marker
 			</@bs3form.radio_inline>
@@ -81,9 +82,10 @@
 
 	<@bs3form.labelled_form_group path="sampler" labelText="Moderated assignment selection" cssClass="hidden sampler">
 		<div class="radio">
-		<@bs3form.radio_inline>
-			<@f.radiobutton path="sampler" value="admin" disabled=true /> Administrator
-		</@bs3form.radio_inline>
+		<#-- TODO-Enable when admin version is ready -->
+		<#--<@bs3form.radio_inline>-->
+			<#--<@f.radiobutton path="sampler" value="admin" disabled=true /> Administrator-->
+		<#--</@bs3form.radio_inline>-->
 		<@bs3form.radio_inline>
 			<@f.radiobutton path="sampler" value="marker" disabled=true  /> Marker
 		</@bs3form.radio_inline>
