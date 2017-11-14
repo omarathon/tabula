@@ -43,8 +43,8 @@ class EmailUnsentEmailCountHealthcheck extends ServiceHealthcheckProvider {
 @Profile(Array("scheduling"))
 class EmailOldestUnsentItemHealthcheck extends ServiceHealthcheckProvider {
 
-	val WarningThreshold = 20 // minutes
-	val ErrorThreshold = 30 // minutes
+	val WarningThreshold = 5 // minutes
+	val ErrorThreshold = 10 // minutes
 
 	@Scheduled(fixedRate = 60 * 1000) // 1 minute
 	def run(): Unit = transactional(readOnly = true) {
