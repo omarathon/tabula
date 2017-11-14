@@ -74,7 +74,8 @@ class EmailOldestUnsentItemHealthcheck extends ServiceHealthcheckProvider {
 			testedAt = DateTime.now,
 			message = s"Last sent email $recentSentEmail minute${if (recentSentEmail == 1) "" else "s"} old, Oldest unsent email $oldestUnsentEmail minute${if (oldestUnsentEmail == 1) "" else "s"} old, (warning: $WarningThreshold, critical: $ErrorThreshold)",
 			performanceData = Seq(
-				ServiceHealthcheck.PerformanceData("oldest_unsent", oldestUnsentEmail, WarningThreshold, ErrorThreshold)
+				ServiceHealthcheck.PerformanceData("oldest_unsent", oldestUnsentEmail, WarningThreshold, ErrorThreshold),
+				ServiceHealthcheck.PerformanceData("last_sent", recentSentEmail, WarningThreshold, ErrorThreshold),
 			)
 		))
 	}
