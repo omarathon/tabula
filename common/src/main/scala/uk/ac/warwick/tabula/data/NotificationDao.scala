@@ -29,6 +29,8 @@ trait NotificationDao {
 	def unemailedRecipientCount: Number
 	def unemailedRecipients: Scrollable[RecipientNotificationInfo]
 	def oldestUnemailedRecipient: Option[RecipientNotificationInfo]
+	def recentEmailedRecipient: Option[RecipientNotificationInfo]
+
 	def recentRecipients(start: Int, count: Int): Seq[RecipientNotificationInfo]
 
 	def unprocessedNotificationCount: Number
@@ -77,6 +79,16 @@ class NotificationDaoImpl extends NotificationDao with Daoisms {
 			.add(is("emailSent", false))
 			.add(is("dismissed", false))
 			.addOrder(Order.asc("notification.created"))
+			.setMaxResults(1)
+			.seq.headOption
+	}
+
+	def recentEmailedRecipient: Option[RecipientNotificationInfo] = {
+		session.newCriteria[RecipientNotificationInfo]
+			.createAlias("notification", "notification")
+			.add(is("emailSent", true))
+			.add(is("dismissed", false))
+			.addOrder(Order.desc("notification.created"))
 			.setMaxResults(1)
 			.seq.headOption
 	}
