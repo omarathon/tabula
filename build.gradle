@@ -9,7 +9,7 @@ buildscript {
     }
 
     dependencies {
-        classpath "gradle.plugin.org.zeroturnaround:gradle-jrebel-plugin:1.1.5"
+        classpath "gradle.plugin.org.zeroturnaround:gradle-jrebel-plugin:1.1.8"
     }
 }
 
@@ -19,18 +19,28 @@ plugins {
 
 // Some properties that we use to resolve dependencies etc.
 ext {
-    scalaVersion = "2.11.7"
+    scalaVersion = "2.11.11"
     scalaMajorVersion = "2.11"
-    springVersion = "4.2.4.RELEASE"
+    springVersion = "4.2.9.RELEASE"
     hibernateVersion = "4.3.11.Final"
-    jacksonVersion = "2.6.5"
+    jacksonVersion = "2.6.7"
     elasticsearchVersion = "2.1.1"
     dispatchVersion = "0.8.10"
-    poiVersion = "3.16"
-    tilesVersion = "3.0.5"
-    jcloudsVersion = "2.0.0"
-    warwickUtilsVersion = "20170503"
+    poiVersion = "3.17"
+    tilesVersion = "3.0.8"
+    jcloudsVersion = "2.0.2"
+    warwickUtilsVersion = "20171113"
     surefireVersion = "2.19.1"
+}
+
+allprojects {
+    apply plugin: 'idea'
+    idea {
+        module {
+            outputDir file('build/classes/scala/main')
+            testOutputDir file('build/classes/scala/test')
+        }
+    }
 }
 
 // Configuration that applies to all subprojects (including common, so nothing war-specific here)
@@ -187,5 +197,6 @@ subprojects {
 // value then running `./gradlew wrapper`. Next time gradlew
 // is run it will fetch and use that version.
 task wrapper(type: Wrapper) {
-    gradleVersion = '4.1'
+    gradleVersion = '4.3.1'
+    distributionType = 'ALL'
 }

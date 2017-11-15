@@ -1,1 +1,3 @@
 include 'common', 'web', 'api'
+include 'integrationTest'
+
