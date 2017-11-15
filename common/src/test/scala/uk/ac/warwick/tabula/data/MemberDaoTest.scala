@@ -362,4 +362,38 @@ class MemberDaoTest extends PersistenceTestBase with Logging with Mockito {
 
 	}
 
+	@Test
+	def testFindUndergraduateStudentsByHomeDepartmentAndLevel(): Unit = transactional { tx =>
+		val dept1 = Fixtures.department("hm", "History of Music")
+		val dept2 = Fixtures.department("ar", "Architecture")
+
+		session.saveOrUpdate(dept1)
+		session.saveOrUpdate(dept2)
+
+		val stu1 = Fixtures.student(universityId = "1000001", userId = "student1", department = dept1, courseDepartment = dept1)
+		val stu2 = Fixtures.student(universityId = "1000002", userId = "student2", department = dept2, courseDepartment = dept2)
+		val stu3 = Fixtures.student(universityId = "1000003", userId = "student3", department = dept2, courseDepartment = dept2)
+		val stu4 = Fixtures.student(universityId = "1000004", userId = "student4", department = dept2, courseDepartment = dept2)
+
+		stu1.groupName="Undergraduate student"
+		stu2.groupName="Undergraduate student"
+		stu3.groupName="Undergraduate student"
+		stu4.groupName="Undergraduate student"
+
+		stu1.mostSignificantCourse.levelCode = "1"
+		stu2.mostSignificantCourse.levelCode = "2"
+		stu3.mostSignificantCourse.levelCode = "2"
+		stu4.mostSignificantCourse.levelCode = "3"
+
+		memberDao.saveOrUpdate(stu1)
+		memberDao.saveOrUpdate(stu2)
+		memberDao.saveOrUpdate(stu3)
+		memberDao.saveOrUpdate(stu4)
+
+		memberDao.findUndergraduateUsercodesByHomeDepartmentAndLevel(dept1, "1") should contain only "student1"
+		memberDao.findUndergraduateUsercodesByHomeDepartmentAndLevel(dept1, "2") should be (empty)
+		memberDao.findUndergraduateUsercodesByHomeDepartmentAndLevel(dept2, "2") should contain allOf ("student2", "student3")
+		memberDao.findUndergraduateUsercodesByHomeDepartmentAndLevel(dept2, "3") should contain only "student4"
+	}
+
 }

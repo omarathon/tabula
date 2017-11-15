@@ -1,7 +1,7 @@
 package uk.ac.warwick.tabula.api.web.controllers.profiles
 
 import org.springframework.stereotype.Controller
-import org.springframework.web.bind.annotation.{ModelAttribute, PathVariable, RequestMapping}
+import org.springframework.web.bind.annotation.{ModelAttribute, PathVariable, RequestMapping, RequestParam}
 import uk.ac.warwick.tabula.api.web.controllers.ApiController
 import uk.ac.warwick.tabula.commands.ViewViewableCommand
 import uk.ac.warwick.tabula.data.model.{Department, Member}
@@ -46,9 +46,14 @@ class DepartmentUserSearchController extends ApiController
 	@RequestMapping(path = Array("/undergraduates"), method = Array(GET), produces = Array("application/json"))
 	def undergraduates(
 		@ModelAttribute("getCommand") command: ViewViewableCommand[Department],
-		@PathVariable department: Department
+		@PathVariable department: Department,
+		@RequestParam(required = false) level: String
 	): Mav = {
-		getMav(profileService.findUndergraduatesUsercodesInHomeDepartment(department))
+		getMav(
+			Option(level)
+				.map(l => profileService.findUndergraduatesUsercodesInHomeDepartmentByLevel(department, l))
+				.getOrElse(profileService.findUndergraduatesUsercodesInHomeDepartment(department))
+		)
 	}
 
 	@RequestMapping(path = Array("/pgt"), method = Array(GET), produces = Array("application/json"))
