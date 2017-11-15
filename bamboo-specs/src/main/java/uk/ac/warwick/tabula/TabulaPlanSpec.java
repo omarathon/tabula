@@ -111,7 +111,7 @@ public class TabulaPlanSpec extends AbstractWarwickBuildSpec {
                 .autoTomcatEnvironment("Development", "tabula-dev.warwick.ac.uk", "tabula", "dev", SLACK_CHANNEL)
                 .autoTomcatEnvironment("Test", "tabula-test.warwick.ac.uk", "tabula", "test", SLACK_CHANNEL)
                 .tomcatEnvironment("Sandbox", "tabula-sandbox.warwick.ac.uk", "tabula", "sandbox", env -> env
-                    .triggers(new AfterSuccessfulBuildPlanTrigger().triggerByMasterBranch())
+                    .triggers(new AfterSuccessfulBuildPlanTrigger().triggerByBranch("master"))
                     .notifications(
                         new Notification()
                             .type(new DeploymentFailedNotification())
