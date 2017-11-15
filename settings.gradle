@@ -1,3 +1,2 @@
-include 'common', 'web', 'api'
-include 'integrationTest'
+include 'common', 'web', 'api', 'integrationTest'
 
