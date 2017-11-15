@@ -75,6 +75,7 @@ trait ProfileService {
 	def findUndergraduatesUsercodesInHomeDepartment(department: Department): Seq[String]
 	def findTaughtPostgraduatesUsercodesInHomeDepartment(department: Department): Seq[String]
 	def findResearchPostgraduatesUsercodesInHomeDepartment(department: Department): Seq[String]
+	def findUndergraduatesUsercodesInHomeDepartmentByLevel(department: Department, levelCode: String): Seq[String]
 }
 
 abstract class AbstractProfileService extends ProfileService with Logging {
@@ -407,6 +408,9 @@ abstract class AbstractProfileService extends ProfileService with Logging {
 		), studentOnly = true)
 	}
 
+	override def findUndergraduatesUsercodesInHomeDepartmentByLevel(department: Department, levelCode: String): Seq[String] = transactional(readOnly = true) {
+		memberDao.findUndergraduateUsercodesByHomeDepartmentAndLevel(department, levelCode)
+	}
 }
 
 trait StaffAssistantsHelpers {
