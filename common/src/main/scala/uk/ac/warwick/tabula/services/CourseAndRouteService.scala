@@ -50,6 +50,7 @@ trait CourseAndRouteService extends RouteDaoComponent with CourseDaoComponent wi
 
 	def getCourseByCode(code: String): Option[Course]
 	def findCoursesInDepartment(department: Department): Seq[Course]
+	def findCoursesNamedLike(query: String): Seq[Course]
 
 	def getRouteTeachingInformation(routeCode: String, departmentCode: String): Option[RouteTeachingInformation]
 
@@ -100,6 +101,9 @@ abstract class AbstractCourseAndRouteService extends CourseAndRouteService {
 
 	def findRoutesNamedLike(query: String): Seq[Route] =
 		routeDao.findRoutesNamedLike(query)
+
+	def findCoursesNamedLike(query: String): Seq[Course] =
+		courseDao.findCoursesNamedLike(query)
 
 	def getRouteTeachingInformation(routeCode: String, departmentCode: String): Option[RouteTeachingInformation] = transactional(readOnly = true) {
 		routeDao.getTeachingInformationByRouteCodeAndDepartmentCode(routeCode, departmentCode)
