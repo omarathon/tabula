@@ -143,26 +143,7 @@ class UpdateSmallGroupEventFromExternalSystemCommandTest extends TestBase with M
 		)
 
 		timetableFetchingService.getTimetableForModule("IN101", includeStudents = false) returns Future.successful(EventList.fresh(Seq(
-			tEventSeminar1, tEventSeminar2,
-			TimetableEvent(
-				uid="uuid3",
-				name="IN101L",
-				title="",
-				description="",
-				startTime=new LocalTime(12, 0),
-				endTime=new LocalTime(13, 0),
-				weekRanges=Seq(WeekRange(6, 10)),
-				day=DayOfWeek.Friday,
-				eventType=TimetableEventType.Lecture,
-				location=Some(NamedLocation("L5")),
-				parent=TimetableEvent.Parent(Some(module)),
-				comments=None,
-				staff=Seq(tutor),
-				students=Nil,
-				year = AcademicYear(2012),
-				relatedUrl = None,
-				attendance = Map()
-			)
+			tEventSeminar1, tEventSeminar2
 		)))
 	}
 
