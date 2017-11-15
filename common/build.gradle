@@ -163,3 +163,9 @@ configurations {
 artifacts {
     testArtifacts testJar
 }
+
+test {
+    onlyIf {
+        !project.hasProperty('integrationTest')
+    }
+}
