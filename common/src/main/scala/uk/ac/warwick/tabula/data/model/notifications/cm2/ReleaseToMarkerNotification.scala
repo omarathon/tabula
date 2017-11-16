@@ -32,20 +32,27 @@ class ReleaseToMarkerNotification
 
 	def title: String = s"${assignment.module.code.toUpperCase}: ${assignment.name} has been released for marking"
 
-	def noSubmissionsCnt = (items.size - items.asScala.find(_ => assignment.submissions.size() > 0).size)
-	def allocatedStudents = if(assignment.cm2Assignment){
+	def submissionsCnt = if (assignment.cm2Assignment) {
+		val markerStudents = 	assignment.cm2MarkerAllocations.filter(_.marker == recipient).flatMap(_.students.map(_.getUserId)).distinct
+		markerStudents.count{ stu => assignment.submissions.asScala.exists( s => s.usercode == stu && s.submitted == true) }
+	} else {
+		assignment.getMarkersSubmissions(recipient).distinct.size
+	}
+
+	def allocatedStudents = if (assignment.cm2Assignment) {
 		assignment.cm2MarkerAllocations.filter(_.marker == recipient).flatMap(_.students).distinct.size
-	}else{
+	} else {
 		assignment.markingWorkflow.getMarkersStudents(assignment, recipient).distinct.size
 	}
+
 	def content = FreemarkerModel(ReleaseToMarkerNotification.templateLocation,
 		if(assignment.collectSubmissions) {
 			Map(
 				"assignment" -> assignment,
 				"numAllocated" -> allocatedStudents,
 				"numReleasedFeedbacks" -> items.size,
-				"numReleasedSubmissionsFeedbacks" -> items.asScala.find(_ => assignment.submissions.size() > 0).size,
-				"numReleasedNoSubmissionsFeedbacks" -> noSubmissionsCnt,
+				"numReleasedSubmissionsFeedbacks" -> submissionsCnt,
+				"numReleasedNoSubmissionsFeedbacks" -> (allocatedStudents - submissionsCnt),
 				"workflowVerb" -> workflowVerb
 			)
 		}else{
