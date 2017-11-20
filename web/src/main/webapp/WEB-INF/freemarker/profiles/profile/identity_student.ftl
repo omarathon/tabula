@@ -131,8 +131,8 @@
 						<#if scyd.yearOfStudy??>
 							<strong>Year of study:</strong> ${(scyd.yearOfStudy)!}<br/>
 						</#if>
-						<#if scd.levelCode??>
-							<strong>Current study level:</strong> ${scd.levelCode}<br />
+						<#if scd.hasCurrentEnrolment && scd.levelCode?? && scyd.latest>
+							<strong>Current course level:</strong> ${scd.levelCode}<br />
 						</#if>
 						<#if scd.sprCode??>
 							<strong>Programme route code:</strong> ${scd.sprCode}<br />
