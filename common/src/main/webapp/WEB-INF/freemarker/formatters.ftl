@@ -180,9 +180,10 @@ preposition: Text to relate the title to the department name in the second line,
 --></#macro>
 
 <#-- Format week ranges for a SmallGroupEvent -->
-<#macro weekRanges object><#--
+<#macro weekRanges object stripHtml=false><#--
 	--><#noescape><#--
-		-->${weekRangesFormatter(object)}<#--
+		--><#local result = weekRangesFormatter(object) /><#--
+		--><#if stripHtml>${result?replace('<sup>','')?replace('</sup>','')}<#else>${result}</#if><#--
 	--></#noescape><#--
 --></#macro>
 
