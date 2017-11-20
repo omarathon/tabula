@@ -10,7 +10,10 @@
 	<#if command.scheme.points?size == 0>
 		<p>There are no points</p>
 	<#else>
-		<p>There are <@fmt.p command.scheme.points?size "point" /> associated with this scheme.</p>
+		<p>
+			There <@fmt.p number=command.scheme.points?size singular="is" plural="are" shownumber=false />
+			<@fmt.p command.scheme.points?size "point" /> associated with this scheme.
+		</p>
 	</#if>
 
 	<@f.errors cssClass="error form-errors" />
