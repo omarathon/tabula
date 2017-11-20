@@ -343,8 +343,8 @@ class AssessmentMembershipDaoImpl extends AssessmentMembershipDao with Daoisms w
 
 
 	def departmentsWithManualAssessmentsOrGroups(academicYear: AcademicYear): Seq[DepartmentWithManualUsers] = {
-
 		// join the usergroupinclude table with member to weed out manually added ext-users
+		// join with upstreamassessmentgroup to ignore assignments/group sets that cannot be linked to an upstream assessment component because none exists
 		val results = session.createSQLQuery("""
 			select distinct(d.id) as id, count(distinct(a.id)) as assignments, count(distinct(s.id)) as smallGroupSets from department d
 				join module m on m.department_id = d.id
@@ -352,10 +352,15 @@ class AssessmentMembershipDaoImpl extends AssessmentMembershipDao with Daoisms w
 					(select distinct(i.group_id) from usergroupinclude i join member m on i.usercode = m.userid where i.group_id = a.membersgroup_id)
 				left join smallgroupset s on s.module_id = m.id and s.academicyear = :academicYear and s.membersgroup_id in
 					(select distinct(i.group_id) from usergroupinclude i join member m on i.usercode = m.userid where i.group_id = s.membersgroup_id)
+				join upstreamassignment c on c.module_id = m.id
+				join upstreamassessmentgroup uag
+					on (uag.academicyear = a.academicyear or uag.academicyear = s.academicyear)
+						 and uag.modulecode = c.modulecode
+						 and uag.assessmentgroup = c.assessmentgroup
+						 and uag.sequence = c.sequence
 				where not (s.id is null and a.id is null)
 				group by d.id, d.parent_id
 		""")
-			//.addEntity(classOf[Department])
 			.addScalar("id", StandardBasicTypes.STRING)
 			.addScalar("assignments", StandardBasicTypes.INTEGER)
 			.addScalar("smallGroupSets", StandardBasicTypes.INTEGER)
