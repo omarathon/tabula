@@ -124,7 +124,7 @@ trait FeedbackAdjustmentCommandValidation extends SelfValidating {
 			errors.rejectValue("adjustedMark", "actualMark.assessmentInvalid")
 		}
 
-		if (sendToSits && gradeValidation.valid.isEmpty) {
+		if (sendToSits && gradeValidation.exists(_.valid.isEmpty)) {
 			errors.reject("feedback.adjustment.invalidSITS")
 		}
 	}
@@ -219,16 +219,20 @@ trait CopiesMarkToFeedback {
 }
 
 trait FeedbackAdjustmentGradeValidation {
-	val gradeValidation: ValidateAndPopulateFeedbackResult
+	val gradeValidation: Option[ValidateAndPopulateFeedbackResult]
 }
 
 trait FeedbackAdjustmentSitsGradeValidation extends FeedbackAdjustmentGradeValidation {
 	self: FeedbackAdjustmentCommandState with FeedbackForSitsServiceComponent with CopiesMarkToFeedback =>
 
-	lazy val gradeValidation: ValidateAndPopulateFeedbackResult = {
-		copyTo(feedback)
-		val result = feedbackForSitsService.validateAndPopulateFeedback(Seq(feedback), gradeGenerator)
-		removeMark()
-		result
+	lazy val gradeValidation: Option[ValidateAndPopulateFeedbackResult] = {
+		try {
+			copyTo(feedback)
+			val result = feedbackForSitsService.validateAndPopulateFeedback(Seq(feedback), gradeGenerator)
+			removeMark()
+			Some(result)
+		} catch {
+			case _: NumberFormatException => None // adjusted mark is invalid
+		}
 	}
 }

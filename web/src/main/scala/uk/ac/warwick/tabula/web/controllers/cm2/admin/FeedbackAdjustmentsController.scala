@@ -65,8 +65,7 @@ class FeedbackAdjustmentsController extends CourseworkController with Autowiring
 	def showForm(
 		@ModelAttribute("command") command: Appliable[Feedback] with FeedbackAdjustmentCommandState with FeedbackAdjustmentGradeValidation,
 		@PathVariable assignment: Assignment,
-		@PathVariable student: User,
-		withValidation: Boolean = false
+		@PathVariable student: User
 	): Mav = {
 		val submission = assignment.findSubmission(student.getUserId)
 		val daysLate = submission.map { _.workingDaysLate }
@@ -97,8 +96,7 @@ class FeedbackAdjustmentsController extends CourseworkController with Autowiring
 			"proposedAdjustment" -> proposedAdjustment,
 			"latePenalty" -> latePenaltyPerDay,
 			"isGradeValidation" -> assignment.module.adminDepartment.assignmentGradeValidation,
-			"withValidation" -> withValidation,
-			"gradeValidation" -> (if (withValidation) command.gradeValidation)
+			"gradeValidation" -> command.gradeValidation.orNull
 		)).noLayout()
 	}
 
@@ -110,7 +108,7 @@ class FeedbackAdjustmentsController extends CourseworkController with Autowiring
 		@PathVariable student: User
 	): Mav = {
 		if (errors.hasErrors) {
-			showForm(command, assignment, student, withValidation = true)
+			showForm(command, assignment, student)
 		} else {
 			command.apply()
 			Mav("ajax_success").noLayout()

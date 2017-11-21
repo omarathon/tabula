@@ -103,7 +103,7 @@
 		</div>
 
 		<#if features.queueFeedbackForSits && assignment.module.adminDepartment.uploadCourseworkMarksToSits && command.canBeUploadedToSits>
-			<@marking.uploadToSits assignment=assignment verb="Adjusting" withValidation=withValidation isGradeValidation=isGradeValidation gradeValidation=gradeValidation />
+			<@marking.uploadToSits assignment=assignment verb="Adjusting" withValidation=gradeValidation?? isGradeValidation=isGradeValidation gradeValidation=gradeValidation />
 		</#if>
 
 		<div class="buttons form-group">
