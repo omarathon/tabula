@@ -45,7 +45,7 @@ class FinishMarkingController extends CourseworkController {
 		errors: Errors
 	): Mav = {
 		Mav("cm2/admin/assignments/markers/marking_complete_confirmation",
-			"formAction" -> Routes.admin.assignment.markerFeedback.complete(assignment, stagePosition, marker),
+			"formAction" -> Routes.admin.assignment.markerFeedback.finish(assignment, stagePosition, marker),
 			"department" -> command.assignment.module.adminDepartment,
 			"isProxying" -> command.isProxying,
 			"proxyingAs" -> marker,
