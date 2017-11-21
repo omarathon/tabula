@@ -124,7 +124,7 @@ trait FeedbackAdjustmentCommandValidation extends SelfValidating {
 			errors.rejectValue("adjustedMark", "actualMark.assessmentInvalid")
 		}
 
-		if (gradeValidation.valid.isEmpty) {
+		if (sendToSits && gradeValidation.valid.isEmpty) {
 			errors.reject("feedback.adjustment.invalidSITS")
 		}
 	}
