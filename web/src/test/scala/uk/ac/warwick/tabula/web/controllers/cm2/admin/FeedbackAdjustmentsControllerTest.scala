@@ -41,7 +41,7 @@ class FeedbackAdjustmentsControllerTest extends TestBase with Mockito {
 			override val assessment: Assignment = CommandFixture.this.assignment
 			override val feedback: Feedback = CommandFixture.this.feedback
 
-			override val gradeValidation: ValidateAndPopulateFeedbackResult = null
+			override val gradeValidation: Option[ValidateAndPopulateFeedbackResult] = None
 		}
 	}
 
