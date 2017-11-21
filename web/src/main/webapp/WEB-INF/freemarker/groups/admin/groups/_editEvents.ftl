@@ -34,7 +34,10 @@
 </div>
 
 <@bs3form.form_group>
-	<p>There are <@fmt.p smallGroupSet.groups?size "group" /> in ${smallGroupSet.name}<#if smallGroupSet.linked> (from ${smallGroupSet.linkedDepartmentSmallGroupSet.name})</#if>.</p>
+	<p>
+		There <@fmt.p number=smallGroupSet.groups?size singular="is" plural="are" shownumber=false />
+		<@fmt.p smallGroupSet.groups?size "group" /> in ${smallGroupSet.name}<#if smallGroupSet.linked> (from ${smallGroupSet.linkedDepartmentSmallGroupSet.name})</#if>.
+	</p>
 
 	<p>
 		<#if is_edit>

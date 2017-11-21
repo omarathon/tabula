@@ -73,20 +73,23 @@
 							 data-scroll="true"
 							 data-remove-tooltip="Remove this student from this group">
 							<div class="fix-header pad-when-fixed">
-								<p class="btn-toolbar">
-									<a class="random btn btn-xs btn-default" data-toggle="randomise" data-disabled-on="empty-list" href="#">
-										Randomly allocate
-									</a>
-									<a class="return-items btn btn-xs btn-default" data-toggle="return" data-disabled-on="no-allocation" href="#">
-										Remove all
-									</a>
-								</p>
+
 								<div class="row">
 									<div class="col-md-5">
+										<p class="btn-toolbar">
+											<a class="random btn btn-xs btn-default" data-toggle="randomise" data-disabled-on="empty-list" href="#">
+												Randomly allocate
+											</a>
+										</p>
 										<h3>Students</h3>
 									</div>
 									<div class="col-md-2"></div>
 									<div class="col-md-5">
+										<p class="btn-toolbar">
+												<a class="return-items btn btn-xs btn-warning" data-toggle="return" data-disabled-on="no-allocation" href="#">
+													Remove all students from groups
+												</a>
+										</p>
 										<h3>Groups</h3>
 									</div>
 								</div>

@@ -35,5 +35,6 @@ class EmailNotificationService extends Logging with Daoisms {
 	def unemailedRecipientCount: Number = dao.unemailedRecipientCount
 	def unemailedRecipients: Scrollable[RecipientNotificationInfo] = dao.unemailedRecipients
 	def oldestUnemailedRecipient: Option[RecipientNotificationInfo] = dao.oldestUnemailedRecipient
+	def recentEmailedRecipient: Option[RecipientNotificationInfo] = dao.recentEmailedRecipient
 
 }

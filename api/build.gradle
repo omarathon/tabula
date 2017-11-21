@@ -56,3 +56,9 @@ war {
     webInf { from 'build/rootContent/WEB-INF' }
     from 'build/rootContent'
 }
+
+test {
+    onlyIf {
+        !project.hasProperty('integrationTest')
+    }
+}

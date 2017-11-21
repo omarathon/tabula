@@ -27,28 +27,31 @@
 
 		<!-- persist header -->
 		<div>
-			<p class="btn-toolbar">
-				<a
-					<#if stageAllocation!false>
-						class="linkedRandom btn btn-default" data-toggle="linkedRandom"
-					<#else>
-						class="random btn btn-default" data-toggle="randomise"
-					</#if>
-					data-disabled-on="empty-list"
-					href="#"
-				>
-					Randomly allocate
-				</a>
-				<a class="return-items btn btn-default" data-toggle="return" data-disabled-on="no-allocation" href="#" >
-					Remove all
-				</a>
-			</p>
+
 			<div class="row">
 				<div class="col-md-5">
+					<p class="btn-toolbar">
+						<a
+							<#if stageAllocation!false>
+								class="linkedRandom btn btn-default" data-toggle="linkedRandom"
+							<#else>
+								class="random btn btn-default" data-toggle="randomise"
+							</#if>
+								data-disabled-on="empty-list"
+								href="#"
+						>
+							Randomly allocate
+						</a>
+					</p>
 					<h3>Students</h3>
 				</div>
 				<div class="col-md-2"></div>
 				<div class="col-md-5">
+					<p class="btn-toolbar">
+						<a class="return-items btn btn-warning" data-toggle="return" data-disabled-on="no-allocation" href="#" >
+							Remove all students from ${role}s
+						</a>
+					</p>
 					<h3>${role}s</h3>
 				</div>
 			</div>
@@ -113,4 +116,3 @@
 		</div>
 	</div>
 </#macro>
-
