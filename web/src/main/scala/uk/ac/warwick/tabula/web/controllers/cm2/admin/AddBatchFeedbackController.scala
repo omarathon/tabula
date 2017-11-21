@@ -46,7 +46,7 @@ class AddBatchFeedbackController extends CourseworkController {
 		} else {
 			// do apply, redirect back
 			cmd.apply()
-			Redirect(Routes.admin.department(assignment.module.adminDepartment, assignment.academicYear))
+			Redirect(Routes.admin.assignment.submissionsandfeedback(assignment))
 		}
 	}
 }
