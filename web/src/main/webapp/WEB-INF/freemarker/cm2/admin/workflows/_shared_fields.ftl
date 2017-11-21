@@ -40,12 +40,13 @@
 			</div>
 		</div>
 	</div>
+<#--
 	<@bs3form.labelled_form_group path="sampler" labelText="Moderated assignment selection" cssClass="hidden sampler">
 		<div class="radio">
-			<#-- TODO-Enable when admin version is ready -->
-			<#--<@bs3form.radio_inline>-->
-				<#--<@f.radiobutton path="sampler" value="admin" /> Administrator-->
-			<#--</@bs3form.radio_inline>-->
+			<#-- TODO-Enable when admin version is ready
+			<@bs3form.radio_inline>
+				<@f.radiobutton path="sampler" value="admin" /> Administrator
+			</@bs3form.radio_inline> ->
 			<@bs3form.radio_inline>
 				<@f.radiobutton path="sampler" value="marker" /> Marker
 			</@bs3form.radio_inline>
@@ -57,6 +58,7 @@
 			Choose who is responsible for selecting assignments for moderation.
 		</div>
 	</@bs3form.labelled_form_group>
+-->
 <#else>
 	<@bs3form.labelled_form_group labelText="Workflow type">
 		<select id="workflowType" name="workflowType" class="form-control" disabled="disabled">
@@ -80,12 +82,12 @@
 		</div>
 	</@bs3form.labelled_form_group>
 
-	<@bs3form.labelled_form_group path="sampler" labelText="Moderated assignment selection" cssClass="hidden sampler">
+	<#--<@bs3form.labelled_form_group path="sampler" labelText="Moderated assignment selection" cssClass="hidden sampler">
 		<div class="radio">
-		<#-- TODO-Enable when admin version is ready -->
-		<#--<@bs3form.radio_inline>-->
-			<#--<@f.radiobutton path="sampler" value="admin" disabled=true /> Administrator-->
-		<#--</@bs3form.radio_inline>-->
+		<!-- TODO-Enable when admin version is ready
+		<@bs3form.radio_inline>
+			<@f.radiobutton path="sampler" value="admin" disabled=true /> Administrator
+		</@bs3form.radio_inline> ->
 		<@bs3form.radio_inline>
 			<@f.radiobutton path="sampler" value="marker" disabled=true  /> Marker
 		</@bs3form.radio_inline>
@@ -100,7 +102,7 @@
 				It is not possible to modify the moderation selector once marking has started.
 			</#if>
 		</div>
-	</@bs3form.labelled_form_group>
+	</@bs3form.labelled_form_group>-->
 
 </#if>
 
