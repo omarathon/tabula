@@ -7,6 +7,7 @@ import uk.ac.warwick.tabula.data.model.Department
 import uk.ac.warwick.tabula.data.model.markingworkflow.MarkingWorkflowStage.{ModerationMarker, ModerationModerator}
 import uk.ac.warwick.tabula.data.model.markingworkflow.MarkingWorkflowType.ModeratedMarking
 import uk.ac.warwick.tabula.data.model.markingworkflow.ModeratedWorkflow.Settings
+import uk.ac.warwick.tabula.data.model.markingworkflow.ModerationSampler.Moderator
 import uk.ac.warwick.tabula.system.TwoWayConverter
 import uk.ac.warwick.userlookup.User
 import uk.ac.warwick.tabula.helpers.StringUtils._
@@ -30,7 +31,7 @@ class ModeratedWorkflow extends CM2MarkingWorkflow {
 		case None => ModerationSampler.Moderator // Default to the moderator being the sampler
 	}
 
-	def moderationSampler_= (sampler: ModerationSampler): Unit = { settings += (Settings.ModerationSampler -> sampler.code) }
+	def moderationSampler_= (sampler: ModerationSampler): Unit = { settings += (Settings.ModerationSampler -> Option(sampler).getOrElse(Moderator).code) }
 }
 
 object ModeratedWorkflow {
