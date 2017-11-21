@@ -34,11 +34,11 @@ abstract class AbstractImportStatusHealthcheck extends ServiceHealthcheckProvide
 
 		// Did the last import fail
 		val lastFailed = imports.find(!_.isIncomplete).filter(_.hadError)
-
+		//TAB-5698 - ensure we have some audit
 		val status =
-			if (!lastSuccessful.exists(_.eventDate.plusMillis(ErrorThreshold.toMillis.toInt).isAfterNow))
+			if (lastSuccessful.isDefined && !lastSuccessful.exists(_.eventDate.plusMillis(ErrorThreshold.toMillis.toInt).isAfterNow))
 				ServiceHealthcheck.Status.Error
-			else if (!lastSuccessful.exists(_.eventDate.plusMillis(WarningThreshold.toMillis.toInt).isAfterNow) || lastFailed.nonEmpty)
+			else if (lastSuccessful.isDefined && !lastSuccessful.exists(_.eventDate.plusMillis(WarningThreshold.toMillis.toInt).isAfterNow) || lastFailed.nonEmpty)
 				ServiceHealthcheck.Status.Warning
 			else
 				ServiceHealthcheck.Status.Okay
