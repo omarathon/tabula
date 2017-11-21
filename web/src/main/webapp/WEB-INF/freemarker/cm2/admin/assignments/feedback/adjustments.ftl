@@ -98,13 +98,12 @@
 			</div>
 		</@bs3form.labelled_form_group>
 
-		<#assign gradeValidation = isGradeValidation?string('true', 'false') />
 		<div class="alert alert-info">
 			The reason for adjustment and any comments will be made available to students when their feedback is published.
 		</div>
 
 		<#if features.queueFeedbackForSits && assignment.module.adminDepartment.uploadCourseworkMarksToSits && command.canBeUploadedToSits>
-			<@marking.uploadToSits assignment=assignment verb="Adjusting" withValidation=false/>
+			<@marking.uploadToSits assignment=assignment verb="Adjusting" withValidation=withValidation isGradeValidation=isGradeValidation gradeValidation=gradeValidation />
 		</#if>
 
 		<div class="buttons form-group">

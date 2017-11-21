@@ -21,6 +21,7 @@ object FeedbackAdjustmentCommand {
 
 	def apply(assignment: Assessment, student:User, submitter: CurrentUser, gradeGenerator: GeneratesGradesFromMarks) =
 		new FeedbackAdjustmentCommandInternal(assignment, student, submitter, gradeGenerator)
+			with CopiesMarkToFeedback
 			with ComposableCommand[Feedback]
 			with FeedbackAdjustmentCommandPermissions
 			with FeedbackAdjustmentCommandDescription
@@ -30,6 +31,7 @@ object FeedbackAdjustmentCommand {
 			with AutowiringZipServiceComponent
 			with AutowiringFeedbackForSitsServiceComponent
 			with QueuesFeedbackForSits
+			with FeedbackAdjustmentSitsGradeValidation
 }
 
 object AssignmentFeedbackAdjustmentCommand {
@@ -38,6 +40,7 @@ object AssignmentFeedbackAdjustmentCommand {
 
 	def apply(thisAssignment: Assignment, student:User, submitter: CurrentUser, gradeGenerator: GeneratesGradesFromMarks) =
 		new FeedbackAdjustmentCommandInternal(thisAssignment, student, submitter, gradeGenerator)
+			with CopiesMarkToFeedback
 			with ComposableCommand[Feedback]
 			with FeedbackAdjustmentCommandPermissions
 			with FeedbackAdjustmentCommandDescription
@@ -48,6 +51,7 @@ object AssignmentFeedbackAdjustmentCommand {
 			with AutowiringFeedbackForSitsServiceComponent
 			with AutowiringProfileServiceComponent
 			with QueuesFeedbackForSits
+			with FeedbackAdjustmentSitsGradeValidation
 			with SubmissionState {
 				override val submission: Option[Submission] = thisAssignment.findSubmission(student.getUserId)
 				override val assignment: Assignment = thisAssignment
@@ -57,7 +61,7 @@ object AssignmentFeedbackAdjustmentCommand {
 class FeedbackAdjustmentCommandInternal(val assessment: Assessment, val student:User, val submitter: CurrentUser, val gradeGenerator: GeneratesGradesFromMarks)
 	extends CommandInternal[Feedback] with FeedbackAdjustmentCommandState {
 
-	self: FeedbackServiceComponent with ZipServiceComponent with QueuesFeedbackForSits =>
+	self: FeedbackServiceComponent with ZipServiceComponent with QueuesFeedbackForSits with CopiesMarkToFeedback with FeedbackAdjustmentSitsGradeValidation =>
 
 	val feedback: Feedback = assessment.findFeedback(student.getUserId)
 		.getOrElse(throw new ItemNotFoundException("Can't adjust for non-existent feedback"))
@@ -83,21 +87,10 @@ class FeedbackAdjustmentCommandInternal(val assessment: Assessment, val student:
 		feedback
 	}
 
-	def copyTo(feedback: Feedback): Option[Mark] = {
-		// save mark and grade
-		if (assessment.collectMarks) {
-			Some(
-				feedback.addMark(submitter.userId, MarkType.Adjustment, adjustedMark.toInt, adjustedGrade.maybeText, reason, comments)
-			)
-		} else {
-			None
-		}
-	}
-
 }
 
 trait FeedbackAdjustmentCommandValidation extends SelfValidating {
-	self: FeedbackAdjustmentCommandState =>
+	self: FeedbackAdjustmentCommandState with FeedbackAdjustmentSitsGradeValidation with CopiesMarkToFeedback =>
 	def validate(errors: Errors) {
 		if (!reason.hasText)
 			errors.rejectValue("reason", "feedback.adjustment.reason.empty")
@@ -129,6 +122,10 @@ trait FeedbackAdjustmentCommandValidation extends SelfValidating {
 
 		if (!assessment.collectMarks) {
 			errors.rejectValue("adjustedMark", "actualMark.assessmentInvalid")
+		}
+
+		if (gradeValidation.valid.isEmpty) {
+			errors.reject("feedback.adjustment.invalidSITS")
 		}
 	}
 }
@@ -198,4 +195,40 @@ trait FeedbackAdjustmentNotifier extends Notifies[Feedback, Feedback] {
 				case _ => Seq()
 			}
 		}
+}
+
+trait CopiesMarkToFeedback {
+	self: FeedbackAdjustmentCommandState =>
+
+	var addedMark: Option[Mark] = None
+
+	def copyTo(feedback: Feedback): Option[Mark] = {
+		addedMark.orElse {
+			// save mark and grade
+			if (assessment.collectMarks) {
+				addedMark = Some(feedback.addMark(submitter.userId, MarkType.Adjustment, adjustedMark.toInt, adjustedGrade.maybeText, reason, comments))
+			}
+			addedMark
+		}
+	}
+
+	def removeMark(): Unit = {
+		addedMark.foreach(feedback.marks.remove)
+		addedMark = None
+	}
+}
+
+trait FeedbackAdjustmentGradeValidation {
+	val gradeValidation: ValidateAndPopulateFeedbackResult
+}
+
+trait FeedbackAdjustmentSitsGradeValidation extends FeedbackAdjustmentGradeValidation {
+	self: FeedbackAdjustmentCommandState with FeedbackForSitsServiceComponent with CopiesMarkToFeedback =>
+
+	lazy val gradeValidation: ValidateAndPopulateFeedbackResult = {
+		copyTo(feedback)
+		val result = feedbackForSitsService.validateAndPopulateFeedback(Seq(feedback), gradeGenerator)
+		removeMark()
+		result
+	}
 }

@@ -3,10 +3,10 @@ package uk.ac.warwick.tabula.web.controllers.cm2.admin
 import org.joda.time.{DateTime, DateTimeConstants}
 import uk.ac.warwick.tabula._
 import uk.ac.warwick.tabula.commands.Appliable
-import uk.ac.warwick.tabula.commands.cm2.feedback.FeedbackAdjustmentCommandState
+import uk.ac.warwick.tabula.commands.cm2.feedback.{FeedbackAdjustmentCommandState, FeedbackAdjustmentGradeValidation}
 import uk.ac.warwick.tabula.data.model._
 import uk.ac.warwick.tabula.helpers.Tap._
-import uk.ac.warwick.tabula.services.{GeneratesGradesFromMarks, ProfileService}
+import uk.ac.warwick.tabula.services.{GeneratesGradesFromMarks, ProfileService, ValidateAndPopulateFeedbackResult}
 import uk.ac.warwick.tabula.web.Mav
 import uk.ac.warwick.userlookup.User
 
@@ -32,7 +32,7 @@ class FeedbackAdjustmentsControllerTest extends TestBase with Mockito {
 		val thisStudent = new User("1234567")
 		thisStudent.setWarwickId("1234567")
 
-		val command = new Appliable[Feedback] with FeedbackAdjustmentCommandState {
+		val command = new Appliable[Feedback] with FeedbackAdjustmentCommandState with FeedbackAdjustmentGradeValidation {
 			override def apply(): Feedback = {null}
 			override val gradeGenerator: GeneratesGradesFromMarks = mock[GeneratesGradesFromMarks]
 			override val student: User = thisStudent
@@ -40,6 +40,8 @@ class FeedbackAdjustmentsControllerTest extends TestBase with Mockito {
 
 			override val assessment: Assignment = CommandFixture.this.assignment
 			override val feedback: Feedback = CommandFixture.this.feedback
+
+			override val gradeValidation: ValidateAndPopulateFeedbackResult = null
 		}
 	}
 

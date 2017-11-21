@@ -63,9 +63,10 @@ class FeedbackAdjustmentsController extends CourseworkController with Autowiring
 
 	@RequestMapping
 	def showForm(
-		@ModelAttribute("command") command: Appliable[Feedback] with FeedbackAdjustmentCommandState,
+		@ModelAttribute("command") command: Appliable[Feedback] with FeedbackAdjustmentCommandState with FeedbackAdjustmentGradeValidation,
 		@PathVariable assignment: Assignment,
-		@PathVariable student: User
+		@PathVariable student: User,
+		withValidation: Boolean = false
 	): Mav = {
 		val submission = assignment.findSubmission(student.getUserId)
 		val daysLate = submission.map { _.workingDaysLate }
@@ -95,19 +96,21 @@ class FeedbackAdjustmentsController extends CourseworkController with Autowiring
 			"marksSubtracted" -> marksSubtracted,
 			"proposedAdjustment" -> proposedAdjustment,
 			"latePenalty" -> latePenaltyPerDay,
-			"isGradeValidation" -> assignment.module.adminDepartment.assignmentGradeValidation
+			"isGradeValidation" -> assignment.module.adminDepartment.assignmentGradeValidation,
+			"withValidation" -> withValidation,
+			"gradeValidation" -> (if (withValidation) command.gradeValidation)
 		)).noLayout()
 	}
 
 	@RequestMapping(method = Array(POST))
 	def submit(
-		@Valid @ModelAttribute("command") command: Appliable[Feedback] with FeedbackAdjustmentCommandState,
+		@Valid @ModelAttribute("command") command: Appliable[Feedback] with FeedbackAdjustmentCommandState with FeedbackAdjustmentGradeValidation,
 		errors: Errors,
 		@PathVariable assignment: Assignment,
 		@PathVariable student: User
 	): Mav = {
 		if (errors.hasErrors) {
-			showForm(command, assignment, student)
+			showForm(command, assignment, student, withValidation = true)
 		} else {
 			command.apply()
 			Mav("ajax_success").noLayout()

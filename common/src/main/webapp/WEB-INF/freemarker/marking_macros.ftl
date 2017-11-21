@@ -436,7 +436,7 @@
 				} else {
 					$validationDiv.hide();
 				}
-			});
+			}).trigger('change');
 		});
 	</script>
 </#macro>
