@@ -9,7 +9,7 @@ import org.springframework.web.bind.annotation.{ModelAttribute, PathVariable, Re
 import uk.ac.warwick.tabula.CurrentUser
 import uk.ac.warwick.tabula.cm2.web.Routes
 import uk.ac.warwick.tabula.commands.{Appliable, SelfValidating}
-import uk.ac.warwick.tabula.commands.cm2.assignments.markers.{MarkingCompletedCommand, MarkingCompletedState}
+import uk.ac.warwick.tabula.commands.cm2.assignments.markers.{MarkingCompletedCommand, WorkflowProgressState}
 import uk.ac.warwick.tabula.data.model.{Assignment, AssignmentFeedback}
 import uk.ac.warwick.tabula.web.Mav
 import uk.ac.warwick.tabula.web.controllers.cm2.CourseworkController
@@ -23,7 +23,7 @@ class MarkingCompletedController extends CourseworkController {
 
 	validatesSelf[SelfValidating]
 
-	type Command = Appliable[Seq[AssignmentFeedback]] with MarkingCompletedState
+	type Command = Appliable[Seq[AssignmentFeedback]] with WorkflowProgressState
 
 	@ModelAttribute("command")
 	def command(@PathVariable assignment: Assignment, @PathVariable marker: User, @PathVariable stagePosition: Int, currentUser: CurrentUser): Command =
@@ -42,7 +42,8 @@ class MarkingCompletedController extends CourseworkController {
 		@ModelAttribute("command") command: Command,
 		errors: Errors
 	): Mav = {
-		Mav("cm2/admin/assignments/markers/marking_complete",
+		Mav("cm2/admin/assignments/markers/marking_complete_confirmation",
+			"formAction" -> Routes.admin.assignment.markerFeedback.complete(assignment, stagePosition, marker),
 			"department" -> command.assignment.module.adminDepartment,
 			"isProxying" -> command.isProxying,
 			"proxyingAs" -> marker,
@@ -65,7 +66,4 @@ class MarkingCompletedController extends CourseworkController {
 			Redirect(Routes.admin.assignment.markerFeedback(command.assignment, command.marker))
 		}
 	}
-
-
-
 }

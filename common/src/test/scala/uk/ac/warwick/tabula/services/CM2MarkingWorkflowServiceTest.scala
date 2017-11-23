@@ -6,7 +6,7 @@ import scala.collection.JavaConverters._
 import uk.ac.warwick.tabula.data.CM2MarkingWorkflowDao
 import uk.ac.warwick.tabula.data.model.{AssignmentFeedback, Feedback, MarkerFeedback}
 import uk.ac.warwick.tabula.data.model.markingworkflow.MarkingWorkflowStage.{DblBlndFinalMarker, DblBlndInitialMarkerA, SingleMarker, _}
-import uk.ac.warwick.tabula.data.model.markingworkflow.{DoubleBlindWorkflow, SingleMarkerWorkflow}
+import uk.ac.warwick.tabula.data.model.markingworkflow.{DoubleBlindWorkflow, ModeratedWorkflow, ModerationSampler, SingleMarkerWorkflow}
 import uk.ac.warwick.tabula.{Fixtures, Mockito, TestBase}
 import uk.ac.warwick.userlookup.User
 
@@ -19,6 +19,7 @@ class CM2MarkingWorkflowServiceTest extends TestBase with Mockito {
 
 	val fs = smartMock[FeedbackService]
 	val mwd = smartMock[CM2MarkingWorkflowDao]
+	val zs = smartMock[ZipService]
 
 	val dept = Fixtures.department("in")
 	val assignment = Fixtures.assignment("test")
@@ -26,6 +27,7 @@ class CM2MarkingWorkflowServiceTest extends TestBase with Mockito {
 	val service = new CM2MarkingWorkflowServiceImpl {
 		feedbackService = fs
 		markingWorkflowDao = mwd
+		zipService = zs
 	}
 
 	val marker1 = Fixtures.user("1170836", "cuslaj")
@@ -102,22 +104,22 @@ class CM2MarkingWorkflowServiceTest extends TestBase with Mockito {
 			).asJava
 		})
 
-		val doneA = service.progressFeedback(DblBlndInitialMarkerA, Seq(feedback.head))
-		val doneB = service.progressFeedback(DblBlndInitialMarkerB, feedback.tail)
+		val doneA = service.progress(DblBlndInitialMarkerA, Seq(feedback.head))
+		val doneB = service.progress(DblBlndInitialMarkerB, feedback.tail)
 		Seq(feedback.head).foreach(f => f.outstandingStages.asScala should be (Seq(DblBlndInitialMarkerB)))
 		feedback.tail.foreach(f => f.outstandingStages.asScala should be (Seq(DblBlndInitialMarkerA)))
 		feedback.foreach(f => verify(fs, times(1)).saveOrUpdate(f))
 		(doneA ++ doneB).isEmpty should be {true}
 
-		val initialDone = service.progressFeedback(DblBlndInitialMarkerB, Seq(feedback.head)) ++
-			service.progressFeedback(DblBlndInitialMarkerA, feedback.tail)
+		val initialDone = service.progress(DblBlndInitialMarkerB, Seq(feedback.head)) ++
+			service.progress(DblBlndInitialMarkerA, feedback.tail)
 
 		feedback.foreach(f => f.outstandingStages.asScala should be (Seq(DblBlndFinalMarker)))
 		feedback.foreach(f => verify(fs, times(2)).saveOrUpdate(f))
 		initialDone.size should be (3)
 		initialDone.forall(_.stage == DblBlndFinalMarker) should be {true}
 
-		val finalDone = service.progressFeedback(DblBlndFinalMarker, feedback)
+		val finalDone = service.progress(DblBlndFinalMarker, feedback)
 		feedback.foreach(f => f.outstandingStages.asScala should be (Seq(DblBlndCompleted)))
 		feedback.foreach(f => verify(fs, times(3)).saveOrUpdate(f))
 		finalDone.isEmpty should be {true}
@@ -127,8 +129,47 @@ class CM2MarkingWorkflowServiceTest extends TestBase with Mockito {
 		feedback.foreach(f => verify(fs, times(4)).saveOrUpdate(f))
 
 		// throws the expected IllegalArgumentException
-		service.progressFeedback(DblBlndCompleted, feedback)
+		service.progress(DblBlndCompleted, feedback)
 	}
+
+	@Test(expected = classOf[IllegalArgumentException])
+	def finish() { new MarkerFeedbackFixture {
+		val marker = Fixtures.user("1170836", "cuslaj")
+		val moderator = Fixtures.user("1170838", "cuslal")
+		val students = Seq(Fixtures.user("1431777", "u1431777"), Fixtures.user("1431778", "u1431778"), Fixtures.user("1431779", "u1431779"))
+		val workflow = ModeratedWorkflow("testAssignment", dept, ModerationSampler.Moderator, Seq(marker), Seq(moderator))
+
+		assignment.cm2MarkingWorkflow = workflow
+		val feedback = markerFeedback.map(_.feedback)
+
+		feedback.foreach(f => {
+			f.outstandingStages = workflow.initialStages.asJava
+			f.allMarkerFeedback.head.stage = ModerationMarker
+			f.markerFeedback.add(new MarkerFeedback{stage = ModerationModerator})
+		})
+
+		// nothing here as we have no content in the marker feedback
+		service.finish(ModerationMarker, feedback).isEmpty should be {true}
+
+		// first markers mark some stuff
+		mf1.mark = Some(41)
+		mf2.comments = "I hate herons"
+
+		val done = service.finish(ModerationMarker, feedback)
+		done.size should be (2)
+		mf1.feedback.outstandingStages.asScala should be (Seq(ModerationCompleted))
+		mf2.feedback.outstandingStages.asScala should be (Seq(ModerationCompleted))
+		verify(fs, times(1)).saveOrUpdate(mf1.feedback)
+		verify(zs, times(1)).invalidateIndividualFeedbackZip(mf1.feedback)
+		verify(fs, times(1)).saveOrUpdate(mf2.feedback)
+		verify(zs, times(1)).invalidateIndividualFeedbackZip(mf2.feedback)
+
+		mf1.feedback.actualMark should be (Some(41))
+		mf2.feedback.comments should be (Some("I hate herons"))
+
+		// throws the expected IllegalArgumentException
+		service.finish(ModerationCompleted, feedback)
+	}}
 
 	@Test
 	def markerAllocationsAndFeedbackByMarker() { new MarkerFeedbackFixture {

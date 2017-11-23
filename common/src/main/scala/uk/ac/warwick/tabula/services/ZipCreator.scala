@@ -186,6 +186,7 @@ trait ZipCreator extends Logging with TaskBenchmarking {
 						// If we caught an exception above, that one will be more useful than one thrown when closing,
 						// so don't throw this one
 						logger.error(s"Exception thrown while trying to close: ${e.getMessage}")
+						throw thrownException
 					} else {
 						throw e
 					}

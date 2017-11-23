@@ -7,12 +7,14 @@ import uk.ac.warwick.tabula.JavaImports.JList
 import uk.ac.warwick.tabula.data.model.Department
 import uk.ac.warwick.tabula.JavaImports._
 import uk.ac.warwick.tabula.commands._
+import uk.ac.warwick.tabula.data.model.markingworkflow.ModerationSampler.Moderator
 import uk.ac.warwick.tabula.data.model.markingworkflow._
 import uk.ac.warwick.tabula.helpers.StringUtils
 import uk.ac.warwick.tabula.services.{UserLookupComponent, _}
 import uk.ac.warwick.tabula.validators.UsercodeListValidator
 import uk.ac.warwick.userlookup.User
 import uk.ac.warwick.tabula.helpers.StringUtils._
+
 import scala.collection.JavaConverters._
 
 object EditMarkingWorkflowCommand {
@@ -38,6 +40,7 @@ class EditMarkingWorkflowCommandInternal(
 	val workflow = Some(w)
 
 	workflowName = w.name
+
 	extractMarkers match { case (a, b) =>
 		markersA = JArrayList(a)
 		markersB = JArrayList(b)
@@ -153,6 +156,8 @@ trait ModifyMarkingWorkflowState {
 	// all the current workflows have at most 2 sets of markers
 	var markersA: JList[Usercode] = _
 	var markersB: JList[Usercode] = _
+
+	var sampler: ModerationSampler = _
 
 	def markersAUsers: Seq[User] = userLookup.getUsersByUserIds(markersA.asScala).values.toSeq
 	def markersBUsers: Seq[User] = userLookup.getUsersByUserIds(markersB.asScala).values.toSeq

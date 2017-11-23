@@ -67,7 +67,7 @@ class MarkerFeedback extends GeneratedId with FeedbackAttachments with ToEntityR
 	// initially starts as null - if the marker makes any changes then this is set
 	// allows us to distinguish between feedback that has been approved (copied from the previous stage) and feedback that has been modified
 	@Column(name = "updated_on")
-	var updatedOn: DateTime = null
+	var updatedOn: DateTime = _
 
 	@Type(`type` = "uk.ac.warwick.tabula.data.model.OptionIntegerUserType")
 	var mark: Option[Int] = None
@@ -131,7 +131,7 @@ class MarkerFeedback extends GeneratedId with FeedbackAttachments with ToEntityR
 
 	def hasGrade: Boolean = grade.isDefined
 
-	def hasFeedbackOrComments: Boolean = hasFeedback || hasFeedback
+	def hasFeedbackOrComments: Boolean = hasFeedback || hasComments
 
 	def hasFeedback: Boolean = attachments != null && attachments.size() > 0
 

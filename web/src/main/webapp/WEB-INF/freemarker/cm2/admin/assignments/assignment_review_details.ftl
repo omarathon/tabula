@@ -62,7 +62,7 @@
 			<@review_details 'Automatically release submissions to markers' sharedPropertiesForm.automaticallyReleaseToMarkers?string('Yes','No') />
 			<@review_details 'Collect marks' sharedPropertiesForm.collectMarks?string('Yes','No') />
 			<@review_details 'Credit bearing' sharedPropertiesForm.summative?string('Summative','Formative') />
-			<@review_details 'Dissertation' sharedPropertiesForm.dissertation?string('Yes','No') />
+			<@review_details 'Feedback turnaround time' sharedPropertiesForm.dissertation?string('Exempt from 20-day universal requirement','Within 20 University working days') />
 		</div>
 
 		<div class="form-group">

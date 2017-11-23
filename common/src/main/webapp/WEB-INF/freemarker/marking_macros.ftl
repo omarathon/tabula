@@ -431,12 +431,12 @@
 		jQuery(function($){
 			$('#sendToSits').on('change', function(){
 				var $validationDiv = $('.grade-validation');
-				if ($(this).is(':checked') && ($validationDiv.hasClass('alert-info') || $validationDiv.hasClass('alert-error'))) {
+				if ($(this).is(':checked') && ($validationDiv.hasClass('alert-info') || $validationDiv.hasClass('alert-danger'))) {
 					$validationDiv.show();
 				} else {
 					$validationDiv.hide();
 				}
-			});
+			}).trigger('change');
 		});
 	</script>
 </#macro>

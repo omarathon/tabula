@@ -190,6 +190,7 @@
 		<bean class="uk.ac.warwick.tabula.data.convert.AssignmentInfoFilterConverter"/>
 		<bean class="uk.ac.warwick.tabula.data.convert.SubmissionAndFeedbackInfoFilterConverter"/>
 		<bean class="uk.ac.warwick.tabula.data.model.AssignmentAnonymityConverter" />
+		<bean class="uk.ac.warwick.tabula.data.model.markingworkflow.ModerationSamplerConverter" />
 	</util:list>
 
 	<bean id="typeConverter"

@@ -1,4 +1,5 @@
 package uk.ac.warwick.tabula.data
+import org.hibernate.criterion.Restrictions.disjunction
 import org.springframework.stereotype.Repository
 import uk.ac.warwick.tabula.AcademicYear
 import uk.ac.warwick.tabula.data.model.{Course, CourseYearWeighting, Department}
@@ -22,6 +23,7 @@ trait CourseDao {
 	def getByCode(code: String): Option[Course]
 	def getAllCourseCodes: Seq[String]
 	def findByDepartment(department: Department): Seq[Course]
+	def findCoursesNamedLike(query: String): Seq[Course]
 
 	def getCourseYearWeighting(courseCode: String, academicYear: AcademicYear, yearOfStudy: YearOfStudy): Option[CourseYearWeighting]
 	def findAllCourseYearWeightings(courses: Seq[Course], academicYear: AcademicYear): Seq[CourseYearWeighting]
@@ -46,6 +48,15 @@ class CourseDaoImpl extends CourseDao with Daoisms {
 		session.newCriteria[Course]
 			.add(is("_department", department))
 			.seq
+
+	def findCoursesNamedLike(query: String): Seq[Course] = {
+		session.newCriteria[Course]
+			.add(disjunction()
+				.add(likeIgnoreCase("code", s"%${query.toLowerCase}%"))
+				.add(likeIgnoreCase("name", s"%${query.toLowerCase}%"))
+			)
+			.setMaxResults(20).seq
+	}
 
 	def getCourseYearWeighting(courseCode: String, academicYear: AcademicYear, yearOfStudy: Int): Option[CourseYearWeighting] =
 		session.newCriteria[CourseYearWeighting]

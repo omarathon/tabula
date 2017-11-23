@@ -43,8 +43,8 @@ class EmailUnsentEmailCountHealthcheck extends ServiceHealthcheckProvider {
 @Profile(Array("scheduling"))
 class EmailOldestUnsentItemHealthcheck extends ServiceHealthcheckProvider {
 
-	val WarningThreshold = 20 // minutes
-	val ErrorThreshold = 30 // minutes
+	val WarningThreshold = 5 // minutes
+	val ErrorThreshold = 10 // minutes
 
 	@Scheduled(fixedRate = 60 * 1000) // 1 minute
 	def run(): Unit = transactional(readOnly = true) {
@@ -52,22 +52,30 @@ class EmailOldestUnsentItemHealthcheck extends ServiceHealthcheckProvider {
 		val oldestUnsentEmail =
 			Wire[EmailNotificationService].oldestUnemailedRecipient
 				.map { recipient: RecipientNotificationInfo =>
+				Minutes.minutesBetween(recipient.notification.created, DateTime.now).getMinutes
+			}.getOrElse(0)
+
+		// How new (in minutes) is the latest item in the queue?
+		val recentSentEmail =
+			Wire[EmailNotificationService].recentEmailedRecipient
+				.map { recipient: RecipientNotificationInfo =>
 					Minutes.minutesBetween(recipient.notification.created, DateTime.now).getMinutes
-				}
-				.getOrElse(0)
+				}.getOrElse(0)
 
 		val status =
-			if (oldestUnsentEmail >= ErrorThreshold) ServiceHealthcheck.Status.Error
-			else if (oldestUnsentEmail >= WarningThreshold) ServiceHealthcheck.Status.Warning
-			else ServiceHealthcheck.Status.Okay
+			if (oldestUnsentEmail == 0) ServiceHealthcheck.Status.Okay // empty queue
+			else if (recentSentEmail >= ErrorThreshold) ServiceHealthcheck.Status.Error
+			else if (recentSentEmail >= WarningThreshold) ServiceHealthcheck.Status.Warning
+			else ServiceHealthcheck.Status.Okay // email queue still processing so may take time to sent them all
 
 		update(ServiceHealthcheck(
 			name = "email-delay",
 			status = status,
 			testedAt = DateTime.now,
-			message = s"Oldest unsent email $oldestUnsentEmail minute${if (oldestUnsentEmail == 1) "" else "s"} old (warning: $WarningThreshold, critical: $ErrorThreshold)",
+			message = s"Last sent email $recentSentEmail minute${if (recentSentEmail == 1) "" else "s"} old, Oldest unsent email $oldestUnsentEmail minute${if (oldestUnsentEmail == 1) "" else "s"} old, (warning: $WarningThreshold, critical: $ErrorThreshold)",
 			performanceData = Seq(
-				ServiceHealthcheck.PerformanceData("oldest_unsent", oldestUnsentEmail, WarningThreshold, ErrorThreshold)
+				ServiceHealthcheck.PerformanceData("oldest_unsent", oldestUnsentEmail, WarningThreshold, ErrorThreshold),
+				ServiceHealthcheck.PerformanceData("last_sent", recentSentEmail, WarningThreshold, ErrorThreshold)
 			)
 		))
 	}

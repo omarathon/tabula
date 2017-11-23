@@ -35,11 +35,11 @@ class CopyMarkingWorkflowCommandInternal(val department: Department, val marking
 			case _ => throw new IllegalArgumentException(s"workflow ${markingWorkflow.id} has no markers")
 		}
 
-		val newWorkflow = markingWorkflow.workflowType match {
-			case DoubleMarking => DoubleWorkflow(markingWorkflow.name, department, markersAUsers, markersBUsers)
-			case ModeratedMarking => ModeratedWorkflow(markingWorkflow.name, department, markersAUsers, markersBUsers)
-			case SingleMarking => SingleMarkerWorkflow(markingWorkflow.name, department, markersAUsers)
-			case DoubleBlindMarking => DoubleBlindWorkflow(markingWorkflow.name, department, markersAUsers, markersBUsers)
+		val newWorkflow = markingWorkflow match {
+			case w: DoubleWorkflow => DoubleWorkflow(w.name, department, markersAUsers, markersBUsers)
+			case w: ModeratedWorkflow => ModeratedWorkflow(w.name, department, w.moderationSampler, markersAUsers, markersBUsers)
+			case w: SingleMarkerWorkflow => SingleMarkerWorkflow(w.name, department, markersAUsers)
+			case w: DoubleBlindWorkflow => DoubleBlindWorkflow(w.name, department, markersAUsers, markersBUsers)
 			case _ => throw new UnsupportedOperationException(markingWorkflow.workflowType + " not specified")
 		}
 		newWorkflow.academicYear = currentAcademicYear

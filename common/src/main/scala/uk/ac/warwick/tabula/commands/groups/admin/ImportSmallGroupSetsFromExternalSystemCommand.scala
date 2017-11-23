@@ -84,7 +84,7 @@ trait LookupEventsFromModuleTimetables {
 	lazy val timetabledEvents: Seq[TimetabledSmallGroupEvent] =
 		modules.toSeq.flatMap { module =>
 			Try {
-				Await.result(timetableFetchingService.getTimetableForModule(module.code.toUpperCase, includeStudents = true),ImportSmallGroupEventsFromExternalSystemCommand.Timeout)
+				Await.result(timetableFetchingService.getTimetableForModule(module.code.toUpperCase, includeStudents = true), ImportSmallGroupEventsFromExternalSystemCommand.Timeout)
 					.events
 					.filter(ImportSmallGroupEventsFromExternalSystemCommand.isValidForYear(academicYear))
 					.groupBy { _.eventType }
@@ -110,7 +110,7 @@ trait SetDefaultSelectedValue extends PopulateOnForm {
 				set.academicYear == academicYear &&
 				!set.archived && !set.deleted &&
 				set.name == name
-			})
+			} && ImportSmallGroupEventsFromExternalSystemCommand.isImportByDefault(eventType))
 		}
 	}
 }

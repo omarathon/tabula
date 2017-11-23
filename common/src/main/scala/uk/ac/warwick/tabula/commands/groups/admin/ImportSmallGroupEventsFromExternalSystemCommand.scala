@@ -43,8 +43,10 @@ object ImportSmallGroupEventsFromExternalSystemCommand {
 			with LookupEventsFromModuleTimetable
 
 	def isValidForYear(academicYear: AcademicYear)(event: TimetableEvent): Boolean =
-		event.year == academicYear &&
-			(event.eventType == TimetableEventType.Practical || event.eventType == TimetableEventType.Seminar || event.eventType == TimetableEventType.Other("WRB-ACTIVE"))
+		event.year == academicYear
+
+	def isImportByDefault(eventType: TimetableEventType): Boolean =
+		eventType == TimetableEventType.Practical || eventType == TimetableEventType.Seminar || eventType == TimetableEventType.Other("WRB-ACTIVE")
 
 	class EventToImport {
 		def this(event: TimetableEvent) {

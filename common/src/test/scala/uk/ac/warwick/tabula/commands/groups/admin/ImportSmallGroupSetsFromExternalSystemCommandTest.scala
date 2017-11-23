@@ -161,26 +161,7 @@ class ImportSmallGroupSetsFromExternalSystemCommandTest extends TestBase with Mo
 		)
 
 		command.timetableFetchingService.getTimetableForModule("IN101", includeStudents = true) returns Future.successful(EventList.fresh(Seq(
-			tEventModule1Seminar1, tEventModule1Seminar2,
-			TimetableEvent(
-				uid="uuid3",
-				name="IN101L",
-				title="",
-				description="",
-				startTime=new LocalTime(12, 0),
-				endTime=new LocalTime(13, 0),
-				weekRanges=Seq(WeekRange(6, 10)),
-				day=DayOfWeek.Friday,
-				eventType=TimetableEventType.Lecture,
-				location=Some(NamedLocation("L5")),
-				parent=TimetableEvent.Parent(Some(module1)),
-				comments=None,
-				staff=Seq(tutor),
-				students=Nil,
-				year = AcademicYear(2012),
-				relatedUrl = None,
-				attendance = Map()
-			)
+			tEventModule1Seminar1, tEventModule1Seminar2
 		)))
 		command.timetableFetchingService.getTimetableForModule("IN102", includeStudents = true) returns Future.successful(EventList.fresh(Seq(
 			TimetableEvent(

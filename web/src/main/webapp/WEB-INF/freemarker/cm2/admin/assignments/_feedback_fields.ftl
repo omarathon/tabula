@@ -37,14 +37,13 @@
 		</@bs3form.radio>
 	</@bs3form.labelled_form_group>
 
-	<@bs3form.labelled_form_group path="dissertation" labelText="Dissertations">
+	<@bs3form.labelled_form_group path="dissertation" labelText="Feedback turnaround time">
 		<@bs3form.checkbox path="dissertation">
 			<@f.checkbox path="dissertation" id="dissertation" />
-			This assignment is a dissertation
+			This assignment is exempt from the
+			<a href="https://warwick.ac.uk/services/aro/dar/quality/categories/examinations/assessmentstrat/assessment/timeliness/" target="_blank">universal requirement</a>
+			to return feedback within 20 University working days
 		</@bs3form.checkbox>
-		<div class="help-block">
-			Dissertations don't have a 20-day turnaround time for feedback.
-		</div>
 	</@bs3form.labelled_form_group>
 
 	<@bs3form.labelled_form_group path="publishFeedback" labelText="Publish feedback to students">

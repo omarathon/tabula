@@ -6,6 +6,7 @@ import org.joda.time.DateTime
 import org.springframework.stereotype.Repository
 import uk.ac.warwick.spring.Wire
 import uk.ac.warwick.tabula.AcademicYear
+import uk.ac.warwick.tabula.JavaImports._
 import uk.ac.warwick.tabula.data.Daoisms._
 import uk.ac.warwick.tabula.data.HibernateHelpers._
 import uk.ac.warwick.tabula.data.model.{MemberStudentRelationship, _}
@@ -68,6 +69,8 @@ trait MemberDao {
 		staffOnly: Boolean = false,
 		studentOnly: Boolean = false
 	): Seq[String]
+
+	def findUndergraduateUsercodesByHomeDepartmentAndLevel(department: Department, levelCode: String): Seq[String]
 }
 
 @Repository
@@ -484,5 +487,15 @@ class MemberDaoImpl extends MemberDao with Logging with AttendanceMonitoringStud
 				session.enableFilter(Member.StudentsOnlyFilter)
 			}
 		}
+	}
+
+	def findUndergraduateUsercodesByHomeDepartmentAndLevel(department: Department, levelCode: String): Seq[String] = {
+		session.createQuery("select userId from StudentMember where homeDepartment = :department and groupName like :groupName and mostSignificantCourse.levelCode = :levelCode")
+			.setEntity("department", department)
+			.setParameter("groupName", "Undergraduate%")
+			.setParameter("levelCode", levelCode)
+			.list
+			.asInstanceOf[JList[String]]
+			.asScala
 	}
 }

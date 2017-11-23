@@ -6,7 +6,11 @@
 	<#if smallGroupSet.linked>
 		<div class="groupEnrolment">
 			<@bs3form.form_group path="members">
-				<p>There are <@fmt.p smallGroupSet.members.size "student" /> in ${smallGroupSet.name} (from ${smallGroupSet.linkedDepartmentSmallGroupSet.name}).</p>
+				<p>
+					There <@fmt.p number=smallGroupSet.members.size singular="is" plural="are" shownumber=false />
+					<@fmt.p smallGroupSet.members.size "student" />
+					in ${smallGroupSet.name} (from ${smallGroupSet.linkedDepartmentSmallGroupSet.name}).
+				</p>
 
 				<div id="enrolment">
 					<table id="enrolment-table" class="table table-striped table-condensed table-hover table-sortable table-checkable sticky-table-headers">

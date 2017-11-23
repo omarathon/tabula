@@ -4,7 +4,9 @@ import org.hibernate.`type`.StandardBasicTypes
 import java.sql.Types
 
 import uk.ac.warwick.tabula.CaseObjectEqualityFixes
+import uk.ac.warwick.tabula.data.HibernateHelpers
 import uk.ac.warwick.tabula.data.model.AbstractBasicUserType
+import uk.ac.warwick.tabula.data.model.markingworkflow.ModerationSampler.Marker
 import uk.ac.warwick.tabula.helpers.StringUtils
 import uk.ac.warwick.tabula.system.TwoWayConverter
 import uk.ac.warwick.tabula.helpers.StringUtils._
@@ -24,6 +26,12 @@ sealed abstract class MarkingWorkflowStage(val name: String, val order: Int) ext
 
 	// should the online marker and upload marks commands be pre-populated with the previous stages feedback
 	def populateWithPreviousFeedback: Boolean = false
+
+	// should users at this stage be able to complete feedback skipping any intermediate stage
+	def canFinish(markingWorkflow: CM2MarkingWorkflow): Boolean = false
+
+	// should the stage show the mark in ListMarkerFeedback
+	def summariseCurrentFeedback: Boolean = false
 
 	// should the stage show the mark and marker name for the previous feedback in ListMarkerFeedback
 	def summarisePreviousFeedback: Boolean = false
@@ -82,12 +90,14 @@ object MarkingWorkflowStage {
 		override def nextStages: Seq[MarkingWorkflowStage] = Seq(DblBlndFinalMarker)
 		override def allocationName = "First independent marker"
 		override def stageAllocation = true
+		override def description = "First independent marker"
 	}
 	case object DblBlndInitialMarkerB extends MarkingWorkflowStage("dbl-blnd-marker-b", 1) {
 		override def roleName: String = "Independent marker"
 		override def nextStages: Seq[MarkingWorkflowStage] = Seq(DblBlndFinalMarker)
 		override def allocationName = "Second independent marker"
 		override def stageAllocation = true
+		override def description = "Second independent marker"
 	}
 	case object DblBlndFinalMarker extends MarkingWorkflowStage("dbl-blnd-final-marker", 2) {
 		override def roleName = "Final marker"
@@ -103,6 +113,10 @@ object MarkingWorkflowStage {
 	// moderated workflow
 	case object ModerationMarker extends MarkingWorkflowStage("moderation-marker", 1) {
 		override def nextStages: Seq[MarkingWorkflowStage] = Seq(ModerationModerator)
+		override def canFinish(workflow: CM2MarkingWorkflow): Boolean = Option(HibernateHelpers.initialiseAndUnproxy(workflow))
+			.collect{case w: ModeratedWorkflow => w}
+			.exists(_.moderationSampler == Marker)
+		override def summariseCurrentFeedback: Boolean = true
 	}
 	case object ModerationModerator extends MarkingWorkflowStage("moderation-moderator", 2) {
 		override def roleName = "Moderator"

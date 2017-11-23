@@ -4,8 +4,7 @@ import scala.collection.JavaConverters._
 import scala.language.implicitConversions
 import uk.ac.warwick.tabula.data.model.groups.WeekRange
 import uk.ac.warwick.tabula.data.model.groups.DayOfWeek
-import uk.ac.warwick.tabula.{CurrentUser, RequestInfo}
-import uk.ac.warwick.tabula.AcademicYear
+import uk.ac.warwick.tabula.{AcademicYear, CurrentUser, NoCurrentUser, RequestInfo}
 import uk.ac.warwick.util.termdates.Term
 import org.joda.time.{DateTime, Interval}
 import uk.ac.warwick.tabula.data.model.Department
@@ -48,7 +47,7 @@ class WeekRangesFormatterTag extends TemplateMethodModelEx with KnowsUserNumberi
 
 	/** Pass through all the arguments, or just a SmallGroupEvent if you're lazy */
 	override def exec(list: JList[_]): String = {
-		val user = RequestInfo.fromThread.get.user
+		val user = RequestInfo.fromThread.map(_.user).getOrElse(NoCurrentUser())
 
 		val args = list.asScala.toSeq.map { model => DeepUnwrap.unwrap(model.asInstanceOf[TemplateModel]) }
 		args match {

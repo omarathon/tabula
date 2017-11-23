@@ -5,11 +5,12 @@ import uk.ac.warwick.tabula.AcademicYear
 import uk.ac.warwick.tabula.commands._
 import uk.ac.warwick.tabula.commands.cm2.markingworkflows._
 import uk.ac.warwick.tabula.data.model.{WorkflowCategory, _}
-import uk.ac.warwick.tabula.data.model.markingworkflow.CM2MarkingWorkflow
+import uk.ac.warwick.tabula.data.model.markingworkflow.{CM2MarkingWorkflow, ModeratedWorkflow}
 import uk.ac.warwick.tabula.permissions.Permissions
 import uk.ac.warwick.tabula.services.{AssessmentServiceComponent, UserLookupComponent, _}
 import uk.ac.warwick.tabula.system.permissions.{PermissionsChecking, PermissionsCheckingMethods, RequiresPermissionsChecking}
 import uk.ac.warwick.tabula.JavaImports._
+import uk.ac.warwick.tabula.data.HibernateHelpers
 
 object EditAssignmentDetailsCommand {
 	def apply(assignment: Assignment) =
@@ -47,6 +48,7 @@ class EditAssignmentDetailsCommandInternal(override val assignment: Assignment) 
 						assignment.resetMarkerFeedback()
 					} else {
 						w.replaceMarkers(markersAUsers, markersBUsers)
+						workflow.map(HibernateHelpers.initialiseAndUnproxy).collect{case w: ModeratedWorkflow => w}.foreach(w => w.moderationSampler = sampler)
 						cm2MarkingWorkflowService.save(w)
 					}
 				// persist any new workflow
@@ -84,6 +86,9 @@ class EditAssignmentDetailsCommandInternal(override val assignment: Assignment) 
 		reusableWorkflow = Option(assignment.cm2MarkingWorkflow).filter(_.isReusable).orNull
 		anonymity = assignment._anonymity
 		workflow.foreach(w => workflowType = w.workflowType)
+		workflow.map(HibernateHelpers.initialiseAndUnproxy).collect{case w: ModeratedWorkflow => w}.foreach(w =>
+			sampler = w.moderationSampler
+		)
 		extractMarkers match { case (a, b) =>
 			markersA = JArrayList(a)
 			markersB = JArrayList(b)
