@@ -63,7 +63,7 @@ class FeedbackAdjustmentsController extends CourseworkController with Autowiring
 
 	@RequestMapping
 	def showForm(
-		@ModelAttribute("command") command: Appliable[Feedback] with FeedbackAdjustmentCommandState,
+		@ModelAttribute("command") command: Appliable[Feedback] with FeedbackAdjustmentCommandState with FeedbackAdjustmentGradeValidation,
 		@PathVariable assignment: Assignment,
 		@PathVariable student: User
 	): Mav = {
@@ -95,13 +95,14 @@ class FeedbackAdjustmentsController extends CourseworkController with Autowiring
 			"marksSubtracted" -> marksSubtracted,
 			"proposedAdjustment" -> proposedAdjustment,
 			"latePenalty" -> latePenaltyPerDay,
-			"isGradeValidation" -> assignment.module.adminDepartment.assignmentGradeValidation
+			"isGradeValidation" -> assignment.module.adminDepartment.assignmentGradeValidation,
+			"gradeValidation" -> command.gradeValidation.orNull
 		)).noLayout()
 	}
 
 	@RequestMapping(method = Array(POST))
 	def submit(
-		@Valid @ModelAttribute("command") command: Appliable[Feedback] with FeedbackAdjustmentCommandState,
+		@Valid @ModelAttribute("command") command: Appliable[Feedback] with FeedbackAdjustmentCommandState with FeedbackAdjustmentGradeValidation,
 		errors: Errors,
 		@PathVariable assignment: Assignment,
 		@PathVariable student: User
