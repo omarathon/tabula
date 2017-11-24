@@ -115,7 +115,7 @@ class Extension extends GeneratedId with PermissionsTarget with ToEntityReferenc
 	def unreviewed: Boolean = state == ExtensionState.Unreviewed
 	def revoked: Boolean = state == ExtensionState.Revoked
 	def moreInfoRequired: Boolean = state == ExtensionState.MoreInformationRequired
-	def moreInfoReceived: Boolean = state == ExtensionState.MoreInformationRequired
+	def moreInfoReceived: Boolean = state == ExtensionState.MoreInformationReceived
 
 	def rejectable: Boolean = awaitingReview || (approved && isInitiatedByStudent)
 	def revocable: Boolean = approved && !isInitiatedByStudent
