@@ -70,7 +70,10 @@ trait MemberDao {
 		studentOnly: Boolean = false
 	): Seq[String]
 
+	def findUndergraduateUsercodesByLevel(levelCode: String): Seq[String]
+	def findFinalistUndergraduateUsercodes(): Seq[String]
 	def findUndergraduateUsercodesByHomeDepartmentAndLevel(department: Department, levelCode: String): Seq[String]
+	def findFinalistUndergraduateUsercodesByHomeDepartment(department: Department): Seq[String]
 }
 
 @Repository
@@ -489,11 +492,37 @@ class MemberDaoImpl extends MemberDao with Logging with AttendanceMonitoringStud
 		}
 	}
 
+	override def findUndergraduateUsercodesByLevel(levelCode: String): Seq[String] = {
+		session.createQuery("select userId from StudentMember where groupName like :groupName and mostSignificantCourse.levelCode = :levelCode")
+			.setParameter("groupName", "Undergraduate%")
+			.setParameter("levelCode", levelCode)
+			.list
+			.asInstanceOf[JList[String]]
+			.asScala
+	}
+
 	def findUndergraduateUsercodesByHomeDepartmentAndLevel(department: Department, levelCode: String): Seq[String] = {
 		session.createQuery("select userId from StudentMember where homeDepartment = :department and groupName like :groupName and mostSignificantCourse.levelCode = :levelCode")
 			.setEntity("department", department)
 			.setParameter("groupName", "Undergraduate%")
 			.setParameter("levelCode", levelCode)
+			.list
+			.asInstanceOf[JList[String]]
+			.asScala
+	}
+
+	override def findFinalistUndergraduateUsercodes(): Seq[String] = {
+		session.createQuery("select userId from StudentMember where groupName like :groupName and mostSignificantCourse.levelCode like mostSignificantCourse.courseYearLength")
+			.setParameter("groupName", "Undergraduate%")
+			.list
+			.asInstanceOf[JList[String]]
+			.asScala
+	}
+
+	def findFinalistUndergraduateUsercodesByHomeDepartment(department: Department): Seq[String] = {
+		session.createQuery("select userId from StudentMember where homeDepartment = :department and groupName like :groupName and mostSignificantCourse.levelCode like mostSignificantCourse.courseYearLength")
+			.setEntity("department", department)
+			.setParameter("groupName", "Undergraduate%")
 			.list
 			.asInstanceOf[JList[String]]
 			.asScala
