@@ -1,20 +1,21 @@
 package uk.ac.warwick.tabula.services
 
+import java.util.UUID
+
 import org.joda.time.DateTime
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.stereotype.Service
 import uk.ac.warwick.spring.Wire
 import uk.ac.warwick.tabula.AcademicYear
-import uk.ac.warwick.tabula.data._
+import uk.ac.warwick.tabula.JavaImports._
+import uk.ac.warwick.tabula.commands.FiltersStudents
 import uk.ac.warwick.tabula.data.Transactions._
+import uk.ac.warwick.tabula.data._
 import uk.ac.warwick.tabula.data.model._
 import uk.ac.warwick.tabula.helpers.Logging
-import uk.ac.warwick.tabula.commands.FiltersStudents
+import uk.ac.warwick.tabula.helpers.StringUtils._
 import uk.ac.warwick.tabula.services.elasticsearch.ProfileQueryService
 import uk.ac.warwick.userlookup.User
-import uk.ac.warwick.tabula.helpers.StringUtils._
-import java.util.UUID
-import uk.ac.warwick.tabula.JavaImports._
 
 /**
  * Service providing access to members and profiles.
@@ -76,6 +77,11 @@ trait ProfileService {
 	def findTaughtPostgraduatesUsercodesInHomeDepartment(department: Department): Seq[String]
 	def findResearchPostgraduatesUsercodesInHomeDepartment(department: Department): Seq[String]
 	def findUndergraduatesUsercodesInHomeDepartmentByLevel(department: Department, levelCode: String): Seq[String]
+	def findFinalistUndergraduateUsercodesInHomeDepartment(department: Department): Seq[String]
+
+	def findUndergraduateUsercodes(): Seq[String]
+	def findUndergraduatesUsercodesByLevel(level: String): Seq[String]
+	def findFinalistUndergraduateUsercodes(): Seq[String]
 }
 
 abstract class AbstractProfileService extends ProfileService with Logging {
@@ -408,8 +414,26 @@ abstract class AbstractProfileService extends ProfileService with Logging {
 		), studentOnly = true)
 	}
 
+	override def findUndergraduateUsercodes(): Seq[String] = transactional(readOnly = true) {
+		memberDao.findAllUsercodesByRestrictions(Seq(
+			new ScalaRestriction(HibernateHelpers.like("groupName", "Undergraduate%"))
+		), studentOnly = true)
+	}
+
+	override def findUndergraduatesUsercodesByLevel(levelCode: String): Seq[String] = transactional(readOnly = true) {
+		memberDao.findUndergraduateUsercodesByLevel(levelCode)
+	}
+
+	override def findFinalistUndergraduateUsercodes(): Seq[String] = transactional(readOnly = true) {
+		memberDao.findFinalistUndergraduateUsercodes()
+	}
+
 	override def findUndergraduatesUsercodesInHomeDepartmentByLevel(department: Department, levelCode: String): Seq[String] = transactional(readOnly = true) {
 		memberDao.findUndergraduateUsercodesByHomeDepartmentAndLevel(department, levelCode)
+	}
+
+	override def findFinalistUndergraduateUsercodesInHomeDepartment(department: Department): Seq[String] = transactional(readOnly = true) {
+		memberDao.findFinalistUndergraduateUsercodesByHomeDepartment(department)
 	}
 }
 
