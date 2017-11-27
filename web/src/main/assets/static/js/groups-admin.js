@@ -148,6 +148,12 @@ $(function() {
 			$this.closest('.form-group').find('input[type="hidden"]').val($this.data('lid'));
 			$this.data('lid','');
 		})
+		.on('blur', function () {
+			var locationPicker = $(this).data('location-picker');
+			if (locationPicker.$menu.children().length === 1) {
+				locationPicker.select();
+			}
+		})
 		.locationPicker();
 });
 
