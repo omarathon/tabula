@@ -104,25 +104,56 @@ Method calls (after initialising):
         var hasReturnList = $returnList.length > 0;
 
         // randomly allocate items from .return-list into all the other lists.
-        this.randomise = function() {
+        this.randomise = function () {
             var $sourceList = $returnList;
             var $targets = $el.find(sortables).not('.return-list');
 
             // shuffle the items
-            var items = $sourceList.find("li").sort(function(){
+            var items = $sourceList.find("li").sort(function () {
                 return Math.random() > 0.5 ? 1 : -1;
             });
 
-            var itemsPerTarget =  Math.floor(items.length / $targets.length);
-            var remainder = items.slice(items.length - (items.length % $targets.length));
-            $targets.each(function(index, target){
+            var itemsPerTarget = Math.floor(items.length / $targets.length);
+            var itemCountToBeDividedUp = items.length;
+            var unlimitedTargets = $targets.length;
+
+            var availableSlots = function ($target) {
+                return ($target.data("max-members") || 1000000) - $target.find('li').length;
+            };
+
+            // check for any limits on group numbers <= average items per target, adjust items per target accordingly
+            $targets.each(function (index, target) {
+                var targetLimit = availableSlots($(target));
+                if (targetLimit <= itemsPerTarget) {
+                    itemCountToBeDividedUp = itemCountToBeDividedUp - targetLimit;
+                    unlimitedTargets--;
+                }
+            });
+
+            // recalculate items per target if any of the targets have limits less than/equal to
+            if (itemCountToBeDividedUp != itemsPerTarget) {
+                itemsPerTarget = Math.floor(itemCountToBeDividedUp / unlimitedTargets)
+            }
+
+            var remainderCount = itemCountToBeDividedUp % unlimitedTargets;
+
+            $targets.each(function (index, target) {
                 var $target = $(target);
-                var from = (index*itemsPerTarget);
-                var to = ((index+1)*itemsPerTarget);
-                var itemsForTarget = items.slice(from, to);
-                // If any left, add one to this list.
-                if(remainder.length > 0)
-                    itemsForTarget = itemsForTarget.add(remainder.splice(0,1));
+                var targetLimit = availableSlots($target);
+                var itemsForTarget;
+
+                // grab appropriate number of members for this group from pool, respecting any limits
+                if (targetLimit <= itemsPerTarget) {
+                    itemsForTarget = items.splice(0, targetLimit);
+                } else {
+                    itemsForTarget = items.splice(0, itemsPerTarget);
+
+                    // If any remainders, push one on to this list.
+                    if (remainderCount > 0) {
+                        itemsForTarget.push(items.splice(0, 1));
+                        remainderCount--;
+                    }
+                }
 
                 self.batchMove([{
                     target: $target,
