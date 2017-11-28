@@ -8,7 +8,7 @@ import uk.ac.warwick.tabula.services._
 import uk.ac.warwick.tabula.services.timetables.{LocationFetchingService, LocationFetchingServiceComponent}
 import uk.ac.warwick.tabula._
 import uk.ac.warwick.tabula.data.model.groups._
-import uk.ac.warwick.tabula.data.model.{Department, Location, Module, NamedLocation}
+import uk.ac.warwick.tabula.data.model._
 import uk.ac.warwick.userlookup.User
 
 class SmallGroupSetSpreadsheetHandlerTest extends TestBase with Mockito {
@@ -84,8 +84,8 @@ class SmallGroupSetSpreadsheetHandlerTest extends TestBase with Mockito {
 						name = "Beta",
 						limit = None,
 						events = Seq(
-							ExtractedSmallGroupEvent(None, Seq(curef), Seq(WeekRange(1, 6), WeekRange(8, 10)), Some(DayOfWeek.Monday), Some(new LocalTime(11, 0)), Some(new LocalTime(12, 0)), Some(NamedLocation("S0.28"))),
-							ExtractedSmallGroupEvent(Some("Class Test"), Seq(curef), Seq(WeekRange(7)), Some(DayOfWeek.Monday), Some(new LocalTime(11, 0)), Some(new LocalTime(12, 0)), Some(NamedLocation("S0.28")))
+							ExtractedSmallGroupEvent(None, Seq(curef), Seq(WeekRange(1, 6), WeekRange(8, 10)), Some(DayOfWeek.Monday), Some(new LocalTime(11, 0)), Some(new LocalTime(12, 0)), Some(MapLocation("S0.28", "37406", Some("S0.28")))),
+							ExtractedSmallGroupEvent(Some("Class Test"), Seq(curef), Seq(WeekRange(7)), Some(DayOfWeek.Monday), Some(new LocalTime(11, 0)), Some(new LocalTime(12, 0)), Some(MapLocation("S0.28", "37406", Some("S0.28"))))
 						)
 					),
 					ExtractedSmallGroup(
@@ -159,7 +159,7 @@ class SmallGroupSetSpreadsheetHandlerTest extends TestBase with Mockito {
 						name = "Group 4",
 						limit = Some(15),
 						events = Seq(
-							ExtractedSmallGroupEvent(None, Seq(cuscav), Seq(WeekRange(15, 24)), Some(DayOfWeek.Thursday), Some(new LocalTime(14, 0)), Some(new LocalTime(16, 0)), Some(NamedLocation("S0.27")))
+							ExtractedSmallGroupEvent(None, Seq(cuscav), Seq(WeekRange(15, 24)), Some(DayOfWeek.Thursday), Some(new LocalTime(14, 0)), Some(new LocalTime(16, 0)), Some(MapLocation("CS1.04", "26858", Some("CS_CS1.04"))))
 						)
 					)
 				)
