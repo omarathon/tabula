@@ -124,3 +124,5 @@ TODO grab values from the routes.groups object in code, as that's pretty equival
 
 <#macro copyDepartment department><@_u page="/admin/department/${department.code}/groups/copy" /></#macro>
 <#macro copyModule module><@_u page="/admin/module/${module.code}/groups/copy" /></#macro>
+
+<#macro check_map_locations department academicYear><@_u page="/admin/department/${department.code}/${academicYear.startYear}/check-map-locations" /></#macro>

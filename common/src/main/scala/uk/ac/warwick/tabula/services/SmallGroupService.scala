@@ -97,6 +97,7 @@ trait SmallGroupService {
 	def listDepartmentSetsForMembershipUpdate: Seq[DepartmentSmallGroupSet]
 
 	def listSmallGroupsWithoutLocation(academicYear: AcademicYear): Seq[SmallGroupEvent]
+	def listSmallGroupSetsWithEventsWithoutMapLocation(academicYear: AcademicYear, department: Option[Department]): Map[SmallGroupSet, Seq[SmallGroupEvent]]
 
 	def findSmallGroupsByNameOrModule(query: String, academicYear: AcademicYear, department: Option[String]): Seq[SmallGroup]
 }
@@ -410,7 +411,7 @@ abstract class AbstractSmallGroupService extends SmallGroupService {
 		smallGroupDao.listDepartmentSetsForMembershipUpdate
 
 	def listSmallGroupsWithoutLocation(academicYear: AcademicYear): Seq[SmallGroupEvent] =
-		smallGroupDao.listSmallGroupsWithoutLocation(academicYear: AcademicYear)
+		smallGroupDao.listSmallGroupsWithoutLocation(academicYear, department = None)
 
 	def findSmallGroupsByNameOrModule(query: String, academicYear: AcademicYear, department: Option[String]): Seq[SmallGroup] = {
 
@@ -424,6 +425,9 @@ abstract class AbstractSmallGroupService extends SmallGroupService {
 			Nil
 	}
 
+	override def listSmallGroupSetsWithEventsWithoutMapLocation(academicYear: AcademicYear, department: Option[Department]): Map[SmallGroupSet, Seq[SmallGroupEvent]] = {
+		smallGroupDao.listSmallGroupsWithoutLocation(academicYear, department).groupBy(_.group.groupSet)
+	}
 
 }
 

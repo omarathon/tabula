@@ -83,6 +83,17 @@
 							</@fmt.permission_button>
 						</li>
 					</#if>
+					<li>
+						<#assign open_url><@routes.groups.check_map_locations department adminCommand.academicYear /></#assign>
+						<@fmt.permission_button
+						permission='SmallGroups.Update'
+						scope=department
+						action_descr='edit small groups'
+						href=open_url
+						>
+							Events without map location
+						</@fmt.permission_button>
+					</li>
 
 					<li class="divider"></li>
 
