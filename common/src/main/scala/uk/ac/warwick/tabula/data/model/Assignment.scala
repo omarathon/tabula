@@ -779,7 +779,7 @@ class Assignment
 		if (openEnded || dissertation || !collectSubmissions || _archived) {
 			false
 		} else {
-			submissions.asScala.exists(s => !fullFeedback.exists(f => f.usercode == s.usercode && f.checkedReleased) && !s.suspectPlagiarised)
+			!submissions.asScala.forall(s => fullFeedback.exists(f => f.usercode == s.usercode && f.checkedReleased) || s.suspectPlagiarised)
 		}
 	}
 
@@ -787,7 +787,7 @@ class Assignment
 		if (openEnded || dissertation || !collectSubmissions || _archived) {
 			false
 		} else {
-			submissions.asScala.exists(s => !findExtension(s.usercode).exists(_.approved) && !fullFeedback.exists(f => f.usercode == s.usercode && f.checkedReleased) && !s.suspectPlagiarised)
+			!submissions.asScala.forall(s => findExtension(s.usercode).exists(_.approved) || fullFeedback.exists(f => f.usercode == s.usercode && f.checkedReleased) || s.suspectPlagiarised)
 		}
 	}
 
@@ -795,7 +795,7 @@ class Assignment
 		if (openEnded || dissertation || !collectSubmissions || _archived) {
 			false
 		} else {
-			submissions.asScala.find { _.usercode == usercode }.exists(s => !fullFeedback.exists(f => f.usercode == s.usercode && f.checkedReleased) && !s.suspectPlagiarised)
+			!submissions.asScala.find(_.usercode == usercode).forall(s => fullFeedback.exists(f => f.usercode == s.usercode && f.checkedReleased) || s.suspectPlagiarised)
 		}
 	}
 
