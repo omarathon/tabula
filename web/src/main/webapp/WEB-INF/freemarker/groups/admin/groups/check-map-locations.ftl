@@ -21,7 +21,7 @@
 					<li>
 						${event.group.name}: <strong>${event.title}</strong>
 						has a named location <em>'${event.location.name}'</em>
-						<a href="<@routes.groups.editseteventseditevent event/>" class="btn btn-default btn-xs">Edit</a>
+						<a href="<@routes.groups.editseteventseditevent event/>?returnTo=${(info.requestedUri!"")?url}" class="btn btn-default btn-xs">Edit</a>
 					</li>
 				</#list>
 			</ul>
