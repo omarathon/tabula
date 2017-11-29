@@ -1,20 +1,18 @@
 package uk.ac.warwick.tabula.web.controllers.cm2.admin
 
-import org.joda.time.DateTime
 import org.springframework.context.annotation.Profile
 import org.springframework.stereotype.Controller
 import org.springframework.validation.Errors
 import org.springframework.web.bind.annotation.{ModelAttribute, PathVariable, RequestMapping}
-import uk.ac.warwick.tabula.{AcademicYear, CurrentUser}
-import uk.ac.warwick.tabula.web.Routes
-import uk.ac.warwick.tabula.services.{AutowiringMaintenanceModeServiceComponent, AutowiringModuleAndDepartmentServiceComponent, AutowiringUserSettingsServiceComponent}
-import uk.ac.warwick.tabula.web.controllers.{AcademicYearScopedController, DepartmentScopedController}
-import uk.ac.warwick.tabula.web.controllers.cm2.CourseworkController
-import uk.ac.warwick.tabula.commands.cm2.assignments.{AssignmentInfoFilters, ListAssignmentsCommand}
 import uk.ac.warwick.tabula.commands.cm2.assignments.ListAssignmentsCommand._
+import uk.ac.warwick.tabula.commands.cm2.assignments.{AssignmentInfoFilters, ListAssignmentsCommand}
 import uk.ac.warwick.tabula.data.model.Department
 import uk.ac.warwick.tabula.permissions.Permission
-import uk.ac.warwick.tabula.web.Mav
+import uk.ac.warwick.tabula.services.{AutowiringMaintenanceModeServiceComponent, AutowiringModuleAndDepartmentServiceComponent, AutowiringUserSettingsServiceComponent}
+import uk.ac.warwick.tabula.web.{Mav, Routes}
+import uk.ac.warwick.tabula.web.controllers.cm2.CourseworkController
+import uk.ac.warwick.tabula.web.controllers.{AcademicYearScopedController, DepartmentScopedController}
+import uk.ac.warwick.tabula.{AcademicYear, CurrentUser}
 
 abstract class AbstractDepartmentHomeController
 	extends CourseworkController
@@ -34,7 +32,7 @@ abstract class AbstractDepartmentHomeController
 
 	@ModelAttribute("command")
 	def command(@PathVariable department: Department, @ModelAttribute("activeAcademicYear") activeAcademicYear: Option[AcademicYear], user: CurrentUser): DepartmentCommand = {
-		val academicYear = activeAcademicYear.getOrElse(AcademicYear.guessSITSAcademicYearByDate(DateTime.now))
+		val academicYear = activeAcademicYear.getOrElse(AcademicYear.now())
 
 		ListAssignmentsCommand.department(department, academicYear, user)
 	}

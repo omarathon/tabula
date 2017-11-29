@@ -1,23 +1,20 @@
 package uk.ac.warwick.tabula.commands.groups
 
 import org.joda.time._
-import uk.ac.warwick.tabula.JavaImports._
 import uk.ac.warwick.tabula.commands.groups.SmallGroupAttendanceState._
 import uk.ac.warwick.tabula.data.model.attendance.AttendanceState
 import uk.ac.warwick.tabula.data.model.groups._
 import uk.ac.warwick.tabula.data.model.{Member, MemberUserType, UnspecifiedTypeUserGroup, UserGroup}
 import uk.ac.warwick.tabula.services._
-import uk.ac.warwick.tabula.{AcademicYear, Fixtures, MockUserLookup, Mockito, TestBase}
+import uk.ac.warwick.tabula._
 import uk.ac.warwick.userlookup.User
-import uk.ac.warwick.util.termdates.Term
 
 class ListStudentGroupAttendanceCommandTest extends TestBase with Mockito {
 
 	val baseLocalDateTime = new DateTime(2014, DateTimeConstants.OCTOBER, 19, 9, 18, 33, 0)
 
-	trait CommandTestSupport extends SmallGroupServiceComponent with TermServiceComponent with WeekToDateConverterComponent {
+	trait CommandTestSupport extends SmallGroupServiceComponent with WeekToDateConverterComponent {
 		val smallGroupService: SmallGroupService = smartMock[SmallGroupService]
-		val termService: TermService = smartMock[TermService]
 		val weekToDateConverter: WeekToDateConverter = smartMock[WeekToDateConverter]
 	}
 
@@ -30,7 +27,7 @@ class ListStudentGroupAttendanceCommandTest extends TestBase with Mockito {
 		}
 
 		val now: DateTime = DateTime.now
-		val academicYear: AcademicYear = AcademicYear.guessSITSAcademicYearByDate(now)
+		val academicYear: AcademicYear = AcademicYear.forDate(now)
 
 		val set = new SmallGroupSet
 		set.academicYear = academicYear
@@ -152,31 +149,10 @@ class ListStudentGroupAttendanceCommandTest extends TestBase with Mockito {
 		command.weekToDateConverter.toLocalDatetime(4, DayOfWeek.Monday, new LocalTime(12, 0), set.academicYear) returns Some(new LocalDateTime(2014, DateTimeConstants.OCTOBER, 20, 12, 0))
 		command.weekToDateConverter.toLocalDatetime(7, DayOfWeek.Monday, new LocalTime(16, 0), set.academicYear) returns Some(new LocalDateTime(2014, DateTimeConstants.OCTOBER, 29, 16, 0))
 
-		command.termService.getAcademicWeeksForYear(new LocalDate(academicYear.startYear, DateTimeConstants.NOVEMBER, 1).toDateTimeAtStartOfDay) returns Seq(
-			JInteger(Some(1)) -> new Interval(new LocalDate(academicYear.startYear, DateTimeConstants.OCTOBER, 1).toDateTimeAtStartOfDay.toDateTime, new LocalDate(academicYear.startYear, DateTimeConstants.OCTOBER, 7).toDateTimeAtStartOfDay.toDateTime.minusSeconds(1)),
-			JInteger(Some(2)) -> new Interval(new LocalDate(academicYear.startYear, DateTimeConstants.OCTOBER, 8).toDateTimeAtStartOfDay.toDateTime, new LocalDate(academicYear.startYear, DateTimeConstants.OCTOBER, 14).toDateTimeAtStartOfDay.toDateTime.minusSeconds(1)),
-			JInteger(Some(3)) -> new Interval(new LocalDate(academicYear.startYear, DateTimeConstants.OCTOBER, 15).toDateTimeAtStartOfDay.toDateTime, new LocalDate(academicYear.startYear, DateTimeConstants.OCTOBER, 21).toDateTimeAtStartOfDay.toDateTime.minusSeconds(1)),
-			JInteger(Some(4)) -> new Interval(new LocalDate(academicYear.startYear, DateTimeConstants.OCTOBER, 22).toDateTimeAtStartOfDay.toDateTime, new LocalDate(academicYear.startYear, DateTimeConstants.OCTOBER, 28).toDateTimeAtStartOfDay.toDateTime.minusSeconds(1)),
-			JInteger(Some(5)) -> new Interval(new LocalDate(academicYear.startYear, DateTimeConstants.OCTOBER, 29).toDateTimeAtStartOfDay.toDateTime, new LocalDate(academicYear.startYear, DateTimeConstants.NOVEMBER, 4).toDateTimeAtStartOfDay.toDateTime.minusSeconds(1)),
-			JInteger(Some(6)) -> new Interval(new LocalDate(academicYear.startYear, DateTimeConstants.NOVEMBER, 5).toDateTimeAtStartOfDay.toDateTime, new LocalDate(academicYear.startYear, DateTimeConstants.NOVEMBER, 11).toDateTimeAtStartOfDay.toDateTime.minusSeconds(1)),
-			JInteger(Some(7)) -> new Interval(new LocalDate(academicYear.startYear, DateTimeConstants.NOVEMBER, 12).toDateTimeAtStartOfDay.toDateTime, new LocalDate(academicYear.startYear, DateTimeConstants.NOVEMBER, 18).toDateTimeAtStartOfDay.toDateTime.minusSeconds(1)),
-			JInteger(Some(8)) -> new Interval(new LocalDate(academicYear.startYear, DateTimeConstants.NOVEMBER, 19).toDateTimeAtStartOfDay.toDateTime, new LocalDate(academicYear.startYear, DateTimeConstants.NOVEMBER, 25).toDateTimeAtStartOfDay.toDateTime.minusSeconds(1)),
-			JInteger(Some(9)) -> new Interval(new LocalDate(academicYear.startYear, DateTimeConstants.NOVEMBER, 26).toDateTimeAtStartOfDay.toDateTime, new LocalDate(academicYear.startYear, DateTimeConstants.DECEMBER, 2).toDateTimeAtStartOfDay.toDateTime.minusSeconds(1)),
-			JInteger(Some(10)) -> new Interval(new LocalDate(academicYear.startYear, DateTimeConstants.DECEMBER, 3).toDateTimeAtStartOfDay.toDateTime, new LocalDate(academicYear.startYear, DateTimeConstants.DECEMBER, 9).toDateTimeAtStartOfDay.toDateTime.minusSeconds(1))
-		)
-
-		val term = mock[Term]
-		term.getStartDate returns new LocalDate(academicYear.startYear, DateTimeConstants.OCTOBER, 1).toDateTimeAtStartOfDay.toDateTime
-		term.getEndDate returns new LocalDate(academicYear.startYear, DateTimeConstants.DECEMBER, 9).toDateTimeAtStartOfDay.toDateTime.minusSeconds(1)
-		command.termService.getTermFromDateIncludingVacations(any[DateTime]) returns term
-
-		command.termService.getAcademicWeekForAcademicYear(term.getStartDate, academicYear) returns 1
-		command.termService.getAcademicWeekForAcademicYear(term.getEndDate, academicYear) returns 10
-
 		val info = command.applyInternal()
 		info.missedCount should be (0)
-		info.missedCountByTerm should be (Map(term -> 0))
-		info.termWeeks.toSeq should be (Seq(term -> WeekRange(1, 10)))
+		info.missedCountByTerm should be (Map("" -> 0))
+		info.termWeeks.toSeq should be (Seq("" -> WeekRange(1, 10)))
 
 		// Map all the SortedMaps to Seqs to preserve the order they've been set as
 		val attendanceSeqs = info.attendance.toSeq.map { case (t, attendance) =>
@@ -188,7 +164,7 @@ class ListStudentGroupAttendanceCommandTest extends TestBase with Mockito {
 		}
 
 		attendanceSeqs should be (Seq(
-			(term, Seq(
+			("", Seq(
 				(group, Seq(
 					(1, Seq(((event2, 1), Attended))),
 					(2, Seq(((event1, 2), Late))),
@@ -220,31 +196,10 @@ class ListStudentGroupAttendanceCommandTest extends TestBase with Mockito {
 		command.weekToDateConverter.toLocalDatetime(4, DayOfWeek.Monday, new LocalTime(12, 0), set.academicYear) returns Some(new LocalDateTime(2014, DateTimeConstants.OCTOBER, 20, 12, 0))
 		command.weekToDateConverter.toLocalDatetime(7, DayOfWeek.Monday, new LocalTime(16, 0), set.academicYear) returns Some(new LocalDateTime(2014, DateTimeConstants.OCTOBER, 29, 16, 0))
 
-		command.termService.getAcademicWeeksForYear(new LocalDate(academicYear.startYear, DateTimeConstants.NOVEMBER, 1).toDateTimeAtStartOfDay) returns Seq(
-			JInteger(Some(1)) -> new Interval(new LocalDate(academicYear.startYear, DateTimeConstants.OCTOBER, 1).toDateTimeAtStartOfDay.toDateTime, new LocalDate(academicYear.startYear, DateTimeConstants.OCTOBER, 7).toDateTimeAtStartOfDay.toDateTime.minusSeconds(1)),
-			JInteger(Some(2)) -> new Interval(new LocalDate(academicYear.startYear, DateTimeConstants.OCTOBER, 8).toDateTimeAtStartOfDay.toDateTime, new LocalDate(academicYear.startYear, DateTimeConstants.OCTOBER, 14).toDateTimeAtStartOfDay.toDateTime.minusSeconds(1)),
-			JInteger(Some(3)) -> new Interval(new LocalDate(academicYear.startYear, DateTimeConstants.OCTOBER, 15).toDateTimeAtStartOfDay.toDateTime, new LocalDate(academicYear.startYear, DateTimeConstants.OCTOBER, 21).toDateTimeAtStartOfDay.toDateTime.minusSeconds(1)),
-			JInteger(Some(4)) -> new Interval(new LocalDate(academicYear.startYear, DateTimeConstants.OCTOBER, 22).toDateTimeAtStartOfDay.toDateTime, new LocalDate(academicYear.startYear, DateTimeConstants.OCTOBER, 28).toDateTimeAtStartOfDay.toDateTime.minusSeconds(1)),
-			JInteger(Some(5)) -> new Interval(new LocalDate(academicYear.startYear, DateTimeConstants.OCTOBER, 29).toDateTimeAtStartOfDay.toDateTime, new LocalDate(academicYear.startYear, DateTimeConstants.NOVEMBER, 4).toDateTimeAtStartOfDay.toDateTime.minusSeconds(1)),
-			JInteger(Some(6)) -> new Interval(new LocalDate(academicYear.startYear, DateTimeConstants.NOVEMBER, 5).toDateTimeAtStartOfDay.toDateTime, new LocalDate(academicYear.startYear, DateTimeConstants.NOVEMBER, 11).toDateTimeAtStartOfDay.toDateTime.minusSeconds(1)),
-			JInteger(Some(7)) -> new Interval(new LocalDate(academicYear.startYear, DateTimeConstants.NOVEMBER, 12).toDateTimeAtStartOfDay.toDateTime, new LocalDate(academicYear.startYear, DateTimeConstants.NOVEMBER, 18).toDateTimeAtStartOfDay.toDateTime.minusSeconds(1)),
-			JInteger(Some(8)) -> new Interval(new LocalDate(academicYear.startYear, DateTimeConstants.NOVEMBER, 19).toDateTimeAtStartOfDay.toDateTime, new LocalDate(academicYear.startYear, DateTimeConstants.NOVEMBER, 25).toDateTimeAtStartOfDay.toDateTime.minusSeconds(1)),
-			JInteger(Some(9)) -> new Interval(new LocalDate(academicYear.startYear, DateTimeConstants.NOVEMBER, 26).toDateTimeAtStartOfDay.toDateTime, new LocalDate(academicYear.startYear, DateTimeConstants.DECEMBER, 2).toDateTimeAtStartOfDay.toDateTime.minusSeconds(1)),
-			JInteger(Some(10)) -> new Interval(new LocalDate(academicYear.startYear, DateTimeConstants.DECEMBER, 3).toDateTimeAtStartOfDay.toDateTime, new LocalDate(academicYear.startYear, DateTimeConstants.DECEMBER, 9).toDateTimeAtStartOfDay.toDateTime.minusSeconds(1))
-		)
-
-		val term = mock[Term]
-		term.getStartDate returns new LocalDate(academicYear.startYear, DateTimeConstants.OCTOBER, 1).toDateTimeAtStartOfDay.toDateTime
-		term.getEndDate returns new LocalDate(academicYear.startYear, DateTimeConstants.DECEMBER, 9).toDateTimeAtStartOfDay.toDateTime.minusSeconds(1)
-		command.termService.getTermFromDateIncludingVacations(any[DateTime]) returns term
-
-		command.termService.getAcademicWeekForAcademicYear(term.getStartDate, academicYear) returns 1
-		command.termService.getAcademicWeekForAcademicYear(term.getEndDate, academicYear) returns 10
-
 		val info = command.applyInternal()
 		info.missedCount should be (1)
-		info.missedCountByTerm should be (Map(term -> 1))
-		info.termWeeks.toSeq should be (Seq(term -> WeekRange(1, 10)))
+		info.missedCountByTerm should be (Map("" -> 1))
+		info.termWeeks.toSeq should be (Seq("" -> WeekRange(1, 10)))
 
 		// Map all the SortedMaps to Seqs to preserve the order they've been set as
 		val attendanceSeqs = info.attendance.toSeq.map { case (t, attendance) =>
@@ -256,7 +211,7 @@ class ListStudentGroupAttendanceCommandTest extends TestBase with Mockito {
 		}
 
 		attendanceSeqs should be (Seq(
-			(term, Seq(
+			("", Seq(
 				(group, Seq(
 					(1, Seq(((event2, 1), Attended))),
 					(2, Seq(((event1, 2), Late))),
@@ -288,31 +243,10 @@ class ListStudentGroupAttendanceCommandTest extends TestBase with Mockito {
 		command.weekToDateConverter.toLocalDatetime(4, DayOfWeek.Monday, new LocalTime(12, 0), set.academicYear) returns Some(new LocalDateTime(2014, DateTimeConstants.OCTOBER, 20, 12, 0))
 		command.weekToDateConverter.toLocalDatetime(7, DayOfWeek.Monday, new LocalTime(16, 0), set.academicYear) returns Some(new LocalDateTime(2014, DateTimeConstants.OCTOBER, 29, 16, 0))
 
-		command.termService.getAcademicWeeksForYear(new LocalDate(academicYear.startYear, DateTimeConstants.NOVEMBER, 1).toDateTimeAtStartOfDay) returns Seq(
-			JInteger(Some(1)) -> new Interval(new LocalDate(academicYear.startYear, DateTimeConstants.OCTOBER, 1).toDateTimeAtStartOfDay.toDateTime, new LocalDate(academicYear.startYear, DateTimeConstants.OCTOBER, 7).toDateTimeAtStartOfDay.toDateTime.minusSeconds(1)),
-			JInteger(Some(2)) -> new Interval(new LocalDate(academicYear.startYear, DateTimeConstants.OCTOBER, 8).toDateTimeAtStartOfDay.toDateTime, new LocalDate(academicYear.startYear, DateTimeConstants.OCTOBER, 14).toDateTimeAtStartOfDay.toDateTime.minusSeconds(1)),
-			JInteger(Some(3)) -> new Interval(new LocalDate(academicYear.startYear, DateTimeConstants.OCTOBER, 15).toDateTimeAtStartOfDay.toDateTime, new LocalDate(academicYear.startYear, DateTimeConstants.OCTOBER, 21).toDateTimeAtStartOfDay.toDateTime.minusSeconds(1)),
-			JInteger(Some(4)) -> new Interval(new LocalDate(academicYear.startYear, DateTimeConstants.OCTOBER, 22).toDateTimeAtStartOfDay.toDateTime, new LocalDate(academicYear.startYear, DateTimeConstants.OCTOBER, 28).toDateTimeAtStartOfDay.toDateTime.minusSeconds(1)),
-			JInteger(Some(5)) -> new Interval(new LocalDate(academicYear.startYear, DateTimeConstants.OCTOBER, 29).toDateTimeAtStartOfDay.toDateTime, new LocalDate(academicYear.startYear, DateTimeConstants.NOVEMBER, 4).toDateTimeAtStartOfDay.toDateTime.minusSeconds(1)),
-			JInteger(Some(6)) -> new Interval(new LocalDate(academicYear.startYear, DateTimeConstants.NOVEMBER, 5).toDateTimeAtStartOfDay.toDateTime, new LocalDate(academicYear.startYear, DateTimeConstants.NOVEMBER, 11).toDateTimeAtStartOfDay.toDateTime.minusSeconds(1)),
-			JInteger(Some(7)) -> new Interval(new LocalDate(academicYear.startYear, DateTimeConstants.NOVEMBER, 12).toDateTimeAtStartOfDay.toDateTime, new LocalDate(academicYear.startYear, DateTimeConstants.NOVEMBER, 18).toDateTimeAtStartOfDay.toDateTime.minusSeconds(1)),
-			JInteger(Some(8)) -> new Interval(new LocalDate(academicYear.startYear, DateTimeConstants.NOVEMBER, 19).toDateTimeAtStartOfDay.toDateTime, new LocalDate(academicYear.startYear, DateTimeConstants.NOVEMBER, 25).toDateTimeAtStartOfDay.toDateTime.minusSeconds(1)),
-			JInteger(Some(9)) -> new Interval(new LocalDate(academicYear.startYear, DateTimeConstants.NOVEMBER, 26).toDateTimeAtStartOfDay.toDateTime, new LocalDate(academicYear.startYear, DateTimeConstants.DECEMBER, 2).toDateTimeAtStartOfDay.toDateTime.minusSeconds(1)),
-			JInteger(Some(10)) -> new Interval(new LocalDate(academicYear.startYear, DateTimeConstants.DECEMBER, 3).toDateTimeAtStartOfDay.toDateTime, new LocalDate(academicYear.startYear, DateTimeConstants.DECEMBER, 9).toDateTimeAtStartOfDay.toDateTime.minusSeconds(1))
-		)
-
-		val term = mock[Term]
-		term.getStartDate returns new LocalDate(academicYear.startYear, DateTimeConstants.OCTOBER, 1).toDateTimeAtStartOfDay.toDateTime
-		term.getEndDate returns new LocalDate(academicYear.startYear, DateTimeConstants.DECEMBER, 9).toDateTimeAtStartOfDay.toDateTime.minusSeconds(1)
-		command.termService.getTermFromDateIncludingVacations(any[DateTime]) returns term
-
-		command.termService.getAcademicWeekForAcademicYear(term.getStartDate, academicYear) returns 1
-		command.termService.getAcademicWeekForAcademicYear(term.getEndDate, academicYear) returns 10
-
 		val info = command.applyInternal()
 		info.missedCount should be (2)
-		info.missedCountByTerm should be (Map(term -> 2))
-		info.termWeeks.toSeq should be (Seq(term -> WeekRange(1, 10)))
+		info.missedCountByTerm should be (Map("" -> 2))
+		info.termWeeks.toSeq should be (Seq("" -> WeekRange(1, 10)))
 
 		// Map all the SortedMaps to Seqs to preserve the order they've been set as
 		val attendanceSeqs = info.attendance.toSeq.map { case (t, attendance) =>
@@ -324,7 +258,7 @@ class ListStudentGroupAttendanceCommandTest extends TestBase with Mockito {
 		}
 
 		attendanceSeqs should be (Seq(
-			(term, Seq(
+			("", Seq(
 				(group, Seq(
 					(1, Seq(((event2, 1), Attended))),
 					(2, Seq(((event1, 2), NotExpected))),

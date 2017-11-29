@@ -6,14 +6,13 @@ import org.springframework.stereotype.Controller
 import org.springframework.validation.Errors
 import org.springframework.web.bind.annotation.{ModelAttribute, PathVariable, RequestMapping}
 import uk.ac.warwick.tabula.commands.Appliable
+import uk.ac.warwick.tabula.commands.groups.admin.EditSmallGroupSetDefaultPropertiesCommand
 import uk.ac.warwick.tabula.data.model.Module
 import uk.ac.warwick.tabula.data.model.groups.SmallGroupSet
-import uk.ac.warwick.tabula.commands.groups.admin.EditSmallGroupSetDefaultPropertiesCommand
 import uk.ac.warwick.tabula.groups.web.Routes
-import uk.ac.warwick.tabula.services.AutowiringTermServiceComponent
 import uk.ac.warwick.tabula.web.Mav
 
-abstract class AbstractEditSmallGroupSetDefaultPropertiesController extends SmallGroupEventsController with AutowiringTermServiceComponent {
+abstract class AbstractEditSmallGroupSetDefaultPropertiesController extends SmallGroupEventsController {
 
 	type EditSmallGroupSetDefaultPropertiesCommand = Appliable[SmallGroupSet]
 

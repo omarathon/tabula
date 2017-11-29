@@ -12,13 +12,12 @@ class AttendanceMonitoringEventAttendanceServiceTest extends TestBase with Mocki
 
 	val mockModuleAndDepartmentService: ModuleAndDepartmentService = smartMock[ModuleAndDepartmentService]
 
-	trait ServiceTestSupport extends SmallGroupServiceComponent with TermServiceComponent
+	trait ServiceTestSupport extends SmallGroupServiceComponent
 		with ProfileServiceComponent with AttendanceMonitoringServiceComponent {
 
 		val attendanceMonitoringService: AttendanceMonitoringService = smartMock[AttendanceMonitoringService]
 		val profileService: ProfileService = smartMock[ProfileService]
 		val smallGroupService: SmallGroupService = smartMock[SmallGroupService]
-		val termService: TermService = smartMock[TermService]
 	}
 
 	trait Fixture {
@@ -41,7 +40,7 @@ class AttendanceMonitoringEventAttendanceServiceTest extends TestBase with Mocki
 			))
 		)
 
-		service.termService.getAcademicWeeksForYear(academicYear2013.dateInTermOne) returns termWeeks
+//		service.termService.getAcademicWeeksForYear(academicYear2013.dateInTermOne) returns termWeeks
 
 		val student: StudentMember = Fixtures.student("1234")
 
@@ -56,7 +55,6 @@ class AttendanceMonitoringEventAttendanceServiceTest extends TestBase with Mocki
 		val occurrence = new SmallGroupEventOccurrence
 		occurrence.event = event
 		occurrence.week = 1
-		occurrence.termService = service.termService
 
 		val attendance = new SmallGroupEventAttendance
 		attendance.occurrence = occurrence
@@ -84,8 +82,8 @@ class AttendanceMonitoringEventAttendanceServiceTest extends TestBase with Mocki
 		smallGroupPoint.smallGroupEventQuantity = 1
 		smallGroupPoint.moduleAndDepartmentService = mockModuleAndDepartmentService
 
-		service.termService.getAcademicWeekForAcademicYear(smallGroupPoint.startDate.toDateTimeAtStartOfDay, groupSet.academicYear) returns 1
-		service.termService.getAcademicWeekForAcademicYear(smallGroupPoint.endDate.toDateTimeAtStartOfDay, groupSet.academicYear) returns 2
+//		service.termService.getAcademicWeekForAcademicYear(smallGroupPoint.startDate.toDateTimeAtStartOfDay, groupSet.academicYear) returns 1
+//		service.termService.getAcademicWeekForAcademicYear(smallGroupPoint.endDate.toDateTimeAtStartOfDay, groupSet.academicYear) returns 2
 
 		service.attendanceMonitoringService.listStudentsPoints(student, None, groupSet.academicYear) returns Seq(smallGroupPoint)
 		service.attendanceMonitoringService.getCheckpoints(Seq(smallGroupPoint), Seq(student)) returns Map()

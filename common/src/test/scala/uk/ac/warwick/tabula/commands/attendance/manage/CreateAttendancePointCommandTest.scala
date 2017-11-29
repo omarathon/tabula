@@ -1,26 +1,23 @@
 package uk.ac.warwick.tabula.commands.attendance.manage
 
+import org.joda.time.{DateTime, LocalDate}
+import org.springframework.validation.BindException
+import uk.ac.warwick.tabula.JavaImports.JHashSet
+import uk.ac.warwick.tabula.data.model._
+import uk.ac.warwick.tabula.data.model.attendance._
+import uk.ac.warwick.tabula.services._
 import uk.ac.warwick.tabula.services.attendancemonitoring.{AttendanceMonitoringService, AttendanceMonitoringServiceComponent}
 import uk.ac.warwick.tabula.{AcademicYear, Fixtures, Mockito, TestBase}
-import uk.ac.warwick.tabula.services._
-import org.springframework.validation.BindException
-import org.joda.time.{DateTime, LocalDate}
-import uk.ac.warwick.util.termdates.{Term, TermImpl}
+import uk.ac.warwick.util.termdates.AcademicYearPeriod.PeriodType
 
+import scala.collection.JavaConverters._
 import scala.collection.mutable
-import uk.ac.warwick.tabula.data.model._
-import uk.ac.warwick.tabula.JavaImports.JHashSet
-import uk.ac.warwick.util.termdates.Term.TermType
-import uk.ac.warwick.tabula.data.model.attendance._
-
-import collection.JavaConverters._
 
 class CreateAttendancePointCommandTest extends TestBase with Mockito {
 
 	trait Fixture {
 		val thisDepartment: Department = Fixtures.department("its")
 		val thisAcademicYear = AcademicYear(2014)
-		val thisTermService: TermService = smartMock[TermService]
 		val scheme = new AttendanceMonitoringScheme
 		scheme.department = thisDepartment
 		scheme.academicYear = thisAcademicYear
@@ -29,21 +26,18 @@ class CreateAttendancePointCommandTest extends TestBase with Mockito {
 		scheme.members.addUserId(student.universityId)
 		val command = new CreateAttendancePointCommandInternal(thisDepartment, thisAcademicYear, Seq(scheme))
 			with CreateAttendancePointCommandState
-			with TermServiceComponent
 			with SmallGroupServiceComponent
 			with ModuleAndDepartmentServiceComponent
 			with AttendanceMonitoringServiceComponent
 			with ProfileServiceComponent {
 
-			val termService: TermService = thisTermService
 			val smallGroupService = null
 			val moduleAndDepartmentService = null
 			val attendanceMonitoringService: AttendanceMonitoringService = smartMock[AttendanceMonitoringService]
 			val profileService: ProfileService = smartMock[ProfileService]
 			thisScheduledNotificationService = smartMock[ScheduledNotificationService]
 		}
-		val validator = new AttendanceMonitoringPointValidation with TermServiceComponent with AttendanceMonitoringServiceComponent {
-			val termService: TermService = thisTermService
+		val validator = new AttendanceMonitoringPointValidation with AttendanceMonitoringServiceComponent {
 			val attendanceMonitoringService: AttendanceMonitoringService = smartMock[AttendanceMonitoringService]
 		}
 		val errors = new BindException(command, "command")
@@ -81,19 +75,19 @@ class CreateAttendancePointCommandTest extends TestBase with Mockito {
 		}
 		new Fixture {
 			val date: LocalDate = new DateTime().withYear(2013).toLocalDate
-			validator.termService.getAcademicWeekForAcademicYear(date.toDateTimeAtStartOfDay, AcademicYear(2014)) returns Term.WEEK_NUMBER_BEFORE_START
+//			validator.termService.getAcademicWeekForAcademicYear(date.toDateTimeAtStartOfDay, AcademicYear(2014)) returns Term.WEEK_NUMBER_BEFORE_START
 			validator.validateDate(errors, date, AcademicYear(2014), "startDate")
 			errors.hasFieldErrors("startDate") should be {true}
 		}
 		new Fixture {
 			val date: LocalDate = new DateTime().withYear(2016).toLocalDate
-			validator.termService.getAcademicWeekForAcademicYear(date.toDateTimeAtStartOfDay, AcademicYear(2014)) returns Term.WEEK_NUMBER_AFTER_END
+//			validator.termService.getAcademicWeekForAcademicYear(date.toDateTimeAtStartOfDay, AcademicYear(2014)) returns Term.WEEK_NUMBER_AFTER_END
 			validator.validateDate(errors, date, AcademicYear(2014), "startDate")
 			errors.hasFieldErrors("startDate") should be {true}
 		}
 		new Fixture {
 			val date: LocalDate = new DateTime().withYear(2015).toLocalDate
-			validator.termService.getAcademicWeekForAcademicYear(date.toDateTimeAtStartOfDay, AcademicYear(2014)) returns 10
+//			validator.termService.getAcademicWeekForAcademicYear(date.toDateTimeAtStartOfDay, AcademicYear(2014)) returns 10
 			validator.validateDate(errors, date, AcademicYear(2014), "startDate")
 			errors.hasFieldErrors("startDate") should be {false}
 		}
@@ -236,17 +230,16 @@ class CreateAttendancePointCommandTest extends TestBase with Mockito {
 	@Test
 	def validateCanPointBeEditedByDate() {
 		val startDate = DateTime.now.toLocalDate
-		val autumnTerm = new TermImpl(null, null, null, TermType.autumn)
 		val studentId = "1234"
 		new Fixture {
-			validator.termService.getTermFromDateIncludingVacations(startDate.toDateTimeAtStartOfDay) returns autumnTerm
-			validator.attendanceMonitoringService.findReports(Seq(studentId), AcademicYear(2014), autumnTerm.getTermTypeAsString) returns Seq(new MonitoringPointReport)
+//			validator.termService.getTermFromDateIncludingVacations(startDate.toDateTimeAtStartOfDay) returns autumnTerm
+			validator.attendanceMonitoringService.findReports(Seq(studentId), AcademicYear(2014), PeriodType.autumnTerm.toString) returns Seq(new MonitoringPointReport)
 			validator.validateCanPointBeEditedByDate(errors, startDate, Seq(studentId), AcademicYear(2014))
 			errors.hasFieldErrors("startDate") should be {true}
 		}
 		new Fixture {
-			validator.termService.getTermFromDateIncludingVacations(startDate.toDateTimeAtStartOfDay) returns autumnTerm
-			validator.attendanceMonitoringService.findReports(Seq(studentId), AcademicYear(2014), autumnTerm.getTermTypeAsString) returns Seq()
+//			validator.termService.getTermFromDateIncludingVacations(startDate.toDateTimeAtStartOfDay) returns autumnTerm
+			validator.attendanceMonitoringService.findReports(Seq(studentId), AcademicYear(2014), PeriodType.autumnTerm.toString) returns Seq()
 			validator.validateCanPointBeEditedByDate(errors, startDate, Seq(studentId), AcademicYear(2014))
 			errors.hasFieldErrors("startDate") should be {false}
 		}

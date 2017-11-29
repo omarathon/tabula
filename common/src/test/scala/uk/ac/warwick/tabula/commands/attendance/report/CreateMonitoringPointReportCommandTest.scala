@@ -36,7 +36,7 @@ class CreateMonitoringPointReportCommandTest extends TestBase with Mockito {
 	}
 
 	@Test def apply() { new CommandFixture {
-		command.academicYear = new AcademicYear(2013)
+		command.academicYear = AcademicYear(2013)
 		command.period = "Autumn"
 
 		val student1: StudentMember = Fixtures.student("1234567")
@@ -106,7 +106,7 @@ class CreateMonitoringPointReportCommandTest extends TestBase with Mockito {
 	}
 
 	@Test def validateNoErrors() { new ValidationFixture {
-		command.academicYear = new AcademicYear(2013)
+		command.academicYear = AcademicYear(2013)
 		command.period = "Autumn"
 
 		val student1: StudentMember = Fixtures.student("1234567")
@@ -137,7 +137,7 @@ class CreateMonitoringPointReportCommandTest extends TestBase with Mockito {
 	}}
 
 	@Test def validateNoStudents() { new ValidationFixture {
-		command.academicYear = new AcademicYear(2013)
+		command.academicYear = AcademicYear(2013)
 		command.period = "Autumn"
 
 		command.missedPoints = ListMap()
@@ -152,7 +152,7 @@ class CreateMonitoringPointReportCommandTest extends TestBase with Mockito {
 	}}
 
 	@Test def validateInvalidTerm() { new ValidationFixture {
-		command.academicYear = new AcademicYear(2013)
+		command.academicYear = AcademicYear(2013)
 		command.period = "Winter"
 
 		val student1: StudentMember = Fixtures.student("1234567")
@@ -193,7 +193,7 @@ class CreateMonitoringPointReportCommandTest extends TestBase with Mockito {
 	}}
 
 	@Test def validateAlreadyReported() { new ValidationFixture {
-		command.academicYear = new AcademicYear(2013)
+		command.academicYear = AcademicYear(2013)
 		command.period = "Autumn"
 
 		val student1: StudentMember = Fixtures.student("1234567")
@@ -228,7 +228,7 @@ class CreateMonitoringPointReportCommandTest extends TestBase with Mockito {
 	}}
 
 	@Test def validateNoPermission() { new ValidationFixture {
-		command.academicYear = new AcademicYear(2013)
+		command.academicYear = AcademicYear(2013)
 		command.period = "Autumn"
 
 		val student1: StudentMember = Fixtures.student("1234567")
@@ -263,7 +263,7 @@ class CreateMonitoringPointReportCommandTest extends TestBase with Mockito {
 	}}
 
 	@Test def validateZeroMissedPoints() { new ValidationFixture {
-		command.academicYear = new AcademicYear(2013)
+		command.academicYear = AcademicYear(2013)
 		command.period = "Autumn"
 
 		val student1: StudentMember = Fixtures.student("1234567")
@@ -297,7 +297,7 @@ class CreateMonitoringPointReportCommandTest extends TestBase with Mockito {
 	}}
 
 	@Test def validateNoSCD() { new ValidationFixture {
-		command.academicYear = new AcademicYear(2013)
+		command.academicYear = AcademicYear(2013)
 		command.period = "Autumn"
 
 		val student1: StudentMember = Fixtures.student("1234567")
@@ -328,7 +328,7 @@ class CreateMonitoringPointReportCommandTest extends TestBase with Mockito {
 	}}
 
 	@Test def validateNoSCYD() { new ValidationFixture {
-		command.academicYear = new AcademicYear(2013)
+		command.academicYear = AcademicYear(2013)
 		command.period = "Autumn"
 
 		val student1: StudentMember = Fixtures.student("1234567")
@@ -365,7 +365,7 @@ class CreateMonitoringPointReportCommandTest extends TestBase with Mockito {
 			val currentUser: CurrentUser = mock[CurrentUser]
 		}
 
-		command.academicYear = new AcademicYear(2013)
+		command.academicYear = AcademicYear(2013)
 		command.period = "Autumn"
 
 		val student1 = Fixtures.student("1234567")

@@ -11,7 +11,7 @@ class TurnitinLtiServiceTest extends TestBase {
 		val assignment: Assignment = Fixtures.assignment("1500 word assignment")
 		val module: Module = Fixtures.module("ab101", "First year module")
 		assignment.module = module
-		assignment.academicYear = new AcademicYear(2014)
+		assignment.academicYear = AcademicYear(2014)
 		assignment.id = "12345"
 	}
 

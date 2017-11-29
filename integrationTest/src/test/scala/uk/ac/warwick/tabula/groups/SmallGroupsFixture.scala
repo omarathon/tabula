@@ -1,11 +1,11 @@
 package uk.ac.warwick.tabula.groups
 
 import uk.ac.warwick.tabula.web.{FeaturesDriver, FixturesDriver}
-import uk.ac.warwick.tabula.{BrowserTest, FunctionalTestAcademicYear, LoginDetails}
+import uk.ac.warwick.tabula.{BrowserTest, AcademicYear, LoginDetails}
 
 trait SmallGroupsFixture extends BrowserTest with FixturesDriver with FeaturesDriver {
 
-	val academicYear: FunctionalTestAcademicYear = FunctionalTestAcademicYear.current
+	val academicYear: AcademicYear = AcademicYear.now()
 	val academicYearString: String = academicYear.startYear.toString
 
   before{

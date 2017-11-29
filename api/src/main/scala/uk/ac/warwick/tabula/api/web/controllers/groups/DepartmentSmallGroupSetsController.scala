@@ -1,14 +1,13 @@
 package uk.ac.warwick.tabula.api.web.controllers.groups
 
-import org.joda.time.DateTime
 import org.springframework.stereotype.Controller
 import org.springframework.validation.Errors
 import org.springframework.web.bind.annotation._
-import uk.ac.warwick.tabula.api.web.helpers.{AssessmentMembershipInfoToJsonConverter, SmallGroupEventToJsonConverter, SmallGroupSetToJsonConverter, SmallGroupToJsonConverter}
 import uk.ac.warwick.tabula.api.web.controllers.ApiController
+import uk.ac.warwick.tabula.api.web.helpers.{AssessmentMembershipInfoToJsonConverter, SmallGroupEventToJsonConverter, SmallGroupSetToJsonConverter, SmallGroupToJsonConverter}
 import uk.ac.warwick.tabula.commands.Appliable
-import uk.ac.warwick.tabula.data.model._
 import uk.ac.warwick.tabula.commands.groups.admin.{AdminSmallGroupsHomeCommand, AdminSmallGroupsHomeCommandState, AdminSmallGroupsHomeInformation}
+import uk.ac.warwick.tabula.data.model._
 import uk.ac.warwick.tabula.web.Mav
 import uk.ac.warwick.tabula.web.views.{JSONErrorView, JSONView}
 import uk.ac.warwick.tabula.{AcademicYear, CurrentUser}
@@ -29,7 +28,7 @@ trait ListSmallGroupSetsForDepartmentApi {
 
 	@ModelAttribute("listCommand")
 	def command(@PathVariable department: Department, @RequestParam(required = false) academicYear: AcademicYear, user: CurrentUser): AdminSmallGroupsHomeCommand = {
-		val year = Option(academicYear).getOrElse(AcademicYear.guessSITSAcademicYearByDate(DateTime.now))
+		val year = Option(academicYear).getOrElse(AcademicYear.now())
 
 		AdminSmallGroupsHomeCommand(mandatory(department), year, user, calculateProgress = false)
 	}

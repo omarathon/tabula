@@ -3,10 +3,8 @@ package uk.ac.warwick.tabula.profiles.profile
 import dispatch.classic._
 import dispatch.classic.thread.ThreadSafeHttpClient
 import org.apache.http.client.params.{ClientPNames, CookiePolicy}
-import org.joda.time.DateTime
 import uk.ac.warwick.tabula.web.FixturesDriver
-import uk.ac.warwick.tabula.{AcademicDateHelper, FunctionalTestAcademicYear, FunctionalTestProperties, LoginDetails}
-import uk.ac.warwick.util.termdates.TermFactoryImpl
+import uk.ac.warwick.tabula.{AcademicYear, FunctionalTestProperties, LoginDetails}
 
 import scala.language.postfixOps
 import scala.util.parsing.json.JSON
@@ -14,9 +12,9 @@ import scala.xml.Elem
 
 trait TimetableDriver extends FixturesDriver  {
 
-	def setTimetableFor(userId:String, year:FunctionalTestAcademicYear, content:Elem) {
+	def setTimetableFor(userId:String, year:AcademicYear, content:Elem) {
 		val uri = FunctionalTestProperties.SiteRoot + "/stubTimetable/student"
-		val req = url(uri).POST << Map("studentId" -> userId, "year"->year.toSyllabusPlusFormat, "content"->content.toString)
+		val req = url(uri).POST << Map("studentId" -> userId, "year" -> year.toString.replace("/", ""), "content"->content.toString)
 		http.when(_==200)(req >| )
 	}
 
@@ -29,8 +27,7 @@ trait TimetableDriver extends FixturesDriver  {
 		try {
 			val requestor = asUser.getOrElse(user)
 			// request all the events for the current year
-			val termDates = new AcademicDateHelper(new TermFactoryImpl)
-			val startOfYear = termDates.getFirstTermOfYearContaining(new DateTime).getStartDate
+			val startOfYear = AcademicYear.now().firstDay.toDateTimeAtStartOfDay
 			val start = startOfYear.getMillis
 			val end = startOfYear.plusYears(1).getMillis
 			val req = (url(s"${FunctionalTestProperties.SiteRoot}/api/v1/member/${user.warwickId}/timetable/calendar") <<?

@@ -1,53 +1,33 @@
 package uk.ac.warwick.tabula.services
 
-import uk.ac.warwick.tabula.{AcademicYear, Mockito, TestBase}
 import org.joda.time._
-import uk.ac.warwick.tabula.JavaImports.JInteger
 import uk.ac.warwick.tabula.data.model.groups.{DayOfWeek, WeekRange}
-import uk.ac.warwick.util.termdates.Term
-import uk.ac.warwick.util.termdates.Term.TermType
+import uk.ac.warwick.tabula.{AcademicYear, Mockito, TestBase}
 
 class TermAwareWeekRangeToDateConversionServiceTest extends TestBase with Mockito{
 
 	val localNow: LocalDateTime = LocalDateTime.now.withDayOfWeek(DateTimeConstants.MONDAY)
 	val dtNow: DateTime = localNow.toDateTime
 
-  val localCurrentYear: AcademicYear = AcademicYear.guessSITSAcademicYearByDate(localNow.toDateTime)
+  val localCurrentYear: AcademicYear = AcademicYear.forDate(localNow.toDateTime)
 
 	val week1:WeekRange.Week = 1
   val week1Interval = new Interval(dtNow.withDayOfWeek(DateTimeConstants.MONDAY).withTimeAtStartOfDay(),
 		                               dtNow.withDayOfWeek(DateTimeConstants.MONDAY).withTimeAtStartOfDay().plusDays(7))
 
-	val currentAcademicYear: AcademicYear = AcademicYear.guessSITSAcademicYearByDate(DateTime.now)
-	val autumnTerm: Term = mock[Term]
-	autumnTerm.getTermType returns TermType.autumn
-	autumnTerm.getStartDate returns new LocalDate(localCurrentYear.startYear, DateTimeConstants.NOVEMBER, 1).toDateTimeAtStartOfDay.toDateTime
+	val currentAcademicYear: AcademicYear = AcademicYear.now()
 
-	val mockTf: TermService = smartMock[TermService]
-	val converter: WeekToDateConverter = new TermAwareWeekToDateConverterComponent with TermServiceComponent {
-		var termService: TermService = mockTf
-	}.weekToDateConverter
+	val converter: WeekToDateConverter = new TermAwareWeekToDateConverterComponent {}.weekToDateConverter
 
-	mockTf.getAcademicWeeksForYear(localCurrentYear.dateInTermOne) returns Seq(
-	  // week 1 includes localNow
-		(JInteger(Some(week1)), week1Interval),
-		// week 2 is after localNow
-		(JInteger(Some(2)), new Interval(week1Interval.getEnd, week1Interval.getEnd.plusDays(7)))
-	)
-
-	mockTf.getAcademicWeeksForYear(localCurrentYear.previous.dateInTermOne) returns Seq()
-	mockTf.getTermFromDateIncludingVacations(any[DateTime]) returns autumnTerm
-
-
-	@Test
-	def GetWeekContainingDate() {
-		converter.getWeekContainingDate(localNow.toLocalDate) should be(Some(week1))
-	}
-
-	@Test
-  def GetWeekContaingDateReturnsNoneIfNoMatch(){
-		converter.getWeekContainingDate(localNow.minusDays(7).toLocalDate) should be(None)
-	}
+//	mockTf.getAcademicWeeksForYear(localCurrentYear.dateInTermOne) returns Seq(
+//	  // week 1 includes localNow
+//		(JInteger(Some(week1)), week1Interval),
+//		// week 2 is after localNow
+//		(JInteger(Some(2)), new Interval(week1Interval.getEnd, week1Interval.getEnd.plusDays(7)))
+//	)
+//
+//	mockTf.getAcademicWeeksForYear(localCurrentYear.previous.dateInTermOne) returns Seq()
+//	mockTf.getTermFromDateIncludingVacations(any[DateTime]) returns autumnTerm
 
 	@Test
 	def intersectsWeekReturnsTrueIfWeeksIntersect(){

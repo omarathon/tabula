@@ -77,11 +77,11 @@ class AssessmentMembershipDaoTest extends PersistenceTestBase {
 		upstreamGroup2.moduleCode = "in101-10"
 		upstreamGroup2.occurrence = "A"
 		upstreamGroup2.assessmentGroup = "A"
-		upstreamGroup2.academicYear = new AcademicYear(2010)
+		upstreamGroup2.academicYear = AcademicYear(2010)
 		upstreamGroup2.members = JArrayList(new UpstreamAssessmentGroupMember(upstreamGroup2, "0672089"))
 
 		assignment2.assessmentGroups.add(assessmentGroup2)
-		assignment2.academicYear = new AcademicYear(2010)
+		assignment2.academicYear = AcademicYear(2010)
 
 		session.save(assignment2AC)
 		session.save(upstreamGroup2)
@@ -106,11 +106,11 @@ class AssessmentMembershipDaoTest extends PersistenceTestBase {
 		upstreamGroup3.moduleCode = "in102-10"
 		upstreamGroup3.occurrence = "A"
 		upstreamGroup3.assessmentGroup = "A"
-		upstreamGroup3.academicYear = new AcademicYear(2010)
+		upstreamGroup3.academicYear = AcademicYear(2010)
 		upstreamGroup3.members = JArrayList(new UpstreamAssessmentGroupMember(upstreamGroup3, "0672089"))
 
 		assignment3.assessmentGroups.add(assessmentGroup3)
-		assignment3.academicYear = new AcademicYear(2010)
+		assignment3.academicYear = AcademicYear(2010)
 		assignment3.members.knownType.addUserId("cuscav")
 
 		session.save(assignment3AC)
@@ -124,7 +124,7 @@ class AssessmentMembershipDaoTest extends PersistenceTestBase {
 		assessmentGroup4.assignment = assignment4
 
 		assignment4.assessmentGroups.add(assessmentGroup4)
-		assignment4.academicYear = new AcademicYear(2010)
+		assignment4.academicYear = AcademicYear(2010)
 		assignment4.members.knownType.excludeUserId("cuscav")
 
 		val user = new User("cuscav")
@@ -187,7 +187,7 @@ class AssessmentMembershipDaoTest extends PersistenceTestBase {
 	@Test def departmentsWithManualAssessmentsOrGroups(): Unit = {
 		transactional { _ =>
 			new Fixture {
-				val thisYear: AcademicYear = AcademicYear.guessSITSAcademicYearByDate(new DateTime())
+				val thisYear: AcademicYear = AcademicYear.now()
 
 				assignment1.members.knownType.removeUserId("cuscav")
 				session.save(assignment1)
@@ -219,7 +219,7 @@ class AssessmentMembershipDaoTest extends PersistenceTestBase {
 				session.save(assignment5)
 				session.flush()
 
-				val thisYear: AcademicYear = AcademicYear.guessSITSAcademicYearByDate(new DateTime())
+				val thisYear: AcademicYear = AcademicYear.now()
 				val membershipInfo: ManualMembershipInfo = assignmentMembershipService.departmentsManualMembership(dept, thisYear)
 
 				membershipInfo.assignments should be {Seq(assignment1, assignment5)}

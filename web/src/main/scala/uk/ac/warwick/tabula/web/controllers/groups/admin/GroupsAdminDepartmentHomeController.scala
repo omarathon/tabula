@@ -1,6 +1,5 @@
 package uk.ac.warwick.tabula.web.controllers.groups.admin
 
-import org.joda.time.DateTime
 import org.springframework.stereotype.Controller
 import org.springframework.web.bind.annotation._
 import uk.ac.warwick.tabula.commands.Appliable
@@ -9,13 +8,13 @@ import uk.ac.warwick.tabula.data.model.Department
 import uk.ac.warwick.tabula.data.model.groups.{SmallGroupAllocationMethod, SmallGroupSet, SmallGroupSetFilters}
 import uk.ac.warwick.tabula.groups.web.Routes
 import uk.ac.warwick.tabula.permissions.Permission
-import uk.ac.warwick.tabula.services.{AutowiringMaintenanceModeServiceComponent, AutowiringModuleAndDepartmentServiceComponent, AutowiringTermServiceComponent, AutowiringUserSettingsServiceComponent}
+import uk.ac.warwick.tabula.services.{AutowiringMaintenanceModeServiceComponent, AutowiringModuleAndDepartmentServiceComponent, AutowiringUserSettingsServiceComponent}
 import uk.ac.warwick.tabula.web.Mav
 import uk.ac.warwick.tabula.web.controllers.groups.{GroupsController, GroupsDepartmentsAndModulesWithPermission}
 import uk.ac.warwick.tabula.web.controllers.{AcademicYearScopedController, DepartmentScopedController}
 import uk.ac.warwick.tabula.{AcademicYear, CurrentUser}
 
-abstract class AbstractGroupsAdminDepartmentHomeController extends GroupsController with AutowiringTermServiceComponent
+abstract class AbstractGroupsAdminDepartmentHomeController extends GroupsController
 	with DepartmentScopedController with AcademicYearScopedController with AutowiringUserSettingsServiceComponent with AutowiringModuleAndDepartmentServiceComponent with AutowiringMaintenanceModeServiceComponent
 	with GroupsDepartmentsAndModulesWithPermission {
 
@@ -56,7 +55,7 @@ abstract class AbstractGroupsAdminDepartmentHomeController extends GroupsControl
 			"allFormatFilters" -> SmallGroupSetFilters.allFormatFilters,
 			"allModuleFilters" -> SmallGroupSetFilters.allModuleFilters(info.modulesWithPermission),
 			"allAllocationFilters" -> SmallGroupSetFilters.AllocationMethod.all(info.departmentSmallGroupSets),
-			"allTermFilters" -> SmallGroupSetFilters.allTermFilters(cmd.academicYear, termService),
+			"allTermFilters" -> SmallGroupSetFilters.allTermFilters(cmd.academicYear),
 			"isFiltered" -> isFiltered,
 			"hasMoreSets" -> (!isFiltered && info.setsWithPermission.size > AdminSmallGroupsHomeCommand.MaxSetsToDisplay)
 		)
@@ -83,7 +82,7 @@ class GroupsAdminDepartmentController extends AbstractGroupsAdminDepartmentHomeC
 
 	@ModelAttribute("adminCommand")
 	def command(@PathVariable("department") dept: Department, @ModelAttribute("activeAcademicYear") academicYear: Option[AcademicYear], user: CurrentUser): AdminSmallGroupsHomeCommand =
-		AdminSmallGroupsHomeCommand(mandatory(dept), academicYear.getOrElse(AcademicYear.guessSITSAcademicYearByDate(DateTime.now)), user, calculateProgress = ajax)
+		AdminSmallGroupsHomeCommand(mandatory(dept), academicYear.getOrElse(AcademicYear.now()), user, calculateProgress = ajax)
 
 }
 

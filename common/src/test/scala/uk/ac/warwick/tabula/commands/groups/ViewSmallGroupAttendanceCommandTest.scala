@@ -32,7 +32,7 @@ class ViewSmallGroupAttendanceCommandTest extends TestBase with Mockito {
 
 	trait Fixture extends BaseFixture {
 		val set = new SmallGroupSet
-		set.academicYear = AcademicYear.guessSITSAcademicYearByDate(DateTime.now)
+		set.academicYear = AcademicYear.now()
 
 		val group = new SmallGroup(set)
 		wireUserLookup(group.students)
@@ -207,7 +207,7 @@ class ViewSmallGroupAttendanceCommandTest extends TestBase with Mockito {
 		// This means that we risk students with the same name getting merged into one.
 		// Bad!
 		val set = new SmallGroupSet
-		set.academicYear = AcademicYear.guessSITSAcademicYearByDate(DateTime.now)
+		set.academicYear = AcademicYear.now()
 
 		val group = new SmallGroup(set)
 		wireUserLookup(group.students)

@@ -6,8 +6,6 @@ import uk.ac.warwick.tabula.data.model.Module
 import uk.ac.warwick.tabula.data.model.groups.{DayOfWeek, WeekRange}
 import uk.ac.warwick.tabula.services._
 import uk.ac.warwick.tabula.timetables.{TimetableEvent, TimetableEventType}
-import uk.ac.warwick.util.termdates.Term.TermType
-import uk.ac.warwick.util.termdates.{TermFactory, TermImpl}
 
 class EventOccurrenceServiceTest extends TestBase with Mockito {
 
@@ -17,7 +15,7 @@ class EventOccurrenceServiceTest extends TestBase with Mockito {
 	// deliberately pick a date that _isn't_ now, so that we can highlight places where we're accidentally
 	// guessing the current year instead of reading it from the event
 	val week1Start: DateTime = DateTime.now().minusYears(2).withDayOfWeek(DateTimeConstants.MONDAY).withTimeAtStartOfDay()
-	val year: AcademicYear = AcademicYear.guessSITSAcademicYearByDate(week1Start)
+	val year: AcademicYear = AcademicYear.forDate(week1Start)
 	val week1end: DateTime = week1Start.plusDays(7)
 	val week2Start: DateTime = week1end
 	val week2End: DateTime = week2Start.plusDays(7)
@@ -38,16 +36,13 @@ class EventOccurrenceServiceTest extends TestBase with Mockito {
 
 	val intervalOutsideOccurrence = new Interval(1,2)
 
-	val occurrenceService = new TermBasedEventOccurrenceService with WeekToDateConverterComponent with TermServiceComponent with ProfileServiceComponent with UserLookupComponent {
+	val occurrenceService = new TermBasedEventOccurrenceService with WeekToDateConverterComponent with ProfileServiceComponent with UserLookupComponent {
 		val weekToDateConverter: WeekToDateConverter = mock[WeekToDateConverter]
-		var termService: TermService = mock[TermService]
 		val profileService: ProfileService = mock[ProfileService]
 		val userLookup = new MockUserLookup
 	}
 
-	val termFactory: TermFactory = mock[TermFactory]
-
-	occurrenceService.termService.getTermFromDate(any[DateTime]) returns new TermImpl(termFactory, DateTime.now().minusDays(14), DateTime.now().plusDays(7),TermType.autumn)
+//	occurrenceService.termService.getTermFromDate(any[DateTime]) returns new TermImpl(termFactory, DateTime.now().minusDays(14), DateTime.now().plusDays(7),TermType.autumn)
 
 	@Test
 	def singleOccurenceDuringInterval(){

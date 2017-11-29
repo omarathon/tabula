@@ -30,11 +30,11 @@ class SmallGroupServiceTest extends TestBase with Mockito {
 
 		val groupSet = new SmallGroupSet
 		groupSet.module = module
-		groupSet.academicYear = new AcademicYear(2013)
+		groupSet.academicYear = AcademicYear(2013)
 
 		val groupSet2 = new SmallGroupSet
 		groupSet2.module = module2
-		groupSet2.academicYear = new AcademicYear(2013)
+		groupSet2.academicYear = AcademicYear(2013)
 
 		val group = new SmallGroup
 		group.groupSet = groupSet
@@ -95,8 +95,8 @@ class SmallGroupServiceTest extends TestBase with Mockito {
 
 			// user  0123456 is in both groups - group and group2
 		group2.addEvent(event2)
-		val modreg = new ModuleRegistration(student.mostSignificantCourseDetails.get, module, new JBigDecimal(30), new AcademicYear(2013), "A")
-		val modreg2 = new ModuleRegistration(student.mostSignificantCourseDetails.get, module2, new JBigDecimal(30), new AcademicYear(2013), "A")
+		val modreg = new ModuleRegistration(student.mostSignificantCourseDetails.get, module, new JBigDecimal(30), AcademicYear(2013), "A")
+		val modreg2 = new ModuleRegistration(student.mostSignificantCourseDetails.get, module2, new JBigDecimal(30), AcademicYear(2013), "A")
 		val userLookup = new MockUserLookup(true)
 		def wireUserLookup(userGroup: UnspecifiedTypeUserGroup): Unit = userGroup match {
 			case cm: UserGroupCacheManager => wireUserLookup(cm.underlying)
@@ -110,7 +110,6 @@ class SmallGroupServiceTest extends TestBase with Mockito {
 			with UserGroupDaoComponent
 			with SmallGroupDaoComponent
 		  with SecurityServiceComponent
-			with TermServiceComponent
 			with TermAwareWeekToDateConverterComponent
 			with Logging with TaskBenchmarking{
 				val eventTutorsHelper: UserGroupMembershipHelper[SmallGroupEvent] = null
@@ -118,15 +117,14 @@ class SmallGroupServiceTest extends TestBase with Mockito {
 				val departmentGroupSetManualMembersHelper: UserGroupMembershipHelper[DepartmentSmallGroupSet] = null
 				val studentGroupHelper: UserGroupMembershipHelper[SmallGroup] = studentGroupMembershipHelper
 				val departmentStudentGroupHelper: UserGroupMembershipHelper[DepartmentSmallGroup] = departmentStudentGroupMembershipHelper
-				val termService: TermService = smartMock[TermService]
 
 				val membershipService: AssessmentMembershipService = smartMock[AssessmentMembershipService]
 				val smallGroupDao: SmallGroupDao = smartMock[SmallGroupDao]
 
 				override val weekToDateConverter: WeekToDateConverter = smartMock[WeekToDateConverter]
 
-				smallGroupDao.findByModuleAndYear(module, new AcademicYear(2013)) returns Seq[SmallGroup](group)
-				smallGroupDao.findByModuleAndYear(module2, new AcademicYear(2013)) returns Seq[SmallGroup]()
+				smallGroupDao.findByModuleAndYear(module, AcademicYear(2013)) returns Seq[SmallGroup](group)
+				smallGroupDao.findByModuleAndYear(module2, AcademicYear(2013)) returns Seq[SmallGroup]()
 				group.groupSet.membershipService = membershipService
 				smallGroupDao.findSmallGroupOccurrencesByGroup(group) returns eventOccurrencesGroup1
 				smallGroupDao.findSmallGroupOccurrencesByGroup(group2) returns eventOccurrencesGroup2

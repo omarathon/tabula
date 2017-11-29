@@ -80,7 +80,7 @@ class RecordAttendanceCommandTest extends TestBase with Mockito {
 
 		val set = new SmallGroupSet()
 		group.groupSet = set
-		set.academicYear = AcademicYear.guessSITSAcademicYearByDate(DateTime.now)
+		set.academicYear = AcademicYear.now()
 
 		val week = 1
 

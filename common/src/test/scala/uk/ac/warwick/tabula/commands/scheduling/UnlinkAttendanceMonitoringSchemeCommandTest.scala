@@ -1,20 +1,14 @@
 package uk.ac.warwick.tabula.commands.scheduling
 
-import org.joda.time.DateTime
 import uk.ac.warwick.tabula._
 import uk.ac.warwick.tabula.data.model.UserGroup
 import uk.ac.warwick.tabula.data.model.attendance.AttendanceMonitoringScheme
 import uk.ac.warwick.tabula.services.attendancemonitoring.{AttendanceMonitoringService, AttendanceMonitoringServiceComponent}
-import uk.ac.warwick.tabula.services.{TermService, TermServiceComponent}
-import uk.ac.warwick.util.termdates.Term.TermType
-import uk.ac.warwick.util.termdates.TermImpl
 
 class UnlinkAttendanceMonitoringSchemeCommandTest extends TestBase with Mockito {
 
 	@Test
 	def commandApply(): Unit = {
-		val autumnTerm = new TermImpl(null, new DateTime(2014, 10, 1, 0, 0), null, TermType.autumn)
-
 		val student1 = Fixtures.student("1111", "1111")
 		val student2 = Fixtures.student("2222", "2222")
 		val student3 = Fixtures.student("3333", "3333")
@@ -32,12 +26,9 @@ class UnlinkAttendanceMonitoringSchemeCommandTest extends TestBase with Mockito 
 		dept1scheme1.members = ug
 		dept1scheme1.memberQuery = "some-filter"
 
-		val command = new UnlinkAttendanceMonitoringSchemeCommandInternal with TermServiceComponent with AttendanceMonitoringServiceComponent {
-			val termService: TermService = smartMock[TermService]
+		val command = new UnlinkAttendanceMonitoringSchemeCommandInternal with AttendanceMonitoringServiceComponent {
 			val attendanceMonitoringService: AttendanceMonitoringService = smartMock[AttendanceMonitoringService]
 		}
-
-		command.termService.getTermFromDateIncludingVacations(any[DateTime]) returns autumnTerm
 
 		command.attendanceMonitoringService.findSchemesLinkedToSITSByDepartment(AcademicYear(2014)) returns Map(
 			dept1 -> Seq(dept1scheme1)

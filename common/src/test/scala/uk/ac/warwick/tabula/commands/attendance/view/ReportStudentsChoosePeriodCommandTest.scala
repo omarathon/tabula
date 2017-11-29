@@ -9,15 +9,11 @@ import uk.ac.warwick.tabula.data.{ScalaOrder, ScalaRestriction}
 import uk.ac.warwick.tabula.services._
 import uk.ac.warwick.tabula.services.attendancemonitoring.{AttendanceMonitoringService, AttendanceMonitoringServiceComponent}
 import uk.ac.warwick.tabula.{AcademicYear, Fixtures, Mockito, TestBase}
-import uk.ac.warwick.util.termdates.Term.TermType
-import uk.ac.warwick.util.termdates.TermImpl
+import uk.ac.warwick.util.termdates.AcademicYearPeriod.PeriodType
 
 class ReportStudentsChoosePeriodCommandTest extends TestBase with Mockito {
 
-	val thisTermService: TermService = smartMock[TermService]
-
-	trait TestSupport extends TermServiceComponent with AttendanceMonitoringServiceComponent with ProfileServiceComponent {
-		val termService: TermService = thisTermService
+	trait TestSupport extends AttendanceMonitoringServiceComponent with ProfileServiceComponent {
 		val attendanceMonitoringService: AttendanceMonitoringService = smartMock[AttendanceMonitoringService]
 		val profileService: ProfileService = smartMock[ProfileService]
 	}
@@ -35,10 +31,6 @@ class ReportStudentsChoosePeriodCommandTest extends TestBase with Mockito {
 		val point2: AttendanceMonitoringPoint = Fixtures.attendanceMonitoringPoint(null)
 		point2.startDate = new LocalDate(2014, 6, 6)
 
-		val autumnTerm = new TermImpl(null, DateTime.now, null, TermType.autumn)
-		val springTerm = new TermImpl(null, DateTime.now, null, TermType.spring)
-		val christmasVacation = Vacation(autumnTerm, null)
-
 		val fakeNow: DateTime = new LocalDate(2015, 1, 1).toDateTimeAtStartOfDay
 
 		val state = new ReportStudentsChoosePeriodCommandState with TestSupport {
@@ -50,9 +42,6 @@ class ReportStudentsChoosePeriodCommandTest extends TestBase with Mockito {
 			val department: Department = Fixtures.department("its")
 			val academicYear = AcademicYear(2014)
 		}
-
-		thisTermService.getPreviousTerm(christmasVacation) returns autumnTerm
-		thisTermService.getPreviousTerm(springTerm) returns christmasVacation
 
 		val command = new ReportStudentsChoosePeriodCommandInternal(Fixtures.department("its"),  AcademicYear(2014)) with ReportStudentsChoosePeriodCommandState with TestSupport
 	}
@@ -79,21 +68,21 @@ class ReportStudentsChoosePeriodCommandTest extends TestBase with Mockito {
 		state.profileService.findAllStudentsByRestrictions(Matchers.eq(state.department), any[Seq[ScalaRestriction]], any[Seq[ScalaOrder]]) returns Seq(student1, student2)
 		state.attendanceMonitoringService.listStudentsPoints(student1, Option(state.department), state.academicYear) returns Seq(point1, point2)
 		state.attendanceMonitoringService.listStudentsPoints(student2, Option(state.department), state.academicYear) returns Seq(point1, point2)
-		state.termService.getTermFromDateIncludingVacations(point1.startDate.toDateTimeAtStartOfDay) returns autumnTerm
-		state.termService.getTermFromDateIncludingVacations(point2.startDate.toDateTimeAtStartOfDay) returns christmasVacation
+//		state.termService.getTermFromDateIncludingVacations(point1.startDate.toDateTimeAtStartOfDay) returns autumnTerm
+//		state.termService.getTermFromDateIncludingVacations(point2.startDate.toDateTimeAtStartOfDay) returns christmasVacation
 		val result: Map[String, Seq[AttendanceMonitoringPoint]] = state.termPoints
-		result(autumnTerm.getTermTypeAsString) should be (Seq(point1))
-		result(christmasVacation.getTermTypeAsString) should be (Seq(point2))
+		result(PeriodType.autumnTerm.toString) should be (Seq(point1))
+		result(PeriodType.christmasVacation.toString) should be (Seq(point2))
 	}}
 
 	@Test
 	def studentReportCounts() { new Fixture {
-		state.period = autumnTerm.getTermTypeAsString
+		state.period = PeriodType.autumnTerm.toString
 		state.profileService.findAllStudentsByRestrictions(Matchers.eq(state.department), any[Seq[ScalaRestriction]], any[Seq[ScalaOrder]]) returns Seq(student1, student2)
 		state.attendanceMonitoringService.listStudentsPoints(student1, Option(state.department), state.academicYear) returns Seq(point1)
 		state.attendanceMonitoringService.listStudentsPoints(student2, Option(state.department), state.academicYear) returns Seq(point1)
-		state.termService.getTermFromDateIncludingVacations(point1.startDate.toDateTimeAtStartOfDay) returns autumnTerm
-		state.attendanceMonitoringService.findNonReportedTerms(state.allStudents, state.academicYear) returns Seq(autumnTerm.getTermTypeAsString)
+//		state.termService.getTermFromDateIncludingVacations(point1.startDate.toDateTimeAtStartOfDay) returns autumnTerm
+		state.attendanceMonitoringService.findNonReportedTerms(state.allStudents, state.academicYear) returns Seq(PeriodType.autumnTerm.toString)
 		state.profileService.findAllStudentsByRestrictions(Matchers.eq(state.department), any[Seq[ScalaRestriction]], any[Seq[ScalaOrder]]) returns Seq()
 
 		val student1point1missed: AttendanceMonitoringCheckpoint = Fixtures.attendanceMonitoringCheckpoint(point1, student1, AttendanceState.MissedUnauthorised)
@@ -108,12 +97,12 @@ class ReportStudentsChoosePeriodCommandTest extends TestBase with Mockito {
 
 	@Test
 	def studentReportCountsUnreportedOnly() { new Fixture {
-		state.period = autumnTerm.getTermTypeAsString
+		state.period = PeriodType.autumnTerm.toString
 		state.profileService.findAllStudentsByRestrictions(Matchers.eq(state.department), any[Seq[ScalaRestriction]], any[Seq[ScalaOrder]]) returns Seq(student1, student2)
 		state.attendanceMonitoringService.listStudentsPoints(student1, Option(state.department), state.academicYear) returns Seq(point1)
 		state.attendanceMonitoringService.listStudentsPoints(student2, Option(state.department), state.academicYear) returns Seq(point1)
-		state.termService.getTermFromDateIncludingVacations(point1.startDate.toDateTimeAtStartOfDay) returns autumnTerm
-		state.attendanceMonitoringService.findNonReportedTerms(state.allStudents, state.academicYear) returns Seq(autumnTerm.getTermTypeAsString)
+//		state.termService.getTermFromDateIncludingVacations(point1.startDate.toDateTimeAtStartOfDay) returns autumnTerm
+		state.attendanceMonitoringService.findNonReportedTerms(state.allStudents, state.academicYear) returns Seq(PeriodType.autumnTerm.toString)
 		state.profileService.findAllStudentsByRestrictions(Matchers.eq(state.department), any[Seq[ScalaRestriction]], any[Seq[ScalaOrder]]) returns Seq()
 
 		val student1point1missed: AttendanceMonitoringCheckpoint = Fixtures.attendanceMonitoringCheckpoint(point1, student1, AttendanceState.MissedUnauthorised)
@@ -135,45 +124,45 @@ class ReportStudentsChoosePeriodCommandTest extends TestBase with Mockito {
 		state.profileService.findAllStudentsByRestrictions(Matchers.eq(state.department), any[Seq[ScalaRestriction]], any[Seq[ScalaOrder]]) returns Seq(student1, student2)
 		state.attendanceMonitoringService.listStudentsPoints(student1, Option(state.department), state.academicYear) returns Seq(point1, point2)
 		state.attendanceMonitoringService.listStudentsPoints(student2, Option(state.department), state.academicYear) returns Seq(point1, point2)
-		state.termService.getTermFromDateIncludingVacations(point1.startDate.toDateTimeAtStartOfDay) returns autumnTerm
-		state.termService.getTermFromDateIncludingVacations(point2.startDate.toDateTimeAtStartOfDay) returns christmasVacation
-		state.termService.getTermFromDateIncludingVacations(fakeNow) returns springTerm
-		state.attendanceMonitoringService.findNonReportedTerms(state.allStudents, state.academicYear) returns Seq(autumnTerm.getTermTypeAsString)
+//		state.termService.getTermFromDateIncludingVacations(point1.startDate.toDateTimeAtStartOfDay) returns autumnTerm
+//		state.termService.getTermFromDateIncludingVacations(point2.startDate.toDateTimeAtStartOfDay) returns christmasVacation
+//		state.termService.getTermFromDateIncludingVacations(fakeNow) returns springTerm
+		state.attendanceMonitoringService.findNonReportedTerms(state.allStudents, state.academicYear) returns Seq(PeriodType.autumnTerm.toString)
 		val result = state.availablePeriods
 		result.size should be (2)
-		result.contains((autumnTerm.getTermTypeAsString, true)) should be {true}
-		result.contains((autumnTerm.getTermTypeAsString, false)) should be {false}
-		result.contains((christmasVacation.getTermTypeAsString, false)) should be {true}
-		result.contains((christmasVacation.getTermTypeAsString, true)) should be {false}
+		result.contains((PeriodType.autumnTerm.toString, true)) should be {true}
+		result.contains((PeriodType.autumnTerm.toString, false)) should be {false}
+		result.contains((PeriodType.christmasVacation.toString, false)) should be {true}
+		result.contains((PeriodType.christmasVacation.toString, true)) should be {false}
 	}}}
 
 	trait ValidatorFixture extends Fixture {
 		validator.profileService.findAllStudentsByRestrictions(Matchers.eq(validator.department), any[Seq[ScalaRestriction]], any[Seq[ScalaOrder]]) returns Seq(student1, student2)
 		validator.attendanceMonitoringService.listStudentsPoints(student1, Option(validator.department), validator.academicYear) returns Seq(point1, point2)
 		validator.attendanceMonitoringService.listStudentsPoints(student2, Option(validator.department), validator.academicYear) returns Seq(point1, point2)
-		validator.termService.getTermFromDateIncludingVacations(point1.startDate.toDateTimeAtStartOfDay) returns autumnTerm
-		validator.termService.getTermFromDateIncludingVacations(point2.startDate.toDateTimeAtStartOfDay) returns christmasVacation
-		validator.termService.getTermFromDateIncludingVacations(fakeNow) returns springTerm
-		validator.attendanceMonitoringService.findNonReportedTerms(validator.allStudents, validator.academicYear) returns Seq(autumnTerm.getTermTypeAsString)
+//		validator.termService.getTermFromDateIncludingVacations(point1.startDate.toDateTimeAtStartOfDay) returns autumnTerm
+//		validator.termService.getTermFromDateIncludingVacations(point2.startDate.toDateTimeAtStartOfDay) returns christmasVacation
+//		validator.termService.getTermFromDateIncludingVacations(fakeNow) returns springTerm
+		validator.attendanceMonitoringService.findNonReportedTerms(validator.allStudents, validator.academicYear) returns Seq(PeriodType.autumnTerm.toString)
 	}
 
 	@Test
 	def validation() {
 		new ValidatorFixture { withFakeTime(fakeNow) {
 			val errors = new BindException(validator, "command")
-			validator.period = springTerm.getTermTypeAsString
+			validator.period = PeriodType.springTerm.toString
 			validator.validate(errors)
 			errors.getAllErrors.size should be (1)
 		}}
 		new ValidatorFixture { withFakeTime(fakeNow) {
 			val errors = new BindException(validator, "command")
-			validator.period = christmasVacation.getTermTypeAsString
+			validator.period = PeriodType.christmasVacation.toString
 			validator.validate(errors)
 			errors.getAllErrors.size should be (1)
 		}}
 		new ValidatorFixture { withFakeTime(fakeNow) {
 			val errors = new BindException(validator, "command")
-			validator.period = autumnTerm.getTermTypeAsString
+			validator.period = PeriodType.autumnTerm.toString
 			validator.validate(errors)
 			errors.getAllErrors.size should be (0)
 		}}
@@ -183,17 +172,17 @@ class ReportStudentsChoosePeriodCommandTest extends TestBase with Mockito {
 		command.profileService.findAllStudentsByRestrictions(Matchers.eq(command.department), any[Seq[ScalaRestriction]], any[Seq[ScalaOrder]]) returns Seq(student1, student2)
 		command.attendanceMonitoringService.listStudentsPoints(student1, Option(command.department), command.academicYear) returns Seq(point1, point2)
 		command.attendanceMonitoringService.listStudentsPoints(student2, Option(command.department), command.academicYear) returns Seq(point1, point2)
-		command.termService.getTermFromDateIncludingVacations(point1.startDate.toDateTimeAtStartOfDay) returns autumnTerm
-		command.termService.getTermFromDateIncludingVacations(point2.startDate.toDateTimeAtStartOfDay) returns christmasVacation
-		command.termService.getTermFromDateIncludingVacations(fakeNow) returns springTerm
-		command.attendanceMonitoringService.findNonReportedTerms(command.allStudents, command.academicYear) returns Seq(autumnTerm.getTermTypeAsString)
+//		command.termService.getTermFromDateIncludingVacations(point1.startDate.toDateTimeAtStartOfDay) returns autumnTerm
+//		command.termService.getTermFromDateIncludingVacations(point2.startDate.toDateTimeAtStartOfDay) returns christmasVacation
+//		command.termService.getTermFromDateIncludingVacations(fakeNow) returns springTerm
+		command.attendanceMonitoringService.findNonReportedTerms(command.allStudents, command.academicYear) returns Seq(PeriodType.autumnTerm.toString)
 	}
 
 	@Test
 	def apply() { new CommandFixture {
 		val student1point1missed: AttendanceMonitoringCheckpoint = Fixtures.attendanceMonitoringCheckpoint(point1, student1, AttendanceState.MissedUnauthorised)
 		val student1point2missed: AttendanceMonitoringCheckpoint = Fixtures.attendanceMonitoringCheckpoint(point2, student1, AttendanceState.MissedUnauthorised)
-		command.period = autumnTerm.getTermTypeAsString
+		command.period = PeriodType.autumnTerm.toString
 		command.attendanceMonitoringService.getCheckpoints(Seq(point1), command.allStudents) returns Map(student1 -> Map(point1 -> student1point1missed, point2 -> student1point2missed))
 		val result: Seq[StudentReportCount] = command.applyInternal()
 		result.size should be (1)

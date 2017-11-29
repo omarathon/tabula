@@ -9,7 +9,7 @@ class AcademicYearConverterTest extends TestBase {
 	val converter = new AcademicYearConverter
 
 	@Test def validInput {
-		converter.convertRight("2012") should be (new AcademicYear(2012))
+		converter.convertRight("2012") should be (AcademicYear(2012))
 	}
 
 	@Test def invalidInput {
@@ -19,7 +19,7 @@ class AcademicYearConverterTest extends TestBase {
 	}
 
 	@Test def formatting {
-		converter.convertLeft(new AcademicYear(2012)) should be ("2012")
+		converter.convertLeft(AcademicYear(2012)) should be ("2012")
 		converter.convertLeft(null) should be (null)
 	}
 

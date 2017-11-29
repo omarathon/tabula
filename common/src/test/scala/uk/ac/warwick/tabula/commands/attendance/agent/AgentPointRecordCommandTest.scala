@@ -1,7 +1,6 @@
 package uk.ac.warwick.tabula.commands.attendance.agent
 
 import org.joda.time.DateTime
-import org.joda.time.base.BaseDateTime
 import org.springframework.core.convert.support.GenericConversionService
 import org.springframework.validation.BindingResult
 import org.springframework.web.bind.WebDataBinder
@@ -14,8 +13,7 @@ import uk.ac.warwick.tabula.permissions.Permissions
 import uk.ac.warwick.tabula.services._
 import uk.ac.warwick.tabula.services.attendancemonitoring.{AttendanceMonitoringService, AttendanceMonitoringServiceComponent}
 import uk.ac.warwick.userlookup.User
-import uk.ac.warwick.util.termdates.Term.TermType
-import uk.ac.warwick.util.termdates.TermImpl
+import uk.ac.warwick.util.termdates.AcademicYearPeriod.PeriodType
 
 import scala.collection.JavaConverters._
 import scala.collection.mutable
@@ -23,7 +21,6 @@ import scala.collection.mutable
 class AgentPointRecordCommandTest extends TestBase with Mockito {
 
 	trait Fixture {
-		val autumnTerm = new TermImpl(null, null, null, TermType.autumn)
 		val dept1: Department = Fixtures.department("its1")
 		val dept2: Department = Fixtures.department("its2")
 		val thisRelationshipType = new StudentRelationshipType
@@ -60,14 +57,13 @@ class AgentPointRecordCommandTest extends TestBase with Mockito {
 		val currentUser = new CurrentUser(new User, new User)
 	}
 
-	trait StateTestSupport extends AttendanceMonitoringServiceComponent with TermServiceComponent with RelationshipServiceComponent {
+	trait StateTestSupport extends AttendanceMonitoringServiceComponent with RelationshipServiceComponent {
 		var relationshipType: StudentRelationshipType = null
 		val academicYear = AcademicYear(2014)
 		var templatePoint: AttendanceMonitoringPoint = null
 		val user: CurrentUser = currentUser
 		val member: StaffMember = Fixtures.staff("1234")
 		val attendanceMonitoringService: AttendanceMonitoringService = smartMock[AttendanceMonitoringService]
-		val termService: TermService = smartMock[TermService]
 		val relationshipService: RelationshipService = smartMock[RelationshipService]
 	}
 
@@ -90,14 +86,13 @@ class AgentPointRecordCommandTest extends TestBase with Mockito {
 	}
 
 	trait PopulateTestSupport extends AgentPointRecordCommandState
-		with AttendanceMonitoringServiceComponent with RelationshipServiceComponent with TermServiceComponent with SecurityServiceComponent {
+		with AttendanceMonitoringServiceComponent with RelationshipServiceComponent with SecurityServiceComponent {
 			var relationshipType: StudentRelationshipType = null
 			val academicYear = AcademicYear(2014)
 			var templatePoint: AttendanceMonitoringPoint = null
 			val user: CurrentUser = currentUser
 			val member: StaffMember = Fixtures.staff("1234")
 			val attendanceMonitoringService: AttendanceMonitoringService = smartMock[AttendanceMonitoringService]
-			val termService: TermService = smartMock[TermService]
 			val relationshipService: RelationshipService = smartMock[RelationshipService]
 			val securityService: SecurityService = smartMock[SecurityService]
 	}
@@ -182,7 +177,7 @@ class AgentPointRecordCommandTest extends TestBase with Mockito {
 	def validateAlreadyReported() { new ValidatorFixture {
 		validator.securityService.can(validator.user, Permissions.MonitoringPoints.Record, student1) returns {true}
 		validator.attendanceMonitoringService.findNonReportedTerms(Seq(student1), AcademicYear(2014)) returns Seq()
-		validator.termService.getTermFromDateIncludingVacations(any[BaseDateTime]) returns autumnTerm
+//		validator.termService.getTermFromDateIncludingVacations(any[BaseDateTime]) returns autumnTerm
 		validator.checkpointMap = JHashMap(
 			student1 -> JHashMap(scheme1point1 -> AttendanceState.Attended.asInstanceOf[AttendanceState])
 		)
@@ -193,8 +188,8 @@ class AgentPointRecordCommandTest extends TestBase with Mockito {
 	@Test
 	def validateTooSoon() { new ValidatorFixture {
 		validator.securityService.can(validator.user, Permissions.MonitoringPoints.Record, student1) returns {true}
-		validator.attendanceMonitoringService.findNonReportedTerms(Seq(student1), AcademicYear(2014)) returns Seq(autumnTerm.getTermTypeAsString)
-		validator.termService.getTermFromDateIncludingVacations(any[BaseDateTime]) returns autumnTerm
+		validator.attendanceMonitoringService.findNonReportedTerms(Seq(student1), AcademicYear(2014)) returns Seq(PeriodType.autumnTerm.toString)
+//		validator.termService.getTermFromDateIncludingVacations(any[BaseDateTime]) returns autumnTerm
 		validator.checkpointMap = JHashMap(
 			student1 -> JHashMap(scheme1point1 -> AttendanceState.Attended.asInstanceOf[AttendanceState])
 		)
@@ -206,8 +201,8 @@ class AgentPointRecordCommandTest extends TestBase with Mockito {
 	@Test
 	def validateOk() { new ValidatorFixture {
 		validator.securityService.can(validator.user, Permissions.MonitoringPoints.Record, student1) returns {true}
-		validator.attendanceMonitoringService.findNonReportedTerms(Seq(student1), AcademicYear(2014)) returns Seq(autumnTerm.getTermTypeAsString)
-		validator.termService.getTermFromDateIncludingVacations(any[BaseDateTime]) returns autumnTerm
+		validator.attendanceMonitoringService.findNonReportedTerms(Seq(student1), AcademicYear(2014)) returns Seq(PeriodType.autumnTerm.toString)
+//		validator.termService.getTermFromDateIncludingVacations(any[BaseDateTime]) returns autumnTerm
 		validator.checkpointMap = JHashMap(
 			student1 -> JHashMap(scheme1point1 -> AttendanceState.Attended.asInstanceOf[AttendanceState])
 		)
