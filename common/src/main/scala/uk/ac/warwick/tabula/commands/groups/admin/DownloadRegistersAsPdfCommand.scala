@@ -1,20 +1,20 @@
 package uk.ac.warwick.tabula.commands.groups.admin
 
-import org.joda.time.{DateTime, Interval}
+import org.joda.time.LocalDate
 import org.springframework.validation.Errors
 import uk.ac.warwick.tabula.commands.groups.admin.DownloadRegistersAsPdfHelper._
 import uk.ac.warwick.tabula.commands.{MemberOrUser, _}
+import uk.ac.warwick.tabula.data.Transactions._
 import uk.ac.warwick.tabula.data.model.groups.{SmallGroupEvent, SmallGroupEventOccurrence, SmallGroupSet}
 import uk.ac.warwick.tabula.data.model.{Department, UserSettings}
+import uk.ac.warwick.tabula.helpers.ComposableOrdering
 import uk.ac.warwick.tabula.helpers.DateTimeOrdering._
 import uk.ac.warwick.tabula.permissions.Permissions
 import uk.ac.warwick.tabula.services._
 import uk.ac.warwick.tabula.services.fileserver.{RenderableAttachment, RenderableFile}
 import uk.ac.warwick.tabula.system.permissions.{PermissionsChecking, PermissionsCheckingMethods, RequiresPermissionsChecking}
-import uk.ac.warwick.tabula.{AcademicYear, CurrentUser}
+import uk.ac.warwick.tabula.{AcademicWeek, AcademicYear, CurrentUser}
 import uk.ac.warwick.userlookup.{AnonymousUser, User}
-import uk.ac.warwick.tabula.data.Transactions._
-import uk.ac.warwick.tabula.helpers.ComposableOrdering
 
 import scala.collection.JavaConverters._
 
@@ -155,33 +155,33 @@ trait DownloadRegistersAsPdfPermissions extends RequiresPermissionsChecking with
 
 trait DownloadRegistersAsPdfCommandState {
 
-	self: TermServiceComponent with SmallGroupServiceComponent =>
+	self: SmallGroupServiceComponent =>
 
 	def department: Department
 	def academicYear: AcademicYear
 
-	lazy val weeksForYear: Map[Integer, Interval] = termService.getAcademicWeeksForYear(academicYear.dateInTermOne).toMap
+	lazy val weeksForYear: Map[Int, AcademicWeek] = academicYear.weeks
 	lazy val smallGroupsInDepartment: Seq[SmallGroupSet] = smallGroupService.getSmallGroupSets(department, academicYear).sortBy(sgs => (sgs.module, sgs.name))
 }
 
 trait GetsOccurrencesForDownloadRegistersAsPdfCommand extends GetsOccurrences with TaskBenchmarking {
 
 	self: DownloadRegistersAsPdfCommandRequest with DownloadRegistersAsPdfCommandState
-		with SmallGroupServiceComponent with TermServiceComponent =>
+		with SmallGroupServiceComponent =>
 
 	override lazy val getOccurrences: Seq[SmallGroupEventOccurrence] = benchmarkTask("getOccurrences") {
-		def toWeekNumber(date: DateTime) = termService.getTermFromDateIncludingVacations(date).getAcademicWeekNumber(date)
+		def toWeekNumber(date: LocalDate) = academicYear.weekForDate(date).weekNumber
 
 		// If the start/end date is outside the specified academic year, set to the min/max for initial filtering
 		val startWeek = {
-			if (startDate.isBefore(termService.getTermFromDate(academicYear.dateInTermOne).getStartDate)) {
+			if (startDate.isBefore(academicYear.firstDay)) {
 				0
 			} else {
 				toWeekNumber(startDate)
 			}
 		}
 		val endWeek = {
-			if (endDate.isAfter(termService.getTermFromDate(academicYear.next.dateInTermOne).getStartDate)) {
+			if (endDate.isAfter(academicYear.lastDay)) {
 				60
 			} else {
 				toWeekNumber(endDate)
@@ -196,11 +196,11 @@ trait GetsOccurrencesForDownloadRegistersAsPdfCommand extends GetsOccurrences wi
 			)
 		})
 		// Now filter each occurrence to see if it's really between the dates
-		roughOccurrances.filter(o => o.dateTime.isDefined).filter(o => {
+		roughOccurrances.filter(o => o.dateTime.nonEmpty).filter(o => {
 			val dateTime = o.dateTime(weeksForYear)
-			dateTime.isDefined &&
-				(dateTime.get.isAfter(startDate) || dateTime.get.isEqual(startDate)) &&
-					(dateTime.get.isBefore(endDate) || dateTime.get.isEqual(endDate))
+			dateTime.nonEmpty &&
+				(dateTime.get.isAfter(startDate.toDateTimeAtStartOfDay) || dateTime.get.isEqual(startDate.toDateTimeAtStartOfDay)) &&
+					(dateTime.get.isBefore(endDate.toDateTimeAtStartOfDay) || dateTime.get.isEqual(endDate.toDateTimeAtStartOfDay))
 		})
 	}
 }

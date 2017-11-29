@@ -7,6 +7,7 @@ import org.joda.time.{DateTime, Period}
 import org.springframework.stereotype.Service
 import uk.ac.warwick.spring.Wire
 import uk.ac.warwick.sso.client.trusted.TrustedApplicationUtils
+import uk.ac.warwick.tabula._
 import uk.ac.warwick.tabula.data.model.Member
 import uk.ac.warwick.tabula.data.model.groups.{DayOfWeek, WeekRange}
 import uk.ac.warwick.tabula.helpers.Futures._
@@ -16,7 +17,6 @@ import uk.ac.warwick.tabula.profiles.web.Routes
 import uk.ac.warwick.tabula.services._
 import uk.ac.warwick.tabula.services.timetables.TimetableFetchingService.EventList
 import uk.ac.warwick.tabula.timetables.{TimetableEvent, TimetableEventType}
-import uk.ac.warwick.tabula._
 
 import scala.collection.JavaConverters._
 import scala.concurrent.Future
@@ -50,12 +50,12 @@ private class ExamTimetableHttpTimetableFetchingService(examTimetableConfigurati
 	extends StaffTimetableFetchingService with StudentTimetableFetchingService with Logging {
 
 	self: DispatchHttpClientComponent with TrustedApplicationsManagerComponent
-		with UserLookupComponent with TermServiceComponent with FeaturesComponent with TopLevelUrlComponent =>
+		with UserLookupComponent with FeaturesComponent with TopLevelUrlComponent =>
 
 	// a dispatch response handler which reads XML from the response and parses it into a list of TimetableEvents
 	def handler(uniId: String): (Map[String, Seq[String]], Request) => Handler[Seq[TimetableEvent]] = { (_: Map[String,Seq[String]], req: dispatch.classic.Request) =>
 		req <> { node =>
-			ExamTimetableHttpTimetableFetchingService.parseXml(node, uniId, termService, toplevelUrl)
+			ExamTimetableHttpTimetableFetchingService.parseXml(node, uniId, toplevelUrl)
 		}
 	}
 
@@ -110,15 +110,14 @@ object ExamTimetableHttpTimetableFetchingService extends Logging {
 			with AutowiringDispatchHttpClientComponent
 			with AutowiringTrustedApplicationsManagerComponent
 			with AutowiringUserLookupComponent
-			with AutowiringTermServiceComponent
 			with AutowiringFeaturesComponent
 			with AutowiringTopLevelUrlComponent
 
 		new CachedStaffAndStudentTimetableFetchingService(service, cacheName)
 	}
 
-	def parseXml(xml: Elem, universityId: String, termService: TermService, topLevelUrl: String): Seq[TimetableEvent] = {
-		val timetable = ExamTimetableFetchingService.examTimetableFromXml(xml, termService)
+	def parseXml(xml: Elem, universityId: String, topLevelUrl: String): Seq[TimetableEvent] = {
+		val timetable = ExamTimetableFetchingService.examTimetableFromXml(xml)
 		val examProfile = (xml \\ "exam-profile" \\ "profile").text
 
 		timetable.exams.map(timetableExam => {
@@ -129,10 +128,7 @@ object ExamTimetableHttpTimetableFetchingService extends Logging {
 				title = "Exam",
 				description = "",
 				eventType = TimetableEventType.Exam,
-				weekRanges = Seq(WeekRange(
-					termService.getTermFromDateIncludingVacations(timetableExam.startDateTime)
-						.getAcademicWeekNumber(timetableExam.startDateTime)
-				)),
+				weekRanges = Seq(WeekRange(timetableExam.academicYear.weekForDate(timetableExam.startDateTime.toLocalDate).weekNumber)),
 				day = DayOfWeek(timetableExam.startDateTime.dayOfWeek.get),
 				startTime = timetableExam.startDateTime.toLocalTime,
 				endTime = timetableExam.endDateTime.toLocalTime,
@@ -176,7 +172,7 @@ object ExamTimetableFetchingService {
 		exams: Seq[ExamTimetableExam]
 	)
 
-	def examTimetableFromXml(xml: Elem, termService: TermService): ExamTimetable = {
+	def examTimetableFromXml(xml: Elem): ExamTimetable = {
 		val header = (xml \\ "exam-headerinfo").text
 		val instructions = (xml \\ "exam-instructions").text
 
@@ -234,7 +230,7 @@ trait ExamTimetableFetchingService {
 abstract class AbstractExamTimetableFetchingService extends ExamTimetableFetchingService with Logging {
 
 	self: DispatchHttpClientComponent with ExamTimetableConfigurationComponent
-		with TrustedApplicationsManagerComponent with TermServiceComponent =>
+		with TrustedApplicationsManagerComponent =>
 
 	def getTimetable(member: Member, viewer: CurrentUser): Future[ExamTimetableFetchingService.ExamTimetable] = {
 		val endpoint = s"${examTimetableConfiguration.examTimetableUrl}${member.universityId}.xml"
@@ -252,7 +248,7 @@ abstract class AbstractExamTimetableFetchingService extends ExamTimetableFetchin
 		// a dispatch response handler which reads XML from the response and parses it into an ExamTimetable
 		def handler = { (_: Map[String,Seq[String]], req: dispatch.classic.Request) =>
 			req <> { node =>
-				ExamTimetableFetchingService.examTimetableFromXml(node, termService)
+				ExamTimetableFetchingService.examTimetableFromXml(node)
 			}
 		}
 
@@ -273,7 +269,6 @@ class ExamTimetableFetchingServiceImpl
 	with AutowiringExamTimetableConfigurationComponent
 	with AutowiringTrustedApplicationsManagerComponent
 	with AutowiringUserLookupComponent
-	with AutowiringTermServiceComponent
 
 trait ExamTimetableFetchingServiceComponent {
 	def examTimetableFetchingService: ExamTimetableFetchingService

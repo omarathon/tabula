@@ -3,11 +3,9 @@ package uk.ac.warwick.tabula.data.model.groups
 import java.sql.Types
 
 import org.hibernate.`type`.StandardBasicTypes
-import org.joda.time.{DateTimeConstants, LocalDate}
 import uk.ac.warwick.tabula.AcademicYear
 import uk.ac.warwick.tabula.data.model.AbstractBasicUserType
-import uk.ac.warwick.tabula.services.TermService
-import uk.ac.warwick.util.termdates.Term
+import uk.ac.warwick.util.termdates.AcademicYearPeriod.PeriodType
 
 import scala.collection.mutable
 
@@ -49,16 +47,13 @@ object WeekRange {
 			}
 		}
 
-	def termWeekRanges(year: AcademicYear)(implicit termService: TermService): Seq[WeekRange] = {
-		// We are confident that November 1st is always in term 1 of the year
-		val autumnTerm = termService.getTermFromDate(new LocalDate(year.startYear, DateTimeConstants.NOVEMBER, 1).toDateTimeAtStartOfDay)
-		val springTerm = termService.getNextTerm(autumnTerm)
-		val summerTerm = termService.getNextTerm(springTerm)
+	def termWeekRanges(year: AcademicYear): Seq[WeekRange] = {
+		// We are confident that November 1st is always in the Autumn of the year
+		val autumnTerm = year.termOrVacation(PeriodType.autumnTerm)
+		val springTerm = year.termOrVacation(PeriodType.springTerm)
+		val summerTerm = year.termOrVacation(PeriodType.summerTerm)
 
-		def toWeekRange(term: Term) =
-			WeekRange(term.getAcademicWeekNumber(term.getStartDate), term.getAcademicWeekNumber(term.getEndDate))
-
-		Seq(autumnTerm, springTerm, summerTerm).map(toWeekRange)
+		Seq(autumnTerm, springTerm, summerTerm).map(_.weekRange)
 	}
 
 	implicit val defaultOrdering: Ordering[WeekRange] = Ordering.by[WeekRange, Week] ( _.minWeek )

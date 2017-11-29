@@ -1,6 +1,6 @@
 package uk.ac.warwick.tabula.dev.web.commands
 
-import org.joda.time.{DateTime, LocalDate}
+import org.joda.time.LocalDate
 import uk.ac.warwick.spring.Wire
 import uk.ac.warwick.tabula.AcademicYear
 import uk.ac.warwick.tabula.commands.{CommandInternal, ComposableCommand, Unaudited}
@@ -61,7 +61,7 @@ class StudentMemberFixtureCommand extends CommandInternal[StudentMember] with Lo
 
 			val scydAcademicYear = {
 				if (null != academicYear) academicYear
-				else AcademicYear.guessSITSAcademicYearByDate(DateTime.now)
+				else AcademicYear.now()
 			}
 
 			// actually, if the specified academic year is before now, perhaps we should create and

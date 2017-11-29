@@ -2,16 +2,16 @@ package uk.ac.warwick.tabula.commands.attendance.manage
 
 import org.joda.time.LocalDate
 import uk.ac.warwick.tabula.AcademicYear
-import uk.ac.warwick.tabula.data.model.attendance.{AttendanceMonitoringPointStyle, AttendanceMonitoringPoint, AttendanceMonitoringPointType}
 import uk.ac.warwick.tabula.JavaImports._
-import uk.ac.warwick.tabula.data.model.{Assignment, Module, MeetingFormat, StudentRelationshipType}
-import uk.ac.warwick.tabula.data.model.groups.DayOfWeek
-import uk.ac.warwick.tabula.services.{ModuleAndDepartmentServiceComponent, SmallGroupServiceComponent, TermServiceComponent}
-import collection.JavaConverters._
+import uk.ac.warwick.tabula.data.model.attendance.{AttendanceMonitoringPoint, AttendanceMonitoringPointStyle, AttendanceMonitoringPointType}
+import uk.ac.warwick.tabula.data.model.{Assignment, MeetingFormat, Module, StudentRelationshipType}
+import uk.ac.warwick.tabula.services.{ModuleAndDepartmentServiceComponent, SmallGroupServiceComponent}
+
+import scala.collection.JavaConverters._
 
 trait AttendancePointCommandState {
 
-	self: TermServiceComponent with SmallGroupServiceComponent with ModuleAndDepartmentServiceComponent =>
+	self: SmallGroupServiceComponent with ModuleAndDepartmentServiceComponent =>
 
 	def pointStyle: AttendanceMonitoringPointStyle
 	def academicYear: AcademicYear
@@ -51,11 +51,11 @@ trait AttendancePointCommandState {
 				point.startDate = startDate
 				point.endDate = endDate
 			case AttendanceMonitoringPointStyle.Week =>
-				val weeksForYear = termService.getAcademicWeeksForYear(point.scheme.academicYear.dateInTermOne).toMap
+				val weeksForYear = point.scheme.academicYear.weeks
 				point.startWeek = startWeek
 				point.endWeek = endWeek
-				point.startDate = weeksForYear(startWeek).getStart.withDayOfWeek(DayOfWeek.Monday.jodaDayOfWeek).toLocalDate
-				point.endDate = weeksForYear(endWeek).getStart.withDayOfWeek(DayOfWeek.Monday.jodaDayOfWeek).toLocalDate.plusDays(6)
+				point.startDate = weeksForYear(startWeek).firstDay
+				point.endDate = weeksForYear(endWeek).lastDay
 		}
 		point.pointType = pointType
 		pointType match {
@@ -64,16 +64,10 @@ trait AttendancePointCommandState {
 				point.meetingFormats = meetingFormats.asScala.toSeq
 				point.meetingQuantity = meetingQuantity
 			case AttendanceMonitoringPointType.SmallGroup =>
-				point.smallGroupEventQuantity = smallGroupEventQuantityAll match {
-					case true => 0
-					case _ => smallGroupEventQuantity.toInt
-				}
-				point.smallGroupEventModules = isAnySmallGroupEventModules match {
-					case true => Seq()
-					case false => smallGroupEventModules match {
-						case modules: JSet[Module] => modules.asScala.toSeq
-						case _ => Seq()
-					}
+				point.smallGroupEventQuantity = if (smallGroupEventQuantityAll) 0 else smallGroupEventQuantity.toInt
+				point.smallGroupEventModules = if (isAnySmallGroupEventModules) Nil else smallGroupEventModules match {
+					case modules: JSet[Module] => modules.asScala.toSeq
+					case _ => Seq()
 				}
 			case AttendanceMonitoringPointType.AssignmentSubmission =>
 				point.assignmentSubmissionType = assignmentSubmissionType
@@ -116,7 +110,7 @@ trait AttendancePointCommandState {
 				smallGroupEventModules.addAll(point.smallGroupEventModules.asJava)
 				smallGroupEventQuantity = point.smallGroupEventQuantity
 				smallGroupEventQuantityAll = point.smallGroupEventQuantity == 0
-				isAnySmallGroupEventModules = point.smallGroupEventModules.size == 0
+				isAnySmallGroupEventModules = point.smallGroupEventModules.nonEmpty
 			case AttendanceMonitoringPointType.AssignmentSubmission =>
 				assignmentSubmissionType = point.assignmentSubmissionType
 				assignmentSubmissionTypeAnyQuantity = point.assignmentSubmissionTypeAnyQuantity

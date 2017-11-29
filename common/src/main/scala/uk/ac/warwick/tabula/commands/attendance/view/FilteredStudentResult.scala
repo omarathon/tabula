@@ -1,11 +1,10 @@
 package uk.ac.warwick.tabula.commands.attendance.view
 
 import uk.ac.warwick.tabula.AcademicYear
-import uk.ac.warwick.tabula.commands.attendance.GroupsPoints
 import uk.ac.warwick.tabula.commands.TaskBenchmarking
+import uk.ac.warwick.tabula.commands.attendance.GroupsPoints
 import uk.ac.warwick.tabula.data.model.attendance.{AttendanceMonitoringCheckpoint, AttendanceMonitoringCheckpointTotal, AttendanceMonitoringPoint}
 import uk.ac.warwick.tabula.data.model.{AttendanceNote, Department, StudentMember}
-import uk.ac.warwick.tabula.services.TermServiceComponent
 import uk.ac.warwick.tabula.services.attendancemonitoring.AttendanceMonitoringServiceComponent
 
 case class FilteredStudentResult(
@@ -23,7 +22,7 @@ case class FilteredStudentsAttendanceResult(
 
 trait BuildsFilteredStudentsAttendanceResult extends TaskBenchmarking with GroupsPoints {
 
-	self: AttendanceMonitoringServiceComponent with TermServiceComponent =>
+	self: AttendanceMonitoringServiceComponent =>
 
 	def buildAttendanceResult(
 		totalResults: Int,

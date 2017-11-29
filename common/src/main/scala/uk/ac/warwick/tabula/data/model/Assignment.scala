@@ -11,6 +11,7 @@ import uk.ac.warwick.tabula.JavaImports._
 import uk.ac.warwick.tabula.data.PostLoadBehaviour
 import uk.ac.warwick.tabula.data.model.AssignmentAnonymity.{IDOnly, NameAndID}
 import uk.ac.warwick.tabula.data.model.forms.{WordCountField, _}
+import uk.ac.warwick.tabula.helpers.JodaConverters._
 import uk.ac.warwick.tabula.data.model.markingworkflow.CM2MarkingWorkflow
 import uk.ac.warwick.tabula.data.model.permissions.AssignmentGrantedRole
 import uk.ac.warwick.tabula.helpers.DateTimeOrdering._
@@ -105,7 +106,7 @@ class Assignment
 	@Basic
 	@Type(`type` = "uk.ac.warwick.tabula.data.model.AcademicYearUserType")
 	@Column(nullable = false)
-	override var academicYear: AcademicYear = AcademicYear.guessSITSAcademicYearByDate(new DateTime())
+	override var academicYear: AcademicYear = AcademicYear.now()
 
 	@Type(`type` = "uk.ac.warwick.tabula.data.model.StringListUserType")
 	var fileExtensions: Seq[String] = _
@@ -217,11 +218,11 @@ class Assignment
 	def feedbackDeadline: Option[LocalDate] = if (openEnded || dissertation) {
 		None
 	} else if (!hasExtensions || !extensions.exists(_.approved) || submissions.exists(s => !extensions.exists(e => e.isForUser(s.usercode))) || !doesAllMembersHaveApprovedExtensions) {
-		Option(workingDaysHelper.datePlusWorkingDays(closeDate.toLocalDate, Feedback.PublishDeadlineInWorkingDays))
+		Option(workingDaysHelper.datePlusWorkingDays(closeDate.toLocalDate.asJava, Feedback.PublishDeadlineInWorkingDays)).map(_.asJoda)
 	} else if (extensions.exists(_.feedbackDeadline.isDefined)) {
 		Option(extensions.filter(_.approved).flatMap(_.feedbackDeadline).map(_.toLocalDate).min)
 	} else if (submissions.size() == 0 && doesAllMembersHaveApprovedExtensions) {
-		Option(workingDaysHelper.datePlusWorkingDays(extensions.filter(_.expiryDate != None).map(_.expiryDate).min.get.toLocalDate, Feedback.PublishDeadlineInWorkingDays))
+		Option(workingDaysHelper.datePlusWorkingDays(extensions.filter(_.expiryDate.nonEmpty).map(_.expiryDate).min.get.toLocalDate.asJava, Feedback.PublishDeadlineInWorkingDays)).map(_.asJoda)
 	}	else None
 
 
@@ -252,7 +253,7 @@ class Assignment
 			if (date.isBefore(now)) 1
 			else -1 // today or in the future
 
-		workingDaysHelper.getNumWorkingDays(now, date) + offset
+		workingDaysHelper.getNumWorkingDays(now.asJava, date.asJava) + offset
 	}
 
 	def feedbackDeadlineWorkingDaysAway: Option[Int] = feedbackDeadline.map(workingDaysAway)
@@ -435,10 +436,10 @@ class Assignment
 				if (deadline.toLocalTime.isAfter(submission.submittedDate.toLocalTime)) -1
 				else 0
 
-			val daysLate = workingDaysHelper.getNumWorkingDays(deadline.toLocalDate, submission.submittedDate.toLocalDate) + offset
-			val lateDay = workingDaysHelper.datePlusWorkingDays(deadline.toLocalDate, daysLate)
+			val daysLate = workingDaysHelper.getNumWorkingDays(deadline.toLocalDate.asJava, submission.submittedDate.toLocalDate.asJava) + offset
+			val lateDay = workingDaysHelper.datePlusWorkingDays(deadline.toLocalDate.asJava, daysLate)
 
-			if (lateDay.isBefore(submission.submittedDate.toLocalDate)) daysLate + 1
+			if (lateDay.isBefore(submission.submittedDate.toLocalDate.asJava)) daysLate + 1
 			else daysLate
 		} else 0
 
@@ -449,10 +450,10 @@ class Assignment
 			if (deadline.toLocalTime.isAfter(DateTime.now.toLocalTime)) -1
 			else 0
 
-		val daysLate = workingDaysHelper.getNumWorkingDays(deadline.toLocalDate, DateTime.now.toLocalDate) + offset
-		val lateDay = workingDaysHelper.datePlusWorkingDays(deadline.toLocalDate, daysLate)
+		val daysLate = workingDaysHelper.getNumWorkingDays(deadline.toLocalDate.asJava, DateTime.now.toLocalDate.asJava) + offset
+		val lateDay = workingDaysHelper.datePlusWorkingDays(deadline.toLocalDate.asJava, daysLate)
 
-		if (lateDay.isBefore(DateTime.now.toLocalDate)) daysLate + 1
+		if (lateDay.isBefore(DateTime.now.toLocalDate.asJava)) daysLate + 1
 		else daysLate
 	}
 

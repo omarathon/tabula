@@ -5,7 +5,7 @@ import org.springframework.validation.Errors
 import org.springframework.web.bind.annotation.{ModelAttribute, PathVariable, RequestMapping}
 import uk.ac.warwick.tabula.AcademicYear
 import uk.ac.warwick.tabula.commands.profiles.{FilterStudentsCommand, FilterStudentsResults}
-import uk.ac.warwick.tabula.commands.{Appliable, CurrentSITSAcademicYear}
+import uk.ac.warwick.tabula.commands.{Appliable, CurrentAcademicYear}
 import uk.ac.warwick.tabula.data.model.Department
 import uk.ac.warwick.tabula.profiles.web.Routes
 import uk.ac.warwick.tabula.services.{AutowiringMaintenanceModeServiceComponent, AutowiringUserSettingsServiceComponent}
@@ -52,7 +52,7 @@ class FilterStudentsController extends ProfilesController
 	with  AcademicYearScopedController
 	with AutowiringUserSettingsServiceComponent
 	with AutowiringMaintenanceModeServiceComponent
-	with CurrentSITSAcademicYear {
+	with CurrentAcademicYear {
 
 	@ModelAttribute("activeAcademicYear")
 	override def activeAcademicYear: Option[AcademicYear] = retrieveActiveAcademicYear(None)

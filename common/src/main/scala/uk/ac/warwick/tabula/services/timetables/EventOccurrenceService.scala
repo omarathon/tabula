@@ -29,7 +29,7 @@ trait EventOccurrenceService {
 }
 
 abstract class TermBasedEventOccurrenceService extends EventOccurrenceService {
-	self: WeekToDateConverterComponent with TermServiceComponent with ProfileServiceComponent =>
+	self: WeekToDateConverterComponent with ProfileServiceComponent =>
 
 	def fromTimetableEvent(event: TimetableEvent, dateRange: Interval): Seq[EventOccurrence] = {
 		def buildEventOccurrence(week: WeekRange.Week, start: LocalDateTime, end: LocalDateTime, uid: String): EventOccurrence = {
@@ -136,6 +136,5 @@ abstract class TermBasedEventOccurrenceService extends EventOccurrenceService {
 @Service("termBasedEventOccurrenceService")
 class TermBasedEventOccurrenceServiceImpl
 	extends TermBasedEventOccurrenceService
-	with AutowiringTermServiceComponent
 	with AutowiringProfileServiceComponent
 	with TermAwareWeekToDateConverterComponent

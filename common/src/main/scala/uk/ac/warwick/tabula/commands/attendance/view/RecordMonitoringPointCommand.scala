@@ -1,20 +1,20 @@
 package uk.ac.warwick.tabula.commands.attendance.view
 
-import uk.ac.warwick.tabula.commands._
-import uk.ac.warwick.tabula.data.AttendanceMonitoringStudentData
-import uk.ac.warwick.tabula.services.attendancemonitoring.{AttendanceMonitoringServiceComponent, AutowiringAttendanceMonitoringServiceComponent}
-import uk.ac.warwick.tabula.system.permissions.{PermissionsChecking, PermissionsCheckingMethods, RequiresPermissionsChecking}
-import uk.ac.warwick.tabula.permissions.Permissions
 import org.springframework.validation.Errors
+import uk.ac.warwick.tabula.JavaImports._
+import uk.ac.warwick.tabula.commands._
+import uk.ac.warwick.tabula.commands.attendance.GroupedPoint
+import uk.ac.warwick.tabula.data.AttendanceMonitoringStudentData
 import uk.ac.warwick.tabula.data.model.attendance._
 import uk.ac.warwick.tabula.data.model.{Department, StudentMember}
-import uk.ac.warwick.tabula.{AcademicYear, CurrentUser}
-import uk.ac.warwick.tabula.JavaImports._
-import uk.ac.warwick.tabula.commands.attendance.GroupedPoint
-import uk.ac.warwick.tabula.services._
-
-import collection.JavaConverters._
 import uk.ac.warwick.tabula.helpers.LazyMaps
+import uk.ac.warwick.tabula.permissions.Permissions
+import uk.ac.warwick.tabula.services._
+import uk.ac.warwick.tabula.services.attendancemonitoring.{AttendanceMonitoringServiceComponent, AutowiringAttendanceMonitoringServiceComponent}
+import uk.ac.warwick.tabula.system.permissions.{PermissionsChecking, PermissionsCheckingMethods, RequiresPermissionsChecking}
+import uk.ac.warwick.tabula.{AcademicYear, CurrentUser}
+
+import scala.collection.JavaConverters._
 
 object RecordMonitoringPointCommand {
 	def apply(department: Department, academicYear: AcademicYear, templatePoint: AttendanceMonitoringPoint, user: CurrentUser) =
@@ -22,7 +22,6 @@ object RecordMonitoringPointCommand {
 			with ComposableCommand[(Seq[AttendanceMonitoringCheckpoint], Seq[AttendanceMonitoringCheckpointTotal])]
 			with AutowiringAttendanceMonitoringServiceComponent
 			with AutowiringProfileServiceComponent
-			with AutowiringTermServiceComponent
 			with AutowiringSecurityServiceComponent
 			with RecordMonitoringPointValidation
 			with RecordMonitoringPointDescription
@@ -83,7 +82,7 @@ trait PopulateRecordMonitoringPointCommand extends PopulateOnForm {
 
 trait RecordMonitoringPointValidation extends SelfValidating with GroupedPointRecordValidation {
 
-	self: RecordMonitoringPointCommandState with AttendanceMonitoringServiceComponent with TermServiceComponent with SecurityServiceComponent =>
+	self: RecordMonitoringPointCommandState with AttendanceMonitoringServiceComponent with SecurityServiceComponent =>
 
 	override def validate(errors: Errors) {
 		validateGroupedPoint(
@@ -127,7 +126,7 @@ trait RecordMonitoringPointDescription extends Describable[(Seq[AttendanceMonito
 
 trait RecordMonitoringPointCommandState {
 
-	self: AttendanceMonitoringServiceComponent with ProfileServiceComponent with TermServiceComponent =>
+	self: AttendanceMonitoringServiceComponent with ProfileServiceComponent =>
 
 	def department: Department
 	def academicYear: AcademicYear
@@ -163,7 +162,7 @@ trait RecordMonitoringPointCommandState {
 		studentMap.flatMap(_._2).map(student =>
 			student -> {
 				val nonReportedTerms = attendanceMonitoringService.findNonReportedTerms(Seq(student), academicYear)
-				!nonReportedTerms.contains(termService.getTermFromDateIncludingVacations(templatePoint.startDate.toDateTimeAtStartOfDay).getTermTypeAsString)
+				!nonReportedTerms.contains(AcademicYear.forDate(templatePoint.startDate).termOrVacationForDate(templatePoint.startDate).periodType.toString)
 			}
 		).toMap
 

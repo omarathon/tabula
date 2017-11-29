@@ -1,14 +1,13 @@
 package uk.ac.warwick.tabula.commands.scheduling
 
-import org.joda.time.DateTime
 import uk.ac.warwick.tabula.AcademicYear
 import uk.ac.warwick.tabula.commands._
-import uk.ac.warwick.tabula.data.model.{Department, DepartmentWithManualUsers, Notification}
 import uk.ac.warwick.tabula.data.model.notifications.{AcademicOfficeMembershipNotification, ManualMembershipWarningNotification}
+import uk.ac.warwick.tabula.data.model.{Department, DepartmentWithManualUsers, Notification}
 import uk.ac.warwick.tabula.helpers.Logging
-import uk.ac.warwick.tabula.system.permissions.PubliclyVisiblePermissions
-import uk.ac.warwick.tabula.services._
 import uk.ac.warwick.tabula.helpers.Tap._
+import uk.ac.warwick.tabula.services._
+import uk.ac.warwick.tabula.system.permissions.PubliclyVisiblePermissions
 
 
 object ManualMembershipWarningCommand {
@@ -34,7 +33,7 @@ abstract class ManualMembershipWarningCommandInternal() extends CommandInternal[
 
 	def applyInternal(): Seq[DepartmentWithManualUsers] = {
 		benchmark("ManualMembershipWarning") {
-			val currentSITSAcademicYear = AcademicYear.guessSITSAcademicYearByDate(new DateTime())
+			val currentSITSAcademicYear = AcademicYear.now()
 			assessmentMembershipService.departmentsWithManualAssessmentsOrGroups(currentSITSAcademicYear)
 		}
 	}

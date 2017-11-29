@@ -1,6 +1,6 @@
 package uk.ac.warwick.tabula.commands.timetables
 
-import org.joda.time.{DateTime, Interval}
+import org.joda.time.{Interval, LocalDate}
 import org.springframework.validation.Errors
 import uk.ac.warwick.tabula.commands._
 import uk.ac.warwick.tabula.commands.timetables.ViewMemberEventsCommand.ReturnType
@@ -10,7 +10,6 @@ import uk.ac.warwick.tabula.helpers.{Futures, Logging}
 import uk.ac.warwick.tabula.permissions.Permissions
 import uk.ac.warwick.tabula.services.timetables.TimetableFetchingService.{EventList, EventOccurrenceList}
 import uk.ac.warwick.tabula.services.timetables._
-import uk.ac.warwick.tabula.services.{AutowiringTermServiceComponent, TermServiceComponent}
 import uk.ac.warwick.tabula.system.permissions.{PermissionsChecking, PermissionsCheckingMethods, PubliclyVisiblePermissions, RequiresPermissionsChecking}
 import uk.ac.warwick.tabula.timetables.TimetableEvent
 import uk.ac.warwick.tabula.{AcademicYear, CurrentUser, ItemNotFoundException}
@@ -35,7 +34,6 @@ object ViewMemberEventsCommand extends Logging {
 				with Unaudited with ReadOnly
 				with AutowiringStudentTimetableEventSourceComponent
 				with AutowiringScheduledMeetingEventSourceComponent
-				with AutowiringTermServiceComponent
 				with AutowiringTermBasedEventOccurrenceServiceComponent
 
 		case staff: StaffMember =>
@@ -46,7 +44,6 @@ object ViewMemberEventsCommand extends Logging {
 				with Unaudited with ReadOnly
 				with AutowiringStaffTimetableEventSourceComponent
 				with AutowiringScheduledMeetingEventSourceComponent
-				with AutowiringTermServiceComponent
 				with AutowiringTermBasedEventOccurrenceServiceComponent
 
 		case _ =>
@@ -63,7 +60,6 @@ object ViewMemberEventsCommand extends Logging {
 				with Unaudited with ReadOnly
 				with AutowiringStudentTimetableEventSourceComponent
 				with AutowiringScheduledMeetingEventSourceComponent
-				with AutowiringTermServiceComponent
 				with AutowiringTermBasedEventOccurrenceServiceComponent
 
 		case staff: StaffMember =>
@@ -74,7 +70,6 @@ object ViewMemberEventsCommand extends Logging {
 				with Unaudited with ReadOnly
 				with AutowiringStaffTimetableEventSourceComponent
 				with AutowiringScheduledMeetingEventSourceComponent
-				with AutowiringTermServiceComponent
 				with AutowiringTermBasedEventOccurrenceServiceComponent
 
 		case _ =>
@@ -84,7 +79,7 @@ object ViewMemberEventsCommand extends Logging {
 }
 
 trait MemberTimetableCommand {
-	self: ViewMemberEventsRequest with TermServiceComponent with EventOccurrenceServiceComponent =>
+	self: ViewMemberEventsRequest with EventOccurrenceServiceComponent =>
 
 	protected def eventsToOccurrences(events: EventList): EventOccurrenceList = {
 		val dateRange = createDateRange()
@@ -99,13 +94,13 @@ trait MemberTimetableCommand {
 	}
 
 	private def createDateRange(): Interval = {
-		val startDate: DateTime =
-			Option(start).map(_.toDateTimeAtStartOfDay).getOrElse(termService.getTermFromDate(academicYear.dateInTermOne).getStartDate)
+		val startDate: LocalDate =
+			Option(start).getOrElse(academicYear.firstDay)
 
-		val endDate: DateTime =
-			Option(end).map(_.toDateTimeAtStartOfDay).getOrElse(termService.getTermFromDate((academicYear + 1).dateInTermOne).getStartDate.minusDays(1))
+		val endDate: LocalDate =
+			Option(end).getOrElse(academicYear.lastDay)
 
-		new Interval(startDate, endDate)
+		new Interval(startDate.toDateTimeAtStartOfDay, endDate.toDateTimeAtStartOfDay)
 	}
 
 	protected def sorted(result: EventOccurrenceList): EventOccurrenceList = {
@@ -119,7 +114,7 @@ abstract class ViewStudentEventsCommandInternal(val member: StudentMember, curre
 	extends CommandInternal[ReturnType]
 		with ViewMemberEventsRequest with MemberTimetableCommand {
 
-	self: StudentTimetableEventSourceComponent with ScheduledMeetingEventSourceComponent with TermServiceComponent with EventOccurrenceServiceComponent =>
+	self: StudentTimetableEventSourceComponent with ScheduledMeetingEventSourceComponent with EventOccurrenceServiceComponent =>
 
 	def applyInternal(): ReturnType = {
 		val timetableOccurrences =
@@ -143,7 +138,7 @@ abstract class ViewStaffEventsCommandInternal(val member: StaffMember, currentUs
 	extends CommandInternal[ReturnType]
 		with ViewMemberEventsRequest with MemberTimetableCommand {
 
-	self: StaffTimetableEventSourceComponent with ScheduledMeetingEventSourceComponent with TermServiceComponent with EventOccurrenceServiceComponent =>
+	self: StaffTimetableEventSourceComponent with ScheduledMeetingEventSourceComponent with EventOccurrenceServiceComponent =>
 
 	def applyInternal(): ReturnType = {
 		val timetableOccurrences =

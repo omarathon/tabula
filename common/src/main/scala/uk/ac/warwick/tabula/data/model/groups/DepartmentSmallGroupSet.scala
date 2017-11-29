@@ -1,19 +1,18 @@
 package uk.ac.warwick.tabula.data.model.groups
 
-import javax.persistence._
 import javax.persistence.CascadeType._
+import javax.persistence._
 import javax.validation.constraints.NotNull
 
 import org.hibernate.annotations.{BatchSize, Filter, FilterDef, Type}
-import org.joda.time.DateTime
 import uk.ac.warwick.spring.Wire
 import uk.ac.warwick.tabula.JavaImports._
 import uk.ac.warwick.tabula.data.PostLoadBehaviour
-import uk.ac.warwick.tabula.services.{AssessmentMembershipService, SmallGroupMembershipHelpers, SmallGroupService, UserGroupCacheManager}
-import uk.ac.warwick.tabula.{AcademicYear, ToString}
 import uk.ac.warwick.tabula.data.model._
 import uk.ac.warwick.tabula.helpers.Logging
 import uk.ac.warwick.tabula.permissions.PermissionsTarget
+import uk.ac.warwick.tabula.services.{SmallGroupMembershipHelpers, SmallGroupService, UserGroupCacheManager}
+import uk.ac.warwick.tabula.{AcademicYear, ToString}
 import uk.ac.warwick.userlookup.User
 
 import scala.collection.JavaConverters._
@@ -48,8 +47,6 @@ class DepartmentSmallGroupSet
 	with ToEntityReference {
 	type Entity = DepartmentSmallGroupSet
 
-	import DepartmentSmallGroupSet._
-
 	// FIXME this isn't really optional, but testing is a pain unless it's made so
 	@transient var smallGroupService: Option[SmallGroupService with SmallGroupMembershipHelpers] = Wire.option[SmallGroupService with SmallGroupMembershipHelpers]
 
@@ -61,7 +58,7 @@ class DepartmentSmallGroupSet
 	@Basic
 	@Type(`type` = "uk.ac.warwick.tabula.data.model.AcademicYearUserType")
 	@Column(nullable = false)
-	var academicYear: AcademicYear = AcademicYear.guessSITSAcademicYearByDate(DateTime.now)
+	var academicYear: AcademicYear = AcademicYear.now()
 
 	@NotNull
 	var name: String = _

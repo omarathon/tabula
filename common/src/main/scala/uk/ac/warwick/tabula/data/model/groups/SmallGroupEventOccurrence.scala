@@ -3,12 +3,11 @@ package uk.ac.warwick.tabula.data.model.groups
 import javax.persistence._
 
 import org.hibernate.annotations.BatchSize
-import org.joda.time.{DateTime, Interval, LocalDate}
-import uk.ac.warwick.spring.Wire
+import org.joda.time.{DateTime, LocalDate}
+import uk.ac.warwick.tabula.AcademicWeek
 import uk.ac.warwick.tabula.JavaImports._
 import uk.ac.warwick.tabula.data.model._
 import uk.ac.warwick.tabula.permissions.PermissionsTarget
-import uk.ac.warwick.tabula.services.TermService
 
 @Access(AccessType.FIELD)
 @Entity
@@ -18,8 +17,6 @@ import uk.ac.warwick.tabula.services.TermService
 class SmallGroupEventOccurrence extends GeneratedId with PermissionsTarget with Serializable with ToEntityReference {
 
 	override type Entity = SmallGroupEventOccurrence
-
-	@transient var termService: TermService = Wire[TermService]
 
 	@ManyToOne(fetch = FetchType.LAZY)
 	@JoinColumn(name="event_id", updatable = false)
@@ -34,21 +31,21 @@ class SmallGroupEventOccurrence extends GeneratedId with PermissionsTarget with 
 	def permissionsParents = Stream(event)
 
 	def date: Option[LocalDate] = {
-		date(termService.getAcademicWeeksForYear(event.group.groupSet.academicYear.dateInTermOne).toMap)
+		date(event.group.groupSet.academicYear.weeks)
 	}
-	def date(weeksForYear: Map[Integer, Interval]): Option[LocalDate] = {
+	def date(weeksForYear: Map[Int, AcademicWeek]): Option[LocalDate] = {
 		event.day match {
 			case null => None
 			case d: DayOfWeek =>
 				def weekNumberToDate(weekNumber: Int, dayOfWeek: DayOfWeek) =
-					weeksForYear(weekNumber).getStart.withDayOfWeek(dayOfWeek.jodaDayOfWeek)
+					weeksForYear(weekNumber).firstDay.withDayOfWeek(dayOfWeek.jodaDayOfWeek)
 
-				Option(weekNumberToDate(week, event.day).toLocalDate)
+				Option(weekNumberToDate(week, event.day))
 		}
 	}
 
 	def dateTime: Option[DateTime] = date.map(_.toDateTime(event.startTime))
-	def dateTime(weeksForYear: Map[Integer, Interval]): Option[DateTime] = date(weeksForYear).map(_.toDateTime(event.startTime))
+	def dateTime(weeksForYear: Map[Int, AcademicWeek]): Option[DateTime] = date(weeksForYear).map(_.toDateTime(event.startTime))
 
 	override def humanReadableId: String = s"${event.humanReadableId} week $week"
 

@@ -8,6 +8,7 @@ import uk.ac.warwick.tabula.coursework.web.Routes
 import uk.ac.warwick.tabula.data.model.NotificationPriority.{Critical, Info, Warning}
 import uk.ac.warwick.tabula.data.model._
 import uk.ac.warwick.tabula.data.model.forms.Extension
+import uk.ac.warwick.tabula.helpers.JodaConverters._
 import uk.ac.warwick.tabula.services.ModuleAndDepartmentService
 import uk.ac.warwick.userlookup.User
 import uk.ac.warwick.util.workingdays.WorkingDaysHelperImpl
@@ -30,7 +31,7 @@ trait FeedbackDueNotification extends AllCompletedActionRequiredNotification {
 				if (d.isBefore(now)) 1
 				else -1 // today or in the future
 
-			workingDaysHelper.getNumWorkingDays(now, d) + offset
+			workingDaysHelper.getNumWorkingDays(now.asJava, d.asJava) + offset
 		}.getOrElse(Integer.MAX_VALUE)
 
 	protected def dueToday: Boolean = deadline.contains(created.toLocalDate)

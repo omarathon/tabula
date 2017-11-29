@@ -1,6 +1,6 @@
 package uk.ac.warwick.tabula.commands.reports.smallgroups
 
-import org.joda.time.DateTime
+import org.joda.time.{DateTime, LocalDate}
 import uk.ac.warwick.tabula.AcademicYear
 import uk.ac.warwick.tabula.JavaImports._
 import uk.ac.warwick.tabula.commands._
@@ -17,7 +17,6 @@ import scala.collection.JavaConverters._
 object SmallGroupsReportProcessor {
 	def apply(department: Department, academicYear: AcademicYear) =
 		new SmallGroupsReportProcessorInternal(department, academicYear)
-			with AutowiringTermServiceComponent
 			with AutowiringProfileServiceComponent
 			with ComposableCommand[SmallGroupsReportProcessorResult]
 			with ReportPermissions
@@ -50,7 +49,7 @@ case class SmallGroupsReportProcessorResult(
 class SmallGroupsReportProcessorInternal(val department: Department, val academicYear: AcademicYear)
 	extends CommandInternal[SmallGroupsReportProcessorResult] with TaskBenchmarking {
 
-	self: SmallGroupsReportProcessorState with TermServiceComponent with ProfileServiceComponent =>
+	self: SmallGroupsReportProcessorState with ProfileServiceComponent =>
 
 	override def applyInternal(): SmallGroupsReportProcessorResult = {
 		val processedStudents = students.asScala.map{properties =>
@@ -67,7 +66,7 @@ class SmallGroupsReportProcessorInternal(val department: Department, val academi
 				properties.get("sprCode")
 			)
 		}.toSeq.sortBy(s => (s.lastName, s.firstName))
-		val thisWeek = termService.getAcademicWeekForAcademicYear(DateTime.now, academicYear)
+		val thisWeek = academicYear.weekForDate(LocalDate.now).weekNumber
 		val thisDay = DateTime.now.getDayOfWeek
 		val processedEvents = events.asScala.map{properties =>
 			EventData(

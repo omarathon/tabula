@@ -6,7 +6,6 @@ import uk.ac.warwick.tabula.AcademicYear
 import uk.ac.warwick.tabula.commands._
 import uk.ac.warwick.tabula.data.model.Department
 import uk.ac.warwick.tabula.data.model.attendance._
-import uk.ac.warwick.tabula.data.model.groups.DayOfWeek
 import uk.ac.warwick.tabula.permissions.Permissions
 import uk.ac.warwick.tabula.services._
 import uk.ac.warwick.tabula.services.attendancemonitoring.{AttendanceMonitoringServiceComponent, AutowiringAttendanceMonitoringServiceComponent}
@@ -21,7 +20,6 @@ object CreateNewAttendancePointsFromCopyCommand {
 		new CreateNewAttendancePointsFromCopyCommandInternal(department, academicYear, schemes)
 			with ComposableCommand[Seq[AttendanceMonitoringPoint]]
 			with AutowiringAttendanceMonitoringServiceComponent
-			with AutowiringTermServiceComponent
 			with AutowiringProfileServiceComponent
 			with CreateNewAttendancePointsFromCopyValidation
 			with CreateNewAttendancePointsFromCopyDescription
@@ -38,8 +36,7 @@ class CreateNewAttendancePointsFromCopyCommandInternal(
 ) extends CommandInternal[Seq[AttendanceMonitoringPoint]] with GetsPointsToCreate with TaskBenchmarking
 		with GeneratesAttendanceMonitoringSchemeNotifications with RequiresCheckpointTotalUpdate {
 
-	self: CreateNewAttendancePointsFromCopyCommandState with TermServiceComponent
-		with AttendanceMonitoringServiceComponent with ProfileServiceComponent =>
+	self: CreateNewAttendancePointsFromCopyCommandState with AttendanceMonitoringServiceComponent with ProfileServiceComponent =>
 
 	override def applyInternal(): Seq[AttendanceMonitoringPoint] = {
 		val points = getPoints(findPointsResult, schemes, pointStyle, academicYear, addToScheme = true)
@@ -55,7 +52,7 @@ class CreateNewAttendancePointsFromCopyCommandInternal(
 
 trait CreateNewAttendancePointsFromCopyValidation extends SelfValidating with GetsPointsToCreate with AttendanceMonitoringPointValidation {
 
-	self: CreateNewAttendancePointsFromCopyCommandState with TermServiceComponent with AttendanceMonitoringServiceComponent =>
+	self: CreateNewAttendancePointsFromCopyCommandState with AttendanceMonitoringServiceComponent =>
 
 	override def validate(errors: Errors) {
 		val points = getPoints(findPointsResult, schemes, pointStyle, academicYear, addToScheme = false)
@@ -76,9 +73,6 @@ trait CreateNewAttendancePointsFromCopyValidation extends SelfValidating with Ge
 }
 
 trait GetsPointsToCreate {
-
-	self: TermServiceComponent =>
-
 	def getPoints(
 		findPointsResult: FindPointsResult,
 		schemes: Seq[AttendanceMonitoringScheme],
@@ -91,17 +85,14 @@ trait GetsPointsToCreate {
 		if (pointStyle == AttendanceMonitoringPointStyle.Week) {
 			// Week points
 			schemes.flatMap { scheme =>
-				val weeksForYear = termService.getAcademicWeeksForYear(scheme.academicYear.dateInTermOne).toMap
+				val weeksForYear = scheme.academicYear.weeks
 				weekPoints.map { weekPoint =>
-					val newPoint = addToScheme match {
-						case true => weekPoint.cloneTo(Option(scheme))
-						case false => weekPoint.cloneTo(None)
-					}
+					val newPoint = if (addToScheme) weekPoint.cloneTo(Option(scheme)) else weekPoint.cloneTo(None)
 					newPoint.createdDate = DateTime.now
 					newPoint.updatedDate = DateTime.now
 					// Fix new points date
-					newPoint.startDate = weeksForYear(weekPoint.startWeek).getStart.withDayOfWeek(DayOfWeek.Monday.jodaDayOfWeek).toLocalDate
-					newPoint.endDate = weeksForYear(weekPoint.endWeek).getStart.withDayOfWeek(DayOfWeek.Monday.jodaDayOfWeek).toLocalDate.plusDays(6)
+					newPoint.startDate = weeksForYear(weekPoint.startWeek).firstDay
+					newPoint.endDate = weeksForYear(weekPoint.endWeek).lastDay
 					newPoint
 				}
 			}

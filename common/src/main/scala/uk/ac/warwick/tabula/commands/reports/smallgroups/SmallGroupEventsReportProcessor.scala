@@ -14,7 +14,6 @@ import scala.collection.mutable
 object SmallGroupEventsReportProcessor {
 	def apply(department: Department, academicYear: AcademicYear) =
 		new SmallGroupEventsReportProcessorInternal(department, academicYear)
-			with AutowiringTermServiceComponent
 			with AutowiringProfileServiceComponent
 			with ComposableCommand[Seq[SmallGroupEventReportData]]
 			with ReportPermissions
@@ -27,7 +26,7 @@ object SmallGroupEventsReportProcessor {
 class SmallGroupEventsReportProcessorInternal(val department: Department, val academicYear: AcademicYear)
 	extends CommandInternal[Seq[SmallGroupEventReportData]] with TaskBenchmarking {
 
-	self: SmallGroupEventsReportProcessorState with TermServiceComponent with ProfileServiceComponent =>
+	self: SmallGroupEventsReportProcessorState with ProfileServiceComponent =>
 
 	override def applyInternal(): mutable.Buffer[SmallGroupEventReportData] = {
 		events.asScala.map(properties =>

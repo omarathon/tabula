@@ -1,6 +1,5 @@
 package uk.ac.warwick.tabula.web.controllers.attendance
 
-import org.joda.time.DateTime
 import org.springframework.stereotype.Controller
 import org.springframework.web.bind.annotation.{ModelAttribute, PathVariable, RequestMapping}
 import uk.ac.warwick.tabula.attendance.web.Routes
@@ -32,7 +31,7 @@ abstract class AbstractAttendanceHomeController extends AttendanceController
 
 		val hasAnyRelationships = info.relationshipTypesMap.exists { case (_, b) => b }
 
-		val academicYear = activeAcademicYear.getOrElse(AcademicYear.guessSITSAcademicYearByDate(DateTime.now))
+		val academicYear = activeAcademicYear.getOrElse(AcademicYear.now())
 
 		if (info.hasProfile && info.managePermissions.isEmpty && info.viewPermissions.isEmpty && !hasAnyRelationships) {
 			Redirect(Routes.Profile.home)

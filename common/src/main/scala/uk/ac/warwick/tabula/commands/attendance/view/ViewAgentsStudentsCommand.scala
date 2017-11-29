@@ -14,7 +14,6 @@ object ViewAgentsStudentsCommand {
 			with ViewAgentsStudentsPermissions
 			with AutowiringRelationshipServiceComponent
 			with AutowiringAttendanceMonitoringServiceComponent
-			with AutowiringTermServiceComponent
 			with ComposableCommand[FilteredStudentsAttendanceResult]
 			with ViewAgentsStudentsState
 			with ReadOnly with Unaudited
@@ -23,7 +22,7 @@ object ViewAgentsStudentsCommand {
 class ViewAgentsStudentsCommandInternal(val department: Department, val academicYear: AcademicYear, val relationshipType: StudentRelationshipType, val agent: Member)
 	extends CommandInternal[FilteredStudentsAttendanceResult] with BuildsFilteredStudentsAttendanceResult {
 
-		self: RelationshipServiceComponent with AttendanceMonitoringServiceComponent with TermServiceComponent =>
+		self: RelationshipServiceComponent with AttendanceMonitoringServiceComponent =>
 
 		def applyInternal(): FilteredStudentsAttendanceResult = {
 			val students = relationshipService.listCurrentStudentRelationshipsWithMemberInDepartment(relationshipType, agent, department).flatMap(_.studentMember)

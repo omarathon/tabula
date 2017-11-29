@@ -69,7 +69,7 @@ trait ViewModuleTimetableState {
 
 // Request parameters
 trait ViewModuleTimetableRequest extends ViewModuleTimetableState
-	with CurrentSITSAcademicYear {
+	with CurrentAcademicYear {
 	var showTimetableEvents: Boolean = true
 	var showSmallGroupEvents: Boolean = false
 	def sourcesToShow: Seq[TimetableEventSource] = if (showTimetableEvents == showSmallGroupEvents) {

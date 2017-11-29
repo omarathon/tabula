@@ -2,7 +2,7 @@ package uk.ac.warwick.tabula.web.controllers.profiles.timetables
 
 import org.springframework.stereotype.Controller
 import org.springframework.web.bind.annotation.{ModelAttribute, PathVariable, RequestMapping}
-import uk.ac.warwick.tabula.commands.CurrentSITSAcademicYear
+import uk.ac.warwick.tabula.commands.CurrentAcademicYear
 import uk.ac.warwick.tabula.commands.timetables.{DepartmentEventsCommand, ViewModuleTimetableCommandFactoryImpl, ViewStaffMemberEventsCommandFactoryImpl, ViewStudentMemberEventsCommandFactoryImpl}
 import uk.ac.warwick.tabula.data.model.Department
 import uk.ac.warwick.tabula.helpers.SystemClockComponent
@@ -15,7 +15,7 @@ import uk.ac.warwick.tabula.web.views.{FullCalendarEvent, JSONView}
 @Controller
 @RequestMapping(Array("/profiles/department/{department}/timetables"))
 class DepartmentTimetablesController extends ProfilesController
-	with CurrentSITSAcademicYear with AutowiringModuleTimetableEventSourceComponent
+	with CurrentAcademicYear with AutowiringModuleTimetableEventSourceComponent
 	with AutowiringUserLookupComponent with AutowiringScientiaConfigurationComponent
 	with SystemClockComponent {
 

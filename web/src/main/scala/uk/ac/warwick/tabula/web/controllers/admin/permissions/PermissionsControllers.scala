@@ -238,9 +238,9 @@ class MemberPermissionsController extends PermissionsControllerMethods[Member] {
 class DepartmentPermissionsController extends PermissionsControllerMethods[Department] {
 	@ModelAttribute("adminLinks") def adminLinks(@PathVariable("target") department: Department) = Seq(
 		AdminLink("Coursework Management", Routes.coursework.admin.department(department)),
-		AdminLink("Small Group Teaching", Routes.groups.admin(department, AcademicYear.guessSITSAcademicYearByDate(DateTime.now))),
-		AdminLink("Monitoring Points - View and record", Routes.attendance.View.departmentForYear(department, AcademicYear.guessSITSAcademicYearByDate(DateTime.now))),
-		AdminLink("Monitoring Points - Create and edit", Routes.attendance.Manage.departmentForYear(department, AcademicYear.guessSITSAcademicYearByDate(DateTime.now))),
+		AdminLink("Small Group Teaching", Routes.groups.admin(department, AcademicYear.now())),
+		AdminLink("Monitoring Points - View and record", Routes.attendance.View.departmentForYear(department, AcademicYear.now())),
+		AdminLink("Monitoring Points - Create and edit", Routes.attendance.Manage.departmentForYear(department, AcademicYear.now())),
 		AdminLink("Administration & Permissions", Routes.admin.department(department))
 	)
 }
@@ -249,7 +249,7 @@ class DepartmentPermissionsController extends PermissionsControllerMethods[Depar
 class ModulePermissionsController extends PermissionsControllerMethods[Module] {
 	@ModelAttribute("adminLinks") def adminLinks(@PathVariable("target") module: Module) = Seq(
 		AdminLink("Coursework Management", Routes.coursework.admin.module(module)),
-		AdminLink("Small Group Teaching", Routes.groups.admin(module.adminDepartment, AcademicYear.guessSITSAcademicYearByDate(DateTime.now))),
+		AdminLink("Small Group Teaching", Routes.groups.admin(module.adminDepartment, AcademicYear.now())),
 		AdminLink("Administration & Permissions", Routes.admin.module(module))
 	)
 }

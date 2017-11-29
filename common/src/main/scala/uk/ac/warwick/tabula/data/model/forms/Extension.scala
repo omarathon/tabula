@@ -1,26 +1,26 @@
 package uk.ac.warwick.tabula.data.model.forms
 
-import uk.ac.warwick.tabula.data.model.forms.ExtensionState.Approved
-
-import scala.collection.JavaConversions._
-import org.hibernate.annotations.{BatchSize, Type}
-import org.joda.time.{DateTime, Days}
-import javax.persistence._
+import java.sql.Types
 import javax.persistence.CascadeType._
 import javax.persistence.FetchType._
+import javax.persistence._
 import javax.validation.constraints.NotNull
 
+import org.hibernate.`type`.StandardBasicTypes
+import org.hibernate.annotations.{BatchSize, Type}
+import org.joda.time.{DateTime, Days}
+import org.springframework.format.annotation.DateTimeFormat
+import uk.ac.warwick.tabula.DateFormats
 import uk.ac.warwick.tabula.JavaImports._
 import uk.ac.warwick.tabula.data.model._
+import uk.ac.warwick.tabula.data.model.forms.ExtensionState.Approved
+import uk.ac.warwick.tabula.helpers.JodaConverters._
 import uk.ac.warwick.tabula.permissions._
-import uk.ac.warwick.util.workingdays.WorkingDaysHelperImpl
-import uk.ac.warwick.userlookup.User
-import org.hibernate.`type`.StandardBasicTypes
-import java.sql.Types
-
-import uk.ac.warwick.tabula.DateFormats
-import org.springframework.format.annotation.DateTimeFormat
 import uk.ac.warwick.tabula.system.TwoWayConverter
+import uk.ac.warwick.userlookup.User
+import uk.ac.warwick.util.workingdays.WorkingDaysHelperImpl
+
+import scala.collection.JavaConversions._
 
 @Entity @Access(AccessType.FIELD)
 class Extension extends GeneratedId with PermissionsTarget with ToEntityReference {
@@ -157,7 +157,7 @@ class Extension extends GeneratedId with PermissionsTarget with ToEntityReferenc
 
 	// the feedback deadline if an expry date exists for this extension
 	def feedbackDueDate: Option[DateTime] = expiryDate.map(ed =>
-		workingDaysHelper.datePlusWorkingDays(ed.toLocalDate, Feedback.PublishDeadlineInWorkingDays).toDateTime(ed)
+		workingDaysHelper.datePlusWorkingDays(ed.toLocalDate.asJava, Feedback.PublishDeadlineInWorkingDays).asJoda.toDateTime(ed)
 	)
 
 

@@ -187,7 +187,7 @@ trait TurnitinLtiConformanceOutcomesServiceState {
 }
 
 trait TurnitinLtiConformanceOutcomesServiceRequest extends TurnitinLtiConformanceOutcomesServiceState
-	with CurrentSITSAcademicYear
+	with CurrentAcademicYear
 
 
 trait TurnitinLtiConformanceOutcomesServiceValidation extends SelfValidating {

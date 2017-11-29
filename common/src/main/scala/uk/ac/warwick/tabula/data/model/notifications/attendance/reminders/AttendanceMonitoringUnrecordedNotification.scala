@@ -9,8 +9,8 @@ import uk.ac.warwick.tabula.attendance.web.Routes
 import uk.ac.warwick.tabula.data.AttendanceMonitoringStudentData
 import uk.ac.warwick.tabula.data.model._
 import uk.ac.warwick.tabula.data.model.attendance.AttendanceMonitoringPoint
+import uk.ac.warwick.tabula.services.ModuleAndDepartmentService
 import uk.ac.warwick.tabula.services.attendancemonitoring.AttendanceMonitoringService
-import uk.ac.warwick.tabula.services.{ModuleAndDepartmentService, TermService}
 import uk.ac.warwick.userlookup.User
 
 abstract class AbstractAttendanceMonitoringUnrecordedNotification
@@ -23,9 +23,6 @@ abstract class AbstractAttendanceMonitoringUnrecordedNotification
 	priority = NotificationPriority.Critical
 
 	@transient
-	implicit var termService: TermService = Wire[TermService]
-
-	@transient
 	var attendanceMonitoringService: AttendanceMonitoringService = Wire[AttendanceMonitoringService]
 
 	@transient
@@ -34,7 +31,7 @@ abstract class AbstractAttendanceMonitoringUnrecordedNotification
 	final def referenceDate: DateTime = created.plusDays(-7)
 
 	@transient
-	lazy val academicYear: AcademicYear = AcademicYear.findAcademicYearContainingDate(referenceDate)
+	lazy val academicYear: AcademicYear = AcademicYear.forDate(referenceDate)
 
 	final def department: Department = item.entity
 

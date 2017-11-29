@@ -1,6 +1,6 @@
 package uk.ac.warwick.tabula.commands.attendance.manage
 
-import org.joda.time.DateTime
+import org.joda.time.{DateTime, LocalDate}
 import org.springframework.validation.Errors
 import uk.ac.warwick.tabula.CurrentUser
 import uk.ac.warwick.tabula.JavaImports._
@@ -38,7 +38,7 @@ class AddStudentsToSchemeCommandInternal(val scheme: AttendanceMonitoringScheme,
 	override def applyInternal(): AttendanceMonitoringScheme = {
 		val previousUniversityIds = scheme.members.members
 
-		if (linkToSits && !scheme.academicYear.isSITSInFlux(DateTime.now)) {
+		if (linkToSits && !scheme.academicYear.isSITSInFlux(LocalDate.now)) {
 			scheme.members.staticUserIds = staticStudentIds.asScala
 			scheme.members.includedUserIds = includedStudentIds.asScala
 			scheme.members.excludedUserIds = excludedStudentIds.asScala

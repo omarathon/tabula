@@ -1,11 +1,11 @@
 package uk.ac.warwick.tabula.commands.coursework.assignments
 
-import org.joda.time.{DateTime, Duration}
+import org.joda.time.Duration
 import uk.ac.warwick.tabula.AcademicYear
 import uk.ac.warwick.tabula.JavaImports._
 import uk.ac.warwick.tabula.commands._
-import uk.ac.warwick.tabula.data.model.triggers.{AssignmentClosedTrigger, Trigger}
 import uk.ac.warwick.tabula.data.model._
+import uk.ac.warwick.tabula.data.model.triggers.{AssignmentClosedTrigger, Trigger}
 import uk.ac.warwick.tabula.permissions.Permissions
 import uk.ac.warwick.tabula.services._
 import uk.ac.warwick.tabula.system.permissions.PermissionsChecking
@@ -120,7 +120,7 @@ trait CopyAssignmentsPermissions extends ArchiveAssignmentsPermissions {
 }
 
 trait CopyAssignmentsState extends ArchiveAssignmentsState {
-	var academicYear: AcademicYear = AcademicYear.guessSITSAcademicYearByDate(new DateTime)
+	var academicYear: AcademicYear = AcademicYear.now()
 	var archive: JBoolean = false
 }
 

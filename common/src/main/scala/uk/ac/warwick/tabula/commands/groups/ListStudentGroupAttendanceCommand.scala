@@ -1,28 +1,26 @@
 package uk.ac.warwick.tabula.commands.groups
 
-import org.joda.time.{LocalDate, LocalDateTime, DateTime, DateTimeConstants}
-import uk.ac.warwick.tabula.AcademicYear
+import org.joda.time.{DateTime, LocalDateTime}
+import uk.ac.warwick.tabula.commands._
 import uk.ac.warwick.tabula.commands.groups.ListStudentGroupAttendanceCommand._
 import uk.ac.warwick.tabula.commands.groups.ViewSmallGroupAttendanceCommand._
-import uk.ac.warwick.tabula.commands.{CommandInternal, ComposableCommand, ReadOnly, TaskBenchmarking, Unaudited}
 import uk.ac.warwick.tabula.data.model.Member
 import uk.ac.warwick.tabula.data.model.groups.SmallGroupFormat.Example
 import uk.ac.warwick.tabula.data.model.groups._
 import uk.ac.warwick.tabula.permissions.Permissions
 import uk.ac.warwick.tabula.services._
 import uk.ac.warwick.tabula.system.permissions.{PermissionsChecking, RequiresPermissionsChecking}
+import uk.ac.warwick.tabula.{AcademicPeriod, AcademicYear}
 import uk.ac.warwick.userlookup.User
-import uk.ac.warwick.util.termdates.Term
 
-import scala.collection.JavaConverters._
 import scala.collection.immutable.SortedMap
 
 case class StudentGroupAttendance(
-	termWeeks: SortedMap[Term, WeekRange],
+	termWeeks: SortedMap[AcademicPeriod, WeekRange],
 	attendance: ListStudentGroupAttendanceCommand.PerTermAttendance,
 	notes: Map[EventInstance, SmallGroupEventAttendanceNote],
 	missedCount: Int,
-	missedCountByTerm: Map[Term, Int],
+	missedCountByTerm: Map[AcademicPeriod, Int],
 	groupTitle: String,
 	hasGroups: Boolean
 )
@@ -32,14 +30,13 @@ object ListStudentGroupAttendanceCommand {
 	type PerInstanceAttendance = SortedMap[EventInstance, SmallGroupAttendanceState]
 	type PerWeekAttendance = SortedMap[SmallGroupEventOccurrence.WeekNumber, PerInstanceAttendance]
 	type PerGroupAttendance = SortedMap[SmallGroup, PerWeekAttendance]
-	type PerTermAttendance = SortedMap[Term, PerGroupAttendance]
+	type PerTermAttendance = SortedMap[AcademicPeriod, PerGroupAttendance]
 
 	def apply(member: Member, academicYear: AcademicYear) =
 		new ListStudentGroupAttendanceCommandInternal(member, academicYear)
 			with ComposableCommand[StudentGroupAttendance]
 			with ListStudentGroupAttendanceCommandPermissions
 			with AutowiringSmallGroupServiceComponent
-			with AutowiringTermServiceComponent
 			with TermAwareWeekToDateConverterComponent
 			with ReadOnly with Unaudited
 }
@@ -47,11 +44,11 @@ object ListStudentGroupAttendanceCommand {
 class ListStudentGroupAttendanceCommandInternal(val member: Member, val academicYear: AcademicYear)
 	extends CommandInternal[StudentGroupAttendance]
 		with ListStudentGroupAttendanceCommandState with TaskBenchmarking {
-	self: SmallGroupServiceComponent with TermServiceComponent with WeekToDateConverterComponent =>
+	self: SmallGroupServiceComponent with WeekToDateConverterComponent =>
 
 	implicit val defaultOrderingForGroup: Ordering[SmallGroup] = Ordering.by { group: SmallGroup => (group.groupSet.module.code, group.groupSet.name, group.name, group.id) }
 	implicit val defaultOrderingForDateTime: Ordering[DateTime] = Ordering.by[DateTime, Long] ( _.getMillis )
-	implicit val defaultOrderingForTerm: Ordering[Term] = Ordering.by[Term, DateTime] ( _.getStartDate )
+	implicit val defaultOrderingForTerm: Ordering[AcademicPeriod] = Ordering.ordered[AcademicPeriod]
 
 	def applyInternal(): StudentGroupAttendance = {
 		val user = member.asSsoUser
@@ -97,10 +94,7 @@ class ListStudentGroupAttendanceCommandInternal(val member: Member, val academic
 		}
 
 		val termWeeks = SortedMap(attendance.keySet.map { term =>
-			term -> WeekRange(
-				termService.getAcademicWeekForAcademicYear(term.getStartDate, academicYear),
-				termService.getAcademicWeekForAcademicYear(term.getEndDate, academicYear)
-			)
+			term -> WeekRange(term.firstWeek.weekNumber, term.lastWeek.weekNumber)
 		}.toSeq:_*)
 
 		val attendanceNotes = benchmarkTask("Get attendance notes") {
@@ -123,15 +117,10 @@ class ListStudentGroupAttendanceCommandInternal(val member: Member, val academic
 
 	def groupByTerm(
 		instances: Seq[(EventInstance, Option[SmallGroupEventOccurrence])]
-	): SortedMap[Term, Seq[(EventInstance, Option[SmallGroupEventOccurrence])]] = {
-		val approxStartDate = new LocalDate(academicYear.startYear, DateTimeConstants.NOVEMBER, 1).toDateTimeAtStartOfDay
-		val day = DayOfWeek.Thursday
-		lazy val weeksForYear = termService.getAcademicWeeksForYear(approxStartDate).toMap
+	): SortedMap[AcademicPeriod, Seq[(EventInstance, Option[SmallGroupEventOccurrence])]] = {
+		lazy val weeksForYear = academicYear.weeks
 
-		SortedMap(instances.groupBy { case ((_, week), _) =>
-			val date = weeksForYear(week).getStart.withDayOfWeek(day.jodaDayOfWeek)
-			termService.getTermFromDateIncludingVacations(date)
-		}.toSeq:_*)
+		SortedMap(instances.groupBy { case ((_, week), _) => weeksForYear(week).period }.toSeq:_*)
 	}
 
 	private def isLate(user: User)(instance: EventInstance): Boolean = instance match {

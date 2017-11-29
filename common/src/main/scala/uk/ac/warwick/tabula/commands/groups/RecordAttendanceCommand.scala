@@ -35,7 +35,6 @@ object RecordAttendanceCommand {
 			with AutowiringUserLookupComponent
 			with AutowiringProfileServiceComponent
 			with TermAwareWeekToDateConverterComponent
-			with AutowiringTermServiceComponent
 			with AutowiringAttendanceMonitoringEventAttendanceServiceComponent
 			with RecordAttendanceNotificationCompletion
 			with AutowiringFeaturesComponent {

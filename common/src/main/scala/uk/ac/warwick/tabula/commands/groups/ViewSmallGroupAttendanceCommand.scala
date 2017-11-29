@@ -2,7 +2,7 @@ package uk.ac.warwick.tabula.commands.groups
 
 import org.joda.time.LocalDateTime
 import uk.ac.warwick.tabula.ItemNotFoundException
-import uk.ac.warwick.tabula.commands.{CommandInternal, ComposableCommand, MemberOrUser, ReadOnly, TaskBenchmarking, Unaudited}
+import uk.ac.warwick.tabula.commands._
 import uk.ac.warwick.tabula.data.model.attendance.AttendanceState
 import uk.ac.warwick.tabula.data.model.groups.SmallGroupEventOccurrence.WeekNumber
 import uk.ac.warwick.tabula.data.model.groups.WeekRange.Week
@@ -52,7 +52,6 @@ object ViewSmallGroupAttendanceCommand {
 			with ComposableCommand[SmallGroupAttendanceInformation]
 			with ViewSmallGroupAttendancePermissions
 			with AutowiringSmallGroupServiceComponent
-			with AutowiringTermServiceComponent
 			with AutowiringUserLookupComponent
 			with TermAwareWeekToDateConverterComponent
 			with ReadOnly with Unaudited {
