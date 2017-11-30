@@ -22,8 +22,6 @@ class AttendanceMonitoringMeetingRecordServiceTest extends TestBase with Mockito
 		val service = new AbstractAttendanceMonitoringMeetingRecordService with ServiceTestSupport
 
 		val academicYear2013 = AcademicYear(2013)
-//		val autumnTerm = new TermImpl(null, dateTime(2013, 1, 7), null, TermType.autumn)
-//		service.termService.getTermFromDateIncludingVacations(any[DateTime]) returns autumnTerm
 
 		val student: StudentMember = Fixtures.student("1234")
 
@@ -45,7 +43,7 @@ class AttendanceMonitoringMeetingRecordServiceTest extends TestBase with Mockito
 		meeting.relationship = meetingRelationship
 		meeting.format = MeetingFormat.FaceToFace
 		meeting.creator = Fixtures.student("student", "student")
-		meeting.meetingDate = dateTime(2013, 1, 7)
+		meeting.meetingDate = dateTime(2014, 1, 7)
 		meeting.approvals = JArrayList(Fixtures.meetingRecordApproval(MeetingApprovalState.Approved))
 
 		val meetingPoint = new AttendanceMonitoringPoint
