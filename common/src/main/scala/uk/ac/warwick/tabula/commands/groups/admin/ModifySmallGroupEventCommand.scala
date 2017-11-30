@@ -214,7 +214,6 @@ trait ModifySmallGroupEventValidation extends SelfValidating {
 			tutorsValidator.validate(errors)
 			if (startTime == null && endTime != null) errors.rejectValue("startTime", "smallGroupEvent.startTime.NotEmpty")
 			if (startTime != null && endTime == null) errors.rejectValue("endTime", "smallGroupEvent.endTime.NotEmpty")
-
 		}
 
 		if (relatedUrl != null && relatedUrl.nonEmpty) {
