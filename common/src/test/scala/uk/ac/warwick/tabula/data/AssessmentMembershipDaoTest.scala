@@ -1,6 +1,5 @@
 package uk.ac.warwick.tabula.data
 
-import org.joda.time.DateTime
 import org.junit.Before
 import uk.ac.warwick.tabula.JavaImports.JArrayList
 import uk.ac.warwick.tabula.data.model._

@@ -1,5 +1,6 @@
 package uk.ac.warwick.tabula.commands.scheduling
 
+import org.joda.time.{DateTime, DateTimeConstants}
 import uk.ac.warwick.tabula._
 import uk.ac.warwick.tabula.data.model.UserGroup
 import uk.ac.warwick.tabula.data.model.attendance.AttendanceMonitoringScheme
@@ -8,7 +9,7 @@ import uk.ac.warwick.tabula.services.attendancemonitoring.{AttendanceMonitoringS
 class UnlinkAttendanceMonitoringSchemeCommandTest extends TestBase with Mockito {
 
 	@Test
-	def commandApply(): Unit = {
+	def commandApply(): Unit = withFakeTime(new DateTime(2015, DateTimeConstants.JULY, 1, 0, 0, 0, 0)) {
 		val student1 = Fixtures.student("1111", "1111")
 		val student2 = Fixtures.student("2222", "2222")
 		val student3 = Fixtures.student("3333", "3333")

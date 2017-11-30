@@ -1,13 +1,13 @@
 package uk.ac.warwick.tabula.services
 
-import org.joda.time.{DateTimeConstants, LocalDateTime, LocalTime}
+import org.joda.time.LocalTime
 import uk.ac.warwick.tabula.JavaImports.JBigDecimal
-import uk.ac.warwick.tabula.commands.TaskBenchmarking
-import uk.ac.warwick.tabula.data.model.groups._
-import uk.ac.warwick.tabula.data.model._
-import uk.ac.warwick.tabula.data._
-import uk.ac.warwick.tabula.helpers.Logging
 import uk.ac.warwick.tabula._
+import uk.ac.warwick.tabula.commands.TaskBenchmarking
+import uk.ac.warwick.tabula.data._
+import uk.ac.warwick.tabula.data.model._
+import uk.ac.warwick.tabula.data.model.groups._
+import uk.ac.warwick.tabula.helpers.Logging
 import uk.ac.warwick.userlookup.User
 
 class SmallGroupServiceTest extends TestBase with Mockito {
@@ -110,7 +110,6 @@ class SmallGroupServiceTest extends TestBase with Mockito {
 			with UserGroupDaoComponent
 			with SmallGroupDaoComponent
 		  with SecurityServiceComponent
-			with TermAwareWeekToDateConverterComponent
 			with Logging with TaskBenchmarking{
 				val eventTutorsHelper: UserGroupMembershipHelper[SmallGroupEvent] = null
 				val groupSetManualMembersHelper: UserGroupMembershipHelper[SmallGroupSet] = null
@@ -120,8 +119,6 @@ class SmallGroupServiceTest extends TestBase with Mockito {
 
 				val membershipService: AssessmentMembershipService = smartMock[AssessmentMembershipService]
 				val smallGroupDao: SmallGroupDao = smartMock[SmallGroupDao]
-
-				override val weekToDateConverter: WeekToDateConverter = smartMock[WeekToDateConverter]
 
 				smallGroupDao.findByModuleAndYear(module, AcademicYear(2013)) returns Seq[SmallGroup](group)
 				smallGroupDao.findByModuleAndYear(module2, AcademicYear(2013)) returns Seq[SmallGroup]()
@@ -137,15 +134,6 @@ class SmallGroupServiceTest extends TestBase with Mockito {
 				departmentStudentGroupHelper.findBy(user1) returns Seq()
 				departmentStudentGroupHelper.findBy(user2) returns Seq()
 				departmentStudentGroupHelper.findBy(user3) returns Seq()
-
-				weekToDateConverter.toLocalDatetime(2, DayOfWeek.Monday, event1.startTime , groupSet.academicYear) returns Some(new LocalDateTime(2013, DateTimeConstants.SEPTEMBER, 15, 11, 0))
-				weekToDateConverter.toLocalDatetime(2, DayOfWeek.Monday, event1.endTime , groupSet.academicYear) returns Some(new LocalDateTime(2013, DateTimeConstants.SEPTEMBER, 15, 13, 0))
-				weekToDateConverter.toLocalDatetime(2, DayOfWeek.Monday, event2.startTime , groupSet.academicYear) returns Some(new LocalDateTime(2013, DateTimeConstants.SEPTEMBER, 15, 11, 0))
-				weekToDateConverter.toLocalDatetime(2, DayOfWeek.Monday, event2.endTime , groupSet.academicYear) returns Some(new LocalDateTime(2013, DateTimeConstants.SEPTEMBER, 15, 12, 0))
-				weekToDateConverter.toLocalDatetime(3, DayOfWeek.Monday, event1.startTime , groupSet.academicYear) returns Some(new LocalDateTime(2013, DateTimeConstants.SEPTEMBER, 22, 11, 0))
-				weekToDateConverter.toLocalDatetime(3, DayOfWeek.Monday, event1.endTime , groupSet.academicYear) returns Some(new LocalDateTime(2013, DateTimeConstants.SEPTEMBER, 22, 13, 0))
-				weekToDateConverter.toLocalDatetime(3, DayOfWeek.Monday, event2.startTime , groupSet.academicYear) returns Some(new LocalDateTime(2013, DateTimeConstants.SEPTEMBER, 22, 11, 0))
-				weekToDateConverter.toLocalDatetime(3, DayOfWeek.Monday, event2.endTime , groupSet.academicYear) returns Some(new LocalDateTime(2013, DateTimeConstants.SEPTEMBER, 22, 12, 0))
 
 				val userGroupDao: UserGroupDao = smartMock[UserGroupDao]
 			  val securityService: SecurityService = smartMock[SecurityService]

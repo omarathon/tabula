@@ -1,11 +1,11 @@
 package uk.ac.warwick.tabula.commands.groups
 
-import org.joda.time.{DateTime, DateTimeConstants, LocalDateTime, LocalTime}
+import org.joda.time.{DateTime, DateTimeConstants, LocalTime}
 import uk.ac.warwick.tabula.commands.groups.SmallGroupAttendanceState._
 import uk.ac.warwick.tabula.commands.groups.ViewSmallGroupAttendanceCommand.SmallGroupAttendanceInformation
 import uk.ac.warwick.tabula.data.model.attendance.AttendanceState
 import uk.ac.warwick.tabula.data.model.groups.SmallGroupEventOccurrence.WeekNumber
-import uk.ac.warwick.tabula.data.model.groups.{DayOfWeek, SmallGroup, SmallGroupEvent, SmallGroupEventAttendance, SmallGroupEventOccurrence, SmallGroupSet, WeekRange}
+import uk.ac.warwick.tabula.data.model.groups._
 import uk.ac.warwick.tabula.data.model.{UnspecifiedTypeUserGroup, UserGroup}
 import uk.ac.warwick.tabula.services._
 import uk.ac.warwick.tabula.{AcademicYear, MockUserLookup, Mockito, TestBase}
@@ -23,9 +23,8 @@ class ViewSmallGroupAttendanceCommandTest extends TestBase with Mockito {
 			case ug: UserGroup => ug.userLookup = mockUserLookup
 		}
 
-		trait CommandTestSupport extends SmallGroupServiceComponent with UserLookupComponent with WeekToDateConverterComponent {
+		trait CommandTestSupport extends SmallGroupServiceComponent with UserLookupComponent {
 			val smallGroupService: SmallGroupService = mock[SmallGroupService]
-			val weekToDateConverter: WeekToDateConverter = smartMock[WeekToDateConverter]
 			val userLookup: MockUserLookup = mockUserLookup
 		}
 	}
@@ -128,13 +127,6 @@ class ViewSmallGroupAttendanceCommandTest extends TestBase with Mockito {
 			Seq(user1, user2, user3, user4, user5).map(_.getWarwickId),
 			Seq(occurrence1, occurrence2, occurrence3)
 		) returns Seq()
-
-		command.weekToDateConverter.toLocalDatetime(1, DayOfWeek.Monday, new LocalTime(16, 0), set.academicYear) returns Some(new LocalDateTime(2014, DateTimeConstants.SEPTEMBER, 29, 16, 0))
-		command.weekToDateConverter.toLocalDatetime(2, DayOfWeek.Monday, new LocalTime(12, 0), set.academicYear) returns Some(new LocalDateTime(2014, DateTimeConstants.OCTOBER, 6, 16, 0))
-		command.weekToDateConverter.toLocalDatetime(3, DayOfWeek.Monday, new LocalTime(12, 0), set.academicYear) returns Some(new LocalDateTime(2014, DateTimeConstants.OCTOBER, 13, 12, 0))
-		command.weekToDateConverter.toLocalDatetime(3, DayOfWeek.Monday, new LocalTime(16, 0), set.academicYear) returns Some(new LocalDateTime(2014, DateTimeConstants.OCTOBER, 13, 16, 0))
-		command.weekToDateConverter.toLocalDatetime(4, DayOfWeek.Monday, new LocalTime(12, 0), set.academicYear) returns Some(new LocalDateTime(2014, DateTimeConstants.OCTOBER, 20, 12, 0))
-		command.weekToDateConverter.toLocalDatetime(7, DayOfWeek.Monday, new LocalTime(16, 0), set.academicYear) returns Some(new LocalDateTime(2014, DateTimeConstants.OCTOBER, 29, 16, 0))
 
 		val info: SmallGroupAttendanceInformation = command.applyInternal()
 
@@ -248,10 +240,6 @@ class ViewSmallGroupAttendanceCommandTest extends TestBase with Mockito {
 			any[Seq[String]],
 			any[Seq[SmallGroupEventOccurrence]]
 		) returns Seq()
-
-		command.weekToDateConverter.toLocalDatetime(2, DayOfWeek.Monday, new LocalTime(12, 0), set.academicYear) returns Some(new LocalDateTime(2014, DateTimeConstants.OCTOBER, 6, 12, 0))
-		command.weekToDateConverter.toLocalDatetime(3, DayOfWeek.Monday, new LocalTime(12, 0), set.academicYear) returns Some(new LocalDateTime(2014, DateTimeConstants.OCTOBER, 13, 12, 0))
-		command.weekToDateConverter.toLocalDatetime(4, DayOfWeek.Monday, new LocalTime(12, 0), set.academicYear) returns Some(new LocalDateTime(2014, DateTimeConstants.OCTOBER, 20, 12, 0))
 
 		val info: SmallGroupAttendanceInformation = command.applyInternal()
 		info.attendance.keySet.size should be (3) // If it's 2, we're bad

@@ -53,7 +53,6 @@ object ViewSmallGroupAttendanceCommand {
 			with ViewSmallGroupAttendancePermissions
 			with AutowiringSmallGroupServiceComponent
 			with AutowiringUserLookupComponent
-			with TermAwareWeekToDateConverterComponent
 			with ReadOnly with Unaudited {
 		override lazy val eventName = "ViewSmallGroupAttendance"
 	}
@@ -114,7 +113,7 @@ object ViewSmallGroupAttendanceCommand {
 
 class ViewSmallGroupAttendanceCommand(val group: SmallGroup)
 	extends CommandInternal[ViewSmallGroupAttendanceCommand.SmallGroupAttendanceInformation] with ViewSmallGroupAttendanceState with TaskBenchmarking {
-	self: SmallGroupServiceComponent with UserLookupComponent with WeekToDateConverterComponent =>
+	self: SmallGroupServiceComponent with UserLookupComponent =>
 
 	import uk.ac.warwick.tabula.commands.groups.ViewSmallGroupAttendanceCommand._
 
@@ -159,8 +158,7 @@ class ViewSmallGroupAttendanceCommand(val group: SmallGroup)
 			// Can't be late if the student is no longer in that group
 			event.group.students.includesUser(user) &&
 			// Get the actual end date of the event in this week
-			weekToDateConverter.toLocalDatetime(week, event.day, event.endTime, event.group.groupSet.academicYear)
-				.exists(eventDateTime => eventDateTime.isBefore(LocalDateTime.now()))
+			event.endDateTimeForWeek(week).exists(_.isBefore(LocalDateTime.now))
 	}
 
 }

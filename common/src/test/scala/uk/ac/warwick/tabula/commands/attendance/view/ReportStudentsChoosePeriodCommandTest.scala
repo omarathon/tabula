@@ -3,8 +3,8 @@ package uk.ac.warwick.tabula.commands.attendance.view
 import org.joda.time.{DateTime, LocalDate}
 import org.mockito.Matchers
 import org.springframework.validation.BindException
-import uk.ac.warwick.tabula.data.model.{Department, StudentMember}
 import uk.ac.warwick.tabula.data.model.attendance.{AttendanceMonitoringCheckpoint, AttendanceMonitoringPoint, AttendanceState}
+import uk.ac.warwick.tabula.data.model.{Department, StudentMember}
 import uk.ac.warwick.tabula.data.{ScalaOrder, ScalaRestriction}
 import uk.ac.warwick.tabula.services._
 import uk.ac.warwick.tabula.services.attendancemonitoring.{AttendanceMonitoringService, AttendanceMonitoringServiceComponent}
@@ -27,23 +27,23 @@ class ReportStudentsChoosePeriodCommandTest extends TestBase with Mockito {
 		student2.firstName = "Bob"
 
 		val point1: AttendanceMonitoringPoint = Fixtures.attendanceMonitoringPoint(null)
-		point1.startDate = new LocalDate(2014, 1, 1)
+		point1.startDate = new LocalDate(2013, 10, 1)
 		val point2: AttendanceMonitoringPoint = Fixtures.attendanceMonitoringPoint(null)
-		point2.startDate = new LocalDate(2014, 6, 6)
+		point2.startDate = new LocalDate(2014, 1, 1)
 
 		val fakeNow: DateTime = new LocalDate(2015, 1, 1).toDateTimeAtStartOfDay
 
 		val state = new ReportStudentsChoosePeriodCommandState with TestSupport {
 			val department: Department = Fixtures.department("its")
-			val academicYear = AcademicYear(2014)
+			val academicYear = AcademicYear(2013)
 		}
 
 		val validator = new ReportStudentsChoosePeriodValidation with ReportStudentsChoosePeriodCommandState with TestSupport {
 			val department: Department = Fixtures.department("its")
-			val academicYear = AcademicYear(2014)
+			val academicYear = AcademicYear(2013)
 		}
 
-		val command = new ReportStudentsChoosePeriodCommandInternal(Fixtures.department("its"),  AcademicYear(2014)) with ReportStudentsChoosePeriodCommandState with TestSupport
+		val command = new ReportStudentsChoosePeriodCommandInternal(Fixtures.department("its"),  AcademicYear(2013)) with ReportStudentsChoosePeriodCommandState with TestSupport
 	}
 
 	@Test
@@ -68,9 +68,8 @@ class ReportStudentsChoosePeriodCommandTest extends TestBase with Mockito {
 		state.profileService.findAllStudentsByRestrictions(Matchers.eq(state.department), any[Seq[ScalaRestriction]], any[Seq[ScalaOrder]]) returns Seq(student1, student2)
 		state.attendanceMonitoringService.listStudentsPoints(student1, Option(state.department), state.academicYear) returns Seq(point1, point2)
 		state.attendanceMonitoringService.listStudentsPoints(student2, Option(state.department), state.academicYear) returns Seq(point1, point2)
-//		state.termService.getTermFromDateIncludingVacations(point1.startDate.toDateTimeAtStartOfDay) returns autumnTerm
-//		state.termService.getTermFromDateIncludingVacations(point2.startDate.toDateTimeAtStartOfDay) returns christmasVacation
 		val result: Map[String, Seq[AttendanceMonitoringPoint]] = state.termPoints
+		println(result)
 		result(PeriodType.autumnTerm.toString) should be (Seq(point1))
 		result(PeriodType.christmasVacation.toString) should be (Seq(point2))
 	}}
@@ -81,7 +80,6 @@ class ReportStudentsChoosePeriodCommandTest extends TestBase with Mockito {
 		state.profileService.findAllStudentsByRestrictions(Matchers.eq(state.department), any[Seq[ScalaRestriction]], any[Seq[ScalaOrder]]) returns Seq(student1, student2)
 		state.attendanceMonitoringService.listStudentsPoints(student1, Option(state.department), state.academicYear) returns Seq(point1)
 		state.attendanceMonitoringService.listStudentsPoints(student2, Option(state.department), state.academicYear) returns Seq(point1)
-//		state.termService.getTermFromDateIncludingVacations(point1.startDate.toDateTimeAtStartOfDay) returns autumnTerm
 		state.attendanceMonitoringService.findNonReportedTerms(state.allStudents, state.academicYear) returns Seq(PeriodType.autumnTerm.toString)
 		state.profileService.findAllStudentsByRestrictions(Matchers.eq(state.department), any[Seq[ScalaRestriction]], any[Seq[ScalaOrder]]) returns Seq()
 
@@ -101,7 +99,6 @@ class ReportStudentsChoosePeriodCommandTest extends TestBase with Mockito {
 		state.profileService.findAllStudentsByRestrictions(Matchers.eq(state.department), any[Seq[ScalaRestriction]], any[Seq[ScalaOrder]]) returns Seq(student1, student2)
 		state.attendanceMonitoringService.listStudentsPoints(student1, Option(state.department), state.academicYear) returns Seq(point1)
 		state.attendanceMonitoringService.listStudentsPoints(student2, Option(state.department), state.academicYear) returns Seq(point1)
-//		state.termService.getTermFromDateIncludingVacations(point1.startDate.toDateTimeAtStartOfDay) returns autumnTerm
 		state.attendanceMonitoringService.findNonReportedTerms(state.allStudents, state.academicYear) returns Seq(PeriodType.autumnTerm.toString)
 		state.profileService.findAllStudentsByRestrictions(Matchers.eq(state.department), any[Seq[ScalaRestriction]], any[Seq[ScalaOrder]]) returns Seq()
 
@@ -124,9 +121,6 @@ class ReportStudentsChoosePeriodCommandTest extends TestBase with Mockito {
 		state.profileService.findAllStudentsByRestrictions(Matchers.eq(state.department), any[Seq[ScalaRestriction]], any[Seq[ScalaOrder]]) returns Seq(student1, student2)
 		state.attendanceMonitoringService.listStudentsPoints(student1, Option(state.department), state.academicYear) returns Seq(point1, point2)
 		state.attendanceMonitoringService.listStudentsPoints(student2, Option(state.department), state.academicYear) returns Seq(point1, point2)
-//		state.termService.getTermFromDateIncludingVacations(point1.startDate.toDateTimeAtStartOfDay) returns autumnTerm
-//		state.termService.getTermFromDateIncludingVacations(point2.startDate.toDateTimeAtStartOfDay) returns christmasVacation
-//		state.termService.getTermFromDateIncludingVacations(fakeNow) returns springTerm
 		state.attendanceMonitoringService.findNonReportedTerms(state.allStudents, state.academicYear) returns Seq(PeriodType.autumnTerm.toString)
 		val result = state.availablePeriods
 		result.size should be (2)
@@ -140,9 +134,6 @@ class ReportStudentsChoosePeriodCommandTest extends TestBase with Mockito {
 		validator.profileService.findAllStudentsByRestrictions(Matchers.eq(validator.department), any[Seq[ScalaRestriction]], any[Seq[ScalaOrder]]) returns Seq(student1, student2)
 		validator.attendanceMonitoringService.listStudentsPoints(student1, Option(validator.department), validator.academicYear) returns Seq(point1, point2)
 		validator.attendanceMonitoringService.listStudentsPoints(student2, Option(validator.department), validator.academicYear) returns Seq(point1, point2)
-//		validator.termService.getTermFromDateIncludingVacations(point1.startDate.toDateTimeAtStartOfDay) returns autumnTerm
-//		validator.termService.getTermFromDateIncludingVacations(point2.startDate.toDateTimeAtStartOfDay) returns christmasVacation
-//		validator.termService.getTermFromDateIncludingVacations(fakeNow) returns springTerm
 		validator.attendanceMonitoringService.findNonReportedTerms(validator.allStudents, validator.academicYear) returns Seq(PeriodType.autumnTerm.toString)
 	}
 
@@ -172,9 +163,6 @@ class ReportStudentsChoosePeriodCommandTest extends TestBase with Mockito {
 		command.profileService.findAllStudentsByRestrictions(Matchers.eq(command.department), any[Seq[ScalaRestriction]], any[Seq[ScalaOrder]]) returns Seq(student1, student2)
 		command.attendanceMonitoringService.listStudentsPoints(student1, Option(command.department), command.academicYear) returns Seq(point1, point2)
 		command.attendanceMonitoringService.listStudentsPoints(student2, Option(command.department), command.academicYear) returns Seq(point1, point2)
-//		command.termService.getTermFromDateIncludingVacations(point1.startDate.toDateTimeAtStartOfDay) returns autumnTerm
-//		command.termService.getTermFromDateIncludingVacations(point2.startDate.toDateTimeAtStartOfDay) returns christmasVacation
-//		command.termService.getTermFromDateIncludingVacations(fakeNow) returns springTerm
 		command.attendanceMonitoringService.findNonReportedTerms(command.allStudents, command.academicYear) returns Seq(PeriodType.autumnTerm.toString)
 	}
 

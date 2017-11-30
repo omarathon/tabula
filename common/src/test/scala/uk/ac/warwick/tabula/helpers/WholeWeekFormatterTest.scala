@@ -58,7 +58,8 @@ class WholeWeekFormatterTest extends TestBase {
 		formatter.format(Seq(WeekRange(1)), DayOfWeek.Tuesday, WeekRange.NumberingSystem.Academic, short = false) should be("Term 1, week 1")
 		formatter.format(Seq(WeekRange(7)), DayOfWeek.Tuesday, WeekRange.NumberingSystem.Academic, short = false) should be("Term 1, week 7")
 		formatter.format(Seq(WeekRange(16)), DayOfWeek.Tuesday, WeekRange.NumberingSystem.Academic, short = false) should be("Term 2, week 16")
-		formatter.format(Seq(WeekRange(52)), DayOfWeek.Tuesday, WeekRange.NumberingSystem.Academic, short = false) should be("Summer vacation, week 52")
+		formatter.format(Seq(WeekRange(-8)), DayOfWeek.Tuesday, WeekRange.NumberingSystem.Academic, short = false) should be("Pre-term vacation, week -8")
+		formatter.format(Seq(WeekRange(44)), DayOfWeek.Tuesday, WeekRange.NumberingSystem.Academic, short = false) should be("Summer vacation, week 44")
 		formatter.format(Seq(WeekRange(14)), DayOfWeek.Tuesday, WeekRange.NumberingSystem.Academic, short = false) should be("Christmas vacation, week 14")
 		formatter.format(Seq(WeekRange(25)), DayOfWeek.Tuesday, WeekRange.NumberingSystem.Academic, short = false) should be("Easter vacation, week 25")
 
@@ -69,7 +70,8 @@ class WholeWeekFormatterTest extends TestBase {
 		formatter.format(Seq(WeekRange(1)), DayOfWeek.Tuesday, WeekRange.NumberingSystem.Academic, short = true) should be("1")
 		formatter.format(Seq(WeekRange(7)), DayOfWeek.Tuesday, WeekRange.NumberingSystem.Academic, short = true) should be("7")
 		formatter.format(Seq(WeekRange(16)), DayOfWeek.Tuesday, WeekRange.NumberingSystem.Academic, short = true) should be("16")
-		formatter.format(Seq(WeekRange(52)), DayOfWeek.Tuesday, WeekRange.NumberingSystem.Academic, short = true) should be("52")
+		formatter.format(Seq(WeekRange(-8)), DayOfWeek.Tuesday, WeekRange.NumberingSystem.Academic, short = true) should be("-8")
+		formatter.format(Seq(WeekRange(44)), DayOfWeek.Tuesday, WeekRange.NumberingSystem.Academic, short = true) should be("44")
 		formatter.format(Seq(WeekRange(14)), DayOfWeek.Tuesday, WeekRange.NumberingSystem.Academic, short = true) should be("14")
 		formatter.format(Seq(WeekRange(25)), DayOfWeek.Tuesday, WeekRange.NumberingSystem.Academic, short = true) should be("25")
 	}
@@ -80,7 +82,8 @@ class WholeWeekFormatterTest extends TestBase {
 		formatter.format(Seq(WeekRange(1)), DayOfWeek.Tuesday, WeekRange.NumberingSystem.None, short = false) should be("w/c Mon 3<sup>rd</sup> Oct 2011")
 		formatter.format(Seq(WeekRange(5)), DayOfWeek.Tuesday, WeekRange.NumberingSystem.None, short = false) should be("w/c Mon 31<sup>st</sup> Oct 2011")
 		formatter.format(Seq(WeekRange(16)), DayOfWeek.Tuesday, WeekRange.NumberingSystem.None, short = false) should be("w/c Mon 16<sup>th</sup> Jan 2012")
-		formatter.format(Seq(WeekRange(52)), DayOfWeek.Tuesday, WeekRange.NumberingSystem.None, short = false) should be("w/c Mon 24<sup>th</sup> Sep 2012")
+		formatter.format(Seq(WeekRange(-8)), DayOfWeek.Tuesday, WeekRange.NumberingSystem.None, short = false) should be("w/c Mon 1<sup>st</sup> Aug 2011")
+		formatter.format(Seq(WeekRange(44)), DayOfWeek.Tuesday, WeekRange.NumberingSystem.None, short = false) should be("w/c Mon 30<sup>th</sup> Jul 2012")
 		formatter.format(Seq(WeekRange(25)), DayOfWeek.Tuesday, WeekRange.NumberingSystem.None, short = false) should be("w/c Mon 19<sup>th</sup> Mar 2012")
 
 		formatter.format(Seq(WeekRange(1, 1)), DayOfWeek.Tuesday, WeekRange.NumberingSystem.None, short = false) should be("w/c Mon 3<sup>rd</sup> Oct 2011")
@@ -92,7 +95,8 @@ class WholeWeekFormatterTest extends TestBase {
 		formatter.format(Seq(WeekRange(1)), DayOfWeek.Tuesday, WeekRange.NumberingSystem.None, short = true) should be("03/10")
 		formatter.format(Seq(WeekRange(5)), DayOfWeek.Tuesday, WeekRange.NumberingSystem.None, short = true) should be("31/10")
 		formatter.format(Seq(WeekRange(16)), DayOfWeek.Tuesday, WeekRange.NumberingSystem.None, short = true) should be("16/01")
-		formatter.format(Seq(WeekRange(52)), DayOfWeek.Tuesday, WeekRange.NumberingSystem.None, short = true) should be("24/09")
+		formatter.format(Seq(WeekRange(-8)), DayOfWeek.Tuesday, WeekRange.NumberingSystem.None, short = true) should be("01/08")
+		formatter.format(Seq(WeekRange(44)), DayOfWeek.Tuesday, WeekRange.NumberingSystem.None, short = true) should be("30/07")
 		formatter.format(Seq(WeekRange(25)), DayOfWeek.Tuesday, WeekRange.NumberingSystem.None, short = true) should be("19/03")
 
 	}

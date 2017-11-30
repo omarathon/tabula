@@ -8,14 +8,14 @@ import uk.ac.warwick.tabula.data.model.{Member, MemberUserType, UnspecifiedTypeU
 import uk.ac.warwick.tabula.services._
 import uk.ac.warwick.tabula._
 import uk.ac.warwick.userlookup.User
+import uk.ac.warwick.util.termdates.AcademicYearPeriod
 
 class ListStudentGroupAttendanceCommandTest extends TestBase with Mockito {
 
 	val baseLocalDateTime = new DateTime(2014, DateTimeConstants.OCTOBER, 19, 9, 18, 33, 0)
 
-	trait CommandTestSupport extends SmallGroupServiceComponent with WeekToDateConverterComponent {
+	trait CommandTestSupport extends SmallGroupServiceComponent {
 		val smallGroupService: SmallGroupService = smartMock[SmallGroupService]
-		val weekToDateConverter: WeekToDateConverter = smartMock[WeekToDateConverter]
 	}
 
 	trait Fixture {
@@ -141,18 +141,13 @@ class ListStudentGroupAttendanceCommandTest extends TestBase with Mockito {
 			Seq(user1).map(_.getWarwickId),
 			Seq(occurrence1, occurrence3, occurrence2)
 		) returns Seq()
-
-		command.weekToDateConverter.toLocalDatetime(1, DayOfWeek.Monday, new LocalTime(16, 0), set.academicYear) returns Some(new LocalDateTime(2014, DateTimeConstants.SEPTEMBER, 29, 16, 0))
-		command.weekToDateConverter.toLocalDatetime(2, DayOfWeek.Monday, new LocalTime(12, 0), set.academicYear) returns Some(new LocalDateTime(2014, DateTimeConstants.OCTOBER, 6, 16, 0))
-		command.weekToDateConverter.toLocalDatetime(3, DayOfWeek.Monday, new LocalTime(12, 0), set.academicYear) returns Some(new LocalDateTime(2014, DateTimeConstants.OCTOBER, 13, 12, 0))
-		command.weekToDateConverter.toLocalDatetime(3, DayOfWeek.Monday, new LocalTime(16, 0), set.academicYear) returns Some(new LocalDateTime(2014, DateTimeConstants.OCTOBER, 13, 16, 0))
-		command.weekToDateConverter.toLocalDatetime(4, DayOfWeek.Monday, new LocalTime(12, 0), set.academicYear) returns Some(new LocalDateTime(2014, DateTimeConstants.OCTOBER, 20, 12, 0))
-		command.weekToDateConverter.toLocalDatetime(7, DayOfWeek.Monday, new LocalTime(16, 0), set.academicYear) returns Some(new LocalDateTime(2014, DateTimeConstants.OCTOBER, 29, 16, 0))
+		
+		val autumnTerm = academicYear.termOrVacation(AcademicYearPeriod.PeriodType.autumnTerm)
 
 		val info = command.applyInternal()
 		info.missedCount should be (0)
-		info.missedCountByTerm should be (Map("" -> 0))
-		info.termWeeks.toSeq should be (Seq("" -> WeekRange(1, 10)))
+		info.missedCountByTerm should be (Map(autumnTerm -> 0))
+		info.termWeeks.toSeq should be (Seq(autumnTerm -> WeekRange(1, 10)))
 
 		// Map all the SortedMaps to Seqs to preserve the order they've been set as
 		val attendanceSeqs = info.attendance.toSeq.map { case (t, attendance) =>
@@ -164,7 +159,7 @@ class ListStudentGroupAttendanceCommandTest extends TestBase with Mockito {
 		}
 
 		attendanceSeqs should be (Seq(
-			("", Seq(
+			(autumnTerm, Seq(
 				(group, Seq(
 					(1, Seq(((event2, 1), Attended))),
 					(2, Seq(((event1, 2), Late))),
@@ -189,17 +184,12 @@ class ListStudentGroupAttendanceCommandTest extends TestBase with Mockito {
 			Seq(occurrence1, occurrence3, occurrence2)
 		) returns Seq()
 
-		command.weekToDateConverter.toLocalDatetime(1, DayOfWeek.Monday, new LocalTime(16, 0), set.academicYear) returns Some(new LocalDateTime(2014, DateTimeConstants.SEPTEMBER, 29, 16, 0))
-		command.weekToDateConverter.toLocalDatetime(2, DayOfWeek.Monday, new LocalTime(12, 0), set.academicYear) returns Some(new LocalDateTime(2014, DateTimeConstants.OCTOBER, 6, 16, 0))
-		command.weekToDateConverter.toLocalDatetime(3, DayOfWeek.Monday, new LocalTime(12, 0), set.academicYear) returns Some(new LocalDateTime(2014, DateTimeConstants.OCTOBER, 13, 12, 0))
-		command.weekToDateConverter.toLocalDatetime(3, DayOfWeek.Monday, new LocalTime(16, 0), set.academicYear) returns Some(new LocalDateTime(2014, DateTimeConstants.OCTOBER, 13, 16, 0))
-		command.weekToDateConverter.toLocalDatetime(4, DayOfWeek.Monday, new LocalTime(12, 0), set.academicYear) returns Some(new LocalDateTime(2014, DateTimeConstants.OCTOBER, 20, 12, 0))
-		command.weekToDateConverter.toLocalDatetime(7, DayOfWeek.Monday, new LocalTime(16, 0), set.academicYear) returns Some(new LocalDateTime(2014, DateTimeConstants.OCTOBER, 29, 16, 0))
+		val autumnTerm = academicYear.termOrVacation(AcademicYearPeriod.PeriodType.autumnTerm)
 
 		val info = command.applyInternal()
 		info.missedCount should be (1)
-		info.missedCountByTerm should be (Map("" -> 1))
-		info.termWeeks.toSeq should be (Seq("" -> WeekRange(1, 10)))
+		info.missedCountByTerm should be (Map(autumnTerm -> 1))
+		info.termWeeks.toSeq should be (Seq(autumnTerm -> WeekRange(1, 10)))
 
 		// Map all the SortedMaps to Seqs to preserve the order they've been set as
 		val attendanceSeqs = info.attendance.toSeq.map { case (t, attendance) =>
@@ -211,7 +201,7 @@ class ListStudentGroupAttendanceCommandTest extends TestBase with Mockito {
 		}
 
 		attendanceSeqs should be (Seq(
-			("", Seq(
+			(autumnTerm, Seq(
 				(group, Seq(
 					(1, Seq(((event2, 1), Attended))),
 					(2, Seq(((event1, 2), Late))),
@@ -236,17 +226,12 @@ class ListStudentGroupAttendanceCommandTest extends TestBase with Mockito {
 			Seq(occurrence1, occurrence3, occurrence2)
 		) returns Seq()
 
-		command.weekToDateConverter.toLocalDatetime(1, DayOfWeek.Monday, new LocalTime(16, 0), set.academicYear) returns Some(new LocalDateTime(2014, DateTimeConstants.SEPTEMBER, 29, 16, 0))
-		command.weekToDateConverter.toLocalDatetime(2, DayOfWeek.Monday, new LocalTime(12, 0), set.academicYear) returns Some(new LocalDateTime(2014, DateTimeConstants.OCTOBER, 6, 16, 0))
-		command.weekToDateConverter.toLocalDatetime(3, DayOfWeek.Monday, new LocalTime(12, 0), set.academicYear) returns Some(new LocalDateTime(2014, DateTimeConstants.OCTOBER, 13, 12, 0))
-		command.weekToDateConverter.toLocalDatetime(3, DayOfWeek.Monday, new LocalTime(16, 0), set.academicYear) returns Some(new LocalDateTime(2014, DateTimeConstants.OCTOBER, 13, 16, 0))
-		command.weekToDateConverter.toLocalDatetime(4, DayOfWeek.Monday, new LocalTime(12, 0), set.academicYear) returns Some(new LocalDateTime(2014, DateTimeConstants.OCTOBER, 20, 12, 0))
-		command.weekToDateConverter.toLocalDatetime(7, DayOfWeek.Monday, new LocalTime(16, 0), set.academicYear) returns Some(new LocalDateTime(2014, DateTimeConstants.OCTOBER, 29, 16, 0))
+		val autumnTerm = academicYear.termOrVacation(AcademicYearPeriod.PeriodType.autumnTerm)
 
 		val info = command.applyInternal()
 		info.missedCount should be (2)
-		info.missedCountByTerm should be (Map("" -> 2))
-		info.termWeeks.toSeq should be (Seq("" -> WeekRange(1, 10)))
+		info.missedCountByTerm should be (Map(autumnTerm -> 2))
+		info.termWeeks.toSeq should be (Seq(autumnTerm -> WeekRange(1, 10)))
 
 		// Map all the SortedMaps to Seqs to preserve the order they've been set as
 		val attendanceSeqs = info.attendance.toSeq.map { case (t, attendance) =>
@@ -258,7 +243,7 @@ class ListStudentGroupAttendanceCommandTest extends TestBase with Mockito {
 		}
 
 		attendanceSeqs should be (Seq(
-			("", Seq(
+			(autumnTerm, Seq(
 				(group, Seq(
 					(1, Seq(((event2, 1), Attended))),
 					(2, Seq(((event1, 2), NotExpected))),

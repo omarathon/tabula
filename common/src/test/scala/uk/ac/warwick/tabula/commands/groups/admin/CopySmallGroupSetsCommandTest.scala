@@ -158,8 +158,8 @@ class CopySmallGroupSetsCommandTest extends TestBase with Mockito {
 
 	// TAB-3974
 	@Test def validationWeekNotInTargetYear(): Unit = new ValidationFixture {
-		command.sourceAcademicYear = AcademicYear(2014) // 14/15
-		command.targetAcademicYear = AcademicYear(2015) // 15/16
+		command.sourceAcademicYear = AcademicYear(2014) // 14/15 - week -8 to week 44
+		command.targetAcademicYear = AcademicYear(2015) // 15/16 - week -8 to week 43
 
 		val set: SmallGroupSet = Fixtures.smallGroupSet("set")
 		val group: SmallGroup = Fixtures.smallGroup("group")
@@ -173,7 +173,7 @@ class CopySmallGroupSetsCommandTest extends TestBase with Mockito {
 
 		// This is fine because there is a week 52 in both years
 		{
-			event.weekRanges = Seq(WeekRange(1, 52))
+			event.weekRanges = Seq(WeekRange(-8, 43))
 			state.copy = true
 			state.copyGroups = true
 			state.copyEvents = true
@@ -186,7 +186,7 @@ class CopySmallGroupSetsCommandTest extends TestBase with Mockito {
 
 		// This is fine because we're set to not copy events
 		{
-			event.weekRanges = Seq(WeekRange(1, 53))
+			event.weekRanges = Seq(WeekRange(-8, 44))
 			state.copy = true
 			state.copyGroups = true
 			state.copyEvents = false
@@ -198,7 +198,7 @@ class CopySmallGroupSetsCommandTest extends TestBase with Mockito {
 		}
 
 		{
-			event.weekRanges = Seq(WeekRange(1, 53))
+			event.weekRanges = Seq(WeekRange(-8, 44))
 			state.copy = true
 			state.copyGroups = true
 			state.copyEvents = true

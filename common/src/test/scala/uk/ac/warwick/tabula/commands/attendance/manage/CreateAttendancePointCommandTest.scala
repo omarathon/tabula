@@ -1,6 +1,6 @@
 package uk.ac.warwick.tabula.commands.attendance.manage
 
-import org.joda.time.{DateTime, LocalDate}
+import org.joda.time.{DateTime, DateTimeConstants, LocalDate}
 import org.springframework.validation.BindException
 import uk.ac.warwick.tabula.JavaImports.JHashSet
 import uk.ac.warwick.tabula.data.model._
@@ -75,21 +75,24 @@ class CreateAttendancePointCommandTest extends TestBase with Mockito {
 		}
 		new Fixture {
 			val date: LocalDate = new DateTime().withYear(2013).toLocalDate
-//			validator.termService.getAcademicWeekForAcademicYear(date.toDateTimeAtStartOfDay, AcademicYear(2014)) returns Term.WEEK_NUMBER_BEFORE_START
-			validator.validateDate(errors, date, AcademicYear(2014), "startDate")
-			errors.hasFieldErrors("startDate") should be {true}
+			withFakeTime(date.toDateTimeAtCurrentTime) {
+				validator.validateDate(errors, date, AcademicYear(2014), "startDate")
+				errors.hasFieldErrors("startDate") should be (true)
+			}
 		}
 		new Fixture {
 			val date: LocalDate = new DateTime().withYear(2016).toLocalDate
-//			validator.termService.getAcademicWeekForAcademicYear(date.toDateTimeAtStartOfDay, AcademicYear(2014)) returns Term.WEEK_NUMBER_AFTER_END
-			validator.validateDate(errors, date, AcademicYear(2014), "startDate")
-			errors.hasFieldErrors("startDate") should be {true}
+			withFakeTime(date.toDateTimeAtCurrentTime) {
+				validator.validateDate(errors, date, AcademicYear(2014), "startDate")
+				errors.hasFieldErrors("startDate") should be (true)
+			}
 		}
 		new Fixture {
-			val date: LocalDate = new DateTime().withYear(2015).toLocalDate
-//			validator.termService.getAcademicWeekForAcademicYear(date.toDateTimeAtStartOfDay, AcademicYear(2014)) returns 10
-			validator.validateDate(errors, date, AcademicYear(2014), "startDate")
-			errors.hasFieldErrors("startDate") should be {false}
+			val date: DateTime = new DateTime(2014, DateTimeConstants.NOVEMBER, 1, 9, 50, 22, 0) // Autumn term, 14/15
+			withFakeTime(date) {
+				validator.validateDate(errors, date.toLocalDate, AcademicYear(2014), "startDate")
+				errors.hasFieldErrors("startDate") should be (false)
+			}
 		}
 	}
 
@@ -229,18 +232,16 @@ class CreateAttendancePointCommandTest extends TestBase with Mockito {
 
 	@Test
 	def validateCanPointBeEditedByDate() {
-		val startDate = DateTime.now.toLocalDate
+		val startDate = new DateTime(2014, DateTimeConstants.NOVEMBER, 1, 9, 50, 22, 0) // Autumn term, 14/15
 		val studentId = "1234"
-		new Fixture {
-//			validator.termService.getTermFromDateIncludingVacations(startDate.toDateTimeAtStartOfDay) returns autumnTerm
+		new Fixture { withFakeTime(startDate) {
 			validator.attendanceMonitoringService.findReports(Seq(studentId), AcademicYear(2014), PeriodType.autumnTerm.toString) returns Seq(new MonitoringPointReport)
-			validator.validateCanPointBeEditedByDate(errors, startDate, Seq(studentId), AcademicYear(2014))
+			validator.validateCanPointBeEditedByDate(errors, startDate.toLocalDate, Seq(studentId), AcademicYear(2014))
 			errors.hasFieldErrors("startDate") should be {true}
-		}
+		}}
 		new Fixture {
-//			validator.termService.getTermFromDateIncludingVacations(startDate.toDateTimeAtStartOfDay) returns autumnTerm
 			validator.attendanceMonitoringService.findReports(Seq(studentId), AcademicYear(2014), PeriodType.autumnTerm.toString) returns Seq()
-			validator.validateCanPointBeEditedByDate(errors, startDate, Seq(studentId), AcademicYear(2014))
+			validator.validateCanPointBeEditedByDate(errors, startDate.toLocalDate, Seq(studentId), AcademicYear(2014))
 			errors.hasFieldErrors("startDate") should be {false}
 		}
 	}

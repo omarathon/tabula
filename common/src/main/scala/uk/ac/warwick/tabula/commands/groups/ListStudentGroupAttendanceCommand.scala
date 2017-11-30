@@ -37,14 +37,13 @@ object ListStudentGroupAttendanceCommand {
 			with ComposableCommand[StudentGroupAttendance]
 			with ListStudentGroupAttendanceCommandPermissions
 			with AutowiringSmallGroupServiceComponent
-			with TermAwareWeekToDateConverterComponent
 			with ReadOnly with Unaudited
 }
 
 class ListStudentGroupAttendanceCommandInternal(val member: Member, val academicYear: AcademicYear)
 	extends CommandInternal[StudentGroupAttendance]
 		with ListStudentGroupAttendanceCommandState with TaskBenchmarking {
-	self: SmallGroupServiceComponent with WeekToDateConverterComponent =>
+	self: SmallGroupServiceComponent =>
 
 	implicit val defaultOrderingForGroup: Ordering[SmallGroup] = Ordering.by { group: SmallGroup => (group.groupSet.module.code, group.groupSet.name, group.name, group.id) }
 	implicit val defaultOrderingForDateTime: Ordering[DateTime] = Ordering.by[DateTime, Long] ( _.getMillis )
@@ -128,8 +127,7 @@ class ListStudentGroupAttendanceCommandInternal(val member: Member, val academic
 			// Can't be late if the student is no longer in that group
 			event.group.students.includesUser(user) &&
 			// Get the actual end date of the event in this week
-			weekToDateConverter.toLocalDatetime(week, event.day, event.endTime, event.group.groupSet.academicYear)
-				.exists(eventDateTime => eventDateTime.isBefore(LocalDateTime.now()))
+			event.endDateTimeForWeek(week).exists(_.isBefore(LocalDateTime.now))
 	}
 
 	private def groupTitle(attendance: PerTermAttendance) = {
