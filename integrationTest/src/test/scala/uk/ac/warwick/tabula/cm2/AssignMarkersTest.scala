@@ -28,6 +28,10 @@ class AssignMarkersTest  extends BrowserTest with CourseworkFixtures with GivenW
 			Then("The allocations have been saved")
 			findAll(cssSelector(".drag-count"))foreach(_.underlying.getText should be ("1"))
 
+			// PhantomJS doesn't support confirm() - (we have a confirmation box when we click remove all)
+			ifPhantomJSDriver { _ =>
+				executeScript("window.confirm = function(msg) { return true; };")
+			}
 			When("I remove the markers")
 			click on partialLinkText("Remove all")
 			Then("No markers should be assigned")
@@ -67,6 +71,11 @@ class AssignMarkersTest  extends BrowserTest with CourseworkFixtures with GivenW
 			first1.foreach(_.underlying.getText should be ("1"))
 			second1.foreach(_.underlying.getText should be ("2"))
 
+			// PhantomJS doesn't support confirm() - (we have confirmation box)
+			ifPhantomJSDriver { _ =>
+				executeScript("window.confirm = function(msg) { return true; };")
+			}
+
 			When("I remove the markers")
 			findAll(partialLinkText("Remove all")).toSeq.foreach(e => click on e.underlying)
 			Then("No markers should be assigned")
@@ -105,6 +114,11 @@ class AssignMarkersTest  extends BrowserTest with CourseworkFixtures with GivenW
 			val (first1, second1) = findAll(cssSelector(".drag-count")).toSeq.splitAt(2)
 			first1.foreach(_.underlying.getText should be ("1"))
 			second1.foreach(_.underlying.getText should be ("2"))
+
+			// PhantomJS doesn't support confirm() - (we have confirmation box)
+			ifPhantomJSDriver { _ =>
+				executeScript("window.confirm = function(msg) { return true; };")
+			}
 
 			When("I remove the markers")
 			findAll(partialLinkText("Remove all")).toSeq.foreach(e => click on e.underlying)
