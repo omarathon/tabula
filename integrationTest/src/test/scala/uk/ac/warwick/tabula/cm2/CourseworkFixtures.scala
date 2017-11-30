@@ -290,7 +290,8 @@ trait CourseworkFixtures extends BrowserTest with FeaturesDriver with FixturesDr
 		eventually(currentUrl should include(s"/admin/assignments/$id/summary"))
 
 		When("I select all the submissions")
-		click on cssSelector(".collection-check-all")
+		eventuallyAjax(click on cssSelector(".collection-check-all"))
+
 		And("I choose to release for marking")
 		click on partialLinkText("Marking")
 		eventually({
@@ -302,8 +303,10 @@ trait CourseworkFixtures extends BrowserTest with FeaturesDriver with FixturesDr
 		eventually(currentUrl should include(s"/admin/assignments/$id/release-submissions"))
 
 		When("I confirm")
-		cssSelector(s"input[name=confirm]").webElement.click()
-		cssSelector(s"input[value=Confirm]").webElement.click()
+		eventuallyAjax{
+			cssSelector(s"input[name=confirm]").webElement.click()
+			cssSelector(s"input[value=Confirm]").webElement.click()
+		}
 		Then("The submissions are released")
 		eventually(currentUrl should include(s"/admin/assignments/$id/summary"))
 	}
