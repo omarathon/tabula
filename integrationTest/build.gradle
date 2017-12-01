@@ -33,7 +33,7 @@ test {
         project.hasProperty('integrationTest')
     }
 
-    maxParallelForks = 2
+    maxParallelForks = 1
 
     doFirst {
         mkdir 'build/integrationTest-screenshots'
