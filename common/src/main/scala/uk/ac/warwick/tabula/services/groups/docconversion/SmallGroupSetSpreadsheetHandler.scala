@@ -22,7 +22,7 @@ import uk.ac.warwick.tabula.helpers.Closeables._
 import uk.ac.warwick.tabula.helpers.StringUtils._
 import uk.ac.warwick.tabula.services._
 import uk.ac.warwick.tabula.services.groups.docconversion.SmallGroupSetSpreadsheetContentsHandler._
-import uk.ac.warwick.tabula.services.timetables.{AutowiringWAI2GoConfigurationComponent, LocationFetchingServiceComponent, WAI2GoHttpLocationFetchingServiceComponent}
+import uk.ac.warwick.tabula.services.timetables.{AutowiringWAI2GoConfigurationComponent, LocationFetchingServiceComponent, ScientiaCentrallyManagedRooms, WAI2GoHttpLocationFetchingServiceComponent}
 import uk.ac.warwick.tabula.{AcademicYear, UniversityId}
 import uk.ac.warwick.userlookup.User
 
@@ -525,10 +525,14 @@ abstract class SmallGroupSetSpreadsheetHandlerImpl extends SmallGroupSetSpreadsh
 				else None
 
 			val location =
-				if (row.values.contains(ExtractedSmallGroupEvent.LocationColumn))
-					Some(locationFetchingService.locationFor(row.values(ExtractedSmallGroupEvent.LocationColumn).formattedValue))
-				else
+				if (row.values.contains(ExtractedSmallGroupEvent.LocationColumn)) {
+					val value = row.values(ExtractedSmallGroupEvent.LocationColumn).formattedValue
+
+					ScientiaCentrallyManagedRooms.CentrallyManagedRooms.get(value)
+						.orElse(Some(locationFetchingService.locationFor(value)))
+				} else {
 					None
+				}
 
 			if (title.nonEmpty || tutors.nonEmpty || weekRanges.nonEmpty || dayOfWeek.nonEmpty || startTime.nonEmpty || endTime.nonEmpty || location.nonEmpty) {
 				Seq(ExtractedSmallGroupEvent(
