@@ -73,8 +73,8 @@ trait CreateAttendancePointValidation extends SelfValidating with AttendanceMoni
 					validateDuplicateForDate(errors, name, startDate, endDate, schemes)
 				}
 			case AttendanceMonitoringPointStyle.Week =>
-				validateWeek(errors, startWeek, "startWeek")
-				validateWeek(errors, endWeek, "endWeek")
+				validateWeek(errors, startWeek, academicYear, "startWeek")
+				validateWeek(errors, endWeek, academicYear, "endWeek")
 				validateWeeks(errors, startWeek, endWeek)
 				validateCanPointBeEditedByWeek(errors, startWeek, schemes.flatMap(_.members.members), academicYear)
 				validateDuplicateForWeek(errors, name, startWeek, endWeek, schemes)

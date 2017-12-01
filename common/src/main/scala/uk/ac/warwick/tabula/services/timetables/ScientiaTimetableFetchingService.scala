@@ -37,12 +37,12 @@ trait AutowiringScientiaConfigurationComponent extends ScientiaConfigurationComp
 		}
 
 		lazy val scientiaBaseUrl: String = Wire.optionProperty("${scientia.base.url}").getOrElse("https://test-timetablingmanagement.warwick.ac.uk/xml")
-		lazy val currentAcademicYear: Option[AcademicYear] = Some(AcademicYear.forDate(clock.now))
+		lazy val currentAcademicYear: Option[AcademicYear] = Some(AcademicYear.forDate(clock.now).extended)
 		lazy val prevAcademicYear: Option[AcademicYear] = {
 			// TAB-3074 we only fetch the previous academic year if the month is >= AUGUST and < OCTOBER
 			val month = clock.now.getMonthOfYear
 			if (month >= DateTimeConstants.AUGUST && month < DateTimeConstants.OCTOBER)
-				currentAcademicYear.map(_ - 1)
+				currentAcademicYear.map(_.previous.extended)
 			else
 				None
 		}

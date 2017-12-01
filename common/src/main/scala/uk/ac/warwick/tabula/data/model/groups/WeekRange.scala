@@ -8,6 +8,7 @@ import uk.ac.warwick.tabula.data.model.AbstractBasicUserType
 import uk.ac.warwick.util.termdates.AcademicYearPeriod.PeriodType
 
 import scala.collection.mutable
+import uk.ac.warwick.tabula.helpers.StringUtils._
 
 case class WeekRange(minWeek: WeekRange.Week, maxWeek: WeekRange.Week) {
 	if (maxWeek < minWeek) throw new IllegalArgumentException("maxWeek must be >= minWeek")
@@ -24,9 +25,9 @@ object WeekRange {
 	type Week = Int
 
 	def apply(singleWeek: Week): WeekRange = WeekRange(singleWeek, singleWeek)
-	def fromString(rep: String): WeekRange = rep.split('-') match {
-		case Array(singleWeek) => WeekRange(singleWeek.trim.toInt)
-		case Array(min, max) => WeekRange(min.trim.toInt, max.trim.toInt)
+	def fromString(rep: String): WeekRange = rep.replaceAll("\\s*", "") match {
+		case r"""(-?\d+)${singleWeek}""" => WeekRange(singleWeek.toInt)
+		case r"""(-?\d+)${min}-(-?\d+)${max}""" => WeekRange(min.toInt, max.toInt)
 		case _ => throw new IllegalArgumentException("Couldn't convert string representation %s to WeekRange" format rep)
 	}
 

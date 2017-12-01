@@ -29,7 +29,7 @@
 							<strong>Gender:</strong> ${member.gender.description}<br/>
 						</#if>
 						<#if member.dateOfBirth??>
-							<strong>Date of birth:</strong> <@warwick.formatDate value=member.dateOfBirth.toDateTimeAtStartOfDay() pattern="dd/MM/yyyy" /><br/>
+							<strong>Date of birth:</strong> ${member.dateOfBirth?date("yyyy-MM-dd")?string("dd/MM/yyyy")}<br/>
 						</#if>
 						<#if member.nationality??>
 							<strong>Nationality:</strong> <@fmt.nationality member.nationality!('Unknown') /><br/>

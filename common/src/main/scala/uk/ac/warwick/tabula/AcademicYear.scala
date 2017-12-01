@@ -8,7 +8,7 @@ import uk.ac.warwick.tabula.JavaImports._
 import uk.ac.warwick.tabula.data.model.Convertible
 import uk.ac.warwick.tabula.data.model.groups.WeekRange
 import uk.ac.warwick.tabula.helpers.JodaConverters._
-import uk.ac.warwick.util.termdates.{AcademicWeek => JAcademicWeek, AcademicYear => JAcademicYear, AcademicYearPeriod => JAcademicYearPeriod, Term => JTerm, Vacation => JVacation}
+import uk.ac.warwick.util.termdates.{AcademicWeek => JAcademicWeek, AcademicYear => JAcademicYear, ExtendedAcademicYear => JExtendedAcademicYear, AcademicYearPeriod => JAcademicYearPeriod, Term => JTerm, Vacation => JVacation}
 
 import scala.collection.JavaConverters._
 import scala.language.implicitConversions
@@ -64,6 +64,11 @@ case class AcademicYear(underlying: JAcademicYear) extends Ordered[AcademicYear]
 	def termOrVacation(periodType: JAcademicYearPeriod.PeriodType): AcademicPeriod = underlying.getPeriod(periodType)
 	def weeks: Map[Int, AcademicWeek] = underlying.getAcademicWeeks.asScala.map { w => (w.getWeekNumber, w: AcademicWeek) }.toMap
 	def weekForDate(now: LocalDate): AcademicWeek = underlying.getAcademicWeek(now.asJava)
+
+	def extended: AcademicYear = underlying match {
+		case _: JExtendedAcademicYear => this
+		case _ => AcademicYear(JExtendedAcademicYear.starting(startYear))
+	}
 }
 
 object AcademicYear {
@@ -72,10 +77,27 @@ object AcademicYear {
 	// An implicit for the UserType to create instances
 	implicit val factory: (JInteger) => AcademicYear = (year: JInteger) => AcademicYear(year)
 
-	def apply(startYear: Int): AcademicYear = JAcademicYear.starting(startYear)
+	// The year at which we stop having ExtendedAcademicYears and just have AcademicYears
+	val extendedAcademicYearCrossover: Int = 2018
+
+	def apply(startYear: Int): AcademicYear =
+		if (startYear < extendedAcademicYearCrossover) JExtendedAcademicYear.starting(startYear)
+		else JAcademicYear.starting(startYear)
+
 	def starting(startYear: Int): AcademicYear = apply(startYear)
-	def parse(string: String): AcademicYear = JAcademicYear.parse(string)
-	def forDate(now: LocalDate): AcademicYear = JAcademicYear.forDate(now.asJava)
+
+	def parse(string: String): AcademicYear = {
+		val year = JAcademicYear.parse(string)
+		if (year.getStartYear < extendedAcademicYearCrossover) JExtendedAcademicYear.starting(year.getStartYear)
+		else year
+	}
+
+	def forDate(now: LocalDate): AcademicYear = {
+		val year = JAcademicYear.forDate(now.asJava)
+		if (year.getStartYear < extendedAcademicYearCrossover) JExtendedAcademicYear.starting(year.getStartYear)
+		else year
+	}
+
 	def forDate(now: DateTime): AcademicYear = forDate(now.toLocalDate)
 	def now(): AcademicYear = forDate(DateTime.now())
 }

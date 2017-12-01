@@ -179,7 +179,7 @@ object ExamTimetableFetchingService {
 		if ((xml \\ "exam").isEmpty) {
 			ExamTimetable(header, instructions, Nil)
 		} else {
-			val academicYear = AcademicYear((xml \\ "academic-year").text.toInt)
+			val academicYear = AcademicYear((xml \\ "academic-year").text.toInt).extended
 			val exams = (xml \\ "exam").map(examNode => {
 				val moduleCode = (examNode \\ "module").text
 				val paper = (examNode \\ "paper").text

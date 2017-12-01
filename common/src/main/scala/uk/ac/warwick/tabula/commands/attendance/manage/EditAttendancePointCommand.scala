@@ -86,8 +86,8 @@ trait EditAttendancePointValidation extends SelfValidating with AttendanceMonito
 					points.exists(p => validateDuplicateForDateForEdit(errors, name, startDate, endDate, p))
 				}
 			case AttendanceMonitoringPointStyle.Week =>
-				validateWeek(errors, startWeek, "startWeek")
-				validateWeek(errors, endWeek, "endWeek")
+				validateWeek(errors, startWeek, academicYear, "startWeek")
+				validateWeek(errors, endWeek, academicYear, "endWeek")
 				validateWeeks(errors, startWeek, endWeek)
 				validateCanPointBeEditedByWeek(errors, startWeek, schemes.flatMap(_.members.members), academicYear)
 				points.exists(p => validateDuplicateForWeekForEdit(errors, name, startWeek, endWeek, p))

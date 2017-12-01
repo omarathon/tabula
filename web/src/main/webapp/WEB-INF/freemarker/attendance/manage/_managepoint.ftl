@@ -11,7 +11,7 @@
 		</#assign>
 		<@bs3form.labelled_form_group path="startWeek" labelText="${label}">
 			<@f.select path="startWeek" cssClass="startDateTime selectOffset form-control">
-				<#list 1..52 as week>
+				<#list command.academicYear.weeks?keys?sort as week>
 					<@f.option value="${week}"><@fmt.monitoringPointWeeksFormat week week command.academicYear command.department /></@f.option>
 				</#list>
 			</@f.select>
@@ -23,7 +23,7 @@
 		</#assign>
 		<@bs3form.labelled_form_group path="endWeek" labelText="${label}">
 			<@f.select path="endWeek" cssClass="endDateTime selectOffset form-control">
-				<#list 1..52 as week>
+				<#list command.academicYear.weeks?keys?sort as week>
 					<@f.option value="${week}"><@fmt.monitoringPointWeeksFormat week week command.academicYear command.department /></@f.option>
 				</#list>
 			</@f.select>

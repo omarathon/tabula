@@ -22,7 +22,7 @@
 							<strong>Gender:</strong> ${student.gender.description}<br/>
 						</#if>
 						<#if student.dateOfBirth??>
-							<strong>Date of birth:</strong> <@warwick.formatDate value=student.dateOfBirth.toDateTimeAtStartOfDay() pattern="dd/MM/yyyy" /><br/>
+							<strong>Date of birth:</strong> ${student.dateOfBirth?date("yyyy-MM-dd")?string("dd/MM/yyyy")}<br/>
 						</#if>
 						<#if student.nationality??>
 							<strong>Nationality:</strong> <@fmt.nationality student.nationality!('Unknown') /><br/>

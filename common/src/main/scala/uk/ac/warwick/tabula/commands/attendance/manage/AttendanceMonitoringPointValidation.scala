@@ -31,10 +31,10 @@ trait AttendanceMonitoringPointValidation {
 		}
 	}
 
-	def validateWeek(errors: Errors, week: Int, bindPoint: String) {
+	def validateWeek(errors: Errors, week: Int, academicYear: AcademicYear, bindPoint: String) {
 		week match {
-			case y if y < 1  => errors.rejectValue(bindPoint, "attendanceMonitoringPoint.week.min")
-			case y if y > 52 => errors.rejectValue(bindPoint, "attendanceMonitoringPoint.week.max")
+			case y if y < academicYear.weeks.keys.min => errors.rejectValue(bindPoint, "attendanceMonitoringPoint.week.min")
+			case y if y > academicYear.weeks.keys.max => errors.rejectValue(bindPoint, "attendanceMonitoringPoint.week.max")
 			case _ =>
 		}
 	}
@@ -165,7 +165,7 @@ trait AttendanceMonitoringPointValidation {
 		bindPoint: String = "startWeek"
 	): Unit = {
 		val weeksForYear = academicYear.weeks
-		val startDate = weeksForYear(startWeek).firstDay.withDayOfWeek(DayOfWeek.Monday.jodaDayOfWeek)
+		val startDate = weeksForYear(startWeek).firstDay
 		validateCanPointBeEditedByDate(errors, startDate, studentIds, academicYear, bindPoint)
 	}
 

@@ -20,8 +20,8 @@ trait AttendancePointCommandState {
 
 	// The point's properties
 	var name: String = _
-	var startWeek: Int = 0
-	var endWeek: Int = 0
+	var startWeek: Int = 1
+	var endWeek: Int = 1
 	var startDate: LocalDate = _
 	var endDate: LocalDate = _
 

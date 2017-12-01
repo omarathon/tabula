@@ -224,6 +224,17 @@ trait ModifySmallGroupEventValidation extends SelfValidating {
 		if (startTime != null && endTime != null && endTime.isBefore(startTime)) errors.rejectValue("endTime", "smallGroupEvent.endTime.beforeStartTime")
 
 		if (location.safeContains("|")) errors.rejectValue("location", "smallGroupEvent.location.invalidChar")
+
+		// Verify that the day we're asking for actually exists
+		if (weekRanges.nonEmpty && day != null) {
+			if (academicYear.weeks(weekRanges.min.minWeek).firstDay.getDayOfWeek > day.jodaDayOfWeek) {
+				errors.rejectValue("weeks", "smallGroupEvent.weeks.invalidForThisYear", Array[Object](weekRanges.min.minWeek: JInteger, day.name), s"There is no $day in week ${weekRanges.min.minWeek} for this year")
+			}
+
+			if (academicYear.weeks(weekRanges.max.maxWeek).lastDay.getDayOfWeek < day.jodaDayOfWeek) {
+				errors.rejectValue("weeks", "smallGroupEvent.weeks.invalidForThisYear", Array[Object](weekRanges.max.maxWeek: JInteger, day.name), s"There is no $day in week ${weekRanges.max.maxWeek} for this year")
+			}
+		}
 	}
 }
 

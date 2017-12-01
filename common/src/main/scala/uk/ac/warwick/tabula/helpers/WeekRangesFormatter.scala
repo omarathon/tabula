@@ -71,8 +71,8 @@ class WeekRangesFormatter(year: AcademicYear) extends WeekRanges(year: AcademicY
 	implicit class PimpedTerm(termOrVacation: AcademicPeriod) {
 		def print(weekRange: WeekRange, dayOfWeek: DayOfWeek, numberingSystem: String): String = {
 			// TODO we've already done this calculation once in groupWeekRangesByTerm, do we really need to do it again?
-			val startDate = weekNumberToDate(weekRange.minWeek, dayOfWeek)
-			val endDate = weekNumberToDate(weekRange.maxWeek, dayOfWeek)
+			val startDate = weekNumberToDate(weekRange.minWeek).withDayOfWeek(dayOfWeek.jodaDayOfWeek)
+			val endDate = weekNumberToDate(weekRange.maxWeek).withDayOfWeek(dayOfWeek.jodaDayOfWeek)
 
 			termOrVacation match {
 				case vac: Vacation =>
@@ -112,8 +112,8 @@ class WeekRangesFormatter(year: AcademicYear) extends WeekRanges(year: AcademicY
 			prefix + " " + ranges.mkString(separator)
 		case WeekRange.NumberingSystem.None =>
 			ranges.map { weekRange =>
-				val startDate = weekNumberToDate(weekRange.minWeek, dayOfWeek)
-				val endDate = weekNumberToDate(weekRange.maxWeek, dayOfWeek)
+				val startDate = weekNumberToDate(weekRange.minWeek).withDayOfWeek(dayOfWeek.jodaDayOfWeek)
+				val endDate = weekNumberToDate(weekRange.maxWeek).withDayOfWeek(dayOfWeek.jodaDayOfWeek)
 
 				IntervalFormatter.formatDate(startDate, endDate)
 			}.mkString(separator)
@@ -128,7 +128,7 @@ class WeekRangesFormatter(year: AcademicYear) extends WeekRanges(year: AcademicY
 			 *
 			 * Then we use our PimpedTerm to print the week numbers based on the numbering system.
 			 */
-			groupWeekRangesByTerm(ranges, dayOfWeek).map {
+			groupWeekRangesByTerm(ranges).map {
 				case (weekRange, term) =>
 					term.print(weekRange, dayOfWeek, numberingSystem)
 			}.mkString(separator)
@@ -139,15 +139,14 @@ class WeekRangesFormatter(year: AcademicYear) extends WeekRanges(year: AcademicY
 class WeekRanges(year: AcademicYear) {
 	lazy val weeksForYear: Map[Int, AcademicWeek] = year.weeks
 
-	def weekNumberToDate(weekNumber: Int, dayOfWeek: DayOfWeek): LocalDate =
-		weeksForYear(weekNumber).firstDay.withDayOfWeek(dayOfWeek.jodaDayOfWeek)
+	def weekNumberToDate(weekNumber: Int): LocalDate = weeksForYear(weekNumber).firstDay
 
-	def groupWeekRangesByTerm(ranges: Seq[WeekRange], dayOfWeek: DayOfWeek): Seq[(WeekRange, AcademicPeriod)] = {
+	def groupWeekRangesByTerm(ranges: Seq[WeekRange]): Seq[(WeekRange, AcademicPeriod)] = {
 		ranges.flatMap { range =>
-			if (range.isSingleWeek) Seq((range, year.termOrVacationForDate(weekNumberToDate(range.minWeek, dayOfWeek))))
+			if (range.isSingleWeek) Seq((range, year.termOrVacationForDate(weekNumberToDate(range.minWeek))))
 			else {
-				val startDate = weekNumberToDate(range.minWeek, dayOfWeek)
-				val endDate = weekNumberToDate(range.maxWeek, dayOfWeek)
+				val startDate = weekNumberToDate(range.minWeek)
+				val endDate = weekNumberToDate(range.maxWeek)
 
 				year.termsAndVacations.filterNot { p => p.lastDay.isBefore(startDate) || p.firstDay.isAfter(endDate) }.map { term =>
 					val minWeek =
@@ -277,9 +276,8 @@ class WholeWeekFormatter(year: AcademicYear) extends WeekRanges(year: AcademicYe
 
 	implicit class PimpedTerm(termOrVacation: AcademicPeriod) {
 		def print(weekRange: WeekRange, dayOfWeek: DayOfWeek, numberingSystem: String, short: Boolean): String = {
-			val startDate = weekNumberToDate(weekRange.minWeek, dayOfWeek)
-			val endDate = weekNumberToDate(weekRange.maxWeek, dayOfWeek)
-			val Monday = DayOfWeek.Monday.getAsInt
+			val startDate = weekNumberToDate(weekRange.minWeek)
+			val endDate = weekNumberToDate(weekRange.maxWeek)
 
 			termOrVacation match {
 				case vac: Vacation if numberingSystem == WeekRange.NumberingSystem.Academic =>
@@ -292,23 +290,23 @@ class WholeWeekFormatter(year: AcademicYear) extends WeekRanges(year: AcademicYe
 					}
 				case vac: Vacation =>
 					if (weekRange.isSingleWeek) {
-						if (short) startDate.withDayOfWeek(Monday).toString("dd/MM")
+						if (short) startDate.toString("dd/MM")
 						else "%s, w/c %s" format (
 							vac.periodType.toString,
-							IntervalFormatter.formatDate(startDate.withDayOfWeek(Monday))
+							IntervalFormatter.formatDate(startDate)
 						)
 					} else {
 						// Date range
 						if (short)
 							"%s, %s-%s" format (
 								vac.periodType.toString,
-								startDate.withDayOfWeek(Monday).toString("dd/MM"),
-								endDate.withDayOfWeek(Monday).toString("dd/MM")
+								startDate.toString("dd/MM"),
+								endDate.toString("dd/MM")
 							)
 						else
 							"%s, %s" format (
 								vac.periodType.toString,
-								IntervalFormatter.formatDate(startDate.withDayOfWeek(Monday), endDate.withDayOfWeek(Monday)).replaceAll("Mon", "w/c Mon")
+								IntervalFormatter.formatDate(startDate, endDate).replaceAll("\\b(Mon|Tue|Wed|Thu|Fri|Sat|Sun)\\b", "w/c $1")
 							)
 					}
 				case term: Term =>
@@ -344,19 +342,18 @@ class WholeWeekFormatter(year: AcademicYear) extends WeekRanges(year: AcademicYe
 		numberingSystem match {
 			case WeekRange.NumberingSystem.None =>
 				ranges.map { weekRange =>
-					val Monday = DayOfWeek.Monday
-					val startDate = weekNumberToDate(weekRange.minWeek, Monday)
-					val endDate = weekNumberToDate(weekRange.maxWeek, Monday)
+					val startDate = weekNumberToDate(weekRange.minWeek)
+					val endDate = weekNumberToDate(weekRange.maxWeek)
 
 					if (short) {
 						if (weekRange.isSingleWeek) startDate.toString("dd/MM")
 						else startDate.toString("dd/MM") + " - " + endDate.toString("dd/MM")
 					} else {
-						IntervalFormatter.formatDate(startDate, endDate).replaceAll("Mon", "w/c Mon")
+						IntervalFormatter.formatDate(startDate, endDate).replaceAll("\\b(Mon|Tue|Wed|Thu|Fri|Sat|Sun)\\b", "w/c $1")
 					}
 				}.mkString(separator)
 			case _ =>
-				groupWeekRangesByTerm(ranges, dayOfWeek).map {
+				groupWeekRangesByTerm(ranges).map {
 					case (weekRange, term) =>
 						term.print(weekRange, dayOfWeek, numberingSystem, short)
 				}.mkString(separator)

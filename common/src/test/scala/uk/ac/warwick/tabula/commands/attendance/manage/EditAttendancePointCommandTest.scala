@@ -94,9 +94,11 @@ class EditAttendancePointCommandTest extends TestBase with Mockito {
 
 	@Test
 	def validateWeek() { new Fixture {
-		validator.validateWeek(errors, 1, "startWeek")
+		validator.validateWeek(errors, 1, AcademicYear(2015), "startWeek")
 		errors.hasFieldErrors("startWeek") should be {false}
-		validator.validateWeek(errors, 53, "startWeek")
+		validator.validateWeek(errors, 52, AcademicYear(2015), "startWeek") // Extended a/y
+		errors.hasFieldErrors("startWeek") should be {false}
+		validator.validateWeek(errors, 54, AcademicYear(2015), "startWeek")
 		errors.hasFieldErrors("startWeek") should be {true}
 	}}
 

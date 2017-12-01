@@ -11,6 +11,11 @@ class WeekRangeTest extends TestBase {
 		WeekRange.fromString("3-3") should be (WeekRange(3))
 		WeekRange.fromString("3-10") should be (WeekRange(3,10))
 		WeekRange.fromString("3  -  10") should be (WeekRange(3,10))
+		WeekRange.fromString("-3") should be (WeekRange(-3))
+		WeekRange.fromString("-3-10") should be (WeekRange(-3,10))
+		WeekRange.fromString("-3  - 10") should be (WeekRange(-3,10))
+		WeekRange.fromString("-3--1") should be (WeekRange(-3,-1))
+		WeekRange.fromString("-3  - -1") should be (WeekRange(-3,-1))
 	}
 
 	@Test
