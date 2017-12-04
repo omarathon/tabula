@@ -35,7 +35,7 @@
 		<@f.input path="location" cssClass="form-control" />
 	</@bs3form.labelled_form_group>
 
-	<div class="alert alert-info" id="namedLocationAlert">
+	<div class="alert alert-info" id="namedLocationAlert" style="display: none">
 		<p>
 			This location couldn't be found on the campus map.
 		</p>

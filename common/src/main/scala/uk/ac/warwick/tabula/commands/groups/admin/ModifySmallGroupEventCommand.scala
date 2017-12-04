@@ -228,7 +228,7 @@ trait ModifySmallGroupEventValidation extends SelfValidating {
 
 		if (location.safeContains("|")) errors.rejectValue("location", "smallGroupEvent.location.invalidChar")
 
-		if (!locationId.hasText && !useNamedLocation) errors.rejectValue("useNamedLocation", "smallGroupEvent.location.named")
+		if (location.hasText && !locationId.hasText && !useNamedLocation) errors.rejectValue("useNamedLocation", "smallGroupEvent.location.named")
 	}
 }
 
