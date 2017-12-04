@@ -117,7 +117,7 @@ class StudentCourseDetails
 	}
 
 	def hasCurrentEnrolment: Boolean = {
-		Option(latestStudentCourseYearDetails).exists(scyd => !scyd.enrolmentStatus.code.startsWith("P"))
+		Option(latestStudentCourseYearDetails).exists(scyd => scyd.enrolmentStatus != null && !scyd.enrolmentStatus.code.startsWith("P"))
 	}
 
 	// The reason this method isn't on SitsStatus is that P* can have a meaning other than

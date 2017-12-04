@@ -881,6 +881,8 @@ var LocationPicker = function (options) {
 	$typeahead.updater = function() {
 		return this.$menu.find('.active .name').text();
 	};
+
+	return $typeahead;
 };
 
 

@@ -90,7 +90,7 @@ class PersonalTutorTest extends BrowserTest with GivenWhenThen with FeaturesDriv
 		}
 
 		Then("The new record is displayed")
-		cssSelector("section.meetings table tbody tr").findAllElements.size should be (1)
+		eventuallyAjax(cssSelector("section.meetings table tbody tr").findAllElements.size should be (1))
 		pageSource should include ("Created meeting")
 
 		When("Student1 views their profile")
