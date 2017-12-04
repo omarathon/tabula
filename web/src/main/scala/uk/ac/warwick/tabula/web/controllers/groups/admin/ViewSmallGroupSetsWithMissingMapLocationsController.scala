@@ -25,7 +25,7 @@ class ViewSmallGroupSetsWithMissingMapLocationsController extends GroupsControll
 
 	@ModelAttribute("command")
 	def command(@PathVariable academicYear: AcademicYear, @PathVariable department: Department): Appliable[Seq[(SmallGroupSet, Seq[SmallGroupEvent])]] = {
-		ViewSmallGroupSetsWithMissingMapLocationsCommand(academicYear, department)
+		ViewSmallGroupSetsWithMissingMapLocationsCommand(mandatory(academicYear), mandatory(department))
 	}
 
 	@ModelAttribute("activeDepartment")
