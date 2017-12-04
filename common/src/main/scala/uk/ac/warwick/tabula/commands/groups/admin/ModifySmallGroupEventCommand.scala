@@ -57,6 +57,7 @@ trait ModifySmallGroupEventCommandState extends CurrentSITSAcademicYear {
 	var tutors: JList[String] = JArrayList()
 	var relatedUrl: String = _
 	var relatedUrlTitle: String = _
+	var useNamedLocation: Boolean = _
 
 	def weekRanges: Seq[WeekRange] = Option(weeks) map { weeks => WeekRange.combine(weeks.asScala.toSeq.map { _.intValue }) } getOrElse Seq()
 	def weekRanges_=(ranges: Seq[WeekRange]) {
@@ -226,6 +227,8 @@ trait ModifySmallGroupEventValidation extends SelfValidating {
 		if (startTime != null && endTime != null && endTime.isBefore(startTime)) errors.rejectValue("endTime", "smallGroupEvent.endTime.beforeStartTime")
 
 		if (location.safeContains("|")) errors.rejectValue("location", "smallGroupEvent.location.invalidChar")
+
+		if (!locationId.hasText && !useNamedLocation) errors.rejectValue("useNamedLocation", "smallGroupEvent.location.named")
 	}
 }
 
