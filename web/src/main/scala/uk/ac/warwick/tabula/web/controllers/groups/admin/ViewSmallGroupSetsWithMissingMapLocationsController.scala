@@ -14,7 +14,7 @@ import uk.ac.warwick.tabula.web.controllers.{AcademicYearScopedController, Depar
 import uk.ac.warwick.tabula.web.{Mav, Routes}
 
 @Controller
-@RequestMapping(Array("/groups/admin/department/{department}/{academicYear}/check-map-locations"))
+@RequestMapping(Array("/groups/admin/department/{department}/{academicYear}/missing-map-locations"))
 class ViewSmallGroupSetsWithMissingMapLocationsController extends GroupsController
 	with DepartmentScopedController with AcademicYearScopedController
 	with AutowiringSmallGroupServiceComponent
@@ -36,12 +36,12 @@ class ViewSmallGroupSetsWithMissingMapLocationsController extends GroupsControll
 
 	@RequestMapping
 	def view(@PathVariable department: Department, @PathVariable academicYear: AcademicYear, @ModelAttribute("command") command: Appliable[Seq[(SmallGroupSet, Seq[SmallGroupEvent])]]): Mav = {
-		Mav("groups/admin/groups/check-map-locations")
+		Mav("groups/admin/groups/missing-map-locations")
 			.addObjects(
 				"smallGroupSets" -> command.apply()
 			)
 			.crumbs(Breadcrumbs.Department(department, academicYear))
-			.secondCrumbs(academicYearBreadcrumbs(academicYear)(year => Routes.groups.admin.checkMapLocations(department, year)): _*)
+			.secondCrumbs(academicYearBreadcrumbs(academicYear)(year => Routes.groups.admin.missingMapLocations(department, year)): _*)
 	}
 
 }

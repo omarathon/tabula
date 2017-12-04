@@ -1,8 +1,7 @@
 <h1>Events without a map location</h1>
 
 <p>
-	This page displays any small group events with locations that aren't recognised by Tabula.
-	These locations cannot be displayed on the campus map.
+	This page displays any small group events with locations that can't be found on the campus map.
 </p>
 
 <#if smallGroupSets?size gt 0>
@@ -29,6 +28,6 @@
 	</#list>
 <#else>
 <div class="alert alert-info">
-	All small group event locations are linked to a map position.
+	All small group event locations are linked to a map location.
 </div>
 </#if>

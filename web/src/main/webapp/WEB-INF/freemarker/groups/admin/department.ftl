@@ -84,14 +84,14 @@
 						</li>
 					</#if>
 					<li>
-						<#assign open_url><@routes.groups.check_map_locations department adminCommand.academicYear /></#assign>
+						<#assign open_url><@routes.groups.missing_map_locations department adminCommand.academicYear /></#assign>
 						<@fmt.permission_button
 						permission='SmallGroups.Update'
 						scope=department
-						action_descr='edit small groups'
+						action_descr='edit small group events'
 						href=open_url
 						>
-							Events without map location
+							Events without a map location
 						</@fmt.permission_button>
 					</li>
 

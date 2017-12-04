@@ -57,7 +57,7 @@ object Routes {
 
 		def importSpreadsheet(department: Department, academicYear: AcademicYear): String = context + s"/admin/department/${encoded(department.code)}/${encoded(academicYear.startYear.toString)}/import-spreadsheet"
 
-		def checkMapLocations(department: Department, academicYear: AcademicYear): String = context + s"/admin/department/${encoded(department.code)}/${encoded(academicYear.startYear.toString)}/check-map-locations"
+		def missingMapLocations(department: Department, academicYear: AcademicYear): String = context + s"/admin/department/${encoded(department.code)}/${encoded(academicYear.startYear.toString)}/missing-map-locations"
 
 		object reusable {
 			def apply(department: Department, academicYear: AcademicYear): String =
