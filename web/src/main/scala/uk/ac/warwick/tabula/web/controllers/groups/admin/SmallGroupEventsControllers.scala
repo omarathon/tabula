@@ -119,7 +119,7 @@ abstract class AbstractEditSmallGroupEventController extends SmallGroupEventsCon
 		if (errors.hasErrors) form(cmd)
 		else {
 			cmd.apply()
-			RedirectForce(route)
+			Redirect(route)
 		}
 	}
 
