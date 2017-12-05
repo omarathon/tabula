@@ -35,6 +35,16 @@
 		<@f.input path="location" cssClass="form-control" />
 	</@bs3form.labelled_form_group>
 
+	<div class="alert alert-info" id="namedLocationAlert" style="display: none">
+		<p>
+			This location couldn't be found on the campus map.
+		</p>
+
+		<@bs3form.checkbox path="useNamedLocation">
+			<@f.checkbox path="useNamedLocation" /> Use this location anyway
+		</@bs3form.checkbox>
+	</div>
+
 	<#assign moreDetailsHelpText>
 		<p>An optional 'More Details' link to the specified webpage from the student's timetable.</p>
 	</#assign>
