@@ -14,6 +14,7 @@ import uk.ac.warwick.tabula.data._
 import uk.ac.warwick.tabula.data.convert._
 import uk.ac.warwick.tabula.data.model._
 import uk.ac.warwick.tabula.data.model.forms.ExtensionState
+import uk.ac.warwick.tabula.data.model.groups.DayOfWeek
 import uk.ac.warwick.tabula.helpers.Logging
 import uk.ac.warwick.tabula.helpers.StringUtils._
 import uk.ac.warwick.tabula.services._
@@ -181,7 +182,7 @@ trait AutowiringDeserializesExtensionsFilterImpl extends DeserializesExtensionsF
 
 sealed abstract class TimeFilter(val code: String, val time: LocalDate)
 object TimeFilter {
-	case object ThisWeek extends TimeFilter("This week", LocalDate.now.withDayOfWeek(1))
+	case object ThisWeek extends TimeFilter("This week", LocalDate.now.withDayOfWeek(DayOfWeek.Monday.jodaDayOfWeek))
 	case object ThisMonth extends TimeFilter("This month", LocalDate.now.withDayOfMonth(1))
 	case object ThisTerm extends TimeFilter("This term", AcademicYear.now().termOrVacationForDate(LocalDate.now).firstDay)
 	case object ThisYear extends TimeFilter("This year", LocalDate.now.withDayOfYear(1))
