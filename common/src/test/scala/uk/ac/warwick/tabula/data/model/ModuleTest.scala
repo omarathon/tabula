@@ -29,7 +29,7 @@ class ModuleTest extends TestBase {
   @Test
   def hasUnreleasedGroupSetsReturnsTrueIfAtLeastOneSetIsUnreleased(){
 
-		val thisAcademicYear = AcademicYear.guessSITSAcademicYearByDate(DateTime.now)
+		val thisAcademicYear = AcademicYear.now()
 
     val fullyReleased = new SmallGroupSet
     fullyReleased.releasedToStudents = true

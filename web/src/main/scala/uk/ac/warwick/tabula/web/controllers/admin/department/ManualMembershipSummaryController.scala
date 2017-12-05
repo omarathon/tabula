@@ -4,7 +4,7 @@ import javax.validation.Valid
 
 import org.springframework.stereotype.Controller
 import org.springframework.web.bind.annotation.{ModelAttribute, PathVariable, RequestMapping}
-import uk.ac.warwick.tabula.commands.{Appliable, CurrentSITSAcademicYear, SelfValidating}
+import uk.ac.warwick.tabula.commands.{Appliable, CurrentAcademicYear, SelfValidating}
 import uk.ac.warwick.tabula.commands.admin.department.ManualMembershipSummaryCommand
 import uk.ac.warwick.tabula.data.model.{Department, Module}
 import uk.ac.warwick.tabula.permissions.{Permission, Permissions}
@@ -23,7 +23,7 @@ class ManualMembershipSummaryController extends AdminController with DepartmentS
 	with AutowiringUserSettingsServiceComponent with AutowiringModuleAndDepartmentServiceComponent
 	with AutowiringMaintenanceModeServiceComponent {
 
-	type ManualMembershipSummaryCommand = Appliable[ManualMembershipInfo] with CurrentSITSAcademicYear
+	type ManualMembershipSummaryCommand = Appliable[ManualMembershipInfo] with CurrentAcademicYear
 
 	validatesSelf[SelfValidating]
 

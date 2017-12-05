@@ -1,6 +1,5 @@
 package uk.ac.warwick.tabula.commands.scheduling
 
-import org.joda.time.DateTime
 import uk.ac.warwick.tabula.AcademicYear
 import uk.ac.warwick.tabula.commands._
 import uk.ac.warwick.tabula.data.Transactions._
@@ -8,14 +7,13 @@ import uk.ac.warwick.tabula.data.model.groups.DepartmentSmallGroupSet
 import uk.ac.warwick.tabula.data.model.notifications.groups.UnlinkedDepartmentSmallGroupSetNotification
 import uk.ac.warwick.tabula.data.model.{Department, Notification}
 import uk.ac.warwick.tabula.permissions.Permissions
-import uk.ac.warwick.tabula.services.{AutowiringSmallGroupServiceComponent, AutowiringTermServiceComponent, SmallGroupServiceComponent, TermServiceComponent}
+import uk.ac.warwick.tabula.services.{AutowiringSmallGroupServiceComponent, SmallGroupServiceComponent}
 import uk.ac.warwick.tabula.system.permissions.{PermissionsChecking, PermissionsCheckingMethods, RequiresPermissionsChecking}
 
 object UnlinkDepartmentSmallGroupSetCommand {
 	def apply() =
 		new UnlinkDepartmentSmallGroupSetCommandInternal
 			with AutowiringSmallGroupServiceComponent
-			with AutowiringTermServiceComponent
 			with ComposableCommand[Map[Department, Seq[DepartmentSmallGroupSet]]]
 			with UnlinkDepartmentSmallGroupSetDescription
 			with UnlinkDepartmentSmallGroupSetPermissions
@@ -25,10 +23,10 @@ object UnlinkDepartmentSmallGroupSetCommand {
 
 class UnlinkDepartmentSmallGroupSetCommandInternal extends CommandInternal[Map[Department, Seq[DepartmentSmallGroupSet]]] {
 
-	self: TermServiceComponent with SmallGroupServiceComponent =>
+	self: SmallGroupServiceComponent =>
 
 	override def applyInternal(): Map[Department, Seq[DepartmentSmallGroupSet]] = {
-		val academicYear = AcademicYear.findAcademicYearContainingDate(DateTime.now)
+		val academicYear = AcademicYear.now()
 		val setMap = transactional() {
 			smallGroupService.findDepartmentSmallGroupSetsLinkedToSITSByDepartment(academicYear)
 		}

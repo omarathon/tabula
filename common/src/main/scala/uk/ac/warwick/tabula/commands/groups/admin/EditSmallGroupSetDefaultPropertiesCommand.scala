@@ -40,6 +40,7 @@ trait EditSmallGroupSetDefaultPropertiesCommandState {
 	var defaultLocation: String = _
 	var defaultLocationId: String = _
 	var resetExistingEvents: Boolean = false
+	var useNamedLocation: Boolean = _
 
 	def defaultWeekRanges: Seq[WeekRange] = Option(defaultWeeks) map { weeks => WeekRange.combine(weeks.asScala.toSeq.map { _.intValue }) } getOrElse Seq()
 	def defaultWeekRanges_=(ranges: Seq[WeekRange]) {
@@ -132,6 +133,8 @@ trait EditSmallGroupSetDefaultPropertiesValidation extends SelfValidating {
 
 		if (defaultEndTime != null && defaultStartTime != null && defaultEndTime.isBefore(defaultStartTime))
 			errors.rejectValue("defaultEndTime", "smallGroupEvent.endTime.beforeStartTime")
+
+		if (defaultLocation.hasText && !defaultLocationId.hasText && !useNamedLocation) errors.rejectValue("useNamedLocation", "smallGroupEvent.defaults.location.named")
 	}
 }
 

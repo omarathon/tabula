@@ -61,7 +61,7 @@ abstract class AbstractFilterExtensionsController extends CourseworkController
 
 	@ModelAttribute("filterExtensionsCommand")
 	def filterCommand(@ModelAttribute("activeAcademicYear") activeAcademicYear: Option[AcademicYear], user: CurrentUser) =
-		FilterExtensionsCommand(activeAcademicYear.getOrElse(AcademicYear.guessSITSAcademicYearByDate(DateTime.now)), user)
+		FilterExtensionsCommand(activeAcademicYear.getOrElse(AcademicYear.now()), user)
 
 	@RequestMapping(params=Array("!ajax"), headers=Array("!X-Requested-With"))
 	def viewForm(@ModelAttribute("filterExtensionsCommand") cmd: FilterExtensionsCommand): Mav = {
@@ -327,7 +327,7 @@ class RedirectExtensionManagementController extends CourseworkController with Ac
 
 	@RequestMapping
 	def redirect(@PathVariable department: Department, @ModelAttribute("activeAcademicYear") activeAcademicYear: Option[AcademicYear]) =
-		Redirect(s"${Routes.admin.extensions(activeAcademicYear.getOrElse(AcademicYear.guessSITSAcademicYearByDate(DateTime.now)))}?departments=${mandatory(department).code}")
+		Redirect(s"${Routes.admin.extensions(activeAcademicYear.getOrElse(AcademicYear.now()))}?departments=${mandatory(department).code}")
 }
 
 @Profile(Array("cm2Enabled")) @Controller

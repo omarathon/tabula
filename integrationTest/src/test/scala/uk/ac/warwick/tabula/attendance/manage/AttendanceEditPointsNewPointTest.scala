@@ -1,7 +1,7 @@
 package uk.ac.warwick.tabula.attendance.manage
 
 import org.scalatest.GivenWhenThen
-import uk.ac.warwick.tabula.FunctionalTestAcademicYear
+import uk.ac.warwick.tabula.AcademicYear
 import uk.ac.warwick.tabula.attendance.AttendanceFixture
 
 class AttendanceEditPointsNewPointTest extends AttendanceFixture with GivenWhenThen {
@@ -55,6 +55,6 @@ class AttendanceEditPointsNewPointTest extends AttendanceFixture with GivenWhenT
 
 		Then("I am redirected to the manage home page")
 		eventually(currentUrl should endWith(s"/attendance/manage/xxx/$thisAcademicYearString"))
-		pageSource should include(s"Manage monitoring points for ${FunctionalTestAcademicYear.current.toString}")
+		pageSource should include(s"Manage monitoring points for ${AcademicYear.now().toString}")
 	}
 }

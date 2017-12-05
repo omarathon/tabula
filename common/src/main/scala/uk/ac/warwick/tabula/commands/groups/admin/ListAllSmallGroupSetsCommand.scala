@@ -1,17 +1,16 @@
 package uk.ac.warwick.tabula.commands.groups.admin
 
-import org.joda.time.DateTime
 import org.springframework.validation.Errors
 import uk.ac.warwick.tabula.AcademicYear
+import uk.ac.warwick.tabula.JavaImports._
 import uk.ac.warwick.tabula.commands._
 import uk.ac.warwick.tabula.commands.groups.admin.ListAllSmallGroupSetsCommand._
+import uk.ac.warwick.tabula.data.model.groups.SmallGroupSet
+import uk.ac.warwick.tabula.groups.web.views.GroupsViewModel
 import uk.ac.warwick.tabula.groups.web.views.GroupsViewModel.{ViewGroup, ViewSet}
 import uk.ac.warwick.tabula.permissions.{Permissions, PermissionsTarget}
 import uk.ac.warwick.tabula.services.{AutowiringSmallGroupServiceComponent, SmallGroupServiceComponent}
 import uk.ac.warwick.tabula.system.permissions.{PermissionsChecking, PermissionsCheckingMethods, RequiresPermissionsChecking}
-import uk.ac.warwick.tabula.JavaImports._
-import uk.ac.warwick.tabula.data.model.groups.SmallGroupSet
-import uk.ac.warwick.tabula.groups.web.views.GroupsViewModel
 
 import scala.collection.JavaConverters._
 
@@ -61,7 +60,7 @@ trait ListAllSmallGroupSetsState {
 trait ListAllSmallGroupSetsRequest extends ListAllSmallGroupSetsState {
 	var num: JInteger = 100
 	var skip: JInteger = 0
-	var academicYear: AcademicYear = AcademicYear.guessSITSAcademicYearByDate(DateTime.now)
+	var academicYear: AcademicYear = AcademicYear.now()
 }
 
 abstract class ListAllSmallGroupSetsCommandInternal extends CommandInternal[Result] {

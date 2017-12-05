@@ -29,7 +29,7 @@ trait EventOccurrenceService {
 }
 
 abstract class TermBasedEventOccurrenceService extends EventOccurrenceService {
-	self: WeekToDateConverterComponent with TermServiceComponent with ProfileServiceComponent =>
+	self: ProfileServiceComponent =>
 
 	def fromTimetableEvent(event: TimetableEvent, dateRange: Interval): Seq[EventOccurrence] = {
 		def buildEventOccurrence(week: WeekRange.Week, start: LocalDateTime, end: LocalDateTime, uid: String): EventOccurrence = {
@@ -51,11 +51,13 @@ abstract class TermBasedEventOccurrenceService extends EventOccurrenceService {
 		}
 
 		def eventDateToLocalDate(week: WeekRange.Week, localTime: LocalTime): LocalDateTime = {
-			weekToDateConverter.toLocalDatetime(week, event.day, localTime, event.year).
-				// Considered just returning None here, but if we ever encounter an event who's week/day/time
-				// specifications can't be converted into calendar dates, we have big problems with
-				// data quality and we need to fix them.
-				getOrElse(throw new RuntimeException("Unable to obtain a date for " + event))
+			val localDateTime: Option[LocalDateTime] =
+				event.year.weeks.get(week).map(_.firstDay.withDayOfWeek(event.day.jodaDayOfWeek).toLocalDateTime(localTime))
+
+			// Considered just returning None here, but if we ever encounter an event who's week/day/time
+			// specifications can't be converted into calendar dates, we have big problems with
+			// data quality and we need to fix them.
+			localDateTime.getOrElse(throw new RuntimeException("Unable to obtain a date for " + event))
 		}
 
 		val weeks = for {
@@ -65,7 +67,11 @@ abstract class TermBasedEventOccurrenceService extends EventOccurrenceService {
 
 		val eventsInIntersectingWeeks =
 			weeks
-				.filter(week => weekToDateConverter.intersectsWeek(dateRange, week, event.year))
+				.filter { week =>
+					event.year.weeks.get(week).exists { week =>
+						dateRange.overlap(week.interval) != null
+					}
+				}
 				.map { week =>
 					buildEventOccurrence(
 						week,
@@ -136,6 +142,4 @@ abstract class TermBasedEventOccurrenceService extends EventOccurrenceService {
 @Service("termBasedEventOccurrenceService")
 class TermBasedEventOccurrenceServiceImpl
 	extends TermBasedEventOccurrenceService
-	with AutowiringTermServiceComponent
 	with AutowiringProfileServiceComponent
-	with TermAwareWeekToDateConverterComponent

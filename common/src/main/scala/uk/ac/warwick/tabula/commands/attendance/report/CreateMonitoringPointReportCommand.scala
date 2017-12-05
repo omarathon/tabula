@@ -7,9 +7,10 @@ import uk.ac.warwick.tabula.data.model.attendance.MonitoringPointReport
 import uk.ac.warwick.tabula.data.model.{Department, StudentMember}
 import uk.ac.warwick.tabula.permissions.Permissions
 import uk.ac.warwick.tabula.services.attendancemonitoring.{AttendanceMonitoringServiceComponent, AutowiringAttendanceMonitoringServiceComponent}
-import uk.ac.warwick.tabula.services.{AutowiringSecurityServiceComponent, SecurityServiceComponent, TermService}
+import uk.ac.warwick.tabula.services.{AutowiringSecurityServiceComponent, SecurityServiceComponent}
 import uk.ac.warwick.tabula.system.permissions.{PermissionsChecking, PermissionsCheckingMethods, RequiresPermissionsChecking}
-import uk.ac.warwick.tabula.{AcademicYear, CurrentUser}
+import uk.ac.warwick.tabula.{AcademicPeriod, AcademicYear, CurrentUser}
+import uk.ac.warwick.util.termdates.AcademicYearPeriod
 
 object CreateMonitoringPointReportCommand {
 	def apply(department: Department, currentUser: CurrentUser) =
@@ -64,7 +65,7 @@ trait CreateMonitoringPointReportCommandValidation extends SelfValidating {
 			errors.rejectValue("missedPoints", "monitoringPointReport.noStudents")
 		}
 
-		if (!TermService.orderedTermNames.contains(period)) {
+		if (!AcademicPeriod.allPeriodTypes.map(_.toString).contains(period)) {
 			errors.rejectValue("period", "monitoringPointReport.invalidPeriod")
 		}
 

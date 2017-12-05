@@ -1,7 +1,7 @@
 package uk.ac.warwick.tabula.profiles.profile
 
 import org.scalatest.GivenWhenThen
-import uk.ac.warwick.tabula.{BrowserTest, FunctionalTestAcademicYear}
+import uk.ac.warwick.tabula.{BrowserTest, AcademicYear}
 import uk.ac.warwick.tabula.web.FeaturesDriver
 
 class AttendanceTest extends BrowserTest with GivenWhenThen with FeaturesDriver with StudentProfileFixture {
@@ -9,7 +9,7 @@ class AttendanceTest extends BrowserTest with GivenWhenThen with FeaturesDriver 
 	"A student" should "be able to view their attendance" in {
 
 		Given("Student1 is a member of a monitoring scheme")
-		createAttendanceMonitoringScheme(TEST_DEPARTMENT_CODE, 1, FunctionalTestAcademicYear.current.startYear.toString, P.Student1.warwickId)
+		createAttendanceMonitoringScheme(TEST_DEPARTMENT_CODE, 1, AcademicYear.now().startYear.toString, P.Student1.warwickId)
 
 		And("Student1 is a member of a small group set")
 		val setId = createSmallGroupSet(
@@ -17,7 +17,7 @@ class AttendanceTest extends BrowserTest with GivenWhenThen with FeaturesDriver 
 			groupSetName = "Module 2 Tutorial",
 			formatName = "tutorial",
 			allocationMethodName = "Manual",
-			academicYear = FunctionalTestAcademicYear.current.startYear.toString
+			academicYear = AcademicYear.now().startYear.toString
 		)
 		addStudentToGroupSet(P.Student1.usercode, setId)
 		addStudentToGroup(P.Student1.usercode, setId, "Group 1")

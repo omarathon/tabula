@@ -8,7 +8,6 @@ import uk.ac.warwick.tabula.AcademicYear
 import uk.ac.warwick.tabula.data.model.Department
 import uk.ac.warwick.tabula.web.controllers.attendance.{AttendanceController, HasMonthNames}
 import uk.ac.warwick.tabula.commands.attendance.GroupsPoints
-import uk.ac.warwick.tabula.services.AutowiringTermServiceComponent
 import uk.ac.warwick.spring.Wire
 import uk.ac.warwick.tabula.services.attendancemonitoring.AttendanceMonitoringService
 import uk.ac.warwick.tabula.web.Mav
@@ -16,7 +15,7 @@ import uk.ac.warwick.tabula.web.Mav
 
 @Controller
 @RequestMapping(Array("/attendance/manage/{department}/{academicYear}/addpoints/template/{templateScheme}"))
-class ViewTemplateSchemePointsController extends AttendanceController with HasMonthNames with GroupsPoints with AutowiringTermServiceComponent {
+class ViewTemplateSchemePointsController extends AttendanceController with HasMonthNames with GroupsPoints {
 
 	var attendanceService: AttendanceMonitoringService = Wire.auto[AttendanceMonitoringService]
 

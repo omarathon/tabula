@@ -2,11 +2,9 @@ package uk.ac.warwick.tabula.web.controllers.groups.admin
 
 import javax.validation.Valid
 
-import org.joda.time.DateTime
 import org.springframework.stereotype.Controller
 import org.springframework.validation.Errors
 import org.springframework.web.bind.annotation.{ModelAttribute, PathVariable, RequestMapping}
-import uk.ac.warwick.tabula.AcademicYear
 import uk.ac.warwick.tabula.commands.groups.admin.{ModifySmallGroupEventCommand, ModifySmallGroupEventCommandState, UpdateSmallGroupEventFromExternalSystemCommand}
 import uk.ac.warwick.tabula.commands.{Appliable, SelfValidating}
 import uk.ac.warwick.tabula.data.model.Module
@@ -14,41 +12,34 @@ import uk.ac.warwick.tabula.data.model.groups._
 import uk.ac.warwick.tabula.groups.web.Routes
 import uk.ac.warwick.tabula.helpers.SystemClockComponent
 import uk.ac.warwick.tabula.services.timetables.{AutowiringScientiaConfigurationComponent, ScientiaHttpTimetableFetchingServiceComponent}
-import uk.ac.warwick.tabula.services.{AutowiringTermServiceComponent, TermService, TermServiceComponent}
 import uk.ac.warwick.tabula.web.Mav
 import uk.ac.warwick.tabula.web.controllers.groups.GroupsController
-import uk.ac.warwick.util.termdates.Term
+import uk.ac.warwick.tabula.{AcademicPeriod, AcademicYear}
 
 trait SmallGroupEventsController extends GroupsController {
-	self: TermServiceComponent =>
-
 	validatesSelf[SelfValidating]
 
 	@ModelAttribute("allDays") def allDays: Seq[DayOfWeek with Product] = DayOfWeek.members
 
-	case class NamedTerm(name: String, term: Term, weekRange: WeekRange)
+	case class NamedTerm(name: String, term: AcademicPeriod, weekRange: WeekRange)
 
 	@ModelAttribute("allTerms") def allTerms(@PathVariable("smallGroupSet") set: SmallGroupSet): Seq[NamedTerm] = {
-		val year = Option(set.academicYear).getOrElse(AcademicYear.guessSITSAcademicYearByDate(DateTime.now))
-		val weeks = termService.getAcademicWeeksForYear(year.dateInTermOne).toMap
-
-		val terms =
-			weeks
-				.map { case (weekNumber, dates) =>
-					(weekNumber, termService.getTermFromAcademicWeekIncludingVacations(weekNumber, year))
-				}
-				.groupBy { _._2 }
-				.map { case (term, weekNumbersAndTerms) =>
-					(term, WeekRange(weekNumbersAndTerms.keys.min, weekNumbersAndTerms.keys.max))
-				}
-				.toSeq
-				.sortBy { case (_, weekRange) => weekRange.minWeek }
-
-		TermService.orderedTermNames.zip(terms).map { case (name, (term, weekRange)) => NamedTerm(name, term, weekRange) }
+		val year = Option(set.academicYear).getOrElse(AcademicYear.now())
+		year.weeks
+			.map { case (weekNumber, week) =>
+				(weekNumber, week.period)
+			}
+			.groupBy { _._2 }
+			.map { case (term, weekNumbersAndTerms) =>
+				(term, WeekRange(weekNumbersAndTerms.keys.min, weekNumbersAndTerms.keys.max))
+			}
+			.toSeq
+			.sortBy { case (_, weekRange) => weekRange.minWeek }
+			.map { case (term, weekRange) => NamedTerm(term.periodType.toString, term, weekRange) }
 	}
 }
 
-abstract class AbstractCreateSmallGroupEventController extends SmallGroupEventsController with AutowiringTermServiceComponent {
+abstract class AbstractCreateSmallGroupEventController extends SmallGroupEventsController {
 
 	type CreateSmallGroupEventCommand = Appliable[SmallGroupEvent] with ModifySmallGroupEventCommandState
 
@@ -101,7 +92,7 @@ class EditSmallGroupSetCreateEventController extends AbstractCreateSmallGroupEve
 
 }
 
-abstract class AbstractEditSmallGroupEventController extends SmallGroupEventsController with AutowiringTermServiceComponent
+abstract class AbstractEditSmallGroupEventController extends SmallGroupEventsController
 	with AutowiringScientiaConfigurationComponent
 	with ScientiaHttpTimetableFetchingServiceComponent with SystemClockComponent
 	with SyllabusPlusEventCountForModule {
@@ -128,7 +119,7 @@ abstract class AbstractEditSmallGroupEventController extends SmallGroupEventsCon
 		if (errors.hasErrors) form(cmd)
 		else {
 			cmd.apply()
-			RedirectForce(route)
+			Redirect(route)
 		}
 	}
 

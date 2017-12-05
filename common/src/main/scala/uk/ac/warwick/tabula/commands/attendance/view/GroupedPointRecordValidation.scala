@@ -2,13 +2,13 @@ package uk.ac.warwick.tabula.commands.attendance.view
 
 import org.joda.time.DateTime
 import org.springframework.validation.Errors
-import uk.ac.warwick.tabula.CurrentUser
 import uk.ac.warwick.tabula.commands.MemberOrUser
 import uk.ac.warwick.tabula.data.model.StudentMember
 import uk.ac.warwick.tabula.data.model.attendance.{AttendanceMonitoringPoint, AttendanceState}
 import uk.ac.warwick.tabula.permissions.Permissions
+import uk.ac.warwick.tabula.services.SecurityServiceComponent
 import uk.ac.warwick.tabula.services.attendancemonitoring.AttendanceMonitoringServiceComponent
-import uk.ac.warwick.tabula.services.{SecurityServiceComponent, TermServiceComponent}
+import uk.ac.warwick.tabula.{AcademicYear, CurrentUser}
 
 trait FiltersCheckpointMapChanges {
 
@@ -30,7 +30,7 @@ trait FiltersCheckpointMapChanges {
 
 trait GroupedPointRecordValidation extends FiltersCheckpointMapChanges {
 
-	self: AttendanceMonitoringServiceComponent with TermServiceComponent with SecurityServiceComponent =>
+	self: AttendanceMonitoringServiceComponent with SecurityServiceComponent =>
 
 	def validateGroupedPoint(
 		errors: Errors,
@@ -50,8 +50,8 @@ trait GroupedPointRecordValidation extends FiltersCheckpointMapChanges {
 				} else {
 					// Check not reported
 					if (!attendanceMonitoringService.findNonReportedTerms(Seq(student), point.scheme.academicYear).contains(
-						termService.getTermFromDateIncludingVacations(templatePoint.startDate.toDateTimeAtStartOfDay).getTermTypeAsString)
-					){
+						AcademicYear.forDate(templatePoint.startDate).termOrVacationForDate(templatePoint.startDate).periodType.toString)
+					) {
 						errors.rejectValue("", "monitoringCheckpoint.student.alreadyReportedThisTerm")
 					}
 

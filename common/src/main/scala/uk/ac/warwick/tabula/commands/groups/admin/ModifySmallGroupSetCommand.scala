@@ -2,19 +2,20 @@ package uk.ac.warwick.tabula.commands.groups.admin
 
 import org.springframework.validation.{BindingResult, Errors}
 import uk.ac.warwick.tabula.AcademicYear
+import uk.ac.warwick.tabula.JavaImports._
 import uk.ac.warwick.tabula.commands._
+import uk.ac.warwick.tabula.data.Transactions._
 import uk.ac.warwick.tabula.data.model._
+import uk.ac.warwick.tabula.data.model.attendance.AttendanceState
 import uk.ac.warwick.tabula.data.model.groups._
+import uk.ac.warwick.tabula.helpers.StringUtils._
 import uk.ac.warwick.tabula.permissions.Permissions
 import uk.ac.warwick.tabula.services._
-import uk.ac.warwick.tabula.data.Transactions._
 import uk.ac.warwick.tabula.system.BindListener
 import uk.ac.warwick.tabula.system.permissions.{PermissionsChecking, PermissionsCheckingMethods, RequiresPermissionsChecking}
-import uk.ac.warwick.tabula.JavaImports._
-import uk.ac.warwick.tabula.helpers.StringUtils._
-import uk.ac.warwick.util.termdates.Term.TermType
+import uk.ac.warwick.util.termdates.AcademicYearPeriod.PeriodType
+
 import scala.collection.JavaConverters._
-import uk.ac.warwick.tabula.data.model.attendance.AttendanceState
 
 object ModifySmallGroupSetCommand {
 	type Command = Appliable[SmallGroupSet] with SelfValidating with ModifySmallGroupSetCommandState
@@ -31,7 +32,6 @@ object ModifySmallGroupSetCommand {
 			with AutowiringSmallGroupServiceComponent
 			with AutowiringAssessmentMembershipServiceComponent
 			with GeneratesDefaultWeekRangesWithTermService
-			with AutowiringTermServiceComponent
 
 	def edit(module: Module, set: SmallGroupSet): Command =
 		new EditSmallGroupSetCommandInternal(module, set)
@@ -43,7 +43,7 @@ object ModifySmallGroupSetCommand {
 			with AutowiringSmallGroupServiceComponent
 }
 
-trait ModifySmallGroupSetCommandState extends CurrentSITSAcademicYear {
+trait ModifySmallGroupSetCommandState extends CurrentAcademicYear {
 	def module: Module
 	def existingSet: Option[SmallGroupSet]
 
@@ -124,24 +124,22 @@ trait GeneratesDefaultWeekRanges {
 }
 
 trait GeneratesDefaultWeekRangesWithTermService extends GeneratesDefaultWeekRanges {
-	self: TermServiceComponent =>
-
 	def defaultWeekRanges(year: AcademicYear): Seq[WeekRange] = {
-		val weeks = termService.getAcademicWeeksForYear(year.dateInTermOne).toMap
+		val weeks = year.weeks
 
 		val startingWeekNumbers =
 			weeks
-				.map { case (weekNumber, dates) =>
-					(weekNumber, termService.getTermFromAcademicWeekIncludingVacations(weekNumber, year))
+				.map { case (weekNumber, week) =>
+					(weekNumber, week.period)
 				}
-				.filterNot { case (_, term) => term.getTermType == null } // Remove vacations - can't do this above as mins would be wrong
-				.groupBy { _._2.getTermType() }
+				.filterNot { case (_, period) => period.isVacation } // Remove vacations - can't do this above as mins would be wrong
+				.groupBy { _._2.periodType }
 				.map { case (termType, weekNumbersAndTerms) => (termType, weekNumbersAndTerms.keys.min) } // Map to minimum week number
 
 		Seq(
-			WeekRange(startingWeekNumbers(TermType.autumn), startingWeekNumbers(TermType.autumn) + 9), // Autumn term
-			WeekRange(startingWeekNumbers(TermType.spring), startingWeekNumbers(TermType.spring) + 9), // Spring term
-			WeekRange(startingWeekNumbers(TermType.summer), startingWeekNumbers(TermType.summer) + 4) // Summer term - only first 5 weeks
+			WeekRange(startingWeekNumbers(PeriodType.autumnTerm), startingWeekNumbers(PeriodType.autumnTerm) + 9), // Autumn term
+			WeekRange(startingWeekNumbers(PeriodType.springTerm), startingWeekNumbers(PeriodType.springTerm) + 9), // Spring term
+			WeekRange(startingWeekNumbers(PeriodType.summerTerm), startingWeekNumbers(PeriodType.summerTerm) + 4) // Summer term - only first 5 weeks
 		)
 	}
 }
@@ -320,11 +318,13 @@ trait ModifySmallGroupSetsScheduledNotifications
 	self: SmallGroupServiceComponent with ModifySmallGroupSetCommandState =>
 
 	override def transformResult(set: SmallGroupSet): Seq[SmallGroupEventOccurrence] =
-		// get all the occurrences (even the ones in invalid weeks) so they can be cleared
-		set.groups.asScala.flatMap(_.events.flatMap(smallGroupService.getOrCreateSmallGroupEventOccurrences))
+		if (allocationMethod == SmallGroupAllocationMethod.Linked)
+			// get all the occurrences (even the ones in invalid weeks) so they can be cleared
+			set.groups.asScala.flatMap(_.events.flatMap(smallGroupService.getOrCreateSmallGroupEventOccurrences))
+		else Nil // The set commands spawned will handle notification creation for events
 
 	override def scheduledNotifications(occurrence: SmallGroupEventOccurrence): Seq[ScheduledNotification[_]] = {
 		if (allocationMethod == SmallGroupAllocationMethod.Linked) generateNotifications(occurrence)
-		else Nil // The set commands spawned will hande notification creation for events
+		else Nil // The set commands spawned will handle notification creation for events
 	}
 }

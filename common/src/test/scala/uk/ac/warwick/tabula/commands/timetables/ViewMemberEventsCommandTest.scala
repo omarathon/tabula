@@ -7,7 +7,6 @@ import uk.ac.warwick.tabula.data.model.groups.DayOfWeek
 import uk.ac.warwick.tabula.permissions.Permissions
 import uk.ac.warwick.tabula.services.timetables.TimetableFetchingService.{EventList, EventOccurrenceList}
 import uk.ac.warwick.tabula.services.timetables._
-import uk.ac.warwick.tabula.services.{TermService, TermServiceComponent}
 import uk.ac.warwick.tabula.system.permissions.PermissionsChecking
 import uk.ac.warwick.tabula.timetables.{EventOccurrence, TimetableEvent, TimetableEventType}
 import uk.ac.warwick.tabula.{AcademicYear, CurrentUser, Mockito, TestBase}
@@ -19,11 +18,9 @@ class ViewMemberEventsCommandTest extends TestBase with Mockito {
 	private trait CommandTestSupport
 		extends StudentTimetableEventSourceComponent
 			with ScheduledMeetingEventSourceComponent
-			with EventOccurrenceServiceComponent
-			with TermServiceComponent {
+			with EventOccurrenceServiceComponent {
 		val studentTimetableEventSource: StudentTimetableEventSource = mock[StudentTimetableEventSource]
 		val scheduledMeetingEventSource: ScheduledMeetingEventSource = mock[ScheduledMeetingEventSource]
-		val termService: TermService = mock[TermService]
 		val eventOccurrenceService: EventOccurrenceService = mock[EventOccurrenceService]
 	}
 

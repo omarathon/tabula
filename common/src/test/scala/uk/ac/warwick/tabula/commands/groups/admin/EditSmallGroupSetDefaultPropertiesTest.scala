@@ -163,6 +163,7 @@ class EditSmallGroupSetDefaultPropertiesTest extends TestBase with Mockito {
 
 	@Test def validationInvalidLocation { new ValidationFixture {
 		command.defaultLocation = "Location with | a pipe"
+		command.useNamedLocation = true
 
 		val errors = new BindException(command, "command")
 		command.validate(errors)
@@ -171,6 +172,18 @@ class EditSmallGroupSetDefaultPropertiesTest extends TestBase with Mockito {
 		errors.getErrorCount should be (1)
 		errors.getFieldError.getField should be ("defaultLocation")
 		errors.getFieldError.getCodes should contain ("smallGroupEvent.location.invalidChar")
+	}}
+
+	@Test def validationMissingLocationId { new ValidationFixture {
+		command.defaultLocation = "Some location"
+
+		val errors = new BindException(command, "command")
+		command.validate(errors)
+
+		errors.hasErrors should be (true)
+		errors.getErrorCount should be (1)
+		errors.getFieldError.getField should be ("useNamedLocation")
+		errors.getFieldError.getCodes should contain ("smallGroupEvent.defaults.location.named")
 	}}
 
 	@Test def validationEndTimeBeforeStart { new ValidationFixture {

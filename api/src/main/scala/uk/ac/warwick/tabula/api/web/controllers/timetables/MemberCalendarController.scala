@@ -5,7 +5,7 @@ import javax.validation.Valid
 import net.fortuna.ical4j.model.Calendar
 import net.fortuna.ical4j.model.component.VEvent
 import net.fortuna.ical4j.model.property._
-import org.joda.time.DateTime
+import org.joda.time.{DateTime, LocalDate}
 import org.springframework.stereotype.Controller
 import org.springframework.validation.Errors
 import org.springframework.web.bind.annotation.{ModelAttribute, PathVariable, RequestMapping}
@@ -37,8 +37,7 @@ class MemberCalendarController extends ApiController
 	with PathVariableMemberCalendarApi
 	with GeneratesTimetableIcalFeed
 	with AutowiringUserLookupComponent
-	with AutowiringTermBasedEventOccurrenceServiceComponent
-	with AutowiringTermServiceComponent {
+	with AutowiringTermBasedEventOccurrenceServiceComponent {
 	validatesSelf[SelfValidating]
 }
 
@@ -50,7 +49,6 @@ class MemberTimetableHashCalendarController extends ApiController
 	with GeneratesTimetableIcalFeed
 	with AutowiringUserLookupComponent
 	with AutowiringTermBasedEventOccurrenceServiceComponent
-	with AutowiringTermServiceComponent
 	with AutowiringProfileServiceComponent {
 	validatesSelf[SelfValidating]
 }
@@ -115,33 +113,32 @@ trait GetMemberCalendarIcalApi {
 	self: ApiController
 		with MemberCalendarApi
 		with UserLookupComponent
-		with GeneratesTimetableIcalFeed
-		with TermServiceComponent =>
+		with GeneratesTimetableIcalFeed =>
 
 	@RequestMapping(method = Array(GET), produces = Array("text/calendar"))
 	def icalMemberTimetable(@Valid @ModelAttribute("getTimetableCommand") command: TimetableCommand): Mav = {
 		val member = command.member
 
-		val year = AcademicYear.guessSITSAcademicYearByDate(DateTime.now)
+		val year = AcademicYear.now()
 
 		// Start from either 1 week ago, or the start of the current academic year, whichever is earlier
 		val start = {
-			val startOfYear = termService.getTermFromAcademicWeek(1, year).getStartDate
-			val oneWeekAgo = DateTime.now.minusWeeks(1)
+			val startOfYear = year.firstDay
+			val oneWeekAgo = LocalDate.now.minusWeeks(1)
 
 			if (startOfYear.isBefore(oneWeekAgo)) startOfYear else oneWeekAgo
 		}
 
 		// End either at the end of the current academic year, or in 15 weeks time, whichever is later
 		val end = {
-			val endOfYear = termService.getTermFromAcademicWeek(1, year + 1).getStartDate
-			val fifteenWeeksTime = DateTime.now.plusWeeks(15)
+			val endOfYear = (year + 1).lastDay
+			val fifteenWeeksTime = LocalDate.now.plusWeeks(15)
 
 			if (endOfYear.isAfter(fifteenWeeksTime)) endOfYear else fifteenWeeksTime
 		}
 
-		command.from = start.getMillis
-		command.to = end.getMillis
+		command.from = start.toDateTimeAtStartOfDay.getMillis
+		command.to = end.toDateTimeAtStartOfDay.getMillis
 
 		command.apply() match {
 			case Success(result) =>

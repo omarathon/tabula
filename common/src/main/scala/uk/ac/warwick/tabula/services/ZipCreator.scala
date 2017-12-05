@@ -173,7 +173,7 @@ trait ZipCreator extends Logging with TaskBenchmarking {
 			fn(zip)
 		} catch {
 			case e: Exception =>
-				logger.error("Exception creating zip file, deleting %s" format file)
+				logger.error(s"Exception creating zip file, deleting $file", e)
 				file.delete
 				thrownException = e
 				throw e

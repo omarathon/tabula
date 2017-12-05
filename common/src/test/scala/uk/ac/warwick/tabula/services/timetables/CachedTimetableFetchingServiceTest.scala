@@ -101,7 +101,7 @@ class CachedTimetableFetchingServiceTest  extends TestBase with Mockito{
 				Some("Comments!"),
 				Seq(tutor1, tutor2),
 				Seq(student),
-				AcademicYear.guessSITSAcademicYearByDate(DateTime.now),
+				AcademicYear.now(),
 				relatedUrl = None,
 				attendance = Map()
 			),
@@ -120,7 +120,7 @@ class CachedTimetableFetchingServiceTest  extends TestBase with Mockito{
 				None,
 				Nil,
 				Nil,
-				AcademicYear.guessSITSAcademicYearByDate(DateTime.now),
+				AcademicYear.now(),
 				relatedUrl = None,
 				attendance = Map()
 			)

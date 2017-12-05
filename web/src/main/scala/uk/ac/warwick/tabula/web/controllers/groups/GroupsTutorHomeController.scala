@@ -1,6 +1,5 @@
 package uk.ac.warwick.tabula.web.controllers.groups
 
-import org.joda.time.DateTime
 import org.springframework.stereotype.Controller
 import org.springframework.web.bind.annotation.{ModelAttribute, PathVariable, RequestMapping, RequestParam}
 import uk.ac.warwick.tabula.AcademicYear
@@ -21,7 +20,7 @@ abstract class AbstractGroupsTutorHomeController extends GroupsController
 	with AcademicYearScopedController with AutowiringMaintenanceModeServiceComponent with AutowiringUserSettingsServiceComponent {
 
 	@ModelAttribute("command") def command(@ModelAttribute("activeAcademicYear") academicYear: Option[AcademicYear]) =
-		TutorHomeCommand(user, academicYear.getOrElse(AcademicYear.guessSITSAcademicYearByDate(DateTime.now)))
+		TutorHomeCommand(user, academicYear.getOrElse(AcademicYear.now()))
 
 	@RequestMapping
 	def listModules(
@@ -30,7 +29,7 @@ abstract class AbstractGroupsTutorHomeController extends GroupsController
 		@RequestParam(value="updatedOccurrence", required=false) occurrence: SmallGroupEventOccurrence
 	): Mav = {
 		val mapping = command.apply()
-		val academicYear = activeAcademicYear.getOrElse(AcademicYear.guessSITSAcademicYearByDate(DateTime.now))
+		val academicYear = activeAcademicYear.getOrElse(AcademicYear.now())
 
 		val data = GroupsViewModel.ViewModules.generate(mapping, GroupsViewModel.Tutor)
 

@@ -34,8 +34,6 @@ object RecordAttendanceCommand {
 			with AutowiringSmallGroupServiceComponent
 			with AutowiringUserLookupComponent
 			with AutowiringProfileServiceComponent
-			with TermAwareWeekToDateConverterComponent
-			with AutowiringTermServiceComponent
 			with AutowiringAttendanceMonitoringEventAttendanceServiceComponent
 			with RecordAttendanceNotificationCompletion
 			with AutowiringFeaturesComponent {
@@ -251,16 +249,14 @@ trait RecordAttendanceState {
 }
 
 trait SmallGroupEventInFutureCheck {
-	self: RecordAttendanceState with WeekToDateConverterComponent =>
+	self: RecordAttendanceState =>
 
 	// TAB-3791
 	private val StartTimeOffset = 15
 
 	lazy val isFutureEvent: Boolean = {
 		// Get the actual end date of the event in this week
-		weekToDateConverter.toLocalDatetime(week, event.day, event.startTime, event.group.groupSet.academicYear).exists(eventDateTime =>
-			eventDateTime.minusMinutes(StartTimeOffset).isAfter(LocalDateTime.now())
-		)
+		event.endDateTimeForWeek(week).exists(_.minusMinutes(StartTimeOffset).isAfter(LocalDateTime.now))
 	}
 }
 

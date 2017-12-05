@@ -433,7 +433,6 @@
 				<entry key="durationPercentage"><bean class="uk.ac.warwick.tabula.helpers.DurationPercentageTag" /></entry>
 				<entry key="weekRangesFormatter"><bean class="uk.ac.warwick.tabula.helpers.WeekRangesFormatterTag" /></entry>
 				<entry key="weekRangesDumper"><bean class="uk.ac.warwick.tabula.helpers.WeekRangesDumperTag" /></entry>
-				<entry key="weekRangeSelectFormatter"><bean class="uk.ac.warwick.tabula.helpers.WeekRangeSelectFormatterTag" /></entry>
 				<entry key="mapGet"><bean class="uk.ac.warwick.tabula.helpers.FreemarkerMapHelper" /></entry>
 				<entry key="wholeWeekFormatter"><bean class="uk.ac.warwick.tabula.helpers.WholeWeekFormatterTag" /></entry>
 				<entry key="dateToWeekNumber"><bean class="uk.ac.warwick.tabula.helpers.DateToWeekNumberTag" /></entry>

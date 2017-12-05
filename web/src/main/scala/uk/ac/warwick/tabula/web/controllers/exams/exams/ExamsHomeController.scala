@@ -1,6 +1,5 @@
 package uk.ac.warwick.tabula.web.controllers.exams.exams
 
-import org.joda.time.DateTime
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.stereotype.Controller
 import org.springframework.web.bind.annotation.{ModelAttribute, PathVariable, RequestMapping, RequestParam}
@@ -9,9 +8,9 @@ import uk.ac.warwick.tabula.AcademicYear
 import uk.ac.warwick.tabula.commands.TaskBenchmarking
 import uk.ac.warwick.tabula.permissions.Permissions
 import uk.ac.warwick.tabula.services._
-import uk.ac.warwick.tabula.web.{Mav, Routes}
 import uk.ac.warwick.tabula.web.controllers.AcademicYearScopedController
 import uk.ac.warwick.tabula.web.controllers.exams.ExamsController
+import uk.ac.warwick.tabula.web.{Mav, Routes}
 
 abstract class AbstractExamsHomeController extends ExamsController with TaskBenchmarking
 	with AcademicYearScopedController with AutowiringUserSettingsServiceComponent with AutowiringMaintenanceModeServiceComponent {
@@ -23,7 +22,7 @@ abstract class AbstractExamsHomeController extends ExamsController with TaskBenc
 
 	@RequestMapping
 	def examsHome(@RequestParam(required = false) marked: Integer, @ModelAttribute("activeAcademicYear") activeAcademicYear: Option[AcademicYear]): Mav = {
-		val academicYear = activeAcademicYear.getOrElse(AcademicYear.guessSITSAcademicYearByDate(DateTime.now))
+		val academicYear = activeAcademicYear.getOrElse(AcademicYear.now())
 
 		val ownedDepartments = benchmarkTask("Get owned departments") {
 			moduleAndDepartmentService.departmentsWithPermission(user, Permissions.Module.ManageAssignments)

@@ -2,7 +2,6 @@ package uk.ac.warwick.tabula.commands.profiles
 
 import org.hibernate.criterion.Order
 import org.hibernate.criterion.Order._
-import org.joda.time.DateTime
 import org.springframework.validation.BindingResult
 import uk.ac.warwick.tabula.AcademicYear
 import uk.ac.warwick.tabula.JavaImports._
@@ -68,7 +67,7 @@ abstract class ViewRelatedStudentsCommandInternal(val currentMember: Member, val
 	self: ProfileServiceComponent with MeetingRecordServiceComponent with RelationshipServiceComponent =>
 
 	def applyInternal(): Result =  {
-		val year = AcademicYear.guessSITSAcademicYearByDate(DateTime.now)
+		val year = AcademicYear.now()
 		val studentCourseDetails = profileService.getSCDsByAgentRelationshipAndRestrictions(relationshipType, currentMember, buildRestrictions(year))
 
 		val lastMeetingWithTotalPendingApprovalsMap: Map[String, (Option[MeetingRecord], Int)] = studentCourseDetails.map(scd => {

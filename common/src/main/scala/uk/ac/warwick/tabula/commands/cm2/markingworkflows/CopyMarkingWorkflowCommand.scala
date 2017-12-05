@@ -1,11 +1,10 @@
 package uk.ac.warwick.tabula.commands.cm2.markingworkflows
 
-import org.joda.time.DateTime
 import org.springframework.validation.Errors
 import uk.ac.warwick.tabula.AcademicYear
 import uk.ac.warwick.tabula.commands.{Describable, Description, _}
+import uk.ac.warwick.tabula.data.HibernateHelpers
 import uk.ac.warwick.tabula.data.model.Department
-import uk.ac.warwick.tabula.data.model.markingworkflow.MarkingWorkflowType.{DoubleBlindMarking, DoubleMarking, ModeratedMarking, SingleMarking}
 import uk.ac.warwick.tabula.data.model.markingworkflow._
 import uk.ac.warwick.tabula.services.{AutowiringCM2MarkingWorkflowServiceComponent, CM2MarkingWorkflowServiceComponent}
 
@@ -35,7 +34,8 @@ class CopyMarkingWorkflowCommandInternal(val department: Department, val marking
 			case _ => throw new IllegalArgumentException(s"workflow ${markingWorkflow.id} has no markers")
 		}
 
-		val newWorkflow = markingWorkflow match {
+		val unproxiedWorkflow = HibernateHelpers.initialiseAndUnproxy(markingWorkflow)
+		val newWorkflow = unproxiedWorkflow match {
 			case w: DoubleWorkflow => DoubleWorkflow(w.name, department, markersAUsers, markersBUsers)
 			case w: ModeratedWorkflow => ModeratedWorkflow(w.name, department, w.moderationSampler, markersAUsers, markersBUsers)
 			case w: SingleMarkerWorkflow => SingleMarkerWorkflow(w.name, department, markersAUsers)
@@ -78,7 +78,7 @@ trait CopyMarkingWorkflowDescription extends Describable[CM2MarkingWorkflow] {
 trait CopyMarkingWorkflowState {
 	def department: Department
 	def markingWorkflow: CM2MarkingWorkflow
-	val currentAcademicYear: AcademicYear = AcademicYear.guessSITSAcademicYearByDate(DateTime.now)
+	val currentAcademicYear: AcademicYear = AcademicYear.now()
 }
 
 trait CopyMarkingWorkflowComponent {

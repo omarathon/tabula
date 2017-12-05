@@ -50,9 +50,11 @@ class DepartmentUserSearchController extends ApiController
 		@RequestParam(required = false) level: String
 	): Mav = {
 		getMav(
-			Option(level)
-				.map(l => profileService.findUndergraduatesUsercodesInHomeDepartmentByLevel(department, l))
-				.getOrElse(profileService.findUndergraduatesUsercodesInHomeDepartment(department))
+			Option(level) match {
+				case Some("f") | Some("F") => profileService.findFinalistUndergraduateUsercodesInHomeDepartment(department)
+				case Some(l) => profileService.findUndergraduatesUsercodesInHomeDepartmentByLevel(department, l)
+				case None => profileService.findUndergraduatesUsercodesInHomeDepartment(department)
+			}
 		)
 	}
 

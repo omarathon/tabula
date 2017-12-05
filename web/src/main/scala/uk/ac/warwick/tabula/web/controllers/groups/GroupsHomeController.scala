@@ -1,6 +1,5 @@
 package uk.ac.warwick.tabula.web.controllers.groups
 
-import org.joda.time.DateTime
 import org.springframework.stereotype.Controller
 import org.springframework.web.bind.annotation.{ModelAttribute, PathVariable, RequestMapping}
 import uk.ac.warwick.tabula.data.model.{Department, Module}
@@ -39,7 +38,7 @@ abstract class AbstractGroupsHomeController extends GroupsController with Groups
 
 	@RequestMapping
 	def home(@ModelAttribute("activeAcademicYear") activeAcademicYear: Option[AcademicYear]): Mav = {
-		val academicYear = activeAcademicYear.getOrElse(AcademicYear.guessSITSAcademicYearByDate(DateTime.now))
+		val academicYear = activeAcademicYear.getOrElse(AcademicYear.now())
 
 		if (user.loggedIn) {
 			val departmentsAndRoutes = departmentsAndModulesForPermission(user, Permissions.Module.ManageSmallGroups)

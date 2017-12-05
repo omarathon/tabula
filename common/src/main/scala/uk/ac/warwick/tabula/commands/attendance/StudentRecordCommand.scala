@@ -8,7 +8,6 @@ import uk.ac.warwick.tabula.data.model.attendance.{AttendanceMonitoringCheckpoin
 import uk.ac.warwick.tabula.data.model.{Department, StudentMember}
 import uk.ac.warwick.tabula.permissions.Permissions
 import uk.ac.warwick.tabula.services.attendancemonitoring.{AttendanceMonitoringServiceComponent, AutowiringAttendanceMonitoringServiceComponent}
-import uk.ac.warwick.tabula.services.{AutowiringTermServiceComponent, TermServiceComponent}
 import uk.ac.warwick.tabula.system.permissions.{PermissionsChecking, PermissionsCheckingMethods, RequiresPermissionsChecking}
 import uk.ac.warwick.tabula.{AcademicYear, CurrentUser}
 
@@ -18,7 +17,6 @@ trait StudentRecordCommandHelper
 	extends ComposableCommand[(Seq[AttendanceMonitoringCheckpoint], Seq[AttendanceMonitoringCheckpointTotal])]
 	with PopulatesStudentRecordCommand
 	with AutowiringAttendanceMonitoringServiceComponent
-	with AutowiringTermServiceComponent
 	with StudentRecordValidation
 	with StudentRecordPermissions
 	with StudentRecordCommandRequest
@@ -62,7 +60,7 @@ trait PopulatesStudentRecordCommand extends PopulateOnForm {
 trait StudentRecordValidation extends SelfValidating with FiltersCheckpointMapChanges {
 
 	self: StudentRecordCommandRequest with StudentRecordCommandState
-		with AttendanceMonitoringServiceComponent with TermServiceComponent =>
+		with AttendanceMonitoringServiceComponent =>
 
 	override def validate(errors: Errors): Unit = {
 		val nonReportedTerms = attendanceMonitoringService.findNonReportedTerms(Seq(student), academicYear)
@@ -78,7 +76,7 @@ trait StudentRecordValidation extends SelfValidating with FiltersCheckpointMapCh
 				errors.rejectValue("","Submitted attendance for a point which is student is not attending")
 			}
 
-			if (!nonReportedTerms.contains(termService.getTermFromDateIncludingVacations(point.startDate.toDateTimeAtStartOfDay).getTermTypeAsString)) {
+			if (!nonReportedTerms.contains(AcademicYear.forDate(point.startDate).termOrVacationForDate(point.startDate).periodType.toString)) {
 				errors.rejectValue("", "attendanceMonitoringCheckpoint.alreadyReportedThisTerm")
 			}
 

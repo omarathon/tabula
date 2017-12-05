@@ -52,7 +52,7 @@ trait ListSmallGroupSetsForModuleApi {
 
 	@ModelAttribute("listCommand")
 	def command(@PathVariable module: Module, @RequestParam(required = false) academicYear: AcademicYear, user: CurrentUser): AdminSmallGroupsHomeCommand = {
-		val year = Option(academicYear).getOrElse(AcademicYear.guessSITSAcademicYearByDate(DateTime.now))
+		val year = Option(academicYear).getOrElse(AcademicYear.now())
 		AdminSmallGroupsHomeCommand(mandatory(module).adminDepartment, year, user, calculateProgress = false)
 	}
 

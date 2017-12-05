@@ -101,7 +101,7 @@ trait ApproveMeetingRecordDescription extends Describable[MeetingRecord] {
 trait ApproveMeetingRecordNotification extends Notifies[MeetingRecord, MeetingRecord] {
 	self: ApproveMeetingRecordState =>
 
-	def emit(meeting: MeetingRecord): Seq[Notification[MeetingRecordApproval, Unit] with MeetingRecordNotificationTrait with SingleItemNotification[MeetingRecordApproval] with AutowiringTermServiceComponent] = {
+	def emit(meeting: MeetingRecord): Seq[Notification[MeetingRecordApproval, Unit] with MeetingRecordNotificationTrait with SingleItemNotification[MeetingRecordApproval]] = {
 		val agent = user.apparentUser
 
 		if (approved)

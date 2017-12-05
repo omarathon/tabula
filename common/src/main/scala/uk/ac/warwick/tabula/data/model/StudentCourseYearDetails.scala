@@ -10,11 +10,10 @@ import uk.ac.warwick.tabula.JavaImports._
 import uk.ac.warwick.tabula.commands.exams.grids.ExamGridEntityYear
 import uk.ac.warwick.tabula.data.PostLoadBehaviour
 import uk.ac.warwick.tabula.permissions.PermissionsTarget
-import uk.ac.warwick.tabula.services.{ModuleAndDepartmentService, TermService, UserLookupService}
+import uk.ac.warwick.tabula.services.{ModuleAndDepartmentService, UserLookupService}
 import uk.ac.warwick.tabula.system.permissions.Restricted
 import uk.ac.warwick.tabula.{AcademicYear, ToString}
 import uk.ac.warwick.userlookup.User
-import uk.ac.warwick.util.termdates.TermNotFoundException
 
 import scala.beans.BeanProperty
 
@@ -41,9 +40,6 @@ object StudentCourseYearDetails {
 class StudentCourseYearDetails extends StudentCourseYearProperties
 	with GeneratedId with ToString with HibernateVersioned with PermissionsTarget
 	with Ordered[StudentCourseYearDetails] with PostLoadBehaviour {
-
-	@transient
-	var termService: TermService = Wire.auto[TermService]
 
 	def this(studentCourseDetails: StudentCourseDetails, sceSequenceNumber: JInteger, year:AcademicYear) {
 		this()
@@ -100,8 +96,8 @@ class StudentCourseYearDetails extends StudentCourseYearProperties
 
 	def relationships(relationshipType: StudentRelationshipType): Seq[StudentRelationship] = {
 		try {
-			val academicYearStartDate = termService.getTermFromAcademicWeek(1, academicYear).getStartDate
-			val academicYearEndDate = termService.getTermFromAcademicWeek(1, academicYear.next).getStartDate.minusDays(1)
+			val academicYearStartDate = academicYear.firstDay
+			val academicYearEndDate = academicYear.lastDay
 			val twoMonthsInDays = 2 * 30
 
 			studentCourseDetails.allRelationshipsOfType(relationshipType)
@@ -112,18 +108,18 @@ class StudentCourseYearDetails extends StudentCourseYearProperties
 					relationship.isCurrent
 				} else {
 					// Otherwise return the relationship if it lasted for at least 6 months in this academic year
-					val relationshipEndDate = if (relationship.endDate == null) academicYearEndDate else relationship.endDate
-					if (relationshipEndDate.isBefore(academicYearStartDate) || relationship.startDate.isAfter(academicYearEndDate)) {
+					val relationshipEndDate = if (relationship.endDate == null) academicYearEndDate.toDateTimeAtStartOfDay else relationship.endDate
+					if (relationshipEndDate.isBefore(academicYearStartDate.toDateTimeAtStartOfDay) || relationship.startDate.isAfter(academicYearEndDate.toDateTimeAtStartOfDay)) {
 						false
 					} else {
 						val inYearStartDate =
-							if (relationship.startDate.isBefore(academicYearStartDate))
-								academicYearStartDate
+							if (relationship.startDate.isBefore(academicYearStartDate.toDateTimeAtStartOfDay))
+								academicYearStartDate.toDateTimeAtStartOfDay
 							else
 								relationship.startDate
 						val inYearEndDate =
-							if (relationshipEndDate.isAfter(academicYearEndDate))
-								academicYearEndDate
+							if (relationshipEndDate.isAfter(academicYearEndDate.toDateTimeAtStartOfDay))
+								academicYearEndDate.toDateTimeAtStartOfDay
 							else
 								relationshipEndDate
 						new Duration(inYearStartDate, inYearEndDate).getStandardDays > twoMonthsInDays
@@ -131,7 +127,7 @@ class StudentCourseYearDetails extends StudentCourseYearProperties
 				}
 			})
 		} catch {
-			case e: TermNotFoundException => Seq()
+			case _: IllegalStateException => Seq()
 		}
 	}
 

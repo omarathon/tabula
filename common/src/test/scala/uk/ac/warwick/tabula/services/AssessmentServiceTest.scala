@@ -88,7 +88,7 @@ class AssessmentServiceTest extends PersistenceTestBase with Mockito {
 		val assignment = new Assignment
 		assignment.name = "Essay"
 		assignment.module = module
-		assignment.academicYear = new AcademicYear(2009)
+		assignment.academicYear = AcademicYear(2009)
 		assignment.markDeleted()
 		assignment.addDefaultFields()
 		assignmentService.save(assignment)
@@ -147,18 +147,18 @@ class AssessmentServiceTest extends PersistenceTestBase with Mockito {
 		val module = new Module
 		session.save(module)
 
-		assignmentService.getAssignmentByNameYearModule("Essay", new AcademicYear(2009), module) should be ('empty)
+		assignmentService.getAssignmentByNameYearModule("Essay", AcademicYear(2009), module) should be ('empty)
 
 		val assignment = new Assignment
 		assignment.name = "Essay"
 		assignment.module = module
-		assignment.academicYear = new AcademicYear(2009)
+		assignment.academicYear = AcademicYear(2009)
 		assignmentService.save(assignment)
 		session.flush()
 
-		assignmentService.getAssignmentByNameYearModule("Essay", new AcademicYear(2009), module) should not be 'empty
-		assignmentService.getAssignmentByNameYearModule("Essay", new AcademicYear(2008), module) should be ('empty)
-		assignmentService.getAssignmentByNameYearModule("Blessay", new AcademicYear(2009), module) should be ('empty)
+		assignmentService.getAssignmentByNameYearModule("Essay", AcademicYear(2009), module) should not be 'empty
+		assignmentService.getAssignmentByNameYearModule("Essay", AcademicYear(2008), module) should be ('empty)
+		assignmentService.getAssignmentByNameYearModule("Blessay", AcademicYear(2009), module) should be ('empty)
 	}
 
 	@Transactional @Test def assignmentsByNameTest() {
@@ -376,7 +376,7 @@ class AssessmentServiceTest extends PersistenceTestBase with Mockito {
 		group.occurrence = "A"
 		group.assessmentGroup = "A"
 		group.sequence = "A01"
-		group.academicYear = new AcademicYear(2010)
+		group.academicYear = AcademicYear(2010)
 		group.members = JArrayList(
 			new UpstreamAssessmentGroupMember(group, "rob"),
 			new UpstreamAssessmentGroupMember(group, "kev"),
@@ -400,9 +400,9 @@ class AssessmentServiceTest extends PersistenceTestBase with Mockito {
 
 		assignmentMembershipService.save(ua) should be (ua)
 
-		assignmentMembershipService.getUpstreamAssessmentGroups(ua, new AcademicYear(2010)) should be (Seq(group))
-		assignmentMembershipService.getUpstreamAssessmentGroups(ua, new AcademicYear(2011)) should be (Seq())
-		assignmentMembershipService.getUpstreamAssessmentGroups(new AssessmentComponent, new AcademicYear(2010)) should be (Seq())
+		assignmentMembershipService.getUpstreamAssessmentGroups(ua, AcademicYear(2010)) should be (Seq(group))
+		assignmentMembershipService.getUpstreamAssessmentGroups(ua, AcademicYear(2011)) should be (Seq())
+		assignmentMembershipService.getUpstreamAssessmentGroups(new AssessmentComponent, AcademicYear(2010)) should be (Seq())
 
 		session.clear()
 
@@ -524,7 +524,7 @@ class AssessmentServiceTest extends PersistenceTestBase with Mockito {
 		upstreamGroup.moduleCode = "ch101-10"
 		upstreamGroup.occurrence = "A"
 		upstreamGroup.assessmentGroup = "A"
-		upstreamGroup.academicYear = new AcademicYear(2010)
+		upstreamGroup.academicYear = AcademicYear(2010)
 		upstreamGroup.members = JArrayList(
 			new UpstreamAssessmentGroupMember(upstreamGroup, "rob"),
 			new UpstreamAssessmentGroupMember(upstreamGroup, "kev"),
@@ -638,7 +638,7 @@ class AssessmentServiceTest extends PersistenceTestBase with Mockito {
 
 		userLookup.registerUserObjects(student1, student2, student3, student4, student5, manual1, manual2, manual3, manual4, manual5, manual10)
 
-		val year: AcademicYear = AcademicYear.guessSITSAcademicYearByDate(DateTime.now)
+		val year: AcademicYear = AcademicYear.now()
 
 		def wireUserLookup(userGroup: UnspecifiedTypeUserGroup): Unit = userGroup match {
 			case cm: UserGroupCacheManager => wireUserLookup(cm.underlying)
@@ -951,11 +951,11 @@ class AssessmentServiceTest extends PersistenceTestBase with Mockito {
 		result.size should be (2)
 
 		// now mismatch the year:
-		scyd.academicYear = new AcademicYear(2012)
+		scyd.academicYear = AcademicYear(2012)
 		val resultForDifferentYear = assignmentService.filterAssignmentsByCourseAndYear(Seq(assignment1, assignment2), scyd)
 		resultForDifferentYear.size should be (0)
 
-		val currentAcademicYear = AcademicYear.guessSITSAcademicYearByDate(DateTime.now)
+		val currentAcademicYear = AcademicYear.now()
 
 		// now register the student on a module:
 		val mr = Fixtures.moduleRegistration(scd, module1, new JBigDecimal("12.0"), currentAcademicYear, "A")

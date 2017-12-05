@@ -25,7 +25,6 @@ object AgentPointRecordCommand {
 		member: Member
 	) =	new AgentPointRecordCommandInternal(relationshipType, academicYear, templatePoint, user, member)
 			with AutowiringRelationshipServiceComponent
-			with AutowiringTermServiceComponent
 			with AutowiringAttendanceMonitoringServiceComponent
 			with AutowiringSecurityServiceComponent
 			with ComposableCommand[(Seq[AttendanceMonitoringCheckpoint], Seq[AttendanceMonitoringCheckpointTotal])]
@@ -77,7 +76,7 @@ trait PopulateAgentPointRecordCommand extends PopulateOnForm {
 
 trait AgentPointRecordValidation extends SelfValidating with GroupedPointRecordValidation {
 
-	self: AgentPointRecordCommandState with AttendanceMonitoringServiceComponent with TermServiceComponent with SecurityServiceComponent =>
+	self: AgentPointRecordCommandState with AttendanceMonitoringServiceComponent with SecurityServiceComponent =>
 
 	override def validate(errors: Errors) {
 		validateGroupedPoint(
@@ -125,7 +124,7 @@ trait AgentPointRecordDescription extends Describable[(Seq[AttendanceMonitoringC
 
 trait AgentPointRecordCommandState extends GroupsPoints {
 
-	self: AttendanceMonitoringServiceComponent with RelationshipServiceComponent with TermServiceComponent =>
+	self: AttendanceMonitoringServiceComponent with RelationshipServiceComponent =>
 
 	def relationshipType: StudentRelationshipType
 	def academicYear: AcademicYear
@@ -161,11 +160,11 @@ trait AgentPointRecordCommandState extends GroupsPoints {
 		students.map(student =>
 			student -> {
 				val nonReportedTerms = attendanceMonitoringService.findNonReportedTerms(Seq(student), academicYear)
-				!nonReportedTerms.contains(termService.getTermFromDateIncludingVacations(templatePoint.startDate.toDateTimeAtStartOfDay).getTermTypeAsString)
+				!nonReportedTerms.contains(AcademicYear.forDate(templatePoint.startDate).termOrVacationForDate(templatePoint.startDate).periodType.toString)
 			}
 		).toMap
 
 	// Bind variables
 	var checkpointMap: JMap[StudentMember, JMap[AttendanceMonitoringPoint, AttendanceState]] =
-		LazyMaps.create{student: StudentMember => JHashMap(): JMap[AttendanceMonitoringPoint, AttendanceState] }.asJava
+		LazyMaps.create { _: StudentMember => JHashMap(): JMap[AttendanceMonitoringPoint, AttendanceState] }.asJava
 }

@@ -1,6 +1,5 @@
 package uk.ac.warwick.tabula.commands.scheduling
 
-import org.joda.time.DateTime
 import uk.ac.warwick.tabula.AcademicYear
 import uk.ac.warwick.tabula.commands._
 import uk.ac.warwick.tabula.data.Transactions._
@@ -9,14 +8,12 @@ import uk.ac.warwick.tabula.data.model.notifications.attendance.UnlinkedAttendan
 import uk.ac.warwick.tabula.data.model.{Department, Notification}
 import uk.ac.warwick.tabula.permissions.Permissions
 import uk.ac.warwick.tabula.services.attendancemonitoring.{AttendanceMonitoringServiceComponent, AutowiringAttendanceMonitoringServiceComponent}
-import uk.ac.warwick.tabula.services.{AutowiringTermServiceComponent, TermServiceComponent}
 import uk.ac.warwick.tabula.system.permissions.{PermissionsChecking, PermissionsCheckingMethods, RequiresPermissionsChecking}
 
 object UnlinkAttendanceMonitoringSchemeCommand {
 	def apply() =
 		new UnlinkAttendanceMonitoringSchemeCommandInternal
 			with AutowiringAttendanceMonitoringServiceComponent
-			with AutowiringTermServiceComponent
 			with ComposableCommand[Map[Department, Seq[AttendanceMonitoringScheme]]]
 			with UnlinkAttendanceMonitoringSchemeDescription
 			with UnlinkAttendanceMonitoringSchemePermissions
@@ -26,10 +23,10 @@ object UnlinkAttendanceMonitoringSchemeCommand {
 
 class UnlinkAttendanceMonitoringSchemeCommandInternal extends CommandInternal[Map[Department, Seq[AttendanceMonitoringScheme]]] {
 
-	self: TermServiceComponent with AttendanceMonitoringServiceComponent =>
+	self: AttendanceMonitoringServiceComponent =>
 
 	override def applyInternal(): Map[Department, Seq[AttendanceMonitoringScheme]] = {
-		val academicYear = AcademicYear.findAcademicYearContainingDate(DateTime.now)
+		val academicYear = AcademicYear.now()
 		val schemeMap = transactional() {
 			attendanceMonitoringService.findSchemesLinkedToSITSByDepartment(academicYear)
 		}

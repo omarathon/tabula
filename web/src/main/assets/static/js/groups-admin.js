@@ -139,14 +139,33 @@ $(function() {
 		});
 	});
 
+	var $location = $('#location, #defaultLocation');
+	var $locationId = $('#locationId, #defaultLocationId');
+	var $namedLocationAlert = $('#namedLocationAlert');
+
+	if ($('#useNamedLocation.errors').length > 0 || ($location.val().length > 0 && $locationId.val().length === 0)) {
+		$namedLocationAlert.show();
+	}
+
 	$('input#location, input#defaultLocation')
-		.on('change', function() {
+		.on('change', function () {
 			var $this = $(this);
-			if ($this.data('lid') === undefined || $this.data('lid').length === 0)
+			if ($this.data('lid') === undefined || $this.data('lid').length === 0) {
+				$this.closest('.form-group').find('input[type="hidden"]').val('');
+				$namedLocationAlert.toggle($this.val().length > 0);
 				return;
+			}
+
+			$namedLocationAlert.hide();
 
 			$this.closest('.form-group').find('input[type="hidden"]').val($this.data('lid'));
-			$this.data('lid','');
+			$this.data('lid', '');
+		})
+		.on('blur', function () {
+			var locationPicker = $(this).data('location-picker');
+			if (locationPicker.$menu.is(':visible') && locationPicker.$menu.children().length === 1) {
+				locationPicker.select();
+			}
 		})
 		.locationPicker();
 });

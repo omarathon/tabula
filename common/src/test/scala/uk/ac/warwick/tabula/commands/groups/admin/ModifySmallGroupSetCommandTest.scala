@@ -30,7 +30,7 @@ class ModifySmallGroupSetCommandTest extends TestBase with Mockito {
 		val set = new SmallGroupSet(module)
 		set.id = "existingId"
 		set.name = "Existing set"
-		set.academicYear = AcademicYear.guessSITSAcademicYearByDate(DateTime.now)
+		set.academicYear = AcademicYear.now()
 		set.format = SmallGroupFormat.Seminar
 		set.allocationMethod = SmallGroupAllocationMethod.Manual
 	}
@@ -45,13 +45,13 @@ class ModifySmallGroupSetCommandTest extends TestBase with Mockito {
 
 	@Test def create { new CreateCommandFixture {
 		command.name = "Set name"
-		command.academicYear = AcademicYear.guessSITSAcademicYearByDate(DateTime.now)
+		command.academicYear = AcademicYear.now()
 
 		command.assessmentMembershipService.getAssessmentComponents(module) returns (Seq())
 
 		val set: SmallGroupSet = command.applyInternal()
 		set.name should be ("Set name")
-		set.academicYear should be (AcademicYear.guessSITSAcademicYearByDate(DateTime.now))
+		set.academicYear should be (AcademicYear.now())
 		set.members should not be (null)
 
 		verify(command.smallGroupService, times(1)).saveOrUpdate(set)
@@ -59,7 +59,7 @@ class ModifySmallGroupSetCommandTest extends TestBase with Mockito {
 
 	@Test def createAutoLinkToSits { new CreateCommandFixture {
 		command.name = "Set name"
-		command.academicYear = AcademicYear.guessSITSAcademicYearByDate(DateTime.now)
+		command.academicYear = AcademicYear.now()
 
 		val ac1: AssessmentComponent = Fixtures.upstreamAssignment(Fixtures.module("in101"), 1)
 		val upstream1: UpstreamAssessmentGroup = Fixtures.assessmentGroup(ac1)
@@ -73,7 +73,7 @@ class ModifySmallGroupSetCommandTest extends TestBase with Mockito {
 
 		val set: SmallGroupSet = command.applyInternal()
 		set.name should be ("Set name")
-		set.academicYear should be (AcademicYear.guessSITSAcademicYearByDate(DateTime.now))
+		set.academicYear should be (AcademicYear.now())
 		set.members should not be (null)
 		set.assessmentGroups.size() should be (2)
 
@@ -85,11 +85,11 @@ class ModifySmallGroupSetCommandTest extends TestBase with Mockito {
 		command.academicYear should be (set.academicYear)
 
 		command.name = "Set name"
-		command.academicYear = AcademicYear.guessSITSAcademicYearByDate(DateTime.now)
+		command.academicYear = AcademicYear.now()
 
 		command.applyInternal() should be (set)
 		set.name should be ("Set name")
-		set.academicYear should be (AcademicYear.guessSITSAcademicYearByDate(DateTime.now))
+		set.academicYear should be (AcademicYear.now())
 		set.members should not be (null)
 
 		verify(command.smallGroupService, times(1)).saveOrUpdate(set)
@@ -180,7 +180,7 @@ class ModifySmallGroupSetCommandTest extends TestBase with Mockito {
 
 	@Test def validationPasses { new ValidationFixture {
 		command.name = "That's not my name"
-		command.academicYear = AcademicYear.guessSITSAcademicYearByDate(DateTime.now)
+		command.academicYear = AcademicYear.now()
 		command.format = SmallGroupFormat.Seminar
 		command.allocationMethod = SmallGroupAllocationMethod.Manual
 		command.smallGroupService.getSmallGroupSetsByNameYearModule(command.name, command.academicYear, command.module) returns (Seq())
@@ -192,7 +192,7 @@ class ModifySmallGroupSetCommandTest extends TestBase with Mockito {
 
 	@Test def validateNoName { new ValidationFixture {
 		command.name = "             "
-		command.academicYear = AcademicYear.guessSITSAcademicYearByDate(DateTime.now)
+		command.academicYear = AcademicYear.now()
 		command.format = SmallGroupFormat.Seminar
 		command.allocationMethod = SmallGroupAllocationMethod.Manual
 
@@ -207,7 +207,7 @@ class ModifySmallGroupSetCommandTest extends TestBase with Mockito {
 
 	@Test def validateDuplicateName { new ValidationFixture {
 		command.name = "Test1"
-		command.academicYear = AcademicYear.guessSITSAcademicYearByDate(DateTime.now)
+		command.academicYear = AcademicYear.now()
 		command.format = SmallGroupFormat.Seminar
 		command.allocationMethod = SmallGroupAllocationMethod.Manual
 		val set = new SmallGroupSet
@@ -226,7 +226,7 @@ class ModifySmallGroupSetCommandTest extends TestBase with Mockito {
 
 	@Test def validateNameTooLong { new ValidationFixture {
 		command.name = (1 to 300).map { _ => "a" }.mkString("")
-		command.academicYear = AcademicYear.guessSITSAcademicYearByDate(DateTime.now)
+		command.academicYear = AcademicYear.now()
 		command.format = SmallGroupFormat.Seminar
 		command.allocationMethod = SmallGroupAllocationMethod.Manual
 		command.smallGroupService.getSmallGroupSetsByNameYearModule(command.name, command.academicYear, command.module) returns (Seq())
@@ -241,7 +241,7 @@ class ModifySmallGroupSetCommandTest extends TestBase with Mockito {
 
 	@Test def validateNoFormat { new ValidationFixture {
 		command.name = "That's not my name"
-		command.academicYear = AcademicYear.guessSITSAcademicYearByDate(DateTime.now)
+		command.academicYear = AcademicYear.now()
 		command.allocationMethod = SmallGroupAllocationMethod.Manual
 		command.smallGroupService.getSmallGroupSetsByNameYearModule(command.name, command.academicYear, command.module) returns (Seq())
 		val errors = new BindException(command, "command")
@@ -255,7 +255,7 @@ class ModifySmallGroupSetCommandTest extends TestBase with Mockito {
 
 	@Test def validateNoAllocationMethod { new ValidationFixture {
 		command.name = "That's not my name"
-		command.academicYear = AcademicYear.guessSITSAcademicYearByDate(DateTime.now)
+		command.academicYear = AcademicYear.now()
 		command.format = SmallGroupFormat.Seminar
 		command.allocationMethod = null
 		command.smallGroupService.getSmallGroupSetsByNameYearModule(command.name, command.academicYear, command.module) returns (Seq())
@@ -269,7 +269,7 @@ class ModifySmallGroupSetCommandTest extends TestBase with Mockito {
 	}}
 
 	@Test def validateCantChangeAcademicYear { new ValidationFixtureExistingSet {
-		set.academicYear = AcademicYear.guessSITSAcademicYearByDate(DateTime.now)
+		set.academicYear = AcademicYear.now()
 
 		command.name = "That's not my name"
 		command.academicYear = set.academicYear + 1
@@ -287,7 +287,7 @@ class ModifySmallGroupSetCommandTest extends TestBase with Mockito {
 
 	@Test def validateCanUnlinkIfNotReleased { new ValidationFixtureExistingSet {
 		command.name = "That's not my name"
-		command.academicYear = AcademicYear.guessSITSAcademicYearByDate(DateTime.now)
+		command.academicYear = AcademicYear.now()
 		command.format = SmallGroupFormat.Seminar
 		command.allocationMethod = SmallGroupAllocationMethod.Manual
 
@@ -301,7 +301,7 @@ class ModifySmallGroupSetCommandTest extends TestBase with Mockito {
 
 	@Test def validateCanChangeLinkIfNotReleased { new ValidationFixtureExistingSet {
 		command.name = "That's not my name"
-		command.academicYear = AcademicYear.guessSITSAcademicYearByDate(DateTime.now)
+		command.academicYear = AcademicYear.now()
 		command.format = SmallGroupFormat.Seminar
 		command.allocationMethod = SmallGroupAllocationMethod.Linked
 		command.linkedDepartmentSmallGroupSet = Fixtures.departmentSmallGroupSet("A set")
@@ -317,7 +317,7 @@ class ModifySmallGroupSetCommandTest extends TestBase with Mockito {
 
 	@Test def validateCantChangeLinkIfAttendanceRecorded { new ValidationFixtureExistingSet {
 		command.name = "That's not my name"
-		command.academicYear = AcademicYear.guessSITSAcademicYearByDate(DateTime.now)
+		command.academicYear = AcademicYear.now()
 		command.format = SmallGroupFormat.Seminar
 		command.allocationMethod = SmallGroupAllocationMethod.Linked
 		command.linkedDepartmentSmallGroupSet = Fixtures.departmentSmallGroupSet("A set")
@@ -361,7 +361,7 @@ class ModifySmallGroupSetCommandTest extends TestBase with Mockito {
 
 	@Test def validateCanCreateLinkWhenAttendanceNotRecorded { new ValidationFixtureExistingSet {
 		command.name = "That's not my name"
-		command.academicYear = AcademicYear.guessSITSAcademicYearByDate(DateTime.now)
+		command.academicYear = AcademicYear.now()
 		command.format = SmallGroupFormat.Seminar
 		command.allocationMethod = SmallGroupAllocationMethod.Linked
 		command.linkedDepartmentSmallGroupSet = Fixtures.departmentSmallGroupSet("A set")
@@ -509,9 +509,7 @@ class ModifySmallGroupSetCommandTest extends TestBase with Mockito {
 	}}
 
 	@Test def defaultWeekRanges {
-		val generator = new GeneratesDefaultWeekRangesWithTermService with TermServiceComponent {
-			val termService = new TermServiceImpl
-		}
+		val generator = new GeneratesDefaultWeekRangesWithTermService {}
 
 		generator.defaultWeekRanges(AcademicYear.parse("13/14")) should be (Seq(
 			WeekRange(1, 10),

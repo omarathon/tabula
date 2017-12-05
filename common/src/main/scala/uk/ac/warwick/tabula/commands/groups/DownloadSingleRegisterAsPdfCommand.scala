@@ -3,12 +3,12 @@ package uk.ac.warwick.tabula.commands.groups
 import uk.ac.warwick.tabula.CurrentUser
 import uk.ac.warwick.tabula.commands._
 import uk.ac.warwick.tabula.commands.groups.admin._
+import uk.ac.warwick.tabula.data.Transactions._
 import uk.ac.warwick.tabula.data.model.groups.{SmallGroupEvent, SmallGroupEventOccurrence}
 import uk.ac.warwick.tabula.permissions.Permissions
 import uk.ac.warwick.tabula.services._
 import uk.ac.warwick.tabula.services.fileserver.RenderableFile
 import uk.ac.warwick.tabula.system.permissions.{PermissionsChecking, PermissionsCheckingMethods, RequiresPermissionsChecking}
-import uk.ac.warwick.tabula.data.Transactions._
 
 object DownloadSingleRegisterAsPdfCommand {
 	def apply(event: SmallGroupEvent, week: Int, filename: String, user: CurrentUser) =
@@ -31,7 +31,7 @@ class DownloadSingleRegisterAsPdfCommandInternal(val event: SmallGroupEvent, val
 
 trait DownloadSingleRegisterAsPdfCommandState extends DownloadRegistersAsPdfCommandState {
 
-	self: TermServiceComponent with SmallGroupServiceComponent =>
+	self: SmallGroupServiceComponent =>
 
 	def event: SmallGroupEvent
 	def week: Int

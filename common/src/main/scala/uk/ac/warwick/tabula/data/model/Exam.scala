@@ -5,7 +5,6 @@ import javax.persistence.FetchType._
 import javax.persistence._
 
 import org.hibernate.annotations.{BatchSize, Filter, FilterDef, Type}
-import org.joda.time.DateTime
 import uk.ac.warwick.tabula.AcademicYear
 import uk.ac.warwick.tabula.JavaImports._
 import uk.ac.warwick.tabula.data.PostLoadBehaviour
@@ -39,7 +38,7 @@ class Exam
 	@Basic
 	@Type(`type` = "uk.ac.warwick.tabula.data.model.AcademicYearUserType")
 	@Column(nullable = false)
-	override var academicYear: AcademicYear = AcademicYear.guessSITSAcademicYearByDate(new DateTime())
+	override var academicYear: AcademicYear = AcademicYear.now()
 
 	override var name: String = _
 

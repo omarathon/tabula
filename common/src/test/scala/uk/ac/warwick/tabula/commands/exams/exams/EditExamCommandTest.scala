@@ -22,7 +22,7 @@ class EditExamCommandTest extends TestBase with Mockito {
 
 	trait Fixture {
 		val module: Module = Fixtures.module("ab123", "Test module")
-		val academicYear = new AcademicYear(2014)
+		val academicYear = AcademicYear(2014)
 		val exam: Exam = Fixtures.exam("Exam 1")
 		exam.module=module
 		exam.academicYear=academicYear

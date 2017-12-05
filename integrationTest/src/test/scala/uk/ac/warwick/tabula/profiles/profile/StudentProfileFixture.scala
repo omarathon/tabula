@@ -1,7 +1,7 @@
 package uk.ac.warwick.tabula.profiles.profile
 
 import org.scalatest.GivenWhenThen
-import uk.ac.warwick.tabula.{BrowserTest, FunctionalTestAcademicYear}
+import uk.ac.warwick.tabula.{BrowserTest, AcademicYear}
 import uk.ac.warwick.tabula.web.FixturesDriver
 
 trait StudentProfileFixture extends FixturesDriver with GivenWhenThen {
@@ -24,7 +24,7 @@ trait StudentProfileFixture extends FixturesDriver with GivenWhenThen {
 			routeCode = TEST_ROUTE_CODE,
 			courseCode = TEST_COURSE_CODE,
 			deptCode = TEST_DEPARTMENT_CODE,
-			academicYear = FunctionalTestAcademicYear.current.startYear.toString
+			academicYear = AcademicYear.now().startYear.toString
 		)
 	}
 }

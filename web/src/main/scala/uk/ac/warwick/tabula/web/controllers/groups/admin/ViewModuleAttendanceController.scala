@@ -1,21 +1,20 @@
 package uk.ac.warwick.tabula.web.controllers.groups.admin
 
-import org.joda.time.DateTime
 import org.springframework.stereotype.Controller
+import org.springframework.web.bind.annotation.{ModelAttribute, PathVariable, RequestMapping}
 import uk.ac.warwick.tabula.AcademicYear
+import uk.ac.warwick.tabula.commands.Appliable
 import uk.ac.warwick.tabula.commands.groups.ViewSmallGroupAttendanceCommand
+import uk.ac.warwick.tabula.commands.groups.admin.{ViewModuleAttendanceCommand, ViewModuleAttendanceState}
+import uk.ac.warwick.tabula.data.model.Module
+import uk.ac.warwick.tabula.data.model.groups.{SmallGroup, SmallGroupSet}
 import uk.ac.warwick.tabula.groups.web.Routes
 import uk.ac.warwick.tabula.services.{AutowiringMaintenanceModeServiceComponent, AutowiringUserSettingsServiceComponent}
 import uk.ac.warwick.tabula.web.Mav
-import org.springframework.web.bind.annotation.{ModelAttribute, RequestMapping, PathVariable}
-import uk.ac.warwick.tabula.data.model.groups.SmallGroup
-import uk.ac.warwick.tabula.commands.Appliable
-import uk.ac.warwick.tabula.data.model.groups.SmallGroupSet
 import uk.ac.warwick.tabula.web.controllers.AcademicYearScopedController
 import uk.ac.warwick.tabula.web.controllers.groups.GroupsController
+
 import scala.collection.immutable.SortedMap
-import uk.ac.warwick.tabula.data.model.Module
-import uk.ac.warwick.tabula.commands.groups.admin.{ViewModuleAttendanceState, ViewModuleAttendanceCommand}
 
 abstract class AbstractViewModuleAttendanceController extends GroupsController
 	with AcademicYearScopedController with AutowiringUserSettingsServiceComponent with AutowiringMaintenanceModeServiceComponent {
@@ -52,7 +51,7 @@ class ViewModuleAttendanceController extends AbstractViewModuleAttendanceControl
 
 	@ModelAttribute("command")
 	def command(@PathVariable module: Module, @ModelAttribute("activeAcademicYear") academicYear: Option[AcademicYear]) =
-		ViewModuleAttendanceCommand(mandatory(module), academicYear.getOrElse(AcademicYear.guessSITSAcademicYearByDate(DateTime.now)))
+		ViewModuleAttendanceCommand(mandatory(module), academicYear.getOrElse(AcademicYear.now()))
 
 }
 

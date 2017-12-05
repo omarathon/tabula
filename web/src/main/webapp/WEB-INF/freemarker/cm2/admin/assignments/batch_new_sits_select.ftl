@@ -118,7 +118,7 @@ first page of the form to setup a bunch of assignments from SITS.
 											${item.upstreamAssignment.sequence}
 										</td>
 										<td class="selectable">
-											${item.occurrence}
+											${item.occurrence!'NONE'}
 										</td>
 										<td class="selectable">
 											<span class="editable-name" id="editable-name-${item_index}">${item.name!''}</span>

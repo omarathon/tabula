@@ -1,20 +1,18 @@
 package uk.ac.warwick.tabula.commands.attendance.view
 
-import uk.ac.warwick.tabula.commands._
-import uk.ac.warwick.tabula.services.attendancemonitoring.{AutowiringAttendanceMonitoringServiceComponent, AttendanceMonitoringServiceComponent}
-import uk.ac.warwick.tabula.system.permissions.{PermissionsChecking, PermissionsCheckingMethods, RequiresPermissionsChecking}
-import uk.ac.warwick.tabula.permissions.Permissions
-import uk.ac.warwick.tabula.commands.attendance.GroupsPoints
-import uk.ac.warwick.tabula.data.model.{Department, StudentMember}
-import uk.ac.warwick.tabula.services.{TermServiceComponent, AutowiringTermServiceComponent}
-import uk.ac.warwick.tabula.data.model.attendance.{AttendanceMonitoringCheckpoint, AttendanceMonitoringPoint}
 import uk.ac.warwick.tabula.AcademicYear
+import uk.ac.warwick.tabula.commands._
+import uk.ac.warwick.tabula.commands.attendance.GroupsPoints
+import uk.ac.warwick.tabula.data.model.attendance.{AttendanceMonitoringCheckpoint, AttendanceMonitoringPoint}
+import uk.ac.warwick.tabula.data.model.{Department, StudentMember}
+import uk.ac.warwick.tabula.permissions.Permissions
+import uk.ac.warwick.tabula.services.attendancemonitoring.{AttendanceMonitoringServiceComponent, AutowiringAttendanceMonitoringServiceComponent}
+import uk.ac.warwick.tabula.system.permissions.{PermissionsChecking, PermissionsCheckingMethods, RequiresPermissionsChecking}
 
 object ViewStudentAttendanceCommand {
 	def apply(department: Department, academicYear: AcademicYear, student: StudentMember) =
 		new ViewStudentAttendanceCommandInternal(department, academicYear, student)
 			with AutowiringAttendanceMonitoringServiceComponent
-			with AutowiringTermServiceComponent
 			with ComposableCommand[Map[String, Seq[(AttendanceMonitoringPoint, AttendanceMonitoringCheckpoint)]]]
 			with ViewStudentAttendancePermissions
 			with ViewStudentAttendanceCommandState
@@ -26,7 +24,7 @@ class ViewStudentAttendanceCommandInternal(val department: Department, val acade
 	extends CommandInternal[Map[String, Seq[(AttendanceMonitoringPoint, AttendanceMonitoringCheckpoint)]]]
 		with GroupsPoints with TaskBenchmarking {
 
-	self: AttendanceMonitoringServiceComponent with TermServiceComponent =>
+	self: AttendanceMonitoringServiceComponent =>
 
 	override def applyInternal(): Map[String, Seq[(AttendanceMonitoringPoint, AttendanceMonitoringCheckpoint)]] = {
 		val points = benchmarkTask("listStudentsPoints"){

@@ -1,6 +1,5 @@
 package uk.ac.warwick.tabula.web.controllers.cm2.admin.assignments
 
-import org.joda.time.DateTime
 import org.springframework.context.annotation.Profile
 import org.springframework.stereotype.Controller
 import org.springframework.web.bind.annotation.{ModelAttribute, PathVariable, RequestMapping}
@@ -12,8 +11,8 @@ import uk.ac.warwick.tabula.data.model.{Assignment, Department, Module}
 import uk.ac.warwick.tabula.permissions.Permission
 import uk.ac.warwick.tabula.services.{AutowiringMaintenanceModeServiceComponent, AutowiringModuleAndDepartmentServiceComponent, AutowiringUserSettingsServiceComponent}
 import uk.ac.warwick.tabula.web.Mav
-import uk.ac.warwick.tabula.web.controllers.{AcademicYearScopedController, DepartmentScopedController}
 import uk.ac.warwick.tabula.web.controllers.cm2.CourseworkController
+import uk.ac.warwick.tabula.web.controllers.{AcademicYearScopedController, DepartmentScopedController}
 
 import scala.collection.JavaConverters._
 
@@ -24,7 +23,7 @@ abstract class AbstractCopyAssignmentsController extends CourseworkController
 
 	@ModelAttribute("academicYearChoices")
 	def academicYearChoices: JList[AcademicYear] =
-		AcademicYear.guessSITSAcademicYearByDate(DateTime.now).yearsSurrounding(0, 1).asJava
+		AcademicYear.now().yearsSurrounding(0, 1).asJava
 
 	@ModelAttribute("activeAcademicYear")
 	override def activeAcademicYear(@PathVariable academicYear: AcademicYear): Option[AcademicYear] =
@@ -75,7 +74,7 @@ abstract class AbstractCopyDepartmentAssignmentsController extends AbstractCopyA
 
 	@ModelAttribute("copyAssignmentsCommand")
 	def copyAssignmentsCommand(@PathVariable department: Department, @ModelAttribute("activeAcademicYear") activeAcademicYear: Option[AcademicYear]): CopyAssignmentsCommand.Command =
-		CopyAssignmentsCommand(mandatory(department), activeAcademicYear.getOrElse(AcademicYear.guessSITSAcademicYearByDate(DateTime.now)))
+		CopyAssignmentsCommand(mandatory(department), activeAcademicYear.getOrElse(AcademicYear.now()))
 
 	@RequestMapping
 	def showForm(@PathVariable department: Department, @ModelAttribute("copyAssignmentsCommand") cmd: CopyAssignmentsCommand.Command): Mav =

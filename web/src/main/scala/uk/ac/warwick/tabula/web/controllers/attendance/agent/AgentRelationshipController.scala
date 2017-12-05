@@ -1,6 +1,5 @@
 package uk.ac.warwick.tabula.web.controllers.attendance.agent
 
-import org.joda.time.DateTime
 import org.springframework.stereotype.Controller
 import org.springframework.web.bind.annotation.{ModelAttribute, PathVariable, RequestMapping}
 import uk.ac.warwick.tabula.AcademicYear
@@ -27,7 +26,7 @@ class AgentRelationshipController extends AttendanceController
 		@PathVariable relationshipType: StudentRelationshipType,
 		@ModelAttribute("activeAcademicYear") activeAcademicYear: Option[AcademicYear]
 	): Mav = {
-		Redirect(Routes.Agent.relationshipForYear(relationshipType, activeAcademicYear.getOrElse(AcademicYear.guessSITSAcademicYearByDate(DateTime.now))))
+		Redirect(Routes.Agent.relationshipForYear(relationshipType, activeAcademicYear.getOrElse(AcademicYear.now())))
 	}
 
 }

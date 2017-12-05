@@ -6,17 +6,15 @@ import net.fortuna.ical4j.model.property._
 import org.joda.time.LocalDate
 import org.springframework.stereotype.Controller
 import org.springframework.web.bind.annotation._
-import uk.ac.warwick.tabula.{AcademicYear, DateFormats}
 import uk.ac.warwick.tabula.api.web.controllers.ApiController
+import uk.ac.warwick.tabula.api.web.controllers.timetables.TermDatesController._
 import uk.ac.warwick.tabula.data.model.groups.WeekRange
-import uk.ac.warwick.tabula.services.{AutowiringTermServiceComponent, TermService, TermServiceComponent}
-import uk.ac.warwick.tabula.web.views.{IcalView, JSONView}
-import TermDatesController._
 import uk.ac.warwick.tabula.web.Mav
-import uk.ac.warwick.util.termdates.Term
+import uk.ac.warwick.tabula.web.views.{IcalView, JSONView}
+import uk.ac.warwick.tabula.{AcademicPeriod, AcademicYear, DateFormats}
 
 object TermDatesController {
-	case class NamedTerm(academicYear: AcademicYear, name: String, term: Term, weekRange: WeekRange)
+	case class NamedTerm(academicYear: AcademicYear, name: String, term: AcademicPeriod, weekRange: WeekRange)
 }
 
 @Controller
@@ -24,28 +22,25 @@ object TermDatesController {
 class TermDatesController extends ApiController
 	with GetTermDatesApi
 	with DefaultAcademicYearApi
-	with AutowiringTermServiceComponent
 
 @Controller
 @RequestMapping(Array("/v1/termdates/{year}", "/v1/termdates/{year}.*"))
 class TermDatesForYearController extends ApiController
 	with GetTermDatesApi
 	with PathVariableAcademicYearScopedApi
-	with AutowiringTermServiceComponent
 
 trait GetTermDatesApi {
 	self: ApiController
-		with AcademicYearScopedApi
-		with TermServiceComponent =>
+		with AcademicYearScopedApi =>
 
 	@ModelAttribute("terms")
 	def terms(@ModelAttribute("academicYear") academicYears: Seq[AcademicYear]): Seq[NamedTerm] = academicYears.flatMap { academicYear =>
-		val weeks = termService.getAcademicWeeksForYear(academicYear.dateInTermOne).toMap
+		val weeks = academicYear.weeks
 
 		val terms =
 			weeks
-				.map { case (weekNumber, dates) =>
-					(weekNumber, termService.getTermFromAcademicWeekIncludingVacations(weekNumber, academicYear))
+				.map { case (weekNumber, week) =>
+					(weekNumber, week.period)
 				}
 				.groupBy { _._2 }
 				.map { case (term, weekNumbersAndTerms) =>
@@ -54,7 +49,7 @@ trait GetTermDatesApi {
 				.toSeq
 				.sortBy { case (_, weekRange) => weekRange.minWeek }
 
-		TermService.orderedTermNames.zip(terms).map { case (name, (term, weekRange)) => NamedTerm(academicYear, name, term, weekRange) }
+		AcademicPeriod.allPeriodTypes.map(_.toString).zip(terms).map { case (name, (term, weekRange)) => NamedTerm(academicYear, name, term, weekRange) }
 	}
 
 	@RequestMapping(method = Array(GET), produces = Array("application/json"))
@@ -65,8 +60,8 @@ trait GetTermDatesApi {
 			"terms" -> terms.map { t => Map(
 				"academicYear" -> t.academicYear.toString,
 				"name" -> t.name,
-				"start" -> DateFormats.IsoDate.print(t.term.getStartDate.toLocalDate),
-				"end" -> DateFormats.IsoDate.print(t.term.getEndDate.toLocalDate),
+				"start" -> DateFormats.IsoDate.print(t.term.firstDay),
+				"end" -> DateFormats.IsoDate.print(t.term.lastDay),
 				"weekRange" -> Map(
 					"minWeek" -> t.weekRange.minWeek,
 					"maxWeek" -> t.weekRange.maxWeek
@@ -89,7 +84,7 @@ trait GetTermDatesApi {
 			new net.fortuna.ical4j.model.Date(date.toString("yyyyMMdd"))
 
 		terms.zipWithIndex.foreach { case (t, termNumber) =>
-			val event: VEvent = new VEvent(toIcalDate(t.term.getStartDate.toLocalDate), toIcalDate(t.term.getEndDate.toLocalDate.plusDays(1)), t.name.safeSubstring(0, 255))
+			val event: VEvent = new VEvent(toIcalDate(t.term.firstDay), toIcalDate(t.term.lastDay.plusDays(1)), t.name.safeSubstring(0, 255))
 
 			event.getProperties.add(new Uid(s"${t.academicYear.startYear}-term-$termNumber"))
 			event.getProperties.add(Method.PUBLISH)

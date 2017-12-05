@@ -1,10 +1,10 @@
 package uk.ac.warwick.tabula.services
 
+import org.springframework.stereotype.Service
 import uk.ac.warwick.spring.Wire
 import uk.ac.warwick.tabula.AcademicYear
-import uk.ac.warwick.tabula.data.{MeetingRecordDaoComponent, AutowiringMeetingRecordDaoComponent}
-import org.springframework.stereotype.Service
-import uk.ac.warwick.tabula.data.model.{AbstractMeetingRecord, StudentRelationship, MeetingRecordApproval, ScheduledMeetingRecord, MeetingRecord, Member}
+import uk.ac.warwick.tabula.data.model._
+import uk.ac.warwick.tabula.data.{AutowiringMeetingRecordDaoComponent, MeetingRecordDaoComponent}
 
 trait MeetingRecordServiceComponent {
 	def meetingRecordService: MeetingRecordService
@@ -28,8 +28,8 @@ trait MeetingRecordService {
 	def countPendingApprovals(universityId: String): Int
 	def get(id: String): Option[AbstractMeetingRecord]
 	def purge(meeting: AbstractMeetingRecord): Unit
-	def getAcademicYear(meeting: AbstractMeetingRecord)(implicit termService: TermService): Option[AcademicYear]
-	def getAcademicYear(id: String)(implicit termService: TermService): Option[AcademicYear]
+	def getAcademicYear(meeting: AbstractMeetingRecord): Option[AcademicYear]
+	def getAcademicYear(id: String): Option[AcademicYear]
 	def migrate(from: StudentRelationship, to: StudentRelationship): Unit
 	def unconfirmedScheduledCount(relationships: Seq[StudentRelationship]): Map[StudentRelationship, Int]
 }
@@ -58,8 +58,8 @@ abstract class AbstractMeetingRecordService extends MeetingRecordService {
 		case _ => None
 	}
 	def purge(meeting: AbstractMeetingRecord): Unit = meetingRecordDao.purge(meeting)
-	def getAcademicYear(meeting: AbstractMeetingRecord)(implicit termService: TermService): Option[AcademicYear] = Some(AcademicYear.findAcademicYearContainingDate(meeting.meetingDate))
-  def getAcademicYear(id: String)(implicit termService: TermService): Option[AcademicYear] = Option(id).flatMap(get).flatMap(getAcademicYear)
+	def getAcademicYear(meeting: AbstractMeetingRecord): Option[AcademicYear] = Some(AcademicYear.forDate(meeting.meetingDate))
+  def getAcademicYear(id: String): Option[AcademicYear] = Option(id).flatMap(get).flatMap(getAcademicYear)
 	def migrate(from: StudentRelationship, to: StudentRelationship): Unit =
 		meetingRecordDao.migrate(from, to)
 	def unconfirmedScheduledCount(relationships: Seq[StudentRelationship]): Map[StudentRelationship, Int] =

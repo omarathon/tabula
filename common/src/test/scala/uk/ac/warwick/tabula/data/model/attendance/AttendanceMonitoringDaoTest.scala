@@ -187,7 +187,7 @@ class AttendanceMonitoringDaoTest extends PersistenceTestBase with Mockito {
 		val terms = attendanceMonitoringDao.findNonReportedTerms(Seq(student1, student2, student3), academicYear)
 
 		// All students recorded against Spring, so that should be missing.
-		terms should be (Seq("Autumn", "Christmas vacation", "Easter vacation", "Summer", "Summer vacation"))
+		terms should be (Seq("Pre-term vacation", "Autumn", "Christmas vacation", "Easter vacation", "Summer", "Summer vacation"))
 	}}
 
 	@Test def correctEndDate(): Unit = { transactional { tx =>
