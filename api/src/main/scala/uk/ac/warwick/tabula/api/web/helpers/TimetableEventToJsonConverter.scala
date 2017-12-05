@@ -1,9 +1,9 @@
 package uk.ac.warwick.tabula.api.web.helpers
 
-import uk.ac.warwick.tabula.data.model.MapLocation
+import uk.ac.warwick.tabula.data.model.{AliasedMapLocation, MapLocation}
+import uk.ac.warwick.tabula.helpers.StringUtils._
 import uk.ac.warwick.tabula.services.ProfileServiceComponent
 import uk.ac.warwick.tabula.timetables.TimetableEvent
-import uk.ac.warwick.tabula.helpers.StringUtils._
 
 trait TimetableEventToJsonConverter {
 	self: ProfileServiceComponent =>
@@ -19,6 +19,11 @@ trait TimetableEventToJsonConverter {
 		"startTime" -> event.startTime.toString("HH:mm"),
 		"endTime" -> event.endTime.toString("HH:mm"),
 		"location" -> (event.location match {
+			case Some(AliasedMapLocation(alias, MapLocation(_, locationId, syllabusPlusName))) => Map(
+				"name" -> alias,
+				"locationId" -> locationId,
+				"syllabusPlusName" -> syllabusPlusName
+			)
 			case Some(l: MapLocation) => Map(
 				"name" -> l.name,
 				"locationId" -> l.locationId,

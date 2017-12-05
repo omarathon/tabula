@@ -7,13 +7,12 @@ import uk.ac.warwick.tabula.commands._
 import uk.ac.warwick.tabula.commands.groups.admin.ImportSmallGroupSetsFromSpreadsheetCommand._
 import uk.ac.warwick.tabula.data.Transactions._
 import uk.ac.warwick.tabula.data.model.groups._
-import uk.ac.warwick.tabula.data.model.{Department, MapLocation, NamedLocation}
+import uk.ac.warwick.tabula.data.model.{AliasedMapLocation, Department, MapLocation, NamedLocation}
+import uk.ac.warwick.tabula.helpers.Logging
 import uk.ac.warwick.tabula.permissions.Permissions
 import uk.ac.warwick.tabula.services.groups.docconversion._
 import uk.ac.warwick.tabula.services.{AutowiringSmallGroupServiceComponent, SmallGroupServiceComponent}
 import uk.ac.warwick.tabula.system.BindListener
-import uk.ac.warwick.tabula.helpers.Logging
-
 import uk.ac.warwick.tabula.system.permissions.{PermissionsChecking, PermissionsCheckingMethods, RequiresPermissionsChecking}
 
 import scala.collection.JavaConverters._
@@ -223,6 +222,10 @@ trait ImportSmallGroupSetsFromSpreadsheetBinding extends BindListener  with Logg
 										eventCommand.location = name
 										eventCommand.locationId = null
 									case MapLocation(name, lid, _) =>
+										eventCommand.location = name
+										eventCommand.locationId = lid
+									case AliasedMapLocation(displayName, MapLocation(name, lid, _)) =>
+										eventCommand.locationAlias = displayName
 										eventCommand.location = name
 										eventCommand.locationId = lid
 								}

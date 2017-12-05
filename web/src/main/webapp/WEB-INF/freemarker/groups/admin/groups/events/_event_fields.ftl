@@ -33,6 +33,9 @@
 	<@bs3form.labelled_form_group path="location" labelText="Location">
 		<@f.hidden path="locationId" />
 		<@f.input path="location" cssClass="form-control" />
+		<div class="help-block small">
+			<a href="#" id="showLocationAlias">Use a different name for this location</a>
+		</div>
 	</@bs3form.labelled_form_group>
 
 	<div class="alert alert-info" id="namedLocationAlert" style="display: none">
@@ -44,6 +47,13 @@
 			<@f.checkbox path="useNamedLocation" /> Use this location anyway
 		</@bs3form.checkbox>
 	</div>
+
+	<@bs3form.labelled_form_group path="locationAlias" labelText="Location display name" cssClass="location-alias-form-group">
+		<@f.input path="locationAlias" cssClass="form-control" />
+		<div class="help-block small">
+			<a href="#" id="removeLocationAlias">Use the standard location name</a>
+		</div>
+	</@bs3form.labelled_form_group>
 
 	<#assign moreDetailsHelpText>
 		<p>An optional 'More Details' link to the specified webpage from the student's timetable.</p>

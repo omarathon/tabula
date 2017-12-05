@@ -39,6 +39,9 @@
 		<@bs3form.labelled_form_group path="defaultLocation" labelText="Location">
 			<@f.hidden path="defaultLocationId" />
 			<@f.input path="defaultLocation" cssClass="form-control" />
+			<div class="help-block small">
+				<a href="#" id="showLocationAlias">Use a different name for this location</a>
+			</div>
 		</@bs3form.labelled_form_group>
 
 		<div class="alert alert-info" id="namedLocationAlert" style="display: none">
@@ -50,6 +53,13 @@
 				<@f.checkbox path="useNamedLocation" /> Use this location anyway
 			</@bs3form.checkbox>
 		</div>
+
+		<@bs3form.labelled_form_group path="defaultLocationAlias" labelText="Location display name" cssClass="location-alias-form-group">
+			<@f.input path="defaultLocationAlias" cssClass="form-control" />
+			<div class="help-block small">
+				<a href="#" id="removeLocationAlias">Use the standard location name</a>
+			</div>
+		</@bs3form.labelled_form_group>
 
 		<@bs3form.checkbox "resetExistingEvents">
 			<@f.checkbox path="resetExistingEvents" value="true" />

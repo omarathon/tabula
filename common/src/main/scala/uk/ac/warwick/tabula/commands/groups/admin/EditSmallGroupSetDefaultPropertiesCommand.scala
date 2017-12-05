@@ -6,7 +6,7 @@ import uk.ac.warwick.tabula.JavaImports._
 import uk.ac.warwick.tabula.commands._
 import uk.ac.warwick.tabula.commands.groups.admin.EditSmallGroupSetDefaultPropertiesCommand._
 import uk.ac.warwick.tabula.data.model.groups._
-import uk.ac.warwick.tabula.data.model.{MapLocation, Module, NamedLocation, UserGroup}
+import uk.ac.warwick.tabula.data.model._
 import uk.ac.warwick.tabula.helpers.StringUtils._
 import uk.ac.warwick.tabula.permissions.Permissions
 import uk.ac.warwick.tabula.services.{AutowiringSmallGroupServiceComponent, SmallGroupServiceComponent}
@@ -41,6 +41,7 @@ trait EditSmallGroupSetDefaultPropertiesCommandState {
 	var defaultLocationId: String = _
 	var resetExistingEvents: Boolean = false
 	var useNamedLocation: Boolean = _
+	var defaultLocationAlias: String = _
 
 	def defaultWeekRanges: Seq[WeekRange] = Option(defaultWeeks) map { weeks => WeekRange.combine(weeks.asScala.toSeq.map { _.intValue }) } getOrElse Seq()
 	def defaultWeekRanges_=(ranges: Seq[WeekRange]) {
@@ -81,6 +82,10 @@ class EditSmallGroupSetDefaultPropertiesCommandInternal(val module: Module, val 
 			case MapLocation(name, lid, _) =>
 				defaultLocation = name
 				defaultLocationId = lid
+			case AliasedMapLocation(displayName, MapLocation(name, lid, _)) =>
+				defaultLocation = name
+				defaultLocationId = lid
+				defaultLocationAlias = displayName
 		}
 
 		defaultWeekRanges = set.defaultWeekRanges
@@ -102,7 +107,11 @@ class EditSmallGroupSetDefaultPropertiesCommandInternal(val module: Module, val 
 
 		if (defaultLocation.hasText) {
 			if (defaultLocationId.hasText) {
-				set.defaultLocation = MapLocation(defaultLocation, defaultLocationId)
+				if (defaultLocationAlias.hasText) {
+					set.defaultLocation = AliasedMapLocation(defaultLocationAlias, MapLocation(defaultLocation, defaultLocationId))
+				} else {
+					set.defaultLocation = MapLocation(defaultLocation, defaultLocationId)
+				}
 			} else {
 				set.defaultLocation = NamedLocation(defaultLocation)
 			}
