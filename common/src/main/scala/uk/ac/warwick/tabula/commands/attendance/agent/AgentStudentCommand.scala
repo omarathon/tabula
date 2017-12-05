@@ -1,20 +1,18 @@
 package uk.ac.warwick.tabula.commands.attendance.agent
 
 import uk.ac.warwick.tabula.AcademicYear
-import uk.ac.warwick.tabula.commands.attendance.GroupsPoints
 import uk.ac.warwick.tabula.commands._
+import uk.ac.warwick.tabula.commands.attendance.GroupsPoints
 import uk.ac.warwick.tabula.data.model.attendance.{AttendanceMonitoringCheckpoint, AttendanceMonitoringPoint}
 import uk.ac.warwick.tabula.data.model.{StudentMember, StudentRelationshipType}
 import uk.ac.warwick.tabula.permissions.Permissions
-import uk.ac.warwick.tabula.services.attendancemonitoring.{AutowiringAttendanceMonitoringServiceComponent, AttendanceMonitoringServiceComponent}
-import uk.ac.warwick.tabula.services.{AutowiringTermServiceComponent, TermServiceComponent}
+import uk.ac.warwick.tabula.services.attendancemonitoring.{AttendanceMonitoringServiceComponent, AutowiringAttendanceMonitoringServiceComponent}
 import uk.ac.warwick.tabula.system.permissions.{PermissionsChecking, PermissionsCheckingMethods, RequiresPermissionsChecking}
 
 object AgentStudentCommand {
 	def apply(relationshipType: StudentRelationshipType, academicYear: AcademicYear, student: StudentMember) =
 		new AgentStudentCommandInternal(relationshipType, academicYear, student)
 			with AutowiringAttendanceMonitoringServiceComponent
-			with AutowiringTermServiceComponent
 			with ComposableCommand[Map[String, Seq[(AttendanceMonitoringPoint, AttendanceMonitoringCheckpoint)]]]
 			with AgentStudentPermissions
 			with AgentStudentCommandState
@@ -26,7 +24,7 @@ class AgentStudentCommandInternal(val relationshipType: StudentRelationshipType,
 	extends CommandInternal[Map[String, Seq[(AttendanceMonitoringPoint, AttendanceMonitoringCheckpoint)]]]
 	with GroupsPoints with TaskBenchmarking {
 
-	self: AttendanceMonitoringServiceComponent with TermServiceComponent =>
+	self: AttendanceMonitoringServiceComponent =>
 
 	override def applyInternal(): Map[String, Seq[(AttendanceMonitoringPoint, AttendanceMonitoringCheckpoint)]] = {
 		val points = benchmarkTask("listStudentsPoints"){

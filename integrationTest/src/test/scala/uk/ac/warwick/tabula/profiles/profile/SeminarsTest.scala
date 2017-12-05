@@ -1,7 +1,7 @@
 package uk.ac.warwick.tabula.profiles.profile
 
 import org.scalatest.GivenWhenThen
-import uk.ac.warwick.tabula.{BrowserTest, FunctionalTestAcademicYear}
+import uk.ac.warwick.tabula.{BrowserTest, AcademicYear}
 import uk.ac.warwick.tabula.web.FeaturesDriver
 
 class SeminarsTest extends BrowserTest with GivenWhenThen with FeaturesDriver with StudentProfileFixture {
@@ -14,7 +14,7 @@ class SeminarsTest extends BrowserTest with GivenWhenThen with FeaturesDriver wi
 			groupSetName = "Module 2 Tutorial",
 			formatName = "tutorial",
 			allocationMethodName = "StudentSignUp",
-			academicYear = FunctionalTestAcademicYear.current.startYear.toString
+			academicYear = AcademicYear.now().startYear.toString
 		)
 		addStudentToGroupSet(P.Student1.usercode, setId)
 

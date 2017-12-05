@@ -1,7 +1,5 @@
 package uk.ac.warwick.tabula.web.controllers.groups
 
-import org.joda.time.DateTime
-import org.joda.time.base.BaseDateTime
 import org.mockito.Mockito._
 import uk.ac.warwick.tabula._
 import uk.ac.warwick.tabula.commands.Appliable
@@ -10,7 +8,7 @@ import uk.ac.warwick.tabula.data.model.Department
 import uk.ac.warwick.tabula.groups.web.views.GroupsViewModel
 import uk.ac.warwick.tabula.groups.web.views.GroupsViewModel.ViewSetWithProgress
 import uk.ac.warwick.tabula.permissions.{Permission, PermissionsTarget}
-import uk.ac.warwick.tabula.services.{SecurityService, TermService}
+import uk.ac.warwick.tabula.services.SecurityService
 import uk.ac.warwick.tabula.web.controllers.groups.admin.GroupsAdminDepartmentController
 
 import scala.collection.immutable.ListMap
@@ -18,13 +16,11 @@ import scala.collection.immutable.ListMap
 class AdminDepartmentHomeControllerTest extends TestBase with Mockito{
 
 	def createController: GroupsAdminDepartmentController = {
-		val controller = new GroupsAdminDepartmentController() {
-			override val termService: TermService = mock[TermService]
-		}
+		val controller = new GroupsAdminDepartmentController
 		controller.securityService = smartMock[SecurityService]
 		controller.features = emptyFeatures
 		when(controller.securityService.can(any[CurrentUser], any[Permission], any[PermissionsTarget])).thenReturn{true}
-		when(controller.termService.getAcademicWeeksForYear(any[BaseDateTime])).thenReturn(Nil)
+//		when(controller.termService.getAcademicWeeksForYear(any[BaseDateTime])).thenReturn(Nil)
 		controller
 	}
 
@@ -37,7 +33,7 @@ class AdminDepartmentHomeControllerTest extends TestBase with Mockito{
 			val cmd = new Appliable[AdminSmallGroupsHomeInformation] with AdminSmallGroupsHomeCommandState {
 				val department: Department = Fixtures.department("in")
 				def user = NoCurrentUser()
-				def academicYear: AcademicYear = AcademicYear.guessSITSAcademicYearByDate(DateTime.now)
+				def academicYear: AcademicYear = AcademicYear.now()
 
 				def apply(): AdminSmallGroupsHomeInformation = {
 					AdminSmallGroupsHomeInformation(canAdminDepartment = false, Seq(groupSet1.module), Seq(ViewSetWithProgress(groupSet1, Nil, GroupsViewModel.Tutor, null, None, ListMap())), Nil)
@@ -62,7 +58,7 @@ class AdminDepartmentHomeControllerTest extends TestBase with Mockito{
 			val cmd = new Appliable[AdminSmallGroupsHomeInformation] with AdminSmallGroupsHomeCommandState {
 				val department: Department = Fixtures.department("in")
 				def user = NoCurrentUser()
-				def academicYear: AcademicYear = AcademicYear.guessSITSAcademicYearByDate(DateTime.now)
+				def academicYear: AcademicYear = AcademicYear.now()
 
 				def apply(): AdminSmallGroupsHomeInformation = {
 					AdminSmallGroupsHomeInformation(canAdminDepartment = false, Seq(groupSet1.module), Seq(ViewSetWithProgress(groupSet1, Nil, GroupsViewModel.Tutor, null, None, ListMap())), Nil)

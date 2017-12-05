@@ -5,19 +5,16 @@ import uk.ac.warwick.tabula.JavaImports.JArrayList
 import uk.ac.warwick.tabula.data.model._
 import uk.ac.warwick.tabula.data.model.attendance._
 import uk.ac.warwick.tabula.data.{MeetingRecordDao, MeetingRecordDaoComponent}
-import uk.ac.warwick.tabula.services.{RelationshipService, RelationshipServiceComponent, TermService, TermServiceComponent}
+import uk.ac.warwick.tabula.services.{RelationshipService, RelationshipServiceComponent}
 import uk.ac.warwick.tabula.{AcademicYear, Fixtures, Mockito, TestBase}
-import uk.ac.warwick.util.termdates.Term.TermType
-import uk.ac.warwick.util.termdates.TermImpl
 
 class AttendanceMonitoringMeetingRecordServiceTest extends TestBase with Mockito {
 
 	trait ServiceTestSupport extends MeetingRecordDaoComponent with AttendanceMonitoringServiceComponent
-		with RelationshipServiceComponent with TermServiceComponent {
+		with RelationshipServiceComponent {
 
 		val meetingRecordDao: MeetingRecordDao = smartMock[MeetingRecordDao]
 		var relationshipService: RelationshipService = smartMock[RelationshipService]
-		val termService: TermService = smartMock[TermService]
 		val attendanceMonitoringService: AttendanceMonitoringService = smartMock[AttendanceMonitoringService]
 	}
 
@@ -25,8 +22,6 @@ class AttendanceMonitoringMeetingRecordServiceTest extends TestBase with Mockito
 		val service = new AbstractAttendanceMonitoringMeetingRecordService with ServiceTestSupport
 
 		val academicYear2013 = AcademicYear(2013)
-		val autumnTerm = new TermImpl(null, dateTime(2013, 1, 7), null, TermType.autumn)
-		service.termService.getTermFromDateIncludingVacations(any[DateTime]) returns autumnTerm
 
 		val student: StudentMember = Fixtures.student("1234")
 
@@ -48,7 +43,7 @@ class AttendanceMonitoringMeetingRecordServiceTest extends TestBase with Mockito
 		meeting.relationship = meetingRelationship
 		meeting.format = MeetingFormat.FaceToFace
 		meeting.creator = Fixtures.student("student", "student")
-		meeting.meetingDate = dateTime(2013, 1, 7)
+		meeting.meetingDate = dateTime(2014, 1, 7)
 		meeting.approvals = JArrayList(Fixtures.meetingRecordApproval(MeetingApprovalState.Approved))
 
 		val meetingPoint = new AttendanceMonitoringPoint

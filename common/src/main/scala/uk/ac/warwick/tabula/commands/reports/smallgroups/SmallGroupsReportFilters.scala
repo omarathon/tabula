@@ -1,21 +1,19 @@
 package uk.ac.warwick.tabula.commands.reports.smallgroups
 
-import org.joda.time.DateTime
+import org.joda.time.{DateTime, LocalDate}
 import uk.ac.warwick.spring.Wire
 import uk.ac.warwick.tabula.AcademicYear
 import uk.ac.warwick.tabula.data.model.attendance.AttendanceState
-import uk.ac.warwick.tabula.services.TermService
 import uk.ac.warwick.tabula.services.attendancemonitoring.AttendanceMonitoringService
 
 object SmallGroupsReportFilters {
 
-	val termService: TermService = Wire[TermService]
 	val attendanceMonitoringService: AttendanceMonitoringService = Wire[AttendanceMonitoringService]
 
 	def identity(result: AllSmallGroupsReportCommandResult): AllSmallGroupsReportCommandResult = result
 
 	def unrecorded(academicYear: AcademicYear)(result: AllSmallGroupsReportCommandResult): AllSmallGroupsReportCommandResult = {
-		val thisWeek = termService.getAcademicWeekForAcademicYear(DateTime.now, academicYear)
+		val thisWeek = academicYear.weekForDate(LocalDate.now).weekNumber
 		val thisDay = DateTime.now.getDayOfWeek
 		val unrecordedMap = result.attendance.map{ case(studentData, eventMap) =>
 			studentData -> eventMap.filter { case (event, state) =>

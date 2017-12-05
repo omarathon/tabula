@@ -15,10 +15,10 @@ class ScalaRestrictionTest extends TestBase {
 
 		val mrRestriction: Option[ScalaRestriction] = inIfNotEmptyMultipleProperties(
 			Seq("moduleRegistration.module", "moduleRegistration.year"),
-			Seq(modules, Seq(AcademicYear.guessSITSAcademicYearByDate(DateTime.now)))
+			Seq(modules, Seq(AcademicYear.now()))
 		)
 
-		val currentAcademicYear = AcademicYear.guessSITSAcademicYearByDate(DateTime.now)
+		val currentAcademicYear = AcademicYear.now()
 		mrRestriction.get.toString should be (s"ScalaRestriction[underlying=(moduleRegistration.module in (Module[advanced foraging], Module[fungal forays]) and moduleRegistration.year in (${currentAcademicYear.toString})),aliases=Map()]")
 	}
 
@@ -28,7 +28,7 @@ class ScalaRestrictionTest extends TestBase {
 
 		val mrRestriction: Option[ScalaRestriction] = inIfNotEmptyMultipleProperties(
 			Seq("moduleRegistration.module", "moduleRegistration.year"),
-			Seq(modules, Seq(AcademicYear.guessSITSAcademicYearByDate(DateTime.now)))
+			Seq(modules, Seq(AcademicYear.now()))
 		)
 
 		mrRestriction should be (None)

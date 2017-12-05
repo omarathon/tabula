@@ -49,7 +49,7 @@ class AddAssignmentsCommandTest extends TestBase with Mockito {
 			val assessmentService: AssessmentService = thisAssignmentService
 		}
 
-		validator.academicYear = new AcademicYear(2012)
+		validator.academicYear = AcademicYear(2012)
 		validator.assignmentItems = Seq(
 			item(upstream1, include = true, optionsId = "A"),
 			item(upstream2, include = false, optionsId = null),
@@ -72,7 +72,7 @@ class AddAssignmentsCommandTest extends TestBase with Mockito {
 			val assessmentMembershipService: AssessmentMembershipService = thisAssignmentMembershipService
 		}
 
-		cmd.academicYear = new AcademicYear(2012)
+		cmd.academicYear = AcademicYear(2012)
 		cmd.assignmentItems = Seq(
 			item(upstream1, include = true, optionsId = "A"),
 			item(upstream2, include = false, optionsId = null),

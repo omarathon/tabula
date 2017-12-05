@@ -1,22 +1,21 @@
 package uk.ac.warwick.tabula.commands.attendance.manage
 
+import org.joda.time.LocalDate
 import org.springframework.validation.Errors
+import uk.ac.warwick.tabula.AcademicYear
+import uk.ac.warwick.tabula.JavaImports._
+import uk.ac.warwick.tabula.data.model._
+import uk.ac.warwick.tabula.data.model.attendance.{AttendanceMonitoringPoint, AttendanceMonitoringPointStyle, AttendanceMonitoringPointType, AttendanceMonitoringScheme}
+import uk.ac.warwick.tabula.data.model.groups.DayOfWeek
 import uk.ac.warwick.tabula.helpers.StringUtils._
 import uk.ac.warwick.tabula.services.attendancemonitoring.AttendanceMonitoringServiceComponent
+
+import scala.collection.JavaConverters._
 import scala.collection.mutable
-import uk.ac.warwick.tabula.data.model.{Assignment, Module, Department, MeetingFormat, StudentRelationshipType}
-import uk.ac.warwick.tabula.JavaImports._
-import org.joda.time.LocalDate
-import uk.ac.warwick.tabula.services.TermServiceComponent
-import uk.ac.warwick.tabula.AcademicYear
-import uk.ac.warwick.tabula.data.model.groups.DayOfWeek
-import uk.ac.warwick.tabula.data.model.attendance.{AttendanceMonitoringPointType, AttendanceMonitoringPoint, AttendanceMonitoringPointStyle, AttendanceMonitoringScheme}
-import collection.JavaConverters._
-import uk.ac.warwick.util.termdates.Term
 
 trait AttendanceMonitoringPointValidation {
 
-	self: TermServiceComponent with AttendanceMonitoringServiceComponent =>
+	self: AttendanceMonitoringServiceComponent =>
 
 	def validateSchemePointStyles(errors: Errors, style: AttendanceMonitoringPointStyle, schemes: Seq[AttendanceMonitoringScheme]): Unit = {
 		if (schemes.exists(_.pointStyle != style)) {
@@ -32,10 +31,10 @@ trait AttendanceMonitoringPointValidation {
 		}
 	}
 
-	def validateWeek(errors: Errors, week: Int, bindPoint: String) {
+	def validateWeek(errors: Errors, week: Int, academicYear: AcademicYear, bindPoint: String) {
 		week match {
-			case y if y < 1  => errors.rejectValue(bindPoint, "attendanceMonitoringPoint.week.min")
-			case y if y > 52 => errors.rejectValue(bindPoint, "attendanceMonitoringPoint.week.max")
+			case y if y < academicYear.weeks.keys.min => errors.rejectValue(bindPoint, "attendanceMonitoringPoint.week.min")
+			case y if y > academicYear.weeks.keys.max => errors.rejectValue(bindPoint, "attendanceMonitoringPoint.week.max")
 			case _ =>
 		}
 	}
@@ -49,12 +48,10 @@ trait AttendanceMonitoringPointValidation {
 	def validateDate(errors: Errors, date: LocalDate, academicYear: AcademicYear, bindPoint: String) {
 		if (date == null) {
 			errors.rejectValue(bindPoint, "NotEmpty")
-		} else {
-			termService.getAcademicWeekForAcademicYear(date.toDateTimeAtStartOfDay, academicYear) match {
-				case Term.WEEK_NUMBER_BEFORE_START => errors.rejectValue(bindPoint, "attendanceMonitoringPoint.date.min")
-				case Term.WEEK_NUMBER_AFTER_END => errors.rejectValue(bindPoint, "attendanceMonitoringPoint.date.max")
-				case _ =>
-			}
+		} else if (date.isBefore(academicYear.firstDay)) {
+			errors.rejectValue(bindPoint, "attendanceMonitoringPoint.date.min")
+		} else if (date.isAfter(academicYear.lastDay)) {
+			errors.rejectValue(bindPoint, "attendanceMonitoringPoint.date.max")
 		}
 	}
 
@@ -78,15 +75,15 @@ trait AttendanceMonitoringPointValidation {
 		department: Department
 	) {
 
-		if (meetingRelationships.size == 0) {
+		if (meetingRelationships.isEmpty) {
 			errors.rejectValue("meetingRelationships", "attendanceMonitoringPoint.meetingType.meetingRelationships.empty")
 		} else {
 			val invalidRelationships = meetingRelationships.filter(r => !department.displayedStudentRelationshipTypes.contains(r))
-			if (invalidRelationships.size > 0)
+			if (invalidRelationships.nonEmpty)
 				errors.rejectValue("meetingRelationships", "attendanceMonitoringPoint.meetingType.meetingRelationships.invalid", invalidRelationships.mkString(", "))
 		}
 
-		if (meetingFormats.size == 0) {
+		if (meetingFormats.isEmpty) {
 			errors.rejectValue("meetingFormats", "attendanceMonitoringPoint.meetingType.meetingFormats.empty")
 		}
 
@@ -106,7 +103,7 @@ trait AttendanceMonitoringPointValidation {
 			errors.rejectValue("smallGroupEventQuantity", "attendanceMonitoringPoint.pointType.quantity")
 		}
 
-		if (!isAnySmallGroupEventModules && (smallGroupEventModules == null || smallGroupEventModules.size == 0)) {
+		if (!isAnySmallGroupEventModules && (smallGroupEventModules == null || smallGroupEventModules.isEmpty)) {
 			errors.rejectValue("smallGroupEventModules", "attendanceMonitoringPoint.smallGroupType.smallGroupModules.empty")
 		}
 
@@ -151,8 +148,8 @@ trait AttendanceMonitoringPointValidation {
 		academicYear: AcademicYear,
 		bindPoint: String = "startDate"
 	): Unit = {
-		val pointTerm = termService.getTermFromDateIncludingVacations(startDate.toDateTimeAtStartOfDay)
-		if (attendanceMonitoringService.findReports(studentIds, academicYear, pointTerm.getTermTypeAsString).size > 0) {
+		val pointTerm = academicYear.termOrVacationForDate(startDate)
+		if (attendanceMonitoringService.findReports(studentIds, academicYear, pointTerm.periodType.toString).nonEmpty) {
 			if (bindPoint.isEmpty)
 				errors.reject("attendanceMonitoringPoint.hasReportedCheckpoints.add")
 			else
@@ -167,8 +164,8 @@ trait AttendanceMonitoringPointValidation {
 		academicYear: AcademicYear,
 		bindPoint: String = "startWeek"
 	): Unit = {
-		val weeksForYear = termService.getAcademicWeeksForYear(academicYear.dateInTermOne).toMap
-		val startDate = weeksForYear(startWeek).getStart.withDayOfWeek(DayOfWeek.Monday.jodaDayOfWeek).toLocalDate
+		val weeksForYear = academicYear.weeks
+		val startDate = weeksForYear(startWeek).firstDay
 		validateCanPointBeEditedByDate(errors, startDate, studentIds, academicYear, bindPoint)
 	}
 
@@ -180,7 +177,7 @@ trait AttendanceMonitoringPointValidation {
 		schemes: Seq[AttendanceMonitoringScheme],
 		global: Boolean = false
 	): Unit = {
-		val allPoints = schemes.map(_.points.asScala).flatten
+		val allPoints = schemes.flatMap(_.points.asScala)
 		if (allPoints.exists(point => point.name == name && point.startWeek == startWeek && point.endWeek == endWeek)) {
 			if (global) {
 				errors.reject("attendanceMonitoringPoint.name.weeks.exists.global", Array(name, startWeek.toString, endWeek.toString), null)
@@ -199,7 +196,7 @@ trait AttendanceMonitoringPointValidation {
 		schemes: Seq[AttendanceMonitoringScheme],
 		global: Boolean = false
 	): Unit = {
-		val allPoints = schemes.map(_.points.asScala).flatten
+		val allPoints = schemes.flatMap(_.points.asScala)
 		if (allPoints.exists(point => point.name == name && point.startDate == startDate && point.endDate == endDate)) {
 			if (global) {
 				errors.reject("attendanceMonitoringPoint.name.dates.exists.global", Array(name, startDate, endDate), null)
@@ -252,7 +249,7 @@ trait AttendanceMonitoringPointValidation {
 		meetingFormats: mutable.Set[MeetingFormat],
 		schemes: Seq[AttendanceMonitoringScheme]
 	): Unit = {
-		val allPoints = schemes.map(_.points.asScala).flatten
+		val allPoints = schemes.flatMap(_.points.asScala)
 		if (allPoints.exists(point =>
 			point.pointType == AttendanceMonitoringPointType.Meeting &&
 				datesOverlap(point, startDate, endDate) &&
@@ -294,7 +291,7 @@ trait AttendanceMonitoringPointValidation {
 		isAnySmallGroupEventModules: Boolean,
 		schemes: Seq[AttendanceMonitoringScheme]
 	): Unit = {
-		val allPoints = schemes.map(_.points.asScala).flatten
+		val allPoints = schemes.flatMap(_.points.asScala)
 		if (allPoints.exists(point =>
 			point.pointType == AttendanceMonitoringPointType.SmallGroup &&
 				datesOverlap(point, startDate, endDate) &&
@@ -344,7 +341,7 @@ trait AttendanceMonitoringPointValidation {
 		isAssignmentSubmissionDisjunction: Boolean,
 		schemes: Seq[AttendanceMonitoringScheme]
 	): Unit = {
-		val allPoints = schemes.map(_.points.asScala).flatten
+		val allPoints = schemes.flatMap(_.points.asScala)
 		if (allPoints.exists(point =>
 			point.pointType == AttendanceMonitoringPointType.AssignmentSubmission &&
 				datesOverlap(point, startDate, endDate) &&

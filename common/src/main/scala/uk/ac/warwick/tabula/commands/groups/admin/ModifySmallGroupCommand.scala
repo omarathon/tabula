@@ -30,7 +30,7 @@ object ModifySmallGroupCommand {
 			with AutowiringSmallGroupServiceComponent
 }
 
-trait ModifySmallGroupCommandState extends CurrentSITSAcademicYear {
+trait ModifySmallGroupCommandState extends CurrentAcademicYear {
 	def module: Module
 	def set: SmallGroupSet
 

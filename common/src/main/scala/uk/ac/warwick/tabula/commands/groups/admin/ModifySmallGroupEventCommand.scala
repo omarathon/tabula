@@ -41,7 +41,7 @@ object ModifySmallGroupEventCommand {
 			with AutowiringSmallGroupServiceComponent
 }
 
-trait ModifySmallGroupEventCommandState extends CurrentSITSAcademicYear {
+trait ModifySmallGroupEventCommandState extends CurrentAcademicYear {
 	def module: Module
 	def set: SmallGroupSet
 	def group: SmallGroup
@@ -229,6 +229,17 @@ trait ModifySmallGroupEventValidation extends SelfValidating {
 		if (location.safeContains("|")) errors.rejectValue("location", "smallGroupEvent.location.invalidChar")
 
 		if (location.hasText && !locationId.hasText && !useNamedLocation) errors.rejectValue("useNamedLocation", "smallGroupEvent.location.named")
+
+		// Verify that the day we're asking for actually exists
+		if (weekRanges.nonEmpty && day != null) {
+			if (academicYear.weeks(weekRanges.min.minWeek).firstDay.getDayOfWeek > day.jodaDayOfWeek) {
+				errors.rejectValue("weeks", "smallGroupEvent.weeks.invalidForThisYear", Array[Object](weekRanges.min.minWeek: JInteger, day.name), s"There is no $day in week ${weekRanges.min.minWeek} for this year")
+			}
+
+			if (academicYear.weeks(weekRanges.max.maxWeek).lastDay.getDayOfWeek < day.jodaDayOfWeek) {
+				errors.rejectValue("weeks", "smallGroupEvent.weeks.invalidForThisYear", Array[Object](weekRanges.max.maxWeek: JInteger, day.name), s"There is no $day in week ${weekRanges.max.maxWeek} for this year")
+			}
+		}
 	}
 }
 
@@ -290,7 +301,7 @@ trait GeneratesNotificationsForSmallGroupEventOccurrence {
 	def generateNotifications(occurrence: SmallGroupEventOccurrence): Seq[ScheduledNotification[_]] = {
 		// Only generate notifications for sets that collect attendance and occurrences that are in valid weeks...
 		if (occurrence.event.group.groupSet.collectAttendance && occurrence.event.allWeeks.contains(occurrence.week)) {
-			occurrence.dateTime.map(dt => {
+			occurrence.startDateTime.map(_.toDateTime).map(dt => {
 				// ... and have a valid date time
 				val endOfEvent = if (occurrence.event.endTime != null)
 						dt.withTime(occurrence.event.endTime.getHourOfDay, occurrence.event.endTime.getMinuteOfHour, 0, 0)

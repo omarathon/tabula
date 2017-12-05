@@ -76,7 +76,7 @@ trait ViewMemberTimetableState {
 
 // Request parameters
 trait ViewMemberTimetableRequest extends ViewMemberTimetableState
-	with CurrentSITSAcademicYear
+	with CurrentAcademicYear
 
 trait ViewMemberTimetablePermissions extends RequiresPermissionsChecking with PermissionsCheckingMethods {
 	self: ViewMemberTimetableState =>
@@ -97,7 +97,7 @@ trait ViewMemberTimetableValidation extends SelfValidating {
 }
 
 trait ViewStaffMemberTimetableCommandFactory {
-	def apply(staffMember: StaffMember): Appliable[ReturnType] with CurrentSITSAcademicYear
+	def apply(staffMember: StaffMember): Appliable[ReturnType] with CurrentAcademicYear
 }
 
 class ViewStaffMemberTimetableCommandFactoryImpl(currentUser: CurrentUser)
@@ -111,7 +111,7 @@ class ViewStaffMemberTimetableCommandFactoryImpl(currentUser: CurrentUser)
 }
 
 trait ViewStudentMemberTimetableCommandFactory {
-	def apply(student: StudentMember): Appliable[ReturnType] with CurrentSITSAcademicYear
+	def apply(student: StudentMember): Appliable[ReturnType] with CurrentAcademicYear
 }
 
 class ViewStudentMemberTimetableCommandFactoryImpl(currentUser: CurrentUser)

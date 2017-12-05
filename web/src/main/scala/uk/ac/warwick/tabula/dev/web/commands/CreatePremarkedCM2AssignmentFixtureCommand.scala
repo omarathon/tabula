@@ -64,7 +64,7 @@ class CreatePremarkedCM2AssignmentFixtureCommand extends CommandInternal[Assignm
 		val markersBUsers: Seq[User] = JArrayList().asScala
 
 		val oldSingleMarkerWorkflow = SingleMarkerWorkflow("Old single marker workflow", module.adminDepartment, markersAUsers)
-		oldSingleMarkerWorkflow.academicYear = AcademicYear.guessSITSAcademicYearByDate(DateTime.now).previous
+		oldSingleMarkerWorkflow.academicYear = AcademicYear.now().previous
 		oldSingleMarkerWorkflow.isReusable = true
 		cm2MarkingWorkflowService.save(oldSingleMarkerWorkflow)
 

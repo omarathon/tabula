@@ -6,23 +6,22 @@ import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.stereotype.Controller
 import org.springframework.validation.Errors
 import org.springframework.web.bind.annotation.{InitBinder, ModelAttribute, PathVariable, RequestMapping}
-import uk.ac.warwick.tabula.AcademicYear
-import uk.ac.warwick.tabula.commands.attendance.{GroupsPoints, StudentRecordCommand}
 import uk.ac.warwick.tabula.attendance.web.Routes
-import uk.ac.warwick.tabula.web.controllers.attendance.{AttendanceController, HasMonthNames}
+import uk.ac.warwick.tabula.commands.attendance.{GroupsPoints, StudentRecordCommand}
 import uk.ac.warwick.tabula.commands.{Appliable, PopulateOnForm, SelfValidating}
 import uk.ac.warwick.tabula.data.model.StudentMember
 import uk.ac.warwick.tabula.data.model.attendance.{AttendanceMonitoringCheckpoint, AttendanceMonitoringNote, AttendanceMonitoringPoint}
-import uk.ac.warwick.tabula.services.{AutowiringMaintenanceModeServiceComponent, AutowiringTermServiceComponent, AutowiringUserSettingsServiceComponent}
 import uk.ac.warwick.tabula.services.attendancemonitoring.AttendanceMonitoringService
+import uk.ac.warwick.tabula.services.{AutowiringMaintenanceModeServiceComponent, AutowiringUserSettingsServiceComponent}
 import uk.ac.warwick.tabula.web.Mav
 import uk.ac.warwick.tabula.web.controllers.AcademicYearScopedController
-import uk.ac.warwick.util.termdates.Term
+import uk.ac.warwick.tabula.web.controllers.attendance.{AttendanceController, HasMonthNames}
+import uk.ac.warwick.tabula.{AcademicPeriod, AcademicYear}
 
 @Controller
 @RequestMapping(Array("/attendance/profile/{student}/{academicYear}/record"))
 class ProfileRecordController extends AttendanceController
-	with HasMonthNames with GroupsPoints with AutowiringTermServiceComponent
+	with HasMonthNames with GroupsPoints
 	with AcademicYearScopedController with AutowiringUserSettingsServiceComponent with AutowiringMaintenanceModeServiceComponent {
 
 	@Autowired var attendanceMonitoringService: AttendanceMonitoringService = _
@@ -60,11 +59,11 @@ class ProfileRecordController extends AttendanceController
 	}
 
 	@ModelAttribute("reportedPointMap")
-	def reportedPointMap(@PathVariable academicYear: AcademicYear, @PathVariable student: StudentMember): Map[AttendanceMonitoringPoint, Option[Term]] = {
+	def reportedPointMap(@PathVariable academicYear: AcademicYear, @PathVariable student: StudentMember): Map[AttendanceMonitoringPoint, Option[AcademicPeriod]] = {
 		val nonReportedTerms = attendanceMonitoringService.findNonReportedTerms(Seq(mandatory(student)), mandatory(academicYear))
 		points.map{ point => point -> {
-			val term = termService.getTermFromDateIncludingVacations(point.startDate.toDateTimeAtStartOfDay)
-			if (nonReportedTerms.contains(term.getTermTypeAsString)) {
+			val term = point.scheme.academicYear.termOrVacationForDate(point.startDate)
+			if (nonReportedTerms.contains(term.periodType.toString)) {
 				None
 			} else {
 				Option(term)

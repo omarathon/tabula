@@ -1,6 +1,5 @@
 package uk.ac.warwick.tabula.web.controllers.groups.admin
 
-import org.joda.time.DateTime
 import org.springframework.stereotype.Controller
 import org.springframework.web.bind.annotation.{ModelAttribute, PathVariable, RequestMapping}
 import uk.ac.warwick.tabula.commands.Appliable
@@ -44,7 +43,7 @@ class ViewDepartmentAttendanceController extends AbstractViewDepartmentAttendanc
 
 	@ModelAttribute("adminCommand")
 	def command(@PathVariable department: Department, @ModelAttribute("activeAcademicYear") academicYear: Option[AcademicYear], user: CurrentUser) =
-		ViewDepartmentAttendanceCommand(mandatory(department), academicYear.getOrElse(AcademicYear.guessSITSAcademicYearByDate(DateTime.now)), user)
+		ViewDepartmentAttendanceCommand(mandatory(department), academicYear.getOrElse(AcademicYear.now()), user)
 
 }
 

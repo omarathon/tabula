@@ -4,7 +4,6 @@ import org.joda.time.{DateTime, DateTimeConstants}
 import uk.ac.warwick.tabula.data.AttendanceMonitoringStudentData
 import uk.ac.warwick.tabula.data.model.{Department, Notification}
 import uk.ac.warwick.tabula.data.model.attendance.AttendanceMonitoringScheme
-import uk.ac.warwick.tabula.services.TermServiceImpl
 import uk.ac.warwick.tabula.services.attendancemonitoring.AttendanceMonitoringService
 import uk.ac.warwick.tabula.{AcademicYear, Fixtures, Mockito, TestBase}
 import uk.ac.warwick.userlookup.AnonymousUser
@@ -16,7 +15,6 @@ class AttendanceMonitoringUnrecordedNotificationTest extends TestBase with Mocki
 	@Test def titlePoints() {
 		val notification = Notification.init(new AttendanceMonitoringUnrecordedPointsNotification, new AnonymousUser, department)
 		notification.attendanceMonitoringService = mock[AttendanceMonitoringService]
-		notification.termService = new TermServiceImpl
 		notification.created = new DateTime(2014, DateTimeConstants.NOVEMBER, 15, 9, 18, 27, 0)
 
 		val scheme = new AttendanceMonitoringScheme
@@ -25,7 +23,7 @@ class AttendanceMonitoringUnrecordedNotificationTest extends TestBase with Mocki
 			Fixtures.attendanceMonitoringPoint(scheme)
 		)
 
-		notification.attendanceMonitoringService.findUnrecordedPoints(department, new AcademicYear(2014), notification.created.minusDays(7).toLocalDate) returns unrecorded
+		notification.attendanceMonitoringService.findUnrecordedPoints(department, AcademicYear(2014), notification.created.minusDays(7).toLocalDate) returns unrecorded
 
 		notification.title should be ("1 monitoring point needs recording")
 	}
@@ -33,7 +31,6 @@ class AttendanceMonitoringUnrecordedNotificationTest extends TestBase with Mocki
 	@Test def titlePointsPlural() {
 		val notification = Notification.init(new AttendanceMonitoringUnrecordedPointsNotification, new AnonymousUser, department)
 		notification.attendanceMonitoringService = mock[AttendanceMonitoringService]
-		notification.termService = new TermServiceImpl
 		notification.created = new DateTime(2014, DateTimeConstants.NOVEMBER, 15, 9, 18, 27, 0)
 
 		val scheme = new AttendanceMonitoringScheme
@@ -42,7 +39,7 @@ class AttendanceMonitoringUnrecordedNotificationTest extends TestBase with Mocki
 			Fixtures.attendanceMonitoringPoint(scheme, startWeek = 2, endWeek = 4)
 		)
 
-		notification.attendanceMonitoringService.findUnrecordedPoints(department, new AcademicYear(2014), notification.created.minusDays(7).toLocalDate) returns unrecorded
+		notification.attendanceMonitoringService.findUnrecordedPoints(department, AcademicYear(2014), notification.created.minusDays(7).toLocalDate) returns unrecorded
 
 		notification.title should be ("2 monitoring points need recording")
 	}
@@ -50,7 +47,6 @@ class AttendanceMonitoringUnrecordedNotificationTest extends TestBase with Mocki
 	@Test def titleStudents() {
 		val notification = Notification.init(new AttendanceMonitoringUnrecordedStudentsNotification, new AnonymousUser, department)
 		notification.attendanceMonitoringService = mock[AttendanceMonitoringService]
-		notification.termService = new TermServiceImpl
 		notification.created = new DateTime(2014, DateTimeConstants.NOVEMBER, 15, 9, 18, 27, 0)
 
 		val unrecorded = Seq(
@@ -68,7 +64,7 @@ class AttendanceMonitoringUnrecordedNotificationTest extends TestBase with Mocki
 			)
 		)
 
-		notification.attendanceMonitoringService.findUnrecordedStudents(department, new AcademicYear(2014), notification.created.toLocalDate) returns unrecorded
+		notification.attendanceMonitoringService.findUnrecordedStudents(department, AcademicYear(2014), notification.created.toLocalDate) returns unrecorded
 
 		notification.title should be ("1 student needs monitoring points recording")
 	}
@@ -76,7 +72,6 @@ class AttendanceMonitoringUnrecordedNotificationTest extends TestBase with Mocki
 	@Test def titleStudentsPlural() {
 		val notification = Notification.init(new AttendanceMonitoringUnrecordedStudentsNotification, new AnonymousUser, department)
 		notification.attendanceMonitoringService = mock[AttendanceMonitoringService]
-		notification.termService = new TermServiceImpl
 		notification.created = new DateTime(2014, DateTimeConstants.NOVEMBER, 15, 9, 18, 27, 0)
 
 		val unrecorded = Seq(
@@ -106,7 +101,7 @@ class AttendanceMonitoringUnrecordedNotificationTest extends TestBase with Mocki
 			)
 		)
 
-		notification.attendanceMonitoringService.findUnrecordedStudents(department, new AcademicYear(2014), notification.created.toLocalDate) returns unrecorded
+		notification.attendanceMonitoringService.findUnrecordedStudents(department, AcademicYear(2014), notification.created.toLocalDate) returns unrecorded
 
 		notification.title should be ("2 students need monitoring points recording")
 	}

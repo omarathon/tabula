@@ -1,19 +1,19 @@
 package uk.ac.warwick.tabula.commands.attendance.view
 
+import org.hibernate.criterion.Order
+import org.hibernate.criterion.Order._
 import org.springframework.validation.BindingResult
+import uk.ac.warwick.tabula.JavaImports._
+import uk.ac.warwick.tabula.commands.attendance.{GroupedPoint, GroupsPoints}
+import uk.ac.warwick.tabula.commands._
 import uk.ac.warwick.tabula.data.AttendanceMonitoringStudentData
 import uk.ac.warwick.tabula.data.model._
-import uk.ac.warwick.tabula.services.attendancemonitoring.{AutowiringAttendanceMonitoringServiceComponent, AttendanceMonitoringServiceComponent}
-import uk.ac.warwick.tabula.system.BindListener
-import uk.ac.warwick.tabula.{CurrentUser, AcademicYear}
-import uk.ac.warwick.tabula.services.{AutowiringProfileServiceComponent, ProfileServiceComponent, TermServiceComponent, AutowiringTermServiceComponent}
-import uk.ac.warwick.tabula.commands.{TaskBenchmarking, CommandInternal, Unaudited, ReadOnly, ComposableCommand}
-import uk.ac.warwick.tabula.commands.attendance.{GroupsPoints, GroupedPoint}
-import uk.ac.warwick.tabula.system.permissions.{PermissionsChecking, PermissionsCheckingMethods, RequiresPermissionsChecking}
 import uk.ac.warwick.tabula.permissions.Permissions
-import org.hibernate.criterion.Order._
-import org.hibernate.criterion.Order
-import uk.ac.warwick.tabula.JavaImports._
+import uk.ac.warwick.tabula.services.attendancemonitoring.{AttendanceMonitoringServiceComponent, AutowiringAttendanceMonitoringServiceComponent}
+import uk.ac.warwick.tabula.services.{AutowiringProfileServiceComponent, ProfileServiceComponent}
+import uk.ac.warwick.tabula.system.BindListener
+import uk.ac.warwick.tabula.system.permissions.{PermissionsChecking, PermissionsCheckingMethods, RequiresPermissionsChecking}
+import uk.ac.warwick.tabula.{AcademicYear, CurrentUser}
 
 case class FilterMonitoringPointsCommandResult(
 	studentDatas: Seq[AttendanceMonitoringStudentData],
@@ -24,7 +24,6 @@ object FilterMonitoringPointsCommand {
 	def apply(department: Department, academicYear: AcademicYear, user: CurrentUser) =
 		new FilterMonitoringPointsCommandInternal(department, academicYear, user)
 			with AutowiringAttendanceMonitoringServiceComponent
-			with AutowiringTermServiceComponent
 			with AutowiringProfileServiceComponent
 			with ComposableCommand[FilterMonitoringPointsCommandResult]
 			with FilterMonitoringPointsPermissions
@@ -36,7 +35,7 @@ object FilterMonitoringPointsCommand {
 class FilterMonitoringPointsCommandInternal(val department: Department, val academicYear: AcademicYear, val user: CurrentUser)
 	extends CommandInternal[FilterMonitoringPointsCommandResult] with GroupsPoints with TaskBenchmarking {
 
-	self: ProfileServiceComponent with FilterMonitoringPointsCommandState with AttendanceMonitoringServiceComponent with TermServiceComponent =>
+	self: ProfileServiceComponent with FilterMonitoringPointsCommandState with AttendanceMonitoringServiceComponent =>
 
 	override def applyInternal(): FilterMonitoringPointsCommandResult = {
 		if (serializeFilter.isEmpty) {

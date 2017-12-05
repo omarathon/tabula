@@ -2,15 +2,14 @@ package uk.ac.warwick.tabula.commands.attendance.manage
 
 import org.joda.time.DateTime
 import org.springframework.validation.Errors
-import uk.ac.warwick.tabula.{ItemNotFoundException, AcademicYear}
 import uk.ac.warwick.tabula.commands._
 import uk.ac.warwick.tabula.data.model.Department
 import uk.ac.warwick.tabula.data.model.attendance.{AttendanceMonitoringPoint, AttendanceMonitoringPointStyle, AttendanceMonitoringPointType, AttendanceMonitoringScheme}
-import uk.ac.warwick.tabula.data.model.groups.DayOfWeek
 import uk.ac.warwick.tabula.permissions.Permissions
 import uk.ac.warwick.tabula.services._
 import uk.ac.warwick.tabula.services.attendancemonitoring.{AttendanceMonitoringServiceComponent, AutowiringAttendanceMonitoringServiceComponent}
 import uk.ac.warwick.tabula.system.permissions.{PermissionsChecking, PermissionsCheckingMethods, RequiresPermissionsChecking}
+import uk.ac.warwick.tabula.{AcademicYear, ItemNotFoundException}
 
 import scala.collection.JavaConverters._
 
@@ -20,7 +19,6 @@ object EditAttendancePointCommand {
 			with ComposableCommand[Seq[AttendanceMonitoringPoint]]
 			with PopulatesEditAttendancePointCommand
 			with AutowiringAttendanceMonitoringServiceComponent
-			with AutowiringTermServiceComponent
 			with AutowiringSmallGroupServiceComponent
 			with AutowiringModuleAndDepartmentServiceComponent
 			with AutowiringProfileServiceComponent
@@ -38,8 +36,7 @@ class EditAttendancePointCommandInternal(
 	val templatePoint: AttendanceMonitoringPoint
 ) extends CommandInternal[Seq[AttendanceMonitoringPoint]] with GeneratesAttendanceMonitoringSchemeNotifications with RequiresCheckpointTotalUpdate {
 
-	self: EditAttendancePointCommandState with AttendanceMonitoringServiceComponent
-		with TermServiceComponent with ProfileServiceComponent =>
+	self: EditAttendancePointCommandState with AttendanceMonitoringServiceComponent with ProfileServiceComponent =>
 
 	override def applyInternal(): Seq[AttendanceMonitoringPoint] = {
 		val editedPoints = pointsToEdit.map(point => {
@@ -70,7 +67,7 @@ trait PopulatesEditAttendancePointCommand extends PopulateOnForm {
 
 trait EditAttendancePointValidation extends SelfValidating with AttendanceMonitoringPointValidation {
 
-	self: EditAttendancePointCommandState with TermServiceComponent with AttendanceMonitoringServiceComponent =>
+	self: EditAttendancePointCommandState with AttendanceMonitoringServiceComponent =>
 
 	override def validate(errors: Errors) {
 		val points = pointsToEdit
@@ -85,22 +82,22 @@ trait EditAttendancePointValidation extends SelfValidating with AttendanceMonito
 				validateDate(errors, endDate, academicYear, "endDate")
 				if (startDate != null && endDate != null) {
 					validateDates(errors, startDate, endDate)
-					validateCanPointBeEditedByDate(errors, startDate, schemes.map{_.members.members}.flatten, academicYear)
+					validateCanPointBeEditedByDate(errors, startDate, schemes.flatMap(_.members.members), academicYear)
 					points.exists(p => validateDuplicateForDateForEdit(errors, name, startDate, endDate, p))
 				}
 			case AttendanceMonitoringPointStyle.Week =>
-				validateWeek(errors, startWeek, "startWeek")
-				validateWeek(errors, endWeek, "endWeek")
+				validateWeek(errors, startWeek, academicYear, "startWeek")
+				validateWeek(errors, endWeek, academicYear, "endWeek")
 				validateWeeks(errors, startWeek, endWeek)
-				validateCanPointBeEditedByWeek(errors, startWeek, schemes.map{_.members.members}.flatten, academicYear)
+				validateCanPointBeEditedByWeek(errors, startWeek, schemes.flatMap(_.members.members), academicYear)
 				points.exists(p => validateDuplicateForWeekForEdit(errors, name, startWeek, endWeek, p))
 		}
 
 		if (!errors.hasErrors) {
 			if (pointStyle == AttendanceMonitoringPointStyle.Week) {
-				val weeksForYear = termService.getAcademicWeeksForYear(schemes.head.academicYear.dateInTermOne).toMap
-				startDate = weeksForYear(startWeek).getStart.withDayOfWeek(DayOfWeek.Monday.jodaDayOfWeek).toLocalDate
-				endDate = weeksForYear(endWeek).getStart.withDayOfWeek(DayOfWeek.Monday.jodaDayOfWeek).toLocalDate.plusDays(6)
+				val weeksForYear = schemes.head.academicYear.weeks
+				startDate = weeksForYear(startWeek).firstDay
+				endDate = weeksForYear(endWeek).lastDay
 			}
 			validateTypeForEndDate(errors, pointType, endDate)
 			pointType match {
@@ -193,7 +190,7 @@ trait EditAttendancePointDescription extends Describable[Seq[AttendanceMonitorin
 
 trait EditAttendancePointCommandState extends AttendancePointCommandState with FindPointsResultCommandState {
 
-	self: TermServiceComponent with SmallGroupServiceComponent with ModuleAndDepartmentServiceComponent =>
+	self: SmallGroupServiceComponent with ModuleAndDepartmentServiceComponent =>
 
 	def department: Department
 	def academicYear: AcademicYear

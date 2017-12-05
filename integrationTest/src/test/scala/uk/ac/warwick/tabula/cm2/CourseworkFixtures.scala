@@ -7,7 +7,7 @@ import org.scalatest.GivenWhenThen
 import uk.ac.warwick.tabula.data.model.WorkflowCategory
 import uk.ac.warwick.tabula.data.model.markingworkflow.MarkingWorkflowType
 import uk.ac.warwick.tabula.web.{FeaturesDriver, FixturesDriver}
-import uk.ac.warwick.tabula.{AcademicYear, BrowserTest, FunctionalTestAcademicYear, LoginDetails}
+import uk.ac.warwick.tabula.{AcademicYear, BrowserTest, LoginDetails}
 
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent._
@@ -47,7 +47,7 @@ trait CourseworkFixtures extends BrowserTest with FeaturesDriver with FixturesDr
 			routeCode = TEST_ROUTE_CODE,
 			courseCode = TEST_COURSE_CODE,
 			deptCode = TEST_DEPARTMENT_CODE,
-			academicYear = FunctionalTestAcademicYear.current.startYear.toString
+			academicYear = AcademicYear.now().startYear.toString
 		)
 		// Make them at the same time.
 		val concurrentJobs = Seq(
@@ -58,7 +58,7 @@ trait CourseworkFixtures extends BrowserTest with FeaturesDriver with FixturesDr
 					routeCode = TEST_ROUTE_CODE,
 					courseCode = TEST_COURSE_CODE,
 					deptCode = TEST_DEPARTMENT_CODE,
-					academicYear = FunctionalTestAcademicYear.current.startYear.toString
+					academicYear = AcademicYear.now().startYear.toString
 				)
 			},
 			Future {
@@ -67,7 +67,7 @@ trait CourseworkFixtures extends BrowserTest with FeaturesDriver with FixturesDr
 					routeCode = TEST_ROUTE_CODE,
 					courseCode = TEST_COURSE_CODE,
 					deptCode = TEST_DEPARTMENT_CODE,
-					academicYear = FunctionalTestAcademicYear.current.startYear.toString
+					academicYear = AcademicYear.now().startYear.toString
 				)
 			},
 			Future {
@@ -76,7 +76,7 @@ trait CourseworkFixtures extends BrowserTest with FeaturesDriver with FixturesDr
 					routeCode = TEST_ROUTE_CODE,
 					courseCode = TEST_COURSE_CODE,
 					deptCode = TEST_DEPARTMENT_CODE,
-					academicYear = FunctionalTestAcademicYear.current.startYear.toString
+					academicYear = AcademicYear.now().startYear.toString
 				)
 			},
 			Future {
@@ -85,7 +85,7 @@ trait CourseworkFixtures extends BrowserTest with FeaturesDriver with FixturesDr
 					routeCode = TEST_ROUTE_CODE,
 					courseCode = TEST_COURSE_CODE,
 					deptCode = TEST_DEPARTMENT_CODE,
-					academicYear = FunctionalTestAcademicYear.current.startYear.toString
+					academicYear = AcademicYear.now().startYear.toString
 				)
 			}
 		)
@@ -420,7 +420,7 @@ trait CourseworkFixtures extends BrowserTest with FeaturesDriver with FixturesDr
 		And("I click the current academic year tertiary nav bar")
 		val tertiaryNavBar = find(cssSelector("nav.navbar.navbar-tertiary"))
 		val tertiaryNavBarElement = tertiaryNavBar.get.underlying
-		val currentYear = AcademicYear.guessSITSAcademicYearByDate(DateTime.now)
+		val currentYear = AcademicYear.now()
 		click on tertiaryNavBarElement.findElement(By.partialLinkText(currentYear.getLabel))
 	}
 

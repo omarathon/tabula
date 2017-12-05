@@ -1,14 +1,13 @@
 package uk.ac.warwick.tabula.web.controllers.profiles.profile
 
-import org.joda.time.DateTime
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.core.convert.ConversionService
 import org.springframework.web.bind.annotation.{ModelAttribute, PathVariable}
 import uk.ac.warwick.tabula.AcademicYear
 import uk.ac.warwick.tabula.JavaImports._
-import uk.ac.warwick.tabula.commands.{ComposableCommand, MemberOrUser, Unaudited}
-import uk.ac.warwick.tabula.commands.profiles.{SearchProfilesCommand, SearchProfilesCommandInternal, SearchProfilesCommandPermissions}
 import uk.ac.warwick.tabula.commands.profiles.profile.ViewProfileCommand
+import uk.ac.warwick.tabula.commands.profiles.{SearchProfilesCommand, SearchProfilesCommandInternal, SearchProfilesCommandPermissions}
+import uk.ac.warwick.tabula.commands.{ComposableCommand, MemberOrUser, Unaudited}
 import uk.ac.warwick.tabula.data.model._
 import uk.ac.warwick.tabula.helpers.RequestLevelCaching
 import uk.ac.warwick.tabula.services.{AutowiringAssessmentServiceComponent, AutowiringMaintenanceModeServiceComponent, AutowiringUserSettingsServiceComponent}
@@ -48,7 +47,7 @@ abstract class AbstractViewProfileController extends ProfilesController
 				case fresh =>
 					fresh
 			}
-			val thisAcademicYear = activeAcademicYear.getOrElse(AcademicYear.guessSITSAcademicYearByDate(DateTime.now))
+			val thisAcademicYear = activeAcademicYear.getOrElse(AcademicYear.now())
 			Option(scyds.find(_.academicYear == thisAcademicYear).getOrElse {
 				if (thisAcademicYear > scyds.last.academicYear)
 					scyds.last

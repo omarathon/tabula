@@ -7,13 +7,12 @@ import org.hibernate.criterion.{Order, ProjectionList, Projections, Restrictions
 import org.joda.time.{DateTime, LocalDate}
 import org.springframework.stereotype.Repository
 import uk.ac.warwick.spring.Wire
-import uk.ac.warwick.tabula.AcademicYear
 import uk.ac.warwick.tabula.commands.TaskBenchmarking
 import uk.ac.warwick.tabula.data.Daoisms._
 import uk.ac.warwick.tabula.data.HibernateHelpers._
 import uk.ac.warwick.tabula.data.model.attendance._
 import uk.ac.warwick.tabula.data.model.{Department, StudentMember}
-import uk.ac.warwick.tabula.services.TermService
+import uk.ac.warwick.tabula.{AcademicPeriod, AcademicYear}
 
 abstract class SchemeMembershipItemType(val value: String)
 case object SchemeMembershipStaticType extends SchemeMembershipItemType("static")
@@ -228,7 +227,7 @@ class AttendanceMonitoringDaoImpl extends AttendanceMonitoringDao with Attendanc
 		val reportedTerms = mergedTermCounts.toSeq
 			.filter { case (term, count) => count.intValue() == students.size}
 			.map { _._1 }
-		TermService.orderedTermNames diff reportedTerms
+		AcademicPeriod.allPeriodTypes.map(_.toString) diff reportedTerms
 	}
 
 	def findReports(studentsIds: Seq[String], academicYear: AcademicYear, period: String): Seq[MonitoringPointReport] = {

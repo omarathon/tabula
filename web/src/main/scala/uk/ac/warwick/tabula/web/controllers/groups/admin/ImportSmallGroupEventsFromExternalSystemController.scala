@@ -5,18 +5,17 @@ import javax.validation.Valid
 import org.springframework.stereotype.Controller
 import org.springframework.validation.Errors
 import org.springframework.web.bind.annotation.{ModelAttribute, PathVariable, RequestMapping}
-import uk.ac.warwick.tabula.commands.{Appliable, PopulateOnForm}
 import uk.ac.warwick.tabula.commands.groups.admin.ImportSmallGroupEventsFromExternalSystemCommand
+import uk.ac.warwick.tabula.commands.{Appliable, PopulateOnForm}
 import uk.ac.warwick.tabula.data.model.Module
 import uk.ac.warwick.tabula.data.model.groups.{SmallGroup, SmallGroupEvent, SmallGroupSet}
 import uk.ac.warwick.tabula.groups.web.Routes
-import uk.ac.warwick.tabula.services.AutowiringTermServiceComponent
 import uk.ac.warwick.tabula.web.Mav
 
 import scala.collection.JavaConverters._
 import scala.collection.mutable
 
-abstract class AbstractImportSmallGroupEventsFromExternalSystemController extends SmallGroupEventsController with AutowiringTermServiceComponent {
+abstract class AbstractImportSmallGroupEventsFromExternalSystemController extends SmallGroupEventsController {
 
 	type ImportSmallGroupEventsFromExternalSystemCommand = Appliable[Seq[SmallGroupEvent]] with PopulateOnForm
 

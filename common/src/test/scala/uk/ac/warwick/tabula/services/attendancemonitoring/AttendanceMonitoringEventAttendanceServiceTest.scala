@@ -12,36 +12,18 @@ class AttendanceMonitoringEventAttendanceServiceTest extends TestBase with Mocki
 
 	val mockModuleAndDepartmentService: ModuleAndDepartmentService = smartMock[ModuleAndDepartmentService]
 
-	trait ServiceTestSupport extends SmallGroupServiceComponent with TermServiceComponent
+	trait ServiceTestSupport extends SmallGroupServiceComponent
 		with ProfileServiceComponent with AttendanceMonitoringServiceComponent {
 
 		val attendanceMonitoringService: AttendanceMonitoringService = smartMock[AttendanceMonitoringService]
 		val profileService: ProfileService = smartMock[ProfileService]
 		val smallGroupService: SmallGroupService = smartMock[SmallGroupService]
-		val termService: TermService = smartMock[TermService]
 	}
 
 	trait Fixture {
 		val service = new AbstractAttendanceMonitoringEventAttendanceService with ServiceTestSupport
 
 		val academicYear2013 = AcademicYear(2013)
-
-		val termWeeks = Seq(
-			(JInteger(Option(1)), new Interval(
-				new DateTime().minusWeeks(4).withDayOfWeek(DateTimeConstants.MONDAY),
-				new DateTime().minusWeeks(3).withDayOfWeek(DateTimeConstants.MONDAY)
-			)),
-			(JInteger(Option(2)), new Interval(
-				new DateTime().minusWeeks(3).withDayOfWeek(DateTimeConstants.MONDAY),
-				new DateTime().minusWeeks(2).withDayOfWeek(DateTimeConstants.MONDAY)
-			)),
-			(JInteger(Option(3)), new Interval(
-				new DateTime().minusWeeks(2).withDayOfWeek(DateTimeConstants.MONDAY),
-				new DateTime().minusWeeks(1).withDayOfWeek(DateTimeConstants.MONDAY)
-			))
-		)
-
-		service.termService.getAcademicWeeksForYear(academicYear2013.dateInTermOne) returns termWeeks
 
 		val student: StudentMember = Fixtures.student("1234")
 
@@ -56,7 +38,6 @@ class AttendanceMonitoringEventAttendanceServiceTest extends TestBase with Mocki
 		val occurrence = new SmallGroupEventOccurrence
 		occurrence.event = event
 		occurrence.week = 1
-		occurrence.termService = service.termService
 
 		val attendance = new SmallGroupEventAttendance
 		attendance.occurrence = occurrence
@@ -76,16 +57,13 @@ class AttendanceMonitoringEventAttendanceServiceTest extends TestBase with Mocki
 
 		val smallGroupPoint = new AttendanceMonitoringPoint
 		// start date: Tuesday week 1
-		smallGroupPoint.startDate = termWeeks.toMap.apply(JInteger(Option(1))).getStart.toLocalDate.withDayOfWeek(DateTimeConstants.TUESDAY)
+		smallGroupPoint.startDate = academicYear2013.weeks(1).firstDay.withDayOfWeek(DateTimeConstants.TUESDAY)
 		// end date: Thursday week 2
-		smallGroupPoint.endDate = termWeeks.toMap.apply(JInteger(Option(2))).getStart.toLocalDate.withDayOfWeek(DateTimeConstants.THURSDAY)
+		smallGroupPoint.endDate = academicYear2013.weeks(2).firstDay.withDayOfWeek(DateTimeConstants.THURSDAY)
 		smallGroupPoint.pointType = AttendanceMonitoringPointType.SmallGroup
 		smallGroupPoint.smallGroupEventModules = Seq()
 		smallGroupPoint.smallGroupEventQuantity = 1
 		smallGroupPoint.moduleAndDepartmentService = mockModuleAndDepartmentService
-
-		service.termService.getAcademicWeekForAcademicYear(smallGroupPoint.startDate.toDateTimeAtStartOfDay, groupSet.academicYear) returns 1
-		service.termService.getAcademicWeekForAcademicYear(smallGroupPoint.endDate.toDateTimeAtStartOfDay, groupSet.academicYear) returns 2
 
 		service.attendanceMonitoringService.listStudentsPoints(student, None, groupSet.academicYear) returns Seq(smallGroupPoint)
 		service.attendanceMonitoringService.getCheckpoints(Seq(smallGroupPoint), Seq(student)) returns Map()

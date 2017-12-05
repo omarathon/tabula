@@ -1,6 +1,6 @@
 package uk.ac.warwick.tabula.services
 
-import org.joda.time.{DateTime, LocalDateTime}
+import org.joda.time.{DateTime, LocalDate, LocalDateTime}
 import org.springframework.stereotype.Service
 import uk.ac.warwick.spring.Wire
 import uk.ac.warwick.tabula.commands.groups.RemoveUserFromSmallGroupCommand
@@ -97,6 +97,7 @@ trait SmallGroupService {
 	def listDepartmentSetsForMembershipUpdate: Seq[DepartmentSmallGroupSet]
 
 	def listSmallGroupsWithoutLocation(academicYear: AcademicYear): Seq[SmallGroupEvent]
+	def listSmallGroupSetsWithEventsWithoutMapLocation(academicYear: AcademicYear, department: Option[Department]): Map[SmallGroupSet, Seq[SmallGroupEvent]]
 
 	def findSmallGroupsByNameOrModule(query: String, academicYear: AcademicYear, department: Option[String]): Seq[SmallGroup]
 }
@@ -108,8 +109,6 @@ abstract class AbstractSmallGroupService extends SmallGroupService {
 		with UserLookupComponent
 		with UserGroupDaoComponent
 		with SecurityServiceComponent
-		with TermServiceComponent
-		with WeekToDateConverterComponent
 		with Logging with TaskBenchmarking =>
 
 	def getSmallGroupSetById(id: String): Option[SmallGroupSet] = smallGroupDao.getSmallGroupSetById(id)
@@ -321,10 +320,10 @@ abstract class AbstractSmallGroupService extends SmallGroupService {
 	}
 
 	def findTodaysEventOccurrences(tutors: Seq[User], modules: Seq[Module], departments: Seq[Department]): Seq[SmallGroupEventOccurrence] = {
-		val now = DateTime.now
+		val now = LocalDate.now
 		val today = DayOfWeek.today
-		val thisAcademicYear = AcademicYear.findAcademicYearContainingDate(now)
-		val thisTermWeek = termService.getTermFromDateIncludingVacations(now).getAcademicWeekNumber(now)
+		val thisAcademicYear = AcademicYear.forDate(now)
+		val thisTermWeek = thisAcademicYear.weekForDate(now).weekNumber
 		val allModules = modules ++ departments.flatMap(_.modules.asScala)
 		val weeksOccurrencesForModules: Seq[SmallGroupEventOccurrence] = findOccurrencesInModulesInWeeks(thisTermWeek, thisTermWeek, allModules, thisAcademicYear)
 			.filter(!_.event.group.groupSet.archived)
@@ -382,8 +381,8 @@ abstract class AbstractSmallGroupService extends SmallGroupService {
 	private def groupOccurrencesWithStartEndDateTimeInfo(group: SmallGroup): Seq[(SmallGroupEventOccurrence, Option[LocalDateTime], Option[LocalDateTime])] = {
 		benchmarkTask(s"groupOccurrencesWithStartEndDateTimeInfo[Group-${group.id}]") {
 			findAttendanceByGroup(group).filterNot(_.event.isUnscheduled).map { groupOccurrence =>
-				val startDateTime = weekToDateConverter.toLocalDatetime(groupOccurrence.week, groupOccurrence.event.day, groupOccurrence.event.startTime, groupOccurrence.event.group.groupSet.academicYear)
-				val endDateTime = weekToDateConverter.toLocalDatetime(groupOccurrence.week, groupOccurrence.event.day, groupOccurrence.event.endTime, groupOccurrence.event.group.groupSet.academicYear)
+				val startDateTime = groupOccurrence.startDateTime
+				val endDateTime = groupOccurrence.endDateTime
 				(groupOccurrence, startDateTime, endDateTime)
 			}
 		}
@@ -410,7 +409,7 @@ abstract class AbstractSmallGroupService extends SmallGroupService {
 		smallGroupDao.listDepartmentSetsForMembershipUpdate
 
 	def listSmallGroupsWithoutLocation(academicYear: AcademicYear): Seq[SmallGroupEvent] =
-		smallGroupDao.listSmallGroupsWithoutLocation(academicYear: AcademicYear)
+		smallGroupDao.listSmallGroupsWithoutLocation(academicYear, department = None)
 
 	def findSmallGroupsByNameOrModule(query: String, academicYear: AcademicYear, department: Option[String]): Seq[SmallGroup] = {
 
@@ -424,6 +423,9 @@ abstract class AbstractSmallGroupService extends SmallGroupService {
 			Nil
 	}
 
+	override def listSmallGroupSetsWithEventsWithoutMapLocation(academicYear: AcademicYear, department: Option[Department]): Map[SmallGroupSet, Seq[SmallGroupEvent]] = {
+		smallGroupDao.listSmallGroupsWithoutLocation(academicYear, department).groupBy(_.group.groupSet)
+	}
 
 }
 
@@ -461,6 +463,4 @@ class SmallGroupServiceImpl
 		with UserLookupComponent
 		with AutowiringUserGroupDaoComponent
 		with AutowiringSecurityServiceComponent
-		with AutowiringTermServiceComponent
-		with TermAwareWeekToDateConverterComponent
 		with Logging with TaskBenchmarking

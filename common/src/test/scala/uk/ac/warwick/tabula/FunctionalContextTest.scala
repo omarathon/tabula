@@ -26,7 +26,7 @@ class FunctionalContextTest extends TestBase with FunctionalContextTesting with 
 		inContext[Ctx] {
 			val wired = new WiredBean
 			wired.mystring should be("cool string")
-			wired.thisYear should be(new AcademicYear(2012))
+			wired.thisYear should be(AcademicYear(2012))
 
 			val service = Wire[StringService]
 			service.resolve("egg") should be("chicken")
@@ -62,7 +62,7 @@ object FunctionalContextTest {
 			"cool string"
 		}
 		bean() {
-			new AcademicYear(olympicYear())
+			AcademicYear(olympicYear())
 		}
 		bean("mockStringService") {
 			val s = mock[StringService]

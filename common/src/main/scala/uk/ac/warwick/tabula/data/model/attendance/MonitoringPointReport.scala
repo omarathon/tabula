@@ -1,14 +1,12 @@
 package uk.ac.warwick.tabula.data.model.attendance
 
 import javax.persistence._
-import uk.ac.warwick.spring.Wire
-import uk.ac.warwick.tabula.data.model.{GeneratedId, StudentCourseYearDetails, StudentCourseDetails, StudentMember}
-import org.joda.time.DateTime
-import org.hibernate.annotations.Type
-import uk.ac.warwick.tabula.AcademicYear
 import javax.validation.constraints.{Min, NotNull}
 
-import uk.ac.warwick.tabula.services.TermService
+import org.hibernate.annotations.Type
+import org.joda.time.DateTime
+import uk.ac.warwick.tabula.AcademicYear
+import uk.ac.warwick.tabula.data.model.{GeneratedId, StudentCourseDetails, StudentCourseYearDetails, StudentMember}
 
 @Entity
 class MonitoringPointReport extends GeneratedId {

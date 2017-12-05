@@ -197,9 +197,11 @@ trait TestHelpers extends TestFixtures {
 	def withFakeTime(when: ReadableInstant)(fn: => Unit): Unit =
 		try {
 			DateTimeUtils.setCurrentMillisFixed(when.getMillis)
-			fn
+			uk.ac.warwick.util.core.DateTimeUtils.useMockDateTime(java.time.Instant.ofEpochMilli(when.getMillis), new Runnable {
+				override def run(): Unit = fn
+			})
 		} finally {
-			DateTimeUtils.setCurrentMillisSystem
+			DateTimeUtils.setCurrentMillisSystem()
 		}
 
 	/** Sets up a pretend requestinfo context with the given pretend user

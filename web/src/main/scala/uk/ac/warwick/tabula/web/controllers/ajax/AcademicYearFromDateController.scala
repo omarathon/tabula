@@ -4,7 +4,6 @@ import org.joda.time.LocalDate
 import org.springframework.stereotype.Controller
 import org.springframework.web.bind.annotation.{RequestMapping, RequestParam}
 import uk.ac.warwick.tabula.AcademicYear
-import uk.ac.warwick.tabula.services.AutowiringTermServiceComponent
 import uk.ac.warwick.tabula.web.Mav
 import uk.ac.warwick.tabula.web.controllers.BaseController
 import uk.ac.warwick.tabula.web.views.JSONView
@@ -15,11 +14,11 @@ import uk.ac.warwick.tabula.web.views.JSONView
 	*/
 @Controller
 @RequestMapping(Array("/ajax/academicyearfromdate"))
-class AcademicYearFromDateController extends BaseController with AutowiringTermServiceComponent {
+class AcademicYearFromDateController extends BaseController {
 
 	@RequestMapping
 	def result(@RequestParam date: LocalDate): Mav = {
-		val academicYear = AcademicYear.findAcademicYearContainingDate(date.toDateTimeAtStartOfDay)(termService)
+		val academicYear = AcademicYear.forDate(date)
 		Mav(new JSONView(Map(
 			"startYear" -> academicYear.startYear,
 			"string" -> academicYear.toString

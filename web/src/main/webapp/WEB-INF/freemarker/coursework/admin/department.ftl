@@ -2,8 +2,8 @@
 <#import "modules/admin_components.ftl" as components />
 
 <#macro longDateRange start end>
-	<#local openTZ><@warwick.formatDate value=start pattern="z" /></#local>
-	<#local closeTZ><@warwick.formatDate value=end pattern="z" /></#local>
+	<#local openTZ>${start?string("z")}</#local>
+	<#local closeTZ>${start?string("z")}</#local>
 	<@fmt.date start />
 	<#if openTZ != closeTZ>(${openTZ})</#if>
 	-<br>

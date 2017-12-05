@@ -2,24 +2,23 @@ package uk.ac.warwick.tabula.web.controllers.cm2.admin.assignments
 
 import javax.validation.Valid
 
-import org.joda.time.DateTime
 import org.springframework.context.annotation.Profile
 import org.springframework.stereotype.Controller
 import org.springframework.validation.Errors
 import org.springframework.web.bind.annotation.{ModelAttribute, PathVariable, RequestMapping}
-import uk.ac.warwick.tabula.{AcademicYear, CurrentUser}
+import uk.ac.warwick.tabula.JavaImports.JList
+import uk.ac.warwick.tabula.cm2.web.Routes
 import uk.ac.warwick.tabula.commands.cm2.assignments._
 import uk.ac.warwick.tabula.commands.{Appliable, SelfValidating}
 import uk.ac.warwick.tabula.data.model.{Assignment, Department}
-import uk.ac.warwick.tabula.web.Mav
-import uk.ac.warwick.tabula.web.controllers.cm2.CourseworkController
-
-import scala.collection.JavaConverters._
-import uk.ac.warwick.tabula.JavaImports.JList
-import uk.ac.warwick.tabula.cm2.web.Routes
 import uk.ac.warwick.tabula.permissions.{Permission, Permissions}
 import uk.ac.warwick.tabula.services.{AutowiringMaintenanceModeServiceComponent, AutowiringModuleAndDepartmentServiceComponent, AutowiringUserSettingsServiceComponent}
+import uk.ac.warwick.tabula.web.Mav
+import uk.ac.warwick.tabula.web.controllers.cm2.CourseworkController
 import uk.ac.warwick.tabula.web.controllers.{AcademicYearScopedController, DepartmentScopedController}
+import uk.ac.warwick.tabula.{AcademicYear, CurrentUser}
+
+import scala.collection.JavaConverters._
 
 /**
 	* Controller that handles the multi-step process of creating many assignments from SITS data.
@@ -50,7 +49,7 @@ abstract class AbstractAddSitsAssignmentsController extends CourseworkController
 
 	@ModelAttribute("command")
 	def command(@PathVariable department: Department, @ModelAttribute("activeAcademicYear") activeAcademicYear: Option[AcademicYear], user: CurrentUser): AddSitsAssignmentsCommand =
-		AddSitsAssignmentsCommand(mandatory(department), activeAcademicYear.getOrElse(AcademicYear.guessSITSAcademicYearByDate(DateTime.now)), user)
+		AddSitsAssignmentsCommand(mandatory(department), activeAcademicYear.getOrElse(AcademicYear.now()), user)
 
 	@ModelAttribute("academicYearChoices")
 	def academicYearChoices: JList[AcademicYear] = availableAcademicYears.asJava

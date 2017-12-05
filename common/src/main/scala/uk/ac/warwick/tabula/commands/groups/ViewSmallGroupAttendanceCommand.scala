@@ -2,7 +2,7 @@ package uk.ac.warwick.tabula.commands.groups
 
 import org.joda.time.LocalDateTime
 import uk.ac.warwick.tabula.ItemNotFoundException
-import uk.ac.warwick.tabula.commands.{CommandInternal, ComposableCommand, MemberOrUser, ReadOnly, TaskBenchmarking, Unaudited}
+import uk.ac.warwick.tabula.commands._
 import uk.ac.warwick.tabula.data.model.attendance.AttendanceState
 import uk.ac.warwick.tabula.data.model.groups.SmallGroupEventOccurrence.WeekNumber
 import uk.ac.warwick.tabula.data.model.groups.WeekRange.Week
@@ -52,9 +52,7 @@ object ViewSmallGroupAttendanceCommand {
 			with ComposableCommand[SmallGroupAttendanceInformation]
 			with ViewSmallGroupAttendancePermissions
 			with AutowiringSmallGroupServiceComponent
-			with AutowiringTermServiceComponent
 			with AutowiringUserLookupComponent
-			with TermAwareWeekToDateConverterComponent
 			with ReadOnly with Unaudited {
 		override lazy val eventName = "ViewSmallGroupAttendance"
 	}
@@ -115,7 +113,7 @@ object ViewSmallGroupAttendanceCommand {
 
 class ViewSmallGroupAttendanceCommand(val group: SmallGroup)
 	extends CommandInternal[ViewSmallGroupAttendanceCommand.SmallGroupAttendanceInformation] with ViewSmallGroupAttendanceState with TaskBenchmarking {
-	self: SmallGroupServiceComponent with UserLookupComponent with WeekToDateConverterComponent =>
+	self: SmallGroupServiceComponent with UserLookupComponent =>
 
 	import uk.ac.warwick.tabula.commands.groups.ViewSmallGroupAttendanceCommand._
 
@@ -160,8 +158,7 @@ class ViewSmallGroupAttendanceCommand(val group: SmallGroup)
 			// Can't be late if the student is no longer in that group
 			event.group.students.includesUser(user) &&
 			// Get the actual end date of the event in this week
-			weekToDateConverter.toLocalDatetime(week, event.day, event.endTime, event.group.groupSet.academicYear)
-				.exists(eventDateTime => eventDateTime.isBefore(LocalDateTime.now()))
+			event.endDateTimeForWeek(week).exists(_.isBefore(LocalDateTime.now))
 	}
 
 }

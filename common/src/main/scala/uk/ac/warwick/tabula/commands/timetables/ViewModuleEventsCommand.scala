@@ -13,7 +13,6 @@ import uk.ac.warwick.tabula.helpers.SystemClockComponent
 import uk.ac.warwick.tabula.permissions.Permissions
 import uk.ac.warwick.tabula.services.timetables.TimetableFetchingService.EventOccurrenceList
 import uk.ac.warwick.tabula.services.timetables._
-import uk.ac.warwick.tabula.services.{AutowiringTermServiceComponent, TermServiceComponent}
 import uk.ac.warwick.tabula.system.permissions.{PermissionsChecking, PermissionsCheckingMethods, RequiresPermissionsChecking}
 
 import scala.concurrent.Await
@@ -35,7 +34,6 @@ object ViewModuleEventsCommand {
 			with AutowiringScientiaConfigurationComponent
 			with SystemClockComponent
 			with ScientiaHttpTimetableFetchingServiceComponent // Only include Scientia events for now. If we ever include from other sources, they should be opt-in via params
-			with AutowiringTermServiceComponent
 			with AutowiringTermBasedEventOccurrenceServiceComponent
 
 	// Re-usable service
@@ -46,7 +44,6 @@ object ViewModuleEventsCommand {
 			with ViewModuleEventsValidation
 			with Unaudited with ReadOnly
 			with ModuleTimetableFetchingServiceComponent
-			with AutowiringTermServiceComponent
 			with AutowiringTermBasedEventOccurrenceServiceComponent {
 			val timetableFetchingService: ModuleTimetableFetchingService = service
 		}
@@ -63,7 +60,7 @@ abstract class ViewModuleEventsCommandInternal(val module: Module)
 	extends CommandInternal[ReturnType]
 		with ViewModuleEventsRequest {
 
-	self: ModuleTimetableFetchingServiceComponent with TermServiceComponent with EventOccurrenceServiceComponent =>
+	self: ModuleTimetableFetchingServiceComponent with EventOccurrenceServiceComponent =>
 
 	def applyInternal(): ReturnType = {
 		val timetableEvents = timetableFetchingService.getTimetableForModule(module.code.toUpperCase, includeStudents = false)
@@ -76,11 +73,11 @@ abstract class ViewModuleEventsCommandInternal(val module: Module)
 			}
 
 		if (start == null) {
-			start = termService.getTermFromDate(academicYear.dateInTermOne).getStartDate.toLocalDate
+			start = academicYear.firstDay
 		}
 
 		if (end == null) {
-			end = termService.getTermFromDate((academicYear + 1).dateInTermOne).getStartDate.toLocalDate.minusDays(1)
+			end = academicYear.lastDay
 		}
 
 		Try(Await.result(timetableEvents.map { events =>

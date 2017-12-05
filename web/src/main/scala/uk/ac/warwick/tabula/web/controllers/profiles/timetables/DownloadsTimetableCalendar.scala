@@ -5,15 +5,13 @@ import uk.ac.warwick.tabula.commands.profiles.PhotosWarwickMemberPhotoUrlGenerat
 import uk.ac.warwick.tabula.data.model.groups.{DayOfWeek, WeekRange}
 import uk.ac.warwick.tabula.helpers.{IntervalFormatter, KnowsUserNumberingSystem, WeekRangesFormatter}
 import uk.ac.warwick.tabula.pdf.FreemarkerXHTMLPDFGeneratorComponent
-import uk.ac.warwick.tabula.services.{ModuleAndDepartmentServiceComponent, TermServiceComponent, UserLookupComponent}
+import uk.ac.warwick.tabula.services.{ModuleAndDepartmentServiceComponent, UserLookupComponent}
 import uk.ac.warwick.tabula.timetables.EventOccurrence
 import uk.ac.warwick.tabula.web.views.{AutowiredTextRendererComponent, FullCalendarEvent, PDFView}
 import uk.ac.warwick.tabula.{AcademicYear, AutowiringTopLevelUrlComponent, CurrentUser}
 
 trait DownloadsTimetableCalendar {
-
-	self: TermServiceComponent with KnowsUserNumberingSystem
-		with ModuleAndDepartmentServiceComponent with UserLookupComponent =>
+	self: KnowsUserNumberingSystem with ModuleAndDepartmentServiceComponent with UserLookupComponent =>
 
 	def getCalendar(
 		events: Seq[EventOccurrence],
@@ -51,13 +49,13 @@ trait DownloadsTimetableCalendar {
 
 		val title = {
 			if (thisCalendarView == "agendaWeek") {
-				val thisWeek = termService.getTermFromDateIncludingVacations(thisRenderDate.toDateTimeAtStartOfDay)
-					.getAcademicWeekNumber(thisRenderDate.toDateTimeAtStartOfDay)
+				val year = AcademicYear.forDate(thisRenderDate)
+				val thisWeek = year.weekForDate(thisRenderDate).weekNumber
 				val system = numberingSystem(user, moduleAndDepartmentService.getDepartmentByCode(user.departmentCode))
 				val description = WeekRangesFormatter.format(
 					Seq(WeekRange(thisWeek)),
 					DayOfWeek(thisRenderDate.dayOfWeek.get),
-					AcademicYear.findAcademicYearContainingDate(thisRenderDate.toDateTimeAtStartOfDay),
+					year,
 					system
 				)
 				if (system == WeekRange.NumberingSystem.Academic || description.startsWith("Term")) {

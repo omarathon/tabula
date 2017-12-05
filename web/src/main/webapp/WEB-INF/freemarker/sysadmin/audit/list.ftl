@@ -67,9 +67,7 @@
 	</tr>
 	<#list items as item>
 		<tr class="stage-${item.eventStage}">
-			<td class="date">
-				<@warwick.formatDate value=item.eventDate pattern="d MMMM yyyy HH:mm" />
-			</td>
+			<td class="date"><@fmt.date item.eventDate /></td>
 			<td>${item.eventType}</td>
 			<td>${item.eventStage}</td>
 			<td>${item.userId!""}</td>

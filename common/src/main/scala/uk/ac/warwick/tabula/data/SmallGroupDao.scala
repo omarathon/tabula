@@ -101,7 +101,7 @@ trait SmallGroupDao {
 
 	def listDepartmentSetsForMembershipUpdate: Seq[DepartmentSmallGroupSet]
 
-	def listSmallGroupsWithoutLocation(academicYear: AcademicYear): Seq[SmallGroupEvent]
+	def listSmallGroupsWithoutLocation(academicYear: AcademicYear, department: Option[Department]): Seq[SmallGroupEvent]
 
 	def findSmallGroupsByNameOrModule(query: FindSmallGroupQuery): Seq[SmallGroup]
 }
@@ -536,16 +536,21 @@ class SmallGroupDaoImpl extends SmallGroupDao
 			"""
 		).seq
 
-	def listSmallGroupsWithoutLocation(academicYear: AcademicYear): Seq[SmallGroupEvent] = {
-		val results = session.newQuery[Array[java.lang.Object]]("""
+	override def listSmallGroupsWithoutLocation(academicYear: AcademicYear, department: Option[Department]): Seq[SmallGroupEvent] = {
+		val departmentCondition = department.map(_ => s"and s.module.adminDepartment = :department").getOrElse("")
+
+		val query = session.newQuery[Array[java.lang.Object]](s"""
 					from SmallGroupEvent e
 					join e.group as g
 					join g.groupSet as s
 					where s.academicYear = :academicYear and location not like '%|%'
+		 			$departmentCondition
 			""")
 			.setString("academicYear", academicYear.getStoreValue.toString)
-			.seq
-		results.map(objArray => objArray(0).asInstanceOf[SmallGroupEvent])
+
+		department.foreach(d => query.setEntity("department", d))
+
+		query.seq.map(objArray => objArray(0).asInstanceOf[SmallGroupEvent])
 	}
 
 	def findSmallGroupsByNameOrModule(query: FindSmallGroupQuery): Seq[SmallGroup] = {

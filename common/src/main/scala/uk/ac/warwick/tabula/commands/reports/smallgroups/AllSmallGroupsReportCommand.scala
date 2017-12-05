@@ -1,8 +1,6 @@
 package uk.ac.warwick.tabula.commands.reports.smallgroups
 
-import java.util.UUID
-
-import org.joda.time.DateTime
+import org.joda.time.{DateTime, LocalDate}
 import uk.ac.warwick.tabula.AcademicYear
 import uk.ac.warwick.tabula.commands._
 import uk.ac.warwick.tabula.commands.reports.{ReportCommandRequest, ReportCommandState, ReportPermissions}
@@ -11,7 +9,7 @@ import uk.ac.warwick.tabula.data.model.Department
 import uk.ac.warwick.tabula.data.model.attendance.AttendanceState
 import uk.ac.warwick.tabula.data.model.groups.{DayOfWeek, SmallGroup, SmallGroupEvent}
 import uk.ac.warwick.tabula.services.attendancemonitoring.{AttendanceMonitoringServiceComponent, AutowiringAttendanceMonitoringServiceComponent}
-import uk.ac.warwick.tabula.services.{AutowiringSmallGroupServiceComponent, AutowiringTermServiceComponent, SmallGroupServiceComponent, TermServiceComponent}
+import uk.ac.warwick.tabula.services.{AutowiringSmallGroupServiceComponent, SmallGroupServiceComponent}
 import uk.ac.warwick.userlookup.User
 
 import scala.collection.JavaConverters._
@@ -24,7 +22,6 @@ object AllSmallGroupsReportCommand {
 	) =
 		new AllSmallGroupsReportCommandInternal(department, academicYear, filter)
 			with AutowiringSmallGroupServiceComponent
-			with AutowiringTermServiceComponent
 			with AutowiringAttendanceMonitoringServiceComponent
 			with ComposableCommand[AllSmallGroupsReportCommandResult]
 			with ReportPermissions
@@ -52,14 +49,14 @@ class AllSmallGroupsReportCommandInternal(
 	val filter: AllSmallGroupsReportCommandResult => AllSmallGroupsReportCommandResult
 ) extends CommandInternal[AllSmallGroupsReportCommandResult] with TaskBenchmarking {
 
-	self: SmallGroupServiceComponent with TermServiceComponent with AttendanceMonitoringServiceComponent with ReportCommandRequest =>
+	self: SmallGroupServiceComponent with AttendanceMonitoringServiceComponent with ReportCommandRequest =>
 
 	override def applyInternal(): AllSmallGroupsReportCommandResult = {
-		val thisWeek = termService.getAcademicWeekForAcademicYear(DateTime.now, academicYear)
+		val thisWeek = academicYear.weekForDate(LocalDate.now).weekNumber
 		val thisDay = DateTime.now.getDayOfWeek
-		val weeksForYear = termService.getAcademicWeeksForYear(academicYear.dateInTermOne).toMap
+		val weeksForYear = academicYear.weeks
 		def weekNumberToDate(weekNumber: Int, dayOfWeek: DayOfWeek) =
-			weeksForYear(weekNumber).getStart.withDayOfWeek(dayOfWeek.jodaDayOfWeek)
+			weeksForYear(weekNumber).firstDay.withDayOfWeek(dayOfWeek.jodaDayOfWeek)
 
 		val sets = benchmarkTask("sets") {
 			smallGroupService.getAllSmallGroupSets(department).filter(_.academicYear == academicYear).filter(_.collectAttendance)
@@ -81,7 +78,7 @@ class AllSmallGroupsReportCommandInternal(
 					week < thisWeek || week == thisWeek && sge.day.getAsInt < thisDay
 				}))
 			})).filter{sgew =>
-				val eventDate = weekNumberToDate(sgew.week, sgew.event.day).toLocalDate
+				val eventDate = weekNumberToDate(sgew.week, sgew.event.day)
 				(eventDate.isEqual(startDate) || eventDate.isAfter(startDate)) && (eventDate.isEqual(endDate) || eventDate.isBefore(endDate))
 			}.sortBy(sgew => (sgew.week, sgew.event.day.getAsInt))
 		}

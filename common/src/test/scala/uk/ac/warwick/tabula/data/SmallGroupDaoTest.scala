@@ -24,7 +24,7 @@ class SmallGroupDaoTest extends PersistenceTestBase {
 		smallGroupDao.sessionFactory = sessionFactory
 		smallGroupDao.userLookup = mockUserLookup
 		moduleDao.sessionFactory = sessionFactory
-		smallGroupSet.academicYear = new AcademicYear(2013)
+		smallGroupSet.academicYear = AcademicYear(2013)
 		smallGroupSet.format = SmallGroupFormat.Seminar
 		smallGroupSet.module = module
 

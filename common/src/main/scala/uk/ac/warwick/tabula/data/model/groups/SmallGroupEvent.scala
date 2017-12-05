@@ -5,7 +5,7 @@ import javax.persistence._
 
 import org.hibernate.annotations.Type
 import org.hibernate.validator.constraints.URL
-import org.joda.time.LocalTime
+import org.joda.time.{LocalDate, LocalDateTime, LocalTime}
 import uk.ac.warwick.spring.Wire
 import uk.ac.warwick.tabula.ToString
 import uk.ac.warwick.tabula.data.model._
@@ -127,5 +127,14 @@ class SmallGroupEvent extends GeneratedId with ToString with PermissionsTarget w
   }
 
 	def allWeeks: Seq[WeekRange.Week] = weekRanges.flatMap(_.toWeeks)
+	def dateForWeek(week: SmallGroupEventOccurrence.WeekNumber): Option[LocalDate] = {
+		val weeksForYear = group.groupSet.academicYear.weeks
+		day match {
+			case null => None
+			case d: DayOfWeek => weeksForYear.get(week).map(_.firstDay.withDayOfWeek(d.jodaDayOfWeek))
+		}
+	}
+	def startDateTimeForWeek(week: SmallGroupEventOccurrence.WeekNumber): Option[LocalDateTime] = dateForWeek(week).map(_.toLocalDateTime(startTime))
+	def endDateTimeForWeek(week: SmallGroupEventOccurrence.WeekNumber): Option[LocalDateTime] = dateForWeek(week).map(_.toLocalDateTime(endTime))
 
 }

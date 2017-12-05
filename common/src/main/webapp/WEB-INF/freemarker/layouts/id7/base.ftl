@@ -220,7 +220,7 @@
 					<li><a href="http://warwick.ac.uk/accessibility">Accessibility</a></li>
 					<#if user?? && user.sysadmin>
 						<li class="subtle">
-							App last built <@warwick.formatDate value=appBuildDate pattern="d MMMM yyyy HH:mm" />
+							App last built <@fmt.date date=appBuildDate relative=false includeTime=true />
 						</li>
 					</#if>
 				</ul>

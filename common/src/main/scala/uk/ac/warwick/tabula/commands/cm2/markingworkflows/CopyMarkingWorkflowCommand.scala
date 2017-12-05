@@ -1,6 +1,5 @@
 package uk.ac.warwick.tabula.commands.cm2.markingworkflows
 
-import org.joda.time.DateTime
 import org.springframework.validation.Errors
 import uk.ac.warwick.tabula.AcademicYear
 import uk.ac.warwick.tabula.commands.{Describable, Description, _}
@@ -79,7 +78,7 @@ trait CopyMarkingWorkflowDescription extends Describable[CM2MarkingWorkflow] {
 trait CopyMarkingWorkflowState {
 	def department: Department
 	def markingWorkflow: CM2MarkingWorkflow
-	val currentAcademicYear: AcademicYear = AcademicYear.guessSITSAcademicYearByDate(DateTime.now)
+	val currentAcademicYear: AcademicYear = AcademicYear.now()
 }
 
 trait CopyMarkingWorkflowComponent {

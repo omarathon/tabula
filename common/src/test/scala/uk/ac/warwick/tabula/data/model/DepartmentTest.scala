@@ -250,7 +250,7 @@ class DepartmentTest extends TestBase with Mockito {
 	@Test
 	def testUploadMarksSettings: Unit = {
 		val department = new Department
-		val year = new AcademicYear(2014)
+		val year = AcademicYear(2014)
 		var degreeType = DegreeType.Undergraduate
 
 		val module = Fixtures.module("AM903", "Test module")

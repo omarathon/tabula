@@ -1,24 +1,13 @@
 package uk.ac.warwick.tabula.api.web.controllers.timetables
 
 import net.fortuna.ical4j.data.CalendarOutputter
-import org.joda.time.DateTime
 import org.springframework.mock.web.MockHttpServletResponse
-import uk.ac.warwick.tabula.commands.Appliable
-import uk.ac.warwick.tabula.commands.timetables.ViewMemberEventsRequest
-import uk.ac.warwick.tabula.data.model.Member
-import uk.ac.warwick.tabula.timetables.EventOccurrence
-import uk.ac.warwick.tabula.{Fixtures, AcademicYear, Mockito, TestBase}
-import uk.ac.warwick.tabula.services.{TermService, TermServiceComponent}
 import uk.ac.warwick.tabula.services.timetables.{EventOccurrenceService, EventOccurrenceServiceComponent}
-import uk.ac.warwick.util.termdates.Term.TermType
-import uk.ac.warwick.util.termdates.TermImpl
-
-import scala.util.{Success, Try}
+import uk.ac.warwick.tabula.{Fixtures, Mockito, TestBase}
 
 class GeneratesTimetableIcalFeedTest extends TestBase with Mockito {
 
-	val generator = new GeneratesTimetableIcalFeed with TermServiceComponent with EventOccurrenceServiceComponent {
-		val termService: TermService = smartMock[TermService]
+	val generator = new GeneratesTimetableIcalFeed with EventOccurrenceServiceComponent {
 		val eventOccurrenceService: EventOccurrenceService = mock[EventOccurrenceService]
 	}
 

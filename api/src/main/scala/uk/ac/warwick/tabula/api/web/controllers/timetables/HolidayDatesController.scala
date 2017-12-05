@@ -9,15 +9,12 @@ import org.springframework.web.bind.annotation.{ModelAttribute, RequestMapping}
 import uk.ac.warwick.tabula.DateFormats
 import uk.ac.warwick.tabula.api.web.controllers.ApiController
 import uk.ac.warwick.tabula.helpers.DateTimeOrdering._
+import uk.ac.warwick.tabula.helpers.JodaConverters._
 import uk.ac.warwick.tabula.web.Mav
 import uk.ac.warwick.tabula.web.views.{IcalView, JSONView}
 import uk.ac.warwick.util.workingdays.WorkingDaysHelperImpl
 
 import scala.collection.JavaConverters._
-
-object HolidayDatesController {
-
-}
 
 @Controller
 @RequestMapping(Array("/v1/holidaydates", "/v1/holidaydates.*"))
@@ -27,7 +24,7 @@ class HolidayDatesController extends ApiController
 trait GetHolidayDatesApi {
 	self: ApiController =>
 
-	lazy val holidayDates: Seq[LocalDate] = new WorkingDaysHelperImpl().getHolidayDates.asScala.toSeq.sorted
+	lazy val holidayDates: Seq[LocalDate] = new WorkingDaysHelperImpl().getHolidayDates.asScala.toSeq.map(_.asJoda).sorted
 
 	@ModelAttribute("holidayDates")
 	def holidayDatesModelAttribute: Seq[LocalDate] = holidayDates

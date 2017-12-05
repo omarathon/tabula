@@ -31,7 +31,7 @@ class FindStudentsForSchemeCommandTest extends TestBase with Mockito {
 	trait Fixture {
 		val scheme = new AttendanceMonitoringScheme
 		scheme.department = new Department
-		scheme.academicYear = AcademicYear.guessSITSAcademicYearByDate(DateTime.now)
+		scheme.academicYear = AcademicYear.now()
 		val student1: StudentMember = Fixtures.student(universityId = "1234", userId = "1234")
 		val student2: StudentMember = Fixtures.student(universityId = "2345", userId = "2345")
 		val student3: StudentMember = Fixtures.student(universityId = "3456", userId = "3456")

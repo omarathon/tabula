@@ -1,8 +1,7 @@
 package uk.ac.warwick.tabula.data.model.groups
 
-import uk.ac.warwick.tabula.AcademicYear
 import uk.ac.warwick.tabula.data.model
-import uk.ac.warwick.tabula.services.TermService
+import uk.ac.warwick.tabula.{AcademicPeriod, AcademicYear}
 
 import scala.collection.JavaConverters._
 
@@ -106,13 +105,13 @@ object SmallGroupSetFilters {
 				.flatMap { _.toWeeks }
 				.exists(weekRange.toWeeks.contains)
 	}
-	def allTermFilters(year: AcademicYear, termService: TermService): Seq[Term] = {
-		val weeks = termService.getAcademicWeeksForYear(year.dateInTermOne).toMap
+	def allTermFilters(year: AcademicYear): Seq[Term] = {
+		val weeks = year.weeks
 
 		val terms =
 			weeks
-				.map { case (weekNumber, dates) =>
-					(weekNumber, termService.getTermFromAcademicWeekIncludingVacations(weekNumber, year))
+				.map { case (weekNumber, week) =>
+					(weekNumber, week.period)
 				}
 				.groupBy { _._2 }
 				.map { case (term, weekNumbersAndTerms) =>
@@ -121,6 +120,6 @@ object SmallGroupSetFilters {
 				.toSeq
 				.sortBy { case (_, weekRange) => weekRange.minWeek }
 
-		TermService.orderedTermNames.zip(terms).map { case (name, (term, weekRange)) => Term(name, weekRange) }
+		AcademicPeriod.allPeriodTypes.map(_.toString).zip(terms).map { case (name, (_, weekRange)) => Term(name, weekRange) }
 	}
 }

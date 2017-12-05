@@ -1,6 +1,5 @@
 package uk.ac.warwick.tabula.web.controllers.cm2.admin.markingworkflows
 
-import org.joda.time.DateTime
 import org.springframework.context.annotation.Profile
 import org.springframework.stereotype.Controller
 import org.springframework.web.bind.annotation.{ModelAttribute, PathVariable, RequestMapping, RequestParam}
@@ -34,7 +33,7 @@ class ListReusableMarkingWorkflowController extends CM2MarkingWorkflowController
 		@RequestParam(value="deletedWorkflow", required=false) deletedWorkflow: String
 	): Mav = {
 		// use the SITS rollover date so we can start adding workflows for 'next' year
-		val currentAcademicYear = AcademicYear.guessSITSAcademicYearByDate(DateTime.now)
+		val currentAcademicYear = AcademicYear.now()
 
 		commonCrumbs(
 			Mav("cm2/admin/workflows/list_reusable", Map(
@@ -63,6 +62,6 @@ class ListReusableMarkingWorkflowRedirectController extends BaseController
 
 	@RequestMapping
 	def redirect(@PathVariable department: Department) =
-		Redirect(Routes.admin.workflows(department, retrieveActiveAcademicYear(None).getOrElse(AcademicYear.guessSITSAcademicYearByDate(DateTime.now))))
+		Redirect(Routes.admin.workflows(department, retrieveActiveAcademicYear(None).getOrElse(AcademicYear.now())))
 
 }

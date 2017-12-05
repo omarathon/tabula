@@ -1,12 +1,10 @@
 package uk.ac.warwick.tabula
-import org.junit.Test
-import org.joda.time.DateTime
 
 //scalastyle:off magic.number
 class AcademicYearTest extends TestBase {
 	@Test def year {
-		AcademicYear.guessSITSAcademicYearByDate(dateTime(2010,11)).startYear should be(2010)
-		AcademicYear.guessSITSAcademicYearByDate(dateTime(2010,5)).startYear should be(2009)
+		AcademicYear.forDate(dateTime(2010,11)).startYear should be(2010)
+		AcademicYear.forDate(dateTime(2010,5)).startYear should be(2009)
 	}
 
 	@Test def strings {

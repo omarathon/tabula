@@ -2,7 +2,7 @@ package uk.ac.warwick.tabula
 
 import java.math
 
-import org.joda.time.DateTime
+import org.joda.time.{DateTime, DateTimeConstants, LocalDate}
 import uk.ac.warwick.tabula.JavaImports._
 import uk.ac.warwick.tabula.data.model._
 import uk.ac.warwick.tabula.data.model.attendance._
@@ -12,7 +12,6 @@ import uk.ac.warwick.tabula.permissions.PermissionsTarget
 import uk.ac.warwick.tabula.services.UserLookupService
 import uk.ac.warwick.tabula.services.attendancemonitoring.AttendanceMonitoringService
 import uk.ac.warwick.userlookup.{AnonymousUser, User}
-import org.junit.Before
 
 import scala.collection.JavaConverters._
 
@@ -120,7 +119,7 @@ object Fixtures extends Mockito {
 		s
 	}
 
-	def smallGroupEvent(title:String): SmallGroupEvent = {
+	def smallGroupEvent(title: String): SmallGroupEvent = {
 		val s = new SmallGroupEvent
 		s.smallGroupService = None
 		s.title = title
@@ -169,7 +168,7 @@ object Fixtures extends Mockito {
 
 	def assessmentGroup(assignment:AssessmentComponent): UpstreamAssessmentGroup =
 		assessmentGroup(
-			academicYear = new AcademicYear(2012),
+			academicYear = AcademicYear(2012),
 			code = assignment.assessmentGroup,
 			module = assignment.moduleCode + "-30",
 			occurrence = "A")
@@ -286,7 +285,7 @@ object Fixtures extends Mockito {
 	}
 
 	def studentCourseYearDetails(
-		academicYear: AcademicYear = AcademicYear.guessSITSAcademicYearByDate(DateTime.now),
+		academicYear: AcademicYear = AcademicYear.now(),
 		modeOfAttendance: ModeOfAttendance = null,
 		yearOfStudy: Int = 1,
 		studentCourseDetails: StudentCourseDetails = null
@@ -355,7 +354,7 @@ object Fixtures extends Mockito {
 		point.name = name
 		point.startWeek = startWeek
 		point.endWeek = endWeek
-		point.startDate = academicYear.dateInTermOne.toLocalDate
+		point.startDate = new LocalDate(academicYear.startYear, DateTimeConstants.NOVEMBER, 1)
 		point.endDate = point.startDate.plusWeeks(endWeek - startWeek).plusDays(6)
 		point
 	}

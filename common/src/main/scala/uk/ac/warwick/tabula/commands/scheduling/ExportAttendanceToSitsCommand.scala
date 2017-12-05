@@ -5,11 +5,10 @@ import uk.ac.warwick.tabula.data.Transactions.transactional
 import uk.ac.warwick.tabula.data.model.attendance.MonitoringPointReport
 import uk.ac.warwick.tabula.helpers.Logging
 import uk.ac.warwick.tabula.permissions._
-import uk.ac.warwick.tabula.services.TermService
 import uk.ac.warwick.tabula.services.attendancemonitoring.{AttendanceMonitoringServiceComponent, AutowiringAttendanceMonitoringServiceComponent}
 import uk.ac.warwick.tabula.services.scheduling.{AutowiringExportAttendanceToSitsServiceComponent, ExportAttendanceToSitsServiceComponent}
 import uk.ac.warwick.tabula.system.permissions.{PermissionsChecking, RequiresPermissionsChecking}
-import uk.ac.warwick.tabula.{AutowiringFeaturesComponent, FeaturesComponent}
+import uk.ac.warwick.tabula.{AcademicPeriod, AutowiringFeaturesComponent, FeaturesComponent}
 
 object ExportAttendanceToSitsCommand {
 	def apply() = new ExportAttendanceToSitsCommand
@@ -41,7 +40,7 @@ class ExportAttendanceToSitsCommand extends CommandInternal[Seq[MonitoringPointR
 				reportsByAcademicYear.keys.toSeq.sortBy(_.startYear).flatMap{academicYear =>
 					val reportsInAcademicYear = reportsByAcademicYear(academicYear)
 					// push a report for each term in order (if a report exists)
-					TermService.orderedTermNames.flatMap(term => {
+					AcademicPeriod.allPeriodTypes.map(_.toString).flatMap(term => {
 						reportsInAcademicYear.find(_.monitoringPeriod == term) match {
 							case None => None
 							case Some(report: MonitoringPointReport) =>

@@ -8,7 +8,7 @@ import uk.ac.warwick.tabula.commands._
 import uk.ac.warwick.tabula.data.model.groups.{SmallGroup, SmallGroupEvent, SmallGroupSet, WeekRange}
 import uk.ac.warwick.tabula.data.model.{AssessmentGroup, Department, Module}
 import uk.ac.warwick.tabula.permissions.Permissions
-import uk.ac.warwick.tabula.services.{SmallGroupService, SmallGroupServiceComponent, TermServiceComponent, TermServiceImpl}
+import uk.ac.warwick.tabula.services.{SmallGroupService, SmallGroupServiceComponent}
 import uk.ac.warwick.tabula.system.permissions.PermissionsChecking
 
 class CopySmallGroupSetsCommandTest extends TestBase with Mockito {
@@ -35,12 +35,12 @@ class CopySmallGroupSetsCommandTest extends TestBase with Mockito {
 	@Test def populate(): Unit = withFakeTime(new DateTime(2014, DateTimeConstants.OCTOBER, 13, 9, 13, 29, 0)) { new CommandFixture {
 		val source = new SmallGroupSet()
 
-		command.smallGroupService.getSmallGroupSets(module, new AcademicYear(2013)) returns (Seq(source))
+		command.smallGroupService.getSmallGroupSets(module, AcademicYear(2013)) returns (Seq(source))
 
 		command.populate()
 
-		command.sourceAcademicYear should be (new AcademicYear(2013))
-		command.targetAcademicYear should be (new AcademicYear(2014))
+		command.sourceAcademicYear should be (AcademicYear(2013))
+		command.targetAcademicYear should be (AcademicYear(2014))
 		command.smallGroupSets.size() should be (1)
 		command.smallGroupSets.get(0).smallGroupSet should be (source)
 	}}
@@ -102,15 +102,13 @@ class CopySmallGroupSetsCommandTest extends TestBase with Mockito {
 	}
 
 	private trait ValidationFixture extends Fixture {
-		val command = new CopySmallGroupSetsValidation with CopySmallGroupSetsCommandState with CopySmallGroupSetsRequestState with TermServiceComponent {
-			val termService = new TermServiceImpl
-
+		val command = new CopySmallGroupSetsValidation with CopySmallGroupSetsCommandState with CopySmallGroupSetsRequestState {
 			val department: Department = ValidationFixture.this.department
 			val modules = Seq(ValidationFixture.this.module)
 
 			// Populate some default values
-			targetAcademicYear = new AcademicYear(2014)
-			sourceAcademicYear = new AcademicYear(2013)
+			targetAcademicYear = AcademicYear(2014)
+			sourceAcademicYear = AcademicYear(2013)
 			smallGroupSets = JArrayList()
 		}
 	}
@@ -160,8 +158,8 @@ class CopySmallGroupSetsCommandTest extends TestBase with Mockito {
 
 	// TAB-3974
 	@Test def validationWeekNotInTargetYear(): Unit = new ValidationFixture {
-		command.sourceAcademicYear = new AcademicYear(2014) // 14/15
-		command.targetAcademicYear = new AcademicYear(2015) // 15/16
+		command.sourceAcademicYear = AcademicYear(2014) // 14/15 - week -8 to week 53
+		command.targetAcademicYear = AcademicYear(2015) // 15/16 - week -8 to week 52
 
 		val set: SmallGroupSet = Fixtures.smallGroupSet("set")
 		val group: SmallGroup = Fixtures.smallGroup("group")
@@ -175,7 +173,7 @@ class CopySmallGroupSetsCommandTest extends TestBase with Mockito {
 
 		// This is fine because there is a week 52 in both years
 		{
-			event.weekRanges = Seq(WeekRange(1, 52))
+			event.weekRanges = Seq(WeekRange(-8, 52))
 			state.copy = true
 			state.copyGroups = true
 			state.copyEvents = true
@@ -188,7 +186,7 @@ class CopySmallGroupSetsCommandTest extends TestBase with Mockito {
 
 		// This is fine because we're set to not copy events
 		{
-			event.weekRanges = Seq(WeekRange(1, 53))
+			event.weekRanges = Seq(WeekRange(-8, 53))
 			state.copy = true
 			state.copyGroups = true
 			state.copyEvents = false
@@ -200,7 +198,7 @@ class CopySmallGroupSetsCommandTest extends TestBase with Mockito {
 		}
 
 		{
-			event.weekRanges = Seq(WeekRange(1, 53))
+			event.weekRanges = Seq(WeekRange(-8, 53))
 			state.copy = true
 			state.copyGroups = true
 			state.copyEvents = true
@@ -227,8 +225,8 @@ class CopySmallGroupSetsCommandTest extends TestBase with Mockito {
 			val modules: Seq[Module] = m
 
 			// Populate some default values
-			targetAcademicYear = new AcademicYear(2014)
-			sourceAcademicYear = new AcademicYear(2013)
+			targetAcademicYear = AcademicYear(2014)
+			sourceAcademicYear = AcademicYear(2013)
 			smallGroupSets = JArrayList(new CopySmallGroupSetState(set) { copy = true })
 		}
 

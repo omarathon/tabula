@@ -9,17 +9,18 @@ import uk.ac.warwick.tabula.data.model.{Department, StudentMember}
 import uk.ac.warwick.tabula.helpers.SystemClockComponent
 import uk.ac.warwick.tabula.services.timetables.TimetableFetchingService.EventOccurrenceList
 import uk.ac.warwick.tabula.services.timetables._
-import uk.ac.warwick.tabula.services.{AutowiringSecurityServiceComponent, AutowiringSmallGroupServiceComponent, AutowiringTermServiceComponent, AutowiringUserLookupComponent}
+import uk.ac.warwick.tabula.services.{AutowiringSecurityServiceComponent, AutowiringSmallGroupServiceComponent, AutowiringUserLookupComponent}
 import uk.ac.warwick.tabula.web.Mav
 import uk.ac.warwick.tabula.web.controllers.profiles.ProfilesController
 import uk.ac.warwick.tabula.web.views.{FullCalendarEvent, JSONView}
+import uk.ac.warwick.util.termdates.AcademicYearPeriod.PeriodType
 
 import scala.util.{Failure, Try}
 
 @Controller
 @RequestMapping(Array("/profiles/department/{department}/timetables/drafts/{academicYear}/{endpoint}"))
 class DepartmentDraftTimetablesController extends ProfilesController
-	with AutowiringUserLookupComponent with AutowiringTermServiceComponent {
+	with AutowiringUserLookupComponent {
 
 	@ModelAttribute("activeDepartment")
 	def activeDepartment(@PathVariable department: Department): Department = department
@@ -70,7 +71,7 @@ class DepartmentDraftTimetablesController extends ProfilesController
 	@RequestMapping(method = Array(GET))
 	def form(@ModelAttribute("command") cmd: DepartmentEventsCommand.CommandType, @PathVariable department: Department, @PathVariable academicYear: AcademicYear): Mav = {
 		Mav("profiles/timetables/department_draft",
-			"startDate" -> termService.getAcademicWeek(academicYear.dateInTermOne, 1).getStart.toLocalDate,
+			"startDate" -> academicYear.termOrVacation(PeriodType.autumnTerm).firstDay,
 			"canFilterStudents" -> false,
 			"canFilterStaff" -> securityService.can(user, DepartmentEventsCommand.FilterStaffPermission, mandatory(department)),
 			"canFilterRoute" -> false,

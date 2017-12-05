@@ -1,6 +1,6 @@
 package uk.ac.warwick.tabula.commands.coursework.assignments
 
-import org.joda.time.DateTime
+import org.joda.time.{DateTime, LocalDate}
 import org.springframework.format.annotation.DateTimeFormat
 import org.springframework.validation.{BindingResult, Errors, ValidationUtils}
 import uk.ac.warwick.spring.Wire
@@ -294,7 +294,7 @@ trait AddAssignmentsCommandState {
 	// academic year to create all these assignments under. Defaults to whatever academic year it will be in 3
 	// months, which means it will start defaulting to next year from about May (under the assumption that
 	// you would've done the current year's import long before then).
-	var academicYear: AcademicYear = AcademicYear.guessSITSAcademicYearByDate(DateTime.now.plusMonths(3))
+	var academicYear: AcademicYear = AcademicYear.forDate(LocalDate.now.plusMonths(3))
 	var includeSubDepartments: Boolean = false
 
 	// All the possible assignments, prepopulated from SITS.

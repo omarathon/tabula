@@ -1,6 +1,5 @@
 package uk.ac.warwick.tabula.web.controllers.groups.admin
 
-import org.joda.time.DateTime
 import org.springframework.stereotype.Controller
 import org.springframework.web.bind.annotation.{ModelAttribute, PathVariable, RequestMapping}
 import uk.ac.warwick.tabula.AcademicYear
@@ -21,6 +20,6 @@ class GroupsAdminModuleHomeController extends GroupsController
 
 	@RequestMapping
 	def adminModule(@PathVariable module: Module, @ModelAttribute("activeAcademicYear") academicYear: Option[AcademicYear]): Mav = {
-		Redirect(Routes.admin.module(module, academicYear.getOrElse(AcademicYear.guessSITSAcademicYearByDate(DateTime.now))))
+		Redirect(Routes.admin.module(module, academicYear.getOrElse(AcademicYear.now())))
 	}
 }

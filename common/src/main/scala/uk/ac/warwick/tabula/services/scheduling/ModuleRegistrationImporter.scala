@@ -3,7 +3,6 @@ package uk.ac.warwick.tabula.services.scheduling
 import java.sql.{ResultSet, Types}
 import javax.sql.DataSource
 
-import org.joda.time.DateTime
 import org.springframework.context.annotation.Profile
 import org.springframework.jdbc.`object`.MappingSqlQuery
 import org.springframework.jdbc.core.SqlParameter
@@ -124,7 +123,7 @@ class SandboxModuleRegistrationImporter extends AbstractModuleRegistrationImport
 					case _ => "O"
 				},
 				occurrence = "A",
-				academicYear = AcademicYear.guessSITSAcademicYearByDate(DateTime.now).toString,
+				academicYear = AcademicYear.now().toString,
 				actualMark = Some(new JBigDecimal(mark)),
 				actualGrade = grade,
 				agreedMark = Some(new JBigDecimal(mark)),

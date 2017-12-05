@@ -3,8 +3,8 @@ package uk.ac.warwick.tabula.commands.attendance
 import java.text.DateFormatSymbols
 
 import uk.ac.warwick.spring.Wire
+import uk.ac.warwick.tabula.AcademicYear
 import uk.ac.warwick.tabula.data.model.attendance.{AttendanceMonitoringPoint, AttendanceMonitoringPointStyle, AttendanceMonitoringScheme}
-import uk.ac.warwick.tabula.services.TermServiceComponent
 import uk.ac.warwick.tabula.services.attendancemonitoring.AttendanceMonitoringService
 
 case class GroupedPoint(
@@ -16,16 +16,13 @@ case class GroupedPoint(
 }
 
 trait GroupsPoints {
-
-	self: TermServiceComponent =>
-
 	def groupByTerm(points: Seq[AttendanceMonitoringPoint], groupSimilar: Boolean = true): Map[String, Seq[GroupedPoint]] = {
 		val ungroupedPoints =
 			// only week points group by term
 			points.filter(_.scheme.pointStyle == AttendanceMonitoringPointStyle.Week)
 			// group by term (using pre-calculated date)
-			.groupBy{ point =>
-				termService.getTermFromDateIncludingVacations(point.startDate.toDateTimeAtStartOfDay).getTermTypeAsString
+			.groupBy { point =>
+				AcademicYear.forDate(point.startDate).termOrVacationForDate(point.startDate).periodType.toString
 			}
 
 		if (groupSimilar)

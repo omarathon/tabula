@@ -8,7 +8,6 @@ import uk.ac.warwick.tabula.data.model.Department
 import uk.ac.warwick.tabula.data.model.attendance.{AttendanceMonitoringPointStyle, AttendanceMonitoringPointType, AttendanceMonitoringScheme}
 import uk.ac.warwick.tabula.helpers.LazyLists
 import uk.ac.warwick.tabula.permissions.Permissions
-import uk.ac.warwick.tabula.services.AutowiringTermServiceComponent
 import uk.ac.warwick.tabula.services.attendancemonitoring.{AttendanceMonitoringServiceComponent, AutowiringAttendanceMonitoringServiceComponent}
 import uk.ac.warwick.tabula.system.permissions.{PermissionsChecking, PermissionsCheckingMethods, RequiresPermissionsChecking}
 import uk.ac.warwick.util.web.UriBuilder
@@ -24,7 +23,6 @@ object FindPointsCommand {
 	def apply(department: Department, academicYear: AcademicYear, restrictedStyle: Option[AttendanceMonitoringPointStyle]) =
 		new FindPointsCommandInternal(department, academicYear, restrictedStyle)
 			with ComposableCommand[FindPointsResult]
-			with AutowiringTermServiceComponent
 			with AutowiringAttendanceMonitoringServiceComponent
 			with GroupsPoints
 			with FindPointsPermissions

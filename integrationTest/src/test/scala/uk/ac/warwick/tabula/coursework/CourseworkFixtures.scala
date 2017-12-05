@@ -5,7 +5,7 @@ import org.openqa.selenium.{By, WebElement}
 import org.scalatest.GivenWhenThen
 import org.scalatest.exceptions.TestFailedException
 import uk.ac.warwick.tabula.web.{FeaturesDriver, FixturesDriver}
-import uk.ac.warwick.tabula.{BrowserTest, FunctionalTestAcademicYear, LoginDetails}
+import uk.ac.warwick.tabula.{AcademicYear, BrowserTest, LoginDetails}
 
 import scala.collection.JavaConverters._
 import scala.concurrent.ExecutionContext.Implicits.global
@@ -42,7 +42,7 @@ trait CourseworkFixtures extends BrowserTest with FeaturesDriver with FixturesDr
 			routeCode = TEST_ROUTE_CODE,
 			courseCode = TEST_COURSE_CODE,
 			deptCode = TEST_DEPARTMENT_CODE,
-			academicYear = FunctionalTestAcademicYear.current.startYear.toString
+			academicYear = AcademicYear.now().startYear.toString
 		)
 		// Make them at the same time.
 		val concurrentJobs = Seq(
@@ -52,28 +52,28 @@ trait CourseworkFixtures extends BrowserTest with FeaturesDriver with FixturesDr
 				routeCode = TEST_ROUTE_CODE,
 				courseCode = TEST_COURSE_CODE,
 				deptCode = TEST_DEPARTMENT_CODE,
-				academicYear = FunctionalTestAcademicYear.current.startYear.toString
+				academicYear = AcademicYear.now().startYear.toString
 			) },
 			Future { createStudentMember(
 				P.Student2.usercode,
 				routeCode = TEST_ROUTE_CODE,
 				courseCode = TEST_COURSE_CODE,
 				deptCode = TEST_DEPARTMENT_CODE,
-				academicYear = FunctionalTestAcademicYear.current.startYear.toString
+				academicYear = AcademicYear.now().startYear.toString
 			) },
 			Future { createStudentMember(
 				P.Student3.usercode,
 				routeCode = TEST_ROUTE_CODE,
 				courseCode = TEST_COURSE_CODE,
 				deptCode = TEST_DEPARTMENT_CODE,
-				academicYear = FunctionalTestAcademicYear.current.startYear.toString
+				academicYear = AcademicYear.now().startYear.toString
 			) },
 			Future { createStudentMember(
 				P.Student4.usercode,
 				routeCode = TEST_ROUTE_CODE,
 				courseCode = TEST_COURSE_CODE,
 				deptCode = TEST_DEPARTMENT_CODE,
-				academicYear = FunctionalTestAcademicYear.current.startYear.toString
+				academicYear = AcademicYear.now().startYear.toString
 			) }
 		)
 
