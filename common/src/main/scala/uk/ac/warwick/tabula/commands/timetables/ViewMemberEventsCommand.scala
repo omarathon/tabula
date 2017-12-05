@@ -7,7 +7,7 @@ import uk.ac.warwick.tabula.commands.timetables.ViewMemberEventsCommand.ReturnTy
 import uk.ac.warwick.tabula.data.model.{Member, StaffMember, StudentMember}
 import uk.ac.warwick.tabula.helpers.Futures._
 import uk.ac.warwick.tabula.helpers.{Futures, Logging}
-import uk.ac.warwick.tabula.permissions.Permissions
+import uk.ac.warwick.tabula.permissions.{Permission, Permissions}
 import uk.ac.warwick.tabula.services.timetables.TimetableFetchingService.{EventList, EventOccurrenceList}
 import uk.ac.warwick.tabula.services.timetables._
 import uk.ac.warwick.tabula.system.permissions.{PermissionsChecking, PermissionsCheckingMethods, PubliclyVisiblePermissions, RequiresPermissionsChecking}
@@ -23,7 +23,7 @@ object ViewMemberEventsCommand extends Logging {
 
 	private[timetables] type ReturnType = Try[EventOccurrenceList]
 	type TimetableCommand = Appliable[ReturnType] with ViewMemberEventsRequest with SelfValidating
-	val RequiredPermission = Permissions.Profiles.Read.Timetable
+	val RequiredPermission: Permission = Permissions.Profiles.Read.Timetable
 
 	def apply(member: Member, currentUser: CurrentUser): TimetableCommand = member match {
 		case student: StudentMember =>
