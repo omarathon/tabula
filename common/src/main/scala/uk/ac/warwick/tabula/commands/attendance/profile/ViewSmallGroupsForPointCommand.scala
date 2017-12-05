@@ -1,18 +1,18 @@
 package uk.ac.warwick.tabula.commands.attendance.profile
 
-import org.joda.time.{DateTime, Interval}
-import uk.ac.warwick.tabula.AcademicYear
-import uk.ac.warwick.tabula.commands.attendance.profile.ViewSmallGroupsForPointCommandResult.GroupData
+import org.joda.time.LocalDate
 import uk.ac.warwick.tabula.commands._
+import uk.ac.warwick.tabula.commands.attendance.profile.ViewSmallGroupsForPointCommandResult.GroupData
 import uk.ac.warwick.tabula.commands.groups.SmallGroupAttendanceState.{Late, MissedAuthorised, MissedUnauthorised, NotRecorded}
 import uk.ac.warwick.tabula.commands.groups.ViewSmallGroupAttendanceCommand._
 import uk.ac.warwick.tabula.commands.groups.{SmallGroupAttendanceState, StudentGroupAttendance}
-import uk.ac.warwick.tabula.data.model.{AttendanceNote, StudentMember}
 import uk.ac.warwick.tabula.data.model.attendance.AttendanceMonitoringPoint
 import uk.ac.warwick.tabula.data.model.groups._
+import uk.ac.warwick.tabula.data.model.{AttendanceNote, StudentMember}
 import uk.ac.warwick.tabula.permissions.Permissions
-import uk.ac.warwick.tabula.services.{AutowiringSmallGroupServiceComponent, AutowiringTermServiceComponent, SmallGroupServiceComponent, TermServiceComponent}
+import uk.ac.warwick.tabula.services.{AutowiringSmallGroupServiceComponent, SmallGroupServiceComponent}
 import uk.ac.warwick.tabula.system.permissions.{PermissionsChecking, PermissionsCheckingMethods, RequiresPermissionsChecking}
+import uk.ac.warwick.tabula.{AcademicWeek, AcademicYear}
 
 import scala.collection.immutable.SortedMap
 
@@ -63,7 +63,6 @@ object ViewSmallGroupsForPointCommand {
 	def apply(student: StudentMember, point: AttendanceMonitoringPoint, attendance: StudentGroupAttendance) =
 		new ViewSmallGroupsForPointCommandInternal(student, point, attendance)
 			with AutowiringSmallGroupServiceComponent
-			with AutowiringTermServiceComponent
 			with ComposableCommand[ViewSmallGroupsForPointCommandResult]
 			with ViewSmallGroupsForPointPermissions
 			with ViewSmallGroupsForPointCommandState
@@ -74,14 +73,14 @@ object ViewSmallGroupsForPointCommand {
 class ViewSmallGroupsForPointCommandInternal(val student: StudentMember, val point: AttendanceMonitoringPoint, val attendance: StudentGroupAttendance)
 	extends CommandInternal[ViewSmallGroupsForPointCommandResult] {
 
-	self: SmallGroupServiceComponent with TermServiceComponent =>
+	self: SmallGroupServiceComponent =>
 
 	type EventInstance = (SmallGroupEvent, SmallGroupEventOccurrence.WeekNumber)
 
-	lazy val weeksForYear: Map[Integer, Interval] = termService.getAcademicWeeksForYear(point.scheme.academicYear.dateInTermOne).toMap
+	lazy val weeksForYear: Map[Int, AcademicWeek] = point.scheme.academicYear.weeks
 
-	def weekNumberToDate(weekNumber: Int, dayOfWeek: DayOfWeek): DateTime =
-		weeksForYear(weekNumber).getStart.withDayOfWeek(dayOfWeek.jodaDayOfWeek)
+	def weekNumberToDate(weekNumber: Int, dayOfWeek: DayOfWeek): LocalDate =
+		weeksForYear(weekNumber).firstDay
 
 	override def applyInternal(): ViewSmallGroupsForPointCommandResult = {
 		ViewSmallGroupsForPointCommandResult(
@@ -126,16 +125,16 @@ class ViewSmallGroupsForPointCommandInternal(val student: StudentMember, val poi
 
 	private def groupData = {
 		// Any day in this week is definitely before the start date of the point
-		val weekBeforePoint = termService.getAcademicWeekForAcademicYear(point.startDate.toDateTimeAtStartOfDay, point.scheme.academicYear) - 1
+		val weekBeforePoint = point.scheme.academicYear.weekForDate(point.startDate).weekNumber - 1
 		// Any day in this week is definitely after the end date of the point
-		val weekAfterPoint = termService.getAcademicWeekForAcademicYear(point.endDate.toDateTimeAtStartOfDay, point.scheme.academicYear) + 1
+		val weekAfterPoint = point.scheme.academicYear.weekForDate(point.endDate).weekNumber + 1
 
 		ViewSmallGroupsForPointCommandResult.GroupData(
 			attendance.attendance.map{case(term, groupAttendance) =>
 				val termWeekBoundaries = attendance.termWeeks(term)
 				val termWeeks = termWeekBoundaries.minWeek to termWeekBoundaries.maxWeek
 				GroupData.Term(
-					term.getTermTypeAsString,
+					term.periodType.toString,
 					termWeeks.map(week => (week, week > weekBeforePoint && week < weekAfterPoint)),
 					groupAttendance.map{case(group, attendanceMap) =>
 						GroupData.Term.Group(
@@ -162,9 +161,9 @@ class ViewSmallGroupsForPointCommandInternal(val student: StudentMember, val poi
 			val instance = (event, week)
 			val state = instanceMap(instance)
 			val instanceDate = weekNumberToDate(week, event.day)
-			if (instanceDate.isBefore(point.startDate.toDateTimeAtStartOfDay)) {
+			if (instanceDate.isBefore(point.startDate)) {
 				GroupData.Term.Group.Attendance(instance, state, notes.get(instance), "This event took place before the monitoring period", relevant = false)
-			} else if (instanceDate.isAfter(point.endDate.toDateTimeAtStartOfDay)) {
+			} else if (instanceDate.isAfter(point.endDate)) {
 				GroupData.Term.Group.Attendance(instance, state, notes.get(instance), "This event took place after the monitoring period", relevant = false)
 			} else {
 				state match {

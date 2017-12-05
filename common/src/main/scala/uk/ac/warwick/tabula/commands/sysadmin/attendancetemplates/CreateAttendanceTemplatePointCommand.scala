@@ -73,8 +73,8 @@ trait CreateAttendanceTemplatePointValidation extends SelfValidating {
 
 	protected def validateWeek(errors: Errors, week: Int, bindPoint: String) {
 		week match {
-			case y if y < 1  => errors.rejectValue(bindPoint, "attendanceMonitoringPoint.week.min")
-			case y if y > 52 => errors.rejectValue(bindPoint, "attendanceMonitoringPoint.week.max")
+			case y if y < -9 => errors.rejectValue(bindPoint, "attendanceMonitoringPoint.week.min")
+			case y if y > 53 => errors.rejectValue(bindPoint, "attendanceMonitoringPoint.week.max")
 			case _ =>
 		}
 	}

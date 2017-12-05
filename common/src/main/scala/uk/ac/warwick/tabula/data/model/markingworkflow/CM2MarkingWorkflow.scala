@@ -5,19 +5,18 @@ import javax.persistence.FetchType._
 import javax.persistence.{Column, DiscriminatorType, OneToMany, _}
 
 import org.hibernate.annotations.{BatchSize, Type}
-import org.joda.time.DateTime
-
-import scala.collection.immutable.{ListMap, SortedSet, TreeMap}
-import scala.collection.JavaConverters._
 import uk.ac.warwick.spring.Wire
 import uk.ac.warwick.tabula.AcademicYear
-import uk.ac.warwick.userlookup.User
 import uk.ac.warwick.tabula.JavaImports.{JArrayList, _}
 import uk.ac.warwick.tabula.data.PostLoadBehaviour
 import uk.ac.warwick.tabula.data.model._
+import uk.ac.warwick.tabula.helpers.UserOrdering._
 import uk.ac.warwick.tabula.permissions.PermissionsTarget
 import uk.ac.warwick.tabula.services.{CM2MarkingWorkflowService, UserGroupCacheManager}
-import uk.ac.warwick.tabula.helpers.UserOrdering._
+import uk.ac.warwick.userlookup.User
+
+import scala.collection.JavaConverters._
+import scala.collection.immutable.{ListMap, SortedSet, TreeMap}
 
 
 object CM2MarkingWorkflow {
@@ -76,7 +75,7 @@ abstract class CM2MarkingWorkflow extends GeneratedId with PermissionsTarget wit
 	@Basic
 	@Type(`type` = "uk.ac.warwick.tabula.data.model.AcademicYearUserType")
 	@Column(nullable = false)
-	var academicYear: AcademicYear = AcademicYear.guessSITSAcademicYearByDate(DateTime.now)
+	var academicYear: AcademicYear = AcademicYear.now()
 
 	// should be hardcoded to the MarkingWorkflowType with the same value as the implementations DiscriminatorValue :(
 	def workflowType: MarkingWorkflowType

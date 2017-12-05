@@ -6,16 +6,16 @@ import org.springframework.validation.Errors
 import org.springframework.web.bind.annotation.{ModelAttribute, PathVariable, RequestMapping, RequestParam}
 import uk.ac.warwick.tabula.AcademicYear
 import uk.ac.warwick.tabula.JavaImports._
+import uk.ac.warwick.tabula.commands._
 import uk.ac.warwick.tabula.commands.attendance.GroupsPoints
 import uk.ac.warwick.tabula.commands.attendance.manage._
-import uk.ac.warwick.tabula.web.controllers.attendance.{AttendanceController, HasMonthNames}
-import uk.ac.warwick.tabula.commands._
 import uk.ac.warwick.tabula.data.model.Department
 import uk.ac.warwick.tabula.data.model.attendance.{AttendanceMonitoringPoint, AttendanceMonitoringPointType, AttendanceMonitoringScheme}
 import uk.ac.warwick.tabula.permissions.Permissions
+import uk.ac.warwick.tabula.services.ModuleAndDepartmentService
 import uk.ac.warwick.tabula.services.attendancemonitoring.AutowiringAttendanceMonitoringServiceComponent
-import uk.ac.warwick.tabula.services.{AutowiringTermServiceComponent, ModuleAndDepartmentService}
 import uk.ac.warwick.tabula.web.Mav
+import uk.ac.warwick.tabula.web.controllers.attendance.{AttendanceController, HasMonthNames}
 
 import scala.collection.JavaConverters._
 
@@ -52,7 +52,7 @@ class CreateAttendancePointsFromCopyController extends AttendanceController with
 		@RequestParam(required = false) searchDepartment: Department,
 		@RequestParam(required = false) searchAcademicYear: AcademicYear,
 		@RequestParam schemes: JList[AttendanceMonitoringScheme]
-	): FindPointsCommandInternal with ComposableCommand[FindPointsResult] with AutowiringTermServiceComponent with AutowiringAttendanceMonitoringServiceComponent with GroupsPoints with FindPointsPermissions with FindPointsCommandState with ReadOnly with Unaudited = {
+	): FindPointsCommandInternal with ComposableCommand[FindPointsResult] with AutowiringAttendanceMonitoringServiceComponent with GroupsPoints with FindPointsPermissions with FindPointsCommandState with ReadOnly with Unaudited = {
 		if (searchDepartment == null || searchAcademicYear == null)
 			null
 		else

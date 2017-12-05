@@ -22,13 +22,15 @@ object IntervalFormatter {
 		val dateFormatter = if (includeDays) IncludeDays else OmitDays
 		val formatter = new ConfigurableIntervalFormatter(timeFormatter, dateFormatter)
 		formatter.format(new Interval(start, end))
-
 	}
+	def formatDate(start: LocalDate, end: LocalDate, includeDays: Boolean = true): String =
+		format(start.toDateTimeAtStartOfDay, end.toDateTimeAtStartOfDay, includeTime = false, includeDays = includeDays)
 
 	/** Useful sometimes if you have an "endless" interval like an open-ended Assignment. */
 	def format(start: DateTime): String = doFormat(start, includeYear = true)
 
 	def format(start: DateTime, includeTime: Boolean): String = doFormat(start, includeYear = true, includeTime = includeTime)
+	def formatDate(start: LocalDate): String = format(start.toDateTimeAtStartOfDay, includeTime = false)
 
 	/** @see #format(DateTime, DateTime, Boolean) */
 	def format(interval: Interval): String = format(interval.getStart, interval.getEnd)

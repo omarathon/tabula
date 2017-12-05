@@ -29,7 +29,6 @@ object ProfileExportSingleCommand {
 			with FreemarkerXHTMLPDFGeneratorWithFileStorageComponent
 			with PhotosWarwickMemberPhotoUrlGeneratorComponent
 			with AutowiringAttendanceMonitoringServiceComponent
-			with AutowiringTermServiceComponent
 			with AutowiringUserLookupComponent
 			with AutowiringAssessmentServiceComponent
 			with AutowiringRelationshipServiceComponent
@@ -49,7 +48,7 @@ class ProfileExportSingleCommandInternal(val student: StudentMember, val academi
 
 	self: FreemarkerXHTMLPDFGeneratorWithFileStorageComponent with AttendanceMonitoringServiceComponent
 		with AssessmentServiceComponent	with RelationshipServiceComponent with MeetingRecordServiceComponent
-		with SmallGroupServiceComponent	with TermServiceComponent with UserLookupComponent
+		with SmallGroupServiceComponent	with UserLookupComponent
 		with FileDaoComponent =>
 
 	import uk.ac.warwick.tabula.helpers.DateTimeOrdering._
@@ -122,11 +121,11 @@ class ProfileExportSingleCommandInternal(val student: StudentMember, val academi
 		val smallGroupData = benchmarkTask("smallGroupData") { getSmallGroupData }
 
 		// Get meetings
-		val startOfYear = termService.getTermFromAcademicWeekIncludingVacations(1, academicYear).getStartDate
-		val endOfYear = termService.getTermFromAcademicWeek(1, academicYear + 1).getStartDate
+		val startOfYear = academicYear.firstDay
+		val endOfYear = academicYear.lastDay
 		val meetingData = benchmarkTask("meetingData") {
 			relationshipService.getAllPastAndPresentRelationships(student).flatMap(meetingRecordService.list)
-				.filter(m => m.meetingDate.isAfter(startOfYear) && m.meetingDate.isBefore(endOfYear) && m.isApproved)
+				.filter(m => !m.meetingDate.isBefore(startOfYear.toDateTimeAtStartOfDay) && m.meetingDate.isBefore(endOfYear.plusDays(1).toDateTimeAtStartOfDay) && m.isApproved)
 				.sortBy(_.meetingDate)
 				.map(meeting => MeetingData(
 					meeting.relationship.relationshipType.agentRole.capitalize,
@@ -186,7 +185,7 @@ class ProfileExportSingleCommandInternal(val student: StudentMember, val academi
 		checkpoints.map(checkpoint => {
 			PointData(
 				checkpoint.point.scheme.department.name,
-				termService.getTermFromDateIncludingVacations(checkpoint.point.startDate.toDateTimeAtStartOfDay).getTermTypeAsString,
+				academicYear.termOrVacationForDate(checkpoint.point.startDate).periodType.toString,
 				checkpoint.state.dbValue,
 				checkpoint.point.name,
 				checkpoint.point.pointType.description,

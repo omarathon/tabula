@@ -2,7 +2,7 @@ package uk.ac.warwick.tabula.profiles.profile
 
 import org.scalatest.GivenWhenThen
 import uk.ac.warwick.tabula.web.FeaturesDriver
-import uk.ac.warwick.tabula.{BrowserTest, FunctionalTestAcademicYear}
+import uk.ac.warwick.tabula.{BrowserTest, AcademicYear}
 
 
 trait TimetablingFixture extends BrowserTest with TimetableDriver  with FeaturesDriver with GivenWhenThen{
@@ -16,7 +16,7 @@ trait TimetablingFixture extends BrowserTest with TimetableDriver  with Features
 
 	var testGroupSetId:String=_
 
-	val academicYear: FunctionalTestAcademicYear = FunctionalTestAcademicYear.current
+	val academicYear: AcademicYear = AcademicYear.now()
 
 	val examTimetablesWasEnabled: Boolean = isFeatureEnabled("personalExamTimetables")
 

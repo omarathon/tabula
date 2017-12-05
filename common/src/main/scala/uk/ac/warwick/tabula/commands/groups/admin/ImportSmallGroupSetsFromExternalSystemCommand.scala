@@ -60,7 +60,7 @@ object ImportSmallGroupSetsFromExternalSystemCommand {
 	}
 }
 
-trait ImportSmallGroupSetsFromExternalSystemCommandState extends CurrentSITSAcademicYear {
+trait ImportSmallGroupSetsFromExternalSystemCommandState extends CurrentAcademicYear {
 	def department: Department
 	def user: CurrentUser
 

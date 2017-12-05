@@ -23,12 +23,12 @@ class ImportModuleRegistrationsCommandTest extends PersistenceTestBase with Mock
 		session.saveOrUpdate(mod)
 		session.flush()
 
-		val mr = new ModuleRegistration(scd, mod, new JBigDecimal(30), new AcademicYear(2013), "A")
+		val mr = new ModuleRegistration(scd, mod, new JBigDecimal(30), AcademicYear(2013), "A")
 		session.saveOrUpdate(mr)
 		session.flush()
 
 		val cats = new JBigDecimal(30)
-		val year = new AcademicYear(2013)
+		val year = AcademicYear(2013)
 		val occurrence = "O"
 
 		val madService: ModuleAndDepartmentService = smartMock[ModuleAndDepartmentService]
@@ -59,7 +59,7 @@ class ImportModuleRegistrationsCommandTest extends PersistenceTestBase with Mock
 
 			// check results
 			newModRegs.size should be (1)
-			newModRegs.head.academicYear should be (new AcademicYear(2013))
+			newModRegs.head.academicYear should be (AcademicYear(2013))
 			newModRegs.head.assessmentGroup should be ("A")
 			newModRegs.head.module should be (mod)
 			newModRegs.head.cats should be (cats)

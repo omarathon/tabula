@@ -7,7 +7,7 @@ import uk.ac.warwick.tabula.{AcademicYear, BrowserTest}
 
 class ReplaceMarkerSingleUseWorkflowTest extends BrowserTest with CourseworkFixtures {
 
-	private val currentYear = AcademicYear.guessSITSAcademicYearByDate(DateTime.now)
+	private val currentYear = AcademicYear.now()
 
 	private def openModifyMarkerScreen(): Unit = {
 		withAssignmentWithWorkflow(SingleMarking, Seq(P.Marker1, P.Marker2)) { _ =>

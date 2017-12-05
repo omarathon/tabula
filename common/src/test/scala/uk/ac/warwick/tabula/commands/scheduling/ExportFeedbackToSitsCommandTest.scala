@@ -27,7 +27,7 @@ class ExportFeedbackToSitsCommandTest extends TestBase  with ComponentMixins wit
 		val department: Department = Fixtures.department("XX", "Xander Department")
 		department.id = "1"
 		department.code = "XX"
-		department.setUploadMarksToSitsForYear(new AcademicYear(2014), DegreeType.Undergraduate, canUpload = true)
+		department.setUploadMarksToSitsForYear(AcademicYear(2014), DegreeType.Undergraduate, canUpload = true)
 
 		module.adminDepartment = department
 
@@ -39,7 +39,7 @@ class ExportFeedbackToSitsCommandTest extends TestBase  with ComponentMixins wit
 
 		val assignment: Assignment = Fixtures.assignment("test assignment")
 		assignment.module = module
-		assignment.academicYear = new AcademicYear(2014)
+		assignment.academicYear = AcademicYear(2014)
 
 		// set up feedback
 		val feedback: AssignmentFeedback = Fixtures.assignmentFeedback("0070790")

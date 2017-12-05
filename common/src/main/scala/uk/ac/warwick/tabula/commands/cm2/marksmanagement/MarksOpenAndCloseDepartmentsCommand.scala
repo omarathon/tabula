@@ -1,13 +1,13 @@
 package uk.ac.warwick.tabula.commands.cm2.marksmanagement
 
+import uk.ac.warwick.tabula.AcademicYear
+import uk.ac.warwick.tabula.JavaImports._
 import uk.ac.warwick.tabula.commands._
 import uk.ac.warwick.tabula.data.model.{DegreeType, Department}
-import uk.ac.warwick.tabula.system.permissions.{PermissionsChecking, PermissionsCheckingMethods, RequiresPermissionsChecking}
 import uk.ac.warwick.tabula.permissions.Permissions
-import uk.ac.warwick.tabula.AcademicYear
-import org.joda.time.DateTime
-import uk.ac.warwick.tabula.services.{ModuleAndDepartmentServiceComponent, AutowiringModuleAndDepartmentServiceComponent, AutowiringTermServiceComponent, TermServiceComponent}
-import uk.ac.warwick.tabula.JavaImports._
+import uk.ac.warwick.tabula.services.{AutowiringModuleAndDepartmentServiceComponent, ModuleAndDepartmentServiceComponent}
+import uk.ac.warwick.tabula.system.permissions.{PermissionsChecking, PermissionsCheckingMethods, RequiresPermissionsChecking}
+
 import scala.collection.JavaConverters._
 
 sealed abstract class DepartmentMarksState (val value: String)
@@ -19,7 +19,6 @@ object MarksOpenAndCloseDepartmentsCommand {
 	def apply() =
 		new MarksOpenAndCloseDepartmentsCommandInternal
 		with ComposableCommand[DegreeType]
-		with AutowiringTermServiceComponent
 		with AutowiringModuleAndDepartmentServiceComponent
 		with MarksPopulateOpenAndCloseDepartmentsCommand
 		with MarksOpenAndCloseDepartmentsCommandState
@@ -77,9 +76,9 @@ trait MarksOpenAndCloseDepartmentsCommandDescription extends Describable[DegreeT
 }
 
 trait MarksOpenAndCloseDepartmentsCommandState {
-	self: TermServiceComponent with ModuleAndDepartmentServiceComponent =>
+	self: ModuleAndDepartmentServiceComponent =>
 
-	lazy val currentAcademicYear: AcademicYear = AcademicYear.findAcademicYearContainingDate(DateTime.now)
+	lazy val currentAcademicYear: AcademicYear = AcademicYear.now()
 	lazy val previousAcademicYear: AcademicYear = currentAcademicYear.previous
 
 	lazy val departments: Seq[Department] = moduleAndDepartmentService.allRootDepartments

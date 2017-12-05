@@ -13,7 +13,7 @@ import scala.language.implicitConversions
 
 class ImportProfilesCommandTest extends PersistenceTestBase with Mockito with Logging with SitsAcademicYearAware {
 	trait Environment {
-		val year = new AcademicYear(2013)
+		val year = AcademicYear(2013)
 
 		// set up a department
 		val dept: Department = Fixtures.department("EN", "English")
@@ -46,7 +46,7 @@ class ImportProfilesCommandTest extends PersistenceTestBase with Mockito with Lo
 		session.flush()
 
 		// register the student on the module
-		val existingMr = new ModuleRegistration(scd, existingMod, new JBigDecimal(30), new AcademicYear(2013), "A")
+		val existingMr = new ModuleRegistration(scd, existingMod, new JBigDecimal(30), AcademicYear(2013), "A")
 		session.saveOrUpdate(existingMr)
 		scd.addModuleRegistration(existingMr)
 		session.saveOrUpdate(scd)
@@ -101,7 +101,7 @@ class ImportProfilesCommandTest extends PersistenceTestBase with Mockito with Lo
 			scd.moduleRegistrations.contains(existingMr) should be (true)
 			session.flush()
 
-			val newMr = new ModuleRegistration(scd, newMod, new JBigDecimal(30), new AcademicYear(2013), "A")
+			val newMr = new ModuleRegistration(scd, newMod, new JBigDecimal(30), AcademicYear(2013), "A")
 			session.saveOrUpdate(newMr)
 			session.flush()
 			scd.addModuleRegistration(newMr)

@@ -30,7 +30,7 @@ trait GetModuleStudentsApi {
 	def currentSITSAcademicYear(@ModelAttribute("getCommand") cmd: ViewViewableCommand[Module]): Mav = {
 		getMav(
 			cmd.apply(),
-			AcademicYear.guessSITSAcademicYearByDate(DateTime.now)
+			AcademicYear.now()
 		)
 	}
 

@@ -11,7 +11,7 @@ import uk.ac.warwick.tabula.data.model._
 import uk.ac.warwick.tabula.data.{AliasAndJoinType, ScalaRestriction}
 import uk.ac.warwick.tabula.permissions.Permissions
 import uk.ac.warwick.tabula.services.attendancemonitoring.{AttendanceMonitoringServiceComponent, AutowiringAttendanceMonitoringServiceComponent}
-import uk.ac.warwick.tabula.services.{AutowiringProfileServiceComponent, AutowiringTermServiceComponent, ProfileServiceComponent, TermServiceComponent}
+import uk.ac.warwick.tabula.services.{AutowiringProfileServiceComponent, ProfileServiceComponent}
 import uk.ac.warwick.tabula.system.BindListener
 import uk.ac.warwick.tabula.system.permissions.{PermissionsChecking, PermissionsCheckingMethods, RequiresPermissionsChecking}
 
@@ -23,7 +23,6 @@ object FilterStudentsAttendanceCommand {
 		new FilterStudentsAttendanceCommandInternal(department, academicYear)
 			with AutowiringSecurityServicePermissionsAwareRoutes
 			with AutowiringProfileServiceComponent
-			with AutowiringTermServiceComponent
 			with AutowiringAttendanceMonitoringServiceComponent
 			with ComposableCommand[FilteredStudentsAttendanceResult]
 			with FilterStudentsAttendancePermissions
@@ -36,8 +35,7 @@ object FilterStudentsAttendanceCommand {
 class FilterStudentsAttendanceCommandInternal(val department: Department, val academicYear: AcademicYear)
 	extends CommandInternal[FilteredStudentsAttendanceResult] with BuildsFilteredStudentsAttendanceResult with TaskBenchmarking {
 
-	self: FilterStudentsAttendanceCommandState with TermServiceComponent
-		with ProfileServiceComponent with AttendanceMonitoringServiceComponent =>
+	self: FilterStudentsAttendanceCommandState with ProfileServiceComponent with AttendanceMonitoringServiceComponent =>
 
 	override def applyInternal(): FilteredStudentsAttendanceResult = {
 		val totalResults = benchmarkTask("profileService.countStudentsByRestrictionsInAffiliatedDepartments") {

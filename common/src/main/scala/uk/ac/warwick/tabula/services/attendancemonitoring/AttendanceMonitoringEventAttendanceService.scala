@@ -3,14 +3,15 @@ package uk.ac.warwick.tabula.services.attendancemonitoring
 import org.joda.time.{DateTime, LocalDate}
 import org.springframework.stereotype.Service
 import uk.ac.warwick.spring.Wire
-import uk.ac.warwick.tabula.{AcademicYear, CurrentUser}
 import uk.ac.warwick.tabula.commands.MemberOrUser
 import uk.ac.warwick.tabula.data.model.attendance._
 import uk.ac.warwick.tabula.data.model.groups.{DayOfWeek, SmallGroupEventAttendance, SmallGroupEventAttendanceNote, SmallGroupEventOccurrence}
 import uk.ac.warwick.tabula.data.model.{AbsenceType, Module, StudentMember}
-import uk.ac.warwick.tabula.services._
-import scala.collection.JavaConverters._
 import uk.ac.warwick.tabula.helpers.StringUtils._
+import uk.ac.warwick.tabula.services._
+import uk.ac.warwick.tabula.{AcademicYear, CurrentUser}
+
+import scala.collection.JavaConverters._
 
 trait AttendanceMonitoringEventAttendanceServiceComponent {
 	def attendanceMonitoringEventAttendanceService: AttendanceMonitoringEventAttendanceService
@@ -29,7 +30,7 @@ trait AttendanceMonitoringEventAttendanceService {
 
 abstract class AbstractAttendanceMonitoringEventAttendanceService extends AttendanceMonitoringEventAttendanceService {
 
-	self: ProfileServiceComponent with AttendanceMonitoringServiceComponent with SmallGroupServiceComponent with TermServiceComponent =>
+	self: ProfileServiceComponent with AttendanceMonitoringServiceComponent with SmallGroupServiceComponent =>
 
 	def getCheckpoints(attendances: Seq[SmallGroupEventAttendance]): Seq[AttendanceMonitoringCheckpoint] = {
 		attendances.filter(a => a.state == AttendanceState.Attended && a.occurrence.event.day != null).flatMap(attendance => {
@@ -197,8 +198,8 @@ abstract class AbstractAttendanceMonitoringEventAttendanceService extends Attend
 		student: StudentMember,
 		modules: Seq[Module]
 	): Seq[SmallGroupEventAttendance] = {
-		val startWeek = termService.getAcademicWeekForAcademicYear(startDate.toDateTimeAtStartOfDay, academicYear)
-		val endWeek = termService.getAcademicWeekForAcademicYear(endDate.toDateTimeAtStartOfDay, academicYear)
+		val startWeek = academicYear.weekForDate(startDate).weekNumber
+		val endWeek = academicYear.weekForDate(endDate).weekNumber
 		val weekAttendances = smallGroupService.findAttendanceForStudentInModulesInWeeks(student, startWeek, endWeek, modules)
 		// weekAttendances may contain attendance before the startDate and after the endDate, so filter those out
 		// don't need to filter if the startDate is a MOnday and the endDate is a Sunday, as that's the whole week
@@ -221,8 +222,8 @@ abstract class AbstractAttendanceMonitoringEventAttendanceService extends Attend
 		student: StudentMember,
 		modules: Seq[Module]
 	): Seq[SmallGroupEventOccurrence] = {
-		val startWeek = termService.getAcademicWeekForAcademicYear(startDate.toDateTimeAtStartOfDay, academicYear)
-		val endWeek = termService.getAcademicWeekForAcademicYear(endDate.toDateTimeAtStartOfDay, academicYear)
+		val startWeek = academicYear.weekForDate(startDate).weekNumber
+		val endWeek = academicYear.weekForDate(endDate).weekNumber
 		val weekOccurrences = (modules match {
 			case Nil => smallGroupService.findOccurrencesInWeeks(startWeek, endWeek, academicYear)
 			case _ => smallGroupService.findOccurrencesInModulesInWeeks(startWeek, endWeek, modules, academicYear)
@@ -250,5 +251,4 @@ class AttendanceMonitoringEventAttendanceServiceImpl
 	extends AbstractAttendanceMonitoringEventAttendanceService
 	with AutowiringAttendanceMonitoringServiceComponent
 	with AutowiringProfileServiceComponent
-	with AutowiringTermServiceComponent
 	with AutowiringSmallGroupServiceComponent

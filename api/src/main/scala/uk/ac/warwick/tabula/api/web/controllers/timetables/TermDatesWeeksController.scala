@@ -3,22 +3,22 @@ package uk.ac.warwick.tabula.api.web.controllers.timetables
 import net.fortuna.ical4j.model.Calendar
 import net.fortuna.ical4j.model.component.VEvent
 import net.fortuna.ical4j.model.property._
-import org.joda.time.{DateTime, Interval, LocalDate}
+import org.joda.time.LocalDate
 import org.springframework.stereotype.Controller
 import org.springframework.web.bind.annotation._
-import uk.ac.warwick.tabula.data.model.groups.WeekRange.Week
-import uk.ac.warwick.tabula.system.permissions.PermissionsCheckingMethods
-import uk.ac.warwick.tabula.{AcademicYear, DateFormats}
 import uk.ac.warwick.tabula.api.web.controllers.ApiController
+import uk.ac.warwick.tabula.api.web.controllers.timetables.TermDatesWeeksController._
+import uk.ac.warwick.tabula.data.model.groups.WeekRange.Week
 import uk.ac.warwick.tabula.data.model.groups.{DayOfWeek, WeekRange}
 import uk.ac.warwick.tabula.helpers.{KnowsUserNumberingSystem, WholeWeekFormatter}
-import uk.ac.warwick.tabula.services.{AutowiringTermServiceComponent, AutowiringUserSettingsServiceComponent, TermServiceComponent}
-import uk.ac.warwick.tabula.web.views.{IcalView, JSONView}
-import TermDatesWeeksController._
+import uk.ac.warwick.tabula.services.AutowiringUserSettingsServiceComponent
+import uk.ac.warwick.tabula.system.permissions.PermissionsCheckingMethods
 import uk.ac.warwick.tabula.web.Mav
+import uk.ac.warwick.tabula.web.views.{IcalView, JSONView}
+import uk.ac.warwick.tabula.{AcademicYear, DateFormats}
 
 object TermDatesWeeksController {
-	case class TermWeek(academicYear: AcademicYear, weekNumber: Week, interval: Interval, name: String)
+	case class TermWeek(academicYear: AcademicYear, weekNumber: Week, firstDay: LocalDate, lastDay: LocalDate, name: String)
 }
 
 @Controller
@@ -26,7 +26,6 @@ object TermDatesWeeksController {
 class TermDatesWeeksController extends ApiController
 	with GetTermDatesWeeksApi
 	with DefaultAcademicYearApi
-	with AutowiringTermServiceComponent
 	with KnowsUserNumberingSystem
 	with AutowiringUserSettingsServiceComponent
 
@@ -35,7 +34,6 @@ class TermDatesWeeksController extends ApiController
 class TermDatesWeeksForYearController extends ApiController
 	with GetTermDatesWeeksApi
 	with PathVariableAcademicYearScopedApi
-	with AutowiringTermServiceComponent
 	with KnowsUserNumberingSystem
 	with AutowiringUserSettingsServiceComponent
 
@@ -47,19 +45,17 @@ trait PathVariableAcademicYearScopedApi extends AcademicYearScopedApi {
 }
 
 trait DefaultAcademicYearApi extends AcademicYearScopedApi {
-	self: TermServiceComponent =>
-	@ModelAttribute("academicYear") def academicYears: Seq[AcademicYear] = AcademicYear.findAcademicYearContainingDate(DateTime.now).yearsSurrounding(1, 1)
+	@ModelAttribute("academicYear") def academicYears: Seq[AcademicYear] = AcademicYear.now().yearsSurrounding(1, 1)
 }
 
 trait GetTermDatesWeeksApi {
 	self: ApiController
 		with AcademicYearScopedApi
-		with TermServiceComponent
 		with KnowsUserNumberingSystem =>
 
 	@ModelAttribute("termDates")
 	def getTermDates(@ModelAttribute("academicYear") academicYears: Seq[AcademicYear], @RequestParam(value = "numberingSystem", required = false) reqNumberingSystem: String): Seq[TermWeek] = academicYears.flatMap { academicYear =>
-		val weeks = termService.getAcademicWeeksForYear(academicYear.dateInTermOne)
+		val weeks = academicYear.weeks
 		val formatter = new WholeWeekFormatter(academicYear)
 
 		val numbSystem =
@@ -67,10 +63,10 @@ trait GetTermDatesWeeksApi {
 			else if (user.exists) numberingSystem(user, None)
 			else WeekRange.NumberingSystem.Academic // Academic makes most sense for this API
 
-		weeks.map { case (weekNumber, interval) =>
+		weeks.map { case (weekNumber, week) =>
 			val asString = formatter.format(Seq(WeekRange(weekNumber)), DayOfWeek.Monday, numbSystem, short = false)
 
-			TermWeek(academicYear, weekNumber, interval, asString)
+			TermWeek(academicYear, weekNumber, week.firstDay, week.lastDay, asString)
 		}
 	}
 
@@ -82,8 +78,8 @@ trait GetTermDatesWeeksApi {
 			"weeks" -> weeks.map { w => Map(
 				"academicYear" -> w.academicYear.toString,
 				"weekNumber" -> w.weekNumber,
-				"start" -> DateFormats.IsoDate.print(w.interval.getStart.toLocalDate),
-				"end" -> DateFormats.IsoDate.print(w.interval.getEnd.toLocalDate.minusDays(1)),
+				"start" -> DateFormats.IsoDate.print(w.firstDay),
+				"end" -> DateFormats.IsoDate.print(w.lastDay),
 				"name" -> w.name
 			)}
 		)))
@@ -103,7 +99,7 @@ trait GetTermDatesWeeksApi {
 			new net.fortuna.ical4j.model.Date(date.toString("yyyyMMdd"))
 
 		weeks.foreach { w =>
-			val event: VEvent = new VEvent(toIcalDate(w.interval.getStart.toLocalDate), toIcalDate(w.interval.getEnd.toLocalDate), w.name.safeSubstring(0, 255))
+			val event: VEvent = new VEvent(toIcalDate(w.firstDay), toIcalDate(w.lastDay.plusDays(1)), w.name.safeSubstring(0, 255))
 
 			event.getProperties.add(new Uid(s"${w.academicYear.startYear}-week-${w.weekNumber}"))
 			event.getProperties.add(Method.PUBLISH)

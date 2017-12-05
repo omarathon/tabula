@@ -1,6 +1,6 @@
 package uk.ac.warwick.tabula.commands.groups.admin
 
-import org.joda.time.DateTime
+import org.joda.time.LocalDate
 import uk.ac.warwick.tabula.AutowiringTopLevelUrlComponent
 import uk.ac.warwick.tabula.JavaImports.{JArrayList, _}
 import uk.ac.warwick.tabula.commands.groups.admin.DownloadRegistersAsPdfHelper.{DisplayCheck, DisplayName, SortOrder}
@@ -14,8 +14,7 @@ import uk.ac.warwick.tabula.web.views.{AutowiredTextRendererComponent, TextRende
 import scala.collection.JavaConverters._
 
 trait AutowiringDownloadRegistersAsPdfCommandHelper
-	extends AutowiringTermServiceComponent
-		with AutowiringSmallGroupServiceComponent
+	extends AutowiringSmallGroupServiceComponent
 		with AutowiringFileDaoComponent
 		with FreemarkerXHTMLPDFGeneratorWithFileStorageComponent
 		with CombinesPdfs
@@ -54,8 +53,8 @@ object DownloadRegistersAsPdfHelper {
 }
 
 trait DownloadRegistersAsPdfCommandRequest {
-	var startDate: DateTime = DateTime.now().withTimeAtStartOfDay()
-	var endDate: DateTime = DateTime.now().withTimeAtStartOfDay().plusWeeks(1)
+	var startDate: LocalDate = LocalDate.now()
+	var endDate: LocalDate = LocalDate.now().plusWeeks(1)
 	var smallGroupSets: JList[SmallGroupSet] = JArrayList()
 	def smallGroupSetIds: Seq[String] = smallGroupSets.asScala.map(_.id)
 	var showPhotos = true

@@ -3,12 +3,12 @@ package uk.ac.warwick.tabula.exams
 import org.openqa.selenium.{By, WebElement}
 import org.scalatest.GivenWhenThen
 import org.scalatest.exceptions.TestFailedException
-import uk.ac.warwick.tabula.FunctionalTestAcademicYear
+import uk.ac.warwick.tabula.AcademicYear
 
 class AdministerExamsTest extends ExamFixtures
 	with GivenWhenThen {
 
-	val year: Int = FunctionalTestAcademicYear.currentSITS.startYear
+	val year: Int = AcademicYear.now().startYear
 
 	"Department admin" should "be able to create and edit exams" in as(P.Admin1) {
 

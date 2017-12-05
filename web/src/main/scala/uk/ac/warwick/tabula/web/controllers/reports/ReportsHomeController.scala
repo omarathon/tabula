@@ -3,7 +3,7 @@ package uk.ac.warwick.tabula.web.controllers.reports
 import org.springframework.stereotype.Controller
 import org.springframework.web.bind.annotation.{ModelAttribute, RequestMapping}
 import uk.ac.warwick.tabula.AcademicYear
-import uk.ac.warwick.tabula.commands.CurrentSITSAcademicYear
+import uk.ac.warwick.tabula.commands.CurrentAcademicYear
 import uk.ac.warwick.tabula.data.model.Department
 import uk.ac.warwick.tabula.permissions.{Permission, Permissions}
 import uk.ac.warwick.tabula.reports.web.Routes
@@ -16,7 +16,7 @@ import uk.ac.warwick.tabula.web.controllers.{AcademicYearScopedController, Depar
  */
 @Controller
 @RequestMapping(Array("/reports"))
-class ReportsHomeController extends ReportsController with CurrentSITSAcademicYear
+class ReportsHomeController extends ReportsController with CurrentAcademicYear
 	with DepartmentScopedController with AcademicYearScopedController
 	with AutowiringUserSettingsServiceComponent with AutowiringModuleAndDepartmentServiceComponent
 	with AutowiringMaintenanceModeServiceComponent {

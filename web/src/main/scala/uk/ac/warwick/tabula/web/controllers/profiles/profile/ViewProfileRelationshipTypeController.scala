@@ -4,25 +4,24 @@ import org.joda.time.DateTime
 import org.springframework.stereotype.Controller
 import org.springframework.web.bind.annotation.{ModelAttribute, PathVariable, RequestMapping, RequestParam}
 import uk.ac.warwick.tabula.AcademicYear
+import uk.ac.warwick.tabula.JavaImports._
 import uk.ac.warwick.tabula.commands.profiles.relationships.meetings.ViewMeetingRecordCommand
 import uk.ac.warwick.tabula.data.model._
+import uk.ac.warwick.tabula.helpers.DateTimeOrdering._
 import uk.ac.warwick.tabula.permissions.Permissions
 import uk.ac.warwick.tabula.permissions.Permissions.Profiles
 import uk.ac.warwick.tabula.profiles.web.Routes
-import uk.ac.warwick.tabula.services.{AutowiringRelationshipServiceComponent, AutowiringTermServiceComponent}
+import uk.ac.warwick.tabula.services.AutowiringRelationshipServiceComponent
 import uk.ac.warwick.tabula.services.attendancemonitoring.AutowiringAttendanceMonitoringMeetingRecordServiceComponent
 import uk.ac.warwick.tabula.web.Mav
 import uk.ac.warwick.tabula.web.controllers.profiles.ProfileBreadcrumbs
-import uk.ac.warwick.util.termdates.{Term, TermNotFoundException}
-import uk.ac.warwick.tabula.helpers.DateTimeOrdering._
 import uk.ac.warwick.tabula.web.controllers.profiles.relationships.{CancelScheduledStudentRelationshipChangeController => CSSRCC, ManageStudentRelationshipController => MSRC}
-import uk.ac.warwick.tabula.JavaImports._
+
 import scala.collection.JavaConverters._
 
 @Controller
 @RequestMapping(Array("/profiles/view"))
 class ViewProfileRelationshipTypeController extends AbstractViewProfileController
-	with AutowiringTermServiceComponent
 	with AutowiringAttendanceMonitoringMeetingRecordServiceComponent
 	with AutowiringRelationshipServiceComponent {
 
@@ -145,19 +144,11 @@ class ViewProfileRelationshipTypeController extends AbstractViewProfileControlle
 		.secondCrumbs(secondBreadcrumbs(activeAcademicYear, studentCourseDetails)(scyd => Routes.Profile.relationshipType(scyd, relationshipType)): _*)
 
 	private def meetingNotInAcademicYear(academicYear: AcademicYear)(meeting: AbstractMeetingRecord) = {
-		try {
-			termService.getAcademicWeekForAcademicYear(meeting.meetingDate, academicYear) match {
-				case Term.WEEK_NUMBER_AFTER_END =>
-					true
-				case Term.WEEK_NUMBER_BEFORE_START if meeting.relationship.studentCourseDetails.freshStudentCourseYearDetails.nonEmpty =>
-					meeting.relationship.studentCourseDetails.freshStudentCourseYearDetails.min.academicYear != academicYear
-				case _ =>
-					false
-			}
-		} catch {
-			case e: TermNotFoundException =>
-				// TAB-2465 Don't include this meeting - this happens if you are looking at a year before we recorded term dates
-				true
-		}
+		if (meeting.meetingDate.toLocalDate.isAfter(academicYear.lastDay))
+			true
+		else if (meeting.meetingDate.toLocalDate.isBefore(academicYear.firstDay))
+			meeting.relationship.studentCourseDetails.freshStudentCourseYearDetails.nonEmpty && meeting.relationship.studentCourseDetails.freshStudentCourseYearDetails.min.academicYear != academicYear
+		else
+			false
 	}
 }

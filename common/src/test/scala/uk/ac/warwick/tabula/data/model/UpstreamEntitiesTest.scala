@@ -55,7 +55,7 @@ class UpstreamEntitiesTest extends PersistenceTestBase {
 			law2010.assignmentService = assignmentService
 			law2010.assessmentMembershipService = assignmentMembershipService
 			law2010.name = "Cool Essay!"
-			law2010.academicYear = new AcademicYear(2010)
+			law2010.academicYear = AcademicYear(2010)
 			law2010.assessmentGroups = List(assessmentGroup2010)
 			assessmentGroup2010.assignment = law2010
 
@@ -63,7 +63,7 @@ class UpstreamEntitiesTest extends PersistenceTestBase {
 			law2011.name = "Cool Essay?"
 			law2011.assignmentService = assignmentService
 			law2011.assessmentMembershipService = assignmentMembershipService
-			law2011.academicYear = new AcademicYear(2011)
+			law2011.academicYear = AcademicYear(2011)
 			law2011.assessmentGroups = List(assessmentGroup2011)
 			assessmentGroup2011.assignment = law2011
 
@@ -72,13 +72,13 @@ class UpstreamEntitiesTest extends PersistenceTestBase {
 			law2012.assignmentService = assignmentService
 			law2012.assessmentMembershipService = assignmentMembershipService
 			law2012.name = "Cool Essay?"
-			law2012.academicYear = new AcademicYear(2011)
+			law2012.academicYear = AcademicYear(2011)
 
 			val group2010 = new UpstreamAssessmentGroup
 			group2010.moduleCode = "la155-10"
 			group2010.occurrence = "A"
 			group2010.assessmentGroup = "A"
-			group2010.academicYear = new AcademicYear(2010)
+			group2010.academicYear = AcademicYear(2010)
 			group2010.members = JArrayList(
 				new UpstreamAssessmentGroupMember(group2010, "rob"),
 				new UpstreamAssessmentGroupMember(group2010, "kev"),
@@ -89,7 +89,7 @@ class UpstreamEntitiesTest extends PersistenceTestBase {
 			group2011.moduleCode = "la155-10"
 			group2011.occurrence = "A"
 			group2011.assessmentGroup = "A"
-			group2011.academicYear = new AcademicYear(2011)
+			group2011.academicYear = AcademicYear(2011)
 			group2011.members = JArrayList(
 				new UpstreamAssessmentGroupMember(group2011, "hog"),
 				new UpstreamAssessmentGroupMember(group2011, "dod"),
@@ -101,7 +101,7 @@ class UpstreamEntitiesTest extends PersistenceTestBase {
 			otherGroup.moduleCode = "la155-10"
 			otherGroup.occurrence = "B"
 			otherGroup.assessmentGroup = "A"
-			otherGroup.academicYear = new AcademicYear(2011)
+			otherGroup.academicYear = AcademicYear(2011)
 			otherGroup.members = JArrayList(
 				new UpstreamAssessmentGroupMember(otherGroup, "hog"),
 				new UpstreamAssessmentGroupMember(otherGroup, "dod"),

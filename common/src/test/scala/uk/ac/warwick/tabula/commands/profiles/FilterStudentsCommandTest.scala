@@ -53,7 +53,7 @@ class FilterStudentsCommandTest extends TestBase with Mockito {
 		val moaFT: ModeOfAttendance = Fixtures.modeOfAttendance("F", "FT", "Full time")
 		val moaPT: ModeOfAttendance = Fixtures.modeOfAttendance("P", "PT", "Part time")
 
-		val year: AcademicYear = AcademicYear.guessSITSAcademicYearByDate(DateTime.now)
+		val year: AcademicYear = AcademicYear.now()
 
 	}
 
@@ -128,7 +128,7 @@ class FilterStudentsCommandTest extends TestBase with Mockito {
 		// no need to test ScalaRestriction.inIfNotEmptyMultipleProperties - it's tested in ScalaRestrictionTest
 		val modRestriction: ScalaRestriction = inIfNotEmptyMultipleProperties(
 			Seq("moduleRegistration.module", "moduleRegistration.academicYear"),
-			Seq(Seq(mod2, mod3), Seq(AcademicYear.guessSITSAcademicYearByDate(DateTime.now)))
+			Seq(Seq(mod2, mod3), Seq(AcademicYear.now()))
 		).get
 
 		modRestriction.alias("mostSignificantCourse", AliasAndJoinType("mostSignificantCourse"))
@@ -141,7 +141,7 @@ class FilterStudentsCommandTest extends TestBase with Mockito {
 			yosRestriction,
 			sprRestriction,
 			modRestriction
-		) ++ command.latestStudentCourseYearDetailsForYearRestrictions(AcademicYear.guessSITSAcademicYearByDate(DateTime.now))
+		) ++ command.latestStudentCourseYearDetailsForYearRestrictions(AcademicYear.now())
 
 		verify(command.profileService, times(1)).findStudentsByRestrictions(
 			isEq(department),

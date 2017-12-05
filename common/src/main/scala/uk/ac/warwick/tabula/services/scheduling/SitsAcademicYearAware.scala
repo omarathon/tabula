@@ -3,7 +3,6 @@ package uk.ac.warwick.tabula.services.scheduling
 import java.sql.ResultSet
 import javax.sql.DataSource
 
-import org.joda.time.DateTime
 import org.springframework.context.annotation.Profile
 import org.springframework.jdbc.`object`.MappingSqlQuery
 import org.springframework.stereotype.Service
@@ -55,5 +54,5 @@ class SitsAcademicYearServiceImpl extends SitsAcademicYearService {
 class SandboxSitsAcademicYearService extends SitsAcademicYearService {
 
 	def getCurrentSitsAcademicYearString: String =
-		AcademicYear.guessSITSAcademicYearByDate(DateTime.now).toString()
+		AcademicYear.now().toString()
 }

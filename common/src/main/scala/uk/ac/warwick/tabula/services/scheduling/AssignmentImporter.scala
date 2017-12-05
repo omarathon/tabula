@@ -3,7 +3,6 @@ package uk.ac.warwick.tabula.services.scheduling
 import java.sql.{ResultSet, Types}
 import javax.sql.DataSource
 
-import org.joda.time.DateTime
 import org.springframework.beans.factory.InitializingBean
 import org.springframework.context.annotation.Profile
 import org.springframework.jdbc.`object`.{MappingSqlQuery, MappingSqlQueryWithParameters}
@@ -33,7 +32,7 @@ trait AssignmentImporter {
 
 	def getAllGradeBoundaries: Seq[GradeBoundary]
 
-	var yearsToImport: Seq[AcademicYear] = AcademicYear.guessSITSAcademicYearByDate(DateTime.now).yearsSurrounding(0, 1)
+	var yearsToImport: Seq[AcademicYear] = AcademicYear.now().yearsSurrounding(0, 1)
 }
 
 @Profile(Array("dev", "test", "production")) @Service
@@ -123,7 +122,7 @@ class SandboxAssignmentImporter extends AssignmentImporter {
 			uniId <- range
 		} callback(
 			UpstreamModuleRegistration(
-				year = AcademicYear.guessSITSAcademicYearByDate(DateTime.now).toString,
+				year = AcademicYear.now().toString,
 				sprCode = "%d/1".format(uniId),
 				seatNumber = "0",
 				occurrence = "A",
@@ -147,7 +146,7 @@ class SandboxAssignmentImporter extends AssignmentImporter {
 		} yield {
 			val ag = new UpstreamAssessmentGroup()
 			ag.moduleCode = "%s-15".format(moduleCode.toUpperCase)
-			ag.academicYear = AcademicYear.guessSITSAcademicYearByDate(DateTime.now)
+			ag.academicYear = AcademicYear.now()
 			ag.assessmentGroup = "A"
 			ag.occurrence = "A"
 			ag.sequence = "A01"

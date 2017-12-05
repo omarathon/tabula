@@ -1,25 +1,25 @@
 package uk.ac.warwick.tabula.web.controllers.coursework.admin
 
-import uk.ac.warwick.tabula.web.controllers.coursework.OldCourseworkController
-import org.springframework.stereotype.Controller
-import org.springframework.web.bind.annotation._
-import uk.ac.warwick.tabula.data.model.{Assignment, Department, Module, StudentMember}
-import uk.ac.warwick.tabula.commands.coursework.assignments.extensions._
-import uk.ac.warwick.tabula.web.Mav
-import org.springframework.validation.{BindingResult, Errors}
-import uk.ac.warwick.tabula.services.{ProfileService, RelationshipService, UserLookupService}
-import uk.ac.warwick.tabula.{AcademicYear, CurrentUser, JsonHelper}
-import uk.ac.warwick.tabula.data.model.forms.Extension
-import uk.ac.warwick.tabula.helpers.DateBuilder
 import javax.validation.Valid
 
-import org.joda.time.DateTime
-import uk.ac.warwick.spring.Wire
-import uk.ac.warwick.tabula.coursework.web.Routes
-import uk.ac.warwick.tabula.commands.{Appliable, SelfValidating}
 import com.fasterxml.jackson.databind.ObjectMapper
+import org.joda.time.DateTime
 import org.springframework.context.annotation.Profile
+import org.springframework.stereotype.Controller
+import org.springframework.validation.{BindingResult, Errors}
+import org.springframework.web.bind.annotation._
+import uk.ac.warwick.spring.Wire
 import uk.ac.warwick.tabula.JavaImports._
+import uk.ac.warwick.tabula.commands.coursework.assignments.extensions._
+import uk.ac.warwick.tabula.commands.{Appliable, SelfValidating}
+import uk.ac.warwick.tabula.coursework.web.Routes
+import uk.ac.warwick.tabula.data.model.forms.Extension
+import uk.ac.warwick.tabula.data.model.{Assignment, Department, Module, StudentMember}
+import uk.ac.warwick.tabula.helpers.DateBuilder
+import uk.ac.warwick.tabula.services.{ProfileService, RelationshipService, UserLookupService}
+import uk.ac.warwick.tabula.web.Mav
+import uk.ac.warwick.tabula.web.controllers.coursework.OldCourseworkController
+import uk.ac.warwick.tabula.{AcademicYear, CurrentUser, JsonHelper}
 import uk.ac.warwick.userlookup.User
 
 import scala.collection.JavaConverters._
@@ -95,11 +95,11 @@ class OldListAllExtensionsController extends OldExtensionController {
 
 	@ModelAttribute("command")
 	def listCommand(@PathVariable department:Department, @RequestParam(value="academicYear", required=false) academicYear: AcademicYear) =
-		new ListAllExtensionsCommand(department, Option(academicYear).getOrElse(AcademicYear.guessSITSAcademicYearByDate(new DateTime)))
+		new ListAllExtensionsCommand(department, Option(academicYear).getOrElse(AcademicYear.now()))
 
 	@ModelAttribute("academicYears")
 	def academicYearChoices: JList[AcademicYear] =
-		AcademicYear.guessSITSAcademicYearByDate(DateTime.now).yearsSurrounding(2, 2).asJava
+		AcademicYear.now().yearsSurrounding(2, 2).asJava
 
 	@RequestMapping(method=Array(HEAD,GET))
 	def listExtensions(@ModelAttribute("command") cmd: ListAllExtensionsCommand, @RequestParam(value="usercode", required=false) usercode: String): Mav = {

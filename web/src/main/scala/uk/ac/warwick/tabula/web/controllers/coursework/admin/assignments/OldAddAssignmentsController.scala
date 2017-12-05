@@ -2,19 +2,18 @@ package uk.ac.warwick.tabula.web.controllers.coursework.admin.assignments
 
 import javax.validation.Valid
 
-import org.joda.time.DateTime
 import org.springframework.context.annotation.Profile
 import org.springframework.stereotype.Controller
 import org.springframework.validation.Errors
 import org.springframework.web.bind.annotation.{ModelAttribute, PathVariable, RequestMapping}
-import uk.ac.warwick.tabula.{AcademicYear, AutowiringFeaturesComponent}
 import uk.ac.warwick.tabula.JavaImports._
 import uk.ac.warwick.tabula.cm2.web.Routes
-import uk.ac.warwick.tabula.commands.{Appliable, SelfValidating}
 import uk.ac.warwick.tabula.commands.coursework.assignments._
-import uk.ac.warwick.tabula.web.controllers.coursework.OldCourseworkController
+import uk.ac.warwick.tabula.commands.{Appliable, SelfValidating}
 import uk.ac.warwick.tabula.data.model.{Assignment, Department}
 import uk.ac.warwick.tabula.web.Mav
+import uk.ac.warwick.tabula.web.controllers.coursework.OldCourseworkController
+import uk.ac.warwick.tabula.{AcademicYear, AutowiringFeaturesComponent}
 
 import scala.collection.JavaConversions._
 
@@ -45,7 +44,7 @@ class OldAddAssignmentsController extends OldCourseworkController with Autowirin
 
 	@ModelAttribute("academicYearChoices")
 	def academicYearChoices: JList[AcademicYear] =
-		AcademicYear.guessSITSAcademicYearByDate(DateTime.now).yearsSurrounding(0, 1)
+		AcademicYear.now().yearsSurrounding(0, 1)
 
 	// The initial load of page 1, where we select the items to import.
 	@RequestMapping(method = Array(GET))

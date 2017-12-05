@@ -1,9 +1,8 @@
 package uk.ac.warwick.tabula.groups.web.views
 
-import org.joda.time.DateTime
-import uk.ac.warwick.tabula.{AcademicYear, WorkflowStage, WorkflowStages}
 import uk.ac.warwick.tabula.data.model.Module
 import uk.ac.warwick.tabula.data.model.groups._
+import uk.ac.warwick.tabula.{AcademicYear, WorkflowStage, WorkflowStages}
 
 import scala.collection.JavaConverters._
 import scala.collection.immutable.ListMap
@@ -51,7 +50,7 @@ object GroupsViewModel {
 		moduleItems: Seq[ViewModule],
 		canManageDepartment: Boolean
 	) {
-		def hasUnreleasedGroupsets : Boolean = hasUnreleasedGroupsets(AcademicYear.guessSITSAcademicYearByDate(DateTime.now))
+		def hasUnreleasedGroupsets : Boolean = hasUnreleasedGroupsets(AcademicYear.now())
 		def hasUnreleasedGroupsets(academicYear: AcademicYear) : Boolean = moduleItems.exists(_.hasUnreleasedGroupsets(academicYear))
 		def hasOpenableGroupsets: Boolean = moduleItems.exists(_.hasOpenableGroupsets)
 		def hasCloseableGroupsets: Boolean = moduleItems.exists(_.hasCloseableGroupsets)

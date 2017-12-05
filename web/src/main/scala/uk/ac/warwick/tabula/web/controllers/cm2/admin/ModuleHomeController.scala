@@ -1,6 +1,5 @@
 package uk.ac.warwick.tabula.web.controllers.cm2.admin
 
-import org.joda.time.DateTime
 import org.springframework.context.annotation.Profile
 import org.springframework.stereotype.Controller
 import org.springframework.web.bind.annotation.{ModelAttribute, PathVariable, RequestMapping}
@@ -22,7 +21,7 @@ abstract class AbstractModuleHomeController
 
 	@ModelAttribute("command")
 	def command(@PathVariable module: Module, @ModelAttribute("activeAcademicYear") activeAcademicYear: Option[AcademicYear], user: CurrentUser): ModuleCommand = {
-		val academicYear = activeAcademicYear.getOrElse(AcademicYear.guessSITSAcademicYearByDate(DateTime.now))
+		val academicYear = activeAcademicYear.getOrElse(AcademicYear.now())
 
 		ListAssignmentsCommand.module(module, academicYear, user)
 	}
@@ -71,6 +70,6 @@ class ModuleHomeRedirectController extends CourseworkController
 
 	@RequestMapping
 	def redirect(@PathVariable module: Module) =
-		Redirect(Routes.admin.module(mandatory(module), retrieveActiveAcademicYear(None).getOrElse(AcademicYear.guessSITSAcademicYearByDate(DateTime.now))))
+		Redirect(Routes.admin.module(mandatory(module), retrieveActiveAcademicYear(None).getOrElse(AcademicYear.now())))
 
 }

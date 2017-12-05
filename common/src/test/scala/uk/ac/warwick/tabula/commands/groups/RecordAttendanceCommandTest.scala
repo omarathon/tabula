@@ -1,12 +1,11 @@
 package uk.ac.warwick.tabula.commands.groups
 
-import org.joda.time.{DateTime, LocalDateTime}
 import org.springframework.validation.BindException
 import uk.ac.warwick.tabula.JavaImports._
 import uk.ac.warwick.tabula._
-import uk.ac.warwick.tabula.data.model.{Department, Module, UserGroup}
 import uk.ac.warwick.tabula.data.model.attendance.AttendanceState
 import uk.ac.warwick.tabula.data.model.groups.{SmallGroup, SmallGroupEvent, SmallGroupEventOccurrence, SmallGroupSet}
+import uk.ac.warwick.tabula.data.model.{Department, Module, UserGroup}
 import uk.ac.warwick.tabula.services._
 import uk.ac.warwick.tabula.services.attendancemonitoring.{AttendanceMonitoringEventAttendanceService, AttendanceMonitoringEventAttendanceServiceComponent}
 import uk.ac.warwick.userlookup.User
@@ -19,13 +18,11 @@ class RecordAttendanceCommandTest extends TestBase with Mockito {
 	val mockCurrentUser: CurrentUser = mock[CurrentUser]
 
 	// Implements the dependencies declared by the command
-	trait CommandTestSupport extends SmallGroupServiceComponent with UserLookupComponent
-	with ProfileServiceComponent with WeekToDateConverterComponent
-	with FeaturesComponent with AttendanceMonitoringEventAttendanceServiceComponent {
+	trait CommandTestSupport extends SmallGroupServiceComponent with UserLookupComponent with ProfileServiceComponent
+		with FeaturesComponent with AttendanceMonitoringEventAttendanceServiceComponent {
 		val smallGroupService: SmallGroupService = smartMock[SmallGroupService]
 		val userLookup: UserLookupService = smartMock[UserLookupService]
 		val profileService: ProfileService = smartMock[ProfileService]
-		val weekToDateConverter: WeekToDateConverter = smartMock[WeekToDateConverter]
 		val attendanceMonitoringEventAttendanceService: AttendanceMonitoringEventAttendanceService = smartMock[AttendanceMonitoringEventAttendanceService]
 		val features: FeaturesImpl = emptyFeatures
 
@@ -80,14 +77,11 @@ class RecordAttendanceCommandTest extends TestBase with Mockito {
 
 		val set = new SmallGroupSet()
 		group.groupSet = set
-		set.academicYear = AcademicYear.guessSITSAcademicYearByDate(DateTime.now)
+		set.academicYear = AcademicYear.now()
 
 		val week = 1
 
 		val command = new RecordAttendanceCommand(event, week, currentUser) with CommandTestSupport with RecordAttendanceCommandValidation with SmallGroupEventInFutureCheck
-
-		command.weekToDateConverter.toLocalDatetime(week, event.day, event.startTime, set.academicYear) returns Some(LocalDateTime.now().minusWeeks(1))
-
 		command.userLookup.getUserByWarwickUniId(invalidUser.getWarwickId) returns invalidUser
 		command.userLookup.getUserByWarwickUniId(missingUser.getWarwickId) returns missingUser
 		command.userLookup.getUserByWarwickUniId(validUser.getWarwickId) returns validUser

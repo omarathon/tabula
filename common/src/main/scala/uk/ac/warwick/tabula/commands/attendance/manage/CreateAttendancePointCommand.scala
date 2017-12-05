@@ -6,7 +6,6 @@ import uk.ac.warwick.tabula.AcademicYear
 import uk.ac.warwick.tabula.commands._
 import uk.ac.warwick.tabula.data.model.Department
 import uk.ac.warwick.tabula.data.model.attendance.{AttendanceMonitoringPoint, AttendanceMonitoringPointStyle, AttendanceMonitoringPointType, AttendanceMonitoringScheme}
-import uk.ac.warwick.tabula.data.model.groups.DayOfWeek
 import uk.ac.warwick.tabula.permissions.Permissions
 import uk.ac.warwick.tabula.services._
 import uk.ac.warwick.tabula.services.attendancemonitoring.{AttendanceMonitoringServiceComponent, AutowiringAttendanceMonitoringServiceComponent}
@@ -19,7 +18,6 @@ object CreateAttendancePointCommand {
 		new CreateAttendancePointCommandInternal(department, academicYear, schemes)
 			with ComposableCommand[Seq[AttendanceMonitoringPoint]]
 			with AutowiringAttendanceMonitoringServiceComponent
-			with AutowiringTermServiceComponent
 			with AutowiringProfileServiceComponent
 			with AutowiringSmallGroupServiceComponent
 			with AutowiringModuleAndDepartmentServiceComponent
@@ -35,7 +33,7 @@ class CreateAttendancePointCommandInternal(val department: Department, val acade
 		with GeneratesAttendanceMonitoringSchemeNotifications with RequiresCheckpointTotalUpdate {
 
 	self: CreateAttendancePointCommandState with AttendanceMonitoringServiceComponent
-		with TermServiceComponent with ProfileServiceComponent =>
+		with ProfileServiceComponent =>
 
 	override def applyInternal(): Seq[AttendanceMonitoringPoint] = {
 		val points = schemes.map(scheme => {
@@ -58,7 +56,7 @@ class CreateAttendancePointCommandInternal(val department: Department, val acade
 
 trait CreateAttendancePointValidation extends SelfValidating with AttendanceMonitoringPointValidation {
 
-	self: CreateAttendancePointCommandState with TermServiceComponent with AttendanceMonitoringServiceComponent =>
+	self: CreateAttendancePointCommandState with AttendanceMonitoringServiceComponent =>
 
 	override def validate(errors: Errors) {
 		validateSchemePointStyles(errors, pointStyle, schemes)
@@ -75,8 +73,8 @@ trait CreateAttendancePointValidation extends SelfValidating with AttendanceMoni
 					validateDuplicateForDate(errors, name, startDate, endDate, schemes)
 				}
 			case AttendanceMonitoringPointStyle.Week =>
-				validateWeek(errors, startWeek, "startWeek")
-				validateWeek(errors, endWeek, "endWeek")
+				validateWeek(errors, startWeek, academicYear, "startWeek")
+				validateWeek(errors, endWeek, academicYear, "endWeek")
 				validateWeeks(errors, startWeek, endWeek)
 				validateCanPointBeEditedByWeek(errors, startWeek, schemes.flatMap(_.members.members), academicYear)
 				validateDuplicateForWeek(errors, name, startWeek, endWeek, schemes)
@@ -84,9 +82,9 @@ trait CreateAttendancePointValidation extends SelfValidating with AttendanceMoni
 
 		if (!errors.hasErrors) {
 			if (pointStyle == AttendanceMonitoringPointStyle.Week) {
-				val weeksForYear = termService.getAcademicWeeksForYear(schemes.head.academicYear.dateInTermOne).toMap
-				startDate = weeksForYear(startWeek).getStart.withDayOfWeek(DayOfWeek.Monday.jodaDayOfWeek).toLocalDate
-				endDate = weeksForYear(endWeek).getStart.withDayOfWeek(DayOfWeek.Monday.jodaDayOfWeek).toLocalDate.plusDays(6)
+				val weeksForYear = schemes.head.academicYear.weeks
+				startDate = weeksForYear(startWeek).firstDay
+				endDate = weeksForYear(endWeek).lastDay
 			}
 			validateTypeForEndDate(errors, pointType, endDate)
 			pointType match {
@@ -173,7 +171,7 @@ trait CreateAttendancePointDescription extends Describable[Seq[AttendanceMonitor
 
 trait CreateAttendancePointCommandState extends AttendancePointCommandState {
 
-	self: TermServiceComponent with SmallGroupServiceComponent with ModuleAndDepartmentServiceComponent =>
+	self: SmallGroupServiceComponent with ModuleAndDepartmentServiceComponent =>
 
 	def department: Department
 	def academicYear: AcademicYear

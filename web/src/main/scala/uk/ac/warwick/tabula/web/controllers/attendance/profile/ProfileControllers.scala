@@ -1,6 +1,5 @@
 package uk.ac.warwick.tabula.web.controllers.attendance.profile
 
-import org.joda.time.DateTime
 import org.springframework.stereotype.Controller
 import org.springframework.web.bind.annotation.{ModelAttribute, PathVariable, RequestMapping}
 import uk.ac.warwick.tabula.AcademicYear
@@ -25,7 +24,7 @@ class ProfileHomeController extends AttendanceController
 	@RequestMapping
 	def render(@ModelAttribute("activeAcademicYear") activeAcademicYear: Option[AcademicYear]): Mav = user.profile match {
 		case Some(student: StudentMember) =>
-			Redirect(Routes.Profile.profileForYear(student, activeAcademicYear.getOrElse(AcademicYear.guessSITSAcademicYearByDate(DateTime.now))))
+			Redirect(Routes.Profile.profileForYear(student, activeAcademicYear.getOrElse(AcademicYear.now())))
 		case _ if user.isStaff =>
 			Mav("attendance/profile/staff").noLayoutIf(ajax)
 		case _ =>
@@ -46,7 +45,7 @@ class ProfileYearRedirectController extends AttendanceController
 		@ModelAttribute("activeAcademicYear") activeAcademicYear: Option[AcademicYear],
 		@PathVariable student: StudentMember
 	): Mav = {
-		Redirect(Routes.Profile.profileForYear(student, activeAcademicYear.getOrElse(AcademicYear.guessSITSAcademicYearByDate(DateTime.now))))
+		Redirect(Routes.Profile.profileForYear(student, activeAcademicYear.getOrElse(AcademicYear.now())))
 	}
 }
 

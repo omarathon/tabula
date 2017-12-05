@@ -1,12 +1,11 @@
 package uk.ac.warwick.tabula.services.attendancemonitoring
 
-import org.joda.time.{DateTime, LocalDate}
+import org.joda.time.{DateTime, DateTimeConstants, LocalDate}
 import org.springframework.stereotype.Service
 import uk.ac.warwick.spring.Wire
 import uk.ac.warwick.tabula.commands.TaskBenchmarking
 import uk.ac.warwick.tabula.data._
 import uk.ac.warwick.tabula.data.model.attendance._
-import uk.ac.warwick.tabula.data.model.groups.DayOfWeek
 import uk.ac.warwick.tabula.data.model.{Department, StudentMember}
 import uk.ac.warwick.tabula.services.UserLookupService.UniversityId
 import uk.ac.warwick.tabula.services._
@@ -102,7 +101,7 @@ trait AttendanceMonitoringService {
 
 abstract class AbstractAttendanceMonitoringService extends AttendanceMonitoringService with TaskBenchmarking {
 
-	self: AttendanceMonitoringDaoComponent with TermServiceComponent with AttendanceMonitoringMembershipHelpers with UserLookupComponent =>
+	self: AttendanceMonitoringDaoComponent with AttendanceMonitoringMembershipHelpers with UserLookupComponent =>
 
 	var queue: Queue = Wire.named[Queue]("settingsSyncTopic")
 
@@ -178,7 +177,7 @@ abstract class AbstractAttendanceMonitoringService extends AttendanceMonitoringS
 
 	def studentAlreadyReportedThisTerm(student: StudentMember, point: AttendanceMonitoringPoint): Boolean =
 		!findNonReportedTerms(Seq(student), point.scheme.academicYear).contains(
-			termService.getTermFromDateIncludingVacations(point.startDate.toDateTimeAtStartOfDay).getTermTypeAsString
+			point.scheme.academicYear.termOrVacationForDate(point.startDate).periodType.toString
 		)
 
 	def findReports(studentIds: Seq[String], year: AcademicYear, period: String): Seq[MonitoringPointReport] =
@@ -391,7 +390,7 @@ abstract class AbstractAttendanceMonitoringService extends AttendanceMonitoringS
 	}
 
 	def generatePointsFromTemplateScheme(templateScheme: AttendanceMonitoringTemplate, academicYear: AcademicYear): Seq[AttendanceMonitoringPoint] = {
-		val weeksForYear = termService.getAcademicWeeksForYear(academicYear.dateInTermOne).toMap
+		val weeksForYear = academicYear.weeks
 		val stubScheme = new AttendanceMonitoringScheme
 		stubScheme.pointStyle = templateScheme.pointStyle
 		stubScheme.academicYear = academicYear
@@ -401,13 +400,17 @@ abstract class AbstractAttendanceMonitoringService extends AttendanceMonitoringS
 				val point = templatePoint.toPoint
 				templateScheme.pointStyle match {
 					case AttendanceMonitoringPointStyle.Date =>
-						point.startDate = templatePoint.startDate.withYear(academicYear.getYear(templatePoint.startDate))
-						point.endDate = templatePoint.endDate.withYear(academicYear.getYear(templatePoint.endDate))
+						def getYear(templateDate: LocalDate) =
+							if (templateDate.getMonthOfYear >= DateTimeConstants.AUGUST) academicYear.startYear
+							else academicYear.startYear + 1
+
+						point.startDate = templatePoint.startDate.withYear(getYear(templatePoint.startDate))
+						point.endDate = templatePoint.endDate.withYear(getYear(templatePoint.endDate))
 					case AttendanceMonitoringPointStyle.Week =>
 						point.startWeek = templatePoint.startWeek
 						point.endWeek = templatePoint.endWeek
-						point.startDate = weeksForYear(templatePoint.startWeek).getStart.withDayOfWeek(DayOfWeek.Monday.jodaDayOfWeek).toLocalDate
-						point.endDate = weeksForYear(templatePoint.endWeek).getStart.withDayOfWeek(DayOfWeek.Monday.jodaDayOfWeek).toLocalDate.plusDays(6)
+						point.startDate = weeksForYear(templatePoint.startWeek).firstDay
+						point.endDate = weeksForYear(templatePoint.endWeek).lastDay
 				}
 				point.scheme = stubScheme
 				point
@@ -509,6 +512,5 @@ trait AttendanceMonitoringMembershipHelpersImpl extends AttendanceMonitoringMemb
 class AttendanceMonitoringServiceImpl
 	extends AbstractAttendanceMonitoringService
 	with AttendanceMonitoringMembershipHelpersImpl
-	with AutowiringTermServiceComponent
 	with AutowiringAttendanceMonitoringDaoComponent
 	with AutowiringUserLookupComponent

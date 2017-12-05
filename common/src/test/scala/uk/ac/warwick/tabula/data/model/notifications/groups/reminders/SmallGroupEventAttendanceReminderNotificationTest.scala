@@ -55,8 +55,6 @@ class SmallGroupEventAttendanceReminderNotificationTest extends TestBase with Fu
 
 object SmallGroupEventAttendanceReminderNotificationTest {
 	class MinimalContext extends FunctionalContext with Mockito {
-		bean() { new TermServiceImpl }
-
 		// Just to get things like Department working
 		bean(){mock[UserLookupService]}
 		bean(){mock[RelationshipService]}

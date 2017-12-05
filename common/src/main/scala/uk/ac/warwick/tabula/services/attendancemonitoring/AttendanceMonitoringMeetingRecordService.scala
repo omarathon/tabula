@@ -4,9 +4,9 @@ import org.joda.time.DateTime
 import org.springframework.stereotype.Service
 import uk.ac.warwick.spring.Wire
 import uk.ac.warwick.tabula.AcademicYear
-import uk.ac.warwick.tabula.data.{AutowiringMeetingRecordDaoComponent, MeetingRecordDaoComponent}
-import uk.ac.warwick.tabula.data.model.attendance._
 import uk.ac.warwick.tabula.data.model._
+import uk.ac.warwick.tabula.data.model.attendance._
+import uk.ac.warwick.tabula.data.{AutowiringMeetingRecordDaoComponent, MeetingRecordDaoComponent}
 import uk.ac.warwick.tabula.services._
 
 trait AttendanceMonitoringMeetingRecordServiceComponent {
@@ -24,7 +24,7 @@ trait AttendanceMonitoringMeetingRecordService {
 
 abstract class AbstractAttendanceMonitoringMeetingRecordService extends AttendanceMonitoringMeetingRecordService {
 
-	self: AttendanceMonitoringServiceComponent with TermServiceComponent with RelationshipServiceComponent with MeetingRecordDaoComponent =>
+	self: AttendanceMonitoringServiceComponent with RelationshipServiceComponent with MeetingRecordDaoComponent =>
 
 	def getCheckpoints(meeting: MeetingRecord): Seq[AttendanceMonitoringCheckpoint] = {
 		if (!meeting.isAttendanceApproved) {
@@ -32,7 +32,7 @@ abstract class AbstractAttendanceMonitoringMeetingRecordService extends Attendan
 		} else {
 			meeting.relationship.studentMember.flatMap{
 				case studentMember: StudentMember =>
-					val academicYear = AcademicYear.findAcademicYearContainingDate(meeting.meetingDate)
+					val academicYear = AcademicYear.forDate(meeting.meetingDate)
 					val relevantPoints = getRelevantPoints(
 						attendanceMonitoringService.listStudentsPoints(studentMember, None, academicYear),
 						meeting,
@@ -106,6 +106,5 @@ abstract class AbstractAttendanceMonitoringMeetingRecordService extends Attendan
 class AttendanceMonitoringMeetingRecordServiceImpl
 	extends AbstractAttendanceMonitoringMeetingRecordService
 	with AutowiringAttendanceMonitoringServiceComponent
-	with AutowiringTermServiceComponent
 	with AutowiringRelationshipServiceComponent
 	with AutowiringMeetingRecordDaoComponent

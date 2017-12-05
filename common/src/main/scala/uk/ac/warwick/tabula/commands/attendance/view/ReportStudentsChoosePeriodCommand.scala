@@ -1,6 +1,6 @@
 package uk.ac.warwick.tabula.commands.attendance.view
 
-import org.joda.time.DateTime
+import org.joda.time.LocalDate
 import org.springframework.validation.Errors
 import uk.ac.warwick.tabula.commands._
 import uk.ac.warwick.tabula.data.model.attendance.{AttendanceMonitoringPoint, AttendanceState}
@@ -9,7 +9,7 @@ import uk.ac.warwick.tabula.permissions.Permissions
 import uk.ac.warwick.tabula.services._
 import uk.ac.warwick.tabula.services.attendancemonitoring.{AttendanceMonitoringServiceComponent, AutowiringAttendanceMonitoringServiceComponent}
 import uk.ac.warwick.tabula.system.permissions.{PermissionsChecking, PermissionsCheckingMethods, RequiresPermissionsChecking}
-import uk.ac.warwick.tabula.{AcademicYear, ItemNotFoundException}
+import uk.ac.warwick.tabula.{AcademicPeriod, AcademicYear, ItemNotFoundException}
 
 case class StudentReportCount(student: StudentMember, missed: Int, unrecorded: Int)
 
@@ -18,7 +18,6 @@ object ReportStudentsChoosePeriodCommand {
 		new ReportStudentsChoosePeriodCommandInternal(department, academicYear)
 			with ComposableCommand[Seq[StudentReportCount]]
 			with AutowiringProfileServiceComponent
-			with AutowiringTermServiceComponent
 			with AutowiringAttendanceMonitoringServiceComponent
 			with ReportStudentsChoosePeriodValidation
 			with ReportStudentsChoosePeriodPermissions
@@ -30,7 +29,7 @@ object ReportStudentsChoosePeriodCommand {
 class ReportStudentsChoosePeriodCommandInternal(val department: Department, val academicYear: AcademicYear)
 	extends CommandInternal[Seq[StudentReportCount]] {
 
-	self: TermServiceComponent with ReportStudentsChoosePeriodCommandState with AttendanceMonitoringServiceComponent =>
+	self: ReportStudentsChoosePeriodCommandState with AttendanceMonitoringServiceComponent =>
 
 	override def applyInternal(): Seq[StudentReportCount] = {
 		studentMissedReportCounts
@@ -62,7 +61,7 @@ trait ReportStudentsChoosePeriodPermissions extends RequiresPermissionsChecking 
 
 trait ReportStudentsChoosePeriodCommandState extends FilterStudentsAttendanceCommandState with TaskBenchmarking {
 
-	self: TermServiceComponent with AttendanceMonitoringServiceComponent =>
+	self: AttendanceMonitoringServiceComponent =>
 
 	// Only students whose enrolment department is this department
 	lazy val allStudents: Seq[StudentMember] = benchmarkTask("profileService.findAllStudentsByRestrictions") {
@@ -78,21 +77,23 @@ trait ReportStudentsChoosePeriodCommandState extends FilterStudentsAttendanceCom
 
 	lazy val termPoints: Map[String, Seq[AttendanceMonitoringPoint]] = benchmarkTask("termPoints") {
 		studentPointMap.values.flatten.toSeq.groupBy{ point =>
-			termService.getTermFromDateIncludingVacations(point.startDate.toDateTimeAtStartOfDay).getTermTypeAsString
+			academicYear.termOrVacationForDate(point.startDate).periodType.toString
 		}.mapValues(_.distinct)
 	}
 
 	lazy val availablePeriods: Seq[(String, Boolean)] = benchmarkTask("availablePeriods") {
 		val termsWithPoints = termPoints.keys.toSeq
+		val orderedTermNames = AcademicPeriod.allPeriodTypes.map(_.toString)
+
 		val thisTerm = {
-			if (academicYear.startYear < AcademicYear.findAcademicYearContainingDate(DateTime.now).startYear)
-				TermService.orderedTermNames.last
+			if (academicYear < AcademicYear.now())
+				orderedTermNames.last
 			else
-				termService.getTermFromDateIncludingVacations(DateTime.now).getTermTypeAsString
+				academicYear.termOrVacationForDate(LocalDate.now).periodType.toString
 		}
-		val thisTermIndex = TermService.orderedTermNames.zipWithIndex
+		val thisTermIndex = orderedTermNames.zipWithIndex
 			.find(_._1 == thisTerm).getOrElse(throw new ItemNotFoundException())._2
-		val termsSoFarThisYear = TermService.orderedTermNames.slice(0, thisTermIndex + 1)
+		val termsSoFarThisYear = orderedTermNames.slice(0, thisTermIndex + 1)
 		val nonReportedTerms = attendanceMonitoringService.findNonReportedTerms(allStudents, academicYear)
 		val termsToShow = termsSoFarThisYear.intersect(termsWithPoints)
 		// Visible terms as those that are this term or before

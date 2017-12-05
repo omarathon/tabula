@@ -3,7 +3,6 @@ package uk.ac.warwick.tabula.data.model.notifications.profiles.meetingrecord
 import javax.persistence.{DiscriminatorValue, Entity}
 
 import uk.ac.warwick.tabula.data.model._
-import uk.ac.warwick.tabula.services.AutowiringTermServiceComponent
 
 @Entity
 @DiscriminatorValue("meetingRecordRejected")
@@ -11,8 +10,7 @@ class MeetingRecordRejectedNotification
 	extends Notification[MeetingRecordApproval, Unit]
 	with MeetingRecordNotificationTrait
 	with SingleItemNotification[MeetingRecordApproval]
-	with AllCompletedActionRequiredNotification
-	with AutowiringTermServiceComponent {
+	with AllCompletedActionRequiredNotification {
 
 	priority = NotificationPriority.Warning
 

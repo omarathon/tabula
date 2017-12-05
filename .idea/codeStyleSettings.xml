@@ -17,9 +17,6 @@
         </option>
         <option name="RIGHT_MARGIN" value="160" />
         <option name="HTML_SPACE_INSIDE_EMPTY_TAG" value="true" />
-        <MarkdownNavigatorCodeStyleSettings>
-          <option name="RIGHT_MARGIN" value="72" />
-        </MarkdownNavigatorCodeStyleSettings>
         <codeStyleSettings language="CSS">
           <indentOptions>
             <option name="INDENT_SIZE" value="2" />

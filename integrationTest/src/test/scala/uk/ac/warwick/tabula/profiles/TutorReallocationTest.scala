@@ -2,11 +2,11 @@ package uk.ac.warwick.tabula.profiles
 
 import org.scalatest.GivenWhenThen
 import uk.ac.warwick.tabula.web.{FeaturesDriver, FixturesDriver}
-import uk.ac.warwick.tabula.{BrowserTest, FunctionalTestAcademicYear}
+import uk.ac.warwick.tabula.{BrowserTest, AcademicYear}
 
 class TutorReallocationTest extends BrowserTest with GivenWhenThen with FeaturesDriver with FixturesDriver {
 
-	val academicYearString: String = FunctionalTestAcademicYear.current.startYear.toString
+	val academicYearString: String = AcademicYear.now().startYear.toString
 	val TEST_ROUTE_CODE="xx123"
 	val TEST_DEPARTMENT_CODE="xxx"
 	val TEST_COURSE_CODE="Ux123"

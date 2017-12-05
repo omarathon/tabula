@@ -1,6 +1,5 @@
 package uk.ac.warwick.tabula.web.controllers.ajax
 
-import org.joda.time.DateTime
 import org.springframework.stereotype.Controller
 import org.springframework.web.bind.annotation.{ModelAttribute, RequestMapping}
 import uk.ac.warwick.tabula.AcademicYear
@@ -12,6 +11,7 @@ import uk.ac.warwick.tabula.system.permissions.Public
 import uk.ac.warwick.tabula.web.Mav
 import uk.ac.warwick.tabula.web.controllers.BaseController
 import uk.ac.warwick.tabula.web.views.JSONView
+
 import scala.util.Try
 
 @Controller
@@ -55,7 +55,7 @@ class SmallGroupPickerCommand extends CommandInternal[Seq[SmallGroup]] {
 		if (!query.hasText) {
 			Seq()
 		} else {
-			val year = Try(AcademicYear(academicYear.toInt)).getOrElse(AcademicYear.guessSITSAcademicYearByDate(DateTime.now))
+			val year = Try(AcademicYear(academicYear.toInt)).getOrElse(AcademicYear.now())
 			val dept = Option(department).filter(_.nonEmpty)
 			smallGroupService.findSmallGroupsByNameOrModule(query, year, dept)
 		}

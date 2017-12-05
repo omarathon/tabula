@@ -5,17 +5,15 @@ import uk.ac.warwick.tabula.commands._
 import uk.ac.warwick.tabula.commands.attendance.GroupsPoints
 import uk.ac.warwick.tabula.data.model.StudentMember
 import uk.ac.warwick.tabula.data.model.attendance.{AttendanceMonitoringCheckpoint, AttendanceMonitoringNote, AttendanceMonitoringPoint, AttendanceState}
+import uk.ac.warwick.tabula.helpers.DateTimeOrdering._
 import uk.ac.warwick.tabula.permissions.Permissions
 import uk.ac.warwick.tabula.services.attendancemonitoring.{AttendanceMonitoringServiceComponent, AutowiringAttendanceMonitoringServiceComponent}
-import uk.ac.warwick.tabula.services.{AutowiringTermServiceComponent, TermServiceComponent}
 import uk.ac.warwick.tabula.system.permissions.{PermissionsChecking, PermissionsCheckingMethods, RequiresPermissionsChecking}
-import uk.ac.warwick.tabula.helpers.DateTimeOrdering._
 
 object AttendanceProfileCommand {
 	def apply(student: StudentMember, academicYear: AcademicYear) =
 		new AttendanceProfileCommandInternal(student, academicYear)
 			with AutowiringAttendanceMonitoringServiceComponent
-			with AutowiringTermServiceComponent
 			with ComposableCommand[AttendanceProfileCommandResult]
 			with AttendanceProfilePermissions
 			with AttendanceProfileCommandState
@@ -34,7 +32,7 @@ class AttendanceProfileCommandInternal(val student: StudentMember, val academicY
 	extends CommandInternal[AttendanceProfileCommandResult]
 		with GroupsPoints with TaskBenchmarking {
 
-	self: AttendanceMonitoringServiceComponent with TermServiceComponent =>
+	self: AttendanceMonitoringServiceComponent =>
 
 	override def applyInternal(): AttendanceProfileCommandResult = {
 		val points = benchmarkTask("listStudentsPoints") {

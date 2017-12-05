@@ -30,7 +30,7 @@ object ProfilesHomeCommand {
 }
 
 abstract class ProfilesHomeCommand(val user: CurrentUser, val currentMember: Option[Member])
-	extends CommandInternal[ProfilesHomeInformation] with TaskBenchmarking with ChecksAgent with CurrentSITSAcademicYear {
+	extends CommandInternal[ProfilesHomeInformation] with TaskBenchmarking with ChecksAgent with CurrentAcademicYear {
 
 	self: FeaturesComponent with SmallGroupServiceComponent with RelationshipServiceComponent with ModuleAndDepartmentServiceComponent with SecurityServiceComponent =>
 

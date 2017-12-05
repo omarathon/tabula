@@ -4,24 +4,23 @@ import uk.ac.warwick.tabula.JavaImports._
 import uk.ac.warwick.tabula.commands.MemberOrUser
 import uk.ac.warwick.tabula.data.model.attendance._
 import uk.ac.warwick.tabula.data.{AttendanceMonitoringDao, AttendanceMonitoringDaoComponent}
-import uk.ac.warwick.tabula.services.{TermService, TermServiceComponent, UserGroupMembershipHelper, UserLookupComponent}
+import uk.ac.warwick.tabula.services.{UserGroupMembershipHelper, UserLookupComponent}
 import uk.ac.warwick.tabula._
-import org.joda.time.DateTime
+import org.joda.time.{DateTime, DateTimeConstants, LocalDate}
 import uk.ac.warwick.tabula.data.model.{Department, StudentMember}
 
 class AttendanceMonitoringServiceTest extends TestBase with Mockito {
 
-	trait ServiceTestSupport extends AttendanceMonitoringDaoComponent with TermServiceComponent
+	trait ServiceTestSupport extends AttendanceMonitoringDaoComponent
 		with UserLookupComponent with AttendanceMonitoringMembershipHelpers {
 		val attendanceMonitoringDao: AttendanceMonitoringDao = smartMock[AttendanceMonitoringDao]
-		val termService: TermService = smartMock[TermService]
 		val userLookup = new MockUserLookup
 		val membersHelper: UserGroupMembershipHelper[AttendanceMonitoringScheme] = smartMock[UserGroupMembershipHelper[AttendanceMonitoringScheme]]
 	}
 
 	trait CheckpointFixture {
 
-		val currentAcademicYear: AcademicYear = AcademicYear.guessSITSAcademicYearByDate(DateTime.now)
+		val currentAcademicYear: AcademicYear = AcademicYear.now()
 
 		val service = new AbstractAttendanceMonitoringService with ServiceTestSupport
 
@@ -49,7 +48,7 @@ class AttendanceMonitoringServiceTest extends TestBase with Mockito {
 
 	@Test
 	def setAttendance() { new CheckpointFixture { withUser("cusfal") {
-		member1.mostSignificantCourse.beginDate = currentAcademicYear.dateInTermOne.minusMonths(1).toLocalDate
+		member1.mostSignificantCourse.beginDate = new LocalDate(currentAcademicYear.startYear, DateTimeConstants.OCTOBER, 1)
 
 		service.attendanceMonitoringDao.getCheckpoints(Seq(point1, point2, point3), member1) returns
 			Map(point1 -> passedCheckpoint, point2 -> missedCheckpoint, point3 -> authorisedCheckpoint)
@@ -71,7 +70,7 @@ class AttendanceMonitoringServiceTest extends TestBase with Mockito {
 
 	@Test
 	def updateCheckpointTotal() { new CheckpointFixture { withUser("cusfal") {
-		member1.mostSignificantCourse.beginDate = currentAcademicYear.dateInTermOne.minusMonths(1).toLocalDate
+		member1.mostSignificantCourse.beginDate = new LocalDate(currentAcademicYear.startYear, DateTimeConstants.OCTOBER, 1)
 
 		service.attendanceMonitoringDao.getCheckpoints(Seq(point1, point2, point3), member1) returns
 			Map(point1 -> passedCheckpoint, point2 -> missedCheckpoint, point3 -> authorisedCheckpoint)

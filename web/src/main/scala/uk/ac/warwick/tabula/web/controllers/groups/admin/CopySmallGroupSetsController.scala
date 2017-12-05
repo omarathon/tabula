@@ -2,7 +2,6 @@ package uk.ac.warwick.tabula.web.controllers.groups.admin
 
 import javax.validation.Valid
 
-import org.joda.time.DateTime
 import org.springframework.stereotype.Controller
 import org.springframework.validation.Errors
 import org.springframework.web.bind.annotation.{ModelAttribute, PathVariable, RequestMapping}
@@ -30,7 +29,7 @@ abstract class CopySmallGroupSetsController extends GroupsController
 	def crumbsList(command: CopySmallGroupSetsCommand): Seq[BreadCrumb]
 
 	@ModelAttribute("academicYearChoices")
-	def academicYearChoices: Seq[AcademicYear] = AcademicYear.guessSITSAcademicYearByDate(DateTime.now).yearsSurrounding(3, 1)
+	def academicYearChoices: Seq[AcademicYear] = AcademicYear.now().yearsSurrounding(3, 1)
 
 	private def formView(command: CopySmallGroupSetsCommand) =
 		Mav("groups/admin/groups/copy").crumbsList(crumbsList(command))
