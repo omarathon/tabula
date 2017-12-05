@@ -9,6 +9,9 @@ import uk.ac.warwick.tabula.data.Transactions._
 import uk.ac.warwick.tabula.data.model.notifications.RecipientNotificationInfo
 import uk.ac.warwick.tabula.services.EmailNotificationService
 
+import scala.concurrent.duration._
+import scala.concurrent.duration.Duration.Zero
+
 @Component
 @Profile(Array("scheduling"))
 class EmailUnsentEmailCountHealthcheck extends ServiceHealthcheckProvider {
@@ -43,27 +46,27 @@ class EmailUnsentEmailCountHealthcheck extends ServiceHealthcheckProvider {
 @Profile(Array("scheduling"))
 class EmailOldestUnsentItemHealthcheck extends ServiceHealthcheckProvider {
 
-	val WarningThreshold = 5 // minutes
-	val ErrorThreshold = 10 // minutes
+	val WarningThreshold: Duration = 30.minutes
+	val ErrorThreshold: Duration = 1.hour
 
 	@Scheduled(fixedRate = 60 * 1000) // 1 minute
 	def run(): Unit = transactional(readOnly = true) {
-		// How old (in minutes) is the oldest item in the queue?
-		val oldestUnsentEmail =
+		// How old is the oldest item in the queue?
+		val oldestUnsentEmail: Duration =
 			Wire[EmailNotificationService].oldestUnemailedRecipient
 				.map { recipient: RecipientNotificationInfo =>
-				Minutes.minutesBetween(recipient.notification.created, DateTime.now).getMinutes
-			}.getOrElse(0)
+					Minutes.minutesBetween(recipient.notification.created, DateTime.now).getMinutes.minutes.toCoarsest
+				}.getOrElse(Zero)
 
-		// How new (in minutes) is the latest item in the queue?
-		val recentSentEmail =
+		// How new is the latest item in the queue?
+		val recentSentEmail: Duration =
 			Wire[EmailNotificationService].recentEmailedRecipient
 				.map { recipient: RecipientNotificationInfo =>
-					Minutes.minutesBetween(recipient.notification.created, DateTime.now).getMinutes
-				}.getOrElse(0)
+					Minutes.minutesBetween(recipient.notification.created, DateTime.now).getMinutes.minutes.toCoarsest
+				}.getOrElse(Zero)
 
 		val status =
-			if (oldestUnsentEmail == 0) ServiceHealthcheck.Status.Okay // empty queue
+			if (oldestUnsentEmail == Zero) ServiceHealthcheck.Status.Okay // empty queue
 			else if (recentSentEmail >= ErrorThreshold) ServiceHealthcheck.Status.Error
 			else if (recentSentEmail >= WarningThreshold) ServiceHealthcheck.Status.Warning
 			else ServiceHealthcheck.Status.Okay // email queue still processing so may take time to sent them all
@@ -72,10 +75,10 @@ class EmailOldestUnsentItemHealthcheck extends ServiceHealthcheckProvider {
 			name = "email-delay",
 			status = status,
 			testedAt = DateTime.now,
-			message = s"Last sent email $recentSentEmail minute${if (recentSentEmail == 1) "" else "s"} old, Oldest unsent email $oldestUnsentEmail minute${if (oldestUnsentEmail == 1) "" else "s"} old, (warning: $WarningThreshold, critical: $ErrorThreshold)",
+			message = s"Last sent email $recentSentEmail ago, oldest unsent email $oldestUnsentEmail old, (warning: $WarningThreshold, critical: $ErrorThreshold)",
 			performanceData = Seq(
-				ServiceHealthcheck.PerformanceData("oldest_unsent", oldestUnsentEmail, WarningThreshold, ErrorThreshold),
-				ServiceHealthcheck.PerformanceData("last_sent", recentSentEmail, WarningThreshold, ErrorThreshold)
+				ServiceHealthcheck.PerformanceData("oldest_unsent", oldestUnsentEmail.toMinutes, WarningThreshold.toMinutes, ErrorThreshold.toMinutes),
+				ServiceHealthcheck.PerformanceData("last_sent", recentSentEmail.toMinutes, WarningThreshold.toMinutes, ErrorThreshold.toMinutes)
 			)
 		))
 	}
