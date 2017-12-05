@@ -1,3 +1,5 @@
+<#import "*/group_components.ftl" as components />
+
 <h1>Events without a map location</h1>
 
 <p>
@@ -18,7 +20,7 @@
 			<ul>
 				<#list events as event>
 					<li>
-						${event.group.name}: <strong>${event.title}</strong>
+						${event.group.name}: <@components.eventShortDetails event />
 						has a named location <em>'${event.location.name}'</em>
 						<a href="<@routes.groups.editseteventseditevent event/>?returnTo=${(info.requestedUri!"")?url}" class="btn btn-default btn-xs">Edit</a>
 					</li>
