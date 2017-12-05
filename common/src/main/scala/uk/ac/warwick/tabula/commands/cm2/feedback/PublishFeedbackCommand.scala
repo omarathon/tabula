@@ -18,6 +18,7 @@ import uk.ac.warwick.tabula.permissions._
 import uk.ac.warwick.tabula.services._
 import uk.ac.warwick.tabula.system.permissions.{PermissionsChecking, PermissionsCheckingMethods, RequiresPermissionsChecking}
 import uk.ac.warwick.userlookup.User
+import scala.collection.JavaConverters._
 
 import scala.language.implicitConversions
 
@@ -148,7 +149,16 @@ trait PublishFeedbackCommandRequest extends SelectedStudentsRequest with Publish
 	var confirm: Boolean = false
 	var sendToSits: Boolean = false
 
-	def feedbackToRelease: Seq[Feedback] = feedbacks.filterNot { f => f.isPlaceholder || f.released }
+	def feedbackToRelease: Seq[Feedback] = {
+		val releaseFeedbacks = feedbacks.filterNot { f => f.isPlaceholder || f.released }
+		if (releaseFeedbacks.nonEmpty) {
+			val plagiarisedSubmissions = assignment.submissions.asScala.filter { submission => submission.suspectPlagiarised }
+			val plagiarisedIds = plagiarisedSubmissions.map { _.usercode }
+			releaseFeedbacks.filter {f => !plagiarisedIds.contains(f.usercode) }
+		} else {
+			Seq()
+		}
+	}
 }
 
 trait GradeValidationResults {
