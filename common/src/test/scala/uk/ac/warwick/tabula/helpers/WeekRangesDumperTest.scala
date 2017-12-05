@@ -87,7 +87,7 @@ class WeekRangesDumperTest extends TestBase with Mockito {
 		val results = JSON.parseFull(jsonString)
 		results match {
 			case Some(a:Seq[Map[String,Any]] @unchecked) => {
-				a.length should be(146)
+				a.length should be(170)
 				a.head should be (anInstanceOf[Map[String,Any]])
 				a.head("desc") should be("Term 7 Week 95")
 				a.head("start") should be(new DateTime(2011, DateTimeConstants.NOVEMBER, 7, 0, 0, 0).minusWeeks(1).getMillis)
