@@ -71,9 +71,5 @@
 		.datetimepicker-hours thead .switch { visibility: hidden; }
 		.datetimepicker-hours thead th { height: 0px; }
 		.datetimepicker-minutes thead .switch { visibility: hidden; }
-
-		#namedLocationAlert .checkbox, #namedLocationAlert .help-block {
-			margin-bottom: 0;
-		}
 	</style>
 </#escape>

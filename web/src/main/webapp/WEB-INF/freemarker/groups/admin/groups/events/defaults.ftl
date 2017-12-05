@@ -65,11 +65,5 @@
 			/>
 			<a class="btn btn-default" href="${cancelUrl}">Cancel</a>
 		</div>
-
-		<style type="text/css">
-			#namedLocationAlert .checkbox, #namedLocationAlert .help-block {
-				margin-bottom: 0;
-			}
-		</style>
 	</@f.form>
 </#escape>
