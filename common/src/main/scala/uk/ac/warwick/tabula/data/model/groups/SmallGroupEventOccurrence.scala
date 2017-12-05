@@ -30,6 +30,8 @@ class SmallGroupEventOccurrence extends GeneratedId with PermissionsTarget with 
 	def permissionsParents = Stream(event)
 
 	def date: Option[LocalDate] = event.dateForWeek(week)
+	@deprecated("Use startDateTime or endDateTime", since = "206")
+	def dateTime: Option[LocalDateTime] = startDateTime
 	def startDateTime: Option[LocalDateTime] = event.startDateTimeForWeek(week)
 	def endDateTime: Option[LocalDateTime] = event.endDateTimeForWeek(week)
 

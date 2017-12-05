@@ -67,7 +67,7 @@ trait GetTermDatesWeeksApi {
 			val asString = formatter.format(Seq(WeekRange(weekNumber)), DayOfWeek.Monday, numbSystem, short = false)
 
 			TermWeek(academicYear, weekNumber, week.firstDay, week.lastDay, asString)
-		}
+		}.toSeq.sortBy(_.weekNumber)
 	}
 
 	@RequestMapping(method = Array(GET), produces = Array("application/json"))
