@@ -8,15 +8,16 @@ import org.junit.{After, Before}
 import org.springframework.beans.factory.config.{BeanDefinition, ConfigurableListableBeanFactory}
 import org.springframework.context.ConfigurableApplicationContext
 import uk.ac.warwick.spring.SpringConfigurer
+import uk.ac.warwick.tabula.JavaImports._
+import uk.ac.warwick.tabula._
+import uk.ac.warwick.tabula.data.model.PlagiarismInvestigation.{NotInvestigated, SuspectPlagiarised}
 import uk.ac.warwick.tabula.data.model.{Module, Notification, UserGroup}
 import uk.ac.warwick.tabula.helpers.Tap._
 import uk.ac.warwick.tabula.roles.ModuleManagerRoleDefinition
 import uk.ac.warwick.tabula.services._
 import uk.ac.warwick.tabula.services.permissions.PermissionsService
 import uk.ac.warwick.tabula.web.views.{FreemarkerRendering, ScalaFreemarkerConfiguration}
-import uk.ac.warwick.tabula._
 import uk.ac.warwick.userlookup.AnonymousUser
-import uk.ac.warwick.tabula.JavaImports._
 
 class FeedbackDueNotificationTest extends TestBase with Mockito with FreemarkerRendering {
 
@@ -241,6 +242,12 @@ class FeedbackDueNotificationTest extends TestBase with Mockito with FreemarkerR
 		// Feedback partially released
 		assignment.feedbacks.get(0).released = true
 		notification.recipients should not be 'empty
+
+		// Feedback released for all assignments without plagiarism investigation
+		assignment.submissions.get(1).plagiarismInvestigation = SuspectPlagiarised
+		assignment.needsFeedbackPublishing should be {false}
+		notification.recipients should be ('empty)
+		assignment.submissions.get(1).plagiarismInvestigation = NotInvestigated
 
 		// Feedback fully released
 		assignment.feedbacks.get(1).released = true
