@@ -119,7 +119,7 @@ object Fixtures extends Mockito {
 		s
 	}
 
-	def smallGroupEvent(title:String): SmallGroupEvent = {
+	def smallGroupEvent(title: String): SmallGroupEvent = {
 		val s = new SmallGroupEvent
 		s.smallGroupService = None
 		s.title = title

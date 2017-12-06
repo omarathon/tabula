@@ -41,6 +41,16 @@
 			<@f.input path="defaultLocation" cssClass="form-control" />
 		</@bs3form.labelled_form_group>
 
+		<div class="alert alert-info" id="namedLocationAlert" style="display: none">
+			<p>
+				This location couldn't be found on the campus map.
+			</p>
+
+			<@bs3form.checkbox path="useNamedLocation">
+				<@f.checkbox path="useNamedLocation" /> Use this location anyway
+			</@bs3form.checkbox>
+		</div>
+
 		<@bs3form.checkbox "resetExistingEvents">
 			<@f.checkbox path="resetExistingEvents" value="true" />
 			Reset existing events to these defaults

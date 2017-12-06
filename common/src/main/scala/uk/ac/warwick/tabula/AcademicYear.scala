@@ -112,7 +112,7 @@ case class AcademicWeek(underlying: JAcademicWeek) extends Ordered[AcademicWeek]
 	def firstDay: LocalDate = underlying.getDateRange.getStart.asJoda
 	def lastDay: LocalDate = underlying.getDateRange.getEndInclusive.asJoda
 
-	@deprecated("Intervals are between two date-times, but weeks are date-based", since = "205")
+	@deprecated("Intervals are between two date-times, but weeks are date-based", since = "206")
 	def interval: Interval = new Interval(firstDay.toDateTimeAtStartOfDay, lastDay.plusDays(1).toDateTimeAtStartOfDay)
 
 	override def compare(that: AcademicWeek): Int = this.underlying.compareTo(that.underlying)
@@ -141,7 +141,7 @@ sealed trait AcademicPeriod extends Ordered[AcademicPeriod] {
 	def isTerm: Boolean = underlying.isTerm
 	def isVacation: Boolean = underlying.isVacation
 
-	@deprecated("Intervals are between two date-times, but periods are date-based", since = "205")
+	@deprecated("Intervals are between two date-times, but periods are date-based", since = "206")
 	def interval: Interval = new Interval(firstDay.toDateTimeAtStartOfDay, lastDay.plusDays(1).toDateTimeAtStartOfDay)
 
 	override def compare(that: AcademicPeriod): Int = this.underlying.compareTo(that.underlying)

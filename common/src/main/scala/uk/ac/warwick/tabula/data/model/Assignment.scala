@@ -238,8 +238,9 @@ class Assignment
 		val baseFeedbackDeadline =
 			extension.flatMap(_.feedbackDeadline).map(_.toLocalDate).getOrElse(wholeAssignmentDeadline)
 
-		// allow 20 days from the submission day only for submissions that aren't late. Late submissions are excluded from this calculation
-		if (submission.isLate)
+		// allow 20 days from the submission day only for submissions that aren't late or suspected plagiarised.
+		// Late or possibly plagiarised submissions are excluded from this calculation
+		if (submission.hasPlagiarismInvestigation || submission.isLate)
 			None
 		else
 			Some(baseFeedbackDeadline)
@@ -779,7 +780,7 @@ class Assignment
 		if (openEnded || dissertation || !collectSubmissions || _archived) {
 			false
 		} else {
-			submissions.asScala.exists(s => !fullFeedback.exists(f => f.usercode == s.usercode && f.checkedReleased))
+			!submissions.asScala.forall(s => fullFeedback.exists(f => f.usercode == s.usercode && f.checkedReleased) || s.hasPlagiarismInvestigation)
 		}
 	}
 
@@ -787,7 +788,7 @@ class Assignment
 		if (openEnded || dissertation || !collectSubmissions || _archived) {
 			false
 		} else {
-			submissions.asScala.exists(s => !findExtension(s.usercode).exists(_.approved) && !fullFeedback.exists(f => f.usercode == s.usercode && f.checkedReleased))
+			!submissions.asScala.forall(s => findExtension(s.usercode).exists(_.approved) || fullFeedback.exists(f => f.usercode == s.usercode && f.checkedReleased) || s.hasPlagiarismInvestigation)
 		}
 	}
 
@@ -795,7 +796,7 @@ class Assignment
 		if (openEnded || dissertation || !collectSubmissions || _archived) {
 			false
 		} else {
-			submissions.asScala.find { _.usercode == usercode }.exists(s => !fullFeedback.exists(f => f.usercode == s.usercode && f.checkedReleased))
+			!submissions.asScala.find(_.usercode == usercode).forall(s => fullFeedback.exists(f => f.usercode == s.usercode && f.checkedReleased) || s.hasPlagiarismInvestigation)
 		}
 	}
 
