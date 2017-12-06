@@ -213,7 +213,7 @@ trait ModifySmallGroupEventValidation extends SelfValidating {
 		} else {
 			val tutorsValidator = new UsercodeListValidator(tutors, "tutors")
 			tutorsValidator.validate(errors)
-			if (startTime == null && endTime != null) errors.rejectValue("startTime", "smallGroupEvent.startTime.NotEmpty")
+			if (startTime == null && (day != null || endTime != null)) errors.rejectValue("startTime", "smallGroupEvent.startTime.NotEmpty")
 			if (startTime != null && endTime == null) errors.rejectValue("endTime", "smallGroupEvent.endTime.NotEmpty")
 		}
 
