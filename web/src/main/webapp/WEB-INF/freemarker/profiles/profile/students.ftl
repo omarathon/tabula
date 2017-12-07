@@ -20,8 +20,7 @@
 	</ul>
 <#else>
 	<p>
-		You are not currently the tutor for any group of students in Tabula. If you think this is incorrect, please contact your
-		departmental access manager for Tabula.
+		You are not currently a tutor for any group of students in Tabula. If you think this is incorrect or you need assistance, please visit our <a href="/help">help page</a>.
 	</p>
 </#if>
 

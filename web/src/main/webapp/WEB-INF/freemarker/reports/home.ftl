@@ -1,13 +1,13 @@
 <#escape x as x?html>
+<h1>Reports</h1>
 
-<p>
-	This is a service for viewing reports for various aspects of Tabula.
+<p class="lead muted">
+  This is a service for viewing reports of data used in Tabula.
 </p>
 
 <#if departmentsWithPermission?size == 0 && user.staff>
 	<p>
-		You do not currently have permission to view any reports. Please contact your
-		departmental access manager for Tabula, or email <a id="email-support-link" href="mailto:tabula@warwick.ac.uk">tabula@warwick.ac.uk</a>.
+		You do not currently have permission to view any reports. If you think this is incorrect or you need assistance, please visit our <a href="/help">help page</a>.
 	</p>
 
 	<script type="text/javascript">

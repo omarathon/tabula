@@ -63,8 +63,14 @@
 			</#list>
 		</ul>
 	</#if>
+<#else>
 
-
+<p class="lead muted">
+  This is a service for managing departmental administration settings and permissions.	
+</p>
+<p>
+  You do not currently have permission to manage departmental settings and permissions. If you think this is incorrect or you need assistance, please visit our <a href="/help">help page</a>.
+</p>
 </#if>
 
 </#escape>
