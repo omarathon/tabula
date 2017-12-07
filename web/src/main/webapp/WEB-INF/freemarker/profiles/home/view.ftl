@@ -31,7 +31,7 @@
 				<div class="header" id="search-header">
 					<h2 class="section">Search profiles</h2>
 				</div>
-				<p class="subtler">Type or paste a name or university ID</p>
+				<p class="subtler">Type or paste a name or University ID</p>
 
 				<#include "../profile/search/form.ftl" />
 
@@ -81,8 +81,7 @@
 				<h2>My students</h2>
 
 				<p>
-					You are not currently the tutor for any group of students in Tabula. If you think this is incorrect, please contact your
-					departmental access manager for Tabula, or email <a id="email-support-link" href="mailto:tabula@warwick.ac.uk">tabula@warwick.ac.uk</a>.
+					You are not currently a tutor for any group of students in Tabula. If you think this is incorrect or you need assistance, please visit our <a href="/help">help page</a>.
 				</p>
 			</#if>
 
