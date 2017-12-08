@@ -36,10 +36,10 @@ class CreateNewAttendancePointsFromCopyCommandInternal(
 ) extends CommandInternal[Seq[AttendanceMonitoringPoint]] with GetsPointsToCreate with TaskBenchmarking
 		with GeneratesAttendanceMonitoringSchemeNotifications with RequiresCheckpointTotalUpdate {
 
-	self: CreateNewAttendancePointsFromCopyCommandState with AttendanceMonitoringServiceComponent with ProfileServiceComponent =>
+	self: CreateNewAttendancePointsFromCopyCommandState with AttendanceMonitoringServiceComponent with ProfileServiceComponent with AttendanceMonitoringPointValidation =>
 
 	override def applyInternal(): Seq[AttendanceMonitoringPoint] = {
-		val points = getPoints(findPointsResult, schemes, pointStyle, academicYear, addToScheme = true)
+		val points = getPoints(findPointsResult, schemes, pointStyle, academicYear, addToScheme = true, None)
 		points.foreach(attendanceMonitoringService.saveOrUpdate)
 
 		generateNotifications(schemes)
@@ -55,30 +55,37 @@ trait CreateNewAttendancePointsFromCopyValidation extends SelfValidating with Ge
 	self: CreateNewAttendancePointsFromCopyCommandState with AttendanceMonitoringServiceComponent =>
 
 	override def validate(errors: Errors) {
-		val points = getPoints(findPointsResult, schemes, pointStyle, academicYear, addToScheme = false)
-		points.foreach(point => {
-			validateSchemePointStyles(errors, pointStyle, schemes)
+		val points = getPoints(findPointsResult, schemes, pointStyle, academicYear, addToScheme = false, Some(errors))
+		if (!errors.hasErrors) {
+			points.foreach(point => {
+				validateSchemePointStyles(errors, pointStyle, schemes)
 
-			pointStyle match {
-				case AttendanceMonitoringPointStyle.Date =>
-					validateCanPointBeEditedByDate(errors, point.startDate, schemes.flatMap(_.members.members), academicYear, "")
-					validateDuplicateForDate(errors, point.name, point.startDate, point.endDate, schemes, global = true)
-				case AttendanceMonitoringPointStyle.Week =>
-					validateCanPointBeEditedByWeek(errors, point.startWeek, schemes.flatMap(_.members.members), academicYear, "")
-					validateDuplicateForWeek(errors, point.name, point.startWeek, point.endWeek, schemes, global = true)
-			}
-		})
+				pointStyle match {
+					case AttendanceMonitoringPointStyle.Date =>
+						validateCanPointBeEditedByDate(errors, point.startDate, schemes.flatMap(_.members.members), academicYear, "")
+						validateDuplicateForDate(errors, point.name, point.startDate, point.endDate, schemes, global = true)
+						validateDate(errors, point.startDate, academicYear, "")
+						validateDate(errors, point.endDate, academicYear, "")
+					case AttendanceMonitoringPointStyle.Week =>
+						validateCanPointBeEditedByWeek(errors, point.startWeek, schemes.flatMap(_.members.members), academicYear, "")
+						validateDuplicateForWeek(errors, point.name, point.startWeek, point.endWeek, schemes, global = true)
+				}
+			})
+		}
 	}
 
 }
 
 trait GetsPointsToCreate {
+	self: AttendanceMonitoringPointValidation =>
+
 	def getPoints(
 		findPointsResult: FindPointsResult,
 		schemes: Seq[AttendanceMonitoringScheme],
 		pointStyle: AttendanceMonitoringPointStyle,
 		academicYear: AcademicYear,
-		addToScheme: Boolean = true
+		addToScheme: Boolean = true,
+		errors: Option[Errors]
 	): Seq[AttendanceMonitoringPoint] = {
 		val weekPoints = findPointsResult.termGroupedPoints.flatMap(_._2).map(_.templatePoint).toSeq
 		val datePoints = findPointsResult.monthGroupedPoints.flatMap(_._2).map(_.templatePoint).toSeq
@@ -90,9 +97,20 @@ trait GetsPointsToCreate {
 					val newPoint = if (addToScheme) weekPoint.cloneTo(Option(scheme)) else weekPoint.cloneTo(None)
 					newPoint.createdDate = DateTime.now
 					newPoint.updatedDate = DateTime.now
+
 					// Fix new points date
-					newPoint.startDate = weeksForYear(weekPoint.startWeek).firstDay
-					newPoint.endDate = weeksForYear(weekPoint.endWeek).lastDay
+					if (!weeksForYear.contains(weekPoint.startWeek)) {
+						errors.foreach(_.rejectValue("", "attendanceMonitoringPoint.date.min"))
+					} else {
+						newPoint.startDate = weeksForYear(weekPoint.startWeek).firstDay
+					}
+
+					if (!weeksForYear.contains(weekPoint.endWeek)) {
+						errors.foreach(_.rejectValue("", "attendanceMonitoringPoint.date.max"))
+					} else {
+						newPoint.endDate = weeksForYear(weekPoint.endWeek).lastDay
+					}
+
 					newPoint
 				}
 			}
@@ -100,10 +118,10 @@ trait GetsPointsToCreate {
 			// Date points
 			schemes.flatMap { scheme =>
 				datePoints.map { datePoint =>
-					val newPoint = addToScheme match {
-						case true => datePoint.cloneTo(Option(scheme))
-						case false => datePoint.cloneTo(None)
-					}
+					val newPoint =
+						if (addToScheme) datePoint.cloneTo(Option(scheme))
+						else datePoint.cloneTo(None)
+
 					newPoint.createdDate = DateTime.now
 					newPoint.updatedDate = DateTime.now
 					// Fix new points year

@@ -6,6 +6,8 @@ import org.springframework.web.bind.annotation.{ModelAttribute, PathVariable}
 import uk.ac.warwick.tabula.AcademicYear
 import java.text.DateFormatSymbols
 
+import org.joda.time.{Months, YearMonth}
+
 import scala.collection.immutable.IndexedSeq
 
 /**
@@ -37,7 +39,13 @@ object MonthNames {
 
 	private val monthNames = new DateFormatSymbols().getMonths.array
 
-	def apply(academicYear: AcademicYear): IndexedSeq[String] =
-		(8 to 11).map{ i => monthNames(i) + " " + academicYear.startYear.toString } ++
-		(0 to 9).map{ i => monthNames(i) + " " + academicYear.endYear.toString }
+	def apply(academicYear: AcademicYear): IndexedSeq[String] = {
+		val first = new YearMonth(academicYear.firstDay.getYear, academicYear.firstDay.getMonthOfYear)
+		val last = new YearMonth(academicYear.lastDay.getYear, academicYear.lastDay.getMonthOfYear)
+
+		(0 to Months.monthsBetween(first, last).getMonths).map { i =>
+			val month = first.plusMonths(i)
+			s"${monthNames(month.getMonthOfYear - 1)} ${month.getYear}"
+		}
+	}
 }
