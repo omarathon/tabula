@@ -1,11 +1,13 @@
 package uk.ac.warwick.tabula.commands.groups.admin
 
-import org.joda.time.{DateTime, Interval}
+import org.joda.time.{LocalDate, LocalTime}
 import org.springframework.validation.Errors
 import uk.ac.warwick.tabula.commands.groups.admin.DownloadRegistersAsPdfHelper._
 import uk.ac.warwick.tabula.commands.{MemberOrUser, _}
+import uk.ac.warwick.tabula.data.Transactions._
 import uk.ac.warwick.tabula.data.model.groups.{SmallGroupEvent, SmallGroupEventOccurrence, SmallGroupSet}
 import uk.ac.warwick.tabula.data.model.{Department, UserSettings}
+import uk.ac.warwick.tabula.helpers.ComposableOrdering
 import uk.ac.warwick.tabula.helpers.DateTimeOrdering._
 import uk.ac.warwick.tabula.permissions.Permissions
 import uk.ac.warwick.tabula.services._
@@ -13,8 +15,6 @@ import uk.ac.warwick.tabula.services.fileserver.{RenderableAttachment, Renderabl
 import uk.ac.warwick.tabula.system.permissions.{PermissionsChecking, PermissionsCheckingMethods, RequiresPermissionsChecking}
 import uk.ac.warwick.tabula.{AcademicYear, CurrentUser}
 import uk.ac.warwick.userlookup.{AnonymousUser, User}
-import uk.ac.warwick.tabula.data.Transactions._
-import uk.ac.warwick.tabula.helpers.ComposableOrdering
 
 import scala.collection.JavaConverters._
 
@@ -48,7 +48,7 @@ class DownloadRegistersAsPdfCommandInternal(val department: Department, val acad
 		val sortedOccurrences = sortOrder match {
 			case SortOrder.Module => getOccurrences.sortBy(o => (
 				o.event.group.groupSet.module,
-				o.dateTime(weeksForYear).get
+				o.startDateTime.get
 			))
 			case _ => getOccurrences.sortBy(o => (
 				// Where there is more than one tutor, sort them by name and pick the first one, then sort all the occurrences by first tutor name
@@ -58,7 +58,7 @@ class DownloadRegistersAsPdfCommandInternal(val department: Department, val acad
 					.headOption
 					.map(u => (u.getLastName, u.getFirstName))
 					.getOrElse(("ZZZZ", "ZZZZ")),
-				o.dateTime(weeksForYear).get
+				o.startDateTime.get
 			))
 		}
 
@@ -100,7 +100,7 @@ class DownloadRegistersAsPdfCommandInternal(val department: Department, val acad
 					Map(
 						"event" -> occurrence.event,
 						"week" -> occurrence.week,
-						"formattedEventDate" -> occurrence.dateTime.get.toString("dd/MM/yyyy"),
+						"formattedEventDate" -> occurrence.startDateTime.get.toString("dd/MM/yyyy"),
 						"members" -> members,
 						"showPhotos" -> showPhotos,
 						"displayName" -> displayName,
@@ -155,33 +155,32 @@ trait DownloadRegistersAsPdfPermissions extends RequiresPermissionsChecking with
 
 trait DownloadRegistersAsPdfCommandState {
 
-	self: TermServiceComponent with SmallGroupServiceComponent =>
+	self: SmallGroupServiceComponent =>
 
 	def department: Department
 	def academicYear: AcademicYear
 
-	lazy val weeksForYear: Map[Integer, Interval] = termService.getAcademicWeeksForYear(academicYear.dateInTermOne).toMap
 	lazy val smallGroupsInDepartment: Seq[SmallGroupSet] = smallGroupService.getSmallGroupSets(department, academicYear).sortBy(sgs => (sgs.module, sgs.name))
 }
 
 trait GetsOccurrencesForDownloadRegistersAsPdfCommand extends GetsOccurrences with TaskBenchmarking {
 
 	self: DownloadRegistersAsPdfCommandRequest with DownloadRegistersAsPdfCommandState
-		with SmallGroupServiceComponent with TermServiceComponent =>
+		with SmallGroupServiceComponent =>
 
 	override lazy val getOccurrences: Seq[SmallGroupEventOccurrence] = benchmarkTask("getOccurrences") {
-		def toWeekNumber(date: DateTime) = termService.getTermFromDateIncludingVacations(date).getAcademicWeekNumber(date)
+		def toWeekNumber(date: LocalDate) = academicYear.weekForDate(date).weekNumber
 
 		// If the start/end date is outside the specified academic year, set to the min/max for initial filtering
 		val startWeek = {
-			if (startDate.isBefore(termService.getTermFromDate(academicYear.dateInTermOne).getStartDate)) {
+			if (startDate.isBefore(academicYear.firstDay)) {
 				0
 			} else {
 				toWeekNumber(startDate)
 			}
 		}
 		val endWeek = {
-			if (endDate.isAfter(termService.getTermFromDate(academicYear.next.dateInTermOne).getStartDate)) {
+			if (endDate.isAfter(academicYear.lastDay)) {
 				60
 			} else {
 				toWeekNumber(endDate)
@@ -190,17 +189,17 @@ trait GetsOccurrencesForDownloadRegistersAsPdfCommand extends GetsOccurrences wi
 		val events: Seq[SmallGroupEvent] = transactional(readOnly = true) { smallGroupSets.asScala.flatMap(_.groups.asScala.flatMap(_.events)) }
 		// Get the occurrences that happen on the week of the start or end date, or a week in-between,
 		// so we don't have to calculate the true date time of every event
-		val roughOccurrances: Seq[SmallGroupEventOccurrence] = events.flatMap(event => {
+		val roughOccurrences: Seq[SmallGroupEventOccurrence] = events.flatMap(event => {
 			event.allWeeks.filter(w => w >= startWeek && w <= endWeek).flatMap(w =>
 				transactional(readOnly = true) { smallGroupService.getOrCreateSmallGroupEventOccurrence(event, w) }
 			)
 		})
 		// Now filter each occurrence to see if it's really between the dates
-		roughOccurrances.filter(o => o.dateTime.isDefined).filter(o => {
-			val dateTime = o.dateTime(weeksForYear)
-			dateTime.isDefined &&
-				(dateTime.get.isAfter(startDate) || dateTime.get.isEqual(startDate)) &&
-					(dateTime.get.isBefore(endDate) || dateTime.get.isEqual(endDate))
+		roughOccurrences.filter(o => o.startDateTime.nonEmpty).filter(o => {
+			val dateTime = o.startDateTime
+			dateTime.nonEmpty &&
+				(dateTime.get.isAfter(startDate.toLocalDateTime(LocalTime.MIDNIGHT)) || dateTime.get.isEqual(startDate.toLocalDateTime(LocalTime.MIDNIGHT))) &&
+				(dateTime.get.isBefore(endDate.toLocalDateTime(LocalTime.MIDNIGHT)) || dateTime.get.isEqual(endDate.toLocalDateTime(LocalTime.MIDNIGHT)))
 		})
 	}
 }

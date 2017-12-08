@@ -22,7 +22,7 @@ class AddExamCommandTest extends TestBase with Mockito {
 
 	trait Fixture {
 		val module: Module = Fixtures.module("ab123", "Test module")
-		val academicYear = new AcademicYear(2014)
+		val academicYear = AcademicYear(2014)
 		val command = new AddExamCommandInternal(module, academicYear) with CommandTestSupport
 
 		val validator = new ExamValidation with ExamState with AssessmentServiceComponent

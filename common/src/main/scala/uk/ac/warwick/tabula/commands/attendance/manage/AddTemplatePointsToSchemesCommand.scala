@@ -6,7 +6,7 @@ import uk.ac.warwick.tabula.AcademicYear
 import uk.ac.warwick.tabula.JavaImports._
 import uk.ac.warwick.tabula.commands._
 import uk.ac.warwick.tabula.data.model.Department
-import uk.ac.warwick.tabula.data.model.attendance.{AttendanceMonitoringPoint, AttendanceMonitoringPointStyle, AttendanceMonitoringPointType, AttendanceMonitoringScheme, AttendanceMonitoringTemplate}
+import uk.ac.warwick.tabula.data.model.attendance._
 import uk.ac.warwick.tabula.permissions.Permissions
 import uk.ac.warwick.tabula.services._
 import uk.ac.warwick.tabula.services.attendancemonitoring.{AttendanceMonitoringServiceComponent, AutowiringAttendanceMonitoringServiceComponent}
@@ -23,7 +23,6 @@ object AddTemplatePointsToSchemesCommand {
 		with AddTemplatePointsToSchemesPermissions
 		with AutowiringAttendanceMonitoringServiceComponent
 		with AutowiringProfileServiceComponent
-		with AutowiringTermServiceComponent
 		with AddTemplatePointsToSchemesDescription
 		with AddTemplatePointsToSchemesValidation
 }
@@ -33,7 +32,7 @@ class AddTemplatePointsToSchemesCommandInternal(val department: Department, val 
 		with GeneratesAttendanceMonitoringSchemeNotifications with RequiresCheckpointTotalUpdate {
 
 	self: AddTemplatePointsToSchemesCommandState with AttendanceMonitoringServiceComponent
-		with ProfileServiceComponent with TermServiceComponent =>
+		with ProfileServiceComponent =>
 
 	override def applyInternal(): Seq[AttendanceMonitoringPoint] = {
 
@@ -91,7 +90,7 @@ trait AddTemplatePointsToSchemesDescription extends Describable[Seq[AttendanceMo
 
 
 trait AddTemplatePointsToSchemesValidation extends AttendanceMonitoringPointValidation with SelfValidating {
-	self: AddTemplatePointsToSchemesCommandState with AttendanceMonitoringServiceComponent with TermServiceComponent =>
+	self: AddTemplatePointsToSchemesCommandState with AttendanceMonitoringServiceComponent =>
 
 	override def validate(errors: Errors) {
 		if (templateScheme == null) {

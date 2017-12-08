@@ -10,7 +10,7 @@ import org.springframework.validation.BindException
 import uk.ac.warwick.spring.Wire
 import uk.ac.warwick.tabula.JavaImports._
 import uk.ac.warwick.tabula._
-import uk.ac.warwick.tabula.commands.CurrentSITSAcademicYear
+import uk.ac.warwick.tabula.commands.CurrentAcademicYear
 import uk.ac.warwick.tabula.data.model.forms.Extension
 import uk.ac.warwick.tabula.data.model.forms.ExtensionState.Unreviewed
 import uk.ac.warwick.tabula.data.model._
@@ -61,7 +61,7 @@ class ModifyAssignmentCommandTest extends TestBase with Mockito with FunctionalC
 		}
 	}
 
-	trait Fixture extends CurrentSITSAcademicYear {
+	trait Fixture extends CurrentAcademicYear {
 		val user = new User("cusxad")
 		val currentUser = new CurrentUser(user, user)
 		val module: Module = Fixtures.module(code="ls101")

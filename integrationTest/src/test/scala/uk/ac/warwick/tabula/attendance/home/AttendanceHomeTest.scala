@@ -2,12 +2,12 @@ package uk.ac.warwick.tabula.attendance.home
 
 import org.openqa.selenium.By
 import org.scalatest.GivenWhenThen
-import uk.ac.warwick.tabula.FunctionalTestAcademicYear
+import uk.ac.warwick.tabula.AcademicYear
 import uk.ac.warwick.tabula.attendance.AttendanceFixture
 
 class AttendanceHomeTest extends AttendanceFixture with GivenWhenThen{
 
-	val year: Int = FunctionalTestAcademicYear.current.startYear
+	val year: Int = AcademicYear.now().startYear
 
 	"A student" should "see monitoring points for the current year" in {
 		Given("I am logged in as Student1")
@@ -28,10 +28,10 @@ class AttendanceHomeTest extends AttendanceFixture with GivenWhenThen{
 		When("I go to /attendance")
 		go to Path("/attendance")
 		click on cssSelector(".navbar-tertiary").webElement.findElement(By.partialLinkText("14/15"))
-		click on cssSelector(".navbar-tertiary").webElement.findElement(By.partialLinkText(s"${FunctionalTestAcademicYear.currentSITS.toString}"))
+		click on cssSelector(".navbar-tertiary").webElement.findElement(By.partialLinkText(s"${AcademicYear.now().toString}"))
 
 		Then("I see the attendance admin sections")
-		currentUrl should endWith(FunctionalTestAcademicYear.currentSITS.startYear.toString)
+		currentUrl should endWith(AcademicYear.now().startYear.toString)
 		pageSource should include("View and record monitoring points")
 		pageSource should include("Create and edit monitoring schemes")
 

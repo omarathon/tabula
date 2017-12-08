@@ -28,8 +28,8 @@ class AssessmentDaoTest extends PersistenceTestBase {
 		val moduleNotInDept: Module = Fixtures.module("ca101")
 		session.save(moduleNotInDept)
 
-		val thisYear: AcademicYear = AcademicYear.guessSITSAcademicYearByDate(new DateTime())
-		val previousYear: AcademicYear = AcademicYear.guessSITSAcademicYearByDate(new DateTime().minusYears(2))
+		val thisYear: AcademicYear = AcademicYear.now()
+		val previousYear: AcademicYear = AcademicYear.forDate(new DateTime().minusYears(2))
 
 		// these assignments are in the current department and year
 		val assignment1: Assignment = Fixtures.assignment("assignment 1")
@@ -65,15 +65,15 @@ class AssessmentDaoTest extends PersistenceTestBase {
 
 		val exam1_2013: Exam = Fixtures.exam("exam1")
 		exam1_2013.module = examModule
-		exam1_2013.academicYear = new AcademicYear(2013)
+		exam1_2013.academicYear = AcademicYear(2013)
 
 		val exam1_2014: Exam = Fixtures.exam("exam1")
 		exam1_2014.module = examModule
-		exam1_2014.academicYear = new AcademicYear(2014)
+		exam1_2014.academicYear = AcademicYear(2014)
 
 		val exam1_2015: Exam = Fixtures.exam("exam1")
 		exam1_2015.module = examModule
-		exam1_2015.academicYear = new AcademicYear(2015)
+		exam1_2015.academicYear = AcademicYear(2015)
 
 		session.save(exam1_2013)
 		session.save(exam1_2014)
@@ -140,7 +140,7 @@ class AssessmentDaoTest extends PersistenceTestBase {
 	@Test def getExams: Unit = {
 		transactional { tx =>
 			new Fixture {
-				val exams: Seq[Exam] = dao.getExamByNameYearModule("exam1", new AcademicYear(2014), examModule)
+				val exams: Seq[Exam] = dao.getExamByNameYearModule("exam1", AcademicYear(2014), examModule)
 				exams.size should be (1)
 				exams.contains(exam1_2013) should be (false)
 				exams.contains(exam1_2014) should be (true)

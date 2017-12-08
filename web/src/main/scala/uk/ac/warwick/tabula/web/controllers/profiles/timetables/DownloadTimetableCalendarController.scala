@@ -7,7 +7,7 @@ import uk.ac.warwick.tabula.commands.timetables.ViewMemberEventsCommand
 import uk.ac.warwick.tabula.commands.timetables.ViewMemberEventsCommand.TimetableCommand
 import uk.ac.warwick.tabula.data.model.Member
 import uk.ac.warwick.tabula.helpers.KnowsUserNumberingSystem
-import uk.ac.warwick.tabula.services.{AutowiringModuleAndDepartmentServiceComponent, AutowiringTermServiceComponent, AutowiringUserLookupComponent, AutowiringUserSettingsServiceComponent}
+import uk.ac.warwick.tabula.services.{AutowiringModuleAndDepartmentServiceComponent, AutowiringUserLookupComponent, AutowiringUserSettingsServiceComponent}
 import uk.ac.warwick.tabula.web.controllers.profiles.ProfilesController
 import uk.ac.warwick.tabula.web.views.PDFView
 import uk.ac.warwick.tabula.{CurrentUser, RequestFailedException}
@@ -18,7 +18,7 @@ import scala.util.{Failure, Success}
 @RequestMapping(Array("/profiles/view/{member}/timetable/download-calendar"))
 class DownloadTimetableCalendarController extends ProfilesController
 	with DownloadsTimetableCalendar
-	with AutowiringUserLookupComponent with AutowiringTermServiceComponent
+	with AutowiringUserLookupComponent
 	with KnowsUserNumberingSystem with AutowiringUserSettingsServiceComponent
 	with AutowiringModuleAndDepartmentServiceComponent {
 

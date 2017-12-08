@@ -138,10 +138,20 @@ trait ZipCreator extends Logging with TaskBenchmarking {
 			items.zipWithIndex.foreach { case(item, index) => item match {
 				case file: ZipFileItem if Option(file.source).nonEmpty && file.length > 0 =>
 					benchmarkTask(s"Write ${file.name}") {
-						zip.putArchiveEntry(new ZipArchiveEntry(basePath + trunc(file.name, MaxFileLength)))
-						file.source.copyTo(zip)
-						zip.closeArchiveEntry()
-						progressCallback(index, items.size)
+						try {
+							val entry = new ZipArchiveEntry(basePath + trunc(file.name, MaxFileLength))
+							logger.info(s"Creating entry named ${entry.getName}")
+							zip.putArchiveEntry(entry)
+							logger.info(s"Copying file into archive")
+							file.source.copyTo(zip)
+							logger.info("Closing archive entry")
+							zip.closeArchiveEntry()
+							progressCallback(index, items.size)
+						} catch {
+							case e: Exception =>
+								logger.error("Exception adding file to archive", e)
+								throw e
+						}
 					}
 				case file: ZipFileItem =>
 					// do nothing
@@ -185,7 +195,7 @@ trait ZipCreator extends Logging with TaskBenchmarking {
 					if (thrownException != null) {
 						// If we caught an exception above, that one will be more useful than one thrown when closing,
 						// so don't throw this one
-						logger.error(s"Exception thrown while trying to close: ${e.getMessage}")
+						logger.error("Exception thrown while trying to close", e)
 						throw thrownException
 					} else {
 						throw e

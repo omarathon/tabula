@@ -1,7 +1,7 @@
 package uk.ac.warwick.tabula.groups.pages
 
 import org.openqa.selenium.{By, WebDriver, WebElement}
-import uk.ac.warwick.tabula.{BreadcrumbsMatcher, EventuallyAjax, FunctionalTestAcademicYear, FunctionalTestProperties}
+import uk.ac.warwick.tabula.{BreadcrumbsMatcher, EventuallyAjax, AcademicYear, FunctionalTestProperties}
 import org.scalatest.selenium.Page
 import org.scalatest.selenium.WebBrowser
 
@@ -142,7 +142,7 @@ class ModuleGroupSetInfoSummarySection(val underlying: WebElement, val moduleCod
 	}
 }
 
-class BatchOpenPage(val departmentCode: String, val academicYear: FunctionalTestAcademicYear)(implicit webDriver: WebDriver) extends Page with WebBrowser with Eventually with Matchers {
+class BatchOpenPage(val departmentCode: String, val academicYear: AcademicYear)(implicit webDriver: WebDriver) extends Page with WebBrowser with Eventually with Matchers {
 	val url: String = FunctionalTestProperties.SiteRoot + s"/groups/admin/department/$departmentCode/groups/open"
 
 	def isCurrentPage: Boolean = {

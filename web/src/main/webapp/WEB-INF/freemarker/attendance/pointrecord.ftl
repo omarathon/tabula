@@ -247,10 +247,12 @@
 </#if>
 
 <div id="meetings-modal" class="modal fade" style="display:none;">
-	<@modal.header>
-		<h3>Meetings</h3>
-	</@modal.header>
-	<@modal.body></@modal.body>
+	<@modal.wrapper>
+		<@modal.header>
+			<h3 class="modal-title">Meetings</h3>
+		</@modal.header>
+		<@modal.body></@modal.body>
+	</@modal.wrapper>
 </div>
 <div id="small-groups-modal" class="modal fade" style="display:none;"></div>
 <div id="upload-attendance-modal" class="modal fade" style="display:none;"></div>

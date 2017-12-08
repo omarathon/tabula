@@ -12,13 +12,12 @@ import uk.ac.warwick.tabula.{AcademicYear, Fixtures, Mockito, TestBase}
 
 class AddTemplatePointsToSchemesCommandTest extends TestBase with Mockito {
 
-	val academicYear = new AcademicYear(2014)
+	val academicYear = AcademicYear(2014)
 	val department = new Department
 	val student: StudentMember = Fixtures.student("1234")
 
-	trait CommandTestSupport extends AddTemplatePointsToSchemesCommandState with TermServiceComponent
+	trait CommandTestSupport extends AddTemplatePointsToSchemesCommandState
 		with AttendanceMonitoringServiceComponent with ProfileServiceComponent {
-		val termService: TermService = smartMock[TermService]
 		val attendanceMonitoringService: AttendanceMonitoringService = smartMock[AttendanceMonitoringService]
 		val profileService: ProfileService = smartMock[ProfileService]
 

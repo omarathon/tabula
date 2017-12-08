@@ -8,12 +8,10 @@ import org.hibernate.`type`.StandardBasicTypes
 import org.hibernate.annotations.{BatchSize, Type}
 import org.joda.time.DateTime
 import org.springframework.format.annotation.DateTimeFormat
-import uk.ac.warwick.spring.Wire
 import uk.ac.warwick.tabula.JavaImports._
 import uk.ac.warwick.tabula.data.model.forms.FormattedHtml
 import uk.ac.warwick.tabula.permissions.{Permission, Permissions, PermissionsTarget}
 import uk.ac.warwick.tabula.profiles.web.Routes
-import uk.ac.warwick.tabula.services.TermService
 import uk.ac.warwick.tabula.system.permissions.RestrictionProvider
 import uk.ac.warwick.tabula.timetables.{EventOccurrence, RelatedUrl, TimetableEvent, TimetableEventType}
 import uk.ac.warwick.tabula.{AcademicYear, DateFormats, ToString}
@@ -43,11 +41,8 @@ abstract class AbstractMeetingRecord extends GeneratedId with PermissionsTarget 
 
 	type Entity = AbstractMeetingRecord
 
-	@transient
-	implicit var termService: TermService = Wire[TermService]
-
 	def isScheduled: Boolean = this match {
-		case (m: ScheduledMeetingRecord) => true
+		case (_: ScheduledMeetingRecord) => true
 		case _ => false
 	}
 
@@ -134,7 +129,7 @@ abstract class AbstractMeetingRecord extends GeneratedId with PermissionsTarget 
 			relatedUrl = Some(RelatedUrl(
 				urlString = Routes.Profile.relationshipType(
 					relationship.studentCourseDetails,
-					AcademicYear.findAcademicYearContainingDate(meetingDate.toDateTime),
+					AcademicYear.forDate(meetingDate.toDateTime),
 					relationship.relationshipType
 				),
 				title = Some("Meeting records")

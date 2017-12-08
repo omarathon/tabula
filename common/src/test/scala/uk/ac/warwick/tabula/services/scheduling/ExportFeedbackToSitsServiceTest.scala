@@ -8,7 +8,7 @@ import uk.ac.warwick.tabula.{AcademicYear, Fixtures, TestBase}
 class ExportFeedbackToSitsServiceTest extends TestBase {
 
 	trait Environment {
-		val year = new AcademicYear(2014)
+		val year = AcademicYear(2014)
 
 		val module: Module = Fixtures.module("nl901", "Foraging Forays")
 

@@ -15,7 +15,7 @@
 
 <#if !user.loggedIn>
 	<p class="lead muted">
-		This is a service for managing seminars, tutorials and lab groups.
+		This is a service for managing small group teaching (e.g. seminars, tutorials and lab groups).
 	</p>
 
 	<#if IS_SSO_PROTECTED!true>
@@ -39,12 +39,11 @@
 
 	<#if !is_student && !is_tutor && !is_admin> <#-- Don't just show an empty page -->
 		<p class="lead muted">
-			This is a service for managing seminars, tutorials and lab groups.
+			This is a service for managing small group teaching (e.g. seminars, tutorials and lab groups).
 		</p>
 
 		<p>
-			You do not currently have permission to manage any small groups. Please contact your
-			departmental access manager for Tabula, or email <a id="email-support-link" href="mailto:tabula@warwick.ac.uk">tabula@warwick.ac.uk</a>.
+			You do not currently have permission to manage any small groups. If you think this is incorrect or you need assistance, please visit our <a href="/help">help page</a>.
 		</p>
 
 		<script type="text/javascript">

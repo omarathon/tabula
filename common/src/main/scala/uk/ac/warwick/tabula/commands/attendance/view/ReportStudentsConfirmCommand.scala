@@ -1,6 +1,6 @@
 package uk.ac.warwick.tabula.commands.attendance.view
 
-import org.joda.time.DateTime
+import org.joda.time.{DateTime, LocalDate}
 import org.springframework.validation.Errors
 import uk.ac.warwick.tabula.JavaImports._
 import uk.ac.warwick.tabula.commands._
@@ -20,7 +20,6 @@ object ReportStudentsConfirmCommand {
 	def apply(department: Department, academicYear: AcademicYear, user: CurrentUser) =
 		new ReportStudentsConfirmCommandInternal(department, academicYear, user)
 			with ComposableCommand[Seq[MonitoringPointReport]]
-			with AutowiringTermServiceComponent
 			with AutowiringAttendanceMonitoringServiceComponent
 			with AutowiringProfileServiceComponent
 			with ReportStudentsConfirmValidation
@@ -97,12 +96,12 @@ trait ReportStudentsConfirmDescription extends Describable[Seq[MonitoringPointRe
 
 trait ReportStudentsConfirmCommandState extends ReportStudentsChoosePeriodCommandState {
 
-	self: TermServiceComponent with AttendanceMonitoringServiceComponent =>
+	self: AttendanceMonitoringServiceComponent =>
 
 	def user: CurrentUser
 
-	lazy val currentPeriod: String = termService.getTermFromDateIncludingVacations(DateTime.now).getTermTypeAsString
-	lazy val currentAcademicYear: AcademicYear = AcademicYear.findAcademicYearContainingDate(DateTime.now)
+	lazy val currentAcademicYear: AcademicYear = AcademicYear.now()
+	lazy val currentPeriod: String = currentAcademicYear.termOrVacationForDate(LocalDate.now).periodType.toString
 
 	// Bind variables
 	var students: JList[StudentMember] = LazyLists.create()

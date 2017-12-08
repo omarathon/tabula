@@ -3,6 +3,7 @@ package uk.ac.warwick.util.workingdays
 import org.joda.time.LocalDate
 import uk.ac.warwick.tabula.TestBase
 import uk.ac.warwick.tabula.helpers.DateTimeOrdering._
+import uk.ac.warwick.tabula.helpers.JodaConverters._
 
 import scala.collection.JavaConverters._
 
@@ -15,7 +16,7 @@ class WorkingDaysHelperTest extends TestBase {
 	@Test
 	def enoughDates(): Unit = {
 		val helper = new WorkingDaysHelperImpl()
-		val dates = helper.getHolidayDates.asScala.toSeq.sorted
+		val dates = helper.getHolidayDates.asScala.toSeq.map(_.asJoda).sorted
 
 		dates.last should be >= LocalDate.now.plusMonths(4)
 	}

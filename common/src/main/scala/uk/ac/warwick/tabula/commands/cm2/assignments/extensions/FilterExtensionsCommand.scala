@@ -28,15 +28,13 @@ object FilterExtensionsCommand {
 			with AutowiringUserLookupComponent
 			with AutowiringExtensionServiceComponent
 			with AutowiringModuleAndDepartmentServiceComponent
-			with AutowiringTermServiceComponent
 			with ReadOnly with Unaudited with Public
 }
 
 class FilterExtensionsCommandInternal(val academicYear: AcademicYear, val user: CurrentUser) extends CommandInternal[FilterExtensionResults]
 	with FilterExtensionsState with TaskBenchmarking {
 
-	this: UserLookupComponent with ExtensionServiceComponent with ModuleAndDepartmentServiceComponent
-		with TermServiceComponent =>
+	self: UserLookupComponent with ExtensionServiceComponent with ModuleAndDepartmentServiceComponent =>
 
 	import FiltersExtensions._
 
@@ -102,8 +100,6 @@ class FilterExtensionsCommandInternal(val academicYear: AcademicYear, val user: 
 }
 
 trait FilterExtensionsState extends FiltersExtensions {
-	self: TermServiceComponent =>
-
 	var page = 1
 	var extensionsPerPage = 50
 	var defaultOrder: JList[Order] = Seq(desc("requestedOn")).asJava

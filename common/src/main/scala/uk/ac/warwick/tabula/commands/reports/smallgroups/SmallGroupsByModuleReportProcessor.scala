@@ -7,14 +7,13 @@ import uk.ac.warwick.tabula.commands.reports.{ReportCommandState, ReportPermissi
 import uk.ac.warwick.tabula.data.AttendanceMonitoringStudentData
 import uk.ac.warwick.tabula.data.model.Department
 import uk.ac.warwick.tabula.helpers.LazyMaps
-import uk.ac.warwick.tabula.services.{AutowiringProfileServiceComponent, AutowiringTermServiceComponent, ProfileServiceComponent, TermServiceComponent}
+import uk.ac.warwick.tabula.services.{AutowiringProfileServiceComponent, ProfileServiceComponent}
 
 import scala.collection.JavaConverters._
 
 object SmallGroupsByModuleReportProcessor {
 	def apply(department: Department, academicYear: AcademicYear) =
 		new SmallGroupsByModuleReportProcessorInternal(department, academicYear)
-			with AutowiringTermServiceComponent
 			with AutowiringProfileServiceComponent
 			with ComposableCommand[SmallGroupsByModuleReportProcessorResult]
 			with ReportPermissions
@@ -39,7 +38,7 @@ case class SmallGroupsByModuleReportProcessorResult(
 class SmallGroupsByModuleReportProcessorInternal(val department: Department, val academicYear: AcademicYear)
 	extends CommandInternal[SmallGroupsByModuleReportProcessorResult] with TaskBenchmarking {
 
-	self: SmallGroupsByModuleReportProcessorState with TermServiceComponent with ProfileServiceComponent =>
+	self: SmallGroupsByModuleReportProcessorState with ProfileServiceComponent =>
 
 	override def applyInternal(): SmallGroupsByModuleReportProcessorResult = {
 		val processedStudents = students.asScala.map{properties =>

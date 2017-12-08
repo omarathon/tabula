@@ -7,9 +7,9 @@
 
 		<div class="item-info row-fluid term">
 			<div class="span12">
-				<h4>${term.termTypeAsString}</h4>
+				<h4>${term.periodType.toString()}</h4>
 				<div class="row-fluid term">
-					<table id="group_attendance_${term.termTypeAsString}" class="table table-striped table-condensed attendance-table">
+					<table id="group_attendance_${term.periodType.toString()}" class="table table-striped table-condensed attendance-table">
 						<thead>
 							<tr>
 								<th class="sortable nowrap">
@@ -161,7 +161,7 @@
 								<#else>
 									${mapGet(seminarAttendanceCommandResult.missedCountByTerm, term)} small group events
 								</#if>
-								in ${term.termTypeAsString}
+								in ${term.periodType.toString()}
 							</div>
 						</#if>
 					</#list>

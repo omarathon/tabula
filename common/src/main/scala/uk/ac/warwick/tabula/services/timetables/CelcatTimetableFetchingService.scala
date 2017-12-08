@@ -8,8 +8,8 @@ import net.fortuna.ical4j.model.{Parameter, Property}
 import org.apache.commons.codec.digest.DigestUtils
 import org.joda.time.{DateTime, DateTimeZone}
 import uk.ac.warwick.spring.Wire
-import uk.ac.warwick.tabula.data.model.{Module, StudentMember}
 import uk.ac.warwick.tabula.data.model.groups.{DayOfWeek, WeekRange}
+import uk.ac.warwick.tabula.data.model.{Module, StudentMember}
 import uk.ac.warwick.tabula.helpers.Futures._
 import uk.ac.warwick.tabula.helpers.StringUtils._
 import uk.ac.warwick.tabula.helpers.{FoundUser, Logging}
@@ -73,7 +73,6 @@ object CelcatHttpTimetableFetchingService {
 			new CelcatHttpTimetableFetchingService(celcatConfiguration)
 				with AutowiringUserLookupComponent
 				with AutowiringProfileServiceComponent
-				with AutowiringTermServiceComponent
 				with AutowiringCacheStrategyComponent
 				with WAI2GoHttpLocationFetchingServiceComponent
 				with AutowiringWAI2GoConfigurationComponent
@@ -99,7 +98,7 @@ object CelcatHttpTimetableFetchingService {
 		locationFetchingService: LocationFetchingService,
 		moduleMap: Map[String, Module],
 		userLookup: UserLookupService
-	)(implicit termService: TermService): Option[TimetableEvent] = {
+	): Option[TimetableEvent] = {
 		val summary = Option(event.getSummary).fold("") { _.getValue }
 		val categories =
 			Option(event.getProperty(Property.CATEGORIES))
@@ -130,10 +129,10 @@ object CelcatHttpTimetableFetchingService {
 
 			val day = DayOfWeek(start.getDayOfWeek)
 
-			val year = AcademicYear.findAcademicYearContainingDate(start)
+			val year = AcademicYear.forDate(start)
 
 			// Convert the date to an academic week number
-			val startWeek = termService.getAcademicWeekForAcademicYear(start, year)
+			val startWeek = year.weekForDate(start.toLocalDate).weekNumber
 
 			// We support exactly one RRule of frequence weekly
 			val endWeek = event.getProperties(Property.RRULE).asScala.headOption.collect {
@@ -204,7 +203,6 @@ object CelcatHttpTimetableFetchingService {
 class CelcatHttpTimetableFetchingService(celcatConfiguration: CelcatConfiguration) extends StaffTimetableFetchingService with StudentTimetableFetchingService with Logging {
 	self: UserLookupComponent
 		with ProfileServiceComponent
-		with TermServiceComponent
 		with LocationFetchingServiceComponent
 		with CacheStrategyComponent
 		with ModuleAndDepartmentServiceComponent
@@ -300,7 +298,7 @@ class CelcatHttpTimetableFetchingService(celcatConfiguration: CelcatConfiguratio
 				}.flatMap { event =>
 					val start = DateFormats.IsoDateTime.parseDateTime(event.getOrElse("start", "").toString)
 					val end = DateFormats.IsoDateTime.parseDateTime(event.getOrElse("end", "").toString)
-					val year = AcademicYear.findAcademicYearContainingDate(start)
+					val year = AcademicYear.forDate(start)
 					val moduleCode = event.getOrElse("moduleCode","").toString
 					val module = moduleAndDepartmentService.getModuleByCode(moduleCode.toLowerCase.safeSubstring(0, expectedModuleCodeLength))
 					val parent = TimetableEvent.Parent(module)
@@ -328,7 +326,7 @@ class CelcatHttpTimetableFetchingService(celcatConfiguration: CelcatConfiguratio
 						title = "",
 						description = "",
 						eventType = eventType,
-						weekRanges =  Seq(WeekRange(termService.getAcademicWeekForAcademicYear(start, year))),
+						weekRanges =  Seq(WeekRange(year.weekForDate(start.toLocalDate).weekNumber)),
 						day = DayOfWeek(start.getDayOfWeek),
 						startTime = start.toLocalTime,
 						endTime = end.toLocalTime,
@@ -337,7 +335,7 @@ class CelcatHttpTimetableFetchingService(celcatConfiguration: CelcatConfiguratio
 						parent = parent,
 						staff = Nil,
 						students = Nil,
-						year = AcademicYear.guessSITSAcademicYearByDate(start),
+						year = year,
 						relatedUrl = None,
 						attendance = Map()
 					))

@@ -243,7 +243,7 @@
 								<li id="whatsnew-link"><a href="http://warwick.ac.uk/tabula/whatsnew/" target="_blank">What's new?</a></li>
 								<li class="spacer subtle">|</li>
 			          			<li class="subtle">
-			          				App last built <@warwick.formatDate value=appBuildDate pattern="d MMMM yyyy HH:mm" />
+			          				App last built <@fmt.date date=appBuildDate relative=false includeTime=true />
 			          			</li>
 		          			</ul>
 

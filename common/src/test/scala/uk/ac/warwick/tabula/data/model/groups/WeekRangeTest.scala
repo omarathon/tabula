@@ -1,13 +1,9 @@
 package uk.ac.warwick.tabula.data.model.groups
 
 import uk.ac.warwick.tabula.TestBase
-import uk.ac.warwick.util.termdates.TermFactoryImpl
 import uk.ac.warwick.tabula.AcademicYear
-import uk.ac.warwick.tabula.services.{TermServiceImpl, TermService}
 
 class WeekRangeTest extends TestBase {
-
-	implicit val termService = new TermServiceImpl
 
 	@Test
 	def fromString {
@@ -15,6 +11,11 @@ class WeekRangeTest extends TestBase {
 		WeekRange.fromString("3-3") should be (WeekRange(3))
 		WeekRange.fromString("3-10") should be (WeekRange(3,10))
 		WeekRange.fromString("3  -  10") should be (WeekRange(3,10))
+		WeekRange.fromString("-3") should be (WeekRange(-3))
+		WeekRange.fromString("-3-10") should be (WeekRange(-3,10))
+		WeekRange.fromString("-3  - 10") should be (WeekRange(-3,10))
+		WeekRange.fromString("-3--1") should be (WeekRange(-3,-1))
+		WeekRange.fromString("-3  - -1") should be (WeekRange(-3,-1))
 	}
 
 	@Test

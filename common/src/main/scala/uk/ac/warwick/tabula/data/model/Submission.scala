@@ -54,6 +54,7 @@ class Submission extends GeneratedId with PermissionsTarget with ToEntityReferen
 
 	def suspectPlagiarised: Boolean = plagiarismInvestigation == SuspectPlagiarised
 	def investigationCompleted: Boolean = plagiarismInvestigation == InvestigationCompleted
+	def hasPlagiarismInvestigation: Boolean = suspectPlagiarised || investigationCompleted
 
 	/**
 	 * It isn't essential to record University ID as their user ID

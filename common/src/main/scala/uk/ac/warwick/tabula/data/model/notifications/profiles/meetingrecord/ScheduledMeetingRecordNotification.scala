@@ -13,14 +13,12 @@ import uk.ac.warwick.spring.Wire
 import uk.ac.warwick.tabula.AcademicYear
 import uk.ac.warwick.tabula.data.model._
 import uk.ac.warwick.tabula.profiles.web.Routes
-import uk.ac.warwick.tabula.services.AutowiringTermServiceComponent
 import uk.ac.warwick.tabula.services.timetables.{EventOccurrenceService, TermBasedEventOccurrenceService}
 import uk.ac.warwick.tabula.timetables.TimetableEvent
 
 abstract class ScheduledMeetingRecordNotification
 	extends NotificationWithTarget[ScheduledMeetingRecord, StudentRelationship]
-	with SingleItemNotification[ScheduledMeetingRecord]
-	with AutowiringTermServiceComponent {
+	with SingleItemNotification[ScheduledMeetingRecord] {
 
 	self: MyWarwickDiscriminator =>
 
@@ -32,7 +30,7 @@ abstract class ScheduledMeetingRecordNotification
 	def studentNotFoundMessage: String = "Student member for SCJ code " + meeting.relationship.studentCourseDetails.scjCode + " not found"
 	def agentNotFoundMessage: String = "Agent member for code " + meeting.relationship.agent + " not found"
 
-	def academicYear: AcademicYear = AcademicYear.findAcademicYearContainingDate(meeting.meetingDate)
+	def academicYear: AcademicYear = AcademicYear.forDate(meeting.meetingDate)
 
 	def url: String = Routes.Profile.relationshipType(
 		meeting.relationship.studentCourseDetails,

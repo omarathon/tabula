@@ -16,7 +16,7 @@ object ManualMembershipSummaryCommand {
 }
 
 class ManualMembershipSummaryCommandInternal(val department: Department) extends CommandInternal[ManualMembershipInfo]
-	with ManualMembershipSummaryState with CurrentSITSAcademicYear {
+	with ManualMembershipSummaryState with CurrentAcademicYear {
 
 	self: AssessmentMembershipServiceComponent =>
 

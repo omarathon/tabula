@@ -1,33 +1,31 @@
 package uk.ac.warwick.tabula.commands.attendance.view
 
-import uk.ac.warwick.tabula.data.AttendanceMonitoringStudentData
-import uk.ac.warwick.tabula.services.attendancemonitoring.{AttendanceMonitoringService, AttendanceMonitoringServiceComponent}
-import uk.ac.warwick.tabula.{AcademicYear, CurrentUser, Fixtures, Mockito, TestBase}
-import uk.ac.warwick.tabula.services._
-import uk.ac.warwick.tabula.data.model.{Department, StudentMember, UserGroup}
-import uk.ac.warwick.tabula.data.model.attendance.{AttendanceMonitoringCheckpoint, AttendanceMonitoringPoint, AttendanceMonitoringScheme, AttendanceState}
-import uk.ac.warwick.tabula.commands.attendance.GroupedPoint
-import uk.ac.warwick.userlookup.User
-
-import collection.JavaConverters._
-import uk.ac.warwick.tabula.JavaImports.JHashMap
-import uk.ac.warwick.tabula.data.convert.{AttendanceMonitoringPointIdConverter, MemberUniversityIdConverter}
-import org.springframework.core.convert.support.GenericConversionService
-import org.springframework.web.bind.WebDataBinder
-import org.joda.time.{DateTime, LocalDate}
-import uk.ac.warwick.util.termdates.TermImpl
 import org.joda.time.base.BaseDateTime
+import org.joda.time.{DateTime, LocalDate}
+import org.springframework.core.convert.support.GenericConversionService
 import org.springframework.validation.BindingResult
-import uk.ac.warwick.util.termdates.Term.TermType
+import org.springframework.web.bind.WebDataBinder
+import uk.ac.warwick.tabula.JavaImports.JHashMap
+import uk.ac.warwick.tabula.commands.attendance.GroupedPoint
+import uk.ac.warwick.tabula.data.AttendanceMonitoringStudentData
+import uk.ac.warwick.tabula.data.convert.{AttendanceMonitoringPointIdConverter, MemberUniversityIdConverter}
+import uk.ac.warwick.tabula.data.model.attendance.{AttendanceMonitoringCheckpoint, AttendanceMonitoringPoint, AttendanceMonitoringScheme, AttendanceState}
+import uk.ac.warwick.tabula.data.model.{Department, StudentMember, UserGroup}
+import uk.ac.warwick.tabula.services._
+import uk.ac.warwick.tabula.services.attendancemonitoring.{AttendanceMonitoringService, AttendanceMonitoringServiceComponent}
+import uk.ac.warwick.tabula._
+import uk.ac.warwick.userlookup.User
+import uk.ac.warwick.util.termdates.AcademicYearPeriod.PeriodType
+
+import scala.collection.JavaConverters._
 
 class RecordMonitoringPointCommandTest extends TestBase with Mockito {
 
 	trait CommandStateTestSupport extends AttendanceMonitoringServiceComponent
-		with ProfileServiceComponent with TermServiceComponent with SecurityServiceComponent {
+		with ProfileServiceComponent with SecurityServiceComponent {
 
 		val attendanceMonitoringService: AttendanceMonitoringService = smartMock[AttendanceMonitoringService]
 		val profileService: ProfileService = smartMock[ProfileService]
-		val termService: TermService = smartMock[TermService]
 		val securityService: SecurityService = smartMock[SecurityService]
 	}
 
@@ -41,8 +39,6 @@ class RecordMonitoringPointCommandTest extends TestBase with Mockito {
 		val student1: StudentMember = Fixtures.student("1234")
 		val student2: StudentMember = Fixtures.student("2345")
 		val student3: StudentMember = Fixtures.student("3456")
-
-		val autumnTerm = new TermImpl(null, null, null, TermType.autumn)
 
 		val scheme1 = new AttendanceMonitoringScheme
 		scheme1.attendanceMonitoringService = None
@@ -198,7 +194,7 @@ class RecordMonitoringPointCommandTest extends TestBase with Mockito {
 	@Test
 	def validateAlreadyReported() { new ValidatorFixture {
 		validator.attendanceMonitoringService.findNonReportedTerms(Seq(student1), AcademicYear(2014)) returns Seq()
-		validator.termService.getTermFromDateIncludingVacations(any[BaseDateTime]) returns autumnTerm
+//		validator.termService.getTermFromDateIncludingVacations(any[BaseDateTime]) returns autumnTerm
 		validator.checkpointMap = JHashMap(
 			student1 -> JHashMap(point1 -> AttendanceState.Attended.asInstanceOf[AttendanceState])
 		)
@@ -208,8 +204,8 @@ class RecordMonitoringPointCommandTest extends TestBase with Mockito {
 
 	@Test
 	def validateTooSoon() { new ValidatorFixture {
-		validator.attendanceMonitoringService.findNonReportedTerms(Seq(student1), AcademicYear(2014)) returns Seq(autumnTerm.getTermTypeAsString)
-		validator.termService.getTermFromDateIncludingVacations(any[BaseDateTime]) returns autumnTerm
+		validator.attendanceMonitoringService.findNonReportedTerms(Seq(student1), AcademicYear(2014)) returns Seq(PeriodType.autumnTerm.toString)
+//		validator.termService.getTermFromDateIncludingVacations(any[BaseDateTime]) returns autumnTerm
 		validator.checkpointMap = JHashMap(
 			student1 -> JHashMap(point1 -> AttendanceState.Attended.asInstanceOf[AttendanceState])
 		)
@@ -220,8 +216,8 @@ class RecordMonitoringPointCommandTest extends TestBase with Mockito {
 
 	@Test
 	def validateOk() { new ValidatorFixture {
-		validator.attendanceMonitoringService.findNonReportedTerms(Seq(student1), AcademicYear(2014)) returns Seq(autumnTerm.getTermTypeAsString)
-		validator.termService.getTermFromDateIncludingVacations(any[BaseDateTime]) returns autumnTerm
+		validator.attendanceMonitoringService.findNonReportedTerms(Seq(student1), AcademicYear(2014)) returns Seq(PeriodType.autumnTerm.toString)
+//		validator.termService.getTermFromDateIncludingVacations(any[BaseDateTime]) returns autumnTerm
 		validator.checkpointMap = JHashMap(
 			student1 -> JHashMap(point1 -> AttendanceState.Attended.asInstanceOf[AttendanceState])
 		)

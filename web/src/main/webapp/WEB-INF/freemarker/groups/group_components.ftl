@@ -1404,7 +1404,7 @@
 					</#if>
 				</#list>
 				<#list allTerms as namedTerm>
-					<#local is_vacation = !(namedTerm.term.termType?has_content) />
+					<#local is_vacation = namedTerm.term.vacation />
 					<tr<#if is_vacation> class="vacation"</#if>>
 						<th>
 							<div class="checkbox">

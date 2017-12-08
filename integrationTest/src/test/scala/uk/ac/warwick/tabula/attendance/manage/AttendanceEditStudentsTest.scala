@@ -2,7 +2,7 @@ package uk.ac.warwick.tabula.attendance.manage
 
 import org.joda.time.{DateTimeConstants, DateTime}
 import org.scalatest.GivenWhenThen
-import uk.ac.warwick.tabula.FunctionalTestAcademicYear
+import uk.ac.warwick.tabula.AcademicYear
 import uk.ac.warwick.tabula.attendance.AttendanceFixture
 
 class AttendanceEditStudentsTest extends AttendanceFixture with GivenWhenThen {
@@ -80,7 +80,7 @@ class AttendanceEditStudentsTest extends AttendanceFixture with GivenWhenThen {
 
 		Then("I am redirected to the manage home page")
 		eventually(currentUrl should endWith(s"/attendance/manage/xxx/$thisAcademicYearString"))
-		pageSource should include(s"Manage monitoring points for ${FunctionalTestAcademicYear.current.toString}")
+		pageSource should include(s"Manage monitoring points for ${AcademicYear.now().toString}")
 
 		When("I choose to edit the students on the same scheme")
 		click on linkText("3 students")
@@ -143,7 +143,7 @@ class AttendanceEditStudentsTest extends AttendanceFixture with GivenWhenThen {
 
 		Then("I am redirected to the manage home page")
 		eventually(currentUrl should endWith(s"/attendance/manage/xxx/$thisAcademicYearString"))
-		pageSource should include(s"Manage monitoring points for ${FunctionalTestAcademicYear.current.toString}")
+		pageSource should include(s"Manage monitoring points for ${AcademicYear.now().toString}")
 		pageSource should include("0 students")
 
 	}

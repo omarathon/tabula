@@ -2,23 +2,22 @@ package uk.ac.warwick.tabula.web.controllers.groups.admin
 
 import javax.validation.Valid
 
-import org.joda.time.DateTime
 import org.springframework.stereotype.Controller
 import org.springframework.validation.Errors
 import org.springframework.web.bind.WebDataBinder
 import org.springframework.web.bind.annotation.{ModelAttribute, PathVariable, RequestMapping, RequestParam}
 import uk.ac.warwick.spring.Wire
-import uk.ac.warwick.tabula.services.SmallGroupService
 import uk.ac.warwick.tabula.AcademicYear
-import uk.ac.warwick.tabula.data.model.Module
-import uk.ac.warwick.tabula.data.model.groups.{DepartmentSmallGroupSet, SmallGroupAllocationMethod, SmallGroupFormat, SmallGroupSet}
-import uk.ac.warwick.tabula.commands.groups.admin._
-import uk.ac.warwick.tabula.groups.web.Routes
-import uk.ac.warwick.tabula.web.controllers.groups.GroupsController
-import uk.ac.warwick.util.web.bind.AbstractPropertyEditor
 import uk.ac.warwick.tabula.commands._
 import uk.ac.warwick.tabula.commands.groups.admin.ModifySmallGroupSetCommand.Command
+import uk.ac.warwick.tabula.commands.groups.admin._
+import uk.ac.warwick.tabula.data.model.Module
+import uk.ac.warwick.tabula.data.model.groups.{DepartmentSmallGroupSet, SmallGroupAllocationMethod, SmallGroupFormat, SmallGroupSet}
+import uk.ac.warwick.tabula.groups.web.Routes
+import uk.ac.warwick.tabula.services.SmallGroupService
 import uk.ac.warwick.tabula.web.Mav
+import uk.ac.warwick.tabula.web.controllers.groups.GroupsController
+import uk.ac.warwick.util.web.bind.AbstractPropertyEditor
 
 trait SmallGroupSetsController extends GroupsController {
 
@@ -29,7 +28,7 @@ trait SmallGroupSetsController extends GroupsController {
 	@ModelAttribute("ManageSmallGroupsMappingParameters") def params = ManageSmallGroupsMappingParameters
 
 	@ModelAttribute("academicYearChoices") def academicYearChoices: Seq[AcademicYear] =
-		AcademicYear.guessSITSAcademicYearByDate(DateTime.now).yearsSurrounding(2, 2)
+		AcademicYear.now().yearsSurrounding(2, 2)
 
 	@ModelAttribute("allFormats") def allFormats: Seq[SmallGroupFormat with Product with Serializable] = SmallGroupFormat.members
 
@@ -53,7 +52,7 @@ class CreateSmallGroupSetController extends SmallGroupSetsController {
 	type CreateSmallGroupSetCommand = Appliable[SmallGroupSet] with CreateSmallGroupSetCommandState
 
 	@ModelAttribute("departmentSmallGroupSets") def departmentSmallGroupSets(@PathVariable module: Module, @RequestParam(value="academicYear", required=false) academicYear: AcademicYear): Seq[DepartmentSmallGroupSet] =
-		smallGroupService.getDepartmentSmallGroupSets(module.adminDepartment, Option(academicYear).getOrElse(AcademicYear.guessSITSAcademicYearByDate(DateTime.now)))
+		smallGroupService.getDepartmentSmallGroupSets(module.adminDepartment, Option(academicYear).getOrElse(AcademicYear.now()))
 
 	@ModelAttribute("createSmallGroupSetCommand") def cmd(@PathVariable module: Module): CreateSmallGroupSetCommand =
 		ModifySmallGroupSetCommand.create(module)

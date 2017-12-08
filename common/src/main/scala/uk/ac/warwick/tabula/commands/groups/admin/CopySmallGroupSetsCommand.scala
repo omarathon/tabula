@@ -1,21 +1,20 @@
 package uk.ac.warwick.tabula.commands.groups.admin
 
-import org.joda.time.DateTime
 import org.springframework.validation.Errors
 import uk.ac.warwick.tabula.AcademicYear
 import uk.ac.warwick.tabula.JavaImports._
 import uk.ac.warwick.tabula.commands._
-import uk.ac.warwick.tabula.data.model.groups.{WeekRange, SmallGroupEventOccurrence, SmallGroupSet}
+import uk.ac.warwick.tabula.data.model.groups.{SmallGroupEventOccurrence, SmallGroupSet, WeekRange}
 import uk.ac.warwick.tabula.data.model.{AssessmentGroup, Department, Module, ScheduledNotification}
 import uk.ac.warwick.tabula.helpers.LazyLists
-import uk.ac.warwick.tabula.permissions.Permissions
-import uk.ac.warwick.tabula.services.{AutowiringTermServiceComponent, TermServiceComponent, AutowiringSmallGroupServiceComponent, SmallGroupServiceComponent}
+import uk.ac.warwick.tabula.permissions.{Permission, Permissions}
+import uk.ac.warwick.tabula.services.{AutowiringSmallGroupServiceComponent, SmallGroupServiceComponent}
 import uk.ac.warwick.tabula.system.permissions.{PermissionsChecking, PermissionsCheckingMethods, RequiresPermissionsChecking}
 
 import scala.collection.JavaConverters._
 
 object CopySmallGroupSetsCommand {
-	val RequiredPermission = Permissions.SmallGroups.Create
+	val RequiredPermission: Permission = Permissions.SmallGroups.Create
 
 	def apply(department: Department, modules: Seq[Module]) =
 		new CopySmallGroupSetsCommandInternal(department, modules)
@@ -24,7 +23,6 @@ object CopySmallGroupSetsCommand {
 			with CopySmallGroupSetsDescription
 			with CopySmallGroupSetsValidation
 			with AutowiringSmallGroupServiceComponent
-			with AutowiringTermServiceComponent
 			with CopySmallGroupSetsScheduledNotifications
 			with PopulateCopySmallGroupSetsRequestDefaults {
 				override lazy val eventName = "CopySmallGroupSetsFromPrevious"
@@ -119,7 +117,7 @@ trait CopySmallGroupSetsRequestState {
 trait PopulateCopySmallGroupSetsRequestDefaults extends PopulateOnForm {
 	self: CopySmallGroupSetsRequestState with CopySmallGroupSetsCommandState with SmallGroupServiceComponent =>
 
-	targetAcademicYear = AcademicYear.guessSITSAcademicYearByDate(DateTime.now)
+	targetAcademicYear = AcademicYear.now()
 	sourceAcademicYear = targetAcademicYear - 1
 	smallGroupSets = LazyLists.create()
 
@@ -141,7 +139,7 @@ trait CopySmallGroupSetsCommandState {
 }
 
 trait CopySmallGroupSetsValidation extends SelfValidating {
-	self: CopySmallGroupSetsCommandState with CopySmallGroupSetsRequestState with TermServiceComponent =>
+	self: CopySmallGroupSetsCommandState with CopySmallGroupSetsRequestState =>
 
 	override def validate(errors: Errors): Unit = {
 		if (sourceAcademicYear == null) errors.rejectValue("sourceAcademicYear", "NotEmpty")
@@ -149,8 +147,7 @@ trait CopySmallGroupSetsValidation extends SelfValidating {
 		else if (sourceAcademicYear == targetAcademicYear) errors.rejectValue("targetAcademicYear", "smallGroupSet.copy.sameYear")
 		else {
 			lazy val targetAcademicYearWeeks: Seq[WeekRange.Week] =
-				termService.getAcademicWeeksForYear(targetAcademicYear.dateInTermOne)
-					.map { case (week, _) => week.toInt }
+				targetAcademicYear.weeks.keys.toSeq
 
 			// TAB-3974 Prevent exception when copying an event with a week number that doesn't exist in the target year
 			smallGroupSets.asScala.zipWithIndex

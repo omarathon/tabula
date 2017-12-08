@@ -2,7 +2,7 @@ package uk.ac.warwick.tabula.web
 
 import dispatch.classic._
 import org.joda.time.DateTime
-import uk.ac.warwick.tabula.{FunctionalTestAcademicYear, FunctionalTestProperties, LoginDetails}
+import uk.ac.warwick.tabula.{AcademicYear, FunctionalTestProperties, LoginDetails}
 
 import scala.language.postfixOps
 import scala.util.parsing.json.JSON
@@ -155,7 +155,7 @@ trait FixturesDriver extends SimpleHttpFetching {
 		val req = url(uri).POST << Map(
 			"universityIds" -> uniIds,
 			"moduleCode" -> moduleCode,
-			"academicYear" -> academicYear.getOrElse(FunctionalTestAcademicYear.currentSITS.startYear.toString))
+			"academicYear" -> academicYear.getOrElse(AcademicYear.now().startYear.toString))
 
 		http.when(_==200)(req >|)
 	}

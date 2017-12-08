@@ -2,7 +2,7 @@ package uk.ac.warwick.tabula.profiles.profile
 
 import com.gargoylesoftware.htmlunit.BrowserVersion
 import org.scalatest.GivenWhenThen
-import uk.ac.warwick.tabula.{BrowserTest, FunctionalTestAcademicYear}
+import uk.ac.warwick.tabula.{BrowserTest, AcademicYear}
 
 import scala.util.{Failure, Success, Try}
 import scala.xml.Elem
@@ -45,14 +45,14 @@ class StudentTimetableTest extends BrowserTest with TimetablingFixture with Give
 		// If the current academic year isn't the SITS year (i.e. between Aug and Oct) set an event in the SITS year
 		// otherwise the timetable will be empty for the SITS year and an exception will be thrown
 		// This should be fixed by TAB-4480
-		if (academicYear < FunctionalTestAcademicYear.currentSITS) {
-			setTimetableFor(P.Student1.usercode, FunctionalTestAcademicYear.currentSITS, singleEvent)
+		if (academicYear < AcademicYear.now()) {
+			setTimetableFor(P.Student1.usercode, AcademicYear.now(), singleEvent)
 		}
 
 		And("Student1 is a member of a small group with a single event")
 
 		addStudentToGroup(P.Student1.usercode, testGroupSetId, "Group 1")
-		createSmallGroupEvent(testGroupSetId, "Test timetabling", weekRange = "47")
+		createSmallGroupEvent(testGroupSetId, "Test timetabling", weekRange = "35")
 
 		When("I request the lecture API for the whole year, as that student")
 		val events = requestWholeYearsTimetableFeedFor(P.Student1)
@@ -74,7 +74,7 @@ class StudentTimetableTest extends BrowserTest with TimetablingFixture with Give
 		createStudentRelationship(P.Student1, P.Marker1)
 
 		And("The timetabling service knows of a single event for student1")
-		setTimetableFor(P.Student1.usercode, FunctionalTestAcademicYear.current, singleEvent)
+		setTimetableFor(P.Student1.usercode, AcademicYear.now(), singleEvent)
 
 		Then("Marker 1 should be able to view Student 1's timetable")
 		val events = requestWholeYearsTimetableFeedFor(P.Student1, asUser = Some(P.Marker1))
@@ -84,7 +84,7 @@ class StudentTimetableTest extends BrowserTest with TimetablingFixture with Give
 
 	"A member of staff" should "be able to view any student's timetable" in {
 		Given("The timetabling service knows of a single event for student1")
-		setTimetableFor(P.Student1.usercode, FunctionalTestAcademicYear.current, singleEvent)
+		setTimetableFor(P.Student1.usercode, AcademicYear.now(), singleEvent)
 
 		Then("Marker 2 should be able to view Student 1's timetable")
 		val events = Try(requestWholeYearsTimetableFeedFor(P.Student1, asUser = Some(P.Marker2)))
@@ -100,7 +100,7 @@ class StudentTimetableTest extends BrowserTest with TimetablingFixture with Give
 				<description/>
 				<start>09:30</start>
 				<end>11:30</end>
-				<weeks>47</weeks>
+				<weeks>35</weeks>
 				<day>0</day>
 				<type>LEC</type>
 				<rooms>
@@ -124,7 +124,7 @@ class StudentTimetableTest extends BrowserTest with TimetablingFixture with Give
 				<description/>
 				<start>09:30</start>
 				<end>11:30</end>
-				<weeks>47</weeks>
+				<weeks>35</weeks>
 				<day>0</day>
 				<type>LEC</type>
 				<rooms>

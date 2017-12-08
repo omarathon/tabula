@@ -8,8 +8,11 @@ class DownloadSubmissionMarkerTest extends BrowserTest with CourseworkFixtures {
 	private def openMarkingScreen(): Unit = {
 
 		When("I select the relevant button on the CM2 assignment")
-		val testModulerow = id("main").webElement.findElements(By.cssSelector("span.mod-code")).get(0)
-		click on testModulerow
+		//ensure page has loaded table elements otherwise wait.
+		eventuallyAjax {
+			val testModulerow = id("main").webElement.findElements(By.cssSelector("span.mod-code")).get(0)
+			click on testModulerow
+		}
 
 		eventuallyAjax {
 
@@ -55,9 +58,10 @@ class DownloadSubmissionMarkerTest extends BrowserTest with CourseworkFixtures {
 	private def downloadAll(): Unit = {
 
 			When("I click on the Download dropdown without selecting any students")
-			val downloadDropdown = id("main").webElement.findElements(By.cssSelector("button.dropdown-toggle")).get(0)
-			click on downloadDropdown
-
+			eventuallyAjax {
+				val downloadDropdown = id("main").webElement.findElements(By.cssSelector("button.dropdown-toggle")).get(0)
+				click on downloadDropdown
+			}
 			Then("The link to download as zip should be disabled")
 		  val disabledlinks = id("main").webElement.findElements(By.cssSelector("ul.dropdown-menu li")).get(0)
 		  disabledlinks.getAttribute("class").contains("disabled") should be (true)

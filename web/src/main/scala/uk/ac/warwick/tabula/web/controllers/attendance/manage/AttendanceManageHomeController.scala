@@ -1,16 +1,15 @@
 package uk.ac.warwick.tabula.web.controllers.attendance.manage
 
-import org.joda.time.DateTime
 import org.springframework.stereotype.Controller
 import org.springframework.web.bind.annotation.{ModelAttribute, PathVariable, RequestMapping}
 import uk.ac.warwick.tabula.attendance.web.Routes
-import uk.ac.warwick.tabula.{AcademicYear, CurrentUser}
-import uk.ac.warwick.tabula.commands.attendance.{HomeCommand, HomeInformation}
-import uk.ac.warwick.tabula.web.controllers.attendance.AttendanceController
 import uk.ac.warwick.tabula.commands.Appliable
+import uk.ac.warwick.tabula.commands.attendance.{HomeCommand, HomeInformation}
 import uk.ac.warwick.tabula.services.{AutowiringMaintenanceModeServiceComponent, AutowiringUserSettingsServiceComponent}
 import uk.ac.warwick.tabula.web.Mav
 import uk.ac.warwick.tabula.web.controllers.AcademicYearScopedController
+import uk.ac.warwick.tabula.web.controllers.attendance.AttendanceController
+import uk.ac.warwick.tabula.{AcademicYear, CurrentUser}
 
 /**
  * Displays the managing home screen, allowing users to choose the department and academic year to manage.
@@ -25,7 +24,7 @@ abstract class AbstractAttendanceManageHomeController extends AttendanceControll
 	@RequestMapping
 	def home(@ModelAttribute("command") cmd: Appliable[HomeInformation], @ModelAttribute("activeAcademicYear") activeAcademicYear: Option[AcademicYear]): Mav = {
 		val info = cmd.apply()
-		val academicYear = activeAcademicYear.getOrElse(AcademicYear.guessSITSAcademicYearByDate(DateTime.now))
+		val academicYear = activeAcademicYear.getOrElse(AcademicYear.now())
 
 		Mav("attendance/manage/home",
 			"academicYear" -> academicYear,

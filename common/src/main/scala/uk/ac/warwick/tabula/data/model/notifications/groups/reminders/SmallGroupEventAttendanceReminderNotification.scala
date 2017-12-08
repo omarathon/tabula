@@ -10,7 +10,7 @@ import uk.ac.warwick.tabula.data.model._
 import uk.ac.warwick.tabula.data.model.groups.{SmallGroupEvent, SmallGroupEventOccurrence, WeekRange}
 import uk.ac.warwick.tabula.groups.web.Routes
 import uk.ac.warwick.tabula.helpers.WholeWeekFormatter
-import uk.ac.warwick.tabula.services.{AutowiringTermServiceComponent, ModuleAndDepartmentService, TermService, UserLookupService}
+import uk.ac.warwick.tabula.services.{ModuleAndDepartmentService, UserLookupService}
 import uk.ac.warwick.userlookup.User
 
 import scala.collection.JavaConverters._
@@ -29,8 +29,6 @@ class SmallGroupEventAttendanceReminderNotification
 
 	override def url: String = Routes.tutor.registerForWeek(event, item.entity.week)
 
-	@transient implicit var termService: TermService = Wire[TermService]
-
 	@transient
 	final lazy val event: SmallGroupEvent = item.entity.event
 
@@ -38,7 +36,7 @@ class SmallGroupEventAttendanceReminderNotification
 	final lazy val configuringDepartment: Department = event.group.groupSet.module.adminDepartment
 
 	@transient
-	final lazy val referenceDate: DateTime = item.entity.dateTime.getOrElse(throw new IllegalArgumentException("Tried to create notification for occurrence with no date time"))
+	final lazy val referenceDate: DateTime = item.entity.startDateTime.map(_.toDateTime).getOrElse(throw new IllegalArgumentException("Tried to create notification for occurrence with no date time"))
 
 	override final def onPreSave(newRecord: Boolean) {
 		priority = if (Days.daysBetween(created, referenceDate).getDays >= 5) {

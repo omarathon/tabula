@@ -116,7 +116,7 @@
 									department
 								/></span>)
 								<div class="alert alert-info">
-									This student's attendance for ${reportedTerm.termTypeAsString}
+									This student's attendance for ${reportedTerm.periodType.toString()}
 									(<@fmt.date date=reportedTerm.startDate relative=false includeTime=false shortMonth=true /> - <@fmt.date date=reportedTerm.endDate relative=false includeTime=false shortMonth=true />)
 									has already been uploaded to SITS e:Vision.
 								</div>
@@ -161,7 +161,7 @@
 								${point.name}
 								(<@fmt.interval point.startDate point.endDate />)
 								<div class="alert alert-info">
-									This student's attendance for ${reportedTerm.termTypeAsString}
+									This student's attendance for ${reportedTerm.periodType.toString()}
 									(<@fmt.date date=reportedTerm.startDate relative=false includeTime=false shortMonth=true /> - <@fmt.date date=reportedTerm.endDate relative=false includeTime=false shortMonth=true />)
 									has already been uploaded to SITS e:Vision.
 								</div>

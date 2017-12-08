@@ -45,9 +45,9 @@ class ImportTier4ForStudentCommandTest extends TestBase with Mockito with Loggin
 			val scd: StudentCourseDetails = studentMember.mostSignificantCourse;
 			val currentScyd: StudentCourseYearDetails = scd.latestStudentCourseYearDetails
 			currentScyd.yearOfStudy = 2
-			val lastScyd: StudentCourseYearDetails = Fixtures.studentCourseYearDetails(AcademicYear.guessSITSAcademicYearByDate(DateTime.now.minusYears(1)), null, 1, scd)
+			val lastScyd: StudentCourseYearDetails = Fixtures.studentCourseYearDetails(AcademicYear.forDate(DateTime.now.minusYears(1)), null, 1, scd)
 			scd.attachStudentCourseYearDetails(lastScyd);
-			val nextScyd: StudentCourseYearDetails = Fixtures.studentCourseYearDetails(AcademicYear.guessSITSAcademicYearByDate(DateTime.now.plusYears(1)), null, 3, scd)
+			val nextScyd: StudentCourseYearDetails = Fixtures.studentCourseYearDetails(AcademicYear.forDate(DateTime.now.plusYears(1)), null, 3, scd)
 			scd.attachStudentCourseYearDetails(nextScyd);
 
 			val casUsageImporter: CasUsageImporter = smartMock[CasUsageImporter]

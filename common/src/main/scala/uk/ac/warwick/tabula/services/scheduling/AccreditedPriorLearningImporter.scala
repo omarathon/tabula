@@ -3,7 +3,6 @@ package uk.ac.warwick.tabula.services.scheduling
 import java.sql.{ResultSet, Types}
 import javax.sql.DataSource
 
-import org.joda.time.DateTime
 import org.springframework.context.annotation.Profile
 import org.springframework.jdbc.`object`.MappingSqlQuery
 import org.springframework.jdbc.core.SqlParameter
@@ -78,7 +77,7 @@ class SandboxAccreditedPriorLearningImporter extends AccreditedPriorLearningImpo
 				scjCode = "%s/1".format(universityId),
 				awardCode = "BA",
 				sequenceNumber = 1,
-				academicYear = AcademicYear.guessSITSAcademicYearByDate(DateTime.now).toString,
+				academicYear = AcademicYear.now().toString,
 				cats = new JBigDecimal(15),
 				levelCode = "2",
 				reason = "Exemption of 30 CATS for 3 terms of Open Studies Languages"

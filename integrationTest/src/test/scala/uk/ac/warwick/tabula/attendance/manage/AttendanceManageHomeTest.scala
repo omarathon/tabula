@@ -1,7 +1,7 @@
 package uk.ac.warwick.tabula.attendance.manage
 
 import org.scalatest.GivenWhenThen
-import uk.ac.warwick.tabula.FunctionalTestAcademicYear
+import uk.ac.warwick.tabula.AcademicYear
 import uk.ac.warwick.tabula.attendance.AttendanceFixture
 
 class AttendanceManageHomeTest extends AttendanceFixture with GivenWhenThen {
@@ -17,7 +17,7 @@ class AttendanceManageHomeTest extends AttendanceFixture with GivenWhenThen {
 		click on linkText(s"Test Services")
 
 		Then("I am redirected to the manage department for year page")
-		eventually(currentUrl should include(s"/attendance/manage/xxx/${FunctionalTestAcademicYear.current.startYear.toString}"))
+		eventually(currentUrl should include(s"/attendance/manage/xxx/${AcademicYear.now().startYear.toString}"))
 
 	}
 }

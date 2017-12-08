@@ -1,15 +1,12 @@
 package uk.ac.warwick.tabula.commands.cm2.marksmanagement
 
 import org.joda.time.DateTime
-import org.joda.time.base.BaseDateTime
-import uk.ac.warwick.tabula.{AcademicYear, Fixtures, Mockito, TestBase}
 import uk.ac.warwick.tabula.commands.{Appliable, Describable}
 import uk.ac.warwick.tabula.data.model.{DegreeType, Department}
 import uk.ac.warwick.tabula.permissions.Permissions
-import uk.ac.warwick.tabula.services.{ModuleAndDepartmentService, ModuleAndDepartmentServiceComponent, TermService, TermServiceComponent}
+import uk.ac.warwick.tabula.services.{ModuleAndDepartmentService, ModuleAndDepartmentServiceComponent}
 import uk.ac.warwick.tabula.system.permissions.PermissionsChecking
-import uk.ac.warwick.util.termdates.Term.TermType
-import uk.ac.warwick.util.termdates.TermImpl
+import uk.ac.warwick.tabula.{AcademicYear, Fixtures, Mockito, TestBase}
 
 import scala.collection.JavaConverters._
 
@@ -17,11 +14,9 @@ class MarksOpenAndCloseDepartmentsCommandTest extends TestBase with Mockito {
 
 	trait CommandTestSupport extends MarksOpenAndCloseDepartmentsCommandState
 		with ModuleAndDepartmentServiceComponent
-		with TermServiceComponent
 		with MarksPopulateOpenAndCloseDepartmentsCommand {
 			val moduleAndDepartmentService: ModuleAndDepartmentService = mock[ModuleAndDepartmentService]
 			moduleAndDepartmentService.allRootDepartments returns Seq()
-			implicit val termService: TermService = mock[TermService]
 	}
 
 	trait OpenAndCloseDepartmentsWorld {
@@ -32,10 +27,8 @@ class MarksOpenAndCloseDepartmentsCommandTest extends TestBase with Mockito {
 		val now = new DateTime
 		val command = new MarksOpenAndCloseDepartmentsCommandInternal with CommandTestSupport
 		command.moduleAndDepartmentService.allRootDepartments returns Seq(department)
-		val autumnTerm = new TermImpl(null, now, null, TermType.autumn)
-		command.termService.getTermFromDateIncludingVacations(any[BaseDateTime]) returns autumnTerm
 		command.moduleAndDepartmentService.getDepartmentByCode(department.code) returns Some(department)
-		val currentYear: AcademicYear = AcademicYear.findAcademicYearContainingDate(now)(command.termService)
+		val currentYear: AcademicYear = AcademicYear.forDate(now)
 	}
 
 	@Test

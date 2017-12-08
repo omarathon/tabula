@@ -6,16 +6,15 @@ import org.apache.http.client.utils.URLEncodedUtils
 import org.hibernate.NullPrecedence
 import org.hibernate.criterion.Restrictions.{gt => _, _}
 import org.hibernate.criterion.{Order, Restrictions}
-import org.joda.time.DateTime
-import org.springframework.beans.factory.annotation.Autowired
+import org.joda.time.LocalDate
 import uk.ac.warwick.tabula.AcademicYear
 import uk.ac.warwick.tabula.JavaImports.{JArrayList, _}
-import uk.ac.warwick.tabula.data.Aliasable.addAliases
 import uk.ac.warwick.tabula.data.ScalaRestriction._
 import uk.ac.warwick.tabula.data._
 import uk.ac.warwick.tabula.data.convert._
 import uk.ac.warwick.tabula.data.model._
 import uk.ac.warwick.tabula.data.model.forms.ExtensionState
+import uk.ac.warwick.tabula.data.model.groups.DayOfWeek
 import uk.ac.warwick.tabula.helpers.Logging
 import uk.ac.warwick.tabula.helpers.StringUtils._
 import uk.ac.warwick.tabula.services._
@@ -48,8 +47,6 @@ object FiltersExtensions {
 }
 
 trait FiltersExtensions extends {
-	self: TermServiceComponent =>
-
 	import FiltersExtensions._
 
 	def academicYear: AcademicYear
@@ -117,7 +114,7 @@ trait DeserializesExtensionsFilter {
 }
 
 trait DeserializesExtensionsFilterImpl extends DeserializesExtensionsFilter with FiltersExtensions with Logging
-	with AssessmentServiceComponent with ModuleAndDepartmentServiceComponent with TermServiceComponent {
+	with AssessmentServiceComponent with ModuleAndDepartmentServiceComponent {
 
 	def deserializeFilter(filterString: String): Unit = {
 		val params: Map[String, Seq[String]] =
@@ -183,28 +180,25 @@ trait AutowiringDeserializesExtensionsFilterImpl extends DeserializesExtensionsF
 	with AutowiringAssessmentServiceComponent
 	with AutowiringModuleAndDepartmentServiceComponent
 
-sealed abstract class TimeFilter(val code: String, val time: DateTime)
+sealed abstract class TimeFilter(val code: String, val time: LocalDate)
 object TimeFilter {
-	case object ThisWeek extends TimeFilter("This week", DateTime.now.withDayOfWeek(1))
-	case object ThisMonth extends TimeFilter("This month", DateTime.now.withDayOfMonth(1))
-	case class ThisTerm(termService: TermService) extends TimeFilter(ThisTerm.Label, termService.getTermFromDate(DateTime.now).getStartDate)
-	object ThisTerm { val Label = "This term" }
-	case object ThisYear extends TimeFilter("This year", DateTime.now.withDayOfYear(1))
+	case object ThisWeek extends TimeFilter("This week", LocalDate.now.withDayOfWeek(DayOfWeek.Monday.jodaDayOfWeek))
+	case object ThisMonth extends TimeFilter("This month", LocalDate.now.withDayOfMonth(1))
+	case object ThisTerm extends TimeFilter("This term", AcademicYear.now().termOrVacationForDate(LocalDate.now).firstDay)
+	case object ThisYear extends TimeFilter("This year", LocalDate.now.withDayOfYear(1))
 
-	def fromCode(code: String)(implicit termService: TermService): TimeFilter = code match {
+	def fromCode(code: String): TimeFilter = code match {
 		case ThisWeek.code => ThisWeek
 		case ThisMonth.code => ThisMonth
-		case ThisTerm.Label => ThisTerm(termService)
+		case ThisTerm.code => ThisTerm
 		case ThisYear.code => ThisYear
 		case _ => throw new IllegalArgumentException()
 	}
 
-	def all(implicit termService: TermService) = Seq(ThisWeek, ThisMonth, ThisTerm(termService: TermService), ThisYear)
+	def all = Seq(ThisWeek, ThisMonth, ThisTerm, ThisYear)
 }
 
 class TimeFilterConverter extends TwoWayConverter[String, TimeFilter] {
-	@Autowired implicit var termService: TermService = _
-
 	override def convertRight(code: String): TimeFilter = TimeFilter.fromCode(code)
 	override def convertLeft(time: TimeFilter): String = (Option(time) map { _.code }).orNull
 }

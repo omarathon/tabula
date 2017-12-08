@@ -3,13 +3,12 @@ package uk.ac.warwick.tabula.data.model.groups
 import java.sql.Types
 
 import org.hibernate.`type`.StandardBasicTypes
-import org.joda.time.{DateTimeConstants, LocalDate}
 import uk.ac.warwick.tabula.AcademicYear
 import uk.ac.warwick.tabula.data.model.AbstractBasicUserType
-import uk.ac.warwick.tabula.services.TermService
-import uk.ac.warwick.util.termdates.Term
+import uk.ac.warwick.util.termdates.AcademicYearPeriod.PeriodType
 
 import scala.collection.mutable
+import uk.ac.warwick.tabula.helpers.StringUtils._
 
 case class WeekRange(minWeek: WeekRange.Week, maxWeek: WeekRange.Week) {
 	if (maxWeek < minWeek) throw new IllegalArgumentException("maxWeek must be >= minWeek")
@@ -26,9 +25,9 @@ object WeekRange {
 	type Week = Int
 
 	def apply(singleWeek: Week): WeekRange = WeekRange(singleWeek, singleWeek)
-	def fromString(rep: String): WeekRange = rep.split('-') match {
-		case Array(singleWeek) => WeekRange(singleWeek.trim.toInt)
-		case Array(min, max) => WeekRange(min.trim.toInt, max.trim.toInt)
+	def fromString(rep: String): WeekRange = rep.replaceAll("\\s*", "") match {
+		case r"""(-?\d+)${singleWeek}""" => WeekRange(singleWeek.toInt)
+		case r"""(-?\d+)${min}-(-?\d+)${max}""" => WeekRange(min.toInt, max.toInt)
 		case _ => throw new IllegalArgumentException("Couldn't convert string representation %s to WeekRange" format rep)
 	}
 
@@ -49,16 +48,13 @@ object WeekRange {
 			}
 		}
 
-	def termWeekRanges(year: AcademicYear)(implicit termService: TermService): Seq[WeekRange] = {
-		// We are confident that November 1st is always in term 1 of the year
-		val autumnTerm = termService.getTermFromDate(new LocalDate(year.startYear, DateTimeConstants.NOVEMBER, 1).toDateTimeAtStartOfDay)
-		val springTerm = termService.getNextTerm(autumnTerm)
-		val summerTerm = termService.getNextTerm(springTerm)
+	def termWeekRanges(year: AcademicYear): Seq[WeekRange] = {
+		// We are confident that November 1st is always in the Autumn of the year
+		val autumnTerm = year.termOrVacation(PeriodType.autumnTerm)
+		val springTerm = year.termOrVacation(PeriodType.springTerm)
+		val summerTerm = year.termOrVacation(PeriodType.summerTerm)
 
-		def toWeekRange(term: Term) =
-			WeekRange(term.getAcademicWeekNumber(term.getStartDate), term.getAcademicWeekNumber(term.getEndDate))
-
-		Seq(autumnTerm, springTerm, summerTerm).map(toWeekRange)
+		Seq(autumnTerm, springTerm, summerTerm).map(_.weekRange)
 	}
 
 	implicit val defaultOrdering: Ordering[WeekRange] = Ordering.by[WeekRange, Week] ( _.minWeek )

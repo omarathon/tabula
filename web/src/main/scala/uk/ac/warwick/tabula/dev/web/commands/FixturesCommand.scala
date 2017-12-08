@@ -88,7 +88,7 @@ class FixturesCommand extends Command[Unit] with Public with Daoisms {
 		session.save(upstreamAssignment)
 
 		val upstreamAssessmentGroup = new UpstreamAssessmentGroup
-		upstreamAssessmentGroup.academicYear = new AcademicYear(new DateTime().getYear)
+		upstreamAssessmentGroup.academicYear = AcademicYear.now()
 		upstreamAssessmentGroup.moduleCode = "XXX01-30"
 		upstreamAssessmentGroup.assessmentGroup = "A"
 		upstreamAssessmentGroup.occurrence = "A"

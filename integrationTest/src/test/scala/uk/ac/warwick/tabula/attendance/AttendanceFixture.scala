@@ -1,7 +1,7 @@
 package uk.ac.warwick.tabula.attendance
 
 import uk.ac.warwick.tabula.web.{FeaturesDriver, FixturesDriver}
-import uk.ac.warwick.tabula.{FunctionalTestAcademicYear, BrowserTest}
+import uk.ac.warwick.tabula.{AcademicYear, BrowserTest}
 
 class AttendanceFixture extends BrowserTest with FeaturesDriver with FixturesDriver {
 
@@ -11,7 +11,7 @@ class AttendanceFixture extends BrowserTest with FeaturesDriver with FixturesDri
 	val TEST_UNDERGRAD_COURSE_CODE="Ux123"
 	val TEST_POSTGRAD_COURSE_CODE="Px123"
 
-	val thisAcademicYearString: String = FunctionalTestAcademicYear.current.startYear.toString
+	val thisAcademicYearString: String = AcademicYear.now().startYear.toString
 
 	before {
 		go to Path("/fixtures/setup")
