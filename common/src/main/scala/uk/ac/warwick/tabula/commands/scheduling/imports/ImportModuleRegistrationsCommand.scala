@@ -24,7 +24,7 @@ class ImportModuleRegistrationsCommand(course: StudentCourseDetails, courseRows:
 	override def applyInternal(): Seq[ModuleRegistration] = {
 		logger.debug("Importing module registration for student " + course.scjCode)
 
-		courseRows.map { modRegRow =>
+		val records = courseRows.map { modRegRow =>
 			val module = modules.find(_.code == Module.stripCats(modRegRow.sitsModuleCode).get.toLowerCase).get
 			val existingRegistration = course.moduleRegistrations.find(mr =>
 				mr.module.code == module.code
@@ -68,7 +68,29 @@ class ImportModuleRegistrationsCommand(course: StudentCourseDetails, courseRows:
 			moduleRegistration
 
 		}
+		markDeleted(course, courseRows)
+		records
 	}
+
+
+	def markDeleted(studentCourse: StudentCourseDetails, courseRows: Seq[ModuleRegistrationRow]): Unit = {
+		studentCourse.moduleRegistrations.map { mr =>
+			val sitsMRRow = courseRows.find { sitsMR  =>  (sitsMR.sitsModuleCode ==  mr.module.code
+				&& AcademicYear.parse(sitsMR.academicYear)  ==  mr.academicYear
+				&& sitsMR.cats == mr.cats
+				&& sitsMR.occurrence == mr.occurrence)
+			}
+			sitsMRRow match {
+				case Some(moduleRegistrationRow) => //no need to do anything
+				case None => // record might have been deleted, let us fflag it here.
+					mr.markDeleted
+					logger.info("Marking delete  for " + mr)
+					mr.lastUpdatedDate = DateTime.now
+					moduleRegistrationDao.saveOrUpdate(mr)
+				}
+			}
+		}
+
 
 	def copySelectionStatus(destinationBean: BeanWrapper, selectionStatusCode: String): Boolean = {
 		val property = "selectionStatus"
