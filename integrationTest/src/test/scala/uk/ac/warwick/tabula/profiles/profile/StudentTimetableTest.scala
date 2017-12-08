@@ -52,7 +52,7 @@ class StudentTimetableTest extends BrowserTest with TimetablingFixture with Give
 		And("Student1 is a member of a small group with a single event")
 
 		addStudentToGroup(P.Student1.usercode, testGroupSetId, "Group 1")
-		createSmallGroupEvent(testGroupSetId, "Test timetabling", weekRange = "47")
+		createSmallGroupEvent(testGroupSetId, "Test timetabling", weekRange = "35")
 
 		When("I request the lecture API for the whole year, as that student")
 		val events = requestWholeYearsTimetableFeedFor(P.Student1)
@@ -100,7 +100,7 @@ class StudentTimetableTest extends BrowserTest with TimetablingFixture with Give
 				<description/>
 				<start>09:30</start>
 				<end>11:30</end>
-				<weeks>47</weeks>
+				<weeks>35</weeks>
 				<day>0</day>
 				<type>LEC</type>
 				<rooms>
@@ -124,7 +124,7 @@ class StudentTimetableTest extends BrowserTest with TimetablingFixture with Give
 				<description/>
 				<start>09:30</start>
 				<end>11:30</end>
-				<weeks>47</weeks>
+				<weeks>35</weeks>
 				<day>0</day>
 				<type>LEC</type>
 				<rooms>

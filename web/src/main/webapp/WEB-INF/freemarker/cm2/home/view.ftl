@@ -32,13 +32,11 @@
 		<#if homeDepartment??>
 			<#assign uams = usersWithRole('UserAccessMgrRoleDefinition', homeDepartment) />
 		</#if>
-		You do not currently have permission to manage any assignments or feedback. If you believe this is an error then please
+		You do not currently have permission to manage any assignments or feedback. If you think this is incorrect or you need assistance, please
 		<#if uams?has_content>
-			contact your department's <a href="mailto:${uams?first.email}">User Access Manager</a> for Tabula, or
-		<#else>
-			contact your departmental access manager for Tabula, or
+			contact your department's <a href="mailto:${uams?first.email}">User Access Manager</a> for Tabula or
 		</#if>
-		email <a id="email-support-link" href="mailto:tabula@warwick.ac.uk">tabula@warwick.ac.uk</a>.
+		visit our <a href="/help">help page</a>.
 	</p>
 
 	<script type="text/javascript">

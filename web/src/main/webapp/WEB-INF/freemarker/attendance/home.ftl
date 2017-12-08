@@ -67,8 +67,7 @@
 <#else>
 	<#if user.staff && !hasAnyRelationships>
 		<p>
-			You do not currently have permission to view or manage any monitoring points. Please contact your
-			departmental access manager for Tabula, or email <a id="email-support-link" href="mailto:tabula@warwick.ac.uk">tabula@warwick.ac.uk</a>.
+			You do not currently have permission to view or manage any monitoring points. If you think this is incorrect or you need assistance, please visit our <a href="/help">help page</a>.
 		</p>
 
 		<script type="text/javascript">
