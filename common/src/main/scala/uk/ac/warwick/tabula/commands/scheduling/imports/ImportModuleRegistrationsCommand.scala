@@ -58,9 +58,10 @@ class ImportModuleRegistrationsCommand(course: StudentCourseDetails, courseRows:
 				copyBigDecimal(moduleRegistrationBean, "actualMark", modRegRow.actualMark) |
 				copyBigDecimal(moduleRegistrationBean, "agreedMark", modRegRow.agreedMark)
 
-			if (isTransient || hasChanged) {
+			if (isTransient || hasChanged || moduleRegistration.deleted) {
 				logger.debug("Saving changes for " + moduleRegistration)
 
+				moduleRegistration.deleted = false
 				moduleRegistration.lastUpdatedDate = DateTime.now
 				moduleRegistrationDao.saveOrUpdate(moduleRegistration)
 			}
@@ -74,22 +75,25 @@ class ImportModuleRegistrationsCommand(course: StudentCourseDetails, courseRows:
 
 
 	def markDeleted(studentCourse: StudentCourseDetails, courseRows: Seq[ModuleRegistrationRow]): Unit = {
-		studentCourse.moduleRegistrations.map { mr =>
-			val sitsMRRow = courseRows.find { sitsMR  =>  (sitsMR.sitsModuleCode ==  mr.module.code
+		studentCourse.moduleRegistrations.filterNot(_.deleted).map { mr =>
+
+			val mrExists = courseRows.exists { sitsMR  =>
+				val module = modules.find(_.code == Module.stripCats(sitsMR.sitsModuleCode).get.toLowerCase).get
+				(module.code ==  mr.module.code
 				&& AcademicYear.parse(sitsMR.academicYear)  ==  mr.academicYear
 				&& sitsMR.cats == mr.cats
 				&& sitsMR.occurrence == mr.occurrence)
 			}
-			sitsMRRow match {
-				case Some(moduleRegistrationRow) => //no need to do anything
-				case None => // record might have been deleted, let us fflag it here.
+			/**Ensure atleast there is some record in SITS.If for some reason we couldn't
+			 get any SITS data, don't mark all deleted- better to leave as it is **/
+			if (courseRows.nonEmpty && !mrExists) {
 					mr.markDeleted
 					logger.info("Marking delete  for " + mr)
 					mr.lastUpdatedDate = DateTime.now
 					moduleRegistrationDao.saveOrUpdate(mr)
-				}
 			}
 		}
+	}
 
 
 	def copySelectionStatus(destinationBean: BeanWrapper, selectionStatusCode: String): Boolean = {

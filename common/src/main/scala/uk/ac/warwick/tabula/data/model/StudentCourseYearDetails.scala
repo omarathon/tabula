@@ -77,7 +77,7 @@ class StudentCourseYearDetails extends StudentCourseYearProperties
 	// There can be more than one StudentCourseYearDetails per year if there are multiple sequence numbers,
 	// so moduleRegistrations are not attached directly - instead, get them from StudentCourseDetails,
 	// filtering by year:
-	def moduleRegistrations: Seq[ModuleRegistration] = studentCourseDetails.moduleRegistrations.filter(_.academicYear == this.academicYear)
+	def moduleRegistrations: Seq[ModuleRegistration] = studentCourseDetails.moduleRegistrations.filter(mr => mr.academicYear == this.academicYear && !mr.deleted)
 
 	// similarly for accredited prior learning
 	def accreditedPriorLearning: Seq[AccreditedPriorLearning] = {
@@ -171,7 +171,7 @@ class StudentCourseYearDetails extends StudentCourseYearProperties
 	final var agreedMarkUploadedBy: User = _
 
 	def toExamGridEntityYear: ExamGridEntityYear = ExamGridEntityYear(
-		moduleRegistrations = moduleRegistrations,
+		moduleRegistrations = moduleRegistrations,//ones that are not deleted
 		cats = moduleRegistrations.map(mr => BigDecimal(mr.cats)).sum,
 		route = route match {
 			case _: Route => route
