@@ -168,6 +168,29 @@ $(function() {
 			}
 		})
 		.locationPicker();
+
+	var $locationAliasFormGroup = $('.location-alias-form-group');
+	var $showLocationAlias = $('#showLocationAlias')
+	var $removeLocationAlias = $('#removeLocationAlias');
+
+	if ($locationAliasFormGroup.find('input').val().length === 0) {
+		$locationAliasFormGroup.hide();
+	} else {
+		$showLocationAlias.parent().hide();
+	}
+
+	$showLocationAlias.on('click', function (e) {
+		e.preventDefault();
+		$showLocationAlias.parent().hide();
+		$locationAliasFormGroup.show().find('input').focus();
+	});
+
+	$removeLocationAlias.on('click', function (e) {
+		e.preventDefault();
+		$showLocationAlias.parent().show();
+		$locationAliasFormGroup.hide();
+		$locationAliasFormGroup.find('input').val('');
+	});
 });
 
 // Re-usable small groups

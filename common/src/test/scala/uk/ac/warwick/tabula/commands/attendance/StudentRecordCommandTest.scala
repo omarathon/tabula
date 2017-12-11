@@ -56,7 +56,6 @@ class StudentRecordCommandTest extends TestBase with Mockito {
 	def invalidPoint() { new Fixture {
 		validator.attendanceMonitoringService.listStudentsPoints(thisStudent, None, thisAcademicYear) returns Seq(point1, point2)
 		validator.attendanceMonitoringService.findNonReportedTerms(Seq(thisStudent), thisAcademicYear) returns Seq()
-//		validator.termService.getTermFromDateIncludingVacations(any[BaseDateTime]) returns autumnTerm
 
 		validator.checkpointMap = JHashMap()
 		validator.checkpointMap.put(notInSchemePoint, null)
@@ -70,7 +69,6 @@ class StudentRecordCommandTest extends TestBase with Mockito {
 	def alreadyReported() { new Fixture {
 		validator.attendanceMonitoringService.listStudentsPoints(thisStudent, None, thisAcademicYear) returns Seq(point1, point2)
 		validator.attendanceMonitoringService.findNonReportedTerms(Seq(thisStudent), thisAcademicYear) returns Seq()
-//		validator.termService.getTermFromDateIncludingVacations(any[BaseDateTime]) returns autumnTerm
 
 		validator.checkpointMap = JHashMap()
 		validator.checkpointMap.put(point1, AttendanceState.Attended)
@@ -84,7 +82,6 @@ class StudentRecordCommandTest extends TestBase with Mockito {
 	def tooSoon() { new Fixture {
 		validator.attendanceMonitoringService.listStudentsPoints(thisStudent, None, thisAcademicYear) returns Seq(point1, point2)
 		validator.attendanceMonitoringService.findNonReportedTerms(Seq(thisStudent), thisAcademicYear) returns Seq()
-//		validator.termService.getTermFromDateIncludingVacations(any[BaseDateTime]) returns autumnTerm
 
 		point1.startDate = DateTime.now.plusDays(2).toLocalDate
 		validator.checkpointMap = JHashMap()
@@ -98,8 +95,7 @@ class StudentRecordCommandTest extends TestBase with Mockito {
 	@Test
 	def beforeStartDateButNull() { new Fixture {
 		validator.attendanceMonitoringService.listStudentsPoints(thisStudent, None, thisAcademicYear) returns Seq(point1, point2)
-		validator.attendanceMonitoringService.findNonReportedTerms(Seq(thisStudent), thisAcademicYear) returns Seq(PeriodType.autumnTerm.toString)
-//		validator.termService.getTermFromDateIncludingVacations(any[BaseDateTime]) returns autumnTerm
+		validator.attendanceMonitoringService.findNonReportedTerms(Seq(thisStudent), thisAcademicYear) returns PeriodType.values().toSeq.map(_.toString)
 
 		point1.startDate = DateTime.now.plusDays(2).toLocalDate
 		validator.checkpointMap = JHashMap()
@@ -113,9 +109,8 @@ class StudentRecordCommandTest extends TestBase with Mockito {
 	@Test
 	def beforeStartDateButAuthorised() { new Fixture {
 		validator.attendanceMonitoringService.listStudentsPoints(thisStudent, None, thisAcademicYear) returns Seq(point1, point2)
-		validator.attendanceMonitoringService.findNonReportedTerms(Seq(thisStudent), thisAcademicYear) returns Seq(PeriodType.autumnTerm.toString)
+		validator.attendanceMonitoringService.findNonReportedTerms(Seq(thisStudent), thisAcademicYear) returns PeriodType.values().toSeq.map(_.toString)
 		validator.attendanceMonitoringService.getAttendanceNote(thisStudent, point1) returns Some(new AttendanceMonitoringNote)
-//		validator.termService.getTermFromDateIncludingVacations(any[BaseDateTime]) returns autumnTerm
 
 		point1.startDate = DateTime.now.plusDays(2).toLocalDate
 		validator.checkpointMap = JHashMap()
@@ -129,9 +124,8 @@ class StudentRecordCommandTest extends TestBase with Mockito {
 	@Test
 	def authorisedWithNoNote() { new Fixture {
 		validator.attendanceMonitoringService.listStudentsPoints(thisStudent, None, thisAcademicYear) returns Seq(point1, point2)
-		validator.attendanceMonitoringService.findNonReportedTerms(Seq(thisStudent), thisAcademicYear) returns Seq(PeriodType.autumnTerm.toString)
+		validator.attendanceMonitoringService.findNonReportedTerms(Seq(thisStudent), thisAcademicYear) returns PeriodType.values().toSeq.map(_.toString)
 		validator.attendanceMonitoringService.getAttendanceNote(thisStudent, point1) returns None
-//		validator.termService.getTermFromDateIncludingVacations(any[BaseDateTime]) returns autumnTerm
 
 		point1.startDate = DateTime.now.plusDays(2).toLocalDate
 		validator.checkpointMap = JHashMap()

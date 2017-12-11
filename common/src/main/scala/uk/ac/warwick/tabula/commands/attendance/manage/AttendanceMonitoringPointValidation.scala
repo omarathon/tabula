@@ -12,6 +12,7 @@ import uk.ac.warwick.tabula.services.attendancemonitoring.AttendanceMonitoringSe
 
 import scala.collection.JavaConverters._
 import scala.collection.mutable
+import scala.util.Try
 
 trait AttendanceMonitoringPointValidation {
 
@@ -147,15 +148,15 @@ trait AttendanceMonitoringPointValidation {
 		studentIds: Seq[String],
 		academicYear: AcademicYear,
 		bindPoint: String = "startDate"
-	): Unit = {
-		val pointTerm = academicYear.termOrVacationForDate(startDate)
-		if (attendanceMonitoringService.findReports(studentIds, academicYear, pointTerm.periodType.toString).nonEmpty) {
-			if (bindPoint.isEmpty)
-				errors.reject("attendanceMonitoringPoint.hasReportedCheckpoints.add")
-			else
-				errors.rejectValue(bindPoint, "attendanceMonitoringPoint.hasReportedCheckpoints.add")
+	): Unit =
+		Try(academicYear.termOrVacationForDate(startDate)).foreach { pointTerm =>
+			if (attendanceMonitoringService.findReports(studentIds, academicYear, pointTerm.periodType.toString).nonEmpty) {
+				if (bindPoint.isEmpty)
+					errors.reject("attendanceMonitoringPoint.hasReportedCheckpoints.add")
+				else
+					errors.rejectValue(bindPoint, "attendanceMonitoringPoint.hasReportedCheckpoints.add")
+			}
 		}
-	}
 
 	def validateCanPointBeEditedByWeek(
 		errors: Errors,

@@ -2,7 +2,7 @@ package uk.ac.warwick.tabula.web.views
 
 import org.joda.time.DateTime
 import org.joda.time.format.DateTimeFormat
-import uk.ac.warwick.tabula.data.model.MapLocation
+import uk.ac.warwick.tabula.data.model.{AliasedMapLocation, MapLocation}
 import uk.ac.warwick.tabula.helpers.ConfigurableIntervalFormatter
 import uk.ac.warwick.tabula.helpers.ConfigurableIntervalFormatter.{Hour12OptionalMins, IncludeDays}
 import uk.ac.warwick.tabula.services.UserLookupService
@@ -79,8 +79,12 @@ object FullCalendarEvent {
 			formattedStartTime = shortTimeFormat.print(source.start.toDateTime),
 			formattedEndTime = shortTimeFormat.print(source.end.toDateTime),
 			formattedInterval = intervalFormatter.format(source.start.toDateTime, source.end.toDateTime),
-			location = source.location.fold("") { _.name },
-			locationId = source.location.collect { case l: MapLocation => l }.fold("") { _.locationId },
+			location = source.location.map(_.name).getOrElse(""),
+			locationId = source.location match {
+				case Some(MapLocation(_, locationId, _)) => locationId
+				case Some(AliasedMapLocation(_, MapLocation(_, locationId, _))) => locationId
+				case _ => ""
+			},
 			syllabusPlusName = source.location.collect { case l: MapLocation => l }.flatMap(_.syllabusPlusName),
 			name = source.name,
 			description = source.description,

@@ -1,6 +1,5 @@
 package uk.ac.warwick.tabula.dev.web.commands
 
-import org.joda.time.LocalDate
 import uk.ac.warwick.spring.Wire
 import uk.ac.warwick.tabula.AcademicYear
 import uk.ac.warwick.tabula.commands.{CommandInternal, ComposableCommand, Unaudited}
@@ -53,7 +52,6 @@ class StudentMemberFixtureCommand extends CommandInternal[StudentMember] with Lo
 			scd.mostSignificant = true
 			scd.sprCode = scd.scjCode
 			scd.statusOnRoute = currentStudentStatus
-			scd.beginDate = new LocalDate().minusYears(2)
 
 			if (route.isDefined) scd.currentRoute = route.get
 			if (course.isDefined) scd.course = course.get
@@ -63,6 +61,9 @@ class StudentMemberFixtureCommand extends CommandInternal[StudentMember] with Lo
 				if (null != academicYear) academicYear
 				else AcademicYear.now()
 			}
+
+			// We begin on the first day of the academic year that was the first year of study 1
+			scd.beginDate = (scydAcademicYear - (yearOfStudy - 1)).firstDay
 
 			// actually, if the specified academic year is before now, perhaps we should create and
 			// attach a StudentCourseYearDetails for every year between then and now

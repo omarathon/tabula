@@ -1,17 +1,18 @@
 package uk.ac.warwick.tabula.dev.web.commands
 
+import org.joda.time.DateTime
 import uk.ac.warwick.spring.Wire
-import uk.ac.warwick.tabula.commands.{CommandInternal, Unaudited, ComposableCommand}
-import uk.ac.warwick.tabula.data.model.attendance._
-import uk.ac.warwick.tabula.services.attendancemonitoring.{AutowiringAttendanceMonitoringServiceComponent, AttendanceMonitoringServiceComponent}
-import uk.ac.warwick.tabula.services.{ProfileServiceComponent, AutowiringProfileServiceComponent, AutowiringModuleAndDepartmentServiceComponent, ModuleAndDepartmentServiceComponent}
-import uk.ac.warwick.tabula.data._
-import uk.ac.warwick.tabula.system.permissions.PubliclyVisiblePermissions
 import uk.ac.warwick.tabula.AcademicYear
-import org.joda.time.{LocalDate, DateTime}
-import scala.collection.JavaConverters._
+import uk.ac.warwick.tabula.commands.{CommandInternal, ComposableCommand, Unaudited}
+import uk.ac.warwick.tabula.data._
+import uk.ac.warwick.tabula.data.model.attendance._
+import uk.ac.warwick.tabula.data.model.{MeetingFormat, StudentMember, UserGroup}
+import uk.ac.warwick.tabula.services.attendancemonitoring.{AttendanceMonitoringServiceComponent, AutowiringAttendanceMonitoringServiceComponent}
+import uk.ac.warwick.tabula.services.{AutowiringModuleAndDepartmentServiceComponent, AutowiringProfileServiceComponent, ModuleAndDepartmentServiceComponent, ProfileServiceComponent}
+import uk.ac.warwick.tabula.system.permissions.PubliclyVisiblePermissions
+
 import scala.collection.JavaConversions._
-import uk.ac.warwick.tabula.data.model.{StudentMember, UserGroup}
+import scala.collection.JavaConverters._
 
 object AttendanceMonitoringSchemeFixtureCommand {
 	def apply() =
@@ -74,10 +75,11 @@ class AttendanceMonitoringSchemeFixtureCommand extends CommandInternal[Attendanc
 				point.updatedDate = DateTime.now
 				point.scheme = scheme
 				point.pointType = AttendanceMonitoringPointType.Meeting
-				point.startDate = new LocalDate()
-				point.endDate = new LocalDate().plusWeeks(2)
+				point.meetingFormats = MeetingFormat.members.toSeq
 				point.startWeek = count + 1
 				point.endWeek = count + 1
+				point.startDate = academicYear.weeks(count + 1).firstDay
+				point.endDate = academicYear.weeks(count + 1).lastDay.plusDays(1)
 				point
 			}
 		}.asJava

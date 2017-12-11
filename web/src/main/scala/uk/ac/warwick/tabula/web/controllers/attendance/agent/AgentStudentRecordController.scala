@@ -5,7 +5,7 @@ import javax.validation.Valid
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.stereotype.Controller
 import org.springframework.validation.Errors
-import org.springframework.web.bind.annotation.{InitBinder, ModelAttribute, PathVariable, RequestMapping}
+import org.springframework.web.bind.annotation.{ModelAttribute, PathVariable, RequestMapping}
 import uk.ac.warwick.tabula.attendance.web.Routes
 import uk.ac.warwick.tabula.commands.attendance.{GroupsPoints, StudentRecordCommand}
 import uk.ac.warwick.tabula.commands.{Appliable, PopulateOnForm, SelfValidating}
@@ -25,12 +25,9 @@ class AgentStudentRecordController extends AttendanceController
 
 	validatesSelf[SelfValidating]
 
-	var points: Seq[AttendanceMonitoringPoint] = _
-
-	@InitBinder // do on each request
-	def populatePoints(@PathVariable academicYear: AcademicYear, @PathVariable student: StudentMember): Unit = {
-			points = attendanceMonitoringService.listStudentsPoints(mandatory(student), None, mandatory(academicYear))
-	}
+	@ModelAttribute("studentPoints")
+	def studentPoints(@PathVariable academicYear: AcademicYear, @PathVariable student: StudentMember): Seq[AttendanceMonitoringPoint] =
+		attendanceMonitoringService.listStudentsPoints(mandatory(student), None, mandatory(academicYear))
 
 	@ModelAttribute("command")
 	def command(
@@ -44,7 +41,7 @@ class AgentStudentRecordController extends AttendanceController
 		attendanceMonitoringService.getAttendanceNoteMap(mandatory(student))
 
 	@ModelAttribute("groupedPointMap")
-	def groupedPointMap(@PathVariable student: StudentMember): Map[String, Seq[(AttendanceMonitoringPoint, AttendanceMonitoringCheckpoint)]] = {
+	def groupedPointMap(@PathVariable student: StudentMember, @ModelAttribute("studentPoints") points: Seq[AttendanceMonitoringPoint]): Map[String, Seq[(AttendanceMonitoringPoint, AttendanceMonitoringCheckpoint)]] = {
 		val checkpointMap = attendanceMonitoringService.getCheckpoints(points, mandatory(student))
 		val groupedPoints = groupByTerm(points, groupSimilar = false) ++
 			groupByMonth(points, groupSimilar = false)
@@ -56,9 +53,9 @@ class AgentStudentRecordController extends AttendanceController
 	}
 
 	@ModelAttribute("reportedPointMap")
-	def reportedPointMap(@PathVariable academicYear: AcademicYear, @PathVariable student: StudentMember): Map[AttendanceMonitoringPoint, Option[AcademicPeriod]] = {
+	def reportedPointMap(@PathVariable academicYear: AcademicYear, @PathVariable student: StudentMember, @ModelAttribute("studentPoints") points: Seq[AttendanceMonitoringPoint]): Map[AttendanceMonitoringPoint, Option[AcademicPeriod]] = {
 		val nonReportedTerms = attendanceMonitoringService.findNonReportedTerms(Seq(mandatory(student)), mandatory(academicYear))
-		points.map{ point => point -> {
+		points.map { point => point -> {
 			val term = point.scheme.academicYear.termOrVacationForDate(point.startDate)
 			if (nonReportedTerms.contains(term.periodType.toString)) {
 				None

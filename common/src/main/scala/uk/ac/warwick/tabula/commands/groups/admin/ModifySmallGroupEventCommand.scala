@@ -58,6 +58,7 @@ trait ModifySmallGroupEventCommandState extends CurrentAcademicYear {
 	var relatedUrl: String = _
 	var relatedUrlTitle: String = _
 	var useNamedLocation: Boolean = _
+	var locationAlias: String = _
 
 	def weekRanges: Seq[WeekRange] = Option(weeks) map { weeks => WeekRange.combine(weeks.asScala.toSeq.map { _.intValue }) } getOrElse Seq()
 	def weekRanges_=(ranges: Seq[WeekRange]) {
@@ -125,6 +126,10 @@ abstract class ModifySmallGroupEventCommandInternal
 			case MapLocation(name, lid, _) =>
 				location = name
 				locationId = lid
+			case AliasedMapLocation(displayName, MapLocation(name, lid, _)) =>
+				location = name
+				locationId = lid
+				locationAlias = displayName
 		}
 
 		if (set.defaultTutors != null) tutors.addAll(set.defaultTutors.knownType.allIncludedIds.asJava)
@@ -138,6 +143,10 @@ abstract class ModifySmallGroupEventCommandInternal
 			case MapLocation(name, lid, _) =>
 				location = name
 				locationId = lid
+			case AliasedMapLocation(displayName, MapLocation(name, lid, _)) =>
+				location = name
+				locationId = lid
+				locationAlias = displayName
 		}
 
 		weekRanges = event.weekRanges
@@ -163,7 +172,11 @@ abstract class ModifySmallGroupEventCommandInternal
 
 		if (location.hasText) {
 			if (locationId.hasText) {
-				event.location = MapLocation(location, locationId)
+				if (locationAlias.hasText) {
+					event.location = AliasedMapLocation(locationAlias, MapLocation(location, locationId))
+				} else {
+					event.location = MapLocation(location, locationId)
+				}
 			} else {
 				event.location = NamedLocation(location)
 			}
