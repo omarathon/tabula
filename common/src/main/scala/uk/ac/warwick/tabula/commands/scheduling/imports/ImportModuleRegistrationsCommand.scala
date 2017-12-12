@@ -20,11 +20,10 @@ class ImportModuleRegistrationsCommand(course: StudentCourseDetails, courseRows:
 	var moduleRegistrationDao: ModuleRegistrationDao = Wire[ModuleRegistrationDao]
 
 
-
 	override def applyInternal(): Seq[ModuleRegistration] = {
 		logger.debug("Importing module registration for student " + course.scjCode)
 
-		courseRows.map { modRegRow =>
+		val records = courseRows.map { modRegRow =>
 			val module = modules.find(_.code == Module.stripCats(modRegRow.sitsModuleCode).get.toLowerCase).get
 			val existingRegistration = course.moduleRegistrations.find(mr =>
 				mr.module.code == module.code
@@ -58,15 +57,39 @@ class ImportModuleRegistrationsCommand(course: StudentCourseDetails, courseRows:
 				copyBigDecimal(moduleRegistrationBean, "actualMark", modRegRow.actualMark) |
 				copyBigDecimal(moduleRegistrationBean, "agreedMark", modRegRow.agreedMark)
 
-			if (isTransient || hasChanged) {
+			if (isTransient || hasChanged || moduleRegistration.deleted) {
 				logger.debug("Saving changes for " + moduleRegistration)
 
+				moduleRegistration.deleted = false
 				moduleRegistration.lastUpdatedDate = DateTime.now
 				moduleRegistrationDao.saveOrUpdate(moduleRegistration)
 			}
 
 			moduleRegistration
 
+		}
+		markDeleted(course, courseRows)
+		records
+	}
+
+	def markDeleted(studentCourse: StudentCourseDetails, courseRows: Seq[ModuleRegistrationRow]): Unit = {
+		studentCourse.moduleRegistrations.filterNot(_.deleted).foreach { mr =>
+			val mrExists = courseRows.exists { sitsMR =>
+				(modules.find(_.code == Module.stripCats(sitsMR.sitsModuleCode).get.toLowerCase)
+					.exists { module => module.code == mr.module.code }
+					&& AcademicYear.parse(sitsMR.academicYear) == mr.academicYear
+					&& sitsMR.cats == mr.cats
+					&& sitsMR.occurrence == mr.occurrence)
+			}
+
+			/** Ensure at least there is some record in SITS.If for some reason we couldn't
+				* get any SITS data, don't mark all deleted- better to leave as it is **/
+			if (courseRows.nonEmpty && !mrExists) {
+				mr.markDeleted
+				logger.info("Marking delete  for " + mr)
+				mr.lastUpdatedDate = DateTime.now
+				moduleRegistrationDao.saveOrUpdate(mr)
+			}
 		}
 	}
 

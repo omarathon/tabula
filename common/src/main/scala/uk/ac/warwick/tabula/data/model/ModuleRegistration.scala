@@ -22,7 +22,7 @@ import scala.collection.JavaConverters._
 
 @Entity
 @Access(AccessType.FIELD)
-class ModuleRegistration() extends GeneratedId	with PermissionsTarget with Ordered[ModuleRegistration] {
+class ModuleRegistration() extends GeneratedId	with PermissionsTarget with CanBeDeleted with Ordered[ModuleRegistration] {
 
 	def this(studentCourseDetails: StudentCourseDetails, module: Module, cats: java.math.BigDecimal, academicYear: AcademicYear, occurrence: String) {
 		this()
