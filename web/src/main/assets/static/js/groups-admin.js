@@ -72,9 +72,11 @@ $(function() {
 		var $this = $(this);
 		var $target = $($this.attr('data-target'));
 		var url = $this.attr('href');
-		$target.load(url, function(){
-			$target.find('form.double-submit-protection').tabulaSubmitOnce();
-		});
+		if (url != undefined) {
+			$target.load(url, function(){
+				$target.find('form.double-submit-protection').tabulaSubmitOnce();
+			});
+		}
 	});
 
     $("#modal-container").on("click","input[type='submit']", function(e){
@@ -142,8 +144,9 @@ $(function() {
 	var $location = $('#location, #defaultLocation');
 	var $locationId = $('#locationId, #defaultLocationId');
 	var $namedLocationAlert = $('#namedLocationAlert');
-
-	if ($('#useNamedLocation.errors').length > 0 || ($location.val().length > 0 && $locationId.val().length === 0)) {
+	var locationValue = $location.val();
+	var locationIdValue = $locationId.val();
+	if ($('#useNamedLocation.errors').length > 0 || (locationValue != undefined && locationValue.length > 0 && locationIdValue != undefined && locationIdValue.length === 0)) {
 		$namedLocationAlert.show();
 	}
 
@@ -161,8 +164,8 @@ $(function() {
 			$this.closest('.form-group').find('input[type="hidden"]').val($this.data('lid'));
 			$this.data('lid', '');
 		})
-		.on('blur', function () {
-			var locationPicker = $(this).data('location-picker');
+	.on('blur', function () {
+		var locationPicker = $(this).data('location-picker');
 			if (locationPicker.$menu.is(':visible') && locationPicker.$menu.children().length === 1) {
 				locationPicker.select();
 			}
@@ -170,10 +173,10 @@ $(function() {
 		.locationPicker();
 
 	var $locationAliasFormGroup = $('.location-alias-form-group');
-	var $showLocationAlias = $('#showLocationAlias')
+	var $showLocationAlias = $('#showLocationAlias');
 	var $removeLocationAlias = $('#removeLocationAlias');
-
-	if ($locationAliasFormGroup.find('input').val().length === 0) {
+	var inputValue = $locationAliasFormGroup.find('input').val();
+	if (inputValue != undefined && inputValue.length === 0) {
 		$locationAliasFormGroup.hide();
 	} else {
 		$showLocationAlias.parent().hide();
