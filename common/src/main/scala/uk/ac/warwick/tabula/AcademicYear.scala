@@ -1,5 +1,7 @@
 package uk.ac.warwick.tabula
 
+import com.fasterxml.jackson.databind.annotation.JsonSerialize
+import com.fasterxml.jackson.databind.ser.std.ToStringSerializer
 import org.joda.time.{DateTime, DateTimeConstants, Interval, LocalDate}
 import uk.ac.warwick.tabula.AcademicWeek._
 import uk.ac.warwick.tabula.AcademicYear._
@@ -8,7 +10,7 @@ import uk.ac.warwick.tabula.JavaImports._
 import uk.ac.warwick.tabula.data.model.Convertible
 import uk.ac.warwick.tabula.data.model.groups.WeekRange
 import uk.ac.warwick.tabula.helpers.JodaConverters._
-import uk.ac.warwick.util.termdates.{AcademicWeek => JAcademicWeek, AcademicYear => JAcademicYear, ExtendedAcademicYear => JExtendedAcademicYear, AcademicYearPeriod => JAcademicYearPeriod, Term => JTerm, Vacation => JVacation}
+import uk.ac.warwick.util.termdates.{AcademicWeek => JAcademicWeek, AcademicYear => JAcademicYear, AcademicYearPeriod => JAcademicYearPeriod, ExtendedAcademicYear => JExtendedAcademicYear, Term => JTerm, Vacation => JVacation}
 
 import scala.collection.JavaConverters._
 import scala.language.implicitConversions
@@ -18,6 +20,7 @@ import scala.language.implicitConversions
  * "99/00" or "11/12" but we just store the first year as a 4-digit number.
  * toString() returns the traditional format.
  */
+@JsonSerialize(using = classOf[ToStringSerializer])
 case class AcademicYear(underlying: JAcademicYear) extends Ordered[AcademicYear] with Convertible[JInteger] {
 	val startYear: Int = underlying.getStartYear
 	val endYear: Int = startYear + 1

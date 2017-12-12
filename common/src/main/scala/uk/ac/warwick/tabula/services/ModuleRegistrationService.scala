@@ -92,13 +92,14 @@ abstract class AbstractModuleRegistrationService extends ModuleRegistrationServi
 		normalLoad: BigDecimal,
 		rules: Seq[UpstreamRouteRule]
 	): Seq[(BigDecimal, Seq[ModuleRegistration])] = {
-		if (entity.moduleRegistrations.exists(_.firstDefinedMark.isEmpty)) {
+		val validRecords = entity.moduleRegistrations.filterNot(_.deleted)
+		if (validRecords.exists(_.firstDefinedMark.isEmpty)) {
 			Seq()
 		} else {
-			val coreAndOptionalCoreModules = entity.moduleRegistrations.filter(mr =>
+			val coreAndOptionalCoreModules = validRecords.filter(mr =>
 				mr.selectionStatus == ModuleSelectionStatus.Core || mr.selectionStatus == ModuleSelectionStatus.OptionalCore
 			)
-			val subsets = entity.moduleRegistrations.toSet.subsets.toSeq
+			val subsets = validRecords.toSet.subsets.toSeq
 			val validSubsets = subsets.filter(_.nonEmpty).filter(modRegs =>
 				// CATS total of at least the normal load
 				modRegs.toSeq.map(mr => BigDecimal(mr.cats)).sum >= normalLoad &&
