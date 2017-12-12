@@ -94,7 +94,6 @@ class ImportModuleRegistrationsCommand(course: StudentCourseDetails, courseRows:
 		}
 	}
 
-
 	def copySelectionStatus(destinationBean: BeanWrapper, selectionStatusCode: String): Boolean = {
 		val property = "selectionStatus"
 		val oldValue = destinationBean.getPropertyValue(property)
