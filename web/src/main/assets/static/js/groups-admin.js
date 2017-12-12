@@ -164,8 +164,8 @@ $(function() {
 			$this.closest('.form-group').find('input[type="hidden"]').val($this.data('lid'));
 			$this.data('lid', '');
 		})
-	.on('blur', function () {
-		var locationPicker = $(this).data('location-picker');
+		.on('blur', function () {
+			var locationPicker = $(this).data('location-picker');
 			if (locationPicker.$menu.is(':visible') && locationPicker.$menu.children().length === 1) {
 				locationPicker.select();
 			}
