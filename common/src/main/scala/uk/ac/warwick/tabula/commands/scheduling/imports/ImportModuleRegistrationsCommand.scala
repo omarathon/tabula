@@ -20,7 +20,6 @@ class ImportModuleRegistrationsCommand(course: StudentCourseDetails, courseRows:
 	var moduleRegistrationDao: ModuleRegistrationDao = Wire[ModuleRegistrationDao]
 
 
-
 	override def applyInternal(): Seq[ModuleRegistration] = {
 		logger.debug("Importing module registration for student " + course.scjCode)
 
@@ -75,22 +74,22 @@ class ImportModuleRegistrationsCommand(course: StudentCourseDetails, courseRows:
 
 
 	def markDeleted(studentCourse: StudentCourseDetails, courseRows: Seq[ModuleRegistrationRow]): Unit = {
-		studentCourse.moduleRegistrations.filterNot(_.deleted).map { mr =>
-
-			val mrExists = courseRows.exists { sitsMR  =>
-				val module = modules.find(_.code == Module.stripCats(sitsMR.sitsModuleCode).get.toLowerCase).get
-				(module.code ==  mr.module.code
-				&& AcademicYear.parse(sitsMR.academicYear)  ==  mr.academicYear
-				&& sitsMR.cats == mr.cats
-				&& sitsMR.occurrence == mr.occurrence)
+		studentCourse.moduleRegistrations.filterNot(_.deleted).foreach { mr =>
+			val mrExists = courseRows.exists { sitsMR =>
+				(modules.find(_.code == Module.stripCats(sitsMR.sitsModuleCode).get.toLowerCase)
+					.exists { module => module.code == mr.module.code }
+					&& AcademicYear.parse(sitsMR.academicYear) == mr.academicYear
+					&& sitsMR.cats == mr.cats
+					&& sitsMR.occurrence == mr.occurrence)
 			}
-			/**Ensure atleast there is some record in SITS.If for some reason we couldn't
-			 get any SITS data, don't mark all deleted- better to leave as it is **/
+
+			/** Ensure at least there is some record in SITS.If for some reason we couldn't
+				* get any SITS data, don't mark all deleted- better to leave as it is **/
 			if (courseRows.nonEmpty && !mrExists) {
-					mr.markDeleted
-					logger.info("Marking delete  for " + mr)
-					mr.lastUpdatedDate = DateTime.now
-					moduleRegistrationDao.saveOrUpdate(mr)
+				mr.markDeleted
+				logger.info("Marking delete  for " + mr)
+				mr.lastUpdatedDate = DateTime.now
+				moduleRegistrationDao.saveOrUpdate(mr)
 			}
 		}
 	}
