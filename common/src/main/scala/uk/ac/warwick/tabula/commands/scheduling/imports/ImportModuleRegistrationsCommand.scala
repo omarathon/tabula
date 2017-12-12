@@ -72,7 +72,6 @@ class ImportModuleRegistrationsCommand(course: StudentCourseDetails, courseRows:
 		records
 	}
 
-
 	def markDeleted(studentCourse: StudentCourseDetails, courseRows: Seq[ModuleRegistrationRow]): Unit = {
 		studentCourse.moduleRegistrations.filterNot(_.deleted).foreach { mr =>
 			val mrExists = courseRows.exists { sitsMR =>
