@@ -95,6 +95,10 @@ trait ApproveMeetingRecordDescription extends Describable[MeetingRecord] {
 
 	def describe(d: Description) {
 		d.meeting(meeting)
+		 .property("approved" -> approved)
+
+		if (!approved && rejectionComments != null)
+			d.property("rejectionComments", rejectionComments)
 	}
 }
 
