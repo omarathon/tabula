@@ -81,7 +81,7 @@ class CourseworkEditAssignmentDetailsReusableWorkflowTest extends BrowserTest wi
 			assigmentMarkerDetails(studentList.size, DoubleMarking)
 
 			val checkboxSubmissionFieldDetails: Seq[(String, Boolean)] = Seq(("collectSubmissions", false), ("automaticallySubmitToTurnitin", false), ("allowLateSubmissions", false))
-			val radioButtonSubmissionFieldDetails: Seq[(String, String)] = Seq(("restrictSubmissions", "false"))
+			val radioButtonSubmissionFieldDetails: Seq[(String, String)] = Seq(("restrictSubmissions", "true"))
 			assignmentSubmissionDetails(checkboxSubmissionFieldDetails, radioButtonSubmissionFieldDetails)
 
 			val textFieldOptionFieldDetails: Seq[(String, String)] = Seq(("individualFileSizeLimit", "2"), ("wordCountMin", "100"), ("wordCountMax", "500"))
@@ -122,7 +122,7 @@ class CourseworkEditAssignmentDetailsReusableWorkflowTest extends BrowserTest wi
 			assigmentStudentDetails(studentList)
 
 			val checkboxSubmissionFieldDetails: Seq[(String, Boolean)] = Seq(("collectSubmissions", false), ("automaticallySubmitToTurnitin", false), ("allowLateSubmissions", false))
-			val radioButtonSubmissionFieldDetails: Seq[(String, String)] = Seq(("restrictSubmissions", "false"))
+			val radioButtonSubmissionFieldDetails: Seq[(String, String)] = Seq(("restrictSubmissions", "true"))
 			assignmentSubmissionDetails(checkboxSubmissionFieldDetails, radioButtonSubmissionFieldDetails)
 
 			val textFieldOptionFieldDetails: Seq[(String, String)] = Seq(("individualFileSizeLimit", "2"), ("wordCountMin", "100"), ("wordCountMax", "500"))
