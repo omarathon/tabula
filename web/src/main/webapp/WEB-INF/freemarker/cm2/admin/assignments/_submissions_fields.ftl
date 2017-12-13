@@ -18,7 +18,7 @@
 
 	</@bs3form.labelled_form_group>
 
-	<@bs3form.labelled_form_group path="" labelText="Submission scope">
+	<@bs3form.labelled_form_group path="restrictSubmissions" labelText="Submission scope">
 		<@bs3form.radio>
 			<@f.radiobutton path="restrictSubmissions" value="true" />
 			Only students enrolled on this assignment can submit coursework
