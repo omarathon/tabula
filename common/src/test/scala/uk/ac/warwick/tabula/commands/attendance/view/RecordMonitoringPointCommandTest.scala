@@ -194,7 +194,6 @@ class RecordMonitoringPointCommandTest extends TestBase with Mockito {
 	@Test
 	def validateAlreadyReported() { new ValidatorFixture {
 		validator.attendanceMonitoringService.findNonReportedTerms(Seq(student1), AcademicYear(2014)) returns Seq()
-//		validator.termService.getTermFromDateIncludingVacations(any[BaseDateTime]) returns autumnTerm
 		validator.checkpointMap = JHashMap(
 			student1 -> JHashMap(point1 -> AttendanceState.Attended.asInstanceOf[AttendanceState])
 		)
@@ -204,8 +203,7 @@ class RecordMonitoringPointCommandTest extends TestBase with Mockito {
 
 	@Test
 	def validateTooSoon() { new ValidatorFixture {
-		validator.attendanceMonitoringService.findNonReportedTerms(Seq(student1), AcademicYear(2014)) returns Seq(PeriodType.autumnTerm.toString)
-//		validator.termService.getTermFromDateIncludingVacations(any[BaseDateTime]) returns autumnTerm
+		validator.attendanceMonitoringService.findNonReportedTerms(Seq(student1), AcademicYear(2014)) returns PeriodType.values().toSeq.map(_.toString)
 		validator.checkpointMap = JHashMap(
 			student1 -> JHashMap(point1 -> AttendanceState.Attended.asInstanceOf[AttendanceState])
 		)
@@ -216,8 +214,7 @@ class RecordMonitoringPointCommandTest extends TestBase with Mockito {
 
 	@Test
 	def validateOk() { new ValidatorFixture {
-		validator.attendanceMonitoringService.findNonReportedTerms(Seq(student1), AcademicYear(2014)) returns Seq(PeriodType.autumnTerm.toString)
-//		validator.termService.getTermFromDateIncludingVacations(any[BaseDateTime]) returns autumnTerm
+		validator.attendanceMonitoringService.findNonReportedTerms(Seq(student1), AcademicYear(2014)) returns PeriodType.values().toSeq.map(_.toString)
 		validator.checkpointMap = JHashMap(
 			student1 -> JHashMap(point1 -> AttendanceState.Attended.asInstanceOf[AttendanceState])
 		)
