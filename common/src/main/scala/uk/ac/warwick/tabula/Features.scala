@@ -146,7 +146,7 @@ abstract class Features {
 	@Value("${features.anonymousMarkingCM2:false}") var anonymousMarkingCM2: Boolean = defaults.anonymousMarkingCM2
 	@Value("${features.openEndedReminderDateCM2:false}") var openEndedReminderDateCM2: Boolean = defaults.openEndedReminderDateCM2
 	@Value("${features.redirectCM1:true}") var redirectCM1: Boolean = defaults.redirectCM1
-	@Value("${features.moderationSelector:false}") var moderationSelector: Boolean = defaults.moderationSelector
+	@Value("${features.moderationSelector:true}") var moderationSelector: Boolean = defaults.moderationSelector
 
 
 
@@ -286,7 +286,7 @@ class FeaturesMessage {
 	@BeanProperty var anonymousMarkingCM2 = false
 	@BeanProperty var openEndedReminderDateCM2 = false
 	@BeanProperty var redirectCM1 = true
-	@BeanProperty var moderationSelector = false
+	@BeanProperty var moderationSelector = true
 }
 
 class FeatureFlagListener extends QueueListener with InitializingBean with Logging {
