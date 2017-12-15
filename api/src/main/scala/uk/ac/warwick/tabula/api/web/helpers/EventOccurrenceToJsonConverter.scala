@@ -1,7 +1,7 @@
 package uk.ac.warwick.tabula.api.web.helpers
 
 import uk.ac.warwick.tabula.DateFormats
-import uk.ac.warwick.tabula.data.model.MapLocation
+import uk.ac.warwick.tabula.data.model.{AliasedMapLocation, MapLocation}
 import uk.ac.warwick.tabula.services.ProfileServiceComponent
 import uk.ac.warwick.tabula.timetables.EventOccurrence
 import uk.ac.warwick.tabula.helpers.StringUtils._
@@ -18,6 +18,11 @@ trait EventOccurrenceToJsonConverter {
 		"start" -> DateFormats.IsoDateTime.print(event.start),
 		"end" -> DateFormats.IsoDateTime.print(event.end),
 		"location" -> (event.location match {
+			case Some(AliasedMapLocation(alias, MapLocation(_, locationId, syllabusPlusName))) => Map(
+				"name" -> alias,
+				"locationId" -> locationId,
+				"syllabusPlusName" -> syllabusPlusName
+			)
 			case Some(l: MapLocation) => Map(
 				"name" -> l.name,
 				"locationId" -> l.locationId,

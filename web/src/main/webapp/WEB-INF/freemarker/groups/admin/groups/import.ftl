@@ -59,12 +59,11 @@
 		<@f.form method="post" id="import-form" action="${post_url}" commandName="command">
 			<input type="hidden" name="action" value="" />
 
-			<p>Below are all of the scheduled small groups defined for modules in this department in Syllabus+, the central timetabling system.</p>
+			<p>Below are all the scheduled small groups and lectures defined for modules in this department in Syllabus+, the central timetabling system.</p>
 
-			<p>Use the checkboxes on the left hand side to choose which ones you want to import into Tabula.
-			   If there is already a set of small groups with the same name for this academic year, it will have
-			   been unchecked, but you can check them if you want to import them again (note: they will be imported
-			   as a <strong>separate</strong> set of small groups to the ones already imported.</p>
+			<p>Use the checkboxes at the left-hand side to choose the groups to import to Tabula. If a group set with the same name already exists in the selected academic year, it is not selected by default. However, you can select these to import them again (they are imported as a separate group set).</p>
+			
+			<p>Lectures are not selected by default. If you want to record attendance at lectures using Tabula, use the checkboxes at the left-hand side to choose which lectures to import. Note that lectures always appear on students' timetables, whether you import them or not.</p>
 
 			<@bs3form.labelled_form_group path="academicYear" labelText="Academic year">
 				<@f.select path="academicYear" id="academicYearSelect" cssClass="form-control">

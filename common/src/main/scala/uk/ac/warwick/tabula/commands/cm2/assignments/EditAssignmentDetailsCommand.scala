@@ -11,6 +11,7 @@ import uk.ac.warwick.tabula.services.{AssessmentServiceComponent, UserLookupComp
 import uk.ac.warwick.tabula.system.permissions.{PermissionsChecking, PermissionsCheckingMethods, RequiresPermissionsChecking}
 import uk.ac.warwick.tabula.JavaImports._
 import uk.ac.warwick.tabula.data.HibernateHelpers
+import uk.ac.warwick.tabula.data.model.WorkflowCategory.NoneUse
 
 object EditAssignmentDetailsCommand {
 	def apply(assignment: Assignment) =
@@ -122,6 +123,10 @@ trait EditAssignmentDetailsValidation extends ModifyAssignmentDetailsValidation 
 		}
 
 		genericValidate(errors)
+
+		if (workflowCategory != NoneUse && !assignment.restrictSubmissions) {
+			errors.rejectValue("workflowCategory", "markingWorkflow.restrictSubmissions")
+		}
 	}
 }
 

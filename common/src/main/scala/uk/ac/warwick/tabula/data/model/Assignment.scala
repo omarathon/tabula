@@ -911,7 +911,7 @@ trait BooleanAssignmentStudentProperties {
 
 trait BooleanAssignmentSubmissionProperties {
 	@BeanProperty var collectSubmissions: JBoolean = true
-	@BeanProperty var restrictSubmissions: JBoolean = false
+	@BeanProperty var restrictSubmissions: JBoolean = true
 	@BeanProperty var allowLateSubmissions: JBoolean = true
 	@BeanProperty var allowResubmission: JBoolean = true
 	@BeanProperty var displayPlagiarismNotice: JBoolean = true

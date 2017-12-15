@@ -49,7 +49,6 @@ object RichByteSource {
 
 private[objectstore] class BlobBackedByteSource(fetchBlob: => Option[Blob]) extends RichByteSource {
 	private[this] lazy val firstFetch: Option[Blob] = fetchBlob
-	private[this] var payloadUsed: Boolean = false
 
 	override lazy val metadata: Option[ObjectStorageService.Metadata] = firstFetch.map { blob =>
 		val contentMetadata = blob.getPayload.getContentMetadata
@@ -62,13 +61,8 @@ private[objectstore] class BlobBackedByteSource(fetchBlob: => Option[Blob]) exte
 		)
 	}
 
-	override def openStream(): InputStream = this.synchronized {
-		if (payloadUsed) fetchBlob.map(_.getPayload.openStream()).orNull
-		else firstFetch.map { blob =>
-			payloadUsed = true
-			blob.getPayload.openStream()
-		}.orNull
-	}
+	override def openStream(): InputStream = fetchBlob.map(_.getPayload.openStream()).orNull
+
 	override lazy val isEmpty: Boolean = firstFetch.isEmpty
 	override lazy val size: Long = firstFetch.map(_.getMetadata.getSize.longValue).getOrElse(-1)
 }

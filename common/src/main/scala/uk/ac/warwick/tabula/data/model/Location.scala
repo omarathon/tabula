@@ -11,10 +11,14 @@ sealed abstract class Location extends Serializable {
 
 @SerialVersionUID(372489712389245l) case class NamedLocation(name: String) extends Location
 @SerialVersionUID(372489712389246l) case class MapLocation(name: String, locationId: String, syllabusPlusName: Option[String] = None) extends Location
+@SerialVersionUID(372489712389246l) case class AliasedMapLocation(alias: String, mapLocation: MapLocation) extends Location {
+	override def name: String = alias
+}
 
 object Location {
 	def fromDatabase(value: String): Location =
-		value.split("\\|", 3) match {
+		value.split("\\|", 4) match {
+			case Array(displayName, name, locationId, syllabusPlusName) => AliasedMapLocation(displayName, MapLocation(name, locationId, Some(syllabusPlusName)))
 			case Array(name, locationId, syllabusPlusName) => MapLocation(name, locationId, Some(syllabusPlusName))
 			case Array(name, locationId) => MapLocation(name, locationId)
 			case Array(name) => NamedLocation(name)
@@ -24,6 +28,7 @@ object Location {
 		location match {
 			case NamedLocation(name) => name
 			case MapLocation(name, locationId, syllabusPlusName) => s"$name|$locationId|${syllabusPlusName.getOrElse("")}"
+			case AliasedMapLocation(displayName, mapLocation) => s"$displayName|${toDatabase(mapLocation)}"
 		}
 }
 

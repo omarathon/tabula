@@ -1,5 +1,6 @@
 package uk.ac.warwick.tabula.commands.cm2.assignments
 
+import org.springframework.validation.Errors
 import uk.ac.warwick.tabula.commands._
 import uk.ac.warwick.tabula.data.model._
 import uk.ac.warwick.tabula.permissions.Permissions
@@ -12,6 +13,7 @@ object ModifyAssignmentSubmissionsCommand {
 			with ComposableCommand[Assignment]
 			with ModifyAssignmentSubmissionsPermissions
 			with ModifyAssignmentSubmissionsDescription
+			with ModifyAssignmentSubmissionsValidation
 			with ModifyAssignmentSubmissionsCommandState
 			with ModifyAssignmentScheduledNotifications
 			with AutowiringAssessmentServiceComponent
@@ -79,5 +81,12 @@ trait ModifyAssignmentSubmissionsDescription extends Describable[Assignment] {
 	}
 }
 
+trait ModifyAssignmentSubmissionsValidation extends SelfValidating {
+	self: ModifyAssignmentSubmissionsCommandState with SharedAssignmentSubmissionProperties =>
 
-
+	override def validate(errors: Errors): Unit = {
+		if (!restrictSubmissions && assignment.hasCM2Workflow) {
+			errors.rejectValue("restrictSubmissions", "assignment.restrictSubmissions.hasWorkflow")
+		}
+	}
+}

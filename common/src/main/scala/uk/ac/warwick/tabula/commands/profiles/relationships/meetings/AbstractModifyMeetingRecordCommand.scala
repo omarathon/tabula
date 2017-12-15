@@ -51,6 +51,9 @@ trait PopulateMeetingRecordCommand extends PopulateOnForm {
 			case MapLocation(name, lid, _) =>
 				meetingLocation = name
 				meetingLocationId = lid
+			case AliasedMapLocation(_, MapLocation(name, lid, _)) =>
+				meetingLocation = name
+				meetingLocationId = lid
 		}
 
 		format = meetingRecord.format
