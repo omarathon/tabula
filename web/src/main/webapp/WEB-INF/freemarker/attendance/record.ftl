@@ -117,7 +117,7 @@
 								/></span>)
 								<div class="alert alert-info">
 									This student's attendance for ${reportedTerm.periodType.toString()}
-									(<@fmt.date date=reportedTerm.startDate relative=false includeTime=false shortMonth=true /> - <@fmt.date date=reportedTerm.endDate relative=false includeTime=false shortMonth=true />)
+									(<@fmt.date date=reportedTerm.firstDay relative=false includeTime=false shortMonth=true /> - <@fmt.date date=reportedTerm.lastDay relative=false includeTime=false shortMonth=true />)
 									has already been uploaded to SITS e:Vision.
 								</div>
 							<#else>
@@ -162,7 +162,7 @@
 								(<@fmt.interval point.startDate point.endDate />)
 								<div class="alert alert-info">
 									This student's attendance for ${reportedTerm.periodType.toString()}
-									(<@fmt.date date=reportedTerm.startDate relative=false includeTime=false shortMonth=true /> - <@fmt.date date=reportedTerm.endDate relative=false includeTime=false shortMonth=true />)
+									(<@fmt.date date=reportedTerm.firstDay relative=false includeTime=false shortMonth=true /> - <@fmt.date date=reportedTerm.lastDay relative=false includeTime=false shortMonth=true />)
 									has already been uploaded to SITS e:Vision.
 								</div>
 							<#else>
