@@ -45,6 +45,10 @@ object ListMarkerFeedbackCommand {
 		enhancedFeedbackByStage: Map[MarkingWorkflowStage, Seq[EnhancedMarkerFeedback]]
 	) {
 		def headerStage: MarkingWorkflowStage = enhancedFeedbackByStage.keys.head
+		def numPreviousMarkers(stage: MarkingWorkflowStage): Int = enhancedFeedbackByStage(stage)
+			.map(_.previousMarkerFeedback.size)
+			.reduceOption(_ max _)
+			.getOrElse(0)
 	}
 
 	def apply(assignment:Assignment, marker:User, submitter: CurrentUser) = new ListMarkerFeedbackCommandInternal(assignment, marker, submitter)
