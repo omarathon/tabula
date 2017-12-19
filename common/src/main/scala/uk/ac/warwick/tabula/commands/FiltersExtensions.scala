@@ -6,7 +6,7 @@ import org.apache.http.client.utils.URLEncodedUtils
 import org.hibernate.NullPrecedence
 import org.hibernate.criterion.Restrictions.{gt => _, _}
 import org.hibernate.criterion.{Order, Restrictions}
-import org.joda.time.LocalDate
+import org.joda.time.{DateTime, LocalDate}
 import uk.ac.warwick.tabula.AcademicYear
 import uk.ac.warwick.tabula.JavaImports.{JArrayList, _}
 import uk.ac.warwick.tabula.data.ScalaRestriction._
@@ -180,12 +180,12 @@ trait AutowiringDeserializesExtensionsFilterImpl extends DeserializesExtensionsF
 	with AutowiringAssessmentServiceComponent
 	with AutowiringModuleAndDepartmentServiceComponent
 
-sealed abstract class TimeFilter(val code: String, val time: LocalDate)
+sealed abstract class TimeFilter(val code: String, val time: DateTime)
 object TimeFilter {
-	case object ThisWeek extends TimeFilter("This week", LocalDate.now.withDayOfWeek(DayOfWeek.Monday.jodaDayOfWeek))
-	case object ThisMonth extends TimeFilter("This month", LocalDate.now.withDayOfMonth(1))
-	case object ThisTerm extends TimeFilter("This term", AcademicYear.now().termOrVacationForDate(LocalDate.now).firstDay)
-	case object ThisYear extends TimeFilter("This year", LocalDate.now.withDayOfYear(1))
+	case object ThisWeek extends TimeFilter("This week", DateTime.now.withDayOfWeek(DayOfWeek.Monday.jodaDayOfWeek))
+	case object ThisMonth extends TimeFilter("This month", DateTime.now.withDayOfMonth(1))
+	case object ThisTerm extends TimeFilter("This term", AcademicYear.now().termOrVacationForDate(LocalDate.now).firstDay.toDateTimeAtStartOfDay)
+	case object ThisYear extends TimeFilter("This year", DateTime.now.withDayOfYear(1))
 
 	def fromCode(code: String): TimeFilter = code match {
 		case ThisWeek.code => ThisWeek
