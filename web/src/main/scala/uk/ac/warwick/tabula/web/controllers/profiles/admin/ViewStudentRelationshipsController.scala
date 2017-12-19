@@ -39,7 +39,7 @@ class ViewStudentRelationshipsController extends ProfilesController {
 }
 
 
-abstract class ViewStudentRelationshipController extends ProfilesController{
+abstract class ViewStudentRelationshipController extends ProfilesController {
 
 	type ViewRelatedStudentsCommand = ViewRelatedStudentsCommand.CommandType
 
@@ -64,7 +64,6 @@ abstract class ViewStudentRelationshipController extends ProfilesController{
 				"meetingsMap" -> meetingInfoMap
 			)
 	}
-
 }
 
 @Controller
@@ -73,8 +72,6 @@ class ViewStudentRelationshipStudentsController extends ViewStudentRelationshipC
 
 	@ModelAttribute("viewRelatedStudentsCommand") def command(@PathVariable relationshipType: StudentRelationshipType) =
 		ViewRelatedStudentsCommand(currentMember, relationshipType)
-
-
 }
 
 
@@ -87,5 +84,4 @@ class ViewStudentRelationshipMemberStudentsController extends ViewStudentRelatio
 		@PathVariable member: Member
 	) =
 		ViewRelatedStudentsCommand(member, relationshipType)
-
 }

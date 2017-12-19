@@ -10,13 +10,13 @@
 		</div>
 		<@student_macros.tableWithMeetingsColumn items=studentCourseDetails meetingsMap=meetingsMap showSelectStudents=true/>
 		<div id="meeting-modal" class="modal fade"></div>
-	 <!-- TODO Changes required in BulkMeetingRecordController to make it working based on member para. Hiding it for others for time being as it throws permission exception if other users clicks it)-->
+		<!-- TODO Changes required in BulkMeetingRecordController to make it working based on member para (if user should be able to see it). Hiding it for others for time being as it throws permission exception if other users clicks it)-->
 		<#if !member?has_content>
-		<div class="submit-buttons fix-footer">
-			<section class="meetings">
-				<a data-href="<@routes.profiles.create_bulk_meeting_record relationshipType />" class="btn btn-default new-meeting-record disabled">Record meeting for selected students</a>
-			</section>
-		</div>
+			<div class="submit-buttons fix-footer">
+				<section class="meetings">
+					<a data-href="<@routes.profiles.create_bulk_meeting_record relationshipType />" class="btn btn-default new-meeting-record disabled">Record meeting for selected students</a>
+				</section>
+			</div>
 		</#if>
 
 	<#else>
