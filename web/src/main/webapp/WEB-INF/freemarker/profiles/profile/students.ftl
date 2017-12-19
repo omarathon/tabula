@@ -6,7 +6,7 @@
 	<ul class="links">
 		<#list relationshipTypesMap?keys as relationshipType>
 			<#if relationshipTypesMapById[relationshipType.id]>
-				<li><a href="<@routes.profiles.relationship_students relationshipType />">${relationshipType.studentRole?cap_first}s</a></li>
+				<li><a href="<@routes.profiles.relationship_member_students relationshipType member/>">${relationshipType.studentRole?cap_first}s</a></li>
 			</#if>
 		</#list>
 
