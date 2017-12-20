@@ -68,7 +68,7 @@ abstract class ViewStudentRelationshipController extends ProfilesController {
 
 @Controller
 @RequestMapping(value = Array("/profiles/{relationshipType}/students"))
-class ViewStudentRelationshipStudentsController extends ViewStudentRelationshipController {
+class ViewMyStudentRelationshipsController extends ViewStudentRelationshipController {
 
 	@ModelAttribute("viewRelatedStudentsCommand") def command(@PathVariable relationshipType: StudentRelationshipType) =
 		ViewRelatedStudentsCommand(currentMember, relationshipType)
@@ -77,7 +77,7 @@ class ViewStudentRelationshipStudentsController extends ViewStudentRelationshipC
 
 @Controller
 @RequestMapping(value = Array("/profiles/{relationshipType}/{member}/students"))
-class ViewStudentRelationshipMemberStudentsController extends ViewStudentRelationshipController {
+class ViewMembersStudentRelationshipsController extends ViewStudentRelationshipController {
 
 	@ModelAttribute("viewRelatedStudentsCommand") def command(
 		@PathVariable relationshipType: StudentRelationshipType,
