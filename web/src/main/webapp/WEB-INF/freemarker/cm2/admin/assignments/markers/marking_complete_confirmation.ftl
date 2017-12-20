@@ -12,7 +12,7 @@
 		<@spring.bind path="markerFeedback">
 			<@bs3form.errors path="markerFeedback" />
 			<#assign markerFeedback=status.actualValue />
-			<#assign noContent =command.noContent />
+			<#assign noContent = command.noContent />
 			<#assign noMarks = command.noMarks />
 			<#assign noFeedback = command.noFeedback />
 			<#assign releasedFeedback = command.releasedFeedback />
@@ -88,7 +88,7 @@
 				<div class="alert alert-info">
 					${count} not been marked. These will not be sent to the ${nextStagesDescription?lower_case}.
 					<a class="use-popover" id="popover-files" data-html="true"
-						 data-original-title="<span class='text-info'><strong>No feedback files</strong></span>"
+						 data-original-title="<span class='text-info'><strong>Not marked</strong></span>"
 						 data-content="${noFilesIds}">
 						<i class="fa fa-question-sign"></i>
 					</a>
