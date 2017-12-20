@@ -80,6 +80,7 @@
 				</thead>
 				<tbody>
 					<#list order.enhancedFeedbackByStage?keys as stage>
+						<#assign maxPrevMarkerCols = 0 />
 						<#assign enhancedMarkerFeedbacks = mapGet(order.enhancedFeedbackByStage, stage)/>
 						<#list enhancedMarkerFeedbacks as emf>
 							<#assign mf = emf.markerFeedback />
@@ -110,11 +111,16 @@
 									<#assign colspan = colspan + 1>
 								</#if>
 								<#if order.headerStage.summarisePreviousFeedback>
-									<#list emf.previousMarkerFeedback as prevMf>
+									<#if emf.previousMarkerFeedback?has_content>
+										<#list emf.previousMarkerFeedback as prevMf>
 										<td><#if prevMf.marker??>${prevMf.marker.fullName}</#if></td>
 										<td><#if prevMf.mark??>${prevMf.mark}</#if></td>
-										<#assign colspan = colspan + 2>
-									</#list>
+											<#assign colspan = colspan + 2>
+											<#assign maxPrevMarkerCols = maxPrevMarkerCols + 2>
+										</#list>
+									<#elseif order.numPreviousMarkers(stage) gt 0>
+										<td colspan="${order.numPreviousMarkers(stage) * 2}"></td>
+									</#if>
 								</#if>
 								<td class="progress-col">
 									<@components.individual_stage_progress_bar emf.workflowStudent.stages assignment student />

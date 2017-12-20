@@ -774,7 +774,9 @@
 								<li>Not closed yet</li>
 							<#else>
 								<#-- Complete? -->
-								<#if assignment.openEnded && assignment.collectSubmissions && studentCount gt 0>
+								<#if assignment.hasReleasedFeedback>
+									<#-- As of TAB-5388 show nothing -->
+								<#elseif assignment.openEnded && assignment.collectSubmissions && studentCount gt 0>
 									<li>Assignment needs submitting (${studentCount} of ${studentCount})</li>
 								<#else>
 									<li>Awaiting feedback</li>

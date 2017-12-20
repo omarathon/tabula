@@ -28,6 +28,7 @@ TODO grab values from the Routes object in code, as that's pretty equivalent and
 <#macro draft_department_timetables department academicYear endpoint><@_u page="/department/${department.code}/timetables/drafts/${academicYear.startYear?c}/${endpoint}" /></#macro>
 
 <#macro relationship_students relationshipType><@_u page="/${relationshipType.urlPart}/students" /></#macro>
+<#macro relationship_member_students relationshipType member><@_u page="/${relationshipType.urlPart}/${member.universityId}/students" /></#macro>
 <#macro relationship_agents department relationshipType><@_u page="/department/${department.code}/${relationshipType.urlPart}" /></#macro>
 <#macro relationship_missing department relationshipType><@_u page="/department/${department.code}/${relationshipType.urlPart}/missing" /></#macro>
 <#macro relationship_scheduled department relationshipType><@_u page="/department/${department.code}/${relationshipType.urlPart}/scheduled" /></#macro>

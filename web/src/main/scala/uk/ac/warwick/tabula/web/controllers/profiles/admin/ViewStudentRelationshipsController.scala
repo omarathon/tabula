@@ -5,7 +5,7 @@ import org.springframework.web.bind.annotation.{ModelAttribute, PathVariable, Re
 import uk.ac.warwick.tabula.commands.Appliable
 import uk.ac.warwick.tabula.commands.profiles.ViewRelatedStudentsCommand
 import uk.ac.warwick.tabula.commands.profiles.relationships.ViewStudentRelationshipsCommand
-import uk.ac.warwick.tabula.data.model.{Department, StudentRelationshipType}
+import uk.ac.warwick.tabula.data.model.{Department, Member, StudentRelationshipType}
 import uk.ac.warwick.tabula.web.Mav
 import uk.ac.warwick.tabula.web.controllers.profiles.ProfilesController
 
@@ -39,15 +39,10 @@ class ViewStudentRelationshipsController extends ProfilesController {
 }
 
 
-
-@Controller
-@RequestMapping(value = Array("/profiles/{relationshipType}/students"))
-class ViewStudentRelationshipStudentsController extends ProfilesController {
+abstract class ViewStudentRelationshipController extends ProfilesController {
 
 	type ViewRelatedStudentsCommand = ViewRelatedStudentsCommand.CommandType
 
-	@ModelAttribute("viewRelatedStudentsCommand") def command(@PathVariable relationshipType: StudentRelationshipType) =
-		ViewRelatedStudentsCommand(currentMember, relationshipType)
 
 	@RequestMapping
 	def view(@ModelAttribute("viewRelatedStudentsCommand") viewRelatedStudentsCommand: ViewRelatedStudentsCommand): Mav = {
@@ -69,4 +64,24 @@ class ViewStudentRelationshipStudentsController extends ProfilesController {
 				"meetingsMap" -> meetingInfoMap
 			)
 	}
+}
+
+@Controller
+@RequestMapping(value = Array("/profiles/{relationshipType}/students"))
+class ViewMyStudentRelationshipsController extends ViewStudentRelationshipController {
+
+	@ModelAttribute("viewRelatedStudentsCommand") def command(@PathVariable relationshipType: StudentRelationshipType) =
+		ViewRelatedStudentsCommand(currentMember, relationshipType)
+}
+
+
+@Controller
+@RequestMapping(value = Array("/profiles/{relationshipType}/{member}/students"))
+class ViewMembersStudentRelationshipsController extends ViewStudentRelationshipController {
+
+	@ModelAttribute("viewRelatedStudentsCommand") def command(
+		@PathVariable relationshipType: StudentRelationshipType,
+		@PathVariable member: Member
+	) =
+		ViewRelatedStudentsCommand(member, relationshipType)
 }
