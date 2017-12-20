@@ -12,6 +12,7 @@
 		<@spring.bind path="markerFeedback">
 			<@bs3form.errors path="markerFeedback" />
 			<#assign markerFeedback=status.actualValue />
+			<#assign noContent = command.noContent />
 			<#assign noMarks = command.noMarks />
 			<#assign noFeedback = command.noFeedback />
 			<#assign releasedFeedback = command.releasedFeedback />
@@ -70,9 +71,24 @@
 				<ul><#list noFeedback as markerFeedback><li>${markerFeedback.feedback.studentIdentifier}</li></#list></ul>
 				</#assign>
 				<div class="alert alert-info">
-					${count} not have any feedback files attached. 	You will not be able to add feedback comments or files to this submission later.
+					${count} not have any feedback files attached. You will not be able to add feedback comments or files to this submission later.
 					<a class="use-popover" id="popover-files" data-html="true"
 						 data-original-title="<span class='text-info'><strong>No feedback files</strong></span>"
+						 data-content="${noFilesIds}">
+						<i class="fa fa-question-sign"></i>
+					</a>
+				</div>
+			</#if>
+
+			<#if (noContent?has_content)>
+				<#assign count><#if (noContent?size > 1)>${noContent?size} submissions have<#else>One submission has</#if></#assign>
+				<#assign noContentIds>
+				<ul><#list noContent as markerFeedback><li>${markerFeedback.feedback.studentIdentifier}</li></#list></ul>
+				</#assign>
+				<div class="alert alert-info">
+					${count} not been marked. These will not be sent to the ${nextStagesDescription?lower_case}.
+					<a class="use-popover" id="popover-files" data-html="true"
+						 data-original-title="<span class='text-info'><strong>Not marked</strong></span>"
 						 data-content="${noFilesIds}">
 						<i class="fa fa-question-sign"></i>
 					</a>
