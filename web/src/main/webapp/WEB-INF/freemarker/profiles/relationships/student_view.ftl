@@ -1,8 +1,12 @@
 <#escape x as x?html>
-<h1>My ${relationshipType.studentRole}s</h1>
 
+<h1><#if member?has_content>${relationshipType.studentRole?cap_first}s<#else>My ${relationshipType.studentRole}s</#if></h1>
 <#if studentCourseDetails?has_content>
-	<#assign submitUrl>/profiles/${relationshipType.urlPart}/students</#assign>
+	<#if member?has_content>
+		<#assign submitUrl>/profiles/${relationshipType.urlPart}/${member.universityId}/students</#assign>
+	<#else>
+		<#assign submitUrl>/profiles/${relationshipType.urlPart}/students</#assign>
+	</#if>
 	<#assign filterCommand = viewRelatedStudentsCommand />
 	<#assign filterCommandName = "viewRelatedStudentsCommand" />
 	<#assign filterResultsPath = "/WEB-INF/freemarker/profiles/relationships/student_view_results.ftl" />
