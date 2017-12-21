@@ -36,13 +36,15 @@
 			data-content="${helpText}"><i class="fa fa-question-circle fa-fw" style="font-size:11pt"></i></a>
 	</#assign>
 
-	<@f.form commandName="auditLogQuery" action="${url('/sysadmin/audit/search')}" method="POST" cssClass="form-inline">
+	<@f.form commandName="auditLogQuery" action="${url('/sysadmin/audit/search')}" method="POST" cssClass="form">
 		<div class="form-group">
 			<div class="input-group">
-				<span class="input-group-addon"><i class="fa fa-search"></i></span><@f.input path="query" placeholder="Query..." cssClass="form-control" />
+				<span class="input-group-addon">
+					<i class="fa fa-search help-inline"><#noescape>${helpLink}</#noescape></i>
+				</span>
+				<@f.input path="query" placeholder="Query..." cssClass="form-control" />
 			</div>
 		</div>
-		<span class="help-inline"><#noescape>${helpLink}</#noescape></span>
 		<input class="btn btn-default" type="submit" value="Search">
 	</@f.form>
 </#if>
