@@ -89,7 +89,7 @@
 					${count} not been marked. These will not be sent to the ${nextStagesDescription?lower_case}.
 					<a class="use-popover" id="popover-files" data-html="true"
 						 data-original-title="<span class='text-info'><strong>Not marked</strong></span>"
-						 data-content="${noFilesIds}">
+						 data-content="${noContentIds}">
 						<i class="fa fa-question-sign"></i>
 					</a>
 				</div>
