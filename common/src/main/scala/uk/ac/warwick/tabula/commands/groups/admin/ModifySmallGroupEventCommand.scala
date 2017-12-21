@@ -20,8 +20,8 @@ import scala.collection.JavaConverters._
 object ModifySmallGroupEventCommand {
 	type Command = Appliable[SmallGroupEvent] with SelfValidating with BindListener with ModifySmallGroupEventCommandState
 
-	def create(module: Module, set: SmallGroupSet, group: SmallGroup): Command =
-		new CreateSmallGroupEventCommandInternal(module, set, group)
+	def create(module: Module, set: SmallGroupSet, group: SmallGroup, isImport:Boolean = false): Command =
+		new CreateSmallGroupEventCommandInternal(module, set, group, isImport)
 			with ComposableCommand[SmallGroupEvent]
 			with CreateSmallGroupEventPermissions
 			with CreateSmallGroupEventDescription
@@ -30,8 +30,8 @@ object ModifySmallGroupEventCommand {
 			with ModifySmallGroupEventScheduledNotifications
 			with AutowiringSmallGroupServiceComponent
 
-	def edit(module: Module, set: SmallGroupSet, group: SmallGroup, event: SmallGroupEvent): Command =
-		new EditSmallGroupEventCommandInternal(module, set, group, event)
+	def edit(module: Module, set: SmallGroupSet, group: SmallGroup, event: SmallGroupEvent, isImport:Boolean = false): Command =
+		new EditSmallGroupEventCommandInternal(module, set, group, event, isImport)
 			with ComposableCommand[SmallGroupEvent]
 			with EditSmallGroupEventPermissions
 			with EditSmallGroupEventDescription
@@ -46,6 +46,7 @@ trait ModifySmallGroupEventCommandState extends CurrentAcademicYear {
 	def set: SmallGroupSet
 	def group: SmallGroup
 	def existingEvent: Option[SmallGroupEvent]
+	def isImport: Boolean // true if this isn't a UI action
 
 	var weeks: JSet[JInteger] = JSet()
 	var day: DayOfWeek = _
@@ -71,7 +72,7 @@ trait ModifySmallGroupEventCommandState extends CurrentAcademicYear {
 }
 
 trait CreateSmallGroupEventCommandState extends ModifySmallGroupEventCommandState {
-	val existingEvent = None
+	val existingEvent: Option[SmallGroupEvent] = None
 
 	def isEmpty: Boolean = tutors.isEmpty && weekRanges.isEmpty && day == null && startTime == null && endTime == null
 }
@@ -81,7 +82,7 @@ trait EditSmallGroupEventCommandState extends ModifySmallGroupEventCommandState 
 	def existingEvent = Some(event)
 }
 
-class CreateSmallGroupEventCommandInternal(val module: Module, var set: SmallGroupSet, var group: SmallGroup)
+class CreateSmallGroupEventCommandInternal(val module: Module, var set: SmallGroupSet, var group: SmallGroup, val isImport:Boolean)
 	extends ModifySmallGroupEventCommandInternal with CreateSmallGroupEventCommandState {
 
 	self: SmallGroupServiceComponent =>
@@ -99,7 +100,9 @@ class CreateSmallGroupEventCommandInternal(val module: Module, var set: SmallGro
 	}
 }
 
-class EditSmallGroupEventCommandInternal(val module: Module, val set: SmallGroupSet, val group: SmallGroup, val event: SmallGroupEvent) extends ModifySmallGroupEventCommandInternal with EditSmallGroupEventCommandState {
+class EditSmallGroupEventCommandInternal(val module: Module, val set: SmallGroupSet, val group: SmallGroup, val event: SmallGroupEvent, val isImport:Boolean)
+	extends ModifySmallGroupEventCommandInternal with EditSmallGroupEventCommandState {
+
 	self: SmallGroupServiceComponent =>
 
 	copyFrom(event)
@@ -241,7 +244,7 @@ trait ModifySmallGroupEventValidation extends SelfValidating {
 
 		if (location.safeContains("|")) errors.rejectValue("location", "smallGroupEvent.location.invalidChar")
 
-		if (location.hasText && !locationId.hasText && !useNamedLocation) errors.rejectValue("useNamedLocation", "smallGroupEvent.location.named")
+		if (!isImport && location.hasText && !locationId.hasText && !useNamedLocation) errors.rejectValue("useNamedLocation", "smallGroupEvent.location.named")
 
 		// Verify that the day we're asking for actually exists
 		if (weekRanges.nonEmpty && day != null) {

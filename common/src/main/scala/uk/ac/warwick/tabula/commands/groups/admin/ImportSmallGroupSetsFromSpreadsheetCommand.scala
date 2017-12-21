@@ -206,8 +206,8 @@ trait ImportSmallGroupSetsFromSpreadsheetBinding extends BindListener  with Logg
 								val existingEvent = existingGroup.toSeq.flatMap(_.events).find(matchesEvent(extractedEvent))
 
 								val (eventCommand, eventCommandType) = existingEvent match {
-									case Some(event) => (ModifySmallGroupEventCommand.edit(event.group.groupSet.module, event.group.groupSet, event.group, event), "Edit")
-									case _ => (ModifySmallGroupEventCommand.create(extracted.module, new SmallGroupSet, new SmallGroup), "Create")
+									case Some(event) => (ModifySmallGroupEventCommand.edit(event.group.groupSet.module, event.group.groupSet, event.group, event, isImport = true), "Edit")
+									case _ => (ModifySmallGroupEventCommand.create(extracted.module, new SmallGroupSet, new SmallGroup, isImport = true), "Create")
 								}
 
 								eventCommand.title = extractedEvent.title.orNull
