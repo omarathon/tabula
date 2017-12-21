@@ -178,7 +178,7 @@ trait SmallGroupEventGenerator {
 
 trait CommandSmallGroupEventGenerator extends SmallGroupEventGenerator {
 	def createEvent(module: Module, set: SmallGroupSet, group: SmallGroup, weeks: Seq[WeekRange], day: DayOfWeek, startTime: LocalTime, endTime: LocalTime, location: Option[Location], title: String, tutorUsercodes: Seq[String]): SmallGroupEvent = {
-		val command = ModifySmallGroupEventCommand.create(module, set, group)
+		val command = ModifySmallGroupEventCommand.create(module, set, group, isImport = true)
 		command.weekRanges = weeks
 		command.day = day
 		command.startTime = startTime

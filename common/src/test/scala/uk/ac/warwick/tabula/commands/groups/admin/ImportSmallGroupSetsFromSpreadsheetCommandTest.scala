@@ -191,6 +191,7 @@ class ImportSmallGroupSetsFromSpreadsheetCommandTest extends TestBase with Mocki
 
 	class ModifyEventCommand(val module: Module, val set: SmallGroupSet, val group: SmallGroup, event: SmallGroupEvent) extends Appliable[SmallGroupEvent] with SelfValidating with ModifySmallGroupEventCommandState with BindListener {
 		val existingEvent = None
+		val isImport: Boolean = true
 		var called = false
 		def apply(): SmallGroupEvent = {
 			called = true
