@@ -48,6 +48,10 @@ object ScalaRestriction {
 		if (!ticked) None
 		else Some(addAliases(new ScalaRestriction(HibernateHelpers.is(property, value)), aliases: _*))
 
+	def isPropertyIfTicked(property1: String, property2: String, ticked: Boolean, aliases: (String, AliasAndJoinType)*): Option[ScalaRestriction] =
+		if (!ticked) None
+		else Some(addAliases(new ScalaRestriction(org.hibernate.criterion.Restrictions.eqProperty(property1, property2)), aliases: _*))
+
 	// if the collection is empty, don't return any restriction - else return the restriction that the property must be in the collection
 	def inIfNotEmpty(property: String, collection: Iterable[Any], aliases: (String, AliasAndJoinType)*): Option[ScalaRestriction] =
 		if (collection.isEmpty) None
@@ -86,6 +90,16 @@ object ScalaRestriction {
 			val criterion = disjunction()
 			criterion.add(HibernateHelpers.is(property1, true))
 			criterion.add(HibernateHelpers.is(property2, true))
+
+			Some(addAliases(new ScalaRestriction(criterion), aliases: _*))
+		}
+
+	def neitherIsTrue(property1: String, property2: String, ticked: Boolean, aliases: (String, AliasAndJoinType)*): Option[ScalaRestriction] =
+		if (!ticked) None
+		else {
+			val criterion = conjunction()
+			criterion.add(HibernateHelpers.is(property1, false))
+			criterion.add(HibernateHelpers.is(property2, false))
 
 			Some(addAliases(new ScalaRestriction(criterion), aliases: _*))
 		}

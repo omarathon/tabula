@@ -1,7 +1,7 @@
 package uk.ac.warwick.tabula.commands
 
-import uk.ac.warwick.tabula.{Mockito, TestBase, JavaImports, Fixtures}
-import uk.ac.warwick.tabula.data.model.{CourseType, ModeOfAttendance, Department, SitsStatus, Module, Route}
+import uk.ac.warwick.tabula.{Fixtures, JavaImports, Mockito, TestBase}
+import uk.ac.warwick.tabula.data.model._
 import uk.ac.warwick.tabula.services.ProfileService
 import org.hibernate.criterion.Order
 import uk.ac.warwick.tabula.JavaImports.JArrayList
@@ -53,8 +53,10 @@ class FiltersStudentsTest extends TestBase with Mockito {
 			val sortOrder: JavaImports.JList[Order] = JArrayList()
 			val profileService: ProfileService = thisProfileService
 			val yearsOfStudy: JavaImports.JList[JavaImports.JInteger] = JArrayList()
+			val levelCodes: JavaImports.JList[String] = JArrayList()
 			val modules: JavaImports.JList[Module] = JArrayList()
 			val routes: JavaImports.JList[Route] = JArrayList()
+			val courses: JavaImports.JList[Course] = JArrayList()
 		}
 
 		filter.allCourseTypes should be (CourseType.all)
@@ -81,6 +83,8 @@ class FiltersStudentsTest extends TestBase with Mockito {
 			val yearsOfStudy: JavaImports.JList[JavaImports.JInteger] = JArrayList(1)
 			val modules: JavaImports.JList[Module] = JArrayList(mod1)
 			val routes: JavaImports.JList[Route] = JArrayList(route1, route2)
+			val courses: JavaImports.JList[Course] = JArrayList()
+			val levelCodes: JavaImports.JList[String] = JArrayList()
 		}
 
 		val serialized: String = filter.serializeFilter
@@ -115,6 +119,8 @@ class FiltersStudentsTest extends TestBase with Mockito {
 			val yearsOfStudy: JavaImports.JList[JavaImports.JInteger] = JArrayList()
 			val modules: JavaImports.JList[Module] = JArrayList()
 			val routes: JavaImports.JList[Route] = JArrayList()
+			val courses: JavaImports.JList[Course] = JArrayList()
+			val levelCodes: JavaImports.JList[String] = JArrayList()
 		}
 
 		val serialized: String = filter.serializeFilter

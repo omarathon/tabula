@@ -6,7 +6,7 @@ import org.springframework.validation.BindingResult
 import uk.ac.warwick.tabula.AcademicYear
 import uk.ac.warwick.tabula.JavaImports._
 import uk.ac.warwick.tabula.commands._
-import uk.ac.warwick.tabula.data.model.{CourseType, Department, ModeOfAttendance, Module, Route, SitsStatus, StudentMember}
+import uk.ac.warwick.tabula.data.model._
 import uk.ac.warwick.tabula.data.{AliasAndJoinType, ScalaRestriction}
 import uk.ac.warwick.tabula.permissions.Permissions
 import uk.ac.warwick.tabula.services.{AutowiringProfileServiceComponent, ProfileServiceComponent}
@@ -81,8 +81,10 @@ trait FilterStudentsState extends ProfileFilterExtras {
 
 	var courseTypes: JList[CourseType] = JArrayList()
 	var routes: JList[Route] = JArrayList()
+	var courses: JList[Course] = JArrayList()
 	var modesOfAttendance: JList[ModeOfAttendance] = JArrayList()
 	var yearsOfStudy: JList[JInteger] = JArrayList()
+	var levelCodes: JList[String] = JArrayList()
 	var sprStatuses: JList[SitsStatus] = JArrayList()
 	var modules: JList[Module] = JArrayList()
 

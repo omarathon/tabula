@@ -73,6 +73,17 @@ trait FiltersStudents extends FilterStudentsOrRelationships {
 		getAliasPaths("mostSignificantCourse") : _*
 	)
 
+	def levelCodeRestriction: Option[ScalaRestriction] = inIfNotEmpty(
+		"mostSignificantCourse.levelCode", levelCodes.asScala,
+		getAliasPaths("mostSignificantCourse") : _*
+	)
+
+	def isFinalistRestriction: Option[ScalaRestriction] = isPropertyIfTicked(
+		"studentCourseYearDetails.yearOfStudy", "mostSignificantCourse.courseYearLength",
+		otherCriteria.contains("Finalist"),
+		getAliasPaths("studentCourseYearDetails") ++ getAliasPaths("mostSignificantCourse") : _*
+	)
+
 	override def getAliasPaths(sitsTable: String) = AliasPaths(sitsTable)
 
 	override protected def latestYearDetailsForYear(year: AcademicYear): DetachedCriteria =
