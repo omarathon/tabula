@@ -15,6 +15,8 @@ import uk.ac.warwick.tabula.web.Mav
 import uk.ac.warwick.tabula.web.controllers.cm2.CourseworkController
 import uk.ac.warwick.userlookup.User
 
+import scala.collection.JavaConverters._
+
 
 @Profile(Array("cm2Enabled"))
 @Controller
@@ -47,7 +49,7 @@ class MarkingCompletedController extends CourseworkController {
 			"department" -> command.assignment.module.adminDepartment,
 			"isProxying" -> command.isProxying,
 			"proxyingAs" -> marker,
-			"nextStagesDescription" ->  command.feedbackForRelease.headOption.flatMap(_.stage.nextStagesDescription)
+			"nextStagesDescription" -> command.markerFeedback.asScala.headOption.flatMap(_.stage.nextStagesDescription).getOrElse("")
 		)
 	}
 
