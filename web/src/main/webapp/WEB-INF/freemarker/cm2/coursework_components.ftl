@@ -1132,10 +1132,12 @@
 					<#-- take the first and continue as above -->
 						<#local attachment = feedback.attachments?first />
 					</#if>
-					<#if attachment?has_content>
-						<#local downloadUrl><@routes.cm2.downloadMarkerFeedbackOne assignment feedback.marker feedback attachment /></#local>
-					<#elseif feedback.attachments?size gt 1>
-						<#local downloadUrl><@routes.cm2.downloadMarkerFeedbackAll assignment feedback.marker feedback stage.description+" feedback" /></#local>
+					<#if feedback.marker??>
+						<#if attachment?has_content>
+							<#local downloadUrl><@routes.cm2.downloadMarkerFeedbackOne assignment feedback.marker feedback attachment /></#local>
+						<#elseif feedback.attachments?size gt 1>
+							<#local downloadUrl><@routes.cm2.downloadMarkerFeedbackAll assignment feedback.marker feedback stage.description+" feedback" /></#local>
+						</#if>
 					</#if>
 					<a class="btn btn-default long-running use-tooltip" href="${downloadUrl}">Download feedback</a>
 					<ul class="feedback-attachments hide">
