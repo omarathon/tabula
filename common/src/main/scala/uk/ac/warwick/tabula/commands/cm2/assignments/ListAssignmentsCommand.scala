@@ -51,7 +51,6 @@ object ListAssignmentsCommand {
 
 	case class AssignmentNextStage(
 		stage: WorkflowStage,
-		title: Option[String],
 		url: Option[String],
 		count: Int
 	)
@@ -217,7 +216,6 @@ trait AssignmentProgressCache extends TaskBenchmarking {
 			allStages.filter(allNextStages.contains).map { stage =>
 				AssignmentNextStage(
 					stage,
-					stage.route(assignment).map(_.title),
 					stage.route(assignment).map(_.url),
 					allNextStages(stage)
 				)
@@ -263,7 +261,6 @@ trait AssignmentProgressCache extends TaskBenchmarking {
 			"nextStages" -> info.nextStages.map { ns =>
 				Map(
 					"stage" -> ns.stage.toString,
-					"title" -> ns.title,
 					"url" -> ns.url,
 					"count" -> ns.count
 				)
@@ -333,7 +330,6 @@ trait CachedAssignmentProgress extends AssignmentProgress with AssignmentProgres
 			nextStages = map("nextStages").asInstanceOf[Seq[Map[String, Any]]].map { ns =>
 				AssignmentNextStage(
 					stage = CM2WorkflowStages.of(ns("stage").asInstanceOf[String]),
-					title = ns.get("title").map(_.asInstanceOf[String]),
 					url = ns.get("url").map(_.asInstanceOf[String]),
 					count = ns("count").asInstanceOf[Int]
 				)

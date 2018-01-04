@@ -122,7 +122,7 @@ object CM2WorkflowCategory {
 sealed abstract class CM2WorkflowStage(val category: CM2WorkflowCategory) extends WorkflowStage {
 	def progress(assignment: Assignment)(coursework: WorkflowItems): WorkflowStages.StageProgress
 
-	case class Route(title: String, url: String)
+	case class Route(url: String)
 	def route(assignment: Assignment): Option[Route]
 
 	def markingRelated: Boolean // Is this a stage that a Marker cares about?
@@ -198,7 +198,7 @@ object CM2WorkflowStages {
 				StageProgress(DownloadSubmission, started = false, messageCode = "workflow.DownloadSubmission.notDownloaded")
 		}
 		override def preconditions = Seq(Seq(Submission))
-		def route(assignment: Assignment): Option[Route] = Some(Route("Download submissions", Routes.admin.assignment.submissionsandfeedback(assignment)))
+		def route(assignment: Assignment): Option[Route] = Some(Route(Routes.admin.assignment.submissionsandfeedback(assignment)))
 		val markingRelated = false
 	}
 
@@ -215,7 +215,7 @@ object CM2WorkflowStages {
 			case _ => StageProgress(CheckForPlagiarism, started = false, messageCode = "workflow.CheckForPlagiarism.notChecked")
 		}
 		override def preconditions = Seq(Seq(Submission))
-		def route(assignment: Assignment): Option[Route] = Some(Route("Check for plagiarism", Routes.admin.assignment.submitToTurnitin(assignment)))
+		def route(assignment: Assignment): Option[Route] = Some(Route(Routes.admin.assignment.submitToTurnitin(assignment)))
 		val markingRelated = false
 	}
 
@@ -229,7 +229,7 @@ object CM2WorkflowStages {
 			}
 		}
 		override def preconditions = Seq()
-		def route(assignment: Assignment): Option[Route] = Some(Route("Release for marking", Routes.admin.assignment.submissionsandfeedback(assignment)))
+		def route(assignment: Assignment): Option[Route] = Some(Route(Routes.admin.assignment.submissionsandfeedback(assignment)))
 		val markingRelated = true
 	}
 
@@ -348,7 +348,7 @@ object CM2WorkflowStages {
 			}
 		}
 		override def preconditions = Seq()
-		def route(assignment: Assignment): Option[Route] = Some(Route("Release for marking", Routes.admin.assignment.submissionsandfeedback(assignment)))
+		def route(assignment: Assignment): Option[Route] = Some(Route(Routes.admin.assignment.submissionsandfeedback(assignment)))
 		val markingRelated = true
 	}
 
@@ -399,7 +399,7 @@ object CM2WorkflowStages {
 			previousStage.preconditions.flatten :+ previousStage
 		})
 
-		override def route(assignment: Assignment): Option[Route] = markingStage.url(assignment).map(Route("", _))
+		override def route(assignment: Assignment): Option[Route] = markingStage.url(assignment).map(Route.apply)
 		val markingRelated = true
 	}
 
@@ -413,7 +413,7 @@ object CM2WorkflowStages {
 				case _ => StageProgress(AddMarks, started = false, messageCode = "workflow.AddMarks.notMarked")
 			}
 
-		def route(assignment: Assignment): Option[Route] = Some(Route("Add marks", Routes.admin.assignment.marks(assignment)))
+		def route(assignment: Assignment): Option[Route] = Some(Route(Routes.admin.assignment.marks(assignment)))
 		val markingRelated = false
 	}
 
@@ -428,7 +428,7 @@ object CM2WorkflowStages {
 				StageProgress(AddFeedback, started = false, messageCode = "workflow.AddFeedback.notUploaded")
 		}
 
-		def route(assignment: Assignment): Option[Route] = Some(Route("Add feedback", Routes.admin.assignment.feedback.online(assignment)))
+		def route(assignment: Assignment): Option[Route] = Some(Route(Routes.admin.assignment.feedback.online(assignment)))
 		val markingRelated = false
 	}
 
@@ -451,7 +451,7 @@ object CM2WorkflowStages {
 			f.previousStages.map(CM2MarkingWorkflowStage.apply)
 		}
 
-		def route(assignment: Assignment): Option[Route] = Some(Route("Release feedback", Routes.admin.assignment.publishFeedback(assignment)))
+		def route(assignment: Assignment): Option[Route] = Some(Route(Routes.admin.assignment.publishFeedback(assignment)))
 		val markingRelated = false
 	}
 
@@ -529,7 +529,7 @@ object CM2WorkflowStages {
 			f.previousStages.map(CM2MarkingWorkflowStage.apply)
 		}
 
-		def route(assignment: Assignment): Option[Route] = Some(Route("Upload feedback to SITS", Routes.admin.assignment.uploadToSits(assignment)))
+		def route(assignment: Assignment): Option[Route] = Some(Route(Routes.admin.assignment.uploadToSits(assignment)))
 		val markingRelated = false
 	}
 }
