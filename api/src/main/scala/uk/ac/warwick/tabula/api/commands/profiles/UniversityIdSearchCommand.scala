@@ -35,7 +35,7 @@ abstract class UniversityIdSearchCommandInternal extends CommandInternal[Seq[Str
 		val restrictions = buildRestrictions(AcademicYear.now())
 		val departments = Option(department) match {
 			case Some(d) => Seq(d)
-				case _ => moduleAndDepartmentService.allDepartments
+			case _ => moduleAndDepartmentService.allDepartments
 		}
 		departments.flatMap(dept =>
 			profileService.findAllUniversityIdsByRestrictionsInAffiliatedDepartments(
