@@ -3,21 +3,25 @@ package uk.ac.warwick.tabula.commands
 import uk.ac.warwick.tabula.data.model._
 import uk.ac.warwick.tabula.JavaImports._
 import org.hibernate.criterion.Order
+
 import scala.collection.JavaConverters._
 import uk.ac.warwick.util.web.UriBuilder
 import org.apache.http.client.utils.URLEncodedUtils
-import java.net.{URLDecoder, URI}
+import java.net.{URI, URLDecoder}
+
 import uk.ac.warwick.tabula.helpers.Logging
-import uk.ac.warwick.tabula.data.convert.{ModuleCodeConverter, SitsStatusCodeConverter, ModeOfAttendanceCodeConverter, RouteCodeConverter}
-import uk.ac.warwick.tabula.services.{AutowiringModuleAndDepartmentServiceComponent, AutowiringCourseAndRouteServiceComponent, ModuleAndDepartmentServiceComponent, CourseAndRouteServiceComponent}
-import uk.ac.warwick.tabula.data.{AutowiringSitsStatusDaoComponent, AutowiringModeOfAttendanceDaoComponent, SitsStatusDaoComponent, ModeOfAttendanceDaoComponent}
+import uk.ac.warwick.tabula.data.convert._
+import uk.ac.warwick.tabula.services.{AutowiringCourseAndRouteServiceComponent, AutowiringModuleAndDepartmentServiceComponent, CourseAndRouteServiceComponent, ModuleAndDepartmentServiceComponent}
+import uk.ac.warwick.tabula.data.{AutowiringModeOfAttendanceDaoComponent, AutowiringSitsStatusDaoComponent, ModeOfAttendanceDaoComponent, SitsStatusDaoComponent}
 
 trait FiltersStudentsBase {
 
 	def courseTypes: JList[CourseType]
 	def routes: JList[Route]
+	def courses: JList[Course]
 	def modesOfAttendance: JList[ModeOfAttendance]
 	def yearsOfStudy: JList[JInteger]
+	def levelCodes: JList[String]
 	def sprStatuses: JList[SitsStatus]
 	def modules: JList[Module]
 	def defaultOrder: Seq[Order]
@@ -34,8 +38,10 @@ trait FiltersStudentsBase {
 		val result = new UriBuilder()
 		courseTypes.asScala.foreach(p => result.addQueryParameter("courseTypes", p.code))
 		routes.asScala.foreach(p => result.addQueryParameter("routes", p.code))
+		courses.asScala.foreach(p => result.addQueryParameter("courses", p.code))
 		modesOfAttendance.asScala.foreach(p => result.addQueryParameter("modesOfAttendance", p.code))
 		yearsOfStudy.asScala.foreach(p => result.addQueryParameter("yearsOfStudy", p.toString))
+		levelCodes.asScala.foreach(p => result.addQueryParameter("yearsOfStudy", p))
 		sprStatuses.asScala.foreach(p => result.addQueryParameter("sprStatuses", p.code))
 		modules.asScala.foreach(p => result.addQueryParameter("modules", p.code))
 		otherCriteria.asScala.foreach(p => result.addQueryParameter("otherCriteria", p.toString))
@@ -49,8 +55,10 @@ trait FiltersStudentsBase {
 		Map(
 			"courseTypes" -> courseTypes.asScala.map{_.code}.mkString(","),
 			"routes" -> routes.asScala.map{_.code}.mkString(","),
+			"courses" -> courses.asScala.map{_.code}.mkString(","),
 			"modesOfAttendance" -> modesOfAttendance.asScala.map{_.code}.mkString(","),
 			"yearsOfStudy" -> yearsOfStudy.asScala.mkString(","),
+			"levelCodes" -> levelCodes.asScala.mkString(","),
 			"sprStatuses" -> sprStatuses.asScala.map{_.code}.mkString(","),
 			"modules" -> modules.asScala.map{_.code}.mkString(","),
 			"otherCriteria" -> otherCriteria.asScala.mkString(",")
@@ -88,6 +96,15 @@ trait DeserializesFilterImpl extends DeserializesFilter with Logging with Filter
 				case _ => logger.warn(s"Could not deserialize filter with route $item")
 			}
 		}}
+		courses.clear()
+		params.get("courses").foreach{_.foreach{ item =>
+			val courseCodeConverter = new CourseCodeConverter
+			courseCodeConverter.service = courseAndRouteService
+			courseCodeConverter.convertRight(item) match {
+				case course: Course => courses.add(course)
+				case _ => logger.warn(s"Could not deserialize filter with course $item")
+			}
+		}}
 		modesOfAttendance.clear()
 		params.get("modesOfAttendance").foreach{_.foreach{ item =>
 			val modeOfAttendanceCodeConverter = new ModeOfAttendanceCodeConverter
@@ -106,6 +123,8 @@ trait DeserializesFilterImpl extends DeserializesFilter with Logging with Filter
 					logger.warn(s"Could not deserialize filter with yearOfStudy $item")
 			}}
 		}
+		levelCodes.clear()
+		params.get("levelCodes").foreach{_.foreach{ item => levelCodes.add(item) }}
 		sprStatuses.clear()
 		params.get("sprStatuses").foreach{_.foreach{ item =>
 			val sitsStatusCodeConverter = new SitsStatusCodeConverter

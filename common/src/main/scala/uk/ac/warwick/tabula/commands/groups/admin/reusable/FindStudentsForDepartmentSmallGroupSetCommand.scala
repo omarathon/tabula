@@ -171,8 +171,10 @@ trait FindStudentsForDepartmentSmallGroupSetCommandState {
 	// Filter binds
 	var courseTypes: JList[CourseType] = JArrayList()
 	var routes: JList[Route] = JArrayList()
+	var courses: JList[Course] = JArrayList()
 	var modesOfAttendance: JList[ModeOfAttendance] = JArrayList()
 	var yearsOfStudy: JList[JInteger] = JArrayList()
+	var levelCodes: JList[String] = JArrayList()
 	var sprStatuses: JList[SitsStatus] = JArrayList()
 	var modules: JList[Module] = JArrayList()
 }
