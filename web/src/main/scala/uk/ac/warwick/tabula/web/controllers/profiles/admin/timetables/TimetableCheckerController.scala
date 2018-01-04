@@ -2,6 +2,7 @@ package uk.ac.warwick.tabula.web.controllers.profiles.admin.timetables
 
 import org.springframework.stereotype.Controller
 import org.springframework.web.bind.annotation.{ModelAttribute, RequestMapping}
+import uk.ac.warwick.tabula.AcademicYear
 import uk.ac.warwick.tabula.commands.Appliable
 import uk.ac.warwick.tabula.commands.profiles.admin.timetables.TimetableCheckerCommand
 import uk.ac.warwick.tabula.web.Mav
@@ -24,6 +25,7 @@ class TimetableCheckerController extends ProfilesController {
 	@RequestMapping(method=Array(POST))
 	def submit(@ModelAttribute("command") command: TimetableCheckerCommand): Mav = {
 		command.apply()
-		Mav("profiles/admin/timetablechecker_results")
+
+		Mav("profiles/admin/timetablechecker_results", "academicYear" -> AcademicYear.now().getLabel.replace("/", ""))
 	}
 }
