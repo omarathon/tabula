@@ -19,7 +19,7 @@ abstract class ExtensionRequestNotification
 
 	def template: String
 
-	def url: String = Routes.admin.assignment.extensions(assignment)//, student.getUserId)
+	def url: String = Routes.admin.assignment.extension(assignment, student)
 	def urlTitle = "review this extension request"
 
 	def studentMember: Option[Member] = Option(student.getWarwickId).flatMap(uid => profileService.getMemberByUniversityId(uid))

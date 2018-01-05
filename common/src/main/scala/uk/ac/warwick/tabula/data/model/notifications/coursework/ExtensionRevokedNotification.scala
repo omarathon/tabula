@@ -27,7 +27,7 @@ class ExtensionRevokedNotification extends Notification[Assignment, Unit]
 	def verb = "revoke"
 
 	def title: String =	"%s: Your extended deadline for \"%s\" has been revoked".format(assignment.module.code.toUpperCase, assignment.name)
-	def url: String = Routes.assignment.apply(assignment)
+	def url: String = Routes.assignment(assignment)
 	def urlTitle = "view the assignment"
 
 	def content = FreemarkerModel(ExtensionRevokedNotification.templateLocation, Map (
