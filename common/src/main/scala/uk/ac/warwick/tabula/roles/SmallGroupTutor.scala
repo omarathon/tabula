@@ -1,17 +1,17 @@
 package uk.ac.warwick.tabula.roles
 
+import uk.ac.warwick.tabula.data.model.groups.{SmallGroup, SmallGroupEvent}
+import uk.ac.warwick.tabula.data.model.{StudentMember, StudentRelationshipType}
 import uk.ac.warwick.tabula.permissions.Permissions._
-import uk.ac.warwick.tabula.data.model.groups.{SmallGroupEvent, SmallGroup}
 import uk.ac.warwick.tabula.permissions.PermissionsSelector
-import uk.ac.warwick.tabula.data.model.StudentRelationshipType
-import uk.ac.warwick.tabula.roles.SmallGroupTutorRoleDefinition._
 
 case class SmallGroupEventTutor(smallGroupEvent: SmallGroupEvent) extends BuiltInRole(SmallGroupEventTutorRoleDefinition, smallGroupEvent)
 case class SmallGroupTutor(smallGroup: SmallGroup) extends BuiltInRole(SmallGroupTutorRoleDefinition, smallGroup)
+case class SmallGroupMembersTutor(student: StudentMember) extends BuiltInRole(SmallGroupMembersTutorRoleDefinition, student)
 
 case object SmallGroupEventTutorRoleDefinition extends UnassignableBuiltInRoleDefinition {
 
-	override def description = "SmallGroupEventTutor"
+	override def description = "Small group event tutor"
 
 	GrantsScopedPermission(
 		SmallGroupEvents.Register
@@ -21,13 +21,21 @@ case object SmallGroupEventTutorRoleDefinition extends UnassignableBuiltInRoleDe
 
 case object SmallGroupTutorRoleDefinition extends UnassignableBuiltInRoleDefinition {
 
-	override def description = "SmallGroupTutor"
+	override def description = "Small group tutor"
 
 	GrantsScopedPermission(
 		SmallGroups.Read,
 		SmallGroups.ReadMembership,
-		SmallGroupEvents.ViewRegister,
+		SmallGroupEvents.ViewRegister
+	)
 
+}
+
+case object SmallGroupMembersTutorRoleDefinition extends UnassignableBuiltInRoleDefinition {
+
+	override def description = "Small group member's tutor"
+
+	GrantsScopedPermission(
 		// Extra permissions on any students in these groups for their profile
 		Profiles.Read.Usercode,
 		Profiles.Read.StudentCourseDetails.Core,
