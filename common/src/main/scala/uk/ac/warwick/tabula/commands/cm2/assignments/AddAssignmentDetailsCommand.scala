@@ -259,7 +259,7 @@ trait GeneratesNotificationsForAssignment {
 
       val feedbackDeadline = assignment.feedbackDeadline
       val feedbackNotifications =
-        if (assignment.dissertation || feedbackDeadline.isEmpty) // No feedback deadline for dissertations or late submissions
+        if (assignment.dissertation || !assignment.publishFeedback || feedbackDeadline.isEmpty) // No feedback deadline for dissertations or late submissions
           Seq()
         else {
           val daysToSend = Seq(-7, -1, 0)

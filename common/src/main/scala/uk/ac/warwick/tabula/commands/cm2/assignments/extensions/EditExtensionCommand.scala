@@ -194,7 +194,7 @@ trait EditExtensionCommandScheduledNotification extends SchedulesNotifications[E
 			}
 
 			val feedbackNotifications =
-				if (assignment.dissertation)
+				if (assignment.dissertation || !assignment.publishFeedback)
 					Seq()
 				else {
 					val daysToSend = Seq(-7, -1, 0)
