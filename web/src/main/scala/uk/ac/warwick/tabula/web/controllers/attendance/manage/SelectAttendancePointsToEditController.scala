@@ -50,7 +50,8 @@ class SelectAttendancePointsToEditController extends AttendanceController with H
 			"allTypes" -> AttendanceMonitoringPointType.values,
 			"allStyles" -> AttendanceMonitoringPointStyle.values,
 			"newPoints" -> Option(points).getOrElse(0),
-			"actionCompleted" -> actionCompleted
+			"actionCompleted" -> actionCompleted,
+			"extendedAcademicYear" ->  AcademicYear.extendedYear(academicYear.startYear)
 		).crumbs(
 			Breadcrumbs.Manage.HomeForYear(academicYear),
 			Breadcrumbs.Manage.DepartmentForYear(department, academicYear)

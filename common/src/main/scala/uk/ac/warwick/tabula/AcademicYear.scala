@@ -83,6 +83,8 @@ object AcademicYear {
 	// The year at which we stop having ExtendedAcademicYears and just have AcademicYears
 	val extendedAcademicYearCrossover: Int = 2018
 
+	def extendedYear(startYear: Int): Boolean = (startYear < AcademicYear.extendedAcademicYearCrossover)
+
 	def apply(startYear: Int): AcademicYear =
 		if (startYear < extendedAcademicYearCrossover) JExtendedAcademicYear.starting(startYear)
 		else JAcademicYear.starting(startYear)
