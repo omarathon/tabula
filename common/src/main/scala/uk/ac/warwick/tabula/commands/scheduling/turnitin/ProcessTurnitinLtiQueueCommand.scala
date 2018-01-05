@@ -4,7 +4,7 @@ import org.joda.time.DateTime
 import org.springframework.transaction.annotation.Propagation._
 import uk.ac.warwick.tabula.commands._
 import uk.ac.warwick.tabula.commands.scheduling.turnitin.ProcessTurnitinLtiQueueCommand.ProcessTurnitinLtiQueueCommandResult
-import uk.ac.warwick.tabula.coursework.web.Routes
+import uk.ac.warwick.tabula.web.Routes
 import uk.ac.warwick.tabula.data.Transactions._
 import uk.ac.warwick.tabula.data.model.notifications.coursework.{TurnitinJobErrorNotification, TurnitinJobSuccessNotification}
 import uk.ac.warwick.tabula.data.model.{Assignment, Notification, OriginalityReport}
@@ -104,7 +104,7 @@ abstract class ProcessTurnitinLtiQueueCommandInternal extends CommandInternal[Pr
 			}
 		}
 
-		val attachmentUrl = s"$toplevelUrl${Routes.admin.assignment.turnitinlti.fileByToken(submission, attachment, token)}"
+		val attachmentUrl = s"$toplevelUrl${Routes.turnitinlti.fileByToken(submission, attachment, token)}"
 
 		val response = turnitinLtiService.submitPaper(
 			assignment = assignment,
