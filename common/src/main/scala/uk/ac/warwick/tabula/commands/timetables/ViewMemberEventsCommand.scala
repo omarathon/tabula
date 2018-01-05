@@ -51,6 +51,19 @@ object ViewMemberEventsCommand extends Logging {
 			throw new ItemNotFoundException
 	}
 
+	// Re-usable service
+	def apply(staff: StaffMember, currentUser: CurrentUser, source: StaffTimetableEventSource): TimetableCommand =
+		new ViewStaffEventsCommandInternal(staff, currentUser)
+			with ComposableCommand[ReturnType]
+			with ViewMemberEventsPermissions
+			with ViewMemberEventsValidation
+			with Unaudited with ReadOnly
+			with AutowiringScheduledMeetingEventSourceComponent
+			with AutowiringTermBasedEventOccurrenceServiceComponent
+			with StaffTimetableEventSourceComponent {
+			val staffTimetableEventSource: StaffTimetableEventSource = source
+		}
+
 	def public(member: Member, currentUser: CurrentUser): TimetableCommand = member match {
 		case student: StudentMember =>
 			new ViewStudentEventsCommandInternal(student, currentUser)
@@ -188,14 +201,27 @@ trait ViewStaffMemberEventsCommandFactory {
 	def apply(staffMember: StaffMember): Appliable[ReturnType] with ViewMemberEventsRequest
 }
 
-class ViewStaffMemberEventsCommandFactoryImpl(currentUser: CurrentUser)
+class ViewStaffMemberEventsCommandFactoryImpl(currentUser: CurrentUser, source: Option[StaffTimetableEventSource] = None)
 	extends ViewStaffMemberEventsCommandFactory {
 
-	def apply(staffMember: StaffMember) =
-		ViewMemberEventsCommand(
-			staffMember,
-			currentUser
-		)
+	def this(currentUser: CurrentUser, source: StaffTimetableEventSource) {
+		this(currentUser, Some(source))
+	}
+
+	def apply(staffMember: StaffMember) = source match {
+		case Some(staffTimetableEventSource) =>
+			ViewMemberEventsCommand(
+				staffMember,
+				currentUser,
+				staffTimetableEventSource
+			)
+
+		case _ =>
+			ViewMemberEventsCommand(
+				staffMember,
+				currentUser
+			)
+	}
 }
 
 trait ViewStudentMemberEventsCommandFactory {
