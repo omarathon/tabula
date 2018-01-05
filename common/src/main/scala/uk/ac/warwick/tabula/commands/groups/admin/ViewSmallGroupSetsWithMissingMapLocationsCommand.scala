@@ -27,7 +27,8 @@ class ViewSmallGroupSetsWithMissingMapLocationsCommand(val academicYear: Academi
 	self: SmallGroupServiceComponent =>
 
 	override def applyInternal(): Seq[(SmallGroupSet, Seq[SmallGroupEvent])] = {
-		smallGroupService.listSmallGroupSetsWithEventsWithoutMapLocation(academicYear, Some(department)).toSeq
+		smallGroupService.listSmallGroupSetsWithEventsWithoutMapLocation(academicYear, Some(department))
+			.toSeq.sortBy { case (set, _) => (set.module, set) }
 	}
 }
 
