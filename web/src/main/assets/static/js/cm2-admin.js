@@ -229,6 +229,9 @@
 				$('#open-reminder-dt').prop("disabled", true);
 			}
 		});
+		$('input#publishFeedback').change(function(){
+			$('#dissertation-checkbox').prop('disabled', !$(this).is(':checked'));
+		});
 		// check that the extension UI elements are present
 		if($('input#allowExtensionRequests').length > 0){
 			$('input#allowExtensionRequests').slideMoreOptions($('#request-extension-fields'), true);

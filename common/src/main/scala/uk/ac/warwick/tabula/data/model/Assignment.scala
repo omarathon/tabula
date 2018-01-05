@@ -215,7 +215,7 @@ class Assignment
 		* deadline based on extension expiry date logic if none of the above AND (there are submissions within extension deadline OR if there are approved extensions  for all students)
 		*
 		*/
-	def feedbackDeadline: Option[LocalDate] = if (openEnded || dissertation) {
+	def feedbackDeadline: Option[LocalDate] = if (openEnded || dissertation || !publishFeedback) {
 		None
 	} else if (!hasExtensions || !extensions.exists(_.approved) || submissions.exists(s => !extensions.exists(e => e.isForUser(s.usercode))) || !doesAllMembersHaveApprovedExtensions) {
 		Option(workingDaysHelper.datePlusWorkingDays(closeDate.toLocalDate.asJava, Feedback.PublishDeadlineInWorkingDays)).map(_.asJoda)
@@ -777,7 +777,7 @@ class Assignment
 	def mustReleaseForMarking: Boolean = hasWorkflow || hasCM2Workflow
 
 	def needsFeedbackPublishing: Boolean = {
-		if (openEnded || dissertation || !collectSubmissions || _archived) {
+		if (openEnded || dissertation || !publishFeedback || !collectSubmissions || _archived) {
 			false
 		} else {
 			!submissions.asScala.forall(s => fullFeedback.exists(f => f.usercode == s.usercode && f.checkedReleased) || s.hasPlagiarismInvestigation)
@@ -785,7 +785,7 @@ class Assignment
 	}
 
 	def needsFeedbackPublishingIgnoreExtensions: Boolean = {
-		if (openEnded || dissertation || !collectSubmissions || _archived) {
+		if (openEnded || dissertation || !publishFeedback || !collectSubmissions || _archived) {
 			false
 		} else {
 			!submissions.asScala.forall(s => findExtension(s.usercode).exists(_.approved) || fullFeedback.exists(f => f.usercode == s.usercode && f.checkedReleased) || s.hasPlagiarismInvestigation)
@@ -793,7 +793,7 @@ class Assignment
 	}
 
 	def needsFeedbackPublishingFor(usercode: String): Boolean = {
-		if (openEnded || dissertation || !collectSubmissions || _archived) {
+		if (openEnded || dissertation || !publishFeedback || !collectSubmissions || _archived) {
 			false
 		} else {
 			!submissions.asScala.find(_.usercode == usercode).forall(s => fullFeedback.exists(f => f.usercode == s.usercode && f.checkedReleased) || s.hasPlagiarismInvestigation)
