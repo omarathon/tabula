@@ -116,10 +116,12 @@ abstract class AbstractMeetingRecord extends GeneratedId with PermissionsTarget 
 			eventType = TimetableEventType.Meeting,
 			start = meetingDate.toLocalDateTime,
 			end = meetingEndDate.toLocalDateTime,
-			if (format == MeetingFormat.FaceToFace) None
-			else Option(format).map {
-				_.description
-			}.map(NamedLocation),
+			location = Option(meetingLocation).orElse {
+				if (format == MeetingFormat.FaceToFace) None
+				else Option(format).map {
+					_.description
+				}.map(NamedLocation)
+			},
 			parent = TimetableEvent.Parent(relationship.relationshipType),
 			comments = None,
 			staff = context match {
