@@ -181,9 +181,9 @@ class ListExtensionsForAssignmentController extends CourseworkController {
 		ListExtensionsForAssignmentCommand(assignment, user)
 
 	@RequestMapping
-	def listExtensions(@ModelAttribute("listCommand") cmd: ListExtensionsForAssignmentCommand.Command, @RequestParam(value="universityId", required=false) universityId: String): Mav =
+	def listExtensions(@ModelAttribute("listCommand") cmd: ListExtensionsForAssignmentCommand.Command, @RequestParam(value="usercode", required=false) usercode: String): Mav =
 		Mav("cm2/admin/extensions/assignmentSummary",
-			"extensionToOpen" -> universityId,
+			"extensionToOpen" -> usercode,
 			"extensionGraphs" -> cmd.apply(),
 			"module" -> cmd.assignment.module,
 			"assignment" -> cmd.assignment,

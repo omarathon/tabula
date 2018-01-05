@@ -2,7 +2,6 @@ package uk.ac.warwick.tabula.web.controllers.admin.permissions
 
 import javax.validation.Valid
 
-import org.joda.time.DateTime
 import org.springframework.stereotype.Controller
 import org.springframework.validation.Errors
 import org.springframework.web.bind.annotation.{ModelAttribute, PathVariable, RequestMapping, RequestParam}
@@ -10,17 +9,17 @@ import uk.ac.warwick.spring.Wire
 import uk.ac.warwick.tabula.commands.permissions._
 import uk.ac.warwick.tabula.commands.{Appliable, SelfValidating}
 import uk.ac.warwick.tabula.data.Transactions._
+import uk.ac.warwick.tabula.data.model._
 import uk.ac.warwick.tabula.data.model.groups.{SmallGroup, SmallGroupEvent, SmallGroupSet}
 import uk.ac.warwick.tabula.data.model.permissions.{GrantedPermission, GrantedRole}
-import uk.ac.warwick.tabula.data.model._
 import uk.ac.warwick.tabula.helpers.ReflectionHelper
 import uk.ac.warwick.tabula.permissions._
 import uk.ac.warwick.tabula.roles.RoleBuilder.GeneratedRole
 import uk.ac.warwick.tabula.roles.{RoleBuilder, RoleDefinition, SelectorBuiltInRoleDefinition}
 import uk.ac.warwick.tabula.services.UserLookupService
 import uk.ac.warwick.tabula.services.permissions.PermissionsService
-import uk.ac.warwick.tabula.web.{Mav, Routes}
 import uk.ac.warwick.tabula.web.controllers.admin.AdminController
+import uk.ac.warwick.tabula.web.{Mav, Routes}
 import uk.ac.warwick.tabula.{AcademicYear, CurrentUser}
 
 import scala.collection.JavaConverters._
@@ -237,7 +236,7 @@ class MemberPermissionsController extends PermissionsControllerMethods[Member] {
 @Controller @RequestMapping(value = Array("/admin/permissions/department/{target}"))
 class DepartmentPermissionsController extends PermissionsControllerMethods[Department] {
 	@ModelAttribute("adminLinks") def adminLinks(@PathVariable("target") department: Department) = Seq(
-		AdminLink("Coursework Management", Routes.coursework.admin.department(department)),
+		AdminLink("Coursework Management", Routes.cm2.admin.department(department, AcademicYear.now())),
 		AdminLink("Small Group Teaching", Routes.groups.admin(department, AcademicYear.now())),
 		AdminLink("Monitoring Points - View and record", Routes.attendance.View.departmentForYear(department, AcademicYear.now())),
 		AdminLink("Monitoring Points - Create and edit", Routes.attendance.Manage.departmentForYear(department, AcademicYear.now())),
@@ -248,7 +247,7 @@ class DepartmentPermissionsController extends PermissionsControllerMethods[Depar
 @Controller @RequestMapping(value = Array("/admin/permissions/module/{target}"))
 class ModulePermissionsController extends PermissionsControllerMethods[Module] {
 	@ModelAttribute("adminLinks") def adminLinks(@PathVariable("target") module: Module) = Seq(
-		AdminLink("Coursework Management", Routes.coursework.admin.module(module)),
+		AdminLink("Coursework Management", Routes.cm2.admin.department(module.adminDepartment, AcademicYear.now())),
 		AdminLink("Small Group Teaching", Routes.groups.admin(module.adminDepartment, AcademicYear.now())),
 		AdminLink("Administration & Permissions", Routes.admin.module(module))
 	)
@@ -264,7 +263,7 @@ class RoutePermissionsController extends PermissionsControllerMethods[Route] {
 @Controller @RequestMapping(value = Array("/admin/permissions/assignment/{target}"))
 class AssignmentPermissionsController extends PermissionsControllerMethods[Assignment] {
 	@ModelAttribute("adminLinks") def adminLinks(@PathVariable("target") assignment: Assignment) = Seq(
-		AdminLink("Manage", Routes.coursework.admin.module(assignment.module))
+		AdminLink("Manage", Routes.cm2.admin.assignment.submissionsandfeedback(assignment))
 	)
 }
 

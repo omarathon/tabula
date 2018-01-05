@@ -325,13 +325,6 @@ class StudentMember extends Member with StudentProperties {
 		topLevelDepts flatMap(_.subDepartmentsContaining(this))
 	}
 
-	@transient var smallGroupService: SmallGroupService = Wire[SmallGroupService]
-
-	/**
-		* Get all small groups that this student is signed up for
-		*/
-	def registeredSmallGroups: Stream[SmallGroup] = smallGroupService.findSmallGroupsByStudent(asSsoUser).toStream
-
 	override def permissionsParents: Stream[PermissionsTarget] = {
 		// TAB-3007 We shouldn't swim downstream to the StudentCourseDetails or StudentCourseYearDetails for things here,
 		// rely on them swimming up.
@@ -352,14 +345,12 @@ class StudentMember extends Member with StudentProperties {
 			(Stream(Option(homeDepartment), enrolmentDepartment).flatten ++ studyDepartments.toStream).distinct.flatMap(_.subDepartmentsContaining(this))
 
 		/*
-		 * FIXME TAB-2971 The small groups and modules from registrations here shouldn't be in permissionsParents, because
-		 * the SmallGroup doesn't wholly contain the student and neither does the Module. As things stand, you can add a student
-		 * to a small group and thereby elevate your own permissions on that student, which is wrong. We're really using this
-		 * as a mechanism to show more information to markers, module managers and small group tutors, which could be achieved
-		 * via a separate role provider that searches for registered small groups (or module registrations) when given the scope
-		 * of a StudentMember.
+		 * FIXME TAB-2971 The modules from registrations here shouldn't be in permissionsParents, because the Module doesn't wholly
+		 * contain the student. As things stand, when a student registers for an option in another department that department gets
+		 * a whole heap of permissions on that student, which is wrong. We're really using this as a mechanism to show more information
+		 * to markers and module managers, which could be achieved via a separate role provider that searches for module registrations when
+		 * given the scope of a StudentMember.
 		 */
-		val smallGroups: Stream[PermissionsTarget] = registeredSmallGroups
 		val modules: Stream[PermissionsTarget] = mostSignificantCourse.toStream.flatMap { scd =>
 			latestStudentCourseYearDetails.toStream.flatMap { scyd =>
 				// Only include module registrations for the latest year of the most significant course
@@ -367,7 +358,7 @@ class StudentMember extends Member with StudentProperties {
 			}
 		}
 
-		departments #::: modules #::: smallGroups #::: currentCourseRoutes
+		departments #::: modules #::: currentCourseRoutes
 	}
 
 	@Restricted(Array("Profiles.Read.StudentCourseDetails.Core"))

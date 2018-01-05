@@ -2,7 +2,6 @@ package uk.ac.warwick.tabula.cm2.web
 
 import uk.ac.warwick.spring.Wire
 import uk.ac.warwick.tabula.AcademicYear
-import uk.ac.warwick.tabula.cm2.web.Routes.admin.assignment
 import uk.ac.warwick.tabula.data.model._
 import uk.ac.warwick.tabula.data.model.forms.Extension
 import uk.ac.warwick.tabula.data.model.markingworkflow.{CM2MarkingWorkflow, MarkingWorkflowStage}
@@ -205,6 +204,7 @@ object Routes {
 			}
 
 			def extensions(assignment: Assignment): String = assignmentroot(assignment) + "/extensions"
+			def extension(assignment: Assignment, student: User): String = extensions(assignment) + s"?usercode=${encoded(student.getUserId)}"
 
 			def submitToTurnitin(assignment: Assignment): String = assignmentroot(assignment) + "/turnitin"
 		}

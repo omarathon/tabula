@@ -3,7 +3,7 @@ package uk.ac.warwick.tabula.data.model.notifications.coursework
 import javax.persistence.{DiscriminatorValue, Entity}
 
 import uk.ac.warwick.spring.Wire
-import uk.ac.warwick.tabula.coursework.web.Routes
+import uk.ac.warwick.tabula.cm2.web.Routes
 import uk.ac.warwick.tabula.data.model.NotificationPriority.Warning
 import uk.ac.warwick.tabula.data.model._
 import uk.ac.warwick.tabula.services.{ProfileService, RelationshipService}
@@ -19,7 +19,7 @@ abstract class ExtensionRequestNotification
 
 	def template: String
 
-	def url: String = Routes.admin.assignment.extension.expandrow(assignment, student.getUserId)
+	def url: String = Routes.admin.assignment.extension(assignment, student)
 	def urlTitle = "review this extension request"
 
 	def studentMember: Option[Member] = Option(student.getWarwickId).flatMap(uid => profileService.getMemberByUniversityId(uid))

@@ -15,9 +15,9 @@ class ExtensionRevokedNotificationTest extends TestBase with Mockito with Extens
 	}
 
 	@Test
-	def urlIsProfilePage():Unit = new ExtensionFixture {
+	def urlIsSubmissionPage():Unit = new ExtensionFixture {
 		val n: ExtensionRevokedNotification = createNotification(assignment, student, admin)
-		n.url should be(s"/$cm1Prefix/module/xxx/123/")
+		n.url should be(s"/$cm2Prefix/submission/123/")
 	}
 
 	@Test
@@ -39,7 +39,7 @@ class ExtensionRevokedNotificationTest extends TestBase with Mockito with Extens
 		n.content.model("assignment") should be(assignment)
 		n.content.model("module") should be(module)
 		n.content.model("user") should be(student)
-		n.url should be(s"/$cm1Prefix/module/xxx/123/")
+		n.url should be(s"/$cm2Prefix/submission/123/")
 	}
 
 	@Test

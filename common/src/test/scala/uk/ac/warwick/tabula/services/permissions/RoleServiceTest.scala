@@ -178,10 +178,6 @@ class RoleServiceTest extends TestBase with Mockito {
 		val profileService = mock[ProfileService with StaffAssistantsHelpers]
 		member.profileService = profileService
 
-		val smallGroupService = mock[SmallGroupService]
-		smallGroupService.findSmallGroupsByStudent(member.asSsoUser) returns (Nil)
-		member.smallGroupService = smallGroupService
-
 		val provider1 = mock[RoleProvider]
 		val provider2 = mock[RoleProvider]
 
@@ -193,7 +189,7 @@ class RoleServiceTest extends TestBase with Mockito {
 		when(provider1.getRolesFor(currentUser, dept)) thenReturn(Stream(DepartmentalAdministrator(dept)))
 		when(provider2.getRolesFor(currentUser, dept)) thenReturn(Stream.empty)
 
-		(service.getRolesFor(currentUser, member) exists { _ == DepartmentalAdministrator(dept) }) should be (true)
+		service.getRolesFor(currentUser, member).contains(DepartmentalAdministrator(dept)) should be (true)
 	}
 
 }

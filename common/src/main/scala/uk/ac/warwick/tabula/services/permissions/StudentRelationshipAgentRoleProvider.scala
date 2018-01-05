@@ -27,7 +27,7 @@ class StudentRelationshipAgentRoleProvider extends RoleProvider
 					.map { rel => rel.relationshipType }
 					.distinct
 					.map { relationshipType =>
-					val custom = customRoles(student, relationshipType, StudentRelationshipAgentRoleDefinition(relationshipType))
+					val custom = customRoles(student, StudentRelationshipAgentRoleDefinition(relationshipType))
 					custom.headOption.getOrElse { StudentRelationshipAgent(student, relationshipType) }
 				}
 
@@ -55,7 +55,7 @@ class HistoricStudentRelationshipAgentRoleProvider extends RoleProvider
 				.map(_.relationshipType).distinct
 				.map(relType => {
 				// for each type of relationship return the first department override we fgetRolesForind or the inbuild role
-				val custom = customRoles(student, relType, HistoricStudentRelationshipAgentRoleDefinition(relType))
+				val custom = customRoles(student, HistoricStudentRelationshipAgentRoleDefinition(relType))
 				custom.headOption.getOrElse(HistoricStudentRelationshipAgent(student, relType))
 			})
 
@@ -68,8 +68,7 @@ class HistoricStudentRelationshipAgentRoleProvider extends RoleProvider
 }
 
 trait CustomRolesForAdminDepartments {
-
-	this : RoleProvider with RelationshipServiceComponent =>
+	self: RoleProvider =>
 
 	// departments to check for custom roles
 	private def studentsAdminDepartments(student: StudentMember): Seq[Department] = {
@@ -80,10 +79,9 @@ trait CustomRolesForAdminDepartments {
 	}
 
 	// returns department overrides for the specified definition for all of the students admin departments
-	def customRoles(student: StudentMember, relType: StudentRelationshipType, definition: RoleDefinition): Seq[Role] =
+	def customRoles(student: StudentMember, definition: RoleDefinition): Seq[Role] =
 		for {
 			department <- studentsAdminDepartments(student)
 			customRole <- customRoleFor(department)(definition, student)
 		} yield customRole
-
 }

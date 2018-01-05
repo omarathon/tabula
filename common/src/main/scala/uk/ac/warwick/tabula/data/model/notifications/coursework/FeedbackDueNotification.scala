@@ -4,7 +4,7 @@ import javax.persistence.{DiscriminatorValue, Entity}
 
 import org.joda.time.LocalDate
 import uk.ac.warwick.spring.Wire
-import uk.ac.warwick.tabula.coursework.web.Routes
+import uk.ac.warwick.tabula.cm2.web.Routes
 import uk.ac.warwick.tabula.data.model.NotificationPriority.{Critical, Info, Warning}
 import uk.ac.warwick.tabula.data.model._
 import uk.ac.warwick.tabula.data.model.forms.Extension

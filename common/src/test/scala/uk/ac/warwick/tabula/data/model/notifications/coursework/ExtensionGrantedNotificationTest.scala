@@ -15,9 +15,9 @@ class ExtensionGrantedNotificationTest extends TestBase with Mockito with Extens
 	}
 
 	@Test
-	def urlIsProfilePage():Unit = new ExtensionFixture {
+	def urlIsSubmissionPage():Unit = new ExtensionFixture {
 		val n: ExtensionGrantedNotification = createNotification(extension, student, admin)
-		n.url should be(s"/$cm1Prefix/module/xxx/123/")
+		n.url should be(s"/$cm2Prefix/submission/123/")
 	}
 
 	@Test
@@ -40,7 +40,7 @@ class ExtensionGrantedNotificationTest extends TestBase with Mockito with Extens
 		n.content.model.get("assignment").get should be(assignment)
 		n.content.model.get("module").get should be(module)
 		n.content.model.get("user").get should be(student)
-		n.content.model.get("path").get should be(s"/$cm1Prefix/module/xxx/123/")
+		n.content.model.get("path").get should be(s"/$cm2Prefix/submission/123/")
 	}
 
 	@Test
