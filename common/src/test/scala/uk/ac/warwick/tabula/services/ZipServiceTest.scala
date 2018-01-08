@@ -1,26 +1,19 @@
 package uk.ac.warwick.tabula.services
 
-import java.io.FileInputStream
-
-import uk.ac.warwick.tabula.services.objectstore.{ObjectStorageService, RichByteSource}
-
-import collection.JavaConverters._
-import uk.ac.warwick.tabula.TestBase
-import uk.ac.warwick.tabula.Mockito
 import java.util.zip.ZipInputStream
 
 import com.google.common.io.Files
-import org.springframework.core.io.ClassPathResource
-import uk.ac.warwick.tabula.data.model.Submission
-import uk.ac.warwick.tabula.data.model.Module
-import uk.ac.warwick.tabula.data.model.Assignment
-import uk.ac.warwick.tabula.data.model.FileAttachment
 import org.apache.commons.compress.archivers.zip.ZipArchiveInputStream
-import uk.ac.warwick.userlookup.User
 import org.junit.Before
-import uk.ac.warwick.userlookup.AnonymousUser
-import uk.ac.warwick.tabula.data.model.Department
+import org.springframework.core.io.ClassPathResource
+import uk.ac.warwick.tabula.{Mockito, TestBase}
+import uk.ac.warwick.tabula.data.model.AssignmentAnonymity.IDOnly
+import uk.ac.warwick.tabula.data.model._
 import uk.ac.warwick.tabula.data.model.forms.SavedFormValue
+import uk.ac.warwick.tabula.services.objectstore.{ObjectStorageService, RichByteSource}
+import uk.ac.warwick.userlookup.{AnonymousUser, User}
+
+import scala.collection.JavaConverters._
 
 class ZipServiceTest extends TestBase with Mockito {
 
@@ -120,7 +113,42 @@ class ZipServiceTest extends TestBase with Mockito {
 		items.head.name should be ("ph105 - Roger Aaaah - 0000007 - garble.doc")
 	}
 
+	@Test def generateSubmissionDownloadAnonymityIDOnly() {
+		val service = new ZipService
+		service.objectStorageService = createTransientObjectStore()
+		service.features = emptyFeatures
+		service.userLookup = userLookup
 
+		val department = new Department
+		department.showStudentName = true
+
+		val module = new Module(code="ph105", adminDepartment=department)
+
+		val assignment = new Assignment
+		assignment.module = module
+
+		val submission = new Submission
+		submission._universityId = "0000007"
+		submission.usercode = "haslat"
+		submission.assignment = assignment
+
+		val attachment = new FileAttachment
+		attachment.name = "garble.doc"
+
+		val backingFile = createTemporaryFile()
+		attachment.objectStorageService = smartMock[ObjectStorageService]
+		attachment.objectStorageService.keyExists(attachment.id) returns true
+		attachment.objectStorageService.fetch(attachment.id) returns RichByteSource.wrap(Files.asByteSource(backingFile), Some(ObjectStorageService.Metadata(backingFile.length(), "application/octet-stream", None)))
+
+		submission.values = Set(SavedFormValue.withAttachments(submission, "files", Set(attachment))).asJava
+		assignment.module = module
+
+		assignment.anonymity = IDOnly
+
+		val items = service.getSubmissionZipItems(submission)
+		items.size should be (1)
+		items.head.name should be ("ph105 - 0000007 - garble.doc")
+	}
 
 	@Test def generateSubmissionDownloadUserLookupFail() {
 		val service = new ZipService
