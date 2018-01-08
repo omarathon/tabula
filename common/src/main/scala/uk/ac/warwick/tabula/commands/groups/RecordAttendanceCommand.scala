@@ -255,8 +255,8 @@ trait SmallGroupEventInFutureCheck {
 	private val StartTimeOffset = 15
 
 	lazy val isFutureEvent: Boolean = {
-		// Get the actual end date of the event in this week
-		event.endDateTimeForWeek(week).exists(_.minusMinutes(StartTimeOffset).isAfter(LocalDateTime.now))
+		// Get the actual start date of the event in this week
+		event.startDateTimeForWeek(week).exists(_.minusMinutes(StartTimeOffset).isAfter(LocalDateTime.now))
 	}
 }
 
