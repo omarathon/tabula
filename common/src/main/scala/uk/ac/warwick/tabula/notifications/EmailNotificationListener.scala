@@ -96,7 +96,7 @@ class EmailNotificationListener extends RecipientNotificationListener with Unico
 				logger.info(s"Not sending email for Notification as it is dismissed for $recipientInfo")
 				cancelSendingEmail()
 			} else if (recipientInfo.notification.priority < Notification.PriorityEmailThreshold) {
-				logger.info(s"Not sending email as notification priority ${recipientInfo.notification.priority} below threshold")
+				logger.info(s"Not sending email as notification priority ${recipientInfo.notification.priority} below threshold: $recipientInfo")
 				cancelSendingEmail()
 			} else if (!recipientInfo.recipient.isFoundUser) {
 				logger.error(s"Couldn't send email for Notification because usercode didn't match a user: $recipientInfo")
@@ -121,7 +121,7 @@ class EmailNotificationListener extends RecipientNotificationListener with Unico
 								logger.info(s"Timeout waiting for message $message to be sent; cancelling to try again later", e)
 								future.cancel(true)
 							case e@(_: ExecutionException | _: InterruptedException) =>
-								logger.warn("Could not send email ${message}, will try later", e)
+								logger.warn(s"Could not send email $message, will try later", e)
 						} finally {
 							/* TAB-4544 log the time at which we tried to send this notification and save
 									* gives us more info for diagnostics
