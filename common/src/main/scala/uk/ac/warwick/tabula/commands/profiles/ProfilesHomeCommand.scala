@@ -65,7 +65,7 @@ abstract class ProfilesHomeCommand(val user: CurrentUser, val currentMember: Opt
 
 			ProfilesHomeInformation(
 				currentSmallGroups = smallGroups.sortBy { group => (group.groupSet.module, group.groupSet, group) },
-				previousSmallGroups = previousSmallGroups.sortBy { group => (group.groupSet.academicYear, group.groupSet.module, group.groupSet, group) },
+				previousSmallGroups = previousSmallGroups.sortBy { group => (group.groupSet.academicYear.toString, group.groupSet.module, group.groupSet, group) },
 				relationshipTypesMap = relationshipTypesMap,
 				adminDepartments = adminDepartments
 			)
