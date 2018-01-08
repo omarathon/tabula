@@ -185,7 +185,7 @@ class ProfileExportSingleCommandInternal(val student: StudentMember, val academi
 		checkpoints.map(checkpoint => {
 			PointData(
 				checkpoint.point.scheme.department.name,
-				academicYear.termOrVacationForDate(checkpoint.point.startDate).periodType.toString,
+				checkpoint.point.scheme.academicYear.termOrVacationForDate(checkpoint.point.startDate).periodType.toString,
 				checkpoint.state.dbValue,
 				checkpoint.point.name,
 				checkpoint.point.pointType.description,
