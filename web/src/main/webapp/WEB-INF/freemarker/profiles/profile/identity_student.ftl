@@ -129,10 +129,12 @@
 							<strong>Route:</strong> ${(scd.currentRoute.name)!} (${(scd.currentRoute.code?upper_case)!})<br/>
 						</#if>
 						<#if scyd.yearOfStudy??>
-							<strong>Year of study:</strong> ${(scyd.yearOfStudy)!}<br/>
+							<strong>Study block or year:</strong> ${(scyd.yearOfStudy)!}
+							<i class="fa fa-question-circle text-primary use-tooltip" title="An intake for a particular course or period of study. E.g. an undergraduate in their third year of study with no breaks is in block 3. A third-year undergraduate who temporarily withdrew for one year is in block 4." data-placement="right"></i>
+							<br/>
 						</#if>
-						<#if scd.hasCurrentEnrolment && scd.levelCode?? && scyd.latest>
-							<strong>Current course level:</strong> ${scd.levelCode}<br />
+						<#if scd.hasCurrentEnrolment && scd.level?? && scyd.latest>
+							<strong>Current course level:</strong> ${scd.level.code} (${scd.level.name?lower_case?cap_first})<br />
 						</#if>
 						<#if scd.sprCode??>
 							<strong>Programme route code:</strong> ${scd.sprCode}<br />
