@@ -1,9 +1,9 @@
 package uk.ac.warwick.tabula.services.fileserver
-import org.springframework.stereotype.Service
-import javax.servlet.http.HttpServletResponse
-import org.springframework.util.FileCopyUtils
-import javax.servlet.http.HttpServletRequest
+import javax.servlet.http.{HttpServletRequest, HttpServletResponse}
+
 import org.joda.time.DateTime
+import org.springframework.stereotype.Service
+import org.springframework.util.FileCopyUtils
 import uk.ac.warwick.tabula.{AutowiringFeaturesComponent, FeaturesComponent}
 
 @Service
@@ -43,6 +43,10 @@ trait StreamsFiles {
 		val inStream = file.inputStream
 
 		out.addHeader("Content-Type", file.contentType)
+
+		if (file.filename != null) {
+			out.addHeader("Content-Disposition", "attachment;filename=\"" + file.filename.replace("\"", "\\\"") + "\"")
+		}
 
 		handleCaching(file, request, out)
 
