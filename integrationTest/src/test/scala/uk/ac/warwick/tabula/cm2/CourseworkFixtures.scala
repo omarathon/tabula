@@ -200,7 +200,12 @@ trait CourseworkFixtures extends BrowserTest with FeaturesDriver with FixturesDr
 	}
 
 	def withAssignmentWithWorkflow(workflowType: MarkingWorkflowType, markers: Seq[LoginDetails]*)(callback: String => Unit): Unit = {
-		withAssignment("xxx01", s"${workflowType.description} - single use") { id =>
+
+		def withWorkflowSubmissionSettings() = {
+			radioButtonGroup("restrictSubmissions").value = "true"
+		}
+
+		withAssignment("xxx01", s"${workflowType.description} - single use", submissionSettings = withWorkflowSubmissionSettings) { id =>
 
 			When("I click on the edit button")
 			click on partialLinkText("Edit assignment")
