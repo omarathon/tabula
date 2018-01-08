@@ -8,7 +8,7 @@ import uk.ac.warwick.tabula.JavaImports._
 import uk.ac.warwick.tabula.ToString
 import uk.ac.warwick.tabula.permissions.PermissionsTarget
 import org.joda.time.DateTime
-import uk.ac.warwick.tabula.services.RelationshipService
+import uk.ac.warwick.tabula.services.{LevelService, RelationshipService}
 import uk.ac.warwick.tabula.system.permissions.Restricted
 import uk.ac.warwick.spring.Wire
 import uk.ac.warwick.tabula.AcademicYear
@@ -41,6 +41,9 @@ class StudentCourseDetails
 
 	@transient
 	var relationshipService: RelationshipService = Wire.auto[RelationshipService]
+
+	@transient
+	var levelService: LevelService = Wire.auto[LevelService]
 
 	def this(student: StudentMember, scjCode: String) {
 		this()
@@ -211,6 +214,7 @@ class StudentCourseDetails
 	def hasEndedRecently: Boolean = endDate != null &&
 		endDate.toDateTimeAtStartOfDay.plusMonths(StudentCourseDetails.GracePeriodInMonths).isAfterNow
 
+	def level: Option[Level] = levelService.levelFromCode(levelCode)
 }
 
 // properties for a student on a course which come direct from SITS - those that need to be
