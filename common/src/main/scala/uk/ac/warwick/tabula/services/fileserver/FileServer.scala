@@ -43,7 +43,10 @@ trait StreamsFiles {
 		val inStream = file.inputStream
 
 		out.addHeader("Content-Type", file.contentType)
-		out.addHeader("Content-Disposition", "attachment;filename=\"" + file.filename.replace("\"", "\\\"") + "\"")
+
+		if (file.filename != null) {
+			out.addHeader("Content-Disposition", "attachment;filename=\"" + file.filename.replace("\"", "\\\"") + "\"")
+		}
 
 		handleCaching(file, request, out)
 
