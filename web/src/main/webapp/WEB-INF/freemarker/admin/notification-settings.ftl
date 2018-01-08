@@ -7,6 +7,13 @@
 </#function>
 <@fmt.id7_deptheader "Notification settings" route_function "for" />
 
+<#if department.hasChildren>
+<div class="alert alert-info">
+	<i class="fa fa-info-circle"></i> Department settings don't cascade to sub-departments.
+	To change settings for a sub-department, select it from the drop-down above.
+</div>
+</#if>
+
 <#assign submitUrl><@routes.admin.notificationsettings department /></#assign>
 <@f.form method="post" class="notification-settings-form" action=submitUrl commandName="command">
 	<input type="hidden" name="returnTo" value="${returnTo}">
