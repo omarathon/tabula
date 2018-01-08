@@ -21,8 +21,11 @@
 			var headerSettings = {};
 			$('th', $table).each(function(index){
 				var sortable = $(this).hasClass("sortable");
+				var customSorter = $(this).data("sorter");
 				if(!sortable){
 					headerSettings[index] = {sorter: false};
+				} else if (customSorter) {
+					headerSettings[index] = {sorter: customSorter};
 				}
 			});
 			$table.tablesorter($.extend({headers: headerSettings}, settings));
