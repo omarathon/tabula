@@ -8,6 +8,7 @@ import uk.ac.warwick.spring.Wire
 import uk.ac.warwick.tabula.commands.TaskBenchmarking
 import uk.ac.warwick.tabula.commands.coursework.DownloadFeedbackAsPdfCommand
 import uk.ac.warwick.tabula.commands.profiles.PhotosWarwickMemberPhotoUrlGeneratorComponent
+import uk.ac.warwick.tabula.data.model.AssignmentAnonymity.NameAndID
 import uk.ac.warwick.tabula.data.model._
 import uk.ac.warwick.tabula.data.{AutowiringFileDaoComponent, SHAFileHasherComponent}
 import uk.ac.warwick.tabula.helpers.Closeables._
@@ -47,7 +48,7 @@ class ZipService
 	private def resolvePath(submission: Submission): String = "submission/" + partition(submission.id)
 	private def resolvePathForSubmission(assignment: Assignment) = "all-submissions/" + partition(assignment.id)
 
-	private def showStudentName(assignment: Assignment): Boolean = assignment.module.adminDepartment.showStudentName
+	private def showStudentName(assignment: Assignment): Boolean = (assignment.anonymity == null && assignment.module.adminDepartment.showStudentName) || assignment.anonymity == NameAndID
 
 	def invalidateSubmissionZip(assignment: Assignment): Unit = invalidate(resolvePathForSubmission(assignment))
 	def invalidateIndividualFeedbackZip(feedback: Feedback): Unit = {
