@@ -112,8 +112,8 @@ class OldAssignMarkersCommand(val module: Module, val assessment: Assessment)
 		val invalidFiles = fileNames.filter(s => !OldMarkerAllocationExtractor.AcceptedFileExtensions.exists(s.endsWith))
 
 		if (invalidFiles.size > 0) {
-			if (invalidFiles.size == 1) result.rejectValue("file", "file.wrongtype.one", Array(invalidFiles.mkString("")), "")
-			else result.rejectValue("", "file.wrongtype", Array(invalidFiles.mkString(", ")), "")
+			if (invalidFiles.size == 1) result.rejectValue("file", "file.wrongtype.one", Array(invalidFiles.mkString(""), OldMarkerAllocationExtractor.AcceptedFileExtensions.mkString(", ")), "")
+			else result.rejectValue("", "file.wrongtype", Array(invalidFiles.mkString(", "), OldMarkerAllocationExtractor.AcceptedFileExtensions.mkString(", ")), "")
 		}
 	}
 
