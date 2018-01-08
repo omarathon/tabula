@@ -427,7 +427,7 @@
 			</div>
 
 			<div class="right">
-				<table class="attendance table tablesorter table-striped table-condensed sb-no-wrapper-table-popout">
+				<table class="attendance table tablesorter table-striped table-condensed table-left-bordered sb-no-wrapper-table-popout">
 					<thead>
 					<tr>
 						<#list attendance_variables.monitoringPointTermNames as term>
