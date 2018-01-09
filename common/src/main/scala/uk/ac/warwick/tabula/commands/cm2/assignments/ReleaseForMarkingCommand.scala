@@ -75,7 +75,7 @@ trait ReleaseForMarkingRequest extends SelectedStudentsRequest {
 
 	def studentsWithoutKnownMarkers: Seq[String] = {
 		val neverAssigned = students.asScala -- feedbacks.filter(f => {
-			val stagesWithoutAllocation = assignment.cm2MarkingWorkflow.allStages.toSet -- f.allMarkerFeedback.map(_.stage)
+			val stagesWithoutAllocation = assignment.cm2MarkingWorkflow.allStages.filter(_.hasMarkers).toSet -- f.allMarkerFeedback.map(_.stage)
 			stagesWithoutAllocation.isEmpty
 		}).map(_.usercode)
 
