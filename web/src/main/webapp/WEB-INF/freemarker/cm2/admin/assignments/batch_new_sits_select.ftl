@@ -73,36 +73,36 @@ first page of the form to setup a bunch of assignments from SITS.
 			</#list>
 	<div class="fix-area">
 		<#if step='options'>
-		<div class="fix-header">
-			<div id="options-buttons">
-			<#-- options sets -->
-				<a class="btn btn-default btn-default" id="set-options-button" data-target="#set-options-modal" href="<@routes.cm2.assignmentSharedOptions department/>">
-					Set options
-				</a>
-				<a class="btn btn-default btn-default" id="set-dates-button" data-target="#set-dates-modal">
-					Set dates
-				</a>
-					<#list command.optionsMap?keys as optionsId>
-						<span class="options-button">
-							<button class="btn btn-default" data-group="${optionsId}">
-								Re-use options
-								<span class="label label-${optionsId}">${optionsId}</span>
-							</button>
-							<div class="options-group">
-								<@spring.nestedPath path="optionsMap[${optionsId}]">
-								<#-- Include all the common fields as hidden fields -->
-									<#assign ignoreQueueFeedbackForSits = true />
-									<#include "_common_fields_hidden.ftl" />
-								</@spring.nestedPath>
-							</div>
-						</span>
-					</#list>
+			<div class="fix-header">
+				<div id="options-buttons">
+				<#-- options sets -->
+					<a class="btn btn-default btn-default" id="set-options-button" data-target="#set-options-modal" href="<@routes.cm2.assignmentSharedOptions department/>">
+						Set options
+					</a>
+					<a class="btn btn-default btn-default" id="set-dates-button" data-target="#set-dates-modal">
+						Set dates
+					</a>
+						<#list command.optionsMap?keys as optionsId>
+							<span class="options-button">
+								<button class="btn btn-default" data-group="${optionsId}">
+									Re-use options
+									<span class="label label-${optionsId}">${optionsId}</span>
+								</button>
+								<div class="options-group">
+									<@spring.nestedPath path="optionsMap[${optionsId}]">
+									<#-- Include all the common fields as hidden fields -->
+										<#assign ignoreQueueFeedbackForSits = true />
+										<#include "_common_fields_hidden.ftl" />
+									</@spring.nestedPath>
+								</div>
+							</span>
+						</#list>
+				</div>
+				<div style="margin-top: 10px">
+					<span id="selected-count">0 selected</span>
+					<span id="selected-deselect"><a href="#">Clear selection</a></span>
+				</div>
 			</div>
-			<div style="margin-top: 10px">
-				<span id="selected-count">0 selected</span>
-				<span id="selected-deselect"><a href="#">Clear selection</a></span>
-			</div>
-		</div>
 		</#if>
 			<div class="assessment-component">
 				<table class="table table-striped table-condensed table-hover table-sortable table-checkable sticky-table-headers" id="batch-add-table">
@@ -274,7 +274,7 @@ first page of the form to setup a bunch of assignments from SITS.
 		<script type="text/javascript">
 			// Give a heads up if you're about to navigate away from your progress
 			jQuery(window).on('beforeunload.backattack', function() {
-				return "If you leave this page without clicking either the Submit button or the Back button above it, you will lose your progress.";
+				return "If you leave this page, you will lose your progress.";
 			});
 
 			// Disable the heads up when we submit the form through the proper means
