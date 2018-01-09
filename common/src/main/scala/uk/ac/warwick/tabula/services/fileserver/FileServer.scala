@@ -44,9 +44,9 @@ trait StreamsFiles {
 
 		out.addHeader("Content-Type", file.contentType)
 
-		if (file.filename != null) {
-			out.addHeader("Content-Disposition", "attachment;filename=\"" + file.filename.replace("\"", "\\\"") + "\"")
-		}
+		file.suggestedFilename.foreach(filename =>
+			out.addHeader("Content-Disposition", "attachment;filename=\"" + filename.replace("\"", "\\\"") + "\"")
+		)
 
 		handleCaching(file, request, out)
 
