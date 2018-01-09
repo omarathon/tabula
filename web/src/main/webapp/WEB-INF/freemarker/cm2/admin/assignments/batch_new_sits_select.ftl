@@ -18,33 +18,27 @@ first page of the form to setup a bunch of assignments from SITS.
 	<@f.form method="post" id="batch-add-form" action=actionUrl commandName=commandName>
 		<#if step =='select'>
 			<div class="alert alert-info slow-page-warning">
-				<p>This page may take a few seconds to fully load, please wait &hellip;</p>
+				<p>This page may take a few seconds to fully load, please wait&hellip;</p>
 			</div>
-			<h2>Step 1: choose assignments</h2>
 
-		<div class="row">
-			<div class="col-md-10">
 				<p>Below are all the assessment components defined for this department in SITS.</p>
 
-				<ol>
-					<li>Use the checkboxes at the left-hand side to select the assignments to create in Tabula.
-						Some components, such as exams and 'Audit Only', are not selected by default.
-						You can still select these – for example, if you want to publish feedback for an exam.</li>
-					<li>Click the <strong>Next</strong> button.</li>
-				</ol>
+		<p>Use the checkboxes at the left-hand side to select the assignments to create in Tabula. Some components, such as exams and 'Audit Only', are not selected by default. You can still select these – for example, if you want to publish feedback for an exam.</p>
 		<#elseif step =='options'>
-			<h2>Step 2: set assignment options</h2>
-			<div class="col-md-10">
+		<p>
+			<button class="btn btn-default" data-action="refresh-select">Return to assignment selection</button>
+		</p>
+
 				<div id="batch-add-errors">
 					<#include "batch_new_sits_validation.ftl" />
 				</div>
 				<p>
-					You can change each assignment's options later, but it's a good idea to set the most common options in bulk now.
+					You can change each assignment's options later, but it's a good idea to set some common options in bulk now.
 				</p>
 				<ol>
-					<li>Select one or more assignments using the checkboxes at the left-hand side.</li>
-					<li>Apply common options such as a feedback template, and open and close dates.</li>
-					<li>Click the <strong>Submit</strong> button to create the assignments.</li>
+					<li>Select one or more components using the checkboxes at the left-hand side.</li>
+					<li>Apply common settings such as a feedback template, and open and close dates.</li>
+					<li>Select the <strong>Create assignments</strong> button.</li>
 				</ol>
 		</#if>
 			<input type="hidden" name="action" value="error" /><!-- this is changed before submit -->
@@ -77,7 +71,40 @@ first page of the form to setup a bunch of assignments from SITS.
 					</@spring.nestedPath>
 				</#if>
 			</#list>
-			<div class = 'assessment-component'>
+	<div class="fix-area">
+		<#if step='options'>
+		<div class="fix-header">
+			<div id="options-buttons">
+			<#-- options sets -->
+				<a class="btn btn-default btn-default" id="set-options-button" data-target="#set-options-modal" href="<@routes.cm2.assignmentSharedOptions department/>">
+					Set options
+				</a>
+				<a class="btn btn-default btn-default" id="set-dates-button" data-target="#set-dates-modal">
+					Set dates
+				</a>
+					<#list command.optionsMap?keys as optionsId>
+						<span class="options-button">
+							<button class="btn btn-default" data-group="${optionsId}">
+								Re-use options
+								<span class="label label-${optionsId}">${optionsId}</span>
+							</button>
+							<div class="options-group">
+								<@spring.nestedPath path="optionsMap[${optionsId}]">
+								<#-- Include all the common fields as hidden fields -->
+									<#assign ignoreQueueFeedbackForSits = true />
+									<#include "_common_fields_hidden.ftl" />
+								</@spring.nestedPath>
+							</div>
+						</span>
+					</#list>
+			</div>
+			<div style="margin-top: 10px">
+				<span id="selected-count">0 selected</span>
+				<span id="selected-deselect"><a href="#">Clear selection</a></span>
+			</div>
+		</div>
+		</#if>
+			<div class="assessment-component">
 				<table class="table table-striped table-condensed table-hover table-sortable table-checkable sticky-table-headers" id="batch-add-table">
 					<thead>
 						<tr>
@@ -160,10 +187,10 @@ first page of the form to setup a bunch of assignments from SITS.
 					</@spring.nestedPath>
 				</#list>
 			</div>
-		</div>
-		<div class="col-md-2">
+
+		<div class="fix-footer">
 			<#if step='select'>
-				<button class="btn btn-large btn-primary btn-block" data-action="options">Next</button>
+				<button class="btn btn-primary" data-action="options">Continue</button>
 				<#-- This is for if you go Back from step 2, to remember previous options -->
 				<#list command.optionsMap?keys as optionsId>
 					<div class="options-group">
@@ -174,35 +201,7 @@ first page of the form to setup a bunch of assignments from SITS.
 					</div>
 				</#list>
 			<#elseif step='options'>
-				<div id="options-buttons">
-					<button class="btn btn-large btn-default btn-block use-tooltip" data-container="body" data-action="refresh-select" title="Go back to change your assignment choices, without losing your work so far.">&larr; Back</button>
-					<button id="batch-add-submit-button" class="btn btn-large btn-primary btn-block" data-action="submit">Submit</button>
-
-					<div id="selected-count">0 selected</div>
-					<div id="selected-deselect"><a href="#">Clear selection</a></div>
-					<#-- options sets -->
-					<a class="btn btn-default btn-default btn-block" id="set-options-button" data-target="#set-options-modal" href="<@routes.cm2.assignmentSharedOptions department/>">
-						Set options&hellip;
-					</a>
-					<a class="btn btn-default btn-default btn-block" id="set-dates-button" data-target="#set-dates-modal">
-						Set dates&hellip;
-					</a>
-					<#list command.optionsMap?keys as optionsId>
-						<div class="options-button">
-							<button class="btn btn-default btn-block" data-group="${optionsId}">
-								Re-use options
-								<span class="label label-${optionsId}">${optionsId}</span>
-							</button>
-							<div class="options-group">
-								<@spring.nestedPath path="optionsMap[${optionsId}]">
-									<#-- Include all the common fields as hidden fields -->
-									<#assign ignoreQueueFeedbackForSits = true />
-									<#include "_common_fields_hidden.ftl" />
-								</@spring.nestedPath>
-							</div>
-						</div>
-					</#list>
-				</div>
+				<button id="batch-add-submit-button" class="btn btn-primary" data-action="submit">Create assignments</button>
 			</#if>
 		</div>
 	</div>
@@ -211,7 +210,7 @@ first page of the form to setup a bunch of assignments from SITS.
 	<#if step='options'>
 		<#-- popup box for 'Set options' button -->
 		<div class="modal fade" id="set-options-modal">
-			<@modal.wrapper>
+			<@modal.wrapper cssClass="modal-lg">
 				<@modal.header>
 					<h3 class="modal-title">Set options</h3>
 				</@modal.header>
@@ -265,7 +264,7 @@ first page of the form to setup a bunch of assignments from SITS.
 				</@modal.body>
 				<@modal.footer>
 					<div class="submit-buttons">
-						<button class="btn btn-primary">Set dates options</button>
+						<button class="btn btn-primary">Save dates</button>
 						<button class="btn btn-default" data-dismiss="modal">Close</button>
 					</div>
 				</@modal.footer>
