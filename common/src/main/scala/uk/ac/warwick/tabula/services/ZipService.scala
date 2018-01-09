@@ -92,7 +92,7 @@ class ZipService
 		val assignment = submission.assignment
 		val moduleCode = assignment.module.code
 
-		val userIdentifier = if (!assignment.showStudentNames || (user == null || user.isInstanceOf[AnonymousUser])) {
+		val userIdentifier = if (!assignment.showStudentNames || user == null || user.isInstanceOf[AnonymousUser]) {
 			submission.studentIdentifier
 		} else {
 			s"${user.getFullName} - ${submission.studentIdentifier}"
