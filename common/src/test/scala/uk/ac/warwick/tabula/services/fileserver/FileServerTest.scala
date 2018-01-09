@@ -138,6 +138,7 @@ class FileServerTest extends TestBase with Mockito {
 		val file = mock[RenderableFile]
 		file.cachePolicy returns (CachePolicy(expires = Some(period)))
 		file.contentLength returns None
+		file.suggestedFilename returns None
 
 		withFakeTime(time) {
 			server.serve(file)(req, res)
