@@ -27,7 +27,7 @@ trait NotificationDao {
 
 	def recent(start: DateTime): Scrollable[Notification[_ >: Null <: ToEntityReference,_]]
 	def unemailedRecipientCount: Number
-	def unemailedRecipients: Scrollable[RecipientNotificationInfo]
+	def unemailedRecipientIds(count: Int): Seq[String]
 	def oldestUnemailedRecipient: Option[RecipientNotificationInfo]
 	def recentEmailedRecipient: Option[RecipientNotificationInfo]
 
@@ -51,7 +51,6 @@ class NotificationDaoImpl extends NotificationDao with Daoisms {
 	}
 
 	private def unemailedRecipientCriteria = {
-
 		val notAttemptedRecently = disjunction()
 			.add(isNull("attemptedAt"))
 			.add(lt("attemptedAt", DateTime.now.minusMinutes(NotificationDao.RETRY_DELAY_MINUTES)))
@@ -66,12 +65,12 @@ class NotificationDaoImpl extends NotificationDao with Daoisms {
 	def unemailedRecipientCount: Number =
 		unemailedRecipientCriteria.count
 
-	def unemailedRecipients: Scrollable[RecipientNotificationInfo] = {
-		val scrollable = unemailedRecipientCriteria
+	def unemailedRecipientIds(count: Int): Seq[String] =
+		unemailedRecipientCriteria
 			.addOrder(Order.asc("notification.created"))
-			.scroll()
-		Scrollable(scrollable, session)
-	}
+			.setMaxResults(count)
+			.project[String](Projections.id())
+			.seq
 
 	def oldestUnemailedRecipient: Option[RecipientNotificationInfo] = {
 		session.newCriteria[RecipientNotificationInfo]
