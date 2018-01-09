@@ -324,16 +324,16 @@ class FileField extends AssignmentFormField {
 					val fileNames = v.file.fileNames map (_.toLowerCase)
 					val invalidFiles = fileNames.filter(s => !attachmentStrings.exists(s.endsWith))
 					if (invalidFiles.nonEmpty) {
-						if (invalidFiles.size == 1) errors.rejectValue("file", "file.wrongtype.one", Array(invalidFiles.mkString("")), "")
-						else errors.rejectValue("file", "file.wrongtype", Array(invalidFiles.mkString(", ")), "")
+						if (invalidFiles.size == 1) errors.rejectValue("file", "file.wrongtype.one", Array(invalidFiles.mkString(""), attachmentStrings.mkString(", ")), "")
+						else errors.rejectValue("file", "file.wrongtype", Array(invalidFiles.mkString(", "), attachmentStrings.mkString(", ")), "")
 					}
 				}
 
 				if (Option(individualFileSizeLimit).nonEmpty){
 					val invalidFiles = v.file.individualFileSizes.filter(_._2 > individualFileSizeLimitInBytes)
 					if (invalidFiles.nonEmpty) {
-						if (invalidFiles.size == 1) errors.rejectValue("file", "file.toobig.one", Array(invalidFiles.map(_._1).mkString("")), "")
-						else errors.rejectValue("file", "file.toobig", Array(invalidFiles.map(_._1).mkString(", ")), "")
+						if (invalidFiles.size == 1) errors.rejectValue("file", "file.toobig.one", Array(invalidFiles.map(_._1).mkString(""), individualFileSizeLimit), "")
+						else errors.rejectValue("file", "file.toobig", Array(invalidFiles.map(_._1).mkString(", "), individualFileSizeLimit), "")
 					}
 				}
 		}

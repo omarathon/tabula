@@ -99,7 +99,7 @@ trait ExtractRelationshipsFromFileCommandBindListener extends BindListener {
 		val invalidFiles = fileNames.filter(s => !ExtractRelationshipsFromFileCommand.AcceptedFileExtensions.exists(s.endsWith))
 
 		if (invalidFiles.nonEmpty) {
-			result.reject("file.wrongtype", Array(invalidFiles.mkString(", ")), "")
+			result.reject("file.wrongtype", Array(invalidFiles.mkString(", "), ExtractRelationshipsFromFileCommand.AcceptedFileExtensions.mkString(", ")), "")
 		}
 
 		if (!result.hasErrors) {

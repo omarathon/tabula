@@ -102,8 +102,8 @@ trait BulkAdjustmentCommandBindListener extends BindListener {
 		val invalidFiles = fileNames.filter(s => !s.endsWith(".xlsx"))
 
 		if (invalidFiles.nonEmpty) {
-			if (invalidFiles.size == 1) result.rejectValue("file", "file.wrongtype.one", Array(invalidFiles.mkString("")), "")
-			else result.rejectValue("", "file.wrongtype", Array(invalidFiles.mkString(", ")), "")
+			if (invalidFiles.size == 1) result.rejectValue("file", "file.wrongtype.one", Array(invalidFiles.mkString(""), ".xlsx"), "")
+			else result.rejectValue("", "file.wrongtype", Array(invalidFiles.mkString(", "), ".xlsx"), "")
 		}
 	}
 
