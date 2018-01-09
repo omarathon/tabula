@@ -15,6 +15,13 @@
 	</#function>
 	<@fmt.id7_deptheader "Departmental permissions" route_function "for" />
 
+	<#if department.hasChildren>
+	<div class="alert alert-info">
+		<i class="fa fa-info-circle"></i> Department permissions don't cascade to sub-departments.
+		To change permissions for a sub-department, select it from the drop-down above.
+	</div>
+	</#if>
+
 	<@pm.alerts "addCommand" department.name users role />
 
 	<div class="row" id="tutors-supervisors-row">

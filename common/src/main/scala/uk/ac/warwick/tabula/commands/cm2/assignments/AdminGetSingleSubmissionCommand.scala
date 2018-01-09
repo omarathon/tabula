@@ -3,6 +3,7 @@ package uk.ac.warwick.tabula.commands.cm2.assignments
 import uk.ac.warwick.tabula.ItemNotFoundException
 import uk.ac.warwick.tabula.commands._
 import uk.ac.warwick.tabula.commands.cm2.assignments.AdminGetSingleSubmissionCommand._
+import uk.ac.warwick.tabula.data.model.AssignmentAnonymity.NameAndID
 import uk.ac.warwick.tabula.data.model.{Assignment, Submission}
 import uk.ac.warwick.tabula.permissions._
 import uk.ac.warwick.tabula.services.fileserver.{RenderableAttachment, RenderableFile}
@@ -44,7 +45,12 @@ class AdminGetSingleSubmissionFileCommandInternal(val assignment: Assignment, va
 	extends CommandInternal[Result] with AdminGetSingleSubmissionFilenameCommandState {
 
 	override def applyInternal(): RenderableFile =
-		submission.allAttachments.find(_.name == filename).map(new RenderableAttachment(_)).getOrElse { throw new ItemNotFoundException() }
+		submission.allAttachments
+			.find(_.name == filename)
+			.map(a => new RenderableAttachment(a, Some(s"${submission.studentIdentifier} - $filename")))
+			.getOrElse {
+				throw new ItemNotFoundException()
+			}
 }
 
 class AdminGetSingleSubmissionAsZipCommandInternal(val assignment: Assignment, val submission: Submission)

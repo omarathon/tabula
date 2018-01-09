@@ -6,6 +6,13 @@
 <@fmt.id7_deptheader "Settings" route_function "for" />
 
 <div class="fix-area">
+	<#if department.hasChildren>
+	<div class="alert alert-info">
+		<i class="fa fa-info-circle"></i> Department settings don't cascade to sub-departments.
+		To change settings for a sub-department, select it from the drop-down above.
+	</div>
+	</#if>
+
 	<#assign submitUrl><@routes.admin.displaysettings department /></#assign>
 	<@f.form method="post" class="department-settings-form" action=submitUrl commandName="displaySettingsCommand">
 		<input type="hidden" name="returnTo" value="${returnTo}">
