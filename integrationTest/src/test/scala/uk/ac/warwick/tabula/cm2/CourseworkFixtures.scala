@@ -233,11 +233,10 @@ trait CourseworkFixtures extends BrowserTest with FeaturesDriver with FixturesDr
 
 			And("I submit the form")
 			cssSelector(s"input[name=editAndEditDetails]").webElement.click()
+			eventually(cssSelector(".confirm.btn-primary").webElement.isDisplayed shouldBe true)
+			cssSelector(".confirm.btn-primary").webElement.click()
 			Then("I should be back on the summary page")
-			withClue(pageSource) {
-				currentUrl should endWith("/summary")
-			}
-
+			eventually(currentUrl should endWith("/summary"))
 			callback(id)
 		}
 	}
