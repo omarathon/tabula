@@ -230,7 +230,7 @@ class NotificationDaoTest extends PersistenceTestBase with Mockito {
 		}
 	}
 
-	@Test def unemailedRecipients() {
+	@Test def unemailedRecipientIds() {
 		val agent = Fixtures.user()
 		val group = Fixtures.smallGroup("Blissfully unaware group")
 		session.save(group)
@@ -248,7 +248,7 @@ class NotificationDaoTest extends PersistenceTestBase with Mockito {
 
 		session.flush()
 
-		notificationDao.unemailedRecipients.all.size should be (50)
+		notificationDao.unemailedRecipientIds(Integer.MAX_VALUE).size should be (50)
 
 		// attempt to send 10 mails - only 5 actually go
 		for (
@@ -263,10 +263,10 @@ class NotificationDaoTest extends PersistenceTestBase with Mockito {
 		session.flush()
 
 		// the half that didn't send won't show up in the unsent queue for another RETRY_DELAY_MINUTES - no point in retrying so soon
-		notificationDao.unemailedRecipients.all.size should be (40)
+		notificationDao.unemailedRecipientIds(Integer.MAX_VALUE).size should be (40)
 
 		// go forward in time RETRY_DELAY_MINUTES +1  minutes - the 5 unsent mails show up again
 		DateTimeUtils.setCurrentMillisFixed(now.plusMinutes(NotificationDao.RETRY_DELAY_MINUTES + 1).getMillis)
-		notificationDao.unemailedRecipients.all.size should be (45)
+		notificationDao.unemailedRecipientIds(Integer.MAX_VALUE).size should be (45)
 	}
 }
