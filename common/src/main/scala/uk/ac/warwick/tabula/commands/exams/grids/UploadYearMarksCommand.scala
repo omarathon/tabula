@@ -77,8 +77,8 @@ trait UploadYearMarksCommandBindListener extends BindListener {
 		val invalidFiles = fileNames.filter(s => !validAttachmentStrings.exists(s.endsWith))
 
 		if (invalidFiles.nonEmpty) {
-			if (invalidFiles.size == 1) result.rejectValue("file", "file.wrongtype.one", Array(invalidFiles.mkString("")), "")
-			else result.rejectValue("file", "file.wrongtype", Array(invalidFiles.mkString(", ")), "")
+			if (invalidFiles.size == 1) result.rejectValue("file", "file.wrongtype.one", Array(invalidFiles.mkString(""), validAttachmentStrings.mkString(", ")), "")
+			else result.rejectValue("file", "file.wrongtype", Array(invalidFiles.mkString(", "), validAttachmentStrings.mkString(", ")), "")
 		}
 
 		if (!result.hasErrors) {
@@ -98,7 +98,7 @@ trait UploadYearMarksCommandBindListener extends BindListener {
 							}
 						} catch {
 							case e: InvalidFormatException =>
-								result.rejectValue("file", "file.wrongtype", Array(invalidFiles.mkString(", ")), "")
+								result.rejectValue("file", "file.wrongtype", Array(invalidFiles.mkString(", "), validAttachmentStrings.mkString(", ")), "")
 						}
 					}
 				}

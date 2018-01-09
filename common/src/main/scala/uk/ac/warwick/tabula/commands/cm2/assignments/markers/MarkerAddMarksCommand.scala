@@ -153,8 +153,8 @@ trait AddMarksCommandBindListener extends BindListener {
 		val invalidFiles = fileNames.filter(s => !VALID_FILE_TYPES.exists(s.endsWith))
 
 		if (invalidFiles.nonEmpty) {
-			if (invalidFiles.size == 1) result.rejectValue("file", "file.wrongtype.one", Array(invalidFiles.mkString("")), "")
-			else result.rejectValue("file", "file.wrongtype", Array(invalidFiles.mkString(", ")), "")
+			if (invalidFiles.size == 1) result.rejectValue("file", "file.wrongtype.one", Array(invalidFiles.mkString(""), VALID_FILE_TYPES.mkString(", ")), "")
+			else result.rejectValue("file", "file.wrongtype", Array(invalidFiles.mkString(", "), VALID_FILE_TYPES.mkString(", ")), "")
 		}
 
 		if (!result.hasErrors) { transactional() {
@@ -162,7 +162,7 @@ trait AddMarksCommandBindListener extends BindListener {
 			file.attached.asScala.filter(_.hasData).foreach(file => {
 				try {
 					marks.addAll(marksExtractor.readXSSFExcelFile(assignment, file.asByteSource.openStream()))
-				} catch { case _: InvalidFormatException => result.rejectValue("file", "file.wrongtype", Array(invalidFiles.mkString(", ")), "") }
+				} catch { case _: InvalidFormatException => result.rejectValue("file", "file.wrongtype", Array(invalidFiles.mkString(", "), VALID_FILE_TYPES.mkString(", ")), "") }
 				if (marks.size() > MAX_MARKS_ROWS) {
 					result.rejectValue("file", "file.tooManyRows", Array(MAX_MARKS_ROWS.toString), "")
 					marks.clear()

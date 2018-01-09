@@ -81,8 +81,8 @@ trait AssignMarkersBySpreadsheetBindListener extends BindListener {
 //		}
 
 		if (invalidFiles.nonEmpty) {
-			if (invalidFiles.size == 1) result.rejectValue("file", "file.wrongtype.one", Array(invalidFiles.mkString("")), "")
-			else result.rejectValue("file", "file.wrongtype", Array(invalidFiles.mkString(", ")), "")
+			if (invalidFiles.size == 1) result.rejectValue("file", "file.wrongtype.one", Array(invalidFiles.mkString(""), AssignMarkersBySpreadsheetCommand.AcceptedFileExtensions.mkString(", ")), "")
+			else result.rejectValue("file", "file.wrongtype", Array(invalidFiles.mkString(", "), AssignMarkersBySpreadsheetCommand.AcceptedFileExtensions.mkString(", ")), "")
 		}
 
 		if (!result.hasErrors) {

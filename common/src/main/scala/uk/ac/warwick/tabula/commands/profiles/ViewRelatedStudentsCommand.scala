@@ -73,7 +73,7 @@ abstract class ViewRelatedStudentsCommandInternal(val currentMember: Member, val
 		val studentCourseDetails = profileService.getSCDsByAgentRelationshipAndRestrictions(relationshipType, currentMember, buildRestrictions(year))
 
 		val lastMeetingWithTotalPendingApprovalsMap: Map[String, (Option[MeetingRecord], Int)] = studentCourseDetails.map(scd => {
-			val rels = relationshipService.getRelationships(relationshipType, scd.student)
+			val rels = relationshipService.getRelationships(relationshipType, scd.student).filter(_.agentMember.contains(currentMember))
 			val lastMeeting = benchmarkTask("lastMeeting"){
 				meetingRecordService.list(rels.toSet, Some(currentMember)).filterNot(_.deleted).headOption
 			}
