@@ -7,7 +7,9 @@ import uk.ac.warwick.tabula.data.model.FileAttachment
 
 class RenderableAttachment(attachment: FileAttachment, name: Option[String] = None) extends RenderableFile {
 	override def inputStream: InputStream = if (attachment == null) null else attachment.asByteSource.openStream()
-	override def filename: String = name.getOrElse(attachment.name)
+	override def filename: String = attachment.name
 	override def contentType: String = attachment.asByteSource.metadata.map(_.contentType).getOrElse(MediaType.OCTET_STREAM.toString)
 	override def contentLength: Option[Long] = attachment.length
+
+	override def suggestedFilename: Option[String] = name
 }

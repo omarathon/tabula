@@ -22,11 +22,10 @@ class EmailNotificationService extends Logging with Daoisms {
 	var listener: RecipientNotificationListener = Wire[EmailNotificationListener]
 
 	def processNotifications(): Unit = transactional() {
-		val batch: Seq[RecipientNotificationInfo] = unemailedRecipients.take(RunBatchSize).toSeq
-		val futures: Seq[Future[(RecipientNotificationInfo, Try[Unit])]] = batch.map { rni => Future {
-			rni -> Try {
+		val futures: Seq[Future[(String, Try[Unit])]] = unemailedRecipientIds.map { id => Future {
+			id -> Try {
 				// This is a (new) read-only session as it happens inside the Future
-				val recipient = session.load(classOf[RecipientNotificationInfo], rni.id).asInstanceOf[RecipientNotificationInfo]
+				val recipient = session.load(classOf[RecipientNotificationInfo], id).asInstanceOf[RecipientNotificationInfo]
 				session.setReadOnly(recipient, false)
 
 				logger.info("Emailing recipient - " + recipient)
@@ -35,19 +34,19 @@ class EmailNotificationService extends Logging with Daoisms {
 			}
 		}}
 
-		Await.result(Future.sequence(futures), Duration.Inf).foreach { case (recipient, result) =>
+		Await.result(Future.sequence(futures), Duration.Inf).foreach { case (recipientId, result) =>
 			result match {
 				case Success(_) =>
 				case Failure(throwable) =>
 					// TAB-2238 Catch and log, so that the overall transaction can still commit
-					logger.error(s"Exception handling email for $recipient:", throwable)
+					logger.error(s"Exception handling email for RecipientNotificationInfo[$recipientId]:", throwable)
 			}
 		}
 	}
 
 	def recentRecipients(start: Int, count: Int): Seq[RecipientNotificationInfo] = dao.recentRecipients(start, count)
 	def unemailedRecipientCount: Number = dao.unemailedRecipientCount
-	def unemailedRecipients: Scrollable[RecipientNotificationInfo] = dao.unemailedRecipients
+	def unemailedRecipientIds: Seq[String] = dao.unemailedRecipientIds(RunBatchSize)
 	def oldestUnemailedRecipient: Option[RecipientNotificationInfo] = dao.oldestUnemailedRecipient
 	def recentEmailedRecipient: Option[RecipientNotificationInfo] = dao.recentEmailedRecipient
 

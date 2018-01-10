@@ -57,3 +57,13 @@ table.manage-student-table {
 		color: #185c54;
 	}
 }
+
+.table-left-bordered tr {
+	> th, > td {
+		border-left: 1px solid @table-border-color;
+
+		&:first-child {
+			border-left: 0;
+		}
+	}
+}
