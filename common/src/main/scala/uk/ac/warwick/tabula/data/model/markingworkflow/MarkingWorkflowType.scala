@@ -70,19 +70,23 @@ object MarkingWorkflowType {
 	)
 
 	// Don't change this to a val https://warwick.slack.com/archives/C029QTGBN/p1493995125972397
-	def values: Seq[MarkingWorkflowType] = Seq(
+	private def allValues : Seq[MarkingWorkflowType] = Seq(
 		SingleMarking,
 		DoubleMarking,
 		ModeratedMarking,
-		DoubleBlindMarking
-		// Don't include - SelectedModeratedMarking in this list (It's not to be selected directly)
+		DoubleBlindMarking,
+		SelectedModeratedMarking
 	)
+
+	// Don't change this to a val https://warwick.slack.com/archives/C029QTGBN/p1493995125972397
+	// Don't include - SelectedModeratedMarking in this list (It's not to be selected directly)
+	def values: Seq[MarkingWorkflowType] = allValues.filterNot(_ == SelectedModeratedMarking)
 
 	def allPossibleStages: Map[MarkingWorkflowType, Seq[MarkingWorkflowStage]] = values.map(t => t -> t.allStages).toMap
 
 	def fromCode(code: String): MarkingWorkflowType =
 		if (code == null) null
-		else values.find{_.name == code} match {
+		else allValues.find{_.name == code} match {
 			case Some(method) => method
 			case None => throw new IllegalArgumentException()
 		}

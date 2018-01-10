@@ -63,6 +63,16 @@ object ModeratedWorkflow {
 @Entity @DiscriminatorValue("SelectedModerated")
 class SelectedModeratedWorkflow extends ModeratedWorkflow {
 	override def workflowType:MarkingWorkflowType = SelectedModeratedMarking
+
+	override def replaceMarkers(markers: Seq[Marker]*): Unit = {
+		val (firstMarkers, moderators) = markers.toList match {
+			case fm :: sm :: _ => (fm, sm)
+			case _ => throw new IllegalArgumentException("Must add a list of markers and moderators")
+		}
+
+		replaceStageMarkers(SelectedModerationMarker, firstMarkers)
+		replaceStageMarkers(SelectedModerationModerator, moderators)
+	}
 }
 
 object SelectedModeratedWorkflow {

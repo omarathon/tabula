@@ -94,6 +94,7 @@
 					<@f.radiobutton path="sampler" value="moderator" disabled=true  /> Moderator
 				</@bs3form.radio_inline>
 			</div>
+			<@f.hidden path="sampler" />
 			<div class="help-block">
 				<#if workflow.isReusable()>
 					It is not possible to modify the moderation selector once a marking workflow has been created.
@@ -133,7 +134,7 @@
 			var $this = $(this);
 			var $workflowOption = $this.find('option:selected');
 
-			if($workflowOption.val() === 'Moderated'){
+			if($workflowOption.val() === 'Moderated' || $workflowOption.val() === 'SelectedModerated'){
 				$('.sampler').removeClass('hidden');
 			} else {
 				$('.sampler').addClass('hidden');
@@ -155,6 +156,8 @@
 			}
 
 		}).trigger('change');
+
+		//# sourceURL=source.coffee
 
 	})(jQuery);
 </script>
