@@ -116,7 +116,8 @@ trait AttendanceMonitoringPointValidation {
 		assignmentSubmissionTypeAnyQuantity: JInteger,
 		assignmentSubmissionTypeModulesQuantity: JInteger,
 		assignmentSubmissionModules: JSet[Module],
-		assignmentSubmissionAssignments: JSet[Assignment]
+		assignmentSubmissionAssignments: JSet[Assignment],
+		academicYear: AcademicYear
 	) {
 
 		assignmentSubmissionType match {
@@ -135,6 +136,12 @@ trait AttendanceMonitoringPointValidation {
 			case AttendanceMonitoringPoint.Settings.AssignmentSubmissionTypes.Assignments =>
 				if (assignmentSubmissionAssignments == null || assignmentSubmissionAssignments.isEmpty) {
 					errors.rejectValue("assignmentSubmissionAssignments", "attendanceMonitoringPoint.assingmentSubmissionType.assignmentSubmissionAssignments.empty")
+				} else {
+					assignmentSubmissionAssignments.asScala.foreach { assignment =>
+						if (assignment.academicYear != academicYear ) {
+							errors.rejectValue("assignmentSubmissionAssignments", "attendanceMonitoringPoint.assingmentSubmissionType.assignmentSubmissionAssignments.invalidYear", Array(assignment.name, academicYear.toString), "")
+						}
+					}
 				}
 			case _ =>
 				errors.rejectValue("assignmentSubmissionType", "attendanceMonitoringPoint.assingmentSubmissionType.assingmentSubmissionType.invalid")

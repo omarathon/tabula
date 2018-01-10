@@ -614,7 +614,7 @@ var AssignmentPicker = function (options) {
 				i = $(that.options.item);
 				i.attr('data-assignmentid', item.id);
 				i.find('div.name').html(that.highlighter(item.module.toUpperCase() + ' ' + item.name));
-				i.find('div.department').html(item.department);
+				i.find('div.department').html(item.department + ' (' + item.academicYear + ')' );
 				return i[0];
 			} else {
 				// no idea what's happened here. Return an empty item.
