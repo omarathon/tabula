@@ -74,6 +74,7 @@ class AddMarkerFeedbackCommand(assignment: Assignment, marker: User, val submitt
 		}
 
 		parentFeedback.updatedDate = DateTime.now
+		markerFeedback.updatedOn = DateTime.now
 		session.saveOrUpdate(parentFeedback)
 		session.saveOrUpdate(markerFeedback)
 		markerFeedback
