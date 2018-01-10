@@ -17,6 +17,7 @@ class UniversityIdSearchController extends ApiController
 
 	final override def onPreRequest {
 		session.enableFilter(Member.ActiveOnlyFilter)
+		session.enableFilter(Member.FreshOnlyFilter)
 	}
 
 	@ModelAttribute("getCommand")
