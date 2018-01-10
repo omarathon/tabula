@@ -22,13 +22,17 @@ class CourseworkEditAssignmentDetailsReusableWorkflowTest extends BrowserTest wi
 		val modifiedAssignmentTitle = "Double reusable marker workflow assignment modified to Moderated"
 
 		val doubleWorkflowId = createMarkingWorkflow(doubleMarkingWorkflowName, DoubleMarking, Seq(P.Marker1, P.Marker2), Seq(P.Marker3))
-		val moderatedworkflowId = createMarkingWorkflow(moderatedWorkflowName, ModeratedMarking, Seq(P.Marker1, P.Marker2), Seq(P.Marker3))
+		val moderatedWorkflowId = createMarkingWorkflow(moderatedWorkflowName, ModeratedMarking, Seq(P.Marker1, P.Marker2), Seq(P.Marker3))
 
-		withAssignment("xxx02", "Double marking-1C") { _ =>
+		def withWorkflowSubmissionSettings(): Unit = {
+			radioButtonGroup("restrictSubmissions").value = "true"
+		}
+
+		withAssignment("xxx02", "Double marking-1C", submissionSettings = withWorkflowSubmissionSettings) { _ =>
 			editAssignment(doubleWorkflowId)
 			val checkboxFeedbackFieldDetails: Seq[(String, Boolean)] = Seq(("automaticallyReleaseToMarkers", false), ("collectMarks", true), ("dissertation", true))
 
-			amendAssignmentDetails(modifiedAssignmentTitle, moderatedworkflowId)
+			amendAssignmentDetails(modifiedAssignmentTitle, moderatedWorkflowId)
 			amendAssignmentFeedback(checkboxFeedbackFieldDetails)
 			assigmentStudentDetails(studentList)
 
@@ -117,7 +121,7 @@ class CourseworkEditAssignmentDetailsReusableWorkflowTest extends BrowserTest wi
 			editAssignment(moderatedworkflowId)
 			val checkboxFeedbackFieldDetails: Seq[(String, Boolean)] = Seq(("automaticallyReleaseToMarkers", true), ("collectMarks", false), ("dissertation", false))
 
-			amendAssignmentDetails(modifiedAssignmentTitle, "")
+			amendAssignmentDetails(modifiedAssignmentTitle, "", confirmModal = false)
 			amendAssignmentFeedback(checkboxFeedbackFieldDetails)
 			assigmentStudentDetails(studentList)
 
@@ -198,7 +202,7 @@ class CourseworkEditAssignmentDetailsReusableWorkflowTest extends BrowserTest wi
 		button.click()
 	}
 
-	def amendAssignmentDetails(newTitle: String, newWorkflowId: String): Unit = {
+	def amendAssignmentDetails(newTitle: String, newWorkflowId: String, confirmModal:Boolean = true): Unit = {
 		When("I click on the edit button again")
 		click on partialLinkText("Edit assignment")
 		Then("I see the edit details screen")
@@ -217,6 +221,10 @@ class CourseworkEditAssignmentDetailsReusableWorkflowTest extends BrowserTest wi
 		}
 		submitAndContinueClick()
 
+		if (confirmModal) {
+			eventually(cssSelector(".confirm.btn-primary").webElement.isDisplayed shouldBe true)
+			cssSelector(".confirm.btn-primary").webElement.click()
+		}
 	}
 
 	def amendAssignmentFeedback(checkboxFieldDetails: Seq[(String, Boolean)]): Unit = {

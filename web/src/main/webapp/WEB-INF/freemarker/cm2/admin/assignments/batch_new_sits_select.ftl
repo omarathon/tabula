@@ -21,25 +21,28 @@ first page of the form to setup a bunch of assignments from SITS.
 				<p>This page may take a few seconds to fully load, please wait&hellip;</p>
 			</div>
 
-				<p>Below are all the assessment components defined for this department in SITS.</p>
+			<p>Below are all the assessment components defined for this department in SITS.</p>
 
-		<p>Use the checkboxes at the left-hand side to select the assignments to create in Tabula. Some components, such as exams and 'Audit Only', are not selected by default. You can still select these – for example, if you want to publish feedback for an exam.</p>
+			<p>Use the checkboxes to select the assessment components you want to set up as assignments in Tabula. Some items, such as exams and Audit Only components, are deselected by default. However, you can reselect them if you want (for example, to publish feedback for an exam).</p>
+
+			<p>One assignment is created for each assessment component you select.	The assessment component name will be used as the assignment name.  To change the assignment name, select the pencil icon to edit the name.</p>
 		<#elseif step =='options'>
-		<p>
-			<button class="btn btn-default" data-action="refresh-select">Return to assignment selection</button>
-		</p>
+			<p>
+				<button class="btn btn-default" data-action="refresh-select">Return to assignment selection</button>
+			</p>
 
-				<div id="batch-add-errors">
-					<#include "batch_new_sits_validation.ftl" />
-				</div>
-				<p>
-					You can change each assignment's options later, but it's a good idea to set some common options in bulk now.
-				</p>
-				<ol>
-					<li>Select one or more components using the checkboxes at the left-hand side.</li>
-					<li>Apply common settings such as a feedback template, and open and close dates.</li>
-					<li>Select the <strong>Create assignments</strong> button.</li>
-				</ol>
+			<div id="batch-add-errors">
+				<#include "batch_new_sits_validation.ftl" />
+			</div>
+
+			<p>
+				You can change each assignment's options later, but it's a good idea to set some common options in bulk now.
+			</p>
+
+			<ol>
+				<li>Set assignment options such as a feedback template, and set the open and close dates.</li>
+				<li>Select the <strong>Create assignments</strong> button to finish setting up the assignments.</li>
+			</ol>
 		</#if>
 			<input type="hidden" name="action" value="error" /><!-- this is changed before submit -->
 
