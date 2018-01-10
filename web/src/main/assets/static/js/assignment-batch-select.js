@@ -89,11 +89,7 @@ jQuery(function($){
 		}
 	});
 
-
-	// make "Set options" buttons magically stay where they are
 	var $opts = $('#options-buttons');
-	$opts.width( $opts.width() ); //absolutify width
-	$opts.affix();
 
 	var $optsButton = $('#set-options-button');
 	var $optsModal = $('#set-options-modal');
@@ -119,9 +115,9 @@ jQuery(function($){
 					var $groupNameLabel = $('<span>').addClass('label').addClass('label-'+groupName).html(groupName);
 					optionGroupCount = optionGroupCount + 1;
 
-					var $group = $('<div>').addClass('options-button');
+					var $group = $('<span>').addClass('options-button');
 					var $hidden = $('<div>').addClass('options-group').data('group', groupName);
-					var $button = $('<button class="btn btn-default btn-block"></button>').html('Re-use options ').append($groupNameLabel);
+					var $button = $('<button class="btn btn-default"></button>').html('Re-use options ').append($groupNameLabel);
 					$button.data('group', groupName);
 					$group.append($button);
 					$group.append($hidden);
@@ -140,7 +136,7 @@ jQuery(function($){
 						$hidden.append(field);
 					});
 
-					$opts.append($group);
+					$opts.append($group).append(' ');
 					$optsModal.modal('hide');
 
 					applyGroupNameToSelected(groupName);
@@ -150,10 +146,12 @@ jQuery(function($){
 		});
 	};
 
-	// eagerly pre-load the options form into the modal.
-	$optsModalBody.load(optsUrl, function(){
-		decorateOptionsModal();
-	});
+	if ($optsButton.length !== 0 && optsUrl) {
+		// eagerly pre-load the options form into the modal.
+		$optsModalBody.load(optsUrl, function () {
+			decorateOptionsModal();
+		});
+	}
 
 	$optsButton.click(function(e){
 		if (!$(this).hasClass('disabled')) {
@@ -215,5 +213,4 @@ jQuery(function($){
 	});
 
 	$('.slow-page-warning').hide('fast');
-
 });

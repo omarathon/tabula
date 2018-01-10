@@ -866,6 +866,7 @@ class Assignment
 
 	def toEntityReference: AssignmentEntityReference = new AssignmentEntityReference().put(this)
 
+	def showStudentNames: Boolean = (anonymity == null && module.adminDepartment.showStudentName) || anonymity == NameAndID
 }
 
 /**
