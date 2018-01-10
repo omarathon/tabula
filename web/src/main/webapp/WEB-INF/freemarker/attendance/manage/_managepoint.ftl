@@ -247,7 +247,7 @@
 						<#list command.assignmentSubmissionAssignments![] as assignment>
 							<li>
 								<input type="hidden" name="assignmentSubmissionAssignments" value="${assignment.id}" />
-								<span title="<@fmt.assignment_name assignment false />"><@fmt.assignment_name assignment false /></span><button class="btn btn-danger btn-xs remove"><i class="fa fa-times"></i></button>
+								<span title="<@fmt.assignment_name assignment false /> (${assignment.academicYear.toString})"><@fmt.assignment_name assignment false /> (${assignment.academicYear.toString})</span><button class="btn btn-danger btn-xs remove"><i class="fa fa-times"></i></button>
 							</li>
 						</#list>
 					</ol>
