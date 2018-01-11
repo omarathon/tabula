@@ -65,6 +65,7 @@ class EditExtensionCommandInternal(val assignment: Assignment, val student: User
 			case ApprovalAction | UpdateApprovalAction => extension.approve(reviewerComments)
 			case RejectionAction => extension.reject(reviewerComments)
 			case RevocationAction => extension.rawState_=(ExtensionState.Revoked)
+			case RequestMoreInfoAction => extension.requestMoreInfo(reviewerComments)
 			case _ =>
 		}
 	}
@@ -97,6 +98,7 @@ trait EditExtensionCommandState {
 	final val RejectionAction = "Reject"
 	final val RevocationAction = "Revoke"
 	final val UpdateApprovalAction = "Update"
+	final val RequestMoreInfoAction = "Request more information"
 
 }
 
@@ -111,7 +113,7 @@ trait EditExtensionCommandValidation extends SelfValidating {
 			errors.rejectValue("expiryDate", "extension.expiryDate.beforeAssignmentExpiry")
 		}
 
-		if(!Option(reviewerComments).exists(_.nonEmpty) && state == ExtensionState.MoreInformationRequired) {
+		if(!Option(reviewerComments).exists(_.nonEmpty) && (state == ExtensionState.MoreInformationRequired || action == RequestMoreInfoAction)) {
 			errors.rejectValue("reviewerComments", "extension.reviewerComments.provideReasons")
 		}
 	}

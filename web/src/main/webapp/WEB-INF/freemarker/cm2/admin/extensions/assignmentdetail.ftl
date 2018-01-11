@@ -196,8 +196,6 @@
 				<div class="muted">Any comments will be saved and sent to the student</div>
 			</@bs3form.labelled_form_group>
 
-			<@f.errors path="*" cssClass="error form-errors" />
-
 			<div class="submit-buttons">
 
 				<#if detail.extension?has_content && detail.extension.approved && can.do("Extension.Update", assignment)>
@@ -211,6 +209,11 @@
 						<input class="btn btn-danger" type="submit" value="${rejectionAction}" name="action">
 					<#elseif detail.extension.revocable && can.do("Extension.Delete", assignment)>
 						<input class="btn btn-danger revoke" type="submit" value="${revocationAction}" name="action">
+					</#if>
+					<#if detail.extension.unreviewed || detail.extension.moreInfoReceived>
+						<input class="btn btn-default" type="submit" value="${requestMoreInfoAction}" name="action">
+					<#elseif detail.extension.moreInfoRequired && can.do("Extension.Update", assignment)>
+						<input class="btn btn-primary" type="submit" value="${updateAction}" name="action">
 					</#if>
 				</#if>
 				<a class="btn btn-default discard-changes" href="">Discard changes</a>

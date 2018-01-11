@@ -241,7 +241,8 @@ class EditExtensionController extends CourseworkController with ExtensionService
 		  "updateAction" -> updateCommand.UpdateApprovalAction,
 			"approvalAction" -> updateCommand.ApprovalAction,
 			"rejectionAction" -> updateCommand.RejectionAction,
-			"revocationAction" -> updateCommand.RevocationAction
+			"revocationAction" -> updateCommand.RevocationAction,
+			"requestMoreInfoAction" -> updateCommand.RequestMoreInfoAction
 		).noLayout()
 	}
 
