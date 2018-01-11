@@ -54,6 +54,7 @@ class MarkerAddMarksCommandInternal(val assignment: Assignment, val marker: User
 				mf.grade = Option(markItem.actualGrade)
 				mf.comments = markItem.feedbackComment
 				mf.feedback.updatedDate = DateTime.now
+				mf.updatedOn = DateTime.now
 				feedbackService.saveOrUpdate(mf.feedback)
 				feedbackService.save(mf)
 			})
