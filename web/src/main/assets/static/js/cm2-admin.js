@@ -140,9 +140,6 @@
 					window.location.replace(data.redirect);
 				} else {
 					$detailRow.html(data);
-					var $form = $detailRow.find('form');
-					var $container = $detailRow.find('.detailrow-container');
-					prepareAjaxForm($form, $container);
 					$detailRow.bindFormHelpers();
 				}
 			});
