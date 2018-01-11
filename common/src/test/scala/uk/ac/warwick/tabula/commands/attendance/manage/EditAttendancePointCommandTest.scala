@@ -16,6 +16,7 @@ import scala.collection.mutable
 class EditAttendancePointCommandTest extends TestBase with Mockito {
 
 	trait Fixture {
+		val academicYear2015 = AcademicYear(2015)
 		val commandState = new EditAttendancePointCommandState with SmallGroupServiceComponent with ModuleAndDepartmentServiceComponent {
 			val templatePoint = null
 			val department = null
@@ -31,7 +32,7 @@ class EditAttendancePointCommandTest extends TestBase with Mockito {
 
 	trait CommandFixture extends Fixture {
 
-		val academicYear2015 = AcademicYear(2015)
+
 		val department = new Department
 		val student: StudentMember = Fixtures.student("1234")
 
@@ -207,7 +208,8 @@ class EditAttendancePointCommandTest extends TestBase with Mockito {
 				assignmentSubmissionTypeAnyQuantity = 0,
 				assignmentSubmissionTypeModulesQuantity = 0,
 				assignmentSubmissionModules = JHashSet(),
-				assignmentSubmissionAssignments = JHashSet()
+				assignmentSubmissionAssignments = JHashSet(),
+				academicYear = academicYear2015
 			)
 			errors.hasFieldErrors("assignmentSubmissionAssignments") should be {true}
 		}
@@ -218,10 +220,24 @@ class EditAttendancePointCommandTest extends TestBase with Mockito {
 				assignmentSubmissionTypeAnyQuantity = 0,
 				assignmentSubmissionTypeModulesQuantity = 0,
 				assignmentSubmissionModules = JHashSet(),
-				assignmentSubmissionAssignments = JHashSet(Fixtures.assignment("assignment"))
+				assignmentSubmissionAssignments = JHashSet(Fixtures.assignment("assignment")),
+				academicYear = academicYear2015
+			)
+			errors.hasFieldErrors("assignmentSubmissionAssignments") should be {true}
+		}
+		new Fixture {
+			validator.validateTypeAssignmentSubmission(
+				errors,
+				assignmentSubmissionType = AttendanceMonitoringPoint.Settings.AssignmentSubmissionTypes.Assignments,
+				assignmentSubmissionTypeAnyQuantity = 0,
+				assignmentSubmissionTypeModulesQuantity = 0,
+				assignmentSubmissionModules = JHashSet(),
+				assignmentSubmissionAssignments = JHashSet(Fixtures.assignment("assignment")),
+				AcademicYear.now()
 			)
 			errors.hasFieldErrors("assignmentSubmissionAssignments") should be {false}
 		}
+
 		new Fixture {
 			validator.validateTypeAssignmentSubmission(
 				errors,
@@ -229,7 +245,8 @@ class EditAttendancePointCommandTest extends TestBase with Mockito {
 				assignmentSubmissionTypeAnyQuantity = 0,
 				assignmentSubmissionTypeModulesQuantity = 0,
 				assignmentSubmissionModules = JHashSet(),
-				assignmentSubmissionAssignments = JHashSet()
+				assignmentSubmissionAssignments = JHashSet(),
+				academicYear = academicYear2015
 			)
 			errors.hasFieldErrors("assignmentSubmissionTypeModulesQuantity") should be {true}
 			errors.hasFieldErrors("assignmentSubmissionModules") should be {true}
@@ -241,7 +258,8 @@ class EditAttendancePointCommandTest extends TestBase with Mockito {
 				assignmentSubmissionTypeAnyQuantity = 0,
 				assignmentSubmissionTypeModulesQuantity = 1,
 				assignmentSubmissionModules = JHashSet(Fixtures.module("a100")),
-				assignmentSubmissionAssignments = JHashSet()
+				assignmentSubmissionAssignments = JHashSet(),
+				academicYear = academicYear2015
 			)
 			errors.hasFieldErrors("assignmentSubmissionTypeModulesQuantity") should be {false}
 			errors.hasFieldErrors("assignmentSubmissionModules") should be {false}
@@ -253,7 +271,8 @@ class EditAttendancePointCommandTest extends TestBase with Mockito {
 				assignmentSubmissionTypeAnyQuantity = 0,
 				assignmentSubmissionTypeModulesQuantity = 0,
 				assignmentSubmissionModules = JHashSet(),
-				assignmentSubmissionAssignments = JHashSet()
+				assignmentSubmissionAssignments = JHashSet(),
+				academicYear = academicYear2015
 			)
 			errors.hasFieldErrors("assignmentSubmissionTypeModulesQuantity") should be {false}
 			errors.hasFieldErrors("assignmentSubmissionTypeAnyQuantity") should be {true}
@@ -265,7 +284,8 @@ class EditAttendancePointCommandTest extends TestBase with Mockito {
 				assignmentSubmissionTypeAnyQuantity = 1,
 				assignmentSubmissionTypeModulesQuantity = 0,
 				assignmentSubmissionModules = JHashSet(),
-				assignmentSubmissionAssignments = JHashSet()
+				assignmentSubmissionAssignments = JHashSet(),
+				academicYear = academicYear2015
 			)
 			errors.hasFieldErrors("assignmentSubmissionTypeModulesQuantity") should be {false}
 			errors.hasFieldErrors("assignmentSubmissionTypeAnyQuantity") should be {false}

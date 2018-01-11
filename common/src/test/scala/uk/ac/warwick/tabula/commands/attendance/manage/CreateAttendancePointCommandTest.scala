@@ -17,14 +17,14 @@ class CreateAttendancePointCommandTest extends TestBase with Mockito {
 
 	trait Fixture {
 		val thisDepartment: Department = Fixtures.department("its")
-		val thisAcademicYear = AcademicYear(2014)
+		val academicYear2014 = AcademicYear(2014)
 		val scheme = new AttendanceMonitoringScheme
 		scheme.department = thisDepartment
-		scheme.academicYear = thisAcademicYear
+		scheme.academicYear = academicYear2014
 		scheme.pointStyle = AttendanceMonitoringPointStyle.Date
 		val student: StudentMember = Fixtures.student("1234")
 		scheme.members.addUserId(student.universityId)
-		val command = new CreateAttendancePointCommandInternal(thisDepartment, thisAcademicYear, Seq(scheme))
+		val command = new CreateAttendancePointCommandInternal(thisDepartment, academicYear2014, Seq(scheme))
 			with CreateAttendancePointCommandState
 			with SmallGroupServiceComponent
 			with ModuleAndDepartmentServiceComponent
@@ -53,11 +53,11 @@ class CreateAttendancePointCommandTest extends TestBase with Mockito {
 
 	@Test
 	def validateWeek() { new Fixture {
-		validator.validateWeek(errors, 1, thisAcademicYear, "startWeek")
+		validator.validateWeek(errors, 1, academicYear2014, "startWeek")
 		errors.hasFieldErrors("startWeek") should be {false}
-		validator.validateWeek(errors, 52, thisAcademicYear, "startWeek") // Extended a/y
+		validator.validateWeek(errors, 52, academicYear2014, "startWeek") // Extended a/y
 		errors.hasFieldErrors("startWeek") should be {false}
-		validator.validateWeek(errors, 54, thisAcademicYear, "startWeek")
+		validator.validateWeek(errors, 54, academicYear2014, "startWeek")
 		errors.hasFieldErrors("startWeek") should be {true}
 	}}
 
@@ -166,7 +166,8 @@ class CreateAttendancePointCommandTest extends TestBase with Mockito {
 				assignmentSubmissionTypeAnyQuantity = 0,
 				assignmentSubmissionTypeModulesQuantity = 0,
 				assignmentSubmissionModules = JHashSet(),
-				assignmentSubmissionAssignments = JHashSet()
+				assignmentSubmissionAssignments = JHashSet(),
+				academicYear = academicYear2014
 			)
 			errors.hasFieldErrors("assignmentSubmissionAssignments") should be {true}
 		}
@@ -177,10 +178,24 @@ class CreateAttendancePointCommandTest extends TestBase with Mockito {
 				assignmentSubmissionTypeAnyQuantity = 0,
 				assignmentSubmissionTypeModulesQuantity = 0,
 				assignmentSubmissionModules = JHashSet(),
-				assignmentSubmissionAssignments = JHashSet(Fixtures.assignment("assignment"))
+				assignmentSubmissionAssignments = JHashSet(Fixtures.assignment("assignment")),
+				academicYear = academicYear2014
+			)
+			errors.hasFieldErrors("assignmentSubmissionAssignments") should be {true}
+		}
+		new Fixture {
+			validator.validateTypeAssignmentSubmission(
+				errors,
+				assignmentSubmissionType = AttendanceMonitoringPoint.Settings.AssignmentSubmissionTypes.Assignments,
+				assignmentSubmissionTypeAnyQuantity = 0,
+				assignmentSubmissionTypeModulesQuantity = 0,
+				assignmentSubmissionModules = JHashSet(),
+				assignmentSubmissionAssignments = JHashSet(Fixtures.assignment("assignment")),
+				AcademicYear.now()
 			)
 			errors.hasFieldErrors("assignmentSubmissionAssignments") should be {false}
 		}
+
 		new Fixture {
 			validator.validateTypeAssignmentSubmission(
 				errors,
@@ -188,7 +203,8 @@ class CreateAttendancePointCommandTest extends TestBase with Mockito {
 				assignmentSubmissionTypeAnyQuantity = 0,
 				assignmentSubmissionTypeModulesQuantity = 0,
 				assignmentSubmissionModules = JHashSet(),
-				assignmentSubmissionAssignments = JHashSet()
+				assignmentSubmissionAssignments = JHashSet(),
+				academicYear = academicYear2014
 			)
 			errors.hasFieldErrors("assignmentSubmissionTypeModulesQuantity") should be {true}
 			errors.hasFieldErrors("assignmentSubmissionModules") should be {true}
@@ -200,7 +216,8 @@ class CreateAttendancePointCommandTest extends TestBase with Mockito {
 				assignmentSubmissionTypeAnyQuantity = 0,
 				assignmentSubmissionTypeModulesQuantity = 1,
 				assignmentSubmissionModules = JHashSet(Fixtures.module("a100")),
-				assignmentSubmissionAssignments = JHashSet()
+				assignmentSubmissionAssignments = JHashSet(),
+				academicYear = academicYear2014
 			)
 			errors.hasFieldErrors("assignmentSubmissionTypeModulesQuantity") should be {false}
 			errors.hasFieldErrors("assignmentSubmissionModules") should be {false}
@@ -212,7 +229,8 @@ class CreateAttendancePointCommandTest extends TestBase with Mockito {
 				assignmentSubmissionTypeAnyQuantity = 0,
 				assignmentSubmissionTypeModulesQuantity = 0,
 				assignmentSubmissionModules = JHashSet(),
-				assignmentSubmissionAssignments = JHashSet()
+				assignmentSubmissionAssignments = JHashSet(),
+				academicYear = academicYear2014
 			)
 			errors.hasFieldErrors("assignmentSubmissionTypeModulesQuantity") should be {false}
 			errors.hasFieldErrors("assignmentSubmissionTypeAnyQuantity") should be {true}
@@ -224,7 +242,8 @@ class CreateAttendancePointCommandTest extends TestBase with Mockito {
 				assignmentSubmissionTypeAnyQuantity = 1,
 				assignmentSubmissionTypeModulesQuantity = 0,
 				assignmentSubmissionModules = JHashSet(),
-				assignmentSubmissionAssignments = JHashSet()
+				assignmentSubmissionAssignments = JHashSet(),
+				academicYear = academicYear2014
 			)
 			errors.hasFieldErrors("assignmentSubmissionTypeModulesQuantity") should be {false}
 			errors.hasFieldErrors("assignmentSubmissionTypeAnyQuantity") should be {false}
@@ -484,7 +503,7 @@ class CreateAttendancePointCommandTest extends TestBase with Mockito {
 		command.attendanceMonitoringService.listAllSchemes(thisDepartment) returns Seq()
 		command.profileService.getAllMembersWithUniversityIds(Seq(student.universityId)) returns Seq(student)
 		command.applyInternal()
-		verify(command.attendanceMonitoringService, times(1)).setCheckpointTotalsForUpdate(Seq(student), thisDepartment, thisAcademicYear)
+		verify(command.attendanceMonitoringService, times(1)).setCheckpointTotalsForUpdate(Seq(student), thisDepartment, academicYear2014)
 	}
 
 }
