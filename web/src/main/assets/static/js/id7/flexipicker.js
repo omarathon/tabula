@@ -613,7 +613,7 @@ var AssignmentPicker = function (options) {
 			if (item != undefined) {
 				i = $(that.options.item);
 				i.attr('data-assignmentid', item.id);
-				i.find('div.name').html(that.highlighter(item.module.toUpperCase() + ' ' + item.name));
+				i.find('div.name').html(that.highlighter(item.module.toUpperCase() + ' ' + item.name + ' (' + item.academicYear + ')'));
 				i.find('div.department').html(item.department);
 				return i[0];
 			} else {

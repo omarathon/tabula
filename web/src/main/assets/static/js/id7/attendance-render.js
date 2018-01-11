@@ -62,7 +62,7 @@ exports.bindModulePickers = function(){
 exports.bindAssignmentPickers = function(){
 	$('.assignment-search-query')
 		.closest('.assignment-choice')
-		.find('.assignments-list').on('click', 'a.remove', function(e){
+		.find('.assignments-list').on('click', '.remove', function(e){
 			e.preventDefault();
 			$(this).closest('li').remove();
 		}).end()
