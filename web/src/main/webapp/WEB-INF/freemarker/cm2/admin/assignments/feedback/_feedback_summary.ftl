@@ -8,7 +8,7 @@
 
 	<div class="${stage.name} feedback-summary" >
 
-		<#if markerFeedback.hasContent && !hasBeenModified>
+		<#if markerFeedback.hasContent && !markerFeedback.hasBeenModified>
 			Approved by the moderator
 		<#elseif !markerFeedback.hasContent>
 			Not moderated
