@@ -64,6 +64,7 @@ class OnlineMarkingTest  extends BrowserTest with CourseworkFixtures with GivenW
 			eventuallyAjax(currentUrl should include(s"/admin/assignments/$assignmentId/mark"))
 
 			When("I expand the student again")
+			eventuallyAjax(cssSelector(".toggle-icon-large.student-col").webElement.isDisplayed shouldBe true)
 			click on cssSelector(".toggle-icon-large.student-col").webElement
 			Then("The feedback I entered before should be present")
 			eventuallyAjax(pageSource contains "Marking and feedback" should be {true})

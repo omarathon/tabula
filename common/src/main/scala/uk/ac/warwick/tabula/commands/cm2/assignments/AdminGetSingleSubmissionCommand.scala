@@ -6,8 +6,9 @@ import uk.ac.warwick.tabula.commands.cm2.assignments.AdminGetSingleSubmissionCom
 import uk.ac.warwick.tabula.data.model.{Assignment, Submission}
 import uk.ac.warwick.tabula.permissions._
 import uk.ac.warwick.tabula.services.fileserver.{RenderableAttachment, RenderableFile}
-import uk.ac.warwick.tabula.services.{AutowiringZipServiceComponent, ZipServiceComponent}
+import uk.ac.warwick.tabula.services.{AutowiringUserLookupComponent, AutowiringZipServiceComponent, UserLookupComponent, ZipServiceComponent}
 import uk.ac.warwick.tabula.system.permissions.{PermissionsChecking, PermissionsCheckingMethods, RequiresPermissionsChecking}
+import uk.ac.warwick.userlookup.AnonymousUser
 
 object AdminGetSingleSubmissionCommand {
 	type Result = RenderableFile
@@ -20,6 +21,7 @@ object AdminGetSingleSubmissionCommand {
 			with ComposableCommand[Result]
 			with AdminGetSingleSubmissionCommandPermissions
 			with AdminGetSingleSubmissionFileCommandDescription
+			with AutowiringUserLookupComponent
 			with ReadOnly
 
 	def zip(assignment: Assignment, submission: Submission) =
@@ -42,9 +44,25 @@ trait AdminGetSingleSubmissionFilenameCommandState extends AdminGetSingleSubmiss
 
 class AdminGetSingleSubmissionFileCommandInternal(val assignment: Assignment, val submission: Submission, val filename: String)
 	extends CommandInternal[Result] with AdminGetSingleSubmissionFilenameCommandState {
+	self: UserLookupComponent =>
 
-	override def applyInternal(): RenderableFile =
-		submission.allAttachments.find(_.name == filename).map(new RenderableAttachment(_)).getOrElse { throw new ItemNotFoundException() }
+	override def applyInternal(): RenderableFile = {
+		val user = userLookup.getUserByUserId(submission.usercode)
+		val moduleCode = assignment.module.code
+
+		val userIdentifier = if (!assignment.showStudentNames || user == null || user.isInstanceOf[AnonymousUser]) {
+			submission.studentIdentifier
+		} else {
+			s"${user.getFullName} - ${submission.studentIdentifier}"
+		}
+
+		submission.allAttachments
+			.find(_.name == filename)
+			.map(a => new RenderableAttachment(a, Some(s"$moduleCode - $userIdentifier - $filename")))
+			.getOrElse {
+				throw new ItemNotFoundException()
+			}
+	}
 }
 
 class AdminGetSingleSubmissionAsZipCommandInternal(val assignment: Assignment, val submission: Submission)

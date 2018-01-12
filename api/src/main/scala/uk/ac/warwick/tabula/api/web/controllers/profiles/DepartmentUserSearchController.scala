@@ -17,6 +17,7 @@ class DepartmentUserSearchController extends ApiController
 
 	final override def onPreRequest {
 		session.enableFilter(Member.ActiveOnlyFilter)
+		session.enableFilter(Member.FreshOnlyFilter)
 	}
 
 	@RequestMapping(method = Array(GET), produces = Array("application/json"))

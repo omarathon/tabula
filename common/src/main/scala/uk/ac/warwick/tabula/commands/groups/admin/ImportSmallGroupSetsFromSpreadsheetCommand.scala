@@ -141,8 +141,8 @@ trait ImportSmallGroupSetsFromSpreadsheetBinding extends BindListener  with Logg
 			val invalidFiles = fileNames.filter(s => !SmallGroupSetSpreadsheetHandler.AcceptedFileExtensions.exists(s.endsWith))
 
 			if (invalidFiles.nonEmpty) {
-				if (invalidFiles.size == 1) result.rejectValue("file", "file.wrongtype.one", Array(invalidFiles.mkString("")), "")
-				else result.rejectValue("file", "file.wrongtype", Array(invalidFiles.mkString(", ")), "")
+				if (invalidFiles.size == 1) result.rejectValue("file", "file.wrongtype.one", Array(invalidFiles.mkString(""), SmallGroupSetSpreadsheetHandler.AcceptedFileExtensions.mkString(", ")), "")
+				else result.rejectValue("file", "file.wrongtype", Array(invalidFiles.mkString(", "), SmallGroupSetSpreadsheetHandler.AcceptedFileExtensions.mkString(", ")), "")
 			}
 		}
 

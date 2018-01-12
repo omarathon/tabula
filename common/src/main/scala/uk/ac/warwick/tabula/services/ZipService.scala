@@ -47,8 +47,6 @@ class ZipService
 	private def resolvePath(submission: Submission): String = "submission/" + partition(submission.id)
 	private def resolvePathForSubmission(assignment: Assignment) = "all-submissions/" + partition(assignment.id)
 
-	private def showStudentName(assignment: Assignment): Boolean = assignment.module.adminDepartment.showStudentName
-
 	def invalidateSubmissionZip(assignment: Assignment): Unit = invalidate(resolvePathForSubmission(assignment))
 	def invalidateIndividualFeedbackZip(feedback: Feedback): Unit = {
 		invalidate(resolvePath(feedback))
@@ -89,27 +87,25 @@ class ZipService
 	 * TODO This doesn't check for duplicate file names
 	 */
 	def getSubmissionZipItems(submission: Submission): Seq[ZipItem] = benchmarkTask(s"Create zip item for $submission") {
-		val allAttachments = submission.allAttachments
+		val attachments = submission.allAttachments
 		val user = userLookup.getUserByUserId(submission.usercode)
 		val assignment = submission.assignment
-		val code = assignment.module.code
+		val moduleCode = assignment.module.code
 
-		val submissionZipItems: Seq[ZipItem] = for (attachment <- allAttachments) yield {
-			val userIdentifier = if(!showStudentName(assignment) || (user==null || user.isInstanceOf[AnonymousUser])) {
-				submission.studentIdentifier
-			} else {
-				s"${user.getFullName} - ${submission.studentIdentifier}"
-			}
-
-			ZipFileItem(code + " - " + userIdentifier + " - " + attachment.name, attachment.asByteSource, attachment.actualDataLength)
+		val userIdentifier = if (!assignment.showStudentNames || user == null || user.isInstanceOf[AnonymousUser]) {
+			submission.studentIdentifier
+		} else {
+			s"${user.getFullName} - ${submission.studentIdentifier}"
 		}
 
-		if (features.feedbackTemplates){
+		val submissionZipItems = attachments.map(a => ZipFileItem(s"$moduleCode - $userIdentifier - ${a.name}", a.asByteSource, a.actualDataLength))
+
+		if (features.feedbackTemplates) {
 			val feedbackSheets = generateFeedbackSheet(submission)
 			feedbackSheets ++ submissionZipItems
-		}
-		else
+		} else {
 			submissionZipItems
+		}
 	}
 
 	/**

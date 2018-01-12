@@ -76,8 +76,8 @@ trait AllocateStudentsToDepartmentalSmallGroupsFileUploadSupport extends GroupsO
 		val invalidFiles = fileNames.filter(s => !GroupsExtractor.AcceptedFileExtensions.exists(s.endsWith))
 
 		if (invalidFiles.nonEmpty) {
-			if (invalidFiles.size == 1) result.rejectValue("file", "file.wrongtype.one", Array(invalidFiles.mkString("")), "")
-			else result.rejectValue("", "file.wrongtype", Array(invalidFiles.mkString(", ")), "")
+			if (invalidFiles.size == 1) result.rejectValue("file", "file.wrongtype.one", Array(invalidFiles.mkString(""), GroupsExtractor.AcceptedFileExtensions.mkString(", ")), "")
+			else result.rejectValue("", "file.wrongtype", Array(invalidFiles.mkString(", "), GroupsExtractor.AcceptedFileExtensions.mkString(", ")), "")
 		}
 	}
 

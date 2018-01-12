@@ -37,22 +37,24 @@
 		</@bs3form.radio>
 	</@bs3form.labelled_form_group>
 
-	<@bs3form.labelled_form_group path="dissertation" labelText="Feedback turnaround time">
-		<@bs3form.checkbox path="dissertation">
-			<@f.checkbox path="dissertation" id="dissertation" />
-			This assignment is exempt from the
-			<a href="https://warwick.ac.uk/services/aro/dar/quality/categories/examinations/assessmentstrat/assessment/timeliness/" target="_blank">universal requirement</a>
-			to return feedback within 20 University working days
-		</@bs3form.checkbox>
-	</@bs3form.labelled_form_group>
-
 	<@bs3form.labelled_form_group path="publishFeedback" labelText="Publish feedback to students">
 		<@bs3form.checkbox path="publishFeedback">
 			<@f.checkbox path="publishFeedback" id="publishFeedback" />
 			Allow feedback to be published to students for this assignment
 		</@bs3form.checkbox>
 		<div class="help-block">
-			If you don't check this box, you won't be able to publish any feedback to students.
+			Deselecting this option will allow feedback to be added to submissions but not published to students. Ideal for exam related assignments
 		</div>
 	</@bs3form.labelled_form_group>
+
+	<fieldset id="dissertation-checkbox" <#if !command.publishFeedback>disabled</#if>>
+		<@bs3form.labelled_form_group path="dissertation" labelText="Feedback turnaround time">
+			<@bs3form.checkbox path="dissertation">
+				<@f.checkbox path="dissertation" id="dissertation" />
+				This assignment is exempt from the
+				<a href="https://warwick.ac.uk/services/aro/dar/quality/categories/examinations/assessmentstrat/assessment/timeliness/" target="_blank">universal requirement</a>
+				to return feedback within 20 University working days
+			</@bs3form.checkbox>
+		</@bs3form.labelled_form_group>
+	</fieldset>
 </#escape>

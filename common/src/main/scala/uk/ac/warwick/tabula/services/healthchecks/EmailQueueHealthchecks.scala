@@ -62,7 +62,7 @@ class EmailOldestUnsentItemHealthcheck extends ServiceHealthcheckProvider {
 		val recentSentEmail: Duration =
 			Wire[EmailNotificationService].recentEmailedRecipient
 				.map { recipient: RecipientNotificationInfo =>
-					Minutes.minutesBetween(recipient.notification.created, DateTime.now).getMinutes.minutes.toCoarsest
+					Minutes.minutesBetween(recipient.attemptedAt, DateTime.now).getMinutes.minutes.toCoarsest
 				}.getOrElse(Zero)
 
 		val status =

@@ -40,10 +40,22 @@ class ReleaseForMarkingCommandTest extends TestBase  with Mockito {
 			val assignment = newDeepAssignment()
 			assignment.cm2MarkingWorkflow = SingleMarkerWorkflow("test", assignment.module.adminDepartment, Seq(marker))
 			val feedback = Fixtures.assignmentFeedback("1", "1")
+
 			feedback.outstandingStages.add(SingleMarker)
 			assignment.feedbacks.add(feedback)
 			val cmd = ReleaseForMarkingCommand(assignment, currentUser.apparentUser)
 			cmd.students = Seq("1", "2", "3").asJava
+			// no known marker as firstmarker not assigned
+			cmd.studentsWithoutKnownMarkers should be(Seq("1","2","3"))
+			feedback.markerFeedback.add({
+				val m = Fixtures.markerFeedback(feedback)
+				val u = Fixtures.user("marker", "marker")
+				m.marker = u
+				m.userLookup = Fixtures.userLookupService(u)
+				m.stage = SingleMarker
+				m
+			})
+			// has known marker as first marker is assigned
 			cmd.studentsWithoutKnownMarkers should be(Seq("2","3"))
 			cmd.studentsAlreadyReleased should be(Seq("1"))
 			cmd.unreleasableSubmissions should be(Seq("2","3","1"))

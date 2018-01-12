@@ -73,21 +73,22 @@
 				</colgroup>
 
 				<thead>
+				<#-- TAB-5807 - make the first header rows from TDs so that the tablesorter plugin can cope -->
 				<tr>
-					<th class="for-check-all"><input  type="checkbox" class="collection-check-all" title="Select all/none" /> </th>
-					<th<#if department.showStudentName> colspan="3"</#if>>Student</th>
+					<td class="for-check-all"><input  type="checkbox" class="collection-check-all" title="Select all/none" /> </td>
+					<td<#if department.showStudentName> colspan="3"</#if>>Student</td>
 
-					<th class="submission" colspan="${submissionColspan?c}">
+					<td class="submission" colspan="${submissionColspan?c}">
 						Submission
-					</th>
+					</td>
 
 					<#if results.hasOriginalityReport>
-						<th class="plagiarism">Plagiarism</th>
+						<td class="plagiarism">Plagiarism</td>
 					</#if>
 
-					<th class="feedback" colspan="${feedbackColspan?c}">
+					<td class="feedback" colspan="${feedbackColspan?c}">
 						Feedback
-					</th>
+					</td>
 				</tr>
 				<tr>
 					<th class="student"></th>
@@ -98,7 +99,7 @@
 					<th class="student sortable">University ID</th>
 
 					<th class="submission">Files</th>
-					<th class="submission sortable">Submitted</th>
+					<th class="submission sortable" data-sorter="customdate">Submitted</th>
 					<th class="submission sortable">Status</th>
 					<#if assignment.wordCountField??>
 						<th class="submission sortable" title="Declared word count">Words</th>
@@ -121,7 +122,7 @@
 					</#if>
 
 					<th class="feedback sortable">Files</th>
-					<th class="feedback sortable">Updated</th>
+					<th class="feedback sortable" data-sorter="customdate">Updated</th>
 					<#if assignment.collectMarks>
 						<th class="feedback sortable">Mark</th>
 						<th class="feedback sortable">Grade</th>
@@ -177,13 +178,15 @@
 								</#if>
 							</#if>
 						</td>
-						<td class="submitted">
-							<#if submission?? && submission.submittedDate??>
+						<#if submission?? && submission.submittedDate??>
+							<td class="submitted" data-datesort="${submission.submittedDate.millis?c!''}">
 								<span class="date use-tooltip" title="${lateness!''}" data-container="body">
 									<@fmt.date date=submission.submittedDate seconds=true capitalise=true shortMonth=true split=true />
-									</span>
-							</#if>
-						</td>
+								</span>
+							</td>
+						<#else>
+							<td class="submitted"></td>
+						</#if>
 						<td class="submission-status">
 						<#-- Markable - ignore placeholder submissions -->
 							<#if assignment.isReleasedForMarking(submissionfeedbackinfo.user.userId)>
@@ -259,11 +262,13 @@
 								</#if>
 							</#if>
 						</td>
-						<td class="uploaded">
-							<#if enhancedFeedback?? && !enhancedFeedback.feedback.placeholder>
-									<@fmt.date date=enhancedFeedback.feedback.updatedDate seconds=true capitalise=true shortMonth=true split=true />
-								</#if>
-						</td>
+						<#if enhancedFeedback?? && !enhancedFeedback.feedback.placeholder>
+							<td class="uploaded" data-datesort="${enhancedFeedback.feedback.updatedDate.millis?c!''}">
+								<@fmt.date date=enhancedFeedback.feedback.updatedDate seconds=true capitalise=true shortMonth=true split=true />
+							</td>
+						<#else>
+							<td class="uploaded" ></td>
+						</#if>
 
 						<#if assignment.collectMarks>
 							<td class="feedback-mark">
@@ -366,6 +371,19 @@
 			$('a.ajax-modal').ajaxModalLink();
 			$('.use-popover').tabulaPopover({trigger: 'click', container: 'body'});
 
+			// add a custom parser for date columns - works from a data-datesort value that holds the date in millis
+			$.tablesorter.addParser({
+				id: 'customdate',
+				is: function(s, table, cell, cellIndex){return false; /*return false so this parser is not auto detected*/},
+				format: function(s, table, cell, cellIndex) {
+					var $cell = $(cell);
+					console.log($cell.attr('data-datesort'));
+					return $cell.attr('data-datesort') || s;
+				},
+				parsed: false,
+				type: 'numeric'
+			});
+
 			var $submissionFeedbackResultsTable = $(".submission-feedback-results table");
 			$submissionFeedbackResultsTable.sortableTable({
 				textExtraction: function(node) {
@@ -390,7 +408,6 @@
 			$('.submission-feedback-results').wideTables();
 			// We probably just grew a scrollbar, so let's trigger a window resize
 			$(window).trigger('resize.ScrollToFixed');
-
 
 		})(jQuery);
 	</script>

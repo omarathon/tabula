@@ -13,6 +13,7 @@ import uk.ac.warwick.userlookup.User
  *
  * For methods called "apply", you can leave out the "apply" and treat the object like a function.
  */
+@deprecated("Always use CM2 Routes", since = "209")
 object Routes {
 	import RoutesUtils._
 
@@ -146,11 +147,6 @@ object Routes {
 						assignmentroot(submission.assignment) + "/turnitin/lti-report/%s".format (encoded(report.attachment.id))
 					else
 						assignmentroot(submission.assignment) + "/turnitin/report/%s".format (encoded(report.attachment.id))
-			}
-
-			object turnitinlti {
-				def fileByToken(submission: Submission, attachment: FileAttachment, token: FileAttachmentToken) =
-					s"/turnitin/submission/${submission.id}/attachment/${attachment.id}?token=${token.id}"
 			}
 
 			object extension {

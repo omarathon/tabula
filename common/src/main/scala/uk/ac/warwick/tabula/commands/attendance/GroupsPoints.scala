@@ -20,9 +20,9 @@ trait GroupsPoints {
 		val ungroupedPoints =
 			// only week points group by term
 			points.filter(_.scheme.pointStyle == AttendanceMonitoringPointStyle.Week)
-			// group by term (using pre-calculated date)
+			// group by term (TAB-5788)
 			.groupBy { point =>
-				AcademicYear.forDate(point.startDate).termOrVacationForDate(point.startDate).periodType.toString
+				point.scheme.academicYear.termOrVacationForDate(point.startDate).periodType.toString
 			}
 
 		if (groupSimilar)

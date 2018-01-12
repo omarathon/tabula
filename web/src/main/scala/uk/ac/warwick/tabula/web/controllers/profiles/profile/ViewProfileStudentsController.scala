@@ -28,7 +28,8 @@ class ViewProfileStudentsController extends AbstractViewProfileController {
 		Mav("profiles/profile/students",
 			"relationshipTypesMap" -> info.relationshipTypesMap,
 			"relationshipTypesMapById" -> info.relationshipTypesMap.map { case (k, v) => (k.id, v) },
-			"smallGroups" -> (info.currentSmallGroups ++ info.previousSmallGroups),
+			"smallGroups" -> info.currentSmallGroups,
+			"previousSmallGroups" -> info.previousSmallGroups,
 			"isSelf" -> (user.universityId.maybeText.getOrElse("") == member.universityId)
 		).crumbs(breadcrumbsStaff(member, ProfileBreadcrumbs.Profile.StudentsIdentifier): _*)
 	}

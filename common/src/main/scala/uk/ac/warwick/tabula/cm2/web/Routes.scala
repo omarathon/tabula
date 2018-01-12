@@ -127,6 +127,12 @@ object Routes {
 				def list(assignment: Assignment): String = assignmentroot(assignment) + "/list"
 			}
 
+			object moderationSampling {
+				def apply(assignment: Assignment): String = assignmentroot(assignment) + "/moderator-sampling"
+				def allocate(assignment: Assignment): String = apply(assignment) + "/allocate"
+				def finalise(assignment: Assignment): String = apply(assignment) + "/finalise-feedback"
+			}
+
 			private def markerroot(assignment: Assignment, marker: User) = assignmentroot(assignment) + s"/marker/${marker.getUserId}"
 
 			object markerFeedback {
@@ -184,7 +190,7 @@ object Routes {
 					}
 				}
 				object returnsubmissions {
-					def apply(assignment: Assignment): String = assignmentroot(assignment) + "/submissionsandfeedback/return-submissions"
+					def apply(assignment: Assignment): String = assignmentroot(assignment) + "/return-submissions"
 				}
 			}
 
@@ -198,6 +204,7 @@ object Routes {
 			}
 
 			def extensions(assignment: Assignment): String = assignmentroot(assignment) + "/extensions"
+			def extension(assignment: Assignment, student: User): String = extensions(assignment) + s"?usercode=${encoded(student.getUserId)}"
 
 			def submitToTurnitin(assignment: Assignment): String = assignmentroot(assignment) + "/turnitin"
 		}

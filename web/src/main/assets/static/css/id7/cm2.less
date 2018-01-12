@@ -365,3 +365,17 @@ table.expanding-row-pairs {
 
 	}
 }
+
+// styles to make assignment table view first header row look like th
+.admin-assignment-submission-list table thead tr td {
+	background-color: transparent;
+	padding-right: 20px;
+	font-weight: bold;
+	vertical-align: bottom;
+	border-bottom: 2px solid #ddd;
+}
+
+abbr[title] {
+	// Fixes double-underline visible in Chrome (ID7 underlines abbr elements with border-bottom)
+	text-decoration: none;
+}

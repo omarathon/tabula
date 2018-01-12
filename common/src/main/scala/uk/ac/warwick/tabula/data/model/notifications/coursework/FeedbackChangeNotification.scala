@@ -2,7 +2,7 @@ package uk.ac.warwick.tabula.data.model.notifications.coursework
 
 import javax.persistence.{DiscriminatorValue, Entity}
 
-import uk.ac.warwick.tabula.coursework.web.Routes
+import uk.ac.warwick.tabula.cm2.web.Routes
 import uk.ac.warwick.tabula.data.model.NotificationPriority.Warning
 import uk.ac.warwick.tabula.data.model._
 import uk.ac.warwick.tabula.services.AutowiringUserLookupComponent
@@ -36,7 +36,7 @@ class FeedbackChangeNotification extends NotificationWithTarget[AssignmentFeedba
 		"module" -> module
 	))
 
-	def url: String = Routes.assignment.receipt(assignment)
+	def url: String = Routes.assignment(assignment)
 	def urlTitle = "view your new feedback"
 
 }

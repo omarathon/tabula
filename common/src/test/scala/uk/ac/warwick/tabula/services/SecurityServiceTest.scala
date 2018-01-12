@@ -2,6 +2,7 @@ package uk.ac.warwick.tabula.services
 
 import uk.ac.warwick.tabula.JavaImports._
 import uk.ac.warwick.tabula._
+import uk.ac.warwick.tabula.data.model.permissions.GrantedPermission
 import uk.ac.warwick.tabula.data.model.{Assignment, Department, Module, RuntimeMember, StaffMember, StudentCourseDetails, StudentMember, StudentRelationshipType}
 import uk.ac.warwick.tabula.permissions._
 import uk.ac.warwick.tabula.roles._
@@ -36,11 +37,11 @@ class SecurityServiceTest extends TestBase with Mockito {
 		roleService.getRolesFor(currentUser,null) returns Stream.empty
 		roleService.getRolesFor(currentUser,department) returns Stream.empty
 		roleService.getExplicitPermissionsFor(currentUser, null) returns Stream(
-			PermissionDefinition(Permissions.UserPicker, None, true),
-			PermissionDefinition(Permissions.ImportSystemData, None, true)
+			PermissionDefinition(Permissions.UserPicker, None, permissionType = GrantedPermission.Allow),
+			PermissionDefinition(Permissions.ImportSystemData, None, permissionType = GrantedPermission.Allow)
 		)
 		roleService.getExplicitPermissionsFor(currentUser, department) returns Stream(
-			PermissionDefinition(Permissions.Department.ManageDisplaySettings, Some(department), true)
+			PermissionDefinition(Permissions.Department.ManageDisplaySettings, Some(department), permissionType = GrantedPermission.Allow)
 		)
 
 		securityService.roleService = roleService
@@ -271,13 +272,6 @@ class SecurityServiceTest extends TestBase with Mockito {
 		student2.universityId = "2222222"
 		student2.homeDepartment = department
 
-		val smallGroupService = mock[SmallGroupService]
-		smallGroupService.findSmallGroupsByStudent(student1.asSsoUser) returns Nil
-		smallGroupService.findSmallGroupsByStudent(student2.asSsoUser) returns Nil
-
-		student1.smallGroupService = smallGroupService
-		student2.smallGroupService = smallGroupService
-
 		val studentCourseDetails = new StudentCourseDetails(student1, "1111111/1")
 
 		/*
@@ -289,12 +283,12 @@ class SecurityServiceTest extends TestBase with Mockito {
 		 */
 
 		val deptPerms = Stream(
-				PermissionDefinition(Permissions.Profiles.StudentRelationship.Read(PermissionsSelector.Any[StudentRelationshipType]), Some(department), true),
-				PermissionDefinition(Permissions.Profiles.StudentRelationship.Manage(type2), Some(department), true)
+				PermissionDefinition(Permissions.Profiles.StudentRelationship.Read(PermissionsSelector.Any[StudentRelationshipType]), Some(department), permissionType = GrantedPermission.Allow),
+				PermissionDefinition(Permissions.Profiles.StudentRelationship.Manage(type2), Some(department), permissionType = GrantedPermission.Allow)
 		)
 
 		val student1Perms = Stream(
-				PermissionDefinition(Permissions.Profiles.StudentRelationship.Manage(type1), Some(student1), true)
+				PermissionDefinition(Permissions.Profiles.StudentRelationship.Manage(type1), Some(student1), permissionType = GrantedPermission.Allow)
 		) #::: deptPerms
 
 		val student2Perms = deptPerms

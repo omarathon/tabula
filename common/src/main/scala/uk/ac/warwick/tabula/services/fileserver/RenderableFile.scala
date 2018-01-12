@@ -7,6 +7,7 @@ trait RenderableFile {
 	def filename: String
 	def contentType: String
 	def contentLength: Option[Long]
+	def suggestedFilename: Option[String] = None
 
 	def cachePolicy = CachePolicy()
 }

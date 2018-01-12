@@ -1,6 +1,5 @@
 package uk.ac.warwick.tabula.cm2
 
-import org.joda.time.DateTime
 import org.openqa.selenium.support.ui.Select
 import org.openqa.selenium.{By, WebElement}
 import org.scalatest.GivenWhenThen
@@ -200,7 +199,12 @@ trait CourseworkFixtures extends BrowserTest with FeaturesDriver with FixturesDr
 	}
 
 	def withAssignmentWithWorkflow(workflowType: MarkingWorkflowType, markers: Seq[LoginDetails]*)(callback: String => Unit): Unit = {
-		withAssignment("xxx01", s"${workflowType.description} - single use") { id =>
+
+		def withWorkflowSubmissionSettings() = {
+			radioButtonGroup("restrictSubmissions").value = "true"
+		}
+
+		withAssignment("xxx01", s"${workflowType.description} - single use", submissionSettings = withWorkflowSubmissionSettings) { id =>
 
 			When("I click on the edit button")
 			click on partialLinkText("Edit assignment")
@@ -228,11 +232,10 @@ trait CourseworkFixtures extends BrowserTest with FeaturesDriver with FixturesDr
 
 			And("I submit the form")
 			cssSelector(s"input[name=editAndEditDetails]").webElement.click()
+			eventually(cssSelector(".confirm.btn-primary").webElement.isDisplayed shouldBe true)
+			cssSelector(".confirm.btn-primary").webElement.click()
 			Then("I should be back on the summary page")
-			withClue(pageSource) {
-				currentUrl should endWith("/summary")
-			}
-
+			eventually(currentUrl should endWith("/summary"))
 			callback(id)
 		}
 	}
@@ -382,10 +385,12 @@ trait CourseworkFixtures extends BrowserTest with FeaturesDriver with FixturesDr
 		select.selectByValue(workflowId)
 		And("I submit the form")
 		cssSelector(s"input[name=editAndEditDetails]").webElement.click()
+		eventually(cssSelector(".confirm.btn-primary").webElement.isDisplayed shouldBe true)
+		cssSelector(".confirm.btn-primary").webElement.click()
+
 		Then("I should be back on the summary page")
-		withClue(pageSource) {
-			currentUrl should endWith("/summary")
-		}
+		currentUrl should endWith("/summary")
+
 	}
 
 	def submitAssignment(user: LoginDetails, assignmentName: String, assignmentId: String, file: String, mustBeEnrolled: Boolean = true): Unit = as(user) {

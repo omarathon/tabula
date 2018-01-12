@@ -25,6 +25,9 @@ object FiltersRelationships {
 		"statusOnRoute" -> Seq(
 			"statusOnRoute" -> AliasAndJoinType("statusOnRoute")
 		),
+		"levelCode" -> Seq(
+			"levelCode" -> AliasAndJoinType("levelCode")
+		),
 		"department" -> Seq(
 			"route" -> AliasAndJoinType("route"),
 			"route.adminDepartment" -> AliasAndJoinType("department")
@@ -45,6 +48,17 @@ trait FiltersRelationships extends FilterStudentsOrRelationships {
 	def sprStatusRestriction: Option[ScalaRestriction] = inIfNotEmpty(
 		"statusOnRoute", sprStatuses.asScala,
 		getAliasPaths("statusOnRoute") : _*
+	)
+
+	def levelCodeRestriction: Option[ScalaRestriction] = inIfNotEmpty(
+		"levelCode", levelCodes.asScala,
+		getAliasPaths("levelCode") : _*
+	)
+
+	def isFinalistRestriction: Option[ScalaRestriction] = isPropertyIfTicked(
+		"studentCourseYearDetails.yearOfStudy", "courseYearLength",
+		otherCriteria.contains("Finalist"),
+		getAliasPaths("studentCourseYearDetails") : _*
 	)
 
 	def allDepartments: Seq[Department]

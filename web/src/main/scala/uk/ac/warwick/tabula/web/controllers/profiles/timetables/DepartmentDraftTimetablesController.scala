@@ -40,16 +40,30 @@ class DepartmentDraftTimetablesController extends ProfilesController
 
 		val moduleTimetableEventSource: ModuleTimetableEventSource =
 			new CombinedModuleTimetableEventSourceComponent
-			with SmallGroupEventTimetableEventSourceComponentImpl
-			with AutowiringSmallGroupServiceComponent
-			with AutowiringUserLookupComponent
-			with AutowiringCelcatConfigurationComponent
-			with AutowiringExamTimetableConfigurationComponent
-			with AutowiringSecurityServiceComponent
-			with SystemClockComponent
-			with ModuleTimetableFetchingServiceComponent {
+				with SmallGroupEventTimetableEventSourceComponentImpl
+				with AutowiringSmallGroupServiceComponent
+				with AutowiringUserLookupComponent
+				with AutowiringCelcatConfigurationComponent
+				with AutowiringExamTimetableConfigurationComponent
+				with AutowiringSecurityServiceComponent
+				with SystemClockComponent
+				with ModuleTimetableFetchingServiceComponent {
 				override val timetableFetchingService: ModuleTimetableFetchingService = draftTimetableFetchingService
 			}.moduleTimetableEventSource
+
+		val staffTimetableEventSource: StaffTimetableEventSource =
+			new CombinedStaffTimetableEventSourceComponent
+				with SmallGroupEventTimetableEventSourceComponentImpl
+				with AutowiringSmallGroupServiceComponent
+				with AutowiringUserLookupComponent
+				with AutowiringScientiaConfigurationComponent
+				with AutowiringCelcatConfigurationComponent
+				with AutowiringExamTimetableConfigurationComponent
+				with AutowiringSecurityServiceComponent
+				with SystemClockComponent
+				with StaffTimetableFetchingServiceComponent {
+				override val timetableFetchingService: StaffTimetableFetchingService = draftTimetableFetchingService
+			}.staffTimetableEventSource
 
 		DepartmentEventsCommand.draft(
 			mandatory(department),
@@ -64,7 +78,7 @@ class DepartmentDraftTimetablesController extends ProfilesController
 						override def apply(): Try[EventOccurrenceList] = Failure(new IllegalArgumentException("Filtering students is not supported for draft timetables"))
 					}
 			},
-			new ViewStaffMemberEventsCommandFactoryImpl(user)
+			new ViewStaffMemberEventsCommandFactoryImpl(user, staffTimetableEventSource)
 		)
 	}
 

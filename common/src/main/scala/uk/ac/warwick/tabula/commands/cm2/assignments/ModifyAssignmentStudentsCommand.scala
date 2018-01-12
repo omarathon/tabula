@@ -4,6 +4,7 @@ import org.springframework.validation.Errors
 import uk.ac.warwick.tabula.UniversityId
 import uk.ac.warwick.tabula.commands._
 import uk.ac.warwick.tabula.data.model._
+import uk.ac.warwick.tabula.helpers.StringUtils._
 import uk.ac.warwick.tabula.permissions.Permissions
 import uk.ac.warwick.tabula.services._
 import uk.ac.warwick.tabula.system.permissions.{PermissionsChecking, PermissionsCheckingMethods, RequiresPermissionsChecking}
@@ -83,12 +84,22 @@ trait ModifyAssignmentStudentsPermissions extends RequiresPermissionsChecking wi
 
 
 trait ModifyAssignmentStudentsDescription extends Describable[Assignment] {
-	self: ModifyAssignmentStudentsCommandState =>
+	self: ModifyAssignmentStudentsCommandState with AssessmentMembershipServiceComponent =>
 
 	override lazy val eventName: String = "ModifyAssignmentStudents"
 
-	override def describe(d: Description) {
+	override def describe(d: Description): Unit = {
+		val oldMembership = assessmentMembershipService.determineMembershipUsers(assignment)
 		d.assignment(assignment)
+		 .properties(
+			 "oldStudents" -> oldMembership.map(_.getWarwickId).filter(_.hasText),
+			 "oldStudentUsercodes" -> oldMembership.map(_.getUserId).filter(_.hasText)
+		 )
+	}
+
+	override def describeResult(d: Description, result: Assignment): Unit = {
+		val newMembership = assessmentMembershipService.determineMembershipUsers(assignment)
+		d.studentIds(newMembership.map(_.getWarwickId).filter(_.hasText)).studentUsercodes(newMembership.map(_.getUserId).filter(_.hasText))
 	}
 }
 

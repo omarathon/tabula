@@ -6,6 +6,7 @@ import org.apache.poi.ss.usermodel.Sheet
 import org.apache.poi.ss.util.WorkbookUtil
 import org.apache.poi.xssf.streaming.SXSSFWorkbook
 import org.joda.time.ReadableInstant
+import org.joda.time.format.DateTimeFormatter
 import uk.ac.warwick.spring.Wire
 import uk.ac.warwick.tabula.cm2.web.Routes
 import uk.ac.warwick.tabula.data.model._
@@ -43,7 +44,7 @@ class XMLBuilder(val items: Seq[WorkflowItems], val assignment: Assignment, over
 					}
 				</submission> % submissionData(item) % submissionStatusData(item)
 			}
-			{ <marking /> % markerData(item, assignment) % plagiarismData(item) }
+			{ <marking /> % markerData(item) % plagiarismData(item) }
 			{
 				<feedback>
 					{ item.enhancedFeedback.flatMap { _.feedback.comments }.orNull }
@@ -51,11 +52,6 @@ class XMLBuilder(val items: Seq[WorkflowItems], val assignment: Assignment, over
 			}
 			{ <adjustment /> % adjustmentData(item) }
 		</student> % identityData(item)
-	}
-
-	private def markerData(item: WorkflowItems, assignment: Assignment): Map[String, Any] = {
-		if (assignment.markingWorkflow != null) markerData(item)
-		else Map()
 	}
 
 	def fieldElement(item: SubmissionListItem)(value: SavedFormValue): Seq[Node] =
@@ -170,7 +166,7 @@ class ExcelBuilder(val items: Seq[WorkflowItems], val assignment: Assignment, ov
 trait SubmissionAndFeedbackSpreadsheetExport extends SubmissionAndFeedbackExport {
 	val items: Seq[WorkflowItems]
 
-	val csvFormatter = DateFormats.CSVDateTime
+	val csvFormatter: DateTimeFormatter = DateFormats.CSVDateTime
 	def csvFormat(i: ReadableInstant): String = csvFormatter print i
 
 	val headers: Seq[String] = {
@@ -184,7 +180,7 @@ trait SubmissionAndFeedbackSpreadsheetExport extends SubmissionAndFeedbackExport
 			prefix(submissionFields, "submission") ++
 			prefix(extraFields.toList.sorted, "submission") ++
 			prefix(submissionStatusFields, "submission") ++
-			(if (assignment.markingWorkflow != null) prefix(markerFields, "marking") else Seq()) ++
+			prefix(markerFields, "marking") ++
 			prefix(plagiarismFields, "marking") ++
 			prefix(feedbackFields, "feedback") ++
 			prefix(adjustmentFields, "adjustment")
@@ -205,7 +201,7 @@ trait SubmissionAndFeedbackSpreadsheetExport extends SubmissionAndFeedbackExport
 			prefix(submissionData(item), "submission") ++
 			prefix(extraFieldData(item), "submission") ++
 			prefix(submissionStatusData(item), "submission") ++
-			(if (assignment.markingWorkflow != null) prefix(markerData(item), "marking") else Map()) ++
+			prefix(markerData(item), "marking") ++
 			prefix(plagiarismData(item), "marking") ++
 			prefix(feedbackData(item), "feedback") ++
 			prefix(adjustmentData(item), "adjustment")
@@ -228,7 +224,7 @@ trait SubmissionAndFeedbackExport {
 
 	def topLevelUrl: String
 
-	val isoFormatter = DateFormats.IsoDateTime
+	val isoFormatter: DateTimeFormatter = DateFormats.IsoDateTime
 	def isoFormat(i: ReadableInstant): String = isoFormatter print i
 
 	// This Seq specifies the core field order
@@ -239,7 +235,10 @@ trait SubmissionAndFeedbackExport {
 
 	val submissionFields = Seq("id", "time", "downloaded")
 	val submissionStatusFields = Seq("late", "within-extension", "markable")
-	val markerFields = Seq("first-marker", "second-marker")
+	val markerFields: Seq[String] =
+		if (assignment.markingWorkflow != null) Seq("first-marker", "second-marker")
+		else if (assignment.cm2MarkingWorkflow != null) assignment.cm2MarkingWorkflow.allocationOrder
+		else Seq()
 	val plagiarismFields = Seq("suspected-plagiarised", "similarity-percentage")
 	val feedbackFields = Seq("id", "uploaded", "released","mark", "grade", "downloaded")
 	val adjustmentFields = Seq("mark", "grade", "reason")
@@ -290,10 +289,21 @@ trait SubmissionAndFeedbackExport {
 		}
 	}
 
-	protected def markerData(student: WorkflowItems): Map[String, Any] = Map(
-		"first-marker" -> assignment.getStudentsFirstMarker(student.student.getUserId).map(_.getFullName).getOrElse(""),
-		"second-marker" -> assignment.getStudentsSecondMarker(student.student.getUserId).map(_.getFullName).getOrElse("")
-	)
+	protected def markerData(student: WorkflowItems): Map[String, Any] =
+		if (assignment.markingWorkflow != null) {
+			Map(
+				"first-marker" -> assignment.getStudentsFirstMarker(student.student.getUserId).map(_.getFullName).getOrElse(""),
+				"second-marker" -> assignment.getStudentsSecondMarker(student.student.getUserId).map(_.getFullName).getOrElse("")
+			)
+		} else if (assignment.cm2MarkingWorkflow != null) {
+			student.enhancedFeedback.map(ef => {
+				assignment.cm2MarkingWorkflow.allocationOrder.map(role => {
+					role -> ef.feedback.feedbackMarkerByAllocationName(role).map(_.getFullName).getOrElse("")
+				})
+			}.toMap).getOrElse(Map())
+		} else {
+			Map()
+		}
 
 	protected def extraFieldData(student: WorkflowItems): Map[String, String] = {
 		var fieldDataMap = mutable.ListMap[String, String]()

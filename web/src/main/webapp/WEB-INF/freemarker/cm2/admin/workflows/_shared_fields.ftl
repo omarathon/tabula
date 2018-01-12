@@ -1,6 +1,6 @@
 <#if newRecord || canEditWorkflowType>
 	<@bs3form.labelled_form_group path="workflowType" labelText="Marking workflow type">
-		<@f.select path="workflowType" class="form-control" >
+		<@f.select path="workflowType" class="form-control workflow-modification" >
 			<option value="" disabled selected></option>
 			<#list availableWorkflows as workflowType>
 				<option <#if status.value?? && (status.value!"") == workflowType.name> selected="selected"</#if>
@@ -41,12 +41,11 @@
 		</div>
 	</div>
 	<#if features.moderationSelector>
-		<@bs3form.labelled_form_group path="sampler" labelText="Moderated assignment selection" cssClass="hidden sampler">
+		<@bs3form.labelled_form_group path="sampler" labelText="Moderated assignment selection" cssClass="hidden sampler workflow-modification">
 			<div class="radio">
-				<#-- TODO-Enable when admin version is ready
 				<@bs3form.radio_inline>
 					<@f.radiobutton path="sampler" value="admin" /> Administrator
-				</@bs3form.radio_inline> -->
+				</@bs3form.radio_inline>
 				<@bs3form.radio_inline>
 					<@f.radiobutton path="sampler" value="marker" /> Marker
 				</@bs3form.radio_inline>
@@ -61,7 +60,7 @@
 	</#if>
 <#else>
 	<@bs3form.labelled_form_group labelText="Workflow type">
-		<select id="workflowType" name="workflowType" class="form-control" disabled="disabled">
+		<select id="workflowType" name="workflowType" class="form-control workflow-modification" disabled="disabled">
 			<option
 					selected="selected"
 					value="${workflow.workflowType.name}"
@@ -83,19 +82,19 @@
 	</@bs3form.labelled_form_group>
 
 	<#if features.moderationSelector>
-		<@bs3form.labelled_form_group path="sampler" labelText="Moderated assignment selection" cssClass="hidden sampler">
+		<@bs3form.labelled_form_group path="sampler" labelText="Moderated assignment selection" cssClass="hidden sampler workflow-modification">
 			<div class="radio">
-			<#-- TODO-Enable when admin version is ready
-			<@bs3form.radio_inline>
-				<@f.radiobutton path="sampler" value="admin" disabled=true /> Administrator
-			</@bs3form.radio_inline> -->
-			<@bs3form.radio_inline>
-				<@f.radiobutton path="sampler" value="marker" disabled=true  /> Marker
-			</@bs3form.radio_inline>
-			<@bs3form.radio_inline>
-				<@f.radiobutton path="sampler" value="moderator" disabled=true  /> Moderator
-			</@bs3form.radio_inline>
+				<@bs3form.radio_inline>
+					<@f.radiobutton path="sampler" value="admin" disabled=true /> Administrator
+				</@bs3form.radio_inline>
+				<@bs3form.radio_inline>
+					<@f.radiobutton path="sampler" value="marker" disabled=true  /> Marker
+				</@bs3form.radio_inline>
+				<@bs3form.radio_inline>
+					<@f.radiobutton path="sampler" value="moderator" disabled=true  /> Moderator
+				</@bs3form.radio_inline>
 			</div>
+			<@f.hidden path="sampler" />
 			<div class="help-block">
 				<#if workflow.isReusable()>
 					It is not possible to modify the moderation selector once a marking workflow has been created.
@@ -135,7 +134,7 @@
 			var $this = $(this);
 			var $workflowOption = $this.find('option:selected');
 
-			if($workflowOption.val() === 'Moderated'){
+			if($workflowOption.val() === 'Moderated' || $workflowOption.val() === 'SelectedModerated'){
 				$('.sampler').removeClass('hidden');
 			} else {
 				$('.sampler').addClass('hidden');
@@ -157,6 +156,8 @@
 			}
 
 		}).trigger('change');
+
+		//# sourceURL=source.coffee
 
 	})(jQuery);
 </script>

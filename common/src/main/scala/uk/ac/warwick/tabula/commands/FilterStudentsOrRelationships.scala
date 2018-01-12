@@ -43,10 +43,17 @@ trait FilterStudentsOrRelationships extends FiltersStudentsBase with Permissions
 
 	def routeRestriction: Option[ScalaRestriction]
 
+	def courseRestriction: Option[ScalaRestriction] = inIfNotEmpty(
+		"course.code", courses.asScala.map {_.code},
+		getAliasPaths("course") : _*
+	)
+
 	def yearOfStudyRestriction: Option[ScalaRestriction] = inIfNotEmpty(
 		"studentCourseYearDetails.yearOfStudy", yearsOfStudy.asScala,
 		getAliasPaths("studentCourseYearDetails") : _*
 	)
+
+	def levelCodeRestriction: Option[ScalaRestriction]
 
 	def registeredModulesRestriction(year: AcademicYear): Option[ScalaRestriction] = inIfNotEmptyMultipleProperties(
 		Seq("moduleRegistration.module", "moduleRegistration.academicYear"),
@@ -58,6 +65,11 @@ trait FilterStudentsOrRelationships extends FiltersStudentsBase with Permissions
 
 	def tier4Restriction: Option[ScalaRestriction] = atLeastOneIsTrue(
 		"studentCourseYearDetails.casUsed", "studentCourseYearDetails.tier4Visa", otherCriteria.contains("Tier 4 only"),
+		getAliasPaths("studentCourseYearDetails") : _*
+	)
+
+	def notTier4Restriction: Option[ScalaRestriction] = neitherIsTrue(
+		"studentCourseYearDetails.casUsed", "studentCourseYearDetails.tier4Visa", otherCriteria.contains("Not Tier 4 only"),
 		getAliasPaths("studentCourseYearDetails") : _*
 	)
 
@@ -75,17 +87,23 @@ trait FilterStudentsOrRelationships extends FiltersStudentsBase with Permissions
 		getAliasPaths("studentCourseYearDetails") : _*
 	)
 
+	def isFinalistRestriction: Option[ScalaRestriction]
+
 	protected def buildRestrictions(year: AcademicYear): Seq[ScalaRestriction] = {
 		val restrictions = Seq(
 			courseTypeRestriction,
 			routeRestriction,
+			courseRestriction,
 			attendanceRestriction,
 			yearOfStudyRestriction,
+			levelCodeRestriction,
 			sprStatusRestriction,
 			registeredModulesRestriction(year),
 			tier4Restriction,
+			notTier4Restriction,
 			visitingRestriction,
-			enrolledOrCompletedRestriction
+			enrolledOrCompletedRestriction,
+			isFinalistRestriction
 		).flatten
 
 		if (restrictions.exists { _.aliases.keys.exists(key => key.contains("studentCourseYearDetails")) }) {

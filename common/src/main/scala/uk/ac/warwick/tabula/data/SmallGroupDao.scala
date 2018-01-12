@@ -544,6 +544,7 @@ class SmallGroupDaoImpl extends SmallGroupDao
 					join e.group as g
 					join g.groupSet as s
 					where s.academicYear = :academicYear and location not like '%|%'
+		 			and s.deleted = 0
 		 			$departmentCondition
 			""")
 			.setString("academicYear", academicYear.getStoreValue.toString)
