@@ -41,7 +41,7 @@ trait FiltersStudentsBase {
 		courses.asScala.foreach(p => result.addQueryParameter("courses", p.code))
 		modesOfAttendance.asScala.foreach(p => result.addQueryParameter("modesOfAttendance", p.code))
 		yearsOfStudy.asScala.foreach(p => result.addQueryParameter("yearsOfStudy", p.toString))
-		levelCodes.asScala.foreach(p => result.addQueryParameter("yearsOfStudy", p))
+		levelCodes.asScala.foreach(p => result.addQueryParameter("levels", p))
 		sprStatuses.asScala.foreach(p => result.addQueryParameter("sprStatuses", p.code))
 		modules.asScala.foreach(p => result.addQueryParameter("modules", p.code))
 		otherCriteria.asScala.foreach(p => result.addQueryParameter("otherCriteria", p.toString))
