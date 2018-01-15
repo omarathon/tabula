@@ -82,7 +82,7 @@
 					<#assign fileTypes=command.attachmentTypes />
 					<@bs3form.filewidget basename="file" types=fileTypes />
 
-					<@bs3form.labelled_form_group path="description" labelText="Description (optional)">
+					<@bs3form.labelled_form_group path="description" labelText="Description">
 						<@f.textarea rows="6" path="description" cssClass="form-control" />
 					</@bs3form.labelled_form_group>
 
