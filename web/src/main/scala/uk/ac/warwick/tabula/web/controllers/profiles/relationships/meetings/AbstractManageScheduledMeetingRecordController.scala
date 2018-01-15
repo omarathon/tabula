@@ -28,8 +28,10 @@ abstract class AbstractManageScheduledMeetingRecordController extends ProfilesCo
 		@PathVariable studentCourseDetails: StudentCourseDetails,
 		@PathVariable relationshipType: StudentRelationshipType
 	): Seq[StudentRelationship] = {
+		val isSelf = user.universityId.maybeText.contains(studentCourseDetails.student.universityId)
+
 		relationshipService.findCurrentRelationships(mandatory(relationshipType), mandatory(studentCourseDetails))
-			.filter(relationship => !user.isStudent || relationship.agentMember.exists(_.homeDepartment.studentsCanScheduleMeetings))
+			.filter(relationship => !isSelf || relationship.agentMember.exists(_.homeDepartment.studentsCanScheduleMeetings))
 	}
 
 	@ModelAttribute("nonSchedulableRelationships")
@@ -37,8 +39,10 @@ abstract class AbstractManageScheduledMeetingRecordController extends ProfilesCo
 		@PathVariable studentCourseDetails: StudentCourseDetails,
 		@PathVariable relationshipType: StudentRelationshipType
 	): Seq[StudentRelationship] = {
+		val isSelf = user.universityId.maybeText.contains(studentCourseDetails.student.universityId)
+
 		relationshipService.findCurrentRelationships(mandatory(relationshipType), mandatory(studentCourseDetails))
-			.filterNot(relationship => !user.isStudent || relationship.agentMember.exists(_.homeDepartment.studentsCanScheduleMeetings))
+			.filterNot(relationship => !isSelf || relationship.agentMember.exists(_.homeDepartment.studentsCanScheduleMeetings))
 	}
 
 	@RequestMapping(method = Array(GET, HEAD), params = Array("iframe"))
