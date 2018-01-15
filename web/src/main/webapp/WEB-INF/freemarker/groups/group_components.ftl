@@ -354,24 +354,37 @@
 				<a href="<@routes.groups.studentsinsetlist set />" class="ajax-modal" data-target="#students-list-modal"><@fmt.p set.allStudentsCount "student" /></a>
 			</#if>
 		</div>
-		<div class="col-md-8">
-			<#local unallocatedSize = set.unallocatedStudentsCount />
-			<#local notInMembershipCount = set.studentsNotInMembershipCount />
 
-			<#if unallocatedSize gt 0>
-				<#if can_update_groups>
-					<a href="<@routes.groups.editsetallocate set />"><@fmt.p unallocatedSize "unallocated student" /></a>
-					<#if notInMembershipCount gt 0><br></#if>
-				<#else>
-					<a href="<@routes.groups.unallocatedstudentslist set />" class="ajax-modal" data-target="#students-list-modal"><@fmt.p unallocatedSize "unallocated student" /></a>
+		<#local unallocatedSize = set.unallocatedStudentsCount />
+		<#local notInMembershipCount = set.studentsNotInMembershipCount />
+		<#if unallocatedSize gt 0 || (notInMembershipCount gt 0 && can_update_groups)>
+			<div class="col-md-8">
+				<#if unallocatedSize gt 0>
+					<#if can_update_groups>
+						<a href="<@routes.groups.editsetallocate set />"><@fmt.p unallocatedSize "unallocated student" /></a>
+						<#if notInMembershipCount gt 0><br></#if>
+					<#else>
+						<a href="<@routes.groups.unallocatedstudentslist set />" class="ajax-modal" data-target="#students-list-modal"><@fmt.p unallocatedSize "unallocated student" /></a>
+					</#if>
 				</#if>
-			</#if>
 
-			<#if notInMembershipCount gt 0 && can_update_groups>
-				<a href="<@routes.groups.deregisteredStudents set />"><@fmt.p notInMembershipCount "student has" "students have" /> deregistered</a>
-				<i class="fa fa-exclamation-triangle warning"></i>
-			</#if>
-		</div>
+				<#if notInMembershipCount gt 0 && can_update_groups>
+					<a href="<@routes.groups.deregisteredStudents set />"><@fmt.p notInMembershipCount "student has" "students have" /> deregistered</a>
+					<i class="fa fa-exclamation-triangle warning"></i>
+				</#if>
+			</div>
+		<#else>
+			<div class="col-md-3">
+				<#if can_update_groups>
+					<a href="<@routes.groups.editsetevents set />"><@fmt.p setItem.eventCount "event" /></a>
+				<#else>
+					<@fmt.p setItem.eventCount "event" />
+				</#if>
+			</div>
+			<div class="col-md-5">
+				<@fmt.p setItem.tutorCount "tutor" />
+			</div>
+		</#if>
 	</div>
 	<#-- Fix nth-of-type zebra striping -->
 	<div></div>
