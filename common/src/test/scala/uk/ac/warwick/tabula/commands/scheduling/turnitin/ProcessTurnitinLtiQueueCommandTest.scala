@@ -482,8 +482,12 @@ class ProcessTurnitinLtiQueueCommandTest extends TestBase with Mockito {
 			successNotifications.size should be (3)
 			successNotifications.count(_.agent == user1) should be (2)
 			successNotifications.count(_.agent == user2) should be (1)
-			successNotifications.find(_.target.entity == fullyCompletedAssignment).get.entities should be (Seq())
+			// As of TAB-5533 we include non-failed originality reports in the notification
+			successNotifications.find(_.target.entity == fullyCompletedAssignment).get.entities should be (Seq(
+				fullyCompletedReport
+			))
 			successNotifications.find(_.target.entity == partiallyCompletedAssignment).get.entities should be (Seq(
+				fullyCompletedReport,
 				failedReportOnSubmission,
 				failedReportOnReport
 			))
