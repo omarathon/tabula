@@ -1,17 +1,24 @@
 package uk.ac.warwick.tabula.commands.groups
 
-import uk.ac.warwick.tabula.commands.{CommandInternal, ComposableCommand, ReadOnly, Unaudited}
+import uk.ac.warwick.tabula.JavaImports._
+import uk.ac.warwick.tabula.commands._
+import uk.ac.warwick.tabula.commands.groups.ListSmallGroupSetTimetableClashStudentsCommand._
 import uk.ac.warwick.tabula.data.model.Member
-import uk.ac.warwick.tabula.data.model.groups.SmallGroupSet
+import uk.ac.warwick.tabula.data.model.groups.{SmallGroup, SmallGroupSet}
 import uk.ac.warwick.tabula.permissions.Permissions
 import uk.ac.warwick.tabula.services.{AutowiringProfileServiceComponent, ProfileServiceComponent}
 import uk.ac.warwick.tabula.system.permissions.{PermissionsChecking, RequiresPermissionsChecking}
 
+import scala.collection.JavaConverters._
+import scala.collection.SortedMap
 
 object ListSmallGroupSetTimetableClashStudentsCommand {
-	def apply(smallGroupSet: SmallGroupSet): ListSmallGroupSetTimetableClashStudentsCommandInternal with ComposableCommand[Seq[Member]] with AutowiringProfileServiceComponent with ListSmallGroupSetTimetableClashStudentsCommandPermissions with ListSmallGroupSetTimetableClashStudentsCommandState with Unaudited with ReadOnly = {
+	type Result = SortedMap[SmallGroup, Seq[Member]]
+	type Command = Appliable[Result] with ListSmallGroupSetTimetableClashStudentsCommandState
+	
+	def apply(smallGroupSet: SmallGroupSet): Command = {
 		new ListSmallGroupSetTimetableClashStudentsCommandInternal(smallGroupSet)
-			with ComposableCommand[Seq[Member]]
+			with ComposableCommand[Result]
 			with AutowiringProfileServiceComponent
 			with ListSmallGroupSetTimetableClashStudentsCommandPermissions
 			with ListSmallGroupSetTimetableClashStudentsCommandState
@@ -20,19 +27,28 @@ object ListSmallGroupSetTimetableClashStudentsCommand {
 }
 
 class ListSmallGroupSetTimetableClashStudentsCommandInternal(val smallGroupSet: SmallGroupSet)
-	extends CommandInternal[Seq[Member]] with ListSmallGroupSetTimetableClashStudentsCommandState {
+	extends CommandInternal[Result] with ListSmallGroupSetTimetableClashStudentsCommandState {
 	self: ProfileServiceComponent =>
 
-	override def applyInternal(): Seq[Member] = {
-		//ensure users from this group are only displayed
-		val users = smallGroupSet.allStudents.filter { user =>  clashStudentUsercodes.contains(user.getUserId) }
-		users.flatMap { user => profileService.getAllMembersWithUserId(user.getUserId) }.distinct
-	}
+	override def applyInternal(): Result =
+		SortedMap(
+			clashStudents.asScala
+				.filter { case (group, _) => smallGroupSet.groups.contains(group) }
+				.map { case (group, usercodes) =>
+					group ->
+						smallGroupSet.allStudents
+							.filter { user => usercodes.contains(user.getUserId) } // ensure users from this group are only displayed
+							.flatMap { user => profileService.getAllMembersWithUserId(user.getUserId) }
+							.distinct
+				}
+				.filter { case (_, students) => students.nonEmpty }
+				.toSeq: _*
+		)
 }
 
 trait ListSmallGroupSetTimetableClashStudentsCommandState {
 	val smallGroupSet: SmallGroupSet
-	var clashStudentUsercodes: Array[String] = _
+	var clashStudents: JMap[SmallGroup, Array[String]] = JHashMap()
 }
 
 trait ListSmallGroupSetTimetableClashStudentsCommandPermissions extends RequiresPermissionsChecking {
