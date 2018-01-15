@@ -358,7 +358,7 @@ class AllocateStudentsToGroupsCommandTest extends TestBase with Mockito {
 	@Test def describe() { new Fixture {
 		val (mod, s) = (module, set)
 		val command = new AllocateStudentsToGroupsDescription with AllocateStudentsToGroupsCommandState {
-			override val eventName = "test"
+			override lazy val eventName = "test"
 			val module: Module = mod
 			val set: SmallGroupSet = s
 			val viewer = null
@@ -370,7 +370,7 @@ class AllocateStudentsToGroupsCommandTest extends TestBase with Mockito {
 		d.allProperties should be (Map(
 			"module" -> "moduleId",
 			"smallGroupSet" -> "existingId",
-			"allocation" -> Seq(("group1Id", Nil), ("group2Id", Nil))
+			"oldAllocation" -> Map("group1Id" -> Nil, "group2Id" -> Nil)
 		))
 	}}
 

@@ -26,6 +26,7 @@ case object PreviousUniversityMemberRoleDefinition extends UnassignableBuiltInRo
 		Profiles.Read.Timetable,
 		Profiles.Read.TimetablePrivateFeed,
 		Profiles.Read.Disability,
+		Profiles.Read.Tier4VisaRequirement,
 
 		MemberNotes.Read,
 		Profiles.Read.ModuleRegistration.Core,

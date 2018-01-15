@@ -15,10 +15,10 @@ class SmallGroupSetFilterConverter extends TwoWayConverter[String, SmallGroupSet
 
 	override def convertRight(source: String): SmallGroupSetFilter = source match {
 		case r"Module\(([^\)]+)${moduleCode}\)" =>
-			SmallGroupSetFilters.Module(moduleService.getModuleByCode(sanitise(moduleCode)).getOrElse { moduleService.getModuleById(moduleCode).orNull })
+			SmallGroupSetFilters.Module(moduleService.getModuleByCode(sanitise(moduleCode)).getOrElse { moduleService.getModuleById(moduleCode).getOrElse { throw new IllegalArgumentException } })
 		case r"AllocationMethod\.Linked\(([^\)]+)${id}\)" =>
 			SmallGroupSetFilters.AllocationMethod.Linked(smallGroupService.getDepartmentSmallGroupSetById(id).getOrElse { throw new IllegalArgumentException })
-		case r"Term\(([^\)]+)${name}, ([0-9]+)${minWeek}, ([0-9]+)${maxWeek}\)" =>
+		case r"Term\(([^\)]+)${name}, (\-?[0-9]+)${minWeek}, (\-?[0-9]+)${maxWeek}\)" =>
 			SmallGroupSetFilters.Term(name, WeekRange(minWeek.toInt, maxWeek.toInt))
 		case _ =>
 			Try(SmallGroupFormat.fromCode(source)).map(SmallGroupSetFilters.Format).getOrElse(

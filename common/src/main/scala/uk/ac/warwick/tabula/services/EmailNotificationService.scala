@@ -16,7 +16,7 @@ import scala.util.{Failure, Success, Try}
 @Service
 class EmailNotificationService extends Logging with Daoisms {
 
-	val RunBatchSize = 100
+	val RunBatchSize = 50
 
 	var dao: NotificationDao = Wire[NotificationDao]
 	var listener: RecipientNotificationListener = Wire[EmailNotificationListener]
