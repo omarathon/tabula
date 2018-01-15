@@ -334,6 +334,16 @@
 			<p>
 				<#if canCreateScheduledMeetings && features.scheduledMeetings>
 					<a class="btn btn-default new-meeting-record" href="<@routes.profiles.create_scheduled_meeting_record studentCourseDetails thisAcademicYear relationshipType />">Schedule meeting</a>
+				<#else>
+					<#if relationshipsToDisplay?size gt 1>
+						<#assign tooltipTitle = "You can't use Tabula to schedule a meeting with any of your ${relationshipType.agentRole?lower_case}s. This isn't allowed by their departments." />
+					<#else>
+						<#assign agentFirstName = relationshipsToDisplay[0].agentMember.firstName />
+						<#assign tooltipTitle = "You can't use Tabula to schedule a meeting with ${agentFirstName}. This isn't allowed by ${agentFirstName}'s department." />
+					</#if>
+					<span class="btn btn-default disabled use-tooltip" title="${tooltipTitle}" data-placement="top">
+						Schedule meeting
+					</span>
 				</#if>
 				<#if canCreateMeetings>
 					<a class="btn btn-default new-meeting-record" href="<@routes.profiles.create_meeting_record studentCourseDetails thisAcademicYear relationshipType />">Record meeting</a>
