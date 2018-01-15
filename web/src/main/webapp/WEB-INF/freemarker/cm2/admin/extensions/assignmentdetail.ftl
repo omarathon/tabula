@@ -197,22 +197,20 @@
 			</@bs3form.labelled_form_group>
 
 			<div class="submit-buttons">
-
-				<#if detail.extension?has_content && detail.extension.approved && can.do("Extension.Update", assignment)>
-					<input class="btn btn-primary" type="submit" value="${updateAction}" name="action">
-				<#elseif can.do("Extension.Create", assignment)>
-					<input class="btn btn-primary" type="submit" value="${approvalAction}" name="action">
-				</#if>
-
 				<#if detail.extension?has_content>
-					<#if detail.extension.rejectable && can.do("Extension.Update", assignment)>
+					<#if detail.extension.approved>
+						<input class="btn btn-primary" type="submit" value="${updateAction}" name="action">
 						<input class="btn btn-danger" type="submit" value="${rejectionAction}" name="action">
-					<#elseif detail.extension.revocable && can.do("Extension.Delete", assignment)>
-						<input class="btn btn-danger revoke" type="submit" value="${revocationAction}" name="action">
-					</#if>
-					<#if detail.extension.unreviewed || detail.extension.moreInfoReceived>
-						<input class="btn btn-default" type="submit" value="${requestMoreInfoAction}" name="action">
-					<#elseif detail.extension.moreInfoRequired && can.do("Extension.Update", assignment)>
+					<#elseif detail.extension.rejected || detail.extension.revoked>
+						<input class="btn btn-primary" type="submit" value="${updateAction}" name="action">
+						<input class="btn btn-primary" type="submit" value="${approvalAction}" name="action">
+					<#elseif detail.extension.moreInfoRequired>
+						<input class="btn btn-primary" type="submit" value="${updateAction}" name="action">
+						<input class="btn btn-primary" type="submit" value="${approvalAction}" name="action">
+						<input class="btn btn-danger" type="submit" value="${rejectionAction}" name="action">
+					<#elseif detail.extension.unreviewed || detail.extension.moreInfoReceived>
+						<input class="btn btn-primary" type="submit" value="${approvalAction}" name="action">
+						<input class="btn btn-danger" type="submit" value="${rejectionAction}" name="action">
 						<input class="btn btn-primary" type="submit" value="${updateAction}" name="action">
 					</#if>
 				</#if>
