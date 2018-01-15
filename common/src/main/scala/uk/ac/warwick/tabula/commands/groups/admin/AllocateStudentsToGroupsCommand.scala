@@ -125,13 +125,15 @@ trait AllocateStudentsToGroupsPermissions extends RequiresPermissionsChecking wi
 trait AllocateStudentsToGroupsDescription extends Describable[SmallGroupSet] {
 	self: AllocateStudentsToGroupsCommandState =>
 
+	override lazy val eventName: String = "AllocateStudentsToGroups"
+
 	override def describe(d: Description) {
 		d.smallGroupSet(set)
-		d.property("allocation", set.groups.asScala.map(g => g.id -> g.students.users.map(_.getUserId)))
+		d.property("oldAllocation", set.groups.asScala.map(g => g.id -> g.students.users.map(_.getUserId).toIndexedSeq).toMap)
 	}
 
 	override def describeResult(d: Description, set: SmallGroupSet): Unit = {
-		d.property("allocation", set.groups.asScala.map(g => g.id -> g.students.users.map(_.getUserId)))
+		d.property("newAllocation", set.groups.asScala.map(g => g.id -> g.students.users.map(_.getUserId).toIndexedSeq).toMap)
 	}
 
 }
