@@ -33,6 +33,11 @@ object Routes {
 		def feedbackPdf(assignment: Assignment, feedback: AssignmentFeedback): String = apply(assignment) + s"${encoded(feedback.usercode)}/feedback.pdf"
 	}
 
+	object extensionRequest {
+		def apply(assignment: Assignment): String = s"$context/assignment/${encoded(assignment.id)}/extension"
+		def attachment(assignment: Assignment, filename: String): String = apply(assignment) + s"/supporting-file/${encoded(filename)}"
+	}
+
 	object admin {
 		def apply() = s"$context/admin"
 		def feedbackTemplates(department: Department): String = apply() + s"/department/${encoded(department.code)}/settings/feedback-templates/"
