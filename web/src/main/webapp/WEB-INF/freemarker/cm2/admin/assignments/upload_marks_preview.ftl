@@ -50,8 +50,8 @@
 			<#if itemList?size gt 0>
 				<table class="table upload-marks-preview">
 					<tr>
-						<th>ID</th>
-						<th>Marks</th>
+						<th>University ID</th>
+						<th>Mark</th>
 						<th>Grade</th>
 						<th>Feedback</th>
 					</tr>
