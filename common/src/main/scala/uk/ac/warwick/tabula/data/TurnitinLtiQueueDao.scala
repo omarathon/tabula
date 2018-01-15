@@ -1,5 +1,6 @@
 package uk.ac.warwick.tabula.data
 
+import org.hibernate.NullPrecedence
 import org.hibernate.criterion.{Order, Restrictions}
 import org.joda.time.DateTime
 import org.springframework.stereotype.Repository
@@ -66,6 +67,7 @@ class TurnitinLtiQueueDaoImpl extends TurnitinLtiQueueDao with Daoisms {
 			.add(Restrictions.lt("lastReportRequest", DateTime.now.minusSeconds(TurnitinLtiService.ReportRequestWaitInSeconds)))
 			.add(Restrictions.lt("reportRequestRetries", TurnitinLtiService.ReportRequestMaxRetries))
 			.addOrder(Order.asc("lastReportRequest"))
+			.addOrder(Order.asc("fileRequested").nulls(NullPrecedence.FIRST))
 			.setMaxResults(1)
 
 		if (longAwaitedOnly) {
