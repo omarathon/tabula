@@ -6,6 +6,8 @@ import net.fortuna.ical4j.model.property._
 import org.joda.time._
 import org.springframework.stereotype.Service
 import uk.ac.warwick.spring.Wire
+import uk.ac.warwick.tabula.data.model
+import uk.ac.warwick.tabula.data.model.AliasedMapLocation
 import uk.ac.warwick.tabula.data.model.groups.WeekRange
 import uk.ac.warwick.tabula.helpers.StringUtils._
 import uk.ac.warwick.tabula.services._
@@ -110,9 +112,12 @@ abstract class TermBasedEventOccurrenceService extends EventOccurrenceService {
 		if (eventOccurrence.description.hasText) {
 			event.getProperties.add(new Description(eventOccurrence.description))
 		}
-		if (eventOccurrence.location.nonEmpty) {
-			event.getProperties.add(new Location(eventOccurrence.location.fold("") { _.name }))
-		}
+
+		(eventOccurrence.location match {
+			case Some(AliasedMapLocation(alias: String, _)) => Some(alias)
+			case Some(location: model.Location) => Some(location.name)
+			case _ => None
+		}).foreach(name => event.getProperties.add(new Location(name)))
 
 		event.getProperties.add(new Uid(eventOccurrence.uid))
 		event.getProperties.add(Method.PUBLISH)
