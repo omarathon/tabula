@@ -219,9 +219,11 @@ trait ImportSmallGroupSetsFromSpreadsheetBinding extends BindListener  with Logg
 
 								extractedEvent.location.foreach {
 									case NamedLocation(name) =>
+										eventCommand.locationAlias = null
 										eventCommand.location = name
 										eventCommand.locationId = null
 									case MapLocation(name, lid, _) =>
+										eventCommand.locationAlias = null
 										eventCommand.location = name
 										eventCommand.locationId = lid
 									case AliasedMapLocation(displayName, MapLocation(name, lid, _)) =>
