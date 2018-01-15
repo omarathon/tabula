@@ -11,13 +11,6 @@
 			commandName="command"
 			class="form-inline"
 		>
-			<button type="button" class="clear-all-filters btn btn-link">
-				<span class="fa-stack">
-					<i class="fa fa-filter fa-stack-1x"></i>
-					<i class="fa fa-ban fa-stack-2x"></i>
-				</span>
-			</button>
-
 			<#-- Department filter-->
 			<#assign placeholder = "All departments" />
 			<#assign currentfilter><@current_filter_value "command.departments" placeholder; department>${department.code}</@current_filter_value></#assign>
@@ -82,6 +75,9 @@
 				${time.code}
 			</@filter>
 
+			<button type="button" class="clear-all-filters btn btn-sm btn-filter">
+				Clear filters
+			</button>
 		</@f.form>
 	</div>
 	<div class="filter-results">

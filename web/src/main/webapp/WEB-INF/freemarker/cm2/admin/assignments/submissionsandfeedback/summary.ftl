@@ -32,10 +32,10 @@
 	<#-- Filtering -->
 	<div class="fix-area form-post-container">
 		<div class="fix-header pad-when-fixed">
-			<#include "_filter.ftl" />
-
 			<#assign currentView = "summary" />
 			<#include "_action-bar.ftl" />
+
+			<#include "_filter.ftl" />
 		</div>
 
 		<div class="filter-results admin-assignment-submission-list">

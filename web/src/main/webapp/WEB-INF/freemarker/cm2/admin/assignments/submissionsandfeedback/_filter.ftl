@@ -4,12 +4,6 @@
 	<div class="filters admin-assignment-submission-filters btn-group-group well well-sm" data-lazy="true">
 		<@f.form commandName="submissionAndFeedbackCommand" action="${info.requestedUri.path}" method="GET" cssClass="form-inline filter-form">
 			<@f.errors cssClass="error form-errors" />
-			<button type="button" class="clear-all-filters btn btn-link">
-				<span class="fa-stack">
-					<i class="fa fa-filter fa-stack-1x"></i>
-					<i class="fa fa-ban fa-stack-2x"></i>
-				</span>
-			</button>
 
 			<#assign placeholder = "All submission states" />
 			<#assign currentfilter><@filters.current_filter_value "submissionStatesFilters" placeholder; f>${f.description}</@filters.current_filter_value></#assign>
@@ -39,6 +33,10 @@
 				${filters.contains_by_filter_name(submissionAndFeedbackCommand.statusesFilters, f)?string('checked','')}>
 			${f.description}
 			</@filters.filter>
+
+			<button type="button" class="clear-all-filters btn btn-sm btn-filter">
+				Clear filters
+			</button>
 
 			<div class='plagiarism-filter' style="display: none;">
 				<@bs3form.labelled_form_group path="overlapFilter.min" labelText="Min overlap">

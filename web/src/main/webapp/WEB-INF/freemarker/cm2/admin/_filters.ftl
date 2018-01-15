@@ -11,7 +11,7 @@
 	<#if allItems?has_content || customPicker?has_content>
 		<@spring.bind path=path>
 			<div id="${name}-filter" class="btn-group filter<#if currentFilter == placeholder> empty</#if>">
-				<a class="btn btn-default btn-xs dropdown-toggle" data-toggle="dropdown">
+				<a class="btn btn-filter btn-sm dropdown-toggle" data-toggle="dropdown">
 					<span class="filter-short-values" data-placeholder="${placeholder}" data-prefix="${prefix}"><#if currentFilter != placeholder>${prefix}</#if>${currentFilter}</span>
 					<span class="caret"></span>
 				</a>
