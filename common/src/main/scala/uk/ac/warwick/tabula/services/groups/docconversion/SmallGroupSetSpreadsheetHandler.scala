@@ -15,9 +15,9 @@ import org.springframework.validation.BindingResult
 import org.xml.sax.InputSource
 import org.xml.sax.helpers.XMLReaderFactory
 import uk.ac.warwick.spring.Wire
+import uk.ac.warwick.tabula.data.model._
 import uk.ac.warwick.tabula.data.model.groups.SmallGroupAllocationMethod.Linked
 import uk.ac.warwick.tabula.data.model.groups._
-import uk.ac.warwick.tabula.data.model.{Department, Location, Module}
 import uk.ac.warwick.tabula.helpers.Closeables._
 import uk.ac.warwick.tabula.helpers.StringUtils._
 import uk.ac.warwick.tabula.services._
@@ -101,8 +101,9 @@ object ExtractedSmallGroupEvent {
 	val StartTimeColumn = "Start time"
 	val EndTimeColumn = "End time"
 	val LocationColumn = "Location"
+	val LocationDisplayNameColumn = "Location display name"
 
-	val AllColumns = Seq(ModuleColumn, SetNameColumn, GroupNameColumn, TitleColumn, TutorsColumn, WeekRangesColumn, DayColumn, StartTimeColumn, EndTimeColumn, LocationColumn)
+	val AllColumns = Seq(ModuleColumn, SetNameColumn, GroupNameColumn, TitleColumn, TutorsColumn, WeekRangesColumn, DayColumn, StartTimeColumn, EndTimeColumn, LocationColumn, LocationDisplayNameColumn)
 	val RequiredColumns = Seq(ModuleColumn, SetNameColumn, GroupNameColumn)
 }
 
@@ -524,14 +525,19 @@ abstract class SmallGroupSetSpreadsheetHandlerImpl extends SmallGroupSetSpreadsh
 					extractLocalTime(sheetName, row.values(ExtractedSmallGroupEvent.EndTimeColumn), result)
 				else None
 
-			val location =
-				if (row.values.contains(ExtractedSmallGroupEvent.LocationColumn)) {
-					val value = row.values(ExtractedSmallGroupEvent.LocationColumn).formattedValue
-
-					ScientiaCentrallyManagedRooms.CentrallyManagedRooms.get(value)
-						.orElse(Some(locationFetchingService.locationFor(value)))
-				} else {
-					None
+			val location = row.values.get(ExtractedSmallGroupEvent.LocationColumn)
+				.map(_.formattedValue)
+				.flatMap { name =>
+					ScientiaCentrallyManagedRooms.CentrallyManagedRooms.get(name)
+						.orElse(Some(locationFetchingService.locationFor(name)))
+				}
+				.map {
+					case loc: MapLocation =>
+						row.values.get(ExtractedSmallGroupEvent.LocationDisplayNameColumn)
+							.map(_.formattedValue)
+							.map(alias => AliasedMapLocation(alias, loc))
+							.getOrElse(loc)
+					case x => x
 				}
 
 			if (title.nonEmpty || tutors.nonEmpty || weekRanges.nonEmpty || dayOfWeek.nonEmpty || startTime.nonEmpty || endTime.nonEmpty || location.nonEmpty) {
