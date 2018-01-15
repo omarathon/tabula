@@ -77,6 +77,8 @@ object GroupsViewModel {
 		def canViewTutors: Boolean = viewerRole == Tutor || set.studentsCanSeeTutorName
 		def isStudentSignUp: Boolean = set.allocationMethod == SmallGroupAllocationMethod.StudentSignUp
 		def isLinked: Boolean = set.allocationMethod == SmallGroupAllocationMethod.Linked
+		def eventCount: Int = groups.map(_.events.size).sum
+		def tutorCount: Int = groups.flatMap(_.events.flatMap(_.event.tutors.knownType.allIncludedIds)).distinct.size
 	}
 
 	case class ViewSet(
