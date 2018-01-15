@@ -402,21 +402,48 @@
 					</#if>
 				</div>
 
-				<div class="${showAttendanceButton?string("col-md-6", "col-md-8")}">
+				<div class="col-md-3">
 					<ul class="unstyled margin-fix">
 						<#list groupItem.events as eventItem>
 							<li class="clearfix">
-								<#if (showOccurrenceAttendance!false) && eventItem.occurrences?has_content>
-									<a href="<@routes.groups.registerForWeek eventItem.event, eventItem.occurrences?first.week />" class="btn btn-primary btn-xs pull-right">
-										Attendance
-									</a>
-								</#if>
 								<@eventShortDetails eventItem.event />
 
 								<#local popoverContent><@eventDetails eventItem.event /></#local>
 								<a class="use-popover"
 								   data-html="true"
 								   data-content="${popoverContent?html}"><i class="fa fa-question-circle"></i></a>
+							</li>
+						</#list>
+					</ul>
+				</div>
+
+				<div class="${showAttendanceButton?string("col-md-3", "col-md-5")}">
+					<ul class="unstyled margin-fix">
+						<#list groupItem.events as eventItem>
+							<#local event = eventItem.event />
+							<li class="clearfix">
+								<#if (showOccurrenceAttendance!false) && eventItem.occurrences?has_content>
+									<a href="<@routes.groups.registerForWeek eventItem.event, eventItem.occurrences?first.week />" class="btn btn-primary btn-xs pull-right">
+										Attendance
+									</a>
+								</#if>
+
+								<#if event.tutors.size gt 0>
+									${event.tutors.users[0].fullName}
+									<#if event.tutors.size gt 1>
+										<#local popoverContent>
+											<ul>
+												<#list event.tutors.users as tutor>
+													<li>${tutor.fullName}</li>
+												</#list>
+											</ul>
+										</#local>
+										<a class="use-popover"
+											 href="#"
+											 data-html="true"
+											 data-content="${popoverContent?html}">and <@fmt.p (event.tutors.size - 1) "other" /></a>
+									</#if>
+								</#if>
 							</li>
 						</#list>
 					</ul>
