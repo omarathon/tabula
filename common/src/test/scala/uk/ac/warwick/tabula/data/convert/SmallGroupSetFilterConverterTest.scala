@@ -61,7 +61,7 @@ class SmallGroupSetFilterConverterTest extends TestBase with Mockito {
 
 		SmallGroupSetFilters.allTermFilters(AcademicYear(2017)).map(converter.convertLeft) should be (Seq("Term(Pre-term vacation, -8, 0)", "Term(Autumn, 1, 10)", "Term(Christmas vacation, 11, 14)", "Term(Spring, 15, 24)", "Term(Easter vacation, 25, 29)", "Term(Summer, 30, 39)", "Term(Summer vacation, 40, 52)"))
 		SmallGroupSetFilters.allFormatFilters.map(converter.convertLeft) should be (Seq("seminar", "lab", "tutorial", "project", "example", "workshop", "lecture", "exam", "meeting"))
-		SmallGroupSetFilters.Status.all.map(converter.convertLeft) should be (Seq("Status.NeedsGroupsCreating", "Status.UnallocatedStudents", "Status.NeedsEventsCreating", "Status.OpenForSignUp", "Status.ClosedForSignUp", "Status.NeedsNotificationsSending", "Status.Completed"))
+		SmallGroupSetFilters.Status.all.map(converter.convertLeft) should be (Seq("Status.NeedsGroupsCreating", "Status.UnallocatedStudents", "Status.NeedsEventsCreating", "Status.OpenForSignUp", "Status.ClosedForSignUp", "Status.NeedsNotificationsSending", "Status.StudentsDeregistered", "Status.Completed"))
 	}
 
 }
