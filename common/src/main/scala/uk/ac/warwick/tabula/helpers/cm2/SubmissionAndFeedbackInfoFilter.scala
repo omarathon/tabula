@@ -259,11 +259,7 @@ object SubmissionAndFeedbackInfoFilters {
 			def description = "Unreleased feedback"
 
 			def predicate(item: AssignmentSubmissionStudentInfo): Boolean =
-				if (item.assignment.cm2Assignment) {
-					item.coursework.enhancedFeedback.exists(!_.feedback.released)
-				} else {
-					item.coursework.enhancedFeedback.filterNot(_.feedback.isPlaceholder).exists(!_.feedback.released)
-				}
+				item.coursework.enhancedFeedback.filterNot(_.feedback.isPlaceholder).exists(!_.feedback.released)
 
 			def apply(assignment: Assignment) = true
 		}
