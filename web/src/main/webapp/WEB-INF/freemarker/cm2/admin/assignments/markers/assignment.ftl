@@ -43,6 +43,8 @@
 						${f.description}
 					</@filters.filter>
 
+					<input type="hidden" name="activeStage" id="filtersActiveStage" />
+
 					<button type="button" class="clear-all-filters btn btn-sm btn-filter">
 						Clear filters
 					</button>

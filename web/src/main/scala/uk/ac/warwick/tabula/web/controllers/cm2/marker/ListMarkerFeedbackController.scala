@@ -39,6 +39,7 @@ class ListMarkerFeedbackController extends CourseworkController {
 		if (ajax) {
 			Mav("cm2/admin/assignments/markers/marker_feedback_list",
 				"feedbackByOrderAndStage" -> command.apply(),
+				"activeStage" -> command.activeStage,
 				"assignment" -> command.assignment,
 				"workflowType" -> workflow.workflowType,
 				"marker" -> command.marker,
