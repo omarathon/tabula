@@ -31,10 +31,9 @@
 
 	<#-- Filtering -->
 	<div class="fix-area form-post-container">
-		<div class="fix-header pad-when-fixed">
+		<div class="fix-header">
 			<#assign currentView = "summary" />
 			<#include "_action-bar.ftl" />
-
 			<#include "_filter.ftl" />
 		</div>
 
