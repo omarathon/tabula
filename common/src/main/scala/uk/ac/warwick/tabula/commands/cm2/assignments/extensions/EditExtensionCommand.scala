@@ -215,16 +215,16 @@ trait EditExtensionCommandNotificationCompletion extends CompletesNotifications[
 	}
 }
 
-	trait EditExtensionCommandDescription extends Describable[Extension] {
-		self: EditExtensionCommandState =>
+trait EditExtensionCommandDescription extends Describable[Extension] {
+	self: EditExtensionCommandState =>
 
-		override lazy val eventName: String = "EditExtension"
+	override lazy val eventName: String = "EditExtension"
 
-		def describe(d: Description) {
-			d.assignment(assignment)
-			d.module(assignment.module)
-			d.studentIds(Option(student.getWarwickId).toSeq)
-			d.studentUsercodes(student.getUserId)
-		}
+	def describe(d: Description) {
+		d.assignment(assignment)
+		d.module(assignment.module)
+		d.studentIds(Option(student.getWarwickId).toSeq)
+		d.studentUsercodes(student.getUserId)
 	}
+}
 
