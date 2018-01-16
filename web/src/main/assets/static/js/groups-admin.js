@@ -153,22 +153,22 @@ $(function() {
 	$('input#location, input#defaultLocation')
 		.on('change', function () {
 			var $this = $(this);
+
+			if ($this.val() !== '' && $this.data('location-name') === $this.val()) {
+				// Value hasn't changed since we last set the location ID
+				return;
+			}
+
 			if ($this.data('lid') === undefined || $this.data('lid').length === 0) {
+				$this.data('location-name', '');
 				$this.closest('.form-group').find('input[type="hidden"]').val('');
 				$namedLocationAlert.toggle($this.val().length > 0);
-				return;
 			}
 
 			$namedLocationAlert.hide();
 
 			$this.closest('.form-group').find('input[type="hidden"]').val($this.data('lid'));
-			$this.data('lid', '');
-		})
-		.on('blur', function () {
-			var locationPicker = $(this).data('location-picker');
-			if (locationPicker.$menu.is(':visible') && locationPicker.$menu.children().length === 1) {
-				locationPicker.select();
-			}
+			$this.data('lid', '').data('location-name', $this.val());
 		})
 		.locationPicker();
 
