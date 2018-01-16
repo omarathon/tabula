@@ -1,4 +1,5 @@
 @import (reference) "id7/less/variables.less";
+@import (reference) "id7/less/bootstrap/mixins/text-emphasis.less";
 @import (reference) "id7/less/bootstrap/mixins/vendor-prefixes.less";
 @import (reference) "id7/less/bootstrap/mixins/buttons.less";
 @import (reference) "colours.less";
@@ -1269,4 +1270,14 @@ a.white-text-decoration {
 
 .filter-form {
 	line-height: normal;
+}
+
+#job-status-value {
+	> p:last-child {
+		margin: 0;
+	}
+
+	&[data-succeeded="false"][data-finished="true"] {
+		.text-emphasis-variant(@state-danger-text);
+	}
 }
