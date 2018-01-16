@@ -163,6 +163,7 @@ $(function() {
 				$this.data('location-name', '');
 				$this.closest('.form-group').find('input[type="hidden"]').val('');
 				$namedLocationAlert.toggle($this.val().length > 0);
+				return;
 			}
 
 			$namedLocationAlert.hide();
