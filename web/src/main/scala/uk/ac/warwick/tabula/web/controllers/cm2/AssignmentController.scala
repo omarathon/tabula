@@ -93,7 +93,8 @@ class AssignmentController extends CourseworkController
 			"extension" -> info.extension,
 			"isExtended" -> info.isExtended,
 			"extensionRequested" -> info.extensionRequested,
-			"hasDisability" -> info.hasDisability,
+			"hasDisability" -> info.disability.nonEmpty,
+			"disability" -> info.disability,
 			"isSelf" -> true)
 			.withTitle(infoCommand.assignment.module.name + " (" + infoCommand.assignment.module.code.toUpperCase + ")" + " - " + infoCommand.assignment.name)
 	}
