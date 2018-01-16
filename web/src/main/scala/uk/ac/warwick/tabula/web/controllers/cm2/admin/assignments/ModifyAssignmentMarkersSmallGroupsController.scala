@@ -24,7 +24,7 @@ class ModifyAssignmentMarkersSmallGroupsController extends AbstractAssignmentCon
 	@ModelAttribute("smallGroupCommand")
 	def smallGroupCommand(@PathVariable assignment: Assignment) = AssignMarkersSmallGroupsCommand(mustBeCM2(mandatory(assignment)))
 
-	private def form(assignment: Assignment, assignMarkersCmd: AssignMarkersCommand,  smallGroupCommand: SmallGroupCommand, mode:String): Mav = {
+	private def form(assignment: Assignment, assignMarkersCmd: AssignMarkersCommand, smallGroupCommand: SmallGroupCommand, mode:String): Mav = {
 		val module =  mandatory(assignment.module)
 		val allocations = smallGroupCommand.apply()
 		val workflow = assignment.cm2MarkingWorkflow
