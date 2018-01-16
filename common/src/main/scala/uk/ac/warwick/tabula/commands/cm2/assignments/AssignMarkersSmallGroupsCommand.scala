@@ -32,12 +32,10 @@ class AssignMarkersSmallGroupsCommandInternal(val assignment: Assignment) extend
 	val academicYear: AcademicYear = assignment.academicYear
 
 	def applyInternal(): Seq[SetAllocation] = {
-
 		val sets = smallGroupService.getSmallGroupSets(module, academicYear)
 		val validStudents = assessmentMembershipService.determineMembershipUsers(assignment)
 
 		val setAllocations = sets.map(set => {
-
 			def getGroupAllocations(markers: Seq[User]): Seq[GroupAllocation] = {
 				val validMarkers: Seq[User] = (for {
 					group <- set.groups.asScala
@@ -46,7 +44,7 @@ class AssignMarkersSmallGroupsCommandInternal(val assignment: Assignment) extend
 				} yield user).distinct
 
 				set.groups.asScala.map(group => {
-					val students = group.students.users.filter(validStudents.contains)
+					val students = group.students.users.filter(validStudents.contains).sortBy { u => (u.getLastName, u.getFirstName) }
 					val markers = group.events.flatMap(_.tutors.users).filter(validMarkers.contains)
 					val otherMarkers = validMarkers.diff(markers)
 					GroupAllocation(group.name, markers, students, otherMarkers)

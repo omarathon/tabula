@@ -77,6 +77,10 @@
 							</div>
 						</#list>
 						<div class="fix-footer">
+							<div class="alert alert-info">
+								<i class="fa fa-info-circle"></i> Any existing marker allocations for this assignment will be overwritten
+							</div>
+
 							<input
 									type="submit"
 									class="btn btn-primary"
