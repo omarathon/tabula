@@ -237,12 +237,7 @@ class EditExtensionController extends CourseworkController with ExtensionService
 			"studentContext" -> studentContext,
 			"detail" -> detail,
 			"modifyExtensionCommand" -> updateCommand,
-			"states" -> ExtensionState,
-		  "updateAction" -> updateCommand.UpdateApprovalAction,
-			"approvalAction" -> updateCommand.ApprovalAction,
-			"rejectionAction" -> updateCommand.RejectionAction,
-			"revocationAction" -> updateCommand.RevocationAction,
-			"requestMoreInfoAction" -> updateCommand.RequestMoreInfoAction
+			"states" -> ExtensionState
 		).noLayout()
 	}
 
@@ -291,11 +286,7 @@ class EditExtensionController extends CourseworkController with ExtensionService
 			"assignment" -> cmd.extension.assignment,
 			"student" -> student,
 			"studentContext" -> studentContext,
-			"userFullName" -> userLookup.getUserByUserId(cmd.extension.usercode).getFullName,
-			"updateAction" -> cmd.UpdateApprovalAction,
-			"approvalAction" -> cmd.ApprovalAction,
-			"rejectionAction" -> cmd.RejectionAction,
-			"revocationAction" -> cmd.RevocationAction
+			"userFullName" -> userLookup.getUserByUserId(cmd.extension.usercode).getFullName
 		).noLayout()
 
 		model

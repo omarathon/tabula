@@ -199,19 +199,19 @@
 			<div class="submit-buttons">
 				<#if detail.extension?has_content>
 					<#if detail.extension.approved>
-						<input class="btn btn-primary" type="submit" value="${updateAction}" name="action">
-						<input class="btn btn-danger" type="submit" value="${rejectionAction}" name="action">
-					<#elseif detail.extension.rejected || detail.extension.revoked>
-						<input class="btn btn-primary" type="submit" value="${updateAction}" name="action">
-						<input class="btn btn-primary" type="submit" value="${approvalAction}" name="action">
-					<#elseif detail.extension.moreInfoRequired>
-						<input class="btn btn-primary" type="submit" value="${updateAction}" name="action">
-						<input class="btn btn-primary" type="submit" value="${approvalAction}" name="action">
-						<input class="btn btn-danger" type="submit" value="${rejectionAction}" name="action">
-					<#elseif detail.extension.unreviewed || detail.extension.moreInfoReceived>
-						<input class="btn btn-primary" type="submit" value="${approvalAction}" name="action">
-						<input class="btn btn-danger" type="submit" value="${rejectionAction}" name="action">
-						<input class="btn btn-primary" type="submit" value="${updateAction}" name="action">
+						<button type="submit" name="state" value="${editExtensionCommand.state.dbValue}" class="btn btn-primary">Update</button>
+						<button type="submit" name="state" value="${states.Revoked.dbValue}" class="btn btn-default">Revoke</button>
+								<#elseif detail.extension.rejected || detail.extension.revoked>
+						<button type="submit" name="state" value="${editExtensionCommand.state.dbValue}" class="btn btn-primary">Update</button>
+						<button type="submit" name="state" value="${states.Approved.dbValue}" class="btn btn-primary">Approve</button>
+								<#elseif detail.extension.moreInfoRequired>
+						<button type="submit" name="state" value="${editExtensionCommand.state.dbValue}" class="btn btn-default">Update</button>
+						<button type="submit" name="state" value="${states.Approved.dbValue}" class="btn btn-primary">Approve</button>
+						<button type="submit" name="state" value="${states.Rejected.dbValue}" class="btn btn-default">Reject</button>
+								<#elseif detail.extension.unreviewed || detail.extension.moreInfoReceived>
+						<button type="submit" name="state" value="${states.Approved.dbValue}" class="btn btn-primary">Approve</button>
+						<button type="submit" name="state" value="${states.Rejected.dbValue}" class="btn btn-default">Reject</button>
+						<button type="submit" name="state" value="${states.MoreInformationRequired.dbValue}" class="btn btn-default">Request more information</button>
 					</#if>
 				</#if>
 				<a class="btn btn-default discard-changes" href="">Discard changes</a>
