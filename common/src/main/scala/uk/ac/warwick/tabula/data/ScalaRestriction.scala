@@ -61,7 +61,7 @@ object ScalaRestriction {
 	// This was written for the case of module registrations, where we should only check the
 	// module registration year if there are modules to restrict by
 	def inIfNotEmptyMultipleProperties(properties: Seq[String], collections: Seq[Iterable[Any]], aliases: (String, AliasAndJoinType)*): Option[ScalaRestriction] = {
-		val criterion = conjunction()
+		val criterion = Restrictions.conjunction()
 		(properties, collections).zipped.foreach { (property, collection) =>
 			if (collection.nonEmpty) {
 				criterion.add(HibernateHelpers.safeIn(property, collection.toSeq.distinct))
@@ -76,7 +76,7 @@ object ScalaRestriction {
 	def startsWithIfNotEmpty(property: String, collection: Iterable[String], aliases: (String, AliasAndJoinType)*): Option[ScalaRestriction] =
 		if (collection.isEmpty) None
 		else {
-			val criterion = disjunction()
+			val criterion = Restrictions.disjunction()
 			collection.toSeq.distinct.foreach { prefix =>
 				criterion.add(like(property, prefix + "%"))
 			}
@@ -87,7 +87,7 @@ object ScalaRestriction {
 	def atLeastOneIsTrue(property1: String, property2: String, ticked: Boolean, aliases: (String, AliasAndJoinType)*): Option[ScalaRestriction] =
 		if (!ticked) None
 		else {
-			val criterion = disjunction()
+			val criterion = Restrictions.disjunction()
 			criterion.add(HibernateHelpers.is(property1, true))
 			criterion.add(HibernateHelpers.is(property2, true))
 
@@ -97,7 +97,7 @@ object ScalaRestriction {
 	def neitherIsTrue(property1: String, property2: String, ticked: Boolean, aliases: (String, AliasAndJoinType)*): Option[ScalaRestriction] =
 		if (!ticked) None
 		else {
-			val criterion = conjunction()
+			val criterion = Restrictions.conjunction()
 			criterion.add(HibernateHelpers.is(property1, false))
 			criterion.add(HibernateHelpers.is(property2, false))
 
@@ -115,6 +115,26 @@ object ScalaRestriction {
 
 	def custom(criterion: Criterion, aliases: (String, AliasAndJoinType)*): Option[ScalaRestriction] =
 		Some(addAliases(new ScalaRestriction(criterion), aliases: _*))
+
+	def anyOf(restrictions: ScalaRestriction*): Option[ScalaRestriction] = restrictions.toList match {
+		case Nil => None
+		case custom :: Nil => Some(custom)
+		case list =>
+			val aliases = list.flatMap(_.aliases).distinct
+			val criterion = list.map(_.underlying)
+
+			Some(addAliases(new ScalaRestriction(Restrictions.disjunction(criterion: _*)), aliases: _*))
+	}
+
+	def allOf(restrictions: ScalaRestriction*): Option[ScalaRestriction] = restrictions.toList match {
+		case Nil => None
+		case custom :: Nil => Some(custom)
+		case list =>
+			val aliases = list.flatMap(_.aliases).distinct
+			val criterion = list.map(_.underlying)
+
+			Some(addAliases(new ScalaRestriction(Restrictions.conjunction(criterion: _*)), aliases: _*))
+	}
 }
 
 trait Aliasable {

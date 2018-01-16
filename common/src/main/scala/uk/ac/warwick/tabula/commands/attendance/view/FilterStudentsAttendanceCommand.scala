@@ -150,15 +150,14 @@ trait AttendanceFilterExtras extends FiltersStudents {
 		))(table)
 	}
 
-	override def buildRestrictions(year: AcademicYear): Seq[ScalaRestriction] = {
-		super.buildRestrictions(year) ++ Seq(
+	override def buildRestrictions(year: AcademicYear): Seq[ScalaRestriction] =
+		super.buildRestrictions(year) ++ ScalaRestriction.anyOf(Seq(
 			unrecordedAttendanceRestriction,
 			authorisedAttendanceRestriction,
 			unauthorisedAttendanceRestriction,
 			unauthorisedAttendance3Restriction,
 			unauthorisedAttendance6Restriction
-		).flatten
-	}
+		).flatten: _*).toSeq
 
 	def unrecordedAttendanceRestriction: Option[ScalaRestriction] = otherCriteria.contains(UNRECORDED) match {
 		case false => None
