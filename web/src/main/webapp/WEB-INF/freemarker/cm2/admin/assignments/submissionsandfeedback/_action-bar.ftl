@@ -1,6 +1,6 @@
 <#import "*/modal_macros.ftl" as modal />
 
-<div class="clearfix">
+<div class="clearfix action-bar">
 	<div class="pull-right view-selector">
 		<form class="form-inline">
 			<label class="radio">View as:</label>

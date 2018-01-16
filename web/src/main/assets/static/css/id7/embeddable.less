@@ -1,5 +1,6 @@
 @import (reference) "id7/less/variables.less";
 @import (reference) "id7/less/bootstrap/mixins/vendor-prefixes.less";
+@import (reference) "id7/less/bootstrap/mixins/buttons.less";
 @import (reference) "colours.less";
 @import (reference) "../css3.less";
 
@@ -703,6 +704,10 @@ table.tablesorter {
 
 //Filter pages
 .student-filter, .small-groups-filter, .filters {
+	&.well {
+		margin-bottom: 0;
+	}
+
 	.filter-list {
 		max-height: 300px;
 		overflow-y: auto;
@@ -1124,8 +1129,6 @@ ul.profile-user-list {
 }
 
 .cm2-progress-table {
-	margin-top: 20px;
-
 	th, td {
 		white-space: nowrap;
 	}
@@ -1258,4 +1261,12 @@ a.white-text-decoration {
 	&:hover {
 		text-decoration-color: darken(white, 20%);
 	}
+}
+
+.btn-filter {
+	.button-variant(@btn-default-color; #ffffff; @btn-default-border);
+}
+
+.filter-form {
+	line-height: normal;
 }
