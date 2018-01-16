@@ -69,12 +69,16 @@ object SmallGroupSetFilters {
 			val description = "Needs notifications sending"
 			def apply(set: SmallGroupSet): Boolean = !set.fullyReleased
 		}
+		case object StudentsDeregistered extends SmallGroupSetFilter {
+			val description = "Students deregistered"
+			def apply(set: SmallGroupSet): Boolean = set.studentsNotInMembershipCount > 0
+		}
 		case object Completed extends SmallGroupSetFilter {
 			val description = "Complete"
 			def apply(set: SmallGroupSet): Boolean = set.fullyReleased && set.unallocatedStudentsCount == 0
 		}
 
-		val all = Seq(NeedsGroupsCreating, UnallocatedStudents, NeedsEventsCreating, OpenForSignUp, ClosedForSignUp, NeedsNotificationsSending, Completed)
+		val all = Seq(NeedsGroupsCreating, UnallocatedStudents, NeedsEventsCreating, OpenForSignUp, ClosedForSignUp, NeedsNotificationsSending, StudentsDeregistered, Completed)
 	}
 
 	object AllocationMethod {
