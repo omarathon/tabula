@@ -53,15 +53,24 @@
 					<@bs3form.labelled_form_group path="relationship" labelText=agent_role?cap_first>
 						<@f.select path="relationship" cssClass="form-control">
 							<@f.option disabled=true selected="true" label="Please select one..." />
-							<@f.options items=allRelationships itemLabel="agentName" />
+							<@f.options items=schedulableRelationships itemLabel="agentName" />
+							<@f.options items=nonSchedulableRelationships itemLabel="agentName" disabled=true />
 						</@f.select>
-						<div class="help-block <#if !isCreatorAgent>alert alert-info</#if>">
-							<#if isCreatorAgent>
-								You have been selected as ${agent_role} by default. Please change this if you're recording a colleague's meeting.
-							<#else>
-								The first ${agent_role} has been selected by default. Please check it's the correct one. <i id="supervisor-ok" class="fa fa-check"></i>
-							</#if>
-						</div>
+						<#if schedulableRelationships?size lt allRelationships?size>
+							<div class="help-block">
+								You can't use Tabula to schedule a meeting with at least one of your ${agent_role}s.
+								This isn't allowed by their department.
+							</div>
+						</#if>
+						<#if schedulableRelationships?size gt 1>
+							<div class="help-block <#if !isCreatorAgent>alert alert-info</#if>">
+								<#if isCreatorAgent>
+									You have been selected as ${agent_role} by default. Please change this if you're recording a colleague's meeting.
+								<#else>
+									The first ${agent_role} has been selected by default. Please check it's the correct one. <i id="supervisor-ok" class="fa fa-check"></i>
+								</#if>
+							</div>
+						</#if>
 					</@bs3form.labelled_form_group>
 				</#if>
 
