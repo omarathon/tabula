@@ -354,24 +354,37 @@
 				<a href="<@routes.groups.studentsinsetlist set />" class="ajax-modal" data-target="#students-list-modal"><@fmt.p set.allStudentsCount "student" /></a>
 			</#if>
 		</div>
-		<div class="col-md-8">
-			<#local unallocatedSize = set.unallocatedStudentsCount />
-			<#local notInMembershipCount = set.studentsNotInMembershipCount />
 
-			<#if unallocatedSize gt 0>
-				<#if can_update_groups>
-					<a href="<@routes.groups.editsetallocate set />"><@fmt.p unallocatedSize "unallocated student" /></a>
-					<#if notInMembershipCount gt 0><br></#if>
-				<#else>
-					<a href="<@routes.groups.unallocatedstudentslist set />" class="ajax-modal" data-target="#students-list-modal"><@fmt.p unallocatedSize "unallocated student" /></a>
+		<#local unallocatedSize = set.unallocatedStudentsCount />
+		<#local notInMembershipCount = set.studentsNotInMembershipCount />
+		<#if unallocatedSize gt 0 || (notInMembershipCount gt 0 && can_update_groups)>
+			<div class="col-md-8">
+				<#if unallocatedSize gt 0>
+					<#if can_update_groups>
+						<a href="<@routes.groups.editsetallocate set />"><@fmt.p unallocatedSize "unallocated student" /></a>
+						<#if notInMembershipCount gt 0><br></#if>
+					<#else>
+						<a href="<@routes.groups.unallocatedstudentslist set />" class="ajax-modal" data-target="#students-list-modal"><@fmt.p unallocatedSize "unallocated student" /></a>
+					</#if>
 				</#if>
-			</#if>
 
-			<#if notInMembershipCount gt 0 && can_update_groups>
-				<a href="<@routes.groups.deregisteredStudents set />"><@fmt.p notInMembershipCount "student has" "students have" /> deregistered</a>
-				<i class="fa fa-exclamation-triangle warning"></i>
-			</#if>
-		</div>
+				<#if notInMembershipCount gt 0 && can_update_groups>
+					<a href="<@routes.groups.deregisteredStudents set />"><@fmt.p notInMembershipCount "student has" "students have" /> deregistered</a>
+					<i class="fa fa-exclamation-triangle warning"></i>
+				</#if>
+			</div>
+		<#else>
+			<div class="col-md-3">
+				<#if can_update_groups>
+					<a href="<@routes.groups.editsetevents set />"><@fmt.p setItem.eventCount "event" /></a>
+				<#else>
+					<@fmt.p setItem.eventCount "event" />
+				</#if>
+			</div>
+			<div class="col-md-5">
+				<@fmt.p setItem.tutorCount "tutor" />
+			</div>
+		</#if>
 	</div>
 	<#-- Fix nth-of-type zebra striping -->
 	<div></div>
@@ -402,21 +415,48 @@
 					</#if>
 				</div>
 
-				<div class="${showAttendanceButton?string("col-md-6", "col-md-8")}">
+				<div class="col-md-3">
 					<ul class="unstyled margin-fix">
 						<#list groupItem.events as eventItem>
 							<li class="clearfix">
-								<#if (showOccurrenceAttendance!false) && eventItem.occurrences?has_content>
-									<a href="<@routes.groups.registerForWeek eventItem.event, eventItem.occurrences?first.week />" class="btn btn-primary btn-xs pull-right">
-										Attendance
-									</a>
-								</#if>
 								<@eventShortDetails eventItem.event />
 
 								<#local popoverContent><@eventDetails eventItem.event /></#local>
 								<a class="use-popover"
 								   data-html="true"
 								   data-content="${popoverContent?html}"><i class="fa fa-question-circle"></i></a>
+							</li>
+						</#list>
+					</ul>
+				</div>
+
+				<div class="${showAttendanceButton?string("col-md-3", "col-md-5")}">
+					<ul class="unstyled margin-fix">
+						<#list groupItem.events as eventItem>
+							<#local event = eventItem.event />
+							<li class="clearfix">
+								<#if (showOccurrenceAttendance!false) && eventItem.occurrences?has_content>
+									<a href="<@routes.groups.registerForWeek eventItem.event, eventItem.occurrences?first.week />" class="btn btn-primary btn-xs pull-right">
+										Attendance
+									</a>
+								</#if>
+
+								<#if event.tutors.size gt 0>
+									${event.tutors.users[0].fullName}
+									<#if event.tutors.size gt 1>
+										<#local popoverContent>
+											<ul>
+												<#list event.tutors.users as tutor>
+													<li>${tutor.fullName}</li>
+												</#list>
+											</ul>
+										</#local>
+										<a class="use-popover"
+											 href="#"
+											 data-html="true"
+											 data-content="${popoverContent?html}">and <@fmt.p (event.tutors.size - 1) "other" /></a>
+									</#if>
+								</#if>
 							</li>
 						</#list>
 					</ul>

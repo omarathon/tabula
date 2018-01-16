@@ -1,6 +1,4 @@
-
-Somebody has written some feedback about the Tabula app.
-The details below could have been amended by the user.
+The following message was submitted via the 'Email the Web Team' form at https://tabula.warwick.ac.uk/help.
 
 Name: ${info.name!"Not provided"}
 Email: ${info.email!"Not provided"}

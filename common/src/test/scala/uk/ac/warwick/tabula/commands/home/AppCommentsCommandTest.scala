@@ -126,7 +126,7 @@ class AppCommentsCommandTest extends TestBase with Mockito {
 
 			mimeMessage.getRecipients(RecipientType.TO).map {_.toString} should be (Array(owner.getEmail))
 			mimeMessage.getFrom.map {_.toString} should be (Array(adminEmail))
-			mimeMessage.getSubject should be ("Tabula feedback")
+			mimeMessage.getSubject should be ("Tabula help")
 
 			// Check properties have been set
 			val text: String = mimeMessage.getContent match {
@@ -152,7 +152,7 @@ class AppCommentsCommandTest extends TestBase with Mockito {
 
 		mimeMessage.getRecipients(RecipientType.TO).map {_.toString} should be (Array(adminEmail))
 		mimeMessage.getFrom.map(_.toString) should be (Array(adminEmail))
-		mimeMessage.getSubject should be ("Tabula feedback")
+		mimeMessage.getSubject should be ("Tabula support")
 
 		// Check properties have been set
 		val text: String = mimeMessage.getContent match {
@@ -184,7 +184,7 @@ class AppCommentsCommandTest extends TestBase with Mockito {
 
 			mimeMessage.getRecipients(RecipientType.TO).map {_.toString} should be (Array(adminEmail))
 			mimeMessage.getFrom.map {_.toString} should be (Array(adminEmail))
-			mimeMessage.getSubject should be ("Tabula feedback")
+			mimeMessage.getSubject should be ("Tabula support")
 
 			// Check properties have been set
 			val text: String = mimeMessage.getContent match {

@@ -159,7 +159,7 @@ class SmallGroupSetSpreadsheetHandlerTest extends TestBase with Mockito {
 						name = "Group 4",
 						limit = Some(15),
 						events = Seq(
-							ExtractedSmallGroupEvent(None, Seq(cuscav), Seq(WeekRange(15, 24)), Some(DayOfWeek.Thursday), Some(new LocalTime(14, 0)), Some(new LocalTime(16, 0)), Some(MapLocation("CS1.04", "26858", Some("CS_CS1.04"))))
+							ExtractedSmallGroupEvent(None, Seq(cuscav), Seq(WeekRange(15, 24)), Some(DayOfWeek.Thursday), Some(new LocalTime(14, 0)), Some(new LocalTime(16, 0)), Some(AliasedMapLocation("First-floor seminar room", MapLocation("CS1.04", "26858", Some("CS_CS1.04")))))
 						)
 					)
 				)

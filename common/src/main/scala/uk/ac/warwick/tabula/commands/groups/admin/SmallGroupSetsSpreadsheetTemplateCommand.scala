@@ -8,7 +8,7 @@ import org.apache.poi.xssf.usermodel.XSSFDataValidationHelper
 import uk.ac.warwick.tabula.AcademicYear
 import uk.ac.warwick.tabula.commands._
 import uk.ac.warwick.tabula.commands.groups.admin.SmallGroupSetsSpreadsheetTemplateCommand._
-import uk.ac.warwick.tabula.data.model.Department
+import uk.ac.warwick.tabula.data.model.{AliasedMapLocation, Department, Location, MapLocation}
 import uk.ac.warwick.tabula.data.model.groups.{DayOfWeek, SmallGroupAllocationMethod, SmallGroupFormat, SmallGroupSet}
 import uk.ac.warwick.tabula.permissions.Permissions
 import uk.ac.warwick.tabula.services.groups.docconversion.{ExtractedSmallGroup, ExtractedSmallGroupEvent, ExtractedSmallGroupSet}
@@ -322,7 +322,14 @@ abstract class SmallGroupSetsSpreadsheetTemplateCommandInternal(val department: 
 			if (event.endTime != null) row.getCell(8).setCellValue(DateUtil.convertTime(event.endTime.toString("HH:mm")))
 			row.getCell(8).setCellStyle(timeStyle)
 
-			if (event.location != null) row.getCell(9).setCellValue(event.location.name)
+			event.location match {
+				case AliasedMapLocation(alias: String, MapLocation(name: String, _, _)) =>
+					row.getCell(9).setCellValue(name)
+					row.getCell(10).setCellValue(alias)
+				case location: Location =>
+					row.getCell(9).setCellValue(location.name)
+				case _ =>
+			}
 		}
 
 		// Day of week validation

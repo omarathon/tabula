@@ -187,20 +187,18 @@ trait ProcessTurnitinLtiQueuePermissions extends RequiresPermissionsChecking wit
 }
 
 trait ProcessTurnitinLtiQueueNotification extends Notifies[ProcessTurnitinLtiQueueCommandResult, Assignment] {
-
 	self: TurnitinLtiQueueServiceComponent =>
 
 	override def emit(result: ProcessTurnitinLtiQueueCommandResult): Seq[Notification[OriginalityReport, Assignment]] = {
-
 		val completedNotifications = result.completedAssignments.filterNot(_.submissions.isEmpty).flatMap(assignment => {
-			val unsuccessfulReports = turnitinLtiQueueService.listOriginalityReports(assignment).filter(report =>
-				!report.reportReceived && (
+			val completedReports = turnitinLtiQueueService.listOriginalityReports(assignment).filter(report =>
+				report.reportReceived || (!report.reportReceived && (
 					report.submitToTurnitinRetries == TurnitinLtiService.SubmitAttachmentMaxRetries ||
-						report.reportRequestRetries == TurnitinLtiService.ReportRequestMaxRetries
-				)
+					report.reportRequestRetries == TurnitinLtiService.ReportRequestMaxRetries
+				))
 			)
 			assignment.turnitinLtiNotifyUsers.map(user =>
-				Notification.init(new TurnitinJobSuccessNotification, user, unsuccessfulReports, assignment)
+				Notification.init(new TurnitinJobSuccessNotification, user, completedReports, assignment)
 			)
 		})
 

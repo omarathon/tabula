@@ -128,7 +128,7 @@ h1.modal-title {
 
 .subtle { color: @subtle-text-color; }
 .subtler { color: @very-subtle-text-color; }
-.very-subtle { color: @very-subtle-text-color; font-size: @very-subtle-font-size; }
+.very-subtle, .has-error .very-subtle { color: @very-subtle-text-color; font-size: @very-subtle-font-size; }
 
 .mac-cmd {
 	font-size: 140%;
@@ -197,7 +197,8 @@ ul.links {
 }
 
 // details polyfill support
-details, summary { display: block; }
+details { display: block; }
+summary { display: list-item; } // TAB-5386
 
 // The following styles are not really needed, since the jQuery script takes care of hiding/displaying the elements.
 // However, we're still gonna use CSS as well to prevent FOUC in browsers that understand these selectors.

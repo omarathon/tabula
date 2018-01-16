@@ -66,7 +66,7 @@ class AppCommentCommandInternal(val user: CurrentUser) extends CommandInternal[F
 			if (recipient == AppCommentCommand.Recipients.DeptAdmin && deptAdmin.isDefined) {
 				mail.setTo(deptAdmin.get.getEmail)
 				mail.setFrom(adminMailAddress)
-				mail.setSubject(encodeSubject("Tabula feedback"))
+				mail.setSubject(encodeSubject("Tabula help"))
 				mail.setText(renderToString(deptAdminTemplate, Map(
 					"user" -> user,
 					"info" -> this
@@ -74,7 +74,7 @@ class AppCommentCommandInternal(val user: CurrentUser) extends CommandInternal[F
 			} else if (recipient == AppCommentCommand.Recipients.WebTeam) {
 				mail.setTo(adminMailAddress)
 				mail.setFrom(adminMailAddress)
-				mail.setSubject(encodeSubject("Tabula feedback"))
+				mail.setSubject(encodeSubject("Tabula support"))
 				mail.setText(renderToString(webTeamTemplate, Map(
 					"user" -> user,
 					"info" -> this

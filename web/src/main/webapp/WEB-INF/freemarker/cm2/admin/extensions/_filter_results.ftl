@@ -30,7 +30,7 @@
 				<td class="student-col toggle-cell toggle-icon">&nbsp;${graph.user.firstName}</td>
 				<td class="student-col toggle-cell">&nbsp;${graph.user.lastName}&nbsp;<#if graph.user.warwickId??><@pl.profile_link graph.user.warwickId /><#else><@pl.profile_link graph.user.userId /></#if></td>
 				<td><@fmt.module_name graph.extension.assignment.module false /></td>
-				<td>${graph.extension.assignment.name}</td>
+				<td><a href="<@routes.cm2.assignmentextensions graph.extension.assignment />">${graph.extension.assignment.name}</a></td>
 				<td>${graph.extension.state.description}</td>
 				<td>
 					<#if graph.hasApprovedExtension || graph.isAwaitingReview() || graph.extension.moreInfoRequired>
