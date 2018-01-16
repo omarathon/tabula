@@ -131,7 +131,7 @@ Method calls (after initialising):
             });
 
             // recalculate items per target if any of the targets have limits less than/equal to
-            if (itemCountToBeDividedUp != itemsPerTarget) {
+            if (itemCountToBeDividedUp !== itemsPerTarget) {
                 itemsPerTarget = Math.floor(itemCountToBeDividedUp / unlimitedTargets)
             }
 
@@ -150,14 +150,19 @@ Method calls (after initialising):
 
                     // If any remainders, push one on to this list.
                     if (remainderCount > 0) {
-                        itemsForTarget.push(items.splice(0, 1));
+                        itemsForTarget.push(items.splice(0, 1)[0]);
                         remainderCount--;
                     }
                 }
 
+                // Append items in the same order as they were in the source list
+                var itemsForTargetSorted = $sourceList.find("li").filter(function () {
+                    return itemsForTarget.indexOf(this) !== -1;
+                });
+
                 self.batchMove([{
                     target: $target,
-                    items: itemsForTarget,
+                    items: itemsForTargetSorted,
                     sources: [] // don't trigger change for source every time
                 }]);
             });

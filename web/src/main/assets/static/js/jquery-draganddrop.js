@@ -150,7 +150,7 @@ Method calls (after initialising):
 
                     // If any remainders, push one on to this list.
                     if(remainderCount > 0) {
-                        itemsForTarget.push(items.splice(0,1));
+                        itemsForTarget.push(items.splice(0,1)[0]);
                         remainderCount--;
                     }
                 }
