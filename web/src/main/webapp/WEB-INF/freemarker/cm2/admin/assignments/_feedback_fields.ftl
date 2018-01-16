@@ -12,8 +12,19 @@
 
 	<@bs3form.labelled_form_group path="automaticallyReleaseToMarkers" labelText="Automated release for marking">
 		<@bs3form.checkbox path="automaticallyReleaseToMarkers">
+			<#assign popoverContent>
+				<p>
+					When using a marking workflow, automatically release submissions to markers once the assignment closes. Late submissions or submissions within an extension are released when they are received. Ensure you assign markers to submissions before the assignment close date.
+				</p>
+
+				<p>
+					<strong>Note:</strong> Students who do not submit work are not released automatically. You need to release these manually.
+				</p>
+			</#assign>
+
 			<@f.checkbox path="automaticallyReleaseToMarkers" id="automaticallyReleaseToMarkers" />
 			Automatically release assignment to markers on the assignment closing date
+			<@fmt.help_popover id="help-automaticallyReleaseToMarkers" content=popoverContent html=true />
 		</@bs3form.checkbox>
 		<div class="help-block">
 			Markers are notified of all students allocated to them, including students who have not submitted work.
