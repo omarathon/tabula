@@ -98,14 +98,13 @@ class FeedbackReportJob extends Job with Logging with FreemarkerRendering {
 			val stringDate = job.getString("startDate")
 			try {
 				DateFormats.CSVDate.parseDateTime(stringDate)
+				throw new IllegalArgumentException
 			} catch {
-				case e:IllegalArgumentException => {
+				case _: IllegalArgumentException =>
 					updateStatus("Start date format was incorrect")
 					throw obsoleteJob
-				}
 			}
 		}
-
 
 		val endDate: DateTime = {
 			val stringDate = job.getString("endDate")

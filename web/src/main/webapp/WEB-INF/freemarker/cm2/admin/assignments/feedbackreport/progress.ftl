@@ -25,6 +25,8 @@
 			</div>
 		</div>
 
+		<p><a href="<@routes.cm2.departmenthome department academicYear/>">Return to Assignments in ${department.name} (${academicYear.toString})</a></p>
+
 		<script>
 			(function($){
 
@@ -36,16 +38,17 @@
 					var percent = parseInt($value.data('progress'));
 					$bar.css('width', Math.floor(percent) + '%');
 					if ($value.data('finished')) {
+						$bar.css('width', '100%');
 						$bar.removeClass('active');
-						if ($value.data('succeeded') == false) {
-							$bar.addClass('progress-bar-warning');
+						if ($value.data('succeeded') === false) {
+							$bar.addClass('progress-bar-danger');
 						} else {
 							$bar.addClass('progress-bar-success');
 						}
 					} else {
-						setTimeout(updateFragment, 2000);
+						setTimeout(updateFragment, 300);
 					}
-				}
+				};
 
 				var $fragment = $('#job-status-fragment');
 				var updateFragment = function() {
@@ -53,7 +56,7 @@
 						updateProgress();
 					});
 				};
-				setTimeout(updateFragment, 2000);
+				setTimeout(updateFragment, 300);
 				updateProgress();
 
 			})(jQuery);
