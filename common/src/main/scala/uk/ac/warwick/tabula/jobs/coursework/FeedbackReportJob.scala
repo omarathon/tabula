@@ -87,7 +87,7 @@ class FeedbackReportJob extends Job with Logging with FreemarkerRendering {
 		val department: Department = {
 			val id = job.getString("department")
 			departmentService.getDepartmentById(id) getOrElse {
-				updateStatus("%s is not a valid department ID" format (id))
+				updateStatus(s"$id is not a valid department ID")
 				throw obsoleteJob
 			}
 		}
@@ -99,23 +99,20 @@ class FeedbackReportJob extends Job with Logging with FreemarkerRendering {
 			try {
 				DateFormats.CSVDate.parseDateTime(stringDate)
 			} catch {
-				case e:IllegalArgumentException => {
+				case _: IllegalArgumentException =>
 					updateStatus("Start date format was incorrect")
 					throw obsoleteJob
-				}
 			}
 		}
-
 
 		val endDate: DateTime = {
 			val stringDate = job.getString("endDate")
 			try {
 				DateFormats.CSVDate.parseDateTime(stringDate)
 			} catch {
-				case e:IllegalArgumentException => {
+				case _: IllegalArgumentException =>
 					updateStatus("End date format was incorrect")
 					throw obsoleteJob
-				}
 			}
 		}
 

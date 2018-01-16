@@ -23,6 +23,28 @@ abstract class AbstractManageScheduledMeetingRecordController extends ProfilesCo
 		relationshipService.findCurrentRelationships(mandatory(relationshipType), mandatory(studentCourseDetails))
 	}
 
+	@ModelAttribute("schedulableRelationships")
+	def schedulableRelationships(
+		@PathVariable studentCourseDetails: StudentCourseDetails,
+		@PathVariable relationshipType: StudentRelationshipType
+	): Seq[StudentRelationship] = {
+		val isSelf = user.universityId.maybeText.contains(studentCourseDetails.student.universityId)
+
+		relationshipService.findCurrentRelationships(mandatory(relationshipType), mandatory(studentCourseDetails))
+			.filter(relationship => !isSelf || relationship.agentMember.exists(_.homeDepartment.studentsCanScheduleMeetings))
+	}
+
+	@ModelAttribute("nonSchedulableRelationships")
+	def nonSchedulableRelationships(
+		@PathVariable studentCourseDetails: StudentCourseDetails,
+		@PathVariable relationshipType: StudentRelationshipType
+	): Seq[StudentRelationship] = {
+		val isSelf = user.universityId.maybeText.contains(studentCourseDetails.student.universityId)
+
+		relationshipService.findCurrentRelationships(mandatory(relationshipType), mandatory(studentCourseDetails))
+			.filterNot(relationship => !isSelf || relationship.agentMember.exists(_.homeDepartment.studentsCanScheduleMeetings))
+	}
+
 	@RequestMapping(method = Array(GET, HEAD), params = Array("iframe"))
 	def getIframe(
 		@ModelAttribute("command") cmd: Appliable[ScheduledMeetingRecord] with PopulateOnForm,

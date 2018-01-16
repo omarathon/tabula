@@ -108,12 +108,12 @@ class ViewProfileRelationshipTypeController extends AbstractViewProfileControlle
 			).apply().filterNot(meetingNotInAcademicYear(thisAcademicYear))
 
 			// User can schedule meetings provided they have the appropriate permission and...
-			// either they aren't the student themseleves, or all of the agents for this relationship type are in a department that allows this
-			val canCreateScheduledMeetings = securityService.can(user, Profiles.ScheduledMeetingRecord.Manage(relationshipType), studentCourseDetails) && (
-				!isSelf ||	studentCourseDetails.relationships(relationshipType).forall(relationship =>
-					relationship.agentMember.isEmpty || relationship.agentMember.get.homeDepartment.studentsCanScheduleMeetings
-				)
-			)
+			// either they aren't the student themselves, or any of the agents for this relationship type are in a department that allows students to schedule meetings
+			val studentCanCreateScheduledMeetings = studentCourseDetails.relationships(relationshipType)
+				.exists(relationship => relationship.agentMember.exists(_.homeDepartment.studentsCanScheduleMeetings))
+
+			val canCreateScheduledMeetings = securityService.can(user, Profiles.ScheduledMeetingRecord.Manage(relationshipType), studentCourseDetails) &&
+				(!isSelf || studentCanCreateScheduledMeetings)
 
 			applyCrumbs(Mav("profiles/profile/relationship_type_student",
 				"studentCourseDetails" -> studentCourseDetails,

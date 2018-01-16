@@ -30,13 +30,15 @@ class SmallGroupSetTimetableClashController extends GroupsController {
 class ListSmallGroupSetTimetableClashStudentsController extends GroupsController {
 
 	@ModelAttribute("command")
-	def command(@PathVariable smallGroupSet: SmallGroupSet) =
+	def command(@PathVariable smallGroupSet: SmallGroupSet): ListSmallGroupSetTimetableClashStudentsCommand.Command =
 		ListSmallGroupSetTimetableClashStudentsCommand(mandatory(smallGroupSet))
 
 	@RequestMapping
-	def ajaxList(@ModelAttribute("command") command: Appliable[Seq[Member]]): Mav = {
+	def ajaxList(@ModelAttribute("command") command: ListSmallGroupSetTimetableClashStudentsCommand.Command): Mav = {
+		val groups = command.apply()
 		Mav("groups/timetableconflicts_students",
-			"students" -> command.apply()
+			"groups" -> groups,
+			"allStudents" -> groups.values.flatten.toSeq
 		).noLayout()
 	}
 }

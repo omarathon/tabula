@@ -12,12 +12,6 @@
 			<div class="filters marker-feedback-filters btn-group-group well well-sm" data-lazy="true">
 				<@f.form commandName="command" action="${info.requestedUri.path}" method="GET" cssClass="form-inline filter-form">
 					<@f.errors cssClass="error form-errors" />
-					<button type="button" class="clear-all-filters btn btn-link">
-						<span class="fa-stack">
-							<i class="fa fa-filter fa-stack-1x"></i>
-							<i class="fa fa-ban fa-stack-2x"></i>
-						</span>
-					</button>
 
 					<#assign placeholder = "All marking statuses" />
 					<#assign currentfilter><@filters.current_filter_value "markerStateFilters" placeholder; f>${f.description}</@filters.current_filter_value></#assign>
@@ -49,6 +43,9 @@
 						${f.description}
 					</@filters.filter>
 
+					<button type="button" class="clear-all-filters btn btn-sm btn-filter">
+						Clear filters
+					</button>
 				</@f.form>
 			</div>
 		</div>
