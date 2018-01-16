@@ -54,9 +54,9 @@
 	<#assign context=cm1Context />
 <#elseif requestPath == cm2Context || requestPath?starts_with("${cm2Context}/")>
 	<#assign bodyClass="coursework-page" />
-	<#assign siteHeader="CM2" />
+	<#assign siteHeader="Coursework Management" />
 	<#assign subsite=true />
-	<#assign title="CM2" />
+	<#assign title="Coursework Management" />
 	<#assign name="cm2" />
 	<#assign nonav=false />
 	<#assign homeUrl><@routes.cm2.home /></#assign>
