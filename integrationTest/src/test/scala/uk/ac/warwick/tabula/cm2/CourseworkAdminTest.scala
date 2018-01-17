@@ -5,7 +5,7 @@ import uk.ac.warwick.tabula.BrowserTest
 class CourseworkAdminTest extends BrowserTest with CourseworkFixtures {
 
 	"Department admin" should "be offered a link to their department" in as(P.Admin1) {
-		pageTitle should be ("Tabula - CM2")
+		pageTitle should be ("Tabula - Coursework Management")
 		pageSource contains "My department-wide responsibilities" should be {true}
 
 		click on linkText("Test Services")
