@@ -5,7 +5,7 @@
 <#--noinspection FtlWellformednessInspection-->
 
 <#macro row graph>
-	<#assign state = (graph.extension.state.description)!"None" />
+	<#assign state = (graph.extension.state.description)!"No extension" />
 <tr class="itemContainer"
 	data-contentid ="${assignment.id}__${graph.user.userId}"
 	data-detailurl ="<@routes.cm2.extensiondetail assignment graph.user.userId />"
@@ -18,15 +18,7 @@
 	<td class="status-col toggle-cell content-cell">
 		<dl style="margin: 0; border-bottom: 0;">
 			<dt>
-				<#if graph.awaitingReview>
-					<span>Awaiting review</span>
-				<#elseif graph.hasApprovedExtension>
-					<span>Approved</span>
-				<#elseif graph.hasRejectedExtension>
-					<span>Rejected</span>
-				<#else>
-					<span>No extension</span>
-				</#if>
+				${state}
 			</dt>
 			<dd style="display: none;" class="table-content-container" data-contentid="${assignment.id}__${graph.user.userId}">
 				<div id="content-${assignment.id}__${graph.user.userId}" class="content-container" data-contentid="${assignment.id}__${graph.user.userId}">
