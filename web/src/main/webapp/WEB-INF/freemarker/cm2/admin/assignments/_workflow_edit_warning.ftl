@@ -2,7 +2,7 @@
 <div id="workflow-edit-warning" class="modal fade">
 	<@modal.wrapper>
 		<@modal.body>
-			<p>You have made changes to this assignments workflow properties. Any existing marker allocations and marker feedback will be deleted.</p>
+			<p>You have changed this assignment's workflow properties. Any existing marker allocations and markers' feedback will be deleted.</p>
 		</@modal.body>
 		<@modal.footer>
 				<a class='confirm btn btn-primary'>Confirm</a>
