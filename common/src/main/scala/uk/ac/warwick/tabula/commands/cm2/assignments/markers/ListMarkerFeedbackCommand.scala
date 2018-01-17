@@ -80,10 +80,17 @@ class ListMarkerFeedbackCommandInternal(val assignment:Assignment, val marker:Us
 		}
 
 		// squash stages with the same order
-		filteredEnhancedFeedbackByStage
+		val stages = filteredEnhancedFeedbackByStage
 			.groupBy { case (stage, _) => stage.order }
 			.map { case(_, map) => EnhancedFeedbackForOrderAndStage(map.values.flatten.nonEmpty, map)}
 			.toSeq
+			.sortBy(_.headerStage.order)
+
+		if (activeStage == null) {
+			activeStage = stages.headOption.map(_.headerStage).orNull
+		}
+
+		stages
 	}
 }
 
@@ -107,6 +114,7 @@ trait ListMarkerFeedbackState extends CanProxy {
 	var submissionStatesFilters: JList[SubmissionAndFeedbackInfoFilter] = JArrayList()
 	var markerStateFilters: JList[SubmissionAndFeedbackInfoMarkerFilter] = JArrayList()
 	var overlapFilter: OverlapPlagiarismFilter = new OverlapPlagiarismFilter
+	var activeStage: MarkingWorkflowStage = _
 }
 
 trait CanProxy {
