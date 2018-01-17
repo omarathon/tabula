@@ -2,7 +2,7 @@
 <#import "/WEB-INF/freemarker/_profile_link.ftl" as pl />
 <#import "*/modal_macros.ftl" as modal />
 <#escape x as x?html>
-	<@cm2.assignmentHeader "Choose moderation sample for" assignment />
+	<@cm2.assignmentHeader "Choose moderation sample" assignment />
 
 	<div id="profile-modal" class="modal fade profile-subset"></div>
 
