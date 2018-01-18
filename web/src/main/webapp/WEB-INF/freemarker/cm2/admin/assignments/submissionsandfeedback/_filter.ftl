@@ -11,8 +11,8 @@
 				<input type="checkbox" name="${status.expression}"
 							 value="${f.name}"
 							 data-short-value="${f.description}"
-				${filters.contains_by_filter_name(submissionAndFeedbackCommand.submissionStatesFilters, f)?string('checked','')}>
-			${f.description}
+					${filters.contains_by_filter_name(submissionAndFeedbackCommand.submissionStatesFilters, f)?string('checked','')}>
+				${f.description}
 			</@filters.filter>
 
 			<#assign placeholder = "All  plagiarism statuses" />
@@ -21,8 +21,8 @@
 				<input type="checkbox" name="${status.expression}"
 							 value="${f.name}"
 							 data-short-value="${f.description}"
-				${filters.contains_by_filter_name(submissionAndFeedbackCommand.plagiarismFilters, f)?string('checked','')}>
-			${f.description}
+					${filters.contains_by_filter_name(submissionAndFeedbackCommand.plagiarismFilters, f)?string('checked','')}>
+				${f.description}
 			</@filters.filter>
 			<#assign placeholder = "All  statuses" />
 			<#assign currentfilter><@filters.current_filter_value "statusesFilters" placeholder; f>${f.description}</@filters.current_filter_value></#assign>
@@ -30,13 +30,9 @@
 				<input type="checkbox" name="${status.expression}"
 							 value="${f.name}"
 							 data-short-value="${f.description}"
-				${filters.contains_by_filter_name(submissionAndFeedbackCommand.statusesFilters, f)?string('checked','')}>
-			${f.description}
+					${filters.contains_by_filter_name(submissionAndFeedbackCommand.statusesFilters, f)?string('checked','')}>
+				${f.description}
 			</@filters.filter>
-
-			<button type="button" class="clear-all-filters btn btn-sm btn-filter">
-				Clear filters
-			</button>
 
 			<div class='plagiarism-filter' style="display: none;">
 				<@bs3form.labelled_form_group path="overlapFilter.min" labelText="Min overlap">
@@ -53,6 +49,11 @@
 					</div>
 				</@bs3form.labelled_form_group>
 			</div>
+
+			<button type="button" class="clear-all-filters btn btn-sm btn-filter">
+				Clear filters
+			</button>
+
 		</@f.form>
 	</div>
 </#escape>
