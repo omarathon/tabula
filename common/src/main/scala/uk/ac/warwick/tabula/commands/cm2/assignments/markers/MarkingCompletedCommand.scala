@@ -119,7 +119,7 @@ trait WorkflowProgressState extends CanProxy with UserAware with HasAssignment {
 	val stagePosition: Int
 
 	// Pre-submit validation
-	def noContent: Seq[MarkerFeedback] = markerFeedback.asScala.filterNot(_.hasMarkOrGrade ) // should be empty
+	def noContent: Seq[MarkerFeedback] = markerFeedback.asScala.filterNot(_.hasContent )
 	def noMarks: Seq[MarkerFeedback] = markerFeedback.asScala.filterNot(_.hasMark) -- noContent
 	def noFeedback: Seq[MarkerFeedback] = markerFeedback.asScala.filterNot(_.hasFeedback) -- noContent
 	def releasedFeedback: Seq[MarkerFeedback] = markerFeedback.asScala.filter(mf => {
