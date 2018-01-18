@@ -183,7 +183,7 @@
 		</#if>
 		<#if ((holder.command.location)!"")?has_content>
 			<div class="location">
-				Room: <@fmt.location_decomposed holder.command.location holder.command.locationId!"" />
+				Room: <@fmt.location_decomposed (holder.command.locationAlias)!holder.command.location holder.command.locationId!"" />
 			</div>
 		</#if>
 		<div class="running">

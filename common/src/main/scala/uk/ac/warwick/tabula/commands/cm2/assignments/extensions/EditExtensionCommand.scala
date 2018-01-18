@@ -58,15 +58,7 @@ class EditExtensionCommandInternal(val assignment: Assignment, val student: User
 		extension._universityId = student.getUserId
 		extension.assignment = assignment
 		extension.expiryDate = expiryDate
-		extension.rawState_=(state)
-		extension.reviewedOn = DateTime.now
-
-		action match {
-			case ApprovalAction | UpdateApprovalAction => extension.approve(reviewerComments)
-			case RejectionAction => extension.reject(reviewerComments)
-			case RevocationAction => extension.rawState_=(ExtensionState.Revoked)
-			case _ =>
-		}
+		extension.updateState(state, reviewerComments)
 	}
 
 	def copyFrom(extension: Extension): Unit = {
@@ -93,21 +85,16 @@ trait EditExtensionCommandState {
 
 	var extension: Extension =_
 
-	final val ApprovalAction = "Approve"
-	final val RejectionAction = "Reject"
-	final val RevocationAction = "Revoke"
-	final val UpdateApprovalAction = "Update"
-
 }
 
 trait EditExtensionCommandValidation extends SelfValidating {
 	self: EditExtensionCommandState =>
 	def validate(errors: Errors) {
 		if(expiryDate == null) {
-			if (action == ApprovalAction || action == UpdateApprovalAction) {
+			if (state == ExtensionState.Approved) {
 				errors.rejectValue("expiryDate", "extension.requestedExpiryDate.provideExpiry")
 			}
-		} else if(expiryDate.isBefore(assignment.closeDate)) {
+		} else if(expiryDate.isBefore(extension.assignment.closeDate)) {
 			errors.rejectValue("expiryDate", "extension.expiryDate.beforeAssignmentExpiry")
 		}
 
@@ -142,21 +129,17 @@ trait EditExtensionCommandNotification extends Notifies[Extension, Option[Extens
 				Seq(Notification.init(new ExtensionChangedNotification, submitter.apparentUser, Seq(extension), assignment))
 			}
 		} else {
-			val baseNotification = if (extension.approved) {
-				new ExtensionRequestApprovedNotification
+			val (baseNotification, baseAdminNotification) = if (extension.approved) {
+				(new ExtensionRequestApprovedNotification, new ExtensionRequestRespondedApproveNotification)
+			} else if (extension.moreInfoRequired){
+				(new ExtensionRequestMoreInfo, new ExtensionRequestRespondedMoreInfoNotification)
 			} else {
-				new ExtensionRequestRejectedNotification
+				(new ExtensionRequestRejectedNotification, new ExtensionRequestRespondedRejectNotification)
 			}
-			val studentNotification = Notification.init(baseNotification, admin, Seq(extension), assignment)
-
-			val baseAdminNotification = if (extension.approved) {
-				new ExtensionRequestRespondedApproveNotification
-			} else {
-				new ExtensionRequestRespondedRejectNotification
-			}
-			val adminNotifications = Notification.init(baseAdminNotification, admin, Seq(extension), assignment)
-
-			Seq(studentNotification, adminNotifications)
+			Seq(
+				Notification.init(baseNotification, admin, Seq(extension), assignment),
+				Notification.init(baseAdminNotification, admin, Seq(extension), assignment)
+			)
 		}
 	}
 }
@@ -221,15 +204,14 @@ trait EditExtensionCommandNotificationCompletion extends CompletesNotifications[
 	self: NotificationHandling with EditExtensionCommandState =>
 
 	def notificationsToComplete(commandResult: Extension): CompletesNotificationsResult = {
-		if (commandResult.approved || commandResult.rejected)
-			CompletesNotificationsResult(
-				notificationService.findActionRequiredNotificationsByEntityAndType[ExtensionRequestCreatedNotification](commandResult) ++
-					notificationService.findActionRequiredNotificationsByEntityAndType[ExtensionRequestModifiedNotification](commandResult)
-				,
-				submitter.apparentUser
-			)
-		else
+		if (commandResult.approved || commandResult.rejected) {
+			val created = notificationService.findActionRequiredNotificationsByEntityAndType[ExtensionRequestCreatedNotification](commandResult)
+			val modified = notificationService.findActionRequiredNotificationsByEntityAndType[ExtensionRequestModifiedNotification](commandResult)
+			val info = notificationService.findActionRequiredNotificationsByEntityAndType[ExtensionInfoReceivedNotification](commandResult)
+			CompletesNotificationsResult(created ++ modified ++ info, submitter.apparentUser)
+		} else {
 			EmptyCompletesNotificationsResult
+		}
 	}
 }
 
@@ -245,3 +227,4 @@ trait EditExtensionCommandDescription extends Describable[Extension] {
 		d.studentUsercodes(student.getUserId)
 	}
 }
+

@@ -13,6 +13,7 @@ sealed abstract class Location extends Serializable {
 @SerialVersionUID(372489712389246l) case class MapLocation(name: String, locationId: String, syllabusPlusName: Option[String] = None) extends Location
 @SerialVersionUID(372489712389246l) case class AliasedMapLocation(alias: String, mapLocation: MapLocation) extends Location {
 	override def name: String = alias
+	def locationId: String = mapLocation.locationId
 }
 
 object Location {

@@ -143,7 +143,8 @@ trait EditAttendancePointValidation extends SelfValidating with AttendanceMonito
 						assignmentSubmissionTypeAnyQuantity,
 						assignmentSubmissionTypeModulesQuantity,
 						assignmentSubmissionModules,
-						assignmentSubmissionAssignments
+						assignmentSubmissionAssignments,
+						academicYear
 					)
 					points.exists(p =>
 						validateOverlapAssignmentForEdit(

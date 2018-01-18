@@ -24,7 +24,7 @@ object StudentSubmissionAndFeedbackCommand {
 		extensionRequested: Boolean,
 		canSubmit: Boolean,
 		canReSubmit: Boolean,
-		hasDisability: Boolean
+		disability: Option[Disability]
   )
 
 	def apply(assignment: Assignment, member: Member, viewingUser: CurrentUser) =
@@ -112,9 +112,9 @@ abstract class StudentSubmissionAndFeedbackCommandInternal(val assignment: Assig
 			canSubmit = assignment.submittable(studentUser),
 			canReSubmit = assignment.resubmittable(studentUser),
 
-			hasDisability = profileService.getMemberByUser(studentUser).exists{
-				case student: StudentMember => student.disability.exists(_.reportable)
-				case _ => false
+			disability = profileService.getMemberByUser(studentUser).flatMap {
+				case student: StudentMember => student.disability.filter(_.reportable)
+				case _ => None
 			}
 		)
 	}

@@ -18,7 +18,6 @@ abstract class ExtensionStudentNotification extends ExtensionNotification with S
 			"assignment" -> assignment,
 			"module" -> assignment.module,
 			"user" -> recipient,
-			"path" -> url,
 			"extension" -> extension,
 			"newExpiryDate" -> dateTimeFormatter.print(extension.expiryDate.orNull),
 			"originalAssignmentDate" -> dateTimeFormatter.print(assignment.closeDate)
@@ -68,6 +67,7 @@ class ExtensionRequestMoreInfo extends ExtensionStudentNotification with MyWarwi
 	def verb = "request"
 	def title: String = titlePrefix + "More information is required in order to review your extension request for \"%s\"".format(assignment.name)
 	def template = "/WEB-INF/freemarker/emails/extension_info_requested.ftl"
-	def urlTitle = "view the assignment deadline"
+	def urlTitle = "view your extension request"
+	override def url: String = Routes.extensionRequest(assignment)
 	priority = NotificationPriority.Warning
 }

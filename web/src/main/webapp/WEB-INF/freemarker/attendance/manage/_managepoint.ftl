@@ -134,25 +134,25 @@
 			</@bs3form.radio>
 
 			<@bs3form.radio>
-				<input class="specific" type="radio" <#if (!command.anySmallGroupEventModules)>checked </#if> value="false" name="isAnySmallGroupEventModules"/>
+				<input class="specific" type="radio" <#if (!command.anySmallGroupEventModules)>checked </#if> value="false" name="isAnySmallGroupEventModules" data-selector=".specific-module-search"/>
 				Specific
 				<@fmt.help_popover id="isAnySmallGroupEventModules" content="Attendance at any of the specified modules recorded in Tabula will count towards this monitoring point" />
-				<div class="module-search input-group">
-					<input class="module-search-query smallGroup form-control" type="text" value="" placeholder="Search for a module" />
-					<span class="input-group-addon"><i class="fa fa-search"></i></span>
-				</div>
-				<div class="modules-list">
-					<input type="hidden" name="_smallGroupEventModules" value="false" />
-					<ol>
-						<#list command.smallGroupEventModules![] as module>
-							<li>
-								<input type="hidden" name="smallGroupEventModules" value="${module.id}" />
-								<#if command.moduleHasSmallGroups(module)><i class="fa fa-fw"></i><#else><i class="fa fa-fw fa-exclamation-circle" title="This module has no small groups set up in Tabula"></i></#if><span title="<@fmt.module_name module false />"><@fmt.module_name module false /></span> <button class="btn btn-danger btn-xs remove">Remove</button>
-							</li>
-						</#list>
-
-					</ol>
-
+				<div class="specific-module-search">
+					<div class="module-search input-group">
+						<input class="module-search-query smallGroup form-control" type="text" value="" placeholder="Search for a module" />
+						<span class="input-group-addon"><i class="fa fa-search"></i></span>
+					</div>
+					<div class="modules-list">
+						<input type="hidden" name="_smallGroupEventModules" value="false" />
+						<ol>
+							<#list command.smallGroupEventModules![] as module>
+								<li>
+									<input type="hidden" name="smallGroupEventModules" value="${module.id}" />
+									<#if command.moduleHasSmallGroups(module)><i class="fa fa-fw"></i><#else><i class="fa fa-fw fa-exclamation-circle" title="This module has no small groups set up in Tabula"></i></#if><span title="<@fmt.module_name module false />"><@fmt.module_name module false /></span> <button class="btn btn-danger btn-xs remove">Remove</button>
+								</li>
+							</#list>
+						</ol>
+					</div>
 				</div>
 			</@bs3form.radio>
 
@@ -247,7 +247,7 @@
 						<#list command.assignmentSubmissionAssignments![] as assignment>
 							<li>
 								<input type="hidden" name="assignmentSubmissionAssignments" value="${assignment.id}" />
-								<span title="<@fmt.assignment_name assignment false />"><@fmt.assignment_name assignment false /></span><button class="btn btn-danger btn-xs remove"><i class="fa fa-times"></i></button>
+								<span title="<@fmt.assignment_name assignment false /> (${assignment.academicYear.toString})"><@fmt.assignment_name assignment false /> (${assignment.academicYear.toString})</span><button class="btn btn-danger btn-xs remove"><i class="fa fa-times"></i></button>
 							</li>
 						</#list>
 					</ol>
@@ -310,6 +310,9 @@
 			$pointTypeInput.on('click', showOptions);
 			showOptions();
 		}
+
+		// Set up radios to show/hide self-sign up options fields.
+		$("input:radio[name='isAnySmallGroupEventModules']").radioControlled({mode: 'hidden'});
 
 		Attendance.bindModulePickers();
 		Attendance.bindAssignmentPickers();

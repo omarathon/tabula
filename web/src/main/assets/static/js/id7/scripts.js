@@ -947,7 +947,7 @@
 		});
 
 		// If we're on OS X, replace all kbd.keyboard-control-key with Cmd instead of Ctrl
-		if (navigator.platform.indexOf('Mac') != -1) {
+		if (navigator.platform.indexOf('Mac') !== -1) {
 			$('kbd.keyboard-control-key').html('<span class="mac-cmd">&#8984;</span> cmd');
 		}
 
@@ -1168,13 +1168,13 @@
 		$('.tabula-dnd').dragAndDrop();
 		$('.tabula-filtered-list').filteredList();
 
-		if (window != window.top) {
+		if (window !== window.top) {
 			// this is an iframe
 			(function(){
 				var bodyHeight = $('body').height();
 				setInterval(function(){
 					var newBodyHeight = $('body').height();
-					if (newBodyHeight != bodyHeight) {
+					if (newBodyHeight !== bodyHeight) {
 						bodyHeight = newBodyHeight;
 						window.parent.GlobalScripts.resizeModalIframes(newBodyHeight);
 					}
@@ -1327,6 +1327,10 @@
 			$(this).addClass('active');
 		});
 
+		// TAB-5314 when you click on an input-group-addon, focus that field
+		$body.on('click', '.input-group-addon', function (e) {
+			$(this).closest('.input-group').find(':input:not(:focus):visible').first().focus();
+		});
 	}); // on ready
 
 	// take anything we've attached to "exports" and add it to the global "Profiles"

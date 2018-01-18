@@ -303,19 +303,27 @@
 			var clashInfo =  function() {
 				// check if we have got json result back, if not then no need to check at this stage
 				if ($('.loading').hasClass('hide')) {
-					var userIds = [];
-					var students = $('input[name^="mapping"]').each(function() {
+					var groups = {};
+					var totalClashes = 0;
+					$('input[name^="mapping"]').each(function() {
 						var inputName = this.name;
 						var inputValue = this.value;
 						var grpId = inputName.substring(inputName.indexOf('[') + 1, inputName.indexOf(']'));
 						var possibleClashGrpInfo = $('#clash-group-info-' + grpId).text();
 						if (possibleClashGrpInfo.length > 0 && possibleClashGrpInfo.indexOf(inputValue) >= 0) {
-							userIds.push(inputValue);
+							if (typeof groups[grpId] === 'undefined') groups[grpId] = [];
+							groups[grpId].push(inputValue);
+							totalClashes++;
 						}
 					});
-					var clashUserIds = userIds.join(',');
+
+					var groupUserIds = [];
+					for (var groupId in groups) {
+						groupUserIds.push('clashStudents[' + groupId + ']=' + groups[groupId].join(','));
+					}
+
+					var clashUserIds = groupUserIds.join('&');
 					$('.actualclash-userIds').append(clashUserIds);
-					var totalClashes = userIds.length;
 					$('.clash-count').html(totalClashes);
 					if (totalClashes > 0) {
 						var $timtableClashLink = $('a.timetable-clash-link');

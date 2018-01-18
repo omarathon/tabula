@@ -15,13 +15,6 @@
 				<@f.form commandName="command" action="${info.requestedUri.path}" method="GET" cssClass="form-inline">
 					<@f.errors cssClass="error form-errors" />
 
-					<button type="button" class="clear-all-filters btn btn-link">
-						<span class="fa-stack">
-							<i class="fa fa-filter fa-stack-1x"></i>
-							<i class="fa fa-ban fa-stack-2x"></i>
-						</span>
-					</button>
-
 					<#assign placeholder = "All modules" />
 					<#assign modulesCustomPicker>
 						<@bs3form.checkbox path="showEmptyModules">
@@ -76,6 +69,10 @@
 							<span class="input-group-addon"><i class="fa fa-calendar"></i></span>
 						</div>
 					</@bs3form.labelled_form_group>
+
+					<button type="button" class="clear-all-filters btn btn-sm btn-filter">
+						Clear filters
+					</button>
 				</@f.form>
 			</div>
 		</div>

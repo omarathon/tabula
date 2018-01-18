@@ -40,6 +40,7 @@ a.profile-link {
 	.toggle-icon:before {
 		font-family: 'FontAwesome';
 		content: @caret-down;
+		margin-right: 6px;
 	}
 
 	&.collapsed .toggle-icon-large:before {
@@ -50,6 +51,7 @@ a.profile-link {
 	.toggle-icon-large:before {
 		font-family: 'FontAwesome';
 		content: @chevron-down;
+		margin-right: 6px;
 	}
 }
 
@@ -378,4 +380,12 @@ table.expanding-row-pairs {
 abbr[title] {
 	// Fixes double-underline visible in Chrome (ID7 underlines abbr elements with border-bottom)
 	text-decoration: none;
+}
+
+p.dates {
+	margin: 0 0 @line-height-computed;
+}
+
+.action-bar {
+	margin: 0 0 (@grid-gutter-width / 2);
 }

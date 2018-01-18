@@ -40,6 +40,20 @@
 		<div role="tabpanel" class="tab-pane" id="webform">
 			<p>Click the add button below to enter marks and feedback for a student.</p>
 			<@f.form cssClass="marks-web-form" method="post" enctype="multipart/form-data" action="${formUrl}" commandName="command">
+				<div class="row hidden-xs hidden-sm">
+					<div class="col-md-2">
+						<label>University ID</label>
+					</div>
+					<div class="col-md-2">
+						<label>Mark</label>
+					</div>
+					<div class="col-md-2">
+						<label>Grade</label>
+					</div>
+					<div class="col-md-6">
+						<label>Feedback</label>
+					</div>
+				</div>
 				<#list command.existingMarks as markItem>
 					<div class="row">
 						<div class="col-md-2">

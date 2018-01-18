@@ -1,5 +1,7 @@
 @import (reference) "id7/less/variables.less";
+@import (reference) "id7/less/bootstrap/mixins/text-emphasis.less";
 @import (reference) "id7/less/bootstrap/mixins/vendor-prefixes.less";
+@import (reference) "id7/less/bootstrap/mixins/buttons.less";
 @import (reference) "colours.less";
 @import (reference) "../css3.less";
 
@@ -128,7 +130,7 @@ h1.modal-title {
 
 .subtle { color: @subtle-text-color; }
 .subtler { color: @very-subtle-text-color; }
-.very-subtle { color: @very-subtle-text-color; font-size: @very-subtle-font-size; }
+.very-subtle, .has-error .very-subtle { color: @very-subtle-text-color; font-size: @very-subtle-font-size; }
 
 .mac-cmd {
 	font-size: 140%;
@@ -197,7 +199,8 @@ ul.links {
 }
 
 // details polyfill support
-details, summary { display: block; }
+details { display: block; }
+summary { display: list-item; } // TAB-5386
 
 // The following styles are not really needed, since the jQuery script takes care of hiding/displaying the elements.
 // However, we're still gonna use CSS as well to prevent FOUC in browsers that understand these selectors.
@@ -702,6 +705,10 @@ table.tablesorter {
 
 //Filter pages
 .student-filter, .small-groups-filter, .filters {
+	&.well {
+		margin-bottom: 0;
+	}
+
 	.filter-list {
 		max-height: 300px;
 		overflow-y: auto;
@@ -882,6 +889,7 @@ h2 {
 		color: white;
 		a, a:hover {
 			color: white;
+			text-decoration: none;
 		}
 		&.active {
 			background: @tabulaGray;
@@ -1123,8 +1131,6 @@ ul.profile-user-list {
 }
 
 .cm2-progress-table {
-	margin-top: 20px;
-
 	th, td {
 		white-space: nowrap;
 	}
@@ -1256,5 +1262,23 @@ a.white-text-decoration {
 	text-decoration-color: white;
 	&:hover {
 		text-decoration-color: darken(white, 20%);
+	}
+}
+
+.btn-filter {
+	.button-variant(@btn-default-color; #ffffff; @btn-default-border);
+}
+
+.filter-form {
+	line-height: normal;
+}
+
+#job-status-value {
+	> p:last-child {
+		margin: 0;
+	}
+
+	&[data-succeeded="false"][data-finished="true"] {
+		.text-emphasis-variant(@state-danger-text);
 	}
 }

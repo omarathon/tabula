@@ -17,9 +17,9 @@ class CreateScheduledMeetingRecordController extends AbstractManageScheduledMeet
 		@PathVariable relationshipType: StudentRelationshipType,
 		@PathVariable studentCourseDetails: StudentCourseDetails,
 		@RequestParam(value = "relationship", required = false) relationship: StudentRelationship,
-		@ModelAttribute("allRelationships") allRelationships: Seq[StudentRelationship]
+		@ModelAttribute("schedulableRelationships") schedulableRelationships: Seq[StudentRelationship]
 	): CreateScheduledMeetingRecordCommand with ComposableCommand[ScheduledMeetingRecord] with CreateScheduledMeetingPermissions with CreateScheduledMeetingRecordState with CreateScheduledMeetingRecordDescription with AutowiringMeetingRecordServiceComponent with CreateScheduledMeetingRecordCommandValidation with CreateScheduledMeetingRecordNotification with CreateScheduledMeetingRecordScheduledNotifications with PopulateOnForm = {
-		allRelationships match {
+		schedulableRelationships match {
 			case Nil => throw new ItemNotFoundException
 			case relationships =>
 				// Go through the relationships for this SPR code and find one where the current user is the agent.
