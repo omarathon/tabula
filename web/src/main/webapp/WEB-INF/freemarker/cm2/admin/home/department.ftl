@@ -56,10 +56,6 @@
 						${f.description}
 					</@filters.filter>
 
-					<button type="button" class="clear-all-filters btn btn-sm btn-filter">
-						Clear filters
-					</button>
-
 					<@bs3form.labelled_form_group path="dueDateFilter.from" labelText="Assignment due date from">
 						<div class="input-group">
 							<@f.input type="text" path="dueDateFilter.from" cssClass="form-control date-picker input-sm" />
@@ -73,6 +69,10 @@
 							<span class="input-group-addon"><i class="fa fa-calendar"></i></span>
 						</div>
 					</@bs3form.labelled_form_group>
+
+					<button type="button" class="clear-all-filters btn btn-sm btn-filter">
+						Clear filters
+					</button>
 				</@f.form>
 			</div>
 		</div>
