@@ -96,6 +96,31 @@
 					</div>
 				</#if>
 
+				<#if findResult.courseworkAssignmentPoints?size gt 0>
+					<#assign year = command.academicYear.toString/>
+					<#if searchAcademicYear??>
+						<#assign year = searchAcademicYear.toString/>
+					</#if>
+				<div>
+					<p>Some points have been found that are based on dedicted assignments of  ${year}. They will be copied with point requirement as submission to any
+						asignment for any module. Details of those points are as which can be edited after copying: </p>
+
+					<div class="alert alert-info">
+						<#list findResult.courseworkAssignmentPoints as assignmentPoint>
+							<#if assignmentPoint.scheme.pointStyle.dbValue == 'week'>
+								<p>${assignmentPoint.name} (<@fmt.monitoringPointWeeksFormat
+									assignmentPoint.startWeek
+									assignmentPoint.endWeek
+									assignmentPoint.scheme.academicYear
+									assignmentPoint.scheme.department/>)
+								</p>
+							<#else>
+								<p>${assignmentPoint.name} (<@fmt.interval assignmentPoint.startDate assignmentPoint.endDate />)</p>
+							</#if>
+						</#list>
+					</div>
+				</#if>
+
 				<p>Use the filters to choose which points to copy:</p>
 
 				<div class="student-filter points-filter btn-group-group well well-sm">

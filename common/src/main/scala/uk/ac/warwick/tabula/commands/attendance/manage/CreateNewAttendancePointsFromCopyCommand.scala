@@ -79,6 +79,21 @@ trait CreateNewAttendancePointsFromCopyValidation extends SelfValidating with Ge
 trait GetsPointsToCreate {
 	self: AttendanceMonitoringPointValidation =>
 
+	def convertSpecificAssignmentPointToAnyAssignment(point: AttendanceMonitoringPoint): Unit = {
+		// convert dedicated assignment to any assignment
+		if (point.isSpecificAssignmentPoint) {
+			point.assignmentSubmissionType = AttendanceMonitoringPoint.Settings.AssignmentSubmissionTypes.Any
+
+			//if any assignment specified just set the new quantity as 1 otherwise based on total assignments required previously
+			if (point.assignmentSubmissionIsDisjunction) {
+				point.assignmentSubmissionTypeAnyQuantity = 1
+			} else {
+				point.assignmentSubmissionTypeAnyQuantity = point.assignmentSubmissionAssignments.size
+			}
+			point.assignmentSubmissionAssignments = Seq()
+		}
+	}
+
 	def getPoints(
 		findPointsResult: FindPointsResult,
 		schemes: Seq[AttendanceMonitoringScheme],
@@ -110,7 +125,7 @@ trait GetsPointsToCreate {
 					} else {
 						newPoint.endDate = weeksForYear(weekPoint.endWeek).lastDay
 					}
-
+					convertSpecificAssignmentPointToAnyAssignment(newPoint)
 					newPoint
 				}
 			}
@@ -128,6 +143,7 @@ trait GetsPointsToCreate {
 					val academicYearDifference = academicYear.startYear - datePoint.scheme.academicYear.startYear
 					newPoint.startDate = newPoint.startDate.withYear(newPoint.startDate.getYear + academicYearDifference)
 					newPoint.endDate = newPoint.endDate.withYear(newPoint.endDate.getYear + academicYearDifference)
+					convertSpecificAssignmentPointToAnyAssignment(newPoint)
 					newPoint
 				}
 			}
@@ -156,6 +172,14 @@ trait CreateNewAttendancePointsFromCopyDescription extends Describable[Seq[Atten
 	}
 	override def describeResult(d: Description, points: Seq[AttendanceMonitoringPoint]) {
 		d.attendanceMonitoringPoints(points, verbose = true)
+		val assignmentPoint = points.filter( _.isSpecificAssignmentPoint)
+		if(assignmentPoint.nonEmpty) {
+			d.property("attendanceMonitoringAssignmentPoint", assignmentPoint.map(point => Map(
+				"id" -> point.id,
+				"name" -> point.name
+			)))
+		}
+
 	}
 }
 

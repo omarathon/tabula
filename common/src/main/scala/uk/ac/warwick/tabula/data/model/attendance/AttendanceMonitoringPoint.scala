@@ -106,6 +106,11 @@ class AttendanceMonitoringPoint extends GeneratedId with AttendanceMonitoringPoi
 		newPoint
 	}
 
+	def isSpecificAssignmentPoint: Boolean = {
+		pointType == AttendanceMonitoringPointType.AssignmentSubmission &&
+			assignmentSubmissionType == AttendanceMonitoringPoint.Settings.AssignmentSubmissionTypes.Assignments
+	}
+
 	def applies(beginDate: LocalDate, finishDate: Option[LocalDate]): Boolean = endDate.isAfter(beginDate) && (finishDate.isEmpty || startDate.isBefore(finishDate.get))
 }
 
