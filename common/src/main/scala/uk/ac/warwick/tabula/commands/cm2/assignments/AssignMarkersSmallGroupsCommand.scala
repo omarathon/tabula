@@ -43,12 +43,15 @@ class AssignMarkersSmallGroupsCommandInternal(val assignment: Assignment) extend
 					user <- event.tutors.users if markers.contains(user)
 				} yield user).distinct
 
-				set.groups.asScala.map(group => {
+				val groupAllocations = set.groups.asScala.map(group => {
 					val students = group.students.users.filter(validStudents.contains).sortBy { u => (u.getLastName, u.getFirstName) }
 					val markers = group.events.flatMap(_.tutors.users).filter(validMarkers.contains)
 					val otherMarkers = validMarkers.diff(markers)
 					GroupAllocation(group.name, markers, students, otherMarkers)
 				})
+
+				// ignore groups that don't have valid tutor/markers
+				groupAllocations.filter(_.students.nonEmpty)
 			}
 
 			val allocations = if(assignment.cm2MarkingWorkflow.workflowType.rolesShareAllocations) {
