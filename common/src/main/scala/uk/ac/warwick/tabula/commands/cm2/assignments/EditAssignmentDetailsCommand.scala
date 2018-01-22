@@ -1,7 +1,7 @@
 package uk.ac.warwick.tabula.commands.cm2.assignments
 
 import org.springframework.validation.Errors
-import uk.ac.warwick.tabula.AcademicYear
+import uk.ac.warwick.tabula.{AcademicYear, AutowiringFeaturesComponent, Features, FeaturesComponent}
 import uk.ac.warwick.tabula.commands._
 import uk.ac.warwick.tabula.commands.cm2.markingworkflows._
 import uk.ac.warwick.tabula.data.model.{WorkflowCategory, _}
@@ -28,6 +28,7 @@ object EditAssignmentDetailsCommand {
 			with AutowiringUserLookupComponent
 			with AutowiringCM2MarkingWorkflowServiceComponent
 			with AutowiringFeedbackServiceComponent
+			with AutowiringFeaturesComponent
 			with ModifyAssignmentsDetailsTriggers
 			with PopulateOnForm
 }
@@ -35,13 +36,13 @@ object EditAssignmentDetailsCommand {
 class EditAssignmentDetailsCommandInternal(override val assignment: Assignment) extends CommandInternal[Assignment] with EditAssignmentDetailsCommandState
 	with EditAssignmentDetailsValidation with SharedAssignmentDetailProperties with PopulateOnForm with AssignmentDetailsCopy with CreatesMarkingWorkflow {
 
-	self: AssessmentServiceComponent with UserLookupComponent with CM2MarkingWorkflowServiceComponent =>
+	self: AssessmentServiceComponent with UserLookupComponent with CM2MarkingWorkflowServiceComponent with FeaturesComponent =>
 
 	override def applyInternal(): Assignment = {
 
 		lazy val moderatedWorkflow = workflow.map(HibernateHelpers.initialiseAndUnproxy).collect{case w: ModeratedWorkflow => w}
 
-		def moderationSelectorChanged: Boolean = moderatedWorkflow.exists(w => w.moderationSampler != sampler)
+		def moderationSelectorChanged: Boolean = features.moderationSelector && moderatedWorkflow.exists(w => w.moderationSampler != sampler)
 
 		if(workflowCategory == WorkflowCategory.SingleUse) {
 			workflow.filterNot(_.isReusable) match {
@@ -55,7 +56,7 @@ class EditAssignmentDetailsCommandInternal(override val assignment: Assignment) 
 						assignment.resetMarkerFeedback()
 					} else {
 						w.replaceMarkers(markersAUsers, markersBUsers)
-						moderatedWorkflow.foreach(w => w.moderationSampler = sampler)
+						moderatedWorkflow.filter(_ => features.moderationSelector).foreach(w => w.moderationSampler = sampler)
 						cm2MarkingWorkflowService.save(w)
 					}
 				// persist any new workflow
