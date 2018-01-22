@@ -60,20 +60,18 @@
 		<div class="row">
 			<div class="col-md-5">
 				<div id="${safeRole}StudentsList" class="students" data-item-selector=".student-list li">
-					<div class="well">
+					<div class="well drag-target">
 						<h4>Not allocated to a marker</h4>
 						<#if assignment.anonymity.equals(AssignmentAnonymity.FullyAnonymous)>
 							You have set anonymity to on. Markers cannot see students' names or University IDs.
 						<#elseif assignment.anonymity.equals(AssignmentAnonymity.IDOnly)>
 							You have set anonymity to ID only. Markers cannot see students' names.
 						</#if>
-						<div class="student-list drag-target">
-							<ul class="drag-list return-list unstyled" data-nobind="true">
-								<#list unassigned as student>
-									<@student_item student student_index stages />
-								</#list>
-							</ul>
-						</div>
+						<ul class="student-list drag-list return-list unstyled" data-nobind="true">
+							<#list unassigned as student>
+								<@student_item student student_index stages />
+							</#list>
+						</ul>
 					</div>
 				</div>
 			</div>
