@@ -201,18 +201,20 @@
 					<#if detail.extension.approved>
 						<button type="submit" name="state" value="${editExtensionCommand.state.dbValue}" class="btn btn-primary">Update</button>
 						<button type="submit" name="state" value="${states.Revoked.dbValue}" class="btn btn-default">Revoke</button>
-								<#elseif detail.extension.rejected || detail.extension.revoked>
+					<#elseif detail.extension.rejected || detail.extension.revoked>
 						<button type="submit" name="state" value="${editExtensionCommand.state.dbValue}" class="btn btn-primary">Update</button>
 						<button type="submit" name="state" value="${states.Approved.dbValue}" class="btn btn-primary">Approve</button>
-								<#elseif detail.extension.moreInfoRequired>
+					<#elseif detail.extension.moreInfoRequired>
 						<button type="submit" name="state" value="${editExtensionCommand.state.dbValue}" class="btn btn-default">Update</button>
 						<button type="submit" name="state" value="${states.Approved.dbValue}" class="btn btn-primary">Approve</button>
 						<button type="submit" name="state" value="${states.Rejected.dbValue}" class="btn btn-default">Reject</button>
-								<#elseif detail.extension.unreviewed || detail.extension.moreInfoReceived>
+					<#elseif detail.extension.unreviewed || detail.extension.moreInfoReceived>
 						<button type="submit" name="state" value="${states.Approved.dbValue}" class="btn btn-primary">Approve</button>
 						<button type="submit" name="state" value="${states.Rejected.dbValue}" class="btn btn-default">Reject</button>
 						<button type="submit" name="state" value="${states.MoreInformationRequired.dbValue}" class="btn btn-default">Request more information</button>
 					</#if>
+				<#elseif can.do('Extension.Create', assignment)>
+					<button class="btn btn-primary" name="state" value="${states.Approved.dbValue}" type="submit">Approve</button>
 				</#if>
 				<a class="btn btn-default discard-changes" href="">Discard changes</a>
 			</div>

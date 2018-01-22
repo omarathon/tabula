@@ -90,15 +90,15 @@ trait EditExtensionCommandState {
 trait EditExtensionCommandValidation extends SelfValidating {
 	self: EditExtensionCommandState =>
 	def validate(errors: Errors) {
-		if(expiryDate == null) {
+		if (expiryDate == null) {
 			if (state == ExtensionState.Approved) {
 				errors.rejectValue("expiryDate", "extension.requestedExpiryDate.provideExpiry")
 			}
-		} else if(expiryDate.isBefore(extension.assignment.closeDate)) {
+		} else if (expiryDate.isBefore(assignment.closeDate)) {
 			errors.rejectValue("expiryDate", "extension.expiryDate.beforeAssignmentExpiry")
 		}
 
-		if(!Option(reviewerComments).exists(_.nonEmpty) && state == ExtensionState.MoreInformationRequired) {
+		if (!Option(reviewerComments).exists(_.nonEmpty) && state == ExtensionState.MoreInformationRequired) {
 			errors.rejectValue("reviewerComments", "extension.reviewerComments.provideReasons")
 		}
 	}
