@@ -203,7 +203,7 @@
 								</td>
 							</tr>
 							<tr>
-								<td colspan="2">
+								<td colspan="3">
 									<#if memberNote.note??>
 										<#noescape>${memberNote.escapedNote}</#noescape>
 									</#if>
