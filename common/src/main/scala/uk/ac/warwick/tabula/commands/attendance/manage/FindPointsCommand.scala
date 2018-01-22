@@ -5,7 +5,7 @@ import uk.ac.warwick.tabula.JavaImports._
 import uk.ac.warwick.tabula.commands._
 import uk.ac.warwick.tabula.commands.attendance.{GroupedPoint, GroupsPoints}
 import uk.ac.warwick.tabula.data.model.Department
-import uk.ac.warwick.tabula.data.model.attendance.{AttendanceMonitoringPointStyle, AttendanceMonitoringPointType, AttendanceMonitoringScheme}
+import uk.ac.warwick.tabula.data.model.attendance.{AttendanceMonitoringPoint, AttendanceMonitoringPointStyle, AttendanceMonitoringPointType, AttendanceMonitoringScheme}
 import uk.ac.warwick.tabula.helpers.LazyLists
 import uk.ac.warwick.tabula.permissions.Permissions
 import uk.ac.warwick.tabula.services.attendancemonitoring.{AttendanceMonitoringServiceComponent, AutowiringAttendanceMonitoringServiceComponent}
@@ -16,8 +16,16 @@ import scala.collection.JavaConverters._
 
 case class FindPointsResult(
 	termGroupedPoints: Map[String, Seq[GroupedPoint]],
-	monthGroupedPoints: Map[String, Seq[GroupedPoint]]
+	monthGroupedPoints: Map[String, Seq[GroupedPoint]],
+	courseworkAssignmentPoints:Seq[AttendanceMonitoringPoint]
 )
+
+trait CourseworkPoints {
+	def assignmentPoints(points: Seq[AttendanceMonitoringPoint]): Seq[AttendanceMonitoringPoint] = {
+		points.filter { point => point.isSpecificAssignmentPoint }
+	}
+}
+
 
 object FindPointsCommand {
 	def apply(department: Department, academicYear: AcademicYear, restrictedStyle: Option[AttendanceMonitoringPointStyle]) =
@@ -25,6 +33,7 @@ object FindPointsCommand {
 			with ComposableCommand[FindPointsResult]
 			with AutowiringAttendanceMonitoringServiceComponent
 			with GroupsPoints
+			with CourseworkPoints
 			with FindPointsPermissions
 			with FindPointsCommandState
 			with ReadOnly with Unaudited
@@ -34,19 +43,18 @@ object FindPointsCommand {
 class FindPointsCommandInternal(val department: Department, val academicYear: AcademicYear, val restrictedStyle: Option[AttendanceMonitoringPointStyle])
 	extends CommandInternal[FindPointsResult] {
 
-	self: AttendanceMonitoringServiceComponent with FindPointsCommandState with GroupsPoints =>
+	self: AttendanceMonitoringServiceComponent with FindPointsCommandState with GroupsPoints with CourseworkPoints =>
 
 	override def applyInternal(): FindPointsResult = {
+		val points = attendanceMonitoringService.findPoints(department, academicYear, findSchemes.asScala, types.asScala, styles.asScala)
+
 		restrictedStyle match {
 			case Some(AttendanceMonitoringPointStyle.Date) =>
-				val points = attendanceMonitoringService.findPoints(department, academicYear, findSchemes.asScala, types.asScala, styles.asScala)
-				FindPointsResult(Map(), groupByMonth(points))
+				FindPointsResult(Map(), groupByMonth(points), assignmentPoints(points))
 			case Some(AttendanceMonitoringPointStyle.Week) =>
-				val points = attendanceMonitoringService.findPoints(department, academicYear, findSchemes.asScala, types.asScala, styles.asScala)
-				FindPointsResult(groupByTerm(points), Map())
+				FindPointsResult(groupByTerm(points), Map(), assignmentPoints(points))
 			case _ =>
-				val points = attendanceMonitoringService.findPoints(department, academicYear, findSchemes.asScala, types.asScala, styles.asScala)
-				FindPointsResult(groupByTerm(points), groupByMonth(points))
+				FindPointsResult(groupByTerm(points), groupByMonth(points), assignmentPoints(points))
 		}
 	}
 
