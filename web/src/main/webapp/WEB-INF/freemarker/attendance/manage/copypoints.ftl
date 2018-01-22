@@ -102,7 +102,7 @@
 						<#assign year = searchAcademicYear.toString/>
 					</#if>
 				<div>
-					<p>Some points have been found that are based on dedicted assignments of  ${year}. They will be copied with point requirement as submission to any
+					<p>Some points have been found that are based on dedicated assignments of  ${year}. They will be copied with point requirement as submission to any
 						asignment for any module. Details of those points are as which can be edited after copying: </p>
 
 					<div class="alert alert-info">
