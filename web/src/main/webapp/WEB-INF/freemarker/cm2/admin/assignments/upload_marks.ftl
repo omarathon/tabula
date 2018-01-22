@@ -33,7 +33,7 @@
 
 			<div class="buttons form-group">
 				<button type="submit" class="btn btn-primary">Upload</button>
-				<a class="btn btn-default cancel" href="${cancelUrl}">Cancel</a>
+				<a class="btn btn-default" href="${cancelUrl}">Cancel</a>
 			</div>
 		</@f.form>
 		</div>
