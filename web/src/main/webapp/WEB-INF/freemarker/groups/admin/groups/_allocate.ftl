@@ -112,7 +112,7 @@
 									<div id="studentslist"
 										 class="students tabula-filtered-list"
 										 data-item-selector=".student-list li">
-										<div class="well">
+										<div class="well drag-target">
 											<h4>Not allocated to a group</h4>
 											<#if features.smallGroupAllocationFiltering>
 												<div class="filter" id="filter-by-gender-controls">
@@ -139,15 +139,13 @@
 													</select>
 												</div>
 											</#if>
-											<div class="student-list drag-target">
-												<ul class="drag-list return-list unstyled" data-bindpath="unallocated">
-													<@spring.bind path="unallocated">
-														<#list status.actualValue as student>
-															<@student_item student "${status.expression}[${student_index}]" />
-														</#list>
-													</@spring.bind>
-												</ul>
-											</div>
+											<ul class="student-list drag-list return-list unstyled" data-bindpath="unallocated">
+												<@spring.bind path="unallocated">
+													<#list status.actualValue as student>
+														<@student_item student "${status.expression}[${student_index}]" />
+													</#list>
+												</@spring.bind>
+											</ul>
 										</div>
 									</div>
 									<#if command.unallocatedPermWithdrawnCount gt 0>
