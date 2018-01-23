@@ -34,7 +34,9 @@
 						<td>
 							<#if email.recipient.foundUser>
 								${email.recipient.userId}<br>
-								<span class="very-subtle">${email.recipient.email}</span>
+								<#if email.recipient.email??>
+									<span class="very-subtle">${email.recipient.email}</span>
+								</#if>
 							</#if>
 						</td>
 						<td>
