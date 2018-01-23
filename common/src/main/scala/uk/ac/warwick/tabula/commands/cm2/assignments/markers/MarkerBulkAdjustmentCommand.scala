@@ -134,7 +134,7 @@ trait MarkerBulkAdjustmentState {
 
 	private lazy val markersFeedback = cm2MarkingWorkflowService
 		.getAllFeedbackForMarker(assignment, marker).getOrElse(currentStage, Seq())
-	  .filter(mf => mf.feedback.outstandingStages.asScala.map(_.order).reduceOption(_ max _).getOrElse(0) >= currentStage.order) // not finished marking
+		.filter(mf => mf.feedback.outstandingStages.asScala.map(_.order).reduceOption(_ max _).getOrElse(0) >= currentStage.order) // not finished marking
 
 
 	private lazy val markersStudents = markersFeedback.map(_.student).toSet
@@ -150,7 +150,7 @@ trait MarkerBulkAdjustmentState {
 	private lazy val previousMarkerFeedback: Map[User, Seq[MarkerFeedback]] = previousMarkers.map(marker => { marker ->
 		cm2MarkingWorkflowService.getAllFeedbackForMarker(assignment, marker)
 			.filterKeys(currentStage.previousStages.contains).values.flatten.toSeq
-		  .filter(mf => markersStudents.contains(mf.student))
+			.filter(mf => markersStudents.contains(mf.student))
 	}).toMap
 
 	private lazy val noMark: Map[User, Seq[User]] =
