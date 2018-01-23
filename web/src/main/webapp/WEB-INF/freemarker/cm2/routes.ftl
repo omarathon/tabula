@@ -139,6 +139,7 @@ TODO grab values from the Routes object in code, as that's pretty equivalent and
 <#macro markerOnlineFeedback assignment stage marker student><@_u page="/admin/assignments/${assignment.id}/marker/${marker.userId}/${stage.name}/feedback/online/${student.userId}"/></#macro>
 <#macro markingCompleted assignment stageOrder marker><@_u page="/admin/assignments/${assignment.id}/marker/${marker.userId}/${stageOrder}/marking-completed"/></#macro>
 <#macro finishMarking assignment stageOrder marker><@_u page="/admin/assignments/${assignment.id}/marker/${marker.userId}/${stageOrder}/finish-marking"/></#macro>
+<#macro bulkAdjustment assignment stage marker><@_u page="/admin/assignments/${assignment.id}/marker/${marker.userId}/${stage.name}/bulk-adjustment"/></#macro>
 
 <#macro downloadMarkerFeedbackOne assignment marker markerFeedback attachment><@_u page="/admin/assignments/${assignment.id}/marker/${marker.userId}/feedback/download/${markerFeedback.id}/attachment/${attachment.name?url}"/></#macro>
 <#macro downloadMarkerFeedbackAll assignment marker markerFeedback zipName><@_u page="/admin/assignments/${assignment.id}/marker/${marker.userId}/feedback/download/${markerFeedback.id}/attachments/${zipName}.zip"/></#macro>

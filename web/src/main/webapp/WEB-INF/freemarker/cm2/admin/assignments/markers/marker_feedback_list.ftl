@@ -26,6 +26,9 @@
 				<#if order.headerStage.canFinish(assignment.cm2MarkingWorkflow)>
 					<a class="btn btn-primary must-have-selected must-have-ready-next-stage form-post" href="${finishMarking}">Confirm selected and send to admin</a>
 				</#if>
+				<#if order.headerStage.allowsBulkAdjustments && assignment.module.adminDepartment.assignmentGradeValidation>
+					<a class="btn btn-primary" data-toggle="modal" data-target="#bulk-adjustment-modal" href="<@routes.cm2.bulkAdjustment assignment order.headerStage marker />">Make bulk adjustment</a>
+				</#if>
 				<div class="btn-group">
 					<button type="button" class="btn btn-default dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
 						Download <span class="caret"></span>
@@ -139,7 +142,7 @@
 									<td>
 										<#if emf.workflowStudent.nextAction?has_content>
 										<@components.workflowMessage emf.workflowStudent.nextAction assignment student />
-									</#if>
+										</#if>
 									</td>
 								</tr>
 								<#assign detailUrl><@routes.cm2.markerOnlineFeedback assignment stage marker student /></#assign>
@@ -175,7 +178,8 @@
 		</div>
 	</div>
 </#list>
-</div>
+	<div id="bulk-adjustment-modal" class="modal fade"></div>
+	</div>
 </div>
 
 <script>
@@ -189,5 +193,28 @@
 
 			$('#markingStageTabs').find('a[href="#' + tabId + '"]').tab('show');
 		});
+
+		$('#markingTabContent').on('click', 'a[data-toggle=modal]', function(e){
+			e.preventDefault();
+			var $this = $(this);
+			var target = $this.attr('data-target');
+			var url = $this.attr('href');
+			$(target).load(url);
+		});
+
+		$("#bulk-adjustment-modal").on('submit', function(e){
+			e.preventDefault();
+			var $this = $(this);
+			var $form = $this.find("form");
+			jQuery.post($form.attr('action'), $form.serialize(), function(data){
+				if(data.status === "successful") {
+					$this.modal('toggle');
+					window.location = data.redirect;
+				} else {
+					$this.html(data);
+				}
+			});
+		});
+		//# sourceURL=marker_feedback_list.ftl
 	})
 </script>
