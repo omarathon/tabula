@@ -332,7 +332,9 @@ class CourseworkEditAssignmentDetailsReusableWorkflowTest extends BrowserTest wi
 
 		studentListId.foreach { id =>
 			val studentUnallocatedList = form.findElement(By.id(id))
-			studentUnallocatedList.findElements(By.cssSelector("div.student-list li.student")).size() should be(studentCount)
+			eventually {
+				studentUnallocatedList.findElements(By.cssSelector("div.student-list li.student")).size() should be(studentCount)
+			}
 		}
 		And("I randomly allocate students")
 		val allocate = form.findElements(By.partialLinkText("Randomly allocate"))
