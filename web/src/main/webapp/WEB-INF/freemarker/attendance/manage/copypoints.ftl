@@ -102,8 +102,7 @@
 						<#assign year = searchAcademicYear.toString/>
 					</#if>
 				<div>
-					<p>Some points have been found that are based on dedicated assignments of  ${year}. They will be copied with point requirement as submission to any
-						assignment for any module. Details of those points are as which can be edited after copying: </p>
+					<p>The following points relate to submitting old assignments in ${year}. These points will be copied and changed to 'submission of any module or assignment'. You can edit these points after you copy them.</p>
 
 					<div class="alert alert-info">
 						<#list findResult.courseworkAssignmentPoints as assignmentPoint>
