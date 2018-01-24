@@ -6,7 +6,7 @@ import java.sql.Types
 import uk.ac.warwick.tabula.CaseObjectEqualityFixes
 import uk.ac.warwick.tabula.cm2.web.Routes
 import uk.ac.warwick.tabula.data.HibernateHelpers
-import uk.ac.warwick.tabula.data.model.{AbstractBasicUserType, Assignment, Feedback, MarkerFeedback}
+import uk.ac.warwick.tabula.data.model.{AbstractBasicUserType, Assignment, Feedback}
 import uk.ac.warwick.tabula.data.model.markingworkflow.ModerationSampler.Marker
 import uk.ac.warwick.tabula.helpers.StringUtils
 import uk.ac.warwick.tabula.system.TwoWayConverter
@@ -25,11 +25,22 @@ sealed abstract class MarkingWorkflowStage(val name: String, val order: Int) ext
 	def previousStages: Seq[MarkingWorkflowStage] = Nil
 	def nextStages: Seq[MarkingWorkflowStage] = Nil
 
-	// should the online marker and upload marks commands be pre-populated with the previous stages feedback
-	def populateWithPreviousFeedback: Boolean = false
+	// get a description of the next stage - default works best when there is only one next stage - may need overriding in other cases
+	def nextStagesDescription: Option[String] = nextStages.headOption.map(_.description)
+
+	// allows you to specify a custom URL to show on the department homepage when viewing this assignments workflow progress
+	def url(assignment: Assignment): Option[String] = None
+
+	// allows the message key used to label this stages completion to vary
+	def actionCompletedKey(feedback: Option[Feedback]): String = MarkingWorkflowStage.DefaultCompletionKey
+
+	override def toString: String = name
 
 	// should users at this stage be able to complete feedback skipping any intermediate stage
 	def canFinish(markingWorkflow: CM2MarkingWorkflow): Boolean = false
+
+	// should the online marker and upload marks commands be pre-populated with the previous stages feedback
+	def populateWithPreviousFeedback: Boolean = false
 
 	// should the stage show the mark in ListMarkerFeedback
 	def summariseCurrentFeedback: Boolean = false
@@ -37,21 +48,14 @@ sealed abstract class MarkingWorkflowStage(val name: String, val order: Int) ext
 	// should the stage show the mark and marker name for the previous feedback in ListMarkerFeedback
 	def summarisePreviousFeedback: Boolean = false
 
-	// get a description of the next stage - default works best when there is only one next stage - may need overriding in other cases
-	def nextStagesDescription: Option[String] = nextStages.headOption.map(_.description)
-
-	// by default allocation is based by role rather than by stage
+	// by default allocation is based by role rather than by stage - stage allocation is needed when there are concurrent stages for the same role (double blind has two streams of markers for example).
 	def stageAllocation: Boolean = false
-	override def toString: String = name
 
-	// allows you to specify a custom URL to show on the department homepage when viewing this assignments workflow progress
-	def url(assignment: Assignment): Option[String] = None
+	// if this is false this stage won't show up on the allocate markers screen - some stages are completed by admins only so they don't need to be allocated
+	def hasMarkers: Boolean = true
 
-	// if this is false this stage won't show up on the allocate markers screen
-	def hasMarkers = true
-
-	// allows the message key used to label this stages completion to vary
-	def actionCompletedKey(feedback: Option[Feedback]): String = MarkingWorkflowStage.DefaultCompletionKey
+	// allows the marker to make bulk adjustments - at time of writing this is intended for moderators only but that could be changed
+	def allowsBulkAdjustments: Boolean = false
 }
 
 abstract class FinalStage(n: String) extends MarkingWorkflowStage(name = n, order = Int.MaxValue) {
@@ -136,6 +140,7 @@ object MarkingWorkflowStage {
 		override def previousStages: Seq[MarkingWorkflowStage] = Seq(ModerationMarker)
 		override def populateWithPreviousFeedback: Boolean = true
 		override def summarisePreviousFeedback: Boolean = true
+		override def allowsBulkAdjustments: Boolean = true
 	}
 	case object ModerationCompleted extends FinalStage("moderation-completed") {
 		override def previousStages: Seq[MarkingWorkflowStage] = Seq(ModerationModerator)
@@ -176,6 +181,7 @@ object MarkingWorkflowStage {
 		override def previousStages: Seq[MarkingWorkflowStage] = Seq(SelectedModerationMarker)
 		override def populateWithPreviousFeedback: Boolean = true
 		override def summarisePreviousFeedback: Boolean = true
+		override def allowsBulkAdjustments: Boolean = true
 
 		val NotModeratedKey: String  = "notModerated"
 		val ApprovedKey: String  = "approved"
@@ -230,8 +236,8 @@ class MarkingWorkflowStageUserType extends AbstractBasicUserType[MarkingWorkflow
 	val basicType: StringType = StandardBasicTypes.STRING
 	override def sqlTypes = Array(Types.VARCHAR)
 
-	val nullValue = null
-	val nullObject = null
+	val nullValue: Null = null
+	val nullObject: Null = null
 
 	override def convertToObject(string: String): MarkingWorkflowStage = MarkingWorkflowStage.fromCode(string)
 	override def convertToValue(stage: MarkingWorkflowStage): String = stage.name

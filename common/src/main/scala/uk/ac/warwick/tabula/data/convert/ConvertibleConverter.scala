@@ -14,3 +14,8 @@ class ConvertibleConverter[A >: Null <: String, B <: Convertible[A]](implicit fa
 	override def convertLeft(source: B): A = source.value
 	override def convertRight(source: A): B = factory(source)
 }
+
+class NullableConvertibleConverter[A >: Null <: String, B <: Convertible[A]](implicit factory: A => B, tagA: ClassTag[A], tagB: ClassTag[B])
+	extends ConvertibleConverter[A, B] {
+	override def convertLeft(source: B): A = if (source == null) null else super.convertLeft(source)
+}
