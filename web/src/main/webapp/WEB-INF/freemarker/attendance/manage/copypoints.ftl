@@ -102,21 +102,23 @@
 						<#assign year = searchAcademicYear.toString/>
 					</#if>
 				<div>
-					<p>The following points relate to submitting old assignments in ${year}. These points will be copied and changed to 'submission of any module or assignment'. You can edit these points after you copy them.</p>
-
 					<div class="alert alert-info">
+						<p>The following points relate to submitting old assignments in ${year}. These points will be copied and changed to 'submission of any module or assignment'. You can edit these points after you copy them.</p>
+
+						<ul>
 						<#list findResult.courseworkAssignmentPoints as assignmentPoint>
 							<#if assignmentPoint.scheme.pointStyle.dbValue == 'week'>
-								<p>${assignmentPoint.name} (<@fmt.monitoringPointWeeksFormat
+								<li>${assignmentPoint.name} (<@fmt.monitoringPointWeeksFormat
 									assignmentPoint.startWeek
 									assignmentPoint.endWeek
 									assignmentPoint.scheme.academicYear
 									assignmentPoint.scheme.department/>)
-								</p>
+								</li>
 							<#else>
-								<p>${assignmentPoint.name} (<@fmt.interval assignmentPoint.startDate assignmentPoint.endDate />)</p>
+								<li>${assignmentPoint.name} (<@fmt.interval assignmentPoint.startDate assignmentPoint.endDate />)</li>
 							</#if>
 						</#list>
+						</ul>
 					</div>
 				</#if>
 
