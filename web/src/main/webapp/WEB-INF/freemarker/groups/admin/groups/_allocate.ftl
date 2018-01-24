@@ -112,33 +112,33 @@
 									<div id="studentslist"
 										 class="students tabula-filtered-list"
 										 data-item-selector=".student-list li">
+										<#if features.smallGroupAllocationFiltering>
+											<div class="filter" id="filter-by-gender-controls">
+												<select data-filter-attr="fGender" class="form-control">
+													<option data-filter-value="*">Any Gender</option>
+													<option data-filter-value="M">Male</option>
+													<option data-filter-value="F">Female</option>
+												</select>
+											</div>
+											<div class="filter" id="filter-by-year-controls">
+												<select data-filter-attr="fYear" class="form-control">
+													<option data-filter-value="*">Any Year of study</option>
+													<#list command.allMembersYears as data>
+														<option data-filter-value="${data.yearOfStudy}">Year ${data.yearOfStudy}</option>
+													</#list>
+												</select>
+											</div>
+											<div class="filter" id="filter-by-route-controls">
+												<select data-filter-attr="fRoute" class="form-control">
+													<option data-filter-value="*">Any Route</option>
+													<#list command.allMembersRoutes as data>
+														<option data-filter-value="${data.routeCode}"><@fmt.route_name route="" routeCode=data.routeCode routeName=data.routeName /></option>
+													</#list>
+												</select>
+											</div>
+										</#if>
 										<div class="well drag-target">
 											<h4>Not allocated to a group</h4>
-											<#if features.smallGroupAllocationFiltering>
-												<div class="filter" id="filter-by-gender-controls">
-													<select data-filter-attr="fGender" class="form-control">
-														<option data-filter-value="*">Any Gender</option>
-														<option data-filter-value="M">Male</option>
-														<option data-filter-value="F">Female</option>
-													</select>
-												</div>
-												<div class="filter" id="filter-by-year-controls">
-													<select data-filter-attr="fYear" class="form-control">
-														<option data-filter-value="*">Any Year of study</option>
-														<#list command.allMembersYears as data>
-															<option data-filter-value="${data.yearOfStudy}">Year ${data.yearOfStudy}</option>
-														</#list>
-													</select>
-												</div>
-												<div class="filter" id="filter-by-route-controls">
-													<select data-filter-attr="fRoute" class="form-control">
-														<option data-filter-value="*">Any Route</option>
-														<#list command.allMembersRoutes as data>
-															<option data-filter-value="${data.routeCode}"><@fmt.route_name route="" routeCode=data.routeCode routeName=data.routeName /></option>
-														</#list>
-													</select>
-												</div>
-											</#if>
 											<ul class="student-list drag-list return-list unstyled" data-bindpath="unallocated">
 												<@spring.bind path="unallocated">
 													<#list status.actualValue as student>
