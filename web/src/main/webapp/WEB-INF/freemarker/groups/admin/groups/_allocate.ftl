@@ -201,7 +201,7 @@
 												</ul>
 											</div>
 										</#list>
-										<div class="well clearfix">
+										<div class="alert alert-info clash-info-alert">
 											<div class="loading">
 												<i class="fa fa-spinner fa-spin"></i><em> Checking possibility of any small group event conflicts for all students&hellip;</em>
 											</div>
@@ -301,6 +301,8 @@
 			var clashInfo =  function() {
 				// check if we have got json result back, if not then no need to check at this stage
 				if ($('.loading').hasClass('hide')) {
+					$('.clash-info-alert').removeClass('alert-info');
+
 					var groups = {};
 					var totalClashes = 0;
 					$('input[name^="mapping"]').each(function() {
@@ -334,10 +336,12 @@
 						}
 						$('.no-clash-info').addClass("hide");
 						$('.clash-info').removeClass("hide");
+						$('.clash-info-alert').addClass('alert-warning').removeClass('alert-success');
 						$timtableClashLink.attr('href', $timtableClashLink.data('href') + clashUserIds);
 					} else {
 						$('.clash-info').addClass("hide");
 						$('.no-clash-info').removeClass("hide");
+						$('.clash-info-alert').removeClass('alert-warning').addClass('alert-success');
 					}
 				}
 			};
