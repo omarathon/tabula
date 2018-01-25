@@ -1,4 +1,4 @@
--- remove FEEDBACK_ID reference for orphened markerfeedback
+-- remove FEEDBACK_ID reference for orphaned markerfeedback
 update markerfeedback set FEEDBACK_ID = null where ID in (select mf.id from markerfeedback mf left join feedback f on mf.FEEDBACK_ID = f.ID where f.id is null);
 -- set legacy stages according to CM1 workflow position
 update markerfeedback set stage = 'legacy-first-marker' where ID in (select mf.id from markerfeedback mf join feedback f on f.FIRST_MARKER_FEEDBACK = mf.id);
