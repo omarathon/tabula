@@ -7,6 +7,7 @@ import uk.ac.warwick.tabula.commands._
 import uk.ac.warwick.tabula.commands.coursework.assignments.{FinaliseFeedbackComponent, FinaliseFeedbackComponentImpl}
 import uk.ac.warwick.tabula.data.AutowiringSavedFormValueDaoComponent
 import uk.ac.warwick.tabula.data.model.MarkingState.{MarkingCompleted, Rejected}
+import uk.ac.warwick.tabula.data.model.markingworkflow.MarkingWorkflowStage.LegacySecondMarkerStage
 import uk.ac.warwick.tabula.data.model.notifications.coursework.{ModeratorRejectedNotification, OldReleaseToMarkerNotification, OldReturnToMarkerNotification}
 import uk.ac.warwick.tabula.data.model.{MarkerFeedback, Notification, _}
 import uk.ac.warwick.tabula.events.NotificationHandling
@@ -73,6 +74,7 @@ abstract class OnlineModerationCommand(
 		val firstMarkerFeedback = parentFeedback.getFirstMarkerFeedback.getOrElse(throw new IllegalArgumentException("Could not find first marker feedback"))
 		secondMarkerFeedback = parentFeedback.getSecondMarkerFeedback.getOrElse {
 			val mf = new MarkerFeedback(parentFeedback)
+			mf.stage = LegacySecondMarkerStage
 			parentFeedback.secondMarkerFeedback = mf
 			mf
 		}

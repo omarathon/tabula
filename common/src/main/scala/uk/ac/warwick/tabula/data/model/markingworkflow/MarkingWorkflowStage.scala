@@ -200,6 +200,12 @@ object MarkingWorkflowStage {
 		override def previousStages: Seq[MarkingWorkflowStage] = Seq(SelectedModerationModerator)
 	}
 
+	// added so that legacy data doesn't violate the constraint defined to fix TAB-5919
+	@Deprecated
+	case object LegacyFirstMarkerStage extends MarkingWorkflowStage("legacy-first-marker", 1)
+	case object LegacySecondMarkerStage extends MarkingWorkflowStage("legacy-second-marker", 1)
+	case object LegacyThirdMarkerStage extends MarkingWorkflowStage("legacy-third-marker", 1)
+
 	// lame manual collection. Keep in sync with the case objects above
 	// Don't change this to a val https://warwick.slack.com/archives/C029QTGBN/p1493995125972397
 	def values: Set[MarkingWorkflowStage] = Set(
@@ -207,7 +213,8 @@ object MarkingWorkflowStage {
 		DblFirstMarker, DblSecondMarker, DblFinalMarker, DblCompleted,
 		DblBlndInitialMarkerA, DblBlndInitialMarkerB, DblBlndFinalMarker, DblBlndCompleted,
 		ModerationMarker, ModerationModerator, ModerationCompleted,
-		SelectedModerationMarker, SelectedModerationAdmin, SelectedModerationModerator, SelectedModerationCompleted
+		SelectedModerationMarker, SelectedModerationAdmin, SelectedModerationModerator, SelectedModerationCompleted,
+		LegacyFirstMarkerStage, LegacySecondMarkerStage, LegacyThirdMarkerStage
 	)
 
 	def unapply(code: String): Option[MarkingWorkflowStage] =

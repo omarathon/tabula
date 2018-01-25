@@ -12,7 +12,7 @@
 
 <div class="fix-area assignment-student-details">
 	<#assign actionUrl><@routes.cm2.assignmentstudents assignment mode/></#assign>
-	<@f.form method="post" action=actionUrl cssClass="dirty-check">
+	<@f.form method="post" action=actionUrl cssClass="dirty-check double-submit-protection">
 		<@components.assignment_wizard 'students' assignment.module assignmentEditMode assignment />
 		<@f.errors cssClass="error form-errors" />
 		<div>
