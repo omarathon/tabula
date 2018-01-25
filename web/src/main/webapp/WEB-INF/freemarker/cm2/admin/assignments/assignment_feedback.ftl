@@ -12,7 +12,7 @@
 
 <div class="fix-area">
 	<#assign actionUrl><@routes.cm2.assignmentfeedback assignment mode /></#assign>
-	<@f.form method="post" action=actionUrl  cssClass="dirty-check">
+	<@f.form method="post" action=actionUrl  cssClass="dirty-check double-submit-protection">
 		<@components.assignment_wizard 'feedback' assignment.module assignmentEditMode assignment />
 		<@f.errors cssClass="error form-errors" />
 		<#assign newRecord=false />

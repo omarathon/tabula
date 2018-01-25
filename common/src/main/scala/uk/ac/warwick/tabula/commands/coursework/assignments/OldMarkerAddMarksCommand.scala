@@ -7,6 +7,7 @@ import uk.ac.warwick.tabula.CurrentUser
 import uk.ac.warwick.tabula.commands.{CommandInternal, ComposableCommand, Describable, Description}
 import uk.ac.warwick.tabula.data.Transactions._
 import uk.ac.warwick.tabula.data.model.MarkingState.{InProgress, ReleasedForMarking}
+import uk.ac.warwick.tabula.data.model.markingworkflow.MarkingWorkflowStage.{LegacyFirstMarkerStage, LegacySecondMarkerStage}
 import uk.ac.warwick.tabula.data.model.{Assignment, Module, _}
 import uk.ac.warwick.tabula.permissions.Permissions
 import uk.ac.warwick.tabula.services.coursework.docconversion.{AutowiringMarksExtractorComponent, MarkItem}
@@ -46,11 +47,13 @@ class OldMarkerAddMarksCommandInternal(val module: Module, val assignment: Assig
 			val markerFeedback:MarkerFeedback = firstMarker match {
 				case true => parentFeedback.getFirstMarkerFeedback.getOrElse {
 					val mf = new MarkerFeedback(parentFeedback)
+					mf.stage = LegacyFirstMarkerStage
 					parentFeedback.firstMarkerFeedback = mf
 					mf
 				}
 				case false => parentFeedback.getSecondMarkerFeedback.getOrElse {
 					val mf = new MarkerFeedback(parentFeedback)
+					mf.stage = LegacySecondMarkerStage
 					parentFeedback.secondMarkerFeedback = mf
 					mf
 				}

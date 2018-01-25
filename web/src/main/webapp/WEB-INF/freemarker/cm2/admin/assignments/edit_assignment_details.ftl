@@ -10,7 +10,7 @@
 	<#else>
 		<#assign actionUrl><@routes.coursework.assignmentedit assignment /></#assign>
 	</#if>
-	<@f.form method="post" action=actionUrl cssClass="dirty-check">
+	<@f.form method="post" action=actionUrl cssClass="dirty-check double-submit-protection">
 		<@components.assignment_wizard 'details'  assignment.module true assignment />
 		<@f.errors cssClass="error form-errors" />
 		<#assign newRecord=false />

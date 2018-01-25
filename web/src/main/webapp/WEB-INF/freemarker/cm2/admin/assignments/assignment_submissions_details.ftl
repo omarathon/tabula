@@ -12,7 +12,7 @@
 
 <div class="fix-area">
 	<#assign actionUrl><@routes.cm2.assignmentsubmissions assignment mode/></#assign>
-	<@f.form method="post" action=actionUrl cssClass="dirty-check">
+	<@f.form method="post" action=actionUrl cssClass="dirty-check double-submit-protection">
 		<@components.assignment_wizard 'submissions' assignment.module assignmentEditMode assignment />
 		<#assign department = assignment.module.adminDepartment />
 		<#include "_submissions_fields.ftl" />

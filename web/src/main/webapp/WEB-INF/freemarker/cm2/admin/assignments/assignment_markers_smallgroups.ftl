@@ -14,7 +14,7 @@
 		</p>
 		<#if sets?has_content>
 			<#assign actionUrl><@routes.cm2.assignmentmarkerssmallgroups assignment mode /></#assign>
-			<@f.form method="post" action=actionUrl cssClass="dirty-check" commandName="assignMarkersCommand">
+			<@f.form method="post" action=actionUrl cssClass="dirty-check double-submit-protection" commandName="assignMarkersCommand">
 
 				<@bs3form.labelled_form_group path="" labelText="Small group set">
 					<@f.select path="" cssClass="form-control set-selector">
