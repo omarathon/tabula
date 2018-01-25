@@ -12,7 +12,7 @@
 
 <div class="fix-area">
 	<#assign actionUrl><@routes.cm2.assignmentoptions assignment mode /></#assign>
-	<@f.form method="post" action=actionUrl cssClass="dirty-check">
+	<@f.form method="post" action=actionUrl cssClass="dirty-check double-submit-protection">
 		<@components.assignment_wizard 'options' assignment.module assignmentEditMode assignment />
 		<#include "_options_fields.ftl" />
         <div class="fix-footer">
