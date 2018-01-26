@@ -41,19 +41,26 @@
 	jQuery(function($) {
 		$('[id^=select-signup]').submit( function(e) {
 			e.preventDefault();
-			var self = this;
-			var formId = $('#' + self.id);
-			var selectedFormGrpId = formId.find("input[name='group']:checked").val();
-			var signupPostFormLink = $(this).prop('action');
-			var clashInfoLink = formId.find('a.timetable-clash-link').data('href');
+			var form = this;
+			var $form = $(this);
+			var selectedFormGrpId = $form.find("input[name='group']:checked").val();
+			var signupPostFormLink = $form.prop('action');
+			var clashInfoLink = $form.find('a.timetable-clash-link').data('href');
+
+			var $button = $form.find('.sign-up-button');
+			var originalVal = $button.val();
+
+			$button.val('Loading...').prop('disabled', true);
 
 			$.getJSON(clashInfoLink, { group:selectedFormGrpId, ts: new Date().getTime()},function(data) {
 				if(data.clash) {
 					$('.timetable-clash-info input[name="group"]').attr("value", selectedFormGrpId);
 					$('.timetable-clash-info form').attr("action", signupPostFormLink);
-					formId.find('a.timetable-clash-link').click();
+					$form.find('a.timetable-clash-link').click();
+
+					$button.val(originalVal).prop('disabled', false);
 				} else {
-					self.submit();
+					form.submit();
 				}
 			});
 		});

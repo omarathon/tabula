@@ -706,7 +706,7 @@
 							if ($section.data('name')) {
 								// Use history.pushState here if supported as it stops the page jumping
 								if (window.history && window.history.pushState && window.location.hash !== ('#' + $section.data('name'))) {
-									window.history.pushState({}, document.title, window.location.pathname + '#' + $section.data('name'));
+									window.history.pushState({}, document.title, window.location.pathname + window.location.search + '#' + $section.data('name'));
 								} else {
 									window.location.hash = $section.data('name');
 								}

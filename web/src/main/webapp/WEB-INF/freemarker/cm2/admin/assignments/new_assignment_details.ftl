@@ -10,7 +10,7 @@
 
 <div class="fix-area">
 	<#assign actionUrl><@routes.cm2.createassignmentdetails module academicYear /></#assign>
-	<@f.form method="post" action=actionUrl>
+	<@f.form cssClass="double-submit-protection" method="post" action=actionUrl>
 		<#if !features.redirectCM1>
 			<#include "_oldversion_redirect_banner.ftl" />
 		</#if>

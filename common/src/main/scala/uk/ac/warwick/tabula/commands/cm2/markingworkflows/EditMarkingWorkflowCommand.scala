@@ -7,6 +7,7 @@ import uk.ac.warwick.tabula.JavaImports.JList
 import uk.ac.warwick.tabula.data.model.Department
 import uk.ac.warwick.tabula.JavaImports._
 import uk.ac.warwick.tabula.commands._
+import uk.ac.warwick.tabula.data.HibernateHelpers
 import uk.ac.warwick.tabula.data.model.markingworkflow._
 import uk.ac.warwick.tabula.helpers.StringUtils
 import uk.ac.warwick.tabula.services.{UserLookupComponent, _}
@@ -39,6 +40,9 @@ class EditMarkingWorkflowCommandInternal(
 	val workflow = Some(w)
 
 	workflowName = w.name
+	workflow.map(HibernateHelpers.initialiseAndUnproxy).collect{case w: ModeratedWorkflow => w}.foreach(w =>
+		sampler = w.moderationSampler
+	)
 
 	extractMarkers match { case (a, b) =>
 		markersA = JArrayList(a)
@@ -47,6 +51,7 @@ class EditMarkingWorkflowCommandInternal(
 
 	def applyInternal(): Option[CM2MarkingWorkflow] = workflow.map(w => {
 		w.name = workflowName
+		// No need to worry about moderationSampler as we don't allow it to change anyway
 		w.replaceMarkers(markersAUsers, markersBUsers)
 		cm2MarkingWorkflowService.save(w)
 		w

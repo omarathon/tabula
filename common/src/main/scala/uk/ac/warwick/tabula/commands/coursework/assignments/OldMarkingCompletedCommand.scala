@@ -5,6 +5,7 @@ import uk.ac.warwick.tabula.CurrentUser
 import uk.ac.warwick.tabula.commands._
 import uk.ac.warwick.tabula.commands.coursework.{OldFeedbackReleasedNotifier, ReleasedState}
 import uk.ac.warwick.tabula.data.model._
+import uk.ac.warwick.tabula.data.model.markingworkflow.MarkingWorkflowStage.{LegacySecondMarkerStage, LegacyThirdMarkerStage}
 import uk.ac.warwick.tabula.data.model.notifications.coursework.{ModeratorRejectedNotification, OldReleaseToMarkerNotification, OldReturnToMarkerNotification}
 import uk.ac.warwick.tabula.events.NotificationHandling
 import uk.ac.warwick.tabula.helpers.Logging
@@ -83,10 +84,12 @@ trait CreatesNextMarkerFeedback {
 			case FirstFeedback if markerFeedback.feedback.markingWorkflow.hasSecondMarker =>
 				val mf = new MarkerFeedback(markerFeedback.feedback)
 				markerFeedback.feedback.secondMarkerFeedback = mf
+				mf.stage = LegacySecondMarkerStage
 				Some(mf)
 			case SecondFeedback if markerFeedback.feedback.markingWorkflow.hasThirdMarker =>
 				val mf = new MarkerFeedback(markerFeedback.feedback)
 				markerFeedback.feedback.thirdMarkerFeedback = mf
+				mf.stage = LegacyThirdMarkerStage
 				Some(mf)
 			case _ => None
 		}

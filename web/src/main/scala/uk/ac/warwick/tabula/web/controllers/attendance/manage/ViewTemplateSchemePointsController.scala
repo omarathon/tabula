@@ -2,8 +2,8 @@ package uk.ac.warwick.tabula.web.controllers.attendance.manage
 
 import org.springframework.stereotype.Controller
 import org.springframework.web.bind.annotation.{ModelAttribute, PathVariable, RequestMapping}
-import uk.ac.warwick.tabula.commands.attendance.manage.FindPointsResult
-import uk.ac.warwick.tabula.data.model.attendance.{AttendanceMonitoringPointStyle, AttendanceMonitoringTemplate}
+import uk.ac.warwick.tabula.commands.attendance.manage.{CourseworkPoints, FindPointsResult}
+import uk.ac.warwick.tabula.data.model.attendance.{AttendanceMonitoringPoint, AttendanceMonitoringPointStyle, AttendanceMonitoringPointType, AttendanceMonitoringTemplate}
 import uk.ac.warwick.tabula.AcademicYear
 import uk.ac.warwick.tabula.data.model.Department
 import uk.ac.warwick.tabula.web.controllers.attendance.{AttendanceController, HasMonthNames}
@@ -15,7 +15,7 @@ import uk.ac.warwick.tabula.web.Mav
 
 @Controller
 @RequestMapping(Array("/attendance/manage/{department}/{academicYear}/addpoints/template/{templateScheme}"))
-class ViewTemplateSchemePointsController extends AttendanceController with HasMonthNames with GroupsPoints {
+class ViewTemplateSchemePointsController extends AttendanceController with HasMonthNames with GroupsPoints with CourseworkPoints {
 
 	var attendanceService: AttendanceMonitoringService = Wire.auto[AttendanceMonitoringService]
 
@@ -45,9 +45,9 @@ class ViewTemplateSchemePointsController extends AttendanceController with HasMo
 	def getGroupedPointsFromTemplate(templateScheme: AttendanceMonitoringTemplate, academicYear: AcademicYear): FindPointsResult = {
 		val points = attendanceService.generatePointsFromTemplateScheme(templateScheme, academicYear)
 		templateScheme.pointStyle match {
-			case AttendanceMonitoringPointStyle.Week => FindPointsResult(groupByTerm(points), Map())
-			case AttendanceMonitoringPointStyle.Date => FindPointsResult(Map(), groupByMonth(points))
-			case _ => FindPointsResult(groupByTerm(points), groupByMonth(points))
+			case AttendanceMonitoringPointStyle.Week => FindPointsResult(groupByTerm(points), Map(), assignmentPoints(points))
+			case AttendanceMonitoringPointStyle.Date => FindPointsResult(Map(), groupByMonth(points), assignmentPoints(points))
+			case _ => FindPointsResult(groupByTerm(points), groupByMonth(points), assignmentPoints(points))
 		}
 	}
 }

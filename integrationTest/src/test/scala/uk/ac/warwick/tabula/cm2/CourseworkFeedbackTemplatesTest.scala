@@ -173,9 +173,8 @@ class CourseworkFeedbackTemplatesTest extends BrowserTest with CourseworkFixture
 
 			// This works, but it doesn't reload the page automatically properly. Do it manually
 			reloadPage
-			currCnt = currentCount()
 
 			And("File should have been deleted so count should be 1 less")
-			currCnt should be (1)
+			id("feedback-template-list").webElement.findElement(By.tagName("tbody")).findElements(By.tagName("tr")).size should be (currCnt-1)
 	}
 }

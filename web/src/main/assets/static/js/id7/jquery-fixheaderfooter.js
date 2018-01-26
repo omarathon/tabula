@@ -34,16 +34,21 @@
             // cache the original header index to cope with reordering for stacking context later
             $(this).data('index', idx);
 
+            var $header = $(this);
+
             // can we fix it? yes we can
             $(this).scrollToFixed({
                 zIndex: 9,
                 marginTop: function() {
                     // calculate based on previous headers
                     var fixedHeight = 0;
-                    var $fixedSoFar = $(selHeader + '.scroll-to-fixed-fixed:visible').not($(this));
-                    $fixedSoFar.each(function() {
-                        fixedHeight += $(this).outerHeight();
-                    });
+
+                    $(selHeader + '.scroll-to-fixed-fixed:visible').each(function() {
+                        if ($(this).data('index') < $header.data('index')) {
+							fixedHeight += $(this).outerHeight();
+						}
+					});
+
                     return fixedHeight;
                 },
                 preFixed: function() {

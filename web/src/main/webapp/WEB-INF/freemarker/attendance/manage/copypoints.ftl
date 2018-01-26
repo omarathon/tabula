@@ -96,6 +96,32 @@
 					</div>
 				</#if>
 
+				<#if findResult.courseworkAssignmentPoints?size gt 0>
+					<#assign year = command.academicYear.toString/>
+					<#if searchAcademicYear??>
+						<#assign year = searchAcademicYear.toString/>
+					</#if>
+				<div>
+					<div class="alert alert-info">
+						<p>The following points relate to submitting old assignments in ${year}. These points will be copied and changed to 'submission of any module or assignment'. You can edit these points after you copy them.</p>
+
+						<ul>
+						<#list findResult.courseworkAssignmentPoints as assignmentPoint>
+							<#if assignmentPoint.scheme.pointStyle.dbValue == 'week'>
+								<li>${assignmentPoint.name} (<@fmt.monitoringPointWeeksFormat
+									assignmentPoint.startWeek
+									assignmentPoint.endWeek
+									assignmentPoint.scheme.academicYear
+									assignmentPoint.scheme.department/>)
+								</li>
+							<#else>
+								<li>${assignmentPoint.name} (<@fmt.interval assignmentPoint.startDate assignmentPoint.endDate />)</li>
+							</#if>
+						</#list>
+						</ul>
+					</div>
+				</#if>
+
 				<p>Use the filters to choose which points to copy:</p>
 
 				<div class="student-filter points-filter btn-group-group well well-sm">

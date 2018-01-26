@@ -1,8 +1,8 @@
 package uk.ac.warwick.tabula.web.views
 
-import com.vladsch.flexmark.ext.autolink.AutolinkExtension
-import com.vladsch.flexmark.html.HtmlRenderer
-import com.vladsch.flexmark.parser.Parser
+import org.commonmark.ext.autolink.AutolinkExtension
+import org.commonmark.parser.Parser
+import org.commonmark.renderer.html.HtmlRenderer
 import uk.ac.warwick.tabula.JavaImports._
 
 trait MarkdownRenderer {

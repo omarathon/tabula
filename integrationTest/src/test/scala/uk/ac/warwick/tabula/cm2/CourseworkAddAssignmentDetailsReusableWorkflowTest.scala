@@ -87,7 +87,8 @@ class CourseworkAddAssignmentDetailsReusableWorkflowTest extends BrowserTest wit
 		And("I check unalloacted student list")
 		val form = webDriver.findElement(By.id("command"))
 		val markerStudentUnallocatedList = form.findElement(By.id("markerStudentsList"))
-		markerStudentUnallocatedList.findElements(By.cssSelector("div.student-list li.student")).size() should be (2)
+
+		markerStudentUnallocatedList.findElements(By.cssSelector("ul.student-list li.student")).size() should be (2)
 
 		And("I randomly allocate students")
 		form.findElement(By.partialLinkText("Randomly allocate")).click()

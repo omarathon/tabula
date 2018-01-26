@@ -39,7 +39,7 @@
 							<a href="#" class="use-popover cue-popover" id="popover-disability" data-html="true"
 							   data-content="<p><#if isSelf>You have<#else>This student has</#if> self-reported the following disability code:</p><div class='well'><h6>${member.disability.code}</h6><small>${(member.disability.sitsDefinition)!}</small></div>"> ${member.disability.definition}</a><br/>
 						</#if>
-						<#if features.visaInStudentProfile && !isSelf && member.hasTier4Visa?? && member.casUsed??>
+						<#if features.visaInStudentProfile && member.hasTier4Visa?? && member.casUsed??>
 							<strong>Tier 4 requirements:</strong>
 							<#if member.casUsed && member.hasTier4Visa>Yes
 							<#elseif !member.casUsed && !member.hasTier4Visa>No
@@ -203,7 +203,7 @@
 								</td>
 							</tr>
 							<tr>
-								<td colspan="2">
+								<td colspan="3">
 									<#if memberNote.note??>
 										<#noescape>${memberNote.escapedNote}</#noescape>
 									</#if>

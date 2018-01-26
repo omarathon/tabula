@@ -81,8 +81,10 @@ class UserGroup private(val universityIds: Boolean)
 		excludeUsers.addAll(userIds.asJava)
 	}
 
-	def add(user:User): Boolean = {
-		addUserId(getIdFromUser(user))
+	def add(user: User): Boolean = {
+		if (isAllowedMember(user)) {
+			addUserId(getIdFromUser(user))
+		} else false
 	}
 	def addUserId(user: String): Boolean = {
 		if (!includeUsers.contains(user) && user.hasText) {
@@ -100,8 +102,10 @@ class UserGroup private(val universityIds: Boolean)
 			excludeUsers.add(user)
 		} else false
 	}
-	def exclude(user:User): Boolean = {
-		excludeUserId(getIdFromUser(user))
+	def exclude(user: User): Boolean = {
+		if (isAllowedMember(user)) {
+			excludeUserId(getIdFromUser(user))
+		} else false
 	}
 	def unexcludeUserId(user: String): Boolean = excludeUsers.remove(user)
   def unexclude(user:User): Boolean = {
@@ -192,6 +196,8 @@ class UserGroup private(val universityIds: Boolean)
 	}
 
 	def knownType: UserGroup = this
+
+	def isAllowedMember(user: User): Boolean = user.getUserType != "Applicant"
 }
 
 object UserGroup {

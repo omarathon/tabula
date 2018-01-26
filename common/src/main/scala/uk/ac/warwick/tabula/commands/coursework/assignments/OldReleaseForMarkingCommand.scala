@@ -4,6 +4,7 @@ import org.joda.time.DateTime
 import org.springframework.validation.{BindingResult, Errors}
 import uk.ac.warwick.tabula.commands._
 import uk.ac.warwick.tabula.commands.coursework.{OldFeedbackReleasedNotifier, ReleasedState}
+import uk.ac.warwick.tabula.data.model.markingworkflow.MarkingWorkflowStage.LegacyFirstMarkerStage
 import uk.ac.warwick.tabula.data.model.notifications.coursework.OldReleaseToMarkerNotification
 import uk.ac.warwick.tabula.data.model.{Module, _}
 import uk.ac.warwick.tabula.helpers.Logging
@@ -71,6 +72,7 @@ abstract class OldReleaseForMarkingCommand(val module: Module, val assignment: A
 		newReleasedFeedback.addAll(feedbackToUpdate.map(f => {
 			val markerFeedback = new MarkerFeedback(f)
 			f.firstMarkerFeedback = markerFeedback
+			markerFeedback.stage = LegacyFirstMarkerStage
 			stateService.updateState(markerFeedback, MarkingState.ReleasedForMarking)
 			markerFeedback
 		}).asJava)

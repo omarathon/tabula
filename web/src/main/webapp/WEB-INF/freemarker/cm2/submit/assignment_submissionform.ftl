@@ -171,8 +171,15 @@
 
 	<script>
 		jQuery(function($){
-			$('form#submitAssignmentCommand').on('submit', function(){
-				$.post('<@routes.cm2.submission_attempt assignment />')
+			$('form#submitAssignmentCommand').on('submit', function (e) {
+				e.preventDefault();
+				var form = this;
+				$.post({
+					url: '<@routes.cm2.submission_attempt assignment />',
+					complete: function () {
+						form.submit();
+					}
+				});
 			});
 		});
 	</script>

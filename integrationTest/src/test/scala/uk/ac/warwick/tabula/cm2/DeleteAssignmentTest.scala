@@ -7,7 +7,7 @@ import scala.collection.JavaConverters._
 
 class DeleteAssignmentTest extends BrowserTest with CourseworkFixtures {
 
-	private def openAssignmentsScreen(): Unit = {
+	private def openAssignmentsScreen(title: String): Unit = {
 
 		When("I go the admin page")
 		if (!currentUrl.contains("/department/xxx/20")) {
@@ -27,15 +27,18 @@ class DeleteAssignmentTest extends BrowserTest with CourseworkFixtures {
 		Then("The  module should expand")
 		eventually(timeout(45.seconds), interval(300.millis)) ({
 			And("I should find an assignment with no submissions")
-			val premarkedAssignmentsSize = id("main").webElement.findElements(By.xpath("//*[contains(text(),'Premarked assignment CM2')]")).size()
+			val premarkedAssignmentsSize = id("main").webElement.findElements(By.xpath("//*[contains(text(),'" ++ title ++ "')]")).size()
 			premarkedAssignmentsSize should be(1)
 		})
 	}
 
-	private def checkUndeletableAssignment(): Unit = {
-
-		val editBtn = id("main").webElement.findElements(By.cssSelector("a.btn-xs")).get(4)
-		click on editBtn
+	private def checkUndeletableAssignment(title: String): Unit = {
+		val path = "//*[contains(text(),'" ++ title ++ "')]"
+		val assignmentRow = id("main").webElement.findElements(By.xpath(path))
+		click on assignmentRow.get(0)
+		eventually(currentUrl should endWith("/summary"))
+		When("I click on the edit button")
+		click on partialLinkText("Edit assignment")
 
 		eventually {
 			Then("I should reach the edit page")
@@ -43,13 +46,16 @@ class DeleteAssignmentTest extends BrowserTest with CourseworkFixtures {
 		}
 
 		cssSelector("p.alert-info").webElement.getText should include ("It's not possible to delete this assignment because it has submissions and/or feedback is published.")
-
 	}
 
-	private def deleteAssignment(): Unit = {
+	private def deleteAssignment(title: String): Unit = {
+		val path = "//*[contains(text(),'" ++ title ++ "')]"
 
-		val editBtn = id("main").webElement.findElements(By.cssSelector("a.btn-xs")).get(5)
-		click on editBtn
+		val assignmentRow = id("main").webElement.findElements(By.xpath(path))
+		click on assignmentRow.get(0)
+		eventually(currentUrl should endWith("/summary"))
+		When("I click on the edit button")
+		click on partialLinkText("Edit assignment")
 
 		eventually {
 			Then("I should reach the edit page")
@@ -82,17 +88,19 @@ class DeleteAssignmentTest extends BrowserTest with CourseworkFixtures {
 		}
 
 		Then("I should find not an assignment with no assignments")
-		val noSubmissionsAssignmentsSize = id("main").webElement.findElements(By.xpath("//*[contains(text(),'No Submissions Assignment CM2')]")).size()
+		val noSubmissionsAssignmentsSize = id("main").webElement.findElements(By.xpath(path)).size()
 		noSubmissionsAssignmentsSize should be (0)
 
 	}
 
 	"Department admin" should "be able to delete an assignment" in {
-		withAssignment("xxx02", "No Submissions Assignment CM2"){ assignmentId => }
+		val assignmentTitle = "No Submissions Assignment CM2"
+		val assignmentTitle1 = "Premarked assignment CM2"
+		withAssignment("xxx02", assignmentTitle){ assignmentId => }
 
-			openAssignmentsScreen()
-			deleteAssignment()
-			openAssignmentsScreen()
-			checkUndeletableAssignment()
+			openAssignmentsScreen(assignmentTitle)
+			deleteAssignment(assignmentTitle)
+			openAssignmentsScreen(assignmentTitle1)
+			checkUndeletableAssignment(assignmentTitle1)
 	}
 }
