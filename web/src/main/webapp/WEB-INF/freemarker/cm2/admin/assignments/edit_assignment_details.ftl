@@ -19,7 +19,7 @@
 		<#include "_modify_assignment_workflow.ftl" />
 		<#include "_workflow_edit_warning.ftl" />
 
-		<div class="fix-footer form-group">
+		<div class="fix-footer">
 			<input
 							type="submit"
 							class="btn btn-primary"
