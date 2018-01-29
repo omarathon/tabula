@@ -21,17 +21,16 @@ class EmailNotificationService extends Logging with Daoisms {
 	var dao: NotificationDao = Wire[NotificationDao]
 	var listener: RecipientNotificationListener = Wire[EmailNotificationListener]
 
-	def processNotifications(): Unit = transactional() {
+	def processNotifications(): Unit = transactional(readOnly = true) {
 		val futures: Seq[Future[(String, Try[Unit])]] = unemailedRecipientIds.map { id => Future {
-			id -> Try {
+			id -> Try(transactional() {
 				// This is a (new) read-only session as it happens inside the Future
 				val recipient = session.load(classOf[RecipientNotificationInfo], id).asInstanceOf[RecipientNotificationInfo]
 				session.setReadOnly(recipient, false)
 
 				logger.info("Emailing recipient - " + recipient)
 				listener.listen(recipient)
-				session.flush()
-			}
+			})
 		}}
 
 		Await.result(Future.sequence(futures), Duration.Inf).foreach { case (recipientId, result) =>
