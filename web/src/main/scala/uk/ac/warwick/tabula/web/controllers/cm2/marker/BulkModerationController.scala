@@ -9,7 +9,7 @@ import org.springframework.web.bind.annotation.{ModelAttribute, PathVariable, Re
 import uk.ac.warwick.tabula.CurrentUser
 import uk.ac.warwick.tabula.cm2.web.Routes
 import uk.ac.warwick.tabula.commands.{Appliable, SelfValidating}
-import uk.ac.warwick.tabula.commands.cm2.assignments.markers.{MarkerAdjustmentDirection, MarkerAdjustmentType, MarkerBulkAdjustmentCommand, MarkerBulkAdjustmentState}
+import uk.ac.warwick.tabula.commands.cm2.assignments.markers._
 import uk.ac.warwick.tabula.commands.cm2.feedback.GenerateGradesFromMarkCommand
 import uk.ac.warwick.tabula.data.model.markingworkflow.MarkingWorkflowStage
 import uk.ac.warwick.tabula.data.model.{Assignment, MarkerFeedback}
@@ -20,15 +20,15 @@ import uk.ac.warwick.userlookup.User
 
 @Profile(Array("cm2Enabled"))
 @Controller
-@RequestMapping(value = Array("/${cm2.prefix}/admin/assignments/{assignment}/marker/{marker}/{stage}/bulk-adjustment"))
-class MarkerBulkAdjustmentController  extends CourseworkController {
+@RequestMapping(value = Array("/${cm2.prefix}/admin/assignments/{assignment}/marker/{marker}/{stage}/bulk-moderation"))
+class BulkModerationController  extends CourseworkController {
 	validatesSelf[SelfValidating]
 
-	type Command = Appliable[Seq[MarkerFeedback]] with MarkerBulkAdjustmentState
+	type Command = Appliable[Seq[MarkerFeedback]] with MarkerBulkModerationState
 
 	@ModelAttribute("command")
 	def command(@PathVariable assignment: Assignment, @PathVariable marker: User, @PathVariable stage: MarkingWorkflowStage, currentUser: CurrentUser): Command =
-		MarkerBulkAdjustmentCommand(mandatory(assignment), mandatory(marker), currentUser, mandatory(stage), GenerateGradesFromMarkCommand(assignment))
+		MarkerBulkModerationCommand(mandatory(assignment), mandatory(marker), currentUser, mandatory(stage), GenerateGradesFromMarkCommand(assignment))
 
 	@RequestMapping(method = Array(GET))
 	def showForm(
@@ -38,7 +38,7 @@ class MarkerBulkAdjustmentController  extends CourseworkController {
 		@ModelAttribute("command") command: Command,
 		errors: Errors
 	): Mav = {
-		Mav("cm2/admin/assignments/markers/bulk_adjustments",
+		Mav("cm2/admin/assignments/markers/bulk_moderation",
 			"previousMarkers" -> command.previousMarkers,
 			"directions" -> MarkerAdjustmentDirection.values,
 			"adjustmentTypes" -> MarkerAdjustmentType.values

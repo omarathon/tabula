@@ -11,7 +11,7 @@ import scala.collection.JavaConverters._
 import scala.collection.immutable.SortedMap
 
 
-class MarkerBulkAdjustmentCommandTest extends TestBase  with Mockito {
+class MarkerBulkModerationCommandTest extends TestBase  with Mockito {
 
 	trait TestFixture {
 
@@ -109,7 +109,7 @@ class MarkerBulkAdjustmentCommandTest extends TestBase  with Mockito {
 			val feedbackService: FeedbackService = smartMock[FeedbackService]
 		}
 
-		val cmd = new MarkerBulkAdjustmentCommandInternal(assignment, moderator, currentUser, SelectedModerationModerator, gradeGenerator)
+		val cmd = new MarkerBulkModerationCommandInternal(assignment, moderator, currentUser, SelectedModerationModerator, gradeGenerator)
 			with MockCM2MarkingWorkflowServiceComponent with MockFeedbackServiceComponent
 	}
 
