@@ -401,6 +401,31 @@ $(function(){
 			})
 		;
 	})();
+
+	// TAB-5653
+	if (navigator.userAgent.indexOf('Mobile') !== -1) {
+		var $shownTooltip = null;
+
+		$('button.use-tooltip')
+			.tooltip('destroy')
+			.tooltip({
+				trigger: 'manual'
+			})
+			.on('click', function () {
+				if ($shownTooltip !== null) {
+					$shownTooltip.tooltip('hide');
+				}
+
+				$(this).tooltip('show');
+				$shownTooltip = $(this);
+			});
+
+		$(window).on('show.bs.modal', function () {
+			if ($shownTooltip) {
+				$shownTooltip.tooltip('hide');
+			}
+		});
+	}
 });
 
 window.Attendance = jQuery.extend(window.Attendance, exports);
