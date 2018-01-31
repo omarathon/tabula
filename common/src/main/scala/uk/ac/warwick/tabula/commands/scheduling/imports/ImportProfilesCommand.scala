@@ -113,6 +113,12 @@ class ImportProfilesCommand extends CommandWithoutTransaction[Unit] with Logging
 					}
 				}
 
+				benchmarkTask("Update hall of residence for student") {
+					transactional() {
+						updateAddress(importMemberCommands)
+					}
+				}
+
 				benchmarkTask("Update module registrations and small groups") {
 					transactional() {
 						updateModuleRegistrationsAndSmallGroups(membershipInfos, users)
@@ -207,6 +213,16 @@ class ImportProfilesCommand extends CommandWithoutTransaction[Unit] with Logging
 		logger.info("Updating visa status")
 
 		toStudentMembers(rowCommands).foreach(student => ImportTier4ForStudentCommand(student, getCurrentSitsAcademicYear).apply())
+
+		session.flush()
+		session.clear()
+	}
+
+
+	def updateAddress(rowCommands: Seq[ImportMemberCommand]) {
+		logger.info("Updating hall of residence address")
+
+		toStudentMembers(rowCommands).foreach(student => ImportHallOfResidenceInfoForStudentCommand(student).apply())
 
 		session.flush()
 		session.clear()

@@ -20,9 +20,11 @@ import uk.ac.warwick.userlookup.AnonymousUser
 trait ComponentMixins extends Mockito
 		with ProfileServiceComponent
 		with Tier4RequirementImporterComponent
+		with HallOfResidenceImporterComponent
 		with ModeOfAttendanceImporterComponent {
 	var profileService: ProfileService = smartMock[ProfileService]
 	var tier4RequirementImporter: Tier4RequirementImporter = smartMock[Tier4RequirementImporter]
+	var hallOfResidenceImporter: HallOfResidenceImporter = smartMock[HallOfResidenceImporter]
 	var modeOfAttendanceImporter: ModeOfAttendanceImporter = smartMock[ModeOfAttendanceImporter]
 }
 
@@ -189,6 +191,7 @@ class ImportStudentRowCommandTest extends TestBase with Mockito with Logging {
 		rowCommand.moduleAndDepartmentService = modAndDeptService
 		rowCommand.profileService = profileService
 		rowCommand.tier4RequirementImporter = tier4RequirementImporter
+		rowCommand.hallOfResidenceImporter = hallOfResidenceImporter
 
 		val row = SitsStudentRow(rs)
 	}
