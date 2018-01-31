@@ -26,24 +26,11 @@ class ImportHallOfResidenceInfoForStudentCommandInternal(student: StudentMember)
 
 	self: HallOfResidenceImporterComponent with MemberDaoComponent with AddressDaoComponent =>
 
-	 private def removeAddressDetails(): Unit = {
-		 val address = student.termtimeAddress
-		 if (address != null) {
-			 student.termtimeAddress = null
-			 student.lastUpdatedDate = DateTime.now
-			 memberDao.saveOrUpdate(student)
-			 addressDao.delete(address)
-			 logger.debug(s"Removing term address for $student.universityId ")
-		 }
-	 }
 	def applyInternal(): Unit = {
 
 		val newResidenceInfo = hallOfResidenceImporter.getResidenceInfo(student.universityId)
 		newResidenceInfo match {
-			case Some(rInfo) =>
-				if (hallOfResidenceImporter.isEmpty(rInfo)) {
-					removeAddressDetails()
-				} else {
+			case Some(rInfo) if !rInfo.isEmpty  =>
 					val address = Option(student.termtimeAddress) match {
 						case Some(adr: Address) => adr
 						case _ => new Address()
@@ -58,10 +45,15 @@ class ImportHallOfResidenceInfoForStudentCommandInternal(student: StudentMember)
 						student.lastUpdatedDate = DateTime.now
 						memberDao.saveOrUpdate(student)
 					}
+			case _ =>
+				val address = student.termtimeAddress
+				if (address != null) {
+					student.termtimeAddress = null
+					student.lastUpdatedDate = DateTime.now
+					memberDao.saveOrUpdate(student)
+					addressDao.delete(address)
+					logger.debug(s"Removing term address for $student.universityId ")
 				}
-
-			case _ => removeAddressDetails()
-
 		}
 	}
 
