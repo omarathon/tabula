@@ -87,6 +87,7 @@ class WeekRangesFormatter(year: AcademicYear) extends WeekRanges(year: AcademicY
 						case PeriodType.autumnTerm => 1
 						case PeriodType.springTerm => 2
 						case PeriodType.summerTerm => 3
+						case _ => throw new IllegalArgumentException
 					}
 
 					def weekNumber(date: LocalDate) =
@@ -315,6 +316,7 @@ class WholeWeekFormatter(year: AcademicYear) extends WeekRanges(year: AcademicYe
 						case PeriodType.autumnTerm => 1
 						case PeriodType.springTerm => 2
 						case PeriodType.summerTerm => 3
+						case _ => throw new IllegalArgumentException
 					}
 
 					def weekNumber(date: LocalDate) =

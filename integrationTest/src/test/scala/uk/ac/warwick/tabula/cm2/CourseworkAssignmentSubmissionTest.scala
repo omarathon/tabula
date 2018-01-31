@@ -32,26 +32,32 @@ class CourseworkAssignmentSubmissionTest extends BrowserTest with CourseworkFixt
 				// Don't upload the second file yet
 				submit()
 
-				pageSource contains "Thanks, we've received your submission." should be (false)
-				pageSource contains "You need to at least submit 2 files" should be {true}
-
-				click on find(cssSelector("input[type=file]")).get
-				ifPhantomJSDriver(
-					operation = { d =>
-						// This hangs forever for some reason in PhantomJS if you use the normal pressKeys method
-						d.executePhantomJS("var page = this; page.uploadFile('input[type=file]', '" + getClass.getResource("/file2.txt").getFile + "');")
-					},
-					otherwise = { _ =>
-						click on find(cssSelector("input[type=file]")).get
-						pressKeys(getClass.getResource("/file2.txt").getFile)
+				eventuallyAjax {
+					pageSource contains "Thanks, we've received your submission." should be(false)
+					pageSource contains "You need to at least submit 2 files" should be {
+						true
 					}
-				)
 
-				submit()
+					click on find(cssSelector("input[type=file]")).get
+					ifPhantomJSDriver(
+						operation = { d =>
+							// This hangs forever for some reason in PhantomJS if you use the normal pressKeys method
+							d.executePhantomJS("var page = this; page.uploadFile('input[type=file]', '" + getClass.getResource("/file2.txt").getFile + "');")
+						},
+						otherwise = { _ =>
+							click on find(cssSelector("input[type=file]")).get
+							pressKeys(getClass.getResource("/file2.txt").getFile)
+						}
+					)
 
-				pageSource contains "Thanks, we've received your submission." should be (true)
+					submit()
 
-				linkText("file1.txt").webElement.isDisplayed should be (true)
+					eventuallyAjax {
+						pageSource contains "Thanks, we've received your submission." should be(true)
+
+						linkText("file1.txt").webElement.isDisplayed should be(true)
+					}
+				}
 			}
 		}
 	}
@@ -67,7 +73,10 @@ class CourseworkAssignmentSubmissionTest extends BrowserTest with CourseworkFixt
 
 		withAssignment("xxx01", "Min 2 attachments", optionSettings = options) { assignmentId =>
 			submitAssignment(P.Student1, "Min 2 attachments", assignmentId, "/file1.txt")
-			pageSource contains "You need to at least submit 2 files" should be {true}
+
+			eventuallyAjax {
+				pageSource contains "You need to at least submit 2 files" should be { true }
+			}
 		}
 	}
 

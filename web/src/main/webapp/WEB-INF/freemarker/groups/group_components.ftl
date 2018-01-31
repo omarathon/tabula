@@ -721,7 +721,7 @@
 														Attendance
 													</a>
 												</#if>
-												<#if setItem.canViewTutors && event.tutors?? && (!(isSelf!false) || event.tutors.size > 1) >
+												<#if setItem.canViewTutors && event.tutors?? && (setItem.viewerIsStudent || (!(isSelf!false) || event.tutors.size > 1)) >
 													<h6>Tutor<#if (event.tutors.size > 1)>s</#if>:
 														<#if (event.tutors.size < 1)>[no tutor]</#if>
 													<#list event.tutors.users as tutor>${tutor.fullName}<#if tutor_has_next>, </#if></#list>

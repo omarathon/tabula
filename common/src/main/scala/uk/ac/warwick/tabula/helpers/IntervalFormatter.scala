@@ -170,8 +170,8 @@ object ConfigurableIntervalFormatter {
 		protected val monthFormat: DateTimeFormatter = DateTimeFormat.forPattern(" MMM")
 
 		protected def formatInterval(interval: Interval, dayFormat: DateTimeFormatter): (String, String) = {
-			val sameMonth = interval.getStart.getMonthOfYear == interval.getEnd.getMonthOfYear
 			val sameYear = interval.getStart.getYear == interval.getEnd.getYear
+			val sameMonth = sameYear && interval.getStart.getMonthOfYear == interval.getEnd.getMonthOfYear
 			val startString = dayFormat.print(interval.getStart) + ordinal(interval.getStart) +
 				(if (!sameMonth) monthFormat.print(interval.getStart) else "") +
 				(if (!sameYear) yearFormat.print(interval.getStart) else "")

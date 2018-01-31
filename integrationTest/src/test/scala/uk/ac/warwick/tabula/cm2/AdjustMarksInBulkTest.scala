@@ -39,22 +39,24 @@ class AdjustMarksInBulkTest extends BrowserTest with CourseworkFixtures {
 			}
 
 			When("I click on the Feedback dropdown without selecting any students")
-			val feedbackDropdown = id("main").webElement.findElements(By.cssSelector("a.dropdown-toggle")).get(5)
+			val feedbackDropdown = id("main").webElement.findElements(By.cssSelector("a.dropdown-toggle")).get(2)
 			click on feedbackDropdown
 
 			Then("The adjustments link is disabled")
-			val adjustmentsLinkHolder = id("main").webElement.findElements(By.cssSelector("li")).get(27)
-			adjustmentsLinkHolder.getAttribute("class")contains("disabled") should be(true)
+			val adjustmentsLinkHolder = id("main").webElement.findElements(By.cssSelector("li")).get(10)
+			eventually {
+				adjustmentsLinkHolder.getAttribute("class").contains("disabled") should be(true)
+			}
 
 			When("I select the all student checkbox")
 			val selectAll = id("main").webElement.findElements(By.cssSelector(".collection-check-all")).get(0)
 			click on selectAll
 
-			And("Select the feeback dropdown")
+			And("Select the feedback dropdown")
 			click on feedbackDropdown
 
 			Then("The adjustments link is enabled")
-			adjustmentsLinkHolder.getAttribute("class") contains ("disabled") should be(false)
+			adjustmentsLinkHolder.getAttribute("class").contains("disabled") should be(false)
 			val adjustmentsLink = id("main").webElement.findElements(By.cssSelector(".dropdown-menu li .form-post")).get(4)
 			adjustmentsLink.isDisplayed should be (true)
 
