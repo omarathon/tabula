@@ -17,20 +17,20 @@ import scala.collection.JavaConverters._
 import scala.util.Try
 
 
-object MarkerBulkAdjustmentCommand {
+object MarkerBulkModerationCommand {
 	def apply(assignment: Assignment, marker: User, submitter: CurrentUser, currentStage: MarkingWorkflowStage, gradeGenerator: GeneratesGradesFromMarks) =
-		new MarkerBulkAdjustmentCommandInternal(assignment, marker, submitter, currentStage, gradeGenerator)
+		new MarkerBulkModerationCommandInternal(assignment, marker, submitter, currentStage, gradeGenerator)
 			with ComposableCommand[Seq[MarkerFeedback]]
-			with MarkerBulkAdjustmentValidation
-			with MarkerBulkAdjustmentPermissions
-			with MarkerBulkAdjustmentDescription
+			with MarkerBulkModerationValidation
+			with MarkerBulkModerationPermissions
+			with MarkerBulkModerationDescription
 			with AutowiringCM2MarkingWorkflowServiceComponent
 			with AutowiringFeedbackServiceComponent
 }
 
-class MarkerBulkAdjustmentCommandInternal(
+class MarkerBulkModerationCommandInternal(
 	val assignment: Assignment, val marker: User, val submitter: CurrentUser, val currentStage: MarkingWorkflowStage, val gradeGenerator: GeneratesGradesFromMarks
-) extends CommandInternal[Seq[MarkerFeedback]] with MarkerBulkAdjustmentState with MarkerBulkAdjustmentValidation {
+) extends CommandInternal[Seq[MarkerFeedback]] with MarkerBulkModerationState with MarkerBulkModerationValidation {
 
 	self: CM2MarkingWorkflowServiceComponent with FeedbackServiceComponent =>
 
@@ -59,8 +59,8 @@ class MarkerBulkAdjustmentCommandInternal(
 	}
 }
 
-trait MarkerBulkAdjustmentPermissions extends RequiresPermissionsChecking with PermissionsCheckingMethods {
-	self: MarkerBulkAdjustmentState =>
+trait MarkerBulkModerationPermissions extends RequiresPermissionsChecking with PermissionsCheckingMethods {
+	self: MarkerBulkModerationState =>
 
 	def permissionsCheck(p: PermissionsChecking) {
 		p.PermissionCheck(Permissions.AssignmentMarkerFeedback.Manage, assignment)
@@ -70,8 +70,8 @@ trait MarkerBulkAdjustmentPermissions extends RequiresPermissionsChecking with P
 	}
 }
 
-trait MarkerBulkAdjustmentValidation extends SelfValidating {
-	self: MarkerBulkAdjustmentState =>
+trait MarkerBulkModerationValidation extends SelfValidating {
+	self: MarkerBulkModerationState =>
 	def validate(errors: Errors) {
 
 		if (!previousMarker.isFoundUser) {
@@ -92,10 +92,10 @@ trait MarkerBulkAdjustmentValidation extends SelfValidating {
 	}
 }
 
-trait MarkerBulkAdjustmentDescription extends Describable[Seq[MarkerFeedback]] {
-	self: MarkerBulkAdjustmentState =>
+trait MarkerBulkModerationDescription extends Describable[Seq[MarkerFeedback]] {
+	self: MarkerBulkModerationState =>
 
-	override lazy val eventName: String = "MarkerBulkAdjustment"
+	override lazy val eventName: String = "MarkerBulkModeration"
 
 	def describe(d: Description) {
 		val students = validForAdjustment(previousMarker).map(_.student)
@@ -112,7 +112,7 @@ trait MarkerBulkAdjustmentDescription extends Describable[Seq[MarkerFeedback]] {
 	}
 }
 
-trait MarkerBulkAdjustmentState {
+trait MarkerBulkModerationState {
 
 	self: CM2MarkingWorkflowServiceComponent =>
 

@@ -2,18 +2,18 @@
 <#escape x as x?html>
 	<@modal.wrapper>
 		<@modal.header>
-				<h3 class="modal-title">Make adjustments</h3>
+				<h3 class="modal-title">Bulk moderation</h3>
 		</@modal.header>
 		<@f.form method="POST" commandName="command" >
 			<@modal.body>
 
-				<@bs3form.labelled_form_group path="previousMarker" labelText="Adjust all submissions marked by">
+				<@bs3form.labelled_form_group path="previousMarker" labelText="Moderate all submissions marked by">
 					<@f.select path="previousMarker" id="previousMarker" cssClass="form-control">
 						<@f.option value="" label=""/>
 						<@f.options items=previousMarkers itemLabel="fullName" itemValue="userId" />
 					</@f.select>
 				</@bs3form.labelled_form_group>
-				<@bs3form.labelled_form_group  labelText="Adjust submissions">
+				<@bs3form.form_group>
 					<div class="form-inline">
 						<@bs3form.form_group path="direction">
 							<@f.select path="direction" id="direction" cssClass="form-control">
@@ -33,22 +33,22 @@
 						<@bs3form.errors path="adjustment"/>
 						Decimals will be rounded up
 					</div>
-				</@bs3form.labelled_form_group>
+				</@bs3form.form_group>
 
 				<#list previousMarkers as marker>
 
 					<#assign validForAdjustment = mapGet(command.validForAdjustment, marker)![]/>
 
 					<p style="display:none;" class="marker-specific marker-${marker.userId}">
-						Marker feedback for <@fmt.p validForAdjustment?size "student" /> will be adjusted. This includes any feedback that has already been moderated,
+						Marker feedback for <@fmt.p validForAdjustment?size "student" /> will be amended. This includes any feedback that has already been moderated,
 						feedback yet to be moderated and feedback that was not selected for moderation. Students that have not yet been marked by ${marker.fullName} will
-						not be adjusted.
+						not be amended.
 					</p>
 
 					<#assign skipReasons = mapGet(command.skipReasons, marker)/>
 					<#if skipReasons?has_content>
 						<div style="display:none;" class="marker-specific marker-${marker.userId}">
-							<p>The following students will not be included in the bulk adjustment:</p>
+							<p>The following students will not be included in the bulk moderation:</p>
 							<ul>
 								<#list skipReasons?keys as student>
 									<#assign reasons = mapGet(skipReasons, student) />

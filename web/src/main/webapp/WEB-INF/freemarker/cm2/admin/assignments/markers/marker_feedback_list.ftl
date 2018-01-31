@@ -26,8 +26,8 @@
 				<#if order.headerStage.canFinish(assignment.cm2MarkingWorkflow)>
 					<a class="btn btn-primary must-have-selected must-have-ready-next-stage form-post" href="${finishMarking}">Confirm selected and send to admin</a>
 				</#if>
-				<#if order.headerStage.allowsBulkAdjustments && assignment.module.adminDepartment.assignmentGradeValidation>
-					<a class="btn btn-primary" data-toggle="modal" data-target="#bulk-adjustment-modal" href="<@routes.cm2.bulkAdjustment assignment order.headerStage marker />">Make bulk adjustment</a>
+				<#if features.bulkModeration && order.headerStage.allowsBulkAdjustments && assignment.module.adminDepartment.assignmentGradeValidation>
+					<a class="btn btn-primary" data-toggle="modal" data-target="#bulk-adjustment-modal" href="<@routes.cm2.bulkModeration assignment order.headerStage marker />">Bulk moderate submissions</a>
 				</#if>
 				<div class="btn-group">
 					<button type="button" class="btn btn-default dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
