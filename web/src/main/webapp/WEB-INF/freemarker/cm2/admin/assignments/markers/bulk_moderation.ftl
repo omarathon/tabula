@@ -13,7 +13,7 @@
 						<@f.options items=previousMarkers itemLabel="fullName" itemValue="userId" />
 					</@f.select>
 				</@bs3form.labelled_form_group>
-				<@bs3form.form_group>
+				<@bs3form.labelled_form_group  labelText="Moderate submissions">
 					<div class="form-inline">
 						<@bs3form.form_group path="direction">
 							<@f.select path="direction" id="direction" cssClass="form-control">
@@ -33,7 +33,7 @@
 						<@bs3form.errors path="adjustment"/>
 						Decimals will be rounded up
 					</div>
-				</@bs3form.form_group>
+				</@bs3form.labelled_form_group>
 
 				<#list previousMarkers as marker>
 
