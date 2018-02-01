@@ -284,6 +284,7 @@ class ImportProfilesCommand extends CommandWithoutTransaction[Unit] with Logging
 					session.flush()
 
 					updateVisa(importMemberCommands)
+					updateAddress(importMemberCommands)
 
 					// re-import module registrations and delete old module and group registrations:
 					val newModuleRegistrations = updateModuleRegistrationsAndSmallGroups(List(membInfo), Map(universityId -> user))

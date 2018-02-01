@@ -114,12 +114,6 @@ class ImportStudentRowCommandInternal(
 			member.lastUpdatedDate = DateTime.now
 			memberDao.saveOrUpdate(member)
 		}
-		//check address
-		updateAddress(member)
-	}
-
-	def updateAddress(member: StudentMember):Unit =  {
-		  ImportHallOfResidenceInfoForStudentCommand(member).apply()
 	}
 
 	private val basicStudentProperties = Set(
