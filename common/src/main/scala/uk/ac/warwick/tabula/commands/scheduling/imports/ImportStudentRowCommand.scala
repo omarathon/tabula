@@ -18,11 +18,12 @@ object ImportStudentRowCommand {
 		ssoUser: User,
 		rows: Seq[SitsStudentRow],
 		importCommandFactory: ImportCommandFactory
-	): ImportStudentRowCommandInternal with Command[Member] with AutowiringProfileServiceComponent with AutowiringTier4RequirementImporterComponent with AutowiringModeOfAttendanceImporterComponent with Unaudited = {
+	): ImportStudentRowCommandInternal with Command[Member] with AutowiringProfileServiceComponent with AutowiringTier4RequirementImporterComponent with AutowiringHallOfResidenceImporterComponent with AutowiringModeOfAttendanceImporterComponent with Unaudited = {
 		new ImportStudentRowCommandInternal(member, ssoUser, rows, importCommandFactory)
 			with Command[Member]
 			with AutowiringProfileServiceComponent
 			with AutowiringTier4RequirementImporterComponent
+			with AutowiringHallOfResidenceImporterComponent
 			with AutowiringModeOfAttendanceImporterComponent
 			with Unaudited
 	}
@@ -43,7 +44,7 @@ class ImportStudentRowCommandInternal(
 	with PropertyCopying
 	with Logging {
 
-	self: ProfileServiceComponent with Tier4RequirementImporterComponent with ModeOfAttendanceImporterComponent =>
+	self: ProfileServiceComponent with Tier4RequirementImporterComponent with HallOfResidenceImporterComponent with ModeOfAttendanceImporterComponent =>
 
 	val studentRow: Option[SitsStudentRow] = rows.headOption
 

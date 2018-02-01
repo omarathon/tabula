@@ -113,6 +113,12 @@ class ImportProfilesCommand extends CommandWithoutTransaction[Unit] with Logging
 					}
 				}
 
+				benchmarkTask("Update hall of residence for student") {
+					transactional() {
+						updateAddress(importMemberCommands)
+					}
+				}
+
 				benchmarkTask("Update module registrations and small groups") {
 					transactional() {
 						updateModuleRegistrationsAndSmallGroups(membershipInfos, users)
@@ -212,6 +218,16 @@ class ImportProfilesCommand extends CommandWithoutTransaction[Unit] with Logging
 		session.clear()
 	}
 
+
+	def updateAddress(rowCommands: Seq[ImportMemberCommand]) {
+		logger.info("Updating hall of residence address")
+
+		toStudentMembers(rowCommands).foreach(student => ImportHallOfResidenceInfoForStudentCommand(student).apply())
+
+		session.flush()
+		session.clear()
+	}
+
 	def rationaliseRelationships(rowCommands: Seq[ImportMemberCommand]): Unit = {
 		logger.info("Updating relationships")
 
@@ -268,6 +284,7 @@ class ImportProfilesCommand extends CommandWithoutTransaction[Unit] with Logging
 					session.flush()
 
 					updateVisa(importMemberCommands)
+					updateAddress(importMemberCommands)
 
 					// re-import module registrations and delete old module and group registrations:
 					val newModuleRegistrations = updateModuleRegistrationsAndSmallGroups(List(membInfo), Map(universityId -> user))
