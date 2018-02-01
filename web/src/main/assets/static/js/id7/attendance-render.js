@@ -401,6 +401,22 @@ $(function(){
 			})
 		;
 	})();
+
+	// TAB-5653
+	if (navigator.userAgent.indexOf('Mobile') !== -1) {
+		$('button.use-tooltip')
+			.tooltip('destroy')
+			.tooltip({
+				trigger: 'focus'
+			})
+			.on('click', function () {
+				$(this).focus();
+			});
+
+		$(window).on('scroll', function () {
+			$('button.use-tooltip:focus').blur();
+		});
+	}
 });
 
 window.Attendance = jQuery.extend(window.Attendance, exports);

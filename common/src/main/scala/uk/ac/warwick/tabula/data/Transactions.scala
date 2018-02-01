@@ -94,7 +94,7 @@ object Transactions extends TransactionAspectSupport {
 
 				val info = TransactionSupport.currentTransactionInfo
 				if (info != null) {
-					val status = info.getTransactionStatus()
+					val status = info.getTransactionStatus
 					if (status != null && !status.isCompleted) {
 						completeTransactionAfterThrowing(info, t)
 					}

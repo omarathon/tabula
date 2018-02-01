@@ -36,14 +36,15 @@
 				<#include "../profile/search/form.ftl" />
 
 				<#if universityId?has_content>
-					<h2><a href="<@routes.profiles.profile_by_id universityId />">My staff profile</a></h2>
+					<#assign shownProfileLink=true />
+					<h2><a href="<@routes.profiles.profile_by_id universityId />">My <#if isPGR>postgraduate<#else>staff</#if> profile</a></h2>
 					<h2><a href="<@routes.profiles.profile_by_id universityId />/timetable">My timetable</a></h2>
 				</#if>
 			</#if>
 
-			<#if isPGR>
+			<#if isPGR && !shownProfileLink??>
 				<#if universityId?has_content>
-					<h2><a href="<@routes.profiles.profile_by_id universityId />">My student profile</a></h2>
+					<h2><a href="<@routes.profiles.profile_by_id universityId />">My postgraduate profile</a></h2>
 				</#if>
 			</#if>
 

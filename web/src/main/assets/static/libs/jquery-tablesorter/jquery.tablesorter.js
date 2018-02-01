@@ -158,7 +158,7 @@
                 }
 
                 if (table.tBodies.length == 0) return; // In the case of empty tables
-                var rows = table.tBodies[0].rows;
+                var rows = table.tBodies[0].children;
 
                 if (rows[0]) {
 
@@ -250,8 +250,8 @@
                     var cacheTime = new Date();
                 }
 
-                var totalRows = (table.tBodies[0] && table.tBodies[0].rows.length) || 0,
-                    totalCells = (table.tBodies[0].rows[0] && table.tBodies[0].rows[0].cells.length) || 0,
+                var totalRows = (table.tBodies[0] && table.tBodies[0].children.length) || 0,
+                    totalCells = (table.tBodies[0].children[0] && table.tBodies[0].children[0].cells.length) || 0,
                     parsers = table.config.parsers,
                     cache = {
                         row: [],
@@ -261,7 +261,7 @@
                 for (var i = 0; i < totalRows; ++i) {
 
                     /** Add the table data to main data array */
-                    var c = $(table.tBodies[0].rows[i]),
+                    var c = $(table.tBodies[0].children[i]),
                         cols = [];
 
                     // if this is a child row, add it to the last row's children and
@@ -715,7 +715,7 @@
                     $headers.click(
 
                     function (e) {
-                        var totalRows = ($this[0].tBodies[0] && $this[0].tBodies[0].rows.length) || 0;
+                        var totalRows = ($this[0].tBodies[0] && $this[0].tBodies[0].children.length) || 0;
                         if (!this.sortDisabled && totalRows > 0) {
                             // Only call sortStart if sorting is
                             // enabled.

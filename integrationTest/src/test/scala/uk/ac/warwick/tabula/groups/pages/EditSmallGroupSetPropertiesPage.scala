@@ -1,9 +1,9 @@
 package uk.ac.warwick.tabula.groups.pages
 
-import org.scalatest.selenium.WebBrowser
 import org.openqa.selenium.WebDriver
-import uk.ac.warwick.tabula.BreadcrumbsMatcher
 import org.openqa.selenium.support.ui.Select
+import org.scalatest.selenium.WebBrowser
+import uk.ac.warwick.tabula.BreadcrumbsMatcher
 
 trait EditSmallGroupSetProgressWizardLinks {
 	self: WebBrowser =>
@@ -111,24 +111,23 @@ class EditSmallGroupSetEventsPage (implicit val webDriver:WebDriver) extends Web
 
 }
 
-class AllocateStudentsToGroupsPage(implicit val webDriver:WebDriver)extends WebBrowser with BreadcrumbsMatcher with EditSmallGroupSetProgressWizardLinks {
-	def isCurrentPage(moduleName:String): Boolean = {
+class AllocateStudentsToGroupsPage(implicit val webDriver: WebDriver) extends WebBrowser with BreadcrumbsMatcher with EditSmallGroupSetProgressWizardLinks {
+	def isCurrentPage(moduleName: String): Boolean = {
 		breadCrumbsMatchID7(Seq("Test Services", moduleName.toUpperCase))
-		val heading =find(cssSelector(".id7-main-content h1")).get
-		heading.text should startWith ("Edit small groups")
-		currentUrl should endWith ("/allocate")
+		val heading = find(cssSelector(".id7-main-content h1")).get
+		heading.text should startWith("Edit small groups")
+		currentUrl should endWith("/allocate")
 		currentUrl.endsWith("/allocate")
 	}
 
-	def findAllUnallocatedStudents: Iterator[Element] =  {
-		val s= findAll(cssSelector("div.student-list ul li"))
-		s
+	def findAllUnallocatedStudents: Iterator[Element] = {
+		findAll(cssSelector("ul.student-list li"))
 	}
 
 	// use native selenium select, because the scalatest SingleSel doesn't allow enumerating its values
-	def findFilterDropdown(filterAttribute:String):Option[Select]={
+	def findFilterDropdown(filterAttribute: String): Option[Select] = {
 		val filterDropdowns = findAll(cssSelector("div.filter select"))
-		filterDropdowns.find(_.underlying.getAttribute("data-filter-attr") == filterAttribute).map(e=>new Select(e.underlying))
+		filterDropdowns.find(_.underlying.getAttribute("data-filter-attr") == filterAttribute).map(e => new Select(e.underlying))
 	}
 
 }

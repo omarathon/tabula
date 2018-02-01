@@ -72,7 +72,7 @@
 		</p>
 	</form>
 
-	<div class="fix-footer form-group">
+	<div class="fix-footer">
 		<a class="btn btn-default" href="<@routes.attendance.manageHomeForYear command.department command.academicYear />">Done</a>
 	</div>
 </div>
