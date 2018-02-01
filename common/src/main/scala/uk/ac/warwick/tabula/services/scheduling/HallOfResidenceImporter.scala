@@ -48,11 +48,11 @@ object HallOfResidenceImporter {
 
 	var dialectRegexpLike = "regexp_like"
 
-	// expecting hall address of format like XX1/202 where XX denotes building, 1 denotes block and remaining after / as room no OR TO21B (Tocil Room B, flat 21)
+	// expecting hall address of format like XX1/202 where XX denotes building, 1 denotes block and remaining after / as room no OR TO21B (Tocil Room B, flat 21) OR SH18.2
 	def GetHallOfResidenceSql =
 		f"""
 			select add_add1, add_add2, add_add3, add_add4, add_add5, add_pcod, add_teln from $sitsSchema.men_add where add_aent = 'STU' and add_adid = :universityId and add_atyc = 'CORR' and add_actv = 'C' and add_dets = 'C'
-			 and add_add3  =  'University of Warwick' and add_pcod in ('CV4 7AL', 'CV4 7ES') and $dialectRegexpLike (add_add1, '^[A-z]{2}[0-9]?\\/?[A-z0-9]+$$') and (add_begd is null or add_begd <= sysdate) and  (add_endd is null or add_endd >= sysdate) order by add_seqn desc
+			 and add_add3  =  'University of Warwick' and add_pcod in ('CV4 7AL', 'CV4 7ES') and $dialectRegexpLike (add_add1, '^[A-z]{2}[0-9]?\\/?[A-z0-9.]+$$') and (add_begd is null or add_begd <= sysdate) and  (add_endd is null or add_endd >= sysdate) order by add_seqn desc
 		"""
 
 	case class HallOfResidenceInfo(var line1: String, var line2: String, var line3: String, var line4: String, var line5: String, var postcode: String, var telephone: String) {
