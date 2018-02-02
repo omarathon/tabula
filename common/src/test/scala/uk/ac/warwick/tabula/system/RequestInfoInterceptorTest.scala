@@ -66,8 +66,8 @@ class RequestInfoInterceptorTest extends TestBase with Mockito {
 
 		val req = new MockHttpServletRequest
 		req.setAttribute(CurrentUser.keyName, user)
-		req.setParameter("one", Array("two", "three"))
-		req.setParameter("yes", Array[String]())
+		req.setParameter("one", "two", "three")
+		req.setParameter("yes")
 		req.setParameter("i", "love")
 		req.addHeader(HttpServletRequestUtils.AjaxHeader, "XMLHttpRequest")
 		req.addHeader(HttpServletRequestUtils.XRequestedUriHeader, "https://tabula.warwick.ac.uk/yes/its/me?i=love")

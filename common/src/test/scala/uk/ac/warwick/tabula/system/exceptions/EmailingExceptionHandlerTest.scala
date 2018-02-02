@@ -30,7 +30,7 @@ class EmailingExceptionHandlerTest extends TestBase with Mockito {
 		val request = testRequest(uri)
 		request.setMethod("GET")
 		request.setParameter("mode", "powerEgg")
-		request.setParameter("groups", Array("group1","group2"))
+		request.setParameter("groups", "group1", "group2")
 		request.addHeader("X-Requested-With", "Coconuts")
 		val context = ExceptionContext("1", new RuntimeException("An egg cracked"), Some(request))
 		RequestInfo.use(info) {
