@@ -33,6 +33,7 @@ sealed trait ExamGridColumnValue {
 	val isActual: Boolean
 	def toHTML: String
 	def populateCell(cell: Cell, cellStyleMap: Map[GenerateExamGridExporter.Style, CellStyle]): Unit
+	def isEmpty: Boolean
 }
 
 object ExamGridColumnValue {
@@ -42,24 +43,23 @@ object ExamGridColumnValue {
 			case _ if values.size == 1 => values.head
 			case _ =>
 				// First see if they're ALL actual marks or not
-				values.tail.forall(_.isActual == values.head.isActual) match {
-					case false =>
-						// If only some are actual we can't apply a common style, so just return a plain merged string
-						ExamGridColumnValueString(values.map(_.getValueStringForRender).mkString(","))
-					case true =>
-						// If they're ALL actual or not, check other cell styles
-						values.head match {
-							case _: ExamGridColumnValueFailed if values.tail.forall(_.isInstanceOf[ExamGridColumnValueFailed]) =>
-								ExamGridColumnValueFailedString(values.map(_.getValueStringForRender).mkString(","), isActual = values.head.isActual)
-							case _: ExamGridColumnValueOvercat if values.tail.forall(_.isInstanceOf[ExamGridColumnValueOvercat]) =>
-								ExamGridColumnValueOvercatString(values.map(_.getValueStringForRender).mkString(","), isActual = values.head.isActual)
-							case _: ExamGridColumnValueOverride if values.tail.forall(_.isInstanceOf[ExamGridColumnValueOverride]) =>
-								ExamGridColumnValueOverrideString(values.map(_.getValueStringForRender).mkString(","), isActual = values.head.isActual)
-							case _: ExamGridColumnValueMissing if values.tail.forall(_.isInstanceOf[ExamGridColumnValueMissing]) =>
-								ExamGridColumnValueMissing()
-							case _ =>
-								ExamGridColumnValueString(values.map(_.getValueStringForRender).mkString(","), isActual = values.head.isActual)
-						}
+				if (values.tail.forall(_.isActual == values.head.isActual)) {
+					// If they're ALL actual or not, check other cell styles
+					values.head match {
+						case _: ExamGridColumnValueFailed if values.tail.forall(_.isInstanceOf[ExamGridColumnValueFailed]) =>
+							ExamGridColumnValueFailedString(values.map(_.getValueStringForRender).mkString(","), isActual = values.head.isActual)
+						case _: ExamGridColumnValueOvercat if values.tail.forall(_.isInstanceOf[ExamGridColumnValueOvercat]) =>
+							ExamGridColumnValueOvercatString(values.map(_.getValueStringForRender).mkString(","), isActual = values.head.isActual)
+						case _: ExamGridColumnValueOverride if values.tail.forall(_.isInstanceOf[ExamGridColumnValueOverride]) =>
+							ExamGridColumnValueOverrideString(values.map(_.getValueStringForRender).mkString(","), isActual = values.head.isActual)
+						case _: ExamGridColumnValueMissing if values.tail.forall(_.isInstanceOf[ExamGridColumnValueMissing]) =>
+							ExamGridColumnValueMissing()
+						case _ =>
+							ExamGridColumnValueString(values.map(_.getValueStringForRender).mkString(","), isActual = values.head.isActual)
+					}
+				} else {
+					// If only some are actual we can't apply a common style, so just return a plain merged string
+					ExamGridColumnValueString(values.map(_.getValueStringForRender).mkString(","))
 				}
 		}
 	}
@@ -83,6 +83,8 @@ class ExamGridColumnValueDecimal(value: BigDecimal, val isActual: Boolean = fals
 		cell.setCellValue(getValueForRender.doubleValue)
 		applyCellStyle(cell, cellStyleMap)
 	}
+
+	override def isEmpty: Boolean = value == null
 }
 
 object ExamGridColumnValueString {
@@ -100,6 +102,8 @@ class ExamGridColumnValueString(value: String, val isActual: Boolean = false) ex
 		cell.setCellValue(value)
 		applyCellStyle(cell, cellStyleMap)
 	}
+
+	override def isEmpty: Boolean = !value.hasText
 }
 
 

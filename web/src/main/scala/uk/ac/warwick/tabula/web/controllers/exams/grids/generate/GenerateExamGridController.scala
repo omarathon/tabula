@@ -11,7 +11,7 @@ import uk.ac.warwick.tabula.commands._
 import uk.ac.warwick.tabula.commands.exams.grids._
 import uk.ac.warwick.tabula.data.model.StudentCourseYearDetails.YearOfStudy
 import uk.ac.warwick.tabula.data.model._
-import uk.ac.warwick.tabula.exams.grids.columns._
+import uk.ac.warwick.tabula.exams.grids.columns.{ExamGridColumnValue, ExamGridColumnValueType, _}
 import uk.ac.warwick.tabula.exams.grids.columns.modules.{CoreRequiredModulesColumnOption, ModuleReportsColumnOption}
 import uk.ac.warwick.tabula.helpers.DateTimeOrdering._
 import uk.ac.warwick.tabula.jobs.scheduling.ImportMembersJob
@@ -348,8 +348,15 @@ class GenerateExamGridController extends ExamsController
 		val perYearColumnValues = benchmarkTask("perYearColumnValues") { perYearColumns.values.flatten.toSeq.map(c => c -> c.values).toMap }
 		val perYearColumnCategories = benchmarkTask("perYearColumnCategories") { perYearColumns.mapValues(_.collect{case c: HasExamGridColumnCategory => c}.groupBy(_.category)) }
 
+		val maxYearColumnSize =  benchmarkTask("maxYearColumnSize") { perYearColumns.map{case (year, columns) =>
+			year -> entities.map{ entity =>
+				// count the number of non-empty columns for this student/year
+				columns.count(_.values.getOrElse(entity, Map()).getOrElse(year, Map()).values.flatten.exists(v => !v.isEmpty))
+			}.reduceOption(_ max _).getOrElse(0)
+		}}
+
 		commonCrumbs(
-			Mav("exams/grids/generate/preview",
+			Mav("exams/grids/generate/shortform_preview",
 				"oldestImport" -> oldestImport,
 				"studentInformationColumns" -> studentInformationColumns,
 				"perYearColumns" -> perYearColumns,
@@ -363,7 +370,9 @@ class GenerateExamGridController extends ExamsController
 				"weightings" -> weightings,
 				"normalLoadLookup" -> normalLoadLookup,
 				"routeRules" -> routeRules,
-				"jobId" -> jobId
+				"jobId" -> jobId,
+
+				"maxYearColumnSize" -> maxYearColumnSize
 			),
 			department,
 			academicYear
