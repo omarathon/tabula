@@ -27,7 +27,7 @@ class OnlineMarkingTest  extends BrowserTest with CourseworkFixtures with GivenW
 				click on mark
 			})
 			Then("I am redirected to the summary screen ")
-			eventually(currentUrl should include(s"/admin/assignments/$assignmentId/mark"))
+			eventuallyAjax(currentUrl should include(s"/admin/assignments/$assignmentId/mark"))
 
 			When("I expand the student")
 			click on cssSelector(".toggle-icon-large.student-col").webElement
