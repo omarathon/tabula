@@ -109,8 +109,12 @@
 
 		if (event.relatedUrl && event.relatedUrl.urlString && event.relatedUrl.urlString.length > 0) {
 			var relatedUrlTitle = (event.relatedUrl.title && event.relatedUrl.title.length > 0) ? event.relatedUrl.title : "More details";
-			content = content + "<tr><th></th><td>" +
-				"<a href=" + event.relatedUrl.urlString + ">" + relatedUrlTitle + "</a></td></tr>";
+
+			var a = document.createElement('a');
+			a.href = event.relatedUrl.urlString;
+			a.innerText = relatedUrlTitle;
+
+			content = content + "<tr><th></th><td>" + a.outerHTML + "</td></tr>";
 		}
 
 		if (event.attendance) {
