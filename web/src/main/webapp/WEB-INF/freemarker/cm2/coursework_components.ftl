@@ -370,7 +370,7 @@
 	</#if>
 </#macro>
 
-<#macro marker_assignment_list id title assignments verb="Mark" expand_by_default=true show_actions=true>
+<#macro marker_assignment_list id title assignments verb="Mark" expand_by_default=true marker=user.apparentUser show_actions=true>
 	<span id="${id}-container">
 		<#local has_assignments = (assignments!?size gt 0) />
 		<div id="${id}" class="striped-section marker-assignment-list<#if has_assignments> collapsible<#if expand_by_default> expanded</#if><#else> empty</#if>" data-name="${id}">
@@ -390,7 +390,7 @@
 
 						<#list assignments as info>
 							<span id="marker-assignment-container-${info.assignment.id}">
-								<@marker_assignment_info info verb show_actions />
+								<@marker_assignment_info info verb marker show_actions />
 							</span>
 						</#list>
 					</div>
@@ -472,7 +472,7 @@
 	</div>
 </#macro>
 
-<#macro marker_assignment_info info verb="Mark" show_actions=true>
+<#macro marker_assignment_info info verb="Mark" marker=user.apparentUser show_actions=true>
 	<#local assignment = info.assignment />
 	<div class="item-info row marker-assignment-${assignment.id}">
 		<div class="col-md-3">
@@ -537,11 +537,11 @@
 		<div class="col-md-2">
 			<#if verb?has_content>
 				<#if assignment.cm2Assignment>
-					<a class="btn btn-block btn-primary" href="<@routes.cm2.listmarkersubmissions assignment user.apparentUser />">
+					<a class="btn btn-block btn-primary" href="<@routes.cm2.listmarkersubmissions assignment marker />">
 						${verb}
 					</a>
 				<#else>
-					<a class="btn btn-block btn-primary" href="<@routes.coursework.listmarkersubmissions assignment user.apparentUser />">
+					<a class="btn btn-block btn-primary" href="<@routes.coursework.listmarkersubmissions assignment marker />">
 						${verb}
 					</a>
 				</#if>

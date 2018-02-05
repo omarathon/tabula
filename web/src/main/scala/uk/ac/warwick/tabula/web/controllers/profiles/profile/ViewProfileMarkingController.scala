@@ -5,6 +5,7 @@ import org.springframework.web.bind.annotation.{ModelAttribute, PathVariable, Re
 import uk.ac.warwick.tabula.AcademicYear
 import uk.ac.warwick.tabula.commands.cm2.MarkingSummaryCommand
 import uk.ac.warwick.tabula.data.model._
+import uk.ac.warwick.tabula.permissions.Permissions
 import uk.ac.warwick.tabula.profiles.web.Routes
 import uk.ac.warwick.tabula.web.Mav
 import uk.ac.warwick.tabula.web.controllers.profiles.ProfileBreadcrumbs
@@ -49,11 +50,15 @@ class ViewProfileMarkingController extends AbstractViewProfileController {
 	private def commonView(member: Member): Mav = {
 		val command = restricted(MarkingSummaryCommand(member))
 
+		val isSelf = user.universityId.maybeText.getOrElse("") == member.universityId
+
 		Mav("profiles/profile/marking",
 			"hasPermission" -> command.nonEmpty,
 			"command" -> command,
 			"result" -> command.map(_.apply()).orNull,
-			"isSelf" -> (user.universityId.maybeText.getOrElse("") == member.universityId)
+			"isSelf" -> isSelf,
+			"showMarkingActions" -> (isSelf || securityService.can(user, Permissions.Assignment.MarkOnBehalf, member)),
+			"marker" -> member.asSsoUser
 		)
 	}
 
