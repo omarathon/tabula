@@ -97,25 +97,16 @@ private class WAI2GoHttpLocationFetchingService(config: WAI2GoConfiguration) ext
 	def locationFor(name: String): Location = {
 		logger.info(s"Requesting location info for $name")
 
-		val uriBuilder = new URIBuilder(config.baseUri.toJavaUri)
-		uriBuilder.addParameter(config.queryParameter, name)
-		config.defaultParameters.foreach { case (n, v) => uriBuilder.addParameter(n, v) }
-
-		val get = new HttpGet(uriBuilder.build())
-		config.defaultHeaders.foreach { case (n, v) => get.addHeader(n, v) }
-
 		var response: CloseableHttpResponse = null
-		var entity: HttpEntity = null
 
 		val result: Try[Seq[WAI2GoLocation]] = try {
-			response = httpClient.execute(get)
+			response = httpClient.execute(requestForName(name))
 
 			if (response.getStatusLine.getStatusCode == 200) {
-				entity = response.getEntity
-				val json = IOUtils.toString(entity.getContent)
+				val responseBody = IOUtils.toString(response.getEntity.getContent)
 
-				JSON.parseFull(json) match {
-					case Some(locations: Seq[Map[String, Any]]@unchecked) => Success(locations.flatMap(WAI2GoLocation.fromProperties))
+				JSON.parseFull(responseBody) match {
+					case Some(locations: Seq[Map[String, Any]]) => Success(locations.flatMap(WAI2GoLocation.fromProperties))
 					case _ => Success(Nil)
 				}
 			} else {
@@ -124,7 +115,6 @@ private class WAI2GoHttpLocationFetchingService(config: WAI2GoConfiguration) ext
 		} catch {
 			case e: Exception => Failure(e)
 		} finally {
-			EntityUtils.consumeQuietly(entity)
 			HttpClientUtils.closeQuietly(response)
 		}
 
@@ -141,6 +131,17 @@ private class WAI2GoHttpLocationFetchingService(config: WAI2GoConfiguration) ext
 				logger.warn(s"Error requesting location information for $name, returning NamedLocation", ex)
 				NamedLocation(name)
 		}
+	}
+
+	private def requestForName(name: String) = {
+		val uriBuilder = new URIBuilder(config.baseUri.toJavaUri)
+		uriBuilder.addParameter(config.queryParameter, name)
+		config.defaultParameters.foreach { case (n, v) => uriBuilder.addParameter(n, v) }
+
+		val request = new HttpGet(uriBuilder.build())
+		config.defaultHeaders.foreach { case (n, v) => request.addHeader(n, v) }
+
+		request
 	}
 }
 
