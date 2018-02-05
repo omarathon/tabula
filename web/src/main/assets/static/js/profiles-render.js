@@ -211,6 +211,7 @@
 				error: function(jqXKR){ handleCalendarError(jqXKR, $container) },
 				complete: function() {
 					complete = true;
+					$loading.hide();
 					$container.fadeTo('fast', 1);
 				}
 			});
