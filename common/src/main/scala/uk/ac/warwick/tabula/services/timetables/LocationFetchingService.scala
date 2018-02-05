@@ -106,7 +106,7 @@ private class WAI2GoHttpLocationFetchingService(config: WAI2GoConfiguration) ext
 				val responseBody = IOUtils.toString(response.getEntity.getContent)
 
 				JSON.parseFull(responseBody) match {
-					case Some(locations: Seq[Map[String, Any]]) => Success(locations.flatMap(WAI2GoLocation.fromProperties))
+					case Some(locations: Seq[Map[String, Any]] @unchecked) => Success(locations.flatMap(WAI2GoLocation.fromProperties))
 					case _ => Success(Nil)
 				}
 			} else {
