@@ -10,6 +10,7 @@
         onNoneChecked($container): callback when no rows are checked.
         onAllChecked($container): callback when all rows selected. defaults to behaviour of onSomeChecked.
         onChange($checkbox): callback when a row is selected/unselected.
+        onBulkChange($container, $checkboxes): callback after rows have been selected/unselected in bulk.
 */
 $.fn.bigList = function(options) {
 
@@ -31,13 +32,16 @@ $.fn.bigList = function(options) {
 
         var doNothing = function(){};
 
-        var onChange = options.onChange || doNothing;
+        var onChange = options.onChange;
+        var onBulkChange = options.onBulkChange || doNothing;
         var onSomeChecked = options.onSomeChecked || doNothing;
         var onNoneChecked = options.onNoneChecked || doNothing;
         var onAllChecked = options.onAllChecked || onSomeChecked;
 
         this.checkboxChangedFunction = function(){
-            onChange.call($(this)); // pass the checkbox as the context
+            if (!!onChange) {
+				onChange.call($(this)); // pass the checkbox as the context
+			}
             var allChecked = $checkboxes.not(':checked').length === 0;
             $selectAll.prop('checked', allChecked);
             if (allChecked) {
@@ -56,9 +60,13 @@ $.fn.bigList = function(options) {
         $selectAll.on('change', function(){
             var checked = $(this).is(':checked');
             $checkboxes.prop('checked', checked);
-            $checkboxes.each(function(){
-                onChange.call(jQuery(this));
-            });
+            if (!!onChange) {
+				// Avoid looping if we can
+				$checkboxes.each(function () {
+					onChange.call(jQuery(this));
+				});
+			}
+			onBulkChange.call($this, $checkboxes);
             if (checked) {
                 $this.data('checked','all');
                 onAllChecked.call($this);

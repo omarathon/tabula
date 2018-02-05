@@ -545,16 +545,14 @@
 				});
 			},
 
-			// rather than just toggling the class check the state of the checkbox to avoid silly errors
-			onChange : function() {
-				this.closest(".itemContainer").toggleClass("selected", this.is(":checked"));
-				var $checkedBoxes = $(".collection-checkbox:checked");
+			onBulkChange: function ($checkboxes) {
+				var $checkedBoxes = $checkboxes.filter(':checked');
 
 				var allPlagiarised = false;
 
 				if ($checkedBoxes.length > 0) {
 					allPlagiarised = true;
-					$checkedBoxes.each(function(index){
+					$checkedBoxes.each(function () {
 						var $checkBox = $(this);
 						if ($checkBox.closest('tr').data('plagiarised') != true) {
 							allPlagiarised = false;
