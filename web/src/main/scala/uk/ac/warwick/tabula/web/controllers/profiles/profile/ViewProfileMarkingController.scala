@@ -3,7 +3,7 @@ package uk.ac.warwick.tabula.web.controllers.profiles.profile
 import org.springframework.stereotype.Controller
 import org.springframework.web.bind.annotation.{ModelAttribute, PathVariable, RequestMapping}
 import uk.ac.warwick.tabula.AcademicYear
-import uk.ac.warwick.tabula.commands.coursework.assignments.MarkerAssignmentsSummaryCommand
+import uk.ac.warwick.tabula.commands.cm2.MarkingSummaryCommand
 import uk.ac.warwick.tabula.data.model._
 import uk.ac.warwick.tabula.profiles.web.Routes
 import uk.ac.warwick.tabula.web.Mav
@@ -47,7 +47,8 @@ class ViewProfileMarkingController extends AbstractViewProfileController {
 	}
 
 	private def commonView(member: Member): Mav = {
-		val command = restricted(MarkerAssignmentsSummaryCommand(member))
+		val command = restricted(MarkingSummaryCommand(member))
+
 		Mav("profiles/profile/marking",
 			"hasPermission" -> command.nonEmpty,
 			"command" -> command,
