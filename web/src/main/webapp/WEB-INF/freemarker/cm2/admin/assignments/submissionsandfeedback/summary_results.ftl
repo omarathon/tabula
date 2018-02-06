@@ -9,7 +9,7 @@
 	<div id="profile-modal" class="modal fade profile-subset"></div>
 	<div id="feedback-modal" class="modal fade"></div>
 
-	<div class="submission-feedback-results">
+	<div class="submission-feedback-results" data-popout="false">
 		<#if (results.students?size > 0)>
 			<table id="submission-feedback-progress" class="cm2-progress-table submission-feedback-list table table-striped table-condensed table-hover table-sortable table-checkable sticky-table-headers">
 				<thead class="fix-header">
