@@ -33,7 +33,7 @@ trait ExtensionServices {
 	class ExtensionMap(extension: Extension) {
 		def asMap: Map[String, String] = {
 
-			def convertDateToString(date: Option[DateTime]) = date.map(DateBuilder.format).getOrElse("")
+			def convertDateToString(date: Option[DateTime]) = date.map(DateBuilder.format(_)).getOrElse("")
 
 			def convertDateToMillis(date: Option[DateTime]) = date.map(_.getMillis.toString).orNull
 
