@@ -583,5 +583,5 @@ trait StaffProperties {
 	// Anyone can view staff phone number
 	def phoneNumberPermissions = Nil
 
-	var teachingStaff: JBoolean = _
+	@deprecated("TeachingStaff attribute is not reliable", since = "2018.2.2") var teachingStaff: JBoolean = _
 }
