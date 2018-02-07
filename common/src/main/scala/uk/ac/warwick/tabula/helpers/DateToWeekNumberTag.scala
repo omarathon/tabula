@@ -18,10 +18,14 @@ class DateToWeekNumberTag extends TemplateMethodModelEx with KnowsUserNumberingS
 
 		def formatDate(date: LocalDate): String = {
 			val year = AcademicYear.forDate(date)
-			val weekNumber = year.weekForDate(date).weekNumber
-			val day = DayOfWeek(date.getDayOfWeek)
+			if (!year.placeholder) {
+				val weekNumber = year.weekForDate(date).weekNumber
+				val day = DayOfWeek(date.getDayOfWeek)
 
-			format(Seq(WeekRange(weekNumber)), day, year, numberingSystem(user, None))
+				format(Seq(WeekRange(weekNumber)), day, year, numberingSystem(user, None))
+			} else {
+				DateBuilder.format(date.toDateTimeAtStartOfDay, includeTime = false)
+			}
 		}
 
 		val args = list.asScala.map { model => DeepUnwrap.unwrap(model.asInstanceOf[TemplateModel]) }
