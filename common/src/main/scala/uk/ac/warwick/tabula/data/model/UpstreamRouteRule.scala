@@ -3,9 +3,11 @@ package uk.ac.warwick.tabula.data.model
 import javax.persistence._
 
 import org.hibernate.annotations.{BatchSize, Type}
+import uk.ac.warwick.spring.Wire
 import uk.ac.warwick.tabula.AcademicYear
 import uk.ac.warwick.tabula.JavaImports._
 import uk.ac.warwick.tabula.data.model.StudentCourseYearDetails.YearOfStudy
+import uk.ac.warwick.tabula.services.LevelService
 import uk.ac.warwick.tabula.services.exams.grids.UpstreamRouteRuleService
 
 import collection.JavaConverters._
@@ -18,11 +20,11 @@ import scala.collection.mutable
 @Entity
 class UpstreamRouteRule extends GeneratedId {
 
-	def this(academicYear: Option[AcademicYear], route: Route, yearOfStudy: Integer) {
+	def this(academicYear: Option[AcademicYear], route: Route, levelCode: String) {
 		this()
 		this.academicYear = academicYear
 		this.route = route
-		this.yearOfStudy = yearOfStudy
+		this.levelCode = levelCode
 	}
 
 	/**
@@ -41,7 +43,11 @@ class UpstreamRouteRule extends GeneratedId {
 	@JoinColumn(name = "routeCode", referencedColumnName="code")
 	var route: Route = _
 
-	var yearOfStudy: JInteger = _
+	@transient
+	var levelService: LevelService = Wire.auto[LevelService]
+
+	var levelCode: String = _
+	def level: Option[Level] = levelService.levelFromCode(levelCode)
 
 	@OneToMany(mappedBy = "rule", fetch = FetchType.LAZY, cascade = Array(CascadeType.ALL), orphanRemoval = true)
 	@BatchSize(size=200)
@@ -53,13 +59,17 @@ class UpstreamRouteRule extends GeneratedId {
 
 }
 
-class UpstreamRouteRuleLookup(academicYear: AcademicYear, yearOfStudy: YearOfStudy, upstreamRouteRuleService: UpstreamRouteRuleService) {
-	private val cache = mutable.Map[Route, Seq[UpstreamRouteRule]]()
-	def apply(route: Route): Seq[UpstreamRouteRule] = cache.get(route) match {
-		case Some(rules) =>
-			rules
-		case _ =>
-			cache.put(route, upstreamRouteRuleService.list(route, academicYear, yearOfStudy))
-			cache(route)
-	}
+class UpstreamRouteRuleLookup(academicYear: AcademicYear,  upstreamRouteRuleService: UpstreamRouteRuleService) {
+	private val cache = mutable.Map[(Route, Level), Seq[UpstreamRouteRule]]()
+
+	def apply(route: Route, level: Option[Level]): Seq[UpstreamRouteRule] = level.map(l =>
+		cache.get((route, l)) match {
+			case Some(rules) => rules
+			case _ =>
+				cache.put((route, l), upstreamRouteRuleService.list(route, academicYear, l))
+				cache((route, l))
+		}).getOrElse(Seq())
+
+
+
 }

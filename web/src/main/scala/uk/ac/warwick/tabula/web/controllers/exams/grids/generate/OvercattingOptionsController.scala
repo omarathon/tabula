@@ -32,7 +32,7 @@ class OvercattingOptionsController extends ExamsController
 	def params = GenerateExamGridMappingParameters
 
 	private def routeRules(scyd: StudentCourseYearDetails, academicYear: AcademicYear): Seq[UpstreamRouteRule] = {
-		upstreamRouteRuleService.list(scyd.route, academicYear, scyd.yearOfStudy)
+		scyd.studentCourseDetails.level.map(upstreamRouteRuleService.list(scyd.route, academicYear, _)).getOrElse(Seq())
 	}
 
 	@ModelAttribute("command")

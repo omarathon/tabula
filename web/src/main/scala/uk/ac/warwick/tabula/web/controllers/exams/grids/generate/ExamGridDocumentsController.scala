@@ -100,7 +100,7 @@ trait ExamGridDocumentsController extends ExamsController
 				selectCourseCommand.course,
 				progressionService,
 				new NormalLoadLookup(selectCourseCommand.academicYear, selectCourseCommand.yearOfStudy, normalCATSLoadService),
-				new UpstreamRouteRuleLookup(selectCourseCommand.academicYear, selectCourseCommand.yearOfStudy, upstreamRouteRuleService),
+				new UpstreamRouteRuleLookup(selectCourseCommand.academicYear, upstreamRouteRuleService),
 				isConfidential = isConfidential
 			)
 		)
@@ -156,7 +156,7 @@ trait ExamGridDocumentsController extends ExamsController
 				selectCourseCommand.academicYear,
 				progressionService,
 				new NormalLoadLookup(selectCourseCommand.academicYear, selectCourseCommand.yearOfStudy, normalCATSLoadService),
-				new UpstreamRouteRuleLookup(selectCourseCommand.academicYear, selectCourseCommand.yearOfStudy, upstreamRouteRuleService),
+				new UpstreamRouteRuleLookup(selectCourseCommand.academicYear, upstreamRouteRuleService),
 				isConfidential
 			)
 		)

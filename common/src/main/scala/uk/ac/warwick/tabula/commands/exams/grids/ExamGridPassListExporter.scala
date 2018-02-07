@@ -54,7 +54,7 @@ object ExamGridPassListExporter extends TaskBenchmarking with AddConfidentialWat
 					progressionService.suggestedResult(
 						year.studentCourseYearDetails.get,
 						normalLoadLookup(year.route),
-						routeRulesLookup(year.route)
+						routeRulesLookup(year.route, entity.courseDetails.level)
 					) match {
 						case ProgressionResult.Proceed | ProgressionResult.PossiblyProceed | ProgressionResult.Pass => true
 						case _ => false
