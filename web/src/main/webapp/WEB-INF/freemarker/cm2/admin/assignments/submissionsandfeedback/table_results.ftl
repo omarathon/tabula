@@ -15,7 +15,7 @@
 			<#return result />
 		</#function>
 
-		<div class="submission-feedback-results">
+		<div class="submission-feedback-results" data-popout="false">
 			<#if (results.students?size > 0)>
 				<table id="submission-feedback-info" class="submission-feedback-list table table-striped table-condensed table-hover table-sortable table-checkable sticky-table-headers">
 				<colgroup class="student">
