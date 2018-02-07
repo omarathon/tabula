@@ -423,11 +423,20 @@ class GenerateExamGridController extends ExamsController
 
 		val (predefinedColumnOptions, customColumnTitles) = gridOptionsCommand.apply()
 
+		val overcatSubsets = entities
+			.flatMap(entity => {entity.validYears.get(selectCourseCommand.yearOfStudy).map((entity, _))})
+			.map{ case (entity, entityYear) =>
+				entityYear -> moduleRegistrationService.overcattedModuleSubsets(
+					entityYear,
+					entityYear.markOverrides.getOrElse(Map()),
+					normalLoadLookup(entityYear.route),
+					routeRulesLookup(entityYear.route, entity.courseDetails.level)
+				)
+			}.toMap
+
 		val state = ExamGridColumnState(
 			entities = entities,
-			overcatSubsets = entities.flatMap(_.validYears.get(selectCourseCommand.yearOfStudy)).map(entityYear => entityYear ->
-				moduleRegistrationService.overcattedModuleSubsets(entityYear, entityYear.markOverrides.getOrElse(Map()), normalLoadLookup(entityYear.route), routeRulesLookup(entityYear.route))
-			).toMap,
+			overcatSubsets = overcatSubsets,
 			coreRequiredModuleLookup = coreRequiredModuleLookup,
 			normalLoadLookup = normalLoadLookup,
 			routeRulesLookup = routeRulesLookup,

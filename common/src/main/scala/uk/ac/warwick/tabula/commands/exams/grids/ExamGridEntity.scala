@@ -2,14 +2,15 @@ package uk.ac.warwick.tabula.commands.exams.grids
 
 import org.joda.time.DateTime
 import uk.ac.warwick.tabula.data.model.StudentCourseYearDetails.YearOfStudy
-import uk.ac.warwick.tabula.data.model.{Module, ModuleRegistration, Route, StudentCourseYearDetails}
+import uk.ac.warwick.tabula.data.model._
 
 case class ExamGridEntity(
 	firstName: String,
 	lastName: String,
 	universityId: String,
 	lastImportDate: Option[DateTime],
-	years: Map[YearOfStudy, Option[ExamGridEntityYear]] // Int = year of study
+	years: Map[YearOfStudy, Option[ExamGridEntityYear]], // Int = year of study
+	courseDetails: StudentCourseDetails
 ) {
 	def validYears: Map[YearOfStudy, ExamGridEntityYear] = years.filter { case (_, year) => year.nonEmpty }.mapValues(_.get)
 }

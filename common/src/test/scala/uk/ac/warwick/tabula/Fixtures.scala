@@ -9,7 +9,7 @@ import uk.ac.warwick.tabula.data.model.attendance._
 import uk.ac.warwick.tabula.data.model.forms.Extension
 import uk.ac.warwick.tabula.data.model.groups._
 import uk.ac.warwick.tabula.permissions.PermissionsTarget
-import uk.ac.warwick.tabula.services.UserLookupService
+import uk.ac.warwick.tabula.services.{LevelService, UserLookupService}
 import uk.ac.warwick.tabula.services.attendancemonitoring.AttendanceMonitoringService
 import uk.ac.warwick.userlookup.{AnonymousUser, User}
 
@@ -280,6 +280,12 @@ object Fixtures extends Mockito {
 
 		member.attachStudentCourseDetails(scd)
 		member.mostSignificantCourse = scd
+
+		scd.levelService = smartMock[LevelService]
+		scd.levelService.levelFromCode(any[String]) answers { arg =>
+			val levelCode = arg.asInstanceOf[String]
+			Some(new Level(levelCode, levelCode))
+		}
 
 		scd
 	}
