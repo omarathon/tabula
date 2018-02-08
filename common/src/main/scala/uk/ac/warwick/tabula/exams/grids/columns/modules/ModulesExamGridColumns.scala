@@ -20,6 +20,8 @@ abstract class ModuleExamGridColumn(state: ExamGridColumnState, val module: Modu
 
 	override val excelColumnWidth: Int = ExamGridColumnOption.ExcelColumnSizes.WholeMark
 
+	val categoryShortForm: String
+
 	override def values: Map[ExamGridEntity, Map[YearOfStudy, Map[ExamGridColumnValueType, Seq[ExamGridColumnValue]]]] = {
 		state.entities.map(entity =>
 			entity -> entity.validYears.map { case (academicYear, entityYear) =>
@@ -146,6 +148,7 @@ class CoreModulesColumnOption extends ModuleExamGridColumnOption {
 		extends ModuleExamGridColumn(state, module, isDuplicate, cats) {
 
 		override val category: String = "Core Modules"
+		override val categoryShortForm: String = "CM"
 
 		override val moduleSelectionStatus = Option(ModuleSelectionStatus.Core)
 
@@ -172,6 +175,7 @@ class CoreRequiredModulesColumnOption extends ModuleExamGridColumnOption {
 		extends ModuleExamGridColumn(state, module, isDuplicate, cats) {
 
 		override val category: String = "Core Required Modules"
+		override val categoryShortForm: String = "CR"
 
 		override val moduleSelectionStatus = None
 
@@ -198,6 +202,7 @@ class CoreOptionalModulesColumnOption extends ModuleExamGridColumnOption {
 		extends ModuleExamGridColumn(state, module, isDuplicate, cats) {
 
 		override val category: String = "Core Optional Modules"
+		override val categoryShortForm: String = "CO"
 
 		override val moduleSelectionStatus = Option(ModuleSelectionStatus.OptionalCore)
 
@@ -224,6 +229,7 @@ class OptionalModulesColumnOption extends ModuleExamGridColumnOption {
 		extends ModuleExamGridColumn(state, module, isDuplicate, cats) {
 
 		override val category: String = "Optional Modules"
+		override val categoryShortForm: String = "OM"
 
 		override val moduleSelectionStatus = Option(ModuleSelectionStatus.Option)
 

@@ -72,6 +72,7 @@ sealed trait ExamGridColumnOption {
 
 	val identifier: ExamGridColumnOption.Identifier
 	val label: String
+	val shortLabel: String = label
 	val sortOrder: Int
 	val mandatory: Boolean = false
 
