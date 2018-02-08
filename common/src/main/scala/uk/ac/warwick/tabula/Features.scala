@@ -147,7 +147,7 @@ abstract class Features {
 	@Value("${features.openEndedReminderDateCM2:false}") var openEndedReminderDateCM2: Boolean = defaults.openEndedReminderDateCM2
 	@Value("${features.redirectCM1:true}") var redirectCM1: Boolean = defaults.redirectCM1
 	@Value("${features.moderationSelector:true}") var moderationSelector: Boolean = defaults.moderationSelector
-	@Value("${features.bulkModeration:true}") var bulkModeration: Boolean = defaults.bulkModeration
+	@Value("${features.bulkModeration:false}") var bulkModeration: Boolean = defaults.bulkModeration
 
 
 
