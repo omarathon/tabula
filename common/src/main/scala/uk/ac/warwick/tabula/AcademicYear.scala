@@ -62,6 +62,7 @@ case class AcademicYear(underlying: JAcademicYear) extends Ordered[AcademicYear]
 		juneThisYear.isBefore(date)
 	}
 
+	def placeholder: Boolean = underlying.isPlaceholder
 	def termsAndVacations: Seq[AcademicPeriod] = underlying.getPeriods.asScala.map { p => p: AcademicPeriod }
 	def termOrVacationForDate(now: LocalDate): AcademicPeriod = underlying.getPeriod(now.asJava)
 	def termOrVacation(periodType: JAcademicYearPeriod.PeriodType): AcademicPeriod = underlying.getPeriod(periodType)

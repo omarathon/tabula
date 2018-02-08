@@ -135,8 +135,9 @@
 
 		var weeks = ${weekRangesDumper()};
 
-		var $calendar = $('.calendar');
-		if ($calendar.is(':visible')) {
+		var createCalendarOnce = _.once(function () {
+			var $calendar = $('.calendar');
+
 			Profiles.createCalendar(
 				$calendar,
 				$calendar.data('viewname'),
@@ -151,9 +152,9 @@
 						var endToSend = new Date(end.getTime());
 						endToSend.setDate(endToSend.getDate() + 1);
 						return {
-							'from':startToSend.getTime(),
-							'to':endToSend.getTime(),
-							'cb':new Date().valueOf() // Break the IE cache
+							from: startToSend.getTime(),
+							to: endToSend.getTime(),
+							cb: new Date().valueOf() // Break the IE cache
 						};
 					},
 					'GET'
@@ -166,21 +167,34 @@
 				</#if>
 			);
 			$calendar.find('table').attr('role', 'presentation');
-		} else {
+		});
+
+		var createSmallScreenCalendarOnce = _.once(function () {
 			Profiles.createSmallScreenCalender(
 				$('.calendar-smallscreen'),
 				$('.calendar-smallscreen-loading'),
 				'/api/v1/member/${member.universityId}/timetable/calendar',
-				function(startDate, endDate) {
+				function (startDate, endDate) {
 					return {
-						'from':startDate.getTime(),
-						'to':endDate.getTime(),
-						'cb':new Date().valueOf() // Break the IE cache
+						from: startDate.getTime(),
+						to: endDate.getTime(),
+						cb: new Date().valueOf() // Break the IE cache
 					};
 				},
 				'GET'
-			)
+			);
+		});
+
+		function createCalendar() {
+			if ($('.calendar').is(':visible')) {
+				createCalendarOnce();
+			} else {
+				createSmallScreenCalendarOnce();
+			}
 		}
+
+		createCalendar();
+		$(window).on('id7:reflow', createCalendar);
 	});
 </script>
 

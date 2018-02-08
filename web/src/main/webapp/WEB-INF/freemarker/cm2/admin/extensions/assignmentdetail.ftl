@@ -179,7 +179,7 @@
 					<p><#noescape>${feedbackNotice}</#noescape></p>
 				</#if>
 
-				<#if features.disabilityRenderingInExtensions && detail.extension.disabilityAdjustment && student?? && student.disability.reportable && can.do("Profiles.Read.Disability", student)>
+				<#if features.disabilityRenderingInExtensions && detail.extension.disabilityAdjustment && student?? && (student.disability.reportable)!false && can.do("Profiles.Read.Disability", student)>
 					<p>${student.firstName} has requested their ${(student.disability.definition)!"recorded disability"} be taken into consideration.</p>
 				</#if>
 

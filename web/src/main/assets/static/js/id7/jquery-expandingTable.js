@@ -77,24 +77,38 @@ jQuery.fn.expandingTable = function(options) {
 						// Add bottom padding equivalent to the height of the content to the content cell
 						var cellPosition = $contentCell.position();
 
-						$contentCell.css('padding-bottom', '');
-						var cellHeight = $contentCell.outerHeight();
+						var tablePosition = $table.position();
+
+						// Check if the table has rendered inside an ID7 wide tables widget
+						var $offsetParent = $contentCell.offsetParent();
+						if ($offsetParent.is('.table-responsive')) {
+							var offsetParentPosition = $offsetParent.position();
+
+							// Adjust the cell position to account for the placement of the table
+							cellPosition.top += offsetParentPosition.top;
+							cellPosition.left += offsetParentPosition.left;
+
+							tablePosition.left += offsetParentPosition.left;
+
+							// Make sure the content isn't wider than the screen
+							$content.outerWidth($offsetParent.outerWidth());
+						}
+
+						var cellHeight = $contentCell.css('padding-bottom', 0).outerHeight();
 						var contentHeight = $content.outerHeight();
 						$contentCell.css('padding-bottom', contentHeight + 10);
 
 						// Position the content div in the correct location
 						$content.css({
-							top: (cellPosition.top + cellHeight - 2) + 'px',
-							left: ($table.position().left + 1) + 'px'
+							top: cellPosition.top + cellHeight,
+							left: tablePosition.left
 						});
 					}
 				}
 			});
 		}
 
-		$table.on('tabula.expandingTable.repositionContent', function() {
-			repositionContentBoxes();
-		});
+		$table.on('tabula.expandingTable.repositionContent', repositionContentBoxes);
 
 		function hideContent($content, $row, $icon) {
 			var $contentCell = $('.content-cell', $row);
@@ -212,6 +226,8 @@ jQuery.fn.expandingTable = function(options) {
 		$(document).on('tabula.expandingTable.contentChanged', function(evt) {
 			repositionContentBoxes();
 		});
+
+		$(window).on('id7:reflow', repositionContentBoxes);
 
 		if(allowTableSort) {
 			$.tablesorter.addWidget({

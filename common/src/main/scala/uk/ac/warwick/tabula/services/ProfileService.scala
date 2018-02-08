@@ -71,8 +71,9 @@ trait ProfileService {
 	def getDisability(code: String): Option[Disability]
 
 	def findUsercodesInHomeDepartment(department: Department): Seq[String]
-	def findTeachingStaffUsercodesInHomeDepartment(department: Department): Seq[String]
-	def findAdminStaffUsercodesInHomeDepartment(department: Department): Seq[String]
+	def findStaffUsercodesInHomeDepartment(department: Department): Seq[String]
+	@deprecated("TeachingStaff attribute is not reliable", since = "2018.2.2") def findTeachingStaffUsercodesInHomeDepartment(department: Department): Seq[String]
+	@deprecated("TeachingStaff attribute is not reliable", since = "2018.2.2") def findAdminStaffUsercodesInHomeDepartment(department: Department): Seq[String]
 	def findUndergraduatesUsercodesInHomeDepartment(department: Department): Seq[String]
 	def findTaughtPostgraduatesUsercodesInHomeDepartment(department: Department): Seq[String]
 	def findResearchPostgraduatesUsercodesInHomeDepartment(department: Department): Seq[String]
@@ -377,6 +378,12 @@ abstract class AbstractProfileService extends ProfileService with Logging {
 		memberDao.findAllUsercodesByRestrictions(Seq(
 			ScalaRestriction.is("homeDepartment", department.rootDepartment).get
 		))
+	}
+
+	override def findStaffUsercodesInHomeDepartment(department: Department): Seq[String] = transactional(readOnly = true) {
+		memberDao.findAllUsercodesByRestrictions(Seq(
+			ScalaRestriction.is("homeDepartment", department.rootDepartment).get
+		), staffOnly = true)
 	}
 
 	override def findTeachingStaffUsercodesInHomeDepartment(department: Department): Seq[String] = transactional(readOnly = true) {

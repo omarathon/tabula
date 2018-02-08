@@ -13,7 +13,7 @@
 						<@f.options items=previousMarkers itemLabel="fullName" itemValue="userId" />
 					</@f.select>
 				</@bs3form.labelled_form_group>
-				<@bs3form.form_group>
+				<@bs3form.labelled_form_group  labelText="Moderate submissions">
 					<div class="form-inline">
 						<@bs3form.form_group path="direction">
 							<@f.select path="direction" id="direction" cssClass="form-control">
@@ -31,32 +31,35 @@
 					</div>
 					<div class="help-block">
 						<@bs3form.errors path="adjustment"/>
-						Decimals will be rounded up
+						Decimals are rounded up.
 					</div>
-				</@bs3form.form_group>
+				</@bs3form.labelled_form_group>
 
 				<#list previousMarkers as marker>
-
 					<#assign validForAdjustment = mapGet(command.validForAdjustment, marker)![]/>
-
-					<p style="display:none;" class="marker-specific marker-${marker.userId}">
-						Marker feedback for <@fmt.p validForAdjustment?size "student" /> will be amended. This includes any feedback that has already been moderated,
-						feedback yet to be moderated and feedback that was not selected for moderation. Students that have not yet been marked by ${marker.fullName} will
-						not be amended.
-					</p>
-
-					<#assign skipReasons = mapGet(command.skipReasons, marker)/>
-					<#if skipReasons?has_content>
-						<div style="display:none;" class="marker-specific marker-${marker.userId}">
-							<p>The following students will not be included in the bulk moderation:</p>
+					<div style="display:none;" class="marker-specific marker-${marker.userId}">
+						<p>
+							Marks for <@fmt.p validForAdjustment?size "student" /> will change. This includes any submissions that:
+						</p>
+						<ul>
+							<li>are already moderated</li>
+							<li>are not moderated</li>
+							<li>are not selected for moderation</li>
+						</ul>
+						<p>
+							Unmarked submissions allocated to ${marker.fullName} will not change.
+						</p>
+						<#assign skipReasons = mapGet(command.skipReasons, marker)/>
+						<#if skipReasons?has_content>
+							<p>The following students are not included in the bulk moderation:</p>
 							<ul>
 								<#list skipReasons?keys as student>
 									<#assign reasons = mapGet(skipReasons, student) />
 									<li>${student.warwickId} - ${reasons?join(", ")}</li>
 								</#list>
 							</ul>
-						</div>
-					</#if>
+						</#if>
+					</div>
 				</#list>
 			</@modal.body>
 			<@modal.footer>

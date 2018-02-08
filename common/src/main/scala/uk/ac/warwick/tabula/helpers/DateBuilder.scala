@@ -1,12 +1,12 @@
 package uk.ac.warwick.tabula.helpers
 
-import scala.collection.JavaConversions._
+import freemarker.template.{TemplateMethodModelEx, TemplateModel}
+import freemarker.template.utility.DeepUnwrap
 import org.joda.time._
 import org.joda.time.format.DateTimeFormat
-import freemarker.template.TemplateMethodModelEx
-import freemarker.template.TemplateModel
-import freemarker.template.utility.DeepUnwrap
 import uk.ac.warwick.tabula.JavaImports._
+
+import scala.collection.JavaConversions._
 
 object DateBuilder {
 
@@ -23,28 +23,16 @@ object DateBuilder {
 		true -> _relativeWords,
 		false -> _relativeWords.mapValues(_.toLowerCase))
 
-	/* called with just a DateTime - use the default arguments */
-	def format(date: ReadableDateTime): String =
-		format(date=date,
-			includeSeconds=false,
-			includeAt=true,
-			includeTimezone=false,
-			capitalise=true,
-			relative=true,
-			split=false,
-			shortMonth=false,
-			includeTime=true)
-
 	/* everything is specified, including whether minutes should be included */
 	def format(date: ReadableDateTime,
-			includeSeconds: Boolean,
-			includeAt: Boolean,
-			includeTimezone: Boolean,
-			capitalise: Boolean,
-			relative: Boolean,
-			split: Boolean,
-			shortMonth: Boolean,
-			includeTime: Boolean): String = {
+		includeSeconds: Boolean = false,
+		includeAt: Boolean = true,
+		includeTimezone: Boolean = false,
+		capitalise: Boolean = true,
+		relative: Boolean = true,
+		split: Boolean = false,
+		shortMonth: Boolean = false,
+		includeTime: Boolean = true): String = {
 		if (includeTime) {
 			val pattern = new StringBuilder
 			pattern.append("HH:mm")
