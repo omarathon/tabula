@@ -6,14 +6,12 @@
 	</script>
 	<#if hasDatePicker>
 		<@f.form method="get" action="" commandName="${commandName}" cssClass="form-inline double-submit-protection">
-			<div class="form-group">
-				<label>Start date</label>
+			<@bs3form.labelled_form_group path="startDate" labelText="Start date">
 				<@f.input id="startDate" path="startDate" cssClass="date-picker input-small form-control" />
-			</div>
-			<div class="form-group">
-				<label>End date</label>
+			</@bs3form.labelled_form_group>
+			<@bs3form.labelled_form_group path="endDate" labelText="End date">
 				<@f.input id="endDate" path="endDate" cssClass="date-picker input-small form-control" />
-			</div>
+			</@bs3form.labelled_form_group>
 			<div class="form-group">
 				<button type="submit" class="btn btn-default">Submit</button>
 			</div>

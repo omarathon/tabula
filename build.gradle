@@ -21,7 +21,7 @@ plugins {
 ext {
     scalaVersion = "2.11.11"
     scalaMajorVersion = "2.11"
-    springVersion = "4.2.9.RELEASE"
+    springVersion = "4.3.14.RELEASE"
     hibernateVersion = "4.3.11.Final"
     jacksonVersion = "2.6.7"
     elasticsearchVersion = "2.1.1"
