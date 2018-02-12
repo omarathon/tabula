@@ -89,6 +89,11 @@ trait FilterStudentsOrRelationships extends FiltersStudentsBase with Permissions
 
 	def isFinalistRestriction: Option[ScalaRestriction]
 
+	def hallOfResidenceRestriction: Option[ScalaRestriction] = inIfNotEmpty(
+		"termtimeAddress.line2", hallsOfResidence.asScala,
+		getAliasPaths("termtimeAddress") : _*
+	)
+
 	protected def buildRestrictions(year: AcademicYear): Seq[ScalaRestriction] = {
 		val restrictions = Seq(
 			courseTypeRestriction,
@@ -103,7 +108,8 @@ trait FilterStudentsOrRelationships extends FiltersStudentsBase with Permissions
 			notTier4Restriction,
 			visitingRestriction,
 			enrolledOrCompletedRestriction,
-			isFinalistRestriction
+			isFinalistRestriction,
+			hallOfResidenceRestriction
 		).flatten
 
 		if (restrictions.exists { _.aliases.keys.exists(key => key.contains("studentCourseYearDetails")) }) {

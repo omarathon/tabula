@@ -26,6 +26,7 @@ trait FiltersStudentsBase {
 	def modules: JList[Module]
 	def defaultOrder: Seq[Order]
 	def sortOrder: JList[Order]
+	def hallsOfResidence: JList[String]
 	var otherCriteria: JList[String] = JArrayList()
 
 	protected def modulesForDepartmentAndSubDepartments(department: Department): Seq[Module] =
@@ -44,6 +45,7 @@ trait FiltersStudentsBase {
 		levelCodes.asScala.foreach(p => result.addQueryParameter("levelCodes", p))
 		sprStatuses.asScala.foreach(p => result.addQueryParameter("sprStatuses", p.code))
 		modules.asScala.foreach(p => result.addQueryParameter("modules", p.code))
+		hallsOfResidence.asScala.foreach(p => result.addQueryParameter("hallsOfResidence", p))
 		otherCriteria.asScala.foreach(p => result.addQueryParameter("otherCriteria", p.toString))
 		if (result.getQuery == null)
 			""
@@ -61,6 +63,7 @@ trait FiltersStudentsBase {
 			"levelCodes" -> levelCodes.asScala.mkString(","),
 			"sprStatuses" -> sprStatuses.asScala.map{_.code}.mkString(","),
 			"modules" -> modules.asScala.map{_.code}.mkString(","),
+			"hallsOfResidence" -> hallsOfResidence.asScala.mkString(","),
 			"otherCriteria" -> otherCriteria.asScala.mkString(",")
 		)
 	}
@@ -143,6 +146,8 @@ trait DeserializesFilterImpl extends DeserializesFilter with Logging with Filter
 				case _ => logger.warn(s"Could not deserialize filter with module $item")
 			}
 		}}
+		hallsOfResidence.clear()
+		params.get("hallsOfResidence").foreach{_.foreach{ item => hallsOfResidence.add(item) }}
 		otherCriteria.clear()
 		params.get("otherCriteria").foreach{_.foreach{ item => otherCriteria.add(item) }}
 	}
