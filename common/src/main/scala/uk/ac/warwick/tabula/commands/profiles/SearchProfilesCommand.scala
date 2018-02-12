@@ -34,7 +34,7 @@ class SearchProfilesCommandInternal(val currentMember: Member, user: CurrentUser
 			}
 			Set(dept) ++ children(dept)
 		})
-		profileService.findMembersByQuery(query, deptsAndDescendantDepts, userTypes, searchAllDepts)
+		profileService.findMembersByQuery(query, deptsAndDescendantDepts, userTypes, searchAllDepts, activeOnly = !includePast)
 	}
 }
 
