@@ -1,11 +1,11 @@
 package uk.ac.warwick.tabula.commands
 
-import org.hibernate.criterion.{Restrictions, Projections, DetachedCriteria}
+import org.hibernate.criterion.{DetachedCriteria, Projections, Restrictions}
 import org.hibernate.sql.JoinType
 import uk.ac.warwick.tabula.AcademicYear
-import uk.ac.warwick.tabula.data.model._
-import uk.ac.warwick.tabula.data.{HibernateHelpers, AliasAndJoinType, ScalaRestriction}
 import uk.ac.warwick.tabula.data.ScalaRestriction._
+import uk.ac.warwick.tabula.data.model._
+import uk.ac.warwick.tabula.data.{AliasAndJoinType, HibernateHelpers, ScalaRestriction}
 
 import scala.collection.JavaConverters._
 
@@ -51,6 +51,9 @@ object FiltersStudents {
 		"statusOnRoute" -> Seq(
 			"mostSignificantCourse" -> AliasAndJoinType("mostSignificantCourse"),
 			"mostSignificantCourse.statusOnRoute" -> AliasAndJoinType("statusOnRoute")
+		),
+		"termtimeAddress" -> Seq(
+			"termtimeAddress" -> AliasAndJoinType("termtimeAddress")
 		)
 	).toMap
 

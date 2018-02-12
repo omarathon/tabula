@@ -31,6 +31,10 @@ object FiltersRelationships {
 		"department" -> Seq(
 			"route" -> AliasAndJoinType("route"),
 			"route.adminDepartment" -> AliasAndJoinType("department")
+		),
+		"termtimeAddress" -> Seq(
+			"student" -> AliasAndJoinType("student"),
+			"student.termtimeAddress" -> AliasAndJoinType("termtimeAddress")
 		)
 	).toMap
 
