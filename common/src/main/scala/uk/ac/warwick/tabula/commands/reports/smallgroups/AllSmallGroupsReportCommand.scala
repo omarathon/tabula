@@ -3,7 +3,7 @@ package uk.ac.warwick.tabula.commands.reports.smallgroups
 import org.joda.time.{DateTime, LocalDate}
 import uk.ac.warwick.tabula.AcademicYear
 import uk.ac.warwick.tabula.commands._
-import uk.ac.warwick.tabula.commands.reports.{ReportCommandRequest, ReportCommandState, ReportPermissions}
+import uk.ac.warwick.tabula.commands.reports.{ReportCommandRequest, ReportCommandRequestValidation, ReportCommandState, ReportPermissions}
 import uk.ac.warwick.tabula.data.AttendanceMonitoringStudentData
 import uk.ac.warwick.tabula.data.model.Department
 import uk.ac.warwick.tabula.data.model.attendance.AttendanceState
@@ -15,17 +15,21 @@ import uk.ac.warwick.userlookup.User
 import scala.collection.JavaConverters._
 
 object AllSmallGroupsReportCommand {
+	type ResultType = AllSmallGroupsReportCommandResult
+	type CommandType = Appliable[AllSmallGroupsReportCommandResult] with ReportCommandRequestValidation
+
 	def apply(
 		department: Department,
 		academicYear: AcademicYear,
 		filter: AllSmallGroupsReportCommandResult => AllSmallGroupsReportCommandResult
-	) =
+	): CommandType =
 		new AllSmallGroupsReportCommandInternal(department, academicYear, filter)
 			with AutowiringSmallGroupServiceComponent
 			with AutowiringAttendanceMonitoringServiceComponent
 			with ComposableCommand[AllSmallGroupsReportCommandResult]
 			with ReportPermissions
 			with ReportCommandRequest
+			with ReportCommandRequestValidation
 			with AllSmallGroupsReportCommandState
 			with ReadOnly with Unaudited
 }
@@ -52,7 +56,12 @@ class AllSmallGroupsReportCommandInternal(
 	self: SmallGroupServiceComponent with AttendanceMonitoringServiceComponent with ReportCommandRequest =>
 
 	override def applyInternal(): AllSmallGroupsReportCommandResult = {
-		val thisWeek = academicYear.weekForDate(LocalDate.now).weekNumber
+		val thisWeek =
+			if (!academicYear.firstDay.isAfter(LocalDate.now) && !academicYear.lastDay.isBefore(LocalDate.now))
+				academicYear.weekForDate(LocalDate.now).weekNumber
+			else
+				academicYear.weeks.keys.max + 1
+
 		val thisDay = DateTime.now.getDayOfWeek
 		val weeksForYear = academicYear.weeks
 		def weekNumberToDate(weekNumber: Int, dayOfWeek: DayOfWeek) =

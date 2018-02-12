@@ -192,7 +192,7 @@
 			</div>
 		</header>
 
-		<div class="id7-main-content">
+		<div class="id7-main-content" data-popout="false">
 			<@tiles.insertAttribute name="body" />
 		</div>
 	</main>

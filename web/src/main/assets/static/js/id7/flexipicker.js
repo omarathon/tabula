@@ -816,15 +816,16 @@ var LocationPicker = function (options) {
 				self.currentSearch = null;
 			}
 			self.currentSearch = $.ajax({
-				url: 'https://campus.warwick.ac.uk/warwick/API/getAC?callback=?',
+				url: 'https://campus-cms.warwick.ac.uk/api/v1/projects/1/autocomplete.json',
 				dataType: 'json',
+				headers: {
+					Authorization: 'Token 3a08c5091e5e477faa6ea90e4ae3e6c3',
+				},
 				data: {
-					mlim: 2,
+					exact_limit: 2,
 					limit: 1000,
-					type: 'lb',
-					key: '$2a$11$ra7c/DofvF6yZuQhl.SBEuLrA8k2fvyt.WlJ8bbI.Asd1OyT.N2JS',
-					_ts: new Date().getTime(),
-					q: query
+					term: query,
+					_ts: new Date().getTime()
 				},
 				success: function(data) {
 					process(data)
@@ -841,9 +842,15 @@ var LocationPicker = function (options) {
 		items = $(items).map(function (i, item) {
 			if (item != undefined) {
 				i = $(that.options.item);
-				i.attr('data-lid', item.lid);
-				i.find('div.name').html(that.highlighter(item.name));
-				i.find('div.department').html(item.sub || '&nbsp;');
+				i.attr('data-lid', item.w2gid);
+				i.find('div.name').html(that.highlighter(item.value));
+				var details = null;
+				if (item.building && item.floor) {
+					details = item.building + ', ' + item.floor;
+				} else if (item.building) {
+					details = item.building;
+				}
+				i.find('div.department').html(details || '&nbsp;');
 				return i[0];
 			} else {
 				// no idea what's happened here. Return an empty item.

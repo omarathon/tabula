@@ -288,7 +288,7 @@ class FeaturesMessage {
 	@BeanProperty var openEndedReminderDateCM2 = false
 	@BeanProperty var redirectCM1 = true
 	@BeanProperty var moderationSelector = true
-	@BeanProperty var bulkModeration = false
+	@BeanProperty var bulkModeration = true
 }
 
 class FeatureFlagListener extends QueueListener with InitializingBean with Logging {
