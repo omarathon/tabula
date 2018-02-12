@@ -383,14 +383,19 @@
 							<div class="col-md-3">Details</div>
 							<div class="col-md-3">Status</div>
 							<div class="col-md-4">Progress</div>
-							<#if show_actions>
+							<#if (show_actions?is_hash && show_actions?size != 0) || (show_actions?is_boolean && show_actions)>
 								<div class="col-md-2">Actions</div>
 							</#if>
 						</div>
 
 						<#list assignments as info>
 							<span id="marker-assignment-container-${info.assignment.id}">
-								<@marker_assignment_info info verb marker show_actions />
+								<#if show_actions?is_hash>
+									<#assign assignment_show_actions=show_actions[info.assignment.id] />
+								<#else>
+									<#assign assignment_show_actions=show_actions />
+								</#if>
+								<@marker_assignment_info info verb marker assignment_show_actions />
 							</span>
 						</#list>
 					</div>

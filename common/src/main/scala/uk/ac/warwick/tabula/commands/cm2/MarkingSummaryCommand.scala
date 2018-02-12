@@ -64,6 +64,8 @@ object MarkingSummaryCommand {
 		completedAssignments: Seq[MarkerAssignmentInfo]
 	) {
 		def isEmpty: Boolean = upcomingAssignments.isEmpty && actionRequiredAssignments.isEmpty && noActionRequiredAssignments.isEmpty && completedAssignments.isEmpty
+
+		def allAssignments: Seq[MarkerAssignmentInfo] = upcomingAssignments ++ actionRequiredAssignments ++ noActionRequiredAssignments ++ completedAssignments
 	}
 
 	type Command = Appliable[MarkingSummaryMarkerInformation]

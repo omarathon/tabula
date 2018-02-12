@@ -52,12 +52,19 @@ class ViewProfileMarkingController extends AbstractViewProfileController {
 
 		val isSelf = user.universityId.maybeText.getOrElse("") == member.universityId
 
+		val result = command.map(_.apply())
+
+		val permissionsMap = result
+			.map(_.allAssignments).getOrElse(Seq.empty)
+			.map(info => (info.assignment.id, isSelf || securityService.can(user, Permissions.Assignment.MarkOnBehalf, info.assignment)))
+			.toMap
+
 		Mav("profiles/profile/marking",
 			"hasPermission" -> command.nonEmpty,
 			"command" -> command,
-			"result" -> command.map(_.apply()).orNull,
+			"result" -> result.orNull,
 			"isSelf" -> isSelf,
-			"showMarkingActions" -> (isSelf || securityService.can(user, Permissions.Assignment.MarkOnBehalf, member)),
+			"showMarkingActions" -> permissionsMap,
 			"marker" -> member.asSsoUser
 		)
 	}
