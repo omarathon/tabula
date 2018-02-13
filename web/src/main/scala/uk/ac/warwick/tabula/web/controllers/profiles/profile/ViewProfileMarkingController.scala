@@ -3,8 +3,9 @@ package uk.ac.warwick.tabula.web.controllers.profiles.profile
 import org.springframework.stereotype.Controller
 import org.springframework.web.bind.annotation.{ModelAttribute, PathVariable, RequestMapping}
 import uk.ac.warwick.tabula.AcademicYear
-import uk.ac.warwick.tabula.commands.coursework.assignments.MarkerAssignmentsSummaryCommand
+import uk.ac.warwick.tabula.commands.cm2.MarkingSummaryCommand
 import uk.ac.warwick.tabula.data.model._
+import uk.ac.warwick.tabula.permissions.Permissions
 import uk.ac.warwick.tabula.profiles.web.Routes
 import uk.ac.warwick.tabula.web.Mav
 import uk.ac.warwick.tabula.web.controllers.profiles.ProfileBreadcrumbs
@@ -47,12 +48,24 @@ class ViewProfileMarkingController extends AbstractViewProfileController {
 	}
 
 	private def commonView(member: Member): Mav = {
-		val command = restricted(MarkerAssignmentsSummaryCommand(member))
+		val command = restricted(MarkingSummaryCommand(member))
+
+		val isSelf = user.universityId.maybeText.getOrElse("") == member.universityId
+
+		val result = command.map(_.apply())
+
+		val permissionsMap = result
+			.map(_.allAssignments).getOrElse(Seq.empty)
+			.map(info => (info.assignment.id, isSelf || securityService.can(user, Permissions.Assignment.MarkOnBehalf, info.assignment)))
+			.toMap
+
 		Mav("profiles/profile/marking",
 			"hasPermission" -> command.nonEmpty,
 			"command" -> command,
-			"result" -> command.map(_.apply()).orNull,
-			"isSelf" -> (user.universityId.maybeText.getOrElse("") == member.universityId)
+			"result" -> result.orNull,
+			"isSelf" -> isSelf,
+			"showMarkingActions" -> permissionsMap,
+			"marker" -> member.asSsoUser
 		)
 	}
 
