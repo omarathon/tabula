@@ -168,6 +168,9 @@
 			$('.content-container').on('tabula.expandingTable.parentRowExpanded', function () {
 				Coursework.equalHeightTabContent($(this));
 			});
+			$(window).on('id7:reflow', function () {
+				Coursework.equalHeightTabContent($('.content-container'));
+			});
 
 			// We probably just grew a scrollbar, so let's trigger a window resize
 			$(window).trigger('resize.ScrollToFixed');
