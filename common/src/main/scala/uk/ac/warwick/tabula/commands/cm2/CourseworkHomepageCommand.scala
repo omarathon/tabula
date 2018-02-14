@@ -78,13 +78,16 @@ class CourseworkHomepageCommandInternal(val user: CurrentUser) extends CommandIn
 	with CourseworkHomepageCommandState
 	with CourseworkHomepageHomeDepartment
 	with CourseworkHomepageStudentAssignments
-	with CourseworkHomepageMarkerAssignmentList
+	with MarkingSummaryCommandState
+	with MarkingSummaryMarkerAssignmentList
 	with CourseworkHomepageAdminDepartments
 	with TaskBenchmarking {
 	self: ModuleAndDepartmentServiceComponent
 		with AssessmentServiceComponent
 		with AssessmentMembershipServiceComponent
 		with CM2MarkingWorkflowServiceComponent =>
+
+	val target: MarkingSummaryCommandTarget = MarkingSummaryCurrentUserCommandTarget(user)
 
 	override def applyInternal(): Result =
 		CourseworkHomepageInformation(

@@ -129,19 +129,4 @@ class CourseworkHomepageCommandTest extends TestBase with Mockito {
 		command.moduleManagerDepartments should be (Seq(cs, po))
 		command.adminDepartments should be (Seq(es, po))
 	}}
-
-	private trait MarkerCommandFixture {
-		val command = new CourseworkHomepageMarkerAssignments with CourseworkHomepageCommandState with AssessmentServiceComponent
-			with CM2MarkingWorkflowServiceComponent with CM2WorkflowProgressServiceComponent with MarkerProgress with MarkerWorkflowInformation {
-			import MarkerWorkflowInformation._
-
-			val assessmentService: AssessmentService = smartMock[AssessmentService]
-			val cm2MarkingWorkflowService: CM2MarkingWorkflowService = smartMock[CM2MarkingWorkflowService]
-			val workflowProgressService: CM2WorkflowProgressService = smartMock[CM2WorkflowProgressService]
-
-			val user: CurrentUser = currentUser
-
-			override def markerWorkflowInformation(assignment: Assignment): Map[Usercode, WorkflowProgressInformation] = Map.empty
-		}
-	}
 }

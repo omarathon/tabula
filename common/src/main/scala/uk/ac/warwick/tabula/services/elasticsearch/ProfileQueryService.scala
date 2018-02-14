@@ -25,16 +25,17 @@ trait ProfileQueryMethods {
 		departments: Seq[Department],
 		includeTouched: Boolean,
 		userTypes: Set[MemberUserType],
-		searchAcrossAllDepartments: Boolean
+		searchAcrossAllDepartments: Boolean,
+		activeOnly: Boolean
 	): Seq[Member]
 
-	def find(query: String, departments: Seq[Department], userTypes: Set[MemberUserType], searchAllDepts: Boolean): Seq[Member] = {
+	def find(query: String, departments: Seq[Department], userTypes: Set[MemberUserType], searchAllDepts: Boolean, activeOnly: Boolean): Seq[Member] = {
 		if (!query.hasText) Nil
-		else findWithQuery(query, departments, includeTouched = true, userTypes = userTypes, searchAcrossAllDepartments = searchAllDepts)
+		else findWithQuery(query, departments, includeTouched = true, userTypes = userTypes, searchAcrossAllDepartments = searchAllDepts, activeOnly = activeOnly)
 	}
 
 	def find(ownDepartment: Department, includeTouched: Boolean, userTypes: Set[MemberUserType]): Seq[Member] =
-		findWithQuery("", Seq(ownDepartment), includeTouched, userTypes, searchAcrossAllDepartments = false)
+		findWithQuery("", Seq(ownDepartment), includeTouched, userTypes, searchAcrossAllDepartments = false, activeOnly = true)
 	}
 
 @Service
@@ -86,7 +87,8 @@ trait ProfileQueryMethodsImpl extends ProfileQueryMethods {
 		departments: Seq[Department],
 		includeTouched: Boolean,
 		userTypes: Set[MemberUserType],
-		searchAcrossAllDepartments: Boolean
+		searchAcrossAllDepartments: Boolean,
+		activeOnly: Boolean
 	): Seq[Member] =
 		if (departments.isEmpty && !searchAcrossAllDepartments) Seq()
 		else try {
@@ -117,19 +119,19 @@ trait ProfileQueryMethodsImpl extends ProfileQueryMethods {
 				})
 
 			// Active only
-			val inUseQuery = Some(bool {
+			val inUseQuery = if (activeOnly) Some(bool {
 				should(
 					termQuery("inUseFlag", "Active"),
 					prefixQuery("inUseFlag", "Inactive - Starts")
 				)
-			})
+			}) else None
 
 			// Course ended in the previous 6 months
-			val courseEndedQuery = Some(
+			val courseEndedQuery = if (activeOnly) Some(
 				rangeQuery("courseEndDate")
 					gte DateFormats.IsoDate.print(DateTime.now.minusMonths(6))
 					lte DateFormats.IsoDate.print(DateTime.now.plusYears(300))
-			)
+			) else None
 
 			val queries = Seq(textQuery, deptQuery, userTypeQuery, inUseQuery, courseEndedQuery).flatten
 

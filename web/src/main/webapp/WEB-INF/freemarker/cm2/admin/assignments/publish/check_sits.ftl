@@ -7,13 +7,24 @@
 
 <h2>${feedback.studentIdentifier}</h2>
 
-<div class="status hidden <#if !result.hasAssessmentGroups>error</#if>">
+<div class="status hidden <#if !result.hasAssessmentGroups || result.hasMultipleAssessmentGroups>error</#if>">
 	<div class="alert alert-info">
-		Checking for SITS links&hellip;
-		<div class="error-message hidden">
-			<p>This ${context} has no SITS links so this feedback cannot be uploaded to SITS.</p>
-			<p>Check whether a SITS link has been accidentally removed or if the student has been moved to an alternate assessment group.</p>
-		</div>
+		Checking SITS links&hellip;
+		<#if !result.hasAssessmentGroups>
+			<div class="error-message hidden">
+				<p>This ${context} has no SITS links so this feedback cannot be uploaded to SITS.</p>
+				<p>Check whether a SITS link has been accidentally removed or if the student has been moved to an alternate assessment group.</p>
+			</div>
+		</#if>
+
+		<#if result.hasMultipleAssessmentGroups>
+			<div class="error-message hidden">
+				<p>This student is a member of more than one of the assessment components linked to this ${context}.  Feedback can only be uploaded to a single assessment component for each student.</p>
+				<#if context == "assignment">
+					<p>Check that the correct <a href="<@routes.cm2.assignmentstudents assignment "edit" />">assessment components</a> are linked for this assignment, and that students are in the correct assessment components.</p>
+				</#if>
+			</div>
+		</#if>
 	</div>
 </div>
 
@@ -81,7 +92,7 @@
 						$('div.final-status').removeClass('hidden');
 					}
 				}
-			}, 1000);
+			}, 500);
 		};
 
 		showNextStatus();

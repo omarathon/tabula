@@ -1,10 +1,12 @@
 package uk.ac.warwick.tabula.web.controllers.reports.smallgroups
 
 import java.io.StringWriter
+import javax.validation.Valid
 
+import org.springframework.validation.Errors
 import org.springframework.web.bind.annotation.{ModelAttribute, PathVariable, RequestParam}
 import uk.ac.warwick.tabula.JavaImports._
-import uk.ac.warwick.tabula.commands.Appliable
+import uk.ac.warwick.tabula.commands.{Appliable, SelfValidating}
 import uk.ac.warwick.tabula.commands.reports.smallgroups._
 import uk.ac.warwick.tabula.permissions.{Permission, Permissions}
 import uk.ac.warwick.tabula.services.{AutowiringMaintenanceModeServiceComponent, AutowiringModuleAndDepartmentServiceComponent, AutowiringUserSettingsServiceComponent}
@@ -13,7 +15,7 @@ import uk.ac.warwick.tabula.data.model.Department
 import uk.ac.warwick.tabula.helpers.LazyMaps
 import uk.ac.warwick.tabula.web.Mav
 import uk.ac.warwick.tabula.web.controllers.reports.ReportsController
-import uk.ac.warwick.tabula.web.views.{CSVView, ExcelView, JSONView}
+import uk.ac.warwick.tabula.web.views.{CSVView, ExcelView, JSONErrorView, JSONView}
 import uk.ac.warwick.tabula.{AcademicYear, JsonHelper}
 import uk.ac.warwick.util.csv.GoodCsvDocument
 
@@ -24,11 +26,13 @@ abstract class AbstractSmallGroupsByModuleReportController extends ReportsContro
 	with DepartmentScopedController with AcademicYearScopedController with AutowiringUserSettingsServiceComponent with AutowiringModuleAndDepartmentServiceComponent
 	with AutowiringMaintenanceModeServiceComponent {
 
-	def filteredAttendanceCommand(department: Department, academicYear: AcademicYear): Appliable[AllSmallGroupsReportCommandResult]
+	validatesSelf[SelfValidating]
+
+	def filteredAttendanceCommand(department: Department, academicYear: AcademicYear): AllSmallGroupsReportCommand.CommandType
 
 	val filePrefix: String
 
-	def page(cmd: Appliable[AllSmallGroupsReportCommandResult], department: Department, academicYear: AcademicYear): Mav
+	def page(cmd: AllSmallGroupsReportCommand.CommandType, errors: Errors, department: Department, academicYear: AcademicYear): Mav
 
 	override val departmentPermission: Permission = Permissions.Department.Reports
 
@@ -51,39 +55,43 @@ abstract class AbstractSmallGroupsByModuleReportController extends ReportsContro
 	@RequestMapping(method = Array(POST))
 	def apply(
 		@ModelAttribute("command") cmd: Appliable[SmallGroupsByModuleReportCommandResult] with SetsFilteredAttendance,
-		@ModelAttribute("filteredAttendanceCommand") filteredAttendanceCmd: Appliable[AllSmallGroupsReportCommandResult],
+		@Valid @ModelAttribute("filteredAttendanceCommand") filteredAttendanceCmd: AllSmallGroupsReportCommand.CommandType,
+		errors: Errors,
 		@PathVariable department: Department,
 		@PathVariable academicYear: AcademicYear
 	): Mav = {
-		cmd.setFilteredAttendance(filteredAttendanceCmd.apply())
-		val result = cmd.apply()
-		val allStudents: Seq[Map[String, String]] = result.studentDatas.map(studentData =>
-			Map(
-				"firstName" -> studentData.firstName,
-				"lastName" -> studentData.lastName,
-				"userId" -> studentData.userId,
-				"universityId" -> studentData.universityId,
-				"yearOfStudy" -> studentData.yearOfStudy,
-				"sprCode" -> studentData.sprCode,
-				"route" -> studentData.routeCode
+		if (errors.hasErrors) Mav(new JSONErrorView(errors))
+		else {
+			cmd.setFilteredAttendance(filteredAttendanceCmd.apply())
+			val result = cmd.apply()
+			val allStudents: Seq[Map[String, String]] = result.studentDatas.map(studentData =>
+				Map(
+					"firstName" -> studentData.firstName,
+					"lastName" -> studentData.lastName,
+					"userId" -> studentData.userId,
+					"universityId" -> studentData.universityId,
+					"yearOfStudy" -> studentData.yearOfStudy,
+					"sprCode" -> studentData.sprCode,
+					"route" -> studentData.routeCode
+				)
 			)
-		)
-		val allModules: Seq[Map[String, String]] = result.modules.map(module =>
-			Map(
-				"id" -> module.id,
-				"code" -> module.code,
-				"name" -> module.name
+			val allModules: Seq[Map[String, String]] = result.modules.map(module =>
+				Map(
+					"id" -> module.id,
+					"code" -> module.code,
+					"name" -> module.name
+				)
 			)
-		)
-		Mav(new JSONView(Map(
-			"counts" -> result.counts.map{case(student, moduleMap) =>
-				student.getWarwickId -> moduleMap.map{case(module, count) =>
-					module.id -> count.toString
-				}
-			},
-			"students" -> allStudents,
-			"modules" -> allModules
-		)))
+			Mav(new JSONView(Map(
+				"counts" -> result.counts.map { case (student, moduleMap) =>
+					student.getWarwickId -> moduleMap.map { case (module, count) =>
+						module.id -> count.toString
+					}
+				},
+				"students" -> allStudents,
+				"modules" -> allModules
+			)))
+		}
 	}
 
 	@RequestMapping(method = Array(POST), value = Array("/download.csv"))

@@ -31,7 +31,6 @@
 				<div class="header" id="search-header">
 					<h2 class="section">Search profiles</h2>
 				</div>
-				<p class="subtler">Type or paste a name or University ID</p>
 
 				<#include "../profile/search/form.ftl" />
 

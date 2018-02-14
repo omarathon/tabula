@@ -370,7 +370,7 @@
 	</#if>
 </#macro>
 
-<#macro marker_assignment_list id title assignments verb="Mark" expand_by_default=true>
+<#macro marker_assignment_list id title assignments verb="Mark" expand_by_default=true marker=user.apparentUser show_actions=true>
 	<span id="${id}-container">
 		<#local has_assignments = (assignments!?size gt 0) />
 		<div id="${id}" class="striped-section marker-assignment-list<#if has_assignments> collapsible<#if expand_by_default> expanded</#if><#else> empty</#if>" data-name="${id}">
@@ -383,12 +383,19 @@
 							<div class="col-md-3">Details</div>
 							<div class="col-md-3">Status</div>
 							<div class="col-md-4">Progress</div>
-							<div class="col-md-2">Actions</div>
+							<#if (show_actions?is_hash && show_actions?size != 0) || (show_actions?is_boolean && show_actions)>
+								<div class="col-md-2">Actions</div>
+							</#if>
 						</div>
 
 						<#list assignments as info>
 							<span id="marker-assignment-container-${info.assignment.id}">
-								<@marker_assignment_info info verb />
+								<#if show_actions?is_hash>
+									<#assign assignment_show_actions=show_actions[info.assignment.id] />
+								<#else>
+									<#assign assignment_show_actions=show_actions />
+								</#if>
+								<@marker_assignment_info info verb marker assignment_show_actions />
 							</span>
 						</#list>
 					</div>
@@ -470,7 +477,7 @@
 	</div>
 </#macro>
 
-<#macro marker_assignment_info info verb="Mark">
+<#macro marker_assignment_info info verb="Mark" marker=user.apparentUser show_actions=true>
 	<#local assignment = info.assignment />
 	<div class="item-info row marker-assignment-${assignment.id}">
 		<div class="col-md-3">
@@ -499,7 +506,7 @@
 				</#list>
 			</ul>
 		</div>
-		<div class="col-md-4">
+		<div class="col-md-${show_actions?string('4', '6')}">
 			<@stage_progress_bar info.stages />
 
 			<#if info.feedbackDeadline??>
@@ -531,19 +538,21 @@
 				</div>
 			</#if>
 		</div>
+		<#if show_actions>
 		<div class="col-md-2">
 			<#if verb?has_content>
 				<#if assignment.cm2Assignment>
-					<a class="btn btn-block btn-primary" href="<@routes.cm2.listmarkersubmissions assignment user.apparentUser />">
+					<a class="btn btn-block btn-primary" href="<@routes.cm2.listmarkersubmissions assignment marker />">
 						${verb}
 					</a>
 				<#else>
-					<a class="btn btn-block btn-primary" href="<@routes.coursework.listmarkersubmissions assignment user.apparentUser />">
+					<a class="btn btn-block btn-primary" href="<@routes.coursework.listmarkersubmissions assignment marker />">
 						${verb}
 					</a>
 				</#if>
 			</#if>
 		</div>
+		</#if>
 	</div>
 </#macro>
 

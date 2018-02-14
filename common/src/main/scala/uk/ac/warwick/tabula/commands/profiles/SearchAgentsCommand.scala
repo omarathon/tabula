@@ -21,6 +21,6 @@ class SearchAgentsCommandInternal(user: CurrentUser) extends AbstractSearchProfi
 		else Seq()
 
 	private def queryMatches = {
-		profileQueryService.findWithQuery(query, Seq(), includeTouched = false, userTypes, searchAcrossAllDepartments = true)
+		profileQueryService.findWithQuery(query, Seq(), includeTouched = false, userTypes, searchAcrossAllDepartments = true, activeOnly = true)
 	}
 }

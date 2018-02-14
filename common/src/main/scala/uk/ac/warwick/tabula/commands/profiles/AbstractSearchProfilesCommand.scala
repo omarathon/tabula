@@ -68,4 +68,6 @@ trait AbstractSearchProfilesCommandState {
 	var query: String = _
 
 	var searchAllDepts: Boolean = _
+
+	var includePast: Boolean = _
 }

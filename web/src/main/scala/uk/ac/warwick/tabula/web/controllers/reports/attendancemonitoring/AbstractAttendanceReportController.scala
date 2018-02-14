@@ -1,21 +1,22 @@
 package uk.ac.warwick.tabula.web.controllers.reports.attendancemonitoring
 
 import java.io.StringWriter
+import javax.validation.Valid
 
 import freemarker.template.{Configuration, DefaultObjectWrapper}
+import org.springframework.validation.Errors
 import org.springframework.web.bind.annotation.{ModelAttribute, PathVariable, RequestParam}
 import uk.ac.warwick.tabula.JavaImports._
-import uk.ac.warwick.tabula.commands.Appliable
-import uk.ac.warwick.tabula.commands.reports.attendancemonitoring.AllAttendanceReportCommand.AllAttendanceReportCommandResult
+import uk.ac.warwick.tabula.commands.{Appliable, SelfValidating}
 import uk.ac.warwick.tabula.commands.reports.attendancemonitoring._
 import uk.ac.warwick.tabula.data.model.Department
 import uk.ac.warwick.tabula.helpers.{IntervalFormatter, LazyMaps}
 import uk.ac.warwick.tabula.permissions.{Permission, Permissions}
 import uk.ac.warwick.tabula.services.{AutowiringMaintenanceModeServiceComponent, AutowiringModuleAndDepartmentServiceComponent, AutowiringUserSettingsServiceComponent}
 import uk.ac.warwick.tabula.web.Mav
-import uk.ac.warwick.tabula.web.controllers.{AcademicYearScopedController, DepartmentScopedController}
 import uk.ac.warwick.tabula.web.controllers.reports.{ReportsBreadcrumbs, ReportsController}
-import uk.ac.warwick.tabula.web.views.{CSVView, ExcelView, JSONView}
+import uk.ac.warwick.tabula.web.controllers.{AcademicYearScopedController, DepartmentScopedController}
+import uk.ac.warwick.tabula.web.views.{CSVView, ExcelView, JSONErrorView, JSONView}
 import uk.ac.warwick.tabula.{AcademicYear, JsonHelper}
 import uk.ac.warwick.util.csv.GoodCsvDocument
 
@@ -26,6 +27,8 @@ abstract class AbstractAttendanceReportController extends ReportsController
 	with DepartmentScopedController with AcademicYearScopedController with AutowiringUserSettingsServiceComponent with AutowiringModuleAndDepartmentServiceComponent
 	with AutowiringMaintenanceModeServiceComponent {
 
+	validatesSelf[SelfValidating]
+
 	override val departmentPermission: Permission = Permissions.Department.Reports
 
 	@ModelAttribute("activeDepartment")
@@ -33,8 +36,8 @@ abstract class AbstractAttendanceReportController extends ReportsController
 
 	@ModelAttribute("activeAcademicYear")
 	override def activeAcademicYear(@PathVariable academicYear: AcademicYear): Option[AcademicYear] = retrieveActiveAcademicYear(Option(academicYear))
-
-	def command(department: Department, academicYear: AcademicYear): Appliable[AllAttendanceReportCommandResult]
+	
+	def command(department: Department, academicYear: AcademicYear): AllAttendanceReportCommand.CommandType
 
 	val pageRenderPath: String
 	val filePrefix: String
@@ -48,7 +51,8 @@ abstract class AbstractAttendanceReportController extends ReportsController
 
 	@RequestMapping(method = Array(GET))
 	def page(
-		@ModelAttribute("command") cmd: Appliable[AllAttendanceReportCommandResult],
+		@Valid @ModelAttribute("command") cmd: AllAttendanceReportCommand.CommandType,
+		errors: Errors,
 		@PathVariable department: Department,
 		@PathVariable academicYear: AcademicYear
 	): Mav = {
@@ -59,44 +63,48 @@ abstract class AbstractAttendanceReportController extends ReportsController
 
 	@RequestMapping(method = Array(POST))
 	def apply(
-		@ModelAttribute("command") cmd: Appliable[AllAttendanceReportCommandResult],
+		@Valid @ModelAttribute("command") cmd: AllAttendanceReportCommand.CommandType,
+		errors: Errors,
 		@PathVariable department: Department,
 		@PathVariable academicYear: AcademicYear
 	): Mav = {
-		val result = cmd.apply()
-		val allStudents: Seq[Map[String, String]] = result.keys.toSeq.sortBy(s => (s.lastName, s.firstName)).map(studentData =>
-			 Map(
-         "firstName" -> studentData.firstName,
-         "lastName" -> studentData.lastName,
-         "userId" -> studentData.userId,
-         "universityId" -> studentData.universityId,
-				 "yearOfStudy" -> studentData.yearOfStudy,
-         "sprCode" -> studentData.sprCode,
-         "route" -> studentData.routeCode
-       )
-		)
-		val intervalFormatter = new IntervalFormatter
-		val wrapper = new DefaultObjectWrapper(Configuration.VERSION_2_3_0)
-		import uk.ac.warwick.tabula.helpers.DateTimeOrdering._
-		val allPoints: Seq[Map[String, String]] = result.values.flatMap(_.keySet).toSeq.distinct.sortBy(p => (p.startDate, p.endDate)).map(point =>
-			Map(
-				"id" -> point.id,
-				"name" -> point.name,
-				"startDate" -> point.startDate.toDateTimeAtStartOfDay.getMillis.toString,
-				"endDate" -> point.endDate.toDateTimeAtStartOfDay.getMillis.toString,
-				"intervalString" -> intervalFormatter.exec(JList(wrapper.wrap(point.startDate), wrapper.wrap(point.endDate))).asInstanceOf[String],
-				"late" -> point.endDate.toDateTimeAtStartOfDay.plusDays(1).isBeforeNow.toString
+		if (errors.hasErrors) Mav(new JSONErrorView(errors))
+		else {
+			val result = cmd.apply()
+			val allStudents: Seq[Map[String, String]] = result.keys.toSeq.sortBy(s => (s.lastName, s.firstName)).map(studentData =>
+				Map(
+					"firstName" -> studentData.firstName,
+					"lastName" -> studentData.lastName,
+					"userId" -> studentData.userId,
+					"universityId" -> studentData.universityId,
+					"yearOfStudy" -> studentData.yearOfStudy,
+					"sprCode" -> studentData.sprCode,
+					"route" -> studentData.routeCode
+				)
 			)
-		)
-		Mav(new JSONView(Map(
-			"attendance" -> result.map{case(studentData, pointMap) =>
-				studentData.universityId -> pointMap.map{case(point, state) =>
-					point.id -> Option(state).map(_.dbValue).orNull
-				}
-			},
-			"students" -> allStudents,
-			"points" -> allPoints
-		)))
+			val intervalFormatter = new IntervalFormatter
+			val wrapper = new DefaultObjectWrapper(Configuration.VERSION_2_3_0)
+			import uk.ac.warwick.tabula.helpers.DateTimeOrdering._
+			val allPoints: Seq[Map[String, String]] = result.values.flatMap(_.keySet).toSeq.distinct.sortBy(p => (p.startDate, p.endDate)).map(point =>
+				Map(
+					"id" -> point.id,
+					"name" -> point.name,
+					"startDate" -> point.startDate.toDateTimeAtStartOfDay.getMillis.toString,
+					"endDate" -> point.endDate.toDateTimeAtStartOfDay.getMillis.toString,
+					"intervalString" -> intervalFormatter.exec(JList(wrapper.wrap(point.startDate), wrapper.wrap(point.endDate))),
+					"late" -> point.endDate.toDateTimeAtStartOfDay.plusDays(1).isBeforeNow.toString
+				)
+			)
+			Mav(new JSONView(Map(
+				"attendance" -> result.map { case (studentData, pointMap) =>
+					studentData.universityId -> pointMap.map { case (point, state) =>
+						point.id -> Option(state).map(_.dbValue).orNull
+					}
+				},
+				"students" -> allStudents,
+				"points" -> allPoints
+			)))
+		}
 	}
 
 	@RequestMapping(method = Array(POST), value = Array("/download.csv"))
