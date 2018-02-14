@@ -36,7 +36,6 @@ class StudentAssessmentCommandInternal(val studentCourseYearDetails: StudentCour
 	extends CommandInternal[Seq[GridAssessmentComponentDetails]] with TaskBenchmarking {
 
 	self: StudentCourseYearDetailsDaoComponent with StudentCourseYearDetailsDaoComponent with AssessmentMembershipServiceComponent =>
-	//with GenerateExamGridSelectCourseCommandRequest =>
 
 	override def applyInternal(): Seq[GridAssessmentComponentDetails] = {
 		studentCourseYearDetails.moduleRegistrations.map { mr =>

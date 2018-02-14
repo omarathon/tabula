@@ -87,116 +87,117 @@
 				</table>
 		</div>
 
-	<div class="assessment_details" >
-		<table class="table table-condensed grid">
-			<thead>
-				<tr class="assessment_componentdetails_header">
-					<th>Module</th>
-					<th>Module Credit</th>
-					<th>Seq</th>
-					<th>Assessment</th>
+		<div class="assessment_details" >
+			<table class="table table-condensed grid">
+				<thead>
+					<tr class="assessment_componentdetails_header">
+						<th>Module</th>
+						<th>Module Credit</th>
+						<th>Seq</th>
+						<th>Assessment</th>
 
-					<th>Type</th>
-					<th>Component Mark</th>
-					<th>Component Grade</th>
-					<th class="header_col">Module Mark</th>
-					<th class="header_col">Module Grade</th>
-				</tr>
-			</thead>
-			<tbody>
-				<#list assessmentComponents as info>
-					<#assign mr = info.moduleRegistration />
-					<#assign test = info.studentAssessmentComponentInfo />
-					<tr>
-						<td class="assessment_details_col assessment_details_col2" ><div>${mr.module.code}</div>  <div>${mr.module.name}</div></td>
-						<td class="assessment_details_col">${mr.cats}</td>
-						<td>
-							<table class="component_info">
-								<tbody>
-									<#list info.studentAssessmentComponentInfo as studentInfo>
-									<tr><td>${studentInfo.grpWithComponentInfo.group.sequence}</td></tr>
-									</#list>
-								</tbody>
-							</table>
-						</td>
-						<td>
-							<table class="component_info">
-								<tbody>
-									<#list info.studentAssessmentComponentInfo as studentInfo>
-									<tr><td>${studentInfo.grpWithComponentInfo.name}</td></tr>
-									</#list>
-								</tbody>
-							</table>
-						</td>
-						<td class="assessment_details_col"><#if mr.selectionStatus??>${(mr.selectionStatus.description)!}<#else>-</#if></td>
-						<td>
-							<table class="component_info">
-								<tbody>
-									<#list info.studentAssessmentComponentInfo as studentInfo>
-										<tr>
-											<td>
-												<#if studentInfo.groupMember.agreedMark??>
-													${studentInfo.groupMember.agreedMark}
-												<#elseif studentInfo.groupMember.actualMark??>
-													<span class="exam-grid-actual-mark">${studentInfo.groupMember.actualMark}</span>
-												<#else>
-													<span class="exam-grid-actual-mark use-tooltip" title="" data-container="body" data-original-title="No marks set for Assessment component">X</span>
-												</#if>
-											</td>
-										</tr>
-									</#list>
-								</tbody>
-							</table>
-						</td>
-						<td>
-							<table class="component_info">
-								<tbody>
-									<#list info.studentAssessmentComponentInfo as studentInfo>
-										<tr>
-											<td>
-												<#if studentInfo.groupMember.agreedGrade??>
-													${studentInfo.groupMember.agreedGrade}
-												<#elseif studentInfo.groupMember.actualGrade??>
-													<span class="exam-grid-actual-mark">${studentInfo.groupMember.actualGrade}</span>
-												<#else>
-													<span class="exam-grid-actual-mark use-tooltip" title="" data-container="body" data-original-title="No grade set for Assessment component">X</span>
-												</#if>
-											</td>
-										</tr>
-									</#list>
-								</tbody>
-							</table>
-						</td>
-						<td class="assessment_details_col assessment_details_col1">
-							<#if mr.agreedMark??>
-								<#if (mr.agreedGrade?? && mr.agreedGrade == 'F')>
-									<span class="exam-grid-fail">${mr.agreedMark}</span>
-								<#else>
-									${mr.agreedMark}
-								</#if>
-							<#elseif mr.actualMark??>
-								<#if mr.actualGrade?? && mr.actualGrade == 'F'>
-									<span class=exam-grid-fail">${mr.actualMark}</span>
-								<#else>
-									<span class=exam-grid-actual-mark">${mr.actualMark}</span>
-								</#if>
-							<#else>
-								<span class="exam-grid-actual-mark use-tooltip" title="" data-container="body" data-original-title="No marks set for Module registration">X</span>
-							</#if>
-						</td>
-						<td class="assessment_details_col assessment_details_col1">
-							<#if mr.agreedGrade??>
-								${mr.agreedGrade}
-							<#elseif mr.actualGrade??>
-								${mr.actualGrade}
-							<#else>
-								<span class="exam-grid-actual-mark use-tooltip" title="" data-container="body" data-original-title="No grade set for Module registration">X</span>
-							</#if>
-						</td>
+						<th>Type</th>
+						<th>Component Mark</th>
+						<th>Component Grade</th>
+						<th class="header_col">Module Mark</th>
+						<th class="header_col">Module Grade</th>
 					</tr>
-				</#list>
-			</tbody>
-		</table>
+				</thead>
+				<tbody>
+					<#list assessmentComponents as info>
+						<#assign mr = info.moduleRegistration />
+						<#assign test = info.studentAssessmentComponentInfo />
+						<tr>
+							<td class="assessment_details_col assessment_details_col2" ><div>${mr.module.code}</div>  <div>${mr.module.name}</div></td>
+							<td class="assessment_details_col">${mr.cats}</td>
+							<td>
+								<table class="component_info">
+									<tbody>
+										<#list info.studentAssessmentComponentInfo as studentInfo>
+										<tr><td>${studentInfo.grpWithComponentInfo.group.sequence}</td></tr>
+										</#list>
+									</tbody>
+								</table>
+							</td>
+							<td>
+								<table class="component_info">
+									<tbody>
+										<#list info.studentAssessmentComponentInfo as studentInfo>
+										<tr><td>${studentInfo.grpWithComponentInfo.name}</td></tr>
+										</#list>
+									</tbody>
+								</table>
+							</td>
+							<td class="assessment_details_col"><#if mr.selectionStatus??>${(mr.selectionStatus.description)!}<#else>-</#if></td>
+							<td>
+								<table class="component_info">
+									<tbody>
+										<#list info.studentAssessmentComponentInfo as studentInfo>
+											<tr>
+												<td>
+													<#if studentInfo.groupMember.agreedMark??>
+														${studentInfo.groupMember.agreedMark}
+													<#elseif studentInfo.groupMember.actualMark??>
+														<span class="exam-grid-actual-mark">${studentInfo.groupMember.actualMark}</span>
+													<#else>
+														<span class="exam-grid-actual-mark use-tooltip" title="" data-container="body" data-original-title="No marks set for Assessment component">X</span>
+													</#if>
+												</td>
+											</tr>
+										</#list>
+									</tbody>
+								</table>
+							</td>
+							<td>
+								<table class="component_info">
+									<tbody>
+										<#list info.studentAssessmentComponentInfo as studentInfo>
+											<tr>
+												<td>
+													<#if studentInfo.groupMember.agreedGrade??>
+														${studentInfo.groupMember.agreedGrade}
+													<#elseif studentInfo.groupMember.actualGrade??>
+														<span class="exam-grid-actual-mark">${studentInfo.groupMember.actualGrade}</span>
+													<#else>
+														<span class="exam-grid-actual-mark use-tooltip" title="" data-container="body" data-original-title="No grade set for Assessment component">X</span>
+													</#if>
+												</td>
+											</tr>
+										</#list>
+									</tbody>
+								</table>
+							</td>
+							<td class="assessment_details_col assessment_details_col1">
+								<#if mr.agreedMark??>
+									<#if (mr.agreedGrade?? && mr.agreedGrade == 'F')>
+										<span class="exam-grid-fail">${mr.agreedMark}</span>
+									<#else>
+										${mr.agreedMark}
+									</#if>
+								<#elseif mr.actualMark??>
+									<#if mr.actualGrade?? && mr.actualGrade == 'F'>
+										<span class=exam-grid-fail">${mr.actualMark}</span>
+									<#else>
+										<span class=exam-grid-actual-mark">${mr.actualMark}</span>
+									</#if>
+								<#else>
+									<span class="exam-grid-actual-mark use-tooltip" title="" data-container="body" data-original-title="No marks set for Module registration">X</span>
+								</#if>
+							</td>
+							<td class="assessment_details_col assessment_details_col1">
+								<#if mr.agreedGrade??>
+									${mr.agreedGrade}
+								<#elseif mr.actualGrade??>
+									${mr.actualGrade}
+								<#else>
+									<span class="exam-grid-actual-mark use-tooltip" title="" data-container="body" data-original-title="No grade set for Module registration">X</span>
+								</#if>
+							</td>
+						</tr>
+					</#list>
+				</tbody>
+			</table>
+		</div>
 	</div>
 
 </#escape>
