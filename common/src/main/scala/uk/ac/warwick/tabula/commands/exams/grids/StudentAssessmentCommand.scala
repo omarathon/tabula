@@ -55,7 +55,7 @@ trait StudentAssessmentPermissions extends RequiresPermissionsChecking with Perm
 	self: StudentAssessmentCommandState =>
 
 	override def permissionsCheck(p: PermissionsChecking) {
-		p.PermissionCheck(Permissions.Department.ExamGrids, studentCourseYearDetails.studentCourseDetails.department)
+		p.PermissionCheck(Permissions.Department.ExamGrids, studentCourseYearDetails.enrolmentDepartment)
 	}
 
 }
@@ -65,7 +65,6 @@ trait StudentAssessmentCommandState {
 	self: StudentCourseYearDetailsDaoComponent with NormalCATSLoadServiceComponent =>
 
 	def academicYear: AcademicYear
-
 	def studentCourseYearDetails: StudentCourseYearDetails
 
 	lazy val normalLoadLookup: NormalLoadLookup = new NormalLoadLookup(academicYear, studentCourseYearDetails.yearOfStudy, normalCATSLoadService)

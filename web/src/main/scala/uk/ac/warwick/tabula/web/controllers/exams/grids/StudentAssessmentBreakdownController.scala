@@ -10,7 +10,8 @@ import uk.ac.warwick.tabula.services._
 import uk.ac.warwick.tabula.services.jobs.AutowiringJobServiceComponent
 import uk.ac.warwick.tabula.web.controllers.AcademicYearScopedController
 import uk.ac.warwick.tabula.web.controllers.exams.ExamsController
-import uk.ac.warwick.tabula.web.{Mav, Routes}
+import uk.ac.warwick.tabula.web.{BreadCrumb, Mav, Routes, Breadcrumbs => BaseBreadcumbs}
+
 
 @Controller
 @RequestMapping(Array("/exams/grids/{academicYear}/{studentCourseDetails}/assessmentdetails"))
@@ -28,19 +29,16 @@ class StudentAssessmentBreakdownController extends ExamsController
 	override def activeAcademicYear(@PathVariable academicYear: AcademicYear): Option[AcademicYear] = retrieveActiveAcademicYear(Option(academicYear))
 
 
-	//validatesSelf[SelfValidating]
-
-
-	protected def fetchScyd(scd: StudentCourseDetails, academicYear: AcademicYear): StudentCourseYearDetails = {
+	protected def fetchScyd(scd: StudentCourseDetails, gridAcademicYear: AcademicYear): StudentCourseYearDetails = {
 		val scyds = scd.freshStudentCourseYearDetails match {
 			case Nil =>
 				scd.freshOrStaleStudentCourseYearDetails
 			case fresh =>
 				fresh
 		}
-		scyds.find(_.academicYear == academicYear) match {
+		scyds.find(_.academicYear == gridAcademicYear) match {
 			case Some(scyd) => scyd
-			case None => throw new UnsupportedOperationException("Not a Option[StudentCourseYearDetails]")
+			case _ => throw new UnsupportedOperationException("Not valid StudentCourseYearDetails for given academic year ")
 		}
 	}
 
@@ -48,14 +46,14 @@ class StudentAssessmentBreakdownController extends ExamsController
 	@ModelAttribute("command")
 	def command(@PathVariable studentCourseDetails: StudentCourseDetails,
 		@PathVariable academicYear: AcademicYear): CommandType = {
-		StudentAssessmentCommand(mandatory(fetchScyd(studentCourseDetails, academicYear)), academicYear)
+		StudentAssessmentCommand(fetchScyd(studentCourseDetails, academicYear), mandatory(academicYear))
 	}
 
 	@ModelAttribute("weightings")
 	def weightings(@PathVariable studentCourseDetails: StudentCourseDetails,
 		@PathVariable academicYear: AcademicYear): IndexedSeq[CourseYearWeighting] = {
 		(1 to FilterStudentsOrRelationships.MaxYearsOfStudy).flatMap(year =>
-			courseAndRouteService.getCourseYearWeighting(studentCourseDetails.course.code, academicYear, year)
+			courseAndRouteService.getCourseYearWeighting(mandatory(studentCourseDetails).course.code, mandatory(academicYear), year)
 		).sorted
 	}
 
@@ -68,8 +66,28 @@ class StudentAssessmentBreakdownController extends ExamsController
 		Mav("exams/grids/generate/studentAssessmentComponentDetails",
 			"assessmentComponents" -> cmd.apply(),
 			"member" -> studentCourseDetails.student
-		).crumbs(Breadcrumbs.Grids.Home, Breadcrumbs.Grids.Department(studentCourseDetails.department, academicYear))
-			.secondCrumbs(academicYearBreadcrumbs(academicYear)(year => Routes.exams.Grids.generate(studentCourseDetails.department, year)): _*)
+		).crumbs(Breadcrumbs.Grids.Home, Breadcrumbs.Grids.Department(mandatory(cmd.studentCourseYearDetails.enrolmentDepartment), mandatory(academicYear)))
+			.secondCrumbs(secondBreadcrumbs(academicYear, studentCourseDetails)(scyd => Routes.exams.Grids.assessmentdetails(scyd)): _*)
+
 	}
 
+	def secondBreadcrumbs(activeAcademicYear: AcademicYear, scd: StudentCourseDetails)(urlGenerator: (StudentCourseYearDetails) => String): Seq[BreadCrumb] = {
+		val chooseScyd = fetchScyd(scd, activeAcademicYear)
+		val scyds = scd.student.freshStudentCourseDetails.flatMap(_.freshStudentCourseYearDetails) match {
+			case Nil =>
+				scd.student.freshOrStaleStudentCourseDetails.flatMap(_.freshOrStaleStudentCourseYearDetails)
+			case fresh =>
+				fresh
+		}
+		scyds.map(scyd =>
+			BaseBreadcumbs.Standard(
+				title = "%s %s".format(scyd.studentCourseDetails.course.code, scyd.academicYear.getLabel),
+				url = Some(urlGenerator(scyd)),
+				tooltip = "%s %s".format(
+					scyd.studentCourseDetails.course.name,
+					scyd.academicYear.getLabel
+				)
+			).setActive(scyd == chooseScyd)
+		).toSeq
+	}
 }

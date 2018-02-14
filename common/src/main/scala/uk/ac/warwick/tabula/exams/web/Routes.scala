@@ -84,6 +84,8 @@ object Routes {
 		def weightings(department: Department, academicYear: AcademicYear): String =
 			context + "/%s/%s/weightings" format(encoded(department.code), encoded(academicYear.startYear.toString))
 
+		def assessmentdetails(scyd: StudentCourseYearDetails): String =
+			context + s"/${encoded(scyd.academicYear.value.toString)}/${encoded(scyd.studentCourseDetails.urlSafeId)}/assessmentdetails"
 	}
 
 }
