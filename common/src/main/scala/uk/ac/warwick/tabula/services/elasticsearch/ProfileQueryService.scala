@@ -127,11 +127,11 @@ trait ProfileQueryMethodsImpl extends ProfileQueryMethods {
 			}) else None
 
 			// Course ended in the previous 6 months
-			val courseEndedQuery = Some(
+			val courseEndedQuery = if (activeOnly) Some(
 				rangeQuery("courseEndDate")
 					gte DateFormats.IsoDate.print(DateTime.now.minusMonths(6))
 					lte DateFormats.IsoDate.print(DateTime.now.plusYears(300))
-			)
+			) else None
 
 			val queries = Seq(textQuery, deptQuery, userTypeQuery, inUseQuery, courseEndedQuery).flatten
 
