@@ -193,6 +193,7 @@ class AssessmentMembershipDaoImpl extends AssessmentMembershipDao with Daoisms w
 		session.newCriteria[AssessmentComponent]
 			.add(is("moduleCode", group.moduleCode))
 			.add(is("assessmentGroup", group.assessmentGroup))
+			.add(is("sequence", group.sequence))
 			.uniqueResult
 	}
 
