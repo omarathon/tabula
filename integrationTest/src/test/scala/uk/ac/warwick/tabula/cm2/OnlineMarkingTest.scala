@@ -34,11 +34,6 @@ class OnlineMarkingTest  extends BrowserTest with CourseworkFixtures with GivenW
 			Then("Marking and feedback")
 			eventuallyAjax(pageSource contains "Marking and feedback" should be {true})
 
-			When("I try and save with no feedback")
-			cssSelector(s"button[type=submit]").webElement.click()
-			Then("I see a validation error")
-			eventuallyAjax(pageSource contains "You cannot save blank feedback" should be {true})
-
 			When("I fill in the online feedback form with an invalid mark")
 			textArea(cssSelector(".big-textarea")).value = "An inspired treatise on the dangers posed by Ardea cinerea. They are truly one of the greatest threats our world faces."
 			numberField("mark").value = "9000"

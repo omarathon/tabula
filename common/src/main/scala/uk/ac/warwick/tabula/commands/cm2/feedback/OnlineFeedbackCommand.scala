@@ -131,10 +131,6 @@ trait OnlineFeedbackValidation extends SelfValidating {
 	self: OnlineFeedbackState =>
 
 	override def validate(errors: Errors) {
-		if(!hasContent) {
-			errors.reject("feedback.empty")
-		}
-
 		fieldValidation(errors)
 	}
 
