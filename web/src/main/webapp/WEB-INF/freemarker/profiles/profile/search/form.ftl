@@ -18,12 +18,14 @@
 				</@bs3form.radio>
 			</@bs3form.form_group>
 
-			<@bs3form.form_group checkbox=true>
-				<@bs3form.checkbox>
-					<input type="checkbox" name="includePast" value="true">
-					Include past students and staff
-				</@bs3form.checkbox>
-			</@bs3form.form_group>
+			<#if features.profilesSearchPast>
+				<@bs3form.form_group checkbox=true>
+					<@bs3form.checkbox>
+						<input type="checkbox" name="includePast" value="true">
+						Include past students and staff
+					</@bs3form.checkbox>
+				</@bs3form.form_group>
+			</#if>
 		</@f.form>
 	</section>
 </#if>
