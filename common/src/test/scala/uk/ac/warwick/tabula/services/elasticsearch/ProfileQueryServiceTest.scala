@@ -91,7 +91,7 @@ class ProfileQueryServiceTest extends ElasticsearchTestBase with Mockito {
 		m.userType = Student
 		m.inUseFlag = "Inactive - Ended 12/12/99"
 
-		queryService.profileService.getMemberByUniversityId("0672089") returns Some(m)
+		queryService.profileService.getMemberByUniversityIdStaleOrFresh("0672089") returns Some(m)
 
 		// Index the profile
 		client.execute { index into indexName / indexType source m.asInstanceOf[Member] id m.id }

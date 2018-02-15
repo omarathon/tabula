@@ -135,11 +135,15 @@ trait ProfileQueryMethodsImpl extends ProfileQueryMethods {
 
 			val queries = Seq(textQuery, deptQuery, userTypeQuery, inUseQuery, courseEndedQuery).flatten
 
-			client.execute { searchFor query bool { must(queries) } }
+			val universityIds = client.execute { searchFor query bool { must(queries) } }
 				.map { response => response.hits.map { _.id }.toSeq }
 				.recover { case _ => Nil } // ignore any error
 				.await(15.seconds) // Avoid Hibernate horror by waiting for the Future here, then initialising in the main thread
-				.flatMap(profileService.getMemberByUniversityId(_))
+
+			if (activeOnly)
+				universityIds.flatMap(profileService.getMemberByUniversityId(_))
+			else
+				universityIds.flatMap(profileService.getMemberByUniversityIdStaleOrFresh(_))
 		} catch {
 			case _: TimeoutException => Seq() // Invalid query string or timeout
 		}
