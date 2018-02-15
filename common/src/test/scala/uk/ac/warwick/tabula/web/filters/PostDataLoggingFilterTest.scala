@@ -48,7 +48,7 @@ class PostDataLoggingFilterTest extends TestBase {
 
 	@Test def withParametersLoggedIn {
 		request.addParameter("sql", "select SYSDATE from hedgefund where snakes='gravy'")
-		request.addParameter("multiball", Array("baseball","pinball"))
+		request.addParameter("multiball", "baseball","pinball")
 		withSsoUser("beatrice") {
 			assert(filter.generateLogLine(request) === "userId=beatrice multipart=false /url.php multiball=baseball&multiball=pinball&sql=select SYSDATE from hedgefund where snakes='gravy'")
 		}

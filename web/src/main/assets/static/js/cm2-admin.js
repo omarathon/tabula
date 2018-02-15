@@ -48,12 +48,26 @@
 			var hasLoaded = $this.data('loaded') || false;
 			if(!hasLoaded) {
 				var detailUrl = $this.data('detailurl');
-				$this.data('request', $.get(detailUrl, function(data) {
-					$this.find('td').html(data);
-					// bind form helpers
-					$this.bindFormHelpers();
-					$this.data('loaded', true);
-					$this.trigger('tabula.formLoaded');
+
+				var $content = $this.find('td');
+
+				$this.data('request', $.ajax({
+					url: detailUrl,
+					statusCode: {
+						403: function () {
+							$content.html("<p class='text-error'><i class='icon-warning-sign'></i> Sorry, you don't have permission to see that. Have you signed out of Tabula?</p><p class='text-error'>Refresh the page and try again. If it remains a problem, please let us know using the comments link on the edge of the page.</p>");
+						}
+					},
+					success: function (data) {
+						$content.html(data);
+						// bind form helpers
+						$this.bindFormHelpers();
+						$this.data('loaded', true);
+						$this.trigger('tabula.formLoaded');
+					},
+					error: function () {
+						$content.html("<p>No data is currently available. Please check that you are signed in.</p>");
+					}
 				}));
 			}
 		});
@@ -545,16 +559,14 @@
 				});
 			},
 
-			// rather than just toggling the class check the state of the checkbox to avoid silly errors
-			onChange : function() {
-				this.closest(".itemContainer").toggleClass("selected", this.is(":checked"));
-				var $checkedBoxes = $(".collection-checkbox:checked");
+			onBulkChange: function ($checkboxes) {
+				var $checkedBoxes = $checkboxes.filter(':checked');
 
 				var allPlagiarised = false;
 
 				if ($checkedBoxes.length > 0) {
 					allPlagiarised = true;
-					$checkedBoxes.each(function(index){
+					$checkedBoxes.each(function () {
 						var $checkBox = $(this);
 						if ($checkBox.closest('tr').data('plagiarised') != true) {
 							allPlagiarised = false;

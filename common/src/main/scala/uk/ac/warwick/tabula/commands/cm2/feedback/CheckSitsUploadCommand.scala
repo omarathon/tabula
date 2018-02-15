@@ -12,6 +12,7 @@ import uk.ac.warwick.tabula.system.permissions.{PermissionsChecking, Permissions
 object CheckSitsUploadCommand {
 	case class Result(
 		hasAssessmentGroups: Boolean = false,
+		hasMultipleAssessmentGroups: Boolean = false,
 		hasAssignmentRow: Boolean = false,
 		hasWritableMark: Boolean = false,
 		hasWritableGrade: Boolean = false
@@ -34,6 +35,11 @@ class CheckSitsUploadCommandInternal(val assignment: Assignment, val feedback: F
 	override def applyInternal(): Result = {
 		if (feedback.assessmentGroups.isEmpty) {
 			CheckSitsUploadCommand.Result(hasAssessmentGroups = false)
+		} else if (feedback.assessmentGroups.size > 1) {
+			CheckSitsUploadCommand.Result(
+				hasAssessmentGroups = true,
+				hasMultipleAssessmentGroups = true
+			)
 		} else {
 			exportFeedbackToSitsService.getPartialMatchingSasRecords(feedback) match {
 				case Seq() =>

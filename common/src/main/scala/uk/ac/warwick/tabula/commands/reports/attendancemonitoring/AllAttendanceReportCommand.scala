@@ -6,13 +6,14 @@ import uk.ac.warwick.tabula.data.AttendanceMonitoringStudentData
 import uk.ac.warwick.tabula.data.model.Department
 import uk.ac.warwick.tabula.data.model.attendance.{AttendanceMonitoringPoint, AttendanceState}
 import uk.ac.warwick.tabula.commands.reports.attendancemonitoring.AllAttendanceReportCommand.AllAttendanceReportCommandResult
-import uk.ac.warwick.tabula.commands.reports.{ReportCommandRequest, ReportCommandState, ReportPermissions}
+import uk.ac.warwick.tabula.commands.reports.{ReportCommandRequest, ReportCommandRequestValidation, ReportCommandState, ReportPermissions}
 import uk.ac.warwick.tabula.services.attendancemonitoring.{AttendanceMonitoringServiceComponent, AutowiringAttendanceMonitoringServiceComponent}
 import uk.ac.warwick.tabula.services.{AutowiringProfileServiceComponent, ProfileServiceComponent}
 
 object AllAttendanceReportCommand {
-
 	type AllAttendanceReportCommandResult = Map[AttendanceMonitoringStudentData, Map[AttendanceMonitoringPoint, AttendanceState]]
+	type CommandType = Appliable[AllAttendanceReportCommandResult] with ReportCommandRequestValidation
+
 	def apply(
 		department: Department,
 		academicYear: AcademicYear,
@@ -25,6 +26,7 @@ object AllAttendanceReportCommand {
 			with ReportPermissions
 			with AllAttendanceReportCommandState
 			with ReportCommandRequest
+			with ReportCommandRequestValidation
 			with ReadOnly with Unaudited
 }
 

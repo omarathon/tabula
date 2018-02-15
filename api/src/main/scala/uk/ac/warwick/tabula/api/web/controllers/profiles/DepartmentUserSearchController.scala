@@ -28,6 +28,14 @@ class DepartmentUserSearchController extends ApiController
 		getMav(profileService.findUsercodesInHomeDepartment(department))
 	}
 
+	@RequestMapping(path = Array("/staff"), method = Array(GET), produces = Array("application/json"))
+	def staff(
+		@ModelAttribute("getCommand") command: ViewViewableCommand[Department],
+		@PathVariable department: Department
+	): Mav = {
+		getMav(profileService.findStaffUsercodesInHomeDepartment(department))
+	}
+
 	@RequestMapping(path = Array("/teachingstaff"), method = Array(GET), produces = Array("application/json"))
 	def teachingStaff(
 		@ModelAttribute("getCommand") command: ViewViewableCommand[Department],

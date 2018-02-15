@@ -36,11 +36,10 @@ class DownloadSelectedFeedbackCommand(val assignment: Assignment, user: CurrentU
 	override def applyInternal(): Either[RenderableFile, JobInstance] = {
 		if (students.isEmpty) throw new ItemNotFoundException
 
-		feedbacks = (for (
-			usercode <- students.asScala;
-			feedback <- feedbackDao.getAssignmentFeedbackByUsercode(assignment, usercode)
-		) yield feedback).asJava
-
+		feedbacks = students.asScala
+			.flatMap(feedbackDao.getAssignmentFeedbackByUsercode(assignment, _))
+			.filter(_.isMarkingCompleted)
+			.asJava
 
 		if (feedbacks.asScala.exists(_.assignment != assignment)) {
 				throw new IllegalStateException("Selected feedback doesn't match the assignment")

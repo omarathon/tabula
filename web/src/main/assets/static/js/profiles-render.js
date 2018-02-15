@@ -109,8 +109,12 @@
 
 		if (event.relatedUrl && event.relatedUrl.urlString && event.relatedUrl.urlString.length > 0) {
 			var relatedUrlTitle = (event.relatedUrl.title && event.relatedUrl.title.length > 0) ? event.relatedUrl.title : "More details";
-			content = content + "<tr><th></th><td>" +
-				"<a href=" + event.relatedUrl.urlString + ">" + relatedUrlTitle + "</a></td></tr>";
+
+			var a = document.createElement('a');
+			a.href = event.relatedUrl.urlString;
+			a.innerText = relatedUrlTitle;
+
+			content = content + "<tr><th></th><td>" + a.outerHTML + "</td></tr>";
 		}
 
 		if (event.attendance) {
@@ -211,6 +215,7 @@
 				error: function(jqXKR){ handleCalendarError(jqXKR, $container) },
 				complete: function() {
 					complete = true;
+					$loading.hide();
 					$container.fadeTo('fast', 1);
 				}
 			});
@@ -471,18 +476,33 @@
 							$spinner.spin('small');
 
 							var searchAllDepts = $("input[type='radio'][name='searchAllDepts']:checked").val();
-							xhr = $.get(target, { query : query, searchAllDepts : searchAllDepts }, function(data) {
-								$spinner.spin(false);
+							var includePast = $("input[type='checkbox'][name='includePast']").is(':checked');
 
-								var members = [];
+							xhr = $.ajax({
+								url: target,
+								data: {
+									query: query,
+									searchAllDepts: searchAllDepts,
+									includePast: includePast 	,
+								},
+								success: function (data) {
+									$spinner.spin(false);
 
-								$.each(data, function(i, member) {
-									var item = member.name + '|' + member.id + '|' + member.userId + '|' + member.description;
-									members.push(item);
-								});
+									var members = [];
 
-								process(members);
-							}).error(function(jqXHR, textStatus, errorThrown) { if (textStatus != 'abort') $spinner.spin(false); });
+									$.each(data, function(i, member) {
+										var item = member.name + '|' + member.id + '|' + member.userId + '|' + member.description;
+										members.push(item);
+									});
+
+									process(members);
+								},
+								error: function(jqXHR, textStatus, errorThrown) {
+									if (textStatus !== 'abort') {
+										$spinner.spin(false);
+									}
+								},
+							});
 						},
 
 						matcher: function(item) { return true; },

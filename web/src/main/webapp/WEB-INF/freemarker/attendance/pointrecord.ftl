@@ -233,7 +233,7 @@
 				<div class="fix-footer submit-buttons">
 					<p>
 						<input type="submit" value="Save" class="btn btn-primary" data-loading-text="Saving&hellip;" autocomplete="off">
-						<a class="btn btn-default dirty-check-ignore" href="${returnTo}">Cancel</a>
+						<a class="btn btn-default dirty-check-ignore" href="<#noescape>${returnTo}</#noescape>">Cancel</a>
 						<#if command.checkpointMap?keys?size < 500>
 							<@fmt.bulk_email_students students=command.checkpointMap?keys />
 						</#if>

@@ -31,7 +31,7 @@ trait ProfileService {
 	def getMemberByUser(user: User, disableFilter: Boolean = false, eagerLoad: Boolean = false): Option[Member]
 	def getStudentBySprCode(sprCode: String): Option[StudentMember]
 	def getMemberByTimetableHash(timetableHash: String): Option[Member]
-	def findMembersByQuery(query: String, departments: Seq[Department], userTypes: Set[MemberUserType], searchAllDepts: Boolean): Seq[Member]
+	def findMembersByQuery(query: String, departments: Seq[Department], userTypes: Set[MemberUserType], searchAllDepts: Boolean, activeOnly: Boolean): Seq[Member]
 	def findMembersByDepartment(department: Department, includeTouched: Boolean, userTypes: Set[MemberUserType]): Seq[Member]
 	def listMembersUpdatedSince(startDate: DateTime, max: Int): Seq[Member]
 	def countStudentsByDepartment(department: Department): Int
@@ -71,8 +71,9 @@ trait ProfileService {
 	def getDisability(code: String): Option[Disability]
 
 	def findUsercodesInHomeDepartment(department: Department): Seq[String]
-	def findTeachingStaffUsercodesInHomeDepartment(department: Department): Seq[String]
-	def findAdminStaffUsercodesInHomeDepartment(department: Department): Seq[String]
+	def findStaffUsercodesInHomeDepartment(department: Department): Seq[String]
+	@deprecated("TeachingStaff attribute is not reliable", since = "2018.2.2") def findTeachingStaffUsercodesInHomeDepartment(department: Department): Seq[String]
+	@deprecated("TeachingStaff attribute is not reliable", since = "2018.2.2") def findAdminStaffUsercodesInHomeDepartment(department: Department): Seq[String]
 	def findUndergraduatesUsercodesInHomeDepartment(department: Department): Seq[String]
 	def findTaughtPostgraduatesUsercodesInHomeDepartment(department: Department): Seq[String]
 	def findResearchPostgraduatesUsercodesInHomeDepartment(department: Department): Seq[String]
@@ -137,8 +138,8 @@ abstract class AbstractProfileService extends ProfileService with Logging {
 
 	def regenerateTimetableHash(member: Member): Unit = memberDao.setTimetableHash(member, UUID.randomUUID.toString)
 
-	def findMembersByQuery(query: String, departments: Seq[Department], userTypes: Set[MemberUserType], searchAllDepts: Boolean): Seq[Member] = transactional(readOnly = true) {
-		profileQueryService.find(query, departments, userTypes, searchAllDepts)
+	def findMembersByQuery(query: String, departments: Seq[Department], userTypes: Set[MemberUserType], searchAllDepts: Boolean, activeOnly: Boolean): Seq[Member] = transactional(readOnly = true) {
+		profileQueryService.find(query, departments, userTypes, searchAllDepts, activeOnly)
 	}
 
 	def findMembersByDepartment(department: Department, includeTouched: Boolean, userTypes: Set[MemberUserType]): Seq[Member] = transactional(readOnly = true) {
@@ -377,6 +378,12 @@ abstract class AbstractProfileService extends ProfileService with Logging {
 		memberDao.findAllUsercodesByRestrictions(Seq(
 			ScalaRestriction.is("homeDepartment", department.rootDepartment).get
 		))
+	}
+
+	override def findStaffUsercodesInHomeDepartment(department: Department): Seq[String] = transactional(readOnly = true) {
+		memberDao.findAllUsercodesByRestrictions(Seq(
+			ScalaRestriction.is("homeDepartment", department.rootDepartment).get
+		), staffOnly = true)
 	}
 
 	override def findTeachingStaffUsercodesInHomeDepartment(department: Department): Seq[String] = transactional(readOnly = true) {
