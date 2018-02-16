@@ -2,27 +2,30 @@
 	<section class="profile-search profile-search-results">
 		<@f.form method="get" action="${url('/profiles/search')}" commandName="searchProfilesCommand">
 			<div class="input-group">
-				<@f.input path="query" placeholder="Search for a student..." cssClass="form-control" />
-				<span
-					class="input-group-btn use-tooltip"
-					data-placement="right"
-					data-container="body"
-					data-trigger="manual"
-					data-title="Start typing a student's name, or put their University ID in, and we'll show you a list of results. Any student who studies in your department should be included."
-				>
+				<@f.input path="query" placeholder="Find people by name or University ID" cssClass="form-control" />
+				<div class="input-group-btn">
 					<button class="btn btn-default" type="submit"><i class="fa fa-search"></i></button>
-				</span>
+				</div>
 			</div>
 			<@bs3form.form_group>
 				<@bs3form.radio>
 					<input type="radio" name="searchAllDepts" checked value="false">
-					Departmental students & staff
+					People in my department
 				</@bs3form.radio>
 				<@bs3form.radio>
 					<input type="radio" name="searchAllDepts" value="true">
-					All students & staff
+					Everyone
 				</@bs3form.radio>
 			</@bs3form.form_group>
+
+			<#if features.profilesSearchPast>
+				<@bs3form.form_group checkbox=true>
+					<@bs3form.checkbox>
+						<input type="checkbox" name="includePast" value="true">
+						Include past students and staff
+					</@bs3form.checkbox>
+				</@bs3form.form_group>
+			</#if>
 		</@f.form>
 	</section>
 </#if>

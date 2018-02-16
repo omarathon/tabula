@@ -476,18 +476,33 @@
 							$spinner.spin('small');
 
 							var searchAllDepts = $("input[type='radio'][name='searchAllDepts']:checked").val();
-							xhr = $.get(target, { query : query, searchAllDepts : searchAllDepts }, function(data) {
-								$spinner.spin(false);
+							var includePast = $("input[type='checkbox'][name='includePast']").is(':checked');
 
-								var members = [];
+							xhr = $.ajax({
+								url: target,
+								data: {
+									query: query,
+									searchAllDepts: searchAllDepts,
+									includePast: includePast 	,
+								},
+								success: function (data) {
+									$spinner.spin(false);
 
-								$.each(data, function(i, member) {
-									var item = member.name + '|' + member.id + '|' + member.userId + '|' + member.description;
-									members.push(item);
-								});
+									var members = [];
 
-								process(members);
-							}).error(function(jqXHR, textStatus, errorThrown) { if (textStatus != 'abort') $spinner.spin(false); });
+									$.each(data, function(i, member) {
+										var item = member.name + '|' + member.id + '|' + member.userId + '|' + member.description;
+										members.push(item);
+									});
+
+									process(members);
+								},
+								error: function(jqXHR, textStatus, errorThrown) {
+									if (textStatus !== 'abort') {
+										$spinner.spin(false);
+									}
+								},
+							});
 						},
 
 						matcher: function(item) { return true; },

@@ -33,7 +33,7 @@ class Cm2StudentFeedbackAdjustmentNotification
 		(mark ++ grade).mkString(" and ")
 	}
 
-	def title = s"${assignment.module.code.toUpperCase} - for ${assignment.name} : Adjustments have been made to your $whatAdjusted"
+	def title = s"""${assignment.module.code.toUpperCase}: Adjustments have been made to your $whatAdjusted for "${assignment.name}""""
 
 	def content = FreemarkerModel(Cm2StudentFeedbackAdjustmentNotification.templateLocation,
 		Map(
@@ -42,7 +42,7 @@ class Cm2StudentFeedbackAdjustmentNotification
 			"whatAdjusted" -> whatAdjusted
 		))
 
-	def url: String = Routes.admin.assignment.markerFeedback(assignment, recipient)
+	def url: String = Routes.assignment(assignment)
 	def urlTitle = "view your feedback"
 
 	priority = Info

@@ -77,7 +77,7 @@ object ListMarkerAllocationsCommand {
 	type Student = User
 	type Marker = User
 
-	implicit val userOrdering: Ordering[User] = Ordering.by { u: User => (u.getLastName, u.getFirstName) }
+	implicit val userOrdering: Ordering[User] = Ordering.by { u: User => (u.getLastName, u.getFirstName, u.getWarwickId, u.getUserId) }
 
 	def apply(assignment: Assignment) = new ListMarkerAllocationsCommandInternal(assignment)
 		with ComposableCommand[MarkerAllocations]
