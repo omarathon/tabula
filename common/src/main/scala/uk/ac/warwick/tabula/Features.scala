@@ -152,6 +152,7 @@ abstract class Features {
 
 
 
+
 	private val bean = new BeanWrapperImpl(this)
 	def update(message: FeaturesMessage): Features = {
 		val values = new BeanWrapperImpl(message)
