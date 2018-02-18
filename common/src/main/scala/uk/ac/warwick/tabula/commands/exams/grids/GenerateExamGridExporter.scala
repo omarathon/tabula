@@ -14,17 +14,7 @@ import uk.ac.warwick.tabula.services.exams.grids.NormalLoadLookup
 
 object GenerateExamGridExporter {
 
-	sealed trait Style
-	case object Header extends Style
-	case object HeaderRotated extends Style
-	case object Rotated extends Style
-	case object Fail extends Style
-	case object Overcat extends Style
-	case object Overridden extends Style
-	case object ActualMark extends Style
-	case object FailAndActualMark extends Style
-	case object OvercatAndActualMark extends Style
-	case object BoldText extends Style
+	import ExamGridExportStyles._
 
 	def apply(
 		department: Department,
@@ -269,7 +259,7 @@ object GenerateExamGridExporter {
 
 	private def summaryAndKey(
 		sheet: Sheet,
-		cellStyleMap: Map[GenerateExamGridExporter.Style, CellStyle],
+		cellStyleMap: Map[ExamGridExportStyles.Style, CellStyle],
 		department: Department,
 		academicYear: AcademicYear,
 		course: Course,
@@ -360,7 +350,24 @@ object GenerateExamGridExporter {
 		sheet.autoSizeColumn(1)
 	}
 
-	private def getCellStyleMap(workbook: Workbook): Map[GenerateExamGridExporter.Style, CellStyle] = {
+}
+
+object ExamGridExportStyles {
+
+	sealed trait Style
+	case object Header extends Style
+	case object HeaderRotated extends Style
+	case object Rotated extends Style
+	case object Fail extends Style
+	case object Overcat extends Style
+	case object Overridden extends Style
+	case object ActualMark extends Style
+	case object FailAndActualMark extends Style
+	case object OvercatAndActualMark extends Style
+	case object BoldText extends Style
+
+
+	def getCellStyleMap(workbook: Workbook): Map[Style, CellStyle] = {
 		val headerStyle = {
 			val cs = workbook.createCellStyle()
 			val boldFont = workbook.createFont()
@@ -473,5 +480,4 @@ object GenerateExamGridExporter {
 			BoldText -> boldText
 		)
 	}
-
 }

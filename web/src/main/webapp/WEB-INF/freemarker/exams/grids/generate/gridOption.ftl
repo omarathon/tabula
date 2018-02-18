@@ -38,6 +38,25 @@
 		</#if>
 	</p>
 
+	<h3>Grid layout</h3>
+
+	<div class="row">
+		<div class="col-md-3">
+			<div class="radio">
+				<label><input type="radio" name="layout" value="short"
+					<#if gridOptionsCommand.layout == 'short'>checked</#if>
+				/> Short form layout</label>
+			</div>
+		</div>
+		<div class="col-md-3">
+			<div class="radio">
+				<label><input type="radio" name="layout" value="full"
+					<#if gridOptionsCommand.layout == 'full'>checked</#if>
+				/> Full column layout</label>
+			</div>
+		</div>
+	</div>
+
 	<h3>Student identification</h3>
 
 	<div class="row">

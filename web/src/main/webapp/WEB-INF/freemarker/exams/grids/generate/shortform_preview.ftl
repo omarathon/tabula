@@ -1,33 +1,45 @@
 <#import 'form_fields.ftl' as form_fields />
 <#escape x as x?html>
 
-	<#function route_function dept>
-		<#local selectCourseCommand><@routes.exams.generateGrid dept academicYear /></#local>
-		<#return selectCourseCommand />
-	</#function>
+<#function route_function dept>
+	<#local selectCourseCommand><@routes.exams.generateGrid dept academicYear /></#local>
+	<#return selectCourseCommand />
+</#function>
 
-	<@fmt.id7_deptheader title="Create a new exam grid for ${department.name}" route_function=route_function />
+<@fmt.id7_deptheader title="Create a new exam grid for ${department.name}" route_function=route_function />
 
-	<#macro showMarks entity markType>
-		<#list perYearColumns?keys?sort as year>
-			<#if gridOptionsCommand.showComponentMarks>
+<#macro showMarks entity markType>
+	<#list perYearColumns?keys?sort as year>
+		<#if gridOptionsCommand.showComponentMarks>
 			<th><span class="use-tooltip" title="${markType.description}">${markType.label}</span></th>
+		</#if>
+
+		<#assign colsUsed = 0 />
+		<#list mapGet(perYearModuleMarkColumns, year) as column>
+			<#assign hasValue = !column.isEmpty(entity, year) />
+			<#if hasValue && mapGet(perYearColumnValues, column)?? && mapGet(mapGet(perYearColumnValues, column), entity)?? && mapGet(mapGet(mapGet(perYearColumnValues, column), entity), year)??>
+				<td>
+						<#assign values = mapGet(mapGet(mapGet(mapGet(perYearColumnValues, column), entity), year), markType) />
+						<#list values as value><#noescape>${value.toHTML}</#noescape><#if value_has_next>,</#if></#list>
+				</td>
+				<#assign colsUsed = colsUsed + 1>
 			</#if>
-			<#list mapGet(perYearColumns, year) as column>
-				<#assign hasValue = mapGet(perYearColumnValues, column)?? && mapGet(mapGet(perYearColumnValues, column), entity)?? && mapGet(mapGet(mapGet(perYearColumnValues, column), entity), year)?? />
-				<#if hasValue>
-					<td>
-							<#assign values = mapGet(mapGet(mapGet(mapGet(perYearColumnValues, column), entity), year), markType) />
-							<#list values as value><#noescape>${value.toHTML}</#noescape><#if value_has_next>,</#if></#list>
-					</td>
-				<#else>
-					<td>NOWT</td>
-				</#if>
-			</#list>
-			<#if !mapGet(perYearColumns, year)?has_content><td class="spacer">&nbsp;</td></#if>
-			<#if !year_has_next><td class="spacer">&nbsp;</td></#if>
 		</#list>
-	</#macro>
+
+		<#assign reportCols = mapGet(perYearModuleReportColumns, year) />
+		<#assign yearPadding = mapGet(maxYearColumnSize, year) - colsUsed>
+		<#list 0..<yearPadding as i><td>&nbsp;</td></#list>
+
+		<#list reportCols as column>
+			<td>
+				<#if mapGet(perYearColumnValues, column)?? && mapGet(mapGet(perYearColumnValues, column), entity)?? && mapGet(mapGet(mapGet(perYearColumnValues, column), entity), year)??>
+					<#assign values = mapGet(mapGet(mapGet(mapGet(perYearColumnValues, column), entity), year), markType) />
+					<#list values as value><#noescape>${value.toHTML}</#noescape><#if value_has_next>,</#if></#list>
+				</#if>
+			</td>
+		</#list>
+	</#list>
+</#macro>
 
 <div class="fix-area">
 
@@ -93,20 +105,20 @@
 		<div class="key clearfix">
 			<table class="table table-condensed">
 				<thead>
-				<tr>
-					<th colspan="2">Report</th>
-				</tr>
+					<tr>
+						<th colspan="2">Report</th>
+					</tr>
 				</thead>
 				<tbody>
-				<tr>
-					<th>Department:</th>
-					<td>${department.name}</td>
-				</tr>
-				<tr>
-					<th>Course:</th>
-					<td>${selectCourseCommand.course.code?upper_case} ${selectCourseCommand.course.name}</td>
-				</tr>
-				<tr>
+					<tr>
+						<th>Department:</th>
+						<td>${department.name}</td>
+					</tr>
+					<tr>
+						<th>Course:</th>
+						<td>${selectCourseCommand.course.code?upper_case} ${selectCourseCommand.course.name}</td>
+					</tr>
+					<tr>
 						<#if !selectCourseCommand.routes?has_content>
 							<th>Routes:</th>
 							<td>All routes</td>
@@ -122,22 +134,22 @@
 							</#assign>
 							<td><a class="use-popover" href="#" data-html="true" data-content="${popover}">${selectCourseCommand.routes?size} routes</a></td>
 						</#if>
-				</tr>
-				<tr>
-					<th>Year of study:</th>
-					<td>${selectCourseCommand.yearOfStudy}</td>
-				</tr>
-				<tr>
-					<th>Year weightings:</th>
-					<td>
+					</tr>
+					<tr>
+						<th>Year of study:</th>
+						<td>${selectCourseCommand.yearOfStudy}</td>
+					</tr>
+					<tr>
+						<th>Year weightings:</th>
+						<td>
 							<#list weightings as weighting>
 								Year ${weighting.yearOfStudy} = ${weighting.weightingAsPercentage}%<#if weighting_has_next><br /></#if>
 							</#list>
-					</td>
-				</tr>
-				<tr>
-					<th>Normal CAT load:</th>
-					<td>
+						</td>
+					</tr>
+					<tr>
+						<th>Normal CAT load:</th>
+						<td>
 							<#if normalLoadLookup.routes?size == 1>
 								<#if normalLoadLookup.withoutDefault(normalLoadLookup.routes?first)?has_content>
 									${normalLoadLookup.withoutDefault(normalLoadLookup.routes?first)}
@@ -160,69 +172,67 @@
 								</#assign>
 								<a href="#" class="use-popover" data-html="true" data-content="${popover}">${normalLoadLookup.routes?size} routes</a>
 							</#if>
-					</td>
-				</tr>
-				<tr>
-					<th>Student Count:</th>
-					<td>${entities?size}</td>
-				</tr>
-				<tr>
-					<th>Grid Generated:</th>
-					<td><@fmt.date date=generatedDate relative=false /></td>
-				</tr>
+						</td>
+					</tr>
+					<tr>
+						<th>Student Count:</th>
+						<td>${entities?size}</td>
+					</tr>
+					<tr>
+						<th>Grid Generated:</th>
+						<td><@fmt.date date=generatedDate relative=false /></td>
+					</tr>
 				</tbody>
 			</table>
 
 			<table class="table table-condensed">
 				<thead>
-				<tr>
-					<th colspan="2">Key</th>
-				</tr>
+					<tr>
+						<th colspan="2">Key</th>
+					</tr>
 				</thead>
 				<tbody>
-				<tr>
-					<td><span class="exam-grid-fail">#</span></td>
-					<td>Failed module</td>
-				</tr>
-				<tr>
-					<td><span class="exam-grid-overcat">#</span></td>
-					<td>Used in overcatting calculation</td>
-				</tr>
-				<tr>
-					<td><span class="exam-grid-actual-mark">#</span></td>
-					<td>Agreed mark missing, using actual</td>
-				</tr>
-				<tr>
-					<td><span class="exam-grid-actual-mark">X</span></td>
-					<td>Agreed and actual mark missing</td>
-				</tr>
-				<tr>
-					<td><span class="exam-grid-actual-mark exam-grid-overcat">#</span></td>
-					<td>Actual mark used in overcatting calculation</td>
-				</tr>
-				<tr>
-					<td></td>
-					<td>Blank indicates module not taken by student</td>
-				</tr>
-				<tr>
-					<td><strong>AB</strong></td>
-					<td>Bold module name indicates a duplicate table entry</td>
-				</tr>
+					<tr>
+						<td><span class="exam-grid-fail">#</span></td>
+						<td>Failed module</td>
+					</tr>
+					<tr>
+						<td><span class="exam-grid-overcat">#</span></td>
+						<td>Used in overcatting calculation</td>
+					</tr>
+					<tr>
+						<td><span class="exam-grid-actual-mark">#</span></td>
+						<td>Agreed mark missing, using actual</td>
+					</tr>
+					<tr>
+						<td><span class="exam-grid-actual-mark">X</span></td>
+						<td>Agreed and actual mark missing</td>
+					</tr>
+					<tr>
+						<td><span class="exam-grid-actual-mark exam-grid-overcat">#</span></td>
+						<td>Actual mark used in overcatting calculation</td>
+					</tr>
+					<tr>
+						<td></td>
+						<td>Blank indicates module not taken by student</td>
+					</tr>
+					<tr>
+						<td><strong>AB</strong></td>
+						<td>Bold module name indicates a duplicate table entry</td>
+					</tr>
 				</tbody>
 			</table>
 		</div>
 
 		<table class="table table-condensed grid <#if !gridOptionsCommand.showComponentMarks>with-hover</#if>">
 			<tbody>
-			<#-- Year row -->
-			<#--<tr class="year"></tr>-->
 			<#-- Category row -->
 			<tr class="category">
 					<#list studentInformationColumns as column><td class="borderless">&nbsp;</td></#list>
-					<#if !gridOptionsCommand.showComponentMarks><td class="spacer">&nbsp;</td></#if>
 					<#list perYearColumns?keys?sort as year>
-						<#if gridOptionsCommand.showComponentMarks><td class="spacer">&nbsp;</td></#if>
+						<td class="spacer">&nbsp;</td>
 						<td class="spacer" colspan="${mapGet(maxYearColumnSize, year)}">&nbsp;</td>
+						<#list mapGet(perYearModuleReportColumns, year) as column><td class="spacer">&nbsp;</td></#list>
 						<#if !year_has_next><td class="spacer">&nbsp;</td></#if>
 					</#list>
 					<#assign currentCategory = '' />
@@ -242,10 +252,17 @@
 					<#list studentInformationColumns as column>
 						<th>${column.title}</th>
 					</#list>
-					<#if !gridOptionsCommand.showComponentMarks><td class="spacer">&nbsp;</td></#if>
+
 					<#list perYearColumns?keys?sort as year>
-						<#if gridOptionsCommand.showComponentMarks><td class="spacer">&nbsp;</td></#if>
-						<th colspan="${mapGet(maxYearColumnSize, year)}">Year ${year}</th>
+						<td class="spacer">&nbsp;</td>
+
+						<#assign yearSize = mapGet(maxYearColumnSize, year)>
+						<th colspan="${yearSize}">Year ${year}</th>
+
+						<#list mapGet(perYearModuleReportColumns, year) as column>
+							<th class="rotated <#if column.category?has_content>has-category</#if>"><div class="rotate">${column.title}</div></th>
+						</#list>
+
 						<#if !year_has_next><td class="spacer">&nbsp;</td></#if>
 					</#list>
 
@@ -266,18 +283,23 @@
 							</td>
 						</#list>
 
-						<td class="spacer">&nbsp;</td>
 						<#list perYearColumns?keys?sort as year>
-							<#list mapGet(perYearColumns, year) as column>
-								<#assign hasValue = mapGet(perYearColumnValues, column)?? && mapGet(mapGet(perYearColumnValues, column), entity)?? && mapGet(mapGet(mapGet(perYearColumnValues, column), entity), year)?? />
+							<td rowspan="<#if !gridOptionsCommand.showComponentMarks>2</#if>" class="spacer">&nbsp;</td>
+							<#assign colsUsed = 0 />
+							<#list mapGet(perYearModuleMarkColumns, year) as column>
+								<#assign hasValue = !column.isEmpty(entity, year) />
 								<#if hasValue>
-									<th class="<#if column.category?has_content>has-category</#if>">
-										${column.title}
-										<span style="white-space:nowrap;">${column.secondaryValue} ${column.categoryShortForm!""}</span>
-									</th>
+									<td class="rotated">
+										<div class="rotate">${column.title} - ${column.secondaryValue} <i>${column.categoryShortForm!""}</i></div>
+									</td>
+									<#assign colsUsed = colsUsed + 1>
 								</#if>
 							</#list>
-							<#if !year_has_next><td class="spacer">&nbsp;</td></#if>
+
+							<#assign reportCols = mapGet(perYearModuleReportColumns, year) />
+							<#assign yearPadding = mapGet(maxYearColumnSize, year) + reportCols?size - colsUsed>
+							<#list 0..<yearPadding as i><td>&nbsp;</td></#list>
+							<#if !year_has_next><td rowspan="<#if gridOptionsCommand.showComponentMarks>4<#else>2</#if>" class="spacer">&nbsp;</td></#if>
 						</#list>
 
 						<#list summaryColumns as column>
@@ -331,16 +353,16 @@
 				<p>
 					When you download the data provided you are responsible for managing the security of the
 					information within it. You agree to abide by the University's <a target='_blank' href='http://www2.warwick.ac.uk/services/legalservices/dataprotection/'>
-					Data Protection Policy
+						Data Protection Policy
 					<a> and the mandatory working practices for <a target='_blank' href='http://www2.warwick.ac.uk/services/gov/informationsecurity/working_practices/assets_protection/'>
 						electronic information asset protection.</a>
-				</p>
+					</p>
 			</div>
 			<div class='modal-footer'>
 				<a class='confirm btn btn-primary'>Accept</a>
 				<a data-dismiss='modal' class='btn btn-default'>Cancel</a>
+				</div>
 			</div>
-		</div>
 		</div>
 	</div>
 </div>
