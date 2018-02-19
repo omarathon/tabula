@@ -87,7 +87,7 @@ trait ExamGridDocumentsController extends ExamsController
 				}
 			}).toMap }
 
-			GenerateShortformExamGridExporter(
+			GenerateExamGridShortFormExporter(
 				department = department,
 				academicYear = academicYear,
 				course = selectCourseCommand.course,

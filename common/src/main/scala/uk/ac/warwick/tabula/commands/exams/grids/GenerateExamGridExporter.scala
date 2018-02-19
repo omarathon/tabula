@@ -5,7 +5,7 @@ import java.awt.Color
 import org.apache.poi.ss.usermodel._
 import org.apache.poi.ss.util.CellRangeAddress
 import org.apache.poi.xssf.streaming.SXSSFWorkbook
-import org.apache.poi.xssf.usermodel.{XSSFColor, XSSFFont, XSSFWorkbook}
+import org.apache.poi.xssf.usermodel.{XSSFColor, XSSFFont}
 import org.joda.time.DateTime
 import uk.ac.warwick.tabula.AcademicYear
 import uk.ac.warwick.tabula.data.model._
@@ -42,7 +42,7 @@ object GenerateExamGridExporter {
 		val sheet = workbook.createSheet(academicYear.toString.replace("/","-"))
 		sheet.trackAllColumnsForAutoSizing()
 
-		summaryAndKey(sheet, cellStyleMap, department, academicYear, course, routes, yearOfStudy, yearWeightings, normalLoadLookup, entities.size, isStudentCount = true)
+		ExamGridSummaryAndKey.summaryAndKey(sheet, cellStyleMap, department, academicYear, course, routes, yearOfStudy, yearWeightings, normalLoadLookup, entities.size, isStudentCount = true)
 
 		val yearRow = sheet.createRow(sheet.getLastRowNum + 1)
 		val categoryRow = sheet.createRow(sheet.getLastRowNum + 1)
@@ -257,99 +257,6 @@ object GenerateExamGridExporter {
 		workbook
 	}
 
-	private def summaryAndKey(
-		sheet: Sheet,
-		cellStyleMap: Map[ExamGridExportStyles.Style, CellStyle],
-		department: Department,
-		academicYear: AcademicYear,
-		course: Course,
-		routes: Seq[Route],
-		yearOfStudy: Int,
-		yearWeightings: Seq[CourseYearWeighting],
-		normalLoadLookup: NormalLoadLookup,
-		count: Int,
-		isStudentCount: Boolean
-	): Unit = {
-		def keyValueCells(key: String, value: String, rowIndex: Int) = {
-			val row = sheet.createRow(rowIndex)
-			val keyCell = row.createCell(0)
-			keyCell.setCellValue(key)
-			keyCell.setCellStyle(cellStyleMap(Header))
-			val valueCell = row.createCell(1)
-			valueCell.setCellValue(value)
-			row
-		}
-		keyValueCells("Department:", department.name, 0)
-		keyValueCells("Academic year:", academicYear.toString, 1)
-		keyValueCells("Course:", s"${course.code.toUpperCase} ${course.name}", 2)
-		routes.size match {
-			case 0 => keyValueCells("Routes:", "All routes", 3)
-			case 1 => keyValueCells("Route:", s"${routes.head.code.toUpperCase} ${routes.head.name}", 3)
-			case n => keyValueCells("Routes:", s"$n routes", 3)
-		}
-		keyValueCells("Year of study:", yearOfStudy.toString, 4)
-		val yearWeightingRow = keyValueCells("Year weightings:", yearWeightings.map(cyw => s"Year ${cyw.yearOfStudy} = ${cyw.weightingAsPercentage}%").mkString("\n"), 5)
-		yearWeightingRow.setHeight((yearWeightingRow.getHeight * (yearWeightings.size - 1)).toShort)
-		val normalCATSLoadRow = keyValueCells("Normal CATS load:", normalLoadLookup.routes.sortBy(_.code).map(r => s"${r.code.toUpperCase}: ${normalLoadLookup(r).underlying.toString}").mkString("\n"), 6)
-		normalCATSLoadRow.setHeight((normalCATSLoadRow.getHeight * (normalLoadLookup.routes.size - 1)).toShort)
-		if (isStudentCount) {
-			keyValueCells("Student Count:", count.toString, 7)
-		} else {
-			keyValueCells("Count:", count.toString, 7)
-		}
-		keyValueCells("Grid Generated:", DateTime.now.toString, 8)
-
-		{
-			val row = sheet.createRow(9)
-			val keyCell = row.createCell(0)
-			keyCell.setCellValue("#")
-			keyCell.setCellStyle(cellStyleMap(Fail))
-			val valueCell = row.createCell(1)
-			valueCell.setCellValue("Failed module")
-		}
-		{
-			val row = sheet.createRow(10)
-			val keyCell = row.createCell(0)
-			keyCell.setCellValue("#")
-			keyCell.setCellStyle(cellStyleMap(Overcat))
-			val valueCell = row.createCell(1)
-			valueCell.setCellValue("Used in overcatting calculation")
-		}
-		{
-			val row = sheet.createRow(11)
-			val keyCell = row.createCell(0)
-			keyCell.setCellValue("#")
-			keyCell.setCellStyle(cellStyleMap(ActualMark))
-			val valueCell = row.createCell(1)
-			valueCell.setCellValue("Agreed mark missing, using actual")
-		}
-		{
-			val row = sheet.createRow(12)
-			val keyCell = row.createCell(0)
-			keyCell.setCellValue("X")
-			val valueCell = row.createCell(1)
-			valueCell.setCellValue("Agreed mark and actual mark missing")
-		}
-		{
-			val row = sheet.createRow(13)
-			val keyCell = row.createCell(0)
-			keyCell.setCellValue("")
-			val valueCell = row.createCell(1)
-			valueCell.setCellValue("Blank indicates module not taken by student")
-		}
-		{
-			val row = sheet.createRow(14)
-			val keyCell = row.createCell(0)
-			keyCell.setCellValue("AB")
-			keyCell.setCellStyle(cellStyleMap(BoldText))
-			val valueCell = row.createCell(1)
-			valueCell.setCellValue("Bold module name indicates a duplicate table entry")
-		}
-
-		sheet.autoSizeColumn(0)
-		sheet.autoSizeColumn(1)
-	}
-
 }
 
 object ExamGridExportStyles {
@@ -479,5 +386,101 @@ object ExamGridExportStyles {
 			OvercatAndActualMark -> overcatAndActualMarkStyle,
 			BoldText -> boldText
 		)
+	}
+}
+
+object ExamGridSummaryAndKey {
+
+	def summaryAndKey(
+		sheet: Sheet,
+		cellStyleMap: Map[ExamGridExportStyles.Style, CellStyle],
+		department: Department,
+		academicYear: AcademicYear,
+		course: Course,
+		routes: Seq[Route],
+		yearOfStudy: Int,
+		yearWeightings: Seq[CourseYearWeighting],
+		normalLoadLookup: NormalLoadLookup,
+		count: Int,
+		isStudentCount: Boolean
+	): Unit = {
+		def keyValueCells(key: String, value: String, rowIndex: Int) = {
+			val row = sheet.createRow(rowIndex)
+			val keyCell = row.createCell(0)
+			keyCell.setCellValue(key)
+			keyCell.setCellStyle(cellStyleMap(ExamGridExportStyles.Header))
+			val valueCell = row.createCell(1)
+			valueCell.setCellValue(value)
+			row
+		}
+		keyValueCells("Department:", department.name, 0)
+		keyValueCells("Academic year:", academicYear.toString, 1)
+		keyValueCells("Course:", s"${course.code.toUpperCase} ${course.name}", 2)
+		routes.size match {
+			case 0 => keyValueCells("Routes:", "All routes", 3)
+			case 1 => keyValueCells("Route:", s"${routes.head.code.toUpperCase} ${routes.head.name}", 3)
+			case n => keyValueCells("Routes:", s"$n routes", 3)
+		}
+		keyValueCells("Year of study:", yearOfStudy.toString, 4)
+		val yearWeightingRow = keyValueCells("Year weightings:", yearWeightings.map(cyw => s"Year ${cyw.yearOfStudy} = ${cyw.weightingAsPercentage}%").mkString("\n"), 5)
+		yearWeightingRow.setHeight((yearWeightingRow.getHeight * (yearWeightings.size - 1)).toShort)
+		val normalCATSLoadRow = keyValueCells("Normal CATS load:", normalLoadLookup.routes.sortBy(_.code).map(r => s"${r.code.toUpperCase}: ${normalLoadLookup(r).underlying.toString}").mkString("\n"), 6)
+		normalCATSLoadRow.setHeight((normalCATSLoadRow.getHeight * (normalLoadLookup.routes.size - 1)).toShort)
+		if (isStudentCount) {
+			keyValueCells("Student Count:", count.toString, 7)
+		} else {
+			keyValueCells("Count:", count.toString, 7)
+		}
+		keyValueCells("Grid Generated:", DateTime.now.toString, 8)
+
+		{
+			val row = sheet.createRow(9)
+			val keyCell = row.createCell(0)
+			keyCell.setCellValue("#")
+			keyCell.setCellStyle(cellStyleMap(ExamGridExportStyles.Fail))
+			val valueCell = row.createCell(1)
+			valueCell.setCellValue("Failed module")
+		}
+		{
+			val row = sheet.createRow(10)
+			val keyCell = row.createCell(0)
+			keyCell.setCellValue("#")
+			keyCell.setCellStyle(cellStyleMap(ExamGridExportStyles.Overcat))
+			val valueCell = row.createCell(1)
+			valueCell.setCellValue("Used in overcatting calculation")
+		}
+		{
+			val row = sheet.createRow(11)
+			val keyCell = row.createCell(0)
+			keyCell.setCellValue("#")
+			keyCell.setCellStyle(cellStyleMap(ExamGridExportStyles.ActualMark))
+			val valueCell = row.createCell(1)
+			valueCell.setCellValue("Agreed mark missing, using actual")
+		}
+		{
+			val row = sheet.createRow(12)
+			val keyCell = row.createCell(0)
+			keyCell.setCellValue("X")
+			val valueCell = row.createCell(1)
+			valueCell.setCellValue("Agreed mark and actual mark missing")
+		}
+		{
+			val row = sheet.createRow(13)
+			val keyCell = row.createCell(0)
+			keyCell.setCellValue("")
+			val valueCell = row.createCell(1)
+			valueCell.setCellValue("Blank indicates module not taken by student")
+		}
+		{
+			val row = sheet.createRow(14)
+			val keyCell = row.createCell(0)
+			keyCell.setCellValue("AB")
+			keyCell.setCellStyle(cellStyleMap(ExamGridExportStyles.BoldText))
+			val valueCell = row.createCell(1)
+			valueCell.setCellValue("Bold module name indicates a duplicate table entry")
+		}
+
+		sheet.autoSizeColumn(0)
+		sheet.autoSizeColumn(1)
 	}
 }

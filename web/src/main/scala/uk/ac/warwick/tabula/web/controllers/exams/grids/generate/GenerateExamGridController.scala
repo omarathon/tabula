@@ -348,6 +348,22 @@ class GenerateExamGridController extends ExamsController
 		val perYearColumnValues = benchmarkTask("perYearColumnValues") { perYearColumns.values.flatten.toSeq.map(c => c -> c.values).toMap }
 		val perYearColumnCategories = benchmarkTask("perYearColumnCategories") { perYearColumns.mapValues(_.collect{case c: HasExamGridColumnCategory => c}.groupBy(_.category)) }
 
+		val shortFormLayoutData = if (!gridOptionsCommand.showFullLayout) {
+			val perYearModuleMarkColumns = benchmarkTask("maxYearColumnSize"){ perYearColumns.map{ case (year, columns) => year -> columns.collect{ case marks: ModuleExamGridColumn => marks}} }
+			val perYearModuleReportColumns  = benchmarkTask("maxYearColumnSize"){ perYearColumns.map{ case (year, columns) => year -> columns.collect{ case marks: ModuleReportsColumn => marks}} }
+
+			val maxYearColumnSize =  benchmarkTask("maxYearColumnSize") { perYearModuleMarkColumns.map{ case (year, columns) =>
+				val maxModuleColumns = (entities.map(entity => columns.count(c => !c.isEmpty(entity, year))) ++ Seq(1)).max
+				year -> maxModuleColumns
+			} }
+
+			Map(
+				"maxYearColumnSize" -> maxYearColumnSize,
+				"perYearModuleMarkColumns" -> perYearModuleMarkColumns,
+				"perYearModuleReportColumns" -> perYearModuleReportColumns
+			)
+		} else { Map[String, Object]() }
+
 		val mavObjects = Map(
 			"oldestImport" -> oldestImport,
 			"studentInformationColumns" -> studentInformationColumns,
@@ -363,29 +379,10 @@ class GenerateExamGridController extends ExamsController
 			"normalLoadLookup" -> normalLoadLookup,
 			"routeRules" -> routeRules,
 			"jobId" -> jobId
-		)
-
-		val mav = if (gridOptionsCommand.showFullLayout) {
-			Mav("exams/grids/generate/preview", mavObjects)
-		} else {
-			val perYearModuleMarkColumns = benchmarkTask("maxYearColumnSize"){ perYearColumns.map{ case (year, columns) => year -> columns.collect{ case marks: ModuleExamGridColumn => marks}} }
-			val perYearModuleReportColumns  = benchmarkTask("maxYearColumnSize"){ perYearColumns.map{ case (year, columns) => year -> columns.collect{ case marks: ModuleReportsColumn => marks}} }
-
-			val maxYearColumnSize =  benchmarkTask("maxYearColumnSize") { perYearModuleMarkColumns.map{ case (year, columns) =>
-				val maxModuleColumns = (entities.map(entity => columns.count(c => !c.isEmpty(entity, year))) ++ Seq(1)).max
-				year -> maxModuleColumns
-			} }
-
-			val shortformMavObjects = mavObjects ++ Map(
-				"maxYearColumnSize" -> maxYearColumnSize,
-				"perYearModuleMarkColumns" -> perYearModuleMarkColumns,
-				"perYearModuleReportColumns" -> perYearModuleReportColumns
-			)
-			Mav("exams/grids/generate/shortform_preview", shortformMavObjects)
-		}
+		) ++ shortFormLayoutData
 
 		commonCrumbs(
-			mav,
+			Mav("exams/grids/generate/preview", mavObjects),
 			department,
 			academicYear
 		)
