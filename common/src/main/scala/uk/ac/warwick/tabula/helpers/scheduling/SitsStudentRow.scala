@@ -106,7 +106,7 @@ trait SitsStudentRowYearDetails extends BasicStudentCourseYearProperties with Lo
 	var sceRouteCode: String = resultSet.getString("sce_route_code")
 
 	this.yearOfStudy = resultSet.getInt("study_block")
-	this.studyLevel = resultSet.getInt("study_level")
+	this.studyLevel = resultSet.getString("study_level")
 
 	//this.fundingSource = rs.getString("funding_source")
 	this.sceSequenceNumber = resultSet.getInt("sce_sequence_number")
