@@ -149,84 +149,98 @@
 						<input type="hidden" name="returnTo" value="${returnTo}"/>
 
 						<#list command.checkpointMap?keys?sort_by("lastName") as student>
-							<#list mapGet(command.checkpointMap, student)?keys as point>
+							<#if mapGet(command.checkpointMap, student)?keys?size == 0>
 								<div class="row item-info">
 									<div class="col-md-8">
 										<#if numberOfStudents <= 50>
 											<@fmt.member_photo student "tinythumbnail" true />
 										</#if>
 										${student.fullName}&nbsp;<@pl.profile_link student.universityId />
-										<#if mapGet(command.hasReportedMap, student)>
-											<br/><span class="hint">A checkpoint cannot be set as this student's attendance data has already been submitted for this period.</span>
-										</#if>
-										<@spring.bind path="command.checkpointMap[${student.universityId}][${point.id}]">
-											<#if status.error>
-												<div class="text-error"><@f.errors path="command.checkpointMap[${student.universityId}][${point.id}]" cssClass="error"/></div>
-											</#if>
-										</@spring.bind>
+										<div class="text-muted">
+											You do not have permission to record monitoring point attendance for this student.
+										</div>
 									</div>
-									<div class="col-md-4">
-										<div class="pull-right">
-											<div class="visible-print-block">
-												<@attendance_macros.checkpointLabel
-													department=department
-													student=student
-													checkpoint=(mapGet(mapGet(command.studentPointCheckpointMap, student), point))!""
-													note=(mapGet(mapGet(command.attendanceNoteMap, student), point))!""
-													point=point
-												/>
-											</div>
-											<#if mapGet(command.hasReportedMap, student)>
-												<@attendance_macros.checkpointLabel
-													department=department
-													student=student
-													checkpoint=(mapGet(mapGet(command.studentPointCheckpointMap, student), point))!""
-													note=(mapGet(mapGet(command.attendanceNoteMap, student), point))!""
-													point=point
-												/>
-											<#else>
-												<@attendance_macros.checkpointSelect
-													id="checkpointMap-${student.universityId}-${point.id}"
-													name="checkpointMap[${student.universityId}][${point.id}]"
-													department=department
-													checkpoint=(mapGet(mapGet(command.studentPointCheckpointMap, student), point))!""
-													note=(mapGet(mapGet(command.attendanceNoteMap, student), point))!""
-													student=student
-													point=point
-												/>
+								</div>
+							<#else>
+								<#list mapGet(command.checkpointMap, student)?keys as point>
+									<div class="row item-info">
+										<div class="col-md-8">
+											<#if numberOfStudents <= 50>
+												<@fmt.member_photo student "tinythumbnail" true />
 											</#if>
+											${student.fullName}&nbsp;<@pl.profile_link student.universityId />
+											<#if mapGet(command.hasReportedMap, student)>
+												<br/><span class="hint">A checkpoint cannot be set as this student's attendance data has already been submitted for this period.</span>
+											</#if>
+											<@spring.bind path="command.checkpointMap[${student.universityId}][${point.id}]">
+												<#if status.error>
+													<div class="text-error"><@f.errors path="command.checkpointMap[${student.universityId}][${point.id}]" cssClass="error"/></div>
+												</#if>
+											</@spring.bind>
+										</div>
+										<div class="col-md-4">
+											<div class="pull-right">
+												<div class="visible-print-block">
+													<@attendance_macros.checkpointLabel
+														department=department
+														student=student
+														checkpoint=(mapGet(mapGet(command.studentPointCheckpointMap, student), point))!""
+														note=(mapGet(mapGet(command.attendanceNoteMap, student), point))!""
+														point=point
+													/>
+												</div>
+												<#if mapGet(command.hasReportedMap, student)>
+													<@attendance_macros.checkpointLabel
+														department=department
+														student=student
+														checkpoint=(mapGet(mapGet(command.studentPointCheckpointMap, student), point))!""
+														note=(mapGet(mapGet(command.attendanceNoteMap, student), point))!""
+														point=point
+													/>
+												<#else>
+													<@attendance_macros.checkpointSelect
+														id="checkpointMap-${student.universityId}-${point.id}"
+														name="checkpointMap[${student.universityId}][${point.id}]"
+														department=department
+														checkpoint=(mapGet(mapGet(command.studentPointCheckpointMap, student), point))!""
+														note=(mapGet(mapGet(command.attendanceNoteMap, student), point))!""
+														student=student
+														point=point
+													/>
+												</#if>
 
-											<#if mapGet(mapGet(command.attendanceNoteMap, student), point)??>
-												<#assign note = mapGet(mapGet(command.attendanceNoteMap, student), point) />
-												<#if note.hasContent>
-													<a id="attendanceNote-${student.universityId}-${point.id}" class="btn btn-default use-tooltip attendance-note edit" title="Edit attendance note" href="<@routes.attendance.noteEdit academicYear student point />?dt=${.now?string('iso')}">
-														<i class="fa fa-pencil-square-o attendance-note-icon"></i>
-													</a>
+												<#if mapGet(mapGet(command.attendanceNoteMap, student), point)??>
+													<#assign note = mapGet(mapGet(command.attendanceNoteMap, student), point) />
+													<#if note.hasContent>
+														<a id="attendanceNote-${student.universityId}-${point.id}" class="btn btn-default use-tooltip attendance-note edit" title="Edit attendance note" href="<@routes.attendance.noteEdit academicYear student point />?dt=${.now?string('iso')}">
+															<i class="fa fa-pencil-square-o attendance-note-icon"></i>
+														</a>
+													<#else>
+														<a id="attendanceNote-${student.universityId}-${point.id}" class="btn btn-default use-tooltip attendance-note" title="Add attendance note" href="<@routes.attendance.noteEdit academicYear student point />">
+															<i class="fa fa-pencil-square-o attendance-note-icon"></i>
+														</a>
+													</#if>
 												<#else>
 													<a id="attendanceNote-${student.universityId}-${point.id}" class="btn btn-default use-tooltip attendance-note" title="Add attendance note" href="<@routes.attendance.noteEdit academicYear student point />">
 														<i class="fa fa-pencil-square-o attendance-note-icon"></i>
 													</a>
 												</#if>
-											<#else>
-												<a id="attendanceNote-${student.universityId}-${point.id}" class="btn btn-default use-tooltip attendance-note" title="Add attendance note" href="<@routes.attendance.noteEdit academicYear student point />">
-													<i class="fa fa-pencil-square-o attendance-note-icon"></i>
-												</a>
-											</#if>
 
-											<#if point.pointType.dbValue == "meeting">
-												<a class="meetings" title="Meetings with this student" href="<@routes.attendance.profileMeetings student academicYear point />"><i class="fa fa-fw fa-info-circle"></i></a>
-											<#elseif point.pointType.dbValue == "smallGroup">
-												<a class="small-groups" title="Small group teaching events for this student" href="<@routes.attendance.profileGroups student academicYear point />"><i class="fa fa-fw fa-info-circle"></i></a>
-											<#else>
-												<i class="fa fa-fw"></i>
-											</#if>
+												<#if point.pointType.dbValue == "meeting">
+													<a class="meetings" title="Meetings with this student" href="<@routes.attendance.profileMeetings student academicYear point />"><i class="fa fa-fw fa-info-circle"></i></a>
+												<#elseif point.pointType.dbValue == "smallGroup">
+													<a class="small-groups" title="Small group teaching events for this student" href="<@routes.attendance.profileGroups student academicYear point />"><i class="fa fa-fw fa-info-circle"></i></a>
+												<#else>
+													<i class="fa fa-fw"></i>
+												</#if>
+											</div>
 										</div>
+										<script>
+											AttendanceRecording.createButtonGroup('#checkpointMap-${student.universityId}-${point.id}');
+										</script>
 									</div>
-									<script>
-										AttendanceRecording.createButtonGroup('#checkpointMap-${student.universityId}-${point.id}');
-									</script>
-								</div>
-							</#list>
+								</#list>
+							</#if>
 						</#list>
 					</div>
 				</div>

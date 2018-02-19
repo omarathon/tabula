@@ -114,12 +114,29 @@ class AgentPointRecordCommandTest extends TestBase with Mockito {
 	def populate() {
 		new PopulateFixture {
 			populate.templatePoint = scheme1point1
+			Seq(student1, student2).foreach(populate.securityService.can(populate.user, Permissions.MonitoringPoints.Record, _).returns(true))
 			populate.populate()
 			val result: collection.Map[StudentMember, mutable.Map[AttendanceMonitoringPoint, AttendanceState]] = populate.checkpointMap.asScala.mapValues(_.asScala)
 			// Student1 doesn't have any attendance, but the checkpoint map should still be populated for each valid point
 			result(student1)(scheme1point1) should be (null)
 			result(student1)(scheme2point1) should be (null)
 			result(student2)(scheme2point1) should be (AttendanceState.MissedAuthorised)
+		}
+	}
+
+	@Test
+	def populateWithIncompletePermissions(): Unit = {
+		new PopulateFixture {
+			populate.templatePoint = scheme1point1
+			populate.securityService.can(populate.user, Permissions.MonitoringPoints.Record, student1).returns(true)
+			populate.securityService.can(populate.user, Permissions.MonitoringPoints.Record, student2).returns(false)
+			populate.populate()
+			val result: collection.Map[StudentMember, mutable.Map[AttendanceMonitoringPoint, AttendanceState]] = populate.checkpointMap.asScala.mapValues(_.asScala)
+
+			result(student1)(scheme1point1) should be (null)
+
+			// The user doesn't have permission to record attendance for student2, so none should be popluated
+			result(student2) should be ('empty)
 		}
 	}
 

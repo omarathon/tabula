@@ -8,7 +8,7 @@ import uk.ac.warwick.tabula.commands.attendance.view.{GroupedPointRecordValidati
 import uk.ac.warwick.tabula.data.model.attendance._
 import uk.ac.warwick.tabula.data.model.{Member, StudentMember, StudentRelationshipType}
 import uk.ac.warwick.tabula.helpers.LazyMaps
-import uk.ac.warwick.tabula.permissions.Permissions
+import uk.ac.warwick.tabula.permissions.{CheckablePermission, Permissions}
 import uk.ac.warwick.tabula.services._
 import uk.ac.warwick.tabula.services.attendancemonitoring.{AttendanceMonitoringServiceComponent, AutowiringAttendanceMonitoringServiceComponent}
 import uk.ac.warwick.tabula.system.permissions.{PermissionsChecking, PermissionsCheckingMethods, RequiresPermissionsChecking}
@@ -23,17 +23,17 @@ object AgentPointRecordCommand {
 		templatePoint: AttendanceMonitoringPoint,
 		user: CurrentUser,
 		member: Member
-	) =	new AgentPointRecordCommandInternal(relationshipType, academicYear, templatePoint, user, member)
-			with AutowiringRelationshipServiceComponent
-			with AutowiringAttendanceMonitoringServiceComponent
-			with AutowiringSecurityServiceComponent
-			with ComposableCommand[(Seq[AttendanceMonitoringCheckpoint], Seq[AttendanceMonitoringCheckpointTotal])]
-			with AgentPointRecordValidation
-			with AgentPointRecordDescription
-			with AgentPointRecordPermissions
-			with AgentPointRecordCommandState
-			with PopulateAgentPointRecordCommand
-			with MissedAttendanceMonitoringCheckpointsNotifications
+	) = new AgentPointRecordCommandInternal(relationshipType, academicYear, templatePoint, user, member)
+		with AutowiringRelationshipServiceComponent
+		with AutowiringAttendanceMonitoringServiceComponent
+		with AutowiringSecurityServiceComponent
+		with ComposableCommand[(Seq[AttendanceMonitoringCheckpoint], Seq[AttendanceMonitoringCheckpointTotal])]
+		with AgentPointRecordValidation
+		with AgentPointRecordDescription
+		with AgentPointRecordPermissions
+		with AgentPointRecordCommandState
+		with PopulateAgentPointRecordCommand
+		with MissedAttendanceMonitoringCheckpointsNotifications
 }
 
 
@@ -45,31 +45,32 @@ class AgentPointRecordCommandInternal(
 	val member: Member
 ) extends CommandInternal[(Seq[AttendanceMonitoringCheckpoint], Seq[AttendanceMonitoringCheckpointTotal])] {
 
-	self: AgentPointRecordCommandState with AttendanceMonitoringServiceComponent =>
+	self: AgentPointRecordCommandState with AttendanceMonitoringServiceComponent with SecurityServiceComponent =>
 
 	override def applyInternal(): (Seq[AttendanceMonitoringCheckpoint], Seq[AttendanceMonitoringCheckpointTotal]) = {
-		checkpointMap.asScala.map { case(student, pointMap) =>
-			attendanceMonitoringService.setAttendance(student, pointMap.asScala.toMap, user)
-		}.toSeq.foldLeft(
-			(Seq[AttendanceMonitoringCheckpoint](), Seq[AttendanceMonitoringCheckpointTotal]())
-		){
-			case ((leftCheckpoints, leftTotals), (rightCheckpoints, rightTotals)) => (leftCheckpoints ++ rightCheckpoints, leftTotals ++ rightTotals)
-		}
+		checkpointMap.asScala
+			.filter { case (student, _) => securityService.can(user, Permissions.MonitoringPoints.Record, student) }
+			.map { case (student, pointMap) => attendanceMonitoringService.setAttendance(student, pointMap.asScala.toMap, user) }
+			.foldLeft((Seq[AttendanceMonitoringCheckpoint](), Seq[AttendanceMonitoringCheckpointTotal]())) {
+				case ((leftCheckpoints, leftTotals), (rightCheckpoints, rightTotals)) => (leftCheckpoints ++ rightCheckpoints, leftTotals ++ rightTotals)
+			}
 	}
 
 }
 
 trait PopulateAgentPointRecordCommand extends PopulateOnForm {
 
-	self: AgentPointRecordCommandState =>
+	self: AgentPointRecordCommandState with SecurityServiceComponent =>
 
 	override def populate(): Unit = {
-		checkpointMap = studentPointMap.map{case(student, points) =>
-			student -> points.map{ point =>
-				point -> studentPointCheckpointMap.get(student).map { pointMap =>
-					pointMap.get(point).map(_.state).orNull
-				}.orNull
-			}.toMap.asJava
+		checkpointMap = studentPointMap.map {
+			case (student, _) if !securityService.can(user, Permissions.MonitoringPoints.Record, student) => (student, Map.empty[AttendanceMonitoringPoint, AttendanceState].asJava)
+			case (student, points) =>
+				student -> points.map { point =>
+					point -> studentPointCheckpointMap.get(student).map { pointMap =>
+						pointMap.get(point).map(_.state).orNull
+					}.orNull
+				}.toMap.asJava
 		}.asJava
 	}
 }
@@ -96,9 +97,11 @@ trait AgentPointRecordPermissions extends RequiresPermissionsChecking with Permi
 
 	override def permissionsCheck(p: PermissionsChecking) {
 		p.PermissionCheck(Permissions.Profiles.StudentRelationship.Read(mandatory(relationshipType)), member)
-		p.PermissionCheckAll(
-			Permissions.MonitoringPoints.Record,
-			relationshipService.listCurrentStudentRelationshipsWithMember(relationshipType, member).flatMap(_.studentMember).distinct
+		p.PermissionCheckAny(
+			relationshipService.listCurrentStudentRelationshipsWithMember(relationshipType, member)
+				.flatMap(_.studentMember)
+				.distinct
+				.map(member => CheckablePermission(Permissions.MonitoringPoints.Record, member))
 		)
 	}
 
@@ -111,13 +114,14 @@ trait AgentPointRecordDescription extends Describable[(Seq[AttendanceMonitoringC
 	override lazy val eventName = "AgentPointRecord"
 
 	override def describe(d: Description) {
-		d.property("checkpoints", checkpointMap.asScala.map{ case (student, pointMap) =>
-			student.universityId -> pointMap.asScala.map{ case(point, state) => point -> {
+		d.property("checkpoints", checkpointMap.asScala.map { case (student, pointMap) =>
+			student.universityId -> pointMap.asScala.map { case (point, state) => point -> {
 				if (state == null)
 					"null"
 				else
 					state.dbValue
-			}}
+			}
+			}
 		})
 	}
 }
@@ -127,9 +131,13 @@ trait AgentPointRecordCommandState extends GroupsPoints {
 	self: AttendanceMonitoringServiceComponent with RelationshipServiceComponent =>
 
 	def relationshipType: StudentRelationshipType
+
 	def academicYear: AcademicYear
+
 	def templatePoint: AttendanceMonitoringPoint
+
 	def user: CurrentUser
+
 	def member: Member
 
 	lazy val students: Seq[StudentMember] = relationshipService.listCurrentStudentRelationshipsWithMember(relationshipType, member).flatMap(_.studentMember).distinct
