@@ -29,6 +29,9 @@ trait AcademicYearScopedController {
 		years
 	}
 
+	@ModelAttribute("academicYearNow")
+	def academicYearNow: AcademicYear = AcademicYear.now()
+
 	protected def retrieveActiveAcademicYear(academicYearOption: Option[AcademicYear]): Option[AcademicYear] = {
 		academicYearOption match {
 			case Some(academicYear) if maintenanceModeService.enabled =>

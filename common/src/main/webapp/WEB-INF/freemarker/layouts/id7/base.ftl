@@ -44,6 +44,12 @@
 				Proxying as <strong>${proxyingAs.fullName}</strong>.
 			</div>
 		</#if>
+		<#if activeAcademicYear?? && activeAcademicYear.toString != academicYearNow.toString>
+			<div class="page-notice">
+				This page is for the ${activeAcademicYear.toString} academic year.
+				To view current information, <a class="text-decoration-underline" href="${info.requestedUri?replace("/" + activeAcademicYear.storeValue, "/" + academicYearNow.storeValue)}">go to ${academicYearNow.toString}</a>.
+			</div>
+		</#if>
 
 		<div class="id7-utility-masthead">
 			<nav class="id7-utility-bar">
