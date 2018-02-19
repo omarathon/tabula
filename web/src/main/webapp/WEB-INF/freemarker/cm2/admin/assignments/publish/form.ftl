@@ -6,36 +6,6 @@
 	<#assign module = assignment.module />
 	<#assign department = module.adminDepartment />
 
-	<#macro recipientCheckReportResults report>
-		<#if recipientCheckReport.hasProblems>
-			<#local problems = recipientCheckReport.problems />
-			<div class="bad-recipients alert alert-danger">
-				<p>
-					<@fmt.p problems?size "problem" /> found with students' and/or their email addresses.
-					You can continue to publish the feedback, but you may want to post the feedback link to
-					a web page that the students can access even if they didn't get the email. You'll be given
-					this link after you publish.
-				</p>
-				<ul>
-					<#list problems as problem>
-						<li>
-							<b>${problem.universityId}</b> :
-							<#if problem.user?? >
-								Bad email address: (${problem.user.email!})
-							<#else>
-								No such user found.
-							</#if>
-						</li>
-					</#list>
-				</ul>
-			</div>
-		<#else>
-			<div class="alert alert-success">
-				<p>No problems found with students' email addresses.</p>
-			</div>
-		</#if>
-	</#macro>
-
 	<#macro userList usercodes>
 		<ul class="user-list">
 			<@userlookup ids=usercodes>
@@ -51,84 +21,27 @@
 		</ul>
 	</#macro>
 
-	<#macro submissionsReportResults report>
-		<#if report.hasProblems>
-			<#if report.submissionOnly?size gt 0>
-				<div class="alert alert-danger">
-					<p>These users have submitted to the assignment, but no feedback has been uploaded for them.</p>
+	<#macro userListPopover collection entity="student" singular="does" plural="do" includeTrailingWord=true>
+		<#assign popoverContent>
+			<@userList collection/>
+		</#assign>
 
-					<@userList report.submissionOnly />
-				</div>
-			</#if>
-
-			<#if report.feedbackOnly?size gt 0>
-				<div class="alert alert-danger">
-					<p>There is feedback or marks for these users but they did not submit an assignment to this system.</p>
-
-					<@userList report.feedbackOnly />
-				</div>
-			</#if>
-
-			<#if report.withoutAttachments?size == command.feedbackToRelease?size>
-				<div class="alert alert-warn">
-					<p>None of the submissions have any feedback.</p>
-				</div>
-			<#elseif report.withoutAttachments?size gt 0>
-				<div class="alert alert-danger">
-					<p>Submissions received from the following students do not have any feedback.</p>
-
-					<@userList report.withoutAttachments />
-				</div>
-			</#if>
-
-			<#if report.withoutMarks?size == command.feedbackToRelease?size>
-				<div class="alert alert-warn">
-					<p>None of the submissions have had marks assigned.</p>
-				</div>
-			<#elseif report.withoutMarks?size gt 0>
-				<div class="alert alert-danger">
-					<p>Submissions received from the following students do not have any marks assigned.</p>
-
-					<@userList report.withoutMarks />
-				</div>
-			</#if>
-
-			<#if report.plagiarised?size == 0>
-				<div class="alert alert-success">
-					<p>No submissions have been marked as suspected of being plagiarised.</p>
-				</div>
-			<#else>
-				<div class="alert alert-warn">
-					<p>
-						<#if report.plagiarised?size == 1>
-							It is suspected that the submission received from the following student is plagiarised. Feedback for this student will not be published.
-						<#else>
-							It is suspected that submissions received from the following students are plagiarised. Feedback for these students will not be published.
-						</#if>
-					</p>
-
-					<@userList report.plagiarised />
-				</div>
-			</#if>
-
-			<p>
-				The above discrepancies are provided for information.
-				It is up to you to decide whether to continue publishing.
-			</p>
-		<#else>
-			<div class="alert alert-success">
-				<p>The submissions and the feedback items appear to match up for this assignment.</p>
-			</div>
+		<a class="use-popover" href="#" data-html="true" data-content="${popoverContent}"><@fmt.p collection?size entity /></a>
+		<#if includeTrailingWord>
+			${(collection?size == 1)?string(singular, plural)}
 		</#if>
 	</#macro>
 
 	<script type="text/javascript">
-		jQuery(function($){ "use strict";
+		jQuery(function ($) {
+			"use strict";
 			var submitButton = $('#publish-submit'),
 				checkbox = $('#confirmCheck');
+
 			function updateCheckbox() {
 				submitButton.attr('disabled', !checkbox.is(':checked'));
 			}
+
 			checkbox.change(updateCheckbox);
 			updateCheckbox();
 		});
@@ -138,66 +51,134 @@
 	<@f.form method="post" action=submitUrl commandName="command">
 		<@bs3form.errors path="" />
 
-		<p>This will publish feedback for <strong><@fmt.p command.feedbackToRelease?size "student" /></strong>:</p>
+		<#if submissionsReport.plagiarised?has_content>
+			<div class="alert alert-danger">
+				<h4>
+					<i class="fa fa-fw fa-exclamation-circle"></i>
+					Plagiarism
+				</h4>
 
-		<ul>
-			<#list command.feedbackToRelease as feedback>
-				<li>
-					<@userlookup id=feedback.usercode>
-						<#if returned_user.foundUser>
-							${returned_user.fullName} (<#if returned_user.warwickId??>${returned_user.warwickId}<#else>${feedback.usercode}</#if>)
-						<#else>
-							${feedback.usercode}
-						</#if>
-					</@userlookup>
-					<@f.hidden name="students" value=feedback.usercode />
-				</li>
-			</#list>
-		</ul>
-
-		<p>
-			<#if submissionsReport.alreadyReleased?has_content>
-				<@fmt.p submissionsReport.alreadyReleased?size "student" /> have already had their feedback published.
-				Those students won't be emailed again.
-			</#if>
-		</p>
-
-		<#if features.queueFeedbackForSits && department.uploadCourseworkMarksToSits>
-			<@marking.uploadToSits assignment=assignment verb="Publishing" withValidation=true isGradeValidation=isGradeValidation gradeValidation=gradeValidation />
-		</#if>
-
-		<#if features.emailStudents>
-			<p>
-				Each student will receive an email containing the link to the feedback. They will sign in
-				and be shown the feedback specific to them.
-			</p>
-		<#else>
-			<p>
-				Note: notifications are not currently sent to students - you will need to distribute the
-				link yourself, by email or by posting it on your module web pages.
-			</p>
-		</#if>
-
-		<div id="feedback-check-recipient-results">
-			<@recipientCheckReportResults recipientCheckReport />
-		</div>
-
-		<#if features.submissions && assignment.submissions?size gt 0>
-			<div id="submissions-report-results">
-				<@submissionsReportResults submissionsReport />
+				<p>
+					<@userListPopover submissionsReport.plagiarised "submission" "is" "are" /> flagged as plagiarised.
+					To publish feedback to ${(submissionsReport.plagiarised?size == 1)?string("this student", "these students")}, you need to remove the plagiarism flag.
+				</p>
 			</div>
 		</#if>
 
-		<@bs3form.form_group path="confirm">
-			<@bs3form.checkbox path="confirm">
-				<@f.checkbox path="confirm" id="confirmCheck" /> I have read the above and am ready to release feedback to students.
-			</@bs3form.checkbox>
-		</@bs3form.form_group>
+		<#if submissionsReport.publishable?size != 0>
+			<div class="panel panel-default panel-body">
+				<h4>
+					<i class="fa fa-fw fa-${recipientCheckReport.hasProblems?string('info-circle', 'check-circle')}"></i>
+					Feedback emails
+				</h4>
 
-		<div class="submit-buttons">
-			<button id="publish-submit" type="submit" class="btn btn-primary">Publish</button>
-			<a class="btn btn-default" href="<@routes.cm2.assignmentsubmissionsandfeedback assignment />">Cancel</a>
+				<#if features.emailStudents>
+					<p>
+						When you publish feedback, each student receives an email with a link to view their feedback.
+					</p>
+				<#else>
+					<p>
+						Email notifications are disabled. Students can view their feedback by signing into Tabula and selecting
+						Coursework Management.
+					</p>
+				</#if>
+
+				<#if recipientCheckReport.hasProblems>
+					<#assign popoverContent>
+						<ul>
+						<#list recipientCheckReport.problems as problem>
+							<li>
+								${problem.universityId}:
+								<#if problem.user??>
+									email address '${problem.user.email!}' is invalid
+								<#else>
+									user not found
+								</#if>
+							</li>
+						</#list>
+						</ul>
+					</#assign>
+
+					<p>
+						Email addresses for
+						<a class="use-popover" href="#" data-html="true" data-content="${popoverContent}"><@fmt.p recipientCheckReport.problems?size "student" /></a>
+						not found.
+
+						<#if recipientCheckReport.problems?size == 1>
+							This student
+						<#else>
+							These students
+						</#if>
+						can view their feedback by signing into Tabula and selecting Coursework Management.
+					</p>
+				</#if>
+			</div>
+		</#if>
+
+		<div class="panel panel-default panel-body">
+			<h4>
+				<i class="fa fa-fw fa-${(submissionsReport.hasProblems || submissionsReport.publishable?size == 0)?string('info-circle', 'check-circle')}"></i>
+				Submissions and feedback
+			</h4>
+
+			<#if submissionsReport.publishable?size == 0>
+			<p>
+				No feedback is available to publish.
+			</p>
+			<#else>
+			<p>
+				You can publish feedback to <@fmt.p submissionsReport.publishable?size "student" />.
+				<#if submissionsReport.hasProblems>
+					Of these:
+				</#if>
+			</p>
+			</#if>
+
+			<#if submissionsReport.hasProblems>
+				<ul>
+					<#if submissionsReport.feedbackOnly?has_content>
+						<li><@userListPopover submissionsReport.feedbackOnly "student" "has" "have" /> marks or feedback, but did not submit coursework to Tabula</li>
+					</#if>
+					<#if submissionsReport.withoutMarks?has_content>
+						<li><@userListPopover submissionsReport.withoutMarks /> not have a mark</li>
+					</#if>
+					<#if submissionsReport.submissionOnly?has_content>
+						<li><@userListPopover submissionsReport.submissionOnly /> not have feedback</li>
+					</#if>
+					<#if submissionsReport.withoutAttachments?has_content>
+						<li><@userListPopover submissionsReport.withoutAttachments /> not have any feedback files attached</li>
+					</#if>
+					<#if submissionsReport.alreadyPublished?has_content>
+						<li><@userListPopover submissionsReport.alreadyPublished "student" "has" "have" /> already received feedback, so won't be sent another email</li>
+					</#if>
+				</ul>
+			<#elseif submissionsReport.publishable?size != 0>
+				<p>
+					No warnings found when checking submissions and feedback for this assignment.
+				</p>
+			</#if>
 		</div>
 
+		<#list command.feedbackToRelease as feedback>
+			<@f.hidden name="students" value=feedback.usercode />
+		</#list>
+
+		<#if command.feedbackToRelease?size != 0>
+			<@bs3form.form_group path="confirm">
+				<@bs3form.checkbox path="confirm">
+					<@f.checkbox path="confirm" id="confirmCheck" /> I've reviewed these messages and am ready to publish feedback to
+				<strong><@fmt.p submissionsReport.publishable?size "student" /></strong>
+				</@bs3form.checkbox>
+			</@bs3form.form_group>
+
+			<#if features.queueFeedbackForSits && department.uploadCourseworkMarksToSits>
+				<@marking.uploadToSits assignment=assignment verb="Publishing" withValidation=true isGradeValidation=isGradeValidation gradeValidation=gradeValidation />
+			</#if>
+
+			<div class="submit-buttons">
+				<button id="publish-submit" type="submit" class="btn btn-primary">Publish feedback</button>
+				<a class="btn btn-default" href="<@routes.cm2.assignmentsubmissionsandfeedback assignment />">Cancel</a>
+			</div>
+		</#if>
 	</@f.form>
 </#escape>
