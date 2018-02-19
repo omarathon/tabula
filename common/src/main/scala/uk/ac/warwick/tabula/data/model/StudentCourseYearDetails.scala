@@ -195,8 +195,12 @@ trait BasicStudentCourseYearProperties {
 		*/
 	def sceSequenceNumberSitsFormat = f"${sceSequenceNumber.toInt}%02d"
 
+	// TODO - rename to studyBlock - TAB-5980
 	@Restricted(Array("Profiles.Read.StudentCourseDetails.Core"))
 	var yearOfStudy: JInteger = _
+
+	@Restricted(Array("Profiles.Read.StudentCourseDetails.Core"))
+	var studyLevel: String = _
 
 	@Column(name="cas_used")
 	@Restricted(Array("Profiles.Read.Tier4VisaRequirement"))

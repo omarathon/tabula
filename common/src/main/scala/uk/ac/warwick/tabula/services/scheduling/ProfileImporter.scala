@@ -187,7 +187,8 @@ class SandboxProfileImporter extends ProfileImporter {
 				"most_signif_indicator" -> "Y",
 				"funding_source" -> null,
 				"enrolment_status_code" -> "C",
-				"year_of_study" -> thisYearOfStudy,
+				"study_block" -> thisYearOfStudy,
+				"study_level" -> thisYearOfStudy,
 				"mode_of_attendance_code" -> (if (member.universityId.toLong % 5 == 0) "P" else "F"),
 				"sce_academic_year" -> (AcademicYear.now() - (yearOfStudy - thisYearOfStudy)).toString,
 				"sce_sequence_number" -> thisYearOfStudy,
@@ -392,13 +393,15 @@ object ProfileImporter extends Logging {
 
 			sce.sce_sfcc as funding_source,
 			sce.sce_stac as enrolment_status_code,
-			sce.sce_blok as year_of_study,
+			sce.sce_blok as study_block, -- formally year_of_study
 			sce.sce_moac as mode_of_attendance_code,
 			sce.sce_ayrc as sce_academic_year,
 			sce.sce_seq2 as sce_sequence_number,
 			sce.sce_dptc as enrolment_department_code,
 			sce.sce_udfj as sce_agreed_mark,
 			sce.sce_rouc as sce_route_code,
+
+			cbo.cbo_levc as study_level,
 
 			ssn.ssn_mrgs as mod_reg_status,
 
@@ -421,6 +424,9 @@ object ProfileImporter extends Logging {
 								where sce.sce_scjc = sce2.sce_scjc
 								and sce2.sce_ayrc = sce.sce_ayrc
 					)
+
+			left join $sitsSchema.srs_cbo cbo -- Course Block Occurrence
+				on sce.SCE_CRSC = cbo.CBO_CRSC and sce.SCE_BLOK = cbo.CBO_BLOK and sce.SCE_OCCL = cbo.CBO_OCCL and sce.SCE_AYRC = cbo.CBO_AYRC
 
 			join $sitsSchema.srs_mst mst -- Master Student
 				on stu.stu_code = mst.mst_adid
