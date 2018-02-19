@@ -188,7 +188,7 @@ class SandboxProfileImporter extends ProfileImporter {
 				"funding_source" -> null,
 				"enrolment_status_code" -> "C",
 				"study_block" -> thisYearOfStudy,
-				"study_level" -> thisYearOfStudy,
+				"study_level" -> thisYearOfStudy.toString,
 				"mode_of_attendance_code" -> (if (member.universityId.toLong % 5 == 0) "P" else "F"),
 				"sce_academic_year" -> (AcademicYear.now() - (yearOfStudy - thisYearOfStudy)).toString,
 				"sce_sequence_number" -> thisYearOfStudy,
