@@ -9,15 +9,15 @@ import uk.ac.warwick.tabula.data.HibernateHelpers
 import uk.ac.warwick.tabula.data.Transactions._
 import uk.ac.warwick.tabula.data.model.MarkType.{Adjustment, PrivateAdjustment}
 import uk.ac.warwick.tabula.data.model._
+import uk.ac.warwick.tabula.data.model.notifications.cm2.{Cm2FeedbackAdjustmentNotification, Cm2StudentFeedbackAdjustmentNotification}
 import uk.ac.warwick.tabula.helpers.SpreadsheetHelpers
 import uk.ac.warwick.tabula.helpers.StringUtils._
 import uk.ac.warwick.tabula.permissions.Permissions
-import uk.ac.warwick.tabula.services.{AutowiringFeedbackServiceComponent, FeedbackServiceComponent, GeneratesGradesFromMarks}
+import uk.ac.warwick.tabula.services.{AutowiringFeedbackServiceComponent, AutowiringUserLookupComponent, FeedbackServiceComponent, GeneratesGradesFromMarks}
 import uk.ac.warwick.tabula.system.BindListener
 import uk.ac.warwick.tabula.system.permissions.{PermissionsChecking, PermissionsCheckingMethods, RequiresPermissionsChecking}
 
 import scala.collection.JavaConverters._
-import scala.collection.mutable
 
 object BulkAdjustmentCommand {
 	val StudentIdHeader = "Student ID"
@@ -29,29 +29,30 @@ object BulkAdjustmentCommand {
 	def apply(assessment: Assessment, gradeGenerator: GeneratesGradesFromMarks, spreadsheetHelper: SpreadsheetHelpers, user: CurrentUser) =
 		new BulkAdjustmentCommandInternal(assessment, gradeGenerator, spreadsheetHelper, user)
 			with AutowiringFeedbackServiceComponent
-			with ComposableCommand[Seq[Mark]]
+			with ComposableCommand[Seq[Feedback]]
 			with BulkAdjustmentCommandBindListener
 			with BulkAdjustmentValidation
 			with BulkAdjustmentDescription
 			with BulkAdjustmentPermissions
 			with BulkAdjustmentCommandState
+			with BulkAdjustmentNotifier
 }
 
 
 class BulkAdjustmentCommandInternal(val assessment: Assessment, val gradeGenerator: GeneratesGradesFromMarks, val spreadsheetHelper: SpreadsheetHelpers, val user: CurrentUser)
-	extends CommandInternal[Seq[Mark]] {
+	extends CommandInternal[Seq[Feedback]] {
 
 	self: BulkAdjustmentCommandState with FeedbackServiceComponent with BulkAdjustmentValidation =>
 
-	override def applyInternal(): mutable.Buffer[Mark] = {
+	override def applyInternal(): Seq[Feedback] = {
 		val errors = new BindException(this, "command")
 		validate(errors)
 
 		students.asScala
 			.filter(usercode =>
 				!errors.hasFieldErrors(s"marks[$usercode]") &&
-				!errors.hasFieldErrors(s"grades[$usercode]") &&
-				!errors.hasFieldErrors(s"reasons[$usercode]")
+					!errors.hasFieldErrors(s"grades[$usercode]") &&
+					!errors.hasFieldErrors(s"reasons[$usercode]")
 			)
 			.map(usercode => {
 				val feedback = feedbackMap(usercode)
@@ -74,7 +75,7 @@ class BulkAdjustmentCommandInternal(val assessment: Assessment, val gradeGenerat
 				)
 				feedbackService.saveOrUpdate(mark)
 				feedbackService.saveOrUpdate(feedback)
-				mark
+				feedback
 			})
 	}
 
@@ -180,7 +181,6 @@ trait BulkAdjustmentValidation extends SelfValidating {
 	}
 
 
-
 }
 
 trait BulkAdjustmentPermissions extends RequiresPermissionsChecking with PermissionsCheckingMethods {
@@ -198,7 +198,7 @@ trait BulkAdjustmentPermissions extends RequiresPermissionsChecking with Permiss
 
 }
 
-trait BulkAdjustmentDescription extends Describable[Seq[Mark]] {
+trait BulkAdjustmentDescription extends Describable[Seq[Feedback]] {
 
 	self: BulkAdjustmentCommandState =>
 
@@ -206,15 +206,18 @@ trait BulkAdjustmentDescription extends Describable[Seq[Mark]] {
 
 	override def describe(d: Description) {
 		d.assessment(assessment)
-		d.property("marks" -> marks.asScala.filter{case(_, mark) => mark.hasText})
+		d.property("marks" -> marks.asScala.filter { case (_, mark) => mark.hasText })
 	}
 }
 
 trait BulkAdjustmentCommandState {
 
 	def assessment: Assessment
+
 	def gradeGenerator: GeneratesGradesFromMarks
+
 	def spreadsheetHelper: SpreadsheetHelpers
+
 	def user: CurrentUser
 
 	lazy val feedbackMap: Map[String, Feedback] = assessment.allFeedback.groupBy(_.studentIdentifier).mapValues(_.head)
@@ -239,4 +242,32 @@ trait BulkAdjustmentCommandState {
 	lazy val requiresDefaultReason: Boolean = !students.asScala.forall(id => reasons.asScala.getOrElse(id, null).hasText)
 	lazy val requiresDefaultComments: Boolean = !students.asScala.forall(id => comments.asScala.getOrElse(id, null).hasText)
 
+}
+
+trait BulkAdjustmentNotifier extends Notifies[Seq[Feedback], Seq[Feedback]] {
+	self: BulkAdjustmentCommandState =>
+
+	def emit(feedbacks: Seq[Feedback]): Seq[NotificationWithTarget[AssignmentFeedback, Assignment] with SingleItemNotification[AssignmentFeedback] with AutowiringUserLookupComponent] = {
+		if (privateAdjustment) {
+			Nil
+		} else {
+			feedbacks.flatMap { feedback =>
+				HibernateHelpers.initialiseAndUnproxy(feedback) match {
+					case assignmentFeedback: AssignmentFeedback =>
+						val studentsNotifications = if (assignmentFeedback.released) {
+							Seq(Notification.init(new Cm2StudentFeedbackAdjustmentNotification, user.apparentUser, assignmentFeedback, assignmentFeedback.assignment))
+						} else {
+							Nil
+						}
+						val adminsNotifications = if (assessment.hasWorkflow) {
+							Seq(Notification.init(new Cm2FeedbackAdjustmentNotification, user.apparentUser, assignmentFeedback, assignmentFeedback.assignment))
+						} else {
+							Nil
+						}
+						studentsNotifications ++ adminsNotifications
+					case x => Nil
+				}
+			}
+		}
+	}
 }
