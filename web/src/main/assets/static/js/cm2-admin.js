@@ -603,17 +603,17 @@
 			var maxHeight = 0;
 			$container.find('.tab-pane').each(function () {
 				var $pane = $(this);
+				var height = $pane.css({ height: '' }).height();
 				if ($pane.is('.active')) {
-					var height = $pane.height();
 					maxHeight = (height > maxHeight) ? height : maxHeight;
 				} else {
 					$pane.addClass('active');
-					var height = $pane.height();
 					maxHeight = (height > maxHeight) ? height : maxHeight;
 					$pane.removeClass('active');
 				}
 			});
 			$container.find('.tab-pane').height(maxHeight);
+			$container.trigger('tabula:tabContentHeightChange');
 		});
 	};
 
