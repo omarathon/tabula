@@ -173,6 +173,11 @@
 				<#else>
 					<li>Show module names</li>
 				</#if>
+				<#if gridOptionsCommand.layout == 'full'>
+					<li>Full column</li>
+				<#else>
+					<li>Short form</li>
+				</#if>
 			</ul>
 		</#assign>
 

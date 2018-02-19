@@ -11,8 +11,8 @@ import uk.ac.warwick.tabula.commands._
 import uk.ac.warwick.tabula.commands.exams.grids._
 import uk.ac.warwick.tabula.data.model.StudentCourseYearDetails.YearOfStudy
 import uk.ac.warwick.tabula.data.model._
-import uk.ac.warwick.tabula.exams.grids.columns._
-import uk.ac.warwick.tabula.exams.grids.columns.modules.{CoreRequiredModulesColumnOption, ModuleReportsColumnOption}
+import uk.ac.warwick.tabula.exams.grids.columns.{ExamGridColumnValueType, _}
+import uk.ac.warwick.tabula.exams.grids.columns.modules.{CoreRequiredModulesColumnOption, ModuleExamGridColumn, ModuleReportsColumn, ModuleReportsColumnOption}
 import uk.ac.warwick.tabula.helpers.DateTimeOrdering._
 import uk.ac.warwick.tabula.jobs.scheduling.ImportMembersJob
 import uk.ac.warwick.tabula.permissions.{Permission, Permissions}
@@ -348,23 +348,41 @@ class GenerateExamGridController extends ExamsController
 		val perYearColumnValues = benchmarkTask("perYearColumnValues") { perYearColumns.values.flatten.toSeq.map(c => c -> c.values).toMap }
 		val perYearColumnCategories = benchmarkTask("perYearColumnCategories") { perYearColumns.mapValues(_.collect{case c: HasExamGridColumnCategory => c}.groupBy(_.category)) }
 
+		val shortFormLayoutData = if (!gridOptionsCommand.showFullLayout) {
+			val perYearModuleMarkColumns = benchmarkTask("perYearModuleMarkColumns"){ perYearColumns.map{ case (year, columns) => year -> columns.collect{ case marks: ModuleExamGridColumn => marks}} }
+			val perYearModuleReportColumns  = benchmarkTask("perYearModuleReportColumns"){ perYearColumns.map{ case (year, columns) => year -> columns.collect{ case marks: ModuleReportsColumn => marks}} }
+
+			val maxYearColumnSize =  benchmarkTask("maxYearColumnSize") { perYearModuleMarkColumns.map{ case (year, columns) =>
+				val maxModuleColumns = (entities.map(entity => columns.count(c => !c.isEmpty(entity, year))) ++ Seq(1)).max
+				year -> maxModuleColumns
+			} }
+
+			Map(
+				"maxYearColumnSize" -> maxYearColumnSize,
+				"perYearModuleMarkColumns" -> perYearModuleMarkColumns,
+				"perYearModuleReportColumns" -> perYearModuleReportColumns
+			)
+		} else { Map[String, Object]() }
+
+		val mavObjects = Map(
+			"oldestImport" -> oldestImport,
+			"studentInformationColumns" -> studentInformationColumns,
+			"perYearColumns" -> perYearColumns,
+			"summaryColumns" -> summaryColumns,
+			"chosenYearColumnValues" -> chosenYearColumnValues,
+			"perYearColumnValues" -> perYearColumnValues,
+			"chosenYearColumnCategories" -> chosenYearColumnCategories,
+			"perYearColumnCategories" -> perYearColumnCategories,
+			"entities" -> entities,
+			"generatedDate" -> DateTime.now,
+			"weightings" -> weightings,
+			"normalLoadLookup" -> normalLoadLookup,
+			"routeRules" -> routeRules,
+			"jobId" -> jobId
+		) ++ shortFormLayoutData
+
 		commonCrumbs(
-			Mav("exams/grids/generate/preview",
-				"oldestImport" -> oldestImport,
-				"studentInformationColumns" -> studentInformationColumns,
-				"perYearColumns" -> perYearColumns,
-				"summaryColumns" -> summaryColumns,
-				"chosenYearColumnValues" -> chosenYearColumnValues,
-				"perYearColumnValues" -> perYearColumnValues,
-				"chosenYearColumnCategories" -> chosenYearColumnCategories,
-				"perYearColumnCategories" -> perYearColumnCategories,
-				"entities" -> entities,
-				"generatedDate" -> DateTime.now,
-				"weightings" -> weightings,
-				"normalLoadLookup" -> normalLoadLookup,
-				"routeRules" -> routeRules,
-				"jobId" -> jobId
-			),
+			Mav("exams/grids/generate/preview", mavObjects),
 			department,
 			academicYear
 		)

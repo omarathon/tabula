@@ -262,7 +262,8 @@ class Department extends GeneratedId
 		getStringSetting(Settings.ExamGridOptions.NameToShow, "full"),
 		getStringSetting(Settings.ExamGridOptions.YearsToShow, "current"),
 		getStringSetting(Settings.ExamGridOptions.MarksToShow, "overall"),
-		getStringSetting(Settings.ExamGridOptions.ModuleNameToShow, "codeOnly")
+		getStringSetting(Settings.ExamGridOptions.ModuleNameToShow, "codeOnly"),
+		getStringSetting(Settings.ExamGridOptions.Layout, "full")
 	)
 	def examGridOptions_=(options: ExamGridOptions): Unit = {
 		settings += (Settings.ExamGridOptions.PredefinedColumnIdentifiers -> options.predefinedColumnIdentifiers)
@@ -271,6 +272,7 @@ class Department extends GeneratedId
 		settings += (Settings.ExamGridOptions.YearsToShow -> options.yearsToShow)
 		settings += (Settings.ExamGridOptions.MarksToShow -> options.marksToShow)
 		settings += (Settings.ExamGridOptions.ModuleNameToShow -> options.moduleNameToShow)
+		settings += (Settings.ExamGridOptions.Layout -> options.layout)
 	}
 
 	// FIXME belongs in Freemarker
@@ -530,6 +532,7 @@ object Department {
 			val YearsToShow = "examGridOptionsYears"
 			val MarksToShow = "examGridOptionsMarks"
 			val ModuleNameToShow = "examGridOptionsModuleName"
+			val Layout ="examGridOptionsLayout"
 		}
 		case class ExamGridOptions(
 			predefinedColumnIdentifiers: Set[String],
@@ -537,7 +540,8 @@ object Department {
 			nameToShow: String,
 			yearsToShow: String,
 			marksToShow: String,
-			moduleNameToShow: String
+			moduleNameToShow: String,
+			layout: String
 		)
 	}
 }
