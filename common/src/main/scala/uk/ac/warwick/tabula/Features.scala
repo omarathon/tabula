@@ -148,7 +148,7 @@ abstract class Features {
 	@Value("${features.redirectCM1:true}") var redirectCM1: Boolean = defaults.redirectCM1
 	@Value("${features.moderationSelector:true}") var moderationSelector: Boolean = defaults.moderationSelector
 	@Value("${features.bulkModeration:false}") var bulkModeration: Boolean = defaults.bulkModeration
-	@Value("${features.profiles.searchPast:false}") var profilesSearchPast: Boolean = defaults.profilesSearchPast
+	@Value("${features.profiles.searchPast:true}") var profilesSearchPast: Boolean = defaults.profilesSearchPast
 
 
 
@@ -290,7 +290,7 @@ class FeaturesMessage {
 	@BeanProperty var redirectCM1 = true
 	@BeanProperty var moderationSelector = true
 	@BeanProperty var bulkModeration = false
-	@BeanProperty var profilesSearchPast = false
+	@BeanProperty var profilesSearchPast = true
 }
 
 class FeatureFlagListener extends QueueListener with InitializingBean with Logging {
