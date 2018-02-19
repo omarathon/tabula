@@ -267,8 +267,22 @@ object SubmissionAndFeedbackInfoFilters {
 		case object LateFeedback extends SubmissionAndFeedbackInfoFilter {
 			def description = "Late feedback"
 
-			def predicate(item: AssignmentSubmissionStudentInfo): Boolean =
-				item.coursework.enhancedSubmission.exists(_.submission.feedbackDeadline.exists(_.isBefore(LocalDate.now))) && item.coursework.enhancedFeedback.exists(!_.feedback.released)
+			def predicate(item: AssignmentSubmissionStudentInfo): Boolean = (for {
+				enhancedSubmission <- item.coursework.enhancedSubmission
+				feedbackDeadline <- enhancedSubmission.submission.feedbackDeadline
+				enhancedFeedback <- item.coursework.enhancedFeedback
+			} yield {
+				val feedback = enhancedFeedback.feedback
+				val feedbackReleasedDate = feedback.releasedDate.toLocalDate
+
+				if (feedback.released) {
+					// Was the feedback released late?
+					feedbackDeadline.isBefore(feedbackReleasedDate)
+				} else {
+					// Would the feedback be late if it were released now?
+					feedbackDeadline.isBefore(LocalDate.now)
+				}
+			}).getOrElse(false) // There is no feedback deadline
 
 			def apply(assignment: Assignment) = true
 		}
