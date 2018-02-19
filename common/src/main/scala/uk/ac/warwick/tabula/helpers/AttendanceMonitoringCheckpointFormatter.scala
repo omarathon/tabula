@@ -58,14 +58,13 @@ class AttendanceMonitoringCheckpointFormatter extends TemplateMethodModelEx {
 	private def describeCheckpoint(checkpoint: AttendanceMonitoringCheckpoint) = {
 		val isStudent = RequestInfo.fromThread.map(_.user.apparentUser.getUserId).contains(checkpoint.student.userId)
 
-		val student = if (isStudent) "you" else checkpoint.student.firstName
-
 		if (checkpoint.autoCreated) {
+			val student = if (isStudent) "you" else checkpoint.student.firstName
+			val attendedOrMissed = if (checkpoint.state == Attended) "attended" else "missed"
+
 			checkpoint.point.pointType match {
 				case Meeting => "Recorded automatically when a meeting record was approved."
-				case SmallGroup =>
-					val verb = if (checkpoint.state == Attended) "attend" else "miss"
-					s"Recorded automatically when $student ${verb}ed a small group teaching event."
+				case SmallGroup => s"Recorded automatically when $student $attendedOrMissed a small group teaching event."
 				case AssignmentSubmission => s"Recorded automatically when $student submitted an assignment."
 				case _ => "Recorded automatically."
 			}
