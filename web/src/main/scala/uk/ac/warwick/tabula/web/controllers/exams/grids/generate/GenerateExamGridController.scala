@@ -349,8 +349,8 @@ class GenerateExamGridController extends ExamsController
 		val perYearColumnCategories = benchmarkTask("perYearColumnCategories") { perYearColumns.mapValues(_.collect{case c: HasExamGridColumnCategory => c}.groupBy(_.category)) }
 
 		val shortFormLayoutData = if (!gridOptionsCommand.showFullLayout) {
-			val perYearModuleMarkColumns = benchmarkTask("maxYearColumnSize"){ perYearColumns.map{ case (year, columns) => year -> columns.collect{ case marks: ModuleExamGridColumn => marks}} }
-			val perYearModuleReportColumns  = benchmarkTask("maxYearColumnSize"){ perYearColumns.map{ case (year, columns) => year -> columns.collect{ case marks: ModuleReportsColumn => marks}} }
+			val perYearModuleMarkColumns = benchmarkTask("perYearModuleMarkColumns"){ perYearColumns.map{ case (year, columns) => year -> columns.collect{ case marks: ModuleExamGridColumn => marks}} }
+			val perYearModuleReportColumns  = benchmarkTask("perYearModuleReportColumns"){ perYearColumns.map{ case (year, columns) => year -> columns.collect{ case marks: ModuleReportsColumn => marks}} }
 
 			val maxYearColumnSize =  benchmarkTask("maxYearColumnSize") { perYearModuleMarkColumns.map{ case (year, columns) =>
 				val maxModuleColumns = (entities.map(entity => columns.count(c => !c.isEmpty(entity, year))) ++ Seq(1)).max
