@@ -54,36 +54,40 @@ class SmallGroupsReportProcessorInternal(val department: Department, val academi
 	override def applyInternal(): SmallGroupsReportProcessorResult = {
 		val processedStudents = students.asScala.map{properties =>
 			AttendanceMonitoringStudentData(
-				properties.get("firstName"),
-				properties.get("lastName"),
-				properties.get("universityId"),
-				null,
-				null,
-				null,
-				properties.get("route"),
-				null,
-				properties.get("yearOfStudy"),
-				properties.get("sprCode")
+				firstName = properties.get("firstName"),
+				lastName = properties.get("lastName"),
+				universityId = properties.get("universityId"),
+				userId = null,
+				scdBeginDate = null,
+				scdEndDate = null,
+				routeCode = properties.get("route"),
+				routeName = null,
+				yearOfStudy = properties.get("yearOfStudy"),
+				sprCode = properties.get("sprCode")
 			)
-		}.toSeq.sortBy(s => (s.lastName, s.firstName))
-		val thisWeek = academicYear.weekForDate(LocalDate.now).weekNumber
+		}.sortBy(s => (s.lastName, s.firstName))
+
+		val thisWeek = AcademicYear.now().weekForDate(LocalDate.now())
 		val thisDay = DateTime.now.getDayOfWeek
-		val processedEvents = events.asScala.map{properties =>
+
+		val processedEvents = events.asScala.map { properties =>
+			val eventWeek = academicYear.weeks(properties.get("week").toInt)
+			val eventDay = properties.get("day").toInt
+
 			EventData(
-				properties.get("id"),
-				properties.get("moduleCode"),
-				properties.get("setName"),
-				properties.get("format"),
-				properties.get("groupName"),
-				properties.get("week").toInt,
-				properties.get("day").toInt,
-				DayOfWeek(properties.get("day").toInt).getName,
-				properties.get("location"),
-				properties.get("tutors"),
-				properties.get("week").toInt < thisWeek ||
-					properties.get("week").toInt == thisWeek && properties.get("day").toInt < thisDay
+				id = properties.get("id"),
+				moduleCode = properties.get("moduleCode"),
+				setName = properties.get("setName"),
+				format = properties.get("format"),
+				groupName = properties.get("groupName"),
+				week = properties.get("week").toInt,
+				day = properties.get("day").toInt,
+				dayString = DayOfWeek(properties.get("day").toInt).getName,
+				location = properties.get("location"),
+				tutors = properties.get("tutors"),
+				isLate = eventWeek < thisWeek || eventWeek == thisWeek && eventDay < thisDay
 			)
-		}.toSeq.sortBy(event => (event.week, event.day))
+		}.sortBy(event => (event.week, event.day))
 		val processedAttendance = attendance.asScala.flatMap{case(universityId, eventMap) =>
 			processedStudents.find(_.universityId == universityId).map(studentData =>
 				studentData -> eventMap.asScala.flatMap { case (id, stateString) =>
