@@ -24,11 +24,12 @@ class ProfileImporterTest extends PersistenceTestBase with Mockito {
 		rs.getMetaData returns md
 		md.getColumnCount returns 3
 		md.getColumnName(1) returns "gender"
-		md.getColumnName(2) returns "year_of_study"
+		md.getColumnName(2) returns "study_block"
 		md.getColumnName(3) returns "spr_code"
 
 		rs.getString("gender") returns "M"
-		rs.getInt("year_of_study") returns 3
+		rs.getInt("study_block") returns 3
+		rs.getInt("study_level") returns 3
 		rs.getString("spr_code") returns "0672089/2"
 
 		val mm = MembershipMember(
