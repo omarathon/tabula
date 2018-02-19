@@ -1,19 +1,22 @@
 package uk.ac.warwick.tabula.helpers
 
-import org.springframework.beans.factory.annotation.Autowired
-
-import freemarker.template._
-import uk.ac.warwick.tabula.services.attendancemonitoring.AttendanceMonitoringService
-import collection.JavaConverters._
-import uk.ac.warwick.tabula.JavaImports._
-import freemarker.template.utility.DeepUnwrap
-import uk.ac.warwick.tabula.data.model.attendance.{AttendanceMonitoringPointStyle, AttendanceState, AttendanceMonitoringPoint, AttendanceMonitoringCheckpoint}
 import freemarker.core.Environment
-import uk.ac.warwick.tabula.data.model.{AttendanceNote, StudentMember, Department}
+import freemarker.template._
+import freemarker.template.utility.DeepUnwrap
 import org.joda.time.DateTime
-import uk.ac.warwick.tabula.services.UserLookupService
-import uk.ac.warwick.tabula.profiles.web.{Routes => ProfileRoutes}
+import org.springframework.beans.factory.annotation.Autowired
+import uk.ac.warwick.tabula.JavaImports._
+import uk.ac.warwick.tabula.RequestInfo
 import uk.ac.warwick.tabula.attendance.web.{Routes => AttendanceRoutes}
+import uk.ac.warwick.tabula.data.model.attendance.AttendanceMonitoringPointType.{AssignmentSubmission, Meeting, SmallGroup}
+import uk.ac.warwick.tabula.data.model.attendance.AttendanceState.Attended
+import uk.ac.warwick.tabula.data.model.attendance.{AttendanceMonitoringCheckpoint, AttendanceMonitoringPoint, AttendanceMonitoringPointStyle, AttendanceState}
+import uk.ac.warwick.tabula.data.model.{AttendanceNote, Department, StudentMember}
+import uk.ac.warwick.tabula.profiles.web.{Routes => ProfileRoutes}
+import uk.ac.warwick.tabula.services.UserLookupService
+import uk.ac.warwick.tabula.services.attendancemonitoring.AttendanceMonitoringService
+
+import scala.collection.JavaConverters._
 
 
 case class AttendanceMonitoringCheckpointFormatterResult(
@@ -53,12 +56,29 @@ class AttendanceMonitoringCheckpointFormatter extends TemplateMethodModelEx {
 	}
 
 	private def describeCheckpoint(checkpoint: AttendanceMonitoringCheckpoint) = {
-		val userString = userLookup.getUserByUserId(checkpoint.updatedBy) match {
-			case FoundUser(user) => s"by ${user.getFullName}, "
-			case _ => ""
-		}
+		val isStudent = RequestInfo.fromThread.map(_.user.apparentUser.getUserId).contains(checkpoint.student.userId)
 
-		s"Recorded $userString${DateBuilder.format(checkpoint.updatedDate)}"
+		val student = if (isStudent) "you" else checkpoint.student.firstName
+
+		if (checkpoint.autoCreated) {
+			checkpoint.point.pointType match {
+				case Meeting => "Recorded automatically when a meeting record was approved."
+				case SmallGroup =>
+					val verb = if (checkpoint.state == Attended) "attend" else "miss"
+					s"Recorded automatically when $student ${verb}ed a small group teaching event."
+				case AssignmentSubmission => s"Recorded automatically when $student submitted an assignment."
+				case _ => "Recorded automatically."
+			}
+		} else {
+			val byWho = userLookup.getUserByUserId(checkpoint.updatedBy) match {
+				case FoundUser(user) => s"by ${user.getFullName}, "
+				case _ => ""
+			}
+			val onDate = DateBuilder.format(checkpoint.updatedDate)
+			val advice = if (isStudent) "  If you have any queries, please contact your department rather than the individual named here." else ""
+
+			s"Recorded $byWho$onDate.$advice"
+		}
 	}
 
 	private def pointDuration(point: AttendanceMonitoringPoint, department: Department) = {
