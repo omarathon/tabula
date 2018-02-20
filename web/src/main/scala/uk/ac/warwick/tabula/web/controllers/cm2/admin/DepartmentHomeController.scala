@@ -6,13 +6,14 @@ import org.springframework.validation.Errors
 import org.springframework.web.bind.annotation.{ModelAttribute, PathVariable, RequestMapping}
 import uk.ac.warwick.tabula.commands.cm2.assignments.ListAssignmentsCommand._
 import uk.ac.warwick.tabula.commands.cm2.assignments.{AssignmentInfoFilters, ListAssignmentsCommand}
-import uk.ac.warwick.tabula.data.model.Department
+import uk.ac.warwick.tabula.data.model.{Department, UserSettings}
 import uk.ac.warwick.tabula.permissions.Permission
 import uk.ac.warwick.tabula.services.{AutowiringMaintenanceModeServiceComponent, AutowiringModuleAndDepartmentServiceComponent, AutowiringUserSettingsServiceComponent}
 import uk.ac.warwick.tabula.web.{Mav, Routes}
 import uk.ac.warwick.tabula.web.controllers.cm2.CourseworkController
 import uk.ac.warwick.tabula.web.controllers.{AcademicYearScopedController, DepartmentScopedController}
 import uk.ac.warwick.tabula.{AcademicYear, CurrentUser}
+import uk.ac.warwick.tabula.data.Transactions._
 
 abstract class AbstractDepartmentHomeController
 	extends CourseworkController
@@ -30,11 +31,16 @@ abstract class AbstractDepartmentHomeController
 	override def activeDepartment(@PathVariable department: Department): Option[Department] =
 		retrieveActiveDepartment(Option(department))
 
+	def showEmptyModulesSetting: Boolean = userSettingsService.getByUserId(user.userId).forall(_.courseworkShowEmptyModules)
+
 	@ModelAttribute("command")
 	def command(@PathVariable department: Department, @ModelAttribute("activeAcademicYear") activeAcademicYear: Option[AcademicYear], user: CurrentUser): DepartmentCommand = {
 		val academicYear = activeAcademicYear.getOrElse(AcademicYear.now())
 
-		ListAssignmentsCommand.department(department, academicYear, user)
+		val command = ListAssignmentsCommand.department(department, academicYear, user)
+		command.showEmptyModules = showEmptyModulesSetting
+
+		command
 	}
 
 	@RequestMapping(params=Array("!ajax"), headers=Array("!X-Requested-With"))
@@ -50,8 +56,19 @@ abstract class AbstractDepartmentHomeController
 			.secondCrumbs(academicYearBreadcrumbs(command.academicYear)(Routes.cm2.admin.department(department, _)): _*)
 
 	@RequestMapping
-	def homeAjax(@ModelAttribute("command") command: DepartmentCommand, errors: Errors): Mav =
-		Mav("cm2/admin/home/moduleList", "modules" -> command.apply(), "academicYear" -> command.academicYear).noLayout()
+	def homeAjax(@ModelAttribute("command") command: DepartmentCommand, errors: Errors): Mav = {
+		val modules = command.apply()
+
+		if (command.showEmptyModules != showEmptyModulesSetting && !maintenanceModeService.enabled) {
+			transactional() {
+				val settings = new UserSettings()
+				settings.courseworkShowEmptyModules = command.showEmptyModules
+				userSettingsService.save(user, settings)
+			}
+		}
+
+		Mav("cm2/admin/home/moduleList", "modules" -> modules, "academicYear" -> command.academicYear).noLayout()
+	}
 
 }
 
