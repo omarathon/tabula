@@ -430,7 +430,7 @@ class GenerateExamGridController extends ExamsController
 					entityYear,
 					entityYear.markOverrides.getOrElse(Map()),
 					normalLoadLookup(entityYear.route),
-					routeRulesLookup(entityYear.route, entity.courseDetails.level)
+					routeRulesLookup(entityYear.route, entityYear.level)
 				)
 			}.toMap
 

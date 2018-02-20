@@ -421,8 +421,6 @@ class StudentMember extends Member with StudentProperties {
 			.flatMap(_.freshOrStaleStudentCourseYearDetails.toSeq.sorted)
 			.takeWhile(_ != baseSCYD) ++ Seq(baseSCYD)
 
-		val courseDetails = baseSCYD.studentCourseDetails
-
 		ExamGridEntity(
 			firstName = Option(firstName).getOrElse("[Unknown]"),
 			lastName = Option(lastName).getOrElse("[Unknown]"),
@@ -430,8 +428,7 @@ class StudentMember extends Member with StudentProperties {
 			lastImportDate = Option(lastImportDate),
 			years = (1 to baseSCYD.yearOfStudy).map(year =>
 				year -> allSCYDs.reverse.find(_.yearOfStudy == year).map(_.toExamGridEntityYear)
-			).toMap,
-			courseDetails
+			).toMap
 		)
 	}
 }

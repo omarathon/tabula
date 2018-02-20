@@ -29,7 +29,7 @@ class FinalOverallMarkColumnOption extends ChosenYearExamGridColumnOption with A
 					progressionService.suggestedFinalYearGrade(
 						entityYear.studentCourseYearDetails.get,
 						state.normalLoadLookup(entityYear.route),
-						state.routeRulesLookup(entityYear.route, entity.courseDetails.level)
+						state.routeRulesLookup(entityYear.route, entityYear.level)
 					) match {
 						case unknown: FinalYearGrade.Unknown => ExamGridColumnValueMissing(unknown.details)
 						case withMark: FinalYearMark => ExamGridColumnValueDecimal(withMark.mark)

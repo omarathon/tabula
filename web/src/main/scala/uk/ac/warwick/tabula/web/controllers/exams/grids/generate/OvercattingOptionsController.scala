@@ -148,7 +148,8 @@ class OvercattingOptionsView(
 			route = scyd.toExamGridEntityYear.route,
 			overcattingModules = Some(overcattedModules.map(_.module)),
 			markOverrides = Some(overwrittenMarks),
-			studentCourseYearDetails = None
+			studentCourseYearDetails = None,
+			level = scyd.level
 		))))
 	}
 

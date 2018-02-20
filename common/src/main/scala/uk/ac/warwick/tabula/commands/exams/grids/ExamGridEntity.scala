@@ -9,8 +9,7 @@ case class ExamGridEntity(
 	lastName: String,
 	universityId: String,
 	lastImportDate: Option[DateTime],
-	years: Map[YearOfStudy, Option[ExamGridEntityYear]], // Int = year of study
-	courseDetails: StudentCourseDetails
+	years: Map[YearOfStudy, Option[ExamGridEntityYear]] // Int = year of study
 ) {
 	def validYears: Map[YearOfStudy, ExamGridEntityYear] = years.filter { case (_, year) => year.nonEmpty }.mapValues(_.get)
 }
@@ -21,5 +20,6 @@ case class ExamGridEntityYear(
 	route: Route,
 	overcattingModules: Option[Seq[Module]],
 	markOverrides: Option[Map[Module, BigDecimal]],
-	studentCourseYearDetails: Option[StudentCourseYearDetails]
+	studentCourseYearDetails: Option[StudentCourseYearDetails],
+	level: Level
 )

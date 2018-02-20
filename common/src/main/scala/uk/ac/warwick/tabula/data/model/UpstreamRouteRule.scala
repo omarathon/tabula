@@ -6,7 +6,6 @@ import org.hibernate.annotations.{BatchSize, Type}
 import uk.ac.warwick.spring.Wire
 import uk.ac.warwick.tabula.AcademicYear
 import uk.ac.warwick.tabula.JavaImports._
-import uk.ac.warwick.tabula.data.model.StudentCourseYearDetails.YearOfStudy
 import uk.ac.warwick.tabula.services.LevelService
 import uk.ac.warwick.tabula.services.exams.grids.UpstreamRouteRuleService
 
@@ -59,16 +58,16 @@ class UpstreamRouteRule extends GeneratedId {
 
 }
 
-class UpstreamRouteRuleLookup(academicYear: AcademicYear,  upstreamRouteRuleService: UpstreamRouteRuleService) {
+class UpstreamRouteRuleLookup(academicYear: AcademicYear, upstreamRouteRuleService: UpstreamRouteRuleService) {
 	private val cache = mutable.Map[(Route, Level), Seq[UpstreamRouteRule]]()
 
-	def apply(route: Route, level: Option[Level]): Seq[UpstreamRouteRule] = level.map(l =>
-		cache.get((route, l)) match {
+	def apply(route: Route, level: Level): Seq[UpstreamRouteRule] =
+		cache.get((route, level)) match {
 			case Some(rules) => rules
 			case _ =>
-				cache.put((route, l), upstreamRouteRuleService.list(route, academicYear, l))
-				cache((route, l))
-		}).getOrElse(Seq())
+				cache.put((route, level), upstreamRouteRuleService.list(route, academicYear, level))
+				cache((route, level))
+		}
 
 
 

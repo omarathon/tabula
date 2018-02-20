@@ -132,14 +132,14 @@ trait GenerateExamGridCheckAndApplyOvercatCommandState {
 			// We only want to apply a subset automaticaly if they have a valid year and have some route rules for that year
 			entity.years.get(selectCourseCommand.yearOfStudy).nonEmpty &&
 				entity.years(selectCourseCommand.yearOfStudy).nonEmpty &&
-				routeRulesLookup(entity.years(selectCourseCommand.yearOfStudy).get.route, entity.courseDetails.level).nonEmpty
+				routeRulesLookup(entity.years(selectCourseCommand.yearOfStudy).get.route, entity.years(selectCourseCommand.yearOfStudy).get.level).nonEmpty
 		).map(entity => entity -> {
 			val year = entity.years(selectCourseCommand.yearOfStudy).get
 			moduleRegistrationService.overcattedModuleSubsets(
 				year,
 				year.markOverrides.getOrElse(Map()),
 				normalLoadLookup(year.route),
-				routeRulesLookup(year.route, entity.courseDetails.level)
+				routeRulesLookup(year.route, year.level)
 			)
 		}).toMap
 
