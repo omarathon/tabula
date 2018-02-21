@@ -125,7 +125,8 @@ object GenerateExamGridShortFormExporter {
 					headerCell.setCellStyle(cellStyleMap(Header))
 					headerRowMaxCellWidth = Math.max(headerRowMaxCellWidth, sheet.getColumnWidth(currentColumnIndex))
 					val yearWidth = maxYearColumnSize(year) - 1
-					sheet.addMergedRegion(new CellRangeAddress(headerCell.getRowIndex, headerCell.getRowIndex, headerCell.getColumnIndex, headerCell.getColumnIndex + yearWidth))
+					if (yearWidth > 0)
+						sheet.addMergedRegion(new CellRangeAddress(headerCell.getRowIndex, headerCell.getRowIndex, headerCell.getColumnIndex, headerCell.getColumnIndex + yearWidth))
 				}
 
 				// Entity rows
