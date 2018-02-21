@@ -21,5 +21,5 @@ case class ExamGridEntityYear(
 	overcattingModules: Option[Seq[Module]],
 	markOverrides: Option[Map[Module, BigDecimal]],
 	studentCourseYearDetails: Option[StudentCourseYearDetails],
-	level: Level
+	level: Option[Level]
 )

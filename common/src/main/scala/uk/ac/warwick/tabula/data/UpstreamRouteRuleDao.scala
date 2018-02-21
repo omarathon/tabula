@@ -33,7 +33,7 @@ class UpstreamRouteRuleDaoImpl extends UpstreamRouteRuleDao with Daoisms {
 			.add(Restrictions.disjunction()
 				.add(is("_academicYear", academicYear))
 				.add(is("_academicYear", null))
-			).add(is("level", level.code))
+			).add(is("levelCode", level.code))
 			.seq
 	}
 

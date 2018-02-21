@@ -206,8 +206,8 @@ trait BasicStudentCourseYearProperties {
 	@transient
 	var levelService: LevelService = Wire.auto[LevelService]
 
-	def level: Level = levelService.levelFromCode(studyLevel)
-		.getOrElse(throw new IllegalArgumentException(s"Invalid studyLevel $studyLevel"))
+	def level: Option[Level] = levelService.levelFromCode(studyLevel)
+
 
 	@Column(name="cas_used")
 	@Restricted(Array("Profiles.Read.Tier4VisaRequirement"))
