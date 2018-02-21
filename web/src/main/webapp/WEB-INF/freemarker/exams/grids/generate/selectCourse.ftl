@@ -174,9 +174,9 @@
 					<li>Show module names</li>
 				</#if>
 				<#if gridOptionsCommand.layout == 'full'>
-					<li>Full column</li>
+					<li>Full grid</li>
 				<#else>
-					<li>Short form</li>
+					<li>Short grid</li>
 				</#if>
 			</ul>
 		</#assign>
