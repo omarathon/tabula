@@ -120,7 +120,7 @@ object RouteRuleImporter {
 			}.map(AcademicYear.parse)
 			UpstreamRouteRuleRow(
 				rs.getString("route_code").maybeText.map(_.toLowerCase).orNull,
-				rs.getString("year_of_study").maybeText.orNull,
+				rs.getString("level").maybeText.orNull,
 				academicYear,
 				rs.getString("module_list"),
 				Option(rs.getBigDecimal("min_cats")).map(BigDecimal.apply),

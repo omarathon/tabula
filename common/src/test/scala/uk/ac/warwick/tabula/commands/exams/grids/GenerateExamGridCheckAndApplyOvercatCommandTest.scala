@@ -42,7 +42,7 @@ class GenerateExamGridCheckAndApplyOvercatCommandTest extends TestBase with Mock
 		state.normalCATSLoadService.find(thisRoute, thisAcademicYear, thisYearOfStudy) returns None
 		// Have to have at least 1 route rule as otherwise it won't apply the change
 		val routeRule = new UpstreamRouteRule(None, null, null)
-		state.upstreamRouteRuleService.list(thisRoute, thisAcademicYear, scd.level.get) returns Seq(routeRule)
+		state.upstreamRouteRuleService.list(thisRoute, thisAcademicYear, scyd.level.get) returns Seq(routeRule)
 	}
 
 	@Test
@@ -177,7 +177,7 @@ class GenerateExamGridCheckAndApplyOvercatCommandTest extends TestBase with Mock
 		cmd.normalCATSLoadService.find(thisRoute, thisAcademicYear, thisYearOfStudy) returns None
 		// Have to have at least 1 route rule as otherwise it won't apply the change
 		val routeRule = new UpstreamRouteRule(None, null, null)
-		cmd.upstreamRouteRuleService.list(thisRoute, thisAcademicYear, scd.level.get) returns Seq(routeRule)
+		cmd.upstreamRouteRuleService.list(thisRoute, thisAcademicYear, scyd.level.get) returns Seq(routeRule)
 		cmd.selectCourseCommand = selectCourseCommand
 		cmd.moduleRegistrationService.overcattedModuleSubsets(entity.validYears(thisYearOfStudy), Map(), thisRoute.degreeType.normalCATSLoad, Seq(routeRule)) returns Seq(
 			(BigDecimal(50), Seq(mr1, mr2)),

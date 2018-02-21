@@ -304,6 +304,11 @@ object Fixtures extends Mockito {
 		scyd.sceSequenceNumber = 1
 		scyd.casUsed = false
 		scyd.tier4Visa = false
+		scyd.levelService = smartMock[LevelService]
+		scyd.levelService.levelFromCode(any[String]) answers { arg =>
+			val levelCode = arg.asInstanceOf[String]
+			Some(new Level(levelCode, levelCode))
+		}
 		scyd
 	}
 
