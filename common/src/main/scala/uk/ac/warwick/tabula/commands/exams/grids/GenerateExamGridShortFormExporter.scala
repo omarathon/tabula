@@ -160,17 +160,17 @@ object GenerateExamGridShortFormExporter {
 							case _ =>
 								if (showComponentMarks) {
 									valueRows(ExamGridColumnValueType.Overall).createCell(currentColumnIndex)
-								} else {
-									valueRows(ExamGridColumnValueType.Overall).createCell(currentColumnIndex)
 									valueRows(ExamGridColumnValueType.Assignment).createCell(currentColumnIndex)
 									valueRows(ExamGridColumnValueType.Exam).createCell(currentColumnIndex)
+								} else {
+									valueRows(ExamGridColumnValueType.Overall).createCell(currentColumnIndex)
 								}
 						}
 					})
 				})
 
 				// and finally ..
-				sheet.setColumnWidth(currentColumnIndex, perYearModuleMarkColumns(year).head.excelColumnWidth)
+				perYearModuleMarkColumns(year).headOption.foreach(c => sheet.setColumnWidth(currentColumnIndex, c.excelColumnWidth))
 				currentColumnIndex = currentColumnIndex + 1
 			}
 
