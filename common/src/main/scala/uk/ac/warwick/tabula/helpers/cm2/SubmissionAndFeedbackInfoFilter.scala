@@ -273,9 +273,9 @@ object SubmissionAndFeedbackInfoFilters {
 				enhancedFeedback <- item.coursework.enhancedFeedback
 			} yield {
 				val feedback = enhancedFeedback.feedback
-				val feedbackReleasedDate = feedback.releasedDate.toLocalDate
 
 				if (feedback.released) {
+					val feedbackReleasedDate = feedback.releasedDate.toLocalDate
 					// Was the feedback released late?
 					feedbackDeadline.isBefore(feedbackReleasedDate)
 				} else {
