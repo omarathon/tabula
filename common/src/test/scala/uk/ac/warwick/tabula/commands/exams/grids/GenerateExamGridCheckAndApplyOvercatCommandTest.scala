@@ -1,5 +1,6 @@
 package uk.ac.warwick.tabula.commands.exams.grids
 
+import uk.ac.warwick.tabula.Fixtures.{any, smartMock}
 import uk.ac.warwick.tabula._
 import uk.ac.warwick.tabula.commands.Appliable
 import uk.ac.warwick.tabula.data.model._
@@ -26,6 +27,9 @@ class GenerateExamGridCheckAndApplyOvercatCommandTest extends TestBase with Mock
 
 	val scyd: StudentCourseYearDetails = scd.latestStudentCourseYearDetails
 	scyd.moduleAndDepartmentService = mads
+	scyd.levelService = smartMock[LevelService]
+	scyd.levelService.levelFromCode(null) returns Some(new Level("3", "3"))
+
 	val mr1: ModuleRegistration = Fixtures.moduleRegistration(scd, module1, null, null)
 	val mr2: ModuleRegistration = Fixtures.moduleRegistration(scd, module2, null, null)
 
