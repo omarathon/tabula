@@ -41,6 +41,7 @@ object PublishFeedbackCommand {
 	}
 
 	case class SubmissionsReport(
+		publishable: Set[String],
 		alreadyPublished: Set[String],
 		feedbackOnly: Set[String],
 		submissionOnly: Set[String],
@@ -217,27 +218,32 @@ trait PublishFeedbackSubmissionsReportGenerator extends SubmissionsReportGenerat
 	self: PublishFeedbackCommandRequest =>
 
 	lazy val submissionsReport: SubmissionsReport = {
-		val alreadyPublished = feedbacks.diff(feedbackToRelease).filterNot(_.isPlaceholder).map(_.usercode).toSet
+		val studentSet = students.asScala.toSet
+
+		val plagiarised = submissions.filter(_.suspectPlagiarised).map(_.usercode).toSet
+		val publishable = feedbacks.filterNot(_.isPlaceholder).map(_.usercode).toSet.diff(plagiarised)
+
+		val alreadyPublished = publishable.intersect(feedbacks.filterNot(_.isPlaceholder).filter(_.released).map(_.usercode).toSet)
 
 		val feedbackUsercodes = feedbacks.filterNot(_.isPlaceholder).map(_.usercode).toSet
 		val submissionUsercodes = submissions.map(_.usercode).toSet
 
 		// Subtract the sets from each other to obtain discrepancies
-		val feedbackOnly: Set[String] = feedbackUsercodes &~ submissionUsercodes
-		val submissionOnly: Set[String] = submissionUsercodes &~ feedbackUsercodes
+		val feedbackOnly: Set[String] = publishable.intersect(feedbackUsercodes.diff(submissionUsercodes))
+		val submissionOnly: Set[String] = publishable.intersect(submissionUsercodes.diff(feedbackUsercodes))
 
 		/**
 			* We want to show a warning if some feedback items are missing either marks or attachments
 			* If however, all feedback items have only marks or attachments then we don't send a warning.
 			*/
-		val withoutAttachments: Set[String] = feedbacks
+		val withoutAttachments: Set[String] = publishable.intersect(feedbacks
 			.filter(f => !f.hasAttachments && !f.comments.exists(_.hasText))
-			.map(_.usercode).toSet
-		val withoutMarks: Set[String] = feedbacks.filter(!_.hasMarkOrGrade).map(_.usercode).toSet
-		val plagiarised: Set[String] = submissions.filter(_.suspectPlagiarised).map(_.usercode).toSet
+			.map(_.usercode).toSet)
+
+		val withoutMarks: Set[String] = publishable.intersect(feedbacks.filter(!_.hasMarkOrGrade).map(_.usercode).toSet)
 
 		val hasProblems: Boolean = {
-			val shouldBeEmpty = Set(feedbackOnly, submissionOnly, plagiarised)
+			val shouldBeEmpty = Set(feedbackOnly, submissionOnly)
 			val problems = assignment.collectSubmissions && shouldBeEmpty.exists { _.nonEmpty }
 
 			if (assignment.collectMarks) {
@@ -249,6 +255,7 @@ trait PublishFeedbackSubmissionsReportGenerator extends SubmissionsReportGenerat
 		}
 
 		SubmissionsReport(
+			publishable,
 			alreadyPublished,
 			feedbackOnly,
 			submissionOnly,

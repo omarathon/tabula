@@ -89,6 +89,7 @@ jQuery.fn.expandingTable = function(options) {
 							cellPosition.left += offsetParentPosition.left;
 
 							tablePosition.left += offsetParentPosition.left;
+							tablePosition.left += $offsetParent.scrollLeft();
 
 							// Make sure the content isn't wider than the screen
 							$content.outerWidth($offsetParent.outerWidth());
@@ -223,8 +224,8 @@ jQuery.fn.expandingTable = function(options) {
 		});
 
 		// global scope for this event. all instances of the plugin will need to run this
-		$(document).on('tabula.expandingTable.contentChanged', function(evt) {
-			repositionContentBoxes();
+		$(document).on('tabula.expandingTable.contentChanged tabula:tabContentHeightChange', function(evt) {
+			setTimeout(repositionContentBoxes, 0);
 		});
 
 		$(window).on('id7:reflow', repositionContentBoxes);

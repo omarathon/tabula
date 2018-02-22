@@ -445,20 +445,20 @@
 	<div class="alert alert-info">
 		<@bs3form.form_group path="sendToSits">
 			<@bs3form.checkbox path="sendToSits">
-				<@f.checkbox path="sendToSits" id="sendToSits" /> Queue these marks for upload to SITS
+				<@f.checkbox path="sendToSits" id="sendToSits" /> Queue marks for upload to SITS
 			</@bs3form.checkbox>
 		</@bs3form.form_group>
 
 		<#if assignment.module.adminDepartment.canUploadMarksToSitsForYear(assignment.academicYear, assignment.module)>
 			<div>
-				<p>${verb} this feedback will cause marks to be queued for upload to SITS.</p>
-				<p>Marks and grades will automatically be uploaded and displayed in the SITS SAT screen as actual marks and grades.</p>
+				<p>${verb} this feedback queues marks for upload to SITS.</p>
+				<p>Marks and grades automatically upload and display in the SITS SAT screen as actual marks and grades.</p>
 			</div>
 		<#else>
 			<div class="alert alert-warning">
-				<p>${verb} this feedback will cause marks to be queued for upload to SITS.</p>
+				<p>${verb} this feedback queues marks for upload to SITS.</p>
 				<p>
-					However mark upload is closed for ${assignment.module.adminDepartment.name} <#if assignment.module.degreeType??> (${assignment.module.degreeType.toString})</#if>
+					However, mark upload is closed for ${assignment.module.adminDepartment.name} <#if assignment.module.degreeType??> (${assignment.module.degreeType.toString})</#if>
 					for the academic year ${assignment.academicYear.toString}.
 				</p>
 				<p>

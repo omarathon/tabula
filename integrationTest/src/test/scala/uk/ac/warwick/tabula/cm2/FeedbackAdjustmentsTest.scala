@@ -31,11 +31,11 @@ class FeedbackAdjustmentsTest extends BrowserTest with CourseworkFixtures with G
 					go to Path(s"/coursework/admin/module/xxx02/assignments/$assignmentId/feedback/adjustments")
 				},
 				otherwise = { _ =>
-					eventually(className("collection-check-all").findElement.exists(_.isDisplayed) should be {true})
+					eventuallyAjax(className("collection-check-all").findElement.exists(_.isDisplayed) should be {true})
 					click on className("collection-check-all")
-					eventually(pageSource contains "Feedback" should be {true})
+					eventuallyAjax(pageSource contains "Feedback" should be {true})
 					click on linkText("Feedback")
-					eventually(pageSource contains "Adjustments" should be {true})
+					eventuallyAjax(pageSource contains "Adjustments" should be {true})
 					click on linkText("Adjustments")
 				}
 			)

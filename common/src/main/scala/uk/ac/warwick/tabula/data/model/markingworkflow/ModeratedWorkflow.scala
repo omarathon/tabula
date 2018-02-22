@@ -115,7 +115,7 @@ object ModerationSampler {
 	def members = Seq(Marker, Moderator, Admin)
 
 	def fromCode(code: String): ModerationSampler =
-		if (code == null) null
+		if (!code.hasText) null
 		else members.find{_.code == code} match {
 			case Some(caseObject) => caseObject
 			case None => throw new IllegalArgumentException()
@@ -123,6 +123,6 @@ object ModerationSampler {
 }
 
 class ModerationSamplerConverter extends TwoWayConverter[String, ModerationSampler] {
-	override def convertRight(source: String): ModerationSampler = source.maybeText.map(ModerationSampler.fromCode).getOrElse(throw new IllegalArgumentException)
+	override def convertRight(source: String): ModerationSampler = source.maybeText.map(ModerationSampler.fromCode).orNull
 	override def convertLeft(source: ModerationSampler): String = Option(source).map { _.code }.orNull
 }

@@ -39,7 +39,8 @@ class GenerateExamGridGridOptionsCommandInternal(val department: Department) ext
 			nameToShow,
 			yearsToShow,
 			marksToShow,
-			moduleNameToShow
+			moduleNameToShow,
+			layout
 		)
 		moduleAndDepartmentService.saveOrUpdate(department)
 		(predefinedColumnOptions, customColumnTitles.asScala)
@@ -59,6 +60,7 @@ trait PopulatesGenerateExamGridGridOptionsCommand extends PopulateOnForm {
 		yearsToShow = options.yearsToShow
 		marksToShow = options.marksToShow
 		moduleNameToShow = options.moduleNameToShow
+		layout = options.layout
 	}
 }
 
@@ -115,9 +117,11 @@ trait GenerateExamGridGridOptionsCommandRequest {
 	var yearsToShow: String = "current"
 	var marksToShow: String = "overall"
 	var moduleNameToShow: String = "codeOnly"
+	var layout: String = "full"
 	var customColumnTitles: JList[String] = JArrayList()
 
 	def showFullName: Boolean = nameToShow != "both"
+	def showFullLayout: Boolean = layout == "full"
 	def showComponentMarks: Boolean = marksToShow == "all"
 	def showModuleNames: Boolean = moduleNameToShow == "nameAndCode"
 

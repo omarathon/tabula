@@ -109,7 +109,7 @@ trait MockedResultSet extends Mockito {
 
 		rsMetaData.getColumnCount returns 6
 		rsMetaData.getColumnName(1) returns "gender"
-		rsMetaData.getColumnName(2) returns "year_of_study"
+		rsMetaData.getColumnName(2) returns "study_block"
 		rsMetaData.getColumnName(3) returns "spr_code"
 		rsMetaData.getColumnName(4) returns "route_code"
 		rsMetaData.getColumnName(5) returns "sce_route_code"
@@ -119,7 +119,8 @@ trait MockedResultSet extends Mockito {
 		rs.getString("family_name") returns "Mannion"
 		rs.getDate("date_of_birth") returns new Date(new LocalDate(1984, DateTimeConstants.AUGUST, 19).toDateTimeAtStartOfDay.getMillis)
 		rs.getString("gender") returns "M"
-		rs.getInt("year_of_study") returns 3
+		rs.getInt("study_block") returns 3
+		rs.getInt("study_level") returns 3
 		rs.getString("spr_code") returns "0672089/2"
 		rs.getString("route_code") returns "C100"
 		rs.getString("sce_route_code") returns "C100"
@@ -364,13 +365,14 @@ class ImportStudentRowCommandTest extends TestBase with Mockito with Logging {
 
 		rsMetaData.getColumnCount returns 4
 		rsMetaData.getColumnName(1) returns "gender"
-		rsMetaData.getColumnName(2) returns "year_of_study"
+		rsMetaData.getColumnName(2) returns "study_block"
 		rsMetaData.getColumnName(3) returns "spr_code"
 		rsMetaData.getColumnName(4) returns "route_code"
 		rsMetaData.getColumnName(5) returns "sce_route_code"
 
 		rs.getString("gender") returns "M"
-		rs.getInt("year_of_study") returns 3
+		rs.getInt("study_block") returns 3
+		rs.getInt("study_level") returns 3
 		rs.getString("spr_code") returns "0672089/2"
 		rs.getString("route_code") returns null
 		rs.getString("sce_route_code") returns null

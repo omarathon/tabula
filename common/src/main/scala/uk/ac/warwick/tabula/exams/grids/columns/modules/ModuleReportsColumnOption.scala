@@ -7,6 +7,8 @@ import uk.ac.warwick.tabula.exams.grids.columns.{ExamGridColumnValueString, _}
 
 import scala.math.BigDecimal.RoundingMode
 
+abstract class ModuleReportsColumn(state: ExamGridColumnState) extends PerYearExamGridColumn(state) with HasExamGridColumnCategory with HasExamGridColumnSecondaryValue
+
 @Component
 class ModuleReportsColumnOption extends PerYearExamGridColumnOption {
 
@@ -17,7 +19,7 @@ class ModuleReportsColumnOption extends PerYearExamGridColumnOption {
 	override val sortOrder: Int = ExamGridColumnOption.SortOrders.ModuleReports
 
 	case class PassedCoreRequiredColumn(state: ExamGridColumnState)
-		extends PerYearExamGridColumn(state) with HasExamGridColumnCategory with HasExamGridColumnSecondaryValue {
+		extends ModuleReportsColumn(state) {
 
 		override val category: String = "Modules Report"
 
@@ -52,7 +54,7 @@ class ModuleReportsColumnOption extends PerYearExamGridColumnOption {
 	}
 
 	case class MeanModuleMarkColumn(state: ExamGridColumnState)
-		extends PerYearExamGridColumn(state) with HasExamGridColumnCategory with HasExamGridColumnSecondaryValue {
+		extends ModuleReportsColumn(state) {
 
 		override val category: String = "Modules Report"
 

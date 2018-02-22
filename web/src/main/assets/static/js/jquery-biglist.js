@@ -54,6 +54,7 @@ $.fn.bigList = function(options) {
                 $this.data('checked','none');
                 onNoneChecked.call($this);
             }
+			onBulkChange.call($this, $checkboxes);
         };
         $checkboxes.on('change', this.checkboxChangedFunction);
 

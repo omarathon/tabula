@@ -1,4 +1,5 @@
 <#import 'form_fields.ftl' as form_fields />
+<#import "*/modal_macros.ftl" as modal />
 <#escape x as x?html>
 
 <#function route_function dept>
@@ -37,6 +38,46 @@
 			<a class="use-popover" href="#" data-html="true" data-content="${popover}" data-container="body">${selectCourseCommand.routes?size} routes</a>
 		</#if>
 	</p>
+
+	<h3>Grid layout <@fmt.help_popover id="gridlayout" content="<dl><dt>Short grid</dt><dd>This layout shows only those modules taken by each student.</dd><br><dt>Full grid </dt><dd>This layout shows all modules taken by the cohort.</dd></dl>" html=true/></h3>
+
+	<div class="row">
+		<div class="col-md-3">
+			<div class="radio">
+				<label><input type="radio" name="layout" value="short"
+					<#if gridOptionsCommand.layout == 'short'>checked</#if>
+				/> Short grid &nbsp;&nbsp;<a href="#short-form-layout-example" data-toggle="modal">Example</a></label>
+			</div>
+		</div>
+		<div class="col-md-3">
+			<div class="radio">
+				<label><input type="radio" name="layout" value="full"
+					<#if gridOptionsCommand.layout == 'full'>checked</#if>
+				/> Full grid &nbsp;&nbsp;<a href="#full-layout-example" data-toggle="modal">Example</a></label>
+			</div>
+		</div>
+	</div>
+
+	<div id="short-form-layout-example" class="modal fade">
+		<@modal.wrapper>
+			<@modal.header><h3 class="modal-title">Short grid</h3></@modal.header>
+			<@modal.body>
+				<p>This layout shows only those modules taken by each student.</p>
+				<img src="<@url resource="/static/images/examgrids/short-grid.png"/>">
+			</@modal.body>
+		</@modal.wrapper>
+	</div>
+
+	<div id="full-layout-example" class="modal fade">
+		<@modal.wrapper>
+			<@modal.header><h3 class="modal-title">Full grid</h3></@modal.header>
+			<@modal.body>
+				<p>This layout shows all modules taken by the cohort.</p>
+				<img src="<@url resource="/static/images/examgrids/full-grid.png"/>">
+			</@modal.body>
+		</@modal.wrapper>
+	</div>
+
 
 	<h3>Student identification</h3>
 

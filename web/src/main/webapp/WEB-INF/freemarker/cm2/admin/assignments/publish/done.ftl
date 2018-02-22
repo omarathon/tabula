@@ -4,7 +4,7 @@
 
 	<p>
 		The feedback has been published.
-		Students will be able to access their feedback by visiting this page:
+		Students can access their feedback by visiting this page:
 	</p>
 
 	<p>
@@ -12,6 +12,6 @@
 	</p>
 
 	<p>
-		<a href="<@routes.cm2.assignmentsubmissionsandfeedbacksummary assignment />">Return to assignment info</a>
+		<a class="btn btn-default" href="<@routes.cm2.assignmentsubmissionsandfeedbacksummary assignment />">Return to submissions and feedback</a>
 	</p>
 </#escape>

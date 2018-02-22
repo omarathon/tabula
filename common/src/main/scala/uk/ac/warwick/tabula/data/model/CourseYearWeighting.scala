@@ -3,19 +3,32 @@ package uk.ac.warwick.tabula.data.model
 import javax.persistence._
 import javax.validation.constraints.NotNull
 
-import uk.ac.warwick.tabula.JavaImports.JBigDecimal
 import org.hibernate.annotations.Type
 import uk.ac.warwick.tabula.AcademicYear
+import uk.ac.warwick.tabula.JavaImports.JBigDecimal
 import uk.ac.warwick.tabula.data.model.StudentCourseYearDetails.YearOfStudy
 
 object CourseYearWeighting {
 	def find(course: Course, academicYear: AcademicYear, yearOfStudy: YearOfStudy)(weighting: CourseYearWeighting): Boolean = {
 		weighting.course == course && weighting.sprStartAcademicYear == academicYear && weighting.yearOfStudy == yearOfStudy
 	}
+
+	implicit val defaultOrdering: Ordering[CourseYearWeighting] {
+		def compare(a: CourseYearWeighting, b: CourseYearWeighting): Int
+	} = new Ordering[CourseYearWeighting] {
+		def compare(a: CourseYearWeighting, b: CourseYearWeighting): Int = {
+			if (a.course.code != b.course.code)
+				a.course.code.compare(b.course.code)
+			else if (a.sprStartAcademicYear != b.sprStartAcademicYear)
+				a.sprStartAcademicYear.compare(b.sprStartAcademicYear)
+			else
+				a.yearOfStudy.compare(b.yearOfStudy)
+		}
+	}
 }
 
 @Entity
-class CourseYearWeighting extends GeneratedId with Ordered[CourseYearWeighting] {
+class CourseYearWeighting extends GeneratedId {
 
 	def this(course: Course, academicYear: AcademicYear, yearOfStudy: YearOfStudy, weightingAsPercentage: BigDecimal) {
 		this()
@@ -26,26 +39,29 @@ class CourseYearWeighting extends GeneratedId with Ordered[CourseYearWeighting] 
 	}
 
 	@ManyToOne(fetch = FetchType.LAZY)
-	@JoinColumn(name = "courseCode", referencedColumnName="code")
+	@JoinColumn(name = "courseCode", referencedColumnName = "code")
 	@NotNull
 	var course: Course = _
 
 	@Basic
 	@NotNull
-	@Column(name="academicYear")
+	@Column(name = "academicYear")
 	@Type(`type` = "uk.ac.warwick.tabula.data.model.AcademicYearUserType")
 	var sprStartAcademicYear: AcademicYear = _
 
 	@NotNull
 	var yearOfStudy: Int = _
 
-	@Column(name="weighting")
+	@Column(name = "weighting")
 	@NotNull
 	private var _weighting: JBigDecimal = _
+
 	def weighting_=(weighting: BigDecimal): Unit = {
 		_weighting = weighting.underlying
 	}
+
 	def weighting: BigDecimal = BigDecimal(_weighting)
+
 	def weightingAsPercentage_=(weightingAsPercentage: BigDecimal): Unit = {
 		weighting = weightingAsPercentage / percentageMultiplier
 	}
@@ -54,14 +70,5 @@ class CourseYearWeighting extends GeneratedId with Ordered[CourseYearWeighting] 
 	private val percentageMultiplier = new JBigDecimal(100)
 
 	def weightingAsPercentage: JBigDecimal = weighting.underlying.multiply(percentageMultiplier).stripTrailingZeros
-
-	def compare(that:CourseYearWeighting): Int = {
-		if (this.course.code != that.course.code)
-			this.course.code.compare(that.course.code)
-		else if (this.sprStartAcademicYear != that.sprStartAcademicYear)
-			this.sprStartAcademicYear.compare(that.sprStartAcademicYear)
-		else
-			this.yearOfStudy.compare(that.yearOfStudy)
-	}
 
 }

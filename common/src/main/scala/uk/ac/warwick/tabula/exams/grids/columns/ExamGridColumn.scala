@@ -72,6 +72,7 @@ sealed trait ExamGridColumnOption {
 
 	val identifier: ExamGridColumnOption.Identifier
 	val label: String
+	val shortLabel: String = label
 	val sortOrder: Int
 	val mandatory: Boolean = false
 
@@ -97,6 +98,10 @@ sealed abstract class ExamGridColumn(state: ExamGridColumnState) {
 
 abstract class PerYearExamGridColumn(state: ExamGridColumnState) extends ExamGridColumn(state) {
 	def values: Map[ExamGridEntity, Map[YearOfStudy, Map[ExamGridColumnValueType, Seq[ExamGridColumnValue]]]]
+
+	def isEmpty(entity: ExamGridEntity, year: YearOfStudy): Boolean = {
+		values.get(entity).flatMap(_.get(year)).forall(_.values.flatten.forall(_.isEmpty))
+	}
 }
 
 abstract class ChosenYearExamGridColumn(state: ExamGridColumnState) extends ExamGridColumn(state) {

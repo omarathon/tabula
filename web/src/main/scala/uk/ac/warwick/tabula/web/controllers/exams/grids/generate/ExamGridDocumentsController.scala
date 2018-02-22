@@ -8,8 +8,9 @@ import org.springframework.web.bind.annotation.{ModelAttribute, PathVariable}
 import org.springframework.web.servlet.View
 import uk.ac.warwick.spring.Wire
 import uk.ac.warwick.tabula.AcademicYear
-import uk.ac.warwick.tabula.commands.exams.grids.{ExamGridMarksRecordExporter, ExamGridPassListExporter, ExamGridTranscriptExporter, GenerateExamGridExporter}
+import uk.ac.warwick.tabula.commands.exams.grids._
 import uk.ac.warwick.tabula.data.model.{CoreRequiredModuleLookup, Department, UpstreamRouteRuleLookup}
+import uk.ac.warwick.tabula.exams.grids.columns.modules.{ModuleExamGridColumn, ModuleReportsColumn}
 import uk.ac.warwick.tabula.services.AutowiringProgressionServiceComponent
 import uk.ac.warwick.tabula.services.exams.grids.{AutowiringNormalCATSLoadServiceComponent, AutowiringUpstreamRouteRuleServiceComponent, NormalLoadLookup}
 import uk.ac.warwick.tabula.web.controllers.exams.ExamsController
@@ -51,17 +52,7 @@ trait ExamGridDocumentsController extends ExamsController
 		val chosenYearColumnValues = benchmarkTask("chosenYearColumnValues") { Seq(studentInformationColumns, summaryColumns).flatten.map(c => c -> c.values).toMap }
 		val perYearColumnValues = benchmarkTask("perYearColumnValues") { perYearColumns.values.flatten.toSeq.map(c => c -> c.values).toMap }
 
-		new ExcelView(
-			"Exam grid for %s %s %s %s.xlsx".format(
-				department.name,
-				selectCourseCommand.course.code,
-				selectCourseCommand.routes.size match {
-					case 0 => "All routes"
-					case 1 => selectCourseCommand.routes.get(0).code.toUpperCase
-					case n => s"$n routes"
-				},
-				academicYear.toString.replace("/","-")
-			),
+		val workbook = if(gridOptionsCommand.showFullLayout) {
 			GenerateExamGridExporter(
 				department = department,
 				academicYear = academicYear,
@@ -78,6 +69,58 @@ trait ExamGridDocumentsController extends ExamsController
 				perYearColumnValues = perYearColumnValues,
 				showComponentMarks = gridOptionsCommand.showComponentMarks
 			)
+		} else {
+			val perYearModuleMarkColumns = benchmarkTask("maxYearColumnSize"){ perYearColumns.map{ case (year, columns) => year -> columns.collect{ case marks: ModuleExamGridColumn => marks}} }
+			val perYearModuleReportColumns  = benchmarkTask("maxYearColumnSize"){ perYearColumns.map{ case (year, columns) => year -> columns.collect{ case marks: ModuleReportsColumn => marks}} }
+
+			val maxYearColumnSize =  benchmarkTask("maxYearColumnSize") { perYearModuleMarkColumns.map{ case (year, columns) =>
+				val maxModuleColumns = (entities.map(entity => columns.count(c => !c.isEmpty(entity, year))) ++ Seq(1)).max
+				year -> maxModuleColumns
+			} }
+
+			// for each entity have a list of all modules with marks and padding at the end for empty cells
+			val moduleColumnsPerEntity = benchmarkTask("moduleColumnsPerEntity"){ entities.map(entity => {
+				entity -> perYearModuleMarkColumns.map{ case(year, modules) =>
+					val hasValue: Seq[Option[ModuleExamGridColumn]] = modules.filter(m => !m.isEmpty(entity, year)).map(Some.apply)
+					val padding: Seq[Option[ModuleExamGridColumn]] = (1 to maxYearColumnSize(year) - hasValue.size).map(_ => None)
+					year -> (hasValue ++ padding)
+				}
+			}).toMap }
+
+			GenerateExamGridShortFormExporter(
+				department = department,
+				academicYear = academicYear,
+				course = selectCourseCommand.course,
+				routes = selectCourseCommand.routes.asScala,
+				yearOfStudy = selectCourseCommand.yearOfStudy,
+				yearWeightings = weightings,
+				normalLoadLookup = normalLoadLookup,
+				entities = entities,
+				leftColumns = studentInformationColumns,
+				perYearColumns = perYearColumns,
+				rightColumns = summaryColumns,
+				chosenYearColumnValues = chosenYearColumnValues,
+				perYearColumnValues = perYearColumnValues,
+				moduleColumnsPerEntity = moduleColumnsPerEntity,
+				perYearModuleMarkColumns = perYearModuleMarkColumns,
+				perYearModuleReportColumns = perYearModuleReportColumns,
+				maxYearColumnSize,
+				showComponentMarks = gridOptionsCommand.showComponentMarks
+			)
+		}
+
+		new ExcelView(
+			"Exam grid for %s %s %s %s.xlsx".format(
+				department.name,
+				selectCourseCommand.course.code,
+				selectCourseCommand.routes.size match {
+					case 0 => "All routes"
+					case 1 => selectCourseCommand.routes.get(0).code.toUpperCase
+					case n => s"$n routes"
+				},
+				academicYear.toString.replace("/","-")
+			),
+			workbook
 		)
 	}
 
