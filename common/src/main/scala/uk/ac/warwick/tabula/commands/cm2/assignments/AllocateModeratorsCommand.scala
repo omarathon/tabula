@@ -20,6 +20,7 @@ object AllocateModeratorsCommand {
 		with AllocateModeratorsActionDescription
 		with AllocateModeratorsActionValidation
 		with PopulateMarkerFeedbackComponentImpl
+		with FeedbackReleasedNotifier
 		with AutowiringCM2MarkingWorkflowServiceComponent {
 			override lazy val eventName: String = "AllocateModerators"
 		}
@@ -34,6 +35,7 @@ class AllocateModeratorsCommandInternal(val assignment: Assignment, val user: Us
 		val feedbackToSendToModerator = feedbacks.filter(_.outstandingStages.contains(SelectedModerationAdmin))
 		val releasedMarkerFeedback = cm2MarkingWorkflowService.progress(SelectedModerationAdmin, feedbackToSendToModerator)
 		populateMarkerFeedback(assignment, releasedMarkerFeedback)
+		newReleasedFeedback = releasedMarkerFeedback.asJava
 		releasedMarkerFeedback.map(_.feedback)
 	}
 }
@@ -91,7 +93,7 @@ trait AllocateModeratorsActionDescription extends Describable[Seq[Feedback]] {
 	}
 }
 
-trait AllocateModeratorsActionState extends SelectedStudentsState with SelectedStudentsRequest with UserAware {
+trait AllocateModeratorsActionState extends SelectedStudentsState with SelectedStudentsRequest with UserAware with ReleasedState {
 	val assignment: Assignment
 	var confirm: Boolean = _
 }
