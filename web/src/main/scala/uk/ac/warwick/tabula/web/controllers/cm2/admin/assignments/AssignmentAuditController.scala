@@ -13,8 +13,8 @@ import uk.ac.warwick.tabula.web.controllers.cm2.CourseworkController
 
 @Profile(Array("cm2Enabled"))
 @Controller
-@RequestMapping(value = Array("/${cm2.prefix}/admin/assignments/{assignment}/review"))
-class AssignmentReviewController extends CourseworkController {
+@RequestMapping(value = Array("/${cm2.prefix}/admin/assignments/{assignment}/audit"))
+class AssignmentAuditController extends CourseworkController with AutowiringAssignmentAuditQueryServiceComponent {
 
 	@ModelAttribute("command")
 	def command(@PathVariable assignment: Assignment): ViewViewableCommand[Assignment] = {
@@ -26,14 +26,15 @@ class AssignmentReviewController extends CourseworkController {
 	@RequestMapping(method = Array(GET, HEAD))
 	def form(@ModelAttribute("command") cmd: Appliable[Assignment]): Mav = {
 		val assignment = cmd.apply()
+
+		val auditEvents = assignmentAuditQueryService.getAuditEventsForAssignment(assignment)
+
 		val sharedPropertiesForm = new SharedAssignmentPropertiesForm
 		sharedPropertiesForm.copySharedFrom(assignment)
-		Mav("cm2/admin/assignments/assignment_review_details",
+		Mav("cm2/admin/assignments/assignment_audit",
 			"module" -> assignment.module,
 			"assignment" -> assignment,
-			"membershipInfo" -> assignment.membershipInfo,
-			"sharedPropertiesForm" -> sharedPropertiesForm,
-			"AssignmentAnonymity" -> AssignmentAnonymity)
+			"auditEvents" -> auditEvents)
 			.crumbsList(Breadcrumbs.assignment(assignment))
 	}
 

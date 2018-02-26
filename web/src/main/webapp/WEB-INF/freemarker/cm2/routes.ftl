@@ -95,6 +95,7 @@ TODO grab values from the Routes object in code, as that's pretty equivalent and
 <#macro copy_assignments_previous_module module academicYear><@_u page="/admin/${module.code}/${academicYear.startYear?c}/copy-assignments" /></#macro>
 
 <#macro editassignmentdetails assignment><@_u page="/admin/assignments/${assignment.id}/edit" /></#macro>
+<#macro assignmentaudit assignment><@_u page="/admin/assignments/${assignment.id}/audit" /></#macro>
 
 <#macro feedbackSummary assignment studentid><@_u page="/admin/assignments/${assignment.id}/feedback/summary/${studentid}"/></#macro>
 <#macro feedbackAudit assignment studentid><@_u page="/admin/assignments/${assignment.id}/audit/${studentid}"/></#macro>

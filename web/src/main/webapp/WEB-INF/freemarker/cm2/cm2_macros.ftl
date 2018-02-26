@@ -141,6 +141,18 @@
 						classes='btn btn-default'>
 							Edit assignment
 					</@fmt.permission_button>
+
+					<#if assignment.cm2Assignment>
+						<#local audit_url><@routes.cm2.assignmentaudit assignment /></#local>
+						<@fmt.permission_button
+						permission='Assignment.Update'
+						scope=assignment
+						action_descr='view assignment audit log'
+						href=audit_url
+						classes='btn btn-default'>
+							View audit log
+						</@fmt.permission_button>
+					</#if>
 				</div>
 			</div>
 		</#if>
