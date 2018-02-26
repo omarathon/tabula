@@ -225,6 +225,7 @@ trait EditExtensionCommandDescription extends Describable[Extension] {
 		d.module(assignment.module)
 		d.studentIds(Option(student.getWarwickId).toSeq)
 		d.studentUsercodes(student.getUserId)
+		d.extensionState(state)
 	}
 }
 
