@@ -58,6 +58,9 @@ class UserSettings extends GeneratedId with SettingsMap with HasNotificationSett
 	def registerPdfSortOrder: String = getStringSetting(Settings.RegisterPdf.SortOrder).getOrElse(DownloadRegistersAsPdfHelper.SortOrder.Module)
 	def registerPdfSortOrder_= (check: String): Unit = settings += (Settings.RegisterPdf.SortOrder -> check)
 
+	def courseworkShowEmptyModules: Boolean = getBooleanSetting(Settings.CourseworkShowEmptyModules).getOrElse(DefaultCourseworkShowEmptyModules)
+	def courseworkShowEmptyModules_=(showEmptyModules: Boolean): Unit = settings += (Settings.CourseworkShowEmptyModules -> showEmptyModules)
+
 	def string(key: String): String = getStringSetting(key).orNull
 
 	def this(userId: String) = {
@@ -81,6 +84,8 @@ object UserSettings {
 
 	val DefaultProfilesDefaultView = "gadget"
 
+	val DefaultCourseworkShowEmptyModules = true
+
 	object Settings {
 		val AlertsSubmission = "alertsSubmission"
 		val HiddenIntros = "hiddenIntros"
@@ -89,6 +94,7 @@ object UserSettings {
 		val ProfilesDefaultView = "profilesDefaultView"
 		val ActiveDepartment = "activeDepartment"
 		val ActiveAcademicYear = "activeAcademicYear"
+		val CourseworkShowEmptyModules = "courseworkShowEmptyModules"
 
 		object RegisterPdf {
 			val ShowPhotos = "registerPdfShowPhotos"
