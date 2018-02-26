@@ -93,6 +93,7 @@ trait ModifyExtensionDescription extends Describable[Extension] {
 		d.module(extension.assignment.module)
 		d.studentIds(extension.universityId.toSeq)
 		d.studentUsercodes(extension.usercode)
+		d.extensionState(state)
 	}
 }
 

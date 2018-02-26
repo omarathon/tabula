@@ -6,6 +6,7 @@ import uk.ac.warwick.tabula.data.HibernateHelpers
 import uk.ac.warwick.tabula.data.Transactions._
 import uk.ac.warwick.tabula.data.model._
 import uk.ac.warwick.tabula.data.model.attendance._
+import uk.ac.warwick.tabula.data.model.forms.ExtensionState
 import uk.ac.warwick.tabula.data.model.groups._
 import uk.ac.warwick.tabula.data.model.markingworkflow.CM2MarkingWorkflow
 import uk.ac.warwick.tabula.data.model.permissions.CustomRoleDefinition
@@ -491,6 +492,10 @@ abstract class Description {
 	def customRoleDefinition(customRoleDefinition: CustomRoleDefinition): Description = {
 		if (customRoleDefinition.department != null) department(customRoleDefinition.department)
 		property("customRoleDefinition", customRoleDefinition.id)
+	}
+
+	def extensionState(state: ExtensionState): Description = {
+		property("extensionState", state.description)
 	}
 
 	// delegate equality to the underlying map
