@@ -1,7 +1,6 @@
 package uk.ac.warwick.tabula.web.controllers.groups.admin
 
 import javax.validation.Valid
-
 import org.springframework.stereotype.Controller
 import org.springframework.validation.Errors
 import org.springframework.web.bind.annotation.{ModelAttribute, PathVariable, RequestMapping}
@@ -46,8 +45,9 @@ class DeregisteredStudentsForSmallGroupSetController extends GroupsController wi
 	}
 
 	private def renderForm(set: SmallGroupSet, cmd: DeregisteredStudentsForSmallGroupSetCommand) =
-		Mav("groups/admin/groups/deregistered/form")
-			.crumbs(
+		Mav("groups/admin/groups/deregistered/form",
+			"returnTo" -> getReturnTo(Breadcrumbs.ModuleForYear(set.module, set.academicYear).url.getOrElse(""))
+		).crumbs(
 				Breadcrumbs.Department(set.module.adminDepartment, set.academicYear),
 				Breadcrumbs.ModuleForYear(set.module, set.academicYear)
 			)
@@ -64,7 +64,7 @@ class DeregisteredStudentsForSmallGroupSetController extends GroupsController wi
 
 			Mav("groups/admin/groups/deregistered/results",
 				"removed" -> removed,
-				"returnTo" -> Breadcrumbs.ModuleForYear(set.module, set.academicYear).url
+				"returnTo" -> getReturnTo(Breadcrumbs.ModuleForYear(set.module, set.academicYear).url.getOrElse(""))
 			).crumbs(
 				Breadcrumbs.Department(set.module.adminDepartment, set.academicYear),
 				Breadcrumbs.ModuleForYear(set.module, set.academicYear)

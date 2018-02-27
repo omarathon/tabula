@@ -28,5 +28,5 @@
 		</#list></tbody>
 	</table>
 
-	<p><a href="${returnTo}">Return</a></p>
+	<p><a href="<#noescape>${returnTo}</#noescape>" class="btn btn-default">Return</a></p>
 </#escape>
