@@ -175,7 +175,8 @@
 									<#else>
 										<strong>Unrecorded</strong>:
 									</#if>
-									${note.point.name}
+									<#assign point = note.point />
+									${point.name}
 									<#if point.scheme.pointStyle.dbValue == "week">
 										(<@fmt.wholeWeekDateFormat point.startWeek point.endWeek point.scheme.academicYear />)
 									<#else>
