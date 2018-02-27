@@ -2,7 +2,7 @@ package uk.ac.warwick.tabula.commands.exams.grids
 
 import org.joda.time.DateTime
 import uk.ac.warwick.tabula.data.model.StudentCourseYearDetails.YearOfStudy
-import uk.ac.warwick.tabula.data.model.{Module, ModuleRegistration, Route, StudentCourseYearDetails}
+import uk.ac.warwick.tabula.data.model._
 
 case class ExamGridEntity(
 	firstName: String,
@@ -20,5 +20,6 @@ case class ExamGridEntityYear(
 	route: Route,
 	overcattingModules: Option[Seq[Module]],
 	markOverrides: Option[Map[Module, BigDecimal]],
-	studentCourseYearDetails: Option[StudentCourseYearDetails]
+	studentCourseYearDetails: Option[StudentCourseYearDetails],
+	level: Option[Level]
 )

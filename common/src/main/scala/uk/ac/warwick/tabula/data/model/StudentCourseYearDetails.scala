@@ -10,7 +10,7 @@ import uk.ac.warwick.tabula.JavaImports._
 import uk.ac.warwick.tabula.commands.exams.grids.ExamGridEntityYear
 import uk.ac.warwick.tabula.data.PostLoadBehaviour
 import uk.ac.warwick.tabula.permissions.PermissionsTarget
-import uk.ac.warwick.tabula.services.{ModuleAndDepartmentService, UserLookupService}
+import uk.ac.warwick.tabula.services.{LevelService, ModuleAndDepartmentService, UserLookupService}
 import uk.ac.warwick.tabula.system.permissions.Restricted
 import uk.ac.warwick.tabula.{AcademicYear, ToString}
 import uk.ac.warwick.userlookup.User
@@ -179,7 +179,8 @@ class StudentCourseYearDetails extends StudentCourseYearProperties
 		},
 		overcattingModules = overcattingModules,
 		markOverrides = None,
-		studentCourseYearDetails = Some(this)
+		studentCourseYearDetails = Some(this),
+		level = level
 	)
 
 	override def postLoad() {
@@ -201,6 +202,12 @@ trait BasicStudentCourseYearProperties {
 
 	@Restricted(Array("Profiles.Read.StudentCourseDetails.Core"))
 	var studyLevel: String = _
+
+	@transient
+	var levelService: LevelService = Wire.auto[LevelService]
+
+	def level: Option[Level] = levelService.levelFromCode(studyLevel)
+
 
 	@Column(name="cas_used")
 	@Restricted(Array("Profiles.Read.Tier4VisaRequirement"))

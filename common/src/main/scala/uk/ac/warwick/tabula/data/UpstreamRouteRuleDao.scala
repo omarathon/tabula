@@ -17,7 +17,7 @@ trait AutowiringUpstreamRouteRuleDaoComponent extends UpstreamRouteRuleDaoCompon
 
 trait UpstreamRouteRuleDao {
 	def saveOrUpdate(list: UpstreamRouteRule): Unit
-	def list(route: Route, academicYear: AcademicYear, yearOfStudy: Int): Seq[UpstreamRouteRule]
+	def list(route: Route, academicYear: AcademicYear, level: Level): Seq[UpstreamRouteRule]
 	def removeAll(): Unit
 }
 
@@ -27,13 +27,13 @@ class UpstreamRouteRuleDaoImpl extends UpstreamRouteRuleDao with Daoisms {
 	def saveOrUpdate(list: UpstreamRouteRule): Unit =
 		session.saveOrUpdate(list)
 
-	def list(route: Route, academicYear: AcademicYear, yearOfStudy: Int): Seq[UpstreamRouteRule] = {
+	def list(route: Route, academicYear: AcademicYear, level: Level): Seq[UpstreamRouteRule] = {
 		session.newCriteria[UpstreamRouteRule]
 			.add(is("route", route))
 			.add(Restrictions.disjunction()
 				.add(is("_academicYear", academicYear))
 				.add(is("_academicYear", null))
-			).add(is("yearOfStudy", yearOfStudy))
+			).add(is("levelCode", level.code))
 			.seq
 	}
 

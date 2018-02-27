@@ -29,7 +29,7 @@ class SuggestedResultColumnOption extends ChosenYearExamGridColumnOption with Au
 					progressionService.suggestedResult(
 						entityYear.get.studentCourseYearDetails.get,
 						state.normalLoadLookup(entityYear.get.route),
-						state.routeRulesLookup(entityYear.get.route)
+						state.routeRulesLookup(entityYear.get.route, entityYear.get.level)
 					) match {
 						case unknown: ProgressionResult.Unknown => ExamGridColumnValueMissing(unknown.details)
 						case result => ExamGridColumnValueString(result.description)

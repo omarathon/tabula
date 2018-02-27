@@ -82,14 +82,14 @@ object ExamGridMarksRecordExporter extends TaskBenchmarking with AddConfidential
 					if (Option(year.studentCourseYearDetails.get.agreedMark).isDefined) {
 						Option(BigDecimal(year.studentCourseYearDetails.get.agreedMark))
 					} else if (entity.years.keys.last == yearOfStudy) {
-						progressionService.getYearMark(year.studentCourseYearDetails.get, normalLoadLookup(year.route), routeRulesLookup(year.route)).right.toOption
+						progressionService.getYearMark(year.studentCourseYearDetails.get, normalLoadLookup(year.route), routeRulesLookup(year.route, year.level)).right.toOption
 					} else {
 						None
 					}
 				}
 				doc.createParagraph().createRun().setText(s"Mark for the year: ${yearMark.map(_.underlying.toPlainString).getOrElse("X")}")
 
-				progressionService.suggestedFinalYearGrade(year.studentCourseYearDetails.get, normalLoadLookup(year.route), routeRulesLookup(year.route)) match {
+				progressionService.suggestedFinalYearGrade(year.studentCourseYearDetails.get, normalLoadLookup(year.route), routeRulesLookup(year.route, year.level)) match {
 					case FinalYearGrade.Ignore =>
 					case grade => doc.createParagraph().createRun().setText(s"Classification: ${grade.description}")
 				}
