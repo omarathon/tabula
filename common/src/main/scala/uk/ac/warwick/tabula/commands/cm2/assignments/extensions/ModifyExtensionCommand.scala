@@ -69,6 +69,9 @@ trait ModifyExtensionState {
 trait ModifyExtensionValidation extends SelfValidating {
 	self: ModifyExtensionState =>
 	def validate(errors: Errors) {
+		if (state == ExtensionState.Unreviewed) {
+			errors.rejectValue("state", "extension.state.empty")
+		}
 		if(expiryDate == null) {
 			if (state == ExtensionState.Approved) {
 				errors.rejectValue("expiryDate", "extension.requestedExpiryDate.provideExpiry")
