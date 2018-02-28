@@ -89,11 +89,11 @@ class UniversityIDColumnOption extends StudentExamGridColumnOption {
 					details <- egey.studentCourseYearDetails
 				} yield details
 				scyd match {
-					case Some(dtls) =>
+					case Some(dtls) if dtls.isFresh =>
 						val componentLink = Routes.Grids.assessmentdetails(dtls)
 						entity ->
 							ExamGridColumnValueStringHtmlOnly(
-								s"""<a href ="$componentLink" target="_blank">${entity.universityId}</a>"""
+								s"""<a href="$componentLink" target="_blank">${entity.universityId}</a>"""
 							)
 					case _	=>  entity -> ExamGridColumnValueString(entity.universityId)
 				}
