@@ -93,7 +93,7 @@ class UniversityIDColumnOption extends StudentExamGridColumnOption {
 						val componentLink = Routes.Grids.assessmentdetails(dtls)
 						entity ->
 							ExamGridColumnValueStringHtmlOnly(
-								"<a href =\"%s\" target=\"_blank\">%s</a>".format(componentLink, entity.universityId)
+								s"""<a href ="$componentLink" target="_blank">${entity.universityId}</a>"""
 							)
 					case _	=>  entity -> ExamGridColumnValueString(entity.universityId)
 				}
