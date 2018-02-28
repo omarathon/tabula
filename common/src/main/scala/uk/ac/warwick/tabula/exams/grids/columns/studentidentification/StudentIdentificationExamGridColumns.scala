@@ -1,6 +1,7 @@
 package uk.ac.warwick.tabula.exams.grids.columns.studentidentification
 
 import org.springframework.stereotype.Component
+import uk.ac.warwick.tabula.exams.web.Routes
 import uk.ac.warwick.tabula.commands.exams.grids.ExamGridEntity
 import uk.ac.warwick.tabula.exams.grids.columns._
 
@@ -79,13 +80,24 @@ class UniversityIDColumnOption extends StudentExamGridColumnOption {
 	case class Column(state: ExamGridColumnState) extends ChosenYearExamGridColumn(state) {
 
 		override val title: String = "ID"
-
 		override val excelColumnWidth: Int = ExamGridColumnOption.ExcelColumnSizes.ShortString
-
 		override def values: Map[ExamGridEntity, ExamGridColumnValue] = {
-			state.entities.map(entity => entity ->
-				ExamGridColumnValueString(entity.universityId)
-			).toMap
+			state.entities.map { entity =>
+				val scyd = for {
+					egeyOpt <- entity.years.get(state.yearOfStudy)
+					egey <- egeyOpt
+					details <- egey.studentCourseYearDetails
+				} yield details
+				scyd match {
+					case Some(dtls) =>
+						val componentLink = Routes.Grids.assessmentdetails(dtls)
+						entity ->
+							ExamGridColumnValueStringHtmlOnly(
+								s"""<a href ="$componentLink" target="_blank">${entity.universityId}</a>"""
+							)
+					case _	=>  entity -> ExamGridColumnValueString(entity.universityId)
+				}
+			}.toMap
 		}
 
 	}
