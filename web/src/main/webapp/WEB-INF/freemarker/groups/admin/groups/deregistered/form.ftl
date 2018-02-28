@@ -46,6 +46,7 @@
 				<input type="submit" class="btn btn-primary" value="Remove deregistered students">
 				<a href="<@routes.groups.depthome module=smallGroupSet.module academicYear=smallGroupSet.academicYear/>" class="btn btn-default">Cancel</a>
 			</div>
+			<input type="hidden" name="returnTo" value="<#noescape>${returnTo}</#noescape>" />
 		</@f.form>
 	</div>
 
