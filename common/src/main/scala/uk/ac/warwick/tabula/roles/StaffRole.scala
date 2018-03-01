@@ -4,6 +4,7 @@ import uk.ac.warwick.tabula.data._
 import uk.ac.warwick.tabula.permissions.Permissions._
 import uk.ac.warwick.tabula.permissions.PermissionsSelector
 import uk.ac.warwick.tabula.data.model.StudentRelationshipType
+import uk.ac.warwick.tabula.roles.SSOStaffRoleDefinition.GrantsScopedPermission
 
 case class StaffRole(department: model.Department) extends BuiltInRole(StaffRoleDefinition, department)
 case class SSOStaffRole(department: model.Department) extends BuiltInRole(SSOStaffRoleDefinition, department)
@@ -13,6 +14,10 @@ case object StaffRoleDefinition extends UnassignableBuiltInRoleDefinition {
 	override def description = "Staff Member"
 
 	GeneratesSubRole(SSOStaffRoleDefinition)
+
+	GrantsScopedPermission(
+		Profiles.Read.Disability // TAB-4386
+	)
 }
 
 /**
@@ -48,9 +53,7 @@ case object SSOStaffRoleDefinition extends UnassignableBuiltInRoleDefinition {
 		Profiles.Read.StudentCourseDetails.Status,
 		Profiles.ViewSearchResults,
 
-		Profiles.Read.SmallGroups,
-
-		Profiles.Read.Disability // TAB-4386
+		Profiles.Read.SmallGroups
 	)
 
 }
