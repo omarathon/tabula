@@ -17,7 +17,7 @@
 
 			<@spring.bind path="command.*">
 				<#if status.error>
-					<div class="error has-error">
+					<div class="alert alert-danger">
 						<@f.errors path="command.*" cssClass="error" />
 					</div>
 				</#if>

@@ -2,8 +2,8 @@ package uk.ac.warwick.tabula.services.scheduling
 
 import org.junit.After
 import org.springframework.jdbc.datasource.embedded.{EmbeddedDatabase, EmbeddedDatabaseBuilder}
-import uk.ac.warwick.tabula.data.model.{Route, UpstreamModuleList}
-import uk.ac.warwick.tabula.services.CourseAndRouteService
+import uk.ac.warwick.tabula.data.model.{Level, Route, UpstreamModuleList}
+import uk.ac.warwick.tabula.services.{CourseAndRouteService, LevelService}
 import uk.ac.warwick.tabula.services.exams.grids.UpstreamModuleListService
 import uk.ac.warwick.tabula.{AcademicYear, Fixtures, Mockito, TestBase}
 
@@ -38,6 +38,12 @@ class RouteRuleImporterTest extends TestBase with Mockito {
 		routeRuleImporter.courseAndRouteService.getRoutesByCodes(any[Seq[String]]) returns allRoutes
 		routeRuleImporter.upstreamModuleListService = smartMock[UpstreamModuleListService]
 		routeRuleImporter.upstreamModuleListService.findByCodes(any[Seq[String]]) returns Seq(moduleList)
+		routeRuleImporter.levelService = smartMock[LevelService]
+		routeRuleImporter.levelService.levelFromCode(any[String]) answers { arg =>
+			val levelCode = arg.asInstanceOf[String]
+			Some(new Level(levelCode, levelCode))
+		}
+
 		val result = routeRuleImporter.getRouteRules
 		result.size should be (3)
 		result.flatMap(_.entries.asScala).size should be (4)

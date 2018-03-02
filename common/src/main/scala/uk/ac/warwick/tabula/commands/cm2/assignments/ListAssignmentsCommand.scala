@@ -67,7 +67,7 @@ object ListAssignmentsCommand {
 	)
 
 	type DepartmentResult = Seq[ModuleAssignmentsInfo]
-	type DepartmentCommand = Appliable[DepartmentResult] with ListDepartmentAssignmentsCommandState with ListAssignmentsModulesWithPermission
+	type DepartmentCommand = Appliable[DepartmentResult] with ListAssignmentsCommandRequest with ListDepartmentAssignmentsCommandState with ListAssignmentsModulesWithPermission
 
 	type ModuleResult = ModuleAssignmentsInfo
 	type ModuleCommand = Appliable[ModuleResult] with ListModuleAssignmentsCommandState

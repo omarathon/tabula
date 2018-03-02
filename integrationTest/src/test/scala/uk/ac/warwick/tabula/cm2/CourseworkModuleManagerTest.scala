@@ -22,26 +22,31 @@ class CourseworkModuleManagerTest extends BrowserTest with CourseworkFixtures wi
 	private def getToPermissionsPage() = {
 		When("I go the admin page, and expand the module list")
 		click on linkText("Test Services")
-		var element = className("filter-results").webElement.findElements(By.cssSelector("div.striped-section.admin-assignment-list "))
-		element.size should be (3)
 
-		Then("I should be able to click on the Manage button")
+		showModulesWithNoFilteredAssignments()
 
-		val row = element.asScala.find({_.findElement(By.cssSelector("span.mod-code")).getText == "XXX01" })
-		row should be (defined)
+		eventuallyAjax {
+			val element = className("filter-results").webElement.findElements(By.cssSelector("div.striped-section.admin-assignment-list"))
+			element.size should be(3)
 
-		val manageModule = row.get
-		click on manageModule.findElement(By.partialLinkText("Manage this module"))
-		Then("I should see the module permissions option")
-		val managersLink = manageModule.findElement(By.partialLinkText("Module permissions"))
-		eventually {
-			managersLink.isDisplayed should be {
-				true
+			Then("I should be able to click on the Manage button")
+
+			val row = element.asScala.find({_.findElement(By.cssSelector("span.mod-code")).getText == "XXX01" })
+			row should be (defined)
+
+			val manageModule = row.get
+			click on manageModule.findElement(By.partialLinkText("Manage this module"))
+			Then("I should see the module permissions option")
+			val managersLink = manageModule.findElement(By.partialLinkText("Module permissions"))
+			eventually {
+				managersLink.isDisplayed should be {
+					true
+				}
 			}
-		}
 
-		When("I click the permissions link")
-		click on managersLink
+			When("I click the permissions link")
+			click on managersLink
+		}
 
 		Then("I should reach the permissions page")
 		currentUrl should include("/permissions")

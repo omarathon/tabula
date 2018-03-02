@@ -5,6 +5,7 @@ import org.springframework.format.annotation.DateTimeFormat
 import org.springframework.validation.Errors
 import uk.ac.warwick.tabula.commands._
 import uk.ac.warwick.tabula.data.Transactions._
+import uk.ac.warwick.tabula.data.model.forms.ExtensionState.Unreviewed
 import uk.ac.warwick.tabula.data.model.forms.{Extension, ExtensionState}
 import uk.ac.warwick.tabula.data.model.notifications.coursework._
 import uk.ac.warwick.tabula.data.model.{Assignment, Notification, ScheduledNotification}
@@ -17,8 +18,8 @@ import uk.ac.warwick.tabula.{CurrentUser, DateFormats}
 import uk.ac.warwick.userlookup.User
 
 object EditExtensionCommand {
-	def apply(assignment: Assignment, student: User, currentUser: CurrentUser, action: String) =
-		new EditExtensionCommandInternal(assignment, student, currentUser, action)
+	def apply(assignment: Assignment, student: User, currentUser: CurrentUser) =
+		new EditExtensionCommandInternal(assignment, student, currentUser)
 			with ComposableCommand[Extension]
 			with EditExtensionCommandPermissions
 			with EditExtensionCommandDescription
@@ -30,7 +31,7 @@ object EditExtensionCommand {
 			with HibernateExtensionPersistenceComponent
 }
 
-class EditExtensionCommandInternal(val assignment: Assignment, val student: User, val submitter: CurrentUser, val action: String) extends CommandInternal[Extension]
+class EditExtensionCommandInternal(val assignment: Assignment, val student: User, val submitter: CurrentUser) extends CommandInternal[Extension]
 		with EditExtensionCommandState with EditExtensionCommandValidation with TaskBenchmarking {
 
 	self: ExtensionPersistenceComponent with UserLookupComponent =>
@@ -76,7 +77,6 @@ trait EditExtensionCommandState {
 	def student: User
 	def assignment: Assignment
 	def submitter: CurrentUser
-	def action: String
 
 	@WithinYears(maxFuture = 3) @DateTimeFormat(pattern = DateFormats.DateTimePickerPattern)
 	var expiryDate: DateTime =_
@@ -90,6 +90,9 @@ trait EditExtensionCommandState {
 trait EditExtensionCommandValidation extends SelfValidating {
 	self: EditExtensionCommandState =>
 	def validate(errors: Errors) {
+		if (state == ExtensionState.Unreviewed) {
+			errors.rejectValue("state", "extension.state.empty")
+		}
 		if (expiryDate == null) {
 			if (state == ExtensionState.Approved) {
 				errors.rejectValue("expiryDate", "extension.requestedExpiryDate.provideExpiry")
@@ -225,6 +228,7 @@ trait EditExtensionCommandDescription extends Describable[Extension] {
 		d.module(assignment.module)
 		d.studentIds(Option(student.getWarwickId).toSeq)
 		d.studentUsercodes(student.getUserId)
+		d.extensionState(state)
 	}
 }
 

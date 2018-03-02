@@ -10,6 +10,10 @@ class CourseworkAdminTest extends BrowserTest with CourseworkFixtures {
 
 		click on linkText("Test Services")
 
+		eventually {
+			showModulesWithNoFilteredAssignments()
+		}
+
 		// check that we can see some modules on the page.
 
 		getModule("xxx01").get.isDisplayed should be {true}
@@ -18,16 +22,16 @@ class CourseworkAdminTest extends BrowserTest with CourseworkFixtures {
 
 		// check that we can hide modules
 		click on linkText("All modules")
-		eventually({
+		eventually {
 			val hide = cssSelector("input[name=showEmptyModules]").webElement
 			hide.isDisplayed should be {true}
 			click on hide
-		})
+		}
 
-		eventuallyAjax({
+		eventuallyAjax {
 			getModule("xxx01").isDefined should be {false}
 			getModule("xxx02").get.isDisplayed should be {true}
 			getModule("xxx03").isDefined should be {false}
-		})
+		}
 	}
 }

@@ -5,8 +5,9 @@ import java.nio.charset.StandardCharsets
 import org.springframework.validation.{BindingResult, Errors}
 import uk.ac.warwick.tabula.JavaImports._
 import uk.ac.warwick.tabula.commands.UploadedFile
-import uk.ac.warwick.tabula.data.model.StudentMember
+import uk.ac.warwick.tabula.data.model.{FileAttachment, StudentMember}
 import uk.ac.warwick.tabula.data.model.attendance.AttendanceState
+import uk.ac.warwick.tabula.helpers.DetectMimeType
 import uk.ac.warwick.tabula.services.{AutowiringProfileServiceComponent, ProfileServiceComponent}
 import uk.ac.warwick.tabula.system.BindListener
 import uk.ac.warwick.util.csv.{GoodCsvDocument, NamedValueCSVLineReader}
@@ -30,9 +31,14 @@ class CSVAttendanceExtractorInternal extends BindListener {
 		file.onBind(result)
 	}
 
+	private def detectMimeType(uploadedFile: UploadedFile) = DetectMimeType.detectMimeType(uploadedFile.attached.get(0).asByteSource.openStream())
+
 	def extract(errors: Errors): Map[StudentMember, AttendanceState] = {
 		if (file.attached.isEmpty) {
 			errors.reject("file.missing")
+			Map()
+		} else if (!detectMimeType(file).startsWith("text/")) {
+			errors.reject("file.format.csv")
 			Map()
 		} else {
 			val reader = new NamedValueCSVLineReader

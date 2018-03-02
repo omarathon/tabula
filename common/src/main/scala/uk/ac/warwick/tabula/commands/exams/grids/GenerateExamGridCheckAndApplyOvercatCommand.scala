@@ -125,21 +125,21 @@ trait GenerateExamGridCheckAndApplyOvercatCommandState {
 		case _ => fetchEntities.map(entity => entity.copy(years = Map(entity.years.keys.max -> entity.years(entity.years.keys.max))))
 	}
 	lazy val normalLoadLookup: NormalLoadLookup = new NormalLoadLookup(academicYear, selectCourseCommand.yearOfStudy, normalCATSLoadService)
-	lazy val routeRulesLookup: UpstreamRouteRuleLookup = new UpstreamRouteRuleLookup(academicYear, selectCourseCommand.yearOfStudy, upstreamRouteRuleService)
+	lazy val routeRulesLookup: UpstreamRouteRuleLookup = new UpstreamRouteRuleLookup(academicYear, upstreamRouteRuleService)
 
 	lazy val overcatSubsets: Map[ExamGridEntity, Seq[(BigDecimal, Seq[ModuleRegistration])]] =
 		entities.filter(entity =>
 			// We only want to apply a subset automaticaly if they have a valid year and have some route rules for that year
 			entity.years.get(selectCourseCommand.yearOfStudy).nonEmpty &&
 				entity.years(selectCourseCommand.yearOfStudy).nonEmpty &&
-				routeRulesLookup(entity.years(selectCourseCommand.yearOfStudy).get.route).nonEmpty
+				routeRulesLookup(entity.years(selectCourseCommand.yearOfStudy).get.route, entity.years(selectCourseCommand.yearOfStudy).get.level).nonEmpty
 		).map(entity => entity -> {
 			val year = entity.years(selectCourseCommand.yearOfStudy).get
 			moduleRegistrationService.overcattedModuleSubsets(
 				year,
 				year.markOverrides.getOrElse(Map()),
 				normalLoadLookup(year.route),
-				routeRulesLookup(year.route)
+				routeRulesLookup(year.route, year.level)
 			)
 		}).toMap
 
