@@ -4,7 +4,6 @@ import uk.ac.warwick.tabula.data._
 import uk.ac.warwick.tabula.permissions.Permissions._
 import uk.ac.warwick.tabula.permissions.PermissionsSelector
 import uk.ac.warwick.tabula.data.model.StudentRelationshipType
-import uk.ac.warwick.tabula.roles.SSOStaffRoleDefinition.GrantsScopedPermission
 
 case class StaffRole(department: model.Department) extends BuiltInRole(StaffRoleDefinition, department)
 case class SSOStaffRole(department: model.Department) extends BuiltInRole(SSOStaffRoleDefinition, department)
