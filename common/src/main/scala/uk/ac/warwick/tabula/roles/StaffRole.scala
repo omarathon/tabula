@@ -13,6 +13,10 @@ case object StaffRoleDefinition extends UnassignableBuiltInRoleDefinition {
 	override def description = "Staff Member"
 
 	GeneratesSubRole(SSOStaffRoleDefinition)
+
+	GrantsScopedPermission(
+		Profiles.Read.Disability // TAB-4386
+	)
 }
 
 /**
@@ -48,9 +52,7 @@ case object SSOStaffRoleDefinition extends UnassignableBuiltInRoleDefinition {
 		Profiles.Read.StudentCourseDetails.Status,
 		Profiles.ViewSearchResults,
 
-		Profiles.Read.SmallGroups,
-
-		Profiles.Read.Disability // TAB-4386
+		Profiles.Read.SmallGroups
 	)
 
 }
