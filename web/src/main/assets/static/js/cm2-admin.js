@@ -161,12 +161,19 @@
 				$form.data('buttonClicked', null);
 			}
 
-			$.post($form.attr('action'), formData, function(data) {
-				if (data.success) {
-					window.location.replace(data.redirect);
-				} else {
-					$detailRow.html(data);
-					$detailRow.bindFormHelpers();
+			$.post({
+				url: $form.attr('action'),
+				data: formData,
+				success: function (data) {
+					if (data.success) {
+						window.location.replace(data.redirect);
+					} else {
+						$detailRow.html(data);
+						$detailRow.bindFormHelpers();
+					}
+				},
+				error: function (xhr) {
+					$detailRow.html(xhr.responseText);
 				}
 			});
 		});
