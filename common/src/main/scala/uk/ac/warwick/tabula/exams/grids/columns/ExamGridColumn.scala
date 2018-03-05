@@ -1,5 +1,8 @@
 package uk.ac.warwick.tabula.exams.grids.columns
 
+import java.sql.Types
+
+import org.hibernate.`type`.{StandardBasicTypes, StringType}
 import org.springframework.stereotype.Component
 import uk.ac.warwick.tabula.AcademicYear
 import uk.ac.warwick.tabula.commands.exams.grids.{ExamGridEntity, ExamGridEntityYear}
@@ -52,12 +55,15 @@ object ExamGridColumnOption {
 	}
 }
 
-sealed abstract class ExamGridStudentIdentificationColumnValue(val value: String, val description: String)
+sealed abstract class ExamGridStudentIdentificationColumnValue(val value: String, val description: String) {
+	override def toString: String = value
+}
 
 object ExamGridStudentIdentificationColumnValue {
+	val Default = FullName
 	case object NoName  extends ExamGridStudentIdentificationColumnValue("none", "No name")
 	case object FullName extends ExamGridStudentIdentificationColumnValue("full", "Official name")
-	case object BothName extends ExamGridStudentIdentificationColumnValue("both", "First And last Name")
+	case object BothName extends ExamGridStudentIdentificationColumnValue("both", "First and last name")
 
 	def fromCode(code: String): ExamGridStudentIdentificationColumnValue =
 		if (code == null) null
@@ -66,23 +72,10 @@ object ExamGridStudentIdentificationColumnValue {
 			case None => throw new IllegalArgumentException()
 		}
 
-	def allValues : Seq[ExamGridStudentIdentificationColumnValue] = Seq(
-		NoName,
-		FullName,
-		BothName
-	)
-}
+	def allValues : Seq[ExamGridStudentIdentificationColumnValue] = Seq(NoName, FullName, BothName)
 
-class ExamGridStudentIdentificationColumnValueUserType extends AbstractStringUserType[ExamGridStudentIdentificationColumnValue]{
-	override def convertToObject(string: String): ExamGridStudentIdentificationColumnValue = ExamGridStudentIdentificationColumnValue.fromCode(string)
-	override def convertToValue(identification: ExamGridStudentIdentificationColumnValue): String = identification.value
+	def apply(value:String): ExamGridStudentIdentificationColumnValue = fromCode(value)
 }
-
-class StringToExamGridStudentIdentificationColumnValue extends TwoWayConverter[String, ExamGridStudentIdentificationColumnValue] {
-	override def convertRight(source: String): ExamGridStudentIdentificationColumnValue = source.maybeText.map(ExamGridStudentIdentificationColumnValue.fromCode).getOrElse(throw new IllegalArgumentException)
-	override def convertLeft(source: ExamGridStudentIdentificationColumnValue): String = Option(source).map { _.value }.orNull
-}
-
 
 case class ExamGridColumnState(
 	entities: Seq[ExamGridEntity],

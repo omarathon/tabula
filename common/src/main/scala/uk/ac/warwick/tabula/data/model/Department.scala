@@ -256,10 +256,15 @@ class Department extends GeneratedId
 		settings += (Settings.MissedMonitoringPointsNotificationLevelHigh -> levels.high)
 	}
 
+	def nameToShow: ExamGridStudentIdentificationColumnValue =
+		getStringSetting(Settings.ExamGridOptions.NameToShow).map(ExamGridStudentIdentificationColumnValue(_)).getOrElse(ExamGridStudentIdentificationColumnValue.Default)
+
+	def nameToShow_= (identification:ExamGridStudentIdentificationColumnValue): Unit =  settings += (Settings.ExamGridOptions.NameToShow->identification.value)
+
 	def examGridOptions: ExamGridOptions = ExamGridOptions(
 		getStringSeqSetting(Settings.ExamGridOptions.PredefinedColumnIdentifiers, Wire.all[ExamGridColumnOption].map(_.identifier)).toSet,
 		getStringSeqSetting(Settings.ExamGridOptions.PredefinedColumnIdentifiers, Seq()),
-		ExamGridStudentIdentificationColumnValue.fromCode(getStringSetting(Settings.ExamGridOptions.NameToShow, ExamGridStudentIdentificationColumnValue.FullName.value)),
+		nameToShow,
 		getStringSetting(Settings.ExamGridOptions.YearsToShow, "current"),
 		getStringSetting(Settings.ExamGridOptions.MarksToShow, "overall"),
 		getStringSetting(Settings.ExamGridOptions.ModuleNameToShow, "codeOnly"),
@@ -268,7 +273,7 @@ class Department extends GeneratedId
 	def examGridOptions_=(options: ExamGridOptions): Unit = {
 		settings += (Settings.ExamGridOptions.PredefinedColumnIdentifiers -> options.predefinedColumnIdentifiers)
 		settings += (Settings.ExamGridOptions.PredefinedColumnIdentifiers -> options.customColumnTitles)
-		settings += (Settings.ExamGridOptions.NameToShow -> options.nameToShow)
+		settings += (Settings.ExamGridOptions.NameToShow -> options.nameToShow.value)
 		settings += (Settings.ExamGridOptions.YearsToShow -> options.yearsToShow)
 		settings += (Settings.ExamGridOptions.MarksToShow -> options.marksToShow)
 		settings += (Settings.ExamGridOptions.ModuleNameToShow -> options.moduleNameToShow)

@@ -184,7 +184,6 @@
 		</#assign>
 
 		<@fmt.help_popover id="gridOptions" title="Previous grid options" content=popover html=true />
-
 	</div>
 </form>
 

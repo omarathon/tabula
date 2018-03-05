@@ -120,8 +120,6 @@ trait GenerateExamGridGridOptionsCommandRequest {
 	var layout: String = "full"
 	var customColumnTitles: JList[String] = JArrayList()
 
-	def hideName: Boolean = nameToShow.value == "none"
-
 	def showFullLayout: Boolean = layout == "full"
 	def showComponentMarks: Boolean = marksToShow == "all"
 	def showModuleNames: Boolean = moduleNameToShow == "nameAndCode"
