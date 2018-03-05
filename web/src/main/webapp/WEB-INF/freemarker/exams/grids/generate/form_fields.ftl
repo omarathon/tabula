@@ -19,7 +19,7 @@
 	<#list gridOptionsCommand.customColumnTitles as column>
 		<input type="hidden" name="customColumnTitles[${column_index}]" value="${column}" />
 	</#list>
-	<input type="hidden" name="nameToShow" value="${gridOptionsCommand.nameToShow}" />
+	<input type="hidden" name="nameToShow" value="${gridOptionsCommand.nameToShow.toString}" />
 	<input type="hidden" name="yearsToShow" value="${gridOptionsCommand.yearsToShow}" />
 	<input type="hidden" name="marksToShow" value="${gridOptionsCommand.marksToShow}" />
 	<input type="hidden" name="moduleNameToShow" value="${gridOptionsCommand.moduleNameToShow}" />

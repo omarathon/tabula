@@ -14,7 +14,7 @@ import uk.ac.warwick.tabula.data.model.groups.{SmallGroupAllocationMethod, WeekR
 import uk.ac.warwick.tabula.data.model.markingworkflow.CM2MarkingWorkflow
 import uk.ac.warwick.tabula.data.model.permissions.{CustomRoleDefinition, DepartmentGrantedRole}
 import uk.ac.warwick.tabula.data.{AliasAndJoinType, PostLoadBehaviour, ScalaRestriction}
-import uk.ac.warwick.tabula.exams.grids.columns.ExamGridColumnOption
+import uk.ac.warwick.tabula.exams.grids.columns.{ExamGridColumnOption, ExamGridStudentIdentificationColumnValue}
 import uk.ac.warwick.tabula.helpers.Logging
 import uk.ac.warwick.tabula.helpers.StringUtils._
 import uk.ac.warwick.tabula.permissions.PermissionsTarget
@@ -259,7 +259,7 @@ class Department extends GeneratedId
 	def examGridOptions: ExamGridOptions = ExamGridOptions(
 		getStringSeqSetting(Settings.ExamGridOptions.PredefinedColumnIdentifiers, Wire.all[ExamGridColumnOption].map(_.identifier)).toSet,
 		getStringSeqSetting(Settings.ExamGridOptions.PredefinedColumnIdentifiers, Seq()),
-		getStringSetting(Settings.ExamGridOptions.NameToShow, "full"),
+		ExamGridStudentIdentificationColumnValue.fromCode(getStringSetting(Settings.ExamGridOptions.NameToShow, ExamGridStudentIdentificationColumnValue.FullName.value)),
 		getStringSetting(Settings.ExamGridOptions.YearsToShow, "current"),
 		getStringSetting(Settings.ExamGridOptions.MarksToShow, "overall"),
 		getStringSetting(Settings.ExamGridOptions.ModuleNameToShow, "codeOnly"),
@@ -537,7 +537,7 @@ object Department {
 		case class ExamGridOptions(
 			predefinedColumnIdentifiers: Set[String],
 			customColumnTitles: Seq[String],
-			nameToShow: String,
+			nameToShow: ExamGridStudentIdentificationColumnValue,
 			yearsToShow: String,
 			marksToShow: String,
 			moduleNameToShow: String,

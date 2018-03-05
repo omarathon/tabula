@@ -6,7 +6,7 @@ import uk.ac.warwick.tabula.JavaImports._
 import uk.ac.warwick.tabula.commands._
 import uk.ac.warwick.tabula.data.model.Department
 import uk.ac.warwick.tabula.data.model.Department.Settings.ExamGridOptions
-import uk.ac.warwick.tabula.exams.grids.columns.ExamGridColumnOption
+import uk.ac.warwick.tabula.exams.grids.columns.{ExamGridColumnOption, ExamGridStudentIdentificationColumnValue}
 import uk.ac.warwick.tabula.permissions.Permissions
 import uk.ac.warwick.tabula.services.{AutowiringModuleAndDepartmentServiceComponent, ModuleAndDepartmentServiceComponent}
 import uk.ac.warwick.tabula.system.permissions.{PermissionsChecking, PermissionsCheckingMethods, RequiresPermissionsChecking}
@@ -113,14 +113,15 @@ trait GenerateExamGridGridOptionsCommandRequest {
 	self: GenerateExamGridGridOptionsCommandState =>
 
 	var predefinedColumnIdentifiers: JSet[String] = JHashSet()
-	var nameToShow: String = "full"
+	var nameToShow: ExamGridStudentIdentificationColumnValue = ExamGridStudentIdentificationColumnValue.FullName
 	var yearsToShow: String = "current"
 	var marksToShow: String = "overall"
 	var moduleNameToShow: String = "codeOnly"
 	var layout: String = "full"
 	var customColumnTitles: JList[String] = JArrayList()
 
-	def showFullName: Boolean = nameToShow != "both"
+	def hideName: Boolean = nameToShow.value == "none"
+
 	def showFullLayout: Boolean = layout == "full"
 	def showComponentMarks: Boolean = marksToShow == "all"
 	def showModuleNames: Boolean = moduleNameToShow == "nameAndCode"
