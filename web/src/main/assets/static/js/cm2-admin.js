@@ -142,13 +142,25 @@
 		});
 
 		// extension management - on submit replace html with validation errors or redirect
+		$body.on('click', 'form.modify-extension button:submit', function () {
+			$(this).closest('form').data('buttonClicked', {
+				name: $(this).attr('name'),
+				value: $(this).val()
+			});
+		});
+
 		$body.on('submit', 'form.modify-extension', function(e){
 			e.preventDefault();
 			var $form = $(e.target);
-			var $detailRow = $form.closest('.content-container,.detailrow-container');
+			var $detailRow = $form.closest('.content-container, .detailrow-container');
 			var formData = $form.serializeArray();
-			var $buttonClicked =  $(document.activeElement);
-			formData.push({ name: $buttonClicked.attr('name'), value: $buttonClicked.val() });
+
+			var buttonClicked = $form.data('buttonClicked');
+			if (buttonClicked) {
+				formData.push(buttonClicked);
+				$form.data('buttonClicked', null);
+			}
+
 			$.post($form.attr('action'), formData, function(data) {
 				if (data.success) {
 					window.location.replace(data.redirect);
