@@ -410,7 +410,7 @@
 					// reset if empty
 					$detailrow.collapse("hide");
 					$detailrow.data('loaded', false);
-					$container.html("<p>No data is currently available. Please check that you are signed in.</p>");
+					$container.html('<span class="text-muted"><i class="fa fa-spinner fa-spin"></i> Loading&hellip;</span>');
 					successCallback($container);
 				} else {
 					$container.html(result);
