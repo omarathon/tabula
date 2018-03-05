@@ -2,7 +2,12 @@
 <div class="well">
 	<div class="feedback-summary-heading">
 		<h3>${stage.description}'s feedback</h3>
-		<h5>${markerFeedback.marker.fullName} <small>- <@fmt.date markerFeedback.uploadedDate /></small></h5>
+		<h5>
+			${markerFeedback.marker.fullName}
+			<#if markerFeedback.updatedOn??>
+				<small>- <@fmt.date markerFeedback.updatedOn /></small>
+			</#if>
+		</h5>
 		<div class="clearfix"></div>
 	</div>
 
