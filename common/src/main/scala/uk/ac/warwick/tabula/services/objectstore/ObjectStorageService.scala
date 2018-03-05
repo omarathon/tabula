@@ -66,7 +66,10 @@ class BlobBackedRichByteSource(blobStore: BlobStore, containerName: String, blob
 	override lazy val isEmpty: Boolean = metadata.isEmpty
 	override lazy val size: Long = metadata.map(_.contentLength).getOrElse(-1)
 
-	override def openStream(): InputStream = byteSource.openStream()
+	override def openStream(): InputStream = try byteSource.openStream() catch {
+		// BlobBackedByteSource::openStream doesn't check whether a Blob's Payload is non-null
+		case e: NullPointerException => null
+	}
 	override def slice(offset: Long, length: Long): ByteSource = byteSource.slice(offset, length)
 }
 
