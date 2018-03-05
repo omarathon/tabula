@@ -1,16 +1,11 @@
 package uk.ac.warwick.tabula.exams.grids.columns
 
-import java.sql.Types
-
-import org.hibernate.`type`.{StandardBasicTypes, StringType}
 import org.springframework.stereotype.Component
 import uk.ac.warwick.tabula.AcademicYear
 import uk.ac.warwick.tabula.commands.exams.grids.{ExamGridEntity, ExamGridEntityYear}
 import uk.ac.warwick.tabula.data.model.StudentCourseYearDetails.YearOfStudy
 import uk.ac.warwick.tabula.data.model._
 import uk.ac.warwick.tabula.services.exams.grids.NormalLoadLookup
-import uk.ac.warwick.tabula.system.TwoWayConverter
-import uk.ac.warwick.tabula.helpers.StringUtils._
 
 object ExamGridColumnOption {
 	type Identifier = String
