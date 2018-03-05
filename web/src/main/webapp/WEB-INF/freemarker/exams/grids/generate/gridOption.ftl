@@ -85,15 +85,22 @@
 		<div class="col-md-3">
 			<div class="radio">
 				<label><input type="radio" name="nameToShow" value="full"
-					<#if gridOptionsCommand.nameToShow == 'full'>checked</#if>
+					<#if gridOptionsCommand.nameToShow.toString == 'full'>checked</#if>
 				/> Official name</label>
 			</div>
 		</div>
 		<div class="col-md-3">
 			<div class="radio">
 				<label><input type="radio" name="nameToShow" value="both"
-					<#if gridOptionsCommand.nameToShow == 'both'>checked</#if>
+					<#if gridOptionsCommand.nameToShow.toString == 'both'>checked</#if>
 				/> First and last name</label>
+			</div>
+		</div>
+		<div class="col-md-3">
+			<div class="radio">
+				<label><input type="radio" name="nameToShow" value="none"
+					<#if gridOptionsCommand.nameToShow.toString == 'none'>checked</#if>
+				/> No name</label>
 			</div>
 		</div>
 	</div>

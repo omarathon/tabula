@@ -193,6 +193,7 @@
 		<bean class="uk.ac.warwick.tabula.data.model.markingworkflow.ModerationSamplerConverter" />
 		<bean class="uk.ac.warwick.tabula.commands.cm2.assignments.markers.MarkerAdjustmentTypeConverter" />
 		<bean class="uk.ac.warwick.tabula.commands.cm2.assignments.markers.MarkerAdjustmentDirectionConverter" />
+		<bean class="uk.ac.warwick.tabula.exams.grids.columns.StringToExamGridStudentIdentificationColumnValue" />
 	</util:list>
 
 	<bean id="typeConverter"
