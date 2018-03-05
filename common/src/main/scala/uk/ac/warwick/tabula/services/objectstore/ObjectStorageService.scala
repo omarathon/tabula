@@ -7,7 +7,7 @@ import com.google.common.io.ByteSource
 import com.google.common.net.MediaType
 import org.jclouds.ContextBuilder
 import org.jclouds.blobstore.domain.{Blob, BlobMetadata}
-import org.jclouds.blobstore.{BlobStoreContext, TransientApiMetadata}
+import org.jclouds.blobstore.{BlobStore, BlobStoreContext, TransientApiMetadata}
 import org.jclouds.filesystem.FilesystemApiMetadata
 import org.jclouds.filesystem.reference.FilesystemConstants
 import org.jclouds.logging.slf4j.config.SLF4JLoggingModule
@@ -19,6 +19,7 @@ import uk.ac.warwick.spring.Wire
 import uk.ac.warwick.tabula.ScalaFactoryBean
 import uk.ac.warwick.tabula.helpers.StringUtils._
 import uk.ac.warwick.tabula.services.fileserver.RenderableFile
+import uk.ac.warwick.util.files.impl.AbstractBlobBackedFileData
 
 import scala.collection.JavaConverters._
 
@@ -40,7 +41,6 @@ object ObjectStorageService {
 
 trait RichByteSource extends ByteSource {
 	def metadata: Option[ObjectStorageService.Metadata]
-	override final def slice(offset: Long, length: Long): ByteSource = throw new UnsupportedOperationException
 }
 
 object RichByteSource {
@@ -53,6 +53,21 @@ object RichByteSource {
 		override def read(): Array[Byte] = source.read()
 	}
 	def empty: RichByteSource = new BlobBackedByteSource(None, None)
+}
+
+class ReadOnlyBlobBackedFileData(blobStore: BlobStore, containerName: String, blobName: String) extends AbstractBlobBackedFileData(blobStore, containerName, blobName) {
+	override def overwrite(in: ByteSource) = throw new UnsupportedOperationException
+}
+
+class BlobBackedRichByteSource(blobStore: BlobStore, containerName: String, blobName: String, fetchMetadata: => Option[BlobMetadata]) extends RichByteSource {
+	private lazy val byteSource = new ReadOnlyBlobBackedFileData(blobStore, containerName, blobName).asByteSource()
+
+	override lazy val metadata: Option[ObjectStorageService.Metadata] = fetchMetadata.map(ObjectStorageService.Metadata.apply)
+	override lazy val isEmpty: Boolean = metadata.isEmpty
+	override lazy val size: Long = metadata.map(_.contentLength).getOrElse(-1)
+
+	override def openStream(): InputStream = byteSource.openStream()
+	override def slice(offset: Long, length: Long): ByteSource = byteSource.slice(offset, length)
 }
 
 private[objectstore] class BlobBackedByteSource(fetchBlob: => Option[Blob], fetchMetadata: => Option[BlobMetadata]) extends RichByteSource {
