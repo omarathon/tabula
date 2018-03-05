@@ -135,8 +135,14 @@ abstract class AbstractProgressionService extends ProgressionService {
 	}
 
 	def suggestedResult(scyd: StudentCourseYearDetails, normalLoad: BigDecimal, routeRules: Seq[UpstreamRouteRule]): ProgressionResult = {
-		if (scyd.moduleRegistrations.exists(_.firstDefinedMark.isEmpty)) {
-			ProgressionResult.Unknown(s"No agreed mark or actual mark for modules: ${scyd.moduleRegistrations.filter(_.firstDefinedMark.isEmpty).map(_.module.code.toUpperCase).mkString(", ")}")
+
+		val emptyExpectingMarks = scyd.moduleRegistrations.filter(mr => !mr.passFail && mr.firstDefinedMark.isEmpty)
+		val emptyExpectingGrades = scyd.moduleRegistrations.filter(mr => mr.passFail && mr.firstDefinedGrade.isEmpty)
+
+		if (emptyExpectingMarks.nonEmpty) {
+			ProgressionResult.Unknown(s"No agreed mark or actual mark for modules: ${emptyExpectingMarks.map(_.module.code.toUpperCase).mkString(", ")}")
+		} else if (emptyExpectingGrades.nonEmpty) {
+			ProgressionResult.Unknown(s"No agreed grade or actual grade for modules: ${emptyExpectingGrades.map(_.module.code.toUpperCase).mkString(", ")}")
 		} else if (scyd.moduleRegistrations.isEmpty) {
 				ProgressionResult.Unknown(s"No module registrations found for ${scyd.studentCourseDetails.scjCode} ${scyd.academicYear.toString}")
 		} else if (scyd.yearOfStudy.toInt == 1) {
@@ -157,6 +163,12 @@ abstract class AbstractProgressionService extends ProgressionService {
 
 	}
 
+	// a definition of a passed module that handles pass-fail modules
+	private def isPassed(mr: ModuleRegistration) = {
+		if(mr.passFail) mr.firstDefinedGrade.contains("P")
+		else BigDecimal(mr.firstDefinedMark.get) >= ProgressionService.ModulePassMark
+	}
+
 	/**
 		* Regulation defined at: http://www2.warwick.ac.uk/services/aro/dar/quality/categories/examinations/conventions/fyboe
 		*/
@@ -166,7 +178,8 @@ abstract class AbstractProgressionService extends ProgressionService {
 			scyd.academicYear,
 			scyd.yearOfStudy
 		)
-		val passedModuleRegistrations = scyd.moduleRegistrations.filter(mr => BigDecimal(mr.firstDefinedMark.get) >= ProgressionService.ModulePassMark)
+
+		val passedModuleRegistrations = scyd.moduleRegistrations.filter(isPassed)
 		val passedCredits = passedModuleRegistrations.map(mr => BigDecimal(mr.cats)).sum > ProgressionService.FirstYearRequiredCredits
 		val passedCoreRequired = coreRequiredModules.forall(cr => passedModuleRegistrations.exists(_.module == cr.module))
 		val overallMark = getYearMark(scyd, normalLoad, routeRules)
@@ -189,7 +202,7 @@ abstract class AbstractProgressionService extends ProgressionService {
 		* Regulation defined at: http://www2.warwick.ac.uk/services/aro/dar/quality/categories/examinations/conventions/ugprogression09/
 		*/
 	private def suggestedResultIntermediateYear(scyd: StudentCourseYearDetails, normalLoad: BigDecimal, routeRules: Seq[UpstreamRouteRule]): ProgressionResult = {
-		val passedModuleRegistrations = scyd.moduleRegistrations.filter(mr => BigDecimal(mr.firstDefinedMark.get) >= ProgressionService.ModulePassMark)
+		val passedModuleRegistrations = scyd.moduleRegistrations.filter(isPassed)
 		val passedCredits = passedModuleRegistrations.map(mr => BigDecimal(mr.cats)).sum > ProgressionService.IntermediateRequiredCredits
 		val overallMark = getYearMark(scyd, normalLoad, routeRules)
 
@@ -278,7 +291,7 @@ abstract class AbstractProgressionService extends ProgressionService {
 	): FinalYearGrade = {
 		val finalTwoYearsModuleRegistrations = scydPerYear.reverse.take(2).flatMap { case (_, yearDetails) => yearDetails.moduleRegistrations }
 
-		if (finalTwoYearsModuleRegistrations.exists(_.firstDefinedMark.isEmpty)) {
+		if (finalTwoYearsModuleRegistrations.filterNot(_.passFail).exists(_.firstDefinedMark.isEmpty)) {
 			FinalYearGrade.Unknown(s"No agreed mark or actual mark for modules: ${
 				finalTwoYearsModuleRegistrations.filter(_.firstDefinedMark.isEmpty).map(mr => "%s %s".format(mr.module.code.toUpperCase, mr.academicYear.toString)).mkString(", ")
 			}")
@@ -287,12 +300,10 @@ abstract class AbstractProgressionService extends ProgressionService {
 				markPerYear.toMap.apply(year) * yearWeightings.toMap.apply(year).weighting
 			}.sum.setScale(1, RoundingMode.HALF_UP)
 
-			val passedModuleRegistrationsInFinalTwoYears: Seq[ModuleRegistration] = finalTwoYearsModuleRegistrations
-				.filter(mr => BigDecimal(mr.firstDefinedMark.get) >= ProgressionService.ModulePassMark)
+			val passedModuleRegistrationsInFinalTwoYears: Seq[ModuleRegistration] = finalTwoYearsModuleRegistrations.filter(isPassed)
 			val passedCreditsInFinalTwoYears = passedModuleRegistrationsInFinalTwoYears.map(mr => BigDecimal(mr.cats)).sum > ProgressionService.FinalTwoYearsRequiredCredits
 
-			val passedModuleRegistrationsFinalYear: Seq[ModuleRegistration] = scydPerYear.reverse.head._2
-				.moduleRegistrations.filter(mr => BigDecimal(mr.firstDefinedMark.get) >= ProgressionService.ModulePassMark)
+			val passedModuleRegistrationsFinalYear: Seq[ModuleRegistration] = scydPerYear.reverse.head._2.moduleRegistrations.filter(isPassed)
 			val passedCreditsFinalYear = passedModuleRegistrationsFinalYear.map(mr => BigDecimal(mr.cats)).sum > ProgressionService.FinalYearRequiredCredits
 
 			if (passedCreditsInFinalTwoYears && passedCreditsFinalYear) {

@@ -24,13 +24,14 @@ import scala.collection.JavaConverters._
 @Access(AccessType.FIELD)
 class ModuleRegistration() extends GeneratedId	with PermissionsTarget with CanBeDeleted with Ordered[ModuleRegistration] {
 
-	def this(studentCourseDetails: StudentCourseDetails, module: Module, cats: java.math.BigDecimal, academicYear: AcademicYear, occurrence: String) {
+	def this(studentCourseDetails: StudentCourseDetails, module: Module, cats: java.math.BigDecimal, academicYear: AcademicYear, occurrence: String, passFail: Boolean = false) {
 		this()
 		this.studentCourseDetails = studentCourseDetails
 		this.module = module
 		this.academicYear = academicYear
 		this.cats = cats
 		this.occurrence = occurrence
+		this.passFail = passFail
 	}
 
 	@transient var membershipService: AssessmentMembershipService = Wire[AssessmentMembershipService]
@@ -72,6 +73,8 @@ class ModuleRegistration() extends GeneratedId	with PermissionsTarget with CanBe
 
 	def firstDefinedMark: Option[JBigDecimal] = Seq(Option(agreedMark), Option(actualMark)).flatten.headOption
 
+	def firstDefinedGrade: Option[String] = Seq(Option(agreedGrade), Option(actualGrade)).flatten.headOption
+
 	@Type(`type` = "uk.ac.warwick.tabula.data.model.ModuleSelectionStatusUserType")
 	@Column(name="selectionstatuscode")
 	@Restricted(Array("Profiles.Read.ModuleRegistration.Core"))
@@ -79,6 +82,9 @@ class ModuleRegistration() extends GeneratedId	with PermissionsTarget with CanBe
 
 	@Restricted(Array("Profiles.Read.ModuleRegistration.Core"))
 	var lastUpdatedDate: DateTime = DateTime.now
+
+	@Restricted(Array("Profiles.Read.ModuleRegistration.Core"))
+	var passFail: Boolean = _
 
 	def upstreamAssessmentGroups: Seq[UpstreamAssessmentGroup] = membershipService.getUpstreamAssessmentGroups(this)
 

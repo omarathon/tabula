@@ -36,18 +36,32 @@ abstract class ModuleExamGridColumn(state: ExamGridColumnState, val module: Modu
 				if (entity.markOverrides.exists(_.get(module).isDefined)) {
 					ExamGridColumnValueOverrideDecimal(entity.markOverrides.get(module))
 				} else {
-					val (mark, isActual) = mr.agreedMark match {
-						case mark: JBigDecimal => (BigDecimal(mark), false)
-						case _ => Option(mr.actualMark).map(m => (BigDecimal(m), true)).getOrElse(null, false)
-					}
-					if (mark == null) {
-						ExamGridColumnValueMissing("Agreed and actual mark missing")
-					} else if (isActual && mr.actualGrade == "F" || mr.agreedGrade == "F") {
-						ExamGridColumnValueFailedDecimal(mark, isActual)
-					} else if (entity.studentCourseYearDetails.isDefined && entity.overcattingModules.exists(_.contains(mr.module))) {
-						ExamGridColumnValueOvercatDecimal(mark, isActual)
+					if(mr.passFail) {
+						val (grade, isActual) = mr.agreedGrade match {
+							case grade: String => (grade, false)
+							case _ => Option(mr.actualGrade).map(g => (g, true)).getOrElse(null, false)
+						}
+						if (grade == null) {
+							ExamGridColumnValueMissing("Agreed and actual grade missing")
+						} else if (grade == "F") {
+							ExamGridColumnValueFailedString(grade, isActual)
+						} else {
+							ExamGridColumnValueString(grade, isActual)
+						}
 					} else {
-						ExamGridColumnValueDecimal(mark, isActual)
+						val (mark, isActual) = mr.agreedMark match {
+							case mark: JBigDecimal => (BigDecimal(mark), false)
+							case _ => Option(mr.actualMark).map(m => (BigDecimal(m), true)).getOrElse(null, false)
+						}
+						if (mark == null) {
+							ExamGridColumnValueMissing("Agreed and actual mark missing")
+						} else if (isActual && mr.actualGrade == "F" || mr.agreedGrade == "F") {
+							ExamGridColumnValueFailedDecimal(mark, isActual)
+						} else if (entity.studentCourseYearDetails.isDefined && entity.overcattingModules.exists(_.contains(mr.module))) {
+							ExamGridColumnValueOvercatDecimal(mark, isActual)
+						} else {
+							ExamGridColumnValueDecimal(mark, isActual)
+						}
 					}
 				}
 			}

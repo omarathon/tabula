@@ -72,7 +72,15 @@ abstract class AbstractModuleRegistrationService extends ModuleRegistrationServi
 
 	def weightedMeanYearMark(moduleRegistrations: Seq[ModuleRegistration], markOverrides: Map[Module, BigDecimal]): Either[String, BigDecimal] = {
 		val nonNullReplacedMarksAndCats: Seq[(BigDecimal, BigDecimal)] = moduleRegistrations.map(mr => {
-			val mark: BigDecimal = markOverrides.getOrElse(mr.module, mr.firstDefinedMark.map(mark => BigDecimal(mark)).orNull)
+			// TAB-5699 - for pass-fail modules a pass is a 100 and a fail is a 0
+			val mrMark: Option[JBigDecimal] =
+				if(mr.passFail) mr.firstDefinedGrade match {
+					case Some("P") => Some(new JBigDecimal("100"))
+					case Some("F") => Some(new JBigDecimal("0"))
+					case _ => None
+				}
+				else mr.firstDefinedMark
+			val mark: BigDecimal = markOverrides.getOrElse(mr.module, mrMark.map(mark => BigDecimal(mark)).orNull)
 			val cats: BigDecimal = Option(mr.cats).map(c => BigDecimal(c)).orNull
 			(mark, cats)
 		}).filter{case(mark, cats) => mark != null & cats != null}

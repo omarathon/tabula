@@ -29,14 +29,15 @@ abstract class CATSThresholdColumnOption(bound: BigDecimal, isUpperBound: Boolea
 				moduleRegistrations.map(mr => BigDecimal(mr.cats)).sum.underlying
 			}
 
-			if (entity.moduleRegistrations.exists(_.firstDefinedMark.isEmpty)) {
+			val modulesWithMarks = entity.moduleRegistrations.filterNot(_.passFail)
+			if (modulesWithMarks.exists(_.firstDefinedMark.isEmpty)) {
 				ExamGridColumnValueMissing("The total CATS cannot be calculated because the following module registrations have no mark: %s".format(
-					entity.moduleRegistrations.filter(_.firstDefinedMark.isEmpty).map(_.module.code.toUpperCase).mkString(", ")
+					modulesWithMarks.filter(_.firstDefinedMark.isEmpty).map(_.module.code.toUpperCase).mkString(", ")
 				))
 			} else if (isUpperBound) {
-				ExamGridColumnValueDecimal(transformModuleRegistrations(entity.moduleRegistrations.filter(mr => mr.firstDefinedMark.exists(mark => BigDecimal(mark) <= bound))))
+				ExamGridColumnValueDecimal(transformModuleRegistrations(modulesWithMarks.filter(mr => mr.firstDefinedMark.exists(mark => BigDecimal(mark) <= bound))))
 			} else {
-				ExamGridColumnValueDecimal(transformModuleRegistrations(entity.moduleRegistrations.filter(mr => mr.firstDefinedMark.exists(mark => BigDecimal(mark) >= bound))))
+				ExamGridColumnValueDecimal(transformModuleRegistrations(modulesWithMarks.filter(mr => mr.firstDefinedMark.exists(mark => BigDecimal(mark) >= bound))))
 			}
 		}
 
