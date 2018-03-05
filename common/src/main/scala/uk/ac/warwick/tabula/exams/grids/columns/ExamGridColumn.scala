@@ -6,6 +6,8 @@ import uk.ac.warwick.tabula.commands.exams.grids.{ExamGridEntity, ExamGridEntity
 import uk.ac.warwick.tabula.data.model.StudentCourseYearDetails.YearOfStudy
 import uk.ac.warwick.tabula.data.model._
 import uk.ac.warwick.tabula.services.exams.grids.NormalLoadLookup
+import uk.ac.warwick.tabula.system.TwoWayConverter
+import uk.ac.warwick.tabula.helpers.StringUtils._
 
 object ExamGridColumnOption {
 	type Identifier = String
@@ -70,6 +72,11 @@ object ExamGridStudentIdentificationColumnValue {
 	def allValues : Seq[ExamGridStudentIdentificationColumnValue] = Seq(NoName, FullName, BothName)
 
 	def apply(value:String): ExamGridStudentIdentificationColumnValue = fromCode(value)
+}
+
+class StringToExamGridStudentIdentificationColumnValue extends TwoWayConverter[String, ExamGridStudentIdentificationColumnValue] {
+	override def convertRight(source: String): ExamGridStudentIdentificationColumnValue = source.maybeText.map(ExamGridStudentIdentificationColumnValue.fromCode).getOrElse(throw new IllegalArgumentException)
+	override def convertLeft(source: ExamGridStudentIdentificationColumnValue): String = Option(source).map { _.value }.orNull
 }
 
 case class ExamGridColumnState(
