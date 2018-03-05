@@ -43,7 +43,8 @@ class ImportModuleRegistrationsCommand(course: StudentCourseDetails, courseRows:
 						module,
 						modRegRow.cats,
 						AcademicYear.parse(modRegRow.academicYear),
-						modRegRow.occurrence
+						modRegRow.occurrence,
+						modRegRow.passFail
 					)
 					course.addModuleRegistration(mr)
 					mr
@@ -111,7 +112,7 @@ class ImportModuleRegistrationsCommand(course: StudentCourseDetails, courseRows:
 	}
 
 	private val properties = Set(
-		"assessmentGroup", "occurrence", "actualGrade", "agreedGrade"
+		"assessmentGroup", "occurrence", "actualGrade", "agreedGrade", "passFail"
 	)
 
 	override def describe(d: Description): Unit = d.properties("scjCode" -> course.scjCode)
