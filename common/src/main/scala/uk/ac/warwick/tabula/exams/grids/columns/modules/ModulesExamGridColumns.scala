@@ -42,7 +42,7 @@ abstract class ModuleExamGridColumn(state: ExamGridColumnState, val module: Modu
 							case _ => Option(mr.actualGrade).map(g => (g, true)).getOrElse(null, false)
 						}
 						if (grade == null) {
-							ExamGridColumnValueMissing("Agreed and actual mark missing")
+							ExamGridColumnValueMissing("Agreed and actual grade missing")
 						} else if (grade == "F") {
 							ExamGridColumnValueFailedString(grade, isActual)
 						} else {
