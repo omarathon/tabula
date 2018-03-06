@@ -1,26 +1,28 @@
 package uk.ac.warwick.tabula.web.controllers.groups.admin
 
 import javax.validation.Valid
-
 import org.springframework.stereotype.Controller
 import org.springframework.validation.Errors
-import org.springframework.web.bind.annotation.{ModelAttribute, PathVariable, RequestMapping}
+import org.springframework.web.bind.annotation.{ModelAttribute, PathVariable, RequestMapping, RequestParam}
 import uk.ac.warwick.tabula.AcademicYear
-import uk.ac.warwick.tabula.commands.{Appliable, SelfValidating}
 import uk.ac.warwick.tabula.commands.groups.admin.{ImportSmallGroupSetsFromSpreadsheetCommand, SmallGroupSetsSpreadsheetTemplateCommand}
+import uk.ac.warwick.tabula.commands.{Appliable, SelfValidating}
 import uk.ac.warwick.tabula.data.model.Department
+import uk.ac.warwick.tabula.jobs.ImportSmallGroupSetsFromSpreadsheetJob
 import uk.ac.warwick.tabula.permissions.Permission
+import uk.ac.warwick.tabula.services.jobs.AutowiringJobServiceComponent
 import uk.ac.warwick.tabula.services.{AutowiringMaintenanceModeServiceComponent, AutowiringModuleAndDepartmentServiceComponent, AutowiringUserSettingsServiceComponent}
-import uk.ac.warwick.tabula.web.{Mav, Routes}
-import uk.ac.warwick.tabula.web.controllers.{AcademicYearScopedController, DepartmentScopedController}
 import uk.ac.warwick.tabula.web.controllers.groups.GroupsController
+import uk.ac.warwick.tabula.web.controllers.{AcademicYearScopedController, DepartmentScopedController}
 import uk.ac.warwick.tabula.web.views.ExcelView
+import uk.ac.warwick.tabula.web.{Mav, Routes}
 
 @Controller
 @RequestMapping(Array("/groups/admin/department/{department}/{academicYear}/import-spreadsheet"))
 class ImportSmallGroupSetsFromSpreadsheetController extends GroupsController
 	with DepartmentScopedController with AcademicYearScopedController
 	with AutowiringUserSettingsServiceComponent with AutowiringModuleAndDepartmentServiceComponent
+	with AutowiringJobServiceComponent
 	with AutowiringMaintenanceModeServiceComponent {
 
 	override val departmentPermission: Permission = ImportSmallGroupSetsFromSpreadsheetCommand.RequiredPermission
@@ -66,11 +68,25 @@ class ImportSmallGroupSetsFromSpreadsheetController extends GroupsController
 		if (errors.hasErrors) {
 			processSpreadsheet(cmd, errors, department, academicYear)
 		} else {
-			cmd.apply()
-			Redirect(Routes.groups.admin(department, academicYear))
+			val job = jobService.add(user.apparentUser, ImportSmallGroupSetsFromSpreadsheetJob(
+				department = department,
+				academicYear = academicYear,
+				file = cmd.file.attached.get(0)
+			))
+
+			Redirect(Routes.groups.admin.importSpreadsheet(department, academicYear) + s"?jobId=${job.id}")
 		}
 	}
 
+	@RequestMapping(method = Array(GET), params = Array("jobId"))
+	def checkProgress(@RequestParam("jobId") jobId: String, @PathVariable department: Department, @PathVariable academicYear: AcademicYear): Mav = {
+		val job = jobService.getInstance(jobId)
+
+		Mav("groups/admin/groups/import-spreadsheet/progress", "job" -> job)
+			.crumbs(Breadcrumbs.Department(department, academicYear))
+			.secondCrumbs(academicYearBreadcrumbs(academicYear)(year => Routes.groups.admin.importSpreadsheet(department, year)): _*)
+			.noLayoutIf(ajax)
+	}
 }
 
 @Controller

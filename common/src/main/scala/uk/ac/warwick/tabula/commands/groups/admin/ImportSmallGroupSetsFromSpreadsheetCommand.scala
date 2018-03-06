@@ -19,7 +19,7 @@ import scala.collection.JavaConverters._
 
 object ImportSmallGroupSetsFromSpreadsheetCommand {
 	val RequiredPermission = Permissions.SmallGroups.ImportFromExternalSystem
-	type CommandType = Appliable[Seq[SmallGroupSet]] with SelfValidating with BindListener
+	type CommandType = Appliable[Seq[SmallGroupSet]] with SelfValidating with BindListener with ImportSmallGroupSetsFromSpreadsheetRequest
 
 	type ModifySetCommand = ModifySmallGroupSetCommand.Command
 	type ModifyGroupCommand = ModifySmallGroupCommand.Command
