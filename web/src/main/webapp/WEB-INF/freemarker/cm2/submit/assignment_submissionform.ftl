@@ -89,16 +89,15 @@
 
 					<#if assignment.allowResubmission && (!assignment.closed || isExtended)>
 						<p class="very-subtle">
-							You can submit to this assignment multiple times up to the deadline. Only
-							the latest submission of your work will be accepted, and you will not be able
-							to change this once the deadline has passed.
+							You can resubmit your assignment multiple times until the deadline.
+							We only accept your latest submission.
+							You cannot resubmit work after the deadline.
 						</p>
 					</#if>
 
 					<#if assignment.allowLateSubmissions>
 						<p class="very-subtle">
-							You can submit<#if assignment.allowResubmission> once only</#if> to this assignment after the deadline, but your mark
-							may be affected.
+							If do not submit your assignment before the deadline, you can submit late work only once. Your mark may be affected.
 						</p>
 					</#if>
 				<#else>
