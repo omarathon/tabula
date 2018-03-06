@@ -125,12 +125,21 @@ sealed abstract class ExamGridColumn(state: ExamGridColumnState) {
 	val excelColumnWidth: Int
 }
 
-abstract class PerYearExamGridColumn(state: ExamGridColumnState) extends ExamGridColumn(state) {
-	def values: Map[ExamGridEntity, Map[YearOfStudy, Map[ExamGridColumnValueType, Seq[ExamGridColumnValue]]]]
+case class ExamGridColumnValues(values: Map[ExamGridColumnValueType, Seq[ExamGridColumnValue]], isEmpty: Boolean)
 
-	def isEmpty(entity: ExamGridEntity, year: YearOfStudy): Boolean = {
-		values.get(entity).flatMap(_.get(year)).forall(_.values.flatten.forall(_.isEmpty))
+abstract class PerYearExamGridColumn(state: ExamGridColumnState) extends ExamGridColumn(state) {
+
+	def values: Map[ExamGridEntity, Map[YearOfStudy, Map[ExamGridColumnValueType, Seq[ExamGridColumnValue]]]] = {
+		state.entities.map(entity =>
+			entity -> entity.validYears.map { case (academicYear, entityYear) =>
+				academicYear -> result(entityYear).values
+			}
+		).toMap
 	}
+
+	def isEmpty(entity: ExamGridEntity, year: YearOfStudy): Boolean = entity.validYears.get(year).forall(ey => result(ey).isEmpty)
+
+	def result(entity: ExamGridEntityYear): ExamGridColumnValues
 }
 
 abstract class ChosenYearExamGridColumn(state: ExamGridColumnState) extends ExamGridColumn(state) {
