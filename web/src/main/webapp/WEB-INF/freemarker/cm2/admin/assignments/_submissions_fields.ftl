@@ -35,7 +35,7 @@
 
 	<@bs3form.labelled_form_group path="">
 		<@bs3form.checkbox path="allowResubmission">
-			<@f.checkbox path="allowResubmission" id="allowResubmission" /> Allow students to re-submit work
+			<@f.checkbox path="allowResubmission" id="allowResubmission" /> Allow students to resubmit work
 		</@bs3form.checkbox>
 	<span class="help-block">
 		Select this option to allow students to submit new work, which replaces any previous submission.

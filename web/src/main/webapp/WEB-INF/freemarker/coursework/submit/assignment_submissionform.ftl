@@ -6,11 +6,11 @@
 
 	<#if submission??>
 		<hr>
-		<h2>Re-submit</h2>
+		<h2>Resubmit</h2>
 		<#if assignment.openEnded>
-			<p>You can still re-submit your work in case you've made a mistake.</p>
+			<p>You can still resubmit your work in case you've made a mistake.</p>
 		<#else>
-			<p>You can re-submit your work in case you've made a mistake,
+			<p>You can resubmit your work in case you've made a mistake,
 				<#if isExtended>
 					up until the end of your extension, <@fmt.date date=extension.expiryDate /> (in ${durationFormatter(extension.expiryDate)}).
 				<#else>
@@ -39,7 +39,7 @@
 
 				<h4>Your submission was not accepted</h4>
 
-				<p>Some of the information in your submission was not accepted. Please check the errors in red below and re-submit the form.</p>
+				<p>Some of the information in your submission was not accepted. Please check the errors in red below and resubmit the form.</p>
 			</div>
 
 			<script type="text/javascript">

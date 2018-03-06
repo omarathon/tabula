@@ -267,7 +267,7 @@
 				</a>
 
 				<a class="btn btn-block btn-default" href="<@routes.cm2.assignment assignment />#submittop">
-					Re-submit assignment
+					Resubmit assignment
 				</a>
 			<#elseif info.submission??>
 				<#-- View receipt -->
