@@ -63,6 +63,8 @@ class AssignmentAuditEventIndexQueryService extends AssignmentAuditQueryService
 object AssignmentAuditEvent {
 	// e.g. ModifyAssignmentOptions => Modify assignment options
 	private def toSentenceCase(string: String): String = StringUtils.capitalize(StringUtils.splitByCharacterTypeCamelCase(string).mkString(" ").toLowerCase)
+
+	private val IGNORED_FIELDS = Set("department", "assignment", "module")
 }
 
 case class AssignmentAuditEvent(event: AuditEvent, name: String, verbed: String) {
@@ -84,6 +86,7 @@ case class AssignmentAuditEvent(event: AuditEvent, name: String, verbed: String)
 	def date: DateTime = event.eventDate
 
 	def fields: Map[String, Any] = event.parsedData.getOrElse(Map.empty)
+		.filterNot { case (key, value) => IGNORED_FIELDS.contains(key) }
 		.collect {
 			case (key, value) if key.toLowerCase.contains("date") && value.isInstanceOf[Long] =>
 				(key, new DateTime(value.asInstanceOf[Long]))

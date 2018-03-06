@@ -46,7 +46,7 @@
 					<#list event.fieldPairs as field>
 						<#assign key=field._1() />
 						<#assign value=field._2() />
-						<#if event.fields[key]?? && key != "Assignment" && key != "Department" && key != "Module">
+						<#if event.fields[key]??>
 							<dt>${key}</dt>
 							<dd>
 								<#if value?is_sequence>
@@ -55,17 +55,15 @@
 											<li>${item}</li>
 										</#list>
 									</ul>
-								<#elseif value?is_hash && value.class.simpleName == "DateTime">
-									<p>
-										<@fmt.date value/>
-									</p>
-								<#elseif value?is_boolean>
-									<p>
-										${value?string("Yes", "No")}
-									</p>
 								<#else>
 									<p>
-										${value}
+										<#if value?is_hash && value.class.simpleName == "DateTime">
+											<@fmt.date value/>
+										<#elseif value?is_boolean>
+											${value?string("Yes", "No")}
+										<#else>
+											${value}
+										</#if>
 									</p>
 								</#if>
 							</dd>
