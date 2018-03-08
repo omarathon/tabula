@@ -20,6 +20,7 @@ trait AutowiringLevelServiceComponent extends LevelServiceComponent {
 
 trait LevelService {
 	def levelFromCode(code: String): Option[Level]
+	def getAllLevels: Seq[Level]
 }
 
 abstract class AbstractLevelService extends LevelService {
@@ -28,6 +29,7 @@ abstract class AbstractLevelService extends LevelService {
 	def levelFromCode(code: String): Option[Level] = code.maybeText.flatMap {
 		someCode => levelDao.getByCode(someCode.toLowerCase)
 	}
+	def getAllLevels: Seq[Level] =	levelDao.getAllLevels
 }
 
 @Service ("levelService")
