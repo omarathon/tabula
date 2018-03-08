@@ -44,21 +44,21 @@ class RouteRuleImporterImpl extends RouteRuleImporter with InitializingBean
 	override def getRouteRules: Seq[UpstreamRouteRule] = {
 		val rows = benchmarkTask("Fetch route rules") { routeRuleQuery.execute }
 		// Remove rows that have null entires that aren't allowed
-		val nonEmptyRows = rows.asScala.filter(r => r.routeCode.hasText && r.level.hasText && r.moduleListCode != null &&  r.moduleListCode.nonEmpty)
+		val nonEmptyRows = rows.asScala.filter(r => r.routeCode.hasText && r.levelCode.hasText && r.moduleListCode != null &&  r.moduleListCode.nonEmpty)
 		// Batch fetch the routes and module lists
 		val routeCodes = nonEmptyRows.map(_.routeCode).distinct
 		val moduleListCodes = nonEmptyRows.map(_.moduleListCode).distinct
 		val routes = transactional(readOnly = true) { courseAndRouteService.getRoutesByCodes(routeCodes) }
 		val moduleLists = transactional(readOnly = true) { upstreamModuleListService.findByCodes(moduleListCodes) }
 		// Remove rows that have invalid routes and module lists
-		val validRows: Seq[UpstreamRouteRuleRow] = nonEmptyRows.groupBy(r => (r.routeCode, r.level, r.moduleListCode))
+		val validRows: Seq[UpstreamRouteRuleRow] = nonEmptyRows.groupBy(r => (r.routeCode, r.levelCode, r.moduleListCode))
 			.filter { case((routeCode, level, moduleListCode), groupedRows) =>
 				routes.exists(_.code == routeCode) && levelService.levelFromCode(level).isDefined && moduleLists.exists(_.code == moduleListCode)
 			}.values.flatten.toSeq
 
-		validRows.groupBy(r => (r.routeCode, r.level, r.academicYear)).map { case((routeCode, level, academicYearOption), groupedRows) =>
+		validRows.groupBy(r => (r.routeCode, r.levelCode, r.academicYear)).map { case((routeCode, levelCode, academicYearOption), groupedRows) =>
 			val route = routes.find(_.code == routeCode).get
-			val rule = new UpstreamRouteRule(academicYearOption, route, level)
+			val rule = new UpstreamRouteRule(academicYearOption, route, levelCode)
 			rule.entries.addAll(groupedRows.map(row => new UpstreamRouteRuleEntry(
 				rule,
 				moduleLists.find(_.code == row.moduleListCode).get,
@@ -89,7 +89,7 @@ object RouteRuleImporter {
 	def GetRouteRules: String = """
 		select
 			pmr.pwy_code as route_code,
-			pmr.lev_code as level,
+			pmr.lev_code as level_code,
 			pmr.pmr_desc as description,
 	 		pmb.fmc_code as module_list,
 			pmb.pmb_min as min_cats,
@@ -102,7 +102,7 @@ object RouteRuleImporter {
 
 	case class UpstreamRouteRuleRow(
 		routeCode: String,
-		level: String,
+		levelCode: String,
 		academicYear: Option[AcademicYear],
 		moduleListCode: String,
 		minCats: Option[BigDecimal],
@@ -120,7 +120,7 @@ object RouteRuleImporter {
 			}.map(AcademicYear.parse)
 			UpstreamRouteRuleRow(
 				rs.getString("route_code").maybeText.map(_.toLowerCase).orNull,
-				rs.getString("level").maybeText.orNull,
+				rs.getString("level_code").maybeText.orNull,
 				academicYear,
 				rs.getString("module_list"),
 				Option(rs.getBigDecimal("min_cats")).map(BigDecimal.apply),
