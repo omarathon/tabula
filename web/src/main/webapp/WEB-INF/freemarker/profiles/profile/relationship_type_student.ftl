@@ -315,7 +315,7 @@
 
 								<#if (meeting.attachments?? && meeting.attachments?size > 0)>
 									<#assign mrDownloadUrl><@routes.profiles.download_meeting_record_attachment relationshipType meeting /></#assign>
-									<@fmt.download_attachments meeting.attachments mrDownloadUrl "for this meeting record" "${meeting.title?url}" />
+									<@fmt.download_attachments meeting.attachments mrDownloadUrl "for this meeting record" meeting.title?replace("/", "-")?url />
 								</#if>
 
 								<#if meeting.scheduled>

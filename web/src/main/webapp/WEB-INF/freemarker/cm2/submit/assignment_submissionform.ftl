@@ -1,11 +1,11 @@
 <#if ((canSubmit && !submission??) || canReSubmit) && submitAssignmentCommand??>
 	<#if submission??>
 		<hr>
-		<h2>Re-submit</h2>
+		<h2>Resubmit</h2>
 		<#if assignment.openEnded>
-			<p>You can still re-submit your work in case you've made a mistake.</p>
+			<p>You can still resubmit your work in case you've made a mistake.</p>
 		<#else>
-			<p>You can re-submit your work in case you've made a mistake,
+			<p>You can resubmit your work in case you've made a mistake,
 				<#if isExtended>
 					up until the end of your extension, <@fmt.date date=extension.expiryDate /> (in ${durationFormatter(extension.expiryDate)}).
 				<#else>
@@ -34,7 +34,7 @@
 
 				<h4>Your submission was not accepted</h4>
 
-				<p>Some of the information in your submission was not accepted. Please check the errors in red below and re-submit the form.</p>
+				<p>Some of the information in your submission was not accepted. Please check the errors in red below and resubmit the form.</p>
 			</div>
 
 			<script type="text/javascript">
@@ -89,16 +89,15 @@
 
 					<#if assignment.allowResubmission && (!assignment.closed || isExtended)>
 						<p class="very-subtle">
-							You can submit to this assignment multiple times up to the deadline. Only
-							the latest submission of your work will be accepted, and you will not be able
-							to change this once the deadline has passed.
+							You can resubmit your assignment multiple times until the deadline.
+							We only accept your latest submission.
+							You cannot resubmit work after the deadline.
 						</p>
 					</#if>
 
 					<#if assignment.allowLateSubmissions>
 						<p class="very-subtle">
-							You can submit<#if assignment.allowResubmission> once only</#if> to this assignment after the deadline, but your mark
-							may be affected.
+							If do not submit your assignment before the deadline, you can submit late work only once. Your mark may be affected.
 						</p>
 					</#if>
 				<#else>

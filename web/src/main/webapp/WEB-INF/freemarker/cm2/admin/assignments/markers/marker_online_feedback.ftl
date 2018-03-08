@@ -1,7 +1,9 @@
 <#import "*/marking_macros.ftl" as marking_macros />
 
+<#assign any_content=false/>
 <div class="online-marking">
 	<#if command.assignment.collectSubmissions || command.previousMarkerFeedback?has_content>
+		<#assign any_content=true/>
 		<div class="details">
 			<ul class="nav nav-tabs" role="tablist">
 				<#if command.assignment.collectSubmissions>
@@ -31,7 +33,14 @@
 		</div>
 	</#if>
 	<#if command.currentMarkerFeedback?has_content>
+		<#assign any_content=true/>
 		<#include "_marker_feedback.ftl" />
+	</#if>
+
+	<#if !any_content>
+		<p>
+			This submission is not yet ready for you to ${command.stage.verb}.
+		</p>
 	</#if>
 </div>
 

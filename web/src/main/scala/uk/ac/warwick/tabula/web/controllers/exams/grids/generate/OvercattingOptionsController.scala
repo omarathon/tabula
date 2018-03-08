@@ -161,7 +161,7 @@ class OvercattingOptionsView(
 		routeRulesLookup = null, // Not used
 		academicYear = academicYear,
 		yearOfStudy = scyd.yearOfStudy,
-		showFullName = false,
+		nameToShow = ExamGridStudentIdentificationColumnValue.BothName,
 		showComponentMarks = false,
 		showModuleNames = false
 	)

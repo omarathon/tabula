@@ -58,10 +58,10 @@ class NameColumnOption extends StudentExamGridColumnOption {
 
 	}
 
-	override def getColumns(state: ExamGridColumnState): Seq[ChosenYearExamGridColumn] = if (state.showFullName) {
-		Seq(FullNameColumn(state))
-	} else {
-		Seq(FirstNameColumn(state), LastNameColumn(state))
+	override def getColumns(state: ExamGridColumnState): Seq[ChosenYearExamGridColumn] =  state.nameToShow match {
+		case ExamGridStudentIdentificationColumnValue.FullName => Seq(FullNameColumn(state))
+		case ExamGridStudentIdentificationColumnValue.BothName	=> Seq(FirstNameColumn(state), LastNameColumn(state))
+		case _ => Seq()
 	}
 
 }
@@ -92,7 +92,8 @@ class UniversityIDColumnOption extends StudentExamGridColumnOption {
 					case Some(dtls) if dtls.isFresh =>
 						val componentLink = Routes.Grids.assessmentdetails(dtls)
 						entity ->
-							ExamGridColumnValueStringHtmlOnly(
+							ExamGridColumnValueStringWithHtml(
+								entity.universityId,
 								s"""<a href="$componentLink" target="_blank">${entity.universityId}</a>"""
 							)
 					case _	=>  entity -> ExamGridColumnValueString(entity.universityId)

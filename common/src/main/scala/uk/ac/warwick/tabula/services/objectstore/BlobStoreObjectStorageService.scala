@@ -31,7 +31,6 @@ class BlobStoreObjectStorageService(blobStoreContext: BlobStoreContext, objectCo
 
 	override def keyExists(key: String): Boolean = blobStore.blobExists(objectContainerName, key)
 
-	private def blob(key: String) = key.maybeText.flatMap { k => Option(blobStore.getBlob(objectContainerName, k)) }
 	private def metadata(key: String) = key.maybeText.flatMap { k => Option(blobStore.blobMetadata(objectContainerName, k)) }
 
 	override def push(key: String, in: ByteSource, metadata: ObjectStorageService.Metadata): Unit = benchmark(s"Push file for key $key", level = Logging.Level.Debug) {
@@ -74,7 +73,7 @@ class BlobStoreObjectStorageService(blobStoreContext: BlobStoreContext, objectCo
 	protected def putBlob(blob: Blob, metadata: ObjectStorageService.Metadata): String = blobStore.putBlob(objectContainerName, blob)
 
 	override def fetch(key: String): RichByteSource = benchmark(s"Fetch key $key", level = Logging.Level.Debug) {
-		RichByteSource(blob(key), metadata(key))
+		new BlobBackedRichByteSource(blobStore, objectContainerName, key, metadata(key))
 	}
 
 	def delete(key: String): Unit = benchmark(s"Deleting key $key", level = Logging.Level.Debug) {

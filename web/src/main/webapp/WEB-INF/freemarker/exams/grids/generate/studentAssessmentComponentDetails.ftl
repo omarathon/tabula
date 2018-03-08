@@ -4,9 +4,8 @@
 		<#return selectCourseCommand />
 	</#function>
 	<div class="exam-grid-preview">
-		<@fmt.id7_deptheader title="Create a new exam grid for ${studentCourseDetails.department.name}" route_function=route_function />
-		<!--TODO If grids are annon then we need to hide name .-->
-		<h2> ${member.fullName!}</h2>
+		<@fmt.id7_deptheader title="Create a new exam grid for ${department.name}" route_function=route_function />
+		<#if department.examGridOptions.nameToShow.toString != 'none'><h2>${member.fullName!}</h2></#if>
 		<h3> ${member.universityId}</h3>
 		<div class="key clearfix">
 			<table class="table table-condensed">

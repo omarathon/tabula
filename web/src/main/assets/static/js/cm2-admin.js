@@ -142,19 +142,38 @@
 		});
 
 		// extension management - on submit replace html with validation errors or redirect
+		$body.on('click', 'form.modify-extension button:submit', function () {
+			$(this).closest('form').data('buttonClicked', {
+				name: $(this).attr('name'),
+				value: $(this).val()
+			});
+		});
+
 		$body.on('submit', 'form.modify-extension', function(e){
 			e.preventDefault();
 			var $form = $(e.target);
-			var $detailRow = $form.closest('.content-container,.detailrow-container');
+			var $detailRow = $form.closest('.content-container, .detailrow-container');
 			var formData = $form.serializeArray();
-			var $buttonClicked =  $(document.activeElement);
-			formData.push({ name: $buttonClicked.attr('name'), value: $buttonClicked.val() });
-			$.post($form.attr('action'), formData, function(data) {
-				if (data.success) {
-					window.location.replace(data.redirect);
-				} else {
-					$detailRow.html(data);
-					$detailRow.bindFormHelpers();
+
+			var buttonClicked = $form.data('buttonClicked');
+			if (buttonClicked) {
+				formData.push(buttonClicked);
+				$form.data('buttonClicked', null);
+			}
+
+			$.post({
+				url: $form.attr('action'),
+				data: formData,
+				success: function (data) {
+					if (data.success) {
+						window.location.replace(data.redirect);
+					} else {
+						$detailRow.html(data);
+						$detailRow.bindFormHelpers();
+					}
+				},
+				error: function (xhr) {
+					$detailRow.html(xhr.responseText);
 				}
 			});
 		});
@@ -398,7 +417,7 @@
 					// reset if empty
 					$detailrow.collapse("hide");
 					$detailrow.data('loaded', false);
-					$container.html("<p>No data is currently available. Please check that you are signed in.</p>");
+					$container.html('<span class="text-muted"><i class="fa fa-spinner fa-spin"></i> Loading&hellip;</span>');
 					successCallback($container);
 				} else {
 					$container.html(result);

@@ -442,7 +442,7 @@ class GenerateExamGridController extends ExamsController
 			routeRulesLookup = routeRulesLookup,
 			academicYear = selectCourseCommand.academicYear,
 			yearOfStudy = selectCourseCommand.yearOfStudy,
-			showFullName = gridOptionsCommand.showFullName,
+			nameToShow = gridOptionsCommand.nameToShow,
 			showComponentMarks = gridOptionsCommand.showComponentMarks,
 			showModuleNames = gridOptionsCommand.showModuleNames
 		)

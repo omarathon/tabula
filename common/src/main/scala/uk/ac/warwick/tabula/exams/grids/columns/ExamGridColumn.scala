@@ -6,6 +6,8 @@ import uk.ac.warwick.tabula.commands.exams.grids.{ExamGridEntity, ExamGridEntity
 import uk.ac.warwick.tabula.data.model.StudentCourseYearDetails.YearOfStudy
 import uk.ac.warwick.tabula.data.model._
 import uk.ac.warwick.tabula.services.exams.grids.NormalLoadLookup
+import uk.ac.warwick.tabula.system.TwoWayConverter
+import uk.ac.warwick.tabula.helpers.StringUtils._
 
 object ExamGridColumnOption {
 	type Identifier = String
@@ -50,6 +52,33 @@ object ExamGridColumnOption {
 	}
 }
 
+sealed abstract class ExamGridStudentIdentificationColumnValue(val value: String, val description: String) {
+	override def toString: String = value
+}
+
+object ExamGridStudentIdentificationColumnValue {
+	val Default = FullName
+	case object NoName  extends ExamGridStudentIdentificationColumnValue("none", "No name")
+	case object FullName extends ExamGridStudentIdentificationColumnValue("full", "Official name")
+	case object BothName extends ExamGridStudentIdentificationColumnValue("both", "First and last name")
+
+	def fromCode(code: String): ExamGridStudentIdentificationColumnValue =
+		if (code == null) null
+		else allValues.find{_.value == code} match {
+			case Some(identificationType) => identificationType
+			case None => throw new IllegalArgumentException()
+		}
+
+	def allValues : Seq[ExamGridStudentIdentificationColumnValue] = Seq(NoName, FullName, BothName)
+
+	def apply(value:String): ExamGridStudentIdentificationColumnValue = fromCode(value)
+}
+
+class StringToExamGridStudentIdentificationColumnValue extends TwoWayConverter[String, ExamGridStudentIdentificationColumnValue] {
+	override def convertRight(source: String): ExamGridStudentIdentificationColumnValue = source.maybeText.map(ExamGridStudentIdentificationColumnValue.fromCode).getOrElse(throw new IllegalArgumentException)
+	override def convertLeft(source: ExamGridStudentIdentificationColumnValue): String = Option(source).map { _.value }.orNull
+}
+
 case class ExamGridColumnState(
 	entities: Seq[ExamGridEntity],
 	overcatSubsets: Map[ExamGridEntityYear, Seq[(BigDecimal, Seq[ModuleRegistration])]],
@@ -58,13 +87,13 @@ case class ExamGridColumnState(
 	routeRulesLookup: UpstreamRouteRuleLookup,
 	academicYear: AcademicYear,
 	yearOfStudy: Int,
-	showFullName: Boolean,
+	nameToShow: ExamGridStudentIdentificationColumnValue,
 	showComponentMarks: Boolean,
 	showModuleNames: Boolean
 )
 
 case object EmptyExamGridColumnState {
-	def apply() = ExamGridColumnState(Nil,Map.empty,null,null,null,null,0,showFullName=true,showComponentMarks=false,showModuleNames=true)
+	def apply() = ExamGridColumnState(Nil,Map.empty,null,null,null,null,0,nameToShow=ExamGridStudentIdentificationColumnValue.FullName,showComponentMarks=false,showModuleNames=true)
 }
 
 @Component
@@ -96,12 +125,21 @@ sealed abstract class ExamGridColumn(state: ExamGridColumnState) {
 	val excelColumnWidth: Int
 }
 
-abstract class PerYearExamGridColumn(state: ExamGridColumnState) extends ExamGridColumn(state) {
-	def values: Map[ExamGridEntity, Map[YearOfStudy, Map[ExamGridColumnValueType, Seq[ExamGridColumnValue]]]]
+case class ExamGridColumnValues(values: Map[ExamGridColumnValueType, Seq[ExamGridColumnValue]], isEmpty: Boolean)
 
-	def isEmpty(entity: ExamGridEntity, year: YearOfStudy): Boolean = {
-		values.get(entity).flatMap(_.get(year)).forall(_.values.flatten.forall(_.isEmpty))
+abstract class PerYearExamGridColumn(state: ExamGridColumnState) extends ExamGridColumn(state) {
+
+	def values: Map[ExamGridEntity, Map[YearOfStudy, Map[ExamGridColumnValueType, Seq[ExamGridColumnValue]]]] = {
+		state.entities.map(entity =>
+			entity -> entity.validYears.map { case (academicYear, entityYear) =>
+				academicYear -> result(entityYear).values
+			}
+		).toMap
 	}
+
+	def isEmpty(entity: ExamGridEntity, year: YearOfStudy): Boolean = entity.validYears.get(year).forall(ey => result(ey).isEmpty)
+
+	def result(entity: ExamGridEntityYear): ExamGridColumnValues
 }
 
 abstract class ChosenYearExamGridColumn(state: ExamGridColumnState) extends ExamGridColumn(state) {

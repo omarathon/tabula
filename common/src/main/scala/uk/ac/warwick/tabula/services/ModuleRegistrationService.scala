@@ -76,7 +76,7 @@ abstract class AbstractModuleRegistrationService extends ModuleRegistrationServi
 			val cats: BigDecimal = Option(mr.cats).map(c => BigDecimal(c)).orNull
 			(mark, cats)
 		}).filter{case(mark, cats) => mark != null & cats != null}
-		if (nonNullReplacedMarksAndCats.nonEmpty && nonNullReplacedMarksAndCats.size == moduleRegistrations.size) {
+		if (nonNullReplacedMarksAndCats.nonEmpty && nonNullReplacedMarksAndCats.size == moduleRegistrations.filterNot(_.passFail).size) {
 			Right(
 				(nonNullReplacedMarksAndCats.map{case(mark, cats) => mark * cats}.sum / nonNullReplacedMarksAndCats.map{case(_, cats) => cats}.sum)
 					.setScale(1, RoundingMode.HALF_UP)

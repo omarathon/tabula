@@ -83,11 +83,11 @@ so that they can be passed around between requests.
 					<@form.field>
 						<label class="checkbox">
 							<@f.checkbox path="allowResubmission" />
-							Allow students to re-submit work
+							Allow students to resubmit work
 						</label>
 						<div class="help-block">
 							Students will be able to submit new work, replacing any previous submission.
-							Re-submission is <em>never</em> allowed after the close date.
+							Resubmission is <em>never</em> allowed after the close date.
 						</div>
 					</@form.field>
 				</@form.row>

@@ -8,11 +8,12 @@ import org.apache.poi.xssf.streaming.SXSSFWorkbook
 import org.apache.poi.xssf.usermodel.{XSSFColor, XSSFFont}
 import org.joda.time.DateTime
 import uk.ac.warwick.tabula.AcademicYear
+import uk.ac.warwick.tabula.commands.TaskBenchmarking
 import uk.ac.warwick.tabula.data.model._
 import uk.ac.warwick.tabula.exams.grids.columns._
 import uk.ac.warwick.tabula.services.exams.grids.NormalLoadLookup
 
-object GenerateExamGridExporter {
+object GenerateExamGridExporter extends TaskBenchmarking {
 
 	import ExamGridExportStyles._
 
@@ -67,32 +68,34 @@ object GenerateExamGridExporter {
 		var categoryRowMaxCellWidth = 0
 		var headerRowMaxCellWidth = 0
 
-		leftColumns.foreach(leftColumn => {
-			// Nothing in year row
-			// Nothing in category row
-			// Header row
-			val headerCell = headerRow.createCell(currentColumnIndex)
-			headerCell.setCellValue(leftColumn.title)
-			headerCell.setCellStyle(cellStyleMap(Header))
-			if (!leftColumn.isInstanceOf[HasExamGridColumnSecondaryValue]) {
-				// rowspan = 2
-				sheet.addMergedRegion(new CellRangeAddress(headerCell.getRowIndex, headerCell.getRowIndex + 1, headerCell.getColumnIndex, headerCell.getColumnIndex))
-			}
-			// Nothing in secondary value row
-			// Entity rows
-			entities.foreach(entity =>
-				if (chosenYearColumnValues.get(leftColumn).exists(_.get(entity).isDefined)) {
-					val entityCell = entityRows(entity)(ExamGridColumnValueType.Overall).createCell(currentColumnIndex)
-					chosenYearColumnValues(leftColumn)(entity).populateCell(entityCell, cellStyleMap)
-					if (showComponentMarks) {
-						sheet.addMergedRegion(new CellRangeAddress(entityCell.getRowIndex, entityCell.getRowIndex + 2, entityCell.getColumnIndex, entityCell.getColumnIndex))
-					}
+		benchmarkTask("leftColumns") {
+			leftColumns.foreach(leftColumn => {
+				// Nothing in year row
+				// Nothing in category row
+				// Header row
+				val headerCell = headerRow.createCell(currentColumnIndex)
+				headerCell.setCellValue(leftColumn.title)
+				headerCell.setCellStyle(cellStyleMap(Header))
+				if (!leftColumn.isInstanceOf[HasExamGridColumnSecondaryValue]) {
+					// rowspan = 2
+					sheet.addMergedRegion(new CellRangeAddress(headerCell.getRowIndex, headerCell.getRowIndex + 1, headerCell.getColumnIndex, headerCell.getColumnIndex))
 				}
-			)
-			// And finally...
-			sheet.setColumnWidth(currentColumnIndex, leftColumn.excelColumnWidth)
-			currentColumnIndex = currentColumnIndex + 1
-		})
+				// Nothing in secondary value row
+				// Entity rows
+				entities.foreach(entity =>
+					if (chosenYearColumnValues.get(leftColumn).exists(_.get(entity).isDefined)) {
+						val entityCell = entityRows(entity)(ExamGridColumnValueType.Overall).createCell(currentColumnIndex)
+						chosenYearColumnValues(leftColumn)(entity).populateCell(entityCell, cellStyleMap)
+						if (showComponentMarks) {
+							sheet.addMergedRegion(new CellRangeAddress(entityCell.getRowIndex, entityCell.getRowIndex + 2, entityCell.getColumnIndex, entityCell.getColumnIndex))
+						}
+					}
+				)
+				// And finally...
+				sheet.setColumnWidth(currentColumnIndex, leftColumn.excelColumnWidth)
+				currentColumnIndex = currentColumnIndex + 1
+			})
+		}
 
 		if (!showComponentMarks) {
 			// Add a spacer
@@ -100,33 +103,112 @@ object GenerateExamGridExporter {
 			currentColumnIndex = currentColumnIndex + 1
 		}
 
-		perYearColumns.keys.toSeq.sorted(yearOrder).foreach(year => {
-			if (showComponentMarks) {
-				entityRows.foreach { case (_, rowMap) => rowMap.foreach { case (valueType, row) =>
-					val cell = row.createCell(currentColumnIndex)
-					cell.setCellValue(valueType.label)
-				}}
-				sheet.setColumnWidth(currentColumnIndex, ExamGridColumnOption.ExcelColumnSizes.Spacer)
-				currentColumnIndex = currentColumnIndex + 1
-			}
+		benchmarkTask("perYearColumns") {
+			perYearColumns.keys.toSeq.sorted(yearOrder).foreach(year => {
+				if (showComponentMarks) {
+					entityRows.foreach { case (_, rowMap) => rowMap.foreach { case (valueType, row) =>
+						val cell = row.createCell(currentColumnIndex)
+						cell.setCellValue(valueType.label)
+					}
+					}
+					sheet.setColumnWidth(currentColumnIndex, ExamGridColumnOption.ExcelColumnSizes.Spacer)
+					currentColumnIndex = currentColumnIndex + 1
+				}
 
-			// Year row
-			val yearCell = yearRow.createCell(currentColumnIndex)
-			yearCell.setCellValue(s"Year $year")
-			yearCell.setCellStyle(cellStyleMap(Header))
+				// Year row
+				val yearCell = yearRow.createCell(currentColumnIndex)
+				yearCell.setCellValue(s"Year $year")
+				yearCell.setCellStyle(cellStyleMap(Header))
 
-			val startColumn = yearCell.getColumnIndex
-			val endColumn = yearCell.getColumnIndex + Math.max(perYearColumns(year).size - 1, 0)
+				val startColumn = yearCell.getColumnIndex
+				val endColumn = yearCell.getColumnIndex + Math.max(perYearColumns(year).size - 1, 0)
 
-			if (endColumn > startColumn)
-				sheet.addMergedRegion(new CellRangeAddress(yearCell.getRowIndex, yearCell.getRowIndex, startColumn, endColumn))
+				if (endColumn > startColumn)
+					sheet.addMergedRegion(new CellRangeAddress(yearCell.getRowIndex, yearCell.getRowIndex, startColumn, endColumn))
 
+				var currentCategory = ""
+				perYearColumns(year).foreach(perYearColumn => {
+					// Category row
+					perYearColumn match {
+						case hasCategory: HasExamGridColumnCategory if hasCategory.category != currentCategory =>
+							currentCategory = hasCategory.category
+							val categoryCell = categoryRow.createCell(currentColumnIndex)
+							categoryCell.setCellValue(hasCategory.category)
+							sheet.autoSizeColumn(currentColumnIndex)
+							categoryRowMaxCellWidth = Math.max(categoryRowMaxCellWidth, sheet.getColumnWidth(currentColumnIndex))
+							categoryCell.setCellStyle(cellStyleMap(HeaderRotated))
+
+							// Guard against trying to create a merged region with only one cell in it
+							val startColumn = categoryCell.getColumnIndex
+							val endColumn = categoryCell.getColumnIndex + perYearColumnCategories(year)(hasCategory.category).size - 1
+
+							if (endColumn > startColumn)
+								sheet.addMergedRegion(new CellRangeAddress(categoryCell.getRowIndex, categoryCell.getRowIndex, startColumn, endColumn))
+						case _ =>
+					}
+					// Header row
+					val headerCell = headerRow.createCell(currentColumnIndex)
+					headerCell.setCellValue(perYearColumn.title)
+					headerRowMaxCellWidth = Math.max(headerRowMaxCellWidth, sheet.getColumnWidth(currentColumnIndex))
+
+					if (perYearColumn.boldTitle)
+						headerCell.setCellStyle(cellStyleMap(HeaderRotated))
+					else
+						headerCell.setCellStyle(cellStyleMap(Rotated))
+
+					if (!perYearColumn.isInstanceOf[HasExamGridColumnCategory]) {
+						// rowspan = 2
+						sheet.addMergedRegion(new CellRangeAddress(headerCell.getRowIndex, headerCell.getRowIndex + 1, headerCell.getColumnIndex, headerCell.getColumnIndex))
+					}
+					// Secondary value row
+					perYearColumn match {
+						case hasSecondaryValue: HasExamGridColumnSecondaryValue =>
+							val secondaryValueCell = secondaryValueRow.createCell(currentColumnIndex)
+							secondaryValueCell.setCellValue(hasSecondaryValue.secondaryValue)
+						case _ =>
+					}
+					// Entity rows
+					entities.foreach(entity =>
+						if (perYearColumnValues.get(perYearColumn).exists(_.get(entity).exists(_.get(year).isDefined))) {
+							if (showComponentMarks) {
+								val overallCell = entityRows(entity)(ExamGridColumnValueType.Overall).createCell(currentColumnIndex)
+								perYearColumnValues(perYearColumn)(entity)(year)(ExamGridColumnValueType.Overall).head.populateCell(overallCell, cellStyleMap)
+								val assignmentCell = entityRows(entity)(ExamGridColumnValueType.Assignment).createCell(currentColumnIndex)
+								ExamGridColumnValue.merge(perYearColumnValues(perYearColumn)(entity)(year)(ExamGridColumnValueType.Assignment)).populateCell(assignmentCell, cellStyleMap)
+								val examsCell = entityRows(entity)(ExamGridColumnValueType.Exam).createCell(currentColumnIndex)
+								ExamGridColumnValue.merge(perYearColumnValues(perYearColumn)(entity)(year)(ExamGridColumnValueType.Exam)).populateCell(examsCell, cellStyleMap)
+							} else {
+								val entityCell = entityRows(entity)(ExamGridColumnValueType.Overall).createCell(currentColumnIndex)
+								perYearColumnValues(perYearColumn)(entity)(year)(ExamGridColumnValueType.Overall).head.populateCell(entityCell, cellStyleMap)
+							}
+						}
+					)
+					// And finally...
+					sheet.setColumnWidth(currentColumnIndex, perYearColumn.excelColumnWidth)
+					currentColumnIndex = currentColumnIndex + 1
+				})
+
+				if (perYearColumns(year).isEmpty) {
+					currentColumnIndex = currentColumnIndex + 1
+				}
+
+				if (!showComponentMarks || perYearColumns.keys.toSeq.sorted(yearOrder).last == year) {
+					// Add a spacer after each year
+					sheet.setColumnWidth(currentColumnIndex, ExamGridColumnOption.ExcelColumnSizes.Spacer)
+					currentColumnIndex = currentColumnIndex + 1
+				}
+			})
+		}
+
+		benchmarkTask("rightColumns") {
 			var currentCategory = ""
-			perYearColumns(year).foreach(perYearColumn => {
+			rightColumns.foreach(rightColumn => {
+				// Nothing in year row
 				// Category row
-				perYearColumn match {
+				rightColumn match {
 					case hasCategory: HasExamGridColumnCategory if hasCategory.category != currentCategory =>
 						currentCategory = hasCategory.category
+
 						val categoryCell = categoryRow.createCell(currentColumnIndex)
 						categoryCell.setCellValue(hasCategory.category)
 						sheet.autoSizeColumn(currentColumnIndex)
@@ -135,7 +217,7 @@ object GenerateExamGridExporter {
 
 						// Guard against trying to create a merged region with only one cell in it
 						val startColumn = categoryCell.getColumnIndex
-						val endColumn = categoryCell.getColumnIndex + perYearColumnCategories(year)(hasCategory.category).size - 1
+						val endColumn = categoryCell.getColumnIndex + chosenYearColumnCategories(hasCategory.category).size - 1
 
 						if (endColumn > startColumn)
 							sheet.addMergedRegion(new CellRangeAddress(categoryCell.getRowIndex, categoryCell.getRowIndex, startColumn, endColumn))
@@ -143,20 +225,19 @@ object GenerateExamGridExporter {
 				}
 				// Header row
 				val headerCell = headerRow.createCell(currentColumnIndex)
-				headerCell.setCellValue(perYearColumn.title)
-				headerRowMaxCellWidth = Math.max(headerRowMaxCellWidth, sheet.getColumnWidth(currentColumnIndex))
+				headerCell.setCellValue(rightColumn.title)
 
-				if(perYearColumn.boldTitle)
+				if (rightColumn.boldTitle)
 					headerCell.setCellStyle(cellStyleMap(HeaderRotated))
 				else
 					headerCell.setCellStyle(cellStyleMap(Rotated))
 
-				if (!perYearColumn.isInstanceOf[HasExamGridColumnCategory]) {
+				if (!rightColumn.isInstanceOf[HasExamGridColumnSecondaryValue]) {
 					// rowspan = 2
 					sheet.addMergedRegion(new CellRangeAddress(headerCell.getRowIndex, headerCell.getRowIndex + 1, headerCell.getColumnIndex, headerCell.getColumnIndex))
 				}
 				// Secondary value row
-				perYearColumn match {
+				rightColumn match {
 					case hasSecondaryValue: HasExamGridColumnSecondaryValue =>
 						val secondaryValueCell = secondaryValueRow.createCell(currentColumnIndex)
 						secondaryValueCell.setCellValue(hasSecondaryValue.secondaryValue)
@@ -164,92 +245,19 @@ object GenerateExamGridExporter {
 				}
 				// Entity rows
 				entities.foreach(entity =>
-					if (perYearColumnValues.get(perYearColumn).exists(_.get(entity).exists(_.get(year).isDefined))) {
+					if (chosenYearColumnValues.get(rightColumn).exists(_.get(entity).isDefined)) {
+						val entityCell = entityRows(entity)(ExamGridColumnValueType.Overall).createCell(currentColumnIndex)
+						chosenYearColumnValues(rightColumn)(entity).populateCell(entityCell, cellStyleMap)
 						if (showComponentMarks) {
-							val overallCell = entityRows(entity)(ExamGridColumnValueType.Overall).createCell(currentColumnIndex)
-							perYearColumnValues(perYearColumn)(entity)(year)(ExamGridColumnValueType.Overall).head.populateCell(overallCell, cellStyleMap)
-							val assignmentCell = entityRows(entity)(ExamGridColumnValueType.Assignment).createCell(currentColumnIndex)
-							ExamGridColumnValue.merge(perYearColumnValues(perYearColumn)(entity)(year)(ExamGridColumnValueType.Assignment)).populateCell(assignmentCell, cellStyleMap)
-							val examsCell = entityRows(entity)(ExamGridColumnValueType.Exam).createCell(currentColumnIndex)
-							ExamGridColumnValue.merge(perYearColumnValues(perYearColumn)(entity)(year)(ExamGridColumnValueType.Exam)).populateCell(examsCell, cellStyleMap)
-						} else {
-							val entityCell = entityRows(entity)(ExamGridColumnValueType.Overall).createCell(currentColumnIndex)
-							perYearColumnValues(perYearColumn)(entity)(year)(ExamGridColumnValueType.Overall).head.populateCell(entityCell, cellStyleMap)
+							sheet.addMergedRegion(new CellRangeAddress(entityCell.getRowIndex, entityCell.getRowIndex + 2, entityCell.getColumnIndex, entityCell.getColumnIndex))
 						}
 					}
 				)
 				// And finally...
-				sheet.setColumnWidth(currentColumnIndex, perYearColumn.excelColumnWidth)
+				sheet.setColumnWidth(currentColumnIndex, rightColumn.excelColumnWidth)
 				currentColumnIndex = currentColumnIndex + 1
 			})
-
-			if (perYearColumns(year).isEmpty) {
-				currentColumnIndex = currentColumnIndex + 1
-			}
-
-			if (!showComponentMarks || perYearColumns.keys.toSeq.sorted(yearOrder).last == year) {
-				// Add a spacer after each year
-				sheet.setColumnWidth(currentColumnIndex, ExamGridColumnOption.ExcelColumnSizes.Spacer)
-				currentColumnIndex = currentColumnIndex + 1
-			}
-		})
-
-		var currentCategory = ""
-		rightColumns.foreach(rightColumn => {
-			// Nothing in year row
-			// Category row
-			rightColumn match {
-				case hasCategory: HasExamGridColumnCategory if hasCategory.category != currentCategory =>
-					currentCategory = hasCategory.category
-
-					val categoryCell = categoryRow.createCell(currentColumnIndex)
-					categoryCell.setCellValue(hasCategory.category)
-					sheet.autoSizeColumn(currentColumnIndex)
-					categoryRowMaxCellWidth = Math.max(categoryRowMaxCellWidth, sheet.getColumnWidth(currentColumnIndex))
-					categoryCell.setCellStyle(cellStyleMap(HeaderRotated))
-
-					// Guard against trying to create a merged region with only one cell in it
-					val startColumn = categoryCell.getColumnIndex
-					val endColumn = categoryCell.getColumnIndex + chosenYearColumnCategories(hasCategory.category).size - 1
-
-					if (endColumn > startColumn)
-						sheet.addMergedRegion(new CellRangeAddress(categoryCell.getRowIndex, categoryCell.getRowIndex, startColumn, endColumn))
-				case _ =>
-			}
-			// Header row
-			val headerCell = headerRow.createCell(currentColumnIndex)
-			headerCell.setCellValue(rightColumn.title)
-
-			if(rightColumn.boldTitle)
-				headerCell.setCellStyle(cellStyleMap(HeaderRotated))
-			else
-				headerCell.setCellStyle(cellStyleMap(Rotated))
-
-			if (!rightColumn.isInstanceOf[HasExamGridColumnSecondaryValue]) {
-				// rowspan = 2
-				sheet.addMergedRegion(new CellRangeAddress(headerCell.getRowIndex, headerCell.getRowIndex + 1, headerCell.getColumnIndex, headerCell.getColumnIndex))
-			}
-			// Secondary value row
-			rightColumn match {
-				case hasSecondaryValue: HasExamGridColumnSecondaryValue =>
-					val secondaryValueCell = secondaryValueRow.createCell(currentColumnIndex)
-					secondaryValueCell.setCellValue(hasSecondaryValue.secondaryValue)
-				case _ =>
-			}
-			// Entity rows
-			entities.foreach(entity =>
-				if (chosenYearColumnValues.get(rightColumn).exists(_.get(entity).isDefined)) {
-					val entityCell = entityRows(entity)(ExamGridColumnValueType.Overall).createCell(currentColumnIndex)
-					chosenYearColumnValues(rightColumn)(entity).populateCell(entityCell, cellStyleMap)
-					if (showComponentMarks) {
-						sheet.addMergedRegion(new CellRangeAddress(entityCell.getRowIndex, entityCell.getRowIndex + 2, entityCell.getColumnIndex, entityCell.getColumnIndex))
-					}
-				}
-			)
-			// And finally...
-			sheet.setColumnWidth(currentColumnIndex, rightColumn.excelColumnWidth)
-			currentColumnIndex = currentColumnIndex + 1
-		})
+		}
 
 		categoryRow.setHeight(Math.min(4000, categoryRowMaxCellWidth * 0.5).toShort)
 		headerRow.setHeight(Math.min(4000, headerRowMaxCellWidth * 0.5).toShort)

@@ -35,9 +35,9 @@ class ImportModuleRegistrationsCommandTest extends PersistenceTestBase with Mock
 		madService.getModuleBySitsCode("AX101-30") returns Some(mod)
 
 		val modRegRow1 = new ModuleRegistrationRow(scd.scjCode, "AX101-30", cats, "A", "C", occurrence, "13/14",
-			Some(new JBigDecimal("90.0")), "A", Some(new JBigDecimal("90.0")), "A")
+			Some(new JBigDecimal("90.0")), "A", Some(new JBigDecimal("90.0")), "A", "PF")
 		val modRegRow2 = new ModuleRegistrationRow(scd.scjCode, "AX101-30", cats, "A", "O", occurrence, "13/14",
-			Some(new JBigDecimal("50.0")), "C", Some(new JBigDecimal("50.0")), "C")
+			Some(new JBigDecimal("50.0")), "C", Some(new JBigDecimal("50.0")), "C", "WAR")
 
 		val scdDao: StudentCourseDetailsDao = smartMock[StudentCourseDetailsDao]
 		scdDao.getByScjCode("0000001/1") returns Some(scd)
@@ -67,6 +67,7 @@ class ImportModuleRegistrationsCommandTest extends PersistenceTestBase with Mock
 			newModRegs.head.selectionStatus.description should be ("Core")
 			newModRegs.head.studentCourseDetails should be (scd)
 			newModRegs.head.lastUpdatedDate.getDayOfMonth should be (LocalDate.now.getDayOfMonth)
+			newModRegs.head.passFail should be {true}
 
 			// now reset the last updated date to 10 days ago:
 			val tenDaysAgo: DateTime = DateTime.now.minusDays(10)

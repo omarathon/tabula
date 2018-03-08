@@ -14,7 +14,7 @@ import uk.ac.warwick.tabula.data.model.groups.{SmallGroupAllocationMethod, WeekR
 import uk.ac.warwick.tabula.data.model.markingworkflow.CM2MarkingWorkflow
 import uk.ac.warwick.tabula.data.model.permissions.{CustomRoleDefinition, DepartmentGrantedRole}
 import uk.ac.warwick.tabula.data.{AliasAndJoinType, PostLoadBehaviour, ScalaRestriction}
-import uk.ac.warwick.tabula.exams.grids.columns.ExamGridColumnOption
+import uk.ac.warwick.tabula.exams.grids.columns.{ExamGridColumnOption, ExamGridStudentIdentificationColumnValue}
 import uk.ac.warwick.tabula.helpers.Logging
 import uk.ac.warwick.tabula.helpers.StringUtils._
 import uk.ac.warwick.tabula.permissions.PermissionsTarget
@@ -256,10 +256,15 @@ class Department extends GeneratedId
 		settings += (Settings.MissedMonitoringPointsNotificationLevelHigh -> levels.high)
 	}
 
+	def nameToShow: ExamGridStudentIdentificationColumnValue =
+		getStringSetting(Settings.ExamGridOptions.NameToShow).map(ExamGridStudentIdentificationColumnValue(_)).getOrElse(ExamGridStudentIdentificationColumnValue.Default)
+
+	def nameToShow_= (identification:ExamGridStudentIdentificationColumnValue): Unit =  settings += (Settings.ExamGridOptions.NameToShow->identification.value)
+
 	def examGridOptions: ExamGridOptions = ExamGridOptions(
 		getStringSeqSetting(Settings.ExamGridOptions.PredefinedColumnIdentifiers, Wire.all[ExamGridColumnOption].map(_.identifier)).toSet,
 		getStringSeqSetting(Settings.ExamGridOptions.PredefinedColumnIdentifiers, Seq()),
-		getStringSetting(Settings.ExamGridOptions.NameToShow, "full"),
+		nameToShow,
 		getStringSetting(Settings.ExamGridOptions.YearsToShow, "current"),
 		getStringSetting(Settings.ExamGridOptions.MarksToShow, "overall"),
 		getStringSetting(Settings.ExamGridOptions.ModuleNameToShow, "codeOnly"),
@@ -268,7 +273,7 @@ class Department extends GeneratedId
 	def examGridOptions_=(options: ExamGridOptions): Unit = {
 		settings += (Settings.ExamGridOptions.PredefinedColumnIdentifiers -> options.predefinedColumnIdentifiers)
 		settings += (Settings.ExamGridOptions.PredefinedColumnIdentifiers -> options.customColumnTitles)
-		settings += (Settings.ExamGridOptions.NameToShow -> options.nameToShow)
+		settings += (Settings.ExamGridOptions.NameToShow -> options.nameToShow.value)
 		settings += (Settings.ExamGridOptions.YearsToShow -> options.yearsToShow)
 		settings += (Settings.ExamGridOptions.MarksToShow -> options.marksToShow)
 		settings += (Settings.ExamGridOptions.ModuleNameToShow -> options.moduleNameToShow)
@@ -537,7 +542,7 @@ object Department {
 		case class ExamGridOptions(
 			predefinedColumnIdentifiers: Set[String],
 			customColumnTitles: Seq[String],
-			nameToShow: String,
+			nameToShow: ExamGridStudentIdentificationColumnValue,
 			yearsToShow: String,
 			marksToShow: String,
 			moduleNameToShow: String,

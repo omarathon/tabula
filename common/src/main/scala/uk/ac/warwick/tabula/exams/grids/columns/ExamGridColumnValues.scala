@@ -180,6 +180,10 @@ case class ExamGridColumnValueMissing(message: String = "") extends ExamGridColu
 	}
 }
 
+case class ExamGridColumnValueStringWithHtml(value: String, html: String) extends ExamGridColumnValueString(value) {
+	override def toHTML: String = html
+}
+
 case class ExamGridColumnValueStringHtmlOnly(value: String) extends ExamGridColumnValueString(value) {
 	override def toHTML: String = super.toHTML
 	override def populateCell(cell: Cell, cellStyleMap: Map[ExamGridExportStyles.Style, CellStyle]): Unit = {}
