@@ -22,6 +22,10 @@
 
 						<th class="student-col sortable">University ID</th>
 
+						<#if assignment.showSeatNumbers>
+							<th class="student-col sortable">Seat number</th>
+						</#if>
+
 						<th class="progress-col">Progress</th>
 						<th class="action-col">Next action</th>
 					</tr>
@@ -113,9 +117,16 @@
 								</td>
 								<td class="student toggle-cell">${student.user.lastName!}</td>
 							</#if>
+
 							<td class="id toggle-cell<#if !department.showStudentName> toggle-icon</#if>">
 								${identifier} <@pl.profile_link identifier />
 							</td>
+
+							<#if assignment.showSeatNumbers>
+								<td class="student toggle-cell">
+									${assignment.getSeatNumber(student.user)!""}
+								</td>
+							</#if>
 
 							<td class="progress-col content-cell toggle-cell">
 								<dl style="margin: 0; border-bottom: 0;">
