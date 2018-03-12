@@ -274,8 +274,10 @@ trait AssessmentMembershipMethods extends Logging {
 	/**
 	 * Returns a simple list of User objects for students who are enrolled on this assessment. May be empty.
 	 */
-	def determineMembershipUsers(assessment: Assessment): Seq[User] =
-		 determineMembershipUsersWithOrder(assessment).map(_._1)
+	def determineMembershipUsers(assessment: Assessment): Seq[User] = assessment match {
+		case a: Assignment => determineMembershipUsers(a.upstreamAssessmentGroups, Option(a.members))
+		case e: Exam => determineMembershipUsersWithOrder(e).map(_._1)
+	}
 
 	def determineMembershipUsersWithOrder(exam: Assessment): Seq[(User, Option[Int])] = {
 		val sitsMembers = exam.upstreamAssessmentGroups.flatMap(_.members.asScala).distinct.sortBy(_.position)
