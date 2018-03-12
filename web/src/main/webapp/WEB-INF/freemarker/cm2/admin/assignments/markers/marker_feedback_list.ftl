@@ -18,7 +18,7 @@
 				</#if>
 				<div class="btn-group">
 					<button type="button" class="btn btn-default dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-						Download <span class="chevron"></span>
+						Download <span class="caret"></span>
 					</button>
 					<ul class="dropdown-menu">
 						<li class="must-have-selected">
@@ -48,7 +48,7 @@
 				<#if !readOnly>
 					<div class="btn-group">
 						<button type="button" class="btn btn-default dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-							Upload <span class="chevron"></span>
+							Upload <span class="caret"></span>
 						</button>
 						<ul class="dropdown-menu">
 							<li><a href="<@routes.cm2.markerUploadFeedback assignment marker />">Upload attachments</a></li>
