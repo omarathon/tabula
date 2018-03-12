@@ -71,21 +71,17 @@
 					<thead>
 					<tr>
 						<th class="check-col"><@bs3form.selector_check_all /></th>
-						<#if assignment.anonymity.equals(AssignmentAnonymity.FullyAnonymous)>
-							<th class="student-col sortable">ID</th>
-							<#if assignment.showSeatNumbers>
-							<th class="student-col sortable">Seat number</th>
+						<th class="student-col sortable">
+							<#if assignment.anonymity.equals(AssignmentAnonymity.FullyAnonymous)>
+								ID
+							<#else>
+								University ID
 							</#if>
-						<#elseif assignment.anonymity.equals(AssignmentAnonymity.IDOnly)>
-							<th class="student-col sortable">University ID</th>
-							<#if assignment.showSeatNumbers>
+						</th>
+						<#if assignment.showSeatNumbers>
 							<th class="student-col sortable">Seat number</th>
-							</#if>
-						<#else>
-							<th class="student-col sortable">University ID</th>
-							<#if assignment.showSeatNumbers>
-							<th class="student-col sortable">Seat number</th>
-							</#if>
+						</#if>
+						<#if assignment.anonymity.equals(AssignmentAnonymity.NameAndID)>
 							<th class="student-col sortable">First name</th>
 							<th class="student-col sortable">Last name</th>
 						</#if>
