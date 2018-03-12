@@ -2,7 +2,7 @@ package uk.ac.warwick.tabula.commands.cm2.assignments.markers
 
 import uk.ac.warwick.tabula.JavaImports._
 import uk.ac.warwick.tabula.commands._
-import uk.ac.warwick.tabula.commands.cm2.assignments.markers.ListMarkerFeedbackCommand.EnhancedFeedbackForOrderAndStage
+import uk.ac.warwick.tabula.commands.cm2.assignments.markers.ListMarkerFeedbackCommand.{EnhancedFeedbackForOrderAndStage, FeedbackByActionability}
 import uk.ac.warwick.tabula.commands.cm2.{CommandWorkflowStudentsForAssignment, WorkflowStudentsForAssignment}
 import uk.ac.warwick.tabula.data.model.markingworkflow.MarkingWorkflowStage
 import uk.ac.warwick.tabula.data.model.{Assignment, MarkerFeedback}
@@ -42,13 +42,22 @@ object ListMarkerFeedbackCommand {
 
 	case class EnhancedFeedbackForOrderAndStage(
 		hasFeedback: Boolean,
-		enhancedFeedbackByStage: Map[MarkingWorkflowStage, Seq[EnhancedMarkerFeedback]]
+		enhancedFeedbackByStage: Map[MarkingWorkflowStage, FeedbackByActionability]
 	) {
 		def headerStage: MarkingWorkflowStage = enhancedFeedbackByStage.keys.head
 		def numPreviousMarkers(stage: MarkingWorkflowStage): Int = enhancedFeedbackByStage(stage)
+			.all
 			.map(_.previousMarkerFeedback.size)
 			.reduceOption(_ max _)
 			.getOrElse(0)
+	}
+
+	case class FeedbackByActionability(
+		readyToMark: Seq[EnhancedMarkerFeedback],
+		notReadyToMark: Seq[EnhancedMarkerFeedback],
+		marked: Seq[EnhancedMarkerFeedback]
+	) {
+		def all: Seq[EnhancedMarkerFeedback] = readyToMark ++ notReadyToMark ++ marked
 	}
 
 	def apply(assignment:Assignment, marker:User, submitter: CurrentUser) = new ListMarkerFeedbackCommandInternal(assignment, marker, submitter)
@@ -82,7 +91,19 @@ class ListMarkerFeedbackCommandInternal(val assignment:Assignment, val marker:Us
 		// squash stages with the same order
 		val stages = filteredEnhancedFeedbackByStage
 			.groupBy { case (stage, _) => stage.order }
-			.map { case(_, map) => EnhancedFeedbackForOrderAndStage(map.values.flatten.nonEmpty, map)}
+			.map { case(_, map) =>
+				EnhancedFeedbackForOrderAndStage(
+					map.values.flatten.nonEmpty,
+					map.map {
+						case (stage, values) =>
+							stage -> FeedbackByActionability(
+								readyToMark = values.filter(_.markerFeedback.feedback.outstandingStages.contains(stage)),
+								notReadyToMark = values.filter(emf => !emf.markerFeedback.hasContent && !emf.markerFeedback.feedback.outstandingStages.contains(stage)),
+								marked = values.filter(emf => emf.markerFeedback.hasContent && !emf.markerFeedback.feedback.outstandingStages.contains(stage))
+							)
+					}
+				)
+			}
 			.toSeq
 			.sortBy(_.headerStage.order)
 

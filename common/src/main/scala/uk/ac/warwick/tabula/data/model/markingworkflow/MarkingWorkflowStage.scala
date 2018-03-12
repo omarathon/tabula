@@ -17,6 +17,8 @@ sealed abstract class MarkingWorkflowStage(val name: String, val order: Int) ext
 
 	def roleName: String = MarkingWorkflowStage.DefaultRole
 	def verb: String = MarkingWorkflowStage.DefaultVerb
+	def pastVerb: String = MarkingWorkflowStage.DefaultPastVerb
+	def presentVerb: String = MarkingWorkflowStage.DefaultPresentVerb
 	// used when stages have their own allocations rather than allocations being at the roleName level
 	def allocationName: String = roleName
 	// used to describe a stage - when two stages share a role name (the same person is responsible for both stages) these will need to be distinct
@@ -70,6 +72,8 @@ object MarkingWorkflowStage {
 
 	val DefaultRole: String = "Marker"
 	val DefaultVerb: String = "mark"
+	val DefaultPastVerb: String = "marked"
+	val DefaultPresentVerb: String = "marking"
 	val DefaultCompletionKey: String = "complete"
 
 	// single marker workflow
@@ -155,6 +159,8 @@ object MarkingWorkflowStage {
 	case object SelectedModerationAdmin extends MarkingWorkflowStage("admin-moderation-admin", 2) {
 		override def roleName = "Admin"
 		override def verb: String = "select"
+		override def pastVerb: String = "selected"
+		override def presentVerb: String = "selecting"
 		override def nextStages: Seq[MarkingWorkflowStage] = Seq(SelectedModerationModerator)
 		override def previousStages: Seq[MarkingWorkflowStage] = Seq(SelectedModerationMarker)
 		override def canFinish(workflow: CM2MarkingWorkflow): Boolean = true
@@ -177,6 +183,8 @@ object MarkingWorkflowStage {
 	case object SelectedModerationModerator extends MarkingWorkflowStage("admin-moderation-moderator", 3) {
 		override def roleName: String = "Moderator"
 		override def verb: String = "moderate"
+		override def pastVerb: String = "moderated"
+		override def presentVerb: String = "moderating"
 		override def nextStages: Seq[MarkingWorkflowStage] = Seq(SelectedModerationCompleted)
 		override def previousStages: Seq[MarkingWorkflowStage] = Seq(SelectedModerationMarker)
 		override def populateWithPreviousFeedback: Boolean = true
