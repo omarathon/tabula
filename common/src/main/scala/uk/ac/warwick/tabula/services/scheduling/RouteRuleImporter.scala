@@ -50,10 +50,12 @@ class RouteRuleImporterImpl extends RouteRuleImporter with InitializingBean
 		val moduleListCodes = nonEmptyRows.map(_.moduleListCode).distinct
 		val routes = transactional(readOnly = true) { courseAndRouteService.getRoutesByCodes(routeCodes) }
 		val moduleLists = transactional(readOnly = true) { upstreamModuleListService.findByCodes(moduleListCodes) }
+		val levels = transactional(readOnly = true) { levelService.getAllLevels }
+
 		// Remove rows that have invalid routes and module lists
 		val validRows: Seq[UpstreamRouteRuleRow] = nonEmptyRows.groupBy(r => (r.routeCode, r.levelCode, r.moduleListCode))
-			.filter { case((routeCode, level, moduleListCode), groupedRows) =>
-				routes.exists(_.code == routeCode) && levelService.levelFromCode(level).isDefined && moduleLists.exists(_.code == moduleListCode)
+			.filter { case((routeCode, levelCode, moduleListCode), _) =>
+				routes.exists(_.code == routeCode) && levels.exists(_.code == levelCode) && moduleLists.exists(_.code == moduleListCode)
 			}.values.flatten.toSeq
 
 		validRows.groupBy(r => (r.routeCode, r.levelCode, r.academicYear)).map { case((routeCode, levelCode, academicYearOption), groupedRows) =>

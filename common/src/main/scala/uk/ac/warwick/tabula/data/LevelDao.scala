@@ -15,6 +15,7 @@ trait LevelDao {
 	def saveOrUpdate(level: Level)
 	def getByCode(code: String): Option[Level]
 	def getAllLevelCodes: Seq[String]
+	def getAllLevels: Seq[Level]
 
 }
 
@@ -29,5 +30,8 @@ class LevelDaoImpl extends LevelDao with Daoisms {
 
 	def getAllLevelCodes: Seq[String] =
 		session.newQuery[String]("select distinct code from StudyLevel").seq
+
+	def getAllLevels: Seq[Level] =
+		session.newQuery[Level]("from StudyLevel level").seq
 
 }

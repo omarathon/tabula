@@ -31,6 +31,7 @@ class RouteRuleImporterTest extends TestBase with Mockito {
 	val allRoutes = Seq(route1, route2, route3, route4)
 
 	val moduleList = new UpstreamModuleList("A100-1-14-CAA", academicYear, route1, 1)
+	val allLevels = Seq(new Level("1", "level 1"), new Level("2", "level 2"))
 
 	@Test
 	def routeRules(): Unit = {
@@ -39,10 +40,7 @@ class RouteRuleImporterTest extends TestBase with Mockito {
 		routeRuleImporter.upstreamModuleListService = smartMock[UpstreamModuleListService]
 		routeRuleImporter.upstreamModuleListService.findByCodes(any[Seq[String]]) returns Seq(moduleList)
 		routeRuleImporter.levelService = smartMock[LevelService]
-		routeRuleImporter.levelService.levelFromCode(any[String]) answers { arg =>
-			val levelCode = arg.asInstanceOf[String]
-			Some(new Level(levelCode, levelCode))
-		}
+		routeRuleImporter.levelService.getAllLevels returns allLevels
 
 		val result = routeRuleImporter.getRouteRules
 		result.size should be (3)
