@@ -268,6 +268,8 @@
 			$(e.target).closest('.marking-collapse').collapse('show');
 
 			$('#markingStageTabs').find('a[href="#' + tabId + '"]').tab('show');
+
+			e.target.scrollIntoView();
 		});
 
 		$('#markingTabContent').on('click', 'a[data-toggle=modal]', function(e){
