@@ -7,6 +7,7 @@ import org.springframework.stereotype.Component
 import uk.ac.warwick.spring.Wire
 import uk.ac.warwick.tabula.data.Transactions._
 import uk.ac.warwick.tabula.data.model.notifications.RecipientNotificationInfo
+import uk.ac.warwick.tabula.helpers.Logging
 import uk.ac.warwick.tabula.services.EmailNotificationService
 
 import scala.concurrent.duration._
@@ -44,7 +45,7 @@ class EmailUnsentEmailCountHealthcheck extends ServiceHealthcheckProvider {
 
 @Component
 @Profile(Array("scheduling"))
-class EmailOldestUnsentItemHealthcheck extends ServiceHealthcheckProvider {
+class EmailOldestUnsentItemHealthcheck extends ServiceHealthcheckProvider with Logging {
 
 	val WarningThreshold: Duration = 30.minutes
 	val ErrorThreshold: Duration = 1.hour
@@ -62,7 +63,11 @@ class EmailOldestUnsentItemHealthcheck extends ServiceHealthcheckProvider {
 		val recentSentEmail: Duration =
 			Wire[EmailNotificationService].recentEmailedRecipient
 				.map { recipient: RecipientNotificationInfo =>
-					Minutes.minutesBetween(recipient.attemptedAt, DateTime.now).getMinutes.minutes.toCoarsest
+					//TODO - extra logging temp to find the root record causing issue in minutesBetween (TAB-6033). This should be removed once we know the root record
+					val time = DateTime.now
+					val attempted = recipient.attemptedAt
+					logger.info(s"Recipient:$recipient,AttemptedAT:$attempted,Time:$time")
+					Minutes.minutesBetween(attempted, time).getMinutes.minutes.toCoarsest
 				}.getOrElse(Zero)
 
 		val status =
