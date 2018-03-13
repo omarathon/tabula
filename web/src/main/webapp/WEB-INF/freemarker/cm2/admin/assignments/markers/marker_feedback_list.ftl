@@ -2,32 +2,19 @@
 <#import "*/coursework_components.ftl" as components />
 <#import "*/modal_macros.ftl" as modal />
 
-<div>
-	<#if feedbackByOrderAndStage?size gt 1>
-		<ul class="nav nav-tabs" role="tablist" style="margin-top: 20px;margin-bottom: 20px;" id="markingStageTabs">
-			<#list feedbackByOrderAndStage as order>
-				<li role="presentation"<#if activeStage.name == order.headerStage.name> class="active"</#if>>
-					<a href="#${order.headerStage.name}" role="tab" data-toggle="tab" data-stage="${order.headerStage.name}">${order.headerStage.description}</a>
-				</li>
-			</#list>
-		</ul>
-	</#if>
-
-<div class="tab-content" id="markingTabContent">
-<#list feedbackByOrderAndStage as order>
-	<div class="tab-pane<#if activeStage.name == order.headerStage.name> active</#if>" role="tabpanel" id="${order.headerStage.name}">
-		<#assign markingCompleted><@routes.cm2.markingCompleted assignment order.headerStage.order marker /></#assign>
-		<#assign finishMarking><@routes.cm2.finishMarking assignment order.headerStage.order marker /></#assign>
-		<div class="marking-stage">
+<#macro markingTabSection order enhancedMarkerFeedbacks readOnly=true>
+	<div class="marking-stage">
 			<#if order.hasFeedback>
-				<#if order.headerStage.nextStagesDescription?has_content>
-					<a class="btn btn-primary must-have-selected must-have-ready-next-stage form-post" href="${markingCompleted}">Confirm selected and send to ${order.headerStage.nextStagesDescription?lower_case}</a>
-				</#if>
-				<#if order.headerStage.canFinish(assignment.cm2MarkingWorkflow)>
-					<a class="btn btn-primary must-have-selected must-have-ready-next-stage form-post" href="${finishMarking}">Confirm selected and send to admin</a>
-				</#if>
-				<#if features.bulkModeration && order.headerStage.allowsBulkAdjustments && assignment.module.adminDepartment.assignmentGradeValidation>
-					<a class="btn btn-primary" data-toggle="modal" data-target="#bulk-adjustment-modal" href="<@routes.cm2.bulkModeration assignment order.headerStage marker />">Bulk moderate submissions</a>
+				<#if !readOnly>
+					<#if order.headerStage.nextStagesDescription?has_content>
+						<a class="btn btn-primary must-have-selected must-have-ready-next-stage form-post" href="${markingCompleted}">Confirm selected and send to ${order.headerStage.nextStagesDescription?lower_case}</a>
+					</#if>
+					<#if order.headerStage.canFinish(assignment.cm2MarkingWorkflow)>
+						<a class="btn btn-primary must-have-selected must-have-ready-next-stage form-post" href="${finishMarking}">Confirm selected and send to admin</a>
+					</#if>
+					<#if features.bulkModeration && order.headerStage.allowsBulkAdjustments && assignment.module.adminDepartment.assignmentGradeValidation>
+						<a class="btn btn-primary" data-toggle="modal" data-target="#bulk-adjustment-modal" href="<@routes.cm2.bulkModeration assignment order.headerStage marker />">Bulk moderate submissions</a>
+					</#if>
 				</#if>
 				<div class="btn-group">
 					<button type="button" class="btn btn-default dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
@@ -58,15 +45,17 @@
 						</#list>
 					</ul>
 				</div>
-				<div class="btn-group">
-					<button type="button" class="btn btn-default dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-						Upload <span class="caret"></span>
-					</button>
-					<ul class="dropdown-menu">
-						<li><a href="<@routes.cm2.markerUploadFeedback assignment marker />">Upload attachments</a></li>
-						<li><a href="<@routes.cm2.markerUploadMarks assignment marker />">Upload marks & feedback</a></li>
-					</ul>
-				</div>
+				<#if !readOnly>
+					<div class="btn-group">
+						<button type="button" class="btn btn-default dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+							Upload <span class="caret"></span>
+						</button>
+						<ul class="dropdown-menu">
+							<li><a href="<@routes.cm2.markerUploadFeedback assignment marker />">Upload attachments</a></li>
+							<li><a href="<@routes.cm2.markerUploadMarks assignment marker />">Upload marks & feedback</a></li>
+						</ul>
+					</div>
+				</#if>
 				<table class="table table-striped marking-table table-sortable<#if order.headerStage.summarisePreviousFeedback> preview-marks</#if>">
 					<thead>
 					<tr>
@@ -100,7 +89,7 @@
 					<tbody>
 						<#list order.enhancedFeedbackByStage?keys as stage>
 							<#assign maxPrevMarkerCols = 0 />
-							<#assign enhancedMarkerFeedbacks = mapGet(order.enhancedFeedbackByStage, stage)/>
+
 							<#list enhancedMarkerFeedbacks as emf>
 								<#assign mf = emf.markerFeedback />
 								<#assign student = mf.student />
@@ -165,7 +154,7 @@
 						</#list>
 					</tbody>
 				</table>
-				<#if order.headerStage.nextStagesDescription?has_content>
+				<#if !readOnly && order.headerStage.nextStagesDescription?has_content>
 					<a class="btn btn-primary must-have-selected must-have-ready-next-stage form-post" href="${markingCompleted}">Confirm selected and send to ${order.headerStage.nextStagesDescription?lower_case}</a>
 				</#if>
 				<div id="download-pdf-modal-${order.headerStage.name}" class="modal fade">
@@ -185,6 +174,75 @@
 			<#else>
 				No students found
 			</#if>
+	</div>
+</#macro>
+
+
+<div>
+	<#if feedbackByOrderAndStage?size gt 1>
+		<ul class="nav nav-tabs" role="tablist" style="margin-top: 20px;margin-bottom: 20px;" id="markingStageTabs">
+			<#list feedbackByOrderAndStage as order>
+				<li role="presentation"<#if activeStage.name == order.headerStage.name> class="active"</#if>>
+					<a href="#${order.headerStage.name}" role="tab" data-toggle="tab" data-stage="${order.headerStage.name}">${order.headerStage.description}</a>
+				</li>
+			</#list>
+		</ul>
+	</#if>
+<div class="tab-content" id="markingTabContent">
+<#list feedbackByOrderAndStage as order>
+	<div class="tab-pane<#if activeStage.name == order.headerStage.name> active</#if>" role="tabpanel" id="${order.headerStage.name}">
+		<#assign markingCompleted><@routes.cm2.markingCompleted assignment order.headerStage.order marker /></#assign>
+		<#assign finishMarking><@routes.cm2.finishMarking assignment order.headerStage.order marker /></#assign>
+
+		<#assign enhancedMarkerFeedbacks = mapGet(order.enhancedFeedbackByStage, order.headerStage)/>
+		<#assign stage = order.headerStage />
+
+		<div class="marking-tab-section">
+			<h4>Submissions to ${stage.verb}</h4>
+
+			<#if enhancedMarkerFeedbacks.readyToMark?size != 0>
+				<p>These submissions are ready for you to ${stage.verb}.</p>
+
+				<@markingTabSection order enhancedMarkerFeedbacks.readyToMark false />
+			<#else>
+				<p>No submissions are ready for you to ${stage.verb}.</p>
+			</#if>
+		</div>
+
+		<div class="marking-tab-section">
+			<h4>
+				<a href="#" data-toggle="collapse" data-target="#${stage.name}-notReadyToMarkSubmissions">
+					<i class="fa fa-fw fa-chevron-right"></i>Not ready to ${stage.verb} (${enhancedMarkerFeedbacks.notReadyToMark?size})
+				</a>
+			</h4>
+
+			<div id="${stage.name}-notReadyToMarkSubmissions" class="marking-collapse collapse">
+				<#if enhancedMarkerFeedbacks.notReadyToMark?size != 0>
+					<p>These submissions are allocated to you for ${stage.presentVerb}, but haven't yet been released.</p>
+
+					<@markingTabSection order enhancedMarkerFeedbacks.notReadyToMark true />
+				<#else>
+					<p>No submissions to show.</p>
+				</#if>
+			</div>
+		</div>
+
+		<div class="marking-tab-section">
+			<h4>
+				<a href="#" data-toggle="collapse" data-target="#${stage.name}-markedSubmissions">
+					<i class="fa fa-fw fa-chevron-right"></i>${stage.pastVerb?cap_first} (${enhancedMarkerFeedbacks.marked?size})
+				</a>
+			</h4>
+
+			<div id="${stage.name}-markedSubmissions" class="marking-collapse collapse">
+				<#if enhancedMarkerFeedbacks.marked?size != 0>
+					<p>You've finished ${stage.presentVerb} these submissions, so can't make any further changes.</p>
+
+					<@markingTabSection order enhancedMarkerFeedbacks.marked true />
+				<#else>
+					<p>No submissions to show.</p>
+				</#if>
+			</div>
 		</div>
 	</div>
 </#list>
@@ -194,14 +252,34 @@
 
 <script>
 	jQuery(function ($) {
+		$('.marking-tab-section > h4 > [data-toggle=collapse]').on('click', function(e) {
+			e.preventDefault();
+		});
+
+		$('.marking-collapse').on('show.bs.collapse', function (e) {
+			if (e.target === this) {
+				$('[data-toggle=collapse][data-target="#' + e.target.id + '"]').children('.fa').removeClass('fa-chevron-right').addClass('fa-chevron-down');
+			}
+		});
+
+		$('.marking-collapse').on('hide.bs.collapse', function (e) {
+			if (e.target === this) {
+				$('[data-toggle=collapse][data-target="#' + e.target.id + '"]').children('.fa').removeClass('fa-chevron-down').addClass('fa-chevron-right');
+			}
+		});
+
 		$('#markingStageTabs').on('show.bs.tab', function (e) {
 			$('#filtersActiveStage').val($(e.target).data('stage'));
 		});
 
 		$('#markingTabContent').on('shown.bs.collapse', function (e) {
-			var tabId = $(e.target).parents('.tab-pane').attr('id');
+			var tabId = $(e.target).closest('.tab-pane').attr('id');
+
+			$(e.target).closest('.marking-collapse').collapse('show');
 
 			$('#markingStageTabs').find('a[href="#' + tabId + '"]').tab('show');
+
+			e.target.scrollIntoView();
 		});
 
 		$('#markingTabContent').on('click', 'a[data-toggle=modal]', function(e){
