@@ -1,7 +1,12 @@
 <#macro student_item student index stages marker={}>
 	<li class="student well well-sm" data-student="${student.userId}">
 		<div class="name">
-			<h6>${student.fullName}&nbsp;${student.warwickId!student.userId}</h6>
+			<h6>
+				${student.fullName}&nbsp;${student.warwickId!student.userId}
+				<#if assignment.showSeatNumbers && assignment.getSeatNumber(student)??>
+					(${assignment.getSeatNumber(student)})
+				</#if>
+			</h6>
 			<#list stages as stage>
 				<#-- one input per stage. if no marker is defined leave the name blank (unallocated students aren't bound) -->
 				<input

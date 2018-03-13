@@ -28,6 +28,7 @@ object AssignMarkersTemplateCommand {
 	val StudentName = "Student name"
 	val MarkerUsercode = "Marker usercode"
 	val MarkerName = "Marker name"
+	val SeatNumber = "Seat number"
 }
 
 class AssignMarkersTemplateCommandInternal(val assignment: Assignment) extends CommandInternal[ExcelView]
@@ -55,12 +56,19 @@ class AssignMarkersTemplateCommandInternal(val assignment: Assignment) extends C
 			val sheet = workbook.createSheet(role)
 			sheet.trackAllColumnsForAutoSizing()
 
+			val columnCount = if (assignment.showSeatNumbers) 4 else 3
+
 			val header = sheet.createRow(0)
 			header.createCell(0).setCellValue(AssignMarkersTemplateCommand.StudentUsercode)
 			header.createCell(1).setCellValue(AssignMarkersTemplateCommand.StudentName)
 			header.createCell(2).setCellValue(AssignMarkersTemplateCommand.MarkerName)
 			header.createCell(3).setCellValue(AssignMarkersTemplateCommand.MarkerUsercode)
-			0 to 3 foreach  { col => // set style on all columns
+
+			if (assignment.showSeatNumbers) {
+				header.createCell(4).setCellValue(AssignMarkersTemplateCommand.SeatNumber)
+			}
+
+			0 to columnCount foreach  { col => // set style on all columns
 				sheet.setDefaultColumnStyle(col, style)
 				sheet.autoSizeColumn(col)
 			}
@@ -98,6 +106,10 @@ class AssignMarkersTemplateCommandInternal(val assignment: Assignment) extends C
 				row.createCell(3).setCellFormula(
 					"IF(TRIM($C" + (row.getRowNum + 1) + ")<>\"\", VLOOKUP($C" + (row.getRowNum + 1) + ", " + markerLookupRange + ", 2, FALSE), \" \")"
 				)
+
+				if (assignment.showSeatNumbers) {
+					assignment.getSeatNumber(student).foreach(row.createCell(4).setCellValue(_))
+				}
 			}
 		}
 		new ExcelView("Allocation for " + assignment.name + ".xlsx", workbook)

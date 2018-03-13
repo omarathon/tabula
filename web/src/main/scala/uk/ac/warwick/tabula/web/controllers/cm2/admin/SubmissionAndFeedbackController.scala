@@ -1,7 +1,6 @@
 package uk.ac.warwick.tabula.web.controllers.cm2.admin
 
 import javax.validation.Valid
-
 import org.springframework.context.annotation.Profile
 import org.springframework.stereotype.Controller
 import org.springframework.validation.Errors
@@ -10,6 +9,7 @@ import uk.ac.warwick.tabula.cm2.web.Routes
 import uk.ac.warwick.tabula.commands.cm2.assignments.SubmissionAndFeedbackCommand
 import uk.ac.warwick.tabula.data.model._
 import uk.ac.warwick.tabula.helpers.cm2.{SubmissionAndFeedbackInfoFilter, SubmissionAndFeedbackInfoFilters}
+import uk.ac.warwick.tabula.services.AutowiringAssessmentMembershipServiceComponent
 import uk.ac.warwick.tabula.web.Mav
 import uk.ac.warwick.tabula.web.controllers.cm2.CourseworkController
 import uk.ac.warwick.tabula.{AcademicYear, AutowiringFeaturesComponent}
@@ -17,7 +17,7 @@ import uk.ac.warwick.tabula.{AcademicYear, AutowiringFeaturesComponent}
 @Profile(Array("cm2Enabled"))
 @Controller
 @RequestMapping(Array("/${cm2.prefix}/admin/assignments/{assignment}"))
-class SubmissionAndFeedbackController extends CourseworkController with AutowiringFeaturesComponent {
+class SubmissionAndFeedbackController extends CourseworkController with AutowiringFeaturesComponent with AutowiringAssessmentMembershipServiceComponent {
 
 	@ModelAttribute("submissionAndFeedbackCommand")
 	def command(@PathVariable assignment: Assignment): SubmissionAndFeedbackCommand.CommandType =

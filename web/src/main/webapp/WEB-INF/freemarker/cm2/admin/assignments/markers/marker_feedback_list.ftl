@@ -71,12 +71,17 @@
 					<thead>
 					<tr>
 						<th class="check-col"><@bs3form.selector_check_all /></th>
-						<#if assignment.anonymity.equals(AssignmentAnonymity.FullyAnonymous)>
-							<th class="student-col sortable">ID</th>
-						<#elseif assignment.anonymity.equals(AssignmentAnonymity.IDOnly)>
-							<th class="student-col sortable">University ID</th>
-						<#else>
-							<th class="student-col sortable">University ID</th>
+						<th class="student-col sortable">
+							<#if assignment.anonymity.equals(AssignmentAnonymity.FullyAnonymous)>
+								ID
+							<#else>
+								University ID
+							</#if>
+						</th>
+						<#if assignment.showSeatNumbers>
+							<th class="student-col sortable">Seat number</th>
+						</#if>
+						<#if assignment.anonymity.equals(AssignmentAnonymity.NameAndID)>
 							<th class="student-col sortable">First name</th>
 							<th class="student-col sortable">Last name</th>
 						</#if>
@@ -108,15 +113,20 @@
 									<td class="check-col">
 										<@bs3form.selector_check_row name="markerFeedback" value="${mf.id}" />
 									</td>
-									<#if assignment.anonymity.equals(AssignmentAnonymity.FullyAnonymous)>
+									<td class="toggle-icon-large student-col">
 										<#assign colspan = 4>
-										<td class="toggle-icon-large student-col"><span class=""></span>Student${mf.feedback.anonymousId}</td>
-									<#elseif assignment.anonymity.equals(AssignmentAnonymity.IDOnly)>
-										<#assign colspan = 4>
-										<td class="toggle-icon-large student-col"><span class=""></span>${mf.feedback.studentIdentifier!""}</td>
-									<#else>
-										<#assign colspan = 6>
-										<td class="toggle-icon-large student-col">${mf.feedback.studentIdentifier!""}</td>
+										<#if assignment.anonymity.equals(AssignmentAnonymity.FullyAnonymous)>
+											Student${mf.feedback.anonymousId}
+										<#else>
+											${mf.feedback.studentIdentifier!""}
+										</#if>
+									</td>
+									<#if assignment.showSeatNumbers>
+										<#assign colspan = colspan + 1/>
+										<td class="student-col">${assignment.getSeatNumber(student)!""}</td>
+									</#if>
+									<#if assignment.anonymity.equals(AssignmentAnonymity.NameAndID)>
+										<#assign colspan = colspan + 2/>
 										<td class="student-col">${student.firstName}</td>
 										<td class="student-col">${student.lastName}&nbsp;<#if student.warwickId??><@pl.profile_link student.warwickId /><#else><@pl.profile_link student.userId /></#if></td>
 									</#if>
