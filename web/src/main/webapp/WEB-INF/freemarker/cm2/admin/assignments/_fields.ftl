@@ -27,7 +27,7 @@
     </div>
 	</@bs3form.labelled_form_group>
 
-	<@bs3form.labelled_form_group path="openEnded" labelText="">
+	<@bs3form.labelled_form_group path="openEnded" labelText="" renderErrors=false>
 		<@bs3form.checkbox path="openEnded">
 			<@f.checkbox path="openEnded" id="openEnded" /> Open-ended
 			<#assign popoverText>
