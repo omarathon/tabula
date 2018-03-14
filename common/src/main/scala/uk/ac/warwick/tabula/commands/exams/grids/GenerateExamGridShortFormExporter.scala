@@ -19,10 +19,10 @@ object GenerateExamGridShortFormExporter extends TaskBenchmarking {
 	def apply(
 		department: Department,
 		academicYear: AcademicYear,
-		course: Course,
+		courses: Seq[Course],
 		routes: Seq[Route],
 		yearOfStudy: Int,
-		yearWeightings: Seq[CourseYearWeighting],
+		yearWeightings: Map[Course, Seq[CourseYearWeighting]],
 		normalLoadLookup: NormalLoadLookup,
 		entities: Seq[ExamGridEntity],
 		leftColumns: Seq[ChosenYearExamGridColumn],
@@ -46,7 +46,7 @@ object GenerateExamGridShortFormExporter extends TaskBenchmarking {
 		val sheet = workbook.createSheet(academicYear.toString.replace("/","-"))
 		sheet.trackAllColumnsForAutoSizing()
 
-		ExamGridSummaryAndKey.summaryAndKey(sheet, cellStyleMap, department, academicYear, course, routes, yearOfStudy, yearWeightings, normalLoadLookup, entities.size, isStudentCount = true)
+		ExamGridSummaryAndKey.summaryAndKey(sheet, cellStyleMap, department, academicYear, courses, routes, yearOfStudy, yearWeightings, normalLoadLookup, entities.size, isStudentCount = true)
 
 		val categoryRow = sheet.createRow(sheet.getLastRowNum + 1)
 		val headerRow = sheet.createRow(sheet.getLastRowNum + 1)

@@ -78,7 +78,7 @@ object SitsCourseImporter {
 	val sitsSchema: String = Wire.property("${schema.sits}")
 
 	def GetCourse = f"""
-		select crs_code, crs_snam, crs_name, crs_titl, crs_dptc from $sitsSchema.srs_crs
+		select crs_code, crs_snam, crs_name, crs_titl, crs_dptc, crs_iuse from $sitsSchema.srs_crs
 		"""
 
 	class CoursesQuery(ds: DataSource) extends MappingSqlQuery[ImportCourseCommand](ds, GetCourse) {
@@ -90,14 +90,15 @@ object SitsCourseImporter {
 					shortName=resultSet.getString("crs_snam"),
 					fullName=resultSet.getString("crs_name"),
 					title=resultSet.getString("crs_titl"),
-					departmentCode=resultSet.getString("crs_dptc")
+					departmentCode=resultSet.getString("crs_dptc"),
+					inUse=resultSet.getString("crs_iuse").equals("Y")
 				)
 			)
 	}
 
 }
 
-case class CourseInfo(code: String, shortName: String, fullName: String, title: String, departmentCode: String)
+case class CourseInfo(code: String, shortName: String, fullName: String, title: String, departmentCode: String, inUse:Boolean)
 
 @Profile(Array("sandbox")) @Service
 class SandboxCourseImporter extends CourseImporter {
@@ -112,7 +113,8 @@ class SandboxCourseImporter extends CourseImporter {
 							shortName=StringUtils.safeSubstring(route.name, 0, 20).toUpperCase,
 							fullName=route.name,
 							title="%s %s".format(route.degreeType.description, route.name),
-							departmentCode=departmentCode.toUpperCase
+							departmentCode=departmentCode.toUpperCase,
+							inUse=true
 						)
 					)
 				}

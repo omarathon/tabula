@@ -82,8 +82,18 @@
 						<td>${department.name}</td>
 					</tr>
 					<tr>
-						<th>Course:</th>
-						<td>${selectCourseCommand.course.code?upper_case} ${selectCourseCommand.course.name}</td>
+						<#if selectCourseCommand.courses?size == 1>
+							<th>Course:</th>
+							<td>${selectCourseCommand.courses?first.code?upper_case} ${selectCourseCommand.courses?first.name}</td>
+						<#else>
+							<th>Courses:</th>
+							<#assign popover>
+								<ul><#list selectCourseCommand.courses?sort_by('code') as course>
+									<li>${course.code?upper_case} ${course.name}</li>
+								</#list></ul>
+							</#assign>
+							<td><a class="use-popover" href="#" data-html="true" data-content="${popover}">${selectCourseCommand.courses?size} courses</a></td>
+						</#if>
 					</tr>
 					<tr>
 						<#if !selectCourseCommand.routes?has_content>
@@ -109,9 +119,22 @@
 					<tr>
 						<th>Year weightings:</th>
 						<td>
-							<#list weightings as weighting>
-								Year ${weighting.yearOfStudy} = ${weighting.weightingAsPercentage}%<#if weighting_has_next><br /></#if>
-							</#list>
+							<#if weightings?size lt 2>
+								<#if weightings?has_content>
+									<#list mapGet(weightings, weightings?keys(0)) as weighting>
+										Year ${weighting.yearOfStudy} = ${weighting.weightingAsPercentage}%<#if weighting_has_next><br /></#if>
+									</#list>
+								</#if>
+							<#else>
+								<#assign popover>
+									<ul><#list weightings?keys as course>
+										<li>${course.code}: <#list mapGet(weightings, course) as weighting>
+											Year ${weighting.yearOfStudy} = ${weighting.weightingAsPercentage}%<#if weighting_has_next>, </#if>
+										</#list></li>
+									</#list></ul>
+								</#assign>
+								<a href="#" class="use-popover" data-html="true" data-content="${popover}">${weightings?keys?size} courses</a>
+							</#if>
 						</td>
 					</tr>
 					<tr>

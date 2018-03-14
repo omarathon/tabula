@@ -4,7 +4,9 @@
 	<#if jobId??>
 		<input type="hidden" name="jobId" value="${jobId}" />
 	</#if>
-	<input type="hidden" name="course" value="${selectCourseCommand.course.code}" />
+	<#list selectCourseCommand.courses as course>
+		<input type="hidden" name="courses" value="${course.code}" />
+	</#list>
 	<#list selectCourseCommand.routes as route>
 		<input type="hidden" name="routes" value="${route.code}" />
 	</#list>
