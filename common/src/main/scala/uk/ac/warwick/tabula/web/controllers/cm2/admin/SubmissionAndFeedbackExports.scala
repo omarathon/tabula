@@ -229,9 +229,9 @@ trait SubmissionAndFeedbackExport {
 
 	// This Seq specifies the core field order
 	val baseFields = Seq("module-code", "id", "open-date", "open-ended", "close-date")
-	val identityFields: Seq[String] =
-		if (module.adminDepartment.showStudentName) Seq("university-id", "name")
-		else Seq("university-id")
+	val identityFields: Seq[String] = Seq("university-id") ++
+		(if (module.adminDepartment.showStudentName) Seq("name") else Seq()) ++
+		(if (assignment.showSeatNumbers) Seq("seat-number") else Seq())
 
 	val submissionFields = Seq("id", "time", "downloaded")
 	val submissionStatusFields = Seq("late", "within-extension", "markable")
@@ -252,9 +252,9 @@ trait SubmissionAndFeedbackExport {
 		"submissions-zip-url" -> (topLevelUrl + Routes.admin.assignment.submissionsZip(assignment))
 	)
 
-	protected def identityData(item: WorkflowItems): Map[String, Any] = Map(
-		"university-id" -> CurrentUser.studentIdentifier(item.student)
-	) ++ (if (module.adminDepartment.showStudentName) Map("name" -> item.student.getFullName) else Map())
+	protected def identityData(item: WorkflowItems): Map[String, Any] = Map("university-id" -> CurrentUser.studentIdentifier(item.student)) ++
+		(if (module.adminDepartment.showStudentName) Map("name" -> item.student.getFullName) else Map()) ++
+		(if (assignment.showSeatNumbers) assignment.getSeatNumber(item.student).map(n => Map("seat-number" -> n)).getOrElse(Map()) else Map())
 
 	protected def submissionData(student: WorkflowItems): Map[String, Any] = student.enhancedSubmission match {
 		case Some(item) if item.submission.id.hasText => Map(
