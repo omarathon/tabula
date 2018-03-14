@@ -121,7 +121,7 @@
 						<td>
 							<#if weightings?size lt 2>
 								<#if weightings?has_content>
-									<#list mapGet(weightings, weightings?keys(0)) as weighting>
+									<#list mapGet(weightings, weightings?keys?first) as weighting>
 										Year ${weighting.yearOfStudy} = ${weighting.weightingAsPercentage}%<#if weighting_has_next><br /></#if>
 									</#list>
 								</#if>
