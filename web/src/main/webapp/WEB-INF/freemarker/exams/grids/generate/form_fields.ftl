@@ -24,6 +24,7 @@
 	<input type="hidden" name="marksToShow" value="${gridOptionsCommand.marksToShow}" />
 	<input type="hidden" name="moduleNameToShow" value="${gridOptionsCommand.moduleNameToShow}" />
 	<input type="hidden" name="layout" value="${gridOptionsCommand.layout}" />
+	<input type="hidden" name="yearMarksToUse" value="${gridOptionsCommand.yearMarksToUse}" />
 </#macro>
 
 </#escape>

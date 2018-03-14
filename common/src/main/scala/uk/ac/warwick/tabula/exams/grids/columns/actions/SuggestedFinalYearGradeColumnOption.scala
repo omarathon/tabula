@@ -29,7 +29,8 @@ class SuggestedFinalYearGradeColumnOption extends ChosenYearExamGridColumnOption
 					progressionService.suggestedFinalYearGrade(
 						entityYear.get.studentCourseYearDetails.get,
 						state.normalLoadLookup(entityYear.get.route),
-						state.routeRulesLookup(entityYear.get.route, entityYear.get.level)
+						entity.validYears.mapValues(ey => state.routeRulesLookup(ey.route, ey.level)),
+						state.calculateYearMarks
 					) match {
 						case unknown: FinalYearGrade.Unknown => ExamGridColumnValueMissing(unknown.details)
 						case result => ExamGridColumnValueString(result.description)

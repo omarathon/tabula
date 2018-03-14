@@ -40,7 +40,8 @@ class GenerateExamGridGridOptionsCommandInternal(val department: Department) ext
 			yearsToShow,
 			marksToShow,
 			moduleNameToShow,
-			layout
+			layout,
+			yearMarksToUse
 		)
 		moduleAndDepartmentService.saveOrUpdate(department)
 		(predefinedColumnOptions, customColumnTitles.asScala)
@@ -61,6 +62,7 @@ trait PopulatesGenerateExamGridGridOptionsCommand extends PopulateOnForm {
 		marksToShow = options.marksToShow
 		moduleNameToShow = options.moduleNameToShow
 		layout = options.layout
+		yearMarksToUse = options.yearMarksToUse
 	}
 }
 
@@ -118,11 +120,13 @@ trait GenerateExamGridGridOptionsCommandRequest {
 	var marksToShow: String = "overall"
 	var moduleNameToShow: String = "codeOnly"
 	var layout: String = "full"
+	var yearMarksToUse: String = "sits"
 	var customColumnTitles: JList[String] = JArrayList()
 
 	def showFullLayout: Boolean = layout == "full"
 	def showComponentMarks: Boolean = marksToShow == "all"
 	def showModuleNames: Boolean = moduleNameToShow == "nameAndCode"
+	def calculateYearMarks: Boolean = yearMarksToUse != "sits"
 
 	protected lazy val predefinedColumnOptions: Seq[ExamGridColumnOption] =
 		allExamGridsColumns.filter(c => c.mandatory || predefinedColumnIdentifiers.contains(c.identifier))

@@ -3,10 +3,10 @@ package uk.ac.warwick.tabula.exams.grids.columns.marking
 import org.springframework.stereotype.Component
 import uk.ac.warwick.tabula.commands.exams.grids.{ExamGridEntity, ExamGridEntityYear}
 import uk.ac.warwick.tabula.exams.grids.columns._
-import uk.ac.warwick.tabula.services.AutowiringModuleRegistrationServiceComponent
+import uk.ac.warwick.tabula.services.{AutowiringModuleRegistrationServiceComponent, AutowiringProgressionServiceComponent}
 
 @Component
-class PreviousYearMarksColumnOption extends ChosenYearExamGridColumnOption with AutowiringModuleRegistrationServiceComponent {
+class PreviousYearMarksColumnOption extends ChosenYearExamGridColumnOption with AutowiringModuleRegistrationServiceComponent with AutowiringProgressionServiceComponent {
 
 	override val identifier: ExamGridColumnOption.Identifier = "previous"
 
@@ -33,9 +33,15 @@ class PreviousYearMarksColumnOption extends ChosenYearExamGridColumnOption with 
 
 		private def result(entity: ExamGridEntity): Either[String, BigDecimal] = {
 			relevantEntityYear(entity) match {
-				case Some(year) => Option(year.studentCourseYearDetails.get.agreedMark) match {
-					case Some(mark) => Right(BigDecimal(mark))
-					case _ => Left(s"No year mark for Year $thisYearOfStudy")
+				case Some(year) => if(state.calculateYearMarks) {
+					year.studentCourseYearDetails.map(scyd =>
+						progressionService.getYearMark(scyd, state.normalLoadLookup(year.route), state.routeRulesLookup(year.route, year.level))
+					).getOrElse(Left(s"No course detail found for ${entity.universityId} for Year $thisYearOfStudy"))
+				} else {
+					Option(year.studentCourseYearDetails.get.agreedMark) match {
+						case Some(mark) => Right(BigDecimal(mark))
+						case _ => Left(s"No year mark for Year $thisYearOfStudy")
+					}
 				}
 				case _ => Left(s"No course detail found for ${entity.universityId} for Year $thisYearOfStudy")
 			}

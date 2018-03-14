@@ -21,6 +21,11 @@ sealed abstract class FinalYearGrade(val description: String, val lowerBound: Bi
 		mark <= upperBound && mark >= lowerBound
 	}
 	def withMark(mark: BigDecimal): FinalYearMark = FinalYearMark(mark, description, lowerBound, upperBound)
+
+	override def equals(other: Any): Boolean = other match {
+		case other: FinalYearGrade => description == other.description
+		case _ => false
+	}
 }
 
 case class FinalYearMark(mark: BigDecimal, override val description: String, override val lowerBound: BigDecimal, override val upperBound: BigDecimal)
@@ -105,8 +110,8 @@ object ProgressionService {
 
 trait ProgressionService {
 	def getYearMark(scyd: StudentCourseYearDetails, normalLoad: BigDecimal, routeRules: Seq[UpstreamRouteRule]): Either[String, BigDecimal]
-	def suggestedResult(scyd: StudentCourseYearDetails, normalLoad: BigDecimal, routeRules: Seq[UpstreamRouteRule]): ProgressionResult
-	def suggestedFinalYearGrade(scyd: StudentCourseYearDetails, normalLoad: BigDecimal, routeRules: Seq[UpstreamRouteRule]): FinalYearGrade
+	def suggestedResult(scyd: StudentCourseYearDetails, normalLoad: BigDecimal, routeRulesPerYear: Map[Int, Seq[UpstreamRouteRule]], calculateYearMarks: Boolean): ProgressionResult
+	def suggestedFinalYearGrade(scyd: StudentCourseYearDetails, normalLoad: BigDecimal, routeRulesPerYear: Map[Int, Seq[UpstreamRouteRule]], calculateYearMarks: Boolean): FinalYearGrade
 }
 
 abstract class AbstractProgressionService extends ProgressionService {
@@ -115,6 +120,7 @@ abstract class AbstractProgressionService extends ProgressionService {
 
 	def getYearMark(scyd: StudentCourseYearDetails, normalLoad: BigDecimal, routeRules: Seq[UpstreamRouteRule]): Either[String, BigDecimal] = {
 		val possibleWeightedMeanMark = moduleRegistrationService.weightedMeanYearMark(scyd.moduleRegistrations, Map())
+		  	.left.map(msg => s"$msg for year ${scyd.yearOfStudy}")
 		val entityYear = scyd.toExamGridEntityYear
 		val overcatSubsets = moduleRegistrationService.overcattedModuleSubsets(entityYear, Map(), normalLoad, routeRules)
 		if (overcatSubsets.size <= 1) {
@@ -134,7 +140,7 @@ abstract class AbstractProgressionService extends ProgressionService {
 		}
 	}
 
-	def suggestedResult(scyd: StudentCourseYearDetails, normalLoad: BigDecimal, routeRules: Seq[UpstreamRouteRule]): ProgressionResult = {
+	def suggestedResult(scyd: StudentCourseYearDetails, normalLoad: BigDecimal, routeRulesPerYear: Map[Int, Seq[UpstreamRouteRule]], calculateYearMarks: Boolean): ProgressionResult = {
 
 		val emptyExpectingMarks = scyd.moduleRegistrations.filter(mr => !mr.passFail && mr.firstDefinedMark.isEmpty)
 		val emptyExpectingGrades = scyd.moduleRegistrations.filter(mr => mr.passFail && mr.firstDefinedGrade.isEmpty)
@@ -146,9 +152,9 @@ abstract class AbstractProgressionService extends ProgressionService {
 		} else if (scyd.moduleRegistrations.isEmpty) {
 				ProgressionResult.Unknown(s"No module registrations found for ${scyd.studentCourseDetails.scjCode} ${scyd.academicYear.toString}")
 		} else if (scyd.yearOfStudy.toInt == 1) {
-			suggestedResultFirstYear(scyd, normalLoad, routeRules)
+			suggestedResultFirstYear(scyd, normalLoad, routeRulesPerYear.getOrElse(scyd.yearOfStudy, Seq()))
 		} else if (scyd.isFinalYear) {
-			val sfyg = suggestedFinalYearGrade(scyd, normalLoad, routeRules)
+			val sfyg = suggestedFinalYearGrade(scyd, normalLoad, routeRulesPerYear, calculateYearMarks)
 			if (sfyg == FinalYearGrade.Fail) {
 				ProgressionResult.Resit
 			} else {
@@ -158,7 +164,7 @@ abstract class AbstractProgressionService extends ProgressionService {
 				}
 			}
 		} else {
-			suggestedResultIntermediateYear(scyd, normalLoad, routeRules)
+			suggestedResultIntermediateYear(scyd, normalLoad, routeRulesPerYear.getOrElse(scyd.yearOfStudy, Seq()))
 		}
 
 	}
@@ -221,7 +227,7 @@ abstract class AbstractProgressionService extends ProgressionService {
 	/**
 		* Regulation defined at: http://www2.warwick.ac.uk/services/aro/dar/quality/categories/examinations/conventions/ug13
 		*/
-	def suggestedFinalYearGrade(scyd: StudentCourseYearDetails, normalLoad: BigDecimal, routeRules: Seq[UpstreamRouteRule]): FinalYearGrade = {
+	def suggestedFinalYearGrade(scyd: StudentCourseYearDetails, normalLoad: BigDecimal, routeRulesPerYear: Map[Int, Seq[UpstreamRouteRule]], calculateYearMarks: Boolean): FinalYearGrade = {
 		if (scyd.isFinalYear) {
 			val finalYearOfStudy = scyd.yearOfStudy.toInt
 			val scydsFromThisAndOlderCourses: Seq[StudentCourseYearDetails] = {
@@ -237,7 +243,7 @@ abstract class AbstractProgressionService extends ProgressionService {
 					(year, Option(scyd))
 				}
 			})
-			lazy val markPerYear: Seq[(Int, Either[String, BigDecimal])] = getMarkPerYear(scyd, scydPerYear, finalYearOfStudy, normalLoad, routeRules)
+			lazy val markPerYear: Seq[(Int, Either[String, BigDecimal])] = getMarkPerYear(scyd, scydPerYear, finalYearOfStudy, normalLoad, routeRulesPerYear, calculateYearMarks)
 			lazy val yearWeightings: Seq[(Int, Option[CourseYearWeighting])] = markPerYear.map { case (year, _) =>
 				(year, courseAndRouteService.getCourseYearWeighting(scyd.studentCourseDetails.course.code, scyd.studentCourseDetails.sprStartAcademicYear, year))
 			}
@@ -267,17 +273,18 @@ abstract class AbstractProgressionService extends ProgressionService {
 		scydPerYear: Seq[(Int, Option[StudentCourseYearDetails])],
 		finalYearOfStudy: Int,
 		normalLoad: BigDecimal,
-		routeRules: Seq[UpstreamRouteRule]
+		routeRulesPerYear: Map[Int, Seq[UpstreamRouteRule]],
+		calculatePreviousYearMarks: Boolean
 	): Seq[(Int, Either[String, BigDecimal])] = {
 		scydPerYear.map{ case (year, scydOption) =>
 			(year, scydOption.map(thisScyd => {
-				if (year != finalYearOfStudy) {
+				if (!calculatePreviousYearMarks && year != finalYearOfStudy) {
 					Option(thisScyd.agreedMark) match {
 						case Some(mark) => Right(BigDecimal(mark))
 						case _ => Left(s"Could not find agreed mark for year $year")
 					}
 				} else {
-					getYearMark(scyd, normalLoad, routeRules)
+					getYearMark(thisScyd, normalLoad, routeRulesPerYear.getOrElse(year, Seq()))
 				}
 			}).getOrElse(Left(s"Could not find course details for year $year")))
 		}
