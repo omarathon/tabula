@@ -89,11 +89,12 @@ case class ExamGridColumnState(
 	yearOfStudy: Int,
 	nameToShow: ExamGridStudentIdentificationColumnValue,
 	showComponentMarks: Boolean,
-	showModuleNames: Boolean
+	showModuleNames: Boolean,
+	calculateYearMarks: Boolean
 )
 
 case object EmptyExamGridColumnState {
-	def apply() = ExamGridColumnState(Nil,Map.empty,null,null,null,null,0,nameToShow=ExamGridStudentIdentificationColumnValue.FullName,showComponentMarks=false,showModuleNames=true)
+	def apply() = ExamGridColumnState(Nil,Map.empty,null,null,null,null,0,nameToShow=ExamGridStudentIdentificationColumnValue.FullName,showComponentMarks=false,showModuleNames=true, calculateYearMarks=false)
 }
 
 @Component

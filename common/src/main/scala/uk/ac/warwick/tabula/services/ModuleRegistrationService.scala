@@ -82,7 +82,10 @@ abstract class AbstractModuleRegistrationService extends ModuleRegistrationServi
 					.setScale(1, RoundingMode.HALF_UP)
 			)
 		} else {
-			Left(s"The year mark cannot be calculated because the following module registrations have no mark: ${moduleRegistrations.filter(_.firstDefinedMark.isEmpty).map(_.module.code.toUpperCase).mkString(", ")}")
+			if(nonNullReplacedMarksAndCats.isEmpty)
+				Left(s"The year mark cannot be calculated because there are no module marks")
+			else
+				Left(s"The year mark cannot be calculated because the following module registrations have no mark: ${moduleRegistrations.filter(mr => !mr.passFail && mr.firstDefinedMark.isEmpty).map(_.module.code.toUpperCase).mkString(", ")}")
 		}
 	}
 

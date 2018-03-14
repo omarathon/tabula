@@ -108,7 +108,7 @@ class GenerateExamGridCheckAndApplyOvercatCommandTest extends TestBase with Mock
 
 		state.filteredEntities.isEmpty should be {false}
 		state.filteredEntities.head should be (entity)
-		state.overcatSubsets(state.filteredEntities.head).head should be (BigDecimal(50), Seq(mr1))
+		state.overcatSubsets(state.filteredEntities.head).head._2.head should be (BigDecimal(50), Seq(mr1))
 		verify(state.moduleRegistrationService, times(1)).overcattedModuleSubsets(entity.validYears(thisYearOfStudy), Map(), thisRoute.degreeType.normalCATSLoad, Seq(routeRule))
 	}}
 
@@ -129,7 +129,7 @@ class GenerateExamGridCheckAndApplyOvercatCommandTest extends TestBase with Mock
 
 		state.filteredEntities.isEmpty should be {false}
 		state.filteredEntities.head should be (entity)
-		state.overcatSubsets(state.filteredEntities.head).head should be (BigDecimal(50), Seq(mr1, mr2))
+		state.overcatSubsets(state.filteredEntities.head).head._2.head should be (BigDecimal(50), Seq(mr1, mr2))
 		verify(state.moduleRegistrationService, times(1)).overcattedModuleSubsets(entity.validYears(thisYearOfStudy), Map(), thisRoute.degreeType.normalCATSLoad, Seq(routeRule))
 	}}
 
@@ -150,7 +150,7 @@ class GenerateExamGridCheckAndApplyOvercatCommandTest extends TestBase with Mock
 
 		state.filteredEntities.isEmpty should be {false}
 		state.filteredEntities.head should be (entity)
-		state.overcatSubsets(state.filteredEntities.head).head should be (BigDecimal(50), Seq(mr2))
+		state.overcatSubsets(state.filteredEntities.head).head._2.head should be (BigDecimal(50), Seq(mr2))
 		verify(state.moduleRegistrationService, times(1)).overcattedModuleSubsets(entity.validYears(thisYearOfStudy), Map(), thisRoute.degreeType.normalCATSLoad, Seq(routeRule))
 	}}
 
@@ -189,7 +189,7 @@ class GenerateExamGridCheckAndApplyOvercatCommandTest extends TestBase with Mock
 		)
 		cmd.filteredEntities.isEmpty should be {false}
 		cmd.filteredEntities.head should be (entity)
-		cmd.overcatSubsets(cmd.filteredEntities.head).head should be (BigDecimal(50), Seq(mr1, mr2))
+		cmd.overcatSubsets(cmd.filteredEntities.head).head._2.head should be (BigDecimal(50), Seq(mr1, mr2))
 		verify(cmd.moduleRegistrationService, times(1)).overcattedModuleSubsets(entity.validYears(thisYearOfStudy), Map(), thisRoute.degreeType.normalCATSLoad, Seq(routeRule))
 
 		val result = cmd.applyInternal()

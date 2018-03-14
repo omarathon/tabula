@@ -180,6 +180,11 @@
 				<#else>
 					<li>Short grid</li>
 				</#if>
+				<#if gridOptionsCommand.yearMarksToUse == 'sits'>
+					<li>Use year marks from SITS</li>
+				<#else>
+					<li>Calculate year marks</li>
+				</#if>
 			</ul>
 		</#assign>
 

@@ -292,6 +292,23 @@
 
 	<div class="row">
 		<div class="col-md-3">
+			<div class="radio">
+				<label><input type="radio" name="yearMarksToUse" value="sits"
+					<#if gridOptionsCommand.yearMarksToUse == 'sits'>checked</#if>
+				/> Use year marks from SITS</label>
+			</div>
+		</div>
+		<div class="col-md-3">
+			<div class="radio">
+				<label><input type="radio" name="yearMarksToUse" value="calculated"
+					<#if gridOptionsCommand.yearMarksToUse == 'calculated'>checked</#if>
+				/> Calculate year marks</label>
+			</div>
+		</div>
+	</div>
+
+	<div class="row">
+		<div class="col-md-3">
 			<div class="checkbox">
 				<label><input type="checkbox" name="predefinedColumnIdentifiers" value="previous"
 					<#if gridOptionsCommand.predefinedColumnIdentifiers?seq_contains("previous")>checked</#if>

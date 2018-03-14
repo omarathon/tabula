@@ -444,7 +444,8 @@ class GenerateExamGridController extends ExamsController
 			yearOfStudy = selectCourseCommand.yearOfStudy,
 			nameToShow = gridOptionsCommand.nameToShow,
 			showComponentMarks = gridOptionsCommand.showComponentMarks,
-			showModuleNames = gridOptionsCommand.showModuleNames
+			showModuleNames = gridOptionsCommand.showModuleNames,
+			calculateYearMarks = gridOptionsCommand.calculateYearMarks
 		)
 
 		val studentInformationColumns = predefinedColumnOptions.collect { case c: StudentExamGridColumnOption => c }.flatMap(_.getColumns(state))
