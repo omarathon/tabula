@@ -197,28 +197,34 @@
 		<#assign enhancedMarkerFeedbacks = mapGet(order.enhancedFeedbackByStage, order.headerStage)/>
 		<#assign stage = order.headerStage />
 
+		<#assign moderator = stage.roleName == "Moderator" />
+		<#assign markOrModerate = moderator?string("moderate", "mark") />
+		<#assign markingOrModeration = moderator?string("moderation", "marking") />
+		<#assign markingOrModerating = moderator?string("moderating", "marking") />
+		<#assign moderatedOrMarked = moderator?string("moderated", "marked") />
+
 		<div class="marking-tab-section">
-			<h4>Submissions to ${stage.verb}</h4>
+			<h4>Submissions to ${markOrModerate} and send to admin</h4>
 
 			<#if enhancedMarkerFeedbacks.readyToMark?size != 0>
-				<p>These submissions are ready for you to ${stage.verb}.</p>
+				<p>These submissions are ready for you to ${markOrModerate}.</p>
 
 				<@markingTabSection order enhancedMarkerFeedbacks.readyToMark false />
 			<#else>
-				<p>No submissions are ready for you to ${stage.verb}.</p>
+				<p>No submissions are ready for you to ${markOrModerate}.</p>
 			</#if>
 		</div>
 
 		<div class="marking-tab-section">
 			<h4>
 				<a href="#" data-toggle="collapse" data-target="#${stage.name}-notReadyToMarkSubmissions">
-					<i class="fa fa-fw fa-chevron-right"></i>Not ready to ${stage.verb} (${enhancedMarkerFeedbacks.notReadyToMark?size})
+					<i class="fa fa-fw fa-chevron-right"></i>Upcoming ${markingOrModeration} (${enhancedMarkerFeedbacks.notReadyToMark?size})
 				</a>
 			</h4>
 
 			<div id="${stage.name}-notReadyToMarkSubmissions" class="marking-collapse collapse">
 				<#if enhancedMarkerFeedbacks.notReadyToMark?size != 0>
-					<p>These submissions are allocated to you for ${stage.presentVerb}, but haven't yet been released.</p>
+					<p>These submissions are allocated to you for ${markingOrModeration}, but haven't yet been released or are with a previous marker.</p>
 
 					<@markingTabSection order enhancedMarkerFeedbacks.notReadyToMark true />
 				<#else>
@@ -230,13 +236,13 @@
 		<div class="marking-tab-section">
 			<h4>
 				<a href="#" data-toggle="collapse" data-target="#${stage.name}-markedSubmissions">
-					<i class="fa fa-fw fa-chevron-right"></i>${stage.pastVerb?cap_first} (${enhancedMarkerFeedbacks.marked?size})
+					<i class="fa fa-fw fa-chevron-right"></i>${moderatedOrMarked?cap_first} (${enhancedMarkerFeedbacks.marked?size})
 				</a>
 			</h4>
 
 			<div id="${stage.name}-markedSubmissions" class="marking-collapse collapse">
 				<#if enhancedMarkerFeedbacks.marked?size != 0>
-					<p>You've finished ${stage.presentVerb} these submissions, so can't make any further changes.</p>
+					<p>You've finished ${markingOrModerating} these submissions, so can't make any further changes.</p>
 
 					<@markingTabSection order enhancedMarkerFeedbacks.marked true />
 				<#else>
