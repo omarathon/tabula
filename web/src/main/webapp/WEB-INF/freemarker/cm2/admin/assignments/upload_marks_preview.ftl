@@ -51,6 +51,9 @@
 				<table class="table upload-marks-preview">
 					<tr>
 						<th>University ID</th>
+						<#if assignment.showSeatNumbers>
+							<th>Seat number</th>
+						</#if>
 						<th>Mark</th>
 						<th>Grade</th>
 						<th>Feedback</th>
@@ -70,6 +73,9 @@
 											<span class="warning">Feedback and/or marks have already been uploaded for this student. This will be overwritten when you click confirm</span>
 									</#if>
 								</td>
+								<#if assignment.showSeatNumbers && item.user(assignment)??>
+									<td>${assignment.getSeatNumber(item.user(assignment))!""}</td>
+								</#if>
 								<td>
 									<@spring.bind path="actualMark">${status.value}</@spring.bind>
 									<@f.errors path="actualMark" cssClass="error" />
