@@ -20,10 +20,10 @@ object GenerateExamGridExporter extends TaskBenchmarking {
 	def apply(
 		department: Department,
 		academicYear: AcademicYear,
-		course: Course,
+		courses: Seq[Course],
 		routes: Seq[Route],
 		yearOfStudy: Int,
-		yearWeightings: Seq[CourseYearWeighting],
+		yearWeightings: Map[Course, Seq[CourseYearWeighting]],
 		normalLoadLookup: NormalLoadLookup,
 		entities: Seq[ExamGridEntity],
 		leftColumns: Seq[ChosenYearExamGridColumn],
@@ -43,7 +43,7 @@ object GenerateExamGridExporter extends TaskBenchmarking {
 		val sheet = workbook.createSheet(academicYear.toString.replace("/","-"))
 		sheet.trackAllColumnsForAutoSizing()
 
-		ExamGridSummaryAndKey.summaryAndKey(sheet, cellStyleMap, department, academicYear, course, routes, yearOfStudy, yearWeightings, normalLoadLookup, entities.size, isStudentCount = true)
+		ExamGridSummaryAndKey.summaryAndKey(sheet, cellStyleMap, department, academicYear, courses, routes, yearOfStudy, yearWeightings, normalLoadLookup, entities.size, isStudentCount = true)
 
 		val yearRow = sheet.createRow(sheet.getLastRowNum + 1)
 		val categoryRow = sheet.createRow(sheet.getLastRowNum + 1)
@@ -404,10 +404,10 @@ object ExamGridSummaryAndKey {
 		cellStyleMap: Map[ExamGridExportStyles.Style, CellStyle],
 		department: Department,
 		academicYear: AcademicYear,
-		course: Course,
+		courses: Seq[Course],
 		routes: Seq[Route],
 		yearOfStudy: Int,
-		yearWeightings: Seq[CourseYearWeighting],
+		yearWeightings: Map[Course, Seq[CourseYearWeighting]],
 		normalLoadLookup: NormalLoadLookup,
 		count: Int,
 		isStudentCount: Boolean
@@ -423,15 +423,29 @@ object ExamGridSummaryAndKey {
 		}
 		keyValueCells("Department:", department.name, 0)
 		keyValueCells("Academic year:", academicYear.toString, 1)
-		keyValueCells("Course:", s"${course.code.toUpperCase} ${course.name}", 2)
+		courses.size match {
+			case 1 => keyValueCells("Course:", s"${courses.head.code} ${courses.head.name}", 2)
+			case n if n > 0 => keyValueCells("Courses:", s"${courses.map(_.code).mkString(", ")}", 2)
+		}
 		routes.size match {
 			case 0 => keyValueCells("Routes:", "All routes", 3)
 			case 1 => keyValueCells("Route:", s"${routes.head.code.toUpperCase} ${routes.head.name}", 3)
 			case n => keyValueCells("Routes:", s"$n routes", 3)
 		}
 		keyValueCells("Year of study:", yearOfStudy.toString, 4)
-		val yearWeightingRow = keyValueCells("Year weightings:", yearWeightings.map(cyw => s"Year ${cyw.yearOfStudy} = ${cyw.weightingAsPercentage}%").mkString("\n"), 5)
-		yearWeightingRow.setHeight((yearWeightingRow.getHeight * (yearWeightings.size - 1)).toShort)
+
+		yearWeightings.size match {
+			case 1 =>
+				val yearWeightingRow =
+					keyValueCells("Year weightings:", yearWeightings.head._2.map(cyw => s"Year ${cyw.yearOfStudy} = ${cyw.weightingAsPercentage.toPlainString}%").mkString("\n"), 5)
+				yearWeightingRow.setHeight((yearWeightingRow.getHeight * (yearWeightings.size - 1)).toShort)
+			case n if n > 0 =>
+				val weightingByCourse = yearWeightings.map{case (course, cyws) =>
+					s"${course.code}: ${cyws.map(cyw => s"Year ${cyw.yearOfStudy} = ${cyw.weightingAsPercentage.toPlainString}%").mkString(", ")}"
+				}.mkString("\n")
+				val yearWeightingRow = keyValueCells("Year weightings:", weightingByCourse, 5)
+				yearWeightingRow.setHeight((yearWeightingRow.getHeight * yearWeightings.size).toShort)
+		}
 		val normalCATSLoadRow = keyValueCells("Normal CATS load:", normalLoadLookup.routes.sortBy(_.code).map(r => s"${r.code.toUpperCase}: ${normalLoadLookup(r).underlying.toString}").mkString("\n"), 6)
 		normalCATSLoadRow.setHeight((normalCATSLoadRow.getHeight * (normalLoadLookup.routes.size - 1)).toShort)
 		if (isStudentCount) {

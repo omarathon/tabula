@@ -99,7 +99,7 @@ trait GenerateExamGridSetCoreRequiredModulesDescription extends Describable[Map[
 		d.department(department)
 			.properties(
 				"academicYear" -> academicYear.toString,
-				"course" -> course.code,
+				"courses" -> courses.asScala.map(_.code),
 				"yearOfStudy" -> yearOfStudy,
 				"modules" -> modules.asScala.map { case (route, crModules) => route.code -> crModules.asScala.map(_.code) }
 			)
@@ -116,7 +116,7 @@ trait GenerateExamGridSetCoreRequiredModulesCommandState {
 
 	private lazy val routesForDisplay: Seq[Route] = routes.asScala match {
 		case _ if routes.isEmpty =>
-			studentCourseYearDetailsDao.findByCourseRoutesYear(academicYear, course, routes.asScala, yearOfStudy, includeTempWithdrawn, eagerLoad = true, disableFreshFilter = true)
+			studentCourseYearDetailsDao.findByCourseRoutesYear(academicYear, courses.asScala, routes.asScala, yearOfStudy, includeTempWithdrawn, eagerLoad = true, disableFreshFilter = true)
 				.filter(scyd => department.includesMember(scyd.studentCourseDetails.student, Some(department)))
 				.map(scyd => scyd.toExamGridEntityYear.route).distinct
 		case _ =>

@@ -30,6 +30,8 @@ class Course {
 
 	var lastUpdatedDate: DateTime = DateTime.now
 
+	var inUse: Boolean = _
+
 	override def toString: String = name
 
 }

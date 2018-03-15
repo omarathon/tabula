@@ -3,7 +3,7 @@ package uk.ac.warwick.tabula.commands.exams.grids
 import org.apache.poi.xwpf.usermodel.XWPFDocument
 import org.openxmlformats.schemas.wordprocessingml.x2006.main.STTblWidth
 import uk.ac.warwick.tabula.commands.TaskBenchmarking
-import uk.ac.warwick.tabula.data.model.{Course, UpstreamRouteRuleLookup}
+import uk.ac.warwick.tabula.data.model.UpstreamRouteRuleLookup
 import uk.ac.warwick.tabula.services.exams.grids.NormalLoadLookup
 import uk.ac.warwick.tabula.services.{FinalYearGrade, ProgressionService}
 
@@ -13,7 +13,6 @@ object ExamGridMarksRecordExporter extends TaskBenchmarking with AddConfidential
 
 	def apply(
 		entities: Seq[ExamGridEntity],
-		course: Course,
 		progressionService: ProgressionService,
 		normalLoadLookup: NormalLoadLookup,
 		routeRulesLookup: UpstreamRouteRuleLookup,
@@ -26,6 +25,8 @@ object ExamGridMarksRecordExporter extends TaskBenchmarking with AddConfidential
 
 		def renderEntity(entity: ExamGridEntity): Unit = benchmarkTask("renderEntity") {
 			val route = entity.validYears(entity.validYears.keys.last).route
+			val course = entity.validYears(entity.validYears.keys.last).studentCourseYearDetails.map(_.studentCourseDetails.course)
+				.getOrElse(throw new IllegalStateException(s"No course for ${entity.universityId}"))
 			val p1 = doc.getLastParagraph
 			val r1 = p1.createRun()
 			r1.setText(s"Marks record for ${entity.firstName} ${entity.lastName}")

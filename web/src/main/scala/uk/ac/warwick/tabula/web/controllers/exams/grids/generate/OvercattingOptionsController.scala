@@ -79,10 +79,10 @@ class OvercattingOptionsController extends ExamsController
 			GenerateExamGridExporter(
 				department = overcatView.department,
 				academicYear = overcatView.academicYear,
-				course = scyd.studentCourseDetails.course,
+				courses = Seq(scyd.studentCourseDetails.course),
 				routes = Seq(scyd.route),
 				yearOfStudy = scyd.yearOfStudy,
-				yearWeightings = Seq(),
+				yearWeightings = Map(),
 				normalLoadLookup = overcatView.normalLoadLookup,
 				entities = overcatView.overcattedEntities,
 				leftColumns = overcatView.optionsColumns,

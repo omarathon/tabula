@@ -33,7 +33,7 @@ class GenerateExamGridSelectCourseCommandInternal(val department: Department, va
 
 	override def applyInternal(): Seq[ExamGridEntity] = {
 		val scyds = benchmarkTask("findByCourseRoutesYear") {
-			studentCourseYearDetailsDao.findByCourseRoutesYear(academicYear, course, routes.asScala, yearOfStudy, includeTempWithdrawn, eagerLoad = true, disableFreshFilter = true)
+			studentCourseYearDetailsDao.findByCourseRoutesYear(academicYear, courses.asScala, routes.asScala, yearOfStudy, includeTempWithdrawn, eagerLoad = true, disableFreshFilter = true)
 				.filter(scyd => department.includesMember(scyd.studentCourseDetails.student, Some(department)))
 		}
 		val sorted = benchmarkTask("sorting") {
@@ -51,9 +51,9 @@ trait GenerateExamGridSelectCourseValidation extends SelfValidating {
 	self: GenerateExamGridSelectCourseCommandState with GenerateExamGridSelectCourseCommandRequest =>
 
 	override def validate(errors: Errors): Unit = {
-		if (course == null) {
+		if (courses.isEmpty) {
 			errors.reject("examGrid.course.empty")
-		} else if (!allCourses.contains(course)) {
+		} else if (courses.asScala.exists(c => !allCourses.contains(c))) {
 			errors.reject("examGrid.course.invalid")
 		}
 		if (yearOfStudy == null) {
@@ -82,13 +82,13 @@ trait GenerateExamGridSelectCourseCommandState {
 	def academicYear: AcademicYear
 
 	// Courses are always owned by the root department
-	lazy val allCourses: List[Course] = department.rootDepartment.descendants.flatMap(d => courseAndRouteService.findCoursesInDepartment(d)).sortBy(_.code)
+	lazy val allCourses: List[Course] = department.rootDepartment.descendants.flatMap(d => courseAndRouteService.findCoursesInDepartment(d)).filter(_.inUse).sortBy(_.code)
 	lazy val allRoutes: List[Route] = department.descendants.flatMap(d => courseAndRouteService.findRoutesInDepartment(d)).sortBy(_.code)
 	lazy val allYearsOfStudy: Inclusive = 1 to FilterStudentsOrRelationships.MaxYearsOfStudy
 }
 
 trait GenerateExamGridSelectCourseCommandRequest {
-	var course: Course = _
+	var courses: JList[Course] = JArrayList()
 	var routes: JList[Route] = JArrayList()
 	var yearOfStudy: JInteger = _
 	var includeTempWithdrawn: Boolean = false

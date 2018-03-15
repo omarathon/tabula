@@ -22,7 +22,18 @@
 	</p>
 
 	<p>
-		Select the items to include in your grid for Course: ${selectCourseCommand.course.code?upper_case} ${selectCourseCommand.course.name},
+		Select the items to include in your grid for
+		<#if selectCourseCommand.courses?size == 1>
+			Course: ${selectCourseCommand.courses?first.code?upper_case} ${selectCourseCommand.courses?first.name}
+				<#else>
+			Courses:
+					<#assign popover>
+				<ul><#list selectCourseCommand.courses?sort_by('code') as course>
+					<li>${course.code?upper_case} ${course.name}</li>
+				</#list></ul>
+					</#assign>
+			<a class="use-popover" href="#" data-html="true" data-content="${popover}" data-container="body">${selectCourseCommand.courses?size} courses</a>
+		</#if>,
 		Year of Study: ${selectCourseCommand.yearOfStudy},
 		<#if !selectCourseCommand.routes?has_content>
 			All routes
@@ -117,6 +128,14 @@
 				<label><input type="checkbox" name="predefinedColumnIdentifiers" value="sprCode"
 					<#if gridOptionsCommand.predefinedColumnIdentifiers?seq_contains("sprCode")>checked</#if>
 				/> SPR code</label>
+			</div>
+		</div>
+
+		<div class="col-md-3">
+			<div class="checkbox">
+				<label><input type="checkbox" name="predefinedColumnIdentifiers" value="course"
+					<#if gridOptionsCommand.predefinedColumnIdentifiers?seq_contains("course")>checked</#if>
+				/> Course</label>
 			</div>
 		</div>
 
