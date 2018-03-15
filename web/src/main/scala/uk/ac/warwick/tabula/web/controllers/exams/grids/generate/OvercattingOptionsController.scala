@@ -163,6 +163,7 @@ class OvercattingOptionsView(
 		yearOfStudy = scyd.yearOfStudy,
 		nameToShow = ExamGridStudentIdentificationColumnValue.BothName,
 		showComponentMarks = false,
+		showZeroWeightedComponents = false,
 		showModuleNames = false,
 		calculateYearMarks = false
 	)

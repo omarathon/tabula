@@ -176,6 +176,11 @@
 					<li>Only show overall mark</li>
 				<#else>
 					<li>Show component marks</li>
+					<#if gridOptionsCommand.componentsToShow == 'all'>
+						<li>Show all assessment components</li>
+					<#else>
+						<li>Hide zero weighted assessment components</li>
+					</#if>
 				</#if>
 				<#if gridOptionsCommand.moduleNameToShow == 'codeOnly'>
 					<li>Show module code only</li>

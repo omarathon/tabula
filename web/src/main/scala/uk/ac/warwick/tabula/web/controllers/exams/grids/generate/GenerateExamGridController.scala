@@ -446,6 +446,7 @@ class GenerateExamGridController extends ExamsController
 			yearOfStudy = selectCourseCommand.yearOfStudy,
 			nameToShow = gridOptionsCommand.nameToShow,
 			showComponentMarks = gridOptionsCommand.showComponentMarks,
+			showZeroWeightedComponents = gridOptionsCommand.showZeroWeightedComponents,
 			showModuleNames = gridOptionsCommand.showModuleNames,
 			calculateYearMarks = gridOptionsCommand.calculateYearMarks
 		)

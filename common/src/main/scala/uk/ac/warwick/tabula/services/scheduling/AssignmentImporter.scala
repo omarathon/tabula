@@ -205,7 +205,8 @@ object AssignmentImporter {
 			'${AssessmentComponent.NoneAssessmentGroup}' as assessment_group,
 			'X' as assessment_code,
 			'Y' as in_use,
-			null as marks_code
+			null as marks_code,
+			0 as weight
 			from $sitsSchema.cam_sms sms
 				join $sitsSchema.cam_ssn ssn -- SSN table holds module registration status
 					on sms.spr_code = ssn.ssn_sprc and ssn.ssn_ayrc = sms.ayr_code and ssn.ssn_mrgs != 'CON' -- mrgs = "Module Registration Status"
@@ -220,7 +221,8 @@ object AssignmentImporter {
 			'${AssessmentComponent.NoneAssessmentGroup}' as assessment_group,
 			'X' as assessment_code,
 			'Y' as in_use,
-			null as marks_code
+			null as marks_code,
+	 		0 as weight
 			from $sitsSchema.cam_smo smo
 				left outer join $sitsSchema.cam_ssn ssn
 					on smo.spr_code = ssn.ssn_sprc and ssn.ssn_ayrc = smo.ayr_code
@@ -237,7 +239,8 @@ object AssignmentImporter {
 			${castToString("mab.mab_agrp")} as assessment_group,
 			${castToString("mab.ast_code")} as assessment_code,
 			${castToString("mab.mab_udf1")} as in_use,
-			${castToString("mab.mks_code")} as marks_code
+			${castToString("mab.mks_code")} as marks_code,
+			mab_perc as weight
 			from $sitsSchema.cam_mab mab -- Module Assessment Body, containing assessment components
 				join $sitsSchema.cam_mav mav -- Module Availability which indicates which modules are avaiable in the year
 					on mab.map_code = mav.mod_code and
@@ -439,6 +442,7 @@ object AssignmentImporter {
 				case _ => false
 			}
 			a.marksCode = rs.getString("marks_code")
+			a.weighting = rs.getInt("weight")
 			a
 		}
 	}

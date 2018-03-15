@@ -39,6 +39,7 @@ class GenerateExamGridGridOptionsCommandInternal(val department: Department) ext
 			nameToShow,
 			yearsToShow,
 			marksToShow,
+			componentsToShow,
 			moduleNameToShow,
 			layout,
 			yearMarksToUse
@@ -60,6 +61,7 @@ trait PopulatesGenerateExamGridGridOptionsCommand extends PopulateOnForm {
 		nameToShow = options.nameToShow
 		yearsToShow = options.yearsToShow
 		marksToShow = options.marksToShow
+		componentsToShow = options.componentsToShow
 		moduleNameToShow = options.moduleNameToShow
 		layout = options.layout
 		yearMarksToUse = options.yearMarksToUse
@@ -118,6 +120,7 @@ trait GenerateExamGridGridOptionsCommandRequest {
 	var nameToShow: ExamGridStudentIdentificationColumnValue = ExamGridStudentIdentificationColumnValue.FullName
 	var yearsToShow: String = "current"
 	var marksToShow: String = "overall"
+	var componentsToShow: String = "all"
 	var moduleNameToShow: String = "codeOnly"
 	var layout: String = "full"
 	var yearMarksToUse: String = "sits"
@@ -125,6 +128,7 @@ trait GenerateExamGridGridOptionsCommandRequest {
 
 	def showFullLayout: Boolean = layout == "full"
 	def showComponentMarks: Boolean = marksToShow == "all"
+	def showZeroWeightedComponents: Boolean = componentsToShow == "all"
 	def showModuleNames: Boolean = moduleNameToShow == "nameAndCode"
 	def calculateYearMarks: Boolean = yearMarksToUse != "sits"
 

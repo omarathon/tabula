@@ -247,6 +247,14 @@
 				/> Module Reports</label>
 			</div>
 		</div>
+
+		<div class="col-md-3">
+			<div class="checkbox">
+				<label><input type="checkbox" name="componentsToShow" value="nonZero"
+					<#if gridOptionsCommand.componentsToShow == 'nonZero'>checked</#if>
+				/> Hide zero weighted components <@fmt.help_popover id="componentsToShow" content="Don't show assessment components that don't contribute towards the overall module mark" /></label>
+			</div>
+		</div>
 	</div>
 
 	<hr />

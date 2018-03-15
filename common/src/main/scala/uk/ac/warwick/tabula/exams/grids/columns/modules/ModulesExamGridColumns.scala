@@ -2,10 +2,12 @@ package uk.ac.warwick.tabula.exams.grids.columns.modules
 
 import org.springframework.stereotype.Component
 import uk.ac.warwick.tabula.JavaImports.JBigDecimal
-import uk.ac.warwick.tabula.commands.exams.grids.{ExamGridEntity, ExamGridEntityYear}
+import uk.ac.warwick.tabula.commands.exams.grids.ExamGridEntityYear
 import uk.ac.warwick.tabula.data.model.StudentCourseYearDetails.YearOfStudy
 import uk.ac.warwick.tabula.data.model.{Module, ModuleRegistration, ModuleSelectionStatus, UpstreamAssessmentGroupMember}
 import uk.ac.warwick.tabula.exams.grids.columns.{ExamGridColumnValue, ExamGridColumnValueType, _}
+import uk.ac.warwick.tabula.services.AutowiringAssessmentMembershipServiceComponent
+
 import scala.collection.mutable
 
 object ModuleExamGridColumn {
@@ -14,7 +16,7 @@ object ModuleExamGridColumn {
 }
 
 abstract class ModuleExamGridColumn(state: ExamGridColumnState, val module: Module, isDuplicate: Boolean, cats: JBigDecimal)
-	extends PerYearExamGridColumn(state) with HasExamGridColumnCategory with HasExamGridColumnSecondaryValue {
+	extends PerYearExamGridColumn(state) with HasExamGridColumnCategory with HasExamGridColumnSecondaryValue with AutowiringAssessmentMembershipServiceComponent {
 
 	def moduleSelectionStatus: Option[ModuleSelectionStatus]
 
@@ -85,8 +87,14 @@ abstract class ModuleExamGridColumn(state: ExamGridColumnState, val module: Modu
 							}
 						}
 
-						val (exams, assignments) = mr.upstreamAssessmentGroupMembers.filter(m => m.agreedMark.isDefined || m.actualMark.isDefined)
-							.partition(_.upstreamAssessmentGroup.sequence.startsWith("E"))
+						val assessmentComponents = {
+							val allComponents = mr.upstreamAssessmentGroupMembers.filter(m => m.agreedMark.isDefined || m.actualMark.isDefined)
+							if (state.showZeroWeightedComponents) allComponents else allComponents.filter(uagm => {
+								assessmentMembershipService.getAssessmentComponent(uagm.upstreamAssessmentGroup).flatMap(ac => Option(ac.weighting)).exists(_ > 0)
+							})
+						}
+
+						val (exams, assignments) = assessmentComponents.partition(_.upstreamAssessmentGroup.sequence.startsWith("E"))
 
 						ExamGridColumnValueType.toMap(
 							overall = overallMark,
@@ -203,7 +211,7 @@ class CoreRequiredModulesColumnOption extends ModuleExamGridColumnOption {
 		override val category: String = "Core Required Modules"
 		override val categoryShortForm: String = "CR"
 
-		override val moduleSelectionStatus = None
+		override val moduleSelectionStatus: Option[ModuleSelectionStatus] = None
 
 	}
 
