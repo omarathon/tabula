@@ -149,6 +149,7 @@ class StudentCourseYearDetailsDaoImpl extends StudentCourseYearDetailsDao with D
 
 		val c = thisSession.newCriteria[StudentCourseYearDetails]
 			.createAlias("studentCourseDetails", "scd")
+			.add(isNull("missingFromImportSince"))
 			.add(is("academicYear", academicYear))
 			.add(is("yearOfStudy", yearOfStudy))
 			.add(safeIn("scd.course", courses))
