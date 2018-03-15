@@ -314,7 +314,7 @@
 			<div class="radio">
 				<label><input type="radio" name="yearMarksToUse" value="sits"
 					<#if gridOptionsCommand.yearMarksToUse == 'sits'>checked</#if>
-				/> Use year marks from SITS</label>
+				/> Uploaded year marks</label>
 			</div>
 		</div>
 		<div class="col-md-3">
