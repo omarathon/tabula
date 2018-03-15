@@ -163,7 +163,8 @@ class OvercattingOptionsView(
 		yearOfStudy = scyd.yearOfStudy,
 		nameToShow = ExamGridStudentIdentificationColumnValue.BothName,
 		showComponentMarks = false,
-		showModuleNames = false
+		showModuleNames = false,
+		calculateYearMarks = false
 	)
 
 	private lazy val currentYearMark = moduleRegistrationService.weightedMeanYearMark(scyd.moduleRegistrations, overwrittenMarks)

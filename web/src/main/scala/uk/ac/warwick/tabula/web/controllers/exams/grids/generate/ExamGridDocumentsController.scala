@@ -124,7 +124,7 @@ trait ExamGridDocumentsController extends ExamsController
 		)
 	}
 
-	private def marksRecordRender(selectCourseCommand: SelectCourseCommand, isConfidential: Boolean): View = {
+	private def marksRecordRender(selectCourseCommand: SelectCourseCommand, gridOptionsCommand: GridOptionsCommand, isConfidential: Boolean): View = {
 		val entities = selectCourseCommand.apply()
 		new WordView(
 			"%sMarks record for %s %s %s %s.docx".format(
@@ -144,7 +144,8 @@ trait ExamGridDocumentsController extends ExamsController
 				progressionService,
 				new NormalLoadLookup(selectCourseCommand.academicYear, selectCourseCommand.yearOfStudy, normalCATSLoadService),
 				new UpstreamRouteRuleLookup(selectCourseCommand.academicYear, upstreamRouteRuleService),
-				isConfidential = isConfidential
+				isConfidential = isConfidential,
+				calculateYearMarks = gridOptionsCommand.calculateYearMarks
 			)
 		)
 	}
@@ -152,6 +153,7 @@ trait ExamGridDocumentsController extends ExamsController
 	@RequestMapping(method = Array(POST), params = Array(GenerateExamGridMappingParameters.marksRecord))
 	def marksRecord(
 		@Valid @ModelAttribute("selectCourseCommand") selectCourseCommand: SelectCourseCommand,
+		@Valid @ModelAttribute("gridOptionsCommand") gridOptionsCommand: GridOptionsCommand,
 		selectCourseCommandErrors: Errors
 	): View = {
 		if (selectCourseCommandErrors.hasErrors) {
@@ -159,13 +161,14 @@ trait ExamGridDocumentsController extends ExamsController
 				messageSource.getMessage(e.getCode, e.getArguments, null)).mkString(", ")
 			)
 		} else {
-			marksRecordRender(selectCourseCommand, isConfidential = false)
+			marksRecordRender(selectCourseCommand, gridOptionsCommand, isConfidential = false)
 		}
 	}
 
 	@RequestMapping(method = Array(POST), params = Array(GenerateExamGridMappingParameters.marksRecordConfidential))
 	def marksRecordConfidential(
 		@Valid @ModelAttribute("selectCourseCommand") selectCourseCommand: SelectCourseCommand,
+		@Valid @ModelAttribute("gridOptionsCommand") gridOptionsCommand: GridOptionsCommand,
 		selectCourseCommandErrors: Errors
 	): View = {
 		if (selectCourseCommandErrors.hasErrors) {
@@ -173,11 +176,11 @@ trait ExamGridDocumentsController extends ExamsController
 				messageSource.getMessage(e.getCode, e.getArguments, null)).mkString(", ")
 			)
 		} else {
-			marksRecordRender(selectCourseCommand, isConfidential = true)
+			marksRecordRender(selectCourseCommand, gridOptionsCommand, isConfidential = true)
 		}
 	}
 
-	private def passListRender(selectCourseCommand: SelectCourseCommand, isConfidential: Boolean): View = {
+	private def passListRender(selectCourseCommand: SelectCourseCommand, gridOptionsCommand: GridOptionsCommand, isConfidential: Boolean): View = {
 		val entities = selectCourseCommand.apply()
 		new WordView(
 			"%sPass list for %s %s %s %s.docx".format(
@@ -200,7 +203,8 @@ trait ExamGridDocumentsController extends ExamsController
 				progressionService,
 				new NormalLoadLookup(selectCourseCommand.academicYear, selectCourseCommand.yearOfStudy, normalCATSLoadService),
 				new UpstreamRouteRuleLookup(selectCourseCommand.academicYear, upstreamRouteRuleService),
-				isConfidential
+				isConfidential,
+				calculateYearMarks = gridOptionsCommand.calculateYearMarks
 			)
 		)
 	}
@@ -208,6 +212,7 @@ trait ExamGridDocumentsController extends ExamsController
 	@RequestMapping(method = Array(POST), params = Array(GenerateExamGridMappingParameters.passList))
 	def passList(
 		@Valid @ModelAttribute("selectCourseCommand") selectCourseCommand: SelectCourseCommand,
+		@Valid @ModelAttribute("gridOptionsCommand") gridOptionsCommand: GridOptionsCommand,
 		selectCourseCommandErrors: Errors
 	): View = {
 		if (selectCourseCommandErrors.hasErrors) {
@@ -215,13 +220,14 @@ trait ExamGridDocumentsController extends ExamsController
 				messageSource.getMessage(e.getCode, e.getArguments, null)).mkString(", ")
 			)
 		} else {
-			passListRender(selectCourseCommand, isConfidential = false)
+			passListRender(selectCourseCommand, gridOptionsCommand, isConfidential = false)
 		}
 	}
 
 	@RequestMapping(method = Array(POST), params = Array(GenerateExamGridMappingParameters.passListConfidential))
 	def passListConfidential(
 		@Valid @ModelAttribute("selectCourseCommand") selectCourseCommand: SelectCourseCommand,
+		@Valid @ModelAttribute("gridOptionsCommand") gridOptionsCommand: GridOptionsCommand,
 		selectCourseCommandErrors: Errors
 	): View = {
 		if (selectCourseCommandErrors.hasErrors) {
@@ -229,7 +235,7 @@ trait ExamGridDocumentsController extends ExamsController
 				messageSource.getMessage(e.getCode, e.getArguments, null)).mkString(", ")
 			)
 		} else {
-			passListRender(selectCourseCommand, isConfidential = true)
+			passListRender(selectCourseCommand, gridOptionsCommand, isConfidential = true)
 		}
 	}
 

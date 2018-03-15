@@ -93,10 +93,15 @@ class GenerateOwnMarksTemplateCommandInternal(val assignment: Assignment, val ma
 		header.createCell(2).setCellValue("Grade")
 		header.createCell(3).setCellValue("Feedback")
 
+		val baseRows = if (assignment.showSeatNumbers) {
+			header.createCell(4).setCellValue("Seat number")
+			4
+		} else 3
+
 		val maxCurrentStage = markerFeedbackToDo.map(_.feedback.currentStageIndex).reduceOption(_ max _).getOrElse(0)
 		val stages = assignment.cm2MarkingWorkflow.allStages.filter(_.order < maxCurrentStage)
 		for((stage, i) <- stages.zipWithIndex){
-			val cell = 3 + ((i+1)*2)
+			val cell = baseRows + ((i+1)*2)
 			header.createCell(cell-1).setCellValue(stage.description)
 			header.createCell(cell).setCellValue(s"${stage.description} mark")
 		}
@@ -118,12 +123,16 @@ class GenerateOwnMarksTemplateCommandInternal(val assignment: Assignment, val ma
 			val gradeCell = createUnprotectedCell(row, 2)
 			val commentsCell = createUnprotectedCell(row, 3)
 
+			if (assignment.showSeatNumbers) {
+				assignment.getSeatNumber(currentMarkerFeedback.student).foreach(row.createCell(4).setCellValue(_))
+			}
+
 			for (mark <- currentMarkerFeedback.mark) markCell.setCellValue(mark)
 			for (grade <- currentMarkerFeedback.grade) gradeCell.setCellValue(grade)
 			for (comments <- currentMarkerFeedback.comments) commentsCell.setCellValue(comments)
 
 			for((stage, i) <- stages.zipWithIndex){
-				val cell = 3 + ((i+1)*2)
+				val cell = baseRows + ((i+1)*2)
 				val pmf = previousMarkerFeedback.find(_.stage == stage)
 				row.createCell(cell-1).setCellValue(pmf.map(_.marker).map(_.getFullName).getOrElse(""))
 				row.createCell(cell).setCellValue(pmf.flatMap(_.mark).map(_.toString).getOrElse(""))
@@ -153,6 +162,10 @@ class GenerateMarksTemplateCommandInternal(val assignment: Assignment) extends C
 		header.createCell(2).setCellValue("Grade")
 		header.createCell(3).setCellValue("Feedback")
 
+		if (assignment.showSeatNumbers) {
+			header.createCell(4).setCellValue("Seat number")
+		}
+
 		// populate the mark sheet with ids and existing data
 		for ((member, i) <- students.zipWithIndex) {
 			val feedback = assignment.allFeedback.find(_.usercode == member.getUserId)
@@ -162,6 +175,10 @@ class GenerateMarksTemplateCommandInternal(val assignment: Assignment) extends C
 			for (f <- feedback; mark <- f.actualMark) row.createCell(1).setCellValue(mark)
 			for (f <- feedback; grade <- f.actualGrade) row.createCell(2).setCellValue(grade)
 			for (f <- feedback; comments <- f.comments) row.createCell(3).setCellValue(comments)
+
+			if (assignment.showSeatNumbers) {
+				assignment.getSeatNumber(member).foreach(row.createCell(4).setCellValue(_))
+			}
 		}
 
 		// add conditional formatting for invalid marks

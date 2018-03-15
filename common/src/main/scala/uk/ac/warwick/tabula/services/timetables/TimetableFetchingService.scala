@@ -148,13 +148,12 @@ trait CombinedHttpTimetableFetchingServiceComponent extends CompleteTimetableFet
 
 }
 
-class CombinedTimetableFetchingService(services: PartialTimetableFetchingService*) extends CompleteTimetableFetchingService with Logging {
-
-	private def mergeDuplicates(events: EventList): EventList = {
+object CombinedTimetableFetchingService {
+	def mergeDuplicates(events: EventList): EventList = {
 		// If an event runs on the same day, between the same times, in the same weeks, of the same type, on the same module,
 		// in the same location, with the same tutors, it is the same
 		events.map(events => events.groupBy { event => (event.year, event.day, event.startTime, event.endTime, event.weekRanges,
-			event.eventType, event.parent.shortName, event.location, event.staff) }
+			event.eventType, event.parent.shortName, event.location.map(_.name), event.staff) }
 			.mapValues {
 				// values are Seq so List cons (::) never matches
 				case event +: Nil => event
@@ -182,6 +181,11 @@ class CombinedTimetableFetchingService(services: PartialTimetableFetchingService
 			}
 			.values.toSeq)
 	}
+}
+
+class CombinedTimetableFetchingService(services: PartialTimetableFetchingService*) extends CompleteTimetableFetchingService with Logging {
+
+	import CombinedTimetableFetchingService._
 
 	def getTimetableForStudent(universityId: String): Future[EventList] =
 		Futures.combine(

@@ -867,6 +867,15 @@ class Assignment
 	def toEntityReference: AssignmentEntityReference = new AssignmentEntityReference().put(this)
 
 	def showStudentNames: Boolean = (anonymity == null && module.adminDepartment.showStudentName) || anonymity == NameAndID
+
+	@transient
+	private lazy val seatNumbers: Map[String, Int] = assessmentMembershipService.determineMembershipUsersWithOrder(this).collect {
+		case (user, Some(seat)) => (user.getUserId, seat)
+	}.toMap
+
+	def getSeatNumber(user: User): Option[Int] = seatNumbers.get(user.getUserId)
+
+	def showSeatNumbers: Boolean = seatNumbers.nonEmpty
 }
 
 /**

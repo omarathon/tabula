@@ -1,18 +1,21 @@
 package uk.ac.warwick.tabula.commands.cm2.assignments
 
 import org.springframework.validation.Errors
-import uk.ac.warwick.tabula.{AcademicYear, AutowiringFeaturesComponent, Features, FeaturesComponent}
+import uk.ac.warwick.tabula.JavaImports._
 import uk.ac.warwick.tabula.commands._
 import uk.ac.warwick.tabula.commands.cm2.markingworkflows._
-import uk.ac.warwick.tabula.data.model.{WorkflowCategory, _}
+import uk.ac.warwick.tabula.commands.coursework.assignments.extensions.{ExtensionPersistenceComponent, HibernateExtensionPersistenceComponent}
+import uk.ac.warwick.tabula.data.HibernateHelpers
+import uk.ac.warwick.tabula.data.model.WorkflowCategory.NoneUse
+import uk.ac.warwick.tabula.data.model.markingworkflow.MarkingWorkflowType.{ModeratedMarking, SelectedModeratedMarking}
 import uk.ac.warwick.tabula.data.model.markingworkflow.{CM2MarkingWorkflow, ModeratedWorkflow}
+import uk.ac.warwick.tabula.data.model.{WorkflowCategory, _}
 import uk.ac.warwick.tabula.permissions.Permissions
 import uk.ac.warwick.tabula.services.{AssessmentServiceComponent, UserLookupComponent, _}
 import uk.ac.warwick.tabula.system.permissions.{PermissionsChecking, PermissionsCheckingMethods, RequiresPermissionsChecking}
-import uk.ac.warwick.tabula.JavaImports._
-import uk.ac.warwick.tabula.data.HibernateHelpers
-import uk.ac.warwick.tabula.data.model.markingworkflow.MarkingWorkflowType.{ModeratedMarking, SelectedModeratedMarking}
-import uk.ac.warwick.tabula.data.model.WorkflowCategory.NoneUse
+import uk.ac.warwick.tabula.{AcademicYear, AutowiringFeaturesComponent, FeaturesComponent}
+
+import scala.collection.JavaConverters._
 
 
 object EditAssignmentDetailsCommand {
@@ -25,10 +28,12 @@ object EditAssignmentDetailsCommand {
 			with EditAssignmentDetailsValidation
 			with ModifyAssignmentScheduledNotifications
 			with AutowiringAssessmentServiceComponent
+			with AutowiringExtensionServiceComponent
 			with AutowiringUserLookupComponent
 			with AutowiringCM2MarkingWorkflowServiceComponent
 			with AutowiringFeedbackServiceComponent
 			with AutowiringFeaturesComponent
+			with HibernateExtensionPersistenceComponent
 			with ModifyAssignmentsDetailsTriggers
 			with PopulateOnForm
 }
@@ -36,7 +41,7 @@ object EditAssignmentDetailsCommand {
 class EditAssignmentDetailsCommandInternal(override val assignment: Assignment) extends CommandInternal[Assignment] with EditAssignmentDetailsCommandState
 	with EditAssignmentDetailsValidation with SharedAssignmentDetailProperties with PopulateOnForm with AssignmentDetailsCopy with CreatesMarkingWorkflow {
 
-	self: AssessmentServiceComponent with UserLookupComponent with CM2MarkingWorkflowServiceComponent with FeaturesComponent =>
+	self: AssessmentServiceComponent with UserLookupComponent with CM2MarkingWorkflowServiceComponent with FeaturesComponent with ExtensionPersistenceComponent =>
 
 	override def applyInternal(): Assignment = {
 
@@ -79,6 +84,17 @@ class EditAssignmentDetailsCommandInternal(override val assignment: Assignment) 
 		}
 
 		copyTo(assignment)
+
+		if (openEnded) {
+			assignment.extensions.asScala
+				.filterNot(e => e.awaitingReview || e.approved)
+				.foreach { extension =>
+					extension.attachments.asScala.foreach(delete)
+					assignment.extensions.remove(extension)
+					extension.assignment = null
+					delete(extension)
+				}
+		}
 
 		assessmentService.save(assignment)
 		assignment
@@ -136,6 +152,10 @@ trait EditAssignmentDetailsValidation extends ModifyAssignmentDetailsValidation 
 
 		if (workflowCategory != NoneUse && !assignment.restrictSubmissions) {
 			errors.rejectValue("workflowCategory", "markingWorkflow.restrictSubmissions")
+		}
+
+		if (openEnded && assignment.extensions.asScala.exists(e => e.awaitingReview || e.approved)) {
+			errors.rejectValue("openEnded", "assignment.openEnded.hasExtensions")
 		}
 	}
 }

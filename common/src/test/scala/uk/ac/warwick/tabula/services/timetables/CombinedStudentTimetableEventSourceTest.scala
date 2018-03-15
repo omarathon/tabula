@@ -16,10 +16,13 @@ class CombinedStudentTimetableEventSourceTest extends TestBase with Mockito{
 	student.universityId = "university ID"
 	val user = new User()
 
-	val ttEvent= TimetableEvent("", "From Timetable","", "",TimetableEventType.Induction,Nil,DayOfWeek.Monday,LocalTime.now, LocalTime.now,None,TimetableEvent.Parent(),None,Nil,Nil,AcademicYear(2013),None,Map())
+	val startTime = LocalTime.now
+	val endTime = LocalTime.now.plusHours(1)
+
+	val ttEvent= TimetableEvent("", "From Timetable","", "",TimetableEventType.Induction,Nil,DayOfWeek.Monday,startTime,endTime,None,TimetableEvent.Parent(),None,Nil,Nil,AcademicYear(2013),None,Map())
 	val timetableEvents = Seq(ttEvent)
 
-	val sgEvent= TimetableEvent("", "From Group","", "",TimetableEventType.Induction,Nil,DayOfWeek.Monday,LocalTime.now, LocalTime.now,None,TimetableEvent.Parent(),None,Nil,Nil,AcademicYear(2013),None,Map())
+	val sgEvent= TimetableEvent("", "From Group","", "",TimetableEventType.Induction,Nil,DayOfWeek.Tuesday,startTime,endTime,None,TimetableEvent.Parent(),None,Nil,Nil,AcademicYear(2013),None,Map())
 	val groupEvents = Seq(sgEvent)
 
 	val source = new CombinedStudentTimetableEventSourceComponent
@@ -37,7 +40,7 @@ class CombinedStudentTimetableEventSourceTest extends TestBase with Mockito{
 	@Test
 	def callsBothServicesAndAggregatesTheResult(){
 		val result = source.studentTimetableEventSource.eventsFor(student, currentUser, TimetableEvent.Context.Student).futureValue
-		result.events should be (timetableEvents ++ groupEvents)
+		result.events.sortBy(_.day.getAsInt) should be (timetableEvents ++ groupEvents)
 	}
 
 

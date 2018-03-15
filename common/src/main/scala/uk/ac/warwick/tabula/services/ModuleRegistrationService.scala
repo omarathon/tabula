@@ -82,7 +82,10 @@ abstract class AbstractModuleRegistrationService extends ModuleRegistrationServi
 					.setScale(1, RoundingMode.HALF_UP)
 			)
 		} else {
-			Left(s"The year mark cannot be calculated because the following module registrations have no mark: ${moduleRegistrations.filter(_.firstDefinedMark.isEmpty).map(_.module.code.toUpperCase).mkString(", ")}")
+			if(nonNullReplacedMarksAndCats.isEmpty)
+				Left(s"The year mark cannot be calculated because there are no module marks")
+			else
+				Left(s"The year mark cannot be calculated because the following module registrations have no mark: ${moduleRegistrations.filter(mr => !mr.passFail && mr.firstDefinedMark.isEmpty).map(_.module.code.toUpperCase).mkString(", ")}")
 		}
 	}
 
@@ -118,12 +121,13 @@ abstract class AbstractModuleRegistrationService extends ModuleRegistrationServi
 					ruleFilteredSubsets
 				}
 			}
-			subsetsToReturn.map(modRegs =>
-				(weightedMeanYearMark(modRegs.toSeq, markOverrides).right.get, modRegs.toSeq.sortBy(_.module.code))
-			).sortBy { case (mark, modRegs) =>
-				// Add a definitive sort so subsets with the same mark always come out the same order
-				(mark, modRegs.size, modRegs.map(_.module.code).mkString(","))
-			}.reverse
+			subsetsToReturn.map(modRegs => (weightedMeanYearMark(modRegs.toSeq, markOverrides), modRegs.toSeq.sortBy(_.module.code)))
+			  .collect{case (Right(mark), modRegs) => (mark, modRegs)}
+				.sortBy { case (mark, modRegs) =>
+					// Add a definitive sort so subsets with the same mark always come out the same order
+					(mark, modRegs.size, modRegs.map(_.module.code).mkString(","))
+				}
+				.reverse
 		}
 	}
 

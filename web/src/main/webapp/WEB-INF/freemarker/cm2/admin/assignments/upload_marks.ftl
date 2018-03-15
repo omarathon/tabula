@@ -44,13 +44,20 @@
 					<div class="col-md-2">
 						<label>University ID</label>
 					</div>
+					<#assign feedbackColumnWidth=6/>
+					<#if assignment.showSeatNumbers>
+						<#assign feedbackColumnWidth=5/>
+						<div class="col-md-1">
+							<label>Seat</label>
+						</div>
+					</#if>
 					<div class="col-md-2">
 						<label>Mark</label>
 					</div>
 					<div class="col-md-2">
 						<label>Grade</label>
 					</div>
-					<div class="col-md-6">
+					<div class="col-md-${feedbackColumnWidth}">
 						<label>Feedback</label>
 					</div>
 				</div>
@@ -61,6 +68,13 @@
 								<input class="form-control" value="${markItem.id}" name="marks[${markItem_index}].id" type="text" readonly="readonly" />
 							</div>
 						</div>
+						<#if assignment.showSeatNumbers>
+						<div class="col-md-1">
+							<div class="form-group">
+								<input class="form-control" value="${assignment.getSeatNumber(markItem.user(assignment))!""}" type="text" readonly="readonly" />
+							</div>
+						</div>
+						</#if>
 						<div class="col-md-2">
 							<div class="form-group">
 								<div class="input-group">
@@ -80,13 +94,13 @@
 								<#else>
 									<div class="form-group">
 										<div class="input-group">
-											<input name="marks[${markItem_index}].actualGrade" class="form-control" value="<#if markItem.actualGrade??>${markItem.actualGrade}</#if>" type="text" placeholder="grade"/>
+											<input name="marks[${markItem_index}].actualGrade" class="form-control" value="<#if markItem.actualGrade??>${markItem.actualGrade}</#if>" type="text" placeholder="Grade"/>
 										</div>
 									</div class="form-group">
 								</#if>
 							</div>
 						</div>
-						<div class="col-md-6">
+						<div class="col-md-${feedbackColumnWidth}">
 							<div class="form-group">
 								<textarea class="small-textarea form-control" name="marks[${markItem_index}].feedbackComment" placeholder="Feedback"><#if markItem.feedbackComment??>${markItem.feedbackComment}</#if></textarea>
 							</div>

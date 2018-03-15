@@ -1,8 +1,8 @@
 package uk.ac.warwick.tabula.commands.cm2.departments
 
-import org.springframework.validation.BindingResult
+import org.springframework.validation.{BindingResult, Errors}
 import uk.ac.warwick.spring.Wire
-import uk.ac.warwick.tabula.commands.{Command, Description, UploadedFile}
+import uk.ac.warwick.tabula.commands.{Command, Description, SelfValidating, UploadedFile}
 import uk.ac.warwick.tabula.data.Daoisms
 import uk.ac.warwick.tabula.data.Transactions._
 import uk.ac.warwick.tabula.data.model.{Department, FeedbackTemplate}
@@ -61,7 +61,7 @@ class BulkFeedbackTemplateCommand(department:Department) extends FeedbackTemplat
 	}
 }
 
-class EditFeedbackTemplateCommand(department:Department, val template: FeedbackTemplate) extends FeedbackTemplateCommand(department) {
+class EditFeedbackTemplateCommand(department:Department, val template: FeedbackTemplate) extends FeedbackTemplateCommand(department) with SelfValidating {
 
 	mustBeLinked(template, department)
 	PermissionCheck(Permissions.FeedbackTemplate.Manage, template)
@@ -88,6 +88,12 @@ class EditFeedbackTemplateCommand(department:Department, val template: FeedbackT
 			feedbackTemplate.assignments.foreach(zipService.invalidateSubmissionZip(_))
 
 			Seq(feedbackTemplate)
+		}
+	}
+
+	override def validate(errors: Errors): Unit = {
+		if (name.isEmpty) {
+			errors.rejectValue("name", "NotEmpty")
 		}
 	}
 }

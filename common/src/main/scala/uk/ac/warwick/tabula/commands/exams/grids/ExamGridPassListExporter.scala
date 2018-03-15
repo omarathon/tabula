@@ -23,7 +23,8 @@ object ExamGridPassListExporter extends TaskBenchmarking with AddConfidentialWat
 		progressionService: ProgressionService,
 		normalLoadLookup: NormalLoadLookup,
 		routeRulesLookup: UpstreamRouteRuleLookup,
-		isConfidential: Boolean
+		isConfidential: Boolean,
+		calculateYearMarks: Boolean
 	): XWPFDocument = {
 
 		val doc = new XWPFDocument()
@@ -49,18 +50,20 @@ object ExamGridPassListExporter extends TaskBenchmarking with AddConfidentialWat
 		createAndFormatParagraph(doc)
 
 		val passedEntites = {
-			entities.filter(entity =>
+			entities.filter(entity => {
+				val routeRules = entity.validYears.mapValues(ey => routeRulesLookup(ey.route, ey.level))
 				entity.years(yearOfStudy).exists { year =>
 					progressionService.suggestedResult(
 						year.studentCourseYearDetails.get,
 						normalLoadLookup(year.route),
-						routeRulesLookup(year.route, year.level)
+						routeRules,
+						calculateYearMarks
 					) match {
 						case ProgressionResult.Proceed | ProgressionResult.PossiblyProceed | ProgressionResult.Pass => true
 						case _ => false
 					}
 				}
-			)
+			})
 		}
 
 		val entityTable = doc.createTable(passedEntites.size, 3)
