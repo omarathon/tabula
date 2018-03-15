@@ -8,6 +8,11 @@ import uk.ac.warwick.tabula.data.model.{Module, ModuleRegistration, ModuleSelect
 import uk.ac.warwick.tabula.exams.grids.columns.{ExamGridColumnValue, ExamGridColumnValueType, _}
 import scala.collection.mutable
 
+object ModuleExamGridColumn {
+	// grades with a special meaning in SITS
+	final val SITSIndicators = Seq("AB", "AM", "L", "M", "PL", "RF", "S", "W", "R", "X", "CP", "N", "QF", "T")
+}
+
 abstract class ModuleExamGridColumn(state: ExamGridColumnState, val module: Module, isDuplicate: Boolean, cats: JBigDecimal)
 	extends PerYearExamGridColumn(state) with HasExamGridColumnCategory with HasExamGridColumnSecondaryValue {
 
@@ -57,6 +62,8 @@ abstract class ModuleExamGridColumn(state: ExamGridColumnState, val module: Modu
 									ExamGridColumnValueFailedDecimal(mark, isActual)
 								} else if (entity.studentCourseYearDetails.isDefined && entity.overcattingModules.exists(_.contains(mr.module))) {
 									ExamGridColumnValueOvercatDecimal(mark, isActual)
+								} else if (mr.firstDefinedGrade.exists(g => ModuleExamGridColumn.SITSIndicators.contains(g))) {
+									ExamGridColumnValueString(s"${mr.firstDefinedGrade.get} ($mark)", isActual)
 								} else {
 									ExamGridColumnValueDecimal(mark, isActual)
 								}
