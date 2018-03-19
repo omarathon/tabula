@@ -88,6 +88,7 @@ abstract class AbstractTurnitinLtiQueueService extends TurnitinLtiQueueService w
 			attachment.originalityReport = report
 			report.lastSubmittedToTurnitin = new DateTime(0)
 			report.lastReportRequest = new DateTime(0)
+			report.nextSubmitAttempt = DateTime.now()
 			originalityReportService.saveOrUpdate(report)
 			report
 		})
@@ -179,8 +180,8 @@ abstract class AbstractTurnitinLtiQueueService extends TurnitinLtiQueueService w
 	}
 }
 
-@Service("turnitinLtiQueueService")
-class AutowiringEventServiceImpl
+@Service
+class TurnitinLtiQueueServiceImpl
 	extends AbstractTurnitinLtiQueueService
 	with AutowiringTurnitinLtiQueueDaoComponent
 	with AutowiringOriginalityReportServiceComponent
@@ -219,7 +220,7 @@ abstract class AbstractTurnitinLtiBackoffQueueService extends TurnitinLtiBackoff
 	def failedAssignments: Seq[Assignment] = turnitinLtiQueueDao.listFailedAssignments
 }
 
-@Service("turnitinLtiBackoffQueueService")
+@Service
 class TurnitinLtiBackoffQueueServiceImpl
 	extends AbstractTurnitinLtiBackoffQueueService
 		with AutowiringTurnitinLtiQueueDaoComponent

@@ -64,6 +64,7 @@ abstract class SubmitToTurnitinCommandInternal(val assignment: Assignment)
 			// Not already started the submission process
 			assignment.lastSubmittedToTurnitin = new DateTime(0)
 			assignment.turnitinLtiNotifyUsers = Seq()
+			assignment.nextTurnitinSubmissionAttempt = DateTime.now()
 			assignment.submitToTurnitin = true
 		}
 

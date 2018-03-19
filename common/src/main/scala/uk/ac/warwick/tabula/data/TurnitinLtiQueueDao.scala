@@ -109,11 +109,15 @@ class TurnitinLtiQueueDaoImpl extends TurnitinLtiQueueDao with Daoisms {
 			.createAlias("submission.assignment", "assignment")
 			.add(is("assignment.submitToTurnitin", true))
 			.add(Restrictions.isNotNull("assignment.turnitinId"))
+			// A report is incomplete if a report hasn't been received, and we're still working on it (submitting paper or fetching report)
 			.add(Restrictions.conjunction(
 				is("reportReceived", false),
-				Restrictions.isNull("submittedDate"),
-				Restrictions.isNull("responseReceived")
-			)).seq
+				Restrictions.disjunction(
+					Restrictions.isNotNull("nextSubmitAttempt"),
+					Restrictions.isNotNull("nextResponseAttempt")
+				)
+			))
+			.seq
 
 		val incompletePendingAssignments = incompleteReports.map(_.attachment.submissionValue.submission.assignment).distinct
 		pendingAssignments.diff(incompletePendingAssignments)
