@@ -304,9 +304,10 @@ class CelcatHttpTimetableFetchingService(celcatConfiguration: CelcatConfiguratio
 					val parent = TimetableEvent.Parent(module)
 					val room = event.getOrElse("room","").toString
 					val location = Option(locationFetchingService.locationFor(room))
-					val eventType:TimetableEventType = event("contactType") match {
+					val eventType = event("contactType") match {
 						case "L" => TimetableEventType.Lecture
 						case "S" => TimetableEventType.Seminar
+						case "O" => TimetableEventType.Other("Online")
 						case _ => TimetableEventType.Other("")
 					}
 					val uid =
