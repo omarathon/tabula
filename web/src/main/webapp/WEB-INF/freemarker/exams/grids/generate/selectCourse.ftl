@@ -181,6 +181,11 @@
 					<#else>
 						<li>Hide zero weighted assessment components</li>
 					</#if>
+					<#if gridOptionsCommand.componentsToShow == 'markOnly'>
+						<li>Only show component marks</li>
+					<#else>
+						<li>Show component marks and the sequence that they relate to</li>
+					</#if>
 				</#if>
 				<#if gridOptionsCommand.moduleNameToShow == 'codeOnly'>
 					<li>Show module code only</li>
