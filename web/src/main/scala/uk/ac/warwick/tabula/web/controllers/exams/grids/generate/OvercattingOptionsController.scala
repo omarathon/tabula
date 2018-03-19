@@ -164,6 +164,7 @@ class OvercattingOptionsView(
 		nameToShow = ExamGridStudentIdentificationColumnValue.BothName,
 		showComponentMarks = false,
 		showZeroWeightedComponents = false,
+		showComponentSequence = false,
 		showModuleNames = false,
 		calculateYearMarks = false
 	)
