@@ -25,7 +25,7 @@ trait MeetingRecordServiceScheduledMeetingEventSourceComponent extends Scheduled
 
 	class MeetingRecordServiceScheduledMeetingEventSource extends ScheduledMeetingEventSource {
 
-		def occurrencesFor(member: Member, currentUser: CurrentUser, context: TimetableEvent.Context): Future[EventOccurrenceList] = Future {
+		def occurrencesFor(member: Member, currentUser: CurrentUser, context: TimetableEvent.Context): Future[EventOccurrenceList] = Future.successful {
 
 			def canReadMeetings(relationshipType: StudentRelationshipType) =
 				if (currentUser.universityId == member.universityId) true

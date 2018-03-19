@@ -168,6 +168,7 @@ class Assignment
 	var submitToTurnitin: JBoolean = false
 	var lastSubmittedToTurnitin: DateTime = _
 	var submitToTurnitinRetries: JInteger = 0
+	var nextTurnitinSubmissionAttempt: DateTime = _
 
 	@ManyToOne(fetch = FetchType.LAZY)
 	@JoinColumn(name = "module_id")

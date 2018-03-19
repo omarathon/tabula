@@ -3,8 +3,8 @@ package uk.ac.warwick.tabula.services.turnitinlti
 import org.joda.time.DateTime
 import org.springframework.stereotype.Service
 import uk.ac.warwick.spring.Wire
+import uk.ac.warwick.tabula.data._
 import uk.ac.warwick.tabula.data.model.{Assignment, OriginalityReport}
-import uk.ac.warwick.tabula.data.{AutowriringTurnitinLtiQueueDaoComponent, TurnitinLtiQueueDaoComponent}
 import uk.ac.warwick.tabula.helpers.Logging
 import uk.ac.warwick.tabula.services.urkund.UrkundService
 import uk.ac.warwick.tabula.services.{AutowiringOriginalityReportServiceComponent, OriginalityReportServiceComponent}
@@ -46,7 +46,6 @@ trait TurnitinLtiQueueService {
 	def createEmptyOriginalityReports(assignment: Assignment): Seq[OriginalityReport]
 	def getAssignmentStatus(assignment: Assignment): TurnitinLtiQueueService.AssignmentStatus
 }
-	
 
 abstract class AbstractTurnitinLtiQueueService extends TurnitinLtiQueueService with Logging {
 	self: TurnitinLtiQueueDaoComponent
@@ -183,7 +182,7 @@ abstract class AbstractTurnitinLtiQueueService extends TurnitinLtiQueueService w
 @Service("turnitinLtiQueueService")
 class AutowiringEventServiceImpl
 	extends AbstractTurnitinLtiQueueService
-	with AutowriringTurnitinLtiQueueDaoComponent
+	with AutowiringTurnitinLtiQueueDaoComponent
 	with AutowiringOriginalityReportServiceComponent
 	with AutowiringFeaturesComponent
 
@@ -193,4 +192,43 @@ trait TurnitinLtiQueueServiceComponent {
 
 trait AutowiringTurnitinLtiQueueServiceComponent extends TurnitinLtiQueueServiceComponent {
 	var turnitinLtiQueueService: TurnitinLtiQueueService = Wire[TurnitinLtiQueueService]
+}
+
+trait TurnitinLtiBackoffQueueService {
+	def nextAssignment: Option[Assignment]
+	def nextReportToSubmit: Option[OriginalityReport]
+	def nextReportToFetch: Option[OriginalityReport]
+	def failedAssignments: Seq[Assignment]
+	def completedAssignments: Seq[Assignment]
+	def originalityReports(assignment: Assignment): Seq[OriginalityReport]
+}
+
+abstract class AbstractTurnitinLtiBackoffQueueService extends TurnitinLtiBackoffQueueService with Logging {
+	self: OriginalityReportDaoComponent with TurnitinLtiQueueDaoComponent =>
+
+	override def nextAssignment: Option[Assignment] = turnitinLtiQueueDao.findAssignmentToProcessInBackoffQueue
+
+	override def nextReportToSubmit: Option[OriginalityReport] = originalityReportDao.findReportToSubmit
+
+	override def nextReportToFetch: Option[OriginalityReport] = originalityReportDao.findReportToRetrieve
+
+	def originalityReports(assignment: Assignment): Seq[OriginalityReport] = turnitinLtiQueueDao.listOriginalityReports(assignment)
+
+	def completedAssignments: Seq[Assignment] = turnitinLtiQueueDao.listCompletedAssignments
+
+	def failedAssignments: Seq[Assignment] = turnitinLtiQueueDao.listFailedAssignments
+}
+
+@Service("turnitinLtiBackoffQueueService")
+class TurnitinLtiBackoffQueueServiceImpl
+	extends AbstractTurnitinLtiBackoffQueueService
+		with AutowiringTurnitinLtiQueueDaoComponent
+		with AutowiringOriginalityReportDaoComponent
+
+trait TurnitinLtiBackoffQueueServiceComponent {
+	def turnitinLtiBackoffQueueService: TurnitinLtiBackoffQueueService
+}
+
+trait AutowiringTurnitinLtiBackoffQueueServiceComponent extends TurnitinLtiBackoffQueueServiceComponent {
+	var turnitinLtiBackoffQueueService: TurnitinLtiBackoffQueueService = Wire[TurnitinLtiBackoffQueueService]
 }

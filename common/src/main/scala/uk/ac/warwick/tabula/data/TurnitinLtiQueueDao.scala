@@ -12,16 +12,23 @@ trait TurnitinLtiQueueDaoComponent {
 	def turnitinLtiQueueDao: TurnitinLtiQueueDao
 }
 
-trait AutowriringTurnitinLtiQueueDaoComponent extends TurnitinLtiQueueDaoComponent{
+trait AutowiringTurnitinLtiQueueDaoComponent extends TurnitinLtiQueueDaoComponent {
 	val turnitinLtiQueueDao: TurnitinLtiQueueDao = Wire[TurnitinLtiQueueDao]
 }
 
 trait TurnitinLtiQueueDao {
 	def findAssignmentToProcess: Option[Assignment]
+
+	def findAssignmentToProcessInBackoffQueue: Option[Assignment]
+
 	def findReportToProcessForSubmission: Option[OriginalityReport]
+
 	def findReportToProcessForReport(longAwaitedOnly: Boolean): Option[OriginalityReport]
+
 	def listCompletedAssignments: Seq[Assignment]
+
 	def listFailedAssignments: Seq[Assignment]
+
 	def listOriginalityReports(assignment: Assignment): Seq[OriginalityReport]
 
 }
@@ -33,8 +40,20 @@ class TurnitinLtiQueueDaoImpl extends TurnitinLtiQueueDao with Daoisms {
 		session.newCriteria[Assignment]
 			.add(is("submitToTurnitin", true))
 			.add(Restrictions.lt("lastSubmittedToTurnitin", DateTime.now.minusSeconds(TurnitinLtiService.SubmitAssignmentWaitInSeconds)))
-		  .add(Restrictions.isNull("turnitinId"))
+			.add(Restrictions.isNull("turnitinId"))
 			.add(Restrictions.lt("submitToTurnitinRetries", TurnitinLtiService.SubmitAssignmentMaxRetries))
+			.addOrder(Order.asc("lastSubmittedToTurnitin"))
+			.setMaxResults(1)
+			.uniqueResult
+	}
+
+	def findAssignmentToProcessInBackoffQueue: Option[Assignment] = {
+		session.newCriteria[Assignment]
+			.add(is("submitToTurnitin", true))
+			.add(Restrictions.or(
+				Restrictions.isNull("nextTurnitinSubmissionAttempt"),
+				Restrictions.lt("nextTurnitinSubmissionAttempt", DateTime.now)))
+			.add(Restrictions.isNull("turnitinId"))
 			.addOrder(Order.asc("lastSubmittedToTurnitin"))
 			.setMaxResults(1)
 			.uniqueResult
@@ -85,15 +104,15 @@ class TurnitinLtiQueueDaoImpl extends TurnitinLtiQueueDao with Daoisms {
 
 		val incompleteReports = session.newCriteria[OriginalityReport]
 			.createAlias("attachment", "attachment")
-		  .createAlias("attachment.submissionValue", "submissionValue")
+			.createAlias("attachment.submissionValue", "submissionValue")
 			.createAlias("submissionValue.submission", "submission")
 			.createAlias("submission.assignment", "assignment")
-		  .add(is("assignment.submitToTurnitin", true))
+			.add(is("assignment.submitToTurnitin", true))
 			.add(Restrictions.isNotNull("assignment.turnitinId"))
-		  .add(Restrictions.conjunction(
+			.add(Restrictions.conjunction(
 				is("reportReceived", false),
-				Restrictions.lt("submitToTurnitinRetries", TurnitinLtiService.SubmitAttachmentMaxRetries),
-				Restrictions.lt("reportRequestRetries", TurnitinLtiService.ReportRequestMaxRetries)
+				Restrictions.isNull("submittedDate"),
+				Restrictions.isNull("responseReceived")
 			)).seq
 
 		val incompletePendingAssignments = incompleteReports.map(_.attachment.submissionValue.submission.assignment).distinct
@@ -104,8 +123,8 @@ class TurnitinLtiQueueDaoImpl extends TurnitinLtiQueueDao with Daoisms {
 		session.newCriteria[Assignment]
 			.add(is("submitToTurnitin", true))
 			.add(Restrictions.isNull("turnitinId"))
-			.add(is("submitToTurnitinRetries", TurnitinLtiService.SubmitAssignmentMaxRetries))
-		  .seq
+			.add(Restrictions.isNull("nextTurnitinSubmissionAttempt"))
+			.seq
 	}
 
 	def listOriginalityReports(assignment: Assignment): Seq[OriginalityReport] = {

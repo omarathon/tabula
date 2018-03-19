@@ -4,7 +4,7 @@ import org.quartz.{DisallowConcurrentExecution, JobExecutionContext}
 import org.springframework.beans.factory.config.BeanDefinition
 import org.springframework.context.annotation.{Profile, Scope}
 import org.springframework.stereotype.Component
-import uk.ac.warwick.tabula.commands.scheduling.turnitin.ProcessTurnitinLtiQueueCommand
+import uk.ac.warwick.tabula.commands.scheduling.turnitin.{ProcessTurnitinLtiBackoffQueueCommand, ProcessTurnitinLtiQueueCommand}
 import uk.ac.warwick.tabula.services.scheduling.AutowiredJobBean
 
 /**
@@ -89,7 +89,7 @@ class ProcessTurnitinLtiQueueJob extends AutowiredJobBean {
 	override def executeInternal(context: JobExecutionContext): Unit = {
 		if (features.turnitinSubmissions)
 			exceptionResolver.reportExceptions {
-				ProcessTurnitinLtiQueueCommand().apply()
+				ProcessTurnitinLtiBackoffQueueCommand().apply()
 			}
 	}
 
