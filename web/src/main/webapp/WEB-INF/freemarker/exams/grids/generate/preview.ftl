@@ -24,7 +24,7 @@
 		</p>
 
 		<div class="alert alert-info">
-			<h3>Your <#if gridOptionsCommand.showFullLayout>full<#else>short</#if> form grid</h3>
+			<h3>Your <#if gridOptionsCommand.showFullLayout>full<#else>short</#if> grid</h3>
 			<p>
 				This grid has been generated from the data available in SITS at
 				<@fmt.date date=oldestImport capitalise=false at=true relative=true />. If data changes in SITS after this
@@ -79,7 +79,7 @@
 				<tbody>
 					<tr>
 						<th>Grid type:</th>
-						<td><#if gridOptionsCommand.showFullLayout>Full<#else>Short</#if> Form Grid</td>
+						<td><#if gridOptionsCommand.showFullLayout>Full<#else>Short</#if> Grid</td>
 					</tr>
 					<tr>
 						<th>Department:</th>

@@ -422,8 +422,8 @@ object ExamGridSummaryAndKey {
 			row
 		}
 		val gridType =  department.examGridOptions.layout match {
-			case "short" => "Short Form Grid"
-			case _ => "Long Form Grid"
+			case "short" => "Short Grid"
+			case _ => "Long Grid"
 		}
 		keyValueCells("Grid type:", gridType, 0)
 		keyValueCells("Department:", department.name, 1)
