@@ -34,7 +34,7 @@
 				<label>
 					<#if SITSInFlux>
 						<input type="checkbox" name="_linkToSits" value="on" disabled />
-						Link to SITS
+						Update student list from SITS
 						<#assign popoverContent><#noescape>
 							You can no longer link to SITS for the current academic year,
 							as changes for the forthcoming academic year are being made that will make the students on this scheme inaccurate.
@@ -48,10 +48,15 @@
 						</a>
 					<#else>
 						<@f.checkbox path="findCommand.linkToSits" />
-						Link to SITS
+						Update student list from SITS
 						<#assign popoverContent><#noescape>
-							<p>Select this option to automatically update the filtered list of students from SITS. If you choose not to link to SITS, these students are imported to Tabula as a static list, which does not update when SITS data changes. Therefore, you need to maintain the list yourself &ndash; e.g. when a student withdraws from their course.</p>
-							<p>You can still upload missed monitoring points to SITS regardless of whether you select this option or not.</p>
+							<p>
+								Select this option to update the list of students on this monitoring scheme as SITS data changes. For example, if a student withdraws from their
+								course, they are removed from the scheme.
+							</p>
+							<p>
+								Deselect this option to keep the list updated manually.
+							</p>
 						</#noescape></#assign>
 						<a class="use-popover"
 						   id="popover-linkToSits"
@@ -63,6 +68,20 @@
 					</#if>
 				</label>
 			</p>
+
+			<#if findCommand.linkToSits>
+				<div class="alert alert-info hidden" id="unlinkSitsAlert">
+					When you choose Save, any students added from SITS move to the list of manually added students. Changes to SITS data for these students will no longer
+					synchronise with this scheme.
+				</div>
+				<script>
+					$(function() {
+						$('input[name=linkToSits]').on('change', function () {
+							$('#unlinkSitsAlert').toggleClass('hidden', $(this).is(':checked'));
+						});
+					});
+				</script>
+			</#if>
 
 			<p>
 				<input
