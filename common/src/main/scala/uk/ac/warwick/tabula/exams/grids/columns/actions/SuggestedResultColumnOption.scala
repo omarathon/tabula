@@ -34,16 +34,12 @@ class SuggestedResultColumnOption extends ChosenYearExamGridColumnOption with Au
 						state.calculateYearMarks
 					) match {
 						case unknown: ProgressionResult.Unknown => ExamGridColumnValueMissing(unknown.details)
-						case resit: Resit.type =>
-							val failedModules = if(state.department.code == "es" || Option(state.department.parent).exists(_.code == "es")) {
-								" " + entityYear.get.moduleRegistrations
-									.filter(_.firstDefinedMark.exists(BigDecimal(_) < ProgressionService.ModulePassMark))
-									.map(_.module.code.toUpperCase)
-									.mkString(", ")
-							} else {
-								""
-							}
-							ExamGridColumnValueString(s"${resit.description}$failedModules")
+						case resit: Resit.type if state.department.code == "es" || Option(state.department.parent).exists(_.code == "es") =>
+							val failedModules = entityYear.get.moduleRegistrations
+								.filter(_.firstDefinedMark.exists(BigDecimal(_) < ProgressionService.ModulePassMark))
+								.map(_.module.code.toUpperCase)
+								.mkString(", ")
+							ExamGridColumnValueString(s"${resit.description} $failedModules")
 						case result => ExamGridColumnValueString(result.description)
 					}
 				).getOrElse(ExamGridColumnValueMissing(s"Could not find course details for ${entity.universityId} for ${state.academicYear}"))
