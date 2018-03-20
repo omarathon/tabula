@@ -1,7 +1,7 @@
 package uk.ac.warwick.tabula.services.timetables
 
 import uk.ac.warwick.tabula.data.model.Module
-import uk.ac.warwick.tabula.helpers.ExecutionContexts.global
+import uk.ac.warwick.tabula.helpers.ExecutionContexts.timetable
 import uk.ac.warwick.tabula.helpers.{Futures, SystemClockComponent}
 import uk.ac.warwick.tabula.services.timetables.TimetableFetchingService.EventList
 import uk.ac.warwick.tabula.services.{AutowiringSecurityServiceComponent, AutowiringSmallGroupServiceComponent, AutowiringUserLookupComponent}
