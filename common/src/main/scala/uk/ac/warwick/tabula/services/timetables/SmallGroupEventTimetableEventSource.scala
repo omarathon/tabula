@@ -30,14 +30,14 @@ trait SmallGroupEventTimetableEventSourceComponentImpl extends SmallGroupEventTi
 	class StudentSmallGroupEventTimetableEventSource extends StudentTimetableEventSource with SmallGroupEventTimetableEventSource {
 
 		def eventsFor(student: StudentMember, currentUser: CurrentUser, context: TimetableEvent.Context): Future[EventList] =
-			Future.successful(eventsFor(userLookup.getUserByUserId(student.userId), currentUser))
+			Future(eventsFor(userLookup.getUserByUserId(student.userId), currentUser))
 
 	}
 
 	class StaffSmallGroupEventTimetableEventSource extends StaffTimetableEventSource with SmallGroupEventTimetableEventSource {
 
 		def eventsFor(staff: StaffMember, currentUser: CurrentUser, context: TimetableEvent.Context): Future[EventList] =
-			Future.successful(eventsFor(userLookup.getUserByUserId(staff.userId), currentUser))
+			Future(eventsFor(userLookup.getUserByUserId(staff.userId), currentUser))
 
 	}
 
