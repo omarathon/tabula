@@ -1,12 +1,13 @@
 package uk.ac.warwick.tabula.web.views
 
+import java.util.concurrent.TimeUnit
+
 import uk.ac.warwick.tabula.TestBase
+import uk.ac.warwick.tabula.helpers.ExecutionContexts.global
 
 import scala.concurrent._
-import scala.util.{Try, Success, Failure}
-import uk.ac.warwick.tabula.helpers.Futures._
 import scala.concurrent.duration.Duration
-import java.util.concurrent.TimeUnit
+import scala.util.{Failure, Success}
 
 class MarkdownRendererTest extends TestBase {
 

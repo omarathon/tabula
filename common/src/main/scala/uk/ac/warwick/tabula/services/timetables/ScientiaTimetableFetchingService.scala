@@ -6,7 +6,7 @@ import org.joda.time.{DateTimeConstants, LocalTime}
 import uk.ac.warwick.spring.Wire
 import uk.ac.warwick.tabula.AcademicYear
 import uk.ac.warwick.tabula.data.model.groups.{DayOfWeek, WeekRangeListUserType}
-import uk.ac.warwick.tabula.helpers.Futures._
+import uk.ac.warwick.tabula.helpers.ExecutionContexts.timetable
 import uk.ac.warwick.tabula.helpers.StringUtils._
 import uk.ac.warwick.tabula.helpers.{ClockComponent, FoundUser, Futures, Logging}
 import uk.ac.warwick.tabula.services._

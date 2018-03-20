@@ -1,13 +1,13 @@
 package uk.ac.warwick.tabula.services.timetables
 
-import uk.ac.warwick.tabula.{AcademicYear, CurrentUser}
 import uk.ac.warwick.tabula.data.model.Module
+import uk.ac.warwick.tabula.helpers.ExecutionContexts.global
 import uk.ac.warwick.tabula.helpers.{Futures, SystemClockComponent}
 import uk.ac.warwick.tabula.services.timetables.TimetableFetchingService.EventList
 import uk.ac.warwick.tabula.services.{AutowiringSecurityServiceComponent, AutowiringSmallGroupServiceComponent, AutowiringUserLookupComponent}
+import uk.ac.warwick.tabula.{AcademicYear, CurrentUser}
 
 import scala.concurrent.Future
-import uk.ac.warwick.tabula.helpers.Futures._
 
 sealed trait TimetableEventSource
 object TimetableEventSource {

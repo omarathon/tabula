@@ -5,7 +5,7 @@ import org.springframework.stereotype.Service
 import uk.ac.warwick.spring.Wire
 import uk.ac.warwick.tabula.CurrentUser
 import uk.ac.warwick.tabula.data.model.{Activity, Module}
-import uk.ac.warwick.tabula.helpers.Futures._
+import uk.ac.warwick.tabula.helpers.ExecutionContexts.global
 import uk.ac.warwick.tabula.permissions.Permissions
 import uk.ac.warwick.tabula.services.elasticsearch.{AuditEventNoteworthySubmissionsService, PagedAuditEvents}
 

@@ -1,13 +1,13 @@
 package uk.ac.warwick.tabula.helpers
 
-import java.util.concurrent.{TimeoutException, Executors, ScheduledExecutorService}
+import java.util.concurrent.{Executors, ScheduledExecutorService, TimeoutException}
 
-import uk.ac.warwick.tabula.helpers.Futures._
+import uk.ac.warwick.tabula.helpers.ExecutionContexts.global
 import uk.ac.warwick.tabula.{Mockito, TestBase}
 
-import scala.concurrent.{Await, Future}
 import scala.concurrent.duration._
-import scala.util.{Success, Failure}
+import scala.concurrent.{Await, Future}
+import scala.util.{Failure, Success}
 
 class FuturesTest extends TestBase with Mockito {
 

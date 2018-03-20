@@ -4,8 +4,8 @@ import org.joda.time.DateTime
 import uk.ac.warwick.tabula.commands._
 import uk.ac.warwick.tabula.commands.cm2.feedback.ListFeedbackCommand._
 import uk.ac.warwick.tabula.data.model.Assignment
+import uk.ac.warwick.tabula.helpers.ExecutionContexts.global
 import uk.ac.warwick.tabula.helpers.Futures
-import uk.ac.warwick.tabula.helpers.Futures._
 import uk.ac.warwick.tabula.permissions._
 import uk.ac.warwick.tabula.services._
 import uk.ac.warwick.tabula.services.elasticsearch.{AuditEventQueryServiceComponent, AutowiringAuditEventQueryServiceComponent}
