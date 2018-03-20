@@ -43,7 +43,7 @@ class SubmissionReceivedNotificationTest extends TestBase  with Mockito {
 		extension.assignment = assignment
 		extension.expiryDate = new DateTime(2014, DateTimeConstants.SEPTEMBER, 17, 9, 0, 0, 0)
 		extension.approve()
-		assignment.extensions.add(extension)
+		assignment.addExtension(extension)
 
 		assignment.isLate(submission) should be (false)
 		assignment.isAuthorisedLate(submission) should be (false)
@@ -81,7 +81,7 @@ class SubmissionReceivedNotificationTest extends TestBase  with Mockito {
 		extension.assignment = assignment
 		extension.expiryDate = new DateTime(2014, DateTimeConstants.SEPTEMBER, 17, 9, 0, 0, 0)
 		extension.approve()
-		assignment.extensions.add(extension)
+		assignment.addExtension(extension)
 
 		assignment.isLate(submission) should be (false)
 		assignment.isAuthorisedLate(submission) should be (true)
@@ -103,7 +103,7 @@ class SubmissionReceivedNotificationTest extends TestBase  with Mockito {
 		extension.assignment = assignment
 		extension.expiryDate = new DateTime(2014, DateTimeConstants.SEPTEMBER, 17, 9, 0, 0, 0)
 		extension.approve()
-		assignment.extensions.add(extension)
+		assignment.addExtension(extension)
 
 		assignment.isLate(submission) should be (true)
 		assignment.isAuthorisedLate(submission) should be (false)

@@ -24,7 +24,7 @@ class ExtensionTest extends PersistenceTestBase {
 			extension.reason = "My hands have turned to flippers. Like the ones that dolphins have. It makes writing and typing super hard. Pity me."
 			extension.approve("That sounds awful. Have an extra month. By then you should be able to write as well as any Cetacea.")
 
-			assignment.extensions add extension
+			assignment.addExtension(extension)
 		}
 
     val cuslaj = new User("cuslaj")

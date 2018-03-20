@@ -79,8 +79,7 @@ class CourseworkHomepageCommandTest extends TestBase with Mockito {
 		val extension: Extension = Fixtures.extension("0672089", "cuscav")
 		extension.approve()
 		extension.expiryDate = new DateTime(2016, DateTimeConstants.JULY, 25, 10, 0, 0, 0)
-		assignment.extensions.add(extension)
-		extension.assignment = assignment
+		assignment.addExtension(extension)
 
 		val feedback: AssignmentFeedback = Fixtures.assignmentFeedback("0672089", "cuscav")
 		feedback.released = true
