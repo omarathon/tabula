@@ -5,6 +5,7 @@ import javax.persistence._
 import org.joda.time.DateTime
 import javax.persistence.Column
 import uk.ac.warwick.tabula.JavaImports._
+import uk.ac.warwick.tabula.services.turnitinlti.TurnitinLtiService
 
 @Entity
 class OriginalityReport extends GeneratedId with ToEntityReference {
@@ -80,6 +81,31 @@ class OriginalityReport extends GeneratedId with ToEntityReference {
 
 	var urkundResponseCode: String = _
 
-
 	override def toEntityReference: OriginalityReportEntityReference = new OriginalityReportEntityReference().put(this)
+
+	// Submitted means an identifier for the associated submission has been created in the source matching service
+	def submitted: Boolean = turnitinId != null || reportUrl != null
+
+	// Received means we have the result from the source matching service
+	def received: Boolean = reportReceived || responseReceived != null
+
+	// In progress means:
+	// - we don't have the report now
+	// - we're planning to try to submit the paper or fetch the report in future
+	def inProgress: Boolean = !received && (submitting || receiving)
+
+	// Failed means:
+	// - we don't have the report now
+	// - we've previously tried to submit the paper or fetch the report
+	// - we're not planning to try that operation again
+	def failed: Boolean = !received && !submitting && !receiving
+
+	// Finished means we're finished processing this report, whether or not we were successful
+	def finished: Boolean = received || failed
+
+	// Submitting means we are actively working on submitting a paper to the source matching service
+	def submitting: Boolean = !submitted && (nextSubmitAttempt != null || submitToTurnitinRetries < TurnitinLtiService.SubmitAttachmentMaxRetries)
+
+	// Receiving means we are actively working on retrieving a report from the source matching service
+	def receiving: Boolean = submitted && !received && (nextResponseAttempt != null || reportRequestRetries < TurnitinLtiService.ReportRequestMaxRetries)
 }

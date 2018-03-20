@@ -198,14 +198,14 @@ class TurnitinLtiQueueDaoTest extends PersistenceTestBase {
 
 	@Test
 	def listCompletedAssignments(): Unit = transactional { tx =>
-  	val completeAssignment = Fixtures.assignment("done")
+		val completeAssignment = Fixtures.assignment("done")
 		completeAssignment.turnitinId = "1234"
 		completeAssignment.submitToTurnitin = true
 		session.save(completeAssignment)
 
-		val completeReportReceieved = fullCompleteReport(completeAssignment)
-		completeReportReceieved.reportReceived = true
-		session.save(completeReportReceieved)
+		val completeReportReceived = fullCompleteReport(completeAssignment)
+		completeReportReceived.reportReceived = true
+		session.save(completeReportReceived)
 		val completeReportMaxSubmitRetry = fullCompleteReport(completeAssignment)
 		completeReportMaxSubmitRetry.submitToTurnitinRetries = TurnitinLtiService.SubmitAttachmentMaxRetries
 		session.save(completeReportMaxSubmitRetry)
@@ -229,4 +229,29 @@ class TurnitinLtiQueueDaoTest extends PersistenceTestBase {
 		result.head should be (completeAssignment)
 	}
 
+	@Test
+	def listCompletedAssignmentsWithBackoffQueueAttributes(): Unit = transactional { tx =>
+		val completeAssignment = Fixtures.assignment("done")
+		completeAssignment.turnitinId = "1234"
+		completeAssignment.submitToTurnitin = true
+		session.save(completeAssignment)
+
+		val completeReport = fullCompleteReport(completeAssignment)
+		session.save(completeReport)
+
+		val incompleteAssignment = Fixtures.assignment("not-yet")
+		incompleteAssignment.turnitinId = "1234"
+		incompleteAssignment.submitToTurnitin = true
+		session.save(incompleteAssignment)
+
+		val incompleteReport = fullCompleteReport(incompleteAssignment)
+		incompleteReport.reportReceived = false
+		incompleteReport.submitAttempts = 1
+		incompleteReport.nextSubmitAttempt = DateTime.now().plusMinutes(1)
+		session.save(incompleteReport)
+
+		val result = turnitinLtiQueueDao.listCompletedAssignments
+		result.size should be (1)
+		result.head should be (completeAssignment)
+	}
 }

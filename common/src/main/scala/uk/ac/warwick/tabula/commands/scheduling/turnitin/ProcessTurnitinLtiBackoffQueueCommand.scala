@@ -80,7 +80,7 @@ abstract class ProcessTurnitinLtiBackoffQueueCommandInternal extends CommandInte
 			logger.info("Assignment was created in Turnitin successfully")
 		} else {
 			assignment.submitToTurnitinRetries += 1
-			assignment.nextTurnitinSubmissionAttempt = nextAttempt(assignment).orNull
+			assignment.nextTurnitinSubmissionAttempt = nextCreateAssignmentAttempt(assignment).orNull
 			logger.info(s"Next attempt will be at ${assignment.nextTurnitinSubmissionAttempt}")
 		}
 
@@ -125,7 +125,7 @@ abstract class ProcessTurnitinLtiBackoffQueueCommandInternal extends CommandInte
 		} else {
 			report.lastTurnitinError = response.statusMessage.getOrElse("Failed to upload")
 			logger.warn(s"Failed to submit paper for report ${report.id}: ${report.lastTurnitinError}")
-			report.nextSubmitAttempt = nextSubmitAttempt(report).orNull
+			report.nextSubmitAttempt = nextSubmitPaperAttempt(report).orNull
 			logger.info(s"Next attempt will be at ${report.nextSubmitAttempt}")
 		}
 
@@ -164,7 +164,7 @@ abstract class ProcessTurnitinLtiBackoffQueueCommandInternal extends CommandInte
 			case response =>
 				logger.info("Bad response for submission details  - " + response.json.orElse(response.html).orElse(response.xml).getOrElse(""))
 				report.lastTurnitinError = response.statusMessage.getOrElse("Failed to retrieve results")
-				report.nextResponseAttempt = nextResponseAttempt(report).orNull
+				report.nextResponseAttempt = nextFetchReportAttempt(report).orNull
 				logger.info(s"Next attempt will be at ${report.nextResponseAttempt}")
 		}
 
@@ -193,17 +193,17 @@ abstract class ProcessTurnitinLtiBackoffQueueCommandInternal extends CommandInte
 		Result(completedAssignments, failedAssignments)
 	}
 
-	private def nextAttempt(assignment: Assignment): Option[DateTime] =
+	private def nextCreateAssignmentAttempt(assignment: Assignment): Option[DateTime] =
 		Option(assignment)
 			.filter(_.submitToTurnitinRetries < MaxAssignmentAttempts)
 			.map(r => DateTime.now.plusSeconds(AttemptInterval.toSeconds.toInt * Math.pow(2, r.submitToTurnitinRetries.toInt).toInt))
 
-	private def nextSubmitAttempt(report: OriginalityReport): Option[DateTime] =
+	private def nextSubmitPaperAttempt(report: OriginalityReport): Option[DateTime] =
 		Option(report)
 			.filter(_.submitAttempts < MaxSubmitAttempts)
 			.map(r => DateTime.now.plusSeconds(AttemptInterval.toSeconds.toInt * Math.pow(2, r.submitAttempts - 1).toInt))
 
-	private def nextResponseAttempt(report: OriginalityReport): Option[DateTime] =
+	private def nextFetchReportAttempt(report: OriginalityReport): Option[DateTime] =
 		Option(report)
 			.filter(_.responseAttempts < MaxResponseAttempts)
 			.map(r => DateTime.now.plusSeconds(AttemptInterval.toSeconds.toInt * Math.pow(2, r.responseAttempts - 1).toInt))
@@ -226,12 +226,8 @@ trait ProcessTurnitinLtiBackoffQueueNotification extends Notifies[Result, Assign
 		val completedNotifications = result.completed
 			.filterNot(_.submissions.isEmpty)
 			.flatMap(assignment => {
-				val completedReports = queue.originalityReports(assignment).filter(report =>
-					report.reportReceived || (!report.reportReceived && (
-						report.submitToTurnitinRetries == TurnitinLtiService.SubmitAttachmentMaxRetries ||
-							report.reportRequestRetries == TurnitinLtiService.ReportRequestMaxRetries
-						))
-				)
+				val completedReports = queue.originalityReports(assignment).filter(_.finished)
+
 				assignment.turnitinLtiNotifyUsers.map(user =>
 					Notification.init(new TurnitinJobSuccessNotification, user, completedReports, assignment)
 				)

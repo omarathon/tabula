@@ -32,6 +32,8 @@ class OriginalityReportDaoImpl extends OriginalityReportDao with Daoisms {
 
 	override def findReportToSubmit: Option[OriginalityReport] = {
 		criteria
+			.add(Restrictions.isNull("submittedDate"))
+			.add(Restrictions.isNotNull("nextSubmitAttempt"))
 			.add(Restrictions.lt("nextSubmitAttempt", DateTime.now))
 			.add(Restrictions.isNull("nextResponseAttempt"))
 			.addOrder(Order.asc("nextSubmitAttempt"))
@@ -41,7 +43,9 @@ class OriginalityReportDaoImpl extends OriginalityReportDao with Daoisms {
 
 	override def findReportToRetrieve: Option[OriginalityReport] = {
 		criteria
+			.add(Restrictions.isNull("responseReceived"))
 			.add(Restrictions.isNull("nextSubmitAttempt"))
+			.add(Restrictions.isNotNull("nextResponseAttempt"))
 			.add(Restrictions.lt("nextResponseAttempt", DateTime.now))
 			.addOrder(Order.asc("nextResponseAttempt"))
 			.setMaxResults(1)
