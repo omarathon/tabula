@@ -70,17 +70,7 @@
 			</p>
 
 			<#if findCommand.linkToSits>
-				<div class="alert alert-info hidden" id="unlinkSitsAlert">
-					When you choose Save, any students added from SITS move to the list of manually added students. Changes to SITS data for these students will no longer
-					synchronise with this scheme.
-				</div>
-				<script>
-					$(function() {
-						$('input[name=linkToSits]').on('change', function () {
-							$('#unlinkSitsAlert').toggleClass('hidden', $(this).is(':checked'));
-						});
-					});
-				</script>
+				<@unlinkSitsAlert />
 			</#if>
 
 			<p>
