@@ -52,21 +52,21 @@ function additionalYearsOfStudyToggle($editor) {
 		var $this = $(this);
 		if ($this.is(':checked')) {
 			$editor
-				.find('.row > .col-md-5').removeClass('col-md-5').addClass('col-md-2').end()
-				.find('.row > .col-md-offset-5').removeClass('col-md-offset-5').addClass('col-md-offset-2').end()
-				.find('.row > .col-md-6').removeClass('col-md-6').addClass('col-md-9')
-					.find('.col-md-2').removeClass('col-md-2').addClass('col-md-1').end()
+				.find('.row > .col-xs-5').removeClass('col-xs-5').addClass('col-xs-2').end()
+				.find('.row > .col-xs-offset-5').removeClass('col-xs-offset-5').addClass('col-xs-offset-2').end()
+				.find('.row > .col-xs-6').removeClass('col-xs-6').addClass('col-xs-9')
+					.find('.col-xs-2').removeClass('col-xs-2').addClass('col-xs-1').end()
 					.each(function(){
-						$(this).find('.col-md-1').show();
+						$(this).find('.col-xs-1').show();
 					});
 		} else {
 			$editor
-				.find('.row > .col-md-2').removeClass('col-md-2').addClass('col-md-5').end()
-				.find('.row > .col-md-offset-2').removeClass('col-md-offset-2').addClass('col-md-offset-5').end()
-				.find('.row > .col-md-9').removeClass('col-md-9').addClass('col-md-6')
-					.find('.col-md-1').removeClass('col-md-1').addClass('col-md-2').end()
+				.find('.row > .col-xs-2').removeClass('col-xs-2').addClass('col-xs-5').end()
+				.find('.row > .col-xs-offset-2').removeClass('col-xs-offset-2').addClass('col-xs-offset-5').end()
+				.find('.row > .col-xs-9').removeClass('col-xs-9').addClass('col-xs-6')
+					.find('.col-xs-1').removeClass('col-xs-1').addClass('col-xs-2').end()
 					.each(function(){
-						$(this).find('.col-md-2').filter(function(i){ return i > 5; }).hide();
+						$(this).find('.col-xs-2').filter(function(i){ return i > 5; }).hide();
 					});
 
 		}
