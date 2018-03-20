@@ -229,7 +229,7 @@ class AssignmentTest extends TestBase with Mockito {
 		extension.approve()
 		extension.expiryDate = new DateTime(2013, DateTimeConstants.JANUARY, 31, 12, 0, 0, 0)
 
-		assignment.extensions.add(extension)
+		assignment.addExtension(extension)
 
 		assignment.isLate(submission) should be {false}
 		assignment.isAuthorisedLate(submission) should be {true}
@@ -298,7 +298,7 @@ class AssignmentTest extends TestBase with Mockito {
 		extension.approve()
 		extension.expiryDate = new DateTime(2013, DateTimeConstants.FEBRUARY, 1, 12, 0, 0, 0)
 
-		assignment.extensions.add(extension)
+		assignment.addExtension(extension)
 
 		submission.submittedDate = new DateTime(2013, DateTimeConstants.JANUARY, 10, 0, 0, 0, 0)
 		assignment.workingDaysLate(submission) should be (0)

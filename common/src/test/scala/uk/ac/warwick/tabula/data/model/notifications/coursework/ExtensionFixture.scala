@@ -52,6 +52,7 @@ trait ExtensionFixture extends Mockito{
 	val assignment = new Assignment
 	assignment.name = "Essay"
 	assignment.id = "123"
+	assignment.openEnded = false
 	assignment.closeDate = new DateTime(2013, 8, 1, 12, 0)
 	assignment.module = module
 
@@ -64,5 +65,5 @@ trait ExtensionFixture extends Mockito{
 	extension.reviewerComments = "That sounds awful. Have an extra month. By then you should be able to write as well as any Cetacea."
 	extension.assignment = assignment
 	extension.approve()
-	assignment.extensions add extension
+	assignment.addExtension(extension)
 }
