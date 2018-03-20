@@ -444,6 +444,7 @@ class GenerateExamGridController extends ExamsController
 			routeRulesLookup = routeRulesLookup,
 			academicYear = selectCourseCommand.academicYear,
 			yearOfStudy = selectCourseCommand.yearOfStudy,
+			department = selectCourseCommand.department,
 			nameToShow = gridOptionsCommand.nameToShow,
 			showComponentMarks = gridOptionsCommand.showComponentMarks,
 			showZeroWeightedComponents = gridOptionsCommand.showZeroWeightedComponents,
