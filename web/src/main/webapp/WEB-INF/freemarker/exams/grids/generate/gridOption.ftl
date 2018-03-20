@@ -325,19 +325,23 @@
 
 	<h3>Marking</h3>
 
+	<#assign uploadedYearMarksPopoverContent>
+		<p>If you have <a target="_blank" href="<@routes.exams.uploadYearMarks department academicYear />">uploaded year marks</a> via Tabula, you can use these in your grid. This option is suitable for when you wish to run final-year calculations, and complete assignment and component marks for previous academic years are not available in SITS.</p>
+	</#assign>	
+
 	<div class="row">
 		<div class="col-md-3">
 			<div class="radio">
 				<label><input type="radio" name="yearMarksToUse" value="sits"
 					<#if gridOptionsCommand.yearMarksToUse == 'sits'>checked</#if>
-				/> Uploaded year marks</label>
+				/> Uploaded year marks <@fmt.help_popover id="sits" content=uploadedYearMarksPopoverContent html=true /></label>
 			</div>
 		</div>
 		<div class="col-md-3">
 			<div class="radio">
 				<label><input type="radio" name="yearMarksToUse" value="calculated"
 					<#if gridOptionsCommand.yearMarksToUse == 'calculated'>checked</#if>
-				/> Calculate year marks</label>
+				/> Calculate year marks <@fmt.help_popover id="calculated" content="Use the current component and assignment marks from SITS to produce your grid. Note that any post-board adjustments &ndash; for example, to accommodate mitigating circumstances &ndash; should be in SITS before you create the grid." html=true /></label>
 			</div>
 		</div>
 	</div>
