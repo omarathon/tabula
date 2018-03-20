@@ -318,6 +318,11 @@
 			e.preventDefault();
 			$(this).closest('.more').addClass('hidden').parent().find('a.show-more').show();
 		});
+
+		// fix the grid scrollbar to the footer
+		$('.doubleScroll-scroll-wrapper').prependTo('.fix-footer').css('margin-bottom', '10px');
+		$('.table-responsive').css('overflow-x', 'hidden');
+
 	});
 </script>
 
