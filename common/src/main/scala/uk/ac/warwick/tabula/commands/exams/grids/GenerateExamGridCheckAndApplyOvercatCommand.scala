@@ -124,7 +124,6 @@ trait GenerateExamGridCheckAndApplyOvercatCommandState {
 	def academicYear: AcademicYear
 
 	var selectCourseCommand: SelectCourseCommand = _
-	//var courseYearsToShow: JSet[String] = JHashSet()
 
 	def fetchEntities: Seq[ExamGridEntity] = selectCourseCommand.apply()
 	lazy val entities: Seq[ExamGridEntity] =  {
