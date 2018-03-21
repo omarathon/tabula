@@ -81,7 +81,12 @@ abstract class ModuleExamGridColumn(state: ExamGridColumnState, val module: Modu
 							if (mark == null) {
 								ExamGridColumnValueMissing("Agreed and actual mark missing")
 							} else if (isActual && member.actualGrade.contains("F") || member.agreedGrade.contains("F")) {
-								ExamGridColumnValueFailedDecimal(mark, isActual)
+								if (state.showComponentSequence) {
+									val markForRender = mark.underlying.stripTrailingZeros.toPlainString
+									ExamGridColumnValueFailedString(s"$markForRender (${member.upstreamAssessmentGroup.sequence})", isActual)
+								} else {
+									ExamGridColumnValueFailedDecimal(mark, isActual)
+								}
 							} else {
 								if (state.showComponentSequence) {
 									val markForRender = mark.underlying.stripTrailingZeros.toPlainString
