@@ -144,7 +144,6 @@
 				<div class="col-md-3 year${counter} <#if counter gt studyYear>hidden</#if>" data-year="${counter}">
 					<div class="checkbox">
 						<#assign yearColumn="Year${counter}"/>
-						<#assign yearColumnXX=selectCourseCommand.courseYearsToShow?seq_contains("${yearColumn}")/>
 						<label>
 							<input class= "test${counter}" type="checkbox" name="courseYearsToShow" value="${yearColumn}"
 								<#if selectCourseCommand.courseYearsToShow?seq_contains("${yearColumn}")>checked</#if> <#if studyYear == counter>disabled</#if>
