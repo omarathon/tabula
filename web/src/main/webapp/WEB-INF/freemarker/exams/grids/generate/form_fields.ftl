@@ -12,6 +12,9 @@
 	</#list>
 	<input type="hidden" name="yearOfStudy" value="${selectCourseCommand.yearOfStudy}" />
 	<input type="hidden" name="includeTempWithdrawn" value="${selectCourseCommand.includeTempWithdrawn?string('true','false')}" />
+	<#list selectCourseCommand.courseYearsToShow as column>
+		<input  type ="hidden" name="courseYearsToShow" value="${column}" />
+	</#list>
 </#macro>
 
 <#macro grid_options_fields>
@@ -22,7 +25,6 @@
 		<input type="hidden" name="customColumnTitles[${column_index}]" value="${column}" />
 	</#list>
 	<input type="hidden" name="nameToShow" value="${gridOptionsCommand.nameToShow.toString}" />
-	<input type="hidden" name="yearsToShow" value="${gridOptionsCommand.yearsToShow}" />
 	<input type="hidden" name="marksToShow" value="${gridOptionsCommand.marksToShow}" />
 	<input type="hidden" name="componentsToShow" value="${gridOptionsCommand.componentsToShow}" />
 	<input type="hidden" name="moduleNameToShow" value="${gridOptionsCommand.moduleNameToShow}" />

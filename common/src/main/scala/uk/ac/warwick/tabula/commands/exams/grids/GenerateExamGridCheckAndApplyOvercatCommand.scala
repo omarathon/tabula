@@ -12,6 +12,8 @@ import uk.ac.warwick.tabula.services._
 import uk.ac.warwick.tabula.services.exams.grids._
 import uk.ac.warwick.tabula.system.permissions.{PermissionsChecking, PermissionsCheckingMethods, RequiresPermissionsChecking}
 import uk.ac.warwick.tabula.{AcademicYear, CurrentUser}
+import uk.ac.warwick.tabula.JavaImports._
+import scala.collection.JavaConverters._
 
 object GenerateExamGridCheckAndApplyOvercatCommand {
 
@@ -122,12 +124,21 @@ trait GenerateExamGridCheckAndApplyOvercatCommandState {
 	def academicYear: AcademicYear
 
 	var selectCourseCommand: SelectCourseCommand = _
-	var yearsToShow: String = "current"
+	//var courseYearsToShow: JSet[String] = JHashSet()
 
 	def fetchEntities: Seq[ExamGridEntity] = selectCourseCommand.apply()
-	lazy val entities: Seq[ExamGridEntity] = yearsToShow match {
-		case "all" => fetchEntities
-		case _ => fetchEntities.map(entity => entity.copy(years = Map(entity.years.keys.max -> entity.years(entity.years.keys.max))))
+	lazy val entities: Seq[ExamGridEntity] =  {
+		val courseYears = selectCourseCommand.courseYearsToShow
+		if (courseYears.size == selectCourseCommand.yearOfStudy) {
+			fetchEntities // all years
+		} else {
+			val selectedYears = courseYears.asScala.map(_.stripPrefix("Year").toInt).toSeq
+			fetchEntities.map { entity =>
+				entity.copy(
+					years = entity.years.filter { case(year,_) => selectedYears.contains(year) }
+				)
+			}
+		}
 	}
 	lazy val normalLoadLookup: NormalLoadLookup = new NormalLoadLookup(academicYear, selectCourseCommand.yearOfStudy, normalCATSLoadService)
 	lazy val routeRulesLookup: UpstreamRouteRuleLookup = new UpstreamRouteRuleLookup(academicYear, upstreamRouteRuleService)

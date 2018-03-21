@@ -37,7 +37,6 @@ class GenerateExamGridGridOptionsCommandInternal(val department: Department) ext
 			predefinedColumnIdentifiers.asScala.toSet,
 			customColumnTitles.asScala,
 			nameToShow,
-			yearsToShow,
 			marksToShow,
 			componentsToShow,
 			moduleNameToShow,
@@ -59,7 +58,6 @@ trait PopulatesGenerateExamGridGridOptionsCommand extends PopulateOnForm {
 		predefinedColumnIdentifiers.addAll(options.predefinedColumnIdentifiers.asJava)
 		customColumnTitles.addAll(options.customColumnTitles.asJava)
 		nameToShow = options.nameToShow
-		yearsToShow = options.yearsToShow
 		marksToShow = options.marksToShow
 		componentsToShow = options.componentsToShow
 		moduleNameToShow = options.moduleNameToShow
@@ -118,7 +116,6 @@ trait GenerateExamGridGridOptionsCommandRequest {
 
 	var predefinedColumnIdentifiers: JSet[String] = JHashSet()
 	var nameToShow: ExamGridStudentIdentificationColumnValue = ExamGridStudentIdentificationColumnValue.FullName
-	var yearsToShow: String = "current"
 	var marksToShow: String = "overall"
 	var componentsToShow: String = "all"
 	var moduleNameToShow: String = "codeOnly"

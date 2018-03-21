@@ -85,11 +85,13 @@ trait GenerateExamGridSelectCourseCommandState {
 	lazy val allCourses: List[Course] = department.rootDepartment.descendants.flatMap(d => courseAndRouteService.findCoursesInDepartment(d)).filter(_.inUse).sortBy(_.code)
 	lazy val allRoutes: List[Route] = department.descendants.flatMap(d => courseAndRouteService.findRoutesInDepartment(d)).sortBy(_.code)
 	lazy val allYearsOfStudy: Inclusive = 1 to FilterStudentsOrRelationships.MaxYearsOfStudy
+ 	lazy val test = allYearsOfStudy.end.intValue()
 }
 
 trait GenerateExamGridSelectCourseCommandRequest {
 	var courses: JList[Course] = JArrayList()
 	var routes: JList[Route] = JArrayList()
 	var yearOfStudy: JInteger = _
+	var courseYearsToShow: JSet[String] = JHashSet()
 	var includeTempWithdrawn: Boolean = false
 }
