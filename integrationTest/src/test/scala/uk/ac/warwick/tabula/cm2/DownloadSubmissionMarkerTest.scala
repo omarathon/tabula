@@ -56,6 +56,11 @@ class DownloadSubmissionMarkerTest extends BrowserTest with CourseworkFixtures {
 	}
 
 	private def downloadAll(): Unit = {
+			Given("I have expanded the Marked section")
+			eventuallyAjax {
+				val markedCollapse = id("main").webElement.findElements(By.cssSelector(".marking-tab-section > h4 > a")).get(1)
+				click on markedCollapse
+			}
 
 			When("I click on the Download dropdown without selecting any students")
 			eventuallyAjax {

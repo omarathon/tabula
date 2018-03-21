@@ -267,6 +267,7 @@ class Department extends GeneratedId
 		nameToShow,
 		getStringSetting(Settings.ExamGridOptions.MarksToShow, "overall"),
 		getStringSetting(Settings.ExamGridOptions.ComponentsToShow, "all"),
+		getStringSetting(Settings.ExamGridOptions.ComponentSequenceToShow, "markOnly"),
 		getStringSetting(Settings.ExamGridOptions.ModuleNameToShow, "codeOnly"),
 		getStringSetting(Settings.ExamGridOptions.Layout, "full"),
 		getStringSetting(Settings.ExamGridOptions.YearMarksToUse, "sits")
@@ -277,6 +278,7 @@ class Department extends GeneratedId
 		settings += (Settings.ExamGridOptions.NameToShow -> options.nameToShow.value)
 		settings += (Settings.ExamGridOptions.MarksToShow -> options.marksToShow)
 		settings += (Settings.ExamGridOptions.ComponentsToShow -> options.componentsToShow)
+		settings += (Settings.ExamGridOptions.ComponentSequenceToShow -> options.componentSequenceToShow)
 		settings += (Settings.ExamGridOptions.ModuleNameToShow -> options.moduleNameToShow)
 		settings += (Settings.ExamGridOptions.Layout -> options.layout)
 		settings += (Settings.ExamGridOptions.YearMarksToUse -> options.yearMarksToUse)
@@ -538,6 +540,7 @@ object Department {
 			val NameToShow = "examGridOptionsName"
 			val MarksToShow = "examGridOptionsMarks"
 			val ComponentsToShow = "examGridOptionsComponents"
+			val ComponentSequenceToShow = "componentSequenceToShow"
 			val ModuleNameToShow = "examGridOptionsModuleName"
 			val Layout ="examGridOptionsLayout"
 			val YearMarksToUse = "examGridOptionsYearMark"
@@ -548,6 +551,7 @@ object Department {
 			nameToShow: ExamGridStudentIdentificationColumnValue,
 			marksToShow: String,
 			componentsToShow: String,
+			componentSequenceToShow: String,
 			moduleNameToShow: String,
 			layout: String,
 			yearMarksToUse: String

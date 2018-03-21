@@ -605,8 +605,7 @@ class AssessmentServiceTest extends PersistenceTestBase with Mockito {
 		val extension = new Extension
 		extension._universityId = "0070790"
 		extension.usercode = "abcdef"
-		extension.assignment = assignment
-		assignment.extensions.add(extension)
+		assignment.addExtension(extension)
 		session.saveOrUpdate(extension)
 
 		session.flush()

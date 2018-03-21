@@ -204,7 +204,7 @@
 		<#assign moderatedOrMarked = moderator?string("moderated", "marked") />
 
 		<div class="marking-tab-section">
-			<h4>Submissions to ${markOrModerate} and send to admin</h4>
+			<h4>Submissions to ${markOrModerate}</h4>
 
 			<#if enhancedMarkerFeedbacks.readyToMark?size != 0>
 				<p>These submissions are ready for you to ${markOrModerate}.</p>

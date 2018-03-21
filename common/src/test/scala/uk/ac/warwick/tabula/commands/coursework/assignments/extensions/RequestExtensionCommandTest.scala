@@ -71,7 +71,7 @@ class RequestExtensionCommandTest extends TestBase with Mockito {
 				}
 				newExtension.approve()
 				newExtension.reviewedOn = DateTime.now
-				assignment.extensions.add(newExtension)
+				assignment.addExtension(newExtension)
 
 				var command = new RequestExtensionCommandInternal(assignment.module, assignment, currentUser) with RequestExtensionCommandTestSupport
 				var returnedExtension = command.applyInternal()
@@ -155,7 +155,7 @@ class RequestExtensionCommandTest extends TestBase with Mockito {
 				val attachment = new FileAttachment
 
 				newExtension.addAttachment(attachment)
-				assignment.extensions.add(newExtension)
+				assignment.addExtension(newExtension)
 
 				val command = new RequestExtensionCommandInternal(assignment.module, assignment, currentUser) with RequestExtensionCommandTestSupport
 				// populate command's view of attachments

@@ -1,9 +1,9 @@
 <#escape x as x?html>
-<#import "*/modal_macros.ftl" as modal />
-<#import "../attendance_macros.ftl" as attendance_macros />
+	<#import "*/modal_macros.ftl" as modal />
+	<#import "../attendance_macros.ftl" as attendance_macros />
 
-<#macro pagination currentPage totalResults resultsPerPage>
-	<#local totalPages = (totalResults / resultsPerPage)?ceiling />
+	<#macro pagination currentPage totalResults resultsPerPage>
+		<#local totalPages = (totalResults / resultsPerPage)?ceiling />
 	<nav class="pull-right">
 		<ul class="pagination pagination-sm">
 			<#if currentPage lte 1>
@@ -27,17 +27,31 @@
 			</#if>
 		</ul>
 	</nav>
-</#macro>
+	</#macro>
 
-<@spring.bind path="persistanceCommand.staticStudentIds">
-	<#if status.error>
+	<#macro unlinkSitsAlert>
+		<div class="alert alert-info hidden" id="unlinkSitsAlert">
+			When you choose Save, any students added from SITS move to the list of manually added students. Changes to SITS data for these students will no longer
+			synchronise with this scheme.
+		</div>
+		<script>
+			$(function() {
+				$('input[name=linkToSits]').on('change', function () {
+					$('#unlinkSitsAlert').toggleClass('hidden', $(this).is(':checked'));
+				});
+			});
+		</script>
+	</#macro>
+
+	<@spring.bind path="persistanceCommand.staticStudentIds">
+		<#if status.error>
 		<div class="alert alert-danger"><@f.errors path="persistanceCommand.staticStudentIds" cssClass="error"/></div>
-	</#if>
-</@spring.bind>
+		</#if>
+	</@spring.bind>
 
-<#if summaryString?has_content>
+	<#if summaryString?has_content>
 	<p><#noescape>${summaryString}</#noescape></p>
-</#if>
+	</#if>
 
 <div class="striped-section collapsible" data-populate=".striped-section-contents .item-info" data-form="form.add-student-to-scheme" data-href="<@routes.attendance.manageAddStudentsAllStudents scheme />">
 	<h3 class="section-title">View all students on this scheme</h3>
@@ -133,7 +147,7 @@
 					${courseType.description}
 				</@filter>
 
-				<#-- Non-standard drop-down for routes -->
+			<#-- Non-standard drop-down for routes -->
 				<#assign placeholder = "All routes" />
 				<#assign currentFilter><@current_filter_value "findCommand.routes" placeholder; route>${route.code?upper_case}</@current_filter_value></#assign>
 				<#assign routesCustomPicker>
@@ -181,7 +195,7 @@
 				<#assign currentfilter><@current_filter_value "findCommand.modesOfAttendance" placeholder; moa>${moa.shortName?capitalize}</@current_filter_value></#assign>
 				<@filter "findCommand.modesOfAttendance" placeholder currentfilter findCommand.allModesOfAttendance; moa>
 					<input type="checkbox" name="${status.expression}" value="${moa.code}" data-short-value="${moa.shortName?capitalize}"
-					${contains_by_code(findCommand.modesOfAttendance, moa)?string('checked','')}>
+						${contains_by_code(findCommand.modesOfAttendance, moa)?string('checked','')}>
 					${moa.fullName}
 				</@filter>
 
@@ -189,7 +203,7 @@
 				<#assign currentfilter><@current_filter_value "findCommand.yearsOfStudy" placeholder; year>${year}</@current_filter_value></#assign>
 				<@filter "findCommand.yearsOfStudy" placeholder currentfilter findCommand.allYearsOfStudy findCommand.allYearsOfStudy "Year "; yearOfStudy>
 					<input type="checkbox" name="${status.expression}" value="${yearOfStudy}" data-short-value="${yearOfStudy}"
-					${findCommand.yearsOfStudy?seq_contains(yearOfStudy)?string('checked','')}>
+						${findCommand.yearsOfStudy?seq_contains(yearOfStudy)?string('checked','')}>
 					${yearOfStudy}
 				</@filter>
 
@@ -210,9 +224,9 @@
 				<#assign currentfilter><@current_filter_value "findCommand.modules" placeholder; module>${module.code?upper_case}</@current_filter_value></#assign>
 				<@filter path="findCommand.modules" placeholder=placeholder currentFilter=currentfilter allItems=findCommand.allModules customPicker=modulesCustomPicker; module>
 					<input type="checkbox" name="${status.expression}"
-						   value="${module.code}"
-						   data-short-value="${module.code?upper_case}"
-					${contains_by_code(findCommand.modules, module)?string('checked','')}>
+								 value="${module.code}"
+								 data-short-value="${module.code?upper_case}"
+						${contains_by_code(findCommand.modules, module)?string('checked','')}>
 					<@fmt.module_name module false />
 				</@filter>
 
@@ -225,41 +239,40 @@
 			</div>
 
 			<#if findCommand.filterChanged>
-				<div class="well well-small student-filter-changed-box">
-					<span class="legend">Filter Update</span>
-					<div>
-						You have changed the filters for this search, to keep these results for the next time you sign in you must select Save at the bottom of the page. If you do not select Save the last filter will still apply next time you sign in.
-					</div>
+				<div class="alert alert-info">
+					<@fmt.p findCommand.totalResults "student matches" "students match" /> these filters.
+					To save the filters and update the students on this scheme, choose Save below.
 				</div>
 			</#if>
 
 			<#if findCommand.staticStudentIds?has_content>
-				<p>To remove the filter, click the button below. This will remove all students currently linked from this filter.</p>
-				<p><button class="btn btn-xs btn-default" type="submit" name="${ManageSchemeMappingParameters.resetFilter}" value="true">Remove filter</button></p>
+				<p>
+					<button class="btn btn-danger" type="submit" name="${ManageSchemeMappingParameters.resetFilter}" value="true">Remove all students</button>
+				</p>
 			</#if>
 
 			<#if (findCommandResult.membershipItems?size > 0)>
-				<div class="pull-right">
+				<div class="clearfix">
 					<@pagination
-						currentPage=findCommand.page
-						resultsPerPage=findCommand.studentsPerPage
-						totalResults=findCommand.totalResults
+					currentPage=findCommand.page
+					resultsPerPage=findCommand.studentsPerPage
+					totalResults=findCommand.totalResults
 					/>
+
+					<#assign startIndex = ((findCommand.page - 1) * findCommand.studentsPerPage) />
+					<#assign endIndex = startIndex + findCommandResult.membershipItems?size />
+					<p>
+						Results ${startIndex + 1} - ${endIndex} of ${findCommand.totalResults}
+					</p>
 				</div>
 
-				<#assign startIndex = ((findCommand.page - 1) * findCommand.studentsPerPage) />
-				<#assign endIndex = startIndex + findCommandResult.membershipItems?size />
-				<p>
-					Results ${startIndex + 1} - ${endIndex} of ${findCommand.totalResults}
-				</p>
-
 				<@attendance_macros.manageStudentTable
-					membershipItems=findCommandResult.membershipItems
-					doSorting=true
-					command=findCommand
-					checkboxName="excludeIds"
-					onlyShowCheckboxForStatic=true
-					showRemoveButton=true
+				membershipItems=findCommandResult.membershipItems
+				doSorting=true
+				command=findCommand
+				checkboxName="excludeIds"
+				onlyShowCheckboxForStatic=true
+				showRemoveButton=true
 				/>
 			<#elseif (findCommand.findStudents?has_content)>
 				<p style="padding-bottom: 20px;">No students were found.</p>
@@ -271,7 +284,7 @@
 <div class="manually-added striped-section collapsible <#if expandManual>expanded</#if>">
 	<h3 class="section-title">
 		Manually add students
-		<span class="very-subtle">Add a list of students by university ID or username</span>
+		<span class="very-subtle">Add a list of students by University ID or usercode</span>
 	</h3>
 	<div class="striped-section-contents">
 		<div class="item-info">
@@ -305,16 +318,16 @@
 			</#if>
 
 			<@attendance_macros.manageStudentTable
-				membershipItems=editMembershipCommandResult.membershipItems
-				checkboxName="resetStudentIds"
-				checkAll=true
-				showResetButton=true
+			membershipItems=editMembershipCommandResult.membershipItems
+			checkboxName="resetStudentIds"
+			checkAll=true
+			showResetButton=true
 			/>
 		</div>
 	</div>
 </div>
 
 <input type="hidden" name="returnTo" value="${returnTo}">
-<@f.hidden path="findCommand.doFind" />
+	<@f.hidden path="findCommand.doFind" />
 
 </#escape>
