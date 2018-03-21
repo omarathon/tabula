@@ -145,7 +145,7 @@
 					<div class="checkbox">
 						<#assign yearColumn="Year${counter}"/>
 						<label>
-							<input class= "test${counter}" type="checkbox" name="courseYearsToShow" value="${yearColumn}"
+							<input type="checkbox" name="courseYearsToShow" value="${yearColumn}"
 								<#if selectCourseCommand.courseYearsToShow?seq_contains("${yearColumn}")>checked</#if> <#if studyYear == counter>disabled</#if>
 							/> Year ${counter}
 						</label>
