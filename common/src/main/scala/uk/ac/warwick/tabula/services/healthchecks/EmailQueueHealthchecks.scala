@@ -62,12 +62,9 @@ class EmailOldestUnsentItemHealthcheck extends ServiceHealthcheckProvider with L
 		// How new is the latest item in the queue?
 		val recentSentEmail: Duration =
 			Wire[EmailNotificationService].recentEmailedRecipient
+				.filter (_.attemptedAt != null) // See TAB-6033 for details
 				.map { recipient: RecipientNotificationInfo =>
-					//TODO - extra logging temp to find the root record causing issue in minutesBetween (TAB-6033). This should be removed once we know the root record
-					val time = DateTime.now
-					val attempted = recipient.attemptedAt
-					logger.info(s"Recipient:$recipient,AttemptedAT:$attempted,Time:$time")
-					Minutes.minutesBetween(attempted, time).getMinutes.minutes.toCoarsest
+					Minutes.minutesBetween(recipient.attemptedAt, DateTime.now).getMinutes.minutes.toCoarsest
 				}.getOrElse(Zero)
 
 		val status =

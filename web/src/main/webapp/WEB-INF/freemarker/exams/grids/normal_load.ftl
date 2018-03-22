@@ -79,7 +79,7 @@
 
 		<div class="header fix-header">
 			<div class="row">
-				<div class="col-md-9 col-md-offset-2">
+				<div class="col-xs-9 col-xs-offset-2">
 					<div class="pull-right">
 						<div class="checkbox">
 							<label>
@@ -92,26 +92,26 @@
 				</div>
 			</div>
 			<div class="row last">
-				<div class="col-md-2">
+				<div class="col-xs-2">
 					<label>Route</label>
 				</div>
-				<div class="col-md-9">
+				<div class="col-xs-9">
 					<#list allYearsOfStudy as year>
-						<div class="col-md-1"><label>${year}</label></div>
+						<div class="col-xs-1"><label>${year}</label></div>
 					</#list>
 				</div>
 
-				<div class="col-md-2">
+				<div class="col-xs-2">
 					<input type="text" class="form-control" name="filter" placeholder="Filter routes" />
 				</div>
-				<div class="col-md-9">
+				<div class="col-xs-9">
 					<#list allYearsOfStudy as year>
-						<div class="col-md-1">
+						<div class="col-xs-1">
 							<input type="text" class="form-control" name="bulk" data-year="${year}" placeholder="All" />
 						</div>
 					</#list>
 				</div>
-				<div class="col-md-1">
+				<div class="col-xs-1">
 					<button type="button" name="bulkapply" class="btn btn-default btn-sm" disabled>Apply</button>
 					<@fmt.help_popover id="bulkapply" content="Enter a CATS load and click Apply to change all filtered routes" />
 				</div>
@@ -120,16 +120,16 @@
 
 		<#list command.allRoutes as route>
 			<div class="row">
-				<div class="col-md-2">
+				<div class="col-xs-2">
 					<label title="${route.code?upper_case} ${route.name}" class="use-tooltip">${route.code?upper_case} ${route.name}</label>
 				</div>
-				<div class="col-md-9">
+				<div class="col-xs-9">
 					<#list allYearsOfStudy as year>
 						<#assign value = "" />
 						<#if mapGet(command.normalLoads, route)?? && mapGet(mapGet(command.normalLoads, route), year)?? >
 							<#assign value = mapGet(mapGet(command.normalLoads, route), year) />
 						</#if>
-						<div class="col-md-1">
+						<div class="col-xs-1">
 							<input title="${route.code?upper_case} ${route.name} Year ${year}"
 								data-container="body"
 								type="text"

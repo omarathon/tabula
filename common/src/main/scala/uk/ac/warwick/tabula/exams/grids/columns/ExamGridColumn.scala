@@ -18,8 +18,9 @@ object ExamGridColumnOption {
 		val Name = 1
 		val UniversityId = 2
 		val SPRCode = 3
-		val Route = 4
-		val StartYear = 5
+		val Course = 4
+		val Route = 5
+		val StartYear = 6
 		val CoreModules = 10
 		val CoreRequiredModules = 11
 		val CoreOptionalModules = 12
@@ -87,14 +88,17 @@ case class ExamGridColumnState(
 	routeRulesLookup: UpstreamRouteRuleLookup,
 	academicYear: AcademicYear,
 	yearOfStudy: Int,
+	department: Department,
 	nameToShow: ExamGridStudentIdentificationColumnValue,
 	showComponentMarks: Boolean,
+	showZeroWeightedComponents: Boolean,
+	showComponentSequence: Boolean,
 	showModuleNames: Boolean,
 	calculateYearMarks: Boolean
 )
 
 case object EmptyExamGridColumnState {
-	def apply() = ExamGridColumnState(Nil,Map.empty,null,null,null,null,0,nameToShow=ExamGridStudentIdentificationColumnValue.FullName,showComponentMarks=false,showModuleNames=true, calculateYearMarks=false)
+	def apply() = ExamGridColumnState(Nil,Map.empty,null,null,null,null,0,null,nameToShow=ExamGridStudentIdentificationColumnValue.FullName,showComponentMarks=false,showZeroWeightedComponents=false,showComponentSequence=false,showModuleNames=true, calculateYearMarks=false)
 }
 
 @Component

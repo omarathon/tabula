@@ -160,7 +160,7 @@ trait GenerateExamGridCheckAndApplyOvercatCommandState {
 				case None => true
 				// Or the highest mark is now a different set of modules (in case the rules have changed)
 				case Some(overcattingModules) =>
-					val highestSubset = overcatSubsets(entity)(year).headOption.map{case (_, modules) => modules}
+					val highestSubset = overcatSubsets(entity).get(year).flatMap(_.headOption.map{case (_, modules) => modules})
 					highestSubset match {
 						case Some(subset) => subset.map(_.module).size != overcattingModules.size || subset.exists(mr => !overcattingModules.contains(mr.module))
 						case _ => false

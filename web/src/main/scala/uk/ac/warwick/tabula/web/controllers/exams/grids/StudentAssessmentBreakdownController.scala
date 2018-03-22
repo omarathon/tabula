@@ -70,6 +70,7 @@ class StudentAssessmentBreakdownController extends ExamsController
 		@ModelAttribute("command") cmd: CommandType
 	): Mav = {
 		Mav("exams/grids/generate/studentAssessmentComponentDetails",
+			"passMark" -> ProgressionService.ModulePassMark,
 			"assessmentComponents" -> cmd.apply(),
 			"member" -> studentCourseDetails.student
 		).crumbs(Breadcrumbs.Grids.Home, Breadcrumbs.Grids.Department(mandatory(cmd.studentCourseYearDetails.enrolmentDepartment), mandatory(academicYear)))

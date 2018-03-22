@@ -5,7 +5,7 @@ import uk.ac.warwick.tabula.data.model.forms.Extension
 import uk.ac.warwick.tabula.{Mockito, TestBase}
 import uk.ac.warwick.userlookup.User
 
-class ExtensionChangedNotificatonTest extends TestBase with Mockito with ExtensionNotificationTesting {
+class ExtensionChangedNotificationTest extends TestBase with Mockito with ExtensionNotificationTesting {
 
 	val TEST_CONTENT = "test"
 

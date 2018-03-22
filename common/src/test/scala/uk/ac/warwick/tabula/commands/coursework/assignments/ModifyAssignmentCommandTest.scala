@@ -89,8 +89,8 @@ class ModifyAssignmentCommandTest extends TestBase with Mockito with FunctionalC
 		extension2.reviewedOn = sometime.plusDays(5)
 
 		assignment.allowExtensions = true
-		assignment.extensions.add(extension1)
-		assignment.extensions.add(extension2)
+		assignment.addExtension(extension1)
+		assignment.addExtension(extension2)
 		assignment.module = module
 
 		module.assignments.add(assignment)

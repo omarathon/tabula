@@ -56,7 +56,7 @@ trait ExamGridDocumentsController extends ExamsController
 			GenerateExamGridExporter(
 				department = department,
 				academicYear = academicYear,
-				course = selectCourseCommand.course,
+				courses = selectCourseCommand.courses.asScala,
 				routes = selectCourseCommand.routes.asScala,
 				yearOfStudy = selectCourseCommand.yearOfStudy,
 				yearWeightings = weightings,
@@ -90,7 +90,7 @@ trait ExamGridDocumentsController extends ExamsController
 			GenerateExamGridShortFormExporter(
 				department = department,
 				academicYear = academicYear,
-				course = selectCourseCommand.course,
+				courses = selectCourseCommand.courses.asScala,
 				routes = selectCourseCommand.routes.asScala,
 				yearOfStudy = selectCourseCommand.yearOfStudy,
 				yearWeightings = weightings,
@@ -112,7 +112,10 @@ trait ExamGridDocumentsController extends ExamsController
 		new ExcelView(
 			"Exam grid for %s %s %s %s.xlsx".format(
 				department.name,
-				selectCourseCommand.course.code,
+				selectCourseCommand.courses.size match {
+					case 1 => selectCourseCommand.courses.get(0).code
+					case n => s"$n courses"
+				},
 				selectCourseCommand.routes.size match {
 					case 0 => "All routes"
 					case 1 => selectCourseCommand.routes.get(0).code.toUpperCase
@@ -130,7 +133,10 @@ trait ExamGridDocumentsController extends ExamsController
 			"%sMarks record for %s %s %s %s.docx".format(
 				if (isConfidential) "Confidential " else "",
 				selectCourseCommand.department.name,
-				selectCourseCommand.course.code,
+				selectCourseCommand.courses.size match {
+					case 1 => selectCourseCommand.courses.get(0).code
+					case n => s"$n courses"
+				},
 				selectCourseCommand.routes.size match {
 					case 0 => "All routes"
 					case 1 => selectCourseCommand.routes.get(0).code.toUpperCase
@@ -140,7 +146,6 @@ trait ExamGridDocumentsController extends ExamsController
 			),
 			ExamGridMarksRecordExporter(
 				entities,
-				selectCourseCommand.course,
 				progressionService,
 				new NormalLoadLookup(selectCourseCommand.academicYear, selectCourseCommand.yearOfStudy, normalCATSLoadService),
 				new UpstreamRouteRuleLookup(selectCourseCommand.academicYear, upstreamRouteRuleService),
@@ -186,7 +191,10 @@ trait ExamGridDocumentsController extends ExamsController
 			"%sPass list for %s %s %s %s.docx".format(
 				if (isConfidential) "Confidential " else "",
 				selectCourseCommand.department.name,
-				selectCourseCommand.course.code,
+				selectCourseCommand.courses.size match {
+					case 1 => selectCourseCommand.courses.get(0).code
+					case n => s"$n courses"
+				},
 				selectCourseCommand.routes.size match {
 					case 0 => "All routes"
 					case 1 => selectCourseCommand.routes.get(0).code.toUpperCase
@@ -197,7 +205,7 @@ trait ExamGridDocumentsController extends ExamsController
 			ExamGridPassListExporter(
 				entities,
 				selectCourseCommand.department,
-				selectCourseCommand.course,
+				selectCourseCommand.courses.asScala,
 				selectCourseCommand.yearOfStudy,
 				selectCourseCommand.academicYear,
 				progressionService,
@@ -245,7 +253,10 @@ trait ExamGridDocumentsController extends ExamsController
 			"%sTranscript for %s %s %s %s.docx".format(
 				if (isConfidential) "Confidential " else "",
 				selectCourseCommand.department.name,
-				selectCourseCommand.course.code,
+				selectCourseCommand.courses.size match {
+					case 1 => selectCourseCommand.courses.get(0).code
+					case n => s"$n courses"
+				},
 				selectCourseCommand.routes.size match {
 					case 0 => "All routes"
 					case 1 => selectCourseCommand.routes.get(0).code.toUpperCase

@@ -97,7 +97,9 @@ class ExamGridColumnValueString(value: String, val isActual: Boolean = false) ex
 			cell.setCellStyle(cellStyleMap(ExamGridExportStyles.ActualMark))
 		}
 	}
-	override def toHTML: String = value
+	override def toHTML: String =
+		if (isActual) "<span class=\"exam-grid-actual-mark\">%s</span>".format(value)
+		else value
 	override def populateCell(cell: Cell, cellStyleMap: Map[ExamGridExportStyles.Style, CellStyle]): Unit = {
 		cell.setCellValue(value)
 		applyCellStyle(cell, cellStyleMap)

@@ -4,7 +4,9 @@
 	<#if jobId??>
 		<input type="hidden" name="jobId" value="${jobId}" />
 	</#if>
-	<input type="hidden" name="course" value="${selectCourseCommand.course.code}" />
+	<#list selectCourseCommand.courses as course>
+		<input type="hidden" name="courses" value="${course.code}" />
+	</#list>
 	<#list selectCourseCommand.routes as route>
 		<input type="hidden" name="routes" value="${route.code}" />
 	</#list>
@@ -22,6 +24,8 @@
 	<input type="hidden" name="nameToShow" value="${gridOptionsCommand.nameToShow.toString}" />
 	<input type="hidden" name="yearsToShow" value="${gridOptionsCommand.yearsToShow}" />
 	<input type="hidden" name="marksToShow" value="${gridOptionsCommand.marksToShow}" />
+	<input type="hidden" name="componentsToShow" value="${gridOptionsCommand.componentsToShow}" />
+	<input type="hidden" name="componentSequenceToShow" value="${gridOptionsCommand.componentSequenceToShow}" />
 	<input type="hidden" name="moduleNameToShow" value="${gridOptionsCommand.moduleNameToShow}" />
 	<input type="hidden" name="layout" value="${gridOptionsCommand.layout}" />
 	<input type="hidden" name="yearMarksToUse" value="${gridOptionsCommand.yearMarksToUse}" />

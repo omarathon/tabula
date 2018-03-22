@@ -22,7 +22,18 @@
 	</p>
 
 	<p>
-		Select the items to include in your grid for Course: ${selectCourseCommand.course.code?upper_case} ${selectCourseCommand.course.name},
+		Select the items to include in your grid for
+		<#if selectCourseCommand.courses?size == 1>
+			Course: ${selectCourseCommand.courses?first.code?upper_case} ${selectCourseCommand.courses?first.name}
+				<#else>
+			Courses:
+					<#assign popover>
+				<ul><#list selectCourseCommand.courses?sort_by('code') as course>
+					<li>${course.code?upper_case} ${course.name}</li>
+				</#list></ul>
+					</#assign>
+			<a class="use-popover" href="#" data-html="true" data-content="${popover}" data-container="body">${selectCourseCommand.courses?size} courses</a>
+		</#if>,
 		Year of Study: ${selectCourseCommand.yearOfStudy},
 		<#if !selectCourseCommand.routes?has_content>
 			All routes
@@ -117,6 +128,14 @@
 				<label><input type="checkbox" name="predefinedColumnIdentifiers" value="sprCode"
 					<#if gridOptionsCommand.predefinedColumnIdentifiers?seq_contains("sprCode")>checked</#if>
 				/> SPR code</label>
+			</div>
+		</div>
+
+		<div class="col-md-3">
+			<div class="checkbox">
+				<label><input type="checkbox" name="predefinedColumnIdentifiers" value="course"
+					<#if gridOptionsCommand.predefinedColumnIdentifiers?seq_contains("course")>checked</#if>
+				/> Course</label>
 			</div>
 		</div>
 
@@ -228,6 +247,22 @@
 				/> Module Reports</label>
 			</div>
 		</div>
+
+		<div class="col-md-3">
+			<div class="checkbox">
+				<label><input type="checkbox" name="componentsToShow" value="nonZero"
+					<#if gridOptionsCommand.componentsToShow == 'nonZero'>checked</#if>
+				/> Hide zero-weighted components <@fmt.help_popover id="componentsToShow" content="Don't show assessment components that don't contribute towards the overall module mark." /></label>
+			</div>
+		</div>
+
+		<div class="col-md-3">
+			<div class="checkbox">
+				<label><input type="checkbox" name="componentSequenceToShow" value="sequenceAndMark"
+					<#if gridOptionsCommand.componentsToShow == 'sequenceAndMark'>checked</#if>
+				/> Show component sequence <@fmt.help_popover id="componentSequenceToShow" content="Show component sequence codes next to component marks" /></label>
+			</div>
+		</div>
 	</div>
 
 	<hr />
@@ -290,19 +325,23 @@
 
 	<h3>Marking</h3>
 
+	<#assign uploadedYearMarksPopoverContent>
+		<p>If you have <a target="_blank" href="<@routes.exams.uploadYearMarks department academicYear />">uploaded year marks</a> via Tabula, you can use these in your grid. This option is suitable for when you wish to run final-year calculations, and complete assignment and component marks for previous academic years are not available in SITS.</p>
+	</#assign>	
+
 	<div class="row">
 		<div class="col-md-3">
 			<div class="radio">
 				<label><input type="radio" name="yearMarksToUse" value="sits"
 					<#if gridOptionsCommand.yearMarksToUse == 'sits'>checked</#if>
-				/> Use year marks from SITS</label>
+				/> Uploaded year marks <@fmt.help_popover id="sits" content=uploadedYearMarksPopoverContent html=true /></label>
 			</div>
 		</div>
 		<div class="col-md-3">
 			<div class="radio">
 				<label><input type="radio" name="yearMarksToUse" value="calculated"
 					<#if gridOptionsCommand.yearMarksToUse == 'calculated'>checked</#if>
-				/> Calculate year marks</label>
+				/> Calculate year marks <@fmt.help_popover id="calculated" content="Use the current component and assignment marks from SITS to produce your grid. Note that any post-board adjustments &ndash; for example, to accommodate mitigating circumstances &ndash; should be in SITS before you create the grid." html=true /></label>
 			</div>
 		</div>
 	</div>

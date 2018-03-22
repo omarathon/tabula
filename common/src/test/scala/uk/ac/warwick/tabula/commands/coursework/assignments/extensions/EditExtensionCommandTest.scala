@@ -112,8 +112,6 @@ class EditExtensionCommandTest extends TestBase {
 				extension.rejected should be (false)
 				extension.state should be (ExtensionState.Unreviewed)
 
-				assignment.extensions.add(extension)
-
 				assignment.extensions.size should be (2)
 				val deleteCommand = new DeleteExtensionCommandInternal(assignment.module, assignment, student, currentUser) with DeleteExtensionCommandTestSupport
 				val result = deleteCommand.apply()
@@ -135,9 +133,9 @@ class EditExtensionCommandTest extends TestBase {
 				val currentUser: CurrentUser = RequestInfo.fromThread.get.user
 				submitter = currentUser
 				assignment = createAssignment()
-				assignment.extensions.add(extension)
 				student = createUser("1234567", "u1234567")
 				extension = createExtension(assignment, student)
+				assignment.addExtension(extension)
 			}
 
 			val emitted = deleteCommand.emit(deleteCommand.extension)
@@ -161,7 +159,7 @@ class EditExtensionCommandTest extends TestBase {
 		val extension = new Extension
 		extension.usercode = student.getUserId
 		extension._universityId = student.getWarwickId
-		extension.assignment = assignment
+		assignment.addExtension(extension)
 		extension.expiryDate = DateTime.now.plusMonths(2)
 		if(reviewerComments.isEmpty)
 			extension.reviewerComments = null

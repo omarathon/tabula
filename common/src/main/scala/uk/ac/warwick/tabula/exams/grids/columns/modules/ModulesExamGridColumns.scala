@@ -2,14 +2,21 @@ package uk.ac.warwick.tabula.exams.grids.columns.modules
 
 import org.springframework.stereotype.Component
 import uk.ac.warwick.tabula.JavaImports.JBigDecimal
-import uk.ac.warwick.tabula.commands.exams.grids.{ExamGridEntity, ExamGridEntityYear}
+import uk.ac.warwick.tabula.commands.exams.grids.ExamGridEntityYear
 import uk.ac.warwick.tabula.data.model.StudentCourseYearDetails.YearOfStudy
 import uk.ac.warwick.tabula.data.model.{Module, ModuleRegistration, ModuleSelectionStatus, UpstreamAssessmentGroupMember}
 import uk.ac.warwick.tabula.exams.grids.columns.{ExamGridColumnValue, ExamGridColumnValueType, _}
+import uk.ac.warwick.tabula.services.AutowiringAssessmentMembershipServiceComponent
+
 import scala.collection.mutable
 
+object ModuleExamGridColumn {
+	// grades with a special meaning in SITS
+	final val SITSIndicators = Seq("AB", "AM", "L", "M", "PL", "RF", "S", "W", "R", "X", "CP", "N", "QF", "T")
+}
+
 abstract class ModuleExamGridColumn(state: ExamGridColumnState, val module: Module, isDuplicate: Boolean, cats: JBigDecimal)
-	extends PerYearExamGridColumn(state) with HasExamGridColumnCategory with HasExamGridColumnSecondaryValue {
+	extends PerYearExamGridColumn(state) with HasExamGridColumnCategory with HasExamGridColumnSecondaryValue with AutowiringAssessmentMembershipServiceComponent {
 
 	def moduleSelectionStatus: Option[ModuleSelectionStatus]
 
@@ -57,6 +64,8 @@ abstract class ModuleExamGridColumn(state: ExamGridColumnState, val module: Modu
 									ExamGridColumnValueFailedDecimal(mark, isActual)
 								} else if (entity.studentCourseYearDetails.isDefined && entity.overcattingModules.exists(_.contains(mr.module))) {
 									ExamGridColumnValueOvercatDecimal(mark, isActual)
+								} else if (mr.firstDefinedGrade.exists(g => ModuleExamGridColumn.SITSIndicators.contains(g))) {
+									ExamGridColumnValueString(s"${mr.firstDefinedGrade.get} ($mark)", isActual)
 								} else {
 									ExamGridColumnValueDecimal(mark, isActual)
 								}
@@ -72,14 +81,29 @@ abstract class ModuleExamGridColumn(state: ExamGridColumnState, val module: Modu
 							if (mark == null) {
 								ExamGridColumnValueMissing("Agreed and actual mark missing")
 							} else if (isActual && member.actualGrade.contains("F") || member.agreedGrade.contains("F")) {
-								ExamGridColumnValueFailedDecimal(mark, isActual)
+								if (state.showComponentSequence) {
+									val markForRender = mark.underlying.stripTrailingZeros.toPlainString
+									ExamGridColumnValueFailedString(s"$markForRender (${member.upstreamAssessmentGroup.sequence})", isActual)
+								} else {
+									ExamGridColumnValueFailedDecimal(mark, isActual)
+								}
 							} else {
-								ExamGridColumnValueDecimal(mark, isActual)
+								if (state.showComponentSequence) {
+									val markForRender = mark.underlying.stripTrailingZeros.toPlainString
+									ExamGridColumnValueString(s"$markForRender (${member.upstreamAssessmentGroup.sequence})", isActual)
+								}
+								else ExamGridColumnValueDecimal(mark, isActual)
 							}
 						}
 
-						val (exams, assignments) = mr.upstreamAssessmentGroupMembers.filter(m => m.agreedMark.isDefined || m.actualMark.isDefined)
-							.partition(_.upstreamAssessmentGroup.sequence.startsWith("E"))
+						val assessmentComponents = {
+							val allComponents = mr.upstreamAssessmentGroupMembers.filter(m => m.agreedMark.isDefined || m.actualMark.isDefined)
+							if (state.showZeroWeightedComponents) allComponents else allComponents.filter(uagm => {
+								assessmentMembershipService.getAssessmentComponent(uagm.upstreamAssessmentGroup).flatMap(ac => Option(ac.weighting)).exists(_ > 0)
+							})
+						}
+
+						val (exams, assignments) = assessmentComponents.partition(_.upstreamAssessmentGroup.sequence.startsWith("E"))
 
 						ExamGridColumnValueType.toMap(
 							overall = overallMark,
@@ -196,7 +220,7 @@ class CoreRequiredModulesColumnOption extends ModuleExamGridColumnOption {
 		override val category: String = "Core Required Modules"
 		override val categoryShortForm: String = "CR"
 
-		override val moduleSelectionStatus = None
+		override val moduleSelectionStatus: Option[ModuleSelectionStatus] = None
 
 	}
 

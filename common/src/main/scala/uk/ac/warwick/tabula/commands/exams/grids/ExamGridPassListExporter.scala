@@ -17,7 +17,7 @@ object ExamGridPassListExporter extends TaskBenchmarking with AddConfidentialWat
 	def apply(
 		entities: Seq[ExamGridEntity],
 		department: Department,
-		course: Course,
+		courses: Seq[Course],
 		yearOfStudy: YearOfStudy,
 		academicYear: AcademicYear,
 		progressionService: ProgressionService,
@@ -43,7 +43,8 @@ object ExamGridPassListExporter extends TaskBenchmarking with AddConfidentialWat
 		createAndFormatParagraph(doc).createRun().setText("Pass List")
 		createAndFormatParagraph(doc).createRun().setText("The following candidates will proceed to the %s year of study:".format(yearOfStudyToString(yearOfStudy + 1)))
 		createAndFormatParagraph(doc).createRun().setText(department.name)
-		createAndFormatParagraph(doc).createRun().setText(s"${course.code.toUpperCase} ${course.name}")
+		val coursesText = courses.map(c => s"${c.code.toUpperCase} ${c.name}")
+		createAndFormatParagraph(doc).createRun().setText(coursesText.mkString(", "))
 
 		createAndFormatParagraph(doc).setBorderBottom(Borders.SINGLE)
 

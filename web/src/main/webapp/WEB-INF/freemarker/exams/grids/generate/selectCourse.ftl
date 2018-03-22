@@ -91,11 +91,18 @@
 		</#function>
 
 		<#assign placeholder = "Course" />
-		<#assign currentfilter><@current_filter_value "selectCourseCommand.course" placeholder; course>${course.code} ${course.name}</@current_filter_value></#assign>
-		<@filter "selectCourseCommand.course" placeholder currentfilter selectCourseCommand.allCourses; course>
-			<label class="radio">
-				<input type="radio" name="${status.expression}" value="${course.code}" data-short-value="${course.code}"
-					${(((selectCourseCommand.course.code)!'') == course.code)?string('checked','')}
+		<#assign currentfilter><#compress><@current_filter_value "selectCourseCommand.courses" placeholder; course>
+			<#if course?is_sequence>
+				<#list course as c>${c.code?upper_case}<#if c_has_next>, </#if></#list>
+			<#else>
+				${course.code?upper_case}
+			</#if>
+		</@current_filter_value></#compress></#assign>
+
+		<@filter "selectCourseCommand.courses" placeholder currentfilter selectCourseCommand.allCourses; course>
+			<label class="checkbox">
+				<input type="checkbox" name="${status.expression}" value="${course.code}" data-short-value="${course.code}"
+					${contains_by_code(selectCourseCommand.courses, course)?string('checked','')}
 				>
 				${course.code} ${course.name}
 			</label>
@@ -169,6 +176,16 @@
 					<li>Only show overall mark</li>
 				<#else>
 					<li>Show component marks</li>
+					<#if gridOptionsCommand.componentsToShow == 'all'>
+						<li>Show all assessment components</li>
+					<#else>
+						<li>Hide zero weighted assessment components</li>
+					</#if>
+					<#if gridOptionsCommand.componentsToShow == 'markOnly'>
+						<li>Only show component marks</li>
+					<#else>
+						<li>Show component marks and the sequence that they relate to</li>
+					</#if>
 				</#if>
 				<#if gridOptionsCommand.moduleNameToShow == 'codeOnly'>
 					<li>Show module code only</li>
@@ -181,7 +198,7 @@
 					<li>Short grid</li>
 				</#if>
 				<#if gridOptionsCommand.yearMarksToUse == 'sits'>
-					<li>Use year marks from SITS</li>
+					<li>Uploaded year marks</li>
 				<#else>
 					<li>Calculate year marks</li>
 				</#if>
@@ -245,7 +262,7 @@
 				$('.clear-all-filters').removeAttr("disabled");
 			}
 
-			var course = $('[name=course]:checked');
+			var course = $('[name=courses]:checked');
 			var yearOfStudy = $('[name=yearOfStudy]:checked');
 
 			if (course.length === 0 || yearOfStudy.length === 0) {

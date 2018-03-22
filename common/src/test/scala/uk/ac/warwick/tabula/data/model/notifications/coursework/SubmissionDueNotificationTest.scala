@@ -17,6 +17,7 @@ class SubmissionDueNotificationTest extends TestBase with Mockito {
 	val assignment = new Assignment
 	assignment.collectSubmissions = true
 	assignment.openEnded = false
+	assignment.closeDate = DateTime.now.plusDays(1)
 
 	@Test
 	def generalRecipients() {
@@ -44,7 +45,7 @@ class SubmissionDueNotificationTest extends TestBase with Mockito {
 			extension._universityId = "0123456"
 			extension.usercode = "0123456"
 			extension.approve()
-			assignment.extensions.add(extension)
+			assignment.addExtension(extension)
 			notification.recipients should be(Seq())
 		}
 	}
@@ -60,7 +61,7 @@ class SubmissionDueNotificationTest extends TestBase with Mockito {
 		}
 		notification.userLookup = mock[UserLookupService]
 		notification.userLookup.getUserByUserId("u0133454") returns users(1)
-		anExtension.assignment = assignment
+		assignment.addExtension(anExtension)
 
 		withClue("Shouldn't send if the extension hasn't been approved") {
 			notification.recipients should be('empty)
@@ -68,6 +69,8 @@ class SubmissionDueNotificationTest extends TestBase with Mockito {
 
 		anExtension.approve()
 		anExtension.expiryDate = DateTime.now.plusWeeks(1)
+
+		println(s"the extension is $anExtension and its assignment is ${anExtension.assignment}")
 
 		withClue("Should only be sent to the one user who has an extension") {
 			notification.recipients should be(Seq(users(1)))

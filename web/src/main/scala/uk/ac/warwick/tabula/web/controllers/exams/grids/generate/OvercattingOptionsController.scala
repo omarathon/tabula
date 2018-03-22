@@ -79,10 +79,10 @@ class OvercattingOptionsController extends ExamsController
 			GenerateExamGridExporter(
 				department = overcatView.department,
 				academicYear = overcatView.academicYear,
-				course = scyd.studentCourseDetails.course,
+				courses = Seq(scyd.studentCourseDetails.course),
 				routes = Seq(scyd.route),
 				yearOfStudy = scyd.yearOfStudy,
-				yearWeightings = Seq(),
+				yearWeightings = Map(),
 				normalLoadLookup = overcatView.normalLoadLookup,
 				entities = overcatView.overcattedEntities,
 				leftColumns = overcatView.optionsColumns,
@@ -160,9 +160,12 @@ class OvercattingOptionsView(
 		normalLoadLookup = normalLoadLookup,
 		routeRulesLookup = null, // Not used
 		academicYear = academicYear,
+		department = department,
 		yearOfStudy = scyd.yearOfStudy,
 		nameToShow = ExamGridStudentIdentificationColumnValue.BothName,
 		showComponentMarks = false,
+		showZeroWeightedComponents = false,
+		showComponentSequence = false,
 		showModuleNames = false,
 		calculateYearMarks = false
 	)

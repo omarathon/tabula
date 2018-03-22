@@ -52,7 +52,9 @@ class StudentSubmissionAndFeedbackCommandTest extends TestBase with Mockito {
 		extension.approve()
 		extension.expiryDate = DateTime.now.plusDays(5)
 
-		assignment.extensions.add(extension)
+		assignment.openEnded = false
+		assignment.closeDate = DateTime.now.plusDays(1)
+		assignment.addExtension(extension)
 
 		command.submissionService.getSubmissionByUsercode(assignment, "cuscav") returns Some(submission)
 		command.feedbackService.getAssignmentFeedbackByUsercode(assignment, "cuscav") returns Some(feedback)
@@ -80,7 +82,9 @@ class StudentSubmissionAndFeedbackCommandTest extends TestBase with Mockito {
 		extension.approve()
 		extension.expiryDate = DateTime.now.plusDays(5)
 
-		assignment.extensions.add(extension)
+		assignment.openEnded = false
+		assignment.closeDate = DateTime.now.plusDays(1)
+		assignment.addExtension(extension)
 
 		command.submissionService.getSubmissionByUsercode(assignment, "cuscav") returns Some(submission)
 		command.feedbackService.getAssignmentFeedbackByUsercode(assignment, "cuscav") returns Some(feedback)

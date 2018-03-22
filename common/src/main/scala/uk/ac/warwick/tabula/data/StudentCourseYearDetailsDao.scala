@@ -26,7 +26,7 @@ trait StudentCourseYearDetailsDao {
 
 	def findByCourseRoutesYear(
 		academicYear: AcademicYear,
-		course: Course,
+		courses: Seq[Course],
 		routes: Seq[Route],
 		yearOfStudy: Int,
 		includeTempWithdrawn: Boolean,
@@ -134,7 +134,7 @@ class StudentCourseYearDetailsDaoImpl extends StudentCourseYearDetailsDao with D
 
 	def findByCourseRoutesYear(
 		academicYear: AcademicYear,
-		course: Course,
+		courses: Seq[Course],
 		routes: Seq[Route],
 		yearOfStudy: Int,
 		includeTempWithdrawn: Boolean,
@@ -149,9 +149,10 @@ class StudentCourseYearDetailsDaoImpl extends StudentCourseYearDetailsDao with D
 
 		val c = thisSession.newCriteria[StudentCourseYearDetails]
 			.createAlias("studentCourseDetails", "scd")
+			.add(isNull("missingFromImportSince"))
 			.add(is("academicYear", academicYear))
 			.add(is("yearOfStudy", yearOfStudy))
-			.add(is("scd.course", course))
+			.add(safeIn("scd.course", courses))
 			.add(is("enrolledOrCompleted", true))
 
 		if (!includeTempWithdrawn) {

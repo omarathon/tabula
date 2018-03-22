@@ -593,6 +593,11 @@ class Assignment
 		submission.assignment = this
 	}
 
+	def addExtension(extension: Extension): Unit = {
+		extensions.add(extension)
+		extension.assignment = this
+	}
+
 	// returns the submission for a specified student
 	def findSubmission(usercode: String): Option[Submission] = submissions.find(_.usercode == usercode)
 

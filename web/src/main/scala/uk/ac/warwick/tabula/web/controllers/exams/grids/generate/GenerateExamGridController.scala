@@ -1,7 +1,6 @@
 package uk.ac.warwick.tabula.web.controllers.exams.grids.generate
 
 import javax.validation.Valid
-
 import org.joda.time.DateTime
 import org.springframework.stereotype.Controller
 import org.springframework.validation.{BindException, Errors}
@@ -24,6 +23,9 @@ import uk.ac.warwick.tabula.web.controllers.{AcademicYearScopedController, Depar
 import uk.ac.warwick.tabula.web.views.JSONView
 import uk.ac.warwick.tabula.web.{Mav, Routes}
 import uk.ac.warwick.tabula.{AcademicYear, ItemNotFoundException}
+
+import scala.collection.JavaConverters._
+import scala.collection.immutable.ListMap
 
 object GenerateExamGridMappingParameters {
 	final val selectCourse = "selectCourse"
@@ -393,7 +395,7 @@ class GenerateExamGridController extends ExamsController
 		studentInformationColumns: Seq[ChosenYearExamGridColumn],
 		perYearColumns: Map[YearOfStudy, Seq[PerYearExamGridColumn]],
 		summaryColumns: Seq[ChosenYearExamGridColumn],
-		weightings: Seq[CourseYearWeighting],
+		weightings: Map[Course, Seq[CourseYearWeighting]],
 		normalLoadLookup: NormalLoadLookup,
 		routeRulesLookup: UpstreamRouteRuleLookup
 	)
@@ -442,8 +444,11 @@ class GenerateExamGridController extends ExamsController
 			routeRulesLookup = routeRulesLookup,
 			academicYear = selectCourseCommand.academicYear,
 			yearOfStudy = selectCourseCommand.yearOfStudy,
+			department = selectCourseCommand.department,
 			nameToShow = gridOptionsCommand.nameToShow,
 			showComponentMarks = gridOptionsCommand.showComponentMarks,
+			showZeroWeightedComponents = gridOptionsCommand.showZeroWeightedComponents,
+			showComponentSequence = gridOptionsCommand.showComponentSequence,
 			showModuleNames = gridOptionsCommand.showModuleNames,
 			calculateYearMarks = gridOptionsCommand.calculateYearMarks
 		)
@@ -456,9 +461,11 @@ class GenerateExamGridController extends ExamsController
 			.groupBy { case (year, _) => year}
 			.mapValues(_.flatMap { case (_, columns) => columns })
 
-		val weightings = (1 to FilterStudentsOrRelationships.MaxYearsOfStudy).flatMap(year =>
-			courseAndRouteService.getCourseYearWeighting(selectCourseCommand.course.code, selectCourseCommand.academicYear, year)
-		).sorted
+		val weightings = ListMap(selectCourseCommand.courses.asScala.map(course => {
+			course -> (1 to FilterStudentsOrRelationships.MaxYearsOfStudy).flatMap(year =>
+				courseAndRouteService.getCourseYearWeighting(course.code, selectCourseCommand.academicYear, year)
+			).sorted
+		}).sortBy{case (course, _) => course.code} :_*)
 
 		GridData(entities, studentInformationColumns, perYearColumns, summaryColumns, weightings, normalLoadLookup, routeRulesLookup)
 	}

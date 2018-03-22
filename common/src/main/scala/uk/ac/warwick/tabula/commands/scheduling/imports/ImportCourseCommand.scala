@@ -25,6 +25,7 @@ class ImportCourseCommand(info: CourseInfo)
 	var shortName: String = info.shortName
 	var name: String = info.fullName
 	var title: String = info.title
+	var inUse: Boolean = info.inUse
 
 	override def applyInternal(): (Course, ImportResult) = transactional() {
 		val courseExisting = courseDao.getByCode(code)
@@ -64,7 +65,7 @@ class ImportCourseCommand(info: CourseInfo)
 	}
 
 	private val properties = Set(
-		"code", "shortName", "name", "title"
+		"code", "shortName", "name", "title", "inUse"
 	)
 
 	override def describe(d: Description): Unit = d.property("shortName" -> shortName)
