@@ -91,5 +91,6 @@ trait GenerateExamGridSelectCourseCommandRequest {
 	var courses: JList[Course] = JArrayList()
 	var routes: JList[Route] = JArrayList()
 	var yearOfStudy: JInteger = _
+	var courseYearsToShow: JSet[String] = JHashSet()
 	var includeTempWithdrawn: Boolean = false
 }

@@ -408,7 +408,6 @@ class GenerateExamGridController extends ExamsController
 	): GridData = {
 
 		checkOvercatCmd.selectCourseCommand = selectCourseCommand
-		checkOvercatCmd.yearsToShow = gridOptionsCommand.yearsToShow
 		val checkOvercatCommmandErrors = new BindException(selectCourseCommand, "checkOvercatCommand")
 		checkOvercatCmd.validate(checkOvercatCommmandErrors)
 

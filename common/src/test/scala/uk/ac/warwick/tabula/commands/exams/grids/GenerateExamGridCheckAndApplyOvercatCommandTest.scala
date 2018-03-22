@@ -1,13 +1,13 @@
 package uk.ac.warwick.tabula.commands.exams.grids
 
-import uk.ac.warwick.tabula.Fixtures.{any, smartMock}
+import uk.ac.warwick.tabula.JavaImports._
 import uk.ac.warwick.tabula._
 import uk.ac.warwick.tabula.commands.Appliable
-import uk.ac.warwick.tabula.data.model._
-import uk.ac.warwick.tabula.data.model.Level
+import uk.ac.warwick.tabula.data.model.{Level, _}
 import uk.ac.warwick.tabula.data.{StudentCourseYearDetailsDao, StudentCourseYearDetailsDaoComponent}
 import uk.ac.warwick.tabula.services._
 import uk.ac.warwick.tabula.services.exams.grids.{NormalCATSLoadService, NormalCATSLoadServiceComponent, UpstreamRouteRuleService, UpstreamRouteRuleServiceComponent}
+
 
 class GenerateExamGridCheckAndApplyOvercatCommandTest extends TestBase with Mockito {
 
@@ -69,6 +69,9 @@ class GenerateExamGridCheckAndApplyOvercatCommandTest extends TestBase with Mock
 			yearOfStudy = thisYearOfStudy
 		}
 		state.selectCourseCommand = selectCourseCommand
+		val years: JSet[String] = JHashSet()
+		years.add("Year3")
+		selectCourseCommand.courseYearsToShow = years
 		state.moduleRegistrationService.overcattedModuleSubsets(entity.validYears(thisYearOfStudy), Map(), thisRoute.degreeType.normalCATSLoad, Seq(routeRule)) returns Seq(null, null)
 		state.filteredEntities.isEmpty should be {false}
 		state.filteredEntities.head should be (entity)
@@ -84,6 +87,10 @@ class GenerateExamGridCheckAndApplyOvercatCommandTest extends TestBase with Mock
 			yearOfStudy = thisYearOfStudy
 		}
 		state.selectCourseCommand = selectCourseCommand
+		val years: JSet[String] = JHashSet()
+		years.add("Year3")
+		selectCourseCommand.courseYearsToShow = years
+
 
 		state.moduleRegistrationService.overcattedModuleSubsets(entity.validYears(thisYearOfStudy), Map(), thisRoute.degreeType.normalCATSLoad, Seq(routeRule)) returns Seq((BigDecimal(0), Seq(mr1)))
 
@@ -100,6 +107,9 @@ class GenerateExamGridCheckAndApplyOvercatCommandTest extends TestBase with Mock
 			yearOfStudy = thisYearOfStudy
 		}
 		state.selectCourseCommand = selectCourseCommand
+		val years: JSet[String] = JHashSet()
+		years.add("Year3")
+		selectCourseCommand.courseYearsToShow = years
 
 		state.moduleRegistrationService.overcattedModuleSubsets(entity.validYears(thisYearOfStudy), Map(), thisRoute.degreeType.normalCATSLoad, Seq(routeRule)) returns Seq(
 			(BigDecimal(50), Seq(mr1)),
@@ -121,7 +131,9 @@ class GenerateExamGridCheckAndApplyOvercatCommandTest extends TestBase with Mock
 			yearOfStudy = thisYearOfStudy
 		}
 		state.selectCourseCommand = selectCourseCommand
-
+		val years: JSet[String] = JHashSet()
+		years.add("Year3")
+		selectCourseCommand.courseYearsToShow = years
 		state.moduleRegistrationService.overcattedModuleSubsets(entity.validYears(thisYearOfStudy), Map(), thisRoute.degreeType.normalCATSLoad, Seq(routeRule)) returns Seq(
 			(BigDecimal(50), Seq(mr1, mr2)),
 			(BigDecimal(40), Seq(mr1))
@@ -142,7 +154,9 @@ class GenerateExamGridCheckAndApplyOvercatCommandTest extends TestBase with Mock
 			yearOfStudy = thisYearOfStudy
 		}
 		state.selectCourseCommand = selectCourseCommand
-
+		val years: JSet[String] = JHashSet()
+		years.add("Year3")
+		selectCourseCommand.courseYearsToShow = years
 		state.moduleRegistrationService.overcattedModuleSubsets(entity.validYears(thisYearOfStudy), Map(), thisRoute.degreeType.normalCATSLoad, Seq(routeRule)) returns Seq(
 			(BigDecimal(50), Seq(mr2)),
 			(BigDecimal(40), Seq(mr1, mr2))
@@ -187,6 +201,9 @@ class GenerateExamGridCheckAndApplyOvercatCommandTest extends TestBase with Mock
 			(BigDecimal(50), Seq(mr1, mr2)),
 			(BigDecimal(40), Seq(mr1))
 		)
+		val years: JSet[String] = JHashSet()
+		years.add("Year3")
+		selectCourseCommand.courseYearsToShow = years
 		cmd.filteredEntities.isEmpty should be {false}
 		cmd.filteredEntities.head should be (entity)
 		cmd.overcatSubsets(cmd.filteredEntities.head).head._2.head should be (BigDecimal(50), Seq(mr1, mr2))
