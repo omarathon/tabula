@@ -14,9 +14,8 @@ import org.springframework.beans.factory.annotation.{Autowired, Value}
 import uk.ac.warwick.tabula.data.Transactions._
 import uk.ac.warwick.tabula.data.model.Identifiable
 import uk.ac.warwick.tabula.helpers.DateTimeOrdering._
-import uk.ac.warwick.tabula.helpers.Futures._
+import uk.ac.warwick.tabula.helpers.ExecutionContexts.global
 import uk.ac.warwick.tabula.helpers.Logging
-import uk.ac.warwick.tabula.helpers.Stopwatches._
 import uk.ac.warwick.tabula.{DateFormats, JsonObjectMapperFactory}
 
 import scala.concurrent.Future

@@ -4,13 +4,13 @@ import org.springframework.stereotype.Service
 import uk.ac.warwick.spring.Wire
 import uk.ac.warwick.tabula.data.Transactions._
 import uk.ac.warwick.tabula.data.model.notifications.RecipientNotificationInfo
-import uk.ac.warwick.tabula.data.{Daoisms, NotificationDao, Scrollable}
+import uk.ac.warwick.tabula.data.{Daoisms, NotificationDao}
+import uk.ac.warwick.tabula.helpers.ExecutionContexts.email
 import uk.ac.warwick.tabula.helpers.Logging
 import uk.ac.warwick.tabula.notifications.EmailNotificationListener
-import uk.ac.warwick.tabula.helpers.Futures._
 
-import scala.concurrent.{Await, Future}
 import scala.concurrent.duration.Duration
+import scala.concurrent.{Await, Future}
 import scala.util.{Failure, Success, Try}
 
 @Service
