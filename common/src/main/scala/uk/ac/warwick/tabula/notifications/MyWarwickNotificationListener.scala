@@ -31,7 +31,7 @@ trait MyWarwickNotificationListener extends NotificationListener {
 				case _ => notification.items.asScala
 			}
 
-			val permissionsTargets = allEntities.map {
+			val permissionsTargets = allEntities.filter(_ != null).map {
 				_.entity
 			}.collect { case pt: PermissionsTarget => pt }
 
