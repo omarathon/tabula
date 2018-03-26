@@ -228,7 +228,7 @@ class Assignment
 
 	private def doesAllMembersHaveApprovedExtensions: Boolean =
 		assessmentMembershipService.determineMembershipUsers(upstreamAssessmentGroups, Option(members))
-			.forall(user => extensions.exists(e => e.approved && e.isForUser(user)))
+			.forall(user => extensions.exists(e => e.expiryDate.isDefined && e.approved && e.isForUser(user)))
 
 
 	def feedbackDeadlineForSubmission(submission: Submission): Option[LocalDate] = feedbackDeadline.flatMap { wholeAssignmentDeadline =>
