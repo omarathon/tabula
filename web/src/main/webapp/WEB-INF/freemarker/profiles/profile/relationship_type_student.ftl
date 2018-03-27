@@ -265,7 +265,7 @@
 					<tr>
 						<th>Date</th>
 						<th>Title</th>
-						<th>State</th>
+						<th>Status</th>
 						<th></th>
 					</tr>
 				</thead>
