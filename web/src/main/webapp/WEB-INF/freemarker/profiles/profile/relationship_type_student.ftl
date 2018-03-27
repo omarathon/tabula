@@ -265,6 +265,8 @@
 					<tr>
 						<th>Date</th>
 						<th>Title</th>
+						<th>Status</th>
+						<th></th>
 					</tr>
 				</thead>
 				<tbody>
@@ -272,6 +274,8 @@
 						<#assign expand = defaultExpand(meeting)/>
 						<tr ${expand?string('class=expand','')} <#if meeting.deleted>class="deleted subtle"</#if>>
 							<td data-sortby="${meeting.meetingDate.millis?c}"><@fmt.date date=meeting.meetingDate includeTime=false /></td>
+							<td>${meeting.title!}</td>
+							<td><@meetingStateSummary meeting /></td>
 							<td>
 								<#if meeting.scheduled>
 									<#assign editUrl><@routes.profiles.edit_scheduled_meeting_record meeting studentCourseDetails thisAcademicYear relationshipType /></#assign>
@@ -302,11 +306,10 @@
 										</span>
 									</div>
 								</#if>
-								${meeting.title!}
 							</td>
 						</tr>
 						<tr>
-							<td colspan="2">
+							<td colspan="4">
 								<#if meeting.description??>
 									<div class="description">
 										<#noescape>${meeting.escapedDescription}</#noescape>
@@ -363,6 +366,27 @@
 	</#if>
 </#function>
 
+<#macro meetingStateSummary meeting>
+	<#if meeting.scheduled>
+		<#if meeting.pendingAction>
+			Pending confirmation by ${meeting.creator.fullName}
+		<#elseif meeting.missed>
+			Missed
+		<#else>
+			Scheduled
+		</#if>
+	<#else>
+		<#if meeting.approved>
+			Approved
+		<#elseif meeting.rejected>
+			Pending revision by ${meeting.creator.fullName}
+		<#else>
+			Pending approval by
+			<#list meeting.approvals as approval>${approval.approver.fullName}<#if approval_has_next>, </#if></#list>
+		</#if>
+	</#if>
+</#macro>
+
 <#macro meetingState meeting>
 	<#if meeting.pendingApproval && !meeting.pendingApprovalBy(user)>
 		<p class="very-subtle">Pending approval. Submitted by ${meeting.creator.fullName}, <@fmt.date meeting.creationDate /></p>
@@ -411,6 +435,15 @@
 				<p>Please edit the record and submit it for approval again.</p>
 			</#list>
 			<a class="edit-meeting-record btn btn-primary" href="<@routes.profiles.edit_meeting_record studentCourseDetails thisAcademicYear meeting/>">Edit</a>
+		</div>
+	<#elseif meeting.rejected>
+		<p class="very-subtle">Pending revision. Submitted by ${meeting.creator.fullName}, <@fmt.date meeting.creationDate /></p>
+		<div class="alert alert-info">
+			<#list meeting.rejectedApprovals as rejectedApproval>
+				<p>This record has been returned to ${meeting.creator.fullName} with comments by ${rejectedApproval.approver.fullName}.</p>
+				<blockquote>${rejectedApproval.comments}</blockquote>
+				<p>${meeting.creator.fullName} needs to edit the record and submit it for approval again.</p>
+			</#list>
 		</div>
 	<#else>
 		<p class="very-subtle">
