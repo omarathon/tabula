@@ -7,6 +7,7 @@ import uk.ac.warwick.tabula.data.model._
 import uk.ac.warwick.tabula.data.model.notifications.cm2.Cm2StudentFeedbackAdjustmentNotification
 import uk.ac.warwick.tabula.data.model.notifications.coursework.FeedbackPublishedNotification
 import uk.ac.warwick.tabula.notifications.{MyWarwickNotificationListener, MyWarwickServiceComponent}
+import uk.ac.warwick.tabula.web.Routes
 import uk.ac.warwick.tabula.web.views.{TextRenderer, TextRendererComponent}
 import uk.ac.warwick.userlookup.User
 import uk.ac.warwick.util.mywarwick.MyWarwickService
@@ -29,6 +30,9 @@ class MyWarwickNotificationListenerTest extends TestBase with Mockito {
 	}
 
 	trait Fixture extends CurrentAcademicYear {
+		val cm2Prefix = "cm2"
+		Routes.cm2._cm2Prefix = Some(cm2Prefix)
+
 		val user = new User("cusxad")
 		user.setFoundUser(true)
 
