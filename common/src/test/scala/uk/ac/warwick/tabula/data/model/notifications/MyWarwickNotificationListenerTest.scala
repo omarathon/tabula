@@ -36,7 +36,7 @@ class MyWarwickNotificationListenerTest extends TestBase with Mockito {
 		val user = new User("cusxad")
 		user.setFoundUser(true)
 
-		val currentUser = new CurrentUser(user, user);
+		val currentUser = new CurrentUser(user, user)
 		val feedback = new AssignmentFeedback
 
 		val module: Module = Fixtures.module(code = "ls101")
