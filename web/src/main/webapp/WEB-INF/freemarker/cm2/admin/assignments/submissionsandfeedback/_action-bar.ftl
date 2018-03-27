@@ -128,9 +128,22 @@
 								action_descr='mark plagiarised'
 								href=markplagiarised_url
 								id="mark-plagiarised-selected-button"
-								tooltip="Toggle whether the selected student submissions are possibly plagiarised"
+								tooltip="Mark the selected student submissions as plagiarised"
 								data_attr='data-container=body'>
 									Mark plagiarised
+							</@fmt.permission_button>
+						</li>
+						<li class="must-have-selected">
+							<#assign markplagiarised_url><@routes.cm2.plagiarismInvestigation assignment/></#assign>
+							<@fmt.permission_button
+							permission='Submission.ManagePlagiarismStatus'
+							scope=assignment
+							action_descr='unmark plagiarised'
+							href=markplagiarised_url
+							id="unmark-plagiarised-selected-button"
+							tooltip="Unmark the student submissions as plagiarised"
+							data_attr='data-container=body'>
+									Unmark plagiarised
 							</@fmt.permission_button>
 						</li>
 					</ul>
