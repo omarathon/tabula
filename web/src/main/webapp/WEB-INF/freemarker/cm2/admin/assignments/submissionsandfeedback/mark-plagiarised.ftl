@@ -21,7 +21,7 @@
 		<@form.errors path="students" />
 		<#assign students=status.actualValue />
 		<p>
-			${verb?cap_first}ing <strong><@fmt.p students?size "student" /></strong> as suspected of being plagiarised.
+			${verb?cap_first}ing <strong><@fmt.p students?size "submission" /></strong> as suspected of being plagiarised.
 			${message}
 		</p>
 		<#list students as usercode>
