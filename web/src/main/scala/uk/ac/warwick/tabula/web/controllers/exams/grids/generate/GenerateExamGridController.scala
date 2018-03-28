@@ -466,6 +466,8 @@ class GenerateExamGridController extends ExamsController
 			).sorted
 		}).sortBy{case (course, _) => course.code} :_*)
 
+		GenerateExamGridAuditCommand(selectCourseCommand).apply()
+
 		GridData(entities, studentInformationColumns, perYearColumns, summaryColumns, weightings, normalLoadLookup, routeRulesLookup)
 	}
 
