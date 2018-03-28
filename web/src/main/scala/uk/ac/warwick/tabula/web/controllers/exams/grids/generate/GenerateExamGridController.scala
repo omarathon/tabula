@@ -455,8 +455,10 @@ class GenerateExamGridController extends ExamsController
 		val studentInformationColumns = predefinedColumnOptions.collect { case c: StudentExamGridColumnOption => c }.flatMap(_.getColumns(state))
 		val summaryColumns = predefinedColumnOptions.collect { case c: ChosenYearExamGridColumnOption => c }.flatMap(_.getColumns(state)) ++
 			customColumnTitles.flatMap(BlankColumnOption.getColumn)
+		val selectedYears = selectCourseCommand.courseYearsToShow.asScala.map(_.stripPrefix("Year").toInt).toSeq
 		val perYearColumns = predefinedColumnOptions.collect { case c: PerYearExamGridColumnOption => c }
 			.flatMap(_.getColumns(state).toSeq)
+			.filter { case (year, _) => selectedYears.contains(year) }
 			.groupBy { case (year, _) => year}
 			.mapValues(_.flatMap { case (_, columns) => columns })
 
