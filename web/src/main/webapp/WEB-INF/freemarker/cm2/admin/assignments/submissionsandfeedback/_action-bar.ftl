@@ -125,12 +125,11 @@
 							<@fmt.permission_button
 								permission='Submission.ManagePlagiarismStatus'
 								scope=assignment
-								action_descr='mark plagiarised'
+								action_descr='flag suspected plagiarism'
 								href=markplagiarised_url
 								id="mark-plagiarised-selected-button"
-								tooltip="Mark the selected student submissions as plagiarised"
 								data_attr='data-container=body'>
-									Mark plagiarised
+									Flag suspected plagiarism
 							</@fmt.permission_button>
 						</li>
 						<li class="must-have-selected">
@@ -138,12 +137,11 @@
 							<@fmt.permission_button
 							permission='Submission.ManagePlagiarismStatus'
 							scope=assignment
-							action_descr='unmark plagiarised'
+							action_descr='remove suspected plagiarism flag'
 							href=markplagiarised_url
 							id="unmark-plagiarised-selected-button"
-							tooltip="Unmark the student submissions as plagiarised"
 							data_attr='data-container=body'>
-									Unmark plagiarised
+									Remove suspected plagiarism flag
 							</@fmt.permission_button>
 						</li>
 					</ul>
