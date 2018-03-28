@@ -82,9 +82,9 @@ class ImportAssignmentsCommandTest extends FlatSpec with Matchers with Mockito {
 			membershipService.getUpstreamAssessmentGroupsNotIn(isEq(Seq("seenGroupId")), any[Seq[AcademicYear]]) returns Nil
 
 			val registrations = Seq(
-				UpstreamModuleRegistration("13/14", "0100001/1", "1", "A", "A01", "HI33M-30", "A", "", "", "", ""),
-				UpstreamModuleRegistration("13/14", "0100001/1", "1", "A", "A01", "HI100-30", "A", "", "", "", ""),
-				UpstreamModuleRegistration("13/14", "0100002/1", "2", "A", "A01", "HI101-30", "A", "", "", "", "")
+				UpstreamModuleRegistration("13/14", "0100001/1", "1", "A", "A01", "HI33M-30", "A", "", "", "", "", "", "", "", ""),
+				UpstreamModuleRegistration("13/14", "0100001/1", "1", "A", "A01", "HI100-30", "A", "", "", "", "", "", "", "", ""),
+				UpstreamModuleRegistration("13/14", "0100002/1", "2", "A", "A01", "HI101-30", "A", "", "", "", "", "", "", "", "")
 			)
 			command.doGroupMembers()
 			verify(membershipService, times(4)).replaceMembers(any[UpstreamAssessmentGroup], any[Seq[UpstreamModuleRegistration]])
@@ -97,10 +97,10 @@ class ImportAssignmentsCommandTest extends FlatSpec with Matchers with Mockito {
 	it should "process empty groups" in {
 		new Fixture {
 			val registrations = Seq(
-				UpstreamModuleRegistration("13/14", "0100001/1", "1", "A", "A01", "HI33M-30", "A", "", "", "", ""),
-				UpstreamModuleRegistration("13/14", "0100002/1", "2", "A", "A01", "HI33M-30", "A", "", "", "", ""),
-				UpstreamModuleRegistration("13/14", "0100003/1", "3", "A", "A01", "HI100-30", "A", "", "", "", ""),
-				UpstreamModuleRegistration("13/14", "0100002/1", "2", "A", "A01", "HI100-30", "A", "", "", "", "")
+				UpstreamModuleRegistration("13/14", "0100001/1", "1", "A", "A01", "HI33M-30", "A", "", "", "", "", "", "", "", ""),
+				UpstreamModuleRegistration("13/14", "0100002/1", "2", "A", "A01", "HI33M-30", "A", "", "", "", "", "", "", "", ""),
+				UpstreamModuleRegistration("13/14", "0100003/1", "3", "A", "A01", "HI100-30", "A", "", "", "", "", "", "", "", ""),
+				UpstreamModuleRegistration("13/14", "0100002/1", "2", "A", "A01", "HI100-30", "A", "", "", "", "", "", "", "", "")
 			)
 
 			membershipService.getUpstreamAssessmentGroupsNotIn(isEq(Seq("seenGroupId")), any[Seq[AcademicYear]]) returns Seq("hi900_30")
@@ -133,10 +133,10 @@ class ImportAssignmentsCommandTest extends FlatSpec with Matchers with Mockito {
 	it should "set seat number to null where there is ambiguity" in {
 		new Fixture {
 			val registrations = Seq(
-				UpstreamModuleRegistration("13/14", "0100001/1", "1", "A", "A01", "HI33M-30", "A", "", "", "", ""),
-				UpstreamModuleRegistration("13/14", "0100001/1", "1", "A", "A01", "HI33M-30", "A", "", "", "", ""),
-				UpstreamModuleRegistration("13/14", "0100002/1", "2", "A", "A01", "HI33M-30", "A", "", "", "", ""),
-				UpstreamModuleRegistration("13/14", "0100002/1", "3", "A", "A01", "HI33M-30", "A", "", "", "", "")
+				UpstreamModuleRegistration("13/14", "0100001/1", "1", "A", "A01", "HI33M-30", "A", "", "", "", "", "", "", "", ""),
+				UpstreamModuleRegistration("13/14", "0100001/1", "1", "A", "A01", "HI33M-30", "A", "", "", "", "", "", "", "", ""),
+				UpstreamModuleRegistration("13/14", "0100002/1", "2", "A", "A01", "HI33M-30", "A", "", "", "", "", "", "", "", ""),
+				UpstreamModuleRegistration("13/14", "0100002/1", "3", "A", "A01", "HI33M-30", "A", "", "", "", "", "", "", "", "")
 			)
 
 			membershipService.getUpstreamAssessmentGroupsNotIn(isEq(Seq("seenGroupId")), any[Seq[AcademicYear]]) returns Seq("hi900_30")
@@ -173,10 +173,10 @@ class ImportAssignmentsCommandTest extends FlatSpec with Matchers with Mockito {
 	it should "set marks and grades to null where there is ambiguity" in {
 		new Fixture {
 			val registrations = Seq(
-				UpstreamModuleRegistration("13/14", "0100001/1", "1", "A", "A01", "HI33M-30", "A", "34", "21", "34", "21"),
-				UpstreamModuleRegistration("13/14", "0100001/1", "1", "A", "A01", "HI33M-30", "A", "34", "F", "34", "F"),
-				UpstreamModuleRegistration("13/14", "0100002/1", "2", "A", "A01", "HI33M-30", "A", "67", "21", "72", "1"),
-				UpstreamModuleRegistration("13/14", "0100002/1", "3", "A", "A01", "HI33M-30", "A", "67", "21", "72", "1")
+				UpstreamModuleRegistration("13/14", "0100001/1", "1", "A", "A01", "HI33M-30", "A", "34", "21", "34", "21","", "", "", ""),
+				UpstreamModuleRegistration("13/14", "0100001/1", "1", "A", "A01", "HI33M-30", "A", "34", "F", "34", "F", "", "", "", ""),
+				UpstreamModuleRegistration("13/14", "0100002/1", "2", "A", "A01", "HI33M-30", "A", "67", "21", "72", "1", "", "", "", ""),
+				UpstreamModuleRegistration("13/14", "0100002/1", "3", "A", "A01", "HI33M-30", "A", "67", "21", "72", "1", "", "", "", "")
 			)
 
 			membershipService.getUpstreamAssessmentGroupsNotIn(isEq(Seq("seenGroupId")), any[Seq[AcademicYear]]) returns Seq("hi900_30")
