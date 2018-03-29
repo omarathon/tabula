@@ -137,11 +137,12 @@
 			</label>
 		</@filter>
 	</div>
+	<#assign studyYear = (selectCourseCommand.yearOfStudy)!0 />
 	<div class="row year_info">
-		<#assign studyYear = (selectCourseCommand.yearOfStudy)!0 />
+		<h3 class="year_info_hdr <#if studyYear == 0>hidden</#if>">Years to display on grid</h3>
 		<#assign maxYear=selectCourseCommand.allYearsOfStudy?size>
 			<#list 1..maxYear as counter>
-				<div class="col-md-3 year${counter} <#if counter gt studyYear>hidden</#if>" data-year="${counter}">
+				<div class="col-sm-2 year${counter} <#if counter gt studyYear>hidden</#if>" data-year="${counter}">
 					<div class="checkbox">
 						<#assign yearColumn="Year${counter}"/>
 						<label>
@@ -155,7 +156,7 @@
 			</#list>
 			<#if studyYear == 0><input type="hidden" name="courseYearsToShow" value=""/></#if>
 	</div>
-
+	<div class="year_info_ftr <#if studyYear == 0>hidden</#if>"><hr/></div>
 	<p>
 		<@bs3form.checkbox path="selectCourseCommand.includeTempWithdrawn">
 			<@f.checkbox path="selectCourseCommand.includeTempWithdrawn" /> Show temporarily withdrawn students
@@ -241,6 +242,7 @@
 											$checkbox.prop('checked', false);
 											updateFilter($checkbox);
 										});
+										hideYearCheckboxesArea();
 									})
 							)
 							.append($('<hr />'))
@@ -288,13 +290,15 @@
 		var yearCheckboxes = function() {
 			var yearOfStudy = $("input[type='radio'][name='yearOfStudy']:checked");
 			var selectedYearOfStudy = 0;
+			$('.year_info .year_info_hdr').toggleClass("hidden", yearOfStudy.length == 0);
+			$('.year_info_ftr').toggleClass("hidden", yearOfStudy.length == 0);
 			if (yearOfStudy.length > 0) {
 				selectedYearOfStudy = yearOfStudy.val();
 				$('.year_info').find("input[type='hidden'][name='courseYearsToShow']").val("Year"+selectedYearOfStudy);
 			} else {
 				return;
 			}
-			$('.year_info .col-md-3').each(function(){
+			$('.year_info .col-sm-2').each(function(){
 				var $yearCheckboxDiv =  $(this);
 				var $yearCheckbox = $yearCheckboxDiv.find('input');
 				var year = $yearCheckboxDiv.data('year');
@@ -305,6 +309,17 @@
 				}
 				$yearCheckbox.prop("disabled", (selectedYearOfStudy ==  year));
 				$yearCheckboxDiv.toggleClass("hidden", selectedYearOfStudy <  year);
+			});
+		};
+
+		var hideYearCheckboxesArea = function() {
+			$('.year_info .year_info_hdr').addClass("hidden");
+			$('.year_info_ftr').addClass("hidden");
+			$('.year_info .col-sm-2').each(function(){
+				var $yearCheckboxDiv =  $(this);
+				var $yearCheckbox = $yearCheckboxDiv.find('input');
+				$yearCheckboxDiv.addClass("hidden");
+				$yearCheckbox.prop("checked", false);
 			});
 		};
 
@@ -351,12 +366,7 @@
 
 				prependClearLink($list);
 			});
-			$('.year_info .col-md-3').each(function(){
-				var $yearCheckboxDiv =  $(this);
-				var $yearCheckbox = $yearCheckboxDiv.find('input');
-				$yearCheckboxDiv.toggleClass("hidden", true);
-				$yearCheckbox.prop("checked", false);
-			});
+			hideYearCheckboxesArea();
 		});
 	});
 </script>
