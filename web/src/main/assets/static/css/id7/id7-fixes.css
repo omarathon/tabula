@@ -19,3 +19,15 @@
 	color: #333;
 }
 
+.alert > p, .alert > ul {
+	margin-bottom: inherit;
+}
+
+.alert > p:last-child, .alert > ul.last-child {
+	margin-bottom: 0;
+}
+
+.alert-info blockquote {
+	border-left-color: #383838;
+}
+

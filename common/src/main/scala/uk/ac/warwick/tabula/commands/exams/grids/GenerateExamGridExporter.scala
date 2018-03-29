@@ -466,7 +466,7 @@ object ExamGridSummaryAndKey {
 			keyCell.setCellValue("#")
 			keyCell.setCellStyle(cellStyleMap(ExamGridExportStyles.Fail))
 			val valueCell = row.createCell(1)
-			valueCell.setCellValue("Failed module")
+			valueCell.setCellValue("Failed module or component")
 		}
 		{
 			val row = sheet.createRow(11)

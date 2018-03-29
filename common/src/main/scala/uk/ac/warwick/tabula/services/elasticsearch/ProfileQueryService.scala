@@ -10,11 +10,12 @@ import org.springframework.stereotype.Service
 import uk.ac.warwick.spring.Wire
 import uk.ac.warwick.tabula.DateFormats
 import uk.ac.warwick.tabula.data.model.{Department, Member, MemberUserType}
+import uk.ac.warwick.tabula.helpers.ExecutionContexts.global
 import uk.ac.warwick.tabula.helpers.StringUtils._
 import uk.ac.warwick.tabula.services.elasticsearch.ProfileQuerySanitisation._
 import uk.ac.warwick.tabula.services.{ProfileService, ProfileServiceComponent}
+
 import scala.concurrent.duration._
-import uk.ac.warwick.tabula.helpers.Futures._
 
 trait ProfileQueryService
 	extends ProfileQueryMethods

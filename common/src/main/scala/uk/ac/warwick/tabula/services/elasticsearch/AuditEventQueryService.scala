@@ -1,7 +1,7 @@
 package uk.ac.warwick.tabula.services.elasticsearch
 
 import com.sksamuel.elastic4s.ElasticDsl._
-import com.sksamuel.elastic4s.{BoolQueryDefinition, QueryDefinition, RichSearchHit, RichSearchResponse}
+import com.sksamuel.elastic4s.{QueryDefinition, RichSearchHit, RichSearchResponse}
 import org.elasticsearch.index.query.QueryStringQueryBuilder.Operator
 import org.elasticsearch.search.sort.SortOrder
 import org.joda.time.DateTime
@@ -11,8 +11,8 @@ import uk.ac.warwick.spring.Wire
 import uk.ac.warwick.tabula.DateFormats
 import uk.ac.warwick.tabula.data.model._
 import uk.ac.warwick.tabula.helpers.DateTimeOrdering._
+import uk.ac.warwick.tabula.helpers.ExecutionContexts.global
 import uk.ac.warwick.tabula.helpers.Futures
-import uk.ac.warwick.tabula.helpers.Futures._
 import uk.ac.warwick.tabula.helpers.StringUtils._
 import uk.ac.warwick.tabula.services.UserLookupService.{UniversityId, Usercode}
 import uk.ac.warwick.tabula.services.{AuditEventService, AuditEventServiceComponent, UserLookupComponent, UserLookupService}

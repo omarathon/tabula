@@ -5,7 +5,7 @@ import org.springframework.validation.Errors
 import uk.ac.warwick.tabula.commands._
 import uk.ac.warwick.tabula.commands.timetables.ViewMemberEventsCommand.ReturnType
 import uk.ac.warwick.tabula.data.model.{Member, StaffMember, StudentMember}
-import uk.ac.warwick.tabula.helpers.Futures._
+import uk.ac.warwick.tabula.helpers.ExecutionContexts.timetable
 import uk.ac.warwick.tabula.helpers.{Futures, Logging}
 import uk.ac.warwick.tabula.permissions.{Permission, Permissions}
 import uk.ac.warwick.tabula.services.timetables.TimetableFetchingService.{EventList, EventOccurrenceList}

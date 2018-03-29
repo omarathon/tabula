@@ -8,7 +8,7 @@ import uk.ac.warwick.tabula.AcademicYear
 import uk.ac.warwick.tabula.commands._
 import uk.ac.warwick.tabula.commands.timetables.ViewModuleEventsCommand.{CommandType, ReturnType}
 import uk.ac.warwick.tabula.data.model.Module
-import uk.ac.warwick.tabula.helpers.Futures._
+import uk.ac.warwick.tabula.helpers.ExecutionContexts.timetable
 import uk.ac.warwick.tabula.helpers.SystemClockComponent
 import uk.ac.warwick.tabula.permissions.Permissions
 import uk.ac.warwick.tabula.services.timetables.TimetableFetchingService.EventOccurrenceList

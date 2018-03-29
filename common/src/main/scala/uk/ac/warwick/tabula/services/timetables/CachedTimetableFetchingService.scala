@@ -4,12 +4,12 @@ import java.util.concurrent.TimeUnit
 
 import org.joda.time.DateTime
 import uk.ac.warwick.tabula.JavaImports._
+import uk.ac.warwick.tabula.helpers.ExecutionContexts.timetable
 import uk.ac.warwick.tabula.services.permissions.AutowiringCacheStrategyComponent
 import uk.ac.warwick.tabula.services.timetables.TimetableCacheKey._
 import uk.ac.warwick.tabula.services.timetables.TimetableFetchingService.EventList
 import uk.ac.warwick.util.cache._
 import uk.ac.warwick.util.collections.Pair
-import uk.ac.warwick.tabula.helpers.Futures._
 
 import scala.collection.JavaConverters._
 import scala.concurrent.duration._

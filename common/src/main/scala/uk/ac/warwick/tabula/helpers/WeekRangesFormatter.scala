@@ -207,7 +207,7 @@ trait WeekRangesDumper extends KnowsUserNumberingSystem {
 		// how they might be used
 		val startDate = clock.now.minusYears(2).toLocalDate
 		val endDate = clock.now.plusYears(2).toLocalDate
-		val user = RequestInfo.fromThread.get.user
+		val user = RequestInfo.fromThread.map(_.user).getOrElse(NoCurrentUser())
 
 		// don't fetch the department if we don't have to, and if we _do_ have to, don't fetch it more than once.
 		lazy val department = moduleAndDepartmentService.getDepartmentByCode(user.departmentCode)
@@ -389,8 +389,7 @@ class WholeWeekFormatterTag extends TemplateMethodModelEx with KnowsUserNumberin
 
 	/** Pass through all the arguments  */
 	override def exec(list: JList[_]): String = {
-		val user = RequestInfo.fromThread.get.user
-
+		val user = RequestInfo.fromThread.map(_.user).getOrElse(NoCurrentUser())
 		val args = list.asScala.toSeq.map { model => DeepUnwrap.unwrap(model.asInstanceOf[TemplateModel]) }
 		args match {
 			case Seq(startWeekNumber: JInteger, endWeekNumber: JInteger, academicYear: AcademicYear, dept: Department, short: JBoolean) =>

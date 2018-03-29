@@ -265,7 +265,6 @@ class Department extends GeneratedId
 		getStringSeqSetting(Settings.ExamGridOptions.PredefinedColumnIdentifiers, Wire.all[ExamGridColumnOption].map(_.identifier)).toSet,
 		getStringSeqSetting(Settings.ExamGridOptions.PredefinedColumnIdentifiers, Seq()),
 		nameToShow,
-		getStringSetting(Settings.ExamGridOptions.YearsToShow, "current"),
 		getStringSetting(Settings.ExamGridOptions.MarksToShow, "overall"),
 		getStringSetting(Settings.ExamGridOptions.ComponentsToShow, "all"),
 		getStringSetting(Settings.ExamGridOptions.ComponentSequenceToShow, "markOnly"),
@@ -277,7 +276,6 @@ class Department extends GeneratedId
 		settings += (Settings.ExamGridOptions.PredefinedColumnIdentifiers -> options.predefinedColumnIdentifiers)
 		settings += (Settings.ExamGridOptions.PredefinedColumnIdentifiers -> options.customColumnTitles)
 		settings += (Settings.ExamGridOptions.NameToShow -> options.nameToShow.value)
-		settings += (Settings.ExamGridOptions.YearsToShow -> options.yearsToShow)
 		settings += (Settings.ExamGridOptions.MarksToShow -> options.marksToShow)
 		settings += (Settings.ExamGridOptions.ComponentsToShow -> options.componentsToShow)
 		settings += (Settings.ExamGridOptions.ComponentSequenceToShow -> options.componentSequenceToShow)
@@ -540,7 +538,6 @@ object Department {
 			val PredefinedColumnIdentifiers = "examGridOptionsPredefined"
 			val CustomColumnTitles = "examGridOptionsCustom"
 			val NameToShow = "examGridOptionsName"
-			val YearsToShow = "examGridOptionsYears"
 			val MarksToShow = "examGridOptionsMarks"
 			val ComponentsToShow = "examGridOptionsComponents"
 			val ComponentSequenceToShow = "componentSequenceToShow"
@@ -552,7 +549,6 @@ object Department {
 			predefinedColumnIdentifiers: Set[String],
 			customColumnTitles: Seq[String],
 			nameToShow: ExamGridStudentIdentificationColumnValue,
-			yearsToShow: String,
 			marksToShow: String,
 			componentsToShow: String,
 			componentSequenceToShow: String,

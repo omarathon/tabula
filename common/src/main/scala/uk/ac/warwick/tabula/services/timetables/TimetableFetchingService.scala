@@ -1,7 +1,7 @@
 package uk.ac.warwick.tabula.services.timetables
 
 import org.joda.time.DateTime
-import uk.ac.warwick.tabula.helpers.Futures._
+import uk.ac.warwick.tabula.helpers.ExecutionContexts.timetable
 import uk.ac.warwick.tabula.helpers.StringUtils._
 import uk.ac.warwick.tabula.helpers.{Futures, Logging}
 import uk.ac.warwick.tabula.services.timetables.TimetableFetchingService.EventList
