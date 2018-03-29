@@ -11,8 +11,26 @@ import uk.ac.warwick.tabula.services.AutowiringAssessmentMembershipServiceCompon
 import scala.collection.mutable
 
 object ModuleExamGridColumn {
+
+	case class SITSIndicator(grade: String, description: String)
+
 	// grades with a special meaning in SITS
-	final val SITSIndicators = Seq("AB", "AM", "L", "M", "PL", "RF", "S", "W", "R", "X", "CP", "N", "QF", "T")
+	final val SITSIndicators = Seq(
+		SITSIndicator("AB", "Absent"),
+		SITSIndicator("AM", "Academic Misconduct"),
+		SITSIndicator("L",  "Late or No submission"),
+		SITSIndicator("M",  "Mitigating circumstances"),
+		SITSIndicator("PL", "Plagiarism"),
+		SITSIndicator("RF", "Resit Fail"),
+		SITSIndicator("S",  "First Sit in September"),
+		SITSIndicator("W",  "Withdrawn"),
+		SITSIndicator("R",  "Forced Resit"),
+		/* SITSIndicator("X",  ""), No mention of this one in the EMU user guides, but it was mentioned by a user when req gathering - taking it out for now */
+		SITSIndicator("CP", "Compensated Pass"),
+		SITSIndicator("N",  "Resit refused/not taken"),
+		SITSIndicator("QF", "Qualified Fail"),
+		SITSIndicator("T",  "Temporary Withdraw")
+	)
 }
 
 abstract class ModuleExamGridColumn(state: ExamGridColumnState, val module: Module, isDuplicate: Boolean, cats: JBigDecimal)
@@ -64,8 +82,9 @@ abstract class ModuleExamGridColumn(state: ExamGridColumnState, val module: Modu
 									ExamGridColumnValueFailedDecimal(mark, isActual)
 								} else if (entity.studentCourseYearDetails.isDefined && entity.overcattingModules.exists(_.contains(mr.module))) {
 									ExamGridColumnValueOvercatDecimal(mark, isActual)
-								} else if (mr.firstDefinedGrade.exists(g => ModuleExamGridColumn.SITSIndicators.contains(g))) {
-									ExamGridColumnValueString(s"${mr.firstDefinedGrade.get} ($mark)", isActual)
+								} else if (mr.firstDefinedGrade.exists(g => ModuleExamGridColumn.SITSIndicators.exists(_.grade == g))) {
+									val indicator = ModuleExamGridColumn.SITSIndicators.find(_.grade == mr.firstDefinedGrade.get).get
+									ExamGridColumnValueWithTooltip(s"${mr.firstDefinedGrade.get} ($mark)", isActual, indicator.description)
 								} else {
 									ExamGridColumnValueDecimal(mark, isActual)
 								}

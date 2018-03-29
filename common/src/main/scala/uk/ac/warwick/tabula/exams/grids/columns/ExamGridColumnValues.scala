@@ -108,6 +108,12 @@ class ExamGridColumnValueString(value: String, val isActual: Boolean = false) ex
 	override def isEmpty: Boolean = !value.hasText
 }
 
+case class ExamGridColumnValueWithTooltip(value:String, actual:Boolean, message: String = "") extends ExamGridColumnValueString(value, actual){
+	override def toHTML: String = "<span class=\"use-tooltip\" %s>%s</span>".format(
+		if (message.hasText) "title=\"%s\" data-container=\"body\"".format(message) else "",
+		value
+	)
+}
 
 trait ExamGridColumnValueFailed {
 
