@@ -242,6 +242,7 @@
 											$checkbox.prop('checked', false);
 											updateFilter($checkbox);
 										});
+										hideYearCheckboxesArea();
 									})
 							)
 							.append($('<hr />'))
@@ -311,6 +312,17 @@
 			});
 		};
 
+		var hideYearCheckboxesArea = function() {
+			$('.year_info .year_info_hdr').addClass("hidden");
+			$('.year_info_ftr').addClass("hidden");
+			$('.year_info .col-sm-2').each(function(){
+				var $yearCheckboxDiv =  $(this);
+				var $yearCheckbox = $yearCheckboxDiv.find('input');
+				$yearCheckboxDiv.addClass("hidden");
+				$yearCheckbox.prop("checked", false);
+			});
+		};
+
 		$('form.select-course .filters').on('change', function(e) {
 			updateFilter($(e.target));
 			yearCheckboxes();
@@ -354,15 +366,7 @@
 
 				prependClearLink($list);
 			});
-			var yearOfStudy = $("input[type='radio'][name='yearOfStudy']:checked");
-			$('.year_info .year_info_hdr').toggleClass("hidden", yearOfStudy.length == 0);
-			$('.year_info_ftr').toggleClass("hidden", yearOfStudy.length == 0);
-			$('.year_info .col-sm-2').each(function(){
-				var $yearCheckboxDiv =  $(this);
-				var $yearCheckbox = $yearCheckboxDiv.find('input');
-				$yearCheckboxDiv.toggleClass("hidden", true);
-				$yearCheckbox.prop("checked", false);
-			});
+			hideYearCheckboxesArea();
 		});
 	});
 </script>
