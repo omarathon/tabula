@@ -13,13 +13,13 @@ class MinimumAttachmentsTest extends BrowserTest with CourseworkFixtures {
 		click on arrow
 
 		Then("The  module should expand")
-		eventually {
+		eventuallyAjax {
 			And("I should find a button to edit the CM2 assignment")
 			val editAssignmentBtn = id("main").webElement.findElements(By.xpath("//*[contains(text(),'Edit assignment')]")).get(1)
 			click on editAssignmentBtn
 		}
 
-		eventually {
+		eventuallyAjax {
 			And("I should be able to select the Options tab")
 			val optionsLink = id("main").webElement.findElements(By.xpath("//*[contains(text(),'Options')]")).get(0)
 			click on optionsLink
