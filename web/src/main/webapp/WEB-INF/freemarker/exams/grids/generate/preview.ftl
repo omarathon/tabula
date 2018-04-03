@@ -320,7 +320,25 @@
 		});
 
 		// fix the grid scrollbar to the footer
-		$('.doubleScroll-scroll-wrapper').prependTo('.fix-footer').css('margin-bottom', '10px');
+		var $scrollWrapper = $('.doubleScroll-scroll-wrapper');
+		var $grid = $('.grid');
+
+		$scrollWrapper.prependTo('.fix-footer').css('margin-bottom', '10px');
+
+		function reflowScroll() {
+			setTimeout(function () {
+				$scrollWrapper
+					// Update the width of the scroll track to match the container
+					.width($scrollWrapper.parent().width())
+					// Update the scroll bar so it reflects the width of the grid
+					.children().width($grid.width()).end()
+					// Reset the scroll bar to the initial position
+					.scrollLeft(0);
+			}, 0);
+		}
+		$(window).on('id7:reflow', reflowScroll);
+		reflowScroll();
+
 		$('.table-responsive').css('overflow-x', 'hidden');
 
 	});
