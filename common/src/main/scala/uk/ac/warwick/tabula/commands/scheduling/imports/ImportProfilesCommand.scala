@@ -31,6 +31,7 @@ class ImportProfilesCommand extends CommandWithoutTransaction[Unit] with Logging
 	var userLookup: UserLookupService = Wire[UserLookupService]
 	var moduleRegistrationImporter: ModuleRegistrationImporter = Wire[ModuleRegistrationImporter]
 	var accreditedPriorLearningImporter: AccreditedPriorLearningImporter = Wire[AccreditedPriorLearningImporter]
+	var studentCourseDetailsNoteImporter: StudentCourseDetailsNoteImporter = Wire[StudentCourseDetailsNoteImporter]
 	var moduleRegistrationService: ModuleRegistrationService = Wire[ModuleRegistrationService]
 	var smallGroupService: SmallGroupService = Wire[SmallGroupService]
 	var profileIndexService: ProfileIndexService = Wire[ProfileIndexService]
@@ -131,6 +132,12 @@ class ImportProfilesCommand extends CommandWithoutTransaction[Unit] with Logging
 					}
 				}
 
+				benchmarkTask("Update student course detail notes") {
+					transactional() {
+						updateStudentCourseDetailsNotes()
+					}
+				}
+
 				benchmarkTask("Rationalise relationships") {
 					transactional() {
 						rationaliseRelationships(importMemberCommands)
@@ -195,6 +202,10 @@ class ImportProfilesCommand extends CommandWithoutTransaction[Unit] with Logging
 		importAccreditedPriorLearningCommands flatMap {
 			_.apply()
 		}
+	}
+
+	def updateStudentCourseDetailsNotes(): Seq[StudentCourseDetailsNote] = {
+		studentCourseDetailsNoteImporter.getStudentCourseDetailsNotes.flatMap(_.apply())
 	}
 
 
