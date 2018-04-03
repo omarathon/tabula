@@ -39,10 +39,10 @@ class ImportCourseDetailsNoteCommand(row: StudentCourseDetailsNoteRow) extends C
 
 		val studentCourseDetails: Option[StudentCourseDetails] = row.code match {
 			case ScjMatch(scj) =>
-				logger.info(s"Found note for SCJ - $scj")
+				logger.debug(s"Found note for SCJ - $scj")
 				studentCourseDetailsDao.getByScjCodeStaleOrFresh(scj)
 			case SprMatch(spr) =>
-				logger.info(s"Found note for SPR - $spr")
+				logger.debug(s"Found note for SPR - $spr")
 				studentCourseDetailsDao.getBySprCodeStaleOrFresh(spr).headOption
 			case _ => None
 		}
