@@ -1,7 +1,6 @@
 package uk.ac.warwick.tabula.web.controllers.cm2
 
 import javax.validation.Valid
-
 import org.joda.time.DateTime
 import org.springframework.context.annotation.Profile
 import org.springframework.stereotype.Controller
@@ -9,14 +8,13 @@ import org.springframework.validation.Errors
 import org.springframework.web.bind.annotation.{ModelAttribute, PathVariable, RequestMapping}
 import uk.ac.warwick.tabula.cm2.web.Routes
 import uk.ac.warwick.tabula.commands.cm2.StudentSubmissionAndFeedbackCommand.StudentSubmissionInformation
+import uk.ac.warwick.tabula.commands.cm2.assignments.{RapidResubmissionException, SubmitAssignmentCommand, SubmitAssignmentRequest}
 import uk.ac.warwick.tabula.commands.cm2.{CurrentUserSubmissionAndFeedbackCommandState, StudentSubmissionAndFeedbackCommand}
-import uk.ac.warwick.tabula.commands.cm2.assignments.{SubmitAssignmentCommand, SubmitAssignmentRequest}
-import uk.ac.warwick.tabula.{AutowiringFeaturesComponent, CurrentUser}
 import uk.ac.warwick.tabula.commands.{Appliable, SelfValidating}
-import uk.ac.warwick.tabula.data.Transactions._
 import uk.ac.warwick.tabula.data.model.{Assignment, Submission}
 import uk.ac.warwick.tabula.services.attendancemonitoring.AutowiringAttendanceMonitoringCourseworkSubmissionServiceComponent
 import uk.ac.warwick.tabula.web.Mav
+import uk.ac.warwick.tabula.{AutowiringFeaturesComponent, CurrentUser}
 
 /**
 	* This is the main student-facing and non-student-facing controller for handling esubmission and return of feedback.
@@ -109,7 +107,11 @@ class AssignmentController extends CourseworkController
 		if (errors.hasErrors) {
 			view(infoCommand, form, errors)
 		} else {
-			transactional() { form.apply() }
+			try {
+				form.apply()
+			} catch {
+				case e: RapidResubmissionException => logger.info(s"Rapid re-submission to assignment ${form.assignment.id} by student ${form.user.usercode}, ignoring", e)
+			}
 
 			Redirect(Routes.assignment(form.assignment)).addObjects("justSubmitted" -> true)
 		}
