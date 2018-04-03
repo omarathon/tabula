@@ -187,6 +187,8 @@ abstract class Notification[A >: Null <: ToEntityReference, B]
 	@transient def content: FreemarkerModel
 	@transient def url: String
 
+	def urlFor(user: User): String = url
+
 	/**
 	 * URL title will be used to generate the links in notifications
 	 *
