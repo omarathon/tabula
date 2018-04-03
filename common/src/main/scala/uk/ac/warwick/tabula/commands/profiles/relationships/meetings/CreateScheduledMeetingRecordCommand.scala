@@ -144,9 +144,9 @@ trait CreateScheduledMeetingRecordDescription extends Describable[ScheduledMeeti
 trait CreateScheduledMeetingRecordNotification extends Notifies[ScheduledMeetingRecord, ScheduledMeetingRecord] {
 	def emit(meeting: ScheduledMeetingRecord): Seq[ScheduledMeetingRecordNotification with SingleRecipientNotification with AddsIcalAttachmentToScheduledMeetingNotification] = {
 		val user = meeting.creator.asSsoUser
-		val inviteeNotification = Notification.init(new ScheduledMeetingRecordInviteeNotification("created"), user, meeting, meeting.relationship)
+		val inviteeNotification = Notification.init(new ScheduledMeetingRecordInviteeNotification("created"), user, meeting)
 		if(!meeting.universityIdInRelationship(user.getWarwickId)) {
-			val behalfNotification = Notification.init(new ScheduledMeetingRecordBehalfNotification("created"), user, meeting, meeting.relationship)
+			val behalfNotification = Notification.init(new ScheduledMeetingRecordBehalfNotification("created"), user, meeting)
 			Seq(inviteeNotification, behalfNotification)
 		} else {
 			Seq(inviteeNotification)
