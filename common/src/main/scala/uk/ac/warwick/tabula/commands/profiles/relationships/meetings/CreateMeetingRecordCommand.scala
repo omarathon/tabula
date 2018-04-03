@@ -62,7 +62,7 @@ trait CreateMeetingRecordCommandNotifications extends Notifies[MeetingRecord, Me
 	self: CreateMeetingRecordCommandState =>
 
 	override def emit(meeting: MeetingRecord) = Seq(
-		Notification.init(new NewMeetingRecordApprovalNotification, creator.asSsoUser, Seq(meeting), relationship)
+		Notification.init(new NewMeetingRecordApprovalNotification, creator.asSsoUser, Seq(meeting))
 	)
 
 	override def transformResult(meetingRecord: MeetingRecord) = Seq(meetingRecord)
