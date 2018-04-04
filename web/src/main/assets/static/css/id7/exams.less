@@ -255,3 +255,51 @@ div.assessment_details {
 	margin-top: 20px;
 	margin-left: 5px;
 }
+
+@media print {
+
+	.grid-preview {
+		@page {
+			size: A3 landscape;
+		}
+
+		.id7-fixed-width-container, .id7-main-content  {
+			width: 100%;
+			margin-right: 0;
+			margin-left: 0;
+		}
+
+		.id7-left-border, .id7-right-border, .id7-page-header, .id7-main-content-header, .deptheader, h2, .progress-arrows, footer {
+			display: none;
+		}
+
+		.key {
+			margin-bottom: 20px;
+		}
+
+		.table-responsive {
+			overflow: visible;
+			position: absolute;
+		}
+
+		/* hacks to override ID7's over zealous repression of colour */
+		.exam-grid-preview {
+			.exam-grid-fail { color: @brand-danger!important; }
+			.exam-grid-overcat { color: @brand-success!important;}
+			.exam-grid-actual-mark {color: @brand-info!important;}
+		}
+
+		.grid {
+			.year, .student, .category {
+				td:first-child {
+					display: none
+				}
+			}
+
+			.header th:first-child {
+				display: none;
+			}
+		}
+	}
+
+}
