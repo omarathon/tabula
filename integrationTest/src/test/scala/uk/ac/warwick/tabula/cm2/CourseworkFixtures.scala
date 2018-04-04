@@ -133,6 +133,13 @@ trait CourseworkFixtures extends BrowserTest with FeaturesDriver with FixturesDr
 		}
 	}
 
+	def showModulesWithNoFilteredAssignments(): Unit = {
+		if (!checkbox("showEmptyModules").isSelected) {
+			click on find(cssSelector("#module-filter > .btn-filter")).get
+			checkbox("showEmptyModules").select()
+		}
+	}
+
 	/* Runs callback with assignment ID */
 	def withAssignment(
 		moduleCode: String,
@@ -151,12 +158,16 @@ trait CourseworkFixtures extends BrowserTest with FeaturesDriver with FixturesDr
 		}
 		loadCurrentAcademicYearTab()
 
-		val module = getModule(moduleCode).get
-		click on module.findElement(By.partialLinkText("Manage this module"))
+		showModulesWithNoFilteredAssignments()
 
-		val addAssignment = module.findElement(By.partialLinkText("Create new assignment"))
-		eventually(addAssignment.isDisplayed should be {true})
-		click on addAssignment
+		eventuallyAjax {
+			val module = getModule(moduleCode).get
+			click on module.findElement(By.partialLinkText("Manage this module"))
+
+			val addAssignment = module.findElement(By.partialLinkText("Create new assignment"))
+			eventually(addAssignment.isDisplayed should be {true})
+			click on addAssignment
+		}
 
 		val prefilledReset = linkText("Don't do this")
 		if (prefilledReset.findElement.isDefined) {

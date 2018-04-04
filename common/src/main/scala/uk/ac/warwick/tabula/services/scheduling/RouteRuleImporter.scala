@@ -14,7 +14,7 @@ import uk.ac.warwick.tabula.commands.scheduling.imports.ImportMemberHelpers
 import uk.ac.warwick.tabula.data.model.{UpstreamRouteRule, UpstreamRouteRuleEntry}
 import uk.ac.warwick.tabula.helpers.StringUtils._
 import uk.ac.warwick.tabula.services.scheduling.RouteRuleImporter.{UpstreamRouteRuleQuery, UpstreamRouteRuleRow}
-import uk.ac.warwick.tabula.services.AutowiringCourseAndRouteServiceComponent
+import uk.ac.warwick.tabula.services.{AutowiringCourseAndRouteServiceComponent, AutowiringLevelServiceComponent}
 import uk.ac.warwick.tabula.data.Transactions._
 import uk.ac.warwick.tabula.services.exams.grids.AutowiringUpstreamModuleListServiceComponent
 
@@ -31,7 +31,7 @@ trait RouteRuleImporter {
 @Profile(Array("dev", "test", "production"))
 @Service
 class RouteRuleImporterImpl extends RouteRuleImporter with InitializingBean
-	with TaskBenchmarking with AutowiringCourseAndRouteServiceComponent with AutowiringUpstreamModuleListServiceComponent {
+	with TaskBenchmarking with AutowiringCourseAndRouteServiceComponent with AutowiringUpstreamModuleListServiceComponent with AutowiringLevelServiceComponent {
 
 	var sits: DataSource = Wire[DataSource]("sitsDataSource")
 
@@ -44,21 +44,23 @@ class RouteRuleImporterImpl extends RouteRuleImporter with InitializingBean
 	override def getRouteRules: Seq[UpstreamRouteRule] = {
 		val rows = benchmarkTask("Fetch route rules") { routeRuleQuery.execute }
 		// Remove rows that have null entires that aren't allowed
-		val nonEmptyRows = rows.asScala.filter(r => r.routeCode.hasText && r.yearOfStudy.nonEmpty && r.moduleListCode != null &&  r.moduleListCode.nonEmpty)
+		val nonEmptyRows = rows.asScala.filter(r => r.routeCode.hasText && r.levelCode.hasText && r.moduleListCode != null &&  r.moduleListCode.nonEmpty)
 		// Batch fetch the routes and module lists
 		val routeCodes = nonEmptyRows.map(_.routeCode).distinct
 		val moduleListCodes = nonEmptyRows.map(_.moduleListCode).distinct
 		val routes = transactional(readOnly = true) { courseAndRouteService.getRoutesByCodes(routeCodes) }
 		val moduleLists = transactional(readOnly = true) { upstreamModuleListService.findByCodes(moduleListCodes) }
+		val levels = transactional(readOnly = true) { levelService.getAllLevels }
+
 		// Remove rows that have invalid routes and module lists
-		val validRows: Seq[UpstreamRouteRuleRow] = nonEmptyRows.groupBy(r => (r.routeCode, r.moduleListCode))
-			.filter { case((routeCode, moduleListCode), groupedRows) =>
-				routes.exists(_.code == routeCode) && moduleLists.exists(_.code == moduleListCode)
+		val validRows: Seq[UpstreamRouteRuleRow] = nonEmptyRows.groupBy(r => (r.routeCode, r.levelCode, r.moduleListCode))
+			.filter { case((routeCode, levelCode, moduleListCode), _) =>
+				routes.exists(_.code == routeCode) && levels.exists(_.code == levelCode) && moduleLists.exists(_.code == moduleListCode)
 			}.values.flatten.toSeq
 
-		validRows.groupBy(r => (r.routeCode, r.yearOfStudy, r.academicYear)).map { case((routeCode, yearOfStudy, academicYearOption), groupedRows) =>
+		validRows.groupBy(r => (r.routeCode, r.levelCode, r.academicYear)).map { case((routeCode, levelCode, academicYearOption), groupedRows) =>
 			val route = routes.find(_.code == routeCode).get
-			val rule = new UpstreamRouteRule(academicYearOption, route, yearOfStudy.get)
+			val rule = new UpstreamRouteRule(academicYearOption, route, levelCode)
 			rule.entries.addAll(groupedRows.map(row => new UpstreamRouteRuleEntry(
 				rule,
 				moduleLists.find(_.code == row.moduleListCode).get,
@@ -89,7 +91,7 @@ object RouteRuleImporter {
 	def GetRouteRules: String = """
 		select
 			pmr.pwy_code as route_code,
-			pmr.lev_code as year_of_study,
+			pmr.lev_code as level_code,
 			pmr.pmr_desc as description,
 	 		pmb.fmc_code as module_list,
 			pmb.pmb_min as min_cats,
@@ -102,7 +104,7 @@ object RouteRuleImporter {
 
 	case class UpstreamRouteRuleRow(
 		routeCode: String,
-		yearOfStudy: Option[Int],
+		levelCode: String,
 		academicYear: Option[AcademicYear],
 		moduleListCode: String,
 		minCats: Option[BigDecimal],
@@ -120,7 +122,7 @@ object RouteRuleImporter {
 			}.map(AcademicYear.parse)
 			UpstreamRouteRuleRow(
 				rs.getString("route_code").maybeText.map(_.toLowerCase).orNull,
-				ImportMemberHelpers.getInteger(rs, "year_of_study"),
+				rs.getString("level_code").maybeText.orNull,
 				academicYear,
 				rs.getString("module_list"),
 				Option(rs.getBigDecimal("min_cats")).map(BigDecimal.apply),

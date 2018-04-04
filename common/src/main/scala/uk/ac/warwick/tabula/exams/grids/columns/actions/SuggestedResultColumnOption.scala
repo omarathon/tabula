@@ -3,7 +3,8 @@ package uk.ac.warwick.tabula.exams.grids.columns.actions
 import org.springframework.stereotype.Component
 import uk.ac.warwick.tabula.commands.exams.grids.ExamGridEntity
 import uk.ac.warwick.tabula.exams.grids.columns._
-import uk.ac.warwick.tabula.services.{AutowiringProgressionServiceComponent, ProgressionResult}
+import uk.ac.warwick.tabula.services.ProgressionResult.Resit
+import uk.ac.warwick.tabula.services.{AutowiringProgressionServiceComponent, ProgressionResult, ProgressionService}
 
 @Component
 class SuggestedResultColumnOption extends ChosenYearExamGridColumnOption with AutowiringProgressionServiceComponent {
@@ -29,9 +30,16 @@ class SuggestedResultColumnOption extends ChosenYearExamGridColumnOption with Au
 					progressionService.suggestedResult(
 						entityYear.get.studentCourseYearDetails.get,
 						state.normalLoadLookup(entityYear.get.route),
-						state.routeRulesLookup(entityYear.get.route)
+						entity.validYears.mapValues(ey => state.routeRulesLookup(ey.route, ey.level)),
+						state.calculateYearMarks
 					) match {
 						case unknown: ProgressionResult.Unknown => ExamGridColumnValueMissing(unknown.details)
+						case resit: Resit.type if state.department.code == "es" || Option(state.department.parent).exists(_.code == "es") =>
+							val failedModules = entityYear.get.moduleRegistrations
+								.filter(_.firstDefinedMark.exists(BigDecimal(_) < ProgressionService.ModulePassMark))
+								.map(_.module.code.toUpperCase)
+								.mkString(", ")
+							ExamGridColumnValueString(s"${resit.description} $failedModules")
 						case result => ExamGridColumnValueString(result.description)
 					}
 				).getOrElse(ExamGridColumnValueMissing(s"Could not find course details for ${entity.universityId} for ${state.academicYear}"))

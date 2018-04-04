@@ -56,7 +56,7 @@ trait ExamGridDocumentsController extends ExamsController
 			GenerateExamGridExporter(
 				department = department,
 				academicYear = academicYear,
-				course = selectCourseCommand.course,
+				courses = selectCourseCommand.courses.asScala,
 				routes = selectCourseCommand.routes.asScala,
 				yearOfStudy = selectCourseCommand.yearOfStudy,
 				yearWeightings = weightings,
@@ -70,8 +70,8 @@ trait ExamGridDocumentsController extends ExamsController
 				showComponentMarks = gridOptionsCommand.showComponentMarks
 			)
 		} else {
-			val perYearModuleMarkColumns = benchmarkTask("maxYearColumnSize"){ perYearColumns.map{ case (year, columns) => year -> columns.collect{ case marks: ModuleExamGridColumn => marks}} }
-			val perYearModuleReportColumns  = benchmarkTask("maxYearColumnSize"){ perYearColumns.map{ case (year, columns) => year -> columns.collect{ case marks: ModuleReportsColumn => marks}} }
+			val perYearModuleMarkColumns = benchmarkTask("perYearModuleMarkColumns"){ perYearColumns.map{ case (year, columns) => year -> columns.collect{ case marks: ModuleExamGridColumn => marks}} }
+			val perYearModuleReportColumns  = benchmarkTask("perYearModuleReportColumns"){ perYearColumns.map{ case (year, columns) => year -> columns.collect{ case marks: ModuleReportsColumn => marks}} }
 
 			val maxYearColumnSize =  benchmarkTask("maxYearColumnSize") { perYearModuleMarkColumns.map{ case (year, columns) =>
 				val maxModuleColumns = (entities.map(entity => columns.count(c => !c.isEmpty(entity, year))) ++ Seq(1)).max
@@ -90,7 +90,7 @@ trait ExamGridDocumentsController extends ExamsController
 			GenerateExamGridShortFormExporter(
 				department = department,
 				academicYear = academicYear,
-				course = selectCourseCommand.course,
+				courses = selectCourseCommand.courses.asScala,
 				routes = selectCourseCommand.routes.asScala,
 				yearOfStudy = selectCourseCommand.yearOfStudy,
 				yearWeightings = weightings,
@@ -112,7 +112,10 @@ trait ExamGridDocumentsController extends ExamsController
 		new ExcelView(
 			"Exam grid for %s %s %s %s.xlsx".format(
 				department.name,
-				selectCourseCommand.course.code,
+				selectCourseCommand.courses.size match {
+					case 1 => selectCourseCommand.courses.get(0).code
+					case n => s"$n courses"
+				},
 				selectCourseCommand.routes.size match {
 					case 0 => "All routes"
 					case 1 => selectCourseCommand.routes.get(0).code.toUpperCase
@@ -124,13 +127,16 @@ trait ExamGridDocumentsController extends ExamsController
 		)
 	}
 
-	private def marksRecordRender(selectCourseCommand: SelectCourseCommand, isConfidential: Boolean): View = {
+	private def marksRecordRender(selectCourseCommand: SelectCourseCommand, gridOptionsCommand: GridOptionsCommand, isConfidential: Boolean): View = {
 		val entities = selectCourseCommand.apply()
 		new WordView(
 			"%sMarks record for %s %s %s %s.docx".format(
 				if (isConfidential) "Confidential " else "",
 				selectCourseCommand.department.name,
-				selectCourseCommand.course.code,
+				selectCourseCommand.courses.size match {
+					case 1 => selectCourseCommand.courses.get(0).code
+					case n => s"$n courses"
+				},
 				selectCourseCommand.routes.size match {
 					case 0 => "All routes"
 					case 1 => selectCourseCommand.routes.get(0).code.toUpperCase
@@ -140,11 +146,11 @@ trait ExamGridDocumentsController extends ExamsController
 			),
 			ExamGridMarksRecordExporter(
 				entities,
-				selectCourseCommand.course,
 				progressionService,
 				new NormalLoadLookup(selectCourseCommand.academicYear, selectCourseCommand.yearOfStudy, normalCATSLoadService),
-				new UpstreamRouteRuleLookup(selectCourseCommand.academicYear, selectCourseCommand.yearOfStudy, upstreamRouteRuleService),
-				isConfidential = isConfidential
+				new UpstreamRouteRuleLookup(selectCourseCommand.academicYear, upstreamRouteRuleService),
+				isConfidential = isConfidential,
+				calculateYearMarks = gridOptionsCommand.calculateYearMarks
 			)
 		)
 	}
@@ -152,6 +158,7 @@ trait ExamGridDocumentsController extends ExamsController
 	@RequestMapping(method = Array(POST), params = Array(GenerateExamGridMappingParameters.marksRecord))
 	def marksRecord(
 		@Valid @ModelAttribute("selectCourseCommand") selectCourseCommand: SelectCourseCommand,
+		@Valid @ModelAttribute("gridOptionsCommand") gridOptionsCommand: GridOptionsCommand,
 		selectCourseCommandErrors: Errors
 	): View = {
 		if (selectCourseCommandErrors.hasErrors) {
@@ -159,13 +166,14 @@ trait ExamGridDocumentsController extends ExamsController
 				messageSource.getMessage(e.getCode, e.getArguments, null)).mkString(", ")
 			)
 		} else {
-			marksRecordRender(selectCourseCommand, isConfidential = false)
+			marksRecordRender(selectCourseCommand, gridOptionsCommand, isConfidential = false)
 		}
 	}
 
 	@RequestMapping(method = Array(POST), params = Array(GenerateExamGridMappingParameters.marksRecordConfidential))
 	def marksRecordConfidential(
 		@Valid @ModelAttribute("selectCourseCommand") selectCourseCommand: SelectCourseCommand,
+		@Valid @ModelAttribute("gridOptionsCommand") gridOptionsCommand: GridOptionsCommand,
 		selectCourseCommandErrors: Errors
 	): View = {
 		if (selectCourseCommandErrors.hasErrors) {
@@ -173,17 +181,20 @@ trait ExamGridDocumentsController extends ExamsController
 				messageSource.getMessage(e.getCode, e.getArguments, null)).mkString(", ")
 			)
 		} else {
-			marksRecordRender(selectCourseCommand, isConfidential = true)
+			marksRecordRender(selectCourseCommand, gridOptionsCommand, isConfidential = true)
 		}
 	}
 
-	private def passListRender(selectCourseCommand: SelectCourseCommand, isConfidential: Boolean): View = {
+	private def passListRender(selectCourseCommand: SelectCourseCommand, gridOptionsCommand: GridOptionsCommand, isConfidential: Boolean): View = {
 		val entities = selectCourseCommand.apply()
 		new WordView(
 			"%sPass list for %s %s %s %s.docx".format(
 				if (isConfidential) "Confidential " else "",
 				selectCourseCommand.department.name,
-				selectCourseCommand.course.code,
+				selectCourseCommand.courses.size match {
+					case 1 => selectCourseCommand.courses.get(0).code
+					case n => s"$n courses"
+				},
 				selectCourseCommand.routes.size match {
 					case 0 => "All routes"
 					case 1 => selectCourseCommand.routes.get(0).code.toUpperCase
@@ -194,13 +205,14 @@ trait ExamGridDocumentsController extends ExamsController
 			ExamGridPassListExporter(
 				entities,
 				selectCourseCommand.department,
-				selectCourseCommand.course,
+				selectCourseCommand.courses.asScala,
 				selectCourseCommand.yearOfStudy,
 				selectCourseCommand.academicYear,
 				progressionService,
 				new NormalLoadLookup(selectCourseCommand.academicYear, selectCourseCommand.yearOfStudy, normalCATSLoadService),
-				new UpstreamRouteRuleLookup(selectCourseCommand.academicYear, selectCourseCommand.yearOfStudy, upstreamRouteRuleService),
-				isConfidential
+				new UpstreamRouteRuleLookup(selectCourseCommand.academicYear, upstreamRouteRuleService),
+				isConfidential,
+				calculateYearMarks = gridOptionsCommand.calculateYearMarks
 			)
 		)
 	}
@@ -208,6 +220,7 @@ trait ExamGridDocumentsController extends ExamsController
 	@RequestMapping(method = Array(POST), params = Array(GenerateExamGridMappingParameters.passList))
 	def passList(
 		@Valid @ModelAttribute("selectCourseCommand") selectCourseCommand: SelectCourseCommand,
+		@Valid @ModelAttribute("gridOptionsCommand") gridOptionsCommand: GridOptionsCommand,
 		selectCourseCommandErrors: Errors
 	): View = {
 		if (selectCourseCommandErrors.hasErrors) {
@@ -215,13 +228,14 @@ trait ExamGridDocumentsController extends ExamsController
 				messageSource.getMessage(e.getCode, e.getArguments, null)).mkString(", ")
 			)
 		} else {
-			passListRender(selectCourseCommand, isConfidential = false)
+			passListRender(selectCourseCommand, gridOptionsCommand, isConfidential = false)
 		}
 	}
 
 	@RequestMapping(method = Array(POST), params = Array(GenerateExamGridMappingParameters.passListConfidential))
 	def passListConfidential(
 		@Valid @ModelAttribute("selectCourseCommand") selectCourseCommand: SelectCourseCommand,
+		@Valid @ModelAttribute("gridOptionsCommand") gridOptionsCommand: GridOptionsCommand,
 		selectCourseCommandErrors: Errors
 	): View = {
 		if (selectCourseCommandErrors.hasErrors) {
@@ -229,7 +243,7 @@ trait ExamGridDocumentsController extends ExamsController
 				messageSource.getMessage(e.getCode, e.getArguments, null)).mkString(", ")
 			)
 		} else {
-			passListRender(selectCourseCommand, isConfidential = true)
+			passListRender(selectCourseCommand, gridOptionsCommand, isConfidential = true)
 		}
 	}
 
@@ -239,7 +253,10 @@ trait ExamGridDocumentsController extends ExamsController
 			"%sTranscript for %s %s %s %s.docx".format(
 				if (isConfidential) "Confidential " else "",
 				selectCourseCommand.department.name,
-				selectCourseCommand.course.code,
+				selectCourseCommand.courses.size match {
+					case 1 => selectCourseCommand.courses.get(0).code
+					case n => s"$n courses"
+				},
 				selectCourseCommand.routes.size match {
 					case 0 => "All routes"
 					case 1 => selectCourseCommand.routes.get(0).code.toUpperCase

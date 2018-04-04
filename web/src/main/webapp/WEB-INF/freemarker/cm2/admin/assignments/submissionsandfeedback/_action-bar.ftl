@@ -125,12 +125,23 @@
 							<@fmt.permission_button
 								permission='Submission.ManagePlagiarismStatus'
 								scope=assignment
-								action_descr='mark plagiarised'
+								action_descr='flag suspected plagiarism'
 								href=markplagiarised_url
 								id="mark-plagiarised-selected-button"
-								tooltip="Toggle whether the selected student submissions are possibly plagiarised"
 								data_attr='data-container=body'>
-									Mark plagiarised
+									Flag suspected plagiarism
+							</@fmt.permission_button>
+						</li>
+						<li class="must-have-selected">
+							<#assign markplagiarised_url><@routes.cm2.plagiarismInvestigation assignment/></#assign>
+							<@fmt.permission_button
+							permission='Submission.ManagePlagiarismStatus'
+							scope=assignment
+							action_descr='remove suspected plagiarism flag'
+							href=markplagiarised_url
+							id="unmark-plagiarised-selected-button"
+							data_attr='data-container=body'>
+									Remove suspected plagiarism flag
 							</@fmt.permission_button>
 						</li>
 					</ul>

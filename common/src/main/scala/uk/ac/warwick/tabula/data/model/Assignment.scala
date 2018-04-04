@@ -228,7 +228,7 @@ class Assignment
 
 	private def doesAllMembersHaveApprovedExtensions: Boolean =
 		assessmentMembershipService.determineMembershipUsers(upstreamAssessmentGroups, Option(members))
-			.forall(user => extensions.exists(e => e.approved && e.isForUser(user)))
+			.forall(user => extensions.exists(e => e.expiryDate.isDefined && e.approved && e.isForUser(user)))
 
 
 	def feedbackDeadlineForSubmission(submission: Submission): Option[LocalDate] = feedbackDeadline.flatMap { wholeAssignmentDeadline =>
@@ -593,6 +593,11 @@ class Assignment
 		submission.assignment = this
 	}
 
+	def addExtension(extension: Extension): Unit = {
+		extensions.add(extension)
+		extension.assignment = this
+	}
+
 	// returns the submission for a specified student
 	def findSubmission(usercode: String): Option[Submission] = submissions.find(_.usercode == usercode)
 
@@ -867,6 +872,15 @@ class Assignment
 	def toEntityReference: AssignmentEntityReference = new AssignmentEntityReference().put(this)
 
 	def showStudentNames: Boolean = (anonymity == null && module.adminDepartment.showStudentName) || anonymity == NameAndID
+
+	@transient
+	private lazy val seatNumbers: Map[String, Int] = assessmentMembershipService.determineMembershipUsersWithOrder(this).collect {
+		case (user, Some(seat)) => (user.getUserId, seat)
+	}.toMap
+
+	def getSeatNumber(user: User): Option[Int] = seatNumbers.get(user.getUserId)
+
+	def showSeatNumbers: Boolean = seatNumbers.nonEmpty
 }
 
 /**

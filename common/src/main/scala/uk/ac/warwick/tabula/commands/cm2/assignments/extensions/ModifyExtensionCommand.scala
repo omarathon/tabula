@@ -69,6 +69,9 @@ trait ModifyExtensionState {
 trait ModifyExtensionValidation extends SelfValidating {
 	self: ModifyExtensionState =>
 	def validate(errors: Errors) {
+		if (state == ExtensionState.Unreviewed) {
+			errors.rejectValue("state", "extension.state.empty")
+		}
 		if(expiryDate == null) {
 			if (state == ExtensionState.Approved) {
 				errors.rejectValue("expiryDate", "extension.requestedExpiryDate.provideExpiry")
@@ -93,6 +96,7 @@ trait ModifyExtensionDescription extends Describable[Extension] {
 		d.module(extension.assignment.module)
 		d.studentIds(extension.universityId.toSeq)
 		d.studentUsercodes(extension.usercode)
+		d.extensionState(state)
 	}
 }
 

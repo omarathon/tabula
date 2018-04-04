@@ -6,7 +6,7 @@ import uk.ac.warwick.tabula.JavaImports._
 import uk.ac.warwick.tabula.commands._
 import uk.ac.warwick.tabula.data.model.Department
 import uk.ac.warwick.tabula.data.model.Department.Settings.ExamGridOptions
-import uk.ac.warwick.tabula.exams.grids.columns.ExamGridColumnOption
+import uk.ac.warwick.tabula.exams.grids.columns.{ExamGridColumnOption, ExamGridStudentIdentificationColumnValue}
 import uk.ac.warwick.tabula.permissions.Permissions
 import uk.ac.warwick.tabula.services.{AutowiringModuleAndDepartmentServiceComponent, ModuleAndDepartmentServiceComponent}
 import uk.ac.warwick.tabula.system.permissions.{PermissionsChecking, PermissionsCheckingMethods, RequiresPermissionsChecking}
@@ -37,10 +37,12 @@ class GenerateExamGridGridOptionsCommandInternal(val department: Department) ext
 			predefinedColumnIdentifiers.asScala.toSet,
 			customColumnTitles.asScala,
 			nameToShow,
-			yearsToShow,
 			marksToShow,
+			componentsToShow,
+			componentSequenceToShow,
 			moduleNameToShow,
-			layout
+			layout,
+			yearMarksToUse
 		)
 		moduleAndDepartmentService.saveOrUpdate(department)
 		(predefinedColumnOptions, customColumnTitles.asScala)
@@ -57,10 +59,12 @@ trait PopulatesGenerateExamGridGridOptionsCommand extends PopulateOnForm {
 		predefinedColumnIdentifiers.addAll(options.predefinedColumnIdentifiers.asJava)
 		customColumnTitles.addAll(options.customColumnTitles.asJava)
 		nameToShow = options.nameToShow
-		yearsToShow = options.yearsToShow
 		marksToShow = options.marksToShow
+		componentsToShow = options.componentsToShow
+		componentSequenceToShow = options.componentSequenceToShow
 		moduleNameToShow = options.moduleNameToShow
 		layout = options.layout
+		yearMarksToUse = options.yearMarksToUse
 	}
 }
 
@@ -113,17 +117,21 @@ trait GenerateExamGridGridOptionsCommandRequest {
 	self: GenerateExamGridGridOptionsCommandState =>
 
 	var predefinedColumnIdentifiers: JSet[String] = JHashSet()
-	var nameToShow: String = "full"
-	var yearsToShow: String = "current"
+	var nameToShow: ExamGridStudentIdentificationColumnValue = ExamGridStudentIdentificationColumnValue.FullName
 	var marksToShow: String = "overall"
+	var componentsToShow: String = "all"
+	var componentSequenceToShow: String = "markOnly"
 	var moduleNameToShow: String = "codeOnly"
 	var layout: String = "full"
+	var yearMarksToUse: String = "sits"
 	var customColumnTitles: JList[String] = JArrayList()
 
-	def showFullName: Boolean = nameToShow != "both"
 	def showFullLayout: Boolean = layout == "full"
 	def showComponentMarks: Boolean = marksToShow == "all"
+	def showComponentSequence: Boolean = componentSequenceToShow == "sequenceAndMark"
+	def showZeroWeightedComponents: Boolean = componentsToShow == "all"
 	def showModuleNames: Boolean = moduleNameToShow == "nameAndCode"
+	def calculateYearMarks: Boolean = yearMarksToUse != "sits"
 
 	protected lazy val predefinedColumnOptions: Seq[ExamGridColumnOption] =
 		allExamGridsColumns.filter(c => c.mandatory || predefinedColumnIdentifiers.contains(c.identifier))

@@ -4,9 +4,8 @@
 		<#return selectCourseCommand />
 	</#function>
 	<div class="exam-grid-preview">
-		<@fmt.id7_deptheader title="Create a new exam grid for ${studentCourseDetails.department.name}" route_function=route_function />
-		<!--TODO If grids are annon then we need to hide name .-->
-		<h2> ${member.fullName!}</h2>
+		<@fmt.id7_deptheader title="Create a new exam grid for ${department.name}" route_function=route_function />
+		<#if department.examGridOptions.nameToShow.toString != 'none'><h2>${member.fullName!}</h2></#if>
 		<h3> ${member.universityId}</h3>
 		<div class="key clearfix">
 			<table class="table table-condensed">
@@ -69,7 +68,7 @@
 				<tbody>
 					<tr>
 						<td><span class="exam-grid-fail">#</span></td>
-						<td>Failed module</td>
+						<td>Failed module or component</td>
 					</tr>
 					<tr>
 						<td><span class="exam-grid-actual-mark">#</span></td>
@@ -108,7 +107,7 @@
 						<#assign mr = info.moduleRegistration />
 						<#assign test = info.studentAssessmentComponentInfo />
 						<tr>
-							<td class="assessment_details_col assessment_details_col2" ><div>${mr.module.code}</div>  <div>${mr.module.name}</div></td>
+							<td class="assessment_details_col assessment_details_col2" ><div>${mr.module.code?upper_case}</div>  <div>${mr.module.name}</div></td>
 							<td class="assessment_details_col">${mr.cats}</td>
 							<td>
 								<table class="component_info">
@@ -136,9 +135,15 @@
 											<tr>
 												<td>
 													<#if studentInfo.groupMember.agreedMark??>
-														${studentInfo.groupMember.agreedMark}
+														<#if studentInfo.groupMember.agreedMark?number < passMark>
+															<span class=exam-grid-fail">${mr.agreedMark}</span>
+														<#else>
+															${studentInfo.groupMember.agreedMark}
+														</#if>
 													<#elseif studentInfo.groupMember.actualMark??>
-														<span class="exam-grid-actual-mark">${studentInfo.groupMember.actualMark}</span>
+														<span class="<#if studentInfo.groupMember.actualMark?number < passMark>exam-grid-fail<#else>exam-grid-actual-mark</#if>">
+															${studentInfo.groupMember.actualMark}
+														</span>
 													<#else>
 														<span class="exam-grid-actual-mark use-tooltip" title="" data-container="body" data-original-title="No marks set for Assessment component">X</span>
 													</#if>
@@ -169,13 +174,13 @@
 							</td>
 							<td class="assessment_details_col assessment_details_col1">
 								<#if mr.agreedMark??>
-									<#if (mr.agreedGrade?? && mr.agreedGrade == 'F')>
+									<#if mr.agreedMark?number < passMark>
 										<span class="exam-grid-fail">${mr.agreedMark}</span>
 									<#else>
 										${mr.agreedMark}
 									</#if>
 								<#elseif mr.actualMark??>
-									<#if mr.actualGrade?? && mr.actualGrade == 'F'>
+									<#if mr.actualMark?number < passMark>
 										<span class=exam-grid-fail">${mr.actualMark}</span>
 									<#else>
 										<span class=exam-grid-actual-mark">${mr.actualMark}</span>

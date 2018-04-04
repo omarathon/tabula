@@ -142,19 +142,38 @@
 		});
 
 		// extension management - on submit replace html with validation errors or redirect
+		$body.on('click', 'form.modify-extension button:submit', function () {
+			$(this).closest('form').data('buttonClicked', {
+				name: $(this).attr('name'),
+				value: $(this).val()
+			});
+		});
+
 		$body.on('submit', 'form.modify-extension', function(e){
 			e.preventDefault();
 			var $form = $(e.target);
-			var $detailRow = $form.closest('.content-container,.detailrow-container');
+			var $detailRow = $form.closest('.content-container, .detailrow-container');
 			var formData = $form.serializeArray();
-			var $buttonClicked =  $(document.activeElement);
-			formData.push({ name: $buttonClicked.attr('name'), value: $buttonClicked.val() });
-			$.post($form.attr('action'), formData, function(data) {
-				if (data.success) {
-					window.location.replace(data.redirect);
-				} else {
-					$detailRow.html(data);
-					$detailRow.bindFormHelpers();
+
+			var buttonClicked = $form.data('buttonClicked');
+			if (buttonClicked) {
+				formData.push(buttonClicked);
+				$form.data('buttonClicked', null);
+			}
+
+			$.post({
+				url: $form.attr('action'),
+				data: formData,
+				success: function (data) {
+					if (data.success) {
+						window.location.replace(data.redirect);
+					} else {
+						$detailRow.html(data);
+						$detailRow.bindFormHelpers();
+					}
+				},
+				error: function (xhr) {
+					$detailRow.html(xhr.responseText);
 				}
 			});
 		});
@@ -398,7 +417,7 @@
 					// reset if empty
 					$detailrow.collapse("hide");
 					$detailrow.data('loaded', false);
-					$container.html("<p>No data is currently available. Please check that you are signed in.</p>");
+					$container.html('<span class="text-muted"><i class="fa fa-spinner fa-spin"></i> Loading&hellip;</span>');
 					successCallback($container);
 				} else {
 					$container.html(result);
@@ -473,23 +492,38 @@
 					return false;
 				});
 
-				$('#mark-plagiarised-selected-button:not(.disabled)', $outerContainer).click(function(event){
-					event.preventDefault();
+				function goToMarkPlagiarised(action, plagiarised, $checkedBoxes) {
+					var $form = $('<form>').attr({method: 'POST', action: action}).hide();
+					$form.append($checkedBoxes.clone());
 
-					var $checkedBoxes = $(".collection-checkbox:checked", $container);
-
-					if ($container.data('checked') !== 'none') {
-
-						var $form = $('<form></form>').attr({method:'POST', action: this.href}).hide();
-						$form.append($checkedBoxes.clone());
-
-						if ($container.data("all-plagiarised") === true) {
-							$form.append("<input type='hidden' name='markPlagiarised' value='false'>");
-						}
-
-						$(document.body).append($form);
-						$form.submit();
+					if (!plagiarised) {
+						$form.append("<input type='hidden' name='markPlagiarised' value='false'>");
 					}
+
+					$(document.body).append($form);
+					$form.submit();
+				}
+
+
+				$('#mark-plagiarised-selected-button:not(.disabled)', $outerContainer).click(function (e) {
+					e.preventDefault();
+
+					if ($container.data('checked') !== 'none' && !$(this).parent().hasClass('disabled')) {
+						var $checkedBoxes = $(".collection-checkbox:checked", $container);
+						goToMarkPlagiarised(this.href, true, $checkedBoxes);
+					}
+
+					return false;
+				});
+
+				$('#unmark-plagiarised-selected-button:not(.disabled)', $outerContainer).click(function (e) {
+					e.preventDefault();
+
+					if ($container.data('checked') !== 'none' && !$(this).parent().hasClass('disabled')) {
+						var $checkedBoxes = $(".collection-checkbox:checked", $container);
+						goToMarkPlagiarised(this.href, false, $checkedBoxes);
+					}
+
 					return false;
 				});
 
@@ -562,23 +596,18 @@
 			onBulkChange: function ($checkboxes) {
 				var $checkedBoxes = $checkboxes.filter(':checked');
 
-				var allPlagiarised = false;
+				var plagiarisedCount = 0, notPlagiarisedCount = 0;
 
-				if ($checkedBoxes.length > 0) {
-					allPlagiarised = true;
-					$checkedBoxes.each(function () {
-						var $checkBox = $(this);
-						if ($checkBox.closest('tr').data('plagiarised') != true) {
-							allPlagiarised = false;
-						}
-					});
-				}
-				$('.submission-feedback-list,.submission-list,.coursework-progress-table').data("all-plagiarised", allPlagiarised);
-				if (allPlagiarised) {
-					$('#mark-plagiarised-selected-button').html('<i class="icon-exclamation-sign icon-fixed-width"></i> Unmark plagiarised');
-				} else {
-					$('#mark-plagiarised-selected-button').html('<i class="icon-exclamation-sign icon-fixed-width"></i> Mark plagiarised');
-				}
+				$checkedBoxes.closest('tr').each(function () {
+					if ($(this).data('plagiarised')) {
+						plagiarisedCount++;
+					} else {
+						notPlagiarisedCount++;
+					}
+				});
+
+				$('#mark-plagiarised-selected-button').parent().toggleClass('disabled', notPlagiarisedCount === 0);
+				$('#unmark-plagiarised-selected-button').parent().toggleClass('disabled', plagiarisedCount === 0);
 			}
 		};
 

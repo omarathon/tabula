@@ -23,7 +23,7 @@ class ScheduledMeetingRecordInviteeNotificationTest extends TestBase with Mockit
 		scheduledMeeting.meetingDate = DateTime.now
 		scheduledMeeting.format = MeetingFormat.FaceToFace
 
-		val notification = Notification.init(new ScheduledMeetingRecordInviteeNotification("created"), currentUser.apparentUser, scheduledMeeting, scheduledMeeting.relationship)
+		val notification = Notification.init(new ScheduledMeetingRecordInviteeNotification("created"), currentUser.apparentUser, scheduledMeeting)
 		notification.recipient.getUserId should be (student.userId)
 		// TAB-2489 even if the meeting is scheduled by an admin the tutor should show as the agent in the notification
 		notification.content.model("actor").asInstanceOf[User].getWarwickId should be (staff.universityId)
@@ -62,19 +62,19 @@ class ScheduledMeetingRecordInviteeNotificationTest extends TestBase with Mockit
 	}
 
 	@Test def titleEditedByTutor() { new TitleFixture {
-		val notification: ScheduledMeetingRecordInviteeNotification = Notification.init(new ScheduledMeetingRecordInviteeNotification("edited"), agent.asSsoUser, meeting, relationship)
+		val notification: ScheduledMeetingRecordInviteeNotification = Notification.init(new ScheduledMeetingRecordInviteeNotification("edited"), agent.asSsoUser, meeting)
 		notification.title should be ("Personal tutor meeting with Tutor Name edited by Tutor Name")
 		notification.recipient.getUserId should be (student.userId)
 	}}
 
 	@Test def titleEditedByStudent() { new TitleFixture {
-		val notification: ScheduledMeetingRecordInviteeNotification = Notification.init(new ScheduledMeetingRecordInviteeNotification("edited"), student.asSsoUser, meeting, relationship)
+		val notification: ScheduledMeetingRecordInviteeNotification = Notification.init(new ScheduledMeetingRecordInviteeNotification("edited"), student.asSsoUser, meeting)
 		notification.title should be ("Personal tutor meeting with Student Name edited by Student Name")
 		notification.recipient.getUserId should be (agent.userId)
 	}}
 
 	@Test def titleEditedByThirdParty() { new TitleFixture {
-		val notification: ScheduledMeetingRecordInviteeNotification = Notification.init(new ScheduledMeetingRecordInviteeNotification("edited"), thirdParty.asSsoUser, meeting, relationship)
+		val notification: ScheduledMeetingRecordInviteeNotification = Notification.init(new ScheduledMeetingRecordInviteeNotification("edited"), thirdParty.asSsoUser, meeting)
 		notification.title should be ("Personal tutor meeting with Tutor Name edited by Third Party")
 		notification.recipient.getUserId should be (student.userId)
 	}}

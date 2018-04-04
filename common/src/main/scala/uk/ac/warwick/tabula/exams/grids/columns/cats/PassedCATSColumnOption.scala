@@ -2,7 +2,9 @@ package uk.ac.warwick.tabula.exams.grids.columns.cats
 
 import org.springframework.stereotype.Component
 import uk.ac.warwick.tabula.commands.exams.grids.{ExamGridEntity, ExamGridEntityYear}
+import uk.ac.warwick.tabula.data.model.ModuleRegistration
 import uk.ac.warwick.tabula.exams.grids.columns._
+import uk.ac.warwick.tabula.helpers.StringUtils._
 
 @Component
 class PassedCATSColumnOption extends ChosenYearExamGridColumnOption {
@@ -30,15 +32,25 @@ class PassedCATSColumnOption extends ChosenYearExamGridColumnOption {
 		}
 
 		private def result(entity: ExamGridEntityYear): ExamGridColumnValue = {
-			if (entity.moduleRegistrations.exists(_.firstDefinedMark.isEmpty)) {
-				ExamGridColumnValueMissing("The passed CATS cannot be calculated because the following module registrations have no mark: %s".format(
-					entity.moduleRegistrations.filter(_.firstDefinedMark.isEmpty).map(_.module.code.toUpperCase).mkString(", ")
-				))
+
+			val emptyExpectingMarks = entity.moduleRegistrations.filter(mr => !mr.passFail && mr.firstDefinedMark.isEmpty)
+			val emptyExpectingGrades = entity.moduleRegistrations.filter(mr => mr.passFail && mr.firstDefinedGrade.isEmpty)
+
+			if (emptyExpectingMarks.nonEmpty || emptyExpectingGrades.nonEmpty) {
+
+				val noMarks = if(emptyExpectingMarks.isEmpty) "" else emptyExpectingMarks.map(_.module.code.toUpperCase).mkString("the following module registrations have no mark: ", ", ", "")
+				val noGrades = if(emptyExpectingGrades.isEmpty) "" else emptyExpectingGrades.map(_.module.code.toUpperCase).mkString("the following module registrations have no grade: ", ", ", "")
+
+				val reasons = Seq(noMarks, noGrades).filter(_.hasText)
+				ExamGridColumnValueMissing("The passed CATS cannot be calculated because %s".format(reasons.mkString(" and ")))
 			} else {
-				ExamGridColumnValueDecimal(
-					entity.moduleRegistrations.filter(mr => if (Option(mr.agreedMark).isDefined) mr.agreedGrade != "F" else mr.actualGrade != "F")
-						.map(mr => BigDecimal(mr.cats)).sum.underlying
-				)
+				def isFailed(mr: ModuleRegistration): Boolean = {
+					if(mr.passFail) !mr.firstDefinedGrade.contains("F")
+					else if (Option(mr.agreedMark).isDefined) mr.agreedGrade != "F"
+					else mr.actualGrade != "F"
+				}
+
+				ExamGridColumnValueDecimal(entity.moduleRegistrations.filter(isFailed).map(mr => BigDecimal(mr.cats)).sum.underlying)
 			}
 		}
 

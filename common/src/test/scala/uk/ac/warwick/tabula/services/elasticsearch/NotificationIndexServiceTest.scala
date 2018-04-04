@@ -10,7 +10,7 @@ import uk.ac.warwick.tabula._
 import uk.ac.warwick.tabula.data.NotificationDao
 import uk.ac.warwick.tabula.data.model._
 import uk.ac.warwick.tabula.helpers.DateTimeOrdering._
-import uk.ac.warwick.tabula.helpers.Futures._
+import uk.ac.warwick.tabula.helpers.ExecutionContexts.global
 import uk.ac.warwick.userlookup.{AnonymousUser, User}
 
 import scala.collection.JavaConverters._

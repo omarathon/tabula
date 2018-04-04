@@ -67,8 +67,8 @@ trait AssessmentMembershipService {
 	def determineMembership(assessment: Assessment): AssessmentMembershipInfo
 	def determineMembershipUsers(upstream: Seq[UpstreamAssessmentGroup], others: Option[UnspecifiedTypeUserGroup]): Seq[User]
 	def determineMembershipUsers(assessment: Assessment): Seq[User]
-	def determineMembershipUsersWithOrder(exam: Exam): Seq[(User, Option[Int])]
-	def determineMembershipUsersWithOrderForMarker(exam: Exam, marker: User): Seq[(User, Option[Int])]
+	def determineMembershipUsersWithOrder(exam: Assessment): Seq[(User, Option[Int])]
+	def determineMembershipUsersWithOrderForMarker(exam: Assessment, marker: User): Seq[(User, Option[Int])]
 	def determineMembershipIds(upstream: Seq[UpstreamAssessmentGroup], others: Option[UnspecifiedTypeUserGroup]): Seq[String]
 
 	def isStudentMember(user: User, upstream: Seq[UpstreamAssessmentGroup], others: Option[UnspecifiedTypeUserGroup]): Boolean
@@ -279,7 +279,7 @@ trait AssessmentMembershipMethods extends Logging {
 		case e: Exam => determineMembershipUsersWithOrder(e).map(_._1)
 	}
 
-	def determineMembershipUsersWithOrder(exam: Exam): Seq[(User, Option[Int])] = {
+	def determineMembershipUsersWithOrder(exam: Assessment): Seq[(User, Option[Int])] = {
 		val sitsMembers = exam.upstreamAssessmentGroups.flatMap(_.members.asScala).distinct.sortBy(_.position)
 		val sitsUniIds = sitsMembers.map(_.universityId)
 		val includesUniIds = Option(exam.members).map(_.users.map(_.getWarwickId).filterNot(sitsUniIds.contains)).getOrElse(Nil)
@@ -287,8 +287,8 @@ trait AssessmentMembershipMethods extends Logging {
 			includesUniIds.map(u => userLookup.getUserByWarwickUniId(u)).sortBy(u => (u.getLastName, u.getFirstName)).map(u => u -> None)
 	}
 
-	def determineMembershipUsersWithOrderForMarker(exam: Exam, marker:User): Seq[(User, Option[Int])] =
-		if (!exam.released || exam.markingWorkflow == null) {
+	def determineMembershipUsersWithOrderForMarker(exam: Assessment, marker:User): Seq[(User, Option[Int])] =
+		if (!exam.isReleasedForMarking || exam.markingWorkflow == null) {
 			Seq()
 		} else {
 			val markersStudents = exam.markingWorkflow.getMarkersStudents(exam, marker)

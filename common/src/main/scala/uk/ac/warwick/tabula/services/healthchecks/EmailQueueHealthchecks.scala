@@ -7,6 +7,7 @@ import org.springframework.stereotype.Component
 import uk.ac.warwick.spring.Wire
 import uk.ac.warwick.tabula.data.Transactions._
 import uk.ac.warwick.tabula.data.model.notifications.RecipientNotificationInfo
+import uk.ac.warwick.tabula.helpers.Logging
 import uk.ac.warwick.tabula.services.EmailNotificationService
 
 import scala.concurrent.duration._
@@ -44,7 +45,7 @@ class EmailUnsentEmailCountHealthcheck extends ServiceHealthcheckProvider {
 
 @Component
 @Profile(Array("scheduling"))
-class EmailOldestUnsentItemHealthcheck extends ServiceHealthcheckProvider {
+class EmailOldestUnsentItemHealthcheck extends ServiceHealthcheckProvider with Logging {
 
 	val WarningThreshold: Duration = 30.minutes
 	val ErrorThreshold: Duration = 1.hour
@@ -61,6 +62,7 @@ class EmailOldestUnsentItemHealthcheck extends ServiceHealthcheckProvider {
 		// How new is the latest item in the queue?
 		val recentSentEmail: Duration =
 			Wire[EmailNotificationService].recentEmailedRecipient
+				.filter (_.attemptedAt != null) // See TAB-6033 for details
 				.map { recipient: RecipientNotificationInfo =>
 					Minutes.minutesBetween(recipient.attemptedAt, DateTime.now).getMinutes.minutes.toCoarsest
 				}.getOrElse(Zero)

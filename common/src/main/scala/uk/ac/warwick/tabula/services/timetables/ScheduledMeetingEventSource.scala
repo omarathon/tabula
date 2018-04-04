@@ -3,7 +3,7 @@ package uk.ac.warwick.tabula.services.timetables
 import uk.ac.warwick.tabula.CurrentUser
 import uk.ac.warwick.tabula.data.HibernateHelpers
 import uk.ac.warwick.tabula.data.model.{Member, StudentMember, StudentRelationshipType}
-import uk.ac.warwick.tabula.helpers.Futures._
+import uk.ac.warwick.tabula.helpers.ExecutionContexts.timetable
 import uk.ac.warwick.tabula.permissions.Permissions
 import uk.ac.warwick.tabula.services._
 import uk.ac.warwick.tabula.services.timetables.TimetableFetchingService.EventOccurrenceList

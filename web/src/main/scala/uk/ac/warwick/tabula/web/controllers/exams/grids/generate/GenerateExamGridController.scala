@@ -1,7 +1,6 @@
 package uk.ac.warwick.tabula.web.controllers.exams.grids.generate
 
 import javax.validation.Valid
-
 import org.joda.time.DateTime
 import org.springframework.stereotype.Controller
 import org.springframework.validation.{BindException, Errors}
@@ -24,6 +23,9 @@ import uk.ac.warwick.tabula.web.controllers.{AcademicYearScopedController, Depar
 import uk.ac.warwick.tabula.web.views.JSONView
 import uk.ac.warwick.tabula.web.{Mav, Routes}
 import uk.ac.warwick.tabula.{AcademicYear, ItemNotFoundException}
+
+import scala.collection.JavaConverters._
+import scala.collection.immutable.ListMap
 
 object GenerateExamGridMappingParameters {
 	final val selectCourse = "selectCourse"
@@ -382,7 +384,7 @@ class GenerateExamGridController extends ExamsController
 		) ++ shortFormLayoutData
 
 		commonCrumbs(
-			Mav("exams/grids/generate/preview", mavObjects),
+			Mav("exams/grids/generate/preview", mavObjects).bodyClasses("grid-preview"),
 			department,
 			academicYear
 		)
@@ -393,7 +395,7 @@ class GenerateExamGridController extends ExamsController
 		studentInformationColumns: Seq[ChosenYearExamGridColumn],
 		perYearColumns: Map[YearOfStudy, Seq[PerYearExamGridColumn]],
 		summaryColumns: Seq[ChosenYearExamGridColumn],
-		weightings: Seq[CourseYearWeighting],
+		weightings: Map[Course, Seq[CourseYearWeighting]],
 		normalLoadLookup: NormalLoadLookup,
 		routeRulesLookup: UpstreamRouteRuleLookup
 	)
@@ -406,7 +408,6 @@ class GenerateExamGridController extends ExamsController
 	): GridData = {
 
 		checkOvercatCmd.selectCourseCommand = selectCourseCommand
-		checkOvercatCmd.yearsToShow = gridOptionsCommand.yearsToShow
 		val checkOvercatCommmandErrors = new BindException(selectCourseCommand, "checkOvercatCommand")
 		checkOvercatCmd.validate(checkOvercatCommmandErrors)
 
@@ -423,32 +424,51 @@ class GenerateExamGridController extends ExamsController
 
 		val (predefinedColumnOptions, customColumnTitles) = gridOptionsCommand.apply()
 
+		val overcatSubsets = entities
+			.flatMap(entity => {entity.validYears.get(selectCourseCommand.yearOfStudy).map((entity, _))})
+			.map{ case (entity, entityYear) =>
+				entityYear -> moduleRegistrationService.overcattedModuleSubsets(
+					entityYear,
+					entityYear.markOverrides.getOrElse(Map()),
+					normalLoadLookup(entityYear.route),
+					routeRulesLookup(entityYear.route, entityYear.level)
+				)
+			}.toMap
+
 		val state = ExamGridColumnState(
 			entities = entities,
-			overcatSubsets = entities.flatMap(_.validYears.get(selectCourseCommand.yearOfStudy)).map(entityYear => entityYear ->
-				moduleRegistrationService.overcattedModuleSubsets(entityYear, entityYear.markOverrides.getOrElse(Map()), normalLoadLookup(entityYear.route), routeRulesLookup(entityYear.route))
-			).toMap,
+			overcatSubsets = overcatSubsets,
 			coreRequiredModuleLookup = coreRequiredModuleLookup,
 			normalLoadLookup = normalLoadLookup,
 			routeRulesLookup = routeRulesLookup,
 			academicYear = selectCourseCommand.academicYear,
 			yearOfStudy = selectCourseCommand.yearOfStudy,
-			showFullName = gridOptionsCommand.showFullName,
+			department = selectCourseCommand.department,
+			nameToShow = gridOptionsCommand.nameToShow,
 			showComponentMarks = gridOptionsCommand.showComponentMarks,
-			showModuleNames = gridOptionsCommand.showModuleNames
+			showZeroWeightedComponents = gridOptionsCommand.showZeroWeightedComponents,
+			showComponentSequence = gridOptionsCommand.showComponentSequence,
+			showModuleNames = gridOptionsCommand.showModuleNames,
+			calculateYearMarks = gridOptionsCommand.calculateYearMarks
 		)
 
 		val studentInformationColumns = predefinedColumnOptions.collect { case c: StudentExamGridColumnOption => c }.flatMap(_.getColumns(state))
 		val summaryColumns = predefinedColumnOptions.collect { case c: ChosenYearExamGridColumnOption => c }.flatMap(_.getColumns(state)) ++
 			customColumnTitles.flatMap(BlankColumnOption.getColumn)
+		val selectedYears = selectCourseCommand.courseYearsToShow.asScala.map(_.stripPrefix("Year").toInt).toSeq
 		val perYearColumns = predefinedColumnOptions.collect { case c: PerYearExamGridColumnOption => c }
 			.flatMap(_.getColumns(state).toSeq)
+			.filter { case (year, _) => selectedYears.contains(year) }
 			.groupBy { case (year, _) => year}
 			.mapValues(_.flatMap { case (_, columns) => columns })
 
-		val weightings = (1 to FilterStudentsOrRelationships.MaxYearsOfStudy).flatMap(year =>
-			courseAndRouteService.getCourseYearWeighting(selectCourseCommand.course.code, selectCourseCommand.academicYear, year)
-		).sorted
+		val weightings = ListMap(selectCourseCommand.courses.asScala.map(course => {
+			course -> (1 to FilterStudentsOrRelationships.MaxYearsOfStudy).flatMap(year =>
+				courseAndRouteService.getCourseYearWeighting(course.code, selectCourseCommand.academicYear, year)
+			).sorted
+		}).sortBy{case (course, _) => course.code} :_*)
+
+		GenerateExamGridAuditCommand(selectCourseCommand).apply()
 
 		GridData(entities, studentInformationColumns, perYearColumns, summaryColumns, weightings, normalLoadLookup, routeRulesLookup)
 	}

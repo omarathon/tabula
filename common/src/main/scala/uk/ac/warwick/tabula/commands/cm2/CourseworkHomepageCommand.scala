@@ -167,7 +167,7 @@ trait CourseworkHomepageStudentAssignments extends TaskBenchmarking {
 
 	// Public for testing
 	def enhance(assignment: Assignment): StudentAssignmentInformation = {
-		val extension = assignment.extensions.asScala.find(e => e.isForUser(user.apparentUser))
+		val extension = assignment.extensions.asScala.find(e => e.isForUser(user.apparentUser) && e.expiryDate.nonEmpty)
 		// isExtended: is within an approved extension
 		val isExtended = assignment.isWithinExtension(user.apparentUser)
 		// hasActiveExtension: active = approved

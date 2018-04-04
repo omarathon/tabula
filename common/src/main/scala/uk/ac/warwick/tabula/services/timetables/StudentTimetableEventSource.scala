@@ -2,10 +2,10 @@ package uk.ac.warwick.tabula.services.timetables
 
 import uk.ac.warwick.tabula.CurrentUser
 import uk.ac.warwick.tabula.data.model.StudentMember
+import uk.ac.warwick.tabula.helpers.ExecutionContexts.timetable
 import uk.ac.warwick.tabula.helpers.{Futures, SystemClockComponent}
-import uk.ac.warwick.tabula.helpers.Futures._
 import uk.ac.warwick.tabula.services.timetables.TimetableFetchingService.EventList
-import uk.ac.warwick.tabula.services.{AutowiringSecurityServiceComponent, AutowiringUserLookupComponent, AutowiringSmallGroupServiceComponent}
+import uk.ac.warwick.tabula.services.{AutowiringSecurityServiceComponent, AutowiringSmallGroupServiceComponent, AutowiringUserLookupComponent}
 import uk.ac.warwick.tabula.timetables.TimetableEvent
 
 import scala.concurrent.Future
@@ -32,7 +32,10 @@ trait CombinedStudentTimetableEventSourceComponent extends StudentTimetableEvent
 				if (student.isPGR) { timetableFetchingService.getTimetableForStaff(student.universityId) }
 				else Future.successful(EventList.fresh(Nil))
 
-			Futures.combine(Seq(timetableEvents, smallGroupEvents, staffEvents), EventList.combine)
+			Futures.combine(
+				Seq(timetableEvents, smallGroupEvents, staffEvents),
+				(eventLists: Seq[EventList]) => CombinedTimetableFetchingService.mergeDuplicates(EventList.combine(eventLists))
+			)
 		}
 	}
 

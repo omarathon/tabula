@@ -22,8 +22,7 @@ class ListAllExtensionsCommandTest extends TestBase with Mockito {
 		val extension1: Extension = Fixtures.extension("0123456", "cuspxp")
 
 		val assignment1: Assignment = Fixtures.assignment("assignment 1")
-		assignment1.extensions.add(extension1)
-		extension1.assignment = assignment1
+		assignment1.addExtension(extension1)
 
 		val assignmentDao: AssessmentDao = smartMock[AssessmentDao]
 		assignmentDao.getAssignments(dept, year) returns Seq(assignment1)

@@ -32,7 +32,7 @@ class OvercattingOptionsController extends ExamsController
 	def params = GenerateExamGridMappingParameters
 
 	private def routeRules(scyd: StudentCourseYearDetails, academicYear: AcademicYear): Seq[UpstreamRouteRule] = {
-		upstreamRouteRuleService.list(scyd.route, academicYear, scyd.yearOfStudy)
+		scyd.level.map(upstreamRouteRuleService.list(scyd.route, academicYear, _)).getOrElse(Seq())
 	}
 
 	@ModelAttribute("command")
@@ -79,10 +79,10 @@ class OvercattingOptionsController extends ExamsController
 			GenerateExamGridExporter(
 				department = overcatView.department,
 				academicYear = overcatView.academicYear,
-				course = scyd.studentCourseDetails.course,
+				courses = Seq(scyd.studentCourseDetails.course),
 				routes = Seq(scyd.route),
 				yearOfStudy = scyd.yearOfStudy,
-				yearWeightings = Seq(),
+				yearWeightings = Map(),
 				normalLoadLookup = overcatView.normalLoadLookup,
 				entities = overcatView.overcattedEntities,
 				leftColumns = overcatView.optionsColumns,
@@ -148,7 +148,8 @@ class OvercattingOptionsView(
 			route = scyd.toExamGridEntityYear.route,
 			overcattingModules = Some(overcattedModules.map(_.module)),
 			markOverrides = Some(overwrittenMarks),
-			studentCourseYearDetails = None
+			studentCourseYearDetails = None,
+			level = scyd.level
 		))))
 	}
 
@@ -159,10 +160,14 @@ class OvercattingOptionsView(
 		normalLoadLookup = normalLoadLookup,
 		routeRulesLookup = null, // Not used
 		academicYear = academicYear,
+		department = department,
 		yearOfStudy = scyd.yearOfStudy,
-		showFullName = false,
+		nameToShow = ExamGridStudentIdentificationColumnValue.BothName,
 		showComponentMarks = false,
-		showModuleNames = false
+		showZeroWeightedComponents = false,
+		showComponentSequence = false,
+		showModuleNames = false,
+		calculateYearMarks = false
 	)
 
 	private lazy val currentYearMark = moduleRegistrationService.weightedMeanYearMark(scyd.moduleRegistrations, overwrittenMarks)

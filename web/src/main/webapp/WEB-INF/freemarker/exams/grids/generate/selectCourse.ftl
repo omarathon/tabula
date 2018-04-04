@@ -91,11 +91,18 @@
 		</#function>
 
 		<#assign placeholder = "Course" />
-		<#assign currentfilter><@current_filter_value "selectCourseCommand.course" placeholder; course>${course.code} ${course.name}</@current_filter_value></#assign>
-		<@filter "selectCourseCommand.course" placeholder currentfilter selectCourseCommand.allCourses; course>
-			<label class="radio">
-				<input type="radio" name="${status.expression}" value="${course.code}" data-short-value="${course.code}"
-					${(((selectCourseCommand.course.code)!'') == course.code)?string('checked','')}
+		<#assign currentfilter><#compress><@current_filter_value "selectCourseCommand.courses" placeholder; course>
+			<#if course?is_sequence>
+				<#list course as c>${c.code?upper_case}<#if c_has_next>, </#if></#list>
+			<#else>
+				${course.code?upper_case}
+			</#if>
+		</@current_filter_value></#compress></#assign>
+
+		<@filter "selectCourseCommand.courses" placeholder currentfilter selectCourseCommand.allCourses; course>
+			<label class="checkbox">
+				<input type="checkbox" name="${status.expression}" value="${course.code}" data-short-value="${course.code}"
+					${contains_by_code(selectCourseCommand.courses, course)?string('checked','')}
 				>
 				${course.code} ${course.name}
 			</label>
@@ -130,7 +137,26 @@
 			</label>
 		</@filter>
 	</div>
-
+	<#assign studyYear = (selectCourseCommand.yearOfStudy)!0 />
+	<div class="row year_info">
+		<h3 class="year_info_hdr <#if studyYear == 0>hidden</#if>">Years to display on grid</h3>
+		<#assign maxYear=selectCourseCommand.allYearsOfStudy?size>
+			<#list 1..maxYear as counter>
+				<div class="col-sm-2 year${counter} <#if counter gt studyYear>hidden</#if>" data-year="${counter}">
+					<div class="checkbox">
+						<#assign yearColumn="Year${counter}"/>
+						<label>
+							<input type="checkbox" name="courseYearsToShow" value="${yearColumn}"
+								<#if selectCourseCommand.courseYearsToShow?seq_contains("${yearColumn}")>checked</#if> <#if studyYear == counter>disabled</#if>
+							/> Year ${counter}
+						</label>
+					</div>
+				</div>
+				<#if studyYear == counter><input type="hidden" name="courseYearsToShow" value="${yearColumn}"/></#if>
+			</#list>
+			<#if studyYear == 0><input type="hidden" name="courseYearsToShow" value=""/></#if>
+	</div>
+	<div class="year_info_ftr <#if studyYear == 0>hidden</#if>"><hr/></div>
 	<p>
 		<@bs3form.checkbox path="selectCourseCommand.includeTempWithdrawn">
 			<@f.checkbox path="selectCourseCommand.includeTempWithdrawn" /> Show temporarily withdrawn students
@@ -153,20 +179,27 @@
 				<#list gridOptionsCommand.customColumnTitles as column>
 					<li>Additional: ${column}</li>
 				</#list>
-				<#if gridOptionsCommand.nameToShow == 'full'>
+				<#if gridOptionsCommand.nameToShow.toString == 'full'>
 					<li>Official name</li>
-				<#else>
+				<#elseif gridOptionsCommand.nameToShow.toString == 'both'>
 					<li>First and last name</li>
-				</#if>
-				<#if gridOptionsCommand.yearsToShow == 'current'>
-					<li>Current year</li>
 				<#else>
-					<li>All years</li>
+					<li>No name</li>
 				</#if>
 				<#if gridOptionsCommand.marksToShow == 'overall'>
 					<li>Only show overall mark</li>
 				<#else>
 					<li>Show component marks</li>
+					<#if gridOptionsCommand.componentsToShow == 'all'>
+						<li>Show all assessment components</li>
+					<#else>
+						<li>Hide zero weighted assessment components</li>
+					</#if>
+					<#if gridOptionsCommand.componentsToShow == 'markOnly'>
+						<li>Only show component marks</li>
+					<#else>
+						<li>Show component marks and the sequence that they relate to</li>
+					</#if>
 				</#if>
 				<#if gridOptionsCommand.moduleNameToShow == 'codeOnly'>
 					<li>Show module code only</li>
@@ -174,15 +207,19 @@
 					<li>Show module names</li>
 				</#if>
 				<#if gridOptionsCommand.layout == 'full'>
-					<li>Full column</li>
+					<li>Full grid</li>
 				<#else>
-					<li>Short form</li>
+					<li>Short grid</li>
+				</#if>
+				<#if gridOptionsCommand.yearMarksToUse == 'sits'>
+					<li>Uploaded year marks</li>
+				<#else>
+					<li>Calculate year marks</li>
 				</#if>
 			</ul>
 		</#assign>
 
 		<@fmt.help_popover id="gridOptions" title="Previous grid options" content=popover html=true />
-
 	</div>
 </form>
 
@@ -205,6 +242,7 @@
 											$checkbox.prop('checked', false);
 											updateFilter($checkbox);
 										});
+										hideYearCheckboxesArea();
 									})
 							)
 							.append($('<hr />'))
@@ -239,7 +277,7 @@
 				$('.clear-all-filters').removeAttr("disabled");
 			}
 
-			var course = $('[name=course]:checked');
+			var course = $('[name=courses]:checked');
 			var yearOfStudy = $('[name=yearOfStudy]:checked');
 
 			if (course.length === 0 || yearOfStudy.length === 0) {
@@ -249,8 +287,45 @@
 			}
 		};
 
+		var yearCheckboxes = function() {
+			var yearOfStudy = $("input[type='radio'][name='yearOfStudy']:checked");
+			var selectedYearOfStudy = 0;
+			$('.year_info .year_info_hdr').toggleClass("hidden", yearOfStudy.length == 0);
+			$('.year_info_ftr').toggleClass("hidden", yearOfStudy.length == 0);
+			if (yearOfStudy.length > 0) {
+				selectedYearOfStudy = yearOfStudy.val();
+				$('.year_info').find("input[type='hidden'][name='courseYearsToShow']").val("Year"+selectedYearOfStudy);
+			} else {
+				return;
+			}
+			$('.year_info .col-sm-2').each(function(){
+				var $yearCheckboxDiv =  $(this);
+				var $yearCheckbox = $yearCheckboxDiv.find('input');
+				var year = $yearCheckboxDiv.data('year');
+				if(year == selectedYearOfStudy) {
+					$yearCheckbox.prop("checked", true);
+				} else if (year > selectedYearOfStudy) {
+					$yearCheckbox.prop("checked", false);
+				}
+				$yearCheckbox.prop("disabled", (selectedYearOfStudy ==  year));
+				$yearCheckboxDiv.toggleClass("hidden", selectedYearOfStudy <  year);
+			});
+		};
+
+		var hideYearCheckboxesArea = function() {
+			$('.year_info .year_info_hdr').addClass("hidden");
+			$('.year_info_ftr').addClass("hidden");
+			$('.year_info .col-sm-2').each(function(){
+				var $yearCheckboxDiv =  $(this);
+				var $yearCheckbox = $yearCheckboxDiv.find('input');
+				$yearCheckboxDiv.addClass("hidden");
+				$yearCheckbox.prop("checked", false);
+			});
+		};
+
 		$('form.select-course .filters').on('change', function(e) {
 			updateFilter($(e.target));
+			yearCheckboxes();
 		});
 		$('form.select-course .filters .filter-list').find('input:first').trigger('change');
 
@@ -291,6 +366,7 @@
 
 				prependClearLink($list);
 			});
+			hideYearCheckboxesArea();
 		});
 	});
 </script>

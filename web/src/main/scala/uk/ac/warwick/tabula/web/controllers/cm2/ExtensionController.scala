@@ -206,8 +206,8 @@ class EditExtensionController extends CourseworkController with ExtensionService
 		DisplayExtensionCommand(mandatory(student),mandatory(assignment))
 
 	@ModelAttribute("editExtensionCommand")
-	def editCommand(@PathVariable assignment: Assignment, @PathVariable student: User, @RequestParam(defaultValue = "") action: String) =
-		EditExtensionCommand(assignment, student, user, action)
+	def editCommand(@PathVariable assignment: Assignment, @PathVariable student: User) =
+		EditExtensionCommand(assignment, student, user)
 
 	@RequestMapping(Array("detail"))
 	def detail(

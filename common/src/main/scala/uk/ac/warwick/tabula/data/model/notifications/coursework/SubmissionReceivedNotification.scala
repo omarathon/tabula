@@ -1,7 +1,6 @@
 package uk.ac.warwick.tabula.data.model.notifications.coursework
 
 import javax.persistence.{DiscriminatorValue, Entity}
-
 import uk.ac.warwick.spring.Wire
 import uk.ac.warwick.tabula.CurrentUser
 import uk.ac.warwick.tabula.cm2.web.Routes
@@ -37,6 +36,7 @@ class SubmissionReceivedNotification extends SubmissionNotification {
 	var securityService: SecurityService = Wire[SecurityService]
 
 	def templateLocation = "/WEB-INF/freemarker/emails/submissionnotify.ftl"
+
 	def submissionTitle: String =
 		if (submission == null) "Submission"
 		else if (submission.isAuthorisedLate) "Authorised late submission"
@@ -47,7 +47,7 @@ class SubmissionReceivedNotification extends SubmissionNotification {
 
 	def canEmailUser(user: User): Boolean = {
 		// Alert on noteworthy submissions by default
-		val setting = userSettings.getByUserId(user.getUserId).map { _.alertsSubmission }.getOrElse(UserSettings.AlertsNoteworthySubmissions)
+		val setting = userSettings.getByUserId(user.getUserId).map(_.alertsSubmission).getOrElse(UserSettings.AlertsNoteworthySubmissions)
 
 		setting match {
 			case UserSettings.AlertsAllSubmissions => true
@@ -57,17 +57,19 @@ class SubmissionReceivedNotification extends SubmissionNotification {
 	}
 
 	def url: String = Routes.admin.assignment.submissionsandfeedback.list(assignment)
+
 	def urlTitle = "view all submissions for this assignment"
 
 	def recipients: Seq[User] = {
 		// TAB-2333 Get any user that has Submission.Delete over the submission, or any of its permission parents
 		// Look at Assignment, Module and Department (can't grant explicitly over one Submission atm)
 		val requiredPermission = Permissions.Submission.Delete
-		def usersWithPermission[A <: PermissionsTarget: ClassTag](scope: A) = {
+
+		def usersWithPermission[A <: PermissionsTarget : ClassTag](scope: A) = {
 			val roleGrantedUsers =
 				permissionsService.getAllGrantedRolesFor[A](scope)
-					.filter { _.mayGrant(requiredPermission) }
-					.flatMap { _.users.users }
+					.filter(_.mayGrant(requiredPermission))
+					.flatMap(_.users.users)
 					.toSet
 
 			val explicitlyGrantedUsers =
@@ -85,13 +87,15 @@ class SubmissionReceivedNotification extends SubmissionNotification {
 
 		// Contact the current marker, if there is one, and the submission has already been released
 		val feedback = assignment.findFeedback(submission.usercode)
-		val currentMarker = if (assignment.hasWorkflow && feedback.exists(_.isPlaceholder)) {
-			feedback.flatMap { f => f.getCurrentWorkflowFeedback }
-				.flatMap { _.getMarkerUser }
-				.toSeq
+
+		val currentMarker = if (assignment.hasCM2Workflow) {
+			feedback.toSeq.flatMap(_.markingInProgress).map(_.marker)
+		} else if (assignment.hasWorkflow && feedback.exists(_.isPlaceholder)) {
+			feedback.flatMap(_.getCurrentWorkflowFeedback).flatMap(_.getMarkerUser).toSeq
 		} else {
 			Seq()
 		}
+
 		(adminsWithPermission ++ currentMarker).distinct.filter(canEmailUser)
 	}
 

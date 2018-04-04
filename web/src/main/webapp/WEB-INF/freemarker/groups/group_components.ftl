@@ -316,7 +316,7 @@
 							<#if notInMembershipCount gt 0>
 								<#local tooltip><@fmt.p notInMembershipCount "student has" "students have" /> deregistered</#local>
 
-								<a href="<@routes.groups.deregisteredStudents set />" class="use-tooltip warning" style="display: inline;" title="${tooltip}"><i class="fa fa-exclamation-triangle warning"></i></a>
+								<a href="<@routes.groups.deregisteredStudents set />?returnTo=${info.requestedUri}<#if filterQuery??>?${filterQuery?url}</#if>" class="use-tooltip warning" style="display: inline;" title="${tooltip}"><i class="fa fa-exclamation-triangle warning"></i></a>
 							</#if>
 						</#if>
 					</div>

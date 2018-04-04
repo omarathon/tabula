@@ -1,10 +1,10 @@
 package uk.ac.warwick.tabula.exams.grids.columns.modules
 
 import org.springframework.stereotype.Component
-import uk.ac.warwick.tabula.commands.exams.grids.{ExamGridEntity, ExamGridEntityYear}
+import uk.ac.warwick.tabula.commands.exams.grids.ExamGridEntityYear
 import uk.ac.warwick.tabula.data.model.StudentCourseYearDetails.YearOfStudy
 import uk.ac.warwick.tabula.exams.grids.columns.{ExamGridColumnValueString, _}
-
+import scala.collection.mutable
 import scala.math.BigDecimal.RoundingMode
 
 abstract class ModuleReportsColumn(state: ExamGridColumnState) extends PerYearExamGridColumn(state) with HasExamGridColumnCategory with HasExamGridColumnSecondaryValue
@@ -29,28 +29,25 @@ class ModuleReportsColumnOption extends PerYearExamGridColumnOption {
 
 		override val excelColumnWidth: Int = ExamGridColumnOption.ExcelColumnSizes.WholeMark
 
-		override def values: Map[ExamGridEntity, Map[YearOfStudy, Map[ExamGridColumnValueType, Seq[ExamGridColumnValue]]]] = {
-			state.entities.map(entity =>
-				entity -> entity.validYears.map { case (academicYear, entityYear) =>
-					academicYear -> ExamGridColumnValueType.toMap(result(entityYear))
-				}
-			).toMap
-		}
+		private lazy val _values = mutable.Map[ExamGridEntityYear, ExamGridColumnValues]()
 
-		private def result(entity: ExamGridEntityYear): ExamGridColumnValue = {
-			val coreRequiredModules = state.coreRequiredModuleLookup(entity.route).map(_.module)
-			val coreRequiredModuleRegistrations = entity.moduleRegistrations.filter(mr => coreRequiredModules.contains(mr.module))
-			if (coreRequiredModules.nonEmpty) {
-				if (coreRequiredModuleRegistrations.exists(_.agreedGrade == "F")) {
-					ExamGridColumnValueString("N")
+		def result(entity: ExamGridEntityYear): ExamGridColumnValues = _values.get(entity) match {
+			case Some(values) => values
+			case _ =>
+				val coreRequiredModules = state.coreRequiredModuleLookup(entity.route).map(_.module)
+				val coreRequiredModuleRegistrations = entity.moduleRegistrations.filter(mr => coreRequiredModules.contains(mr.module))
+				val values = if (coreRequiredModules.nonEmpty) {
+					if (coreRequiredModuleRegistrations.exists(_.agreedGrade == "F")) {
+						ExamGridColumnValues(ExamGridColumnValueType.toMap(ExamGridColumnValueString("N")), isEmpty=false)
+					} else {
+						ExamGridColumnValues(ExamGridColumnValueType.toMap(ExamGridColumnValueString("Y")), isEmpty=false)
+					}
 				} else {
-					ExamGridColumnValueString("Y")
+					ExamGridColumnValues(ExamGridColumnValueType.toMap(ExamGridColumnValueString("")), isEmpty=true)
 				}
-			} else {
-				ExamGridColumnValueString("")
-			}
+				_values.put(entity, values)
+				_values(entity)
 		}
-
 	}
 
 	case class MeanModuleMarkColumn(state: ExamGridColumnState)
@@ -64,21 +61,19 @@ class ModuleReportsColumnOption extends PerYearExamGridColumnOption {
 
 		override val excelColumnWidth: Int = ExamGridColumnOption.ExcelColumnSizes.Decimal
 
-		override def values: Map[ExamGridEntity, Map[YearOfStudy, Map[ExamGridColumnValueType, Seq[ExamGridColumnValue]]]] = {
-			state.entities.map(entity =>
-				entity -> entity.validYears.map { case (academicYear, entityYear) =>
-					academicYear -> ExamGridColumnValueType.toMap(result(entityYear))
-				}
-			).toMap
-		}
+		private lazy val _values = mutable.Map[ExamGridEntityYear, ExamGridColumnValues]()
 
-		private def result(entity: ExamGridEntityYear): ExamGridColumnValue = {
-			val entityMarks = entity.moduleRegistrations.flatMap(mr => mr.firstDefinedMark).map(mark => BigDecimal(mark))
-			if (entityMarks.nonEmpty) {
-				ExamGridColumnValueString((entityMarks.sum / entityMarks.size).setScale(1, RoundingMode.HALF_UP).toString)
-			} else {
-				ExamGridColumnValueString("")
-			}
+		override def result(entity: ExamGridEntityYear): ExamGridColumnValues = _values.get(entity) match {
+			case Some(values) => values
+			case _ =>
+				val entityMarks = entity.moduleRegistrations.flatMap(mr => mr.firstDefinedMark).map(mark => BigDecimal(mark))
+				val values = if (entityMarks.nonEmpty) {
+					ExamGridColumnValues(ExamGridColumnValueType.toMap(ExamGridColumnValueString((entityMarks.sum / entityMarks.size).setScale(1, RoundingMode.HALF_UP).toString)), isEmpty=false)
+				} else {
+					ExamGridColumnValues(ExamGridColumnValueType.toMap(ExamGridColumnValueString("")), isEmpty=true)
+				}
+				_values.put(entity, values)
+				_values(entity)
 		}
 
 	}

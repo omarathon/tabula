@@ -1,13 +1,13 @@
 package uk.ac.warwick.tabula.commands.cm2.assignments
 
 import uk.ac.warwick.tabula.commands._
-import uk.ac.warwick.tabula.system.permissions.{PermissionsChecking, PermissionsCheckingMethods, RequiresPermissionsChecking}
-import uk.ac.warwick.userlookup.User
-import ListMarkerAllocationsCommand._
+import uk.ac.warwick.tabula.commands.cm2.assignments.ListMarkerAllocationsCommand._
 import uk.ac.warwick.tabula.data.model.Assignment
 import uk.ac.warwick.tabula.permissions.Permissions
 import uk.ac.warwick.tabula.services.CM2MarkingWorkflowService.Allocations
 import uk.ac.warwick.tabula.services.{AssessmentMembershipServiceComponent, CM2MarkingWorkflowServiceComponent, UserLookupComponent, _}
+import uk.ac.warwick.tabula.system.permissions.{PermissionsChecking, PermissionsCheckingMethods, RequiresPermissionsChecking}
+import uk.ac.warwick.userlookup.User
 
 import scala.collection.immutable.SortedSet
 import scala.collection.mutable
@@ -27,16 +27,29 @@ trait FetchMarkerAllocations {
 		with AssessmentMembershipServiceComponent =>
 
 	def fetchAllocations(assignment: Assignment): MarkerAllocations = {
+
+		// If seat number is empty we use the uni ID instead. This will be larger than a real seat number and unique
+		def seatNumberOrUniId = (user: User) => assignment.getSeatNumber(user).getOrElse(user.getWarwickId.toInt)
+
 		val workflow = assignment.cm2MarkingWorkflow
 		val stagesByRole = workflow.markerStages.groupBy(_.roleName)
-		val allStudents = SortedSet(assessmentMembershipService.determineMembershipUsers(assignment): _*)
+		val users: Seq[User] = assessmentMembershipService.determineMembershipUsers(assignment)
+		val allStudents = if (assignment.showSeatNumbers) {
+			SortedSet(users: _*)(Ordering.by(seatNumberOrUniId))
+		} else {
+			SortedSet(users: _*)
+		}
 
 		val allocations = mutable.Map[String, Map[Marker, SortedSet[Student]]]()
 		val markers = mutable.Map[String, SortedSet[Marker]]()
 		val allocateByStage = mutable.Map[String, Boolean]()
 
-		def toSortedSet(allocations: Allocations) = allocations.map{case(marker, students) =>
-			marker -> SortedSet(students.toSeq: _*)
+		def toSortedSet(allocations: Allocations) = allocations.map { case (marker, students) =>
+			marker -> (if (assignment.showSeatNumbers) {
+				SortedSet(students.toSeq: _*)(Ordering.by(seatNumberOrUniId))
+			} else {
+				SortedSet(students.toSeq: _*)
+			})
 		}
 
 		for {

@@ -59,7 +59,7 @@
 		<@f.textarea path="wordCountConventions" id="wordCountConventions" rows="6" cssClass="form-control col-md-6" />
 	<div class="help-block">
 		Tell students if there are specific items that they should include in or exclude from the word count e.g. a bibliography or appendices.
-		This only applies when you specify a minimum an/or maximum word count.
+		This only applies when you specify a minimum and/or maximum word count.
 	</div>
 	</@bs3form.labelled_form_group>
 	<@bs3form.labelled_form_group path="comment" labelText="Text to show on submission form">

@@ -3,14 +3,14 @@ package uk.ac.warwick.tabula.services.exams.grids
 import org.springframework.stereotype.Service
 import uk.ac.warwick.spring.Wire
 import uk.ac.warwick.tabula.AcademicYear
-import uk.ac.warwick.tabula.data.model.{Route, UpstreamRouteRule}
+import uk.ac.warwick.tabula.data.model.{Level, Route, UpstreamRouteRule}
 import uk.ac.warwick.tabula.data.{AutowiringUpstreamRouteRuleDaoComponent, UpstreamRouteRuleDaoComponent}
 
 trait UpstreamRouteRuleService {
 
 	def saveOrUpdate(list: UpstreamRouteRule): Unit
 	def removeAll(): Unit
-	def list(route: Route, academicYear: AcademicYear, yearOfStudy: Int): Seq[UpstreamRouteRule]
+	def list(route: Route, academicYear: AcademicYear, level: Level): Seq[UpstreamRouteRule]
 
 }
 
@@ -24,8 +24,8 @@ abstract class AbstractUpstreamRouteRuleService extends UpstreamRouteRuleService
 	def removeAll(): Unit =
 		upstreamRouteRuleDao.removeAll()
 
-	def list(route: Route, academicYear: AcademicYear, yearOfStudy: Int): Seq[UpstreamRouteRule] =
-		upstreamRouteRuleDao.list(route, academicYear, yearOfStudy)
+	def list(route: Route, academicYear: AcademicYear, level: Level): Seq[UpstreamRouteRule] =
+		upstreamRouteRuleDao.list(route, academicYear, level)
 
 }
 

@@ -29,17 +29,17 @@ class ScheduledMeetingRecordReminderNotificationTest extends TestBase {
 	}
 
 	@Test def titleForStudent() = withFakeTime(new DateTime(2014, DateTimeConstants.SEPTEMBER, 15, 9, 39, 0, 0)) { new TitleFixture {
-		val notification: ScheduledMeetingRecordReminderStudentNotification = Notification.init(new ScheduledMeetingRecordReminderStudentNotification, new AnonymousUser, meeting, relationship)
+		val notification: ScheduledMeetingRecordReminderStudentNotification = Notification.init(new ScheduledMeetingRecordReminderStudentNotification, new AnonymousUser, meeting)
 		notification.title should be ("Personal tutor meeting with Tutor Name today at 11am")
 	}}
 
 	@Test def titleForTutor() = withFakeTime(new DateTime(2014, DateTimeConstants.SEPTEMBER, 15, 9, 39, 0, 0)) { new TitleFixture {
-		val notification: ScheduledMeetingRecordReminderAgentNotification = Notification.init(new ScheduledMeetingRecordReminderAgentNotification, new AnonymousUser, meeting, relationship)
+		val notification: ScheduledMeetingRecordReminderAgentNotification = Notification.init(new ScheduledMeetingRecordReminderAgentNotification, new AnonymousUser, meeting)
 		notification.title should be ("Personal tutor meeting with Student Name today at 11am")
 	}}
 
 	@Test def titleForStudentAfterTheFact() = withFakeTime(new DateTime(2014, DateTimeConstants.SEPTEMBER, 18, 9, 39, 0, 0)) { new TitleFixture {
-		val notification: ScheduledMeetingRecordReminderStudentNotification = Notification.init(new ScheduledMeetingRecordReminderStudentNotification, new AnonymousUser, meeting, relationship)
+		val notification: ScheduledMeetingRecordReminderStudentNotification = Notification.init(new ScheduledMeetingRecordReminderStudentNotification, new AnonymousUser, meeting)
 		notification.title should be ("Personal tutor meeting with Tutor Name at 11am, Monday 15 September 2014")
 	}}
 

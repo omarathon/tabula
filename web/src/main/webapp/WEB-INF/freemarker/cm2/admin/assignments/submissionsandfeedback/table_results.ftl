@@ -25,6 +25,9 @@
 						<col class="student-info" />
 					</#if>
 					<col class="student-info" />
+					<#if assignment.showSeatNumbers>
+						<col class="student-info" />
+					</#if>
 				</colgroup>
 
 				<colgroup class="submission">
@@ -76,7 +79,16 @@
 				<#-- TAB-5807 - make the first header rows from TDs so that the tablesorter plugin can cope -->
 				<tr>
 					<td class="for-check-all"><input  type="checkbox" class="collection-check-all" title="Select all/none" /> </td>
-					<td<#if department.showStudentName> colspan="3"</#if>>Student</td>
+
+					<#assign studentColspan=1/>
+					<#if department.showStudentName>
+						<#assign studentColspan=studentColspan+2/>
+					</#if>
+					<#if assignment.showSeatNumbers>
+						<#assign studentColspan=studentColspan+1/>
+					</#if>
+
+					<td colspan="${studentColspan?c}">Student</td>
 
 					<td class="submission" colspan="${submissionColspan?c}">
 						Submission
@@ -97,6 +109,9 @@
 						<th class="student sortable">Last name</th>
 					</#if>
 					<th class="student sortable">University ID</th>
+					<#if assignment.showSeatNumbers>
+						<th class="student sortable">Seat number</th>
+					</#if>
 
 					<th class="submission">Files</th>
 					<th class="submission sortable" data-sorter="customdate">Submitted</th>
@@ -115,7 +130,6 @@
 							<th class="submission sortable">Second Marker</th>
 						</#if>
 					</#if>
-
 
 					<#if results.hasOriginalityReport>
 						<th class="plagiarism sortable">Report</th>
@@ -157,6 +171,10 @@
 							<#if submissionfeedbackinfo.user.warwickId??>${submissionfeedbackinfo.user.warwickId}<#else>${submissionfeedbackinfo.user.userId}</#if>
 							<#if submissionfeedbackinfo.user.warwickId??><@pl.profile_link submissionfeedbackinfo.user.warwickId /><#else><@pl.profile_link submissionfeedbackinfo.user.userId /></#if>
 						</td>
+
+						<#if assignment.showSeatNumbers>
+							<td class="id">${assignment.getSeatNumber(submissionfeedbackinfo.user)!""}</td>
+						</#if>
 
 						<td class="files">
 							<#if submission??>

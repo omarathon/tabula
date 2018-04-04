@@ -196,6 +196,8 @@
 				<div class="muted">Any comments will be saved and sent to the student</div>
 			</@bs3form.labelled_form_group>
 
+			<@bs3form.errors "state"/>
+
 			<div class="submit-buttons">
 				<#if detail.extension?has_content>
 					<#if detail.extension.approved>

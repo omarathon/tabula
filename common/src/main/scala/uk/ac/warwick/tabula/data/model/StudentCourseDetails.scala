@@ -145,6 +145,11 @@ class StudentCourseDetails
 	@BatchSize(size=200)
 	var allRelationships: JSet[StudentRelationship] = JHashSet()
 
+	@ElementCollection
+	@CollectionTable(name="STUDENTCOURSEDETAILSNOTE", joinColumns=Array(new JoinColumn(name="scjCode")))
+	@Column(name="NOTE")
+	var notes: JSet[String] = JHashSet()
+
 	def allRelationshipsOfType(relationshipType: StudentRelationshipType): Seq[StudentRelationship] = {
 		allRelationships.asScala
 			.toSeq

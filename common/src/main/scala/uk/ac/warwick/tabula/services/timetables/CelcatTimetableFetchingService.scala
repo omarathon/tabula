@@ -10,7 +10,7 @@ import org.joda.time.{DateTime, DateTimeZone}
 import uk.ac.warwick.spring.Wire
 import uk.ac.warwick.tabula.data.model.groups.{DayOfWeek, WeekRange}
 import uk.ac.warwick.tabula.data.model.{Module, StudentMember}
-import uk.ac.warwick.tabula.helpers.Futures._
+import uk.ac.warwick.tabula.helpers.ExecutionContexts.timetable
 import uk.ac.warwick.tabula.helpers.StringUtils._
 import uk.ac.warwick.tabula.helpers.{FoundUser, Logging}
 import uk.ac.warwick.tabula.services.UserLookupService.UniversityId

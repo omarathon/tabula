@@ -1,22 +1,24 @@
 package uk.ac.warwick.tabula.data.model.markingworkflow
 
-import org.hibernate.`type`.{StandardBasicTypes, StringType}
 import java.sql.Types
 
+import org.hibernate.`type`.{StandardBasicTypes, StringType}
 import uk.ac.warwick.tabula.CaseObjectEqualityFixes
 import uk.ac.warwick.tabula.cm2.web.Routes
 import uk.ac.warwick.tabula.data.HibernateHelpers
-import uk.ac.warwick.tabula.data.model.{AbstractBasicUserType, Assignment, Feedback}
 import uk.ac.warwick.tabula.data.model.markingworkflow.ModerationSampler.Marker
+import uk.ac.warwick.tabula.data.model.{AbstractBasicUserType, Assignment, Feedback}
 import uk.ac.warwick.tabula.helpers.StringUtils
-import uk.ac.warwick.tabula.system.TwoWayConverter
 import uk.ac.warwick.tabula.helpers.StringUtils._
+import uk.ac.warwick.tabula.system.TwoWayConverter
 
 sealed abstract class MarkingWorkflowStage(val name: String, val order: Int) extends CaseObjectEqualityFixes[MarkingWorkflowStage] {
 	override def getName: String = name
 
 	def roleName: String = MarkingWorkflowStage.DefaultRole
 	def verb: String = MarkingWorkflowStage.DefaultVerb
+	def pastVerb: String = MarkingWorkflowStage.DefaultPastVerb
+	def presentVerb: String = MarkingWorkflowStage.DefaultPresentVerb
 	// used when stages have their own allocations rather than allocations being at the roleName level
 	def allocationName: String = roleName
 	// used to describe a stage - when two stages share a role name (the same person is responsible for both stages) these will need to be distinct
@@ -70,6 +72,8 @@ object MarkingWorkflowStage {
 
 	val DefaultRole: String = "Marker"
 	val DefaultVerb: String = "mark"
+	val DefaultPastVerb: String = "marked"
+	val DefaultPresentVerb: String = "marking"
 	val DefaultCompletionKey: String = "complete"
 
 	// single marker workflow
@@ -133,7 +137,7 @@ object MarkingWorkflowStage {
 			.exists(_.moderationSampler == Marker)
 		override def summariseCurrentFeedback: Boolean = true
 	}
-	case object ModerationModerator extends MarkingWorkflowStage("moderation-moderator", 2) {
+	case object ModerationModerator extends MarkingWorkflowStage("moderation-moderator", 2) with ModerationStage {
 		override def roleName = "Moderator"
 		override def verb: String = "moderate"
 		override def nextStages: Seq[MarkingWorkflowStage] = Seq(ModerationCompleted)
@@ -155,6 +159,8 @@ object MarkingWorkflowStage {
 	case object SelectedModerationAdmin extends MarkingWorkflowStage("admin-moderation-admin", 2) {
 		override def roleName = "Admin"
 		override def verb: String = "select"
+		override def pastVerb: String = "selected"
+		override def presentVerb: String = "selecting"
 		override def nextStages: Seq[MarkingWorkflowStage] = Seq(SelectedModerationModerator)
 		override def previousStages: Seq[MarkingWorkflowStage] = Seq(SelectedModerationMarker)
 		override def canFinish(workflow: CM2MarkingWorkflow): Boolean = true
@@ -166,7 +172,7 @@ object MarkingWorkflowStage {
 		val NotModeratedKey: String  = "notModerated"
 
 		override def actionCompletedKey(feedback: Option[Feedback]): String = {
-			val markerFeedback = feedback.flatMap(_.allMarkerFeedback.find(_.stage == SelectedModerationModerator))
+			val markerFeedback = feedback.flatMap(_.allMarkerFeedback.find(_.stage == this))
 			markerFeedback match {
 				case Some(mf) if !mf.hasContent => NotModeratedKey
 				case _ => MarkingWorkflowStage.DefaultCompletionKey
@@ -174,26 +180,16 @@ object MarkingWorkflowStage {
 		}
 	}
 
-	case object SelectedModerationModerator extends MarkingWorkflowStage("admin-moderation-moderator", 3) {
+	case object SelectedModerationModerator extends MarkingWorkflowStage("admin-moderation-moderator", 3) with ModerationStage {
 		override def roleName: String = "Moderator"
 		override def verb: String = "moderate"
+		override def pastVerb: String = "moderated"
+		override def presentVerb: String = "moderating"
 		override def nextStages: Seq[MarkingWorkflowStage] = Seq(SelectedModerationCompleted)
 		override def previousStages: Seq[MarkingWorkflowStage] = Seq(SelectedModerationMarker)
 		override def populateWithPreviousFeedback: Boolean = true
 		override def summarisePreviousFeedback: Boolean = true
 		override def allowsBulkAdjustments: Boolean = true
-
-		val NotModeratedKey: String  = "notModerated"
-		val ApprovedKey: String  = "approved"
-
-		override def actionCompletedKey(feedback: Option[Feedback]): String = {
-			val markerFeedback = feedback.flatMap(_.allMarkerFeedback.find(_.stage == SelectedModerationModerator))
-			markerFeedback match {
-				case Some(mf) if mf.hasContent && !mf.hasBeenModified => ApprovedKey
-				case Some(mf) if !mf.hasContent => NotModeratedKey
-				case _ => MarkingWorkflowStage.DefaultCompletionKey
-			}
-		}
 	}
 
 	case object SelectedModerationCompleted extends FinalStage("admin-moderation-completed") {
@@ -234,6 +230,21 @@ object MarkingWorkflowStage {
 		def compare(a: MarkingWorkflowStage, b: MarkingWorkflowStage): Int = {
 			val orderCompare = a.order compare b.order
 			if (orderCompare != 0) orderCompare else StringUtils.AlphaNumericStringOrdering.compare(a.name, b.name)
+		}
+	}
+
+	trait ModerationStage {
+		self: MarkingWorkflowStage =>
+		val NotModeratedKey: String = "notModerated"
+		val ApprovedKey: String = "approved"
+
+		override def actionCompletedKey(feedback: Option[Feedback]): String = {
+			val markerFeedback = feedback.flatMap(_.allMarkerFeedback.find(_.stage == this))
+			markerFeedback match {
+				case Some(mf) if mf.hasContent && !mf.hasBeenModified => ApprovedKey
+				case Some(mf) if !mf.hasContent => NotModeratedKey
+				case _ => MarkingWorkflowStage.DefaultCompletionKey
+			}
 		}
 	}
 }

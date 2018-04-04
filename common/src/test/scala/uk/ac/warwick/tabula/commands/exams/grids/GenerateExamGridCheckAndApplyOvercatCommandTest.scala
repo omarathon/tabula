@@ -1,11 +1,13 @@
 package uk.ac.warwick.tabula.commands.exams.grids
 
+import uk.ac.warwick.tabula.JavaImports._
 import uk.ac.warwick.tabula._
 import uk.ac.warwick.tabula.commands.Appliable
-import uk.ac.warwick.tabula.data.model._
+import uk.ac.warwick.tabula.data.model.{Level, _}
 import uk.ac.warwick.tabula.data.{StudentCourseYearDetailsDao, StudentCourseYearDetailsDaoComponent}
 import uk.ac.warwick.tabula.services._
 import uk.ac.warwick.tabula.services.exams.grids.{NormalCATSLoadService, NormalCATSLoadServiceComponent, UpstreamRouteRuleService, UpstreamRouteRuleServiceComponent}
+
 
 class GenerateExamGridCheckAndApplyOvercatCommandTest extends TestBase with Mockito {
 
@@ -14,14 +16,20 @@ class GenerateExamGridCheckAndApplyOvercatCommandTest extends TestBase with Mock
 	val thisRoute: Route = Fixtures.route("a100")
 	thisRoute.degreeType = DegreeType.Undergraduate
 	val thisYearOfStudy = 3
+
 	val module1: Module = Fixtures.module("its01")
 	val module2: Module = Fixtures.module("its02")
 	val mads: ModuleAndDepartmentService = smartMock[ModuleAndDepartmentService]
 	mads.getModuleByCode(module1.code) returns Some(module1)
 	mads.getModuleByCode(module2.code) returns Some(module2)
 	val scd: StudentCourseDetails = Fixtures.student("1234").mostSignificantCourse
+	scd.levelCode = "3"
+
 	val scyd: StudentCourseYearDetails = scd.latestStudentCourseYearDetails
 	scyd.moduleAndDepartmentService = mads
+	scyd.levelService = smartMock[LevelService]
+	scyd.levelService.levelFromCode(null) returns Some(new Level("3", "3"))
+
 	val mr1: ModuleRegistration = Fixtures.moduleRegistration(scd, module1, null, null)
 	val mr2: ModuleRegistration = Fixtures.moduleRegistration(scd, module2, null, null)
 
@@ -38,12 +46,12 @@ class GenerateExamGridCheckAndApplyOvercatCommandTest extends TestBase with Mock
 		state.normalCATSLoadService.find(thisRoute, thisAcademicYear, thisYearOfStudy) returns None
 		// Have to have at least 1 route rule as otherwise it won't apply the change
 		val routeRule = new UpstreamRouteRule(None, null, null)
-		state.upstreamRouteRuleService.list(thisRoute, thisAcademicYear, thisYearOfStudy) returns Seq(routeRule)
+		state.upstreamRouteRuleService.list(thisRoute, thisAcademicYear, scyd.level.get) returns Seq(routeRule)
 	}
 
 	@Test
 	def stateFilterNotOvercat(): Unit = { new StateFixture {
-		val entity = ExamGridEntity(null, null, null, null, Map(thisYearOfStudy -> Some(ExamGridEntityYear(null, thisRoute.degreeType.normalCATSLoad, thisRoute, None, None, None))))
+		val entity = ExamGridEntity(null, null, null, null, Map(thisYearOfStudy -> Some(ExamGridEntityYear(null, thisRoute.degreeType.normalCATSLoad, thisRoute, None, None, None, Some(new Level("3"))))))
 		val selectCourseCommand = new Appliable[Seq[ExamGridEntity]] with GenerateExamGridSelectCourseCommandRequest {
 			override def apply(): Seq[ExamGridEntity] = Seq(entity)
 			yearOfStudy = thisYearOfStudy
@@ -55,12 +63,15 @@ class GenerateExamGridCheckAndApplyOvercatCommandTest extends TestBase with Mock
 
 	@Test
 	def stateFilterNoOvercatSelection(): Unit = { new StateFixture {
-		val entity = ExamGridEntity(null, null, null, null, Map(thisYearOfStudy -> Some(ExamGridEntityYear(null, thisRoute.degreeType.normalCATSLoad + 15, thisRoute, None, None, None))))
+		val entity = ExamGridEntity(null, null, null, null, Map(thisYearOfStudy -> Some(ExamGridEntityYear(null, thisRoute.degreeType.normalCATSLoad + 15, thisRoute, None, None, None, Some(new Level("3"))))))
 		val selectCourseCommand = new Appliable[Seq[ExamGridEntity]] with GenerateExamGridSelectCourseCommandRequest {
 			override def apply(): Seq[ExamGridEntity] = Seq(entity)
 			yearOfStudy = thisYearOfStudy
 		}
 		state.selectCourseCommand = selectCourseCommand
+		val years: JSet[String] = JHashSet()
+		years.add("Year3")
+		selectCourseCommand.courseYearsToShow = years
 		state.moduleRegistrationService.overcattedModuleSubsets(entity.validYears(thisYearOfStudy), Map(), thisRoute.degreeType.normalCATSLoad, Seq(routeRule)) returns Seq(null, null)
 		state.filteredEntities.isEmpty should be {false}
 		state.filteredEntities.head should be (entity)
@@ -69,13 +80,17 @@ class GenerateExamGridCheckAndApplyOvercatCommandTest extends TestBase with Mock
 
 	@Test
 	def stateFilterSameModule(): Unit = { new StateFixture {
-		val entity = ExamGridEntity(null, null, null, null, Map(thisYearOfStudy -> Some(ExamGridEntityYear(null, thisRoute.degreeType.normalCATSLoad + 15, thisRoute, Some(Seq(module1)), None, None))))
+		val entity = ExamGridEntity(null, null, null, null, Map(thisYearOfStudy -> Some(ExamGridEntityYear(null, thisRoute.degreeType.normalCATSLoad + 15, thisRoute, Some(Seq(module1)), None, None, Some(new Level("3"))))))
 
 		val selectCourseCommand = new Appliable[Seq[ExamGridEntity]] with GenerateExamGridSelectCourseCommandRequest {
 			override def apply(): Seq[ExamGridEntity] = Seq(entity)
 			yearOfStudy = thisYearOfStudy
 		}
 		state.selectCourseCommand = selectCourseCommand
+		val years: JSet[String] = JHashSet()
+		years.add("Year3")
+		selectCourseCommand.courseYearsToShow = years
+
 
 		state.moduleRegistrationService.overcattedModuleSubsets(entity.validYears(thisYearOfStudy), Map(), thisRoute.degreeType.normalCATSLoad, Seq(routeRule)) returns Seq((BigDecimal(0), Seq(mr1)))
 
@@ -85,13 +100,16 @@ class GenerateExamGridCheckAndApplyOvercatCommandTest extends TestBase with Mock
 
 	@Test
 	def stateFilterDifferentModule(): Unit = { new StateFixture {
-		val entity = ExamGridEntity(null, null, null, null, Map(thisYearOfStudy -> Some(ExamGridEntityYear(null, thisRoute.degreeType.normalCATSLoad + 15, thisRoute, Some(Seq(module2)), None, None))))
+		val entity = ExamGridEntity(null, null, null, null, Map(thisYearOfStudy -> Some(ExamGridEntityYear(null, thisRoute.degreeType.normalCATSLoad + 15, thisRoute, Some(Seq(module2)), None, None, Some(new Level("3"))))))
 
 		val selectCourseCommand = new Appliable[Seq[ExamGridEntity]] with GenerateExamGridSelectCourseCommandRequest {
 			override def apply(): Seq[ExamGridEntity] = Seq(entity)
 			yearOfStudy = thisYearOfStudy
 		}
 		state.selectCourseCommand = selectCourseCommand
+		val years: JSet[String] = JHashSet()
+		years.add("Year3")
+		selectCourseCommand.courseYearsToShow = years
 
 		state.moduleRegistrationService.overcattedModuleSubsets(entity.validYears(thisYearOfStudy), Map(), thisRoute.degreeType.normalCATSLoad, Seq(routeRule)) returns Seq(
 			(BigDecimal(50), Seq(mr1)),
@@ -100,20 +118,22 @@ class GenerateExamGridCheckAndApplyOvercatCommandTest extends TestBase with Mock
 
 		state.filteredEntities.isEmpty should be {false}
 		state.filteredEntities.head should be (entity)
-		state.overcatSubsets(state.filteredEntities.head).head should be (BigDecimal(50), Seq(mr1))
+		state.overcatSubsets(state.filteredEntities.head).head._2.head should be (BigDecimal(50), Seq(mr1))
 		verify(state.moduleRegistrationService, times(1)).overcattedModuleSubsets(entity.validYears(thisYearOfStudy), Map(), thisRoute.degreeType.normalCATSLoad, Seq(routeRule))
 	}}
 
 	@Test
 	def stateFilterExtraModule(): Unit = { new StateFixture {
-		val entity = ExamGridEntity(null, null, null, null, Map(thisYearOfStudy -> Some(ExamGridEntityYear(null, thisRoute.degreeType.normalCATSLoad + 15, thisRoute, Some(Seq(module1)), None, None))))
+		val entity = ExamGridEntity(null, null, null, null, Map(thisYearOfStudy -> Some(ExamGridEntityYear(null, thisRoute.degreeType.normalCATSLoad + 15, thisRoute, Some(Seq(module1)), None, None, Some(new Level("3"))))))
 
 		val selectCourseCommand = new Appliable[Seq[ExamGridEntity]] with GenerateExamGridSelectCourseCommandRequest {
 			override def apply(): Seq[ExamGridEntity] = Seq(entity)
 			yearOfStudy = thisYearOfStudy
 		}
 		state.selectCourseCommand = selectCourseCommand
-
+		val years: JSet[String] = JHashSet()
+		years.add("Year3")
+		selectCourseCommand.courseYearsToShow = years
 		state.moduleRegistrationService.overcattedModuleSubsets(entity.validYears(thisYearOfStudy), Map(), thisRoute.degreeType.normalCATSLoad, Seq(routeRule)) returns Seq(
 			(BigDecimal(50), Seq(mr1, mr2)),
 			(BigDecimal(40), Seq(mr1))
@@ -121,20 +141,22 @@ class GenerateExamGridCheckAndApplyOvercatCommandTest extends TestBase with Mock
 
 		state.filteredEntities.isEmpty should be {false}
 		state.filteredEntities.head should be (entity)
-		state.overcatSubsets(state.filteredEntities.head).head should be (BigDecimal(50), Seq(mr1, mr2))
+		state.overcatSubsets(state.filteredEntities.head).head._2.head should be (BigDecimal(50), Seq(mr1, mr2))
 		verify(state.moduleRegistrationService, times(1)).overcattedModuleSubsets(entity.validYears(thisYearOfStudy), Map(), thisRoute.degreeType.normalCATSLoad, Seq(routeRule))
 	}}
 
 	@Test
 	def stateFilterRemovedModule(): Unit = { new StateFixture {
-		val entity = ExamGridEntity(null, null, null, null, Map(thisYearOfStudy -> Some(ExamGridEntityYear(null, thisRoute.degreeType.normalCATSLoad + 15, thisRoute, Some(Seq(module1, module2)), None, None))))
+		val entity = ExamGridEntity(null, null, null, null, Map(thisYearOfStudy -> Some(ExamGridEntityYear(null, thisRoute.degreeType.normalCATSLoad + 15, thisRoute, Some(Seq(module1, module2)), None, None, Some(new Level("3"))))))
 
 		val selectCourseCommand = new Appliable[Seq[ExamGridEntity]] with GenerateExamGridSelectCourseCommandRequest {
 			override def apply(): Seq[ExamGridEntity] = Seq(entity)
 			yearOfStudy = thisYearOfStudy
 		}
 		state.selectCourseCommand = selectCourseCommand
-
+		val years: JSet[String] = JHashSet()
+		years.add("Year3")
+		selectCourseCommand.courseYearsToShow = years
 		state.moduleRegistrationService.overcattedModuleSubsets(entity.validYears(thisYearOfStudy), Map(), thisRoute.degreeType.normalCATSLoad, Seq(routeRule)) returns Seq(
 			(BigDecimal(50), Seq(mr2)),
 			(BigDecimal(40), Seq(mr1, mr2))
@@ -142,13 +164,13 @@ class GenerateExamGridCheckAndApplyOvercatCommandTest extends TestBase with Mock
 
 		state.filteredEntities.isEmpty should be {false}
 		state.filteredEntities.head should be (entity)
-		state.overcatSubsets(state.filteredEntities.head).head should be (BigDecimal(50), Seq(mr2))
+		state.overcatSubsets(state.filteredEntities.head).head._2.head should be (BigDecimal(50), Seq(mr2))
 		verify(state.moduleRegistrationService, times(1)).overcattedModuleSubsets(entity.validYears(thisYearOfStudy), Map(), thisRoute.degreeType.normalCATSLoad, Seq(routeRule))
 	}}
 
 	@Test
 	def apply(): Unit = {
-		val entity = ExamGridEntity(null, null, null, null, Map(thisYearOfStudy -> Some(ExamGridEntityYear(null, thisRoute.degreeType.normalCATSLoad + 15, thisRoute, None, None, Option(scyd)))))
+		val entity = ExamGridEntity(null, null, null, null, Map(thisYearOfStudy -> Some(ExamGridEntityYear(null, thisRoute.degreeType.normalCATSLoad + 15, thisRoute, None, None, Option(scyd), Some(new Level("3"))))))
 
 		var fetchCount = 0
 
@@ -173,15 +195,18 @@ class GenerateExamGridCheckAndApplyOvercatCommandTest extends TestBase with Mock
 		cmd.normalCATSLoadService.find(thisRoute, thisAcademicYear, thisYearOfStudy) returns None
 		// Have to have at least 1 route rule as otherwise it won't apply the change
 		val routeRule = new UpstreamRouteRule(None, null, null)
-		cmd.upstreamRouteRuleService.list(thisRoute, thisAcademicYear, thisYearOfStudy) returns Seq(routeRule)
+		cmd.upstreamRouteRuleService.list(thisRoute, thisAcademicYear, scyd.level.get) returns Seq(routeRule)
 		cmd.selectCourseCommand = selectCourseCommand
 		cmd.moduleRegistrationService.overcattedModuleSubsets(entity.validYears(thisYearOfStudy), Map(), thisRoute.degreeType.normalCATSLoad, Seq(routeRule)) returns Seq(
 			(BigDecimal(50), Seq(mr1, mr2)),
 			(BigDecimal(40), Seq(mr1))
 		)
+		val years: JSet[String] = JHashSet()
+		years.add("Year3")
+		selectCourseCommand.courseYearsToShow = years
 		cmd.filteredEntities.isEmpty should be {false}
 		cmd.filteredEntities.head should be (entity)
-		cmd.overcatSubsets(cmd.filteredEntities.head).head should be (BigDecimal(50), Seq(mr1, mr2))
+		cmd.overcatSubsets(cmd.filteredEntities.head).head._2.head should be (BigDecimal(50), Seq(mr1, mr2))
 		verify(cmd.moduleRegistrationService, times(1)).overcattedModuleSubsets(entity.validYears(thisYearOfStudy), Map(), thisRoute.degreeType.normalCATSLoad, Seq(routeRule))
 
 		val result = cmd.applyInternal()

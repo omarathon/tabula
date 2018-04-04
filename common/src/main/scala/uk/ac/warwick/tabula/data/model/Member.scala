@@ -420,6 +420,7 @@ class StudentMember extends Member with StudentProperties {
 		val allSCYDs: Seq[StudentCourseYearDetails] = freshOrStaleStudentCourseDetails.toSeq.sorted
 			.flatMap(_.freshOrStaleStudentCourseYearDetails.toSeq.sorted)
 			.takeWhile(_ != baseSCYD) ++ Seq(baseSCYD)
+
 		ExamGridEntity(
 			firstName = Option(firstName).getOrElse("[Unknown]"),
 			lastName = Option(lastName).getOrElse("[Unknown]"),

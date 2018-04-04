@@ -97,7 +97,9 @@ class ExamGridColumnValueString(value: String, val isActual: Boolean = false) ex
 			cell.setCellStyle(cellStyleMap(ExamGridExportStyles.ActualMark))
 		}
 	}
-	override def toHTML: String = value
+	override def toHTML: String =
+		if (isActual) "<span class=\"exam-grid-actual-mark\">%s</span>".format(value)
+		else value
 	override def populateCell(cell: Cell, cellStyleMap: Map[ExamGridExportStyles.Style, CellStyle]): Unit = {
 		cell.setCellValue(value)
 		applyCellStyle(cell, cellStyleMap)
@@ -106,6 +108,12 @@ class ExamGridColumnValueString(value: String, val isActual: Boolean = false) ex
 	override def isEmpty: Boolean = !value.hasText
 }
 
+case class ExamGridColumnValueWithTooltip(value:String, actual:Boolean, message: String = "") extends ExamGridColumnValueString(value, actual){
+	override def toHTML: String = "<span class=\"use-tooltip\" %s>%s</span>".format(
+		if (message.hasText) "title=\"%s\" data-container=\"body\"".format(message) else "",
+		value
+	)
+}
 
 trait ExamGridColumnValueFailed {
 
@@ -178,6 +186,10 @@ case class ExamGridColumnValueMissing(message: String = "") extends ExamGridColu
 	override protected def applyCellStyle(cell: Cell, cellStyleMap: Map[ExamGridExportStyles.Style, CellStyle]): Unit = {
 		cell.setCellStyle(cellStyleMap(ExamGridExportStyles.ActualMark))
 	}
+}
+
+case class ExamGridColumnValueStringWithHtml(value: String, html: String) extends ExamGridColumnValueString(value) {
+	override def toHTML: String = html
 }
 
 case class ExamGridColumnValueStringHtmlOnly(value: String) extends ExamGridColumnValueString(value) {

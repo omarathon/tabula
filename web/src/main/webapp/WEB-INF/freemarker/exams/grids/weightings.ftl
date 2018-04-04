@@ -70,7 +70,7 @@
 
 		<div class="header fix-header">
 			<div class="row">
-				<div class="col-md-9 col-md-offset-2">
+				<div class="col-xs-9 col-xs-offset-2">
 					<div class="pull-right">
 						<div class="checkbox">
 							<label>
@@ -83,26 +83,26 @@
 				</div>
 			</div>
 			<div class="row last">
-				<div class="col-md-2">
+				<div class="col-xs-2">
 					<label>Course</label>
 				</div>
-				<div class="col-md-9">
+				<div class="col-xs-9">
 					<#list allYearsOfStudy as year>
-						<div class="col-md-1"><label>${year}</label></div>
+						<div class="col-xs-1"><label>${year}</label></div>
 					</#list>
 				</div>
 
-				<div class="col-md-2">
+				<div class="col-xs-2">
 					<input type="text" class="form-control" name="filter" placeholder="Filter courses" />
 				</div>
-				<div class="col-md-9">
+				<div class="col-xs-9">
 					<#list allYearsOfStudy as year>
-						<div class="col-md-1">
+						<div class="col-xs-1">
 							<input type="text" class="form-control" name="bulk" data-year="${year}" placeholder="All" />
 						</div>
 					</#list>
 				</div>
-				<div class="col-md-1">
+				<div class="col-xs-1">
 					<button type="button" name="bulkapply" class="btn btn-default btn-sm" disabled>Apply</button>
 					<@fmt.help_popover id="bulkapply" content="Enter a weighting and click Apply to change all filtered courses" />
 				</div>
@@ -111,16 +111,16 @@
 
 		<#list command.allCourses as course>
 			<div class="row">
-				<div class="col-md-2">
+				<div class="col-xs-2">
 					<label title="${course.code?upper_case} ${course.name}" class="use-tooltip">${course.code?upper_case} ${course.name}</label>
 				</div>
-				<div class="col-md-9">
+				<div class="col-xs-9">
 					<#list allYearsOfStudy as year>
 						<#assign value = "" />
 						<#if mapGet(command.yearWeightings, course)?? && mapGet(mapGet(command.yearWeightings, course), year)?? >
 							<#assign value = mapGet(mapGet(command.yearWeightings, course), year) />
 						</#if>
-						<div class="col-md-1">
+						<div class="col-xs-1">
 							<input title="${course.code?upper_case} ${course.name} Year ${year}"
 								data-container="body"
 								type="text"

@@ -6,6 +6,8 @@ import javax.persistence.Id
 import javax.persistence.NamedQueries
 import javax.persistence.NamedQuery
 
+import org.apache.commons.lang3.builder.{EqualsBuilder, HashCodeBuilder}
+
 @Entity(name="StudyLevel") // Level is a reserved word in Oracle so the table is called StudyLevel
 @NamedQueries(Array(
 	new NamedQuery(name = "level.code", query = "select level from StudyLevel level where code = :code")))
@@ -25,4 +27,10 @@ class Level {
 
 	override def toString: String = name
 
+	override def equals(other: Any): Boolean = other match {
+		case that: Level => new EqualsBuilder().append(code, that.code).build()
+		case _ => false
+	}
+
+	override def hashCode(): Int = new HashCodeBuilder().append(code).build()
 }

@@ -40,7 +40,7 @@ Macros for customised form elements, containers and more complex pickers.
 	</div>
 </#macro>
 
-<#macro labelled_form_group path="" labelText="" help="" cssClass="">
+<#macro labelled_form_group path="" labelText="" help="" cssClass="" renderErrors=true>
 	<@form_group path=path cssClass=cssClass>
 		<#if labelText?has_content>
 			<@label path=path><#compress><#noescape>${labelText}</#noescape></#compress></@label>
@@ -49,7 +49,9 @@ Macros for customised form elements, containers and more complex pickers.
 			<@spring.bind path=path>
 				<#nested />
 			</@spring.bind>
-			<@errors path=path />
+			<#if renderErrors>
+				<@errors path=path />
+			</#if>
 		<#else>
 			<#nested />
 		</#if>

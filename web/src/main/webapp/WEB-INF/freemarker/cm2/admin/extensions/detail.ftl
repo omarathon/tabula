@@ -82,6 +82,8 @@
 		<@f.textarea path="reviewerComments" cssClass="form-control text big-textarea" maxlength=4000/>
 	</@bs3form.labelled_form_group>
 
+	<@bs3form.errors "state"/>
+
 	<div class="buttons form-group">
 		<#if detail.extension.approved>
 			<button type="submit" name="state" value="${modifyExtensionCommand.state.dbValue}" class="btn btn-primary">Update</button>

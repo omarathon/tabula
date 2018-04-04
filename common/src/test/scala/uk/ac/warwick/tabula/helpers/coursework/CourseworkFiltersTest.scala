@@ -224,8 +224,7 @@ class CourseworkFiltersTest extends TestBase with Mockito {
 		val extension = Fixtures.extension("0672089", "cuscav")
 		extension.approve()
 		extension.expiryDate = DateTime.now.plusDays(1)
-		extension.assignment = assignment
-		assignment.extensions.add(extension)
+		assignment.addExtension(extension)
 
 		submission.isLate should be {false}
 		submission.isAuthorisedLate should be {true}
@@ -266,8 +265,7 @@ class CourseworkFiltersTest extends TestBase with Mockito {
 		val extension = Fixtures.extension("0672089", "cuscav")
 		extension.approve()
 		extension.expiryDate = DateTime.now.plusDays(1)
-		extension.assignment = assignment
-		assignment.extensions.add(extension)
+		assignment.addExtension(extension)
 
 		submission.isLate should be {false}
 		submission.isAuthorisedLate should be {true}
@@ -343,8 +341,7 @@ class CourseworkFiltersTest extends TestBase with Mockito {
 		val extension = Fixtures.extension("0672089", "cuscav")
 		extension.approve()
 		extension.expiryDate = DateTime.now.plusDays(1)
-		extension.assignment = assignment
-		assignment.extensions.add(extension)
+		assignment.addExtension(extension)
 
 		submission.isLate should be {false}
 		submission.isAuthorisedLate should be {true}

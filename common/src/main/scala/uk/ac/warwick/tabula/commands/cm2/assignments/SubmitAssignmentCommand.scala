@@ -2,6 +2,7 @@ package uk.ac.warwick.tabula.commands.cm2.assignments
 
 import org.apache.commons.collections.Factory
 import org.apache.commons.collections.map.LazyMap
+import org.hibernate.exception.ConstraintViolationException
 import org.joda.time.DateTime
 import org.springframework.util.Assert
 import org.springframework.validation.{BindingResult, Errors}
@@ -146,13 +147,22 @@ abstract class SubmitAssignmentCommandInternal(val assignment: Assignment, val u
 		)
 
 		zipService.invalidateSubmissionZip(assignment)
-		submissionService.saveSubmission(submission)
+		try {
+			submissionService.saveSubmission(submission)
 
-		attendanceMonitoringCourseworkSubmissionService.updateCheckpoints(submission)
+			attendanceMonitoringCourseworkSubmissionService.updateCheckpoints(submission)
 
-		submission
+			submission
+		} catch {
+			case e: ConstraintViolationException =>
+				// TAB-6045 - this can happen with a precisely-timed double-click on the submit button
+				// Roll back the transaction and indicate to the caller what has happened
+				throw new RapidResubmissionException(e)
+		}
 	}
 }
+
+class RapidResubmissionException(e: Exception) extends RuntimeException("A duplicate submission was saved while preparing to save this submission", e)
 
 trait SubmitAssignmentBinding extends BindListener {
 	self: SubmitAssignmentRequest =>

@@ -78,6 +78,8 @@ class AssessmentComponent extends GeneratedId with PreSaveBehaviour with Seriali
 
 	var marksCode: String = _
 
+	var weighting: JInteger = _
+
 	/**
 	 * Returns moduleCode without CATS. e.g. in304
 	 */
@@ -93,7 +95,8 @@ class AssessmentComponent extends GeneratedId with PreSaveBehaviour with Seriali
 		this.module != other.module ||
 		this.assessmentGroup != other.assessmentGroup ||
 		this.inUse != other.inUse ||
-		this.marksCode != other.marksCode
+		this.marksCode != other.marksCode ||
+		this.weighting != other.weighting
 
 	override def preSave(newRecord: Boolean) {
 		ensureNotNull("name", name)
@@ -113,6 +116,7 @@ class AssessmentComponent extends GeneratedId with PreSaveBehaviour with Seriali
 		name = other.name
 		assessmentType = other.assessmentType
 		marksCode = other.marksCode
+		weighting = other.weighting
 	}
 
 	def upstreamAssessmentGroups(year: AcademicYear): Seq[UpstreamAssessmentGroup] = membershipService.getUpstreamAssessmentGroups(this, year)

@@ -30,7 +30,7 @@
 						<dt>Single marking</dt>
 						<dd>One marker is allocated to a submission. They mark the submission and pass it to the administrator.</dd>
 						<dt>Moderated marking</dt>
-						<dd>The first marker marks the submission and passes it to the moderator. The moderator decides the final mark and passes the submission to the administrator.</dd>
+						<dd>The first marker marks the submission and passes it to the moderator. The moderator decides the final mark and passes the submission to the administrator. If you want to second mark only a subset of submissions, we recommend that you use moderated marking rather than double seen or double blind marking.</dd>
 						<dt>Double seen marking</dt>
 						<dd>The first marker adds their feedback. They send the submission to a second marker, who can see the first marker's feedback, mark or grade. The second marker adds their own feedback, mark or grade. They return the submission to the first marker, who decides the final mark and summarises comments into a single item of feedback for the student. Comments can be combined or rewritten entirely.</dd>
 						<dt>Double blind marking</dt>

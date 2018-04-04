@@ -24,7 +24,7 @@
 		</p>
 
 		<div class="alert alert-info">
-			<h3>Your grid</h3>
+			<h3>Your <#if gridOptionsCommand.showFullLayout>full<#else>short</#if> grid</h3>
 			<p>
 				This grid has been generated from the data available in SITS at
 				<@fmt.date date=oldestImport capitalise=false at=true relative=true />. If data changes in SITS after this
@@ -78,12 +78,31 @@
 				</thead>
 				<tbody>
 					<tr>
+						<th>Grid type:</th>
+						<td><#if gridOptionsCommand.showFullLayout>Full<#else>Short</#if> Grid</td>
+					</tr>
+					<tr>
 						<th>Department:</th>
 						<td>${department.name}</td>
 					</tr>
 					<tr>
-						<th>Course:</th>
-						<td>${selectCourseCommand.course.code?upper_case} ${selectCourseCommand.course.name}</td>
+						<#if selectCourseCommand.courses?size == 1>
+							<th>Course:</th>
+							<td>${selectCourseCommand.courses?first.code?upper_case} ${selectCourseCommand.courses?first.name}</td>
+						<#else>
+							<th>Courses:</th>
+							<#assign popover>
+								<ul><#list selectCourseCommand.courses?sort_by('code') as course>
+									<li>${course.code?upper_case} ${course.name}</li>
+								</#list></ul>
+							</#assign>
+							<td>
+								<a class="use-popover hidden-print" href="#" data-html="true" data-content="${popover}">${selectCourseCommand.courses?size} courses</a>
+								<div class="visible-print">
+									<#noescape>${popover}</#noescape>
+								</div>
+							</td>
+						</#if>
 					</tr>
 					<tr>
 						<#if !selectCourseCommand.routes?has_content>
@@ -99,7 +118,12 @@
 									<li>${route.code?upper_case} ${route.name}</li>
 								</#list></ul>
 							</#assign>
-							<td><a class="use-popover" href="#" data-html="true" data-content="${popover}">${selectCourseCommand.routes?size} routes</a></td>
+							<td>
+								<a class="use-popover hidden-print" href="#" data-html="true" data-content="${popover}">${selectCourseCommand.routes?size} routes</a>
+								<div class="visible-print">
+									<#noescape>${popover}</#noescape>
+								</div>
+							</td>
 						</#if>
 					</tr>
 					<tr>
@@ -109,9 +133,25 @@
 					<tr>
 						<th>Year weightings:</th>
 						<td>
-							<#list weightings as weighting>
-								Year ${weighting.yearOfStudy} = ${weighting.weightingAsPercentage}%<#if weighting_has_next><br /></#if>
-							</#list>
+							<#if weightings?size lt 2>
+								<#if weightings?has_content>
+									<#list mapGet(weightings, weightings?keys?first) as weighting>
+										Year ${weighting.yearOfStudy} = ${weighting.weightingAsPercentage}%<#if weighting_has_next><br /></#if>
+									</#list>
+								</#if>
+							<#else>
+								<#assign popover>
+									<ul><#list weightings?keys as course>
+										<li>${course.code}: <#list mapGet(weightings, course) as weighting>
+											Year ${weighting.yearOfStudy} = ${weighting.weightingAsPercentage}%<#if weighting_has_next>, </#if>
+										</#list></li>
+									</#list></ul>
+								</#assign>
+								<a href="#" class="use-popover hidden-print" data-html="true" data-content="${popover}">${weightings?keys?size} courses</a>
+								<div class="visible-print">
+									<#noescape>${popover}</#noescape>
+								</div>
+							</#if>
 						</td>
 					</tr>
 					<tr>
@@ -122,7 +162,7 @@
 									${normalLoadLookup.withoutDefault(normalLoadLookup.routes?first)}
 								<#else>
 									<#assign defaultNormalLoad>${normalLoadLookup.apply(normalLoadLookup.routes?first)}</#assign>
-									${defaultNormalLoad} <@fmt.help_popover id="normal-load" content="Could not find a Pathway Module Rule for the normal load so using the default value of ${defaultNormalLoad}" />
+									${defaultNormalLoad} <@fmt.help_popover id="normal-load" cssClass="hidden-print" content="Could not find a Pathway Module Rule for the normal load so using the default value of ${defaultNormalLoad}" />
 								</#if>
 							<#else>
 								<#assign popover>
@@ -132,12 +172,15 @@
 												${normalLoadLookup.withoutDefault(route)}
 											<#else>
 												<#assign defaultNormalLoad>${normalLoadLookup.apply(route)}</#assign>
-												${defaultNormalLoad} <@fmt.help_popover id="normal-load" content="Could not find a Pathway Module Rule for the normal load so using the default value of ${defaultNormalLoad}" />
+												${defaultNormalLoad} <@fmt.help_popover id="normal-load" cssClass="hidden-print" content="Could not find a Pathway Module Rule for the normal load so using the default value of ${defaultNormalLoad}" />
 											</#if>
 										</li>
 									</#list></ul>
 								</#assign>
-								<a href="#" class="use-popover" data-html="true" data-content="${popover}">${normalLoadLookup.routes?size} routes</a>
+								<a href="#" class="use-popover hidden-print" data-html="true" data-content="${popover}">${normalLoadLookup.routes?size} routes</a>
+								<div class="visible-print">
+									<#noescape>${popover}</#noescape>
+								</div>
 							</#if>
 						</td>
 					</tr>
@@ -161,7 +204,7 @@
 				<tbody>
 					<tr>
 						<td><span class="exam-grid-fail">#</span></td>
-						<td>Failed module</td>
+						<td>Failed module or component</td>
 					</tr>
 					<tr>
 						<td><span class="exam-grid-overcat">#</span></td>
@@ -197,7 +240,7 @@
 			<#include "_short_form_grid.ftl" />
 		</#if>
 
-		<div class="fix-footer">
+		<div class="fix-footer hidden-print">
 			<div class="btn-group dropup">
 				<button type="button" class="btn btn-primary dropdown-toggle" data-toggle="dropdown">Download&hellip; <span class="caret"></span></button>
 				<ul class="dropdown-menu download-options">
@@ -291,6 +334,29 @@
 			e.preventDefault();
 			$(this).closest('.more').addClass('hidden').parent().find('a.show-more').show();
 		});
+
+		// fix the grid scrollbar to the footer
+		var $scrollWrapper = $('.doubleScroll-scroll-wrapper');
+		var $grid = $('.grid');
+
+		$scrollWrapper.prependTo('.fix-footer').css('margin-bottom', '10px');
+
+		function reflowScroll() {
+			setTimeout(function () {
+				$scrollWrapper
+					// Update the width of the scroll track to match the container
+					.width($scrollWrapper.parent().width())
+					// Update the scroll bar so it reflects the width of the grid
+					.children().width($grid.width()).end()
+					// Reset the scroll bar to the initial position
+					.scrollLeft(0);
+			}, 0);
+		}
+		$(window).on('id7:reflow', reflowScroll);
+		reflowScroll();
+
+		$('.table-responsive').css('overflow-x', 'hidden');
+
 	});
 </script>
 

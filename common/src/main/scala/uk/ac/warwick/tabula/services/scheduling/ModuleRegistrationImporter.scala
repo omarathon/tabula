@@ -109,10 +109,22 @@ class SandboxModuleRegistrationImporter extends AbstractModuleRegistrationImport
 			if (route.studentsStartId to route.studentsEndId).contains(universityId.toInt)
 			moduleCode <- route.moduleCodes
 		} yield {
-			val mark = (universityId ++ universityId ++ moduleCode.substring(3)).toCharArray.map(char =>
-				Try(char.toString.toInt).toOption.getOrElse(0) * universityId.toCharArray.apply(0).toString.toInt
-			).sum % 100
-			val grade = SandboxData.GradeBoundaries.find(gb => gb.marksCode == "TABULA-UG" && gb.minimumMark <= mark && gb.maximumMark >= mark).map(_.grade).getOrElse("F")
+
+			val isPassFail = moduleCode.takeRight(1) == "9" // modules with a code ending in 9 are pass/fails
+			val markScheme = if (isPassFail) "PF" else "WAR"
+
+			val mark = if (isPassFail) {
+				if(math.random < 0.25) 0 else 100
+			} else {
+				(universityId ++ universityId ++ moduleCode.substring(3)).toCharArray.map(char =>
+					Try(char.toString.toInt).toOption.getOrElse(0) * universityId.toCharArray.apply(0).toString.toInt
+				).sum % 100
+			}
+
+			val grade =
+				if(isPassFail) if (mark == 100) "P" else "F"
+				else SandboxData.GradeBoundaries.find(gb => gb.marksCode == "TABULA-UG" && gb.minimumMark <= mark && gb.maximumMark >= mark).map(_.grade).getOrElse("F")
+
 			new ModuleRegistrationRow(
 				scjCode = "%s/1".format(universityId),
 				sitsModuleCode = "%s-15".format(moduleCode.toUpperCase),
@@ -127,7 +139,8 @@ class SandboxModuleRegistrationImporter extends AbstractModuleRegistrationImport
 				actualMark = Some(new JBigDecimal(mark)),
 				actualGrade = grade,
 				agreedMark = Some(new JBigDecimal(mark)),
-				agreedGrade = grade
+				agreedGrade = grade,
+				markScheme = markScheme
 			)
 		}).toSeq
 
@@ -137,6 +150,9 @@ class SandboxModuleRegistrationImporter extends AbstractModuleRegistrationImport
 
 object ModuleRegistrationImporter {
 	val sitsSchema: String = Wire.property("${schema.sits}")
+
+	// a list of all the markscheme codes that we consider to be pass/fail modules
+	final val PassFailMarkSchemeCodes = Seq("PF")
 
 	// union 3 things -
 	// 1. unconfirmed module registrations from the SMS table
@@ -154,7 +170,8 @@ object ModuleRegistrationImporter {
 			null as smr_actm, -- actual mark
 			null as smr_actg, -- actual grade
 			null as smr_agrm, -- agreed mark
-			null as smr_agrg -- agreed grade
+			null as smr_agrg, -- agreed grade
+	 		null as smr_mksc -- mark scheme
 				from $sitsSchema.ins_stu stu -- student
 					join $sitsSchema.ins_spr spr -- Student Programme Route, needed for SPR code
 						on spr.spr_stuc = stu.stu_code
@@ -176,7 +193,8 @@ object ModuleRegistrationImporter {
 			smr_actm, -- actual overall module mark
 			smr_actg, -- actual overall module grade
 			smr_agrm, -- agreed overall module mark
-			smr_agrg -- agreed overall module grade
+			smr_agrg, -- agreed overall module grade
+	 		smr_mksc -- mark scheme - used to work out if this is a pass/fail module
 				from $sitsSchema.ins_stu stu
 					join $sitsSchema.ins_spr spr
 						on spr.spr_stuc = stu.stu_code
@@ -202,7 +220,7 @@ object ModuleRegistrationImporter {
 	// but that column has a non-null constraint
 	def AutoUploadedConfirmedModuleRegistrations = s"""
 			select scj_code, smo.mod_code, smo.smo_mcrd as credit, smo.smo_agrp as assess_group,
-			smo.ses_code, smo.ayr_code, smo.mav_occur as occurrence, smr_actm, smr_actg, smr_agrm, smr_agrg
+			smo.ses_code, smo.ayr_code, smo.mav_occur as occurrence, smr_actm, smr_actg, smr_agrm, smr_agrg, smr_mksc
 				from $sitsSchema.ins_stu stu
 					join $sitsSchema.ins_spr spr
 						on spr.spr_stuc = stu.stu_code
@@ -238,7 +256,8 @@ object ModuleRegistrationImporter {
 			Option(resultSet.getBigDecimal("smr_actm")),
 			resultSet.getString("smr_actg"),
 			Option(resultSet.getBigDecimal("smr_agrm")),
-			resultSet.getString("smr_agrg")
+			resultSet.getString("smr_agrg"),
+			resultSet.getString("smr_mksc")
 		)
 	}
 
@@ -278,6 +297,7 @@ class ModuleRegistrationRow {
 	var actualGrade: String = _
 	var agreedMark: Option[JBigDecimal] = _
 	var agreedGrade: String = _
+	var passFail: Boolean = _
 
 	def this(
 		scjCode: String,
@@ -290,7 +310,8 @@ class ModuleRegistrationRow {
 		actualMark: Option[JBigDecimal],
 		actualGrade: String,
 		agreedMark: Option[JBigDecimal],
-		agreedGrade: String
+		agreedGrade: String,
+		markScheme: String
 	) {
 		this()
 		this.scjCode = scjCode
@@ -304,6 +325,7 @@ class ModuleRegistrationRow {
 		this.actualGrade = actualGrade
 		this.agreedMark = agreedMark
 		this.agreedGrade = agreedGrade
+		this.passFail = ModuleRegistrationImporter.PassFailMarkSchemeCodes.contains(markScheme)
 	}
 
 }

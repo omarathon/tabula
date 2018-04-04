@@ -17,13 +17,14 @@ object ExamGridPassListExporter extends TaskBenchmarking with AddConfidentialWat
 	def apply(
 		entities: Seq[ExamGridEntity],
 		department: Department,
-		course: Course,
+		courses: Seq[Course],
 		yearOfStudy: YearOfStudy,
 		academicYear: AcademicYear,
 		progressionService: ProgressionService,
 		normalLoadLookup: NormalLoadLookup,
 		routeRulesLookup: UpstreamRouteRuleLookup,
-		isConfidential: Boolean
+		isConfidential: Boolean,
+		calculateYearMarks: Boolean
 	): XWPFDocument = {
 
 		val doc = new XWPFDocument()
@@ -42,25 +43,28 @@ object ExamGridPassListExporter extends TaskBenchmarking with AddConfidentialWat
 		createAndFormatParagraph(doc).createRun().setText("Pass List")
 		createAndFormatParagraph(doc).createRun().setText("The following candidates will proceed to the %s year of study:".format(yearOfStudyToString(yearOfStudy + 1)))
 		createAndFormatParagraph(doc).createRun().setText(department.name)
-		createAndFormatParagraph(doc).createRun().setText(s"${course.code.toUpperCase} ${course.name}")
+		val coursesText = courses.map(c => s"${c.code.toUpperCase} ${c.name}")
+		createAndFormatParagraph(doc).createRun().setText(coursesText.mkString(", "))
 
 		createAndFormatParagraph(doc).setBorderBottom(Borders.SINGLE)
 
 		createAndFormatParagraph(doc)
 
 		val passedEntites = {
-			entities.filter(entity =>
+			entities.filter(entity => {
+				val routeRules = entity.validYears.mapValues(ey => routeRulesLookup(ey.route, ey.level))
 				entity.years(yearOfStudy).exists { year =>
 					progressionService.suggestedResult(
 						year.studentCourseYearDetails.get,
 						normalLoadLookup(year.route),
-						routeRulesLookup(year.route)
+						routeRules,
+						calculateYearMarks
 					) match {
 						case ProgressionResult.Proceed | ProgressionResult.PossiblyProceed | ProgressionResult.Pass => true
 						case _ => false
 					}
 				}
-			)
+			})
 		}
 
 		val entityTable = doc.createTable(passedEntites.size, 3)

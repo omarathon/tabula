@@ -22,7 +22,18 @@
 	</p>
 
 	<p>
-		Select the items to include in your grid for Course: ${selectCourseCommand.course.code?upper_case} ${selectCourseCommand.course.name},
+		Select the items to include in your grid for
+		<#if selectCourseCommand.courses?size == 1>
+			Course: ${selectCourseCommand.courses?first.code?upper_case} ${selectCourseCommand.courses?first.name}
+				<#else>
+			Courses:
+					<#assign popover>
+				<ul><#list selectCourseCommand.courses?sort_by('code') as course>
+					<li>${course.code?upper_case} ${course.name}</li>
+				</#list></ul>
+					</#assign>
+			<a class="use-popover" href="#" data-html="true" data-content="${popover}" data-container="body">${selectCourseCommand.courses?size} courses</a>
+		</#if>,
 		Year of Study: ${selectCourseCommand.yearOfStudy},
 		<#if !selectCourseCommand.routes?has_content>
 			All routes
@@ -39,36 +50,42 @@
 		</#if>
 	</p>
 
-	<h3>Grid layout <@fmt.help_popover id="gridlayout" content="List all modules taken by the cohort as separate columns or repeat the module columns for each student showing only modules taken by that student" /></h3>
+	<h3>Grid layout <@fmt.help_popover id="gridlayout" content="<dl><dt>Short grid</dt><dd>This layout shows only those modules taken by each student.</dd><br><dt>Full grid </dt><dd>This layout shows all modules taken by the cohort.</dd></dl>" html=true/></h3>
 
 	<div class="row">
 		<div class="col-md-3">
 			<div class="radio">
 				<label><input type="radio" name="layout" value="short"
 					<#if gridOptionsCommand.layout == 'short'>checked</#if>
-				/> Short form &nbsp;&nbsp;<a href="#short-form-layout-example" data-toggle="modal">Example</a></label>
+				/> Short grid &nbsp;&nbsp;<a href="#short-form-layout-example" data-toggle="modal">Example</a></label>
 			</div>
 		</div>
 		<div class="col-md-3">
 			<div class="radio">
 				<label><input type="radio" name="layout" value="full"
 					<#if gridOptionsCommand.layout == 'full'>checked</#if>
-				/> Full column &nbsp;&nbsp;<a href="#full-layout-example" data-toggle="modal">Example</a></label>
+				/> Full grid &nbsp;&nbsp;<a href="#full-layout-example" data-toggle="modal">Example</a></label>
 			</div>
 		</div>
 	</div>
 
 	<div id="short-form-layout-example" class="modal fade">
 		<@modal.wrapper>
-			<@modal.header><h3 class="modal-title">Short form</h3></@modal.header>
-			<@modal.body><img src="<@url resource="/static/images/examgrids/shortexample.jpg"/>"></@modal.body>
+			<@modal.header><h3 class="modal-title">Short grid</h3></@modal.header>
+			<@modal.body>
+				<p>This layout shows only those modules taken by each student.</p>
+				<img src="<@url resource="/static/images/examgrids/short-grid.png"/>">
+			</@modal.body>
 		</@modal.wrapper>
 	</div>
 
 	<div id="full-layout-example" class="modal fade">
 		<@modal.wrapper>
-			<@modal.header><h3 class="modal-title">Full column</h3></@modal.header>
-			<@modal.body><img src="<@url resource="/static/images/examgrids/fullexample.jpg"/>"></@modal.body>
+			<@modal.header><h3 class="modal-title">Full grid</h3></@modal.header>
+			<@modal.body>
+				<p>This layout shows all modules taken by the cohort.</p>
+				<img src="<@url resource="/static/images/examgrids/full-grid.png"/>">
+			</@modal.body>
 		</@modal.wrapper>
 	</div>
 
@@ -79,15 +96,22 @@
 		<div class="col-md-3">
 			<div class="radio">
 				<label><input type="radio" name="nameToShow" value="full"
-					<#if gridOptionsCommand.nameToShow == 'full'>checked</#if>
+					<#if gridOptionsCommand.nameToShow.toString == 'full'>checked</#if>
 				/> Official name</label>
 			</div>
 		</div>
 		<div class="col-md-3">
 			<div class="radio">
 				<label><input type="radio" name="nameToShow" value="both"
-					<#if gridOptionsCommand.nameToShow == 'both'>checked</#if>
+					<#if gridOptionsCommand.nameToShow.toString == 'both'>checked</#if>
 				/> First and last name</label>
+			</div>
+		</div>
+		<div class="col-md-3">
+			<div class="radio">
+				<label><input type="radio" name="nameToShow" value="none"
+					<#if gridOptionsCommand.nameToShow.toString == 'none'>checked</#if>
+				/> No name</label>
 			</div>
 		</div>
 	</div>
@@ -109,6 +133,14 @@
 
 		<div class="col-md-3">
 			<div class="checkbox">
+				<label><input type="checkbox" name="predefinedColumnIdentifiers" value="course"
+					<#if gridOptionsCommand.predefinedColumnIdentifiers?seq_contains("course")>checked</#if>
+				/> Course</label>
+			</div>
+		</div>
+
+		<div class="col-md-3">
+			<div class="checkbox">
 				<label><input type="checkbox" name="predefinedColumnIdentifiers" value="route"
 					<#if gridOptionsCommand.predefinedColumnIdentifiers?seq_contains("route")>checked</#if>
 				/> Route</label>
@@ -120,27 +152,6 @@
 				<label><input type="checkbox" name="predefinedColumnIdentifiers" value="startyear"
 					<#if gridOptionsCommand.predefinedColumnIdentifiers?seq_contains("startyear")>checked</#if>
 				/> Start Year</label>
-			</div>
-		</div>
-	</div>
-
-	<hr />
-
-	<h3>Years</h3>
-
-	<div class="row">
-		<div class="col-md-3">
-			<div class="radio">
-				<label><input type="radio" name="yearsToShow" value="current"
-					<#if gridOptionsCommand.yearsToShow == 'current'>checked</#if>
-				/> Current year</label>
-			</div>
-		</div>
-		<div class="col-md-3">
-			<div class="radio">
-				<label><input type="radio" name="yearsToShow" value="all"
-					<#if gridOptionsCommand.yearsToShow == 'all'>checked</#if>
-				/> All years</label>
 			</div>
 		</div>
 	</div>
@@ -215,6 +226,22 @@
 				/> Module Reports</label>
 			</div>
 		</div>
+
+		<div class="col-md-3">
+			<div class="checkbox">
+				<label><input type="checkbox" name="componentsToShow" value="nonZero"
+					<#if gridOptionsCommand.componentsToShow == 'nonZero'>checked</#if>
+				/> Hide zero-weighted components <@fmt.help_popover id="componentsToShow" content="Don't show assessment components that don't contribute towards the overall module mark." /></label>
+			</div>
+		</div>
+
+		<div class="col-md-3">
+			<div class="checkbox">
+				<label><input type="checkbox" name="componentSequenceToShow" value="sequenceAndMark"
+					<#if gridOptionsCommand.componentsToShow == 'sequenceAndMark'>checked</#if>
+				/> Show component sequence <@fmt.help_popover id="componentSequenceToShow" content="Show component sequence codes next to component marks" /></label>
+			</div>
+		</div>
 	</div>
 
 	<hr />
@@ -276,6 +303,27 @@
 	<hr />
 
 	<h3>Marking</h3>
+
+	<#assign uploadedYearMarksPopoverContent>
+		<p>If you have <a target="_blank" href="<@routes.exams.uploadYearMarks department academicYear />">uploaded year marks</a> via Tabula, you can use these in your grid. This option is suitable for when you wish to run final-year calculations, and complete assignment and component marks for previous academic years are not available in SITS.</p>
+	</#assign>	
+
+	<div class="row">
+		<div class="col-md-3">
+			<div class="radio">
+				<label><input type="radio" name="yearMarksToUse" value="sits"
+					<#if gridOptionsCommand.yearMarksToUse == 'sits'>checked</#if>
+				/> Uploaded year marks <@fmt.help_popover id="sits" content=uploadedYearMarksPopoverContent html=true /></label>
+			</div>
+		</div>
+		<div class="col-md-3">
+			<div class="radio">
+				<label><input type="radio" name="yearMarksToUse" value="calculated"
+					<#if gridOptionsCommand.yearMarksToUse == 'calculated'>checked</#if>
+				/> Calculate year marks <@fmt.help_popover id="calculated" content="Use the current component and assignment marks from SITS to produce your grid. Note that any post-board adjustments &ndash; for example, to accommodate mitigating circumstances &ndash; should be in SITS before you create the grid." html=true /></label>
+			</div>
+		</div>
+	</div>
 
 	<div class="row">
 		<div class="col-md-3">

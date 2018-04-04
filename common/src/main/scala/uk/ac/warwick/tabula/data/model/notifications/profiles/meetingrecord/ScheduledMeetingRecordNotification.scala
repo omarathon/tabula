@@ -16,8 +16,9 @@ import uk.ac.warwick.tabula.profiles.web.Routes
 import uk.ac.warwick.tabula.services.timetables.{EventOccurrenceService, TermBasedEventOccurrenceService}
 import uk.ac.warwick.tabula.timetables.TimetableEvent
 
+
 abstract class ScheduledMeetingRecordNotification
-	extends NotificationWithTarget[ScheduledMeetingRecord, StudentRelationship]
+	extends Notification[ScheduledMeetingRecord, Unit]
 	with SingleItemNotification[ScheduledMeetingRecord] {
 
 	self: MyWarwickDiscriminator =>
