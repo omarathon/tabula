@@ -487,8 +487,8 @@ preposition: Text to relate the title to the department name in the second line,
 	<@bulk_email emails title subject />
 </#macro>
 
-<#macro help_popover id title="" content="" html=false>
-	<a class="help-popover use-popover"
+<#macro help_popover id title="" content="" html=false cssClass="">
+	<a class="help-popover use-popover ${cssClass}"
 	   id="popover-${id}"
 	   <#if title?has_content> data-title="${title}"</#if>
 	   data-content="${content}"

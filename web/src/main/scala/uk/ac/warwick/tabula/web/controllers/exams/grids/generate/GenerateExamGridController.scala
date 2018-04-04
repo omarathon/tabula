@@ -384,7 +384,7 @@ class GenerateExamGridController extends ExamsController
 		) ++ shortFormLayoutData
 
 		commonCrumbs(
-			Mav("exams/grids/generate/preview", mavObjects),
+			Mav("exams/grids/generate/preview", mavObjects).bodyClasses("grid-preview"),
 			department,
 			academicYear
 		)
