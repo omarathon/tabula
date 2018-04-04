@@ -28,7 +28,7 @@ abstract class DismissNotificationCommandInternal(val notifications: Seq[Notific
 			notifications.foreach(_.unDismiss(user))
 		}
 		notificationService.update(notifications, user)
-		notifications.flatMap(notificationService.toActivity)
+		notifications.flatMap(notificationService.toActivity(user))
 	}
 }
 
