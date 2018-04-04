@@ -110,8 +110,12 @@ class ListMarkerFeedbackCommandInternal(val assignment:Assignment, val marker:Us
 			.sortBy(_.headerStage.order)
 
 		if (activeWorkflowPosition == null) {
-			val order: Option[JInteger] = stages.headOption.map(_.headerStage.order)
-			activeWorkflowPosition = order.orNull
+			val position: Option[JInteger] =
+				stages.find(_.feedbackByActionability.readyToMark.nonEmpty)
+					.orElse(stages.headOption)
+					.map(_.headerStage.order)
+
+			activeWorkflowPosition = position.orNull
 		}
 
 		stages
