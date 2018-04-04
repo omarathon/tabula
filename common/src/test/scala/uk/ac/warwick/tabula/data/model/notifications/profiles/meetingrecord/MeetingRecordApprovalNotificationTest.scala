@@ -27,7 +27,7 @@ class MeetingRecordApprovalNotificationTest extends TestBase with FreemarkerRend
 	@Test def titleNewMeetingStudent() = withUser("cuscav", "0672089") {
 		val meeting = new MeetingRecord(agent, relationship)
 
-		val notification = Notification.init(new NewMeetingRecordApprovalNotification, currentUser.apparentUser, meeting, relationship)
+		val notification = Notification.init(new NewMeetingRecordApprovalNotification, currentUser.apparentUser, meeting)
 		notification.title should be ("Personal tutor meeting record with Tutor Name needs review")
 	}
 
@@ -41,7 +41,7 @@ class MeetingRecordApprovalNotificationTest extends TestBase with FreemarkerRend
 		val meeting = new MeetingRecord(agent, relationship)
 		meeting.meetingDate = new DateTime(2017, DateTimeConstants.MARCH, 21, 18, 30, 0, 0)
 
-		val notification = Notification.init(new NewMeetingRecordApprovalNotification, u, meeting, relationship)
+		val notification = Notification.init(new NewMeetingRecordApprovalNotification, u, meeting)
 
 		val notificationContent = renderToString(freeMarkerConfig.getTemplate(notification.content.template), notification.content.model)
 		notificationContent should startWith ("Tutor Name has created a record of your personal tutor meeting")
@@ -50,21 +50,21 @@ class MeetingRecordApprovalNotificationTest extends TestBase with FreemarkerRend
 	@Test def titleNewMeetingTutor() = withUser("cuscav", "0672089") {
 		val meeting = new MeetingRecord(student, relationship)
 
-		val notification = Notification.init(new NewMeetingRecordApprovalNotification, currentUser.apparentUser, meeting, relationship)
+		val notification = Notification.init(new NewMeetingRecordApprovalNotification, currentUser.apparentUser, meeting)
 		notification.title should be ("Personal tutor meeting record with Student Name needs review")
 	}
 
 	@Test def titleEditMeetingStudent() = withUser("cuscav", "0672089") {
 		val meeting = new MeetingRecord(agent, relationship)
 
-		val notification = Notification.init(new EditedMeetingRecordApprovalNotification, currentUser.apparentUser, meeting, relationship)
+		val notification = Notification.init(new EditedMeetingRecordApprovalNotification, currentUser.apparentUser, meeting)
 		notification.title should be ("Personal tutor meeting record with Tutor Name needs review")
 	}
 
 	@Test def titleEditMeetingTutor() = withUser("cuscav", "0672089") {
 		val meeting = new MeetingRecord(student, relationship)
 
-		val notification = Notification.init(new EditedMeetingRecordApprovalNotification, currentUser.apparentUser, meeting, relationship)
+		val notification = Notification.init(new EditedMeetingRecordApprovalNotification, currentUser.apparentUser, meeting)
 		notification.title should be ("Personal tutor meeting record with Student Name needs review")
 	}
 

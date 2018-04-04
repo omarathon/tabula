@@ -53,7 +53,7 @@ trait BulkMeetingRecordCommandNotifications extends Notifies[Seq[MeetingRecord],
 	self: BulkMeetingRecordCommandState =>
 
 	def emit(meetingRecords: Seq[MeetingRecord]): Seq[NewMeetingRecordApprovalNotification] = meetingRecords.map { meetingRecord =>
-		Notification.init(new NewMeetingRecordApprovalNotification, creator.asSsoUser, meetingRecord, meetingRecord.relationship)
+		Notification.init(new NewMeetingRecordApprovalNotification, creator.asSsoUser, meetingRecord)
 	}
 
 	override def transformResult(meetingRecords: Seq[MeetingRecord]): Seq[MeetingRecord] = meetingRecords
