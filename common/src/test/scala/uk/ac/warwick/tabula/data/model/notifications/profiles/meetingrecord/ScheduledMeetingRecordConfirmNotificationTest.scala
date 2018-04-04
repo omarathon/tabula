@@ -21,14 +21,14 @@ class ScheduledMeetingRecordConfirmNotificationTest extends TestBase {
 	@Test def titleScheduledByStudent() = withUser("cuscav", "0672089") {
 		val meeting = new ScheduledMeetingRecord(student, relationship)
 
-		val notification = Notification.init(new ScheduledMeetingRecordConfirmNotification, currentUser.apparentUser, meeting, relationship)
+		val notification = Notification.init(new ScheduledMeetingRecordConfirmNotification, currentUser.apparentUser, meeting)
 		notification.title should be ("Personal tutor meeting record with Tutor Name needs confirmation")
 	}
 
 	@Test def titleScheduledByTutor() = withUser("cuscav", "0672089") {
 		val meeting = new ScheduledMeetingRecord(agent, relationship)
 
-		val notification = Notification.init(new ScheduledMeetingRecordConfirmNotification, currentUser.apparentUser, meeting, relationship)
+		val notification = Notification.init(new ScheduledMeetingRecordConfirmNotification, currentUser.apparentUser, meeting)
 		notification.title should be ("Personal tutor meeting record with Student Name needs confirmation")
 	}
 

@@ -156,7 +156,7 @@ class NotificationDaoTest extends PersistenceTestBase with Mockito {
 
 		val r: StudentRelationship = relationship
 
-		val notification = Notification.init(new ScheduledMeetingRecordInviteeNotification, agent, Seq(meeting), r)
+		val notification = Notification.init(new ScheduledMeetingRecordInviteeNotification, agent, Seq(meeting))
 		notificationDao.save(notification)
 
 		session.flush()

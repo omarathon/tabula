@@ -193,9 +193,9 @@ trait EditScheduledMeetingRecordNotification extends Notifies[ScheduledMeetingRe
 			if (result.isRescheduled) "rescheduled"
 			else "updated"
 
-		val inviteeNotification = Notification.init(new ScheduledMeetingRecordInviteeNotification(verb), user, meeting, meeting.relationship)
+		val inviteeNotification = Notification.init(new ScheduledMeetingRecordInviteeNotification(verb), user, meeting)
 		if(!meeting.universityIdInRelationship(user.getWarwickId)) {
-			val behalfNotification = Notification.init(new ScheduledMeetingRecordBehalfNotification(verb), user, meeting, meeting.relationship)
+			val behalfNotification = Notification.init(new ScheduledMeetingRecordBehalfNotification(verb), user, meeting)
 			Seq(inviteeNotification, behalfNotification)
 		} else {
 			Seq(inviteeNotification)
