@@ -27,11 +27,15 @@ trait FetchMarkerAllocations {
 		with AssessmentMembershipServiceComponent =>
 
 	def fetchAllocations(assignment: Assignment): MarkerAllocations = {
+
+		// If seat number is empty we use the uni ID instead. This will be larger than a real seat number and unique
+		def seatNumberOrUniId = (user: User) => assignment.getSeatNumber(user).getOrElse(user.getWarwickId.toInt)
+
 		val workflow = assignment.cm2MarkingWorkflow
 		val stagesByRole = workflow.markerStages.groupBy(_.roleName)
 		val users: Seq[User] = assessmentMembershipService.determineMembershipUsers(assignment)
 		val allStudents = if (assignment.showSeatNumbers) {
-			SortedSet(users: _*)(Ordering.by(assignment.getSeatNumber))
+			SortedSet(users: _*)(Ordering.by(seatNumberOrUniId))
 		} else {
 			SortedSet(users: _*)
 		}
@@ -42,7 +46,7 @@ trait FetchMarkerAllocations {
 
 		def toSortedSet(allocations: Allocations) = allocations.map { case (marker, students) =>
 			marker -> (if (assignment.showSeatNumbers) {
-				SortedSet(students.toSeq: _*)(Ordering.by(assignment.getSeatNumber))
+				SortedSet(students.toSeq: _*)(Ordering.by(seatNumberOrUniId))
 			} else {
 				SortedSet(students.toSeq: _*)
 			})
