@@ -878,7 +878,7 @@ class Assignment
 		case (user, Some(seat)) => (user.getUserId, seat)
 	}.toMap
 
-	def getSeatNumber(user: User): Option[Int] = seatNumbers.get(user.getUserId)
+	def getSeatNumber(user: User): Option[Int] = Option(user).flatMap(u => seatNumbers.get(u.getUserId))
 
 	def showSeatNumbers: Boolean = seatNumbers.nonEmpty
 }
