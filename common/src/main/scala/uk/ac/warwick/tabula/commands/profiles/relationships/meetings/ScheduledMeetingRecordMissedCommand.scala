@@ -72,7 +72,7 @@ trait ScheduledMeetingRecordMissedNotification
 
 	def emit(meeting: ScheduledMeetingRecord): Seq[ScheduledMeetingRecordMissedInviteeNotification] = {
 		val user = meeting.creator.asSsoUser
-		Seq(Notification.init(new ScheduledMeetingRecordMissedInviteeNotification(), user, meeting, meeting.relationship))
+		Seq(Notification.init(new ScheduledMeetingRecordMissedInviteeNotification(), user, meeting))
 	}
 
 	def transformResult(meeting: ScheduledMeetingRecord): Seq[ScheduledMeetingRecord] = Seq(meeting)

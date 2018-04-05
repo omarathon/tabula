@@ -8,7 +8,7 @@ import uk.ac.warwick.tabula.data.model._
 import uk.ac.warwick.userlookup.User
 
 abstract class MeetingRecordApprovalNotification(val verb: String)
-	extends NotificationWithTarget[MeetingRecord, StudentRelationship]
+	extends Notification[MeetingRecord, Unit]
 	with MeetingRecordNotificationTrait
 	with SingleItemNotification[MeetingRecord]
 	with RecipientCompletedActionRequiredNotification {
@@ -23,7 +23,7 @@ abstract class MeetingRecordApprovalNotification(val verb: String)
 	}
 
 	def meeting: MeetingRecord = item.entity
-	def relationship: StudentRelationship = target.entity
+	def relationship: StudentRelationship = meeting.relationship
 
 	def title: String = {
 		val name =

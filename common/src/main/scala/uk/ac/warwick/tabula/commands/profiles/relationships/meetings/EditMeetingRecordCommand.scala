@@ -64,7 +64,7 @@ trait EditMeetingRecordCommandNotifications extends Notifies[MeetingRecord, Meet
 	self: EditMeetingRecordCommandState with NotificationHandling =>
 
 	override def emit(meeting: MeetingRecord) = Seq(
-		Notification.init(new EditedMeetingRecordApprovalNotification, creator.asSsoUser, Seq(meeting), relationship)
+		Notification.init(new EditedMeetingRecordApprovalNotification, creator.asSsoUser, Seq(meeting))
 	)
 
 	override def transformResult(meetingRecord: MeetingRecord) = Seq(meetingRecord)

@@ -78,9 +78,9 @@ trait DeleteScheduledMeetingRecordNotification extends Notifies[AbstractMeetingR
 	def emit(meeting: AbstractMeetingRecord): Seq[ScheduledMeetingRecordNotification with SingleRecipientNotification with AddsIcalAttachmentToScheduledMeetingNotification] = {
 		meeting match {
 			case m: ScheduledMeetingRecord =>
-				val inviteeNotification = Notification.init(new ScheduledMeetingRecordInviteeNotification("deleted"), user.apparentUser, m, m.relationship)
+				val inviteeNotification = Notification.init(new ScheduledMeetingRecordInviteeNotification("deleted"), user.apparentUser, m)
 				if(!m.universityIdInRelationship(user.universityId)) {
-					val behalfNotification = Notification.init(new ScheduledMeetingRecordBehalfNotification("deleted"), user.apparentUser, m, m.relationship)
+					val behalfNotification = Notification.init(new ScheduledMeetingRecordBehalfNotification("deleted"), user.apparentUser, m)
 					Seq(inviteeNotification, behalfNotification)
 				} else {
 					Seq(inviteeNotification)
@@ -119,9 +119,9 @@ trait RestoreScheduledMeetingRecordNotification extends Notifies[AbstractMeeting
 	def emit(meeting: AbstractMeetingRecord): Seq[ScheduledMeetingRecordNotification with SingleRecipientNotification with AddsIcalAttachmentToScheduledMeetingNotification] = {
 		meeting match {
 			case m: ScheduledMeetingRecord =>
-				val inviteeNotification = Notification.init(new ScheduledMeetingRecordInviteeNotification("rescheduled"), user.apparentUser, m, m.relationship)
+				val inviteeNotification = Notification.init(new ScheduledMeetingRecordInviteeNotification("rescheduled"), user.apparentUser, m)
 				if(!m.universityIdInRelationship(user.universityId)) {
-					val behalfNotification = Notification.init(new ScheduledMeetingRecordBehalfNotification("rescheduled"), user.apparentUser, m, m.relationship)
+					val behalfNotification = Notification.init(new ScheduledMeetingRecordBehalfNotification("rescheduled"), user.apparentUser, m)
 					Seq(inviteeNotification, behalfNotification)
 				} else {
 					Seq(inviteeNotification)

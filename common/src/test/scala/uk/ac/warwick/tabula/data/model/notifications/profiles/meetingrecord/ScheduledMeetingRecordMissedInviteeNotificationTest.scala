@@ -21,7 +21,7 @@ class ScheduledMeetingRecordMissedInviteeNotificationTest extends TestBase with 
 		scheduledMeeting.meetingDate = DateTime.now
 		scheduledMeeting.format = MeetingFormat.FaceToFace
 
-		val notification = Notification.init(new ScheduledMeetingRecordMissedInviteeNotification(), currentUser.apparentUser, scheduledMeeting, scheduledMeeting.relationship)
+		val notification = Notification.init(new ScheduledMeetingRecordMissedInviteeNotification(), currentUser.apparentUser, scheduledMeeting)
 		notification.recipient.getUserId should be (student.userId)
 
 		// if the student creates the meeting instead, recipient should be staff
@@ -50,7 +50,7 @@ class ScheduledMeetingRecordMissedInviteeNotificationTest extends TestBase with 
 	@Test def titleStudent() { new TitleFixture {
 		val meeting = new ScheduledMeetingRecord(agent, relationship)
 
-		val notification: ScheduledMeetingRecordMissedInviteeNotification = Notification.init(new ScheduledMeetingRecordMissedInviteeNotification, agent.asSsoUser, meeting, relationship)
+		val notification: ScheduledMeetingRecordMissedInviteeNotification = Notification.init(new ScheduledMeetingRecordMissedInviteeNotification, agent.asSsoUser, meeting)
 		notification.title should be ("Scheduled personal tutor meeting with Tutor Name did not take place")
 		notification.recipient.getUserId should be (student.userId)
 	}}
@@ -58,7 +58,7 @@ class ScheduledMeetingRecordMissedInviteeNotificationTest extends TestBase with 
 	@Test def titleTutor() { new TitleFixture {
 		val meeting = new ScheduledMeetingRecord(student, relationship)
 
-		val notification: ScheduledMeetingRecordMissedInviteeNotification = Notification.init(new ScheduledMeetingRecordMissedInviteeNotification, student.asSsoUser, meeting, relationship)
+		val notification: ScheduledMeetingRecordMissedInviteeNotification = Notification.init(new ScheduledMeetingRecordMissedInviteeNotification, student.asSsoUser, meeting)
 		notification.title should be ("Scheduled personal tutor meeting with Student Name did not take place")
 		notification.recipient.getUserId should be (agent.userId)
 	}}
