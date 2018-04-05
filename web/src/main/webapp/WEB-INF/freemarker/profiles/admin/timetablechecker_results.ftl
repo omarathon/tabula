@@ -1,5 +1,5 @@
 <h3>Syllabus+ student timetable feed</h3>
-<a href="https://timetablefeed.warwick.ac.uk/xml1617/?StudentXML&p0=${command.warwickUniId}">
+<a href="https://timetablefeed.warwick.ac.uk/xml${academicYear}/?StudentXML&p0=${command.warwickUniId}">
 	https://timetablefeed.warwick.ac.uk/xml${academicYear}/?StudentXML&p0=${command.warwickUniId}
 </a>
 
