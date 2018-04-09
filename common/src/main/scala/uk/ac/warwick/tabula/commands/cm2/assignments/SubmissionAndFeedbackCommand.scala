@@ -53,6 +53,7 @@ trait SubmissionAndFeedbackRequest extends SubmissionAndFeedbackState with Selec
 	var submissionStatesFilters: JList[SubmissionAndFeedbackInfoFilter] = JArrayList()
 	var plagiarismFilters: JList[SubmissionAndFeedbackInfoFilter] = JArrayList()
 	var statusesFilters: JList[SubmissionAndFeedbackInfoFilter] = JArrayList()
+	var extensionFilters: JList[SubmissionAndFeedbackInfoFilter] = JArrayList()
 	var overlapFilter: OverlapPlagiarismFilter = new OverlapPlagiarismFilter
 }
 
@@ -259,7 +260,9 @@ abstract class SubmissionAndFeedbackCommandInternal(val assignment: Assignment)
 					}
 					val itemExistsInSubmissionStatesFilters = submissionStatesFilters.asScala.isEmpty || submissionStatesFilters.asScala.exists(_.predicate(assignmentSubmissionStudentInfo))
 					val itemExistsInStatusesFilters = statusesFilters.asScala.isEmpty || statusesFilters.asScala.exists(_.predicate(assignmentSubmissionStudentInfo))
-					itemExistsInPlagiarismFilters && itemExistsInSubmissionStatesFilters && itemExistsInStatusesFilters
+					val itemExistsInExtensionFilters = extensionFilters.asScala.isEmpty || extensionFilters.asScala.exists(_.predicate(assignmentSubmissionStudentInfo))
+
+					itemExistsInPlagiarismFilters && itemExistsInSubmissionStatesFilters && itemExistsInStatusesFilters && itemExistsInExtensionFilters
 				}
 			}
 			val studentsFiltered = if (students.isEmpty) filteredStudents else filteredStudents.filter(studentInfo => students.contains(studentInfo.user.getUserId))
