@@ -98,7 +98,7 @@ class ListMarkerFeedbackCommandInternal(val assignment:Assignment, val marker:Us
 						case (stage, values) =>
 							stage -> FeedbackByActionability(
 								readyToMark = values.filter(_.markerFeedback.feedback.outstandingStages.contains(stage)),
-								notReadyToMark = values.filter(emf => !emf.markerFeedback.hasContent && !emf.markerFeedback.feedback.outstandingStages.contains(stage)),
+								notReadyToMark = values.filter(emf => !emf.markerFeedback.hasContent && emf.markerFeedback.feedback.currentStageIndex < stage.order),
 								marked = values.filter(emf => emf.markerFeedback.hasContent && !emf.markerFeedback.feedback.outstandingStages.contains(stage))
 							)
 					}
