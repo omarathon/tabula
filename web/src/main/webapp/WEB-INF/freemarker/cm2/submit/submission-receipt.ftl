@@ -103,16 +103,16 @@
 		</#if>
 
 		<#if assignment.displayPlagiarismNotice>
-			<p class="plagiarism-field">
-				Work submitted to the University of Warwick for official
-				assessment must be all your own work and any parts that
-				are copied or used from other people must be appropriately
-				acknowledged. Failure to properly acknowledge any copied
-				work is plagiarism and may result in a mark of zero.
-			</p>
 			<p>
-				<input type="checkbox" checked="checked" disabled="disabled" /> I confirm that this assignment is all my own work
+				In submitting my work I confirm that:
 			</p>
+
+			<ol>
+				<li>I have read the guidance on plagiarism/cheating provided in the handbook and understand the University regulations in relation to plagiarism/cheating. I am aware of the potential consequences of committing plagiarism/cheating. I declare that the work is all my own, except where I have stated otherwise.</li>
+				<li>No substantial part(s) of the work submitted here has also been submitted by me in other assessments for accredited courses of study (other than in the case of a resubmission of a piece of work), and I acknowledge that if this has been done an appropriate reduction in the mark I might otherwise have received will be made.</li>
+				<li>I understand that should this piece of work raise concerns requiring investigation in relation to points 1) and/or 2) above, it is possible that other work I have submitted for assessment will be checked, even if the marking process has been completed.</li>
+				<li>Where a proof reader, paid or unpaid was used, I confirm that the proof reader was made aware of and has complied with the <a target='_blank' href='https://warwick.ac.uk/proofreadingpolicy'>University’s proof reading policy</a>.</li>
+			</ol>
 		</#if>
 	</div>
 </body>
