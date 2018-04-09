@@ -1218,7 +1218,7 @@
 				</#list>
 				</ul>
 
-				<p style="margin-top: 1.5rem; font-weight: bold;">
+				<p style="margin-top: 1.5rem; margin-bottom: 0; font-weight: bold;">
 					<a class="long-running" href="${downloadUrl}"><i class="fa fa-arrow-circle-o-down fa-fw"></i>Download all as zip</a>
 				</p>
 			</#local>
