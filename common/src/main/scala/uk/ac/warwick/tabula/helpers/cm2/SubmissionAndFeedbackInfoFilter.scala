@@ -200,7 +200,7 @@ object SubmissionAndFeedbackInfoFilters {
 		case object NoExtension extends SubmissionAndFeedbackInfoFilter {
 			override def description: String = "No extension"
 
-			override def predicate(item: AssignmentSubmissionStudentInfo): Boolean = item.coursework.enhancedExtension.isEmpty
+			override def predicate(item: AssignmentSubmissionStudentInfo): Boolean = !item.coursework.enhancedExtension.exists(_.extension.expiryDate.exists(item.assignment.closeDate.isBefore))
 
 			def apply(assignment: Assignment): Boolean = assignment.extensionsPossible
 		}
@@ -216,7 +216,7 @@ object SubmissionAndFeedbackInfoFilters {
 		case object ExtensionApproved extends SubmissionAndFeedbackInfoFilter {
 			override def description: String = "Extension approved"
 
-			override def predicate(item: AssignmentSubmissionStudentInfo): Boolean = item.coursework.enhancedExtension.exists(_.extension.approved)
+			override def predicate(item: AssignmentSubmissionStudentInfo): Boolean = item.coursework.enhancedExtension.exists(ee => ee.extension.approved && ee.extension.expiryDate.exists(item.assignment.closeDate.isBefore))
 
 			def apply(assignment: Assignment): Boolean = assignment.extensionsPossible
 		}
