@@ -1199,27 +1199,45 @@
 	</#if>
 </#compress></#macro>
 
+<#macro submission_attachments_link submission link_single="Download submission" link_multiple="Download submission">
+	<#local attachments = submission.allAttachments />
+
+	<#if attachments?size gt 0>
+		<#if attachments?size == 1>
+			<#local filename = "${attachments[0].name}">
+			<#local downloadUrl><@routes.cm2.downloadSubmission submission filename/>?single=true</#local>
+			<a class="long-running" href="${downloadUrl}">${link_single}</a>
+		<#else>
+			<#local filename = "submission-${submission.studentIdentifier}.zip">
+			<#local downloadUrl><@routes.cm2.downloadSubmission submission filename/></#local>
+
+			<#local popoverContent>
+				<ul class="list-unstyled">
+				<#list attachments as attachment>
+					<li><a href="<@routes.cm2.downloadSubmission submission attachment.name />">${attachment.name}</a></li>
+				</#list>
+				</ul>
+
+				<p style="margin-top: 1.5rem; font-weight: bold;">
+					<a class="long-running" href="${downloadUrl}"><i class="fa fa-arrow-circle-o-down fa-fw"></i>Download all as zip</a>
+				</p>
+			</#local>
+
+			<a href="#" class="use-popover" data-html="true" data-content="${popoverContent?html}">${link_multiple}</a>
+		</#if>
+	</#if>
+</#macro>
+
 <#macro submission_details submission=[]><@compress single_line=true>
 	<#if submission?has_content>
-		<#local attachments = submission.allAttachments />
-		<#local assignment = submission.assignment />
-		<#local module = assignment.module />
-
 		<#if submission.submittedDate??>
 			<span class="date use-tooltip" title="<@lateness submission />" data-container="body">
 				<@fmt.date date=submission.submittedDate seconds=true capitalise=true shortMonth=true />
 			</span>
 		</#if>
 
-		<#if attachments?size gt 0>
-			<#if attachments?size == 1>
-				<#local filename = "${attachments[0].name}">
-				<#local downloadUrl><@routes.cm2.downloadSubmission submission filename/>?single=true</#local>
-			<#else>
-				<#local filename = "submission-${submission.studentIdentifier}.zip">
-				<#local downloadUrl><@routes.cm2.downloadSubmission submission filename/></#local>
-			</#if>
-			&emsp;<a class="long-running" href="${downloadUrl}">Download submission</a>
+		<#if submission.allAttachments?size gt 0>
+			&emsp;<@submission_attachments_link submission />
 		</#if>
 	</#if>
 </@compress></#macro>
