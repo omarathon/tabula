@@ -88,19 +88,22 @@ class AddMarkerFeedbackCommand(assignment: Assignment, marker: User, val submitt
 
 
 	override def validateExisting(item: FeedbackItem, errors: Errors) {
-
 		val usercode = item.student.map(_.getUserId)
-		val feedback = usercode.flatMap(u => assignment.allFeedback.find(_.usercode == u))
-		val allMarkerFeedback = feedback.flatMap { feedback =>
-			val outstandingStages = feedback.outstandingStages.asScala
-			feedback.allMarkerFeedback.find(mf => mf.marker == marker && (outstandingStages.contains(mf.stage) || mf.feedback.isMarkingCompleted))
-		} match {
-			case Some(markerFeedback) if markerFeedback.hasFeedback =>
-				// set warning flag for existing feedback and check if any existing files will be overwritten
-				item.submissionExists = true
-				checkForDuplicateFiles(item, markerFeedback)
-			case Some(markerFeedback) =>
-			case _ => errors.reject("markingWorkflow.feedback.finalised", "No more feedback can be added")
+		val feedback = usercode.flatMap(assignment.findFeedback)
+
+		val markerFeedback = feedback.toSeq.flatMap(_.allMarkerFeedback)
+		val nonFinalFeedback = markerFeedback.filterNot(_.finalised)
+
+		if (nonFinalFeedback.filter(_.marker == marker).exists(_.hasFeedback)) {
+			// There is a non-final feedback item, but it's already got something in it.  Warn
+			item.submissionExists = true
+			checkForDuplicateFiles(item, nonFinalFeedback.filter(_.marker == marker).find(_.hasFeedback).head)
+		} else if (markerFeedback.forall(_.marker != marker)) {
+			// This marker is not a marker for this student.  Validation error
+			errors.reject("markingWorkflow.feedback.otherMarker", Array(usercode.getOrElse("this student")), "You are not assigned to provide feedback for {0}")
+		} else if (nonFinalFeedback.isEmpty) {
+			// There is no non-final feedback item for anyone.  The feedback is finalised.  Validation error
+			errors.reject("markingWorkflow.feedback.finalised", Array(usercode.getOrElse("this student")), "Your feedback for {0} is already finalised")
 		}
 	}
 
@@ -112,23 +115,15 @@ class AddMarkerFeedbackCommand(assignment: Assignment, marker: User, val submitt
 
 	def describe(d: Description) {
 		d.assignment(assignment)
-			.studentIds(items.asScala.map {
-				_.uniNumber
-			})
+			.studentIds(items.asScala.map(_.uniNumber))
 			.studentUsercodes(items.asScala.flatMap(_.student.map(_.getUserId)))
 	}
 
 	override def describeResult(d: Description, feedbacks: List[MarkerFeedback]): Unit = {
 		d.assignment(assignment)
-			.studentIds(items.asScala.map {
-				_.uniNumber
-			})
+			.studentIds(items.asScala.map(_.uniNumber))
 			.studentUsercodes(items.asScala.flatMap(_.student.map(_.getUserId)))
-			.fileAttachments(feedbacks.flatMap {
-				_.attachments.asScala
-			})
-			.properties("feedback" -> feedbacks.map {
-				_.id
-			})
+			.fileAttachments(feedbacks.flatMap(_.attachments.asScala))
+			.properties("feedback" -> feedbacks.map(_.id))
 	}
 }

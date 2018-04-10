@@ -140,6 +140,8 @@ class MarkerFeedback extends GeneratedId with FeedbackAttachments with ToEntityR
 
 	def readyForNextStage: Boolean = hasContent && feedback.outstandingStages.contains(stage)
 
+	def finalised: Boolean = !feedback.outstandingStages.contains(stage)
+
 	override def toEntityReference: MarkerFeedbackEntityReference = new MarkerFeedbackEntityReference().put(this)
 }
 
