@@ -35,11 +35,9 @@ class AddMarkerFeedbackCommand(assignment: Assignment, marker: User, val submitt
 	def processStudents() {
 		//bring all feedbacks belonging to the current marker along with  completed marking. Completed marking records are displayed to the user at front end if marker did upload again
 		val allMarkerFeedbacks = assignment.allFeedback.flatMap { feedback =>
-			val outstandingStages = feedback.outstandingStages.asScala
-			val mFeedback = feedback.allMarkerFeedback.filter { mFeedback =>
-				mFeedback.marker == marker && (outstandingStages.contains(mFeedback.stage) || mFeedback.feedback.isMarkingCompleted)
+			 feedback.allMarkerFeedback.filter { mFeedback =>
+				mFeedback.marker == marker && (mFeedback.outstanding || mFeedback.feedback.isMarkingCompleted)
 			}
-			mFeedback
 		}
 		val allMarkedFeedbackUserCodes = allMarkerFeedbacks.filter(_.feedback.isMarkingCompleted).map(_.student.getUserId)
 
@@ -63,7 +61,7 @@ class AddMarkerFeedbackCommand(assignment: Assignment, marker: User, val submitt
 	private def saveMarkerFeedback(student: User, file: UploadedFile) = {
 		// find the parent feedback
 		val parentFeedback = assignment.allFeedback.find(_.usercode == student.getUserId).getOrElse(throw new IllegalArgumentException)
-		val markerFeedback = parentFeedback.allMarkerFeedback.find(mf => mf.marker == marker && parentFeedback.outstandingStages.contains(mf.stage)).getOrElse(throw new IllegalArgumentException)
+		val markerFeedback = parentFeedback.allMarkerFeedback.find(mf => mf.marker == marker && mf.outstanding).getOrElse(throw new IllegalArgumentException)
 
 
 		for (attachment <- file.attached.asScala) {
