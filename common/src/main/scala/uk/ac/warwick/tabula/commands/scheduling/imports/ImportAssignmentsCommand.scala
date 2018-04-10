@@ -262,33 +262,35 @@ trait ImportAssignmentsCommand extends CommandInternal[Unit] with RequiresPermis
 	}
 
 	def removeBlankFeedbackForDeregisteredStudents(): Seq[Feedback] =
-		modifiedAssignments.toSeq.flatMap { assignment =>
-			transactional() {
-				// Find students who are assigned to a marker but are not a member of the assignment
-				val memberUsercodes = assessmentMembershipService.determineMembershipUsers(assignment).map(_.getUserId)
-				val removedMembers = assignment.allFeedback.map(_.usercode).toSet.diff(memberUsercodes.toSet)
+		modifiedAssignments.toSeq
+			.filter(_.cm2Assignment)
+			.flatMap { assignment =>
+				transactional() {
+					// Find students who are assigned to a marker but are not a member of the assignment
+					val memberUsercodes = assessmentMembershipService.determineMembershipUsers(assignment).map(_.getUserId)
+					val removedMembers = assignment.allFeedback.map(_.usercode).toSet.diff(memberUsercodes.toSet)
 
-				val removedFeedback = assignment.allFeedback
-					.filter(f => removedMembers.contains(f.usercode))
-					.collect {
-						case feedback if feedback.hasBeenModified || assignment.findSubmission(feedback.usercode).exists(_.submitted) =>
-							logger.debug(s"${feedback.usercode} is no longer a member of assignment ${assignment.id} but has submission or feedback")
+					val removedFeedback = assignment.allFeedback
+						.filter(f => removedMembers.contains(f.usercode))
+						.collect {
+							case feedback if feedback.hasBeenModified || assignment.findSubmission(feedback.usercode).exists(_.submitted) =>
+								logger.debug(s"${feedback.usercode} is no longer a member of assignment ${assignment.id} but has submission or feedback")
 
-							null
-						case feedback =>
-							logger.info(s"Removing feedback for ${feedback.usercode} from assignment ${assignment.id}")
+								null
+							case feedback =>
+								logger.info(s"Removing feedback for ${feedback.usercode} from assignment ${assignment.id}")
 
-							assignment.feedbacks.remove(feedback)
-							feedback.assignment = null
-							session.delete(feedback)
+								assignment.feedbacks.remove(feedback)
+								feedback.assignment = null
+								session.delete(feedback)
 
-							feedback
-					}
-					.filter(_ != null)
+								feedback
+						}
+						.filter(_ != null)
 
-				removedFeedback
+					removedFeedback
+				}
 			}
-		}
 }
 
 
