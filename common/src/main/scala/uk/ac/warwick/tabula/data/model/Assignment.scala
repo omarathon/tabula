@@ -401,7 +401,7 @@ class Assignment
 	def isWithinExtension(user: User, time: DateTime): Boolean = isWithinExtension(user.getUserId, time)
 
 	def isWithinExtension(usercode: String, time: DateTime): Boolean =
-		extensions.exists(e => e.isForUser(usercode) && e.approved && e.relevant)
+		extensions.exists(e => e.isForUser(usercode) && e.approved && e.expiryDate.exists(_.isAfter(time)))
 
 	/**
 	 * True if the specified user has been granted an extension and that extension has not expired now
