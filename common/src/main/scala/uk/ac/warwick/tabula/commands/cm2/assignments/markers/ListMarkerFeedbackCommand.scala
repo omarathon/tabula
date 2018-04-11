@@ -42,11 +42,20 @@ object ListMarkerFeedbackCommand {
 
 	case class EnhancedFeedbackForOrderAndStage(
 		hasFeedback: Boolean,
-		enhancedFeedbackByStage: Map[MarkingWorkflowStage, FeedbackByActionability]
+		enhancedFeedbackByStage: Map[MarkingWorkflowStage, Seq[EnhancedMarkerFeedback]]
 	) {
+		lazy val feedbackByActionability: FeedbackByActionability = {
+			enhancedFeedbackByStage.map{ case(stage, values) =>
+				FeedbackByActionability(
+					readyToMark = values.filter(_.markerFeedback.feedback.outstandingStages.contains(stage)),
+					notReadyToMark = values.filter(emf => !emf.markerFeedback.hasContent && emf.markerFeedback.feedback.currentStageIndex < stage.order),
+					marked = values.filter(emf => emf.markerFeedback.hasContent && !emf.markerFeedback.feedback.outstandingStages.contains(stage))
+				)
+			}.foldLeft(FeedbackByActionability(Nil, Nil, Nil))((a, b) => a.merge(b))
+		}
+
 		def headerStage: MarkingWorkflowStage = enhancedFeedbackByStage.keys.head
-		def numPreviousMarkers(stage: MarkingWorkflowStage): Int = enhancedFeedbackByStage(stage)
-			.all
+		def numPreviousMarkers: Int = enhancedFeedbackByStage(headerStage)
 			.map(_.previousMarkerFeedback.size)
 			.reduceOption(_ max _)
 			.getOrElse(0)
@@ -58,6 +67,11 @@ object ListMarkerFeedbackCommand {
 		marked: Seq[EnhancedMarkerFeedback]
 	) {
 		def all: Seq[EnhancedMarkerFeedback] = readyToMark ++ notReadyToMark ++ marked
+		def merge(other: FeedbackByActionability): FeedbackByActionability = FeedbackByActionability(
+			readyToMark = readyToMark ++ other.readyToMark,
+			notReadyToMark = notReadyToMark ++ other.notReadyToMark,
+			marked = marked ++ other.marked
+		)
 	}
 
 	def apply(assignment:Assignment, marker:User, submitter: CurrentUser) = new ListMarkerFeedbackCommandInternal(assignment, marker, submitter)
@@ -91,24 +105,13 @@ class ListMarkerFeedbackCommandInternal(val assignment:Assignment, val marker:Us
 		// squash stages with the same order
 		val stages = filteredEnhancedFeedbackByStage
 			.groupBy { case (stage, _) => stage.order }
-			.map { case(_, map) =>
-				EnhancedFeedbackForOrderAndStage(
-					map.values.flatten.nonEmpty,
-					map.map {
-						case (stage, values) =>
-							stage -> FeedbackByActionability(
-								readyToMark = values.filter(_.markerFeedback.feedback.outstandingStages.contains(stage)),
-								notReadyToMark = values.filter(emf => !emf.markerFeedback.hasContent && emf.markerFeedback.feedback.currentStageIndex < stage.order),
-								marked = values.filter(emf => emf.markerFeedback.hasContent && !emf.markerFeedback.feedback.outstandingStages.contains(stage))
-							)
-					}
-				)
-			}
+			.map { case(_, map) => EnhancedFeedbackForOrderAndStage(map.values.flatten.nonEmpty, map) }
 			.toSeq
 			.sortBy(_.headerStage.order)
 
-		if (activeStage == null) {
-			activeStage = stages.headOption.map(_.headerStage).orNull
+		if (activeWorkflowPosition == null) {
+			val order: Option[JInteger] = stages.headOption.map(_.headerStage.order)
+			activeWorkflowPosition = order.orNull
 		}
 
 		stages
@@ -135,7 +138,7 @@ trait ListMarkerFeedbackState extends CanProxy {
 	var submissionStatesFilters: JList[SubmissionAndFeedbackInfoFilter] = JArrayList()
 	var markerStateFilters: JList[SubmissionAndFeedbackInfoMarkerFilter] = JArrayList()
 	var overlapFilter: OverlapPlagiarismFilter = new OverlapPlagiarismFilter
-	var activeStage: MarkingWorkflowStage = _
+	var activeWorkflowPosition: JInteger = _
 }
 
 trait CanProxy {
