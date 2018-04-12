@@ -178,22 +178,7 @@
 
 						<td class="files">
 							<#if submission??>
-								<#local attachments=submission.allAttachments />
-								<#if attachments?size gt 0>
-									<#if attachments?size == 1>
-										<#local filename = "${attachments[0].name}">
-										<#local downloadUrl><@routes.cm2.downloadSubmission submission filename/>?single=true</#local>
-									<#else>
-										<#local filename = "submission-${submission.studentIdentifier}.zip">
-										<#local downloadUrl><@routes.cm2.downloadSubmission submission filename/></#local>
-									</#if>
-									<a class="long-running" href="${downloadUrl}">
-									${attachments?size}
-										<#if attachments?size == 1> file
-										<#else> files
-										</#if>
-									</a>
-								</#if>
+								<@components.submission_attachments_link submission "1 file" "${submission.allAttachments?size} files" />
 							</#if>
 						</td>
 						<#if submission?? && submission.submittedDate??>

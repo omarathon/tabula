@@ -1,8 +1,8 @@
 package uk.ac.warwick.tabula.notifications
 
 import java.util.concurrent.{ExecutionException, TimeUnit, TimeoutException}
-import javax.mail.internet.MimeMessage
 
+import javax.mail.internet.MimeMessage
 import org.hibernate.ObjectNotFoundException
 import org.joda.time.DateTime
 import org.springframework.stereotype.Component
@@ -14,6 +14,7 @@ import uk.ac.warwick.tabula.helpers.{Logging, UnicodeEmails}
 import uk.ac.warwick.tabula.services.{NotificationService, RecipientNotificationListener}
 import uk.ac.warwick.tabula.web.views.AutowiredTextRendererComponent
 import uk.ac.warwick.tabula.{CurrentUser, RequestInfo}
+import uk.ac.warwick.userlookup.User
 import uk.ac.warwick.util.mail.WarwickMailSender
 
 @Component
@@ -31,10 +32,14 @@ class EmailNotificationListener extends RecipientNotificationListener with Unico
 	val mailFooter = "\n\nThank you,\nTabula"
 	val replyWarning = "\n\nThis email was sent from an automated system and replies to it will not reach a real person."
 
-	def link(n: Notification[_,_]): String = if(n.isInstanceOf[ActionRequiredNotification]) {
-			s"\n\nYou need to ${n.urlTitle}. Please visit $topLevelUrl${n.url}"
-	} else {
-			s"\n\nTo ${n.urlTitle}, please visit $topLevelUrl${n.url}"
+	def link(n: Notification[_, _], recipient: User): String = {
+		val url = topLevelUrl + n.urlFor(recipient)
+
+		if (n.isInstanceOf[ActionRequiredNotification]) {
+			s"\n\nYou need to ${n.urlTitle}. Please visit $url"
+		} else {
+			s"\n\nTo ${n.urlTitle}, please visit $url"
+		}
 	}
 
 	// add an isEmail property for the model for emails
@@ -69,7 +74,7 @@ class EmailNotificationListener extends RecipientNotificationListener with Unico
 				val body = new StringBuilder("")
 				body.append(mailHeader.format(recipient.getFirstName))
 				body.append(content)
-				body.append(link(notification))
+				body.append(link(notification, recipient))
 				body.append(mailFooter)
 				body.append(replyWarning)
 				message.setText(body.toString())

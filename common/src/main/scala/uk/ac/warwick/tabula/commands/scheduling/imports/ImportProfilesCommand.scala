@@ -60,6 +60,15 @@ class ImportProfilesCommand extends CommandWithoutTransaction[Unit] with Logging
 		logger.info("Importing member details")
 		val importCommandFactory = new ImportCommandFactory
 
+		// only import notes for engineering (query shouldn't bring back any notes other than engineering ones but no point in running this more than once
+		if (department.code == "es") {
+			benchmarkTask("Update student course detail notes") {
+				transactional() {
+					updateStudentCourseDetailsNotes()
+				}
+			}
+		}
+
 		logSize(profileImporter.membershipInfoByDepartment(department)).grouped(BatchSize).zipWithIndex.toSeq.foreach { case (membershipInfos, batchNumber) =>
 			benchmarkTask(s"Import member details for department=${department.code}, batch=#${batchNumber + 1}") {
 				val users: Map[UniversityId, User] =
@@ -129,12 +138,6 @@ class ImportProfilesCommand extends CommandWithoutTransaction[Unit] with Logging
 				benchmarkTask("Update accredited prior learning") {
 					transactional() {
 						updateAccreditedPriorLearning(membershipInfos, users)
-					}
-				}
-
-				benchmarkTask("Update student course detail notes") {
-					transactional() {
-						updateStudentCourseDetailsNotes()
 					}
 				}
 

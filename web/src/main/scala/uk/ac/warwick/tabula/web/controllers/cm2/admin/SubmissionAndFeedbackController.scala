@@ -46,6 +46,10 @@ class SubmissionAndFeedbackController extends CourseworkController with Autowiri
 	def allPlagiarismFilters(@PathVariable assignment: Assignment): Seq[SubmissionAndFeedbackInfoFilter] =
 		SubmissionAndFeedbackInfoFilters.PlagiarismStatuses.allPlagiarismStatuses.filter(_.apply(assignment))
 
+	@ModelAttribute("allExtensionFilters")
+	def allExtensionFilters(@PathVariable assignment: Assignment): Seq[SubmissionAndFeedbackInfoFilter] =
+		SubmissionAndFeedbackInfoFilters.ExtensionStatuses.allExtensionStatuses.filter(_.apply(assignment))
+
 	@ModelAttribute("allStatusFilters")
 	def allStatusFilters(@PathVariable assignment: Assignment): Seq[SubmissionAndFeedbackInfoFilter] =
 		SubmissionAndFeedbackInfoFilters.Statuses.allStatuses.filter(_.apply(assignment))

@@ -1,6 +1,5 @@
 package uk.ac.warwick.tabula.commands.home
 
-import org.mockito.Mockito.{times, verify}
 import uk.ac.warwick.tabula.data.model.HeronWarningNotification
 import uk.ac.warwick.tabula.services.{NotificationService, NotificationServiceComponent}
 import uk.ac.warwick.tabula.{Fixtures, Mockito, TestBase}
@@ -14,8 +13,8 @@ class DismissNotificationCommandTest extends TestBase with Mockito {
 	val n2: HeronWarningNotification = Fixtures.notification(recipient, recipient)
 	val notifications = Seq(n1, n2)
 	val ns: NotificationService = smartMock[NotificationService]
-	ns.toActivity(n1) returns None
-	ns.toActivity(n2) returns None
+	ns.toActivity(recipient)(n1) returns None
+	ns.toActivity(recipient)(n2) returns None
 
 	trait CommandTestSupport extends NotificationServiceComponent {
 		def notificationService: NotificationService = ns
