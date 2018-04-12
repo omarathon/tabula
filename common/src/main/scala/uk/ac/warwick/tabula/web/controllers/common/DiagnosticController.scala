@@ -44,7 +44,8 @@ class DiagnosticController extends Logging {
 	}
 
 	@RequestMapping(method = Array(RequestMethod.POST), value = Array("/upload"))
-	def testUpload(@RequestParam("file") file: MultipartFile): Unit = {
+	def testUpload(@RequestParam("file") file: MultipartFile, out: Writer): Unit = {
 		logger.info(s"Uploaded: ${file.getOriginalFilename} - ${file.getSize}")
+		out.write(s"Uploaded: ${file.getOriginalFilename} - ${file.getSize}")
 	}
 }
