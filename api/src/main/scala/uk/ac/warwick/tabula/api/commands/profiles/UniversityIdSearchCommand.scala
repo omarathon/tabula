@@ -33,17 +33,22 @@ abstract class UniversityIdSearchCommandInternal extends CommandInternal[Seq[Str
 		}
 
 		val restrictions = buildRestrictions(AcademicYear.now())
-		val departments = Option(department) match {
-			case Some(d) => Seq(d)
-			case _ => moduleAndDepartmentService.allDepartments
+
+		Option(department) match {
+			case Some(d) =>
+				Seq(d).flatMap(dept =>
+					profileService.findAllUniversityIdsByRestrictionsInAffiliatedDepartments(
+						dept,
+						restrictions,
+						buildOrders()
+					)
+				).distinct
+			case _ =>
+				profileService.findAllUniversityIdsByRestrictions(
+					restrictions,
+					buildOrders()
+				).distinct
 		}
-		departments.flatMap(dept =>
-			profileService.findAllUniversityIdsByRestrictionsInAffiliatedDepartments(
-				dept,
-				restrictions,
-				buildOrders()
-			)
-		).distinct
 	}
 
 }
