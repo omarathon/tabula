@@ -41,7 +41,8 @@ abstract class UniversityIdSearchCommandInternal extends CommandInternal[Seq[Str
 						dept,
 						restrictions,
 						buildOrders()
-				)).distinct
+					)
+				).distinct
 			case _ =>
 				profileService.findAllUniversityIdsByRestrictions(
 					restrictions,
