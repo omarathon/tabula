@@ -91,6 +91,10 @@ subprojects {
 
             // Same configuration as the WAR classloader
             resources.srcDirs += 'src/main/webapp'
+
+            // Make compileOnly dependencies available to tests
+            compileClasspath += configurations.compileOnly
+            runtimeClasspath += configurations.compileOnly
         }
     }
 
