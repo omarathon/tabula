@@ -78,11 +78,11 @@ dependencies {
     // Upgrade transitive jackson dependencies
     compile "com.fasterxml.jackson.core:jackson-core:${jacksonVersion}"
     compile "com.fasterxml.jackson.core:jackson-databind:${jacksonVersion}"
-    compile "com.fasterxml.jackson.core:jackson-annotations:${jacksonVersion}"
+    annotationProcessor "com.fasterxml.jackson.core:jackson-annotations:${jacksonVersion}"
     compile "com.fasterxml.jackson.dataformat:jackson-dataformat-cbor:${jacksonVersion}"
     compile "com.fasterxml.jackson.dataformat:jackson-dataformat-smile:${jacksonVersion}"
     compile "com.fasterxml.jackson.dataformat:jackson-dataformat-yaml:${jacksonVersion}"
-    compile "com.fasterxml.jackson.module:jackson-module-jaxb-annotations:${jacksonVersion}"
+    annotationProcessor "com.fasterxml.jackson.module:jackson-module-jaxb-annotations:${jacksonVersion}"
 
     compile 'javax.mail:mail:1.4.5'
 

@@ -45,10 +45,8 @@ allprojects {
 
 // Configuration that applies to all subprojects (including common, so nothing war-specific here)
 subprojects {
-    apply plugin: 'java'
     apply plugin: 'scala'
     apply plugin: "org.zeroturnaround.gradle.jrebel"
-    apply plugin: 'war'
 
     // TAB-5441 - additional jrebel config to include language specific build dirs
     rebel {
@@ -134,26 +132,26 @@ subprojects {
         compile "com.jsuereth:scala-arm_${scalaMajorVersion}:1.4"
 
         // 'providedCompile' deps are not included in WAR and also makes it compile within IDEA internally.
-        providedCompile 'javax.servlet:javax.servlet-api:3.1.0'
+        compileOnly 'javax.servlet:javax.servlet-api:3.1.0'
         compile 'javax.servlet.jsp:javax.servlet.jsp-api:2.3.1'
         compile 'javax.servlet:jstl:1.2'
 
         /* LOGGING */
-        providedCompile 'uk.ac.warwick:warwick-logging:1.0:all'
+        compileOnly 'uk.ac.warwick:warwick-logging:1.0:all'
 
         // Provided by the above
-        providedCompile 'ch.qos.logback:logback-classic:1.2.3'
-        providedCompile ('net.logstash.logback:logstash-logback-encoder:4.11') {
+        compileOnly 'ch.qos.logback:logback-classic:1.2.3'
+        compileOnly('net.logstash.logback:logstash-logback-encoder:4.11') {
             exclude group: 'com.fasterxml.jackson.core'
         }
-        providedCompile 'org.slf4j:slf4j-api:1.7.25'
+        compileOnly 'org.slf4j:slf4j-api:1.7.25'
 
         compile 'org.slf4j:log4j-over-slf4j:1.7.25'
         compile 'org.slf4j:jcl-over-slf4j:1.7.25'
         compile 'org.slf4j:jul-to-slf4j:1.7.25'
         // Not actually provided -  it's a ruse to exclude commons-logging from the WAR.
         // The API at runtime is provided by jcl-over-slf4j.
-        providedCompile 'commons-logging:commons-logging:1.2'
+        compileOnly 'commons-logging:commons-logging:1.2'
         /* ******* */
 
         testCompile 'junit:junit:4.12'
@@ -171,9 +169,13 @@ subprojects {
     }
 
     test {
+        def forks = Runtime.runtime.availableProcessors() / 2
+        doFirst {
+            println "Executing tests with ${forks} forks"
+        }
         ignoreFailures = true // So we can quarantine in Bamboo
         maxHeapSize = '2048m'
-        maxParallelForks = Runtime.runtime.availableProcessors() / 2
+        maxParallelForks = forks
         systemProperties = [TestProcessId: "F1"] // FIXME
         testLogging {
             // set options for log level LIFECYCLE
@@ -190,13 +192,15 @@ subprojects {
         }
     }
 
-    war.dependsOn(generateRebel)
+    tasks.withType(War) {
+        dependsOn(generateRebel)
+    }
 }
 
 // upgrade to a different version of Gradle by changing this
 // value then running `./gradlew wrapper`. Next time gradlew
 // is run it will fetch and use that version.
 task wrapper(type: Wrapper) {
-    gradleVersion = '4.5'
+    gradleVersion = '4.6'
     distributionType = 'ALL'
 }
