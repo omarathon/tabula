@@ -152,7 +152,7 @@
 
 			$('.add-mark-row').on('click', function(e){
 				e.preventDefault();
-				var numExistingRows = $('.marks-web-form div.row').size();
+				var numExistingRows = $('.marks-web-form div.row').length;
 				var $newRow = $rowTemplate.clone();
 				$newRow.find('input,textarea').each(function(i, field){
 					var newName = 'marks['+ numExistingRows +'].' + $(field).attr('name');

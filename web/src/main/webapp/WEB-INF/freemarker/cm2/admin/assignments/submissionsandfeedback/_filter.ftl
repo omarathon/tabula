@@ -5,7 +5,7 @@
 		<@f.form commandName="submissionAndFeedbackCommand" action="${info.requestedUri.path}" method="GET" cssClass="form-inline filter-form">
 			<@f.errors cssClass="error form-errors" />
 
-			<#assign placeholder = "All submission states" />
+			<#assign placeholder = "All submission statuses" />
 			<#assign currentfilter><@filters.current_filter_value "submissionStatesFilters" placeholder; f>${f.description}</@filters.current_filter_value></#assign>
 			<@filters.filter "submission-states" "submissionAndFeedbackCommand.submissionStatesFilters" placeholder currentfilter allSubmissionStatesFilters; f>
 				<input type="checkbox" name="${status.expression}"
@@ -15,7 +15,7 @@
 				${f.description}
 			</@filters.filter>
 
-			<#assign placeholder = "All  plagiarism statuses" />
+			<#assign placeholder = "All plagiarism statuses" />
 			<#assign currentfilter><@filters.current_filter_value "plagiarismFilters" placeholder; f>${f.description}</@filters.current_filter_value></#assign>
 			<@filters.filter "plagiarism-status" "submissionAndFeedbackCommand.plagiarismFilters" placeholder currentfilter allPlagiarismFilters; f>
 				<input type="checkbox" name="${status.expression}"
@@ -24,7 +24,18 @@
 					${filters.contains_by_filter_name(submissionAndFeedbackCommand.plagiarismFilters, f)?string('checked','')}>
 				${f.description}
 			</@filters.filter>
-			<#assign placeholder = "All  statuses" />
+
+			<#assign placeholder = "All extension statuses" />
+			<#assign currentfilter><@filters.current_filter_value "extensionFilters" placeholder; f>${f.description}</@filters.current_filter_value></#assign>
+			<@filters.filter "extension-status" "submissionAndFeedbackCommand.extensionFilters" placeholder currentfilter allExtensionFilters; f>
+				<input type="checkbox" name="${status.expression}"
+							 value="${f.name}"
+							 data-short-value="${f.description}"
+					${filters.contains_by_filter_name(submissionAndFeedbackCommand.extensionFilters, f)?string('checked','')}>
+				${f.description}
+			</@filters.filter>
+
+			<#assign placeholder = "All feedback statuses" />
 			<#assign currentfilter><@filters.current_filter_value "statusesFilters" placeholder; f>${f.description}</@filters.current_filter_value></#assign>
 			<@filters.filter "other-statuses" "submissionAndFeedbackCommand.statusesFilters" placeholder currentfilter allStatusFilters; f>
 				<input type="checkbox" name="${status.expression}"

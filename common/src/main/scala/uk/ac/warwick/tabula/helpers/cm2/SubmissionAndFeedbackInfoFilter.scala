@@ -169,7 +169,7 @@ object SubmissionAndFeedbackInfoFilters {
 		}
 
 		case object MarkedPlagiarised extends SubmissionAndFeedbackInfoFilter {
-			val description = "Plagiarised"
+			val description = "Suspected plagiarism"
 
 			def predicate(item: AssignmentSubmissionStudentInfo): Boolean =
 				item.coursework.enhancedSubmission.exists(_.submission.suspectPlagiarised.booleanValue)
@@ -196,6 +196,49 @@ object SubmissionAndFeedbackInfoFilters {
 		lazy val allPlagiarismStatuses = Seq(NotCheckedForPlagiarism, CheckedForPlagiarism, MarkedPlagiarised, WithOverlapPercentage)
 	}
 
+	object ExtensionStatuses {
+		case object NoExtension extends SubmissionAndFeedbackInfoFilter {
+			override def description: String = "No extension"
+
+			override def predicate(item: AssignmentSubmissionStudentInfo): Boolean = !item.coursework.enhancedExtension.map(_.extension).exists(_.relevant)
+
+			def apply(assignment: Assignment): Boolean = assignment.extensionsPossible
+		}
+
+		case object ExtensionAwaitingReview extends SubmissionAndFeedbackInfoFilter {
+			override def description: String = "Extension awaiting review"
+
+			override def predicate(item: AssignmentSubmissionStudentInfo): Boolean = item.coursework.enhancedExtension.exists(_.extension.awaitingReview)
+
+			def apply(assignment: Assignment): Boolean = assignment.extensionsPossible && assignment.module.adminDepartment.allowExtensionRequests
+		}
+
+		case object ExtensionApproved extends SubmissionAndFeedbackInfoFilter {
+			override def description: String = "Extension approved"
+
+			override def predicate(item: AssignmentSubmissionStudentInfo): Boolean = item.coursework.enhancedExtension.map(_.extension).filter(_.relevant).exists(_.approved)
+
+			def apply(assignment: Assignment): Boolean = assignment.extensionsPossible
+		}
+
+		case object ExtensionRejected extends SubmissionAndFeedbackInfoFilter {
+			override def description: String = "Extension rejected"
+
+			override def predicate(item: AssignmentSubmissionStudentInfo): Boolean = item.coursework.enhancedExtension.exists(ee => ee.extension.rejected)
+
+			def apply(assignment: Assignment): Boolean = assignment.extensionsPossible && assignment.module.adminDepartment.allowExtensionRequests
+		}
+
+		case object ExtensionRevoked extends SubmissionAndFeedbackInfoFilter {
+			override def description: String = "Extension revoked"
+
+			override def predicate(item: AssignmentSubmissionStudentInfo): Boolean = item.coursework.enhancedExtension.exists(ee => ee.extension.revoked)
+
+			def apply(assignment: Assignment): Boolean = assignment.extensionsPossible
+		}
+
+		val allExtensionStatuses = Seq(NoExtension, ExtensionAwaitingReview, ExtensionApproved, ExtensionRejected, ExtensionRevoked)
+	}
 
 	object Statuses {
 

@@ -136,6 +136,20 @@ CREATE TABLE IF NOT EXISTS CAM_SAS
 , SAS_AGRG VARCHAR(2)
 );
 
+CREATE TABLE IF NOT EXISTS CAM_SRA
+(
+  SPR_CODE VARCHAR(12) NOT NULL
+  , AYR_CODE VARCHAR(6) NOT NULL
+  , MOD_CODE VARCHAR(10) NOT NULL
+  , MAV_OCCUR VARCHAR(6) NOT NULL
+  , SRA_SEQ VARCHAR(6) NOT NULL
+  , SRA_ACTM INTEGER
+  , SRA_ACTG VARCHAR(2)
+  , SRA_AGRM INTEGER
+  , SRA_AGRG VARCHAR(2)
+);
+
+
 -- Thoughts - only the assignment importer test really needs all this data,
 -- so perhaps move it into a separate file. Alternatively, just don't invoke
 -- sits.sql at all in the regular PersistenceTestBase since we only require
@@ -219,3 +233,7 @@ INSERT INTO CAM_SSN VALUES ('0123458/1', '10/11', 'CON');
 -- assessment component marks
 INSERT INTO CAM_SAS VALUES ('0123456/1', '11/12', 'CH115-30', 'A', 'A01', 67, '21', 72, '1');
 INSERT INTO CAM_SAS VALUES ('0123458/1', '11/12', 'CH120-15', 'A', 'A01', null, null, null, null);
+INSERT INTO CAM_SAS VALUES ('0123457/1', '11/12', 'CH115-30', 'A', 'A01', 32, 'F', 33, 'F');
+
+-- resit marks
+INSERT INTO CAM_SRA VALUES ('0123457/1', '11/12', 'CH115-30', 'A', 'A01', 40, '3', 40, '3');
