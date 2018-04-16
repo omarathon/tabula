@@ -232,6 +232,7 @@ class ImportAssignmentsCommandTest extends FlatSpec with Matchers with Mockito {
 		feedback.usercode = user.getUserId
 
 		val assignment = new Assignment
+		assignment.cm2Assignment = true
 		assignment.addFeedback(feedback)
 
 		command.modifiedAssignments = Set(assignment)
