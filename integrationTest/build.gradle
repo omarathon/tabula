@@ -45,9 +45,7 @@ test {
 
 // run npm install
 task installPhantomJSDependency(type: NpmTask) {
-    inputs.file 'package.json'
     outputs.dir 'node_modules/phantomjs'
-
     args = ['install', 'phantomjs-prebuilt', '--no-save']
 }
 

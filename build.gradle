@@ -173,7 +173,8 @@ subprojects {
     }
 
     test {
-        def forks = Runtime.runtime.availableProcessors() / 2
+        // half the cores, but at least four
+        def forks = Math.max(4, Runtime.runtime.availableProcessors().intdiv(2))
         doFirst {
             println "Executing tests with ${forks} forks"
         }
