@@ -102,7 +102,7 @@ private class ScientiaHttpTimetableFetchingService(scientiaConfiguration: Scient
 		case (uri, year) => (uri + "?RoomXML", year)
 	}
 
-	// a dispatch response handler which reads XML from the response and parses it into a list of TimetableEvents
+	// an HTTPClient response handler which reads XML from the response and parses it into a list of TimetableEvents
 	// the timetable response doesn't include its year, so we pass that in separately.
 	def handler(year: AcademicYear, excludeSmallGroupEventsInTabula: Boolean = false, uniId: String): ResponseHandler[Seq[TimetableEvent]] =
 		ApacheHttpClientUtils.xmlResponseHandler { node =>
