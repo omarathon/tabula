@@ -7,6 +7,7 @@ import org.apache.http.auth.UsernamePasswordCredentials
 import org.apache.http.client.ResponseHandler
 import org.apache.http.client.methods.HttpGet
 import org.apache.http.client.utils.URIBuilder
+import org.apache.http.impl.client.BasicResponseHandler
 import org.apache.http.util.EntityUtils
 import org.apache.http.{HttpResponse, HttpStatus}
 import uk.ac.warwick.tabula.commands._
@@ -50,13 +51,12 @@ class TimetableCheckerCommandInternal() extends CommandInternal[String] with Tim
 		val req = new HttpGet(uri)
 		req.setHeader(ApacheHttpClientUtils.basicAuthHeader(new UsernamePasswordCredentials(wbsConfiguration.credentials.username, wbsConfiguration.credentials.password)))
 
-		def handler: ResponseHandler[String] = { response: HttpResponse =>
-			if (response.getStatusLine.getStatusCode != HttpStatus.SC_OK)
-				throw new IOException(s"Received invalid status code: ${response.getStatusLine.getStatusCode}")
-
-			val jsonString = EntityUtils.toString(response.getEntity)
-			val jsonObject = if (jsonMapper != null) jsonMapper.readValue(jsonString, classOf[List[Map[String, Any]]])
-			jsonMapper.writerWithDefaultPrettyPrinter().writeValueAsString(jsonObject)
+		def handler: ResponseHandler[String] = new BasicResponseHandler() {
+			override def handleResponse(response: HttpResponse): String = {
+				val jsonString = super.handleResponse(response)
+				val jsonObject = if (jsonMapper != null) jsonMapper.readValue(jsonString, classOf[List[Map[String, Any]]])
+				jsonMapper.writerWithDefaultPrettyPrinter().writeValueAsString(jsonObject)
+			}
 		}
 
 		Try(httpClient.execute(req, handler)) match {
