@@ -83,7 +83,11 @@ class AssignmentImporterImpl extends AssignmentImporter with InitializingBean {
 					actualMark = rs.getString("actual_mark"),
 					actualGrade = rs.getString("actual_grade"),
 					agreedMark = rs.getString("agreed_mark"),
-					agreedGrade = rs.getString("agreed_grade")
+					agreedGrade = rs.getString("agreed_grade"),
+					resitActualMark = rs.getString("resit_actual_mark"),
+					resitActualGrade = rs.getString("resit_actual_grade"),
+					resitAgreedMark = rs.getString("resit_agreed_mark"),
+					resitAgreedGrade = rs.getString("resit_agreed_grade")
 				))
 
 			}
@@ -132,7 +136,11 @@ class SandboxAssignmentImporter extends AssignmentImporter {
 				actualMark = "",
 				actualGrade = "",
 				agreedMark = "",
-				agreedGrade = ""
+				agreedGrade = "",
+				resitActualMark = "",
+				resitActualGrade = "",
+				resitAgreedMark = "",
+				resitAgreedGrade = ""
 			)
 		)
 
@@ -299,7 +307,11 @@ object AssignmentImporter {
 			sas.sas_actm as actual_mark,
 			sas.sas_actg as actual_grade,
 			sas.sas_agrm as agreed_mark,
-			sas.sas_agrg as agreed_grade
+			sas.sas_agrg as agreed_grade,
+			sra.sra_actm as resit_actual_mark,
+			sra.sra_actg as resit_actual_grade,
+			sra.sra_agrm as resit_agreed_mark,
+			sra.sra_agrg as resit_agreed_grade
 				from $sitsSchema.srs_scj scj -- Student Course Join  - gives us most significant course
 					join $sitsSchema.ins_spr spr -- Student Programme Route - gives us SPR code
 						on scj.scj_sprc = spr.spr_code and
@@ -322,6 +334,10 @@ object AssignmentImporter {
 						on sas.spr_code = sms.spr_code and sas.ayr_code = sms.ayr_code and sas.mod_code = sms.mod_code
 							and sas.mav_occur = sms.sms_occl and sas.mab_seq = mab.mab_seq
 
+					left join $sitsSchema.cam_sra sra -- Where resit marks go
+						on sra.spr_code = sms.spr_code and sra.ayr_code = sms.ayr_code and sra.mod_code = sms.mod_code
+							and sra.mav_occur = sms.sms_occl and sra.sra_seq = mab.mab_seq
+
 			where
 				scj.scj_udfa in ('Y','y') and -- most significant courses only
 				sms.ayr_code in (:academic_year_code)"""
@@ -339,7 +355,11 @@ object AssignmentImporter {
 			sas.sas_actm as actual_mark,
 			sas.sas_actg as actual_grade,
 			sas.sas_agrm as agreed_mark,
-			sas.sas_agrg as agreed_grade
+			sas.sas_agrg as agreed_grade,
+			sra.sra_actm as resit_actual_mark,
+			sra.sra_actg as resit_actual_grade,
+			sra.sra_agrm as resit_agreed_mark,
+			sra.sra_agrg as resit_agreed_grade
 				from $sitsSchema.srs_scj scj
 					join $sitsSchema.ins_spr spr
 						on scj.scj_sprc = spr.spr_code and
@@ -363,6 +383,10 @@ object AssignmentImporter {
 						on sas.spr_code = smo.spr_code and sas.ayr_code = smo.ayr_code and sas.mod_code = smo.mod_code
 							and sas.mav_occur = smo.mav_occur and sas.mab_seq = mab.mab_seq
 
+ 					left join $sitsSchema.cam_sra sra -- Where resit marks go
+						on sra.spr_code = smo.spr_code and sra.ayr_code = smo.ayr_code and sra.mod_code = smo.mod_code
+							and sra.mav_occur = smo.mav_occur and sra.sra_seq = mab.mab_seq
+
 			where
 				scj.scj_udfa in ('Y','y') and -- most significant courses only
 				smo.ayr_code in (:academic_year_code)"""
@@ -379,7 +403,11 @@ object AssignmentImporter {
 			sas.sas_actm as actual_mark,
 			sas.sas_actg as actual_grade,
 			sas.sas_agrm as agreed_mark,
-			sas.sas_agrg as agreed_grade
+			sas.sas_agrg as agreed_grade,
+			sra.sra_actm as resit_actual_mark,
+			sra.sra_actg as resit_actual_grade,
+			sra.sra_agrm as resit_agreed_mark,
+			sra.sra_agrg as resit_agreed_grade
 				from $sitsSchema.srs_scj scj
 					join $sitsSchema.ins_spr spr
 						on scj.scj_sprc = spr.spr_code and
@@ -402,6 +430,10 @@ object AssignmentImporter {
 					left join $sitsSchema.cam_sas sas -- Where component marks go
 						on sas.spr_code = smo.spr_code and sas.ayr_code = smo.ayr_code and sas.mod_code = smo.mod_code
 							and sas.mav_occur = smo.mav_occur and sas.mab_seq = mab.mab_seq
+
+					left join $sitsSchema.cam_sra sra -- Where resit marks go
+						on sra.spr_code = smo.spr_code and sra.ayr_code = smo.ayr_code and sra.mod_code = smo.mod_code
+							and sra.mav_occur = smo.mav_occur and sra.sra_seq = mab.mab_seq
 
 			where
 				scj.scj_udfa in ('Y','y') and -- most significant courses only

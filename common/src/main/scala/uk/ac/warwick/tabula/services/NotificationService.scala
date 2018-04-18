@@ -60,7 +60,7 @@ class NotificationService extends Logging with FreemarkerTextRenderer with Daois
 
 	def stream(req: ActivityStreamRequest): ActivityStream = {
 		val notifications = queryService.userStream(req)
-		val activities = notifications.items.flatMap(toActivity)
+		val activities = notifications.items.flatMap(toActivity(req.user))
 
 		ActivityStream(
 			items = activities,
@@ -69,7 +69,7 @@ class NotificationService extends Logging with FreemarkerTextRenderer with Daois
 		)
 	}
 
-	def toActivity(notification: Notification[_, _]) : Option[Activity[Any]] = {
+	def toActivity(user: User)(notification: Notification[_, _]) : Option[Activity[Any]] = {
 		try {
 			val (message, priority) =
 				notification match {
@@ -99,7 +99,7 @@ class NotificationService extends Logging with FreemarkerTextRenderer with Daois
 				priority = priority.toNumericalValue,
 				agent = notification.agent,
 				verb = notification.verb,
-				url = notification.url,
+				url = notification.urlFor(user),
 				urlTitle = notification.urlTitle,
 				message = message,
 				entity = null

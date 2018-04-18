@@ -487,19 +487,26 @@ object ExamGridSummaryAndKey {
 		{
 			val row = sheet.createRow(13)
 			val keyCell = row.createCell(0)
+			keyCell.setCellValue("[# (#)]")
+			val valueCell = row.createCell(1)
+			valueCell.setCellValue("Mark is from a resit, the original mark is shown in brackets")
+		}
+		{
+			val row = sheet.createRow(14)
+			val keyCell = row.createCell(0)
 			keyCell.setCellValue("X")
 			val valueCell = row.createCell(1)
 			valueCell.setCellValue("Agreed mark and actual mark missing")
 		}
 		{
-			val row = sheet.createRow(14)
+			val row = sheet.createRow(15)
 			val keyCell = row.createCell(0)
 			keyCell.setCellValue("")
 			val valueCell = row.createCell(1)
 			valueCell.setCellValue("Blank indicates module not taken by student")
 		}
 		{
-			val row = sheet.createRow(15)
+			val row = sheet.createRow(16)
 			val keyCell = row.createCell(0)
 			keyCell.setCellValue("AB")
 			keyCell.setCellStyle(cellStyleMap(ExamGridExportStyles.BoldText))

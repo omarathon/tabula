@@ -87,70 +87,67 @@
 					</tr>
 					</thead>
 					<tbody>
-						<#list order.enhancedFeedbackByStage?keys as stage>
-							<#assign maxPrevMarkerCols = 0 />
-
-							<#list enhancedMarkerFeedbacks as emf>
-								<#assign mf = emf.markerFeedback />
-								<#assign student = mf.student />
-								<#assign studentId><#if assignment.anonymity.equals(AssignmentAnonymity.FullyAnonymous)>${mf.feedback.anonymousId}<#else>${student.userId}</#if></#assign>
-								<tr
-									data-toggle="collapse"
-									data-target="#${stage.name}-${studentId}"
-									class="clickable collapsed expandable-row <#if mf.readyForNextStage>ready-next-stage</#if>"
-								>
-									<td class="check-col">
-										<@bs3form.selector_check_row name="markerFeedback" value="${mf.id}" />
-									</td>
-									<td class="toggle-icon-large student-col">
-										<#assign colspan = 4>
-										<#if assignment.anonymity.equals(AssignmentAnonymity.FullyAnonymous)>
-											Student${mf.feedback.anonymousId}
-										<#else>
-											${mf.feedback.studentIdentifier!""}
-										</#if>
-									</td>
-									<#if assignment.showSeatNumbers>
-										<#assign colspan = colspan + 1/>
-										<td class="student-col">${assignment.getSeatNumber(student)!""}</td>
+						<#assign maxPrevMarkerCols = 0 />
+						<#list enhancedMarkerFeedbacks as emf>
+							<#assign mf = emf.markerFeedback />
+							<#assign student = mf.student />
+							<#assign studentId><#if assignment.anonymity.equals(AssignmentAnonymity.FullyAnonymous)>${mf.feedback.anonymousId}<#else>${student.userId}</#if></#assign>
+							<tr
+								data-toggle="collapse"
+								data-target="#${mf.stage.name}-${studentId}"
+								class="clickable collapsed expandable-row <#if mf.readyForNextStage>ready-next-stage</#if>"
+							>
+								<td class="check-col">
+									<@bs3form.selector_check_row name="markerFeedback" value="${mf.id}" />
+								</td>
+								<td class="toggle-icon-large student-col">
+									<#assign colspan = 4>
+									<#if assignment.anonymity.equals(AssignmentAnonymity.FullyAnonymous)>
+										Student${mf.feedback.anonymousId}
+									<#else>
+										${mf.feedback.studentIdentifier!""}
 									</#if>
-									<#if assignment.anonymity.equals(AssignmentAnonymity.NameAndID)>
-										<#assign colspan = colspan + 2/>
-										<td class="student-col">${student.firstName}</td>
-										<td class="student-col">${student.lastName}&nbsp;<#if student.warwickId??><@pl.profile_link student.warwickId /><#else><@pl.profile_link student.userId /></#if></td>
+								</td>
+								<#if assignment.showSeatNumbers>
+									<#assign colspan = colspan + 1/>
+									<td class="student-col">${assignment.getSeatNumber(student)!""}</td>
+								</#if>
+								<#if assignment.anonymity.equals(AssignmentAnonymity.NameAndID)>
+									<#assign colspan = colspan + 2/>
+									<td class="student-col">${student.firstName}</td>
+									<td class="student-col">${student.lastName}&nbsp;<#if student.warwickId??><@pl.profile_link student.warwickId /><#else><@pl.profile_link student.userId /></#if></td>
+								</#if>
+								<#if mf.stage.summariseCurrentFeedback>
+									<td><#if mf.mark??>${mf.mark}</#if></td>
+									<#assign colspan = colspan + 1>
+								</#if>
+								<#if mf.stage.summarisePreviousFeedback>
+									<#if emf.previousMarkerFeedback?has_content>
+										<#list emf.previousMarkerFeedback as prevMf>
+										<td><#if prevMf.marker??>${prevMf.marker.fullName}</#if></td>
+										<td><#if prevMf.mark??>${prevMf.mark}</#if></td>
+											<#assign colspan = colspan + 2>
+											<#assign maxPrevMarkerCols = maxPrevMarkerCols + 2>
+										</#list>
+									<#elseif order.numPreviousMarkers gt 0>
+										<td colspan="${order.numPreviousMarkers * 2}"></td>
 									</#if>
-									<#if order.headerStage.summariseCurrentFeedback>
-										<td><#if mf.mark??>${mf.mark}</#if></td>
-										<#assign colspan = colspan + 1>
+								</#if>
+								<td class="progress-col">
+									<@components.individual_stage_progress_bar emf.workflowStudent.stages assignment student />
+								</td>
+								<td>
+									<#if emf.workflowStudent.nextAction?has_content>
+									<@components.workflowMessage emf.workflowStudent.nextAction assignment student />
 									</#if>
-									<#if order.headerStage.summarisePreviousFeedback>
-										<#if emf.previousMarkerFeedback?has_content>
-											<#list emf.previousMarkerFeedback as prevMf>
-											<td><#if prevMf.marker??>${prevMf.marker.fullName}</#if></td>
-											<td><#if prevMf.mark??>${prevMf.mark}</#if></td>
-												<#assign colspan = colspan + 2>
-												<#assign maxPrevMarkerCols = maxPrevMarkerCols + 2>
-											</#list>
-										<#elseif order.numPreviousMarkers(stage) gt 0>
-											<td colspan="${order.numPreviousMarkers(stage) * 2}"></td>
-										</#if>
-									</#if>
-									<td class="progress-col">
-										<@components.individual_stage_progress_bar emf.workflowStudent.stages assignment student />
-									</td>
-									<td>
-										<#if emf.workflowStudent.nextAction?has_content>
-										<@components.workflowMessage emf.workflowStudent.nextAction assignment student />
-										</#if>
-									</td>
-								</tr>
-								<#assign detailUrl><@routes.cm2.markerOnlineFeedback assignment stage marker student /></#assign>
-								<tr id="${stage.name}-${studentId}" data-detailurl="${detailUrl}" class="collapse detail-row">
-									<td colspan="${colspan}" class="detailrow-container">
-										<i class="fa fa-spinner fa-spin"></i> Loading
-									</td>
-								</tr>
-							</#list>
+								</td>
+							</tr>
+							<#assign detailUrl><@routes.cm2.markerOnlineFeedback assignment mf.stage marker student /></#assign>
+							<tr id="${mf.stage.name}-${studentId}" data-detailurl="${detailUrl}" class="collapse detail-row">
+								<td colspan="${colspan}" class="detailrow-container">
+									<i class="fa fa-spinner fa-spin"></i> Loading
+								</td>
+							</tr>
 						</#list>
 					</tbody>
 				</table>
@@ -165,7 +162,7 @@
 						<@modal.body>
 							<p>There are <span class="count"></span> submissions that have files that are not PDFs (shown below). The download will not include these files.</p>
 							<p><a class="form-post btn btn-primary"
-										data-href="<@routes.cm2.downloadMarkerSubmissionsPdf assignment marker />?download" href="">Download submissions as PDF</a>
+										data-href="<@routes.cm2.downloadMarkerSubmissionsPdf assignment marker />?download" href="">Download submissions as PDF</a>First
 							</p>
 							<ul class="submissions"></ul>
 						</@modal.body>
@@ -182,22 +179,21 @@
 	<#if feedbackByOrderAndStage?size gt 1>
 		<ul class="nav nav-tabs" role="tablist" style="margin-top: 20px;margin-bottom: 20px;" id="markingStageTabs">
 			<#list feedbackByOrderAndStage as order>
-				<li role="presentation"<#if activeStage.name == order.headerStage.name> class="active"</#if>>
-					<a href="#${order.headerStage.name}" role="tab" data-toggle="tab" data-stage="${order.headerStage.name}">${order.headerStage.description}</a>
+				<li role="presentation"<#if activeWorkflowPosition == order.headerStage.order> class="active"</#if>>
+					<a href="#${order.headerStage.name}" role="tab" data-toggle="tab" data-order="${order.headerStage.order}">${order.headerStage.roleName}</a>
 				</li>
 			</#list>
 		</ul>
 	</#if>
 <div class="tab-content" id="markingTabContent">
 <#list feedbackByOrderAndStage as order>
-	<div class="tab-pane<#if activeStage.name == order.headerStage.name> active</#if>" role="tabpanel" id="${order.headerStage.name}">
+	<div class="tab-pane<#if activeWorkflowPosition == order.headerStage.order> active</#if>" role="tabpanel" id="${order.headerStage.name}">
 		<#assign markingCompleted><@routes.cm2.markingCompleted assignment order.headerStage.order marker /></#assign>
 		<#assign finishMarking><@routes.cm2.finishMarking assignment order.headerStage.order marker /></#assign>
 
-		<#assign enhancedMarkerFeedbacks = mapGet(order.enhancedFeedbackByStage, order.headerStage)/>
-		<#assign stage = order.headerStage />
+		<#assign headerStage = order.headerStage />
 
-		<#assign moderator = stage.roleName == "Moderator" />
+		<#assign moderator = headerStage.roleName == "Moderator" />
 		<#assign markOrModerate = moderator?string("moderate", "mark") />
 		<#assign markingOrModeration = moderator?string("moderation", "marking") />
 		<#assign markingOrModerating = moderator?string("moderating", "marking") />
@@ -206,10 +202,10 @@
 		<div class="marking-tab-section">
 			<h4>Submissions to ${markOrModerate}</h4>
 
-			<#if enhancedMarkerFeedbacks.readyToMark?size != 0>
+			<#if order.feedbackByActionability.readyToMark?size != 0>
 				<p>These submissions are ready for you to ${markOrModerate}.</p>
 
-				<@markingTabSection order enhancedMarkerFeedbacks.readyToMark false />
+				<@markingTabSection order order.feedbackByActionability.readyToMark false />
 			<#else>
 				<p>No submissions are ready for you to ${markOrModerate}.</p>
 			</#if>
@@ -217,16 +213,16 @@
 
 		<div class="marking-tab-section">
 			<h4>
-				<a href="#" data-toggle="collapse" data-target="#${stage.name}-notReadyToMarkSubmissions">
-					<i class="fa fa-fw fa-chevron-right"></i>Upcoming ${markingOrModeration} (${enhancedMarkerFeedbacks.notReadyToMark?size})
+				<a href="#" data-toggle="collapse" data-target="#${headerStage.name}-notReadyToMarkSubmissions">
+					<i class="fa fa-fw fa-chevron-right"></i>Upcoming ${markingOrModeration} (${order.feedbackByActionability.notReadyToMark?size})
 				</a>
 			</h4>
 
-			<div id="${stage.name}-notReadyToMarkSubmissions" class="marking-collapse collapse">
-				<#if enhancedMarkerFeedbacks.notReadyToMark?size != 0>
+			<div id="${headerStage.name}-notReadyToMarkSubmissions" class="marking-collapse collapse">
+				<#if order.feedbackByActionability.notReadyToMark?size != 0>
 					<p>These submissions are allocated to you for ${markingOrModeration}, but haven't yet been released or are with a previous marker.</p>
 
-					<@markingTabSection order enhancedMarkerFeedbacks.notReadyToMark true />
+					<@markingTabSection order order.feedbackByActionability.notReadyToMark true />
 				<#else>
 					<p>No submissions to show.</p>
 				</#if>
@@ -235,16 +231,16 @@
 
 		<div class="marking-tab-section">
 			<h4>
-				<a href="#" data-toggle="collapse" data-target="#${stage.name}-markedSubmissions">
-					<i class="fa fa-fw fa-chevron-right"></i>${moderatedOrMarked?cap_first} (${enhancedMarkerFeedbacks.marked?size})
+				<a href="#" data-toggle="collapse" data-target="#${headerStage.name}-markedSubmissions">
+					<i class="fa fa-fw fa-chevron-right"></i>${moderatedOrMarked?cap_first} (${order.feedbackByActionability.marked?size})
 				</a>
 			</h4>
 
-			<div id="${stage.name}-markedSubmissions" class="marking-collapse collapse">
-				<#if enhancedMarkerFeedbacks.marked?size != 0>
+			<div id="${headerStage.name}-markedSubmissions" class="marking-collapse collapse">
+				<#if order.feedbackByActionability.marked?size != 0>
 					<p>You've finished ${markingOrModerating} these submissions, so can't make any further changes.</p>
 
-					<@markingTabSection order enhancedMarkerFeedbacks.marked true />
+					<@markingTabSection order order.feedbackByActionability.marked true />
 				<#else>
 					<p>No submissions to show.</p>
 				</#if>
@@ -275,7 +271,7 @@
 		});
 
 		$('#markingStageTabs').on('show.bs.tab', function (e) {
-			$('#filtersActiveStage').val($(e.target).data('stage'));
+			$('#filtersActiveStage').val($(e.target).data('order'));
 		});
 
 		$('#markingTabContent').on('shown.bs.collapse', function (e) {

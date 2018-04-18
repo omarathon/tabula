@@ -75,6 +75,10 @@
 						<td>Agreed mark missing, using actual</td>
 					</tr>
 					<tr>
+						<td><span class="exam-grid-resit"># (#)</span></td>
+						<td>Mark is from a resit, the original mark is shown in brackets</td>
+					</tr>
+					<tr>
 						<td><span class="exam-grid-actual-mark">X</span></td>
 						<td>Agreed and actual mark missing</td>
 					</tr>
@@ -134,16 +138,18 @@
 										<#list info.studentAssessmentComponentInfo as studentInfo>
 											<tr>
 												<td>
-													<#if studentInfo.groupMember.agreedMark??>
-														<#if studentInfo.groupMember.agreedMark?number < passMark>
-															<span class=exam-grid-fail">${mr.agreedMark}</span>
-														<#else>
-															${studentInfo.groupMember.agreedMark}
-														</#if>
-													<#elseif studentInfo.groupMember.actualMark??>
-														<span class="<#if studentInfo.groupMember.actualMark?number < passMark>exam-grid-fail<#else>exam-grid-actual-mark</#if>">
-															${studentInfo.groupMember.actualMark}
-														</span>
+													<#if studentInfo.groupMember.firstDefinedMark??>
+														<#assign class><#compress>
+															<#if studentInfo.groupMember.firstDefinedMark?number < passMark>exam-grid-fail </#if>
+															<#if !studentInfo.groupMember.isAgreedMark()>exam-grid-actual-mark </#if>
+															<#if studentInfo.groupMember.isResitMark()>exam-grid-resit </#if>
+														</#compress></#assign>
+														<span class="${class}"><#compress>
+															${studentInfo.groupMember.firstDefinedMark}
+															<#if studentInfo.groupMember.isResitMark() && studentInfo.groupMember.firstOriginalMark??>
+																(${studentInfo.groupMember.firstOriginalMark})
+															</#if>
+														</#compress></span>
 													<#else>
 														<span class="exam-grid-actual-mark use-tooltip" title="" data-container="body" data-original-title="No marks set for Assessment component">X</span>
 													</#if>
@@ -159,10 +165,8 @@
 										<#list info.studentAssessmentComponentInfo as studentInfo>
 											<tr>
 												<td>
-													<#if studentInfo.groupMember.agreedGrade??>
-														${studentInfo.groupMember.agreedGrade}
-													<#elseif studentInfo.groupMember.actualGrade??>
-														<span class="exam-grid-actual-mark">${studentInfo.groupMember.actualGrade}</span>
+													<#if studentInfo.groupMember.firstDefinedGrade??>
+														<span class="<#if !studentInfo.groupMember.isAgreedGrade()>exam-grid-actual-mark</#if>"> ${studentInfo.groupMember.firstDefinedGrade}</span>
 													<#else>
 														<span class="exam-grid-actual-mark use-tooltip" title="" data-container="body" data-original-title="No grade set for Assessment component">X</span>
 													</#if>

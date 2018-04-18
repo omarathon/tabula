@@ -96,7 +96,12 @@
 									<li>${course.code?upper_case} ${course.name}</li>
 								</#list></ul>
 							</#assign>
-							<td><a class="use-popover" href="#" data-html="true" data-content="${popover}">${selectCourseCommand.courses?size} courses</a></td>
+							<td>
+								<a class="use-popover hidden-print" href="#" data-html="true" data-content="${popover}">${selectCourseCommand.courses?size} courses</a>
+								<div class="visible-print">
+									<#noescape>${popover}</#noescape>
+								</div>
+							</td>
 						</#if>
 					</tr>
 					<tr>
@@ -113,7 +118,12 @@
 									<li>${route.code?upper_case} ${route.name}</li>
 								</#list></ul>
 							</#assign>
-							<td><a class="use-popover" href="#" data-html="true" data-content="${popover}">${selectCourseCommand.routes?size} routes</a></td>
+							<td>
+								<a class="use-popover hidden-print" href="#" data-html="true" data-content="${popover}">${selectCourseCommand.routes?size} routes</a>
+								<div class="visible-print">
+									<#noescape>${popover}</#noescape>
+								</div>
+							</td>
 						</#if>
 					</tr>
 					<tr>
@@ -137,7 +147,10 @@
 										</#list></li>
 									</#list></ul>
 								</#assign>
-								<a href="#" class="use-popover" data-html="true" data-content="${popover}">${weightings?keys?size} courses</a>
+								<a href="#" class="use-popover hidden-print" data-html="true" data-content="${popover}">${weightings?keys?size} courses</a>
+								<div class="visible-print">
+									<#noescape>${popover}</#noescape>
+								</div>
 							</#if>
 						</td>
 					</tr>
@@ -149,7 +162,7 @@
 									${normalLoadLookup.withoutDefault(normalLoadLookup.routes?first)}
 								<#else>
 									<#assign defaultNormalLoad>${normalLoadLookup.apply(normalLoadLookup.routes?first)}</#assign>
-									${defaultNormalLoad} <@fmt.help_popover id="normal-load" content="Could not find a Pathway Module Rule for the normal load so using the default value of ${defaultNormalLoad}" />
+									${defaultNormalLoad} <@fmt.help_popover id="normal-load" cssClass="hidden-print" content="Could not find a Pathway Module Rule for the normal load so using the default value of ${defaultNormalLoad}" />
 								</#if>
 							<#else>
 								<#assign popover>
@@ -159,12 +172,15 @@
 												${normalLoadLookup.withoutDefault(route)}
 											<#else>
 												<#assign defaultNormalLoad>${normalLoadLookup.apply(route)}</#assign>
-												${defaultNormalLoad} <@fmt.help_popover id="normal-load" content="Could not find a Pathway Module Rule for the normal load so using the default value of ${defaultNormalLoad}" />
+												${defaultNormalLoad} <@fmt.help_popover id="normal-load" cssClass="hidden-print" content="Could not find a Pathway Module Rule for the normal load so using the default value of ${defaultNormalLoad}" />
 											</#if>
 										</li>
 									</#list></ul>
 								</#assign>
-								<a href="#" class="use-popover" data-html="true" data-content="${popover}">${normalLoadLookup.routes?size} routes</a>
+								<a href="#" class="use-popover hidden-print" data-html="true" data-content="${popover}">${normalLoadLookup.routes?size} routes</a>
+								<div class="visible-print">
+									<#noescape>${popover}</#noescape>
+								</div>
 							</#if>
 						</td>
 					</tr>
@@ -199,6 +215,10 @@
 						<td>Agreed mark missing, using actual</td>
 					</tr>
 					<tr>
+						<td><span class="exam-grid-resit"># (#)</span></td>
+						<td>Mark is from a resit, the original mark is shown in brackets</td>
+					</tr>
+					<tr>
 						<td><span class="exam-grid-actual-mark">X</span></td>
 						<td>Agreed and actual mark missing</td>
 					</tr>
@@ -224,7 +244,7 @@
 			<#include "_short_form_grid.ftl" />
 		</#if>
 
-		<div class="fix-footer">
+		<div class="fix-footer hidden-print">
 			<div class="btn-group dropup">
 				<button type="button" class="btn btn-primary dropdown-toggle" data-toggle="dropdown">Download&hellip; <span class="caret"></span></button>
 				<ul class="dropdown-menu download-options">

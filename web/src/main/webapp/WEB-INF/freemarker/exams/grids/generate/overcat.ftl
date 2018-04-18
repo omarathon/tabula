@@ -23,11 +23,15 @@
 							<td><span class="exam-grid-actual-mark">#</span></td>
 							<td>Agreed mark missing, using actual</td>
 						</tr>
+						<tr>
+							<td><span class="exam-grid-resit"># (#)</span></td>
+							<td>Mark is from a resit, the original mark is shown in brackets</td>
+						</tr>
 					</tbody>
 				</table>
 			</div>
 
-			<h3>Select an overcatted mark for ${scyd.studentCourseDetails.student.fullName!} - ${scyd.studentCourseDetails.student.universityId}</h3>
+			<h3>Select an overcatted mark for <#if overcatView.nameToShow.value != "none">${scyd.studentCourseDetails.student.fullName!} - </#if>${scyd.studentCourseDetails.student.universityId}</h3>
 
 			<p>You can change module marks but any changes made at this stage will not be saved back to SITS.</p>
 

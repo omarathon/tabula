@@ -170,6 +170,8 @@
 			$('.fixed-container').fixHeaderFooter();
 			$('a.ajax-modal').ajaxModalLink();
 
+			$('.use-popover').tabulaPopover();
+
 			var $submissionFeedbackResultsTable = $(".submission-feedback-results table");
 			$submissionFeedbackResultsTable.expandingTable();
 
