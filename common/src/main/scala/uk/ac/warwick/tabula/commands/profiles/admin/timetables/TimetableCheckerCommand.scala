@@ -51,7 +51,7 @@ class TimetableCheckerCommandInternal() extends CommandInternal[String] with Tim
 		val req = new HttpGet(uri)
 		req.setHeader(ApacheHttpClientUtils.basicAuthHeader(new UsernamePasswordCredentials(wbsConfiguration.credentials.username, wbsConfiguration.credentials.password)))
 
-		def handler: ResponseHandler[String] = new BasicResponseHandler() {
+		val handler: ResponseHandler[String] = new BasicResponseHandler() {
 			override def handleResponse(response: HttpResponse): String = {
 				val jsonString = super.handleResponse(response)
 				val jsonObject = if (jsonMapper != null) jsonMapper.readValue(jsonString, classOf[List[Map[String, Any]]])
