@@ -3,17 +3,14 @@ package uk.ac.warwick.tabula.commands.profiles.admin.timetables
 import java.io.IOException
 
 import com.fasterxml.jackson.databind.ObjectMapper
-import org.apache.http.auth.{AuthScope, UsernamePasswordCredentials}
+import org.apache.http.auth.UsernamePasswordCredentials
 import org.apache.http.client.ResponseHandler
 import org.apache.http.client.methods.HttpGet
-import org.apache.http.client.protocol.HttpClientContext
-import org.apache.http.client.utils.{URIBuilder, URIUtils}
-import org.apache.http.impl.auth.BasicScheme
-import org.apache.http.impl.client.{BasicAuthCache, BasicCredentialsProvider}
-import org.apache.http.impl.conn.DefaultSchemePortResolver
+import org.apache.http.client.utils.URIBuilder
 import org.apache.http.util.EntityUtils
-import org.apache.http.{HttpHost, HttpResponse, HttpStatus}
+import org.apache.http.{HttpResponse, HttpStatus}
 import uk.ac.warwick.tabula.commands._
+import uk.ac.warwick.tabula.helpers.ApacheHttpClientUtils
 import uk.ac.warwick.tabula.permissions.Permissions
 import uk.ac.warwick.tabula.services.timetables._
 import uk.ac.warwick.tabula.services.{ApacheHttpClientComponent, AutowiringApacheHttpClientComponent}
@@ -49,23 +46,9 @@ class TimetableCheckerCommandInternal() extends CommandInternal[String] with Tim
 		uriBuilder.addParameter("forcebasic", "true")
 
 		val uri = uriBuilder.build()
-		val host = new HttpHost(uriBuilder.getHost, DefaultSchemePortResolver.INSTANCE.resolve(URIUtils.extractHost(uri)), uriBuilder.getScheme)
-
-		val credsProvider = new BasicCredentialsProvider
-		credsProvider.setCredentials(new AuthScope(host), new UsernamePasswordCredentials(wbsConfiguration.credentials.username, wbsConfiguration.credentials.password))
-
-		// Create AuthCache instance
-		val authCache = new BasicAuthCache
-		// Generate BASIC scheme object and add it to the local auth cache
-		val basicAuth = new BasicScheme
-		authCache.put(host, basicAuth)
-
-		// Add AuthCache to the execution context
-		val context = HttpClientContext.create
-		context.setCredentialsProvider(credsProvider)
-		context.setAuthCache(authCache)
 
 		val req = new HttpGet(uri)
+		req.setHeader(ApacheHttpClientUtils.basicAuthHeader(new UsernamePasswordCredentials(wbsConfiguration.credentials.username, wbsConfiguration.credentials.password)))
 
 		def handler: ResponseHandler[String] = { response: HttpResponse =>
 			if (response.getStatusLine.getStatusCode != HttpStatus.SC_OK)
