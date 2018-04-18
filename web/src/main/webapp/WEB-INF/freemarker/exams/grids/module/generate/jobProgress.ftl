@@ -10,30 +10,23 @@
 <@fmt.id7_deptheader title="Create a new module exam grid for ${department.name}" route_function=route_function />
 
 <form action="<@routes.exams.generateModuleGrid department academicYear />" class="dirty-check" method="post">
-
-		<@form_fields.select_module_fields />
-
-		<h2>Importing student data</h2>
-
-		<p class="progress-arrows">
-			<span class="arrow-right"><button type="submit" class="btn btn-link">Select modules</button></span>
-			<span class="arrow-right arrow-left active">Preview and download</span>
-		</p>
-
-
+	<@form_fields.select_module_fields />
+	<h2>Importing student data</h2>
+	<p class="progress-arrows">
+		<span class="arrow-right"><button type="submit" class="btn btn-link">Select modules</button></span>
+		<span class="arrow-right arrow-left active">Preview and download</span>
+	</p>
 	<div class="alert alert-info">
 		<div class="progress">
 			<div class="progress-bar progress-bar-striped active" style="width: ${jobProgress!0}%;"></div>
 		</div>
 		<p class="job-status">${jobStatus!"Waiting for job to start"}</p>
 	</div>
-
 	<p>
 		Tabula is currently importing fresh data for the students you selected from SITS.
 		You can <a href="#" data-toggle="modal" data-target="#student-import-dates">view the last import date for each student</a>.
 		If you wish you can skip this import and proceed to generate the grid.
 	</p>
-
 	<div class="modal fade" id="student-import-dates">
 		<@modal.wrapper>
 			<@modal.body>
@@ -56,7 +49,6 @@
 			</@modal.body>
 		</@modal.wrapper>
 	</div>
-
 	<button class="btn btn-primary" type="submit" name="${GenerateModuleExamGridMappingParameters.previewAndDownload}">Skip import and generate grid</button>
 </form>
 
