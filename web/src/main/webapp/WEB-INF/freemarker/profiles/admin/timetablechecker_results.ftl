@@ -5,4 +5,4 @@
 
 <h3>WBS feed</h3>
 Below is the raw, unfiltered feed from WBS.
-<pre>${command.wbsFeed}</pre>
+<pre>${wbsFeed}</pre>
