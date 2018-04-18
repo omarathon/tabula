@@ -6,23 +6,16 @@
 		<#return selectModuleCommand />
 	</#function>
 
-
 <@fmt.id7_deptheader title="Create a new module exam grid for ${department.name}" route_function=route_function />
 
 <div class="fix-area">
-
 	<form action="<@routes.exams.generateModuleGrid department academicYear />" class="dirty-check exam-grid-preview" method="post">
-
 		<@form_fields.select_module_fields />
-
 		<h2>Preview and download</h2>
-
 		<p class="progress-arrows">
 			<span class="arrow-right"><button type="submit" class="btn btn-link">Select modules</button></span>
 			<span class="arrow-right arrow-left active">Preview and download</span>
 		</p>
-
-
 		<div class="alert alert-info">
 			<h3>Your grid</h3>
 			<p>
@@ -31,7 +24,6 @@
 				time, you'll need to generate the grid again to see the most recent information.
 			</p>
 		</div>
-
 		<div class="key clearfix">
 			<table class="table table-condensed">
 				<thead>
@@ -56,10 +48,8 @@
 						<th>Grid Generated:</th>
 						<td><@fmt.date date=generatedDate relative=false /></td>
 					</tr>
-
 				</tbody>
 			</table>
-
 			<table class="table table-condensed">
 				<thead>
 					<tr>
@@ -86,8 +76,6 @@
 				</tbody>
 			</table>
 		</div>
-
-
 		<table class="table table-condensed grid">
 			<thead>
 				<tr>
@@ -109,7 +97,6 @@
 				</tr>
 			</thead>
 			<tbody>
-
 				<#-- Entities -->
 				<#list entities as entity>
 					<#assign assessmentComponentMap = entity.componentInfo />
@@ -122,61 +109,60 @@
 						<td>${mr.studentCourseDetails.currentRoute.code}</td>
 						<td>${mr.academicYear.startYear?c}</td>
 						<td>${mr.cats}</td>
-
 						<#list componentInfo as component>
 							<#assign groupAndSequence = component._1() />
 								<#if mapGet(assessmentComponentMap, groupAndSequence)??>
 									<#assign componentDetails = mapGet(assessmentComponentMap, groupAndSequence) />
-												<td>
-													<#if componentDetails.mark??>
-														<#if componentDetails.mark?number < passMark>
-															<span class="exam-grid-fail">${componentDetails.mark}</span>
-														<#elseif componentDetails.actual>
-															<span class="exam-grid-actual-mark">${componentDetails.mark}</span>
-														<#else>
-															${componentDetails.mark}
-														</#if>
-													<#else>
-														<span class="exam-grid-actual-mark use-tooltip" title="" data-container="body" data-original-title="No mark set">X</span>
-													</#if>
-												</td>
-												<td>
-													<#if componentDetails.grade??>
-														<#if componentDetails.actual>
-																<span class="exam-grid-actual-mark">${componentDetails.grade}</span>
-														<#else>
-															${componentDetails.grade}
-														</#if>
-													<#else>
-														<span class="exam-grid-actual-mark use-tooltip" title="" data-container="body" data-original-title="No grade set">X</span>
-													</#if>
-												</td>
+									<td>
+										<#if componentDetails.mark??>
+											<#if componentDetails.mark?number < passMark>
+												<span class="exam-grid-fail">${componentDetails.mark}</span>
+											<#elseif componentDetails.actual>
+												<span class="exam-grid-actual-mark">${componentDetails.mark}</span>
+											<#else>
+												${componentDetails.mark}
+											</#if>
+										<#else>
+											<span class="exam-grid-actual-mark use-tooltip" title="" data-container="body" data-original-title="No mark set">X</span>
+										</#if>
+									</td>
+									<td>
+										<#if componentDetails.grade??>
+											<#if componentDetails.actual>
+													<span class="exam-grid-actual-mark">${componentDetails.grade}</span>
+											<#else>
+												${componentDetails.grade}
+											</#if>
+										<#else>
+											<span class="exam-grid-actual-mark use-tooltip" title="" data-container="body" data-original-title="No grade set">X</span>
+										</#if>
+									</td>
 								<#else>
 									<td></td><td></td>
 								</#if>
 						</#list>
 						<td>
 							<#if mr.agreedMark??>
-									<#if mr.agreedMark?number < passMark>
-										<span class=exam-grid-fail">${mr.agreedMark}</span>
-									<#else>
-										${mr.agreedMark}
-									</#if>
+								<#if mr.agreedMark?number < passMark>
+									<span class=exam-grid-fail">${mr.agreedMark}</span>
+								<#else>
+									${mr.agreedMark}
+								</#if>
 							<#elseif mr.actualMark??>
 								<span class="<#if mr.actualMark?number < passMark>exam-grid-fail<#else>exam-grid-actual-mark</#if>">
 									${mr.actualMark}
 								</span>
 							<#else>
-									<span class="exam-grid-actual-mark use-tooltip" title="" data-container="body" data-original-title="No marks set">X</span>
+								<span class="exam-grid-actual-mark use-tooltip" title="" data-container="body" data-original-title="No marks set">X</span>
 							</#if>
 						</td>
 						<td>
 							<#if mr.agreedGrade??>
 								${mr.agreedGrade}
 							<#elseif mr.actualGrade??>
-									<span class="exam-grid-actual-mark">${mr.actualGrade}</span>
+								<span class="exam-grid-actual-mark">${mr.actualGrade}</span>
 							<#else>
-									<span class="exam-grid-actual-mark use-tooltip" title="" data-container="body" data-original-title="No grade set">X</span>
+								<span class="exam-grid-actual-mark use-tooltip" title="" data-container="body" data-original-title="No grade set">X</span>
 							</#if>
 						</td>
 					</tr>

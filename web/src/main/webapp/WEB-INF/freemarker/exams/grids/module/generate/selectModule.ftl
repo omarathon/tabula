@@ -21,14 +21,7 @@
 		Before you create a new grid, ensure you have entered all the necessary data in SITS and verified its accuracy.</p>
 </div>
 
-
-
 <form action="<@routes.exams.generateModuleGrid department academicYear />" class="form-inline select-course" method="post">
-
-
-
-
-
 	<div class="form-inline creation-form" style="margin-bottom: 10px;">
 		<label for="module-picker">Select module:</label>
 		<select id="module-picker" name ="module" class="form-control" style="width: 360px;" placeholder="Start typing a module code or name&hellip;">
@@ -38,14 +31,12 @@
 			</#list>
 		</select>
 
-			<@bs3form.errors path="selectExamModuleCommand" />
+		<@bs3form.errors path="selectExamModuleCommand" />
 
 		<div class="buttons">
 			<button class="btn btn-default disabled" type="submit" name="${GenerateModuleExamGridMappingParameters.selectModule}" >Next</button>
 		</div>
 	</div>
-
-
 </form>
 
 <script>
