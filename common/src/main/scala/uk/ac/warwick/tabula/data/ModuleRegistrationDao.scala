@@ -79,7 +79,7 @@ class ModuleRegistrationDaoImpl extends ModuleRegistrationDao with Daoisms {
 			.add(is("module", module))
 			.add(is("academicYear", academicYear))
 			.setFetchMode("studentCourseDetails", FetchMode.JOIN)
-  		.addOrder(asc("studentCourseDetails.scjCode"))
+			.addOrder(asc("studentCourseDetails.scjCode"))
 			.seq
 	}
 
