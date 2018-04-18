@@ -43,6 +43,7 @@ trait AssessmentMembershipDao {
 	def getUpstreamAssessmentGroup(id:String): Option[UpstreamAssessmentGroup]
 	def getAssessmentComponent(id: String): Option[AssessmentComponent]
 	def getAssessmentComponent(group: UpstreamAssessmentGroup): Option[AssessmentComponent]
+	def getUpstreamAssessmentGroups(module: Module, academicYear:AcademicYear): Seq[UpstreamAssessmentGroup]
 
 	/**
 	 * Get all AssessmentComponents that appear to belong to this module.
@@ -197,6 +198,14 @@ class AssessmentMembershipDaoImpl extends AssessmentMembershipDao with Daoisms w
 			.uniqueResult
 	}
 
+	def getUpstreamAssessmentGroups(module: Module, academicYear:AcademicYear): Seq[UpstreamAssessmentGroup] = {
+		session.newCriteria[UpstreamAssessmentGroup]
+			.add(Restrictions.like("moduleCode", module.code.toUpperCase + "-%"))
+			.add(is("academicYear", academicYear))
+			.addOrder(Order.asc("assessmentGroup"))
+			.addOrder(Order.asc("sequence"))
+			.seq
+	}
 	/** Just gets components of type Assignment for this module, not all components. */
 	def getAssessmentComponents(module: Module, inUseOnly: Boolean): Seq[AssessmentComponent] = {
 		val c = session.newCriteria[AssessmentComponent]
