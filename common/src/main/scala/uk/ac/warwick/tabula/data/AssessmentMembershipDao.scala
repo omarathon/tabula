@@ -1,6 +1,5 @@
 package uk.ac.warwick.tabula.data
 
-import org.hibernate.FetchMode
 import org.hibernate.`type`.StandardBasicTypes
 import uk.ac.warwick.tabula.data.Transactions._
 import uk.ac.warwick.tabula.helpers.Logging

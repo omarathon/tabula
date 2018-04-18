@@ -9,15 +9,10 @@ import uk.ac.warwick.spring.Wire
 import uk.ac.warwick.tabula.AcademicYear
 import uk.ac.warwick.tabula.commands.exams.grids._
 import uk.ac.warwick.tabula.data.model.Department
-import uk.ac.warwick.tabula.services.AutowiringProgressionServiceComponent
-import uk.ac.warwick.tabula.services.exams.grids.{AutowiringNormalCATSLoadServiceComponent, AutowiringUpstreamRouteRuleServiceComponent}
 import uk.ac.warwick.tabula.web.controllers.exams.ExamsController
 import uk.ac.warwick.tabula.web.views.ExcelView
 
-trait ExamModuleGridDocumentsController extends ExamsController
-	with AutowiringUpstreamRouteRuleServiceComponent
-	with AutowiringProgressionServiceComponent
-	with AutowiringNormalCATSLoadServiceComponent {
+trait ExamModuleGridDocumentsController extends ExamsController {
 
 	self: GenerateModuleExamGridController =>
 
