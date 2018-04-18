@@ -1,9 +1,12 @@
 package uk.ac.warwick.tabula.services.scheduling
 
 import java.sql.{ResultSet, Types}
-import javax.sql.DataSource
 
-import dispatch.classic.{Http, url}
+import javax.sql.DataSource
+import org.apache.http.HttpEntity
+import org.apache.http.client.methods.HttpGet
+import org.apache.http.impl.client.AbstractResponseHandler
+import org.apache.http.util.EntityUtils
 import org.springframework.context.annotation.Profile
 import org.springframework.jdbc.`object`.{MappingSqlQuery, MappingSqlQueryWithParameters}
 import org.springframework.jdbc.core.SqlParameter
@@ -14,6 +17,7 @@ import uk.ac.warwick.tabula.data.model.DegreeType
 import uk.ac.warwick.tabula.helpers.Logging
 import uk.ac.warwick.tabula.helpers.StringUtils._
 import uk.ac.warwick.tabula.sandbox.SandboxData
+import uk.ac.warwick.tabula.services.AutowiringApacheHttpClientComponent
 
 import scala.collection.JavaConverters._
 import scala.util.parsing.json.JSON
@@ -36,14 +40,13 @@ trait ModuleImporter {
 }
 
 /**
- * Retrieves department and module information from Webgroups.
+ * Retrieves department and module information from Webgroups and SITS.
  */
 @Profile(Array("dev", "test", "production")) @Service
-class ModuleImporterImpl extends ModuleImporter with Logging {
+class ModuleImporterImpl extends ModuleImporter with Logging with AutowiringApacheHttpClientComponent {
 	import ModuleImporter._
 
 	var sits: DataSource = Wire[DataSource]("sitsDataSource")
-	var httpClient: Http = Wire[Http]
 
 	var departmentsApiUrl: String = Wire.property("${departments.api}")
 
@@ -53,22 +56,25 @@ class ModuleImporterImpl extends ModuleImporter with Logging {
 	lazy val routeTeachingDepartmentMappingQuery = new RouteTeachingDepartmentInfoMappingQuery(sits)
 
 	def getDepartments(): Seq[DepartmentInfo] = {
-		httpClient.when(_ == 200)(url(departmentsApiUrl) >- { json =>
-			JSON.parseFull(json) match {
-				case Some(departments: Seq[Map[String, Any]] @unchecked) =>
-					departments
-						.filterNot(_.get("deleted").exists(_ == true))
-						.filterNot(_.get("inUse").exists(_ == false))
-						.filter(_.get("code").collect { case s: String => s }.orNull.hasText)
-						.map { properties =>
-							DepartmentInfo(
-								fullName = properties.get("name").collect { case s: String => s }.orNull.safeTrim,
-								shortName = properties.get("shortName").collect { case s: String => s }.orNull.safeTrim,
-								code = properties.get("code").collect { case s: String => s }.orNull.toLowerCase,
-								faculty = properties.get("faculty").collect { case s: String => s }.orNull.safeTrim
-							)
-						}
-				case _ => throw new IllegalArgumentException(s"Couldn't parse JSON $json")
+		httpClient.execute(new HttpGet(departmentsApiUrl), new AbstractResponseHandler[Seq[DepartmentInfo]] {
+			override def handleEntity(entity: HttpEntity): Seq[DepartmentInfo] = {
+				val json = EntityUtils.toString(entity)
+				JSON.parseFull(json) match {
+					case Some(departments: Seq[Map[String, Any]] @unchecked) =>
+						departments
+							.filterNot(_.get("deleted").exists(_ == true))
+							.filterNot(_.get("inUse").exists(_ == false))
+							.filter(_.get("code").collect { case s: String => s }.orNull.hasText)
+							.map { properties =>
+								DepartmentInfo(
+									fullName = properties.get("name").collect { case s: String => s }.orNull.safeTrim,
+									shortName = properties.get("shortName").collect { case s: String => s }.orNull.safeTrim,
+									code = properties.get("code").collect { case s: String => s }.orNull.toLowerCase,
+									faculty = properties.get("faculty").collect { case s: String => s }.orNull.safeTrim
+								)
+							}
+					case _ => throw new IllegalArgumentException(s"Couldn't parse JSON $json")
+				}
 			}
 		})
 	}

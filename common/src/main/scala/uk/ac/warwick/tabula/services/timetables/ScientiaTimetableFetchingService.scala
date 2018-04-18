@@ -1,14 +1,16 @@
 package uk.ac.warwick.tabula.services.timetables
 
-import dispatch.classic.{Handler, Request, url}
 import org.apache.commons.codec.digest.DigestUtils
+import org.apache.http.client.ResponseHandler
+import org.apache.http.client.methods.HttpGet
+import org.apache.http.client.utils.URIBuilder
 import org.joda.time.{DateTimeConstants, LocalTime}
 import uk.ac.warwick.spring.Wire
 import uk.ac.warwick.tabula.AcademicYear
 import uk.ac.warwick.tabula.data.model.groups.{DayOfWeek, WeekRangeListUserType}
 import uk.ac.warwick.tabula.helpers.ExecutionContexts.timetable
 import uk.ac.warwick.tabula.helpers.StringUtils._
-import uk.ac.warwick.tabula.helpers.{ClockComponent, FoundUser, Futures, Logging}
+import uk.ac.warwick.tabula.helpers._
 import uk.ac.warwick.tabula.services._
 import uk.ac.warwick.tabula.services.timetables.TimetableFetchingService.EventList
 import uk.ac.warwick.tabula.timetables.{TimetableEvent, TimetableEventType}
@@ -75,7 +77,7 @@ private class ScientiaHttpTimetableFetchingService(scientiaConfiguration: Scient
 		with SmallGroupServiceComponent
 		with ModuleAndDepartmentServiceComponent
 		with UserLookupComponent
-		with DispatchHttpClientComponent =>
+		with ApacheHttpClientComponent =>
 
 	import ScientiaHttpTimetableFetchingService._
 
@@ -100,13 +102,12 @@ private class ScientiaHttpTimetableFetchingService(scientiaConfiguration: Scient
 		case (uri, year) => (uri + "?RoomXML", year)
 	}
 
-	// a dispatch response handler which reads XML from the response and parses it into a list of TimetableEvents
+	// an HTTPClient response handler which reads XML from the response and parses it into a list of TimetableEvents
 	// the timetable response doesn't include its year, so we pass that in separately.
-	def handler(year: AcademicYear, excludeSmallGroupEventsInTabula: Boolean = false, uniId: String): (Map[String, Seq[String]], Request) => Handler[Seq[TimetableEvent]] = { (_: Map[String,Seq[String]], req: dispatch.classic.Request) =>
-		req <> { node =>
+	def handler(year: AcademicYear, excludeSmallGroupEventsInTabula: Boolean = false, uniId: String): ResponseHandler[Seq[TimetableEvent]] =
+		ApacheHttpClientUtils.xmlResponseHandler { node =>
 			parseXml(node, year, uniId, locationFetchingService, moduleAndDepartmentService, userLookup)
 		}
-	}
 
 	private def hasSmallGroups(moduleCode: Option[String], year: AcademicYear) =
 		moduleCode.flatMap(moduleAndDepartmentService.getModuleByCode).fold(false) { module =>
@@ -136,17 +137,21 @@ private class ScientiaHttpTimetableFetchingService(scientiaConfiguration: Scient
 		// fetch the events from each of the supplied URIs, and flatmap them to make one big list of events
 		val results: Seq[Future[EventList]] = uris.map { case (uri, year) =>
 			// add ?p0={param} to the URL's get parameters
-			val req = url(uri) <<? Map("p0" -> param)
+			val uriBuilder = new URIBuilder(uri)
+			uriBuilder.addParameter("p0", param)
+
+			val req = new HttpGet(uriBuilder.build())
+			
 			// execute the request.
 			// If the status is OK, pass the response to the handler function for turning into TimetableEvents
 			// else return an empty list.
-			logger.info(s"Requesting timetable data from ${req.to_uri.toString}")
+			logger.info(s"Requesting timetable data from ${req.getURI.toString}")
 
 			val result = Future {
-				val ev = httpClient.when(_==200)(req >:+ handler(year, excludeSmallGroupEventsInTabula, param))
+				val ev = httpClient.execute(req, handler(year, excludeSmallGroupEventsInTabula, param))
 
 				if (ev.isEmpty) {
-					logger.info(s"Timetable request successful but no events returned: ${req.to_uri.toString}")
+					logger.info(s"Timetable request successful but no events returned: ${req.getURI.toString}")
 				}
 
 				ev
@@ -154,7 +159,7 @@ private class ScientiaHttpTimetableFetchingService(scientiaConfiguration: Scient
 
 			// Some extra logging here
 			result.onFailure { case e =>
-				logger.warn(s"Request for ${req.to_uri.toString} failed: ${e.getMessage}")
+				logger.warn(s"Request for ${req.getURI.toString} failed: ${e.getMessage}")
 			}
 
 			result.map { events =>
@@ -196,7 +201,7 @@ object ScientiaHttpTimetableFetchingService extends Logging {
 				with AutowiringModuleAndDepartmentServiceComponent
 				with AutowiringWAI2GoConfigurationComponent
 				with AutowiringUserLookupComponent
-				with AutowiringDispatchHttpClientComponent
+				with AutowiringApacheHttpClientComponent
 
 		if (scientiaConfiguration.perYearUris.exists(_._1.contains("stubTimetable"))) {
 			// don't cache if we're using the test stub - otherwise we won't see updates that the test setup makes

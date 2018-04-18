@@ -1,7 +1,7 @@
 package uk.ac.warwick.tabula.services.timetables
 
-import dispatch.classic.{Credentials, Http}
-import org.apache.http.client.HttpClient
+import org.apache.http.auth.UsernamePasswordCredentials
+import org.apache.http.impl.client.CloseableHttpClient
 import org.joda.time.LocalTime
 import org.mockito.Matchers
 import uk.ac.warwick.spring.Wire
@@ -17,15 +17,15 @@ class CelcatTimetableFetchingServiceTest extends TestBase with Mockito {
 
 	val module: Module = Fixtures.module("ib121")
 
-	val httpClient: HttpClient = mock[HttpClient]
+	val httpClient: CloseableHttpClient = mock[CloseableHttpClient]
 
 	val service = new CelcatHttpTimetableFetchingService(new CelcatConfiguration {
 		override val wbsConfiguration: CelcatDepartmentConfiguration = CelcatDepartmentConfiguration (
 			baseUri = "https://rimmer.wbs.ac.uk",
-			credentials = Credentials(Wire.property("username"), "password")
+			credentials = new UsernamePasswordCredentials(Wire.property("username"), "password")
 		)
 		val cacheEnabled = false
-	}) with UserLookupComponent with ProfileServiceComponent with CacheStrategyComponent with LocationFetchingServiceComponent with ModuleAndDepartmentServiceComponent with DispatchHttpClientComponent {
+	}) with UserLookupComponent with ProfileServiceComponent with CacheStrategyComponent with LocationFetchingServiceComponent with ModuleAndDepartmentServiceComponent with ApacheHttpClientComponent {
 		val userLookup = new MockUserLookup
 		val profileService = mock[ProfileService]
 		val cacheStrategy = CacheStrategy.InMemoryOnly
@@ -37,9 +37,7 @@ class CelcatTimetableFetchingServiceTest extends TestBase with Mockito {
 			Some(Fixtures.module(moduleCode.asInstanceOf[String]))
 		}
 
-		override val httpClient: Http = new Http {
-			override def make_client: HttpClient = CelcatTimetableFetchingServiceTest.this.httpClient
-		}
+		override val httpClient: CloseableHttpClient = CelcatTimetableFetchingServiceTest.this.httpClient
 	}
 
 	@Test def parseJSON() {
