@@ -1,15 +1,11 @@
 package uk.ac.warwick.tabula.commands.profiles.admin.timetables
 
-import java.io.IOException
-
 import com.fasterxml.jackson.databind.ObjectMapper
-import org.apache.http.auth.UsernamePasswordCredentials
+import org.apache.http.HttpResponse
 import org.apache.http.client.ResponseHandler
 import org.apache.http.client.methods.HttpGet
 import org.apache.http.client.utils.URIBuilder
 import org.apache.http.impl.client.BasicResponseHandler
-import org.apache.http.util.EntityUtils
-import org.apache.http.{HttpResponse, HttpStatus}
 import uk.ac.warwick.tabula.commands._
 import uk.ac.warwick.tabula.helpers.ApacheHttpClientUtils
 import uk.ac.warwick.tabula.permissions.Permissions
@@ -49,7 +45,7 @@ class TimetableCheckerCommandInternal() extends CommandInternal[String] with Tim
 		val uri = uriBuilder.build()
 
 		val req = new HttpGet(uri)
-		req.setHeader(ApacheHttpClientUtils.basicAuthHeader(new UsernamePasswordCredentials(wbsConfiguration.credentials.username, wbsConfiguration.credentials.password)))
+		req.setHeader(ApacheHttpClientUtils.basicAuthHeader(wbsConfiguration.credentials))
 
 		def handler: ResponseHandler[String] = new BasicResponseHandler() {
 			override def handleResponse(response: HttpResponse): String = {
