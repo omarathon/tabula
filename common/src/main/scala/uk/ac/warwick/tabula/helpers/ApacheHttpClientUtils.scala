@@ -4,12 +4,11 @@ import java.io.InputStreamReader
 import java.net.URI
 import java.nio.charset.StandardCharsets
 
-import dispatch.classic.Handler
 import javax.xml.parsers.SAXParserFactory
 import org.apache.commons.codec.binary.Base64
 import org.apache.commons.io.IOUtils
 import org.apache.http.auth.{AuthScope, Credentials}
-import org.apache.http.client.ResponseHandler
+import org.apache.http.client.{HttpResponseException, ResponseHandler}
 import org.apache.http.client.protocol.HttpClientContext
 import org.apache.http.client.utils.URIUtils
 import org.apache.http.entity.ContentType
@@ -18,7 +17,7 @@ import org.apache.http.impl.client.{AbstractResponseHandler, BasicAuthCache, Bas
 import org.apache.http.impl.conn.DefaultSchemePortResolver
 import org.apache.http.message.BasicHeader
 import org.apache.http.util.EntityUtils
-import org.apache.http.{Header, HttpEntity, HttpHost}
+import org.apache.http._
 
 import scala.xml.XML
 
@@ -56,13 +55,30 @@ trait ApacheHttpClientUtils {
 				try {
 					val charset = ContentType.getLenientOrDefault(entity).getCharset
 					val reader = new InputStreamReader(in, charset)
-					val xml = XML.withSAXParser(Handler.saxParserFactory.newSAXParser).load(reader)
+					val xml = XML.withSAXParser(ApacheHttpClientUtils.saxParserFactory.newSAXParser).load(reader)
 					block(xml)
 				} finally {
 					IOUtils.closeQuietly(in)
 					EntityUtils.consumeQuietly(entity)
 				}
 			}
+		}
+
+	def statusCodeFilteringHandler[A](expected: Int)(block: HttpEntity => A): ResponseHandler[A] =
+		handler {
+			case response if response.getStatusLine.getStatusCode == expected => block(response.getEntity)
+		}
+
+	def handler[A](block: PartialFunction[HttpResponse, A]): ResponseHandler[A] =
+		new ResponseHandler[A] {
+			override def handleResponse(response: HttpResponse): A =
+				block.applyOrElse(response, { _: HttpResponse =>
+					val statusLine: StatusLine = response.getStatusLine
+					val entity: HttpEntity = response.getEntity
+
+					EntityUtils.consumeQuietly(entity)
+					throw new HttpResponseException(statusLine.getStatusCode, statusLine.getReasonPhrase)
+				})
 		}
 }
 
