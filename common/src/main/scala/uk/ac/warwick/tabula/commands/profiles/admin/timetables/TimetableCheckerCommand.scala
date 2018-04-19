@@ -41,7 +41,7 @@ class TimetableCheckerCommandInternal() extends CommandInternal[String] with Tim
 			RequestBuilder.get(s"${wbsConfiguration.baseUri}/$warwickUniId")
 				.addParameter("forcebasic", "true")
 				.setHeader(ApacheHttpClientUtils.basicAuthHeader(wbsConfiguration.credentials))
-  			.build()
+				.build()
 
 		val handler: ResponseHandler[String] = new BasicResponseHandler() {
 			override def handleResponse(response: HttpResponse): String = {

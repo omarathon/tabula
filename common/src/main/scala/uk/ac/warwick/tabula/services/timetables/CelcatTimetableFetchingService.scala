@@ -238,8 +238,8 @@ class CelcatHttpTimetableFetchingService(celcatConfiguration: CelcatConfiguratio
 		val req =
 			RequestBuilder.get(s"${config.baseUri}/$filename")
 				.addParameter("forcebasic", "true")
-  			.setHeader(ApacheHttpClientUtils.basicAuthHeader(config.credentials))
-  			.build()
+				.setHeader(ApacheHttpClientUtils.basicAuthHeader(config.credentials))
+				.build()
 
 		// Execute the request
 		// If the status is OK, pass the response to the handler function for turning into TimetableEvents
