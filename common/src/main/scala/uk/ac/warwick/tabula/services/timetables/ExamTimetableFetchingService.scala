@@ -2,7 +2,7 @@ package uk.ac.warwick.tabula.services.timetables
 
 import org.apache.commons.codec.digest.DigestUtils
 import org.apache.http.client.ResponseHandler
-import org.apache.http.client.methods.HttpGet
+import org.apache.http.client.methods.RequestBuilder
 import org.joda.time.format.{DateTimeFormat, DateTimeFormatter, PeriodFormatter, PeriodFormatterBuilder}
 import org.joda.time.{DateTime, Period}
 import org.springframework.stereotype.Service
@@ -79,7 +79,7 @@ private class ExamTimetableHttpTimetableFetchingService(examTimetableConfigurati
 			case user =>
 				val endpoint = s"${examTimetableConfiguration.examTimetableUrl}timetable.xml"
 
-				val req = new HttpGet(endpoint)
+				val req = RequestBuilder.get(endpoint).build()
 				TrustedApplicationUtils.signRequest(applicationManager.getCurrentApplication, user.getUserId, req)
 
 				logger.info(s"Requesting exam timetable data from $endpoint")
@@ -228,7 +228,7 @@ abstract class AbstractExamTimetableFetchingService extends ExamTimetableFetchin
 	def getTimetable(member: Member, viewer: CurrentUser): Future[ExamTimetableFetchingService.ExamTimetable] = {
 		val endpoint = s"${examTimetableConfiguration.examTimetableUrl}${member.universityId}.xml"
 
-		val req = new HttpGet(endpoint)
+		val req = RequestBuilder.get(endpoint).build()
 		TrustedApplicationUtils.signRequest(applicationManager.getCurrentApplication, viewer.userId, req)
 
 		logger.info(s"Requesting exam timetable data from $endpoint")

@@ -2,7 +2,7 @@ package uk.ac.warwick.tabula.web.controllers.profiles
 
 import org.apache.http.HttpEntity
 import org.apache.http.client.ResponseHandler
-import org.apache.http.client.methods.HttpGet
+import org.apache.http.client.methods.RequestBuilder
 import org.apache.http.impl.client.AbstractResponseHandler
 import org.apache.http.util.EntityUtils
 import uk.ac.warwick.spring.Wire
@@ -51,7 +51,7 @@ trait PeopleSearchData extends Logging {
 				.addQueryParameter("query", queryPara)
 				.toString
 
-		val req = new HttpGet(endPointUrl)
+		val req = RequestBuilder.get(endPointUrl).build()
 		TrustedApplicationUtils.signRequest(applicationManager.getCurrentApplication, onBehalfOf, req)
 
 		Try(httpClient.execute(req, handler)) match {

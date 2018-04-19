@@ -3,8 +3,7 @@ package uk.ac.warwick.tabula.commands.profiles.admin.timetables
 import com.fasterxml.jackson.databind.ObjectMapper
 import org.apache.http.HttpResponse
 import org.apache.http.client.ResponseHandler
-import org.apache.http.client.methods.HttpGet
-import org.apache.http.client.utils.URIBuilder
+import org.apache.http.client.methods.RequestBuilder
 import org.apache.http.impl.client.BasicResponseHandler
 import uk.ac.warwick.tabula.commands._
 import uk.ac.warwick.tabula.helpers.ApacheHttpClientUtils
@@ -38,14 +37,11 @@ class TimetableCheckerCommandInternal() extends CommandInternal[String] with Tim
 	def applyInternal(): String = {
 		val wbsConfiguration: CelcatDepartmentConfiguration = celcatConfiguration.wbsConfiguration
 
-		val uriBuilder = new URIBuilder(wbsConfiguration.baseUri)
-		uriBuilder.setPath(s"/$warwickUniId")
-		uriBuilder.addParameter("forcebasic", "true")
-
-		val uri = uriBuilder.build()
-
-		val req = new HttpGet(uri)
-		req.setHeader(ApacheHttpClientUtils.basicAuthHeader(wbsConfiguration.credentials))
+		val req =
+			RequestBuilder.get(s"${wbsConfiguration.baseUri}/$warwickUniId")
+				.addParameter("forcebasic", "true")
+				.setHeader(ApacheHttpClientUtils.basicAuthHeader(wbsConfiguration.credentials))
+				.build()
 
 		val handler: ResponseHandler[String] = new BasicResponseHandler() {
 			override def handleResponse(response: HttpResponse): String = {

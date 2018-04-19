@@ -4,7 +4,7 @@ import java.sql.{ResultSet, Types}
 
 import javax.sql.DataSource
 import org.apache.http.HttpEntity
-import org.apache.http.client.methods.HttpGet
+import org.apache.http.client.methods.RequestBuilder
 import org.apache.http.impl.client.AbstractResponseHandler
 import org.apache.http.util.EntityUtils
 import org.springframework.context.annotation.Profile
@@ -56,7 +56,7 @@ class ModuleImporterImpl extends ModuleImporter with Logging with AutowiringApac
 	lazy val routeTeachingDepartmentMappingQuery = new RouteTeachingDepartmentInfoMappingQuery(sits)
 
 	def getDepartments(): Seq[DepartmentInfo] = {
-		httpClient.execute(new HttpGet(departmentsApiUrl), new AbstractResponseHandler[Seq[DepartmentInfo]] {
+		httpClient.execute(RequestBuilder.get(departmentsApiUrl).build(), new AbstractResponseHandler[Seq[DepartmentInfo]] {
 			override def handleEntity(entity: HttpEntity): Seq[DepartmentInfo] = {
 				val json = EntityUtils.toString(entity)
 				JSON.parseFull(json) match {
