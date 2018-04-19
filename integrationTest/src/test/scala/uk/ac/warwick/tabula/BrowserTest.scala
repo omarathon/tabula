@@ -35,7 +35,7 @@ import scala.util.{Success, Try}
 @RunWith(classOf[JUnitRunner])
 abstract class BrowserTest
 	extends FlatSpec
-	with ShouldMatchers
+	with Matchers
 	with BeforeAndAfter
 	with EventuallyAjax
 	with SpanSugar
@@ -250,7 +250,7 @@ trait UserKnowledge {
 }
 
 trait TestScreenshots extends Logging {
-	self: Suite =>
+	self: TestSuite =>
 
   implicit val webDriver: WebDriver // let the trait know this will be implemented
   val screenshotDirectory: File
