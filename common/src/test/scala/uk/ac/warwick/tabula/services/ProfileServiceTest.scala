@@ -26,7 +26,7 @@ class ProfileServiceTest extends PersistenceTestBase with Mockito {
 		}
 	}
 
-	@Test def crud() = transactional { tx =>
+	@Test def crud(): Unit = transactional { tx =>
 		val m1 = Fixtures.student(universityId = "0000001", userId="student")
 		val m2 = Fixtures.student(universityId = "0000002", userId="student")
 
@@ -73,7 +73,7 @@ class ProfileServiceTest extends PersistenceTestBase with Mockito {
 		profileService.getMemberByUser(new User("staff1"), disableFilter = false) should be (Some(m3))
 	}
 
-	@Test def listMembersUpdatedSince() = transactional { tx =>
+	@Test def listMembersUpdatedSince(): Unit = transactional { tx =>
 
 		val dept1 = Fixtures.departmentWithId("in", "IT Services", "1")
 		val dept2 = Fixtures.departmentWithId("po", "Politics", "2")

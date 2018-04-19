@@ -68,7 +68,7 @@ class ExtensionTest extends PersistenceTestBase {
 
   }
 
-	@Test def deleteFileAttachmentOnDelete() = transactional{tx=>
+	@Test def deleteFileAttachmentOnDelete(): Unit = transactional{tx=>
 		// TAB-667
 		val orphanAttachment = flushing(session) {
 			val attachment = new FileAttachment

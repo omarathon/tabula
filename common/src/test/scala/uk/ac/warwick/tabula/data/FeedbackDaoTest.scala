@@ -9,7 +9,7 @@ class FeedbackDaoTest extends PersistenceTestBase {
 		override def session: Session = FeedbackDaoTest.this.session
 	}
 
-	@Test def crud() = transactional { tx =>
+	@Test def crud(): Unit = transactional { tx =>
 		// TAB-2415
 		session.enableFilter("notDeleted")
 

@@ -159,7 +159,7 @@ subprojects {
         testCompile 'junit:junit:4.12'
         testCompile 'org.jmock:jmock-junit4:2.5.1'
         testCompile 'jmock:jmock-cglib:1.2.0'
-        testCompile "org.specs2:specs2_${scalaMajorVersion}:2.4.15"
+        testCompile "org.specs2:specs2_${scalaMajorVersion}:2.4.17"
         testCompile "org.scalatest:scalatest_${scalaMajorVersion}:3.0.5"
         testCompile 'org.mockito:mockito-all:1.10.19'
     }
