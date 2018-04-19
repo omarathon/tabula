@@ -100,7 +100,7 @@ dependencies {
 
     compile 'org.xhtmlrenderer:flying-saucer-pdf-itext5:9.0.4'
 
-    compile "uk.co.halfninja:random-name-generator_${scalaMajorVersion}:0.2-warwick"
+    compile "uk.co.halfninja:random-name-generator_${scalaMajorVersion}:0.3-warwick"
 
     // libphonenumber, for formatting phone numbers
     compile 'com.googlecode.libphonenumber:libphonenumber:5.2'
