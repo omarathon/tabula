@@ -116,7 +116,7 @@ dependencies {
     compile 'com.google.code.gson:gson:2.3.1'
 
     compile "org.elasticsearch:elasticsearch:${elasticsearchVersion}"
-    compile "com.sksamuel.elastic4s:elastic4s-core_${scalaMajorVersion}:${elasticsearchVersion}"
+    compile "com.sksamuel.elastic4s:elastic4s-core_${scalaMajorVersion}:${elastic4sVersion}"
 
     compile "org.apache.jclouds:jclouds-blobstore:${jcloudsVersion}"
     compile "org.apache.jclouds.driver:jclouds-slf4j:${jcloudsVersion}"
@@ -137,7 +137,9 @@ dependencies {
     compile 'org.hsqldb:hsqldb:2.2.9'
 
     testCompile "org.elasticsearch:elasticsearch:${elasticsearchVersion}:tests"
-    testCompile "com.sksamuel.elastic4s:elastic4s-testkit_${scalaMajorVersion}:${elasticsearchVersion}"
+    testCompile ("com.sksamuel.elastic4s:elastic4s-testkit_${scalaMajorVersion}:${elastic4sVersion}") {
+        exclude group: 'org.scalatest'
+    }
 }
 
 jar.dependsOn(generateRebel)
