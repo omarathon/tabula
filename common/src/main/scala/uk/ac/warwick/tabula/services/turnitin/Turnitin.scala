@@ -3,15 +3,13 @@ package uk.ac.warwick.tabula.services.turnitin
 import java.io.InputStream
 
 import org.apache.http.client.config.RequestConfig
-import org.apache.http.client.methods.{HttpGet, HttpPost, HttpUriRequest}
+import org.apache.http.client.methods.RequestBuilder
 import org.apache.http.impl.client.{CloseableHttpClient, HttpClients}
 import org.springframework.beans.factory.DisposableBean
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.stereotype.Service
 import uk.ac.warwick.tabula.data.model.Assignment
 import uk.ac.warwick.tabula.helpers.Logging
-
-import scala.reflect.runtime.universe._
 
 case class FileData(data: InputStream, name: String)
 
@@ -73,16 +71,9 @@ class Turnitin extends Logging with DisposableBean {
 	val userAgent = "Coursework submission app, University of Warwick, coursework@warwick.ac.uk"
 
 	// URL to call for all requests.
-	def request[A <: HttpUriRequest : TypeTag]: A = {
-		val request: A = typeOf[A] match {
-			case t if t =:= typeOf[HttpGet] => new HttpGet(apiEndpoint).asInstanceOf[A]
-			case t if t =:= typeOf[HttpPost] => new HttpPost(apiEndpoint).asInstanceOf[A]
-			case t => throw new IllegalArgumentException(s"Unexpected type $t")
-		}
-
-		request.setHeader("User-Agent", userAgent)
-		request
-	}
+	def request(method: String): RequestBuilder =
+		RequestBuilder.create(method)
+			.setHeader("User-Agent", userAgent)
 
 	val httpClient: CloseableHttpClient =
 		HttpClients.custom()

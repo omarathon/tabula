@@ -6,8 +6,7 @@ import net.fortuna.ical4j.model.property.{Categories, DateProperty, RRule}
 import net.fortuna.ical4j.model.{Parameter, Property}
 import org.apache.commons.codec.digest.DigestUtils
 import org.apache.http.auth.{Credentials, UsernamePasswordCredentials}
-import org.apache.http.client.methods.HttpGet
-import org.apache.http.client.utils.URIBuilder
+import org.apache.http.client.methods.RequestBuilder
 import org.apache.http.client.{HttpResponseException, ResponseHandler}
 import org.apache.http.impl.client.AbstractResponseHandler
 import org.apache.http.util.EntityUtils
@@ -236,30 +235,27 @@ class CelcatHttpTimetableFetchingService(celcatConfiguration: CelcatConfiguratio
 	}
 
 	def doRequest(filename: String, config: CelcatDepartmentConfiguration, filterLectures: Boolean): Future[EventList] = {
-		val uriBuilder = new URIBuilder(config.baseUri)
-		uriBuilder.setPath(s"/$filename")
-		uriBuilder.addParameter("forcebasic", "true")
-
-		val uri = uriBuilder.build()
-
-		val req = new HttpGet(uri)
-		req.setHeader(ApacheHttpClientUtils.basicAuthHeader(config.credentials))
+		val req =
+			RequestBuilder.get(s"${config.baseUri}/$filename")
+				.addParameter("forcebasic", "true")
+  			.setHeader(ApacheHttpClientUtils.basicAuthHeader(config.credentials))
+  			.build()
 
 		// Execute the request
 		// If the status is OK, pass the response to the handler function for turning into TimetableEvents
 		// else return an empty list.
-		logger.info(s"Requesting timetable data from ${uri.toString}")
+		logger.info(s"Requesting timetable data from ${req.getURI.toString}")
 		val result =
 			Future(httpClient.execute(req, handler(config, filterLectures)))
 				.recover { case e: HttpResponseException if e.getStatusCode == HttpStatus.SC_NOT_FOUND =>
 					// Special case a 404, just return no events
-					logger.warn(s"Request for ${uri.toString} returned a 404")
+					logger.warn(s"Request for ${req.getURI.toString} returned a 404")
 					EventList.fresh(Nil)
 				}
 
 		// Extra logging
 		result.onFailure { case e =>
-			logger.warn(s"Request for ${uri.toString} failed: ${e.getMessage}")
+			logger.warn(s"Request for ${req.getURI.toString} failed: ${e.getMessage}")
 		}
 
 		result

@@ -2,7 +2,7 @@ package uk.ac.warwick.tabula.services.timetables
 
 import org.apache.commons.codec.digest.DigestUtils
 import org.apache.http.client.ResponseHandler
-import org.apache.http.client.methods.HttpGet
+import org.apache.http.client.methods.RequestBuilder
 import org.apache.http.client.utils.URIBuilder
 import org.joda.time.{DateTimeConstants, LocalTime}
 import uk.ac.warwick.spring.Wire
@@ -140,7 +140,7 @@ private class ScientiaHttpTimetableFetchingService(scientiaConfiguration: Scient
 			val uriBuilder = new URIBuilder(uri)
 			uriBuilder.addParameter("p0", param)
 
-			val req = new HttpGet(uriBuilder.build())
+			val req = RequestBuilder.get(uriBuilder.build()).build()
 			
 			// execute the request.
 			// If the status is OK, pass the response to the handler function for turning into TimetableEvents

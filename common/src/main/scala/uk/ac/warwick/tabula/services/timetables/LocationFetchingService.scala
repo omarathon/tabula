@@ -1,10 +1,8 @@
 package uk.ac.warwick.tabula.services.timetables
 
 import org.apache.commons.io.IOUtils
-import org.apache.http.HttpEntity
-import org.apache.http.client.methods.{CloseableHttpResponse, HttpGet}
+import org.apache.http.client.methods.{CloseableHttpResponse, RequestBuilder}
 import org.apache.http.client.utils.{HttpClientUtils, URIBuilder}
-import org.apache.http.util.EntityUtils
 import uk.ac.warwick.tabula.JavaImports._
 import uk.ac.warwick.tabula.data.model.{Location, MapLocation, NamedLocation}
 import uk.ac.warwick.tabula.helpers.Logging
@@ -138,10 +136,10 @@ private class WAI2GoHttpLocationFetchingService(config: WAI2GoConfiguration) ext
 		uriBuilder.addParameter(config.queryParameter, name)
 		config.defaultParameters.foreach { case (n, v) => uriBuilder.addParameter(n, v) }
 
-		val request = new HttpGet(uriBuilder.build())
+		val request = RequestBuilder.get(uriBuilder.build())
 		config.defaultHeaders.foreach { case (n, v) => request.addHeader(n, v) }
 
-		request
+		request.build()
 	}
 }
 

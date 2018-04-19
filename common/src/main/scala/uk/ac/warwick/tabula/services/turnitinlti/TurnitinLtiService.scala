@@ -11,8 +11,7 @@ import org.apache.commons.io.FilenameUtils._
 import org.apache.http.HttpStatus
 import org.apache.http.client.ResponseHandler
 import org.apache.http.client.config.RequestConfig
-import org.apache.http.client.entity.EntityBuilder
-import org.apache.http.client.methods.HttpPost
+import org.apache.http.client.methods.RequestBuilder
 import org.apache.http.impl.client.{CloseableHttpClient, HttpClients}
 import org.apache.http.message.BasicNameValuePair
 import org.apache.http.util.EntityUtils
@@ -307,15 +306,12 @@ class TurnitinLtiService extends Logging with DisposableBean
 
 		logger.debug("doRequest: " + signedParams)
 
-		val req = new HttpPost(endpoint)
-		req.setEntity(
-			EntityBuilder.create()
-				.setParameters(signedParams.toSeq.map { case (k, v) => new BasicNameValuePair(k, v) }: _*)
-				.build()
-		)
+		val req =
+			RequestBuilder.post(endpoint)
+				.addParameters(signedParams.toSeq.map { case (k, v) => new BasicNameValuePair(k, v) }: _*)
 
 		try {
-			httpClient.execute(req, ApacheHttpClientUtils.handler {
+			httpClient.execute(req.build(), ApacheHttpClientUtils.handler {
 				case response if expectedStatusCode.isEmpty || expectedStatusCode.contains(response.getStatusLine.getStatusCode) =>
 					transform.handleResponse(response)
 
@@ -337,16 +333,13 @@ class TurnitinLtiService extends Logging with DisposableBean
 	) (transform: ResponseHandler[TurnitinLtiResponse]): TurnitinLtiResponse = {
 		val signedParams = getSignedParams(params, endpoint)
 
-		val req = new HttpPost(endpoint)
-		req.setEntity(
-			EntityBuilder.create()
-				.setParameters(signedParams.toSeq.map { case (k, v) => new BasicNameValuePair(k, v) }: _*)
-				.build()
-		)
+		val req =
+			RequestBuilder.post(endpoint)
+				.addParameters(signedParams.toSeq.map { case (k, v) => new BasicNameValuePair(k, v) }: _*)
 
 		logger.debug("doRequest: " + signedParams)
 		try {
-			httpClient.execute(req, ApacheHttpClientUtils.handler {
+			httpClient.execute(req.build(), ApacheHttpClientUtils.handler {
 				case response if expectedStatusCode.isEmpty || expectedStatusCode.contains(response.getStatusLine.getStatusCode) =>
 					transform.handleResponse(response)
 

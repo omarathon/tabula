@@ -4,7 +4,6 @@ import java.io.IOException
 
 import org.apache.commons.codec.digest.DigestUtils
 import org.apache.http.client.ResponseHandler
-import org.apache.http.client.entity.EntityBuilder
 import org.apache.http.client.methods.{HttpPost, HttpUriRequest}
 import org.apache.http.message.BasicNameValuePair
 import org.apache.http.util.EntityUtils
@@ -92,15 +91,12 @@ class Session(turnitin: Turnitin, val sessionId: String) extends TurnitinMethods
 		params: (String, String)*): HttpUriRequest = {
 
 		val fullParameters = calculateParameters(functionId, params:_*)
-		val req = turnitin.request[HttpPost]
-		req.setEntity(
-			EntityBuilder.create()
-				.setParameters(fullParameters.toSeq.map { case (k, v) => new BasicNameValuePair(k, v) }: _*)
-				.build()
-		)
+		val req =
+			turnitin.request(HttpPost.METHOD_NAME)
+				.addParameters(fullParameters.toSeq.map { case (k, v) => new BasicNameValuePair(k, v) }: _*)
 
 		logger.debug("doRequest: " + fullParameters)
-		req
+		req.build()
 	}
 
 	def calculateParameters(functionId: String, params: (String, String)*): Map[String, String] = {
@@ -119,17 +115,14 @@ class Session(turnitin: Turnitin, val sessionId: String) extends TurnitinMethods
 		(transform: ResponseHandler[TurnitinResponse]): TurnitinResponse = {
 
 		val parameters = Map("fid" -> functionId) ++ commonParameters ++ params
-		val req = turnitin.request[HttpPost]
-		req.setEntity(
-			EntityBuilder.create()
-				.setParameters((parameters + md5hexparam(parameters)).toSeq.map { case (k, v) => new BasicNameValuePair(k, v) }: _*)
-				.build()
-		)
+		val req =
+			turnitin.request(HttpPost.METHOD_NAME)
+				.addParameters((parameters + md5hexparam(parameters)).toSeq.map { case (k, v) => new BasicNameValuePair(k, v) }: _*)
 
 		logger.debug("doRequest: " + parameters)
 
 		try {
-			httpClient.execute(req, ApacheHttpClientUtils.handler {
+			httpClient.execute(req.build(), ApacheHttpClientUtils.handler {
 				case response if turnitin.diagnostic =>
 					TurnitinResponse.fromDiagnostic(EntityUtils.toString(response.getEntity))
 

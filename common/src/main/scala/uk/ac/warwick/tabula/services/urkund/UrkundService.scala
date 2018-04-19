@@ -9,7 +9,7 @@ import org.apache.http._
 import org.apache.http.auth.{Credentials, UsernamePasswordCredentials}
 import org.apache.http.client.config.RequestConfig
 import org.apache.http.client.entity.EntityBuilder
-import org.apache.http.client.methods.{HttpGet, HttpPost}
+import org.apache.http.client.methods.RequestBuilder
 import org.apache.http.client.{HttpResponseException, ResponseHandler}
 import org.apache.http.entity.ContentType
 import org.apache.http.impl.client.{BasicResponseHandler, CloseableHttpClient, HttpClients}
@@ -173,11 +173,12 @@ abstract class AbstractUrkundService extends UrkundService
 		urkundDao.findReportToSubmit
 
 	private def getReceiverAddress(report: OriginalityReport): Try[String] = {
-		val req = new HttpGet(receiverUrl(report))
-		req.setHeader(ApacheHttpClientUtils.basicAuthHeader(credentials))
-		req.setHeader("Accept", "application/json")
+		val req =
+			RequestBuilder.get(receiverUrl(report))
+				.setHeader(ApacheHttpClientUtils.basicAuthHeader(credentials))
+				.setHeader("Accept", "application/json")
 
-		Try(httpClient.execute(req, new BasicResponseHandler {
+		Try(httpClient.execute(req.build(), new BasicResponseHandler {
 			override def handleEntity(entity: HttpEntity): String = {
 				EntityUtils.consumeQuietly(entity)
 				UrkundService.receiverAddress(report, analysisPrefix)
@@ -201,18 +202,19 @@ abstract class AbstractUrkundService extends UrkundService
 			"AnalysisAddress" -> expectedReceiverAddress
 		))
 
-		val req = new HttpPost(UrkundService.receiversBaseUrl)
-		req.setHeader(ApacheHttpClientUtils.basicAuthHeader(credentials))
-		req.setHeader("Accept", "application/json")
-		req.setEntity(
-			EntityBuilder.create()
-  			.setText(postData)
-  			.setContentType(ContentType.APPLICATION_JSON)
-  			.build()
-		)
+		val req =
+			RequestBuilder.post(UrkundService.receiversBaseUrl)
+				.setHeader(ApacheHttpClientUtils.basicAuthHeader(credentials))
+				.setHeader("Accept", "application/json")
+				.setEntity(
+					EntityBuilder.create()
+						.setText(postData)
+						.setContentType(ContentType.APPLICATION_JSON)
+						.build()
+				)
 
 		Try {
-			httpClient.execute(req, ApacheHttpClientUtils.statusCodeFilteringHandler(HttpStatus.SC_CREATED) { entity =>
+			httpClient.execute(req.build(), ApacheHttpClientUtils.statusCodeFilteringHandler(HttpStatus.SC_CREATED) { entity =>
 				val json = EntityUtils.toString(entity)
 				JSON.parseFull(json) match {
 					case Some(responseJson: Map[String, Any] @unchecked) => responseJson
@@ -238,17 +240,18 @@ abstract class AbstractUrkundService extends UrkundService
 				val tempFile = File.createTempFile(report.attachment.id, null)
 				report.attachment.asByteSource.copyTo(Files.asByteSink(tempFile))
 
-				val req = new HttpPost(documentUrl(report))
-				req.setHeader(ApacheHttpClientUtils.basicAuthHeader(credentials))
-				req.setHeader("Accept", "application/json")
-				req.setHeader("x-urkund-filename", UrkundService.urkundSafeFilename(report.attachment))
-				req.setHeader("x-urkund-submitter", UrkundService.submitterAddress(report.attachment.submissionValue.submission))
-				req.setEntity(
-					EntityBuilder.create()
-  					.setFile(tempFile)
-  					.setContentType(ContentType.create(UrkundService.mimeTypeConversion(report.attachment)))
-  					.build()
-				)
+				val req =
+					RequestBuilder.post(documentUrl(report))
+						.setHeader(ApacheHttpClientUtils.basicAuthHeader(credentials))
+						.setHeader("Accept", "application/json")
+						.setHeader("x-urkund-filename", UrkundService.urkundSafeFilename(report.attachment))
+						.setHeader("x-urkund-submitter", UrkundService.submitterAddress(report.attachment.submissionValue.submission))
+						.setEntity(
+							EntityBuilder.create()
+								.setFile(tempFile)
+								.setContentType(ContentType.create(UrkundService.mimeTypeConversion(report.attachment)))
+								.build()
+						)
 
 				Try {
 					val handler: ResponseHandler[UrkundResponse] = ApacheHttpClientUtils.handler {
@@ -259,7 +262,7 @@ abstract class AbstractUrkundService extends UrkundService
 							UrkundErrorResponse(response.getStatusLine.getStatusCode, Option(response.getEntity).map(EntityUtils.toString).getOrElse(""))
 					}
 
-					httpClient.execute(req, handler)
+					httpClient.execute(req.build(), handler)
 				}
 			case Failure(e) => Failure(e)
 		}
@@ -270,9 +273,10 @@ abstract class AbstractUrkundService extends UrkundService
 		urkundDao.findReportToRetreive
 
 	override def retrieveReport(report: OriginalityReport): Try[UrkundResponse] = {
-		val req = new HttpGet(documentUrl(report))
-		req.setHeader(ApacheHttpClientUtils.basicAuthHeader(credentials))
-		req.setHeader("Accept", "application/json")
+		val req =
+			RequestBuilder.get(documentUrl(report))
+				.setHeader(ApacheHttpClientUtils.basicAuthHeader(credentials))
+				.setHeader("Accept", "application/json")
 
 		Try {
 			val handler: ResponseHandler[UrkundResponse] = ApacheHttpClientUtils.handler {
@@ -283,7 +287,7 @@ abstract class AbstractUrkundService extends UrkundService
 					UrkundErrorResponse(response.getStatusLine.getStatusCode, Option(response.getEntity).map(EntityUtils.toString).getOrElse(""))
 			}
 
-			httpClient.execute(req, handler)
+			httpClient.execute(req.build(), handler)
 		}
 	}
 

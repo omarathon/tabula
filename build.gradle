@@ -25,7 +25,6 @@ ext {
     hibernateVersion = "4.3.11.Final"
     jacksonVersion = "2.6.7"
     elasticsearchVersion = "2.1.1"
-    dispatchVersion = "0.8.10"
     poiVersion = "3.17"
     tilesVersion = "3.0.8"
     jcloudsVersion = "2.0.2"
