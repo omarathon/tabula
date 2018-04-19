@@ -4,7 +4,6 @@ import java.io.InputStreamReader
 import java.net.URI
 import java.nio.charset.StandardCharsets
 
-import dispatch.classic.Handler
 import javax.xml.parsers.SAXParserFactory
 import org.apache.commons.codec.binary.Base64
 import org.apache.commons.io.IOUtils
@@ -56,7 +55,7 @@ trait ApacheHttpClientUtils {
 				try {
 					val charset = ContentType.getLenientOrDefault(entity).getCharset
 					val reader = new InputStreamReader(in, charset)
-					val xml = XML.withSAXParser(Handler.saxParserFactory.newSAXParser).load(reader)
+					val xml = XML.withSAXParser(ApacheHttpClientUtils.saxParserFactory.newSAXParser).load(reader)
 					block(xml)
 				} finally {
 					IOUtils.closeQuietly(in)
@@ -77,7 +76,7 @@ trait ApacheHttpClientUtils {
 					val statusLine: StatusLine = response.getStatusLine
 					val entity: HttpEntity = response.getEntity
 
-					EntityUtils.consume(entity)
+					EntityUtils.consumeQuietly(entity)
 					throw new HttpResponseException(statusLine.getStatusCode, statusLine.getReasonPhrase)
 				})
 		}
