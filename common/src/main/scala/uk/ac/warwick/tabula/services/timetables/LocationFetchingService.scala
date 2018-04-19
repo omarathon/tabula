@@ -1,8 +1,8 @@
 package uk.ac.warwick.tabula.services.timetables
 
 import org.apache.commons.io.IOUtils
-import org.apache.http.client.methods.{CloseableHttpResponse, RequestBuilder}
-import org.apache.http.client.utils.{HttpClientUtils, URIBuilder}
+import org.apache.http.client.methods.{CloseableHttpResponse, HttpUriRequest, RequestBuilder}
+import org.apache.http.client.utils.HttpClientUtils
 import uk.ac.warwick.tabula.JavaImports._
 import uk.ac.warwick.tabula.data.model.{Location, MapLocation, NamedLocation}
 import uk.ac.warwick.tabula.helpers.Logging
@@ -27,7 +27,7 @@ class CachedLocationFetchingService(delegate: LocationFetchingService) extends L
 
 	val CacheExpiryTime: Int = 60 * 60 * 48 // 48 hours in seconds
 
-	val cacheEntryFactory = new CacheEntryFactory[String, Location] {
+	val cacheEntryFactory: CacheEntryFactory[String, Location] = new CacheEntryFactory[String, Location] {
 		def create(name: String): Location = delegate.locationFor(name)
 
 		def create(names: JList[String]): JMap[String, Location] = {
@@ -121,7 +121,7 @@ private class WAI2GoHttpLocationFetchingService(config: WAI2GoConfiguration) ext
 				if locations.size == 1 =>
 					MapLocation(locations.head.name, locations.head.locationId)
 
-			case Success(locations) =>
+			case Success(_) =>
 				logger.info(s"Multiple locations (or no locations) returned for $name, returning NamedLocation")
 				NamedLocation(name)
 
@@ -131,12 +131,11 @@ private class WAI2GoHttpLocationFetchingService(config: WAI2GoConfiguration) ext
 		}
 	}
 
-	private def requestForName(name: String) = {
-		val uriBuilder = new URIBuilder(config.baseUri.toJavaUri)
-		uriBuilder.addParameter(config.queryParameter, name)
-		config.defaultParameters.foreach { case (n, v) => uriBuilder.addParameter(n, v) }
-
-		val request = RequestBuilder.get(uriBuilder.build())
+	private def requestForName(name: String): HttpUriRequest = {
+		val request =
+			RequestBuilder.get(config.baseUri.toJavaUri)
+				.addParameter(config.queryParameter, name)
+		config.defaultParameters.foreach { case (n, v) => request.addParameter(n, v) }
 		config.defaultHeaders.foreach { case (n, v) => request.addHeader(n, v) }
 
 		request.build()

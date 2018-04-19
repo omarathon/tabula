@@ -3,7 +3,6 @@ package uk.ac.warwick.tabula.services.timetables
 import org.apache.commons.codec.digest.DigestUtils
 import org.apache.http.client.ResponseHandler
 import org.apache.http.client.methods.RequestBuilder
-import org.apache.http.client.utils.URIBuilder
 import org.joda.time.{DateTimeConstants, LocalTime}
 import uk.ac.warwick.spring.Wire
 import uk.ac.warwick.tabula.AcademicYear
@@ -137,10 +136,10 @@ private class ScientiaHttpTimetableFetchingService(scientiaConfiguration: Scient
 		// fetch the events from each of the supplied URIs, and flatmap them to make one big list of events
 		val results: Seq[Future[EventList]] = uris.map { case (uri, year) =>
 			// add ?p0={param} to the URL's get parameters
-			val uriBuilder = new URIBuilder(uri)
-			uriBuilder.addParameter("p0", param)
-
-			val req = RequestBuilder.get(uriBuilder.build()).build()
+			val req =
+				RequestBuilder.get(uri)
+					.addParameter("p0", param)
+					.build()
 			
 			// execute the request.
 			// If the status is OK, pass the response to the handler function for turning into TimetableEvents
