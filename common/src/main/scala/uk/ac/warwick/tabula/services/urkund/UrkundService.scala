@@ -159,7 +159,8 @@ abstract class AbstractUrkundService extends UrkundService
 				.setConnectTimeout(UrkundService.responseTimeout)
 				.setSocketTimeout(UrkundService.responseTimeout)
 				.build())
-  		.disableRedirectHandling()
+			.disableRedirectHandling()
+			.disableCookieManagement()
 			.build()
 
 	override def destroy() {

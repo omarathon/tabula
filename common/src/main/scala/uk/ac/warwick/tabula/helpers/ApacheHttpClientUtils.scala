@@ -48,7 +48,7 @@ trait ApacheHttpClientUtils {
 		new BasicHeader("Authorization", s"Basic $encodedCredentials")
 	}
 
-	def xmlResponseHandler[A](block: xml.Elem => A): ResponseHandler[A] =
+	def xmlResponseHandler[A](block: xml.Elem => A): AbstractResponseHandler[A] =
 		new AbstractResponseHandler[A] {
 			override def handleEntity(entity: HttpEntity): A = {
 				val in = entity.getContent
