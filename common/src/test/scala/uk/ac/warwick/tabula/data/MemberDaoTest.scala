@@ -24,7 +24,7 @@ class MemberDaoTest extends PersistenceTestBase with Logging with Mockito {
 	val moaFT: ModeOfAttendance = Fixtures.modeOfAttendance("F", "FT", "Full time")
 	val moaPT: ModeOfAttendance = Fixtures.modeOfAttendance("P", "PT", "Part time")
 
-	@Before def setup() {
+	@Before def setup(): Unit = {
 		memberDao.sessionFactory = sessionFactory
 		relationshipDao.sessionFactory = sessionFactory
 		sitsStatusDao.sessionFactory = sessionFactory
@@ -42,7 +42,7 @@ class MemberDaoTest extends PersistenceTestBase with Logging with Mockito {
 	}
 
 	@Test
-	def crud() = {
+	def crud(): Unit = {
 		transactional { tx =>
 
 			sitsStatusDao.saveOrUpdate(sprFullyEnrolledStatus)
@@ -84,7 +84,7 @@ class MemberDaoTest extends PersistenceTestBase with Logging with Mockito {
 
 	@Transactional
 	@Test
-	def testGetStudentByTimetableHash() = {
+	def testGetStudentByTimetableHash(): Unit = {
 		val student = Fixtures.student()
 		val timetableHash = "abc"
 		student.timetableHash = timetableHash

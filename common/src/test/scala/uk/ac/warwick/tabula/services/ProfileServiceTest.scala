@@ -106,7 +106,7 @@ class ProfileServiceTest extends PersistenceTestBase with Mockito {
 		profileService.listMembersUpdatedSince(new DateTime(2013, DateTimeConstants.FEBRUARY, 5, 0, 0, 0, 0), 5) should be (Seq())
 	}
 
-	@Test def studentsByRouteForAcademicYear() = {
+	@Test def studentsByRouteForAcademicYear(): Unit = {
 		val service = new AbstractProfileService with MemberDaoComponent with StudentCourseDetailsDaoComponent with StaffAssistantsHelpers {
 			val memberDao: MemberDao = mock[MemberDao]
 			val studentCourseDetailsDao: StudentCourseDetailsDao = mock[StudentCourseDetailsDao]
@@ -163,7 +163,7 @@ class ProfileServiceTest extends PersistenceTestBase with Mockito {
 		) should be {false}
 	}
 
-	@Test def studentsByRouteWithdrawn() = {
+	@Test def studentsByRouteWithdrawn(): Unit = {
 		val service = new AbstractProfileService with MemberDaoComponent with StudentCourseDetailsDaoComponent with StaffAssistantsHelpers {
 			val memberDao: MemberDao = mock[MemberDao]
 			val studentCourseDetailsDao: StudentCourseDetailsDao = mock[StudentCourseDetailsDao]
@@ -210,7 +210,7 @@ class ProfileServiceTest extends PersistenceTestBase with Mockito {
 
 
 
-	@Test def studentsByRouteMostSignificantCourse() = {
+	@Test def studentsByRouteMostSignificantCourse(): Unit = {
 		val service = new AbstractProfileService with MemberDaoComponent with StudentCourseDetailsDaoComponent with StaffAssistantsHelpers {
 			val memberDao: MemberDao = mock[MemberDao]
 			val studentCourseDetailsDao: StudentCourseDetailsDao = mock[StudentCourseDetailsDao]
@@ -240,9 +240,7 @@ class ProfileServiceTest extends PersistenceTestBase with Mockito {
 
 	}
 
-
-
-	@Test def studentsByRouteNotMostSignificantCourse() = {
+	@Test def studentsByRouteNotMostSignificantCourse(): Unit = {
 		val service = new AbstractProfileService with MemberDaoComponent with StudentCourseDetailsDaoComponent with StaffAssistantsHelpers {
 			val memberDao: MemberDao = mock[MemberDao]
 			val studentCourseDetailsDao: StudentCourseDetailsDao = mock[StudentCourseDetailsDao]
@@ -279,7 +277,7 @@ class ProfileServiceTest extends PersistenceTestBase with Mockito {
 		}
 	}
 
-	@Test def disability() {
+	@Test def disability(): Unit = {
 		new MockFixture {
 			val disabilityQ = new Disability
 			profileServiceWithMocks.memberDao.getDisability("Q") returns Some(disabilityQ)
@@ -291,7 +289,7 @@ class ProfileServiceTest extends PersistenceTestBase with Mockito {
 	}
 
 	@Transactional
-	@Test def regenerateEmptyTimetableHash() {
+	@Test def regenerateEmptyTimetableHash(): Unit = {
 		val member = Fixtures.student()
 		member.timetableHash should be (null)
 
@@ -305,7 +303,7 @@ class ProfileServiceTest extends PersistenceTestBase with Mockito {
 	}
 
 	@Transactional
-	@Test def regenerateExistingTimetableHash() {
+	@Test def regenerateExistingTimetableHash(): Unit = {
 		val member = Fixtures.student()
 		val existingHash = "1234567"
 		member.timetableHash = existingHash
@@ -321,7 +319,7 @@ class ProfileServiceTest extends PersistenceTestBase with Mockito {
 		profileService.getMemberByUniversityId(member.universityId).get.timetableHash should not be existingHash
 	}
 
-	@Test def memberByUser() { transactional { tx =>
+	@Test def memberByUser(): Unit = { transactional { tx =>
 		// TAB-2014
 		val m1 = Fixtures.student(universityId = "1000001", userId="student")
 		m1.email = "student@warwick.ac.uk"
