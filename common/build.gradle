@@ -96,7 +96,7 @@ dependencies {
     compile 'net.sf.ehcache:ehcache:2.9.0'
     compile 'net.spy:spymemcached:2.12.3'
 
-    compile "org.springframework.scala:spring-scala_${scalaMajorVersion}:1.0.0.RC2"
+    compile "org.springframework.scala:spring-scala_${scalaMajorVersion}:1.0.0.RC1"
 
     compile 'org.xhtmlrenderer:flying-saucer-pdf-itext5:9.0.4'
 
