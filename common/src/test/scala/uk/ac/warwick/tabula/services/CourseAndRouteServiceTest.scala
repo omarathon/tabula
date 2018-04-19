@@ -40,7 +40,7 @@ class CourseAndRouteServiceTest extends PersistenceTestBase with Mockito {
 		service.securityService.can(isA[CurrentUser],isA[Permission],isA[PermissionsTarget] ) returns true
 	}
 
-	@Test def crud() = transactional { tx =>
+	@Test def crud(): Unit = transactional { tx =>
 		// uses data created in data.sql
 		val g500 = service.getRouteByCode("g500").get
 		val g503 = service.getRouteByCode("g503").get

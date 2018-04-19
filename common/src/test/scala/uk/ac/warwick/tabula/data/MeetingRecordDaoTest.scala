@@ -18,13 +18,13 @@ class MeetingRecordDaoTest extends PersistenceTestBase {
 	val meetingDao = new MeetingRecordDaoImpl
 
 	@Before
-	def setup() {
+	def setup(): Unit = {
 		memberDao.sessionFactory = sessionFactory
 		relationshipDao.sessionFactory = sessionFactory
 		meetingDao.sessionFactory = sessionFactory
 	}
 
-	@Test def createAndList() = transactional { tx =>
+	@Test def createAndList(): Unit = transactional { tx =>
 		val relationshipType = StudentRelationshipType("tutor", "tutor", "personal tutor", "personal tutee")
 		relationshipDao.saveOrUpdate(relationshipType)
 

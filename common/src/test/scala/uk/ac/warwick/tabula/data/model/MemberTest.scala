@@ -268,7 +268,7 @@ class MemberPersistenceTest extends PersistenceTestBase with Mockito {
 		studentCourseDetailsDao.sessionFactory = sessionFactory
 	}
 
-	@Test def deleteFileAttachmentOnDelete() = transactional { tx =>
+	@Test def deleteFileAttachmentOnDelete(): Unit = transactional { tx =>
 		// TAB-667
 		val orphanAttachment =flushing(session){
 			val attachment = new FileAttachment
@@ -306,7 +306,7 @@ class MemberPersistenceTest extends PersistenceTestBase with Mockito {
 		}
 	}
 
-	@Test def testPermanentlyWithdrawn() = transactional { tx =>
+	@Test def testPermanentlyWithdrawn(): Unit = transactional { tx =>
 
 		val dept1 = Fixtures.department("ms", "Motorsport")
 		session.save(dept1)
