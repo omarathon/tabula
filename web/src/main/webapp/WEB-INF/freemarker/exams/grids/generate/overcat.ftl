@@ -23,6 +23,10 @@
 							<td><span class="exam-grid-actual-mark">#</span></td>
 							<td>Agreed mark missing, using actual</td>
 						</tr>
+						<tr>
+							<td><span class="exam-grid-resit"># (#)</span></td>
+							<td>Resit mark (original mark)</td>
+						</tr>
 					</tbody>
 				</table>
 			</div>

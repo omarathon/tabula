@@ -71,9 +71,9 @@ class ModuleRegistration() extends GeneratedId	with PermissionsTarget with CanBe
 	@Restricted(Array("Profiles.Read.ModuleRegistration.Results"))
 	var agreedGrade: String = _
 
-	def firstDefinedMark: Option[JBigDecimal] = Seq(Option(agreedMark), Option(actualMark)).flatten.headOption
+	def firstDefinedMark: Option[JBigDecimal] = Option(agreedMark).orElse(Option(actualMark))
 
-	def firstDefinedGrade: Option[String] = Seq(Option(agreedGrade), Option(actualGrade)).flatten.headOption
+	def firstDefinedGrade: Option[String] = Option(agreedGrade).orElse(Option(actualGrade))
 
 	@Type(`type` = "uk.ac.warwick.tabula.data.model.ModuleSelectionStatusUserType")
 	@Column(name="selectionstatuscode")
@@ -122,7 +122,11 @@ case class UpstreamModuleRegistration(
 	actualMark: String,
 	actualGrade: String,
 	agreedMark: String,
-	agreedGrade: String
+	agreedGrade: String,
+	resitActualMark: String,
+	resitActualGrade: String,
+	resitAgreedMark: String,
+	resitAgreedGrade: String
 ) {
 
 	def universityId: String = SprCode.getUniversityId(sprCode)

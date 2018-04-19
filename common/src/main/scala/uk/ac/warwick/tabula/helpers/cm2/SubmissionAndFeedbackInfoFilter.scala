@@ -169,7 +169,7 @@ object SubmissionAndFeedbackInfoFilters {
 		}
 
 		case object MarkedPlagiarised extends SubmissionAndFeedbackInfoFilter {
-			val description = "Plagiarised"
+			val description = "Suspected plagiarism"
 
 			def predicate(item: AssignmentSubmissionStudentInfo): Boolean =
 				item.coursework.enhancedSubmission.exists(_.submission.suspectPlagiarised.booleanValue)

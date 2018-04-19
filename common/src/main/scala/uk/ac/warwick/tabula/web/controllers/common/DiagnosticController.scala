@@ -1,11 +1,12 @@
 package uk.ac.warwick.tabula.web.controllers.common
 
 import java.io._
-import javax.servlet.http.HttpServletResponse
 
+import javax.servlet.http.HttpServletResponse
 import org.springframework.beans.BeanWrapperImpl
 import org.springframework.stereotype.Controller
 import org.springframework.web.bind.annotation._
+import org.springframework.web.multipart.MultipartFile
 import uk.ac.warwick.spring.Wire
 import uk.ac.warwick.tabula.Features
 import uk.ac.warwick.tabula.commands.NullCommand
@@ -40,5 +41,11 @@ class DiagnosticController extends Logging {
 	@RequestMapping(Array("/error/client-abort")) def clientAbortError(response: HttpServletResponse): Nothing = {
 		response.getOutputStream.print("Partial content downlo")
 		throw Class.forName("org.apache.catalina.connector.ClientAbortException").newInstance().asInstanceOf[IOException]
+	}
+
+	@RequestMapping(method = Array(RequestMethod.POST), value = Array("/upload"))
+	def testUpload(@RequestParam("file") file: MultipartFile, out: Writer): Unit = {
+		logger.info(s"Uploaded: ${file.getOriginalFilename} - ${file.getSize}")
+		out.write(s"Uploaded: ${file.getOriginalFilename} - ${file.getSize}")
 	}
 }

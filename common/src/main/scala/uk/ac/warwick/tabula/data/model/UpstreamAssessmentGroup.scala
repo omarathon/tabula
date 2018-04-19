@@ -83,6 +83,20 @@ class UpstreamAssessmentGroupMember extends GeneratedId with Ordered[UpstreamAss
 			case 0 => Ordering.String.compare(this.universityId, that.universityId)
 			case nonZero => nonZero
 		}
+
+	def isAgreedMark: Boolean = resitAgreedMark.orElse(agreedMark).isDefined
+	def isResitMark: Boolean  = resitAgreedMark.orElse(resitActualMark).isDefined
+
+	def firstDefinedMark: Option[BigDecimal] = resitAgreedMark.orElse(resitActualMark).orElse(firstOriginalMark)
+	// doesn't include resit marks
+	def firstOriginalMark: Option[BigDecimal] = agreedMark.orElse(actualMark)
+
+	def isAgreedGrade: Boolean  = resitAgreedGrade.orElse(agreedGrade).isDefined
+	def isResitGrade: Boolean  = resitAgreedGrade.orElse(resitActualGrade).isDefined
+
+	def firstDefinedGrade: Option[String] = resitAgreedGrade.orElse(resitActualGrade).orElse(firstOriginalGrade)
+	// doesn't include resit grades
+	def firstOriginalGrade: Option[String] = agreedGrade.orElse(actualGrade)
 }
 
 trait UpstreamAssessmentGroupMemberProperties {
@@ -101,5 +115,18 @@ trait UpstreamAssessmentGroupMemberProperties {
 
 	@Type(`type` = "uk.ac.warwick.tabula.data.model.OptionStringUserType")
 	var agreedGrade: Option[String] = None
+
+	@Type(`type` = "uk.ac.warwick.tabula.data.model.OptionBigDecimalUserType")
+	var resitActualMark: Option[BigDecimal] = None
+
+	@Type(`type` = "uk.ac.warwick.tabula.data.model.OptionStringUserType")
+	var resitActualGrade: Option[String] = None
+
+	@Type(`type` = "uk.ac.warwick.tabula.data.model.OptionBigDecimalUserType")
+	var resitAgreedMark: Option[BigDecimal] = None
+
+	@Type(`type` = "uk.ac.warwick.tabula.data.model.OptionStringUserType")
+	var resitAgreedGrade: Option[String] = None
+
 
 }

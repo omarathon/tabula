@@ -183,6 +183,10 @@ trait ImportAssignmentsCommand extends CommandInternal[Unit] with RequiresPermis
 								actualGrade = studentRegistrations.head.actualGrade.maybeText
 								agreedMark = Try(BigDecimal(studentRegistrations.head.agreedMark)).toOption
 								agreedGrade = studentRegistrations.head.agreedGrade.maybeText
+								resitActualMark = Try(BigDecimal(studentRegistrations.head.resitActualMark)).toOption
+								resitActualGrade = studentRegistrations.head.resitActualGrade.maybeText
+								resitAgreedMark = Try(BigDecimal(studentRegistrations.head.resitAgreedMark)).toOption
+								resitAgreedGrade = studentRegistrations.head.resitAgreedGrade.maybeText
 							}
 						} else {
 							def validInts(strings: Seq[String]): Seq[Int] = strings.filter(s => Try(s.toInt).isSuccess).map(_.toInt)
@@ -209,6 +213,10 @@ trait ImportAssignmentsCommand extends CommandInternal[Unit] with RequiresPermis
 								actualGrade = resolveDuplicates(validStrings(studentRegistrations.map(_.actualGrade)), "actual grade")
 								agreedMark = resolveDuplicates(validBigDecimals(studentRegistrations.map(_.agreedMark)), "agreed mark")
 								agreedGrade = resolveDuplicates(validStrings(studentRegistrations.map(_.agreedGrade)), "agreed grade")
+								resitActualMark = resolveDuplicates(validBigDecimals(studentRegistrations.map(_.resitActualMark)), "resit actual mark")
+								resitActualGrade = resolveDuplicates(validStrings(studentRegistrations.map(_.resitActualGrade)), "resit actual grade")
+								resitAgreedMark = resolveDuplicates(validBigDecimals(studentRegistrations.map(_.resitAgreedMark)), "resit agreed mark")
+								resitAgreedGrade = resolveDuplicates(validStrings(studentRegistrations.map(_.resitAgreedGrade)), "resit agreed grade")
 							}
 						}
 					}}
@@ -219,6 +227,10 @@ trait ImportAssignmentsCommand extends CommandInternal[Unit] with RequiresPermis
 						member.actualGrade = properties.actualGrade
 						member.agreedMark = properties.agreedMark
 						member.agreedGrade = properties.agreedGrade
+						member.resitActualMark = properties.resitActualMark
+						member.resitActualGrade = properties.resitActualGrade
+						member.resitAgreedMark = properties.resitAgreedMark
+						member.resitAgreedGrade = properties.resitAgreedGrade
 						assessmentMembershipService.save(member)
 					}}
 				}

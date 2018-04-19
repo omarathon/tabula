@@ -57,6 +57,7 @@ trait ProfileService {
 		startResult: Int = 0
 	): (Int, Seq[StudentMember])
 	def findAllStudentsByRestrictions(department: Department, restrictions: Seq[ScalaRestriction], orders: Seq[ScalaOrder] = Seq()): Seq[StudentMember]
+	def findAllUniversityIdsByRestrictions(restrictions: Seq[ScalaRestriction], orders: Seq[ScalaOrder] = Seq()): Seq[String]
 	def findAllUniversityIdsByRestrictionsInAffiliatedDepartments(department: Department, restrictions: Seq[ScalaRestriction], orders: Seq[ScalaOrder] = Seq()): Seq[String]
 	def findAllStudentDataByRestrictionsInAffiliatedDepartments(department: Department, restrictions: Seq[ScalaRestriction], academicYear: AcademicYear): Seq[AttendanceMonitoringStudentData]
 	def getSCDsByAgentRelationshipAndRestrictions(
@@ -319,6 +320,13 @@ abstract class AbstractProfileService extends ProfileService with Logging {
 			}
 		}
 		memberDao.findUniversityIdsByRestrictions(allRestrictions)
+	}
+
+	def findAllUniversityIdsByRestrictions(
+		restrictions: Seq[ScalaRestriction],
+		orders: Seq[ScalaOrder] = Seq()
+	): Seq[String] = transactional(readOnly = true) {
+		memberDao.findUniversityIdsByRestrictions(restrictions, orders)
 	}
 
 	def findAllUniversityIdsByRestrictionsInAffiliatedDepartments(
