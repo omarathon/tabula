@@ -1,5 +1,5 @@
 dependencies {
-    compile "org.scala-lang.modules:scala-parser-combinators_${scalaMajorVersion}:1.0.3"
+    compile "org.scala-lang.modules:scala-parser-combinators_${scalaMajorVersion}:1.1.0"
 
     compile "org.springframework:spring-aop:${springVersion}"
     compile "org.springframework:spring-beans:${springVersion}"
