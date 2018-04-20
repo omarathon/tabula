@@ -1,7 +1,6 @@
 package uk.ac.warwick.tabula.data.model
 
 import javax.persistence._
-
 import org.hibernate.ObjectNotFoundException
 import org.hibernate.annotations.{BatchSize, Type}
 import org.joda.time.DateTime
@@ -19,7 +18,6 @@ import uk.ac.warwick.tabula.permissions.PermissionsTarget
 import uk.ac.warwick.tabula.services._
 import uk.ac.warwick.userlookup.User
 
-import scala.beans.BeanProperty
 import scala.collection.JavaConverters._
 
 object Notification {
@@ -242,10 +240,14 @@ abstract class NotificationWithTarget[A >: Null <: ToEntityReference, B >: Null 
 
 	self: MyWarwickDiscriminator =>
 
+	@transient private[this] var _target: EntityReference[B] = _
+
 	@Access(value=AccessType.PROPERTY)
 	@OneToOne(cascade = Array(CascadeType.ALL), targetEntity = classOf[EntityReference[B]], fetch = FetchType.LAZY)
-	@BeanProperty
-	var target: EntityReference[B] = _
+	def getTarget: EntityReference[B] = _target
+	def target: EntityReference[B] = getTarget
+	def setTarget(target: EntityReference[B]): Unit = _target = target
+	def target_=(target: EntityReference[B]): Unit = setTarget(target)
 }
 
 object FreemarkerModel {

@@ -144,7 +144,6 @@ trait SimpleValue[A] { self: FormField =>
 
 @Entity
 abstract class AssignmentFormField extends FormField {
-	@BeanProperty
 	@ManyToOne(fetch = FetchType.LAZY)
 	@JoinColumn(name = "assignment_id")
 	var assignment: Assignment = _

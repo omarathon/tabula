@@ -47,7 +47,7 @@ class HomeControllerTest extends TestBase with Mockito {
 
 		val mav: Mav = controller.home(None, null, currentUser)
 		mav.viewName should be ("admin/home/view")
-		mav.toModel should be (Map(
+		mav.toModel.toMap should be (Map(
 			"ownedDepartments" -> Set(dept1),
 			"ownedModuleDepartments" -> Set(dept1, dept2),
 			"ownedRouteDepartments" -> Set(dept1, dept2),
