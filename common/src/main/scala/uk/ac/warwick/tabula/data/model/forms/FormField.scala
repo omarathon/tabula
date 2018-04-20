@@ -1,26 +1,22 @@
 package uk.ac.warwick.tabula.data.model.forms
 
 import java.io.StringReader
-
-import scala.annotation.meta.field
-import org.hibernate.annotations.Type
-import org.springframework.validation.Errors
-import javax.persistence._
-
-import uk.ac.warwick.tabula.JavaImports._
-import uk.ac.warwick.tabula.data.model._
-import uk.ac.warwick.spring.Wire
-import uk.ac.warwick.userlookup.User
-import uk.ac.warwick.tabula.services.UserLookupService
-
-import scala.reflect._
-import scala.beans.BeanProperty
-import uk.ac.warwick.tabula.helpers.Logging
-import uk.ac.warwick.tabula.JsonObjectMapperFactory
-import org.hibernate.`type`.StandardBasicTypes
 import java.sql.Types
 
 import com.fasterxml.jackson.databind.ObjectMapper
+import javax.persistence._
+import org.hibernate.`type`.StandardBasicTypes
+import org.hibernate.annotations.Type
+import org.springframework.validation.Errors
+import uk.ac.warwick.spring.Wire
+import uk.ac.warwick.tabula.JavaImports._
+import uk.ac.warwick.tabula.JsonObjectMapperFactory
+import uk.ac.warwick.tabula.data.model._
+import uk.ac.warwick.tabula.helpers.Logging
+import uk.ac.warwick.tabula.services.UserLookupService
+import uk.ac.warwick.userlookup.User
+
+import scala.reflect._
 
 /**
  * A FormField defines a field to be displayed on an Assignment
@@ -352,7 +348,6 @@ class FileField extends AssignmentFormField {
 
 @Entity
 abstract class ExamFormField extends FormField {
-	@BeanProperty
 	@ManyToOne(fetch = FetchType.LAZY)
 	@JoinColumn(name = "exam_id")
 	var exam: Exam = _
