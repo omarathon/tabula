@@ -64,7 +64,7 @@ dependencies {
     compile "com.google.guava:guava:18.0"
     compile "com.google.code.findbugs:jsr305:2.0.1"
 
-    compile "com.fasterxml.jackson.module:jackson-module-scala_${scalaMajorVersion}:${jacksonVersion}"
+    compile "com.fasterxml.jackson.module:jackson-module-scala_${scalaMajorVersion}:${jacksonScalaModuleVersion}"
     compile "com.fasterxml.jackson.datatype:jackson-datatype-joda:${jacksonVersion}"
 
     // Upgrade transitive jackson dependencies

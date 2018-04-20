@@ -466,8 +466,8 @@ class SmallGroupDaoImpl extends SmallGroupDao
 				.add(property("id"))
 				.add(property("group.id"))
 				.add(property("groupSet.name"))
-				.add(property("group.uk$ac$warwick$tabula$data$model$groups$SmallGroup$$_name")) // Fuck you Hibernate
-				.add(property("linkedGroup.name")) // Fuck you Hibernate
+				.add(property("group._name"))
+				.add(property("linkedGroup.name"))
 				.add(property("title"))
 				.add(property("module.name"))
 				.add(property("day"))

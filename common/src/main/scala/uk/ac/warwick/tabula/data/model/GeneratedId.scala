@@ -1,8 +1,6 @@
 package uk.ac.warwick.tabula.data.model
-import javax.persistence.GeneratedValue
+import javax.persistence.{GeneratedValue, Id}
 import org.hibernate.annotations.GenericGenerator
-import javax.persistence.Id
-import scala.beans.BeanProperty
 import org.hibernate.proxy.HibernateProxyHelper
 
 /**
@@ -12,7 +10,6 @@ import org.hibernate.proxy.HibernateProxyHelper
  */
 trait GeneratedId extends IdEquality {
 
-	@BeanProperty
 	@Id
 	@GeneratedValue(generator = "system-uuid")
 	@GenericGenerator(name = "system-uuid", strategy = "org.hibernate.id.UUIDGenerator")
