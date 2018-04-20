@@ -26,6 +26,7 @@ trait ModuleRegistrationService {
 
 	def getByUsercodesAndYear(usercodes: Seq[String], academicYear: AcademicYear) : Seq[ModuleRegistration]
 
+	def getByModuleAndYear(module: Module, academicYear: AcademicYear): Seq[ModuleRegistration]
 	/**
 		* Gets the weighted mean mark for the given module registrations.
 		* Each agreed mark is multiplied by the CAT weighing of the module then added together, and the result is divided by the total CATS.
@@ -69,6 +70,9 @@ abstract class AbstractModuleRegistrationService extends ModuleRegistrationServi
 
 	def getByUsercodesAndYear(usercodes: Seq[String], academicYear: AcademicYear): Seq[ModuleRegistration] =
 		moduleRegistrationDao.getByUsercodesAndYear(usercodes, academicYear)
+
+	def getByModuleAndYear(module: Module, academicYear: AcademicYear): Seq[ModuleRegistration] =
+		moduleRegistrationDao.getByModuleAndYear(module, academicYear)
 
 	def weightedMeanYearMark(moduleRegistrations: Seq[ModuleRegistration], markOverrides: Map[Module, BigDecimal]): Either[String, BigDecimal] = {
 		val nonNullReplacedMarksAndCats: Seq[(BigDecimal, BigDecimal)] = moduleRegistrations.map(mr => {
@@ -122,10 +126,10 @@ abstract class AbstractModuleRegistrationService extends ModuleRegistrationServi
 				}
 			}
 			subsetsToReturn.map(modRegs => (weightedMeanYearMark(modRegs.toSeq, markOverrides), modRegs.toSeq.sortBy(_.module.code)))
-			  .collect{case (Right(mark), modRegs) => (mark, modRegs)}
+			  .collect{ case (Right(mark), modRegs) => (mark, modRegs) }
 				.sortBy { case (mark, modRegs) =>
 					// Add a definitive sort so subsets with the same mark always come out the same order
-					(mark, modRegs.size, modRegs.map(_.module.code).mkString(","))
+					(mark.doubleValue(), modRegs.size, modRegs.map(_.module.code).mkString(","))
 				}
 				.reverse
 		}

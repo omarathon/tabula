@@ -34,12 +34,12 @@ class PermissionsServiceTest extends PersistenceTestBase with Mockito {
 	service.queue = mock[Queue]
 
 	@Before
-	def setup(){
+	def setup(): Unit ={
 		permsDao.sessionFactory = sessionFactory
 	}
 
 
-	@Test def crud = transactional { t =>
+	@Test def crud(): Unit = transactional { t =>
 		val dept1 = Fixtures.department("dp1")
 		val dept2 = Fixtures.department("dp2")
 
@@ -116,7 +116,7 @@ class PermissionsServiceTest extends PersistenceTestBase with Mockito {
 		service.ensureUserGroupFor(dept2, DepartmentalAdministratorRoleDefinition).asInstanceOf[UserGroup].id should not be (null)
 	}
 
-	@Test def guards = transactional { t => withUser("cuscav") {
+	@Test def guards(): Unit = transactional { t => withUser("cuscav") {
 		// Make sure we don't throw an exception with a permissions type we don't know how to set roles/permissions for
 		val scope = Fixtures.userSettings("cuscav")
 

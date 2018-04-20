@@ -5,7 +5,7 @@ import uk.ac.warwick.tabula.Fixtures
 
 class CourseDaoTest extends PersistenceTestBase {
 
-	@Test def crud = transactional { tx =>
+	@Test def crud(): Unit = transactional { tx =>
 		val dao = new CourseDaoImpl
 		dao.sessionFactory = sessionFactory
 		val course = Fixtures.course("TPOS-M9P0")

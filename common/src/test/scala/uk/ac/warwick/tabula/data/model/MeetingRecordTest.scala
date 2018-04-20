@@ -10,7 +10,7 @@ class MeetingRecordTest extends PersistenceTestBase {
 
 	val aprilFool: DateTime = dateTime(2013, DateTimeConstants.APRIL)
 
-	@Test def deleteFileAttachmentOnDelete() = transactional {ts=>
+	@Test def deleteFileAttachmentOnDelete(): Unit = transactional {ts=>
 		val orphanAttachment = flushing(session) {
 			val attachment = new FileAttachment
 			session.save(attachment)

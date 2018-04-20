@@ -4,7 +4,7 @@ import uk.ac.warwick.tabula.TestBase
 
 class TurnitinLtiResponseTest extends TestBase {
 
-	@Test def submissionsList() = {
+	@Test def submissionsList(): Unit = {
 		val response = TurnitinLtiResponse.fromJson( SubmittedPaperInfo )
 		val submissionInfo = response.submissionInfo()
 		submissionInfo.overlap should be (Some(67))

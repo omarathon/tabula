@@ -73,19 +73,22 @@ object Routes {
 		def home: String = context + "/"
 
 		def departmentAcademicYear(department: Department, academicYear: AcademicYear): String =
-			context + "/%s/%s" format(encoded(department.code), encoded(academicYear.startYear.toString))
+			s"$context/${encoded(department.code)}/${encoded(academicYear.startYear.toString)}"
 
 		def generate(department: Department, academicYear: AcademicYear): String =
-			context + "/%s/%s/generate" format(encoded(department.code), encoded(academicYear.startYear.toString))
+			s"$context/${encoded(department.code)}/${encoded(academicYear.startYear.toString)}/generate"
+
+		def moduleGenerate(department: Department, academicYear: AcademicYear): String =
+			s"$context/${encoded(department.code)}/${encoded(academicYear.startYear.toString)}/module/generate"
 
 		def normalLoad(department: Department, academicYear: AcademicYear): String =
-			context + "/%s/%s/normalload" format(encoded(department.code), encoded(academicYear.startYear.toString))
+			s"$context/${encoded(department.code)}/${encoded(academicYear.startYear.toString)}/normalload"
 
 		def weightings(department: Department, academicYear: AcademicYear): String =
-			context + "/%s/%s/weightings" format(encoded(department.code), encoded(academicYear.startYear.toString))
+			s"$context/${encoded(department.code)}/${encoded(academicYear.startYear.toString)}/weightings"
 
 		def assessmentdetails(scyd: StudentCourseYearDetails): String =
-			context + s"/${encoded(scyd.enrolmentDepartment.code)}/${encoded(scyd.academicYear.value.toString)}/${encoded(scyd.studentCourseDetails.urlSafeId)}/assessmentdetails"
+			s"$context/${encoded(scyd.enrolmentDepartment.code)}/${encoded(scyd.academicYear.value.toString)}/${encoded(scyd.studentCourseDetails.urlSafeId)}/assessmentdetails"
 	}
 
 }

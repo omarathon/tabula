@@ -2,7 +2,6 @@ package uk.ac.warwick.tabula.data.model
 
 import javax.persistence._
 import org.joda.time.DateTime
-import scala.beans.BeanProperty
 import scala.annotation.meta.field
 
 @Entity(name = "Scheduled_Notification")
@@ -23,12 +22,16 @@ class ScheduledNotification[A >: Null <: ToEntityReference](
 		this(null, null, null)
 	}
 
-	@Access(value=AccessType.PROPERTY)
-	@OneToOne(cascade = Array(CascadeType.ALL), targetEntity = classOf[EntityReference[A]], fetch = FetchType.LAZY)
-	@BeanProperty
-	var target: EntityReference[A] = Option(targetEntity).map { e =>
+	@transient private[this] var _target: EntityReference[A] = Option(targetEntity).map { e =>
 		e.toEntityReference.asInstanceOf[EntityReference[A]]
 	}.orNull
+
+	@Access(value=AccessType.PROPERTY)
+	@OneToOne(cascade = Array(CascadeType.ALL), targetEntity = classOf[EntityReference[A]], fetch = FetchType.LAZY)
+	def getTarget: EntityReference[A] = _target
+	def target: EntityReference[A] = getTarget
+	def setTarget(target: EntityReference[A]): Unit = _target = target
+	def target_=(target: EntityReference[A]): Unit = setTarget(target)
 
 	var completed: Boolean = false
 }

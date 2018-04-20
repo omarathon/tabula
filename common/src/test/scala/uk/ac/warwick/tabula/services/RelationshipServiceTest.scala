@@ -49,7 +49,7 @@ class RelationshipServiceTest extends AppContextTestBase with Mockito {
 		session.createCriteria(classOf[Member]).list().asInstanceOf[JList[Member]].asScala foreach { session.delete(_) }
 	}
 
-	@Test def saveFindGetStudentRelationships() = transactional { tx =>
+	@Test def saveFindGetStudentRelationships(): Unit = transactional { tx =>
 
 		val dept1 = Fixtures.department("el", "Equatorial Life")
 		val dept2 = Fixtures.department("nr", "Northern Regions")
@@ -96,7 +96,7 @@ class RelationshipServiceTest extends AppContextTestBase with Mockito {
 		relationshipService.getRelationships(null, m1) should be (Seq())
 	}
 
-	@Test def saveReplaceStudentRelationships() = transactional { tx =>
+	@Test def saveReplaceStudentRelationships(): Unit = transactional { tx =>
 
 		val dept1 = Fixtures.department("el", "Equatorial Life")
 		val dept2 = Fixtures.department("nr", "Northern Regions")
@@ -167,7 +167,7 @@ class RelationshipServiceTest extends AppContextTestBase with Mockito {
 	}
 
 
-	@Test def listStudentRelationships() = transactional { tx =>
+	@Test def listStudentRelationships(): Unit = transactional { tx =>
 
 		val dept1 = Fixtures.department("pe", "Polar Exploration")
 		val dept2 = Fixtures.department("mi", "Micrology")
@@ -209,7 +209,7 @@ class RelationshipServiceTest extends AppContextTestBase with Mockito {
 		relationshipService.listCurrentStudentRelationshipsWithMember(relationshipType, m4) should be (Seq())
 	}
 
-	@Test def listStudentsWithoutRelationship() = transactional { tx =>
+	@Test def listStudentsWithoutRelationship(): Unit = transactional { tx =>
 
 		val dept1 = Fixtures.department("mm", "Mumbling Modularity")
 		val dept2 = Fixtures.department("dd", "Departmental Diagnostics")
@@ -264,7 +264,7 @@ class RelationshipServiceTest extends AppContextTestBase with Mockito {
 		relationshipService.listStudentsWithoutCurrentRelationship(null, dept1) should be (Seq())
 	}
 
-	@Test def testRelationshipNotPermanentlyWithdrawn() = transactional { tx =>
+	@Test def testRelationshipNotPermanentlyWithdrawn(): Unit = transactional { tx =>
 		val dept1 = Fixtures.department("pe", "Polar Exploration")
 		val dept2 = Fixtures.department("mi", "Micrology")
 		session.saveOrUpdate(dept1)
@@ -303,7 +303,7 @@ class RelationshipServiceTest extends AppContextTestBase with Mockito {
 		relationshipService.relationshipNotPermanentlyWithdrawn(rel2) should be (false)
 	}
 
-	@Test def testExpectedToHaveRelationship() = transactional { tx =>
+	@Test def testExpectedToHaveRelationship(): Unit = transactional { tx =>
 		val dept1 = Fixtures.department("pe", "Polar Exploration")
 		val dept2 = Fixtures.department("mi", "Micrology")
 

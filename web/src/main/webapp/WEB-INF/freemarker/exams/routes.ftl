@@ -55,7 +55,9 @@ TODO grab values from the Routes object in code, as that's pretty equivalent and
 <#macro gridsHome><@_u page="/grids" /></#macro>
 <#macro gridsDepartmentHomeForYear department academicYear><@_u page="/grids/${department.code}/${academicYear.startYear?c}" /></#macro>
 <#macro generateGrid department academicYear><@_u page="/grids/${department.code}/${academicYear.startYear?c}/generate" /></#macro>
+<#macro generateModuleGrid department academicYear><@_u page="/grids/${department.code}/${academicYear.startYear?c}/module/generate" /></#macro>
 <#macro generateGridProgress department academicYear><@_u page="/grids/${department.code}/${academicYear.startYear?c}/generate/progress" /></#macro>
+<#macro generateModuleGridProgress department academicYear><@_u page="/grids/${department.code}/${academicYear.startYear?c}/module/generate/progress" /></#macro>
 <#macro generateGridOvercatting department academicYear scyd><@_u page="/grids/${department.code}/${academicYear.startYear?c}/generate/overcatting/${scyd.id}" /></#macro>
 <#macro uploadYearMarks department academicYear><@_u page="/grids/${department.code}/${academicYear.startYear?c}/upload"/></#macro>
 <#macro manageNormalLoads department academicYear><@_u page="/grids/${department.code}/${academicYear.startYear?c}/normalload"/></#macro>

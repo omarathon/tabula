@@ -1,18 +1,23 @@
 package uk.ac.warwick.tabula.services.timetables
 
-import dispatch.classic._
 import net.fortuna.ical4j.model.component.VEvent
 import net.fortuna.ical4j.model.parameter.Value
 import net.fortuna.ical4j.model.property.{Categories, DateProperty, RRule}
 import net.fortuna.ical4j.model.{Parameter, Property}
 import org.apache.commons.codec.digest.DigestUtils
+import org.apache.http.auth.{Credentials, UsernamePasswordCredentials}
+import org.apache.http.client.methods.RequestBuilder
+import org.apache.http.client.{HttpResponseException, ResponseHandler}
+import org.apache.http.impl.client.AbstractResponseHandler
+import org.apache.http.util.EntityUtils
+import org.apache.http.{HttpEntity, HttpStatus}
 import org.joda.time.{DateTime, DateTimeZone}
 import uk.ac.warwick.spring.Wire
 import uk.ac.warwick.tabula.data.model.groups.{DayOfWeek, WeekRange}
 import uk.ac.warwick.tabula.data.model.{Module, StudentMember}
 import uk.ac.warwick.tabula.helpers.ExecutionContexts.timetable
 import uk.ac.warwick.tabula.helpers.StringUtils._
-import uk.ac.warwick.tabula.helpers.{FoundUser, Logging}
+import uk.ac.warwick.tabula.helpers.{ApacheHttpClientUtils, FoundUser, Logging}
 import uk.ac.warwick.tabula.services.UserLookupService.UniversityId
 import uk.ac.warwick.tabula.services._
 import uk.ac.warwick.tabula.services.permissions.{AutowiringCacheStrategyComponent, CacheStrategyComponent}
@@ -47,11 +52,10 @@ trait AutowiringCelcatConfigurationComponent extends CelcatConfigurationComponen
 	val celcatConfiguration = new AutowiringCelcatConfiguration
 
 	class AutowiringCelcatConfiguration extends CelcatConfiguration with AutowiringFeaturesComponent {
-
 		val wbsConfiguration = CelcatDepartmentConfiguration(
 			baseUri = "https://rimmer.wbs.ac.uk",
 			enabledFn = { () => features.celcatTimetablesWBS },
-			credentials = Credentials(Wire.property("${celcat.fetcher.ib.username}"), Wire.property("${celcat.fetcher.ib.password}"))
+			credentials = new UsernamePasswordCredentials(Wire.property("${celcat.fetcher.ib.username}"), Wire.property("${celcat.fetcher.ib.password}"))
 		)
 
 		val cacheEnabled = true
@@ -77,7 +81,7 @@ object CelcatHttpTimetableFetchingService {
 				with WAI2GoHttpLocationFetchingServiceComponent
 				with AutowiringWAI2GoConfigurationComponent
 				with AutowiringModuleAndDepartmentServiceComponent
-				with AutowiringDispatchHttpClientComponent
+				with AutowiringApacheHttpClientComponent
 
 		if (celcatConfiguration.cacheEnabled) {
 			new CachedStaffAndStudentTimetableFetchingService(delegate, cacheName)
@@ -206,16 +210,18 @@ class CelcatHttpTimetableFetchingService(celcatConfiguration: CelcatConfiguratio
 		with LocationFetchingServiceComponent
 		with CacheStrategyComponent
 		with ModuleAndDepartmentServiceComponent
-		with DispatchHttpClientComponent =>
+		with ApacheHttpClientComponent =>
 
 	lazy val wbsConfig: CelcatDepartmentConfiguration = celcatConfiguration.wbsConfiguration
 
-	// a dispatch response handler which reads JSON from the response and parses it into a list of TimetableEvents
-	def handler(config: CelcatDepartmentConfiguration, filterLectures: Boolean): (Map[String, Seq[String]], Request) => Handler[EventList] = { (_: Map[String,Seq[String]], req: dispatch.classic.Request) =>
-		req >- { (rawJSON) =>
-			combineIdenticalEvents(parseJSON(rawJSON, filterLectures))
+	// an HTTPClient response handler which reads JSON from the response and parses it into a list of TimetableEvents
+	def handler(config: CelcatDepartmentConfiguration, filterLectures: Boolean): ResponseHandler[EventList] =
+		new AbstractResponseHandler[EventList] {
+			override def handleEntity(entity: HttpEntity): EventList = {
+				val rawJSON = EntityUtils.toString(entity)
+				combineIdenticalEvents(parseJSON(rawJSON, filterLectures))
+			}
 		}
-	}
 
 	def getTimetableForStudent(universityId: UniversityId): Future[EventList] = {
 		val member = profileService.getMemberByUniversityId(universityId)
@@ -230,24 +236,26 @@ class CelcatHttpTimetableFetchingService(celcatConfiguration: CelcatConfiguratio
 
 	def doRequest(filename: String, config: CelcatDepartmentConfiguration, filterLectures: Boolean): Future[EventList] = {
 		val req =
-			(url(config.baseUri) / filename <<? Map("forcebasic" -> "true"))
-				.as_!(config.credentials.username, config.credentials.password)
+			RequestBuilder.get(s"${config.baseUri}/$filename")
+				.addParameter("forcebasic", "true")
+				.setHeader(ApacheHttpClientUtils.basicAuthHeader(config.credentials))
+				.build()
 
 		// Execute the request
 		// If the status is OK, pass the response to the handler function for turning into TimetableEvents
 		// else return an empty list.
-		logger.info(s"Requesting timetable data from ${req.to_uri.toString}")
+		logger.info(s"Requesting timetable data from ${req.getURI.toString}")
 		val result =
-			Future(httpClient.when(_==200)(req >:+ handler(config, filterLectures)))
-				.recover { case StatusCode(404, _) =>
+			Future(httpClient.execute(req, handler(config, filterLectures)))
+				.recover { case e: HttpResponseException if e.getStatusCode == HttpStatus.SC_NOT_FOUND =>
 					// Special case a 404, just return no events
-					logger.warn(s"Request for ${req.to_uri.toString} returned a 404")
+					logger.warn(s"Request for ${req.getURI.toString} returned a 404")
 					EventList.fresh(Nil)
 				}
 
 		// Extra logging
 		result.onFailure { case e =>
-			logger.warn(s"Request for ${req.to_uri.toString} failed: ${e.getMessage}")
+			logger.warn(s"Request for ${req.getURI.toString} failed: ${e.getMessage}")
 		}
 
 		result

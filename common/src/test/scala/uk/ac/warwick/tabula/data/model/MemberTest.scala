@@ -14,7 +14,7 @@ class MemberTest extends TestBase with Mockito {
 	val profileService: ProfileService with StaffAssistantsHelpers = smartMock[ProfileService with StaffAssistantsHelpers]
 	val relationshipService: RelationshipService = smartMock[RelationshipService]
 
-	@Test def testAffiliatedDepartments() {
+	@Test def testAffiliatedDepartments(): Unit = {
 		val member = new StudentMember
 		member.universityId = "01234567"
 
@@ -88,7 +88,7 @@ class MemberTest extends TestBase with Mockito {
 		member.affiliatedDepartments should be (Stream(homeDept, courseDept, teachingDepartment))
 	}
 
-	@Test def testModuleRegistrations() {
+	@Test def testModuleRegistrations(): Unit = {
 		val member = new StudentMember
 		member.universityId = "01234567"
 
@@ -124,7 +124,7 @@ class MemberTest extends TestBase with Mockito {
 		member.moduleRegistrationsByYear(Some(AcademicYear(2012))) should be (Set(modReg1, modReg3))
 	}
 
-	@Test def nullUsers() {
+	@Test def nullUsers(): Unit = {
 		val member = new StaffMember
 		member.fullName should be (None)
 
@@ -138,7 +138,7 @@ class MemberTest extends TestBase with Mockito {
 		member.fullName should be (Some("Sonny"))
 	}
 
-	@Test def fromCurrentUser() = withUser("cuscav", "0672089") {
+	@Test def fromCurrentUser(): Unit = withUser("cuscav", "0672089") {
 		currentUser.realUser.setFirstName("Mat")
 		currentUser.realUser.setLastName("Mannion")
 		currentUser.realUser.setEmail("M.Mannion@warwick.ac.uk")
@@ -175,7 +175,7 @@ class MemberTest extends TestBase with Mockito {
 		user.getExtraProperty("urn:websignon:usersource") should be ("Tabula")
 	}
 
-	@Test def description() = {
+	@Test def description(): Unit = {
 		val dept = Fixtures.department("in", "IT Services")
 
 		val staff = new StaffMember
@@ -200,7 +200,7 @@ class MemberTest extends TestBase with Mockito {
 		student.description should be ("Undergraduate student, MEng Computer Science, IT Services")
 	}
 
-	@Test def relationshipAgent() {
+	@Test def relationshipAgent(): Unit = {
 		val staff = new StaffMember
 		staff.profileService = profileService
 		staff.relationshipService = relationshipService
@@ -214,7 +214,7 @@ class MemberTest extends TestBase with Mockito {
 		staff.isRelationshipAgent(relationshipType) should be {true}
 	}
 
-	@Test def freshOrStaleSCYDTest() = {
+	@Test def freshOrStaleSCYDTest(): Unit = {
 		val studentMember = Fixtures.student()
 		val year = studentMember.mostSignificantCourseDetails.get.latestStudentCourseYearDetails.academicYear
 		val studentCourseYearDetails = studentMember.freshOrStaleStudentCourseYearDetails(year).head
@@ -223,7 +223,7 @@ class MemberTest extends TestBase with Mockito {
 		studentCourseYearDetails should be (latestCourseYearDetails)
 	}
 
-	@Test def testVisaProperties() = {
+	@Test def testVisaProperties(): Unit = {
 		val studentMember = Fixtures.student()
 		studentMember.casUsed.get should be {false}
 		studentMember.hasTier4Visa.get should be {false}
@@ -263,12 +263,12 @@ class MemberPersistenceTest extends PersistenceTestBase with Mockito {
 	val memberDao = new AutowiringMemberDaoImpl
 	val studentCourseDetailsDao = new StudentCourseDetailsDaoImpl
 
-	@Before def setup() {
+	@Before def setup(): Unit = {
 		memberDao.sessionFactory = sessionFactory
 		studentCourseDetailsDao.sessionFactory = sessionFactory
 	}
 
-	@Test def deleteFileAttachmentOnDelete() = transactional { tx =>
+	@Test def deleteFileAttachmentOnDelete(): Unit = transactional { tx =>
 		// TAB-667
 		val orphanAttachment =flushing(session){
 			val attachment = new FileAttachment
@@ -306,7 +306,7 @@ class MemberPersistenceTest extends PersistenceTestBase with Mockito {
 		}
 	}
 
-	@Test def testPermanentlyWithdrawn() = transactional { tx =>
+	@Test def testPermanentlyWithdrawn(): Unit = transactional { tx =>
 
 		val dept1 = Fixtures.department("ms", "Motorsport")
 		session.save(dept1)

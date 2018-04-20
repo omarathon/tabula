@@ -584,7 +584,7 @@ trait AttendanceMonitoringStudentDataFetcher extends TaskBenchmarking {
 					criteria.add(isNull("studentCourseDetails.endDate"))
 				}
 			}
-			safeInSeqWithProjection[StudentMember, Array[java.lang.Object]](criteriaFactory, projection, "universityId", universityIds)
+			safeInSeqWithProjection[StudentMember, Array[java.lang.Object]](() => criteriaFactory(), projection, "universityId", universityIds)
 		}
 		// The end date is either null, or if all are not null, the maximum end date, so get the nulls first
 		val nullEndDateData = setupCriteria(setupProjection(withEndDate = false)).map {

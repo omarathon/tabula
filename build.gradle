@@ -19,13 +19,14 @@ plugins {
 
 // Some properties that we use to resolve dependencies etc.
 ext {
-    scalaVersion = "2.11.11"
-    scalaMajorVersion = "2.11"
+    scalaVersion = "2.12.5"
+    scalaMajorVersion = "2.12"
     springVersion = "4.3.14.RELEASE"
     hibernateVersion = "4.3.11.Final"
     jacksonVersion = "2.6.7"
-    elasticsearchVersion = "2.1.1"
-    dispatchVersion = "0.8.10"
+    jacksonScalaModuleVersion = "2.6.7.1"
+    elasticsearchVersion = "2.1.2"
+    elastic4sVersion = "2.1.3-warwick"
     poiVersion = "3.17"
     tilesVersion = "3.0.8"
     jcloudsVersion = "2.0.2"
@@ -133,7 +134,7 @@ subprojects {
 
     dependencies {
         compile "org.scala-lang:scala-library:${scalaVersion}"
-        compile "com.jsuereth:scala-arm_${scalaMajorVersion}:1.4"
+        compile "com.jsuereth:scala-arm_${scalaMajorVersion}:2.0"
 
         // 'providedCompile' deps are not included in WAR and also makes it compile within IDEA internally.
         compileOnly 'javax.servlet:javax.servlet-api:3.1.0'
@@ -161,8 +162,8 @@ subprojects {
         testCompile 'junit:junit:4.12'
         testCompile 'org.jmock:jmock-junit4:2.5.1'
         testCompile 'jmock:jmock-cglib:1.2.0'
-        testCompile "org.specs2:specs2_${scalaMajorVersion}:2.4.15"
-        testCompile "org.scalatest:scalatest_${scalaMajorVersion}:2.2.4"
+        testCompile "org.specs2:specs2_${scalaMajorVersion}:2.4.17"
+        testCompile "org.scalatest:scalatest_${scalaMajorVersion}:3.0.5"
         testCompile 'org.mockito:mockito-all:1.10.19'
     }
 
@@ -206,6 +207,6 @@ subprojects {
 // value then running `./gradlew wrapper`. Next time gradlew
 // is run it will fetch and use that version.
 task wrapper(type: Wrapper) {
-    gradleVersion = '4.6'
+    gradleVersion = '4.7'
     distributionType = 'ALL'
 }

@@ -18,7 +18,7 @@ class FormValueTest extends PersistenceTestBase {
 		saved.attachments.iterator.next.temporary.booleanValue should be {false}
 	}
 
-	@Test def tab3614() = transactional{ tx=>
+	@Test def tab3614(): Unit = transactional{ tx=>
 		// TAB-667
 		val orphanAttachment = flushing(session) {
 			val attachment = new FileAttachment

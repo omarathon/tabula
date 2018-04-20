@@ -19,12 +19,12 @@ class FileDaoTest extends PersistenceTestBase with Mockito {
 	val dao = new FileDao
 	val objectStorageService: ObjectStorageService = smartMock[ObjectStorageService]
 
-	@Before def setup() {
+	@Before def setup(): Unit = {
 		dao.objectStorageService = objectStorageService
 		dao.sessionFactory = sessionFactory
 	}
 
-	@Test def deletingTemporaryFiles = withFakeTime(new DateTime(2012, DateTimeConstants.JANUARY, 15, 1, 0, 0, 0)) {
+	@Test def deletingTemporaryFiles(): Unit = withFakeTime(new DateTime(2012, DateTimeConstants.JANUARY, 15, 1, 0, 0, 0)) {
 		transactional { transactionStatus =>
 			for (i <- 0 to 50) {
 				val attachment = new FileAttachment
@@ -40,11 +40,11 @@ class FileDaoTest extends PersistenceTestBase with Mockito {
 		}
 	}
 
-	@After def bangtidy() { transactional { tx =>
+	@After def bangtidy(): Unit = transactional { tx =>
 		session.createQuery("delete from FileAttachment").executeUpdate()
-	}}
+	}
 
-	@Test def crud = transactional { tx =>
+	@Test def crud(): Unit = transactional { tx =>
 		val attachments = for (i <- 1 to 10) yield {
 			val attachment = new FileAttachment
 			attachment.dateUploaded = new DateTime(2013, DateTimeConstants.FEBRUARY, i, 1, 0, 0, 0)
@@ -74,7 +74,7 @@ class FileDaoTest extends PersistenceTestBase with Mockito {
 	}
 
 	@Test
-	def save() {
+	def save(): Unit = {
 		transactional { tx =>
 			val attachment = new FileAttachment("file.txt")
 			val string = "Doe, a deer, a female deer"

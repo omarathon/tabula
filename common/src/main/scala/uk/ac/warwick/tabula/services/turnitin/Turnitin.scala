@@ -2,16 +2,11 @@ package uk.ac.warwick.tabula.services.turnitin
 
 import java.io.InputStream
 
-import dispatch.classic.Request.toRequestVerbs
-import dispatch.classic._
-import dispatch.classic.thread.ThreadSafeHttpClient
-import org.apache.http.client.params.{ClientPNames, CookiePolicy}
-import org.apache.http.impl.client.DefaultRedirectStrategy
-import org.apache.http.params.HttpConnectionParams
-import org.apache.http.protocol.HttpContext
-import org.apache.http.{HttpRequest, HttpResponse}
+import org.apache.http.client.config.RequestConfig
+import org.apache.http.client.methods.RequestBuilder
+import org.apache.http.impl.client.{CloseableHttpClient, HttpClients}
+import org.springframework.beans.factory.DisposableBean
 import org.springframework.beans.factory.annotation.Value
-import org.springframework.beans.factory.{DisposableBean, InitializingBean}
 import org.springframework.stereotype.Service
 import uk.ac.warwick.tabula.data.model.Assignment
 import uk.ac.warwick.tabula.helpers.Logging
@@ -49,15 +44,15 @@ object Turnitin {
  * logout() to end the session.
  */
 @Service
-class Turnitin extends Logging with DisposableBean with InitializingBean {
+class Turnitin extends Logging with DisposableBean {
 
 
 	/** The top level account ID (usually for University of Warwick account) */
-	@Value("${turnitin.aid}") var aid: String = null
+	@Value("${turnitin.aid}") var aid: String = _
 	/** Sub-account ID underneath University of Warwick */
-	@Value("${turnitin.said}") var said: String = null
+	@Value("${turnitin.said}") var said: String = _
 	/** Shared key as set up on the University of Warwick account's Open API settings */
-	@Value("${turnitin.key}") var sharedSecretKey: String = null
+	@Value("${turnitin.key}") var sharedSecretKey: String = _
 
 	@Value("${turnitin.url}") var apiEndpoint: String = _
 
@@ -76,26 +71,22 @@ class Turnitin extends Logging with DisposableBean with InitializingBean {
 	val userAgent = "Coursework submission app, University of Warwick, coursework@warwick.ac.uk"
 
 	// URL to call for all requests.
-	lazy val endpoint: Request = url(apiEndpoint) <:< Map("User-Agent" -> userAgent)
+	def request(method: String): RequestBuilder =
+		RequestBuilder.create(method)
+			.setHeader("User-Agent", userAgent)
 
-	// TODO does this really need to be a custom instance?
-	val http: Http = new Http with thread.Safety {
-		override def make_client = new ThreadSafeHttpClient(new Http.CurrentCredentials(None), maxConnections, maxConnectionsPerRoute) {
-			HttpConnectionParams.setConnectionTimeout(getParams, 20000)
-			HttpConnectionParams.setSoTimeout(getParams, 20000)
-			setRedirectStrategy(new DefaultRedirectStrategy {
-				override def isRedirected(req: HttpRequest, res: HttpResponse, ctx: HttpContext) = false
-			})
-			getParams.setParameter(ClientPNames.COOKIE_POLICY, CookiePolicy.IGNORE_COOKIES)
-		}
-	}
+	val httpClient: CloseableHttpClient =
+		HttpClients.custom()
+			.setDefaultRequestConfig(RequestConfig.custom()
+				.setConnectTimeout(20000)
+				.setSocketTimeout(20000)
+				.build())
+			.disableRedirectHandling()
+			.disableCookieManagement()
+			.build()
 
-	override def destroy {
-		http.shutdown()
-	}
-
-	override def afterPropertiesSet {
-
+	override def destroy(): Unit = {
+		httpClient.close()
 	}
 
 	def login(email:String, firstName:String, lastName:String): Option[Session] = {

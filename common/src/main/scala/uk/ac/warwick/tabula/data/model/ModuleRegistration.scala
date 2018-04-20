@@ -93,7 +93,8 @@ class ModuleRegistration() extends GeneratedId	with PermissionsTarget with CanBe
 
 	override def toString: String = studentCourseDetails.scjCode + "-" + module.code + "-" + cats + "-" + AcademicYear.toString
 
-	def permissionsParents: Stream[StudentCourseDetails] = Option(studentCourseDetails).toStream
+	//allowing module manager to see MR records - TAB-6062(module grids)
+	def permissionsParents: Stream[PermissionsTarget] = Stream(Option(studentCourseDetails), Option(module)).flatten
 
 	override def compare(that: ModuleRegistration): Int =
 		new CompareToBuilder()

@@ -489,7 +489,7 @@ object ExamGridSummaryAndKey {
 			val keyCell = row.createCell(0)
 			keyCell.setCellValue("[# (#)]")
 			val valueCell = row.createCell(1)
-			valueCell.setCellValue("Mark is from a resit, the original mark is shown in brackets")
+			valueCell.setCellValue("Resit mark (original mark)")
 		}
 		{
 			val row = sheet.createRow(14)

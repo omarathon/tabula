@@ -29,6 +29,9 @@ task deployToTomcat(dependsOn: 'war') {
     }
 }
 
+task bamboo(dependsOn: ['clean', 'test', 'war']) {}
+task deployApplicationLocally(dependsOn: ['war', 'deployToTomcat']) {}
+
 rebel {
     web {
         resource {}
