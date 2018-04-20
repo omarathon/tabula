@@ -45,10 +45,10 @@ allprojects {
 }
 
 // Configuration that applies to all subprojects (including common, so nothing war-specific here)
+// TODO get rid of the war plugin here
 subprojects {
-    apply plugin: 'java'
     apply plugin: 'scala'
-    apply plugin: "org.zeroturnaround.gradle.jrebel"
+    apply plugin: 'org.zeroturnaround.gradle.jrebel'
     apply plugin: 'war'
 
     // TAB-5441 - additional jrebel config to include language specific build dirs
@@ -144,7 +144,7 @@ subprojects {
 
         // Provided by the above
         providedCompile 'ch.qos.logback:logback-classic:1.2.3'
-        providedCompile ('net.logstash.logback:logstash-logback-encoder:4.11') {
+        providedCompile('net.logstash.logback:logstash-logback-encoder:4.11') {
             exclude group: 'com.fasterxml.jackson.core'
         }
         providedCompile 'org.slf4j:slf4j-api:1.7.25'
@@ -172,9 +172,14 @@ subprojects {
     }
 
     test {
+        // half the cores, but at least four
+        def forks = Math.max(4, Runtime.runtime.availableProcessors().intdiv(2))
+        doFirst {
+            println "Executing tests with ${forks} forks"
+        }
         ignoreFailures = true // So we can quarantine in Bamboo
         maxHeapSize = '2048m'
-        maxParallelForks = Runtime.runtime.availableProcessors() / 2
+        maxParallelForks = forks
         systemProperties = [TestProcessId: "F1"] // FIXME
         testLogging {
             // set options for log level LIFECYCLE
@@ -191,7 +196,9 @@ subprojects {
         }
     }
 
-    war.dependsOn(generateRebel)
+    tasks.withType(War) {
+        dependsOn(generateRebel)
+    }
 }
 
 // upgrade to a different version of Gradle by changing this
