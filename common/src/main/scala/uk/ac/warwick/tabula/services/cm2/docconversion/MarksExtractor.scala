@@ -34,7 +34,7 @@ class MarkItem extends AutowiringUserLookupComponent {
 	var isModified = false
 
 	def user(assignment:Assignment): Option[User] = Option(userLookup.getUserByWarwickUniId(id)).filter(u => u.isFoundUser && !u.isLoginDisabled)
-  	.orElse(Option(userLookup.getUserByWarwickUniIdUncached(id, skipMemberLookup = true)).filter(u => u.isFoundUser && !u.isLoginDisabled))
+		.orElse(Option(userLookup.getUserByWarwickUniIdUncached(id, skipMemberLookup = true)).filter(u => u.isFoundUser && !u.isLoginDisabled))
 		.orElse(Option(userLookup.getUserByUserId(id)).filter(u => u.isFoundUser && !u.isLoginDisabled))
 		.orElse({
 			val anonId = Try(id.toInt).toOption
