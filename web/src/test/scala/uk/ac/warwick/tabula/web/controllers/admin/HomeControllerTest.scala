@@ -38,7 +38,7 @@ class HomeControllerTest extends TestBase with Mockito {
 		controller.roleService = smartMock[RoleService]
 	}
 
-	@Test def itWorks() = withUser("cuscav") { new Fixture {
+	@Test def itWorks(): Unit = withUser("cuscav") { new Fixture {
 		controller.moduleAndDepartmentService.departmentsWithPermission(currentUser, Permissions.Module.Administer) returns Set(dept1)
 		controller.moduleAndDepartmentService.departmentsWithPermission(currentUser, Permissions.Route.Administer) returns Set(dept1)
 		controller.moduleAndDepartmentService.modulesWithPermission(currentUser, Permissions.Module.Administer) returns Set(mod1, mod2, mod3)
@@ -47,7 +47,7 @@ class HomeControllerTest extends TestBase with Mockito {
 
 		val mav: Mav = controller.home(None, null, currentUser)
 		mav.viewName should be ("admin/home/view")
-		mav.toModel.toMap should be (Map(
+		mav.toModel should be (Map[String, Any](
 			"ownedDepartments" -> Set(dept1),
 			"ownedModuleDepartments" -> Set(dept1, dept2),
 			"ownedRouteDepartments" -> Set(dept1, dept2),
