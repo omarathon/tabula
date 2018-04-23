@@ -153,7 +153,7 @@ trait AssignMarkersValidation extends SelfValidating with ValidateConcurrentStag
 		validateChangedAllocations(errors)
 	}
 
-	private def validateChangedAllocations(errors: Errors): Unit = {
+	def validateChangedAllocations(errors: Errors): Unit = {
 		val changedMarkerAllocationsWithFinalisedFeedback: Iterable[(MarkingWorkflowStage, Marker, Student)] = for {
 			(stage, allocations) <- allocationMap
 			(newMarker, students) <- allocations
