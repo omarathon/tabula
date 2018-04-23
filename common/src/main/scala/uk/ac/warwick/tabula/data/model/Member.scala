@@ -162,7 +162,7 @@ abstract class Member
 			u.setDepartmentCode(dept.code.toUpperCase)
 		}
 
-		u.setLoginDisabled(!(inUseFlag.hasText && (inUseFlag == "Active" || inUseFlag.startsWith("Inactive - Starts "))))
+		u.setLoginDisabled(!active)
 		userType match {
 			case MemberUserType.Staff =>
 				u.setStaff(true)
@@ -198,6 +198,10 @@ abstract class Member
 	def isRelationshipAgent(relationshipType: StudentRelationshipType): Boolean = {
 		relationshipService.listCurrentStudentRelationshipsWithMember(relationshipType, this).nonEmpty
 	}
+
+	def active: Boolean = activeNow || activeLater
+	def activeNow: Boolean = inUseFlag == "Active"
+	def activeLater: Boolean = inUseFlag.hasText && inUseFlag.startsWith("Inactive - Starts")
 
 	// Overridden in StudentMember
 	def hasRelationship(relationshipType: StudentRelationshipType) = false

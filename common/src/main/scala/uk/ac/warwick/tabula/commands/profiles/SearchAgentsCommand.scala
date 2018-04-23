@@ -17,7 +17,7 @@ class SearchAgentsCommandInternal(user: CurrentUser) extends AbstractSearchProfi
 	with CommandInternal[Seq[Member]] {
 
 	override def applyInternal(): Seq[Member] =
-		if (validQuery) usercodeMatches ++ universityIdMatches ++ queryMatches
+		if (validQuery) usercodeMatches ++ universityIdMatches.filter(_.active) ++ queryMatches
 		else Seq()
 
 	private def queryMatches = {

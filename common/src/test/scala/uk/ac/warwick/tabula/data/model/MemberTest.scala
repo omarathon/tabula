@@ -256,6 +256,29 @@ class MemberTest extends TestBase with Mockito {
 		entity.validYears(3).studentCourseYearDetails.get should be (scyd2015)
 	}
 
+	@Test def inUseFlag(): Unit = {
+		val member = Fixtures.staff()
+
+		member.inUseFlag = null
+		member should not be 'active
+
+		member.inUseFlag = ""
+		member should not be 'active
+
+		member.inUseFlag = "Active"
+		member shouldBe 'activeNow
+		member shouldBe 'active
+
+		member.inUseFlag = "Inactive - Starts 01/01/01"
+		member shouldBe 'activeLater
+		member shouldBe 'active
+
+		member.inUseFlag = "Inactive - Ended 01/01/01"
+		member should not be 'active
+
+		member.inUseFlag = "Inactive"
+		member should not be 'active
+	}
 }
 
 class MemberPersistenceTest extends PersistenceTestBase with Mockito {

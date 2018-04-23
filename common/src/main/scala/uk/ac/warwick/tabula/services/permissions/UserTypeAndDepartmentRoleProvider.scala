@@ -22,7 +22,7 @@ class UserTypeAndDepartmentRoleProvider extends ScopelessRoleProvider with TaskB
 	val departmentService: MutablePromise[ModuleAndDepartmentService] = promise { Wire[ModuleAndDepartmentService] }
 
 	private def getRolesForMembers(members: Seq[Member]): Stream[Role] = members.toStream.flatMap { member =>
-		if (member.inUseFlag == "Active" || member.inUseFlag.startsWith("Inactive - Starts ")) {
+		if (member.active) {
 			val memberRole = customRoleFor(Option(member.homeDepartment))(UniversityMemberRoleDefinition, member).getOrElse(UniversityMemberRole(member))
 
 			memberRole #:: (member.userType match {
