@@ -272,14 +272,14 @@ class MemberDaoTest extends PersistenceTestBase with Logging with Mockito {
 		memberDao.saveOrUpdate(stu3)
 		memberDao.saveOrUpdate(stu4)
 
-		memberDao.getFreshUniversityIds.size should be (4)
+		memberDao.getFreshStudentUniversityIds.size should be (4)
 		memberDao.getAllWithUniversityIdsStaleOrFresh(Seq("1000001", "1000002", "1000003", "1000004")).size should be (4)
 
 		stu3.missingFromImportSince = DateTime.now
 		memberDao.saveOrUpdate(stu3)
 		session.flush()
 
-		memberDao.getFreshUniversityIds.size should be (3)
+		memberDao.getFreshStudentUniversityIds.size should be (3)
 		memberDao.getAllWithUniversityIdsStaleOrFresh(Seq("1000001", "1000002", "1000003", "1000004")).size should be (4)
 
 		memberDao.getByUniversityId("1000003") should be (None)
