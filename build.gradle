@@ -196,9 +196,7 @@ subprojects {
         }
     }
 
-    tasks.withType(War) {
-        dependsOn(generateRebel)
-    }
+    war.dependsOn(generateRebel)
 }
 
 // upgrade to a different version of Gradle by changing this

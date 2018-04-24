@@ -35,6 +35,8 @@ task deployToTomcat(dependsOn: 'war') {
 }
 
 rebel {
+    rebelXmlDirectory = file("build/rootContent/WEB-INF/classes")
+
     web {
         resource {
             directory = "build/rootContent/static"
@@ -55,6 +57,7 @@ rebel {
         }
     }
 }
+generateRebel.dependsOn('webInf')
 
 task commonWebInf(type: Copy) {
     from project(':common').file('src/main/webapp/WEB-INF')
