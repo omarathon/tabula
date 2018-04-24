@@ -31,7 +31,7 @@ class ModuleRegistrationServiceTest extends TestBase with Mockito {
 				Fixtures.moduleRegistration(null, module5, BigDecimal(7.5).underlying, null, agreedMark = BigDecimal(97)),
 				Fixtures.moduleRegistration(null, module6, BigDecimal(15).underlying, null, agreedMark = BigDecimal(64))
 			)
-			val result: Either[String, BigDecimal] = service.weightedMeanYearMark(moduleRegistrations, Map())
+			val result: Either[String, BigDecimal] = service.weightedMeanYearMark(moduleRegistrations, Map(), allowEmpty = false)
 			result.isRight should be {true}
 			result.right.get.scale should be (1)
 			result.right.get.doubleValue() should be (64.6)
@@ -44,7 +44,7 @@ class ModuleRegistrationServiceTest extends TestBase with Mockito {
 				Fixtures.moduleRegistration(null, module5, BigDecimal(7.5).underlying, null, agreedMark = BigDecimal(97)),
 				Fixtures.moduleRegistration(null, module6, BigDecimal(15).underlying, null, agreedMark = BigDecimal(64))
 			)
-			val noResult: Either[String, BigDecimal] = service.weightedMeanYearMark(moduleRegistrationsWithMissingAgreedMark, Map())
+			val noResult: Either[String, BigDecimal] = service.weightedMeanYearMark(moduleRegistrationsWithMissingAgreedMark, Map(), allowEmpty = false)
 			noResult.isRight should be {false}
 
 			val moduleRegistrationsWithOverriddenMark = Seq(
@@ -55,10 +55,22 @@ class ModuleRegistrationServiceTest extends TestBase with Mockito {
 				Fixtures.moduleRegistration(null, module5, BigDecimal(7.5).underlying, null, agreedMark = BigDecimal(97)),
 				Fixtures.moduleRegistration(null, module6, BigDecimal(15).underlying, null, agreedMark = BigDecimal(64))
 			)
-			val overriddenResult: Either[String, BigDecimal] = service.weightedMeanYearMark(moduleRegistrationsWithOverriddenMark, Map(module4 -> 0))
+			val overriddenResult: Either[String, BigDecimal] = service.weightedMeanYearMark(moduleRegistrationsWithOverriddenMark, Map(module4 -> 0), allowEmpty = false)
 			overriddenResult.isRight should be {true}
 			overriddenResult.right.get.scale should be (1)
 			overriddenResult.right.get.doubleValue() should be (64.6)
+		}
+	}
+
+	@Test
+	def weightedMeanYearMarkNoModules(): Unit = {
+		new Fixture {
+			val errorResult: Either[String, BigDecimal] = service.weightedMeanYearMark(Nil, Map(), allowEmpty = false)
+			errorResult.isRight should be (false)
+
+			val noErrorResult: Either[String, BigDecimal] = service.weightedMeanYearMark(Nil, Map(), allowEmpty = true)
+			noErrorResult.isRight should be (true)
+			noErrorResult.right.get should be (BigDecimal(0))
 		}
 	}
 

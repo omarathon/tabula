@@ -27,14 +27,17 @@ trait ModuleRegistrationService {
 	def getByUsercodesAndYear(usercodes: Seq[String], academicYear: AcademicYear) : Seq[ModuleRegistration]
 
 	def getByModuleAndYear(module: Module, academicYear: AcademicYear): Seq[ModuleRegistration]
+
 	/**
 		* Gets the weighted mean mark for the given module registrations.
 		* Each agreed mark is multiplied by the CAT weighing of the module then added together, and the result is divided by the total CATS.
 		* This is then rounded to 1 decimal place.
+		*
 		* @param moduleRegistrations The module registrations to use
+		* @param allowEmpty Whether this method should return 0 if no module registrations are found
 		* @return The weighted mean mark, if all the provided registration has an agreed mark
 		*/
-	def weightedMeanYearMark(moduleRegistrations: Seq[ModuleRegistration], markOverrides: Map[Module, BigDecimal]): Either[String, BigDecimal]
+	def weightedMeanYearMark(moduleRegistrations: Seq[ModuleRegistration], markOverrides: Map[Module, BigDecimal], allowEmpty: Boolean): Either[String, BigDecimal]
 
 	def overcattedModuleSubsets(
 		entity: ExamGridEntityYear,
@@ -74,7 +77,7 @@ abstract class AbstractModuleRegistrationService extends ModuleRegistrationServi
 	def getByModuleAndYear(module: Module, academicYear: AcademicYear): Seq[ModuleRegistration] =
 		moduleRegistrationDao.getByModuleAndYear(module, academicYear)
 
-	def weightedMeanYearMark(moduleRegistrations: Seq[ModuleRegistration], markOverrides: Map[Module, BigDecimal]): Either[String, BigDecimal] = {
+	def weightedMeanYearMark(moduleRegistrations: Seq[ModuleRegistration], markOverrides: Map[Module, BigDecimal], allowEmpty: Boolean): Either[String, BigDecimal] = {
 		val nonNullReplacedMarksAndCats: Seq[(BigDecimal, BigDecimal)] = moduleRegistrations.map(mr => {
 			val mark: BigDecimal = markOverrides.getOrElse(mr.module, mr.firstDefinedMark.map(mark => BigDecimal(mark)).orNull)
 			val cats: BigDecimal = Option(mr.cats).map(c => BigDecimal(c)).orNull
@@ -86,8 +89,11 @@ abstract class AbstractModuleRegistrationService extends ModuleRegistrationServi
 					.setScale(1, RoundingMode.HALF_UP)
 			)
 		} else {
-			if(nonNullReplacedMarksAndCats.isEmpty)
-				Left(s"The year mark cannot be calculated because there are no module marks")
+			if (nonNullReplacedMarksAndCats.isEmpty)
+				if (allowEmpty)
+					Right(BigDecimal(0))
+				else
+					Left(s"The year mark cannot be calculated because there are no module marks")
 			else
 				Left(s"The year mark cannot be calculated because the following module registrations have no mark: ${moduleRegistrations.filter(mr => !mr.passFail && mr.firstDefinedMark.isEmpty).map(_.module.code.toUpperCase).mkString(", ")}")
 		}
@@ -125,7 +131,7 @@ abstract class AbstractModuleRegistrationService extends ModuleRegistrationServi
 					ruleFilteredSubsets
 				}
 			}
-			subsetsToReturn.map(modRegs => (weightedMeanYearMark(modRegs.toSeq, markOverrides), modRegs.toSeq.sortBy(_.module.code)))
+			subsetsToReturn.map(modRegs => (weightedMeanYearMark(modRegs.toSeq, markOverrides, allowEmpty = false), modRegs.toSeq.sortBy(_.module.code)))
 			  .collect{ case (Right(mark), modRegs) => (mark, modRegs) }
 				.sortBy { case (mark, modRegs) =>
 					// Add a definitive sort so subsets with the same mark always come out the same order
