@@ -44,7 +44,9 @@
 							<th colspan="3">Options</th>
 							<td class="spacer">&nbsp;</td>
 							<#list overcatView.perYearColumns?keys?sort?reverse as year>
-								<th colspan="${mapGet(overcatView.perYearColumns, year)?size}">Year ${year}</th>
+								<#if mapGet(overcatView.perYearColumns, year)?size gt 0>
+									<th colspan="${mapGet(overcatView.perYearColumns, year)?size}">Year ${year}</th>
+								</#if>
 								<td class="spacer">&nbsp;</td>
 							</#list>
 						</tr>
