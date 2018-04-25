@@ -3,6 +3,7 @@ package uk.ac.warwick.tabula.helpers
 import java.io.InputStreamReader
 import java.net.URI
 import java.nio.charset.StandardCharsets
+import java.util.zip.GZIPInputStream
 
 import javax.xml.parsers.SAXParserFactory
 import org.apache.commons.codec.binary.Base64
@@ -51,7 +52,12 @@ trait ApacheHttpClientUtils {
 	def xmlResponseHandler[A](block: xml.Elem => A): AbstractResponseHandler[A] =
 		new AbstractResponseHandler[A] {
 			override def handleEntity(entity: HttpEntity): A = {
-				val in = entity.getContent
+				val in = (entity.getContent, entity.getContentEncoding) match {
+					case (stm, null) => stm
+					case (stm, enc) if enc.getValue == "gzip" => new GZIPInputStream(stm)
+					case (stm, _) => stm
+				}
+
 				try {
 					val charset = Option(ContentType.getLenientOrDefault(entity).getCharset).getOrElse(StandardCharsets.UTF_8)
 					val reader = new InputStreamReader(in, charset)
