@@ -24,7 +24,7 @@
 				time, you'll need to generate the grid again to see the most recent information.
 			</p>
 		</div>
-		<div class="key clearfix">
+		<div class="key clearfix exam-modulegrid-preview">
 			<table class="table table-condensed">
 				<thead>
 					<tr>
@@ -59,7 +59,7 @@
 				<tbody>
 					<tr>
 						<td><span class="exam-grid-fail">#</span></td>
-						<td>Failed</td>
+						<td>Failed module or component</td>
 					</tr>
 					<tr>
 						<td><span class="exam-grid-actual-mark">#</span></td>
@@ -68,10 +68,6 @@
 					<tr>
 						<td><span class="exam-grid-actual-mark">X</span></td>
 						<td>Agreed and actual mark missing</td>
-					</tr>
-					<tr>
-						<td></td>
-						<td>Blank indicates module not taken by student</td>
 					</tr>
 				</tbody>
 			</table>
@@ -101,12 +97,13 @@
 				<#list entities as entity>
 					<#assign assessmentComponentMap = entity.componentInfo />
 					<#assign mr = entity.moduleRegistration />
+					<#assign scd = mr.studentCourseDetails />
 					<tr class="student <#if entity_index%2 == 1>odd</#if>">
 						<td>${entity.name}</td>
 						<td>${entity.universityId} </td>
-						<td> ${mr.studentCourseDetails.scjCode}</td>
-						<td>${mr.studentCourseDetails.course.code}</td>
-						<td>${mr.studentCourseDetails.currentRoute.code}</td>
+						<td> ${scd.scjCode}</td>
+						<td><span class="use-tooltip" title="" data-container="body" data-original-title="${scd.course.shortName!""}">${scd.course.code}</span></td>
+						<td><span class="use-tooltip" title="" data-container="body" data-original-title="${scd.currentRoute.name!""}">${scd.currentRoute.code?upper_case}</span></td>
 						<td>${mr.academicYear.startYear?c}</td>
 						<td>${mr.cats}</td>
 						<#list componentInfo as component>
