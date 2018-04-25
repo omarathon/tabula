@@ -6,6 +6,8 @@ import uk.ac.warwick.tabula.JavaImports._
 import uk.ac.warwick.tabula.commands._
 import uk.ac.warwick.tabula.data.model.Department
 import uk.ac.warwick.tabula.data.model.Department.Settings.ExamGridOptions
+import uk.ac.warwick.tabula.exams.grids.columns.marking.CurrentYearMarkColumnOption
+import uk.ac.warwick.tabula.exams.grids.columns.modules.CoreModulesColumnOption
 import uk.ac.warwick.tabula.exams.grids.columns.{ExamGridColumnOption, ExamGridStudentIdentificationColumnValue}
 import uk.ac.warwick.tabula.permissions.Permissions
 import uk.ac.warwick.tabula.services.{AutowiringModuleAndDepartmentServiceComponent, ModuleAndDepartmentServiceComponent}
@@ -24,9 +26,7 @@ object GenerateExamGridGridOptionsCommand {
 			with GenerateExamGridGridOptionsDescription
 			with GenerateExamGridGridOptionsCommandState
 			with GenerateExamGridGridOptionsCommandRequest
-			
 }
-
 
 class GenerateExamGridGridOptionsCommandInternal(val department: Department) extends CommandInternal[(Seq[ExamGridColumnOption], Seq[String])] {
 
@@ -42,7 +42,8 @@ class GenerateExamGridGridOptionsCommandInternal(val department: Department) ext
 			componentSequenceToShow,
 			moduleNameToShow,
 			layout,
-			yearMarksToUse
+			yearMarksToUse,
+			mandatoryModulesAndYearMarkColumns
 		)
 		moduleAndDepartmentService.saveOrUpdate(department)
 		(predefinedColumnOptions, customColumnTitles.asScala)
@@ -65,6 +66,12 @@ trait PopulatesGenerateExamGridGridOptionsCommand extends PopulateOnForm {
 		moduleNameToShow = options.moduleNameToShow
 		layout = options.layout
 		yearMarksToUse = options.yearMarksToUse
+		mandatoryModulesAndYearMarkColumns = options.mandatoryModulesAndYearMarkColumns
+
+		if (options.mandatoryModulesAndYearMarkColumns) {
+			predefinedColumnIdentifiers.add(new CoreModulesColumnOption().identifier)
+			predefinedColumnIdentifiers.add(new CurrentYearMarkColumnOption().identifier)
+		}
 	}
 }
 
@@ -124,6 +131,7 @@ trait GenerateExamGridGridOptionsCommandRequest {
 	var moduleNameToShow: String = "codeOnly"
 	var layout: String = "full"
 	var yearMarksToUse: String = "sits"
+	var mandatoryModulesAndYearMarkColumns: Boolean = true
 	var customColumnTitles: JList[String] = JArrayList()
 
 	def showFullLayout: Boolean = layout == "full"
@@ -133,8 +141,12 @@ trait GenerateExamGridGridOptionsCommandRequest {
 	def showModuleNames: Boolean = moduleNameToShow == "nameAndCode"
 	def calculateYearMarks: Boolean = yearMarksToUse != "sits"
 
+	private def isModulesOrYearMarkColumn(identifier: ExamGridColumnOption.Identifier): Boolean =
+		identifier == new CoreModulesColumnOption().identifier ||
+		identifier == new CurrentYearMarkColumnOption().identifier
+
 	protected lazy val predefinedColumnOptions: Seq[ExamGridColumnOption] =
-		allExamGridsColumns.filter(c => c.mandatory || predefinedColumnIdentifiers.contains(c.identifier))
+		allExamGridsColumns.filter(c => c.mandatory || predefinedColumnIdentifiers.contains(c.identifier) || (mandatoryModulesAndYearMarkColumns && isModulesOrYearMarkColumn(c.identifier)))
 
 	lazy val predefinedColumnDescriptions: Seq[String] = {
 		predefinedColumnOptions.filter(_.label.nonEmpty).map(_.label)
