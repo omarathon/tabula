@@ -103,7 +103,7 @@ object GenerateModuleExamGridExporter extends TaskBenchmarking {
 				createCell(row, currentColumnIndex + 1, entity.universityId, None)
 				createCell(row, currentColumnIndex + 2, scd.scjCode, None)
 				createCell(row, currentColumnIndex + 3, scd.course.code, None)
-				createCell(row, currentColumnIndex + 4, scd.currentRoute.code, None)
+				createCell(row, currentColumnIndex + 4, scd.currentRoute.code.toUpperCase, None)
 				createCell(row, currentColumnIndex + 5, mr.academicYear.startYear.toString, None)
 				createCell(row, currentColumnIndex + 6, mr.cats.toString, None)
 
@@ -242,7 +242,7 @@ object ModuleExamGridSummaryAndKey {
 
 		keyValueCells("Department:", department.name, 0)
 		keyValueCells("Academic year:", academicYear.toString, 1)
-		keyValueCells("Module:", s"${module.code} ${module.name}", 2)
+		keyValueCells("Module:", s"${module.code.toUpperCase} ${module.name}", 2)
 		keyValueCells("Student Count:", count.toString, 3)
 		keyValueCells("Grid Generated:", DateTime.now.toString, 4)
 

@@ -31,7 +31,7 @@
 			</#list>
 		</select>
 
-		<@bs3form.errors path="selectExamModuleCommand" />
+		<@bs3form.errors path="selectModuleExamCommand" />
 
 		<div class="buttons">
 			<button class="btn btn-default disabled" type="submit" name="${GenerateModuleExamGridMappingParameters.selectModule}" >Next</button>
