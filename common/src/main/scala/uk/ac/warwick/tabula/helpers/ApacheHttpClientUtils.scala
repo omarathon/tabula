@@ -53,7 +53,7 @@ trait ApacheHttpClientUtils {
 			override def handleEntity(entity: HttpEntity): A = {
 				val in = entity.getContent
 				try {
-					val charset = ContentType.getLenientOrDefault(entity).getCharset
+					val charset = Option(ContentType.getLenientOrDefault(entity).getCharset).getOrElse(StandardCharsets.UTF_8)
 					val reader = new InputStreamReader(in, charset)
 					val xml = XML.withSAXParser(ApacheHttpClientUtils.saxParserFactory.newSAXParser).load(reader)
 					block(xml)
