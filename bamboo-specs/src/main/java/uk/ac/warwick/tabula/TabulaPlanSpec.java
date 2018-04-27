@@ -4,12 +4,21 @@ import com.atlassian.bamboo.specs.api.BambooSpec;
 import com.atlassian.bamboo.specs.api.builders.Variable;
 import com.atlassian.bamboo.specs.api.builders.deployment.Deployment;
 import com.atlassian.bamboo.specs.api.builders.notification.Notification;
+import com.atlassian.bamboo.specs.api.builders.plan.Job;
 import com.atlassian.bamboo.specs.api.builders.plan.Plan;
+import com.atlassian.bamboo.specs.api.builders.plan.Stage;
 import com.atlassian.bamboo.specs.api.builders.plan.artifact.Artifact;
 import com.atlassian.bamboo.specs.api.builders.project.Project;
+import com.atlassian.bamboo.specs.api.builders.requirement.Requirement;
 import com.atlassian.bamboo.specs.builders.notification.DeploymentFailedNotification;
+import com.atlassian.bamboo.specs.builders.task.CheckoutItem;
+import com.atlassian.bamboo.specs.builders.task.ScriptTask;
+import com.atlassian.bamboo.specs.builders.task.TestParserTask;
+import com.atlassian.bamboo.specs.builders.task.VcsCheckoutTask;
 import com.atlassian.bamboo.specs.builders.trigger.AfterSuccessfulBuildPlanTrigger;
 import com.atlassian.bamboo.specs.builders.trigger.ScheduledTrigger;
+import com.atlassian.bamboo.specs.model.task.ScriptTaskProperties;
+import com.atlassian.bamboo.specs.model.task.TestParserTaskProperties;
 import uk.ac.warwick.bamboo.specs.AbstractWarwickBuildSpec;
 
 import java.time.LocalTime;
@@ -37,26 +46,59 @@ public class TabulaPlanSpec extends AbstractWarwickBuildSpec {
         new TabulaPlanSpec().publish();
     }
 
+    private static Stage buildStage() {
+        Job job =
+            new Job("Build and check", "BUILD")
+                .tasks(
+                    new VcsCheckoutTask()
+                        .description("Checkout source from default repository")
+                        .checkoutItems(new CheckoutItem().defaultRepository()),
+                    new ScriptTask()
+                        .description("gradlew clean check war")
+                        .interpreter(ScriptTaskProperties.Interpreter.BINSH_OR_CMDEXE)
+                        .location(ScriptTaskProperties.Location.FILE)
+                        .fileFromPath("gradlew")
+                        .argument("clean check war")
+                        .environmentVariables("JAVA_OPTS=\"-Xmx256m -Xms128m\""),
+                    new ScriptTask()
+                        .description("Touch test files so Bamboo doesn't ignore them")
+                        .interpreter(ScriptTaskProperties.Interpreter.BINSH_OR_CMDEXE)
+                        .location(ScriptTaskProperties.Location.INLINE)
+                        .inlineBody("find . -type f -name 'TEST-*.xml' -exec touch {} +")
+                )
+                .requirements(
+                    new Requirement("system.jdk.JDK 1.8")
+                );
+
+        job.finalTasks(
+            new TestParserTask(TestParserTaskProperties.TestType.JUNIT)
+                .description("Parse test results")
+                .resultDirectories("**/test-results/**/*.xml")
+        );
+
+        job.artifacts(
+            new Artifact()
+                .name("ROOT.war")
+                .copyPattern("ROOT.war")
+                .location("web/build/libs")
+                .shared(true),
+            new Artifact()
+                .name("api.war")
+                .copyPattern("api.war")
+                .location("api/build/libs")
+                .shared(true)
+        );
+
+        return new Stage("Build Stage").jobs(job);
+    }
+
     @Override
     protected Collection<Plan> builds() {
         return Arrays.asList(
             build(PROJECT, "ALL", "Tabula")
                 .linkedRepository(LINKED_REPOSITORY)
                 .description("Run checks and build WARs")
-                .gradleBuild(
-                    "clean check war",
-                    "**/test-results/**/*.xml",
-                    new Artifact()
-                        .name("ROOT.war")
-                        .copyPattern("ROOT.war")
-                        .location("web/build/libs")
-                        .shared(true),
-                    new Artifact()
-                        .name("api.war")
-                        .copyPattern("api.war")
-                        .location("api/build/libs")
-                        .shared(true)
-                )
+                .stage(buildStage())
                 .slackNotifications(SLACK_CHANNEL, false)
                 .build(),
             build(PROJECT, "FUNC", "Tabula Functional Tests")
