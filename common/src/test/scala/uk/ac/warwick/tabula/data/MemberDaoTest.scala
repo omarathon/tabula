@@ -24,7 +24,7 @@ class MemberDaoTest extends PersistenceTestBase with Logging with Mockito {
 	val moaFT: ModeOfAttendance = Fixtures.modeOfAttendance("F", "FT", "Full time")
 	val moaPT: ModeOfAttendance = Fixtures.modeOfAttendance("P", "PT", "Part time")
 
-	@Before def setup() {
+	@Before def setup(): Unit = {
 		memberDao.sessionFactory = sessionFactory
 		relationshipDao.sessionFactory = sessionFactory
 		sitsStatusDao.sessionFactory = sessionFactory
@@ -42,7 +42,7 @@ class MemberDaoTest extends PersistenceTestBase with Logging with Mockito {
 	}
 
 	@Test
-	def crud() = {
+	def crud(): Unit = {
 		transactional { tx =>
 
 			sitsStatusDao.saveOrUpdate(sprFullyEnrolledStatus)
@@ -84,7 +84,7 @@ class MemberDaoTest extends PersistenceTestBase with Logging with Mockito {
 
 	@Transactional
 	@Test
-	def testGetStudentByTimetableHash() = {
+	def testGetStudentByTimetableHash(): Unit = {
 		val student = Fixtures.student()
 		val timetableHash = "abc"
 		student.timetableHash = timetableHash
@@ -94,7 +94,7 @@ class MemberDaoTest extends PersistenceTestBase with Logging with Mockito {
 	}
 
 	@Test
-  def listUpdatedSince() = transactional { tx =>
+  def listUpdatedSince(): Unit = transactional { tx =>
 		val dept1 = Fixtures.department("hi", "History")
 		val dept2 = Fixtures.department("fr", "French")
 
@@ -132,7 +132,7 @@ class MemberDaoTest extends PersistenceTestBase with Logging with Mockito {
 		memberDao.listUpdatedSince(new DateTime(2013, DateTimeConstants.JANUARY, 31, 0, 0, 0, 0), dept2, 5) should be (Seq(m4))
 	}
 
-	@Test def studentsCounting() = transactional { tx =>
+	@Test def studentsCounting(): Unit = transactional { tx =>
 		val dept1 = Fixtures.department("ms", "Motorsport")
 		val dept2 = Fixtures.department("vr", "Vehicle Repair")
 
@@ -172,7 +172,7 @@ class MemberDaoTest extends PersistenceTestBase with Logging with Mockito {
 	}
 
 	@Test
-	def testGetAllSprStatuses() = transactional { tx =>
+	def testGetAllSprStatuses(): Unit = transactional { tx =>
 		sitsStatusDao.saveOrUpdate(sprFullyEnrolledStatus)
 		sitsStatusDao.saveOrUpdate(sprPermanentlyWithdrawnStatus)
 
@@ -197,7 +197,7 @@ class MemberDaoTest extends PersistenceTestBase with Logging with Mockito {
 	}
 
 	@Test
-	def testGetAllModesOfAttendance() = transactional { tx =>
+	def testGetAllModesOfAttendance(): Unit = transactional { tx =>
 		modeOfAttendanceDao.saveOrUpdate(moaFT)
 		modeOfAttendanceDao.saveOrUpdate(moaPT)
 
@@ -255,7 +255,7 @@ class MemberDaoTest extends PersistenceTestBase with Logging with Mockito {
 	}
 
 	@Test
-	def testGetFreshAndStaleUniversityIds() = transactional { tx =>
+	def testGetFreshAndStaleUniversityIds(): Unit = transactional { tx =>
 		val dept1 = Fixtures.department("hm", "History of Music")
 		val dept2 = Fixtures.department("ar", "Architecture")
 
@@ -272,14 +272,14 @@ class MemberDaoTest extends PersistenceTestBase with Logging with Mockito {
 		memberDao.saveOrUpdate(stu3)
 		memberDao.saveOrUpdate(stu4)
 
-		memberDao.getFreshUniversityIds.size should be (4)
+		memberDao.getFreshStudentUniversityIds.size should be (4)
 		memberDao.getAllWithUniversityIdsStaleOrFresh(Seq("1000001", "1000002", "1000003", "1000004")).size should be (4)
 
 		stu3.missingFromImportSince = DateTime.now
 		memberDao.saveOrUpdate(stu3)
 		session.flush()
 
-		memberDao.getFreshUniversityIds.size should be (3)
+		memberDao.getFreshStudentUniversityIds.size should be (3)
 		memberDao.getAllWithUniversityIdsStaleOrFresh(Seq("1000001", "1000002", "1000003", "1000004")).size should be (4)
 
 		memberDao.getByUniversityId("1000003") should be (None)
@@ -287,7 +287,7 @@ class MemberDaoTest extends PersistenceTestBase with Logging with Mockito {
 	}
 
 	@Test
-	def testStampMissingFromImport() = transactional { tx =>
+	def testStampMissingFromImport(): Unit = transactional { tx =>
 		val dept1 = Fixtures.department("hm", "History of Music")
 		val dept2 = Fixtures.department("ar", "Architecture")
 
@@ -325,7 +325,7 @@ class MemberDaoTest extends PersistenceTestBase with Logging with Mockito {
 	}
 
 	@Test
-	def testUnstampPresentInImport() = transactional { tx =>
+	def testUnstampPresentInImport(): Unit = transactional { tx =>
 		val dept1 = Fixtures.department("hm", "History of Music")
 		val dept2 = Fixtures.department("ar", "Architecture")
 

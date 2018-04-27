@@ -25,6 +25,7 @@ trait AssessmentMembershipService {
 	def getAssessmentGroup(id: String): Option[AssessmentGroup]
 	def getAssessmentGroup(template: AssessmentGroup): Option[AssessmentGroup]
 	def getUpstreamAssessmentGroup(template: UpstreamAssessmentGroup): Option[UpstreamAssessmentGroup]
+	def getUpstreamAssessmentGroups(module: Module, academicYear:AcademicYear): Seq[UpstreamAssessmentGroup]
 	def getUpstreamAssessmentGroup(id:String): Option[UpstreamAssessmentGroup]
 	def getAssessmentComponent(id: String): Option[AssessmentComponent]
 	def getAssessmentComponent(group: UpstreamAssessmentGroup): Option[AssessmentComponent]
@@ -153,6 +154,7 @@ class AssessmentMembershipServiceImpl
 
 	def getAssessmentGroup(id:String): Option[AssessmentGroup] = dao.getAssessmentGroup(id)
 	def getAssessmentGroup(template: AssessmentGroup): Option[AssessmentGroup] = find(template)
+	def getUpstreamAssessmentGroups(module: Module, academicYear: AcademicYear): Seq[UpstreamAssessmentGroup]= dao.getUpstreamAssessmentGroups(module, academicYear)
 	def getUpstreamAssessmentGroup(template: UpstreamAssessmentGroup): Option[UpstreamAssessmentGroup] = find(template)
 	def getUpstreamAssessmentGroup(id:String): Option[UpstreamAssessmentGroup] = dao.getUpstreamAssessmentGroup(id)
 

@@ -34,7 +34,7 @@ class OvercattedYearMarkColumnOption extends ChosenYearExamGridColumnOption with
 		private def result(entity: ExamGridEntityYear): Either[String, BigDecimal] = {
 			// If the entity isn't based on an SCYD i.e. when we're showing the overcatting options, just show the mean mark for this student
 			if (entity.studentCourseYearDetails.isEmpty) {
-				moduleRegistrationService.weightedMeanYearMark(entity.moduleRegistrations, entity.markOverrides.getOrElse(Map()))
+				moduleRegistrationService.weightedMeanYearMark(entity.moduleRegistrations, entity.markOverrides.getOrElse(Map()), allowEmpty = false)
 			} else {
 				val overcatSubsets = state.overcatSubsets(entity)
 				if (overcatSubsets.size == 1) {

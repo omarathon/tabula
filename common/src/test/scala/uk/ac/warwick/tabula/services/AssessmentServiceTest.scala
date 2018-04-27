@@ -370,7 +370,7 @@ class AssessmentServiceTest extends PersistenceTestBase with Mockito {
 		assignmentsByCourseAndYear.head should be (assignment1)
 	}
 
-	@Test def upstreamAssessmentGroups() = transactional { tx =>
+	@Test def upstreamAssessmentGroups(): Unit = transactional { tx =>
 		val group = new UpstreamAssessmentGroup
 		group.moduleCode = "LA155-10"
 		group.occurrence = "A"
@@ -420,7 +420,7 @@ class AssessmentServiceTest extends PersistenceTestBase with Mockito {
 		assignmentMembershipService.find(foundGroup.get) should be ('defined)
 	}
 
-	@Test def upstreamAssignments() = transactional { tx =>
+	@Test def upstreamAssignments(): Unit = transactional { tx =>
 		val chemistryDept = Fixtures.department("chem") // dept code irrelephant
 		val chemistryModule = Fixtures.module("ch101")
 		chemistryDept.modules.add(chemistryModule)
@@ -512,7 +512,7 @@ class AssessmentServiceTest extends PersistenceTestBase with Mockito {
 		assignmentMembershipService.getAssessmentComponents(chemistryDept, includeSubDepartments = true) should be (Seq(ua1, ua2))
 	}
 
-	@Test def assessmentGroups() = transactional { tx =>
+	@Test def assessmentGroups(): Unit = transactional { tx =>
 		val assignment = newDeepAssignment("ch101")
 		val module = assignment.module
 		val department = module.adminDepartment
@@ -562,7 +562,7 @@ class AssessmentServiceTest extends PersistenceTestBase with Mockito {
 		assignmentMembershipService.getAssessmentGroup(group.id) should be ('empty)
 	}
 
-	@Test def submissions() = transactional { tx =>
+	@Test def submissions(): Unit = transactional { tx =>
 		val assignment = newDeepAssignment()
 		val department = assignment.module.adminDepartment
 
@@ -594,7 +594,7 @@ class AssessmentServiceTest extends PersistenceTestBase with Mockito {
 		submissionService.getSubmissionByUsercode(assignment, "abcdef") should be ('empty)
 	}
 
-	@Test def extensions() = transactional { tx =>
+	@Test def extensions(): Unit = transactional { tx =>
 		val assignment = newDeepAssignment()
 		val department = assignment.module.adminDepartment
 

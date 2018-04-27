@@ -2,11 +2,14 @@ package uk.ac.warwick.tabula.services.turnitin
 
 import java.io.IOException
 
-import dispatch.classic._
 import org.apache.commons.codec.digest.DigestUtils
+import org.apache.http.client.ResponseHandler
+import org.apache.http.client.methods.{HttpPost, HttpUriRequest}
+import org.apache.http.message.BasicNameValuePair
+import org.apache.http.util.EntityUtils
 import org.xml.sax.SAXParseException
-import uk.ac.warwick.tabula.helpers.Logging
 import uk.ac.warwick.tabula.helpers.Products._
+import uk.ac.warwick.tabula.helpers.{ApacheHttpClientUtils, Logging}
 
 /**
  * Acquired from a call to Turnitin.login(), this will call Turnitin methods as a particular
@@ -34,7 +37,7 @@ class Session(turnitin: Turnitin, val sessionId: String) extends TurnitinMethods
 	var userLastName = ""
 	var userId = ""
 
-	private val http = turnitin.http
+	private val httpClient = turnitin.httpClient
 	private def diagnostic = turnitin.diagnostic
 	def apiEndpoint: String = turnitin.apiEndpoint
 
@@ -52,18 +55,25 @@ class Session(turnitin: Turnitin, val sessionId: String) extends TurnitinMethods
 		functionId: String, // API function ID (defined in TurnitinMethods object)
 		params: (String, String)*): TurnitinResponse = {
 
-		val req = getRequest(functionId, params:_*)
+		val request = getRequest(functionId, params:_*)
 
-		val request: Handler[TurnitinResponse] =
-			req >:+ { (headers, req) =>
-				val location = headers("location").headOption
-				if (location.isDefined) req >- { (text) => TurnitinResponse.redirect(location.get) }
-				else if (turnitin.diagnostic) req >- { (text) => TurnitinResponse.fromDiagnostic(text) }
-				else req <> { (node) => TurnitinResponse.fromXml(node) }
+		val handler: ResponseHandler[TurnitinResponse] =
+			ApacheHttpClientUtils.handler {
+				case response if Option(response.getFirstHeader("location")).nonEmpty =>
+					EntityUtils.consumeQuietly(response.getEntity)
+					TurnitinResponse.redirect(response.getFirstHeader("location").getValue)
+
+				case response if turnitin.diagnostic =>
+					TurnitinResponse.fromDiagnostic(EntityUtils.toString(response.getEntity))
+
+				case response =>
+					// Call handleEntity to avoid AbstractResponseHandler throwing exceptions for >=300 status codes
+					ApacheHttpClientUtils.xmlResponseHandler(TurnitinResponse.fromXml)
+						.handleEntity(response.getEntity)
 			}
 
 		try {
-			val response = http.x(request)
+			val response = httpClient.execute(request, handler)
 			logger.debug("Response: " + response)
 			response
 		} catch {
@@ -78,12 +88,15 @@ class Session(turnitin: Turnitin, val sessionId: String) extends TurnitinMethods
 
 	def getRequest(
 		functionId: String, // API function ID (defined in TurnitinMethods object)
-		params: (String, String)*): Request = {
+		params: (String, String)*): HttpUriRequest = {
 
 		val fullParameters = calculateParameters(functionId, params:_*)
-		val req = turnitin.endpoint.POST << fullParameters
+		val req =
+			turnitin.request(HttpPost.METHOD_NAME)
+				.addParameters(fullParameters.toSeq.map { case (k, v) => new BasicNameValuePair(k, v) }: _*)
+
 		logger.debug("doRequest: " + fullParameters)
-		req
+		req.build()
 	}
 
 	def calculateParameters(functionId: String, params: (String, String)*): Map[String, String] = {
@@ -99,17 +112,23 @@ class Session(turnitin: Turnitin, val sessionId: String) extends TurnitinMethods
 		functionId: String, // API function ID
 		pdata: Option[FileData], // optional file to put in "pdata" parameter
 		params: (String, String)*) // POST parameters
-		(transform: Request => Handler[TurnitinResponse]): TurnitinResponse = {
+		(transform: ResponseHandler[TurnitinResponse]): TurnitinResponse = {
 
 		val parameters = Map("fid" -> functionId) ++ commonParameters ++ params
-		val req = turnitin.endpoint.POST << (parameters + md5hexparam(parameters))
+		val req =
+			turnitin.request(HttpPost.METHOD_NAME)
+				.addParameters((parameters + md5hexparam(parameters)).toSeq.map { case (k, v) => new BasicNameValuePair(k, v) }: _*)
 
 		logger.debug("doRequest: " + parameters)
 
 		try {
-			http.x(
-				if (diagnostic) req >- { (text) => TurnitinResponse.fromDiagnostic(text) }
-				else transform(req))
+			httpClient.execute(req.build(), ApacheHttpClientUtils.handler {
+				case response if turnitin.diagnostic =>
+					TurnitinResponse.fromDiagnostic(EntityUtils.toString(response.getEntity))
+
+				case response =>
+					transform.handleResponse(response)
+			})
 		} catch {
 			case e: IOException =>
 				logger.error("Exception contacting Turnitin", e)

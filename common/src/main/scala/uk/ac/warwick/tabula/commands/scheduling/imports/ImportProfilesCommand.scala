@@ -331,6 +331,19 @@ class ImportProfilesCommand extends CommandWithoutTransaction[Unit] with Logging
 
 	def updateMissingForIndividual(universityId: String): Unit = {
 		profileService.getMemberByUniversityIdStaleOrFresh(universityId).foreach {
+			case member: StaffMember =>
+				val missingFromImport = profileImporter.getUniversityIdsPresentInMembership(Set(member.universityId)).isEmpty
+
+				if (member.isFresh && missingFromImport) {
+					// The member has gone missing
+					member.missingFromImportSince = DateTime.now
+					memberDao.saveOrUpdate(member)
+				} else if (!member.isFresh && !missingFromImport) {
+					// The member has re-appeared
+					member.missingFromImportSince = null
+					memberDao.saveOrUpdate(member)
+				}
+
 			case stu: StudentMember =>
 				val sitsRows = profileImporter.multipleStudentInformationQuery.executeByNamedParam(Map("universityIds" -> Seq(universityId).asJava).asJava).asScala
 				val universityIdsSeen = sitsRows.map(_.universityId.getOrElse("")).distinct

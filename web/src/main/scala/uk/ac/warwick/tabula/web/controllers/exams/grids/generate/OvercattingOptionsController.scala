@@ -172,7 +172,7 @@ class OvercattingOptionsView(
 		calculateYearMarks = false
 	)
 
-	private lazy val currentYearMark = moduleRegistrationService.weightedMeanYearMark(scyd.moduleRegistrations, overwrittenMarks)
+	private lazy val currentYearMark = moduleRegistrationService.weightedMeanYearMark(scyd.moduleRegistrations, overwrittenMarks, allowEmpty = false)
 
 	lazy val optionsColumns: Seq[ChosenYearExamGridColumn] = Seq(
 		new ChooseOvercatColumnOption().getColumns(overcattedEntitiesState, Option(overcatChoice)),

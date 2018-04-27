@@ -36,7 +36,7 @@ class RelationshipDaoTest extends PersistenceTestBase with Logging with Mockito 
 	}
 
 	@Test
-	def studentRelationshipsCurrentAndByTarget() = transactional { tx =>
+	def studentRelationshipsCurrentAndByTarget(): Unit = transactional { tx =>
 		val dept1 = Fixtures.department("sp", "Spanish")
 		val dept2 = Fixtures.department("en", "English")
 
@@ -91,7 +91,7 @@ class RelationshipDaoTest extends PersistenceTestBase with Logging with Mockito 
 	}
 
 	@Test
-	def studentRelationshipsByDepartmentAndAgent() = transactional { tx =>
+	def studentRelationshipsByDepartmentAndAgent(): Unit = transactional { tx =>
 		sitsStatusDao.saveOrUpdate(sprFullyEnrolledStatus)
 
 		val dept1 = Fixtures.department("hm", "History of Music")
@@ -141,7 +141,7 @@ class RelationshipDaoTest extends PersistenceTestBase with Logging with Mockito 
 	}
 
 	@Test
-	def studentsWithoutRelationships() = transactional { tx =>
+	def studentsWithoutRelationships(): Unit = transactional { tx =>
 		val dept1 = Fixtures.department("af", "Art of Foraging")
 		val dept2 = Fixtures.department("tm", "Traditional Music")
 
@@ -183,7 +183,7 @@ class RelationshipDaoTest extends PersistenceTestBase with Logging with Mockito 
 		relationshipDao.getStudentsWithoutCurrentRelationshipByDepartment(null, dept1) should be (Seq())
 	}
 
-	@Test def studentRelationshipsByStaffDepartments() = transactional{tx=>
+	@Test def studentRelationshipsByStaffDepartments(): Unit = transactional{tx=>
 		sitsStatusDao.saveOrUpdate(sprFullyEnrolledStatus)
 
 		val dept1 = Fixtures.department("hm", "History of Music")
@@ -217,7 +217,7 @@ class RelationshipDaoTest extends PersistenceTestBase with Logging with Mockito 
 
 	}
 
-	@Test def studentsByAgentRelationship() = transactional { tx =>
+	@Test def studentsByAgentRelationship(): Unit = transactional { tx =>
 		val dept1 = Fixtures.department("ml", "Modern Languages")
 		val dept2 = Fixtures.department("fr", "French")
 		val dept3 = Fixtures.department("es", "Spanish")
@@ -271,7 +271,7 @@ class RelationshipDaoTest extends PersistenceTestBase with Logging with Mockito 
 		memberDao.getSCDsByAgentRelationshipAndRestrictions(relationshipType, staff2.universityId, Seq()).size should be (1)
 	}
 
-	@Test def studentsByAgentRelationshipMultiScds() = transactional { tx =>
+	@Test def studentsByAgentRelationshipMultiScds(): Unit = transactional { tx =>
 
 		val dept = Fixtures.department("ml", "Modern Languages")
 		session.save(dept)

@@ -19,13 +19,14 @@ plugins {
 
 // Some properties that we use to resolve dependencies etc.
 ext {
-    scalaVersion = "2.11.11"
-    scalaMajorVersion = "2.11"
+    scalaVersion = "2.12.5"
+    scalaMajorVersion = "2.12"
     springVersion = "4.3.14.RELEASE"
     hibernateVersion = "4.3.11.Final"
     jacksonVersion = "2.6.7"
-    elasticsearchVersion = "2.1.1"
-    dispatchVersion = "0.8.10"
+    jacksonScalaModuleVersion = "2.6.7.1"
+    elasticsearchVersion = "2.1.2"
+    elastic4sVersion = "2.1.3-warwick"
     poiVersion = "3.17"
     tilesVersion = "3.0.8"
     jcloudsVersion = "2.0.2"
@@ -44,10 +45,10 @@ allprojects {
 }
 
 // Configuration that applies to all subprojects (including common, so nothing war-specific here)
+// TODO get rid of the war plugin here
 subprojects {
-    apply plugin: 'java'
     apply plugin: 'scala'
-    apply plugin: "org.zeroturnaround.gradle.jrebel"
+    apply plugin: 'org.zeroturnaround.gradle.jrebel'
     apply plugin: 'war'
 
     // TAB-5441 - additional jrebel config to include language specific build dirs
@@ -131,7 +132,7 @@ subprojects {
 
     dependencies {
         compile "org.scala-lang:scala-library:${scalaVersion}"
-        compile "com.jsuereth:scala-arm_${scalaMajorVersion}:1.4"
+        compile "com.jsuereth:scala-arm_${scalaMajorVersion}:2.0"
 
         // 'providedCompile' deps are not included in WAR and also makes it compile within IDEA internally.
         providedCompile 'javax.servlet:javax.servlet-api:3.1.0'
@@ -143,7 +144,7 @@ subprojects {
 
         // Provided by the above
         providedCompile 'ch.qos.logback:logback-classic:1.2.3'
-        providedCompile ('net.logstash.logback:logstash-logback-encoder:4.11') {
+        providedCompile('net.logstash.logback:logstash-logback-encoder:4.11') {
             exclude group: 'com.fasterxml.jackson.core'
         }
         providedCompile 'org.slf4j:slf4j-api:1.7.25'
@@ -159,8 +160,8 @@ subprojects {
         testCompile 'junit:junit:4.12'
         testCompile 'org.jmock:jmock-junit4:2.5.1'
         testCompile 'jmock:jmock-cglib:1.2.0'
-        testCompile "org.specs2:specs2_${scalaMajorVersion}:2.4.15"
-        testCompile "org.scalatest:scalatest_${scalaMajorVersion}:2.2.4"
+        testCompile "org.specs2:specs2_${scalaMajorVersion}:2.4.17"
+        testCompile "org.scalatest:scalatest_${scalaMajorVersion}:3.0.5"
         testCompile 'org.mockito:mockito-all:1.10.19'
     }
 
@@ -171,9 +172,14 @@ subprojects {
     }
 
     test {
+        // half the cores, but at least four
+        def forks = Math.max(4, Runtime.runtime.availableProcessors().intdiv(2))
+        doFirst {
+            println "Executing tests with ${forks} forks"
+        }
         ignoreFailures = true // So we can quarantine in Bamboo
         maxHeapSize = '2048m'
-        maxParallelForks = Runtime.runtime.availableProcessors() / 2
+        maxParallelForks = forks
         systemProperties = [TestProcessId: "F1"] // FIXME
         testLogging {
             // set options for log level LIFECYCLE
@@ -197,6 +203,6 @@ subprojects {
 // value then running `./gradlew wrapper`. Next time gradlew
 // is run it will fetch and use that version.
 task wrapper(type: Wrapper) {
-    gradleVersion = '4.3.1'
+    gradleVersion = '4.7'
     distributionType = 'ALL'
 }

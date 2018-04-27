@@ -119,8 +119,12 @@ abstract class AbstractProgressionService extends ProgressionService {
 	self: ModuleRegistrationServiceComponent with CourseAndRouteServiceComponent =>
 
 	def getYearMark(scyd: StudentCourseYearDetails, normalLoad: BigDecimal, routeRules: Seq[UpstreamRouteRule]): Either[String, BigDecimal] = {
-		val possibleWeightedMeanMark = moduleRegistrationService.weightedMeanYearMark(scyd.moduleRegistrations, Map())
+		lazy val yearWeighting: Option[CourseYearWeighting] =
+			courseAndRouteService.getCourseYearWeighting(scyd.studentCourseDetails.course.code, scyd.studentCourseDetails.sprStartAcademicYear, scyd.yearOfStudy)
+
+		val possibleWeightedMeanMark = moduleRegistrationService.weightedMeanYearMark(scyd.moduleRegistrations, Map(), allowEmpty = yearWeighting.exists(_.weighting == 0))
 		  	.left.map(msg => s"$msg for year ${scyd.yearOfStudy}")
+
 		val entityYear = scyd.toExamGridEntityYear
 		val overcatSubsets = moduleRegistrationService.overcattedModuleSubsets(entityYear, Map(), normalLoad, routeRules)
 		if (overcatSubsets.size <= 1) {
@@ -296,7 +300,13 @@ abstract class AbstractProgressionService extends ProgressionService {
 		markPerYear: Seq[(Int, BigDecimal)],
 		yearWeightings: Seq[(Int, CourseYearWeighting)]
 	): FinalYearGrade = {
-		val finalTwoYearsModuleRegistrations = scydPerYear.reverse.take(2).flatMap { case (_, yearDetails) => yearDetails.moduleRegistrations }
+		// This only considers years where the weighting counts - so for a course with an
+		// intercalated year weighted 0,50,0,50, this would consider years 2 and 4
+		val finalTwoYearsModuleRegistrations =
+			scydPerYear.reverse
+				.filter { case (year, _) => yearWeightings.toMap.apply(year).weighting > 0 }
+				.take(2)
+				.flatMap { case (_, yearDetails) => yearDetails.moduleRegistrations }
 
 		if (finalTwoYearsModuleRegistrations.filterNot(_.passFail).exists(_.firstDefinedMark.isEmpty)) {
 			FinalYearGrade.Unknown(s"No agreed mark or actual mark for modules: ${

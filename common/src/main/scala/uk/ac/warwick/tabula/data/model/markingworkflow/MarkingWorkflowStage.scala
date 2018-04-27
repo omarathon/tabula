@@ -172,7 +172,7 @@ object MarkingWorkflowStage {
 		val NotModeratedKey: String  = "notModerated"
 
 		override def actionCompletedKey(feedback: Option[Feedback]): String = {
-			val markerFeedback = feedback.flatMap(_.allMarkerFeedback.find(_.stage == this))
+			val markerFeedback = feedback.flatMap(_.allMarkerFeedback.find(_.stage == SelectedModerationModerator))
 			markerFeedback match {
 				case Some(mf) if !mf.hasContent => NotModeratedKey
 				case _ => MarkingWorkflowStage.DefaultCompletionKey

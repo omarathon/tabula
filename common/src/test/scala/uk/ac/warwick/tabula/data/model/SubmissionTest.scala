@@ -10,7 +10,7 @@ class SubmissionTest extends PersistenceTestBase {
 		submission.allAttachments.size should be (0)
 	}
 
-	@Test def tab3614() = transactional{tx=>
+	@Test def tab3614(): Unit = transactional{tx=>
 		// TAB-667
 		val orphanAttachment = flushing(session) {
 			val attachment = new FileAttachment
