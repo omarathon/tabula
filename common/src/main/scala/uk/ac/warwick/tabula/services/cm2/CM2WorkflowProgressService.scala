@@ -92,15 +92,36 @@ class CM2WorkflowProgressService extends RequestLevelCaching[Assignment, Seq[CM2
 		if (progresses.last.completed) {
 			WorkflowProgress(MaxPower, progresses.last.messageCode, progresses.last.health.cssClass, None, workflowMap)
 		} else {
-			// get the last started stage
-			val stageIndex = progresses.lastIndexWhere(_.started)
-			if (stageIndex == -1) WorkflowProgress(0, progresses.head.messageCode, progresses.head.health.cssClass, None, workflowMap)
-			else {
-				val lastProgress = progresses(stageIndex)
-				val nextProgress = if (lastProgress.completed) progresses(stageIndex + 1) else lastProgress
+			val stagesWithPreconditionsMet = progresses.filter(progress => workflowMap(progress.stage.toString).preconditionsMet)
 
-				val percentage = ((stageIndex + 1) * MaxPower) / allStages.size
-				WorkflowProgress(percentage, lastProgress.messageCode, lastProgress.health.cssClass, Some(nextProgress.stage), workflowMap)
+			progresses.filter(_.started).lastOption match {
+				case Some(lastProgress) =>
+					val index = progresses.indexOf(lastProgress)
+
+					// If the current stage is complete, the next stage requires action
+					val nextProgress = if (lastProgress.completed) {
+						val nextProgressCandidate = progresses(index + 1)
+
+						if (stagesWithPreconditionsMet.contains(nextProgressCandidate)) {
+							nextProgressCandidate
+						} else {
+							// The next stage can't start yet because its preconditions are not met.
+							// Find the latest incomplete stage from earlier in the workflow whose preconditions are met.
+							val earlierReadyStages = progresses.reverse
+								.dropWhile(_ != nextProgressCandidate)
+								.filterNot(_.completed)
+								.filter(stagesWithPreconditionsMet.contains)
+
+							earlierReadyStages.headOption.getOrElse(lastProgress)
+						}
+					} else {
+						lastProgress
+					}
+
+					val percentage = ((index + 1) * MaxPower) / allStages.size
+					WorkflowProgress(percentage, lastProgress.messageCode, lastProgress.health.cssClass, Some(nextProgress.stage), workflowMap)
+				case None =>
+					WorkflowProgress(0, progresses.head.messageCode, progresses.head.health.cssClass, None, workflowMap)
 			}
 		}
 	}
