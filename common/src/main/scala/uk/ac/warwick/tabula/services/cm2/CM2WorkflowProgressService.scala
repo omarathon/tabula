@@ -211,7 +211,8 @@ object CM2WorkflowStages {
 				StageProgress(CheckForPlagiarism, started = true, messageCode = "workflow.CheckForPlagiarism.checked", health = Good, completed = true)
 			case Some(item) if item.submission.allAttachments.nonEmpty && assignment.submitToTurnitin =>
 				StageProgress(CheckForPlagiarism, started = true, messageCode = "workflow.CheckForPlagiarism.started", health = Good)
-			case Some(_) => StageProgress(CheckForPlagiarism, started = false, messageCode = "workflow.CheckForPlagiarism.notChecked")
+			case None if assignment.isClosed && !assignment.allowLateSubmissions =>
+				StageProgress(CheckForPlagiarism, started = true, messageCode = "workflow.CheckForPlagiarism.failedToSubmit", health = Good, completed = true)
 			case _ => StageProgress(CheckForPlagiarism, started = false, messageCode = "workflow.CheckForPlagiarism.notChecked")
 		}
 		override def preconditions = Seq(Seq(Submission))
