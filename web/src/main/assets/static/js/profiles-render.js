@@ -29,7 +29,7 @@
 	}
 
 	function updateCalendarTitle(view, weeks){
-		if (view.name == 'agendaWeek') {
+		if (view.name === 'agendaWeek') {
 			var start = view.start.getTime();
 			var end = view.end.getTime();
 			var week = $.grep(weeks, function(week) {
@@ -539,6 +539,16 @@
 				} else {
 					$row.addClass('expanded').after($row.data('expandRow'))
 						.find('td i.fa-caret-right').removeClass('fa-caret-right').addClass('fa-caret-down');
+					$row.next().each(function () {
+						var $expandRow = $(this);
+						$expandRow.find('input.date-time-picker').tabulaDateTimePicker();
+						$expandRow.find('input.date-picker').tabulaDatePicker();
+						$expandRow.find('input.time-picker').tabulaTimePicker();
+						$expandRow.find('input.date-time-minute-picker').tabulaDateTimeMinutePicker();
+						$expandRow.find('form.double-submit-protection').tabulaSubmitOnce();
+						$expandRow.find('select.selectOffset').selectOffset();
+						$expandRow.tabulaPrepareSpinners();
+					});
 				}
 			}).find('tr.expand td.can-expand').trigger('click');
 		});
@@ -693,7 +703,7 @@
 					.appendTo($mb);
 			}).fail(function() {
 				if (!$('#meeting-modal-failure').length) {
-					var $error = $('<p id="meeting-modal-failure" class="alert alert-error hide"><i class="icon-warning-sign"></i> Sorry, I\'m unable to edit meeting records for this student at the moment.</p>');
+					var $error = $('<p id="meeting-modal-failure" class="alert alert-danger hide"><i class="icon-warning-sign"></i> Sorry, I\'m unable to edit meeting records for this student at the moment.</p>');
 					$this.before($error);
 					$error.slideDown();
 				}
