@@ -33,7 +33,7 @@ class ControllerMethodsTest extends TestBase with ControllerMethods with Mockito
 	}
 
 	@Test def restricted {
-		securityService.check(user, Permissions.Module.Create, dept) throws(new PermissionDeniedException(user, Permissions.Module.Create, dept))
+		securityService.check(user, Permissions.Module.Create, dept) throws(PermissionDeniedException(user, Permissions.Module.Create, dept))
 
 		restricted(BasicCommand()) should be (None)
 
@@ -43,7 +43,7 @@ class ControllerMethodsTest extends TestBase with ControllerMethods with Mockito
 	}
 
 	@Test def restrictedBy {
-		securityService.check(user, Permissions.Module.Create, dept) throws (new PermissionDeniedException(user, Permissions.Module.Create, dept))
+		securityService.check(user, Permissions.Module.Create, dept) throws (PermissionDeniedException(user, Permissions.Module.Create, dept))
 
 		restrictedBy(true)(BasicCommand()) should be (None)
 

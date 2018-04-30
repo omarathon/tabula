@@ -29,7 +29,7 @@ class OldDownloadFeedbackAsPdfController extends OldCourseworkController {
 
 		// We send a permission denied explicitly (this would normally be a 404 for feedback not found) because PDF handling is silly in Chrome et al
 		if (!user.loggedIn) {
-			throw new PermissionDeniedException(user, Permissions.AssignmentFeedback.Read, assignment)
+			throw PermissionDeniedException(user, Permissions.AssignmentFeedback.Read, assignment)
 		}
 
 		DownloadFeedbackAsPdfCommand(module, assignment, mandatory(feedbackService.getAssignmentFeedbackByUsercode(assignment, student.getUserId)))

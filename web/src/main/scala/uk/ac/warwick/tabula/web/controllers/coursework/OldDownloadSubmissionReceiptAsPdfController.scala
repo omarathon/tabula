@@ -95,7 +95,7 @@ trait DownloadSubmissionReceiptAsPdfPermissions extends RequiresPermissionsCheck
 	def permissionsCheck(p: PermissionsChecking) {
 		// We send a permission denied explicitly (this would normally be a 404 for feedback not found) because PDF handling is silly in Chrome et al
 		if (!viewer.loggedIn) {
-			throw new PermissionDeniedException(viewer, DownloadSubmissionReceiptAsPdfCommand.RequiredPermission, assignment)
+			throw PermissionDeniedException(viewer, DownloadSubmissionReceiptAsPdfCommand.RequiredPermission, assignment)
 		}
 
 		notDeleted(mandatory(assignment))

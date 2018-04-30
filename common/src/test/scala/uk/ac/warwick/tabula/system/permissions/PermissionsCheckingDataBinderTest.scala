@@ -52,7 +52,7 @@ class PermissionsCheckingDataBinderTest extends TestBase with Mockito {
 	}
 
 	@Test(expected=classOf[PermissionDeniedException]) def basicCheckWithFailure = withUser("cuscav", "0672089") {
-		securityService.check(currentUser, Permissions.Module.Create, dept) throws (new PermissionDeniedException(currentUser, Permissions.Module.Create, dept))
+		securityService.check(currentUser, Permissions.Module.Create, dept) throws (PermissionDeniedException(currentUser, Permissions.Module.Create, dept))
 
 		new Binder(BasicCommand(dept), "command", securityService)
 	}
@@ -62,7 +62,7 @@ class PermissionsCheckingDataBinderTest extends TestBase with Mockito {
 	}
 
 	@Test(expected=classOf[PermissionDeniedException]) def multipleChecksWithFailure = withUser("cuscav", "0672089") {
-		securityService.check(currentUser, Permissions.Module.Delete, dept) throws (new PermissionDeniedException(currentUser, Permissions.Module.Delete, dept))
+		securityService.check(currentUser, Permissions.Module.Delete, dept) throws (PermissionDeniedException(currentUser, Permissions.Module.Delete, dept))
 
 		new Binder(MultipleCommand(dept), "command", securityService)
 	}
