@@ -254,7 +254,7 @@
 <h2>Record of meetings</h2>
 
 <#if !(canReadMeetings!true)>
-	<div class="alert alert-error">You do not have permission to view the meetings for this student</div>
+	<div class="alert alert-danger">You do not have permission to view the meetings for this student</div>
 <#else>
 	<section class="meetings">
 		<#if !meetings?has_content>
