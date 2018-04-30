@@ -404,7 +404,7 @@
 		</div>
 
 		<!-- not a spring form as we don't want the issue of binding multiple sets of data to the same command -->
-		<form method="post" class="approval" id="meeting-${meeting.id}" action="<@routes.profiles.save_meeting_approval meeting />" >
+		<form method="post" class="approval double-submit-protection" id="meeting-${meeting.id}" action="<@routes.profiles.save_meeting_approval meeting />" >
 			<@bs3form.form_group>
 				<@bs3form.radio>
 					<input type="radio" name="approved" value="true">
@@ -419,7 +419,9 @@
 				</div>
 			</@bs3form.form_group>
 
-			<button type="submit" class="btn btn-primary spinnable spinner-auto">Submit</button>
+			<div class="submit-buttons">
+				<button type="submit" class="btn btn-primary spinnable spinner-auto">Submit</button>
+			</div>
 		</form>
 	<#elseif meeting.rejectedBy(currentMember)>
 		<p class="very-subtle">Pending revision. Submitted by ${meeting.creator.fullName}, <@fmt.date meeting.creationDate /></p>
