@@ -26,7 +26,7 @@ class DownloadFeedbackAsPdfController extends CourseworkController {
 	@ModelAttribute def command(@PathVariable assignment: Assignment, @PathVariable student: User): DownloadFeedbackAsPdfCommand = {
 		// We send a permission denied explicitly (this would normally be a 404 for feedback not found) because PDF handling is silly in Chrome et al
 		if (!user.loggedIn) {
-			throw new PermissionDeniedException(user, Permissions.AssignmentFeedback.Read, assignment)
+			throw PermissionDeniedException(user, Permissions.AssignmentFeedback.Read, assignment)
 		}
 		val studentMember = profileService.getMemberByUniversityIdStaleOrFresh(student.getWarwickId)
 

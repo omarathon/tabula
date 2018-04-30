@@ -42,7 +42,7 @@ class ExtensionRequestController extends CourseworkController {
 
 		if (!assignment.module.adminDepartment.allowExtensionRequests) {
 			logger.info("Rejecting access to extension request screen as department does not allow extension requests")
-			throw new PermissionDeniedException(user, Permissions.Extension.MakeRequest, assignment)
+			throw PermissionDeniedException(user, Permissions.Extension.MakeRequest, assignment)
 		} else {
 			val existingRequest = assignment.findExtension(user.userId)
 			existingRequest.foreach(cmd.presetValues)

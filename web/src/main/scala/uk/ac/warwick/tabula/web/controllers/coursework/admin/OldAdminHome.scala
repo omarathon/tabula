@@ -106,7 +106,7 @@ class AdminDepartmentHomeCommand(val department: Department, val user: CurrentUs
 			PermissionCheckAll(Permissions.Module.ManageAssignments, managedModules)
 
 			if (managedModules.isEmpty)
-				throw new PermissionDeniedException(user, Permissions.Module.ManageAssignments, department)
+				throw PermissionDeniedException(user, Permissions.Module.ManageAssignments, department)
 
 			managedModules
 		}

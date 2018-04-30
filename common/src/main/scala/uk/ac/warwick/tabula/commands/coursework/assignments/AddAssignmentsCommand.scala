@@ -260,7 +260,7 @@ trait AddAssignmentsValidation extends SelfValidating with Logging {
 
 		if (hasInvalidAssignments) {
 			logger.warn("Rejected request to setup assignments that aren't in this department")
-			throw new PermissionDeniedException(user, Permissions.Assignment.ImportFromExternalSystem, department)
+			throw PermissionDeniedException(user, Permissions.Assignment.ImportFromExternalSystem, department)
 		}
 	}
 

@@ -139,6 +139,12 @@ trait PermissionsCheckingMethods extends Logging {
 			throw new ItemNotFoundException(roleOverride, "Not displaying role override as it doesn't belong to specified role definition")
 		}
 
+	def mustBeLinked(studentCourseDetails: StudentCourseDetails, member: Member): Unit =
+		if (mandatory(studentCourseDetails).student.id != mandatory(member).id) {
+			logger.info("Not displaying student course details as it doesn't belong to specified member")
+			throw new ItemNotFoundException(studentCourseDetails, "Not displaying student course details as it doesn't belong to specified member")
+		}
+
 	/**
 	 * Returns an object if it is non-null and not None. Otherwise
 	 * it throws an ItemNotFoundException, which should get picked
@@ -195,7 +201,7 @@ trait PermissionsCheckingMethods extends Logging {
 					.collect { case (_, Some(assignment: Assignment)) => assignment }
 					.map { assignment => new SubmitPermissionDeniedException(user, assignment) }
 					.getOrElse {
-						new PermissionDeniedException(user, target.permissionsAnyChecks.head._1, target.permissionsAnyChecks.head._2)
+						PermissionDeniedException(user, target.permissionsAnyChecks.head._1, target.permissionsAnyChecks.head._2)
 					}
 
 			throw exception
