@@ -235,6 +235,10 @@ trait OnlineFeedbackDescription[A] extends Describable[A] {
 		d.studentUsercodes(student.getUserId)
 		d.assignment(assignment)
 	}
+
+	override def describeResult(d: Description): Unit = {
+		d.fileAttachments(file.attached.asScala)
+	}
 }
 
 trait OnlineFeedbackState extends SubmissionState with ExtensionState {
