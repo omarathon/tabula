@@ -95,7 +95,7 @@ class GenerateExamGridController extends ExamsController
 		@RequestParam(value = "yearOfStudy", required = false) yearOfStudy: JInteger
 	): CoreRequiredModuleLookup = {
 		if (Option(yearOfStudy).nonEmpty) {
-			new CoreRequiredModuleLookup(academicYear, yearOfStudy, moduleRegistrationService)
+			new CoreRequiredModuleLookupImpl(academicYear, yearOfStudy, moduleRegistrationService)
 		} else {
 			null
 		}
@@ -440,7 +440,7 @@ class GenerateExamGridController extends ExamsController
 		val state = ExamGridColumnState(
 			entities = entities,
 			overcatSubsets = overcatSubsets,
-			coreRequiredModuleLookup = coreRequiredModuleLookup,
+			coreRequiredModuleLookup = if (coreRequiredModulesColumnSelected) coreRequiredModuleLookup else NullCoreRequiredModuleLookup,
 			normalLoadLookup = normalLoadLookup,
 			routeRulesLookup = routeRulesLookup,
 			academicYear = selectCourseCommand.academicYear,
@@ -451,8 +451,7 @@ class GenerateExamGridController extends ExamsController
 			showZeroWeightedComponents = gridOptionsCommand.showZeroWeightedComponents,
 			showComponentSequence = gridOptionsCommand.showComponentSequence,
 			showModuleNames = gridOptionsCommand.showModuleNames,
-			calculateYearMarks = gridOptionsCommand.calculateYearMarks,
-			showCoreRequiredModules = coreRequiredModulesColumnSelected
+			calculateYearMarks = gridOptionsCommand.calculateYearMarks
 		)
 
 		val studentInformationColumns = predefinedColumnOptions.collect { case c: StudentExamGridColumnOption => c }.flatMap(_.getColumns(state))

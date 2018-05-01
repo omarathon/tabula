@@ -171,9 +171,8 @@ abstract class ModuleExamGridColumnOption extends PerYearExamGridColumnOption {
 
 		val allYears = state.entities.flatMap(_.validYears.values).toList
 
-		val allCoreRequiredModules = if (state.showCoreRequiredModules)
+		val allCoreRequiredModules =
 			allYears.map(_.route).flatMap(state.coreRequiredModuleLookup.apply).map(cr => (cr.module, "CoreRequired"))
-		else Nil
 
 		val allOtherModules = allYears
 			.flatMap(_.moduleRegistrations).map(mr => (mr.module, mr.selectionStatus))
@@ -187,7 +186,7 @@ abstract class ModuleExamGridColumnOption extends PerYearExamGridColumnOption {
 		state.entities.flatMap(_.years.keys).distinct.map(academicYear => academicYear -> {
 			val years = state.entities.flatMap(_.validYears.get(academicYear))
 			val moduleAndCats: Set[(Module, JBigDecimal)] = years.flatMap { entityYear =>
-				val coreRequiredModules = if (state.showCoreRequiredModules) state.coreRequiredModuleLookup(entityYear.route).map(_.module) else Nil
+				val coreRequiredModules = state.coreRequiredModuleLookup(entityYear.route).map(_.module)
 				entityYear.moduleRegistrations.filter(moduleRegistrationFilter(_, coreRequiredModules))
 			}.groupBy(mr => (mr.module, mr.cats)).keySet
 
