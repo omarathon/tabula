@@ -57,7 +57,9 @@ trait PopulatesGenerateExamGridGridOptionsCommand extends PopulateOnForm {
 
 	def populate(): Unit = {
 		val options = department.examGridOptions
+		predefinedColumnIdentifiers.clear()
 		predefinedColumnIdentifiers.addAll(options.predefinedColumnIdentifiers.asJava)
+		customColumnTitles.clear()
 		customColumnTitles.addAll(options.customColumnTitles.asJava)
 		nameToShow = options.nameToShow
 		marksToShow = options.marksToShow
