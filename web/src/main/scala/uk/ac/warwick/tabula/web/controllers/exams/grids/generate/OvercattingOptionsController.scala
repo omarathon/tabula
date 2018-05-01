@@ -169,7 +169,8 @@ class OvercattingOptionsView(
 		showZeroWeightedComponents = false,
 		showComponentSequence = false,
 		showModuleNames = false,
-		calculateYearMarks = false
+		calculateYearMarks = false,
+		showCoreRequiredModules = true
 	)
 
 	private lazy val currentYearMark = moduleRegistrationService.weightedMeanYearMark(scyd.moduleRegistrations, overwrittenMarks, allowEmpty = false)

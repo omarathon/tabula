@@ -435,6 +435,8 @@ class GenerateExamGridController extends ExamsController
 				)
 			}.toMap
 
+		val coreRequiredModulesColumnSelected = predefinedColumnOptions.exists(_.isInstanceOf[CoreRequiredModulesColumnOption])
+
 		val state = ExamGridColumnState(
 			entities = entities,
 			overcatSubsets = overcatSubsets,
@@ -449,7 +451,8 @@ class GenerateExamGridController extends ExamsController
 			showZeroWeightedComponents = gridOptionsCommand.showZeroWeightedComponents,
 			showComponentSequence = gridOptionsCommand.showComponentSequence,
 			showModuleNames = gridOptionsCommand.showModuleNames,
-			calculateYearMarks = gridOptionsCommand.calculateYearMarks
+			calculateYearMarks = gridOptionsCommand.calculateYearMarks,
+			showCoreRequiredModules = coreRequiredModulesColumnSelected
 		)
 
 		val studentInformationColumns = predefinedColumnOptions.collect { case c: StudentExamGridColumnOption => c }.flatMap(_.getColumns(state))
