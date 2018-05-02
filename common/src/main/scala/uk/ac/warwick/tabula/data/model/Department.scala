@@ -263,7 +263,7 @@ class Department extends GeneratedId
 
 	def examGridOptions: ExamGridOptions = ExamGridOptions(
 		getStringSeqSetting(Settings.ExamGridOptions.PredefinedColumnIdentifiers, Wire.all[ExamGridColumnOption].map(_.identifier)).toSet,
-		getStringSeqSetting(Settings.ExamGridOptions.PredefinedColumnIdentifiers, Seq()),
+		getStringSeqSetting(Settings.ExamGridOptions.CustomColumnTitles, Seq()),
 		nameToShow,
 		getStringSetting(Settings.ExamGridOptions.MarksToShow, "overall"),
 		getStringSetting(Settings.ExamGridOptions.ComponentsToShow, "all"),
@@ -275,7 +275,7 @@ class Department extends GeneratedId
 	)
 	def examGridOptions_=(options: ExamGridOptions): Unit = {
 		settings += (Settings.ExamGridOptions.PredefinedColumnIdentifiers -> options.predefinedColumnIdentifiers)
-		settings += (Settings.ExamGridOptions.PredefinedColumnIdentifiers -> options.customColumnTitles)
+		settings += (Settings.ExamGridOptions.CustomColumnTitles -> options.customColumnTitles)
 		settings += (Settings.ExamGridOptions.NameToShow -> options.nameToShow.value)
 		settings += (Settings.ExamGridOptions.MarksToShow -> options.marksToShow)
 		settings += (Settings.ExamGridOptions.ComponentsToShow -> options.componentsToShow)
