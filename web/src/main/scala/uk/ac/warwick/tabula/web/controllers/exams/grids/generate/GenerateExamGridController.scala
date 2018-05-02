@@ -95,7 +95,7 @@ class GenerateExamGridController extends ExamsController
 		@RequestParam(value = "yearOfStudy", required = false) yearOfStudy: JInteger
 	): CoreRequiredModuleLookup = {
 		if (Option(yearOfStudy).nonEmpty) {
-			new CoreRequiredModuleLookup(academicYear, yearOfStudy, moduleRegistrationService)
+			new CoreRequiredModuleLookupImpl(academicYear, yearOfStudy, moduleRegistrationService)
 		} else {
 			null
 		}
@@ -435,10 +435,12 @@ class GenerateExamGridController extends ExamsController
 				)
 			}.toMap
 
+		val coreRequiredModulesColumnSelected = predefinedColumnOptions.exists(_.isInstanceOf[CoreRequiredModulesColumnOption])
+
 		val state = ExamGridColumnState(
 			entities = entities,
 			overcatSubsets = overcatSubsets,
-			coreRequiredModuleLookup = coreRequiredModuleLookup,
+			coreRequiredModuleLookup = if (coreRequiredModulesColumnSelected) coreRequiredModuleLookup else NullCoreRequiredModuleLookup,
 			normalLoadLookup = normalLoadLookup,
 			routeRulesLookup = routeRulesLookup,
 			academicYear = selectCourseCommand.academicYear,
