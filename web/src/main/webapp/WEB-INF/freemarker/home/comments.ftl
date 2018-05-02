@@ -71,6 +71,10 @@
 				</div>
 			</div>
 		</div>
+		<div class="boxstyle_ box2">
+			<h4>Need help with an Exam Grid?</h4>
+			<p>If you need help with an exam grid for an area not covered in the Manual, please <a target="_blank" href="https://warwick.ac.uk/services/its/servicessupport/web/tabula/request-exam-grid-help">complete this web form</a></p>
+		</div>
 
 		<#if hasDeptAdmin>
 
