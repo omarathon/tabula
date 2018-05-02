@@ -1,12 +1,9 @@
 <#escape x as x?html>
-	<#function route_function dept>
-		<#local selectCourseCommand><@routes.exams.generateGrid dept academicYear /></#local>
-		<#return selectCourseCommand />
-	</#function>
 	<div class="exam-grid-preview">
-		<@fmt.id7_deptheader title="Create a new exam grid for ${department.name}" route_function=route_function />
-		<#if department.examGridOptions.nameToShow.toString != 'none'><h2>${member.fullName!}</h2></#if>
-		<h3> ${member.universityId}</h3>
+		<h1>
+			<#if department.examGridOptions.nameToShow.toString != 'none'><p>${member.fullName!}</p></#if>
+			<div>${member.universityId}</div>
+		</h1>
 		<div class="key clearfix">
 			<table class="table table-condensed">
 				<thead>
