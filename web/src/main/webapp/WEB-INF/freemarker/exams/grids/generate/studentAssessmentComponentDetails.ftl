@@ -1,9 +1,13 @@
 <#escape x as x?html>
 	<div class="exam-grid-preview">
-		<h1>
-			<#if department.examGridOptions.nameToShow.toString != 'none'><p>${member.fullName!}</p></#if>
-			<div>${member.universityId}</div>
-		</h1>
+		<div class="deptheader">
+			<#if department.examGridOptions.nameToShow.toString != 'none'>
+				<h1>${member.fullName!}</h1>
+				<h4 class="with-related">${member.universityId}</h4>
+			<#else>
+				<h1>${member.universityId}</h1>
+			</#if>
+		</div>
 		<div class="key clearfix">
 			<table class="table table-condensed">
 				<thead>
