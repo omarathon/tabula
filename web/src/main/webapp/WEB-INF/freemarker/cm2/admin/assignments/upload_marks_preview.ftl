@@ -3,21 +3,21 @@
 <@spring.bind path=commandName>
 	<#assign hasErrors=status.errors.allErrors?size gt 0 />
 </@spring.bind>
-<#assign verbed_your_noun="received your files"/>
+<#assign verbed_your_noun="files uploaded successfully"/>
 <#assign isfile=RequestParameters.isfile/>
 <#if isfile = "true">
-	<#assign text_acknowledge="I've ${verbed_your_noun} and I found marks and feedback for"/>
-	<#assign text_problems="However, there were some problems with its contents, which are shown below.
-				You'll need to correct these problems with the spreadsheet and try again.
-				If you choose to confirm without fixing the spreadsheet any rows with errors
-				will be ignored."/>
-	<#assign column_headings_warning="Remember that the first row in all spreadsheets is assumed to be column headings and ignored."/>
+	<#assign text_acknowledge="Your ${verbed_your_noun} with marks and feedback for"/>
+	<#assign text_problems="However, there are some problems, which are shown below.
+				You need to correct these problems with the spreadsheet and upload it again.
+				If you choose to confirm without amending the spreadsheet, any rows with errors
+				are ignored."/>
+	<#assign column_headings_warning="The first row in spreadsheets is assumed to contain column headings and is ignored."/>
 <#else>
 	<#assign text_acknowledge="You are submitting marks for "/>
-	<#assign text_problems="However, there were some problems, which are shown below.
-				You'll need to return to the previous page, correct these problems and try again.
-				If you choose to confirm without fixing the data any rows with errors
-				will be ignored."/>
+	<#assign text_problems="However, there are some problems, which are shown below.
+				You need to return to the previous page, correct these problems and try again.
+				If you choose to confirm without fixing the data, any rows with errors
+				are ignored."/>
 	<#assign column_headings_warning=""/>
 </#if>
 
@@ -39,7 +39,7 @@
 					${text_problems}
 					</#if>
 				<#else>
-					I've ${verbed_your_noun} but I couldn't find any rows that looked like
+					Your ${verbed_your_noun} but do not appear to contain any rows that look like
 					marks. ${column_headings_warning}
 				</#if>
 			</p>
@@ -70,7 +70,7 @@
 										<@spring.bind path="id">${status.value}</@spring.bind>
 										<@f.errors path="id" cssClass="error" />
 										<#if item.modified>
-											<span class="warning">Feedback and/or marks have already been uploaded for this student. This will be overwritten when you click confirm</span>
+											<span class="warning">Feedback and/or marks have already been uploaded for this student. These will be overwritten when you click confirm.</span>
 									</#if>
 								</td>
 								<#if assignment.showSeatNumbers && item.user(assignment)??>
