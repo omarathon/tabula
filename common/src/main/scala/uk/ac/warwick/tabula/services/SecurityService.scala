@@ -175,7 +175,7 @@ class SecurityService extends Logging with RequestLevelCaching[(CurrentUser, Per
 	private def _check(user: CurrentUser, permission: Permission, scope: Option[PermissionsTarget]) = if (!_can(user, permission, scope, canDelegate = false)) {
 		(permission, scope) match {
 			case (Permissions.Submission.Create, Some(assignment: Assignment)) => throw new SubmitPermissionDeniedException(user, assignment)
-			case (p, s) => throw new PermissionDeniedException(user, p, s)
+			case (p, s) => throw PermissionDeniedException(user, p, s)
 		}
 	}
 }

@@ -139,7 +139,7 @@ class OvercattingOptionsView(
 
 	val nameToShow = department.nameToShow
 
-	private lazy val coreRequiredModuleLookup = new CoreRequiredModuleLookup(academicYear, scyd.yearOfStudy, moduleRegistrationService)
+	private lazy val coreRequiredModuleLookup = new CoreRequiredModuleLookupImpl(academicYear, scyd.yearOfStudy, moduleRegistrationService)
 
 	private lazy val originalEntity = scyd.studentCourseDetails.student.toExamGridEntity(scyd)
 

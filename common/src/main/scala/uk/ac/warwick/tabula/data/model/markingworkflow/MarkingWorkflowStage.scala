@@ -122,7 +122,7 @@ object MarkingWorkflowStage {
 		override def roleName = "Final marker"
 		override def verb = "finalise"
 		override def nextStages: Seq[MarkingWorkflowStage] = Seq(DblBlndCompleted)
-		override def previousStages: Seq[MarkingWorkflowStage] = Seq(DblBlndInitialMarkerA, DblBlndInitialMarkerA)
+		override def previousStages: Seq[MarkingWorkflowStage] = Seq(DblBlndInitialMarkerA, DblBlndInitialMarkerB)
 		override def description = "Final marker"
 	}
 	case object DblBlndCompleted extends FinalStage("dbl-blnd-completed") {

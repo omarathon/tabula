@@ -15,8 +15,6 @@ class CurrentYearMarkColumnOption extends ChosenYearExamGridColumnOption with Au
 
 	override val sortOrder: Int = ExamGridColumnOption.SortOrders.CurrentYear
 
-	override val mandatory = true
-
 	case class Column(state: ExamGridColumnState) extends ChosenYearExamGridColumn(state) with HasExamGridColumnCategory {
 
 		override val title: String = "Weighted Mean Module Mark"

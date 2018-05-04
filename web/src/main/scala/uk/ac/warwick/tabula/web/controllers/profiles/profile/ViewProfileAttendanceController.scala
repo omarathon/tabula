@@ -1,7 +1,5 @@
 package uk.ac.warwick.tabula.web.controllers.profiles.profile
 
-import java.text.DateFormatSymbols
-
 import org.springframework.stereotype.Controller
 import org.springframework.web.bind.annotation.{ModelAttribute, PathVariable, RequestMapping}
 import uk.ac.warwick.tabula.AcademicYear
@@ -24,10 +22,10 @@ class ViewProfileAttendanceController extends AbstractViewProfileController {
 		@ModelAttribute("activeAcademicYear") activeAcademicYear: Option[AcademicYear]
 	): Mav = {
 		mandatory(member) match {
-			case student: StudentMember if student.mostSignificantCourseDetails.isDefined =>
+			case student: StudentMember if student.mostSignificantCourseDetails.nonEmpty =>
 				viewByCourse(student.mostSignificantCourseDetails.get, activeAcademicYear)
 			case student: StudentMember if student.freshOrStaleStudentCourseDetails.nonEmpty =>
-				viewByCourse(student.freshOrStaleStudentCourseDetails.lastOption.get, activeAcademicYear)
+				viewByCourse(student.freshOrStaleStudentCourseDetails.last, activeAcademicYear)
 			case _ =>
 				Redirect(Routes.Profile.identity(member))
 		}
@@ -55,7 +53,6 @@ class ViewProfileAttendanceController extends AbstractViewProfileController {
 			"student" -> student,
 			"hasMonitoringPointAttendancePermission" -> monitoringPointAttendanceCommand.nonEmpty,
 			"hasSeminarAttendancePermission" -> seminarAttendanceCommand.nonEmpty,
-
 			"monitoringPointAttendanceCommandResult" -> monitoringPointAttendanceCommand.map(_.apply()).orNull,
 			"seminarAttendanceCommandResult" -> seminarAttendanceCommand.map(_.apply()).orNull,
 			"isSelf" -> (user.universityId.maybeText.getOrElse("") == student.universityId),

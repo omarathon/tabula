@@ -34,7 +34,7 @@ trait ControllerMethods extends PermissionsCheckingMethods with Logging {
 			permittedByChecks(securityService, user, something)
 			Some(something)
 		} catch {
-			case e @ (_ : ItemNotFoundException | _ : PermissionDeniedException)=> None
+			case _ @ (_ : ItemNotFoundException | _ : PermissionDeniedException)=> None
 		}
 
 	def restrictedBy[A <: PermissionsChecking](fn: => Boolean)(something: => A): Option[A] =

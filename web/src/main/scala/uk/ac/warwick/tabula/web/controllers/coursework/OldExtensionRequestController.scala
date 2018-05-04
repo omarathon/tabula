@@ -46,7 +46,7 @@ class OldExtensionRequestController extends OldCourseworkController{
 
 		if (!module.adminDepartment.canRequestExtension) {
 			logger.info("Rejecting access to extension request screen as department does not allow extension requests")
-			throw new PermissionDeniedException(user, Permissions.Extension.MakeRequest, assignment)
+			throw PermissionDeniedException(user, Permissions.Extension.MakeRequest, assignment)
 		} else {
 			if (user.loggedIn){
 				val existingRequest = assignment.findExtension(user.userId)

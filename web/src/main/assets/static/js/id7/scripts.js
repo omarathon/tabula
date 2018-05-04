@@ -279,11 +279,22 @@
 		}
 
 		var errorHandler = function($form, data) {
-			var scopeSelector = (data.formId != undefined) ? "#" + data.formId + " " : "";
+			var scopeSelector = (data.formId !== undefined) ? "#" + data.formId + " " : "";
 			if ($form.is('.double-submit-protection')) {
 				$form.find('.submit-buttons .btn').removeClass('disabled');
 				$form.removeData('submitOnceSubmitted');
 			}
+			$form.find('.spinnable').each(function () {
+				var $spinnable = $(this);
+				if ($spinnable.data('spinContainer')) {
+					$spinnable.data('spinContainer').spin(false)
+				}
+
+				if (window.pendingSpinner !== undefined) {
+					clearTimeout(window.pendingSpinner);
+					window.pendingSpinner = null;
+				}
+			});
 
 			// delete any old errors
 			$(scopeSelector + "div.error").remove();
@@ -304,11 +315,11 @@
 			}
 		};
 
-		$(this).on('submit', 'form', function(e){
+		$(this).on('submit', 'form', function(e) {
 			e.preventDefault();
-			var $form = $(this);
+			var $form = $(this).trigger('tabula.ajaxSubmit');
 			$.post($form.attr('action'), $form.serialize(), function(data){
-				if(data.status == "error") {
+				if(data.status === "error") {
 					errorHandler($form, data);
 				} else {
 					successCallback(data)
@@ -337,7 +348,7 @@
 
 		if ($spinnable.length) {
 			// stop any delayed spinner
-			if (window.pendingSpinner != undefined) {
+			if (window.pendingSpinner !== undefined) {
 				clearTimeout(window.pendingSpinner);
 				window.pendingSpinner = null;
 			}
@@ -402,7 +413,7 @@
 			$this.data('submitOnceHandled', true);
 			$this.removeData('submitOnceSubmitted');
 
-			$(this).on('submit tabula.ajaxSubmit', function(event) {
+			$this.on('submit tabula.ajaxSubmit', function(event) {
 				var $this = $(event.target),
 					submitted = $this.data('submitOnceSubmitted');
 
@@ -812,7 +823,7 @@
 			$m.find('input.time-picker').tabulaTimePicker();
 			$m.find('input.date-time-minute-picker').tabulaDateTimeMinutePicker();
 			$m.find('form.double-submit-protection').tabulaSubmitOnce();
-			$('select.selectOffset').selectOffset();
+			$m.find('select.selectOffset').selectOffset();
 			$m.tabulaPrepareSpinners();
 
 			var $form = ($m.find('iframe').contents().find('form').length == 1) ? $m.find('iframe').contents().find('form') : $m.find('form');
