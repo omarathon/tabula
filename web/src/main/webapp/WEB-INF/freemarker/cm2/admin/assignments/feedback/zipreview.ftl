@@ -12,22 +12,22 @@
 		<input type="hidden" name="batch" value="true">
 		<@spring.bind path="fromArchive"><#assign fromArchive=status.actualValue /></@spring.bind>
 		<#if fromArchive>
-			<#assign verbed_your_noun="unpacked your Zip file"/>
+			<#assign noun_verb_passive=".zip file has been unpacked"/>
 		<#else>
-			<#assign verbed_your_noun="received your files"/>
+			<#assign noun_verb_passive="files have been received"/>
 		</#if>
 
 		<@spring.bind path="items">
 			<#assign itemsList=status.actualValue />
 			<p>
 				<#if itemsList?size gt 0>
-					I've ${verbed_your_noun} and I found feedback for <@fmt.p itemsList?size "student"/>.
+					Your ${noun_verb_passive} with feedback for <@fmt.p itemsList?size "student"/>.
 					<#if hasErrors>
-						However, there were some problems with its contents, which are shown below.
-						You'll need to correct these problems with the zip and try again.
+						There are some problems, which are shown below.
+						You need to correct these problems with the .zip file and try again.
 					</#if>
 				<#else>
-						I've ${verbed_your_noun} but I couldn't find any files that looked like feedback items.
+						Your ${noun_verb_passive} but there are no files that look like feedback items.
 				</#if>
 			</p>
 		</@spring.bind>
@@ -37,7 +37,7 @@
 		<#else>
 			<#if addFeedbackCommand.unrecognisedFiles?size gt 0>
 				<div class="alert alert-info">
-					<div>I didn't understand some of the files uploaded, and these will be ignored:</div>
+					<div>The following files are not recognised and will be ignored:</div>
 					<ul class="file-list">
 						<#list addFeedbackCommand.unrecognisedFiles as unrecognisedFile>
 							<li>
@@ -51,7 +51,7 @@
 			</#if>
 			<#if addFeedbackCommand.moduleMismatchFiles?size gt 0>
 				<div class="invalid-files alert-block alert-info">
-					<div>There were some files which, from their names, look as if they may belong to another module. Please check these before confirming.</div>
+					<div>Some files, based on their names, appear to relate to another module. Please check these before confirming.</div>
 					<ul class="file-list">
 						<#list addFeedbackCommand.moduleMismatchFiles as moduleMismatchFile>
 							<li>
@@ -66,7 +66,7 @@
 
 			<#if addFeedbackCommand.invalidFiles?size gt 0>
 				<div class="alert alert-block alert-info">
-				<div>There were some files with problem names. You'll need to fix these and then try uploading again.</div>
+				<div>Some files have problematic names. Fix them, then try uploading again.</div>
 					<ul class="file-list">
 						<#list addFeedbackCommand.invalidFiles as invalidFile>
 							<li>
@@ -99,7 +99,7 @@
 										<#-- If there is nothing to upload hide these errors -->
 										<#if item.modified>
 											<#if item.submissionExists>
-												<span class="warning">Feedback already exists for this user. New files will be added to the existing ones</span>
+												<span class="warning">Feedback already exists for this student. New files will be added to the existing ones.</span>
 											</#if>
 											<#if item.published>
 												<span class="warning">Feedback for this student has already been published. They will be notified that their feedback has changed.</span>
