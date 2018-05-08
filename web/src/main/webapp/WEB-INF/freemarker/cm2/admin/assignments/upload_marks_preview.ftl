@@ -3,10 +3,10 @@
 <@spring.bind path=commandName>
 	<#assign hasErrors=status.errors.allErrors?size gt 0 />
 </@spring.bind>
-<#assign verbed_your_noun="files uploaded successfully"/>
+<#assign noun_verb_passive="files uploaded successfully"/>
 <#assign isfile=RequestParameters.isfile/>
 <#if isfile = "true">
-	<#assign text_acknowledge="Your ${verbed_your_noun} with marks and feedback for"/>
+	<#assign text_acknowledge="Your ${noun_verb_passive} with marks and feedback for"/>
 	<#assign text_problems="However, there are some problems, which are shown below.
 				You need to correct these problems with the spreadsheet and upload it again.
 				If you choose to confirm without amending the spreadsheet, any rows with errors
@@ -39,7 +39,7 @@
 					${text_problems}
 					</#if>
 				<#else>
-					Your ${verbed_your_noun} but do not appear to contain any rows that look like
+					Your ${noun_verb_passive} but do not appear to contain any rows that look like
 					marks. ${column_headings_warning}
 				</#if>
 			</p>

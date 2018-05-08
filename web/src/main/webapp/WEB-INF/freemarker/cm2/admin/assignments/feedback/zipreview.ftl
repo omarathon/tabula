@@ -12,22 +12,22 @@
 		<input type="hidden" name="batch" value="true">
 		<@spring.bind path="fromArchive"><#assign fromArchive=status.actualValue /></@spring.bind>
 		<#if fromArchive>
-			<#assign verbed_your_noun=".zip file has been unpacked"/>
+			<#assign noun_verb_passive=".zip file has been unpacked"/>
 		<#else>
-			<#assign verbed_your_noun="files have been received"/>
+			<#assign noun_verb_passive="files have been received"/>
 		</#if>
 
 		<@spring.bind path="items">
 			<#assign itemsList=status.actualValue />
 			<p>
 				<#if itemsList?size gt 0>
-					Your ${verbed_your_noun} with feedback for <@fmt.p itemsList?size "student"/>.
+					Your ${noun_verb_passive} with feedback for <@fmt.p itemsList?size "student"/>.
 					<#if hasErrors>
 						There are some problems, which are shown below.
 						You need to correct these problems with the .zip file and try again.
 					</#if>
 				<#else>
-						Your ${verbed_your_noun} but there are no files that look like feedback items.
+						Your ${noun_verb_passive} but there are no files that look like feedback items.
 				</#if>
 			</p>
 		</@spring.bind>
