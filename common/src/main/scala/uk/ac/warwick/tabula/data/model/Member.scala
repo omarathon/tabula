@@ -421,9 +421,8 @@ class StudentMember extends Member with StudentProperties {
 	def isUG: Boolean = groupName == "Undergraduate - full-time" || groupName == "Undergraduate - part-time"
 
 	def toExamGridEntity(baseSCYD: StudentCourseYearDetails, basedOnLevel: Boolean = false): ExamGridEntity = {
-		val allSCYDs: Seq[StudentCourseYearDetails] = freshOrStaleStudentCourseDetails.toSeq.filter(_.mostSignificant).sorted
+		val allSCYDs: Seq[StudentCourseYearDetails] = freshOrStaleStudentCourseDetails.toSeq.sorted
 			.flatMap(_.freshOrStaleStudentCourseYearDetails.toSeq.sorted)
-			.filter(_.studentCourseDetails.mostSignificant)
 			.takeWhile(_ != baseSCYD) ++ Seq(baseSCYD)
 
 		val years = if (basedOnLevel) {

@@ -247,8 +247,10 @@ abstract class AbstractProgressionService extends ProgressionService {
 						allScyds.groupBy(_.level.orNull)
 							.map{ case (level, scyds) => level.toYearOfStudy -> StudentCourseYearDetails.toExamGridEntityYearGrouped(level.toYearOfStudy, scyds:_ *)}
 					} else {
-						allScyds.groupBy(_.yearOfStudy.toInt)
-							.map{ case (block, scyds) => block -> StudentCourseYearDetails.toExamGridEntityYearGrouped(block, scyds:_ *)}
+						(1 to finalYearOfStudy).map(block => {
+							val latestSCYDForThisYear = allScyds.filter(_.yearOfStudy.toInt == block).lastOption
+							block -> latestSCYDForThisYear.map(_.toExamGridEntityYear).orNull
+						}).toMap
 					}
 				}
 
