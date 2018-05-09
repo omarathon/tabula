@@ -1,7 +1,11 @@
 package uk.ac.warwick.tabula.web
 
-import dispatch.classic._
+import org.apache.http.HttpStatus
+import org.apache.http.client.methods.RequestBuilder
+import org.apache.http.impl.client.BasicResponseHandler
+import org.apache.http.util.EntityUtils
 import org.joda.time.DateTime
+import uk.ac.warwick.tabula.helpers.ApacheHttpClientUtils
 import uk.ac.warwick.tabula.{AcademicYear, FunctionalTestProperties, LoginDetails}
 
 import scala.language.postfixOps
@@ -11,14 +15,31 @@ trait FixturesDriver extends SimpleHttpFetching {
 
 	def updateExtensionSettings(departmentCode: String, allow: Boolean = true, managerUserId: String = ""): Unit = {
 		val uri = FunctionalTestProperties.SiteRoot + "/fixtures/update/extensionSettings"
-		val req = url(uri).POST << Map("departmentCode" -> departmentCode, "allow" -> allow.toString, "userId" -> managerUserId)
-		http.when(_==200)(req >| )
+		val req =
+			RequestBuilder.post(uri)
+				.addParameter("departmentCode", departmentCode)
+				.addParameter("allow", allow.toString)
+				.addParameter("userId", managerUserId)
+
+		httpClient.execute(
+			req.build(),
+			ApacheHttpClientUtils.statusCodeFilteringHandler(HttpStatus.SC_OK)(EntityUtils.consumeQuietly)
+		)
 	}
 
 	def createModule(departmentCode: String, code: String, name: String) {
 		val uri = FunctionalTestProperties.SiteRoot + "/fixtures/create/module"
-		val req = url(uri).POST << Map("departmentCode" -> departmentCode, "code" -> code, "name" -> name)
-		http.when(_==200)(req >| )
+
+		val req =
+			RequestBuilder.post(uri)
+				.addParameter("departmentCode", departmentCode)
+				.addParameter("code", code)
+				.addParameter("name", name)
+
+		httpClient.execute(
+			req.build(),
+			ApacheHttpClientUtils.statusCodeFilteringHandler(HttpStatus.SC_OK)(EntityUtils.consumeQuietly)
+		)
 	}
 
 	def createSmallGroupSet(
@@ -34,19 +55,21 @@ trait FixturesDriver extends SimpleHttpFetching {
 		academicYear: String
 	):String  = {
 		val uri = FunctionalTestProperties.SiteRoot + "/fixtures/create/groupset"
-		val req = url(uri).POST << Map(
-			"moduleCode" -> moduleCode,
-			"groupSetName" -> groupSetName,
-		  "formatName" -> formatName,
-		  "allocationMethodName" -> allocationMethodName,
-		  "groupCount" -> groupCount.toString,
-		  "openForSignups" -> openForSignups.toString,
-		  "releasedToStudents" -> releasedToStudents.toString,
-		  "maxGroupSize" -> maxGroupSize.toString,
-		  "allowSelfGroupSwitching" -> allowSelfGroupSwitching.toString,
-			"academicYear" -> academicYear
-		)
-		val resp = http.when(_==200)(req as_str)
+
+		val req =
+			RequestBuilder.post(uri)
+				.addParameter("moduleCode", moduleCode)
+				.addParameter("groupSetName", groupSetName)
+				.addParameter("formatName", formatName)
+				.addParameter("allocationMethodName", allocationMethodName)
+				.addParameter("groupCount", groupCount.toString)
+				.addParameter("openForSignups", openForSignups.toString)
+				.addParameter("releasedToStudents", releasedToStudents.toString)
+				.addParameter("maxGroupSize", maxGroupSize.toString)
+				.addParameter("allowSelfGroupSwitching", allowSelfGroupSwitching.toString)
+				.addParameter("academicYear", academicYear)
+
+		val resp = httpClient.execute(req.build(), new BasicResponseHandler)
 
 		val id = JSON.parseFull(resp).get.asInstanceOf[Map[String,Any]]("id").toString
 		id
@@ -54,26 +77,47 @@ trait FixturesDriver extends SimpleHttpFetching {
 
 	def createSmallGroupEvent(setId: String,title: String, weekRange:String="1") {
 		val uri = FunctionalTestProperties.SiteRoot + "/fixtures/create/groupEvent"
-		val req = url(uri).POST << Map("setId" -> setId, "title" -> title, "weekRange"->weekRange)
-		http.when(_==200)(req >| )
+
+		val req =
+			RequestBuilder.post(uri)
+				.addParameter("setId", setId)
+				.addParameter("title", title)
+				.addParameter("weekRange", weekRange)
+
+		httpClient.execute(
+			req.build(),
+			ApacheHttpClientUtils.statusCodeFilteringHandler(HttpStatus.SC_OK)(EntityUtils.consumeQuietly)
+		)
 	}
 
 
   def addStudentToGroupSet(studentUserId: String, setId:String){
 		val uri = FunctionalTestProperties.SiteRoot + "/fixtures/create/groupsetMembership"
-		val req = url(uri).POST << Map(
-			"groupSetId" -> setId,
-			"userId" -> studentUserId)
-		http.when(_==200)(req >|)
+
+		val req =
+			RequestBuilder.post(uri)
+				.addParameter("groupSetId", setId)
+				.addParameter("userId", studentUserId)
+
+		httpClient.execute(
+			req.build(),
+			ApacheHttpClientUtils.statusCodeFilteringHandler(HttpStatus.SC_OK)(EntityUtils.consumeQuietly)
+		)
 	}
 
 	def addStudentToGroup(studentUserId: String, setId:String, groupName:String){
 		val uri = FunctionalTestProperties.SiteRoot + "/fixtures/create/groupMembership"
-		val req = url(uri).POST << Map(
-			"groupSetId" -> setId,
-			"userId" -> studentUserId,
-		  "groupName"->groupName)
-		http.when(_==200)(req >|)
+
+		val req =
+			RequestBuilder.post(uri)
+				.addParameter("groupSetId", setId)
+				.addParameter("userId", studentUserId)
+				.addParameter("groupName", groupName)
+
+		httpClient.execute(
+			req.build(),
+			ApacheHttpClientUtils.statusCodeFilteringHandler(HttpStatus.SC_OK)(EntityUtils.consumeQuietly)
+		)
 	}
 
 	def createStudentMember(
@@ -86,169 +130,242 @@ trait FixturesDriver extends SimpleHttpFetching {
 		academicYear:String = "2014"
 	){
 		val uri = FunctionalTestProperties.SiteRoot + "/fixtures/create/studentMember"
-		val req = url(uri).POST << Map(
-			"userId" -> userId,
-			"genderCode"->genderCode,
-		  "yearOfStudy"->yearOfStudy.toString,
-		  "routeCode"->routeCode,
-		  "courseCode"->courseCode,
-		  "deptCode"->deptCode,
-		  "academicYear"->academicYear
+
+		val req =
+			RequestBuilder.post(uri)
+				.addParameter("userId", userId)
+				.addParameter("genderCode", genderCode)
+				.addParameter("yearOfStudy", yearOfStudy.toString)
+				.addParameter("routeCode", routeCode)
+				.addParameter("courseCode", courseCode)
+				.addParameter("deptCode", deptCode)
+				.addParameter("academicYear", academicYear)
+
+		httpClient.execute(
+			req.build(),
+			ApacheHttpClientUtils.statusCodeFilteringHandler(HttpStatus.SC_OK)(EntityUtils.consumeQuietly)
 		)
-		http.when(_==200)(req >|)
 	}
 
 	def createStaffMember(userId:String, genderCode:String = "M", deptCode:String){
 		val uri = FunctionalTestProperties.SiteRoot + "/fixtures/create/staffMember"
-		val req = url(uri).POST << Map(
-			"userId" -> userId,
-			"genderCode"->genderCode,
-			"deptCode"->deptCode
+
+		val req =
+			RequestBuilder.post(uri)
+				.addParameter("userId", userId)
+				.addParameter("genderCode", genderCode)
+				.addParameter("deptCode", deptCode)
+
+		httpClient.execute(
+			req.build(),
+			ApacheHttpClientUtils.statusCodeFilteringHandler(HttpStatus.SC_OK)(EntityUtils.consumeQuietly)
 		)
-		http.when(_==200)(req >|)
 	}
 
 	def updateAssignment(deptCode:String, assignmentName:String, openDate:Option[DateTime] = None, closeDate:Option[DateTime] = None){
-		val datesToUpdate:Seq[(String,String)] = Seq("openDate" -> openDate, "closeDate" -> closeDate).flatMap(t => t._2 match {
+		val datesToUpdate: Seq[(String,String)] = Seq("openDate" -> openDate, "closeDate" -> closeDate).flatMap(t => t._2 match {
 			case None => None
 			case Some(d) => Some(t._1, d.toString("dd-MMM-yyyy HH:mm:ss"))
 		})
-		val params:Seq[(String,String)] = Seq("deptCode"->deptCode,"assignmentName"->assignmentName) ++ datesToUpdate
+		val params: Seq[(String,String)] = Seq("deptCode" -> deptCode, "assignmentName" -> assignmentName) ++ datesToUpdate
 		val uri = FunctionalTestProperties.SiteRoot + "/fixtures/update/assignment"
-		val req = url(uri).POST << Map(
-			params :_*
+
+		val req = RequestBuilder.post(uri)
+		params.foreach { case (k, v) => req.addParameter(k, v) }
+
+		httpClient.execute(
+			req.build(),
+			ApacheHttpClientUtils.statusCodeFilteringHandler(HttpStatus.SC_OK)(EntityUtils.consumeQuietly)
 		)
-		http.when(_==200)(req >|)
 	}
 
 	def createExtension(userId: String, assignmentId: String, approved: Boolean) {
 		val uri = FunctionalTestProperties.SiteRoot + "/fixtures/create/extension"
-		val req = url(uri).POST << Map(
-			"userId" -> userId,
-			"assignmentId" -> assignmentId,
-			"approved" -> approved.toString)
-		http.when(_==200)(req >|)
+
+		val req =
+			RequestBuilder.post(uri)
+				.addParameter("userId", userId)
+				.addParameter("assignmentId", assignmentId)
+				.addParameter("approved", approved.toString)
+
+		httpClient.execute(
+			req.build(),
+			ApacheHttpClientUtils.statusCodeFilteringHandler(HttpStatus.SC_OK)(EntityUtils.consumeQuietly)
+		)
 	}
 
 	def createRoute(routeCode:String, departmentCode:String, routeName:String, degreeType:String="UG" ){
 		val uri = FunctionalTestProperties.SiteRoot + "/fixtures/create/route"
-		val req = url(uri).POST << Map(
-			"routeCode" -> routeCode,
-			"departmentCode"->departmentCode,
-		  "routeName"->routeName,
-		  "degreeType"->degreeType)
-		http.when(_==200)(req >|)
+
+		val req =
+			RequestBuilder.post(uri)
+				.addParameter("routeCode", routeCode)
+				.addParameter("departmentCode", departmentCode)
+				.addParameter("routeName", routeName)
+				.addParameter("degreeType", degreeType)
+
+		httpClient.execute(
+			req.build(),
+			ApacheHttpClientUtils.statusCodeFilteringHandler(HttpStatus.SC_OK)(EntityUtils.consumeQuietly)
+		)
 	}
 
 
 	def createCourse(courseCode:String, courseName:String ){
 		val uri = FunctionalTestProperties.SiteRoot + "/fixtures/create/course"
-		val req = url(uri).POST << Map(
-			"courseCode" -> courseCode,
-			"courseName"->courseName)
-		http.when(_==200)(req >|)
+
+		val req =
+			RequestBuilder.post(uri)
+				.addParameter("courseCode", courseCode)
+				.addParameter("courseName", courseName)
+
+		httpClient.execute(
+			req.build(),
+			ApacheHttpClientUtils.statusCodeFilteringHandler(HttpStatus.SC_OK)(EntityUtils.consumeQuietly)
+		)
 	}
 
 	def registerStudentsOnModule(students: Seq[LoginDetails], moduleCode: String, academicYear: Option[String] = None) {
 		val uniIds = students.map(_.warwickId).mkString(",")
 		val uri = FunctionalTestProperties.SiteRoot + "/fixtures/create/moduleRegistration"
-		val req = url(uri).POST << Map(
-			"universityIds" -> uniIds,
-			"moduleCode" -> moduleCode,
-			"academicYear" -> academicYear.getOrElse(AcademicYear.now().startYear.toString))
 
-		http.when(_==200)(req >|)
+		val req =
+			RequestBuilder.post(uri)
+				.addParameter("universityIds", uniIds)
+				.addParameter("moduleCode", moduleCode)
+				.addParameter("academicYear", academicYear.getOrElse(AcademicYear.now().startYear.toString))
+
+		httpClient.execute(
+			req.build(),
+			ApacheHttpClientUtils.statusCodeFilteringHandler(HttpStatus.SC_OK)(EntityUtils.consumeQuietly)
+		)
 	}
 
 	def createStudentRelationship(student:LoginDetails, agent:LoginDetails, relationshipType:String = "tutor"){
 		val uri = FunctionalTestProperties.SiteRoot + "/fixtures/create/relationship"
-		val req = url(uri).POST << Map(
-			"studentUniId" -> student.warwickId,
-			"agent"->agent.warwickId,
-		  "relationshipType"->relationshipType)
 
-		http.when(_==200)(req >|)
+		val req =
+			RequestBuilder.post(uri)
+				.addParameter("studentUniId", student.warwickId)
+				.addParameter("agent", agent.warwickId)
+				.addParameter("relationshipType", relationshipType)
+
+		httpClient.execute(
+			req.build(),
+			ApacheHttpClientUtils.statusCodeFilteringHandler(HttpStatus.SC_OK)(EntityUtils.consumeQuietly)
+		)
 	}
 
 	def createMonitoringPointSet(routeCode:String, pointCount:Int, academicYear:String, yearOption:Option[Int]){
 		val uri = FunctionalTestProperties.SiteRoot + "/fixtures/create/monitoringPointSet"
-		var args = Map(
-			"routeCode" -> routeCode,
-			"pointCount"-> pointCount.toString,
-			"academicYear" -> academicYear
-		)
-		if (yearOption.isDefined)
-			args = args ++ Map("year" -> yearOption.get.toString)
 
-		val req = url(uri).POST << args
-		http.when(_==200)(req >|)
+		val req =
+			RequestBuilder.post(uri)
+				.addParameter("routeCode", routeCode)
+				.addParameter("pointCount", pointCount.toString)
+				.addParameter("academicYear", academicYear)
+
+		if (yearOption.nonEmpty)
+			req.addParameter("year", yearOption.get.toString)
+
+		httpClient.execute(
+			req.build(),
+			ApacheHttpClientUtils.statusCodeFilteringHandler(HttpStatus.SC_OK)(EntityUtils.consumeQuietly)
+		)
 	}
 
 	def createAttendanceMonitoringScheme(deptCode:String, pointCount:Int, academicYear:String, warwickId:String ){
 		val uri = FunctionalTestProperties.SiteRoot + "/fixtures/create/attendanceMonitoringScheme"
-		val args = Map(
-			"deptCode" -> deptCode,
-			"pointCount"-> pointCount.toString,
-			"academicYear" -> academicYear,
-			"warwickId" -> warwickId
-		)
 
-		val req = url(uri).POST << args
-		http.when(_==200)(req >|)
+		val req =
+			RequestBuilder.post(uri)
+				.addParameter("deptCode", deptCode)
+				.addParameter("pointCount", pointCount.toString)
+				.addParameter("academicYear", academicYear)
+				.addParameter("warwickId", warwickId)
+
+		httpClient.execute(
+			req.build(),
+			ApacheHttpClientUtils.statusCodeFilteringHandler(HttpStatus.SC_OK)(EntityUtils.consumeQuietly)
+		)
 	}
 
 	def createAssessmentComponent(departmentCode: String, moduleCode: String, name: String, assessmentGroup: String = "A", sequence: String = "A01") {
 		val uri = FunctionalTestProperties.SiteRoot + "/fixtures/create/assessmentComponent"
-		val req = url(uri).POST << Map(
-			"moduleCode" -> moduleCode,
-			"assessmentGroup" -> assessmentGroup,
-			"sequence" -> sequence,
-			"departmentCode" -> departmentCode,
-			"name" -> name
+
+		val req =
+			RequestBuilder.post(uri)
+				.addParameter("moduleCode", moduleCode)
+				.addParameter("assessmentGroup", assessmentGroup)
+				.addParameter("sequence", sequence)
+				.addParameter("departmentCode", departmentCode)
+				.addParameter("name", name)
+
+		httpClient.execute(
+			req.build(),
+			ApacheHttpClientUtils.statusCodeFilteringHandler(HttpStatus.SC_OK)(EntityUtils.consumeQuietly)
 		)
-		http.when(_==200)(req >|)
 	}
 
 	def createUpstreamAssessmentGroup(moduleCode: String, universityIds: Seq[String], assessmentGroup: String = "A", occurrence: String = "A") {
 		val uri = FunctionalTestProperties.SiteRoot + "/fixtures/create/upstreamAssessmentGroup"
 
-		val universityIdArgs: Map[String, String] = universityIds.zipWithIndex.map { case (universityId, index) =>
-			s"universityIds[$index]" -> universityId
-		}.toMap
+		val req =
+			RequestBuilder.post(uri)
+				.addParameter("moduleCode", moduleCode)
+				.addParameter("assessmentGroup", assessmentGroup)
+				.addParameter("occurrence", occurrence)
 
-		val args = Map(
-			"moduleCode" -> moduleCode,
-			"assessmentGroup" -> assessmentGroup,
-			"occurrence" -> occurrence
-		) ++ universityIdArgs
+		universityIds.zipWithIndex.foreach { case (universityId, index) =>
+			req.addParameter(s"universityIds[$index]", universityId)
+		}
 
-		val req = url(uri).POST << args
-		http.when(_==200)(req >|)
+		httpClient.execute(
+			req.build(),
+			ApacheHttpClientUtils.statusCodeFilteringHandler(HttpStatus.SC_OK)(EntityUtils.consumeQuietly)
+		)
 	}
 
 	def createPremarkedAssignment(moduleCode: String): Unit = {
 		val uri = FunctionalTestProperties.SiteRoot + "/fixtures/create/premarkedAssignment"
-		val args = Map("moduleCode" -> moduleCode)
-		val req = url(uri).POST << args
-		http.when(_==200)(req >|)
+
+		val req =
+			RequestBuilder.post(uri)
+				.addParameter("moduleCode", moduleCode)
+
+		httpClient.execute(
+			req.build(),
+			ApacheHttpClientUtils.statusCodeFilteringHandler(HttpStatus.SC_OK)(EntityUtils.consumeQuietly)
+		)
 	}
 
 	def createPremarkedCM2Assignment(moduleCode: String): Unit = {
 		val uri = FunctionalTestProperties.SiteRoot + "/fixtures/create/premarkedCM2Assignment"
-		val args = Map("moduleCode" -> moduleCode)
-		val req = url(uri).POST << args
-		http.when(_==200)(req >|)
+
+		val req =
+			RequestBuilder.post(uri)
+				.addParameter("moduleCode", moduleCode)
+
+		httpClient.execute(
+			req.build(),
+			ApacheHttpClientUtils.statusCodeFilteringHandler(HttpStatus.SC_OK)(EntityUtils.consumeQuietly)
+		)
 	}
 
 	def createMemberNote(memberId: String, creatorId: String, note: String, title: String = ""): Unit = {
 		val uri = FunctionalTestProperties.SiteRoot + "/fixtures/create/memberNote"
-		val req = url(uri).POST << Map(
-			"memberId" -> memberId,
-			"creatorId" -> creatorId,
-			"note" -> note,
-			"title" -> title
+
+		val req =
+			RequestBuilder.post(uri)
+				.addParameter("memberId", memberId)
+				.addParameter("creatorId", creatorId)
+				.addParameter("note", note)
+				.addParameter("title", title)
+
+		httpClient.execute(
+			req.build(),
+			ApacheHttpClientUtils.statusCodeFilteringHandler(HttpStatus.SC_OK)(EntityUtils.consumeQuietly)
 		)
-		http.when(_==200)(req >|)
 	}
 
 }

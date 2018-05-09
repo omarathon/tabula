@@ -10,7 +10,7 @@
 <@fmt.id7_deptheader title="Create a new exam grid for ${department.name}" route_function=route_function />
 
 <form action="<@routes.exams.generateGrid department academicYear />" class="dirty-check grid-options" method="post">
-
+	<input type="hidden" name="mandatoryModulesAndYearMarkColumns" value="false" />
 	<@form_fields.select_course_fields />
 
 	<h2>Set grid options</h2>
@@ -24,9 +24,9 @@
 	<p>
 		Select the items to include in your grid for
 		<#if selectCourseCommand.courses?size == 1>
-			Course: ${selectCourseCommand.courses?first.code?upper_case} ${selectCourseCommand.courses?first.name}
+			course: ${selectCourseCommand.courses?first.code?upper_case} ${selectCourseCommand.courses?first.name}
 				<#else>
-			Courses:
+			courses:
 					<#assign popover>
 				<ul><#list selectCourseCommand.courses?sort_by('code') as course>
 					<li>${course.code?upper_case} ${course.name}</li>
@@ -34,13 +34,13 @@
 					</#assign>
 			<a class="use-popover" href="#" data-html="true" data-content="${popover}" data-container="body">${selectCourseCommand.courses?size} courses</a>
 		</#if>,
-		Year of Study: ${selectCourseCommand.yearOfStudy},
+		year of study: ${selectCourseCommand.yearOfStudy},
 		<#if !selectCourseCommand.routes?has_content>
-			All routes
+			all routes
 		<#elseif selectCourseCommand.routes?size == 1>
-			Route: ${selectCourseCommand.routes?first.code?upper_case} ${selectCourseCommand.routes?first.name}
+			route: ${selectCourseCommand.routes?first.code?upper_case} ${selectCourseCommand.routes?first.name}
 		<#else>
-			Routes:
+			routes:
 			<#assign popover>
 				<ul><#list selectCourseCommand.routes?sort_by('code') as route>
 					<li>${route.code?upper_case} ${route.name}</li>
@@ -119,7 +119,7 @@
 		<div class="col-md-3">
 			<div class="checkbox">
 				<label><input type="checkbox" name="predefinedColumnIdentifiers" value="universityId" checked disabled
-				/> University ID</label>
+				/> University ID <@fmt.help_popover id="universityId" content="Each student has a University ID unique to them, which is printed on the right of their University card." /></label>
 			</div>
 		</div>
 
@@ -127,7 +127,7 @@
 			<div class="checkbox">
 				<label><input type="checkbox" name="predefinedColumnIdentifiers" value="sprCode"
 					<#if gridOptionsCommand.predefinedColumnIdentifiers?seq_contains("sprCode")>checked</#if>
-				/> SPR code</label>
+				/> SPR code <@fmt.help_popover id="sprCode" content="A student has a Student Programme Route (SPR) code for each course they take. For example: 1234567/1." /></label>
 			</div>
 		</div>
 
@@ -143,7 +143,7 @@
 			<div class="checkbox">
 				<label><input type="checkbox" name="predefinedColumnIdentifiers" value="route"
 					<#if gridOptionsCommand.predefinedColumnIdentifiers?seq_contains("route")>checked</#if>
-				/> Route</label>
+				/> Route <@fmt.help_popover id="route" content="A variant of a course the student is taking." /></label>
 			</div>
 		</div>
 
@@ -151,7 +151,7 @@
 			<div class="checkbox">
 				<label><input type="checkbox" name="predefinedColumnIdentifiers" value="startyear"
 					<#if gridOptionsCommand.predefinedColumnIdentifiers?seq_contains("startyear")>checked</#if>
-				/> Start Year</label>
+				/> Start year</label>
 			</div>
 		</div>
 	</div>
@@ -165,14 +165,14 @@
 			<div class="radio">
 				<label><input type="radio" name="marksToShow" value="all"
 					<#if gridOptionsCommand.marksToShow == 'all'>checked</#if>
-				/> Show component marks</label>
+				/> Show component marks <@fmt.help_popover id="all" content="Marks breakdown for each assessment component in a module, such as an assignment and exam." /></label>
 			</div>
 		</div>
 		<div class="col-md-3">
 			<div class="radio">
 				<label><input type="radio" name="marksToShow" value="overall"
 					<#if gridOptionsCommand.marksToShow == 'overall'>checked</#if>
-				/> Only show overall mark</label>
+				/> Only show overall mark <@fmt.help_popover id="overall" content="The final module mark calculated from weighted assessment component marks, such as assignments and exams." /></label>
 			</div>
 		</div>
 	</div>
@@ -180,30 +180,30 @@
 	<div class="row">
 		<div class="col-md-3">
 			<div class="checkbox">
-				<label><input type="checkbox" name="predefinedColumnIdentifiers" value="core" checked disabled
-				/> Core Modules</label>
+				<label><input type="checkbox" name="predefinedColumnIdentifiers" value="core"
+					<#if gridOptionsCommand.predefinedColumnIdentifiers?seq_contains("core")>checked</#if>
+				/> Core modules <@fmt.help_popover id="core" content="Includes both core required and core optional modules." /></label>
 			</div>
 		</div>
 		<div class="col-md-3">
 			<div class="checkbox">
 				<label><input type="checkbox" name="predefinedColumnIdentifiers" value="corerequired"
 					<#if gridOptionsCommand.predefinedColumnIdentifiers?seq_contains("corerequired")>checked</#if>
-				/> Core Required Modules</label>
-				<p class="help-block">(You can confirm these in the next step)</p>
+				/> Core required modules <@fmt.help_popover id="corerequired" content="Compulsory modules for all students on the selected course. You can confirm these modules in the next step." /></label>
 			</div>
 		</div>
 		<div class="col-md-3">
 			<div class="checkbox">
 				<label><input type="checkbox" name="predefinedColumnIdentifiers" value="coreoptional"
 					<#if gridOptionsCommand.predefinedColumnIdentifiers?seq_contains("coreoptional")>checked</#if>
-				/> Core Optional Modules</label>
+				/> Core optional modules <@fmt.help_popover id="coreoptional" content="Students have a limited choice within core modules." /></label>
 			</div>
 		</div>
 		<div class="col-md-3">
 			<div class="checkbox">
 				<label><input type="checkbox" name="predefinedColumnIdentifiers" value="optional"
 					<#if gridOptionsCommand.predefinedColumnIdentifiers?seq_contains("optional")>checked</#if>
-				/> Optional Modules</label>
+				/> Optional modules <@fmt.help_popover id="optional" content="Students choose from a prescribed list of modules for a particular route." /></label>
 			</div>
 		</div>
 	</div>
@@ -223,7 +223,7 @@
 			<div class="checkbox">
 				<label><input type="checkbox" name="predefinedColumnIdentifiers" value="modulereports"
 					<#if gridOptionsCommand.predefinedColumnIdentifiers?seq_contains("modulereports")>checked</#if>
-				/> Module Reports</label>
+				/> Module reports <@fmt.help_popover id="modulereports" content="Include the columns <strong>Passed required modules</strong> and <strong>Weighted module mark for this year</strong>." html=true /></label>
 			</div>
 		</div>
 
@@ -231,7 +231,7 @@
 			<div class="checkbox">
 				<label><input type="checkbox" name="componentsToShow" value="nonZero"
 					<#if gridOptionsCommand.componentsToShow == 'nonZero'>checked</#if>
-				/> Hide zero-weighted components <@fmt.help_popover id="componentsToShow" content="Don't show assessment components that don't contribute towards the overall module mark." /></label>
+				/> Hide zero-weighted components <@fmt.help_popover id="componentsToShow" content="Hide assessment components that don't contribute towards the overall module mark." /></label>
 			</div>
 		</div>
 
@@ -330,12 +330,13 @@
 			<div class="checkbox">
 				<label><input type="checkbox" name="predefinedColumnIdentifiers" value="previous"
 					<#if gridOptionsCommand.predefinedColumnIdentifiers?seq_contains("previous")>checked</#if>
-				/> Marks from previous year(s)</label>
+				/> Previous year marks <@fmt.help_popover id="previous" content="Show the year mark for previous years of study." /></label>
 			</div>
 		</div>
 		<div class="col-md-3">
 			<div class="checkbox">
-				<label><input type="checkbox" name="predefinedColumnIdentifiers" value="currentyear" checked disabled
+				<label><input type="checkbox" name="predefinedColumnIdentifiers" value="currentyear"
+					<#if gridOptionsCommand.predefinedColumnIdentifiers?seq_contains("currentyear")>checked</#if>
 				/> Current year mean mark <@fmt.help_popover id="currentyear" content="Year mark calculated from module marks using CATS weighting." /></label>
 			</div>
 		</div>
@@ -367,7 +368,7 @@
 
 	<hr />
 
-	<h3>Suggested Actions</h3>
+	<h3>Suggested actions</h3>
 
 	<div class="row">
 		<div class="col-md-3">
@@ -381,7 +382,7 @@
 			<div class="checkbox">
 				<label><input type="checkbox" name="predefinedColumnIdentifiers" value="suggestedgrade"
 					<#if gridOptionsCommand.predefinedColumnIdentifiers?seq_contains("suggestedgrade")>checked</#if>
-				/> Suggested final year grade <@fmt.help_popover id="suggestedgrade" content="Suggested degree class for final year students." /></label>
+				/> Suggested final-year grade <@fmt.help_popover id="suggestedgrade" content="Suggested degree class for final-year students." /></label>
 			</div>
 		</div>
 	</div>
@@ -395,14 +396,14 @@
 			<div class="checkbox">
 				<label><input type="checkbox" name="predefinedColumnIdentifiers" value="mitigating"
 					<#if gridOptionsCommand.predefinedColumnIdentifiers?seq_contains("mitigating")>checked</#if>
-				/> Mitigating Circumstances</label>
+				/> Mitigating circumstances</label>
 			</div>
 		</div>
 		<div class="col-md-3">
 			<div class="checkbox">
 				<label><input type="checkbox" name="predefinedColumnIdentifiers" value="comments"
 					<#if gridOptionsCommand.predefinedColumnIdentifiers?seq_contains("comments")>checked</#if>
-				/> Comments</label>
+				/> Comments <@fmt.help_popover id="comments" content="Append an empty column headed <strong>Comments</strong> to your grid." html=true /></label>
 			</div>
 		</div>
 	</div>

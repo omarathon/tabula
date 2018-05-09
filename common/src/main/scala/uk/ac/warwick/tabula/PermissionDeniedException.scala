@@ -26,10 +26,19 @@ trait PermissionsError
  */
 class PermissionDeniedException(
 	val user: CurrentUser,
-	val permission: Permission,
+	val permissions: Seq[Permission],
 	val scope: Any,
-	cause: Throwable = null) extends RuntimeException(s"${user} can't perform ${permission} on ${scope match { case Some(o) => o; case _ => scope }}", cause) with UserError with PermissionsError {
+	cause: Throwable = null) extends RuntimeException(s"$user can't perform ${permissions.mkString(" or ")} on ${scope match { case Some(o) => o; case _ => scope }}", cause) with UserError with PermissionsError {
+	def permission: Permission = permissions.head
 	override val httpStatus = HttpStatus.FORBIDDEN
+}
+
+object PermissionDeniedException {
+	def apply(user: CurrentUser, permission: Permission, scope: Any): PermissionDeniedException =
+		new PermissionDeniedException(user, Seq(permission), scope)
+
+	def apply(user: CurrentUser, permission: Permission, scope: Any, cause: Throwable): PermissionDeniedException =
+		new PermissionDeniedException(user, Seq(permission), scope, cause)
 }
 
 /**
@@ -37,6 +46,6 @@ class PermissionDeniedException(
  * the submission/feedback/info page for an assignment. It is just so the
  * exception resolver can send it off to a specific error page.
  */
-class SubmitPermissionDeniedException(user: CurrentUser, assignment: Assignment) extends RuntimeException(s"${user} can't submit assignment ${assignment}") with UserError with PermissionsError {
+class SubmitPermissionDeniedException(user: CurrentUser, assignment: Assignment) extends RuntimeException(s"$user can't submit assignment $assignment") with UserError with PermissionsError {
 	override val httpStatus = HttpStatus.FORBIDDEN
 }

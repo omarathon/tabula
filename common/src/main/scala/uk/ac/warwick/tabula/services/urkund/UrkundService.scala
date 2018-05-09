@@ -4,14 +4,16 @@ import java.io.File
 
 import com.fasterxml.jackson.databind.ObjectMapper
 import com.google.common.io.Files
-import dispatch.classic.thread.ThreadSafeHttpClient
-import dispatch.classic.{Http, thread, _}
 import org.apache.commons.io.FilenameUtils._
-import org.apache.http.client.params.{ClientPNames, CookiePolicy}
-import org.apache.http.impl.client.DefaultRedirectStrategy
-import org.apache.http.params.HttpConnectionParams
-import org.apache.http.protocol.HttpContext
-import org.apache.http.{HttpRequest, HttpResponse}
+import org.apache.http._
+import org.apache.http.auth.{Credentials, UsernamePasswordCredentials}
+import org.apache.http.client.config.RequestConfig
+import org.apache.http.client.entity.EntityBuilder
+import org.apache.http.client.methods.RequestBuilder
+import org.apache.http.client.{HttpResponseException, ResponseHandler}
+import org.apache.http.entity.ContentType
+import org.apache.http.impl.client.{BasicResponseHandler, CloseableHttpClient, HttpClients}
+import org.apache.http.util.EntityUtils
 import org.joda.time.DateTime
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.beans.factory.{DisposableBean, InitializingBean}
@@ -20,7 +22,7 @@ import uk.ac.warwick.spring.Wire
 import uk.ac.warwick.tabula.JavaImports._
 import uk.ac.warwick.tabula.data.model.{Assignment, FileAttachment, OriginalityReport, Submission}
 import uk.ac.warwick.tabula.data.{AutowiringUrkundDaoComponent, UrkundDaoComponent}
-import uk.ac.warwick.tabula.helpers.Logging
+import uk.ac.warwick.tabula.helpers.{ApacheHttpClientUtils, Logging}
 import uk.ac.warwick.util.core.StringUtils
 
 import scala.util.parsing.json.JSON
@@ -133,6 +135,8 @@ abstract class AbstractUrkundService extends UrkundService
 
 	@Value("${Urkund.username}") var username: String = _
 	@Value("${Urkund.password}") var password: String = _
+	lazy val credentials: Credentials = new UsernamePasswordCredentials(username, password)
+
 	@Value("${Urkund.unit}") var unit: JInteger = _
 	@Value("${Urkund.organization}") var organization: JInteger = _
 	@Value("${Urkund.subOrganization}") var subOrganization: JInteger = _
@@ -149,19 +153,18 @@ abstract class AbstractUrkundService extends UrkundService
 		UrkundService.receiverAddress(report, analysisPrefix)
 	)
 
-	val http: Http = new Http with thread.Safety {
-		override def make_client = new ThreadSafeHttpClient(new Http.CurrentCredentials(None), maxConnections, maxConnectionsPerRoute) {
-			HttpConnectionParams.setConnectionTimeout(getParams, UrkundService.responseTimeout)
-			HttpConnectionParams.setSoTimeout(getParams, UrkundService.responseTimeout)
-			setRedirectStrategy(new DefaultRedirectStrategy {
-				override def isRedirected(req: HttpRequest, res: HttpResponse, ctx: HttpContext) = false
-			})
-			getParams.setParameter(ClientPNames.COOKIE_POLICY, CookiePolicy.IGNORE_COOKIES)
-		}
-	}
+	val httpClient: CloseableHttpClient =
+		HttpClients.custom()
+			.setDefaultRequestConfig(RequestConfig.custom()
+				.setConnectTimeout(UrkundService.responseTimeout)
+				.setSocketTimeout(UrkundService.responseTimeout)
+				.build())
+			.disableRedirectHandling()
+			.disableCookieManagement()
+			.build()
 
 	override def destroy() {
-		http.shutdown()
+		httpClient.close()
 	}
 
 	override def afterPropertiesSet() {}
@@ -170,15 +173,19 @@ abstract class AbstractUrkundService extends UrkundService
 		urkundDao.findReportToSubmit
 
 	private def getReceiverAddress(report: OriginalityReport): Try[String] = {
-		val req = url(receiverUrl(report))
-			.as_!(username, password) // Add mandatory Basic auth
-			.<:<(Map( // Add request headers
-				"Accept" -> "application/json"
-			))
+		val req =
+			RequestBuilder.get(receiverUrl(report))
+				.setHeader(ApacheHttpClientUtils.basicAuthHeader(credentials))
+				.setHeader("Accept", "application/json")
 
-		Try(http.when(_==200){ req >- { _ => UrkundService.receiverAddress(report, analysisPrefix) }}) match {
+		Try(httpClient.execute(req.build(), new BasicResponseHandler {
+			override def handleEntity(entity: HttpEntity): String = {
+				EntityUtils.consumeQuietly(entity)
+				UrkundService.receiverAddress(report, analysisPrefix)
+			}
+		})) match {
 			case Success(response) => Success(response)
-			case Failure(StatusCode(code, _)) if code == 404 => createReceiverAddress(report)
+			case Failure(e: HttpResponseException) if e.getStatusCode == HttpStatus.SC_NOT_FOUND => createReceiverAddress(report)
 			case failure => failure
 		}
 	}
@@ -195,20 +202,26 @@ abstract class AbstractUrkundService extends UrkundService
 			"AnalysisAddress" -> expectedReceiverAddress
 		))
 
-		val req = url(UrkundService.receiversBaseUrl)
-			.as_!(username, password) // Add mandatory Basic auth
-			.<:<(Map( // Add request headers
-				"Accept" -> "application/json",
-				"Content-Type" -> "application/json"
-			))
-			.<<(postData, "application/json") // Add POST as string
+		val req =
+			RequestBuilder.post(UrkundService.receiversBaseUrl)
+				.setHeader(ApacheHttpClientUtils.basicAuthHeader(credentials))
+				.setHeader("Accept", "application/json")
+				.setEntity(
+					EntityBuilder.create()
+						.setText(postData)
+						.setContentType(ContentType.APPLICATION_JSON)
+						.build()
+				)
 
-		Try(http.when(_==201){ req >- { json =>
-			JSON.parseFull(json) match {
-				case Some(responseJson: Map[String, Any] @unchecked) => responseJson
-				case _ => throw new IllegalArgumentException (s"Could not parse response JSON: $json")
-			}
-		}}) match {
+		Try {
+			httpClient.execute(req.build(), ApacheHttpClientUtils.statusCodeFilteringHandler(HttpStatus.SC_CREATED) { entity =>
+				val json = EntityUtils.toString(entity)
+				JSON.parseFull(json) match {
+					case Some(responseJson: Map[String, Any] @unchecked) => responseJson
+					case _ => throw new IllegalArgumentException (s"Could not parse response JSON: $json")
+				}
+			})
+		} match {
 			case Success(response) => response.get("AnalysisAddress") match {
 				case Some(receiverAddress) if receiverAddress.asInstanceOf[String] == expectedReceiverAddress =>
 					Success(expectedReceiverAddress)
@@ -227,21 +240,29 @@ abstract class AbstractUrkundService extends UrkundService
 				val tempFile = File.createTempFile(report.attachment.id, null)
 				report.attachment.asByteSource.copyTo(Files.asByteSink(tempFile))
 
-				val req = url(documentUrl(report))
-					.as_!(username, password) // Add mandatory Basic auth
-					.<:<(Map( // Add request headers
-						"Content-Type" -> UrkundService.mimeTypeConversion(report.attachment),
-						"Accept" -> "application/json",
-						"x-urkund-filename" -> UrkundService.urkundSafeFilename(report.attachment),
-						"x-urkund-submitter" -> UrkundService.submitterAddress(report.attachment.submissionValue.submission)
-					))
-					.<<<(tempFile, UrkundService.mimeTypeConversion(report.attachment)) // Attach the file (turns it into a PUT because of course it does
-					.copy(method="POST") // Change it back into a POST
+				val req =
+					RequestBuilder.post(documentUrl(report))
+						.setHeader(ApacheHttpClientUtils.basicAuthHeader(credentials))
+						.setHeader("Accept", "application/json")
+						.setHeader("x-urkund-filename", UrkundService.urkundSafeFilename(report.attachment))
+						.setHeader("x-urkund-submitter", UrkundService.submitterAddress(report.attachment.submissionValue.submission))
+						.setEntity(
+							EntityBuilder.create()
+								.setFile(tempFile)
+								.setContentType(ContentType.create(UrkundService.mimeTypeConversion(report.attachment)))
+								.build()
+						)
 
-				Try(http.when(_==202){ req >- { json => UrkundResponse.fromSuccessJson(202, json) }}) match {
-					case Success(response) => Success(response)
-					case Failure(StatusCode(code, contents)) if code.toString.startsWith("4") => Success(UrkundErrorResponse(code, contents))
-					case failure => failure
+				Try {
+					val handler: ResponseHandler[UrkundResponse] = ApacheHttpClientUtils.handler {
+						case response if response.getStatusLine.getStatusCode == HttpStatus.SC_ACCEPTED =>
+							UrkundResponse.fromSuccessJson(HttpStatus.SC_ACCEPTED, Option(response.getEntity).map(EntityUtils.toString).getOrElse(""))
+
+						case response if response.getStatusLine.getStatusCode.toString.startsWith("4") =>
+							UrkundErrorResponse(response.getStatusLine.getStatusCode, Option(response.getEntity).map(EntityUtils.toString).getOrElse(""))
+					}
+
+					httpClient.execute(req.build(), handler)
 				}
 			case Failure(e) => Failure(e)
 		}
@@ -252,16 +273,21 @@ abstract class AbstractUrkundService extends UrkundService
 		urkundDao.findReportToRetreive
 
 	override def retrieveReport(report: OriginalityReport): Try[UrkundResponse] = {
-		val req = url(documentUrl(report))
-			.as_!(username, password) // Add mandatory Basic auth
-			.<:<(Map( // Add request headers
-				"Accept" -> "application/json"
-		))
+		val req =
+			RequestBuilder.get(documentUrl(report))
+				.setHeader(ApacheHttpClientUtils.basicAuthHeader(credentials))
+				.setHeader("Accept", "application/json")
 
-		Try(http.when(_==200){ req >- { json => UrkundResponse.fromSuccessJson(200, json) }}) match {
-			case Success(response) => Success(response)
-			case Failure(StatusCode(code, contents)) if code.toString.startsWith("4") => Success(UrkundErrorResponse(code, contents))
-			case failure => failure
+		Try {
+			val handler: ResponseHandler[UrkundResponse] = ApacheHttpClientUtils.handler {
+				case response if response.getStatusLine.getStatusCode == HttpStatus.SC_OK =>
+					UrkundResponse.fromSuccessJson(HttpStatus.SC_OK, Option(response.getEntity).map(EntityUtils.toString).getOrElse(""))
+
+				case response if response.getStatusLine.getStatusCode.toString.startsWith("4") =>
+					UrkundErrorResponse(response.getStatusLine.getStatusCode, Option(response.getEntity).map(EntityUtils.toString).getOrElse(""))
+			}
+
+			httpClient.execute(req.build(), handler)
 		}
 	}
 

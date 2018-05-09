@@ -157,10 +157,22 @@ class ExceptionResolver extends HandlerExceptionResolver with Logging with Order
 		request.foreach { request =>
 			if (request.isJsonRequest) {
 				mav.viewName = null
+
+				val error =
+					if (httpStatus == HttpStatus.INTERNAL_SERVER_ERROR)
+						Map(
+							"message" -> interestingException.getMessage,
+							"stackTrace" -> ExceptionHandler.renderStackTrace(interestingException)
+						)
+					else
+						Map(
+							"message" -> interestingException.getMessage
+						)
+
 				mav.view = new JSONView(Map(
 					"success" -> false,
 					"status" -> statusReason.toLowerCase.replace(' ', '_'),
-					"errors" -> Array(Map("message" -> interestingException.getMessage, "stackTrace" -> ExceptionHandler.renderStackTrace(interestingException)))
+					"errors" -> Array(error)
 				))
 			} else if (request.requestedUri.getPath.startsWith("/profiles/view/photo") && contentNegotiationManager.resolveMediaTypes(new ServletWebRequest(request)).asScala.exists(_.getType == "image")) {
 				// FIXME this is a bit general, and would be confusing if you were downloading jpg of someone's submission

@@ -28,7 +28,7 @@ class StudentCourseDetailsDaoTest extends PersistenceTestBase with Logging with 
 		session.createCriteria(classOf[Member]).list().asInstanceOf[JList[Member]].asScala foreach { session.delete(_) }
 	}
 
-	@Test def testGetByScjCode() = transactional { tx =>
+	@Test def testGetByScjCode(): Unit = transactional { tx =>
 		val dept1 = Fixtures.department("ms", "Motorsport")
 		val dept2 = Fixtures.department("vr", "Vehicle Repair")
 
@@ -53,7 +53,7 @@ class StudentCourseDetailsDaoTest extends PersistenceTestBase with Logging with 
 		studentCourseDetailsDao.getStudentBySprCode("1000001/2").get.universityId should be ("1000001")
 	}
 
-	@Test def testGetBySprCode() = transactional { tx =>
+	@Test def testGetBySprCode(): Unit = transactional { tx =>
 		val dept1 = Fixtures.department("ms", "Motorsport")
 		val dept2 = Fixtures.department("vr", "Vehicle Repair")
 
@@ -95,7 +95,7 @@ class StudentCourseDetailsDaoTest extends PersistenceTestBase with Logging with 
 	}
 
 
-	@Test def testGetByDepartment() = transactional { tx =>
+	@Test def testGetByDepartment(): Unit = transactional { tx =>
 		val dept1 = Fixtures.department("ms", "Motorsport")
 		val dept2 = Fixtures.department("vr", "Vehicle Repair")
 
@@ -121,7 +121,7 @@ class StudentCourseDetailsDaoTest extends PersistenceTestBase with Logging with 
 	}
 
 	@Test
-	def testGetAllFresh() = transactional { tx =>
+	def testGetAllFresh(): Unit = transactional { tx =>
 		val dept1 = Fixtures.department("hm", "History of Music")
 		val dept2 = Fixtures.department("ar", "Architecture")
 
@@ -147,7 +147,7 @@ class StudentCourseDetailsDaoTest extends PersistenceTestBase with Logging with 
 	}
 
 	@Test
-	def testStampMissingFromImport() = transactional { tx =>
+	def testStampMissingFromImport(): Unit = transactional { tx =>
 		val dept1 = Fixtures.department("hm", "History of Music")
 		val dept2 = Fixtures.department("ar", "Architecture")
 
@@ -183,7 +183,7 @@ class StudentCourseDetailsDaoTest extends PersistenceTestBase with Logging with 
 	}
 
 	@Test
-	def testUnstampPresentInImport() = transactional { tx =>
+	def testUnstampPresentInImport(): Unit = transactional { tx =>
 		val dept1 = Fixtures.department("hm", "History of Music")
 		val dept2 = Fixtures.department("ar", "Architecture")
 

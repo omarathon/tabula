@@ -1,12 +1,12 @@
 package uk.ac.warwick.tabula.services.urkund
 
 import com.google.common.io.ByteSource
-import dispatch.classic.Http
-import org.apache.http.client.HttpClient
-import org.apache.http.client.methods.HttpRequestBase
+import org.apache.http._
+import org.apache.http.client.ResponseHandler
+import org.apache.http.client.methods.{CloseableHttpResponse, HttpRequestBase}
 import org.apache.http.entity.{ContentType, StringEntity}
+import org.apache.http.impl.client.CloseableHttpClient
 import org.apache.http.message.BasicHttpResponse
-import org.apache.http.{HttpHost, HttpRequest, HttpVersion}
 import org.joda.time.{DateTime, DateTimeZone}
 import uk.ac.warwick.tabula.data.model._
 import uk.ac.warwick.tabula.data.model.forms.SavedFormValue
@@ -21,11 +21,8 @@ class UrkundServiceTest extends TestBase with Mockito {
 	trait Fixture {
 		val mockObjectStorageService: ObjectStorageService = smartMock[ObjectStorageService]
 
-		val service = new AbstractUrkundService with UrkundDaoComponent {
-			override val http: Http = new Http {
-				override def make_client: HttpClient = smartMock[HttpClient]
-			}
-
+		val service: AbstractUrkundService = new AbstractUrkundService with UrkundDaoComponent {
+			override val httpClient: CloseableHttpClient = smartMock[CloseableHttpClient]
 			override val urkundDao: UrkundDao = smartMock[UrkundDao]
 		}
 		service.username = "username"
@@ -58,10 +55,10 @@ class UrkundServiceTest extends TestBase with Mockito {
 	@Test
 	def submitSuccessNewReceiver(): Unit = new Fixture {
 		// Mock the receiver check
-		val findReceiverHttpResponse = new BasicHttpResponse(HttpVersion.HTTP_1_1, 404, "Not Found")
+		val findReceiverHttpResponse = new BasicCloseableHttpResponse(HttpVersion.HTTP_1_1, 404, "Not Found")
 
 		// Mock the receiver created response
-		val createReceiverHttpResponse = new BasicHttpResponse(HttpVersion.HTTP_1_1, 201, "Created")
+		val createReceiverHttpResponse = new BasicCloseableHttpResponse(HttpVersion.HTTP_1_1, 201, "Created")
 		createReceiverHttpResponse.setEntity(new StringEntity(
 			"""
 				{
@@ -76,7 +73,7 @@ class UrkundServiceTest extends TestBase with Mockito {
 			""", ContentType.APPLICATION_JSON))
 
 		// Mock the request
-		val submitHttpResponse = new BasicHttpResponse(HttpVersion.HTTP_1_1, 202, "OK")
+		val submitHttpResponse = new BasicCloseableHttpResponse(HttpVersion.HTTP_1_1, 202, "OK")
 		submitHttpResponse.setEntity(new StringEntity(
 			"""
 				{
@@ -98,18 +95,25 @@ class UrkundServiceTest extends TestBase with Mockito {
 			""", ContentType.APPLICATION_JSON))
 
 		// Handle each request
-		service.http.client.execute(any[HttpHost], any[HttpRequest]) answers { args =>
-			args.asInstanceOf[Array[_]](1).asInstanceOf[HttpRequestBase].getURI.getPath match {
+		service.httpClient.execute(any[HttpRequestBase], any[ResponseHandler[Any]]) answers { args =>
+			val (request, handler) = args.asInstanceOf[Array[_]].toList match {
+				case List(r: HttpRequestBase, h: ResponseHandler[_]) => (r, h)
+				case other => throw new IllegalArgumentException(s"Invalid arguments: $other")
+			}
+
+			val response = request.getURI.getPath match {
 				case uri if uri.contains(UrkundService.receiversBaseUrl.replace(UrkundService.baseUrl, "") + "/2345.its01.tabula.dev@analysis.urkund.com") => findReceiverHttpResponse
 				case uri if uri.contains(UrkundService.receiversBaseUrl.replace(UrkundService.baseUrl, "")) => createReceiverHttpResponse
 				case uri if uri.contains(UrkundService.documentBaseUrl.replace(UrkundService.baseUrl, "")) => submitHttpResponse
 				case uri => throw new IllegalArgumentException(s"Unexpected request URI: $uri")
 			}
+
+			handler.handleResponse(response)
 		}
 
 		val response: UrkundSuccessResponse = service.submit(report) match {
 			case success: Success[UrkundSuccessResponse] @unchecked => success.value
-			case _ => fail(s"Not a success response")
+			case Failure(e) => fail("Not a success response", e)
 		}
 		response.statusCode should be (202)
 		response.submissionId should be (Some(3456))
@@ -125,7 +129,7 @@ class UrkundServiceTest extends TestBase with Mockito {
 	@Test
 	def submitSuccessExistingReceiver(): Unit = new Fixture {
 		// Mock the receiver check
-		val findReceiverHttpResponse = new BasicHttpResponse(HttpVersion.HTTP_1_1, 200, "OK")
+		val findReceiverHttpResponse = new BasicCloseableHttpResponse(HttpVersion.HTTP_1_1, 200, "OK")
 		findReceiverHttpResponse.setEntity(new StringEntity(
 			"""
 				{
@@ -140,7 +144,7 @@ class UrkundServiceTest extends TestBase with Mockito {
 			""", ContentType.APPLICATION_JSON))
 
 		// Mock the request
-		val submitHttpResponse = new BasicHttpResponse(HttpVersion.HTTP_1_1, 202, "OK")
+		val submitHttpResponse = new BasicCloseableHttpResponse(HttpVersion.HTTP_1_1, 202, "OK")
 		submitHttpResponse.setEntity(new StringEntity(
 			"""
 				{
@@ -162,17 +166,24 @@ class UrkundServiceTest extends TestBase with Mockito {
 			""", ContentType.APPLICATION_JSON))
 
 		// Handle each request
-		service.http.client.execute(any[HttpHost], any[HttpRequest]) answers { args =>
-			args.asInstanceOf[Array[_]](1).asInstanceOf[HttpRequestBase].getURI.getPath match {
+		service.httpClient.execute(any[HttpRequestBase], any[ResponseHandler[Any]]) answers { args =>
+			val (request, handler) = args.asInstanceOf[Array[_]].toList match {
+				case List(r: HttpRequestBase, h: ResponseHandler[_]) => (r, h)
+				case other => throw new IllegalArgumentException(s"Invalid arguments: $other")
+			}
+
+			val response = request.getURI.getPath match {
 				case uri if uri.contains(UrkundService.receiversBaseUrl.replace(UrkundService.baseUrl, "") + "/2345.its01.tabula.dev@analysis.urkund.com") => findReceiverHttpResponse
 				case uri if uri.contains(UrkundService.documentBaseUrl.replace(UrkundService.baseUrl, "")) => submitHttpResponse
 				case uri => throw new IllegalArgumentException(s"Unexpected request URI: $uri")
 			}
+
+			handler.handleResponse(response)
 		}
 
 		val response: UrkundSuccessResponse = service.submit(report) match {
 			case success: Success[UrkundSuccessResponse] @unchecked => success.value
-			case _ => fail("Not a success response")
+			case Failure(e) => fail("Not a success response", e)
 		}
 		response.statusCode should be (202)
 		response.submissionId should be (Some(3456))
@@ -188,7 +199,7 @@ class UrkundServiceTest extends TestBase with Mockito {
 	@Test
 	def submitClientError(): Unit = new Fixture {
 		// Mock the receiver check
-		val findReceiverHttpResponse = new BasicHttpResponse(HttpVersion.HTTP_1_1, 200, "OK")
+		val findReceiverHttpResponse = new BasicCloseableHttpResponse(HttpVersion.HTTP_1_1, 200, "OK")
 		findReceiverHttpResponse.setEntity(new StringEntity(
 			"""
 				{
@@ -203,20 +214,27 @@ class UrkundServiceTest extends TestBase with Mockito {
 			""", ContentType.APPLICATION_JSON))
 
 		// Mock the request
-		val submitHttpResponse = new BasicHttpResponse(HttpVersion.HTTP_1_1, 400, "Bad Request")
+		val submitHttpResponse = new BasicCloseableHttpResponse(HttpVersion.HTTP_1_1, 400, "Bad Request")
 
 		// Handle each request
-		service.http.client.execute(any[HttpHost], any[HttpRequest]) answers { args =>
-			args.asInstanceOf[Array[_]](1).asInstanceOf[HttpRequestBase].getURI.getPath match {
+		service.httpClient.execute(any[HttpRequestBase], any[ResponseHandler[Any]]) answers { args =>
+			val (request, handler) = args.asInstanceOf[Array[_]].toList match {
+				case List(r: HttpRequestBase, h: ResponseHandler[_]) => (r, h)
+				case other => throw new IllegalArgumentException(s"Invalid arguments: $other")
+			}
+
+			val response = request.getURI.getPath match {
 				case uri if uri.contains(UrkundService.receiversBaseUrl.replace(UrkundService.baseUrl, "") + "/2345.its01.tabula.dev@analysis.urkund.com") => findReceiverHttpResponse
 				case uri if uri.contains(UrkundService.documentBaseUrl.replace(UrkundService.baseUrl, "")) => submitHttpResponse
 				case uri => throw new IllegalArgumentException(s"Unexpected request URI: $uri")
 			}
+
+			handler.handleResponse(response)
 		}
 
 		val response: UrkundErrorResponse = service.submit(report) match {
 			case success: Success[UrkundErrorResponse] @unchecked => success.value
-			case _ => fail("Not a success response")
+			case Failure(e) => fail("Not a success response", e)
 		}
 		response.statusCode should be (400)
 	}
@@ -224,9 +242,12 @@ class UrkundServiceTest extends TestBase with Mockito {
 	@Test
 	def submitServerError(): Unit = new Fixture {
 		// Mock the request
-		val httpResponse = new BasicHttpResponse(HttpVersion.HTTP_1_1, 500, "Oh noes!")
+		val httpResponse = new BasicCloseableHttpResponse(HttpVersion.HTTP_1_1, 500, "Oh noes!")
 
-		service.http.client.execute(any[HttpHost], any[HttpRequest]) returns httpResponse
+		service.httpClient.execute(any[HttpRequestBase], any[ResponseHandler[Any]]) answers { args =>
+			val handler = args.asInstanceOf[Array[_]](1).asInstanceOf[ResponseHandler[_]]
+			handler.handleResponse(httpResponse)
+		}
 
 		service.submit(report) match {
 			case failure: Failure[_] => null
@@ -237,7 +258,7 @@ class UrkundServiceTest extends TestBase with Mockito {
 	@Test
 	def reportSubmitted(): Unit = new Fixture {
 		// Mock the request
-		val httpResponse = new BasicHttpResponse(HttpVersion.HTTP_1_1, 200, "OK")
+		val httpResponse = new BasicCloseableHttpResponse(HttpVersion.HTTP_1_1, 200, "OK")
 		httpResponse.setEntity(new StringEntity(
 			"""
 				{
@@ -258,11 +279,14 @@ class UrkundServiceTest extends TestBase with Mockito {
 				}
 			""", ContentType.APPLICATION_JSON))
 
-		service.http.client.execute(any[HttpHost], any[HttpRequest]) returns httpResponse
+		service.httpClient.execute(any[HttpRequestBase], any[ResponseHandler[Any]]) answers { args =>
+			val handler = args.asInstanceOf[Array[_]](1).asInstanceOf[ResponseHandler[_]]
+			handler.handleResponse(httpResponse)
+		}
 
 		val response: UrkundSuccessResponse = service.retrieveReport(report) match {
 			case success: Success[UrkundSuccessResponse] @unchecked => success.value
-			case _ => fail("Not a success response")
+			case Failure(e) => fail("Not a success response", e)
 		}
 		response.statusCode should be (200)
 		response.submissionId should be (Some(3456))
@@ -278,7 +302,7 @@ class UrkundServiceTest extends TestBase with Mockito {
 	@Test
 	def reportRejected(): Unit = new Fixture {
 		// Mock the request
-		val httpResponse = new BasicHttpResponse(HttpVersion.HTTP_1_1, 200, "OK")
+		val httpResponse = new BasicCloseableHttpResponse(HttpVersion.HTTP_1_1, 200, "OK")
 		httpResponse.setEntity(new StringEntity(
 			"""
 				{
@@ -299,11 +323,14 @@ class UrkundServiceTest extends TestBase with Mockito {
 				}
 			""", ContentType.APPLICATION_JSON))
 
-		service.http.client.execute(any[HttpHost], any[HttpRequest]) returns httpResponse
+		service.httpClient.execute(any[HttpRequestBase], any[ResponseHandler[Any]]) answers { args =>
+			val handler = args.asInstanceOf[Array[_]](1).asInstanceOf[ResponseHandler[_]]
+			handler.handleResponse(httpResponse)
+		}
 
 		val response: UrkundSuccessResponse = service.retrieveReport(report) match {
 			case success: Success[UrkundSuccessResponse] @unchecked => success.value
-			case _ => fail("Not a success response")
+			case Failure(e) => fail("Not a success response", e)
 		}
 
 		response.status should be (UrkundSubmissionStatus.Rejected)
@@ -314,7 +341,7 @@ class UrkundServiceTest extends TestBase with Mockito {
 	@Test
 	def reportAccepted(): Unit = new Fixture {
 		// Mock the request
-		val httpResponse = new BasicHttpResponse(HttpVersion.HTTP_1_1, 200, "OK")
+		val httpResponse = new BasicCloseableHttpResponse(HttpVersion.HTTP_1_1, 200, "OK")
 		httpResponse.setEntity(new StringEntity(
 			"""
 				{
@@ -343,11 +370,14 @@ class UrkundServiceTest extends TestBase with Mockito {
 				}
 			""", ContentType.APPLICATION_JSON))
 
-		service.http.client.execute(any[HttpHost], any[HttpRequest]) returns httpResponse
+		service.httpClient.execute(any[HttpRequestBase], any[ResponseHandler[Any]]) answers { args =>
+			val handler = args.asInstanceOf[Array[_]](1).asInstanceOf[ResponseHandler[_]]
+			handler.handleResponse(httpResponse)
+		}
 
 		val response: UrkundSuccessResponse = service.retrieveReport(report) match {
 			case success: Success[UrkundSuccessResponse] @unchecked => success.value
-			case _ => fail("Not a success response")
+			case Failure(e) => fail("Not a success response", e)
 		}
 
 		response.status should be (UrkundSubmissionStatus.Accepted)
@@ -362,7 +392,7 @@ class UrkundServiceTest extends TestBase with Mockito {
 	@Test
 	def reportError(): Unit = new Fixture {
 		// Mock the request
-		val httpResponse = new BasicHttpResponse(HttpVersion.HTTP_1_1, 200, "OK")
+		val httpResponse = new BasicCloseableHttpResponse(HttpVersion.HTTP_1_1, 200, "OK")
 		httpResponse.setEntity(new StringEntity(
 			"""
 				{
@@ -391,11 +421,14 @@ class UrkundServiceTest extends TestBase with Mockito {
 				}
 			""", ContentType.APPLICATION_JSON))
 
-		service.http.client.execute(any[HttpHost], any[HttpRequest]) returns httpResponse
+		service.httpClient.execute(any[HttpRequestBase], any[ResponseHandler[Any]]) answers { args =>
+			val handler = args.asInstanceOf[Array[_]](1).asInstanceOf[ResponseHandler[_]]
+			handler.handleResponse(httpResponse)
+		}
 
 		val response: UrkundSuccessResponse = service.retrieveReport(report) match {
 			case success: Success[UrkundSuccessResponse] @unchecked => success.value
-			case _ => fail("Not a success response")
+			case Failure(e) => fail("Not a success response", e)
 		}
 
 		response.status should be (UrkundSubmissionStatus.Error)
@@ -410,7 +443,7 @@ class UrkundServiceTest extends TestBase with Mockito {
 	@Test
 	def reportAnalyzed(): Unit = new Fixture {
 		// Mock the request
-		val httpResponse = new BasicHttpResponse(HttpVersion.HTTP_1_1, 200, "OK")
+		val httpResponse = new BasicCloseableHttpResponse(HttpVersion.HTTP_1_1, 200, "OK")
 		httpResponse.setEntity(new StringEntity(
 			"""
 				{
@@ -457,7 +490,10 @@ class UrkundServiceTest extends TestBase with Mockito {
 				}
 			""", ContentType.APPLICATION_JSON))
 
-		service.http.client.execute(any[HttpHost], any[HttpRequest]) returns httpResponse
+		service.httpClient.execute(any[HttpRequestBase], any[ResponseHandler[Any]]) answers { args =>
+			val handler = args.asInstanceOf[Array[_]](1).asInstanceOf[ResponseHandler[_]]
+			handler.handleResponse(httpResponse)
+		}
 
 		val response: UrkundSuccessResponse = service.retrieveReport(report) match {
 			case success: Success[UrkundSuccessResponse] @unchecked => success.value
@@ -624,6 +660,10 @@ class UrkundServiceTest extends TestBase with Mockito {
 		report.responseAttempts = 8
 		UrkundService.setNextResponseAttemptOnError(report)
 		report.nextResponseAttempt should be (null)
+	}
+
+	private class BasicCloseableHttpResponse(version: ProtocolVersion, statusCode: Int, statusReason: String) extends BasicHttpResponse(version, statusCode, statusReason) with CloseableHttpResponse {
+		override def close(): Unit = {}
 	}
 
 }

@@ -57,7 +57,7 @@ class FeedbackTest extends TestBase {
 
 class FeedbackPersistenceTest extends PersistenceTestBase {
 
-	@Test def deleteFileAttachmentOnDelete = transactional {ts=>
+	@Test def deleteFileAttachmentOnDelete(): Unit = transactional {ts=>
 		// TAB-667
 		val orphanAttachment = flushing(session) {
 			val attachment = new FileAttachment

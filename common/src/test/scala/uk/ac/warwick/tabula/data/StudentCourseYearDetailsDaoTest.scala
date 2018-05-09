@@ -86,7 +86,7 @@ class StudentCourseYearDetailsDaoTest extends PersistenceTestBase {
 	}
 
 	@Test
-	def testStampMissingFromImport() = transactional { tx =>
+	def testStampMissingFromImport(): Unit = transactional { tx =>
 		val dept1 = Fixtures.department("hm", "History of Music")
 		val dept2 = Fixtures.department("ar", "Architecture")
 
@@ -148,7 +148,7 @@ class StudentCourseYearDetailsDaoTest extends PersistenceTestBase {
 	}
 
 	@Test
-	def testUnstampPresentInImport() = transactional { tx =>
+	def testUnstampPresentInImport(): Unit = transactional { tx =>
 		val dept1 = Fixtures.department("hm", "History of Music")
 		val dept2 = Fixtures.department("ar", "Architecture")
 

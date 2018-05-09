@@ -2,38 +2,37 @@ package uk.ac.warwick.tabula.services.turnitinlti
 
 import java.io.IOException
 import java.net.URLEncoder
+
 import javax.crypto.spec.SecretKeySpec
 import javax.crypto.{Mac, SecretKey}
-
-import dispatch.classic.Request.toRequestVerbs
-import dispatch.classic._
-import dispatch.classic.thread.ThreadSafeHttpClient
 import net.oauth.OAuthMessage
 import net.oauth.signature.OAuthSignatureMethod
 import org.apache.commons.io.FilenameUtils._
-import org.apache.http.client.params.{ClientPNames, CookiePolicy}
-import org.apache.http.impl.client.DefaultRedirectStrategy
-import org.apache.http.params.HttpConnectionParams
-import org.apache.http.protocol.HttpContext
-import org.apache.http.{HttpRequest, HttpResponse, HttpStatus}
+import org.apache.http.HttpStatus
+import org.apache.http.client.ResponseHandler
+import org.apache.http.client.config.RequestConfig
+import org.apache.http.client.methods.RequestBuilder
+import org.apache.http.impl.client.{CloseableHttpClient, HttpClients}
+import org.apache.http.message.BasicNameValuePair
+import org.apache.http.util.EntityUtils
 import org.joda.time.DateTime
+import org.joda.time.format.DateTimeFormatter
+import org.springframework.beans.factory.DisposableBean
 import org.springframework.beans.factory.annotation.Value
-import org.springframework.beans.factory.{DisposableBean, InitializingBean}
 import org.springframework.stereotype.Service
 import org.xml.sax.SAXParseException
 import uk.ac.warwick.spring.Wire
 import uk.ac.warwick.tabula.JavaImports._
 import uk.ac.warwick.tabula.api.web.Routes
 import uk.ac.warwick.tabula.data.model.{Assignment, FileAttachment}
-import uk.ac.warwick.tabula.helpers.Logging
+import uk.ac.warwick.tabula.helpers.DateTimeOrdering._
 import uk.ac.warwick.tabula.helpers.StringUtils._
+import uk.ac.warwick.tabula.helpers.{ApacheHttpClientUtils, Logging}
 import uk.ac.warwick.tabula.services.AutowiringOriginalityReportServiceComponent
 import uk.ac.warwick.tabula.{CurrentUser, DateFormats}
 import uk.ac.warwick.util.core.StringUtils
 
 import scala.collection.JavaConverters._
-import scala.util.{Failure, Success, Try}
-import uk.ac.warwick.tabula.helpers.DateTimeOrdering._
 
 object TurnitinLtiService {
 
@@ -106,7 +105,7 @@ object TurnitinLtiService {
  * Service for accessing the Turnitin LTI plagiarism API.
  */
 @Service("turnitinLTIService")
-class TurnitinLtiService extends Logging with DisposableBean with InitializingBean
+class TurnitinLtiService extends Logging with DisposableBean
 	with AutowiringOriginalityReportServiceComponent {
 
 	/** Turnitin LTI account id */
@@ -126,24 +125,21 @@ class TurnitinLtiService extends Logging with DisposableBean with InitializingBe
 
 	val userAgent = "Tabula, Coursework submission app, University of Warwick, coursework@warwick.ac.uk"
 
-	val isoFormatter = DateFormats.IsoDateTime
+	val isoFormatter: DateTimeFormatter = DateFormats.IsoDateTime
 
-	val http: Http = new Http with thread.Safety  with JdkLogging {
-		override def make_client = new ThreadSafeHttpClient(new Http.CurrentCredentials(None), maxConnections, maxConnectionsPerRoute) {
-			HttpConnectionParams.setConnectionTimeout(getParams, 120000)
-			HttpConnectionParams.setSoTimeout(getParams, 120000)
-			setRedirectStrategy(new DefaultRedirectStrategy {
-				override def isRedirected(req: HttpRequest, res: HttpResponse, ctx: HttpContext) = false
-			})
-			getParams.setParameter(ClientPNames.COOKIE_POLICY, CookiePolicy.IGNORE_COOKIES)
-		}
+	val httpClient: CloseableHttpClient =
+		HttpClients.custom()
+			.setDefaultRequestConfig(RequestConfig.custom()
+				.setConnectTimeout(120000)
+				.setSocketTimeout(120000)
+				.build())
+			.disableRedirectHandling()
+			.disableCookieManagement()
+			.build()
+
+	override def destroy(): Unit = {
+		httpClient.close()
 	}
-
-	override def destroy() {
-		http.shutdown()
-	}
-
-	override def afterPropertiesSet() {}
 
 	def submitAssignment(assignment: Assignment, user: CurrentUser): TurnitinLtiResponse = {
 		//
@@ -163,7 +159,7 @@ class TurnitinLtiService extends Logging with DisposableBean with InitializingBe
 				"ext_resource_tool_placement_url" -> s"$topLevelUrl${Routes.turnitin.submitAssignmentCallback(assignment)}"
 			) ++ userParams(user.userId, user.email, user.firstName, user.lastName),
 			Some(HttpStatus.SC_OK)
-		) { request => request >- { html => TurnitinLtiResponse.fromHtml(success = true, html = html) }}
+		)(ApacheHttpClientUtils.handler { case response => TurnitinLtiResponse.fromHtml(success = true, html = EntityUtils.toString(response.getEntity)) })
 	}
 
 	/**
@@ -180,7 +176,6 @@ class TurnitinLtiService extends Logging with DisposableBean with InitializingBe
 	def submitPaper(
 		assignment: Assignment,	paperUrl: String, userId: String, userEmail: String, attachment: FileAttachment, userFirstName: String, userLastName: String
 	 ): TurnitinLtiResponse = doRequest(
-
 		s"$apiSubmitPaperEndpoint/${assignment.turnitinId}",
 		Map(
 			"resource_link_id" -> TurnitinLtiService.assignmentIdFor(assignment).value,
@@ -194,35 +189,19 @@ class TurnitinLtiService extends Logging with DisposableBean with InitializingBe
 			"custom_submission_url" -> paperUrl,
 			"custom_submission_title" -> attachment.id,
 			"custom_submission_filename" -> attachment.name
+		) ++ userParams(userId, userEmail, userFirstName, userLastName))(ApacheHttpClientUtils.handler {
+		case response =>
+			// Call handleEntity to avoid AbstractResponseHandler throwing exceptions for >=300 status codes
+			ApacheHttpClientUtils.xmlResponseHandler(TurnitinLtiResponse.fromXml)
+				.handleEntity(response.getEntity)
+	})
 
-		)
-			++ userParams(userId, userEmail, userFirstName, userLastName) ) {
-		request =>
-			request >:+ {
-				(headers, request) =>
-					request <>  {
-						(node) => {
-							val response = TurnitinLtiResponse.fromXml(node)
-
-							response
-						}
-					}
-			}
-
-	}
-
-	def getSubmissionDetails(turnitinSubmissionId: String, user: CurrentUser): TurnitinLtiResponse = doRequest(
-		s"$apiSubmissionDetails/$turnitinSubmissionId", Map()) {
-		request =>
-			request >:+ {
-				(headers, request) =>
-					request >- {
-						(json) => {
-							TurnitinLtiResponse.fromJson(json)
-						}
-					}
-			}
-	}
+	def getSubmissionDetails(turnitinSubmissionId: String, user: CurrentUser): TurnitinLtiResponse =
+		doRequest(s"$apiSubmissionDetails/$turnitinSubmissionId", Map())(ApacheHttpClientUtils.handler {
+			case response =>
+				val json = EntityUtils.toString(response.getEntity)
+				TurnitinLtiResponse.fromJson(json)
+		})
 
 	def getOriginalityReportEndpoint(attachment: FileAttachment) = s"$apiReportLaunch/${attachment.originalityReport.turnitinId}"
 
@@ -236,18 +215,12 @@ class TurnitinLtiService extends Logging with DisposableBean with InitializingBe
 		) ++ userParams(userId, email, firstName, lastName), getOriginalityReportEndpoint(attachment))
 	}
 
-	def listEndpoints(turnitinAssignmentId: String, user: CurrentUser): TurnitinLtiResponse = doRequest(
-		s"$apiListEndpoints/$turnitinAssignmentId", Map()) {
-		request =>
-			request >:+ {
-				(headers, request) =>
-					request >- {
-						(json) => {
-							TurnitinLtiResponse.fromJson(json)
-						}
-					}
-			}
-	}
+	def listEndpoints(turnitinAssignmentId: String, user: CurrentUser): TurnitinLtiResponse =
+		doRequest(s"$apiListEndpoints/$turnitinAssignmentId", Map())(ApacheHttpClientUtils.handler {
+			case response =>
+				val json = EntityUtils.toString(response.getEntity)
+				TurnitinLtiResponse.fromJson(json)
+		})
 
 	def ltiConformanceTestParams(
 		endpoint: String,
@@ -327,25 +300,24 @@ class TurnitinLtiService extends Logging with DisposableBean with InitializingBe
 
 	def doRequestForLtiTesting(
 		endpoint: String, secret: String, key: String, params: Map[String, String], expectedStatusCode: Option[Int] = None
-	) (transform: Request => Handler[TurnitinLtiResponse]): TurnitinLtiResponse = {
+	) (transform: ResponseHandler[TurnitinLtiResponse]): TurnitinLtiResponse = {
 
 		val signedParams = getSignedParams(params, endpoint, Some(secret), Some(key))
 
 		logger.debug("doRequest: " + signedParams)
 
-		val req = (url(endpoint) <:< Map()).POST << signedParams
+		val req =
+			RequestBuilder.post(endpoint)
+				.addParameters(signedParams.toSeq.map { case (k, v) => new BasicNameValuePair(k, v) }: _*)
 
 		try {
-			if (expectedStatusCode.isDefined){
-				Try(http.when(_==expectedStatusCode.get)(transform(req))) match {
-					case Success(response) => response
-					case Failure(StatusCode(code, contents)) =>
-						logger.warn(s"Not expected http status code - $code")
-						new TurnitinLtiResponse(false, statusMessage = Some("Unexpected HTTP status code"), responseCode = Some(code))
-					case _ =>
-						new TurnitinLtiResponse(false, statusMessage = Some("Unexpected HTTP status code"))
-				}
-			} else http.x(transform(req))
+			httpClient.execute(req.build(), ApacheHttpClientUtils.handler {
+				case response if expectedStatusCode.isEmpty || expectedStatusCode.contains(response.getStatusLine.getStatusCode) =>
+					transform.handleResponse(response)
+
+				case response =>
+					new TurnitinLtiResponse(false, statusMessage = Some("Unexpected HTTP status code"), responseCode = Some(response.getStatusLine.getStatusCode))
+			})
 		} catch {
 				case e: IOException =>
 					logger.error("Exception contacting provider", e)
@@ -358,24 +330,22 @@ class TurnitinLtiService extends Logging with DisposableBean with InitializingBe
 
 	def doRequest(
 		endpoint: String, params: Map[String, String], expectedStatusCode: Option[Int] = None
-	) (transform: Request => Handler[TurnitinLtiResponse]): TurnitinLtiResponse = {
-
+	) (transform: ResponseHandler[TurnitinLtiResponse]): TurnitinLtiResponse = {
 		val signedParams = getSignedParams(params, endpoint)
 
-		val req = (url(endpoint) <:< Map()).POST << signedParams
+		val req =
+			RequestBuilder.post(endpoint)
+				.addParameters(signedParams.toSeq.map { case (k, v) => new BasicNameValuePair(k, v) }: _*)
 
 		logger.debug("doRequest: " + signedParams)
 		try {
-			if (expectedStatusCode.isDefined){
-				Try(http.when(_==expectedStatusCode.get)(transform(req))) match {
-					case Success(response) => response
-					case Failure(StatusCode(code, contents)) =>
-						logger.warn(s"Not expected http status code - $code")
-						new TurnitinLtiResponse(false, statusMessage = Some("Unexpected HTTP status code"), responseCode = Some(code))
-					case _ =>
-						new TurnitinLtiResponse(false, statusMessage = Some("Unexpected HTTP status code"))
-				}
-			} else http.x(transform(req))
+			httpClient.execute(req.build(), ApacheHttpClientUtils.handler {
+				case response if expectedStatusCode.isEmpty || expectedStatusCode.contains(response.getStatusLine.getStatusCode) =>
+					transform.handleResponse(response)
+
+				case response =>
+					new TurnitinLtiResponse(false, statusMessage = Some("Unexpected HTTP status code"), responseCode = Some(response.getStatusLine.getStatusCode))
+			})
 		} catch {
 				case e: IOException =>
 					logger.error("Exception contacting Turnitin", e)

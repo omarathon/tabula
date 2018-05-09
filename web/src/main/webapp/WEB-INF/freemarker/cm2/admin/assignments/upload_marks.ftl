@@ -39,7 +39,7 @@
 		</div>
 		<div role="tabpanel" class="tab-pane" id="webform">
 			<p>Click the add button below to enter marks and feedback for a student.</p>
-			<@f.form cssClass="marks-web-form" method="post" enctype="multipart/form-data" action="${formUrl}" commandName="command">
+			<@f.form cssClass="marks-web-form" method="post" action="${formUrl}" commandName="command">
 				<div class="row hidden-xs hidden-sm">
 					<div class="col-md-2">
 						<label>University ID</label>
@@ -62,7 +62,7 @@
 					</div>
 				</div>
 				<#list command.existingMarks as markItem>
-					<div class="row">
+					<div class="row mark-row">
 						<div class="col-md-2">
 							<div class="form-group">
 								<input class="form-control" value="${markItem.id}" name="marks[${markItem_index}].id" type="text" readonly="readonly" />
@@ -107,7 +107,7 @@
 						</div>
 					</div>
 				</#list>
-				<input type="hidden" name="isfile" value="true" />
+				<input type="hidden" name="isfile" value="false" />
 				<div class="form-group">
 					<button class="add-mark-row btn btn-default">+ Add</button>
 				</div>
@@ -116,8 +116,8 @@
 					<a class="btn btn-default" href="${cancelUrl}">Cancel</a>
 				</div>
 			</@f.form>
-			<div class="hidden mark-row">
-				<div class="row">
+			<div class="hidden mark-row-template">
+				<div class="row mark-row">
 					<div class="col-md-2">
 						<div class="form-group">
 							<input name="id" class="form-control" type="text" placeholder="ID">
@@ -148,11 +148,11 @@
 
 	<script type="text/javascript">
 		(function($) {
-			var $rowTemplate = $('div.mark-row .row');
+			var $rowTemplate = $('.mark-row-template .mark-row');
 
 			$('.add-mark-row').on('click', function(e){
 				e.preventDefault();
-				var numExistingRows = $('.marks-web-form div.row').length;
+				var numExistingRows = $('.marks-web-form .mark-row').length;
 				var $newRow = $rowTemplate.clone();
 				$newRow.find('input,textarea').each(function(i, field){
 					var newName = 'marks['+ numExistingRows +'].' + $(field).attr('name');

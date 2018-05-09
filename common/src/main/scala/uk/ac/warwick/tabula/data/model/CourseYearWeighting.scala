@@ -2,9 +2,8 @@ package uk.ac.warwick.tabula.data.model
 
 import javax.persistence._
 import javax.validation.constraints.NotNull
-
 import org.hibernate.annotations.Type
-import uk.ac.warwick.tabula.AcademicYear
+import uk.ac.warwick.tabula.{AcademicYear, ToString}
 import uk.ac.warwick.tabula.JavaImports.JBigDecimal
 import uk.ac.warwick.tabula.data.model.StudentCourseYearDetails.YearOfStudy
 
@@ -28,7 +27,7 @@ object CourseYearWeighting {
 }
 
 @Entity
-class CourseYearWeighting extends GeneratedId {
+class CourseYearWeighting extends GeneratedId with ToString {
 
 	def this(course: Course, academicYear: AcademicYear, yearOfStudy: YearOfStudy, weightingAsPercentage: BigDecimal) {
 		this()
@@ -71,4 +70,10 @@ class CourseYearWeighting extends GeneratedId {
 
 	def weightingAsPercentage: JBigDecimal = weighting.underlying.multiply(percentageMultiplier).stripTrailingZeros
 
+	override def toStringProps: Seq[(String, Any)] = Seq(
+		"course" -> course,
+		"sprStartAcademicYear" -> sprStartAcademicYear,
+		"yearOfStudy" -> yearOfStudy,
+		"weighting" -> weighting
+	)
 }

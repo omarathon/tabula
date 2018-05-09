@@ -8,12 +8,12 @@ class ApplicationTest extends AppContextTestBase {
 
 	@Autowired var sysadminController: SysadminController = _
 
-	@Test def itWorks = {
+	@Test def itWorks(): Unit = {
 		assert(beans.containsBean("userLookup"))
 	}
 
 	// Can resolve message codes from any controller
-	@Test def messageResolving = {
+	@Test def messageResolving(): Unit = {
 		sysadminController.getMessage("NotEmpty") should be("You need to put something here.")
 		sysadminController.getMessage("userId.notingroup", "alvin") should be("The usercode alvin isn't in this group.")
 	}

@@ -1,11 +1,13 @@
 package uk.ac.warwick.tabula.data
 
+import org.hibernate.FetchMode
+import org.hibernate.criterion.Order._
 import org.hibernate.criterion.Projections
 import org.springframework.stereotype.Repository
 import uk.ac.warwick.spring.Wire
-import uk.ac.warwick.tabula.data.model._
 import uk.ac.warwick.tabula.AcademicYear
 import uk.ac.warwick.tabula.JavaImports.JBigDecimal
+import uk.ac.warwick.tabula.data.model._
 
 trait ModuleRegistrationDaoComponent {
 	val moduleRegistrationDao: ModuleRegistrationDao
@@ -27,6 +29,8 @@ trait ModuleRegistrationDao {
 		occurrence: String
 	): Option[ModuleRegistration]
 	def getByUsercodesAndYear(usercodes: Seq[String], academicYear: AcademicYear) : Seq[ModuleRegistration]
+	def getByModuleAndYear(module: Module, academicYear: AcademicYear): Seq[ModuleRegistration]
+
 	def findCoreRequiredModules(route: Route, academicYear: AcademicYear, yearOfStudy: Int): Seq[CoreRequiredModule]
 	def findRegisteredUsercodes(module: Module, academicYear: AcademicYear): Seq[String]
 }
@@ -67,6 +71,16 @@ class ModuleRegistrationDaoImpl extends ModuleRegistrationDao with Daoisms {
 
 		query.setParameterList("usercodes", userCodes)
 					.seq
+	}
+
+	def getByModuleAndYear(module: Module, academicYear: AcademicYear): Seq[ModuleRegistration] = {
+		session.newCriteria[ModuleRegistration]
+			.createAlias("studentCourseDetails", "studentCourseDetails")
+			.add(is("module", module))
+			.add(is("academicYear", academicYear))
+			.setFetchMode("studentCourseDetails", FetchMode.JOIN)
+			.addOrder(asc("studentCourseDetails.scjCode"))
+			.seq
 	}
 
 	def findCoreRequiredModules(route: Route, academicYear: AcademicYear, yearOfStudy: Int): Seq[CoreRequiredModule] = {

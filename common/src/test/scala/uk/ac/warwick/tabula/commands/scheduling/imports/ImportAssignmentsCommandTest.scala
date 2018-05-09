@@ -1,13 +1,15 @@
 package uk.ac.warwick.tabula.commands.scheduling.imports
 
 import org.hibernate.Session
+import org.joda.time.DateTime
 import org.junit.runner.RunWith
 import org.scalatest.junit._
 import org.scalatest.{FlatSpec, Matchers}
-import uk.ac.warwick.tabula.data.model.{AssessmentComponent, UpstreamAssessmentGroup, UpstreamAssessmentGroupMember, UpstreamModuleRegistration}
+import uk.ac.warwick.tabula.data.model._
 import uk.ac.warwick.tabula.services.scheduling.AssignmentImporter
 import uk.ac.warwick.tabula.services.{AssessmentMembershipService, ModuleAndDepartmentService}
 import uk.ac.warwick.tabula.{AcademicYear, CustomHamcrestMatchers, Mockito}
+import uk.ac.warwick.userlookup.User
 
 import scala.collection.mutable.ArrayBuffer
 
@@ -215,5 +217,38 @@ class ImportAssignmentsCommandTest extends FlatSpec with Matchers with Mockito {
 	/** Matches on an UpstreamAssessmentGroup's module code. */
 	def hasModuleCode(code: String): _root_.uk.ac.warwick.tabula.CustomHamcrestMatchers.HasPropertyMatcher[Nothing] = CustomHamcrestMatchers.hasProperty('moduleCode, code)
 
+	behavior of "removeBlankFeedbackForDeregisteredStudents"
+
+	it should "remove blank feedback for deregistered students" in new Fixture {
+		val registrations: Seq[UpstreamModuleRegistration] = Nil
+
+		val user = new User
+		user.setUserId("custrd")
+
+		val feedback = new AssignmentFeedback
+		val markerFeedback = new MarkerFeedback
+		markerFeedback.feedback = feedback
+		feedback.markerFeedback.add(markerFeedback)
+		feedback.usercode = user.getUserId
+
+		val assignment = new Assignment
+		assignment.cm2Assignment = true
+		assignment.addFeedback(feedback)
+
+		command.modifiedAssignments = Set(assignment)
+
+		// User not a member of the assignment, empty feedback - remove
+		membershipService.determineMembershipUsers(assignment) returns Nil
+		command.removeBlankFeedbackForDeregisteredStudents() should contain(feedback)
+
+		// User not a member of the assignment, modified feedback - don't remove
+		markerFeedback.updatedOn = DateTime.now
+		command.removeBlankFeedbackForDeregisteredStudents() should be(empty)
+
+		// User is a member of the assignment, empty feedback - don't remove
+		membershipService.determineMembershipUsers(assignment) returns Seq(user)
+		markerFeedback.updatedOn = null
+		command.removeBlankFeedbackForDeregisteredStudents() should be(empty)
+	}
 
 }

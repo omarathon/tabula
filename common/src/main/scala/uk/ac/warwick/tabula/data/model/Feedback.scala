@@ -393,6 +393,7 @@ abstract class Feedback extends GeneratedId with FeedbackAttachments with Permis
 		else stage.order < currentPosition
 	}
 
+	def hasBeenModified: Boolean = hasContent || allMarkerFeedback.exists(_.hasBeenModified)
 }
 
 @Entity @DiscriminatorValue("assignment")

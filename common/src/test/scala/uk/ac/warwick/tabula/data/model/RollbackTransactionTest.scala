@@ -15,12 +15,12 @@ class RollbackTransactionTest  extends PersistenceTestBase{
 	val dao = new AutowiringMemberDaoImpl
 
 	@Before
-	def setup() {
+	def setup(): Unit = {
 		dao.sessionFactory = sessionFactory
 	}
 
 	@Test
-	def insertOneThing()= transactional{tx=>
+	def insertOneThing(): Unit= transactional{tx=>
 
 		dao.getAllByUserId("student") should be(Nil)
 
@@ -33,7 +33,7 @@ class RollbackTransactionTest  extends PersistenceTestBase{
 	}
 
 	@Test
-	def insertOneThingAgain()= transactional{tx=>
+	def insertOneThingAgain(): Unit= transactional{tx=>
 
 			dao.getAllByUserId("student") should be(Nil)
 

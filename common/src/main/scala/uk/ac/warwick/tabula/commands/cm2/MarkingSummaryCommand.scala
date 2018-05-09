@@ -14,7 +14,6 @@ import uk.ac.warwick.tabula.helpers.DateTimeOrdering._
 import uk.ac.warwick.tabula.helpers.cm2.AssignmentSubmissionStudentInfo
 import uk.ac.warwick.tabula.permissions.Permissions
 import uk.ac.warwick.tabula.services._
-import uk.ac.warwick.tabula.services.cm2.CM2WorkflowStages.{CM1ReleaseForMarking, CM2ReleaseForMarking}
 import uk.ac.warwick.tabula.services.cm2.{AutowiringCM2WorkflowProgressServiceComponent, CM2WorkflowProgressServiceComponent, CM2WorkflowStages}
 import uk.ac.warwick.tabula.services.permissions.{AutowiringCacheStrategyComponent, CacheStrategyComponent}
 import uk.ac.warwick.tabula.system.permissions.{PermissionsChecking, PubliclyVisiblePermissions, RequiresPermissionsChecking}
@@ -170,13 +169,24 @@ trait MarkingSummaryMarkerAssignments extends MarkingSummaryMarkerAssignmentList
 		with CM2MarkingWorkflowServiceComponent
 		with MarkingSummaryMarkerProgress =>
 
-	// Upcoming - assignments involving marker but not yet released
+	// Upcoming - assignments involving the marker but that are waiting for someone else's action
 	lazy val markerUpcomingAssignments: Seq[MarkerAssignmentInfo] = benchmarkTask("Get upcoming assignments") {
-		allMarkerAssignments.filterNot { info =>
-			info.stages
-				.filter { s => s.stage == CM1ReleaseForMarking || s.stage == CM2ReleaseForMarking }
-				.exists(_.progress.exists(_.progress.completed))
-		}
+		// Include assignments where
+		allMarkerAssignments.filter(info =>
+
+			// all feedback items
+			info.assignment.allFeedback.forall(feedback =>
+
+				// have outstanding stages, all of which
+				feedback.outstandingStages.asScala.forall(outstandingStage =>
+
+					// are earlier in the workflow than the next stage this marker is involved with
+					feedback.allMarkerFeedback.filter(_.marker == markerUser).filterNot(_.hasBeenModified)
+						.map(_.stage).sortBy(_.order).headOption
+						.exists(nextStageInvolvingMarker => outstandingStage.order < nextStageInvolvingMarker.order)
+				)
+			)
+		)
 	}
 
 	// Action required - assignments which need an action

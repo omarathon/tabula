@@ -5,9 +5,9 @@ import uk.ac.warwick.tabula.AcademicYear
 import uk.ac.warwick.tabula.commands.exams.grids.{ExamGridEntity, ExamGridEntityYear}
 import uk.ac.warwick.tabula.data.model.StudentCourseYearDetails.YearOfStudy
 import uk.ac.warwick.tabula.data.model._
+import uk.ac.warwick.tabula.helpers.StringUtils._
 import uk.ac.warwick.tabula.services.exams.grids.NormalLoadLookup
 import uk.ac.warwick.tabula.system.TwoWayConverter
-import uk.ac.warwick.tabula.helpers.StringUtils._
 
 object ExamGridColumnOption {
 	type Identifier = String
@@ -98,7 +98,7 @@ case class ExamGridColumnState(
 )
 
 case object EmptyExamGridColumnState {
-	def apply() = ExamGridColumnState(Nil,Map.empty,null,null,null,null,0,null,nameToShow=ExamGridStudentIdentificationColumnValue.FullName,showComponentMarks=false,showZeroWeightedComponents=false,showComponentSequence=false,showModuleNames=true, calculateYearMarks=false)
+	def apply() = ExamGridColumnState(Nil, Map.empty, null, null, null, null, 0, null, nameToShow = ExamGridStudentIdentificationColumnValue.FullName, showComponentMarks = false, showZeroWeightedComponents = false, showComponentSequence = false, showModuleNames = true, calculateYearMarks = false)
 }
 
 @Component

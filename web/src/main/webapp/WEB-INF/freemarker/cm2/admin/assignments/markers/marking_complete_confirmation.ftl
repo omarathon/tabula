@@ -5,7 +5,7 @@
 		<@cm2.assignmentHeader "Send to ${nextStagesDescription?lower_case}" assignment "for" />
 	</#if>
 
-	<@f.form method="post" action="${formAction}" commandName="command">
+	<@f.form method="post" action="${formAction}" commandName="command" cssClass="double-submit-protection">
 		<@form.errors path="" />
 		<input type="hidden" name="confirmScreen" value="true" />
 
@@ -112,7 +112,7 @@
 			</@bs3form.checkbox>
 		</@bs3form.form_group>
 
-		<div class="buttons">
+		<div class="buttons submit-buttons">
 			<input class="btn btn-primary" type="submit" value="Confirm">
 			<a class="btn btn-default" href="<@routes.cm2.listmarkersubmissions assignment marker />">Cancel</a>
 		</div>

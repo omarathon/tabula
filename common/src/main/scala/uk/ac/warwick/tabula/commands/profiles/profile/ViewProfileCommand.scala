@@ -16,6 +16,6 @@ class ViewProfileCommand(user: CurrentUser, profile: Member)
 
 	if (!user.god && !viewingOwnProfile && (user.isStudent || profile.isStaff && !viewerInSameDepartment)) {
 		logger.info("Denying access for user " + user + " to view profile " + profile)
-		throw new PermissionDeniedException(user, Permissions.Profiles.Read.Core, profile)
+		throw PermissionDeniedException(user, Permissions.Profiles.Read.Core, profile)
 	}
 }

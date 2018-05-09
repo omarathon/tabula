@@ -2,19 +2,18 @@ package uk.ac.warwick.tabula.exams.grids.columns.marking
 
 import org.springframework.stereotype.Component
 import uk.ac.warwick.tabula.commands.exams.grids.{ExamGridEntity, ExamGridEntityYear}
+import uk.ac.warwick.tabula.data.model.CourseYearWeighting
 import uk.ac.warwick.tabula.exams.grids.columns._
-import uk.ac.warwick.tabula.services.AutowiringModuleRegistrationServiceComponent
+import uk.ac.warwick.tabula.services.{AutowiringCourseAndRouteServiceComponent, AutowiringModuleRegistrationServiceComponent}
 
 @Component
-class CurrentYearMarkColumnOption extends ChosenYearExamGridColumnOption with AutowiringModuleRegistrationServiceComponent {
+class CurrentYearMarkColumnOption extends ChosenYearExamGridColumnOption with AutowiringModuleRegistrationServiceComponent with AutowiringCourseAndRouteServiceComponent {
 
 	override val identifier: ExamGridColumnOption.Identifier = "currentyear"
 
 	override val label: String = "Marking: Current year mean mark"
 
 	override val sortOrder: Int = ExamGridColumnOption.SortOrders.CurrentYear
-
-	override val mandatory = true
 
 	case class Column(state: ExamGridColumnState) extends ChosenYearExamGridColumn(state) with HasExamGridColumnCategory {
 
@@ -38,7 +37,12 @@ class CurrentYearMarkColumnOption extends ChosenYearExamGridColumnOption with Au
 				// If the has more than one valid overcat subset, and a subset has not been chosen for the overcatted mark, don't show anything
 				Left("The overcat adjusted mark subset has not been chosen")
 			} else {
-				moduleRegistrationService.weightedMeanYearMark(entity.moduleRegistrations, entity.markOverrides.getOrElse(Map()))
+				lazy val yearWeighting: Option[CourseYearWeighting] =
+					entity.studentCourseYearDetails.flatMap { scyd =>
+						courseAndRouteService.getCourseYearWeighting(scyd.studentCourseDetails.course.code, scyd.studentCourseDetails.sprStartAcademicYear, scyd.yearOfStudy)
+					}
+
+				moduleRegistrationService.weightedMeanYearMark(entity.moduleRegistrations, entity.markOverrides.getOrElse(Map()), allowEmpty = yearWeighting.exists(_.weighting == 0))
 			}
 		}
 

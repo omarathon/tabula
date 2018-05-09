@@ -207,8 +207,6 @@ class CoreModulesColumnOption extends ModuleExamGridColumnOption {
 
 	override val sortOrder: Int = ExamGridColumnOption.SortOrders.CoreModules
 
-	override val mandatory = true
-
 	class Column(state: ExamGridColumnState, module: Module, isDuplicate: Boolean, cats: JBigDecimal)
 		extends ModuleExamGridColumn(state, module, isDuplicate, cats) {
 

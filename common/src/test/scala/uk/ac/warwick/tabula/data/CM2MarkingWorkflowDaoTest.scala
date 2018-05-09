@@ -23,7 +23,7 @@ class CM2MarkingWorkflowDaoTest extends PersistenceTestBase {
 		session.flush()
 	}
 
-	@Test def saveThenFetch() = transactional { tx =>
+	@Test def saveThenFetch(): Unit = transactional { tx =>
 		val singleMarkerWorkflow = SingleMarkerWorkflow("testAssignment", dept, Seq(marker))
 		singleMarkerWorkflow.academicYear = AcademicYear(2016)
 
@@ -47,7 +47,7 @@ class CM2MarkingWorkflowDaoTest extends PersistenceTestBase {
 		stage.nextStages should be {Seq(SingleMarkingCompleted)}
 	}
 
-	@Test def testGetReusableWorkflows() = transactional { tx =>
+	@Test def testGetReusableWorkflows(): Unit = transactional { tx =>
 		val singleMarkerWorkflow = SingleMarkerWorkflow("testAssignment", dept, Seq(marker))
 		singleMarkerWorkflow.academicYear = AcademicYear(2016)
 		singleMarkerWorkflow.isReusable = true
@@ -64,7 +64,7 @@ class CM2MarkingWorkflowDaoTest extends PersistenceTestBase {
 		dao.getReusableWorkflows(dept, AcademicYear(2014)).length should be (0)
 	}
 
-	@Test def markerFeedbackForAssignmentAndStage() = transactional { tx =>
+	@Test def markerFeedbackForAssignmentAndStage(): Unit = transactional { tx =>
 		val w = SingleMarkerWorkflow("test", dept, Seq(marker))
 		val assignment = Fixtures.assignment("test")
 		assignment.cm2MarkingWorkflow = w
@@ -95,7 +95,7 @@ class CM2MarkingWorkflowDaoTest extends PersistenceTestBase {
 		dao.markerFeedbackForAssignmentAndStage(assignment2, SingleMarker) should be (Seq(markerFeedback2))
 	}
 
-	@Test def markerFeedbackForMarker() = transactional { tx =>
+	@Test def markerFeedbackForMarker(): Unit = transactional { tx =>
 		val w = DoubleBlindWorkflow("test", dept, Seq(marker, marker2), Seq(marker))
 		val assignment = Fixtures.assignment("test")
 		assignment.cm2MarkingWorkflow = w

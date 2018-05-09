@@ -35,12 +35,13 @@ object ImportAssignmentsCommand {
 		assignmentsChanged: Int,
 		groupsFound: Int,
 		groupsChanged: Int)
+
 }
 
 
 trait ImportAssignmentsCommand extends CommandInternal[Unit] with RequiresPermissionsChecking with Logging with SessionComponent {
 
-	def permissionsCheck(p:PermissionsChecking) {
+	def permissionsCheck(p: PermissionsChecking) {
 		p.PermissionCheck(Permissions.ImportSystemData)
 	}
 
@@ -50,6 +51,8 @@ trait ImportAssignmentsCommand extends CommandInternal[Unit] with RequiresPermis
 
 	val ImportGroupSize = 100
 
+	var modifiedAssignments: Set[Assignment] = Set.empty
+
 	def applyInternal() {
 		benchmark("ImportAssessment") {
 			doAssignments()
@@ -58,6 +61,9 @@ trait ImportAssignmentsCommand extends CommandInternal[Unit] with RequiresPermis
 			doGroupMembers()
 			logger.debug("Imported assessment groups. Importing grade boundaries...")
 			doGradeBoundaries()
+
+			logger.debug("Removing blank feedback for students who have deregistered...")
+			removeBlankFeedbackForDeregisteredStudents()
 		}
 	}
 
@@ -94,12 +100,12 @@ trait ImportAssignmentsCommand extends CommandInternal[Unit] with RequiresPermis
 	}
 
 	/**
-	 * This calls the importer method that iterates over ALL module registrations.
-	 * The results are ordered such that it can hold a list of items until it
-	 * detects one that belongs to a different group, at which point it saves
-	 * what it's got and starts a new list. This way we don't have to load many
-	 * things into memory at once.
-	 */
+		* This calls the importer method that iterates over ALL module registrations.
+		* The results are ordered such that it can hold a list of items until it
+		* detects one that belongs to a different group, at which point it saves
+		* what it's got and starts a new list. This way we don't have to load many
+		* things into memory at once.
+		*/
 	def doGroupMembers() {
 		benchmark("Import all group members") {
 			var registrations = List[UpstreamModuleRegistration]()
@@ -135,8 +141,8 @@ trait ImportAssignmentsCommand extends CommandInternal[Unit] with RequiresPermis
 			// empty unseen groups - this is done in transactional batches
 
 			val groupsToEmpty = transactional(readOnly = true) {
-				assessmentMembershipService.getUpstreamAssessmentGroupsNotIn (
-					ids = notEmptyGroupIds.filter { _.hasText }.toSeq,
+				assessmentMembershipService.getUpstreamAssessmentGroupsNotIn(
+					ids = notEmptyGroupIds.filter(_.hasText).toSeq,
 					academicYears = assignmentImporter.yearsToImport
 				)
 			}
@@ -152,12 +158,12 @@ trait ImportAssignmentsCommand extends CommandInternal[Unit] with RequiresPermis
 	}
 
 	/**
-	 * This sequence of ModuleRegistrations represents the members of an assessment
-	 * group, so save them (and reconcile it with any existing members we have in the
-	 * database).
-	 * The students in a group does NOT vary by sequence, so the memebership should be set on ALL the groups.
-	 * Then set the properties of members of each group by sequence.
-	 */
+		* This sequence of ModuleRegistrations represents the members of an assessment
+		* group, so save them (and reconcile it with any existing members we have in the
+		* database).
+		* The students in a group does NOT vary by sequence, so the memebership should be set on ALL the groups.
+		* Then set the properties of members of each group by sequence.
+		*/
 	def save(registrations: Seq[UpstreamModuleRegistration]): Seq[UpstreamAssessmentGroup] = {
 		registrations.headOption.map { head =>
 			// Get all the Assessment Components we have in the DB, even if marked as not in use, as we might have previous years groups to populate
@@ -190,8 +196,11 @@ trait ImportAssignmentsCommand extends CommandInternal[Unit] with RequiresPermis
 							}
 						} else {
 							def validInts(strings: Seq[String]): Seq[Int] = strings.filter(s => Try(s.toInt).isSuccess).map(_.toInt)
+
 							def validBigDecimals(strings: Seq[String]): Seq[BigDecimal] = strings.filter(s => Try(BigDecimal(s)).isSuccess).map(BigDecimal(_))
+
 							def validStrings(strings: Seq[String]): Seq[String] = strings.filter(s => s.maybeText.isDefined)
+
 							def resolveDuplicates[A](props: Seq[A], description: String): Option[A] = {
 								if (props.distinct.size > 1) {
 									logger.warn("Found multiple %ss (%s) for %s for Assessment Group %s. %s will be null".format(
@@ -219,7 +228,8 @@ trait ImportAssignmentsCommand extends CommandInternal[Unit] with RequiresPermis
 								resitAgreedGrade = resolveDuplicates(validStrings(studentRegistrations.map(_.resitAgreedGrade)), "resit agreed grade")
 							}
 						}
-					}}
+					}
+					}
 
 					propertiesMap.foreach { case (sprCode, properties) => group.members.asScala.find(_.universityId == SprCode.getUniversityId(sprCode)).foreach { member =>
 						member.position = properties.position
@@ -232,9 +242,13 @@ trait ImportAssignmentsCommand extends CommandInternal[Unit] with RequiresPermis
 						member.resitAgreedMark = properties.resitAgreedMark
 						member.resitAgreedGrade = properties.resitAgreedGrade
 						assessmentMembershipService.save(member)
-					}}
+					}
+					}
 				}
 			})
+
+			modifiedAssignments = modifiedAssignments ++ assessmentComponents.flatMap(_.linkedAssignments)
+
 			assessmentGroups
 		}.getOrElse(Seq())
 	}
@@ -259,6 +273,36 @@ trait ImportAssignmentsCommand extends CommandInternal[Unit] with RequiresPermis
 		}
 	}
 
+	def removeBlankFeedbackForDeregisteredStudents(): Seq[Feedback] =
+		modifiedAssignments.toSeq
+			.filter(_.cm2Assignment)
+			.flatMap { assignment =>
+				transactional() {
+					// Find students who are assigned to a marker but are not a member of the assignment
+					val memberUsercodes = assessmentMembershipService.determineMembershipUsers(assignment).map(_.getUserId)
+					val removedMembers = assignment.allFeedback.map(_.usercode).toSet.diff(memberUsercodes.toSet)
+
+					val removedFeedback = assignment.allFeedback
+						.filter(f => removedMembers.contains(f.usercode))
+						.collect {
+							case feedback if feedback.hasBeenModified || assignment.findSubmission(feedback.usercode).exists(_.submitted) =>
+								logger.debug(s"${feedback.usercode} is no longer a member of assignment ${assignment.id} but has submission or feedback")
+
+								null
+							case feedback =>
+								logger.info(s"Removing feedback for ${feedback.usercode} from assignment ${assignment.id}")
+
+								assignment.feedbacks.remove(feedback)
+								feedback.assignment = null
+								session.delete(feedback)
+
+								feedback
+						}
+						.filter(_ != null)
+
+					removedFeedback
+				}
+			}
 }
 
 

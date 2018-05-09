@@ -8,11 +8,11 @@ class MarkingWorkflowDaoTest extends PersistenceTestBase {
 	val dao = new MarkingWorkflowDaoImpl
 
 	@Before
-	def setup() {
+	def setup(): Unit = {
 		dao.sessionFactory = sessionFactory
 	}
 
-	@Test def crud() = transactional { tx =>
+	@Test def crud(): Unit = transactional { tx =>
 		val dept = Fixtures.department("in")
 		session.save(dept)
 		session.flush()

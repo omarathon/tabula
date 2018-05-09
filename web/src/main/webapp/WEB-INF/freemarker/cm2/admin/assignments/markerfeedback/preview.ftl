@@ -12,25 +12,25 @@
 		<input type="hidden" name="batch" value="true">
 			<@spring.bind path="fromArchive"><#assign fromArchive=status.actualValue /></@spring.bind>
 			<#if fromArchive>
-				<#assign verbed_your_noun="unpacked your Zip file"/>
+				<#assign noun_verb_passive=".zip file has been unpacked"/>
 			<#else>
-				<#assign verbed_your_noun="received your files"/>
+				<#assign noun_verb_passive="files have been received"/>
 			</#if>
 
 			<@spring.bind path="items">
 				<#assign itemsList=status.actualValue />
 				<p>
 					<#if itemsList?size gt 0>
-						I've ${verbed_your_noun} and I found feedback for <@fmt.p number=itemsList?size singular="student" plural="students" shownumber=true />
+						Your ${noun_verb_passive} with feedback for <@fmt.p number=itemsList?size singular="student" plural="students" shownumber=true />
 						<#if hasErrors>
 							<div class="alert alert-danger">
-								However, there were some problems with its contents, which are shown below.
-								You'll need to correct these problems with the zip and try again.
+								There are some problems, which are shown below.
+								You need to correct these problems with the .zip file and try again.
 							</div>
 						</#if>
 					<#else>
 						<div class="alert alert-danger">
-							I've ${verbed_your_noun} but I couldn't find any files that looked like feedback items.
+							Your ${noun_verb_passive} but there are no files that look like feedback items.
 						</div>
 					</#if>
 				</p>
@@ -41,7 +41,7 @@
 			<#else>
 				<#if addMarkerFeedbackCommand.unrecognisedFiles?size gt 0>
 					<div class="unrecognised-files alert alert-block">
-						<div>I didn't understand some of the files uploaded, and these will be ignored:</div>
+						<div>The following files are not recognised and will be ignored:</div>
 							<ul class="file-list">
 								<#list addMarkerFeedbackCommand.unrecognisedFiles as unrecognisedFile>
 									<li>
@@ -56,7 +56,7 @@
 
 				<#if addMarkerFeedbackCommand.moduleMismatchFiles?size gt 0>
 					<div class="invalid-files alert alert-danger">
-						<div>There were some files with problem names, which look as if they may belong to another module. Please check these before confirming.</div>
+						<div>Some files, based on their names, appear to relate to another module. Please check these before confirming.</div>
 							<ul class="file-list">
 								<#list addMarkerFeedbackCommand.moduleMismatchFiles as moduleMismatchFile>
 									<li>
@@ -70,7 +70,7 @@
 				</#if>
 				<#if addMarkerFeedbackCommand.invalidFiles?size gt 0>
 					<div class="invalid-files alert alert-block alert-danger">
-						<div>There were some files with problem names. You'll need to fix these and then try uploading again.</div>
+						<div>Some files have problematic names. Fix them, then try uploading again.</div>
 							<ul class="file-list">
 								<#list addMarkerFeedbackCommand.invalidFiles as invalidFile>
 									<li>
@@ -84,7 +84,7 @@
 				</#if>
 				<#if addMarkerFeedbackCommand.invalidStudents?size gt 0>
 					<div class="invalid-students alert">
-						<div>Some of the feedback that you uploaded was for students that you are not assigned to mark. These files will be ignored</div>
+						<div>Some of the feedback you uploaded is for students that are not allocated to you for marking. These files will be ignored.</div>
 							<ul class="file-list">
 								<#list addMarkerFeedbackCommand.invalidStudents as invalidStudent>
 									<li>
@@ -96,7 +96,7 @@
 				</#if>
 				<#if addMarkerFeedbackCommand.markedStudents?size gt 0>
 					<div class="invalid-students alert">
-						<div>Some of the feedback that you uploaded was for students that you have finished marking. These files will be ignored</div>
+						<div>Some of the feedback that you uploaded is for students that you have finished marking. These files will be ignored.</div>
 						<ul class="file-list">
 							<#list addMarkerFeedbackCommand.markedStudents as markedStudent>
 								<li>
@@ -124,7 +124,7 @@
 											</@spring.bind>
 											<@f.errors path="uniNumber" cssClass="error" />
 											<#if item.submissionExists>
-												<span class="warning">Feedback already exists for this user. New files will be added to the existing ones</span>
+												<span class="warning">Feedback already exists for this student. New files will be added to the existing ones.</span>
 											</#if>
 										</td>
 										<#noescape>

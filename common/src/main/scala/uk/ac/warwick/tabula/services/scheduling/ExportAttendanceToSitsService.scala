@@ -47,7 +47,7 @@ class AbstractExportAttendanceToSitsService extends ExportAttendanceToSitsServic
 			("academicYear", report.academicYear.toString),
 			("deptCode", Option(report.studentCourseYearDetails).flatMap { scyd => Option(scyd.enrolmentDepartment) }.fold("") { _.code }.toUpperCase),
 			("courseCode", Option(report.studentCourseDetails).flatMap { scd => Option(scd.course) }.fold("") { _.code }),
-			("recorder", report.reporter),
+			("recorder", report.reporter.substring(0, ExportAttendanceToSitsService.recorderMaxColumnSize)),
 			("missedPoints", report.missed),
 			("monitoringPeriod", monitoringPeriod)
 		)
@@ -59,6 +59,7 @@ class AbstractExportAttendanceToSitsService extends ExportAttendanceToSitsServic
 
 object ExportAttendanceToSitsService {
 	val sitsSchema: String = Wire.property("${schema.sits}")
+	val recorderMaxColumnSize = 15
 
 	// find the latest row in the Student Absence (SAB) table in SITS for the student
 	final def GetHighestExistingSequence = f"""
