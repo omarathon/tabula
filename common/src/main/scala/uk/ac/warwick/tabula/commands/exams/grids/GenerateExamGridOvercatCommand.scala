@@ -29,8 +29,9 @@ object GenerateExamGridOvercatCommand {
 		scyd: StudentCourseYearDetails,
 		normalLoadLookup: NormalLoadLookup,
 		routeRules: Seq[UpstreamRouteRule],
-		user: CurrentUser
-	) = new GenerateExamGridOvercatCommandInternal(department, academicYear, scyd, normalLoadLookup, routeRules, user)
+		user: CurrentUser,
+		basedOnLevel: Boolean
+	) = new GenerateExamGridOvercatCommandInternal(department, academicYear, scyd, normalLoadLookup, routeRules, user, basedOnLevel)
 			with ComposableCommand[Seq[Module]]
 			with AutowiringStudentCourseYearDetailsDaoComponent
 			with AutowiringModuleRegistrationServiceComponent
@@ -49,17 +50,21 @@ class GenerateExamGridOvercatCommandInternal(
 	val scyd: StudentCourseYearDetails,
 	val normalLoadLookup: NormalLoadLookup,
 	val routeRules: Seq[UpstreamRouteRule],
-	val user: CurrentUser
+	val user: CurrentUser,
+	val basedOnLevel: Boolean
 )	extends CommandInternal[Seq[Module]] {
 
-	self: GenerateExamGridOvercatCommandRequest with StudentCourseYearDetailsDaoComponent =>
+	self: GenerateExamGridOvercatCommandRequest with GenerateExamGridOvercatCommandState with StudentCourseYearDetailsDaoComponent =>
 
 	override def applyInternal(): Seq[Module] = {
 		val modules = chosenModuleSubset.get._2.map(_.module)
-		scyd.overcattingModules = modules
-		scyd.overcattingChosenBy = user.apparentUser
-		scyd.overcattingChosenDate = DateTime.now
-		studentCourseYearDetailsDao.saveOrUpdate(scyd)
+
+		allSCYDs.foreach(scyd => {
+			scyd.overcattingModules = modules.filter(scyd.moduleRegistrations.map(_.module).contains)
+			scyd.overcattingChosenBy = user.apparentUser
+			scyd.overcattingChosenDate = DateTime.now
+			studentCourseYearDetailsDao.saveOrUpdate(scyd)
+		})
 		modules
 	}
 
@@ -126,11 +131,22 @@ trait GenerateExamGridOvercatCommandState {
 	def normalLoadLookup: NormalLoadLookup
 	def routeRules: Seq[UpstreamRouteRule]
 	def user: CurrentUser
+	def basedOnLevel: Boolean
+
+	def allSCYDs: Seq[StudentCourseYearDetails] = if(basedOnLevel)
+		scyd.studentCourseDetails.freshOrStaleStudentCourseYearDetails.filter(_.level == scyd.level).toSeq.sorted.takeWhile(_ != scyd) ++ Seq(scyd)
+	else
+		Seq(scyd)
+
+	def examGridEntityYear: ExamGridEntityYear = allSCYDs match {
+		case scyd :: Seq() => scyd.toExamGridEntityYear
+		case scyds => StudentCourseYearDetails.toExamGridEntityYearGrouped(1, scyds: _*)
+	}
 
 	lazy val overcattedModuleSubsets: Seq[(BigDecimal, Seq[ModuleRegistration])] = moduleRegistrationService.overcattedModuleSubsets(
-		scyd.toExamGridEntityYear,
+		examGridEntityYear,
 		overwrittenMarks,
-		normalLoadLookup(scyd.toExamGridEntityYear.route),
+		normalLoadLookup(examGridEntityYear.studentCourseYearDetails.get.studentCourseDetails.currentRoute),
 		routeRules
 	)
 

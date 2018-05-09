@@ -10,7 +10,8 @@
 	<#list selectCourseCommand.routes as route>
 		<input type="hidden" name="routes" value="${route.code}" />
 	</#list>
-	<input type="hidden" name="yearOfStudy" value="${selectCourseCommand.yearOfStudy}" />
+	<#if selectCourseCommand.yearOfStudy??><input type="hidden" name="yearOfStudy" value="${selectCourseCommand.yearOfStudy}" /></#if>
+	<#if selectCourseCommand.levelCode??><input type="hidden" name="levelCode" value="${selectCourseCommand.levelCode}" /></#if>
 	<input type="hidden" name="includeTempWithdrawn" value="${selectCourseCommand.includeTempWithdrawn?string('true','false')}" />
 	<#list selectCourseCommand.courseYearsToShow as column>
 		<input  type ="hidden" name="courseYearsToShow" value="${column}" />

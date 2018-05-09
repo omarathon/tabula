@@ -127,8 +127,13 @@
 						</#if>
 					</tr>
 					<tr>
-						<th>Year of study:</th>
-						<td>${selectCourseCommand.yearOfStudy}</td>
+						<#if selectCourseCommand.yearOfStudy??>
+							<th>Year of study:</th>
+							<td>${selectCourseCommand.yearOfStudy}</td>
+						<#elseif selectCourseCommand.levelCode??>
+							<th>Study level:</th>
+							<td>${selectCourseCommand.levelCode}</td>
+						</#if>
 					</tr>
 					<tr>
 						<th>Year weightings:</th>

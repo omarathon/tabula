@@ -1,7 +1,6 @@
 package uk.ac.warwick.tabula.data.model
 
 import javax.persistence._
-
 import org.apache.commons.lang3.builder.{EqualsBuilder, HashCodeBuilder}
 import org.hibernate.annotations.{Any => _, _}
 import org.joda.time.{DateTime, Duration}
@@ -28,6 +27,32 @@ object StudentCourseYearDetails {
 		final val ChosenDate = "chosenDate"
 		final val MarkOverrides = "markOverrides"
 	}
+
+	// makes an ExamGridEntityYear that is really multiple study years that contribute to a single level or block (groups related StudentCourseYearDetails together)
+	def toExamGridEntityYearGrouped(yearOfStudy: YearOfStudy, scyds: StudentCourseYearDetails *): ExamGridEntityYear = {
+
+		if(scyds.map(_.studyLevel).distinct.size > 1 ) throw new IllegalArgumentException("Cannot group StudentCourseYearDetails from different levels")
+		val moduleRegistrations = scyds.flatMap(_.moduleRegistrations)
+		val route = {
+			val allRoutes = scyds.flatMap(scyd => Option(scyd.route)).toSet // ignore any nulls
+			if (allRoutes.size > 1) throw new IllegalArgumentException(s"Cannot generate an ExamGridEntityLevel ${scyds.head.studyLevel} for ${scyds.head.studentCourseDetails.scjCode} with a mixture of routes: ${allRoutes.mkString(", ")}")
+			allRoutes.headOption.getOrElse(scyds.head.studentCourseDetails.currentRoute)
+		}
+		val overcattingModules = scyds.map(_.overcattingModules).fold(Option(Seq()))((m1, m2) => Option((m1 ++ m2).flatten.toList.distinct).filter(_.nonEmpty))
+
+		ExamGridEntityYear(
+			moduleRegistrations = moduleRegistrations,
+			cats = moduleRegistrations.map(mr => BigDecimal(mr.cats)).sum,
+			route = route,
+			overcattingModules = overcattingModules,
+			markOverrides = None,
+			studentCourseYearDetails = scyds.sorted.lastOption,
+			level = scyds.head.level,
+			yearOfStudy
+		)
+	}
+
+
 }
 
 @FilterDefs(Array(
@@ -180,7 +205,8 @@ class StudentCourseYearDetails extends StudentCourseYearProperties
 		overcattingModules = overcattingModules,
 		markOverrides = None,
 		studentCourseYearDetails = Some(this),
-		level = level
+		level = level,
+		yearOfStudy = this.yearOfStudy
 	)
 
 	override def postLoad() {

@@ -34,7 +34,8 @@
 					</#assign>
 			<a class="use-popover" href="#" data-html="true" data-content="${popover}" data-container="body">${selectCourseCommand.courses?size} courses</a>
 		</#if>,
-		Year of Study: ${selectCourseCommand.yearOfStudy},
+		<#if selectCourseCommand.yearOfStudy??>Year of Study: ${selectCourseCommand.yearOfStudy},</#if>
+		<#if selectCourseCommand.levelCode??>Study level: ${selectCourseCommand.levelCode},</#if>
 		<#if !selectCourseCommand.routes?has_content>
 			All routes
 		<#elseif selectCourseCommand.routes?size == 1>

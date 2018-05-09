@@ -136,8 +136,20 @@
 				${yearOfStudy}
 			</label>
 		</@filter>
+
+		<#assign placeholder = "Study level" />
+		<#assign currentfilter><@current_filter_value "selectCourseCommand.levelCode" placeholder; levelCode>${levelCode}</@current_filter_value></#assign>
+		<@filter "selectCourseCommand.levelCode" placeholder currentfilter selectCourseCommand.allLevels "Level "; level>
+			<label class="radio">
+				<input type="radio" name="${status.expression}" value="${level.code}" data-short-value="${level.code}"
+					${(((selectCourseCommand.levelCode)!'') == level.code)?string('checked','')}
+				>
+				${level.code} - ${level.name}
+			</label>
+		</@filter>
+
 	</div>
-	<#assign studyYear = (selectCourseCommand.yearOfStudy)!0 />
+	<#assign studyYear = (selectCourseCommand.studyYearByLevelOrBlock)!0 />
 	<div class="row year_info">
 		<h3 class="year_info_hdr <#if studyYear == 0>hidden</#if>">Years to display on grid</h3>
 		<#assign maxYear=selectCourseCommand.allYearsOfStudy?size>
@@ -279,8 +291,9 @@
 
 			var course = $('[name=courses]:checked');
 			var yearOfStudy = $('[name=yearOfStudy]:checked');
+			var studyLevel = $('[name=levelCode]:checked');
 
-			if (course.length === 0 || yearOfStudy.length === 0) {
+			if (course.length === 0 || (yearOfStudy.length === 0 && studyLevel.length === 0)) {
 				$('.buttons button.btn-default').prop('disabled', true);
 			} else {
 				$('.buttons button.btn-default').prop('disabled', false);
@@ -288,12 +301,12 @@
 		};
 
 		var yearCheckboxes = function() {
-			var yearOfStudy = $("input[type='radio'][name='yearOfStudy']:checked");
+			var yearOfStudy = $("input[type='radio'][name='yearOfStudy']:checked, input[type='radio'][name='levelCode']:checked");
 			var selectedYearOfStudy = 0;
-			$('.year_info .year_info_hdr').toggleClass("hidden", yearOfStudy.length == 0);
-			$('.year_info_ftr').toggleClass("hidden", yearOfStudy.length == 0);
+			$('.year_info .year_info_hdr').toggleClass("hidden", yearOfStudy.length === 0);
+			$('.year_info_ftr').toggleClass("hidden", yearOfStudy.length === 0);
 			if (yearOfStudy.length > 0) {
-				selectedYearOfStudy = yearOfStudy.val();
+				selectedYearOfStudy = isNaN(Number(yearOfStudy.val())) ? 1 : yearOfStudy.val();
 				$('.year_info').find("input[type='hidden'][name='courseYearsToShow']").val("Year"+selectedYearOfStudy);
 			} else {
 				return;
@@ -302,12 +315,12 @@
 				var $yearCheckboxDiv =  $(this);
 				var $yearCheckbox = $yearCheckboxDiv.find('input');
 				var year = $yearCheckboxDiv.data('year');
-				if(year == selectedYearOfStudy) {
+				if(year === selectedYearOfStudy) {
 					$yearCheckbox.prop("checked", true);
 				} else if (year > selectedYearOfStudy) {
 					$yearCheckbox.prop("checked", false);
 				}
-				$yearCheckbox.prop("disabled", (selectedYearOfStudy ==  year));
+				$yearCheckbox.prop("disabled", (selectedYearOfStudy ===  year));
 				$yearCheckboxDiv.toggleClass("hidden", selectedYearOfStudy <  year);
 			});
 		};

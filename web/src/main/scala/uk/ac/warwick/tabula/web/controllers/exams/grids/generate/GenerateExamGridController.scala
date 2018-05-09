@@ -92,10 +92,13 @@ class GenerateExamGridController extends ExamsController
 	@ModelAttribute("coreRequiredModuleLookup")
 	def coreRequiredModuleLookup(
 		@PathVariable academicYear: AcademicYear,
-		@RequestParam(value = "yearOfStudy", required = false) yearOfStudy: JInteger
+		@RequestParam(value = "yearOfStudy", required = false) yearOfStudy: JInteger,
+		@RequestParam(value = "levelCode", required = false) levelCode: String
 	): CoreRequiredModuleLookup = {
 		if (Option(yearOfStudy).nonEmpty) {
 			new CoreRequiredModuleLookup(academicYear, yearOfStudy, moduleRegistrationService)
+		} else if (levelCode != null){
+			new CoreRequiredModuleLookup(academicYear, Level.toYearOfStudy(levelCode), moduleRegistrationService)
 		} else {
 			null
 		}
@@ -425,7 +428,7 @@ class GenerateExamGridController extends ExamsController
 		val (predefinedColumnOptions, customColumnTitles) = gridOptionsCommand.apply()
 
 		val overcatSubsets = entities
-			.flatMap(entity => {entity.validYears.get(selectCourseCommand.yearOfStudy).map((entity, _))})
+			.flatMap(entity => {entity.validYears.get(selectCourseCommand.studyYearByLevelOrBlock).map((entity, _))})
 			.map{ case (entity, entityYear) =>
 				entityYear -> moduleRegistrationService.overcattedModuleSubsets(
 					entityYear,
@@ -442,14 +445,15 @@ class GenerateExamGridController extends ExamsController
 			normalLoadLookup = normalLoadLookup,
 			routeRulesLookup = routeRulesLookup,
 			academicYear = selectCourseCommand.academicYear,
-			yearOfStudy = selectCourseCommand.yearOfStudy,
+			yearOfStudy = selectCourseCommand.studyYearByLevelOrBlock,
 			department = selectCourseCommand.department,
 			nameToShow = gridOptionsCommand.nameToShow,
 			showComponentMarks = gridOptionsCommand.showComponentMarks,
 			showZeroWeightedComponents = gridOptionsCommand.showZeroWeightedComponents,
 			showComponentSequence = gridOptionsCommand.showComponentSequence,
 			showModuleNames = gridOptionsCommand.showModuleNames,
-			calculateYearMarks = gridOptionsCommand.calculateYearMarks
+			calculateYearMarks = gridOptionsCommand.calculateYearMarks,
+			isLevelGrid = selectCourseCommand.isLevelGrid
 		)
 
 		val studentInformationColumns = predefinedColumnOptions.collect { case c: StudentExamGridColumnOption => c }.flatMap(_.getColumns(state))
