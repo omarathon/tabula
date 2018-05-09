@@ -26,6 +26,7 @@ class ApacheHttpClientFactoryBean extends ScalaFactoryBean[CloseableHttpClient] 
 			.setConnectTimeout(connectTimeout)
 			.setSocketTimeout(socketTimeout)
 			.build())
+		.disableCookieManagement()
 		.build()
 
 	override def destroyInstance(instance: CloseableHttpClient): Unit = instance.close()

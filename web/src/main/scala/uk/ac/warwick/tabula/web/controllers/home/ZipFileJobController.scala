@@ -29,7 +29,7 @@ class ZipFileJobController extends BaseController with AutowiringJobServiceCompo
 					if (jobInstance.user.apparentUser == user.apparentUser)
 						(zipJob, jobInstance)
 					else
-						throw new PermissionDeniedException(user, Permissions.DownloadZipFromJob, null)
+						throw PermissionDeniedException(user, Permissions.DownloadZipFromJob, null)
 				case _ => throw new ItemNotFoundException()
 			}
 			case _ => throw new ItemNotFoundException()

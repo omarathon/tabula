@@ -47,7 +47,7 @@ class OldAddMarksController extends OldCourseworkController {
 
 		if(assignment.hasWorkflow) {
 			logger.error(s"Can't add marks to an assignment with a workflow - ${assignment.id}")
-			throw new PermissionDeniedException(user, Permissions.AssignmentFeedback.Manage, assignment)
+			throw PermissionDeniedException(user, Permissions.AssignmentFeedback.Manage, assignment)
 		}
 
 		// All mark uploads are keyed on uniID so ignore others

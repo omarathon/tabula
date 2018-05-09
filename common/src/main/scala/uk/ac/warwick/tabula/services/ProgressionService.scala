@@ -120,8 +120,11 @@ abstract class AbstractProgressionService extends ProgressionService {
 	self: ModuleRegistrationServiceComponent with CourseAndRouteServiceComponent =>
 
 	def getYearMark(entityYear: ExamGridEntityYear, normalLoad: BigDecimal, routeRules: Seq[UpstreamRouteRule]): Either[String, BigDecimal] = {
-		val possibleWeightedMeanMark = moduleRegistrationService.weightedMeanYearMark(entityYear.moduleRegistrations, Map())
-		  	.left.map(msg => s"$msg for year ${entityYear.level.map(_.code)}")
+		lazy val yearWeighting: Option[CourseYearWeighting] = entityYear.studentCourseYearDetails.flatMap{scyd =>
+			courseAndRouteService.getCourseYearWeighting(scyd.studentCourseDetails.course.code, scyd.studentCourseDetails.sprStartAcademicYear, entityYear.yearOfStudy)
+		}
+		val possibleWeightedMeanMark = moduleRegistrationService.weightedMeanYearMark(entityYear.moduleRegistrations, Map(), allowEmpty = yearWeighting.exists(_.weighting == 0))
+		  	.left.map(msg => s"$msg for year ${entityYear.yearOfStudy}")
 
 		val overcatSubsets = moduleRegistrationService.overcattedModuleSubsets(entityYear, Map(), normalLoad, routeRules)
 		if (overcatSubsets.size <= 1) {
@@ -302,7 +305,13 @@ abstract class AbstractProgressionService extends ProgressionService {
 		markPerYear: Map[Int, BigDecimal],
 		yearWeightings:  Map[Int, CourseYearWeighting]
 	): FinalYearGrade = {
-		val finalTwoYearsModuleRegistrations = entityPerYear.toSeq.reverse.take(2).flatMap { case (_, yearDetails) => yearDetails.moduleRegistrations }
+		// This only considers years where the weighting counts - so for a course with an
+		// intercalated year weighted 0,50,0,50, this would consider years 2 and 4
+		val finalTwoYearsModuleRegistrations =
+			entityPerYear.toSeq.reverse
+				.filter { case (year, _) => yearWeightings.toMap.apply(year).weighting > 0 }
+				.take(2)
+				.flatMap { case (_, yearDetails) => yearDetails.moduleRegistrations }
 
 		if (finalTwoYearsModuleRegistrations.filterNot(_.passFail).exists(_.firstDefinedMark.isEmpty)) {
 			FinalYearGrade.Unknown(s"No agreed mark or actual mark for modules: ${

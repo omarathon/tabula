@@ -10,7 +10,7 @@ class ModuleDaoTest extends PersistenceTestBase {
 	val dao = new ModuleDaoImpl
 
 	@Before
-	def setup() {
+	def setup(): Unit = {
 		dao.sessionFactory = sessionFactory
 	}
 
@@ -22,7 +22,7 @@ class ModuleDaoTest extends PersistenceTestBase {
 		val cs242: Module = dao.getByCode("cs242").get
 	}
 
-	@Test def crud { transactional { tx =>
+	@Test def crud(): Unit = { transactional { tx =>
 		new Context {
 			dao.allModules should be (Seq(cs108, cs240, cs241, cs242))
 
@@ -49,7 +49,7 @@ class ModuleDaoTest extends PersistenceTestBase {
 	}}
 
 	@Test
-	def testStampMissingFromImport = transactional { tx =>
+	def testStampMissingFromImport(): Unit = transactional { tx =>
 		val module1 = Fixtures.module("one", "my name is one") // not stale before, stale now
 		val module2 = Fixtures.module("two", "my name is two") // not stale before, not stale now
 		val module3 = Fixtures.module("three", "my name is three")

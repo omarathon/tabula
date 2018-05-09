@@ -9,7 +9,7 @@ class UserSettingsServiceTest extends AppContextTestBase {
 
 	@Autowired var service: UserSettingsService = _
 
-	@Test def itWorks = transactional { tx =>
+	@Test def itWorks(): Unit = transactional { tx =>
 		service.getByUserId("cuscav") should be (None)
 
 		val userSettings = new UserSettings

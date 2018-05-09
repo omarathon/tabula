@@ -1,5 +1,6 @@
 package uk.ac.warwick.tabula.services.turnitin
 
+import uk.ac.warwick.tabula.helpers.ApacheHttpClientUtils
 import uk.ac.warwick.tabula.services.turnitin.TurnitinMethods._
 import uk.ac.warwick.util.web.{Uri, UriBuilder}
 
@@ -59,13 +60,15 @@ trait TurnitinMethods { self: Session =>
 			"uem" -> userEmail,
 			"ufn" -> userFirstName,
 			"uln" -> userLastName,
-			"create_session" -> "1") { request =>
-				request >:+ { (headers, request) =>
+			"create_session" -> "1")(ApacheHttpClientUtils.handler {
+				case httpResponse =>
 					logger.debug("Login request")
-					logger.debug(headers.toString())
-					request <> { (node) => TurnitinResponse.fromXml(node) }
-				}
-			}
+					logger.debug(httpResponse.getAllHeaders.map { h => h.getName -> h.getValue }.toString)
+
+					// Call handleEntity to avoid AbstractResponseHandler throwing exceptions for >=300 status codes
+					ApacheHttpClientUtils.xmlResponseHandler(TurnitinResponse.fromXml)
+						.handleEntity(httpResponse.getEntity)
+			})
 		if (logger.isDebugEnabled) {
 			logger.debug("Login %s : %s" format (userEmail, response))
 		}

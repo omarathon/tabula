@@ -150,7 +150,7 @@ class OvercattingOptionsView(
 
 	val nameToShow: ExamGridStudentIdentificationColumnValue = department.nameToShow
 
-	private lazy val coreRequiredModuleLookup = new CoreRequiredModuleLookup(academicYear, scyd.yearOfStudy, moduleRegistrationService)
+	private lazy val coreRequiredModuleLookup = new CoreRequiredModuleLookupImpl(academicYear, scyd.yearOfStudy, moduleRegistrationService)
 
 	private lazy val originalEntity = scyd.studentCourseDetails.student.toExamGridEntity(scyd, basedOnLevel)
 
@@ -185,7 +185,7 @@ class OvercattingOptionsView(
 		isLevelGrid = basedOnLevel
 	)
 
-	private lazy val currentYearMark = moduleRegistrationService.weightedMeanYearMark(allSCYDs.flatMap(_.moduleRegistrations), overwrittenMarks)
+	private lazy val currentYearMark = moduleRegistrationService.weightedMeanYearMark(allSCYDs.flatMap(_.moduleRegistrations), overwrittenMarks, allowEmpty = false)
 
 	lazy val optionsColumns: Seq[ChosenYearExamGridColumn] = Seq(
 		new ChooseOvercatColumnOption().getColumns(overcattedEntitiesState, Option(overcatChoice)),

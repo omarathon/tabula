@@ -2,13 +2,13 @@ package uk.ac.warwick.tabula.commands.scheduling.imports
 
 import org.joda.time.DateTime
 import uk.ac.warwick.tabula.commands._
+import uk.ac.warwick.tabula.data.Transactions._
 import uk.ac.warwick.tabula.data._
 import uk.ac.warwick.tabula.data.model.StudentCourseYearKey
 import uk.ac.warwick.tabula.helpers.Logging
 import uk.ac.warwick.tabula.permissions.Permissions
 import uk.ac.warwick.tabula.services.scheduling.{AutowiringProfileImporterComponent, ProfileImporterComponent}
 import uk.ac.warwick.tabula.system.permissions.{PermissionsChecking, PermissionsCheckingMethods, RequiresPermissionsChecking}
-import Transactions._
 
 import scala.collection.JavaConverters._
 
@@ -25,15 +25,18 @@ object StampMissingRowsCommand {
 }
 
 
-class StampMissingRowsCommandInternal extends CommandInternal[Unit] with Logging with Daoisms with ChecksStudentsInSits {
+class StampMissingRowsCommandInternal extends CommandInternal[Unit] with Logging with Daoisms with ChecksStudentsInSits with ChecksStaffInMembership {
 
 	self: MemberDaoComponent with StudentCourseYearDetailsDaoComponent with StudentCourseDetailsDaoComponent
 		with ProfileImporterComponent =>
 
-
 	override def applyInternal(): Unit = {
+		applyStudents()
+		applyStaff()
+	}
 
-		val allUniversityIDs = transactional() { memberDao.getFreshUniversityIds.toSet }
+	def applyStudents(): Unit = {
+		val allUniversityIDs = transactional() { memberDao.getFreshStudentUniversityIds.toSet }
 		logger.info(s"${allUniversityIDs.size} students to fetch from SITS")
 
 		val studentsFound = checkSitsForStudents(allUniversityIDs)
@@ -77,12 +80,28 @@ class StampMissingRowsCommandInternal extends CommandInternal[Unit] with Logging
 		transactional() { session.flush() }
 		transactional() { session.clear() }
 
-		val newFreshUniIds = transactional() { memberDao.getFreshUniversityIds.toSet }
+		val newFreshUniIds = transactional() { memberDao.getFreshStudentUniversityIds.toSet }
 		val uniIDsStillNotMarked = newStaleUniversityIds.toSet.intersect(newFreshUniIds)
 		if (uniIDsStillNotMarked.nonEmpty) {
 			logger.error(s"There are still stale IDs that weren't marked as missing (${uniIDsStillNotMarked.size} total); here are a few: ${uniIDsStillNotMarked.take(5).mkString(", ")}")
 		} else {
 			logger.info(s"All ${newStaleUniversityIds.size} Uni IDs marked correctly")
+		}
+	}
+
+	def applyStaff(): Unit = {
+		val expectedStaff = transactional()(memberDao.getFreshStaffUniversityIds).toSet
+		val presentStaff = checkMembershipForStaff(expectedStaff)
+
+		if (expectedStaff.nonEmpty && presentStaff.isEmpty) {
+			throw new IllegalStateException("None of the expected staff were found in Membership - aborting")
+		}
+
+		val missingStaff = (expectedStaff -- presentStaff).toSeq
+
+		logger.warn(s"Timestamping ${missingStaff.size} missing staff members")
+		transactional() {
+			memberDao.stampMissingFromImport(missingStaff, DateTime.now)
 		}
 	}
 
@@ -132,4 +151,11 @@ trait ChecksStudentsInSits {
 		StudentsFound(universityIdsSeen.toSet, scjCodesSeen.toSet, studentCourseYearKeysSeen.toSet)
 	}
 
+}
+
+trait ChecksStaffInMembership {
+	self: ProfileImporterComponent =>
+
+	def checkMembershipForStaff(universityIds: Set[String]): Set[String] =
+		profileImporter.getUniversityIdsPresentInMembership(universityIds)
 }

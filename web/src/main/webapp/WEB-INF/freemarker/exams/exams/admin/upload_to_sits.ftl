@@ -5,7 +5,7 @@
 <#if isGradeValidation>
 
 	<#if command.gradeValidation.invalid?keys?has_content>
-		<div class="alert alert-error">
+		<div class="alert alert-danger">
 			<p>
 				<#assign total = command.gradeValidation.invalid?keys?size />
 				<@fmt.p total "student" />
@@ -37,7 +37,7 @@
 	</#if>
 
 	<#if command.gradeValidation.zero?keys?has_content>
-		<div class="alert alert-error">
+		<div class="alert alert-danger">
 			<p>
 				<#assign total = command.gradeValidation.zero?keys?size />
 				<@fmt.p total "student" />
@@ -91,7 +91,7 @@
 <#else>
 
 	<#if command.gradeValidation.invalid?has_content || command.gradeValidation.populated?has_content>
-		<div class="alert alert-error">
+		<div class="alert alert-danger">
 			<p>
 				<#assign total = command.gradeValidation.invalid?keys?size + command.gradeValidation.populated?keys?size />
 				<@fmt.p total "student" />

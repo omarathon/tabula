@@ -41,6 +41,7 @@ trait ProfileImporter {
 	def membershipInfoByDepartment(department: Department): Seq[MembershipInformation]
 	def membershipInfoForIndividual(universityId: String): Option[MembershipInformation]
 	def multipleStudentInformationQuery: MultipleStudentInformationQuery
+	def getUniversityIdsPresentInMembership(universityIds: Set[String]): Set[String]
 }
 
 @Profile(Array("dev", "test", "production"))
@@ -52,6 +53,8 @@ class ProfileImporterImpl extends ProfileImporter with Logging with SitsAcademic
 
 	var fim: DataSource = Wire[DataSource]("fimDataSource")
 
+	private val FixMaxParameterCount: Int = 2000
+
 	lazy val membershipByDepartmentQuery = new MembershipByDepartmentQuery(fim)
 	lazy val membershipByUniversityIdQuery = new MembershipByUniversityIdQuery(fim)
 
@@ -60,6 +63,14 @@ class ProfileImporterImpl extends ProfileImporter with Logging with SitsAcademic
 	def studentInformationQuery: StudentInformationQuery = new StudentInformationQuery(sits)
 
 	def multipleStudentInformationQuery: MultipleStudentInformationQuery = new MultipleStudentInformationQuery(sits)
+
+	def membershipUniversityIdPresenceQuery: MembershipUniversityIdPresenceQuery = new MembershipUniversityIdPresenceQuery(fim)
+
+	def getUniversityIdsPresentInMembership(universityIds: Set[String]): Set[String] = {
+		universityIds.toSeq.grouped(FixMaxParameterCount).flatMap(ids =>
+			membershipUniversityIdPresenceQuery.executeByNamedParam(Map("universityIds" -> ids.asJava).asJava).asScala.toSet
+		).toSet
+	}
 
 	def getMemberDetails(memberInfo: Seq[MembershipInformation], users: Map[UniversityId, User], importCommandFactory: ImportCommandFactory)
 		: Seq[ImportMemberCommand] = {
@@ -342,6 +353,7 @@ class SandboxProfileImporter extends ProfileImporter {
 		}
 
 	def multipleStudentInformationQuery = throw new UnsupportedOperationException
+	def getUniversityIdsPresentInMembership(universityIds: Set[String]): Set[String] = throw new UnsupportedOperationException
 }
 
 object ProfileImporter extends Logging {
@@ -531,6 +543,16 @@ object ProfileImporter extends Logging {
 		declareParameter(new SqlParameter("universityIds", Types.VARCHAR))
 		compile()
 		override def mapRow(rs: ResultSet, rowNumber: Int): MembershipMember = membershipToMember(rs)
+	}
+
+	val GetUniversityIdsPresentInMembership = """
+		select universityId from FIMSynchronizationService.dbo.UOW_Current_Accounts where warwickPrimary = 'Yes' and universityId in (:universityIds)
+	"""
+
+	class MembershipUniversityIdPresenceQuery(ds: DataSource) extends MappingSqlQuery[String](ds, GetUniversityIdsPresentInMembership) {
+		declareParameter(new SqlParameter("universityIds", Types.VARCHAR))
+		compile()
+		override def mapRow(rs: ResultSet, rowNumber: Int): String = rs.getString("universityId")
 	}
 
 	val GetMembershipByDepartmentInformation = """

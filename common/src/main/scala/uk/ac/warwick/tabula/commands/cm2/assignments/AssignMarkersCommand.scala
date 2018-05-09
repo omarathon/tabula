@@ -1,19 +1,19 @@
 package uk.ac.warwick.tabula.commands.cm2.assignments
 
-import uk.ac.warwick.tabula.commands._
-import uk.ac.warwick.tabula.system.permissions.{PermissionsChecking, PermissionsCheckingMethods, RequiresPermissionsChecking}
 import org.springframework.validation.{BindingResult, Errors}
-import uk.ac.warwick.tabula.data.model.Assignment
-import uk.ac.warwick.tabula.services._
 import uk.ac.warwick.tabula.JavaImports._
+import uk.ac.warwick.tabula.commands._
 import uk.ac.warwick.tabula.data.Transactions.transactional
+import uk.ac.warwick.tabula.data.model.Assignment
 import uk.ac.warwick.tabula.data.model.markingworkflow.MarkingWorkflowStage
 import uk.ac.warwick.tabula.helpers.LazyMaps
 import uk.ac.warwick.tabula.permissions.Permissions
-import uk.ac.warwick.tabula.services.CM2MarkingWorkflowService.Allocations
+import uk.ac.warwick.tabula.services.CM2MarkingWorkflowService.{Allocations, Marker, Student}
+import uk.ac.warwick.tabula.services._
 import uk.ac.warwick.tabula.services.cm2.docconversion.MarkerAllocationExtractor.ParsedRow
 import uk.ac.warwick.tabula.services.cm2.docconversion.{AutowiringMarkerAllocationExtractorComponent, MarkerAllocationExtractorComponent}
 import uk.ac.warwick.tabula.system.BindListener
+import uk.ac.warwick.tabula.system.permissions.{PermissionsChecking, PermissionsCheckingMethods, RequiresPermissionsChecking}
 
 import scala.collection.JavaConverters._
 
@@ -148,7 +148,34 @@ trait ValidateConcurrentStages {
 
 trait AssignMarkersValidation extends SelfValidating with ValidateConcurrentStages {
 	self: AssignMarkersState =>
-	def validate(errors: Errors): Unit = validateConcurrentStages(allocationMap, errors)
+	def validate(errors: Errors): Unit = {
+		validateConcurrentStages(allocationMap, errors)
+		validateChangedAllocations(errors)
+	}
+
+	def validateChangedAllocations(errors: Errors): Unit = {
+		val changedMarkerAllocationsWithFinalisedFeedback: Iterable[(MarkingWorkflowStage, Marker, Student)] = for {
+			(stage, allocations) <- allocationMap
+			(newMarker, students) <- allocations
+			student <- students
+			markerFeedback <- assignment.findFeedback(student.getUserId).toSeq.flatMap(_.allMarkerFeedback)
+				.filter(_.stage == stage).filter(_.marker != newMarker).filter(_.finalised)
+		} yield {
+			val currentMarker = markerFeedback.marker
+
+			(stage, currentMarker, student)
+		}
+
+		changedMarkerAllocationsWithFinalisedFeedback
+			.groupBy { case (stage, marker, _) => (stage, marker) }
+			.mapValues(_.map({ case (_, _, student) => student }))
+			.foreach {
+				case ((stage, marker), students) =>
+					val args: Array[Object] = Array(stage.description.toLowerCase, marker.getFullName, students.map(_.getFullName).mkString(", "))
+
+					errors.reject("markingWorkflow.markers.finalised", args, "")
+			}
+	}
 }
 
 trait AssignMarkersDescription extends Describable[Assignment] {

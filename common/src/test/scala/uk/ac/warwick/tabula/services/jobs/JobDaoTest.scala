@@ -10,7 +10,7 @@ class JobDaoTest extends AppContextTestBase with HasJobDao {
 
 	@Autowired var service: JobService = _
 
-	@Test def crud() = transactional { _ =>
+	@Test def crud(): Unit = transactional { _ =>
 
 		val anHourAgo = DateTime.now.minusHours(1)
 		val twoHoursAgo = DateTime.now.minusHours(2)

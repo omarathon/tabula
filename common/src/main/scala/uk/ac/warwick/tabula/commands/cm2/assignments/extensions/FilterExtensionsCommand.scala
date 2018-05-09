@@ -55,7 +55,7 @@ class FilterExtensionsCommandInternal(val academicYear: AcademicYear, val user: 
 	def applyInternal(): FilterExtensionResults = {
 		// permission to manage extensions are all scoped by dept or module - we can't do normal permissions checking as there could be no scope to check against
 		if (allDepartments.isEmpty)
-			throw new PermissionDeniedException(user, Permissions.Extension.Read, null)
+			throw PermissionDeniedException(user, Permissions.Extension.Read, null)
 
 		// on the off chance that someone has tried to hack extra departments or modules into the filter remove them
 		departments = departments.asScala.filter(d => allDepartments.contains(d)).asJava

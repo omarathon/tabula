@@ -221,7 +221,7 @@
 					</tr>
 					<tr>
 						<td><span class="exam-grid-resit"># (#)</span></td>
-						<td>Mark is from a resit, the original mark is shown in brackets</td>
+						<td>Resit mark (original mark)</td>
 					</tr>
 					<tr>
 						<td><span class="exam-grid-actual-mark">X</span></td>

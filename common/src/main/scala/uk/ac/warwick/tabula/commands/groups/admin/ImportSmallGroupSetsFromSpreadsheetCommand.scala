@@ -9,6 +9,7 @@ import uk.ac.warwick.tabula.data.Transactions._
 import uk.ac.warwick.tabula.data.model.groups._
 import uk.ac.warwick.tabula.data.model.{AliasedMapLocation, Department, MapLocation, NamedLocation}
 import uk.ac.warwick.tabula.helpers.Logging
+import uk.ac.warwick.tabula.helpers.StringUtils._
 import uk.ac.warwick.tabula.permissions.Permissions
 import uk.ac.warwick.tabula.services.groups.docconversion._
 import uk.ac.warwick.tabula.services.{AutowiringSmallGroupServiceComponent, SmallGroupServiceComponent}
@@ -19,7 +20,7 @@ import scala.collection.JavaConverters._
 
 object ImportSmallGroupSetsFromSpreadsheetCommand {
 	val RequiredPermission = Permissions.SmallGroups.ImportFromExternalSystem
-	type CommandType = Appliable[Seq[SmallGroupSet]] with SelfValidating with BindListener with ImportSmallGroupSetsFromSpreadsheetRequest
+	type CommandType = Appliable[Seq[SmallGroupSet]] with SelfValidating with BindListener with ImportSmallGroupSetsFromSpreadsheetRequest with ImportSmallGroupSetsFromSpreadsheetWarnings
 
 	type ModifySetCommand = ModifySmallGroupSetCommand.Command
 	type ModifyGroupCommand = ModifySmallGroupCommand.Command
@@ -29,6 +30,7 @@ object ImportSmallGroupSetsFromSpreadsheetCommand {
 
 	def apply(department: Department, academicYear: AcademicYear): CommandType =
 		new ImportSmallGroupSetsFromSpreadsheetCommandInternal(department, academicYear)
+			with ImportSmallGroupSetsFromSpreadsheetWarnings
 			with ComposableCommand[Seq[SmallGroupSet]]
 			with ImportSmallGroupSetsFromSpreadsheetPermissions
 			with ImportSmallGroupSetsFromSpreadsheetDescription
@@ -289,4 +291,25 @@ trait ImportSmallGroupSetsFromSpreadsheetDescription extends Describable[Seq[Sma
 
 	override def describe(d: Description): Unit =
 		d.department(department)
+}
+
+trait ImportSmallGroupSetsFromSpreadsheetWarnings {
+	self: ImportSmallGroupSetsFromSpreadsheetRequest =>
+	def warnings(): Seq[String] = {
+		commands.asScala
+			.flatMap { setHolder =>
+				val set = setHolder.command
+				setHolder.modifyGroupCommands.asScala.flatMap { groupHolder =>
+					val group = groupHolder.command
+					val groupDescription = s"""${set.module.code.toUpperCase} ${set.format.plural}: "${set.name}", Group "${group.name}""""
+
+					groupHolder.modifyEventCommands.asScala.map(_.command)
+						.filterNot(_.locationId.hasText).filter(_.location.hasText)
+						.map { event =>
+							val maybeTitle = event.title.maybeText.map(t => s"""event "$t"""").getOrElse("untitled event")
+							s"""$groupDescription, $maybeTitle: the location "${event.location}" was not found on the campus map"""
+						}
+				}
+			}
+	}
 }

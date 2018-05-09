@@ -14,7 +14,8 @@
 </#if>
 
 <#if can.do("Department.ExamGrids", department)>
-	<h2><a href="<@routes.exams.generateGrid department academicYear />">Generate new grid</a></h2>
+	<h2><a href="<@routes.exams.generateGrid department academicYear />">Generate new course exam grid</a></h2>
+	<h2><a href="<@routes.exams.generateModuleGrid department academicYear />">Generate new module exam grid</a></h2>
 	<h2><a href="<@routes.exams.uploadYearMarks department academicYear />">Upload year marks</a></h2>
 	<h2><a href="<@routes.exams.manageNormalLoads department academicYear />">Manage normal CATS loads</a></h2>
 	<h2><a href="<@routes.exams.manageWeightings department academicYear />">Manage course year weightings</a></h2>

@@ -122,7 +122,7 @@ object MarkingWorkflowStage {
 		override def roleName = "Final marker"
 		override def verb = "finalise"
 		override def nextStages: Seq[MarkingWorkflowStage] = Seq(DblBlndCompleted)
-		override def previousStages: Seq[MarkingWorkflowStage] = Seq(DblBlndInitialMarkerA, DblBlndInitialMarkerA)
+		override def previousStages: Seq[MarkingWorkflowStage] = Seq(DblBlndInitialMarkerA, DblBlndInitialMarkerB)
 		override def description = "Final marker"
 	}
 	case object DblBlndCompleted extends FinalStage("dbl-blnd-completed") {
@@ -172,7 +172,7 @@ object MarkingWorkflowStage {
 		val NotModeratedKey: String  = "notModerated"
 
 		override def actionCompletedKey(feedback: Option[Feedback]): String = {
-			val markerFeedback = feedback.flatMap(_.allMarkerFeedback.find(_.stage == this))
+			val markerFeedback = feedback.flatMap(_.allMarkerFeedback.find(_.stage == SelectedModerationModerator))
 			markerFeedback match {
 				case Some(mf) if !mf.hasContent => NotModeratedKey
 				case _ => MarkingWorkflowStage.DefaultCompletionKey

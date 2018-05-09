@@ -10,7 +10,6 @@ import uk.ac.warwick.tabula.services.attendancemonitoring.{AttendanceMonitoringS
 import uk.ac.warwick.tabula.services.{AutowiringSecurityServiceComponent, SecurityServiceComponent}
 import uk.ac.warwick.tabula.system.permissions.{PermissionsChecking, PermissionsCheckingMethods, RequiresPermissionsChecking}
 import uk.ac.warwick.tabula.{AcademicPeriod, AcademicYear, CurrentUser}
-import uk.ac.warwick.util.termdates.AcademicYearPeriod
 
 object CreateMonitoringPointReportCommand {
 	def apply(department: Department, currentUser: CurrentUser) =
@@ -41,11 +40,13 @@ class CreateMonitoringPointReportCommandInternal(val department: Department, val
 		missedPoints.map { case (student, missedCount) =>
 			val scd = student.mostSignificantCourseDetails.orNull
 			val report = new MonitoringPointReport
+			val reporterId = Option(currentUser.apparentUser.getWarwickId).getOrElse(currentUser.apparentUser.getUserId)
+			val reporterDepartment =  Option(currentUser.departmentCode).map { _.toUpperCase }.getOrElse("")
 			report.academicYear = academicYear
 			report.createdDate = DateTime.now
 			report.missed = missedCount
 			report.monitoringPeriod = period
-			report.reporter = currentUser.departmentCode.toUpperCase + currentUser.apparentUser.getWarwickId
+			report.reporter = reporterDepartment + reporterId
 			report.student = student
 			report.studentCourseDetails = scd
 			report.studentCourseYearDetails = scd.freshStudentCourseYearDetails.find(_.academicYear == academicYear).orNull

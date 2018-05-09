@@ -36,9 +36,17 @@ class CoreRequiredModule extends GeneratedId {
 
 }
 
-class CoreRequiredModuleLookup(academicYear: AcademicYear, yearOfStudy: YearOfStudy, moduleRegistrationService: ModuleRegistrationService) {
+trait CoreRequiredModuleLookup {
+	def apply(route: Route): Seq[CoreRequiredModule]
+}
+
+object NullCoreRequiredModuleLookup extends CoreRequiredModuleLookup {
+	override def apply(route: Route): Seq[CoreRequiredModule] = Nil
+}
+
+class CoreRequiredModuleLookupImpl(academicYear: AcademicYear, yearOfStudy: YearOfStudy, moduleRegistrationService: ModuleRegistrationService)  extends CoreRequiredModuleLookup {
 	private val cache = mutable.Map[Route, Seq[CoreRequiredModule]]()
-	def apply(route: Route): Seq[CoreRequiredModule] = cache.get(route) match {
+	override def apply(route: Route): Seq[CoreRequiredModule] = cache.get(route) match {
 		case Some(modules) =>
 			modules
 		case _ =>

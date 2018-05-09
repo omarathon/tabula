@@ -25,7 +25,7 @@ class MeetingRecordApprovalNotificationTest extends TestBase with Mockito with F
 
 	freeMarkerConfig.setSharedVariable("url", urlMethodModel)
 
-	@Test def itWorks() {
+	@Test def itWorks(): Unit = {
 		val department = Fixtures.department("es", "Engineering")
 
 		val agent = Fixtures.staff("1234567", "estaff", department)

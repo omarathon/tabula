@@ -6,22 +6,22 @@
 <#if submission??>
 <#if sent>
 
-<p>I've sent a fresh copy of the email to <strong>${user.email}</strong>. If it doesn't show up in your inbox after
-  a couple of minutes, check your spam folder in case it has been put in there.</p>
+<p>A fresh copy of the receipt email has been sent to <strong>${user.email}</strong>. If it doesn't appear in your inbox after
+  a few minutes, check your spam folder.</p>
 
 <#elseif hasEmail>
 
-<p>I was unable to send an email to <strong>${user.email}</strong>. Please try again later.</p>
+<p>The receipt email could not be sent to <strong>${user.email}</strong>. Please try again later.</p>
 
 <#else>
 
-<p>I was unable to send a receipt email because you don't have any email address registered. Please contact the
-ITS helpdesk who will help you </p>
+<p>The receipt email could not be sent because you do not have a registered email address. Please contact the
+<a target="_blank" href="https://warwick.ac.uk/helpdesk">IT Services Help Desk</a> for assistance.</p>
 
 </#if>
 <#else>
 
-<p>You haven't submitted to this assignment.</p>
+<p>You haven't submitted this assignment.</p>
 
 </#if>
 

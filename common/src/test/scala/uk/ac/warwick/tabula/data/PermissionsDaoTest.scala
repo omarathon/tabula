@@ -17,11 +17,11 @@ class PermissionsDaoTest extends PersistenceTestBase {
 	val dao = new PermissionsDaoImpl
 
 	@Before
-	def setup() {
+	def setup(): Unit = {
 		dao.sessionFactory = sessionFactory
 	}
 
-	@Test def crud = transactional { t =>
+	@Test def crud(): Unit = transactional { t =>
 		val dept1 = Fixtures.department("dp1")
 		val dept2 = Fixtures.department("dp2")
 
@@ -81,7 +81,7 @@ class PermissionsDaoTest extends PersistenceTestBase {
 		dao.getGrantedPermissionsForUser(new User("cusfaq")) should be (Seq())
 	}
 
-	@Test def guards = transactional { tx =>
+	@Test def guards(): Unit = transactional { tx =>
 		// Make sure we don't throw an exception with a permissions type we don't know how to set roles/permissions for
 		val scope = Fixtures.userSettings("cuscav")
 

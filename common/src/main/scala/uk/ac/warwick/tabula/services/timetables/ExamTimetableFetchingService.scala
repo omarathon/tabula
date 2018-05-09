@@ -1,7 +1,8 @@
 package uk.ac.warwick.tabula.services.timetables
 
-import dispatch.classic.{Handler, Request, url}
 import org.apache.commons.codec.digest.DigestUtils
+import org.apache.http.client.ResponseHandler
+import org.apache.http.client.methods.RequestBuilder
 import org.joda.time.format.{DateTimeFormat, DateTimeFormatter, PeriodFormatter, PeriodFormatterBuilder}
 import org.joda.time.{DateTime, Period}
 import org.springframework.stereotype.Service
@@ -11,14 +12,14 @@ import uk.ac.warwick.tabula._
 import uk.ac.warwick.tabula.data.model.Member
 import uk.ac.warwick.tabula.data.model.groups.{DayOfWeek, WeekRange}
 import uk.ac.warwick.tabula.helpers.ExecutionContexts.timetable
-import uk.ac.warwick.tabula.helpers.Logging
 import uk.ac.warwick.tabula.helpers.StringUtils._
+import uk.ac.warwick.tabula.helpers.{ApacheHttpClientUtils, Logging}
 import uk.ac.warwick.tabula.profiles.web.Routes
 import uk.ac.warwick.tabula.services._
+import uk.ac.warwick.tabula.services.timetables.ExamTimetableFetchingService.ExamTimetable
 import uk.ac.warwick.tabula.services.timetables.TimetableFetchingService.EventList
 import uk.ac.warwick.tabula.timetables.{TimetableEvent, TimetableEventType}
 
-import scala.collection.JavaConverters._
 import scala.concurrent.Future
 import scala.util.Try
 import scala.xml.Elem
@@ -49,15 +50,14 @@ trait ExamTimetableHttpTimetableFetchingServiceComponent extends StaffAndStudent
 private class ExamTimetableHttpTimetableFetchingService(examTimetableConfiguration: ExamTimetableConfiguration)
 	extends StaffTimetableFetchingService with StudentTimetableFetchingService with Logging {
 
-	self: DispatchHttpClientComponent with TrustedApplicationsManagerComponent
+	self: ApacheHttpClientComponent with TrustedApplicationsManagerComponent
 		with UserLookupComponent with FeaturesComponent with TopLevelUrlComponent =>
 
-	// a dispatch response handler which reads XML from the response and parses it into a list of TimetableEvents
-	def handler(uniId: String): (Map[String, Seq[String]], Request) => Handler[Seq[TimetableEvent]] = { (_: Map[String,Seq[String]], req: dispatch.classic.Request) =>
-		req <> { node =>
+	// an HTTPClient response handler which reads XML from the response and parses it into a list of TimetableEvents
+	def handler(uniId: String): ResponseHandler[Seq[TimetableEvent]] =
+		ApacheHttpClientUtils.xmlResponseHandler { node =>
 			ExamTimetableHttpTimetableFetchingService.parseXml(node, uniId, toplevelUrl)
 		}
-	}
 
 	private def featureProtected(arg: String)(f: (String) => Future[EventList]): Future[EventList] = {
 		if (features.personalExamTimetables) {
@@ -79,21 +79,14 @@ private class ExamTimetableHttpTimetableFetchingService(examTimetableConfigurati
 			case user =>
 				val endpoint = s"${examTimetableConfiguration.examTimetableUrl}timetable.xml"
 
-				val trustedAppHeaders = TrustedApplicationUtils.getRequestHeaders(
-					applicationManager.getCurrentApplication,
-					user.getUserId,
-					endpoint
-				).asScala.map { header => header.getName -> header.getValue }.toMap
+				val req = RequestBuilder.get(endpoint).build()
+				TrustedApplicationUtils.signRequest(applicationManager.getCurrentApplication, user.getUserId, req)
 
-				val req = url(endpoint) <:< trustedAppHeaders
+				logger.info(s"Requesting exam timetable data from $endpoint")
 
-				logger.info(s"Requesting exam timetable data from ${req.to_uri.toString}")
-
-				val result = Future {
-					httpClient.when(_ == 200)(req >:+ handler(param))
-				}
+				val result = Future { httpClient.execute(req, handler(param)) }
 				result.onFailure { case e =>
-					logger.warn(s"Request for ${req.to_uri.toString} failed: ${e.getMessage}")
+					logger.warn(s"Request for $endpoint failed: ${e.getMessage}")
 				}
 				result.map(EventList.fresh)
 		}
@@ -107,7 +100,7 @@ object ExamTimetableHttpTimetableFetchingService extends Logging {
 
 	def apply(examTimetableConfiguration: ExamTimetableConfiguration): CachedStaffAndStudentTimetableFetchingService = {
 		val service =	new ExamTimetableHttpTimetableFetchingService(examTimetableConfiguration)
-			with AutowiringDispatchHttpClientComponent
+			with AutowiringApacheHttpClientComponent
 			with AutowiringTrustedApplicationsManagerComponent
 			with AutowiringUserLookupComponent
 			with AutowiringFeaturesComponent
@@ -229,34 +222,26 @@ trait ExamTimetableFetchingService {
 
 abstract class AbstractExamTimetableFetchingService extends ExamTimetableFetchingService with Logging {
 
-	self: DispatchHttpClientComponent with ExamTimetableConfigurationComponent
+	self: ApacheHttpClientComponent with ExamTimetableConfigurationComponent
 		with TrustedApplicationsManagerComponent =>
 
 	def getTimetable(member: Member, viewer: CurrentUser): Future[ExamTimetableFetchingService.ExamTimetable] = {
 		val endpoint = s"${examTimetableConfiguration.examTimetableUrl}${member.universityId}.xml"
 
-		val trustedAppHeaders = TrustedApplicationUtils.getRequestHeaders(
-			applicationManager.getCurrentApplication,
-			viewer.userId,
-			endpoint
-		).asScala.map { header => header.getName -> header.getValue }.toMap
+		val req = RequestBuilder.get(endpoint).build()
+		TrustedApplicationUtils.signRequest(applicationManager.getCurrentApplication, viewer.userId, req)
 
-		val req = url(endpoint) <:< trustedAppHeaders
+		logger.info(s"Requesting exam timetable data from $endpoint")
 
-		logger.info(s"Requesting exam timetable data from ${req.to_uri.toString}")
-
-		// a dispatch response handler which reads XML from the response and parses it into an ExamTimetable
-		def handler = { (_: Map[String,Seq[String]], req: dispatch.classic.Request) =>
-			req <> { node =>
+		// an HTTPClient response handler which reads XML from the response and parses it into an ExamTimetable
+		val handler: ResponseHandler[ExamTimetable] =
+			ApacheHttpClientUtils.xmlResponseHandler { node =>
 				ExamTimetableFetchingService.examTimetableFromXml(node)
 			}
-		}
 
-		val result = Future {
-			httpClient.when(_ == 200)(req >:+ handler)
-		}
+		val result = Future { httpClient.execute(req, handler) }
 		result.onFailure { case e =>
-			logger.warn(s"Request for ${req.to_uri.toString} failed: ${e.getMessage}")
+			logger.warn(s"Request for $endpoint failed: ${e.getMessage}")
 		}
 		result
 	}
@@ -265,7 +250,7 @@ abstract class AbstractExamTimetableFetchingService extends ExamTimetableFetchin
 @Service("examTimetableFetchingService")
 class ExamTimetableFetchingServiceImpl
 	extends AbstractExamTimetableFetchingService
-	with AutowiringDispatchHttpClientComponent
+	with AutowiringApacheHttpClientComponent
 	with AutowiringExamTimetableConfigurationComponent
 	with AutowiringTrustedApplicationsManagerComponent
 	with AutowiringUserLookupComponent

@@ -263,18 +263,19 @@ class Department extends GeneratedId
 
 	def examGridOptions: ExamGridOptions = ExamGridOptions(
 		getStringSeqSetting(Settings.ExamGridOptions.PredefinedColumnIdentifiers, Wire.all[ExamGridColumnOption].map(_.identifier)).toSet,
-		getStringSeqSetting(Settings.ExamGridOptions.PredefinedColumnIdentifiers, Seq()),
+		getStringSeqSetting(Settings.ExamGridOptions.CustomColumnTitles, Seq()),
 		nameToShow,
 		getStringSetting(Settings.ExamGridOptions.MarksToShow, "overall"),
 		getStringSetting(Settings.ExamGridOptions.ComponentsToShow, "all"),
 		getStringSetting(Settings.ExamGridOptions.ComponentSequenceToShow, "markOnly"),
 		getStringSetting(Settings.ExamGridOptions.ModuleNameToShow, "codeOnly"),
 		getStringSetting(Settings.ExamGridOptions.Layout, "full"),
-		getStringSetting(Settings.ExamGridOptions.YearMarksToUse, "sits")
+		getStringSetting(Settings.ExamGridOptions.YearMarksToUse, "sits"),
+		getBooleanSetting(Settings.ExamGridOptions.MandatoryModulesAndYearMarkColumns, default = true)
 	)
 	def examGridOptions_=(options: ExamGridOptions): Unit = {
 		settings += (Settings.ExamGridOptions.PredefinedColumnIdentifiers -> options.predefinedColumnIdentifiers)
-		settings += (Settings.ExamGridOptions.PredefinedColumnIdentifiers -> options.customColumnTitles)
+		settings += (Settings.ExamGridOptions.CustomColumnTitles -> options.customColumnTitles)
 		settings += (Settings.ExamGridOptions.NameToShow -> options.nameToShow.value)
 		settings += (Settings.ExamGridOptions.MarksToShow -> options.marksToShow)
 		settings += (Settings.ExamGridOptions.ComponentsToShow -> options.componentsToShow)
@@ -282,6 +283,7 @@ class Department extends GeneratedId
 		settings += (Settings.ExamGridOptions.ModuleNameToShow -> options.moduleNameToShow)
 		settings += (Settings.ExamGridOptions.Layout -> options.layout)
 		settings += (Settings.ExamGridOptions.YearMarksToUse -> options.yearMarksToUse)
+		settings += (Settings.ExamGridOptions.MandatoryModulesAndYearMarkColumns -> options.mandatoryModulesAndYearMarkColumns)
 	}
 
 	// FIXME belongs in Freemarker
@@ -544,6 +546,7 @@ object Department {
 			val ModuleNameToShow = "examGridOptionsModuleName"
 			val Layout ="examGridOptionsLayout"
 			val YearMarksToUse = "examGridOptionsYearMark"
+			val MandatoryModulesAndYearMarkColumns = "examGridOptionsMandatoryModulesAndYearMarkColumns"
 		}
 		case class ExamGridOptions(
 			predefinedColumnIdentifiers: Set[String],
@@ -554,7 +557,8 @@ object Department {
 			componentSequenceToShow: String,
 			moduleNameToShow: String,
 			layout: String,
-			yearMarksToUse: String
+			yearMarksToUse: String,
+			mandatoryModulesAndYearMarkColumns: Boolean
 		)
 	}
 }

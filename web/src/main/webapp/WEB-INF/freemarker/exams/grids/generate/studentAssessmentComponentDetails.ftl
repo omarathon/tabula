@@ -1,12 +1,13 @@
 <#escape x as x?html>
-	<#function route_function dept>
-		<#local selectCourseCommand><@routes.exams.generateGrid dept academicYear /></#local>
-		<#return selectCourseCommand />
-	</#function>
 	<div class="exam-grid-preview">
-		<@fmt.id7_deptheader title="Create a new exam grid for ${department.name}" route_function=route_function />
-		<#if department.examGridOptions.nameToShow.toString != 'none'><h2>${member.fullName!}</h2></#if>
-		<h3> ${member.universityId}</h3>
+		<div class="deptheader">
+			<#if department.examGridOptions.nameToShow.toString != 'none'>
+				<h1>${member.fullName!}</h1>
+				<h4 class="with-related">${member.universityId}</h4>
+			<#else>
+				<h1>${member.universityId}</h1>
+			</#if>
+		</div>
 		<div class="key clearfix">
 			<table class="table table-condensed">
 				<thead>
@@ -76,7 +77,7 @@
 					</tr>
 					<tr>
 						<td><span class="exam-grid-resit"># (#)</span></td>
-						<td>Mark is from a resit, the original mark is shown in brackets</td>
+						<td>Resit mark (original mark)</td>
 					</tr>
 					<tr>
 						<td><span class="exam-grid-actual-mark">X</span></td>

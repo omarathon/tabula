@@ -1,7 +1,7 @@
 package uk.ac.warwick.tabula.web
 
-import dispatch.classic._
-import org.apache.http.HttpStatus
+import org.apache.http.client.methods.RequestBuilder
+import org.apache.http.impl.client.BasicResponseHandler
 import org.openqa.selenium.By
 import uk.ac.warwick.tabula.{BrowserTest, FunctionalTestProperties}
 
@@ -31,10 +31,9 @@ trait FeaturesDriver extends BrowserTest with SimpleHttpFetching {
 
 	def isFeatureEnabled(name: String): Boolean = {
 		val uri = FunctionalTestProperties.SiteRoot + "/test/feature/" + name
-		val req = url(uri)
+		val req = RequestBuilder.get(uri)
 
-		val resp = http.when(_ == HttpStatus.SC_OK) { req.as_str }
-		resp.toBoolean
+		httpClient.execute(req.build(), new BasicResponseHandler).toBoolean
 	}
 
 }

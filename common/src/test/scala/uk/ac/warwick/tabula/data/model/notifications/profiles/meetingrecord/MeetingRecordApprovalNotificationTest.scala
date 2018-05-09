@@ -24,7 +24,7 @@ class MeetingRecordApprovalNotificationTest extends TestBase with FreemarkerRend
 
 	val relationship: StudentRelationship = StudentRelationship(agent, relationshipType, student, DateTime.now)
 
-	@Test def titleNewMeetingStudent() = withUser("cuscav", "0672089") {
+	@Test def titleNewMeetingStudent(): Unit = withUser("cuscav", "0672089") {
 		val meeting = new MeetingRecord(agent, relationship)
 
 		val notification = Notification.init(new NewMeetingRecordApprovalNotification, currentUser.apparentUser, meeting)
@@ -32,7 +32,7 @@ class MeetingRecordApprovalNotificationTest extends TestBase with FreemarkerRend
 	}
 
 	// TAB-5119
-	@Test def rendersOutsideThreadNewMeetingStudent() = {
+	@Test def rendersOutsideThreadNewMeetingStudent(): Unit = {
 		val u = new User("cuscav")
 		u.setIsLoggedIn(true)
 		u.setFoundUser(true)
@@ -47,21 +47,21 @@ class MeetingRecordApprovalNotificationTest extends TestBase with FreemarkerRend
 		notificationContent should startWith ("Tutor Name has created a record of your personal tutor meeting")
 	}
 
-	@Test def titleNewMeetingTutor() = withUser("cuscav", "0672089") {
+	@Test def titleNewMeetingTutor(): Unit = withUser("cuscav", "0672089") {
 		val meeting = new MeetingRecord(student, relationship)
 
 		val notification = Notification.init(new NewMeetingRecordApprovalNotification, currentUser.apparentUser, meeting)
 		notification.title should be ("Personal tutor meeting record with Student Name needs review")
 	}
 
-	@Test def titleEditMeetingStudent() = withUser("cuscav", "0672089") {
+	@Test def titleEditMeetingStudent(): Unit = withUser("cuscav", "0672089") {
 		val meeting = new MeetingRecord(agent, relationship)
 
 		val notification = Notification.init(new EditedMeetingRecordApprovalNotification, currentUser.apparentUser, meeting)
 		notification.title should be ("Personal tutor meeting record with Tutor Name needs review")
 	}
 
-	@Test def titleEditMeetingTutor() = withUser("cuscav", "0672089") {
+	@Test def titleEditMeetingTutor(): Unit = withUser("cuscav", "0672089") {
 		val meeting = new MeetingRecord(student, relationship)
 
 		val notification = Notification.init(new EditedMeetingRecordApprovalNotification, currentUser.apparentUser, meeting)

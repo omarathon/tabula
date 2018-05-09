@@ -42,7 +42,7 @@ class ExceptionResolverTest extends TestBase {
 		withUser(null) {
 			val requestInfo = RequestInfo.fromThread.get
 			val user = requestInfo.user
-			val exception = new PermissionDeniedException(user, null, null, null)
+			val exception = PermissionDeniedException(user, null, null, null)
 			val modelAndView = resolver.doResolve(exception, None)
 			modelAndView.viewName should be ("redirect:"+resolver.loginUrl)
 		}
@@ -58,7 +58,7 @@ class ExceptionResolverTest extends TestBase {
 		withUser("cusebr") {
 			val requestInfo = RequestInfo.fromThread.get
 			val user = requestInfo.user
-			val exception = new PermissionDeniedException(user, null, null, null)
+			val exception = PermissionDeniedException(user, null, null, null)
 			val modelAndView = resolver.doResolve(exception, None)
 			modelAndView.viewName should be (resolver.defaultView)
 		}
@@ -113,7 +113,7 @@ class ExceptionResolverTest extends TestBase {
 
 			val requestInfo = RequestInfo.fromThread.get
 			val user = requestInfo.user
-			val exception = new PermissionDeniedException(user, null, null, null)
+			val exception = PermissionDeniedException(user, null, null, null)
 			val modelAndView = resolver.resolveException(request, response, handled, exception)
 			modelAndView.getViewName should be (resolver.defaultView)
 

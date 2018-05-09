@@ -2,11 +2,11 @@
 
 <#macro command_type_label commandType>
 	<#if commandType == "Create">
-		<span class="label label-success">${commandType}</span>
+		<span class="label label-success">Creating</span>
 	<#elseif commandType == "Edit">
-		<span class="label label-warning">${commandType}</span>
+		<span class="label label-warning">Editing</span>
 	<#elseif commandType == "Delete">
-		<span class="label label-danger">${commandType}</span>
+		<span class="label label-danger">Deleting</span>
 	<#else>
 		<span class="label label-default">${commandType}</span>
 	</#if>
@@ -238,7 +238,28 @@
 			<p>Some rows in your spreadsheet weren't valid. See the errors below.</p>
 		</#if>
 	</div>
-<#else>
+</#if>
+
+<#if command.warnings?size != 0>
+	<div class="alert alert-info">
+		<p>
+			There were some warnings while reading your spreadsheet:
+		</p>
+
+		<ul>
+			<#list command.warnings as warning>
+				<li>${warning}</li>
+			</#list>
+		</ul>
+
+		<p>
+			You can complete the import and correct these issues afterwards.
+			Or, edit your spreadsheet and upload it again.
+		</p>
+	</div>
+</#if>
+
+<#if !errors.hasErrors()>
 	<div class="alert alert-info">
 		<p>Please review the changes below - note that it is not possible to undo these changes once they have been made!</p>
 	</div>

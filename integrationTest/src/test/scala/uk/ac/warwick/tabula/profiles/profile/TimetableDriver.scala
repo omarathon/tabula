@@ -1,56 +1,55 @@
 package uk.ac.warwick.tabula.profiles.profile
 
-import dispatch.classic._
-import dispatch.classic.thread.ThreadSafeHttpClient
-import org.apache.http.client.params.{ClientPNames, CookiePolicy}
+import org.apache.http.HttpStatus
+import org.apache.http.auth.UsernamePasswordCredentials
+import org.apache.http.client.methods.RequestBuilder
+import org.apache.http.impl.client.BasicResponseHandler
+import org.apache.http.util.EntityUtils
+import uk.ac.warwick.tabula.helpers.ApacheHttpClientUtils
 import uk.ac.warwick.tabula.web.FixturesDriver
 import uk.ac.warwick.tabula.{AcademicYear, FunctionalTestProperties, LoginDetails}
 
-import scala.language.postfixOps
 import scala.util.parsing.json.JSON
 import scala.xml.Elem
 
-trait TimetableDriver extends FixturesDriver  {
+trait TimetableDriver extends FixturesDriver {
 
 	def setTimetableFor(userId:String, year:AcademicYear, content:Elem) {
 		val uri = FunctionalTestProperties.SiteRoot + "/stubTimetable/student"
-		val req = url(uri).POST << Map("studentId" -> userId, "year" -> year.toString.replace("/", ""), "content"->content.toString)
-		http.when(_==200)(req >| )
+
+		val req =
+			RequestBuilder.post(uri)
+				.addParameter("studentId", userId)
+				.addParameter("year", year.toString.replace("/", ""))
+				.addParameter("content", content.toString)
+
+		httpClient.execute(
+			req.build(),
+			ApacheHttpClientUtils.statusCodeFilteringHandler(HttpStatus.SC_OK)(EntityUtils.consumeQuietly)
+		)
 	}
 
 	def requestWholeYearsTimetableFeedFor(user:LoginDetails, asUser:Option[LoginDetails]=None ):Seq[Map[String,Any]]={
-		val http: Http = new Http with thread.Safety {
-			override def make_client = new ThreadSafeHttpClient(new Http.CurrentCredentials(None), maxConnections, maxConnectionsPerRoute) {
-				getParams.setParameter(ClientPNames.COOKIE_POLICY, CookiePolicy.IGNORE_COOKIES)
-			}
-		}
-		try {
-			val requestor = asUser.getOrElse(user)
-			// request all the events for the current year
-			val startOfYear = AcademicYear.now().firstDay.toDateTimeAtStartOfDay
-			val start = startOfYear.getMillis
-			val end = startOfYear.plusYears(1).getMillis
-			val req = (url(s"${FunctionalTestProperties.SiteRoot}/api/v1/member/${user.warwickId}/timetable/calendar") <<?
-				Map(
-					"from" -> start.toString,
-					"to" -> end.toString,
-					"whoFor" -> user.warwickId,
-					"forceBasic" -> "true"
-				)
-				).as_!(requestor.usercode, requestor.password)
+		val requestor = asUser.getOrElse(user)
+		// request all the events for the current year
+		val startOfYear = AcademicYear.now().firstDay.toDateTimeAtStartOfDay
+		val start = startOfYear.getMillis
+		val end = startOfYear.plusYears(1).getMillis
+		val req =
+			RequestBuilder.get(s"${FunctionalTestProperties.SiteRoot}/api/v1/member/${user.warwickId}/timetable/calendar")
+				.addParameter("from", start.toString)
+				.addParameter("to", end.toString)
+				.addParameter("whoFor", user.warwickId)
+				.addParameter("forceBasic", "true")
+  			.setHeader(ApacheHttpClientUtils.basicAuthHeader(new UsernamePasswordCredentials(requestor.usercode, requestor.password)))
 
-			import scala.language.postfixOps
-			val rawJSON = http.x(req as_str)
-			JSON.parseFull(rawJSON) match {
-				case Some(json: Map[String, Any] @unchecked) => json.get("events") match {
-					case Some(events: Seq[Map[String, Any]] @unchecked) => events
-					case _ => throw new RuntimeException(s"Couldn't parse JSON into sequence\n $rawJSON")
-				}
+		val rawJSON = httpClient.execute(req.build(), new BasicResponseHandler)
+		JSON.parseFull(rawJSON) match {
+			case Some(json: Map[String, Any] @unchecked) => json.get("events") match {
+				case Some(events: Seq[Map[String, Any]] @unchecked) => events
 				case _ => throw new RuntimeException(s"Couldn't parse JSON into sequence\n $rawJSON")
 			}
-		} finally {
-			http.shutdown()
+			case _ => throw new RuntimeException(s"Couldn't parse JSON into sequence\n $rawJSON")
 		}
-
 	}
 }

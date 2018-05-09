@@ -96,9 +96,9 @@ class GenerateExamGridController extends ExamsController
 		@RequestParam(value = "levelCode", required = false) levelCode: String
 	): CoreRequiredModuleLookup = {
 		if (Option(yearOfStudy).nonEmpty) {
-			new CoreRequiredModuleLookup(academicYear, yearOfStudy, moduleRegistrationService)
+			new CoreRequiredModuleLookupImpl(academicYear, yearOfStudy, moduleRegistrationService)
 		} else if (levelCode != null){
-			new CoreRequiredModuleLookup(academicYear, Level.toYearOfStudy(levelCode), moduleRegistrationService)
+			new CoreRequiredModuleLookupImpl(academicYear, Level.toYearOfStudy(levelCode), moduleRegistrationService)
 		} else {
 			null
 		}
@@ -438,10 +438,12 @@ class GenerateExamGridController extends ExamsController
 				)
 			}.toMap
 
+		val coreRequiredModulesColumnSelected = predefinedColumnOptions.exists(_.isInstanceOf[CoreRequiredModulesColumnOption])
+
 		val state = ExamGridColumnState(
 			entities = entities,
 			overcatSubsets = overcatSubsets,
-			coreRequiredModuleLookup = coreRequiredModuleLookup,
+			coreRequiredModuleLookup = if (coreRequiredModulesColumnSelected) coreRequiredModuleLookup else NullCoreRequiredModuleLookup,
 			normalLoadLookup = normalLoadLookup,
 			routeRulesLookup = routeRulesLookup,
 			academicYear = selectCourseCommand.academicYear,
