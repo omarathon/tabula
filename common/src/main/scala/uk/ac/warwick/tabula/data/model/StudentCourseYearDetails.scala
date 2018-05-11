@@ -35,7 +35,6 @@ object StudentCourseYearDetails {
 		val moduleRegistrations = scyds.flatMap(_.moduleRegistrations)
 		val route = {
 			val allRoutes = scyds.sorted.flatMap(scyd => Option(scyd.route)).toSet // ignore any nulls
-			//if (allRoutes.size > 1) throw new IllegalArgumentException(s"Cannot generate an ExamGridEntityLevel ${scyds.head.studyLevel} for ${scyds.head.studentCourseDetails.scjCode} with a mixture of routes: ${allRoutes.mkString(", ")}")
 			allRoutes.lastOption.getOrElse(scyds.head.studentCourseDetails.currentRoute)
 		}
 		val overcattingModules = scyds.map(_.overcattingModules).fold(Option(Seq()))((m1, m2) => Option((m1 ++ m2).flatten.toList.distinct).filter(_.nonEmpty))
