@@ -8,13 +8,13 @@
 	</@bs3form.labelled_form_group>
 
 	<@bs3form.labelled_form_group path="academicYear" labelText="Academic year">
-		<p class="form-control-static">${status.actualValue.label} <span class="very-subtle">(can't be changed)</span></p>
+		<p class="form-control-static">${status.actualValue.label} <span class="very-subtle">(cannot be changed)</span></p>
 		<@f.hidden path="academicYear" id="academicYear" value="${status.actualValue.label}" cssClass="form-control-static" />
 	</@bs3form.labelled_form_group>
 
 	<#assign label>
 		Set name
-		<@fmt.help_popover id="name" content="Give this set of groups a name to distinguish it from any other sets - eg. UG Year 1 seminars and UG Year 2 seminars" />
+		<@fmt.help_popover id="name" content="Give this set of groups a name to distinguish it from any other sets - for example, UG year 1 seminars and UG year 2 seminars" />
 	</#assign>
 	<@bs3form.labelled_form_group path="name" labelText="Set name">
 		<@f.input path="name" cssClass="form-control" />
@@ -31,7 +31,7 @@
 				<@bs3form.radio>
 					<@f.radiobutton path="allocationMethod" value="StudentSignUp" selector=".student-sign-up-options" />
 					Self sign-up
-					<@fmt.help_popover id="allocationMethod-ssu" content="Allow students to sign up for groups (you can edit group allocation later" />
+					<@fmt.help_popover id="allocationMethod-ssu" content="Allow students to sign up for groups (you can edit the group allocation later)" />
 				</@bs3form.radio>
 			</#if>
 			<#if features.smallGroupCrossModules>
@@ -44,14 +44,14 @@
 								<@f.options items=departmentSmallGroupSets itemLabel="name" itemValue="id" />
 							</@f.select>
 						</span>
-						<@fmt.help_popover id="allocationMethod-linked" content="Link these groups to a reusable set of small groups" />
+						<@fmt.help_popover id="allocationMethod-linked" content="Link these groups to a reusable small group set" />
 					</@bs3form.radio>
 				<#else>
 					<@bs3form.radio>
 						<span class="disabled use-tooltip" title="There are no reusable small group sets to link to">
 							<input type="radio" disabled="disabled">
 							Linked
-							<@fmt.help_popover id="allocationMethod-linked" content="Link these groups to a reusable set of small groups" />
+							<@fmt.help_popover id="allocationMethod-linked" content="Link these groups to a reusable small group set" />
 						</span>
 					</@bs3form.radio>
 				</#if>
@@ -87,7 +87,7 @@
 			<@bs3form.checkbox path="allowSelfGroupSwitching">
 				<@f.checkbox path="allowSelfGroupSwitching" id="allowSelfGroupSwitching" />
 				Allow students to switch groups
-				<@fmt.help_popover id="allowSelfGroupSwitching" content="When self sign up is enabled students will be able to switch groups." />
+				<@fmt.help_popover id="allowSelfGroupSwitching" content="When self sign-up is enabled students can switch groups" />
 			</@bs3form.checkbox>
 		</div>
 	</#if>
