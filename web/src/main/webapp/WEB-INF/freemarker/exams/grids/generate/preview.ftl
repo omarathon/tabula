@@ -329,7 +329,7 @@
 		});
 
 		$('button.edit-overcatting').each(function(){
-			$(this).attr('href', '<@routes.exams.generateGrid department academicYear />/overcatting/' + $(this).data('student'))
+			$(this).attr('href', '<@routes.exams.generateGrid department academicYear />/overcatting/' + $(this).data('student') + '?basedOnLevel=' + $(this).data('basedonlevel'))
 				.data('target', '#edit-overcatting-modal');
 
 		}).ajaxModalLink();

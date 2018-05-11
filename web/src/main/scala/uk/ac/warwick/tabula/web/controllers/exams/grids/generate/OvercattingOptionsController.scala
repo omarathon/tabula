@@ -5,6 +5,7 @@ import org.springframework.stereotype.Controller
 import org.springframework.validation.Errors
 import org.springframework.web.bind.annotation.{ModelAttribute, PathVariable, RequestMapping, RequestParam}
 import org.springframework.web.servlet.View
+import uk.ac.warwick.tabula.JavaImports.JInteger
 import uk.ac.warwick.tabula.commands.exams.grids._
 import uk.ac.warwick.tabula.commands.{Appliable, PopulateOnForm, SelfValidating}
 import uk.ac.warwick.tabula.data.model.StudentCourseYearDetails.YearOfStudy
@@ -154,8 +155,16 @@ class OvercattingOptionsView(
 
 	private lazy val originalEntity = scyd.studentCourseDetails.student.toExamGridEntity(scyd, basedOnLevel)
 
+
+
+	def studyYearByLevelOrBlock: JInteger = if(basedOnLevel) {
+		Level.toYearOfStudy(scyd.studyLevel)
+	} else {
+		scyd.yearOfStudy
+	}
+
 	lazy val overcattedEntities: Seq[ExamGridEntity] = overcattedModuleSubsets.map { case (_, overcattedModules) =>
-		originalEntity.copy(years = originalEntity.years.updated(scyd.yearOfStudy, Some(ExamGridEntityYear(
+		originalEntity.copy(years = originalEntity.years.updated(studyYearByLevelOrBlock, Some(ExamGridEntityYear(
 			moduleRegistrations = overcattedModules,
 			cats = overcattedModules.map(mr => BigDecimal(mr.cats)).sum,
 			route = scyd.studentCourseDetails.currentRoute,
@@ -163,7 +172,7 @@ class OvercattingOptionsView(
 			markOverrides = Some(overwrittenMarks),
 			studentCourseYearDetails = None,
 			level = scyd.level,
-			yearOfStudy = scyd.yearOfStudy
+			yearOfStudy = studyYearByLevelOrBlock
 		))))
 	}
 
@@ -175,7 +184,7 @@ class OvercattingOptionsView(
 		routeRulesLookup = null, // Not used
 		academicYear = academicYear,
 		department = department,
-		yearOfStudy = scyd.yearOfStudy,
+		yearOfStudy = studyYearByLevelOrBlock,
 		nameToShow = department.nameToShow,
 		showComponentMarks = false,
 		showZeroWeightedComponents = false,

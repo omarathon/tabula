@@ -37,6 +37,7 @@
 
 			<p class="clearfix">&nbsp;</p>
 			<form action="<@routes.exams.generateGridOvercatting department academicYear scyd/>" method="post">
+				<input type="hidden" name="basedOnLevel" value="${overcatView.basedOnLevel?c}" />
 				<table class="table table-condensed grid overcat">
 					<tbody>
 						<#-- Year row -->

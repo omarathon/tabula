@@ -133,7 +133,7 @@ trait GenerateExamGridOvercatCommandState {
 	def user: CurrentUser
 	def basedOnLevel: Boolean
 
-	def allSCYDs: Seq[StudentCourseYearDetails] = if(basedOnLevel)
+	val allSCYDs: Seq[StudentCourseYearDetails] = if(basedOnLevel)
 		scyd.studentCourseDetails.freshOrStaleStudentCourseYearDetails.filter(_.level == scyd.level).toSeq.sorted.takeWhile(_ != scyd) ++ Seq(scyd)
 	else
 		Seq(scyd)

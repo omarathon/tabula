@@ -25,10 +25,10 @@ object GenerateModuleExamGridExporter extends TaskBenchmarking {
 		}
 	}
 
-	private def getCellStyle(isActual: Boolean, styleMap: Map[Style, CellStyle], mark: BigDecimal): Option[CellStyle] = {
+	private def getCellStyle(isActual: Boolean, styleMap: Map[Style, CellStyle], mark: BigDecimal, degreeType: DegreeType): Option[CellStyle] = {
 		isActual match {
-			case true => if (mark < ProgressionService.ModulePassMark) Option(styleMap(FailAndActualMark)) else Option(styleMap(ActualMark))
-			case false if (mark < ProgressionService.ModulePassMark) => Option(styleMap(Fail))
+			case true => if (mark < ProgressionService.modulePassMark(degreeType)) Option(styleMap(FailAndActualMark)) else Option(styleMap(ActualMark))
+			case false if mark < ProgressionService.modulePassMark(degreeType) => Option(styleMap(Fail))
 			case _ => None
 		}
 	}
@@ -82,9 +82,9 @@ object GenerateModuleExamGridExporter extends TaskBenchmarking {
 			//detail rows
 			entities.foreach { entity =>
 				val (mark, markStyle) = if (Option(entity.moduleRegistration.agreedMark).isDefined) {
-					(entity.moduleRegistration.agreedMark.toString, getCellStyle(false, cellStyleMap, entity.moduleRegistration.agreedMark))
+					(entity.moduleRegistration.agreedMark.toString, getCellStyle(isActual = false, cellStyleMap, entity.moduleRegistration.agreedMark, entity.moduleRegistration.module.degreeType))
 				} else if (Option(entity.moduleRegistration.actualMark).isDefined) {
-					(entity.moduleRegistration.actualMark.toString, getCellStyle(true, cellStyleMap, entity.moduleRegistration.agreedMark))
+					(entity.moduleRegistration.actualMark.toString, getCellStyle(isActual = true, cellStyleMap, entity.moduleRegistration.agreedMark, entity.moduleRegistration.module.degreeType))
 				} else {
 					("X", None)
 				}
@@ -112,7 +112,7 @@ object GenerateModuleExamGridExporter extends TaskBenchmarking {
 					cSeqColumnIndex = cSeqColumnIndex + 1
 					var (cMark, cMarkStyle) = entity.componentInfo.get(aGroupAndSequence) match {
 						case Some(cInfo) => if (Option(cInfo.mark).isDefined) {
-							(cInfo.mark.toString, getCellStyle(cInfo.isActual, cellStyleMap, cInfo.mark))
+							(cInfo.mark.toString, getCellStyle(cInfo.isActual, cellStyleMap, cInfo.mark, mr.module.degreeType))
 						} else {
 							("X", None)
 						}

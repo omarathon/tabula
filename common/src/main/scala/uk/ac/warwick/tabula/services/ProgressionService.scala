@@ -3,6 +3,8 @@ package uk.ac.warwick.tabula.services
 import org.springframework.stereotype.Service
 import uk.ac.warwick.spring.Wire
 import uk.ac.warwick.tabula.commands.exams.grids.ExamGridEntityYear
+import uk.ac.warwick.tabula.data.model.CourseType._
+import uk.ac.warwick.tabula.data.model.DegreeType.{Postgraduate, Undergraduate}
 import uk.ac.warwick.tabula.data.model._
 
 import scala.math.BigDecimal.RoundingMode
@@ -100,7 +102,17 @@ object FinalYearGrade {
 }
 
 object ProgressionService {
-	final val ModulePassMark = 40
+
+	def modulePassMark(degreeType: DegreeType): Int = degreeType match {
+		case Undergraduate => UndergradPassMark
+		case Postgraduate => PostgraduatePassMark
+		case _ => DefaultPassMark
+	}
+
+	final val DefaultPassMark = 40
+	final val UndergradPassMark = 40
+	final val PostgraduatePassMark = 50
+
 	final val FirstYearPassMark = 40
 	final val FirstYearRequiredCredits = 80
 	final val IntermediateYearPassMark = 40
@@ -176,7 +188,7 @@ abstract class AbstractProgressionService extends ProgressionService {
 	// a definition of a passed module that handles pass-fail modules
 	private def isPassed(mr: ModuleRegistration) = {
 		if(mr.passFail) mr.firstDefinedGrade.contains("P")
-		else BigDecimal(mr.firstDefinedMark.get) >= ProgressionService.ModulePassMark
+		else BigDecimal(mr.firstDefinedMark.get) >= ProgressionService.modulePassMark(mr.module.degreeType)
 	}
 
 	/**

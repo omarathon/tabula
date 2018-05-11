@@ -37,7 +37,7 @@ class SuggestedResultColumnOption extends ChosenYearExamGridColumnOption with Au
 						case unknown: ProgressionResult.Unknown => ExamGridColumnValueMissing(unknown.details)
 						case resit: Resit.type if state.department.code == "es" || Option(state.department.parent).exists(_.code == "es") =>
 							val failedModules = entityYear.get.moduleRegistrations
-								.filter(_.firstDefinedMark.exists(BigDecimal(_) < ProgressionService.ModulePassMark))
+								.filter(mr => mr.firstDefinedMark.exists(BigDecimal(_) < ProgressionService.modulePassMark(mr.module.degreeType)))
 								.map(_.module.code.toUpperCase)
 								.mkString(", ")
 							ExamGridColumnValueString(s"${resit.description} $failedModules")
