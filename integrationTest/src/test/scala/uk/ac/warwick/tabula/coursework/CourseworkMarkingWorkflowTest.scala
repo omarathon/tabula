@@ -98,7 +98,7 @@ class CourseworkMarkingWorkflowTest extends BrowserTest with CourseworkFixtures 
 		})
 
 		Then("I should get a confirmation modal")
-		eventually {
+		eventuallyAjax {
 			find("marking-workflow-modal") map { _.isDisplayed } should be (Some(true))
 		}
 
