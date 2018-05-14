@@ -25,10 +25,10 @@ object GenerateModuleExamGridExporter extends TaskBenchmarking {
 		}
 	}
 
-	private def getCellStyle(isActual: Boolean, styleMap: Map[Style, CellStyle], mark: BigDecimal): Option[CellStyle] = {
+	private def getCellStyle(isActual: Boolean, styleMap: Map[Style, CellStyle], mark: BigDecimal, degreeType: DegreeType): Option[CellStyle] = {
 		isActual match {
-			case true => if (mark < ProgressionService.ModulePassMark) Option(styleMap(FailAndActualMark)) else Option(styleMap(ActualMark))
-			case false if (mark < ProgressionService.ModulePassMark) => Option(styleMap(Fail))
+			case true => if (mark < ProgressionService.modulePassMark(degreeType)) Option(styleMap(FailAndActualMark)) else Option(styleMap(ActualMark))
+			case false if mark < ProgressionService.modulePassMark(degreeType) => Option(styleMap(Fail))
 			case _ => None
 		}
 	}
@@ -82,9 +82,9 @@ object GenerateModuleExamGridExporter extends TaskBenchmarking {
 			//detail rows
 			entities.foreach { entity =>
 				val (mark, markStyle) = if (Option(entity.moduleRegistration.agreedMark).isDefined) {
-					(entity.moduleRegistration.agreedMark.toString, getCellStyle(false, cellStyleMap, entity.moduleRegistration.agreedMark))
+					(entity.moduleRegistration.agreedMark.toString, getCellStyle(isActual = false, cellStyleMap, entity.moduleRegistration.agreedMark, entity.moduleRegistration.module.degreeType))
 				} else if (Option(entity.moduleRegistration.actualMark).isDefined) {
-					(entity.moduleRegistration.actualMark.toString, getCellStyle(true, cellStyleMap, entity.moduleRegistration.actualMark))
+					(entity.moduleRegistration.actualMark.toString, getCellStyle(isActual = true, cellStyleMap, entity.moduleRegistration.actualMark, entity.moduleRegistration.module.degreeType))
 				} else {
 					("X", None)
 				}
@@ -114,12 +114,12 @@ object GenerateModuleExamGridExporter extends TaskBenchmarking {
 						case Some(cInfo) => if (Option(cInfo.resitInfo.resitMark).isDefined) {
 							if (Option(cInfo.mark).isDefined) {
 								//will use resit style because of the limitation of multiple sytle application to single excel cell for SXSSFWorkbook
-								(s"[${cInfo.resitInfo.resitMark.toString}(${cInfo.mark.toString})]", getCellStyle(cInfo.resitInfo.isActualResitMark, cellStyleMap, cInfo.resitInfo.resitMark))
+								(s"[${cInfo.resitInfo.resitMark.toString}(${cInfo.mark.toString})]", getCellStyle(cInfo.resitInfo.isActualResitMark, cellStyleMap, cInfo.resitInfo.resitMark, mr.module.degreeType))
 							} else {
-								(s"[${cInfo.resitInfo.resitMark.toString}]", getCellStyle(cInfo.resitInfo.isActualResitMark, cellStyleMap, cInfo.resitInfo.resitMark))
+								(s"[${cInfo.resitInfo.resitMark.toString}]", getCellStyle(cInfo.resitInfo.isActualResitMark, cellStyleMap, cInfo.resitInfo.resitMark, mr.module.degreeType))
 							}
 						} else if (Option(cInfo.mark).isDefined) {
-							(cInfo.mark.toString, getCellStyle(cInfo.isActualMark, cellStyleMap, cInfo.mark))
+							(cInfo.mark.toString, getCellStyle(cInfo.isActualMark, cellStyleMap, cInfo.mark, mr.module.degreeType))
 						} else {
 							("X", None)
 						}

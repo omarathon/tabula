@@ -17,7 +17,8 @@ object ExamGridMarksRecordExporter extends TaskBenchmarking with AddConfidential
 		normalLoadLookup: NormalLoadLookup,
 		routeRulesLookup: UpstreamRouteRuleLookup,
 		isConfidential: Boolean,
-		calculateYearMarks: Boolean
+		calculateYearMarks: Boolean,
+		isLevelGrid: Boolean
 	): XWPFDocument = {
 
 		val doc = new XWPFDocument()
@@ -82,7 +83,7 @@ object ExamGridMarksRecordExporter extends TaskBenchmarking with AddConfidential
 
 				val yearMark = {
 					if(calculateYearMarks || entity.years.keys.last == yearOfStudy) {
-						progressionService.getYearMark(year.studentCourseYearDetails.get, normalLoadLookup(year.route), routeRulesLookup(year.route, year.level)).right.toOption
+						progressionService.getYearMark(year, normalLoadLookup(year.route), routeRulesLookup(year.route, year.level)).right.toOption
 					} else if (Option(year.studentCourseYearDetails.get.agreedMark).isDefined) {
 						Option(BigDecimal(year.studentCourseYearDetails.get.agreedMark))
 					} else {
@@ -92,7 +93,7 @@ object ExamGridMarksRecordExporter extends TaskBenchmarking with AddConfidential
 				doc.createParagraph().createRun().setText(s"Mark for the year: ${yearMark.map(_.underlying.toPlainString).getOrElse("X")}")
 
 				val routeRules = entity.validYears.mapValues(ey => routeRulesLookup(ey.route, ey.level))
-				progressionService.suggestedFinalYearGrade(year.studentCourseYearDetails.get, normalLoadLookup(year.route), routeRules, calculateYearMarks) match {
+				progressionService.suggestedFinalYearGrade(year, normalLoadLookup(year.route), routeRules, calculateYearMarks, isLevelGrid) match {
 					case FinalYearGrade.Ignore =>
 					case grade => doc.createParagraph().createRun().setText(s"Classification: ${grade.description}")
 				}

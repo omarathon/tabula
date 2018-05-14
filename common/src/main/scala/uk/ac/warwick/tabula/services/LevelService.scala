@@ -27,7 +27,7 @@ abstract class AbstractLevelService extends LevelService {
 	self: LevelDaoComponent =>
 
 	def levelFromCode(code: String): Option[Level] = code.maybeText.flatMap {
-		someCode => levelDao.getByCode(someCode.toLowerCase)
+		someCode => levelDao.getByCode(someCode)
 	}
 	def getAllLevels: Seq[Level] =	levelDao.getAllLevels
 }
