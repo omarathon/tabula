@@ -37,7 +37,7 @@
 		<#if job.finished && job.succeeded>
 			<span class="label label-success">Succeeded</span>
 		<#elseif job.finished>
-			<span class="label label-important">Failed</span>
+			<span class="label label-danger">Failed</span>
 		<#elseif job.started>
 			<span class="label label-info">Started</span>
 		<#else>
