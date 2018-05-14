@@ -21,10 +21,18 @@
 		<span class="arrow-right arrow-left">Preview and download</span>
 	</p>
 
+	<#assign yearOrLevel>
+		<#if selectCourseCommand.yearOfStudy??>
+			year of study ${selectCourseCommand.yearOfStudy}
+		<#else>
+			study level ${selectCourseCommand.levelCode}
+		</#if>
+	</#assign>
+
 	<div class="alert alert-info">
 		<h3>Core required modules</h3>
 		<p>Unfortunately Tabula cannot identify core required modules within SITS. Please select the modules for each route from the list below.</p>
-		<p><strong>Note:</strong> The chosen modules will apply to all students on each route for year of study ${selectCourseCommand.yearOfStudy} and ${academicYear.toString}</p>
+		<p><strong>Note:</strong> The chosen modules will apply to all students on each route for ${yearOrLevel} and ${academicYear.toString}</p>
 	</div>
 
 	<h3>Identify Core Required Modules</h3>

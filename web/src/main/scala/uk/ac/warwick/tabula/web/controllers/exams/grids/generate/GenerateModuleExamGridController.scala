@@ -121,10 +121,10 @@ class GenerateModuleExamGridController extends ExamsController
 				Mav("exams/grids/module/generate/jobProgress",
 					"jobId" -> jobId,
 					"module" -> selectModuleExamCommand.module,
-					"passMark" -> ProgressionService.ModulePassMark,
+					"passMark" -> ProgressionService.modulePassMark(selectModuleExamCommand.module.degreeType),
 					"entities" -> moduleGridResult.gridStudentDetailRecords,
 					"studentCount" -> moduleGridResult.gridStudentDetailRecords.map(_.universityId).distinct.size,
-					"componentInfo" -> moduleGridResult.upstreamAssessmentGroupAndSequencesWithComponentName,
+					"componentInfo" -> moduleGridResult.upstreamAssessmentGroupAndSequenceAndOccurrencesWithComponentName,
 					"jobProgress" -> jobInstance.get.progress,
 					"jobStatus" -> jobInstance.get.status,
 					"studentLastImportDates" -> studentLastImportDates
@@ -191,8 +191,8 @@ class GenerateModuleExamGridController extends ExamsController
 			"generatedDate" -> DateTime.now,
 			"jobId" -> jobId,
 			"module" -> selectModuleExamCommand.module,
-			"passMark" -> ProgressionService.ModulePassMark,
-			"componentInfo" -> moduleGridResult.upstreamAssessmentGroupAndSequencesWithComponentName
+			"passMark" -> ProgressionService.modulePassMark(selectModuleExamCommand.module.degreeType),
+			"componentInfo" -> moduleGridResult.upstreamAssessmentGroupAndSequenceAndOccurrencesWithComponentName
 		)
 		commonCrumbs(
 			Mav("exams/grids/module/generate/preview", mavObjects),

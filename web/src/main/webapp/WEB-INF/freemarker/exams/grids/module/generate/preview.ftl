@@ -13,7 +13,7 @@
 		<@form_fields.select_module_fields />
 		<h2>Preview and download</h2>
 		<p class="progress-arrows">
-			<span class="arrow-right"><button type="submit" class="btn btn-link">Select modules</button></span>
+			<span class="arrow-right"><button type="submit" class="btn btn-link">Select module</button></span>
 			<span class="arrow-right arrow-left active">Preview and download</span>
 		</p>
 
@@ -72,6 +72,14 @@
 							<td>Agreed mark missing, using actual</td>
 						</tr>
 						<tr>
+						<td><span class="exam-grid-resit"># (#)</span></td>
+						<td>Resit mark (original mark)</td>
+					</tr>
+					<tr>
+						<td><span class="exam-grid-resit"># (#)</span></td>
+						<td>Resit grade (original grade)</td>
+					</tr>
+					<tr>
 							<td><span class="exam-grid-actual-mark">X</span></td>
 							<td>Agreed and actual mark missing</td>
 						</tr>
@@ -90,9 +98,9 @@
 						<th>Credit</th>
 
 						<#list componentInfo as component>
-							<#assign groupAndSequence = component._1() />
+						<#assign groupAndSequenceAndOccurrence = component._1() />
 							<#assign cName = component._2() />
-							<th colspan="2"><span class="use-tooltip" title="" data-container="body" data-original-title="${cName}">${groupAndSequence}</span></th>
+						<th colspan="2"><span class="use-tooltip" title="" data-container="body" data-original-title="${cName}">${groupAndSequenceAndOccurrence}</span></th>
 						</#list>
 						<th>Module Mark</th>
 						<th>Module Grade</th>
@@ -113,29 +121,46 @@
 							<td>${mr.academicYear.startYear?c}</td>
 							<td>${mr.cats}</td>
 							<#list componentInfo as component>
-								<#assign groupAndSequence = component._1() />
-									<#if mapGet(assessmentComponentMap, groupAndSequence)??>
-										<#assign componentDetails = mapGet(assessmentComponentMap, groupAndSequence) />
+							<#assign groupAndSequenceAndOccurrence = component._1() />
+								<#if mapGet(assessmentComponentMap, groupAndSequenceAndOccurrence)??>
+									<#assign componentDetails = mapGet(assessmentComponentMap, groupAndSequenceAndOccurrence) />
+									<#assign componentResitDetails = componentDetails.resitInfo />
 										<td>
+										<#if componentResitDetails.resitMark??>
+											<#assign resitmark_class>
+												<#compress>
+													<#if componentResitDetails.resitMark?number lt passMark>exam-grid-fail</#if>
+													<#if componentResitDetails.actualResitMark>exam-grid-actual-mark</#if>
+												</#compress>
+											</#assign>
 											<#if componentDetails.mark??>
-												<#if componentDetails.mark?number < passMark>
-													<span class="exam-grid-fail">${componentDetails.mark}</span>
-												<#elseif componentDetails.actual>
-													<span class="exam-grid-actual-mark">${componentDetails.mark}</span>
+												<span class="exam-grid-resit ${resitmark_class}">${componentResitDetails.resitMark} (${componentDetails.mark})</span>
 												<#else>
-													${componentDetails.mark}
+												<span class="exam-grid-resit ${resitmark_class}">${componentResitDetails.resitMark}</span>
 												</#if>
+										<#elseif componentDetails.mark??>
+											<#assign componentmark_class>
+												<#compress>
+													<#if componentDetails.mark?number lt passMark>exam-grid-fail</#if>
+													<#if componentDetails.actualMark>exam-grid-actual-mark</#if>
+												</#compress>
+											</#assign>
+											<span <#if componentmark_class?length gt 0>class="${componentmark_class}"</#if>>${componentDetails.mark}</span>
 											<#else>
 												<span class="exam-grid-actual-mark use-tooltip" title="" data-container="body" data-original-title="No mark set">X</span>
 											</#if>
 										</td>
 										<td>
+										<#if componentResitDetails.resitGrade??>
+											<#assign resitgrade_class><#if componentResitDetails.actualResitGrade>exam-grid-actual-mark</#if></#assign>
 											<#if componentDetails.grade??>
-												<#if componentDetails.actual>
-														<span class="exam-grid-actual-mark">${componentDetails.grade}</span>
+												<span class="exam-grid-resit ${resitgrade_class}">${componentResitDetails.resitGrade} (${componentDetails.grade})</span>
 												<#else>
-													${componentDetails.grade}
+												<span class="exam-grid-resit ${resitgrade_class}">${componentResitDetails.resitGrade}</span>
 												</#if>
+										<#elseif componentDetails.grade??>
+											<#assign componentgrade_class><#if componentDetails.actualGrade>exam-grid-actual-mark</#if></#assign>
+											<span <#if componentgrade_class?length gt 0>class="${componentgrade_class}"</#if>>${componentDetails.grade}</span>
 											<#else>
 												<span class="exam-grid-actual-mark use-tooltip" title="" data-container="body" data-original-title="No grade set">X</span>
 											</#if>
@@ -146,22 +171,16 @@
 							</#list>
 							<td>
 								<#if mr.agreedMark??>
-									<#if mr.agreedMark?number < passMark>
-										<span class=exam-grid-fail">${mr.agreedMark}</span>
-									<#else>
-										${mr.agreedMark}
-									</#if>
+								<span <#if mr.agreedMark?number lt passMark>class="exam-grid-fail"</#if>>${mr.agreedMark}</span>
 								<#elseif mr.actualMark??>
-									<span class="<#if mr.actualMark?number < passMark>exam-grid-fail<#else>exam-grid-actual-mark</#if>">
-										${mr.actualMark}
-									</span>
+								<span class="<#if mr.actualMark?number lt passMark>exam-grid-fail </#if>exam-grid-actual-mark">${mr.actualMark}</span>
 								<#else>
 									<span class="exam-grid-actual-mark use-tooltip" title="" data-container="body" data-original-title="No marks set">X</span>
 								</#if>
 							</td>
 							<td>
 								<#if mr.agreedGrade??>
-									${mr.agreedGrade}
+								<span>${mr.agreedGrade}</span>
 								<#elseif mr.actualGrade??>
 									<span class="exam-grid-actual-mark">${mr.actualGrade}</span>
 								<#else>

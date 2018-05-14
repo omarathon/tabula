@@ -128,7 +128,7 @@ trait GenerateExamGridCheckAndApplyOvercatCommandState {
 	def fetchEntities: Seq[ExamGridEntity] = selectCourseCommand.apply()
 	lazy val entities: Seq[ExamGridEntity] =  {
 		val courseYears = selectCourseCommand.courseYearsToShow
-		if (courseYears.size == selectCourseCommand.yearOfStudy) {
+		if (courseYears.size == selectCourseCommand.studyYearByLevelOrBlock) {
 			fetchEntities // all years
 		} else {
 			val selectedYears = courseYears.asScala.map(_.stripPrefix("Year").toInt).toSeq
@@ -139,7 +139,7 @@ trait GenerateExamGridCheckAndApplyOvercatCommandState {
 			}
 		}
 	}
-	lazy val normalLoadLookup: NormalLoadLookup = new NormalLoadLookup(academicYear, selectCourseCommand.yearOfStudy, normalCATSLoadService)
+	lazy val normalLoadLookup: NormalLoadLookup = new NormalLoadLookup(academicYear, selectCourseCommand.studyYearByLevelOrBlock, normalCATSLoadService)
 	lazy val routeRulesLookup: UpstreamRouteRuleLookup = new UpstreamRouteRuleLookup(academicYear, upstreamRouteRuleService)
 
 	lazy val overcatSubsets: Map[ExamGridEntity, Map[YearOfStudy, Seq[(BigDecimal, Seq[ModuleRegistration])]]] =

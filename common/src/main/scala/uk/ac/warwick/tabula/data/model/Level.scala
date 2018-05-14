@@ -5,8 +5,13 @@ import javax.persistence.Entity
 import javax.persistence.Id
 import javax.persistence.NamedQueries
 import javax.persistence.NamedQuery
-
 import org.apache.commons.lang3.builder.{EqualsBuilder, HashCodeBuilder}
+
+import scala.util.Try
+
+object Level {
+	def toYearOfStudy(levelCode: String):Int  = Try(levelCode.toInt).toOption.getOrElse(1)
+}
 
 @Entity(name="StudyLevel") // Level is a reserved word in Oracle so the table is called StudyLevel
 @NamedQueries(Array(
@@ -24,6 +29,8 @@ class Level {
 	var name: String = _
 
 	var lastUpdatedDate: DateTime = DateTime.now
+
+	def toYearOfStudy: Int = Level.toYearOfStudy(code)
 
 	override def toString: String = name
 

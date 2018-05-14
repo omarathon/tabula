@@ -69,9 +69,16 @@ class StudentAssessmentBreakdownController extends ExamsController
 		@PathVariable academicYear: AcademicYear,
 		@ModelAttribute("command") cmd: CommandType
 	): Mav = {
+
+		val assessmentComponents = cmd.apply()
+		val passMarkMap = assessmentComponents.map(ac => {
+			val module = ac.moduleRegistration.module
+			module -> ProgressionService.modulePassMark(module.degreeType)
+		}).toMap
+
 		Mav("exams/grids/generate/studentAssessmentComponentDetails",
-			"passMark" -> ProgressionService.ModulePassMark,
-			"assessmentComponents" -> cmd.apply(),
+			"passMarkMap" -> passMarkMap,
+			"assessmentComponents" -> assessmentComponents,
 			"member" -> studentCourseDetails.student
 		).crumbs(Breadcrumbs.Grids.Home, Breadcrumbs.Grids.Department(mandatory(cmd.studentCourseYearDetails.enrolmentDepartment), mandatory(academicYear)))
 			.secondCrumbs(secondBreadcrumbs(academicYear, studentCourseDetails)(scyd => Routes.exams.Grids.assessmentdetails(scyd)): _*)

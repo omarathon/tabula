@@ -132,8 +132,13 @@
 							</#if>
 						</tr>
 						<tr>
+						<#if selectCourseCommand.yearOfStudy??>
 							<th>Year of study:</th>
 							<td>${selectCourseCommand.yearOfStudy}</td>
+						<#elseif selectCourseCommand.levelCode??>
+							<th>Study level:</th>
+							<td>${selectCourseCommand.levelCode}</td>
+						</#if>
 						</tr>
 						<tr>
 							<th>Year weightings:</th>
@@ -332,7 +337,7 @@
 		});
 
 		$('button.edit-overcatting').each(function(){
-			$(this).attr('href', '<@routes.exams.generateGrid department academicYear />/overcatting/' + $(this).data('student'))
+			$(this).attr('href', '<@routes.exams.generateGrid department academicYear />/overcatting/' + $(this).data('student') + '?basedOnLevel=' + $(this).data('basedonlevel'))
 				.data('target', '#edit-overcatting-modal');
 
 		}).ajaxModalLink();

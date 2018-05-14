@@ -121,8 +121,15 @@ div.assessment_details {
 			border: 1px solid @table-border-color;
 			float: left;
 			width: auto;
+			max-width: 60%;
 			margin-right: 32px;
+
+			&:last-child {
+				max-width: 40%;
+				margin-right:0;
 		}
+		}
+
 		thead th {
 			text-align: center;
 			background: @table-bg-hover;

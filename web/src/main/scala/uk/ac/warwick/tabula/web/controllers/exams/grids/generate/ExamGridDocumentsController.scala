@@ -150,7 +150,8 @@ trait ExamGridDocumentsController extends ExamsController
 				new NormalLoadLookup(selectCourseCommand.academicYear, selectCourseCommand.yearOfStudy, normalCATSLoadService),
 				new UpstreamRouteRuleLookup(selectCourseCommand.academicYear, upstreamRouteRuleService),
 				isConfidential = isConfidential,
-				calculateYearMarks = gridOptionsCommand.calculateYearMarks
+				calculateYearMarks = gridOptionsCommand.calculateYearMarks,
+				selectCourseCommand.isLevelGrid
 			)
 		)
 	}
@@ -212,7 +213,8 @@ trait ExamGridDocumentsController extends ExamsController
 				new NormalLoadLookup(selectCourseCommand.academicYear, selectCourseCommand.yearOfStudy, normalCATSLoadService),
 				new UpstreamRouteRuleLookup(selectCourseCommand.academicYear, upstreamRouteRuleService),
 				isConfidential,
-				calculateYearMarks = gridOptionsCommand.calculateYearMarks
+				calculateYearMarks = gridOptionsCommand.calculateYearMarks,
+				selectCourseCommand.isLevelGrid
 			)
 		)
 	}
