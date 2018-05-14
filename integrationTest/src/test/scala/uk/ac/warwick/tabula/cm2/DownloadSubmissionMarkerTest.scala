@@ -14,11 +14,17 @@ class DownloadSubmissionMarkerTest extends BrowserTest with CourseworkFixtures {
 			click on testModulerow
 		}
 
-		eventuallyAjax {
+		When("I expand Completed assignments")
+		val completedAssignmentsBlock = id("main").webElement.findElements(By.cssSelector("div#marker-completed")).get(0)
+		val arrow = completedAssignmentsBlock.findElement(By.cssSelector(".fa-chevron-right"))
+		click on arrow
 
+		Then("The completed assignments for marking should expand")
+		eventuallyAjax {
 			val reviewAssignmentBtn = id("main").webElement.findElements(By.cssSelector(".btn-block")).get(1)
 			reviewAssignmentBtn.getText should include("Review")
 			click on reviewAssignmentBtn
+
 		}
 		Then("I should be taken to the Marking page")
 
