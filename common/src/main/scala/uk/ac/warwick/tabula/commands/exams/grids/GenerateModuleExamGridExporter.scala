@@ -119,7 +119,7 @@ object GenerateModuleExamGridExporter extends TaskBenchmarking {
 								(s"[${cInfo.resitInfo.resitMark.toString}]", getCellStyle(cInfo.resitInfo.isActualResitMark, cellStyleMap, cInfo.resitInfo.resitMark, mr.module.degreeType))
 							}
 						} else if (Option(cInfo.mark).isDefined) {
-							(cInfo.mark.toString, getCellStyle(cInfo.isActualMark, cellStyleMap, cInfo.mark))
+							(cInfo.mark.toString, getCellStyle(cInfo.isActualMark, cellStyleMap, cInfo.mark, mr.module.degreeType))
 						} else {
 							("X", None)
 						}
