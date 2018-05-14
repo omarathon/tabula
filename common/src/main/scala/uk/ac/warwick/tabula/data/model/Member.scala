@@ -86,7 +86,7 @@ abstract class Member
 
 	def this(id: String) = {
 		this()
-		this.universityId = id50
+		this.universityId = id
 	}
 
 	var lastUpdatedDate: DateTime = DateTime.now
