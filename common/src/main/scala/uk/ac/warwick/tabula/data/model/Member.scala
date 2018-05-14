@@ -80,7 +80,7 @@ abstract class Member
 		this.email = user.email
 		this.userType =
 			if (user.isStudent) MemberUserType.Student
-			else if (user.isStaff) MemberUserType.Staff
+			else if (uimplcictlyser.isStaff) MemberUserType.Staff
 			else MemberUserType.Other
 	}
 
@@ -434,7 +434,6 @@ class StudentMember extends Member with StudentProperties {
 			// remove the index once sorted
 			val groupedByLevel = groupedByLevelWithIndex.mapValues(_.map{ case(scyds, _) => scyds })
 			groupedByLevel.values.toSeq.zipWithIndex
-				//.map(scyds => Option(StudentCourseYearDetails.toExamGridEntityLevel(scyds: _*))).toSeq.zipWithIndex
 				.map{ case (scyds, index) => (index+1, Option(StudentCourseYearDetails.toExamGridEntityYearGrouped(index+1, scyds: _*))) }.toMap
 		} else {
 			(1 to baseSCYD.yearOfStudy).map(year =>
