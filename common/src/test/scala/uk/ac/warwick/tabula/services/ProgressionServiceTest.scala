@@ -24,7 +24,7 @@ class ProgressionServiceTest extends TestBase with Mockito {
 			override val moduleRegistrationService: ModuleRegistrationService = smartMock[ModuleRegistrationService]
 			override val courseAndRouteService: CourseAndRouteService = smartMock[CourseAndRouteService]
 		}
-		val entityYear3: ExamGridEntityYear = scyd3.toExamGridEntityYear
+		def entityYear3: ExamGridEntityYear = scyd3.toExamGridEntityYear
 	}
 
 	@Test
