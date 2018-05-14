@@ -24,7 +24,6 @@ class DownloadSubmissionMarkerTest extends BrowserTest with CourseworkFixtures {
 			val reviewAssignmentBtn = id("main").webElement.findElements(By.cssSelector(".btn-block")).get(1)
 			reviewAssignmentBtn.getText should include("Review")
 			click on reviewAssignmentBtn
-
 		}
 		Then("I should be taken to the Marking page")
 
