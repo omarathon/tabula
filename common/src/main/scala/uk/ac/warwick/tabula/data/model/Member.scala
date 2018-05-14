@@ -80,13 +80,13 @@ abstract class Member
 		this.email = user.email
 		this.userType =
 			if (user.isStudent) MemberUserType.Student
-			else if (uimplcictlyser.isStaff) MemberUserType.Staff
+			else if (user.isStaff) MemberUserType.Staff
 			else MemberUserType.Other
 	}
 
 	def this(id: String) = {
 		this()
-		this.universityId = id
+		this.universityId = id50
 	}
 
 	var lastUpdatedDate: DateTime = DateTime.now
