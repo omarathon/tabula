@@ -45,7 +45,7 @@ object GenerateModuleExamGridExporter extends TaskBenchmarking {
 		// Styles
 		val cellStyleMap = getCellStyleMap(workbook)
 		val entities = examModuleGridResult.gridStudentDetailRecords
-		val aGroupAndSequences = examModuleGridResult.upstreamAssessmentGroupAndSequencesWithComponentName.map { case (aGroupAndSeq, _) => aGroupAndSeq }
+		val aGroupAndSequenceAndOccurrences = examModuleGridResult.upstreamAssessmentGroupAndSequenceAndOccurrencesWithComponentName.map { case (aGroupAndSeqAndOcc, _) => aGroupAndSeqAndOcc }
 		val sheet = workbook.createSheet(academicYear.toString.replace("/", "-"))
 		sheet.trackAllColumnsForAutoSizing()
 
@@ -68,11 +68,11 @@ object GenerateModuleExamGridExporter extends TaskBenchmarking {
 
 			// 2 columns for for each component seq
 			var cSeqColumnIndex = 0
-			aGroupAndSequences.foreach { aGroupAndSequence =>
+			aGroupAndSequenceAndOccurrences.foreach { aGroupAndSequenceAndOcc =>
 				cSeqColumnIndex = cSeqColumnIndex + 1
-				createCell(headerRow, currentColumnIndex + 6 + cSeqColumnIndex, aGroupAndSequence, headerStyle)
+				createCell(headerRow, currentColumnIndex + 6 + cSeqColumnIndex, aGroupAndSequenceAndOcc, headerStyle)
 				cSeqColumnIndex = cSeqColumnIndex + 1
-				createCell(headerRow, currentColumnIndex + 6 + cSeqColumnIndex, aGroupAndSequence, headerStyle)
+				createCell(headerRow, currentColumnIndex + 6 + cSeqColumnIndex, aGroupAndSequenceAndOcc, headerStyle)
 				sheet.addMergedRegion(new CellRangeAddress(headerRow.getRowNum, headerRow.getRowNum, currentColumnIndex + 6 + cSeqColumnIndex - 1, currentColumnIndex + 6 + cSeqColumnIndex))
 			}
 
@@ -84,12 +84,12 @@ object GenerateModuleExamGridExporter extends TaskBenchmarking {
 				val (mark, markStyle) = if (Option(entity.moduleRegistration.agreedMark).isDefined) {
 					(entity.moduleRegistration.agreedMark.toString, getCellStyle(isActual = false, cellStyleMap, entity.moduleRegistration.agreedMark, entity.moduleRegistration.module.degreeType))
 				} else if (Option(entity.moduleRegistration.actualMark).isDefined) {
-					(entity.moduleRegistration.actualMark.toString, getCellStyle(isActual = true, cellStyleMap, entity.moduleRegistration.agreedMark, entity.moduleRegistration.module.degreeType))
+					(entity.moduleRegistration.actualMark.toString, getCellStyle(isActual = true, cellStyleMap, entity.moduleRegistration.actualMark, entity.moduleRegistration.module.degreeType))
 				} else {
 					("X", None)
 				}
 
-				val (grade, gradeStyle) = if (Option(entity.moduleRegistration.agreedMark).isDefined) {
+				val (grade, gradeStyle) = if (Option(entity.moduleRegistration.agreedGrade).isDefined) {
 					(entity.moduleRegistration.agreedGrade, None)
 				} else if (Option(entity.moduleRegistration.actualGrade).isDefined) {
 					(entity.moduleRegistration.actualGrade, Option(cellStyleMap(ActualMark)))
@@ -108,20 +108,33 @@ object GenerateModuleExamGridExporter extends TaskBenchmarking {
 				createCell(row, currentColumnIndex + 6, mr.cats.toString, None)
 
 				cSeqColumnIndex = 0
-				aGroupAndSequences.foreach { aGroupAndSequence =>
+				aGroupAndSequenceAndOccurrences.foreach { aGroupAndSequenceAndOcc =>
 					cSeqColumnIndex = cSeqColumnIndex + 1
-					var (cMark, cMarkStyle) = entity.componentInfo.get(aGroupAndSequence) match {
-						case Some(cInfo) => if (Option(cInfo.mark).isDefined) {
-							(cInfo.mark.toString, getCellStyle(cInfo.isActual, cellStyleMap, cInfo.mark, mr.module.degreeType))
+					var (cMark, cMarkStyle) = entity.componentInfo.get(aGroupAndSequenceAndOcc) match {
+						case Some(cInfo) => if (Option(cInfo.resitInfo.resitMark).isDefined) {
+							if (Option(cInfo.mark).isDefined) {
+								//will use resit style because of the limitation of multiple sytle application to single excel cell for SXSSFWorkbook
+								(s"[${cInfo.resitInfo.resitMark.toString}(${cInfo.mark.toString})]", getCellStyle(cInfo.resitInfo.isActualResitMark, cellStyleMap, cInfo.resitInfo.resitMark, mr.module.degreeType))
+							} else {
+								(s"[${cInfo.resitInfo.resitMark.toString}]", getCellStyle(cInfo.resitInfo.isActualResitMark, cellStyleMap, cInfo.resitInfo.resitMark, mr.module.degreeType))
+							}
+						} else if (Option(cInfo.mark).isDefined) {
+							(cInfo.mark.toString, getCellStyle(cInfo.isActualMark, cellStyleMap, cInfo.mark))
 						} else {
 							("X", None)
 						}
 						case _ => ("", None)
 					}
 					createCell(row, currentColumnIndex + 6 + cSeqColumnIndex, cMark, cMarkStyle)
-					var (cGrade, cGradeStyle) = entity.componentInfo.get(aGroupAndSequence) match {
-						case Some(cInfo) => if (Option(cInfo.grade).isDefined) {
-							(cInfo.grade.toString, if (cInfo.isActual) Option(cellStyleMap(ActualMark)) else None)
+					var (cGrade, cGradeStyle) = entity.componentInfo.get(aGroupAndSequenceAndOcc) match {
+						case Some(cInfo) => if (Option(cInfo.resitInfo.resitGrade).isDefined) {
+							if (Option(cInfo.grade).isDefined) {
+								(s"[${cInfo.resitInfo.resitGrade.toString}(${cInfo.grade.toString})]", if (cInfo.resitInfo.isActualResitGrade) Option(cellStyleMap(ActualMark)) else None)
+							} else {
+								(s"[${cInfo.resitInfo.resitGrade.toString}]", if (cInfo.resitInfo.isActualResitGrade) Option(cellStyleMap(ActualMark)) else None)
+							}
+						} else  if (Option(cInfo.grade).isDefined) {
+							(cInfo.grade.toString, if (cInfo.isActualGrade) Option(cellStyleMap(ActualMark)) else None)
 						} else {
 							("X", None)
 						}
@@ -264,6 +277,20 @@ object ModuleExamGridSummaryAndKey {
 		}
 		{
 			val row = sheet.createRow(7)
+			val keyCell = row.createCell(0)
+			keyCell.setCellValue("[# (#)]")
+			val valueCell = row.createCell(1)
+			valueCell.setCellValue("Resit mark (original mark)")
+		}
+		{
+			val row = sheet.createRow(8)
+			val keyCell = row.createCell(0)
+			keyCell.setCellValue("[# (#)]")
+			val valueCell = row.createCell(1)
+			valueCell.setCellValue("Resit grade (original grade)")
+		}
+		{
+			val row = sheet.createRow(9)
 			val keyCell = row.createCell(0)
 			keyCell.setCellValue("X")
 			val valueCell = row.createCell(1)
