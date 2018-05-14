@@ -397,12 +397,14 @@
 			hideYearCheckboxesArea();
 		});
 
-		$('.level,.block').hide();
-		var $gridScopeRadio = $('input[name=gridScope]');
-		$gridScopeRadio.on('change', function(){
-			if(this.value === "level"){ $('.block').hide(); $('.level').show(); }
-			else if (this.value === "block") { $('.level').hide(); $('.block').show(); }
-		});
+		<#if department.code == 'et'>
+			$('.level,.block').hide();
+			var $gridScopeRadio = $('input[name=gridScope]');
+			$gridScopeRadio.on('change', function(){
+				if(this.value === "level"){ $('.block').hide(); $('.level').show(); }
+				else if (this.value === "block") { $('.level').hide(); $('.block').show(); }
+			});
+		</#if>
 
 	});
 </script>
