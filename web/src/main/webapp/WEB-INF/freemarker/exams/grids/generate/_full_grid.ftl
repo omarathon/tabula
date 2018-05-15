@@ -42,7 +42,7 @@
 				<#if column.category?has_content>
 					<#if currentCategory != column.category>
 						<#assign currentCategory = column.category />
-						<th class="rotated" colspan="${mapGet(perYearColumnCategories, year)[column.category]?size}"><div class="rotate">${column.category}</div></th>
+						<th class="rotated" colspan="${mapGet(perYearColumnCategories, year)[column.category]?size}"><div class="rotate-outer"><div class="rotate">${column.category}</div></div></th>
 					</#if>
 				<#else>
 					<td>&nbsp;</td>
@@ -56,7 +56,7 @@
 			<#if column.category?has_content>
 				<#if currentCategory != column.category>
 					<#assign currentCategory = column.category />
-					<th class="rotated" colspan="${chosenYearColumnCategories[column.category]?size}"><div class="rotate">${column.category}</div></th>
+					<th class="rotated" colspan="${chosenYearColumnCategories[column.category]?size}"><div class="rotate-outer"><div class="rotate">${column.category}</div></div></th>
 				</#if>
 			<#else>
 				<td>&nbsp;</td>
@@ -72,13 +72,13 @@
 		<#list perYearColumns?keys?sort as year>
 			<#if gridOptionsCommand.showComponentMarks><td class="spacer">&nbsp;</td></#if>
 			<#list mapGet(perYearColumns, year) as column>
-				<th class="rotated <#if column.boldTitle>bold</#if> <#if column.category?has_content>has-category</#if>" <#if !column.secondaryValue?has_content>rowspan="2"</#if>><div class="rotate">${column.title}</div></th>
+				<th class="rotated <#if column.boldTitle>bold</#if> <#if column.category?has_content>has-category</#if>" <#if !column.secondaryValue?has_content>rowspan="2"</#if>><div class="rotate-outer"><div class="rotate">${column.title}</div></div></th>
 			</#list>
 			<#if !mapGet(perYearColumns, year)?has_content><td class="spacer">&nbsp;</td></#if>
 			<#if !year_has_next><td class="spacer">&nbsp;</td></#if>
 		</#list>
 		<#list summaryColumns as column>
-			<th class="rotated <#if column.boldTitle>bold</#if> <#if column.category?has_content>has-category</#if>" <#if !column.secondaryValue?has_content>rowspan="2"</#if>><div class="rotate">${column.title}</div></th>
+			<th class="rotated <#if column.boldTitle>bold</#if> <#if column.category?has_content>has-category</#if>" <#if !column.secondaryValue?has_content>rowspan="2"</#if>><div class="rotate-outer"><div class="rotate">${column.title}</div></div></th>
 		</#list>
 	</tr>
 	<#-- Secondary value row -->
