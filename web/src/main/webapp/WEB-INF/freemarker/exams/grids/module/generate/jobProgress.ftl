@@ -9,11 +9,11 @@
 
 <@fmt.id7_deptheader title="Create a new module exam grid for ${department.name}" route_function=route_function />
 
-<form action="<@routes.exams.generateModuleGrid department academicYear />" class="dirty-check" method="post">
+<form action="<@routes.exams.generateModuleGridPreview department academicYear />" class="dirty-check" method="get">
 	<@form_fields.select_module_fields />
 	<h2>Importing student data</h2>
 	<p class="progress-arrows">
-		<span class="arrow-right"><button type="submit" class="btn btn-link">Select module</button></span>
+		<span class="arrow-right"><a class="btn btn-link" href="<@routes.exams.generateModuleGrid department academicYear />">Select module</a></span>
 		<span class="arrow-right arrow-left active">Preview and download</span>
 	</p>
 	<div class="alert alert-info">

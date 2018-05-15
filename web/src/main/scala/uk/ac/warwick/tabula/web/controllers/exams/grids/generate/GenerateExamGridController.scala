@@ -199,9 +199,10 @@ class GenerateExamGridController extends ExamsController
 			} else {
 				val jobInstance = jobService.add(Some(user), ImportMembersJob(students.map(_.universityId)))
 
+				allRequestParams.remove("jobId")
 				allRequestParams.add("jobId", jobInstance.id)
 				if (usePreviousSettings) {
-					redirectTo(Grids.jobProgress(department,academicYear,jobInstance.id), allRequestParams)
+					redirectTo(Grids.jobProgress(department,academicYear), allRequestParams)
 				} else {
 					redirectTo(Grids.options(department, academicYear), allRequestParams)
 				}
@@ -243,7 +244,7 @@ class GenerateExamGridController extends ExamsController
 			if (columnIDs.contains(new CoreRequiredModulesColumnOption().identifier) || columnIDs.contains(new ModuleReportsColumnOption().identifier)) {
 				redirectTo(Grids.coreRequired(department,academicYear), allRequestParams)
 			} else {
-				redirectTo(Grids.jobProgress(department,academicYear,jobId), allRequestParams)
+				redirectTo(Grids.jobProgress(department,academicYear), allRequestParams)
 			}
 		}
 	}
@@ -284,7 +285,7 @@ class GenerateExamGridController extends ExamsController
 			coreRequiredModulesRender(jobId, department, academicYear)
 		} else {
 			coreRequiredModulesCommand.apply()
-			redirectTo(Grids.jobProgress(department, academicYear, jobId), allRequestParams)
+			redirectTo(Grids.jobProgress(department, academicYear), allRequestParams)
 		}
 	}
 
