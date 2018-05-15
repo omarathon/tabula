@@ -20,7 +20,6 @@
 </#macro>
 
 <table class="table table-condensed grid <#if !gridOptionsCommand.showComponentMarks>with-hover</#if>">
-	<tbody>
 	<#-- Year row -->
 	<tr class="year">
 		<#list studentInformationColumns as column><td class="borderless">&nbsp;</td></#list>
@@ -96,39 +95,40 @@
 
 	<#-- Entities -->
 	<#list entities as entity>
-		<tr class="student <#if entity_index%2 == 1>odd</#if>">
-			<#list studentInformationColumns as column>
-				<td <#if gridOptionsCommand.showComponentMarks>rowspan="3"</#if>>
-					<#assign hasValue = mapGet(chosenYearColumnValues, column)?? && mapGet(mapGet(chosenYearColumnValues, column), entity)?? />
-					<#if hasValue>
-						<#noescape>${mapGet(mapGet(chosenYearColumnValues, column), entity).toHTML}</#noescape>
-					</#if>
-				</td>
-			</#list>
+		<tbody>
+			<tr class="student <#if entity_index%2 == 1>odd</#if>">
+				<#list studentInformationColumns as column>
+					<td <#if gridOptionsCommand.showComponentMarks>rowspan="3"</#if>>
+						<#assign hasValue = mapGet(chosenYearColumnValues, column)?? && mapGet(mapGet(chosenYearColumnValues, column), entity)?? />
+						<#if hasValue>
+							<#noescape>${mapGet(mapGet(chosenYearColumnValues, column), entity).toHTML}</#noescape>
+						</#if>
+					</td>
+				</#list>
 
-			<#if !gridOptionsCommand.showComponentMarks><td class="spacer">&nbsp;</td></#if>
+				<#if !gridOptionsCommand.showComponentMarks><td class="spacer">&nbsp;</td></#if>
 
-			<@showMarks entity ExamGridColumnValueType.Overall />
+				<@showMarks entity ExamGridColumnValueType.Overall />
 
-			<#list summaryColumns as column>
-				<td <#if gridOptionsCommand.showComponentMarks>rowspan="3"</#if>>
-					<#assign hasValue = mapGet(chosenYearColumnValues, column)?? && mapGet(mapGet(chosenYearColumnValues, column), entity)?? />
-					<#if hasValue>
-						<#noescape>${mapGet(mapGet(chosenYearColumnValues, column), entity).toHTML}</#noescape>
-					</#if>
-				</td>
-			</#list>
-		</tr>
-
-		<#if gridOptionsCommand.showComponentMarks>
-			<tr class="assignments <#if entity_index%2 == 1>odd</#if>">
-				<@showMarks entity ExamGridColumnValueType.Assignment />
+				<#list summaryColumns as column>
+					<td <#if gridOptionsCommand.showComponentMarks>rowspan="3"</#if>>
+						<#assign hasValue = mapGet(chosenYearColumnValues, column)?? && mapGet(mapGet(chosenYearColumnValues, column), entity)?? />
+						<#if hasValue>
+							<#noescape>${mapGet(mapGet(chosenYearColumnValues, column), entity).toHTML}</#noescape>
+						</#if>
+					</td>
+				</#list>
 			</tr>
-			<tr class="exams <#if entity_index%2 == 1>odd</#if>">
-				<@showMarks entity ExamGridColumnValueType.Exam />
-			</tr>
-		</#if>
+
+			<#if gridOptionsCommand.showComponentMarks>
+				<tr class="assignments <#if entity_index%2 == 1>odd</#if>">
+					<@showMarks entity ExamGridColumnValueType.Assignment />
+				</tr>
+				<tr class="exams <#if entity_index%2 == 1>odd</#if>">
+					<@showMarks entity ExamGridColumnValueType.Exam />
+				</tr>
+			</#if>
+		</tbody>
 	</#list>
-	</tbody>
 </table>
 </#escape>
