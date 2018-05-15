@@ -73,7 +73,7 @@ class GenerateExamGridController extends ExamsController
 
 	@ModelAttribute("selectCourseCommand")
 	def selectCourseCommand(@PathVariable department: Department, @PathVariable academicYear: AcademicYear) =
-		GenerateExamGridSelectCourseCommand(mandatory(department), mandatory(academicYear))
+		GenerateExamGridSelectCourseCommand(mandatory(department), mandatory(academicYear), permitRoutesFromRootDepartment = securityService.can(user, departmentPermission, department.rootDepartment))
 
 	@ModelAttribute("gridOptionsCommand")
 	def gridOptionsCommand(@PathVariable department: Department) = GenerateExamGridGridOptionsCommand(mandatory(department))
