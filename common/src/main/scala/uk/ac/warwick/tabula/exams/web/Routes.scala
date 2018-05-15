@@ -78,6 +78,18 @@ object Routes {
 		def generate(department: Department, academicYear: AcademicYear): String =
 			s"$context/${encoded(department.code)}/${encoded(academicYear.startYear.toString)}/generate"
 
+		def options(department: Department, academicYear: AcademicYear): String =
+			s"$context/${encoded(department.code)}/${encoded(academicYear.startYear.toString)}/generate/options"
+
+		def coreRequired(department: Department, academicYear: AcademicYear): String =
+			s"$context/${encoded(department.code)}/${encoded(academicYear.startYear.toString)}/generate/corerequired"
+
+		def jobProgress(department: Department, academicYear: AcademicYear, jobId: String): String =
+			s"$context/${encoded(department.code)}/${encoded(academicYear.startYear.toString)}/generate/import"
+
+		def preview(department: Department, academicYear: AcademicYear): String =
+		s"$context/${encoded(department.code)}/${encoded(academicYear.startYear.toString)}/generate/preview"
+
 		def moduleGenerate(department: Department, academicYear: AcademicYear): String =
 			s"$context/${encoded(department.code)}/${encoded(academicYear.startYear.toString)}/module/generate"
 
