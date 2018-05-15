@@ -310,6 +310,11 @@ div.assessment_details {
 			.header th:first-child {
 				display: none;
 			}
+
+			// group student rows in tbody tags and try and avoid page breaks on them
+			tbody {
+				page-break-inside: avoid;
+			}
 		}
 	}
 
