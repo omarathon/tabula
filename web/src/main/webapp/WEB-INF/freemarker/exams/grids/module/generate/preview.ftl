@@ -16,56 +16,62 @@
 			<span class="arrow-right"><button type="submit" class="btn btn-link">Select module</button></span>
 			<span class="arrow-right arrow-left active">Preview and download</span>
 		</p>
-		<div class="alert alert-info">
-			<h3>Your grid</h3>
-			<p>
-				This grid has been generated from the data available in SITS at
-				<@fmt.date date=oldestImport capitalise=false at=true relative=true />. If data changes in SITS after this
-				time, you'll need to generate the grid again to see the most recent information.
-			</p>
+
+		<div id="examGridSpinner">
+			<i class="fa fa-spinner fa-spin"></i> Loading&hellip;
 		</div>
-		<div class="key clearfix exam-modulegrid-preview">
-			<table class="table table-condensed">
-				<thead>
-					<tr>
-						<th colspan="2">Report</th>
-					</tr>
-				</thead>
-				<tbody>
-					<tr>
-						<th>Department:</th>
-						<td>${department.name}</td>
-					</tr>
-					<tr>
-						<th>Module:</th>
-						<td>${selectModuleExamCommand.module.code?upper_case} ${selectModuleExamCommand.module.name}</td>
-					</tr>
-					<tr>
-						<th>Student Count:</th>
-						<td>${studentCount}</td>
-					</tr>
-					<tr>
-						<th>Grid Generated:</th>
-						<td><@fmt.date date=generatedDate relative=false /></td>
-					</tr>
-				</tbody>
-			</table>
-			<table class="table table-condensed">
-				<thead>
-					<tr>
-						<th colspan="2">Key</th>
-					</tr>
-				</thead>
-				<tbody>
-					<tr>
-						<td><span class="exam-grid-fail">#</span></td>
-						<td>Failed module or component</td>
-					</tr>
-					<tr>
-						<td><span class="exam-grid-actual-mark">#</span></td>
-						<td>Agreed mark missing, using actual</td>
-					</tr>
-					<tr>
+
+		<div id="examGridContainer">
+			<div class="alert alert-info">
+				<h3>Your grid</h3>
+				<p>
+					This grid has been generated from the data available in SITS at
+					<@fmt.date date=oldestImport capitalise=false at=true relative=true />. If data changes in SITS after this
+					time, you'll need to generate the grid again to see the most recent information.
+				</p>
+			</div>
+			<div class="key clearfix exam-modulegrid-preview">
+				<table class="table table-condensed">
+					<thead>
+						<tr>
+							<th colspan="2">Report</th>
+						</tr>
+					</thead>
+					<tbody>
+						<tr>
+							<th>Department:</th>
+							<td>${department.name}</td>
+						</tr>
+						<tr>
+							<th>Module:</th>
+							<td>${selectModuleExamCommand.module.code?upper_case} ${selectModuleExamCommand.module.name}</td>
+						</tr>
+						<tr>
+							<th>Student Count:</th>
+							<td>${studentCount}</td>
+						</tr>
+						<tr>
+							<th>Grid Generated:</th>
+							<td><@fmt.date date=generatedDate relative=false /></td>
+						</tr>
+					</tbody>
+				</table>
+				<table class="table table-condensed">
+					<thead>
+						<tr>
+							<th colspan="2">Key</th>
+						</tr>
+					</thead>
+					<tbody>
+						<tr>
+							<td><span class="exam-grid-fail">#</span></td>
+							<td>Failed module or component</td>
+						</tr>
+						<tr>
+							<td><span class="exam-grid-actual-mark">#</span></td>
+							<td>Agreed mark missing, using actual</td>
+						</tr>
+						<tr>
 						<td><span class="exam-grid-resit"># (#)</span></td>
 						<td>Resit mark (original mark)</td>
 					</tr>
@@ -74,52 +80,52 @@
 						<td>Resit grade (original grade)</td>
 					</tr>
 					<tr>
-						<td><span class="exam-grid-actual-mark">X</span></td>
-						<td>Agreed and actual mark missing</td>
-					</tr>
-				</tbody>
-			</table>
-		</div>
-		<table class="table table-condensed grid">
-			<thead>
-				<tr>
-					<th>Name</th>
-					<th>ID</th>
-					<th>SCJ Code</th>
-					<th>Course</th>
-					<th>Route</th>
-					<th>Start Year</th>
-					<th>Credit</th>
+							<td><span class="exam-grid-actual-mark">X</span></td>
+							<td>Agreed and actual mark missing</td>
+						</tr>
+					</tbody>
+				</table>
+			</div>
+			<table class="table table-condensed grid">
+				<thead>
+					<tr>
+						<th>Name</th>
+						<th>ID</th>
+						<th>SCJ Code</th>
+						<th>Course</th>
+						<th>Route</th>
+						<th>Start Year</th>
+						<th>Credit</th>
 
-					<#list componentInfo as component>
-						<#assign groupAndSequenceAndOccurrence = component._1() />
-						<#assign cName = component._2() />
-						<th colspan="2"><span class="use-tooltip" title="" data-container="body" data-original-title="${cName}">${groupAndSequenceAndOccurrence}</span></th>
-					</#list>
-					<th>Module Mark</th>
-					<th>Module Grade</th>
-				</tr>
-			</thead>
-			<tbody>
-				<#-- Entities -->
-				<#list entities as entity>
-					<#assign assessmentComponentMap = entity.componentInfo />
-					<#assign mr = entity.moduleRegistration />
-					<#assign scd = mr.studentCourseDetails />
-					<tr class="student <#if entity_index%2 == 1>odd</#if>">
-						<td>${entity.name}</td>
-						<td>${entity.universityId} </td>
-						<td> ${scd.scjCode}</td>
-						<td><span class="use-tooltip" title="" data-container="body" data-original-title="${scd.course.shortName!""}">${scd.course.code}</span></td>
-						<td><span class="use-tooltip" title="" data-container="body" data-original-title="${scd.currentRoute.name!""}">${scd.currentRoute.code?upper_case}</span></td>
-						<td>${mr.academicYear.startYear?c}</td>
-						<td>${mr.cats}</td>
 						<#list componentInfo as component>
+						<#assign groupAndSequenceAndOccurrence = component._1() />
+							<#assign cName = component._2() />
+						<th colspan="2"><span class="use-tooltip" title="" data-container="body" data-original-title="${cName}">${groupAndSequenceAndOccurrence}</span></th>
+						</#list>
+						<th>Module Mark</th>
+						<th>Module Grade</th>
+					</tr>
+				</thead>
+				<tbody>
+					<#-- Entities -->
+					<#list entities as entity>
+						<#assign assessmentComponentMap = entity.componentInfo />
+						<#assign mr = entity.moduleRegistration />
+						<#assign scd = mr.studentCourseDetails />
+						<tr class="student <#if entity_index%2 == 1>odd</#if>">
+							<td>${entity.name}</td>
+							<td>${entity.universityId} </td>
+							<td> ${scd.scjCode}</td>
+							<td><span class="use-tooltip" title="" data-container="body" data-original-title="${scd.course.shortName!""}">${scd.course.code}</span></td>
+							<td><span class="use-tooltip" title="" data-container="body" data-original-title="${scd.currentRoute.name!""}">${scd.currentRoute.code?upper_case}</span></td>
+							<td>${mr.academicYear.startYear?c}</td>
+							<td>${mr.cats}</td>
+							<#list componentInfo as component>
 							<#assign groupAndSequenceAndOccurrence = component._1() />
 								<#if mapGet(assessmentComponentMap, groupAndSequenceAndOccurrence)??>
 									<#assign componentDetails = mapGet(assessmentComponentMap, groupAndSequenceAndOccurrence) />
 									<#assign componentResitDetails = componentDetails.resitInfo />
-									<td>
+										<td>
 										<#if componentResitDetails.resitMark??>
 											<#assign resitmark_class>
 												<#compress>
@@ -129,9 +135,9 @@
 											</#assign>
 											<#if componentDetails.mark??>
 												<span class="exam-grid-resit ${resitmark_class}">${componentResitDetails.resitMark} (${componentDetails.mark})</span>
-											<#else>
+												<#else>
 												<span class="exam-grid-resit ${resitmark_class}">${componentResitDetails.resitMark}</span>
-											</#if>
+												</#if>
 										<#elseif componentDetails.mark??>
 											<#assign componentmark_class>
 												<#compress>
@@ -140,51 +146,52 @@
 												</#compress>
 											</#assign>
 											<span <#if componentmark_class?length gt 0>class="${componentmark_class}"</#if>>${componentDetails.mark}</span>
-										<#else>
-											<span class="exam-grid-actual-mark use-tooltip" title="" data-container="body" data-original-title="No mark set">X</span>
-										</#if>
-									</td>
-									<td>
+											<#else>
+												<span class="exam-grid-actual-mark use-tooltip" title="" data-container="body" data-original-title="No mark set">X</span>
+											</#if>
+										</td>
+										<td>
 										<#if componentResitDetails.resitGrade??>
 											<#assign resitgrade_class><#if componentResitDetails.actualResitGrade>exam-grid-actual-mark</#if></#assign>
 											<#if componentDetails.grade??>
 												<span class="exam-grid-resit ${resitgrade_class}">${componentResitDetails.resitGrade} (${componentDetails.grade})</span>
-											<#else>
+												<#else>
 												<span class="exam-grid-resit ${resitgrade_class}">${componentResitDetails.resitGrade}</span>
-											</#if>
+												</#if>
 										<#elseif componentDetails.grade??>
 											<#assign componentgrade_class><#if componentDetails.actualGrade>exam-grid-actual-mark</#if></#assign>
 											<span <#if componentgrade_class?length gt 0>class="${componentgrade_class}"</#if>>${componentDetails.grade}</span>
-										<#else>
-											<span class="exam-grid-actual-mark use-tooltip" title="" data-container="body" data-original-title="No grade set">X</span>
-										</#if>
-									</td>
-								<#else>
-									<td></td><td></td>
-								</#if>
-						</#list>
-						<td>
-							<#if mr.agreedMark??>
+											<#else>
+												<span class="exam-grid-actual-mark use-tooltip" title="" data-container="body" data-original-title="No grade set">X</span>
+											</#if>
+										</td>
+									<#else>
+										<td></td><td></td>
+									</#if>
+							</#list>
+							<td>
+								<#if mr.agreedMark??>
 								<span <#if mr.agreedMark?number lt passMark>class="exam-grid-fail"</#if>>${mr.agreedMark}</span>
-							<#elseif mr.actualMark??>
+								<#elseif mr.actualMark??>
 								<span class="<#if mr.actualMark?number lt passMark>exam-grid-fail </#if>exam-grid-actual-mark">${mr.actualMark}</span>
-							<#else>
-								<span class="exam-grid-actual-mark use-tooltip" title="" data-container="body" data-original-title="No marks set">X</span>
-							</#if>
-						</td>
-						<td>
-							<#if mr.agreedGrade??>
+								<#else>
+									<span class="exam-grid-actual-mark use-tooltip" title="" data-container="body" data-original-title="No marks set">X</span>
+								</#if>
+							</td>
+							<td>
+								<#if mr.agreedGrade??>
 								<span>${mr.agreedGrade}</span>
-							<#elseif mr.actualGrade??>
-								<span class="exam-grid-actual-mark">${mr.actualGrade}</span>
-							<#else>
-								<span class="exam-grid-actual-mark use-tooltip" title="" data-container="body" data-original-title="No grade set">X</span>
-							</#if>
-						</td>
-					</tr>
-				</#list>
-			</tbody>
-		</table>
+								<#elseif mr.actualGrade??>
+									<span class="exam-grid-actual-mark">${mr.actualGrade}</span>
+								<#else>
+									<span class="exam-grid-actual-mark use-tooltip" title="" data-container="body" data-original-title="No grade set">X</span>
+								</#if>
+							</td>
+						</tr>
+					</#list>
+				</tbody>
+			</table>
+		</div>
 
 		<div class="fix-footer">
 			<div class="btn-group dropup">
@@ -224,6 +231,8 @@
 
 <script>
 	jQuery(function($){
+		$('#examGridContainer').show();
+
 		$('.fix-area').fixHeaderFooter();
 
 		var $form = $('form.exam-grid-preview'), $confirmModal = $('#confirmModal');
@@ -279,6 +288,8 @@
 
 		$('.table-responsive').css('overflow-x', 'hidden');
 
+		$('#examGridContainer').css('opacity', 1);
+		$('#examGridSpinner').hide();
 	});
 </script>
 
