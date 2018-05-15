@@ -67,6 +67,7 @@ object ImportAcademicInformationCommand {
 		val module = new Module
 		module.code = m.code
 		module.name = m.name
+		module.shortName = m.shortName
 		// TODO TAB-87 check child department rules and maybe sort it into a child department instead
 		module.adminDepartment = dept
 		module.degreeType = m.degreeType
@@ -222,6 +223,15 @@ trait ImportModules {
 					if (mod.name != module.name) {
 						logger.info("Updating name of %s to %s".format(mod.code, mod.name))
 						module.name = mod.name
+						module.shortName = mod.shortName
+						module.degreeType = mod.degreeType
+						module.missingFromImportSince = null
+						moduleAndDepartmentService.saveOrUpdate(module)
+						ImportResult(changed = 1)
+					} else if (mod.shortName != module.shortName) {
+						logger.info("Updating short name of %s to %s".format(mod.code, mod.shortName))
+						module.name = mod.name
+						module.shortName = mod.shortName
 						module.degreeType = mod.degreeType
 						module.missingFromImportSince = null
 						moduleAndDepartmentService.saveOrUpdate(module)
@@ -229,6 +239,7 @@ trait ImportModules {
 					} else if (mod.degreeType != module.degreeType) {
 						logger.info("Updating degreetype of %s to %s".format(mod.code, mod.degreeType))
 						module.degreeType = mod.degreeType
+						module.shortName = mod.shortName
 						module.missingFromImportSince = null
 						moduleAndDepartmentService.saveOrUpdate(module)
 						ImportResult(changed = 1)

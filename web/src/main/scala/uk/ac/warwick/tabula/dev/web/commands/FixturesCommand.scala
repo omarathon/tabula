@@ -307,10 +307,10 @@ object Fixtures {
 	val TestSubDepartment = DepartmentInfo("Test Services - Undergraduates", "Test Services - UG", "xxx-ug", null, Some("xxx"), Some("UG"))
 	val TestSubSubDepartment = DepartmentInfo("Test Services - Freshers", "Test Services - Freshers", "xxx-ug1", null, Some("xxx-ug"), Some("UG,Y1"))
 
-	val TestModule1 = ModuleInfo("Test Module 1", "xxx01", "xxx-xxx01", DegreeType.Undergraduate)
-	val TestModule2 = ModuleInfo("Test Module 2", "xxx02", "xxx-xxx02", DegreeType.Undergraduate)
-	val TestModule3 = ModuleInfo("Test Module 3", "xxx03", "xxx-xxx03", DegreeType.Undergraduate)
-	val TestModule4 = ModuleInfo("Test Module 3","xxx04","xxx-ug-xxx-ug-104", DegreeType.Undergraduate)
+	val TestModule1 = ModuleInfo("Test Module 1", "TM1", "xxx01", "xxx-xxx01", DegreeType.Undergraduate)
+	val TestModule2 = ModuleInfo("Test Module 2", "TM2", "xxx02", "xxx-xxx02", DegreeType.Undergraduate)
+	val TestModule3 = ModuleInfo("Test Module 3", "TM3", "xxx03", "xxx-xxx03", DegreeType.Undergraduate)
+	val TestModule4 = ModuleInfo("Test Module 4","TM4", "xxx04","xxx-ug-xxx-ug-104", DegreeType.Undergraduate)
 
 
 	val TestAdmin1 = "tabula-functest-admin1"

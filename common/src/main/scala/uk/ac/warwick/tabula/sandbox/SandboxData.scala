@@ -11,21 +11,21 @@ object SandboxData {
 
 	final val Departments = Map(
 		"arc" -> Department("School of Architecture", "arc", "S", Map(
-			"arc101" -> Module("Introduction to Architecture", "arc101"),
-			"arc102" -> Module("Architectural Design 1", "arc102"),
-			"arc103" -> Module("Introduction to Architectural History", "arc103"),
-			"arc106" -> Module("Architectural Technology 1", "arc106"),
-			"arc115" -> Module("20th Century Architecture", "arc115"),
-			"arc129" -> Module("Environmental Design and Services", "arc129"),
-			"arc201" -> Module("Architectural Technology 2", "arc201"),
-			"arc203" -> Module("Professional Practice and Management", "arc203"),
-			"arc204" -> Module("Principles and Theories of Architecture", "arc204"),
-			"arc210" -> Module("The Place of Houses", "arc210"),
-			"arc219" -> Module("Tectonic Practice", "arc219"),
-			"arc222" -> Module("Sustainable Principles", "arc222"),
-			"arc3a1" -> Module("Integrating Technology", "arc3a1"),
-			"arc330" -> Module("History of Modern Architecture", "arc330"),
-			"arc339" -> Module("Dissertation (Architecture)", "arc339")
+			"arc101" -> Module("Introduction to Architecture", "INTROARC","arc101"),
+			"arc102" -> Module("Architectural Design 1", "ARCDES1","arc102"),
+			"arc103" -> Module("Introduction to Architectural History","INTROARCH", "arc103"),
+			"arc106" -> Module("Architectural Technology 1", "ARCTECH1", "arc106"),
+			"arc115" -> Module("20th Century Architecture", "ARCTECH20", "arc115"),
+			"arc129" -> Module("Environmental Design and Services", "ENVDESSERV","arc129"),
+			"arc201" -> Module("Architectural Technology 2","ARCTECH2", "arc201"),
+			"arc203" -> Module("Professional Practice and Management", "PPM", "arc203"),
+			"arc204" -> Module("Principles and Theories of Architecture", "PTA", "arc204"),
+			"arc210" -> Module("The Place of Houses", "PAH","arc210"),
+			"arc219" -> Module("Tectonic Practice","TECPRA", "arc219"),
+			"arc222" -> Module("Sustainable Principles", "SUVPRI", "arc222"),
+			"arc3a1" -> Module("Integrating Technology", "INTGTECH", "arc3a1"),
+			"arc330" -> Module("History of Modern Architecture", "HMTEC", "arc330"),
+			"arc339" -> Module("Dissertation (Architecture)", "SISARC", "arc339")
 		), Map(
 			"ac801" ->
 				Route("Architecture", "ac801", DegreeType.Undergraduate, CourseType.UG, isResearch = false,
@@ -45,21 +45,21 @@ object SandboxData {
 				4200301, 4200350)
 		), 5200001, 5200030),
 		"hom" -> Department("History of Music", "hom", "A", Map(
-			"hom101" -> Module("History of Musical Techniques", "hom101"),
-			"hom102" -> Module("Introduction to Ethnomusicology", "hom102"),
-			"hom103" -> Module("The Long Nineteenth Century", "hom103"),
-			"hom106" -> Module("History of Composition", "hom106"),
-			"hom115" -> Module("20th Century Music", "hom115"),
-			"hom129" -> Module("Theory and Analysis", "hom129"),
-			"hom201" -> Module("Russian and Soviet Music, 1890-1975", "hom201"),
-			"hom203" -> Module("Studies in Popular Music", "hom203"),
-			"hom204" -> Module("History of Opera", "hom204"),
-			"hom210" -> Module("Writing Practices in Music", "hom210"),
-			"hom219" -> Module("Popular Music and Theories of Mass Culture", "hom219"),
-			"hom222" -> Module("Late 19th and Early 20th Century English Song", "hom222"),
-			"hom3a1" -> Module("Britten's Chamber Operas", "hom3a1"),
-			"hom330" -> Module("Influences of Hip-hop on Popular Culture", "hom330"),
-			"hom339" -> Module("Dissertation (History of Music)", "hom339")
+			"hom101" -> Module("History of Musical Techniques", "HOM101", "hom101"),
+			"hom102" -> Module("Introduction to Ethnomusicology", "HOM102", "hom102"),
+			"hom103" -> Module("The Long Nineteenth Century","HOM103", "hom103"),
+			"hom106" -> Module("History of Composition", "HOM106", "hom106"),
+			"hom115" -> Module("20th Century Music", "HOM115", "hom115"),
+			"hom129" -> Module("Theory and Analysis", "HOM129", "hom129"),
+			"hom201" -> Module("Russian and Soviet Music, 1890-1975", "HOM201", "hom201"),
+			"hom203" -> Module("Studies in Popular Music", "HOM203", "hom203"),
+			"hom204" -> Module("History of Opera", "HOM204", "hom204"),
+			"hom210" -> Module("Writing Practices in Music", "HOM210", "hom210"),
+			"hom219" -> Module("Popular Music and Theories of Mass Culture", "HOM222", "hom219"),
+			"hom222" -> Module("Late 19th and Early 20th Century English Song", "HOM222", "hom222"),
+			"hom3a1" -> Module("Britten's Chamber Operas", "HOM3A1", "hom3a1"),
+			"hom330" -> Module("Influences of Hip-hop on Popular Culture", "HOM330", "hom330"),
+			"hom339" -> Module("Dissertation (History of Music)", "HOM339", "hom339")
 		), Map(
 			"hm801" ->
 				Route("History of Music", "hm801", DegreeType.Undergraduate, CourseType.UG, isResearch = false,
@@ -79,8 +79,8 @@ object SandboxData {
 				4300301, 4300350)
 		), 5300001, 5300030),
 		"psp" -> Department("Public Speaking", "psp", "I", Map(
-			"psp101" -> Module("Pronunciation and Enunciation", "psp101"),
-			"psp102" -> Module("Professional Speaking", "psp102")
+			"psp101" -> Module("Pronunciation and Enunciation", "PSP101", "psp101"),
+			"psp102" -> Module("Professional Speaking", "PSP102", "psp102")
 		), Map(
 			"xp301" ->
 				Route("Public Speaking", "xp301", DegreeType.Undergraduate, CourseType.UG, isResearch = false,
@@ -96,8 +96,8 @@ object SandboxData {
 				Route("Public Speaking (Taught)", "xp3p1", DegreeType.Postgraduate, CourseType.PGT, isResearch = false, Seq(), 4400301, 4400350)
 		), 5400001, 5400030),
 		"trn" -> Department("Training Methods", "trn", "I", Map(
-			"trn101" -> Module("Introduction to Tabula Training", "trn101"),
-			"trn102" -> Module("Advanced Sitebuilder Training", "trn102")
+			"trn101" -> Module("Introduction to Tabula Training", "INT-TAB-TRNG", "trn101"),
+			"trn102" -> Module("Advanced Sitebuilder Training", "ADV-SB-TRNG", "trn102")
 		), Map(
 			"tr301" ->
 				Route("Training Methods", "tr301", DegreeType.Undergraduate, CourseType.UG, isResearch = false,
@@ -155,7 +155,7 @@ object SandboxData {
 		staffStartId: Int,
 		staffEndId: Int
 	)
-	case class Module(name: String, code: String)
+	case class Module(name: String, shortName:String, code: String)
 	case class Route(
 		name: String,
 		code: String,
