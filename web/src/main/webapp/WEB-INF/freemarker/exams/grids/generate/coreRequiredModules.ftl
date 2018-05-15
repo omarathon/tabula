@@ -73,6 +73,11 @@
 			</div>
 		</div>
 	</#list>
+	<#if coreRequiredModulesCommand.allModules?size == 0>
+		<p>
+			There are no modules for any of the selected routes.
+		</p>
+	</#if>
 
 	<button class="btn btn-primary" type="submit" name="${GenerateExamGridMappingParameters.coreRequiredModules}">Next</button>
 </form>
