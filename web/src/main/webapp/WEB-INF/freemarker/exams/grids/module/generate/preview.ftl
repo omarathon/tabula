@@ -9,11 +9,10 @@
 <@fmt.id7_deptheader title="Create a new module exam grid for ${department.name}" route_function=route_function />
 
 <div class="fix-area">
-	<form action="<@routes.exams.generateModuleGrid department academicYear />" class="dirty-check exam-grid-preview" method="post">
-		<@form_fields.select_module_fields />
+	<div class="exam-grid-preview">
 		<h2>Preview and download</h2>
 		<p class="progress-arrows">
-			<span class="arrow-right"><button type="submit" class="btn btn-link">Select module</button></span>
+			<span class="arrow-right"><a class="btn btn-link" href="<@routes.exams.generateModuleGrid department academicYear />">Select module</a></span>
 			<span class="arrow-right arrow-left active">Preview and download</span>
 		</p>
 
@@ -29,6 +28,14 @@
 					<@fmt.date date=oldestImport capitalise=false at=true relative=true />. If data changes in SITS after this
 					time, you'll need to generate the grid again to see the most recent information.
 				</p>
+				<form action="<@routes.exams.generateModuleGrid department academicYear />" method="post">
+					<@form_fields.select_module_fields />
+					<p>
+						<button type="submit" class="btn btn-primary">
+							Refresh SITS data and regenerate grid
+						</button>
+					</p>
+				</form>
 			</div>
 			<div class="key clearfix exam-modulegrid-preview">
 				<table class="table table-condensed">
@@ -194,14 +201,17 @@
 		</div>
 
 		<div class="fix-footer">
+			<form action="<@routes.exams.generateModuleGrid department academicYear />" method="post" id="examGridDocuments">
+		<@form_fields.select_module_fields />
 			<div class="btn-group dropup">
 				<button type="button" class="btn btn-primary dropdown-toggle" data-toggle="dropdown">Download&hellip; <span class="caret"></span></button>
 				<ul class="dropdown-menu download-options">
 					<li><button class="btn btn-link" type="submit" name="${GenerateModuleExamGridMappingParameters.excel}">Excel grid</button></li>
 				</ul>
 			</div>
+			</form>
 		</div>
-	</form>
+	</div>
 	<div class='modal fade' id='confirmModal'>
 		<div class='modal-dialog' role='document'><div class='modal-content'>
 			<div class='modal-body'>
@@ -235,7 +245,7 @@
 
 		$('.fix-area').fixHeaderFooter();
 
-		var $form = $('form.exam-grid-preview'), $confirmModal = $('#confirmModal');
+		var $form = $('#examGridDocuments'), $confirmModal = $('#confirmModal');
 		$('a.confirm', $confirmModal).on('click', function() {
 			$form.submit();
 			$confirmModal.modal('hide');

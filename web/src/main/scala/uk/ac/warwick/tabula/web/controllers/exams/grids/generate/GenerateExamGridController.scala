@@ -3,25 +3,28 @@ package uk.ac.warwick.tabula.web.controllers.exams.grids.generate
 import javax.validation.Valid
 import org.joda.time.DateTime
 import org.springframework.stereotype.Controller
+import org.springframework.util.MultiValueMap
 import org.springframework.validation.{BindException, Errors}
-import org.springframework.web.bind.annotation.{ModelAttribute, PathVariable, RequestMapping, RequestParam}
+import org.springframework.web.bind.annotation._
+import org.springframework.web.util.UriComponentsBuilder
 import uk.ac.warwick.tabula.JavaImports._
 import uk.ac.warwick.tabula.commands._
 import uk.ac.warwick.tabula.commands.exams.grids._
 import uk.ac.warwick.tabula.data.model.StudentCourseYearDetails.YearOfStudy
 import uk.ac.warwick.tabula.data.model._
-import uk.ac.warwick.tabula.exams.grids.columns.{ExamGridColumnValueType, _}
 import uk.ac.warwick.tabula.exams.grids.columns.modules.{CoreRequiredModulesColumnOption, ModuleExamGridColumn, ModuleReportsColumn, ModuleReportsColumnOption}
+import uk.ac.warwick.tabula.exams.grids.columns.{ExamGridColumnValueType, _}
+import uk.ac.warwick.tabula.exams.web.Routes.Grids
 import uk.ac.warwick.tabula.helpers.DateTimeOrdering._
 import uk.ac.warwick.tabula.jobs.scheduling.ImportMembersJob
 import uk.ac.warwick.tabula.permissions.{Permission, Permissions}
 import uk.ac.warwick.tabula.services._
 import uk.ac.warwick.tabula.services.exams.grids.NormalLoadLookup
 import uk.ac.warwick.tabula.services.jobs.AutowiringJobServiceComponent
+import uk.ac.warwick.tabula.web.Mav
 import uk.ac.warwick.tabula.web.controllers.exams.ExamsController
 import uk.ac.warwick.tabula.web.controllers.{AcademicYearScopedController, DepartmentScopedController}
 import uk.ac.warwick.tabula.web.views.JSONView
-import uk.ac.warwick.tabula.web.{Mav, Routes}
 import uk.ac.warwick.tabula.{AcademicYear, ItemNotFoundException}
 
 import scala.collection.JavaConverters._
@@ -69,7 +72,7 @@ class GenerateExamGridController extends ExamsController
 
 	private def commonCrumbs(view: Mav, department: Department, academicYear: AcademicYear): Mav =
 		view.crumbs(Breadcrumbs.Grids.Home, Breadcrumbs.Grids.Department(department, academicYear))
-			.secondCrumbs(academicYearBreadcrumbs(academicYear)(year => Routes.exams.Grids.generate(department, year)): _*)
+			.secondCrumbs(academicYearBreadcrumbs(academicYear)(year => Grids.generate(department, year)): _*)
 
 	@ModelAttribute("selectCourseCommand")
 	def selectCourseCommand(@PathVariable department: Department, @PathVariable academicYear: AcademicYear) =
@@ -82,12 +85,17 @@ class GenerateExamGridController extends ExamsController
 	def coreRequiredModulesCommand(@PathVariable department: Department, @PathVariable academicYear: AcademicYear) =
 		GenerateExamGridSetCoreRequiredModulesCommand(mandatory(department), mandatory(academicYear))
 
-	@ModelAttribute("checkOvercatCommmand")
-	def checkOvercatCommmand(@PathVariable department: Department, @PathVariable academicYear: AcademicYear) =
+	@ModelAttribute("checkOvercatCommand")
+	def checkOvercatCommand(@PathVariable department: Department, @PathVariable academicYear: AcademicYear) =
 		GenerateExamGridCheckAndApplyOvercatCommand(department, academicYear, user)
 
 	@ModelAttribute("GenerateExamGridMappingParameters")
 	def params = GenerateExamGridMappingParameters
+
+	@ModelAttribute("gridOptionsQueryString")
+	def gridOptionsQueryString(@RequestParam params: MultiValueMap[String, String]): String = {
+		UriComponentsBuilder.newInstance().queryParams(params).build().getQuery
+	}
 
 	@ModelAttribute("coreRequiredModuleLookup")
 	def coreRequiredModuleLookup(
@@ -107,7 +115,7 @@ class GenerateExamGridController extends ExamsController
 	@ModelAttribute("ExamGridColumnValueType")
 	def examGridColumnValueType = ExamGridColumnValueType
 
-	@RequestMapping(method = Array(GET, POST))
+	@GetMapping
 	def selectCourseRender(
 		@ModelAttribute("selectCourseCommand") selectCourseCommand: SelectCourseCommand,
 		@ModelAttribute("gridOptionsCommand") gridOptionsCommand: GridOptionsCommand,
@@ -122,49 +130,51 @@ class GenerateExamGridController extends ExamsController
 		)
 	}
 
-	@RequestMapping(method = Array(POST), params = Array(GenerateExamGridMappingParameters.selectCourse))
+	@PostMapping(params = Array(GenerateExamGridMappingParameters.selectCourse))
 	def selectCourseSubmit(
 		@Valid @ModelAttribute("selectCourseCommand") selectCourseCommand: SelectCourseCommand,
 		errors: Errors,
 		@ModelAttribute("gridOptionsCommand") gridOptionsCommand: GridOptionsCommand,
-		@ModelAttribute("checkOvercatCommmand") checkOvercatCommmand: CheckOvercatCommand,
+		@ModelAttribute("checkOvercatCommand") checkOvercatCommand: CheckOvercatCommand,
 		@ModelAttribute("coreRequiredModuleLookup") coreRequiredModuleLookup: CoreRequiredModuleLookup,
 		@PathVariable department: Department,
 		@PathVariable academicYear: AcademicYear,
-		@RequestParam allRequestParams: JMap[String, String]
+		@RequestParam allRequestParams: MultiValueMap[String, String]
 	): Mav = {
 		selectCourseSubmit(
 			selectCourseCommand,
 			errors,
 			gridOptionsCommand,
-			checkOvercatCommmand,
+			checkOvercatCommand,
 			coreRequiredModuleLookup,
 			department,
 			academicYear,
-			usePreviousSettings = false
+			usePreviousSettings = false,
+			allRequestParams
 		)
 	}
 
-	@RequestMapping(method = Array(POST), params = Array(GenerateExamGridMappingParameters.usePreviousSettings))
+	@PostMapping(params = Array(GenerateExamGridMappingParameters.usePreviousSettings))
 	def selectCourseSubmitWithPreviousSettings(
 		@Valid @ModelAttribute("selectCourseCommand") selectCourseCommand: SelectCourseCommand,
 		errors: Errors,
 		@ModelAttribute("gridOptionsCommand") gridOptionsCommand: GridOptionsCommand,
-		@ModelAttribute("checkOvercatCommmand") checkOvercatCommmand: CheckOvercatCommand,
+		@ModelAttribute("checkOvercatCommand") checkOvercatCommand: CheckOvercatCommand,
 		@ModelAttribute("coreRequiredModuleLookup") coreRequiredModuleLookup: CoreRequiredModuleLookup,
 		@PathVariable department: Department,
 		@PathVariable academicYear: AcademicYear,
-		@RequestParam allRequestParams: JMap[String, String]
+		@RequestParam allRequestParams: MultiValueMap[String, String]
 	): Mav = {
 		selectCourseSubmit(
 			selectCourseCommand,
 			errors,
 			gridOptionsCommand,
-			checkOvercatCommmand,
+			checkOvercatCommand,
 			coreRequiredModuleLookup,
 			department,
 			academicYear,
-			usePreviousSettings = true
+			usePreviousSettings = true,
+			allRequestParams
 		)
 	}
 
@@ -172,11 +182,12 @@ class GenerateExamGridController extends ExamsController
 		selectCourseCommand: SelectCourseCommand,
 		errors: Errors,
 		gridOptionsCommand: GridOptionsCommand,
-		checkOvercatCommmand: CheckOvercatCommand,
+		checkOvercatCommand: CheckOvercatCommand,
 		coreRequiredModuleLookup: CoreRequiredModuleLookup,
 		department: Department,
 		academicYear: AcademicYear,
-		usePreviousSettings: Boolean
+		usePreviousSettings: Boolean,
+		allRequestParams: MultiValueMap[String, String]
 	): Mav = {
 		if (errors.hasErrors) {
 			selectCourseRender(selectCourseCommand, gridOptionsCommand, department, academicYear)
@@ -188,41 +199,93 @@ class GenerateExamGridController extends ExamsController
 			} else {
 				val jobInstance = jobService.add(Some(user), ImportMembersJob(students.map(_.universityId)))
 
+				allRequestParams.remove("jobId")
+				allRequestParams.add("jobId", jobInstance.id)
 				if (usePreviousSettings) {
-					checkJobProgress(jobInstance.id, selectCourseCommand, gridOptionsCommand, checkOvercatCommmand, coreRequiredModuleLookup, department, academicYear)
+					redirectTo(Grids.jobProgress(department,academicYear), allRequestParams)
 				} else {
-					gridOptionsRender(jobInstance.id, selectCourseCommand, department, academicYear)
+					redirectTo(Grids.options(department, academicYear), allRequestParams)
 				}
 			}
 		}
 	}
 
-	private def gridOptionsRender(jobId: String, selectCourseCommand: SelectCourseCommand, department: Department, academicYear: AcademicYear): Mav = {
-		commonCrumbs(Mav("exams/grids/generate/gridOption", "jobId" -> jobId), department, academicYear)
+	@GetMapping(path = Array("/options"))
+	def gridOptionsForm(
+		@ModelAttribute("selectCourseCommand") selectCourseCommand: SelectCourseCommand,
+		@ModelAttribute("gridOptionsCommand") gridOptionsCommand: GridOptionsCommand,
+		@ModelAttribute("coreRequiredModulesCommand") coreRequiredModulesCommand: CoreRequiredModulesCommand,
+		@ModelAttribute("checkOvercatCommand") checkOvercatCommand: CheckOvercatCommand,
+		@ModelAttribute("coreRequiredModuleLookup") coreRequiredModuleLookup: CoreRequiredModuleLookup,
+		@RequestParam jobId: String,
+		@PathVariable department: Department,
+		@PathVariable academicYear: AcademicYear,
+	): Mav = {
+		gridOptionsRender(jobId, department, academicYear)
 	}
 
-	@RequestMapping(method = Array(POST), params = Array(GenerateExamGridMappingParameters.gridOptions))
+	@PostMapping(path = Array("/options"))
 	def gridOptions(
 		@ModelAttribute("selectCourseCommand") selectCourseCommand: SelectCourseCommand,
 		@Valid @ModelAttribute("gridOptionsCommand") gridOptionsCommand: GridOptionsCommand,
 		errors: Errors,
 		@ModelAttribute("coreRequiredModulesCommand") coreRequiredModulesCommand: CoreRequiredModulesCommand,
-		@ModelAttribute("checkOvercatCommmand") checkOvercatCommmand: CheckOvercatCommand,
+		@ModelAttribute("checkOvercatCommand") checkOvercatCommand: CheckOvercatCommand,
+		@ModelAttribute("coreRequiredModuleLookup") coreRequiredModuleLookup: CoreRequiredModuleLookup,
+		@RequestParam jobId: String,
+		@PathVariable department: Department,
+		@PathVariable academicYear: AcademicYear,
+		@RequestParam allRequestParams: MultiValueMap[String, String]
+	): Mav = {
+		if (errors.hasErrors) {
+			gridOptionsRender(jobId, department, academicYear)
+		} else {
+			val columnIDs = gridOptionsCommand.apply()._1.map(_.identifier)
+			if (columnIDs.contains(new CoreRequiredModulesColumnOption().identifier) || columnIDs.contains(new ModuleReportsColumnOption().identifier)) {
+				redirectTo(Grids.coreRequired(department,academicYear), allRequestParams)
+			} else {
+				redirectTo(Grids.jobProgress(department,academicYear), allRequestParams)
+			}
+		}
+	}
+
+	private def gridOptionsRender(jobId: String, department: Department, academicYear: AcademicYear): Mav = {
+		commonCrumbs(Mav("exams/grids/generate/gridOption", "jobId" -> jobId), department, academicYear)
+	}
+
+	@GetMapping(path = Array("/corerequired"))
+	def coreRequiredModulesForm(
+		@ModelAttribute("selectCourseCommand") selectCourseCommand: SelectCourseCommand,
+		@ModelAttribute("gridOptionsCommand") gridOptionsCommand: GridOptionsCommand,
+		@ModelAttribute("coreRequiredModulesCommand") coreRequiredModulesCommand: CoreRequiredModulesCommand,
+		@ModelAttribute("checkOvercatCommand") checkOvercatCommand: CheckOvercatCommand,
 		@ModelAttribute("coreRequiredModuleLookup") coreRequiredModuleLookup: CoreRequiredModuleLookup,
 		@RequestParam jobId: String,
 		@PathVariable department: Department,
 		@PathVariable academicYear: AcademicYear
 	): Mav = {
+		coreRequiredModulesCommand.populate()
+		coreRequiredModulesRender(jobId, department, academicYear)
+	}
+
+	@PostMapping(path = Array("/corerequired"))
+	def coreRequiredModules(
+		@ModelAttribute("selectCourseCommand") selectCourseCommand: SelectCourseCommand,
+		@ModelAttribute("gridOptionsCommand") gridOptionsCommand: GridOptionsCommand,
+		@Valid @ModelAttribute("coreRequiredModulesCommand") coreRequiredModulesCommand: CoreRequiredModulesCommand,
+		errors: Errors,
+		@ModelAttribute("coreRequiredModuleLookup") coreRequiredModuleLookup: CoreRequiredModuleLookup,
+		@ModelAttribute("checkOvercatCommand") checkOvercatCommand: CheckOvercatCommand,
+		@RequestParam jobId: String,
+		@PathVariable department: Department,
+		@PathVariable academicYear: AcademicYear,
+		@RequestParam allRequestParams: MultiValueMap[String, String]
+	): Mav = {
 		if (errors.hasErrors) {
-			gridOptionsRender(jobId, selectCourseCommand, department, academicYear)
+			coreRequiredModulesRender(jobId, department, academicYear)
 		} else {
-			val columnIDs = gridOptionsCommand.apply()._1.map(_.identifier)
-			if (columnIDs.contains(new CoreRequiredModulesColumnOption().identifier) || columnIDs.contains(new ModuleReportsColumnOption().identifier)) {
-				coreRequiredModulesCommand.populate()
-				coreRequiredModulesRender(jobId, department, academicYear)
-			} else {
-				checkJobProgress(jobId, selectCourseCommand, gridOptionsCommand, checkOvercatCommmand, coreRequiredModuleLookup, department, academicYear)
-			}
+			coreRequiredModulesCommand.apply()
+			redirectTo(Grids.jobProgress(department, academicYear), allRequestParams)
 		}
 	}
 
@@ -234,35 +297,17 @@ class GenerateExamGridController extends ExamsController
 		)
 	}
 
-	@RequestMapping(method = Array(POST), params = Array(GenerateExamGridMappingParameters.coreRequiredModules))
-	def coreRequiredModules(
+	@GetMapping(path = Array("/import"))
+	def checkJobProgress(
+		@RequestParam jobId: String,
 		@ModelAttribute("selectCourseCommand") selectCourseCommand: SelectCourseCommand,
 		@ModelAttribute("gridOptionsCommand") gridOptionsCommand: GridOptionsCommand,
-		@Valid @ModelAttribute("coreRequiredModulesCommand") coreRequiredModulesCommand: CoreRequiredModulesCommand,
-		errors: Errors,
+		@ModelAttribute("checkOvercatCommand") checkOvercatCommand: CheckOvercatCommand,
 		@ModelAttribute("coreRequiredModuleLookup") coreRequiredModuleLookup: CoreRequiredModuleLookup,
-		@ModelAttribute("checkOvercatCommmand") checkOvercatCommmand: CheckOvercatCommand,
-		@RequestParam jobId: String,
 		@PathVariable department: Department,
-		@PathVariable academicYear: AcademicYear
+		@PathVariable academicYear: AcademicYear,
+		@RequestParam allRequestParams: MultiValueMap[String, String]
 	): Mav = {
-		if (errors.hasErrors) {
-			coreRequiredModulesRender(jobId, department, academicYear)
-		} else {
-			coreRequiredModulesCommand.apply()
-			checkJobProgress(jobId, selectCourseCommand, gridOptionsCommand, checkOvercatCommmand, coreRequiredModuleLookup, department, academicYear)
-		}
-	}
-
-	private def checkJobProgress(
-		jobId: String,
-		selectCourseCommand: SelectCourseCommand,
-		gridOptionsCommand: GridOptionsCommand,
-		checkOvercatCommmand: CheckOvercatCommand,
-		coreRequiredModuleLookup: CoreRequiredModuleLookup,
-		department: Department,
-		academicYear: AcademicYear
-	) = {
 		val jobInstance = jobService.getInstance(jobId)
 		if (jobInstance.isDefined && !jobInstance.get.finished) {
 			val studentLastImportDates = selectCourseCommand.apply().map(e =>
@@ -279,19 +324,11 @@ class GenerateExamGridController extends ExamsController
 				academicYear
 			)
 		} else {
-			previewAndDownloadRender(
-				selectCourseCommand,
-				gridOptionsCommand,
-				checkOvercatCommmand,
-				coreRequiredModuleLookup,
-				department,
-				academicYear,
-				jobId
-			)
+			redirectTo(Grids.preview(department, academicYear), allRequestParams)
 		}
 	}
 
-	@RequestMapping(method = Array(POST), value = Array("/progress"))
+	@PostMapping(path = Array("/progress"))
 	def jobProgress(@RequestParam jobId: String): Mav = {
 		jobService.getInstance(jobId).map(jobInstance =>
 			Mav(new JSONView(Map(
@@ -303,47 +340,27 @@ class GenerateExamGridController extends ExamsController
 		).getOrElse(throw new ItemNotFoundException())
 	}
 
-	@RequestMapping(method = Array(POST), params = Array(GenerateExamGridMappingParameters.previewAndDownload))
+	@GetMapping(path = Array("/preview"))
 	def previewAndDownload(
 		@Valid @ModelAttribute("selectCourseCommand") selectCourseCommand: SelectCourseCommand,
 		selectCourseCommandErrors: Errors,
 		@Valid @ModelAttribute("gridOptionsCommand") gridOptionsCommand: GridOptionsCommand,
 		gridOptionsCommandErrors: Errors,
-		@ModelAttribute("checkOvercatCommmand") checkOvercatCommmand: CheckOvercatCommand,
+		@ModelAttribute("checkOvercatCommand") checkOvercatCommand: CheckOvercatCommand,
 		@ModelAttribute("coreRequiredModuleLookup") coreRequiredModuleLookup: CoreRequiredModuleLookup,
 		@PathVariable department: Department,
-		@PathVariable academicYear: AcademicYear,
-		@RequestParam jobId: String
+		@PathVariable academicYear: AcademicYear
 	): Mav = {
 		if (selectCourseCommandErrors.hasErrors || gridOptionsCommandErrors.hasErrors) {
 			throw new IllegalArgumentException
 		}
-		previewAndDownloadRender(
-			selectCourseCommand,
-			gridOptionsCommand,
-			checkOvercatCommmand,
-			coreRequiredModuleLookup,
-			department,
-			academicYear,
-			jobId
-		)
-	}
 
-	private def previewAndDownloadRender(
-		selectCourseCommand: SelectCourseCommand,
-		gridOptionsCommand: GridOptionsCommand,
-		checkOvercatCommmand: CheckOvercatCommand,
-		coreRequiredModules: CoreRequiredModuleLookup,
-		department: Department,
-		academicYear: AcademicYear,
-		jobId: String
-	): Mav = {
 		val GridData(entities, studentInformationColumns, perYearColumns, summaryColumns, weightings, normalLoadLookup, routeRules) = benchmarkTask("GridData") {
 			checkAndApplyOvercatAndGetGridData(
 				selectCourseCommand,
 				gridOptionsCommand,
-				checkOvercatCommmand,
-				coreRequiredModules
+				checkOvercatCommand,
+				coreRequiredModuleLookup
 			)
 		}
 
@@ -382,8 +399,7 @@ class GenerateExamGridController extends ExamsController
 			"generatedDate" -> DateTime.now,
 			"weightings" -> weightings,
 			"normalLoadLookup" -> normalLoadLookup,
-			"routeRules" -> routeRules,
-			"jobId" -> jobId
+			"routeRules" -> routeRules
 		) ++ shortFormLayoutData
 
 		commonCrumbs(
@@ -411,11 +427,11 @@ class GenerateExamGridController extends ExamsController
 	): GridData = {
 
 		checkOvercatCmd.selectCourseCommand = selectCourseCommand
-		val checkOvercatCommmandErrors = new BindException(selectCourseCommand, "checkOvercatCommand")
-		checkOvercatCmd.validate(checkOvercatCommmandErrors)
+		val checkOvercatCommandErrors = new BindException(selectCourseCommand, "checkOvercatCommand")
+		checkOvercatCmd.validate(checkOvercatCommandErrors)
 
 		val entities = {
-			if (checkOvercatCommmandErrors.hasErrors) {
+			if (checkOvercatCommandErrors.hasErrors) {
 				checkOvercatCmd.entities
 			} else {
 				checkOvercatCmd.apply().entities
@@ -479,4 +495,8 @@ class GenerateExamGridController extends ExamsController
 		GridData(entities, studentInformationColumns, perYearColumns, summaryColumns, weightings, normalLoadLookup, routeRulesLookup)
 	}
 
+	private def redirectTo(path: String, params: MultiValueMap[String, String]): Mav = {
+		val uri = UriComponentsBuilder.fromPath(path).queryParams(params).toUriString
+		RedirectForce(uri)
+	}
 }

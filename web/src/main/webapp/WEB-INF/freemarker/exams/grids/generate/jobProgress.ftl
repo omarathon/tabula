@@ -9,7 +9,7 @@
 
 <@fmt.id7_deptheader title="Create a new exam grid for ${department.name}" route_function=route_function />
 
-<form action="<@routes.exams.generateGrid department academicYear />" class="dirty-check" method="post">
+<form id="generateGridPreview" action="<@routes.exams.generateGridPreview department academicYear />" class="dirty-check" method="get">
 
 	<@form_fields.select_course_fields />
 	<@form_fields.grid_options_fields />
@@ -17,8 +17,8 @@
 	<h2>Importing student data</h2>
 
 	<p class="progress-arrows">
-		<span class="arrow-right"><button type="submit" class="btn btn-link">Select courses</button></span>
-		<span class="arrow-right arrow-left"><button type="submit" class="btn btn-link" name="${GenerateExamGridMappingParameters.selectCourse}">Set grid options</button></span>
+		<span class="arrow-right"><a class="btn btn-link" href="<@routes.exams.generateGrid department academicYear />?${gridOptionsQueryString}">Select courses</a></span>
+		<span class="arrow-right arrow-left"><a class="btn btn-link" href="<@routes.exams.generateGridOptions department academicYear />?${gridOptionsQueryString}">Set grid options</a></span>
 		<span class="arrow-right arrow-left active">Preview and download</span>
 	</p>
 
@@ -58,7 +58,7 @@
 		</@modal.wrapper>
 	</div>
 
-	<button class="btn btn-primary" type="submit" name="${GenerateExamGridMappingParameters.previewAndDownload}">Skip import and generate grid</button>
+	<button class="btn btn-primary" type="submit">Skip import and generate grid</button>
 </form>
 
 <script>
@@ -66,7 +66,7 @@
 		var updateProgress = function(){
 			$.post('<@routes.exams.generateGridProgress department academicYear />', {'jobId': '${jobId}'}, function(data){
 				if (data.finished) {
-					$('button[name="${GenerateExamGridMappingParameters.previewAndDownload}"]').trigger('click');
+					$('#generateGridPreview').trigger('submit');
 				} else {
 					if (data.progress) {
 						$('.progress .progress-bar').css('width', data.progress + '%');
