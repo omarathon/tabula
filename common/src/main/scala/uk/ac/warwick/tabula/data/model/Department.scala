@@ -284,7 +284,7 @@ class Department extends GeneratedId
 		settings += (Settings.ExamGridOptions.MarksToShow -> options.marksToShow)
 		settings += (Settings.ExamGridOptions.ComponentsToShow -> options.componentsToShow)
 		settings += (Settings.ExamGridOptions.ComponentSequenceToShow -> options.componentSequenceToShow)
-		settings += (Settings.ExamGridOptions.ModuleNameToShow -> options.moduleNameToShow)
+		settings += (Settings.ExamGridOptions.ModuleNameToShow -> options.moduleNameToShow.value)
 		settings += (Settings.ExamGridOptions.Layout -> options.layout)
 		settings += (Settings.ExamGridOptions.YearMarksToUse -> options.yearMarksToUse)
 		settings += (Settings.ExamGridOptions.MandatoryModulesAndYearMarkColumns -> options.mandatoryModulesAndYearMarkColumns)
