@@ -64,18 +64,27 @@
 <script>
 	jQuery(function($){
 		var updateProgress = function(){
-			$.post('<@routes.exams.generateGridProgress department academicYear />', {'jobId': '${jobId}'}, function(data){
-				if (data.finished) {
-					$('#generateGridPreview').trigger('submit');
-				} else {
-					if (data.progress) {
-						$('.progress .progress-bar').css('width', data.progress + '%');
+			$.ajax({
+				type: "POST",
+				url: '<@routes.exams.generateGridProgress department academicYear />',
+				data: {'jobId': '${jobId}'},
+				error: function(xmlhttprequest, textstatus, message) {
+					if(textstatus === "timeout"){ updateProgress()};
+				},
+				success: function(data){
+					if (data.finished) {
+						$('#generateGridPreview').trigger('submit');
+					} else {
+						if (data.progress) {
+							$('.progress .progress-bar').css('width', data.progress + '%');
+						}
+						if (data.status) {
+							$('.job-status').html(data.status);
+						}
+						setTimeout(updateProgress, 5 * 1000);
 					}
-					if (data.status) {
-						$('.job-status').html(data.status);
-					}
-					setTimeout(updateProgress, 5 * 1000);
-				}
+				},
+				timeout: 5000
 			});
 		};
 		updateProgress();
