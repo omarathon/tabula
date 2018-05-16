@@ -98,9 +98,8 @@ trait Assessment extends GeneratedId with CanBeDeleted with PermissionsTarget {
 
 	// if any feedback exists that has a marker feedback with a marker then at least one marker has been assigned
 	def markersAssigned: Boolean = allFeedback.exists(_.allMarkerFeedback.exists(_.marker != null))
-
-	// if any feedback exists that has outstanding stages marking has begun (when marking is finished there is a completed stage)
-	def isReleasedForMarking: Boolean = allFeedback.exists(_.outstandingStages.asScala.nonEmpty)
+	
+	def isReleasedForMarking: Boolean
 
 	def members: UnspecifiedTypeUserGroup
 }

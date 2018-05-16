@@ -65,6 +65,8 @@ class Exam
 
 	var released: JBoolean = _
 
+	def isReleasedForMarking: Boolean = released
+
 	// sort order is unpredictable on retrieval from Hibernate; use indexed defs below for access
 	@OneToMany(mappedBy = "exam", fetch = LAZY, cascade = Array(ALL))
 	@BatchSize(size = 200)
