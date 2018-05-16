@@ -142,8 +142,8 @@
 								<#list marksToDisplay as markItem>
 									<div class="mark-row form-group clearfix">
 										<#if seatNumberMap?has_content>
-											<#if mapGet(seatNumberMap, markItem.universityId)??>
-												<div class="col-md-2">${mapGet(seatNumberMap, markItem.universityId)}</div>
+											<#if mapGet(seatNumberMap, markItem.user.userId)??>
+												<div class="col-md-2">${mapGet(seatNumberMap, markItem.user.userId)}</div>
 											<#else>
 												<div class="col-md-2"></div>
 											</#if>
