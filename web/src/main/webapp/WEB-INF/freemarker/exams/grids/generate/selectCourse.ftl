@@ -228,10 +228,12 @@
 						<li>Show component marks and the sequence that they relate to</li>
 					</#if>
 				</#if>
-				<#if gridOptionsCommand.moduleNameToShow == 'codeOnly'>
-					<li>Show module code only</li>
-				<#else>
+				<#if gridOptionsCommand.moduleNameToShow.toString == 'nameAndCode'>
 					<li>Show module names</li>
+				<#elseif gridOptionsCommand.moduleNameToShow.toString == 'shortNameAndCode'>
+					<li>Show module short names</li>
+				<#else>
+					<li>Show module code only</li>
 				</#if>
 				<#if gridOptionsCommand.layout == 'full'>
 					<li>Full grid</li>

@@ -453,7 +453,7 @@ class GenerateExamGridController extends ExamsController
 			showComponentMarks = gridOptionsCommand.showComponentMarks,
 			showZeroWeightedComponents = gridOptionsCommand.showZeroWeightedComponents,
 			showComponentSequence = gridOptionsCommand.showComponentSequence,
-			showModuleNames = gridOptionsCommand.showModuleNames,
+			showModuleNames = gridOptionsCommand.moduleNameToShow,
 			calculateYearMarks = gridOptionsCommand.calculateYearMarks,
 			isLevelGrid = selectCourseCommand.isLevelGrid
 		)

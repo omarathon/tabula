@@ -211,13 +211,6 @@
 
 	<div class="row">
 
-		<div class="col-md-3">
-			<div class="checkbox">
-				<label><input type="checkbox" name="moduleNameToShow" value="nameAndCode"
-					<#if gridOptionsCommand.moduleNameToShow == 'nameAndCode'>checked</#if>
-				/> Show module names</label>
-			</div>
-		</div>
 
 
 		<div class="col-md-3">
@@ -241,6 +234,30 @@
 				<label><input type="checkbox" name="componentSequenceToShow" value="sequenceAndMark"
 					<#if gridOptionsCommand.componentsToShow == 'sequenceAndMark'>checked</#if>
 				/> Show component sequence <@fmt.help_popover id="componentSequenceToShow" content="Show component sequence codes next to component marks" /></label>
+			</div>
+		</div>
+	</div>
+
+	<div class="row">
+		<div class="col-md-3">
+			<div class="radio">
+				<label><input type="radio" name="moduleNameToShow" value="nameAndCode"
+					<#if gridOptionsCommand.moduleNameToShow.toString == 'nameAndCode'>checked</#if>
+				/> Show module names</label>
+			</div>
+		</div>
+		<div class="col-md-3">
+			<div class="radio">
+				<label><input type="radio" name="moduleNameToShow" value="shortNameAndCode"
+					<#if gridOptionsCommand.moduleNameToShow.toString == 'shortNameAndCode'>checked</#if>
+				/> Show module short names</label>
+			</div>
+		</div>
+		<div class="col-md-3">
+			<div class="radio">
+				<label><input type="radio" name="moduleNameToShow" value="codeOnly"
+					<#if gridOptionsCommand.moduleNameToShow.toString == 'codeOnly'>checked</#if>
+				/> No names</label>
 			</div>
 		</div>
 	</div>
