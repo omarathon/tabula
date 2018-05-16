@@ -310,8 +310,6 @@
 
 <script>
 	jQuery(function($){
-		$('#examGridContainer').show();
-
 		$('.fix-area').fixHeaderFooter();
 
 		var $form = $('#examGridDocuments'), $confirmModal = $('#confirmModal');
