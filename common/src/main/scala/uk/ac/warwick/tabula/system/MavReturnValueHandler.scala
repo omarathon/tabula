@@ -22,19 +22,14 @@ class MavReturnValueHandler extends HandlerMethodReturnValueHandler with Logging
 		mavContainer: ModelAndViewContainer,
 		webRequest: NativeWebRequest): Unit =
 		returnValue match {
-			case mav: Mav => {
+			case mav: Mav =>
 				mavContainer.addAllAttributes(mav.toModel.asJava)
 				if (mav.viewName != null) {
 					mavContainer.setViewName(mav.viewName)
 				} else {
 					mavContainer.setView(mav.view)
 				}
-				if (mav.viewName != null && mav.viewName.startsWith("redirect:")) {
-					// Don't dump model attributes into the query string when redirecting
-					mavContainer.getModel.clear()
-				}
 				mavContainer.setRequestHandled(false)
-			}
 		}
 
 }
