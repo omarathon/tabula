@@ -92,7 +92,7 @@ fi
 
 JAVA_OPTS="-Xms${JVM_MINIMUM_MEMORY} -Xmx${JVM_MAXIMUM_MEMORY} ${JMX_OPTS} ${JAVA_OPTS} ${JVM_REQUIRED_ARGS}"
 
-JAVA_OPTS="-XX:+UseG1GC -XX:G1HeapRegionSize=32m ${JAVA_OPTS}"
+JAVA_OPTS="-XX:+UseG1GC -XX:G1HeapRegionSize=32m -Dwarwick.memcached.config=/memcached.properties -Dssoclient.cache.strategy=MemcachedRequired -Dnet.spy.log.LoggerImpl=net.spy.memcached.compat.log.SLF4JLogger ${JAVA_OPTS}"
 
 DEBUG_OPTS="-Xdebug -Xrunjdwp:transport=dt_socket,address=8787,server=y,suspend=n"
 

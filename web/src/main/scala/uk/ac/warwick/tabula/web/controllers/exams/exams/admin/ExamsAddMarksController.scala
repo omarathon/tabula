@@ -52,7 +52,7 @@ class ExamsAddMarksController extends ExamsController {
 		}
 
 		val studentMarkerMap = members.map(m =>
-			MarkingWorkflow.getMarkerFromAssessmentMap(userLookup, m._1.getWarwickId, exam.firstMarkerMap) match {
+			MarkingWorkflow.getMarkerFromAssessmentMap(userLookup, m._1.getUserId, exam.firstMarkerMap) match {
 				case Some(markerId) => m._1.getWarwickId -> userLookup.getUserByUserId(markerId).getFullName
 				case None => m._1.getWarwickId -> None
 			}).toMap

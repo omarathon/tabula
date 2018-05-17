@@ -34,7 +34,7 @@
 			</span>
 		</button>
 
-		<#macro filter path placeholder currentFilter allItems prefix="" customPicker="" cssClass="">
+		<#macro filter path placeholder currentFilter allItems prefix="" customPicker="" cssClass="" emptyText="N/A for this department">
 			<@spring.bind path=path>
 				<div class="btn-group<#if currentFilter == placeholder> empty-filter</#if> ${cssClass}">
 					<a class="btn btn-default btn-mini btn-xs dropdown-toggle" data-toggle="dropdown">
@@ -59,7 +59,7 @@
 									</li>
 								</#list>
 							<#else>
-								<li><small class="muted" style="padding-left: 5px;">N/A for this department</small></li>
+								<li><div class="small muted" style="padding-left: 5px;">${emptyText}</div></li>
 							</#if>
 						</ul>
 					</div>
@@ -117,7 +117,7 @@
 				${route.code?upper_case}
 			</#if>
 		</@current_filter_value></#compress></#assign>
-		<@filter "selectCourseCommand.routes" placeholder currentfilter selectCourseCommand.allRoutes; route>
+		<@filter path="selectCourseCommand.routes" placeholder=placeholder currentFilter=currentfilter allItems=selectCourseCommand.allRoutes emptyText="No course routes found"; route>
 			<label class="checkbox">
 				<input type="checkbox" name="${status.expression}" value="${route.code}" data-short-value="${route.code?upper_case}"
 					${contains_by_code(selectCourseCommand.routes, route)?string('checked','')}

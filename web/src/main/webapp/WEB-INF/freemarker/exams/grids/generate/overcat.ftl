@@ -247,10 +247,7 @@
 			}));
 			$.post('<@routes.exams.generateGridOvercatting department academicYear scyd/>', $form.serialize(), function(data){
 				if (!data.errors) {
-					$('form.exam-grid-preview').append($('<input/>').attr({
-						'type': 'hidden',
-						'name': '${GenerateExamGridMappingParameters.previewAndDownload}'
-					})).submit();
+					window.location.reload();
 				} else {
 					updateButtons();
 				}

@@ -16,8 +16,8 @@ import scala.collection.immutable.Range.Inclusive
 import scala.util.Try
 
 object GenerateExamGridSelectCourseCommand {
-	def apply(department: Department, academicYear: AcademicYear) =
-		new GenerateExamGridSelectCourseCommandInternal(department, academicYear)
+	def apply(department: Department, academicYear: AcademicYear, permitRoutesFromRootDepartment: Boolean = false) =
+		new GenerateExamGridSelectCourseCommandInternal(department, academicYear, permitRoutesFromRootDepartment)
 			with AutowiringCourseAndRouteServiceComponent
 			with AutowiringStudentCourseYearDetailsDaoComponent
 			with AutowiringLevelServiceComponent
@@ -29,7 +29,7 @@ object GenerateExamGridSelectCourseCommand {
 			with ReadOnly with Unaudited
 }
 
-class GenerateExamGridSelectCourseCommandInternal(val department: Department, val academicYear: AcademicYear) 
+class GenerateExamGridSelectCourseCommandInternal(val department: Department, val academicYear: AcademicYear, val permitRoutesFromRootDepartment: Boolean)
 	extends CommandInternal[Seq[ExamGridEntity]] with TaskBenchmarking {
 
 	self: StudentCourseYearDetailsDaoComponent with GenerateExamGridSelectCourseCommandRequest =>
@@ -89,10 +89,19 @@ trait GenerateExamGridSelectCourseCommandState {
 
 	def department: Department
 	def academicYear: AcademicYear
+	def permitRoutesFromRootDepartment: Boolean
 
 	// Courses are always owned by the root department
 	lazy val allCourses: List[Course] = department.rootDepartment.descendants.flatMap(d => courseAndRouteService.findCoursesInDepartment(d)).filter(_.inUse).sortBy(_.code)
-	lazy val allRoutes: List[Route] = department.descendants.flatMap(d => courseAndRouteService.findRoutesInDepartment(d)).sortBy(_.code)
+	lazy val allRoutes: List[Route] = {
+		val descendantRoutes = department.descendants.flatMap(d => courseAndRouteService.findRoutesInDepartment(d))
+
+		val rootDepartmentRoutes = if (descendantRoutes.isEmpty && permitRoutesFromRootDepartment) {
+			courseAndRouteService.findRoutesInDepartment(department.rootDepartment)
+		} else Nil
+
+		(descendantRoutes ++ rootDepartmentRoutes).sortBy(_.code)
+	}
 	lazy val allYearsOfStudy: Inclusive = 1 to FilterStudentsOrRelationships.MaxYearsOfStudy
 	lazy val allLevels: List[Level] = levelService.getAllLevels.toList.sortBy(_.code)(StringUtils.AlphaNumericStringOrdering)
 }

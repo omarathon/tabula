@@ -33,7 +33,7 @@ trait ExamGridDocumentsController extends ExamsController
 		selectCourseCommandErrors: Errors,
 		@Valid @ModelAttribute("gridOptionsCommand") gridOptionsCommand: GridOptionsCommand,
 		gridOptionsCommandErrors: Errors,
-		@ModelAttribute("checkOvercatCommmand") checkOvercatCommmand: CheckOvercatCommand,
+		@ModelAttribute("checkOvercatCommand") checkOvercatCommand: CheckOvercatCommand,
 		@ModelAttribute("coreRequiredModuleLookup") coreRequiredModuleLookup: CoreRequiredModuleLookup,
 		@PathVariable department: Department,
 		@PathVariable academicYear: AcademicYear
@@ -45,7 +45,7 @@ trait ExamGridDocumentsController extends ExamsController
 		val GridData(entities, studentInformationColumns, perYearColumns, summaryColumns, weightings, normalLoadLookup, _) = benchmarkTask("GridData") { checkAndApplyOvercatAndGetGridData(
 			selectCourseCommand,
 			gridOptionsCommand,
-			checkOvercatCommmand,
+			checkOvercatCommand,
 			coreRequiredModuleLookup
 		)}
 

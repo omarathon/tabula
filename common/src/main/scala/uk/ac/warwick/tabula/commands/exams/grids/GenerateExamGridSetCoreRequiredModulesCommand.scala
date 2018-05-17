@@ -114,17 +114,18 @@ trait GenerateExamGridSetCoreRequiredModulesCommandState {
 	def department: Department
 	def academicYear: AcademicYear
 
-	private lazy val routesForDisplay: Seq[Route] = routes.asScala match {
-		case _ if routes.isEmpty =>
+	private lazy val routesForDisplay: Seq[Route] = {
+		if (routes.isEmpty) {
 			studentCourseYearDetailsDao.findByCourseRoutesYear(academicYear, courses.asScala, routes.asScala, studyYearByLevelOrBlock, includeTempWithdrawn, eagerLoad = true, disableFreshFilter = true)
 				.filter(scyd => department.includesMember(scyd.studentCourseDetails.student, Some(department)))
 				.map(scyd => scyd.studentCourseDetails.currentRoute).distinct
-		case _ =>
+		} else {
 			routes.asScala.distinct
+		}
 	}
 	lazy val allModules: Map[Route, Seq[Module]] = routesForDisplay.map(r =>
 		r -> moduleAndDepartmentService.findByRouteYearAcademicYear(r, studyYearByLevelOrBlock, academicYear).sortBy(_.code)
-	).toMap
+	).filter { case (_, modules) => modules.nonEmpty }.toMap
 	lazy val existingCoreRequiredModules: Map[Route, Seq[CoreRequiredModule]] = routesForDisplay.map(r =>
 		r -> moduleRegistrationService.findCoreRequiredModules(r, academicYear, studyYearByLevelOrBlock)
 	).toMap
