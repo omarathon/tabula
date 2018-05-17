@@ -9,14 +9,14 @@
 
 <@fmt.id7_deptheader title="Create a new exam grid for ${department.name}" route_function=route_function />
 
-<form action="<@routes.exams.generateGrid department academicYear />" class="dirty-check grid-options" method="post">
+<form action="<@routes.exams.generateGridOptions department academicYear />" class="dirty-check grid-options" method="post">
 	<input type="hidden" name="mandatoryModulesAndYearMarkColumns" value="false" />
 	<@form_fields.select_course_fields />
 
 	<h2>Set grid options</h2>
 
 	<p class="progress-arrows">
-		<span class="arrow-right"><button type="submit" class="btn btn-link">Select courses</button></span>
+		<span class="arrow-right"><a class="btn btn-link" href="<@routes.exams.generateGrid department academicYear />?${gridOptionsQueryString}">Select courses</a></span>
 		<span class="arrow-right arrow-left active">Set grid options</span>
 		<span class="arrow-right arrow-left">Preview and download</span>
 	</p>
@@ -34,7 +34,8 @@
 					</#assign>
 			<a class="use-popover" href="#" data-html="true" data-content="${popover}" data-container="body">${selectCourseCommand.courses?size} courses</a>
 		</#if>,
-		year of study: ${selectCourseCommand.yearOfStudy},
+		<#if selectCourseCommand.yearOfStudy??>year of study: ${selectCourseCommand.yearOfStudy},</#if>
+		<#if selectCourseCommand.levelCode??>study level: ${selectCourseCommand.levelCode},</#if>
 		<#if !selectCourseCommand.routes?has_content>
 			all routes
 		<#elseif selectCourseCommand.routes?size == 1>
@@ -433,7 +434,7 @@
 
 	<@bs3form.errors path="gridOptionsCommand" />
 
-	<button class="btn btn-primary" type="submit" name="${GenerateExamGridMappingParameters.gridOptions}">Next</button>
+	<button class="btn btn-primary" type="submit">Next</button>
 </form>
 
 <script>

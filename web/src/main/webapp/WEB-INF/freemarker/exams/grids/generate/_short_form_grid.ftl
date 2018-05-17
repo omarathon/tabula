@@ -34,7 +34,6 @@
 </#macro>
 
 <table class="table table-condensed grid <#if !gridOptionsCommand.showComponentMarks>with-hover</#if>">
-	<tbody>
 	<#-- Category row -->
 	<tr class="category">
 		<#list studentInformationColumns as column><td class="borderless">&nbsp;</td></#list>
@@ -49,7 +48,7 @@
 			<#if column.category?has_content>
 				<#if currentCategory != column.category>
 					<#assign currentCategory = column.category />
-					<th class="rotated" colspan="${chosenYearColumnCategories[column.category]?size}"><div class="rotate">${column.category}</div></th>
+					<th class="rotated" colspan="${chosenYearColumnCategories[column.category]?size}"><div class="rotate-outer"><div class="rotate">${column.category}</div></div></th>
 				</#if>
 			<#else>
 				<td>&nbsp;</td>
@@ -69,70 +68,73 @@
 			<th colspan="${yearSize}">Year ${year}</th>
 
 			<#list mapGet(perYearModuleReportColumns, year) as column>
-				<th class="rotated <#if column.category?has_content>has-category</#if>"><div class="rotate">${column.title}</div></th>
+				<th class="rotated <#if column.category?has_content>has-category</#if>"><div class="rotate-outer"><div class="rotate">${column.title}</div></div></th>
 			</#list>
 
 			<#if !year_has_next><td class="spacer">&nbsp;</td></#if>
 		</#list>
 
 		<#list summaryColumns as column>
-			<th class="rotated <#if column.boldTitle>bold</#if> <#if column.category?has_content>has-category</#if>"><div class="rotate">${column.title}</div></th>
+			<th class="rotated <#if column.boldTitle>bold</#if> <#if column.category?has_content>has-category</#if>"><div class="rotate-outer"><div class="rotate">${column.title}</div></div></th>
 		</#list>
 	</tr>
 
 		<#-- Entities -->
 		<#list entities as entity>
-			<tr class="student <#if entity_index%2 == 1>odd</#if>">
-				<#list studentInformationColumns as column>
-					<td rowspan="<#if gridOptionsCommand.showComponentMarks>4<#else>2</#if>">
-						<#assign hasValue = mapGet(chosenYearColumnValues, column)?? && mapGet(mapGet(chosenYearColumnValues, column), entity)?? />
-						<#if hasValue>
-							<#noescape>${mapGet(mapGet(chosenYearColumnValues, column), entity).toHTML}</#noescape>
-						</#if>
-					</td>
-				</#list>
-
-				<#list perYearColumns?keys?sort as year>
-					<td rowspan="<#if !gridOptionsCommand.showComponentMarks>2</#if>" class="spacer">&nbsp;</td>
-					<#assign colsUsed = 0 />
-					<#list mapGet(perYearModuleMarkColumns, year) as column>
-						<#assign hasValue = !column.isEmpty(entity, year) />
-						<#if hasValue>
-							<td class="rotated">
-								<div class="rotate">${column.title} - ${column.secondaryValue} <i>${column.categoryShortForm!""}</i></div>
-							</td>
-							<#assign colsUsed = colsUsed + 1>
-						</#if>
+			<tbody>
+				<tr class="student <#if entity_index%2 == 1>odd</#if>">
+					<#list studentInformationColumns as column>
+						<td rowspan="<#if gridOptionsCommand.showComponentMarks>4<#else>2</#if>">
+							<#assign hasValue = mapGet(chosenYearColumnValues, column)?? && mapGet(mapGet(chosenYearColumnValues, column), entity)?? />
+							<#if hasValue>
+								<#noescape>${mapGet(mapGet(chosenYearColumnValues, column), entity).toHTML}</#noescape>
+							</#if>
+						</td>
 					</#list>
 
-					<#assign reportCols = mapGet(perYearModuleReportColumns, year) />
-					<#assign yearPadding = mapGet(maxYearColumnSize, year) + reportCols?size - colsUsed>
-					<#list 0..<yearPadding as i><td>&nbsp;</td></#list>
-					<#if !year_has_next><td rowspan="<#if gridOptionsCommand.showComponentMarks>4<#else>2</#if>" class="spacer">&nbsp;</td></#if>
-				</#list>
+					<#list perYearColumns?keys?sort as year>
+						<td rowspan="<#if !gridOptionsCommand.showComponentMarks>2</#if>" class="spacer">&nbsp;</td>
+						<#assign colsUsed = 0 />
+						<#list mapGet(perYearModuleMarkColumns, year) as column>
+							<#assign hasValue = !column.isEmpty(entity, year) />
+							<#if hasValue>
+								<td class="rotated">
+									<div class="rotate-outer">
+										<div class="rotate">${column.title} - ${column.secondaryValue} <i>${column.categoryShortForm!""}</i></div>
+									</div>
+								</td>
+								<#assign colsUsed = colsUsed + 1>
+							</#if>
+						</#list>
 
-				<#list summaryColumns as column>
-					<td rowspan="<#if gridOptionsCommand.showComponentMarks>4<#else>2</#if>">
-						<#assign hasValue = mapGet(chosenYearColumnValues, column)?? && mapGet(mapGet(chosenYearColumnValues, column), entity)?? />
-						<#if hasValue>
-							<#noescape>${mapGet(mapGet(chosenYearColumnValues, column), entity).toHTML}</#noescape>
-						</#if>
-					</td>
-				</#list>
-			</tr>
+						<#assign reportCols = mapGet(perYearModuleReportColumns, year) />
+						<#assign yearPadding = mapGet(maxYearColumnSize, year) + reportCols?size - colsUsed>
+						<#list 0..<yearPadding as i><td>&nbsp;</td></#list>
+						<#if !year_has_next><td rowspan="<#if gridOptionsCommand.showComponentMarks>4<#else>2</#if>" class="spacer">&nbsp;</td></#if>
+					</#list>
 
-			<tr class="overall assignments <#if entity_index%2 == 1>odd</#if>">
-				<@showMarksShort entity ExamGridColumnValueType.Overall />
-			</tr>
-			<#if gridOptionsCommand.showComponentMarks>
-				<tr class="assignments <#if entity_index%2 == 1>odd</#if>">
-					<@showMarksShort entity ExamGridColumnValueType.Assignment />
+					<#list summaryColumns as column>
+						<td rowspan="<#if gridOptionsCommand.showComponentMarks>4<#else>2</#if>">
+							<#assign hasValue = mapGet(chosenYearColumnValues, column)?? && mapGet(mapGet(chosenYearColumnValues, column), entity)?? />
+							<#if hasValue>
+								<#noescape>${mapGet(mapGet(chosenYearColumnValues, column), entity).toHTML}</#noescape>
+							</#if>
+						</td>
+					</#list>
 				</tr>
-				<tr class="exams <#if entity_index%2 == 1>odd</#if>">
-					<@showMarksShort entity ExamGridColumnValueType.Exam />
+
+				<tr class="overall assignments <#if entity_index%2 == 1>odd</#if>">
+					<@showMarksShort entity ExamGridColumnValueType.Overall />
 				</tr>
-			</#if>
+				<#if gridOptionsCommand.showComponentMarks>
+					<tr class="assignments <#if entity_index%2 == 1>odd</#if>">
+						<@showMarksShort entity ExamGridColumnValueType.Assignment />
+					</tr>
+					<tr class="exams <#if entity_index%2 == 1>odd</#if>">
+						<@showMarksShort entity ExamGridColumnValueType.Exam />
+					</tr>
+				</#if>
+			</tbody>
 		</#list>
-	</tbody>
 </table>
 </#escape>

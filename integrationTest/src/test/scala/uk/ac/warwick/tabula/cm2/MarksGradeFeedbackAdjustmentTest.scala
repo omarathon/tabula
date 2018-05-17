@@ -70,7 +70,7 @@ class MarksGradeFeedbackAdjustmentTest extends BrowserTest with CourseworkFixtur
 		click on saveBtn
 
 		Then("The marks, grades and feedback should be received")
-		id("main").webElement.findElement(By.cssSelector("form#command p")).getText should equal("I've received your files and I found marks and feedback for 1 students.")
+		id("main").webElement.findElement(By.cssSelector("form#command p")).getText should equal("You are submitting marks for 1 students.")
 
 		var confirmBtn = id("main").webElement.findElements(By.cssSelector(".btn-primary")).get(0)
 		click on confirmBtn
@@ -122,10 +122,10 @@ class MarksGradeFeedbackAdjustmentTest extends BrowserTest with CourseworkFixtur
 		click on saveBtn2
 
 		Then("The marks, grades and feedback should be received")
-		id("main").webElement.findElement(By.cssSelector("form#command p")).getText should equal("I've received your files and I found marks and feedback for 1 students.")
+		id("main").webElement.findElement(By.cssSelector("form#command p")).getText should equal("You are submitting marks for 1 students.")
 
 		And("The user should be warned this will replace the existing marks,grades and feedback")
-		id("main").webElement.findElement(By.cssSelector("span.warning")).getText should equal("Feedback and/or marks have already been uploaded for this student. This will be overwritten when you click confirm")
+		id("main").webElement.findElement(By.cssSelector("span.warning")).getText should equal("Feedback and/or marks have already been uploaded for this student. These will be overwritten when you click confirm.")
 
 		var confirmBtn2 = id("main").webElement.findElements(By.cssSelector(".btn-primary")).get(0)
 		click on confirmBtn2

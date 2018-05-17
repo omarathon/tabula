@@ -1,12 +1,11 @@
 package uk.ac.warwick.tabula.system
 
-import scala.collection.JavaConversions._
+import scala.collection.JavaConverters._
 import org.springframework.core.MethodParameter
 import org.springframework.web.context.request.NativeWebRequest
 import org.springframework.web.method.support.HandlerMethodReturnValueHandler
 import org.springframework.web.method.support.ModelAndViewContainer
-import uk.ac.warwick.tabula.helpers.Logging
-import uk.ac.warwick.tabula.helpers.Ordered
+import uk.ac.warwick.tabula.helpers.{Logging, Ordered}
 import uk.ac.warwick.tabula.web.Mav
 
 /**
@@ -24,11 +23,15 @@ class MavReturnValueHandler extends HandlerMethodReturnValueHandler with Logging
 		webRequest: NativeWebRequest): Unit =
 		returnValue match {
 			case mav: Mav => {
-				mavContainer.addAllAttributes(mav.toModel)
+				mavContainer.addAllAttributes(mav.toModel.asJava)
 				if (mav.viewName != null) {
 					mavContainer.setViewName(mav.viewName)
 				} else {
 					mavContainer.setView(mav.view)
+				}
+				if (mav.viewName != null && mav.viewName.startsWith("redirect:")) {
+					// Don't dump model attributes into the query string when redirecting
+					mavContainer.getModel.clear()
 				}
 				mavContainer.setRequestHandled(false)
 			}

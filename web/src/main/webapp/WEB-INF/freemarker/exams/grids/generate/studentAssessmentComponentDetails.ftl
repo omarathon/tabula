@@ -141,6 +141,7 @@
 												<td>
 													<#if studentInfo.groupMember.firstDefinedMark??>
 														<#assign class><#compress>
+															<#assign passMark>mapGet(passMarkMap, studentInfo.grpWithComponentInfo.assessmentComponent.module)</#assign>
 															<#if studentInfo.groupMember.firstDefinedMark?number < passMark>exam-grid-fail </#if>
 															<#if !studentInfo.groupMember.isAgreedMark()>exam-grid-actual-mark </#if>
 															<#if studentInfo.groupMember.isResitMark()>exam-grid-resit </#if>

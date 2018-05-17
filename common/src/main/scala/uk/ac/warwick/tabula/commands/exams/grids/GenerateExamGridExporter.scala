@@ -440,6 +440,7 @@ object ExamGridSummaryAndKey {
 		keyValueCells("Year of study:", yearOfStudy.toString, 5)
 
 		yearWeightings.size match {
+			case 0 => keyValueCells("Year weightings:", "", 6)
 			case 1 =>
 				val yearWeightingRow =
 					keyValueCells("Year weightings:", yearWeightings.head._2.map(cyw => s"Year ${cyw.yearOfStudy} = ${cyw.weightingAsPercentage.toPlainString}%").mkString("\n"), 6)

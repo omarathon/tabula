@@ -37,6 +37,7 @@
 
 			<p class="clearfix">&nbsp;</p>
 			<form action="<@routes.exams.generateGridOvercatting department academicYear scyd/>" method="post">
+				<input type="hidden" name="basedOnLevel" value="${overcatView.basedOnLevel?c}" />
 				<table class="table table-condensed grid overcat">
 					<tbody>
 						<#-- Year row -->
@@ -246,10 +247,7 @@
 			}));
 			$.post('<@routes.exams.generateGridOvercatting department academicYear scyd/>', $form.serialize(), function(data){
 				if (!data.errors) {
-					$('form.exam-grid-preview').append($('<input/>').attr({
-						'type': 'hidden',
-						'name': '${GenerateExamGridMappingParameters.previewAndDownload}'
-					})).submit();
+					window.location.reload();
 				} else {
 					updateButtons();
 				}

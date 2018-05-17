@@ -28,15 +28,16 @@ class SuggestedResultColumnOption extends ChosenYearExamGridColumnOption with Au
 			state.entities.map(entity =>
 				entity -> entity.years.filter { case (_, entityYear) => entityYear.nonEmpty }.get(state.yearOfStudy).map(entityYear =>
 					progressionService.suggestedResult(
-						entityYear.get.studentCourseYearDetails.get,
+						entityYear.get,
 						state.normalLoadLookup(entityYear.get.route),
 						entity.validYears.mapValues(ey => state.routeRulesLookup(ey.route, ey.level)),
-						state.calculateYearMarks
+						state.calculateYearMarks,
+						state.isLevelGrid
 					) match {
 						case unknown: ProgressionResult.Unknown => ExamGridColumnValueMissing(unknown.details)
 						case resit: Resit.type if state.department.code == "es" || Option(state.department.parent).exists(_.code == "es") =>
 							val failedModules = entityYear.get.moduleRegistrations
-								.filter(_.firstDefinedMark.exists(BigDecimal(_) < ProgressionService.ModulePassMark))
+								.filter(mr => mr.firstDefinedMark.exists(BigDecimal(_) < ProgressionService.modulePassMark(mr.module.degreeType)))
 								.map(_.module.code.toUpperCase)
 								.mkString(", ")
 							ExamGridColumnValueString(s"${resit.description} $failedModules")

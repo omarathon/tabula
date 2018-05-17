@@ -8,7 +8,7 @@
 
 <@fmt.id7_deptheader title="Create a new exam grid for ${department.name}" route_function=route_function />
 
-<form action="<@routes.exams.generateGrid department academicYear />" class="dirty-check" method="post">
+<form action="<@routes.exams.generateGridCoreRequired department academicYear />" class="dirty-check" method="post">
 
 	<@form_fields.select_course_fields />
 	<@form_fields.grid_options_fields />
@@ -16,15 +16,23 @@
 	<h2>Set grid options</h2>
 
 	<p class="progress-arrows">
-		<span class="arrow-right"><button type="submit" class="btn btn-link">Select courses</button></span>
+		<span class="arrow-right"><a class="btn btn-link" href="<@routes.exams.generateGrid department academicYear />?${gridOptionsQueryString}">Select courses</a></span>
 		<span class="arrow-right arrow-left active">Set grid options</span>
 		<span class="arrow-right arrow-left">Preview and download</span>
 	</p>
 
+	<#assign yearOrLevel>
+		<#if selectCourseCommand.yearOfStudy??>
+			year of study ${selectCourseCommand.yearOfStudy}
+		<#else>
+			study level ${selectCourseCommand.levelCode}
+		</#if>
+	</#assign>
+
 	<div class="alert alert-info">
 		<h3>Core required modules</h3>
 		<p>Unfortunately Tabula cannot identify core required modules within SITS. Please select the modules for each route from the list below.</p>
-		<p><strong>Note:</strong> The chosen modules will apply to all students on each route for year of study ${selectCourseCommand.yearOfStudy} and ${academicYear.toString}</p>
+		<p><strong>Note:</strong> The chosen modules will apply to all students on each route for ${yearOrLevel} and ${academicYear.toString}</p>
 	</div>
 
 	<h3>Identify Core Required Modules</h3>
@@ -65,6 +73,11 @@
 			</div>
 		</div>
 	</#list>
+	<#if coreRequiredModulesCommand.allModules?size == 0>
+		<p>
+			There are no modules for any of the selected routes.
+		</p>
+	</#if>
 
 	<button class="btn btn-primary" type="submit" name="${GenerateExamGridMappingParameters.coreRequiredModules}">Next</button>
 </form>

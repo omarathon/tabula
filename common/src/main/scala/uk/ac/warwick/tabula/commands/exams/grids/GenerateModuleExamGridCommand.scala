@@ -27,7 +27,7 @@ object GenerateModuleExamGridCommand {
 }
 
 case class ModuleExamGridResult(
-	upstreamAssessmentGroupAndSequencesWithComponentName: Seq[(String, String)],
+	upstreamAssessmentGroupAndSequenceAndOccurrencesWithComponentName: Seq[(String, String)],
 	gridStudentDetailRecords: Seq[ModuleGridDetailRecord]
 )
 
@@ -40,7 +40,9 @@ case class ModuleGridDetailRecord(
 )
 
 
-case class AssessmentComponentInfo(mark: BigDecimal, grade: String, isActual: Boolean)
+case class AssessmentComponentInfo(mark: BigDecimal, grade: String, isActualMark: Boolean, isActualGrade: Boolean, resitInfo: ResitComponentInfo)
+
+case class ResitComponentInfo(resitMark: BigDecimal, resitGrade: String, isActualResitMark: Boolean, isActualResitGrade: Boolean)
 
 class GenerateModuleExamGridCommandInternal(val department: Department, val academicYear: AcademicYear)
 	extends CommandInternal[ModuleExamGridResult] with TaskBenchmarking {
@@ -50,11 +52,11 @@ class GenerateModuleExamGridCommandInternal(val department: Department, val acad
 
 	override def applyInternal(): ModuleExamGridResult = {
 
-		val upstreamAssessmentGroupAndSequencesWithComponentName = benchmarkTask("AssessmentComponentInfo") {
+		val upstreamAssessmentGroupAndSequenceAndOccurrencesWithComponentName = benchmarkTask("AssessmentComponentInfo") {
 			assessmentMembershipService.getUpstreamAssessmentGroups(module, academicYear)
 				.filterNot(p => p.assessmentGroup == AssessmentComponent.NoneAssessmentGroup)
 				.map { ac =>
-					(s"${ac.assessmentGroup}-${ac.sequence}", (assessmentMembershipService.getAssessmentComponent(ac) match {
+					(s"${ac.assessmentGroup}-${ac.sequence}-${ac.occurrence}", (assessmentMembershipService.getAssessmentComponent(ac) match {
 						case Some(c) => c.name
 						case _ => ""
 					}))
@@ -70,7 +72,10 @@ class GenerateModuleExamGridCommandInternal(val department: Department, val acad
 					aComponent.map { comp =>
 						val mark = uagm.agreedMark.getOrElse(uagm.actualMark.getOrElse(null))
 						val grade = uagm.agreedGrade.getOrElse(uagm.actualGrade.getOrElse(null))
-						s"${uagm.upstreamAssessmentGroup.assessmentGroup}-${uagm.upstreamAssessmentGroup.sequence}" -> AssessmentComponentInfo(mark, grade, !uagm.agreedMark.isDefined)
+						val resitMark = uagm.resitAgreedMark.getOrElse(uagm.resitActualMark.getOrElse(null))
+						val resitGrade = uagm.resitAgreedGrade.getOrElse(uagm.resitActualGrade.getOrElse(null))
+						val resitInfo = ResitComponentInfo(resitMark, resitGrade, !uagm.resitAgreedMark.isDefined, !uagm.resitAgreedGrade.isDefined)
+						s"${uagm.upstreamAssessmentGroup.assessmentGroup}-${uagm.upstreamAssessmentGroup.sequence}-${uagm.upstreamAssessmentGroup.occurrence}" -> AssessmentComponentInfo(mark, grade, !uagm.agreedMark.isDefined, !uagm.agreedGrade.isDefined, resitInfo)
 					}
 				}.sortBy(_._1).toMap
 				val stu = mr.studentCourseDetails.student
@@ -78,7 +83,7 @@ class GenerateModuleExamGridCommandInternal(val department: Department, val acad
 			}
 		}
 
-		ModuleExamGridResult(upstreamAssessmentGroupAndSequencesWithComponentName, gridStudentDetailRecords)
+		ModuleExamGridResult(upstreamAssessmentGroupAndSequenceAndOccurrencesWithComponentName, gridStudentDetailRecords)
 	}
 }
 

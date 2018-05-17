@@ -8,10 +8,9 @@
 
 <@fmt.id7_deptheader title="Create a new module exam grid for ${department.name}" route_function=route_function />
 
-<h2>Select grid options</h2>
 
 <p class="progress-arrows">
-	<span class="arrow-right active">Select modules</span>
+	<span class="arrow-right active">Select module</span>
 	<span class="arrow-right arrow-left">Preview and download</span>
 </p>
 
@@ -34,7 +33,7 @@
 		<@bs3form.errors path="selectModuleExamCommand" />
 
 		<div class="buttons">
-			<button class="btn btn-default disabled" type="submit" name="${GenerateModuleExamGridMappingParameters.selectModule}" >Next</button>
+			<button class="btn btn-default disabled" type="submit">Next</button>
 		</div>
 	</div>
 </form>

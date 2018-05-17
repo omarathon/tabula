@@ -24,8 +24,9 @@ class PotentialMarkingOptionsColumnOption extends StudentExamGridColumnOption {
 		override def values: Map[ExamGridEntity, ExamGridColumnValue] = {
 			state.entities.map(entity => entity ->
 				ExamGridColumnValueStringHtmlOnly(
-					"<button class=\"btn btn-default edit-overcatting btn-xs\" type=\"button\" data-student=\"%s\">Edit</button>".format(
-						entity.validYears(state.yearOfStudy).studentCourseYearDetails.get.id
+					"<button class=\"btn btn-default edit-overcatting btn-xs\" type=\"button\" data-student=\"%s\" data-basedonlevel=\"%s\">Edit</button>".format(
+						entity.validYears(state.yearOfStudy).studentCourseYearDetails.get.id,
+						state.isLevelGrid
 					)
 				)
 			).toMap

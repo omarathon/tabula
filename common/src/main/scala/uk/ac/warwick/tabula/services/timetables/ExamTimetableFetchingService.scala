@@ -226,7 +226,12 @@ abstract class AbstractExamTimetableFetchingService extends ExamTimetableFetchin
 		with TrustedApplicationsManagerComponent =>
 
 	def getTimetable(member: Member, viewer: CurrentUser): Future[ExamTimetableFetchingService.ExamTimetable] = {
-		val endpoint = s"${examTimetableConfiguration.examTimetableUrl}${member.universityId}.xml"
+		// staff and student have different end points
+		val endpoint = if(member.universityId == viewer.universityId) {
+			s"${examTimetableConfiguration.examTimetableUrl}timetable.xml"
+		} else {
+			s"${examTimetableConfiguration.examTimetableUrl}${member.universityId}.xml"
+		}
 
 		val req = RequestBuilder.get(endpoint).build()
 		TrustedApplicationUtils.signRequest(applicationManager.getCurrentApplication, viewer.userId, req)

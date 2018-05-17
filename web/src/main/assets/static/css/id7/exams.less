@@ -2,7 +2,9 @@
 
 .table th.rotated, .table td.rotated {
 	vertical-align: bottom;
-	position: relative;
+	.rotate-outer {
+		position: relative;
+	}
 	.rotate {
 		float: left;
 		position: absolute;
@@ -121,8 +123,15 @@ div.assessment_details {
 			border: 1px solid @table-border-color;
 			float: left;
 			width: auto;
+			max-width: 60%;
 			margin-right: 32px;
+
+			&:last-child {
+				max-width: 40%;
+				margin-right:0;
 		}
+		}
+
 		thead th {
 			text-align: center;
 			background: @table-bg-hover;
@@ -303,6 +312,11 @@ div.assessment_details {
 			.header th:first-child {
 				display: none;
 			}
+
+			// group student rows in tbody tags and try and avoid page breaks on them
+			tbody {
+				page-break-inside: avoid;
+			}
 		}
 	}
 
@@ -310,4 +324,15 @@ div.assessment_details {
 
 div.exam-modulegrid-preview {
 	margin-bottom: 10px;
+}
+
+#examGridSpinner {
+	font-size: 4em;
+	line-height: 4em;
+	text-align: center;
+	font-style: italic;
+}
+
+#examGridContainer {
+	opacity: 0;
 }

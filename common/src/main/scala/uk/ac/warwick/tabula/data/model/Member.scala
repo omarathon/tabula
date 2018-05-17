@@ -2,13 +2,12 @@ package uk.ac.warwick.tabula.data.model
 
 import javax.persistence.CascadeType._
 import javax.persistence.{CascadeType, Entity, _}
-
 import org.apache.commons.lang3.builder.{EqualsBuilder, HashCodeBuilder}
 import org.hibernate.annotations.{AccessType => _, Any => _, ForeignKey => _, _}
 import org.joda.time.{DateTime, LocalDate}
 import uk.ac.warwick.spring.Wire
 import uk.ac.warwick.tabula.JavaImports._
-import uk.ac.warwick.tabula.commands.exams.grids.ExamGridEntity
+import uk.ac.warwick.tabula.commands.exams.grids.{ExamGridEntity, ExamGridEntityYear}
 import uk.ac.warwick.tabula.data.PostLoadBehaviour
 import uk.ac.warwick.tabula.data.model.attendance.AttendanceMonitoringCheckpointTotal
 import uk.ac.warwick.tabula.data.model.groups.SmallGroup
@@ -22,6 +21,7 @@ import uk.ac.warwick.tabula.{AcademicYear, CurrentUser, ToString}
 import uk.ac.warwick.userlookup.User
 
 import scala.collection.JavaConverters._
+import scala.collection.immutable.ListMap
 import scala.collection.mutable
 
 object Member {
@@ -142,7 +142,7 @@ abstract class Member
 	@BatchSize(size=200)
 	var grantedRoles:JList[MemberGrantedRole] = JArrayList()
 
-	override def postLoad {
+	override def postLoad() {
 		ensureSettings
 	}
 
@@ -420,19 +420,33 @@ class StudentMember extends Member with StudentProperties {
 	def isPGT: Boolean = groupName == "Postgraduate (taught) FT" || groupName == "Postgraduate (taught) PT"
 	def isUG: Boolean = groupName == "Undergraduate - full-time" || groupName == "Undergraduate - part-time"
 
-	def toExamGridEntity(baseSCYD: StudentCourseYearDetails): ExamGridEntity = {
+	def toExamGridEntity(baseSCYD: StudentCourseYearDetails, basedOnLevel: Boolean = false): ExamGridEntity = {
 		val allSCYDs: Seq[StudentCourseYearDetails] = freshOrStaleStudentCourseDetails.toSeq.sorted
 			.flatMap(_.freshOrStaleStudentCourseYearDetails.toSeq.sorted)
 			.takeWhile(_ != baseSCYD) ++ Seq(baseSCYD)
+
+		val years = if (basedOnLevel) {
+			// groups by level preserving the order in which they appear for this student
+			// add index to the scyd list and group by level
+			val groupedByLevelUnordered = allSCYDs.zipWithIndex.groupBy{ case (scyd, _) => scyd.studyLevel }
+			// sort by the index
+			val groupedByLevelWithIndex = ListMap(groupedByLevelUnordered.toSeq.sortBy{ case (_, values) => values.head._2 }: _*)
+			// remove the index once sorted
+			val groupedByLevel = groupedByLevelWithIndex.mapValues(_.map{ case(scyds, _) => scyds })
+			groupedByLevel.values.toSeq.zipWithIndex
+				.map{ case (scyds, index) => (index+1, Option(StudentCourseYearDetails.toExamGridEntityYearGrouped(index+1, scyds: _*))) }.toMap
+		} else {
+			(1 to baseSCYD.yearOfStudy).map(year =>
+				year -> allSCYDs.reverse.find(_.yearOfStudy == year).map(_.toExamGridEntityYear)
+			).toMap
+		}
 
 		ExamGridEntity(
 			firstName = Option(firstName).getOrElse("[Unknown]"),
 			lastName = Option(lastName).getOrElse("[Unknown]"),
 			universityId = universityId,
 			lastImportDate = Option(lastImportDate),
-			years = (1 to baseSCYD.yearOfStudy).map(year =>
-				year -> allSCYDs.reverse.find(_.yearOfStudy == year).map(_.toExamGridEntityYear)
-			).toMap
+			years = years
 		)
 	}
 }

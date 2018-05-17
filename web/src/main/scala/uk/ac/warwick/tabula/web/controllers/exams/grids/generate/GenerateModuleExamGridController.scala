@@ -3,21 +3,23 @@ package uk.ac.warwick.tabula.web.controllers.exams.grids.generate
 import javax.validation.Valid
 import org.joda.time.DateTime
 import org.springframework.stereotype.Controller
+import org.springframework.util.MultiValueMap
 import org.springframework.validation.Errors
-import org.springframework.web.bind.annotation.{ModelAttribute, PathVariable, RequestMapping, RequestParam}
-import uk.ac.warwick.tabula.JavaImports._
+import org.springframework.web.bind.annotation._
+import org.springframework.web.util.UriComponentsBuilder
 import uk.ac.warwick.tabula.commands._
 import uk.ac.warwick.tabula.commands.exams.grids._
 import uk.ac.warwick.tabula.data.model._
+import uk.ac.warwick.tabula.exams.web.Routes.Grids
 import uk.ac.warwick.tabula.helpers.DateTimeOrdering._
 import uk.ac.warwick.tabula.jobs.scheduling.ImportMembersJob
 import uk.ac.warwick.tabula.permissions.{Permission, Permissions}
 import uk.ac.warwick.tabula.services._
 import uk.ac.warwick.tabula.services.jobs.AutowiringJobServiceComponent
+import uk.ac.warwick.tabula.web.Mav
 import uk.ac.warwick.tabula.web.controllers.exams.ExamsController
 import uk.ac.warwick.tabula.web.controllers.{AcademicYearScopedController, DepartmentScopedController}
 import uk.ac.warwick.tabula.web.views.JSONView
-import uk.ac.warwick.tabula.web.{Mav, Routes}
 import uk.ac.warwick.tabula.{AcademicYear, ItemNotFoundException}
 
 import scala.collection.JavaConverters._
@@ -62,7 +64,7 @@ class GenerateModuleExamGridController extends ExamsController
 
 	private def commonCrumbs(view: Mav, department: Department, academicYear: AcademicYear): Mav =
 		view.crumbs(Breadcrumbs.Grids.Home, Breadcrumbs.Grids.Department(department, academicYear))
-			.secondCrumbs(academicYearBreadcrumbs(academicYear)(year => Routes.exams.Grids.moduleGenerate(department, year)): _*)
+			.secondCrumbs(academicYearBreadcrumbs(academicYear)(year => Grids.moduleGenerate(department, year)): _*)
 
 	@ModelAttribute("selectModuleExamCommand")
 	def selectModuleExamCommand(@PathVariable department: Department, @PathVariable academicYear: AcademicYear) =
@@ -72,7 +74,7 @@ class GenerateModuleExamGridController extends ExamsController
 	@ModelAttribute("GenerateModuleExamGridMappingParameters")
 	def params = GenerateModuleExamGridMappingParameters
 
-	@RequestMapping(method = Array(GET, POST))
+	@GetMapping
 	def selectModuleRender(
 		@ModelAttribute("selectModuleExamCommand") selectModuleExamCommand: SelectModuleExamCommand,
 		@PathVariable department: Department,
@@ -86,13 +88,13 @@ class GenerateModuleExamGridController extends ExamsController
 	}
 
 
-	@RequestMapping(method = Array(POST), params = Array(GenerateModuleExamGridMappingParameters.selectModule))
+	@PostMapping
 	def selectExamModuleSubmit(
 		@Valid @ModelAttribute("selectModuleExamCommand") selectModuleExamCommand: SelectModuleExamCommand,
 		errors: Errors,
 		@PathVariable department: Department,
 		@PathVariable academicYear: AcademicYear,
-		@RequestParam allRequestParams: JMap[String, String]
+		@RequestParam allRequestParams: MultiValueMap[String, String]
 	): Mav = {
 		val students = selectModuleExamCommand.apply().gridStudentDetailRecords
 		if (students.isEmpty) {
@@ -100,16 +102,20 @@ class GenerateModuleExamGridController extends ExamsController
 			selectModuleRender(selectModuleExamCommand, department, academicYear)
 		} else {
 			val jobInstance = jobService.add(Some(user), ImportMembersJob(students.map(_.moduleRegistration.studentCourseDetails.student.universityId)))
-			checkJobProgress(jobInstance.id, selectModuleExamCommand, department, academicYear)
+
+			allRequestParams.remove("jobId")
+			allRequestParams.add("jobId", jobInstance.id)
+			redirectTo(Grids.moduleJobProgress(department, academicYear), allRequestParams)
 		}
 	}
 
-
-	private def checkJobProgress(
-		jobId: String,
-		selectModuleExamCommand: SelectModuleExamCommand,
-		department: Department,
-		academicYear: AcademicYear
+	@GetMapping(path = Array("/import"))
+	def checkJobProgress(
+		@RequestParam jobId: String,
+		@ModelAttribute("selectModuleExamCommand") selectModuleExamCommand: SelectModuleExamCommand,
+		@PathVariable department: Department,
+		@PathVariable academicYear: AcademicYear,
+		@RequestParam allRequestParams: MultiValueMap[String, String]
 	) = {
 		val jobInstance = jobService.getInstance(jobId)
 		if (jobInstance.isDefined && !jobInstance.get.finished) {
@@ -121,10 +127,10 @@ class GenerateModuleExamGridController extends ExamsController
 				Mav("exams/grids/module/generate/jobProgress",
 					"jobId" -> jobId,
 					"module" -> selectModuleExamCommand.module,
-					"passMark" -> ProgressionService.ModulePassMark,
+					"passMark" -> ProgressionService.modulePassMark(selectModuleExamCommand.module.degreeType),
 					"entities" -> moduleGridResult.gridStudentDetailRecords,
 					"studentCount" -> moduleGridResult.gridStudentDetailRecords.map(_.universityId).distinct.size,
-					"componentInfo" -> moduleGridResult.upstreamAssessmentGroupAndSequencesWithComponentName,
+					"componentInfo" -> moduleGridResult.upstreamAssessmentGroupAndSequenceAndOccurrencesWithComponentName,
 					"jobProgress" -> jobInstance.get.progress,
 					"jobStatus" -> jobInstance.get.status,
 					"studentLastImportDates" -> studentLastImportDates
@@ -133,16 +139,11 @@ class GenerateModuleExamGridController extends ExamsController
 				academicYear
 			)
 		} else {
-			previewAndDownloadRender(
-				selectModuleExamCommand,
-				department,
-				academicYear,
-				jobId
-			)
+			redirectTo(Grids.modulePreview(department, academicYear), allRequestParams)
 		}
 	}
 
-	@RequestMapping(method = Array(POST), value = Array("/progress"))
+	@PostMapping(path = Array("/progress"))
 	def jobProgress(@RequestParam jobId: String): Mav = {
 		jobService.getInstance(jobId).map(jobInstance =>
 			Mav(new JSONView(Map(
@@ -154,7 +155,7 @@ class GenerateModuleExamGridController extends ExamsController
 		).getOrElse(throw new ItemNotFoundException())
 	}
 
-	@RequestMapping(method = Array(POST), params = Array(GenerateExamGridMappingParameters.previewAndDownload))
+	@GetMapping(path = Array("/preview"))
 	def previewAndDownload(
 		@Valid @ModelAttribute("selectModuleExamCommand") selectModuleExamCommand: SelectModuleExamCommand,
 		errors: Errors,
@@ -191,13 +192,18 @@ class GenerateModuleExamGridController extends ExamsController
 			"generatedDate" -> DateTime.now,
 			"jobId" -> jobId,
 			"module" -> selectModuleExamCommand.module,
-			"passMark" -> ProgressionService.ModulePassMark,
-			"componentInfo" -> moduleGridResult.upstreamAssessmentGroupAndSequencesWithComponentName
+			"passMark" -> ProgressionService.modulePassMark(selectModuleExamCommand.module.degreeType),
+			"componentInfo" -> moduleGridResult.upstreamAssessmentGroupAndSequenceAndOccurrencesWithComponentName
 		)
 		commonCrumbs(
 			Mav("exams/grids/module/generate/preview", mavObjects),
 			department,
 			academicYear
 		)
+	}
+
+	private def redirectTo(path: String, params: MultiValueMap[String, String]): Mav = {
+		val uri = UriComponentsBuilder.fromPath(path).queryParams(params).toUriString
+		RedirectForce(uri)
 	}
 }

@@ -34,9 +34,7 @@ class PreviousYearMarksColumnOption extends ChosenYearExamGridColumnOption with 
 		private def result(entity: ExamGridEntity): Either[String, BigDecimal] = {
 			relevantEntityYear(entity) match {
 				case Some(year) => if(state.calculateYearMarks) {
-					year.studentCourseYearDetails.map(scyd =>
-						progressionService.getYearMark(scyd, state.normalLoadLookup(year.route), state.routeRulesLookup(year.route, year.level))
-					).getOrElse(Left(s"No course detail found for ${entity.universityId} for Year $thisYearOfStudy"))
+					progressionService.getYearMark(year, state.normalLoadLookup(year.route), state.routeRulesLookup(year.route, year.level))
 				} else {
 					Option(year.studentCourseYearDetails.get.agreedMark) match {
 						case Some(mark) => Right(BigDecimal(mark))

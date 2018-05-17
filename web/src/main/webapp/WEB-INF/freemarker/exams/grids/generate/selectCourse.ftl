@@ -34,9 +34,9 @@
 			</span>
 		</button>
 
-		<#macro filter path placeholder currentFilter allItems prefix="" customPicker="">
+		<#macro filter path placeholder currentFilter allItems prefix="" customPicker="" cssClass="" emptyText="N/A for this department">
 			<@spring.bind path=path>
-				<div class="btn-group<#if currentFilter == placeholder> empty-filter</#if>">
+				<div class="btn-group<#if currentFilter == placeholder> empty-filter</#if> ${cssClass}">
 					<a class="btn btn-default btn-mini btn-xs dropdown-toggle" data-toggle="dropdown">
 						<span class="filter-short-values" data-placeholder="${placeholder}" data-prefix="${prefix}"><#if currentFilter != placeholder>${prefix}</#if>${currentFilter}</span>
 						<span class="caret"></span>
@@ -59,7 +59,7 @@
 									</li>
 								</#list>
 							<#else>
-								<li><small class="muted" style="padding-left: 5px;">N/A for this department</small></li>
+								<li><div class="small muted" style="padding-left: 5px;">${emptyText}</div></li>
 							</#if>
 						</ul>
 					</div>
@@ -117,7 +117,7 @@
 				${route.code?upper_case}
 			</#if>
 		</@current_filter_value></#compress></#assign>
-		<@filter "selectCourseCommand.routes" placeholder currentfilter selectCourseCommand.allRoutes; route>
+		<@filter path="selectCourseCommand.routes" placeholder=placeholder currentFilter=currentfilter allItems=selectCourseCommand.allRoutes emptyText="No course routes found"; route>
 			<label class="checkbox">
 				<input type="checkbox" name="${status.expression}" value="${route.code}" data-short-value="${route.code?upper_case}"
 					${contains_by_code(selectCourseCommand.routes, route)?string('checked','')}
@@ -126,9 +126,22 @@
 			</label>
 		</@filter>
 
+		<#-- level grids only for CAL at this point -->
+		<#if department.code == 'et'>
+			<div class="btn-group" style="margin: 0 10px;">
+				Generate grid on:&nbsp;
+				<label class="radio-inline">
+					<input type="radio" name="gridScope" value="block"> Block
+				</label>
+				<label class="radio-inline">
+					<input type="radio" name="gridScope" value="level"> Level
+				</label>
+			</div>
+		</#if>
+
 		<#assign placeholder = "Year of study" />
 		<#assign currentfilter><@current_filter_value "selectCourseCommand.yearOfStudy" placeholder; year>${year}</@current_filter_value></#assign>
-		<@filter "selectCourseCommand.yearOfStudy" placeholder currentfilter selectCourseCommand.allYearsOfStudy "Year "; yearOfStudy>
+		<@filter path="selectCourseCommand.yearOfStudy" placeholder=placeholder currentFilter=currentfilter allItems=selectCourseCommand.allYearsOfStudy prefix="Year " cssClass="block" ; yearOfStudy>
 			<label class="radio">
 				<input type="radio" name="${status.expression}" value="${yearOfStudy}" data-short-value="${yearOfStudy}"
 					${(((selectCourseCommand.yearOfStudy)!0) == yearOfStudy)?string('checked','')}
@@ -136,8 +149,22 @@
 				${yearOfStudy}
 			</label>
 		</@filter>
+
+		<#if department.code == 'et'>
+			<#assign placeholder = "Study level" />
+			<#assign currentfilter><@current_filter_value "selectCourseCommand.levelCode" placeholder; levelCode>${levelCode}</@current_filter_value></#assign>
+			<@filter path="selectCourseCommand.levelCode" placeholder=placeholder currentFilter=currentfilter allItems=selectCourseCommand.allLevels prefix="Level " cssClass="level"; level>
+				<label class="radio">
+					<input type="radio" name="${status.expression}" value="${level.code}" data-short-value="${level.code}"
+						${(((selectCourseCommand.levelCode)!'') == level.code)?string('checked','')}
+					>
+					${level.code} - ${level.name}
+				</label>
+			</@filter>
+		</#if>
+
 	</div>
-	<#assign studyYear = (selectCourseCommand.yearOfStudy)!0 />
+	<#assign studyYear = (selectCourseCommand.studyYearByLevelOrBlock)!0 />
 	<div class="row year_info">
 		<h3 class="year_info_hdr <#if studyYear == 0>hidden</#if>">Years to display on grid</h3>
 		<#assign maxYear=selectCourseCommand.allYearsOfStudy?size>
@@ -279,8 +306,9 @@
 
 			var course = $('[name=courses]:checked');
 			var yearOfStudy = $('[name=yearOfStudy]:checked');
+			var studyLevel = $('[name=levelCode]:checked');
 
-			if (course.length === 0 || yearOfStudy.length === 0) {
+			if (course.length === 0 || (yearOfStudy.length === 0 && studyLevel.length === 0)) {
 				$('.buttons button.btn-default').prop('disabled', true);
 			} else {
 				$('.buttons button.btn-default').prop('disabled', false);
@@ -288,12 +316,12 @@
 		};
 
 		var yearCheckboxes = function() {
-			var yearOfStudy = $("input[type='radio'][name='yearOfStudy']:checked");
+			var yearOfStudy = $("input[type='radio'][name='yearOfStudy']:checked, input[type='radio'][name='levelCode']:checked");
 			var selectedYearOfStudy = 0;
-			$('.year_info .year_info_hdr').toggleClass("hidden", yearOfStudy.length == 0);
-			$('.year_info_ftr').toggleClass("hidden", yearOfStudy.length == 0);
+			$('.year_info .year_info_hdr').toggleClass("hidden", yearOfStudy.length === 0);
+			$('.year_info_ftr').toggleClass("hidden", yearOfStudy.length === 0);
 			if (yearOfStudy.length > 0) {
-				selectedYearOfStudy = yearOfStudy.val();
+				selectedYearOfStudy = isNaN(Number(yearOfStudy.val())) ? 1 : yearOfStudy.val();
 				$('.year_info').find("input[type='hidden'][name='courseYearsToShow']").val("Year"+selectedYearOfStudy);
 			} else {
 				return;
@@ -302,12 +330,12 @@
 				var $yearCheckboxDiv =  $(this);
 				var $yearCheckbox = $yearCheckboxDiv.find('input');
 				var year = $yearCheckboxDiv.data('year');
-				if(year == selectedYearOfStudy) {
+				if(year === selectedYearOfStudy) {
 					$yearCheckbox.prop("checked", true);
 				} else if (year > selectedYearOfStudy) {
 					$yearCheckbox.prop("checked", false);
 				}
-				$yearCheckbox.prop("disabled", (selectedYearOfStudy ==  year));
+				$yearCheckbox.prop("disabled", (selectedYearOfStudy ===  year));
 				$yearCheckboxDiv.toggleClass("hidden", selectedYearOfStudy <  year);
 			});
 		};
@@ -368,6 +396,16 @@
 			});
 			hideYearCheckboxesArea();
 		});
+
+		<#if department.code == 'et'>
+			$('.level,.block').hide();
+			var $gridScopeRadio = $('input[name=gridScope]');
+			$gridScopeRadio.on('change', function(){
+				if(this.value === "level"){ $('.block').hide(); $('.level').show(); }
+				else if (this.value === "block") { $('.level').hide(); $('.block').show(); }
+			});
+		</#if>
+
 	});
 </script>
 </#escape>
