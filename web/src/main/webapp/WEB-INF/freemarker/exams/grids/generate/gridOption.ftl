@@ -338,7 +338,7 @@
 			<div class="checkbox">
 				<label><input type="checkbox" name="predefinedColumnIdentifiers" value="currentyear"
 					<#if gridOptionsCommand.predefinedColumnIdentifiers?seq_contains("currentyear")>checked</#if>
-				/> Current year mean mark <@fmt.help_popover id="currentyear" content="Year mark calculated from module marks using CATS weighting." /></label>
+				/> Current year weighted mean mark <@fmt.help_popover id="currentyear" content="Year mark calculated from module marks using CATS weighting." /></label>
 			</div>
 		</div>
 		<div class="col-md-3">
