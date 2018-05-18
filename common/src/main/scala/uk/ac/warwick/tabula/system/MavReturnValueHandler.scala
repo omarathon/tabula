@@ -29,6 +29,11 @@ class MavReturnValueHandler extends HandlerMethodReturnValueHandler with Logging
 				} else {
 					mavContainer.setView(mav.view)
 				}
+				if (mav.viewName != null && mav.viewName.startsWith("redirect:")
+					   && mav.viewName.contains("clearModel=true")) {
+					//Don't dump model attributes into the query string when redirecting if we have specified clearModel
+					mavContainer.getModel.clear()
+				}
 				mavContainer.setRequestHandled(false)
 		}
 
