@@ -202,9 +202,9 @@ class GenerateExamGridController extends ExamsController
 				allRequestParams.remove("jobId")
 				allRequestParams.add("jobId", jobInstance.id)
 				if (usePreviousSettings) {
-					redirectTo(Grids.jobProgress(department,academicYear), allRequestParams)
+					redirectToAndClearModel(Grids.jobProgress(department,academicYear), allRequestParams)
 				} else {
-					redirectTo(Grids.options(department, academicYear), allRequestParams)
+					redirectToAndClearModel(Grids.options(department, academicYear), allRequestParams)
 				}
 			}
 		}
@@ -242,9 +242,9 @@ class GenerateExamGridController extends ExamsController
 		} else {
 			val columnIDs = gridOptionsCommand.apply()._1.map(_.identifier)
 			if (columnIDs.contains(new CoreRequiredModulesColumnOption().identifier) || columnIDs.contains(new ModuleReportsColumnOption().identifier)) {
-				redirectTo(Grids.coreRequired(department,academicYear), allRequestParams)
+				redirectToAndClearModel(Grids.coreRequired(department,academicYear), allRequestParams)
 			} else {
-				redirectTo(Grids.jobProgress(department,academicYear), allRequestParams)
+				redirectToAndClearModel(Grids.jobProgress(department,academicYear), allRequestParams)
 			}
 		}
 	}
@@ -285,7 +285,7 @@ class GenerateExamGridController extends ExamsController
 			coreRequiredModulesRender(jobId, department, academicYear)
 		} else {
 			coreRequiredModulesCommand.apply()
-			redirectTo(Grids.jobProgress(department, academicYear), allRequestParams)
+			redirectToAndClearModel(Grids.jobProgress(department, academicYear), allRequestParams)
 		}
 	}
 
@@ -324,7 +324,7 @@ class GenerateExamGridController extends ExamsController
 				academicYear
 			)
 		} else {
-			redirectTo(Grids.preview(department, academicYear), allRequestParams)
+			redirectToAndClearModel(Grids.preview(department, academicYear), allRequestParams)
 		}
 	}
 
@@ -495,7 +495,8 @@ class GenerateExamGridController extends ExamsController
 		GridData(entities, studentInformationColumns, perYearColumns, summaryColumns, weightings, normalLoadLookup, routeRulesLookup)
 	}
 
-	private def redirectTo(path: String, params: MultiValueMap[String, String]): Mav = {
+	private def redirectToAndClearModel(path: String, params: MultiValueMap[String, String]): Mav = {
+		params.add("clearModel", "true")
 		val uri = UriComponentsBuilder.fromPath(path).queryParams(params).toUriString
 		RedirectForce(uri)
 	}
