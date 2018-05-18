@@ -47,7 +47,7 @@ class AbstractExportAttendanceToSitsService extends ExportAttendanceToSitsServic
 			("academicYear", report.academicYear.toString),
 			("deptCode", Option(report.studentCourseYearDetails).flatMap { scyd => Option(scyd.enrolmentDepartment) }.fold("") { _.code }.toUpperCase),
 			("courseCode", Option(report.studentCourseDetails).flatMap { scd => Option(scd.course) }.fold("") { _.code }),
-			("recorder", report.reporter.substring(0, ExportAttendanceToSitsService.recorderMaxColumnSize)),
+			("recorder", report.reporter.substring(0, Math.min(report.reporter.length, ExportAttendanceToSitsService.recorderMaxColumnSize))),
 			("missedPoints", report.missed),
 			("monitoringPeriod", monitoringPeriod)
 		)
