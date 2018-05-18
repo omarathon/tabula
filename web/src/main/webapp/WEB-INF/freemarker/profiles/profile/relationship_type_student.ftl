@@ -52,7 +52,7 @@
 					<strong>University number:</strong> ${relationship.agentMember.universityId}<br />
 					<#if relationship.agentMember.userId??><strong>IT code:</strong> ${relationship.agentMember.userId}<br /></#if>
 					<span class="peoplesearch-info" data-href="<@routes.profiles.peoplesearchData relationship.agentMember />"></span>
-					<#if (canEditRelationship!false)>
+					<#if (canEditRelationship!false) && !studentCourseDetails.student.deceased>
 						<a class="btn btn-primary ajax-modal"
 						   href="<@routes.profiles.relationship_edit relationshipType studentCourseDetails.urlSafeId relationship.agentMember />"
 						   data-target="#change-agent"
@@ -75,7 +75,7 @@
 <div class="row">
 	<div class="col-md-12">
 		<p>
-			<#if (canEditRelationship!false)>
+			<#if (canEditRelationship!false) &&  !studentCourseDetails.student.deceased >
 				<a class="btn btn-primary ajax-modal"
 					href="<@routes.profiles.relationship_add relationshipType studentCourseDetails.urlSafeId />"
 					data-target="#change-agent"
