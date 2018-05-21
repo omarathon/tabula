@@ -520,7 +520,6 @@ class GenerateExamGridController extends ExamsController
 			.foreach(jobService.kill)
 	}
 
-
 	private def redirectToAndClearModel(path: String, params: MultiValueMap[String, String]): Mav = {
 		params.add("clearModel", "true")
 		val uri = UriComponentsBuilder.fromPath(path).queryParams(params).toUriString

@@ -60,6 +60,7 @@ TODO grab values from the Routes object in code, as that's pretty equivalent and
 <#macro generateGridOptions department academicYear><@_u page="/grids/${department.code}/${academicYear.startYear?c}/generate/options" /></#macro>
 <#macro generateGridCoreRequired department academicYear><@_u page="/grids/${department.code}/${academicYear.startYear?c}/generate/corerequired" /></#macro>
 <#macro generateModuleGrid department academicYear><@_u page="/grids/${department.code}/${academicYear.startYear?c}/module/generate" /></#macro>
+<#macro generateModuleGridSkipImport department academicYear><@_u page="/grids/${department.code}/${academicYear.startYear?c}/module/generate/import/skip" /></#macro>
 <#macro generateModuleGridPreview department academicYear><@_u page="/grids/${department.code}/${academicYear.startYear?c}/module/generate/preview" /></#macro>
 <#macro generateGridProgress department academicYear><@_u page="/grids/${department.code}/${academicYear.startYear?c}/generate/progress" /></#macro>
 <#macro generateModuleGridProgress department academicYear><@_u page="/grids/${department.code}/${academicYear.startYear?c}/module/generate/progress" /></#macro>
