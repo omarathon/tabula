@@ -332,12 +332,12 @@
 				var $yearCheckboxDiv =  $(this);
 				var $yearCheckbox = $yearCheckboxDiv.find('input');
 				var year = $yearCheckboxDiv.data('year');
-				if(year === selectedYearOfStudy) {
+				if(year == selectedYearOfStudy) {
 					$yearCheckbox.prop("checked", true);
 				} else if (year > selectedYearOfStudy) {
 					$yearCheckbox.prop("checked", false);
 				}
-				$yearCheckbox.prop("disabled", (selectedYearOfStudy ===  year));
+				$yearCheckbox.prop("disabled", (selectedYearOfStudy ==  year));
 				$yearCheckboxDiv.toggleClass("hidden", selectedYearOfStudy <  year);
 			});
 		};

@@ -11,13 +11,13 @@ class CurrentYearMarkColumnOption extends ChosenYearExamGridColumnOption with Au
 
 	override val identifier: ExamGridColumnOption.Identifier = "currentyear"
 
-	override val label: String = "Marking: Current year mean mark"
+	override val label: String = "Marking: Current year weighted mean mark"
 
 	override val sortOrder: Int = ExamGridColumnOption.SortOrders.CurrentYear
 
 	case class Column(state: ExamGridColumnState) extends ChosenYearExamGridColumn(state) with HasExamGridColumnCategory {
 
-		override val title: String = "Weighted Mean Module Mark"
+		override val title: String = "Weighted mean year mark"
 
 		override val category: String = s"Year ${state.yearOfStudy} Marks"
 
