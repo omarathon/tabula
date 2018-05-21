@@ -220,26 +220,11 @@ trait ImportModules {
 					seenModuleCodesForDepartment = seenModuleCodesForDepartment :+ module.code
 
 					// HFC-354 Update module name if it changes.
-					if (mod.name != module.name) {
-						logger.info("Updating name of %s to %s".format(mod.code, mod.name))
+					if (mod.name != module.name || mod.shortName != module.shortName || mod.degreeType != module.degreeType ) {
+						logger.info("Updating module info for %s, Name- %s, Shortname- %s, Degreetype- %s".format(mod.code, mod.name, mod.shortName, mod.degreeType))
 						module.name = mod.name
 						module.shortName = mod.shortName
 						module.degreeType = mod.degreeType
-						module.missingFromImportSince = null
-						moduleAndDepartmentService.saveOrUpdate(module)
-						ImportResult(changed = 1)
-					} else if (mod.shortName != module.shortName) {
-						logger.info("Updating short name of %s to %s".format(mod.code, mod.shortName))
-						module.name = mod.name
-						module.shortName = mod.shortName
-						module.degreeType = mod.degreeType
-						module.missingFromImportSince = null
-						moduleAndDepartmentService.saveOrUpdate(module)
-						ImportResult(changed = 1)
-					} else if (mod.degreeType != module.degreeType) {
-						logger.info("Updating degreetype of %s to %s".format(mod.code, mod.degreeType))
-						module.degreeType = mod.degreeType
-						module.shortName = mod.shortName
 						module.missingFromImportSince = null
 						moduleAndDepartmentService.saveOrUpdate(module)
 						ImportResult(changed = 1)
