@@ -80,6 +80,33 @@ class StringToExamGridStudentIdentificationColumnValue extends TwoWayConverter[S
 	override def convertLeft(source: ExamGridStudentIdentificationColumnValue): String = Option(source).map { _.value }.orNull
 }
 
+sealed abstract class ExamGridDisplayModuleNameColumnValue(val value: String, val description: String) {
+	override def toString: String = value
+}
+
+object ExamGridDisplayModuleNameColumnValue {
+	val Default = NoNames
+	case object NoNames  extends ExamGridDisplayModuleNameColumnValue("codeOnly", "No names")
+	case object LongNames extends ExamGridDisplayModuleNameColumnValue("nameAndCode", "Show module names")
+	case object ShortNames extends ExamGridDisplayModuleNameColumnValue("shortNameAndCode", "Show module short names")
+
+	def fromCode(code: String): ExamGridDisplayModuleNameColumnValue =
+		if (code == null) null
+		else allValues.find{_.value == code} match {
+			case Some(displayModuleName) => displayModuleName
+			case None => throw new IllegalArgumentException()
+		}
+
+	def allValues : Seq[ExamGridDisplayModuleNameColumnValue] = Seq(NoNames, LongNames, ShortNames)
+
+	def apply(value:String): ExamGridDisplayModuleNameColumnValue = fromCode(value)
+}
+
+class StringToExamGridDisplayModuleNameColumnValue extends TwoWayConverter[String, ExamGridDisplayModuleNameColumnValue] {
+	override def convertRight(source: String): ExamGridDisplayModuleNameColumnValue = source.maybeText.map(ExamGridDisplayModuleNameColumnValue.fromCode).getOrElse(throw new IllegalArgumentException)
+	override def convertLeft(source: ExamGridDisplayModuleNameColumnValue): String = Option(source).map { _.value }.orNull
+}
+
 case class ExamGridColumnState(
 	entities: Seq[ExamGridEntity],
 	overcatSubsets: Map[ExamGridEntityYear, Seq[(BigDecimal, Seq[ModuleRegistration])]],
@@ -93,13 +120,13 @@ case class ExamGridColumnState(
 	showComponentMarks: Boolean,
 	showZeroWeightedComponents: Boolean,
 	showComponentSequence: Boolean,
-	showModuleNames: Boolean,
+	showModuleNames: ExamGridDisplayModuleNameColumnValue,
 	calculateYearMarks: Boolean,
 	isLevelGrid: Boolean
 )
 
 case object EmptyExamGridColumnState {
-	def apply() = ExamGridColumnState(Nil, Map.empty, null, null, null, null, 0, null, nameToShow=ExamGridStudentIdentificationColumnValue.FullName, showComponentMarks=false, showZeroWeightedComponents=false, showComponentSequence=false, showModuleNames=true, calculateYearMarks=false, isLevelGrid=false)
+	def apply() = ExamGridColumnState(Nil, Map.empty, null, null, null, null, 0, null, nameToShow=ExamGridStudentIdentificationColumnValue.FullName, showComponentMarks=false, showZeroWeightedComponents=false, showComponentSequence=false, showModuleNames=ExamGridDisplayModuleNameColumnValue.LongNames, calculateYearMarks=false, isLevelGrid=false)
 }
 
 @Component

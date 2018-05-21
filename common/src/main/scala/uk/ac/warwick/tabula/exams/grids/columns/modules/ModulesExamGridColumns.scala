@@ -38,9 +38,16 @@ abstract class ModuleExamGridColumn(state: ExamGridColumnState, val module: Modu
 
 	def moduleSelectionStatus: Option[ModuleSelectionStatus]
 
-	override val title: String =
-		if (state.showModuleNames) s"${module.code.toUpperCase} ${module.name}"
-		else s"${module.code.toUpperCase}"
+	override val title: String = state.showModuleNames match {
+		case ExamGridDisplayModuleNameColumnValue.LongNames => s"${module.code.toUpperCase} ${module.name}"
+		case ExamGridDisplayModuleNameColumnValue.ShortNames	=>
+			if(module.shortName == null || module.shortName == module.code.toUpperCase) {
+				s"${module.code.toUpperCase}"
+			} else {
+				s"${module.code.toUpperCase} ${module.shortName}"
+			}
+		case _ => s"${module.code.toUpperCase}"
+	}
 
 	override val boldTitle: Boolean = isDuplicate
 

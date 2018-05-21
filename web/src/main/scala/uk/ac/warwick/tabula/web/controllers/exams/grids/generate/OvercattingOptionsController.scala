@@ -189,7 +189,7 @@ class OvercattingOptionsView(
 		showComponentMarks = false,
 		showZeroWeightedComponents = false,
 		showComponentSequence = false,
-		showModuleNames = false,
+		showModuleNames = department.moduleNameToShow,
 		calculateYearMarks = false,
 		isLevelGrid = basedOnLevel
 	)
