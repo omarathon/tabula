@@ -11,8 +11,9 @@ import uk.ac.warwick.tabula.data.Transactions._
 import uk.ac.warwick.tabula.data.model._
 import uk.ac.warwick.tabula.helpers.Logging
 import uk.ac.warwick.tabula.JavaImports._
-import scala.collection.JavaConverters._
+import uk.ac.warwick.tabula.data.ScalaRestriction.is
 
+import scala.collection.JavaConverters._
 import scala.collection.immutable.TreeMap
 
 trait RelationshipServiceComponent {
@@ -393,9 +394,11 @@ abstract class AbstractRelationshipService extends RelationshipService with Logg
 		FiltersStudents.AliasPaths("statusOnRoute"): _*
 	)
 
+	private val notDeceasedRestriction =  is("deceased", false)
+
 	def getStudentAssociationDataWithoutRelationship(department: Department, relationshipType: StudentRelationshipType, restrictions: Seq[ScalaRestriction] = Seq()): Seq[StudentAssociationData] = transactional(readOnly = true) {
 		benchmarkTask("getStudentAssociationDataWithoutRelationship") {
-			val allRestrictions = departmentRestrictions(department) ++ notPermanentlyWithdrawnRestriction ++
+			val allRestrictions = departmentRestrictions(department) ++ notPermanentlyWithdrawnRestriction ++ notDeceasedRestriction ++
 				// For this relationship type and not expired, but null
 				ScalaRestriction.custom(
 					Restrictions.isNull("relationshipsOfType.id"),
