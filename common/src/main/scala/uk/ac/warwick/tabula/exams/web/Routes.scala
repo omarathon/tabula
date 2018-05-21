@@ -87,6 +87,9 @@ object Routes {
 		def jobProgress(department: Department, academicYear: AcademicYear): String =
 			s"$context/${encoded(department.code)}/${encoded(academicYear.startYear.toString)}/generate/import"
 
+		def jobSkip(department: Department, academicYear: AcademicYear): String =
+			s"$context/${encoded(department.code)}/${encoded(academicYear.startYear.toString)}/generate/import/skip"
+
 		def preview(department: Department, academicYear: AcademicYear): String =
 		s"$context/${encoded(department.code)}/${encoded(academicYear.startYear.toString)}/generate/preview"
 
