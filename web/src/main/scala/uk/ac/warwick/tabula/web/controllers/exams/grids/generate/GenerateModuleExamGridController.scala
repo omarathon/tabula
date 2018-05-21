@@ -105,7 +105,7 @@ class GenerateModuleExamGridController extends ExamsController
 
 			allRequestParams.remove("jobId")
 			allRequestParams.add("jobId", jobInstance.id)
-			redirectTo(Grids.moduleJobProgress(department, academicYear), allRequestParams)
+			redirectToAndClearModel(Grids.moduleJobProgress(department, academicYear), allRequestParams)
 		}
 	}
 
@@ -139,7 +139,7 @@ class GenerateModuleExamGridController extends ExamsController
 				academicYear
 			)
 		} else {
-			redirectTo(Grids.modulePreview(department, academicYear), allRequestParams)
+			redirectToAndClearModel(Grids.modulePreview(department, academicYear), allRequestParams)
 		}
 	}
 
@@ -202,7 +202,8 @@ class GenerateModuleExamGridController extends ExamsController
 		)
 	}
 
-	private def redirectTo(path: String, params: MultiValueMap[String, String]): Mav = {
+	private def redirectToAndClearModel(path: String, params: MultiValueMap[String, String]): Mav = {
+		params.add("clearModel", "true")
 		val uri = UriComponentsBuilder.fromPath(path).queryParams(params).toUriString
 		RedirectForce(uri)
 	}
