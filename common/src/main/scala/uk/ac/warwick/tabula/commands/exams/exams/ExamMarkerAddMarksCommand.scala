@@ -48,7 +48,7 @@ trait MarkerAddMarksNotifications extends Notifies[Seq[Feedback], Feedback] {
 
 	def emit(updatedFeedback: Seq[Feedback]): Seq[ExamMarkedNotification] = updatedFeedback.headOption.flatMap { feedback => HibernateHelpers.initialiseAndUnproxy(feedback) match {
 		case examFeedback: ExamFeedback =>
-			Option(Notification.init(new ExamMarkedNotification, submitter.apparentUser, examFeedback, examFeedback.exam))
+			Option(Notification.init(new ExamMarkedNotification, submitter.apparentUser, examFeedback.exam))
 			case _ => None
 	}}.map(Seq(_)).getOrElse(Seq())
 
