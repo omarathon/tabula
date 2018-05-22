@@ -35,7 +35,8 @@ object GenerateExamGridShortFormExporter extends TaskBenchmarking {
 		perYearModuleReportColumns: Map[YearOfStudy, Seq[ModuleReportsColumn]],
 		maxYearColumnSize: Map[YearOfStudy, Int],
 		showComponentMarks: Boolean,
-		yearOrder: Ordering[Int] = Ordering.Int
+		yearOrder: Ordering[Int] = Ordering.Int,
+		mergedCells: Boolean = true
 	): Workbook = {
 		// Allow randomly accessing rows at any point during generation, don't flush
 		val workbook = new SXSSFWorkbook(null, -1)
@@ -84,13 +85,17 @@ object GenerateExamGridShortFormExporter extends TaskBenchmarking {
 				// Entity rows
 				entities.foreach(entity =>
 					if (chosenYearColumnValues.get(leftColumn).exists(_.get(entity).isDefined)) {
-						val (header, _) = entityRows(entity)
+						val (header, valueRows) = entityRows(entity)
 						val entityCell = header.createCell(currentColumnIndex)
 						chosenYearColumnValues(leftColumn)(entity).populateCell(entityCell, cellStyleMap)
-						if (showComponentMarks) {
-							sheet.addMergedRegion(new CellRangeAddress(entityCell.getRowIndex, entityCell.getRowIndex + 3, entityCell.getColumnIndex, entityCell.getColumnIndex))
+						if(mergedCells) {
+							val lastRow = if(showComponentMarks) entityCell.getRowIndex + 3 else entityCell.getRowIndex + 1
+							sheet.addMergedRegion(new CellRangeAddress(entityCell.getRowIndex, lastRow, entityCell.getColumnIndex, entityCell.getColumnIndex))
 						} else {
-							sheet.addMergedRegion(new CellRangeAddress(entityCell.getRowIndex, entityCell.getRowIndex + 1, entityCell.getColumnIndex, entityCell.getColumnIndex))
+							valueRows.values.foreach(row => {
+								val entityCell = row.createCell(currentColumnIndex)
+								chosenYearColumnValues(leftColumn)(entity).populateCell(entityCell, cellStyleMap)
+							})
 						}
 					}
 				)
@@ -235,14 +240,18 @@ object GenerateExamGridShortFormExporter extends TaskBenchmarking {
 
 				// Entity rows
 				entities.foreach(entity => {
-					val (header, _) = entityRows(entity)
+					val (header, valueRows) = entityRows(entity)
 					if (chosenYearColumnValues.get(rightColumn).exists(_.get(entity).isDefined)) {
 						val entityCell = header.createCell(currentColumnIndex)
 						chosenYearColumnValues(rightColumn)(entity).populateCell(entityCell, cellStyleMap)
-						if (showComponentMarks) {
-							sheet.addMergedRegion(new CellRangeAddress(entityCell.getRowIndex, entityCell.getRowIndex + 3, entityCell.getColumnIndex, entityCell.getColumnIndex))
+						if(mergedCells) {
+							val lastRow = if(showComponentMarks) entityCell.getRowIndex + 3 else entityCell.getRowIndex + 1
+							sheet.addMergedRegion(new CellRangeAddress(entityCell.getRowIndex, lastRow, entityCell.getColumnIndex, entityCell.getColumnIndex))
 						} else {
-							sheet.addMergedRegion(new CellRangeAddress(entityCell.getRowIndex, entityCell.getRowIndex + 1, entityCell.getColumnIndex, entityCell.getColumnIndex))
+							valueRows.values.foreach(row => {
+								val entityCell = row.createCell(currentColumnIndex)
+								chosenYearColumnValues(rightColumn)(entity).populateCell(entityCell, cellStyleMap)
+							})
 						}
 					}
 				})

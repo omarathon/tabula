@@ -270,6 +270,7 @@
 				<button type="button" class="btn btn-primary dropdown-toggle" data-toggle="dropdown">Download&hellip; <span class="caret"></span></button>
 				<ul class="dropdown-menu download-options">
 					<li><button class="btn btn-link" type="submit" name="${GenerateExamGridMappingParameters.excel}">Excel grid</button></li>
+					<li><button class="btn btn-link" type="submit" name="${GenerateExamGridMappingParameters.excelNoMergedCells}">Excel grid without merged cells</button></li>
 					<li><button class="btn btn-link" type="submit" name="${GenerateExamGridMappingParameters.marksRecord}">Marks record</button></li>
 					<li><button class="btn btn-link" type="submit" name="${GenerateExamGridMappingParameters.marksRecordConfidential}">Confidential marks record</button></li>
 					<li><button class="btn btn-link" type="submit" name="${GenerateExamGridMappingParameters.passList}">Pass list</button></li>

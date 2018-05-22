@@ -1,10 +1,9 @@
 package uk.ac.warwick.tabula.web.controllers.exams.grids.generate
 
 import javax.validation.Valid
-
 import org.springframework.context.MessageSource
 import org.springframework.validation.Errors
-import org.springframework.web.bind.annotation.{ModelAttribute, PathVariable}
+import org.springframework.web.bind.annotation.{ModelAttribute, PathVariable, RequestParam}
 import org.springframework.web.servlet.View
 import uk.ac.warwick.spring.Wire
 import uk.ac.warwick.tabula.AcademicYear
@@ -28,7 +27,7 @@ trait ExamGridDocumentsController extends ExamsController
 	var messageSource: MessageSource = Wire.auto[MessageSource]
 
 	@RequestMapping(method = Array(POST), params = Array(GenerateExamGridMappingParameters.excel))
-	def excel(
+	def mergedCells(
 		@Valid @ModelAttribute("selectCourseCommand") selectCourseCommand: SelectCourseCommand,
 		selectCourseCommandErrors: Errors,
 		@Valid @ModelAttribute("gridOptionsCommand") gridOptionsCommand: GridOptionsCommand,
@@ -37,6 +36,50 @@ trait ExamGridDocumentsController extends ExamsController
 		@ModelAttribute("coreRequiredModuleLookup") coreRequiredModuleLookup: CoreRequiredModuleLookup,
 		@PathVariable department: Department,
 		@PathVariable academicYear: AcademicYear
+	): View = excel(
+		selectCourseCommand,
+		selectCourseCommandErrors,
+		gridOptionsCommand,
+		gridOptionsCommandErrors,
+		checkOvercatCommand,
+		coreRequiredModuleLookup,
+		department,
+		academicYear,
+		mergedCells = true
+	)
+
+	@RequestMapping(method = Array(POST), params = Array(GenerateExamGridMappingParameters.excelNoMergedCells))
+	def noMergedCells(
+		@Valid @ModelAttribute("selectCourseCommand") selectCourseCommand: SelectCourseCommand,
+		selectCourseCommandErrors: Errors,
+		@Valid @ModelAttribute("gridOptionsCommand") gridOptionsCommand: GridOptionsCommand,
+		gridOptionsCommandErrors: Errors,
+		@ModelAttribute("checkOvercatCommand") checkOvercatCommand: CheckOvercatCommand,
+		@ModelAttribute("coreRequiredModuleLookup") coreRequiredModuleLookup: CoreRequiredModuleLookup,
+		@PathVariable department: Department,
+		@PathVariable academicYear: AcademicYear
+	): View = excel(
+		selectCourseCommand,
+		selectCourseCommandErrors,
+		gridOptionsCommand,
+		gridOptionsCommandErrors,
+		checkOvercatCommand,
+		coreRequiredModuleLookup,
+		department,
+		academicYear,
+		mergedCells = false
+	)
+
+	def excel(
+		selectCourseCommand: SelectCourseCommand,
+		selectCourseCommandErrors: Errors,
+		gridOptionsCommand: GridOptionsCommand,
+		gridOptionsCommandErrors: Errors,
+		checkOvercatCommand: CheckOvercatCommand,
+		coreRequiredModuleLookup: CoreRequiredModuleLookup,
+		department: Department,
+		academicYear: AcademicYear,
+		mergedCells: Boolean
 	): View = {
 		if (selectCourseCommandErrors.hasErrors || gridOptionsCommandErrors.hasErrors) {
 			throw new IllegalArgumentException
@@ -67,7 +110,8 @@ trait ExamGridDocumentsController extends ExamsController
 				rightColumns = summaryColumns,
 				chosenYearColumnValues = chosenYearColumnValues,
 				perYearColumnValues = perYearColumnValues,
-				showComponentMarks = gridOptionsCommand.showComponentMarks
+				showComponentMarks = gridOptionsCommand.showComponentMarks,
+				mergedCells = mergedCells
 			)
 		} else {
 			val perYearModuleMarkColumns = benchmarkTask("perYearModuleMarkColumns"){ perYearColumns.map{ case (year, columns) => year -> columns.collect{ case marks: ModuleExamGridColumn => marks}} }
@@ -105,7 +149,8 @@ trait ExamGridDocumentsController extends ExamsController
 				perYearModuleMarkColumns = perYearModuleMarkColumns,
 				perYearModuleReportColumns = perYearModuleReportColumns,
 				maxYearColumnSize,
-				showComponentMarks = gridOptionsCommand.showComponentMarks
+				showComponentMarks = gridOptionsCommand.showComponentMarks,
+				mergedCells = mergedCells
 			)
 		}
 
