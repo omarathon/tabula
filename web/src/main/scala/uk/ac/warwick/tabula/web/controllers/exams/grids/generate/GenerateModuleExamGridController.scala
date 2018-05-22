@@ -155,13 +155,26 @@ class GenerateModuleExamGridController extends ExamsController
 		).getOrElse(throw new ItemNotFoundException())
 	}
 
+	@PostMapping(path = Array("/import/skip"))
+	def skipImportAndGenerateGrid(
+		@RequestParam jobId: String,
+		@PathVariable department: Department,
+		@PathVariable academicYear: AcademicYear,
+		@RequestParam allRequestParams: MultiValueMap[String, String]
+	): Mav = {
+		jobService.getInstance(jobId)
+			.filter(_.jobType == ImportMembersJob.identifier)
+			.foreach(jobService.kill)
+
+		redirectToAndClearModel(Grids.modulePreview(department, academicYear), allRequestParams)
+	}
+
 	@GetMapping(path = Array("/preview"))
 	def previewAndDownload(
 		@Valid @ModelAttribute("selectModuleExamCommand") selectModuleExamCommand: SelectModuleExamCommand,
 		errors: Errors,
 		@PathVariable department: Department,
-		@PathVariable academicYear: AcademicYear,
-		@RequestParam jobId: String
+		@PathVariable academicYear: AcademicYear
 	): Mav = {
 		if (errors.hasErrors) {
 			throw new IllegalArgumentException
@@ -169,8 +182,7 @@ class GenerateModuleExamGridController extends ExamsController
 		previewAndDownloadRender(
 			selectModuleExamCommand,
 			department,
-			academicYear,
-			jobId
+			academicYear
 		)
 	}
 
@@ -178,7 +190,6 @@ class GenerateModuleExamGridController extends ExamsController
 		selectModuleExamCommand: SelectModuleExamCommand,
 		department: Department,
 		academicYear: AcademicYear,
-		jobId: String
 	): Mav = {
 
 		val moduleGridResult = selectModuleExamCommand.apply()
@@ -190,7 +201,6 @@ class GenerateModuleExamGridController extends ExamsController
 			"entities" -> moduleGridResult.gridStudentDetailRecords,
 			"studentCount" -> moduleGridResult.gridStudentDetailRecords.map(_.universityId).distinct.size,
 			"generatedDate" -> DateTime.now,
-			"jobId" -> jobId,
 			"module" -> selectModuleExamCommand.module,
 			"passMark" -> ProgressionService.modulePassMark(selectModuleExamCommand.module.degreeType),
 			"componentInfo" -> moduleGridResult.upstreamAssessmentGroupAndSequenceAndOccurrencesWithComponentName
@@ -200,6 +210,15 @@ class GenerateModuleExamGridController extends ExamsController
 			department,
 			academicYear
 		)
+	}
+
+	private def stopOngoingImportForStudents(students: Seq[ExamGridEntity]): Unit = {
+		val members = students.map(_.universityId).toSet
+
+		jobService.jobDao.listRunningJobs
+			.filter(_.jobType == ImportMembersJob.identifier)
+			.filter(_.getStrings(ImportMembersJob.MembersKey).toSet == members)
+			.foreach(jobService.kill)
 	}
 
 	private def redirectToAndClearModel(path: String, params: MultiValueMap[String, String]): Mav = {

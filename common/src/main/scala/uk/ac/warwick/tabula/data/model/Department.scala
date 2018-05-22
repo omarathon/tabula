@@ -2,7 +2,6 @@ package uk.ac.warwick.tabula.data.model
 
 import javax.persistence.CascadeType.ALL
 import javax.persistence._
-
 import org.hibernate.annotations.{BatchSize, Type}
 import org.hibernate.criterion.Restrictions._
 import uk.ac.warwick.spring.Wire
@@ -14,7 +13,7 @@ import uk.ac.warwick.tabula.data.model.groups.{SmallGroupAllocationMethod, WeekR
 import uk.ac.warwick.tabula.data.model.markingworkflow.CM2MarkingWorkflow
 import uk.ac.warwick.tabula.data.model.permissions.{CustomRoleDefinition, DepartmentGrantedRole}
 import uk.ac.warwick.tabula.data.{AliasAndJoinType, PostLoadBehaviour, ScalaRestriction}
-import uk.ac.warwick.tabula.exams.grids.columns.{ExamGridColumnOption, ExamGridStudentIdentificationColumnValue}
+import uk.ac.warwick.tabula.exams.grids.columns.{ExamGridColumnOption, ExamGridDisplayModuleNameColumnValue, ExamGridStudentIdentificationColumnValue}
 import uk.ac.warwick.tabula.helpers.Logging
 import uk.ac.warwick.tabula.helpers.StringUtils._
 import uk.ac.warwick.tabula.permissions.PermissionsTarget
@@ -261,6 +260,11 @@ class Department extends GeneratedId
 
 	def nameToShow_= (identification:ExamGridStudentIdentificationColumnValue): Unit =  settings += (Settings.ExamGridOptions.NameToShow->identification.value)
 
+	def moduleNameToShow: ExamGridDisplayModuleNameColumnValue =
+		getStringSetting(Settings.ExamGridOptions.ModuleNameToShow).map(ExamGridDisplayModuleNameColumnValue(_)).getOrElse(ExamGridDisplayModuleNameColumnValue.Default)
+
+	def moduleNameToShow_= (identification:ExamGridDisplayModuleNameColumnValue): Unit =  settings += (Settings.ExamGridOptions.ModuleNameToShow->identification.value)
+
 	def examGridOptions: ExamGridOptions = ExamGridOptions(
 		getStringSeqSetting(Settings.ExamGridOptions.PredefinedColumnIdentifiers, Wire.all[ExamGridColumnOption].map(_.identifier)).toSet,
 		getStringSeqSetting(Settings.ExamGridOptions.CustomColumnTitles, Seq()),
@@ -268,7 +272,7 @@ class Department extends GeneratedId
 		getStringSetting(Settings.ExamGridOptions.MarksToShow, "overall"),
 		getStringSetting(Settings.ExamGridOptions.ComponentsToShow, "all"),
 		getStringSetting(Settings.ExamGridOptions.ComponentSequenceToShow, "markOnly"),
-		getStringSetting(Settings.ExamGridOptions.ModuleNameToShow, "codeOnly"),
+		moduleNameToShow,
 		getStringSetting(Settings.ExamGridOptions.Layout, "full"),
 		getStringSetting(Settings.ExamGridOptions.YearMarksToUse, "sits"),
 		getBooleanSetting(Settings.ExamGridOptions.MandatoryModulesAndYearMarkColumns, default = true)
@@ -280,7 +284,7 @@ class Department extends GeneratedId
 		settings += (Settings.ExamGridOptions.MarksToShow -> options.marksToShow)
 		settings += (Settings.ExamGridOptions.ComponentsToShow -> options.componentsToShow)
 		settings += (Settings.ExamGridOptions.ComponentSequenceToShow -> options.componentSequenceToShow)
-		settings += (Settings.ExamGridOptions.ModuleNameToShow -> options.moduleNameToShow)
+		settings += (Settings.ExamGridOptions.ModuleNameToShow -> options.moduleNameToShow.value)
 		settings += (Settings.ExamGridOptions.Layout -> options.layout)
 		settings += (Settings.ExamGridOptions.YearMarksToUse -> options.yearMarksToUse)
 		settings += (Settings.ExamGridOptions.MandatoryModulesAndYearMarkColumns -> options.mandatoryModulesAndYearMarkColumns)
@@ -555,7 +559,7 @@ object Department {
 			marksToShow: String,
 			componentsToShow: String,
 			componentSequenceToShow: String,
-			moduleNameToShow: String,
+			moduleNameToShow: ExamGridDisplayModuleNameColumnValue,
 			layout: String,
 			yearMarksToUse: String,
 			mandatoryModulesAndYearMarkColumns: Boolean

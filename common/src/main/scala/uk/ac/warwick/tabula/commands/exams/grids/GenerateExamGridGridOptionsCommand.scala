@@ -8,7 +8,7 @@ import uk.ac.warwick.tabula.data.model.Department
 import uk.ac.warwick.tabula.data.model.Department.Settings.ExamGridOptions
 import uk.ac.warwick.tabula.exams.grids.columns.marking.CurrentYearMarkColumnOption
 import uk.ac.warwick.tabula.exams.grids.columns.modules.CoreModulesColumnOption
-import uk.ac.warwick.tabula.exams.grids.columns.{ExamGridColumnOption, ExamGridStudentIdentificationColumnValue}
+import uk.ac.warwick.tabula.exams.grids.columns.{ExamGridColumnOption, ExamGridDisplayModuleNameColumnValue, ExamGridStudentIdentificationColumnValue}
 import uk.ac.warwick.tabula.permissions.Permissions
 import uk.ac.warwick.tabula.services.{AutowiringModuleAndDepartmentServiceComponent, ModuleAndDepartmentServiceComponent}
 import uk.ac.warwick.tabula.system.permissions.{PermissionsChecking, PermissionsCheckingMethods, RequiresPermissionsChecking}
@@ -130,7 +130,7 @@ trait GenerateExamGridGridOptionsCommandRequest {
 	var marksToShow: String = "overall"
 	var componentsToShow: String = "all"
 	var componentSequenceToShow: String = "markOnly"
-	var moduleNameToShow: String = "codeOnly"
+	var moduleNameToShow: ExamGridDisplayModuleNameColumnValue = ExamGridDisplayModuleNameColumnValue.NoNames
 	var layout: String = "full"
 	var yearMarksToUse: String = "sits"
 	var mandatoryModulesAndYearMarkColumns: Boolean = true
@@ -140,7 +140,6 @@ trait GenerateExamGridGridOptionsCommandRequest {
 	def showComponentMarks: Boolean = marksToShow == "all"
 	def showComponentSequence: Boolean = componentSequenceToShow == "sequenceAndMark"
 	def showZeroWeightedComponents: Boolean = componentsToShow == "all"
-	def showModuleNames: Boolean = moduleNameToShow == "nameAndCode"
 	def calculateYearMarks: Boolean = yearMarksToUse != "sits"
 
 	private def isModulesOrYearMarkColumn(identifier: ExamGridColumnOption.Identifier): Boolean =

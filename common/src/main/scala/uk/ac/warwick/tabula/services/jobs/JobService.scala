@@ -2,15 +2,15 @@ package uk.ac.warwick.tabula.services.jobs
 
 import java.net.InetAddress
 import java.util.UUID
-import javax.annotation.PreDestroy
 
+import javax.annotation.PreDestroy
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.stereotype.Service
 import uk.ac.warwick.spring.Wire
 import uk.ac.warwick.tabula.CurrentUser
 import uk.ac.warwick.tabula.events.JobNotificationHandling
 import uk.ac.warwick.tabula.helpers.Logging
-import uk.ac.warwick.tabula.jobs.{FailedJobException, Job, JobPrototype, ObsoleteJobException}
+import uk.ac.warwick.tabula.jobs._
 import uk.ac.warwick.userlookup.User
 
 trait JobServiceComponent {
@@ -129,6 +129,9 @@ class JobService extends HasJobDao with Logging with JobNotificationHandling {
 		catch {
 			case e: Exception if stopping =>
 				logger.info(s"Caught exception from job ${instance.id} during restart handling", e)
+			case _: KilledJobException =>
+				logger.info(s"Job ${instance.id} was killed")
+				fail(instance)
 			case _: ObsoleteJobException =>
 				logger.info(s"Job ${instance.id} obsolete")
 				fail(instance)

@@ -9,7 +9,7 @@
 
 <@fmt.id7_deptheader title="Create a new exam grid for ${department.name}" route_function=route_function />
 
-<form id="generateGridPreview" action="<@routes.exams.generateGridPreview department academicYear />" class="dirty-check" method="get">
+<form action="<@routes.exams.generateGridSkipImport department academicYear />" class="dirty-check" method="post">
 
 	<@form_fields.select_course_fields />
 	<@form_fields.grid_options_fields />
@@ -73,7 +73,7 @@
 				},
 				success: function(data){
 					if (data.finished) {
-						$('#generateGridPreview').trigger('submit');
+						window.location = '<#noescape><@routes.exams.generateGridPreview department academicYear />?${gridOptionsQueryString}</#noescape>';
 					} else {
 						if (data.progress) {
 							$('.progress .progress-bar').css('width', data.progress + '%');

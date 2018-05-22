@@ -32,6 +32,7 @@ class Module extends GeneratedId with PermissionsTarget with Serializable {
 
 	var code: String = _
 	var name: String = _
+	var shortName: String = _
 
 	@Type(`type` = "uk.ac.warwick.tabula.data.model.DegreeTypeUserType")
 	var degreeType: DegreeType = _ // ug or pg

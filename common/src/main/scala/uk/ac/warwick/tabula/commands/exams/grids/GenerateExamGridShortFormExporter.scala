@@ -131,29 +131,29 @@ object GenerateExamGridShortFormExporter extends TaskBenchmarking {
 					}
 
 					// Entity rows
-					entities.foreach(entity => {
+					entities.foreach(entity => benchmarkTask(s"entityRow${entity.universityId}"){
+						val (header, valueRows) = entityRows(entity)
 						moduleColumnsPerEntity(entity)(year).lift(moduleColumnIndex - 1).foreach(col => {
-							val (header, valueRows) = entityRows(entity)
+							val marks = col.map(c => perYearColumnValues.getOrElse(c, Map()).getOrElse(entity,Map()).getOrElse(year,Map())).getOrElse(Map())
 							col match {
 								// has marks for this module
-								case Some(column) if perYearColumnValues.get(column).exists(_.get(entity).exists(_.get(year).isDefined)) =>
+								case Some(column) if marks.nonEmpty =>
 									val headerCell = header.createCell(currentColumnIndex)
 									val title = s"${column.title} - ${column.secondaryValue} ${column.categoryShortForm}"
 									headerCell.setCellValue(title)
-									sheet.autoSizeColumn(currentColumnIndex)
 									entityHeaderRowMaxCellWidth = Math.max(entityHeaderRowMaxCellWidth, sheet.getColumnWidth(currentColumnIndex))
 									headerCell.setCellStyle(cellStyleMap(Rotated))
 
 									if (showComponentMarks) {
 										val overallCell = valueRows(ExamGridColumnValueType.Overall).createCell(currentColumnIndex)
-										perYearColumnValues(column)(entity)(year)(ExamGridColumnValueType.Overall).head.populateCell(overallCell, cellStyleMap)
+										marks(ExamGridColumnValueType.Overall).head.populateCell(overallCell, cellStyleMap)
 										val assignmentCell = valueRows(ExamGridColumnValueType.Assignment).createCell(currentColumnIndex)
-										ExamGridColumnValue.merge(perYearColumnValues(column)(entity)(year)(ExamGridColumnValueType.Assignment)).populateCell(assignmentCell, cellStyleMap)
+										ExamGridColumnValue.merge(marks(ExamGridColumnValueType.Assignment)).populateCell(assignmentCell, cellStyleMap)
 										val examsCell = valueRows(ExamGridColumnValueType.Exam).createCell(currentColumnIndex)
-										ExamGridColumnValue.merge(perYearColumnValues(column)(entity)(year)(ExamGridColumnValueType.Exam)).populateCell(examsCell, cellStyleMap)
+										ExamGridColumnValue.merge(marks(ExamGridColumnValueType.Exam)).populateCell(examsCell, cellStyleMap)
 									} else {
 										val entityCell = valueRows(ExamGridColumnValueType.Overall).createCell(currentColumnIndex)
-										perYearColumnValues(column)(entity)(year)(ExamGridColumnValueType.Overall).head.populateCell(entityCell, cellStyleMap)
+										marks(ExamGridColumnValueType.Overall).head.populateCell(entityCell, cellStyleMap)
 									}
 
 								// blank cell(s)
@@ -180,7 +180,6 @@ object GenerateExamGridShortFormExporter extends TaskBenchmarking {
 					val headerCell = headerRow.createCell(currentColumnIndex)
 					headerCell.setCellValue(reportColumn.title)
 					headerCell.setCellStyle(cellStyleMap(Rotated))
-					sheet.autoSizeColumn(currentColumnIndex)
 					headerRowMaxCellWidth = Math.max(headerRowMaxCellWidth, sheet.getColumnWidth(currentColumnIndex))
 					// Entity rows
 					entities.foreach(entity => {
