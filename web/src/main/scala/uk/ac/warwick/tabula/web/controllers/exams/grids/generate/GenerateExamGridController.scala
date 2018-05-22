@@ -197,6 +197,8 @@ class GenerateExamGridController extends ExamsController
 				errors.reject("examGrid.noStudents")
 				selectCourseRender(selectCourseCommand, gridOptionsCommand, department, academicYear)
 			} else {
+				stopOngoingImportForStudents(students)
+
 				val jobInstance = jobService.add(Some(user), ImportMembersJob(students.map(_.universityId)))
 
 				allRequestParams.remove("jobId")
@@ -338,6 +340,20 @@ class GenerateExamGridController extends ExamsController
 				"finished" -> jobInstance.finished
 			))).noLayout()
 		).getOrElse(throw new ItemNotFoundException())
+	}
+
+	@PostMapping(path = Array("/import/skip"))
+	def skipImportAndGenerateGrid(
+		@RequestParam jobId: String,
+		@PathVariable department: Department,
+		@PathVariable academicYear: AcademicYear,
+		@RequestParam allRequestParams: MultiValueMap[String, String]
+	): Mav = {
+		jobService.getInstance(jobId)
+			.filter(_.jobType == ImportMembersJob.identifier)
+			.foreach(jobService.kill)
+
+		redirectToAndClearModel(Grids.preview(department, academicYear), allRequestParams)
 	}
 
 	@GetMapping(path = Array("/preview"))
@@ -493,6 +509,15 @@ class GenerateExamGridController extends ExamsController
 		GenerateExamGridAuditCommand(selectCourseCommand).apply()
 
 		GridData(entities, studentInformationColumns, perYearColumns, summaryColumns, weightings, normalLoadLookup, routeRulesLookup)
+	}
+
+	private def stopOngoingImportForStudents(students: Seq[ExamGridEntity]): Unit = {
+		val members = students.map(_.universityId).toSet
+
+		jobService.jobDao.listRunningJobs
+			.filter(_.jobType == ImportMembersJob.identifier)
+			.filter(_.getStrings(ImportMembersJob.MembersKey).toSet == members)
+			.foreach(jobService.kill)
 	}
 
 	private def redirectToAndClearModel(path: String, params: MultiValueMap[String, String]): Mav = {

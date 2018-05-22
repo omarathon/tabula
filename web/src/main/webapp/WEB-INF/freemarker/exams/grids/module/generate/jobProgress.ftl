@@ -9,7 +9,7 @@
 
 <@fmt.id7_deptheader title="Create a new module exam grid for ${department.name}" route_function=route_function />
 
-<form action="<@routes.exams.generateModuleGridPreview department academicYear />" class="dirty-check" method="get">
+<form action="<@routes.exams.generateModuleGridSkipImport department academicYear />" class="dirty-check" method="post">
 	<@form_fields.select_module_fields />
 	<h2>Importing student data</h2>
 	<p class="progress-arrows">
@@ -57,7 +57,7 @@
 		var updateProgress = function(){
 			$.post('<@routes.exams.generateModuleGridProgress department academicYear />', {'jobId': '${jobId}'}, function(data){
 				if (data.finished) {
-					$('button[name="previewAndDownload"]').trigger('click');
+					window.location = '<@routes.exams.generateModuleGridPreview department academicYear />?module=${module.code}';
 				} else {
 					if (data.progress) {
 						$('.progress .progress-bar').css('width', data.progress + '%');
