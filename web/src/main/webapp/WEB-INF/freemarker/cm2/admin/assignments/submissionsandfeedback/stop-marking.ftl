@@ -11,17 +11,17 @@
 
 	<#if command.studentsAlreadyFinished?has_content>
 		<div class="alert alert-info">
-			Marking could not be stopped for <a class="clickable" id="invalid-submissions"> <@fmt.p (command.studentsAlreadyFinished?size ) "submission" /></a>
+			Marking could not be stopped for <a class="clickable" id="invalid-students"> <@fmt.p (command.studentsAlreadyFinished?size ) "student" /></a>
 		</div>
 
-		<div id="invalid-submissions-content" class="hide">
-				<ul><#list command.studentsAlreadyFinished as submission><li>${submission}</li></#list></ul>
+		<div id="invalid-students-content" class="hide">
+				<ul><#list command.studentsAlreadyFinished as student><li>${student}</li></#list></ul>
 		</div>
 		<script type="text/javascript">
 			jQuery(function($){
-				$("#invalid-submissions").popover({
+				$("#invalid-students").popover({
 					html: true,
-					content: function(){return $('#invalid-submissions-content').html();},
+					content: function(){return $('#invalid-students-content').html();},
 					title: 'Marking has already been completed for the following students'
 				});
 			});

@@ -205,7 +205,7 @@ object CM2WorkflowStages {
 		}
 
 		def route(assignment: Assignment): Option[Route] = None
-		val markingRelated = false
+		val markingRelated = true
 	}
 
 	case object DownloadSubmission extends CM2WorkflowStage(Marking) {

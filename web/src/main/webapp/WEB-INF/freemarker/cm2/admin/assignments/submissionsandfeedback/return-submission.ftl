@@ -4,25 +4,25 @@
 
 <@f.form method="post" action="${formAction}" commandName="command">
 
-	<@cm2.assignmentHeader "Return submissions to markers" assignment "for" />
+	<@cm2.assignmentHeader "Return students to markers" assignment "for" />
 
 	<@bs3form.errors path="" />
 	<input type="hidden" name="confirmScreen" value="true" />
 
 	<#if command.published?has_content>
 		<div class="alert alert-info">
-			<a class="clickable" id="invalid-submissions"> <@fmt.p (command.published?size ) "submission" /></a> could not be returned for marking.
+			<a class="clickable" id="invalid-students"> <@fmt.p (command.published?size ) "student" /></a> could not be returned for marking.
 		</div>
 
-		<div id="invalid-submissions-content" class="hide">
+		<div id="invalid-students-content" class="hide">
 				<p>Feedback published</p>
-				<ul><#list command.published as submission><li>${submission}</li></#list></ul>
+				<ul><#list command.published as student><li>${student}</li></#list></ul>
 		</div>
 		<script type="text/javascript">
 			jQuery(function($){
-				$("#invalid-submissions").popover({
+				$("#invalid-students").popover({
 					html: true,
-					content: function(){return $('#invalid-submissions-content').html();},
+					content: function(){return $('#invalid-students-content').html();},
 					title: 'Could not return the following students for marking'
 				});
 			});
@@ -34,7 +34,7 @@
 		<@spring.bind path="students">
 			<#assign students = status.actualValue />
 			<p>
-				Returning <strong><@fmt.p (students?size - command.published?size ) "student" /></strong> submissions to markers.
+				Returning <strong><@fmt.p (students?size - command.published?size ) "student" /></strong> to markers.
 			</p>
 			<#list students as usercode><input type="hidden" name="students" value="${usercode}" /></#list>
 		</@spring.bind>
@@ -52,9 +52,9 @@
 			<@bs3form.checkbox path="confirm">
 				<@f.checkbox path="confirm" />
 				<#if ((students?size - command.published?size) > 1)>
-				I confirm that I want to return these students' submissions to markers.
+				I confirm that I want to return these students to markers.
 				<#else>
-				I confirm that I want to return this student's submission to the marker.
+				I confirm that I want to return this student to the marker.
 				</#if>
 			</@bs3form.checkbox>
 		</@bs3form.form_group>
