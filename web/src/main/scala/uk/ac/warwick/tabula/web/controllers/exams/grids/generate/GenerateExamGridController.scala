@@ -37,6 +37,7 @@ object GenerateExamGridMappingParameters {
 	final val coreRequiredModules = "coreRequiredModules"
 	final val previewAndDownload = "previewAndDownload"
 	final val excel = "excel"
+	final val excelNoMergedCells = "excelNoMergedCells"
 	final val marksRecord = "marksRecord"
 	final val marksRecordConfidential = "marksRecordConfidential"
 	final val passList = "passList"
