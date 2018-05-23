@@ -1,7 +1,6 @@
 package uk.ac.warwick.tabula.data.model.notifications.exams
 
 import javax.persistence.{DiscriminatorValue, Entity}
-
 import uk.ac.warwick.spring.Wire
 import uk.ac.warwick.tabula.data.model.{FreemarkerModel, _}
 import uk.ac.warwick.tabula.exams.web
@@ -11,12 +10,12 @@ import uk.ac.warwick.userlookup.User
 
 @Entity
 @DiscriminatorValue(value="ExamMarked")
-class ExamMarkedNotification
-	extends NotificationWithTarget[ExamFeedback, Exam]
+class ExamMarkedNotification extends Notification[Exam, Unit]
+	with SingleItemNotification[Exam]
 	with MyWarwickActivity {
 
 	@transient
-	final lazy val exam: Exam = target.entity
+	final lazy val exam: Exam = item.entity
 
 	@transient
 	final lazy val moduleCode: String = exam.module.code.toUpperCase
