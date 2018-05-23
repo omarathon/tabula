@@ -1,7 +1,9 @@
 package uk.ac.warwick.tabula.services.scheduling
 
 import java.sql.ResultSet
+
 import javax.sql.DataSource
+
 import scala.collection.JavaConverters._
 import org.springframework.context.annotation.Profile
 import org.springframework.jdbc.`object`.MappingSqlQuery
@@ -9,7 +11,7 @@ import org.springframework.stereotype.Service
 import uk.ac.warwick.spring.Wire
 import uk.ac.warwick.tabula.commands.TaskBenchmarking
 import uk.ac.warwick.tabula.commands.scheduling.imports.ImportCourseDetailsNoteCommand
-import uk.ac.warwick.tabula.helpers.StringUtils._
+import uk.ac.warwick.tabula.data.{AutowiringStudentCourseDetailNoteDaoComponent, StudentCourseDetailNoteDao}
 
 trait StudentCourseDetailsNoteImporter {
 	def getStudentCourseDetailsNotes: Seq[ImportCourseDetailsNoteCommand]
@@ -22,12 +24,21 @@ class StudentCourseDetailsNoteImporterImpl extends StudentCourseDetailsNoteImpor
 	import StudentCourseDetailsNoteImporter._
 
 	var sits: DataSource = Wire[DataSource]("sitsDataSource")
+	var studentCourseDetailNoteDao: StudentCourseDetailNoteDao = Wire[StudentCourseDetailNoteDao]
 
 	lazy val studentCourseDetailsNoteImporterQuery = new StudentCourseDetailsNoteQuery(sits)
 
 	override def getStudentCourseDetailsNotes: Seq[ImportCourseDetailsNoteCommand] = {
 		benchmarkTask("Fetch student course detail notes") {
-			studentCourseDetailsNoteImporterQuery.execute.asScala.map(r => new ImportCourseDetailsNoteCommand(r))
+			val allNotes = studentCourseDetailNoteDao.getAllNotes
+			val foundNotes = studentCourseDetailsNoteImporterQuery.execute.asScala.map(r => new ImportCourseDetailsNoteCommand(r))
+			val foundCodes = foundNotes.map(_.code)
+			val deletedNotes = allNotes.filterNot(note => foundCodes.contains(note.code))
+			deletedNotes.foreach(note => {
+				logger.info(s"${note.code} is no longer in SITS - deleting note")
+				studentCourseDetailNoteDao.delete(note)
+			})
+			foundNotes
 		}
 	}
 }
