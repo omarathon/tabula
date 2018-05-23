@@ -3,7 +3,7 @@ package uk.ac.warwick.tabula.data
 import org.hibernate.criterion.Order
 import org.springframework.stereotype.Repository
 import uk.ac.warwick.spring.Wire
-import uk.ac.warwick.tabula.data.model.{Route, StudentCourseDetailsNote}
+import uk.ac.warwick.tabula.data.model.StudentCourseDetailsNote
 
 
 trait StudentCourseDetailNoteDaoComponent {
