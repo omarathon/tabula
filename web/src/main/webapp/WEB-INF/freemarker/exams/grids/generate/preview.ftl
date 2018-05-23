@@ -20,6 +20,9 @@
 
 		<div id="examGridSpinner">
 			<i class="fa fa-spinner fa-spin"></i> Loading&hellip;
+			<div class="progress">
+				<div class="progress-bar progress-bar-striped progress-bar-animated" role="progressbar" aria-valuenow="0" aria-valuemin="0" aria-valuemax="${entities?size}" style="width: 0%"></div>
+			</div>
 		</div>
 
 		<div id="examGridContainer">
