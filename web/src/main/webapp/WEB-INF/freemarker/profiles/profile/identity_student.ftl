@@ -110,8 +110,11 @@
 						<#if scd.award??>
 							<strong>Intended award:</strong> ${(scd.award.name)!}<br />
 						</#if>
+						<#if scyd.modeOfAttendance??>
+							<strong>Attendance:</strong> ${scyd.modeOfAttendance.fullNameAliased}<br />
+						</#if>
 						<#if !isSelf && scd.statusOnCourse??>
-							<strong>Status on Course:</strong> <@fmt.status_on_course scd /><br />
+							<strong>Status on course:</strong> <@fmt.status_on_course scd /><br />
 						</#if>
 						<#if scd.beginDate??>
 							<strong>Start date:</strong> <@fmt.date date=scd.beginDate includeTime=false /><br />
