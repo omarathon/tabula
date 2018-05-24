@@ -179,8 +179,9 @@
 								</table>
 							</td>
 							<td class="assessment_details_col assessment_details_col1">
+								<#assign passMark = mapGet(passMarkMap, mr.module) />
 								<#if mr.agreedMark??>
-									<#if mr.agreedMark?number < passMark>
+									<#if mr.agreedMark?number lt passMark>
 										<span class="exam-grid-fail">${mr.agreedMark}</span>
 									<#else>
 										${mr.agreedMark}

@@ -32,7 +32,8 @@ object GenerateExamGridExporter extends TaskBenchmarking {
 		chosenYearColumnValues: Map[ChosenYearExamGridColumn, Map[ExamGridEntity, ExamGridColumnValue]],
 		perYearColumnValues: Map[PerYearExamGridColumn, Map[ExamGridEntity, Map[StudentCourseYearDetails.YearOfStudy, Map[ExamGridColumnValueType, Seq[ExamGridColumnValue]]]]],
 		showComponentMarks: Boolean,
-		yearOrder: Ordering[Int] = Ordering.Int
+		yearOrder: Ordering[Int] = Ordering.Int,
+		mergedCells: Boolean = true
 	): Workbook = {
 		// Allow randomly accessing rows at any point during generation, don't flush
 		val workbook = new SXSSFWorkbook(null, -1)
@@ -87,7 +88,14 @@ object GenerateExamGridExporter extends TaskBenchmarking {
 						val entityCell = entityRows(entity)(ExamGridColumnValueType.Overall).createCell(currentColumnIndex)
 						chosenYearColumnValues(leftColumn)(entity).populateCell(entityCell, cellStyleMap)
 						if (showComponentMarks) {
-							sheet.addMergedRegion(new CellRangeAddress(entityCell.getRowIndex, entityCell.getRowIndex + 2, entityCell.getColumnIndex, entityCell.getColumnIndex))
+							if(mergedCells) {
+								sheet.addMergedRegion(new CellRangeAddress(entityCell.getRowIndex, entityCell.getRowIndex + 2, entityCell.getColumnIndex, entityCell.getColumnIndex))
+							} else {
+								entityRows(entity).filterKeys(_ != ExamGridColumnValueType.Overall).values.foreach(row => {
+									val cell = row.createCell(currentColumnIndex)
+									chosenYearColumnValues(leftColumn)(entity).populateCell(cell, cellStyleMap)
+								})
+							}
 						}
 					}
 				)
@@ -249,7 +257,14 @@ object GenerateExamGridExporter extends TaskBenchmarking {
 						val entityCell = entityRows(entity)(ExamGridColumnValueType.Overall).createCell(currentColumnIndex)
 						chosenYearColumnValues(rightColumn)(entity).populateCell(entityCell, cellStyleMap)
 						if (showComponentMarks) {
-							sheet.addMergedRegion(new CellRangeAddress(entityCell.getRowIndex, entityCell.getRowIndex + 2, entityCell.getColumnIndex, entityCell.getColumnIndex))
+							if(mergedCells) {
+								sheet.addMergedRegion(new CellRangeAddress(entityCell.getRowIndex, entityCell.getRowIndex + 2, entityCell.getColumnIndex, entityCell.getColumnIndex))
+							} else {
+								entityRows(entity).filterKeys(_ != ExamGridColumnValueType.Overall).values.foreach(row => {
+									val cell = row.createCell(currentColumnIndex)
+									chosenYearColumnValues(rightColumn)(entity).populateCell(cell, cellStyleMap)
+								})
+							}
 						}
 					}
 				)

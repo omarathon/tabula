@@ -29,7 +29,7 @@
 	<input type="hidden" name="marksToShow" value="${gridOptionsCommand.marksToShow}" />
 	<input type="hidden" name="componentsToShow" value="${gridOptionsCommand.componentsToShow}" />
 	<input type="hidden" name="componentSequenceToShow" value="${gridOptionsCommand.componentSequenceToShow}" />
-	<input type="hidden" name="moduleNameToShow" value="${gridOptionsCommand.moduleNameToShow}" />
+	<input type="hidden" name="moduleNameToShow" value="${gridOptionsCommand.moduleNameToShow.toString}" />
 	<input type="hidden" name="layout" value="${gridOptionsCommand.layout}" />
 	<input type="hidden" name="yearMarksToUse" value="${gridOptionsCommand.yearMarksToUse}" />
 	<input type="hidden" name="mandatoryModulesAndYearMarkColumns" value="${gridOptionsCommand.mandatoryModulesAndYearMarkColumns?c}" />

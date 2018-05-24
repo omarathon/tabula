@@ -1,19 +1,25 @@
 <#escape x as x?html>
 
+<#assign years = perYearColumns?keys?sort />
+
 <#macro showMarksShort entity markType>
-	<#list perYearColumns?keys?sort as year>
+	<#list years as year>
 		<#if gridOptionsCommand.showComponentMarks>
-		<th><span class="use-tooltip" title="${markType.description}">${markType.label}</span></th>
+			<th><span class="use-tooltip" title="${markType.description}">${markType.label}</span></th>
 		</#if>
 
 		<#assign colsUsed = 0 />
 		<#list mapGet(perYearModuleMarkColumns, year) as column>
-			<#assign hasValue = !column.isEmpty(entity, year) />
-			<#if hasValue && mapGet(perYearColumnValues, column)?? && mapGet(mapGet(perYearColumnValues, column), entity)?? && mapGet(mapGet(mapGet(perYearColumnValues, column), entity), year)??>
-			<td>
-					<#assign values = mapGet(mapGet(mapGet(mapGet(perYearColumnValues, column), entity), year), markType) />
-					<#list values as value><#noescape>${value.toHTML}</#noescape><#if value_has_next>,</#if></#list>
-			</td>
+			<#if !column.isEmpty(entity, year) && mapGet(perYearColumnValues, column)?? && mapGet(mapGet(perYearColumnValues, column), entity)??>
+				<#assign columnValue = mapGet(mapGet(mapGet(perYearColumnValues, column), entity), year) />
+			<#else>
+				<#assign columnValue = "" />
+			</#if>
+			<#if columnValue?has_content>
+				<td>
+						<#assign values = mapGet(columnValue, markType) />
+						<#list values as value><#noescape>${value.toHTML}</#noescape><#if value_has_next>,</#if></#list>
+				</td>
 				<#assign colsUsed = colsUsed + 1>
 			</#if>
 		</#list>
@@ -24,8 +30,13 @@
 
 		<#list reportCols as column>
 		<td>
-			<#if mapGet(perYearColumnValues, column)?? && mapGet(mapGet(perYearColumnValues, column), entity)?? && mapGet(mapGet(mapGet(perYearColumnValues, column), entity), year)??>
-				<#assign values = mapGet(mapGet(mapGet(mapGet(perYearColumnValues, column), entity), year), markType) />
+			<#if mapGet(perYearColumnValues, column)?? && mapGet(mapGet(perYearColumnValues, column), entity)??>
+				<#assign columnValue = mapGet(mapGet(mapGet(perYearColumnValues, column), entity), year) />
+			<#else>
+				<#assign columnValue = "" />
+			</#if>
+			<#if columnValue?has_content>
+				<#assign values = mapGet(columnValue, markType) />
 				<#list values as value><#noescape>${value.toHTML}</#noescape><#if value_has_next>,</#if></#list>
 			</#if>
 		</td>
@@ -37,7 +48,7 @@
 	<#-- Category row -->
 	<tr class="category">
 		<#list studentInformationColumns as column><td class="borderless">&nbsp;</td></#list>
-		<#list perYearColumns?keys?sort as year>
+		<#list years as year>
 			<td class="spacer">&nbsp;</td>
 			<td class="spacer" colspan="${mapGet(maxYearColumnSize, year)}">&nbsp;</td>
 			<#list mapGet(perYearModuleReportColumns, year) as column><td class="spacer">&nbsp;</td></#list>
@@ -61,7 +72,7 @@
 			<th>${column.title}</th>
 		</#list>
 
-		<#list perYearColumns?keys?sort as year>
+		<#list years as year>
 			<td class="spacer">&nbsp;</td>
 
 			<#assign yearSize = mapGet(maxYearColumnSize, year)>
@@ -85,14 +96,16 @@
 				<tr class="student <#if entity_index%2 == 1>odd</#if>">
 					<#list studentInformationColumns as column>
 						<td rowspan="<#if gridOptionsCommand.showComponentMarks>4<#else>2</#if>">
-							<#assign hasValue = mapGet(chosenYearColumnValues, column)?? && mapGet(mapGet(chosenYearColumnValues, column), entity)?? />
-							<#if hasValue>
-								<#noescape>${mapGet(mapGet(chosenYearColumnValues, column), entity).toHTML}</#noescape>
+							<#if mapGet(chosenYearColumnValues, column)??>
+								<#assign columnValue = mapGet(mapGet(chosenYearColumnValues, column), entity) />
+							<#else>
+								<#assign columnValue = ""/>
 							</#if>
+							<#if columnValue?has_content><#noescape>${columnValue.toHTML}</#noescape></#if>
 						</td>
 					</#list>
 
-					<#list perYearColumns?keys?sort as year>
+					<#list years as year>
 						<td rowspan="<#if !gridOptionsCommand.showComponentMarks>2</#if>" class="spacer">&nbsp;</td>
 						<#assign colsUsed = 0 />
 						<#list mapGet(perYearModuleMarkColumns, year) as column>
@@ -115,10 +128,17 @@
 
 					<#list summaryColumns as column>
 						<td rowspan="<#if gridOptionsCommand.showComponentMarks>4<#else>2</#if>">
-							<#assign hasValue = mapGet(chosenYearColumnValues, column)?? && mapGet(mapGet(chosenYearColumnValues, column), entity)?? />
-							<#if hasValue>
-								<#noescape>${mapGet(mapGet(chosenYearColumnValues, column), entity).toHTML}</#noescape>
+							<#if mapGet(chosenYearColumnValues, column)??>
+								<#assign columnValue = mapGet(mapGet(chosenYearColumnValues, column), entity) />
+							<#else>
+								<#assign columnValue = ""/>
 							</#if>
+							<#if columnValue?has_content><#noescape>${columnValue.toHTML}</#noescape></#if>
+							<#if !column_has_next><script>
+								$('#examGridSpinner').find('.progress-bar')
+									.attr('aria-valuenow', '${entity_index+1}')
+									.css('width', '${((entity_index+1)/entities?size)*100}%');
+							</script></#if>
 						</td>
 					</#list>
 				</tr>

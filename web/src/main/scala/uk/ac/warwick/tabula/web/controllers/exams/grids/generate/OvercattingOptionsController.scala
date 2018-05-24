@@ -189,7 +189,7 @@ class OvercattingOptionsView(
 		showComponentMarks = false,
 		showZeroWeightedComponents = false,
 		showComponentSequence = false,
-		showModuleNames = false,
+		showModuleNames = department.moduleNameToShow,
 		calculateYearMarks = false,
 		isLevelGrid = basedOnLevel
 	)
@@ -268,7 +268,7 @@ class FixedValueColumnOption extends ChosenYearExamGridColumnOption {
 
 	case class Column(state: ExamGridColumnState, value: Option[BigDecimal]) extends ChosenYearExamGridColumn(state) with HasExamGridColumnCategory {
 
-		override val title: String = "Weighted Mean Module Mark"
+		override val title: String = "Weighted mean year mark"
 
 		override val category: String = s"Year ${state.yearOfStudy} Marks"
 

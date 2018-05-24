@@ -17,9 +17,10 @@ class ModuleFixtureCommand extends CommandInternal[Module] with Logging{
 
   var name:String = _
 	var code:String = _
+	var shortName:String = _
 	var departmentCode:String = _
 
-	def moduleInfo = ModuleInfo(name, code,"", DegreeType.Undergraduate)
+	def moduleInfo = ModuleInfo(name, shortName, code, "", DegreeType.Undergraduate)
 	def applyInternal(): Module =
 		transactional() {
 			val department  = moduleAndDepartmentService.getDepartmentByCode(departmentCode).get

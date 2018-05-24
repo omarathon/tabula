@@ -7,9 +7,13 @@
 		</#if>
 		<#list mapGet(perYearColumns, year) as column>
 		<td>
-			<#assign hasValue = mapGet(perYearColumnValues, column)?? && mapGet(mapGet(perYearColumnValues, column), entity)?? && mapGet(mapGet(mapGet(perYearColumnValues, column), entity), year)?? />
-			<#if hasValue>
-				<#assign values = mapGet(mapGet(mapGet(mapGet(perYearColumnValues, column), entity), year), markType) />
+			<#if mapGet(perYearColumnValues, column)?? && mapGet(mapGet(perYearColumnValues, column), entity)??>
+				<#assign columnValue = mapGet(mapGet(mapGet(perYearColumnValues, column), entity), year) />
+			<#else>
+				<#assign columnValue = "" />
+			</#if>
+			<#if columnValue?has_content>
+				<#assign values = mapGet(columnValue, markType) />
 				<#list values as value><#noescape>${value.toHTML}</#noescape><#if value_has_next>,</#if></#list>
 			</#if>
 		</td>
@@ -99,10 +103,12 @@
 			<tr class="student <#if entity_index%2 == 1>odd</#if>">
 				<#list studentInformationColumns as column>
 					<td <#if gridOptionsCommand.showComponentMarks>rowspan="3"</#if>>
-						<#assign hasValue = mapGet(chosenYearColumnValues, column)?? && mapGet(mapGet(chosenYearColumnValues, column), entity)?? />
-						<#if hasValue>
-							<#noescape>${mapGet(mapGet(chosenYearColumnValues, column), entity).toHTML}</#noescape>
+						<#if mapGet(chosenYearColumnValues, column)??>
+							<#assign columnValue = mapGet(mapGet(chosenYearColumnValues, column), entity) />
+						<#else>
+							<#assign columnValue = ""/>
 						</#if>
+						<#if columnValue?has_content><#noescape>${columnValue.toHTML}</#noescape></#if>
 					</td>
 				</#list>
 
@@ -112,10 +118,17 @@
 
 				<#list summaryColumns as column>
 					<td <#if gridOptionsCommand.showComponentMarks>rowspan="3"</#if>>
-						<#assign hasValue = mapGet(chosenYearColumnValues, column)?? && mapGet(mapGet(chosenYearColumnValues, column), entity)?? />
-						<#if hasValue>
-							<#noescape>${mapGet(mapGet(chosenYearColumnValues, column), entity).toHTML}</#noescape>
+						<#if mapGet(chosenYearColumnValues, column)??>
+							<#assign columnValue = mapGet(mapGet(chosenYearColumnValues, column), entity) />
+						<#else>
+							<#assign columnValue = ""/>
 						</#if>
+						<#if columnValue?has_content><#noescape>${columnValue.toHTML}</#noescape></#if>
+						<#if !column_has_next><script>
+							$('#examGridSpinner').find('.progress-bar')
+								.attr('aria-valuenow', '${entity_index+1}')
+								.css('width', '${((entity_index+1)/entities?size)*100}%');
+						</script></#if>
 					</td>
 				</#list>
 			</tr>

@@ -38,7 +38,7 @@ class DownloadSelectedFeedbackCommand(val assignment: Assignment, user: CurrentU
 
 		feedbacks = students.asScala
 			.flatMap(feedbackDao.getAssignmentFeedbackByUsercode(assignment, _))
-			.filter(_.isMarkingCompleted)
+			.filter(f => !assignment.hasCM2Workflow || f.isMarkingCompleted)
 			.asJava
 
 		if (feedbacks.asScala.exists(_.assignment != assignment)) {

@@ -47,6 +47,10 @@ abstract class Job extends Logging {
 	protected def getProgress(implicit job: JobInstance): Int = job.progress
 
 	protected def updateProgress(percent: Int)(implicit job: JobInstance): Unit = {
+		if (killed) {
+			throw new KilledJobException
+		}
+
 		transactional(propagation = REQUIRES_NEW) {
 			job.progress = percent
 			jobService.update(job)
@@ -57,12 +61,20 @@ abstract class Job extends Logging {
 
 	protected def getStatus(implicit job: JobInstance): String = job.status
 
-	protected def updateStatus(status: String)(implicit job: JobInstance) {
+	protected def updateStatus(status: String)(implicit job: JobInstance): Unit = {
+		if (killed) {
+			throw new KilledJobException
+		}
+
 		transactional(propagation = REQUIRES_NEW) {
 			if (debugEnabled) logger.debug("Job:" + job.id + " - " + status)
 			job.status = status
 			jobService.update(job)
 		}
+	}
+
+	protected def killed(implicit job: JobInstance): Boolean = {
+		jobService.getInstance(job.id).exists(_.status == "Killed")
 	}
 
 	/** An exception you can throw when a Job is obsolete, e.g. it references an entity that no longer exists.

@@ -30,25 +30,25 @@ class ImportMembersJob extends Job {
 		implicit private val _job: JobInstance = job
 
 		def run(): Unit = {
-			transactional() {
-				val memberIds = job.getStrings(ImportMembersJob.MembersKey)
+			val memberIds = job.getStrings(ImportMembersJob.MembersKey)
 
-				updateProgress(0)
+			updateProgress(0)
 
-				memberIds.zipWithIndex.foreach{case (universityId, index) =>
-					updateStatus(ImportMembersJob.status(universityId))
+			memberIds.zipWithIndex.foreach{case (universityId, index) =>
+				updateStatus(ImportMembersJob.status(universityId))
 
+				transactional() {
 					val command = new ImportProfilesCommand
 					command.refresh(universityId, None)
-
-					updateProgress(index + 1, memberIds.size)
 				}
 
-				updateStatus("Import complete")
-				updateProgress(100)
-
-				job.succeeded = true
+				updateProgress(index + 1, memberIds.size)
 			}
+
+			updateStatus("Import complete")
+			updateProgress(100)
+
+			job.succeeded = true
 		}
 	}
 }
