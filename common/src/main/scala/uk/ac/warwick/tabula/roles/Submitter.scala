@@ -14,7 +14,8 @@ case object SubmitterRoleDefinition extends UnassignableBuiltInRoleDefinition {
 
 	GrantsScopedPermission(
 		Submission.Read,
-		Submission.SendReceipt
+		Submission.SendReceipt,
+		Submission.ViewPlagiarismStatus
 	)
 
 }

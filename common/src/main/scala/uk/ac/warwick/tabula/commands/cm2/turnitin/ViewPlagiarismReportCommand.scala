@@ -20,8 +20,8 @@ import uk.ac.warwick.util.web.Uri
 object ViewPlagiarismReportCommand {
 	type CommandType = Appliable[Either[Uri, TurnitinReportError]] with ViewPlagiarismReportRequest with SelfValidating
 
-	def apply(assignment: Assignment, attachment: FileAttachment): CommandType =
-		new ViewPlagiarismReportCommandInternal(assignment, attachment)
+	def apply(assignment: Assignment, attachment: FileAttachment, isInstructor: Boolean): CommandType =
+		new ViewPlagiarismReportCommandInternal(assignment, attachment, isInstructor)
 			with ComposableCommand[Either[Uri, TurnitinReportError]]
 			with ViewPlagiarismReportPermissions
 			with ViewPlagiarismReportValidation
@@ -30,8 +30,8 @@ object ViewPlagiarismReportCommand {
 			with AutowiringTurnitinLtiServiceComponent
 			with AutowiringOriginalityReportServiceComponent
 
-	def apply(assignment: Assignment, attachment: FileAttachment, currentUser: CurrentUser): CommandType =
-		new ViewPlagiarismReportCommandInternal(assignment, attachment, currentUser)
+	def apply(assignment: Assignment, attachment: FileAttachment, isInstructor: Boolean, currentUser: CurrentUser): CommandType =
+		new ViewPlagiarismReportCommandInternal(assignment, attachment, isInstructor, currentUser)
 			with ComposableCommand[Either[Uri, TurnitinReportError]]
 			with ViewPlagiarismReportPermissions
 			with ViewPlagiarismReportValidation
@@ -55,11 +55,11 @@ trait ViewPlagiarismReportRequest extends ViewPlagiarismReportState {
 	var viewer: User = _
 }
 
-class ViewPlagiarismReportCommandInternal(val assignment: Assignment, val attachment: FileAttachment)
+class ViewPlagiarismReportCommandInternal(val assignment: Assignment, val attachment: FileAttachment, val isInstructor: Boolean)
 	extends CommandInternal[Either[Uri, TurnitinReportError]] with ViewPlagiarismReportRequest with Logging {
 	self: TurnitinApiComponent with TurnitinLtiServiceComponent =>
 
-	def this(assignment: Assignment, attachment: FileAttachment, user: CurrentUser) {
+	def this(assignment: Assignment, attachment: FileAttachment, isInstructor: Boolean, user: CurrentUser) {
 		this(assignment, attachment)
 
 		viewer = user.apparentUser
@@ -76,12 +76,20 @@ class ViewPlagiarismReportCommandInternal(val assignment: Assignment, val attach
 				assignment = assignment,
 				attachment = attachment,
 				userId = viewer.getUserId,
-				email = viewer.getEmail,
+				email = {
+					if(isInstructor) viewer.getEmail
+					else viewer.getUserId + "@TurnitinLti.warwick.ac.uk"
+				},
 				firstName = viewer.getFirstName,
-				lastName = viewer.getLastName
+				lastName = viewer.getLastName,
+				isInstructor = isInstructor
 			)
 			Left(Uri.parse(ltiEndpoint))
+		} else if (!isInstructor) {
+			// only doing LTI for student view atm
+			Right(TurnitinReportError.NoSessionError)
 		} else {
+
 			debug("Getting document viewer URL for FileAttachment %s", attachment.id)
 
 			api.login(viewer.getEmail, viewer.getFirstName, viewer.getLastName) match {

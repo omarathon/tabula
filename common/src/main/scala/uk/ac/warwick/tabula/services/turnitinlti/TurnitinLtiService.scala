@@ -205,11 +205,14 @@ class TurnitinLtiService extends Logging with DisposableBean
 
 	def getOriginalityReportEndpoint(attachment: FileAttachment) = s"$apiReportLaunch/${attachment.originalityReport.turnitinId}"
 
-	def getOriginalityReportParams(endpoint: String, assignment: Assignment, attachment: FileAttachment, userId: String, email: String, firstName: String, lastName: String):Map[String, String] = {
+	def getOriginalityReportParams(endpoint: String, assignment: Assignment, attachment: FileAttachment,
+		userId: String, email: String, firstName: String, lastName: String, isInstructor: Boolean):Map[String, String] = {
 		getSignedParams(
 			Map(
 			"resource_link_id" -> TurnitinLtiService.assignmentIdFor(assignment).value,
-			"roles" -> "Instructor",
+			"roles" -> {
+				if (isInstructor) "Instructor" else "Learner"
+			},
 			"context_id" -> TurnitinLtiService.classIdFor(assignment, classPrefix).value,
 			"context_title" -> TurnitinLtiService.classNameFor(assignment).value
 		) ++ userParams(userId, email, firstName, lastName), getOriginalityReportEndpoint(attachment))

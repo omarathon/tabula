@@ -7,6 +7,15 @@
 	</div>
 </#if>
 
+<#if submission??>
+	<#list submission.allAttachments as attachment>
+		<#if attachment.originalityReport?? && attachment.originalityReport.turnitinId?has_content>
+			<a target="turnitin-viewer" href="<@routes.cm2.turnitinLtiReportForStudent submission attachment />">View full report - for student</a>
+		<#else> No turnitin report available
+		</#if>
+	</#list>
+</#if>
+
 <#if feedback.latestMark?? || feedback.latestGrade??>
 	<div>
 		<#if feedback.studentViewableAdjustments?has_content && feedback.latestMark??>
