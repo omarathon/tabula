@@ -209,6 +209,8 @@ trait ImportModules {
 		var seenModuleCodesForDepartment = Seq[String]()
 
 		val results = for (mod <- modules) yield {
+			//temp log info to see the record causing sandbox error (remove this later)
+			logger.info("Checking module-" + mod.code + "-")
 			moduleAndDepartmentService.getModuleByCode(mod.code) match {
 				case None =>
 					debug("Mod code %s not found in database, so inserting", mod.code)
