@@ -386,8 +386,6 @@
 		$(window).on('id7:reflow', reflowScroll);
 		reflowScroll();
 
-		$('.table-responsive').css('overflow-x', 'hidden');
-
 		$('#examGridContainer').css('opacity', 1);
 		$('#examGridSpinner').hide();
 	});
