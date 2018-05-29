@@ -68,8 +68,15 @@
 				type: "POST",
 				url: '<@routes.exams.generateGridProgress department academicYear />',
 				data: {'jobId': '${jobId}'},
-				error: function(xmlhttprequest, textstatus, message) {
-					if(textstatus === "timeout"){ updateProgress()};
+				error: function(jqXHR, textstatus, message) {
+					if(textstatus === "timeout"){ updateProgress(); }
+					else {
+						// not a timeout - some other JS error - advise the user to reload the page
+						var $progressContainer = $('.alert').removeClass('alert-info').addClass('alert-warning');
+						$progressContainer.find('.progress-bar').addClass("progress-bar-danger");
+						var messageEnd = jqXHR.status === 403 ? ", it appears that you have signed out. Please refresh this page." : ". Please refresh this page.";
+						$progressContainer.find('.job-status').html("Unable to check the progress of your import"+messageEnd);
+					}
 				},
 				success: function(data){
 					if (data.finished) {
