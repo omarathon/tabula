@@ -118,7 +118,7 @@
 
 				<#list summaryColumns as column>
 					<td <#if gridOptionsCommand.showComponentMarks>rowspan="3"</#if>>
-						<#if mapGet(chosenYearColumnValues, column)??>
+						<#if mapGet(chosenYearColumnValues, column)?? && mapGet(mapGet(chosenYearColumnValues, column), entity)??>
 							<#assign columnValue = mapGet(mapGet(chosenYearColumnValues, column), entity) />
 						<#else>
 							<#assign columnValue = ""/>
