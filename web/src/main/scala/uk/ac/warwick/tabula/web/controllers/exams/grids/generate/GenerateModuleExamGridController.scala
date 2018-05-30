@@ -101,10 +101,11 @@ class GenerateModuleExamGridController extends ExamsController
 			errors.reject("examGrid.noStudents")
 			selectModuleRender(selectModuleExamCommand, department, academicYear)
 		} else {
+			stopOngoingImportForStudents(students)
+
 			val jobInstance = jobService.add(Some(user), ImportMembersJob(students.map(_.moduleRegistration.studentCourseDetails.student.universityId)))
 
-			allRequestParams.remove("jobId")
-			allRequestParams.add("jobId", jobInstance.id)
+			allRequestParams.set("jobId", jobInstance.id)
 			redirectToAndClearModel(Grids.moduleJobProgress(department, academicYear), allRequestParams)
 		}
 	}
@@ -212,7 +213,7 @@ class GenerateModuleExamGridController extends ExamsController
 		)
 	}
 
-	private def stopOngoingImportForStudents(students: Seq[ExamGridEntity]): Unit = {
+	private def stopOngoingImportForStudents(students: Seq[ModuleGridDetailRecord]): Unit = {
 		val members = students.map(_.universityId).toSet
 
 		jobService.jobDao.listRunningJobs
@@ -222,7 +223,7 @@ class GenerateModuleExamGridController extends ExamsController
 	}
 
 	private def redirectToAndClearModel(path: String, params: MultiValueMap[String, String]): Mav = {
-		params.add("clearModel", "true")
+		params.set("clearModel", "true")
 		val uri = UriComponentsBuilder.fromPath(path).queryParams(params).toUriString
 		RedirectForce(uri)
 	}

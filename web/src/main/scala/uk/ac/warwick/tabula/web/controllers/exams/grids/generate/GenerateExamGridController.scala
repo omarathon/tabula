@@ -95,6 +95,7 @@ class GenerateExamGridController extends ExamsController
 
 	@ModelAttribute("gridOptionsQueryString")
 	def gridOptionsQueryString(@RequestParam params: MultiValueMap[String, String]): String = {
+		params.keySet.asScala.filter(_.startsWith("modules[")).foreach(params.remove)
 		UriComponentsBuilder.newInstance().queryParams(params).build().getQuery
 	}
 
@@ -202,8 +203,7 @@ class GenerateExamGridController extends ExamsController
 
 				val jobInstance = jobService.add(Some(user), ImportMembersJob(students.map(_.universityId)))
 
-				allRequestParams.remove("jobId")
-				allRequestParams.add("jobId", jobInstance.id)
+				allRequestParams.set("jobId", jobInstance.id)
 				if (usePreviousSettings) {
 					redirectToAndClearModel(Grids.jobProgress(department,academicYear), allRequestParams)
 				} else {
@@ -522,7 +522,9 @@ class GenerateExamGridController extends ExamsController
 	}
 
 	private def redirectToAndClearModel(path: String, params: MultiValueMap[String, String]): Mav = {
-		params.add("clearModel", "true")
+		params.set("clearModel", "true")
+		params.keySet.asScala.filter(_.startsWith("modules[")).foreach(params.remove)
+		
 		val uri = UriComponentsBuilder.fromPath(path).queryParams(params).toUriString
 		RedirectForce(uri)
 	}
