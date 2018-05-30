@@ -54,7 +54,7 @@
 			Allow feedback to be published to students for this assignment
 		</@bs3form.checkbox>
 		<div class="help-block">
-			Deselecting this option will allow feedback to be added but not published to students. Ideal for exam related assignments
+			Deselecting this option allows feedback to be added but not published to students. Ideal for exam-related assignments.
 		</div>
 	</@bs3form.labelled_form_group>
 

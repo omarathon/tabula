@@ -211,7 +211,7 @@
 				<#if moderator>
 					<p>No feedback is ready for you to moderate.</p>
 				<#else>
-					<p>No students are ready for marks.</p>
+					<p>No students are ready to mark.</p>
 				</#if>
 			</#if>
 		</div>
