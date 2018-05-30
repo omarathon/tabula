@@ -101,7 +101,7 @@ class SandboxModuleImporter extends ModuleImporter {
 		SandboxData.Departments.toSeq map { case (code, d) => DepartmentInfo(d.name, d.name, d.code, d.facultyCode) }
 
 	def getModules(deptCode: String): Seq[ModuleInfo] =
-		SandboxData.Departments.get(deptCode).map(_.modules.toSeq.map{ case (code, m) => ModuleInfo(m.name, m.code, m.shortName, deptCode + "-" + m.code, DegreeType.fromCode("UG")) }).getOrElse(Seq())
+		SandboxData.Departments.get(deptCode).map(_.modules.toSeq.map{ case (code, m) => ModuleInfo(m.name, m.shortName, m.code, deptCode + "-" + m.code, DegreeType.fromCode("UG")) }).getOrElse(Seq())
 
 	def getModuleTeachingDepartments(moduleCode: String): Seq[ModuleTeachingDepartmentInfo] =
 		SandboxData.Departments.values
