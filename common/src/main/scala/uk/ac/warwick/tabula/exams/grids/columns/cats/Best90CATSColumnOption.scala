@@ -36,7 +36,7 @@ abstract class BestA90CATSColumnOption(isResultRequired: Boolean = false, column
 			modRegs.toSeq.map(mr => BigDecimal(mr.cats)).sum == 90
 		)
 
-		val validSubsetsWithWieghtedMeanMark = validSubsets.map(modRegs => (moduleRegistrationService.weightedMeanYearMark(modRegs.toSeq, Map(), allowEmpty = true), modRegs.toSeq.sortBy(_.module.code)))
+		val validSubsetsWithWieghtedMeanMark = validSubsets.map(modRegs => (result(modRegs.toSeq), modRegs.toSeq.sortBy(_.module.code)))
 		validSubsetsWithWieghtedMeanMark.collect { case (Right(mark), modRegs) => (mark, modRegs) }
 			.sortBy { case (mark, modRegs) =>
 				// Add a definitive sort so subsets with the same mark always come out the same order
