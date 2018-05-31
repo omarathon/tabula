@@ -26,7 +26,7 @@ class TurnitinReportController extends CourseworkController {
 	@ModelAttribute("command") def command(
 		@PathVariable assignment: Assignment,
 		@PathVariable attachment: FileAttachment
-	): ViewPlagiarismReportCommand = ViewPlagiarismReportCommand(mandatory(assignment), mandatory(attachment), user)
+	): ViewPlagiarismReportCommand = ViewPlagiarismReportCommand(mandatory(assignment), mandatory(attachment), isInstructor = true, user)
 
 	@RequestMapping
 	def goToReport(@ModelAttribute("command") command: ViewPlagiarismReportCommand): Mav = command.apply() match {

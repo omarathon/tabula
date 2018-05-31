@@ -21,6 +21,15 @@
 
 <a id="submittop"></a>
 
+<#if submission??>
+	<#list submission.allAttachments as attachment>
+		<#if attachment.originalityReport?? && attachment.originalityReport.turnitinId?has_content>
+		<a target="turnitin-viewer" href="<@routes.cm2.turnitinLtiReportForStudent submission attachment />">View full report - for student</a>
+		<#else> No turnitin report available
+		</#if>
+	</#list>
+</#if>
+
 <#if feedback??>
 	<h2>Feedback for ${feedback.studentIdentifier}</h2>
 	<#include "_assignment_feedbackdownload.ftl" />

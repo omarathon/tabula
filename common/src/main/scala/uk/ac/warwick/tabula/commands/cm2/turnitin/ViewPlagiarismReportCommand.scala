@@ -45,6 +45,7 @@ object ViewPlagiarismReportCommand {
 trait ViewPlagiarismReportState {
 	def assignment: Assignment
 	def attachment: FileAttachment
+	def isInstructor: Boolean
 	var ltiParams: Map[String, String] = Map()
 	var ltiEndpoint: String = _
 }
@@ -60,7 +61,7 @@ class ViewPlagiarismReportCommandInternal(val assignment: Assignment, val attach
 	self: TurnitinApiComponent with TurnitinLtiServiceComponent =>
 
 	def this(assignment: Assignment, attachment: FileAttachment, isInstructor: Boolean, user: CurrentUser) {
-		this(assignment, attachment)
+		this(assignment, attachment, isInstructor)
 
 		viewer = user.apparentUser
 	}

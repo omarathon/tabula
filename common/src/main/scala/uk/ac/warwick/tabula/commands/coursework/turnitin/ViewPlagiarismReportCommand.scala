@@ -78,7 +78,8 @@ class ViewPlagiarismReportCommandInternal(val module: Module, val assignment: As
 				userId = viewer.getUserId,
 				email = viewer.getEmail,
 				firstName = viewer.getFirstName,
-				lastName = viewer.getLastName
+				lastName = viewer.getLastName,
+				isInstructor = true
 			)
 			Left(Uri.parse(ltiEndpoint))
 		} else {
