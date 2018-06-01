@@ -7,7 +7,7 @@ import uk.ac.warwick.tabula.exams.grids.columns.{HasExamGridColumnCategory, _}
 import uk.ac.warwick.tabula.services.AutowiringModuleRegistrationServiceComponent
 
 
-abstract class BestA90CATSColumnOption(isResultRequired: Boolean = false, columnTitle: String) extends ChosenYearExamGridColumnOption
+abstract class Best90CATSColumnOption(isResultRequired: Boolean = false, columnTitle: String) extends ChosenYearExamGridColumnOption
 	with AutowiringModuleRegistrationServiceComponent {
 
 
@@ -15,7 +15,7 @@ abstract class BestA90CATSColumnOption(isResultRequired: Boolean = false, column
 
 	override val label: String = "Marking: MA2XX Weighted Average [best 90 MA2XX CATS]"
 
-	override val sortOrder: Int = ExamGridColumnOption.SortOrders.BEST90CATSWEIGHTEDAVERAGE
+	override val sortOrder: Int = ExamGridColumnOption.SortOrders.Best90CATSWeightedAverage
 
 	final val ProgressCourseTitle = "Progresses on G103 (4 year programme)"
 
@@ -58,7 +58,7 @@ abstract class BestA90CATSColumnOption(isResultRequired: Boolean = false, column
 
 		override def values: Map[ExamGridEntity, ExamGridColumnValue] = {
 			//add logic to display best 90 cats for each ExamGridEntity
-			if (state.department.code == "ma" || Option(state.department.parent).exists(_.code == "ma")) {
+			if (state.department.rootDepartment.code == "ma") {
 				state.entities.map { entity =>
 					//get all the MA2 modules for the student (2nd year)
 					val validRecords = entity.years.get(2).flatten match {
@@ -92,13 +92,13 @@ abstract class BestA90CATSColumnOption(isResultRequired: Boolean = false, column
 }
 
 @Component
-class Best90WeightAverageMarksColumn extends BestA90CATSColumnOption(columnTitle = s"Weighted Average Best 90 CATS") {
-	override val sortOrder: Int = ExamGridColumnOption.SortOrders.BEST90CATSWEIGHTEDAVERAGE
+class Best90WeightAverageMarksColumn extends Best90CATSColumnOption(columnTitle = s"Weighted Average Best 90 CATS") {
+	override val sortOrder: Int = ExamGridColumnOption.SortOrders.Best90CATSWeightedAverage
 }
 
 @Component
-class Best90CourseStatusColumn extends BestA90CATSColumnOption(true, "Year 2 Course status") {
-	override val sortOrder: Int = ExamGridColumnOption.SortOrders.BEST90CATSRESULT
+class Best90CourseStatusColumn extends Best90CATSColumnOption(true, "Year 2 Course status") {
+	override val sortOrder: Int = ExamGridColumnOption.SortOrders.Best90CATSResult
 
 }
 

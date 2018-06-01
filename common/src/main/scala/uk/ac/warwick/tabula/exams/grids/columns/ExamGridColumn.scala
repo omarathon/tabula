@@ -26,8 +26,8 @@ object ExamGridColumnOption {
 		val CoreOptionalModules = 12
 		val OptionalModules = 13
 		val ModuleReports = 14
-		val BEST90CATSWEIGHTEDAVERAGE = 18
-		val BEST90CATSRESULT = 19
+		val Best90CATSWeightedAverage = 18
+		val Best90CATSResult = 19
 		val CATSThreshold30 = 20
 		val CATSThreshold40 = 21
 		val CATSThreshold50 = 22
