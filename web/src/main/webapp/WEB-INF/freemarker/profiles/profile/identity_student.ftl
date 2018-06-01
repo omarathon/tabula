@@ -21,41 +21,36 @@
 				<div class="col-md-7 col-lg-8">
 					<strong>Official name:</strong> ${member.officialName}<br/>
 					<strong>Preferred name:</strong> ${member.fullName}<br/>
-					<details class="indent">
-						<summary>
-							<strong>More info</strong>
-						</summary>
-						<#if member.gender??>
-							<strong>Gender:</strong> ${member.gender.description}<br/>
-						</#if>
-						<#if member.dateOfBirth??>
-							<strong>Date of birth:</strong> ${member.dateOfBirth?date("yyyy-MM-dd")?string("dd/MM/yyyy")}<br/>
-						</#if>
-						<#if member.nationality??>
-							<strong>Nationality:</strong> <@fmt.nationality member.nationality!('Unknown') /><br/>
-						</#if>
-						<#if features.disabilityRenderingInProfiles && (member.disability.reportable)!false>
-							<strong>Disability:</strong>
-							<a href="#" class="use-popover cue-popover" id="popover-disability" data-html="true"
-							   data-content="<p><#if isSelf>You have<#else>This student has</#if> self-reported the following disability code:</p><div class='well'><h6>${member.disability.code}</h6><small>${(member.disability.sitsDefinition)!}</small></div>"> ${member.disability.definition}</a><br/>
-						</#if>
-						<#if features.visaInStudentProfile && member.hasTier4Visa?? && member.casUsed??>
-							<strong>Tier 4 requirements:</strong>
-							<#if member.casUsed && member.hasTier4Visa>Yes
-							<#elseif !member.casUsed && !member.hasTier4Visa>No
+					<#if member.gender??>
+						<strong>Gender:</strong> ${member.gender.description}<br/>
+					</#if>
+					<#if member.dateOfBirth??>
+						<strong>Date of birth:</strong> ${member.dateOfBirth?date("yyyy-MM-dd")?string("dd/MM/yyyy")}<br/>
+					</#if>
+					<#if member.nationality??>
+						<strong>Nationality:</strong> <@fmt.nationality member.nationality!('Unknown') /><br/>
+					</#if>
+					<#if features.disabilityRenderingInProfiles && (member.disability.reportable)!false>
+						<strong>Disability:</strong>
+						<a href="#" class="use-popover cue-popover" id="popover-disability" data-html="true"
+						   data-content="<p><#if isSelf>You have<#else>This student has</#if> self-reported the following disability code:</p><div class='well'><h6>${member.disability.code}</h6><small>${(member.disability.sitsDefinition)!}</small></div>"> ${member.disability.definition}</a><br/>
+					</#if>
+					<#if features.visaInStudentProfile && member.hasTier4Visa?? && member.casUsed??>
+						<strong>Tier 4 requirements:</strong>
+						<#if member.casUsed && member.hasTier4Visa>Yes
+						<#elseif !member.casUsed && !member.hasTier4Visa>No
+						<#else>
+							<#if !member.casUsed && member.hasTier4Visa>
+								<#assign inconsistency = "Tier 4 visa exists but no Confirmation of Acceptance for Studies" />
 							<#else>
-								<#if !member.casUsed && member.hasTier4Visa>
-									<#assign inconsistency = "Tier 4 visa exists but no Confirmation of Acceptance for Studies" />
-								<#else>
-									<#assign inconsistency = "Confirmation of Acceptance for Studies exists but no tier 4 visa" />
-								</#if>
-								Contact the <a href="mailto:immigrationservice@warwick.ac.uk">Immigration Service</a>
-								<a class="use-popover" data-content="Contact the University's Immigration Service to find out whether tier 4
-								requirements apply to this student. (${inconsistency})" data-toggle="popover"><i class="fa fa-question-circle"></i></a>
+								<#assign inconsistency = "Confirmation of Acceptance for Studies exists but no tier 4 visa" />
 							</#if>
-							<br/>
+							Contact the <a href="mailto:immigrationservice@warwick.ac.uk">Immigration Service</a>
+							<a class="use-popover" data-content="Contact the University's Immigration Service to find out whether tier 4
+							requirements apply to this student. (${inconsistency})" data-toggle="popover"><i class="fa fa-question-circle"></i></a>
 						</#if>
-					</details>
+						<br/>
+					</#if>
 					<#if member.email??>
 						<strong>Warwick email:</strong> <a href="mailto:${member.email}">${member.email}</a><br/>
 					</#if>
