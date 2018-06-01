@@ -1,5 +1,6 @@
 package uk.ac.warwick.tabula.data
 
+import org.hibernate.criterion.Order
 import org.springframework.stereotype.Repository
 import uk.ac.warwick.spring.Wire
 import uk.ac.warwick.tabula.data.model.StudentCourseDetailsNote
@@ -17,6 +18,7 @@ trait StudentCourseDetailNoteDao {
 	def saveOrUpdate(note: StudentCourseDetailsNote)
 	def getNoteByCode(code: String): Option[StudentCourseDetailsNote]
 	def getAllNotes: Seq[StudentCourseDetailsNote]
+	def delete(note: StudentCourseDetailsNote)
 }
 
 @Repository
@@ -26,6 +28,8 @@ class StudentCourseDetailNoteDaoImpl extends StudentCourseDetailNoteDao with Dao
 
 	override def getNoteByCode(code: String): Option[StudentCourseDetailsNote] = session.newCriteria[StudentCourseDetailsNote].add(is("code", code)).uniqueResult
 
-	override def getAllNotes: Seq[StudentCourseDetailsNote] = session.newQuery[StudentCourseDetailsNote]("from StudentCourseDetailNote").seq
+	override def getAllNotes: Seq[StudentCourseDetailsNote] = session.newCriteria[StudentCourseDetailsNote].addOrder(Order.asc("code")).seq.distinct
+
+	override def delete(note: StudentCourseDetailsNote): Unit = session.delete(note)
 }
 

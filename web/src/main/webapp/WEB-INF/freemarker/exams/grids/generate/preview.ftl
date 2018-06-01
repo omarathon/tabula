@@ -276,8 +276,9 @@
 					<li><button class="btn btn-link" type="submit" name="${GenerateExamGridMappingParameters.excelNoMergedCells}">Excel grid without merged cells</button></li>
 					<li><button class="btn btn-link" type="submit" name="${GenerateExamGridMappingParameters.marksRecord}">Marks record</button></li>
 					<li><button class="btn btn-link" type="submit" name="${GenerateExamGridMappingParameters.marksRecordConfidential}">Confidential marks record</button></li>
-					<li><button class="btn btn-link" type="submit" name="${GenerateExamGridMappingParameters.passList}">Pass list</button></li>
-					<li><button class="btn btn-link" type="submit" name="${GenerateExamGridMappingParameters.passListConfidential}">Confidential pass list</button></li>
+					<#-- Removed for - TAB-6217 -->
+					<#--<li><button class="btn btn-link" type="submit" name="${GenerateExamGridMappingParameters.passList}">Pass list</button></li>-->
+					<#--<li><button class="btn btn-link" type="submit" name="${GenerateExamGridMappingParameters.passListConfidential}">Confidential pass list</button></li>-->
 					<li><button class="btn btn-link" type="submit" name="${GenerateExamGridMappingParameters.transcript}">Transcript</button></li>
 					<li><button class="btn btn-link" type="submit" name="${GenerateExamGridMappingParameters.transcriptConfidential}">Confidential transcript</button></li>
 				</ul>
