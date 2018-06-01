@@ -7,7 +7,7 @@ import uk.ac.warwick.tabula.exams.grids.columns.{HasExamGridColumnCategory, _}
 import uk.ac.warwick.tabula.services.AutowiringModuleRegistrationServiceComponent
 
 
-abstract class Best90CATSColumnOption(isResultRequired: Boolean = false, columnTitle: String) extends ChosenYearExamGridColumnOption
+abstract class Best90MA2CATSColumnOption(isResultRequired: Boolean = false, columnTitle: String) extends ChosenYearExamGridColumnOption
 	with AutowiringModuleRegistrationServiceComponent {
 
 
@@ -92,12 +92,12 @@ abstract class Best90CATSColumnOption(isResultRequired: Boolean = false, columnT
 }
 
 @Component
-class Best90WeightAverageMarksColumn extends Best90CATSColumnOption(columnTitle = s"Weighted Average Best 90 CATS") {
+class Best90MA2WeightAverageMarksColumn extends Best90MA2CATSColumnOption(columnTitle = s"Weighted Average Best 90 CATS") {
 	override val sortOrder: Int = ExamGridColumnOption.SortOrders.Best90CATSWeightedAverage
 }
 
 @Component
-class Best90CourseStatusColumn extends Best90CATSColumnOption(true, "Year 2 Course status") {
+class Best90MA2CourseStatusColumn extends Best90MA2CATSColumnOption(true, "Year 2 Course status") {
 	override val sortOrder: Int = ExamGridColumnOption.SortOrders.Best90CATSResult
 
 }
