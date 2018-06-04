@@ -382,6 +382,15 @@
 				/> Final overall mark <@fmt.help_popover id="finalOverallMark" content="For final-year students, the average mark calculated according to year weighting." /></label>
 			</div>
 		</div>
+		<#if department.rootDepartment.code == 'ma'>
+			<div class="col-md-3">
+				<div class="checkbox">
+					<label><input type="checkbox" name="predefinedColumnIdentifiers" value="best90MA2Modules"
+						<#if gridOptionsCommand.predefinedColumnIdentifiers?seq_contains("best90MA2Modules")>checked</#if>
+					/> Best 90 CATS MA2xx modules <@fmt.help_popover id="best90MA2Modules" content="For second-year Maths students taking the course G103, show the weighted average mark for their best 90 CATS scored in MA2xx modules." /></label>
+				</div>
+			</div>
+		</#if>
 	</div>
 
 	<hr />
