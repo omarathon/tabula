@@ -2,8 +2,6 @@
 
 .scrollable-table(@left-width, @row-height, @header-row-height: @row-height) {
 
-
-
 	.scrollable-table {
 		display: table;
 		width: 100%;
@@ -37,24 +35,13 @@
 
 		.right {
 			@media (min-width: @screen-xs-min) {
-				@width: @container-tablet - @grid-gutter-width * 2 - @left-width * 3;
-				//width: @width;
-				max-width: @width;
-			}
-			@media (min-width: @screen-sm-min) {
-				@width: @container-tablet - @grid-gutter-width * 2 - @left-width * 3;
-				//width: @width;
-				max-width: @width;
+				max-width: @container-tablet - @grid-gutter-width * 2 - @left-width * 3;
 			}
 			@media (min-width: @screen-md-min) {
-				@width: @container-desktop - @grid-gutter-width * 2 - @left-width * 3;
-				//width: @width;
-				max-width: @width;
+				max-width: @container-desktop - @grid-gutter-width * 2 - @left-width * 3;
 			}
 			@media (min-width: @screen-lg-min) {
-				@width: @container-large-desktop - @grid-gutter-width * 2 - @left-width * 3;
-				//width: @width;
-				max-width: @width;
+				max-width: @container-large-desktop - @grid-gutter-width * 2 - @left-width * 3;
 			}
 
 			.doubleScroll-scroll-wrapper {
