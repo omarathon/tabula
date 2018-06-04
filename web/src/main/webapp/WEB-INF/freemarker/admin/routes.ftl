@@ -46,4 +46,8 @@ TODO grab values from the Routes object in code, as that's pretty equivalent and
 <#macro editLocation location><@_u page="/scientia-rooms/${location.id}/edit" /></#macro>
 <#macro deleteLocation location><@_u page="/scientia-rooms/${location.id}/delete" /></#macro>
 
+<#macro markingdescriptors department><@_u page="/department/${department.code}/markingdescriptors" /></#macro>
+<#macro addmarkingdescriptor department markPoint><@_u page="/department/${department.code}/markingdescriptors/new?markPoints=${markPoint.mark}" /></#macro>
+<#macro editmarkingdescriptor department markingdescriptor><@_u page="/department/${department.code}/markingdescriptors/${markingdescriptor.id}/edit" /></#macro>
+<#macro deletemarkingdescriptor department markingdescriptor><@_u page="/department/${department.code}/markingdescriptors/${markingdescriptor.id}/delete" /></#macro>
 </#compress>
