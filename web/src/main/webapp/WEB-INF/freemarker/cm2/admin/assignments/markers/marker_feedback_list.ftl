@@ -194,20 +194,25 @@
 		<#assign headerStage = order.headerStage />
 
 		<#assign moderator = headerStage.roleName == "Moderator" />
+		<#assign actionPresent = moderator?string("moderate feedback", "add marks and feedback") />
+		<#assign actionPast = moderator?string("moderating feedback", "adding marks and feedback") />
 		<#assign markOrModerate = moderator?string("moderate", "mark") />
 		<#assign markingOrModeration = moderator?string("moderation", "marking") />
-		<#assign markingOrModerating = moderator?string("moderating", "marking") />
 		<#assign moderatedOrMarked = moderator?string("moderated", "marked") />
 
 		<div class="marking-tab-section">
-			<h4>Submissions to ${markOrModerate}</h4>
+			<h4>Ready to ${markOrModerate}</h4>
 
 			<#if order.feedbackByActionability.readyToMark?size != 0>
-				<p>These submissions are ready for you to ${markOrModerate}.</p>
+				<p>You can ${actionPresent} for these students now.</p>
 
 				<@markingTabSection order order.feedbackByActionability.readyToMark false />
 			<#else>
-				<p>No submissions are ready for you to ${markOrModerate}.</p>
+				<#if moderator>
+					<p>No feedback is ready for you to moderate.</p>
+				<#else>
+					<p>No students are ready to mark.</p>
+				</#if>
 			</#if>
 		</div>
 
@@ -220,11 +225,11 @@
 
 			<div id="${headerStage.name}-notReadyToMarkSubmissions" class="marking-collapse collapse">
 				<#if order.feedbackByActionability.notReadyToMark?size != 0>
-					<p>These submissions are allocated to you for ${markingOrModeration}, but haven't yet been released or are with a previous marker.</p>
+					<p>These students are allocated to you for ${markingOrModeration}, but haven't yet been released or are with a previous marker.</p>
 
 					<@markingTabSection order order.feedbackByActionability.notReadyToMark true />
 				<#else>
-					<p>No submissions to show.</p>
+					<p>No students to show.</p>
 				</#if>
 			</div>
 		</div>
@@ -238,11 +243,11 @@
 
 			<div id="${headerStage.name}-markedSubmissions" class="marking-collapse collapse">
 				<#if order.feedbackByActionability.marked?size != 0>
-					<p>You've finished ${markingOrModerating} these submissions, so can't make any further changes.</p>
+					<p>You've finished ${actionPast} for these students, so can't make any further changes.</p>
 
 					<@markingTabSection order order.feedbackByActionability.marked true />
 				<#else>
-					<p>No submissions to show.</p>
+					<p>No students to show.</p>
 				</#if>
 			</div>
 		</div>

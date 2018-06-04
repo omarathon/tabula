@@ -4,31 +4,31 @@
 
 <@f.form cssClass="double-submit-protection" method="post" action="${formAction}" commandName="command">
 
-	<@cm2.assignmentHeader "Release submissions to markers" assignment "for" />
+	<@cm2.assignmentHeader "Release students to markers" assignment "for" />
 
 	<@bs3form.errors path="" />
 	<input type="hidden" name="confirmScreen" value="true" />
 
 	<#if command.unreleasableSubmissions?has_content>
 		<div class="alert alert-info">
-			<a class="clickable" id="invalid-submissions"> <@fmt.p (command.unreleasableSubmissions?size ) "submission" /></a> could not be released for marking.
+			<a class="clickable" id="invalid-students"> <@fmt.p (command.unreleasableSubmissions?size ) "student" /></a> could not be released for marking.
 		</div>
 
-		<div id="invalid-submissions-content" class="hide">
+		<div id="invalid-students-content" class="hide">
 			<#if command.studentsAlreadyReleased?has_content>
 				<p>Already released for marking</p>
-				<ul><#list command.studentsAlreadyReleased as submission><li>${submission}</li></#list></ul>
+				<ul><#list command.studentsAlreadyReleased as student><li>${student}</li></#list></ul>
 			</#if>
 			<#if command.studentsWithoutKnownMarkers?has_content>
 				<p>No marker allocated</p>
-				<ul><#list command.studentsWithoutKnownMarkers as submission><li>${submission}</li></#list></ul>
+				<ul><#list command.studentsWithoutKnownMarkers as student><li>${student}</li></#list></ul>
 			</#if>
 		</div>
 		<script type="text/javascript">
 			jQuery(function($){
-				$("#invalid-submissions").popover({
+				$("#invalid-students").popover({
 					html: true,
-					content: function(){return $('#invalid-submissions-content').html();},
+					content: function(){return $('#invalid-students-content').html();},
 					title: 'Could not release the following students for marking'
 				});
 			});
@@ -40,7 +40,7 @@
 		<@spring.bind path="students">
 			<#assign students = status.actualValue />
 			<p>
-				Releasing <strong><@fmt.p (students?size - command.unreleasableSubmissions?size ) "student" /></strong> submissions to markers.
+				Releasing <strong><@fmt.p (students?size - command.unreleasableSubmissions?size ) "student" /></strong> to markers.
 			</p>
 			<#list students as usercode><input type="hidden" name="students" value="${usercode}" /></#list>
 		</@spring.bind>
@@ -49,9 +49,9 @@
 			<@bs3form.checkbox path="confirm">
 				<@f.checkbox path="confirm" />
 				<#if (students?size > 1)>
-					I confirm that I want to release these students' submissions to markers.
+					I confirm that I want to release these students for marking.
 				<#else>
-					I confirm that I want to release this student's submission to the marker.
+					I confirm that I want to release this student for marking.
 				</#if>
 			</@bs3form.checkbox>
 		</@bs3form.form_group>

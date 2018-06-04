@@ -9,7 +9,7 @@
 	<@spring.bind path="students">
 		<#assign students = status.actualValue />
 		<p>
-			Allocating <strong><@fmt.p students?size "submission" /></strong> to moderators.
+			Allocating <strong><@fmt.p students?size "student" /></strong> to moderators.
 		</p>
 		<#list students as student><input type="hidden" name="students" value="${student}" /></#list>
 	</@spring.bind>
@@ -17,7 +17,7 @@
 	<@bs3form.form_group>
 		<@bs3form.checkbox path="confirm">
 			<@f.checkbox path="confirm" />
-				I confirm that I want to allocate these submissions to moderators.
+				I confirm that I want to allocate these students to moderators.
 		</@bs3form.checkbox>
 	</@bs3form.form_group>
 
