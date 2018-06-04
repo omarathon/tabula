@@ -2,6 +2,8 @@
 
 .scrollable-table(@left-width, @row-height, @header-row-height: @row-height) {
 
+
+
 	.scrollable-table {
 		display: table;
 		width: 100%;
@@ -23,6 +25,7 @@
 		}
 
 		.left {
+			min-width: 145px;
 			width: @left-width;
 			table { table-layout: fixed; }
 			tbody tr .ellipsis {
@@ -31,21 +34,31 @@
 				text-overflow: ellipsis;
 			}
 		}
+
 		.right {
+			@media (min-width: @screen-xs-min) {
+				@width: @container-tablet - @grid-gutter-width * 2 - @left-width * 3;
+				//width: @width;
+				max-width: @width;
+			}
 			@media (min-width: @screen-sm-min) {
-				@width: @container-tablet - @grid-gutter-width * 2 - @left-width;
-				width: @width;
+				@width: @container-tablet - @grid-gutter-width * 2 - @left-width * 3;
+				//width: @width;
 				max-width: @width;
 			}
 			@media (min-width: @screen-md-min) {
-				@width: @container-desktop - @grid-gutter-width * 2 - @left-width;
-				width: @width;
+				@width: @container-desktop - @grid-gutter-width * 2 - @left-width * 3;
+				//width: @width;
 				max-width: @width;
 			}
 			@media (min-width: @screen-lg-min) {
-				@width: @container-large-desktop - @grid-gutter-width * 2 - @left-width;
-				width: @width;
+				@width: @container-large-desktop - @grid-gutter-width * 2 - @left-width * 3;
+				//width: @width;
 				max-width: @width;
+			}
+
+			.doubleScroll-scroll-wrapper {
+				overflow-x: hidden !important;
 			}
 		}
 
