@@ -22,9 +22,9 @@ sealed abstract class MarkingDescriptor extends GeneratedId with Serializable {
 		maxMark = markPoint.mark
 	}
 
-	def minMarkPoint: MarkPoint = MarkPoint.forMark(minMark)
+	def minMarkPoint: MarkPoint = MarkPoint.forMark(minMark).getOrElse(throw new IllegalStateException("No mark point for min mark"))
 
-	def maxMarkPoint: MarkPoint = MarkPoint.forMark(maxMark)
+	def maxMarkPoint: MarkPoint = MarkPoint.forMark(maxMark).getOrElse(throw new IllegalStateException("No mark point for max mark"))
 
 	def isForMarkPoint(markPoint: MarkPoint): Boolean = markPoints.contains(markPoint)
 

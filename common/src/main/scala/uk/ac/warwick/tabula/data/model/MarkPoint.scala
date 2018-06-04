@@ -40,7 +40,7 @@ object MarkPoint {
 
 	val comparator: Comparator[MarkPoint] = Comparator.comparingInt(_.mark)
 
-	def forMark(mark: Int): MarkPoint = all.find(_.mark == mark).getOrElse(throw new IllegalArgumentException(s"Invalid mark point $mark"))
+	def forMark(mark: Int): Option[MarkPoint] = all.find(_.mark == mark)
 
 	val all: Seq[MarkPoint] = Seq(
 		MarkPoint(0, Zero, "Zero"),
