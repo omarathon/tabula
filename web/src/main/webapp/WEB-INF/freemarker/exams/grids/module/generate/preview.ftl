@@ -39,7 +39,7 @@
 					</form>
 				<#else>
 					<p>
-						<button class="btn btn-primary use-popover" disabled title="Tabula has been placed in a read-only mode. Refreshing SITS data is not currently possible.">
+						<button class="btn btn-primary use-tooltip" disabled title="Tabula has been placed in a read-only mode. Refreshing SITS data is not currently possible.">
 							Refresh SITS data and regenerate grid
 						</button>
 					</p>

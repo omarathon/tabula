@@ -101,24 +101,26 @@ class GenerateModuleExamGridController extends ExamsController
 			errors.reject("examGrid.noStudents")
 			selectModuleRender(selectModuleExamCommand, department, academicYear)
 		} else {
-			stopOngoingImportForStudents(students)
+			if (!maintenanceModeService.enabled) {
+				stopOngoingImportForStudents(students)
 
-			val jobInstance = jobService.add(Some(user), ImportMembersJob(students.map(_.moduleRegistration.studentCourseDetails.student.universityId)))
+				val jobInstance = jobService.add(Some(user), ImportMembersJob(students.map(_.moduleRegistration.studentCourseDetails.student.universityId)))
 
-			allRequestParams.set("jobId", jobInstance.id)
+				allRequestParams.set("jobId", jobInstance.id)
+			}
 			redirectToAndClearModel(Grids.moduleJobProgress(department, academicYear), allRequestParams)
 		}
 	}
 
 	@GetMapping(path = Array("/import"))
 	def checkJobProgress(
-		@RequestParam jobId: String,
+		@RequestParam(required = false) jobId: String,
 		@ModelAttribute("selectModuleExamCommand") selectModuleExamCommand: SelectModuleExamCommand,
 		@PathVariable department: Department,
 		@PathVariable academicYear: AcademicYear,
 		@RequestParam allRequestParams: MultiValueMap[String, String]
 	) = {
-		val jobInstance = jobService.getInstance(jobId)
+		val jobInstance = Option(jobId).flatMap(jobService.getInstance)
 		if (jobInstance.isDefined && !jobInstance.get.finished) {
 			val moduleGridResult = selectModuleExamCommand.apply()
 			val studentLastImportDates = moduleGridResult.gridStudentDetailRecords.map { e =>
