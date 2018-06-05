@@ -55,6 +55,37 @@
 
 </#macro><#-- end of "header" -->
 
+<#macro upstream_group ug isLinked isInUse>
+	<tr<#if !isInUse> class="text-muted" style="display: none"</#if> data-in-use="${isInUse?string('true','false')}">
+		<td>
+			<input
+				type="checkbox"
+				id="chk-${ug.id}"
+				<#if isLinked>
+					checked
+				</#if>
+				<#if isInUse>
+					value="${ug.id}"
+				<#else>
+					disabled
+				</#if>
+				class="collection-checkbox"
+			/>
+		</td>
+		<td>
+			<label for="chk-${ug.id}"<#if !isInUse> class="text-muted"</#if>>
+				${ug.name}
+				<span class="label label-primary linked <#if !isLinked>hidden</#if>">Linked</span>
+			</label>
+		</td>
+		<td class="sortable">${ug.group.members?size}</td>
+		<td>${ug.group.assessmentGroup}</td>
+		<td>${ug.cats!'-'}</td>
+		<td>${ug.occurrence}</td>
+		<td>${ug.sequence}</td>
+		<td>${ug.assessmentType!'A'}</td>
+	</tr>
+</#macro>
 
 <#--
 Generates the bulk of the picker HTML, inside a fieldset element
@@ -293,20 +324,41 @@ Generates the bulk of the picker HTML, inside a fieldset element
 								<th class="sortable">Type</th>
 							</tr>
 						</thead>
-						<tbody><#list command.availableUpstreamGroups as available>
-							<#local isLinked = available.isLinked(command.assessmentGroups) />
-							<tr>
-								<td><input type="checkbox" id="chk-${available.id}" name="" value="${available.id}"></td>
-								<td><label for="chk-${available.id}">${available.name}<#if isLinked> <span class="label label-primary">Linked</span></#if></label></td>
-								<td>${available.group.members?size}</td><#-- FIXME: a.popover (overflow-y: scroll) with member list -->
-								<td>${available.group.assessmentGroup}</td>
-								<td>${available.cats!'-'}</td>
-								<td>${available.occurrence}</td>
-								<td>${available.sequence}</td>
-								<td>${available.assessmentType!'A'}</td> <#-- TAB-1174 can remove default when non-null -->
-							</tr>
-						</#list></tbody>
+						<tbody>
+							<#list command.availableUpstreamGroups as available>
+								<#local isLinked = available.isLinked(command.assessmentGroups) />
+								<@upstream_group available isLinked true />
+							</#list>
+							<#list command.notInUseUpstreamGroups as notInUse>
+								<#local isLinked = notInUse.isLinked(command.assessmentGroups) />
+								<@upstream_group notInUse isLinked false />
+							</#list>
+						</tbody>
 					</table>
+					<#if command.notInUseUpstreamGroups?size != 0>
+						<p>
+							<a href="#" id="toggleNotInUseComponents">
+								<span>Show</span>
+								<#if command.notInUseUpstreamGroups?size == 1>
+									1 not-in-use component
+								<#else>
+									${command.notInUseUpstreamGroups?size} not-in-use components
+								</#if>
+							</a>
+						</p>
+						<script>
+							$(function() {
+								var visible = false;
+
+								$('#toggleNotInUseComponents').on('click', function () {
+									visible = !visible;
+									$('#sits-table [data-in-use=false]').toggle('fast');
+									$(this).blur().children('span').text(visible ? 'Hide' : 'Show');
+									return false;
+								});
+							});
+						</script>
+					</#if>
 				</@modal.body>
 
 				<@modal.footer>
@@ -364,7 +416,7 @@ Generates the bulk of the picker HTML, inside a fieldset element
 			$enrolment.on('click', '.table-checkable th .check-all', function(e) {
 				var $table = $(this).closest('table');
 				var checkStatus = this.checked;
-				$table.find('td input:checkbox').prop('checked', checkStatus);
+				$table.find('td input:checkbox:not(:disabled)').prop('checked', checkStatus);
 
 				updateCheckboxes($table);
 				enableActions($table);
@@ -418,7 +470,7 @@ Generates the bulk of the picker HTML, inside a fieldset element
 		$enrolment.on('click', '.table-checkable tr', function(e) {
 			if ($(e.target).is(':not(input:checkbox)')) {
 				e.preventDefault();
-				var $chk = $(this).find('input:checkbox');
+				var $chk = $(this).find('input:checkbox:not(:disabled)');
 				if ($chk.length) {
 					$chk.prop('checked', !$chk.prop('checked'));
 				}
