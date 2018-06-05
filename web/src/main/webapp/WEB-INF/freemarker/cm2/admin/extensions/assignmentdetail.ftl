@@ -141,18 +141,22 @@
 	<div class="content extension-detail">
 		<#assign actionUrl><@routes.cm2.extensiondetail assignment usercode /></#assign>
 		<@f.form method="post" enctype="multipart/form-data" action=actionUrl id="editExtensionCommand" commandName="editExtensionCommand" cssClass="form-horizontal double-submit-protection modify-extension">
-			<input type="hidden" name="closeDate" class="startDateTime" value="${assignment.closeDate}" />
+			<input type="hidden" name="closeDate" class="startDateTime" value="${assignment.closeDate!""}" />
 
 			<#if detail.extension?has_content>
 				<#if detail.extension.awaitingReview>
 					<input type="hidden" name="rawRequestedExpiryDate" value="${detail.extension.requestedExpiryDate}" />
 					<h5>Requested <@fmt.date date=detail.extension.requestedExpiryDate capitalise=false at=true/>&ensp;
-						<span class="muted">${durationFormatter(assignment.closeDate, detail.extension.requestedExpiryDate)} after the set deadline</span></h5>
+						<#if assignment.closeDate??>
+							<span class="muted">${durationFormatter(assignment.closeDate, detail.extension.requestedExpiryDate)} after the set deadline</span></h5>
+						</#if>
 					<#if detail.extension.approved>
 						<p>
 							<b>This is a revised request from the student.</b>
 							There is already an extension approved until <@fmt.date date=detail.extension.expiryDate capitalise=false at=true/>
-							(${durationFormatter(assignment.closeDate, detail.extension.expiryDate)} after the set deadline).
+							<#if assignment.closeDate??>
+								(${durationFormatter(assignment.closeDate, detail.extension.expiryDate)} after the set deadline).
+							</#if>
 							<#noescape>${feedbackNotice}</#noescape>
 						</p>
 						<p class="alert alert-info">To retain the existing extension, choose <i>Update</i> below,
@@ -164,14 +168,18 @@
 				<#elseif detail.extension.initiatedByStudent>
 					<#if detail.extension.approved && detail.extension.expiryDate?has_content >
 						<h5>Approved <@fmt.date date=detail.extension.reviewedOn capitalise=false includeTime=false /> until <@fmt.date date=detail.extension.expiryDate capitalise=false at=true />&ensp;
-							<span class="muted">${durationFormatter(assignment.closeDate, detail.extension.expiryDate)} after the set deadline</span></h5>
+							<#if assignment.closeDate??>
+								<span class="muted">${durationFormatter(assignment.closeDate, detail.extension.expiryDate)} after the set deadline</span></h5>
+							</#if>
 					<#elseif detail.extension.rejected>
 						<h5>Rejected <@fmt.date date=detail.extension.reviewedOn capitalise=false includeTime=false /></h5>
 					</#if>
 					<p>
 						<#if (detail.extension.expiryDate?has_content)&&(detail.extension.requestedExpiryDate?has_content)&&(detail.extension.expiryDate != detail.extension.requestedExpiryDate)>
 							The extension was requested for <@fmt.date date=detail.extension.requestedExpiryDate capitalise=false at=true />
-							(${durationFormatter(assignment.closeDate, detail.extension.requestedExpiryDate)} after the set deadline).
+							<#if assignment.closeDate??>
+								(${durationFormatter(assignment.closeDate, detail.extension.requestedExpiryDate)} after the set deadline).
+							</#if>
 							<#noescape>${feedbackNotice}</#noescape>
 						</#if>
 					</p>

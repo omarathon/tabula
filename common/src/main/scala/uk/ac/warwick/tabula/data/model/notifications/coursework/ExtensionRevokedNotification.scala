@@ -34,6 +34,6 @@ class ExtensionRevokedNotification extends Notification[Assignment, Unit]
 		"assignment" -> assignment,
 		"module" -> assignment.module,
 		"user" -> recipient,
-		"originalAssignmentDate" -> dateTimeFormatter.print(assignment.closeDate)
+		"originalAssignmentDate" -> Option(assignment.closeDate).map(dateTimeFormatter.print)
 	))
 }
