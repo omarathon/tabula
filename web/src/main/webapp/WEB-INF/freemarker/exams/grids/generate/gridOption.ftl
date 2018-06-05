@@ -190,7 +190,7 @@
 			<div class="checkbox">
 				<label><input type="checkbox" name="predefinedColumnIdentifiers" value="corerequired"
 					<#if gridOptionsCommand.predefinedColumnIdentifiers?seq_contains("corerequired")>checked</#if>
-				/> Core required modules <@fmt.help_popover id="corerequired" content="Compulsory modules for all students on the selected course. You can confirm these modules in the next step." /></label>
+				/> Core required modules <@fmt.help_popover id="corerequired" content="Compulsory modules for all students on the selected course. You can confirm these modules in the next step." /><i class="text-warning fa fa-fw fa-exclamation-triangle use-popover" title="System read-only" data-content="Tabula has been placed in a read-only mode. It's not currently possible to modify the core required modules for the selected routes. Your previous selections will be used."></i></label>
 			</div>
 		</div>
 		<div class="col-md-3">

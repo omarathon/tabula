@@ -10,7 +10,7 @@ import uk.ac.warwick.tabula.exams.grids.columns.marking.CurrentYearMarkColumnOpt
 import uk.ac.warwick.tabula.exams.grids.columns.modules.CoreModulesColumnOption
 import uk.ac.warwick.tabula.exams.grids.columns.{ExamGridColumnOption, ExamGridDisplayModuleNameColumnValue, ExamGridStudentIdentificationColumnValue}
 import uk.ac.warwick.tabula.permissions.Permissions
-import uk.ac.warwick.tabula.services.{AutowiringModuleAndDepartmentServiceComponent, ModuleAndDepartmentServiceComponent}
+import uk.ac.warwick.tabula.services.{AutowiringMaintenanceModeServiceComponent, AutowiringModuleAndDepartmentServiceComponent, MaintenanceModeServiceComponent, ModuleAndDepartmentServiceComponent}
 import uk.ac.warwick.tabula.system.permissions.{PermissionsChecking, PermissionsCheckingMethods, RequiresPermissionsChecking}
 
 import scala.collection.JavaConverters._
@@ -26,11 +26,13 @@ object GenerateExamGridGridOptionsCommand {
 			with GenerateExamGridGridOptionsDescription
 			with GenerateExamGridGridOptionsCommandState
 			with GenerateExamGridGridOptionsCommandRequest
+			with AutowiringMaintenanceModeServiceComponent
+			with ReadOnly
 }
 
 class GenerateExamGridGridOptionsCommandInternal(val department: Department) extends CommandInternal[(Seq[ExamGridColumnOption], Seq[String])] {
 
-	self: GenerateExamGridGridOptionsCommandState with GenerateExamGridGridOptionsCommandRequest with ModuleAndDepartmentServiceComponent =>
+	self: GenerateExamGridGridOptionsCommandState with GenerateExamGridGridOptionsCommandRequest with ModuleAndDepartmentServiceComponent with MaintenanceModeServiceComponent =>
 
 	override def applyInternal(): (Seq[ExamGridColumnOption], Seq[String]) = {
 		department.examGridOptions = ExamGridOptions(
@@ -45,7 +47,11 @@ class GenerateExamGridGridOptionsCommandInternal(val department: Department) ext
 			yearMarksToUse,
 			mandatoryModulesAndYearMarkColumns
 		)
-		moduleAndDepartmentService.saveOrUpdate(department)
+
+		if (!maintenanceModeService.enabled) {
+			moduleAndDepartmentService.saveOrUpdate(department)
+		}
+
 		(predefinedColumnOptions, customColumnTitles.asScala)
 	}
 

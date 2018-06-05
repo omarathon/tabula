@@ -28,14 +28,22 @@
 					<@fmt.date date=oldestImport capitalise=false at=true relative=true />. If data changes in SITS after this
 					time, you'll need to generate the grid again to see the most recent information.
 				</p>
-				<form action="<@routes.exams.generateModuleGrid department academicYear />" method="post">
-					<@form_fields.select_module_fields />
+				<#if !(info.maintenance!false)>
+					<form action="<@routes.exams.generateModuleGrid department academicYear />" method="post">
+						<@form_fields.select_module_fields />
+						<p>
+							<button type="submit" class="btn btn-primary">
+								Refresh SITS data and regenerate grid
+							</button>
+						</p>
+					</form>
+				<#else>
 					<p>
-						<button type="submit" class="btn btn-primary">
+						<button class="btn btn-primary use-popover" disabled title="Tabula has been placed in a read-only mode. Refreshing SITS data is not currently possible.">
 							Refresh SITS data and regenerate grid
 						</button>
 					</p>
-				</form>
+				</#if>
 			</div>
 			<div class="key clearfix exam-modulegrid-preview">
 				<table class="table table-condensed">
