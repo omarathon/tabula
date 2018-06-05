@@ -86,7 +86,7 @@
 			</#if>
 
 			<#if searchDepartments??>
-				<#list searchDepartments as dept>
+				<#list searchDepartments?sort_by("code") as dept>
 					<h2>${dept.name}</h2>
 					<ul>
 						<li><a href="<@routes.profiles.filter_students dept />">Show all students in ${dept.name}</a></li>
