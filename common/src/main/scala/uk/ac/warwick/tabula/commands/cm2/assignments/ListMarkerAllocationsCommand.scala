@@ -29,7 +29,10 @@ trait FetchMarkerAllocations {
 	def fetchAllocations(assignment: Assignment): MarkerAllocations = {
 
 		// If seat number is empty we use the uni ID instead. This will be larger than a real seat number and unique
-		def seatNumberOrUniId = (user: User) => assignment.getSeatNumber(user).getOrElse(user.getWarwickId.toInt)
+		def seatNumberOrUniId = (user: User) => assignment.getSeatNumber(user) match {
+			case Some(seatNo) => (seatNo, user.getWarwickId.toInt)
+			case _ => 	(0, user.getWarwickId.toInt)
+		}
 
 		val workflow = assignment.cm2MarkingWorkflow
 		val stagesByRole = workflow.markerStages.groupBy(_.roleName)
