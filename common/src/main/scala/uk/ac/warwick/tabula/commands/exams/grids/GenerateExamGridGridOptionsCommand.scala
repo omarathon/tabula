@@ -10,7 +10,7 @@ import uk.ac.warwick.tabula.exams.grids.columns.marking.CurrentYearMarkColumnOpt
 import uk.ac.warwick.tabula.exams.grids.columns.modules.CoreModulesColumnOption
 import uk.ac.warwick.tabula.exams.grids.columns.{ExamGridColumnOption, ExamGridDisplayModuleNameColumnValue, ExamGridStudentIdentificationColumnValue}
 import uk.ac.warwick.tabula.permissions.Permissions
-import uk.ac.warwick.tabula.services.{AutowiringMaintenanceModeServiceComponent, AutowiringModuleAndDepartmentServiceComponent, MaintenanceModeServiceComponent, ModuleAndDepartmentServiceComponent}
+import uk.ac.warwick.tabula.services.{AutowiringModuleAndDepartmentServiceComponent, ModuleAndDepartmentServiceComponent}
 import uk.ac.warwick.tabula.system.permissions.{PermissionsChecking, PermissionsCheckingMethods, RequiresPermissionsChecking}
 
 import scala.collection.JavaConverters._
@@ -26,13 +26,25 @@ object GenerateExamGridGridOptionsCommand {
 			with GenerateExamGridGridOptionsDescription
 			with GenerateExamGridGridOptionsCommandState
 			with GenerateExamGridGridOptionsCommandRequest
-			with AutowiringMaintenanceModeServiceComponent
+			with GenerateExamGridGridOptionsCommandDepartmentPersistence
+
+	def applyReadOnly(department: Department) =
+		new GenerateExamGridGridOptionsCommandInternal(department)
+			with ComposableCommand[(Seq[ExamGridColumnOption], Seq[String])]
+			with AutowiringModuleAndDepartmentServiceComponent
+			with PopulatesGenerateExamGridGridOptionsCommand
+			with GenerateExamGridGridOptionsValidation
+			with GenerateExamGridGridOptionsPermissions
+			with GenerateExamGridGridOptionsDescription
+			with GenerateExamGridGridOptionsCommandState
+			with GenerateExamGridGridOptionsCommandRequest
+			with GenerateExamGridGridOptionsCommandNoPersistence
 			with ReadOnly
 }
 
 class GenerateExamGridGridOptionsCommandInternal(val department: Department) extends CommandInternal[(Seq[ExamGridColumnOption], Seq[String])] {
 
-	self: GenerateExamGridGridOptionsCommandState with GenerateExamGridGridOptionsCommandRequest with ModuleAndDepartmentServiceComponent with MaintenanceModeServiceComponent =>
+	self: GenerateExamGridGridOptionsCommandState with GenerateExamGridGridOptionsCommandRequest with GenerateExamGridGridOptionsCommandPersistence =>
 
 	override def applyInternal(): (Seq[ExamGridColumnOption], Seq[String]) = {
 		department.examGridOptions = ExamGridOptions(
@@ -48,13 +60,27 @@ class GenerateExamGridGridOptionsCommandInternal(val department: Department) ext
 			mandatoryModulesAndYearMarkColumns
 		)
 
-		if (!maintenanceModeService.enabled) {
-			moduleAndDepartmentService.saveOrUpdate(department)
-		}
+		saveDepartment()
 
 		(predefinedColumnOptions, customColumnTitles.asScala)
 	}
 
+}
+
+trait GenerateExamGridGridOptionsCommandPersistence {
+	def saveDepartment(): Unit
+}
+
+trait GenerateExamGridGridOptionsCommandNoPersistence extends GenerateExamGridGridOptionsCommandPersistence {
+	self: ReadOnly =>
+	override def saveDepartment(): Unit = {}
+}
+
+trait GenerateExamGridGridOptionsCommandDepartmentPersistence extends GenerateExamGridGridOptionsCommandPersistence {
+	self: GenerateExamGridGridOptionsCommandState with ModuleAndDepartmentServiceComponent =>
+	override def saveDepartment(): Unit = {
+		moduleAndDepartmentService.saveOrUpdate(department)
+	}
 }
 
 trait PopulatesGenerateExamGridGridOptionsCommand extends PopulateOnForm {

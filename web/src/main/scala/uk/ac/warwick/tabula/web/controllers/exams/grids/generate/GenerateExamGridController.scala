@@ -80,7 +80,12 @@ class GenerateExamGridController extends ExamsController
 		GenerateExamGridSelectCourseCommand(mandatory(department), mandatory(academicYear), permitRoutesFromRootDepartment = securityService.can(user, departmentPermission, department.rootDepartment))
 
 	@ModelAttribute("gridOptionsCommand")
-	def gridOptionsCommand(@PathVariable department: Department) = GenerateExamGridGridOptionsCommand(mandatory(department))
+	def gridOptionsCommand(@PathVariable department: Department) = {
+		if (maintenanceModeService.enabled)
+			GenerateExamGridGridOptionsCommand.applyReadOnly(mandatory(department))
+		else
+			GenerateExamGridGridOptionsCommand(mandatory(department))
+	}
 
 	@ModelAttribute("coreRequiredModulesCommand")
 	def coreRequiredModulesCommand(@PathVariable department: Department, @PathVariable academicYear: AcademicYear) =
