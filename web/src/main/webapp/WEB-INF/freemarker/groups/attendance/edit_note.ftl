@@ -77,7 +77,7 @@
 				<#if command.attachedFile?has_content>
 					<@bs3form.labelled_form_group "attachedFile" "Attached file">
 						<@fmt.download_link
-							filePath="/profiles/note/${command.member.universityId}/${command.occurrence.id}/attachment/${command.attachedFile.name}"
+							filePath="/groups/note/${command.member.universityId}/${command.occurrence.id}/attachment/${command.attachedFile.name}"
 							mimeType=command.attachedFile.mimeType
 							title="Download file ${command.attachedFile.name}"
 							text="Download ${command.attachedFile.name}"
