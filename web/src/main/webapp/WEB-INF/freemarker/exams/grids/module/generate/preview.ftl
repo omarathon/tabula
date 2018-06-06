@@ -302,7 +302,11 @@
 		$(window).on('id7:reflow', reflowScroll);
 		reflowScroll();
 
-		$('.key table').css('max-width', '');
+		_.defer(function () {
+			$('.key table').css('max-width', '');
+		});
+
+		$('.table-responsive').css('overflow-x', 'hidden');
 
 		$('#examGridContainer').css('opacity', 1);
 		$('#examGridSpinner').hide();

@@ -398,46 +398,10 @@
 			$('.key table').css('max-width', '');
 		});
 
+		$('.table-responsive').css('overflow-x', 'hidden');
+
 		$('#examGridContainer').css('opacity', 1);
 		$('#examGridSpinner').hide();
-	});
-</script>
-
-<script>
-	$(function () {
-		var $table = $('table.grid'),
-			$bodies = $table.find('tbody'),
-			$rows = $table.find('tr'),
-			$cells = $table.find('th, td');
-
-		var outerWidth = function () {
-			return $(this).outerWidth();
-		};
-
-		var bodyWidths = $bodies.map(outerWidth);
-		var rowWidths = $rows.map(outerWidth);
-		var cellWidths = $cells.map(outerWidth);
-
-		$bodies.css('display', 'block').each(function (i) {
-			$(this).css({
-				width: bodyWidths[i],
-				minWidth: bodyWidths[i]
-			});
-		});
-
-		$rows.each(function (i) {
-			$(this).css({
-				width: rowWidths[i],
-				minWidth: rowWidths[i]
-			});
-		});
-
-		$cells.each(function (i) {
-			$(this).css({
-				width: cellWidths[i],
-				minWidth: cellWidths[i]
-			});
-		});
 	});
 </script>
 
