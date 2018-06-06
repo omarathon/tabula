@@ -403,33 +403,4 @@
 	});
 </script>
 
-<script>
-	$(function () {
-		var $table = $('table.grid'),
-			$bodies = $table.find('tbody'),
-			$rows = $table.find('tr'),
-			$cells = $table.find('th, td');
-
-		var outerWidth = function () {
-			return $(this).outerWidth();
-		};
-
-		var bodyWidths = $bodies.map(outerWidth);
-		var rowWidths = $rows.map(outerWidth);
-		var cellWidths = $cells.map(outerWidth);
-
-		$bodies.css('display', 'block').each(function (i) {
-			$(this).outerWidth(bodyWidths[i]);
-		});
-
-		$rows.each(function (i) {
-			$(this).outerWidth(rowWidths[i]);
-		});
-
-		$cells.each(function (i) {
-			$(this).outerWidth(cellWidths[i]);
-		});
-	});
-</script>
-
 </#escape>
