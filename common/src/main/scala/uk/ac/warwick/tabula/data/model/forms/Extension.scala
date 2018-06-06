@@ -54,7 +54,13 @@ class Extension extends GeneratedId with PermissionsTarget with ToEntityReferenc
 	@DateTimeFormat(pattern = DateFormats.DateTimePickerPattern)
 	@Column(name = "requestedExpiryDate")
 	private var _requestedExpiryDate: DateTime = _
-	def requestedExpiryDate: Option[DateTime] = Option(_requestedExpiryDate)
+	def requestedExpiryDate: Option[DateTime] = {
+		if (assignment.openEnded) {
+			None
+		} else {
+			Option(_requestedExpiryDate)
+		}
+	}
 	def requestedExpiryDate_=(red: DateTime) {_requestedExpiryDate = red}
 
 	@Type(`type` = "org.jadira.usertype.dateandtime.joda.PersistentDateTime")

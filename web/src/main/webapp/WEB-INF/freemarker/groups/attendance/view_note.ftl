@@ -29,7 +29,7 @@
 			<#if attendanceNote.attachment?has_content>
 				<p>
 					<@fmt.download_link
-						filePath="/profiles/note/${attendanceNote.student.universityId}/${attendanceNote.occurrence.id}/attachment/${attendanceNote.attachment.name}"
+						filePath="/groups/note/${attendanceNote.student.universityId}/${attendanceNote.occurrence.id}/attachment/${attendanceNote.attachment.name}"
 						mimeType=attendanceNote.attachment.mimeType
 						title="Download file ${attendanceNote.attachment.name}"
 						text="Download ${attendanceNote.attachment.name}"

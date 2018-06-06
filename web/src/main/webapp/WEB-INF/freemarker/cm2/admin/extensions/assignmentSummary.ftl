@@ -1,7 +1,6 @@
 <#import "*/cm2_macros.ftl" as cm2 />
 <#assign module = assignment.module />
 <#assign department = module.adminDepartment />
-<#assign time_remaining=durationFormatter(assignment.closeDate) />
 <#--noinspection FtlWellformednessInspection-->
 
 <#macro row graph>
@@ -50,12 +49,12 @@
 	<div class="col-md-7">
 		<#if assignment.closed>
 			<p class="late deadline">
-				<span class="time-remaining">Closed ${time_remaining}.</span>
+				<span class="time-remaining">Closed ${durationFormatter(assignment.closeDate)}.</span>
 				Deadline was <@fmt.date date=assignment.closeDate />.
 			</p>
-		<#else>
+		<#elseif assignment.closeDate??>
 			<p class="deadline">
-				<span class="time-remaining">Closes in ${time_remaining}.</span>
+				<span class="time-remaining">Closes in ${durationFormatter(assignment.closeDate)}.</span>
 				Deadline <@fmt.date date=assignment.closeDate />.
 			</p>
 		</#if>

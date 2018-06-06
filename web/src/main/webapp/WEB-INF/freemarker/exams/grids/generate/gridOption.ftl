@@ -190,7 +190,7 @@
 			<div class="checkbox">
 				<label><input type="checkbox" name="predefinedColumnIdentifiers" value="corerequired"
 					<#if gridOptionsCommand.predefinedColumnIdentifiers?seq_contains("corerequired")>checked</#if>
-				/> Core required modules <@fmt.help_popover id="corerequired" content="Compulsory modules for all students on the selected course. You can confirm these modules in the next step." /></label>
+				/> Core required modules <@fmt.help_popover id="corerequired" content="Compulsory modules for all students on the selected course. You can confirm these modules in the next step." /><#if info.maintenanceMode!false><i class="text-warning fa fa-fw fa-exclamation-triangle use-popover" title="System read-only" data-content="Tabula has been placed in a read-only mode. It's not currently possible to modify the core required modules for the selected routes. Your previous selections will be used."></i></#if></label>
 			</div>
 		</div>
 		<div class="col-md-3">
@@ -382,6 +382,15 @@
 				/> Final overall mark <@fmt.help_popover id="finalOverallMark" content="For final-year students, the average mark calculated according to year weighting." /></label>
 			</div>
 		</div>
+		<#if department.rootDepartment.code == 'ma'>
+			<div class="col-md-3">
+				<div class="checkbox">
+					<label><input type="checkbox" name="predefinedColumnIdentifiers" value="best90MA2Modules"
+						<#if gridOptionsCommand.predefinedColumnIdentifiers?seq_contains("best90MA2Modules")>checked</#if>
+					/> Best 90 CATS MA2xx modules <@fmt.help_popover id="best90MA2Modules" content="For second-year Maths students taking the course G103, show the weighted average mark for their best 90 CATS scored in MA2xx modules." /></label>
+				</div>
+			</div>
+		</#if>
 	</div>
 
 	<hr />

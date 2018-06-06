@@ -23,7 +23,7 @@ class MitigatingCircumstancesColumnOption extends ChosenYearExamGridColumnOption
 		override val excelColumnWidth: Int = ExamGridColumnOption.ExcelColumnSizes.ShortString
 
 		override def values: Map[ExamGridEntity, ExamGridColumnValue] = {
-			if(state.department.code == "es" || Option(state.department.parent).exists(_.code == "es")){
+			if(state.department.rootDepartment.code == "es"){
 				state.entities.map(entity => {
 					val notes = entity.validYears.headOption
 						.flatMap{case (_, year) => year.studentCourseYearDetails}

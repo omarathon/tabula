@@ -174,6 +174,9 @@
 				},
 				error: function (xhr) {
 					$detailRow.html(xhr.responseText);
+				},
+				complete: function () {
+					$body.find('.expanding-table').trigger('tabula.expandingTable.repositionContent');
 				}
 			});
 		});

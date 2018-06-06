@@ -716,7 +716,7 @@
 										<li class="clearfix">
 											<#-- Tutor, weeks, day/time, location -->
 											<div class="eventWeeks">
-												<#if (showOccurrenceAttendance!false) && eventItem.occurrences?has_content>
+												<#if (showOccurrenceAttendance!false) && eventItem.occurrences?has_content && groupSet.collectAttendance>
 													<a href="<@routes.groups.registerForWeek eventItem.event, eventItem.occurrences?first.week />" class="btn btn-primary btn-xs pull-right">
 														Attendance
 													</a>

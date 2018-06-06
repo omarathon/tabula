@@ -171,6 +171,15 @@ trait UpdatesStudentMembership {
 		} yield new UpstreamGroup(ua, uag)
 	}
 
+	/**
+		* Upstream groups that are not in use
+		*/
+	lazy val notInUseUpstreamGroups: Seq[UpstreamGroup] = {
+		for {
+			ua <- assessmentMembershipService.getAssessmentComponents(module, inUseOnly = false) if !ua.inUse
+			uag <- assessmentMembershipService.getUpstreamAssessmentGroups(ua, academicYear)
+		} yield new UpstreamGroup(ua, uag)
+	}
 
 	/** get UAGs, populated with membership, from the currently stored assessmentGroups */
 	def linkedUpstreamAssessmentGroups: Seq[UpstreamAssessmentGroup] =

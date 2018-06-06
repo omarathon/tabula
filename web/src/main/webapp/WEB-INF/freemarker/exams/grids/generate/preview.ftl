@@ -34,16 +34,24 @@
 					time, you'll need to generate the grid again to see the most recent information.
 				</p>
 
-			<form action="<@routes.exams.generateGrid department academicYear />" method="post">
-				<@form_fields.select_course_fields />
-				<@form_fields.grid_options_fields />
+				<#if !(info.maintenance!false)>
+					<form action="<@routes.exams.generateGrid department academicYear />" method="post">
+						<@form_fields.select_course_fields />
+						<@form_fields.grid_options_fields />
 
-				<p>
-					<button type="submit" class="btn btn-primary" name="${GenerateExamGridMappingParameters.usePreviousSettings}">
-						Refresh SITS data and regenerate grid
-					</button>
-				</p>
-			</form>
+						<p>
+							<button type="submit" class="btn btn-primary" name="${GenerateExamGridMappingParameters.usePreviousSettings}">
+								Refresh SITS data and regenerate grid
+							</button>
+						</p>
+					</form>
+				<#else>
+					<p>
+						<button class="btn btn-primary use-tooltip" disabled title="Tabula has been placed in a read-only mode. Refreshing SITS data is not currently possible.">
+							Refresh SITS data and regenerate grid
+						</button>
+					</p>
+				</#if>
 
 				<p>
 					<strong>
@@ -386,8 +394,48 @@
 		$(window).on('id7:reflow', reflowScroll);
 		reflowScroll();
 
+		$('.key table').css('max-width', '');
+
 		$('#examGridContainer').css('opacity', 1);
 		$('#examGridSpinner').hide();
+	});
+</script>
+
+<script>
+	$(function () {
+		var $table = $('table.grid'),
+			$bodies = $table.find('tbody'),
+			$rows = $table.find('tr'),
+			$cells = $table.find('th, td');
+
+		var outerWidth = function () {
+			return $(this).outerWidth();
+		};
+
+		var bodyWidths = $bodies.map(outerWidth);
+		var rowWidths = $rows.map(outerWidth);
+		var cellWidths = $cells.map(outerWidth);
+
+		$bodies.css('display', 'block').each(function (i) {
+			$(this).css({
+				width: bodyWidths[i],
+				minWidth: bodyWidths[i]
+			});
+		});
+
+		$rows.each(function (i) {
+			$(this).css({
+				width: rowWidths[i],
+				minWidth: rowWidths[i]
+			});
+		});
+
+		$cells.each(function (i) {
+			$(this).css({
+				width: cellWidths[i],
+				minWidth: cellWidths[i]
+			});
+		});
 	});
 </script>
 

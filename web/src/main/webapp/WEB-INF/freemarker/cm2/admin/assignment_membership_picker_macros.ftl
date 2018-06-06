@@ -1,6 +1,38 @@
 <#include "*/prelude.ftl" />
 <#escape x as x?html>
 
+<#macro upstream_group ug isLinked isInUse>
+	<tr<#if !isInUse> class="text-muted" style="display: none"</#if> data-in-use="${isInUse?string('true','false')}">
+		<td>
+			<input
+				type="checkbox"
+				id="chk-${ug.id}"
+				<#if isLinked>
+					checked
+				</#if>
+				<#if isInUse>
+					value="${ug.id}"
+				<#else>
+					disabled
+				</#if>
+				class="collection-checkbox"
+			/>
+		</td>
+		<td>
+			<label for="chk-${ug.id}"<#if !isInUse> class="text-muted"</#if>>
+				${ug.name}
+				<span class="label label-primary linked <#if !isLinked>hidden</#if>">Linked</span>
+			</label>
+		</td>
+		<td class="sortable">${ug.group.members?size}</td>
+		<td>${ug.group.assessmentGroup}</td>
+		<td>${ug.cats!'-'}</td>
+		<td>${ug.occurrence}</td>
+		<td>${ug.sequence}</td>
+		<td>${ug.assessmentType!'A'}</td>
+	</tr>
+</#macro>
+
 <#macro coursework_sits_groups command >
 	<#if command.availableUpstreamGroups?has_content>
 		<div class="assessment-component form-group">
@@ -20,27 +52,38 @@
 				<tbody>
 					<#list command.availableUpstreamGroups as available>
 						<#local isLinked = available.isLinked(command.assessmentGroups) />
-					<tr>
-						<td>
-							<input
-									type="checkbox"
-									id="chk-${available.id}"
-									value="${available.id}"
-							${isLinked?string(" checked","")}
-									class="collection-checkbox"
-							>
-						</td>
-						<td><label for="chk-${available.id}">${available.name}<span class="label label-primary linked <#if !isLinked>hidden</#if>">Linked</span></label></td>
-						<td class="sortable">${available.group.members?size}</td>
-						<td>${available.group.assessmentGroup}</td>
-						<td>${available.cats!'-'}</td>
-						<td>${available.occurrence}</td>
-						<td>${available.sequence}</td>
-						<td>${available.assessmentType!'A'}</td>
-					</tr>
+						<@upstream_group available isLinked true />
+					</#list>
+					<#list command.notInUseUpstreamGroups as notInUse>
+						<#local isLinked = notInUse.isLinked(command.assessmentGroups) />
+						<@upstream_group notInUse isLinked false />
 					</#list>
 				</tbody>
 			</table>
+			<#if command.notInUseUpstreamGroups?size != 0>
+				<p>
+					<a href="#" id="toggleNotInUseComponents">
+						<span>Show</span>
+						<#if command.notInUseUpstreamGroups?size == 1>
+							1 not-in-use component
+						<#else>
+							${command.notInUseUpstreamGroups?size} not-in-use components
+						</#if>
+					</a>
+				</p>
+				<script>
+					$(function() {
+						var visible = false;
+
+						$('#toggleNotInUseComponents').on('click', function () {
+							visible = !visible;
+							$('#sits-table [data-in-use=false]').toggle('fast');
+							$(this).blur().children('span').text(visible ? 'Hide' : 'Show');
+							return false;
+						});
+					});
+				</script>
+			</#if>
 			<div class="sits-picker">
 				<a class="btn btn-primary disabled sits-picker sits-picker-action spinnable spinner-auto link-sits" data-url="<@routes.enrolment command.assignment />">Link</a>
 				<a class="btn btn-danger disabled sits-picker sits-picker-action spinnable spinner-auto unlink-sits" data-url="<@routes.enrolment command.assignment/>">Unlink</a>
