@@ -204,9 +204,9 @@ class GenerateExamGridController extends ExamsController
 				errors.reject("examGrid.noStudents")
 				selectCourseRender(selectCourseCommand, gridOptionsCommand, department, academicYear)
 			} else {
-				stopOngoingImportForStudents(students)
-
 				if (!maintenanceModeService.enabled) {
+					stopOngoingImportForStudents(students)
+
 					val jobInstance = jobService.add(Some(user), ImportMembersJob(students.map(_.universityId)))
 
 					allRequestParams.set("jobId", jobInstance.id)
