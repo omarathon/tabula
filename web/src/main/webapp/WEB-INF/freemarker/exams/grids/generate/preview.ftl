@@ -419,24 +419,15 @@
 		var cellWidths = $cells.map(outerWidth);
 
 		$bodies.css('display', 'block').each(function (i) {
-			$(this).css({
-				width: bodyWidths[i],
-				minWidth: bodyWidths[i]
-			});
+			$(this).outerWidth(bodyWidths[i]);
 		});
 
 		$rows.each(function (i) {
-			$(this).css({
-				width: rowWidths[i],
-				minWidth: rowWidths[i]
-			});
+			$(this).outerWidth(rowWidths[i]);
 		});
 
 		$cells.each(function (i) {
-			$(this).css({
-				width: cellWidths[i],
-				minWidth: cellWidths[i]
-			});
+			$(this).outerWidth(cellWidths[i]);
 		});
 	});
 </script>
