@@ -8,12 +8,17 @@
 
 	<@cm2.assignmentHeader title assignment "for" />
 
-	<#assign time_remaining=durationFormatter(assignment.closeDate) />
 	<#if !assignment.newExtensionsCanBeRequested>
-		<p>
-			This assignment closed <@fmt.date date=assignment.closeDate /> (${time_remaining}).
-			You cannot request an extension after the close date has passed.
-		</p>
+		<#if assignment.extensionsPossible>
+			<p>
+				This assignment closed <@fmt.date date=assignment.closeDate /> (${durationFormatter(assignment.closeDate)}).
+				You cannot request an extension after the close date has passed.
+			</p>
+		<#else>
+			<p>
+				You cannot request an extension for this assignment.
+			</p>
+		</#if>
 	<#else>
 		<#assign formAction><@routes.cm2.extensionRequest assignment /></#assign>
 
@@ -68,7 +73,13 @@
 					Use the form below to update the details of your extension request.
 				</p>
 			<#else>
-				<p>This assignment closes at <@fmt.date date=assignment.closeDate /> (${time_remaining} remaining).</p>
+				<p>
+					<#if assignment.closed>
+						This assignment closed <@fmt.date date=assignment.closeDate /> (${durationFormatter(assignment.closeDate)}).
+					<#else>
+						This assignment closes at <@fmt.date date=assignment.closeDate /> (${durationFormatter(assignment.closeDate)} remaining).
+					</#if>
+				</p>
 
 				<div id="extensionGuidelines">
 					<@bs3form.labelled_form_group "" "Extension guidelines">
