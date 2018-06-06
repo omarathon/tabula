@@ -80,7 +80,12 @@ class GenerateExamGridController extends ExamsController
 		GenerateExamGridSelectCourseCommand(mandatory(department), mandatory(academicYear), permitRoutesFromRootDepartment = securityService.can(user, departmentPermission, department.rootDepartment))
 
 	@ModelAttribute("gridOptionsCommand")
-	def gridOptionsCommand(@PathVariable department: Department) = GenerateExamGridGridOptionsCommand(mandatory(department))
+	def gridOptionsCommand(@PathVariable department: Department) = {
+		if (maintenanceModeService.enabled)
+			GenerateExamGridGridOptionsCommand.applyReadOnly(mandatory(department))
+		else
+			GenerateExamGridGridOptionsCommand(mandatory(department))
+	}
 
 	@ModelAttribute("coreRequiredModulesCommand")
 	def coreRequiredModulesCommand(@PathVariable department: Department, @PathVariable academicYear: AcademicYear) =
@@ -199,11 +204,13 @@ class GenerateExamGridController extends ExamsController
 				errors.reject("examGrid.noStudents")
 				selectCourseRender(selectCourseCommand, gridOptionsCommand, department, academicYear)
 			} else {
-				stopOngoingImportForStudents(students)
+				if (!maintenanceModeService.enabled) {
+					stopOngoingImportForStudents(students)
 
-				val jobInstance = jobService.add(Some(user), ImportMembersJob(students.map(_.universityId)))
+					val jobInstance = jobService.add(Some(user), ImportMembersJob(students.map(_.universityId)))
 
-				allRequestParams.set("jobId", jobInstance.id)
+					allRequestParams.set("jobId", jobInstance.id)
+				}
 				if (usePreviousSettings) {
 					redirectToAndClearModel(Grids.jobProgress(department,academicYear), allRequestParams)
 				} else {
@@ -220,7 +227,7 @@ class GenerateExamGridController extends ExamsController
 		@ModelAttribute("coreRequiredModulesCommand") coreRequiredModulesCommand: CoreRequiredModulesCommand,
 		@ModelAttribute("checkOvercatCommand") checkOvercatCommand: CheckOvercatCommand,
 		@ModelAttribute("coreRequiredModuleLookup") coreRequiredModuleLookup: CoreRequiredModuleLookup,
-		@RequestParam jobId: String,
+		@RequestParam(required = false) jobId: String,
 		@PathVariable department: Department,
 		@PathVariable academicYear: AcademicYear,
 	): Mav = {
@@ -235,7 +242,7 @@ class GenerateExamGridController extends ExamsController
 		@ModelAttribute("coreRequiredModulesCommand") coreRequiredModulesCommand: CoreRequiredModulesCommand,
 		@ModelAttribute("checkOvercatCommand") checkOvercatCommand: CheckOvercatCommand,
 		@ModelAttribute("coreRequiredModuleLookup") coreRequiredModuleLookup: CoreRequiredModuleLookup,
-		@RequestParam jobId: String,
+		@RequestParam(required = false) jobId: String,
 		@PathVariable department: Department,
 		@PathVariable academicYear: AcademicYear,
 		@RequestParam allRequestParams: MultiValueMap[String, String]
@@ -244,7 +251,8 @@ class GenerateExamGridController extends ExamsController
 			gridOptionsRender(jobId, department, academicYear)
 		} else {
 			val columnIDs = gridOptionsCommand.apply()._1.map(_.identifier)
-			if (columnIDs.contains(new CoreRequiredModulesColumnOption().identifier) || columnIDs.contains(new ModuleReportsColumnOption().identifier)) {
+
+			if (!maintenanceModeService.enabled && columnIDs.contains(new CoreRequiredModulesColumnOption().identifier) || columnIDs.contains(new ModuleReportsColumnOption().identifier)) {
 				redirectToAndClearModel(Grids.coreRequired(department,academicYear), allRequestParams)
 			} else {
 				redirectToAndClearModel(Grids.jobProgress(department,academicYear), allRequestParams)
@@ -263,7 +271,7 @@ class GenerateExamGridController extends ExamsController
 		@ModelAttribute("coreRequiredModulesCommand") coreRequiredModulesCommand: CoreRequiredModulesCommand,
 		@ModelAttribute("checkOvercatCommand") checkOvercatCommand: CheckOvercatCommand,
 		@ModelAttribute("coreRequiredModuleLookup") coreRequiredModuleLookup: CoreRequiredModuleLookup,
-		@RequestParam jobId: String,
+		@RequestParam(required = false) jobId: String,
 		@PathVariable department: Department,
 		@PathVariable academicYear: AcademicYear
 	): Mav = {
@@ -279,7 +287,7 @@ class GenerateExamGridController extends ExamsController
 		errors: Errors,
 		@ModelAttribute("coreRequiredModuleLookup") coreRequiredModuleLookup: CoreRequiredModuleLookup,
 		@ModelAttribute("checkOvercatCommand") checkOvercatCommand: CheckOvercatCommand,
-		@RequestParam jobId: String,
+		@RequestParam(required = false) jobId: String,
 		@PathVariable department: Department,
 		@PathVariable academicYear: AcademicYear,
 		@RequestParam allRequestParams: MultiValueMap[String, String]
@@ -302,7 +310,7 @@ class GenerateExamGridController extends ExamsController
 
 	@GetMapping(path = Array("/import"))
 	def checkJobProgress(
-		@RequestParam jobId: String,
+		@RequestParam(required = false) jobId: String,
 		@ModelAttribute("selectCourseCommand") selectCourseCommand: SelectCourseCommand,
 		@ModelAttribute("gridOptionsCommand") gridOptionsCommand: GridOptionsCommand,
 		@ModelAttribute("checkOvercatCommand") checkOvercatCommand: CheckOvercatCommand,
@@ -311,7 +319,7 @@ class GenerateExamGridController extends ExamsController
 		@PathVariable academicYear: AcademicYear,
 		@RequestParam allRequestParams: MultiValueMap[String, String]
 	): Mav = {
-		val jobInstance = jobService.getInstance(jobId)
+		val jobInstance = Option(jobId).flatMap(jobService.getInstance)
 		if (jobInstance.isDefined && !jobInstance.get.finished) {
 			val studentLastImportDates = selectCourseCommand.apply().map(e =>
 				(Seq(e.firstName, e.lastName).mkString(" "), e.lastImportDate.getOrElse(new DateTime(0)))
@@ -448,7 +456,7 @@ class GenerateExamGridController extends ExamsController
 		checkOvercatCmd.validate(checkOvercatCommandErrors)
 
 		val entities = {
-			if (checkOvercatCommandErrors.hasErrors) {
+			if (checkOvercatCommandErrors.hasErrors || maintenanceModeService.enabled) {
 				checkOvercatCmd.entities
 			} else {
 				checkOvercatCmd.apply().entities

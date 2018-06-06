@@ -34,16 +34,24 @@
 					time, you'll need to generate the grid again to see the most recent information.
 				</p>
 
-			<form action="<@routes.exams.generateGrid department academicYear />" method="post">
-				<@form_fields.select_course_fields />
-				<@form_fields.grid_options_fields />
+				<#if !(info.maintenance!false)>
+					<form action="<@routes.exams.generateGrid department academicYear />" method="post">
+						<@form_fields.select_course_fields />
+						<@form_fields.grid_options_fields />
 
-				<p>
-					<button type="submit" class="btn btn-primary" name="${GenerateExamGridMappingParameters.usePreviousSettings}">
-						Refresh SITS data and regenerate grid
-					</button>
-				</p>
-			</form>
+						<p>
+							<button type="submit" class="btn btn-primary" name="${GenerateExamGridMappingParameters.usePreviousSettings}">
+								Refresh SITS data and regenerate grid
+							</button>
+						</p>
+					</form>
+				<#else>
+					<p>
+						<button class="btn btn-primary use-tooltip" disabled title="Tabula has been placed in a read-only mode. Refreshing SITS data is not currently possible.">
+							Refresh SITS data and regenerate grid
+						</button>
+					</p>
+				</#if>
 
 				<p>
 					<strong>

@@ -26,11 +26,25 @@ object GenerateExamGridGridOptionsCommand {
 			with GenerateExamGridGridOptionsDescription
 			with GenerateExamGridGridOptionsCommandState
 			with GenerateExamGridGridOptionsCommandRequest
+			with GenerateExamGridGridOptionsCommandDepartmentPersistence
+
+	def applyReadOnly(department: Department) =
+		new GenerateExamGridGridOptionsCommandInternal(department)
+			with ComposableCommand[(Seq[ExamGridColumnOption], Seq[String])]
+			with AutowiringModuleAndDepartmentServiceComponent
+			with PopulatesGenerateExamGridGridOptionsCommand
+			with GenerateExamGridGridOptionsValidation
+			with GenerateExamGridGridOptionsPermissions
+			with GenerateExamGridGridOptionsDescription
+			with GenerateExamGridGridOptionsCommandState
+			with GenerateExamGridGridOptionsCommandRequest
+			with GenerateExamGridGridOptionsCommandNoPersistence
+			with ReadOnly
 }
 
 class GenerateExamGridGridOptionsCommandInternal(val department: Department) extends CommandInternal[(Seq[ExamGridColumnOption], Seq[String])] {
 
-	self: GenerateExamGridGridOptionsCommandState with GenerateExamGridGridOptionsCommandRequest with ModuleAndDepartmentServiceComponent =>
+	self: GenerateExamGridGridOptionsCommandState with GenerateExamGridGridOptionsCommandRequest with GenerateExamGridGridOptionsCommandPersistence =>
 
 	override def applyInternal(): (Seq[ExamGridColumnOption], Seq[String]) = {
 		department.examGridOptions = ExamGridOptions(
@@ -45,10 +59,28 @@ class GenerateExamGridGridOptionsCommandInternal(val department: Department) ext
 			yearMarksToUse,
 			mandatoryModulesAndYearMarkColumns
 		)
-		moduleAndDepartmentService.saveOrUpdate(department)
+
+		saveDepartment()
+
 		(predefinedColumnOptions, customColumnTitles.asScala)
 	}
 
+}
+
+trait GenerateExamGridGridOptionsCommandPersistence {
+	def saveDepartment(): Unit
+}
+
+trait GenerateExamGridGridOptionsCommandNoPersistence extends GenerateExamGridGridOptionsCommandPersistence {
+	self: ReadOnly =>
+	override def saveDepartment(): Unit = {}
+}
+
+trait GenerateExamGridGridOptionsCommandDepartmentPersistence extends GenerateExamGridGridOptionsCommandPersistence {
+	self: GenerateExamGridGridOptionsCommandState with ModuleAndDepartmentServiceComponent =>
+	override def saveDepartment(): Unit = {
+		moduleAndDepartmentService.saveOrUpdate(department)
+	}
 }
 
 trait PopulatesGenerateExamGridGridOptionsCommand extends PopulateOnForm {
