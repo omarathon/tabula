@@ -412,7 +412,7 @@ Generates the bulk of the picker HTML, inside a fieldset element
 
 			<#-- dynamically attach check-all checkbox -->
 			$('.for-check-all').append($('<input />', { type: 'checkbox', 'class': 'check-all use-tooltip', title: 'Select all/none' }));
-			$('.check-all').tooltip({ delay: 1500 });
+			$('.check-all').tooltip({ delay: 1500, container: 'body' });
 			$enrolment.on('click', '.table-checkable th .check-all', function(e) {
 				var $table = $(this).closest('table');
 				var checkStatus = this.checked;
