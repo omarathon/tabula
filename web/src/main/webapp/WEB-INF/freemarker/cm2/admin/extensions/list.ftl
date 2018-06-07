@@ -1,8 +1,10 @@
 <#import "*/cm2_macros.ftl" as cm2 />
 <#include "../_filters.ftl" />
+<#assign currentPage = command.page />
+<#assign totalPages = results.total/command.extensionsPerPage?ceiling />
+
 <#escape x as x?html><#compress>
 	<h1>Extensions</h1>
-
 	<div class="filters btn-group-group well well-small well-sm">
 		<#assign formAction><@routes.cm2.filterExtensions academicYear /></#assign>
 		<@f.form
@@ -80,6 +82,34 @@
 			</button>
 		</@f.form>
 	</div>
+
+  <div class="col-md-12">
+		<script language="JavaScript">
+
+		</script>
+		<ul class="pagination pagination-sm pull-right">
+  		<#if currentPage lte 1>
+  			<li class="disabled"><span>&laquo;</span></li>
+			<#else>
+  			<li><a href="?page=${currentPage - 1}">&laquo;</a></li>
+			</#if>
+
+  		<#list 1..totalPages as page>
+				<#if page == currentPage>
+  				<li class="active"><span>${page}</span></li>
+				<#else>
+  				<li><a href="?page=${page}">${page}</a></li>
+				</#if>
+			</#list>
+
+  		<#if currentPage gte totalPages>
+  			<li class="disabled"><span>&raquo;</span></li>
+			<#else>
+  			<li><a href="?page=${currentPage + 1}">&raquo;</a></li>
+			</#if>
+		</ul>
+	</div>
+
 	<div class="filter-results">
 		<#include "_filter_results.ftl" />
 	</div>
