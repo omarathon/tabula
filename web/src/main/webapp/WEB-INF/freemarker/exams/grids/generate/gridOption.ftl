@@ -383,7 +383,8 @@
 			</div>
 		</div>
 		<#if department.rootDepartment.code == 'ma'>
-			<div class="col-md-3">
+		<!--TODO make it visible once download excel grids works based on job as that currently times out after 5 mins  -->
+			<div class="col-md-3 hidden">
 				<div class="checkbox">
 					<label><input type="checkbox" name="predefinedColumnIdentifiers" value="best90MA2Modules"
 						<#if gridOptionsCommand.predefinedColumnIdentifiers?seq_contains("best90MA2Modules")>checked</#if>
