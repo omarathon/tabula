@@ -116,7 +116,7 @@ TODO grab values from the Routes object in code, as that's pretty equivalent and
 <#macro extensionRequestAttachment assignment attachment><@_u page="/assignment/${assignment.id}/extension/supporting-file/${attachment.name?url}"/></#macro>
 <#macro assignmentreceipt assignment><@_u page="/submission/${assignment.id}/resend-receipt"/></#macro>
 <#macro submissionReceiptPdf submission><@_u page="/submission/${submission.assignment.id}/submission-receipt.pdf"/></#macro>
-<#macro submissionReceiptPdf_in_profile assignment><@_u page="submission/${submission.assignment.id}/${submission.usercode}/submission-receipt.pdf"/></#macro>
+<#macro submissionReceiptPdf_in_profile assignment><@_u page="/submission/${submission.assignment.id}/${submission.usercode}/submission-receipt.pdf"/></#macro>
 <#macro submissionAttachment submission attachment><@_u page="/submission/${submission.assignment.id}/attachment/${attachment.name?url}" /></#macro>
 <#macro submissionAttachment_in_profile submission attachment><@_u page="/submission/${submission.assignment.id}/${submission.usercode}/attachment/${attachment.name?url}" /></#macro>
 <#macro feedbackPdf assignment feedback><@_u page="/submission/${assignment.id}/${feedback.usercode}/feedback.pdf"/></#macro>
