@@ -494,10 +494,7 @@ preposition: Text to relate the title to the department name in the second line,
 	   data-content="${content}"
 	   data-container="body"
 	   <#if html>data-html="true"</#if>
-	>
-		<i class="icon-question-sign fa fa-question-circle"></i>
-	</a>
-
+	><i class="icon-question-sign fa fa-question-circle"></i></a>
 </#macro>
 
 <#macro location location>

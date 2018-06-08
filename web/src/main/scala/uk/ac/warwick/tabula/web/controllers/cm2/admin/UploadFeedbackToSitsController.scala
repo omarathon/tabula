@@ -32,7 +32,9 @@ class UploadFeedbackToSitsController extends CourseworkController {
 	@RequestMapping(method = Array(POST), params = Array("confirm"))
 	def submit(@ModelAttribute("command") cmd: Appliable[Seq[Feedback]], @PathVariable assignment: Assignment): Mav = {
 		cmd.apply()
-		Redirect(Routes.admin.assignment.submissionsandfeedback(assignment))
+
+		Mav("cm2/admin/assignments/publish/sits_done")
+			.crumbsList(Breadcrumbs.assignment(assignment))
 	}
 
 }

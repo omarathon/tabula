@@ -14,7 +14,7 @@
 		<@bs3form.checkbox path="automaticallyReleaseToMarkers">
 			<#assign popoverContent>
 				<p>
-					When using a marking workflow, automatically release submissions to markers once the assignment closes. Late submissions or submissions within an extension are released when they are received. Ensure you assign markers to submissions before the assignment close date.
+					When using a marking workflow, automatically release students to markers once the assignment closes. Students with late submissions or submissions within an extension are released when the submission is received. Ensure you assign markers to students before the assignment close date.
 				</p>
 
 				<p>
@@ -54,7 +54,7 @@
 			Allow feedback to be published to students for this assignment
 		</@bs3form.checkbox>
 		<div class="help-block">
-			Deselecting this option will allow feedback to be added to submissions but not published to students. Ideal for exam related assignments
+			Deselecting this option allows feedback to be added but not published to students. Ideal for exam-related assignments.
 		</div>
 	</@bs3form.labelled_form_group>
 

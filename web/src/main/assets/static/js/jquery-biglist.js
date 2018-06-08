@@ -60,14 +60,15 @@ $.fn.bigList = function(options) {
 
         $selectAll.on('change', function(){
             var checked = $(this).is(':checked');
-            $checkboxes.prop('checked', checked);
+            var $checkableCheckboxes = $checkboxes.filter(':not(:disabled)');
+            $checkableCheckboxes.prop('checked', checked);
             if (!!onChange) {
 				// Avoid looping if we can
-				$checkboxes.each(function () {
+				$checkableCheckboxes.each(function () {
 					onChange.call(jQuery(this));
 				});
 			}
-			onBulkChange.call($this, $checkboxes);
+			onBulkChange.call($this, $checkableCheckboxes);
             if (checked) {
                 $this.data('checked','all');
                 onAllChecked.call($this);

@@ -51,11 +51,7 @@
 							<ul class="nav nav-tabs" role="tablist">
 								<li role="presentation" class="active">
 									<a href="#${identifier}-submission" aria-controls="${identifier}-submission" role="tab" data-toggle="tab">
-										<#if assignment.collectSubmissions>
-											Submission details
-										<#else>
-											Details
-										</#if>
+										Progress
 									</a>
 								</li>
 

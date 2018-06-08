@@ -45,10 +45,10 @@
 
 		<div class="alert alert-info">
 			<p>
-				Any submissions <#if workflow.reusable>to the assignments listed above </#if>that have already been released will not be re-released, so the new marker will not be notified that they need to mark the submissions. You should contact the new marker yourself.
+				Any students <#if workflow.reusable>to the assignments listed above </#if>that have already been released will not be re-released, so the new marker will not be notified that they need to add marks for the students. You should contact the new marker yourself.
 			</p>
 			<@bs3form.checkbox path="confirm">
-				<@f.checkbox path="confirm" /> I understand that I need to contact the new marker to inform them that they may need to mark submissions.
+				<@f.checkbox path="confirm" /> I understand that I need to contact the new marker to inform them that they may need to add marks for students.
 			</@bs3form.checkbox>
 		</div>
 	<#else>

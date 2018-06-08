@@ -18,6 +18,7 @@ object GenerateExamGridAuditCommand {
 			with GenerateExamGridAuditState
 			with GenerateExamGridAuditDescription
 			with GenerateExamGridAuditPermissions
+			with ReadOnly
 		{
 			courses = cmd.courses
 			routes = cmd.routes

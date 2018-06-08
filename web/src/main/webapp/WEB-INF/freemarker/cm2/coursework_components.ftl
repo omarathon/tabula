@@ -1302,6 +1302,7 @@
 		jQuery(function($){
 			$("#tool-tip-${attachment.id}").popover({
 				placement: 'right',
+				container: 'body',
 				html: true,
 				content: function(){return $('#tip-content-${attachment.id}').html();},
 				title: 'Turnitin report summary'

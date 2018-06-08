@@ -110,7 +110,7 @@ trait AttendancePointCommandState {
 				smallGroupEventModules.addAll(point.smallGroupEventModules.asJava)
 				smallGroupEventQuantity = point.smallGroupEventQuantity
 				smallGroupEventQuantityAll = point.smallGroupEventQuantity == 0
-				isAnySmallGroupEventModules = point.smallGroupEventModules.nonEmpty
+				isAnySmallGroupEventModules = point.smallGroupEventModules.isEmpty
 			case AttendanceMonitoringPointType.AssignmentSubmission =>
 				assignmentSubmissionType = point.assignmentSubmissionType
 				assignmentSubmissionTypeAnyQuantity = point.assignmentSubmissionTypeAnyQuantity
