@@ -84,46 +84,7 @@
 	</div>
 
   <div class="col-md-12">
-		<script language="JavaScript">
-			jQuery(function($) {
-				$('.pagination a').on('click', function(e) {
-					e.preventDefault();
-					e.stopPropagation();
-					var pageNumber = $(this).data('page');
-					if (location.search) {
-						if (location.search.indexOf('page=') != -1) {
-							location.search = location.search.replace(/page=\d+/, 'page='+ pageNumber)
-						} else {
-							location.search = location.search + '&page=' + pageNumber;
-						}
-					} else {
-						location.search = '?page=' + pageNumber;
-					}
-				});
-			});
-		</script>
-
-		<ul class="pagination pagination-sm pull-right">
-  		<#if currentPage lte 1>
-  			<li class="disabled"><span>&laquo;</span></li>
-			<#else>
-  			<li><a data-page="${currentPage - 1}">&laquo;</a></li>
-			</#if>
-
-  		<#list 1..totalPages as page>
-				<#if page == currentPage>
-  				<li class="active"><span>${page}</span></li>
-				<#else>
-  				<li><a data-page="${page}">${page}</a></li>
-				</#if>
-			</#list>
-
-  		<#if currentPage gte totalPages>
-  			<li class="disabled"><span>&raquo;</span></li>
-			<#else>
-  			<li><a data-page="${currentPage + 1}">&raquo;</a></li>
-			</#if>
-		</ul>
+		 <@cm2.pagination currentPage totalPages />
 	</div>
 
 	<div class="filter-results">
