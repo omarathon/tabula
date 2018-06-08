@@ -118,7 +118,7 @@ TODO grab values from the Routes object in code, as that's pretty equivalent and
 <#macro submissionReceiptPdf submission><@_u page="/submission/${submission.assignment.id}/submission-receipt.pdf"/></#macro>
 <#macro submissionReceiptPdf_in_profile assignment><@_u page="submission/${submission.assignment.id}/${submission.usercode}/submission-receipt.pdf"/></#macro>
 <#macro submissionAttachment submission attachment><@_u page="/submission/${submission.assignment.id}/attachment/${attachment.name?url}" /></#macro>
-<#macro submissionAttachment_in_profile submission attachment><@_u page="submission/${submission.assignment.id}/${submission.usercode}/attachment/${attachment.name?url}" /></#macro>
+<#macro submissionAttachment_in_profile submission attachment><@_u page="/submission/${submission.assignment.id}/${submission.usercode}/attachment/${attachment.name?url}" /></#macro>
 <#macro feedbackPdf assignment feedback><@_u page="/submission/${assignment.id}/${feedback.usercode}/feedback.pdf"/></#macro>
 <#macro feedbackAttachment feedback attachment><@_u page="/submission/${feedback.assignment.id}/get/${attachment.name?url}"/></#macro>
 <#macro feedbackAttachment_in_profile feedback attachment><@_u page="/submission/${feedback.assignment.id}/${feedback.universityId}/get/${attachment.name?url}"/></#macro>
