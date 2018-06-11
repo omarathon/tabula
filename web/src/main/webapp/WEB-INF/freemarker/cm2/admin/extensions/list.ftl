@@ -1,7 +1,5 @@
 <#import "*/cm2_macros.ftl" as cm2 />
 <#include "../_filters.ftl" />
-<#assign currentPage = command.page />
-<#assign totalPages = results.total/command.extensionsPerPage?ceiling />
 
 <#escape x as x?html><#compress>
 	<h1>Extensions</h1>
@@ -81,10 +79,6 @@
 				Clear filters
 			</button>
 		</@f.form>
-	</div>
-
-  <div class="col-md-12">
-		 <@cm2.pagination currentPage totalPages />
 	</div>
 
 	<div class="filter-results">
