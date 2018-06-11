@@ -359,12 +359,8 @@
 			});
 		});
 	}
-
 	setUpPaginationButtons();
-
-	$(document).on('tabula.filterResultsChanged', function(){
-		setUpPaginationButtons();
-	});
+	$(document).on('tabula.filterResultsChanged', setUpPaginationButtons);
 
 	// code for bulk copy assignments
 	$(function(){
