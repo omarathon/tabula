@@ -101,7 +101,7 @@ class FilterExtensionsCommandInternal(val academicYear: AcademicYear, val user: 
 
 trait FilterExtensionsState extends FiltersExtensions {
 	var page = 1
-	var extensionsPerPage = 50
+	var extensionsPerPage = 5
 	var defaultOrder: JList[Order] = Seq(desc("requestedOn")).asJava
 	var sortOrder: JList[Order] = JArrayList()
 
