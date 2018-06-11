@@ -50,31 +50,27 @@
 	</#macro>
 
   <#macro pagination currentPage totalPages>
-	  <div>
-    	<div class="col-md-12">
-	  		<ul class="pagination pagination-sm pull-right">
-    		<#if currentPage lte 1>
-    			<li class="disabled"><span>&laquo;</span></li>
-	  		<#else>
-    			<li><a data-page="${currentPage - 1}">&laquo;</a></li>
-	  		</#if>
-
-    		<#list 1..totalPages as page>
-	  			<#if page == currentPage>
-    				<li class="active"><span>${page}</span></li>
-	  			<#else>
-    				<li><a data-page="${page}">${page}</a></li>
-	  			</#if>
-	  		</#list>
-
-    		<#if currentPage gte totalPages>
-    			<li class="disabled"><span>&raquo;</span></li>
-	  		<#else>
-    			<li><a data-page="${currentPage + 1}">&raquo;</a></li>
-	  		</#if>
-	  		</ul>
-	  	</div>
-	  </div>
+  	<#if totalPages gt 1>
+			<ul class="pagination pagination-sm pull-right">
+    	<#if currentPage lte 1>
+    		<li class="disabled"><span>&laquo;</span></li>
+			<#else>
+    		<li><a data-page="${currentPage - 1}">&laquo;</a></li>
+			</#if>
+    	<#list 1..totalPages as page>
+				<#if page == currentPage>
+    			<li class="active"><span>${page}</span></li>
+				<#else>
+    			<li><a data-page="${page}">${page}</a></li>
+				</#if>
+			</#list>
+    	<#if currentPage gte totalPages>
+    		<li class="disabled"><span>&raquo;</span></li>
+			<#else>
+    		<li><a data-page="${currentPage + 1}">&raquo;</a></li>
+			</#if>
+			</ul>
+  	</#if>
   </#macro>
 
 	<#macro previousSubmissions extensionId studentIdentifier fullName previousSubmissions>
