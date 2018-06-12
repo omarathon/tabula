@@ -32,7 +32,7 @@ object StudentCourseYearDetails {
 	def toExamGridEntityYearGrouped(yearOfStudy: YearOfStudy, scyds: StudentCourseYearDetails *): ExamGridEntityYear = {
 
 		if (scyds.map(_.studyLevel).distinct.size > 1) throw new IllegalArgumentException("Cannot group StudentCourseYearDetails from different levels")
-		val moduleRegistrations = scyds.flatMap(_.moduleRegistrations).sortBy { mr => (mr.module.code, mr.academicYear.startYear) }.reverse
+		val moduleRegistrations = scyds.flatMap(_.moduleRegistrations).sortBy { mr => (mr.module.code, -mr.academicYear.startYear) }
 		val route = {
 			val allRoutes = scyds.sorted.flatMap(scyd => Option(scyd.route)).toSet // ignore any nulls
 			allRoutes.lastOption.getOrElse(scyds.head.studentCourseDetails.currentRoute)
