@@ -12,9 +12,7 @@ import uk.ac.warwick.tabula.commands.TaskBenchmarking
 import uk.ac.warwick.tabula.data.model._
 import uk.ac.warwick.tabula.exams.grids.StatusAdapter
 import uk.ac.warwick.tabula.exams.grids.columns._
-import uk.ac.warwick.tabula.jobs.Job
 import uk.ac.warwick.tabula.services.exams.grids.NormalLoadLookup
-import uk.ac.warwick.tabula.services.jobs.JobInstance
 
 object GenerateExamGridExporter extends TaskBenchmarking {
 

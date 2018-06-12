@@ -76,16 +76,36 @@ class ExcelGridDocument extends ExamGridDocument
 			)
 		}
 
+		status.stageCount = 4
+
 		val chosenYearColumnValues = benchmarkTask("chosenYearColumnValues") {
-			Seq(studentInformationColumns, summaryColumns).flatten.map(c => c -> c.values).toMap
+			status.stageNumber = 1
+			val columns = Seq(studentInformationColumns, summaryColumns).flatten
+
+			columns.zipWithIndex.map { case (c, i) =>
+				status.setMessage(s"Populating column: ${c.title}")
+				status.setProgress(i, columns.size)
+
+				c -> c.values
+			}.toMap
 		}
+
 		val perYearColumnValues = benchmarkTask("perYearColumnValues") {
-			perYearColumns.values.flatten.toSeq.map(c => c -> c.values).toMap
+			status.stageNumber = 2
+			val columns = perYearColumns.values.flatten.toSeq
+
+			columns.zipWithIndex.map { case (c, i) =>
+				status.setMessage(s"Populating column: ${c.title}")
+				status.setProgress(i, columns.size)
+
+				c -> c.values
+			}.toMap
 		}
+
+		status.stageNumber = 3
+		status.setMessage("Building the spreadsheet")
 
 		val workbook = if (gridOptionsCommand.showFullLayout) {
-			status.setMessage("Building spreadsheet")
-
 			GenerateExamGridExporter(
 				department = department,
 				academicYear = academicYear,
@@ -130,8 +150,6 @@ class ExcelGridDocument extends ExamGridDocument
 				}).toMap
 			}
 
-			status.setMessage("Building spreadsheet")
-
 			GenerateExamGridShortFormExporter(
 				department = department,
 				academicYear = academicYear,
@@ -155,6 +173,10 @@ class ExcelGridDocument extends ExamGridDocument
 				status = status
 			)
 		}
+
+		status.stageNumber = 4
+		status.setMessage("Finalising the spreadsheet")
+		status.setProgress(0)
 
 		val file = new FileAttachment
 
