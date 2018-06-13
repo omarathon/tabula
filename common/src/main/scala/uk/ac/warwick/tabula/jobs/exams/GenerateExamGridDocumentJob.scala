@@ -4,16 +4,16 @@ import org.springframework.beans.MutablePropertyValues
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.format.support.FormattingConversionService
 import org.springframework.stereotype.Component
+import org.springframework.transaction.annotation.Propagation
 import org.springframework.validation.{BindingResult, DataBinder}
 import uk.ac.warwick.spring.Wire
-import uk.ac.warwick.tabula.JavaImports._
 import uk.ac.warwick.tabula.commands.TaskBenchmarking
 import uk.ac.warwick.tabula.commands.exams.grids.{GenerateExamGridCheckAndApplyOvercatCommand, GenerateExamGridGridOptionsCommand, GenerateExamGridSelectCourseCommand}
 import uk.ac.warwick.tabula.data.Transactions._
-import uk.ac.warwick.tabula.data.model.{CoreRequiredModuleLookup, CoreRequiredModuleLookupImpl, Department, Level}
+import uk.ac.warwick.tabula.data.model.Department
 import uk.ac.warwick.tabula.exams.grids.JobInstanceStatusAdapter
 import uk.ac.warwick.tabula.exams.grids.documents.ExamGridDocument._
-import uk.ac.warwick.tabula.exams.grids.documents.{ExamGridDocument, ExamGridDocumentPrototype, ExcelGridDocument}
+import uk.ac.warwick.tabula.exams.grids.documents.{ExamGridDocument, ExamGridDocumentPrototype}
 import uk.ac.warwick.tabula.jobs.{Job, JobPrototype}
 import uk.ac.warwick.tabula.permissions.{Permission, Permissions}
 import uk.ac.warwick.tabula.services.jobs.JobInstance
@@ -71,7 +71,7 @@ class GenerateExamGridDocumentJob extends Job with AutowiringSecurityServiceComp
 		binder.getBindingResult
 	}
 
-	override def run(implicit job: JobInstance): Unit = transactional() {
+	override def run(implicit job: JobInstance): Unit = transactional(propagation = Propagation.SUPPORTS) {
 		updateStatus("Preparing")
 
 		val department = moduleAndDepartmentService.getDepartmentByCode(job.getString("department")).get
