@@ -20,7 +20,7 @@
 
 <div class="hidden" id="downloadLink">
 	<p>
-		<a href="/exams/grids/${department.code}/${academicYear.storeValue}/generate/documents/download?jobId=${job.id}" class="btn btn-default">
+		<a href="<@routes.exams.downloadGridDocument department academicYear job />" class="btn btn-default">
 			<i class="fa fa-fw fa-arrow-circle-o-down"></i>
 			Download
 		</a>
