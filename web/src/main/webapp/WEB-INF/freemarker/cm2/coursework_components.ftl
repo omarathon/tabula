@@ -1260,7 +1260,7 @@
 				<span class="label label-info">Disability disclosed</span>
 			</a>
 		</#if>
-	<#elseif !enhancedFeedback?has_content>
+	<#else>
 		<span class="label label-info">Unsubmitted</span>
 		<#if enhancedExtension?has_content>
 			<#local extension=enhancedExtension.extension>
