@@ -10,7 +10,8 @@ import uk.ac.warwick.tabula.data.AutowiringCM2MarkingWorkflowDaoComponent
 import uk.ac.warwick.tabula.data.model.markingworkflow._
 import uk.ac.warwick.tabula.data.model._
 import uk.ac.warwick.tabula.JavaImports._
-import uk.ac.warwick.userlookup.User
+import uk.ac.warwick.userlookup.{AnonymousUser, User}
+
 import scala.collection.immutable.{SortedMap, TreeMap}
 import CM2MarkingWorkflowService._
 import uk.ac.warwick.tabula.data.model.forms.SavedFormValue
@@ -275,7 +276,13 @@ class CM2MarkingWorkflowServiceImpl extends CM2MarkingWorkflowService with Autow
 	}
 
 	override def getAllStudentsForMarker(assignment: Assignment, marker: User): Seq[User] =
-		getAllFeedbackForMarker(assignment: Assignment, marker: User).values.flatten.map(_.student).toSeq.distinct
+		getAllFeedbackForMarker(assignment: Assignment, marker: User).values.flatten.flatMap { mf =>
+			try {
+				Some(mf.student)
+			} catch {
+				case _: IllegalStateException => None
+			}
+		}.toSeq.distinct
 
 	override def getReusableWorkflows(department: Department, academicYear: AcademicYear): Seq[CM2MarkingWorkflow] = {
 		markingWorkflowDao.getReusableWorkflows(department, academicYear)
