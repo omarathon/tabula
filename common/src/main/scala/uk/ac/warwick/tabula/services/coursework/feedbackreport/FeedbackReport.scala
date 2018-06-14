@@ -71,7 +71,7 @@ class FeedbackReport(department: Department, academicYear: Option[AcademicYear],
 			addStringCell(assignmentInfo.assignment.name, row)
 			addStringCell(assignmentInfo.moduleCode.toUpperCase, row)
 			addStringCell(assignmentInfo.moduleName, row)
-			addStringCell(if (assignmentInfo.feedbackCount.onTime == assignmentInfo.totalPublished) "Y" else "N", row)
+			addStringCell(if (assignmentInfo.feedbackCount.late == 0) "Y" else "N", row)
 			addStringCell(if (assignmentInfo.dissertation) "Y" else "N", row)
 			addStringCell("", row)
 
@@ -181,11 +181,12 @@ class FeedbackReport(department: Department, academicYear: Option[AcademicYear],
 			val totalPublished = assignmentInfoList.map(_.totalPublished).sum
 			val totalUnPublished = numberOfSubmissions - totalPublished
 			val ontime = assignmentInfoList.map(_.feedbackCount.onTime).sum
+			val late = assignmentInfoList.map(_.feedbackCount.late).sum // minus any dissertations?
 
 			// Columns we believe are required for admin report to The Centre TAB-6246
 			addStringCell(assignmentInfoList.head.moduleName, row)
 			addStringCell(moduleCode.toUpperCase, row)
-			addStringCell(if (ontime == totalPublished) "Y" else "N", row)
+			addStringCell(if (late == 0) "Y" else "N", row)
 			addStringCell(if (assignmentInfoList.exists(_.assignment.dissertation)) "Y" else "N", row)
 			addStringCell("", row)
 
@@ -202,7 +203,6 @@ class FeedbackReport(department: Department, academicYear: Option[AcademicYear],
 			addNumericCell(totalPublished, row)
 			addNumericCell(ontime, row)
 			addPercentageCell(ontime, totalPublished, row, workbook)
-			val late = assignmentInfoList.map(_.feedbackCount.late).sum // minus any dissertations?
 			addNumericCell(late, row)
 			addPercentageCell(late, totalPublished, row, workbook)
 		}

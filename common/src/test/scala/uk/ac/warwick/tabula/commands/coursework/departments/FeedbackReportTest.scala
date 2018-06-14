@@ -157,23 +157,23 @@ class FeedbackReportTest extends TestBase with ReportWorld {
 
 		check("Row 1",
 			assignmentSheet.getRow(1),
-			Seq("test one", "IN101", dateTime(2013, 3, 10), dateTime(2013, 4, 9), "Summative", "", 10, 10, 0, 2, 0, 10, 10, 1, 0, 0))
+			Seq("test one", "IN101", "Module One", "Y", "N", "", dateTime(2013, 3, 10), dateTime(2013, 4, 9), "Summative", 10, 10, 0, 2, 0, 10, 10, 1, 0, 0))
 
 		check("Row 2",
 			assignmentSheet.getRow(2),
-			Seq("test two", "IN101", dateTime(2013, 4, 10), dateTime(2013, 5, 9), "Summative", "", 29, 29, 0, 5, 0, 29, 5, 0.1724137931034483, 24, 0.8275862068965517))
+			Seq("test two", "IN101", "Module One", "N", "N", "", dateTime(2013, 4, 10), dateTime(2013, 5, 9), "Summative", 29, 29, 0, 5, 0, 29, 5, 0.1724137931034483, 24, 0.8275862068965517))
 
 		check("Row 3",
 			assignmentSheet.getRow(3),
-			Seq("test three", "IN101", dateTime(2013, 5, 10), dateTime(2013, 6, 10), "Formative", "",  13, 13, 0, 2, 0, 13, 6, 0.46153846153846156, 7, 0.5384615384615384))
+			Seq("test three", "IN101", "Module One", "N", "N", "", dateTime(2013, 5, 10), dateTime(2013, 6, 10), "Formative", 13, 13, 0, 2, 0, 13, 6, 0.46153846153846156, 7, 0.5384615384615384))
 
 		check("Row 4",
 			assignmentSheet.getRow(4),
-			Seq("test four","IN102",dateTime(2013, 5, 30),dateTime(2013, 6, 27),"Summative", "", 35,35,0,7,0,35,7,0.2,28,0.8))
+			Seq("test four","IN102", "Module Two", "N", "N", "", dateTime(2013, 5, 30),dateTime(2013, 6, 27),"Summative", 35,35,0,7,0,35,7,0.2,28,0.8))
 
 		check("Row 5",
 			assignmentSheet.getRow(8),
-			Seq("test five","IN102",dateTime(2013, 8, 22),dateTime(2013, 9, 20),"Summative", "", 100,100,0,2,0,100,2,0.02,98,0.98))
+			Seq("test five","IN102", "Module Two", "N", "N", "", dateTime(2013, 8, 22),dateTime(2013, 9, 20),"Summative", 100,100,0,2,0,100,2,0.02,98,0.98))
 
 		/** Not sure how this was working previously with publish date as dateTime(2013, 7, 31). Looking at the logic of extension deadline, 20 day cal is done
 			* based on assignment close date if there are no extensions OR if there is any extension other than approved OR if there is any submission that doesn't
@@ -182,17 +182,17 @@ class FeedbackReportTest extends TestBase with ReportWorld {
 			*/
 		check("Row 6",
 			assignmentSheet.getRow(5),
-			Seq("test six","IN102",dateTime(2013, 7, 1),dateTime(2013, 7, 29),"Summative", "", 73,73,1,23,0,73,68,0.9315068493150684,5,0.0684931506849315))
+			Seq("test six","IN102","Module Two","N", "N", "", dateTime(2013, 7, 1),dateTime(2013, 7, 29),"Summative", 73,73,1,23,0,73,68,0.9315068493150684,5,0.0684931506849315))
 
 		check("Row 7",
 			assignmentSheet.getRow(6),
-			Seq("test seven","IN102", dateTime(2013, 7, 1), null, "Summative", "Dissertation", 100, 100, 0, 2, 50, 50, 50, 1, 0, 0))
+			Seq("test seven","IN102", "Module Two", "Y", "Y", "", dateTime(2013, 7, 1), null, "Summative", 100, 100, 0, 2, 50, 50, 50, 1, 0, 0))
 
 		//assignmentEight has 100 submissions, 2 submitted late. Only 50 have feedback as late.
 		// 1 of this 50 was submitted late so will be excluded
 		check("Row 8",
 			assignmentSheet.getRow(7),
-			Seq("test eight","IN102", dateTime(2013, 7, 1), dateTime(2013, 7, 29), "Summative", "", 100, 100, 0, 2, 50, 50, 1, 0.02, 49, 0.98)
+			Seq("test eight","IN102", "Module Two",  "N", "N", "", dateTime(2013, 7, 1), dateTime(2013, 7, 29), "Summative", 100, 100, 0, 2, 50, 50, 1, 0.02, 49, 0.98)
 		)
 
 
@@ -202,12 +202,12 @@ class FeedbackReportTest extends TestBase with ReportWorld {
 		//assignmentOne/assignmentTwo/assignmentThree belongs to -IN101 - count of all those
 		check("Module row 1",
 			moduleSheet.getRow(1),
-			Seq("Module One","IN101",3,52,52,0,9,0,52,21,0.40384615384615385,31,0.5961538461538461))
+			Seq("Module One","IN101","N", "N", "", 3,52,52,0,9,0,52,21,0.40384615384615385,31,0.5961538461538461))
 
 		//assignmentFour/assignmentFive/assignmentSix/assignmentSeven/assignmentEight belongs to -IN102 - count of all those
 		check("Module row 2",
 			moduleSheet.getRow(2),
-			Seq("Module Two","IN102",5,408,408,1,36,100,308,128,0.4155844155844156,180,0.5844155844155844))
+			Seq("Module Two","IN102","N", "Y", "", 5,408,408,1,36,100,308,128,0.4155844155844156,180,0.5844155844155844))
 	}
 
 	def getTestFeedbackReport: FeedbackReport = {
