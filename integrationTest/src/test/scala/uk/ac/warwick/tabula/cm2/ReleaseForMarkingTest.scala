@@ -9,7 +9,7 @@ class ReleaseForMarkingTest extends BrowserTest with CourseworkFixtures with Giv
 	"Admin" should "be able to release for marking" in {
 		withAssignmentWithWorkflow(SingleMarking, Seq(P.Marker1, P.Marker2)) { id =>
 			releaseForMarking(id)
-			findAll(cssSelector("td.action-col"))foreach(_.underlying.getText should be ("Submission needs marking"))
+			findAll(cssSelector("td.action-col"))foreach(_.underlying.getText should be ("Needs marking"))
 		}
 	}
 
