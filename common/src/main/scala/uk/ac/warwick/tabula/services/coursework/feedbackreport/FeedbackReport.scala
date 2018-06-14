@@ -35,12 +35,18 @@ class FeedbackReport(department: Department, academicYear: Option[AcademicYear],
 		val header = sheet.createRow(0)
 		val style = headerStyle(workbook)
 
+		// Columns we believe are required for admin report to The Centre TAB-6246
 		addStringCell("Assignment name", header, style)
 		addStringCell("Module code", header, style)
+		addStringCell("Module name", header, style)
+		addStringCell("Did assignment meet required 20 University working days turnaround? (Y/N)", header, style)
+		addStringCell("Exemption", header, style)
+		addStringCell("Notes", header, style)
+
+		// Other columns
 		addStringCell("Close date", header, style)
 		addStringCell("Publish deadline", header, style)
 		addStringCell("Credit bearing", header, style)
-		addStringCell("Is dissertation?", header, style)
 		addStringCell("Expected submissions", header, style)
 		addStringCell("Actual submissions", header, style)
 		addStringCell("Late submissions - within extension", header, style)
@@ -61,15 +67,21 @@ class FeedbackReport(department: Department, academicYear: Option[AcademicYear],
 		for (assignmentInfo <- assignmentData) {
 			val row = sheet.createRow(sheet.getLastRowNum + 1)
 
+			// Columns we believe are required for admin report to The Centre TAB-6246
 			addStringCell(assignmentInfo.assignment.name, row)
 			addStringCell(assignmentInfo.moduleCode.toUpperCase, row)
+			addStringCell(assignmentInfo.moduleName, row)
+			addStringCell(if (assignmentInfo.feedbackCount.onTime == assignmentInfo.totalPublished) "Y" else "N", row)
+			addStringCell(if (assignmentInfo.dissertation) "Y" else "N", row)
+			addStringCell("", row)
+
+			// Other columns
 			addDateCell(assignmentInfo.assignment.closeDate, row, dateCellStyle(workbook))
 
 			val publishDeadline = assignmentInfo.assignment.feedbackDeadline.orNull
 			addDateCell(publishDeadline, row, dateCellStyle(workbook))
 
 			addStringCell(if (assignmentInfo.summative) "Summative" else "Formative", row)
-			addStringCell(if (assignmentInfo.dissertation) "Dissertation" else "", row)
 
 			addNumericCell(assignmentInfo.membership, row)
 			addNumericCell(assignmentInfo.numberOfSubmissions, row)
@@ -130,8 +142,15 @@ class FeedbackReport(department: Department, academicYear: Option[AcademicYear],
 		val style = headerStyle(workbook)
 		// add header row
 		val header = sheet.createRow(0)
+
+		// Columns we believe are required for admin report to The Centre TAB-6246
 		addStringCell("Module name", header, style)
 		addStringCell("Module code", header, style)
+		addStringCell("Did module meet required 20 University working days turnaround? (Y/N)", header, style)
+		addStringCell("Any assignments with exemption", header, style)
+		addStringCell("Notes", header, style)
+
+		// Other columns
 		addStringCell("Number of assignments", header, style)
 		addStringCell("Expected submissions", header, style)
 		addStringCell("Actual submissions", header, style)
@@ -154,25 +173,33 @@ class FeedbackReport(department: Department, academicYear: Option[AcademicYear],
 		for ((moduleCode, assignmentInfoList) <- sortedModules) {
 			val row = sheet.createRow(sheet.getLastRowNum + 1)
 
-			addStringCell(assignmentInfoList.head.moduleName, row)
-			addStringCell(moduleCode.toUpperCase, row)
-			addNumericCell(assignmentInfoList.groupBy(_.assignment.name).size, row)
-
 			val expectedSubmissions = assignmentInfoList.map(_.membership).sum
-			addNumericCell(expectedSubmissions, row)
 			val numberOfSubmissions = assignmentInfoList.map(_.numberOfSubmissions).sum
-			addNumericCell(numberOfSubmissions, row)
 			val submissionsLateWithExt = assignmentInfoList.map(_.submissionsLateWithExt).sum
-			addNumericCell(submissionsLateWithExt, row)
 			val submissionsLateWithoutExt = assignmentInfoList.map(_.submissionsLateWithoutExt).sum
-			addNumericCell(submissionsLateWithoutExt, row)
+
 			val totalPublished = assignmentInfoList.map(_.totalPublished).sum
 			val totalUnPublished = numberOfSubmissions - totalPublished
+			val ontime = assignmentInfoList.map(_.feedbackCount.onTime).sum
+
+			// Columns we believe are required for admin report to The Centre TAB-6246
+			addStringCell(assignmentInfoList.head.moduleName, row)
+			addStringCell(moduleCode.toUpperCase, row)
+			addStringCell(if (ontime == totalPublished) "Y" else "N", row)
+			addStringCell(if (assignmentInfoList.exists(_.assignment.dissertation)) "Y" else "N", row)
+			addStringCell("", row)
+
+			// Other columns
+			addNumericCell(assignmentInfoList.groupBy(_.assignment.name).size, row)
+			addNumericCell(expectedSubmissions, row)
+			addNumericCell(numberOfSubmissions, row)
+			addNumericCell(submissionsLateWithExt, row)
+			addNumericCell(submissionsLateWithoutExt, row)
+
 			// totalUnPublished vs. outstanding. not necessarily the same thing.
 
 			addNumericCell(totalUnPublished, row)
 			addNumericCell(totalPublished, row)
-			val ontime = assignmentInfoList.map(_.feedbackCount.onTime).sum
 			addNumericCell(ontime, row)
 			addPercentageCell(ontime, totalPublished, row, workbook)
 			val late = assignmentInfoList.map(_.feedbackCount.late).sum // minus any dissertations?
