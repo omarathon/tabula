@@ -374,7 +374,8 @@ class GenerateExamGridController extends ExamsController
 		@ModelAttribute("checkOvercatCommand") checkOvercatCommand: CheckOvercatCommand,
 		@ModelAttribute("coreRequiredModuleLookup") coreRequiredModuleLookup: CoreRequiredModuleLookup,
 		@PathVariable department: Department,
-		@PathVariable academicYear: AcademicYear
+		@PathVariable academicYear: AcademicYear,
+		@RequestParam(defaultValue = "1") page: Int
 	): Mav = {
 		if (selectCourseCommandErrors.hasErrors || gridOptionsCommandErrors.hasErrors) {
 			throw new IllegalArgumentException
@@ -411,6 +412,8 @@ class GenerateExamGridController extends ExamsController
 			)
 		} else { Map[String, Object]() }
 
+		val entitiesPerPage = Option(gridOptionsCommand.entitiesPerPage).filter(_ > 0)
+
 		val mavObjects = Map(
 			"oldestImport" -> oldestImport,
 			"studentInformationColumns" -> studentInformationColumns,
@@ -420,7 +423,13 @@ class GenerateExamGridController extends ExamsController
 			"perYearColumnValues" -> perYearColumnValues,
 			"chosenYearColumnCategories" -> chosenYearColumnCategories,
 			"perYearColumnCategories" -> perYearColumnCategories,
-			"entities" -> entities,
+			"allEntities" -> entities,
+			"currentPage" -> page,
+			"entities" -> entitiesPerPage.map(perPage => {
+				val start = (page - 1) * perPage
+				entities.slice(start, start + perPage)
+			}).getOrElse(entities),
+			"totalPages" -> entitiesPerPage.map(perPage => Math.ceil(entities.size.toFloat / perPage)).getOrElse(1),
 			"generatedDate" -> DateTime.now,
 			"weightings" -> weightings,
 			"normalLoadLookup" -> normalLoadLookup,

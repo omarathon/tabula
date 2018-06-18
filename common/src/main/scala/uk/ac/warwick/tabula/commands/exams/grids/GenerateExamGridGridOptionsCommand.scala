@@ -57,7 +57,8 @@ class GenerateExamGridGridOptionsCommandInternal(val department: Department) ext
 			moduleNameToShow,
 			layout,
 			yearMarksToUse,
-			mandatoryModulesAndYearMarkColumns
+			mandatoryModulesAndYearMarkColumns,
+			Option(entitiesPerPage).filter(_ > 0)
 		)
 
 		saveDepartment()
@@ -101,6 +102,7 @@ trait PopulatesGenerateExamGridGridOptionsCommand extends PopulateOnForm {
 		layout = options.layout
 		yearMarksToUse = options.yearMarksToUse
 		mandatoryModulesAndYearMarkColumns = options.mandatoryModulesAndYearMarkColumns
+		entitiesPerPage = options.entitiesPerPage.getOrElse(0)
 
 		if (options.mandatoryModulesAndYearMarkColumns) {
 			predefinedColumnIdentifiers.add(new CoreModulesColumnOption().identifier)
@@ -167,6 +169,7 @@ trait GenerateExamGridGridOptionsCommandRequest {
 	var yearMarksToUse: String = "sits"
 	var mandatoryModulesAndYearMarkColumns: Boolean = true
 	var customColumnTitles: JList[String] = JArrayList()
+	var entitiesPerPage: Int = 0
 
 	def showFullLayout: Boolean = layout == "full"
 	def showComponentMarks: Boolean = marksToShow == "all"
@@ -195,6 +198,7 @@ trait GenerateExamGridGridOptionsCommandRequest {
 		"layout" -> layout,
 		"yearMarksToUse" -> yearMarksToUse,
 		"mandatoryModulesAndYearMarkColumns" -> mandatoryModulesAndYearMarkColumns,
-		"customColumnTitles" -> customColumnTitles
+		"customColumnTitles" -> customColumnTitles,
+		"entitiesPerPage" -> entitiesPerPage
 	)
 }

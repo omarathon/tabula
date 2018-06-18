@@ -48,7 +48,7 @@
 							Create small groups from Syllabus+
 						</@fmt.permission_button>
 					</li>
-					<li<#if !modules?has_content> class="disabled"</#if>>
+					<li<#if !modules?has_content || !features.smallGroupTeachingSpreadsheetImport> class="disabled"</#if>>
 						<#assign import_url><@routes.groups.import_spreadsheet department adminCommand.academicYear /></#assign>
 						<@fmt.permission_button
 							permission='SmallGroups.ImportFromExternalSystem'

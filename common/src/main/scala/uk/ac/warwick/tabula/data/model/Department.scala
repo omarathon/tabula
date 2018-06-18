@@ -275,7 +275,8 @@ class Department extends GeneratedId
 		moduleNameToShow,
 		getStringSetting(Settings.ExamGridOptions.Layout, "full"),
 		getStringSetting(Settings.ExamGridOptions.YearMarksToUse, "sits"),
-		getBooleanSetting(Settings.ExamGridOptions.MandatoryModulesAndYearMarkColumns, default = true)
+		getBooleanSetting(Settings.ExamGridOptions.MandatoryModulesAndYearMarkColumns, default = true),
+		Option(getIntSetting(Settings.ExamGridOptions.EntitiesPerPage, default = 0)).filter(_ > 0)
 	)
 	def examGridOptions_=(options: ExamGridOptions): Unit = {
 		settings += (Settings.ExamGridOptions.PredefinedColumnIdentifiers -> options.predefinedColumnIdentifiers)
@@ -288,6 +289,7 @@ class Department extends GeneratedId
 		settings += (Settings.ExamGridOptions.Layout -> options.layout)
 		settings += (Settings.ExamGridOptions.YearMarksToUse -> options.yearMarksToUse)
 		settings += (Settings.ExamGridOptions.MandatoryModulesAndYearMarkColumns -> options.mandatoryModulesAndYearMarkColumns)
+		settings += (Settings.ExamGridOptions.EntitiesPerPage -> options.entitiesPerPage.getOrElse(0))
 	}
 
 	// FIXME belongs in Freemarker
@@ -551,6 +553,7 @@ object Department {
 			val Layout ="examGridOptionsLayout"
 			val YearMarksToUse = "examGridOptionsYearMark"
 			val MandatoryModulesAndYearMarkColumns = "examGridOptionsMandatoryModulesAndYearMarkColumns"
+			val EntitiesPerPage = "entitiesPerPage"
 		}
 		case class ExamGridOptions(
 			predefinedColumnIdentifiers: Set[String],
@@ -562,7 +565,8 @@ object Department {
 			moduleNameToShow: ExamGridDisplayModuleNameColumnValue,
 			layout: String,
 			yearMarksToUse: String,
-			mandatoryModulesAndYearMarkColumns: Boolean
+			mandatoryModulesAndYearMarkColumns: Boolean,
+			entitiesPerPage: Option[Int]
 		)
 	}
 }

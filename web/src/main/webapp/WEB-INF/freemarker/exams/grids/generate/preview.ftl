@@ -213,7 +213,7 @@
 						</tr>
 						<tr>
 							<th>Student Count:</th>
-							<td>${entities?size}</td>
+							<td>${allEntities?size}</td>
 						</tr>
 						<tr>
 							<th>Grid Generated:</th>
@@ -271,6 +271,50 @@
 				<#include "_short_form_grid.ftl" />
 			</#if>
 		</div>
+
+		<#if totalPages gt 1>
+			<form action="<@routes.exams.generateGridPreview department academicYear />" method="get" id="gridPreviewPagination">
+				<@form_fields.select_course_fields />
+				<@form_fields.grid_options_fields />
+
+				<input type="hidden" name="page" value="" />
+
+				<ul class="pagination" style="margin-top: 0;">
+					<#if currentPage lte 1>
+						<li class="disabled"><span>&laquo;</span></li>
+					<#else>
+						<li><a href="#" data-page="${currentPage - 1}">&laquo;</a></li>
+					</#if>
+
+					<#list 1..totalPages as page>
+						<#if currentPage == page>
+							<li class="active"><span>${page}</span></li>
+						<#else>
+							<li><a href="#" data-page="${page}">${page}</a></li>
+						</#if>
+					</#list>
+
+					<#if currentPage gte totalPages>
+						<li class="disabled"><span>&raquo;</span></li>
+					<#else>
+						<li><a href="#" data-page="${currentPage + 1}">&raquo;</a></li>
+					</#if>
+				</ul>
+			</form>
+
+			<script>
+				jQuery(function ($) {
+					var $form = $('#gridPreviewPagination');
+
+					$form.find('a[data-page]').on('click', function (e) {
+						e.preventDefault();
+
+						$form.find('input[name=page]').val($(this).data('page'));
+						$form.submit();
+					});
+				});
+			</script>
+		</#if>
 
 		<form action="<@routes.exams.generateGrid department academicYear />" id="examGridDocuments" class="dirty-check" method="post" target="_blank">
 			<@form_fields.select_course_fields />
