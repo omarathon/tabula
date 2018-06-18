@@ -276,13 +276,7 @@ class CM2MarkingWorkflowServiceImpl extends CM2MarkingWorkflowService with Autow
 	}
 
 	override def getAllStudentsForMarker(assignment: Assignment, marker: User): Seq[User] =
-		getAllFeedbackForMarker(assignment: Assignment, marker: User).values.flatten.flatMap { mf =>
-			try {
-				Some(mf.student)
-			} catch {
-				case _: IllegalStateException => None
-			}
-		}.toSeq.distinct
+		getAllFeedbackForMarker(assignment: Assignment, marker: User).values.flatten.map(_.student).toSeq.distinct
 
 	override def getReusableWorkflows(department: Department, academicYear: AcademicYear): Seq[CM2MarkingWorkflow] = {
 		markingWorkflowDao.getReusableWorkflows(department, academicYear)
