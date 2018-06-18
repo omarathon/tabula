@@ -72,7 +72,7 @@ abstract class Features {
 	@Value("${features.smallGroupTeaching.randomAllocation:false}") var smallGroupTeachingRandomAllocation: Boolean = defaults.smallGroupTeachingRandomAllocation
 	@Value("${features.smallGroupTeaching.selfGroupSwitching:true}") var smallGroupTeachingSelfGroupSwitching: Boolean = defaults.smallGroupTeachingSelfGroupSwitching
 	@Value("${features.smallGroupTeaching.tutorView:true}") var smallGroupTeachingTutorView: Boolean = defaults.smallGroupTeachingTutorView
-	@Value("${features.smallGroupTeaching.spreadsheetImport:false}") var smallGroupTeachingSpreadsheetImport: Boolean = defaults.smallGroupTeachingSpreadsheetImport
+	@Value("${features.smallGroupTeaching.spreadsheetImport:true}") var smallGroupTeachingSpreadsheetImport: Boolean = defaults.smallGroupTeachingSpreadsheetImport
 
 	@Value("${features.smallGroupAllocationFiltering:true}") var smallGroupAllocationFiltering: Boolean = defaults.smallGroupAllocationFiltering
 	@Value("${features.personalTutorAssignment:true}") var personalTutorAssignment: Boolean = defaults.personalTutorAssignment
@@ -248,7 +248,7 @@ class FeaturesMessage {
 	@BeanProperty var smallGroupTeachingRecordAttendance = true
 	@BeanProperty var smallGroupTeachingLectures = true
 	@BeanProperty var smallGroupCrossModules = true
-	@BeanProperty var smallGroupTeachingSpreadsheetImport = false
+	@BeanProperty var smallGroupTeachingSpreadsheetImport = true
 
 	@BeanProperty var attendanceMonitoring = true
 	@BeanProperty var attendanceMonitoringMeetingPointType = true
