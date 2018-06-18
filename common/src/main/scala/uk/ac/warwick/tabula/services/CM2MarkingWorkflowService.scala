@@ -11,7 +11,6 @@ import uk.ac.warwick.tabula.data.model.markingworkflow._
 import uk.ac.warwick.tabula.data.model._
 import uk.ac.warwick.tabula.JavaImports._
 import uk.ac.warwick.userlookup.User
-
 import scala.collection.immutable.{SortedMap, TreeMap}
 import CM2MarkingWorkflowService._
 import uk.ac.warwick.tabula.data.model.forms.SavedFormValue

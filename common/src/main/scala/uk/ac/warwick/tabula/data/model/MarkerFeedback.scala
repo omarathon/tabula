@@ -66,7 +66,7 @@ class MarkerFeedback extends GeneratedId
 				activeOnly = false
 			).distinct
 
-			if (possibleMembers.size > 1 || possibleMembers.isEmpty) {
+			if (possibleMembers.size != 1) {
 				val dummyUser = new User
 				dummyUser.setUserId(userId)
 				dummyUser.setWarwickId(feedback.universityId.getOrElse("Unknown University ID"))
@@ -84,7 +84,7 @@ class MarkerFeedback extends GeneratedId
 				dummyUser.setFoundUser(true)
 				dummyUser
 			} else {
-				possibleMembers.get(0).asSsoUser
+				possibleMembers.head.asSsoUser
 			}
 		} else {
 			student
