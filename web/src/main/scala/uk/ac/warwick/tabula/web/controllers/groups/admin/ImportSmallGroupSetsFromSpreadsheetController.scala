@@ -54,9 +54,15 @@ class ImportSmallGroupSetsFromSpreadsheetController extends GroupsController
 		errors: Errors,
 		@PathVariable department: Department,
 		@PathVariable academicYear: AcademicYear
-	): Mav = Mav("groups/admin/groups/import-spreadsheet/preview", "errors" -> errors)
-		.crumbs(Breadcrumbs.Department(department, academicYear))
-		.secondCrumbs(academicYearBreadcrumbs(academicYear)(year => Routes.groups.admin.importSpreadsheet(department, year)): _*)
+	): Mav = {
+		if (!features.smallGroupTeachingSpreadsheetImport) {
+			Redirect(Routes.groups.admin.importSpreadsheet(department, academicYear))
+		} else {
+			Mav("groups/admin/groups/import-spreadsheet/preview", "errors" -> errors)
+				.crumbs(Breadcrumbs.Department(department, academicYear))
+				.secondCrumbs(academicYearBreadcrumbs(academicYear)(year => Routes.groups.admin.importSpreadsheet(department, year)): _*)
+		}
+	}
 
 	@RequestMapping(method = Array(POST), params = Array("confirm=true"))
 	def submit(

@@ -21,7 +21,11 @@
 	<@bs3form.filewidget basename="file" types=[] multiple=false labelText="Choose your spreadsheet" />
 
 	<div class="fix-footer">
-		<button type="submit" class="btn btn-primary">Upload spreadsheet</button>
+		<#if features.smallGroupTeachingSpreadsheetImport>
+			<button type="submit" class="btn btn-primary">Upload spreadsheet</button>
+		<#else>
+			<button type="submit" class="btn btn-danger disabled" title="Uploading groups by spreadsheet is currently disabled">Upload spreadsheet</button>
+		</#if>
 		<a class="btn btn-default" href="<@routes.groups.departmenthome department academicYear />">Cancel</a>
 	</div>
 </@f.form>
