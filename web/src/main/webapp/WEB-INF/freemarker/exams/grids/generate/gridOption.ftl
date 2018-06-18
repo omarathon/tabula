@@ -458,6 +458,46 @@
 		</div>
 	</div>
 
+	<hr />
+
+	<h3>Preview options</h3>
+
+	<div class="form-group">
+		<div class="row">
+			<div class="col-xs-12">
+				<h5 style="margin-bottom: 0;">Students per page</h5>
+			</div>
+			<div class="col-md-3">
+				<div class="radio">
+					<label><input type="radio" name="entitiesPerPage" value="0"
+						<#if gridOptionsCommand.entitiesPerPage == 0>checked</#if>
+					/> Show all</label>
+				</div>
+			</div>
+			<div class="col-md-3">
+				<div class="radio">
+					<label><input type="radio" name="entitiesPerPage" value="25"
+						<#if gridOptionsCommand.entitiesPerPage == 25>checked</#if>
+					/> 25</label>
+				</div>
+			</div>
+			<div class="col-md-3">
+				<div class="radio">
+					<label><input type="radio" name="entitiesPerPage" value="50"
+						<#if gridOptionsCommand.entitiesPerPage == 50>checked</#if>
+					/> 50</label>
+				</div>
+			</div>
+			<div class="col-md-3">
+				<div class="radio">
+					<label><input type="radio" name="entitiesPerPage" value="100"
+						<#if gridOptionsCommand.entitiesPerPage == 100>checked</#if>
+					/> 100</label>
+				</div>
+			</div>
+		</div>
+	</div>
+
 	<@bs3form.errors path="gridOptionsCommand" />
 
 	<button class="btn btn-primary" type="submit">Next</button>

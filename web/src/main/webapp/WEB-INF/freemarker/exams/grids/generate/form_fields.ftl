@@ -33,6 +33,7 @@
 	<input type="hidden" name="layout" value="${gridOptionsCommand.layout}" />
 	<input type="hidden" name="yearMarksToUse" value="${gridOptionsCommand.yearMarksToUse}" />
 	<input type="hidden" name="mandatoryModulesAndYearMarkColumns" value="${gridOptionsCommand.mandatoryModulesAndYearMarkColumns?c}" />
+	<input type="hidden" name="entitiesPerPage" value="${gridOptionsCommand.entitiesPerPage?c}" />
 </#macro>
 
 </#escape>
