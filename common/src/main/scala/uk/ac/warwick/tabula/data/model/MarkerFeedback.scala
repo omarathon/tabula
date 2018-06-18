@@ -12,7 +12,7 @@ import uk.ac.warwick.userlookup.{AnonymousUser, User}
 import uk.ac.warwick.spring.Wire
 import uk.ac.warwick.tabula.data.{AutowiringMemberDaoComponent, HibernateHelpers, MemberDao}
 import uk.ac.warwick.tabula.data.model.markingworkflow.MarkingWorkflowStage
-import uk.ac.warwick.tabula.services.UserLookupService
+import uk.ac.warwick.tabula.services.{ProfileService, UserLookupService}
 
 import scala.collection.JavaConverters._
 
@@ -33,7 +33,7 @@ class MarkerFeedback extends GeneratedId
 	var userLookup: UserLookupService = Wire[UserLookupService]("userLookup")
 
 	@transient
-	var memberDao: MemberDao = Wire[MemberDao]
+	var profileService: ProfileService = Wire[ProfileService]
 
 	@ManyToOne(optional = false, fetch = FetchType.LAZY)
 	@JoinColumn(name = "feedback_id", nullable = false)
@@ -60,7 +60,7 @@ class MarkerFeedback extends GeneratedId
 		val student = userLookup.getUserByUserId(feedback.usercode)
 		if (!student.isFoundUser) {
 			val userId = feedback.usercode
-			val possibleMembers = memberDao.getAllByUserId(
+			val possibleMembers = profileService.getAllMembersWithUserId(
 				userId = userId,
 				disableFilter = true,
 				activeOnly = false
