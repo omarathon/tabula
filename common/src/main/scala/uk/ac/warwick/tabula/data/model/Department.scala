@@ -276,7 +276,7 @@ class Department extends GeneratedId
 		getStringSetting(Settings.ExamGridOptions.Layout, "full"),
 		getStringSetting(Settings.ExamGridOptions.YearMarksToUse, "sits"),
 		getBooleanSetting(Settings.ExamGridOptions.MandatoryModulesAndYearMarkColumns, default = true),
-		Option(getIntSetting(Settings.ExamGridOptions.EntitiesPerPage, default = 0)).filterNot(_ == 0)
+		Option(getIntSetting(Settings.ExamGridOptions.EntitiesPerPage, default = 0)).filter(_ > 0)
 	)
 	def examGridOptions_=(options: ExamGridOptions): Unit = {
 		settings += (Settings.ExamGridOptions.PredefinedColumnIdentifiers -> options.predefinedColumnIdentifiers)

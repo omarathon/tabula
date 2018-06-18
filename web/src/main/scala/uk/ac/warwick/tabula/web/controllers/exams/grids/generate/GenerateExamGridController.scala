@@ -412,7 +412,7 @@ class GenerateExamGridController extends ExamsController
 			)
 		} else { Map[String, Object]() }
 
-		val entitiesPerPage = Option(gridOptionsCommand.entitiesPerPage).filterNot(_ == 0)
+		val entitiesPerPage = Option(gridOptionsCommand.entitiesPerPage).filter(_ > 0)
 
 		val mavObjects = Map(
 			"oldestImport" -> oldestImport,

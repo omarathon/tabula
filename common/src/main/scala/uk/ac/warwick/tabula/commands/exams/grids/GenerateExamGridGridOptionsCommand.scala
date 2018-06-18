@@ -58,7 +58,7 @@ class GenerateExamGridGridOptionsCommandInternal(val department: Department) ext
 			layout,
 			yearMarksToUse,
 			mandatoryModulesAndYearMarkColumns,
-			Option(entitiesPerPage).filterNot(_ == 0)
+			Option(entitiesPerPage).filter(_ > 0)
 		)
 
 		saveDepartment()
