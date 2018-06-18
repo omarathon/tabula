@@ -299,7 +299,7 @@ abstract class AbstractProgressionService extends ProgressionService {
 		routeRulesPerYear: Map[Int, Seq[UpstreamRouteRule]],
 		calculatePreviousYearMarks: Boolean
 	): Map[Int, Either[String, BigDecimal]] = {
-		entityPerYear.map{ case (year, entityYear) =>
+		entityPerYear.filter { case (_, entityYear) => entityYear != null }.map { case (year, entityYear) =>
 			year -> entityYear.studentCourseYearDetails.map(thisScyd => {
 				if (!calculatePreviousYearMarks && year != finalYearOfStudy) {
 					Option(thisScyd.agreedMark) match {
