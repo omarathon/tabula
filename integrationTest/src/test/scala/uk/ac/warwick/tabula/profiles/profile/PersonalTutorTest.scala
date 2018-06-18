@@ -70,7 +70,7 @@ class PersonalTutorTest extends BrowserTest with GivenWhenThen with FeaturesDriv
 				click on linkText("Record meeting")
         eventuallyAjax(find(cssSelector(".modal-body iframe")) should be ('defined))
 				switch to frame(find(cssSelector(".modal-body iframe")).get)
-				textField(name("title")).isDisplayed should be (true)
+				eventuallyAjax(textField(name("title")).isDisplayed should be (true))
 			}
 		)
 
