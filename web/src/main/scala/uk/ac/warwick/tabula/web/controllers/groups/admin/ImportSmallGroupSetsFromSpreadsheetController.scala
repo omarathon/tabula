@@ -71,7 +71,9 @@ class ImportSmallGroupSetsFromSpreadsheetController extends GroupsController
 		@PathVariable department: Department,
 		@PathVariable academicYear: AcademicYear
 	): Mav = {
-		if (errors.hasErrors) {
+		if (!features.smallGroupTeachingSpreadsheetImport) {
+			Redirect(Routes.groups.admin.importSpreadsheet(department, academicYear))
+		} else if (errors.hasErrors) {
 			processSpreadsheet(cmd, errors, department, academicYear)
 		} else {
 			val job = jobService.add(user.apparentUser, ImportSmallGroupSetsFromSpreadsheetJob(
