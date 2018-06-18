@@ -8,9 +8,9 @@ import javax.persistence.CascadeType._
 import uk.ac.warwick.tabula.JavaImports._
 import uk.ac.warwick.tabula.data.model.forms.{FormField, SavedFormValue}
 import javax.persistence.Entity
-import uk.ac.warwick.userlookup.{AnonymousUser, User}
+import uk.ac.warwick.userlookup.User
 import uk.ac.warwick.spring.Wire
-import uk.ac.warwick.tabula.data.{AutowiringMemberDaoComponent, HibernateHelpers, MemberDao}
+import uk.ac.warwick.tabula.data.HibernateHelpers
 import uk.ac.warwick.tabula.data.model.markingworkflow.MarkingWorkflowStage
 import uk.ac.warwick.tabula.services.{ProfileService, UserLookupService}
 
