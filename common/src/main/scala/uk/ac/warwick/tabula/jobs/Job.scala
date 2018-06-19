@@ -47,11 +47,11 @@ abstract class Job extends Logging {
 	protected def getProgress(implicit job: JobInstance): Int = job.progress
 
 	def updateProgress(percent: Int)(implicit job: JobInstance): Unit = {
-		if (killed) {
-			throw new KilledJobException
-		}
-
 		if (percent != job.progress) {
+			if (killed) {
+				throw new KilledJobException
+			}
+
 			transactional(propagation = REQUIRES_NEW) {
 				job.progress = percent
 				jobService.update(job)
