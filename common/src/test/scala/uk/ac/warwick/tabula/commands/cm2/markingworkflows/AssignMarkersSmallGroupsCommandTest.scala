@@ -24,7 +24,7 @@ class AssignMarkersSmallGroupsCommandTest extends TestBase with Mockito {
 		val setAllocation: SetAllocation = setAllocations.head
 		setAllocation.set should be (smallGroupSetA)
 
-		val fg: Seq[GroupAllocation]  = setAllocation.allocations("Marker")
+		val fg: Seq[GroupAllocation]  = setAllocation.allocations("First marker")
 		fg.size should be (2)
 
 		val a1: GroupAllocation = fg.filter(_.name == "A1").head
