@@ -76,9 +76,7 @@ abstract class Job extends Logging {
 		}
 	}
 
-	protected def killed(implicit job: JobInstance): Boolean = {
-		jobService.getInstance(job.id).exists(_.status == "Killed")
-	}
+	protected def killed: Boolean = false
 
 	/** An exception you can throw when a Job is obsolete, e.g. it references an entity that no longer exists.
 	 * JobService will catch this and remove the job. */
