@@ -4,7 +4,6 @@ import org.springframework.beans.MutablePropertyValues
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.format.support.FormattingConversionService
 import org.springframework.stereotype.Component
-import org.springframework.transaction.annotation.Propagation
 import org.springframework.validation.{BindingResult, DataBinder}
 import uk.ac.warwick.spring.Wire
 import uk.ac.warwick.tabula.commands.TaskBenchmarking
@@ -71,7 +70,7 @@ class GenerateExamGridDocumentJob extends Job with AutowiringSecurityServiceComp
 		binder.getBindingResult
 	}
 
-	override def run(implicit job: JobInstance): Unit = transactional(propagation = Propagation.SUPPORTS) {
+	override def run(implicit job: JobInstance): Unit = transactional() {
 		updateStatus("Preparing")
 
 		val department = moduleAndDepartmentService.getDepartmentByCode(job.getString("department")).get
