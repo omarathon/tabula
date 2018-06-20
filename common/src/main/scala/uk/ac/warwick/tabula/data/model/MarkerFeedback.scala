@@ -3,23 +3,25 @@ package uk.ac.warwick.tabula.data.model
 import scala.collection.JavaConversions._
 import org.joda.time.DateTime
 import javax.persistence._
-
 import org.hibernate.annotations.{BatchSize, Fetch, FetchMode, Type}
 import javax.persistence.CascadeType._
-
 import uk.ac.warwick.tabula.JavaImports._
 import uk.ac.warwick.tabula.data.model.forms.{FormField, SavedFormValue}
 import javax.persistence.Entity
-
 import uk.ac.warwick.userlookup.User
 import uk.ac.warwick.spring.Wire
 import uk.ac.warwick.tabula.data.HibernateHelpers
 import uk.ac.warwick.tabula.data.model.markingworkflow.MarkingWorkflowStage
-import uk.ac.warwick.tabula.services.UserLookupService
+import uk.ac.warwick.tabula.services.{ProfileService, UserLookupService}
+
 import scala.collection.JavaConverters._
 
 @Entity @Access(AccessType.FIELD)
-class MarkerFeedback extends GeneratedId with FeedbackAttachments with ToEntityReference with CanBeDeleted with CM1MarkerFeedbackSupport {
+class MarkerFeedback extends GeneratedId
+	with FeedbackAttachments
+	with ToEntityReference
+	with CanBeDeleted
+	with CM1MarkerFeedbackSupport {
 	type Entity = MarkerFeedback
 
 	def this(parent:Feedback){
@@ -29,6 +31,9 @@ class MarkerFeedback extends GeneratedId with FeedbackAttachments with ToEntityR
 
 	@transient
 	var userLookup: UserLookupService = Wire[UserLookupService]("userLookup")
+
+	@transient
+	var profileService: ProfileService = Wire[ProfileService]
 
 	@ManyToOne(optional = false, fetch = FetchType.LAZY)
 	@JoinColumn(name = "feedback_id", nullable = false)
@@ -53,8 +58,37 @@ class MarkerFeedback extends GeneratedId with FeedbackAttachments with ToEntityR
 
 	def student: User = {
 		val student = userLookup.getUserByUserId(feedback.usercode)
-		if (!student.isFoundUser) throw new IllegalStateException(s"Student ${feedback.usercode} is not a valid user")
-		student
+		if (!student.isFoundUser) {
+			val userId = feedback.usercode
+			val possibleMembers = profileService.getAllMembersWithUserId(
+				userId = userId,
+				disableFilter = true,
+				activeOnly = false
+			).distinct
+
+			if (possibleMembers.size != 1) {
+				val dummyUser = new User
+				dummyUser.setUserId(userId)
+				dummyUser.setWarwickId(feedback.universityId.getOrElse("Unknown University ID"))
+				dummyUser.setFirstName("[Unknown user]")
+				dummyUser.setLastName("[Unknown user]")
+				dummyUser.setFullName("[Unknown user]")
+				dummyUser.setLoginDisabled(true)
+				dummyUser.setUserType("Student")
+				dummyUser.setExtraProperties(JHashMap(
+					"urn:websignon:usertype" -> dummyUser.getUserType,
+					"urn:websignon:timestamp" -> DateTime.now.toString,
+					"urn:websignon:usersource" -> "Tabula"
+				))
+				dummyUser.setVerified(true)
+				dummyUser.setFoundUser(true)
+				dummyUser
+			} else {
+				possibleMembers.head.asSsoUser
+			}
+		} else {
+			student
+		}
 	}
 
 	@Basic
