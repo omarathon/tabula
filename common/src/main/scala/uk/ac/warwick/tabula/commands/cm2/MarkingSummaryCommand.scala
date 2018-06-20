@@ -224,10 +224,10 @@ trait MarkingSummaryMarkerAssignments extends MarkingSummaryMarkerAssignmentList
 
 	private lazy val allEnhancedCM2MarkerAssignments: Seq[MarkerAssignmentInfo] = benchmarkTask("Enhance CM2 assignments for marking") {
 		allCM2MarkerAssignments.map { assignment =>
-			val markerFeedbacks = cm2MarkingWorkflowService.getAllFeedbackForMarker(assignment, markerUser).values.flatten
-			val students = markerFeedbacks.map(_.student).toSet
-
-			enhance(assignment, students)
+			enhance(
+				assignment = assignment,
+				students = cm2MarkingWorkflowService.getAllStudentsForMarker(assignment, markerUser).toSet
+			)
 		}
 	}
 
