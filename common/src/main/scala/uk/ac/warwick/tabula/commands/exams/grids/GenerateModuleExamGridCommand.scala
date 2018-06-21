@@ -72,25 +72,27 @@ class GenerateModuleExamGridCommandInternal(val department: Department, val acad
 									isActualResitMark = uagm.resitAgreedMark.isEmpty,
 									isActualResitGrade = uagm.resitAgreedGrade.isEmpty
 								)
-							)
+						)
 					}
-				}.sortBy{ case (assessmentIdentity, _) => assessmentIdentity.code }
+				}
 
 				componentInfo.map { case (assessmentIdentity, _) =>
 					assessmentIdentity ->
 						ModuleGridDetailRecord(
 							moduleRegistration = mr,
-							componentInfo = componentInfo.map { case (_, info) => (assessmentIdentity.code, info) }.toMap,
+							componentInfo = componentInfo.map { case (id, info) => (id.code, info) }.toMap,
 							name = s"${student.firstName} ${student.lastName}",
 							universityId = student.universityId,
 							lastImportDate = Option(student.lastImportDate)
 						)
+
 				}
 			}
 		}
+
 		ModuleExamGridResult(
 			upstreamAssessmentGroupAndSequenceAndOccurrencesWithComponentName = result.toMap.keys.toSeq.map(assessmentIdentity => (assessmentIdentity.code, assessmentIdentity.name)),
-			gridStudentDetailRecords = result.toMap.values.toSeq
+			gridStudentDetailRecords = result.map { case (_, records) => records}.distinct
 		)
 	}
 }
