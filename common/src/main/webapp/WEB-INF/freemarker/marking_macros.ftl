@@ -445,28 +445,25 @@
 	<div class="alert alert-info">
 		<@bs3form.form_group path="sendToSits">
 			<@bs3form.checkbox path="sendToSits">
-				<@f.checkbox path="sendToSits" id="sendToSits" /> Queue marks for upload to SITS
+				<@f.checkbox path="sendToSits" id="sendToSits" /> Upload ${verb} marks and grades to SITS
 			</@bs3form.checkbox>
 		</@bs3form.form_group>
 
 		<#if assignment.module.adminDepartment.canUploadMarksToSitsForYear(assignment.academicYear, assignment.module)>
 			<div>
-				<p>${verb} this feedback queues marks for upload to SITS.</p>
-				<p>Marks and grades automatically upload and display in the SITS SAT screen as actual marks and grades.</p>
+				<p>They display in the SITS SAT screen as actual marks and grades.</p>
 			</div>
 		<#else>
 			<div class="alert alert-warning">
-				<p>${verb} this feedback queues marks for upload to SITS.</p>
 				<p>
-					However, mark upload is closed for ${assignment.module.adminDepartment.name} <#if assignment.module.degreeType??> (${assignment.module.degreeType.toString})</#if>
+					Mark upload is closed for ${assignment.module.adminDepartment.name} <#if assignment.module.degreeType??> (${assignment.module.degreeType.toString})</#if>
 					for the academic year ${assignment.academicYear.toString}.
 				</p>
 				<p>
-					If you still have marks to upload, please contact the Exams Office <a id="email-support-link" href="mailto:aoexams@warwick.ac.uk">aoexams@warwick.ac.uk</a>.
+					If you still have marks and grades to upload, please contact the Exams Office <a id="email-support-link" href="mailto:aoexams@warwick.ac.uk">aoexams@warwick.ac.uk</a>.
 				</p>
 				<p>
-					As soon as mark upload is re-opened for this department,
-					the marks and grades will automatically be uploaded and displayed in the SITS SAT screen as actual marks and grades
+					Select the checkbox to queue marks and grades for upload to SITS. As soon as mark upload re-opens for this department, the marks and grades will automatically upload. They display in the SITS SAT screen as actual marks and grades.
 				</p>
 			</div>
 		</#if>
