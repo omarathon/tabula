@@ -73,7 +73,7 @@ class GenerateModuleExamGridCommandInternal(val department: Department, val acad
 							)
 						)
 					}
-				}
+				}.sortBy{ case (assessmentId, _) => assessmentId.code }
 
 				componentInfo.map { case (assessmentIdentity, _) =>
 					assessmentIdentity ->
