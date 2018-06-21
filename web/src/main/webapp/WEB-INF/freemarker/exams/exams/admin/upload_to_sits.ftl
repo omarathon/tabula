@@ -162,7 +162,7 @@
 	<div class="alert alert-info">
 		<#if module.adminDepartment.canUploadMarksToSitsForYear(exam.academicYear, exam.module)>
 			<div>
-				<p>Marks and grades will automatically be uploaded and displayed in the SITS SAT screen as actual marks and grades.</p>
+				<p>Marks and grades display in the SITS SAT screen as actual marks and grades.</p>
 			</div>
 		<#else>
 			<div class="alert alert-danger">
@@ -174,8 +174,7 @@
 					If you still have marks to upload, please contact the Exams Office <a id="email-support-link" href="mailto:aoexams@warwick.ac.uk">aoexams@warwick.ac.uk</a>.
 				</p>
 				<p>
-					As soon as mark upload is re-opened for this department,
-					the marks and grades will automatically be uploaded and displayed in the SITS SAT screen as actual marks and grades
+					Select the checkbox to queue marks and grades for upload to SITS. As soon as mark upload re-opens for this department, the marks and grades will automatically upload. They display in the SITS SAT screen as actual marks and grades.
 				</p>
 			</div>
 		</#if>

@@ -12,7 +12,7 @@ sealed abstract class FeedbackForSitsStatus(val code: String, val description: S
 
 object FeedbackForSitsStatus {
 	case object UploadNotAttempted extends FeedbackForSitsStatus("uploadNotAttempted", "Queued for SITS upload")
-	case object Failed extends FeedbackForSitsStatus("failed", "SITS Upload Failed")
+	case object Failed extends FeedbackForSitsStatus("failed", "SITS upload failed")
 	case object Successful extends FeedbackForSitsStatus("successful", "Uploaded to SITS")
 
 	// manual collection - keep in sync with the case objects above
