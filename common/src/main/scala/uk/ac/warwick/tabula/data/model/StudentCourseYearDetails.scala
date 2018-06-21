@@ -28,11 +28,18 @@ object StudentCourseYearDetails {
 		final val MarkOverrides = "markOverrides"
 	}
 
+	//ensure we have  a single module code from module registration records. Some students have same module codes for different years but the latest year is the valid one with board marks
+	def extractValidModuleRegistrations(mrRecords: Seq[ModuleRegistration]): Seq[ModuleRegistration] = {
+		mrRecords.filterNot { mr =>
+			mrRecords.exists(mr1 => mr1.module.code == mr.module.code &&  mr1.academicYear.startYear >  mr.academicYear.startYear)
+		}
+	}
+
 	// makes an ExamGridEntityYear that is really multiple study years that contribute to a single level or block (groups related StudentCourseYearDetails together)
 	def toExamGridEntityYearGrouped(yearOfStudy: YearOfStudy, scyds: StudentCourseYearDetails *): ExamGridEntityYear = {
 
 		if (scyds.map(_.studyLevel).distinct.size > 1) throw new IllegalArgumentException("Cannot group StudentCourseYearDetails from different levels")
-		val moduleRegistrations = scyds.flatMap(_.moduleRegistrations).sortBy { mr => (mr.module.code, -mr.academicYear.startYear) }
+		val moduleRegistrations = extractValidModuleRegistrations(scyds.flatMap(_.moduleRegistrations))
 		val route = {
 			val allRoutes = scyds.sorted.flatMap(scyd => Option(scyd.route)).toSet // ignore any nulls
 			allRoutes.lastOption.getOrElse(scyds.head.studentCourseDetails.currentRoute)
