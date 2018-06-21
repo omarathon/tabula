@@ -73,18 +73,16 @@ class GenerateModuleExamGridCommandInternal(val department: Department, val acad
 							)
 						)
 					}
-				}.sortBy{ case (assessmentId, _) => assessmentId.code }
+				}.sortBy { case (assessmentIdentity, _) => assessmentIdentity.code }
 
-				componentInfo.map { case (assessmentIdentity, _) =>
-					assessmentIdentity ->
-						ModuleGridDetailRecord(
-							moduleRegistration = mr,
-							componentInfo = componentInfo.map { case (id, info) => (id.code, info) }.toMap,
-							name = s"${student.firstName} ${student.lastName}",
-							universityId = student.universityId,
-							lastImportDate = Option(student.lastImportDate)
-						)
-
+				componentInfo.map { case (assessmentIdentity, _) => assessmentIdentity ->
+					ModuleGridDetailRecord(
+						moduleRegistration = mr,
+						componentInfo = componentInfo.map { case (id, info) => (id.code, info) }.toMap,
+						name = s"${student.firstName} ${student.lastName}",
+						universityId = student.universityId,
+						lastImportDate = Option(student.lastImportDate)
+					)
 				}
 			}
 		}
