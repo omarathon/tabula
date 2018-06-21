@@ -49,7 +49,6 @@ class GenerateModuleExamGridCommandInternal(val department: Department, val acad
 
 	self: StudentCourseYearDetailsDaoComponent with GenerateModuleExamGridCommandRequest with ModuleRegistrationServiceComponent with AssessmentMembershipServiceComponent =>
 
-
 	override def applyInternal(): ModuleExamGridResult = {
 		case class AssessmentIdentity(code: String, name: String)
 		val result: Seq[(AssessmentIdentity, ModuleGridDetailRecord)] = benchmarkTask("GenerateMRComponents") {
@@ -62,16 +61,16 @@ class GenerateModuleExamGridCommandInternal(val department: Department, val acad
 							code = code,
 							name = comp.name
 						) -> AssessmentComponentInfo(
-								mark = uagm.agreedMark.getOrElse(uagm.actualMark.orNull),
-								grade = uagm.agreedGrade.getOrElse(uagm.actualGrade.orNull),
-								isActualMark = uagm.agreedMark.isEmpty,
-								isActualGrade = uagm.agreedGrade.isEmpty,
-								resitInfo = ResitComponentInfo(
-									resitMark = uagm.resitAgreedMark.getOrElse(uagm.resitActualMark.orNull),
-									resitGrade = uagm.resitAgreedGrade.getOrElse(uagm.resitActualGrade.orNull),
-									isActualResitMark = uagm.resitAgreedMark.isEmpty,
-									isActualResitGrade = uagm.resitAgreedGrade.isEmpty
-								)
+							mark = uagm.agreedMark.getOrElse(uagm.actualMark.orNull),
+							grade = uagm.agreedGrade.getOrElse(uagm.actualGrade.orNull),
+							isActualMark = uagm.agreedMark.isEmpty,
+							isActualGrade = uagm.agreedGrade.isEmpty,
+							resitInfo = ResitComponentInfo(
+								resitMark = uagm.resitAgreedMark.getOrElse(uagm.resitActualMark.orNull),
+								resitGrade = uagm.resitAgreedGrade.getOrElse(uagm.resitActualGrade.orNull),
+								isActualResitMark = uagm.resitAgreedMark.isEmpty,
+								isActualResitGrade = uagm.resitAgreedGrade.isEmpty
+							)
 						)
 					}
 				}
@@ -91,8 +90,9 @@ class GenerateModuleExamGridCommandInternal(val department: Department, val acad
 		}
 
 		ModuleExamGridResult(
-			upstreamAssessmentGroupAndSequenceAndOccurrencesWithComponentName = result.toMap.keys.toSeq.map(assessmentIdentity => (assessmentIdentity.code, assessmentIdentity.name)),
-			gridStudentDetailRecords = result.map { case (_, records) => records}.distinct
+			upstreamAssessmentGroupAndSequenceAndOccurrencesWithComponentName = result.toMap.keys.toSeq.map(assessmentIdentity =>
+				(assessmentIdentity.code, assessmentIdentity.name)),
+			gridStudentDetailRecords = result.map { case (_, records) => records }.distinct
 		)
 	}
 }
