@@ -1268,8 +1268,6 @@
 				<#local date>
 					<#if extension.expiryDate??>
 						<@fmt.date date=extension.expiryDate capitalise=true shortMonth=true stripHtml=true />
-					<#else>
-					  Unknown date
 					</#if>
 				</#local>
 			</#if>
