@@ -104,7 +104,7 @@ class ProfileExportSingleCommandInternal(val student: StudentMember, val academi
 		val assignmentData = benchmarkTask("assignmentData") {
 			assessmentService.getAssignmentsWithSubmission(student.userId)
 				.filter(_.academicYear == academicYear)
-				.sortBy(_.closeDate)
+				.sortBy (assignment => Option(assignment.closeDate).getOrElse(assignment.openDate))
 				.flatMap(assignment => {
 					assignment.findSubmission(student.userId).map(submission => {
 						AssignmentData(
