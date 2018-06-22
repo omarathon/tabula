@@ -29,11 +29,8 @@ object StudentCourseYearDetails {
 	}
 
 	//ensure we have  a single module code from module registration records. Some students have same module codes for different years but the latest year is the valid one with board marks
-	def extractValidModuleRegistrations(mrRecords: Seq[ModuleRegistration]): Seq[ModuleRegistration] = {
-		mrRecords.filterNot { mr =>
-			mrRecords.exists(mr1 => mr1.module.code == mr.module.code &&  mr1.academicYear.startYear >  mr.academicYear.startYear)
-		}
-	}
+	def extractValidModuleRegistrations(mrRecords: Seq[ModuleRegistration]): Seq[ModuleRegistration] =
+		mrRecords.groupBy(_.module.code).values.map(_.sortBy(_.academicYear.startYear).last).toSeq
 
 	// makes an ExamGridEntityYear that is really multiple study years that contribute to a single level or block (groups related StudentCourseYearDetails together)
 	def toExamGridEntityYearGrouped(yearOfStudy: YearOfStudy, scyds: StudentCourseYearDetails *): ExamGridEntityYear = {
