@@ -323,7 +323,7 @@ abstract class AbstractProgressionService extends ProgressionService {
 		// intercalated year weighted 0,50,0,50, this would consider years 2 and 4
 		val finalTwoYearsModuleRegistrations =
 			entityPerYear.toSeq.reverse
-				.filter { case (year, _) => yearWeightings.toMap.apply(year).weighting > 0 }
+				.filter { case (year, gridEntityYear) => gridEntityYear != null && yearWeightings.toMap.apply(year).weighting > 0 }
 				.take(2)
 				.flatMap { case (_, yearDetails) => yearDetails.moduleRegistrations }
 
