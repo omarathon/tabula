@@ -44,13 +44,14 @@ case class AssessmentComponentInfo(mark: BigDecimal, grade: String, isActualMark
 
 case class ResitComponentInfo(resitMark: BigDecimal, resitGrade: String, isActualResitMark: Boolean, isActualResitGrade: Boolean)
 
+case class AssessmentIdentity(code: String, name: String)
+
 class GenerateModuleExamGridCommandInternal(val department: Department, val academicYear: AcademicYear)
 	extends CommandInternal[ModuleExamGridResult] with TaskBenchmarking {
 
 	self: StudentCourseYearDetailsDaoComponent with GenerateModuleExamGridCommandRequest with ModuleRegistrationServiceComponent with AssessmentMembershipServiceComponent =>
 
 	override def applyInternal(): ModuleExamGridResult = {
-		case class AssessmentIdentity(code: String, name: String)
 		val result: Seq[(AssessmentIdentity, ModuleGridDetailRecord)] = benchmarkTask("GenerateMRComponents") {
 			moduleRegistrationService.getByModuleAndYear(module, academicYear).flatMap { mr =>
 				val student: StudentMember = mr.studentCourseDetails.student
