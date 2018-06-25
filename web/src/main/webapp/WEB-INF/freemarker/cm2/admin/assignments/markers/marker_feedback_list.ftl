@@ -180,7 +180,13 @@
 		<ul class="nav nav-tabs" role="tablist" style="margin-top: 20px;margin-bottom: 20px;" id="markingStageTabs">
 			<#list feedbackByOrderAndStage as order>
 				<li role="presentation"<#if activeWorkflowPosition == order.headerStage.order> class="active"</#if>>
-					<a href="#${order.headerStage.name}" role="tab" data-toggle="tab" data-order="${order.headerStage.order}">${order.headerStage.roleName}</a>
+					<a href="#${order.headerStage.name}" role="tab" data-toggle="tab" data-order="${order.headerStage.order}">
+						${order.headerStage.description}
+
+						<#if order.feedbackByActionability.readyToMark?size != 0>
+							<span class="badge">${order.feedbackByActionability.readyToMark?size}</span>
+						</#if>
+					</a>
 				</li>
 			</#list>
 		</ul>
