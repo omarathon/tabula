@@ -199,7 +199,11 @@
 				<tbody>
 					<tr>
 						<td>Submission deadline</td>
-						<td>${assignment.submissionDeadline}</td>
+						<#if assignment.submissionDeadline?has_content>
+							<td>${assignment.submissionDeadline}</td>
+						<#else>
+							<td>Open-ended assignment</td>
+						</#if>
 					</tr>
 					<tr>
 						<td>Submission date</td>
