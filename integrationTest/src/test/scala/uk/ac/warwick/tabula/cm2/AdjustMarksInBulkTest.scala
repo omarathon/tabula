@@ -27,13 +27,13 @@ class AdjustMarksInBulkTest extends BrowserTest with CourseworkFixtures {
 				click on testModule
 			}
 
-			eventuallyAjax {
+			eventually {
 				And("click on the cm2 assignment")
 				val cm2Assignment = id("main").webElement.findElements(By.cssSelector("h5.assignment-name a")).get(0)
 				click on cm2Assignment
 			}
 
-			eventuallyAjax {
+			eventually {
 				Then("I should get to the summary page")
 				currentUrl.contains("/summary") should be(true)
 			}

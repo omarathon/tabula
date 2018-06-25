@@ -24,7 +24,7 @@ class AttendanceViewPointsTest extends AttendanceFixture with GivenWhenThen{
 		 click on cssSelector("input[name=courseTypes][value=UG]")
 
 		 Then("The points are displayed")
-		 eventuallyAjax{
+		 eventually{
 			 id("filter-results").webElement.findElements(By.cssSelector(".monitoring-points .item-info.point")).size should be > 0
 		 }
 

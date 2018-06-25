@@ -1,19 +1,19 @@
 package uk.ac.warwick.tabula
 
 import collection.JavaConverters._
-
 import org.scalatest.selenium.WebBrowser
 import org.scalatest.Assertions
 import org.scalatest.Matchers
 import org.openqa.selenium.{Cookie, WebDriver}
 import org.scalatest.concurrent.Eventually
 import org.scalatest.time.SpanSugar._
-
 import WebsignonMethods._
+
 import scala.util.matching.Regex
 import org.openqa.selenium.htmlunit.HtmlUnitDriver
 import com.gargoylesoftware.htmlunit
 import com.gargoylesoftware.htmlunit.WebClient
+import org.scalatest.time.{Millis, Seconds, Span}
 
 object WebsignonMethods {
 	def parseSignedInDetail(html: String): String = {
@@ -82,7 +82,11 @@ class SessionCache {
 	}
 }
 
-trait WebsignonMethods extends Matchers  with Eventually{
+trait WebsignonMethods extends Matchers with Eventually {
+
+	override implicit val patienceConfig =
+		PatienceConfig(timeout = Span(30, Seconds), interval = Span(200, Millis))
+
 	import WebBrowser._ // include methods like "go to"
 	implicit val webDriver: WebDriver // let the trait know this will be implemented
 

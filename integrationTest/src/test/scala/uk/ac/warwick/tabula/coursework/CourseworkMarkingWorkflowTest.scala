@@ -98,12 +98,12 @@ class CourseworkMarkingWorkflowTest extends BrowserTest with CourseworkFixtures 
 		})
 
 		Then("I should get a confirmation modal")
-		eventuallyAjax {
+		eventually {
 			find("marking-workflow-modal") map { _.isDisplayed } should be (Some(true))
 		}
 
 		And("It should have a dangerous button")
-		eventuallyAjax {
+		eventually {
 			Option(id("marking-workflow-modal").webElement.findElement(By.className("btn-danger"))) should be ('defined)
 		}
 

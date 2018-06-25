@@ -58,7 +58,7 @@ class CourseworkAddAssignmentsTest extends BrowserTest with CourseworkFixtures w
 
         click on cssSelector(".modal-footer .btn-primary")
 
-        eventuallyAjax {
+        eventually {
           page.getOptionIdForRow(page.itemRows.head) should be(Some("A"))
         }
       }
@@ -69,7 +69,7 @@ class CourseworkAddAssignmentsTest extends BrowserTest with CourseworkFixtures w
 		assertNoFreemarkerErrors()
 
 		And("I can click Next again")
-		eventuallyAjax { page.clickNext() }
+		eventually { page.clickNext() }
 
 		And("My options are intact with no errors")
 //		page.getOptionIdForRow(page.itemRows.head) should be (Some("A"))

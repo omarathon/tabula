@@ -60,7 +60,7 @@ class CourseworkAssignmentMembershipTest extends BrowserTest with CourseworkFixt
 
 			// there will be a delay between the dialog being dismissed and the source being updated by the
 			// ajax response. So wait some more
-			eventuallyAjax { pageSource should include("4 enrolled") }
+			eventually { pageSource should include("4 enrolled") }
 		}
 
 		withAssignment("xxx01", "Fully featured assignment", studentSettings = assignmentSettings, submissionSettings = submissionSettings, students=Nil) { assignmentId =>

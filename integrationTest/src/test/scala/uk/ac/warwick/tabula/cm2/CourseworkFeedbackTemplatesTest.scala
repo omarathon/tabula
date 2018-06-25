@@ -107,7 +107,7 @@ class CourseworkFeedbackTemplatesTest extends BrowserTest with CourseworkFixture
 
 				click on (row.get.findElement(By.partialLinkText("Edit")))
 
-				eventuallyAjax {
+				eventually {
 					find("feedback-template-model") map { _.isDisplayed } should be (Some(true))
 
 					val ifr = find(cssSelector(".modal-body iframe"))
@@ -158,7 +158,7 @@ class CourseworkFeedbackTemplatesTest extends BrowserTest with CourseworkFixture
 			Then("I should be able to delete the second file")
 			deleteFile("file2.txt")
 
-			eventuallyAjax {
+			eventually {
 				find("feedback-template-model") map { _.isDisplayed } should be (Some(true))
 
 				val ifr = find(cssSelector(".modal-body iframe"))

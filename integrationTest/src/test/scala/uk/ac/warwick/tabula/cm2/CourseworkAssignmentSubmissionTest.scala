@@ -32,7 +32,7 @@ class CourseworkAssignmentSubmissionTest extends BrowserTest with CourseworkFixt
 				// Don't upload the second file yet
 				submit()
 
-				eventuallyAjax {
+				eventually {
 					pageSource contains "Thanks, we've received your submission." should be(false)
 					pageSource contains "You need to at least submit 2 files" should be {
 						true
@@ -52,7 +52,7 @@ class CourseworkAssignmentSubmissionTest extends BrowserTest with CourseworkFixt
 
 					submit()
 
-					eventuallyAjax {
+					eventually {
 						pageSource contains "Thanks, we've received your submission." should be(true)
 
 						linkText("file1.txt").webElement.isDisplayed should be(true)
@@ -74,7 +74,7 @@ class CourseworkAssignmentSubmissionTest extends BrowserTest with CourseworkFixt
 		withAssignment("xxx01", "Min 2 attachments", optionSettings = options) { assignmentId =>
 			submitAssignment(P.Student1, "Min 2 attachments", assignmentId, "/file1.txt")
 
-			eventuallyAjax {
+			eventually {
 				pageSource contains "You need to at least submit 2 files" should be { true }
 			}
 		}

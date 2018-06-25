@@ -16,11 +16,10 @@ import org.openqa.selenium.phantomjs.PhantomJSDriver
 import org.openqa.selenium.remote.ScreenshotException
 import org.openqa.selenium.{OutputType, TakesScreenshot, WebDriver}
 import org.scalatest._
-import org.scalatest.concurrent.Eventually
 import org.scalatest.exceptions.TestFailedException
 import org.scalatest.junit._
 import org.scalatest.selenium.WebBrowser
-import org.scalatest.time.SpanSugar
+import org.scalatest.time.{Millis, Seconds, Span, SpanSugar}
 import uk.ac.warwick.tabula.helpers.Logging
 import uk.ac.warwick.userlookup.UserLookup
 import uk.ac.warwick.util.core.ExceptionUtils
@@ -37,13 +36,15 @@ abstract class BrowserTest
 	extends FlatSpec
 	with Matchers
 	with BeforeAndAfter
-	with EventuallyAjax
 	with SpanSugar
 	with WebBrowser
 	with WebsignonMethods
 	with UserKnowledge
 	with TestScreenshots
 	with BeforeAndAfterAll {
+
+	override implicit val patienceConfig =
+		PatienceConfig(timeout = Span(30, Seconds), interval = Span(200, Millis))
 
 	// Shorthand to expose properties to test classes
 	val P = FunctionalTestProperties
@@ -105,7 +106,7 @@ abstract class BrowserTest
 	}
 
 	// Sometimes you need to wait for a page to load after clicking on a link
-	def verifyPageLoaded(fun: => Unit): Unit = eventuallyAjax(fun)
+	def verifyPageLoaded(fun: => Unit): Unit = eventually(fun)
 
 	// Don't set textField.value for a datetimepicker, as IT WILL HURT YOU
 	class DateTimePickerField(val underlying: org.openqa.selenium.WebElement, selector: String) {
@@ -145,17 +146,6 @@ abstract class BrowserTest
 }
 
 case class LoginDetails(usercode: String, password: String, description: String, warwickId:String)
-
-trait EventuallyAjax extends Eventually with SpanSugar {
-	/**
-	 * eventually{} is a generic ScalaTest method to repeatedly
-	 * try a block of code until it works or we give up. eventuallyAjax {}
-	 * just calls that with some sensible default timeouts.
-	 */
-	def eventuallyAjax(fun: =>Unit) {
-		eventually(timeout(30.seconds), interval(200.millis)) (fun)
-	}
-}
 
 /** Properties that can be overridden by a functionaltest.properties file in the classpath.
   *

@@ -68,9 +68,9 @@ class PersonalTutorTest extends BrowserTest with GivenWhenThen with FeaturesDriv
 			},
 			otherwise = { d =>
 				click on linkText("Record meeting")
-        eventuallyAjax(find(cssSelector(".modal-body iframe")) should be ('defined))
+        eventually(find(cssSelector(".modal-body iframe")) should be ('defined))
 				switch to frame(find(cssSelector(".modal-body iframe")).get)
-				eventuallyAjax(textField(name("title")).isDisplayed should be (true))
+				eventually(textField(name("title")).isDisplayed should be (true))
 			}
 		)
 
@@ -90,7 +90,7 @@ class PersonalTutorTest extends BrowserTest with GivenWhenThen with FeaturesDriv
 		}
 
 		Then("The new record is displayed")
-		eventuallyAjax(cssSelector("section.meetings table tbody tr").findAllElements.size should be (1))
+		eventually(cssSelector("section.meetings table tbody tr").findAllElements.size should be (1))
 		pageSource should include ("Created meeting")
 
 		When("Student1 views their profile")
@@ -109,7 +109,7 @@ class PersonalTutorTest extends BrowserTest with GivenWhenThen with FeaturesDriv
 		cssSelector("form.approval button.btn-primary").findElement.get.underlying.click()
 
 		Then("The meeting is approved")
-		eventuallyAjax(cssSelector("input[name=approved]").findElement.isEmpty should be (true))
+		eventually(cssSelector("input[name=approved]").findElement.isEmpty should be (true))
 	}
 
 }

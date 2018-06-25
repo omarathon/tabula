@@ -22,7 +22,7 @@ class ReplaceMarkerSingleUseWorkflowTest extends BrowserTest with CourseworkFixt
 			val getCurrentYear = linkText(currentYear.previous.toString)
 			click on getCurrentYear
 
-			eventuallyAjax {
+			eventually {
 				Then(s"I should be on the ${currentYear.previous} version of the page")
 				currentUrl should include(s"/${currentYear.previous.startYear}/markingworkflows")
 			}
@@ -30,7 +30,7 @@ class ReplaceMarkerSingleUseWorkflowTest extends BrowserTest with CourseworkFixt
 			val addToYear = id("main").webElement.findElement(By.linkText(s"Add to $currentYear"))
 			click on addToYear
 
-			eventuallyAjax {
+			eventually {
 				Then("I should reach the marking workflows page")
 				currentUrl should include(s"/${currentYear.startYear}/markingworkflows")
 			}
@@ -41,7 +41,7 @@ class ReplaceMarkerSingleUseWorkflowTest extends BrowserTest with CourseworkFixt
 			val modifyBtn = id("main").webElement.findElement(By.cssSelector("td a.btn-default"))
 			click on modifyBtn
 
-			eventuallyAjax {
+			eventually {
 				Then("I should reach the modify workflows options page")
 				currentUrl should include("/edit")
 			}
@@ -49,7 +49,7 @@ class ReplaceMarkerSingleUseWorkflowTest extends BrowserTest with CourseworkFixt
 			val replaceLink = id("main").webElement.findElement(By.partialLinkText("Replace marker"))
 			click on replaceLink
 
-			eventuallyAjax {
+			eventually {
 				Then("I should reach the modify workflows page")
 				currentUrl should include("/replace")
 			}
@@ -72,7 +72,7 @@ class ReplaceMarkerSingleUseWorkflowTest extends BrowserTest with CourseworkFixt
 		val saveButton = cssSelector("input.btn-primary")
 		click on saveButton
 
-		eventuallyAjax {
+		eventually {
 			Then("I should reach the modify workflows page again")
 			currentUrl should include(s"/xxx/${currentYear.startYear}/markingworkflows")
 		}

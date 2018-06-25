@@ -1,8 +1,8 @@
 package uk.ac.warwick.tabula.coursework.pages
 
 import org.openqa.selenium.{By, Keys, WebDriver, WebElement}
-import org.scalatest.concurrent.{Eventually, IntegrationPatience}
 import org.scalatest.Matchers
+import org.scalatest.concurrent.{Eventually, IntegrationPatience}
 import org.scalatest.selenium.WebBrowser
 import uk.ac.warwick.tabula.{AcademicYear, FunctionalTestProperties}
 
@@ -10,6 +10,7 @@ import scala.collection.JavaConverters._
 
 
 class SetupAssignmentsPage(val departmentCode: String)(implicit driver: WebDriver) extends WebBrowser with Matchers with Eventually with IntegrationPatience {
+
 	val thisYear: AcademicYear = AcademicYear.now()
 	val url = s"${FunctionalTestProperties.SiteRoot}/coursework/admin/department/$departmentCode/${thisYear.startYear}/setup-assignments"
 

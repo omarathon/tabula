@@ -26,7 +26,7 @@ class ReplaceMarkerReusableWorkflowTest extends BrowserTest with CourseworkFixtu
 			val getCurrentYear = linkText(currentYear.previous.toString)
 			click on getCurrentYear
 
-			eventuallyAjax {
+			eventually {
 				Then(s"I should be on the ${currentYear.previous} version of the page")
 				currentUrl should include(s"/${currentYear.previous.startYear}/markingworkflows")
 			}
@@ -35,7 +35,7 @@ class ReplaceMarkerReusableWorkflowTest extends BrowserTest with CourseworkFixtu
 			click on addToYear
 		}
 
-		eventuallyAjax {
+		eventually {
 			Then("I should reach the marking workflows page")
 			currentUrl should include(s"/${currentYear.startYear}/markingworkflows")
 		}
@@ -50,7 +50,7 @@ class ReplaceMarkerReusableWorkflowTest extends BrowserTest with CourseworkFixtu
 		val modifyBtn = id("main").webElement.findElement(By.cssSelector("td a.btn-default"))
 		click on modifyBtn
 
-		eventuallyAjax {
+		eventually {
 			Then("I should reach the modify workflows options page")
 			currentUrl should include("/edit")
 		}
@@ -58,7 +58,7 @@ class ReplaceMarkerReusableWorkflowTest extends BrowserTest with CourseworkFixtu
 		val replaceLink = id("main").webElement.findElement(By.partialLinkText("Replace marker"))
 		click on replaceLink
 
-		eventuallyAjax {
+		eventually {
 			Then("I should reach the modify workflows page")
 			currentUrl should include("/replace")
 		}
@@ -77,7 +77,7 @@ class ReplaceMarkerReusableWorkflowTest extends BrowserTest with CourseworkFixtu
 		val saveButton = cssSelector("input.btn-primary")
 		click on saveButton
 
-		eventuallyAjax {
+		eventually {
 			Then("I should reach the modify workflows page again")
 			currentUrl should include(s"/xxx/${currentYear.startYear}/markingworkflows")
 		}
@@ -96,7 +96,7 @@ class ReplaceMarkerReusableWorkflowTest extends BrowserTest with CourseworkFixtu
 		val modifyBtn = id("main").webElement.findElements(By.cssSelector("td a.btn-default")).get(2)
 		click on modifyBtn
 
-		eventuallyAjax {
+		eventually {
 			Then("I should reach the modify workflows options page")
 			currentUrl should include("/edit")
 		}
@@ -104,7 +104,7 @@ class ReplaceMarkerReusableWorkflowTest extends BrowserTest with CourseworkFixtu
 		val replaceLink = id("main").webElement.findElement(By.partialLinkText("Replace marker"))
 		click on replaceLink
 
-		eventuallyAjax {
+		eventually {
 			Then("I should reach the modify workflows page")
 			currentUrl should include("/replace")
 		}
@@ -114,7 +114,7 @@ class ReplaceMarkerReusableWorkflowTest extends BrowserTest with CourseworkFixtu
 		click on markerToReplace
 
 		val oldMarker = markerToReplace.findElement(By.cssSelector("option[value^=tabula-functest-marker]"))
-		eventuallyAjax {
+		eventually {
 			oldMarker.isDisplayed should be (true)
 			click on oldMarker
 		}
@@ -137,7 +137,7 @@ class ReplaceMarkerReusableWorkflowTest extends BrowserTest with CourseworkFixtu
 		val saveButton = cssSelector("input.btn-primary")
 		click on saveButton
 
-		eventuallyAjax {
+		eventually {
 			Then("I should reach the modify workflows page again")
 			currentUrl should include(s"/xxx/${currentYear.startYear}/markingworkflows")
 		}

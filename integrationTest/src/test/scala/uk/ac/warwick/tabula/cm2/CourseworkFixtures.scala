@@ -121,7 +121,7 @@ trait CourseworkFixtures extends BrowserTest with FeaturesDriver with FixturesDr
 					click on cssSelector(s"$table .pickedUser")
 					enter(u)
 					val typeahead = cssSelector(".typeahead .active a")
-					eventuallyAjax {
+					eventually {
 						find(typeahead) should not be None
 					}
 					click on typeahead
@@ -160,7 +160,7 @@ trait CourseworkFixtures extends BrowserTest with FeaturesDriver with FixturesDr
 
 		showModulesWithNoFilteredAssignments()
 
-		eventuallyAjax {
+		eventually {
 			val module = getModule(moduleCode).get
 			click on module.findElement(By.partialLinkText("Manage this module"))
 
@@ -185,8 +185,8 @@ trait CourseworkFixtures extends BrowserTest with FeaturesDriver with FixturesDr
 		if (students.nonEmpty) {
 			textArea("massAddUsers").value = students.mkString("\n")
 			click on className("add-students-manually")
-			eventuallyAjax(pageSource contains "Your changes will not be recorded until you save this assignment." should be {true})
-			eventuallyAjax{pageSource should include(students.size + " manually enrolled")}
+			eventually(pageSource contains "Your changes will not be recorded until you save this assignment." should be {true})
+			eventually{pageSource should include(students.size + " manually enrolled")}
 		}
 		studentSettings(students)
 
@@ -225,11 +225,11 @@ trait CourseworkFixtures extends BrowserTest with FeaturesDriver with FixturesDr
 			When("I choose Single use")
 			singleSel("workflowCategory").value = WorkflowCategory.SingleUse.code
 			Then("I see the options for single use workflows")
-			eventuallyAjax(pageSource contains "Marking workflow type" should be {true})
+			eventually(pageSource contains "Marking workflow type" should be {true})
 
 			When("I select single marking add a markers usercode")
 			singleSel("workflowType").value = workflowType.name
-			eventuallyAjax(pageSource contains "Add marker" should be {true})
+			eventually(pageSource contains "Add marker" should be {true})
 
 			Seq("markersA" -> markers.headOption.getOrElse(Nil), "markersB" -> markers.tail.headOption.getOrElse(Nil)).foreach{case (field, m) =>
 				m.zipWithIndex.foreach{ case(marker, i) =>
@@ -304,7 +304,7 @@ trait CourseworkFixtures extends BrowserTest with FeaturesDriver with FixturesDr
 		eventually(currentUrl should include(s"/admin/assignments/$id/summary"))
 
 		When("I select all the submissions")
-		eventuallyAjax(click on cssSelector(".collection-check-all"))
+		eventually(click on cssSelector(".collection-check-all"))
 
 		And("I choose to release for marking")
 		click on partialLinkText("Marking")
@@ -317,7 +317,7 @@ trait CourseworkFixtures extends BrowserTest with FeaturesDriver with FixturesDr
 		eventually(currentUrl should include(s"/admin/assignments/$id/release-submissions"))
 
 		When("I confirm")
-		eventuallyAjax{
+		eventually{
 			cssSelector(s"input[name=confirm]").webElement.click()
 			cssSelector(s"input[value=Confirm]").webElement.click()
 		}
@@ -389,7 +389,7 @@ trait CourseworkFixtures extends BrowserTest with FeaturesDriver with FixturesDr
 		When("I choose Reusable workflow")
 		singleSel("workflowCategory").value = WorkflowCategory.Reusable.code
 		Then("I see the reusable workflow list")
-		eventuallyAjax(pageSource contains "Marking workflow type" should be {true})
+		eventually(pageSource contains "Marking workflow type" should be {true})
 
 		When("I select reusable workflow")
 		val select = new Select(find(cssSelector("select[name=reusableWorkflow]")).get.underlying)

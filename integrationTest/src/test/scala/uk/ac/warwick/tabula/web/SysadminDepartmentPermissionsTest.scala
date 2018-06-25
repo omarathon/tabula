@@ -48,7 +48,7 @@ class SysadminDepartmentPermissionsTest extends BrowserTest with SysadminFixture
 
 			Then("I should get a result back")
 				val typeahead = cssSelector(".typeahead .active a")
-				eventuallyAjax {
+				eventually {
 					find(typeahead) should not be None
 				}
 

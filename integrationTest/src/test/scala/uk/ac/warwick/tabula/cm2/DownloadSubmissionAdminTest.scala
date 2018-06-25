@@ -17,12 +17,12 @@ class DownloadSubmissionAdminTest extends BrowserTest with CourseworkFixtures {
 		val testModule =id("main").webElement.findElements(By.cssSelector(".fa-chevron-right")).get(0)
 		click on testModule
 
-		eventuallyAjax {
+		eventually {
 			val cm2Assignment =id("main").webElement.findElements(By.cssSelector("h5.assignment-name a")).get(0)
 			click on cm2Assignment
 		}
 
-		eventuallyAjax {
+		eventually {
 			currentUrl.contains("/summary") should be(true)
 		}
 

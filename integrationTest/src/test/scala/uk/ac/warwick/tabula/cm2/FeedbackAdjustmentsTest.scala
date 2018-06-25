@@ -16,7 +16,7 @@ class FeedbackAdjustmentsTest extends BrowserTest with CourseworkFixtures with G
 			val module = getModule("XXX02").get
 			click on module.findElement(By.className("mod-code"))
 			Then("I should see the premarked assignment")
-			eventuallyAjax(pageSource contains "Premarked assignment" should be {true})
+			eventually(pageSource contains "Premarked assignment" should be {true})
 			click on linkText("Premarked assignment")
 
 			When("I go to the adjustments page")
@@ -31,11 +31,11 @@ class FeedbackAdjustmentsTest extends BrowserTest with CourseworkFixtures with G
 					go to Path(s"/coursework/admin/module/xxx02/assignments/$assignmentId/feedback/adjustments")
 				},
 				otherwise = { _ =>
-					eventuallyAjax(className("collection-check-all").findElement.exists(_.isDisplayed) should be {true})
+					eventually(className("collection-check-all").findElement.exists(_.isDisplayed) should be {true})
 					click on className("collection-check-all")
-					eventuallyAjax(pageSource contains "Feedback" should be {true})
+					eventually(pageSource contains "Feedback" should be {true})
 					click on linkText("Feedback")
-					eventuallyAjax(pageSource contains "Adjustments" should be {true})
+					eventually(pageSource contains "Adjustments" should be {true})
 					click on linkText("Adjustments")
 				}
 			)
@@ -48,7 +48,7 @@ class FeedbackAdjustmentsTest extends BrowserTest with CourseworkFixtures with G
 			When("I click on a student's ID")
 			click on cssSelector("h6.toggle-icon")
 			Then("I see the form and the student's current marks")
-			eventuallyAjax(pageSource contains "Original mark - 41" should be {true})
+			eventually(pageSource contains "Original mark - 41" should be {true})
 
 			When("I populate and submit the form")
 			// as there is a hidden and disabled reason element on the same page we can't use the scala test singleSel
@@ -59,14 +59,14 @@ class FeedbackAdjustmentsTest extends BrowserTest with CourseworkFixtures with G
 			find(cssSelector(s"#row-${P.Student1.usercode} button.btn-primary")).get.underlying.click()
 			Then("the students marks get adjusted")
 
-      eventuallyAjax {
+      eventually {
         id(s"row-${P.Student1.usercode}").webElement.isDisplayed should be (false)
       }
 
 			When("I click on the student's ID again")
 			click on cssSelector("h6.toggle-icon")
 			Then("I see the form and the adusted mark")
-      eventuallyAjax(pageSource contains "Adjusted mark - 31" should be {true})
+      eventually(pageSource contains "Adjusted mark - 31" should be {true})
 
       click on partialLinkText("XXX02 Test Module 2")
 			click on getModule("XXX02").get.findElement(By.className("mod-code"))

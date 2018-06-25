@@ -73,7 +73,7 @@ class CourseworkFeedbackTemplatesTest extends BrowserTest with CourseworkFixture
 			click on (row.get.findElement(By.partialLinkText("Edit")))
 		}
 
-		eventuallyAjax {
+		eventually {
 			find("feedback-template-model") map {
 				_.isDisplayed
 			} should be(Some(true))
@@ -120,7 +120,7 @@ class CourseworkFeedbackTemplatesTest extends BrowserTest with CourseworkFixture
 			click on (row.get.findElement(By.partialLinkText("Delete")))
 		}
 
-		eventuallyAjax {
+		eventually {
 			find("feedback-template-model") map {
 				_.isDisplayed
 			} should be(Some(true))

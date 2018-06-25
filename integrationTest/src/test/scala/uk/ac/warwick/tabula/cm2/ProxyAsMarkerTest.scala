@@ -55,7 +55,7 @@ class ProxyAsMarkerTest extends BrowserTest with CourseworkFixtures {
 
 				click on cssSelector("span.mod-code")
 
-				eventuallyAjax {
+				eventually {
 					releaseForMarking(id)
 				}
 

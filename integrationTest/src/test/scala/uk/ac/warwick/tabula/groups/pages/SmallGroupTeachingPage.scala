@@ -1,17 +1,21 @@
 package uk.ac.warwick.tabula.groups.pages
 
 import org.openqa.selenium.{By, WebDriver, WebElement}
-import uk.ac.warwick.tabula.{BreadcrumbsMatcher, EventuallyAjax, AcademicYear, FunctionalTestProperties}
+import uk.ac.warwick.tabula.{AcademicYear, BreadcrumbsMatcher, FunctionalTestProperties}
 import org.scalatest.selenium.Page
 import org.scalatest.selenium.WebBrowser
 
 import scala.collection.JavaConverters._
 import org.scalatest.concurrent.Eventually
 import org.scalatest.Matchers
+import org.scalatest.time.{Millis, Seconds, Span}
 
 
 class SmallGroupTeachingPage(val departmentCode:String, val academicYear: String)(implicit val webDriver:WebDriver)
-	extends Page with WebBrowser with	BreadcrumbsMatcher with EventuallyAjax with Matchers  with GroupSetList {
+	extends Page with WebBrowser with BreadcrumbsMatcher with Eventually with Matchers with GroupSetList {
+
+	override implicit val patienceConfig =
+		PatienceConfig(timeout = Span(30, Seconds), interval = Span(200, Millis))
 
 	val url: String = "%s/groups/admin/department/%s/%s".format(FunctionalTestProperties.SiteRoot, departmentCode, academicYear)
 
@@ -160,12 +164,12 @@ class BatchOpenPage(val departmentCode: String, val academicYear: AcademicYear)(
 }
 
 trait GroupSetList {
-	this: WebBrowser with EventuallyAjax with Matchers =>
+	this: WebBrowser with Eventually with Matchers =>
 
 	def getGroupsetInfo(moduleCode: String, groupsetName: String)(implicit webdriver:WebDriver): Option[GroupSetInfoSummarySection] = {
 
 		// wait for sets to load ajaxically
-		eventuallyAjax {
+		eventually {
 			Option(className("small-group-sets-list").webElement.findElement(By.className("mod-code"))
 				.getText.trim == s"${moduleCode.toUpperCase}") should be ('defined)
 		}
@@ -182,7 +186,7 @@ trait GroupSetList {
 				if (section.getAttribute("class").indexOf("collapsible") != -1 && section.getAttribute("class").indexOf("expanded") == -1) {
 					click on section.findElement(By.className("section-title"))
 
-					eventuallyAjax {
+					eventually {
 						section.getAttribute("class") should include ("expanded")
 					}
 				}
@@ -194,13 +198,16 @@ trait GroupSetList {
 }
 
 trait ModuleAndGroupSetList {
-	this: WebBrowser with EventuallyAjax with Matchers =>
+	this: WebBrowser with Eventually with Matchers =>
+
+	override implicit val patienceConfig =
+		PatienceConfig(timeout = Span(30, Seconds), interval = Span(200, Millis))
 
 	def getGroupsetInfo(moduleCode: String, groupsetName: String)(implicit webdriver: WebDriver): Option[ModuleGroupSetInfoSummarySection] = {
 		getModuleInfo(moduleCode).flatMap { module =>
 			if (module.getAttribute("class").indexOf("collapsible") != -1 && module.getAttribute("class").indexOf("expanded") == -1) {
 				click on module.findElement(By.className("section-title"))
-				eventuallyAjax {
+				eventually {
 					module.getAttribute("class") should include("expanded")
 				}
 			}

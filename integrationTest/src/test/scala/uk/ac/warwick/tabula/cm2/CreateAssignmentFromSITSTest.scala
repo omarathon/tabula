@@ -55,7 +55,7 @@ class CreateAssignmentFromSITSTest extends BrowserTest with CourseworkFixtures {
 		When("The I click on the Next button")
 		val nextButton = id("main").webElement.findElement(By.tagName("button"))
 		click on nextButton
-		eventuallyAjax {
+		eventually {
 			val options = id("main").webElement.findElements(By.id("options-buttons")).size()
 			options should be (1)
 		}
@@ -133,7 +133,7 @@ class CreateAssignmentFromSITSTest extends BrowserTest with CourseworkFixtures {
 		When("I click on the submit button")
 		val submitButton = id("main").webElement.findElement(By.cssSelector(".btn-primary"))
 		click on submitButton
-		eventuallyAjax {
+		eventually {
 			Then("The page should go to the assignments page")
 			currentUrl should include("/department/xxx/20")
 		}

@@ -25,7 +25,7 @@ class CourseworkModuleManagerTest extends BrowserTest with CourseworkFixtures wi
 
 		showModulesWithNoFilteredAssignments()
 
-		eventuallyAjax {
+		eventually {
 			val element = className("filter-results").webElement.findElements(By.cssSelector("div.striped-section.admin-assignment-list"))
 			element.size should be(3)
 
@@ -67,7 +67,7 @@ class CourseworkModuleManagerTest extends BrowserTest with CourseworkFixtures wi
 
 		Then("I should get a result back")
 		val typeahead = cssSelector(".typeahead .active a")
-		eventuallyAjax {
+		eventually {
 			find(typeahead) should not be None
 		}
 
@@ -98,7 +98,7 @@ class CourseworkModuleManagerTest extends BrowserTest with CourseworkFixtures wi
 			click on cssSelector(s"$parentElement .pickedUser")
 			enter(usersToBeAdded.last)
 			val typeahead = cssSelector(".typeahead .active a")
-			eventuallyAjax {
+			eventually {
 				find(typeahead) should not be (None)
 			}
 			click on typeahead
