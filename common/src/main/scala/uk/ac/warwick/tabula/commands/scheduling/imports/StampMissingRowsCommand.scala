@@ -103,6 +103,23 @@ class StampMissingRowsCommandInternal extends CommandInternal[Unit] with Logging
 		transactional() {
 			memberDao.stampMissingFromImport(missingStaff, DateTime.now)
 		}
+
+		val staffMembersToInactivate = memberDao.getAllWithUniversityIds(missingStaff).filter(
+			missingMember => {
+				missingMember.inactivationDate != null &&
+				!missingMember.inactivationDate.toDateTimeAtStartOfDay.isAfter(DateTime.now)
+			}
+		)
+
+		transactional() {
+			staffMembersToInactivate.foreach(
+				member => {
+					member.inUseFlag = "Inactive - Ended " + member.inactivationDate.toString("dd/MM/yyyy")
+					memberDao.saveOrUpdate(member)
+				}
+			)
+		}
+
 	}
 
 }
