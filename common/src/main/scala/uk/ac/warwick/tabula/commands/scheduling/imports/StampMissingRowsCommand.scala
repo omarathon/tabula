@@ -31,7 +31,6 @@ class StampMissingRowsCommandInternal extends CommandInternal[Unit] with Logging
 		with ProfileImporterComponent =>
 
 	override def applyInternal(): Unit = {
-
 		applyStudents()
 		applyStaff()
 	}
@@ -106,7 +105,10 @@ class StampMissingRowsCommandInternal extends CommandInternal[Unit] with Logging
 		}
 
 		val staffMembersToInactivate = memberDao.getAllWithUniversityIds(missingStaff).filter(
-			! _.inactivationDate.toDateTimeAtStartOfDay.isAfter(DateTime.now)
+			missingMember => {
+				missingMember.inactivationDate != null &&
+				!missingMember.inactivationDate.toDateTimeAtStartOfDay.isAfter(DateTime.now)
+			}
 		)
 
 		transactional() {
