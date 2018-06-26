@@ -57,7 +57,7 @@
 		<p>Alternatively, harness unlimited power by entering God mode:</p>
 
 		<@f.form method="post" action="${url('/sysadmin/god')}">
-			<input type="hidden" name="returnTo" value="${info.requestedUri!""}" />
+			<input type="hidden" name="returnTo" value="${info.requestedUriWithParameters!""}" />
 			<button class="btn btn-large btn-warning"><i class="icon-eye-open fa fa-eye"></i> Enable God mode</button>
 		</@f.form>
 	</div>
