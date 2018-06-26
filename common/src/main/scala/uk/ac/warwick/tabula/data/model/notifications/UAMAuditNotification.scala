@@ -6,29 +6,27 @@ import uk.ac.warwick.tabula.{AcademicYear, DateFormats}
 import uk.ac.warwick.tabula.data.model._
 import uk.ac.warwick.userlookup.User
 
-object UAMAuditNotification {
-
-	object Deadline {
-		val permissionConfirmation: LocalDate = AcademicYear
-			.forDate(new DateTime())
-			.next
-			.termsAndVacations
-			.filter(_.isTerm)
-			.head
-			.firstDay
-			.minusWeeks(1)
-
-		val roleConfirmation: LocalDate = permissionConfirmation.minusWeeks(4)
-	}
-
-}
+trait UAMAuditNotification extends Notification[Department, Unit] with MyWarwickNotification
 
 @Entity
-@DiscriminatorValue("UAMAuditNotification")
-class UAMAuditNotification extends Notification[Department, Unit] with MyWarwickNotification {
+@DiscriminatorValue("UAMAuditFirstNotification")
+class UAMAuditFirstNotification extends UAMAuditNotification {
 
 	@transient
 	val templateLocation = "/WEB-INF/freemarker/emails/uam_audit_email.ftl"
+
+	@transient
+	def permissionConfirmationDeadline: LocalDate = AcademicYear
+		.forDate(this.created)
+		.next
+		.termsAndVacations
+		.filter(_.isTerm)
+		.head
+		.firstDay
+		.minusWeeks(1)
+
+	@transient
+	def roleConfirmationDeadline: LocalDate = permissionConfirmationDeadline.minusWeeks(4)
 
 	def departments: Seq[Department] = entities
 
@@ -43,12 +41,19 @@ class UAMAuditNotification extends Notification[Department, Unit] with MyWarwick
 	def content: FreemarkerModel = FreemarkerModel(templateLocation, Map(
 		"departments" -> departments,
 		"userAccessManager" -> agent.getFullName,
-		"permissionConfirmation" -> UAMAuditNotification.Deadline.permissionConfirmation.toString(DateFormats.NotificationDateOnlyPattern),
-		"roleConfirmation" -> UAMAuditNotification.Deadline.roleConfirmation.toString(DateFormats.NotificationDateOnlyPattern),
+		"permissionConfirmation" -> permissionConfirmationDeadline.toString(DateFormats.NotificationDateOnlyPattern),
+		"roleConfirmation" -> roleConfirmationDeadline.toString(DateFormats.NotificationDateOnlyPattern),
 		"url" -> url,
 		"urlTitle" -> urlTitle
 	))
 
 	@transient
 	def recipients: Seq[User] = Seq(agent)
+}
+
+@Entity
+@DiscriminatorValue("UAMAuditChaserNotification")
+class UAMAuditSecondNotification extends UAMAuditFirstNotification {
+	@transient
+	override val templateLocation = "/WEB-INF/freemarker/emails/uam_audit_second_email.ftl"
 }

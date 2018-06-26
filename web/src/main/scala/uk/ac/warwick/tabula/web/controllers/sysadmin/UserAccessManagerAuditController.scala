@@ -6,7 +6,7 @@ import org.springframework.validation.Errors
 import org.springframework.web.bind.annotation._
 import uk.ac.warwick.spring.Wire
 import uk.ac.warwick.tabula.commands.sysadmin.UserAccessManagerAuditCommand
-import uk.ac.warwick.tabula.data.model.notifications.{UAMAuditChaserNotification, UAMAuditNotification}
+import uk.ac.warwick.tabula.data.model.notifications.{UAMAuditFirstNotification, UAMAuditNotification, UAMAuditSecondNotification}
 import uk.ac.warwick.tabula.roles.UserAccessMgrRoleDefinition
 import uk.ac.warwick.tabula.services.permissions.{PermissionsService, PermissionsServiceComponent}
 import uk.ac.warwick.tabula.web.Mav
@@ -40,8 +40,8 @@ class UserAccessManagerAuditController extends BaseSysadminController with Permi
 	@PostMapping
 	def onSubmit(@RequestParam(value = "notification", required = false) choice: String): Mav = {
 		(choice match {
-			case "first" => Some(new UAMAuditNotification)
-			case "second" => Some(new UAMAuditChaserNotification)
+			case "first" => Some(new UAMAuditFirstNotification)
+			case "second" => Some(new UAMAuditSecondNotification)
 			case _ => None
 		}).map(sendNotification).getOrElse(error)
 	}
