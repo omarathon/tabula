@@ -56,10 +56,10 @@ class StudentAssessmentBreakdownController extends ExamsController
 	}
 
 	@ModelAttribute("weightings")
-	def weightings(@PathVariable studentCourseDetails: StudentCourseDetails,
-		@PathVariable academicYear: AcademicYear): IndexedSeq[CourseYearWeighting] = {
+	def weightings(@PathVariable studentCourseDetails: StudentCourseDetails): IndexedSeq[CourseYearWeighting] = {
 		(1 to FilterStudentsOrRelationships.MaxYearsOfStudy).flatMap(year =>
-			courseAndRouteService.getCourseYearWeighting(mandatory(studentCourseDetails).course.code, mandatory(academicYear), year)
+			courseAndRouteService.getCourseYearWeighting(mandatory(studentCourseDetails).course.code,
+				mandatory(studentCourseDetails.sprStartAcademicYear), year)
 		).sorted
 	}
 
