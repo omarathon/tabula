@@ -2,7 +2,7 @@ package uk.ac.warwick.tabula.commands.sysadmin
 
 import uk.ac.warwick.tabula.CurrentUser
 import uk.ac.warwick.tabula.commands._
-import uk.ac.warwick.tabula.data.model.notifications.UAMAuditNotification
+import uk.ac.warwick.tabula.data.model.notifications.{UAMAuditFirstNotification, UAMAuditNotification, UAMAuditSecondNotification}
 import uk.ac.warwick.tabula.data.model.{Department, Notification}
 import uk.ac.warwick.tabula.permissions.Permissions
 import uk.ac.warwick.tabula.roles.UserAccessMgrRoleDefinition
@@ -14,18 +14,18 @@ object UserAccessManagerAuditCommand {
 
 	def apply[A <: UAMAuditNotification](notification: A): Appliable[Seq[UserAccessManagerWithDepartments]] =
 		new UserAccessManagerAuditCommandInternal[A](notification)
-			with UserAccessManagerAuditCommandState[A]
 			with ComposableCommand[Seq[UserAccessManagerWithDepartments]]
 			with AutowiringPermissionsServiceComponent
 			with UserAccessManagerAuditCommandNotifications[A]
 			with UserAccessManagerAuditCommandPermissions
 			with UserAccessManagerAuditCommandDescription
+			with ReadOnly
 }
 
 case class UserAccessManagerWithDepartments(user: User, departments: Seq[Department])
 
 class UserAccessManagerAuditCommandInternal[A <: UAMAuditNotification](val notification: A) extends CommandInternal[Seq[UserAccessManagerWithDepartments]] {
-	self: PermissionsServiceComponent with UserAccessManagerAuditCommandState[A] =>
+	self: PermissionsServiceComponent =>
 
 	override def applyInternal(): Seq[UserAccessManagerWithDepartments] =
 		permissionsService.getAllGrantedRolesForDefinition(UserAccessMgrRoleDefinition).flatMap(_.users.users).distinct.map { user =>
@@ -38,22 +38,9 @@ class UserAccessManagerAuditCommandInternal[A <: UAMAuditNotification](val notif
 }
 
 trait UserAccessManagerAuditCommandNotifications[A <: UAMAuditNotification] extends Notifies[Seq[UserAccessManagerWithDepartments], User] {
-	self: UserAccessManagerAuditCommandState[A] =>
-
 	override def emit(result: Seq[UserAccessManagerWithDepartments]): Seq[A] = {
-		val re = result.map{ uamWithDepts =>
-			val uam = uamWithDepts.user
-			val depts = uamWithDepts.departments
-			Notification.init(notification, uam, depts)
-			???
-		}
-//		val re = result.map(uam => Notification.init[Department, A](notification, uam.user, uam.departments))
-		re
+		result.map(uam => Notification.init(new A, uam.user, uam.departments))
 	}
-}
-
-trait UserAccessManagerAuditCommandState[A <: UAMAuditNotification] {
-	val notification: A
 }
 
 trait UserAccessManagerAuditCommandPermissions extends RequiresPermissionsChecking with PermissionsCheckingMethods {
