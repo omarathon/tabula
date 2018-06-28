@@ -38,8 +38,17 @@ class UserAccessManagerAuditCommandInternal[A <: UAMAuditNotification](val notif
 }
 
 trait UserAccessManagerAuditCommandNotifications[A <: UAMAuditNotification] extends Notifies[Seq[UserAccessManagerWithDepartments], User] {
-	override def emit(result: Seq[UserAccessManagerWithDepartments]): Seq[A] = {
-		result.map(uam => Notification.init(new A, uam.user, uam.departments))
+	val notification: A
+
+	override def emit(result: Seq[UserAccessManagerWithDepartments]): Seq[UAMAuditNotification] = {
+		result.map { uam =>
+			def makeNotification(n: UAMAuditNotification): UAMAuditNotification = Notification.init(n, uam.user, uam.departments)
+			notification match {
+				case _: UAMAuditSecondNotification => makeNotification(new UAMAuditSecondNotification)
+				case _: UAMAuditFirstNotification => makeNotification(new UAMAuditFirstNotification)
+				case _ => throw new IllegalStateException("Invalid UAM audit notification")
+			}
+		}
 	}
 }
 
