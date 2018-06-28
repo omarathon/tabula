@@ -13,7 +13,7 @@ import uk.ac.warwick.userlookup.User
 object UserAccessManagerAuditCommand {
 
 	def apply[A <: UAMAuditNotification](notification: A): Appliable[Seq[UserAccessManagerWithDepartments]] =
-		new UserAccessManagerAuditCommandInternal(notification)
+		new UserAccessManagerAuditCommandInternal[A](notification)
 			with UserAccessManagerAuditCommandState[A]
 			with ComposableCommand[Seq[UserAccessManagerWithDepartments]]
 			with AutowiringPermissionsServiceComponent
@@ -30,7 +30,6 @@ class UserAccessManagerAuditCommandInternal[A <: UAMAuditNotification](val notif
 	override def applyInternal(): Seq[UserAccessManagerWithDepartments] =
 		permissionsService.getAllGrantedRolesForDefinition(UserAccessMgrRoleDefinition).flatMap(_.users.users).distinct.map { user =>
 			val roles = permissionsService.getAllGrantedRolesFor(new CurrentUser(user, user))
-
 			UserAccessManagerWithDepartments(
 				user = user,
 				departments = roles.filter(_.roleDefinition == UserAccessMgrRoleDefinition).flatMap(_.scopeDepartment)
@@ -42,7 +41,14 @@ trait UserAccessManagerAuditCommandNotifications[A <: UAMAuditNotification] exte
 	self: UserAccessManagerAuditCommandState[A] =>
 
 	override def emit(result: Seq[UserAccessManagerWithDepartments]): Seq[A] = {
-		result.map(uam => Notification.init[Department, A](notification, uam.user, uam.departments))
+		val re = result.map{ uamWithDepts =>
+			val uam = uamWithDepts.user
+			val depts = uamWithDepts.departments
+			Notification.init(notification, uam, depts)
+			???
+		}
+//		val re = result.map(uam => Notification.init[Department, A](notification, uam.user, uam.departments))
+		re
 	}
 }
 
