@@ -172,7 +172,7 @@
 			</@bs3form.form_group>
 
 			<#if features.queueFeedbackForSits && department.uploadCourseworkMarksToSits>
-				<@marking.uploadToSits assignment=assignment verb="Publishing" withValidation=true isGradeValidation=isGradeValidation gradeValidation=gradeValidation />
+				<@marking.uploadToSits assignment=assignment verb="published" withValidation=true isGradeValidation=isGradeValidation gradeValidation=gradeValidation />
 			</#if>
 
 			<div class="submit-buttons">

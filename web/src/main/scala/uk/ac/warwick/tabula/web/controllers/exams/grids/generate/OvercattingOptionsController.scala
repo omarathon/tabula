@@ -133,9 +133,9 @@ class OvercattingOptionsController extends ExamsController
 object OvercattingOptionsView {
 	def apply(department: Department, academicYear: AcademicYear, scyd: StudentCourseYearDetails, normalLoadLookup: NormalLoadLookup, routeRules: Seq[UpstreamRouteRule], basedOnLevel: Boolean) =
 		new OvercattingOptionsView(department, academicYear, scyd, normalLoadLookup, routeRules, basedOnLevel)
-		with AutowiringModuleRegistrationServiceComponent
-		with GenerateExamGridOvercatCommandState
-		with GenerateExamGridOvercatCommandRequest
+			with AutowiringModuleRegistrationServiceComponent
+			with GenerateExamGridOvercatCommandState
+			with GenerateExamGridOvercatCommandRequest
 }
 
 class OvercattingOptionsView(
@@ -158,8 +158,7 @@ class OvercattingOptionsView(
 	private lazy val originalEntity = scyd.studentCourseDetails.student.toExamGridEntity(scyd, basedOnLevel)
 
 
-
-	def studyYearByLevelOrBlock: JInteger = if(basedOnLevel) {
+	def studyYearByLevelOrBlock: JInteger = if (basedOnLevel) {
 		Level.toYearOfStudy(scyd.studyLevel)
 	} else {
 		scyd.yearOfStudy
@@ -196,7 +195,11 @@ class OvercattingOptionsView(
 		isLevelGrid = basedOnLevel
 	)
 
-	private lazy val currentYearMark = moduleRegistrationService.weightedMeanYearMark(allSCYDs.flatMap(_.moduleRegistrations), overwrittenMarks, allowEmpty = false)
+	private lazy val currentYearMark = if (basedOnLevel) {
+		moduleRegistrationService.weightedMeanYearMark(StudentCourseYearDetails.extractValidModuleRegistrations(allSCYDs.flatMap(_.moduleRegistrations)), overwrittenMarks, allowEmpty = false)}
+	else {
+		moduleRegistrationService.weightedMeanYearMark(allSCYDs.flatMap(_.moduleRegistrations), overwrittenMarks, allowEmpty = false)
+	}
 
 	lazy val optionsColumns: Seq[ChosenYearExamGridColumn] = Seq(
 		new ChooseOvercatColumnOption().getColumns(overcattedEntitiesState, Option(overcatChoice)),
@@ -205,7 +208,7 @@ class OvercattingOptionsView(
 	).flatten
 
 	lazy val optionsColumnCategories: Map[String, Seq[ExamGridColumn with HasExamGridColumnCategory]] =
-		optionsColumns.collect{case c: HasExamGridColumnCategory => c}.groupBy(_.category)
+		optionsColumns.collect { case c: HasExamGridColumnCategory => c }.groupBy(_.category)
 
 	lazy val optionsColumnValues: Map[ChosenYearExamGridColumn, Map[ExamGridEntity, ExamGridColumnValue]] = optionsColumns.map(c => c -> c.values).toMap
 
@@ -214,13 +217,13 @@ class OvercattingOptionsView(
 		new CoreRequiredModulesColumnOption().getColumns(overcattedEntitiesState),
 		new CoreOptionalModulesColumnOption().getColumns(overcattedEntitiesState),
 		new OptionalModulesColumnOption().getColumns(overcattedEntitiesState)
-	).flatMap(_.toSeq).groupBy { case (year, _) => year}.mapValues(_.flatMap { case (_, columns) => columns })
+	).flatMap(_.toSeq).groupBy { case (year, _) => year }.mapValues(_.flatMap { case (_, columns) => columns })
 
 	lazy val perYearColumnValues: Map[PerYearExamGridColumn, Map[ExamGridEntity, Map[YearOfStudy, Map[ExamGridColumnValueType, Seq[ExamGridColumnValue]]]]] =
 		perYearColumns.values.flatten.toSeq.map(c => c -> c.values).toMap
 
 	lazy val perYearColumnCategories: Map[YearOfStudy, Map[String, Seq[PerYearExamGridColumn with HasExamGridColumnCategory]]] =
-		perYearColumns.mapValues(_.collect{case c: HasExamGridColumnCategory => c}.groupBy(_.category))
+		perYearColumns.mapValues(_.collect { case c: HasExamGridColumnCategory => c }.groupBy(_.category))
 
 }
 

@@ -69,7 +69,7 @@ abstract class AbstractMeetingRecordCommand {
 	private def persistAttachments(meeting: MeetingRecord) {
 
 		// delete attachments that have been removed
-		if (meeting.attachments != null && meeting.attachments.size() > 0) {
+		if (meeting.attachments != null) {
 			val filesToKeep = Option(attachedFiles).map(_.asScala.toList).getOrElse(List())
 			val filesToRemove = meeting.attachments.asScala -- filesToKeep
 			meeting.attachments = JArrayList[FileAttachment](filesToKeep)

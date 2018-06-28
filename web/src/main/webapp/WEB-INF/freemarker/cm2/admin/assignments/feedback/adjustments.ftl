@@ -99,11 +99,11 @@
 		</@bs3form.labelled_form_group>
 
 		<div class="alert alert-info">
-			The reason for adjustment and any comments will be made available to students when their feedback is published.
+			When the feedback is published, students can see the reason for the adjustment and any comments.
 		</div>
 
 		<#if features.queueFeedbackForSits && assignment.module.adminDepartment.uploadCourseworkMarksToSits && command.canBeUploadedToSits>
-			<@marking.uploadToSits assignment=assignment verb="Adjusting" withValidation=gradeValidation?? isGradeValidation=isGradeValidation gradeValidation=gradeValidation />
+			<@marking.uploadToSits assignment=assignment verb="adjusted" withValidation=gradeValidation?? isGradeValidation=isGradeValidation gradeValidation=gradeValidation />
 		</#if>
 
 		<div class="buttons form-group">

@@ -1266,7 +1266,9 @@
 			<#local extension=enhancedExtension.extension>
 			<#if extension.approved && !extension.rejected>
 				<#local date>
-					<@fmt.date date=extension.expiryDate capitalise=true shortMonth=true stripHtml=true />
+					<#if extension.expiryDate??>
+						<@fmt.date date=extension.expiryDate capitalise=true shortMonth=true stripHtml=true />
+					</#if>
 				</#local>
 			</#if>
 			<#if enhancedExtension.within>

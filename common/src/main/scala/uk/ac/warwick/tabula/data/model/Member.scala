@@ -428,11 +428,12 @@ class StudentMember extends Member with StudentProperties {
 		val years = if (basedOnLevel) {
 			// groups by level preserving the order in which they appear for this student
 			// add index to the scyd list and group by level
-			val groupedByLevelUnordered = allSCYDs.zipWithIndex.groupBy{ case (scyd, _) => scyd.studyLevel }
+			//student can be on multiple courses but we need only the one based on baseSCYD level
+			val groupedByLevelUnordered = allSCYDs.filter(_.studyLevel == baseSCYD.studyLevel).zipWithIndex.groupBy { case (scyd, _) => scyd.studyLevel }
 			// sort by the index
-			val groupedByLevelWithIndex = ListMap(groupedByLevelUnordered.toSeq.sortBy{ case (_, values) => values.head._2 }: _*)
+			val groupedByLevelWithIndex = ListMap(groupedByLevelUnordered.toSeq.sortBy { case (_, values) => values.head._2 }: _*)
 			// remove the index once sorted
-			val groupedByLevel = groupedByLevelWithIndex.mapValues(_.map{ case(scyds, _) => scyds })
+			val groupedByLevel = groupedByLevelWithIndex.mapValues(_.map { case(scyds, _) => scyds })
 			groupedByLevel.values.toSeq.zipWithIndex
 				.map{ case (scyds, index) => (index+1, Option(StudentCourseYearDetails.toExamGridEntityYearGrouped(index+1, scyds: _*))) }.toMap
 		} else {
