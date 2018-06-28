@@ -1,8 +1,12 @@
-We are contacting you because you are currently assigned to the User Access Manager (UAM) role for <#list departments as department>${department.fullName}<#if department_has_next>, </#if></#list> in Tabula. The UAM is the most senior role in Tabula - the person assigned to this role has ultimate responsibility for the staff they assign permissions to and, in turn, for the delegation of permissions throughout the department. These permissions control who can see information about students and who can carry out particular tasks related to, for example, attendance monitoring, marking and feedback.
+We are contacting you because you are currently assigned to the User Access Manager (UAM) role for <#list departments as department>${department.departmentName}<#if department_has_next>, </#if></#list> in Tabula. The UAM is the most senior role in Tabula - the person assigned to this role has ultimate responsibility for the staff they assign permissions to and, in turn, for the delegation of permissions throughout the department. These permissions control who can see information about students and who can carry out particular tasks related to, for example, attendance monitoring, marking and feedback.
 
 The person assigned to this role should be in a position to oversee administration of all sub-departments, too. In order to satisfy data audit requirements, please could you confirm that you are still performing this role. If you are not the appropriate person, please choose a named person to act in this role and let us know who this is by ${roleConfirmation}. For any department that does not have a confirmed UAM by this date, we will unfortunately need to remove all existing permissions previously assigned to your department's staff in Tabula.
 
-As the confirmed UAM for <#list departments as department>${department.fullName}<#if department_has_next>, </#if></#list>, please check that the permission levels in Tabula are accurate now:
+please check that the permission levels in Tabula are accurate now:
+
+<#list departments as department>${department.departmentName} - https://tabula.warwick.ac.uk${department.permissionTreeUrl} <#if department_has_next><br></#if></#list>
+
+link to the form:
 
 ${url}
 

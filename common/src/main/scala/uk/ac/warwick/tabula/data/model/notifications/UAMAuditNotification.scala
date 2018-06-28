@@ -5,8 +5,18 @@ import org.joda.time.{DateTime, LocalDate}
 import uk.ac.warwick.tabula.{AcademicYear, DateFormats}
 import uk.ac.warwick.tabula.data.model._
 import uk.ac.warwick.userlookup.User
+import scala.collection.JavaConverters._
+
 
 trait UAMAuditNotification extends Notification[Department, Unit] with MyWarwickNotification
+
+case class DeptNameWithPermissionTreeUrl(departmentName: String, permissionTreeUrl: String)
+
+object DeptNameWithPermissionTreeUrl {
+	def permissionTreeUrl(departmentCode: String): String = s"/admin/permissions/department/$departmentCode/tree"
+
+	def apply(department: Department): DeptNameWithPermissionTreeUrl = new DeptNameWithPermissionTreeUrl(department.fullName, permissionTreeUrl(department.code))
+}
 
 @Entity
 @DiscriminatorValue("UAMAuditFirstNotification")
@@ -34,12 +44,17 @@ class UAMAuditFirstNotification extends UAMAuditNotification {
 
 	def title: String = s"Tabula Users Audit ${this.created.getYear}"
 
-	def url: String = "https://warwick.ac.uk/services/its/servicessupport/web/tabula/uamconfirmation/"
+	def url: String = "https://warwick.ac.uk/tabulaaudit"
 
 	def urlTitle: String = title
 
 	def content: FreemarkerModel = FreemarkerModel(templateLocation, Map(
-		"departments" -> departments,
+		"departments" -> departments.flatMap { department =>
+			Seq(
+				Seq(DeptNameWithPermissionTreeUrl(department)),
+				if (department.hasChildren) department.children.asScala.map(DeptNameWithPermissionTreeUrl.apply).toSeq else Seq.empty
+			)
+		}.flatten,
 		"userAccessManager" -> agent.getFullName,
 		"permissionConfirmation" -> permissionConfirmationDeadline.toString(DateFormats.NotificationDateOnlyPattern),
 		"roleConfirmation" -> roleConfirmationDeadline.toString(DateFormats.NotificationDateOnlyPattern),
