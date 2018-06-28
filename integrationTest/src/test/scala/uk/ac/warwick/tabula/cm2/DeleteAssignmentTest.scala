@@ -82,7 +82,7 @@ class DeleteAssignmentTest extends BrowserTest with CourseworkFixtures {
 			cssSelector(".btn-danger").webElement.isEnabled should be(true)
 			click on cssSelector(".btn-danger")
 		}
-		eventuallyAjax {
+		eventually {
 			Then("I should reach the delete page")
 			currentUrl should not include("/edit")
 		}

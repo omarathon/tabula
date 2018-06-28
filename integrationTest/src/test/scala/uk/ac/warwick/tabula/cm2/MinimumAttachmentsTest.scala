@@ -13,13 +13,13 @@ class MinimumAttachmentsTest extends BrowserTest with CourseworkFixtures {
 		click on arrow
 
 		Then("The  module should expand")
-		eventuallyAjax {
+		eventually {
 			And("I should find a button to edit the CM2 assignment")
 			val editAssignmentBtn = id("main").webElement.findElements(By.xpath("//*[contains(text(),'Edit assignment')]")).get(1)
 			click on editAssignmentBtn
 		}
 
-		eventuallyAjax {
+		eventually {
 			And("I should be able to select the Options tab")
 			val optionsLink = id("main").webElement.findElements(By.xpath("//*[contains(text(),'Options')]")).get(0)
 			click on optionsLink
@@ -71,7 +71,7 @@ class MinimumAttachmentsTest extends BrowserTest with CourseworkFixtures {
 		And("press submit")
 		click on id("main").webElement.findElements(By.cssSelector(".btn-primary")).get(0)
 
-		eventuallyAjax {
+		eventually {
 			Then("an error around file numbers will be shown")
 			val errorMsg = cssSelector(".has-error").webElement.findElements(By.xpath("//*[contains(text(),'You need to at least submit 2 files.')]")).get(0)
 			errorMsg.isDisplayed should be (true)
@@ -92,7 +92,7 @@ class MinimumAttachmentsTest extends BrowserTest with CourseworkFixtures {
 		And("press submit")
 		click on id("main").webElement.findElements(By.cssSelector(".btn-primary")).get(0)
 
-		eventuallyAjax {
+		eventually {
 			Then("an error around file numbers is no longer shown")
 			val fileCountErrorMsg = cssSelector(".has-error").webElement.findElements(By.xpath("//*[contains(text(),'You need to at least submit 2 files.')]")).size()
 			fileCountErrorMsg should be (0)

@@ -74,7 +74,7 @@ class GroupsHomePageTest extends SmallGroupsFixture with GivenWhenThen with Brea
 				currentUrl should include("/groups/admin/department/xxx/")
 
 		// wait for sets to load ajaxically
-		eventuallyAjax {
+		eventually {
 			And("The page should display at least one set")
 			findAll(className("set-info")).toList should not be Nil
 		}

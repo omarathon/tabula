@@ -54,7 +54,7 @@ class SelfSignUpTest  extends SmallGroupsFixture with GivenWhenThen {
 		When("I click the sign up button")
 		groupsetInfo.getSignupButton.submit()
 
-    eventuallyAjax {
+    eventually {
       pageSource should include("1 student")
     }
 

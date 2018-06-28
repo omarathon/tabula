@@ -124,7 +124,7 @@ trait CourseworkFixtures extends BrowserTest with FeaturesDriver with FixturesDr
 					click on cssSelector(s"$table .pickedUser")
 					enter(u)
 					val typeahead = cssSelector(".typeahead .active a")
-					eventuallyAjax {
+					eventually {
 						find(typeahead) should not be None
 					}
 					click on typeahead
@@ -312,10 +312,10 @@ trait CourseworkFixtures extends BrowserTest with FeaturesDriver with FixturesDr
 			click on className("add-students")
 
 			// Eventually, a Jax!
-			eventuallyAjax { textArea("massAddUsers").isDisplayed should be {false} }
+			eventually { textArea("massAddUsers").isDisplayed should be {false} }
 			// there will be a delay between the dialog being dismissed and the source being updated by the
 			// ajax response. So wait some more
-			eventuallyAjax{pageSource should include(members.size + " manually enrolled")}
+			eventually{pageSource should include(members.size + " manually enrolled")}
 		}
 
 		checkbox("collectSubmissions").select()
@@ -364,7 +364,7 @@ trait CourseworkFixtures extends BrowserTest with FeaturesDriver with FixturesDr
 		if (module.getAttribute("class").indexOf("collapsible") != -1 && module.getAttribute("class").indexOf("expanded") == -1) {
 			click on module.findElement(By.className("section-title"))
 
-			eventuallyAjax {
+			eventually {
 				module.getAttribute("class") should include ("expanded")
 			}
 		}

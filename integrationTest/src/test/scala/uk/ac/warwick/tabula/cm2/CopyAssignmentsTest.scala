@@ -55,7 +55,7 @@ class CopyAssignmentsTest extends BrowserTest with CourseworkFixtures {
 
 		And("I choose to save the changes")
 		val confirmModalBtn = id("main").webElement.findElement(By.xpath("//button[@name='submit']"))
-		eventuallyAjax({
+		eventually({
 			confirmModalBtn.isDisplayed should be (true)
 			click on confirmModalBtn
 		})
@@ -103,7 +103,7 @@ class CopyAssignmentsTest extends BrowserTest with CourseworkFixtures {
 
 		When("I choose to save the changes")
 		val confirmModalBtn = id("main").webElement.findElement(By.xpath("//button[@name='submit']"))
-		eventuallyAjax({
+		eventually({
 			confirmModalBtn.isDisplayed should be (true)
 			click on confirmModalBtn
 		})

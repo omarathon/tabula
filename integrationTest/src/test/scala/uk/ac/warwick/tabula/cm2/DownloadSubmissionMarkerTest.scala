@@ -9,7 +9,7 @@ class DownloadSubmissionMarkerTest extends BrowserTest with CourseworkFixtures {
 
 		When("I select the relevant button on the CM2 assignment")
 		//ensure page has loaded table elements otherwise wait.
-		eventuallyAjax {
+		eventually {
 			val testModulerow = id("main").webElement.findElements(By.cssSelector("span.mod-code")).get(0)
 			click on testModulerow
 		}
@@ -20,14 +20,14 @@ class DownloadSubmissionMarkerTest extends BrowserTest with CourseworkFixtures {
 		click on arrow
 
 		Then("The completed assignments for marking should expand")
-		eventuallyAjax {
+		eventually {
 			val reviewAssignmentBtn = id("main").webElement.findElements(By.cssSelector(".btn-block")).get(1)
 			reviewAssignmentBtn.getText should include("Review")
 			click on reviewAssignmentBtn
 		}
 		Then("I should be taken to the Marking page")
 
-		eventuallyAjax {
+		eventually {
 				currentUrl should include("/marker/tabula-functest-marker1")
 		}
 
@@ -62,13 +62,13 @@ class DownloadSubmissionMarkerTest extends BrowserTest with CourseworkFixtures {
 
 	private def downloadAll(): Unit = {
 			Given("I have expanded the Marked section")
-			eventuallyAjax {
+			eventually {
 				val markedCollapse = id("main").webElement.findElements(By.cssSelector(".marking-tab-section > h4 > a")).get(1)
 				click on markedCollapse
 			}
 
 			When("I click on the Download dropdown without selecting any students")
-			eventuallyAjax {
+			eventually {
 				val downloadDropdown = id("main").webElement.findElements(By.cssSelector("button.dropdown-toggle")).get(0)
 				click on downloadDropdown
 			}

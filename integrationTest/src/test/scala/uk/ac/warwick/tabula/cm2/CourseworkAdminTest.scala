@@ -28,7 +28,7 @@ class CourseworkAdminTest extends BrowserTest with CourseworkFixtures {
 			click on hide
 		}
 
-		eventuallyAjax {
+		eventually {
 			getModule("xxx01").isDefined should be {false}
 			getModule("xxx02").get.isDisplayed should be {true}
 			getModule("xxx03").isDefined should be {false}

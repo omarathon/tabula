@@ -49,7 +49,7 @@ class AssignmentsTest extends BrowserTest with GivenWhenThen with FeaturesDriver
 		val module = getModule("XXX02").get
 		click on module.findElement(By.className("mod-code"))
 
-		eventuallyAjax(pageSource.contains("Feedback needs publishing (2 of 2)") should be (true))
+		eventually(pageSource.contains("Feedback needs publishing (2 of 2)") should be (true))
 		click on linkText("Feedback needs publishing (2 of 2)")
 		click on checkbox("confirm")
 		cssSelector("div.submit-buttons button[type=submit]").findElement.get.underlying.click()
