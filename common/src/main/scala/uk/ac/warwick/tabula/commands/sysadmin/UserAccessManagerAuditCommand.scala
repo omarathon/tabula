@@ -4,7 +4,7 @@ import uk.ac.warwick.tabula.CurrentUser
 import uk.ac.warwick.tabula.commands._
 import uk.ac.warwick.tabula.data.model.notifications.{UAMAuditFirstNotification, UAMAuditNotification, UAMAuditSecondNotification}
 import uk.ac.warwick.tabula.data.model.{Department, Notification}
-import uk.ac.warwick.tabula.permissions.Permissions
+import uk.ac.warwick.tabula.permissions.{Permissions, PermissionsTarget}
 import uk.ac.warwick.tabula.roles.UserAccessMgrRoleDefinition
 import uk.ac.warwick.tabula.services.permissions.{AutowiringPermissionsServiceComponent, PermissionsServiceComponent}
 import uk.ac.warwick.tabula.system.permissions.{PermissionsChecking, PermissionsCheckingMethods, RequiresPermissionsChecking}
@@ -53,7 +53,7 @@ trait UserAccessManagerAuditCommandNotifications[A <: UAMAuditNotification] exte
 }
 
 trait UserAccessManagerAuditCommandPermissions extends RequiresPermissionsChecking with PermissionsCheckingMethods {
-	override def permissionsCheck(p: PermissionsChecking): Unit = p.PermissionCheck(Permissions.GodMode)
+	override def permissionsCheck(p: PermissionsChecking): Unit = p.PermissionCheck(Permissions.RolesAndPermissions.Read, PermissionsTarget.Global)
 }
 
 trait UserAccessManagerAuditCommandDescription extends Describable[Seq[UserAccessManagerWithDepartments]] {
