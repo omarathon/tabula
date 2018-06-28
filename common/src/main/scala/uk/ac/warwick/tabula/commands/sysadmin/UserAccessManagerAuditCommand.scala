@@ -48,7 +48,7 @@ trait UserAccessManagerAuditCommandPermissions extends RequiresPermissionsChecki
 }
 
 trait UserAccessManagerAuditCommandDescription extends Describable[Seq[UserAccessManagerWithDepartments]] {
-	override def describe(d: Description): Unit = ()
+	override def describe(d: Description): Unit = {}
 
 	override def describeResult(d: Description, result: Seq[UserAccessManagerWithDepartments]): Unit = d.users(result.map(_.user))
 }
