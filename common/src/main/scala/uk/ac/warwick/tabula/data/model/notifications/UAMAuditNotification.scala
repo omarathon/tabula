@@ -54,7 +54,7 @@ class UAMAuditFirstNotification extends UAMAuditNotification {
 				Seq(DeptNameWithPermissionTreeUrl(department)),
 				if (department.hasChildren) department.children.asScala.map(DeptNameWithPermissionTreeUrl.apply).toSeq else Seq.empty
 			)
-		}.flatten,
+		}.flatten.distinct,
 		"userAccessManager" -> agent.getFullName,
 		"permissionConfirmation" -> permissionConfirmationDeadline.toString(DateFormats.NotificationDateOnlyPattern),
 		"roleConfirmation" -> roleConfirmationDeadline.toString(DateFormats.NotificationDateOnlyPattern),

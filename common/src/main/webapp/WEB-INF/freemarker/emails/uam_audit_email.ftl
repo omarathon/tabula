@@ -4,14 +4,19 @@ The person assigned to this role should be in a position to oversee administrati
 
 please check that the permission levels in Tabula are accurate now:
 
-<#list departments as department>${department.departmentName} - https://tabula.warwick.ac.uk${department.permissionTreeUrl} <#if department_has_next><br></#if></#list>
+<#list departments as department>${department.departmentName} - https://tabula.warwick.ac.uk${department.permissionTreeUrl} <#if department_has_next>
 
-link to the form:
+</#if></#list>
 
-${url}
 
 - Ensure that staff in your department have the appropriate permission levels.
 - Ensure that only those staff necessary have permission to view students' personal information.
 - In accepting the UAM role, you accept that you are responsible for the accuracy of these permissions - and will monitor permissions periodically. If you are unable to monitor permissions in the future, you should request that the UAM role be assigned to another person within your department.
+
+
+and go to this form:
+
+${url}
+
 
 Please respond to confirm that you have checked your permissions by ${permissionConfirmation}. If you have any questions or wish to discuss this further, please contact the Web Team via tabula@warwick.ac.uk.
