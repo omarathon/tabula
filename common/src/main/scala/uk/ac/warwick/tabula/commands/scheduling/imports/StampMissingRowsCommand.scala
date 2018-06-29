@@ -90,7 +90,7 @@ class StampMissingRowsCommandInternal extends CommandInternal[Unit] with Logging
 	}
 
 	def applyStaff(): Unit = {
-		val expectedStaff = transactional()(memberDao.getFreshStaffUniversityIds).toSet
+		val expectedStaff = transactional(readOnly = true)(memberDao.getFreshStaffUniversityIds).toSet
 		val presentStaff = checkMembershipForStaff(expectedStaff)
 
 		if (expectedStaff.nonEmpty && presentStaff.isEmpty) {
@@ -104,12 +104,14 @@ class StampMissingRowsCommandInternal extends CommandInternal[Unit] with Logging
 			memberDao.stampMissingFromImport(missingStaff, DateTime.now)
 		}
 
-		val staffMembersToInactivate = memberDao.getAllWithUniversityIds(missingStaff).filter(
-			missingMember => {
-				missingMember.inactivationDate != null &&
-				!missingMember.inactivationDate.toDateTimeAtStartOfDay.isAfter(DateTime.now)
-			}
-		)
+		val staffMembersToInactivate = transactional(readOnly = true) {
+			memberDao.getAllWithUniversityIds(missingStaff).filter(
+				missingMember => {
+					missingMember.inactivationDate != null &&
+						!missingMember.inactivationDate.toDateTimeAtStartOfDay.isAfter(DateTime.now)
+				}
+			)
+		}
 
 		transactional() {
 			staffMembersToInactivate.foreach(
