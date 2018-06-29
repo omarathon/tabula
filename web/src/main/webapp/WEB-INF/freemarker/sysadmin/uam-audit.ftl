@@ -18,13 +18,13 @@
 	<div class="form-group">
 		<div class="radio">
 			<label>
-				<input type="radio" name="notification" value="first">
+				<input type="radio" name="notificationChoice" value="first">
 				Send the first notification
 			</label>
 		</div>
 		<div class="radio">
 			<label>
-				<input type="radio" name="notification" value="second">
+				<input type="radio" name="notificationChoice" value="second">
 				Send the second notification
 			</label>
 		</div>
