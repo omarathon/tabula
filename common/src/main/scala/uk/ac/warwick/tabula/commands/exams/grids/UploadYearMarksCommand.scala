@@ -11,6 +11,7 @@ import uk.ac.warwick.tabula.data.{AutowiringStudentCourseYearDetailsDaoComponent
 import uk.ac.warwick.tabula.helpers.LazyLists
 import uk.ac.warwick.tabula.helpers.StringUtils._
 import uk.ac.warwick.tabula.permissions.Permissions
+import uk.ac.warwick.tabula.roles.UserAccessMgrRoleDefinition
 import uk.ac.warwick.tabula.services.coursework.docconversion.{AutowiringYearMarksExtractorComponent, YearMarkItem, YearMarksExtractorComponent}
 import uk.ac.warwick.tabula.system.BindListener
 import uk.ac.warwick.tabula.system.permissions.{PermissionsChecking, PermissionsCheckingMethods, RequiresPermissionsChecking}
@@ -167,14 +168,20 @@ trait UploadYearMarksCommandBindListener extends BindListener {
 		}
 	}
 
-	private def validateStudent(studentId: String, scyd: Option[StudentCourseYearDetails], isSCJCode: Boolean): Seq[String] = {
+	private def validateStudent(studentId: String, maybeScyd: Option[StudentCourseYearDetails], isSCJCode: Boolean): Seq[String] = {
 		def departmentAndParents(department: Department): Stream[Department] = Stream(department) ++ (if (department.hasParent) departmentAndParents(department.parent) else Stream())
-		if (scyd.isEmpty) {
-			Seq(s"Could not find a student with ${if (isSCJCode) "SCJ code" else "University ID"} $studentId for academic year ${academicYear.toString}")
-		} else if (!departmentAndParents(scyd.get.enrolmentDepartment).contains(department)) {
-			Seq(s"You do not have permission to upload marks for this student. Their enrolment department is ${scyd.get.enrolmentDepartment.rootDepartment.name}")
-		} else {
-			Seq()
+
+		maybeScyd match {
+			case None =>
+				Seq(s"Could not find a student with ${if (isSCJCode) "SCJ code" else "University ID"} $studentId for academic year ${academicYear.toString}")
+			case Some(scyd) if !departmentAndParents(scyd.enrolmentDepartment).contains(department) =>
+				val enrolmentRootDepartment = scyd.enrolmentDepartment.rootDepartment
+
+				val userAccessManagers = enrolmentRootDepartment.grantedRoles.asScala.filter(_.builtInRoleDefinition == UserAccessMgrRoleDefinition).flatMap(_.users.users).map(u => s"${u.getFullName} (${u.getEmail})")
+
+				Seq(s"You do not have permission to upload marks for this student. Their enrolment department is ${enrolmentRootDepartment.name}.${if (userAccessManagers.nonEmpty) s" To get permission, contact the Tabula User Access Manager for ${enrolmentRootDepartment.name}, ${userAccessManagers.mkString(" or ")}." else ""}")
+			case _ =>
+				Nil
 		}
 	}
 }

@@ -1,34 +1,51 @@
 <#escape x as x?html>
 
+<h1>Submit year marks</h1>
+
 <div class="fix-area">
 	<#if invalidItems?has_content>
-		<details>
-			<summary>
-				There were some rows that had errors. They will be ignored.
-			</summary>
+		<div class="alert alert-danger">
+			<#if validItems?has_content>
+				<p>
+					<@fmt.p invalidItems?size "row is" "rows are" /> invalid and cannot be uploaded.
+				</p>
+				<p>
+					<button class="btn btn-default" id="toggleInvalidRows">Show details</button>
+				</p>
+			<#else>
+				There are no valid rows to upload.
+			</#if>
+		</div>
 
-			<table class="table table-striped table-condensed">
-				<thead>
+		<table class="table table-striped table-condensed" id="invalidRows"<#if validItems?has_content> style="display: none"</#if>>
+			<thead>
+				<tr>
+					<th>Student ID</th>
+					<th>Mark</th>
+					<th>Errors</th>
+				</tr>
+			</thead>
+			<tbody>
+				<#list invalidItems as row>
 					<tr>
-						<th>Student ID</th>
-						<th>Mark</th>
-						<th>Errors</th>
+						<td>${row.yearMarkItem.studentId!}</td>
+						<td>${row.yearMarkItem.mark!}</td>
+						<td><#list row.errors![] as error>
+							${error}<#if error_has_next><br /></#if>
+						</#list></td>
 					</tr>
-				</thead>
-				<tbody>
-					<#list invalidItems as row>
-						<tr>
-							<td>${row.yearMarkItem.studentId!}</td>
-							<td>${row.yearMarkItem.mark!}</td>
-							<td><#list row.errors![] as error>
-								${error}<#if error_has_next><br /></#if>
-							</#list></td>
-						</tr>
-					</#list>
-				</tbody>
-			</table>
-		</details>
-		<p></p>
+				</#list>
+			</tbody>
+		</table>
+
+		<script>
+			jQuery(function ($) {
+				$('#toggleInvalidRows').on('click', function () {
+					$(this).text($('#invalidRows').is(':visible') ? 'Show details' : 'Hide details');
+					$('#invalidRows').toggle();
+				});
+			});
+		</script>
 	</#if>
 
 	<#if defaultAcademicYear?has_content || guessedSCJ?has_content || roundedMark?has_content>
@@ -94,10 +111,6 @@
 			</div>
 		</@f.form>
 	<#else>
-		<div class="alert alert-danger">
-			Could not find any valid rows.
-		</div>
-
 		<div class="submit-buttons fix-footer">
 			<a class="btn btn-default" href="<@routes.exams.gridsDepartmentHomeForYear department academicYear />">Cancel</a>
 		</div>
