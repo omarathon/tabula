@@ -12,6 +12,28 @@ import uk.ac.warwick.userlookup.User
 
 object UserAccessManagerAuditCommand {
 
+	def apply(choice: String): Appliable[Seq[UserAccessManagerWithDepartments]] = {
+		val notification: Option[UAMAuditFirstNotification] = choice match {
+			case "second" => Some(new UAMAuditSecondNotification)
+			case "first" => Some(new UAMAuditFirstNotification)
+			case _ => None
+		}
+		if (notification.isDefined) apply(notification.get) else apply
+	}
+
+	def apply: Appliable[Seq[UserAccessManagerWithDepartments]] = {
+		class EmptyUserAccessManagerAuditCommandInternal[A <: UAMAuditNotification] extends CommandInternal[Seq[UserAccessManagerWithDepartments]] {
+			self: PermissionsServiceComponent =>
+			override def applyInternal(): Seq[UserAccessManagerWithDepartments] = Seq.empty[UserAccessManagerWithDepartments]
+		}
+		new EmptyUserAccessManagerAuditCommandInternal
+			with ComposableCommand[Seq[UserAccessManagerWithDepartments]]
+			with AutowiringPermissionsServiceComponent
+			with UserAccessManagerAuditCommandPermissions
+			with UserAccessManagerAuditCommandDescription
+			with ReadOnly
+	}
+
 	def apply[A <: UAMAuditNotification](notification: A): Appliable[Seq[UserAccessManagerWithDepartments]] =
 		new UserAccessManagerAuditCommandInternal[A](notification)
 			with ComposableCommand[Seq[UserAccessManagerWithDepartments]]
@@ -43,6 +65,7 @@ trait UserAccessManagerAuditCommandNotifications[A <: UAMAuditNotification] exte
 	override def emit(result: Seq[UserAccessManagerWithDepartments]): Seq[UAMAuditNotification] = {
 		result.map { uam =>
 			def makeNotification(n: UAMAuditNotification): UAMAuditNotification = Notification.init(n, uam.user, uam.departments)
+
 			notification match {
 				case _: UAMAuditSecondNotification => makeNotification(new UAMAuditSecondNotification)
 				case _: UAMAuditFirstNotification => makeNotification(new UAMAuditFirstNotification)
