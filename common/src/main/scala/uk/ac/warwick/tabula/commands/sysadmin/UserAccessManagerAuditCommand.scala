@@ -22,7 +22,7 @@ object UserAccessManagerAuditCommand {
 	}
 
 	def apply: Appliable[Seq[UserAccessManagerWithDepartments]] = {
-		class EmptyUserAccessManagerAuditCommandInternal[A <: UAMAuditNotification] extends CommandInternal[Seq[UserAccessManagerWithDepartments]] {
+		class EmptyUserAccessManagerAuditCommandInternal extends CommandInternal[Seq[UserAccessManagerWithDepartments]] {
 			self: PermissionsServiceComponent =>
 			override def applyInternal(): Seq[UserAccessManagerWithDepartments] = Seq.empty[UserAccessManagerWithDepartments]
 		}
