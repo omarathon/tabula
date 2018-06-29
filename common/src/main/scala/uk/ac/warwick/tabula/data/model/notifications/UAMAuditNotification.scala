@@ -36,7 +36,7 @@ class UAMAuditFirstNotification extends UAMAuditNotification {
 		.minusWeeks(1)
 
 	@transient
-	def roleConfirmationDeadline: LocalDate = permissionConfirmationDeadline.minusWeeks(4)
+	def roleConfirmationDeadline: LocalDate = permissionConfirmationDeadline.minusWeeks(4).minusDays(1)
 
 	def departments: Seq[Department] = entities
 
@@ -59,7 +59,8 @@ class UAMAuditFirstNotification extends UAMAuditNotification {
 		"permissionConfirmation" -> permissionConfirmationDeadline.toString(DateFormats.NotificationDateOnlyPattern),
 		"roleConfirmation" -> roleConfirmationDeadline.toString(DateFormats.NotificationDateOnlyPattern),
 		"url" -> url,
-		"urlTitle" -> urlTitle
+		"urlTitle" -> urlTitle,
+		"academicYear" -> s"${permissionConfirmationDeadline.minusYears(1).getYear}/${permissionConfirmationDeadline.getYear}"
 	))
 
 	@transient
