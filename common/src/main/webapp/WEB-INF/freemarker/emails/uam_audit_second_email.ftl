@@ -1,22 +1,21 @@
-You received an email (copied below) from the ITS Web Team because you have User Access Manager (UAM) permissions in Tabula. This means that you were nominated by your Head of Department to have the most senior role in Tabula for the department. The person with this role has ultimate responsibility for the staff they assign permissions to and, in turn, for the delegation of permissions throughout the department and any sub-departments.
+For the Tabula audit of user access permissions, we have not yet received confirmations from all the User Access Managers (UAMs).
 
-In the email below we asked you to do two things to satisfy the University's data audit requirements:
+If you have not yet done so, to satisfy data audit requirements, please complete the Tabula User Audit form here:
 
-Confirm by ${roleConfirmation} that you continue to be the nominated User Access Manager and that you are in a position to oversee the administration of permissions in Tabula.
+https://warwick.ac.uk/tabulainfo/tabulaaudit
 
-To ensure by ${permissionConfirmation} that permission levels for staff in your department are accurate and appropriate.
+Here is a list of departments and sub-departments that you should check:
 
-We provided you with a URL to help you to do that.
 
-We have not received your response to the email below and would be grateful if you could contact us to confirm the requests.
+${url}
 
-Please be aware that, should we not receive a response, due to the audit implications we will need to remove your User Access Manager permissions and ask the Head of Department to select a new User Access Manager.
+
+Ensure that staff in your department have the appropriate permission levels.
+
+Ensure that only those staff necessary have permission to view students’ personal information.
+
+In accepting the UAM role, you agree that you are responsible for the accuracy of these permissions - and will monitor permissions periodically. If you are unable to monitor permissions in the future, you should request that the UAM role is assigned to another person within your department.
+
+Please be aware that, should we not receive a response, due to the audit implications we will need to remove your User Access Manager permissions and ask the Head of Department to select a new User Access Manager. For audit purposes, this must be done by ${permissionConfirmation}.
 
 Thanks for your assistance in this matter.
-
---- original message ---
-
-<#include "uam_audit_email.ftl" />
-
-
---- end of original message ---
