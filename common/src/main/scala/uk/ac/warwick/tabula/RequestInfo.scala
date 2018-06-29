@@ -2,6 +2,7 @@ package uk.ac.warwick.tabula
 
 import org.springframework.web.context.request.{RequestAttributes, RequestContextHolder, ServletRequestAttributes}
 import org.springframework.web.servlet.HandlerMapping
+import org.springframework.web.util.UriComponentsBuilder
 import uk.ac.warwick.tabula.helpers.RequestLevelCache
 import uk.ac.warwick.util.web.Uri
 
@@ -30,7 +31,13 @@ class RequestInfo(
 	val emergencyMessage: String = "",
 	val userAgent: String = "",
 	val ipAddress: String = ""
-) extends EarlyRequestInfo
+) extends EarlyRequestInfo {
+	lazy val requestedUriWithParameters: String = {
+		val builder = UriComponentsBuilder.fromUriString(requestedUri.toString)
+		for ((name, values) <- requestParameters; value <- values) yield builder.queryParam(name, value)
+		builder.toUriString
+	}
+}
 
 object RequestInfo {
 	private val threadLocal = new ThreadLocal[Option[RequestInfo]] {
