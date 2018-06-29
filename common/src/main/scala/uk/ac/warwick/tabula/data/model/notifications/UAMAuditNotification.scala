@@ -35,14 +35,11 @@ class UAMAuditFirstNotification extends UAMAuditNotification {
 		.firstDay
 		.minusWeeks(1)
 
-	@transient
-	def roleConfirmationDeadline: LocalDate = permissionConfirmationDeadline.minusWeeks(4).minusDays(1)
-
 	def departments: Seq[Department] = entities
 
 	def verb: String = "view"
 
-	def title: String = s"Tabula Users Audit ${this.created.getYear}"
+	def title: String = s"Tabula Users Audit ${this.permissionConfirmationDeadline.getYear}"
 
 	def url: String = "https://warwick.ac.uk/tabulaaudit"
 
@@ -57,7 +54,6 @@ class UAMAuditFirstNotification extends UAMAuditNotification {
 		}.flatten.distinct,
 		"userAccessManager" -> agent.getFullName,
 		"permissionConfirmation" -> permissionConfirmationDeadline.toString(DateFormats.NotificationDateOnlyPattern),
-		"roleConfirmation" -> roleConfirmationDeadline.toString(DateFormats.NotificationDateOnlyPattern),
 		"url" -> url,
 		"urlTitle" -> urlTitle,
 		"academicYear" -> s"${permissionConfirmationDeadline.minusYears(1).getYear}/${permissionConfirmationDeadline.getYear}"
