@@ -57,7 +57,7 @@ class UAMAuditFirstNotification extends UAMAuditNotification {
 		"permissionConfirmation" -> permissionConfirmationDeadline.toString(DateFormats.NotificationDateOnlyPattern),
 		"url" -> url,
 		"urlTitle" -> urlTitle,
-		"academicYear" -> s"${permissionConfirmationDeadline.minusYears(1).getYear}/${permissionConfirmationDeadline.getYear}"
+		"academicYear" -> s"${permissionConfirmationDeadline.getYear}/${permissionConfirmationDeadline.plusYears(1).getYear}"
 	))
 
 	@transient
