@@ -34,6 +34,7 @@ class UAMAuditFirstNotification extends UAMAuditNotification {
 		.head
 		.firstDay
 		.minusWeeks(1)
+  	.minusDays(1)
 
 	def departments: Seq[Department] = entities
 
