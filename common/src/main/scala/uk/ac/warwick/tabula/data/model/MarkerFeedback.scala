@@ -51,12 +51,16 @@ class MarkerFeedback extends GeneratedId
 	// returns an Anon user when the markerUsercode is null
 	def marker: User = {
 		val marker = userLookup.getUserByUserId(markerUsercode)
-		if (markerUsercode != null && !marker.isFoundUser) dummyUser(MemberUserType.Other) else marker
+		if (markerUsercode != null && !marker.isFoundUser)
+			dummyUser(ofUserType = MemberUserType.Other, userId = markerUsercode)
+		else
+			marker
 	}
 
+	// get user profile from tabula if not found from sso
+	// or create a dummy user with the same usercode
 	@transient
-	def dummyUser(ofUserType: MemberUserType): User = {
-		val userId = feedback.usercode
+	def dummyUser(ofUserType: MemberUserType, userId: String): User = {
 		val possibleMembers = profileService.getAllMembersWithUserId(
 			userId = userId,
 			disableFilter = true,
@@ -86,8 +90,12 @@ class MarkerFeedback extends GeneratedId
 	}
 
 	def student: User = {
-		val student = userLookup.getUserByUserId(feedback.usercode)
-		if (!student.isFoundUser) dummyUser(MemberUserType.Student) else student
+		val studentUsercode: String = feedback.usercode
+		val student = userLookup.getUserByUserId(studentUsercode)
+		if (!student.isFoundUser)
+			dummyUser(MemberUserType.Student, studentUsercode)
+		else
+			student
 	}
 
 	@Basic
