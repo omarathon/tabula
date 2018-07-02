@@ -7,7 +7,7 @@ import org.junit.After
 import uk.ac.warwick.tabula.data.model.{Department, Notification}
 import uk.ac.warwick.tabula.{Fixtures, TestBase}
 
-class UAMAuditFirstNotificationTest extends TestBase {
+class UAMAuditNotificationTest extends TestBase {
 
 	@After
 	def setTimeBack(): Unit = DateTimeUtils.setCurrentMillisSystem()
@@ -94,11 +94,7 @@ class UAMAuditFirstNotificationTest extends TestBase {
 		template.process(notification.content.model, writer)
 		writer.flush()
 		val renderedResult = output.toString
-		renderedResult.contains("We are contacting you because you currently hold the User Access Manager (UAM) role for computer science, computer science for human in Tabula. The person assigned to this role should be in a position to oversee the administration of the departments and sub-departments listed in this notification.") should be(true)
-		renderedResult.contains("computer science - https://tabula.warwick.ac.uk/admin/permissions/department/cs/tree") should be(true)
-		renderedResult.contains("computer science for human - https://tabula.warwick.ac.uk/admin/permissions/department/csh/tree") should be(true)
-		renderedResult.contains("this should be done by 27 September 2021.") should be(true)
-
+		renderedResult should be ("We are contacting you because you currently hold the User Access Manager (UAM) role for computer science, computer science for human in Tabula. The person assigned to this role should be in a position to oversee the administration of the departments and sub-departments listed in this notification.\n\nTo satisfy data audit requirements, please complete the Tabula User Audit form here:\n\nhttps://warwick.ac.uk/tabulaaudit\n\nIn the form, we ask you to confirm that you can continue to perform this role for computer science, computer science for human for the academic year 2020/2021 and that you have checked that permission levels in Tabula are accurate.\n\nHere is a list of departments and sub-departments that you should check:\n\ncomputer science - https://tabula.warwick.ac.uk/admin/permissions/department/cs/tree \n\ncomputer science for human - https://tabula.warwick.ac.uk/admin/permissions/department/csh/tree \n\n- Ensure that staff in your department have the appropriate permission levels.\n- Ensure that only those staff necessary have permission to view students’ personal information.\n- In accepting the UAM role, you agree that you are responsible for the accuracy of these permissions - and will monitor permissions periodically. If you are unable to monitor permissions in the future, you should request that the UAM role is assigned to another person within your department.\n\nFor audit purposes, this should be done by 27 September 2021.\n\nIf you no longer wish to be the UAM or are unable to check the departmental permissions within this timeframe, please let us know as soon as possible. We’ll remove the User Access Manager permissions from your account and ask your Head of Department to assign the role to another staff member.\n\nIf you have any questions or wish to discuss this further, please contact the Tabula Team via tabula@warwick.ac.uk.")
 	}
 
 	@Test
@@ -121,11 +117,7 @@ class UAMAuditFirstNotificationTest extends TestBase {
 		template.process(notification.content.model, writer)
 		writer.flush()
 		val renderedResult = output.toString
-		renderedResult.contains("We are contacting you because you currently hold the User Access Manager (UAM) role for computer science, computer science for human in Tabula. The person assigned to this role should be in a position to oversee the administration of the departments and sub-departments listed in this notification.") should be(true)
-		renderedResult.contains("computer science - https://tabula.warwick.ac.uk/admin/permissions/department/cs/tree") should be(true)
-		renderedResult.contains("computer science for human - https://tabula.warwick.ac.uk/admin/permissions/department/csh/tree") should be(false)
-		renderedResult.contains("this should be done by 27 September 2021.") should be(true)
-
+		renderedResult should be ("We are contacting you because you currently hold the User Access Manager (UAM) role for computer science in Tabula. The person assigned to this role should be in a position to oversee the administration of the departments and sub-departments listed in this notification.\n\nTo satisfy data audit requirements, please complete the Tabula User Audit form here:\n\nhttps://warwick.ac.uk/tabulaaudit\n\nIn the form, we ask you to confirm that you can continue to perform this role for computer science for the academic year 2020/2021 and that you have checked that permission levels in Tabula are accurate.\n\nHere is a list of departments and sub-departments that you should check:\n\ncomputer science - https://tabula.warwick.ac.uk/admin/permissions/department/cs/tree \n\n- Ensure that staff in your department have the appropriate permission levels.\n- Ensure that only those staff necessary have permission to view students’ personal information.\n- In accepting the UAM role, you agree that you are responsible for the accuracy of these permissions - and will monitor permissions periodically. If you are unable to monitor permissions in the future, you should request that the UAM role is assigned to another person within your department.\n\nFor audit purposes, this should be done by 27 September 2021.\n\nIf you no longer wish to be the UAM or are unable to check the departmental permissions within this timeframe, please let us know as soon as possible. We’ll remove the User Access Manager permissions from your account and ask your Head of Department to assign the role to another staff member.\n\nIf you have any questions or wish to discuss this further, please contact the Tabula Team via tabula@warwick.ac.uk.")
 	}
 
 	@Test
