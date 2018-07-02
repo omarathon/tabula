@@ -1,25 +1,22 @@
 package uk.ac.warwick.tabula.api.commands.profiles
 
-import org.hibernate.criterion.Order
-import org.hibernate.criterion.Order.asc
 import uk.ac.warwick.tabula.AcademicYear
-import uk.ac.warwick.tabula.JavaImports.{JInteger, JList}
-import uk.ac.warwick.tabula.commands.{CommandInternal, FiltersStudents}
-import uk.ac.warwick.tabula.data.model._
-import uk.ac.warwick.tabula.permissions.{Permissions, PermissionsTarget}
-import uk.ac.warwick.tabula.services.ModuleAndDepartmentServiceComponent
-import uk.ac.warwick.tabula.system.permissions.{PermissionsChecking, PermissionsCheckingMethods, RequiresPermissionsChecking}
+import uk.ac.warwick.tabula.commands._
+import uk.ac.warwick.tabula.services.{AutowiringModuleAndDepartmentServiceComponent, AutowiringProfileServiceComponent, ModuleAndDepartmentServiceComponent}
 
 
 object UsercodeSearchCommand {
-
+	def apply() =
+		new UsercodeSearchCommandInternal
+			with ComposableCommand[Seq[String]]
+			with AutowiringProfileServiceComponent
+			with AutowiringModuleAndDepartmentServiceComponent
+			with UsercodeSearchCommandPermissions
+			with UsercodeSearchCommandRequest
+			with ReadOnly with Unaudited
 }
 
-class UsercodeSearchCommand {
-
-}
-
-abstract class UniversityIdSearchCommandInternal extends CommandInternal[Seq[String]] with FiltersStudents {
+abstract class UsercodeSearchCommandInternal extends CommandInternal[Seq[String]] with FiltersStudents {
 
 	self: UsercodeSearchCommandRequest with ModuleAndDepartmentServiceComponent =>
 
@@ -32,22 +29,15 @@ abstract class UniversityIdSearchCommandInternal extends CommandInternal[Seq[Str
 
 		Option(department) match {
 			case Some(d) =>
-				Seq(d).flatMap(dept =>
-
-					profileService.findAllUniversityIdsByRestrictionsInAffiliatedDepartments(
-						dept,
-						restrictions,
-						buildOrders()
+				Seq(d).flatMap(department =>
+					profileService.findAllUserIdsByRestrictionsInAffiliatedDepartments(
+						department,
+						restrictions
 					)
 				).distinct
 			case _ =>
-				profileService.findAllUniversityIdsByRestrictions(
-					restrictions,
-					buildOrders()
-				).distinct
+				profileService.findAllUserIdsByRestrictions(restrictions).distinct
 		}
-
-		???
 	}
 }
 
