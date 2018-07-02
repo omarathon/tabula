@@ -49,46 +49,53 @@ class MarkerFeedback extends GeneratedId
 	}
 
 	// returns an Anon user when the markerUsercode is null
-	def marker: User =  {
+	def marker: User = {
 		val marker = userLookup.getUserByUserId(markerUsercode)
 		if (markerUsercode != null && !marker.isFoundUser)
-			throw new IllegalStateException(s"Marker $markerUsercode is not a valid user")
-		marker
+			dummyUser(ofUserType = MemberUserType.Other, userId = markerUsercode)
+		else
+			marker
+	}
+
+	// get user profile from tabula if not found from sso
+	// or create a dummy user with the same usercode
+	@transient
+	def dummyUser(ofUserType: MemberUserType, userId: String): User = {
+		val possibleMembers = profileService.getAllMembersWithUserId(
+			userId = userId,
+			disableFilter = true,
+			activeOnly = false
+		).distinct
+
+		if (possibleMembers.isEmpty) {
+			val dummyUser = new User
+			dummyUser.setUserId(userId)
+			dummyUser.setWarwickId(feedback.universityId.getOrElse("Unknown University ID"))
+			dummyUser.setFirstName("[Unknown user]")
+			dummyUser.setLastName("[Unknown user]")
+			dummyUser.setFullName("[Unknown user]")
+			dummyUser.setLoginDisabled(true)
+			dummyUser.setUserType(ofUserType.description)
+			dummyUser.setExtraProperties(JHashMap(
+				"urn:websignon:usertype" -> dummyUser.getUserType,
+				"urn:websignon:timestamp" -> DateTime.now.toString,
+				"urn:websignon:usersource" -> "Tabula"
+			))
+			dummyUser.setVerified(true)
+			dummyUser.setFoundUser(true)
+			dummyUser
+		} else {
+			possibleMembers.head.asSsoUser
+		}
 	}
 
 	def student: User = {
-		val student = userLookup.getUserByUserId(feedback.usercode)
-		if (!student.isFoundUser) {
-			val userId = feedback.usercode
-			val possibleMembers = profileService.getAllMembersWithUserId(
-				userId = userId,
-				disableFilter = true,
-				activeOnly = false
-			).distinct
-
-			if (possibleMembers.size != 1) {
-				val dummyUser = new User
-				dummyUser.setUserId(userId)
-				dummyUser.setWarwickId(feedback.universityId.getOrElse("Unknown University ID"))
-				dummyUser.setFirstName("[Unknown user]")
-				dummyUser.setLastName("[Unknown user]")
-				dummyUser.setFullName("[Unknown user]")
-				dummyUser.setLoginDisabled(true)
-				dummyUser.setUserType("Student")
-				dummyUser.setExtraProperties(JHashMap(
-					"urn:websignon:usertype" -> dummyUser.getUserType,
-					"urn:websignon:timestamp" -> DateTime.now.toString,
-					"urn:websignon:usersource" -> "Tabula"
-				))
-				dummyUser.setVerified(true)
-				dummyUser.setFoundUser(true)
-				dummyUser
-			} else {
-				possibleMembers.head.asSsoUser
-			}
-		} else {
+		val studentUsercode: String = feedback.usercode
+		val student = userLookup.getUserByUserId(studentUsercode)
+		if (!student.isFoundUser)
+			dummyUser(MemberUserType.Student, studentUsercode)
+		else
 			student
-		}
 	}
 
 	@Basic
