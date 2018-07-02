@@ -20,6 +20,6 @@ Here is a list of departments and sub-departments that you should check:
 
 For audit purposes, this should be done by ${permissionConfirmation}.
 
-If you no longer wish to be the UAM or are unable to check the departmental permissions within this timeframe, please let us know as soon as possible. We’ll remove the User Access Manager permissions from your account and ask your Head of Department to assign the role to another staff member.
+If you should no longer be the UAM or are unable to check the departmental permissions within this timeframe, please let us know as soon as possible. We'll remove the User Access Manager permissions from your account and ask your Head of Department to assign the role to another staff member.
 
 If you have any questions or wish to discuss this further, please contact the Tabula Team via tabula@warwick.ac.uk.
