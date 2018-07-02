@@ -59,6 +59,7 @@ trait ProfileService {
 	def findAllStudentsByRestrictions(department: Department, restrictions: Seq[ScalaRestriction], orders: Seq[ScalaOrder] = Seq()): Seq[StudentMember]
 	def findAllUniversityIdsByRestrictions(restrictions: Seq[ScalaRestriction], orders: Seq[ScalaOrder] = Seq()): Seq[String]
 	def findAllUniversityIdsByRestrictionsInAffiliatedDepartments(department: Department, restrictions: Seq[ScalaRestriction], orders: Seq[ScalaOrder] = Seq()): Seq[String]
+	def findAllUserIdsByRestrictionsInAffiliatedDepartments(department: Department, restrictions: Seq[ScalaRestriction], orders: Seq[ScalaOrder] = Seq()): Seq[String]
 	def findAllStudentDataByRestrictionsInAffiliatedDepartments(department: Department, restrictions: Seq[ScalaRestriction], academicYear: AcademicYear): Seq[AttendanceMonitoringStudentData]
 	def getSCDsByAgentRelationshipAndRestrictions(
 		relationshipType: StudentRelationshipType,
@@ -339,6 +340,16 @@ abstract class AbstractProfileService extends ProfileService with Logging {
 			department.filterRule.restriction(FiltersStudents.AliasPaths, Some(department))
 
 		memberDao.findUniversityIdsByRestrictions(allRestrictions, orders)
+	}
+
+
+	override def findAllUserIdsByRestrictionsInAffiliatedDepartments(
+		department: Department,
+		restrictions: Seq[ScalaRestriction],
+		orders: Seq[ScalaOrder]
+	): Seq[String] = {
+
+		???
 	}
 
 	def findAllStudentDataByRestrictionsInAffiliatedDepartments(department: Department, restrictions: Seq[ScalaRestriction], academicYear: AcademicYear): Seq[AttendanceMonitoringStudentData] = {
