@@ -1,4 +1,4 @@
-<#macro deparmentAsSentence><#list departments as department>${department.departmentName}<#if department_has_next>, </#if></#list></#macro>
+<#macro deparmentAsSentence><#list departments as department>${department.departmentName}<#if department_has_next>, <#if department_index + 1 == departments?size - 1>and </#if></#if></#list></#macro>
 We are contacting you because you currently hold the User Access Manager (UAM) role in Tabula. The person assigned to this role should be in a position to oversee the administration of the departments and sub-departments listed in this notification.
 
 To satisfy data audit requirements, please complete the Tabula User Audit form here:
