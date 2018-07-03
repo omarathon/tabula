@@ -2,7 +2,7 @@ package uk.ac.warwick.tabula.api.web.controllers.profiles
 
 import org.springframework.stereotype.Controller
 import org.springframework.web.bind.annotation.{ModelAttribute, RequestMapping, RequestParam}
-import uk.ac.warwick.tabula.api.commands.profiles.UsercodeSearchCommand
+import uk.ac.warwick.tabula.api.commands.profiles.UserCodeSearchCommand
 import uk.ac.warwick.tabula.api.web.controllers.ApiController
 import uk.ac.warwick.tabula.commands.Appliable
 import uk.ac.warwick.tabula.data.model.Member
@@ -12,7 +12,7 @@ import uk.ac.warwick.tabula.web.views.JSONView
 
 @Controller
 @RequestMapping(Array("/v1/usercodeSearch"))
-class UsercodeSearchController extends ApiController with AutowiringProfileServiceComponent {
+class UserCodeSearchController extends ApiController with AutowiringProfileServiceComponent {
 
 	final override def onPreRequest {
 		session.enableFilter(Member.ActiveOnlyFilter)
@@ -20,7 +20,7 @@ class UsercodeSearchController extends ApiController with AutowiringProfileServi
 	}
 
 	@ModelAttribute("getCommand")
-	def getCommand: Appliable[Seq[String]] = UsercodeSearchCommand()
+	def getCommand: Appliable[Seq[String]] = UserCodeSearchCommand()
 
 	@RequestMapping(method = Array(GET), produces = Array("application/json"))
 	def search(

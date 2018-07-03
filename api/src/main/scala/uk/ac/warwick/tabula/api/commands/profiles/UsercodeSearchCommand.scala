@@ -5,20 +5,20 @@ import uk.ac.warwick.tabula.commands._
 import uk.ac.warwick.tabula.services.{AutowiringModuleAndDepartmentServiceComponent, AutowiringProfileServiceComponent, ModuleAndDepartmentServiceComponent}
 
 
-object UsercodeSearchCommand {
+object UserCodeSearchCommand {
 	def apply() =
-		new UsercodeSearchCommandInternal
+		new UserCodeSearchCommandInternal
 			with ComposableCommand[Seq[String]]
 			with AutowiringProfileServiceComponent
 			with AutowiringModuleAndDepartmentServiceComponent
-			with UsercodeSearchCommandPermissions
-			with UsercodeSearchCommandRequest
+			with UserCodeSearchCommandPermissions
+			with UserCodeSearchCommandRequest
 			with ReadOnly with Unaudited
 }
 
-abstract class UsercodeSearchCommandInternal extends CommandInternal[Seq[String]] with FiltersStudents {
+abstract class UserCodeSearchCommandInternal extends CommandInternal[Seq[String]] with FiltersStudents {
 
-	self: UsercodeSearchCommandRequest with ModuleAndDepartmentServiceComponent =>
+	self: UserCodeSearchCommandRequest with ModuleAndDepartmentServiceComponent =>
 
 	override def applyInternal(): Seq[String] = {
 		if (Option(department).isEmpty && serializeFilter.isEmpty) {
@@ -41,6 +41,6 @@ abstract class UsercodeSearchCommandInternal extends CommandInternal[Seq[String]
 	}
 }
 
-trait UsercodeSearchCommandPermissions extends UniversityIdSearchPermissions
+trait UserCodeSearchCommandPermissions extends UniversityIdSearchPermissions
 
-trait UsercodeSearchCommandRequest extends UniversityIdSearchCommandRequest
+trait UserCodeSearchCommandRequest extends UniversityIdSearchCommandRequest
