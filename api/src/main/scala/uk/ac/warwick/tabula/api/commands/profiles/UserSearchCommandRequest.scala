@@ -8,20 +8,12 @@ import uk.ac.warwick.tabula.permissions.{Permissions, PermissionsTarget}
 import uk.ac.warwick.tabula.system.permissions.{PermissionsChecking, PermissionsCheckingMethods, RequiresPermissionsChecking}
 import uk.ac.warwick.tabula.JavaImports._
 
-trait UserSearchPermissions extends RequiresPermissionsChecking with PermissionsCheckingMethods {
-
-	override def permissionsCheck(p: PermissionsChecking) {
-		p.PermissionCheck(Permissions.Profiles.ViewSearchResults, PermissionsTarget.Global)
-	}
-
-}
-
-trait UserSearchCommandRequest {
+trait UserSearchCommandRequest extends RequiresPermissionsChecking with PermissionsCheckingMethods {
 	var department: Department = _
 
 	val defaultOrder = Seq(asc("lastName"), asc("firstName"))
-	var sortOrder: JList[Order] = JArrayList()
 
+	var sortOrder: JList[Order] = JArrayList()
 	var courseTypes: JList[CourseType] = JArrayList()
 	var routes: JList[Route] = JArrayList()
 	var courses: JList[Course] = JArrayList()
@@ -31,4 +23,8 @@ trait UserSearchCommandRequest {
 	var sprStatuses: JList[SitsStatus] = JArrayList()
 	var modules: JList[Module] = JArrayList()
 	var hallsOfResidence: JList[String] = JArrayList()
+
+	override def permissionsCheck(p: PermissionsChecking): Unit = {
+		p.PermissionCheck(Permissions.Profiles.ViewSearchResults, PermissionsTarget.Global)
+	}
 }

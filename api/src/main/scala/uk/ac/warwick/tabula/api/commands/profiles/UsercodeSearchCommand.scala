@@ -11,7 +11,6 @@ object UserCodeSearchCommand {
 			with ComposableCommand[Seq[String]]
 			with AutowiringProfileServiceComponent
 			with AutowiringModuleAndDepartmentServiceComponent
-			with UserSearchPermissions
 			with UserSearchCommandRequest
 			with ReadOnly with Unaudited
 }

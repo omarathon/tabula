@@ -10,11 +10,9 @@ object UniversityIdSearchCommand {
 			with ComposableCommand[Seq[String]]
 			with AutowiringProfileServiceComponent
 			with AutowiringModuleAndDepartmentServiceComponent
-			with UserSearchPermissions
 			with UserSearchCommandRequest
 			with ReadOnly with Unaudited
 }
-
 
 abstract class UniversityIdSearchCommandInternal extends CommandInternal[Seq[String]] with FiltersStudents {
 
