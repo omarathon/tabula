@@ -11,14 +11,14 @@ object UserCodeSearchCommand {
 			with ComposableCommand[Seq[String]]
 			with AutowiringProfileServiceComponent
 			with AutowiringModuleAndDepartmentServiceComponent
-			with UserCodeSearchCommandPermissions
-			with UserCodeSearchCommandRequest
+			with UserSearchPermissions
+			with UserSearchCommandRequest
 			with ReadOnly with Unaudited
 }
 
 abstract class UserCodeSearchCommandInternal extends CommandInternal[Seq[String]] with FiltersStudents {
 
-	self: UserCodeSearchCommandRequest with ModuleAndDepartmentServiceComponent =>
+	self: UserSearchCommandRequest with ModuleAndDepartmentServiceComponent =>
 
 	override def applyInternal(): Seq[String] = {
 		if (Option(department).isEmpty && serializeFilter.isEmpty) {
@@ -40,7 +40,3 @@ abstract class UserCodeSearchCommandInternal extends CommandInternal[Seq[String]
 		}
 	}
 }
-
-trait UserCodeSearchCommandPermissions extends UniversityIdSearchPermissions
-
-trait UserCodeSearchCommandRequest extends UniversityIdSearchCommandRequest
