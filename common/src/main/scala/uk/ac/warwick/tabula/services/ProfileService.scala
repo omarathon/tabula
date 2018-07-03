@@ -58,7 +58,10 @@ trait ProfileService {
 	): (Int, Seq[StudentMember])
 	def findAllStudentsByRestrictions(department: Department, restrictions: Seq[ScalaRestriction], orders: Seq[ScalaOrder] = Seq()): Seq[StudentMember]
 	def findAllUniversityIdsByRestrictions(restrictions: Seq[ScalaRestriction], orders: Seq[ScalaOrder] = Seq()): Seq[String]
+	def findAllUserIdsByRestrictions(restrictions: Seq[ScalaRestriction]): Seq[String]
+
 	def findAllUniversityIdsByRestrictionsInAffiliatedDepartments(department: Department, restrictions: Seq[ScalaRestriction], orders: Seq[ScalaOrder] = Seq()): Seq[String]
+	def findAllUserIdsByRestrictionsInAffiliatedDepartments(department: Department, restrictions: Seq[ScalaRestriction]): Seq[String]
 	def findAllStudentDataByRestrictionsInAffiliatedDepartments(department: Department, restrictions: Seq[ScalaRestriction], academicYear: AcademicYear): Seq[AttendanceMonitoringStudentData]
 	def getSCDsByAgentRelationshipAndRestrictions(
 		relationshipType: StudentRelationshipType,
@@ -329,6 +332,12 @@ abstract class AbstractProfileService extends ProfileService with Logging {
 		memberDao.findUniversityIdsByRestrictions(restrictions, orders)
 	}
 
+	def findAllUserIdsByRestrictions(
+		restrictions: Seq[ScalaRestriction]
+	): Seq[String] = transactional(readOnly = true) {
+		memberDao.findAllUsercodesByRestrictions(restrictions)
+	}
+
 	def findAllUniversityIdsByRestrictionsInAffiliatedDepartments(
 		department: Department,
 		restrictions: Seq[ScalaRestriction],
@@ -339,6 +348,16 @@ abstract class AbstractProfileService extends ProfileService with Logging {
 			department.filterRule.restriction(FiltersStudents.AliasPaths, Some(department))
 
 		memberDao.findUniversityIdsByRestrictions(allRestrictions, orders)
+	}
+
+
+	override def findAllUserIdsByRestrictionsInAffiliatedDepartments(
+		department: Department,
+		restrictions: Seq[ScalaRestriction],
+	): Seq[String] = {
+		val allRestrictions = affiliatedDepartmentsRestriction(department, restrictions) ++
+			department.filterRule.restriction(FiltersStudents.AliasPaths, Some(department))
+		memberDao.findAllUsercodesByRestrictions(allRestrictions)
 	}
 
 	def findAllStudentDataByRestrictionsInAffiliatedDepartments(department: Department, restrictions: Seq[ScalaRestriction], academicYear: AcademicYear): Seq[AttendanceMonitoringStudentData] = {

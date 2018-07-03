@@ -4,9 +4,10 @@ import uk.ac.warwick.tabula.AcademicYear
 import uk.ac.warwick.tabula.commands._
 import uk.ac.warwick.tabula.services.{AutowiringModuleAndDepartmentServiceComponent, AutowiringProfileServiceComponent, ModuleAndDepartmentServiceComponent}
 
-object UniversityIdSearchCommand {
+
+object UserCodeSearchCommand {
 	def apply() =
-		new UniversityIdSearchCommandInternal
+		new UserCodeSearchCommandInternal
 			with ComposableCommand[Seq[String]]
 			with AutowiringProfileServiceComponent
 			with AutowiringModuleAndDepartmentServiceComponent
@@ -14,7 +15,7 @@ object UniversityIdSearchCommand {
 			with ReadOnly with Unaudited
 }
 
-abstract class UniversityIdSearchCommandInternal extends CommandInternal[Seq[String]] with FiltersStudents {
+abstract class UserCodeSearchCommandInternal extends CommandInternal[Seq[String]] with FiltersStudents {
 
 	self: UserSearchCommandRequest with ModuleAndDepartmentServiceComponent =>
 
@@ -27,18 +28,14 @@ abstract class UniversityIdSearchCommandInternal extends CommandInternal[Seq[Str
 
 		Option(department) match {
 			case Some(d) =>
-				Seq(d).flatMap(dept =>
-					profileService.findAllUniversityIdsByRestrictionsInAffiliatedDepartments(
-						dept,
-						restrictions,
-						buildOrders()
+				Seq(d).flatMap(department =>
+					profileService.findAllUserIdsByRestrictionsInAffiliatedDepartments(
+						department,
+						restrictions
 					)
 				).distinct
 			case _ =>
-				profileService.findAllUniversityIdsByRestrictions(
-					restrictions,
-					buildOrders()
-				).distinct
+				profileService.findAllUserIdsByRestrictions(restrictions).distinct
 		}
 	}
 }
