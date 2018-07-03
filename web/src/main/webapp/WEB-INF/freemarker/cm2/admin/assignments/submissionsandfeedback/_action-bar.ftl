@@ -402,18 +402,22 @@
 					</li>
 
 					<#if features.queueFeedbackForSits && department.uploadCourseworkMarksToSits>
-						<li>
-							<#assign uploadToSitsUrl><@routes.cm2.uploadToSits assignment /></#assign>
-							<@fmt.permission_button
-								permission='AssignmentFeedback.Publish'
-								scope=assignment
-								action_descr='upload feedback to SITS'
-								classes='form-post'
-								href=uploadToSitsUrl
-								tooltip='Upload mark and grade to SITS for selected students'>
-									Upload to SITS
-							</@fmt.permission_button>
-						</li>
+						<#if assignment.fullFeedback?size gt 0>
+							<li class="must-have-selected">
+								<#assign uploadToSitsUrl><@routes.cm2.uploadToSits assignment /></#assign>
+								<@fmt.permission_button
+									permission='AssignmentFeedback.Publish'
+									scope=assignment
+									action_descr='upload feedback to SITS'
+									classes='form-post'
+									href=uploadToSitsUrl
+									tooltip='Upload mark and grade to SITS for selected students'>
+										Upload to SITS
+								</@fmt.permission_button>
+							</li>
+						<#else>
+							<li class="disabled"><a class="use-tooltip" data-container="body" title="No marks or grades to upload to SITS.">Upload to SITS</a></li>
+						</#if>
 					</#if>
 				</ul>
 			</div>
