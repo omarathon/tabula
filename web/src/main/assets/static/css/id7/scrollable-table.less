@@ -1,6 +1,6 @@
 @import (reference) "id7/less/variables.less";
 
-.scrollable-table(@left-width, @row-height, @header-row-height: @row-height) {
+.scrollable-table(@left-width, @row-height, @header-row-height: @row-height, @left-offset: 0) {
 
 	.scrollable-table {
 		display: table;
@@ -34,13 +34,13 @@
 
 		.right {
 			@media (min-width: @screen-xs-min) {
-				max-width: @container-tablet - @grid-gutter-width * 2 - @left-width * 3;
+				max-width: @container-tablet - @grid-gutter-width * 2 - @left-width - @left-offset;
 			}
 			@media (min-width: @screen-md-min) {
-				max-width: @container-desktop - @grid-gutter-width * 2 - @left-width * 3;
+				max-width: @container-desktop - @grid-gutter-width * 2 - @left-width - @left-offset;
 			}
 			@media (min-width: @screen-lg-min) {
-				max-width: @container-large-desktop - @grid-gutter-width * 2 - @left-width * 3;
+				max-width: @container-large-desktop - @grid-gutter-width * 2 - @left-width - @left-offset;
 			}
 
 		}
