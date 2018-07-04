@@ -30,7 +30,7 @@ class UserCodeSearchController extends ApiController with AutowiringProfileServi
 		Mav(new JSONView(Map(
 			"success" -> true,
 			"status" -> "ok",
-			"userCodes" -> command.apply()
+			"usercodes" -> command.apply()
 		)))
 	}
 
