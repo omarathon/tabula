@@ -10,6 +10,7 @@ Here is a list of departments and sub-departments that you should check:
 
 </#if></#list>
 
+
 - Ensure that staff in your department have the appropriate permission levels.
 - Ensure that only those staff necessary have permission to view students’ personal information.
 - In accepting the UAM role, you agree that you are responsible for the accuracy of these permissions - and will monitor permissions periodically. If you are unable to monitor permissions in the future, you should request that the UAM role is assigned to another person within your department.

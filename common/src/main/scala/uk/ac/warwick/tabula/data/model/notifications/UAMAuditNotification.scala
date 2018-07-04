@@ -44,7 +44,7 @@ class UAMAuditFirstNotification extends UAMAuditNotification {
 
 	def url: String = "https://warwick.ac.uk/tabulaaudit"
 
-	def urlTitle: String = "review and confirm user permissions"
+	def urlTitle: String = "confirm you've reviewed user permissions"
 
 	def content: FreemarkerModel = FreemarkerModel(templateLocation, Map(
 		"departments" -> departments.flatMap { department =>

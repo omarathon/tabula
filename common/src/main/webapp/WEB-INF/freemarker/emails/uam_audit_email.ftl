@@ -1,11 +1,11 @@
 <#macro deparmentAsSentence><#list departments as department>${department.departmentName}<#if department_has_next>, <#if department_index + 1 == departments?size - 1>and </#if></#if></#list></#macro>
-We are contacting you because you currently hold the User Access Manager (UAM) role in Tabula. The person assigned to this role should be in a position to oversee the administration of the departments and sub-departments listed in this notification.
+We are contacting you because you currently hold the User Access Manager (UAM) role in Tabula for <@deparmentAsSentence />. The person assigned to this role should be in a position to oversee the administration of these departments and sub-departments.
 
 To satisfy data audit requirements, please complete the Tabula User Audit form here:
 
 ${url}
 
-In the form, we ask you to confirm that you can continue to perform this role for <@deparmentAsSentence /> for the academic year ${academicYear} and that you have checked that permission levels in Tabula are accurate.
+In the form, we ask you to confirm that you can continue to perform this role for the academic year ${academicYear} and that you have checked that permission levels in Tabula are accurate.
 
 Here is a list of departments and sub-departments that you should check:
 
