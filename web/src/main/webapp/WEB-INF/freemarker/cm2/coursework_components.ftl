@@ -1133,30 +1133,32 @@
 			<div class="col-xs-3">
 			<#-- Download a zip of all feedback or just a single file if there is only one -->
 				<#if feedback.attachments?has_content >
-					<#local attachment = "" />
-					<#if !feedback.attachments?is_enumerable>
-					<#-- assume it's a FileAttachment -->
-						<#local attachment = feedback.attachments />
-					<#elseif feedback.attachments?size == 1>
-					<#-- take the first and continue as above -->
-						<#local attachment = feedback.attachments?first />
-					</#if>
-					<#if feedback.marker??>
-						<#if attachment?has_content>
-							<#local downloadUrl><@routes.cm2.downloadMarkerFeedbackOne assignment feedback.marker feedback attachment /></#local>
-						<#elseif feedback.attachments?size gt 1>
-							<#local downloadUrl><@routes.cm2.downloadMarkerFeedbackAll assignment feedback.marker feedback stage.description+" feedback" /></#local>
+					<#if feedback.marker.userId?has_content >
+						<#local attachment = "" />
+						<#if !feedback.attachments?is_enumerable>
+						<#-- assume it's a FileAttachment -->
+							<#local attachment = feedback.attachments />
+						<#elseif feedback.attachments?size == 1>
+						<#-- take the first and continue as above -->
+							<#local attachment = feedback.attachments?first />
 						</#if>
+							<#if attachment?has_content>
+								<#local downloadUrl><@routes.cm2.downloadMarkerFeedbackOne assignment feedback.marker feedback attachment /></#local>
+							<#elseif feedback.attachments?size gt 1>
+								<#local downloadUrl><@routes.cm2.downloadMarkerFeedbackAll assignment feedback.marker feedback stage.description+" feedback" /></#local>
+							</#if>
+						<a class="btn btn-default long-running use-tooltip" href="${downloadUrl}">Download feedback</a>
+						<ul class="feedback-attachments hide">
+							<#list feedback.attachments as attachment>
+								<li id="attachment-${attachment.id}" class="attachment">
+									<span>${attachment.name}</span>&nbsp;<a href="#" class="remove-attachment">Remove</a>
+									<input type="hidden" name="attachedFiles" value="${attachment.id}" />
+								</li>
+							</#list>
+						</ul>
+					<#else>
+						The <@fmt.p number=feedback.attachments?size singular="feedback attachment" shownumber=false/> cannot be downloaded as the marker is unknown.
 					</#if>
-					<a class="btn btn-default long-running use-tooltip" href="${downloadUrl}">Download feedback</a>
-					<ul class="feedback-attachments hide">
-						<#list feedback.attachments as attachment>
-							<li id="attachment-${attachment.id}" class="attachment">
-								<span>${attachment.name}</span>&nbsp;<a href="#" class="remove-attachment">Remove</a>
-								<input type="hidden" name="attachedFiles" value="${attachment.id}" />
-							</li>
-						</#list>
-					</ul>
 				</#if>
 			</div>
 			<div class="col-xs-3">
