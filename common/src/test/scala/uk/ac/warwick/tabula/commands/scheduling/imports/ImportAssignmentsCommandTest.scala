@@ -21,10 +21,10 @@ class ImportAssignmentsCommandTest extends FlatSpec with Matchers with Mockito {
 		val importer: AssignmentImporter = smartMock[AssignmentImporter]
 		val membershipService: AssessmentMembershipService = smartMock[AssessmentMembershipService]
 		val moduleService: ModuleAndDepartmentService = smartMock[ModuleAndDepartmentService]
-		val command = new ImportAssignmentsCommand with ImportAssignmentsAllMembers {
+		val command = new ImportAssignmentsCommand {
 			def session: Session = mockSession
-			override def assignmentImporter: AssignmentImporter = importer
 		}
+		command.assignmentImporter = importer
 		command.assessmentMembershipService = membershipService
 		command.moduleAndDepartmentService = moduleService
 
