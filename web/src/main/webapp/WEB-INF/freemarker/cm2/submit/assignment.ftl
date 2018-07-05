@@ -2,7 +2,11 @@
 <#escape x as x?html>
 <#compress>
 
-<@cm2.assignmentHeader "Submit assignment" assignment "for" />
+<#if canSubmit>
+	<@cm2.assignmentHeader "Submit assignment" assignment "for" />
+<#else>
+	<@cm2.assignmentHeader "View assignment" assignment "for" />
+</#if>
 
 <#if can.do("Assignment.Update", assignment)>
 	<div class="alert alert-info">
