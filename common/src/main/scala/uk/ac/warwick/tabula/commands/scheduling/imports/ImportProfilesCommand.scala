@@ -6,7 +6,6 @@ import org.springframework.validation.BindException
 import uk.ac.warwick.spring.Wire
 import uk.ac.warwick.tabula.commands.{CommandWithoutTransaction, Description, TaskBenchmarking}
 import uk.ac.warwick.tabula.data.Transactions._
-import uk.ac.warwick.tabula.data.model.MemberUserType.Student
 import uk.ac.warwick.tabula.data.model._
 import uk.ac.warwick.tabula.data.{Daoisms, MemberDao, StudentCourseDetailsDao, StudentCourseYearDetailsDao}
 import uk.ac.warwick.tabula.helpers.scheduling.ImportCommandFactory
@@ -303,7 +302,6 @@ class ImportProfilesCommand extends CommandWithoutTransaction[Unit] with Logging
 
 					// re-import module registrations and delete old module and group registrations:
 					val newModuleRegistrations = updateModuleRegistrationsAndSmallGroups(List(membInfo), Map(universityId -> user))
-					updateComponentMarks(List(membInfo))
 					updateAccreditedPriorLearning(List(membInfo), Map(universityId -> user))
 					rationaliseRelationships(importMemberCommands)
 
@@ -401,14 +399,6 @@ class ImportProfilesCommand extends CommandWithoutTransaction[Unit] with Logging
 				smallGroupService.removeFromSmallGroups(existingMR)
 			}
 		}
-	}
-
-	def updateComponentMarks(membershipInfo: Seq[MembershipInformation]): Unit = {
-		logger.info("Updating component marks")
-		ImportAssignmentsCommand.applyForMembers(membershipInfo.map(_.member).filter(_.userType == Student)).apply()
-
-		session.flush()
-		session.clear()
 	}
 
 	def describe(d: Description): Unit = d.property("deptCode" -> deptCode)

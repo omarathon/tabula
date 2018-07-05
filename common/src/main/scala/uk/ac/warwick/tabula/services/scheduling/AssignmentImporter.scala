@@ -1,8 +1,8 @@
 package uk.ac.warwick.tabula.services.scheduling
 
 import java.sql.{ResultSet, Types}
-
 import javax.sql.DataSource
+
 import org.springframework.beans.factory.InitializingBean
 import org.springframework.context.annotation.Profile
 import org.springframework.jdbc.`object`.{MappingSqlQuery, MappingSqlQueryWithParameters}
@@ -19,22 +19,12 @@ import uk.ac.warwick.tabula.services.scheduling.AssignmentImporter.{AssessmentCo
 
 import scala.collection.JavaConverters._
 
-trait AssignmentImporterComponent {
-	def assignmentImporter: AssignmentImporter
-}
-
-trait AutowiringAssignmentImporterComponent extends AssignmentImporterComponent {
-	val assignmentImporter: AssignmentImporter = Wire[AssignmentImporter]
-}
-
 trait AssignmentImporter {
 	/**
 	 * Iterates through ALL module registration elements,
 	 * passing each ModuleRegistration item to the given callback for it to process.
 	 */
 	def allMembers(callback: UpstreamModuleRegistration => Unit): Unit
-
-	def specificMembers(members: Seq[MembershipMember])(callback: UpstreamModuleRegistration => Unit): Unit
 
 	def getAllAssessmentGroups: Seq[UpstreamAssessmentGroup]
 
@@ -80,38 +70,28 @@ class AssignmentImporterImpl extends AssignmentImporter with InitializingBean {
 	def allMembers(callback: UpstreamModuleRegistration => Unit) {
 		val params: JMap[String, Object] = JMap(
 			"academic_year_code" -> yearsToImportArray)
-		jdbc.query(AssignmentImporter.GetAllAssessmentGroupMembers, params, new UpstreamModuleRegistrationRowCallbackHandler(callback))
-	}
+		jdbc.query(AssignmentImporter.GetAllAssessmentGroupMembers, params, new RowCallbackHandler {
+			override def processRow(rs: ResultSet) {
+				callback(UpstreamModuleRegistration(
+					year = rs.getString("academic_year_code"),
+					sprCode = rs.getString("spr_code"),
+					seatNumber = rs.getString("seat_number"),
+					occurrence = rs.getString("mav_occurrence"),
+					sequence = rs.getString("sequence"),
+					moduleCode = rs.getString("module_code"),
+					assessmentGroup = convertAssessmentGroupFromSITS(rs.getString("assessment_group")),
+					actualMark = rs.getString("actual_mark"),
+					actualGrade = rs.getString("actual_grade"),
+					agreedMark = rs.getString("agreed_mark"),
+					agreedGrade = rs.getString("agreed_grade"),
+					resitActualMark = rs.getString("resit_actual_mark"),
+					resitActualGrade = rs.getString("resit_actual_grade"),
+					resitAgreedMark = rs.getString("resit_agreed_mark"),
+					resitAgreedGrade = rs.getString("resit_agreed_grade")
+				))
 
-	def specificMembers(members: Seq[MembershipMember])(callback: UpstreamModuleRegistration => Unit): Unit = {
-		val params: JMap[String, Object] = JMap(
-			"academic_year_code" -> yearsToImportArray,
-			"universityIds" -> members.map(_.universityId).asJava
-		)
-
-		jdbc.query(AssignmentImporter.GetModuleRegistrationsByUniversityId, params, new UpstreamModuleRegistrationRowCallbackHandler(callback))
-	}
-
-	class UpstreamModuleRegistrationRowCallbackHandler(callback: UpstreamModuleRegistration => Unit) extends RowCallbackHandler {
-		override def processRow(rs: ResultSet) {
-			callback(UpstreamModuleRegistration(
-				year = rs.getString("academic_year_code"),
-				sprCode = rs.getString("spr_code"),
-				seatNumber = rs.getString("seat_number"),
-				occurrence = rs.getString("mav_occurrence"),
-				sequence = rs.getString("sequence"),
-				moduleCode = rs.getString("module_code"),
-				assessmentGroup = convertAssessmentGroupFromSITS(rs.getString("assessment_group")),
-				actualMark = rs.getString("actual_mark"),
-				actualGrade = rs.getString("actual_grade"),
-				agreedMark = rs.getString("agreed_mark"),
-				agreedGrade = rs.getString("agreed_grade"),
-				resitActualMark = rs.getString("resit_actual_mark"),
-				resitActualGrade = rs.getString("resit_actual_grade"),
-				resitAgreedMark = rs.getString("resit_agreed_mark"),
-				resitAgreedGrade = rs.getString("resit_agreed_grade")
-			))
-		}
+			}
+		})
 	}
 
 	/** Convert incoming null assessment groups into the NONE value */
@@ -124,12 +104,6 @@ class AssignmentImporterImpl extends AssignmentImporter with InitializingBean {
 
 @Profile(Array("sandbox")) @Service
 class SandboxAssignmentImporter extends AssignmentImporter {
-
-	override def specificMembers(members: Seq[MembershipMember])(callback: UpstreamModuleRegistration => Unit): Unit = allMembers(umr => {
-		if (members.map(_.universityId).contains(umr.universityId)) {
-			callback(umr)
-		}
-	})
 
 	def allMembers(callback: UpstreamModuleRegistration => Unit): Unit = {
 		var moduleCodesToIds = Map[String, Seq[Range]]()
@@ -472,17 +446,6 @@ object AssignmentImporter {
 			$GetConfirmedModuleRegistrations
 				union all
 			$GetAutoUploadedConfirmedModuleRegistrations
-		order by academic_year_code, module_code, assessment_group, mav_occurrence, sequence, spr_code"""
-
-	def GetModuleRegistrationsByUniversityId = s"""
-			$GetUnconfirmedModuleRegistrations
-				and SUBSTR(spr.spr_code, 0, 7) in (:universityIds)
-				union all
-			$GetConfirmedModuleRegistrations
-				and SUBSTR(spr.spr_code, 0, 7) in (:universityIds)
-				union all
-			$GetAutoUploadedConfirmedModuleRegistrations
-				and SUBSTR(spr.spr_code, 0, 7) in (:universityIds)
 		order by academic_year_code, module_code, assessment_group, mav_occurrence, sequence, spr_code"""
 
 	def GetAllGradeBoundaries = s"""
