@@ -48,7 +48,11 @@ trait MyWarwickNotificationListener extends NotificationListener {
 			val activity = new Activity(
 				recipients.toSet.asJava,
 				notification.title,
-				toplevelUrl + notification.url,
+				if (notification.url.toLowerCase.startsWith("https://")) {
+					notification.url
+				} else {
+					toplevelUrl + notification.url
+				},
 				textRenderer.renderTemplate(notification.content.template, notification.content.model),
 				notification.notificationType
 			)
