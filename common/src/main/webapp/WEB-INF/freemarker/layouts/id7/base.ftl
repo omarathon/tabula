@@ -264,7 +264,6 @@
 		</#if>
 
 		<div style="clear:both;"></div>
-		<div class="cog"></div>
 	</footer>
 </div>
 <div class="id7-right-border"></div>
