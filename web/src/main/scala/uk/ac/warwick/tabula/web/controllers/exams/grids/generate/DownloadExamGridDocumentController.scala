@@ -17,7 +17,7 @@ class DownloadExamGridDocumentController extends ExamsController
 	@GetMapping
 	def download(@PathVariable department: Department, @PathVariable academicYear: AcademicYear, @PathVariable jobId: String): RenderableFile =
 		jobService.getInstance(jobId)
-			.filter(_.user == user)
+			.filter(_.user.apparentUser == user.apparentUser)
 			.filter(_.jobType == GenerateExamGridDocumentJob.identifier)
 			.filter(_.getString("department") == department.code)
 			.filter(_.succeeded)
