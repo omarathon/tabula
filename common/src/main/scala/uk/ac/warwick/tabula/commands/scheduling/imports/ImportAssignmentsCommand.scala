@@ -10,7 +10,7 @@ import uk.ac.warwick.tabula.helpers.Logging
 import uk.ac.warwick.tabula.helpers.StringUtils._
 import uk.ac.warwick.tabula.permissions._
 import uk.ac.warwick.tabula.services._
-import uk.ac.warwick.tabula.services.scheduling.{AssignmentImporterComponent, AutowiringAssignmentImporterComponent, MembershipMember}
+import uk.ac.warwick.tabula.services.scheduling.AssignmentImporter
 import uk.ac.warwick.tabula.system.permissions.{PermissionsChecking, RequiresPermissionsChecking}
 import uk.ac.warwick.tabula.{AcademicYear, SprCode}
 
@@ -18,29 +18,16 @@ import scala.collection.JavaConverters._
 import scala.util.Try
 
 object ImportAssignmentsCommand {
-	def apply(): ComposableCommandWithoutTransaction[Unit] = new ComposableCommandWithoutTransaction[Unit]
+	def apply() = new ComposableCommandWithoutTransaction[Unit]
 		with ImportAssignmentsCommand
-		with ImportAssignmentsAllMembers
 		with ImportAssignmentsDescription
-		with AutowiringAssignmentImporterComponent
 		with Daoisms
 
-	def applyAllYears(): ComposableCommandWithoutTransaction[Unit] = new ComposableCommandWithoutTransaction[Unit]
+	def applyAllYears() = new ComposableCommandWithoutTransaction[Unit]
 		with ImportAssignmentsAllYearsCommand
-		with ImportAssignmentsAllMembers
 		with ImportAssignmentsDescription
-		with AutowiringAssignmentImporterComponent
 		with Daoisms {
 		override lazy val eventName = "ImportAssignmentsAllYears"
-	}
-
-	def applyForMembers(applyMembers: Seq[MembershipMember]): ComposableCommandWithoutTransaction[Unit] = new ComposableCommandWithoutTransaction[Unit]
-		with ImportAssignmentsCommand
-		with ImportAssignmentsSpecificMembers
-		with ImportAssignmentsDescription
-		with AutowiringAssignmentImporterComponent
-		with Daoisms {
-		override val members: Seq[MembershipMember] = applyMembers
 	}
 
 	case class Result(
@@ -51,39 +38,14 @@ object ImportAssignmentsCommand {
 
 }
 
-trait ImportAssignmentsMembersToImport {
-	def membersToImport(callback: UpstreamModuleRegistration => Unit): Unit
 
-	def importEverything: Boolean
-}
+trait ImportAssignmentsCommand extends CommandInternal[Unit] with RequiresPermissionsChecking with Logging with SessionComponent {
 
-trait ImportAssignmentsAllMembers extends ImportAssignmentsMembersToImport {
-	self: AssignmentImporterComponent =>
-
-	override def membersToImport(callback: UpstreamModuleRegistration => Unit): Unit = {
-		assignmentImporter.allMembers(callback)
-	}
-
-	val importEverything: Boolean = true
-}
-
-trait ImportAssignmentsSpecificMembers extends ImportAssignmentsMembersToImport {
-	self: AssignmentImporterComponent =>
-
-	val members: Seq[MembershipMember]
-
-	override def membersToImport(callback: UpstreamModuleRegistration => Unit): Unit = {
-		assignmentImporter.specificMembers(members)(callback)
-	}
-
-	val importEverything: Boolean = false
-}
-
-trait ImportAssignmentsCommand extends CommandInternal[Unit] with RequiresPermissionsChecking with Logging with SessionComponent with AssignmentImporterComponent with ImportAssignmentsMembersToImport {
 	def permissionsCheck(p: PermissionsChecking) {
 		p.PermissionCheck(Permissions.ImportSystemData)
 	}
 
+	var assignmentImporter: AssignmentImporter = Wire[AssignmentImporter]
 	var assessmentMembershipService: AssessmentMembershipService = Wire[AssessmentMembershipService]
 	var moduleAndDepartmentService: ModuleAndDepartmentService = Wire[ModuleAndDepartmentService]
 
@@ -93,20 +55,15 @@ trait ImportAssignmentsCommand extends CommandInternal[Unit] with RequiresPermis
 
 	def applyInternal() {
 		benchmark("ImportAssessment") {
-			if (importEverything) {
-				doAssignments()
-				logger.debug("Imported AssessmentComponents. Importing assessment groups...")
-				doGroups()
-				doGroupMembers()
-				logger.debug("Imported assessment groups. Importing grade boundaries...")
-				doGradeBoundaries()
+			doAssignments()
+			logger.debug("Imported AssessmentComponents. Importing assessment groups...")
+			doGroups()
+			doGroupMembers()
+			logger.debug("Imported assessment groups. Importing grade boundaries...")
+			doGradeBoundaries()
 
-				logger.debug("Removing blank feedback for students who have deregistered...")
-				removeBlankFeedbackForDeregisteredStudents()
-			} else {
-				logger.debug("Importing assessment group members...")
-				doGroupMembers()
-			}
+			logger.debug("Removing blank feedback for students who have deregistered...")
+			removeBlankFeedbackForDeregisteredStudents()
 		}
 	}
 
@@ -155,7 +112,7 @@ trait ImportAssignmentsCommand extends CommandInternal[Unit] with RequiresPermis
 			var notEmptyGroupIds = Set[String]()
 
 			var count = 0
-			membersToImport { r =>
+			assignmentImporter.allMembers { r =>
 				if (registrations.nonEmpty && r.differentGroup(registrations.head)) {
 					// This element r is for a new group, so save this group and start afresh
 					transactional() {
@@ -181,22 +138,22 @@ trait ImportAssignmentsCommand extends CommandInternal[Unit] with RequiresPermis
 				}
 			}
 
-			if (importEverything) {
-				// empty unseen groups - this is done in transactional batches
+			// empty unseen groups - this is done in transactional batches
 
-				val groupsToEmpty = transactional(readOnly = true) {
-					assessmentMembershipService.getUpstreamAssessmentGroupsNotIn(
-						ids = notEmptyGroupIds.filter(_.hasText).toSeq,
-						academicYears = assignmentImporter.yearsToImport
-					)
-				}
-
-				logger.info("Emptying members for unseen groups")
-				val numEmptied = transactional() {
-					assessmentMembershipService.emptyMembers(groupsToEmpty)
-				}
-				logger.info(s"Emptied $numEmptied users from ${groupsToEmpty.size} unseen groups")
+			val groupsToEmpty = transactional(readOnly = true) {
+				assessmentMembershipService.getUpstreamAssessmentGroupsNotIn(
+					ids = notEmptyGroupIds.filter(_.hasText).toSeq,
+					academicYears = assignmentImporter.yearsToImport
+				)
 			}
+
+			logger.info("Emptying members for unseen groups")
+			val numEmptied = transactional() {
+				assessmentMembershipService.emptyMembers(groupsToEmpty)
+			}
+			logger.info(s"Emptied $numEmptied users from ${groupsToEmpty.size} unseen groups")
+
+
 		}
 	}
 
