@@ -404,11 +404,15 @@ class ImportProfilesCommand extends CommandWithoutTransaction[Unit] with Logging
 	}
 
 	def updateComponentMarks(membershipInfo: Seq[MembershipInformation]): Unit = {
-		logger.info("Updating component marks")
-		ImportAssignmentsCommand.applyForMembers(membershipInfo.map(_.member).filter(_.userType == Student)).apply()
+		val studentMembers = membershipInfo.map(_.member).filter(_.userType == Student)
 
-		session.flush()
-		session.clear()
+		if (studentMembers.nonEmpty) {
+			logger.info("Updating component marks")
+			ImportAssignmentsCommand.applyForMembers(studentMembers).apply()
+
+			session.flush()
+			session.clear()
+		} else logger.info("No students - so not updating component marks")
 	}
 
 	def describe(d: Description): Unit = d.property("deptCode" -> deptCode)
