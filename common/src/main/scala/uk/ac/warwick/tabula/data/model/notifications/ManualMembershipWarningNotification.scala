@@ -49,7 +49,7 @@ class ManualMembershipWarningNotification extends Notification[Department, Unit]
 			s"$y small group sets in ${department.name} have manually added students"
 
 		case (1, 1) =>
-			s"1 assignment and 1 small group set in ${department.name} has manually added students"
+			s"1 assignment and 1 small group set in ${department.name} have manually added students"
 
 		case (1, y) =>
 			s"1 assignment and $y small group sets in ${department.name} have manually added students"

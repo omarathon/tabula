@@ -69,7 +69,7 @@ class ManualMembershipWarningNotificationTest extends TestBase with Mockito with
 		}
 
 		new SingleAssignmentFixture with SingleSmallGroupSetFixture {
-			notification.title should be ("1 assignment and 1 small group set in IT Services has manually added students")
+			notification.title should be ("1 assignment and 1 small group set in IT Services have manually added students")
 		}
 
 		new MultipleAssignmentsFixture {
