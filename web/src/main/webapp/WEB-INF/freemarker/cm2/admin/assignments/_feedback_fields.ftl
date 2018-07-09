@@ -14,7 +14,7 @@
 		<@bs3form.checkbox path="automaticallyReleaseToMarkers">
 			<#assign popoverContent>
 				<p>
-					When using a marking workflow, automatically release students to markers when the assignment closes. Students who submit work late or within an extension are released automatically when the submission is received. Ensure you assign markers to students before the assignment closing date.
+					When using a marking workflow, automatically release students to markers when the assignment closes. Students who do not submit work by the deadline or have an extension are still released automatically on the closing date. Ensure you assign markers to students before the assignment closes.
 				</p>
 			</#assign>
 
