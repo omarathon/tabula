@@ -26,7 +26,7 @@ class AttendanceReportExporter(val processorResult: AttendanceReportProcessorRes
 	val students: Seq[AttendanceMonitoringStudentData] = processorResult.students
 	val points: Seq[PointData] = processorResult.points
 
-	val headers: Seq[String] = Seq("First name","Last name","University ID", "Route", "Year of study", "SPR code") ++
+	val headers: Seq[String] = Seq("First name","Last name","University ID", "Route", "Year of study", "SPR code", "Tier 4 requirements") ++
 		points.map(p => s"${p.name} (${intervalFormatter.exec(JList(
 			wrapper.wrap(p.startDate.toDate),
 			wrapper.wrap(p.endDate.toDate)
@@ -52,12 +52,14 @@ class AttendanceReportExporter(val processorResult: AttendanceReportProcessorRes
 				studentData.yearOfStudy
 			case 5 =>
 				studentData.sprCode
+			case 6 =>
+				if (studentData.tier4Requirements) "Yes" else "No"
 			case index if index == unrecordedIndex =>
-				result(studentData).map { case (point, state) => state}.count(_ == NotRecorded).toString
+				result(studentData).map { case (_, state) => state }.count(_ == NotRecorded).toString
 			case index if index == missedIndex =>
-				result(studentData).map { case (point, state) => state}.count(_ == MissedUnauthorised).toString
+				result(studentData).map { case (_, state) => state }.count(_ == MissedUnauthorised).toString
 			case _ =>
-				val thisPoint = points(pointIndex - 6)
+				val thisPoint = points(pointIndex - 7)
 				result(studentData).get(thisPoint).map{
 					case state if state == NotRecorded =>
 						if (thisPoint.isLate)
@@ -136,6 +138,7 @@ class AttendanceReportExporter(val processorResult: AttendanceReportProcessorRes
 						route={studentData.routeCode}
 						year={studentData.yearOfStudy}
 						spr={studentData.sprCode}
+						tier4Requirements={if (studentData.tier4Requirements) "Yes" else "No"}
 					/>
 				)}
 			</students>

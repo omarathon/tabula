@@ -87,9 +87,9 @@ class RecordMonitoringPointCommandTest extends TestBase with Mockito {
 	trait StudentDatasFixture extends Fixture {
 		val thisStudentDatas =
 			Seq(
-				AttendanceMonitoringStudentData(student1.firstName, student1.lastName, student1.universityId, "", new LocalDate, None, null, null, null, null),
-				AttendanceMonitoringStudentData(student2.firstName, student2.lastName, student2.universityId, "", new LocalDate, None, null, null, null, null),
-				AttendanceMonitoringStudentData(student3.firstName, student3.lastName, student3.universityId, "", new LocalDate, None, null, null, null, null)
+				AttendanceMonitoringStudentData(student1.firstName, student1.lastName, student1.universityId, "", new LocalDate, None, null, null, null, null, tier4Requirements = false),
+				AttendanceMonitoringStudentData(student2.firstName, student2.lastName, student2.universityId, "", new LocalDate, None, null, null, null, null, tier4Requirements = false),
+				AttendanceMonitoringStudentData(student3.firstName, student3.lastName, student3.universityId, "", new LocalDate, None, null, null, null, null, tier4Requirements = false)
 			)
 	}
 
@@ -152,9 +152,9 @@ class RecordMonitoringPointCommandTest extends TestBase with Mockito {
 
 		validator.filteredPoints = Map("point" -> Seq(GroupedPoint(point1, Seq(), Seq(point1, point2))))
 		validator.studentDatas = Seq(
-			AttendanceMonitoringStudentData(null, null, student1.universityId, null, null, null, null, null, null, null),
-			AttendanceMonitoringStudentData(null, null, student2.universityId, null, null, null, null, null, null, null),
-			AttendanceMonitoringStudentData(null, null, student3.universityId, null, null, null, null, null, null, null)
+			AttendanceMonitoringStudentData(null, null, student1.universityId, null, null, null, null, null, null, null, tier4Requirements = false),
+			AttendanceMonitoringStudentData(null, null, student2.universityId, null, null, null, null, null, null, null, tier4Requirements = false),
+			AttendanceMonitoringStudentData(null, null, student3.universityId, null, null, null, null, null, null, null, tier4Requirements = false)
 		)
 
 		val conversionService = new GenericConversionService()

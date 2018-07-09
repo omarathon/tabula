@@ -7,6 +7,7 @@ import org.hibernate.criterion.{Order, ProjectionList, Projections, Restrictions
 import org.joda.time.{DateTime, LocalDate}
 import org.springframework.stereotype.Repository
 import uk.ac.warwick.spring.Wire
+import uk.ac.warwick.tabula.JavaImports.JBoolean
 import uk.ac.warwick.tabula.commands.TaskBenchmarking
 import uk.ac.warwick.tabula.data.Daoisms._
 import uk.ac.warwick.tabula.data.HibernateHelpers._
@@ -541,7 +542,8 @@ case class AttendanceMonitoringStudentData(
 	routeCode: String,
 	routeName: String,
 	yearOfStudy: String,
-	sprCode: String
+	sprCode: String,
+	tier4Requirements: Boolean
 ) {
 	def fullName = s"$firstName $lastName"
 }
@@ -564,6 +566,8 @@ trait AttendanceMonitoringStudentDataFetcher extends TaskBenchmarking {
 					.add(max("route.name"))
 					.add(max("studentCourseYearDetails.yearOfStudy"))
 					.add(max("studentCourseDetails.sprCode"))
+  				.add(max("studentCourseYearDetails.casUsed"))
+					.add(max("studentCourseYearDetails.tier4Visa"))
 			if (withEndDate) {
 				projections.add(max("studentCourseDetails.endDate"))
 			}
@@ -588,7 +592,7 @@ trait AttendanceMonitoringStudentDataFetcher extends TaskBenchmarking {
 		}
 		// The end date is either null, or if all are not null, the maximum end date, so get the nulls first
 		val nullEndDateData = setupCriteria(setupProjection(withEndDate = false)).map {
-			case Array(firstName: String, lastName: String, universityId: String, userId: String, scdBeginDate: LocalDate, routeCode: String, routeName: String, yearOfStudy: Integer, sprCode: String) =>
+			case Array(firstName: String, lastName: String, universityId: String, userId: String, scdBeginDate: LocalDate, routeCode: String, routeName: String, yearOfStudy: Integer, sprCode: String, casUsed: JBoolean, tier4Visa: JBoolean) =>
 				AttendanceMonitoringStudentData(
 					firstName,
 					lastName,
@@ -599,12 +603,13 @@ trait AttendanceMonitoringStudentDataFetcher extends TaskBenchmarking {
 					routeCode,
 					routeName,
 					yearOfStudy.toString,
-					sprCode
+					sprCode,
+					Option(casUsed).contains(true) || Option(tier4Visa).contains(true)
 				)
 		}
 		// Then get the not-nulls
 		val hasEndDateData = setupCriteria(setupProjection(withEndDate = true), withEndDate = true).map {
-			case Array(firstName: String, lastName: String, universityId: String, userId: String, scdBeginDate: LocalDate, routeCode: String, routeName: String, yearOfStudy: Integer, sprCode: String, scdEndDate: LocalDate) =>
+			case Array(firstName: String, lastName: String, universityId: String, userId: String, scdBeginDate: LocalDate, routeCode: String, routeName: String, yearOfStudy: Integer, sprCode: String, casUsed: JBoolean, tier4Visa: JBoolean, scdEndDate: LocalDate) =>
 				AttendanceMonitoringStudentData(
 					firstName,
 					lastName,
@@ -615,7 +620,8 @@ trait AttendanceMonitoringStudentDataFetcher extends TaskBenchmarking {
 					routeCode,
 					routeName,
 					yearOfStudy.toString,
-					sprCode
+					sprCode,
+					Option(casUsed).contains(true) || Option(tier4Visa).contains(true)
 				)
 		}
 		// Then combine the two, but filter any ended found in the not-ended

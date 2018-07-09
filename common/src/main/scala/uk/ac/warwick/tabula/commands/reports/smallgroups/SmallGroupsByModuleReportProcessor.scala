@@ -52,7 +52,8 @@ class SmallGroupsByModuleReportProcessorInternal(val department: Department, val
 				properties.get("route"),
 				null,
 				properties.get("yearOfStudy"),
-				properties.get("sprCode")
+				properties.get("sprCode"),
+				tier4Requirements = properties.get("tier4Requirements").toBoolean
 			)
 		}.toSeq.sortBy(s => (s.lastName, s.firstName))
 		val processedModules = modules.asScala.map{properties =>

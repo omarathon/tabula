@@ -60,7 +60,8 @@ class AttendanceMonitoringUnrecordedNotificationTest extends TestBase with Mocki
 				null,
 				null,
 				null,
-				null
+				null,
+				tier4Requirements = false
 			)
 		)
 
@@ -85,7 +86,8 @@ class AttendanceMonitoringUnrecordedNotificationTest extends TestBase with Mocki
 				null,
 				null,
 				null,
-				null
+				null,
+				tier4Requirements = false
 			),
 			AttendanceMonitoringStudentData(
 				firstName = "Nick",
@@ -97,7 +99,8 @@ class AttendanceMonitoringUnrecordedNotificationTest extends TestBase with Mocki
 				null,
 				null,
 				null,
-				null
+				null,
+				tier4Requirements = false
 			)
 		)
 

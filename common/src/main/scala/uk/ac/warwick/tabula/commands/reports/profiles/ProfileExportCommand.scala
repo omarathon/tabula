@@ -56,7 +56,8 @@ class ProfileExportCommandInternal(val department: Department, val academicYear:
 						scd.map(_.currentRoute.code).getOrElse(""),
 						scd.map(_.currentRoute.name).getOrElse(""),
 						scd.map(_.latestStudentCourseYearDetails.yearOfStudy.toString).getOrElse(""),
-						scd.map(_.sprCode).getOrElse("")
+						scd.map(_.sprCode).getOrElse(""),
+						scd.map(_.latestStudentCourseYearDetails).exists { scyd => Option(scyd.casUsed).contains(true) || Option(scyd.tier4Visa).contains(true) }
 					)
 				})
 			} else if (hasBeenFiltered) {
