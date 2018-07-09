@@ -35,9 +35,34 @@ class ManualMembershipWarningNotification extends Notification[Department, Unit]
 	def numSmallGroupSets_= (count:Int) { settings += ("numSmallGroupSets" -> count) }
 
 	def verb = "view"
-	def title: String = s"Some assignments or small group sets in ${department.name} have manually added students."
+	def title: String = (numAssignments, numSmallGroupSets) match {
+		case (1, 0) =>
+			s"1 assignment in ${department.name} has manually-added students"
+
+		case (0, 1) =>
+			s"1 small group set in ${department.name} has manually-added students"
+
+		case (x, 0) =>
+			s"$x assignments in ${department.name} have manually-added students"
+
+		case (0, y) =>
+			s"$y small group sets in ${department.name} have manually-added students"
+
+		case (1, 1) =>
+			s"1 assignment and 1 small group set in ${department.name} have manually-added students"
+
+		case (1, y) =>
+			s"1 assignment and $y small group sets in ${department.name} have manually-added students"
+
+		case (x, 1) =>
+			s"$x assignments and 1 small group set in ${department.name} have manually-added students"
+
+		case (x, y) =>
+			s"$x assignments and $y small group sets in ${department.name} have manually-added students"
+	}
+
 	def url: String = Routes.department.manualMembership(department)
-	def urlTitle = s"view a list of assignments and small group sets with manually added students for ${department.name}"
+	def urlTitle = s"view a list of assignments and small group sets with manually-added students for ${department.name}"
 
 	def content = FreemarkerModel(ManualMembershipWarningNotification.templateLocation, Map (
 		"department" -> department,
