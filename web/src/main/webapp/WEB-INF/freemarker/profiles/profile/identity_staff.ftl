@@ -31,10 +31,10 @@
 					<strong>Warwick email:</strong> <a href="mailto:${member.email}">${member.email}</a><br/>
 				</#if>
 				<#if member.universityId??>
-					<strong>University number: </strong> ${member.universityId}<br/>
+					<strong>University ID: </strong> ${member.universityId}<br/>
 				</#if>
 				<#if member.userId??>
-					<strong>IT code:</strong> ${member.userId}<br/>
+					<strong>Username:</strong> ${member.userId}<br/>
 				</#if>
 			</div>
 		</div>

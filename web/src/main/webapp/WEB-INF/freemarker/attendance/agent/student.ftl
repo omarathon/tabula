@@ -59,10 +59,10 @@
 						<strong>Mobile phone:</strong> ${phoneNumberFormatter(student.mobileNumber)}<br/>
 					</#if>
 					<#if student.universityId??>
-						<strong>University number: </strong> ${student.universityId}<br/>
+						<strong>University ID: </strong> ${student.universityId}<br/>
 					</#if>
 					<#if student.userId??>
-						<strong>IT code:</strong> ${student.userId}<br/>
+						<strong>Username:</strong> ${student.userId}<br/>
 					</#if>
 					<#if student.homeDepartment??>
 						<strong>Home department:</strong> ${student.homeDepartment.name}<br/>

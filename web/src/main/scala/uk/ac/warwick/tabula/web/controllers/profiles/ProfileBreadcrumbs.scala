@@ -83,8 +83,8 @@ object ProfileBreadcrumbs {
 
 		case class SeminarsForScyd(scyd: StudentCourseYearDetails) extends ProfileBreadcrumb {
 			val identifier = SeminarsIdentifier
-			val title = "Seminars"
-			val url = Some(Routes.Profile.seminars(scyd))
+			val title = "Events"
+			val url = Some(Routes.Profile.events(scyd))
 		}
 
 		case class Marking(member: Member) extends ProfileBreadcrumb {

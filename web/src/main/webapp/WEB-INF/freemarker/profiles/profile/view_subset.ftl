@@ -33,14 +33,14 @@
 
 							<#if profile.universityId??>
 							<tr>
-								<th>University number</th>
+								<th>University ID</th>
 								<td>${profile.universityId}</td>
 							</tr>
 							</#if>
 
 							<#if profile.userId??>
 							<tr>
-								<th>IT code</th>
+								<th>Username</th>
 								<td>${profile.userId}</td>
 							</tr>
 							</#if>
@@ -118,13 +118,13 @@
 					</#if>
 					<#if studentUser.warwickId??>
 						<tr>
-							<th>University number</th>
+							<th>University ID</th>
 							<td>${studentUser.warwickId!}</td>
 						</tr>
 					</#if>
 					<#if studentUser.userId??>
 						<tr>
-							<th>IT code</th>
+							<th>Username</th>
 							<td>${studentUser.userId}</td>
 						</tr>
 					</#if>

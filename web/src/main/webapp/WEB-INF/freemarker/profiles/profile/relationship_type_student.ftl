@@ -49,8 +49,8 @@
 				<p>
 					<strong>Name:</strong> ${relationship.agentMember.fullName!relationshipType.agentRole?cap_first}<br />
 					<#if relationship.agentMember.email?has_content><strong>Warwick email:</strong> <a href="mailto:${relationship.agentMember.email}">${relationship.agentMember.email}</a><br /></#if>
-					<strong>University number:</strong> ${relationship.agentMember.universityId}<br />
-					<#if relationship.agentMember.userId??><strong>IT code:</strong> ${relationship.agentMember.userId}<br /></#if>
+					<strong>University ID:</strong> ${relationship.agentMember.universityId}<br />
+					<#if relationship.agentMember.userId??><strong>Username:</strong> ${relationship.agentMember.userId}<br /></#if>
 					<span class="peoplesearch-info" data-href="<@routes.profiles.peoplesearchData relationship.agentMember />"></span>
 					<#if (canEditRelationship!false) && !studentCourseDetails.student.deceased>
 						<a class="btn btn-primary ajax-modal"

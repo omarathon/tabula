@@ -61,10 +61,10 @@
 						<strong>Mobile phone:</strong> ${phoneNumberFormatter(member.mobileNumber)}<br/>
 					</#if>
 					<#if member.universityId??>
-						<strong>University number: </strong> ${member.universityId}<br/>
+						<strong>University ID: </strong> ${member.universityId}<br/>
 					</#if>
 					<#if member.userId??>
-						<strong>IT code:</strong> ${member.userId}<br/>
+						<strong>Username:</strong> ${member.userId}<br/>
 					</#if>
 					<#if member.homeDepartment??>
 						<strong>Home department:</strong> ${member.homeDepartment.name}<br/>
