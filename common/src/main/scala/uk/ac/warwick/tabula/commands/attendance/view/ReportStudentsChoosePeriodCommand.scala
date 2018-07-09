@@ -64,13 +64,12 @@ trait ReportStudentsChoosePeriodCommandNotifications extends Notifies[Department
 	@transient
 	val userLookup: UserLookupService = Wire[UserLookupService]
 
-	var department: Department = _
 
 	override def emit(result: Department): Seq[ReportStudentsChoosePeriodCommandNotification] = {
 		Seq(Notification.init(
 			new ReportStudentsChoosePeriodCommandNotification,
 			userLookup.getUserByUserId("studentrecords_warwick_ac_uk"),
-			department
+			result
 		))
 	}
 
