@@ -141,7 +141,7 @@ class JobService extends HasJobDao with Logging with JobNotificationHandling {
 				fail(instance)
 			case e: Throwable =>
 				logger.info(s"Job ${instance.id} failed", e)
-				instance.status = "Sorry, there was an error: " + e.getMessage
+				instance.status = s"Sorry, there was an error: ${e.getMessage.substring(0, 1000)}"
 				fail(instance)
 		}
 
