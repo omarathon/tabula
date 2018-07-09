@@ -30,7 +30,7 @@ class ReportStudentsChoosePeriodCommandNotification extends Notification[Departm
 		"created" -> created.toString(DateFormats.NotificationDateTimePattern)
 	))
 
-	override def url: String = "https://warwick.ac.uk/services/its/servicessupport/web/tabula/manual/monitoring-points/upload-to-sits"
+	override def url: String = "https://warwick.ac.uk/tabula/manual/monitoring-points/upload-to-sits"
 
 	override def urlTitle: String = "learn more about uploading missed monitoring points to SITS"
 
