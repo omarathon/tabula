@@ -1,4 +1,4 @@
-There are manually added students in <@fmt.p numAssignments "assignment"/> and <@fmt.p numSmallGroupSets "small group set"/> in ${department.name}:
+There are manually added students in<#if numAssignments gt 0> <@fmt.p numAssignments "assignment"/></#if><#if numAssignments gt 0 && numSmallGroupSets gt 0> and</#if><#if numSmallGroupSets gt 0> <@fmt.p numSmallGroupSets "small group set"/></#if> in ${department.name}:
 
 It's important that SITS holds up-to-date information on which students take each module.
 
