@@ -1,1 +1,1 @@
-${agent} in  uploaded missed monitoring points from Tabula to SITS at ${created}.
+${agent} in ${departmentName} uploaded missed monitoring points from Tabula to SITS at ${created}.
