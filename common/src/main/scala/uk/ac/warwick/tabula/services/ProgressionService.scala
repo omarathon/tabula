@@ -268,10 +268,18 @@ abstract class AbstractProgressionService extends ProgressionService {
 
 				lazy val markPerYear: Map[Int, Either[String, BigDecimal]] = getMarkPerYear(entityPerYear, finalYearOfStudy, normalLoad, routeRulesPerYear, calculateYearMarks)
 				lazy val yearWeightings: Map[Int, Option[CourseYearWeighting]] = markPerYear.map { case (year, _) =>
-					year ->courseAndRouteService.getCourseYearWeighting(scyd.studentCourseDetails.course.code, scyd.studentCourseDetails.sprStartAcademicYear, year)
+					year -> courseAndRouteService.getCourseYearWeighting(scyd.studentCourseDetails.course.code, scyd.studentCourseDetails.sprStartAcademicYear, year)
 				}
 				if (markPerYear.exists { case (_, possibleMark) => possibleMark.isLeft }) {
-					FinalYearGrade.Unknown(markPerYear.flatMap { case (_, possibleMark) => possibleMark.left.toOption }.mkString(", "))
+					FinalYearGrade.Unknown(
+						"The final overall mark cannot be calculated because there is no mark for " +
+						markPerYear.filter { case (_, possibleMark) => possibleMark.isLeft }
+							.map { case (year, _) => year }
+							.toSeq
+							.sorted
+							.map { year => s"year $year" }
+							.mkString(", ")
+					)
 				} else if (yearWeightings.exists { case (_, possibleYearWeighting) => possibleYearWeighting.isEmpty } ) {
 					FinalYearGrade.Unknown("Could not find year weightings for: %s".format(
 						yearWeightings.filter { case (_, possibleWeighting) => possibleWeighting.isEmpty }.map { case (year, _) =>
