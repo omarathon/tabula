@@ -446,6 +446,14 @@
 
 		$('#examGridContainer').css('opacity', 1);
 		$('#examGridSpinner').hide();
+
+		$('.use-popover').on('shown.bs.popover', function (e) {
+			var $target = $(e.target).popover().data('bs.popover').tip();
+			$target.find('.use-popover').tabulaPopover({
+				trigger: 'click',
+				container: 'body'
+			});
+		});
 	});
 </script>
 
