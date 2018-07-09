@@ -37,7 +37,6 @@ object ReportStudentsChoosePeriodCommand {
 
 trait ReportStudentsChoosePeriodCommandNotifications extends Notifies[StudentReport, User] {
 
-
 	override def emit(result: StudentReport): Seq[ReportStudentsChoosePeriodCommandNotification] = {
 		Seq(Notification.init(
 			new ReportStudentsChoosePeriodCommandNotification,
@@ -45,8 +44,8 @@ trait ReportStudentsChoosePeriodCommandNotifications extends Notifies[StudentRep
 			result.department
 		))
 	}
-}
 
+}
 
 class ReportStudentsChoosePeriodCommandInternal(
 	val department: Department,
@@ -145,8 +144,7 @@ trait ReportStudentsChoosePeriodCommandState extends FilterStudentsAttendanceCom
 					&& !attendanceMonitoringService.studentAlreadyReportedThisTerm(student, point)
 			)
 			StudentReportCount(student, missedAndUnreported, unrecorded)
-		}
-		}
+		}}
 	}
 
 	lazy val studentMissedReportCounts: Seq[StudentReportCount] = studentReportCounts.filter(_.missed > 0)
