@@ -6,6 +6,7 @@ import uk.ac.warwick.spring.Wire
 import uk.ac.warwick.tabula.commands._
 import uk.ac.warwick.tabula.data.model.attendance.{AttendanceMonitoringPoint, AttendanceState}
 import uk.ac.warwick.tabula.data.model._
+import uk.ac.warwick.tabula.data.model.notifications.ReportStudentsChoosePeriodCommandNotification
 import uk.ac.warwick.tabula.permissions.Permissions
 import uk.ac.warwick.tabula.services._
 import uk.ac.warwick.tabula.services.attendancemonitoring.{AttendanceMonitoringServiceComponent, AutowiringAttendanceMonitoringServiceComponent}
@@ -15,76 +16,52 @@ import uk.ac.warwick.userlookup.User
 
 case class StudentReportCount(student: StudentMember, missed: Int, unrecorded: Int)
 
+case class StudentReport(
+	studentReportCounts: Seq[StudentReportCount],
+	department: Department,
+	currentUser: User
+)
+
 object ReportStudentsChoosePeriodCommand {
-	def apply(department: Department, academicYear: AcademicYear) =
-		new ReportStudentsChoosePeriodCommandInternal(department, academicYear)
-			with ComposableCommand[Seq[StudentReportCount]]
+	def apply(department: Department, academicYear: AcademicYear, currentUser: User) =
+		new ReportStudentsChoosePeriodCommandInternal(department, academicYear, currentUser)
+			with ComposableCommand[StudentReport]
 			with AutowiringProfileServiceComponent
 			with AutowiringAttendanceMonitoringServiceComponent
 			with ReportStudentsChoosePeriodCommandNotifications
 			with ReportStudentsChoosePeriodValidation
 			with ReportStudentsChoosePeriodPermissions
 			with ReportStudentsChoosePeriodCommandState
-			with ReadOnly with Unaudited {
-		}
+			with ReadOnly with Unaudited
 }
 
-trait ReportStudentsChoosePeriodCommandNotifications extends Notifies[Department, User] {
-
-	class ReportStudentsChoosePeriodCommandNotification extends Notification[Department, Unit]
-		with SingleRecipientNotification
-		with SingleItemNotification[Department]
-		with MyWarwickNotification {
-
-		@transient
-		val templateLocation = "/WEB-INF/freemarker/emails/missed_monitoring_to_sits_email.ftl"
-
-		override def verb: String = "view"
-
-		override def title: String = "A department has uploaded missed monitoring points to SITS"
-
-		override def content: FreemarkerModel = FreemarkerModel(templateLocation, Map(
-			"agent" -> agent.getUserId,
-			"departmentName" -> item.entity.fullName,
-			"created" -> created
-		))
-
-		override def url: String = ""
-
-		override def urlTitle: String = ""
-
-		override def recipient: User = agent
-	}
-
-	//	override def emit(result: Unit) = {
-	//		// create the appropriate notification from here
-	//		???
-	//	}
-
-	@transient
-	val userLookup: UserLookupService = Wire[UserLookupService]
+trait ReportStudentsChoosePeriodCommandNotifications extends Notifies[StudentReport, User] {
 
 
-	override def emit(result: Department): Seq[ReportStudentsChoosePeriodCommandNotification] = {
+	override def emit(result: StudentReport): Seq[ReportStudentsChoosePeriodCommandNotification] = {
 		Seq(Notification.init(
 			new ReportStudentsChoosePeriodCommandNotification,
-			userLookup.getUserByUserId("studentrecords_warwick_ac_uk"),
-			result
+			result.currentUser,
+			result.department
 		))
 	}
-
-
 }
 
 
-
-class ReportStudentsChoosePeriodCommandInternal(val department: Department, val academicYear: AcademicYear)
-	extends CommandInternal[Seq[StudentReportCount]] {
+class ReportStudentsChoosePeriodCommandInternal(
+	val department: Department,
+	val academicYear: AcademicYear,
+	val currentUser: User
+) extends CommandInternal[StudentReport] {
 
 	self: ReportStudentsChoosePeriodCommandState with AttendanceMonitoringServiceComponent =>
 
-	override def applyInternal(): Seq[StudentReportCount] = {
-		studentMissedReportCounts
+	override def applyInternal(): StudentReport = {
+		StudentReport(
+			studentReportCounts = studentMissedReportCounts,
+			department = department,
+			currentUser = currentUser
+		)
 	}
 
 }
@@ -128,7 +105,7 @@ trait ReportStudentsChoosePeriodCommandState extends FilterStudentsAttendanceCom
 	}
 
 	lazy val termPoints: Map[String, Seq[AttendanceMonitoringPoint]] = benchmarkTask("termPoints") {
-		studentPointMap.values.flatten.toSeq.groupBy{ point =>
+		studentPointMap.values.flatten.toSeq.groupBy { point =>
 			academicYear.termOrVacationForDate(point.startDate).periodType.toString
 		}.mapValues(_.distinct)
 	}
@@ -168,7 +145,8 @@ trait ReportStudentsChoosePeriodCommandState extends FilterStudentsAttendanceCom
 					&& !attendanceMonitoringService.studentAlreadyReportedThisTerm(student, point)
 			)
 			StudentReportCount(student, missedAndUnreported, unrecorded)
-		}}
+		}
+		}
 	}
 
 	lazy val studentMissedReportCounts: Seq[StudentReportCount] = studentReportCounts.filter(_.missed > 0)
