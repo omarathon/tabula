@@ -2,14 +2,16 @@ package uk.ac.warwick.tabula.commands.attendance.view
 
 import org.joda.time.LocalDate
 import org.springframework.validation.Errors
+import uk.ac.warwick.spring.Wire
 import uk.ac.warwick.tabula.commands._
 import uk.ac.warwick.tabula.data.model.attendance.{AttendanceMonitoringPoint, AttendanceState}
-import uk.ac.warwick.tabula.data.model.{Department, StudentMember}
+import uk.ac.warwick.tabula.data.model._
 import uk.ac.warwick.tabula.permissions.Permissions
 import uk.ac.warwick.tabula.services._
 import uk.ac.warwick.tabula.services.attendancemonitoring.{AttendanceMonitoringServiceComponent, AutowiringAttendanceMonitoringServiceComponent}
 import uk.ac.warwick.tabula.system.permissions.{PermissionsChecking, PermissionsCheckingMethods, RequiresPermissionsChecking}
 import uk.ac.warwick.tabula.{AcademicPeriod, AcademicYear, ItemNotFoundException}
+import uk.ac.warwick.userlookup.User
 
 case class StudentReportCount(student: StudentMember, missed: Int, unrecorded: Int)
 
@@ -19,11 +21,62 @@ object ReportStudentsChoosePeriodCommand {
 			with ComposableCommand[Seq[StudentReportCount]]
 			with AutowiringProfileServiceComponent
 			with AutowiringAttendanceMonitoringServiceComponent
+			with ReportStudentsChoosePeriodCommandNotifications
 			with ReportStudentsChoosePeriodValidation
 			with ReportStudentsChoosePeriodPermissions
 			with ReportStudentsChoosePeriodCommandState
-			with ReadOnly with Unaudited
+			with ReadOnly with Unaudited {
+		}
 }
+
+trait ReportStudentsChoosePeriodCommandNotifications extends Notifies[Department, User] {
+
+	class ReportStudentsChoosePeriodCommandNotification extends Notification[Department, Unit]
+		with SingleRecipientNotification
+		with SingleItemNotification[Department]
+		with MyWarwickNotification {
+
+		@transient
+		val templateLocation = "/WEB-INF/freemarker/emails/missed_monitoring_to_sits_email.ftl"
+
+		override def verb: String = "view"
+
+		override def title: String = "A department has uploaded missed monitoring points to SITS"
+
+		override def content: FreemarkerModel = FreemarkerModel(templateLocation, Map(
+			"agent" -> agent.getUserId,
+			"departmentName" -> item.entity.fullName,
+			"created" -> created
+		))
+
+		override def url: String = ""
+
+		override def urlTitle: String = ""
+
+		override def recipient: User = agent
+	}
+
+	//	override def emit(result: Unit) = {
+	//		// create the appropriate notification from here
+	//		???
+	//	}
+
+	@transient
+	val userLookup: UserLookupService = Wire[UserLookupService]
+
+	var department: Department = _
+
+	override def emit(result: Department): Seq[ReportStudentsChoosePeriodCommandNotification] = {
+		Seq(Notification.init(
+			new ReportStudentsChoosePeriodCommandNotification,
+			userLookup.getUserByUserId("studentrecords_warwick_ac_uk"),
+			department
+		))
+	}
+
+
+}
+
 
 
 class ReportStudentsChoosePeriodCommandInternal(val department: Department, val academicYear: AcademicYear)
