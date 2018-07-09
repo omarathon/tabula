@@ -6,7 +6,7 @@
 
 	<#if !markerInformation??>
 		<div class="marker-information">
-			<p class="hint">Loading&hellip;</p>
+			<p class="hint"><i class="fa fa-spinner fa-spin"></i><em> Loading&hellip;</em></p>
 		</div>
 
 		<script type="text/javascript">
