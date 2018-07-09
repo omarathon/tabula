@@ -1,6 +1,11 @@
 <#escape x as x?html>
 
-<h1>Submit year marks</h1>
+<#function route_function dept>
+	<#local result><@routes.exams.uploadYearMarks dept academicYear /></#local>
+	<#return result />
+</#function>
+
+<@fmt.id7_deptheader title="Submit year marks for ${academicYear.toString}" route_function=route_function preposition="in" />
 
 <ul id="marks-tabs" class="nav nav-tabs">
 	<li class="active"><a href="#upload">Upload</a></li>
