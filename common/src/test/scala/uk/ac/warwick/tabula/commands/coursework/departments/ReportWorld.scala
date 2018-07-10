@@ -84,9 +84,9 @@ trait ReportWorld extends TestBase with Mockito {
 
 
 	var submissionService: SubmissionService = mock[SubmissionService]
-	submissionService.getSubmissionsByAssignment(any[Assignment]).asJava answers { assignmentObj =>
+	submissionService.getSubmissionsByAssignment(any[Assignment]) answers { assignmentObj =>
 		val assignment = assignmentObj.asInstanceOf[Assignment]
-		assignment.submissions
+		assignment.submissions.asScala
 	}
 
 
