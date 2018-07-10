@@ -2,7 +2,6 @@ package uk.ac.warwick.tabula.data
 import org.springframework.stereotype.Repository
 import uk.ac.warwick.tabula.data.model.Department
 import org.hibernate.criterion.Order
-import scala.collection.JavaConverters._
 import uk.ac.warwick.tabula.helpers.StringUtils._
 
 trait DepartmentDao {
@@ -19,8 +18,7 @@ class DepartmentDaoImpl extends DepartmentDao with Daoisms {
 	def allDepartments: Seq[Department] =
 		session.newCriteria[Department]
 			.addOrder(Order.asc("code"))
-			.list
-			.asScala
+			.seq
 			.distinct
 
 	def allRootDepartments: Seq[Department] =

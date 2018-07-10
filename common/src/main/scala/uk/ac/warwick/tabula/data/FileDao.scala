@@ -95,7 +95,7 @@ class FileDao extends Daoisms with Logging with SHAFileHasherComponent {
 				.setMaxResults(maxResults)
 				.addOrder(asc("dateUploaded"))
 				.addOrder(asc("id"))
-				.list.asScala
+				.seq
 	}
 
 	def getFilesCreatedOn(createdOn: DateTime, maxResults: Int, startingId: String): Seq[FileAttachment] = transactional(readOnly = true) {
@@ -109,7 +109,7 @@ class FileDao extends Daoisms with Logging with SHAFileHasherComponent {
 		criteria
 			.setMaxResults(maxResults)
 			.addOrder(asc("id"))
-			.list.asScala
+			.seq
 	}
 
 	def getAllFileIds(createdBefore: Option[DateTime] = None): Set[String] = transactional(readOnly = true) {
