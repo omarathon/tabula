@@ -2,37 +2,65 @@ package uk.ac.warwick.tabula.commands.attendance.view
 
 import org.joda.time.LocalDate
 import org.springframework.validation.Errors
+import uk.ac.warwick.spring.Wire
 import uk.ac.warwick.tabula.commands._
 import uk.ac.warwick.tabula.data.model.attendance.{AttendanceMonitoringPoint, AttendanceState}
-import uk.ac.warwick.tabula.data.model.{Department, StudentMember}
+import uk.ac.warwick.tabula.data.model._
+import uk.ac.warwick.tabula.data.model.notifications.ReportStudentsChoosePeriodCommandNotification
 import uk.ac.warwick.tabula.permissions.Permissions
 import uk.ac.warwick.tabula.services._
 import uk.ac.warwick.tabula.services.attendancemonitoring.{AttendanceMonitoringServiceComponent, AutowiringAttendanceMonitoringServiceComponent}
 import uk.ac.warwick.tabula.system.permissions.{PermissionsChecking, PermissionsCheckingMethods, RequiresPermissionsChecking}
 import uk.ac.warwick.tabula.{AcademicPeriod, AcademicYear, ItemNotFoundException}
+import uk.ac.warwick.userlookup.User
 
 case class StudentReportCount(student: StudentMember, missed: Int, unrecorded: Int)
 
+case class StudentReport(
+	studentReportCounts: Seq[StudentReportCount],
+	department: Department,
+	currentUser: User
+)
+
 object ReportStudentsChoosePeriodCommand {
-	def apply(department: Department, academicYear: AcademicYear) =
-		new ReportStudentsChoosePeriodCommandInternal(department, academicYear)
-			with ComposableCommand[Seq[StudentReportCount]]
+	def apply(department: Department, academicYear: AcademicYear, currentUser: User) =
+		new ReportStudentsChoosePeriodCommandInternal(department, academicYear, currentUser)
+			with ComposableCommand[StudentReport]
 			with AutowiringProfileServiceComponent
 			with AutowiringAttendanceMonitoringServiceComponent
+			with ReportStudentsChoosePeriodCommandNotifications
 			with ReportStudentsChoosePeriodValidation
 			with ReportStudentsChoosePeriodPermissions
 			with ReportStudentsChoosePeriodCommandState
 			with ReadOnly with Unaudited
 }
 
+trait ReportStudentsChoosePeriodCommandNotifications extends Notifies[StudentReport, User] {
 
-class ReportStudentsChoosePeriodCommandInternal(val department: Department, val academicYear: AcademicYear)
-	extends CommandInternal[Seq[StudentReportCount]] {
+	override def emit(result: StudentReport): Seq[ReportStudentsChoosePeriodCommandNotification] = {
+		Seq(Notification.init(
+			new ReportStudentsChoosePeriodCommandNotification,
+			result.currentUser,
+			result.department
+		))
+	}
+
+}
+
+class ReportStudentsChoosePeriodCommandInternal(
+	val department: Department,
+	val academicYear: AcademicYear,
+	val currentUser: User
+) extends CommandInternal[StudentReport] {
 
 	self: ReportStudentsChoosePeriodCommandState with AttendanceMonitoringServiceComponent =>
 
-	override def applyInternal(): Seq[StudentReportCount] = {
-		studentMissedReportCounts
+	override def applyInternal(): StudentReport = {
+		StudentReport(
+			studentReportCounts = studentMissedReportCounts,
+			department = department,
+			currentUser = currentUser
+		)
 	}
 
 }
@@ -76,7 +104,7 @@ trait ReportStudentsChoosePeriodCommandState extends FilterStudentsAttendanceCom
 	}
 
 	lazy val termPoints: Map[String, Seq[AttendanceMonitoringPoint]] = benchmarkTask("termPoints") {
-		studentPointMap.values.flatten.toSeq.groupBy{ point =>
+		studentPointMap.values.flatten.toSeq.groupBy { point =>
 			academicYear.termOrVacationForDate(point.startDate).periodType.toString
 		}.mapValues(_.distinct)
 	}

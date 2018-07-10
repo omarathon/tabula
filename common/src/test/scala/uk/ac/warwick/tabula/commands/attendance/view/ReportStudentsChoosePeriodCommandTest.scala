@@ -9,6 +9,7 @@ import uk.ac.warwick.tabula.data.{ScalaOrder, ScalaRestriction}
 import uk.ac.warwick.tabula.services._
 import uk.ac.warwick.tabula.services.attendancemonitoring.{AttendanceMonitoringService, AttendanceMonitoringServiceComponent}
 import uk.ac.warwick.tabula.{AcademicYear, Fixtures, Mockito, TestBase}
+import uk.ac.warwick.userlookup.User
 import uk.ac.warwick.util.termdates.AcademicYearPeriod.PeriodType
 
 class ReportStudentsChoosePeriodCommandTest extends TestBase with Mockito {
@@ -25,6 +26,8 @@ class ReportStudentsChoosePeriodCommandTest extends TestBase with Mockito {
 		val student2: StudentMember = Fixtures.student("2345", "2345")
 		student2.lastName = "Smith"
 		student2.firstName = "Bob"
+
+		val currentUser: User = Fixtures.user("1574575", "u1574575")
 
 		val point1: AttendanceMonitoringPoint = Fixtures.attendanceMonitoringPoint(null)
 		point1.startDate = new LocalDate(2013, 10, 1)
@@ -43,7 +46,7 @@ class ReportStudentsChoosePeriodCommandTest extends TestBase with Mockito {
 			val academicYear = AcademicYear(2013)
 		}
 
-		val command = new ReportStudentsChoosePeriodCommandInternal(Fixtures.department("its"),  AcademicYear(2013)) with ReportStudentsChoosePeriodCommandState with TestSupport
+		val command = new ReportStudentsChoosePeriodCommandInternal(Fixtures.department("its"),  AcademicYear(2013), currentUser) with ReportStudentsChoosePeriodCommandState with TestSupport
 	}
 
 	@Test
@@ -172,8 +175,8 @@ class ReportStudentsChoosePeriodCommandTest extends TestBase with Mockito {
 		val student1point2missed: AttendanceMonitoringCheckpoint = Fixtures.attendanceMonitoringCheckpoint(point2, student1, AttendanceState.MissedUnauthorised)
 		command.period = PeriodType.autumnTerm.toString
 		command.attendanceMonitoringService.getCheckpoints(Seq(point1), command.allStudents) returns Map(student1 -> Map(point1 -> student1point1missed, point2 -> student1point2missed))
-		val result: Seq[StudentReportCount] = command.applyInternal()
-		result.size should be (1)
-		result.head.missed should be (1)
+		val result: StudentReport = command.applyInternal()
+		result.studentReportCounts.size should be (1)
+		result.studentReportCounts.head.missed should be (1)
 	}}
 }
