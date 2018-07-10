@@ -3,7 +3,7 @@ package uk.ac.warwick.tabula.data.model
 import org.joda.time.{DateTime, DateTimeConstants}
 import uk.ac.warwick.tabula.{Fixtures, PersistenceTestBase}
 
-import scala.collection.JavaConversions._
+import scala.collection.JavaConverters._
 
 // scalastyle:off magic.number
 class MeetingRecordTest extends PersistenceTestBase {
@@ -31,7 +31,7 @@ class MeetingRecordTest extends PersistenceTestBase {
 			meetingRecord.id = idFormat(2)
 
 			val attachment = new FileAttachment
-			meetingRecord.attachments = List(attachment)
+			meetingRecord.attachments = List(attachment).asJava
 
 			session.save(meetingRecord)
 			(meetingRecord, attachment)

@@ -1,6 +1,6 @@
 package uk.ac.warwick.tabula.data.model
 
-import scala.collection.JavaConversions._
+import scala.collection.JavaConverters._
 import org.joda.time.DateTime
 import javax.persistence._
 import org.hibernate.annotations.{BatchSize, Fetch, FetchMode, Type}
@@ -146,12 +146,12 @@ class MarkerFeedback extends GeneratedId
 	}
 
 	def getValue(field: FormField): Option[SavedFormValue] = {
-		customFormValues.find( _.name == field.name )
+		customFormValues.asScala.find( _.name == field.name )
 	}
 
-	def comments: Option[String] = customFormValues.find(_.name == Assignment.defaultFeedbackTextFieldName).map(_.value)
+	def comments: Option[String] = customFormValues.asScala.find(_.name == Assignment.defaultFeedbackTextFieldName).map(_.value)
 	def comments_=(value: String) {
-		customFormValues
+		customFormValues.asScala
 			.find(_.name == Assignment.defaultFeedbackTextFieldName)
 			.getOrElse({
 				val newValue = new SavedFormValue()
@@ -177,7 +177,7 @@ class MarkerFeedback extends GeneratedId
 
 	def hasFeedback: Boolean = attachments != null && attachments.size() > 0
 
-	def hasComments: Boolean = customFormValues.exists(_.value != null)
+	def hasComments: Boolean = customFormValues.asScala.exists(_.value != null)
 
 	def readyForNextStage: Boolean = hasContent && outstanding
 

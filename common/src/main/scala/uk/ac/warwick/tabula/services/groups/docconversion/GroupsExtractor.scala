@@ -2,7 +2,7 @@ package uk.ac.warwick.tabula.services.groups.docconversion
 
 import uk.ac.warwick.spring.Wire
 
-import scala.collection.JavaConversions._
+import scala.collection.JavaConverters._
 import org.apache.poi.openxml4j.opc.OPCPackage
 import org.apache.poi.xssf.eventusermodel.{ReadOnlySharedStringsTable, XSSFReader}
 import org.springframework.stereotype.Service
@@ -45,7 +45,7 @@ class GroupsExtractorImpl extends GroupsExtractor {
 		val sheetHandler = new XslxSheetHandler(styles, sst, allocateStudentItems)
 		val parser = sheetHandler.fetchSheetParser
 
-		for (sheet <- reader.getSheetsData) {
+		for (sheet <- reader.getSheetsData.asScala) {
 			val sheetSource = new InputSource(sheet)
 			parser.parse(sheetSource)
 			sheet.close()

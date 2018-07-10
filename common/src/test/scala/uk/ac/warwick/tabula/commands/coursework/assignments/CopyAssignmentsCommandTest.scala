@@ -2,7 +2,7 @@ package uk.ac.warwick.tabula.commands.coursework.assignments
 
 import uk.ac.warwick.tabula.data.model.forms.{MarkerSelectField, WordCountField}
 
-import scala.collection.JavaConversions._
+import scala.collection.JavaConverters._
 import uk.ac.warwick.tabula._
 import uk.ac.warwick.tabula.services._
 import uk.ac.warwick.tabula.data.model._
@@ -49,9 +49,9 @@ class CopyAssignmentsCommandTest extends TestBase with Mockito {
 	def commandApply() {
 		new Fixture {
 			val command = new CopyAssignmentsCommand(department, Seq(module)) with CommandTestSupport
-			command.assignments = Seq(assignment)
+			command.assignments = Seq(assignment).asJava
 			command.archive = true
-			val newAssignment: Assignment = command.applyInternal().get(0)
+			val newAssignment: Assignment = command.applyInternal().head
 
 			verify(command.assessmentService, times(1)).save(assignment)
 			verify(command.assessmentService, times(1)).save(newAssignment)
@@ -63,9 +63,9 @@ class CopyAssignmentsCommandTest extends TestBase with Mockito {
 		new Fixture with FindAssignmentFields {
 			withFakeTime(fakeDate) {
 				val command = new CopyAssignmentsCommand(department, Seq(module)) with CommandTestSupport
-				command.assignments = Seq(assignment)
+				command.assignments = Seq(assignment).asJava
 				command.archive = true
-				val newAssignment = command.applyInternal().get(0)
+				val newAssignment = command.applyInternal().head
 
 				assignment.isAlive should be {false}
 				newAssignment.academicYear.toString should be("13/14")
@@ -91,7 +91,7 @@ class CopyAssignmentsCommandTest extends TestBase with Mockito {
 	@Test def guessSitsLinks() {
 		new Fixture {
 			val command = new CopyAssignmentsCommand(department, Seq(module)) with CommandTestSupport
-			command.assignments = Seq(assignment)
+			command.assignments = Seq(assignment).asJava
 			command.academicYear = AcademicYear.parse("13/14")
 
 			val ag1: AssessmentGroup = {
@@ -140,7 +140,7 @@ class CopyAssignmentsCommandTest extends TestBase with Mockito {
 					None
 			}
 
-			val newAssignment: Assignment = command.applyInternal().get(0)
+			val newAssignment: Assignment = command.applyInternal().head
 			newAssignment.assessmentGroups.size should be (1)
 
 			val link: AssessmentGroup = newAssignment.assessmentGroups.get(0)
@@ -154,8 +154,8 @@ class CopyAssignmentsCommandTest extends TestBase with Mockito {
 	def copyDefaultFields() {
 		new Fixture with FindAssignmentFields {
 			val command = new CopyAssignmentsCommand(department, Seq(module)) with CommandTestSupport
-			command.assignments = Seq(assignment)
-			val newAssignment: Assignment = command.applyInternal().get(0)
+			command.assignments = Seq(assignment).asJava
+			val newAssignment: Assignment = command.applyInternal().head
 
 			findCommentField(newAssignment).get.value should be ("")
 			findFileField(newAssignment).get.attachmentLimit should be (1)
@@ -182,8 +182,8 @@ class CopyAssignmentsCommandTest extends TestBase with Mockito {
 			findFileField(assignment).get.attachmentTypes = Seq(".hateherons")
 			findFileField(assignment).get.individualFileSizeLimit = 100
 			val command = new CopyAssignmentsCommand(department, Seq(module)) with CommandTestSupport
-			command.assignments = Seq(assignment)
-			val newAssignment: Assignment = command.applyInternal().get(0)
+			command.assignments = Seq(assignment).asJava
+			val newAssignment: Assignment = command.applyInternal().head
 
 			findCommentField(newAssignment).get.value should be (extremeHeronRant)
 			findFileField(newAssignment).get.attachmentLimit should be (9999)
@@ -203,9 +203,9 @@ class CopyAssignmentsCommandTest extends TestBase with Mockito {
 			assignment.markingWorkflow = studentChooseWorkflow
 			assignment.addField(new MarkerSelectField)
 			val command = new CopyAssignmentsCommand(department, Seq(module)) with CommandTestSupport
-			command.assignments = Seq(assignment)
+			command.assignments = Seq(assignment).asJava
 
-			val newAssignment: Assignment = command.applyInternal().get(0)
+			val newAssignment: Assignment = command.applyInternal().head
 			newAssignment.fields.asScala.exists{
 				case f: MarkerSelectField => true
 					case _ => false

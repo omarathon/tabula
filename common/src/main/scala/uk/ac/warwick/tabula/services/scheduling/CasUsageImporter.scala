@@ -11,7 +11,7 @@ import org.springframework.stereotype.Service
 import uk.ac.warwick.spring.Wire
 import uk.ac.warwick.tabula.JavaImports._
 
-import scala.collection.JavaConversions._
+import scala.collection.JavaConverters._
 
 trait CasUsageImporter {
 	// cas is a confirmation of acceptance to study - this determines whether such was used to apply for a visa
@@ -28,7 +28,7 @@ class CasUsageImporterImpl extends CasUsageImporter {
 
 	def isCasUsed(universityId: String): Boolean = {
 		val earliestEndDate = DateTime.now.minusMonths(4).toDate
-		val rowCount = casUsedMappingQuery.executeByNamedParam(Map("universityId" -> universityId, "earliestEndDate" -> earliestEndDate)).head
+		val rowCount = casUsedMappingQuery.executeByNamedParam(Map("universityId" -> universityId, "earliestEndDate" -> earliestEndDate).asJava).asScala.head
 		rowCount.intValue > 0
 	}
 }

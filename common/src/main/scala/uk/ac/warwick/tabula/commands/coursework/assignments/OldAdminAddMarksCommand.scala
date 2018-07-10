@@ -14,7 +14,7 @@ import uk.ac.warwick.tabula.services._
 import uk.ac.warwick.tabula.system.permissions.{PermissionsChecking, PermissionsCheckingMethods, RequiresPermissionsChecking}
 import uk.ac.warwick.userlookup.User
 
-import scala.collection.JavaConversions._
+import scala.collection.JavaConverters._
 
 object OldAdminAddMarksCommand {
 	def apply(module: Module, assessment: Assessment, submitter: CurrentUser, gradeGenerator: GeneratesGradesFromMarks) =
@@ -81,7 +81,7 @@ class OldAdminAddMarksCommandInternal(val module: Module, val assessment: Assess
 		}
 
 
-		val markList = marks.filter(_.isValid).map{ mark =>
+		val markList = marks.asScala.filter(_.isValid).map{ mark =>
 			saveFeedback(mark.user, mark.actualMark, mark.actualGrade, mark.isModified)
 		}
 

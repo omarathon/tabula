@@ -24,7 +24,7 @@ import uk.ac.warwick.tabula.services.{AutowiringProfileServiceComponent, Profile
 import uk.ac.warwick.tabula.{AcademicYear, Features}
 import uk.ac.warwick.userlookup.User
 
-import scala.collection.JavaConversions._
+import scala.collection.JavaConverters._
 import scala.collection.JavaConverters._
 import scala.collection.immutable.IndexedSeq
 import scala.util.Try
@@ -87,8 +87,8 @@ class ProfileImporterImpl extends ProfileImporter with Logging with SitsAcademic
 						val ssoUser = users(universityId)
 
 						val sitsRows = studentInformationQuery.executeByNamedParam(
-							Map("universityId" -> universityId)
-						).toSeq
+							Map("universityId" -> universityId).asJava
+						).asScala
 						ImportStudentRowCommand(
 							info,
 							ssoUser,
@@ -108,25 +108,24 @@ class ProfileImporterImpl extends ProfileImporter with Logging with SitsAcademic
 	def membershipInfoByDepartment(department: Department): Seq[MembershipInformation] =
 		// Magic student recruitment department - get membership information directly from SITS for applicants
 		if (department.code == applicantDepartmentCode) {
-			val members = applicantQuery.execute().toSeq
+			val members = applicantQuery.execute().asScala.toSeq
 			val universityIds = members.map { _.universityId }
 
 			// Filter out people in UOW_CURRENT_MEMBERS to avoid double import
 			val universityIdsInMembership =
 				universityIds.grouped(Daoisms.MaxInClauseCount).flatMap { ids =>
-					membershipByUniversityIdQuery.executeByNamedParam(Map("universityIds" -> ids.asJavaCollection)).asScala
-						.map { _.universityId }
+					membershipByUniversityIdQuery.executeByNamedParam(Map("universityIds" -> ids.asJavaCollection).asJava).asScala.map(_.universityId)
 				}
 
 			members.filterNot { m => universityIdsInMembership.contains(m.universityId) }.map { member => MembershipInformation(member) }
 		} else {
-			membershipByDepartmentQuery.executeByNamedParam(Map("departmentCode" -> department.code.toUpperCase)).toSeq map { member =>
+			membershipByDepartmentQuery.executeByNamedParam(Map("departmentCode" -> department.code.toUpperCase).asJava).asScala.map { member =>
 				MembershipInformation(member)
 			}
 		}
 
 	def membershipInfoForIndividual(universityId: String): Option[MembershipInformation] = {
-		membershipByUniversityIdQuery.executeByNamedParam(Map("universityIds" -> universityId)).asScala.toList match {
+		membershipByUniversityIdQuery.executeByNamedParam(Map("universityIds" -> universityId).asJava).asScala.toList match {
 			case Nil => None
 			case mem: List[MembershipMember] => Some (
 					MembershipInformation(

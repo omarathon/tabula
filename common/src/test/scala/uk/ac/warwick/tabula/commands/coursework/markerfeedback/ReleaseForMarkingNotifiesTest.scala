@@ -10,7 +10,7 @@ import uk.ac.warwick.tabula.services.{UserLookupComponent, UserLookupService}
 import uk.ac.warwick.tabula.{Mockito, TestBase}
 import uk.ac.warwick.userlookup.User
 
-import scala.collection.JavaConversions._
+import scala.collection.JavaConverters._
 
 
 class ReleaseForMarkingNotifiesTest extends TestBase with Mockito {
@@ -30,7 +30,7 @@ class ReleaseForMarkingNotifiesTest extends TestBase with Mockito {
 		testAssignment.firstMarkers = Seq(
 			FirstMarkersMap(testAssignment, "marker1", m1UserGroup),
 			FirstMarkersMap(testAssignment, "marker2", m2UserGroup)
-		)
+		).asJava
 
 		val (f1, mf1) = makeMarkerFeedback(student1)(MarkingNotificationFixture.FirstMarkerLink)
 		val (f2, mf2) = makeMarkerFeedback(student2)(MarkingNotificationFixture.FirstMarkerLink)
@@ -42,7 +42,7 @@ class ReleaseForMarkingNotifiesTest extends TestBase with Mockito {
 			val user: User = marker1
 			val assignment: Assignment = testAssignment
 			val module = new Module
-			newReleasedFeedback = List(mf1, mf2, mf3, mf4)
+			newReleasedFeedback = List(mf1, mf2, mf3, mf4).asJava
 			var userLookup: UserLookupService = mockUserLookup
 		}
 

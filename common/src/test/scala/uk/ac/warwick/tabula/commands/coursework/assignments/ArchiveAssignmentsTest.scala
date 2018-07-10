@@ -1,6 +1,6 @@
 package uk.ac.warwick.tabula.commands.coursework.assignments
 
-import scala.collection.JavaConversions._
+import scala.collection.JavaConverters._
 import uk.ac.warwick.tabula.{Mockito, TestBase}
 import uk.ac.warwick.tabula.services._
 import uk.ac.warwick.tabula.data.model.{Assignment, Department, Module}
@@ -27,7 +27,7 @@ class ArchiveAssignmentsTest  extends TestBase with Mockito {
 		new Fixture {
 			val command = new ArchiveAssignmentsCommand(department, Seq(module)) with CommandTestSupport
 
-			command.assignments = Seq(assignment)
+			command.assignments = Seq(assignment).asJava
 			assignment.isAlive should be(false)
 			command.applyInternal()
 			verify(command.assessmentService, times(1)).save(assignment)

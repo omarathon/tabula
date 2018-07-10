@@ -10,7 +10,7 @@ import org.springframework.stereotype.Service
 import uk.ac.warwick.spring.Wire
 import uk.ac.warwick.tabula.JavaImports._
 
-import scala.collection.JavaConversions._
+import scala.collection.JavaConverters._
 
 trait Tier4VisaImporter {
 
@@ -26,8 +26,8 @@ class Tier4VisaImporterImpl extends Tier4VisaImporter {
 	lazy val tier4VisaMappingQuery = new Tier4VisaMappingQuery(sits)
 
 	def hasTier4Visa(universityId: String): Boolean = {
-		val rowCount = tier4VisaMappingQuery.executeByNamedParam(Map("universityId" -> universityId)).head
-		(rowCount.intValue() > 0)
+		val rowCount = tier4VisaMappingQuery.executeByNamedParam(Map("universityId" -> universityId).asJava).asScala.head
+		rowCount.intValue() > 0
 	}
 }
 

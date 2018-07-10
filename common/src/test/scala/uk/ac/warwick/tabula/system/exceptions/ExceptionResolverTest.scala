@@ -1,6 +1,6 @@
 package uk.ac.warwick.tabula.system.exceptions
 
-import scala.collection.JavaConversions._
+import scala.collection.JavaConverters._
 import uk.ac.warwick.tabula.TestBase
 import uk.ac.warwick.tabula.PermissionDeniedException
 import uk.ac.warwick.tabula.RequestInfo
@@ -27,7 +27,7 @@ class ExceptionResolverTest extends TestBase {
 		viewMappings = Map(
 			classOf[ItemNotFoundException].getName -> "could-not-find",
 			classOf[FileUploadException].getName -> "upload-failed"
-		)
+		).asJava
 
 		override def loginUrl = "https://websignon.example.com/?target=whatever&etc"
 	}

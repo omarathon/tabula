@@ -1,6 +1,6 @@
 package uk.ac.warwick.tabula.commands.coursework.feedback
 
-import collection.JavaConversions._
+import scala.collection.JavaConverters._
 import uk.ac.warwick.tabula.TestBase
 import uk.ac.warwick.tabula.JavaImports._
 import org.junit.Test

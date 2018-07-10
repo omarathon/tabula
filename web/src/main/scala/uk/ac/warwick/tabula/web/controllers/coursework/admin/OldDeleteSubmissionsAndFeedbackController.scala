@@ -1,5 +1,5 @@
 package uk.ac.warwick.tabula.web.controllers.coursework.admin
-import scala.collection.JavaConversions._
+import scala.collection.JavaConverters._
 import org.springframework.stereotype.Controller
 import org.springframework.validation.Errors
 import org.springframework.web.bind.annotation.ModelAttribute

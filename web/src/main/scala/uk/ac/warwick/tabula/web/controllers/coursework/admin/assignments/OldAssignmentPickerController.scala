@@ -1,6 +1,6 @@
 package uk.ac.warwick.tabula.web.controllers.coursework.admin.assignments
 
-import scala.collection.JavaConversions._
+import scala.collection.JavaConverters._
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.stereotype.Controller
 import org.springframework.web.bind.annotation.PathVariable
@@ -29,7 +29,7 @@ class OldAssignmentPickerController extends OldCourseworkController {
 
 	@RequestMapping
 	def submit(cmd: AssignmentPickerCommand): JSONView = {
-		val assignmentsJson: JList[Map[String, Object]] = toJson(cmd.apply())
+		val assignmentsJson: JList[Map[String, String]] = toJson(cmd.apply()).asJava
 
 		new JSONView(assignmentsJson)
 	}

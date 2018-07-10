@@ -15,7 +15,7 @@ import uk.ac.warwick.tabula.helpers.Logging
 import uk.ac.warwick.tabula.services._
 import uk.ac.warwick.userlookup.User
 
-import scala.collection.JavaConversions._
+import scala.collection.JavaConverters._
 import scala.collection.mutable
 
 /*
@@ -80,7 +80,7 @@ class MarkingCompletedTest extends TestBase with MarkingWorkflowWorld with Mocki
 	def firstMarkerFinished() {
 		withUser("cuslaj") { new CommandFixture {
 			val students = List("9876004", "0270954", "9170726")
-			command.markerFeedback = assignment.feedbacks.filter(f => students.contains(f._universityId)).map(_.firstMarkerFeedback)
+			command.markerFeedback = assignment.feedbacks.asScala.filter(f => students.contains(f._universityId)).map(_.firstMarkerFeedback).asJava
 
 			command.onBind(null)
 
@@ -88,10 +88,10 @@ class MarkingCompletedTest extends TestBase with MarkingWorkflowWorld with Mocki
 			command.noMarks.size should be (3)
 
 			command.applyInternal()
-			val releasedFeedback: mutable.Buffer[MarkerFeedback] = assignment.feedbacks.map(_.firstMarkerFeedback).filter(_.state == MarkingState.MarkingCompleted)
+			val releasedFeedback: mutable.Buffer[MarkerFeedback] = assignment.feedbacks.asScala.map(_.firstMarkerFeedback).filter(_.state == MarkingState.MarkingCompleted)
 			releasedFeedback.size should be (3)
 
-			val secondMarkerFeedback: mutable.Buffer[MarkerFeedback] = assignment.feedbacks.flatMap(f => Option(f.secondMarkerFeedback)).filter(_.state == MarkingState.ReleasedForMarking)
+			val secondMarkerFeedback: mutable.Buffer[MarkerFeedback] = assignment.feedbacks.asScala.flatMap(f => Option(f.secondMarkerFeedback)).filter(_.state == MarkingState.ReleasedForMarking)
 			secondMarkerFeedback.size should be (3)
 		}}
 	}
@@ -103,9 +103,9 @@ class MarkingCompletedTest extends TestBase with MarkingWorkflowWorld with Mocki
 		inContext[MarkingCompletedTest.Ctx] {
 		withUser("cuday") { new CommandFixture {
 			val students = List("0672088", "0672089")
-			assignment.feedbacks.foreach(addMarkerFeedback(_, SecondFeedback))
-			val feedbacks: mutable.Buffer[AssignmentFeedback] = assignment.feedbacks.filter(f => students.contains(f._universityId))
-			command.markerFeedback = feedbacks.map(_.secondMarkerFeedback)
+			assignment.feedbacks.asScala.foreach(addMarkerFeedback(_, SecondFeedback))
+			val feedbacks: mutable.Buffer[AssignmentFeedback] = assignment.feedbacks.asScala.filter(f => students.contains(f._universityId))
+			command.markerFeedback = feedbacks.map(_.secondMarkerFeedback).asJava
 			setFirstMarkerFeedbackState(MarkingState.MarkingCompleted)
 			command.onBind(null)
 
@@ -114,15 +114,15 @@ class MarkingCompletedTest extends TestBase with MarkingWorkflowWorld with Mocki
 
 			command.applyInternal()
 
-			val firstFeedback: mutable.Buffer[MarkerFeedback] = assignment.feedbacks.flatMap(f => Option(f.firstMarkerFeedback))
+			val firstFeedback: mutable.Buffer[MarkerFeedback] = assignment.feedbacks.asScala.flatMap(f => Option(f.firstMarkerFeedback))
 			val completedFirstMarking: mutable.Buffer[MarkerFeedback] = firstFeedback.filter(_.state == MarkingState.MarkingCompleted)
 			completedFirstMarking.size should be (5)
 
-			val secondFeedback: mutable.Buffer[MarkerFeedback] = assignment.feedbacks.flatMap(f => Option(f.secondMarkerFeedback))
+			val secondFeedback: mutable.Buffer[MarkerFeedback] = assignment.feedbacks.asScala.flatMap(f => Option(f.secondMarkerFeedback))
 			val completedSecondMarking: mutable.Buffer[MarkerFeedback] = secondFeedback.filter(_.state == MarkingState.MarkingCompleted)
 			completedSecondMarking.size should be (2)
 
-			val finalFeedback: mutable.Buffer[MarkerFeedback] = assignment.feedbacks.flatMap(f => Option(f.thirdMarkerFeedback)).filter(_.state == MarkingState.ReleasedForMarking)
+			val finalFeedback: mutable.Buffer[MarkerFeedback] = assignment.feedbacks.asScala.flatMap(f => Option(f.thirdMarkerFeedback)).filter(_.state == MarkingState.ReleasedForMarking)
 			finalFeedback.size should be (2)
 		}}}
 	}
@@ -132,14 +132,14 @@ class MarkingCompletedTest extends TestBase with MarkingWorkflowWorld with Mocki
 	def finalMarkingComplete() {
 		inContext[MarkingCompletedTest.Ctx] {
 			withUser("cuslaj") { new CommandFixture {
-				assignment.feedbacks.foreach(addMarkerFeedback(_, ThirdFeedback))
-				assignment.feedbacks.foreach(addMarkerFeedback(_, SecondFeedback))
+				assignment.feedbacks.asScala.foreach(addMarkerFeedback(_, ThirdFeedback))
+				assignment.feedbacks.asScala.foreach(addMarkerFeedback(_, SecondFeedback))
 				setFinalMarkerFeedbackState(MarkingState.InProgress)
 				setFirstMarkerFeedbackState(MarkingState.MarkingCompleted)
 				setSecondMarkerFeedbackState(MarkingState.MarkingCompleted)
 
 				val students = List("9876004", "0270954", "9170726")
-				command.markerFeedback = assignment.feedbacks.filter(f => students.contains(f._universityId)).map(_.thirdMarkerFeedback)
+				command.markerFeedback = assignment.feedbacks.asScala.filter(f => students.contains(f._universityId)).map(_.thirdMarkerFeedback).asJava
 
 				command.onBind(null)
 
@@ -149,15 +149,15 @@ class MarkingCompletedTest extends TestBase with MarkingWorkflowWorld with Mocki
 
 				command.applyInternal()
 
-				val firstFeedback: mutable.Buffer[MarkerFeedback] = assignment.feedbacks.flatMap(f => Option(f.firstMarkerFeedback))
+				val firstFeedback: mutable.Buffer[MarkerFeedback] = assignment.feedbacks.asScala.flatMap(f => Option(f.firstMarkerFeedback))
 				val completedFirstMarking: mutable.Buffer[MarkerFeedback] = firstFeedback.filter(_.state == MarkingState.MarkingCompleted)
 				completedFirstMarking.size should be(5)
 
-				val secondFeedback: mutable.Buffer[MarkerFeedback] = assignment.feedbacks.flatMap(f => Option(f.secondMarkerFeedback))
+				val secondFeedback: mutable.Buffer[MarkerFeedback] = assignment.feedbacks.asScala.flatMap(f => Option(f.secondMarkerFeedback))
 				val completedSecondMarking: mutable.Buffer[MarkerFeedback] = secondFeedback.filter(_.state == MarkingState.MarkingCompleted)
 				completedSecondMarking.size should be(5)
 
-				val releasedFeedback: mutable.Buffer[MarkerFeedback] = assignment.feedbacks.map(_.thirdMarkerFeedback).filter(_.state == MarkingState.MarkingCompleted)
+				val releasedFeedback: mutable.Buffer[MarkerFeedback] = assignment.feedbacks.asScala.map(_.thirdMarkerFeedback).filter(_.state == MarkingState.MarkingCompleted)
 				releasedFeedback.size should be(3)
 			}
 		}}
@@ -179,7 +179,7 @@ class MarkingCompletedTest extends TestBase with MarkingWorkflowWorld with Mocki
 		testAssignment.secondMarkers = Seq(
 			SecondMarkersMap(testAssignment, "marker2", m2UserGroup),
 			SecondMarkersMap(testAssignment, "marker3", m3UserGroup)
-		)
+		).asJava
 
 		val (f1, mf1) = makeMarkerFeedback(student1)(MarkingNotificationFixture.SecondMarkerLink)
 		val (f2, mf2) = makeMarkerFeedback(student2)(MarkingNotificationFixture.SecondMarkerLink)
@@ -191,7 +191,7 @@ class MarkingCompletedTest extends TestBase with MarkingWorkflowWorld with Mocki
 			val submitter = new CurrentUser(marker1, marker1)
 			val assignment: Assignment = testAssignment
 			val module = new Module
-			newReleasedFeedback = List(mf1, mf2, mf3, mf4)
+			newReleasedFeedback = List(mf1, mf2, mf3, mf4).asJava
 			var userLookup: UserLookupService = mockUserLookup
 		}
 

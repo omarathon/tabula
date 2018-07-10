@@ -1,6 +1,6 @@
 package uk.ac.warwick.tabula.data.model.permissions
 
-import scala.collection.JavaConversions._
+import scala.collection.JavaConverters._
 import org.hibernate.annotations.{BatchSize, Type}
 import javax.persistence._
 import uk.ac.warwick.tabula.JavaImports._
@@ -77,7 +77,7 @@ class CustomRoleDefinition extends RoleDefinition with HibernateVersioned with G
 	def permissions(scope: Option[PermissionsTarget]): Map[Permission, Option[PermissionsTarget]] = {
 		val basePermissions = baseRoleDefinition.allPermissions(scope)
 
-		val (additionOverrides, removalOverrides) = overrides.partition(_.overrideType)
+		val (additionOverrides, removalOverrides) = overrides.asScala.partition(_.overrideType)
 		val additions = additionOverrides.map { _.permission -> scope }
 		val removals = removalOverrides.map { _.permission }
 
@@ -94,8 +94,8 @@ class CustomRoleDefinition extends RoleDefinition with HibernateVersioned with G
 
 	def mayGrant(target: Permission): Boolean = {
 		val baseGrants = baseRoleDefinition.mayGrant(target)
-		val explicitDeny = (overrides.exists { o => o.overrideType == RoleOverride.Deny && o.permission == target})
-		val explicitGrant = (overrides.exists { o => o.overrideType == RoleOverride.Allow && o.permission == target})
+		val explicitDeny = overrides.asScala.exists { o => o.overrideType == RoleOverride.Deny && o.permission == target}
+		val explicitGrant = overrides.asScala.exists { o => o.overrideType == RoleOverride.Allow && o.permission == target}
 
 		(baseGrants || explicitGrant) && !explicitDeny
 	}

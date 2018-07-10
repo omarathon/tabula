@@ -3,7 +3,7 @@ package uk.ac.warwick.tabula.validators
 import uk.ac.warwick.tabula.TestBase
 import uk.ac.warwick.tabula.MockUserLookup
 import org.springframework.validation.BindException
-import scala.collection.JavaConversions._
+import scala.collection.JavaConverters._
 
 class UsercodeListValidatorTest extends TestBase {
 
@@ -17,7 +17,7 @@ class UsercodeListValidatorTest extends TestBase {
 		val userLookup = new MockUserLookup
 		userLookup.registerUsers("cuscav", "cusebr")
 
-		val validator = new UsercodeListValidator(List("cuscav", "cusebr"), "usercodes")
+		val validator = new UsercodeListValidator(List("cuscav", "cusebr").asJava, "usercodes")
 		validator.userLookup = userLookup
 
 		validator.validate(errors)
@@ -31,7 +31,7 @@ class UsercodeListValidatorTest extends TestBase {
 		val userLookup = new MockUserLookup
 		userLookup.registerUsers("cuscav", "cusebr")
 
-		val validator = new UsercodeListValidator(List(""), "usercodes")
+		val validator = new UsercodeListValidator(List("").asJava, "usercodes")
 		validator.userLookup = userLookup
 
 		validator.validate(errors)
@@ -48,7 +48,7 @@ class UsercodeListValidatorTest extends TestBase {
 		val userLookup = new MockUserLookup
 		userLookup.registerUsers("cuscav", "cusebr")
 
-		val validator = new UsercodeListValidator(List("cuscav", "cusebr"), "usercodes") {
+		val validator = new UsercodeListValidator(List("cuscav", "cusebr").asJava, "usercodes") {
 			override def alreadyHasCode = true
 		}
 
@@ -68,7 +68,7 @@ class UsercodeListValidatorTest extends TestBase {
 		val userLookup = new MockUserLookup
 		userLookup.registerUsers("cuscav") // cusebr is not found
 
-		val validator = new UsercodeListValidator(List("cuscav", "cusebr"), "usercodes")
+		val validator = new UsercodeListValidator(List("cuscav", "cusebr").asJava, "usercodes")
 		validator.userLookup = userLookup
 
 		validator.validate(errors)

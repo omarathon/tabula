@@ -4,7 +4,7 @@ import com.fasterxml.jackson.databind.ObjectMapper
 import org.junit.Test
 import com.fasterxml.jackson.module.scala.DefaultScalaModule
 import java.io.StringReader
-import collection.JavaConversions._
+import scala.collection.JavaConverters._
 import uk.ac.warwick.tabula.JavaImports._
 import org.joda.time.{DateTimeZone, Chronology, LocalDate, DateTime}
 import scala.beans.BeanProperty

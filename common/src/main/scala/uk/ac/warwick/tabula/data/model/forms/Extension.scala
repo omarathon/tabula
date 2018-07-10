@@ -20,7 +20,7 @@ import uk.ac.warwick.tabula.system.TwoWayConverter
 import uk.ac.warwick.userlookup.User
 import uk.ac.warwick.util.workingdays.WorkingDaysHelperImpl
 
-import scala.collection.JavaConversions._
+import scala.collection.JavaConverters._
 
 @Entity @Access(AccessType.FIELD)
 class Extension extends GeneratedId with PermissionsTarget with ToEntityReference {
@@ -97,7 +97,7 @@ class Extension extends GeneratedId with PermissionsTarget with ToEntityReferenc
 	@BatchSize(size = 200)
 	var attachments: JSet[FileAttachment] = JSet()
 
-	def nonEmptyAttachments: Seq[FileAttachment] = attachments.toSeq filter(_.hasData)
+	def nonEmptyAttachments: Seq[FileAttachment] = attachments.asScala.toSeq.filter(_.hasData)
 
 	def addAttachment(attachment: FileAttachment) {
 		if (attachment.isAttached) throw new IllegalArgumentException("File already attached to another object")

@@ -6,7 +6,7 @@ import org.joda.time._
 import org.joda.time.format.DateTimeFormat
 import uk.ac.warwick.tabula.JavaImports._
 
-import scala.collection.JavaConversions._
+import scala.collection.JavaConverters._
 
 object DateBuilder {
 
@@ -75,7 +75,7 @@ class DateBuilder extends TemplateMethodModelEx {
 
 	/** For Freemarker */
 	override def exec(list: JList[_]): String = {
-		val args = list.toSeq.map { model => DeepUnwrap.unwrap(model.asInstanceOf[TemplateModel]) }
+		val args = list.asScala.map { model => DeepUnwrap.unwrap(model.asInstanceOf[TemplateModel]) }
 
 		val date = args.head match {
 			case partial: LocalDate => partial.toDateTimeAtStartOfDay

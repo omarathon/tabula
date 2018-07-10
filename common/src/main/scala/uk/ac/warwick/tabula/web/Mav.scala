@@ -1,6 +1,6 @@
 package uk.ac.warwick.tabula.web
 
-import scala.collection.JavaConversions._
+import scala.collection.JavaConverters._
 import scala.collection.mutable
 import org.springframework.web.servlet.ModelAndView
 import org.springframework.web.servlet.View
@@ -129,7 +129,7 @@ class Mav() {
 
 	def toModelAndView: ModelAndView = {
 		val mav = if (view != null) new ModelAndView(view) else new ModelAndView(viewName)
-		mav.addAllObjects(toModel)
+		mav.addAllObjects(toModel.asJava)
 		mav
 	}
 

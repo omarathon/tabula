@@ -4,7 +4,7 @@ import uk.ac.warwick.tabula.TestBase
 import org.junit.Test
 import org.joda.time.DateTime
 import org.joda.time.DateTimeZone
-import collection.JavaConversions._
+import scala.collection.JavaConverters._
 import uk.ac.warwick.tabula.web.views.FreemarkerRendering
 import org.joda.time.LocalTime
 

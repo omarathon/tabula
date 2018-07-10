@@ -3,7 +3,7 @@ package uk.ac.warwick.tabula.services.groups.docconversion
 import org.apache.poi.xssf.model.StylesTable
 import org.xml.sax.helpers.XMLReaderFactory
 
-import scala.collection.JavaConversions._
+import scala.collection.JavaConverters._
 import uk.ac.warwick.tabula.JavaImports._
 import uk.ac.warwick.tabula.helpers.Logging
 import org.apache.poi.xssf.eventusermodel.{ReadOnlySharedStringsTable, XSSFSheetXMLHandler}
@@ -47,7 +47,7 @@ class XslxSheetHandler(var styles: StylesTable, var sst: ReadOnlySharedStringsTa
 	override def cell(cellReference: String, formattedValue: String, comment: XSSFComment){
 		val col = new CellReference(cellReference).getCol
 		if (isFirstRow) columnMap(col) = formattedValue
-		else if (columnMap.containsKey(col)) {
+		else if (columnMap.asJava.containsKey(col)) {
 			columnMap(col) match {
 				case "student_id" => {
 					if (formattedValue.hasText) {

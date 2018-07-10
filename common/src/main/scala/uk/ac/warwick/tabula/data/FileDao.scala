@@ -18,7 +18,7 @@ import uk.ac.warwick.tabula.services.objectstore.ObjectStorageService
 import uk.ac.warwick.util.files.hash.FileHasher
 import uk.ac.warwick.util.files.hash.impl.SHAFileHasher
 
-import scala.collection.JavaConversions._
+import scala.collection.JavaConverters._
 
 trait FileDaoComponent {
 	def fileDao: FileDao
@@ -95,7 +95,7 @@ class FileDao extends Daoisms with Logging with SHAFileHasherComponent {
 				.setMaxResults(maxResults)
 				.addOrder(asc("dateUploaded"))
 				.addOrder(asc("id"))
-				.list
+				.list.asScala
 	}
 
 	def getFilesCreatedOn(createdOn: DateTime, maxResults: Int, startingId: String): Seq[FileAttachment] = transactional(readOnly = true) {
@@ -109,7 +109,7 @@ class FileDao extends Daoisms with Logging with SHAFileHasherComponent {
 		criteria
 			.setMaxResults(maxResults)
 			.addOrder(asc("id"))
-			.list
+			.list.asScala
 	}
 
 	def getAllFileIds(createdBefore: Option[DateTime] = None): Set[String] = transactional(readOnly = true) {
@@ -137,7 +137,7 @@ class FileDao extends Daoisms with Logging with SHAFileHasherComponent {
 		 * Trying to run a few at a time in a separate transaction so that if something
 		 * goes rubbish, there isn't too much out of sync.
 		 */
-		for (files <- oldFiles.grouped(TemporaryFileSubBatch)) deleteSomeFiles(files)
+		for (files <- oldFiles.asScala.grouped(TemporaryFileSubBatch)) deleteSomeFiles(files)
 
 		oldFiles.size
 	}
