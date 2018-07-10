@@ -12,6 +12,7 @@ import uk.ac.warwick.tabula.data.model.{Assignment, FeedbackForSits, FeedbackFor
 import uk.ac.warwick.tabula.helpers.RequestLevelCaching
 import uk.ac.warwick.tabula.helpers.cm2.WorkflowItems
 import uk.ac.warwick.tabula.helpers.StringUtils._
+import uk.ac.warwick.tabula.services.IncludeType
 
 import scala.collection.JavaConverters._
 
@@ -525,6 +526,12 @@ object CM2WorkflowStages {
 					)
 			}
 
+			lazy val isManuallyAdded: Boolean =
+				assignment.membershipInfo.items
+					.filterNot(_.extraneous)
+					.find(_.user == coursework.student)
+  				.exists(_.itemType == IncludeType)
+
 			coursework.enhancedFeedback.flatMap(_.feedbackForSits) match {
 				case Some(feedbackForSits) if feedbackForSits.status == FeedbackForSitsStatus.Failed =>
 					StageProgress(UploadMarksToSits, started = true, messageCode = "workflow.UploadMarksToSits.failed", health = Danger)
@@ -537,6 +544,9 @@ object CM2WorkflowStages {
 
 				case Some(_) =>
 					StageProgress(UploadMarksToSits, started = true, messageCode = "workflow.UploadMarksToSits.queued", health = Warning)
+
+				case _ if isManuallyAdded =>
+					StageProgress(UploadMarksToSits, started = true, messageCode = "workflow.UploadMarksToSits.manuallyAdded", health = Danger, completed = true)
 
 				case _ => StageProgress(UploadMarksToSits, started = false, messageCode = "workflow.UploadMarksToSits.notQueued")
 			}
