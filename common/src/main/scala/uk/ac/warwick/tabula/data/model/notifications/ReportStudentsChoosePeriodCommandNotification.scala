@@ -18,6 +18,11 @@ class ReportStudentsChoosePeriodCommandNotification extends Notification[Departm
 	val userLookup: UserLookupService = Wire[UserLookupService]
 
 	@transient
+	lazy val RecipientUsercode: String = Wire.optionProperty("${sits.notificationrecipient}").getOrElse(
+		throw new IllegalStateException("sits.notificationrecipient property is missing")
+	)
+
+	@transient
 	val templateLocation = "/WEB-INF/freemarker/emails/missed_monitoring_to_sits_email.ftl"
 
 	override def verb: String = "view"
@@ -34,6 +39,6 @@ class ReportStudentsChoosePeriodCommandNotification extends Notification[Departm
 
 	override def urlTitle: String = "learn more about uploading missed monitoring points to SITS"
 
-	override def recipient: User = userLookup.getUserByUserId("studentrecords_warwick_ac_uk")
+	override def recipient: User = userLookup.getUserByUserId(RecipientUsercode)
 
 }
