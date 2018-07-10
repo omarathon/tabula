@@ -14,7 +14,7 @@ import uk.ac.warwick.tabula.web.{Mav, Routes => WebRoutes}
 import uk.ac.warwick.tabula.{AutowiringFeaturesComponent, CurrentUser, PermissionDeniedException}
 import uk.ac.warwick.tabula.cm2.web.{Routes => CM2Routes}
 
-import scala.collection.JavaConversions._
+import scala.collection.JavaConverters._
 import scala.collection.mutable
 import scala.xml.Elem
 
@@ -108,17 +108,17 @@ class AdminDepartmentHomeCommand(val department: Department, val user: CurrentUs
 			if (managedModules.isEmpty)
 				throw PermissionDeniedException(user, Permissions.Module.ManageAssignments, department)
 
-			managedModules
+			managedModules.asJava
 		}
 
 	def applyInternal(): mutable.Buffer[Module] = {
-		modules.sortBy { (module) => (module.assignments.isEmpty, module.code) }
+		modules.asScala.sortBy { module => (module.assignments.isEmpty, module.code) }
 	}
 
 	def gatherNotices(modules: Seq[Module]): Map[String, Seq[Assignment]] = benchmarkTask("Gather notices") {
 		val unpublished = for (
 				module <- modules;
-				assignment <- module.assignments
+				assignment <- module.assignments.asScala
 				if assignment.isAlive && assignment.hasUnreleasedFeedback
 			) yield assignment
 

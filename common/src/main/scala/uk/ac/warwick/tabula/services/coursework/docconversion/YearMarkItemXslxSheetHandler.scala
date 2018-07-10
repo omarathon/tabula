@@ -9,7 +9,7 @@ import uk.ac.warwick.tabula.JavaImports._
 import uk.ac.warwick.tabula.helpers.Logging
 import uk.ac.warwick.tabula.helpers.StringUtils._
 
-import scala.collection.JavaConversions._
+import scala.collection.JavaConverters._
 
 class YearMarkItemXslxSheetHandler(styles: StylesTable, sst: ReadOnlySharedStringsTable, markItems: JList[YearMarkItem])
 	extends AbstractXslxSheetHandler(styles, sst, markItems) with SheetContentsHandler with Logging {
@@ -20,7 +20,7 @@ class YearMarkItemXslxSheetHandler(styles: StylesTable, sst: ReadOnlySharedStrin
 		val col = new CellReference(cellReference).getCol
 		if (isFirstRow){
 			columnMap(col) = formattedValue
-		} else if (columnMap.containsKey(col)) {
+		} else if (columnMap.asJava.containsKey(col)) {
 			columnMap(col) match {
 				case "Student ID" =>
 					currentItem.studentId = formattedValue

@@ -5,7 +5,7 @@ import uk.ac.warwick.tabula.data.model._
 import uk.ac.warwick.tabula.services.UserLookupComponent
 import uk.ac.warwick.tabula.{MockUserLookup, Mockito, TestBase}
 
-import scala.collection.JavaConversions._
+import scala.collection.JavaConverters._
 
 
 class ListMarkerFeedbackTest extends TestBase with MarkingWorkflowWorld with Mockito {
@@ -34,7 +34,7 @@ class ListMarkerFeedbackTest extends TestBase with MarkingWorkflowWorld with Moc
 
 	@Test
 	def secondMarkerTest() {
-		assignment.feedbacks.foreach{feedback =>
+		assignment.feedbacks.asScala.foreach{feedback =>
 			val fmFeedback = new MarkerFeedback(feedback)
 			feedback.firstMarkerFeedback = fmFeedback
 			fmFeedback.state = MarkingState.MarkingCompleted

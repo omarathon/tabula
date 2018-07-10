@@ -10,7 +10,7 @@ import org.scalatest.concurrent.ScalaFutures
 import uk.ac.warwick.tabula.events.EventHandling
 import uk.ac.warwick.tabula.services.objectstore.{BlobStoreObjectStorageService, ObjectStorageService}
 
-import scala.collection.JavaConversions._
+import scala.collection.JavaConverters._
 import org.apache.commons.configuration.PropertiesConfiguration
 import org.joda.time.DateTime
 import org.joda.time.DateTimeUtils
@@ -88,7 +88,7 @@ trait TestFixtures {
         new ClassTemplateLoader(getClass, "/freemarker/"), // to match test templates
         new ClassTemplateLoader(getClass, "/") // to match live templates
       )))
-      setAutoIncludes(List("WEB-INF/freemarker/prelude.ftl"))
+      setAutoIncludes(List("WEB-INF/freemarker/prelude.ftl").asJava)
       setSharedVariables(sharedVariables)
     }
 
@@ -131,7 +131,7 @@ trait TestFixtures {
 trait TestHelpers extends TestFixtures {
 	lazy val json: ObjectMapper = new JsonObjectMapperFactory().createInstance
 
-	def readJsonMap(s: String): Map[String, Any] = json.readValue(new StringReader(s), classOf[JMap[String, Any]]).toMap
+	def readJsonMap(s: String): Map[String, Any] = json.readValue(new StringReader(s), classOf[JMap[String, Any]]).asScala.toMap
 
 	var currentUser: CurrentUser = null
 

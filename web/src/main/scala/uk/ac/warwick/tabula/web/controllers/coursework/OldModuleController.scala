@@ -7,7 +7,7 @@ import uk.ac.warwick.tabula.helpers.DateTimeOrdering._
 import org.springframework.web.bind.annotation._
 import org.springframework.stereotype._
 
-import collection.JavaConversions._
+import scala.collection.JavaConverters._
 import uk.ac.warwick.tabula.commands.ViewViewableCommand
 import uk.ac.warwick.tabula.permissions._
 import uk.ac.warwick.tabula.web.Mav
@@ -28,7 +28,7 @@ class OldModuleController extends OldCourseworkController {
 
 		Mav("coursework/submit/module",
 			"module" -> module,
-			"assignments" -> module.assignments
+			"assignments" -> module.assignments.asScala
 				.filterNot { _.deleted }
 				.sortBy { _.closeDate }
 				.reverse)

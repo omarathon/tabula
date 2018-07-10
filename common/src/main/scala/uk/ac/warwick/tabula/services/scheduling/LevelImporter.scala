@@ -14,7 +14,7 @@ import uk.ac.warwick.tabula.data.model.Level
 import uk.ac.warwick.tabula.helpers.Logging
 import uk.ac.warwick.tabula.helpers.StringUtils._
 
-import scala.collection.JavaConversions._
+import scala.collection.JavaConverters._
 
 trait LevelImporter extends Logging {
 	var levelDao: LevelDao = Wire[LevelDao]
@@ -65,7 +65,7 @@ class SitsLevelImporter extends LevelImporter {
 	lazy val levelsQuery = new LevelsQuery(sits)
 
 	def getImportCommands(): Seq[ImportLevelCommand] = {
-		levelsQuery.execute.toSeq
+		levelsQuery.execute.asScala
 	}
 }
 

@@ -4,7 +4,7 @@ import org.joda.time.DateTime
 import uk.ac.warwick.tabula.CurrentUser
 import uk.ac.warwick.userlookup.User
 
-import scala.collection.JavaConversions._
+import scala.collection.JavaConverters._
 import uk.ac.warwick.tabula.data.model.MarkingState._
 import uk.ac.warwick.tabula.data.model._
 import uk.ac.warwick.tabula.commands.{UploadedFile, Description}
@@ -40,22 +40,22 @@ class OldAddMarkerFeedbackCommand(module: Module, assignment:Assignment, marker:
 		val allUsercodes = submissions.map(_.usercode)
 		val markedUsercodes = markedSubmissions.map(_.usercode)
 
-		invalidStudents = items.filter(item => {
+		invalidStudents = items.asScala.filter(item => {
 			val usercode = item.student.map(_.getUserId).getOrElse("")
 			!allUsercodes.contains(usercode)
-		})
+		}).asJava
 
-		markedStudents = items.filter(item => {
+		markedStudents = items.asScala.filter(item => {
 			val usercode = item.student.map(_.getUserId).getOrElse("")
 			!markedUsercodes.contains(usercode)
-		})
+		}).asJava
 
-		items = items.toList.diff(invalidStudents.toList).diff(markedStudents.toList)
+		items = items.asScala.toList.diff(invalidStudents.asScala.toList).diff(markedStudents.asScala.toList).asJava
 	}
 
 	private def saveMarkerFeedback(student: User, file: UploadedFile) = {
 		// find the parent feedback or make a new one
-		val parentFeedback = assignment.feedbacks.find(_.usercode == student.getUserId).getOrElse({
+		val parentFeedback = assignment.feedbacks.asScala.find(_.usercode == student.getUserId).getOrElse({
 			val newFeedback = new AssignmentFeedback
 			newFeedback.assignment = assignment
 			newFeedback.uploaderId = marker.getUserId
@@ -71,9 +71,9 @@ class OldAddMarkerFeedbackCommand(module: Module, assignment:Assignment, marker:
 			case Some(mf) => mf
 		}
 
-		for (attachment <- file.attached){
+		for (attachment <- file.attached.asScala){
 			// if an attachment with the same name as this one exists then delete it
-			val duplicateAttachment = markerFeedback.attachments.find(_.name == attachment.name)
+			val duplicateAttachment = markerFeedback.attachments.asScala.find(_.name == attachment.name)
 			duplicateAttachment.foreach(markerFeedback.removeAttachment)
 			markerFeedback.addAttachment(attachment)
 		}
@@ -88,14 +88,14 @@ class OldAddMarkerFeedbackCommand(module: Module, assignment:Assignment, marker:
 	}
 
 	override def applyInternal(): List[MarkerFeedback] = transactional() {
-		val markerFeedbacks = for(item <- items; student <- item.student) yield saveMarkerFeedback(student, item.file)
+		val markerFeedbacks = for(item <- items.asScala; student <- item.student) yield saveMarkerFeedback(student, item.file)
 		markerFeedbacks.toList
 	}
 
 	override def validateExisting(item: OldFeedbackItem, errors: Errors) {
 
 		val usercode = item.student.map(_.getUserId)
-		val feedback = usercode.flatMap(u => assignment.feedbacks.find(_.usercode == u))
+		val feedback = usercode.flatMap(u => assignment.feedbacks.asScala.find(_.usercode == u))
 
 		// warn if feedback for this student is already uploaded
 		feedback flatMap { _.getCurrentWorkflowFeedback } match {
@@ -110,21 +110,21 @@ class OldAddMarkerFeedbackCommand(module: Module, assignment:Assignment, marker:
 
 	private def checkForDuplicateFiles(item: OldFeedbackItem, feedback: MarkerFeedback){
 		val attachedFiles = item.file.attachedFileNames.toSet
-		val feedbackFiles = feedback.attachments.map(file => file.getName).toSet
+		val feedbackFiles = feedback.attachments.asScala.map(file => file.getName).toSet
 		item.duplicateFileNames = attachedFiles & feedbackFiles
 	}
 
 	def describe(d: Description){
 		d.assignment(assignment)
-		 .studentIds(items.map { _.uniNumber })
-		 .studentUsercodes(items.flatMap(_.student.map(_.getUserId)))
+		 .studentIds(items.asScala.map { _.uniNumber })
+		 .studentUsercodes(items.asScala.flatMap(_.student.map(_.getUserId)))
 	}
 
 	override def describeResult(d: Description, feedbacks: List[MarkerFeedback]): Unit = {
 		d.assignment(assignment)
-		 .studentIds(items.map { _.uniNumber })
-		 .studentUsercodes(items.flatMap(_.student.map(_.getUserId)))
-		 .fileAttachments(feedbacks.flatMap { _.attachments })
+		 .studentIds(items.asScala.map { _.uniNumber })
+		 .studentUsercodes(items.asScala.flatMap(_.student.map(_.getUserId)))
+		 .fileAttachments(feedbacks.flatMap { _.attachments.asScala })
 		 .properties("feedback" -> feedbacks.map { _.id })
 	}
 }

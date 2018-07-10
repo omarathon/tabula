@@ -2,7 +2,7 @@ package uk.ac.warwick.tabula.web.views
 
 import org.springframework.http.HttpStatus
 
-import scala.collection.JavaConversions._
+import scala.collection.JavaConverters._
 import uk.ac.warwick.tabula.JavaImports._
 import javax.servlet.http.{HttpServletResponse, HttpServletRequest}
 import org.springframework.validation.Errors
@@ -21,10 +21,10 @@ class JSONErrorView(val errors: Errors, val additionalData: Map[String, _]) exte
 
 		val out = response.getWriter
 		val errorList = errors.getFieldErrors
-		val errorMap = Map() ++ (errorList map (error => (error.getField, getMessage(error.getCode, error.getArguments: _*))))
+		val errorMap = Map() ++ errorList.asScala.map (error => (error.getField, getMessage(error.getCode, error.getArguments: _*)))
 
-		val globalErrors = errors.getGlobalErrors.map { error => GlobalError(error.getCode, getMessage(error.getCode, error.getArguments: _*)) }.toArray
-		val fieldErrors = errors.getFieldErrors.map { error => FieldError(error.getCode, error.getField, getMessage(error.getCode, error.getArguments: _*)) }.toArray
+		val globalErrors = errors.getGlobalErrors.asScala.map { error => GlobalError(error.getCode, getMessage(error.getCode, error.getArguments: _*)) }.toArray
+		val fieldErrors = errors.getFieldErrors.asScala.map { error => FieldError(error.getCode, error.getField, getMessage(error.getCode, error.getArguments: _*)) }.toArray
 
 		val errorJson = Map(
 			"success" -> false,

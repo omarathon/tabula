@@ -3,7 +3,7 @@ package uk.ac.warwick.tabula.commands.admin.modules
 import uk.ac.warwick.tabula.data.Transactions._
 import uk.ac.warwick.tabula.commands._
 import uk.ac.warwick.tabula.data.model._
-import collection.JavaConversions._
+import scala.collection.JavaConverters._
 import org.springframework.validation.{ ValidationUtils, Errors }
 import uk.ac.warwick.tabula.permissions._
 import uk.ac.warwick.tabula.system.permissions.{PermissionsChecking, PermissionsCheckingMethods, RequiresPermissionsChecking}
@@ -53,7 +53,7 @@ trait AddModuleCommandValidation extends SelfValidating {
 			if (moduleAndDepartmentService.getModuleByCode(sanitisedCode).isDefined) {
 				errors.rejectValue("code", "code.duplicate.module", Array(code.toUpperCase), "")
 			}
-			if (department.modules.exists { _.name equalsIgnoreCase name }) {
+			if (department.modules.asScala.exists { _.name equalsIgnoreCase name }) {
 				errors.rejectValue("name", "name.duplicate.module", Array(name), "")
 			}
 		}

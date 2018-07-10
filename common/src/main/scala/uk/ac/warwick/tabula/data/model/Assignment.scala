@@ -21,7 +21,7 @@ import uk.ac.warwick.userlookup.User
 import uk.ac.warwick.util.workingdays.WorkingDaysHelperImpl
 
 import scala.beans.BeanProperty
-import scala.collection.JavaConversions._
+import scala.collection.JavaConverters._
 import scala.collection.JavaConverters._
 import scala.collection.mutable
 import scala.reflect._
@@ -217,18 +217,18 @@ class Assignment
 		*/
 	def feedbackDeadline: Option[LocalDate] = if (openEnded || dissertation || !publishFeedback) {
 		None
-	} else if (!hasExtensions || !extensions.exists(_.approved) || submissions.exists(s => !extensions.exists(e => e.isForUser(s.usercode))) || !doesAllMembersHaveApprovedExtensions) {
+	} else if (!hasExtensions || !extensions.asScala.exists(_.approved) || submissions.asScala.exists(s => !extensions.asScala.exists(e => e.isForUser(s.usercode))) || !doesAllMembersHaveApprovedExtensions) {
 		Option(workingDaysHelper.datePlusWorkingDays(closeDate.toLocalDate.asJava, Feedback.PublishDeadlineInWorkingDays)).map(_.asJoda)
-	} else if (extensions.exists(_.feedbackDeadline.isDefined)) {
-		Option(extensions.filter(_.approved).flatMap(_.feedbackDeadline).map(_.toLocalDate).min)
+	} else if (extensions.asScala.exists(_.feedbackDeadline.isDefined)) {
+		Option(extensions.asScala.filter(_.approved).flatMap(_.feedbackDeadline).map(_.toLocalDate).min)
 	} else if (submissions.size() == 0 && doesAllMembersHaveApprovedExtensions) {
-		Option(workingDaysHelper.datePlusWorkingDays(extensions.filter(_.expiryDate.nonEmpty).map(_.expiryDate).min.get.toLocalDate.asJava, Feedback.PublishDeadlineInWorkingDays)).map(_.asJoda)
+		Option(workingDaysHelper.datePlusWorkingDays(extensions.asScala.filter(_.expiryDate.nonEmpty).map(_.expiryDate).min.get.toLocalDate.asJava, Feedback.PublishDeadlineInWorkingDays)).map(_.asJoda)
 	}	else None
 
 
 	private def doesAllMembersHaveApprovedExtensions: Boolean =
 		assessmentMembershipService.determineMembershipUsers(upstreamAssessmentGroups, Option(members))
-			.forall(user => extensions.exists(e => e.expiryDate.isDefined && e.approved && e.isForUser(user)))
+			.forall(user => extensions.asScala.exists(e => e.expiryDate.isDefined && e.approved && e.isForUser(user)))
 
 
 	def feedbackDeadlineForSubmission(submission: Submission): Option[LocalDate] = feedbackDeadline.flatMap { wholeAssignmentDeadline =>
@@ -280,9 +280,9 @@ class Assignment
 
 	// IndexColumn is a busted flush for fields because of reuse of non-uniqueness.
 	// Use manual position management on add/removeFields, and in these getters
-	def submissionFields: Seq[AssignmentFormField] = fields.filter(_.context == FormFieldContext.Submission).sortBy(_.position)
+	def submissionFields: Seq[AssignmentFormField] = fields.asScala.filter(_.context == FormFieldContext.Submission).sortBy(_.position)
 
-	def feedbackFields: Seq[AssignmentFormField] = fields.filter(_.context == FormFieldContext.Feedback).sortBy(_.position)
+	def feedbackFields: Seq[AssignmentFormField] = fields.asScala.filter(_.context == FormFieldContext.Feedback).sortBy(_.position)
 
 	@OneToOne(cascade = Array(ALL), fetch = FetchType.LAZY)
 	@JoinColumn(name = "membersgroup_id")
@@ -404,7 +404,7 @@ class Assignment
 	def isWithinExtension(user: User, time: DateTime): Boolean = isWithinExtension(user.getUserId, time)
 
 	def isWithinExtension(usercode: String, time: DateTime): Boolean =
-		extensions.exists(e => e.isForUser(usercode) && e.approved && e.expiryDate.exists(_.isAfter(time)))
+		extensions.asScala.exists(e => e.isForUser(usercode) && e.approved && e.expiryDate.exists(_.isAfter(time)))
 
 	/**
 	 * True if the specified user has been granted an extension and that extension has not expired now
@@ -419,7 +419,7 @@ class Assignment
 	def isLate(submission: Submission): Boolean =
 		!openEnded && closeDate.isBefore(submission.submittedDate) && !isWithinExtension(submission.usercode, submission.submittedDate)
 
-	def lateSubmissionCount: Int = submissions.count(submission => isLate(submission))
+	def lateSubmissionCount: Int = submissions.asScala.count(submission => isLate(submission))
 
 	/**
 		* Deadline taking into account any approved extension
@@ -427,7 +427,7 @@ class Assignment
 	def submissionDeadline(usercode: String): DateTime =
 		if (openEnded) null
 		else
-			extensions.find(e => e.isForUser(usercode) && e.approved).flatMap(_.expiryDate).getOrElse(closeDate)
+			extensions.asScala.find(e => e.isForUser(usercode) && e.approved).flatMap(_.expiryDate).getOrElse(closeDate)
 
 	def submissionDeadline(user: User): DateTime = submissionDeadline(user.getUserId)
 	def submissionDeadline(submission: Submission): DateTime = submissionDeadline(submission.usercode)
@@ -469,7 +469,7 @@ class Assignment
 		!openEnded && closeDate.isBefore(submission.submittedDate) && isWithinExtension(submission.usercode, submission.submittedDate)
 
 	// returns extension for a specified student
-	def findExtension(usercode: String): Option[Extension] = extensions.find(_.usercode == usercode)
+	def findExtension(usercode: String): Option[Extension] = extensions.asScala.find(_.usercode == usercode)
 
 	/**
 	 * Whether the assignment is not archived or deleted.
@@ -497,16 +497,16 @@ class Assignment
 	 */
 	def resubmittable(user: User): Boolean = submittable(user) && allowResubmission && (!isClosed || isWithinExtension(user))
 
-	def mostRecentFeedbackUpload: DateTime = feedbacks.maxBy {
+	def mostRecentFeedbackUpload: DateTime = feedbacks.asScala.maxBy {
 		_.updatedDate
 	}.updatedDate
 
 	def addField(field: AssignmentFormField) {
 		if (field.context == null)
 			throw new IllegalArgumentException("Field with name " + field.name + " has no context specified")
-		if (fields.exists(_.name == field.name)) throw new IllegalArgumentException("Field with name " + field.name + " already exists")
+		if (fields.asScala.exists(_.name == field.name)) throw new IllegalArgumentException("Field with name " + field.name + " already exists")
 		field.assignment = this
-		field.position = fields.count(_.context == field.context)
+		field.position = fields.asScala.count(_.context == field.context)
 		fields.add(field)
 	}
 
@@ -514,7 +514,7 @@ class Assignment
 		fields.remove(field)
 		assignmentService.deleteFormField(field)
 		// manually update all fields in the context to reflect their new positions
-		fields.filter(_.context == field.context).zipWithIndex foreach {
+		fields.asScala.filter(_.context == field.context).zipWithIndex foreach {
 			case (f, index) => f.position = index
 		}
 	}
@@ -533,7 +533,7 @@ class Assignment
 	/**
 	 * Find a FormField on the Assignment with the given name.
 	 */
-	def findField(name: String): Option[FormField] = fields.find {
+	def findField(name: String): Option[FormField] = fields.asScala.find {
 		_.name == name
 	}
 
@@ -581,7 +581,7 @@ class Assignment
 	def getUnapprovedExtensions: Seq[Extension] = extensionService.getUnapprovedExtensions(this)
 
 	def extensionCountByStatus: Map[ExtensionState, Int] = {
-		extensions.groupBy(_._state).map { case (state, extensionList) => (state, extensionList.size ) }
+		extensions.asScala.groupBy(_._state).map { case (state, extensionList) => (state, extensionList.size ) }
 	}
 
 	def addFields(fieldz: AssignmentFormField*): Unit = for (field <- fieldz) addField(field)
@@ -602,7 +602,7 @@ class Assignment
 	}
 
 	// returns the submission for a specified student
-	def findSubmission(usercode: String): Option[Submission] = submissions.find(_.usercode == usercode)
+	def findSubmission(usercode: String): Option[Submission] = submissions.asScala.find(_.usercode == usercode)
 
 	// Help views decide whether to show a publish button.
 	def canPublishFeedback: Boolean =
@@ -629,7 +629,7 @@ class Assignment
 
 	@Deprecated
 	def getMarkerFeedback(usercode: String, user: User, feedbackPosition: FeedbackPosition): Option[MarkerFeedback] = {
-		val parentFeedback = feedbacks.find(_.usercode == usercode)
+		val parentFeedback = feedbacks.asScala.find(_.usercode == usercode)
 		parentFeedback.flatMap {
 			f => getMarkerFeedbackForPositionInFeedback(user, feedbackPosition, f)
 		}
@@ -637,14 +637,14 @@ class Assignment
 
 	@Deprecated
 	def getMarkerFeedbackForCurrentPosition(usercode: String, user: User): Option[MarkerFeedback] = for {
-		feedback <- feedbacks.find(_.usercode == usercode)
+		feedback <- feedbacks.asScala.find(_.usercode == usercode)
 		position <- feedback.getCurrentWorkflowFeedbackPosition
 		markerFeedback <- getMarkerFeedbackForPositionInFeedback(user, position, feedback)
 	} yield markerFeedback
 
 	@Deprecated
 	def getLatestCompletedMarkerFeedback(usercode: String, user: User): Option[MarkerFeedback] = {
-		val parentFeedback = feedbacks.find(_.usercode == usercode)
+		val parentFeedback = feedbacks.asScala.find(_.usercode == usercode)
 		parentFeedback.flatMap {
 			f => getUpToThirdFeedbacks(user, f).find(_.state == MarkingState.MarkingCompleted)
 		}
@@ -652,7 +652,7 @@ class Assignment
 
 	@Deprecated
 	def getAllMarkerFeedbacks(usercode: String, user: User): Seq[MarkerFeedback] = {
-		feedbacks.find(_.usercode == usercode).fold(Seq[MarkerFeedback]())(feedback =>
+		feedbacks.asScala.find(_.usercode == usercode).fold(Seq[MarkerFeedback]())(feedback =>
 			feedback.getCurrentWorkflowFeedbackPosition match {
 				case None => getUpToThirdFeedbacks(user, feedback)
 				case Some(ThirdFeedback) => getUpToThirdFeedbacks(user, feedback)
@@ -811,7 +811,7 @@ class Assignment
 	def resetMarkerFeedback(): Unit = {
 		val markerFeedbacks  = allFeedback.flatMap(_.allMarkerFeedback)
 		markerFeedbacks.foreach(feedbackService.delete)
-		feedbacks.foreach(f => {
+		feedbacks.asScala.foreach(f => {
 			f.outstandingStages.clear()
 			f.markerFeedback.clear()
 			feedbackService.saveOrUpdate(f)

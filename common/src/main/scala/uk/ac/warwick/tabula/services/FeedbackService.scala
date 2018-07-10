@@ -1,5 +1,5 @@
 package uk.ac.warwick.tabula.services
-import scala.collection.JavaConversions._
+import scala.collection.JavaConverters._
 
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.stereotype.Service
@@ -38,7 +38,7 @@ class FeedbackServiceImpl extends FeedbackService with Daoisms with Logging {
 	/* get users whose feedback is not published and who have not submitted work suspected
 	 * of being plagiarised */
 	def getUsersForFeedback(assignment: Assignment): Seq[(String, User)] = {
-		val plagiarisedSubmissions = assignment.submissions.filter { submission => submission.suspectPlagiarised }
+		val plagiarisedSubmissions = assignment.submissions.asScala.filter { submission => submission.suspectPlagiarised }
 		val plagiarisedIds = plagiarisedSubmissions.map { _.usercode }
 		val unreleasedIds = assignment.unreleasedFeedback.map { _.usercode }
 		val unplagiarisedUnreleasedIds = unreleasedIds.filter { usercode => !plagiarisedIds.contains(usercode) }

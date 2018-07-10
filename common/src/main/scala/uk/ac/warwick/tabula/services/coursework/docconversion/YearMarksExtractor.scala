@@ -2,7 +2,7 @@ package uk.ac.warwick.tabula.services.coursework.docconversion
 
 import uk.ac.warwick.spring.Wire
 
-import scala.collection.JavaConversions._
+import scala.collection.JavaConverters._
 import org.apache.poi.openxml4j.opc.OPCPackage
 import org.apache.poi.xssf.eventusermodel.{ReadOnlySharedStringsTable, XSSFReader}
 import org.springframework.stereotype.Service
@@ -48,12 +48,12 @@ class YearMarksExtractorImpl extends YearMarksExtractor {
 		val markItems: JList[YearMarkItem] = JArrayList()
 		val sheetHandler = new YearMarkItemXslxSheetHandler(styles, sst, markItems)
 		val parser = sheetHandler.fetchSheetParser
-		for (sheet <- reader.getSheetsData) {
+		for (sheet <- reader.getSheetsData.asScala) {
 			val sheetSource = new InputSource(sheet)
 			parser.parse(sheetSource)
 			sheet.close()
 		}
-		markItems.filterNot(markItem => markItem.studentId == null || markItem.mark == null)
+		markItems.asScala.filterNot(markItem => markItem.studentId == null || markItem.mark == null).asJava
 	}
 }
 

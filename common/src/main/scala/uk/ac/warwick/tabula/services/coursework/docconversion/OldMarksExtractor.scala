@@ -2,7 +2,7 @@ package uk.ac.warwick.tabula.services.coursework.docconversion
 
 import uk.ac.warwick.spring.Wire
 
-import scala.collection.JavaConversions._
+import scala.collection.JavaConverters._
 import org.apache.poi.openxml4j.opc.OPCPackage
 import org.apache.poi.xssf.eventusermodel.{ReadOnlySharedStringsTable, XSSFReader}
 import org.springframework.stereotype.Service
@@ -40,12 +40,12 @@ class OldMarksExtractor extends AutowiringUserLookupComponent {
 		val markItems: JList[MarkItem] = JArrayList()
 		val sheetHandler = OldMarkItemXslxSheetHandler(styles, sst, markItems, userLookup)
 		val parser = sheetHandler.fetchSheetParser
-		for (sheet <- reader.getSheetsData) {
+		for (sheet <- reader.getSheetsData.asScala) {
 			val sheetSource = new InputSource(sheet)
 			parser.parse(sheetSource)
 			sheet.close()
 		}
-		markItems.filterNot(markItem => markItem.universityId == null && markItem.actualMark == null && markItem.actualGrade == null)
+		markItems.asScala.filterNot(markItem => markItem.universityId == null && markItem.actualMark == null && markItem.actualGrade == null).asJava
 	}
 }
 

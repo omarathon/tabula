@@ -2,7 +2,7 @@ package uk.ac.warwick.tabula.commands.cm2.assignments.extensions
 
 import uk.ac.warwick.tabula.data.model.notifications.coursework._
 
-import scala.collection.JavaConversions._
+import scala.collection.JavaConverters._
 import uk.ac.warwick.tabula.commands._
 import uk.ac.warwick.tabula.data.model.forms.{Extension, ExtensionState}
 import uk.ac.warwick.tabula.data.model._
@@ -65,11 +65,11 @@ class RequestExtensionCommandInternal(val assignment:Assignment, val submitter: 
 
 		if (extension.attachments != null) {
 			// delete attachments that have been removed
-			val matchingAttachments: mutable.Set[FileAttachment] = extension.attachments -- attachedFiles
+			val matchingAttachments: mutable.Set[FileAttachment] = extension.attachments.asScala -- attachedFiles.asScala
 			matchingAttachments.foreach(delete)
 		}
 
-		for (attachment <- file.attached) {
+		for (attachment <- file.attached.asScala) {
 			extension.addAttachment(attachment)
 		}
 
@@ -142,7 +142,7 @@ trait RequestExtensionCommandDescription extends Describable[Extension] {
 	override def describeResult(d: Description, extension: Extension) {
 		d.assignment(assignment)
 			.property("extension" -> extension.id)
-			.fileAttachments(extension.attachments.toSeq)
+			.fileAttachments(extension.attachments.asScala.toSeq)
 	}
 }
 

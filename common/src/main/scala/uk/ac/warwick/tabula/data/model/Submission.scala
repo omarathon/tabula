@@ -13,7 +13,7 @@ import uk.ac.warwick.tabula.data.model.forms.{FormField, SavedFormValue}
 import uk.ac.warwick.tabula.permissions._
 import uk.ac.warwick.userlookup.User
 
-import scala.collection.JavaConversions._
+import scala.collection.JavaConverters._
 import scala.collection.mutable
 
 object Submission {
@@ -77,7 +77,7 @@ class Submission extends GeneratedId with PermissionsTarget with ToEntityReferen
 	var values: JSet[SavedFormValue] = new java.util.HashSet
 
 	def getValue(field: FormField): Option[SavedFormValue] = {
-		values.find( _.name == field.name )
+		values.asScala.find( _.name == field.name )
 	}
 
 	def isForUser(user: User): Boolean = usercode == user.getUserId
@@ -87,11 +87,11 @@ class Submission extends GeneratedId with PermissionsTarget with ToEntityReferen
 	@Deprecated
 	def secondMarker:Option[User] = assignment.getStudentsSecondMarker(usercode)
 
-	def valuesByFieldName: Map[String, String] = (values map { v => (v.name, v.value) }).toMap
+	def valuesByFieldName: Map[String, String] = values.asScala.map { v => (v.name, v.value) }.toMap
 
-	def valuesWithAttachments: mutable.Set[SavedFormValue] = values.filter(_.hasAttachments)
+	def valuesWithAttachments: mutable.Set[SavedFormValue] = values.asScala.filter(_.hasAttachments)
 
-	def allAttachments: Seq[FileAttachment] = valuesWithAttachments.toSeq flatMap { _.attachments }
+	def allAttachments: Seq[FileAttachment] = valuesWithAttachments.toSeq.flatMap(_.attachments.asScala)
 
 	def attachmentsWithOriginalityReport: Seq[FileAttachment] = allAttachments.filter(_.originalityReportReceived)
 
@@ -108,7 +108,7 @@ class Submission extends GeneratedId with PermissionsTarget with ToEntityReferen
 		assignment.module.code + " - " + name + " - " + attachment.name
 	}
 
-	def useDisability: Boolean = values.find(_.name == Submission.UseDisabilityFieldName).exists(_.value.toBoolean)
+	def useDisability: Boolean = values.asScala.find(_.name == Submission.UseDisabilityFieldName).exists(_.value.toBoolean)
 
 	def toEntityReference: SubmissionEntityReference = new SubmissionEntityReference().put(this)
 

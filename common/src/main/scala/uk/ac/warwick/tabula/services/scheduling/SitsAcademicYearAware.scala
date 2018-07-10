@@ -9,7 +9,7 @@ import org.springframework.stereotype.Service
 import uk.ac.warwick.spring.Wire
 import uk.ac.warwick.tabula.AcademicYear
 
-import scala.collection.JavaConversions._
+import scala.collection.JavaConverters._
 
 trait SitsAcademicYearAware {
 	var sitsAcademicYearService: SitsAcademicYearService = Wire[SitsAcademicYearService]
@@ -36,7 +36,7 @@ class SitsAcademicYearServiceImpl extends SitsAcademicYearService {
 		"""
 
 	def getCurrentSitsAcademicYearString: String = {
-		new GetCurrentAcademicYearQuery(sits).execute().head
+		new GetCurrentAcademicYearQuery(sits).execute().asScala.head
 	}
 
 	def getCurrentSitsAcademicYear: AcademicYear = {

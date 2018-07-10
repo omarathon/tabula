@@ -2,12 +2,13 @@ package uk.ac.warwick.tabula.commands.cm2.assignments
 
 import org.springframework.beans.MutablePropertyValues
 import org.springframework.validation.BindException
+import uk.ac.warwick.tabula
 import uk.ac.warwick.tabula._
 import uk.ac.warwick.tabula.data.model._
 import uk.ac.warwick.tabula.services._
 import uk.ac.warwick.tabula.system.{CustomDataBinder, NoAutoGrownNestedPaths}
 
-import scala.collection.JavaConversions._
+import scala.collection.JavaConverters._
 
 class AddSitsAssignmentsCommandTest extends TestBase with Mockito {
 
@@ -52,10 +53,10 @@ class AddSitsAssignmentsCommandTest extends TestBase with Mockito {
 			item(upstream1, include = true, optionsId = "A"),
 			item(upstream2, include = false, optionsId = null),
 			item(upstream3, include = true, "A", openEnded = true)
-		)
+		).asJava
 		validator.optionsMap = Map(
 			"A" -> new SharedAssignmentPropertiesForm
-		)
+		).asJava
 
 		val errors = new BindException(validator, "command")
 		validator.validate(errors)
@@ -74,10 +75,10 @@ class AddSitsAssignmentsCommandTest extends TestBase with Mockito {
 			item(upstream1, include = true, optionsId = "A"),
 			item(upstream2, include = false, optionsId = null),
 			item(upstream3, include = true, "A", openEnded = true)
-		)
+		).asJava
 		cmd.optionsMap = Map(
 			"A" -> new SharedAssignmentPropertiesForm
-		)
+		).asJava
 
 		val result = cmd.applyInternal()
 
@@ -111,7 +112,7 @@ class AddSitsAssignmentsCommandTest extends TestBase with Mockito {
 		pvs.add("optionsMap[A].allowExtensions", true)
 		binder.bind(pvs)
 
-		cmd.optionsMap("A").allowExtensions.booleanValue should be (right = true)
+		cmd.optionsMap.get("A").allowExtensions.booleanValue should be (true)
 	}}
 
 	private def item(assignment: AssessmentComponent, include: Boolean, optionsId: String, openEnded: Boolean = false) = {

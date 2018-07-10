@@ -3,7 +3,7 @@ package uk.ac.warwick.tabula.data.model
 import javax.persistence._
 import uk.ac.warwick.tabula.system.TwoWayConverter
 
-import scala.collection.JavaConversions._
+import scala.collection.JavaConverters._
 import uk.ac.warwick.userlookup.User
 import uk.ac.warwick.spring.Wire
 import uk.ac.warwick.tabula.services.{AssessmentServiceUserGroupHelpers, AssessmentService, UserGroupCacheManager, UserLookupService}
@@ -199,7 +199,7 @@ trait AssessmentMarkerMap {
 				assignment.firstMarkerMap.get(marker.getUserId).map{_.knownType.allIncludedIds}.getOrElse(Seq()) ++
 					assignment.secondMarkerMap.get(marker.getUserId).map{_.knownType.allIncludedIds}.getOrElse(Seq())
 
-			assignment.submissions.filter(s => studentIds.contains(s.usercode))
+			assignment.submissions.asScala.filter(s => studentIds.contains(s.usercode))
 		}
 
 		val allSubmissionsForMarker = getSubmissionsFromMap(assignment, marker)

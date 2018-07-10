@@ -1,5 +1,5 @@
 package uk.ac.warwick.tabula.data.model.forms
-import scala.collection.JavaConversions._
+import scala.collection.JavaConverters._
 import org.joda.time.DateTime
 import uk.ac.warwick.tabula.PersistenceTestBase
 import uk.ac.warwick.tabula.data.model.{Submission, Assignment, FileAttachment}
@@ -63,7 +63,7 @@ class ExtensionTest extends PersistenceTestBase {
       assignment.submissions add newSubmission
     }
 
-    val lateSubmissions = assignment.submissions filter assignment.isLate map (_._universityId)
+    val lateSubmissions = assignment.submissions.asScala.filter(assignment.isLate).map(_._universityId)
     lateSubmissions should be ((11 to 15) map idFormat)
 
   }

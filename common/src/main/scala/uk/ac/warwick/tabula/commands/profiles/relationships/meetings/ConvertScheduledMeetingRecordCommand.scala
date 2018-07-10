@@ -7,7 +7,7 @@ import uk.ac.warwick.tabula.permissions.Permissions
 import uk.ac.warwick.tabula.services.{AutowiringFileAttachmentServiceComponent, AutowiringMeetingRecordServiceComponent, FileAttachmentServiceComponent, MeetingRecordServiceComponent}
 import uk.ac.warwick.tabula.system.permissions.{PermissionsChecking, PermissionsCheckingMethods, RequiresPermissionsChecking}
 
-import scala.collection.JavaConversions._
+import scala.collection.JavaConverters._
 
 object ConvertScheduledMeetingRecordCommand {
 	def apply(creator: Member, meetingRecord: ScheduledMeetingRecord) =
@@ -30,7 +30,7 @@ class ConvertScheduledMeetingRecordCommand (override val creator: Member, val me
 
 	def applyInternal(): MeetingRecord = {
 		val newMeeting = createCommand.apply()
-		newMeeting.attachments.foreach(_.meetingRecord = newMeeting)
+		newMeeting.attachments.asScala.foreach(_.meetingRecord = newMeeting)
 
 		meetingRecord.removeAllAttachments()
 		meetingRecordService.purge(meetingRecord)

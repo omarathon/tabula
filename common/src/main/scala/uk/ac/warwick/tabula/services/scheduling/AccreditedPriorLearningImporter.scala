@@ -17,7 +17,7 @@ import uk.ac.warwick.tabula.data.model.MemberUserType.Student
 import uk.ac.warwick.tabula.sandbox.SandboxData
 import uk.ac.warwick.userlookup.User
 
-import scala.collection.JavaConversions._
+import scala.collection.JavaConverters._
 import scala.collection.immutable.Iterable
 
 /**
@@ -44,7 +44,7 @@ class AccreditedPriorLearningImporterImpl extends AccreditedPriorLearningImporte
 		benchmarkTask("Fetch accredited prior learning") {
 			membersAndCategories.filter { _.member.userType == Student }.flatMap { mac =>
 				val universityId = mac.member.universityId
-				accreditedPriorLearningQuery.executeByNamedParam(Map("universityId" -> universityId)).toSeq.map(row => new ImportAccreditedPriorLearningCommand(row))
+				accreditedPriorLearningQuery.executeByNamedParam(Map("universityId" -> universityId).asJava).asScala.map(new ImportAccreditedPriorLearningCommand(_))
 			}.seq
 		}
 	}

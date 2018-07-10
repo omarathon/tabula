@@ -28,8 +28,8 @@ object TestLoggerFactory {
 	}
 
 	def retrieveEvents(logger: logback.classic.Logger) : Seq[ILoggingEvent] = {
-		val appender = logger.iteratorForAppenders().next.asInstanceOf[Appender]
-		appender.list.asScala.toSeq
+		val appender: Appender = logger.iteratorForAppenders().next.asInstanceOf[Appender]
+		appender.list.asScala
 	}
 
 	def tearDown() : Unit = {

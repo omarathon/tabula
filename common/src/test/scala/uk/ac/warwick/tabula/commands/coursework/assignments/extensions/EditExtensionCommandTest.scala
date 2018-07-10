@@ -1,6 +1,6 @@
 package uk.ac.warwick.tabula.commands.coursework.assignments.extensions
 
-import scala.collection.JavaConversions._
+import scala.collection.JavaConverters._
 import org.joda.time.DateTime
 import uk.ac.warwick.tabula.data.model.forms.{Extension, ExtensionState}
 import uk.ac.warwick.tabula.data.model.{Assignment, FileAttachment}
@@ -148,10 +148,10 @@ class EditExtensionCommandTest extends TestBase {
 	def createAssignment(): Assignment = {
 		val assignment = newDeepAssignment()
 		assignment.closeDate = DateTime.now.plusMonths(1)
-		assignment.extensions += new Extension {
+		assignment.extensions = (assignment.extensions.asScala += new Extension {
 			_universityId = currentUser.universityId
 			usercode = currentUser.userId
-		}
+		}).asJava
 		assignment
 	}
 

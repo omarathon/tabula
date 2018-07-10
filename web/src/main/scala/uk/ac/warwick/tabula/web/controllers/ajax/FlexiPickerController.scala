@@ -20,7 +20,7 @@ import uk.ac.warwick.tabula.web.controllers.ajax.FlexiPickerController.{FlexiPic
 import uk.ac.warwick.userlookup.webgroups.{GroupNotFoundException, GroupServiceException}
 import uk.ac.warwick.userlookup.{Group, User}
 
-import scala.collection.JavaConversions._
+import scala.collection.JavaConverters._
 
 @Controller
 class FlexiPickerController extends BaseController {
@@ -79,9 +79,9 @@ object FlexiPickerController {
 			if (hasQuery) {
 				val matched = EmailPattern.findAllIn(query.trim).matchData.toList
 
-				if (matched.length>0) {
+				if (matched.nonEmpty) {
 					val firstMatch = matched.head
-					val builder : Map[String, String] = Map("type" -> "email", "address" -> firstMatch.group(2))
+					val builder : java.util.Map[String, String] = Map("type" -> "email", "address" -> firstMatch.group(2)).asJava
 
 					if (firstMatch.group(1) != null) {
 						builder.put("name", firstMatch.group(1))
@@ -89,8 +89,8 @@ object FlexiPickerController {
 					}
 					else {
 						builder.put("value", firstMatch.group(2))
+						list = list :+ builder.asScala.toMap
 					}
-					list = list :+ builder
 				}
 			}
 			list
@@ -136,19 +136,19 @@ object FlexiPickerController {
 				if (user.isFoundUser) {
 					users = users :+ user
 				}	else {
-					users  = users ++  userLookup.findUsersWithFilter(item("sn" , terms(0)))
+					users  = users ++  userLookup.findUsersWithFilter(item("sn" , terms(0)).asJava).asScala
 					if (users.size < EnoughResults) {
-						users ++= userLookup.findUsersWithFilter(item("givenName", terms(0)))
+						users ++= userLookup.findUsersWithFilter(item("givenName", terms(0)).asJava).asScala
 					}
 					if (users.size < EnoughResults) {
-						users ++= userLookup.findUsersWithFilter(item("cn", terms(0)))
+						users ++= userLookup.findUsersWithFilter(item("cn", terms(0)).asJava).asScala
 					}
 				}
 			}
 			else if (terms.length >= 2) {
-				users ++= userLookup.findUsersWithFilter(item("givenName", terms(0)) ++ item("sn", terms(1)))
+				users ++= userLookup.findUsersWithFilter((item("givenName", terms(0)) ++ item("sn", terms(1))).asJava).asScala
 				if (users.size < EnoughResults) {
-					users ++= userLookup.findUsersWithFilter(item("sn", terms(0)) ++ item("givenName", terms(1)))
+					users ++= userLookup.findUsersWithFilter((item("sn", terms(0)) ++ item("givenName", terms(1))).asJava).asScala
 				}
 			}
 
@@ -195,7 +195,7 @@ object FlexiPickerController {
 			}
 			else {
 				val groupQuery = URLEncoder.encode(query.trim, "UTF-8")
-				val groups: List[Group] = userLookup.getGroupService.getGroupsForQuery(groupQuery).toList
+				val groups: List[Group] = userLookup.getGroupService.getGroupsForQuery(groupQuery).asScala.toList
 				outList = groups.map(createItemFor)
 			}
 

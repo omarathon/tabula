@@ -6,7 +6,7 @@ import uk.ac.warwick.tabula.data.HibernateHelpers
 import uk.ac.warwick.userlookup.User
 import uk.ac.warwick.tabula.data.model.notifications.coursework.FeedbackChangeNotification
 
-import scala.collection.JavaConversions._
+import scala.collection.JavaConverters._
 import uk.ac.warwick.tabula.data.Transactions._
 import uk.ac.warwick.tabula.commands.{Notifies, Description, UploadedFile}
 import uk.ac.warwick.tabula.data.model._
@@ -33,7 +33,7 @@ class OldAddFeedbackCommand(module: Module, assignment: Assignment, marker: User
 				newFeedback
 			})
 
-			val newAttachments = feedback.addAttachments(file.attached)
+			val newAttachments = feedback.addAttachments(file.attached.asScala)
 
 			if (newAttachments.nonEmpty) {
 				session.saveOrUpdate(feedback)
@@ -43,7 +43,7 @@ class OldAddFeedbackCommand(module: Module, assignment: Assignment, marker: User
 			}
 		}
 
-		(for(item <- items; student <- item.student) yield {
+		(for(item <- items.asScala; student <- item.student) yield {
 			val feedback = saveFeedback(student, item.file)
 			feedback.foreach(zipService.invalidateIndividualFeedbackZip)
 			feedback
@@ -52,7 +52,7 @@ class OldAddFeedbackCommand(module: Module, assignment: Assignment, marker: User
 
 	override def validateExisting(item: OldFeedbackItem, errors: Errors) {
 		// warn if feedback for this student is already uploaded
-		assignment.feedbacks.find { feedback => feedback._universityId == item.uniNumber && feedback.hasAttachments } match {
+		assignment.feedbacks.asScala.find { feedback => feedback._universityId == item.uniNumber && feedback.hasAttachments } match {
 			case Some(feedback) =>
 				// set warning flag for existing feedback and check if any existing files will be overwritten
 				item.submissionExists = true
@@ -65,10 +65,10 @@ class OldAddFeedbackCommand(module: Module, assignment: Assignment, marker: User
 	private def checkForDuplicateFiles(item: OldFeedbackItem, feedback: Feedback){
 		case class duplicatePair(attached:FileAttachment, feedback:FileAttachment)
 
-		val attachmentNames = item.file.attached.map(_.name)
+		val attachmentNames = item.file.attached.asScala.map(_.name)
 		val withSameName = for (
-			attached <- item.file.attached;
-			feedback <- feedback.attachments
+			attached <- item.file.attached.asScala;
+			feedback <- feedback.attachments.asScala
 			if attached.name == feedback.name
 		) yield new duplicatePair(attached, feedback)
 
@@ -79,14 +79,14 @@ class OldAddFeedbackCommand(module: Module, assignment: Assignment, marker: User
 
 	def describe(d: Description): Unit = d
 		.assignment(assignment)
-		.studentIds(items.map(_.uniNumber))
-		.studentUsercodes(items.flatMap(_.student.map(_.getUserId)))
+		.studentIds(items.asScala.map(_.uniNumber))
+		.studentUsercodes(items.asScala.flatMap(_.student.map(_.getUserId)))
 
 	override def describeResult(d: Description, feedbacks: Seq[Feedback]): Unit = {
 		d.assignment(assignment)
-		 .studentIds(items.map(_.uniNumber))
-		 .studentUsercodes(items.flatMap(_.student.map(_.getUserId)))
-		 .fileAttachments(feedbacks.flatMap { _.attachments })
+		 .studentIds(items.asScala.map(_.uniNumber))
+		 .studentUsercodes(items.asScala.flatMap(_.student.map(_.getUserId)))
+		 .fileAttachments(feedbacks.flatMap { _.attachments.asScala })
 		 .properties("feedback" -> feedbacks.map { _.id })
 	}
 

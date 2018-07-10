@@ -11,7 +11,7 @@ import uk.ac.warwick.tabula.services._
 import uk.ac.warwick.tabula.services.objectstore.ObjectStorageService
 import uk.ac.warwick.tabula.{Features, Mockito, TestBase}
 
-import scala.collection.JavaConversions._
+import scala.collection.JavaConverters._
 
 class DownloadMarkerSubmissionTest extends TestBase with MarkingWorkflowWorld with Mockito {
 
@@ -23,11 +23,11 @@ class DownloadMarkerSubmissionTest extends TestBase with MarkingWorkflowWorld wi
 		attachment.objectStorageService = zipService.objectStorageService
 		attachment.objectStorageService.push(attachment.id, ByteSource.wrap("yes".getBytes), ObjectStorageService.Metadata(3, "application/octet-stream", None))
 
-    assignment.submissions.foreach {
+    assignment.submissions.asScala.foreach {
       submission =>
         submission.values.add({
           val sv = new SavedFormValue()
-          sv.attachments = Set(attachment)
+          sv.attachments = Set(attachment).asJava
           sv
         })
     }
