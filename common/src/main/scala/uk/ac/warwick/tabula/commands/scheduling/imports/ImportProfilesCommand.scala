@@ -346,6 +346,19 @@ class ImportProfilesCommand extends CommandWithoutTransaction[Unit] with Logging
 					memberDao.saveOrUpdate(member)
 				}
 
+			case applicantMember: ApplicantMember =>
+				val missingFromImport = profileImporter.getUniversityIdsPresentInMembership(Set(applicantMember.universityId)).isEmpty
+
+				if (applicantMember.isFresh && missingFromImport) {
+					// The member has gone missing
+					applicantMember.missingFromImportSince = DateTime.now
+					memberDao.saveOrUpdate(applicantMember)
+				} else if (!applicantMember.isFresh && !missingFromImport) {
+					// The member has re-appeared
+					applicantMember.missingFromImportSince = null
+					memberDao.saveOrUpdate(applicantMember)
+				}
+
 			case stu: StudentMember =>
 				val sitsRows = profileImporter.multipleStudentInformationQuery.executeByNamedParam(Map("universityIds" -> Seq(universityId).asJava).asJava).asScala
 				val universityIdsSeen = sitsRows.map(_.universityId.getOrElse("")).distinct
