@@ -195,7 +195,7 @@ abstract class AbstractProgressionService extends ProgressionService {
 	/**
 		* Regulation defined at: http://www2.warwick.ac.uk/services/aro/dar/quality/categories/examinations/conventions/fyboe
 		*/
-	private def suggestedResultFirstYear(entityYear: ExamGridEntityYear, normalLoad: BigDecimal, routeRules: Seq[UpstreamRouteRule], yearWeighting: Seq[CourseYearWeighting]): ProgressionResult = {
+	private def suggestedResultFirstYear(entityYear: ExamGridEntityYear, normalLoad: BigDecimal, routeRules: Seq[UpstreamRouteRule], yearWeightings: Seq[CourseYearWeighting]): ProgressionResult = {
 		entityYear.studentCourseYearDetails.map(scyd => {
 			val coreRequiredModules = moduleRegistrationService.findCoreRequiredModules(
 				scyd.studentCourseDetails.currentRoute,
@@ -206,7 +206,7 @@ abstract class AbstractProgressionService extends ProgressionService {
 			val passedModuleRegistrations = entityYear.moduleRegistrations.filter(isPassed)
 			val passedCredits = passedModuleRegistrations.map(mr => BigDecimal(mr.cats)).sum > ProgressionService.FirstYearRequiredCredits
 			val passedCoreRequired = coreRequiredModules.forall(cr => passedModuleRegistrations.exists(_.module == cr.module))
-			val overallMark = getYearMark(entityYear, normalLoad, routeRules, yearWeighting)
+			val overallMark = getYearMark(entityYear, normalLoad, routeRules, yearWeightings)
 
 			if (overallMark.isLeft) {
 				ProgressionResult.Unknown(overallMark.left.get)
@@ -273,7 +273,15 @@ abstract class AbstractProgressionService extends ProgressionService {
 					year -> (if (yearWeighting.isEmpty) None  else Some(yearWeighting.head))
 				}
 				if (markPerYear.exists { case (_, possibleMark) => possibleMark.isLeft }) {
-					FinalYearGrade.Unknown(markPerYear.flatMap { case (_, possibleMark) => possibleMark.left.toOption }.mkString(", "))
+					FinalYearGrade.Unknown(
+						"The final overall mark cannot be calculated because there is no mark for " +
+						markPerYear.filter { case (_, possibleMark) => possibleMark.isLeft }
+							.map { case (year, _) => year }
+							.toSeq
+							.sorted
+							.map { year => s"year $year" }
+							.mkString(", ")
+					)
 				} else if (yearWeightings.exists { case (_, possibleYearWeighting) => possibleYearWeighting.isEmpty } ) {
 					FinalYearGrade.Unknown("Could not find year weightings for: %s".format(
 						yearWeightings.filter { case (_, possibleWeighting) => possibleWeighting.isEmpty }.map { case (year, _) =>
