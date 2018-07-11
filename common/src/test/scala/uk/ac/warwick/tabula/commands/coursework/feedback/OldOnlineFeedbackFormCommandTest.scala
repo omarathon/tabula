@@ -10,7 +10,7 @@ import uk.ac.warwick.tabula.services._
 import uk.ac.warwick.tabula.{CurrentUser, Fixtures, Mockito, TestBase}
 import uk.ac.warwick.userlookup.User
 
-import scala.collection.JavaConversions._
+import scala.collection.JavaConverters._
 
 class OldOnlineFeedbackFormCommandTest extends TestBase with Mockito {
 
@@ -103,7 +103,7 @@ class OldOnlineFeedbackFormCommandTest extends TestBase with Mockito {
 			savedFormValue.feedback = existingFeedback
 			existingFeedback.customFormValues.add(savedFormValue)
 
-			assignment.feedbacks = Seq(existingFeedback)
+			assignment.feedbacks = Seq(existingFeedback).asJava
 
 			val command2 = new OldOnlineFeedbackFormCommand(module, assignment, student, currentUser.apparentUser, currentUser, gradeGenerator)
 				with OnlineFeedbackFormCommandTestSupport

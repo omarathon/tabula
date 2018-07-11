@@ -15,7 +15,7 @@ import uk.ac.warwick.tabula.web.Mav
 import uk.ac.warwick.tabula.web.controllers.coursework.OldCourseworkController
 import uk.ac.warwick.tabula.{AcademicYear, AutowiringFeaturesComponent}
 
-import scala.collection.JavaConversions._
+import scala.collection.JavaConverters._
 
 /**
  * Controller that handles the multi-step process of creating many assignments from SITS data.
@@ -44,7 +44,7 @@ class OldAddAssignmentsController extends OldCourseworkController with Autowirin
 
 	@ModelAttribute("academicYearChoices")
 	def academicYearChoices: JList[AcademicYear] =
-		AcademicYear.now().yearsSurrounding(0, 1)
+		AcademicYear.now().yearsSurrounding(0, 1).asJava
 
 	// The initial load of page 1, where we select the items to import.
 	@RequestMapping(method = Array(GET))

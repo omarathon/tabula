@@ -6,7 +6,7 @@ import uk.ac.warwick.tabula.data.model._
 import uk.ac.warwick.tabula.services._
 import uk.ac.warwick.tabula.{MockUserLookup, Mockito, TestBase}
 
-import scala.collection.JavaConversions._
+import scala.collection.JavaConverters._
 import scala.collection.JavaConverters._
 
 class ReleaseForMarkingTest extends TestBase with Mockito {
@@ -48,13 +48,13 @@ class ReleaseForMarkingTest extends TestBase with Mockito {
 			}
 
 
-			command.students = assignment.submissions.map(_.usercode)
-			assignment.feedbacks = command.applyInternal()
+			command.students = assignment.submissions.asScala.map(_.usercode).asJava
+			assignment.feedbacks = command.applyInternal().asJava
 
 			verify(command.stateService, times(3)).updateState(any[MarkerFeedback], any[MarkingState])
 
 			assignment.feedbacks.size should be (3)
-			val firstMarkerFeedback = assignment.feedbacks.map(_.firstMarkerFeedback)
+			val firstMarkerFeedback = assignment.feedbacks.asScala.map(_.firstMarkerFeedback)
 			firstMarkerFeedback.size should be (3)
 		}
 	}

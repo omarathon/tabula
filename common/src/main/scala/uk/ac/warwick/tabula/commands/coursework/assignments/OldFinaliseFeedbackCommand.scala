@@ -12,7 +12,7 @@ import uk.ac.warwick.tabula.services.{AutowiringZipServiceComponent, ZipService,
 import uk.ac.warwick.tabula.system.permissions.{PermissionsChecking, PermissionsCheckingMethods, RequiresPermissionsChecking}
 import uk.ac.warwick.userlookup.User
 
-import scala.collection.JavaConversions._
+import scala.collection.JavaConverters._
 
 /**
  * Copies the appropriate MarkerFeedback item to its parent Feedback ready for processing by administrators
@@ -49,13 +49,13 @@ abstract class FinaliseFeedbackCommandInternal(val assignment: Assignment, val m
 		parent.clearCustomFormValues()
 
 		// save custom fields
-		parent.customFormValues.addAll(markerFeedback.customFormValues.map { formValue =>
+		parent.customFormValues.addAll(markerFeedback.customFormValues.asScala.map { formValue =>
 			val newValue = new SavedFormValue()
 			newValue.name = formValue.name
 			newValue.feedback = formValue.markerFeedback.feedback
 			newValue.value = formValue.value
 			newValue
-		}.toSet[SavedFormValue])
+		}.toSet[SavedFormValue].asJava)
 
 		parent.actualGrade = markerFeedback.grade
 		parent.actualMark = markerFeedback.mark
@@ -65,7 +65,7 @@ abstract class FinaliseFeedbackCommandInternal(val assignment: Assignment, val m
 		// erase any existing attachments - these will be replaced
 		parent.clearAttachments()
 
-		markerFeedback.attachments.foreach(parent.addAttachment)
+		markerFeedback.attachments.asScala.foreach(parent.addAttachment)
 		zipService.invalidateIndividualFeedbackZip(parent)
 		parent
 	}

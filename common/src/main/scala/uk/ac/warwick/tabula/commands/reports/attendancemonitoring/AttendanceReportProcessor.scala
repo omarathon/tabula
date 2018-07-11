@@ -56,7 +56,8 @@ class AttendanceReportProcessorInternal(val department: Department, val academic
 				properties.get("route"),
 				null,
 				properties.get("yearOfStudy"),
-				properties.get("sprCode")
+				properties.get("sprCode"),
+				tier4Requirements = properties.get("tier4Requirements").toBoolean
 			)
 		}.toSeq.sortBy(s => (s.lastName, s.firstName))
 		import uk.ac.warwick.tabula.helpers.DateTimeOrdering._

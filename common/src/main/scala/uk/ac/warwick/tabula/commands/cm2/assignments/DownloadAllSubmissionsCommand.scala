@@ -8,7 +8,7 @@ import uk.ac.warwick.tabula.services.fileserver.RenderableFile
 import uk.ac.warwick.tabula.services.{AutowiringZipServiceComponent, ZipServiceComponent}
 import uk.ac.warwick.tabula.system.permissions.{PermissionsChecking, PermissionsCheckingMethods, RequiresPermissionsChecking}
 
-import scala.collection.JavaConversions._
+import scala.collection.JavaConverters._
 
 object DownloadAllSubmissionsCommand {
 	type Result = RenderableFile
@@ -51,8 +51,8 @@ trait DownloadAllSubmissionsCommandDescription extends Describable[Result] {
 
 	override def describe(d: Description): Unit = d
 		.assignment(assignment)
-		.studentIds(assignment.submissions.flatMap(_.universityId))
-		.studentUsercodes(assignment.submissions.map(_.usercode))
+		.studentIds(assignment.submissions.asScala.flatMap(_.universityId))
+		.studentUsercodes(assignment.submissions.asScala.map(_.usercode))
 		.properties(
 			"submissionCount" -> Option(assignment.submissions).map(_.size).getOrElse(0))
 }

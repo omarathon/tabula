@@ -79,7 +79,8 @@ abstract class AbstractSmallGroupsReportController extends ReportsController
 					"userId" -> studentData.userId,
 					"yearOfStudy" -> studentData.yearOfStudy,
 					"sprCode" -> studentData.sprCode,
-					"route" -> studentData.routeCode
+					"route" -> studentData.routeCode,
+					"tier4Requirements" -> studentData.tier4Requirements.toString
 				)
 			)
 			val allEvents: Seq[Map[String, String]] = result.eventWeeks.map(sgew =>

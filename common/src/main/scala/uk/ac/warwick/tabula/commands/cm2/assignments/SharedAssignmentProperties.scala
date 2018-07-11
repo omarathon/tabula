@@ -9,7 +9,7 @@ import uk.ac.warwick.tabula.data.model._
 import uk.ac.warwick.tabula.data.model.forms.{CommentField, FileField, MarkerSelectField, WordCountField}
 import uk.ac.warwick.tabula.services.{AutowiringZipServiceComponent, ZipServiceComponent}
 
-import scala.collection.JavaConversions._
+import scala.collection.JavaConverters._
 
 /**
  * Bound as the value of a Map on a parent form object, to store multiple sets of
@@ -132,7 +132,7 @@ trait SharedAssignmentOptionsProperties extends FindAssignmentFields {
 		for (file <- findFileField(assignment)) {
 			fileAttachmentLimit = file.attachmentLimit
 			minimumFileAttachmentLimit = file.minimumAttachmentLimit
-			fileAttachmentTypes = file.attachmentTypes
+			fileAttachmentTypes = file.attachmentTypes.asJava
 			individualFileSizeLimit = file.individualFileSizeLimit
 		}
 
@@ -148,7 +148,7 @@ trait SharedAssignmentOptionsProperties extends FindAssignmentFields {
 		for (file <- findFileField(assignment)) {
 			file.attachmentLimit = fileAttachmentLimit
 			file.minimumAttachmentLimit = minimumFileAttachmentLimit
-			file.attachmentTypes = fileAttachmentTypes
+			file.attachmentTypes = fileAttachmentTypes.asScala
 			file.individualFileSizeLimit = individualFileSizeLimit
 		}
 
@@ -172,7 +172,7 @@ trait SharedAssignmentOptionsProperties extends FindAssignmentFields {
 	}
 
 	def validateSharedOptions(errors: Errors): Unit = {
-		if (fileAttachmentTypes.mkString("").matches(invalidAttachmentPattern)) {
+		if (fileAttachmentTypes.asScala.mkString("").matches(invalidAttachmentPattern)) {
 			errors.rejectValue("fileAttachmentTypes", "attachment.invalidChars")
 		}
 

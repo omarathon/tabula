@@ -1,5 +1,5 @@
 package uk.ac.warwick.tabula.permissions
-import scala.collection.JavaConversions._
+import scala.collection.JavaConverters._
 
 import javax.persistence._
 import uk.ac.warwick.tabula.JavaImports._

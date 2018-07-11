@@ -1,6 +1,6 @@
 package uk.ac.warwick.tabula.validators
 
-import scala.collection.JavaConversions._
+import scala.collection.JavaConverters._
 import org.springframework.validation.Errors
 import uk.ac.warwick.tabula.services.UserLookupService
 import uk.ac.warwick.tabula.JavaImports._
@@ -18,7 +18,7 @@ class UsercodeListValidator(usercodes: JList[String], pathName: String, universi
 	var userLookup: UserLookupService = Wire.auto[UserLookupService]
 
 	def validate(errors: Errors) {
-		val trimmedCodes = usercodes.filter(_.hasText).map(_.trim)
+		val trimmedCodes = usercodes.asScala.filter(_.hasText).map(_.trim)
 		if (usercodesEmpty) {
 			errors.rejectValue(pathName, "NotEmpty")
 		} else if (alreadyHasCode) {
@@ -43,5 +43,5 @@ class UsercodeListValidator(usercodes: JList[String], pathName: String, universi
 	// can override for custom check for pre-existing usercode.
 	def alreadyHasCode = false
 
-	private def usercodesEmpty = !usercodes.exists(_.hasText)
+	private def usercodesEmpty = !usercodes.asScala.exists(_.hasText)
 }

@@ -7,7 +7,7 @@ import uk.ac.warwick.tabula.data.model._
 import uk.ac.warwick.tabula.services._
 import uk.ac.warwick.tabula.system.{CustomDataBinder, NoAutoGrownNestedPaths}
 
-import scala.collection.JavaConversions._
+import scala.collection.JavaConverters._
 
 //scalastyle:off magic.number
 class AddAssignmentsCommandTest extends TestBase with Mockito {
@@ -54,10 +54,10 @@ class AddAssignmentsCommandTest extends TestBase with Mockito {
 			item(upstream1, include = true, optionsId = "A"),
 			item(upstream2, include = false, optionsId = null),
 			item(upstream3, include = true, "A", openEnded = true)
-		)
+		).asJava
 		validator.optionsMap = Map(
 			"A" -> new SharedAssignmentPropertiesForm
-		)
+		).asJava
 
 		val errors = new BindException(validator, "command")
 		validator.validate(errors)
@@ -77,10 +77,10 @@ class AddAssignmentsCommandTest extends TestBase with Mockito {
 			item(upstream1, include = true, optionsId = "A"),
 			item(upstream2, include = false, optionsId = null),
 			item(upstream3, include = true, "A", openEnded = true)
-		)
+		).asJava
 		cmd.optionsMap = Map(
 			"A" -> new SharedAssignmentPropertiesForm
-		)
+		).asJava
 
 		val result = cmd.applyInternal()
 
@@ -114,7 +114,7 @@ class AddAssignmentsCommandTest extends TestBase with Mockito {
 		pvs.add("optionsMap[A].allowExtensions", true)
 		binder.bind(pvs)
 
-		cmd.optionsMap("A").allowExtensions.booleanValue should be (right = true)
+		cmd.optionsMap.get("A").allowExtensions.booleanValue should be (true)
 	}}
 
 	private def item(assignment: AssessmentComponent, include: Boolean, optionsId: String, openEnded: Boolean = false) = {

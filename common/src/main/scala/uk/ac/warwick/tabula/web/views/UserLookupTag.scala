@@ -9,7 +9,7 @@ import uk.ac.warwick.tabula.services.UserLookupService
 import freemarker.template.utility.DeepUnwrap
 import uk.ac.warwick.tabula.JavaImports._
 import freemarker.template.TemplateException
-import collection.JavaConversions._
+import scala.collection.JavaConverters._
 
 import scala.collection.JavaConverters._
 
@@ -53,7 +53,7 @@ class UserLookupTag extends TemplateDirectiveModel {
 			val userIds = users.get
 
 			val returnedUsers =
-				if (lookupByUniversityId) userLookup.getUsersByWarwickUniIds(userIds)
+				if (lookupByUniversityId) userLookup.getUsersByWarwickUniIds(userIds.asScala)
 				else userLookup.getUsersByUserIds(userIds).asScala
 
 			val missingUserIds =

@@ -267,7 +267,7 @@ class ProgressionServiceTest extends TestBase with Mockito {
 			service.moduleRegistrationService.overcattedModuleSubsets(any[ExamGridEntityYear], any[Map[Module, BigDecimal]], any[BigDecimal], any[Seq[UpstreamRouteRule]]) answers(args => Seq())
 			val result: FinalYearGrade = service.suggestedFinalYearGrade(entityYear3, 120, Map(), calculateYearMarks=false, groupByLevel=false, yearWeightings)
 			result.description should be (FinalYearGrade.Unknown("").description)
-			result.asInstanceOf[FinalYearGrade.Unknown].details.contains("Could not find agreed mark for year 1, Could not find agreed mark for year 2, No mark for you") should be {true}
+			result.asInstanceOf[FinalYearGrade.Unknown].details should be ("The final overall mark cannot be calculated because there is no mark for year 1, year 2, year 3")
 		}
 
 		// No mark for 2nd year
@@ -280,7 +280,7 @@ class ProgressionServiceTest extends TestBase with Mockito {
 			student.mostSignificantCourse.freshStudentCourseYearDetails.head.agreedMark = BigDecimal(90.0).underlying
 			val result: FinalYearGrade = service.suggestedFinalYearGrade(entityYear3, 120, Map(), calculateYearMarks=false, groupByLevel=false, yearWeightings)
 			result.description should be (FinalYearGrade.Unknown("").description)
-			result.asInstanceOf[FinalYearGrade.Unknown].details.contains("Could not find agreed mark for year 2") should be {true}
+			result.asInstanceOf[FinalYearGrade.Unknown].details should be ("The final overall mark cannot be calculated because there is no mark for year 2")
 		}
 
 		// No mark for this year
@@ -292,7 +292,7 @@ class ProgressionServiceTest extends TestBase with Mockito {
 			student.mostSignificantCourse.freshStudentCourseYearDetails.tail.head.agreedMark = BigDecimal(90.0).underlying
 			val result: FinalYearGrade = service.suggestedFinalYearGrade(entityYear3, 120, Map(), calculateYearMarks=false, groupByLevel=false, yearWeightings)
 			result.description should be (FinalYearGrade.Unknown("").description)
-			result.asInstanceOf[FinalYearGrade.Unknown].details.contains("No mark for you") should be {true}
+			result.asInstanceOf[FinalYearGrade.Unknown].details should be ("The final overall mark cannot be calculated because there is no mark for year 3")
 		}
 	}
 
@@ -365,7 +365,7 @@ class ProgressionServiceTest extends TestBase with Mockito {
 
 			val result: FinalYearGrade = service.suggestedFinalYearGrade(entityYear3, 180, Map(), calculateYearMarks=false, groupByLevel=false, yearWeightings)
 			result.description should be (FinalYearGrade.Unknown("").description)
-			result.asInstanceOf[FinalYearGrade.Unknown].details.contains("The overcat adjusted mark subset has not been chosen") should be {true}
+			result.asInstanceOf[FinalYearGrade.Unknown].details should be ("The final overall mark cannot be calculated because there is no mark for year 3")
 		}
 
 		// Overcat, 2 subsets, 1 chosen

@@ -4,7 +4,7 @@ import uk.ac.warwick.tabula.commands.{CommandInternal, Appliable}
 import uk.ac.warwick.tabula.commands.coursework.assignments.ListSubmissionsCommand.SubmissionListItem
 import uk.ac.warwick.tabula.services.elasticsearch.{AuditEventQueryService, AuditEventQueryServiceComponent}
 
-import collection.JavaConversions._
+import scala.collection.JavaConverters._
 import uk.ac.warwick.tabula.TestBase
 import org.joda.time.DateTime
 import uk.ac.warwick.tabula.commands.coursework.assignments.{ListSubmissionsRequest, ListSubmissionsCommandInternal}
@@ -73,7 +73,7 @@ class OldSubmissionsInfoControllerTest extends TestBase with Mockito {
 		val subDate = new DateTime(2012, DateTimeConstants.NOVEMBER, 27, 10, 44)
 		command.assignment.submissions.addAll(Seq(
 			submission(subDate, assignment, "0123456", Seq("Interesting helicopter.jpg"))
-		))
+		).asJava)
 
 		withUser("cusebr") {
 			val result = controller.xml(command, assignment)
@@ -93,7 +93,7 @@ class OldSubmissionsInfoControllerTest extends TestBase with Mockito {
 		assignment.id = "fakeassid"
 		command.assignment.submissions.addAll(Seq(
 			submission(subDate, assignment, "0123456", Seq("Interesting helicopter.jpg"))
-		))
+		).asJava)
 
 		withUser("cusxad") {
 			val actual = controller.csv(command).getAsString

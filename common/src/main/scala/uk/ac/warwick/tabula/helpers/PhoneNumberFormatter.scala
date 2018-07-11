@@ -1,6 +1,6 @@
 package uk.ac.warwick.tabula.helpers
 
-import collection.JavaConversions._
+import scala.collection.JavaConverters._
 import freemarker.template.TemplateMethodModelEx
 import freemarker.template.utility.DeepUnwrap
 import freemarker.template.TemplateModel
@@ -50,7 +50,7 @@ class PhoneNumberFormatter extends TemplateMethodModelEx {
 
 	/** Single argument method */
 	override def exec(list: JList[_]): String = {
-		val args = list.toSeq.map { model => DeepUnwrap.unwrap(model.asInstanceOf[TemplateModel]) }
+		val args = list.asScala.map { model => DeepUnwrap.unwrap(model.asInstanceOf[TemplateModel]) }
 		args match {
 			case Seq(unformatted: String) => format(unformatted)
 			case _ => throw new IllegalArgumentException("Bad args")

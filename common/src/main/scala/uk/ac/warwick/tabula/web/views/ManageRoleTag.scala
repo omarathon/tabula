@@ -10,7 +10,7 @@ import freemarker.template.utility.DeepUnwrap
 import uk.ac.warwick.tabula.JavaImports._
 import freemarker.ext.beans.BeansWrapper
 import freemarker.template.TemplateException
-import collection.JavaConversions._
+import scala.collection.JavaConverters._
 import uk.ac.warwick.tabula.RequestInfo
 import uk.ac.warwick.tabula.services.SecurityService
 import uk.ac.warwick.tabula.permissions.PermissionsTarget

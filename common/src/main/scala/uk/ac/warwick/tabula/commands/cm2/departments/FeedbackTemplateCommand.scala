@@ -11,7 +11,7 @@ import uk.ac.warwick.tabula.permissions._
 import uk.ac.warwick.tabula.services.ZipService
 import uk.ac.warwick.tabula.system.BindListener
 
-import scala.collection.JavaConversions._
+import scala.collection.JavaConverters._
 
 abstract class FeedbackTemplateCommand(val department:Department)
 	extends Command[Seq[FeedbackTemplate]] with Daoisms with BindListener {
@@ -43,7 +43,7 @@ class BulkFeedbackTemplateCommand(department:Department) extends FeedbackTemplat
 	override def applyInternal(): Seq[FeedbackTemplate] = {
 		transactional() {
 			val feedbackTemplates = if (!file.attached.isEmpty) {
-				for (attachment <- file.attached) yield {
+				for (attachment <- file.attached.asScala) yield {
 					val feedbackForm = new FeedbackTemplate
 					feedbackForm.name = attachment.name
 					feedbackForm.department = department
@@ -74,18 +74,18 @@ class EditFeedbackTemplateCommand(department:Department, val template: FeedbackT
 
 	override def applyInternal(): Seq[FeedbackTemplate] = {
 		transactional() {
-			val feedbackTemplate = department.feedbackTemplates.find(_.id == id).get
+			val feedbackTemplate = department.feedbackTemplates.asScala.find(_.id == id).get
 			feedbackTemplate.name = name
 			feedbackTemplate.description = description
 			feedbackTemplate.department = department
 			if (!file.attached.isEmpty) {
-				for (attachment <- file.attached) {
+				for (attachment <- file.attached.asScala) {
 					feedbackTemplate.attachFile(attachment)
 				}
 			}
 			session.update(feedbackTemplate)
 			// invalidate any zip files for linked assignments
-			feedbackTemplate.assignments.foreach(zipService.invalidateSubmissionZip(_))
+			feedbackTemplate.assignments.asScala.foreach(zipService.invalidateSubmissionZip(_))
 
 			Seq(feedbackTemplate)
 		}
@@ -107,7 +107,7 @@ class DeleteFeedbackTemplateCommand(department:Department, val template: Feedbac
 
 	override def applyInternal(): Seq[FeedbackTemplate] = {
 		transactional() {
-			val feedbackTemplate = department.feedbackTemplates.find(_.id == id).get
+			val feedbackTemplate = department.feedbackTemplates.asScala.find(_.id == id).get
 			if (feedbackTemplate.hasAssignments) {
 				logger.error("Cannot delete feedback template " + feedbackTemplate.id + " - it is still linked to assignments")
 				Nil

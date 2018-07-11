@@ -13,7 +13,7 @@ import uk.ac.warwick.tabula.web.Mav
 import uk.ac.warwick.tabula.web.controllers.cm2.CourseworkController
 import uk.ac.warwick.tabula.web.views.JSONView
 
-import scala.collection.JavaConversions._
+import scala.collection.JavaConverters._
 
 @Profile(Array("cm2Enabled"))
 @Controller
@@ -27,7 +27,7 @@ class AssignmentSearchController extends CourseworkController {
 
 	@RequestMapping(method = Array(GET), produces = Array("application/json"), params = Array("query"))
 	def submitSearchJSON(@Valid @ModelAttribute("searchAssignmentCommand") cmd: SearchAssignmentsCommand): Mav = {
-		val assignmentsJson: JList[Map[String, Object]] = toJson(cmd.apply())
+		val assignmentsJson: JList[Map[String, String]] = toJson(cmd.apply()).asJava
 		Mav(new JSONView(assignmentsJson))
 	}
 

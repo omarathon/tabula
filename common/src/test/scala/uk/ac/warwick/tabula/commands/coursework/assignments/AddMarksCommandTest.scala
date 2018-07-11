@@ -7,7 +7,7 @@ import uk.ac.warwick.tabula.services._
 import uk.ac.warwick.tabula.services.coursework.docconversion.MarkItem
 import uk.ac.warwick.tabula.{CurrentUser, Mockito, RequestInfo, TestBase}
 
-import scala.collection.JavaConversions._
+import scala.collection.JavaConverters._
 
 // scalastyle:off magic.number
 class AddMarksCommandTest extends TestBase with Mockito {
@@ -94,7 +94,7 @@ class AddMarksCommandTest extends TestBase with Mockito {
 			marks5.actualGrade = ""
 
 			validator.postExtractValidation(errors)
-			validator.marks.count(_.isValid) should be (0)
+			validator.marks.asScala.count(_.isValid) should be (0)
 		}
 	}
 
@@ -144,7 +144,7 @@ class AddMarksCommandTest extends TestBase with Mockito {
 			marks5.actualGrade = ""
 
 			validator.postExtractValidation(errors)
-			validator.marks.count(_.isValid) should be (1)
+			validator.marks.asScala.count(_.isValid) should be (1)
 		}
 	}
 

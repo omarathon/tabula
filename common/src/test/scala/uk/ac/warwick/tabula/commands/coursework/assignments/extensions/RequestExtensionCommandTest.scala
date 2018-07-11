@@ -7,7 +7,7 @@ import uk.ac.warwick.tabula.data.model.forms.Extension
 import uk.ac.warwick.tabula.services.{FileAttachmentService, FileAttachmentServiceComponent, RelationshipService, RelationshipServiceComponent}
 import uk.ac.warwick.tabula.{Mockito, RequestInfo, TestBase}
 
-import scala.collection.JavaConversions._
+import scala.collection.JavaConverters._
 
 // scalastyle:off magic.number
 class RequestExtensionCommandTest extends TestBase with Mockito {
@@ -133,7 +133,7 @@ class RequestExtensionCommandTest extends TestBase with Mockito {
 				assignment.extensionAttachmentMandatory = true
 				errors = new BindException(command, "command")
 				command.validate(errors)
-				errors.getFieldErrors("file").nonEmpty should be {true}
+				errors.getFieldErrors("file").asScala.nonEmpty should be {true}
 			}
 		}
 	}
@@ -162,7 +162,7 @@ class RequestExtensionCommandTest extends TestBase with Mockito {
 				command.presetValues(newExtension)
 
 				var returnedExtension = command.applyInternal()
-				returnedExtension.attachments.head should be (attachment)
+				returnedExtension.attachments.asScala.head should be (attachment)
 
 				command.attachedFiles.remove(attachment)
 				returnedExtension = command.applyInternal()

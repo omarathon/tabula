@@ -11,7 +11,6 @@ import uk.ac.warwick.tabula.services.attendancemonitoring.{AttendanceMonitoringS
 import uk.ac.warwick.tabula.services.{AutowiringModuleAndDepartmentServiceComponent, AutowiringProfileServiceComponent, ModuleAndDepartmentServiceComponent, ProfileServiceComponent}
 import uk.ac.warwick.tabula.system.permissions.PubliclyVisiblePermissions
 
-import scala.collection.JavaConversions._
 import scala.collection.JavaConverters._
 
 object AttendanceMonitoringSchemeFixtureCommand {
@@ -45,7 +44,7 @@ class AttendanceMonitoringSchemeFixtureCommand extends CommandInternal[Attendanc
 		val department = moduleAndDepartmentService.getDepartmentByCode(deptCode).getOrElse(throw new IllegalArgumentException)
 
 		for (scheme <- attendanceMonitoringService.listSchemes(department, academicYear)) {
-			for (point <- scheme.points){
+			for (point <- scheme.points.asScala){
 				for (checkpoint <- attendanceMonitoringService.getAllCheckpoints(point)){
 					session.delete(checkpoint)
 				}

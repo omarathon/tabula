@@ -7,7 +7,7 @@ import uk.ac.warwick.tabula.data.model.Member
 import uk.ac.warwick.tabula.web.Mav
 import uk.ac.warwick.tabula.web.views.JSONView
 
-import scala.collection.JavaConversions._
+import scala.collection.JavaConverters._
 
 trait SearchJSONHelpers {
 
@@ -30,8 +30,7 @@ trait SearchJSONHelpers {
 		if (errors.hasErrors) {
 			formMav
 		} else {
-			val profilesJson: JList[Map[String, Object]] = toJson(cmd.apply())
-
+			val profilesJson: JList[Map[String, String]] = toJson(cmd.apply()).asJava
 			Mav(new JSONView(profilesJson))
 		}
 	}

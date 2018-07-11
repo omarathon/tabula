@@ -2,7 +2,7 @@ package uk.ac.warwick.tabula.helpers
 
 import org.joda.time._
 import org.joda.time.format.{DateTimeFormatter, DateTimeFormat}
-import collection.JavaConversions._
+import scala.collection.JavaConverters._
 import freemarker.template.TemplateMethodModelEx
 import freemarker.template.utility.DeepUnwrap
 import freemarker.template.TemplateModel
@@ -53,7 +53,7 @@ class IntervalFormatter extends TemplateMethodModelEx {
 
 	/** Two-argument method taking a start and end date. */
 	override def exec(list: JList[_]): String = {
-		val args = list.toSeq.map {
+		val args = list.asScala.map {
 			model => {
 				DeepUnwrap.unwrap(model.asInstanceOf[TemplateModel])
 			}

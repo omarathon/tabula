@@ -8,7 +8,7 @@ import uk.ac.warwick.tabula.roles.Marker
 import uk.ac.warwick.tabula.services.AssessmentService
 import uk.ac.warwick.userlookup.User
 
-import scala.collection.JavaConversions._
+import scala.collection.JavaConverters._
 
 class MarkerRoleProviderTest extends TestBase with Mockito {
 
@@ -46,10 +46,10 @@ class MarkerRoleProviderTest extends TestBase with Mockito {
 	assignmentIsMarker2.module = mod2
 	assignmentNotMarker.module = mod3
 
-	dept.modules.addAll(Seq(mod1, mod2, mod3))
-	mod1.assignments.addAll(Seq(assignmentIsMarker1, assignmentNotMarker))
-	mod2.assignments.addAll(Seq(assignmentIsMarker2))
-	mod3.assignments.addAll(Seq(assignmentNotMarker))
+	dept.modules.addAll(Seq(mod1, mod2, mod3).asJava)
+	mod1.assignments.addAll(Seq(assignmentIsMarker1, assignmentNotMarker).asJava)
+	mod2.assignments.addAll(Seq(assignmentIsMarker2).asJava)
+	mod3.assignments.addAll(Seq(assignmentNotMarker).asJava)
 
 	val cuscavUser = new CurrentUser(new User("cuscav"), new User("cuscav"))
 

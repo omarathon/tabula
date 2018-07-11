@@ -10,6 +10,7 @@ import uk.ac.warwick.spring.Wire
 import uk.ac.warwick.tabula.CurrentUser
 import uk.ac.warwick.tabula.events.JobNotificationHandling
 import uk.ac.warwick.tabula.helpers.Logging
+import uk.ac.warwick.tabula.helpers.StringUtils._
 import uk.ac.warwick.tabula.jobs._
 import uk.ac.warwick.userlookup.User
 
@@ -141,7 +142,7 @@ class JobService extends HasJobDao with Logging with JobNotificationHandling {
 				fail(instance)
 			case e: Throwable =>
 				logger.info(s"Job ${instance.id} failed", e)
-				instance.status = "Sorry, there was an error: " + e.getMessage
+				instance.status = s"Sorry, there was an error: ${e.getMessage.safeSubstring(0, 1000)}"
 				fail(instance)
 		}
 

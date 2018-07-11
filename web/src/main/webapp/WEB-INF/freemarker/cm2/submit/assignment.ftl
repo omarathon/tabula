@@ -2,7 +2,7 @@
 <#escape x as x?html>
 <#compress>
 
-<#if canSubmit>
+<#if canSubmit && !submission??>
 	<@cm2.assignmentHeader "Submit assignment" assignment "for" />
 <#else>
 	<@cm2.assignmentHeader "View assignment" assignment "for" />

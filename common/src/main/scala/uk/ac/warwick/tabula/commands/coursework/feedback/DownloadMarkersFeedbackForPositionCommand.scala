@@ -10,7 +10,7 @@ import uk.ac.warwick.tabula.services.{AutowiringZipServiceComponent, ZipServiceC
 import uk.ac.warwick.tabula.system.permissions.{PermissionsChecking, PermissionsCheckingMethods, RequiresPermissionsChecking}
 import uk.ac.warwick.userlookup.User
 
-import scala.collection.JavaConversions._
+import scala.collection.JavaConverters._
 
 object DownloadMarkersFeedbackForPositionCommand {
 
@@ -36,7 +36,7 @@ class DownloadMarkersFeedbackForPositionCommand(
 
 	override def applyInternal(): RenderableFile = {
 		val markersSubs = assignment.getMarkersSubmissions(marker)
-		val feedbacks = assignment.feedbacks.filter(f => markersSubs.exists(_.usercode == f.usercode))
+		val feedbacks = assignment.feedbacks.asScala.filter(f => markersSubs.exists(_.usercode == f.usercode))
 		val releasedMarkerFeedbacks = feedbacks.flatMap(f => position match {
 			case FirstFeedback => Option(f.firstMarkerFeedback)
 			case SecondFeedback => Option(f.secondMarkerFeedback)

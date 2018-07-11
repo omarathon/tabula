@@ -1,6 +1,6 @@
 package uk.ac.warwick.tabula.services.permissions
 
-import collection.JavaConversions._
+import scala.collection.JavaConverters._
 import org.mockito.Matchers._
 import org.mockito.Mockito._
 import uk.ac.warwick.tabula.Fixtures
@@ -105,7 +105,7 @@ class RoleServiceTest extends TestBase with Mockito {
 		val in = Fixtures.department("in")
 		val insub1 = Fixtures.department("in-sub1")
 		val insub2 = Fixtures.department("in-sub2")
-		in.children.addAll(Seq(insub1, insub2))
+		in.children.addAll(Seq(insub1, insub2).asJava)
 		insub1.parent = in
 		insub2.parent = in
 

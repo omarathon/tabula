@@ -9,7 +9,7 @@ import org.springframework.web.servlet.View
 import uk.ac.warwick.spring.Wire
 import uk.ac.warwick.tabula.JavaImports._
 
-import scala.collection.JavaConversions._
+import scala.collection.JavaConverters._
 import scala.xml.{Elem, MinimizeMode, Utility}
 
 class XmlErrorView(errors: Errors, filename: Option[String] = None) extends View {
@@ -20,8 +20,8 @@ class XmlErrorView(errors: Errors, filename: Option[String] = None) extends View
 		response.setContentType(getContentType())
 		response.setStatus(HttpStatus.BAD_REQUEST.value())
 
-		val globalErrors = errors.getGlobalErrors.map { error => GlobalError(error.getCode, getMessage(error.getCode, error.getArguments: _*)) }.toArray
-		val fieldErrors = errors.getFieldErrors.map { error => FieldError(error.getCode, error.getField, getMessage(error.getCode, error.getArguments: _*)) }.toArray
+		val globalErrors = errors.getGlobalErrors.asScala.map { error => GlobalError(error.getCode, getMessage(error.getCode, error.getArguments: _*)) }.toArray
+		val fieldErrors = errors.getFieldErrors.asScala.map { error => FieldError(error.getCode, error.getField, getMessage(error.getCode, error.getArguments: _*)) }.toArray
 
 		val xml: Elem =
 			<errors>

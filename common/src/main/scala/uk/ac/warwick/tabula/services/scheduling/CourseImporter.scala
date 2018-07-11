@@ -18,7 +18,7 @@ import uk.ac.warwick.tabula.helpers.StringUtils._
 import uk.ac.warwick.tabula.sandbox.SandboxData
 import uk.ac.warwick.util.core.StringUtils
 
-import scala.collection.JavaConversions._
+import scala.collection.JavaConverters._
 
 trait CourseImporter extends Logging {
 	var courseDao: CourseDao = Wire[CourseDao]
@@ -70,7 +70,7 @@ class SitsCourseImporter extends CourseImporter {
 	lazy val coursesQuery = new CoursesQuery(sits)
 
 	override def buildImportCommands(): Seq[ImportCourseCommand] = {
-		coursesQuery.execute.toSeq
+		coursesQuery.execute.asScala
 	}
 }
 

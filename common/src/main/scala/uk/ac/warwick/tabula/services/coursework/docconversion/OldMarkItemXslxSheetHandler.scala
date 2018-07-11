@@ -10,7 +10,7 @@ import uk.ac.warwick.tabula.helpers.Logging
 import uk.ac.warwick.tabula.helpers.StringUtils._
 import uk.ac.warwick.tabula.services.{UserLookupComponent, UserLookupService}
 
-import scala.collection.JavaConversions._
+import scala.collection.JavaConverters._
 
 object OldMarkItemXslxSheetHandler {
 	def apply(styles: StylesTable, sst: ReadOnlySharedStringsTable, markItems: JList[MarkItem], userLookupService: UserLookupService) =
@@ -29,7 +29,7 @@ abstract class OldMarkItemXslxSheetHandler(styles: StylesTable, sst: ReadOnlySha
 		val col = new CellReference(cellReference).getCol
 		if (isFirstRow){
 			columnMap(col) = formattedValue
-		} else if (columnMap.containsKey(col)) {
+		} else if (columnMap.asJava.containsKey(col)) {
 			columnMap(col) match {
 				case "University ID" | "ID" =>
 					currentItem.universityId = formattedValue

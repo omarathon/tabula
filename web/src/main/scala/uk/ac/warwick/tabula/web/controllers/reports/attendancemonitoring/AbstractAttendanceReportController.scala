@@ -79,7 +79,8 @@ abstract class AbstractAttendanceReportController extends ReportsController
 					"universityId" -> studentData.universityId,
 					"yearOfStudy" -> studentData.yearOfStudy,
 					"sprCode" -> studentData.sprCode,
-					"route" -> studentData.routeCode
+					"route" -> studentData.routeCode,
+					"tier4Requirements" -> studentData.tier4Requirements.toString
 				)
 			)
 			val intervalFormatter = new IntervalFormatter

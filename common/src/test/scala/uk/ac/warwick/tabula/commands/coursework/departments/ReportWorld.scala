@@ -5,7 +5,7 @@ import org.joda.time.DateTime
 import uk.ac.warwick.tabula.data.model.forms.Extension
 import uk.ac.warwick.tabula.services._
 import uk.ac.warwick.tabula.services.elasticsearch.AuditEventQueryMethods
-import collection.JavaConversions._
+import scala.collection.JavaConverters._
 import uk.ac.warwick.tabula.{TestBase, Mockito}
 import uk.ac.warwick.userlookup.User
 
@@ -42,7 +42,7 @@ trait ReportWorld extends TestBase with Mockito {
 	val moduleTwo = new Module("IN102", department)
 	moduleTwo.name = "Module Two"
 
-	department.modules = List(moduleOne, moduleTwo)
+	department.modules = List(moduleOne, moduleTwo).asJava
 
 	var auditEvents: List[AuditEvent] = List()
 
@@ -86,7 +86,7 @@ trait ReportWorld extends TestBase with Mockito {
 	var submissionService: SubmissionService = mock[SubmissionService]
 	submissionService.getSubmissionsByAssignment(any[Assignment]) answers { assignmentObj =>
 		val assignment = assignmentObj.asInstanceOf[Assignment]
-		assignment.submissions
+		assignment.submissions.asScala
 	}
 
 
@@ -95,7 +95,7 @@ trait ReportWorld extends TestBase with Mockito {
 		val args = argsObj.asInstanceOf[Array[_]]
 		val assignment = args(0).asInstanceOf[Assignment]
 		val usercode = args(1).asInstanceOf[String]
-		assignment.feedbacks.find(_.usercode == usercode)
+		assignment.feedbacks.asScala.find(_.usercode == usercode)
 	}}
 
 	def studentData(start:Int, end:Int): List[String] = (start to end).map(i => s"u${idFormat(i)}").toList
@@ -124,7 +124,7 @@ trait ReportWorld extends TestBase with Mockito {
 	extension.approve()
 	extension.expiryDate = assignmentSix.closeDate.plusDays(2)
 	extension.assignment =  assignmentSix
-	assignmentSix.extensions = Seq(extension)
+	assignmentSix.extensions = Seq(extension).asJava
 
 	def addAssignment(id: String, name: String, closeDate: DateTime, numberOfStudents: Int, lateModNumber: Int, module: Module): Assignment = {
 		val assignment = new Assignment(module)
@@ -153,7 +153,7 @@ trait ReportWorld extends TestBase with Mockito {
 
 	def addFeedback(assignment:Assignment) {
 		withFakeTime(dateTime(2013, 3, 13)) {
-			val feedback = assignment.submissions.map { s=>
+			val feedback = assignment.submissions.asScala.map { s=>
 				val newFeedback = new AssignmentFeedback
 				newFeedback.assignment = assignment
 				newFeedback.usercode = s.usercode
@@ -161,7 +161,7 @@ trait ReportWorld extends TestBase with Mockito {
 				newFeedback.released = true
 				newFeedback
 			}
-			assignment.feedbacks = feedback
+			assignment.feedbacks = feedback.asJava
 		}
 	}
 

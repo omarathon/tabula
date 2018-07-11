@@ -1,5 +1,5 @@
 package uk.ac.warwick.tabula.system
-import scala.collection.JavaConversions._
+import scala.collection.JavaConverters._
 import org.springframework.web.bind.support.WebBindingInitializer
 import org.springframework.web.context.request.NativeWebRequest
 import org.springframework.web.method.support.InvocableHandlerMethod
@@ -14,7 +14,7 @@ import org.springframework.validation.DataBinder
  * from a request. We use our own custom data binder.
  */
 class CustomDataBinderFactory(binderMethods: List[InvocableHandlerMethod], initializer: WebBindingInitializer)
-	extends ServletRequestDataBinderFactory(binderMethods, initializer) {
+	extends ServletRequestDataBinderFactory(binderMethods.asJava, initializer) {
 
 	trait CustomDataBinderDependencies {
 		// dependency for PermissionsBinding

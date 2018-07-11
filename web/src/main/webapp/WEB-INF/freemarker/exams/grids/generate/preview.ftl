@@ -28,11 +28,14 @@
 		<div id="examGridContainer">
 			<div class="alert alert-info">
 				<h3>Your <#if gridOptionsCommand.showFullLayout>full<#else>short</#if> grid</h3>
-				<p>
-					This grid has been generated from the data available in SITS at
-					<@fmt.date date=oldestImport capitalise=false at=true relative=true />. If data changes in SITS after this
-					time, you'll need to generate the grid again to see the most recent information.
-				</p>
+
+				<#if oldestImport??>
+					<p>
+						This grid has been generated from the data available in SITS at
+						<@fmt.date date=oldestImport capitalise=false at=true relative=true />. If data changes in SITS after this
+						time, you'll need to generate the grid again to see the most recent information.
+					</p>
+				</#if>
 
 				<#if !(info.maintenance!false)>
 					<form action="<@routes.exams.generateGrid department academicYear />" method="post">
@@ -422,6 +425,14 @@
 
 		$('#examGridContainer').css('opacity', 1);
 		$('#examGridSpinner').hide();
+
+		$('.use-popover').on('shown.bs.popover', function (e) {
+			var $target = $(e.target).popover().data('bs.popover').tip();
+			$target.find('.use-popover').tabulaPopover({
+				trigger: 'click',
+				container: 'body'
+			});
+		});
 	});
 </script>
 
