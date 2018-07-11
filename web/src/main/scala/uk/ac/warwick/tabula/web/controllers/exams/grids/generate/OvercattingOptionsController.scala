@@ -14,6 +14,7 @@ import uk.ac.warwick.tabula.exams.grids.NullStatusAdapter
 import uk.ac.warwick.tabula.exams.grids.columns._
 import uk.ac.warwick.tabula.exams.grids.columns.marking.OvercattedYearMarkColumnOption
 import uk.ac.warwick.tabula.exams.grids.columns.modules.{CoreModulesColumnOption, CoreOptionalModulesColumnOption, CoreRequiredModulesColumnOption, OptionalModulesColumnOption}
+import uk.ac.warwick.tabula.exams.grids.columns.studentidentification.YearWeightingsColumnOption
 import uk.ac.warwick.tabula.services.exams.grids.{AutowiringNormalCATSLoadServiceComponent, AutowiringUpstreamRouteRuleServiceComponent, NormalLoadLookup}
 import uk.ac.warwick.tabula.services.{AutowiringModuleRegistrationServiceComponent, ModuleRegistrationServiceComponent}
 import uk.ac.warwick.tabula.web.Mav
@@ -94,7 +95,6 @@ class OvercattingOptionsController extends ExamsController
 				courses = Seq(scyd.studentCourseDetails.course),
 				routes = Seq(scyd.route),
 				yearOfStudy = scyd.yearOfStudy,
-				yearWeightings = Map(),
 				normalLoadLookup = overcatView.normalLoadLookup,
 				entities = overcatView.overcattedEntities,
 				leftColumns = overcatView.optionsColumns,

@@ -32,7 +32,8 @@ class SuggestedResultColumnOption extends ChosenYearExamGridColumnOption with Au
 						state.normalLoadLookup(entityYear.get.route),
 						entity.validYears.mapValues(ey => state.routeRulesLookup(ey.route, ey.level)),
 						state.calculateYearMarks,
-						state.isLevelGrid
+						state.isLevelGrid,
+						entity.yearWeightings
 					) match {
 						case unknown: ProgressionResult.Unknown => ExamGridColumnValueMissing(unknown.details)
 						case resit: Resit.type if state.department.rootDepartment.code == "es" =>

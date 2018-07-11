@@ -1,9 +1,10 @@
 package uk.ac.warwick.tabula.exams.grids.columns.studentidentification
 
 import org.springframework.stereotype.Component
-import uk.ac.warwick.tabula.exams.web.Routes
 import uk.ac.warwick.tabula.commands.exams.grids.ExamGridEntity
 import uk.ac.warwick.tabula.exams.grids.columns._
+import uk.ac.warwick.tabula.exams.web.Routes
+import uk.ac.warwick.tabula.services.{AutowiringCourseAndRouteServiceComponent, AutowiringModuleRegistrationServiceComponent}
 
 @Component
 class NameColumnOption extends StudentExamGridColumnOption {
@@ -58,9 +59,9 @@ class NameColumnOption extends StudentExamGridColumnOption {
 
 	}
 
-	override def getColumns(state: ExamGridColumnState): Seq[ChosenYearExamGridColumn] =  state.nameToShow match {
+	override def getColumns(state: ExamGridColumnState): Seq[ChosenYearExamGridColumn] = state.nameToShow match {
 		case ExamGridStudentIdentificationColumnValue.FullName => Seq(FullNameColumn(state))
-		case ExamGridStudentIdentificationColumnValue.BothName	=> Seq(FirstNameColumn(state), LastNameColumn(state))
+		case ExamGridStudentIdentificationColumnValue.BothName => Seq(FirstNameColumn(state), LastNameColumn(state))
 		case _ => Seq()
 	}
 
@@ -81,6 +82,7 @@ class UniversityIDColumnOption extends StudentExamGridColumnOption {
 
 		override val title: String = "ID"
 		override val excelColumnWidth: Int = ExamGridColumnOption.ExcelColumnSizes.ShortString
+
 		override def values: Map[ExamGridEntity, ExamGridColumnValue] = {
 			state.entities.map { entity =>
 				val scyd = for {
@@ -96,7 +98,7 @@ class UniversityIDColumnOption extends StudentExamGridColumnOption {
 								entity.universityId,
 								s"""<a href="$componentLink" target="_blank">${entity.universityId}</a>"""
 							)
-					case _	=>  entity -> ExamGridColumnValueString(entity.universityId)
+					case _ => entity -> ExamGridColumnValueString(entity.universityId)
 				}
 			}.toMap
 		}
@@ -124,7 +126,7 @@ class SPRCodeColumnOption extends StudentExamGridColumnOption {
 
 		override def values: Map[ExamGridEntity, ExamGridColumnValue] = {
 			state.entities.map(entity => entity ->
-				ExamGridColumnValueString (
+				ExamGridColumnValueString(
 					(for {
 						egeyOpt <- entity.years.get(state.yearOfStudy)
 						egey <- egeyOpt
@@ -226,6 +228,47 @@ class StartYearColumnOption extends StudentExamGridColumnOption {
 					).map(_.toString).getOrElse("[Unknown]")
 				)
 			).toMap
+		}
+
+	}
+
+	override def getColumns(state: ExamGridColumnState): Seq[ChosenYearExamGridColumn] = Seq(Column(state))
+
+}
+
+
+@Component
+class YearWeightingsColumnOption extends StudentExamGridColumnOption with AutowiringModuleRegistrationServiceComponent with AutowiringCourseAndRouteServiceComponent {
+
+	override val identifier: ExamGridColumnOption.Identifier = "yearWeightings"
+
+	override val label: String = "Student identification: Year Weightings"
+
+	override val sortOrder: Int = ExamGridColumnOption.SortOrders.YearWeightings
+
+	case class Column(state: ExamGridColumnState) extends ChosenYearExamGridColumn(state) {
+
+		override val title: String = "Year Weightings"
+
+		override val excelColumnWidth: Int = ExamGridColumnOption.ExcelColumnSizes.ShortString
+
+		override def values: Map[ExamGridEntity, ExamGridColumnValue] = {
+			state.entities.map { entity =>
+				val yearWeightings = entity.validYears.get(state.yearOfStudy).flatMap(_.studentCourseYearDetails).map { scyd =>
+					courseAndRouteService.findAllCourseYearWeightings(Seq(scyd.studentCourseDetails.course), scyd.studentCourseDetails.sprStartAcademicYear)
+				} match {
+					case Some(weightings) => weightings
+					case None => Seq()
+				}
+				val yearWeightingsAsString = for {
+					yearWeighting <- yearWeightings
+				} yield s"${yearWeighting.weightingAsPercentage.toPlainString}"
+
+				val weightingCol = if (yearWeightings.size > 0) {
+					s"${yearWeightingsAsString.mkString("/")} - ${yearWeightings.head.course.code}"
+				} else "Year weightings not set"
+				entity -> ExamGridColumnValueString(weightingCol)
+			}.toMap
 		}
 
 	}
