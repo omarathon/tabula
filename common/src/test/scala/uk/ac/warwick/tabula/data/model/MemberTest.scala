@@ -250,6 +250,7 @@ class MemberTest extends TestBase with Mockito {
 		val scyd2016 = scd2.latestStudentCourseYearDetails
 		scyd2016.academicYear = AcademicYear(2016)
 		scyd2016.yearOfStudy = 1
+		student.courseAndRouteService = courseAndRouteService
 
 		val entity = student.toExamGridEntity(scyd2015)
 		entity.validYears(1).studentCourseYearDetails.get should be (scyd2013) // Latest year 1 BEFORE the baseSCYD (15/16)
