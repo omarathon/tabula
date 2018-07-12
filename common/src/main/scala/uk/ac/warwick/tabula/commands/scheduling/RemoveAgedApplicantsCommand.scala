@@ -5,12 +5,15 @@ import uk.ac.warwick.spring.Wire
 import uk.ac.warwick.tabula.commands.CommandInternal
 import uk.ac.warwick.tabula.data.MemberDao
 import uk.ac.warwick.tabula.data.model.MemberUserType
-import uk.ac.warwick.tabula.services.{ProfileService}
+import uk.ac.warwick.tabula.permissions.Permissions
+import uk.ac.warwick.tabula.services.ProfileService
+import uk.ac.warwick.tabula.system.permissions.{PermissionsChecking, PermissionsCheckingMethods, RequiresPermissionsChecking}
 
 
 object RemoveAgedApplicantsCommand {
 	def apply() =
 		new RemoveAgedApplicantsCommandInternal
+			with RemoveAgedApplicantsPermissions
 }
 
 class RemoveAgedApplicantsCommandInternal extends CommandInternal[Unit] {
@@ -32,3 +35,8 @@ class RemoveAgedApplicantsCommandInternal extends CommandInternal[Unit] {
 	}
 }
 
+trait RemoveAgedApplicantsPermissions extends RequiresPermissionsChecking with PermissionsCheckingMethods {
+	override def permissionsCheck(p: PermissionsChecking) {
+		p.PermissionCheck(Permissions.ImportSystemData)
+	}
+}
