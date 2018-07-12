@@ -3,7 +3,7 @@ package uk.ac.warwick.tabula.data.model
 import org.joda.time.DateTime
 import org.junit.Before
 import uk.ac.warwick.tabula.data.{AutowiringMemberDaoImpl, StudentCourseDetailsDaoImpl}
-import uk.ac.warwick.tabula.services.{ProfileService, RelationshipService, StaffAssistantsHelpers}
+import uk.ac.warwick.tabula.services.{CourseAndRouteService, ProfileService, RelationshipService, StaffAssistantsHelpers}
 import uk.ac.warwick.tabula._
 import uk.ac.warwick.tabula.JavaImports.JBigDecimal
 
@@ -13,6 +13,7 @@ class MemberTest extends TestBase with Mockito {
 
 	val profileService: ProfileService with StaffAssistantsHelpers = smartMock[ProfileService with StaffAssistantsHelpers]
 	val relationshipService: RelationshipService = smartMock[RelationshipService]
+	val courseAndRouteService: CourseAndRouteService = smartMock[CourseAndRouteService]
 
 	@Test def testAffiliatedDepartments(): Unit = {
 		val member = new StudentMember
