@@ -24,7 +24,7 @@ class RemoveAgedApplicantsCommandInternal extends CommandInternal[Unit] {
 	override protected def applyInternal(): Unit = {
 
 		memberDao.getMissingSince(
-			from = DateTime.now().minusYears(1),
+			from = DateTime.now().minusMonths(2),
 			memberUserType = MemberUserType.Applicant
 		).flatMap { universityId =>
 			memberDao.getByUniversityId(
