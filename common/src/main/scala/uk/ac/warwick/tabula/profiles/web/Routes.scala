@@ -36,12 +36,12 @@ object Routes {
 			context + "/view/course/%s/%s/assignments" format (encoded(scyd.studentCourseDetails.urlSafeId), encoded(scyd.academicYear.value.toString))
 		def modules(scyd: StudentCourseYearDetails): String =
 			context + "/view/course/%s/%s/modules" format (encoded(scyd.studentCourseDetails.urlSafeId), encoded(scyd.academicYear.value.toString))
-		def seminars(universityId: String): String =
-			context + "/view/%s/seminars" format encoded(universityId)
-		def seminars(member: Member): String =
-			context + "/view/%s/seminars" format encoded(member.universityId)
-		def seminars(scyd: StudentCourseYearDetails): String =
-			context + "/view/course/%s/%s/seminars" format (encoded(scyd.studentCourseDetails.urlSafeId), encoded(scyd.academicYear.value.toString))
+		def events(universityId: String): String =
+			context + "/view/%s/events" format encoded(universityId)
+		def events(member: Member): String =
+			context + "/view/%s/events" format encoded(member.universityId)
+		def events(scyd: StudentCourseYearDetails): String =
+			context + "/view/course/%s/%s/events" format (encoded(scyd.studentCourseDetails.urlSafeId), encoded(scyd.academicYear.value.toString))
 		def marking(member: Member): String = context + "/view/%s/marking" format encoded(member.universityId)
 		def marking(scyd: StudentCourseYearDetails): String =
 			context + "/view/course/%s/%s/marking" format (encoded(scyd.studentCourseDetails.urlSafeId), encoded(scyd.academicYear.value.toString))

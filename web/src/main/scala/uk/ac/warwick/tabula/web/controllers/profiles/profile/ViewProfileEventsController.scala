@@ -11,9 +11,9 @@ import uk.ac.warwick.tabula.web.controllers.profiles.ProfileBreadcrumbs
 
 @Controller
 @RequestMapping(Array("/profiles/view"))
-class ViewProfileSeminarsController extends AbstractViewProfileController {
+class ViewProfileEventsController extends AbstractViewProfileController {
 
-	@RequestMapping(Array("/{member}/seminars"))
+	@RequestMapping(Array("/{member}/events", "/{member}/seminars"))
 	def viewByMemberMapping(
 		@PathVariable member: Member,
 		@ModelAttribute("activeAcademicYear") activeAcademicYear: Option[AcademicYear]
@@ -28,7 +28,7 @@ class ViewProfileSeminarsController extends AbstractViewProfileController {
 		}
 	}
 
-	@RequestMapping(Array("/course/{studentCourseDetails}/{academicYear}/seminars"))
+	@RequestMapping(Array("/course/{studentCourseDetails}/{academicYear}/events", "/course/{studentCourseDetails}/{academicYear}/seminars"))
 	def viewByCourseMapping(
 		@PathVariable studentCourseDetails: StudentCourseDetails,
 		@PathVariable academicYear: AcademicYear
@@ -48,8 +48,8 @@ class ViewProfileSeminarsController extends AbstractViewProfileController {
 			"command" -> command,
 			"commandResult" -> command.map(_.apply()).orNull,
 			"isSelf" -> (user.universityId.maybeText.getOrElse("") == studentCourseDetails.student.universityId)
-		).crumbs(breadcrumbsStudent(activeAcademicYear, studentCourseDetails, ProfileBreadcrumbs.Profile.SeminarsIdentifier): _*)
-			.secondCrumbs(secondBreadcrumbs(activeAcademicYear, studentCourseDetails)(scyd => Routes.Profile.seminars(scyd)): _*)
+		).crumbs(breadcrumbsStudent(activeAcademicYear, studentCourseDetails, ProfileBreadcrumbs.Profile.EventsIdentifier): _*)
+			.secondCrumbs(secondBreadcrumbs(activeAcademicYear, studentCourseDetails)(scyd => Routes.Profile.events(scyd)): _*)
 	}
 
 }
