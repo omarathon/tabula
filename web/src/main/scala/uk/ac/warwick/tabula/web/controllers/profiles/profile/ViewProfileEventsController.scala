@@ -11,7 +11,7 @@ import uk.ac.warwick.tabula.web.controllers.profiles.ProfileBreadcrumbs
 
 @Controller
 @RequestMapping(Array("/profiles/view"))
-class ViewProfileSeminarsController extends AbstractViewProfileController {
+class ViewProfileEventsController extends AbstractViewProfileController {
 
 	@RequestMapping(Array("/{member}/events", "/{member}/seminars"))
 	def viewByMemberMapping(
@@ -48,7 +48,7 @@ class ViewProfileSeminarsController extends AbstractViewProfileController {
 			"command" -> command,
 			"commandResult" -> command.map(_.apply()).orNull,
 			"isSelf" -> (user.universityId.maybeText.getOrElse("") == studentCourseDetails.student.universityId)
-		).crumbs(breadcrumbsStudent(activeAcademicYear, studentCourseDetails, ProfileBreadcrumbs.Profile.SeminarsIdentifier): _*)
+		).crumbs(breadcrumbsStudent(activeAcademicYear, studentCourseDetails, ProfileBreadcrumbs.Profile.EventsIdentifier): _*)
 			.secondCrumbs(secondBreadcrumbs(activeAcademicYear, studentCourseDetails)(scyd => Routes.Profile.events(scyd)): _*)
 	}
 
