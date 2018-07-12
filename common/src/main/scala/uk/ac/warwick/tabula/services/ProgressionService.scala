@@ -132,7 +132,7 @@ abstract class AbstractProgressionService extends ProgressionService {
 	self: ModuleRegistrationServiceComponent with CourseAndRouteServiceComponent =>
 
 	def getYearMark(entityYear: ExamGridEntityYear, normalLoad: BigDecimal, routeRules: Seq[UpstreamRouteRule], yearWeightings: Seq[CourseYearWeighting]): Either[String, BigDecimal] = {
-		/**TODO - We need to check MOA categories similar to what cognos does currently which will resolve issue for different years abroad for the same course. If those specific categories, then allowEmpty should be set as true.
+		/**TODO (TAB-6397)- We need to check MOA categories similar to what cognos does currently which will resolve issue for different years abroad for the same course. If those specific categories, then allowEmpty should be set as true.
 			* Will need same checking at other places too. Currently, for those  courses  year weightings are set as non zero for one of them (2nd or 3rd year) by modern language making it unable to calculate final year overall marks
 			* even though they are abroad. A further validation  will be required to ensure weighted %age is 100 when we calculate final overall marks.
 			*/
