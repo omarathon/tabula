@@ -263,7 +263,7 @@ object Permissions {
 		case object ViewSearchResults extends Permission("View profile search results")
 
 		object Read {
-			case object Core extends Permission("View a member's name, Warwick email, job title and University number")
+			case object Core extends Permission("View a member's name, Warwick email, job title and University ID")
 			case object Photo extends Permission("View a member's photo")
 
 			/* We can split these back into DateOfBirth, Nationality and HomeEmail if any role requires a subset */

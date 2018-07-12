@@ -90,7 +90,7 @@ class ReleaseSmallGroupSetsNotificationTest extends TestBase with Mockito {
 	def urlIsProfilePageForStudents():Unit = new SmallGroupFixture{
 		val n: ReleaseSmallGroupSetsNotification = createNotification(group1, actor, recipient, isStudent = true)
 		n.userLookup = userLookup
-		n.url should be(s"/profiles/view/${recipient.getWarwickId}/seminars")
+		n.url should be(s"/profiles/view/${recipient.getWarwickId}/events")
 
 	}
 
@@ -112,7 +112,7 @@ class ReleaseSmallGroupSetsNotificationTest extends TestBase with Mockito {
 		val n: ReleaseSmallGroupSetsNotification = createNotification(group1, actor, recipient)
 		n.userLookup = userLookup
 		n.content.model.get("user") should be(Some(recipient))
-		n.content.model.get("profileUrl") should be(Some(s"/profiles/view/${recipient.getWarwickId}/seminars"))
+		n.content.model.get("profileUrl") should be(Some(s"/profiles/view/${recipient.getWarwickId}/events"))
 		n.content.model.get("groups") should be(Some(List(group1)))
 	}
 

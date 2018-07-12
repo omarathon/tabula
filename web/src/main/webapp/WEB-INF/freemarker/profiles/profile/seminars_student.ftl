@@ -19,7 +19,7 @@
 	</details>
 </#if>
 
-<h1>Seminars</h1>
+<h1>Small group events</h1>
 
 	<#if hasPermission>
 

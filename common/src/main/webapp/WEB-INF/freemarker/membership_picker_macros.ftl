@@ -283,7 +283,7 @@ Generates the bulk of the picker HTML, inside a fieldset element
 
 			<@modal.body>
 				<p>
-					Type or paste in a list of usercodes or University numbers here, separated by white space, then click <code>Add</code>.
+					Type or paste in a list of usercodes or University IDs here, separated by white space, then click <code>Add</code>.
 				</p>
 				<p class="alert">
 					<i class="icon-lightbulb fa fa-lightbulb-o icon-large fa fa-lg"></i> <strong>Is your module in SITS?</strong> It may be better to fix the data there,

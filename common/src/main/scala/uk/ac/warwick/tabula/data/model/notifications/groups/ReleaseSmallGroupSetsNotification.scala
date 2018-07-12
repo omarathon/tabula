@@ -54,7 +54,7 @@ class ReleaseSmallGroupSetsNotification extends Notification[SmallGroup, Unit]
 
 	def url: String = {
 		if (isStudent) {
-			Routes.profiles.Profile.seminars(recipient.getWarwickId)
+			Routes.profiles.Profile.events(recipient.getWarwickId)
 		} else {
 			Routes.groups.tutor.mygroups
 		}
