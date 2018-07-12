@@ -1,28 +1,26 @@
 package uk.ac.warwick.tabula.commands.scheduling
 
 import org.joda.time.DateTime
-import uk.ac.warwick.spring.Wire
 import uk.ac.warwick.tabula.commands.CommandInternal
-import uk.ac.warwick.tabula.data.MemberDao
+import uk.ac.warwick.tabula.data.{AutowiringMemberDaoComponent, MemberDaoComponent}
 import uk.ac.warwick.tabula.data.model.MemberUserType
 import uk.ac.warwick.tabula.permissions.Permissions
-import uk.ac.warwick.tabula.services.ProfileService
+import uk.ac.warwick.tabula.services.permissions.{AutowiringPermissionsServiceComponent, PermissionsServiceComponent}
 import uk.ac.warwick.tabula.system.permissions.{PermissionsChecking, PermissionsCheckingMethods, RequiresPermissionsChecking}
 
 
 object RemoveAgedApplicantsCommand {
 	def apply() =
 		new RemoveAgedApplicantsCommandInternal
+			with AutowiringPermissionsServiceComponent
+			with AutowiringMemberDaoComponent
 			with RemoveAgedApplicantsPermissions
 }
 
 class RemoveAgedApplicantsCommandInternal extends CommandInternal[Unit] {
-
-	val profileService: ProfileService = Wire[ProfileService]
-	val memberDao: MemberDao = Wire[MemberDao]
+	self: PermissionsServiceComponent with MemberDaoComponent =>
 
 	override protected def applyInternal(): Unit = {
-
 		memberDao.getMissingSince(
 			from = DateTime.now().minusMonths(2),
 			memberUserType = MemberUserType.Applicant
