@@ -293,6 +293,25 @@
 		</#list>
 		<input type="hidden" name="confirm" value="true">
 
+		<#if command.locationMappings?has_content>
+			<p>Select a map location for the following room<#if command.locationMappings?keys?size gt 1>s</#if>:</p>
+
+			<ul class="list-unstyled">
+				<#list command.locationMappings?keys?sort as locationName>
+					<li>
+						<@bs3form.labelled_form_group "locationMappings[${locationName}]" locationName>
+							<@f.select path="locationMappings[${locationName}]" cssClass="form-control">
+								<@f.option value="" label=""/>
+								<#list wai2GoLocations[locationName] as wai2GoLocation>
+									<@f.option value="${wai2GoLocation.locationId}" label="${wai2GoLocation.name} (${wai2GoLocation.building}, ${wai2GoLocation.floor})" />
+								</#list>
+							</@f.select>
+						</@bs3form.labelled_form_group>
+					</li>
+				</#list>
+			</ul>
+		</#if>
+
 		<div class="fix-footer">
 			<button type="submit" class="btn btn-primary">Make changes</button>
 			<a class="btn btn-default" href="<@routes.groups.departmenthome department academicYear />">Cancel</a>

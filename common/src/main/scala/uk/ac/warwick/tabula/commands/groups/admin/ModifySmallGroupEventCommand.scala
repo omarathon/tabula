@@ -11,6 +11,7 @@ import uk.ac.warwick.tabula.data.model.groups._
 import uk.ac.warwick.tabula.helpers.StringUtils._
 import uk.ac.warwick.tabula.permissions.Permissions
 import uk.ac.warwick.tabula.services._
+import uk.ac.warwick.tabula.services.timetables.WAI2GoLocation
 import uk.ac.warwick.tabula.system.BindListener
 import uk.ac.warwick.tabula.system.permissions.{PermissionsChecking, PermissionsCheckingMethods, RequiresPermissionsChecking}
 import uk.ac.warwick.tabula.validators.UsercodeListValidator
@@ -60,6 +61,7 @@ trait ModifySmallGroupEventCommandState extends CurrentAcademicYear {
 	var relatedUrlTitle: String = _
 	var useNamedLocation: Boolean = _
 	var locationAlias: String = _
+	var possibleMapLocations: Seq[WAI2GoLocation] = Nil
 
 	def weekRanges: Seq[WeekRange] = Option(weeks) map { weeks => WeekRange.combine(weeks.asScala.toSeq.map { _.intValue }) } getOrElse Seq()
 	def weekRanges_=(ranges: Seq[WeekRange]) {
