@@ -109,6 +109,16 @@ object ProgressionService {
 		case _ => DefaultPassMark
 	}
 
+	def allowEmptyYearMarks(yearWeightings: Seq[CourseYearWeighting], entityYear: ExamGridEntityYear): Boolean = {
+		// codes are same that cognos used -TAB-6397
+		val yearAbroadMoaCode =  List("YO","SW","YOE","SWE","YM","YME","V")
+		val yearAbroad = entityYear.studentCourseYearDetails match {
+			case Some(scyd) => yearAbroadMoaCode.contains(scyd.modeOfAttendance.code) && (scyd.occurrence ==  null || scyd.occurrence !=  'I') // doesn't apply to intercalated years
+			case _ => false
+		}
+		yearWeightings.exists( w => w.yearOfStudy == entityYear.yearOfStudy && w.weighting == 0) || yearAbroad
+	}
+
 	final val DefaultPassMark = 40
 	final val UndergradPassMark = 40
 	final val PostgraduatePassMark = 50
@@ -136,7 +146,7 @@ abstract class AbstractProgressionService extends ProgressionService {
 			* Will need same checking at other places too. Currently, for those  courses  year weightings are set as non zero for one of them (2nd or 3rd year) by modern language making it unable to calculate final year overall marks
 			* even though they are abroad. A further validation  will be required to ensure weighted %age is 100 when we calculate final overall marks.
 			*/
-		val possibleWeightedMeanMark = moduleRegistrationService.weightedMeanYearMark(entityYear.moduleRegistrations, Map(), allowEmpty = yearWeightings.exists( w => w.yearOfStudy == entityYear.yearOfStudy && w.weighting == 0))
+		val possibleWeightedMeanMark = moduleRegistrationService.weightedMeanYearMark(entityYear.moduleRegistrations, Map(), allowEmpty = ProgressionService.allowEmptyYearMarks(yearWeightings, entityYear))
 		  	.left.map(msg => s"$msg for year ${entityYear.yearOfStudy}")
 
 		val overcatSubsets = moduleRegistrationService.overcattedModuleSubsets(entityYear, Map(), normalLoad, routeRules)
