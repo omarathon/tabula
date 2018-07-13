@@ -74,7 +74,8 @@ abstract class Best90MA2CATSColumnOption(isResultRequired: Boolean = false, colu
 						entity -> gridColumnValue
 					} else {
 						//get the best one out
-						val mark = best90MAModuleSet(validRecords).head._1
+						val markSet = best90MAModuleSet(validRecords)
+						val mark = if (markSet.nonEmpty) best90MAModuleSet(validRecords).head._1 else BigDecimal(0)
 						if (isResultRequired) {
 							entity -> ExamGridColumnValueString(getResultTitle(mark))
 						} else {
