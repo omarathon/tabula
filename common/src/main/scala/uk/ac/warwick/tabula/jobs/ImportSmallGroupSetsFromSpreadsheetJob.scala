@@ -10,14 +10,16 @@ import uk.ac.warwick.tabula.data.Transactions._
 import uk.ac.warwick.tabula.data.model.{Department, FileAttachment}
 import uk.ac.warwick.tabula.services.AutowiringModuleAndDepartmentServiceComponent
 import uk.ac.warwick.tabula.services.jobs.JobInstance
+import scala.collection.JavaConverters._
 
 object ImportSmallGroupSetsFromSpreadsheetJob {
 	val identifier = "import-small-group-sets"
 
-	def apply(department: Department, academicYear: AcademicYear, file: FileAttachment): JobPrototype = JobPrototype(identifier, Map(
+	def apply(department: Department, academicYear: AcademicYear, file: FileAttachment, locationMappings: Map[String, String]): JobPrototype = JobPrototype(identifier, Map(
 		"department" -> department.id,
 		"academicYear" -> academicYear.toString,
-		"file" -> file.id
+		"file" -> file.id,
+		"locationMappings" -> locationMappings.asJava
 	))
 }
 
@@ -36,6 +38,7 @@ class ImportSmallGroupSetsFromSpreadsheetJob extends Job
 
 		val command = ImportSmallGroupSetsFromSpreadsheetCommand(department, academicYear)
 		command.file = file
+		command.locationMappings = job.getStringMap("locationMappings").asJava
 
 		updateStatus("Reading the spreadsheet")
 		updateProgress(20)
