@@ -161,30 +161,6 @@
 						</#if>
 						</tr>
 						<tr>
-							<th>Year weightings:</th>
-							<td>
-								<#if weightings?size lt 2>
-									<#if weightings?has_content>
-										<#list mapGet(weightings, weightings?keys?first) as weighting>
-											Year ${weighting.yearOfStudy} = ${weighting.weightingAsPercentage}%<#if weighting_has_next><br /></#if>
-										</#list>
-									</#if>
-								<#else>
-									<#assign popover>
-										<ul><#list weightings?keys as course>
-											<li>${course.code}: <#list mapGet(weightings, course) as weighting>
-												Year ${weighting.yearOfStudy} = ${weighting.weightingAsPercentage}%<#if weighting_has_next>, </#if>
-											</#list></li>
-										</#list></ul>
-									</#assign>
-									<a href="#" class="use-popover hidden-print" data-html="true" data-content="${popover}">${weightings?keys?size} courses</a>
-									<div class="visible-print">
-										<#noescape>${popover}</#noescape>
-									</div>
-								</#if>
-							</td>
-						</tr>
-						<tr>
 							<th>Normal CAT load:</th>
 							<td>
 								<#if normalLoadLookup.routes?size == 1>

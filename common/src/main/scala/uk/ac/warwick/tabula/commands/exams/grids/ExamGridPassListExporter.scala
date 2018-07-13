@@ -60,7 +60,8 @@ object ExamGridPassListExporter extends TaskBenchmarking with AddConfidentialWat
 						normalLoadLookup(year.route),
 						routeRules,
 						calculateYearMarks,
-						isLevelGrid
+						isLevelGrid,
+						entity.yearWeightings
 					) match {
 						case ProgressionResult.Proceed | ProgressionResult.PossiblyProceed | ProgressionResult.Pass => true
 						case _ => false

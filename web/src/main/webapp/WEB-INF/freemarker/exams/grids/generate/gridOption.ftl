@@ -155,6 +155,14 @@
 				/> Start year</label>
 			</div>
 		</div>
+		<div class="col-md-3">
+			<div class="checkbox">
+				<label><input type="checkbox" name="predefinedColumnIdentifiers" value="yearWeightings"
+					<#if gridOptionsCommand.predefinedColumnIdentifiers?seq_contains("yearWeightings")>checked</#if>
+				/> Year weightings</label>
+			</div>
+		</div>
+
 	</div>
 
 	<hr />

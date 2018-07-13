@@ -381,7 +381,7 @@ class GenerateExamGridController extends ExamsController
 			throw new IllegalArgumentException
 		}
 
-		val GridData(entities, studentInformationColumns, perYearColumns, summaryColumns, weightings, normalLoadLookup, routeRules) = benchmarkTask("GridData") {
+		val GridData(entities, studentInformationColumns, perYearColumns, summaryColumns, normalLoadLookup, routeRules) = benchmarkTask("GridData") {
 			checkAndApplyOvercatAndGetGridData(
 				selectCourseCommand,
 				gridOptionsCommand,
@@ -431,7 +431,6 @@ class GenerateExamGridController extends ExamsController
 			}).getOrElse(entities),
 			"totalPages" -> entitiesPerPage.map(perPage => Math.ceil(entities.size.toFloat / perPage)).getOrElse(1),
 			"generatedDate" -> DateTime.now,
-			"weightings" -> weightings,
 			"normalLoadLookup" -> normalLoadLookup,
 			"routeRules" -> routeRules
 		) ++ shortFormLayoutData
@@ -448,7 +447,6 @@ class GenerateExamGridController extends ExamsController
 		studentInformationColumns: Seq[ChosenYearExamGridColumn],
 		perYearColumns: Map[YearOfStudy, Seq[PerYearExamGridColumn]],
 		summaryColumns: Seq[ChosenYearExamGridColumn],
-		weightings: Map[Course, Seq[CourseYearWeighting]],
 		normalLoadLookup: NormalLoadLookup,
 		routeRulesLookup: UpstreamRouteRuleLookup
 	)
@@ -518,15 +516,9 @@ class GenerateExamGridController extends ExamsController
 			.groupBy { case (year, _) => year}
 			.mapValues(_.flatMap { case (_, columns) => columns })
 
-		val weightings = ListMap(selectCourseCommand.courses.asScala.map(course => {
-			course -> (1 to FilterStudentsOrRelationships.MaxYearsOfStudy).flatMap(year =>
-				courseAndRouteService.getCourseYearWeighting(course.code, selectCourseCommand.academicYear, year)
-			).sorted
-		}).sortBy{case (course, _) => course.code} :_*)
-
 		GenerateExamGridAuditCommand(selectCourseCommand).apply()
 
-		GridData(entities, studentInformationColumns, perYearColumns, summaryColumns, weightings, normalLoadLookup, routeRulesLookup)
+		GridData(entities, studentInformationColumns, perYearColumns, summaryColumns, normalLoadLookup, routeRulesLookup)
 	}
 
 	private def stopOngoingImportForStudents(students: Seq[ExamGridEntity]): Unit = {

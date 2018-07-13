@@ -70,6 +70,9 @@ abstract class Member
 	@transient
 	var relationshipService: RelationshipService = Wire[RelationshipService]
 
+	@transient
+	var courseAndRouteService: CourseAndRouteService = Wire[CourseAndRouteService]
+
 	def this(user: CurrentUser) = {
 		this()
 
@@ -447,7 +450,8 @@ class StudentMember extends Member with StudentProperties {
 			lastName = Option(lastName).getOrElse("[Unknown]"),
 			universityId = universityId,
 			lastImportDate = Option(lastImportDate),
-			years = years
+			years = years,
+			yearWeightings = courseAndRouteService.findAllCourseYearWeightings(Seq(baseSCYD.studentCourseDetails.course), baseSCYD.studentCourseDetails.sprStartAcademicYear) // year weightings based on the GRID course that we are generating
 		)
 	}
 }

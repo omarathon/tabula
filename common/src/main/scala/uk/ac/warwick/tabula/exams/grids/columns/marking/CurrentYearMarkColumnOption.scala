@@ -25,24 +25,19 @@ class CurrentYearMarkColumnOption extends ChosenYearExamGridColumnOption with Au
 
 		override def values: Map[ExamGridEntity, ExamGridColumnValue] = {
 			state.entities.map(entity =>
-				entity -> entity.validYears.get(state.yearOfStudy).map(entity => result(entity) match {
+				entity -> entity.validYears.get(state.yearOfStudy).map(entityYear => result(entityYear, entity) match {
 					case Right(mark) => ExamGridColumnValueDecimal(mark)
 					case Left(message) => ExamGridColumnValueMissing(message)
 				}).getOrElse(ExamGridColumnValueMissing(s"Could not find course details for ${entity.universityId} for ${state.academicYear}"))
 			).toMap
 		}
 
-		private def result(entity: ExamGridEntityYear): Either[String, BigDecimal] = {
-			if (state.overcatSubsets(entity).size > 1 && entity.overcattingModules.isEmpty) {
-				// If the has more than one valid overcat subset, and a subset has not been chosen for the overcatted mark, don't show anything
+		private def result(entityYear: ExamGridEntityYear, entity: ExamGridEntity): Either[String, BigDecimal] = {
+			if (state.overcatSubsets(entityYear).size > 1 && entityYear.overcattingModules.isEmpty) {
+				// If there is more than one valid overcat subset, and a subset has not been chosen for the overcatted mark, don't show anything
 				Left("The overcat adjusted mark subset has not been chosen")
 			} else {
-				lazy val yearWeighting: Option[CourseYearWeighting] =
-					entity.studentCourseYearDetails.flatMap { scyd =>
-						courseAndRouteService.getCourseYearWeighting(scyd.studentCourseDetails.course.code, scyd.studentCourseDetails.sprStartAcademicYear, scyd.yearOfStudy)
-					}
-
-				moduleRegistrationService.weightedMeanYearMark(entity.moduleRegistrations, entity.markOverrides.getOrElse(Map()), allowEmpty = yearWeighting.exists(_.weighting == 0))
+				moduleRegistrationService.weightedMeanYearMark(entityYear.moduleRegistrations, entityYear.markOverrides.getOrElse(Map()), allowEmpty = entity.yearWeightings.exists( w => w.yearOfStudy == entityYear.yearOfStudy && w.weighting == 0))
 			}
 		}
 

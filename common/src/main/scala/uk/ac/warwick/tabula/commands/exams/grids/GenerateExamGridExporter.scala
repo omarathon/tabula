@@ -24,7 +24,6 @@ object GenerateExamGridExporter extends TaskBenchmarking {
 		courses: Seq[Course],
 		routes: Seq[Route],
 		yearOfStudy: Int,
-		yearWeightings: Map[Course, Seq[CourseYearWeighting]],
 		normalLoadLookup: NormalLoadLookup,
 		entities: Seq[ExamGridEntity],
 		leftColumns: Seq[ChosenYearExamGridColumn],
@@ -53,7 +52,7 @@ object GenerateExamGridExporter extends TaskBenchmarking {
 		val sheet = workbook.createSheet(academicYear.toString.replace("/","-"))
 		sheet.trackAllColumnsForAutoSizing()
 
-		ExamGridSummaryAndKey.summaryAndKey(sheet, cellStyleMap, department, academicYear, courses, routes, yearOfStudy, yearWeightings, normalLoadLookup, entities.size, isStudentCount = true)
+		ExamGridSummaryAndKey.summaryAndKey(sheet, cellStyleMap, department, academicYear, courses, routes, yearOfStudy, normalLoadLookup, entities.size, isStudentCount = true)
 
 		val yearRow = sheet.createRow(sheet.getLastRowNum + 1)
 		val categoryRow = sheet.createRow(sheet.getLastRowNum + 1)
@@ -434,7 +433,6 @@ object ExamGridSummaryAndKey {
 		courses: Seq[Course],
 		routes: Seq[Route],
 		yearOfStudy: Int,
-		yearWeightings: Map[Course, Seq[CourseYearWeighting]],
 		normalLoadLookup: NormalLoadLookup,
 		count: Int,
 		isStudentCount: Boolean
@@ -465,31 +463,17 @@ object ExamGridSummaryAndKey {
 			case n => keyValueCells("Routes:", s"$n routes", 4)
 		}
 		keyValueCells("Year of study:", yearOfStudy.toString, 5)
-
-		yearWeightings.size match {
-			case 0 => keyValueCells("Year weightings:", "", 6)
-			case 1 =>
-				val yearWeightingRow =
-					keyValueCells("Year weightings:", yearWeightings.head._2.map(cyw => s"Year ${cyw.yearOfStudy} = ${cyw.weightingAsPercentage.toPlainString}%").mkString("\n"), 6)
-				yearWeightingRow.setHeight((yearWeightingRow.getHeight * (yearWeightings.size - 1)).toShort)
-			case n if n > 0 =>
-				val weightingByCourse = yearWeightings.map{case (course, cyws) =>
-					s"${course.code}: ${cyws.map(cyw => s"Year ${cyw.yearOfStudy} = ${cyw.weightingAsPercentage.toPlainString}%").mkString(", ")}"
-				}.mkString("\n")
-				val yearWeightingRow = keyValueCells("Year weightings:", weightingByCourse, 6)
-				yearWeightingRow.setHeight((yearWeightingRow.getHeight * yearWeightings.size).toShort)
-		}
-		val normalCATSLoadRow = keyValueCells("Normal CATS load:", normalLoadLookup.routes.sortBy(_.code).map(r => s"${r.code.toUpperCase}: ${normalLoadLookup(r).underlying.toString}").mkString("\n"), 7)
+		val normalCATSLoadRow = keyValueCells("Normal CATS load:", normalLoadLookup.routes.sortBy(_.code).map(r => s"${r.code.toUpperCase}: ${normalLoadLookup(r).underlying.toString}").mkString("\n"), 6)
 		normalCATSLoadRow.setHeight((normalCATSLoadRow.getHeight * (normalLoadLookup.routes.size - 1)).toShort)
 		if (isStudentCount) {
-			keyValueCells("Student Count:", count.toString, 8)
+			keyValueCells("Student Count:", count.toString, 7)
 		} else {
-			keyValueCells("Count:", count.toString, 8)
+			keyValueCells("Count:", count.toString, 7)
 		}
-		keyValueCells("Grid Generated:", DateTime.now.toString, 9)
+		keyValueCells("Grid Generated:", DateTime.now.toString, 8)
 
 		{
-			val row = sheet.createRow(10)
+			val row = sheet.createRow(9)
 			val keyCell = row.createCell(0)
 			keyCell.setCellValue("#")
 			keyCell.setCellStyle(cellStyleMap(ExamGridExportStyles.Fail))
@@ -497,7 +481,7 @@ object ExamGridSummaryAndKey {
 			valueCell.setCellValue("Failed module or component")
 		}
 		{
-			val row = sheet.createRow(11)
+			val row = sheet.createRow(10)
 			val keyCell = row.createCell(0)
 			keyCell.setCellValue("#")
 			keyCell.setCellStyle(cellStyleMap(ExamGridExportStyles.Overcat))
@@ -505,7 +489,7 @@ object ExamGridSummaryAndKey {
 			valueCell.setCellValue("Used in overcatting calculation")
 		}
 		{
-			val row = sheet.createRow(12)
+			val row = sheet.createRow(11)
 			val keyCell = row.createCell(0)
 			keyCell.setCellValue("#")
 			keyCell.setCellStyle(cellStyleMap(ExamGridExportStyles.ActualMark))
@@ -513,28 +497,28 @@ object ExamGridSummaryAndKey {
 			valueCell.setCellValue("Agreed mark missing, using actual")
 		}
 		{
-			val row = sheet.createRow(13)
+			val row = sheet.createRow(12)
 			val keyCell = row.createCell(0)
 			keyCell.setCellValue("[# (#)]")
 			val valueCell = row.createCell(1)
 			valueCell.setCellValue("Resit mark (original mark)")
 		}
 		{
-			val row = sheet.createRow(14)
+			val row = sheet.createRow(13)
 			val keyCell = row.createCell(0)
 			keyCell.setCellValue("X")
 			val valueCell = row.createCell(1)
 			valueCell.setCellValue("Agreed mark and actual mark missing")
 		}
 		{
-			val row = sheet.createRow(15)
+			val row = sheet.createRow(14)
 			val keyCell = row.createCell(0)
 			keyCell.setCellValue("")
 			val valueCell = row.createCell(1)
 			valueCell.setCellValue("Blank indicates module not taken by student")
 		}
 		{
-			val row = sheet.createRow(16)
+			val row = sheet.createRow(15)
 			val keyCell = row.createCell(0)
 			keyCell.setCellValue("AB")
 			keyCell.setCellStyle(cellStyleMap(ExamGridExportStyles.BoldText))
