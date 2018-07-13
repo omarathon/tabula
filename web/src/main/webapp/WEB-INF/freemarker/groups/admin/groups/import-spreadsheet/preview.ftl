@@ -253,8 +253,8 @@
 		</ul>
 
 		<p>
-			You can complete the import and correct these issues afterwards.
-			Or, edit your spreadsheet and upload it again.
+			You can complete the import and correct these issues afterwards,
+			edit your spreadsheet and upload it again, or make the required changes below.
 		</p>
 	</div>
 </#if>
