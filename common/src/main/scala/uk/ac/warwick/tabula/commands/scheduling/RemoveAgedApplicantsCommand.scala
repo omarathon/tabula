@@ -8,6 +8,7 @@ import uk.ac.warwick.tabula.data.model.{ApplicantMember, Member, MemberUserType}
 import uk.ac.warwick.tabula.permissions.Permissions
 import uk.ac.warwick.tabula.services.permissions.{AutowiringPermissionsServiceComponent, PermissionsServiceComponent}
 import uk.ac.warwick.tabula.system.permissions.{PermissionsChecking, PermissionsCheckingMethods, RequiresPermissionsChecking}
+import uk.ac.warwick.userlookup.User
 
 
 object RemoveAgedApplicantsCommand {
@@ -46,4 +47,12 @@ trait RemoveAgedApplicantsPermissions extends RequiresPermissionsChecking with P
 
 trait RemoveAgedApplicantsDescription extends Describable[Seq[String]] {
 	override def describe(d: Description) {}
+
+	override def describeResult(d: Description, result: Seq[String]): Unit = {
+		d.users(result.map { uniId =>
+			val user = new User
+			user.setWarwickId(uniId)
+			user
+		})
+	}
 }
