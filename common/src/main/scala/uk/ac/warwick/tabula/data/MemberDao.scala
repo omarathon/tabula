@@ -104,8 +104,8 @@ class MemberDaoImpl extends MemberDao with Logging with AttendanceMonitoringStud
 
 	def deleteByUniversityIds(universityIds: Seq[String]): Unit = {
 		if (universityIds.nonEmpty) {
-			val query = session.createQuery("delete from MEMBER where MEMBER.UNIVERSITYID in (:universityIds)")
-			query.setParameter("universityIds", universityIds.asJava)
+			val query = session.createQuery("delete Member where universityId in (:universityIds)")
+			query.setParameterList("universityIds", universityIds.asJava)
 			query.executeUpdate()
 		}
 	}
