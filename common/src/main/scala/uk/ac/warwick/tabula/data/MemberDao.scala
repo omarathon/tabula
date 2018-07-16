@@ -56,8 +56,8 @@ trait MemberDao {
 
 	def getFreshStudentUniversityIds: Seq[String]
 	def getFreshStaffUniversityIds: Seq[String]
-	def getMissingSince(from: DateTime, memberUserType: MemberUserType = MemberUserType.Student): Seq[String]
-
+	def getMissingSince(from: DateTime): Seq[String]
+	def getMissingBefore[A <: Member](from: DateTime): Seq[String]
 	def stampMissingFromImport(newStaleUniversityIds: Seq[String], importStart: DateTime)
 	def unstampPresentInImport(notStaleUniversityIds: Seq[String]): Unit
 	def getDisability(code: String): Option[Disability]
@@ -158,11 +158,19 @@ class MemberDaoImpl extends MemberDao with Logging with AttendanceMonitoringStud
 			.project[String](Projections.property("universityId"))
 			.seq
 
-	def getMissingSince(from: DateTime, memberUserType: MemberUserType = MemberUserType.Student): Seq[String] =
-		sessionWithoutFreshFilters.newCriteria[memberUserType.type]
+	def getMissingSince(from: DateTime): Seq[String] =
+		sessionWithoutFreshFilters.newCriteria[StudentMember]
 			.add(ge("missingFromImportSince", from))
 			.project[String](Projections.property("universityId"))
 			.seq
+
+	def getMissingBefore[A <: Member](from: DateTime): Seq[String] = {
+		sessionWithoutFreshFilters.newCriteria[A]
+			.add(le("missingFromImportSince", from))
+			.project[String](Projections.property("universityId"))
+			.seq
+		???
+	}
 
 	def getAllWithUniversityIds(universityIds: Seq[String]): Seq[Member] =
 		if (universityIds.isEmpty) Seq.empty
