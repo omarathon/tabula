@@ -15,6 +15,7 @@ import uk.ac.warwick.tabula.helpers.StringUtils.StringToSuperString
 
 import scala.collection.JavaConverters._
 import scala.collection.mutable
+import scala.reflect.ClassTag
 
 trait MemberDaoComponent {
 	def memberDao: MemberDao
@@ -58,7 +59,7 @@ trait MemberDao {
 	def getFreshStudentUniversityIds: Seq[String]
 	def getFreshStaffUniversityIds: Seq[String]
 	def getMissingSince(from: DateTime): Seq[String]
-	def getMissingBefore[A <: Member](from: DateTime): Seq[String]
+	def getMissingBefore[A <: Member: ClassTag](from: DateTime): Seq[String]
 	def stampMissingFromImport(newStaleUniversityIds: Seq[String], importStart: DateTime)
 	def unstampPresentInImport(notStaleUniversityIds: Seq[String]): Unit
 	def getDisability(code: String): Option[Disability]
@@ -173,7 +174,7 @@ class MemberDaoImpl extends MemberDao with Logging with AttendanceMonitoringStud
 			.project[String](Projections.property("universityId"))
 			.seq
 
-	def getMissingBefore[A <: Member](from: DateTime): Seq[String] = {
+	def getMissingBefore[A <: Member: ClassTag](from: DateTime): Seq[String] = {
 		sessionWithoutFreshFilters.newCriteria[A]
 			.add(le("missingFromImportSince", from))
 			.project[String](Projections.property("universityId"))
