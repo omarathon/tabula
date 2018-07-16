@@ -169,7 +169,6 @@ class MemberDaoImpl extends MemberDao with Logging with AttendanceMonitoringStud
 			.add(le("missingFromImportSince", from))
 			.project[String](Projections.property("universityId"))
 			.seq
-		???
 	}
 
 	def getAllWithUniversityIds(universityIds: Seq[String]): Seq[Member] =
