@@ -94,7 +94,6 @@ class OvercattingOptionsController extends ExamsController
 				courses = Seq(scyd.studentCourseDetails.course),
 				routes = Seq(scyd.route),
 				yearOfStudy = scyd.yearOfStudy,
-				yearWeightings = Map(),
 				normalLoadLookup = overcatView.normalLoadLookup,
 				entities = overcatView.overcattedEntities,
 				leftColumns = overcatView.optionsColumns,

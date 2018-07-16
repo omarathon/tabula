@@ -17,6 +17,9 @@ import uk.ac.warwick.tabula.web.controllers.{AcademicYearScopedController, Depar
 import uk.ac.warwick.tabula.web.views.ExcelView
 import uk.ac.warwick.tabula.web.{Mav, Routes}
 
+import scala.collection.JavaConverters._
+import scala.collection.immutable.SortedMap
+
 @Controller
 @RequestMapping(Array("/groups/admin/department/{department}/{academicYear}/import-spreadsheet"))
 class ImportSmallGroupSetsFromSpreadsheetController extends GroupsController
@@ -58,7 +61,18 @@ class ImportSmallGroupSetsFromSpreadsheetController extends GroupsController
 		if (!features.smallGroupTeachingSpreadsheetImport) {
 			Redirect(Routes.groups.admin.importSpreadsheet(department, academicYear))
 		} else {
-			Mav("groups/admin/groups/import-spreadsheet/preview", "errors" -> errors)
+			Mav("groups/admin/groups/import-spreadsheet/preview",
+				"errors" -> errors,
+				"wai2GoLocations" -> cmd.locationMappings.asScala.map { case (name, _) =>
+					name -> cmd.commands.asScala
+						.flatMap(_.modifyGroupCommands.asScala)
+						.flatMap(_.modifyEventCommands.asScala)
+						.filter(_.command.location == name)
+						.flatMap(_.command.possibleMapLocations)
+						.distinct
+						.sortBy(_.locationId)
+				}
+			)
 				.crumbs(Breadcrumbs.Department(department, academicYear))
 				.secondCrumbs(academicYearBreadcrumbs(academicYear)(year => Routes.groups.admin.importSpreadsheet(department, year)): _*)
 		}
@@ -79,7 +93,8 @@ class ImportSmallGroupSetsFromSpreadsheetController extends GroupsController
 			val job = jobService.add(user.apparentUser, ImportSmallGroupSetsFromSpreadsheetJob(
 				department = department,
 				academicYear = academicYear,
-				file = cmd.file.attached.get(0)
+				file = cmd.file.attached.get(0),
+				locationMappings = cmd.locationMappings.asScala.toMap
 			))
 
 			Redirect(Routes.groups.admin.importSpreadsheet(department, academicYear) + s"?jobId=${job.id}")

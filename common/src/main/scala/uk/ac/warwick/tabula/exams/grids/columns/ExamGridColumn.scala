@@ -21,6 +21,7 @@ object ExamGridColumnOption {
 		val Course = 4
 		val Route = 5
 		val StartYear = 6
+		val YearWeightings = 7
 		val CoreModules = 10
 		val CoreRequiredModules = 11
 		val CoreOptionalModules = 12

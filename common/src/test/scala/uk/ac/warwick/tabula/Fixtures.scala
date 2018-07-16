@@ -4,6 +4,7 @@ import java.math
 
 import org.joda.time.{DateTime, DateTimeConstants, LocalDate}
 import uk.ac.warwick.tabula.JavaImports._
+import uk.ac.warwick.tabula.data.model.StudentCourseYearDetails.YearOfStudy
 import uk.ac.warwick.tabula.data.model._
 import uk.ac.warwick.tabula.data.model.attendance._
 import uk.ac.warwick.tabula.data.model.forms.Extension
@@ -96,6 +97,10 @@ object Fixtures extends Mockito {
 		c.code = code
 		c.name = Option(name).getOrElse("Course " + code)
 		c
+	}
+
+	def yearWeighting(course: Course, weighting: JBigDecimal, academicYear: AcademicYear, yearOfStudy: YearOfStudy): CourseYearWeighting = {
+		new CourseYearWeighting(course, academicYear, yearOfStudy, BigDecimal(weighting))
 	}
 
 	def assignment(name:String): Assignment = {
