@@ -396,4 +396,45 @@ class MemberDaoTest extends PersistenceTestBase with Logging with Mockito {
 		memberDao.findUndergraduateUsercodesByHomeDepartmentAndLevel(dept2, "3") should contain only "student4"
 	}
 
+	@Test
+	def testDeleteByUniversityIds(): Unit = transactional { tx =>
+		val app1 = Fixtures.member(
+			userType = MemberUserType.Applicant,
+			universityId = "id1",
+			userId = "id1",
+			department = null
+		)
+		val app2 = Fixtures.member(
+			userType = MemberUserType.Applicant,
+			universityId = "id2",
+			userId = "id2",
+			department = null
+		)
+		val app3 = Fixtures.member(
+			userType = MemberUserType.Applicant,
+			universityId = "id3",
+			userId = "id3",
+			department = null
+		)
+		val app4 = Fixtures.member(
+			userType = MemberUserType.Applicant,
+			universityId = "id4",
+			userId = "id4",
+			department = null
+		)
+
+		session.saveOrUpdate(app1)
+		session.saveOrUpdate(app2)
+		session.saveOrUpdate(app3)
+		session.saveOrUpdate(app4)
+
+		memberDao.deleteByUniversityIds(Seq("id1"))
+		memberDao.getAllByUserId("id1") should be (empty)
+
+		memberDao.deleteByUniversityIds(Seq("id2", "id3"))
+
+		memberDao.getAllByUserId("id2") should be (empty)
+		memberDao.getAllByUserId("id3") should be (empty)
+	}
+
 }
