@@ -27,6 +27,7 @@ trait AutowiringMemberDaoComponent extends MemberDaoComponent {
 trait MemberDao {
 	def saveOrUpdate(member: Member)
 	def delete(member: Member)
+	def deleteByUniversityIds(universityIds: Seq[String])
 	def getByUniversityId(universityId: String, disableFilter: Boolean = false, eagerLoad: Boolean = false): Option[Member]
 	def getByUniversityIdStaleOrFresh(universityId: String): Option[Member]
 	def getAllWithUniversityIds(universityIds: Seq[String]): Seq[Member]
@@ -98,6 +99,12 @@ class MemberDaoImpl extends MemberDao with Logging with AttendanceMonitoringStud
 			session.delete(member)
 			// Immediately flush delete
 			session.flush()
+	}
+
+	def deleteByUniversityIds(universityIds: Seq[String]): Unit = {
+		val query = session.createQuery("delete from MEMBER where MEMBER.UNIVERSITYID in (:universityIds)")
+		query.setParameter("universityIds", universityIds.asJava)
+		query.executeUpdate()
 	}
 
 	def getByUniversityId(universityId: String, disableFilter: Boolean = false, eagerLoad: Boolean = false): Option[Member] = {
