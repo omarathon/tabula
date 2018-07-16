@@ -61,8 +61,8 @@ class ImportStudentCourseYearCommand(row: SitsStudentRow, studentCourseDetails: 
 
 	private val basicStudentCourseYearProperties = Set(
 		"yearOfStudy",
-		"studyLevel",
-		"occurrence"
+		"studyLevel" ,
+		"blockOccurrence"
 	)
 
 	private def copyStudentCourseYearProperties(commandBean: BeanWrapper, studentCourseYearBean: BeanWrapper) = {
@@ -100,6 +100,7 @@ class ImportStudentCourseYearCommand(row: SitsStudentRow, studentCourseDetails: 
 			true
 		}
 	}
+
 
 	def copyModuleRegistrationStatus(code: String, destinationBean: BeanWrapper): Boolean = {
 		val property = "moduleRegistrationStatus"
@@ -147,6 +148,7 @@ class ImportStudentCourseYearCommand(row: SitsStudentRow, studentCourseDetails: 
 			false
 		}
 	}
+
 
 	private def toModeOfAttendance(code: String) = {
 		if (code == null || code == "") {

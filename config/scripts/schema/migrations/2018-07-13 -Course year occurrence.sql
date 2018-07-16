@@ -1,5 +1,5 @@
 ALTER TABLE studentcourseyeardetails ADD (
-  OCCURRENCE NVARCHAR2(10)
+  BLOCK_OCCURRENCE NVARCHAR2(10)
 );
 
 

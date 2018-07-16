@@ -113,7 +113,7 @@ object ProgressionService {
 		// codes are same that cognos used -TAB-6397
 		val yearAbroadMoaCode =  List("YO","SW","YOE","SWE","YM","YME","V")
 		val yearAbroad = entityYear.studentCourseYearDetails match {
-			case Some(scyd) => yearAbroadMoaCode.contains(scyd.modeOfAttendance.code) && (scyd.occurrence ==  null || scyd.occurrence !=  'I') // doesn't apply to intercalated years
+			case Some(scyd) => yearAbroadMoaCode.contains(scyd.modeOfAttendance.code) && (scyd.blockOccurrence ==  null || scyd.blockOccurrence !=  'I') // doesn't apply to intercalated years
 			case _ => false
 		}
 		yearWeightings.exists( w => w.yearOfStudy == entityYear.yearOfStudy && w.weighting == 0) || yearAbroad
