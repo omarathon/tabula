@@ -174,9 +174,9 @@ class MemberDaoImpl extends MemberDao with Logging with AttendanceMonitoringStud
 			.project[String](Projections.property("universityId"))
 			.seq
 
-	def getMissingBefore[A <: Member: ClassTag](from: DateTime): Seq[String] = {
+	def getMissingBefore[A <: Member: ClassTag](missingSince: DateTime): Seq[String] = {
 		sessionWithoutFreshFilters.newCriteria[A]
-			.add(le("missingFromImportSince", from))
+			.add(le("missingFromImportSince", missingSince))
 			.project[String](Projections.property("universityId"))
 			.seq
 	}
