@@ -334,17 +334,23 @@ abstract class AbstractProgressionService extends ProgressionService {
 		}
 	}
 
+	private def inValidTotalYearWeightings(markPerYear: Map[Int, BigDecimal], yearWeightings:  Map[Int, CourseYearWeighting]): Boolean = {
+		// you can set up 0/50/50/50 initially. One of those could be abroad(2nd or 3rd year year). Excluding any abroad year we still should have total as 100
+		//0 marks  generated for the year  are valid allowed marks with 0 weightings based on year abroad. Check the remaining ones total are  still 100%
+		markPerYear.filter(_._2 > 0).map { case(year, _) =>  yearWeightings(year).weighting }.toSeq.sum != 1
+	}
+
 	private def weightedFinalYearGrade(
 		scyd: StudentCourseYearDetails,
 		entityPerYear: Map[Int, ExamGridEntityYear],
 		markPerYear: Map[Int, BigDecimal],
 		yearWeightings:  Map[Int, CourseYearWeighting]
 	): FinalYearGrade = {
-		// This only considers years where the weighting counts - so for a course with an
-		// intercalated year weighted 0,50,0,50, this would consider years 2 and 4
+		// This only considers years where the weighting counts  when they are not not abroad - so for a course with an
+		// intercalated year weighted 0,50,0,50, this would consider years 2 and 4. For weightings set like 0/50/50/50 (2nd or 3rd year abroad for same course), it will consider last 2 years non- abroad ones
 		val finalTwoYearsModuleRegistrations =
 			entityPerYear.toSeq.reverse
-				.filter { case (year, gridEntityYear) => gridEntityYear != null && yearWeightings.toMap.apply(year).weighting > 0 }
+				.filter { case (year, gridEntityYear) => gridEntityYear != null &&  !ProgressionService.allowEmptyYearMarks(yearWeightings.map(_._2).toSeq, gridEntityYear)}
 				.take(2)
 				.flatMap { case (_, yearDetails) => yearDetails.moduleRegistrations }
 
@@ -352,7 +358,9 @@ abstract class AbstractProgressionService extends ProgressionService {
 			FinalYearGrade.Unknown(s"No agreed mark or actual mark for modules: ${
 				finalTwoYearsModuleRegistrations.filter(_.firstDefinedMark.isEmpty).map(mr => "%s %s".format(mr.module.code.toUpperCase, mr.academicYear.toString)).mkString(", ")
 			}")
-		} else {
+		} else if (inValidTotalYearWeightings(markPerYear, yearWeightings)) {
+			FinalYearGrade.Unknown("Total year weightings for all course years excluding abroad  are not 100%")
+		} else	{
 			val finalMark: BigDecimal = markPerYear.map { case (year, _) =>
 				markPerYear(year) * yearWeightings(year).weighting
 			}.sum.setScale(1, RoundingMode.HALF_UP)
