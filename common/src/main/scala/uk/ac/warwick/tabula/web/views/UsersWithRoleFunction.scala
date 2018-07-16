@@ -9,7 +9,6 @@ import freemarker.template.utility.DeepUnwrap
 import uk.ac.warwick.tabula.roles.RoleDefinition
 import uk.ac.warwick.tabula.permissions.PermissionsTarget
 import uk.ac.warwick.tabula.services.UserLookupService
-import scala.collection.JavaConversions.seqAsJavaList
 import scala.collection.JavaConverters._
 import uk.ac.warwick.tabula.JavaImports._
 import uk.ac.warwick.tabula.data.model.permissions.BuiltInRoleDefinitionUserType

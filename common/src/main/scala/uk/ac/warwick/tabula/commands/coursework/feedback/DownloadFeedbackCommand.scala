@@ -8,8 +8,7 @@ import uk.ac.warwick.tabula.helpers.StringUtils.StringToSuperString
 import uk.ac.warwick.tabula.permissions._
 import uk.ac.warwick.tabula.services.ZipService
 import uk.ac.warwick.tabula.services.fileserver._
-
-import scala.collection.JavaConversions.asScalaBuffer
+import scala.collection.JavaConverters._
 
 class DownloadFeedbackCommand(val module: Module, val assignment: Assignment, val feedback: Feedback, val student: Option[Member])
 	extends Command[Option[RenderableFile]] with ReadOnly {
@@ -39,7 +38,7 @@ class DownloadFeedbackCommand(val module: Module, val assignment: Assignment, va
 	def applyInternal(): Option[RenderableFile] = {
 		filename match {
 			case filename: String if filename.hasText =>
-				feedback.attachments.find(_.name == filename).map(new RenderableAttachment(_))
+				feedback.attachments.asScala.find(_.name == filename).map(new RenderableAttachment(_))
 			case _ => Some(zipped(feedback))
 		}
 	}

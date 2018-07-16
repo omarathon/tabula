@@ -22,7 +22,6 @@ import uk.ac.warwick.tabula.data.{Daoisms, SessionComponent}
 import uk.ac.warwick.tabula.events.Event
 import uk.ac.warwick.tabula.services.elasticsearch.AuditEventIndexService
 
-import scala.collection.JavaConversions.asScalaBuffer
 import scala.collection.JavaConverters._
 
 trait AuditEventService {
@@ -98,7 +97,7 @@ class AuditEventServiceImpl extends AuditEventService {
 	def getByEventId(eventId: String): Seq[AuditEvent] = {
 		val query = session.createSQLQuery(eventIdSql)
 		query.setString("id", eventId)
-		query.list.asInstanceOf[JList[Array[Object]]] map mapListToObject
+		query.list.asInstanceOf[JList[Array[Object]]].asScala map mapListToObject
 	}
 
 	def mapListToObject(array: Array[Object]): AuditEvent = {
@@ -212,6 +211,7 @@ class AuditEventServiceImpl extends AuditEventService {
 		query.setMaxResults(max)
 		query.list()
 			.asInstanceOf[JList[Array[Object]]]
+  		.asScala
 			.map(mapListToObject)
 	}
 
@@ -221,6 +221,7 @@ class AuditEventServiceImpl extends AuditEventService {
 		query.setMaxResults(count)
 		query.list()
 			.asInstanceOf[JList[Array[Object]]]
+  		.asScala
 			.map(mapListToObject)
 	}
 
