@@ -15,7 +15,7 @@ class RemoveAgedApplicantsJob extends AutowiredJobBean {
 	override def executeInternal(context: JobExecutionContext): Unit = {
 		if (features.schedulingRemoveAgedApplicantsJob) {
 			exceptionResolver.reportExceptions {
-				RemoveAgedApplicantsCommand.apply()
+				RemoveAgedApplicantsCommand().apply()
 			}
 		}
 	}
