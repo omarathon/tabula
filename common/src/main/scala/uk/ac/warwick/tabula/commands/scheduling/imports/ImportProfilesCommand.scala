@@ -333,7 +333,7 @@ class ImportProfilesCommand extends CommandWithoutTransaction[Unit] with Logging
 
 	def updateMissingForIndividual(universityId: String): Unit = {
 		profileService.getMemberByUniversityIdStaleOrFresh(universityId).foreach {
-			case member: StaffMember =>
+			case member @ (_:StaffMember | _: ApplicantMember) =>
 				val missingFromImport = profileImporter.getUniversityIdsPresentInMembership(Set(member.universityId)).isEmpty
 
 				if (member.isFresh && missingFromImport) {

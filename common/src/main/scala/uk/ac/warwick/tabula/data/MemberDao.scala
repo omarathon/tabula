@@ -15,6 +15,7 @@ import uk.ac.warwick.tabula.helpers.StringUtils.StringToSuperString
 
 import scala.collection.JavaConverters._
 import scala.collection.mutable
+import scala.reflect.ClassTag
 
 trait MemberDaoComponent {
 	def memberDao: MemberDao
@@ -27,6 +28,7 @@ trait AutowiringMemberDaoComponent extends MemberDaoComponent {
 trait MemberDao {
 	def saveOrUpdate(member: Member)
 	def delete(member: Member)
+	def deleteByUniversityIds(universityIds: Seq[String])
 	def getByUniversityId(universityId: String, disableFilter: Boolean = false, eagerLoad: Boolean = false): Option[Member]
 	def getByUniversityIdStaleOrFresh(universityId: String): Option[Member]
 	def getAllWithUniversityIds(universityIds: Seq[String]): Seq[Member]
@@ -57,7 +59,7 @@ trait MemberDao {
 	def getFreshStudentUniversityIds: Seq[String]
 	def getFreshStaffUniversityIds: Seq[String]
 	def getMissingSince(from: DateTime): Seq[String]
-
+	def getMissingBefore[A <: Member: ClassTag](from: DateTime): Seq[String]
 	def stampMissingFromImport(newStaleUniversityIds: Seq[String], importStart: DateTime)
 	def unstampPresentInImport(notStaleUniversityIds: Seq[String]): Unit
 	def getDisability(code: String): Option[Disability]
@@ -98,6 +100,14 @@ class MemberDaoImpl extends MemberDao with Logging with AttendanceMonitoringStud
 			session.delete(member)
 			// Immediately flush delete
 			session.flush()
+	}
+
+	def deleteByUniversityIds(universityIds: Seq[String]): Unit = {
+		if (universityIds.nonEmpty) {
+			val query = session.createQuery("delete Member where universityId in (:universityIds)")
+			query.setParameterList("universityIds", universityIds.asJava)
+			query.executeUpdate()
+		}
 	}
 
 	def getByUniversityId(universityId: String, disableFilter: Boolean = false, eagerLoad: Boolean = false): Option[Member] = {
@@ -163,6 +173,13 @@ class MemberDaoImpl extends MemberDao with Logging with AttendanceMonitoringStud
 			.add(ge("missingFromImportSince", from))
 			.project[String](Projections.property("universityId"))
 			.seq
+
+	def getMissingBefore[A <: Member: ClassTag](missingSince: DateTime): Seq[String] = {
+		sessionWithoutFreshFilters.newCriteria[A]
+			.add(le("missingFromImportSince", missingSince))
+			.project[String](Projections.property("universityId"))
+			.seq
+	}
 
 	def getAllWithUniversityIds(universityIds: Seq[String]): Seq[Member] =
 		if (universityIds.isEmpty) Seq.empty
