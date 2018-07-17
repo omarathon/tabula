@@ -21,6 +21,7 @@ class ProgressionServiceTest extends TestBase with Mockito {
 		val scyd3: StudentCourseYearDetails = student.mostSignificantCourse.latestStudentCourseYearDetails
 		scyd3.academicYear = academicYear
 		student.mostSignificantCourse.courseYearLength = "3"
+		scyd3.modeOfAttendance = Fixtures.modeOfAttendance("F", "FT", "Full time")
 		val service = new AbstractProgressionService with ModuleRegistrationServiceComponent with CourseAndRouteServiceComponent {
 			override val moduleRegistrationService: ModuleRegistrationService = smartMock[ModuleRegistrationService]
 			override val courseAndRouteService: CourseAndRouteService = smartMock[CourseAndRouteService]
@@ -246,6 +247,7 @@ class ProgressionServiceTest extends TestBase with Mockito {
 	trait ThreeYearStudentFixture extends Fixture {
 		scyd3.yearOfStudy = 3
 		val scyd1: StudentCourseYearDetails = Fixtures.studentCourseYearDetails()
+		scyd1.modeOfAttendance = Fixtures.modeOfAttendance("F", "FT", "Full time")
 		scyd1.studentCourseDetails = student.mostSignificantCourse
 		scyd1.yearOfStudy = 1
 		scyd1.academicYear = academicYear - 2
@@ -255,6 +257,7 @@ class ProgressionServiceTest extends TestBase with Mockito {
 		scyd2.studentCourseDetails = student.mostSignificantCourse
 		scyd2.yearOfStudy = 2
 		scyd2.academicYear = academicYear - 1
+		scyd2.modeOfAttendance = Fixtures.modeOfAttendance("F", "FT", "Full time")
 		val entityYear2: ExamGridEntityYear = scyd2.toExamGridEntityYear
 		student.mostSignificantCourse.addStudentCourseYearDetails(scyd2)
 	}
