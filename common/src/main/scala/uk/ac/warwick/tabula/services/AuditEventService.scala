@@ -209,20 +209,14 @@ class AuditEventServiceImpl extends AuditEventService {
 		val query = session.createSQLQuery(indexListSql)
 		query.setTimestamp("eventdate", timestampColumnMapper.toNonNullValue(date))
 		query.setMaxResults(max)
-		query.list()
-			.asInstanceOf[JList[Array[Object]]]
-  		.asScala
-			.map(mapListToObject)
+		query.list().asInstanceOf[JList[Array[Object]]].asScala.map(mapListToObject)
 	}
 
 	def listRecent(start: Int, count: Int): Seq[AuditEvent] = {
 		val query = session.createSQLQuery(listSql)
 		query.setFirstResult(start)
 		query.setMaxResults(count)
-		query.list()
-			.asInstanceOf[JList[Array[Object]]]
-  		.asScala
-			.map(mapListToObject)
+		query.list().asInstanceOf[JList[Array[Object]]].asScala.map(mapListToObject)
 	}
 
 	// parse the data portion of the AuditEvent
