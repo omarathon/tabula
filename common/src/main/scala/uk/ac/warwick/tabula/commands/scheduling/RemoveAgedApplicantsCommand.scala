@@ -43,10 +43,6 @@ trait RemoveAgedApplicantsDescription extends Describable[Seq[String]] {
 	override def describe(d: Description) {}
 
 	override def describeResult(d: Description, result: Seq[String]): Unit = {
-		d.users(result.map { uniId =>
-			val user = new User
-			user.setWarwickId(uniId)
-			user
-		})
+		d.studentIds(result)
 	}
 }
