@@ -18,6 +18,7 @@ trait AutowiringStudentCourseDetailsDaoComponent extends StudentCourseDetailsDao
 trait StudentCourseDetailsDao {
 	def saveOrUpdate(studentCourseDetails: StudentCourseDetails)
 	def delete(studentCourseDetails: StudentCourseDetails)
+	def getByStudentUniversityId(universityId: String): Seq[StudentCourseDetails]
 	def getByScjCode(scjCode: String): Option[StudentCourseDetails]
 	def getByScjCodeStaleOrFresh(scjCode: String): Option[StudentCourseDetails]
 	def getBySprCode(sprCode: String): Seq[StudentCourseDetails]
@@ -43,6 +44,13 @@ class StudentCourseDetailsDaoImpl extends StudentCourseDetailsDao with Daoisms {
 	def delete(studentCourseDetails: StudentCourseDetails): Unit =  {
 		session.delete(studentCourseDetails)
 		session.flush()
+	}
+
+	override def getByStudentUniversityId(universityId: String): Seq[StudentCourseDetails] = {
+		session.newCriteria[StudentCourseDetails]
+			.add(is("UNIVERSITYID", universityId.trim))
+			.add(isNull("missingFromImportSince"))
+  		.seq
 	}
 
 	def getByScjCode(scjCode: String): Option[StudentCourseDetails] =
