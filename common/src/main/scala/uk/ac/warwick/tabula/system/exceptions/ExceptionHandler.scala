@@ -3,7 +3,6 @@ package uk.ac.warwick.tabula.system.exceptions
 import java.io.IOException
 import java.io.PrintWriter
 import java.io.StringWriter
-import scala.collection.JavaConversions.asScalaBuffer
 import org.joda.time.DateTime
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.beans.factory.annotation.Value
@@ -20,6 +19,7 @@ import uk.ac.warwick.tabula.web.views.FreemarkerRendering
 import uk.ac.warwick.tabula.system.exceptions._
 import uk.ac.warwick.tabula.helpers.UnicodeEmails
 import uk.ac.warwick.tabula.JavaImports._
+import scala.collection.JavaConverters._
 
 case class ExceptionContext(val token: String, val exception: Throwable, val request: Option[HttpServletRequest] = None)
 
@@ -42,7 +42,7 @@ trait ExceptionHandler {
 }
 
 class CompositeExceptionHandler(handlers: JList[ExceptionHandler]) extends ExceptionHandler {
-	private val _handlers = handlers.toList
+	private val _handlers = handlers.asScala.toList
 	override def exception(context: ExceptionContext): Unit =
 		for (handler <- _handlers) handler.exception(context)
 }

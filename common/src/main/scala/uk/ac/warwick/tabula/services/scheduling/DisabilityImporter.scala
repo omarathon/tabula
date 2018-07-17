@@ -13,7 +13,7 @@ import uk.ac.warwick.tabula.data.Transactions.transactional
 import uk.ac.warwick.tabula.data.model.Disability
 import uk.ac.warwick.tabula.helpers.Logging
 
-import scala.collection.JavaConversions.asScalaBuffer
+import scala.collection.JavaConverters._
 
 trait DisabilityImporter extends Logging {
 	var disabilityDao: DisabilityDao = Wire[DisabilityDao]
@@ -61,7 +61,7 @@ class SitsDisabilityImporter extends DisabilityImporter {
 	lazy val disabilitysQuery = new DisabilitysQuery(sits)
 
 	def getImportCommands: Seq[ImportDisabilitiesCommand] = {
-		disabilitysQuery.execute.toSeq
+		disabilitysQuery.execute.asScala
 	}
 }
 

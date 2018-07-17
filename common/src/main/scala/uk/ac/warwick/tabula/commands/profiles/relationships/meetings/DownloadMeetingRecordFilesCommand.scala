@@ -8,7 +8,7 @@ import uk.ac.warwick.tabula.permissions._
 import uk.ac.warwick.tabula.services.ZipService
 import uk.ac.warwick.tabula.services.fileserver._
 
-import scala.collection.JavaConversions.asScalaBuffer
+import scala.collection.JavaConverters._
 
 
 class DownloadMeetingRecordFilesCommand (val meetingRecord: AbstractMeetingRecord) extends Command[Option[RenderableFile]] with ReadOnly {
@@ -30,7 +30,7 @@ class DownloadMeetingRecordFilesCommand (val meetingRecord: AbstractMeetingRecor
 		val result: Option[RenderableFile] =
 			filename match {
 				case filename: String if filename.hasText => {
-					meetingRecord.attachments.find(_.name == filename).map(new RenderableAttachment(_))
+					meetingRecord.attachments.asScala.find(_.name == filename).map(new RenderableAttachment(_))
 				}
 				case _ => Some(zipped(meetingRecord))
 			}

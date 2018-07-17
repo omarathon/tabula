@@ -14,6 +14,7 @@ import uk.ac.warwick.tabula.permissions.Permissions
 import uk.ac.warwick.tabula.permissions.Permission
 import freemarker.template.TemplateBooleanModel
 import freemarker.ext.beans.SimpleMethodModel
+import scala.collection.JavaConverters._
 
 class MyObject extends PermissionsTarget {
 	var name = "text"
@@ -98,14 +99,14 @@ class ScalaBeansWrapperTest extends TestBase with Mockito {
 			}
 			case _ => fail()
 		}
-		val list:JList[String] = collection.JavaConversions.bufferAsJavaList(Buffer("yes","yes"))
+		val list:JList[String] = Seq("yes","yes").asJava
 		wrapper.wrap(list) match {
 			case listy:SimpleSequence =>
 			case nope => fail("nope" + nope.getClass().getName())
 		}
 
 		class ListHolder {
-			val list:JList[String] = collection.JavaConversions.bufferAsJavaList(Buffer("contents","bontents"))
+			val list:JList[String] = Seq("contents","bontents").asJava
 		}
 
 		new ListHolder().list.size should be (2)

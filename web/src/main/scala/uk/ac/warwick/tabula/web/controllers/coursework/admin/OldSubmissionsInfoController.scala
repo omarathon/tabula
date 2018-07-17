@@ -2,8 +2,7 @@ package uk.ac.warwick.tabula.web.controllers.coursework.admin
 
 import java.io.StringWriter
 
-import scala.collection.JavaConversions.asScalaSet
-import scala.collection.JavaConversions.seqAsJavaList
+import scala.collection.JavaConverters._
 import org.joda.time.ReadableInstant
 import org.springframework.context.annotation.Profile
 import uk.ac.warwick.tabula.helpers.DateTimeOrdering.orderedDateTime
@@ -65,14 +64,14 @@ class OldSubmissionsInfoController extends OldCourseworkController {
 				university-id={ item.submission.universityId.orNull }
 				usercode={ item.submission.usercode }
 				downloaded={ item.downloaded.toString }>
-			{ item.submission.values map fieldElement(item) }
+			{ item.submission.values.asScala map fieldElement(item) }
 		</submission>
 
 	def fieldElement(item: SubmissionListItem)(value: SavedFormValue): AbstractSeq[Node] with Seq[Node] =
 		if (value.hasAttachments)
 			<field name={ value.name }>
 				{
-					value.attachments map { file =>
+					value.attachments.asScala map { file =>
 						<file name={ file.name } zip-path={ item.submission.zipFileName(file) }/>
 					}
 				}
@@ -114,7 +113,7 @@ class OldSubmissionsInfoController extends OldCourseworkController {
 		def getNoOfColumns(item:SubmissionListItem): Int = headers.size
 
 		def getColumn(item:SubmissionListItem, i:Int): String = {
-			itemData(item).getOrElse(headers.get(i), "")
+			itemData(item).getOrElse(headers.asJava.get(i), "")
 		}
 	}
 
@@ -134,9 +133,9 @@ class OldSubmissionsInfoController extends OldCourseworkController {
 	private def extraFieldData(item: SubmissionListItem) = {
 		var fieldDataMap = ListMap[String, String]()
 
-		item.submission.values foreach ( value =>
+		item.submission.values.asScala foreach ( value =>
 			if (value.hasAttachments)
-				value.attachments foreach {file => {
+				value.attachments.asScala foreach {file => {
 					fieldDataMap += (value.name + "-name") -> file.name
 					fieldDataMap += (value.name + "-zip-path") -> item.submission.zipFileName(file)
 				}}

@@ -8,8 +8,7 @@ import uk.ac.warwick.tabula.permissions._
 import uk.ac.warwick.tabula.services.fileserver._
 import uk.ac.warwick.tabula.services.{AutowiringZipServiceComponent, ZipServiceComponent}
 import uk.ac.warwick.tabula.system.permissions.{PermissionsChecking, PermissionsCheckingMethods, RequiresPermissionsChecking}
-
-import scala.collection.JavaConversions.asScalaBuffer
+import scala.collection.JavaConverters._
 
 object DownloadFeedbackCommand {
 	type Result = Option[RenderableFile]
@@ -47,7 +46,7 @@ class DownloadFeedbackCommandInternal(val assignment: Assignment, val feedback: 
 	 */
 	override def applyInternal(): Result = filename match {
 		case filename: String if filename.hasText =>
-			feedback.attachments.find(_.name == filename).map(new RenderableAttachment(_))
+			feedback.attachments.asScala.find(_.name == filename).map(new RenderableAttachment(_))
 		case _ => Some(zipService.getFeedbackZip(feedback))
 	}
 }
