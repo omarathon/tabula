@@ -125,8 +125,7 @@ trait AssignMarkersPermissions extends RequiresPermissionsChecking with Permissi
 }
 
 trait ValidateConcurrentStages {
-
-	self :SelfValidating =>
+	self: SelfValidating with AssignMarkersState =>
 
 	def validateConcurrentStages(allocationMap: Map[MarkingWorkflowStage, Allocations], errors: Errors) {
 		val noDupesAllowed = allocationMap.filterKeys(_.stageAllocation)
@@ -142,8 +141,33 @@ trait ValidateConcurrentStages {
 				errors.reject("markingWorkflow.marker.noDupes", Array(marker.getFullName, dupes.map(_.getFullName).mkString(", ")), "")
 			}
 		})
+
+		validateSequentialStageMarkers(allocationMap, errors)
 	}
 
+	private def validateSequentialStageMarkers(allocationMap: Map[MarkingWorkflowStage, Allocations], errors: Errors): Unit = {
+		val allocationPairs: Map[MarkingWorkflowStage, Seq[(Marker, Student)]] = allocationMap.map { case (stage, allocations) =>
+				stage -> allocations.toSeq.flatMap { case (marker, students) => students.map(marker -> _) }
+		}
+
+		val unwiseAllocations: Iterable[(MarkingWorkflowStage, (Marker, Student))] = allocationMap.keys.flatMap { stage =>
+			allocationPairs(stage).filter(pair =>
+				stage.otherStagesInSequence
+					.exists(otherStage => allocationPairs.getOrElse(otherStage, Nil).contains(pair))
+			).map(stage -> _)
+		}.toSeq.distinct
+
+		unwiseAllocations.groupBy(_._2).foreach { case ((marker, student), iterable) =>
+			val stages = iterable.map(_._1).toSeq.distinct.sortBy(_.order)
+			val stageNames = stages.map(_.allocationName).mkString(if (stages.size == 2) " and " else ", ")
+
+			allocationWarnings :+= s"${student.getFullName} is allocated to marker ${marker.getFullName} for ${stages.size} stages: $stageNames"
+		}
+
+		if (allocationWarnings.nonEmpty && !allowSameMarkerForSequentialStages) {
+			errors.reject("markingWorkflow.marker.warnings")
+		}
+	}
 }
 
 trait AssignMarkersValidation extends SelfValidating with ValidateConcurrentStages {
@@ -198,6 +222,10 @@ trait AssignMarkersDescription extends Describable[Assignment] {
 trait AssignMarkersState {
 	def assignment: Assignment
 	def allocationMap: Map[MarkingWorkflowStage, Allocations]
+
+	var allocationWarnings: Seq[String] = Nil
+
+	var allowSameMarkerForSequentialStages: Boolean = false
 }
 
 trait AssignMarkersBySpreadsheetState extends AssignMarkersState {
@@ -205,6 +233,8 @@ trait AssignMarkersBySpreadsheetState extends AssignMarkersState {
 	protected var _allocationMap: Map[MarkingWorkflowStage, Allocations] = Map()
 	var rowsWithErrors: Seq[ParsedRow] = Nil
 	var file: UploadedFile = new UploadedFile
+
+	allowSameMarkerForSequentialStages = true
 }
 
 trait AssignMarkersDragAndDropState extends AssignMarkersState {

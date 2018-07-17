@@ -1,7 +1,6 @@
 package uk.ac.warwick.tabula.web.controllers.cm2.admin.assignments
 
 import javax.validation.Valid
-
 import org.springframework.context.annotation.Profile
 import org.springframework.stereotype.Controller
 import org.springframework.validation.Errors
@@ -11,6 +10,8 @@ import uk.ac.warwick.tabula.commands.cm2.assignments._
 import uk.ac.warwick.tabula.commands.{Appliable, SelfValidating}
 import uk.ac.warwick.tabula.data.model.{Assignment, AssignmentAnonymity}
 import uk.ac.warwick.tabula.web.Mav
+
+import scala.collection.JavaConverters._
 
 @Profile(Array("cm2Enabled"))
 @Controller
@@ -39,13 +40,19 @@ class ModifyAssignmentMarkersController extends AbstractAssignmentController {
 			workflow.allStages.map(s => s.allocationName -> Seq(s.name)).toMap
 		}
 
+		val allocations = if (assignMarkersCmd.allocationWarnings.nonEmpty)
+			ListMarkerAllocationsCommand(assignment, Some(assignMarkersCmd.allocationMap.map { case (k, v) => (k.allocationName, v) })).apply()
+		else
+			existingAllocations
+
 		Mav("cm2/admin/assignments/assignment_assign_markers",
 			"module" -> module,
 			"department" -> module.adminDepartment,
 			"stages" -> stages,
-			"state" -> existingAllocations,
+			"state" -> allocations,
 			"mode" -> mode,
-			"AssignmentAnonymity" -> AssignmentAnonymity
+			"AssignmentAnonymity" -> AssignmentAnonymity,
+			"allocationWarnings" -> assignMarkersCmd.allocationWarnings.asJava
 		)
 			.crumbsList(Breadcrumbs.assignment(assignment))
 	}
