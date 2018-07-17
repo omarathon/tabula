@@ -614,7 +614,9 @@ trait AttendanceMonitoringStudentDataFetcher extends TaskBenchmarking {
 				sprCode = sprCode,
 				tier4Requirements = false
 			))
-		case _ => None
+		case data: _ =>
+			logger.error("Unknown student data format.", data)
+			None
 	}
 
 	def getAttendanceMonitoringDataForStudents(universityIds: Seq[String], academicYear: AcademicYear): Seq[AttendanceMonitoringStudentData] = {
