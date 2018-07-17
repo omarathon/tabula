@@ -212,6 +212,7 @@ object Permissions {
 
 	object AssignmentFeedback {
 		case object Publish extends Permission("Release feedback to a student")
+		case object UnPublish extends Permission("Unpublish a students feedback")
 		case object Rate extends Permission("Rate feedback received")
 
 		case object Manage extends Permission("Manage feedback")
