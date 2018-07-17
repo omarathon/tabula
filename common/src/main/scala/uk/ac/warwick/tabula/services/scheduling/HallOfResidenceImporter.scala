@@ -13,7 +13,6 @@ import uk.ac.warwick.tabula.JavaImports.JMap
 import uk.ac.warwick.tabula.services.scheduling.HallOfResidenceImporter.HallOfResidenceInfo
 
 import scala.collection.JavaConverters._
-import scala.collection.JavaConversions.mapAsJavaMap
 
 trait HallOfResidenceImporter {
 	def getResidenceInfo(universityId: String): Option[HallOfResidenceInfo]
@@ -30,7 +29,7 @@ class HallOfResidenceImporterImpl extends HallOfResidenceImporter {
 	lazy val hallOfResidenceMappingQuery = new HallOfResidenceMappingQuery(sits)
 
 	def getResidenceInfo(universityId: String): Option[HallOfResidenceInfo] = {
-		hallOfResidenceMappingQuery.executeByNamedParam(Map("universityId" -> universityId)).asScala.toList match {
+		hallOfResidenceMappingQuery.executeByNamedParam(Map("universityId" -> universityId).asJava).asScala.toList match {
 			case addressList: List[HallOfResidenceInfo] if addressList.nonEmpty =>  Some(addressList.head)
 			case _ => None
 		}

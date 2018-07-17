@@ -372,6 +372,7 @@
 								Download feedback
 						</@fmt.permission_button>
 					</li>
+
 					<#if assignment.canPublishFeedback>
 						<li class="must-have-selected">
 							<#assign publishfeedbackurl><@routes.cm2.publishFeedback assignment/></#assign>
@@ -388,6 +389,22 @@
 					<#elseif assignment.publishFeedback>
 						<li class="disabled"><a class="use-tooltip" data-container="body" title="No current feedback to publish, or the assignment is not yet closed.">Publish feedback</a></li>
 					</#if>
+
+					<#if user?? && user.sysadmin>
+						<li class="must-have-selected">
+								<#assign unpublishfeedbackurl><@routes.cm2.unPublishFeedback assignment/></#assign>
+								<@fmt.permission_button
+									permission='AssignmentFeedback.UnPublish'
+									scope=assignment
+									action_descr='unpublish feedback'
+									classes='form-post'
+									href=unpublishfeedbackurl
+									tooltip='Unpublish feedback'>
+										Unpublish feedback
+								</@fmt.permission_button>
+						</li>
+					</#if>
+
 					<li class="must-have-selected">
 						<#assign deletefeedback_url><@routes.cm2.deleteSubmissionsAndFeedback assignment/></#assign>
 						<@fmt.permission_button

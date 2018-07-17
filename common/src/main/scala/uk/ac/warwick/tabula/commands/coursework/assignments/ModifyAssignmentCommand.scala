@@ -2,7 +2,6 @@ package uk.ac.warwick.tabula.commands.coursework.assignments
 
 import uk.ac.warwick.tabula.data.model.triggers.{AssignmentClosedTrigger, Trigger}
 
-import scala.collection.JavaConversions.{asScalaBuffer, seqAsJavaList}
 import scala.collection.JavaConverters._
 
 import org.hibernate.validator.constraints.{Length, NotEmpty}
@@ -104,7 +103,7 @@ abstract class ModifyAssignmentCommand(val module: Module,val updateStudentMembe
 
 		assignment.assessmentGroups.clear()
 		assignment.assessmentGroups.addAll(assessmentGroups)
-		for (group <- assignment.assessmentGroups if group.assignment == null) {
+		for (group <- assignment.assessmentGroups.asScala if group.assignment == null) {
 			group.assignment = assignment
 		}
 
@@ -146,8 +145,8 @@ abstract class ModifyAssignmentCommand(val module: Module,val updateStudentMembe
 		assessmentGroups = assignment.assessmentGroups
 		// TAB-4848 get all the groups that are linked even if they're marked not in use
 		upstreamGroups.addAll(allUpstreamGroups.filter { ug =>
-			assessmentGroups.exists( ag => ug.assessmentComponent == ag.assessmentComponent && ag.occurrence == ug.occurrence )
-		})
+			assessmentGroups.asScala.exists( ag => ug.assessmentComponent == ag.assessmentComponent && ag.occurrence == ug.occurrence )
+		}.asJava)
 	}
 
 	def copyFrom(assignment: Assignment) {
