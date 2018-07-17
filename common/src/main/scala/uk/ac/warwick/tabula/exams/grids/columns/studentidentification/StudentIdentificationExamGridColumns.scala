@@ -1,12 +1,13 @@
 package uk.ac.warwick.tabula.exams.grids.columns.studentidentification
 
 import org.springframework.stereotype.Component
-import uk.ac.warwick.tabula.commands.exams.grids.ExamGridEntity
-import uk.ac.warwick.tabula.data.model.{CourseYearWeighting, StudentCourseDetails}
+import uk.ac.warwick.tabula.commands.exams.grids.{ExamGridEntity, ExamGridEntityYear}
+import uk.ac.warwick.tabula.data.model.StudentCourseYearDetails.YearOfStudy
+import uk.ac.warwick.tabula.data.model.{CourseYearWeighting, StudentCourseYearDetails}
 import uk.ac.warwick.tabula.exams.grids.columns._
 import uk.ac.warwick.tabula.exams.web.Routes
 import uk.ac.warwick.tabula.services.ProgressionService._
-import uk.ac.warwick.tabula.services.{AutowiringCourseAndRouteServiceComponent, AutowiringModuleRegistrationServiceComponent, ProgressionService}
+import uk.ac.warwick.tabula.services.{AutowiringCourseAndRouteServiceComponent, AutowiringModuleRegistrationServiceComponent}
 
 @Component
 class NameColumnOption extends StudentExamGridColumnOption {
@@ -263,7 +264,7 @@ class YearWeightingsColumnOption extends StudentExamGridColumnOption with Autowi
 					case Some(weightings) => weightings
 					case None => Seq()
 				}
-				val weightingsInfo = yearWeightingsWithYearAbroadInfo(yearWeightings, studentCourseYearDetails.headOption.map(_.studentCourseDetails))
+				val weightingsInfo = yearWeightingsWithYearAbroadInfo(yearWeightings, studentCourseYearDetails)
 				val yearWeightingsAsString = for {
 					(yearWeighting, yrAbroad) <- weightingsInfo
 
@@ -279,23 +280,23 @@ class YearWeightingsColumnOption extends StudentExamGridColumnOption with Autowi
 
 	override def getColumns(state: ExamGridColumnState): Seq[ChosenYearExamGridColumn] = Seq(Column(state))
 
-	private def yearWeightingsWithYearAbroadInfo(courseYearWeightings: Seq[CourseYearWeighting], studentCourseDetails: Option[StudentCourseDetails] ) = {
-		val allYearDetails  = studentCourseDetails match {
-			case Some(scd) => scd.freshStudentCourseYearDetails//.filter(_.course ==  yearWeighting.course)
-			case _ => 	Seq()
+	private def yearWeightingsWithYearAbroadInfo(courseYearWeightings: Seq[CourseYearWeighting], studentCourseYearDetails: Option[StudentCourseYearDetails]): Seq[(CourseYearWeighting, Boolean)] = {
+		val allYearStudentCourseDetails: Map[YearOfStudy, Option[ExamGridEntityYear]] = studentCourseYearDetails match {
+			case Some(scyd) => scyd.studentCourseDetails.student.toExamGridEntity(scyd).years
+			case _ => Map()
 		}
 		courseYearWeightings.map { yearWeighting =>
 			// if any year weightings are non zero they will still be considered 0 if student has gone abroad. Display 0 if abroad for that course year
 			// if year weightings are already 0 then we don't need to check further
-			val yrAbroad = if (yearWeighting.weighting > 0 ) {
-				allYearDetails.filter(scyd => scyd.yearOfStudy ==  yearWeighting.yearOfStudy && scyd.studentCourseDetails.course ==  yearWeighting.course).headOption.map(scyd => allowEmptyYearMarks(courseYearWeightings, scyd.toExamGridEntityYear)).getOrElse(false)
+			val yrAbroad = if (yearWeighting.weighting > 0) {
+				allYearStudentCourseDetails.get(yearWeighting.yearOfStudy).map { egey =>
+					egey match {
+						case Some(ey) => allowEmptyYearMarks(courseYearWeightings, ey)
+						case _ => false
+					}
+				}.getOrElse(false)
 			} else false
-			(yearWeighting, yrAbroad )
+			(yearWeighting, yrAbroad)
 		}
-
-
-
 	}
-
-
 }
