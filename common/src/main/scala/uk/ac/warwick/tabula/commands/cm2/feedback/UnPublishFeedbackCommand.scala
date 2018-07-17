@@ -26,7 +26,7 @@ object UnPublishFeedbackCommand {
 }
 
 class UnPublishFeedbackCommandInternal(val assignment: Assignment, val submitter: CurrentUser) extends CommandInternal[Seq[Feedback]] with UnPublishFeedbackCommandRequest {
-	self: UserLookupComponent with AutowiringFeedbackServiceComponent =>
+	self: AutowiringFeedbackServiceComponent =>
 
 	def applyInternal(): Seq[Feedback] = {
 		feedbackToUnPublish.foreach(feedback => {
