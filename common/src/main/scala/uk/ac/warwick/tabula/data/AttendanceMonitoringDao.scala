@@ -553,6 +553,102 @@ trait AttendanceMonitoringStudentDataFetcher extends TaskBenchmarking {
 
 	import org.hibernate.criterion.Projections._
 
+	def projectionToAttendanceMonitoringStudentData(projection: Array[Object]): Option[AttendanceMonitoringStudentData] = projection match {
+		// without scdEndDate with casUsed and tier4
+		case Array(firstName: String, lastName: String, universityId: String, userId: String, scdBeginDate: LocalDate, routeCode: String, routeName: String, yearOfStudy: Integer, sprCode: String) =>
+			Some(AttendanceMonitoringStudentData(
+				firstName = firstName,
+				lastName = lastName,
+				universityId = universityId,
+				userId = userId,
+				scdBeginDate = scdBeginDate,
+				scdEndDate = None,
+				routeCode = routeCode,
+				routeName = routeName,
+				yearOfStudy = yearOfStudy.toString,
+				sprCode = sprCode,
+				tier4Requirements = false
+			))
+		// without scdEndDate with casUsed and tier4
+		case Array(firstName: String, lastName: String, universityId: String, userId: String, scdBeginDate: LocalDate, routeCode: String, routeName: String, yearOfStudy: Integer, sprCode: String, casUsed: JBoolean, tier4Visa: JBoolean) =>
+			Some(AttendanceMonitoringStudentData(
+				firstName = firstName,
+				lastName = lastName,
+				universityId = universityId,
+				userId = userId,
+				scdBeginDate = scdBeginDate,
+				scdEndDate = None,
+				routeCode = routeCode,
+				routeName = routeName,
+				yearOfStudy = yearOfStudy.toString,
+				sprCode = sprCode,
+				tier4Requirements = casUsed || tier4Visa
+			))
+		// without scdEndDate with one of (cas and tier4)
+		case Array(firstName: String, lastName: String, universityId: String, userId: String, scdBeginDate: LocalDate, routeCode: String, routeName: String, yearOfStudy: Integer, sprCode: String, casUsedOrTier4Visa: JBoolean) =>
+			Some(AttendanceMonitoringStudentData(
+				firstName = firstName,
+				lastName = lastName,
+				universityId = universityId,
+				userId = userId,
+				scdBeginDate = scdBeginDate,
+				scdEndDate = None,
+				routeCode = routeCode,
+				routeName = routeName,
+				yearOfStudy = yearOfStudy.toString,
+				sprCode = sprCode,
+				tier4Requirements = casUsedOrTier4Visa
+			))
+		// with scdEndDate and one of (casUsed and tier4)
+		case Array(firstName: String, lastName: String, universityId: String, userId: String, scdBeginDate: LocalDate, routeCode: String, routeName: String, yearOfStudy: Integer, sprCode: String, casUsedOrTier4Visa: JBoolean, scdEndDate: LocalDate) =>
+			Some(AttendanceMonitoringStudentData(
+				firstName = firstName,
+				lastName = lastName,
+				universityId = universityId,
+				userId = userId,
+				scdBeginDate = scdBeginDate,
+				scdEndDate = Option(scdEndDate),
+				routeCode = routeCode,
+				routeName = routeName,
+				yearOfStudy = yearOfStudy.toString,
+				sprCode = sprCode,
+				tier4Requirements = casUsedOrTier4Visa
+			))
+		// with scdEndDate and casUsed and tier4
+		case Array(firstName: String, lastName: String, universityId: String, userId: String, scdBeginDate: LocalDate, routeCode: String, routeName: String, yearOfStudy: Integer, sprCode: String, casUsed: JBoolean, tier4Visa: JBoolean, scdEndDate: LocalDate) =>
+			Some(AttendanceMonitoringStudentData(
+				firstName = firstName,
+				lastName = lastName,
+				universityId = universityId,
+				userId = userId,
+				scdBeginDate = scdBeginDate,
+				scdEndDate = Option(scdEndDate),
+				routeCode = routeCode,
+				routeName = routeName,
+				yearOfStudy = yearOfStudy.toString,
+				sprCode = sprCode,
+				tier4Requirements = casUsed || tier4Visa
+			))
+		// with scdEndDate without tier4
+		case Array(firstName: String, lastName: String, universityId: String, userId: String, scdBeginDate: LocalDate, routeCode: String, routeName: String, yearOfStudy: Integer, sprCode: String, scdEndDate: LocalDate) =>
+			Some(AttendanceMonitoringStudentData(
+				firstName = firstName,
+				lastName = lastName,
+				universityId = universityId,
+				userId = userId,
+				scdBeginDate = scdBeginDate,
+				scdEndDate = Option(scdEndDate),
+				routeCode = routeCode,
+				routeName = routeName,
+				yearOfStudy = yearOfStudy.toString,
+				sprCode = sprCode,
+				tier4Requirements = false
+			))
+		case data: Any =>
+			logger.error("Unknown student data format.", data)
+			None
+	}
+
 	def getAttendanceMonitoringDataForStudents(universityIds: Seq[String], academicYear: AcademicYear): Seq[AttendanceMonitoringStudentData] = {
 		def setupProjection(withEndDate: Boolean = false): ProjectionList = {
 			val projections =
@@ -573,7 +669,8 @@ trait AttendanceMonitoringStudentDataFetcher extends TaskBenchmarking {
 			}
 			projections
 		}
-		def setupCriteria(projection: ProjectionList, withEndDate: Boolean = false) = {
+
+		def setupCriteria(projection: ProjectionList, withEndDate: Boolean = false): Seq[Array[Object]] = {
 			def criteriaFactory(): ScalaCriteria[StudentMember] = {
 				val criteria = session.newCriteria[StudentMember]
 					.createAlias("studentCourseDetails", "studentCourseDetails")
@@ -591,39 +688,11 @@ trait AttendanceMonitoringStudentDataFetcher extends TaskBenchmarking {
 			safeInSeqWithProjection[StudentMember, Array[java.lang.Object]](() => criteriaFactory(), projection, "universityId", universityIds)
 		}
 		// The end date is either null, or if all are not null, the maximum end date, so get the nulls first
-		val nullEndDateData = setupCriteria(setupProjection(withEndDate = false)).map {
-			case Array(firstName: String, lastName: String, universityId: String, userId: String, scdBeginDate: LocalDate, routeCode: String, routeName: String, yearOfStudy: Integer, sprCode: String, casUsed: JBoolean, tier4Visa: JBoolean) =>
-				AttendanceMonitoringStudentData(
-					firstName,
-					lastName,
-					universityId,
-					userId,
-					scdBeginDate,
-					None,
-					routeCode,
-					routeName,
-					yearOfStudy.toString,
-					sprCode,
-					Option(casUsed).contains(true) || Option(tier4Visa).contains(true)
-				)
-		}
+		val nullEndDateData = setupCriteria(setupProjection(withEndDate = false)).flatMap(projectionToAttendanceMonitoringStudentData)
+
 		// Then get the not-nulls
-		val hasEndDateData = setupCriteria(setupProjection(withEndDate = true), withEndDate = true).map {
-			case Array(firstName: String, lastName: String, universityId: String, userId: String, scdBeginDate: LocalDate, routeCode: String, routeName: String, yearOfStudy: Integer, sprCode: String, casUsed: JBoolean, tier4Visa: JBoolean, scdEndDate: LocalDate) =>
-				AttendanceMonitoringStudentData(
-					firstName,
-					lastName,
-					universityId,
-					userId,
-					scdBeginDate,
-					Option(scdEndDate),
-					routeCode,
-					routeName,
-					yearOfStudy.toString,
-					sprCode,
-					Option(casUsed).contains(true) || Option(tier4Visa).contains(true)
-				)
-		}
+		val hasEndDateData = setupCriteria(setupProjection(withEndDate = true), withEndDate = true).flatMap(projectionToAttendanceMonitoringStudentData)
+
 		// Then combine the two, but filter any ended found in the not-ended
 		benchmarkTask("Combine data and filter") { nullEndDateData ++ hasEndDateData.filterNot(s => nullEndDateData.exists(_.universityId == s.universityId)) }
 	}
