@@ -255,6 +255,18 @@ class AttendanceMonitoringDaoTest extends PersistenceTestBase with Mockito {
 			).map(_.asInstanceOf[Object])
 			attendanceMonitoringDao.projectionToAttendanceMonitoringStudentData(student1ProjectionWithEndDateWithTier4Requirement).get should be(AttendanceMonitoringStudentData("kai", "lan", "1234567", "1234567", now, Some(now), "r1", "r1", "1", "spr1", true))
 
+
+			val student1ProjectionWithEndDateWithOneOfTier4OrCasUsedNull: Array[Object] = Array(
+				"kai", "lan", "1234567", "1234567", now, "r1", "r1", 1, "spr1", true, now
+			).map(_.asInstanceOf[Object])
+			attendanceMonitoringDao.projectionToAttendanceMonitoringStudentData(student1ProjectionWithEndDateWithOneOfTier4OrCasUsedNull).get should be(AttendanceMonitoringStudentData("kai", "lan", "1234567", "1234567", now, Some(now), "r1", "r1", "1", "spr1", true))
+
+			val student2ProjectionWithEndDateWithOneOfTier4OrCasUsedNull: Array[Object] = Array(
+				"kai", "lan", "1234567", "1234567", now, "r1", "r1", 1, "spr1", false, now
+			).map(_.asInstanceOf[Object])
+			attendanceMonitoringDao.projectionToAttendanceMonitoringStudentData(student2ProjectionWithEndDateWithOneOfTier4OrCasUsedNull).get should be(AttendanceMonitoringStudentData("kai", "lan", "1234567", "1234567", now, Some(now), "r1", "r1", "1", "spr1", false))
+
+
 		}
 	}
 
