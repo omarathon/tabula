@@ -230,21 +230,30 @@ class AttendanceMonitoringDaoTest extends PersistenceTestBase with Mockito {
 		transactional { tx =>
 			val now = org.joda.time.LocalDate.now()
 			val student1ProjectionWithTier4Requirement: Array[Object] = Array(
-				"kai", "lan", "1234567", "1234567",now, "r1","r1", 1, "spr1", true, true
+				"kai", "lan", "1234567", "1234567", now, "r1", "r1", 1, "spr1", true, true
 			).map(_.asInstanceOf[Object])
 
 			val student2ProjectionWithTier4Requirement: Array[Object] = Array(
-				"simon", "langford", "12121212", "12121212", now, "r2","r2", 2, "spr2", true, true
+				"simon", "langford", "12121212", "12121212", now, "r2", "r2", 2, "spr2", true, true
 			).map(_.asInstanceOf[Object])
 
 			attendanceMonitoringDao.projectionToAttendanceMonitoringStudentData(student1ProjectionWithTier4Requirement).get should be(AttendanceMonitoringStudentData("kai", "lan", "1234567", "1234567", now, None, "r1", "r1", "1", "spr1", true))
 			attendanceMonitoringDao.projectionToAttendanceMonitoringStudentData(student2ProjectionWithTier4Requirement).get should be(AttendanceMonitoringStudentData("simon", "langford", "12121212", "12121212", now, None, "r2", "r2", "2", "spr2", true))
 
 			val student1ProjectionWithoutTier4Requirement: Array[Object] = Array(
-				"kai", "lan", "1234567", "1234567",now, "r1","r1", 1, "spr1"
+				"kai", "lan", "1234567", "1234567", now, "r1", "r1", 1, "spr1"
 			).map(_.asInstanceOf[Object])
 			attendanceMonitoringDao.projectionToAttendanceMonitoringStudentData(student1ProjectionWithoutTier4Requirement).get should be(AttendanceMonitoringStudentData("kai", "lan", "1234567", "1234567", now, None, "r1", "r1", "1", "spr1", false))
 
+			val student1ProjectionWithEndDateWithoutTier4Requirement: Array[Object] = Array(
+				"kai", "lan", "1234567", "1234567", now, "r1", "r1", 1, "spr1", now
+			).map(_.asInstanceOf[Object])
+			attendanceMonitoringDao.projectionToAttendanceMonitoringStudentData(student1ProjectionWithEndDateWithoutTier4Requirement).get should be(AttendanceMonitoringStudentData("kai", "lan", "1234567", "1234567", now, Some(now), "r1", "r1", "1", "spr1", false))
+
+			val student1ProjectionWithEndDateWithTier4Requirement: Array[Object] = Array(
+				"kai", "lan", "1234567", "1234567", now, "r1", "r1", 1, "spr1", true, true, now
+			).map(_.asInstanceOf[Object])
+			attendanceMonitoringDao.projectionToAttendanceMonitoringStudentData(student1ProjectionWithEndDateWithTier4Requirement).get should be(AttendanceMonitoringStudentData("kai", "lan", "1234567", "1234567", now, Some(now), "r1", "r1", "1", "spr1", true))
 
 		}
 	}
