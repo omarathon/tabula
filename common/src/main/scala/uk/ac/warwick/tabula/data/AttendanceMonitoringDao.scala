@@ -614,7 +614,7 @@ trait AttendanceMonitoringStudentDataFetcher extends TaskBenchmarking {
 				sprCode = sprCode,
 				tier4Requirements = false
 			))
-		case data: _ =>
+		case data: Any =>
 			logger.error("Unknown student data format.", data)
 			None
 	}
