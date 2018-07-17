@@ -220,10 +220,18 @@ trait ImportSmallGroupSetsFromSpreadsheetBinding extends BindListener  with Logg
 								eventCommand.endTime = extractedEvent.endTime.orNull
 
 								extractedEvent.location.foreach {
+									case NamedLocation(name) if locationMappings.asScala.get(name).exists(_.hasText) =>
+										eventCommand.locationAlias = null
+										eventCommand.location = name
+										eventCommand.locationId = locationMappings.asScala(name)
 									case NamedLocation(name) =>
 										eventCommand.locationAlias = null
 										eventCommand.location = name
 										eventCommand.locationId = null
+
+										if (extractedEvent.possibleMapLocations.nonEmpty) {
+											locationMappings.putIfAbsent(name, null)
+										}
 									case MapLocation(name, lid, _) =>
 										eventCommand.locationAlias = null
 										eventCommand.location = name
@@ -233,6 +241,7 @@ trait ImportSmallGroupSetsFromSpreadsheetBinding extends BindListener  with Logg
 										eventCommand.location = name
 										eventCommand.locationId = lid
 								}
+								eventCommand.possibleMapLocations = extractedEvent.possibleMapLocations
 
 								new ModifySmallGroupEventCommandHolder(eventCommand, eventCommandType)
 							}
@@ -269,6 +278,7 @@ class ModifySmallGroupEventCommandHolder(var command: ModifyEventCommand, val co
 
 trait ImportSmallGroupSetsFromSpreadsheetRequest extends ImportSmallGroupSetsFromSpreadsheetState {
 	var file: UploadedFile = new UploadedFile
+	var locationMappings: JMap[String, String] = JHashMap() // A map of names to location IDs
 	var confirm: Boolean = _
 
 	// Bound by BindListener (ImportSmallGroupSetsFromSpreadsheetBinding)
@@ -307,7 +317,12 @@ trait ImportSmallGroupSetsFromSpreadsheetWarnings {
 						.filterNot(_.locationId.hasText).filter(_.location.hasText)
 						.map { event =>
 							val maybeTitle = event.title.maybeText.map(t => s"""event "$t"""").getOrElse("untitled event")
-							s"""$groupDescription, $maybeTitle: the location "${event.location}" was not found on the campus map"""
+
+							val reason =
+								if (event.possibleMapLocations.isEmpty) "was not found on the campus map"
+								else s"matched multiple locations on the campus map - ${event.possibleMapLocations.map { location => s"${location.name} (${location.building}, ${location.floor})" }.mkString(", ")}"
+
+							s"""$groupDescription, $maybeTitle: the location "${event.location}" $reason"""
 						}
 				}
 			}

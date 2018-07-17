@@ -11,7 +11,7 @@ import org.springframework.stereotype.Service
 import uk.ac.warwick.spring.Wire
 import uk.ac.warwick.tabula.JavaImports.JMap
 
-import scala.collection.JavaConversions.{asScalaBuffer, mapAsJavaMap}
+import scala.collection.JavaConverters._
 
 trait Tier4RequirementImporter {
 	def hasTier4Requirement(universityId: String): Boolean
@@ -27,7 +27,7 @@ class Tier4RequirementImporterImpl extends Tier4RequirementImporter {
 
 	def hasTier4Requirement(universityId: String): Boolean = {
 		val numNationalitiesNotNeedingVisa =
-			tier4RequirementMappingQuery.executeByNamedParam(Map("universityId" -> universityId)).head
+			tier4RequirementMappingQuery.executeByNamedParam(Map("universityId" -> universityId).asJava).asScala.head
 		(numNationalitiesNotNeedingVisa.intValue() == 0)
 	}
 }

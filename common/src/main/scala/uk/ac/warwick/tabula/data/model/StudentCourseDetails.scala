@@ -295,18 +295,18 @@ trait StudentCourseProperties extends BasicStudentCourseProperties {
 	var sprStartAcademicYear: AcademicYear = _
 }
 
-sealed abstract class CourseType(val code: String, val level: String, val description: String, val courseCodeChar: Char) extends Convertible[String] with Product with Serializable {
+sealed abstract class CourseType(val code: String, val level: String, val description: String, val courseCodeChars: Set[Char]) extends Convertible[String] with Product with Serializable {
 	def value: String = code
 }
 
 object CourseType {
-	implicit val factory: (String) => CourseType = { code: String => CourseType(code) }
+	implicit val factory: String => CourseType = { code: String => CourseType(code) }
 
-	case object PGR extends CourseType("PG(R)", "Postgraduate", "Postgraduate (Research)", 'R')
-	case object PGT extends CourseType("PG(T)", "Postgraduate", "Postgraduate (Taught)", 'T')
-	case object UG extends CourseType("UG", "Undergraduate", "Undergraduate", 'U')
-	case object Foundation extends CourseType("F", "Foundation", "Foundation course", 'F') // pre-UG
-	case object PreSessional extends CourseType("PS", "Pre-sessional", "Pre-sessional course", 'N') // pre-PG
+	case object PGR extends CourseType("PG(R)", "Postgraduate", "Postgraduate (Research)", Set('R'))
+	case object PGT extends CourseType("PG(T)", "Postgraduate", "Postgraduate (Taught)", Set('T', 'E'))
+	case object UG extends CourseType("UG", "Undergraduate", "Undergraduate", Set('U', 'D'))
+	case object Foundation extends CourseType("F", "Foundation", "Foundation course", Set('F')) // pre-UG
+	case object PreSessional extends CourseType("PS", "Pre-sessional", "Pre-sessional course", Set('N')) // pre-PG
 
 	// these are used in narrowing departmental filters via Department.filterRule
 	val all = Seq(UG, PGT, PGR, Foundation, PreSessional)
@@ -323,15 +323,15 @@ object CourseType {
 	}
 
 	def fromCourseCode(cc: String): CourseType = {
-		if(cc == null || cc.isEmpty) {
+		if (cc == null || cc.isEmpty) {
 			null
 		} else {
 			cc.charAt(0) match {
-				case UG.courseCodeChar => UG
-				case PGT.courseCodeChar => PGT
-				case PGR.courseCodeChar => PGR
-				case Foundation.courseCodeChar => Foundation
-				case PreSessional.courseCodeChar => PreSessional
+				case c if UG.courseCodeChars.contains(c) => UG
+				case c if PGT.courseCodeChars.contains(c) => PGT
+				case c if PGR.courseCodeChars.contains(c) => PGR
+				case c if Foundation.courseCodeChars.contains(c) => Foundation
+				case c if PreSessional.courseCodeChars.contains(c) => PreSessional
 				case other => throw new IllegalArgumentException("Unexpected first character of course code: %s".format(other))
 			}
 		}

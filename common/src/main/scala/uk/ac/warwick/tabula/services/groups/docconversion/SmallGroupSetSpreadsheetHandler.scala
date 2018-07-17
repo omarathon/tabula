@@ -22,7 +22,7 @@ import uk.ac.warwick.tabula.helpers.Closeables._
 import uk.ac.warwick.tabula.helpers.StringUtils._
 import uk.ac.warwick.tabula.services._
 import uk.ac.warwick.tabula.services.groups.docconversion.SmallGroupSetSpreadsheetContentsHandler._
-import uk.ac.warwick.tabula.services.timetables.{AutowiringWAI2GoConfigurationComponent, LocationFetchingServiceComponent, ScientiaCentrallyManagedRooms, WAI2GoHttpLocationFetchingServiceComponent}
+import uk.ac.warwick.tabula.services.timetables._
 import uk.ac.warwick.tabula.{AcademicYear, UniversityId}
 import uk.ac.warwick.userlookup.User
 
@@ -85,7 +85,8 @@ case class ExtractedSmallGroupEvent(
 	dayOfWeek: Option[DayOfWeek],
 	startTime: Option[LocalTime],
 	endTime: Option[LocalTime],
-	location: Option[Location]
+	location: Option[Location],
+	possibleMapLocations: Seq[WAI2GoLocation]
 )
 
 object ExtractedSmallGroupEvent {
@@ -540,6 +541,13 @@ abstract class SmallGroupSetSpreadsheetHandlerImpl extends SmallGroupSetSpreadsh
 					case x => x
 				}
 
+			val possibleMapLocations: Seq[WAI2GoLocation] = row.values.get(ExtractedSmallGroupEvent.LocationColumn)
+  			.map(_.formattedValue)
+  			.toSeq
+  			.flatMap { name =>
+					locationFetchingService.mapLocationsFor(name).getOrElse(Nil)
+				}
+
 			if (title.nonEmpty || tutors.nonEmpty || weekRanges.nonEmpty || dayOfWeek.nonEmpty || startTime.nonEmpty || endTime.nonEmpty || location.nonEmpty) {
 				Seq(ExtractedSmallGroupEvent(
 					title,
@@ -548,7 +556,8 @@ abstract class SmallGroupSetSpreadsheetHandlerImpl extends SmallGroupSetSpreadsh
 					dayOfWeek,
 					startTime,
 					endTime,
-					location
+					location,
+					possibleMapLocations
 				))
 			} else {
 				Nil

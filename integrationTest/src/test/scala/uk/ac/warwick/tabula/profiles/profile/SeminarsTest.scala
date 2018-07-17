@@ -22,9 +22,9 @@ class SeminarsTest extends BrowserTest with GivenWhenThen with FeaturesDriver wi
 		signIn as P.Student1 to Path("/profiles")
 		currentUrl should endWith (s"/profiles/view/${P.Student1.warwickId}")
 
-		And("They view the Seminars page")
-		click on linkText("Seminars")
-		currentUrl should endWith ("/seminars")
+		And("They view the Events page")
+		click on linkText("Events")
+		currentUrl should endWith ("/events")
 
 		Then("They see the group to sign up")
 		cssSelector(s"div.groupset-$setId").findElement.isDefined should be {true}

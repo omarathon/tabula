@@ -177,7 +177,7 @@ class SandboxProfileImporter extends ProfileImporter {
 				"alternative_email_address" -> null,
 				"mobile_number" -> null,
 				"nationality" -> "British (ex. Channel Islands & Isle of Man)",
-				"course_code" -> "%c%s-%s".format(route.courseType.courseCodeChar, member.departmentCode.toUpperCase, route.code.toUpperCase),
+				"course_code" -> "%c%s-%s".format(route.courseType.courseCodeChars.head, member.departmentCode.toUpperCase, route.code.toUpperCase),
 				"course_year_length" -> "3",
 				"spr_code" -> "%s/1".format(member.universityId),
 				"route_code" -> route.code.toUpperCase,

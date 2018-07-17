@@ -26,6 +26,7 @@ trait AcademicYearScopedController {
 		if (features.academicYear2016) years += AcademicYear(2016)
 		if (features.academicYear2017) years += AcademicYear(2017)
 		if (features.academicYear2018) years += AcademicYear(2018)
+		if (features.academicYear2019) years += AcademicYear(2019)
 		years
 	}
 

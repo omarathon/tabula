@@ -4,11 +4,12 @@ import org.joda.time.LocalTime
 import org.mockito.Matchers
 import uk.ac.warwick.tabula._
 import uk.ac.warwick.tabula.data.model.groups.{DayOfWeek, WeekRange}
-import uk.ac.warwick.tabula.data.model.{MapLocation, Module, NamedLocation}
+import uk.ac.warwick.tabula.data.model.{MapLocation, Module}
 import uk.ac.warwick.tabula.services.ModuleAndDepartmentService
 import uk.ac.warwick.tabula.timetables.{TimetableEvent, TimetableEventType}
 import uk.ac.warwick.userlookup.User
 
+import scala.util.Success
 import scala.xml.XML
 
 class TimetableFetchingServiceTest extends TestBase with Mockito {
@@ -16,9 +17,7 @@ class TimetableFetchingServiceTest extends TestBase with Mockito {
 	val module: Module = Fixtures.module("cs132")
 
 	@Test def parseXML() {
-		val locationFetchingService = new LocationFetchingService {
-			def locationFor(name: String) = NamedLocation(name)
-		}
+		val locationFetchingService: LocationFetchingService = (_: String) => Success(Nil)
 		val mockModuleAndDepartmentService = smartMock[ModuleAndDepartmentService]
 		mockModuleAndDepartmentService.getModulesByCodes(Matchers.any[Seq[String]]) answers {codes =>
 			codes.asInstanceOf[Seq[String]].map(code => Fixtures.module(code))

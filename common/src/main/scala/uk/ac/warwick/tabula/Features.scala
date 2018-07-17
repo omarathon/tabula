@@ -47,7 +47,8 @@ abstract class Features {
 	@Value("${features.academicYear.2015:true}") var academicYear2015: Boolean = defaults.academicYear2015
 	@Value("${features.academicYear.2016:true}") var academicYear2016: Boolean = defaults.academicYear2016
 	@Value("${features.academicYear.2017:true}") var academicYear2017: Boolean = defaults.academicYear2017
-	@Value("${features.academicYear.2018:false}") var academicYear2018: Boolean = defaults.academicYear2018
+	@Value("${features.academicYear.2018:true}") var academicYear2018: Boolean = defaults.academicYear2018
+	@Value("${features.academicYear.2019:false}") var academicYear2019: Boolean = defaults.academicYear2019
 
 	@Value("${features.emailStudents:false}") var emailStudents: Boolean = defaults.emailStudents
 	@Value("${features.collectRatings:true}") var collectRatings: Boolean = defaults.collectRatings
@@ -140,7 +141,7 @@ abstract class Features {
 	@Value("${features.scheduling.processNotificationListeners:true}") var schedulingProcessNotificationListeners: Boolean = defaults.schedulingProcessNotificationListeners
 	@Value("${features.scheduling.monitoringPointMigration:false}") var schedulingMonitoringPointMigration: Boolean = defaults.schedulingMonitoringPointMigration
 	@Value("${features.scheduling.groups.updateDepartmentSets:true}") var schedulingGroupsUpdateDepartmentSets: Boolean = defaults.schedulingGroupsUpdateDepartmentSets
-
+	@Value("${features.scheduling.groups.removeAgedApplicantsJob:true}") var schedulingRemoveAgedApplicantsJob: Boolean = defaults.schedulingRemoveAgedApplicantsJob
 	@Value("${features.exams:true}") var exams: Boolean = defaults.exams
 	@Value("${features.exams.grids:true}") var examGrids: Boolean = defaults.examGrids
 
@@ -190,7 +191,8 @@ class FeaturesMessage {
 	@BeanProperty var academicYear2015 = true
 	@BeanProperty var academicYear2016 = true
 	@BeanProperty var academicYear2017 = true
-	@BeanProperty var academicYear2018 = false
+	@BeanProperty var academicYear2018 = true
+	@BeanProperty var academicYear2019 = false
 
 	@BeanProperty var emailStudents = false
 	@BeanProperty var activityStreams = true
@@ -282,6 +284,7 @@ class FeaturesMessage {
 	@BeanProperty var schedulingProcessNotificationListeners = true
 	@BeanProperty var schedulingMonitoringPointMigration = false
 	@BeanProperty var schedulingGroupsUpdateDepartmentSets = true
+	@BeanProperty var schedulingRemoveAgedApplicantsJob = true
 
 	@BeanProperty var exams = true
 	@BeanProperty var examGrids = true

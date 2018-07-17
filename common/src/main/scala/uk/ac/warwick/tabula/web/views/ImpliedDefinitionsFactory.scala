@@ -4,7 +4,6 @@ import org.apache.tiles.request.Request
 import org.apache.tiles.definition.UnresolvingLocaleDefinitionsFactory
 import org.apache.tiles.Attribute
 import org.apache.tiles.Definition
-import scala.collection.JavaConversions.mapAsJavaMap
 import uk.ac.warwick.tabula.helpers.Logging
 import scala.collection.JavaConverters._
 
@@ -36,7 +35,7 @@ class ImpliedDefinitionsFactory extends UnresolvingLocaleDefinitionsFactory with
 			case definition: Any => definition
 			case _ if !name2.startsWith("/") => new Definition(layoutDefinition(ctx)) {
 				addAll(Map(
-					BodyTileAttribute -> new Attribute(FreemarkerRoot + name2 + Extension)))
+					BodyTileAttribute -> new Attribute(FreemarkerRoot + name2 + Extension)).asJava)
 			}
 			case _ => null // Let it be handled by FreemarkerServlet
 		}

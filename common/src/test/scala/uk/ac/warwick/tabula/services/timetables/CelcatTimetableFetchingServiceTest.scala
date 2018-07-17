@@ -13,6 +13,8 @@ import uk.ac.warwick.tabula.services.permissions.CacheStrategyComponent
 import uk.ac.warwick.tabula.timetables.{TimetableEvent, TimetableEventType}
 import uk.ac.warwick.util.cache.Caches.CacheStrategy
 
+import scala.util.Success
+
 class CelcatTimetableFetchingServiceTest extends TestBase with Mockito {
 
 	val module: Module = Fixtures.module("ib121")
@@ -29,9 +31,7 @@ class CelcatTimetableFetchingServiceTest extends TestBase with Mockito {
 		val userLookup = new MockUserLookup
 		val profileService = mock[ProfileService]
 		val cacheStrategy = CacheStrategy.InMemoryOnly
-		val locationFetchingService = new LocationFetchingService {
-			def locationFor(name: String) = NamedLocation(name)
-		}
+		val locationFetchingService: LocationFetchingService = (_: String) => Success(Nil)
 		val moduleAndDepartmentService: ModuleAndDepartmentService = smartMock[ModuleAndDepartmentService]
 		moduleAndDepartmentService.getModuleByCode(Matchers.any[String]) answers {moduleCode =>
 			Some(Fixtures.module(moduleCode.asInstanceOf[String]))
