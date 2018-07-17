@@ -2,10 +2,13 @@ package uk.ac.warwick.tabula.data.model.attendance
 
 import org.joda.time.{DateTime, LocalDate}
 import org.junit.Before
+import uk.ac.warwick.tabula.JavaImports.JBoolean
 import uk.ac.warwick.tabula._
 import uk.ac.warwick.tabula.commands.MemberOrUser
-import uk.ac.warwick.tabula.data.AutowiringAttendanceMonitoringDao
+import uk.ac.warwick.tabula.data.{AttendanceMonitoringStudentData, AutowiringAttendanceMonitoringDao}
 import uk.ac.warwick.tabula.data.model.{Department, Route, StudentMember, UserGroup}
+
+import scala.collection.JavaConverters._
 
 class AttendanceMonitoringDaoTest extends PersistenceTestBase with Mockito {
 
@@ -221,5 +224,29 @@ class AttendanceMonitoringDaoTest extends PersistenceTestBase with Mockito {
 		import uk.ac.warwick.tabula.helpers.DateTimeOrdering._
 		result3.head.scdEndDate.get should be (student1.freshStudentCourseDetails.map(_.endDate).max)
 	}}
+
+	@Test
+	def mapProjectionToAttendanceMonitoringStudentData(): Unit = {
+		transactional { tx =>
+			val now = org.joda.time.LocalDate.now()
+			val student1ProjectionWithTier4Requirement: Array[Object] = Array(
+				"kai", "lan", "1234567", "1234567",now, "r1","r1", 1, "spr1", true, true
+			).map(_.asInstanceOf[Object])
+
+			val student2ProjectionWithTier4Requirement: Array[Object] = Array(
+				"simon", "langford", "12121212", "12121212", now, "r2","r2", 2, "spr2", true, true
+			).map(_.asInstanceOf[Object])
+
+			attendanceMonitoringDao.projectionToAttendanceMonitoringStudentData(student1ProjectionWithTier4Requirement).get should be(AttendanceMonitoringStudentData("kai", "lan", "1234567", "1234567", now, None, "r1", "r1", "1", "spr1", true))
+			attendanceMonitoringDao.projectionToAttendanceMonitoringStudentData(student2ProjectionWithTier4Requirement).get should be(AttendanceMonitoringStudentData("simon", "langford", "12121212", "12121212", now, None, "r2", "r2", "2", "spr2", true))
+
+			val student1ProjectionWithoutTier4Requirement: Array[Object] = Array(
+				"kai", "lan", "1234567", "1234567",now, "r1","r1", 1, "spr1"
+			).map(_.asInstanceOf[Object])
+			attendanceMonitoringDao.projectionToAttendanceMonitoringStudentData(student1ProjectionWithoutTier4Requirement).get should be(AttendanceMonitoringStudentData("kai", "lan", "1234567", "1234567", now, None, "r1", "r1", "1", "spr1", false))
+
+
+		}
+	}
 
 }
