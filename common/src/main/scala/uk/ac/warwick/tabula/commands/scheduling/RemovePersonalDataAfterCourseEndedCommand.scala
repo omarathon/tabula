@@ -5,21 +5,23 @@ import uk.ac.warwick.tabula.data.MemberDaoComponent
 import uk.ac.warwick.tabula.helpers.Logging
 import uk.ac.warwick.tabula.services.permissions.PermissionsServiceComponent
 
-object RemovePersonalDataAfterRelationshipFinishedCommand {
+object RemovePersonalDataAfterCourseEndedCommand {
 
 }
 
-class RemovePersonalDataAfterRelationshipFinishedCommandInternal extends CommandInternal[Seq[String]] with Logging {
+class RemovePersonalDataAfterCourseEndedCommandInternal extends CommandInternal[Seq[String]] with Logging {
 	self: PermissionsServiceComponent with MemberDaoComponent =>
 	override protected def applyInternal(): Seq[String] = {
 
-		memberDao.getByUniversityId()
+		// get missing from import since date that's more than 6 yeats ago
+		// and intersect with the one's course ended 6 years ago
 
+		memberDao.getMissingSince()
 		???
 	}
 }
 
-trait RemovePersonalDataAfterRelationshipFinishedCommandDescription extends Describable[Seq[String]] {
+trait RemovePersonalDataAfterCourseEndedCommandDescription extends Describable[Seq[String]] {
 	override def describe(d: Description) {}
 	override def describeResult(d: Description, result: Seq[String]): Unit = {
 		d.users(???) //  get all the users removed
