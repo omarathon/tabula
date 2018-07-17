@@ -141,7 +141,7 @@ abstract class Features {
 	@Value("${features.scheduling.processNotificationListeners:true}") var schedulingProcessNotificationListeners: Boolean = defaults.schedulingProcessNotificationListeners
 	@Value("${features.scheduling.monitoringPointMigration:false}") var schedulingMonitoringPointMigration: Boolean = defaults.schedulingMonitoringPointMigration
 	@Value("${features.scheduling.groups.updateDepartmentSets:true}") var schedulingGroupsUpdateDepartmentSets: Boolean = defaults.schedulingGroupsUpdateDepartmentSets
-
+	@Value("${features.scheduling.groups.removeAgedApplicantsJob:true}") var schedulingRemoveAgedApplicantsJob: Boolean = defaults.schedulingRemoveAgedApplicantsJob
 	@Value("${features.exams:true}") var exams: Boolean = defaults.exams
 	@Value("${features.exams.grids:true}") var examGrids: Boolean = defaults.examGrids
 
@@ -284,6 +284,7 @@ class FeaturesMessage {
 	@BeanProperty var schedulingProcessNotificationListeners = true
 	@BeanProperty var schedulingMonitoringPointMigration = false
 	@BeanProperty var schedulingGroupsUpdateDepartmentSets = true
+	@BeanProperty var schedulingRemoveAgedApplicantsJob = true
 
 	@BeanProperty var exams = true
 	@BeanProperty var examGrids = true

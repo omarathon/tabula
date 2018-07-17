@@ -109,15 +109,17 @@ abstract class AbstractModuleRegistrationService extends ModuleRegistrationServi
 		if (validRecords.exists(_.firstDefinedMark.isEmpty)) {
 			Seq()
 		} else {
-			val coreAndOptionalCoreModules = validRecords.filter(mr =>
-				mr.selectionStatus == ModuleSelectionStatus.Core || mr.selectionStatus == ModuleSelectionStatus.OptionalCore
+			// TAB-6331 - Overcat subsets don't _have_ to contain all optional core modules. If a minimum number of optional core modules must be passed that should
+			// be handled by pathway rules instead (which means as far as grids are concerned there is no difference between Optional and OptionalCore modules)
+			val coreModules = validRecords.filter(mr =>
+				mr.selectionStatus == ModuleSelectionStatus.Core
 			)
 			val subsets = validRecords.toSet.subsets.toSeq
 			val validSubsets = subsets.filter(_.nonEmpty).filter(modRegs =>
 				// CATS total of at least the normal load
 				modRegs.toSeq.map(mr => BigDecimal(mr.cats)).sum >= normalLoad &&
-					// Contains all the core and optional core modules
-					coreAndOptionalCoreModules.forall(modRegs.contains) &&
+					// Contains all the core modules
+					coreModules.forall(modRegs.contains) &&
 					// All the registrations have agreed or actual marks
 					modRegs.forall(mr => mr.firstDefinedMark.isDefined || markOverrides.get(mr.module).isDefined && markOverrides(mr.module) != null)
 			)

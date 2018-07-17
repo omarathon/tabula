@@ -106,6 +106,7 @@ class FilterStudentsCommandTest extends TestBase with Mockito {
 		val courseTypeRestriction = new ScalaRestriction(
 			Restrictions.disjunction()
 				.add(Restrictions.like("course.code", "U%"))
+				.add(Restrictions.like("course.code", "D%"))
 				.add(Restrictions.like("course.code", "N%"))
 		)
 		courseTypeRestriction.alias("mostSignificantCourse", AliasAndJoinType("mostSignificantCourse"))
