@@ -14,7 +14,7 @@ import uk.ac.warwick.tabula.data.model.Award
 import uk.ac.warwick.tabula.helpers.Logging
 import uk.ac.warwick.tabula.helpers.StringUtils._
 
-import scala.collection.JavaConversions.asScalaBuffer
+import scala.collection.JavaConverters._
 
 trait AwardImporter extends Logging {
 	var awardDao: AwardDao = Wire[AwardDao]
@@ -65,7 +65,7 @@ class SitsAwardImporter extends AwardImporter {
 	lazy val awardsQuery = new AwardsQuery(sits)
 
 	def getImportCommands: Seq[ImportAwardCommand] = {
-		awardsQuery.execute.toSeq
+		awardsQuery.execute.asScala
 	}
 }
 

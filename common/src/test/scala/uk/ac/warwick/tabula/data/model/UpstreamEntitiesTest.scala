@@ -3,10 +3,10 @@ package uk.ac.warwick.tabula.data.model
 import uk.ac.warwick.tabula.JavaImports.JArrayList
 import uk.ac.warwick.tabula.data.model.markingworkflow.StageMarkers
 
-import scala.collection.JavaConversions.seqAsJavaList
 import uk.ac.warwick.tabula.{AcademicYear, PersistenceTestBase}
 import uk.ac.warwick.tabula.services._
 import uk.ac.warwick.tabula.data.{AssessmentDaoComponent, AssessmentDaoImpl, AssessmentMembershipDaoImpl}
+import scala.collection.JavaConverters._
 
 // scalastyle:off magic.number
 class UpstreamEntitiesTest extends PersistenceTestBase {
@@ -56,7 +56,7 @@ class UpstreamEntitiesTest extends PersistenceTestBase {
 			law2010.assessmentMembershipService = assignmentMembershipService
 			law2010.name = "Cool Essay!"
 			law2010.academicYear = AcademicYear(2010)
-			law2010.assessmentGroups = List(assessmentGroup2010)
+			law2010.assessmentGroups = List(assessmentGroup2010).asJava
 			assessmentGroup2010.assignment = law2010
 
 			val law2011 = new Assignment
@@ -64,7 +64,7 @@ class UpstreamEntitiesTest extends PersistenceTestBase {
 			law2011.assignmentService = assignmentService
 			law2011.assessmentMembershipService = assignmentMembershipService
 			law2011.academicYear = AcademicYear(2011)
-			law2011.assessmentGroups = List(assessmentGroup2011)
+			law2011.assessmentGroups = List(assessmentGroup2011).asJava
 			assessmentGroup2011.assignment = law2011
 
 			// Not linked to an upstream assignment
