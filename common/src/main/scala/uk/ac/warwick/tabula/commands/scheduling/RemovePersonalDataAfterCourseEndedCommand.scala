@@ -3,7 +3,7 @@ package uk.ac.warwick.tabula.commands.scheduling
 import org.joda.time.DateTime
 import uk.ac.warwick.tabula.commands.{CommandInternal, ComposableCommand, Describable, Description}
 import uk.ac.warwick.tabula.data.{AutowiringMemberDaoComponent, AutowiringStudentCourseDetailsDaoComponent, MemberDaoComponent, StudentCourseDetailsDaoComponent}
-import uk.ac.warwick.tabula.data.model.Member
+import uk.ac.warwick.tabula.data.model.{Member, StudentMember}
 import uk.ac.warwick.tabula.helpers.Logging
 import uk.ac.warwick.tabula.permissions.Permissions
 import uk.ac.warwick.tabula.services.permissions.{AutowiringPermissionsServiceComponent, PermissionsServiceComponent}
@@ -25,7 +25,12 @@ class RemovePersonalDataAfterCourseEndedCommandInternal extends CommandInternal[
 	override protected def applyInternal(): Seq[String] = {
 		val sixYearsAgo = DateTime.now().minusYears(6)
 		memberDao.deleteByUniversityIds(memberDao.getMissingBefore[Member](sixYearsAgo) // member missing from SITS
-			.map(studentCourseDetailsDao.getByStudentUniversityId)
+			.flatMap(memberDao.getByUniversityId(_))
+			.flatMap {
+				case student: StudentMember => Some(student)
+				case _ => None
+			}
+			.map(studentCourseDetailsDao.getByStudent)
 			.map(_.filter(details => details.endDate != null && details.missingFromImportSince != null)) // has endDate and is missing
 			.map(_.sortWith((l, r) => l.endDate.isBefore(r.endDate))).tail // course details that ends latest
 			.flatten
