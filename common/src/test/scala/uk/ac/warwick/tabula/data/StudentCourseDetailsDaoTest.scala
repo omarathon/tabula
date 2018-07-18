@@ -221,4 +221,6 @@ class StudentCourseDetailsDaoTest extends PersistenceTestBase with Logging with 
 		studentCourseDetailsDao.getByScjCodeStaleOrFresh("1000002/1").get.missingFromImportSince should be (null)
 	}
 
+	@Test
+	def
 }
