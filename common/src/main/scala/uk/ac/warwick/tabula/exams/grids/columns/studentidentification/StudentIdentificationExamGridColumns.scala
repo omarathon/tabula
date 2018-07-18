@@ -264,11 +264,10 @@ class YearWeightingsColumnOption extends StudentExamGridColumnOption with Autowi
 					case Some(weightings) => weightings
 					case None => Seq()
 				}
-				val weightingsInfo = yearWeightingsWithYearAbroadInfo(yearWeightings, studentCourseYearDetails)
+				val abroadWeightings = abroadYearWeightings(yearWeightings, studentCourseYearDetails)
 				val yearWeightingsAsString = for {
-					(yearWeighting, yrAbroad) <- weightingsInfo
-
-				} yield if (yrAbroad) 0 else s"${yearWeighting.weightingAsPercentage.toPlainString}"
+					yearWeighting <- yearWeightings
+				} yield if (abroadWeightings.contains(yearWeighting)) 0 else s"${yearWeighting.weightingAsPercentage.toPlainString}"
 
 				val weightingCol = if (yearWeightings.size > 0) {
 					s"${yearWeightingsAsString.mkString("/")} - ${yearWeightings.head.course.code}"
@@ -280,23 +279,19 @@ class YearWeightingsColumnOption extends StudentExamGridColumnOption with Autowi
 
 	override def getColumns(state: ExamGridColumnState): Seq[ChosenYearExamGridColumn] = Seq(Column(state))
 
-	private def yearWeightingsWithYearAbroadInfo(courseYearWeightings: Seq[CourseYearWeighting], studentCourseYearDetails: Option[StudentCourseYearDetails]): Seq[(CourseYearWeighting, Boolean)] = {
+	private def abroadYearWeightings(courseYearWeightings: Seq[CourseYearWeighting], studentCourseYearDetails: Option[StudentCourseYearDetails]): Seq[CourseYearWeighting] = {
 		val allYearStudentCourseDetails: Map[YearOfStudy, Option[ExamGridEntityYear]] = studentCourseYearDetails match {
 			case Some(scyd) => scyd.studentCourseDetails.student.toExamGridEntity(scyd).years
 			case _ => Map()
 		}
-		courseYearWeightings.map { yearWeighting =>
-			// if any year weightings are non zero they will still be considered 0 if student has gone abroad. Display 0 if abroad for that course year
-			// if year weightings are already 0 then we don't need to check further
-			val yrAbroad = if (yearWeighting.weighting > 0) {
+		courseYearWeightings.filter { yearWeighting =>
+			// if any year weightings are non zero they will still be considered 0 if student has gone abroad. We would display 0 if abroad for that course year
 				allYearStudentCourseDetails.get(yearWeighting.yearOfStudy).map { egey =>
 					egey match {
 						case Some(ey) => allowEmptyYearMarks(courseYearWeightings, ey)
 						case _ => false
 					}
 				}.getOrElse(false)
-			} else false
-			(yearWeighting, yrAbroad)
 		}
 	}
 }
