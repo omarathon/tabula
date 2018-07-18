@@ -45,7 +45,9 @@ trait ControllerMethods extends PermissionsCheckingMethods with Logging {
 trait ControllerViews extends Logging {
 	val Mav = uk.ac.warwick.tabula.web.Mav
 
-	def getReturnTo(defaultUrl:String): String =
+	def getReturnTo(defaultUrl: String): String = StringEscapeUtils.escapeHtml4(getReturnToUnescaped(defaultUrl))
+
+	def getReturnToUnescaped(defaultUrl: String): String =
 		requestInfo.flatMap {
 			_.requestParameters.get("returnTo")
 		}.flatMap {
@@ -58,11 +60,11 @@ trait ControllerViews extends Logging {
 			defaultUrl
 		})(url =>
 			// Prevent returnTo rabbit hole by stripping other returnTos from the URL
-			StringEscapeUtils.escapeHtml4(url.replaceAll("[&?]returnTo=[^&]*", ""))
+			url.replaceAll("[&?]returnTo=[^&]*", "")
 		)
 
-	def Redirect(path: String, objects: (String, _)*) = Mav("redirect:" + getReturnTo(path), objects: _*)
-	def Redirect(path: String, objects: Map[String, _]) = Mav("redirect:" + getReturnTo(path), objects)
+	def Redirect(path: String, objects: (String, _)*) = Mav("redirect:" + getReturnToUnescaped(path), objects: _*)
+	def Redirect(path: String, objects: Map[String, _]) = Mav("redirect:" + getReturnToUnescaped(path), objects)
 	// Force the redirect regardless of returnTo
 	def RedirectForce(path: String, objects: (String, _)*) = Mav("redirect:" + path, objects: _*)
 	def RedirectForce(path: String, objects: Map[String, _]) = Mav("redirect:" + path, objects)
