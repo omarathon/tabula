@@ -222,5 +222,27 @@ class StudentCourseDetailsDaoTest extends PersistenceTestBase with Logging with 
 	}
 
 	@Test
-	def
+	def testGetByStudentUniversityId(): Unit = transactional { tx =>
+		val dept1 = Fixtures.department("hm", "History of Music")
+		val dept2 = Fixtures.department("ar", "Architecture")
+
+		session.saveOrUpdate(dept1)
+		session.saveOrUpdate(dept2)
+
+		val stu1 = Fixtures.student(universityId = "1000001", userId="1000001", department=dept1, courseDepartment=dept1)
+		val stu2 = Fixtures.student(universityId = "1000002", userId="1000002", department=dept2, courseDepartment=dept2)
+		val stu3 = Fixtures.student(universityId = "1000003", userId="1000003", department=dept2, courseDepartment=dept2)
+		val stu4 = Fixtures.student(universityId = "1000004", userId="1000004", department=dept2, courseDepartment=dept2)
+
+		memberDao.saveOrUpdate(stu1)
+		memberDao.saveOrUpdate(stu2)
+		memberDao.saveOrUpdate(stu3)
+		memberDao.saveOrUpdate(stu4)
+
+		session.flush()
+		session.clear()
+
+		studentCourseDetailsDao.getByUniversityId("1000004").head.student.universityId should be ("1000004")
+		studentCourseDetailsDao.getByUniversityId("1000003").head.student.universityId should be ("1000003")
+	}
 }
