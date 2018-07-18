@@ -14,14 +14,17 @@ object RemovePersonalDataAfterCourseEndedCommand {
 class RemovePersonalDataAfterCourseEndedCommandInternal extends CommandInternal[Seq[String]] with Logging {
 	self: PermissionsServiceComponent with MemberDaoComponent with StudentCourseDetailsDaoComponent =>
 	override protected def applyInternal(): Seq[String] = {
-
 		val sixYearsAgo = DateTime.now().minusYears(6)
-		memberDao.getMissingBefore[Member](sixYearsAgo) // gone from SITS
+		memberDao.getMissingBefore[Member](sixYearsAgo) // member missing from SITS
 			.map(studentCourseDetailsDao.getByStudentUniversityId)
-  			.
-//			.map(_.student.universityId)
-
-		???
+			.map(_.filter(details => details.endDate != null && details.missingFromImportSince != null)) // has endDate and is missing
+			.map(_.sortWith((l, r) => l.endDate.isBefore(r.endDate))).tail // course details that ends latest
+			.flatten
+			.filter { details =>
+				details.endDate.isBefore(sixYearsAgo.toLocalDate) && details.missingFromImportSince.isBefore(sixYearsAgo)
+				// ended and missing 6+ years ago
+			}
+			.map(_.student.universityId)
 	}
 }
 
@@ -29,6 +32,6 @@ trait RemovePersonalDataAfterCourseEndedCommandDescription extends Describable[S
 	override def describe(d: Description) {}
 
 	override def describeResult(d: Description, result: Seq[String]): Unit = {
-		d.users(???) //  get all the users removed
+		d.studentIds(result)
 	}
 }
