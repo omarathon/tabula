@@ -675,5 +675,46 @@ class ProgressionServiceTest extends TestBase with Mockito {
 		}
 	}
 
+	@Test
+	def allowEmptyYearMarks(): Unit =  {
+		// full time student with no year abroad
+		new ThreeYearStudentFixture {
+			var allowEmpty  = ProgressionService.allowEmptyYearMarks(yearWeightings, entityYear3)
+			allowEmpty should be (false)
+		}
+
+		// An year abroad - 2nd year  with null block occurrence
+		new ThreeYearStudentFixture {
+			scyd2.modeOfAttendance = Fixtures.modeOfAttendance("SWE", "SANDWICH (E)", "Sandwich (thick) Erasmus Scheme")
+			var allowEmpty  = ProgressionService.allowEmptyYearMarks(yearWeightings, entityYear2)
+			allowEmpty should be (true)
+		}
+
+		// An year abroad - 2nd year
+		new ThreeYearStudentFixture {
+			scyd2.modeOfAttendance = Fixtures.modeOfAttendance("YO", "OPTIONAL YR", "Optional year out (study related)")
+			scyd2.blockOccurrence = "FW" //  SITS block occurrence
+			var allowEmpty  = ProgressionService.allowEmptyYearMarks(yearWeightings, entityYear2)
+			allowEmpty should be (true)
+		}
+
+		// Intercalated year (this should not consider year abroad even though we have one of the valid MOA codes that is acceptable for year abroad)
+		new ThreeYearStudentFixture {
+			scyd2.modeOfAttendance = Fixtures.modeOfAttendance("YM", "COMP YR", "Compulsory year out (study related)")
+			scyd2.blockOccurrence = "I"
+			var allowEmpty  = ProgressionService.allowEmptyYearMarks(yearWeightings, entityYear2)
+			allowEmpty should be (false)
+		}
+
+		// Intercalated year (this should not consider year abroad)
+		new ThreeYearStudentFixture {
+			scyd2.modeOfAttendance = Fixtures.modeOfAttendance("YX", "EXCH YR", "Exchange year out (study related)")
+			scyd2.blockOccurrence = "I"
+			var allowEmpty  = ProgressionService.allowEmptyYearMarks(yearWeightings, entityYear2)
+			allowEmpty should be (false)
+		}
+
+	}
+
 
 }
