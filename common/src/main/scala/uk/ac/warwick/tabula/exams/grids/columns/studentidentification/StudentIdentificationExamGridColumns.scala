@@ -286,12 +286,12 @@ class YearWeightingsColumnOption extends StudentExamGridColumnOption with Autowi
 		}
 		courseYearWeightings.filter { yearWeighting =>
 			// if any year weightings are non zero they will still be considered 0 if student has gone abroad. We would display 0 if abroad for that course year
-				allYearStudentCourseDetails.get(yearWeighting.yearOfStudy).map { egey =>
+				allYearStudentCourseDetails.get(yearWeighting.yearOfStudy).exists { egey =>
 					egey match {
 						case Some(ey) => allowEmptyYearMarks(courseYearWeightings, ey)
 						case _ => false
 					}
-				}.getOrElse(false)
+				}
 		}
 	}
 }
