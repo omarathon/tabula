@@ -25,15 +25,11 @@ class RemovePersonalDataAfterCourseEndedCommandInternal extends CommandInternal[
 	override protected def applyInternal(): Seq[String] = {
 		val sixYearsAgo = DateTime.now().minusYears(6)
 		memberDao.deleteByUniversityIds(memberDao.getMissingBefore[Member](sixYearsAgo) // member missing from SITS
-			.flatMap(memberDao.getByUniversityId(_))
-			.flatMap {
-				case student: StudentMember => Some(student)
-				case _ => None
-			}
-			.map(studentCourseDetailsDao.getByStudent)
-			.map(_.filter(details => details.endDate != null && details.missingFromImportSince != null)) // has endDate and is missing
-			.map(_.sortWith((l, r) => l.endDate.isBefore(r.endDate))).tail // course details that ends latest
-			.flatten
+			.map(studentCourseDetailsDao.getByUniversityId)
+			.map(_.filter(_.endDate != null))
+			.map(_.filter(_.missingFromImportSince != null))
+			.map(_.sortWith((l, r) => l.endDate.isBefore(r.endDate))) // course details that ends latest
+			.flatMap(_.tail)
 			.filter { details =>
 				details.endDate.isBefore(sixYearsAgo.toLocalDate) && details.missingFromImportSince.isBefore(sixYearsAgo)
 				// ended and missing 6+ years ago
