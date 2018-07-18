@@ -15,17 +15,19 @@ class RemovePersonalDataAfterCourseEndedCommandInternal extends CommandInternal[
 	self: PermissionsServiceComponent with MemberDaoComponent with StudentCourseDetailsDaoComponent =>
 	override protected def applyInternal(): Seq[String] = {
 
-		// get missing from import since date that's more than 6 yeats ago
-		// and intersect with the one's course ended 6 years ago
+		val sixYearsAgo = DateTime.now().minusYears(6)
+		memberDao.getMissingBefore[Member](sixYearsAgo) // gone from SITS
+			.map(studentCourseDetailsDao.getByStudentUniversityId)
+  			.
+//			.map(_.student.universityId)
 
-		val ss = memberDao.getMissingBefore[Member](DateTime.now().minusYears(6))
-		studentCourseDetailsDao
 		???
 	}
 }
 
 trait RemovePersonalDataAfterCourseEndedCommandDescription extends Describable[Seq[String]] {
 	override def describe(d: Description) {}
+
 	override def describeResult(d: Description, result: Seq[String]): Unit = {
 		d.users(???) //  get all the users removed
 	}

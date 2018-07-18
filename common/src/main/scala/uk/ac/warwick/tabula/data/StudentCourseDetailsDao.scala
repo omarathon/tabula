@@ -18,6 +18,7 @@ trait AutowiringStudentCourseDetailsDaoComponent extends StudentCourseDetailsDao
 trait StudentCourseDetailsDao {
 	def saveOrUpdate(studentCourseDetails: StudentCourseDetails)
 	def delete(studentCourseDetails: StudentCourseDetails)
+	def getByStudentUniversityId(universityId: String, missingBefore: Option[DateTime], courseEndedBefore: Option[DateTime]): Seq[StudentCourseDetails]
 	def getByStudentUniversityId(universityId: String): Seq[StudentCourseDetails]
 	def getByScjCode(scjCode: String): Option[StudentCourseDetails]
 	def getByScjCodeStaleOrFresh(scjCode: String): Option[StudentCourseDetails]
@@ -46,11 +47,21 @@ class StudentCourseDetailsDaoImpl extends StudentCourseDetailsDao with Daoisms {
 		session.flush()
 	}
 
+
 	override def getByStudentUniversityId(universityId: String): Seq[StudentCourseDetails] = {
-		session.newCriteria[StudentCourseDetails]
+		session.newCriteria[StudentCourseDetails].add(is("UNIVERSITYID", universityId.trim)).seq
+	}
+
+	override def getByStudentUniversityId(
+		universityId: String,
+		missingBefore: Option[DateTime],
+		courseEndedBefore: Option[DateTime]
+	): Seq[StudentCourseDetails] = {
+		val query = session.newCriteria[StudentCourseDetails]
 			.add(is("UNIVERSITYID", universityId.trim))
-			.add(isNull("missingFromImportSince"))
-  		.seq
+		if (missingBefore.isDefined) query.add(le("missingFromImportSince", missingBefore.get))
+		if (courseEndedBefore.isDefined) query.add(le("", courseEndedBefore.get))
+		query.seq
 	}
 
 	def getByScjCode(scjCode: String): Option[StudentCourseDetails] =
