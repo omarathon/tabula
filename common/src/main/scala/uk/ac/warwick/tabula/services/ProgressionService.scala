@@ -111,7 +111,7 @@ object ProgressionService {
 
 	def allowEmptyYearMarks(yearWeightings: Seq[CourseYearWeighting], entityYear: ExamGridEntityYear): Boolean = {
 		// codes are same that cognos used -TAB-6397
-		val yearAbroadMoaCode =  List("YO","SW","YOE","SWE","YM","YME","V")
+		val yearAbroadMoaCode =  List("YO","SW","YOE","SWE","YM","YME","YV")
 		val yearAbroad = entityYear.studentCourseYearDetails match {
 			case Some(scyd) => yearAbroadMoaCode.contains(scyd.modeOfAttendance.code) && (scyd.blockOccurrence ==  null || scyd.blockOccurrence !=  "I") // doesn't apply to intercalated years
 			case _ => false
