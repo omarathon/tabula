@@ -3,9 +3,10 @@ package uk.ac.warwick.tabula.commands.scheduling
 import org.joda.time.DateTime
 import uk.ac.warwick.tabula.commands.{CommandInternal, ComposableCommand, Describable, Description}
 import uk.ac.warwick.tabula.data.{AutowiringMemberDaoComponent, AutowiringStudentCourseDetailsDaoComponent, MemberDaoComponent, StudentCourseDetailsDaoComponent}
-import uk.ac.warwick.tabula.data.model.{Member, StudentMember}
+import uk.ac.warwick.tabula.data.model.{Member, StudentCourseDetails, StudentMember}
 import uk.ac.warwick.tabula.helpers.Logging
 import uk.ac.warwick.tabula.permissions.Permissions
+import uk.ac.warwick.tabula.permissions.Permissions.Profiles.Read.StudentCourseDetails
 import uk.ac.warwick.tabula.services.permissions.{AutowiringPermissionsServiceComponent, PermissionsServiceComponent}
 import uk.ac.warwick.tabula.system.permissions.{PermissionsChecking, PermissionsCheckingMethods, RequiresPermissionsChecking}
 
@@ -20,21 +21,29 @@ object RemovePersonalDataAfterCourseEndedCommand {
 			with RemovePersonalDataAfterCourseEndedCommandDescription
 }
 
-class RemovePersonalDataAfterCourseEndedCommandInternal extends CommandInternal[Seq[String]] with Logging {
-	self: PermissionsServiceComponent with MemberDaoComponent with StudentCourseDetailsDaoComponent =>
-	override protected def applyInternal(): Seq[String] = {
-		val sixYearsAgo = DateTime.now().minusYears(6)
-		memberDao.deleteByUniversityIds(memberDao.getMissingBefore[Member](sixYearsAgo) // member missing from SITS
-			.map(studentCourseDetailsDao.getByUniversityId)
+trait Helper {
+	val sixYearsAgo: DateTime = DateTime.now().minusYears(6)
+
+	def uniIDsWithEndedCourse(studentCourseDetailsList: Seq[Seq[StudentCourseDetails]]): Seq[String] = {
+		studentCourseDetailsList
 			.map(_.filter(_.endDate != null))
 			.map(_.filter(_.missingFromImportSince != null))
 			.map(_.sortWith((l, r) => l.endDate.isBefore(r.endDate))) // course details that ends latest
 			.flatMap(_.tail)
-			.filter { details =>
-				details.endDate.isBefore(sixYearsAgo.toLocalDate) && details.missingFromImportSince.isBefore(sixYearsAgo)
-				// ended and missing 6+ years ago
-			}
-			.map(_.student.universityId))
+			.filter(_.endDate.isBefore(sixYearsAgo.toLocalDate))
+			.filter(_.missingFromImportSince.isBefore(sixYearsAgo))
+			.map(_.student.universityId)
+	}
+}
+
+class RemovePersonalDataAfterCourseEndedCommandInternal extends CommandInternal[Seq[String]] with Logging with Helper {
+	self: PermissionsServiceComponent with MemberDaoComponent with StudentCourseDetailsDaoComponent =>
+	override protected def applyInternal(): Seq[String] = {
+		memberDao.deleteByUniversityIds(
+			uniIDsWithEndedCourse(memberDao.getMissingBefore[Member](sixYearsAgo)
+				.map(studentCourseDetailsDao.getByUniversityId)
+			)
+		)
 	}
 }
 
