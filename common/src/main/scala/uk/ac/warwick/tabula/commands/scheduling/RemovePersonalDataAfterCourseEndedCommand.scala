@@ -15,7 +15,7 @@ class RemovePersonalDataAfterCourseEndedCommandInternal extends CommandInternal[
 	self: PermissionsServiceComponent with MemberDaoComponent with StudentCourseDetailsDaoComponent =>
 	override protected def applyInternal(): Seq[String] = {
 		val sixYearsAgo = DateTime.now().minusYears(6)
-		memberDao.getMissingBefore[Member](sixYearsAgo) // member missing from SITS
+		memberDao.deleteByUniversityIds(memberDao.getMissingBefore[Member](sixYearsAgo) // member missing from SITS
 			.map(studentCourseDetailsDao.getByStudentUniversityId)
 			.map(_.filter(details => details.endDate != null && details.missingFromImportSince != null)) // has endDate and is missing
 			.map(_.sortWith((l, r) => l.endDate.isBefore(r.endDate))).tail // course details that ends latest
@@ -24,7 +24,7 @@ class RemovePersonalDataAfterCourseEndedCommandInternal extends CommandInternal[
 				details.endDate.isBefore(sixYearsAgo.toLocalDate) && details.missingFromImportSince.isBefore(sixYearsAgo)
 				// ended and missing 6+ years ago
 			}
-			.map(_.student.universityId)
+			.map(_.student.universityId))
 	}
 }
 

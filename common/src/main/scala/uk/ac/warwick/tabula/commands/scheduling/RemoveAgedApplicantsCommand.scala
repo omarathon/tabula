@@ -25,11 +25,9 @@ class RemoveAgedApplicantsCommandInternal extends CommandInternal[Seq[String]] {
 	self: PermissionsServiceComponent with MemberDaoComponent =>
 
 	override protected def applyInternal(): Seq[String] = transactional() {
-		val uniIdsToBeRemoved: Seq[String] = memberDao.getMissingBefore[ApplicantMember](
+		memberDao.deleteByUniversityIds(memberDao.getMissingBefore[ApplicantMember](
 			from = DateTime.now().minusMonths(2)
-		)
-		memberDao.deleteByUniversityIds(uniIdsToBeRemoved)
-		uniIdsToBeRemoved
+		))
 	}
 }
 
