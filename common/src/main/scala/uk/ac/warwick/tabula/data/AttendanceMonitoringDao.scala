@@ -554,7 +554,6 @@ trait AttendanceMonitoringStudentDataFetcher extends TaskBenchmarking {
 	import org.hibernate.criterion.Projections._
 
 	def projectionToAttendanceMonitoringStudentData(projection: Array[Object]): Option[AttendanceMonitoringStudentData] = projection match {
-
 		// without scdEndDate with casUsed and tier4
 		case Array(firstName: String, lastName: String, universityId: String, userId: String, scdBeginDate: LocalDate, routeCode: String, routeName: String, yearOfStudy: Integer, sprCode: String, casUsed: JBoolean, tier4Visa: JBoolean ) =>
 			Some(AttendanceMonitoringStudentData(
@@ -615,7 +614,6 @@ trait AttendanceMonitoringStudentDataFetcher extends TaskBenchmarking {
 				sprCode = sprCode,
 				tier4Requirements = false
 			))
-
 
 		// with scdEndDate and casUsed and tier4
 		case Array(firstName: String, lastName: String, universityId: String, userId: String, scdBeginDate: LocalDate, routeCode: String, routeName: String, yearOfStudy: Integer, sprCode: String, casUsed: JBoolean, tier4Visa: JBoolean, scdEndDate: LocalDate) =>
