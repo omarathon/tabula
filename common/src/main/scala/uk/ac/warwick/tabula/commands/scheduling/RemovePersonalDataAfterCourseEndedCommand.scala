@@ -57,7 +57,8 @@ class RemovePersonalDataAfterCourseEndedCommandInternal
 	self: PermissionsServiceComponent with MemberDaoComponent with StudentCourseDetailsDaoComponent =>
 	override protected def applyInternal(): Seq[String] = {
 		memberDao.deleteByUniversityIds(
-			uniIDsWithEndedCourse(memberDao.getMissingBefore[Member](sixYearsAgo)
+			// target students who's been missing from import for a year
+			uniIDsWithEndedCourse(memberDao.getMissingBefore[StudentMember](DateTime.now().minusYears(1))
 				.map(studentCourseDetailsDao.getByUniversityId)
 			)
 		)
