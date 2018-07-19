@@ -553,7 +553,7 @@ trait AttendanceMonitoringStudentDataFetcher extends TaskBenchmarking {
 
 	import org.hibernate.criterion.Projections._
 
-	def projectionToAttendanceMonitoringStudentData(projection: Array[Object]): Option[AttendanceMonitoringStudentData] = projection match {
+	def projectionToAttendanceMonitoringStudentDataWithoutEndDate(projection: Array[Object]): Option[AttendanceMonitoringStudentData] = projection match {
 		// without scdEndDate with casUsed and tier4
 		case Array(firstName: String, lastName: String, universityId: String, userId: String, scdBeginDate: LocalDate, routeCode: String, routeName: String, yearOfStudy: Integer, sprCode: String, casUsed: JBoolean, tier4Visa: JBoolean ) =>
 			Some(AttendanceMonitoringStudentData(
@@ -614,7 +614,9 @@ trait AttendanceMonitoringStudentDataFetcher extends TaskBenchmarking {
 				sprCode = sprCode,
 				tier4Requirements = false
 			))
+	}
 
+	def projectionToAttendanceMonitoringStudentDataWithEndDate(projection: Array[Object]): Option[AttendanceMonitoringStudentData] = projection match {
 		// with scdEndDate and casUsed and tier4
 		case Array(firstName: String, lastName: String, universityId: String, userId: String, scdBeginDate: LocalDate, routeCode: String, routeName: String, yearOfStudy: Integer, sprCode: String, casUsed: JBoolean, tier4Visa: JBoolean, scdEndDate: LocalDate) =>
 			Some(AttendanceMonitoringStudentData(
@@ -716,10 +718,10 @@ trait AttendanceMonitoringStudentDataFetcher extends TaskBenchmarking {
 			safeInSeqWithProjection[StudentMember, Array[java.lang.Object]](() => criteriaFactory(), projection, "universityId", universityIds)
 		}
 		// The end date is either null, or if all are not null, the maximum end date, so get the nulls first
-		val nullEndDateData = setupCriteria(setupProjection(withEndDate = false)).flatMap(projectionToAttendanceMonitoringStudentData)
+		val nullEndDateData = setupCriteria(setupProjection(withEndDate = false), withEndDate = false).flatMap(projectionToAttendanceMonitoringStudentDataWithoutEndDate)
 
 		// Then get the not-nulls
-		val hasEndDateData = setupCriteria(setupProjection(withEndDate = true), withEndDate = true).flatMap(projectionToAttendanceMonitoringStudentData)
+		val hasEndDateData = setupCriteria(setupProjection(withEndDate = true), withEndDate = true).flatMap(projectionToAttendanceMonitoringStudentDataWithEndDate)
 
 		// Then combine the two, but filter any ended found in the not-ended
 		benchmarkTask("Combine data and filter") { nullEndDateData ++ hasEndDateData.filterNot(s => nullEndDateData.exists(_.universityId == s.universityId)) }
