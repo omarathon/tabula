@@ -25,13 +25,28 @@ trait RemovePersonalDataAfterCourseEndedCommandHelper {
 
 	def uniIDsWithEndedCourse(studentCourseDetailsList: Seq[Seq[StudentCourseDetails]]): Seq[String] = {
 		studentCourseDetailsList
-			.map(_.filter(_.endDate != null))
-			.map(_.filter(_.missingFromImportSince != null))
-			.map(_.sortWith((l, r) => l.endDate.isAfter(r.endDate))) // course details that ends latest
-			.flatMap(_.headOption)
-			.filter(_.endDate.isBefore(sixYearsAgo.toLocalDate))
-			.filter(_.missingFromImportSince.isBefore(sixYearsAgo))
-			.map(_.student.universityId)
+			.filter(_.nonEmpty)
+			.map(details => (details.head.student.universityId, details))
+			.map {
+				case (uniId, detailsList) =>
+					(uniId, detailsList.filter(_.endDate != null).filter(_.missingFromImportSince != null))
+			}
+			.filter {
+				case (_, detailsList) => detailsList.nonEmpty
+			}
+			.map {
+				case (uniId, detailsList) =>
+					val latestCourseDetails = detailsList
+						.sortWith((l, r) => l.endDate.isAfter(r.endDate))
+						.head
+					(uniId, latestCourseDetails)
+			}
+			.flatMap {
+				case (uniId, details) =>
+					val ended = details.endDate.isBefore(sixYearsAgo.toLocalDate)
+					val missing = details.missingFromImportSince.isBefore(sixYearsAgo)
+					if (ended && missing) Some(uniId) else None
+			}
 	}
 }
 
