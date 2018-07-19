@@ -554,23 +554,9 @@ trait AttendanceMonitoringStudentDataFetcher extends TaskBenchmarking {
 	import org.hibernate.criterion.Projections._
 
 	def projectionToAttendanceMonitoringStudentData(projection: Array[Object]): Option[AttendanceMonitoringStudentData] = projection match {
+
 		// without scdEndDate with casUsed and tier4
-		case Array(firstName: String, lastName: String, universityId: String, userId: String, scdBeginDate: LocalDate, routeCode: String, routeName: String, yearOfStudy: Integer, sprCode: String) =>
-			Some(AttendanceMonitoringStudentData(
-				firstName = firstName,
-				lastName = lastName,
-				universityId = universityId,
-				userId = userId,
-				scdBeginDate = scdBeginDate,
-				scdEndDate = None,
-				routeCode = routeCode,
-				routeName = routeName,
-				yearOfStudy = yearOfStudy.toString,
-				sprCode = sprCode,
-				tier4Requirements = false
-			))
-		// without scdEndDate with casUsed and tier4
-		case Array(firstName: String, lastName: String, universityId: String, userId: String, scdBeginDate: LocalDate, routeCode: String, routeName: String, yearOfStudy: Integer, sprCode: String, casUsed: JBoolean, tier4Visa: JBoolean) =>
+		case Array(firstName: String, lastName: String, universityId: String, userId: String, scdBeginDate: LocalDate, routeCode: String, routeName: String, yearOfStudy: Integer, sprCode: String, casUsed: JBoolean, tier4Visa: JBoolean ) =>
 			Some(AttendanceMonitoringStudentData(
 				firstName = firstName,
 				lastName = lastName,
@@ -584,8 +570,8 @@ trait AttendanceMonitoringStudentDataFetcher extends TaskBenchmarking {
 				sprCode = sprCode,
 				tier4Requirements = casUsed || tier4Visa
 			))
-		// without scdEndDate with one of (cas and tier4)
-		case Array(firstName: String, lastName: String, universityId: String, userId: String, scdBeginDate: LocalDate, routeCode: String, routeName: String, yearOfStudy: Integer, sprCode: String, casUsedOrTier4Visa: JBoolean) =>
+		// without scdEndDate or tier4, with casUsed
+		case Array(firstName: String, lastName: String, universityId: String, userId: String, scdBeginDate: LocalDate, routeCode: String, routeName: String, yearOfStudy: Integer, sprCode: String, casUsed: JBoolean, _ ) =>
 			Some(AttendanceMonitoringStudentData(
 				firstName = firstName,
 				lastName = lastName,
@@ -597,23 +583,40 @@ trait AttendanceMonitoringStudentDataFetcher extends TaskBenchmarking {
 				routeName = routeName,
 				yearOfStudy = yearOfStudy.toString,
 				sprCode = sprCode,
-				tier4Requirements = casUsedOrTier4Visa
+				tier4Requirements = casUsed
 			))
-		// with scdEndDate and one of (casUsed and tier4)
-		case Array(firstName: String, lastName: String, universityId: String, userId: String, scdBeginDate: LocalDate, routeCode: String, routeName: String, yearOfStudy: Integer, sprCode: String, casUsedOrTier4Visa: JBoolean, scdEndDate: LocalDate) =>
+		// without scdEndDate or casUsed, with tier4
+		case Array(firstName: String, lastName: String, universityId: String, userId: String, scdBeginDate: LocalDate, routeCode: String, routeName: String, yearOfStudy: Integer, sprCode: String, _, tier4Visa: JBoolean ) =>
 			Some(AttendanceMonitoringStudentData(
 				firstName = firstName,
 				lastName = lastName,
 				universityId = universityId,
 				userId = userId,
 				scdBeginDate = scdBeginDate,
-				scdEndDate = Option(scdEndDate),
+				scdEndDate = None,
 				routeCode = routeCode,
 				routeName = routeName,
 				yearOfStudy = yearOfStudy.toString,
 				sprCode = sprCode,
-				tier4Requirements = casUsedOrTier4Visa
+				tier4Requirements = tier4Visa
 			))
+		// without scdEndDate, casUsed or tier4
+		case Array(firstName: String, lastName: String, universityId: String, userId: String, scdBeginDate: LocalDate, routeCode: String, routeName: String, yearOfStudy: Integer, sprCode: String, _, _ )=>
+			Some(AttendanceMonitoringStudentData(
+				firstName = firstName,
+				lastName = lastName,
+				universityId = universityId,
+				userId = userId,
+				scdBeginDate = scdBeginDate,
+				scdEndDate = None,
+				routeCode = routeCode,
+				routeName = routeName,
+				yearOfStudy = yearOfStudy.toString,
+				sprCode = sprCode,
+				tier4Requirements = false
+			))
+
+
 		// with scdEndDate and casUsed and tier4
 		case Array(firstName: String, lastName: String, universityId: String, userId: String, scdBeginDate: LocalDate, routeCode: String, routeName: String, yearOfStudy: Integer, sprCode: String, casUsed: JBoolean, tier4Visa: JBoolean, scdEndDate: LocalDate) =>
 			Some(AttendanceMonitoringStudentData(
@@ -629,8 +632,38 @@ trait AttendanceMonitoringStudentDataFetcher extends TaskBenchmarking {
 				sprCode = sprCode,
 				tier4Requirements = casUsed || tier4Visa
 			))
-		// with scdEndDate without tier4
-		case Array(firstName: String, lastName: String, universityId: String, userId: String, scdBeginDate: LocalDate, routeCode: String, routeName: String, yearOfStudy: Integer, sprCode: String, scdEndDate: LocalDate) =>
+		// with scdEndDate and casUsed, without tier4
+		case Array(firstName: String, lastName: String, universityId: String, userId: String, scdBeginDate: LocalDate, routeCode: String, routeName: String, yearOfStudy: Integer, sprCode: String, casUsed: JBoolean, _, scdEndDate: LocalDate) =>
+			Some(AttendanceMonitoringStudentData(
+				firstName = firstName,
+				lastName = lastName,
+				universityId = universityId,
+				userId = userId,
+				scdBeginDate = scdBeginDate,
+				scdEndDate = Option(scdEndDate),
+				routeCode = routeCode,
+				routeName = routeName,
+				yearOfStudy = yearOfStudy.toString,
+				sprCode = sprCode,
+				tier4Requirements = casUsed
+			))
+		// with scdEndDate and tier4, without casUsed
+		case Array(firstName: String, lastName: String, universityId: String, userId: String, scdBeginDate: LocalDate, routeCode: String, routeName: String, yearOfStudy: Integer, sprCode: String, _, tier4Visa: JBoolean, scdEndDate: LocalDate) =>
+			Some(AttendanceMonitoringStudentData(
+				firstName = firstName,
+				lastName = lastName,
+				universityId = universityId,
+				userId = userId,
+				scdBeginDate = scdBeginDate,
+				scdEndDate = Option(scdEndDate),
+				routeCode = routeCode,
+				routeName = routeName,
+				yearOfStudy = yearOfStudy.toString,
+				sprCode = sprCode,
+				tier4Requirements = tier4Visa
+			))
+		//with scdEndDate without tier4 or casUsed
+		case Array(firstName: String, lastName: String, universityId: String, userId: String, scdBeginDate: LocalDate, routeCode: String, routeName: String, yearOfStudy: Integer, sprCode: String, _, _, scdEndDate: LocalDate) =>
 			Some(AttendanceMonitoringStudentData(
 				firstName = firstName,
 				lastName = lastName,
@@ -644,9 +677,6 @@ trait AttendanceMonitoringStudentDataFetcher extends TaskBenchmarking {
 				sprCode = sprCode,
 				tier4Requirements = false
 			))
-		case data: Any =>
-			logger.error("Unknown student data format.", data)
-			None
 	}
 
 	def getAttendanceMonitoringDataForStudents(universityIds: Seq[String], academicYear: AcademicYear): Seq[AttendanceMonitoringStudentData] = {
