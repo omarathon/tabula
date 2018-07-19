@@ -261,7 +261,7 @@ class YearWeightingsColumnOption extends StudentExamGridColumnOption with Autowi
 				val weightings = abroadYearWeightings(studentCourseYearDetails)
 				val yearWeightingsAsString = for {
 					weighting <- weightings
-				} yield  s"${weighting.weightingAsPercentage.toPlainString}"
+				} yield s"${weighting.weightingAsPercentage.toPlainString}"
 
 				val weightingCol = if (weightings.size > 0) {
 					s"${yearWeightingsAsString.mkString("/")} - ${weightings.head.course.code}"
@@ -279,10 +279,10 @@ class YearWeightingsColumnOption extends StudentExamGridColumnOption with Autowi
 			val weightings = courseAndRouteService.findAllCourseYearWeightings(Seq(scyd.studentCourseDetails.course), scyd.studentCourseDetails.sprStartAcademicYear)
 			val allYearStudentCourseDetails = scyd.studentCourseDetails.student.toExamGridEntity(scyd).years
 			weightings.map { yearWeighting =>
-			 // if any year weightings are non zero they will still be considered 0 if student has gone abroad. We would display 0 if abroad for that course year
+				// if any year weightings are non zero they will still be considered 0 if student has gone abroad. We would display 0 if abroad for that course year
 				val abroad = allYearStudentCourseDetails.get(yearWeighting.yearOfStudy).exists {
-						case Some(ey) => allowEmptyYearMarks(weightings, ey)
-						case _ => false
+					case Some(ey) => allowEmptyYearMarks(weightings, ey)
+					case _ => false
 				}
 				if (abroad) yearWeighting.copyZeroWeighted else yearWeighting
 			}
