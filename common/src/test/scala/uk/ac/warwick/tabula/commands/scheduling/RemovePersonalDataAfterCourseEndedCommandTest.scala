@@ -46,13 +46,13 @@ class RemovePersonalDataAfterCourseEndedCommandTest extends TestBase with Mockit
 			Seq(stu2_scd1, stu2_scd2)
 		)) should be(Seq.empty)
 
-		// ended long enough but not missing long enough
+		// ended long enough and missing long enough
 		stu1_scd1.missingFromImportSince = DateTime.now.minusYears(2)
 		stu1_scd1.endDate = DateTime.now.minusYears(7).toLocalDate
 		new TestObject().uniIDsWithEndedCourse(Seq(
 			Seq(stu1_scd1, stu1_scd2),
 			Seq(stu2_scd1, stu2_scd2)
-		)) should be(Seq.empty)
+		)) should be(Seq(stu1.universityId))
 
 		// 1 course ended enough long ago, but the other is not long enough
 		stu1_scd1.missingFromImportSince = DateTime.now.minusYears(2)
