@@ -242,7 +242,9 @@ class StudentCourseDetailsDaoTest extends PersistenceTestBase with Logging with 
 		session.flush()
 		session.clear()
 
+		studentCourseDetailsDao.getByUniversityId("1000004").size should be (1)
 		studentCourseDetailsDao.getByUniversityId("1000004").head.student.universityId should be ("1000004")
+		studentCourseDetailsDao.getByUniversityId("1000003").size should be (1)
 		studentCourseDetailsDao.getByUniversityId("1000003").head.student.universityId should be ("1000003")
 	}
 }
