@@ -47,8 +47,10 @@ class StudentCourseDetailsDaoImpl extends StudentCourseDetailsDao with Daoisms {
 	}
 
 	override def getByUniversityId(universityId: String): Seq[StudentCourseDetails] = {
+		val studentMember = new StudentMember()
+		studentMember.universityId = universityId.trim
 		session.newCriteria[StudentCourseDetails]
-			.add(like("scjCode", universityId.trim + "%"))
+			.add(is("student", studentMember ))
 			.seq
 	}
 
