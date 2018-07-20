@@ -21,8 +21,6 @@ object RemovePersonalDataAfterCourseEndedCommand {
 }
 
 trait RemovePersonalDataAfterCourseEndedCommandHelper {
-	val sixYearsAgo: DateTime = DateTime.now().minusYears(6)
-
 	def uniIDsWithEndedCourse(studentCourseDetailsList: Seq[Seq[StudentCourseDetails]]): Seq[String] = {
 		studentCourseDetailsList
 			.filter(_.nonEmpty)
@@ -43,8 +41,10 @@ trait RemovePersonalDataAfterCourseEndedCommandHelper {
 			}
 			.flatMap {
 				case (uniId, details) =>
-					val ended = details.endDate.isBefore(sixYearsAgo.toLocalDate)
-					val missing = details.missingFromImportSince.isBefore(sixYearsAgo)
+					val ended = details.endDate.isBefore(DateTime.now().minusYears(6).toLocalDate)
+					val missing = details.missingFromImportSince.isBefore(DateTime.now().minusYears(1))
+					// the student we want to remove if course ended > 6 years ago
+					// and also student course details missing from SITS > 1 year ago
 					if (ended && missing) Some(uniId) else None
 			}
 	}
