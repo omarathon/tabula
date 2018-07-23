@@ -365,7 +365,6 @@ object AssignmentImporter {
 							and sra.mav_occur = sms.sms_occl and sra.sra_seq = mab.mab_seq
 
 			where
-				scj.scj_udfa in ('Y','y') and -- most significant courses only
 				sms.ayr_code in (:academic_year_code)"""
 
 	// this gets a student's assessments from the SMO table, which stores confirmed module choices
@@ -414,7 +413,6 @@ object AssignmentImporter {
 							and sra.mav_occur = smo.mav_occur and sra.sra_seq = mab.mab_seq
 
 			where
-				scj.scj_udfa in ('Y','y') and -- most significant courses only
 				smo.ayr_code in (:academic_year_code)"""
 
 	def GetAutoUploadedConfirmedModuleRegistrations = s"""
@@ -462,7 +460,6 @@ object AssignmentImporter {
 							and sra.mav_occur = smo.mav_occur and sra.sra_seq = mab.mab_seq
 
 			where
-				scj.scj_udfa in ('Y','y') and -- most significant courses only
 				smo.ayr_code in (:academic_year_code) and
 				ssn.ssn_sprc is null -- no matching SSN"""
 
