@@ -40,8 +40,8 @@ class RemovePersonalDataAfterCourseEndedCommandTest extends TestBase with Mockit
 	def allHaveNullMissingAndEndDate(): Unit = {
 
 		new TestObject().uniIDsWithEndedCourse(Seq(
-			UniversityIdWithStudentCourseDetails(stu1.universityId, Seq(stu1_scd1, stu1_scd2)),
-			UniversityIdWithStudentCourseDetails(stu2.universityId, Seq(stu2_scd1, stu2_scd2))
+			UniversityIdWithScd(stu1.universityId, Seq(stu1_scd1, stu1_scd2)),
+			UniversityIdWithScd(stu2.universityId, Seq(stu2_scd1, stu2_scd2))
 		)) should be(Seq.empty)
 	}
 
@@ -49,14 +49,14 @@ class RemovePersonalDataAfterCourseEndedCommandTest extends TestBase with Mockit
 		stu1_scd1.endDate = DateTime.now.minusYears(7).toLocalDate
 		stu1_scd1.missingFromImportSince = null
 		new TestObject().uniIDsWithEndedCourse(Seq(
-			UniversityIdWithStudentCourseDetails(stu1.universityId, Seq(stu1_scd1))
+			UniversityIdWithScd(stu1.universityId, Seq(stu1_scd1))
 		)) should be(Seq.empty)
 		stu1_scd1.endDate = DateTime.now.minusYears(7).toLocalDate
 		stu1_scd1.missingFromImportSince = null
 		stu1_scd2.endDate = DateTime.now.minusYears(7).toLocalDate
 		stu1_scd2.missingFromImportSince = DateTime.now.minusYears(7)
 		new TestObject().uniIDsWithEndedCourse(Seq(
-			UniversityIdWithStudentCourseDetails(stu1.universityId, Seq(stu1_scd1, stu1_scd2))
+			UniversityIdWithScd(stu1.universityId, Seq(stu1_scd1, stu1_scd2))
 		)) should be(Seq.empty)
 	}
 
@@ -64,14 +64,14 @@ class RemovePersonalDataAfterCourseEndedCommandTest extends TestBase with Mockit
 		stu1_scd1.endDate = DateTime.now.toLocalDate
 		stu1_scd1.missingFromImportSince = DateTime.now.minusYears(7)
 		new TestObject().uniIDsWithEndedCourse(Seq(
-			UniversityIdWithStudentCourseDetails(stu1.universityId, Seq(stu1_scd1))
+			UniversityIdWithScd(stu1.universityId, Seq(stu1_scd1))
 		)) should be(Seq.empty)
 	}
 
 	def studentMissingFromMemberAndHavingNoCoursedetails(): Unit = {
 		stu1_scd1.endDate = DateTime.now.toLocalDate
 		new TestObject().uniIDsWithEndedCourse(Seq(
-			UniversityIdWithStudentCourseDetails(stu1.universityId, Seq.empty)
+			UniversityIdWithScd(stu1.universityId, Seq.empty)
 		)) should be(stu1.universityId)
 	}
 
@@ -80,7 +80,7 @@ class RemovePersonalDataAfterCourseEndedCommandTest extends TestBase with Mockit
 		stu1_scd1.missingFromImportSince = DateTime.now.minusYears(2)
 		stu1_scd1.endDate = DateTime.now.minusYears(7).toLocalDate
 		new TestObject().uniIDsWithEndedCourse(Seq(
-			UniversityIdWithStudentCourseDetails(stu1.universityId, Seq(stu1_scd1)),
+			UniversityIdWithScd(stu1.universityId, Seq(stu1_scd1)),
 		)) should be(Seq(stu1.universityId))
 	}
 
@@ -91,7 +91,7 @@ class RemovePersonalDataAfterCourseEndedCommandTest extends TestBase with Mockit
 		stu1_scd2.missingFromImportSince = DateTime.now.minusYears(7)
 		stu1_scd2.endDate = DateTime.now.minusYears(7).toLocalDate
 		new TestObject().uniIDsWithEndedCourse(Seq(
-			UniversityIdWithStudentCourseDetails(stu1.universityId, Seq(stu1_scd1, stu1_scd2)),
+			UniversityIdWithScd(stu1.universityId, Seq(stu1_scd1, stu1_scd2)),
 		)) should be(Seq.empty)
 	}
 
@@ -102,7 +102,7 @@ class RemovePersonalDataAfterCourseEndedCommandTest extends TestBase with Mockit
 		stu1_scd2.missingFromImportSince = DateTime.now.minusYears(7)
 		stu1_scd2.endDate = DateTime.now.minusYears(7).toLocalDate
 		new TestObject().uniIDsWithEndedCourse(Seq(
-			UniversityIdWithStudentCourseDetails(stu1.universityId, Seq(stu1_scd1, stu1_scd2))
+			UniversityIdWithScd(stu1.universityId, Seq(stu1_scd1, stu1_scd2))
 		)) should be(Seq(stu1.universityId))
 
 	}
@@ -119,8 +119,8 @@ class RemovePersonalDataAfterCourseEndedCommandTest extends TestBase with Mockit
 		stu2_scd2.endDate = DateTime.now.minusYears(7).toLocalDate
 
 		new TestObject().uniIDsWithEndedCourse(Seq(
-			UniversityIdWithStudentCourseDetails(stu1.universityId, Seq(stu1_scd1, stu1_scd2)),
-			UniversityIdWithStudentCourseDetails(stu2.universityId, Seq(stu2_scd1, stu2_scd2))
+			UniversityIdWithScd(stu1.universityId, Seq(stu1_scd1, stu1_scd2)),
+			UniversityIdWithScd(stu2.universityId, Seq(stu2_scd1, stu2_scd2))
 		)) should be(Seq(stu1.universityId, stu2.universityId))
 
 		// ok with student only has 1 course
@@ -136,9 +136,9 @@ class RemovePersonalDataAfterCourseEndedCommandTest extends TestBase with Mockit
 		stu3_scd1.endDate = DateTime.now.minusYears(7).toLocalDate
 
 		new TestObject().uniIDsWithEndedCourse(Seq(
-			UniversityIdWithStudentCourseDetails(stu1.universityId, Seq(stu1_scd1, stu1_scd2)),
-			UniversityIdWithStudentCourseDetails(stu2.universityId, Seq(stu2_scd1, stu2_scd2)),
-			UniversityIdWithStudentCourseDetails(stu3.universityId, Seq(stu3_scd1))
+			UniversityIdWithScd(stu1.universityId, Seq(stu1_scd1, stu1_scd2)),
+			UniversityIdWithScd(stu2.universityId, Seq(stu2_scd1, stu2_scd2)),
+			UniversityIdWithScd(stu3.universityId, Seq(stu3_scd1))
 		)) should be(Seq(stu1.universityId, stu2.universityId, stu3.universityId))
 	}
 }
