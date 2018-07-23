@@ -1,9 +1,7 @@
 package uk.ac.warwick.tabula.cm2
 
 import org.openqa.selenium.By
-import uk.ac.warwick.tabula.BrowserTest
-
-import scala.collection.JavaConverters._
+import uk.ac.warwick.tabula.{AcademicYear, BrowserTest}
 
 class DeleteAssignmentTest extends BrowserTest with CourseworkFixtures {
 
@@ -14,10 +12,8 @@ class DeleteAssignmentTest extends BrowserTest with CourseworkFixtures {
 			click on linkText("Test Services")
 		}
 
-		// make sure we are looking at the latest academic year
-		val yearNav = findAll(cssSelector(".navbar-tertiary .navbar-nav")).next().underlying
-		val latestAcademicYear = yearNav.findElements(By.cssSelector("li")).asScala
-		click on latestAcademicYear.last
+		// make sure we are looking at the current academic year
+		click on cssSelector(".navbar-tertiary").webElement.findElement(By.partialLinkText(s"${AcademicYear.now().toString}"))
 
 		When("I expand module XXX02")
 		val moduleBlock = id("main").webElement.findElements(By.cssSelector("h4.with-button")).get(1)
