@@ -20,33 +20,32 @@ object RemovePersonalDataAfterCourseEndedCommand {
 			with RemovePersonalDataAfterCourseEndedCommandDescription
 }
 
+case class UniversityIdWithStudentCourseDetails(
+	universityID: String,
+	studentCourseDetailsList: Seq[StudentCourseDetails]
+)
+
 trait RemovePersonalDataAfterCourseEndedCommandHelper {
-	def uniIDsWithEndedCourse(studentCourseDetailsList: Seq[Seq[StudentCourseDetails]]): Seq[String] = {
-		studentCourseDetailsList
-			.filter(_.nonEmpty)
-			.map(details => (details.head.student.universityId, details))
-			.map {
-				case (uniId, detailsList) =>
-					(uniId, detailsList.filter(_.endDate != null).filter(_.missingFromImportSince != null))
+
+	def uniIDsWithEndedCourse(universityIdWithStudentCourseDetails: Seq[UniversityIdWithStudentCourseDetails]): Seq[String] = {
+		universityIdWithStudentCourseDetails.filter { item =>
+			val detailsList = item.studentCourseDetailsList
+			detailsList.isEmpty || detailsList.forall { details =>
+				details.endDate != null && details.missingFromImportSince != null
 			}
-			.filter {
-				case (_, detailsList) => detailsList.nonEmpty
+		}.flatMap { item =>
+			val detailsList = item.studentCourseDetailsList
+			if (detailsList.isEmpty) Some(item.universityID) else {
+				val latestCourseDetails = detailsList
+					.sortWith((l, r) => l.endDate.isAfter(r.endDate))
+					.head
+				val ended = latestCourseDetails.endDate.isBefore(DateTime.now().minusYears(6).toLocalDate)
+				val missing = latestCourseDetails.missingFromImportSince.isBefore(DateTime.now().minusYears(1))
+				// the student we want to remove if course ended > 6 years ago
+				// and also student course details missing from SITS > 1 year ago
+				if (ended && missing) Some(item.universityID) else None
 			}
-			.map {
-				case (uniId, detailsList) =>
-					val latestCourseDetails = detailsList
-						.sortWith((l, r) => l.endDate.isAfter(r.endDate))
-						.head
-					(uniId, latestCourseDetails)
-			}
-			.flatMap {
-				case (uniId, details) =>
-					val ended = details.endDate.isBefore(DateTime.now().minusYears(6).toLocalDate)
-					val missing = details.missingFromImportSince.isBefore(DateTime.now().minusYears(1))
-					// the student we want to remove if course ended > 6 years ago
-					// and also student course details missing from SITS > 1 year ago
-					if (ended && missing) Some(uniId) else None
-			}
+		}
 	}
 }
 
@@ -56,12 +55,16 @@ class RemovePersonalDataAfterCourseEndedCommandInternal
 		with RemovePersonalDataAfterCourseEndedCommandHelper {
 	self: PermissionsServiceComponent with MemberDaoComponent with StudentCourseDetailsDaoComponent =>
 	override protected def applyInternal(): Seq[String] = {
-		memberDao.deleteByUniversityIds(
+		memberDao.deleteByUniversityIds(uniIDsWithEndedCourse(memberDao
 			// target students who's been missing from import for a year
-			uniIDsWithEndedCourse(memberDao.getMissingBefore[StudentMember](DateTime.now().minusYears(1))
-				.map(studentCourseDetailsDao.getByUniversityId)
-			)
-		)
+			.getMissingBefore[StudentMember](DateTime.now().minusYears(1))
+			.map { universityId =>
+				UniversityIdWithStudentCourseDetails(
+					universityID = universityId,
+					studentCourseDetailsList = studentCourseDetailsDao.getByUniversityId(universityId)
+				)
+			}
+		))
 	}
 }
 
