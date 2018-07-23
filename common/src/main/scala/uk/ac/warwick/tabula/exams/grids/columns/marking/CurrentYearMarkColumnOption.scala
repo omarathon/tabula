@@ -2,9 +2,8 @@ package uk.ac.warwick.tabula.exams.grids.columns.marking
 
 import org.springframework.stereotype.Component
 import uk.ac.warwick.tabula.commands.exams.grids.{ExamGridEntity, ExamGridEntityYear}
-import uk.ac.warwick.tabula.data.model.CourseYearWeighting
 import uk.ac.warwick.tabula.exams.grids.columns._
-import uk.ac.warwick.tabula.services.{AutowiringCourseAndRouteServiceComponent, AutowiringModuleRegistrationServiceComponent}
+import uk.ac.warwick.tabula.services.{AutowiringCourseAndRouteServiceComponent, AutowiringModuleRegistrationServiceComponent, ProgressionService}
 
 @Component
 class CurrentYearMarkColumnOption extends ChosenYearExamGridColumnOption with AutowiringModuleRegistrationServiceComponent with AutowiringCourseAndRouteServiceComponent {
@@ -37,7 +36,7 @@ class CurrentYearMarkColumnOption extends ChosenYearExamGridColumnOption with Au
 				// If there is more than one valid overcat subset, and a subset has not been chosen for the overcatted mark, don't show anything
 				Left("The overcat adjusted mark subset has not been chosen")
 			} else {
-				moduleRegistrationService.weightedMeanYearMark(entityYear.moduleRegistrations, entityYear.markOverrides.getOrElse(Map()), allowEmpty = entity.yearWeightings.exists( w => w.yearOfStudy == entityYear.yearOfStudy && w.weighting == 0))
+				moduleRegistrationService.weightedMeanYearMark(entityYear.moduleRegistrations, entityYear.markOverrides.getOrElse(Map()), allowEmpty = ProgressionService.allowEmptyYearMarks(entity.yearWeightings, entityYear))
 			}
 		}
 

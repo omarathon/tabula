@@ -21,6 +21,7 @@ class ProgressionServiceTest extends TestBase with Mockito {
 		val scyd3: StudentCourseYearDetails = student.mostSignificantCourse.latestStudentCourseYearDetails
 		scyd3.academicYear = academicYear
 		student.mostSignificantCourse.courseYearLength = "3"
+		scyd3.modeOfAttendance = Fixtures.modeOfAttendance("F", "FT", "Full time")
 		val service = new AbstractProgressionService with ModuleRegistrationServiceComponent with CourseAndRouteServiceComponent {
 			override val moduleRegistrationService: ModuleRegistrationService = smartMock[ModuleRegistrationService]
 			override val courseAndRouteService: CourseAndRouteService = smartMock[CourseAndRouteService]
@@ -246,6 +247,7 @@ class ProgressionServiceTest extends TestBase with Mockito {
 	trait ThreeYearStudentFixture extends Fixture {
 		scyd3.yearOfStudy = 3
 		val scyd1: StudentCourseYearDetails = Fixtures.studentCourseYearDetails()
+		scyd1.modeOfAttendance = Fixtures.modeOfAttendance("F", "FT", "Full time")
 		scyd1.studentCourseDetails = student.mostSignificantCourse
 		scyd1.yearOfStudy = 1
 		scyd1.academicYear = academicYear - 2
@@ -255,6 +257,7 @@ class ProgressionServiceTest extends TestBase with Mockito {
 		scyd2.studentCourseDetails = student.mostSignificantCourse
 		scyd2.yearOfStudy = 2
 		scyd2.academicYear = academicYear - 1
+		scyd2.modeOfAttendance = Fixtures.modeOfAttendance("F", "FT", "Full time")
 		val entityYear2: ExamGridEntityYear = scyd2.toExamGridEntityYear
 		student.mostSignificantCourse.addStudentCourseYearDetails(scyd2)
 	}
@@ -670,6 +673,47 @@ class ProgressionServiceTest extends TestBase with Mockito {
 			val result: Either[String, BigDecimal] = service.getYearMark(entityYear3, 180, Nil, yearWeightings)
 			result should be (Right(BigDecimal(30)))
 		}
+	}
+
+	@Test
+	def allowEmptyYearMarks(): Unit =  {
+		// full time student with no year abroad
+		new ThreeYearStudentFixture {
+			var allowEmpty  = ProgressionService.allowEmptyYearMarks(yearWeightings, entityYear3)
+			allowEmpty should be (false)
+		}
+
+		// An year abroad - 2nd year  with null block occurrence
+		new ThreeYearStudentFixture {
+			scyd2.modeOfAttendance = Fixtures.modeOfAttendance("SWE", "SANDWICH (E)", "Sandwich (thick) Erasmus Scheme")
+			var allowEmpty  = ProgressionService.allowEmptyYearMarks(yearWeightings, entityYear2)
+			allowEmpty should be (true)
+		}
+
+		// An year abroad - 2nd year
+		new ThreeYearStudentFixture {
+			scyd2.modeOfAttendance = Fixtures.modeOfAttendance("YO", "OPTIONAL YR", "Optional year out (study related)")
+			scyd2.blockOccurrence = "FW" //  SITS block occurrence
+			var allowEmpty  = ProgressionService.allowEmptyYearMarks(yearWeightings, entityYear2)
+			allowEmpty should be (true)
+		}
+
+		// Intercalated year (this should not consider year abroad even though we have one of the valid MOA codes that is acceptable for year abroad)
+		new ThreeYearStudentFixture {
+			scyd2.modeOfAttendance = Fixtures.modeOfAttendance("YM", "COMP YR", "Compulsory year out (study related)")
+			scyd2.blockOccurrence = "I"
+			var allowEmpty  = ProgressionService.allowEmptyYearMarks(yearWeightings, entityYear2)
+			allowEmpty should be (false)
+		}
+
+		// Intercalated year (this should not consider year abroad)
+		new ThreeYearStudentFixture {
+			scyd2.modeOfAttendance = Fixtures.modeOfAttendance("YX", "EXCH YR", "Exchange year out (study related)")
+			scyd2.blockOccurrence = "I"
+			var allowEmpty  = ProgressionService.allowEmptyYearMarks(yearWeightings, entityYear2)
+			allowEmpty should be (false)
+		}
+
 	}
 
 

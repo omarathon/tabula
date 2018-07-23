@@ -76,4 +76,8 @@ class CourseYearWeighting extends GeneratedId with ToString {
 		"yearOfStudy" -> yearOfStudy,
 		"weighting" -> weighting
 	)
+
+	def copyZeroWeighted:CourseYearWeighting =  {
+		new CourseYearWeighting(course, sprStartAcademicYear, yearOfStudy , 0)
+	}
 }
