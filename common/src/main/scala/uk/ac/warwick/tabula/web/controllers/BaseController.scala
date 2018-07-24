@@ -63,11 +63,13 @@ trait ControllerViews extends Logging {
 			url.replaceAll("[&?]returnTo=[^&]*", "")
 		)
 
-	def Redirect(path: String, objects: (String, _)*) = Mav("redirect:" + getReturnToUnescaped(path), objects: _*)
-	def Redirect(path: String, objects: Map[String, _]) = Mav("redirect:" + getReturnToUnescaped(path), objects)
+	def Redirect(path: String, objects: (String, _)*): Mav = Redirect(path, Map(objects: _*))
+	def Redirect(path: String, objects: Map[String, _]): Mav = Mav("redirect:" + validRedirectDestination(getReturnToUnescaped(path)), objects)
 	// Force the redirect regardless of returnTo
-	def RedirectForce(path: String, objects: (String, _)*) = Mav("redirect:" + path, objects: _*)
-	def RedirectForce(path: String, objects: Map[String, _]) = Mav("redirect:" + path, objects)
+	def RedirectForce(path: String, objects: (String, _)*): Mav = RedirectForce(path, Map(objects: _*))
+	def RedirectForce(path: String, objects: Map[String, _]): Mav = Mav("redirect:" + validRedirectDestination(path), objects)
+
+	private def validRedirectDestination(dest: String): String = Option(dest).filter(d => d.startsWith("/") || d.startsWith(s"${currentUri.getScheme}://${currentUri.getAuthority}/") || d == loginUrl).getOrElse("/")
 
 	def RedirectToSignin(target: String = loginUrl): Mav = Redirect(target)
 
