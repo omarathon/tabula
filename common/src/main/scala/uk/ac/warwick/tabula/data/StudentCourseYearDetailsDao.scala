@@ -18,6 +18,7 @@ trait StudentCourseYearDetailsDao {
 	def getBySceKeyStaleOrFresh(studentCourseDetails: StudentCourseDetails, seq: Integer): Option[StudentCourseYearDetails]
 	def getFreshIds: Seq[String]
 	def getIdsStaleSince(from:DateTime): Seq[String]
+	def getMissingFromImportBefore(date: DateTime): Seq[StudentCourseYearDetails]
 	def getFreshKeys: Seq[StudentCourseYearKey]
 	def getIdFromKey(key: StudentCourseYearKey): Option[String]
 	def convertKeysToIds(keys: Seq[StudentCourseYearKey]): Seq[String]
@@ -101,6 +102,12 @@ class StudentCourseYearDetailsDaoImpl extends StudentCourseYearDetailsDao with D
 		session.newCriteria[StudentCourseYearDetails]
 			.add(ge("missingFromImportSince", from))
 			.project[String](Projections.property("id"))
+			.seq
+	}
+
+	def getMissingFromImportBefore(date: DateTime): Seq[StudentCourseYearDetails] = {
+		session.newCriteria[StudentCourseYearDetails]
+			.add(le("missingFromImportSince", date))
 			.seq
 	}
 
