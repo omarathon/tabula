@@ -18,6 +18,35 @@ class StudentCourseYearDetailsDaoTest extends PersistenceTestBase {
 		memDao.sessionFactory = sessionFactory
 	}
 
+	@Test def deletingScdShouldDeleteAssociatedScyd(): Unit = transactional { tx =>
+
+		val stuMem = new StudentMember("0123456")
+		stuMem.userId = "abcde"
+		memDao.saveOrUpdate(stuMem)
+		val scd = new StudentCourseDetails(stuMem, "0123456/1")
+		scd.sprCode = "0123456/2"
+		scdDao.saveOrUpdate(scd)
+
+		val nonexistantYearDetails = scydDao.getBySceKey(scd, 1)
+		nonexistantYearDetails should be (None)
+
+		val scyd = new StudentCourseYearDetails(scd, 1,AcademicYear(2013))
+
+		scd.addStudentCourseYearDetails(scyd)
+
+		scydDao.saveOrUpdate(scyd)
+		scdDao.saveOrUpdate(scd)
+
+		scd.freshStudentCourseYearDetails.size should be (1)
+		val retrievedScyd = scydDao.getBySceKey(scd, 1).get
+		retrievedScyd.isInstanceOf[StudentCourseYearDetails] should be (true)
+		retrievedScyd.studentCourseDetails.scjCode should be ("0123456/1")
+		retrievedScyd.studentCourseDetails.sprCode should be ("0123456/2")
+		retrievedScyd.academicYear should be (AcademicYear(2013))
+		scdDao.delete(scd)
+		scydDao.getBySceKey(scd, 1) should be (Option.empty)
+	}
+
 	@Test def testGetBySceKey() {
 		transactional { tx =>
 			val stuMem = new StudentMember("0123456")
