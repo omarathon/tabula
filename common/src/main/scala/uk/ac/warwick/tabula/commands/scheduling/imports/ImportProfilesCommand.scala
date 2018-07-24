@@ -333,36 +333,28 @@ class ImportProfilesCommand extends CommandWithoutTransaction[Unit] with Logging
 	}
 
 	def updateMissingForIndividual(universityId: String, applicantOnly: Boolean = false): Unit = {
+
+		def handleApplicantOrStaff(member: Member): Unit = {
+			val missingFromImport = profileImporter.getUniversityIdsPresentInMembership(Set(member.universityId)).isEmpty
+			if (member.isFresh && missingFromImport) {
+				// The member has gone missing
+				member.missingFromImportSince = DateTime.now
+				memberDao.saveOrUpdate(member)
+			} else if (!member.isFresh && !missingFromImport) {
+				// The member has re-appeared
+				member.missingFromImportSince = null
+				memberDao.saveOrUpdate(member)
+			}
+		}
+
 		if (applicantOnly) {
 			profileService.getMemberByUniversityIdStaleOrFresh(universityId).foreach {
-				case member: ApplicantMember =>
-					val missingFromImport = profileImporter.getUniversityIdsPresentInMembership(Set(member.universityId)).isEmpty
-					if (member.isFresh && missingFromImport) {
-						// The member has gone missing
-						member.missingFromImportSince = DateTime.now
-						memberDao.saveOrUpdate(member)
-					} else if (!member.isFresh && !missingFromImport) {
-						// The member has re-appeared
-						member.missingFromImportSince = null
-						memberDao.saveOrUpdate(member)
-					}
+				case member: ApplicantMember => handleApplicantOrStaff(member)
 				case _ =>
 			}
 		} else {
 			profileService.getMemberByUniversityIdStaleOrFresh(universityId).foreach {
-				case member@(_: StaffMember | _: ApplicantMember) =>
-					val missingFromImport = profileImporter.getUniversityIdsPresentInMembership(Set(member.universityId)).isEmpty
-
-					if (member.isFresh && missingFromImport) {
-						// The member has gone missing
-						member.missingFromImportSince = DateTime.now
-						memberDao.saveOrUpdate(member)
-					} else if (!member.isFresh && !missingFromImport) {
-						// The member has re-appeared
-						member.missingFromImportSince = null
-						memberDao.saveOrUpdate(member)
-					}
-
+				case member@(_: StaffMember | _: ApplicantMember) => handleApplicantOrStaff(member)
 				case stu: StudentMember =>
 					val sitsRows = profileImporter.multipleStudentInformationQuery.executeByNamedParam(Map("universityIds" -> Seq(universityId).asJava).asJava).asScala
 					val universityIdsSeen = sitsRows.map(_.universityId.getOrElse("")).distinct
