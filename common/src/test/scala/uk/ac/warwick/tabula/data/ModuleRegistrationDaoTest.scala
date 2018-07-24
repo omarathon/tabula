@@ -25,6 +25,46 @@ class ModuleRegistrationDaoTest extends PersistenceTestBase {
 		scdDao.sessionFactory = sessionFactory
 	}
 
+	@Test def deletingScdShouldAlsoDeleteAssociatedModReg(): Unit = transactional { tx =>
+		val stuMem = new StudentMember("0123456")
+		stuMem.userId = "abcde"
+		memDao.saveOrUpdate(stuMem)
+
+		val scd = new StudentCourseDetails(stuMem, "0123456/1")
+		scd.sprCode = "0123456/2"
+
+		val module = new Module
+
+		val nonexistantModReg = modRegDao.getByNotionalKey(scd, module, new JBigDecimal("10.0"), AcademicYear(2012), "A")
+		nonexistantModReg should be (None)
+
+		module.code = "ab123"
+		moduleDao.saveOrUpdate(module)
+
+		val modReg = new ModuleRegistration(scd, module, new JBigDecimal("10.0"), AcademicYear(2012), "A")
+		modReg.assessmentGroup = "D"
+		modReg.selectionStatus = ModuleSelectionStatus.OptionalCore
+		modRegDao.saveOrUpdate(modReg)
+
+		scd.addModuleRegistration(modReg)
+
+		scdDao.saveOrUpdate(scd)
+
+		val retrievedModReg = modRegDao.getByNotionalKey(scd, module, new JBigDecimal("10.0"), AcademicYear(2012), "A").get
+
+		retrievedModReg.isInstanceOf[ModuleRegistration] should be (true)
+		retrievedModReg.studentCourseDetails.scjCode should be ("0123456/1")
+		retrievedModReg.studentCourseDetails.sprCode should be ("0123456/2")
+		retrievedModReg.module.code should be ("ab123")
+		retrievedModReg.cats should be (new JBigDecimal("10.0"))
+		retrievedModReg.academicYear should be (AcademicYear(2012))
+		retrievedModReg.assessmentGroup should be ("D")
+		retrievedModReg.selectionStatus should be (ModuleSelectionStatus.OptionalCore)
+
+		scdDao.delete(scd)
+		modRegDao.getByNotionalKey(scd, module, new JBigDecimal("10.0"), AcademicYear(2012), "A") should be (Option.empty)
+	}
+
 	@Test def testModReg {
 		transactional { tx =>
 			val stuMem = new StudentMember("0123456")
