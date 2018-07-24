@@ -3,6 +3,7 @@ package uk.ac.warwick.tabula.commands.cm2.assignments
 import uk.ac.warwick.tabula.commands._
 import uk.ac.warwick.tabula.commands.cm2.assignments.ListMarkerAllocationsCommand._
 import uk.ac.warwick.tabula.data.model.Assignment
+import uk.ac.warwick.tabula.data.model.markingworkflow.MarkingWorkflowStage
 import uk.ac.warwick.tabula.permissions.Permissions
 import uk.ac.warwick.tabula.services.CM2MarkingWorkflowService.Allocations
 import uk.ac.warwick.tabula.services.{AssessmentMembershipServiceComponent, CM2MarkingWorkflowServiceComponent, UserLookupComponent, _}
@@ -26,7 +27,7 @@ trait FetchMarkerAllocations {
 	self: UserLookupComponent with CM2MarkingWorkflowServiceComponent
 		with AssessmentMembershipServiceComponent =>
 
-	def fetchAllocations(assignment: Assignment, maybeAllocations: Option[Map[String, Allocations]] = None): MarkerAllocations = {
+	def fetchAllocations(assignment: Assignment, selectedAllocations: Map[MarkingWorkflowStage, Allocations] = Map.empty): MarkerAllocations = {
 
 		// If seat number is empty we use the uni ID instead. This will be larger than a real seat number and unique
 		def seatNumberOrUniId = (user: User) => assignment.getSeatNumber(user) match {
@@ -60,11 +61,11 @@ trait FetchMarkerAllocations {
 			stage <- stages
 		} if(workflow.workflowType.rolesShareAllocations) {
 			// key by role as the allocations are the same
-			allocations += role -> toSortedSet(maybeAllocations.map(_.getOrElse(role, Map.empty)).getOrElse(cm2MarkingWorkflowService.getMarkerAllocations(assignment, stage)))
+			allocations += role -> toSortedSet(selectedAllocations.getOrElse(MarkingWorkflowStage.fromCode(role), cm2MarkingWorkflowService.getMarkerAllocations(assignment, stage)))
 			markers += role -> SortedSet(workflow.markers(stage): _*)
 			allocateByStage += role -> false
 		} else {
-			allocations += stage.allocationName -> toSortedSet(maybeAllocations.map(_.getOrElse(stage.allocationName, Map.empty)).getOrElse(cm2MarkingWorkflowService.getMarkerAllocations(assignment, stage)))
+			allocations += stage.allocationName -> toSortedSet(selectedAllocations.getOrElse(stage, cm2MarkingWorkflowService.getMarkerAllocations(assignment, stage)))
 			markers += stage.allocationName -> SortedSet(workflow.markers(stage): _*)
 			allocateByStage += stage.allocationName -> stage.stageAllocation
 		}
@@ -95,7 +96,7 @@ object ListMarkerAllocationsCommand {
 
 	implicit val userOrdering: Ordering[User] = Ordering.by { u: User => (u.getLastName, u.getFirstName, u.getWarwickId, u.getUserId) }
 
-	def apply(assignment: Assignment, allocations: Option[Map[String, Allocations]] = None) = new ListMarkerAllocationsCommandInternal(assignment, allocations)
+	def apply(assignment: Assignment, allocations: Map[MarkingWorkflowStage, Allocations] = Map.empty) = new ListMarkerAllocationsCommandInternal(assignment, allocations)
 		with ComposableCommand[MarkerAllocations]
 		with ListMarkerAllocationsPermissions
 		with Unaudited
@@ -105,7 +106,7 @@ object ListMarkerAllocationsCommand {
 		with AutowiringAssessmentMembershipServiceComponent
 }
 
-class ListMarkerAllocationsCommandInternal(val assignment: Assignment, allocations: Option[Map[String, Allocations]]) extends CommandInternal[MarkerAllocations]
+class ListMarkerAllocationsCommandInternal(val assignment: Assignment, allocations: Map[MarkingWorkflowStage, Allocations]) extends CommandInternal[MarkerAllocations]
 	with ListMarkerAllocationsState with FetchMarkerAllocations {
 
 	this: UserLookupComponent with CM2MarkingWorkflowServiceComponent with AssessmentMembershipServiceComponent =>

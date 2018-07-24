@@ -41,7 +41,7 @@ class ModifyAssignmentMarkersController extends AbstractAssignmentController {
 		}
 
 		val allocations = if (assignMarkersCmd.allocationWarnings.nonEmpty)
-			ListMarkerAllocationsCommand(assignment, Some(assignMarkersCmd.allocationMap.map { case (k, v) => (k.allocationName, v) })).apply()
+			ListMarkerAllocationsCommand(assignment, allocations = assignMarkersCmd.allocationMap).apply()
 		else
 			existingAllocations
 
