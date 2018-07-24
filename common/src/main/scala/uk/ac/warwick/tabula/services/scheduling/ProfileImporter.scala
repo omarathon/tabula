@@ -200,6 +200,7 @@ class SandboxProfileImporter extends ProfileImporter {
 				"study_block" -> thisYearOfStudy,
 				"study_level" -> thisYearOfStudy.toString,
 				"mode_of_attendance_code" -> (if (member.universityId.toLong % 5 == 0) "P" else "F"),
+				"block_occurrence" -> (if (member.universityId.toLong % 5 == 0) "I" else "C"),
 				"sce_academic_year" -> (AcademicYear.now() - (yearOfStudy - thisYearOfStudy)).toString,
 				"sce_sequence_number" -> thisYearOfStudy,
 				"sce_route_code" -> route.code.toUpperCase,
@@ -406,6 +407,7 @@ object ProfileImporter extends Logging {
 			sce.sce_stac as enrolment_status_code,
 			sce.sce_blok as study_block, -- formally year_of_study
 			sce.sce_moac as mode_of_attendance_code,
+			sce.sce_occl as block_occurrence,
 			sce.sce_ayrc as sce_academic_year,
 			sce.sce_seq2 as sce_sequence_number,
 			sce.sce_dptc as enrolment_department_code,

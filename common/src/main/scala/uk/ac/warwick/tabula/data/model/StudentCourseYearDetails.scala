@@ -285,6 +285,8 @@ trait StudentCourseYearProperties extends BasicStudentCourseYearProperties {
 	@Restricted(Array("Profiles.Read.StudentCourseDetails.Status"))
 	var modeOfAttendance: ModeOfAttendance = _
 
+	var blockOccurrence: String = _
+
 	/*
 	 * A boolean flag set at import-time (see ImportStudentCourseYearCommand) that indicates whether we believe
 	 * the student was enrolled in this year or not. For every year except the student's final year, this is effectively
