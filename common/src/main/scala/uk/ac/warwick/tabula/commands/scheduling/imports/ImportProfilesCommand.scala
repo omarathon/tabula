@@ -326,78 +326,78 @@ class ImportProfilesCommand extends CommandWithoutTransaction[Unit] with Logging
 					members.headOption
 				case None =>
 					logger.warn("Student is no longer in uow_current_members in membership - not updating")
-					updateMissingForIndividual(universityId, applicantOnly = true)
+					updateMissingForApplicant(universityId)
 					None
 			}
 		}
 	}
 
-	def updateMissingForIndividual(universityId: String, applicantOnly: Boolean = false): Unit = {
-
-		def handleApplicantOrStaff(member: Member): Unit = {
-			val missingFromImport = profileImporter.getUniversityIdsPresentInMembership(Set(member.universityId)).isEmpty
-			if (member.isFresh && missingFromImport) {
-				// The member has gone missing
-				member.missingFromImportSince = DateTime.now
-				memberDao.saveOrUpdate(member)
-			} else if (!member.isFresh && !missingFromImport) {
-				// The member has re-appeared
-				member.missingFromImportSince = null
-				memberDao.saveOrUpdate(member)
-			}
+	def updateMissingForApplicantOrStaff(member: Member): Unit = {
+		val missingFromImport = profileImporter.getUniversityIdsPresentInMembership(Set(member.universityId)).isEmpty
+		if (member.isFresh && missingFromImport) {
+			// The member has gone missing
+			member.missingFromImportSince = DateTime.now
+			memberDao.saveOrUpdate(member)
+		} else if (!member.isFresh && !missingFromImport) {
+			// The member has re-appeared
+			member.missingFromImportSince = null
+			memberDao.saveOrUpdate(member)
 		}
+	}
 
-		if (applicantOnly) {
-			profileService.getMemberByUniversityIdStaleOrFresh(universityId).foreach {
-				case member: ApplicantMember => handleApplicantOrStaff(member)
-				case _ =>
-			}
-		} else {
-			profileService.getMemberByUniversityIdStaleOrFresh(universityId).foreach {
-				case member@(_: StaffMember | _: ApplicantMember) => handleApplicantOrStaff(member)
-				case stu: StudentMember =>
-					val sitsRows = profileImporter.multipleStudentInformationQuery.executeByNamedParam(Map("universityIds" -> Seq(universityId).asJava).asJava).asScala
-					val universityIdsSeen = sitsRows.map(_.universityId.getOrElse("")).distinct
-					val scjCodesSeen = sitsRows.map(_.scjCode).distinct
-					val studentCourseYearKeysSeen = sitsRows.map(row => new StudentCourseYearKey(row.scjCode, row.sceSequenceNumber)).distinct
+	def updateMissingForApplicant(uniId: String): Unit = {
+		profileService.getMemberByUniversityIdStaleOrFresh(uniId).foreach {
+			case member: ApplicantMember => updateMissingForApplicantOrStaff(member)
+			case _ =>
+		}
+	}
 
-					// update missingFromImportSince on member
-					if (stu.missingFromImportSince != null && universityIdsSeen.contains(stu.universityId)) {
-						stu.missingFromImportSince = null
-						memberDao.saveOrUpdate(stu)
+	def updateMissingForIndividual(universityId: String): Unit = {
+		profileService.getMemberByUniversityIdStaleOrFresh(universityId).foreach {
+			case member@(_: StaffMember | _: ApplicantMember) => updateMissingForApplicantOrStaff(member)
+			case stu: StudentMember =>
+				val sitsRows = profileImporter.multipleStudentInformationQuery.executeByNamedParam(Map("universityIds" -> Seq(universityId).asJava).asJava).asScala
+				val universityIdsSeen = sitsRows.map(_.universityId.getOrElse("")).distinct
+				val scjCodesSeen = sitsRows.map(_.scjCode).distinct
+				val studentCourseYearKeysSeen = sitsRows.map(row => new StudentCourseYearKey(row.scjCode, row.sceSequenceNumber)).distinct
+
+				// update missingFromImportSince on member
+				if (stu.missingFromImportSince != null && universityIdsSeen.contains(stu.universityId)) {
+					stu.missingFromImportSince = null
+					memberDao.saveOrUpdate(stu)
+				}
+				else if (stu.missingFromImportSince == null && !universityIdsSeen.contains(stu.universityId)) {
+					var missingSince = stu.missingFromImportSince
+					stu.missingFromImportSince = DateTime.now
+					missingSince = stu.missingFromImportSince
+
+					memberDao.saveOrUpdate(stu)
+				}
+
+				for (scd <- stu.freshOrStaleStudentCourseDetails) {
+					// on studentCourseDetails
+					if (scd.missingFromImportSince != null && scjCodesSeen.contains(scd.scjCode)) {
+						scd.missingFromImportSince = null
+						studentCourseDetailsDao.saveOrUpdate(scd)
+					} else if (scd.missingFromImportSince == null && !scjCodesSeen.contains(scd.scjCode)) {
+						scd.missingFromImportSince = DateTime.now
+						studentCourseDetailsDao.saveOrUpdate(scd)
 					}
-					else if (stu.missingFromImportSince == null && !universityIdsSeen.contains(stu.universityId)) {
-						var missingSince = stu.missingFromImportSince
-						stu.missingFromImportSince = DateTime.now
-						missingSince = stu.missingFromImportSince
 
-						memberDao.saveOrUpdate(stu)
-					}
-
-					for (scd <- stu.freshOrStaleStudentCourseDetails) {
-						// on studentCourseDetails
-						if (scd.missingFromImportSince != null && scjCodesSeen.contains(scd.scjCode)) {
-							scd.missingFromImportSince = null
-							studentCourseDetailsDao.saveOrUpdate(scd)
-						} else if (scd.missingFromImportSince == null && !scjCodesSeen.contains(scd.scjCode)) {
-							scd.missingFromImportSince = DateTime.now
-							studentCourseDetailsDao.saveOrUpdate(scd)
+					// and on studentCourseYearDetails
+					for (scyd <- scd.freshOrStaleStudentCourseYearDetails) {
+						val key = new StudentCourseYearKey(scd.scjCode, scyd.sceSequenceNumber)
+						if (scyd.missingFromImportSince != null && studentCourseYearKeysSeen.contains(key)) {
+							scyd.missingFromImportSince = null
+							studentCourseYearDetailsDao.saveOrUpdate(scyd)
+						} else if (scyd.missingFromImportSince == null && !studentCourseYearKeysSeen.contains(key)) {
+							scyd.missingFromImportSince = DateTime.now
+							studentCourseYearDetailsDao.saveOrUpdate(scyd)
 						}
-
-						// and on studentCourseYearDetails
-						for (scyd <- scd.freshOrStaleStudentCourseYearDetails) {
-							val key = new StudentCourseYearKey(scd.scjCode, scyd.sceSequenceNumber)
-							if (scyd.missingFromImportSince != null && studentCourseYearKeysSeen.contains(key)) {
-								scyd.missingFromImportSince = null
-								studentCourseYearDetailsDao.saveOrUpdate(scyd)
-							} else if (scyd.missingFromImportSince == null && !studentCourseYearKeysSeen.contains(key)) {
-								scyd.missingFromImportSince = DateTime.now
-								studentCourseYearDetailsDao.saveOrUpdate(scyd)
-							}
-						}
 					}
-				case _ =>
-			}
+				}
+			case _ =>
+
 		}
 	}
 
