@@ -2,7 +2,8 @@ package uk.ac.warwick.tabula.commands.cm2.markingworkflows
 
 
 import org.mockito.Mockito._
-import uk.ac.warwick.tabula.commands.cm2.assignments.{AssignMarkersSmallGroupsCommandInternal, GroupAllocation, SetAllocation}
+import uk.ac.warwick.tabula.commands.PopulateOnForm
+import uk.ac.warwick.tabula.commands.cm2.assignments._
 import uk.ac.warwick.tabula.data.model._
 import uk.ac.warwick.tabula.data.model.groups.{SmallGroup, SmallGroupSet}
 import uk.ac.warwick.tabula.data.model.markingworkflow.DoubleWorkflow
@@ -17,8 +18,9 @@ class AssignMarkersSmallGroupsCommandTest extends TestBase with Mockito {
 
 	@Test
 	def getsAllocations() { new Fixture {
-		val cmd = new AssignMarkersSmallGroupsCommandInternal(assignment) with MockServices
-		val setAllocations: Seq[SetAllocation] = cmd.applyInternal()
+		val cmd: AssignMarkersSmallGroupsState with PopulateOnForm = new AssignMarkersSmallGroupsCommandInternal(assignment) with AssignMarkersSmallGroupsCommandPopulate with AssignMarkersSmallGroupsState with AssignMarkersSmallGroupsCommandRequest with MockServices
+		cmd.populate()
+		val setAllocations: Seq[SetAllocation] = cmd.setAllocations
 		setAllocations.size should be (1)
 
 		val setAllocation: SetAllocation = setAllocations.head

@@ -10,6 +10,18 @@
 	<@f.form method="post" action=actionUrl enctype="multipart/form-data" cssClass="dirty-check double-submit-protection" commandName="assignMarkersBySpreadsheetCommand">
 		<@components.assignment_wizard 'markers' assignment.module false assignment />
 
+		<#if allocationWarnings?size != 0>
+			<div class="alert alert-info">
+				<h4>Allocation warnings</h4>
+
+				<ul>
+					<#list allocationWarnings as warning>
+						<li>${warning}</li>
+					</#list>
+				</ul>
+			</div>
+		</#if>
+
 		<#if assignMarkersBySpreadsheetCommand.rowsWithErrors?size &gt; 0>
 			<h2>Invalid rows</h2>
 			<h6>The following rows had errors which prevent them being uploaded</h6>
