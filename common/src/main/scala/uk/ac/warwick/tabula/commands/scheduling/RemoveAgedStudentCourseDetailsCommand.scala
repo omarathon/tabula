@@ -25,7 +25,7 @@ class RemoveAgedStudentCourseDetailsCommandInternal
 		with StudentCourseDetailsDaoComponent =>
 	override protected def applyInternal(): Seq[String] = {
 		studentCourseDetailsDao
-			.getByEndDateBefore(DateTime.now.minusYears(7))
+			.getByEndDateBefore(DateTime.now.minusYears(6))
 			.filter(_.missingFromImportSince != null)
 			.filter(_.missingFromImportSince.isBefore(DateTime.now().minusYears(1)))
 			.map(studentCourseDetailsDao.delete)
