@@ -50,6 +50,21 @@ object AssignMarkersBySpreadsheetCommand {
 	val AcceptedFileExtensions = Seq(".xlsx")
 }
 
+object AssignMarkersBySmallGroupsCommand {
+	def apply(assignment: Assignment, groupMarkerAllocationSequence: Seq[GroupMarkerAllocation]) =
+		new AssignMarkersCommandInternal(assignment)
+			with ComposableCommand[Assignment]
+			with AssignMarkersBySmallGroupsState
+			with AssignMarkersValidation
+			with AssignMarkersPermissions
+			with AssignMarkersDescription
+			with AutowiringUserLookupComponent
+			with AutowiringCM2MarkingWorkflowServiceComponent
+			with AutowiringFeedbackServiceComponent {
+			def groupMarkerAllocations: Seq[GroupMarkerAllocation] = groupMarkerAllocationSequence
+		}
+}
+
 abstract class AssignMarkersCommandInternal(val assignment: Assignment) extends CommandInternal[Assignment] {
 
 	this: UserLookupComponent with CM2MarkingWorkflowServiceComponent with AssignMarkersState with FeedbackServiceComponent =>
@@ -125,8 +140,7 @@ trait AssignMarkersPermissions extends RequiresPermissionsChecking with Permissi
 }
 
 trait ValidateConcurrentStages {
-
-	self :SelfValidating =>
+	self: SelfValidating =>
 
 	def validateConcurrentStages(allocationMap: Map[MarkingWorkflowStage, Allocations], errors: Errors) {
 		val noDupesAllowed = allocationMap.filterKeys(_.stageAllocation)
@@ -134,22 +148,56 @@ trait ValidateConcurrentStages {
 
 		val markers = allocations.flatMap(_.keys).toSet
 
-		markers.foreach(marker => {
+		markers.foreach { marker =>
 			val students = allocations.flatMap(_.getOrElse(marker, Set()).toSeq)
 			val dupes = students.groupBy(identity).collect{case (k, v) if v.size > 1 => k}
 
 			if(dupes.nonEmpty) {
 				errors.reject("markingWorkflow.marker.noDupes", Array(marker.getFullName, dupes.map(_.getFullName).mkString(", ")), "")
 			}
-		})
+		}
 	}
-
 }
 
-trait AssignMarkersValidation extends SelfValidating with ValidateConcurrentStages {
+trait ValidateSequentialStages {
+	self: SelfValidating with AssignMarkersState =>
+
+	def validateSequentialStageMarkers(errors: Errors): Unit = {
+		val allocationPairs: Map[MarkingWorkflowStage, Seq[(Marker, Student)]] = allocationMap.map { case (stage, allocations) =>
+			stage -> allocations.toSeq.flatMap { case (marker, students) => students.map(marker -> _) }
+		}
+
+		val unwiseAllocations: Iterable[(MarkingWorkflowStage, (Marker, Student))] = allocationMap.keys.flatMap { stage =>
+			allocationPairs(stage).filter(pair =>
+				stage.otherStagesInSequence
+					.exists(otherStage => allocationPairs.getOrElse(otherStage, Nil).contains(pair))
+			).map(stage -> _)
+		}.toSeq.distinct
+
+		unwiseAllocations.groupBy(_._2).foreach { case ((marker, student), iterable) =>
+			val stages = iterable.map(_._1).toSeq.distinct.sortBy(_.order)
+			val stageNames = stages.map(_.description).mkString(if (stages.size == 2) " and " else ", ")
+
+			allocationWarnings :+= s"${student.getFullName} is allocated to marker ${marker.getFullName} for ${stages.size} stages: $stageNames"
+		}
+
+		if (allocationWarnings.nonEmpty && !allowSameMarkerForSequentialStages) {
+			errors.reject("markingWorkflow.marker.warnings")
+		}
+	}
+}
+
+trait AssignMarkersSequentialStageValidationState {
+	var allowSameMarkerForSequentialStages: Boolean = false
+
+	var allocationWarnings: Seq[String] = Nil
+}
+
+trait AssignMarkersValidation extends SelfValidating with ValidateConcurrentStages with ValidateSequentialStages {
 	self: AssignMarkersState =>
 	def validate(errors: Errors): Unit = {
 		validateConcurrentStages(allocationMap, errors)
+		validateSequentialStageMarkers(errors)
 		validateChangedAllocations(errors)
 	}
 
@@ -195,7 +243,7 @@ trait AssignMarkersDescription extends Describable[Assignment] {
 	}
 }
 
-trait AssignMarkersState {
+trait AssignMarkersState extends AssignMarkersSequentialStageValidationState {
 	def assignment: Assignment
 	def allocationMap: Map[MarkingWorkflowStage, Allocations]
 }
@@ -205,6 +253,8 @@ trait AssignMarkersBySpreadsheetState extends AssignMarkersState {
 	protected var _allocationMap: Map[MarkingWorkflowStage, Allocations] = Map()
 	var rowsWithErrors: Seq[ParsedRow] = Nil
 	var file: UploadedFile = new UploadedFile
+
+	allowSameMarkerForSequentialStages = true
 }
 
 trait AssignMarkersDragAndDropState extends AssignMarkersState {
@@ -223,4 +273,21 @@ trait AssignMarkersDragAndDropState extends AssignMarkersState {
 	var allocations: JMap[MarkingWorkflowStage, JMap[String, JList[String]]] = LazyMaps.create{ _: MarkingWorkflowStage =>
 		LazyMaps.create{ _: String => JArrayList(): JList[String] }.asJava
 	}.asJava
+}
+
+trait AssignMarkersBySmallGroupsState extends AssignMarkersState {
+	def groupMarkerAllocations: Seq[GroupMarkerAllocation]
+
+	def allocationMap: Map[MarkingWorkflowStage, Allocations] = {
+		groupMarkerAllocations.groupBy(_.stages).flatMap { case (stages, allocations) =>
+			var map = Map.empty[Marker, Set[Student]]
+
+			allocations.map(alloc => alloc.marker -> alloc.group.students.users.toSet)
+				.foreach { case (marker, students) =>
+					map += marker -> (map.getOrElse(marker, Set.empty) ++ students)
+				}
+
+			stages.asScala.map(stage => stage -> map)
+		}
+	}
 }

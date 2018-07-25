@@ -80,7 +80,8 @@ class ModifyAssignmentMarkersSpreadsheetController extends AbstractAssignmentCon
 			"allocationPreview" -> allocationPreview,
 			"allocationOrder" -> workflow.allocationOrder,
 			"unallocatedStudents" -> unallocatedStudents,
-			"mode" -> mode)
+			"mode" -> mode,
+			"allocationWarnings" -> assignMarkersBySpreadsheetCommand.allocationWarnings)
 			.crumbsList(Breadcrumbs.assignment(assignment))
 	}
 
