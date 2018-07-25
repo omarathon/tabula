@@ -17,12 +17,11 @@ trait AutowiringStudentCourseDetailsDaoComponent extends StudentCourseDetailsDao
 
 trait StudentCourseDetailsDao {
 	def saveOrUpdate(studentCourseDetails: StudentCourseDetails)
-	def delete(studentCourseDetails: StudentCourseDetails): String
+	def delete(studentCourseDetails: StudentCourseDetails)
 	def getByScjCode(scjCode: String): Option[StudentCourseDetails]
 	def getByScjCodeStaleOrFresh(scjCode: String): Option[StudentCourseDetails]
 	def getBySprCode(sprCode: String): Seq[StudentCourseDetails]
 	def getBySprCodeStaleOrFresh(sprCode: String): Seq[StudentCourseDetails]
-	def getByEndDateBefore(date: DateTime): Seq[StudentCourseDetails]
 	def getStudentBySprCode(sprCode: String): Option[StudentMember]
 	def getByRoute(route: Route) : Seq[StudentCourseDetails]
 	def findByDepartment(department:Department):Seq[StudentCourseDetails]
@@ -41,12 +40,11 @@ class StudentCourseDetailsDaoImpl extends StudentCourseDetailsDao with Daoisms {
 		session.flush()
 	}
 
-	def delete(studentCourseDetails: StudentCourseDetails): String =  {
-		val scjCode = studentCourseDetails.scjCode
+	def delete(studentCourseDetails: StudentCourseDetails): Unit =  {
 		session.delete(studentCourseDetails)
 		session.flush()
-		scjCode
 	}
+
 	def getByScjCode(scjCode: String): Option[StudentCourseDetails] =
 		session.newCriteria[StudentCourseDetails]
 				.add(is("scjCode", scjCode.trim))
@@ -69,12 +67,6 @@ class StudentCourseDetailsDaoImpl extends StudentCourseDetailsDao with Daoisms {
 		session.newCriteria[StudentCourseDetails]
 			.add(is("sprCode", sprCode.trim))
 			.seq
-
-	def getByEndDateBefore(date: DateTime): Seq[StudentCourseDetails] = {
-		session.newCriteria[StudentCourseDetails]
-			.add(le("endDate", date))
-			.seq
-	}
 
 	def findByDepartment(department:Department):Seq[StudentCourseDetails] = {
 		session.newCriteria[StudentCourseDetails]
