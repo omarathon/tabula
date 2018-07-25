@@ -23,13 +23,16 @@ class RemoveAgedStudentCourseDetailsCommandInternal
 		with Logging {
 	self: PermissionsServiceComponent
 		with StudentCourseDetailsDaoComponent =>
-	override protected def applyInternal(): Seq[String] = {
-		studentCourseDetailsDao
+	override protected def applyInternal(): Seq[String] = (for {
+		ids <- Some(studentCourseDetailsDao
 			.getByEndDateBefore(DateTime.now.minusYears(6))
 			.filter(_.missingFromImportSince != null)
 			.filter(_.missingFromImportSince.isBefore(DateTime.now().minusYears(1)))
-			.map(studentCourseDetailsDao.delete)
-	}
+			.map(_.scjCode))
+	} yield {
+		studentCourseDetailsDao.deleteByIds(ids)
+		ids
+	}).getOrElse(Seq.empty)
 }
 
 trait RemoveAgedStudentCourseDetailsCommandPermission
