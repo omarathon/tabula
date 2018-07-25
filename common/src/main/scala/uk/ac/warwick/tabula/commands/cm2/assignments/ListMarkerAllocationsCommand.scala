@@ -61,7 +61,7 @@ trait FetchMarkerAllocations {
 			stage <- stages
 		} if(workflow.workflowType.rolesShareAllocations) {
 			// key by role as the allocations are the same
-			allocations += role -> toSortedSet(selectedAllocations.getOrElse(MarkingWorkflowStage.fromCode(role), cm2MarkingWorkflowService.getMarkerAllocations(assignment, stage)))
+			allocations += role -> toSortedSet(selectedAllocations.getOrElse(MarkingWorkflowStage.fromCode(role, workflow.workflowType), cm2MarkingWorkflowService.getMarkerAllocations(assignment, stage)))
 			markers += role -> SortedSet(workflow.markers(stage): _*)
 			allocateByStage += role -> false
 		} else {

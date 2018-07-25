@@ -84,7 +84,7 @@ abstract class AssignMarkersCommandInternal(val assignment: Assignment) extends 
 trait AssignMarkersBySpreadsheetBindListener extends BindListener {
 
 	this: UserLookupComponent with CM2MarkingWorkflowServiceComponent with MarkerAllocationExtractorComponent
-		with AssignMarkersBySpreadsheetState with ValidateConcurrentStages =>
+		with AssignMarkersBySpreadsheetState with ValidateConcurrentStages with ValidateSequentialStages =>
 
 	override def onBind(result: BindingResult): Unit = transactional() {
 
@@ -124,6 +124,7 @@ trait AssignMarkersBySpreadsheetBindListener extends BindListener {
 						}
 					}
 					validateConcurrentStages(_allocationMap, result)
+					validateSequentialStageMarkers(_allocationMap, result)
 				}
 			}
 		}
@@ -162,7 +163,7 @@ trait ValidateConcurrentStages {
 trait ValidateSequentialStages {
 	self: SelfValidating with AssignMarkersState =>
 
-	def validateSequentialStageMarkers(errors: Errors): Unit = {
+	def validateSequentialStageMarkers(allocationMap: Map[MarkingWorkflowStage, Allocations], errors: Errors): Unit = {
 		val allocationPairs: Map[MarkingWorkflowStage, Seq[(Marker, Student)]] = allocationMap.map { case (stage, allocations) =>
 			stage -> allocations.toSeq.flatMap { case (marker, students) => students.map(marker -> _) }
 		}
@@ -197,7 +198,7 @@ trait AssignMarkersValidation extends SelfValidating with ValidateConcurrentStag
 	self: AssignMarkersState =>
 	def validate(errors: Errors): Unit = {
 		validateConcurrentStages(allocationMap, errors)
-		validateSequentialStageMarkers(errors)
+		validateSequentialStageMarkers(allocationMap, errors)
 		validateChangedAllocations(errors)
 	}
 

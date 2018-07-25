@@ -48,7 +48,7 @@
 					<div class="set" id="set-${set.id}" style="display:none">
 						<#list allocationOrder as roleOrStage>
 							<#assign groupAllocations = mapGet(allocation.allocations, roleOrStage)![]>
-							<#assign stages = mapGet(stageNames, roleOrStage)![roleOrStage]>
+							<#assign stages = mapGet(stageNames, roleOrStage)>
 							<div class="role" data-stages="${stages?join(",")}">
 								<h2>${roleOrStage}</h2>
 								<#list groupAllocations as group>
