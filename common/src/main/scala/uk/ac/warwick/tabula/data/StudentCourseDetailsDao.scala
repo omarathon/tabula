@@ -6,6 +6,7 @@ import org.joda.time.DateTime
 import org.springframework.stereotype.Repository
 import uk.ac.warwick.spring.Wire
 import uk.ac.warwick.tabula.data.model.{Department, Route, StudentCourseDetails, StudentMember}
+import scala.collection.JavaConverters._
 
 trait StudentCourseDetailsDaoComponent {
 	val studentCourseDetailsDao: StudentCourseDetailsDao
@@ -17,7 +18,8 @@ trait AutowiringStudentCourseDetailsDaoComponent extends StudentCourseDetailsDao
 
 trait StudentCourseDetailsDao {
 	def saveOrUpdate(studentCourseDetails: StudentCourseDetails)
-	def delete(studentCourseDetails: StudentCourseDetails): String
+	def delete(studentCourseDetails: StudentCourseDetails): Unit
+	def deleteByIds(ids: Seq[String]): Unit
 	def getByScjCode(scjCode: String): Option[StudentCourseDetails]
 	def getByScjCodeStaleOrFresh(scjCode: String): Option[StudentCourseDetails]
 	def getBySprCode(sprCode: String): Seq[StudentCourseDetails]
@@ -41,11 +43,17 @@ class StudentCourseDetailsDaoImpl extends StudentCourseDetailsDao with Daoisms {
 		session.flush()
 	}
 
-	def delete(studentCourseDetails: StudentCourseDetails): String =  {
-		val scjCode = studentCourseDetails.scjCode
+	def deleteByIds(ids: Seq[String]): Unit = {
+		if (ids.nonEmpty) {
+			val query = session.createQuery("delete StudentCourseDetails where id in (:ids)")
+			query.setParameterList("ids", ids.asJava)
+			query.executeUpdate()
+		}
+	}
+
+	def delete(studentCourseDetails: StudentCourseDetails): Unit =  {
 		session.delete(studentCourseDetails)
 		session.flush()
-		scjCode
 	}
 	def getByScjCode(scjCode: String): Option[StudentCourseDetails] =
 		session.newCriteria[StudentCourseDetails]

@@ -5,9 +5,9 @@ import org.joda.time.DateTime
 import org.joda.time.DateTimeConstants
 import org.junit.After
 import org.junit.Before
-import uk.ac.warwick.tabula.{Mockito, PersistenceTestBase, Fixtures}
+import uk.ac.warwick.tabula.{Fixtures, Mockito, PersistenceTestBase}
 import uk.ac.warwick.tabula.JavaImports.JList
-import uk.ac.warwick.tabula.data.model.Member
+import uk.ac.warwick.tabula.data.model.{Member, StudentCourseDetails}
 import uk.ac.warwick.tabula.helpers.Logging
 
 class StudentCourseDetailsDaoTest extends PersistenceTestBase with Logging with Mockito {
@@ -53,7 +53,7 @@ class StudentCourseDetailsDaoTest extends PersistenceTestBase with Logging with 
 		studentCourseDetailsDao.getStudentBySprCode("1000001/2").get.universityId should be ("1000001")
 
 		memberDao.deleteByUniversityIds(Seq(stu1.universityId))
-		studentCourseDetailsDao.getByScjCode("1000001/1") should not be Option.empty
+		studentCourseDetailsDao.getByScjCode("1000001/1").get.isInstanceOf[StudentCourseDetails] should be (true)
 	}
 
 	@Test def deletingMemberShouldDeleteAssociatedScd(): Unit = transactional { tx =>
