@@ -28,7 +28,7 @@ class StudentCourseDetailsDaoTest extends PersistenceTestBase with Logging with 
 		session.createCriteria(classOf[Member]).list().asInstanceOf[JList[Member]].asScala foreach { session.delete(_) }
 	}
 
-	@Test def deletingMemberByUniIdShouldDeleteAssociatedScd(): Unit = transactional { tx =>
+	@Test def deletingMemberShouldNotDeleteAssociatedScd(): Unit = transactional { tx =>
 		val dept1 = Fixtures.department("ms", "Motorsport")
 		val dept2 = Fixtures.department("vr", "Vehicle Repair")
 
@@ -53,10 +53,13 @@ class StudentCourseDetailsDaoTest extends PersistenceTestBase with Logging with 
 		studentCourseDetailsDao.getStudentBySprCode("1000001/2").get.universityId should be ("1000001")
 
 		memberDao.delete(stu1)
-		studentCourseDetailsDao.getByScjCode("1000001/1") should be (Option.empty)
+		studentCourseDetailsDao.getByScjCode("1000001/1").get.department should be (dept1)
+		studentCourseDetailsDao.getByScjCode("1000001/1").get.student.universityId should be ("1000001")
+
 
 		memberDao.deleteByUniversityIds(Seq(stu1.universityId))
-		studentCourseDetailsDao.getByScjCode("1000001/1") should be (Option.empty)
+		studentCourseDetailsDao.getByScjCode("1000001/1").get.department should be (dept1)
+		studentCourseDetailsDao.getByScjCode("1000001/1").get.student.universityId should be ("1000001")
 
 	}
 
