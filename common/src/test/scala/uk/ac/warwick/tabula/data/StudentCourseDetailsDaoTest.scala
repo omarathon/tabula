@@ -28,41 +28,6 @@ class StudentCourseDetailsDaoTest extends PersistenceTestBase with Logging with 
 		session.createCriteria(classOf[Member]).list().asInstanceOf[JList[Member]].asScala foreach { session.delete(_) }
 	}
 
-	@Test def deletingMemberShouldNotDeleteAssociatedScd(): Unit = transactional { tx =>
-		val dept1 = Fixtures.department("ms", "Motorsport")
-		val dept2 = Fixtures.department("vr", "Vehicle Repair")
-
-		session.save(dept1)
-		session.save(dept2)
-
-		session.flush()
-
-		val stu1 = Fixtures.student(universityId = "1000001", userId="student", department=dept1, courseDepartment=dept1)
-		stu1.lastUpdatedDate = new DateTime(2013, DateTimeConstants.FEBRUARY, 1, 1, 0, 0, 0)
-
-		val stu2 = Fixtures.student(universityId = "1000002", userId="student", department=dept2, courseDepartment=dept2)
-		stu2.lastUpdatedDate = new DateTime(2013, DateTimeConstants.FEBRUARY, 2, 1, 0, 0, 0)
-
-		memberDao.saveOrUpdate(stu1)
-		memberDao.saveOrUpdate(stu2)
-
-		session.flush()
-
-		studentCourseDetailsDao.getByScjCode("1000001/1").get.department should be (dept1)
-		studentCourseDetailsDao.getByScjCode("1000001/1").get.student.universityId should be ("1000001")
-		studentCourseDetailsDao.getStudentBySprCode("1000001/2").get.universityId should be ("1000001")
-
-		memberDao.delete(stu1)
-		studentCourseDetailsDao.getByScjCode("1000001/1").get.department should be (dept1)
-		studentCourseDetailsDao.getByScjCode("1000001/1").get.student.universityId should be ("1000001")
-
-
-		memberDao.deleteByUniversityIds(Seq(stu1.universityId))
-		studentCourseDetailsDao.getByScjCode("1000001/1").get.department should be (dept1)
-		studentCourseDetailsDao.getByScjCode("1000001/1").get.student.universityId should be ("1000001")
-
-	}
-
 	@Test def testGetByScjCode(): Unit = transactional { tx =>
 		val dept1 = Fixtures.department("ms", "Motorsport")
 		val dept2 = Fixtures.department("vr", "Vehicle Repair")
