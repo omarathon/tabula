@@ -114,6 +114,7 @@ object MarkingWorkflowStage {
 		override def allocationName = "First independent marker"
 		override def stageAllocation = true
 		override def description = "First independent marker"
+		override def otherStagesInSequence: Set[MarkingWorkflowStage] = Set(DblBlndFinalMarker)
 	}
 	case object DblBlndInitialMarkerB extends MarkingWorkflowStage("dbl-blnd-marker-b", 1) {
 		override def roleName: String = "Independent marker"
@@ -121,6 +122,7 @@ object MarkingWorkflowStage {
 		override def allocationName = "Second independent marker"
 		override def stageAllocation = true
 		override def description = "Second independent marker"
+		override def otherStagesInSequence: Set[MarkingWorkflowStage] = Set(DblBlndFinalMarker)
 	}
 	case object DblBlndFinalMarker extends MarkingWorkflowStage("dbl-blnd-final-marker", 2) {
 		override def roleName = "Final marker"
@@ -128,6 +130,7 @@ object MarkingWorkflowStage {
 		override def nextStages: Seq[MarkingWorkflowStage] = Seq(DblBlndCompleted)
 		override def previousStages: Seq[MarkingWorkflowStage] = Seq(DblBlndInitialMarkerA, DblBlndInitialMarkerB)
 		override def description = "Final marker"
+		override def otherStagesInSequence: Set[MarkingWorkflowStage] = Set(DblBlndInitialMarkerA, DblBlndInitialMarkerB)
 	}
 	case object DblBlndCompleted extends FinalStage("dbl-blnd-completed") {
 		override def previousStages: Seq[MarkingWorkflowStage] = Seq(DblBlndFinalMarker)
@@ -159,6 +162,7 @@ object MarkingWorkflowStage {
 	// moderated workflow with admin selection
 	case object SelectedModerationMarker extends MarkingWorkflowStage("admin-moderation-marker", 1) {
 		override def nextStages: Seq[MarkingWorkflowStage] = Seq(SelectedModerationAdmin)
+		override def otherStagesInSequence: Set[MarkingWorkflowStage] = Set(SelectedModerationModerator)
 	}
 
 	// moderated workflow with admin selection
@@ -225,8 +229,12 @@ object MarkingWorkflowStage {
 			values.find(_.name == code).orElse(values.find(_.allocationName == code))
 		}
 
-	def fromCode(code: String): MarkingWorkflowStage = code match {
+	def fromAllocationName(allocationName: String, workflowType: MarkingWorkflowType): Option[MarkingWorkflowStage] =
+		values.filter(workflowType.allStages.contains).find(_.allocationName == allocationName)
+
+	def fromCode(code: String, workflowType: MarkingWorkflowType = null): MarkingWorkflowStage = code match {
 		case null => null
+		case allocationName if workflowType != null => MarkingWorkflowStage.fromAllocationName(allocationName, workflowType).getOrElse(throw new IllegalArgumentException(s"Invalid allocation name for ${workflowType.name}: $code"))
 		case MarkingWorkflowStage(s) => s
 		case _ => throw new IllegalArgumentException(s"Invalid marking stage: $code")
 	}
@@ -269,6 +277,6 @@ class MarkingWorkflowStageUserType extends AbstractBasicUserType[MarkingWorkflow
 }
 
 class StringToMarkingWorkflowStage extends TwoWayConverter[String, MarkingWorkflowStage] {
-	override def convertRight(source: String): MarkingWorkflowStage = source.maybeText.map(MarkingWorkflowStage.fromCode).getOrElse(throw new IllegalArgumentException)
+	override def convertRight(source: String): MarkingWorkflowStage = source.maybeText.map(MarkingWorkflowStage.fromCode(_)).getOrElse(throw new IllegalArgumentException)
 	override def convertLeft(source: MarkingWorkflowStage): String = Option(source).map { _.name }.orNull
 }
