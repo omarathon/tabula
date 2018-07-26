@@ -22,7 +22,7 @@ class RemoveAgedStudentCourseYearDetailsCommandInternal
 	self: PermissionsServiceComponent
 		with StudentCourseYearDetailsDaoComponent =>
 	override protected def applyInternal(): Seq[String] = (for {
-		ids <- Some(studentCourseYearDetailsDao.getOrphanedScyds)
+		ids <- Some(studentCourseYearDetailsDao.getOrphaned)
 	} yield {
 		studentCourseYearDetailsDao.deleteByIds(ids)
 		ids

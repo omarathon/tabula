@@ -15,8 +15,8 @@ import scala.collection.JavaConverters._
 trait StudentCourseYearDetailsDao {
 	def saveOrUpdate(studentCourseYearDetails: StudentCourseYearDetails)
 	def delete(studentCourseYearDetails: StudentCourseYearDetails)
-	def deleteByIds(ids: Seq[String]): Unit
-	def getOrphanedScyds: Seq[String] // scyds' scj is not in scd
+	def deleteByIds(ids: Seq[String]): Unit // delete by query, no hibernate cascade magic
+	def getOrphaned: Seq[String] // scyd whose scj is not in scd
 	def getStudentCourseYearDetails(id: String): Option[StudentCourseYearDetails]
 	def getBySceKey(studentCourseDetails: StudentCourseDetails, seq: Integer): Option[StudentCourseYearDetails]
 	def getBySceKeyStaleOrFresh(studentCourseDetails: StudentCourseDetails, seq: Integer): Option[StudentCourseYearDetails]
@@ -67,13 +67,13 @@ class StudentCourseYearDetailsDaoImpl extends StudentCourseYearDetailsDao with D
 	}
 
 	override def deleteByIds(ids: Seq[String]): Unit = {
-		val query = session.createSQLQuery("""delete from STUDENTCOURSEYEARDETAILS where id in (:ids)""")
+		val query = session.createQuery("""delete StudentCourseYearDetails where id in (:ids)""")
 		query.setParameterList("ids", ids.asJava)
 		query.executeUpdate
 		session.flush()
 	}
 
-	def getOrphanedScyds: Seq[String] = {
+	def getOrphaned: Seq[String] = {
 		session.createSQLQuery(
 			"""
 				select STUDENTCOURSEYEARDETAILS.ID

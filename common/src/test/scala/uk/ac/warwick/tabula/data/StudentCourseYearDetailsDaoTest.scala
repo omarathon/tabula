@@ -288,7 +288,7 @@ class StudentCourseYearDetailsDaoTest extends PersistenceTestBase {
 		session.saveOrUpdate(scyd)
 		scdDao.deleteByIds(Seq(scyd.studentCourseDetails.scjCode))
 
-		scydDao.getOrphanedScyds.head should be (scyd.id)
+		scydDao.getOrphaned.head should be (scyd.id)
 		scydDao.getFreshIds.size should be (3)
 	}
 

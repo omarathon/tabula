@@ -19,7 +19,7 @@ trait AutowiringStudentCourseDetailsDaoComponent extends StudentCourseDetailsDao
 trait StudentCourseDetailsDao {
 	def saveOrUpdate(studentCourseDetails: StudentCourseDetails)
 	def delete(studentCourseDetails: StudentCourseDetails): Unit
-	def deleteByIds(ids: Seq[String]): Unit
+	def deleteByIds(ids: Seq[String]): Unit // delete by query, no hibernate cascade magic
 	def getByScjCode(scjCode: String): Option[StudentCourseDetails]
 	def getByScjCodeStaleOrFresh(scjCode: String): Option[StudentCourseDetails]
 	def getBySprCode(sprCode: String): Seq[StudentCourseDetails]
