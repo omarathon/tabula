@@ -8,11 +8,15 @@ import org.joda.time.DateTime
 import org.springframework.stereotype.Repository
 import uk.ac.warwick.spring.Wire
 import uk.ac.warwick.tabula.AcademicYear
+import uk.ac.warwick.tabula.JavaImports.JList
 import uk.ac.warwick.tabula.data.model._
+import scala.collection.JavaConverters._
 
 trait StudentCourseYearDetailsDao {
 	def saveOrUpdate(studentCourseYearDetails: StudentCourseYearDetails)
 	def delete(studentCourseYearDetails: StudentCourseYearDetails)
+	def deleteByIds(ids: Seq[String]): Unit
+	def getOrphanedScyds: Seq[String] // scyds' scj is not in scd
 	def getStudentCourseYearDetails(id: String): Option[StudentCourseYearDetails]
 	def getBySceKey(studentCourseDetails: StudentCourseDetails, seq: Integer): Option[StudentCourseYearDetails]
 	def getBySceKeyStaleOrFresh(studentCourseDetails: StudentCourseDetails, seq: Integer): Option[StudentCourseYearDetails]
@@ -60,6 +64,30 @@ class StudentCourseYearDetailsDaoImpl extends StudentCourseYearDetailsDao with D
 	def delete(studentCourseYearDetails: StudentCourseYearDetails): Unit =  {
 		session.delete(studentCourseYearDetails)
 		session.flush()
+	}
+
+	override def deleteByIds(ids: Seq[String]): Unit = {
+		val query = session.createSQLQuery("""delete from STUDENTCOURSEYEARDETAILS where id in (:ids)""")
+		query.setParameterList("ids", ids.asJava)
+		query.executeUpdate
+		session.flush()
+	}
+
+	def getOrphanedScyds: Seq[String] = {
+		session.createSQLQuery(
+			"""
+				select STUDENTCOURSEYEARDETAILS.ID
+				from
+				  STUDENTCOURSEYEARDETAILS
+				  left join
+				  STUDENTCOURSEDETAILS
+				    on
+				      STUDENTCOURSEDETAILS.SCJCODE = STUDENTCOURSEYEARDETAILS.SCJCODE
+				where STUDENTCOURSEDETAILS.SCJCODE is null;
+			""")
+			.list
+			.asInstanceOf[JList[String]]
+  		.asScala
 	}
 
 	def getStudentCourseYearDetails(id: String): Option[StudentCourseYearDetails] = getById[StudentCourseYearDetails](id)
