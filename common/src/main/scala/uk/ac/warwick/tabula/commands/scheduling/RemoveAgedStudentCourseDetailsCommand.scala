@@ -23,6 +23,7 @@ class RemoveAgedStudentCourseDetailsCommandInternal
 		with Logging {
 	self: PermissionsServiceComponent
 		with StudentCourseDetailsDaoComponent =>
+
 	override protected def applyInternal(): Seq[String] = (for {
 		ids <- Some(studentCourseDetailsDao
 			.getByEndDateBefore(DateTime.now.minusYears(6))
@@ -47,6 +48,6 @@ trait RemoveAgedStudentCourseDetailsCommandDescription extends Describable[Seq[S
 	override def describe(d: Description) {}
 
 	override def describeResult(d: Description, result: Seq[String]): Unit = {
-		d.studentIds(result)
+		d.properties(("ScdIds", result))
 	}
 }
