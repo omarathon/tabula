@@ -253,4 +253,82 @@ class StudentCourseYearDetailsDaoTest extends PersistenceTestBase {
 
 	}
 
+	@Test def getOrphanedScyds: Unit = transactional { tx =>
+		val dept1 = Fixtures.department("hm", "History of Music")
+		val dept2 = Fixtures.department("ar", "Architecture")
+
+		session.saveOrUpdate(dept1)
+		session.saveOrUpdate(dept2)
+
+		val stu1 = Fixtures.student(universityId = "1000001", userId="student", department=dept1, courseDepartment=dept1)
+		val stu2 = Fixtures.student(universityId = "1000002", userId="student", department=dept2, courseDepartment=dept2)
+		val stu3 = Fixtures.student(universityId = "1000003", userId="student", department=dept2, courseDepartment=dept2)
+		val stu4 = Fixtures.student(universityId = "1000004", userId="student", department=dept2, courseDepartment=dept2)
+
+		session.saveOrUpdate(stu1)
+		session.saveOrUpdate(stu2)
+		session.saveOrUpdate(stu3)
+		session.saveOrUpdate(stu4)
+
+		scydDao.getFreshKeys.size should be (4)
+
+		scydDao.getFreshKeys.head.scjCode.length() should be (9)
+		val scjCodes = scydDao.getFreshKeys map { key => key.getScjCode}
+		scjCodes.contains("1000001/1") should be (true)
+		scjCodes.contains("1000002/1") should be (true)
+		scjCodes.contains("1000003/1") should be (true)
+		scjCodes.contains("1000004/1") should be (true)
+
+		scydDao.getFreshKeys.head.sceSequenceNumber should be (1)
+
+		val scyd: StudentCourseYearDetails = stu2.mostSignificantCourse.freshStudentCourseYearDetails.head
+
+		scyd.missingFromImportSince = DateTime.now
+		scyd.academicYear = AcademicYear.forDate(DateTime.now().minusYears(8))
+		session.saveOrUpdate(scyd)
+		scdDao.deleteByIds(Seq(scyd.studentCourseDetails.scjCode))
+
+		scydDao.getOrphanedScyds.head should be (scyd.id)
+		scydDao.getFreshIds.size should be (3)
+	}
+
+	@Test def deleteByIds: Unit = transactional { tx =>
+		val dept1 = Fixtures.department("hm", "History of Music")
+		val dept2 = Fixtures.department("ar", "Architecture")
+
+		session.saveOrUpdate(dept1)
+		session.saveOrUpdate(dept2)
+
+		val stu1 = Fixtures.student(universityId = "1000001", userId="student", department=dept1, courseDepartment=dept1)
+		val stu2 = Fixtures.student(universityId = "1000002", userId="student", department=dept2, courseDepartment=dept2)
+		val stu3 = Fixtures.student(universityId = "1000003", userId="student", department=dept2, courseDepartment=dept2)
+		val stu4 = Fixtures.student(universityId = "1000004", userId="student", department=dept2, courseDepartment=dept2)
+
+		val students = Seq(stu1, stu2, stu3, stu4)
+
+		students.foreach(session.saveOrUpdate)
+
+		scydDao.getFreshKeys.size should be (4)
+
+		scydDao.getFreshKeys.head.scjCode.length() should be (9)
+		val scjCodes = scydDao.getFreshKeys map { key => key.getScjCode}
+		scjCodes.contains("1000001/1") should be (true)
+		scjCodes.contains("1000002/1") should be (true)
+		scjCodes.contains("1000003/1") should be (true)
+		scjCodes.contains("1000004/1") should be (true)
+
+		scydDao.getFreshKeys.head.sceSequenceNumber should be (1)
+
+		val scyd: StudentCourseYearDetails = stu2.mostSignificantCourse.freshStudentCourseYearDetails.head
+
+		session.saveOrUpdate(scyd)
+		session.flush()
+//		val id = scyd.id
+
+		scydDao.deleteByIds(students.flatMap(_.mostSignificantCourseDetails).map(_.id))
+		session.flush()
+//		scydDao.deleteByIds(Seq(id))
+		scydDao.getFreshIds.size should be (0)
+	}
+
 }
