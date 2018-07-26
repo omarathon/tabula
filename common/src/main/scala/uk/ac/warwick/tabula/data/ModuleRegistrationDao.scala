@@ -6,8 +6,9 @@ import org.hibernate.criterion.Projections
 import org.springframework.stereotype.Repository
 import uk.ac.warwick.spring.Wire
 import uk.ac.warwick.tabula.AcademicYear
-import uk.ac.warwick.tabula.JavaImports.JBigDecimal
+import uk.ac.warwick.tabula.JavaImports.{JBigDecimal, JList}
 import uk.ac.warwick.tabula.data.model._
+import scala.collection.JavaConverters._
 
 trait ModuleRegistrationDaoComponent {
 	val moduleRegistrationDao: ModuleRegistrationDao
@@ -21,6 +22,9 @@ trait ModuleRegistrationDao {
 	def saveOrUpdate(moduleRegistration: ModuleRegistration): Unit
 	def saveOrUpdate(coreRequiredModule: CoreRequiredModule): Unit
 	def delete(coreRequiredModule: CoreRequiredModule): Unit
+	def getById(id: String): Option[ModuleRegistration]
+	def deleteByIds(ids: Seq[String]): Unit // delete by query, no hibernate cascade magic
+	def getOrphaned: Seq[String] // modReg whose scj code cannot be found from scd
 	def getByNotionalKey(
 		studentCourseDetails: StudentCourseDetails,
 		module: Module,
@@ -43,6 +47,32 @@ class ModuleRegistrationDaoImpl extends ModuleRegistrationDao with Daoisms {
 	def saveOrUpdate(coreRequiredModule: CoreRequiredModule): Unit = session.saveOrUpdate(coreRequiredModule)
 
 	def delete(coreRequiredModule: CoreRequiredModule): Unit = session.delete(coreRequiredModule)
+
+	def getById(id: String): Option[ModuleRegistration] = getById[ModuleRegistration](id)
+
+	def deleteByIds(ids: Seq[String]): Unit = {
+		val query = session.createQuery("""delete ModuleRegistration where id in (:ids)""")
+		query.setParameterList("ids", ids.asJava)
+		query.executeUpdate
+		session.flush()
+	}
+
+	def getOrphaned: Seq[String] = {
+		session.createSQLQuery(
+			"""
+				select MODULEREGISTRATION.ID
+				from
+				  MODULEREGISTRATION
+				  left join
+				  STUDENTCOURSEDETAILS
+				    on
+				      STUDENTCOURSEDETAILS.SCJCODE = MODULEREGISTRATION.SCJCODE
+				where STUDENTCOURSEDETAILS.SCJCODE is null;
+			""")
+			.list
+			.asInstanceOf[JList[String]]
+			.asScala
+	}
 
 	def getByNotionalKey(
 		studentCourseDetails: StudentCourseDetails,
