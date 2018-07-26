@@ -323,11 +323,7 @@ class StudentCourseYearDetailsDaoTest extends PersistenceTestBase {
 
 		session.saveOrUpdate(scyd)
 		session.flush()
-//		val id = scyd.id
-
-		scydDao.deleteByIds(students.flatMap(_.mostSignificantCourseDetails).map(_.id))
-		session.flush()
-//		scydDao.deleteByIds(Seq(id))
+		scydDao.deleteByIds(scydDao.getFreshIds)
 		scydDao.getFreshIds.size should be (0)
 	}
 
