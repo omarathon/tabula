@@ -100,6 +100,7 @@ trait SitsStudentRowYearDetails extends BasicStudentCourseYearProperties with Lo
 	var enrolmentDepartmentCode: String = resultSet.getString("enrolment_department_code")
 	var enrolmentStatusCode: String = resultSet.getString("enrolment_status_code")
 	var modeOfAttendanceCode: String = resultSet.getString("mode_of_attendance_code")
+	var blockOccurrence: String = resultSet.getString("block_occurrence")
 	var academicYearString: String = resultSet.getString("sce_academic_year")
 	var moduleRegistrationStatusCode: String = resultSet.getString("mod_reg_status")
 
