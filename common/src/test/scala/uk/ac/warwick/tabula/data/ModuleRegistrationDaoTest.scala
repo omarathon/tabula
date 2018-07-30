@@ -114,7 +114,7 @@ class ModuleRegistrationDaoTest extends PersistenceTestBase {
 		modRegDao.getByNotionalKey(scd, module, new JBigDecimal("10.0"), AcademicYear(2012), "A") should be (Option.empty)
 	}
 
-	@Test def deleteByIds: Unit = transactional {
+	@Test def deleteByIds(): Unit = transactional {
 		tx =>
 			val stuMem = new StudentMember("0123456")
 			stuMem.userId = "abcde"
@@ -155,8 +155,7 @@ class ModuleRegistrationDaoTest extends PersistenceTestBase {
 
 			modRegDao.deleteByIds(Seq(retrievedModReg.id))
 			scdDao.getByScjCode(scd.scjCode).get.isInstanceOf[StudentCourseDetails] should be (true)
-
-			modRegDao.getById(modRegId) should be ("")
+			modRegDao.getByNotionalKey(scd, module, new JBigDecimal("10.0"), AcademicYear(2012), "A") should be (Option.empty)
 	}
 
 

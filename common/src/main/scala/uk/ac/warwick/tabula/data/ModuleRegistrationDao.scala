@@ -48,7 +48,7 @@ class ModuleRegistrationDaoImpl extends ModuleRegistrationDao with Daoisms {
 	def delete(coreRequiredModule: CoreRequiredModule): Unit = session.delete(coreRequiredModule)
 
 	def deleteByIds(ids: Seq[String]): Unit = {
-		val query = session.createSQLQuery("""delete from MODULEREGISTRATION where id in (:ids)""")
+		val query = session.createQuery("""delete ModuleRegistration where id in (:ids)""")
 		query.setParameterList("ids", ids.asJava)
 		query.executeUpdate
 		session.flush()
