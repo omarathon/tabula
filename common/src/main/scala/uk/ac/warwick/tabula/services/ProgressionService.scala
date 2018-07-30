@@ -345,6 +345,8 @@ abstract class AbstractProgressionService extends ProgressionService {
 			}")
 		} else if (invalidTotalYearWeightings(markPerYear, yearWeightings)) {
 			FinalYearGrade.Unknown("Total year weightings for all course years excluding abroad are not 100%")
+		} else if (scyd.studentCourseDetails.courseType.isEmpty) {
+			FinalYearGrade.Unknown("Unknown course type")
 		} else	{
 			val finalMark: BigDecimal = markPerYear.map { case (year, _) =>
 				markPerYear(year) * yearWeightings(year).weighting
