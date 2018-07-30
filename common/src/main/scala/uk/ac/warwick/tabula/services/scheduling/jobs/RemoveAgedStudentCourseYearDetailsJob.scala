@@ -4,7 +4,7 @@ import org.quartz.{DisallowConcurrentExecution, JobExecutionContext}
 import org.springframework.beans.factory.config.BeanDefinition
 import org.springframework.context.annotation.{Profile, Scope}
 import org.springframework.stereotype.Component
-import uk.ac.warwick.tabula.commands.scheduling.RemoveAgedStudentCourseDetailsCommand
+import uk.ac.warwick.tabula.commands.scheduling.RemoveAgedStudentCourseYearDetailsCommand
 import uk.ac.warwick.tabula.services.scheduling.AutowiredJobBean
 
 @Component
@@ -15,7 +15,7 @@ class RemoveAgedStudentCourseYearDetailsJob extends AutowiredJobBean {
 	override def executeInternal(context: JobExecutionContext): Unit = {
 		if (features.schedulingRemoveAgedStudentCourseDetailsJob) {
 			exceptionResolver.reportExceptions {
-				RemoveAgedStudentCourseDetailsCommand().apply()
+				RemoveAgedStudentCourseYearDetailsCommand().apply()
 			}
 		}
 	}
