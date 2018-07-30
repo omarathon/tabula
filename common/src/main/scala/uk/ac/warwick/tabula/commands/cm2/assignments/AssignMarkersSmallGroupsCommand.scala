@@ -112,11 +112,7 @@ trait AssignMarkersSmallGroupsCommandPopulate extends PopulateOnForm {
 				groupAllocations.filter(_.students.nonEmpty)
 			}
 
-			val allocations = if(assignment.cm2MarkingWorkflow.workflowType.rolesShareAllocations) {
-				assignment.cm2MarkingWorkflow.markers.map{case (s, m) => s.allocationName -> getGroupAllocations(m)}
-			} else {
-				assignment.cm2MarkingWorkflow.markersByRole.mapValues(getGroupAllocations)
-			}
+			val allocations = assignment.cm2MarkingWorkflow.markers.map{case (s, m) => s.allocationName -> getGroupAllocations(m)}
 
 			SetAllocation(set, allocations)
 		})

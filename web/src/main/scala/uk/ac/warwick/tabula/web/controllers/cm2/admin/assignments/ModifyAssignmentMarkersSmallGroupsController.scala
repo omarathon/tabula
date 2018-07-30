@@ -39,7 +39,7 @@ class ModifyAssignmentMarkersSmallGroupsController extends AbstractAssignmentCon
 			"setsMap" -> smallGroupCommand.setAllocations.map(a => a.set.id -> a).toMap.asJava,
 			"allocations" -> allocations,
 			"allocationOrder" -> workflow.allocationOrder,
-			"stageNames" -> workflow.allStages.groupBy(_.roleName).mapValues(_.map(_.name)),
+			"stageNames" -> workflow.allStages.groupBy(_.allocationName).mapValues(_.map(_.name)),
 			"mode" -> mode,
 			"allocationWarnings" -> smallGroupCommand.allocationWarnings)
 			.crumbsList(Breadcrumbs.assignment(assignment))
