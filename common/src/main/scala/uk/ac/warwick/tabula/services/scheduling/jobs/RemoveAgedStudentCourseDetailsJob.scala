@@ -14,7 +14,7 @@ import uk.ac.warwick.tabula.services.scheduling.AutowiredJobBean
 class RemoveAgedStudentCourseDetailsJob extends AutowiredJobBean {
 
 	override def executeInternal(context: JobExecutionContext): Unit = {
-		if (features.removeAgedStudentCourseDetailsJob) {
+		if (features.schedulingRemoveAgedStudentCourseYearDetailsJob) {
 			exceptionResolver.reportExceptions {
 				RemoveAgedStudentCourseDetailsCommand().apply()
 			}

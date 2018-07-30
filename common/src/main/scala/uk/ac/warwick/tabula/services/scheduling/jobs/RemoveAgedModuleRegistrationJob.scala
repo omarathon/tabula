@@ -13,7 +13,7 @@ import uk.ac.warwick.tabula.services.scheduling.AutowiredJobBean
 @Scope(value = BeanDefinition.SCOPE_PROTOTYPE)
 class RemoveAgedModuleRegistrationJob extends AutowiredJobBean {
 	override def executeInternal(context: JobExecutionContext): Unit = {
-		if (features.removeAgedModuleRegistrationJob) {
+		if (features.schedulingRemoveAgedModuleRegistrationJob) {
 			exceptionResolver.reportExceptions {
 				RemoveAgedModuleRegistrationCommand().apply()
 			}
