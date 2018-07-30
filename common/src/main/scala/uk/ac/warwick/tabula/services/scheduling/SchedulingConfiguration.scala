@@ -118,6 +118,10 @@ object SchedulingConfiguration {
 
 		CronTriggerJob[CleanupTemporaryFilesJob](cronExpression = "0 0 2 * * ?"), // 2am
 
+		CronTriggerJob[RemoveAgedStudentCourseDetailsJob](cronExpression = "0 0 4 * * ?"), // 4am everyday
+		CronTriggerJob[RemoveAgedModuleRegistrationJob](cronExpression = "0 0 5 * * ?"), // 5am everyday
+		CronTriggerJob[RemoveAgedStudentCourseYearDetailsJob](cronExpression = "0 0 5 * * ?"), // 5am everyday
+
 		CronTriggerJob[UpdateMonitoringPointSchemeMembershipJob](cronExpression = "0 0 4 * * ?"), // 4am
 		CronTriggerJob[UpdateLinkedDepartmentSmallGroupSetJob](cronExpression = "0 0 5 * * ?"), // 5am
 
