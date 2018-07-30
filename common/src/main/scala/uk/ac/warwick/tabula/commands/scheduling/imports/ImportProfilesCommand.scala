@@ -326,26 +326,35 @@ class ImportProfilesCommand extends CommandWithoutTransaction[Unit] with Logging
 					members.headOption
 				case None =>
 					logger.warn("Student is no longer in uow_current_members in membership - not updating")
+					updateMissingForApplicant(universityId)
 					None
 			}
 		}
 	}
 
+	def updateMissingForApplicantOrStaff(member: Member): Unit = {
+		val missingFromImport = profileImporter.getUniversityIdsPresentInMembership(Set(member.universityId)).isEmpty
+		if (member.isFresh && missingFromImport) {
+			// The member has gone missing
+			member.missingFromImportSince = DateTime.now
+			memberDao.saveOrUpdate(member)
+		} else if (!member.isFresh && !missingFromImport) {
+			// The member has re-appeared
+			member.missingFromImportSince = null
+			memberDao.saveOrUpdate(member)
+		}
+	}
+
+	def updateMissingForApplicant(uniId: String): Unit = {
+		profileService.getMemberByUniversityIdStaleOrFresh(uniId).foreach {
+			case member: ApplicantMember => updateMissingForApplicantOrStaff(member)
+			case _ =>
+		}
+	}
+
 	def updateMissingForIndividual(universityId: String): Unit = {
 		profileService.getMemberByUniversityIdStaleOrFresh(universityId).foreach {
-			case member @ (_:StaffMember | _: ApplicantMember) =>
-				val missingFromImport = profileImporter.getUniversityIdsPresentInMembership(Set(member.universityId)).isEmpty
-
-				if (member.isFresh && missingFromImport) {
-					// The member has gone missing
-					member.missingFromImportSince = DateTime.now
-					memberDao.saveOrUpdate(member)
-				} else if (!member.isFresh && !missingFromImport) {
-					// The member has re-appeared
-					member.missingFromImportSince = null
-					memberDao.saveOrUpdate(member)
-				}
-
+			case member@(_: StaffMember | _: ApplicantMember) => updateMissingForApplicantOrStaff(member)
 			case stu: StudentMember =>
 				val sitsRows = profileImporter.multipleStudentInformationQuery.executeByNamedParam(Map("universityIds" -> Seq(universityId).asJava).asJava).asScala
 				val universityIdsSeen = sitsRows.map(_.universityId.getOrElse("")).distinct
@@ -388,6 +397,7 @@ class ImportProfilesCommand extends CommandWithoutTransaction[Unit] with Logging
 					}
 				}
 			case _ =>
+
 		}
 	}
 

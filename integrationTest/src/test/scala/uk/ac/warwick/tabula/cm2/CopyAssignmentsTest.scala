@@ -1,7 +1,7 @@
 package uk.ac.warwick.tabula.cm2
 
 import org.openqa.selenium.By
-import uk.ac.warwick.tabula.BrowserTest
+import uk.ac.warwick.tabula.{AcademicYear, BrowserTest}
 
 import scala.collection.JavaConverters._
 
@@ -13,10 +13,9 @@ class CopyAssignmentsTest extends BrowserTest with CourseworkFixtures {
 			click on linkText("Test Services")
 		}
 
-		// make sure we are looking at the latest academic year
-		val yearNav = findAll(cssSelector(".navbar-tertiary .navbar-nav")).next().underlying
-		val latestAcademicYear = yearNav.findElements(By.cssSelector("li")).asScala
-		click on latestAcademicYear.last
+		// make sure we are looking at the current academic year
+		click on cssSelector(".navbar-tertiary").webElement.findElement(By.partialLinkText(s"${AcademicYear.now().toString}"))
+
 
 		Then("I should be able to click on the Assignments dropdown")
 		val toolbar = findAll(className("dept-toolbar")).next().underlying
