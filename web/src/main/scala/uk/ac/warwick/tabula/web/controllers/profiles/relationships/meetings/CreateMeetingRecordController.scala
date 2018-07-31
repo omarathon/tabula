@@ -17,7 +17,7 @@ class CreateMeetingRecordController extends AbstractManageMeetingRecordControlle
 		@PathVariable studentCourseDetails: StudentCourseDetails,
 		@RequestParam(value = "relationship", required = false) relationship: StudentRelationship,
 		@ModelAttribute("allRelationships") allRelationships: Seq[StudentRelationship]
-	): Appliable[MeetingRecord] = {
+	): Appliable[MeetingRecord] with CreateMeetingRecordCommandState = {
 		allRelationships match {
 			case Nil => throw new ItemNotFoundException
 			case relationships =>
