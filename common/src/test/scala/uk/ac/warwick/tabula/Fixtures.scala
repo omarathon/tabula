@@ -288,8 +288,11 @@ object Fixtures extends Mockito {
 		member.attachStudentCourseDetails(scd)
 		member.mostSignificantCourse = scd
 
-		scd.levelService = smartMock[LevelService]
-		scd.levelService.levelFromCode(any[String]) answers { arg =>
+		val mockLevelService = smartMock[LevelService]
+		scd.levelService = mockLevelService
+		scyd.levelService = mockLevelService
+
+		mockLevelService.levelFromCode(any[String]) answers { arg =>
 			val levelCode = arg.asInstanceOf[String]
 			Some(new Level(levelCode, levelCode))
 		}
