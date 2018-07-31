@@ -192,6 +192,10 @@
 			<@f.checkbox path="selectCourseCommand.includeTempWithdrawn" /> Temporarily withdrawn
 		</@bs3form.checkbox>
 		<br>
+		<@bs3form.checkbox path="selectCourseCommand.includePermWithdrawn">
+			<@f.checkbox path="selectCourseCommand.includePermWithdrawn" /> Show permanently withdrawn students
+		</@bs3form.checkbox>
+		<br>
 		<@bs3form.checkbox path="selectCourseCommand.resitOnly">
 			<@f.checkbox path="selectCourseCommand.resitOnly" /> Resit only
 		</@bs3form.checkbox>
