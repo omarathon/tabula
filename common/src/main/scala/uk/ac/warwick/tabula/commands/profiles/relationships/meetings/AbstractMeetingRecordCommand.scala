@@ -55,7 +55,7 @@ abstract class AbstractMeetingRecordCommand {
 		// persist the meeting record
 		meetingRecordService.saveOrUpdate(meeting)
 
-		if (features.meetingRecordApproval) {
+		if (features.meetingRecordApproval && !meeting.missed) {
 			updateMeetingApproval(meeting)
 		}
 
@@ -204,3 +204,4 @@ trait MeetingRecordCommandRequest {
 	var file: UploadedFile = new UploadedFile
 	var attachedFiles: JList[FileAttachment] = _
 }
+

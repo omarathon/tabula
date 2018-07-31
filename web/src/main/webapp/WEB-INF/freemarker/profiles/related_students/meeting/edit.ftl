@@ -13,7 +13,7 @@
 	<@modal.wrapper enabled=(isModal!false)>
 
 		<#assign heading>
-			<h2 <#if isModal!false>class="modal-title"</#if>>Record a meeting</h2>
+			<h2 <#if isModal!false>class="modal-title"</#if>>Record a <#if missedMeeting??>missed </#if>meeting</h2>
 			<h6 <#if isModal!false>class="modal-title"</#if>>
 				<span class="very-subtle">between ${agent_role}</span><#if !chooseRelationship> ${command.relationship.agentName!""}</#if>
 				<span class="very-subtle">and ${member_role}</span> ${student.fullName}
@@ -33,10 +33,16 @@
 			<div class="modal-body"></div>
 			<@modal.footer>
 				<form class="double-submit-protection">
-					<#assign title>Submit record for approval by <#if isStudent>${agent_role}<#else>${member_role}</#if></#assign>
-					<button title="${title}" class="btn btn-primary spinnable spinner-auto" type="submit" name="submit">
-						Submit for approval
-					</button>
+					<#if missedMeeting??>
+						<button class="btn btn-primary spinnable spinner-auto" type="submit" name="submit">
+							Submit
+						</button>
+					<#else>
+						<#assign title>Submit record for approval by <#if isStudent>${agent_role}<#else>${member_role}</#if></#assign>
+						<button title="${title}" class="btn btn-primary spinnable spinner-auto" type="submit" name="submit">
+							Submit for approval
+						</button>
+					</#if>
 					<button class="btn btn-default" data-dismiss="modal" aria-hidden="true">Cancel</button>
 				</form>
 			</@modal.footer>
