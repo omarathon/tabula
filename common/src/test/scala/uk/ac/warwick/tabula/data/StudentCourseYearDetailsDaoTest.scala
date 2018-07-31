@@ -2,7 +2,7 @@ package uk.ac.warwick.tabula.data
 
 import org.joda.time.DateTime
 import org.junit.Before
-import uk.ac.warwick.tabula.data.model.{StudentCourseDetails, StudentCourseYearDetails, StudentCourseYearKey, StudentMember}
+import uk.ac.warwick.tabula.data.model._
 import uk.ac.warwick.tabula.{AcademicYear, Fixtures, PersistenceTestBase}
 
 class StudentCourseYearDetailsDaoTest extends PersistenceTestBase {
@@ -189,6 +189,130 @@ class StudentCourseYearDetailsDaoTest extends PersistenceTestBase {
 		scydDao.getBySceKey(stu2.mostSignificantCourse, 1).get.missingFromImportSince should be (null)
 		scydDao.getBySceKey(stu3.mostSignificantCourse, 1).get.missingFromImportSince should be (null)
 		scydDao.getBySceKey(stu4.mostSignificantCourse, 1) should be (None)
+
+	}
+
+	@Test
+	def findByCourseAndRoutes(): Unit = transactional { tx =>
+		val dept1 = Fixtures.department("hm", "History of Music")
+		val dept2 = Fixtures.department("ar", "Architecture")
+
+		session.saveOrUpdate(dept1)
+		session.saveOrUpdate(dept2)
+
+		val course1 = Fixtures.course("U100-ABCD")
+		val course2 = Fixtures.course("U100-EFGH")
+		val route1 = Fixtures.route("a100")
+		val route2 = Fixtures.route("a101")
+		val route3 = Fixtures.route("e100")
+
+		session.saveOrUpdate(course1)
+		session.saveOrUpdate(course2)
+		session.saveOrUpdate(route1)
+		session.saveOrUpdate(route2)
+		session.saveOrUpdate(route3)
+
+		val stu1 = Fixtures.student(universityId = "1000001", userId="student", department=dept1, courseDepartment=dept1)
+		val stu2 = Fixtures.student(universityId = "1000002", userId="student", department=dept2, courseDepartment=dept2)
+		val stu3 = Fixtures.student(universityId = "1000003", userId="student", department=dept2, courseDepartment=dept2)
+		val stu4 = Fixtures.student(universityId = "1000004", userId="student", department=dept2, courseDepartment=dept2)
+
+		memDao.saveOrUpdate(stu1)
+		memDao.saveOrUpdate(stu2)
+		memDao.saveOrUpdate(stu3)
+		memDao.saveOrUpdate(stu4)
+
+		val key1 = new StudentCourseYearKey(stu1.mostSignificantCourse.scjCode, 1)
+		val key3 = new StudentCourseYearKey(stu3.mostSignificantCourse.scjCode, 1)
+
+		val scyd1 = scydDao.getBySceKey(stu1.mostSignificantCourse, 1).get
+		scyd1.studentCourseDetails.course = course1
+		scyd1.studentCourseDetails.currentRoute = route1
+		scyd1.enrolledOrCompleted = true
+		scyd1.studentCourseDetails.statusOnRoute = Fixtures.sitsStatus()
+
+		val uag = Fixtures.assessmentGroup(AcademicYear.now(), "", "", "A01")
+		val uagm = new UpstreamAssessmentGroupMember(uag, "1000001")
+		uagm.resitActualMark = Some(41)
+		uagm.resitActualGrade = Some("3")
+		uag.members.add(uagm)
+
+		session.saveOrUpdate(uag)
+		session.saveOrUpdate(uagm)
+
+		val scyd2 = scydDao.getBySceKey(stu2.mostSignificantCourse, 1).get
+		scyd2.studentCourseDetails.course = course1
+		scyd2.studentCourseDetails.currentRoute = route2
+		scyd2.enrolledOrCompleted = true
+		scyd2.studentCourseDetails.statusOnRoute = Fixtures.sitsStatus()
+		val scyd3 = scydDao.getBySceKey(stu3.mostSignificantCourse, 1).get
+		scyd3.studentCourseDetails.course = course2
+		scyd3.studentCourseDetails.currentRoute = route2
+		scyd3.enrolledOrCompleted = true
+		scyd3.studentCourseDetails.statusOnRoute = Fixtures.sitsStatus()
+		val scyd4 = scydDao.getBySceKey(stu4.mostSignificantCourse, 1).get
+		scyd4.studentCourseDetails.course = course2
+		scyd4.studentCourseDetails.currentRoute = route2
+		scyd4.enrolledOrCompleted = true
+		scyd4.studentCourseDetails.statusOnRoute = Fixtures.sitsStatus("T")
+
+		session.saveOrUpdate(scyd1)
+		session.saveOrUpdate(scyd2)
+		session.saveOrUpdate(scyd3)
+		session.saveOrUpdate(scyd4)
+		session.saveOrUpdate(scyd1.studentCourseDetails)
+		session.saveOrUpdate(scyd2.studentCourseDetails)
+		session.saveOrUpdate(scyd3.studentCourseDetails)
+		session.saveOrUpdate(scyd4.studentCourseDetails)
+
+
+		session.flush()
+		session.clear()
+
+		scydDao.findByCourseRoutesYear(
+			AcademicYear.now(),
+			Seq(course1),
+			Seq(),
+			1,
+			false,
+			false
+		).length should be(2)
+
+		scydDao.findByCourseRoutesYear(
+			AcademicYear.now(),
+			Seq(course2),
+			Seq(),
+			1,
+			false,
+			false
+		).length should be(1)
+
+		scydDao.findByCourseRoutesLevel(
+			AcademicYear.now(),
+			Seq(course2),
+			Seq(),
+			"1",
+			true,
+			false
+		).length should be(2)
+
+		scydDao.findByCourseRoutesLevel(
+			AcademicYear.now(),
+			Seq(course1, course2),
+			Seq(route1),
+			"1",
+			true,
+			false
+		).length should be(1)
+
+		scydDao.findByCourseRoutesYear(
+			AcademicYear.now(),
+			Seq(course1, course2),
+			Seq(),
+			1,
+			true,
+			true
+		).length should be(1)
 
 	}
 
