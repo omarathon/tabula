@@ -206,6 +206,12 @@
 					<@f.textarea rows="6" path="description" cssClass="form-control" />
 				</@bs3form.labelled_form_group>
 
+				<#if missedMeeting??>
+					<@bs3form.labelled_form_group path="missedReason" labelText="Reason meeting was missed">
+						<@f.textarea rows="3" path="missedReason" cssClass="form-control" />
+					</@bs3form.labelled_form_group>
+				</#if>
+
 				<#if isIframe!false>
 					<input type="hidden" name="modal" value="true" />
 				<#else>

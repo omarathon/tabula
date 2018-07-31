@@ -310,6 +310,13 @@
 						</tr>
 						<tr>
 							<td colspan="4">
+								<#if meeting.missedReason?has_content>
+									<div class="alert alert-danger">
+										<p>This meeting did not take place because:</p>
+										<blockquote>${meeting.missedReason}</blockquote>
+									</div>
+								</#if>
+
 								<#if meeting.description??>
 									<div class="description">
 										<#noescape>${meeting.escapedDescription}</#noescape>
