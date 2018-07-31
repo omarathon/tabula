@@ -279,6 +279,8 @@ object Fixtures extends Mockito {
 
 		val scyd = studentCourseYearDetails()
 		scyd.enrolmentDepartment = courseDepartment
+		scyd.yearOfStudy = 1
+		scyd.studyLevel = "1"
 		scyd.studentCourseDetails = scd
 		scd.addStudentCourseYearDetails(scyd)
 		scd.latestStudentCourseYearDetails = scyd
