@@ -259,7 +259,7 @@ class StudentCourseYearDetailsDaoImpl extends StudentCourseYearDetailsDao with D
 		disableFreshFilter: Boolean = false,
 		includePermWithdrawn: Boolean = false
 	): Seq[StudentCourseYearDetails] = {
-		findByCourseRoutesWithPermWithdrawnOption(academicYear, courses, routes, includeTempWithdrawn, resitOnly, eagerLoad, disableFreshFilter, includePermWithdrawn, extraCriteria = Seq(is("yearOfStudy", levelCode)))
+		findByCourseRoutesWithPermWithdrawnOption(academicYear, courses, routes, includeTempWithdrawn, resitOnly, eagerLoad, disableFreshFilter, includePermWithdrawn, extraCriteria = Seq(is("studyLevel", levelCode)))
 	}
 
 	def findByScjCodeAndAcademicYear(items: Seq[(String, AcademicYear)]): Map[(String, AcademicYear), StudentCourseYearDetails] = {
