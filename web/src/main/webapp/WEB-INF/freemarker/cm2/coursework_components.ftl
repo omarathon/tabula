@@ -171,7 +171,13 @@
 	<#local assignment = info.assignment />
 	<div class="item-info row assignment-${assignment.id}">
 		<div class="col-md-3">
-			<div class="module-title"><@fmt.module_name assignment.module /></div>
+			<div class="module-title">
+				<#if can.do('Submission.Read',assignment.module)>
+					<a href="/coursework/admin/assignments/${assignment.id}"><@fmt.module_name assignment.module /></a>
+				<#else>
+					<@fmt.module_name assignment.module />
+				</#if>
+			</div>
 			<h4 class="name">
 				<a href="<@routes.cm2.assignment assignment />">
 					<span class="ass-name">${assignment.name}</span>
