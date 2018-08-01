@@ -199,11 +199,6 @@
 			</div>
 		</div>
 	</p>
-	<p>
-		<@bs3form.checkbox path="selectCourseCommand.includePermWithdrawn">
-			<@f.checkbox path="selectCourseCommand.includePermWithdrawn" /> Show permanently withdrawn students
-		</@bs3form.checkbox>
-	</p>
 
 	<@bs3form.errors path="selectCourseCommand" />
 
