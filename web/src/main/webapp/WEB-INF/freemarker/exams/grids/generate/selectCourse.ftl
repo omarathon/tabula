@@ -184,9 +184,24 @@
 			<#if studyYear == 0><input type="hidden" name="courseYearsToShow" value=""/></#if>
 	</div>
 	<div class="year_info_ftr <#if studyYear == 0>hidden</#if>"><hr/></div>
+
 	<p>
-		<@bs3form.checkbox path="selectCourseCommand.includeTempWithdrawn">
-			<@f.checkbox path="selectCourseCommand.includeTempWithdrawn" /> Show temporarily withdrawn students
+		<div class="row">
+			<div class="col-md-4">
+				<@bs3form.checkbox path="selectCourseCommand.includeTempWithdrawn">
+					<@f.checkbox path="selectCourseCommand.includeTempWithdrawn" /> Show temporarily withdrawn students
+				</@bs3form.checkbox>
+			</div>
+			<div class="col-md-4">
+				<@bs3form.checkbox path="selectCourseCommand.resitOnly">
+					<@f.checkbox path="selectCourseCommand.resitOnly" /> Show only resit students
+				</@bs3form.checkbox>
+			</div>
+		</div>
+	</p>
+	<p>
+		<@bs3form.checkbox path="selectCourseCommand.includePermWithdrawn">
+			<@f.checkbox path="selectCourseCommand.includePermWithdrawn" /> Show permanently withdrawn students
 		</@bs3form.checkbox>
 	</p>
 

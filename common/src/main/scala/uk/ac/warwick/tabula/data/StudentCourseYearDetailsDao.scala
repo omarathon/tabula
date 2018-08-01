@@ -10,6 +10,8 @@ import uk.ac.warwick.spring.Wire
 import uk.ac.warwick.tabula.AcademicYear
 import uk.ac.warwick.tabula.data.model._
 
+import scala.reflect.classTag
+
 trait StudentCourseYearDetailsDao {
 	def saveOrUpdate(studentCourseYearDetails: StudentCourseYearDetails)
 	def delete(studentCourseYearDetails: StudentCourseYearDetails)
@@ -30,8 +32,10 @@ trait StudentCourseYearDetailsDao {
 		routes: Seq[Route],
 		yearOfStudy: Int,
 		includeTempWithdrawn: Boolean,
+		resitOnly: Boolean,
 		eagerLoad: Boolean = false,
-		disableFreshFilter: Boolean = false
+		disableFreshFilter: Boolean = false,
+		includePermWithdrawn: Boolean = false
 	): Seq[StudentCourseYearDetails]
 
 	def findByCourseRoutesLevel(
@@ -40,8 +44,10 @@ trait StudentCourseYearDetailsDao {
 		routes: Seq[Route],
 		levelCode: String,
 		includeTempWithdrawn: Boolean,
+		resitOnly: Boolean,
 		eagerLoad: Boolean = false,
-		disableFreshFilter: Boolean = false
+		disableFreshFilter: Boolean = false,
+		includePermWithdrawn: Boolean = false
 	): Seq[StudentCourseYearDetails]
 
 	def findByScjCodeAndAcademicYear(items: Seq[(String, AcademicYear)]): Map[(String, AcademicYear), StudentCourseYearDetails]
@@ -148,8 +154,11 @@ class StudentCourseYearDetailsDaoImpl extends StudentCourseYearDetailsDao with D
 		courses: Seq[Course],
 		routes: Seq[Route],
 		includeTempWithdrawn: Boolean,
+		resitOnly: Boolean,
 		eagerLoad: Boolean,
-		disableFreshFilter: Boolean
+		disableFreshFilter: Boolean,
+		enrolledOrCompleted: Boolean = true,
+		extraCriteria: Seq[Criterion] = Nil
 	): ScalaCriteria[StudentCourseYearDetails] = {
 
 		val thisSession = if (disableFreshFilter) {
@@ -162,8 +171,8 @@ class StudentCourseYearDetailsDaoImpl extends StudentCourseYearDetailsDao with D
 			.createAlias("studentCourseDetails", "scd")
 			.add(isNull("missingFromImportSince"))
 			.add(is("academicYear", academicYear))
+			.add(is("enrolledOrCompleted", enrolledOrCompleted))
 			.add(safeIn("scd.course", courses))
-			.add(is("enrolledOrCompleted", true))
 
 		if (!includeTempWithdrawn) {
 			c.add(not(like("scd.statusOnRoute.code", "T%")))
@@ -175,7 +184,7 @@ class StudentCourseYearDetailsDaoImpl extends StudentCourseYearDetailsDao with D
 				.setFetchMode("studentCourseDetails.moduleRegistrations", FetchMode.JOIN)
 		}
 
-		if (!routes.isEmpty) {
+		if (routes.nonEmpty) {
 			c.add(disjunction(
 				safeIn("route", routes),
 				conjunction(
@@ -185,7 +194,44 @@ class StudentCourseYearDetailsDaoImpl extends StudentCourseYearDetailsDao with D
 			))
 		}
 
+		if(resitOnly) {
+			val resitQuery = DetachedCriteria.forClass(classTag[UpstreamAssessmentGroupMember].runtimeClass, "uagm")
+				.createAlias("upstreamAssessmentGroup", "uag")
+				.add(is("uag.academicYear", academicYear))
+				.add(or(
+					or(isNotNull("resitActualMark"), isNotNull("resitActualGrade")),
+					or(isNotNull("resitAgreedMark"), isNotNull("resitAgreedGrade"))
+				))
+				.add(eqProperty("uagm.universityId", "scd.student.universityId"))
+			c.add(Subqueries.exists(resitQuery.setProjection(property("uagm.universityId"))))
+		}
+
+		extraCriteria.foreach(c.add)
+
 		c
+	}
+
+	private def findByCourseRoutesWithPermWithdrawnOption(
+		academicYear: AcademicYear,
+		courses: Seq[Course],
+		routes: Seq[Route],
+		includeTempWithdrawn: Boolean,
+		resitOnly: Boolean,
+		eagerLoad: Boolean = false,
+		disableFreshFilter: Boolean = false,
+		includePermWithdrawn: Boolean = false,
+		extraCriteria: Seq[Criterion] = Nil
+	): Seq[StudentCourseYearDetails] = {
+		val result = findByCourseRoutesCriteria(academicYear, courses, routes, includeTempWithdrawn, resitOnly, eagerLoad, disableFreshFilter, enrolledOrCompleted = true, extraCriteria).seq
+
+		if (includePermWithdrawn) {
+			val withdrawn = findByCourseRoutesCriteria(academicYear, courses, routes, includeTempWithdrawn, resitOnly, eagerLoad, disableFreshFilter, enrolledOrCompleted = false, extraCriteria).seq
+
+			// Return enrolled/completed rows, plus non-enrolled/completed rows that don't belong to a student who also has an enrolled/completed row
+			result ++ withdrawn.filterNot(pwd => result.exists(_.studentCourseDetails.student.universityId == pwd.studentCourseDetails.student.universityId))
+		} else {
+			result
+		}
 	}
 
 	def findByCourseRoutesYear(
@@ -194,12 +240,12 @@ class StudentCourseYearDetailsDaoImpl extends StudentCourseYearDetailsDao with D
 		routes: Seq[Route],
 		yearOfStudy: Int,
 		includeTempWithdrawn: Boolean,
+		resitOnly: Boolean,
 		eagerLoad: Boolean = false,
-		disableFreshFilter: Boolean = false
+		disableFreshFilter: Boolean = false,
+		includePermWithdrawn: Boolean = false
 	): Seq[StudentCourseYearDetails] = {
-		val c = findByCourseRoutesCriteria(academicYear, courses, routes, includeTempWithdrawn, eagerLoad, disableFreshFilter)
-		c.add(is("yearOfStudy", yearOfStudy))
-		c.seq
+		findByCourseRoutesWithPermWithdrawnOption(academicYear, courses, routes, includeTempWithdrawn, resitOnly, eagerLoad, disableFreshFilter, includePermWithdrawn, extraCriteria = Seq(is("yearOfStudy", yearOfStudy)))
 	}
 
 	def findByCourseRoutesLevel(
@@ -208,12 +254,12 @@ class StudentCourseYearDetailsDaoImpl extends StudentCourseYearDetailsDao with D
 		routes: Seq[Route],
 		levelCode: String,
 		includeTempWithdrawn: Boolean,
+		resitOnly: Boolean,
 		eagerLoad: Boolean = false,
-		disableFreshFilter: Boolean = false
+		disableFreshFilter: Boolean = false,
+		includePermWithdrawn: Boolean = false
 	): Seq[StudentCourseYearDetails] = {
-		val c = findByCourseRoutesCriteria(academicYear, courses, routes, includeTempWithdrawn, eagerLoad, disableFreshFilter)
-		c.add(is("studyLevel", levelCode))
-		c.seq
+		findByCourseRoutesWithPermWithdrawnOption(academicYear, courses, routes, includeTempWithdrawn, resitOnly, eagerLoad, disableFreshFilter, includePermWithdrawn, extraCriteria = Seq(is("studyLevel", levelCode)))
 	}
 
 	def findByScjCodeAndAcademicYear(items: Seq[(String, AcademicYear)]): Map[(String, AcademicYear), StudentCourseYearDetails] = {
