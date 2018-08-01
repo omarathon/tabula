@@ -172,8 +172,8 @@
 	<div class="item-info row assignment-${assignment.id}">
 		<div class="col-md-3">
 			<div class="module-title">
-				<#if can.do('Submission.Read',assignment.module)>
-					<a href="/coursework/admin/assignments/${assignment.id}"><@fmt.module_name assignment.module /></a>
+				<#if can.do('Submission.Read', assignment.module)>
+					<@fmt.module_name_with_link assignment.module "/coursework/admin/assignments/${assignment.id}"/>
 				<#else>
 					<@fmt.module_name assignment.module />
 				</#if>
